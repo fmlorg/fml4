@@ -7,7 +7,7 @@ Update 1999-003
 
 			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
 
-	Copyright (C) 1999 Ken'ichi Fukamachi
+	Copyright (C) 1999,2001 Ken'ichi Fukamachi
 		All rights reserved.
 .~HTML_PRE
 
@@ -143,11 +143,7 @@ Please give up if you use fml before fml 1.6.
 ○ libviruschk.pl を入手する。それを/usr/local/fmlのようなfmlをインス
 トールしてある場所に置く。
 
-[ftp]
-.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/src/libviruschk.pl
-
-[www]
-.url http://www.sapporo.iij.ad.jp/staff/fukachan/archive/current/src/src/libviruschk.pl
+.url ftp://ftp.fml.org/pub/fml/current/src/src/libviruschk.pl
 
 
 .S	cfの場合
@@ -199,11 +195,11 @@ if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
 .appendix
 .include enable_filter.wix
 
-.# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# $FML$
+.# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -8,10 +8,9 @@
 	   			¿¼Ä® ¸­°ì
 
    http://www.fml.org/fml/
-   http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-   Copyright (C) 1993-1999 Ken'ichi Fukamachi
+   Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
             All rights reserved. 
    
    FML is free software; you can redistribute it and/or modify
@@ -159,7 +158,7 @@ In this part we describe FML internals more deeply.
 =E
 Can you understand sources of quotations?:-)
 
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/Anime/AminoTetsuro.html
+.url	http://www.fml.org/anime/AminoTetsuro/
 
 
 
@@ -185,11 +184,11 @@ Can you understand sources of quotations?:-)
 .# .include app/obsolete.wix
 
 
-.# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# $FML: op.wix,v 2.12 2000/02/11 16:57:14 fukachan Exp $
+.# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
