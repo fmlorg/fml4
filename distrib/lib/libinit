@@ -66,7 +66,7 @@ INIT_VERSION () {
 		echo 	USAGE: $0 -i fml.pl
 	fi
 
-	RID=`perl distrib/bin/fml_version.pl -X $FML -s`
+	RID=`perl $FML_VERSION -s`
 	echo -n $RID     > $RELEASE_MANIFEST
 	echo -n ";"	>> $RELEASE_MANIFEST
 	date 		>> $RELEASE_MANIFEST
