@@ -1,0 +1,43 @@
+.HTML_PRE
+
+	SPAMメールをはじくちょっとしたコツ
+=E
+	nospam tips
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+
+.toc
+
+.S	To: とか Cc: にメーリングリストがないのはSPAMだ！
+
+fml-support: 06389
+fml-support: 07286
+
+SPAM メールを弾くために
+
+To: および Cc: 行に ML のアドレス (大文字/小文字は区別しない) が入って
+なければ，そのメールを拒否する
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+    if (($e{'h:to:'} !~ /$MAIL_LIST/i) && ($e{'h:cc:'} !~ /$MAIL_LIST/i)){
+        return 'Not addressed to mailing list';
+    }
+#;
+
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
