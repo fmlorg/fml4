@@ -13,19 +13,27 @@
 
 ### MAIN ###
 if ($0 eq __FILE__) {
-    # signal handling
-    $SIG{'HUP'} = $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = "irc'Exit";#';
-
-    &IrcParseArgv;
-    &IrcInit;
-
     if (($pid = fork) < 0) {
-	&Log("cannot fork");
+	die("cannot fork\n");
     }
     elsif (0 == $pid) {
-	&IrcConnect;
-	&IrcMainLoop;
-	# infinite loop
+	$stdin2irc'LOGFILE = "$ENV{'PWD'}/log"; #';
+	eval q#sub Log { &stdin2irc'Log(@_);}#; #';
+	
+	for (;;) {
+	    # signal handling
+	    $SIG{'HUP'} = $SIG{'INT'} = $SIG{'QUIT'} = 
+		$SIG{'TERM'} = "irc'Exit";#';
+
+	    &IrcParseArgv;
+	    &IrcInit;
+
+	    &IrcConnect;
+	    &IrcMainLoop; # infinite loop
+
+	    close(S);
+	    sleep 3;
+	}
     }
 
     # parent
@@ -47,8 +55,6 @@ sub Log { main'Log(@_);}
 
 sub main'IrcParseArgv #'
 {
-    eval "sub Log { print STDERR \"LOG: \@_\\n\";}";
-
     ### getopts
     require 'getopts.pl';
     &Getopts("df:I:t:");
@@ -226,6 +232,9 @@ sub main'IrcMainLoop  #'
     local($rout, $wout, $eout);
     local($buf, $wbuf);
 
+    # server timeout
+    $IRC_SERVER_TIMEOUT = $IRC_SERVER_TIMEOUT || 1800;
+
     $BITS{'S'}     = fileno(S);
     $BITS{'STDIN'} = fileno(STDIN);
 
@@ -234,11 +243,22 @@ sub main'IrcMainLoop  #'
     vec($rin,fileno(STDIN),1) = 1;
     $ein = $rin | $win;
 
+    $lasttime_input = time;
     for (;;) {
 	$0 = "--stdin2irc $SetProcTitle";
     
 	($nfound, $timeleft) =
 	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
+
+	# logs time
+	if ($nfound != 0) { 
+	    $lasttime_input = time;
+	}
+	elsif (time - $lasttime_input > $IRC_SERVER_TIMEOUT) {
+	    &SendS("QUIT :$IRC_SIGNOFF_MSG");
+	    &Log("no input time lasts over $IRC_SERVER_TIMEOUT sec.");
+	    last;
+	}
 
 	if (vec($rout, $BITS{'S'}, 1)) {
 	    sysread(S, $buf, 4096) || &Log("Error:$!");
@@ -257,8 +277,15 @@ sub main'IrcMainLoop  #'
 	}
 
 	sleep 1;
+	sleep int(length(@Queue)/3);
 	$wbuf = shift @Queue;
 	&SendS($wbuf) if $wbuf;
+
+	# counter
+	$count = @Queue ? 0 : ($count+1);
+
+	# ping, pong
+	if ($count % 10 == 0) { &SendS("PING $IRC_SERVER");}
     }
 }
 
@@ -310,6 +337,80 @@ sub main'Write2Irc #'
 	    }
 	}
     }
+}
+
+
+package stdin2irc;
+
+sub GetTime
+{
+    local($time) = @_;
+
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time||time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+
+    $MailDate;
+}
+
+
+sub Log 
+{ 
+    local($str, $s) = @_;
+    local($from) = $USER;
+    local(@c)    = caller;
+
+    &GetTime(time);
+
+    # existence and append(open system call check)
+    if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
+	&Append2("$Now $str", $LOGFILE);
+	&Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
+    }
+    else {
+	print STDERR "$Now $str\n\t$s\n";
+    }
+}
+
+
+# append $s >> $file
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2 { &Write2(@_, 1);}
+sub Write2
+{
+    local($s, $f, $o_append) = @_;
+
+    if ($o_append && $s && open(APP, ">> $f")) { 
+	select(APP); $| = 1; select(STDOUT);
+	print APP "$s\n";
+	close(APP);
+    }
+    elsif ($s && open(APP, "> $f")) { 
+	select(APP); $| = 1; select(STDOUT);
+	print APP "$s\n";
+	close(APP);
+    }
+    else {
+	local(@caller) = caller;
+	print STDERR "Append2(@_)::Error [@caller] \n";
+    }
+
+    1;
 }
 
 
