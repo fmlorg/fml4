@@ -11,11 +11,6 @@ __________________________________
 
 .C	Windows NT 4.0 Porting Status
 
-2.2 RELEASE の source tree は Beta です。2.2.1 も同様です。
-=E
-I released 2.2 and 2.2.1 with sys/WINDOWS_NT4 as beta release status.
-
-
 .S	おまけ:基本原理	
 =E.S	Mechanisms on NT4
 
