@@ -75,7 +75,7 @@ sub SplitAndMSend
     local(@to, $mlist); 
     
     ### 
-    $file = $_cf{"opt:f"} || die ("Please define -f file-to-send");
+    $file = $Opt{"opt:f"} || die ("Please define -f file-to-send");
     print STDERR "FILE: $file\n" if $debug;
 
     if (! -f $file) { &Log("Not exist such a file:$file"); return;}

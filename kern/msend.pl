@@ -58,14 +58,14 @@ if ($0 eq __FILE__) {
 
     &InitConfig;		# initialize date etc..
 
-    &SlowStart if $_cf{"opt:s"};# sleep a little 
+    &SlowStart if $Opt{"opt:s"};# sleep a little 
 				# to be shifed from cron kick off
 
     require 'libfop.pl';	# file operations
 
     &MSendInit(*Envelope);	# IF $MSEND_RC is NOT SET, exit
 
-    $Quiet = 1 if $_cf{"opt:q"}; # quiet mode;
+    $Quiet = 1 if $Opt{"opt:q"}; # quiet mode;
 
     if (! $Quiet) {
 	print STDERR "MatomeOkuri Control Program for $ML_FN\n";
@@ -73,7 +73,7 @@ if ($0 eq __FILE__) {
     }
 
     # Daemon or Self Running;
-    if ($_cf{"opt:b"} eq 'd' || $_cf{"opt:b"} eq 'sr') {
+    if ($Opt{"opt:b"} eq 'd' || $Opt{"opt:b"} eq 'sr') {
 	local($t);
 	while (1) {
 	    $t = time;
@@ -123,7 +123,7 @@ sub ExecMSend
 
     &MSend4You;			        # MAIN
 
-    if ($_cf{"opt:n"}|| $debug && ($ID % 3 == 0)) {     # debug mode
+    if ($Opt{"opt:n"}|| $debug && ($ID % 3 == 0)) {     # debug mode
 	local($sep) =  "-" x 65;
 
 	if (! $Quiet) {

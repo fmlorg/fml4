@@ -475,7 +475,7 @@ sub InitConfig
 
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
     if ($debug)   { require 'libdebug.pl';}
-    if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
+    if ($Opt{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
 
     # COMPATIBILITY
     if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
@@ -1160,7 +1160,7 @@ sub CheckCurrentProc
     }
 
     ### SubSection: Address Test Mode; (Become Test Mode)
-    if ($_cf{"opt:b"} eq 't') { 
+    if ($Opt{"opt:b"} eq 't') { 
 	$DO_NOTHING = 1; &Log("Address Test Mode:Do nothing");
     } 
 
@@ -2357,8 +2357,8 @@ sub SetOpts
 	    next;
 	}
 
-	/^\-(\S)/      && ($_cf{"opt:$1"} = 1);
-	/^\-(\S)(\S+)/ && ($_cf{"opt:$1"} = $2);
+	/^\-(\S)/      && ($Opt{"opt:$1"} = 1);
+	/^\-(\S)(\S+)/ && ($Opt{"opt:$1"} = $2);
 
 	/^\-d(\d+)/    && ($debug = $1)        && next;
 	/^\-d|^\-bt/   && ($debug = 1)         && next;
