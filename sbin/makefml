@@ -780,7 +780,8 @@ sub ExecCmd
     {
 	local($not_require_ml, $ml);
 	$ml = $argv[0];
-	for (newml, info, help, install, majordomo, fmlserv, listserv) {
+	for ("newml", "info", "help", "install", 
+	     "fmlserv", "majordomo", "listserv") {
 	    # print STDERR "check $fp eq $_\n";
 	    $fp eq $_ && $not_require_ml++;
 	}
@@ -2125,6 +2126,20 @@ sub EachLevelQuery
 
 	    last;
 	}
+	elsif ($query{"type"} eq "reverse-y-or-n") {
+	    print "--query y/n\n";
+	    $v   = $CONFIG{$top_level};
+	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;");
+
+	    if ($v) {
+		$config{$v} = $r eq "y" ? 0 : 1;
+	    }
+	    else {
+		&Debug("EachLevelQuery(y/n): Error, $v is not defined");
+	    }
+
+	    last;
+	}
 	elsif ($query{"type"} eq "select" && ($r == 0)) {
 	    last;
 	}
@@ -2135,6 +2150,7 @@ sub EachLevelQuery
 	    if ($v = $CONFIG{$top_level}) {
 		$config{$v} = 
 		    $MAP{$top_level, $r} ne "" ? $MAP{$top_level, $r} : $r;
+		undef $config{$v} if $config{$v} eq "_NULL_";
 	    }
 	    else {
 		&EachLevelQuery(*config, "$top_level/$lvl");
@@ -2914,6 +2930,12 @@ sub EvalMenu
     $SUMMARY{'REMOTE_ADMINISTRATION'} = 
 	$config{'REMOTE_ADMINISTRATION'} ? "yes" : "no";
 
+    $SUMMARY{'SPOOLING'} = 
+	$config{'NOT_USE_SPOOL'} ? "not spooling" : "spooling";
+
+    $SUMMARY{'CONTROL_ADDRESS'} = 
+	$config{'CONTROL_ADDRESS'} || "*** Command Unavailable ***";
+
 
     for (split(/\n/, $MenuTemplate{$menu})) {
 	# substitute
@@ -2962,7 +2984,7 @@ sub GenQuery
     # "type", "menu", "query", "pat", "default"
     $type = $query{"type"};
 
-    if ($type eq "y-or-n") {
+    if ($type eq "y-or-n" || $type eq "reverse-y-or-n") {
 	$query{"menu"}    = $query{"menu"}    || "Use this option?";
 	$query{"query"}   = $query{"query"}   || "y/n";
 	$query{"pat"}     = $query{"pat"}     || "y|n";
