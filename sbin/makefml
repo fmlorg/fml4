@@ -2581,7 +2581,7 @@ sub QmailSetUp
 	}
 
 	if (! &Grep("\\+$ml\\-:", "$qmail_users_dir/assign")) {
-	    print OUT "+$ml-:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	    print OUT "+$ml:$USER:$uid:$gid:$qmail_alias_dir:-:$ml:\n";
 	}
 	print OUT ".\n";
 	close(OUT);
