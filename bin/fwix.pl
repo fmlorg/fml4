@@ -11,10 +11,14 @@ require 'getopts.pl';
 ##### VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
-$KEYWORD = 'C|ST|S|C\.S|P|http|label|key|seealso|xref';
+$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A';
 $FORMAT  = 'q|~q';
 
 $HTML_KEYWORD = 'HTML_PRE|HTML_ENDPRE';
+
+# Alphabetical Order Table
+for('A'..'Z') { push(@AlpTable, $_);}
+
 
 $|        = 1;
 $no_index = 1 if $opt_n eq 'i';
@@ -276,6 +280,17 @@ sub FormatReset
 }
 
 
+sub GetCurPosition
+{
+    if ($InAppendix) {
+	$CurPosition = $Section ? 
+	    "Appendix $Appendix.$Section" : "Appendix $Appendix";
+    }
+    else {
+	$CurPosition = $Section ? "$Chapter.$Section" : $Chapter;
+    }
+}
+
 ########################
 # ROFF
 # .TH 
@@ -288,6 +303,9 @@ sub Expand
     local($c, $s, $file, $mode) = @_;
     local($mh, $mn, $mr);
 
+    &GetCurPosition;
+    print STDERR "Current: $CurPosition\n" if $debug;
+    
     $htmlname = $file;
     $htmlname =~ s#.*/##;
     $htmlname =~ s#\.wix$#.html#;
@@ -347,7 +365,9 @@ sub Expand
 	$CurrentSubject = $s;
 
 	$Chapter++;
-	$Section = 0;
+	$Section    = 0;
+	$InAppendix = 0;
+
 	$s = "$Chapter\t$s";
 
 	if ($mt) {
@@ -373,7 +393,7 @@ sub Expand
 	$CurrentSubject = $s;
 
 	$Section++;
-	$s = "$Chapter.$Section\t$s";
+	$s = &GetCurPosition."\t$s";
 
 	if ($mt) {
 	    $INDEX .= "$s\n";
@@ -395,26 +415,46 @@ sub Expand
 	$s = "\t$s";
 	$INDEX .= "$s\n";
     }
+    ###  Chapter
+    elsif ($c eq 'A') {
+	&FormatReset;
+	$CurrentSubject = $s;
+	$InAppendix = 1;
+
+	$Appendix = shift @AlpTable;
+	$Section = 0;
+	$s = "Appendix $Appendix\t$s";
+
+	if ($mt) {
+	    $INDEX .= "\n$s\n";
+	}
+	elsif ($mh) {
+	    ;
+	}
+	elsif ($mr) {
+	    ;
+	}
+
+    }
     elsif ($c eq 'http') {
 	;
     }
-    elsif ($c eq 'key') {
-	$key{$s} = $Section ? "$Chapter.$Section" : $Chapter;
-	$MANIFEST .= "key=$s\n";
-	$MANIFEST .= "   ".($Section ? "$Chapter.$Section" : $Chapter);
+    elsif ($c eq 'key' || $c eq 'k') {
+	$key{$s} = $CurPosition;
+	$MANIFEST .= "key=$s\n$CurPosition";
 	$MANIFEST .= "   $CurrentSubject\n";
 	return '#.next';
     }
     elsif ($c eq 'seealso' || $c eq 'xref') {
 	$s = "\#.xref $s";
     }
-    elsif ($c eq 'label') {
+    elsif ($c eq 'label' || $c eq 'l') {
 	&Log("$s already exists\tin \%index[$.]\n  ALREADY $_index{$s}") 
 	    if $index{$s};
 	$_index{$s} = "$c $s($.)";
 
 	if ($mode eq 'text') {
-	    $index{$s}  = "$Chapter.$Section"; 
+	    $index{$s}  = $CurPosition;
 	}
 	elsif ($mode eq 'html') {
 	    $index{$s} = 
@@ -540,7 +580,9 @@ sub IndexExpand
 	print STDERR "$r " if $debug;	    
 	$result .= "$r ";
 
-	(index($r, $org) == 0) && &Log("MISS HIT? when try s/$org/$r/\n");
+	if (index($r, $org) == 0) {
+	    &Log("[$. lines] MISS HIT? when try s/$org/$r/\n");
+	}
     }
 
     print STDERR "]\n" if $debug;
