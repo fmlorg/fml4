@@ -114,9 +114,11 @@ sub InitConfig
 	      'Sep', 'Oct', 'Nov', 'Dec');
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", $year, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			1900 + $year, $hour, $min, $sec, $TZone);
 }
 
 

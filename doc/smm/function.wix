@@ -350,11 +350,11 @@ localtime(); を実行し、フォーマットの違ういくつかの日付変数(グローバル)
 =E
 runs localtime(); and sets several global variables such as:
 
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
+		   $year % 100, $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			$year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, $TZone);
 
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
