@@ -1,23 +1,31 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001 Ken'ichi Fukamachi
+# Copyright (C) 2000-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
 # $FML$
 #
 
+use vars qw($debug);
 
 package MySQL;
 
+my $debug = $main::debug;
 
 sub Log { &main::Log(@_);}
+
+my ($NULL); # ''
+my ($dbh);  # $dbh = data base handler
+my ($res);  # $res = response from data base handler
+my (@row);  # data $res->fetchrow_array() returns 
 
 
 sub DataBases::Execute
 {
     my ($e, $mib, $result, $misc) = @_;
 
-    if ($main::debug) {
+    if ($debug) {
+	my ($k, $v);
 	while (($k, $v) = each %$mib) { print "MySQL: $k => $v\n";}
     }
 
@@ -341,7 +349,7 @@ sub __ListCtl
 	my ($new_addr) = $mib->{'_value'};
 	$new_addr      = &main::LowerDomain($new_addr);
 
-	for $file ('actives', 'members') {
+	for my $file ('actives', 'members') {
 	    $query  = " update ml ";
 	    $query .= " set address = '$new_addr' ";
 	    $query .= " where ml = '$ml' ";
@@ -389,7 +397,7 @@ sub __ListCtl
 sub Count
 {
     my ($mib, $file) = @_;
-    my ($mll, $query, $res);
+    my ($mll, $query, $res, $ml);
 
     $ml     = $mib->{'_ml_acct'};
     $query  = " select count(address) from ml ";
@@ -406,7 +414,7 @@ sub Count
 sub Status
 {
     my ($mib, $file) = @_;
-    my ($mll, $query, $res, $addr);
+    my ($mll, $query, $res, $addr, $ml);
 
     $addr   = $mib->{'_address'};
     $addr   = &main::LowerDomain($addr);
@@ -422,13 +430,6 @@ sub Status
 
     $mib->{'_result'} .= "off "  if $off;
     $mib->{'_result'} .= $option if $option;
-}
-
-
-sub __Error
-{
-    my ($s) = @_;
-    $mib->{'error'} = $s;
 }
 
 
@@ -463,8 +464,9 @@ if ($0 eq __FILE__) {
     eval "sub Log { print \@_, \"\\n\";}";
 
     # getopt()
-    require 'getopts.pl';
-    &Getopts("dh");
+    use vars qw($debug $opt_D $opt_H $opt_U);
+    use Getopt::Std;
+    Getopts("dh");
 
     my (%mib);
     $mib{'dbname'}   = $opt_D || 'fml';
@@ -472,7 +474,7 @@ if ($0 eq __FILE__) {
     $mib{'user'}     = $opt_U || $ENV{'USER'};
     $mib{'_ml_acct'} = 'elena';
 
-    $MySQL::debug = 1;
+    $debug = 1;
     &MySQL::Init(\%mib);
     &MySQL::Dump(\%mib);
     &MySQL::Count(\%mib, 'actives');
