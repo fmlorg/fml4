@@ -760,10 +760,12 @@ sub FixHeaderFields
     $e{'macro:x'}        = $e{'tmp:x'}; 
     &Log("Gecos [$e{'macro:x'}]") if $debug;
 
-    if ($COMMAND_RETURN_ADDR_POLICY eq 'from') {
+    # XXX should we nuke $COMMAND_RETURN_ADDR_POLICY ?
+    if ($COMMAND_RETURN_ADDR_POLICY eq 'from' ||
+	$MESSAGE_RETURN_ADDR_POLICY eq 'from') {
 	$e{'Addr2Reply:'} = $From_address;
     }
-    else {
+    else { # $MESSAGE_RETURN_ADDR_POLICY eq 'reply-to'
 	$e{'Addr2Reply:'} = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
     }
 

@@ -793,6 +793,12 @@ FORCE_COMMAND_REPLY_TO:
 # value: string
 MGET_SUBJECT_TEMPLATE:	result for mget _DOC_MODE_ _PART_ _ML_FN_
 
+# send error message to Reply-To: ? or From: ?
+# (Of course From: if Reply-To: is not defined).
+# If $MESSAGE_RETURN_ADDR_POLICY is null, 
+# it implies we prefer Reply-To: (by default).
+# value: from / reply-to
+MESSAGE_RETURN_ADDR_POLICY: reply-to
 
 #####################################################################
 # ### Section: Digest/Matome Okuri Configurations ###
