@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML$
+# $FML: showvar.pl,v 1.1 2001/09/29 13:26:17 fukachan Exp $
 #
 
 my %define = {};
@@ -14,7 +14,9 @@ for my $file (<kern/* proc/*>) {
     read_file($file, \%var);
 }
 
-ReadMANIFEST(\%define);
+read_manifest(\%define);
+
+init_ignore_list(\%define);
 
 while (($key, $value) = each %var) {
     next if $key =~ /HOOK/;
@@ -26,7 +28,7 @@ while (($key, $value) = each %var) {
 
 exit 0;
 
-sub ReadMANIFEST
+sub read_manifest
 {
     my ($define, $file) = @_;
     my ($local_config);
@@ -94,6 +96,29 @@ sub read_file
 	use Carp;
 	croak ("cannot open $file\n");
     }
+}
+
+
+sub init_ignore_list
+{
+    my ($ignore_list) = @_;
+    my $list = {
+	'@INC'         => 1,
+	'@LIBDIR'      => 1,
+	'@MEMBER_LIST' => 1,
+	'@ACTIVE_LIST' => 1,
+
+	'$FML'         => 1,
+	'$DIR'         => 1,
+	'$LIBDIR'      => 1,
+	'$NULL'        => 1,
+	'$DO_NOTHING'  => 1,
+    };
+
+    for (keys %$list) {
+	$ignore_list->{ $_ } = 1;
+    }
+
 }
 
 
