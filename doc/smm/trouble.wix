@@ -562,3 +562,161 @@ sub fp_sort
 
 
 
+.S	503 Need RCPT (recipient) 
+
+そのひとから ＤＭ をもらってみると、なんかわかるんじゃないかな〜と
+
+たとえば 
+	ヘッダのどっかが一行あいてる （いいかげんなsendmailがパスのどっかにいる）
+		とか
+	From: のかたちが 特殊
+		とか
+	Reply-to: （なにもアドレスなし）になっている
+		とか
+
+まぁ〜そういうなんかがあるんではないかとおもうです
+
+８２２でみとめているアドレス形式は もっと いろいろかけるんですが、実用
+的には sendamil.cf のデフォールトのどっちかの形 つまり 4.x BSD の 
+/usr/share/misc/doc/smm/op.me？ にかいてある形式
+
+	Full Name <address>
+	address (comment)
+
+を仮定しています。＃完全な８２２サポートはすごくたいへんなので…てぬき
+
+だから
+	From: ("< uja ") <uja@uja.baycity.jp> 
+
+とかは間違ってないんだけど… うまく parsing できないということがありえますね…
+
+
+.S	最新版にバージョンアップする時に、config.ph は前のままでＯＫ？
+
+そうです。 
+
+1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
+いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
+使ってない場合はそのままでＯＫです。
+
+ただ、たまぁ〜〜〜〜に 変数名の スペリングの間違いを直すとか〜で かわっ
+ちゃうことがありますけど そういうのは doc/INFO にかいてありますんで、
+みてもらえばＯＫのはずっす
+
+
+.S	$Envelope{'macro:s'}  = 'localhost'; にしておくとまずい？
+
+まずくはないですが、この変数は 他にも使っちゃってるんで、Message-ID と
+かも @locahost とかついちゃうから…
+＃そういうことをすると、Message-ID が Unique でなくなるからだめ
+
+そのときは Message-ID をカスタマイズしちゃえばいいんですけどね…
+
+
+.S	fml.pl はうごくのに MSendv4.pl とか cron.pl とかでメールがうまくだせない
+
+そのマシンで sendmail は動いてます？
+動いてないと、log に Smtp:connect:なんとか とかでるんじゃないかとおもいます。
+
+
+.S	553 machine-name host name configuration error
+
+sendmail R8 では相当するコードが存在しないので…なにがおこっているのか
+わかりません;-)
+
+config.ph の 
+	$Envelope{'macro:s'}（旧 $_Ds） =  'localhost.ドメイン名';
+
+とかにすると ＯＫになるとおもいます
+
+
+.S	MSendv4.pl の直接 Edit はちょっと書き方が違うんです…
+
+ある意味では悪いんです;-) すいません_o_
+
+   Elena@Baycity.jp  matome   1u
+
+で、実は、 これは古いフォーマットなのですが、fml.pl とか libfml.pl は
+理解するんですが、
+
+メール経由で まとめおくりの命令を与えたら、古いフォーマットになるはず
+がないので、
+
+   Elena@Baycity.jp  m=1u
+
+となっていなくてはいけないはずです（と MSendv4 は仮定している）。
+このときファイル（members とか actives）は
+
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENTION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relayserver matome 3u
+#.endFML HEADER
+Elena@Baycity.jp  m=1u
+
+こうなります。そして、MSendv4 はこのフォーマットしか理解しません（てぬ
+きか？）。それで、
+
+	WARNING: /usr/local/ml/hitomi/MSend/MSendrc filesize=0 O.K.?
+
+となります。
+
+
+.S	:include:うじゃ is unsafe for mailing to program
+
+check：		includeするファイルおよびそこまでのパスの	
+		どこかで危ないことがないか？
+		
+		でも、fpathconf とか  fchown ってよくわからない
+		意外なものも判定条件にしてるかも…（わからないけど）
+		＃sun os4.1.3JLEも変とかいってたし…
+
+ＯＳ：
+		fpathconf はPOSIXです。
+
+		EWS は…よくわかりません… がマニュアルにPOSIXとかかい
+		てあればきっと同じような現象でしょう。
+
+		HP では fchown() ではんていしてるらしいです。
+		あと、HP では setuid() じゃなくて まだ setreuid() を
+		使ってるとおもうので、
+		default の fml.c ではうまくいかないでしょう
+		setuid -> setreuid にしてでいいのかな…
+		% man setreuid ででてくる設定は多分setuid
+		なんかとおなじだとおもいますが…
+
+回避：
+		/usr/local/ml/include-file
+		とか local disk 上にうつして permission をきびしくする
+		＃111 とかまで？…:-)
+
+		限界までpermissionをおとして、
+		rootにsetuidした C-wrapper を同様な場所につくる
+		＃要注意な作業	
+
+		sendmail の chownsafe() が常に真を返すように改造する
+
+理由：
+
+QUNSAFEADDR フラッグがONになるのは、
+
+１	chown がちゃんとできないとき
+２	world writable であるとき
+
+です。で、１のほうは fpathconf() とか  fchown() だとすれば
+
+これは、fpathconf() かな？＃たぶん…:-)
+
+sendmail -> 
+forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
+			このとき
+			fpathconf()が安全性をチェックする
+
+の時に fpathconf() が bugってるか、それともpath
+のどこかにファイルの所有者以外への write permission が与えられていると
+か、NFSごし だとか… 
