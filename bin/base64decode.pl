@@ -27,8 +27,11 @@ require 'mimer202.pl';
 
 undef $/;
 undef $body;
-while (sysread(STDIN, $_, 4096)) { $body .= $_;}
 binmode(STDOUT);
-print &bodydecode($body);
+
+while (sysread(STDIN, $_, 1024)) { 
+    print &bodydecode($_);
+}
+
 
 1;
