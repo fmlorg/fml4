@@ -20,10 +20,6 @@ sub MTICache
     local($host, $date, $rdate, $buf, $status);
     local(%hostinfo, %addrinfo);
 
-    ### 2.1B test ###
-    $USE_MTI_TEST = 1;
-    ### 2.1B test end ###
-
     ### Extract Header Fields
     $time    = time;
     $date    = &Date2UnixTime($e{'h:date:'});
@@ -328,10 +324,7 @@ sub MTILog
 	$buf .= sprintf("%15s %s\n", "$h:", $e{"h:$_:"}) if $e{"h:$_:"};
     }
     $buf .= "\nsince\n$s\n";
-
-    # IN TEST PHASE, please set $USE_MTI_TEST to reject mails automatically.
-    # removed $USE_MTI_TEST in the future;
-    $MTIErrorString .= $buf if $USE_MTI_TEST && $s;
+    $MTIErrorString .= $buf if $s;
 }
 
 
