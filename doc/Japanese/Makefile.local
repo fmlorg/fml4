@@ -16,7 +16,7 @@ all:
 	@ echo "diag	diagnostic check"
 
 update:
-	cvs update -dAP
+	@ cvs update -d -P
 
 scan:
 	@ cvs -n update 2>&1|\
