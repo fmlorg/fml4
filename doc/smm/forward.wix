@@ -1,0 +1,87 @@
+.C	~/.forward でＭＬを行なう
+.key	.forward
+.key	~/.forward
+.key	$HOME/.forward
+
+
+.S	概論
+.label	{forward-intro}
+
+理屈は簡単です。~/.forward もsendmailは/etc/aliasesと同様に
+実行されます。だから
+
+~/.forward に
+
+"|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml" 
+
+とかけば、 ＭＬを作ることができます。この場合 sendmail は fork()して 
+STDIN にSMTPでもらったメールの内容をfml.plへ送り込みます。
+
+この場合の問題は、自分自身へも配送するのでループ（bounce）問題をどう避
+けるか？ が問題になります。
+
+
+.S	架空のユーザーを作る
+.key	架空のユーザー
+
+たとえば provider でのはなしですね。/etc/aliases を変更してもらえない
+のなら、ようはアドレスがあればいいので、架空のユーザーの ~/.forward に 
+fml.plの設定を /etc/aliases への設定(上述)と同様にすればＯＫです。
+
+
+.S	MH インターフェイス
+.key	slocal
+.key	.maildelivery
+.label	{slocal-1}
+
+ここでは slocal を用いたやりかたを述べます。
+
+	~/.forward に
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+
+と書きます。よく名前を聞く slocal ってやつですね。
+slocal では、設定は  ~/.maildelivery で設定します。
+例：
+To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
+それ以外は全部スプールに落す（普通の挙動）
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field   pattern   action  result    string
+To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
+
+# drop to the personal mail-spool
+default  -       >       ?      /var/mail/fukachan
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+この場合 PIPE で fml.pl へ渡すとき UNIX FROM がおちてしまうのかもしれ
+ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
+す。
+
+
+.S	ほかのソフトを使ったインターフェイス(おしえて〜おねえさ〜ん)
+
+誰かやったひとおしえて_o_。
+基本原理は同じで どうやって pipe にわたせばいいのか？ だけ考えればいい
+だけです。
+
+
+.S	ローカル配送のためのインターフェイス(libexec/fml_local.pl)
+
+.S	libexec/fml_local.pl
+.label	{libexec/fml_local.pl}
+.key	libexec
+.key	libexec/fml_local.pl
+.key	fml_local.pl
+
+ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
+slocal と同じになっちゃいましたね(馬鹿)
+
+まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
+(開きなおり(苦笑))
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
+という upper compatibility です。
+最後にマッチするエントリを実行するというところが決定的に違いますね。
+でも、こうすることで、学習するvacationプログラムが簡単に書けます。
+
+

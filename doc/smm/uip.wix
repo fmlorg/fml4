@@ -1,0 +1,25 @@
+.C	ユーザーインターフェイス
+
+.S	MH scan.format (lib/Utilities/scan.format)
+.label	scan.format 
+.key	scan.format 
+.key	lib/Utilities/scan.format
+
+暗号のようですが、ポイントは今レジスターに何が入っているかと、
+if	%<
+elif	%?
+else	%|
+fi	%>
+です。
+
+X-ML-Name: とかと名前が違うフィールドは ↓この辺を
+
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+
+X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
+適当に増やして、適当に増やしてください。
+
+%?(match NetBSD.ORG)NetBSD\
+
+
+

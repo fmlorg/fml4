@@ -1,0 +1,120 @@
+
+.C	perl 豆知識
+.S	exec LIST
+
+     `LIST' の中に 1 以上の引数がある場合、または `LIST' が 1 以上の値を
+     持つ配列の場合、`LIST' 中の引数で `execvp()' をコールする。
+
+     スカラー引数が 1 しかない場合、引数にシェルのメタキャラクターがある
+     かどうかチェックされる。もしあれば、parse するために全引数が 
+     `/bin/sh -c' に渡される。もしなければ、引数は単語毎に分けられ、
+     `execvp()' にそのまま渡される。この方が効率的だからである。
+
+
+.S	system LIST
+
+     `exec LIST' と全く同じことをするが、違いは最初に `fork' を行い、親
+     プロセスは子プロセスが完了するのを待つ点である。
+
+
+.S	open
+
+最終的に exec (do_exec in doio.c)を呼ぶので、この場合のメタキャラクタ
+の取り扱いも同じ
+
+
+.S	perl の習得はやさしいか？
+
+perlの書き方は見ての通り、
+
+	shell script, awk, C, sed
+
+の知識がちょっとあれば書けるものです。
+＃初心者でもわかるように 変な書き方をしないよう気をつけているつもりで
+すけど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+
+気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
+
+* Traps::			注意点
+
+あたりにあります。このperl.texinfoの日本語版は持っていて損はしないです。
+＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容である。
+＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
+
+perl texinfo in japanese --- version 4.0.19.2
+・perl.texinfo		perl.man を日本語に訳して texinfo 形式にしたもの
+
+というものがfj.sourcesに投稿されています。ちなみに
+
+ftp.phys.titech.ac.jp:pub/misc/perl
+-r--r--r--  1 fukachan   112208 Mar 12  1993 perl.texinfo-j4.0.19.2.tar.gz
+
+にもあります
+
+
+.S	perlはinterpreter
+
+必要のないコードは評価しない方が“少しは”はやいよね、きっと
+＃そうして、require ってのが増えていく（笑）
+
+
+.S	変数
+
+基本はグローバルで、localで明示的にlocal variableにする。
+そうでなければ前に評価した時の値のままなんです。
+＃でもって、interpreterなんですよね、perlは
+
+だから、“config.phを評価する時に$DIRに入っている値”が重要になるわけ
+ですね。
+
+
+.S	@INC	
+@INC : perl スクリプトを探す場所のリスト
+========================================
+
+`@INC': perl スクリプトを探す場所のリスト
+
+`do EXPR' コマンドまたは `require' コマンドで評価される。
+
+最初は コマンドスイッチ `-I' で指定した引数 + デフォルト perl ライブラリ 
+(多分 `/usr/local/lib/perl'、次に `.' すなわちカレントディレクトリ )が入っ
+ている。
+
+-----------------------------------------
+
+fml.plでは、
+
+$DIR	      = $ARGV[0] ? $ARGV[0] : '/home/axion/fukachan/work/spool/EXP';
+
+で、$DIRを引数からとった後
+
+push(@INC,"$DIR");		# add the path for include files
+
+で、探す場所を指定しています。
+% perl -e '$,="\n", print @INC'
+とかしてみればわかりますが、
+
+/usr/local/lib/perl
+$DIRの場所
+$LIBDIRの場所
+
+の順番で探していくはずです。つまり、
+
+require 'libsmtp.pl';	とか
+require 'sys/socket.ph';	
+
+がこの順で探されるはずなんですね。
+
+
+.S	require
+
+@INCの順でファイルを探してそれをperl scriptとして評価する。
+＃perlはinterpreterなので必要に応じて取り込んで評価した方がいいはず
+
+
+.S	主に言葉ではなくCodingする姿から伝わってくるもの
+
+ごみん、なんとなく… P^^;
+＃出典がわかる人（おぉ同志よ（笑））メールください(^^)
+
+

@@ -1,0 +1,55 @@
+.C	References
+
+rfc822				headers of mail
+rfc821				smtp
+rfc142[5678]			about esmtp
+
+rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
+
+rfc934				Proposed Standard for Message Encapsulation
+rfc1153				digest
+
+rfc1522				MIME part 2
+
+rfc1594				�Ѹ콸
+
+perl texinfo in japanese --- version 4.0.19.2
+
+.# ##########################################################
+.# ##########################################################
+
+fj.sources:
+Release Version 1.5
+Message-ID: <FUKACHAN.95Jun13000736@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001452@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001132@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001217@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001255@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001321@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001352@beth.phys.titech.ac.jp>
+
+Release Version 1.3
+Message-ID: <FUKACHAN.94Sep12063149@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063412@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063554@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063737@axion.phys.titech.ac.jp>
+
+Release Version 1.2.1
+Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+fml 1.2    Mailing List Server(upper compatible with hml 1.6).
+Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
+
+Subject: hml1.6: a powerful mailing list server
+Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
+
+.# ##########################################################
+.# ##########################################################
+
+
+Papers(http://www.phys.titech.ac.jp/uja/PAPERS/):
+Ken'ichi Fukamachi,
+"1/f Fluctuations in Internet Communication"
+to appaer in Interdisciplinary Information Sciences.
+

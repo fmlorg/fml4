@@ -1,0 +1,44 @@
+.C	OS依存性。OSごとのインストールの注意
+
+.S	4.3BSD
+
+	ターゲットマシンなので、なにもなし
+
+.S	4.4BSD
+
+	ターゲットマシンなので、なにもなし
+
+.S	SUN OS 4.1.3
+
+fmlの昔のヴァージョンでは lseek system call をつかうところで、こけてま
+したが、その問題はもう発生しません。
+
+NFS ごしの fpathconf() はうまく作動しません。ローカルに include をもつ
+か、fmlを置く場所をローカルにするか等の技が必要になるでしょう
+
+
+.S	HP-UX 
+
+setuid まわりが 4.3と4.4の中間みたいな感じで止まってます。
+sendmail はいろいろとまわりみちをして、setuid を実行するようですが、
+:include: を使う限りうまくいくらしいです。
+＃Version依存性がよくわからないんですが…
+
+もし、それでだめなら perl -U をつかってもらうということで
+
+
+.S	SGI Indy(IRIX5.3)
+.q
+From:    nino@windy.mech.utsunomiya-u.ac.jp
+
+私のホストは、SGIのIndy(IRIX5.3)なんですが、そのまま
+では全然動かなかったので、-D_POSIX_CHOWN_RESTRICTED
+を付けてkernelをreconfigして何とかなりました。更に、
+:includeを使える様にするために、sendmailを入れ換え、
+大文字が使えなかったので、CFも入れ換えました。
+(See fj.sys.sgi)
+
+.~q
+
+
+

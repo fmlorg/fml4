@@ -1,0 +1,355 @@
+.C	libexec/fml_local.pl マニュアル
+.key	libexec/fml_local.pl manual
+.key	manual of libexec/fml_local.pl
+.label	{manual of libexec/fml_local.pl}
+
+.S	~/.forward
+
+~/.forwardに
+"|/some/directory/libexec/fml_local.pl -user username || exit 75"
+
+とか書いて使います。usename はあなたの account名です。
+
+
+.S	~/.fmllocalrc 1
+
+fml_local.pl は ~/.fmllocalrc で制御します。
+
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+	“最後にマッチするエントリを実行します”
+
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+また # ではじまる行はコメントです。空行は無視して次へいきます
+
+
+.S	~/.fmllocalrc 2
+
+デフォールトは自分のスプールへ、そしてローカルなＭＬの配送はスプールへ
+落すようにセットしてループしないようにするべきです。
+
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+だから、最後に必ず
+
+From		自分	&	MailLocal
+X-MLserver 	\S+	& 	MailLocal
+
+のエントリをかくことがループを防ぐためにもっとも大事になります
+さらに、ＭＬをやるときは
+From		自分	&	MailLocal
+
+ＭＬの設定
+
+X-MLserver 	\S+	& 	MailLocal
+
+のように 挟んでください。そうしないと自分ではＭＬへ投稿できません（笑）
+＃後にあると From がマッチしてしまう
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+
+.S	~/.fmllocalrc 3
+
+４つの変数が スペース で区切ってやってほしいことをかきます。
+「フィールド パターン 実行のタイプ 実行すること」
+
+それ以外に変数を定義できます。それらの変数は 実行内容の中で展開して使
+われます。
+セットされる変数一覧（@VAR の中身）は後述します(.seealso fml_local-var )
+
+
+.S	正規表現
+
+以下で実際に出てくる基本的な表現だけをすこし説明します。
+
+○ . なんでもいいから一文字
+○ \s 空白文字 e.g. space TAB 
+○ \S は空白でない文字
+○ + は１個以上、* は０個以上です。
+
+○ ()でくくったものがマッチしたもので fml_local.pl では
+左から順番に グローバル変数 $F1 $F2 $F3 にセットされます
+
+	to	(uja)		|	$DIR/fml.pl $DIR $DIR
+
+To: フィールドのどっかに uja という文字列があれば、それにマッチする
+
+	to	\(uja\)		|	$DIR/fml.pl $DIR $DIR
+
+uja ではなく (uja)  にまっちします。
+
+○“１個以上の空白でない文字”
+	Subject	get\s+(\S+)	&	sendback
+
+	Subject: get GUIDE FILE の GUIDE だけにまっち 
+
+○“０個以上のなんでも”
+
+	body	get my spool (.*)	& 	getmyspool
+
+メール本文に 
+	get my spool uja uja
+とあれば、"uja uja" の部分を $F1 にセットします。.* だからスペースにも
+マッチしてます。これでパスワードに空白も使えると
+
+
+S	~/.fmllocalrc の例
+
+ＭＬをセットする ~/.fmllocalrc の例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+DIR	/usr/local/fml
+
+From		fukachan	&	MailLocal
+
+to		\(uja\)		|	$DIR/fml.pl $DIR $DIR
+
+to		\(sayori\)	|	$DIR/fml.pl $HOME/var/sayori $DIR
+
+X-MLserver	\S		&	MailLocal
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+で、To: username@somewhere.jp (uja) というメールがきたら
+"|$DIR/fml.pl $DIR $DIR" 
+という普通の形でＭＬを作動させるというものです。
+ここで $DIR は上の DIR の行の値で展開されます。
+
+このfml.pl は普通のfml.pl です。パッチとかをあてる必要はありません。
+つまり、fml_local.pl がヘッダをみて何を起動すればいいかを
+判断するので、起動するべきものは普通のＭＬサーバでいいわけです。
+
+また、 (uja)  は 
+	うじゃＭＬ（/usr/local/fmlの下にconfig.phでカスタマイズ）を、
+(sayori) はまた別の 
+	さよりちゃんＭＬ（/usr/local/fml/var/sayori/config.ph）
+を起動します。
+
+これ以外の、From: fukachan…（@phys とかついてても なくてもいい） 
+や、X-MLserver: フィールドのあるメール、いづれにもマッチしないメールは
+すべて /var/mail/fukachan のように sendmail が普通ためておく場所に
+おとします。
+
+
+.S	フィールドはヘッダの任意のフィールドです
+
+「フィールド パターン 実行のタイプ 実行すること」
+
+フィールド パターン はメールのヘッダのすべての行について、
+
+	if ( そのフィールドの値 =~ /パターン/ ) 
+
+が実行されます。というわけで、
+
+	subject: の特定のキーワードでＭＬを起動する
+	X-ML:	uja というフィールドがあったらＭＬを起動する
+
+等も自由に設定できます。
+
+
+.S	フィールドはヘッダ以外に body  があります
+
+これはパスワードを必要とするようなものは、本体でパスワードを書くべきで
+す。エラーメールではヘッダはまるみえですから
+
+body	getmyspool\s+(\S+)	&	getmyspool_pw
+
+とか設定すれば、Providerから会社の自分のスプールの内容を夜中に読むとかが
+できるようになります。
+例：
+% echo "getmyspool password-is-required" |Mail 自分のアドレス
+
+
+.S	変数’ｓ
+.label	fml_local-var
+
+もし変数を明示的にセットしないときは適当な値がデフォールト設定されます。
+
+    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
+	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
+	    MY_FUNCTIONS);
+
+
+# USER	-user fukachan で設定する変数と同じ意味
+USER	fukachan
+
+# HOME	$HOME変数。
+# Bourne Shell 風にしているので、~/ を展開するようにはなっていません
+HOME	/home/axion/fukachan
+
+# fml.pl のある場所。でも使ってない変数…:-)
+FML_PL	/home/vivian/fukachan/work/EXP/fml.pl
+
+# $DIR 変数の設定。下で使われると $DIR を次の値で展開するため
+DIR	/home/vivian/fukachan/work/EXP
+
+# $LIBDIR 変数の設定。下で使われると $LIBDIR を次の値で展開するため
+LIBDIR	/home/vivian/fukachan/work/EXP
+
+# メールスプールの場所
+MAIL_SPOOL	/var/mail/fukachan
+
+# デバッグモード
+DEBUG
+
+# From: であり、エラーメールが返る場所。もっともふつう〜は
+# 自分自身以外に設定仕様がないですね
+MAINTAINER 	fukachan@phys.titech.ac.jp
+
+# From: in MAINTAINER's SIGNATURE
+# From: $MAINTAINER ($MAINTAINER_SIGNATURE) になる
+# e.g. 返るメールのFrom:が、
+# From: fukachan@phys.titech.ac.jp (Prisoner No.6 Fukachan)
+# になる
+MAINTAINER_SIGNATURE	Prisoner No.6 Fukachan
+
+# ログファイル デフォールトは ~/log
+LOG		$HOME/work/fml/log
+
+# パスワード
+PASSWORD	uja uja 
+
+# get とかで使う アーカイブの置き場所。もし設定してないと HOME
+ARCHIVE_DIR	/home/uja/uja/work/archive
+
+# Vacation program compatible で vacation の働きもする。
+VACATION	/home/uja/uja/.vacationrc
+
+# フィールドセパレータを変更する
+FS	\s+
+
+FS	:
+とすれば、.fmllocalrcの設定は From:fukachan:&:MailLocal とかくことになる
+
+# ユーザーが自分用に設定した関数を 別のファイルにしまいたいなら
+# そのファイル名を設定する。デフォールトは ~/.myfunctions.pl
+MY_FUNCTIONS	/home/your-function-file
+
+
+
+.S	フィールド パターン 実行のタイプ 実行すること
+
+各フィールドは スペースとタブ の塊で区切られます。
+# slocalと違って４つしかないから注意
+
+フィールド	To, subject, 等。なんでもいい
+
+パターン	perlの正規表現が使えます。
+		スペースとかは含めないので
+		get\s+(\S+) 
+		こんな形になります。
+		() でマッチした変数は順に
+		$F1 $F2 $F3 に設定されます
+実行のタイプ	& は perl の関数呼びだし
+		> は そのファイルにアペンドです
+		| は パイプで渡します。
+		UNIX FROMつきのまま渡します
+		UNIX FROMを抜いた形でプログラムへ渡すには
+		|の代わりにmhと書いてください
+		（mhへ渡すことを想定している）
+
+実行するもの	実行するもの。関数 or ファイル
+
+
+.S	フィールド設定の例
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field		pattern		type	exec
+
+# (/usr/libexec/mail.local にならう)
+# スプール （例 /var/mail/fukachan ）に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+From		fukachan	&	MailLocal
+
+# MH の folder へいれる。MH本来の slocal はこう使うんだろうなぁ
+From		fukachan@phys	mh	/usr/local/lib/mh/rcvstore +inbox
+
+# 外国ＴＶシリーズＭＬからのメールは
+# TO:enterprise@phys.titech.ac.jp になるから、それにマッチしたら
+# ~/Mail/enterprise というフォルダーにいれる
+To		Enterprise@phys mh	/usr/local/lib/mh/rcvstore +enterprise
+
+# File Retrieving 
+# perl の関数を呼ぶ。(\S+)でマッチしたものが ↓$F1 に置き換えられる。
+Subject		get\s+(\S+)	|	/usr/bin/Mail -s $F1 $From_address
+
+# Exec ML
+# ＭＬサーバ fml.pl を呼ぶ。
+# 今の場合管理者宛のメールは上のFrom や X-MLserverでスプールに落すので
+# ループはしない
+
+to		(uja)		|	$DIR/fml.pl $DIR $DIR
+
+
+# これは最後にマッチするべき、これで絶対にループしないはず
+# MailLocal は
+# (/usr/libexec/mail.local にならう)
+# スプール （例 /var/mail/fukachan ）に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+# From		fukachan	&	MailLocal
+# もし ML からきたら、ローカルにおとす
+X-MLserver	\S		&	MailLocal
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	ファイルを送り返す用にする設定の例
+
+~/.fmllocalrc
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+# Subject: get ファイル名
+# アーカイブの“ファイル名”のファイルを
+# Reply-to: へ もしなければ From: へ送り返す
+
+Subject         get\s+(\S+)     	&	sendback
+
+# Subject: GUIDE
+# アーカイブの ファイル GUIDE を
+# Reply-to: へ もしなければ From: へ送り返す
+
+Subject         (GUIDE)  	   	&	sendback
+
+# メール本文に "getmyspool パスワード" とかいて
+# 家から (大学|会社)のメールスプールを 家に送ってもらう
+# 一応スプールのメールは消さない
+# Reply-to: へ もしなければ From: へ送り返す
+
+body            getmyspool\s+(\S+)	&	getmyspool_pw
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	BUILD-IN Functions
+
+ sendback
+     内部定義関数としては &sendback(ファイル) は
+     ファイル を送り返します
+     引数なしに sendback を使うと
+        e.g. .fmllocalrc で from uja & sendback
+     正規表現でマッチした第一フィールドのファイルを送り返す
+     .fmllocalrcの例:
+     subject get (\S+) & sendback
+ 
+ getmyspool_nopasswd
+     メールスプールを送り返します
+     パスワードは必要ありません。
+     内部定義関数として使うべきです
+ 
+ getmyspool 
+     メールスプールを送り返します
+     正規表現でマッチした第一フィールドをパスワードとして認証します
+     認証した場合 送り返します。
+    .fmllocalrcの例:
+    body get my spool (\.*) & getmyspool
+ 
+ forward
+     メールを特定のアドレスへフォワードする
+     アドレスは forward の後に空白で続けて 
+     \@OPT の中に入ってます。
+     簡単なメーリングリストですね
+    .fmllocalrcの例:
+    To (uja) & forward address-1 address-2 ..
+ 
+ 
+ ALIASES:
+ getback       は sendback と同じ
+ 
+ getmyspool_pw は getmyspool と同じ

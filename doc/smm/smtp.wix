@@ -1,0 +1,89 @@
+.C	System Tuning
+
+.S	％リレー
+.key	%リレー
+
+sendmail.cfの問題です。それに厳密にはＲＦＣには従ってない？から％なん
+ざぁ理解しなくていいんだぜってサイトも世の中にはあることに注意
+
+
+.S	activesファイルによるリレー（sendmail 8.x）
+.key	%リレー
+
+actives には
+
+アドレス			リレーサーバー
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+
+のような書き方ができます。これをするとsendmailには
+
+fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
+
+のように渡されます。	
+だからactivesファイルに
+
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+…
+Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
+…
+cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+
+なものがあると
+
+fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
+Elena%phys.titech.ac.jp@axion.phys.titech.ac.jp
+cocoa%phys.titech.ac.jp@axion.phys.titech.ac.jp
+
+のように渡されてaxion.phys.titech.ac.jpまで一通にまとめられて来て
+axion.phys.titech.ac.jpで３通にばらけます。
+パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可
+が得られればどこかでリレーサーバーを使えるといいですね。
+
+＃注意：ＲＦＣに従うなら、% ではなく : を使った形が正しい。
+%式制御は ＲＦＣにはないが、これで動くという類のものです。(see rfc821)
+
+
+.S	activesファイルによるリレー（sendmail 8.x）捕捉
+.key	リレー
+
+1.3.2 からは内部表現が拡張性のため違う形になっています。が、この章の内
+容は以前有効です。内部で古いフォーマットも自動的に変換して解釈していま
+す。気にしないで下さい:-)
+
+NEW FORMAT に自動変換します。＃気にしないでください。
+
+fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp m=1u 
+＃意味：axion をリレーサーバとし、まとめおくりは一時間おきにPLAINで
+
+
+.S	activesファイルによるリレー（sendmail 5.x）
+
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
+cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+
+↑このように順番に並んでいないと一通になってくれませんので注意。
+それ以外は8.xの時と一緒です。
+
+
+.S	同じｍｘについて
+.key	mx
+
+sendmail 8.xではCHANGES-R5-R8にあるとおり↓
+
+   For example, if two sites ``foo.com'' and ``bar.com'' are both
+   served by UUNET, they will have the same set of MX hosts and will
+   be sent in one transaction.  UUNET will then split the message
+
+一通で送られます。ばらばらの順番でも大丈夫。
+
+sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
+れば
+
+	fukachan@phys.titech.ac.jp	
+	Elena@phys.titech.ac.jp	
+	cocoa@phys.titech.ac.jp	
+
+一通にまとめられます。
+
+

@@ -1,0 +1,200 @@
+.C	フック、カスタマイズ（例を見る方がはやいかも）
+.label	{customize}
+
+.S	インタプリタとconfig.ph
+.seealso	command-hook
+
+インタプリタなんですから、コマンドでそのＭＬ独自の機能をもたせたかった
+らconfig.ph にフックをセットして下さい（そうすれば、ＭＬが複数あっても
+ＭＬごとに変更できるわけです）。以下、例題です。
+
+
+.S	$START_HOOK
+.key	$START_HOOK
+
+この時点では、ヘッダの各フィールドの切り出しは終っている。が、配送orコ
+マンド本体を行なう前である。
+
+例： 配送前に、もし #ではじまらない行が８行以上あれば、たとえ#ではじま
+る行があっても普通のメールとおもうようにする。
+
+$START_HOOK =q%
+    if($Envelope{'req:guide'} &&
+       (! ($MailBody =~ /\#\s*msg/)) &&
+       ($BodyLines - $_cf{'cl'} > 8)
+       ) {
+	$Envelope{'req:guide'} = "";
+    };
+%;
+
+
+.S	$HEADER_ADD_HOOK
+.key	$HEADER_ADD_HOOK
+
+ヘッダに”新たに”つけくわえる フィールドをかいて、カスタマイズするた
+めのフック
+
+例：
+    $HEADER_ADD_HOOK = q#
+	$body .= "X-Baycity-weather: Mizumaki";
+    #;
+
+ヘッダに X-Baycity-weather: Mizumaki とつけくわえる（意味不明（笑））
+
+例２：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	$SMTP_OPEN_HOOK
+.key	$SMTP_OPEN_HOOK
+
+このフックの後、 Sendmail へ渡すヘッダの処理が始まります。
+ここで、強制的にヘッダの内容を変えたりすると効果的です。
+
+例：
+Reply-To: フィールドをＭＬ自体へ強制書き換え
+Precedence: を bulk へ
+
+$SMTP_OPEN_HOOK = q#
+	$Envelope{'h:reply-to:'}   = $Reply_to = $MAIL_LIST; 
+	$Envelope{'h:Precedence:'} = PRECEDENCE = 'bulk';
+#;
+
+＊＊＊1.5 と 1.6 と注意＊＊＊ 
+$COMPAT_FML15 = 1; とすれば 
+$Reply_to = $MAIL_LIST; 
+という昔(1.6以前)の形でも理解します。
+
+
+.S	$FML_EXIT_HOOK
+.key	$FML_EXIT_HOOK
+.seealso expire
+
+fml.pl が最後に実行する フック。このときすでに 排他制御の lock も解除
+されていることに注意。expire とかがその例ですね。
+
+
+.S	$MSEND_OPT_HOOK
+.key	$MSEND_OPT_HOOK
+
+デフォールトでは、まとめおくり や mget の時の Subject は
+
+Subject: Matomete Send [PLAINTEXT(UNIX FROM)] (1/1) (Elena Lolobrigita ML)
+
+のようになります。が    ↑↑↑↑ここのところの文章がきにいらないので
+OVERWRITE したいときは、
+
+$MSEND_OPT_HOOK = q%
+    $MSendOpt{'#uf'} = "#Overwritten... $MSendOpt{'#uf'}";
+%;
+
+このように、
+		$MSEND_OPT_HOOK 
+に 連想配列の 
+	#モード の値が #説明の文章
+
+のようにかいてください。なにをやってるのかは、libutils.pl の中の
+sub MSendModeSet  という関数を見るとわかるとおもいます。
+
+
+.S	COMMAND_HOOK（コマンドへの追加）
+
+次を参照
+
+
+.S	コマンドをふやそう！♪でっきるかな〜♪でっきるかな
+
+config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
+します。こういうことをしてもいいというのは、大抵コマンドは一メールあた
+り１、２回しか呼ばれないので、eval は重たいけど、１、２度ならまぁ便利
+さの方が優先という経験と観察に基づいてます。
+
+
+.S	コマンドをふやそう！例： "# list" and "# rsummary"
+.key	$COMMAND_HOOK
+
+注意： rsummary は現在は summary 引数 の形で実行できます
+
+例：
+# list 			list リストファイルを取り寄せる
+# rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
+
+$COMMAND_HOOK =q#
+print STDERR $COMMAND_HOOK;
+      if(/list/io) {
+	  &Logging("List ($From_address)");
+	  &SendFile($to, "List $ML_FN", "$DIR/list");
+	  next GivenCommands;
+      }
+
+	if(/rsummary/io) {
+	    &Logging("R Summary ". $Fld[2]);
+	    if($Fld[2] =~ /^(\d+)\-(\d+)$/) {
+		local($a) = $1; local($b) = $2; local($RETURN);
+		open(TMP, "$DIR/summary") || do { &Logging("$!"); next GivenCommands;};
+		while(<TMP>) {
+		    if(/\[$a:/ .. /\[$b:/) {
+			$RETURN .= $_;						
+		    }
+		}
+		close(TMP);
+		&Sendmail($to, "Restricted  Summary $Fld[2]", $RETURN);
+	    }else {
+		&Logging("Summary ($From_address)");
+		&SendFile($to, "Summary $ML_FN", "$DIR/summary");
+	    }
+	    next GivenCommands;
+	}
+#;
+
+.S	コマンドをふやそう！例： "# sget"
+.key	$COMMAND_HOOK
+
+# sget uja		subjectに uja というキーワードが入っているファ
+			イルを取り寄せる
+
+$COMMAND_HOOK =q#
+      if(/^sget$/io) {
+	  local($s);
+	  if(open(F, $SUMMARY_FILE)) {
+	      while(<F>) {
+		  /$Fld[2]/ && do {/\s\[(\d+):/ && ($s .= $s ? ",$1" : $1);}
+	      }
+	      close(F);
+	  }else {
+	      $s = "Fail";
+	      &Logging("Search and Get $Fld[2] Fail");
+	      next GivenCommands;
+	  }
+
+	  &Logging("Search and Get $Fld[2]");
+	  &Sendmail($to, "Search and Get ". $Fld[2] . $ML_FN, $s);
+      }
+#;
+
+
+.S	コマンドをふやそう！例： "# admin" アドミンコマンド
+.key	$COMMAND_HOOK
+.key	$ADMIN_MEMBER_LIST
+.key	$ADMIN_HELP_FILE
+.key	$REMORE_AUTH
+.key	admin-command
+.key	アドミンコマンド
+.seealso	REMOTE-ADMINISTRATION 
+
+"# admin" アドミンコマンド って昔あったんですが、いまは、
+内蔵しちゃったので、わざわざ↓これしなくても、
+
+$REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
+(.seealso REMOTE-ADMINISTRATION )をみてね
+
+
+.S	"# admin" アドミンの昔の呼出し方
+
+lib/remote/REAMDE をみてもらうとわかりますね。 
