@@ -1,8 +1,12 @@
-fml Mailing List Packeges release revison 3.0 current Bulletin
+	fml 4.0 mailing list package
 
 				深町 賢一
 
-○ メーリングリストなど
+[ホームページ]
+
+	http://www.fml.org/fml/
+
+[メーリングリストなど]
 
 ＃バグ、質問等は fml-query@ffs.fml.org までおねがいします。
 
@@ -19,19 +23,13 @@ fml Mailing List Packeges release revison 3.0 current Bulletin
 です。使用・改造をする場合は常に update, bugfixes, extensions が行なわ
 れているので最新版のfml-current を手に入れてからしてもらえると幸いです。
 
-○ fmlの入手方法
 
-最新版のソースは
+[fml の入手方法]
 
+	ftp://ftp.fml.org/pub/fml/
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-の下です。ファイル名はfml-current.日付.tar.gzです。日付の新しいのを使っ
-てみて下さい。過去の正式リリースは
+お薦めは stable/ release/ current/ の順になります。
+ディレクトリの説明は以下の URL を参照して下さい。
 
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/
-
-の下にあります。
-
-HOME PAGE: 
-
-	http://www.fml.org/fml/
+	http://www.fml.org/fml/ftphier.ja.html

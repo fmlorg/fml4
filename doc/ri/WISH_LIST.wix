@@ -1,8 +1,8 @@
 .HTML_PRE
-	WISH LIST of fml project
+		WISH LIST of fml project
 
 .if LANG == JAPANESE
-     WISH_LIST 助けの欲しいリスト
+	     WISH_LIST 助けの欲しいリスト
 
 人手 ;_;
 
@@ -15,6 +15,16 @@
   * エラーを知らせる文などの変な英語を直す (優先順位高し)
 
   * ドキュメントの英語を直す
+
+ハードウエア
+	とりあえず困ってないけど、
+
+		要らない SUN とか
+		要らない portmaster 2 とか
+		要らない cisco 2514 とか
+
+	あったら誰か下さい
+
 .endif
 .if LANG == ENGLISH
 

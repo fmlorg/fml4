@@ -1,14 +1,14 @@
 .HTML_PRE
-	On Porting to Non UNIX Operating Systems
+	Port "fml" from UNIX to Non UNIX Operating Systems
 
 				深町 賢一
 =E
 				Ken'ichi Fukamachi
-			
+
 .toc
+.~HTML_PRE
 
-
-.C	Windows NT 4.0 Porting Status
+.C	Windows NT 4.0
 
 .S	おまけ:基本原理	
 =E.S	Mechanisms on NT4
@@ -126,6 +126,18 @@ GUI 化する予定はない(作り方知らないし)。 makefml を drive できればいい
 Now I have no plan to change it to GUI since I want to use makefml. 
 I hope browsers can handle makefml directly but ....
 
+
+.C	Windows 2000
+
+ドメインが絡まない限り NT 4.0 との互換性は高く
+現状 NT と同じに扱って問題はない模様
+
+
+.C	OS/2 
+
+OS/2 でも動くかな？というはなしがいっかいあったけど。どうなったかな…
+
+.HTML_PRE
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

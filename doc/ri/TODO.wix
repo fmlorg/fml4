@@ -11,51 +11,26 @@
 .C	終ったもの
 =E.C	DONE
 
-XXX 終ったもの/終ったつもりのものはここに一回書いておく
-XXX 一月くらいで消すこと
+	XXX 終ったもの/終ったつもりのものはここに一回書いておく
+	XXX 一月くらいで消すこと
 
 
-＊＊＊ PGP 関係の再構成 ＊＊＊
+.S	mead
 
-◯ makefml でのPGP操作をどうするべきなのか？
-	＃makefml pgp は管理者用に使ってしまったから
-	＃一般メンバー操作には適用できない
+fml-support: 6897
+
+	mead が判定不能だったメールを知らせる
 =E
-makefml pgp ??? This command is for administrators.
-Which command could we use for usual member PGP authentication?
+	if mead finds unknown error format, 
+	notify it to administrator.
 
+実際に実装されたものは、fml の管理者にメールで知らせるのではなく mead 
+の作業ディレクトリの var/ 以下に判定不能だったメールを残しています。
 
-◯	暗号化の問題 (USE_ENCRYPTION_DISTRIBUTION)
-=E
-	USE_ENCRYPTION_DISTRIBUTION
+.S	MTIの理論の解説書(本の厚さとはいわないが…)
+=E.S	MTI document
 
-この時に使う PGP は $DIR/etc/pgp/ ではよくない。別につくるべき。
-この時の makefml のコマンドは？ 
-=E
-DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
-command" to handle pgp key for usual users.
-
-.q
-fml-support: 08120
-
-$DIR/$ml/etc/pgp/
-	デフォールトではさようなら 
-	＃互換: 変数を $DIR/$ml/etc/pgp2/admin/ から etc/pgp/ にもどすと
-	＃これになるようにする 
-
-$DIR/$ml/etc/pgp2/
-	$DIR/$ml/etc/pgp2/dist/		(post ? distribute ?)
-	$DIR/$ml/etc/pgp2/admin/
-
-$DIR/$ml/etc/pgp5/
-	$DIR/$ml/etc/pgp5/dist/		(post ? distribute ?)
-	$DIR/$ml/etc/pgp5/admin/
-
-とかでわかりますかね？（いい、ねーみんぐ募集中)
-＃ dist/	記事の暗号化をするＭＬのための $PGPPATH
-＃ admin/	admin コマンドの認証のための $PGPPATH
-.~q
-
+XRef: fml-support:05930
 
 
 
@@ -208,15 +183,6 @@ chaddrのレポートメールのTo: CC: にuniqかける
 aggregate addresses to reply
 
 
-.S	mead
-
-fml-support: 6897
-
-mead が判定不能だったメールを知らせる
-=E
-if mead finds unknown error format, notify it to administrator.
-
-
 .S	$DEFAULT_DIR_MODE in makefml ?
 
 makefml 内での $DEFAULT_DIR_MODE の取り扱い
@@ -244,6 +210,7 @@ fml-support:6899
 .S	日本語化問題
 =E.S	Japanese configuration files
 
+
 *	cf/MANIFEST 未定義変数探し
 =E
 *	search undefined variables on cf/MANIFEST
@@ -263,6 +230,7 @@ $SENDER_AUTH_TYPE = address / pgp
 
 S/MIME
 
+
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
 
@@ -277,11 +245,6 @@ fml-support: 7155
 # mget 6869,6870,6880,6908-6917,6970,6992,6994 unpack
 # end
 .~q
-
-.S	MTIの理論の解説書(本の厚さとはいわないが…)
-=E.S	MTI document
-
-XRef: fml-support:05930
 
 
 .S	Naming Convention
@@ -431,7 +394,7 @@ makefml remove-article ってあるべきなんかなぁ…
 Hmm..., impossible?
 
 
-.S	configure mead 
+.S	configure mead ?
 
 
 .S	右から左のメニューへ update があがってない
