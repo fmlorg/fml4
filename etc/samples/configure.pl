@@ -27,6 +27,7 @@ if ($ENV{'MAIL_LIST'} && ($MAIL_LIST ne $ENV{'MAIL_LIST'})) {
 $MAIL_LIST  = $ENV{'MAIL_LIST'}  if $ENV{'MAIL_LIST'};
 $MAINTAINER = $ENV{'MAINTAINER'} if $ENV{'MAINTAINER'};
 
+
 $ml             = (split(/\@/, $MAIL_LIST))[0];
 $MAINTAINER	= (split(/\@/, $MAINTAINER))[0];
 $FMLDIR		= $ENV{'FMLDIR'} || $PWD;
@@ -38,8 +39,8 @@ $FMLSERVDIR =~ s#(\S+)/\S+#$1#;
 
 ($a, $d) = split(/@/,$ML);
 
-$EXECDIR        = "$FMLDIR/src";
-$MLDIR          = $FMLDIR;
+$EXECDIR        = $ENV{'EXECDIR'} || "$FMLDIR/src";
+$MLDIR          = $ENV{'MLDIR'} || $FMLDIR;
 $INCLUDEDIR     = "$FMLDIR/samples";
 $SAMPLE_DIR     = 'samples';
 
