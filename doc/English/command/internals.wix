@@ -1,0 +1,242 @@
+.C	内部構造
+.l	procedure-internal
+
+%Procedure というのが内部で使っているコマンド定義のハッシュテーブルで
+す。このハッシュを操作する手段が以下の配列やハッシュです。
+
+
+.S	ＭＬで使えるコマンドを増やすor減らす
+=E.S	How to Add or Remove Available Commands
+.l	add-procedures
+.xref	add-admin-procedures
+.l	@PermitProcedure
+.l	@DenyProcedure
+
+config.ph でコントロールできます。いくつかの変数がありますが、次のよう
+に作動します
+=E
+You can set up what commands you add or remove in config.ph.
+FML interprets it as follows:
+
+   1	@PermitProcedure が定義してあるなら
+	@PermitProcedure で許しているコマンドだけを設定します。
+	もし、定義されていなければデフォールトのすべてのコマンドが
+	利用可能になります。
+	これらの設定はグローバル変数の %Procedure に定義されます。
+=E
+   1 	If @PermitProcedure is defined, FML disables all commands 
+	and permits commands defined in it. 
+	If not defined, %Procedure (default) is used which is 
+	automatically set in the first phase of FML command routine
+
+   2	%LocalProcedure が定義されているなら
+	1 で定義された %Procedure を %LocalProcedure で上書きします。
+=E
+   2	%LocalProcedure overwrites %Procedure.
+
+   3	@DenyProcedure が定義されているなら
+	@DenyProcedure のコマンドだけを使えなくする
+=E
+   3 	If @DenyProcedure is defined, remove commands defined in
+	@DenyProcedure from %Procedure.
+
+Example:
+
+	○ guide と summary のみを使用可能、それ以外はすべて使用不可
+=E
+	permit only "guide" and "summary", but disables other commands.
+
+	@PermitProcedure = ('guide', 'summary');
+
+	○デフォールトに加え自分で定義した hack コマンドも使える
+=E
+	add my "hack" command. You need to write subroutine "ProcHack".
+
+	%LocalProcedure = ('hack', 'ProcHack');
+.l	%LocalProcedure
+
+	もちろんこの場合はどこかで sub ProcHack { ...; } があって
+	この関数を用意しておく必要がある。
+
+	○デフォールトの中で get 関係は使えなくする
+=E
+	Disable "get" commands but others are available.
+
+	@DenyProcedure = ('get', 'send', 'mget', 'msend');
+
+	○ メンバーリストなどを取れないようにする
+=E
+	Disable commands to retrieve member lists
+
+	@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
+
+.S	ハッシュ %Procedure の特殊なキー
+=E.S	Special keys available in %Procedure
+.l	%Procedure-special-key
+
+ハッシュ %Procedure には特別な書き方があります。通常は
+=E
+%Procedure has a special format. Usually the key and value of the hash
+is as follows:
+
+	ハッシュのキー	値
+	----------------------------------------
+	コマンド名	関数名
+=E
+	hash key	the corresponding value
+	----------------------------------------
+	command name	the corresponding Function name (e.g. ProcHoeHoe)
+
+ですが、
+=E
+FML defines and uses the following special syntaxes.
+
+	ハッシュのキー	値
+	----------------------------------------
+=E
+	hash key	the corresponding value
+	----------------------------------------
+
+	key		Function Name (e.g. ProcHoeHoe)
+	#key		file name
+	r#key		1 or 0
+	r2a#key		1 or 0
+	l#key		the maximum request for key in one mail
+
+○ #key はファイルを送り返す関数でのファイル名です。実はファイルを送り
+返す関数は共通なので、これを利用すると好きなファイルを送り返す新しいコ
+マンドがほいほい作れます。
+=E
+'#key' is a file name to send back since the function to send back a
+file is common and the file to send differs. You can use this to
+define a new command to a special file.
+
+例: "help" コマンドは $HELP_FILE ("#help"の値) を送り返す。
+=E
+Example: "help" command definition. 
+
+		    # help for usage of commands
+		    'help',	'ProcFileSendBack',
+		    '#help',	$HELP_FILE,
+
+
+Example: add your new command "news" to send back "$DIR/news" file.
+.xref my-file-sendback-command
+
+%LocalProcedure = ('news',	'ProcFileSendBack',
+		   '#news',	"$DIR/news");
+			
+○ r#key はこのコマンドを実行したら実行のログをユーザーに送り返します。
+=E
+* If "r#key" is defined, FML sends the trace log of the command to the
+user who submits the command mail.
+
+例: "off" コマンドではログをユーザーに送り返す。
+=E
+Example: "off" command definition
+
+		    'off',    'ProcSetDeliveryMode',
+		    'r#off', 1,
+
+○ r2a#key はこのコマンドを実行したら実行のログを管理者に送り返します。
+* If "r2a#key" is defined, FML sends the trace log of the command to
+$MAINTAINER. 
+
+例: "bye" や "unsubscribe" のコマンドの実行ログは管理者にも送る。
+=E
+Example: "bye" and "unsubscribe" to notify the log to maintainers.
+
+		    'bye',             'ProcSetMemberList',
+		    'r#bye',           1,
+		    'r2a#bye',         1,
+		    'unsubscribe',     'ProcSetMemberList',
+		    'r#unsubscribe',   1,
+		    'r2a#unsubscribe', 1,
+
+Ex 2: "chaddr" case.
+		    'chaddr',         'ProcSetMemberList',
+		    'r#chaddr', 1,
+
+○ l#key
+
+一通のメールの中のコマンド 'command' リクエストを最大でも
+$Procedure{"l#command"} 個までに制限する。コマンドごとに制限は変えられ
+る。$MAXNUM_COMMAND_INPUT は一つのメールの中のコマンドの合計への制限に
+なっている(種別を問わず足し合わせた値)。
+=E
+Restrict 'command' requests in one mail up to $Procedure{"l#command"}
+$MAXNUM_COMMAND_INPUT is another issue which restrict the
+total number of commands in on email.
+
+例: "get" は１メールで１０個まで
+=E
+Example: "get" command requets is up to 10 in one mail.
+
+	             'l#get',      10,
+
+.S	コマンドの # syntax 
+=E.S	'# syntax' is required?
+.k	# コマンド シンタックス
+
+.if LANG == ENGLISH
+Usually, '# ' part is NOT needed. In default FML sets up
+"listname@FQDN" for post and "listname-ctl@FQDN" for command.
+
+If both posting and command addresses are the same, a keyword for the
+switching between post function and command function is required. '#
+syntax' is the key of switching.
+
+.fi
+.if LANG == JAPANESE
+デフォールトではポストするＭＬとコマンド用のＭＬは別々に用意されます。
+配送用のアドレスとコマンド用のアドレスが同じ場合($MAIL_LIST と
+$CONTROL_ADDRESS が同じ場合)に問題となります。
+
+この場合記事とコマンドを見わける必要があります。その切替えのキーワード
+が"# syntax"です。これは最初の3行のどこかに "# command(英文字Only)" シ
+ンタックスを見つけた場合にコマンドとして認識することで区別しています。
+
+○ # でモードを切替えるのが不必要な場合
+
+makefml が作る listname-ctl アドレスはコマンド専用なので要りません。も
+ちろんあっても # 部分は勝手に解釈するのでどっちでも構いません。
+Listserv 形式のシンタックスをうけつけるように拡張されたインターフェイ
+ス(libexec/fmlserv.pl)を使う場合も無関係です。
+
+“コマンド専用のアドレスにメールが来た場合”は必要がない場合には以下の
+ような設定の場合がありえます。
+
+	1. config.ph に $COMMAND_ONLY_SERVER = 1;
+	2. fml.pl に --ctladdr がついている
+	   (include-ctl はそうなっている)
+
+コマンド専用のアドレスで"# command" も "command" も同じコマンドになり
+ます。またコマンドのシンタックスで
+
+	# get 1
+	#get 1
+
+は同じです。同様に
+
+	# help
+	#help
+
+を同じものにみなします。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+
+両方解釈するなら１、"# summary" みたいな形式だけなら０
+.fi
+
+コマンドはデフォールトで "# get 1" と "#get 1" は同じものとみなしてい
+ます。# で始まるか否かだけで判定しています。--ctladdr で fml.pl を呼び
+出している場合(例えば include-ctl を使っている場合)は # も必要ありませ
+ん。
+=E
+To configure that "# command" is the same as "#command", set 
+
+	$COMMAND_SYNTAX_EXTENSION = 1; (default 1)
+.k	$COMMAND_SYNTAX_EXTENSION
+
+がデフォールトです。

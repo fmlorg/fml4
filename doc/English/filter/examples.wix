@@ -1,0 +1,260 @@
+.C	投稿メールのフィルタリング事例
+
+.S	Message-Id: がないものを reject
+=E	reject null Message-Id:
+
+	&DEFINE_FIELD_PAT_TO_REJECT('message-id', '^\s*$');
+
+.S	Subject:に特定のパターンがあったら拒否する
+
+Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
+	SPAMとみなして捨てる(でもこれするとFreesoftも捨てちゃうね;-)
+	最初と最後の / はあってもなくてもよいです。/ 以外は使わないで下さい
+=E
+	reject Subject: with FREE, SEX, ADULT, XXX.
+	(but this config ignores "free software" content ?;-).
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+
+.S	Subject:に特定のパターン(大文字小文字を問わず)があったら拒否する
+
+	Adult も ADULT も大文字小文字に関係なく許否。/i というperlで
+	おなじみの形式を使います。/ 以外は使わないで下さい。
+=E
+	reject Subject: with FREE, SEX, ADULT, XXX (case insensitive).
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/free|sex|adult|xxx/i');
+
+
+.S	received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'h:received:'} =~ /from spam.co.jp/) {
+	return 'from a host in spam blacklist';
+    }
+#;
+
+
+.S	本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+	return 'mail with appended HTML documents';
+    }
+#;
+
+
+.S	From: のドメインが Message-ID に含まれていないなら拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+   local($domain) = (split(/@/, $From_address))[1];
+   if ($e{'h:message-id:'} !~ /$domain/i) {
+	return 'Message-Id conflicts your From: address';
+   }
+#;
+
+
+.S	前者３つ全部
+
+例: (not tested ;-)
+○ received: 行のどこかに spam.co.jp というドメインを見つけたら拒否する。
+○ 本文に http-equiv=3DContent-Type なHTMLをつけてくる迷惑なメール
+   は reject する
+○ From: のドメインが Message-ID にも含まれているかどうか？
+   含まれていないならメールの偽造とみなして reject
+=E
+Example:
+	* reject if a Received: line has "from spam.co.jp".
+	* reject if http-equiv=3DContent-Type exists in the body.
+	* reject $From_address conflicts with Message-Id:'s domain.
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'h:received:'} =~ /from spam.co.jp/) {
+	return 'from a host in spam blacklist';
+    }
+
+    if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+	return 'mail with appended HTML documents';
+    }
+
+   local($domain) = (split(/@/, $From_address))[1];
+   if ($e{'h:message-id:'} !~ /$domain/i) {
+	return 'Message-Id conflicts your From: address';
+   }
+
+#;
+
+
+.S	sendmail の PICKY_HELO_CHECK と組み合わせる
+
+=E
+Example 2: When you configure PICKY_HELO_CHECK is on in config.h of
+sendmail, reject mail when it has X-Authentication-Warning by
+PICKY_HELO_CHECK. However this filter does not work well 
+since virtual domain users matches them even if they are not spammers;D
+
+    # PICKY_HELO_CHECK
+    if ($e{'h:x-authentication-warning:'} !~ /Host \S+ claimed to be \S+/) {
+	$r = "Your SMTP session or your host config is invalid";
+    }
+
+でもメールを出す人が virtual domain とかだとバソバソ reject されて困っ
+ちゃうだろう ＃それでも構わないという人は使ってみよう(強引)
+
+
+.S	容量オーバーのメールを投稿した場合のエラーメッセージを変更する
+
+/usr/local/fml/messages/Japanese/resource が定義ファイルでその中の
+
+resource.too_big:
+	あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
+
+の定義部分を使って
+
+  あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
+
+という本文のメールが返るはずです。この部分を編集すれば変わります。
+＃そのあとによけいな英語がついてるかもしれませんが…
+
+ただ /usr/local/fml/messages/ はインストール時に上書きされるので
+編集する場合は copy を /var/spool/ml/etc/fml/messages/ にコピーして
+/var/spool/ml/etc/fml/messages/resouce を編集しておくのがよいです。
+
+
+.S	ヘッダ情報の容量制限の設定ってのはあるんでしょうか？
+
+いまのサイズ制限はヘッダと本文と全部含んだ長さについてです。
+ヘッダの長さだけをチェックするというオプションは今はないです。
+
+ヘッダが十分大きくてひっかかる場合はどうせ今のチェックと同じだし、
+ヘッダは普通で本文がでかい場合には、どうせヘッダの大きさは誤差でしょう
+という感じです。＃そのあいだの微妙な場合はかんがえてないといえばない
+
+
+.S	To: とか Cc: にメーリングリストがないのはSPAMだ！
+
+fml-support: 06389
+fml-support: 07286
+
+SPAM メールを弾くために
+
+To: および Cc: 行に ML のアドレス (大文字/小文字は区別しない) が入って
+なければ，そのメールを拒否する
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+    if (($e{'h:to:'} !~ /$MAIL_LIST/i) && ($e{'h:cc:'} !~ /$MAIL_LIST/i)){
+        return 'Not addressed to mailing list';
+    }
+#;
+
+
+.S	EnvelopeFilterは厳し過ぎる。VBscriptだけ弾きたい
+
+1. Content-Type: に .vbs .js .jse .exe とあるメール
+2. 元のメールは badarticle というファイルに保存して 
+3. ＭＬにはアナウンスを流す。
+   「ウィルスぽいものが来たので、ＭＬに流さずに別途ファイルに落した」 
+
+.q
+# check attatchment of VB script and others :-)
+$START_HOOK .= q#
+    if ($Envelope{'Body'} =~ /Content.*\.(vbs|js|jse|exe)/i ||
+	$Envelope{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
+	my($savefile) = "$FP_TMP_DIR/badarticle.$PCurrentTime";
+	if (open(SAVE, "> $savefile")) {
+	    print SAVE $Envelope{'Header'};
+	    print SAVE "\n";
+	    print SAVE $Envelope{'Body'};
+	    close(SAVE);
+	    $Envelope{'Body'}  = 'WARNING: incoming mail is ignored ';
+	    $Envelope{'Body'} .= 'since it may be with virus.';
+	    $Envelope{'Body'} .= "\n\n";
+	    $Envelope{'Body'} .= "This article is saved in\n";
+	    $Envelope{'Body'} .= $savefile;
+	    $Envelope{'Body'} .= "\n\n";
+	    $Envelope{'Body'} .= "-- $MAIL_LIST maintainer\n";
+	}
+	else {
+	    &Log("system error: pass this article through");
+	}
+    }
+#;
+.~q
+
+
+.S	Notes で「Duplicated Message-ID」になるケース
+
+Q: Notesのメールでテンプレートか何かを使うと同じMessage-IDになるのため
+  「Duplicated Message-ID」になるケースはどうする？
+
+これは直しようがないです;-) NOTES担当に文句をいいましょう 
+
+
+.S	特定のアドレスを拒否する(e.g. spam mails)
+=E.S	Reject Mails From Specific Domains
+.k	spam mails
+.l	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR
+.l	$DIR/spamlist
+
+.if LANG == JAPANESE
+メインのルーチンに飛ぶ前に reject するコードなら入っています(2.1 gamma
+206以降)。$REJECT_ADDR_LIST (デフォールトは $DIR/spamlist) に perl の
+正規表現で書いたアドレスから来たメールには何もしないで reject するよう
+になります。この場合配送、コマンド、自動登録すべての場合にそこへいく前
+に reject します。
+
+   \S+@spam.org (spam.org のアドレスは全部許否)
+   manager@\S+  (あらゆるサイトの個人を代表しないアドレスは拒否)
+
+みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
+れます。
+.fi
+.if LANG == ENGLISH
+Before the main routine works, fml.pl can check and reject mails from
+specific domains in $REJECT_ADDR_LIST ($DIR/spamlist in default).
+Please write e.g.
+
+   \S+@spam.org (reject spammers?, mails from spam.org)
+   manager@\S+  (reject not personal addresses)
+
+fml adjusts $REJECT_ADDR for rejection irrespective of this file.
+.fi
+
+
+.S	勝手についてしまう signature を取る
+=E.S	ISP enforce to append a signature to your mail 
+.k	signature
+
+(料金を下げるかわりにそういうことをするとか最初に明言しているサービス
+ならともかく)そもそもメールの本文をいじるなんてとんでもない話ですね
+=E
+Such an ISP is terrible since it implies YOU HAVE NO SECRET, someone
+can rewrite your mail.
+
+これができるということは内容の改竄もできるし機密保持も存在していないわ
+けです。ということは通信の秘密に関してモラルがない企業ということではな
+いでしょうか？
+
+その部分を削るHOOKの例:
+=E
+To cut off the last signature.
+
+$SMTP_OPEN_HOOK = q#
+	local($uja);
+	for (split(/\n/, $e{'Body'})) {
+	   next if /=+/ .. /\-+/;
+	   $uja .= "$_\n";
+	}
+
+	$e{'Body'} = $uja;
+#;
+
+.#
+.# $Id$
+.#

@@ -1,0 +1,36 @@
+.C	一般的な質問 (Windows NT4 および Windows 2000)
+
+.S	Windows で動きますか？
+
+NT4 でも WIN2000 でも動きます。
+
+.S	perl のバージョンは？
+
+少なくとも ActivePerl の build 522 は結構実績ありです。
+5.6.0 ベースの build 600 以降が問題で、うまくいくという意見と
+今一つうまくいかなかったというのと事例があってよくわかりません。
+とにかく、うまく動いたら勝ちです ;-)
+
+build 522
+.url http://www.activestate.com/download/ActivePerl/APi522e.exe
+
+
+.S	実績のあるメールサーバは？
+
+作者が試したことのあるものは Metainfo sendmail (現在は Sendmail Inc. )
+です。
+
+fml-support ＭＬでこの話題が出た時には以下の MTA の名前が挙げられてい
+ます。
+
+	Sendmail
+	IMail
+	emwac 
+	emwac ims + SPA SMTP
+	IIS のおまけ(?) + Aki POP
+
+Exchange はよくわかりませんが、IMail と同様の技が使えるのではないだろ
+うか？という意見もありますが、試した人がいないという status のようです。
+
+
+.# $Id$

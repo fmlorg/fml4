@@ -1,0 +1,118 @@
+.C	内部構造
+
+.S	ヘッダ・フィールドのフォーマット
+=E.S	Configure Header Fields
+.key	ヘッダ・フィールドのフォーマット
+.key	@HdrFieldsOrder 
+.l	@HdrFieldsOrder
+.xref	data-structure
+
+fml は配送メールおよびコマンドの結果を知らせるメールなどのヘッダのフィー
+ルドの成形を行います。またあらかじめ設定されたフィールドのみを通すよう
+に設定できます。例えば、フィールドの並び順は @HdrFieldsOrder という変
+数配列に従い、@HdrFieldsOrder に出てくるフィールドのみを通過させます。
+X-Faces のようなうざったいフィールドは通さない などのようにです。
+=E
+fml.pl passes only defined fields through to cut off annoying fields,
+e.g. X-Faces, and distributes the mail with a formatted header. It
+orders the header fields of distribution following an array
+@HdrFieldsOrder.
+
+$PASS_ALL_FIELDS_IN_HEADER という変数を指定すると @HdrFieldsOrder にな
+いフィールドも通過させます。@HdrFieldsOrder にないフィールドは入力の順
+番でヘッダに現れます。2.2以降のデフォールトでは１です(素通し)。
+=E
+If $PASS_ALL_FIELDS_IN_HEADER is defined, fml.pl passed all fields in a
+header except for Received: and Return-Receipt-To: (fields defined in
+$SKIP_FIELDS).
+
+	$PASS_ALL_FIELDS_IN_HEADER = 1; (path through, 1 is default)
+.k	$PASS_ALL_FIELDS_IN_HEADER
+.l	$PASS_ALL_FIELDS_IN_HEADER
+
+* fml 2.1 is "0", fml 2.2 is "1".
+
+.if LANG == JAPANESE
+注意: $SUPERFLUOUS_HEADERS は昔の名前です。
+なお $PASS_ALL_FIELDS_IN_HEADER でも $SUPERFLUOUS_HEADERS でもどっちを
+使ってもOKです。また makefml は自動的に変換します($CFVersion 3.2)。
+.k	$SUPERFLUOUS_HEADERS
+.fi
+
+ただし Received: と Return-Receipt-To: は切落とします($SKIP_FIELDS と
+いう変数で定義されているフィールドは通さない)。この２つのフィールドを
+通すには明示的に@HdrFieldsOrder に定義する必要があります。
+Return-Recipient-To は当然として Received: は MAX HOP を越える場合に備
+えてです。
+
+フィールドの種類と順番に凝る場合:-)は @HdrFieldsOrder を config.ph 等
+で定義しなおしてください。
+=E
+If you consists on your customize, you can set up @HdrFieldsOrder
+e.g. in config.ph. In default @HdrFieldsOrder (1998/04/26) is
+
+@HdrFieldsOrder のデフォールトは (1998/08/10, 2.2BETA#1)
+
+    @HdrFieldsOrder =	# rfc822; fields = ...; Resent-* are ignored;
+	('Return-Path', 'Received',
+	 'Date', 'Posted', 'X-Posted', 'X-Original-Date',
+	 'From', 'Reply-To', 'Subject', 'Sender', 
+	 'To', 'Cc', 'Errors-To', 'Message-Id', 'In-Reply-To', 
+	 'References', 'Keywords', 'Comments', 'Encrypted',
+	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
+	 'XRef', 'X-Stardate', 'X-ML-Info', 
+	 'X-Mailer',
+	 ':body:', ':any:', 
+	 'X-Authentication-Warning',
+	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
+	 'Content-ID', 'Content-Description', # RFC2045
+	 'Precedence', 'Lines');
+
+のように定義されています。X-Authentication-Warning は PICKY_HELO_CHECK
+(sendmail) 等で Security の Warning がつくので通すようにしました。
+=E
+where FML passes X-Authentication-Warning through to show the security
+warning.
+
+また @HdrFieldsOrder 中では
+=E
+In @HdrFieldsOrder
+
+	:body:
+	:any:
+	:XMLNAME:
+	:XMLCOUNT:
+
+の特殊な変数が使われています。それぞれ
+=E
+are defined for special purposes and expanded before distribution. The
+meaning is
+
+	:body:		$body を展開する場所
+			$SMTP_OPEN_HOOK や $HEAD_ADD_HOOK 等で独自ヘッダを
+			$body で定義した場合等に使われる(Backward Compatible)
+=E
+	:body:		$doby variable is expanded
+			(obsolete, left for backward compatible)
+
+	:any:		$PASS_ALL_FIELDS_IN_HEADER の時 @HdrFieldsOrder
+			に明示的に現れないフィールドを展開する場所
+=E
+	:any:		fields not defined in @HdrFieldsOrder are shown 
+			when $PASS_ALL_FIELDS_IN_HEADER is set.
+
+	:XMLNAME:	$XMLNAME を展開する (X-ML-Name: フィールド)
+.k	$XMLNAME
+=E
+	:XMLNAME:	$XMLNAME (X-ML-Name: Field)
+
+	:XMLCOUNT:	$XMLCOUNT を展開する (X-Mail-Count: フィールド)
+.k	XMLCOUNT
+=E
+	:XMLCOUNT:	$XMLCOUNT (X-Mail-Count: field)
+
+のような特殊な目的に使われます。これらは互換性の趣が強い例外処理です。
+
+.#
+.# $Id$
+.#

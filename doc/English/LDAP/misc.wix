@@ -1,0 +1,36 @@
+.C	もろもろ
+
+.S	NetBSD の場合の注意
+
+   openldap ではなく /usr/pkgsrc/devel/ldapsdk/ をいれる。
+
+	% LDAPSDKDIR=/usr/pkg perl Makefile.PL 
+	% make
+	# make install
+
+
+.S	データベースの設計についての２、３の考察…
+
+データベースの構造をいかに設計するべきかが肝心な点だとおもうんですが、
+斜め読みのせいかもしれないんですが…
+やっぱり肝心な点が今一つ素人にはわからないっす(素人過ぎ？)ねぇ。
+
+LDAP の例
+.q     
+     cn=$file,dc=$ml,dc=$FQDN
+     
+     cn=actives,dc=elena,dc=fml.org
+     cn=members,dc=elena,dc=fml.org
+     
+              $suffix (content prefix)
+                |
+              o=fml,org
+                |
+              cn=$domain
+                |
+              ml=$ml
+             /    |
+     cn=actives   cn=members
+.~q
+
+.# $Id$

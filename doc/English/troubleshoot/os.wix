@@ -1,0 +1,234 @@
+.C	OSごとのインストールの注意
+=E.C	OS dependences
+.n	os-dependence
+.l	os-dependence
+.l	os-dependences
+.k	OS dependences
+.l	troubles.os
+
+　ここではOSによる各種の設定方法を述べます。ただし全てのOSおよび環境に
+は対応出来ませんのでヒントを書いておきますので参考にして設定して下さい。
+あくまで現在確認できている部分なので、このほかにOS依存した不具合・不動
+作・その対策等を発見された方はご一報下さい。
+
+.S	4.4BSD derived systems
+.k	4.4BSD derived systems
+
+=E 
+4.4BSD is the target machine. Nothing annoys you.
+
+.S	NetBSD
+
+NetBSD 1.x はターゲットマシンなので、なにもなし。
+=E
+NetBSD is the target operating system. Anything are O.K.
+
+
+.S	OpenBSD
+
+NetBSDの親戚だから大丈夫？
+
+
+.S	FreeBSD
+
+FreeBSDのパスワードについてはcrypt or md5どちらを使う？問題があります
+がcurrentはどちらでも動くようになっているはずです。
+
+
+.S	Debian/linux
+
+dselect でインストールする時は /usr/doc/ 以下のドキュメントを読んで下
+さいね。
+
+
+.S	BSD/OS 3.0, 4.0
+
+struct sockaddrがBSD traditionalとは違い拡張されている。インストーラが
+自動半別できるはず。3.0以前に作成したＭＬを3.0へもってくるとはまる可能
+性があります。その時は
+
+移った先でSTRUCT_SOCKADDRという文字列をMLのホームの設定ファイル中で探
+してみて手で置き換える
+
+ＭＬを移った先で作り直して、手で差分だけ反映させる。cf ファイルだけあ
+れば自動でできるはず。cfファイルだけもってきたら STRUCT_SOCKADDR 行を
+消して make config.ph すると自動調整されるとおもいます。
+
+
+.S	BSD/OS 3.0 以前
+=E.S	Before BSD/OS 3.0
+
+何もしなくても動くような気がします。
+=E
+I believe nothing to do.
+
+
+.S	4.3BSD
+.k	4.3BSD
+
+旧ターゲットマシンなので、多分なにごともなくうまくいくでしょう。
+=E
+4.3BSD is the target machine until from the first to FML 2.0 alpha or
+so. I believe nothing annoys you.
+
+
+.S	SUN OS 4.1.3
+.k	SUN OS 4.1.3
+
+・sendmail に関して: NFS 越しの fpathconf() がうまく作動しません。対策
+として、ローカルにinclude をもつかFMLを置く場所をローカルにするか等の
+技が必要になるかもしれません。
+＃それ以前に NFS ごしの include なんぞ作ってはいけませんが。
+=E
+FML must works well, but SUN OS JLE (Japanese Language Extension) has
+a lot of bugs, which paranoids you.
+
+・FMLの昔のヴァージョンでは lseek system call をつかうところで、こけて
+ましたが、その問題はもう発生しません。
+
+
+.S	HP-UX 9?
+.k	HP-UX
+
+　setuid まわりが 4.3と4.4の中間みたいな感じで止まってます。
+sendmail はいろいろとまわりみちをして、setuid を実行するようですが、
+:include: を使う限りうまくいくらしいです。
+＃Version依存性がよくわからないんですが…
+=E
+Very strange. I don't know know-hows on HP.  Syscalls around setuid is
+between 4.3 and 4.4 ?  You may or may not require "perl -U"(enable
+insecure action) or that ":include:file" (with ") is required? and so
+on...  That is, there is a lot of riddles ...
+
+perl -U を使わないと動かないとか、:include: じゃなくて展開して書くとい
+いとか、":include:ファイル" みたいに書くといいとかいろんな説があってよ
+くわかりません。とりあえず総当り戦で試してみると良いでしょう。
+
+
+.S	SGI Indy (IRIX5.3)
+.k	IRIX5.3
+
+.q
+From:    nino@windy.mech.utsunomiya-u.ac.jp
+
+私のホストは、SGIのIndy(IRIX5.3)なんですが、そのまま
+では全然動かなかったので、-D_POSIX_CHOWN_RESTRICTED
+を付けてkernelをreconfigして何とかなりました。更に、
+:includeを使える様にするために、sendmailを入れ換え、
+大文字が使えなかったので、CFも入れ換えました。
+(See fj.sys.sgi)
+
+.~q
+SGI may require kernel reconfig with -D_POSIX_CHOWN_RESTRICTED and
+replace sendmail, sendmail.cf with latest ones.
+
+
+.S	UXP/DS V20L10(SVR4.2)
+
+	FUJITSU GRANPOWER 7000(DS/90)
+	UXP/DS V20L10(SVR4.2)
+
+で(インストーラ(config.guess)がどう判定するかはよくわかってないのです
+が)、
+=E
+require
+
+	$COMPAT_SOLARIS2 = 1;
+
+が必要だそうです。
+
+
+.S	AIX 4.2
+
+fml-support: 04555
+
+sendmail 8.8.5	include style works 
+sendmail 8.8.8	include style fails but
+		C Wrapper (fml.c fml-ctl.c) works
+
+
+.S	Solaris 2.4 でプロセス間通信がうまくいかない
+=E.S	Socket connection does not work on Solaris 2.4
+.k	Solaris 2.4 でプロセス間通信がうまくいかない
+
+makefml がインストール時にOSやアーキテクチャアについて推測し config.ph 
+に書き込みます。
+=E
+Now "makefml" probes your operations system and writes it into
+config.ph as a variable
+
+	$CPU_TYPE_MANUFACTURER_OS 
+
+という変数に solaris2 という文字列がちゃんとあるかどうか確かめて下さい。
+OEM等ではちゃんと判定できない場合もあります。 
+=E
+Please check it contains "solaris2". If your host is OEM of solaris2,
+it may not have the string.
+
+ソラリス互換２で強制的に実行するには config.ph で 
+=E
+Enforce Solaris 2 compatible socket constants to fml.pl, please set
+
+	$COMPAT_SOLARIS2 = 1; 
+
+をセットしてためしてみてください。強制的に $CPU_TYPE_MANUFACTURER_OS 
+を定義するのも可です。
+
+ソラリスでは意味不明に(意地悪く?)定数が違うので、ちゃんと 
+/usr/include/sys/socket.h から作った sys/socket.ph
+(/usr/local/lib/perl(/OS名)/sys/socket.ph あたり) を呼んでいないと動き
+ません。
+
+
+.S	Solaris 2.3 (SUN OS 5) で flock がうごかない
+=E.S	flock(2) cannot work on Solaris 2.3
+.k	Solaris 2.3 (SUN OS 5) で flock がうごかない
+
+flock がだめというエラーメッセージがでたら
+=E
+Please try 
+
+	$USE_FLOCK = 0;
+
+にしてみてください
+
+
+.S	DEC alpha(OSF1 V3.0)上の perl4 で config 等が動かない
+=E.S	perl 4 cannot work on DEC alpha(OSF1 V3.0) ?
+.k	DEC alpha(OSF1 V3.0)
+
+perl4 だと多分動かないとおもう。perl5 を install して試してみてくださ
+い。
+=E
+Please try perl 5.
+
+.S	article ID duplication error 
+.k	article ID duplication error 
+
+次を見てね↓
+=E
+Please see below.
+
+
+.S	perl 5.003 flock と そらりす 2.5 2.5.1 ?
+=E.S	perl 5.003 flock on solaris 2.5 2.5.1 ?
+
+fml 2.1 current のどこかで直った
+＃flock やってるふりしてできてない？そのため SEQUENCE_FILE がちゃんと
+＃更新されなくて article ID duplication error が出る？
+＃参照: fml-support:241? あたり
+=E
+Fixed at somewhere from 2.1 to 2.2. It comes the bug flock(2)
+emulation? Now I believe flock(2) works well also on solaris.
+
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,92 @@
+.C	コマンドラインオプション
+.l	makefml-getopts
+
+.S	-d
+
+デバッグモード on
+
+.S	-v
+
+verbose mode
+
+.S	-D CONFIG_DIR
+
+/usr/local/fml/.fml に相当するディレクトリを指定する。
+
+.S	-f systemファイル
+.l	makefml-opt-f
+
+system file を指定できる。virtual domain の時に便利
+.xref virtual-domains
+
+	% makefml -f /some/where/fml/.fml/system install
+
+
+.S	 -i コマンド入力チャンネル
+
+-i STDIN は CGI なんかが使ってます。
+
+  CGI -> 入力チェック -> open(MAKEFML, "|  makefml -i STDIN  ") ..
+
+
+.S	-U
+
+ロックをしない。
+
+例:
+
+makefml -U install
+
+
+.S	-F
+
+newml 時にすでにＭＬがある場合はエラーになる。
+しかし -F をつけるとその場合にも再作成を行なう。
+
+makefml -F newml elena
+
+
+.S	-E Environment (for GUI)
+
+makefml に CUI モードか GUI モードかを教えるフラッグ 
+
+
+.S	-W cgi (for GUI)
+
+CGI installation mode
+
+
+.S	-c cgi.conf (for GUI)
+
+cgi configuration file.
+
+
+
+.# ######################################################
+
+.S	-m
+
+makefml test で使ってる。実際にエラーメールを出していいか？
+
+
+.S	-u USER
+
+$USER 変数
+
+.S	-w 
+
+windows NT4 でつかっている。メニューを無限ループしている。
+＃そうしないと MSDOS prompt が終了しちゃって画面から消えてしまうんです。
+
+.S	-V VENDOR
+
+VENDOR 。たぶんでばっぐ以外で使わない
+
+.S	-A アーキテクチャ
+
+アーキテクチャを強制的に指定する。デバッグ以外でつかうことがたぶんない
+
+.S	-O オペレーティングシステム
+
+オペレーティングシステムを強制的に指定する。デバッグ以外でつかうことが
+たぶんない

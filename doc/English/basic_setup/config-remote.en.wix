@@ -1,0 +1,97 @@
+* Why should we control fml by mail from remote?
+
+You would like to run mailing list but you cannot login the host.  You
+need to control fml by mail from remote since you cannot login it.
+"fml" package calls this type control "remote administration".
+
+For example, consider ISP mailing list service.
+
+* command ?
+
+You can send a command mail to fml to control
+
+	add a user
+	remove a user
+	add a new maintainer
+	remove another maintainer
+	see logfile
+	...
+
+* authentication
+
+You need password to send a "admin" command mail.  Who knows the
+password is a maintainer.  Each password for each maintainer may
+differ. It is defined in $DIR/etc/passwd file (for example
+/var/spool/ml/elena/etc/passwd).
+
+For more strong authentication, you can use PGP 2.x clear sign.
+
+fml has two administrative command syntaxes.
+
+   1.	admin command 
+   2.	apporove PASSWORD command
+
+"approve" is just syntax sugar of "admin" for compatibility. 
+
+Example 1. admin command 
+
+	admin pass YOUR-PASSWORD
+	admin add someone@some.where
+
+Example 2. apporove PASSWORD command
+
+	approve YOUR-PASSWORD add someone@some.where
+
+
+* set up remote administration
+
+Firstly you (or administrator for "fml" running host) need to enable
+"remote administration" function. "fml" default disables this for
+security reason.
+
+% makefml config elena
+
+次のような画面が現れるので数字を入れて選択していく。0 を押すと前の画面
+に戻る。(y/n) という yes or no という選択では y (yes) か n (no) どちら
+かを選ぶ。[]の中がデフォールト値。
+
+   MAIN MENU -> 4 -> REMOTE ADMINISTRATION -> "y"
+
+.include main-menu.wix
+
+In the end of operation, you will find
+
+   4    REMOTE ADMINISTRATION              
+                     PERMIT ?              YES
+                     AUTH_TYPE             crypt
+
+Secondary you need to add at lease one person who can control fml from
+remote.
+
+* add first person as an administrator for the "elena" ML.
+  This person is only for "elena" ML, off course.
+
+% makefml addadmin elena fukachan@fml.org
+
+* set up initial password
+
+% makefml passwd elena
+
+Address: fukachan@fml.org
+Password: 
+Retype Password: 
+   Passwd Changed (/var/spool/ml/elena/etc/passwd).
+---UnLocking elena ML
+Done.
+
+* remove an administrator
+
+% makefml byeadmin elena fukachan@fml.org
+
+* After here, the first person can add/remove another administrators
+from remote. 
+
+See help-admin (/var/spool/ml/elena/help-admin) for available commands. 
+"makefml newml elena" generates help file /var/spool/ml/elena/help-admin.
+
+.# $Id$

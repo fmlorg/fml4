@@ -1,0 +1,9 @@
+.C	Examples
+
+.S	メールを全文検索する例 ...
+
+fml-support: 08217
+
+fml と関係ないですが　普通に受け取ったメールを SQL なデータベースで メー
+ルを全文検索する例は、「PostgreSQL 完全攻略ガイド」 ISBN4-7741-0890-1
+に PostgreSQL + Perl CGI の例がのっていますが... 

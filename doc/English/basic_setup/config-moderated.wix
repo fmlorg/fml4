@@ -1,0 +1,72 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- メーリングリストの記事はながれる前に査読をうける --
+=E
+	fml 3.0 -- moderator mode --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include config-moderated.en.wix
+.return
+.fi
+○ 目的
+
+メーリングリストに流す前に記事を査読する。例えば
+
+	アナウンス用
+
+	SPAMよけに査読する
+
+	応用として企業のサポート用ＭＬ(で変なメールがでないように査読
+        する)などもありうるかもしれない
+
+
+○ モデレータモードにする
+
+   メインメニュー -> PERMIT_POST_FROM -> moderators 
+
+これを設定すると次のような挙動になります。
+
+0.  メールをＭＬに投稿する。
+
+1.  モデレータに査読を依頼するメールを飛ぶ
+
+    submitされたメールと one time password (OTP) がモデレータ(s)に送ら
+    れる。そのOTPを送る先は
+
+   if  moderators というファイルがあるなら
+
+        そのファイルのメンバーに送る
+
+   else # そのファイルがないなら		
+
+        $MAINTAINER におくる
+
+2. モデレータ(の少なくとも一人)がメーリングリストに流しても良いと判断
+   を下せば、そのOTPをコマンドとして送り込みます。
+
+3. メールがメンバーに配送される。
+
+
+モデレータにはこれ以外にもいくらかバリエーションがあるが、
+これ以外のものについては tutorial を参照のこと 
+.~HTML_PRE
+.HTML_PRE
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

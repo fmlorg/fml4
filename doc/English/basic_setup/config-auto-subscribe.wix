@@ -1,0 +1,85 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- 自動登録 --
+=E
+	fml 3.0 -- automatic subscribe --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+
+○ 目的
+
+いちいち登録するのが面倒だから自動でやってほしい
+
+○ 自動登録にする(1)
+
+% makefml config elena
+
+.if LANG == JAPANESE
+次のような画面が現れるので数字を入れて選択していく。0 を押すと前の画面
+に戻る。
+
+   メインメニュ -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_subscribe
+
+   例えばこの場合押すキーは
+.fi
+.if LANG == ENGLISH
+which shows the following menu. Please input one of number and go
+forward. Change the $REJECT_COMMAND_HANDLER to be "auto_subscribe".
+
+   MAIN MENU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_subscribe
+.fi
+                   1 -> 4 -> 2 -> 0 -> 0 -> 0
+
+   のような感じになる。
+
+.include main-menu.wix
+
+
+○ 終る直前の画面では
+=E
+* In the end of operation, the main menu shows 
+
+	〜〜〜略〜〜〜
+
+   0    END		
+   1    POLICY OF ACCESS (WHO CAN POST AND USE COMMANDS)
+
+        [POST]
+          PERMIT_POST_FROM                 members_only
+          WHEN POST FROM NOT MEMBER        reject
+
+        [COMMAND]                          
+          PERMIT_COMMAND_FROM              members_only
+          WHEN COMMAND FROM NOT MEMBER     auto_subscribe   <========
+
+	〜〜〜略〜〜〜
+
+のように auto_subscribe になっているなら自動登録モードになっている。
+
+
+○ 登録時に自動的に送り返されるファイルなどを編集しておく
+=E
+* Edit mailing list guide which is sent back to the newly added user.
+
+% $EDITOR /var/spool/ml/elena/welcome
+
+
+○ あとは広告をうって(?)ほっておく :)
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

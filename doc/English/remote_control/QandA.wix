@@ -1,0 +1,27 @@
+.C	Q and A
+
+.S	管理者コマンドでメンバーのクリア＆登録を行いたい
+
+admin remove ってのがあります
+＃alias で unlink でも同じです。
+
+	admin pass パスワード
+	admin remove members
+	admin remove actives
+	admin add aaa@bbb.co.jp
+
+というコマンドのメールを elena-ctl へおくると
+
+1.
+  members ファイルを消す
+  actives ファイルを消す
+  つまり現在のメンバー全員が消えた状態になる。
+
+2.
+  新たに aaa@bbb.co.jp という人だけがメンバーとして登録された
+
+状態になります。
+
+なお、remove コマンドで消せるのは @REMOTE_RECONFIGURABLE_FILES に登録
+してあるファイルだけです
+

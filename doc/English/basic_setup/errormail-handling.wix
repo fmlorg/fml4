@@ -1,0 +1,122 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- エラーメールの処理 --
+=E
+	fml 3.0 -- handling error mail ---
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include errormail-handling.en.wix
+.return
+.fi
+
+○	概要
+
+・	概要
+
+ＭＬの規模が小さい場合はエラーメールも管理者が個別に対応できるかもしれ
+ないが、規模が大きくなると自動的になんとかしたいとおもうようになるもの
+です。例えば季節の変わり目では大学や会社を辞めたのにアドレスの変更など
+をしないままにする人のせいでエラーが一斉に発生します。この場合 user
+unknown などが大量に返ってきます。
+
+fml 附属の libexec/mead.pl というプログラムはこのエラーメールを解析し
+一定回数以上のエラーが返ってくるとそのユーザを削除するようにできます。
+デフォールトでは「このユーザは消すべきだと管理者に教える」ようになって
+います。が、自動的に削除してしまうようにすることもできます。
+
+・	MTAごとの挙動
+
+エラーの返し方についてはRFC1891 DSN (Delivery Status Notification)とい
+う規格があります。sendmailはDSNに対応してくれてますが、qmailのように無
+視して VERPs (Variable Envelope Return Paths)に頼っているMTAもあります。
+
+DSNは複雑なのと情報を教えすぎるのでそんなもの嫌だとかいろんな意見があっ
+てちっとも普及してません。一方VERPsはMTAが配送する時に送り主は
+
+	return-path-user.account=user.domain@my.domain
+
+などのようにユーザのEmailアドレスを含んだ形でフェイクします。このおか
+げでエラーが返ってきた時には確実にどのユーザのエラーかわかります。しか
+し原理的にメール一通ごとに送り主を変更しなければならないためあるISPに3
+万通配送する場合は3万回ばらばらに送り込まないといけません。
+
+つまりSMTPは本来配送をまとめて送り込むことができるのにもかかわらず、ネッ
+トワークや送り先のメールサーバに多大の負荷をかけることになります。
+
+
+
+○	meadの設定
+
+・	OSにmeadの設定を加える
+
+% makefml newml elena
+
+でＭＬを作成した際には include-mead という設定ファイルが作成される。中
+身は次のようなもので /usr/local/fml/libexec/mead.pl を呼びだします。
+/var/spool/ml/elena/include-mead と /var/spool/ml/elena/aliases を見て
+みて下さい。
+
+[include-mead の内容]
+
+.include sample.include-mead
+
+[aliases のmeadの部分 (デフォールトではコメントアウトされています)]
+
+.include sample.aliases-mead
+
+mead での処理を有効にするためには /etc/aliases に
+
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+
+この行を付け加えて newaliases を走らせるだけで良いです。
+
+
+○	mead の進んだ設定
+
+・	コマンドラインオプション
+
+独立に指定できる２つのオプションが大事です。
+	-m  モード
+	-k  アクション
+
+-m は自動で処理を行なうか、それともレポートを受けて管理者が処理を行なうか？
+-k は処理の仕方で bye か off です。
+
+
+・	例: 自動で削除に変更する
+
+/var/spool/ml/elena/include-mead で -m report を -m auto にする。
+/etc/aliases の設定は特に変更する必要はない。
+
+"|/usr/local/fml/libexec/mead.pl -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+
+
+・	例: 自動でなおかつ、削除ではなくOFFに変更する
+
+/var/spool/ml/elena/include-mead で -k off を付け加える。/etc/aliases 
+の設定は特に変更する必要はない。
+
+"|/usr/local/fml/libexec/mead.pl -m auto -k off -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+
+○ 
+
+[詳細]は
+.url ../errormails/index.html
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

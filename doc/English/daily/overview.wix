@@ -1,0 +1,69 @@
+.C	TIPS
+
+.S	自動的に記事のスプールを圧縮する
+
+spool を tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう。
+デフォールトでは100通の記事を一つの tar.gz 形式に圧縮する。
+注意: tar.gz を作るだけで、圧縮したものの記事は(危ないので)消さない。
+      自動的に消すには $USE_EXPIRE (次節)
+
+	$USE_ARCHIVE
+.xref	$USE_ARCHIVE
+
+.S	自動的にスプールの古い記事を消す
+
+	$USE_EXPIRE
+.xref	$USE_EXPIRE
+
+spool/ の古い記事を自動的に消す。これは「消すだけ」です。
+
+$USE_ARCHIVE と同時に使う時は注意が必要です。
+.xref relation_EXPIRE_LIMIT_and_ARCHIVE_UNIT 
+
+.S	ログをみる
+
+最後の10行をみる。ちなみに log と tail は一緒
+.q
+% makefml log elena
+.~q
+(2000/春以降の current only)
+
+最後の100行
+.q
+% makefml elena::tail -100 
+.~q
+
+.S	fml のログのチェックをする
+.xref bin/daily.pl
+
+/usr/local/fml/bin/daily.pl というプログラムがある。あきらかに正常とい
+う以外の行(例: Article 数字)を全部表示する。
+出過ぎるとおもうときはパターンファイルを変更する。
+
+本質的には、前日のログに対して
+.q
+% egrep -v -f /usr/local/fml/etc/daily.ignore ログファイル
+.~q
+をするのと一緒
+
+.q
+[daily ヘルプ]
+
+daily.pl [-hd] [-f patfile] [-t trap_patfile] [-p days]
+
+	-h	ヘルプ
+	-d	デバッグモード
+	-p	Ｎ日前のログを調べる。デフォールトは１
+
+	-f	無視するパターンのファイル
+.~q
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,13 @@
+
+	Title		: Mail transfer reliability in Simple Mail Tranfer 
+                          Protocol(SMTP)
+	Author(s)	: K. Khanna
+	Filename	: draft-khanna-smtp-mail-transfer-reliability-00.txt
+	Pages		: 5
+	Date		: 03-Oct-00
+	
+This draft discusses the issue which makes the data tranfer in SMTP 
+protocol highly vulnerable to a 'resend' in case of a network 
+disruption. We then discuss a means by which such a 'resend' can be 
+avoided, by tranferring mail data only from the point of disruption.
+

@@ -1,0 +1,80 @@
+.C	library コマンド
+
+.S	library コマンド
+=E.S	Library Commands for Special Purposes
+.l	library
+.k	library コマンド
+
+library コマンドはＭＬの中に配送されないsubのＭＬを含んでいるような状
+態です。次のようなコマンドがあります(help ファイルも見てね)
+=E
+FML does not accept "put" style commands in default for security.
+So "library" commands are defined in @DenyProcedure (see config.ph).
+If you use "put" style commands, you can use "library" commands series.
+==
+"library" commands are a sub-mailing list. This command has its own
+summary file and archive directories. "put" file is stored in
+$LIBRARY_ARCHIVE_DIR ($SPOOL_DIR for ML) and summary file is
+$LIBRARY_DIR/summary. The system is closed under $LIBRARY_DIR.
+This system uses the same routines as the usual ML. Hence the file
+name is number. Also FML does not permit the freedom of file names to
+put for security.
+
+.if LANG == JAPANESE
+	library put	このコマンド以降の部分を記事として保存
+	library get 	ファイル名(数字)
+	library summary	
+	library index	libraryとして蓄えられた記事の
+			サマリ・ファイルを送り返します。
+	library unlink [番号] 指定番号の記事をライブラリーから削除する
+	library delete [番号] 同上
+	library rm     [番号] 同上
+.fi
+.if LANG == JAPANESE
+	library put	put a file (after this line)
+	library get 	file to get (number)
+	library summary	
+	library index	summary file (index file) in library 
+	library unlink [number]	remove "number" file in library
+	library delete [number]
+	library rm [number]
+.fi
+
+等があります。 削除にあたっては From: のアドレスがそのファイルをかつて
+突っ込んだ人と同じである必要があります。
+=E
+Removing needs the authentication that From: address is the same
+person which submitted the file in the past.
+
+ファイル名が数字なのは一つにはＭＬ本体と全く同じように実装しているから
+です。そして security 上ファイル名をユーザが自由に選ぶことはさせません。
+やるなら submit した後で管理者が後で名前の変更 rename(2) をするべきで
+す。
+=E
+Please rename a number file name to arbitrary file name by hand if you
+like it.
+
+$DIR の代わりに対応するものとして次のものがが定義されています。
+.k	$LIBRARY_DIR
+.k	$LIBRARY_ARCHIVE_DIR
+
+	$LIBRARY_DIR		library コマンドの HOME ($DIRに相当)
+	$LIBRARY_ARCHIVE_DIR	library コマンドの SPOOL($SPOOL_DIRに相当)
+=E
+	$LIBRARY_DIR		library HOME  (<=> $DIR)
+	$LIBRARY_ARCHIVE_DIR	library SPOOL (<=> $SPOOL_DIR)
+
+library コマンドの特定のコマンドを使えないようにするには 
+@DenyLibraryProcedure に定義します。シンタックスと理屈は 
+@DenyProcudure と同様です。
+.xref add-procedures
+=E
+To disable one of library commands, set @DenyLibraryProcedure.
+How to use this array is the same as @DenyProcedure. 
+.xref add-procedures
+
+例: 'library put' を使えないようにする。
+=E
+e.g. disable 'library put' command.
+
+	@DenyLibraryProcedure = ('put');

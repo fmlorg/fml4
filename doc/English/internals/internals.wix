@@ -1,0 +1,1292 @@
+.C	FML のプロセス
+=E.C	Fml Processes
+.k	fml process
+.l	fml-process
+
+ＭＬサーバの基本動作を知っておくとカスタマイズの時役にたちます。
+=E
+It is useful to customize FML if you know the fundamentals of ML
+servers. In this chapter we describe fml internals.
+
+.S	ＭＬサーバの動作 (fml と sendmail の役割分担)
+=E.S	Functions as  ML Server
+.key	ＭＬサーバの動作
+.l	ml-process
+
+.if LANG == JAPANESE
+   メールが SMTP で送られてくる
+
+             ↓
+
+   SMTP で待ち構えているプログラムがうけとる (例: sendmail)
+
+             ↓
+
+   /etc/aliases から何をすれば良いのかを理解して、
+   setuid 操作等を行なった後 fml.pl の STDIN にメールが送り込まれる。
+
+             ↓
+
+   (sendmail -> fml.pl へ引き渡される。ここからが FML の担当)
+   config.ph による設定に従い、ヘッダの解析、ＭＬメンバーのリストに従い
+   配送 or コマンド要求を処理した結果のメールを配送リストと共に
+   sendmail 等のSMTPサーバへ引き渡す
+
+             ↓
+
+   (ここから再び sendmail の担当)
+   sendmail 等のSMTPサーバがメールの配送を行なう。
+.fi
+.if LANG == ENGLISH
+	mail comes via SMTP.
+		|
+	MTA e.g. sendmail receives it.
+	Here after we suppose MTA is sendmail. 
+		|
+	sendmail scans /etc/aliases and runs programs after setuid().
+	sendmail runs and injects an in coming mail into the program.
+		|
+	sendmail -> fml.pl
+	Fml.pl reads and evaluates config.ph and runs.
+	It analyses the header, 
+	authenticate the sender is a member or not.
+	Fml distributes a ML article by passing it to MTA.
+		|
+	MTA delivers a passed mail to ML members.
+.fi
+
+フィルタだけなら sed でも十分だし"配るだけ"なら Sendmail 8.x でも十分
+でしょう。しかし、+αでログをとり、スプールし、必要なら取り寄せられる
+ようにちょこっとだけ複雑なことをしようとするならこのサーバ まで必要と
+なるというわけです。
+=E
+It is enough to use "sed" for a filter and "sendmail" for delivery.
+If you expect a mailing list driver works for logging, spooling and a
+lot of commands to retrieve articles and so on, you need more
+elaborate programs. Fml provides a lot of functions described below.
+
+なおこの図でわかるとおり、まとめおくりはこれとは"全く別の"プロセスです。
+まとめおくりは自動的に作動するわけではありません。
+まとめおくりとは、一定時間ごとにスプールされたＭＬの記事を送ってあげる
+"別のプロセス"です。このプロセスは別の仕掛けで定期的に実行されなければ
+なりません。
+.xref msend
+=E
+Fml provides, delivery, functions for a lot of commands, digest
+delivery and so on. fml.pl is a delivery program and also provides
+command functions.  Digest delivery (matome okuri) is another process. 
+You must set up that cron executes msend.pl (digest delivery system)
+periodically. 
+.xref msend
+
+.S	Sendmail -> fml.pl 時の動作
+=E.S	How "sendmail -> fml.pl" works
+.k	sendmail -> fml 時の動作
+.l	sendmail2fml
+
+sendmail から fml.pl へメールが渡される時は次のように動作します。
+=E
+How sendmail passes an in-coming mail to fml.pl? Here it is. Consider
+Elena Mailing list as one example below.
+
+○ まず /etc/aliases にある
+=E
+Firstly sendmail scans /etc/aliases to find
+
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
+
+のような部分から /usr/local/list/Elena を実行すればよいことがわかるの
+で sendmail はこのファイルを実行します。/usr/local/list/Elena の中身は
+=E
+For Elena ML, sendmail executes the content of /usr/local/list/Elena.
+The content of /usr/local/list/Elena is 
+
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena"
+
+のようになっています。
+=E
+This implies that sendmail passes mail to fml.pl via PIPE (pipe(2)).
+fml.pl receives mail via STDIN. fml.pl works with this input.
+
+次に fml が上の引数は /var/spool/ml/elena を Elena ML の HOME だと見な
+し /var/spool/ml/elena/config.ph に従い fml の設定を行います。
+=E
+fml.pl recognizes the first argument /var/spool/ml/elena as HOME
+directory of Elena ML. fml.pl reads /var/spool/ml/elena/config.ph and
+sets up Elena ML configurations.
+
+そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
+するときは /usr/local/list/Elena の中で
+=E
+If you use command line options for fml.pl, please use like this.
+
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr "
+
+のように書きます(コマンドラインオプションについては Chapter .ptr{clo})。
+引数の書き方の順番は任意ですが、引数の中の最初の directory を ML の 
+HOME (config.phのある場所 もしくは spool やメンバーファイルのある場所) 
+と見なします。
+=E
+Arbitrary order is available. fml.pl regards the first argument of
+directory as ML's HOME (e.g. location of config.ph).
+
+.S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
+=E.S	Order to search library files
+.k	fml.plと引数
+.k	$DIR
+.k	$LIBDIR
+
+=E
+Consider elena ML again. fml.pl is kicked off like 
+
+	/usr/local/fml/fml.pl /var/spool/ml/elena
+
+のように起動されるわけですが、この場合/usr/local/fml/fml.pl の 
+/usr/local/fml 部分をとりだし /usr/local/fml を実行ファイルやライブラ
+リのパスとみなします。
+=E
+fml.pl extracts the directory path (/usr/local/fml) of fml.pl absolute
+path. It searches OS for executable and libraries in the following
+order
+
+	1   /var/spool/ml/elena 
+	2   /usr/local/fml 
+
+この順番で dynamic loading するファイルを探します。例えば config.ph や 
+libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
+け加えられていた(複数可能)場合、例えば
+=E
+If the following arguments are given,  
+
+   "|/usr/local/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
+
+の時は
+=E
+fml.pl searches OS for executable and libraries like this:
+
+	1   /var/spool/ml/elena 
+	2   /var/spool/ml/etc/fml/
+	3   /usr/local/fml 
+	4   /usr/lib/uja
+	5   /lib/uja
+
+のような順番でファイルを探します。
+
+.S	設定ファイルのサーチ順番
+=E.S	Priority of configuration file search
+.l	order-of-option-efficiency
+.l	設定ファイルのサーチ順番
+.l	site_init.ph
+.l	sitedef.ph
+.n	sitedef.ph
+.k	site_init.ph
+.k	sitedef.ph
+
+オプション設定の強い順番に並べると
+=E
+The evaluation order of configuration files is like this. 
+"1" is most directive.
+
+	1 コマンドラインオプション (fml.pl -d や fml.pl --ctladdr 等)
+	  なおコマンドラインオプションについては Chapter .ptr{clo}。
+	2 sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
+	3 各MLごとの config.ph による設定
+	4 site_init.ph によるデフォールト設定	
+	5 fml デフォールト設定
+=E
+	1 command line options (e.g. fml.pl --ctladdr)
+	2 sitedef.ph
+	3 config.ph
+	3 site_init.ph
+	5 fml defaults
+
+普通の program と同様ですね。ＭＬごとではなくそのマシン共通の設定にな
+るもの
+=E
+sitedef.ph and site_init.ph may be useful to be used as a common
+configuration file over mailing lists e.g. to set up command search
+path ,tar, gzip, ...
+
+	tar や gzip はどこにある？
+
+等を sitedef.ph に書くと便利でしょう。
+
+site_init.ph は各MLの config.ph の前に評価されデフォールトを決めます。
+sitedef.ph は各MLの config.ph の評価後に適用され、各ＭＬの設定を強制的
+に書き換えることもできます。それぞれ使いわけると良いでしょう。いずれに
+しろ config.ph にない変数であればどちらを使っても同じことです。
+
+sitedef.ph site_init.ph のサーチは
+=E
+fml (after 2.2.1) searchs sitedef.ph and site_init.ph in the following
+order:
+
+				Example
+	-----------------------------------------------
+	$DIR			/var/spool/ml/elena/
+	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
+	$EXEC_DIR		/usr/local/fml/
+	perl standard path	@INC
+
+の順にサーチされます。共通の場所なので
+=E
+It shoule exist in common directory.
+
+	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
+	$EXEC_DIR		/usr/local/fml/
+
+のいづれかでしょう。fml 2.2.1 で $ML_DIR/etc/fml/ が先頭になりました。
+これはversion up時に/usr/local/fmlの下をいじらなくてもよいようにという
+配慮からです。
+=E
+So it will be either of them. To avoid recnstructuing under
+/usr/local/fml in version up, the first location in fml 2.2.1 search
+path is $ML_DIR/etc/fml/.
+
+.S	fmlのプロセス(STDINからの読み込みの第一段階)
+=E.S	fml.pl process (first stage) 
+.l	STDIN->fml
+
+STDIN からの読み込みは第壱段階でハッシュテーブル %Envelope
+.k	$Envelope{'Header'}
+.k	$Envelope{'Body'}
+.k	メールのヘッダ
+.k	メールのボディ
+
+=E
+fml.pl scans the input mail and splits up it and save them in
+
+	ヘッダ	$Envelope{'Header'}
+	ボディ	$Envelope{'Body'}
+.xref	%Envelope
+=E
+	Header	$Envelope{'Header'}
+	Body	$Envelope{'Body'}
+.xref	%Envelope
+
+に保存されます。この時ボディ(メールの本文)に対しては次のようなチェック
+がなされます。
+
+○ 最初の $GUIDE_CHECK_LIMIT 行に対して $GUIDE_KEYWORD のキーワードが
+現れるか否か？
+メンバー以外からのメールでこのキーワードをキャッチした場合は、ガイドを
+送り返してそれ以外のことはしない。
+.k	$GUIDE_CHECK_LIMIT
+.k	$GUIDE_KEYWORD
+.if LANG == ENGLISH
+In default fml.pl is not compatible with hml 1.6 (which is a mailing
+list server may be used only in Japanese). The following descriptions
+are of no means.
+
+If the mode is compatible with hml 1.6, fml.pl checks the body.  Even
+though fml.pl is not in the compatible mode, the check routine works
+but the result is not used.
+
+* checks the first $GUIDE_CHECK_LIMIT lines to find $GUIDE_KEYWORD.
+  If found, FML sends back guide and do nothing except it.
+.k	$GUIDE_CHECK_LIMIT
+.k	$GUIDE_KEYWORD
+.fi
+
+○ 最初の $COMMAND_CHECK_LIMIT 行に対して
+.k	$COMMAND_CHECK_LIMIT
+.k	$CHADDR_KEYWORD
+=E
+* fml.pl scans the first $COMMAND_CHECK_LIMIT to change the mode from
+distribution to command mode. The trap keyword is 
+==
+	^#(\s*\w+\s|^\#\s*\w+)
+	^#$CHADDR_KEYWORD
+
+	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
+
+	# で始まり、$CHADDR_KEYWORD のキーワード
+	が現れる行があるか否か？あった場合はコマンドモードへ移行。
+
+の2つのチェックをしています。それぞれの LIMIT を調節すると、つまり 
+LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
+ンドの対象にすることもできます。デフォールトではそれぞれ最初の3行のみ
+を対象にしています。
+
+なお、それぞれのキーワードデフォールトは次のように設定されています。
+=E
+In default
+
+	$GUIDE_KEYWORD  = "guide";
+	$CHADDR_KEYWORD = "chaddr|change-address|change";
+
+.S	fmlのプロセス(第２段階, %Envelopeの処理)
+=E.S	fml process (second stage) 
+
+%Envelope にヘッダとボディを読み込んだ後はヘッダの解析プロセスが続きま
+す。詳細については次の章を見て下さい。
+.xref	%Envelope
+.xref	header-custom
+=E
+After parsing, fml.pl sets up %Envelope, locks into critical region.
+Under locked state, fml.pl main part works.
+.xref	%Envelope
+.xref	header-custom
+
+この後ロックして、メインのプロセスが続くことになります。
+
+.S	fml process の lock と signal handling 
+=E.S	fml process, lock and signal handling
+.k	$Sigarlm
+.k	$TimeOut{'flock'}
+.k	$FLOCK_TIMEOUT(Obsolete)
+.k	$MAX_TIMEOUT
+
+現在の flock を使うロックアルゴリズムは次のように設定されています。
+flock(2) と alarm(3) によるTIMEOUT処理による一般的な方法です。 
+sendmail のような alarm(3) ベースの event 駆動をするようにプロセス管理
+をしています。
+
+NT4 上では Activestate ntperl を使っています。この ntperl では 
+flock(2) は動きます(かなり怪しいという話も聞くが詳細は不明)が alarm(3) 
+がないので Win32::Process による wrapper で alarm(3) を emulate してい
+ます。emulation といってもTIMEOUTしたら強制終了するだけですが。
+=E
+fml.pl uses flock(2) and alarm(3). It is standard technique on
+UNIX. On Micro$oft Windows NT4 with activestate perl, flock(2) works
+but alarm(3) does not work. We emulate it by Win32::Process. Under our
+NT4 alarm emulation, timeout equals to "end of process".
+
+sub Flock {
+
+    &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
+	...
+
+TIMEOUTを待つ時間は $TimeOut{'flock'} で決まります。(flock でない場合
+は 3秒+α 程度の sleep を $MAX_TIMEOUT 回して待ってみる)
+
+    # signal handling
+    $SIG{'ALRM'} = 'TimeOut';
+    $SIG{'INT'}  = $SIG{'QUIT'} = 'SignalLog';
+
+$TimeOut{'flock'} (デフォールトは3600秒)後 $SIG{'ALRM'} で定義された関
+数(TimeOut)を実行します。
+=E
+Flock timeout is defined by $TimeOut{'flock'}, default is 3600 seconds.
+
+関数 TimeOut は管理者へ TIMEOUT を知らせ、ログを残しfmlを終了します。
+これがないとずっとロック(flock)がかかったままになるからです。
+=E
+When timeout occurs, fml.pl notifies it to the maintainer, logs it and
+exits. 
+
+なお flock を使わない時はTIMEOUTしたメールを保存し管理者へ TIMEOUT を
+知らせます。詳細は liblock.pl を見るとわかるでしょう。
+.xref	books
+=E
+When flock(2) is not used, fml.pl uses link(2) based lock
+algorithm. If timeout, fml.pl notifies it and exits. Please see
+liblock.pl for more details.
+.xref	books
+
+.S	イベント・スケジューラ
+=E.S	Event Scheduler
+.k	SetEvent
+.k	ClearEvent
+.k	Tick
+
+TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら(割り込
+んで) 実行する必要がありますがそれは伝統の味 alarm(3) を使って実装しま
+す。なお Windows NT 4.0 Version では alarm(3) が使えないのこの処理は実
+行されません。
+=E
+fml.pl uses flock(2) and alarm(3). It is standard technique on
+UNIX. Software trap by alarm(3) maintains event scheduling inside FML.
+On Micro$oft Windows NT4 with activestate perl, flock(2) works but
+alarm(3) does not work. We emulate it by Win32::Process. The emulation
+is incomplete for the restriction of ntperl. We only enforce fml.pl
+exits if timeout.
+
+.S	ロックの仕方(flock でない場合)
+=E.S	Another locking algorithm
+.l	how-to-lock
+.k	ロックアルゴリズム
+.xref	seq-file
+
+ロックアルゴリズムは二通り用意されてます。flockがお奨めです。flock(2) 
+参照
+=E
+fml.pl provides two lock algorithms, flock(2) and link(2) based lock
+algorithm. In default fml.pl uses flock(2). flock(2) is used if
+
+.key	$USE_FLOCK
+	$USE_FLOCK    = 1; (default 1)
+
+で flock system call
+=E
+link(2) based lock is used if
+
+	$USE_FLOCK    = 0;
+
+で大昔からある link(2) を使う方式を使います。この方式はロックするファ
+イルへの link() ができるか否か?を排他制御に使います。このロックするファ
+イルは
+=E
+link(2) style lock is based on whether link(2) works or not. 
+The lock file is 
+
+	$LOCK_FILE
+
+という変数で変更できます。デフォールトは $DIR/var/run/lockfile.v7 です。
+=E
+The default lock file is $DIR/var/run/lockfile.v7
+
+	"$FP_VARRUN_DIR/lockfile.v7"
+
+つまり ML の home の下の var/run/lockfile.v7 です。この方式の問題は OS 
+がいきなり落ちた時にこのファイルが残ってしまうので手動でこのファイル群
+を消さなければならないという点が最大の問題点です。そのため flock() の
+ようなOSが直接ロックを支援する形が望ましいです。
+=E
+This lock algorithm is not fault tolerant e.g. in sudden death of OS
+since the lock file is not removed. After the reboot, maintainer
+should remove left lock files.  Just after reboot, remove all files
+$FP_VARRUN_DIR/lockfile*. From this view, I recommends you that 
+you should use the lock mechanism OS provides.
+
+そういう場合は reboot 直後に
+
+	"$FP_VARRUN_DIR/lockfile.v7"
+	"$FP_VARRUN_DIR/lockfile.数字"
+.k	$FP_VARRUN_DIR/lockfile.v7
+
+すべてを消して下さい。
+
+fmlの何かプロセスが走っている状態ではどのロックファイルを消していいか
+はプロセステーブルを見る必要があります。数字はプロセス番号ですからプロ
+セステーブルを見て(ps(1))、該当する数字(fml の process)がなければ、そ
+のファイルは消して良いです。
+
+なお link(2) スタイルの場合 $MAX_TIMEOUT 秒後、var/log/ の下にTIMEOUT
+したメールは保存され管理者へTIMEOUTが通知されます。
+=E
+Also in link(2) style, timeout is defined by $MAX_TIMEOUT. The mail is
+saved in var/log. fml.pl notifies it to the maintainer.
+
+[捕捉]	flock(2) を見れば分かりますが 
+.k	flock(2)
+=E
+FYI: flock(2)
+
+	$LOCK_SH                       = 1;
+	$LOCK_EX                       = 2;
+	$LOCK_NB                       = 4;
+	$LOCK_UN                       = 8;
+.k	$LOCK_SH
+.k	$LOCK_EX
+.k	$LOCK_NB
+.k	$LOCK_UN
+
+.q
+     #include <sys/file.h>
+     #define   LOCK_SH   1    /* shared lock */
+     #define   LOCK_EX   2    /* exclusive lock */
+     #define   LOCK_NB   4    /* don't block when locking */
+     #define   LOCK_UN   8    /* unlock */
+
+     int
+     flock(int fd, int operation)
+.~q
+
+排他制御については例えば A. S. Tanenbaum, "Modern Operating Systems" など
+=E
+See e.g. A. S. Tannenbaum, "Modern Operating Systems" for exclusive locks.
+
+
+.C	FML 内部におけるデータ構造
+=E.C	FML internal data structures
+.l	data-structure
+
+ここでは fml 内部処理におけるデータ構造について解説します。これらの知
+識は改造する上で必須の事柄でしょうが、単に変数を 1 or 0 にセットするだ
+けしか設定 (config.ph) をいじらないなら読む必要はないでしょう。
+=E
+Here we describe FML internal data structures. When you hacks FML,
+this knowledge is required. However you do not need to read this
+chapter if you toggle variables only on/off.
+
+.S	変数名の naming convention
+=E.S	Naming convention of variables
+.key	変数の Naming Convention
+
+○ 大文字（[A-Z0-9_]+）だけの塊はユーザーのカスタマイズで使う目的の
+   Global 変数です。
+=E
+* ^[A-Z0-9_]+$ name variable is USER DEFINED VARIABLE for customize.
+It is a global variable. Fundamentally these variables are defined in
+config.ph, sitedef.ph and site_init.ph.
+
+	Example:	$MAIL_LIST
+
+○ "1単語の先頭一文字が大文字、残りは小文字"の塊からなる単語はメー
+   ル本体やヘッダをSubroutine間で渡しあうための Global 変数です。
+=E
+* Capitals are global not for USERS but for systems. In principle
+  users should not touch them. If you hacks, it must require to handle
+  these variable.
+
+	$MailBody	$Reply_to
+	%Envelope	*_cf
+
+	例外： *_cf は システム情報をもっている名前空間です。
+	(_cfはほとんど使われていません。将来は消去すべきです)
+
+   %Envelope は最も重要な変数です。
+   しかしながら、こういうグローバル変数は本来出来るだけ少なくするべきです。
+   また、@Fld にように現在グローバルとして使われていないのに名残として
+   残ってしまっているものもあります。
+   が、これはもぉこのまま使うしかないようです。
+=E
+   %Envelope is the most important variable. We should not increase
+   the number of global variables. Several variables e.g. @Fld 
+   are capital but historically left not as global.
+
+   注意：
+	$debug だけは全部小文字でグローバル変数という例外です。
+	便利だからというのと、歴史的にそうなっているというだけなので
+	今後そういう変数名は作られることはありません。
+	また、昔ユーザ定義で今は内部変数扱いになった $ML_MEMBER_CHECK も
+	例外です。
+=E
+  ATTENTION: historically $debug is global for convenience.
+
+○ 小文字は基本的にlocal variableで、大抵はsubroutineの先頭でlocal宣言
+   されています。
+=E
+* Lower case word is local variable. 
+
+○ 補足
+なお、Directory を定義する $*_DIR タイプの変数には
+=E
+[Appendix]
+Directory variables consists of two types
+
+	$*_DIR 		$DIR からの相対パス
+	$FP_*_DIR 	絶対パス
+=E
+	$*_DIR 		relative path to $DIR
+	$FP_*_DIR 	obsolete path
+
+の２種類があります。 $FP_*_DIR タイプの変数は自動的に変換され定義され
+ます。基本的には絶対パスが使われます。$FP_ の変数は fml.pl の初期化で
+自動的に補正されつつ設定されます。ほとんど全ての場面で絶対パスを用いま
+す。
+=E
+$FP_*_DIR is automatically defined based on directory variables.
+In a lot cases absolute path is used.
+
+	$FP_TMP_DIR
+	$FP_VARDB_DIR
+	$FP_VARLOG_DIR
+	$FP_VARRUN_DIR
+	$FP_VAR_DIR
+    	$FP_SPOOL_DIR
+.k	$FP_TMP_DIR
+.k	$FP_VARDB_DIR
+.k	$FP_VARLOG_DIR
+.k	$FP_VARRUN_DIR
+.k	$FP_VAR_DIR
+.k    	$FP_SPOOL_DIR
+
+.S	関数名の Naming Convention
+=E.S	Naming convention of functions
+.k	関数名の Naming Convention
+
+一部の例外を除いて”１単語の先頭一文字が大文字、残りは小文字”の塊から
+なる単語です。基本的に subroutine の名前はX11風だったりします。最近の
+はlisp風味も混ざってます:-) #おおむねX11風ですね
+=E
+Except for a few cases, a function name is capitalized. The word after
+"_" is also capitalized. It is similar to X11 style:D
+
+○ fml 1.5 以降では若干例外があります。
+=E
+* Some exceptions remains after fml 1.5.
+
+ファイル操作をする関数で
+=E
+File operation functions are defined as 
+
+	変換インターフェイスとしての 	f_関数 名
+	＃いつか、なくなるだろう
+=E
+	f_function_name 	conversion interface
+
+		と 
+
+	そのモードのコンストラクタ	Cnstr_関数 名
+	そのモードのディストラクタ	Destr_関数 名
+=E
+	Cnstr_function_name		constructor for this mode
+	Destr_function_name		destructor for this mode
+
+が例外です。「将来 replace するべきです」と当時言ったまま replace され
+ないままですが:-)
+=E
+These are exceptional. In that age I should replace these naming
+convention but still remains ;D
+
+.S	%Envelope (ハッシュテーブル)
+=E.S	%Envelope (hash)
+.l	%Envelope
+.k	%Envelope
+.k	struct envelope e;
+
+%Envelope には今 fml を起動したメールの内容(ヘッダ、ヘッダの各フィール
+ド、本文等)が格納されます。また、そのメールに対しどういうMETHODでREPLY
+を返すべきか？や、sendmailとの通信等の設定に関しての付加情報も 
+%Envelope を通じて渡されます。それはこのメールに対する METHOD の定義と
+みなしているからです。
+=E
+%Envelope is most important variable(hash). %Envelope contains header,
+each field of the header, body as a hash table. This hash is passed in
+a lot of function calls. It is similar to sendmail's struct ENVELOPE
+e;
+
+sendmail の struct envelope e; に対応するものです。
+しかし、perl 4 を本来ターゲットにしているため
+=E
+In the age of FML 1.5, perl 5 does not run. Hence we cannot use
+e.g. the following style
+
+	$Envelope->$Header->$From = "uja@domain";
+
+のような使い方はしません(できない)。これと同様のことを意図したシンタッ
+クスが
+=E
+It is represented by
+
+	$Envelope{"h:From:"}  = "uja@domain";
+
+で表現されています。 h = header で From: はわざと Field だとわかりやす
+いように : まで含めています。
+=E
+":" is a separator. From: is a special syntax to identify this key is
+a field.
+
+以下 %EnvelopeのKEYについて説明します。
+＃ハッシュなので、KEY => VALUE が $Envelope{KEY} の値が VALUE です
+=E
+Keys of %Envelope:
+
+	h: ではじまるものKEYは「ヘッダの各フィールドのデータ」です。
+=E
+	KEY beginning with "h:" is a field of a header.
+
+	h:Capital:	補正されたデータ e.g. h:Subject:
+	h:lower-case:	元メールのデータ e.g. h:subject:
+=E
+	h:Capital:	adjusted field data to use in delivery e.g. h:Subject:
+	h:lower-case:	original field data e.g. h:subject:
+
+	それ以外に その Envelope のメールをどういうモードで処理するか？
+	や、そのメールへのREPLY、エラーレポート処理をどうするか？
+	というMETHODの指定等の付加情報も付け加えることもあります。
+
+	[ヘッダ関係]
+
+	h:field:	上述のヘッダ：フィールド：設定値
+=E
+	h:field:	header field 
+			lower case name is original
+			Capital is after changed.
+
+	fh:field:	field(小文字) は fml.pl がある値を強制する
+=E
+	fh:field:	enforce a field to use this value
+
+			例： fh:to: は To: を $Envelope{'fh:to:'} の値にする
+
+	oh:field:	field は original のヘッダフィールドを使う
+=E
+	oh:field:	enforce fml.pl to use original field value
+			for this field
+
+	GH:field:	コマンドの結果を返すメールは GenerateHeader() という
+			ルーチンでメールヘッダを生成する。
+			そこでの値を変更したいならこのKEYを使う。
+=E
+	GH:field:	enforce some value for field of command mail results
+			and so on. used in GenerateHeader().
+
+	Addr2Reply:	コマンドの結果の返事を返すアドレス
+			reply-to: > From:
+=E
+	Addr2Reply:	address to send a command result and so on
+
+	[メールが呼び出すべきモードやメソッドのConfig]
+=E
+	[mode or method configurations]
+
+	macro:x		x は sendmail の $x に対応する内容を保存
+=E
+	macro:x		corresponds to $x of sendmail
+
+	mode:x		モード設定値 
+=E
+	mode:x		mode x is enabled.
+
+	mci:mailer	mci は Mail Connection Information (MCI)
+			mci:mailer は ipc(SMTP) か prog(exec sendmail)
+			のどちらかである
+=E
+	mci:mailer	Mail Connection Information
+			mci:mailer is ipc or prog.
+
+	[内部表現]
+=E
+	[Internal Data]
+
+	Header		元メールのヘッダ
+	Body		元メールのメール本文
+	Hdr		送り出すメールのヘッダ（&Smtpの直前に生成される）
+=E
+	Header		original header
+	Body		original mail body
+	Hdr		header of sending mails out in distribute phase	
+
+	message		メールをサーバへ送ったユーザへのメッセージ
+	error		管理者への(エラー)メッセージ
+=E
+	message		message to send back to a sender
+			for command results and others
+	error		error message to send back to a sender
+
+	MIME		ISO-2022-JP is detected (toggle Flag)
+	UnixFrom	Unix From
+	Hdr2add		$SUPERFLUOUS_HEADER の時につかうバッファ
+	nclines		# command の行数
+	nlines		メール本文の行数
+	preamble	メール本文の前につける文章
+	trailer		メール本文の後につける文章
+=E
+	MIME		ISO-2022-JP is detected (toggle Flag)
+	UnixFrom	Unix From
+	Hdr2add		buffer when $SUPERFLUOUS_HEADER is set.
+	nclines		number of lines for "# command" style lines
+	nlines		lines of mail body
+	preamble	preamble to put on mail body
+	trailer		trailer to put on mail body
+
+	tmp:x		temporary used
+
+
+例: Subject:
+=E
+Example: Subject:
+
+   $Envelope{'h:subject:'} は来たメールそのもの
+=E
+   $Envelope{'h:subject:'} is 
+   an in-coming mail's original Subject: field value. 
+
+   $Envelope{'h:Subject:'} は来たメールの Re: をとり
+   必要なら [Elena 100] のようなものを処理したもの
+=E
+   $Envelope{'h:Subject:'} is after cutting Re:'s and tags e.g. [Elena 100].
+
+のような違いがある。配送されるヘッダと大文字ではじまる単語は次のように
+対応する。
+
+配送メールのヘッダ: %Envelope
+=E
+Example: In a header of distribution, used key of %Envelop is as follow:
+
+        Field           key in %Envelope
+	--------------------------------------- 
+	Date: 		h:Date:
+	From:		h:From:
+	To: 		h:To:
+	Subject: 	h:Subject:
+
+.S	データ構造の初期化
+=E.S	Initialize data structures
+.l	init-data-structure
+.k	データ構造の初期化
+
+各データの初期化は次の順序で行なわれる。
+=E
+Initialization of fml.pl is as follows:
+
+	$DIR $LIBDIR @INC の初期化
+=E
+	initialize $DIR $LIBDIR @INC and so on
+
+	&InitConfig
+	   &SetDefaults
+		%Envelope
+		DNS, @HdrFieldsOrder, and others
+
+	   &LoadConfig
+		$DIR/config.ph
+		sitedef.ph
+
+   	   &SetOpts
+		command line options
+
+	   COMPATIBILITY CODE
+   
+	&Parse
+		%Envelope へ Header Body 等の元々の内容を保存
+=E
+	&Parse
+		reset %Envelope
+		
+	&GetFieldsFromHeader
+		%Envelope へ h:field: および h:Field: をセット
+=E
+	&GetFieldsFromHeader
+		analyze %Envelope and set h:field: and h:Field: up.
+
+	&FixHeaderFields
+		h:Field: への各種補正を行なう
+=E
+	&FixHeaderFields
+		adjust h:Field:
+
+	&CheckCurrentProc
+		%Envelope による設定、動作モードチェック
+=E
+	&CheckCurrentProc
+		adjust fields, check loops, modes and so on
+
+	この後各種フックがそれぞれの場所で評価される。
+=E
+	After this fml.pl sets in the main routine,
+	hooks are evaluated in several locations.
+
+	Example:
+		$START_HOOK
+		$SMTP_OPEN_HOOK
+		$FML_EXIT_HOOK
+
+この後ロックされ、ロック下でクリティカルな作業が行なわれる。作業が終る
+まで alarm(3) による割り込み以外ではこのロックははずれない。
+=E
+After this, the critical section begins. 
+
+.S	ディレクトリ変数
+=E.S	Directory variables
+.xref	fml-process
+
+起動時の一番最初の段階では $DIR $LIBDIR @INC という変数の設定を筆頭に
+各種変数の初期化が行なわれます(上述)。$DIR $LIBDIR @INC が起動時にどう
+評価され使われているかは「fml の基本動作と起動オプション…」の章を見る
+と分かるでしょう。
+.xref	fml-process
+
+以下では DIRECTORY 一覧を示します。
+=E
+[Directory variable list]
+		
+	@INC	(参考)
+		これは Perl の include file の search path
+		$DIR @INC(original) $LIBDIR ...
+		の順番に探される。
+
+	$DIR
+		config.phのある場所、いわゆるMLのHOME	
+		@INC の先頭に設定される
+=E
+	$DIR
+		config.ph location. ML's HOME directory.
+		The argument of @INC.
+
+.if LANG == JAPANESE
+	$LIBDIR	
+		fml.pl や libsmtp.pl 等の置き場所。
+		$DIR と同じでも良いし、別の場所で保守されていてもよい。
+		もともと複数のＭＬを扱うためにスプールと *.pl ファイル
+		群の置き場所をわけるために導入された。@INC の最後に入る。
+
+		なおコマンドラインに出てくるdirectoryはすべて @INC に
+		設定されるが、$DIR の直後の directory が $LIBDIR に設
+		定される。
+
+		@LIBDIR にも入っている
+.fi
+.if LANG == ENGLISH
+	$LIBDIR	
+		library paths. @LIBDIR is a list of $LIBDIR's.
+		fml pushes $LIBDIR to @LIBDIR.
+		fml searches @LIBDIR for executable and libraries
+.fi
+
+    	$SPOOL_DIR		$DIR/spool
+		ＭＬの記事を格納する場所
+=E
+    	$SPOOL_DIR		$DIR/spool
+		spool of articles of ML
+
+	[$DIRからの相対パスで設定されるもの]
+=E
+	[Relative path from $DIR]
+
+.if LANG == JAPANESE
+	$TMP_DIR		tmp (temporary)	4.4BSD の /tmp
+	$VARDB_DIR		4.4BSD の /var/db (データベース)
+	$VARLOG_DIR		4.4BSD の /var/log に対応 ログが置かれる
+				backward compat のため
+				log 等のデフォールトは $DIR/log のままである
+				(本来は $VARLOG_DIR/log が望ましいだろうが)
+	$VARRUN_DIR		4.4BSD の /var/run pid-file 等はここ
+				なお cache もここにおいている。
+	$VAR_DIR		4.4BSD の /var
+.fi
+.if LANG == ENGLISH
+	$TMP_DIR		tmp (temporary)
+	$VARDB_DIR		var/db  (database, 4.4BSD like)
+	$VARLOG_DIR		var/log (log, 4.4BSD like)
+				$DIR/log is exceptional for backward 
+				compatibility.
+				($VARLOG_DIR/log is preferable)
+	$VARRUN_DIR		var/run (4.4BSD like)
+				pid's file and several caches
+	$VAR_DIR		var (4.4BSD like)
+.fi
+
+	[FULL PATH 化された変数]
+=E
+	[Corresponding fully pathed directory variables]
+
+	$FP_TMP_DIR		$DIR/$TMP_DIR
+	$FP_VARDB_DIR		$DIR/$VARDB_DIR
+	$FP_VARLOG_DIR		$DIR/$VARLOG_DIR
+	$FP_VARRUN_DIR		$DIR/$VARRUN_DIR
+	$FP_VAR_DIR		$DIR/$VAR_DIR
+    	$FP_SPOOL_DIR		$DIR/$SPOOL_DIR
+
+.S	$TMP_DIR について
+=E.S	On temporary directory ($TMP_DIR)
+.key	$TMP_DIR
+
+ＭＬサーバの作業エリアにはデフォールトでは $DIR/tmp (つまり $TMP_DIR =
+'./tmp';) を使います。変更したい場合は $TMP_DIR を変更して下さい。
+=E
+$DIR/tmp is temporary working area. It is defined as $TMP_DIR. We
+should not use the system's /tmp or /var/tmp if the file is left when
+OS crashes.
+
+/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
+private communication のファイルを public な場所にファイルを残すことは
+しないためです。
+
+その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
+存されます。
+
+.S	設定ファイル群
+=E.S	Configuration files
+.xref	fml-file-structure
+
+[メンバーのリスト関係]
+=E
+[Member Lists]
+
+	$MEMBER_LIST 	 	$DIR/members
+.l	$MEMBER_LIST
+.k	$MEMBER_LIST
+.xref	fml-file-structure
+
+	メンバーリスト(認証のみに使う)
+=E
+	the ML member list for authentication. If a given address is
+	not in this list, fml.pl does not authenticate the
+	address. This is not a delivery list in non automatically
+	registration mode. In automatic registration mode, this file
+	is both a member and delivery list.
+
+	$ACTIVE_LIST 		$DIR/actives
+.l	$ACTIVE_LIST
+.k	$ACTIVE_LIST
+.xref	fml-file-structure
+
+	ＭＬの配送リスト
+=E
+	list of distribution in non automatically registration mode.
+
+	$REJECT_ADDR_LIST	$DIR/spamlist
+.k	$REJECT_ADDR_LIST
+.xref	$REJECT_ADDR_LIST
+
+	投稿/コマンド/自動登録をはじめとして全ての場合について、弾きた
+	いアドレスのリスト。自動的に登録する機能もある。
+=E
+	list to reject as a spammer.
+
+[各種の説明、ご案内関係のファイル]
+=E
+[files of guides and so on]
+
+	$OBJECTIVE_FILE	 	$DIR/objective
+.l	$OBJECTIVE_FILE
+.k	$OBJECTIVE_FILE
+
+	ＭＬの目的を書いたファイル
+=E
+	objective of ML
+
+	$GUIDE_FILE		$DIR/guide
+.l	$GUIDE_FILE
+.k	$GUIDE_FILE
+
+	ＭＬの一般向けご案内（ガイド）
+=E
+	guide for general people (for not member)
+
+	$HELP_FILE	 	$DIR/help
+.l	$HELP_FILE
+.k	$HELP_FILE
+
+	ＭＬのHELP、コマンドの解説等
+=E
+	help file of ML (for only member)
+
+	$DENY_FILE	 	$DIR/deny
+.l	$DENY_FILE
+.k	$DENY_FILE
+
+	ＭＬがメンバーチェックをしている時
+	メンバー以外からメールが来た時に返す断りの文章
+=E
+	file to send back when fml.pl rejects mail from a non member.
+	This is not used in auto registration mode.
+		
+	$WELCOME_FILE	 	$DIR/guide
+.l	$WELCOME_FILE
+.k	$WELCOME_FILE
+.xref	auto-regist
+
+	ＭＬが自動登録の時、登録時に送ってあげる文章
+=E
+	file to send back in auto-registration mode when 
+	a user is automatically registered. 
+
+	$CONFIRMATION_FILE       $DIR/confirm
+.l	$CONFIRMATION_FILE
+.k	$CONFIRMATION_FILE
+.xref	confirmation
+
+	自動登録で confirmation モードの際 reply を返す 
+	confirmation の説明のファイル
+=E
+	confirmation file in auto-registration mode.
+	Please see confirmation (.ptr{confirmation}).
+
+[ログファイル関係]
+=E
+[Logfiles]
+
+	$LOGFILE	 	$DIR/log
+.l	$LOGFILE
+.k	$LOGFILE
+
+	ログ
+=E
+	log file
+
+	$MGET_LOGFILE    	$DIR/log
+.l	$MGET_LOGFILE
+.k	$MGET_LOGFILE
+.xref	mget
+
+	mgetのログ。デフォールトでは↑ログファイルと同じ
+=E
+	mget log. In default $MGET_LOGFILE == $LOGFILE.
+
+	$SMTPLOG		$VARLOG_DIR/_smtplog
+.l	$SMTPLOG
+.k	$SMTPLOG
+.l	$VARLOG_DIR/_smtplog
+.k	$VARLOG_DIR/_smtplog
+
+	プロセス間通信(SMTP)のログ(デバッグの役に立つ)
+=E
+	Log of SMTP (for debug).
+
+	$SUMMARY_FILE 	 	$DIR/summary	
+.l	$SUMMARY_FILE
+.k	$SUMMARY_FILE
+
+	MLの記事のサマリ
+=E
+	summary of ML
+
+	$SEQUENCE_FILE 	 	$DIR/seq
+.l	$SEQUENCE_FILE
+.k	$SEQUENCE_FILE
+
+	MLの記事番号
+=E
+	ML's sequence number
+
+	$MSEND_RC		$VARLOG_DIR/msendrc
+.l	$MSEND_RC
+.k	$MSEND_RC
+.xref	msend
+
+	まとめおくりの制御ファイル
+=E
+	digest control file.
+
+	$LOCK_FILE	 	$VARRUN_DIR/lockfile.v7
+.l	$LOCK_FILE
+.k	$LOCK_FILE
+
+	flock() を使わない時のロックで使うファイル
+=E
+	lock file when not flock(2) lock but link(2) based.
+
+	$LOG_MESSAGE_ID		$VARRUN_DIR/msgidcache
+.l	$LOG_MESSAGE_ID
+.k	$LOG_MESSAGE_ID
+
+	message-id cache ファイル
+	(ML自身での無限ループを防ぐためのキャッシュ)
+=E
+	Message-Id cache file to prevent loops.
+
+	$MESSAGE_ID_CACHE_BUFSIZE
+.l	$MESSAGE_ID_CACHE_BUFSIZE
+.k	$MESSAGE_ID_CACHE_BUFSIZE
+	
+	Message-ID cache ファイルサイズ
+=E
+	Message-ID cache file size
+
+	$INDEX_FILE		$DIR/index
+.l	$INDEX_FILE
+.k	$INDEX_FILE
+
+	このファイルはなくても構わない。indexコマンドで表示したい内容
+	を書く。このファイルがない場合はその場でMLのHOME内容を調べて返
+	す。
+=E
+	Fml.pl works without this file. If exists, "index" commands
+	sends back this file. If not, FML scans $SPOOL_DIR,
+	@ARCHIVE_DIR and sends back the summary.
+
+.S	単に便利なためにある変数
+=E.S	Other useful variables
+
+	$DO_NOTHING
+.l	$DO_NOTHING
+.k	$DO_NOTHING
+
+	何もしないという分岐をするための変数。特殊なサーバを作る時や
+	特別なHOOKをかけたりする場合に有用である。
+=E
+	Special flag to declare "do nothing".
+
+	$NULL
+.l	$NULL
+.k	$NULL
+
+	ダミー:-) ＃ 別にこんな変数いらない 
+	#define null (char *)0 みたいなものだと思ってもらえば良い
+=E
+	dummy:D like "#define null (char *)0".
+
+	$FML	
+.l	$FML	
+.k	$FML	
+
+	カーネル内のプロセステーブルを書き変える際に使う変数
+=E
+	process table name
+
+	$FACE_MARK
+.l	$FACE_MARK
+.k	$FACE_MARK
+
+	(単なる愛敬:-)。各種リクエストの結果を返す時にお別れの文章の腋につける
+	e.g. 	P(^^)
+		Be seeing you P(^^)
+	のようになる。
+=E
+	appended in the reply message, e.g. command results.
+
+	$INCLUDE_SIM_PATH
+.l	$INCLUDE_SIM_PATH
+.k	$INCLUDE_SIM_PATH
+
+	Simulation で使う。気にしないで下さい:)
+=E
+	Please ignore this. This is used in simulation.
+
+	$UNISTD
+.l	$UNISTD
+
+	Declare "Unix Standard" flag. undefined on Windows NT4
+
+	$LOCKFILE
+.l	$LOCKFILE
+
+	lock file variable in some libraries. It may be uncontrolled
+	by a user.
+
+	%MAKE_FML
+.l	%MAKE_FML
+
+config.ph に現れるハッシュ %MAKE_FML は makefml で使うためのものです。
+makefml 以外では使われません。現在では使われていません、無視して下さい。
+.k	%MAKE_FML
+=E
+Please not touch %MAKE_FML in config.ph which variable "makefml" uses
+though it is not used today.
+
+○ 古い変数として他の名前に置き換えられたもの
+.k	$GUIDE_REQUEST
+.k	$RPG_ML_FORM_FLAG
+=E
+* obsolete variables (renamed to)
+
+   $GUIDE_REQUEST	-> $GuideRequest
+   $RPG_ML_FORM_FLAG	-> $COMMAND_SYNTAX_EXTENSION
+
+○ obsolete なもの
+=E
+* obsolete
+
+   $NON_PORTABILITY
+
+.S	内部で使われている変数を調べるには？
+=E.S	Listing variables list
+.k	$DUMPVAR
+.k	dumpvar.pl
+
+config.ph で 
+=E
+To dump variable used in fml.pl (by dumpvar.pl), sets 
+
+	$DUMPVAR = 1;
+
+やコマンドラインで
+
+	fml.pl --DUMPVAR 引数
+
+として fml を呼び出すと全ての変数を dump します。この場合はPerlについ
+てくる dumpvar.pl ライブラリを利用し、名前空間から変数リストを引っ張り
+出しています。
+
+ちなみに fmlserv.pl は同様のやり方で名前空間の switch を利用して複数の
+ＭＬを疑似的に実行しています。
+=E
+FYI: fmlserv.pl uses the same technique to switch name spaces.
+
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

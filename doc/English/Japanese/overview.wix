@@ -1,0 +1,81 @@
+.C	Overview
+
+本来MIME関係はクライアントプログラムが処理すればいいことなのでサーバと
+しては素通しでいいはずです。fmlのMIME関係の処理は基本的に素通しです。
+
+.S	MIME 関係の処理を ON にする (default ON)
+
+	$USE_MIME = 1; (default 1)
+.xref	$USE_MIME
+
+
+.S	HOOKで使うと便利な関数: &STR2JIS(文字列)
+
+	&STR2JIS(変換したい文字列);
+
+日本語(JISコード)にする。
+
+	$string = &STR2JIS($string);
+
+.S	HOOKで使うと便利な関数: &STR2EUC(文字列)
+
+	&STR2JIS(変換したい文字列);
+
+日本語(EUCコード)にする。
+文字列をperlの正規表現でマッチさせる時はEUCが何かと便利である。
+そのため文字列をEUCにする必要のある時に使われる。
+主に内部用途といえよう。
+
+	$string = &STR2EUC($string);
+
+.S	HOOKで使うと便利な関数: &mimeencode(文字列)
+
+	&mimeencode(encode したい文字列);
+
+文字列を MIME encode する。
+
+.S	HOOKで使うと便利な関数: &mimedecode(文字列)
+
+	&DecodeMimeStrings(decode したい文字列);
+	&MimeDecode(decode したい文字列);
+
+文字列を MIME decode する。どっちの関数を呼んでも今は一緒
+
+
+
+.S	例題: STR2EUC を使う
+
+1. EUC にして
+2. MIME encoding のルーチンに渡して
+3. 結果を変数 $WELCOME_STATEMNET に代入
+
+fmlでのwelcomeメールのsubjectを日本語にする(fml-support: 07219)
+この時のsubjecthさ $WELCOME_STATEMNET で決定されている。
+
+ＭＬのHOMEにあるcfというファイルの最後(LOCAL_CONFIGという行より後)に
+
+.q
+$START_HOOK = q#
+	&use('MIME');
+	$WELCOME_STATEMENT  = "ようこそここへ、うふふ";
+	$WELCOME_STATEMENT  = &STR2EUC($WELCOME_STATEMENT);
+	$WELCOME_STATEMENT  = &mimeencode($WELCOME_STATEMENT);
+#;
+
+と呪文を書いておいて、その場所で
+
+   % makefml update-config.ph ML名
+
+で config.ph をつくりなおす。config.ph というファイルの文字コードはEUC
+で save しなければならないことに注意。
+.~q
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

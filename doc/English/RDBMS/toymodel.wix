@@ -1,0 +1,39 @@
+.C	おもちゃのモデル
+.l	sql-toymodel
+
+
+おもちゃなので、実用的なモデルかどうかは不明、というより多分教育的効果
+以上のものは期待されないモデルのようにおもいます。
+それぞれのテーブルの定義は以下のようになっています。
+
+.S	PostgreSQL
+
+  create table ml (ml text,
+		file text, 
+		address text,
+		off int,
+		options text);
+
+.q
+fml> select * from ml
+
+  ml   |  file   |          address           | off | options 
+-------+---------+----------------------------+-----+---------
+ elena | actives | fukachan@sapporo.iij.ad.jp |   0 | 
+ elena | members | fukachan@sapporo.iij.ad.jp |   0 | 
+ elena | actives | fukachan@fml.org           |   0 | 
+ elena | members | fukachan@fml.org           |   0 | 
+(4 rows)
+
+.~q
+
+
+.S	MySQL
+
+  create table ml (
+	ml char(64),
+	file char(64),
+	address char(64),
+	off int,
+	options char(64)
+  );

@@ -1,0 +1,46 @@
+.HTML_PRE
+
+	『qmail の VERPs での自動エラー処理のしかた』
+
+◯ INSTALL_with_QMAIL というファイルを見ながらインストール&&qmailの設定をする
+
+◯ elena MLを例にとると
+
+% makefml newml elena 
+
+と走らせると
+
+/var/spool/ml/etc/qmail/alias/.qmail-elena
+/var/spool/ml/etc/qmail/alias/.qmail-elena-admin
+/var/spool/ml/etc/qmail/alias/.qmail-elena-ctl
+/var/spool/ml/etc/qmail/alias/.qmail-elena-default
+
+というファイルができる。
+/var/spool/ml/etc/qmail/alias/.qmail-elena-default 
+では
+
+|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml
+
+のように mead をよぶようになっている。自動削除なら このファイルをいじって
+-m report を -m auto にかえる
+
+◯ qmailのVERPsを使う
+
+config.ph で $USE_VERP = 1 (defaultは０で、VREPSを使わない)を設定する
+
+・makefml config elena のメニュー / CGIのメニュー(日本語表示)では 
+トップメニュー → SMTP -> VERPs -> "y"
+
+[解説]
+
+この設定がされているならエラーメールが帰ってきた時は .
+qmail-elena-default の中身がよばれて、自動的にエラーの集計をおこなう
+
+
+◯ KNOWN_BUGS / TODO(にあるけど)
+
+mead の設定は今 mead のコマンドラインオプションだけになっています。こ
+れを overwrite できるような設定ファイルが別に必要でしょう
+
+$Id$
+.~HTML_PRE

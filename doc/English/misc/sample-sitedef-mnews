@@ -1,0 +1,125 @@
+.S	site*ph sample (mnews ML)
+
+.q
+# コマンドメールの返送に付くフッタのフェースマーク
+$FACE_MARK     = '(^_^)/~';
+
+# たとえ空メールでも配布する
+$AUTO_REGISTRATION_LINES_LIMIT = -1;
+
+# ヘッダの「X-何たら: 」を素通しにする
+$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+# MIME に対応する
+$USE_LIBMIME   = 1;		# when use MIME Extension in libMIME.pl
+
+# spool に MIME デコードしてから書き込む
+$MIME_DECODED_ARTICLE = 1;	# do MIME decoding, then spool
+
+# コマンドメールであるかどうかを確認する行数
+$COMMAND_CHECK_LIMIT = 1;	# the first 3 lines is checked for
+ 				# mistakes whether the command mode or not?
+ 				# at &Parsing in fml.pl, 
+ 
+# コマンドで単なるシンタックスエラーの警告
+$USE_WARNING = 1;		# コマンドで単なるシンタックスエラーの警告
+
+# まとめ送りのとき mh/burst 用にする
+$USE_RFC934    = 1;		# inMatomeokuri, use mh/burst for the split
+ 
+# パス名を変更(更新のとき =* をコピーすれば良い)
+$OBJECTIVE_FILE = "$DIR/=objective"; 	# objective file
+$GUIDE_FILE    = "$DIR/=guide";		# the guide file of our Mailing List 
+$HELP_FILE     = "$DIR/=help";		# the help file for useful commands
+$DENY_FILE     = "$DIR/=deny";		# attention to illegal access
+$FAIL_FILE     = "$DIR/=fail";		# attention to illegal access
+$WELCOME_FILE  = "$DIR/=welcome";	# could be "$DIR/welcome"
+
+# 気分的に log とは分離した
+$MGET_LOGFILE  = "$DIR/log_mget";	# log file for mget routine
+
+# ちょっとした変更(特に効果はない)
+$Subject       = '(No Subject in original)';	# Subject field
+
+# SMTP コネクションを張って HELO のときに localhost と名乗る
+$Envelope{'macro:s'} = 'localhost';
+
+# 配送レベルを bulk にする
+$PRECEDENCE     = 'bulk';
+
+# ローテーションするログの指定
+@NEWSYSLOG_FILES = ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak",
+                    "${LOGFILE}_archive", "${LOGFILE}_matome");
+
+# スキップする「X-何たら: 」フィールド
+$SKIP_FIELDS = '|X-Nsubject|X-Confirm-Reading-To';
+
+# スタートフック
+$START_HOOK = q#
+     # コントロールメールアドレスか?
+    if ($CONTROL_ADDRESS && ($Envelope{'mode:chk'} =~ /$CONTROL_ADDRESS/i)) {
+         # 新規登録か?
+        if ($Envelope{'Body'} =~ /subscribe/io
+              && $Envelope{'Body'} !~ /unsubscribe/io) {
+            &use('utils');
+            &AutoRegist(*Envelope);
+            $DO_NOTHING = 1;
+        }
+        $Envelope{'mode:uip'} = 'on'
+     # コマンドモードか?
+     # (この ML では本体の方でコマンドメールを受け付けていないため)
+    } elsif ($Envelope{'mode:uip'}) {
+        &Logging("Unsupport Command Mail");
+        &SendFile($From_address, 
+                  "Unsupport Command Mail this Address $ML_FN", $FAIL_FILE);
+        $DO_NOTHING = 1;
+     # 普通に配送する
+    } else {
+        &Distribute;
+        $DO_NOTHING = 1;
+    }
+#;
+
+# SMTP 開始時のフック
+$SMTP_OPEN_HOOK = q#
+     # 元メールの To: フィールドを保存
+    $Envelope{'h:To:'}       = $Envelope{'h:to:'}
+          || $Envelope{'h:apparently-to:'} || "$MAIL_LIST $ML_FN";
+     # Reply-To: を強制的に書き換える
+    $Envelope{'h:Reply-To:'} = $Envelope{'h:reply-to:'} = $MAIL_LIST;
+     # MIME なら Subject: をデコードする
+    if ($USE_LIBMIME && $Envelope{'MIME'}) {
+        &use('MIME');
+        $Envelope{'h:Subject:'} = &DecodeMimeStrings($Envelope{'h:Subject:'});
+    }
+#;
+ 
+# ヘッダに追加するフック
+$HEADER_ADD_HOOK = q#
+     # X-Nsubject: フィールドの処理
+     # (この ML では X-Nsubject: も Subject: と同じ処理を受ける)
+    if ($Envelope{'x-nsubject:'}) {
+        if ($STRIP_BRACKETS) {
+            $_ = $Envelope{'x-nsubject:'};
+            local($r)  = 10;
+
+            s/\[$BRACKET:\d+\]\s*//g;
+
+            while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
+
+            $Envelope{'x-nsubject:'} = $_;
+        }
+        if ($USE_LIBMIME && $Envelope{'MIME'}) {
+            &use('MIME');
+            $Envelope{'x-nsubject:'} =
+                  &DecodeMimeStrings($Envelope{'x-nsubject:'});
+        }
+        $body .= "X-Nsubject: [$BRACKET:$ID] $Envelope{'x-nsubject:'}\n";
+    }
+#;
+ 
+# libtraffic のフック(試験的設定)
+$TRF_NAME_HOOK = q#
+    $name =~ s/umura@solan\.chu/umura@nn.solan./oi;
+#;
+.~q

@@ -1,0 +1,119 @@
+.C	ヘッダのいろいろな操作
+
+fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
+ドの並び変えや特定のフィールドの削除などを行なっています。FML 2.2 以降
+のデフォールトは『Return-Receipt-To と Received を除き素通し』に設定さ
+れています。ヘッダの一部を切ったり、付け加えるにはconfig.phに &DEFINE_
+なんとか という関数呼びだしを設定して行ないます。
+
+
+.S	サブジェクトの書き換え
+
+	$SUBJECT_TAG_TYPE	[elena:00100] みたいな部分の選択
+.xref	$SUBJECT_TAG_TYPE
+
+	$SUBJECT_TAG_FIGURE	       ↑これの桁数
+
+.q
+[メニュー画面]
+
+makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_TYPE
+makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
+.~q
+
+.S	ヘッダフィールドの値をコピーする
+.xref	COPY_FIELD
+
+	&COPY_FIELD(コピー元, コピー先);
+
+  例:
+	&COPY_FIELD('Sender', 'X-Sender');
+
+.S	ヘッダフィールドの値をある値に強制的にする
+.xref	DEFINE_FIELD_FORCED
+
+	&DEFINE_FIELD_FORCED(フィールド名, 値);
+
+  例:
+	&DEFINE_FIELD_FORCED("reply-to", "$From_address, $MAIL_LIST");
+
+	&DEFINE_FIELD_ORIGINAL
+	&DEFINE_FIELD_ORIGINAL()
+	&DEFINE_FIELD_PAT_TO_REJECT
+	DEFINE_FIELD_FORCED
+	DEFINE_FIELD_ORIGINAL()
+
+.S	ヘッダフィールドを加える
+.xref	ADD_FIELD
+
+	&ADD_FIELD(フィールド名);
+
+   例:
+	&ADD_FIELD('X-Uja');
+
+デフォールトで $PASS_ALL_FIELDS_IN_HEADER が定義されているので
+見知らぬヘッダは素通りしていく。
+$PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
+
+
+.S	ヘッダフィールドを消す
+.xref	DELETE_FIELD
+
+	&DELETE_FIELD(フィールド名);
+
+   例:
+	&DELETE_FIELD('X-Uja');
+
+デフォールトで $PASS_ALL_FIELDS_IN_HEADER が定義されているので見知らぬ
+ヘッダは素通りしていく。しかし特定のフィールドだけを消したい時に便利
+
+
+.S	ヘッダフィールドの値をそのまま通すようにする
+.xref	DEFINE_FIELD_ORIGINAL
+
+	&DEFINE_FIELD_ORIGINAL(フィールド名);
+
+   例:
+	&DEFINE_FIELD_ORIGINAL('reply-to');
+
+
+.S	コマンドの返事メールのヘッダの値を設定する
+.xref	DEFINE_FIELD_OF_REPORT_MAIL
+
+	&DEFINE_FIELD_OF_REPORT_MAIL(フィールド名, 値);
+
+   例:
+	&DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "Your Reply-To Address");
+
+.S	ヘッダを素通しする(デフォールト)
+.xref	$PASS_ALL_FIELDS_IN_HEADER
+
+$PASS_ALL_FIELDS_IN_HEADER
+
+.S	ヘッダの並び方
+.xref	@HdrFieldsOrder
+
+@HdrFieldsOrder という配列
+
+
+
+.C	関連事項
+
+.S	ヘッダの値によって弾く
+
+これはヘッダの書き換えではなく、フィルタリングルールを拡張する命令。
+詳しくはフィルタリングの章を参照
+
+   例: subject にいかがわしい文字列があったら弾く
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,63 @@
+.C	トラブル事例の概要
+.l	trouble
+
+トラブルといっても内容は多岐に渡ります。
+
+.S	OSの問題
+
+典型例
+	permission がない
+	OS のディレクトリ permission の設定がおかしい
+	附属のパッケージがおかしい、ソースから作り直すべき
+
+などです。OS 特有の設定とかおまじないが必要な場合もあります。
+
+詳細: .ptr{troubles.os}
+
+
+.S	メールサーバの問題
+
+メールサーバの設定がおかしくてエラーになることがあります。単にOSの出荷
+時の初期設定がおかしいためにメールサーバがちゃんと動作してくれないこと
+も多いです。
+
+典型例は(OSとだぶりますが)
+	OS のバージョンアップをしたら smrsh になっていた (redhat > 5.2 ?)
+	ディレクトリの permission がおかしい
+
+詳細: .ptr{troubles.mailserv}
+
+
+.S	FML自体の問題
+
+特定のバージョンでだけ失敗する。
+	もっと新しいものを使ってみてください
+	bug report をください
+
+
+.S	質問やバグレポートの際のお願い
+
+.if LANG == JAPANESE
+ログなりがないと答えようがありません。
+
+チェックしてみてほしい項目はここです。
+
+.url http://www.fml.org/fml/CHECK_LIST/
+
+c.f. OS依存性: .ptr{os-dependence}
+.fi
+.if LANG == ENGLISH
+Please check your configuration by following check list.
+.url http://www.fml.org/fml/CHECK_LIST-e/
+.fi
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,88 @@
+.C	一般的な質問
+
+.S	エラーになった。
+
+◯ トラブル事例集
+
+.url http://www.fml.org/fml/Japanese/troubleshoot/
+
+◯ ドキュメントのサーチ
+
+とりあえずエラーメッセージにでてくる単語でサーチをしてみて、ドキュメン
+トのエラーリストなりに事例がないかを調べて下さい。
+
+.url http://www.fml.org/fml/search-j.html
+
+
+.S	必要なものは？
+
+メールサーバのソフトウエアと perl です。
+詳しくはインストールファイル参照
+.url http://www.fml.org/fml/INSTALL/
+
+
+.S	お薦めのバージョンは？
+
+fml-stable は最新のリリース版にバグフィックスがされている版です。
+fml-stable の一番新しい日付がお薦めです
+原則として新機能は一切追加されません。bug を直すだけです。
+
+一方 fml-current は開発版です。新機能が追加されます。開発サイドとして
+はfml-currentのテストをしてくれる方がもちろんあり難いです。
+
+fml-current のダウンロード(日付の新しいのをダウンロードしてね)
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
+
+fml-stable のダウンロード(日付の新しいのをダウンロードしてね)
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/
+
+リリースのされ方について
+.url http://www.fml.org/fml/releng.ja.html
+
+
+.S	自分の使っているバージョンを知りたい
+
+.q
+% makefml showconf 
+.~q
+
+もしこのコマンドがないようなら古い fml なので
+
+.q
+% cat /usr/local/fml/etc/release_version
+.~q
+
+を実行して下さい。
+
+
+.S	バージョン番号の意味は？ (current の場合)
+
+例:
+	3.0A-20000512
+	数字 ＋ 英語 ＋ 日付
+
+です。
+
+英語の部分は単語自体には深い意味はありません。開発のある程度大きな区切
+りが終った時か内部構造が変わった時に一つずつ進められます。
+余談: ちなみに Z の次は ZA になります:)
+
+「 3.0C-**** では動いたけど 3.0D-**** では動きません」といわれる方が
+単なる日付よりも直観的に分かりやすいので目安として使います。
+
+
+.S	最近の current の変更点を知りたい
+
+手元のソース(の日付)と現在との変更点は 
+
+.url http://www.fml.org/fml/WHATS_NEW/
+
+に日付が新しい順にならんでいるので、そこまで日付を遡ってください :D
+
+
+最近の代表的なトピックスは fml のページにも書かれているのでそちら”も”
+見て下さい。
+.url http://www.fml.org/fml/
+
+
+.# $Id$

@@ -1,0 +1,132 @@
+.C	その他のTIPS
+
+.S	cronでnewsyslogをする (OBSOLETE shell version)
+=E.S	Cron Runs Newsyslog (obsolete)
+
+たとえば、
+=E
+Example(Vixie cron):
+
+0 6 * * 0 (chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
+
+とか書くわけです。msend.pl 等では
+=E
+FYI: msend.pl runs newsyslog in default.  msend.pl does not run
+newsyslog if $NOT_USE_NEWSYSLOG = 1; is defined.
+
+.l	newsyslog-2
+.xref	newsyslog
+.key	$NOT_USE_NEWSYSLOG
+
+	$NOT_USE_NEWSYSLOG = 1; (default 0)
+
+とすると newsyslog を実行しません(default は実行)。
+
+.S	actives/members ファイルのバックアップ: .bak => .0 =>.1 
+=E.S	Turn over actives/members files: .bak => .0 =>.1 
+.l	list-turn-over
+
+一般に配送リストやメンバーリストの更新が行なわれると .bak ファイルに通
+常一週間分の更新がつけ足されていきます。メンバーが多いとこの .bak ファ
+イルは大きくなってしまいます。現在ではファイルのサイズが
+=E
+When fml operates actives and members file, fml saves the previous
+content in file.bak e.g. actives.bak and members.bak. In default 
+fml appends content to file.bak in one week. If the file size is over
+
+	$AMLIST_NEWSYSLOG_LIMIT	(default 50*3000 = 150K bytes)
+.l	$AMLIST_NEWSYSLOG_LIMIT
+.k	$AMLIST_NEWSYSLOG_LIMIT
+
+を越えたら newsyslog (see .ptr{newsyslog}) を使って file.bak ファイル
+は var/log/file.0 に移動させるということをしています。
+=E
+fml turns over the file like this:
+
+	file.bak       -> var/log/file.0
+	var/log/file.0 -> var/log/file.1
+	...
+
+またこれとは独立にRCSによるバックアップも可能です。RCSでバックアップを
+とる場合は
+=E
+Independtly from this turn over, fml can save the previous content by
+RCS. If you use this, please define
+
+	$AMLIST_BACKUP_TYPE = "rcs"; (default "")
+.l	$AMLIST_BACKUP_TYPE
+.k	$AMLIST_BACKUP_TYPE
+
+を指定して下さい。この時の .bak ファイルは更新のかかる直前の内容の 
+file です。
+
+.S	ログファイル($DIR/log)の turn over
+=E.S	Turn over log file ($DIR/log)
+.l	logfile-turn-over
+
+ログファイルがある大きさを越えたら log -> log.0 -> log.1 のようにずら
+していきます。大きさの基準は次の変数にいれます。
+=E
+If the log file excees the threshold $LOGFILE_NEWSYSLOG_LIMIT size
+(bytes), fml turns over the log file
+	log -> log.0 -> log.1 ...
+The threshold is defined by this variable
+
+	$LOGFILE_NEWSYSLOG_LIMIT (default "")
+.l	$LOGFILE_NEWSYSLOG_LIMIT
+.k	$LOGFILE_NEWSYSLOG_LIMIT
+
+10K や 1M のような入力もできます。
+=E
+The unit is bytes. You can use 10K (10 Kiro bytes) and 1M (1 Mega
+bytes) syntaxes.
+
+
+.S	newsyslog/logファイルの整理と消去
+=E.S	Newsyslog; To Maintenance Log Files
+.l	newsyslog
+.k	$NOT_USE_NEWSYSLOG
+.k	@NEWSYSLOG_FILES
+.k	libnewsyslog.pl
+
+newsyslog(8) はログファイルを整理するプログラムです。これを簡略化した
+ものをFMLは提供しています。
+=E
+newsyslog(8) is a log maintainer program. FML provides simplified
+version of it.
+
+       Newsyslog  is  a  program  that should be scheduled to run
+       periodically by crontab.  When it is executed it  archives
+       log  files  if  necessary.  If a log file is determined to
+       require archiving, newsyslog rearranges the files so  that
+       ``logfile''  is empty, ``logfile.0'' has the last period's
+       logs in it, ``logfile.1'' has the next  to  last  period's
+       logs  in  it,  and so on, up to a user-specified number of
+       archived logs.  Optionally the archived logs can  be  com-
+       pressed to save space.
+
+例えば、まとめおくりの msend.pl は日曜朝6時に(default) newsyslog を実
+行しています。これは @NEWSYSLOG_FILES で設定されているこの3つのファイ
+ルに対し古いログを順番に残し、古くなり過ぎたら消すという動作をします。
+=E
+msend.pl (digest program) runs newsyslog for files defined by
+@NEWSYSLOG_FILES.
+
+	@NEWSYSLOG_FILES = 
+	   ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak")
+
+	rm -f var/log/members.4
+	mv -f var/log/members.3 var/log/members.4
+	mv -f var/log/members.2 var/log/members.3
+	mv -f var/log/members.1 var/log/members.2
+	mv -f var/log/members.0 var/log/members.1
+	ln -s members.bak 	var/log/members.0
+
+を実行します。必要なら この @NEWSYSLOG_FILES に これ↑をやってほしいファ
+イル（log とか…）をつけくわえて、 config.ph などに書いて下さい。
+=E
+To apply newsyslog to another files, please add them to
+@NEWSYSLOG_FILES.
+ 
+@NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak", "log")

@@ -1,0 +1,79 @@
+.C	virtual domain
+
+.S	２つの virtual domain で同じＭＬを作る
+
+例:
+=E
+Example:
+
+   info@domain1.org
+   info@domain2.org 
+
+1. fml を２つインストールする。
+
+make install する時に
+
+一つは
+
+   DOMAIN NAME               [domain1.org] 
+   FQDN                      [domain1.org] 
+   EXEC FILES DIRECTORY      [/usr/local/fml] 
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+ 
+もう一つを
+
+   DOMAIN NAME               [domain2.org] 
+   FQDN                      [domain2.org] 
+   EXEC FILES DIRECTORY      [/usr/local/fml2] 
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml2] 
+ 
+にしてインストールする。２つめを作る時にロックが気になるかも知れないが、
+インストール時にロックをしないで進めるには
+
+	% makefml -U install 
+
+とすると lock しない。
+
+
+2. それぞれのfmlでＭＬをつくる
+
+info@domain1.orgをつくる
+
+	% /usr/local/fml/makefml newml info
+
+info@domain2.orgをつくる
+
+	% /usr/local/fml2/makefml newml info
+
+
+3. /etc/aliases にそれぞれの設定を書く
+
+
+	info: :include:/var/spool/ml/info/include
+	... 略  ...
+
+	info-domain2: :include:/var/spool/ml2/info/include
+	... 略  ...
+
+
+どっちのドメインの設定かわかりやすいように
+
+	info-domain1: :include:/var/spool/ml/info/include
+	... 略  ...
+
+	info-domain2: :include:/var/spool/ml2/info/include
+	... 略  ...
+
+などもいいかもしれない。
+
+
+4. MTAに info@domain2 を info-domain2 に読み変える設定を付け加える。
+
+[postfix]
+
+/etc/postfix/virtual.pcre で行なう。
+.xref	virtual-domain-postfix-example
+
+[sendmail]
+
+例えば CF の usertable

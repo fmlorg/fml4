@@ -1,0 +1,131 @@
+.HTML_PRE
+
+	インストールの際の Q & A
+=E
+	installer Q and A
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+Q: おすすめの設定は？
+A: 
+
+fml 4.0 では最初から厳し目の推奨設定をセットアップできます。
+
+	     % make install RECOMMEND=yes
+
+のように指定してインストールして下さい。
+makefml を実行する場合は 
+
+	     % env RECOMMEND=yes perl makefml install
+
+としてください。
+なおこれは make secure を実行すると行なわれる状態です。
+
+
+Q: virtual domain をしたいとき (1)
+A. fml を２つインストールする (1)
+  
+  make install (つまり perl makefml install 引数はなし)する時に
+  
+  一つは
+  
+     DOMAIN NAME               [domain1.org] 
+     FQDN                      [domain1.org] 
+     EXEC FILES DIRECTORY      [/usr/local/fml] 
+     TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+   
+  もう一つを
+  
+     DOMAIN NAME               [domain2.org] 
+     FQDN                      [domain2.org] 
+     EXEC FILES DIRECTORY      [/usr/local/fml2] 
+     TOP LEVEL ML DIRECTORY    [/var/spool/ml2] 
+   
+  そして、それぞれのfmlでＭＬをつくる
+  
+  info@domain1.orgをつくる
+  
+  	% /usr/local/fml/makefml newml info
+  
+  info@domain2.orgをつくる
+  
+  	% /usr/local/fml2/makefml newml info
+
+Q: virtual domain をしたいとき (2)
+A. fml を２つインストールする (2)
+
+  makefml の -f 設定ファイル オプションを使う。つまり
+
+     % perl makefml -f /usr/local/fml/.fml/system install
+     % perl makefml -f /usr/local/fml2/.fml/system install
+
+  のようにインストーラを走らせる。それぞれその .fml/system を読んで
+  "対話的に聞くことなく"全自動でインストールプロセスが進む。
+
+
+Q: virtual domain をしたいとき (3)
+A. fml を２つインストールする (3)
+
+  makefml install の引数としてインストール場所を設定する。
+
+    % perl makefml install /usr/local/fml
+    % perl makefml install /usr/local/fml2
+
+  のようにインストーラを走らせる。これは (2) と同様にそれぞれの設定ファイル
+
+     /usr/local/fml/.fml/system
+     usr/local/fml2/.fml/system
+
+  を load して対話的に聞く時のデフォールト値を変更する。
+  -f と違うのは全自動ではなく対話モードで走ること
+
+  ◯ BUG
+	ソースを広げ直すことなく、続けて走らせた時に
+	たとえ引数があっても /usr/local/fml/.fml/system を読み込んでし
+	まう。
+
+Q: fml は一回だけいれるが、各ＭＬそれぞれ勝手に virtual domain (1)
+A: 各ＭＬの config.ph, help などを書けばどうとでもなります。
+
+   XXX MTAの設定については省略します。以下同様
+
+Q: fml は一回だけいれるが、各ＭＬそれぞれ勝手に virtual domain の時
+   help ファイルはどうすればいいか？
+
+A: config.ph を変更した後で、
+
+	% make doc-template
+
+   を実行すると help などを config.ph の値で作り直す。
+
+
+Q: fml は一回だけいれるが、各ＭＬそれぞれ勝手に virtual domain の時
+   help ファイルはどうすればいいか？
+
+A: rm -f help 
+
+   このときは template ファイルを見て help ファイルを合成する
+
+  ◯ バグ: そのとおりうごいてない;_;
+
+
+Q: executable は入れる (/usr/local/fml1, /usr/local/fml2, ..)が
+   /var/spool/ml は共有することはできるか？
+A: できるけれど、おなじＭＬ名が作れなかったりするのでしない方が無難だろう
+A: makefml で操作することを考えなければもちろんなんでもOK :-)
+
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

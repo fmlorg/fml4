@@ -1,0 +1,30 @@
+.C	Q&A
+
+
+.S   Subject: [test-ml:0010] ,0009,0005 Re: test
+   
+Q&A のML でこの機能を利用したいのですが、
+メールソフトで Subject だけを見て、瞬時に何番のメールに対する
+返事かを たどっていきたい という要望があがっているわけです。
+ふたつ前ぐらいの番号まで残るというのがベストです。ひとつ前だけでも 残れば うれしいです。
+＃いや、むしろ ひとつ前だけの方が 簡潔 で分かりやすいかも。
+   
+とかする程度なら１０行くらいのHOOKできっとできます。
+＃行数が少ないのは決め打ちだから:)
+   
+   $START_HOOK = q#
+      if ($Envelope{'h:subject:'} =~ /($SUBJECT_FREE_FORM_REGEXP)/) {
+   	$x = $1;
+   	if ($x =~ /(\d+)/) { $x = $1;}
+   	$Envelope{'h:Subject:'} = ",$x ".$Envelope{'h:Subject:'};
+   	while ($Envelope{'h:Subject:'} =~ s/(Re: )(,\d+)/$2$1/i) {;}
+   	while ($Envelope{'h:Subject:'} =~ s/\s+(,\d+)/$1/) {;}
+      }
+   #;
+   
+   ＃ expire しなくていいのだろうか…つぅか > ,\d+ は２つまでとか
+   
+   ○ libtagdef.pl に新しいのを定義して patch は commit :)
+      subject tag にHOOKがあれば解決する問題なんだろうか…
+      いやそれだけじゃきっとしない
+   

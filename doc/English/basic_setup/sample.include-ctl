@@ -1,0 +1,7 @@
+# ***ATTENTION***  --ctladdr options is stronger than "--distribute", 
+# Hence even if config.ph has the setting &DEFINE_MODE(distribute),
+# this "fml.pl ... --ctladdr" does commnads-service;
+"|/usr/local/fml/fml.pl /var/spool/ml/elena  --ctladdr"
+
+# Multipart Canceler Filter by Yuao TANIGAWA 
+#"|/usr/local/fml/bin/multipart.pl |/usr/local/fml/fml.pl /var/spool/ml/elena  --ctladdr"

@@ -1,0 +1,56 @@
+Let "elena" mailing list. In default
+
+   ML maintainer ($MAINTAINER) add and remove member list explicitly
+
+It is most safe.
+
+* create the mailing list
+
+% makefml newml elena
+% makefml add elena your@address
+% su
+# cat /var/spool/ml/elena/aliases >> /etc/aliases
+# newaliases
+# exit
+
+* test
+
+% echo test |Mail elena@your.domain
+
+
+* add a new comer
+
+% makefml add elena someone@some.where
+
+
+* remove a user
+
+% makefml bye elena someone@some.where
+
+
+* add a lot of addresses
+
+It is better to edit files $MEMBER_LIST and $ACTIVE_LIST
+
+1. Firstly lock ML (here 120 seconds).
+
+% makefml lock elena 120 &
+
+2. edit 
+
+% cd /var/spool/ml/elena
+% $EDITOR members
+% $EDITOR actives
+
+The format is one address at one line.
+
+NOTE: What is members and actives ?
+
+fml uses two different files for address lists.  The two file is
+"actives" and "members" in /var/spool/ml/elena.
+
+	actives		recipient list
+	members		member list who can post and use commands
+
+Generally speaking, members is bigger than actives since members may
+contain addresses he/she can post from but not receive at.

@@ -1,0 +1,123 @@
+.C	Overview
+
+エラーメールの事例については「トラブル対策」の方をみてください。
+.xref ../troubleshoot/
+
+
+.S	エラーメール
+
+エラーメールは通常 $MAINTAINER に返ってきます。
+elena MLなら elena-admin@あなたのドメイン です。
+
+MTAから返ってくるメールはエラーの分析とデバッグの大事な情報です。
+ほとんどは典型的なフレーズでしかないので英語だからと嫌わず
+エラーをしらせるキーワードを探してみてください。
+
+典型的な例 => .ptr{errorlist}
+
+メールがループするのもエラーです。=> .ptr{loop}
+
+
+.S	エラーメールの送られる先は？
+
+elena-admin です。
+
+"makefml newml"の時に作る見本で
+
+	elena-admin: そのmakefmlを走らせたユーザ
+
+になっています。例:
+
+	elena-admin: fml
+
+fml@あなたのドメイン のメールを読む人にいきます。設定によっては単にメー
+ルスプール /var/mail/fml にたまっているだけかもしれません
+
+この送り先を変えるには
+
+1. 単に /etc/aliases をいじる
+
+	elena-admin: ユーザ１@どっかのドメイン, ユーザ2@どっかのドメイン2
+
+2. いちいち root になりたくない
+
+	elena-admin: :include:/var/spool/ml/elena/include-admin
+
+/var/spool/ml/elena/include-admin は一行一アドレス
+
+	ユーザ１@どっかのドメイン
+	ユーザ2@どっかのドメイン2
+
+[注意]
+	/var/spool/ml/elena/include-admin は chmod 644 してください
+
+
+.S	エラーになるアドレスの自動削除
+
+/etc/aliases を編集して mead (Mail Error Analyze Daemon) を有効にして
+下さい。詳細は .ptr{mead}
+
+elena ML の例:
+=E
+Example: elena ML. To set up mead
+
+	elena-admin: fukachan
+
+	# MEAD; If you use mead.pl, 
+	#elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+
+を 
+
+	# elena-admin: fukachan
+
+	# MEAD; If you use mead.pl, 
+	elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+
+のように入れ換えます。/var/spool/ml/elena/include-mead は mead.pl を起
+動するように最初から設定されています。
+
+
+.S	ＭＬ側から定期的に『入り続けるか？』を確認する
+.xref 	confirmd
+
+抜けなきゃいけないけれど連絡をし忘れているなどよくある話です。confirmd 
+というデーモンは定期的(例: 2カ月の一度)にメンバーに「これからもＭＬに
+入り続けるか？」を尋ね、返事がなければ参加の意志がないものとして、その
+メンバーを削除するプログラムです。
+
+.S	ループを防ぐ
+.xref	loop
+
+fml は入力されるメールをチェックしています。その項目は以下のようなものです。
+一定期間内にくるメールが
+
+1. 同じ Message-ID: をもたない
+
+	同じMessage-ID:のメールはありえない。同じIDのものがきたら拒否する。
+	
+2. あきらかに自分のＭＬの X-ML-Info: をもったメールはおかしい
+
+   X-ML-Info: フィールドにはＭＬのアドレス(MLのアドレス、コマンドのア
+   ドレス、管理者のアドレスのいづれか)が出てきます。例え多段のＭＬ(例
+   えば ML-A -> ML-B -> ML-C -> ... のML-B)であってもX-ML-Info: に自分
+   のＭＬアドレス(X-ML-Info: ML-B)はでないはずという仮定です。
+
+ここまではデフォールトです。オプションで
+
+3. メール本文の MD5 checksum 
+
+というチェックができます。つまり同じ内容のメールが来たらそれはループに
+ちがいありません。
+
+もっとも「 test 」と一行だけのメールが送れなくなりますが、いいですよね:-)
+	
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

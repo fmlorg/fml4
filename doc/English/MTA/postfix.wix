@@ -1,0 +1,20 @@
+.C	Postfix
+
+.url http://www.postfix.org/
+
+.S	postfix の一時停止
+
+To suspend smtp delivery:
+
+    postconf -e defer_transports=smtp; postfix reload
+
+To enable smtp delivery:
+
+    postconf -e defer_transports=; postfix reload; postfix flush
+
+
+これは便利で、一時的に配送を止めることができます。
+正確には SMTP というサービスを defer モードに変更する
+という意味です。
+本来はダイアルアップ接続などで queue を flush するまでは
+キューに入れるだけ良い場合を想定した機能です。 

@@ -1,0 +1,19 @@
+.S	ロードしていく様子の例 (配送の場合)
+=E.S	loading order (in distrubution mode)
+
+$LIBDIR, $DIR の初期化
+
+316:        require 'libloadconfig.pl'; &__LoadConfiguration('__KERN__');
+57:         require 'default_config.ph';
+73:             require("$DIR/config.ph");
+318:        require 'libsmtp.pl';               # a library using smtp
+474:        if ($COMPAT_ARCH)  { require "sys/$COMPAT_ARCH/depend.pl";}
+476:        if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
+477:        if ($debug)   { require 'libdebug.pl';}
+
+	$FP_*_DIR の初期化
+
+880:            require("module/$LANGUAGE/liblangdep.pl");
+39:         require 'jcode.pl'; # not needed but try again
+1363:       require 'libdist.pl';
+768:        if ($CF_DEF && $RELAY_HACK) { require 'librelayhack.pl'; &RelayHack;}

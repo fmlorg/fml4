@@ -1,0 +1,65 @@
+.C	Overview
+
+.S	fml の返すメッセージ
+
+fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
+大雑把にいって長いものと短いものがあります。長いものは各ＭＬのホームに
+ファイルとして容易されています。例えば
+
+	登録された時に返すメッセージ (/var/spool/ml/elena/welcome)
+
+です。一方短いものは
+
+	コマンドのシンタックスが間違っていた時に返るエラーメッセージ
+
+などです。エラーメッセージはソースに(英語で)埋め込まれていますが、現在
+徐々に /usr/local/fml/messages/Japanese/ の下のファイルへの移行が進ん
+でいます。これは
+
+	エラーメッセージの日本語化
+	エラーメッセージをユーザがカスタマイズ可能なようにする
+
+という作業です。どのようなものがあるのかについては完全なリストはありま
+せんが、Japanese/ 以下のファイルがそれぞれ何に対応しているのかは
+
+	/usr/local/fml/messages/Japanese/MANIFEST.Japanese
+
+を見て下さい。また最新版は以下のURLをみてください。
+
+.url http://www.fml.org/fml/messages-list.ja.txt
+
+
+.S	長めの返事のテンプレート
+
+makefml newml を実行した際に各ＭＬのHOMEに用意されるテンプレートのファ
+イルは
+
+     confirm             confirm モードの登録用
+     confirmd.ackreq     confirm モードの登録継続確認用
+     deny                メンバ外
+     guide               ML の guide
+     help                ML の使い方の help
+     help-admin          admin メンバ用 help
+     objective           ML の objective (目的)
+     welcome             入会メッセージ
+
+です。これらはメッセージとしてはかなり長いものです。短いものは全部
+
+	/usr/local/fml/messages/言語/ 下で定義されているか
+	埋め込まれているか
+
+のいづれかです。埋め込まれているものを messages/ 以下にひっぺがす作業
+は少しずつ進んでいます。
+
+
+.xref messages.customize
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

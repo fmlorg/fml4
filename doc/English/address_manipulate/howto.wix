@@ -1,0 +1,52 @@
+.C	Emailアドレスの判定方法とSecurity
+=E.C	Email Address Check Rules and Security
+
+.S	アドレスのチェックを緩めたい or きつくしたい
+=E.S	Level of address check severity
+.l	$ADDR_CHECK_MAX
+
+メンバーチェックは送られてきたメールの発信者のアドレスと members に書
+かれたアドレスとが一致するか否かで判断しています。今の設定は
+＃1.3.2からは…緩くした
+=E
+When fml.pl compares From: address and an address in member lists,
+fml.pl recognizes the following four addresses as the same one in
+default. That is fml.pl checks within three levels from DNS root.
+
+	fukachan@titech.ac.jp
+	fukachan@phys.titech.ac.jp
+	fukachan@beth.phys.titech.ac.jp
+	fukachan@exelion.phys.titech.ac.jp
+
+はすべて同じにみなしてます。つまり phys.titech.ac.jp のjp側から数えて
+３つの部分の判定チェックですね。(木構造のルートから数える)
+＃経験的にここまでやれば十分でしょう
+
+4つ(jp ac phys titech の4つ)までチェックしたいなら、
+=E
+If you check domains more severely, the levels from DNS root is
+controlled by $ADDR_CHECK_MAX. If you check 4 levels, set up
+
+	$ADDR_CHECK_MAX = 4;
+.k	$ADDR_CHECK_MAX
+
+と config.ph のどっかに書いておいて下さい。$ADDR_CHECK_MAX という変数
+が設定されてない場合は３として動きます。４の時
+=E
+If 4, 
+
+	fukachan@phys.titech.ac.jp
+	fukachan@beth.phys.titech.ac.jp
+	fukachan@exelion.phys.titech.ac.jp
+
+は同じだが、
+=E
+is the same but 
+
+	fukachan@titech.ac.jp
+
+は違うアドレスである。
+=E
+differs from others.
+
+
