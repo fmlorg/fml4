@@ -1985,6 +1985,7 @@ $SMTP_OPEN_HOOK = q#
 
 .include forward.wix
 .include fml_local.wix
+.include listserv.wix
 
 
 .# ##########################################################
