@@ -1,9 +1,9 @@
 #! /usr/local/bin/perl
-# Copyright (C) 1995 tanigawa@tribo.mech.nitech.ac.jp
+# Copyright (C) 1995-2000 yuao@infonia.ne.jp
 # Please obey GNU Public Licence(see ./COPYING)
 
 local($id);
-$id = q$Id: libtraffic.pl,v 1.2 1999/12/27 06:01:03 yuao Exp yuao $;
+$id = q$Id: libtraffic.pl,v 1.3 2000/03/09 08:19:31 yuao Exp yuao $;
 $rcsid  .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 if ($0 eq __FILE__) {
@@ -164,7 +164,7 @@ sub Traffic {
 		} else {
 			if ( $mfirst ) {
 				$mfirst = 0;
-			} elsif ( $monthbak > 0 ) {
+			} elsif ( $monthbak ) {
 				push( @monthtab, $monthbak, $mcount );
 				$mcount_max = $mcount if $mcount > $mcount_max;
 			}
