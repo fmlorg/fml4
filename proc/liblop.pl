@@ -219,7 +219,10 @@ sub ResentForwFileInSpool
 
     &Log("Get $ID, Success");
 
+    # reset for the sequel actions;
+    for (@ResentForwHdrFieldsOrder) { undef $e{"GH:$_:"};}
     undef @ResentHdrFieldsOrder;
+
 }
 
 1;
