@@ -1,0 +1,105 @@
+.C	spool 
+
+.S	spool は何を保存してるの？
+
+配送された記事です。get などの取り寄せ時に同じものが返るように、配送さ
+れたものと同じものを保存しています。
+fml に入力されたものとは違います。
+
+
+.S	fml に入力されたものを spool/ に保存できますか？
+
+そういうオプションはありません。
+
+expire してもいいなら $USE_LOG_MAIL を on にすると入力(のメール)を 
+var/Mail/ の下に貯めていけます。
+
+spool.orig とかにオリジナルをずっと貯めておきたいなら、こんなかんじで
+すかね
+
+# $ID は $START_HOOK ではまだ決まっていないので最後のHOOKにする
+$FML_EXIT_HOOK = q#
+	my ($f) = "$SPOOL_DIR.orig/$ID";
+	-d "$SPOOL_DIR.orig" || mkdir("$SPOOL_DIR.orig", 0700);
+	if (open($f, "> $f)) {
+		print $f $Envelope{'Header'}."\n".$Envelope{'Body'};
+		close($f);
+	}
+#;
+
+
+.S	スプールに記事をためない
+=E.S	Not spooling of articles
+.k	スプールに記事をためない
+.l	$NOT_USE_SPOOL
+
+DISKが足りない等で記事をためずに配送するだけにしたいなら
+=E
+If you have not enough disk, you may not spool articles. If so, set
+
+	$NOT_USE_SPOOL = 1;
+
+と設定してください。もちろんその場合は古い記事の取り寄せ等ができません
+(当たり前)。
+=E
+Of course, "get", "mget" commands do not work.
+
+
+.S	ＭＬのスプールの read permission
+=E.S	read permission for ML's spool ($SPOOL_DIR)
+
+通常ＭＬ管理者の権限で fml は走っています。そしてＭＬの全てのファイル
+は管理者以外の人が見れない様になっています。
+=E
+FML runs as an owner of a ML maintainer. In default the only maintainer
+can read articles, spools, ...
+
+例外としてメーリングリストの directory でも htdocs だけはすべての人が
+読めるようになっています。これは httpd がどのユーザ権限で走っているか
+わからないためです(通常 nobodyとかで走っている)。
+=E
+Some exceptional files exist. For example directories under htdocs/ is
+world readable for httpd.
+
+セキュリティについては .ptr{security}
+=E
+See .ptr{security} for security.
+
+
+.S	スプールにあるファイルをMIME逆変換する
+=E.S	reconvert MIME characters in the spool
+.k	スプールにあるファイルをMIME逆変換
+
+lib/MIME/rmime を使って、/bin/sh なら
+=E
+use lib/MIME/rmime and runs shell scripts like 
+
+	for file in *
+	do
+	   mv   $file     $file.org
+	   perl rmime $file.org > $file
+	done
+
+くらいでＯＫでしょう
+＃とりあえず .org つきのをバックアップに残すコードつき:-)
+
+nkf -m でもいいだろう
+=E
+nkf -m must be also useful if nkf is not too old.
+
+
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+=E.S	read not MH in the spool which is sent back by "mget".
+.l	lib/Utilities/packmbox.pl
+.k	packmbox.pl
+ 
+lib/Utilities/packmbox.pl を使って、
+=E
+To create "mbox", you use lib/Utilities/packmbox.pl and runs 
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+

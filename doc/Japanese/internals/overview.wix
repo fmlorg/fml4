@@ -1,6 +1,12 @@
-.C	メーリングリストサーバ Overview
+.C	概要
 =E.C	Mailing list server overview
 .n	overview
+
+＊＊＊ まだまだ、整理途上です。 ＊＊＊
+
+ここは 内部構造について、fml 開発者向け情報の集積地です。旧 
+fml/doc/smm/ の一番濃い部分がここに移されてきたと思ってもいいです。
+
 
 .if LANG == JAPANESE
 -- ＭＬサーバの設計ポリシーとはなんだろうか…

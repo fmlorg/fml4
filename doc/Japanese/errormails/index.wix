@@ -5,7 +5,6 @@
 .~HTML_PRE
 
 .include overview.wix
-.include list.wix
 .include mead.wix
 .include qmail-mead.wix
 .include loop.wix
