@@ -465,7 +465,6 @@ Example: to change HTML article subject.
 .S	&TalkWithHttpServer
 .l	&TalkWithHttpServer
 .k	&TalkWithHttpServer
-.xref	bin/geturl.pl
 
 SYNOPSIS:
 	&TalkWithHttpServer($host, $port, $request, $tp, *e); 
@@ -560,11 +559,6 @@ $Envelope{'message'}. Request types below are available.
 また、もしバイナリデータの場合はuuencodeして送り返します。
 =E
 ftp:// automatically changes to local or to be related to ftpmail. 
-
-関数の使い方の実例としては bin/geturl.pl 
-=E
-An example of functions is bin/geturl.pl
-.xref bin/geturl.pl
 
 .S	NOTE: Special Character (libsynchtml.pl)
 

@@ -220,41 +220,6 @@ in fml-support ML's Count: 02393
 	-I lib*.pl locations (required)
 	-m MIME decoding
 
-.S	URL の中身を取り出す (bin/geturl.pl)
-=E.S	get given URL content (bin/geturl.pl)
-.k	geturl.pl
-.l	bin/geturl.pl
-.k	$WWW_HOME
-.k	$WITH_WWW_WATCH
-.k	$LIBRARY_TO_OVERWRITE
-
-おまけ機能:)
-=E
-bonus program:), a demo using libhref.pl. Today it is of no use since
-a lot of programs to do this exist. e.g. GNU wget, ncftp, ...
-
-	bin/geturl.pl URL
-
-でその中身を取り出して、URLのパス名の最後の文字列（index.html等）に
-saveします。画像データや音声データでも同様にファイルに落せます。
-
-   % $FML/bin/geturl.pl http://www.iij.ad.jp/index.html
-   LOG>"eval sys/socket.ph" O.K.
-   LOG>>>> HREF=http://www.iij.ad.jp/index.html
-   
-   LOG>TalkWithHttpServer(www.iij.ad.jp, 80, /index.html, http, *re)
-   LOG>open(HOUT, > /var/tmp/href:21452
-   LOG>>>> ENDS HREF=http://www.iij.ad.jp/index.html
-   
-   LOG>/var/tmp/href:21452 -> index.html
-   % ls -l index.html 
-   -rw-r--r--  1 fukachan  wheel  2046 Sep 15 18:41 index.html
-
-なお引数がないと環境変数 $WWW_HOME の内容を落します。libhref.pl の使い
-方のデモだと思えば良いでしょう。
-
-一般には例えば GNU wget 等のWWWデータを落すソフトが多数あります。
-
 .S	ローカルテスト (sbin/localtest.pl)
 =E.S	localtest (sbin/localtest.pl)
 .l	sbin/localtest.pl
