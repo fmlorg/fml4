@@ -1,3 +1,9 @@
+fmlserv.process.info:
+	_ARG0_ ML宛のリクエストは以下の通りです。
+
+fmlserv.command.info:
+	fmlserv 内蔵コマンドを処理します。
+
 fmlserv.ml.not_found:
 	_ARG0_ メーリングリストはありません
 
@@ -18,3 +24,7 @@ fmlserv.not_any_member:
 
 fmlserv.subscribed_lists:
 	<_ARG0_>は次のメーリングリストのメンバーです。
+
+fmlserv.mlmap.opendir.fail:
+	エラー: ML MAP を作れません (opendir()に失敗しました)。
+
