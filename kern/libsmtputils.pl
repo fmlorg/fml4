@@ -26,7 +26,7 @@ sub SmtpMCIDeliver
     local(*e, *rcpt, *smtp, *files) = @_;
     local($nh, $nm, $i);
 
-    if ($e{'mode:_Deliver'} && $e{'mode:DirectListAccess'}) { 
+    if ($e{'mode:_Deliver'}) {
 	return &SmtpDLAMCIDeliver(*e, *rcpt, *smtp, *files);
     }
 

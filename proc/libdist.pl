@@ -211,7 +211,7 @@ sub ReadActiveRecipients
     ##### ML Preliminary Session Phase 03: get @Rcpt
     &Open(ACTIVE_LIST, $active) || return 0;
 
-    # Under DLA_HACK($e{'mode:DirectListAccess'}), PreProcessing Section;
+    # Under DLA_HACK PreProcessing Section;
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
     {
@@ -276,14 +276,6 @@ sub ReadActiveRecipients
 	      # "Key" of %RclayRcpt is lower case for convenice;
 	      $RelayRcpt{$lc_rcpt} = "\@${relay}:$rcpt";
 	      $rcpt = "\@${relay}:$rcpt";
-	  }
-
-	  if ($e{'mode:DirectListAccess'}) {
-	      ;# if DirectListAccess (List == ACTIVE_LIST), delivery in Smtp;
-	  }
-	  else {
-	      print STDERR "DoDistribute::RCPT:<$rcpt>\n\n" if $debug;
-	      push(@Rcpt, $rcpt);
 	  }
 
 	  $Rcpt++; # count the number of recipients;
