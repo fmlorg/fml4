@@ -15,7 +15,7 @@ sub MesgLE
     local($dir) = "messages/$MESSAGE_LANGUAGE";
     local($found, $x, $msg);
 
-    &Log("MesgLE: key=$key (@argv)");
+    &Log("MesgLE: key=$key (@argv)") if $debug_mesgle;
 
     # it is default. no translation
     if ($MESSAGE_LANGUAGE eq 'English') { return $NULL;}
@@ -30,7 +30,14 @@ sub MesgLE
 
     # 1. check whether the message template with the key exists?
     if ($dir = $found) {
-	if (opendir(DIRD, $dir)) {
+	local($file) = split(/\./, $key);
+	$msg = &MesgLE'Lookup($key, "$dir/$file"); #';
+
+	if ($msg) {
+	    &Log("MesgLE: found in file 'a' o keyword a.b.c.")
+		if $debug_mesgle;
+	}
+	elsif (opendir(DIRD, $dir)) {
 	    while ($x = readdir(DIRD)) {
 		next if $x =~ /^\./;
 		$msg = &MesgLE'Lookup($key, "$dir/$x"); #';
