@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/05/20
+
+   sbin/makefml
+
+	CGI で: htpasswd のデフォルト permission をユーザ nobody でも
+		見えるように修正する。
+		＃いいのか？それで、という気もするのだが…
+
 2001/05/11
 
    IPv6 by default
