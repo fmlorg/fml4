@@ -1,22 +1,42 @@
 .HTML_PRE
-	LIST OF BUG FIXES between 3.0 release and 3.0 patch
+	LIST OF BUG FIXES in 3.0patch sereis since 3.0 release
 
 				深町 賢一
 =E
 				Ken'ichi Fukamachi
 
-  update libtraffic to 1.2
-	fix y2k related bugs
-	PR from Yuao Tanigawa
+  html generator
+	fix title to YYYY/MM/DD
 
-  update multipart.pl to 1.3.1.2
-	PR from Yuao Tanigawa
+[3.0.1_BETA#3]
+
+  update fwix.pl 
+	fix cross reference, so I've recreate ducuments.
+
+	ドキュメントのcross referenceのバグ修正
+
+[3.0.1_BETA#2]
+
+  fix "traffic" command (traffic command module)
+	update "libtraffic.pl" to 1.2
+	fix y2k related (looks of report) bugs.
+	PR from Yuao Tanigawa (author).
+
+	trafficコマンドの見栄えが悪い(y2k;)のを修正
+	作者の谷川さんに最新版をもらったので入れ換え
+
+  update multipart.pl (multipart mail prefilter) to 1.3.1.2
+	PR from Yuao Tanigawa (author).
+
+	multipart フィルタを最新版にアップデート
+
+  smm/hack.wix (2.17-2.18)
+	update url. PR from Yuao Tanigawa
 
   update to use jcode.pl-2.11
 	PR from Fumitoshi UKAI
 
-  smm/hack.wix (2.17-2.18)
-	update url. PR from Yuao Tanigawa
+	jcode.pl を最新版に
 
 [3.0.1_BETA#1]
 
