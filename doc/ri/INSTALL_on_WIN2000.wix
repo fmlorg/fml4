@@ -28,6 +28,17 @@ windows 2000 professional (5.00.2195)
 fml-current (3.0G 20000716) pop version 
 
 
+.S	case 2
+
+    ・Windows 2000 Server(5.00.2195) + Service Pack2
+    ・Exchange 2000 Server
+    ・fml-4.0.1                   ※POPモードにて使用
+    ・ActivePerl-5.6.1-626
+    ・Execsvc-0.4                 ※サービス化に使用
+    ・lhmelt                      ※ファイル解凍用
+
+
+
 .C	installation
 
 .if LANG == JAPANESE
@@ -43,11 +54,32 @@ No difference is found between NT 4 and 2000 untile now.
 .url ../INSTALL_on_NT4-e/index.html
 .fi
 
+.C	インストールの手順の例
+
+    1. Active Perlのインストール
+    2. Perlの動作確認
+    3. fmlのインストール(POPタイプ)
+    4. メーリングリスト用アカウントの作成
+    5. メーリングリストの作成
+    6. メーリングリストの設定
+    7. ntfml.cmd(ntfml.pl)のサービス化
+    8. サービスの設定/開始
+    9. 動作確認
+
+
+.C	Acknowledgment
+
+The fml project thanks all people who contributes information. I am
+appreciate the environment information to be installed on windows
+2000.
+
+	Masaya Mase
+
 $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
