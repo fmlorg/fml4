@@ -1472,7 +1472,7 @@ actives members のバックアップについて => .ptr{list-turn-over}
 turn over actives/members list => .ptr{list-turn-over}
 
 .##########
-.include member_name.wix
+.# .include member_name.wix
 .##########
 
 .S	msendrc ファイルのフォーマットと構造
@@ -2547,10 +2547,10 @@ conjecture, we check and reject mails with "X-ML-INfo: our ML".
 です。
 
 
-.include mti.wix
+.# .include mti.wix
 .include function.wix
-.include hook.wix
-.include smtp.wix
+.# .include hook.wix
+.# .include smtp.wix
 
 
 

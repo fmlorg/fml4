@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 基礎的なこと
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include acl.wix

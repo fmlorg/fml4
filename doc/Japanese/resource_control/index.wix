@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 リソースの制御	
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include mti.wix

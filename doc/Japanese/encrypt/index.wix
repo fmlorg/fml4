@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 °Å¹æ²½´Ø·¸
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include pgp.wix

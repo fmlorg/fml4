@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 開発者向け
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include fop.wix

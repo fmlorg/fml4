@@ -1,14 +1,22 @@
-# Copyright (C) 1993-2000 Ken'ichi Fukamachi
-#          All rights reserved. 
-#               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2000 fukachan@sapporo.iij.ad.jp
-# 
-# FML is free software; you can redistribute it and/or modify
-# it under the terms of GNU General Public License.
-# See the file COPYING for more details.
 #
 # $Id$
 #
 
-scan:
-	@ cvs -n update 2>&1| grep -v ':' || echo 'nothing changes'
+TUTORIAL_LANGUAGE    = Japanese
+
+DOC_TUTORIAL_SUBDIR += Japanese
+DOC_TUTORIAL_SUBDIR += basic
+DOC_TUTORIAL_SUBDIR += daily
+DOC_TUTORIAL_SUBDIR += debug
+DOC_TUTORIAL_SUBDIR += develope
+DOC_TUTORIAL_SUBDIR += encrypt
+DOC_TUTORIAL_SUBDIR += extension
+DOC_TUTORIAL_SUBDIR += filter
+DOC_TUTORIAL_SUBDIR += header_rewrite
+DOC_TUTORIAL_SUBDIR += install
+DOC_TUTORIAL_SUBDIR += misc
+DOC_TUTORIAL_SUBDIR += procedure
+DOC_TUTORIAL_SUBDIR += remote_control
+DOC_TUTORIAL_SUBDIR += resource_control
+DOC_TUTORIAL_SUBDIR += smtp
+DOC_TUTORIAL_SUBDIR += troubleshoot

@@ -39,6 +39,9 @@ HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 .include "doc/examples/virtual/Makefile"
 .include "doc/devel/Makefile"
 
+# doc/Japanese
+.include "doc/Japanese/Makefile"
+
 ### RULES ###
 .include "distrib/mk/fml.sys.mk"
 
@@ -47,6 +50,9 @@ HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 
 # examples; I provides this in html format only.
 .include "distrib/mk/fml.examples.mk"
+
+# tutorial;
+.include "distrib/mk/fml.tutorial.mk"
 
 # doc/devel/
 .include "distrib/mk/fml.devel.mk"

@@ -645,7 +645,7 @@ runs, /usr/local/fml/fml.pl runs by reading the configuration
 /var/spool/ml/elena/config.ph and libraries /usr/local/fml/lib*pl.
 .fi
 
-.include files.wix
+.# .include files.wix
 
 .S	設定ファイル (config.ph)
 =E.S	configuration file (config.ph)

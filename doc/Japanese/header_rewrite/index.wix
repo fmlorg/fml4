@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 ヘッダの書き換え
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include header.wix

@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 遠隔からメールでの操作 (REMOTE_ADMINISTRATION)
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include remote.wix

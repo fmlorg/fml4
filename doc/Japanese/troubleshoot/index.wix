@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 トラブルシューティング
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include os.wix

@@ -495,7 +495,7 @@ body            getmyspool\s+(\S+)	&	getmyspool_pw
 
 
 .S	fml_local BUILD-IN Functions °ìÍ÷
-.include fml_local_builtin_functions.wix
+.# .include fml_local_builtin_functions.wix
 
 
 .# $Id$

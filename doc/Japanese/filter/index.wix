@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 フィルタリング
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include filter.wix

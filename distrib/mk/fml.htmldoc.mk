@@ -135,6 +135,7 @@ __htmlbuild__ += ${__HTML_RI__}
 __htmlbuild__ += ${HTML_SMM} 
 __htmlbuild__ += ${__HTML_CPP__}
 __htmlbuild__ += ${__HTML_EXAMPLES__}
+__htmlbuild__ += ${__HTML_TUTORIAL__}
 __htmlbuild__ += ${__HTML_MANIFEST__}
 __htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
 htmlbuild: ${__htmlbuild__}

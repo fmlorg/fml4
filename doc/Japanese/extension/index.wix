@@ -1,9 +1,11 @@
+.HTML_PRE
 .# .__repl_title__
                 ³ÈÄ¥
 
 --------------------
 .toc
 --------------------
+.~HTML_PRE
 
 .# .__repl_include__
 .include hack.wix
