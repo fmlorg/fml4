@@ -19,7 +19,7 @@ no_such_article:
 no_such_command:
 	_ARG0_というコマンドはありません。
 
-no_such_command:
+no_such_admin_command:
 	_ARG0_という管理用コマンドはありません。
 
 no_such_request:
