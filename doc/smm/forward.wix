@@ -1,15 +1,15 @@
-.C	~/.forward でＭＬを行なう
-.key	.forward
+.C	~/.forward でＭＬ
+.l	.forward
 .key	~/.forward
 .key	$HOME/.forward
 
+/etc/aliases をいじれないユーザや密かにＭＬを実行する:-)ユーザ向けの話
+です。
 
-.S	概論
+.S	.forward での方法の概論
 .label	{forward-intro}
 
-理屈は簡単です。~/.forward もsendmailは/etc/aliasesと同様に
-実行されます。だから
-
+~/.forward もsendmailは/etc/aliasesと同様に実行されます。
 ~/.forward に
 
 "|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml" 
@@ -20,84 +20,52 @@ fml.pl の STDIN にSMTPでもらったメールの内容を送りこみます。
 この場合の問題は、自分自身へも配送するのでループ(bounce)問題をどう避け
 るか? が問題になります。
 
+.forward 方式では2通りの考え方ができます。
+
+○	架空のユーザを作りその .forward を使う
+	この場合ＭＬの名前は架空のユーザになります
+
+○	自分のアカウントで受けて、ヘッダをみてＭＬ宛か否か？を
+	判定して、ＭＬを実行する。
+
 
 .S	架空のユーザーを作る
-.key	架空のユーザー
 
-たとえば インターネットプロバイダ でのはなしですね。/etc/aliases を変
-更してもらえないのなら、ようはアドレスがあればいいので、ＭＬ専用として
-架空のユーザーを申請し、その ~/.forward に fml.plの設定を /etc/aliases 
-への設定(上述)と同様にすればＯＫです。
+○	架空のユーザを作りその .forward を使う
+	この場合ＭＬの名前は架空のユーザになります
 
-注意：そういう UNIX 貸しをしているプロバイダに限ります。そうでないとこ
-ろもありますから注意。
+~/.forward に include ファイルと同様の内容を書けば良いだけです。
+注意することはこの場合
 
+	MLのアドレス		==	架空のユーザ
+	管理者のアドレス	==	他のアカウント
 
-.S	MH インターフェイス
-.key	slocal
-.key	.maildelivery
-.label	{slocal-1}
+になるでしょう。
 
-ここでは slocal を用いたやりかたを述べます。
-
-	~/.forward に
-	"|/usr/local/lib/mh/slocal -user username || exit 75"
-
-と書きます。よく名前を聞く slocal ってやつですね。
-slocal では、設定は  ~/.maildelivery で設定します。
-例：
-To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
-それ以外は全部スプールに落す（普通の挙動）
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-#field   pattern   action  result    string
-To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
-
-# drop to the personal mail-spool
-default  -       >       ?      /var/mail/fukachan
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-この場合 PIPE で fml.pl へ渡すとき UNIX FROM がおちてしまうのかもしれ
-ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
-す。
+shell サービスのあるインターネットプロバイダならできますが、
+そうでないところもありますから注意して下さい。
 
 
-.S	ほかのソフトを使ったインターフェイス
+.S	自分のアカウントで実行する
 
-誰かやったひとおしえて_o_ 基本原理は同じで どうやって pipe にわたせば
-いいのか？ だけ考えればいいだけです。
+自分のアカウントで受ける → フィルタで振り分ける
+				 → 	自分のメールスプール
+				 → 	ＭＬ１
+				 → 	ＭＬ２
 
+フィルタは何かのキーワードでＭＬ宛か自分宛かを判定する必要があります。
+フィルタの話は .ptr{filter} を見て下さい。
 
-.S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
-.label	{libexec/fml_local.pl}
-.key	libexec
-.key	libexec/fml_local.pl
-.key	fml_local.pl
+例:
+	Subject: [Elena]
 
-ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
-slocal と同じになっちゃいましたね(馬鹿)
+Subject: に [Elena] を含むメールが来たらＭＬへ流すとか
 
-まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
-(開きなおり(苦笑))
+	To: あなたのアカウント (ML-1)
 
-slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
-か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
-という upper compatibility です。
-
-歴史的に(デフォールトでは)「最後にマッチするエントリを実行する」という
-ところが決定的に違います。
-
-簡単に学習するvacationプログラムへと拡張できるための仕様だったのですが、
-今となっては設計のミスのようなきがします。設定で
-
-	FIRST_MATCH
-
-とすれば 最初にマッチしたパターンを実行するようになります。slocal なん
-かと同じです。
-
-	libexec/fml_local2.pl 
-
-のほうはデフォールトが「最初にマッチしたパターンを実行」です。
-＃実は単なるリンクで、自分の名前を見て実行を変えているだけですが
+が来たら ML-1 を見つけたら ML-1 へメールを流すとか、そういったキーワー
+ド探索をフィルタでするということです。そしてマッチしなかった内容は全部
+あなたのメールスプールいきということです。
 
 
 .# $Id$
