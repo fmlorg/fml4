@@ -1,5 +1,5 @@
 scan:
-	fvs scan
+	cvs -n update
 
 clean:
 	gar *~
