@@ -30,7 +30,13 @@
 	<A HREF=#29>29章　バーチャルドメイン
 
 	<LI>
+	<A HREF=#36>36章　データベース
+
+	<LI>
 	<A HREF=#version>バージョン依存性について
+
+	<LI>
+	<A HREF=#rfc> RFC 821,822 と RFC 2821,2822
 </UL>
 
 
@@ -73,6 +79,30 @@ Cw localhost
 Cw localhost virtual-1.domain
 </PRE>
 にして sendmail に HUP シグナルを送ります。 
+
+
+<!---------- chapter 36 ------>
+<P>
+<A NAME="36">
+
+注意:
+<BR>
+      現在の toymodel は postgresql 7.1 以降では
+      うまく動かないようです。理由は off というエントリが
+      SQL '99 の規格にある予約語とぶつかっているからです。
+
+<P> 
+      とりあえずの回避策は
+<UL>
+	<LI> postgresql 7.0.x を使う
+	<LI> toymodel の off のエントリを他の名前に変える
+</UL>
+
+<P>
+  TODO:
+<BR>
+	互換性のために現在の toymodel はそのままにし、別途 SQL'99 でも
+	使えるドライバを用意しようと思います。
 
 
 <HR>
@@ -164,11 +194,19 @@ A:
 	</UL>
 </UL>
 
+
+<P>
+<A NAME="rfc">
+	FYI: RFC 821 と 822 は 2821 と 2822 により obsolete になりました。
+	fml ドキュメント中で 821 822 をよく取り上げますが、適宜読み直すなり
+	してください。
+
+
 <PRE>
 Copyright (C) 1993-2001 Ken'ichi Fukamachi
          All rights reserved.
 
-$Id$
+$FML$
 </PRE>
 </BODY>
 </HTML>
