@@ -56,8 +56,8 @@ sub GetUrl
 	}
     }
 
-    $head     = ".head-${outfile}";
-    $headnew  = ".head-${outfile}-new";
+    $head     = ".headinfo_${outfile}";
+    $headnew  = ".cur_headinfo_${outfile}";
 
     $oldcache = "${outfile}.old";
     $newcache = "${outfile}.new";
