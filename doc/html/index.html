@@ -33,36 +33,39 @@ The latest official release is fml-3.0.1.
 </CENTER>
 <BR>
 <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/">
-ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/</A>
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/
+</A>
 <BR>
 #ifdef JAPANESE
-"3.0pl数字".{tar.gz,zip}という名前のパッケージは3.0リリースのバグ修正
+3.0.1-stable-日付.{tar.gz,zip}
+という名前のパッケージは3.0リリースのバグ修正
 だけ(機能拡張なし)という安定したバージョンを提供するためのものです。
 <BR>
 3.0.1はそのバグ修正シリーズの一回目のまとめです。3.0.1のあともバグ修正
-があれば3.0pl数字(patchlevel 数字)というシリーズが作られ、いつか3.0.2
-にまとまることになるでしょう。
+が fml-stable シリーズが続いていき、いつか3.0.2にまとまることになるで
+しょう。
 <BR>
-新しい機能を試したい人はcurrentを試してみてください。今(3.0A)の旬の話
-題はCGIインターフェイスです。
+新しい機能を試したい人はcurrentを試してみてください
+(stableがお薦めですが開発サイドの希望としては current を試してみて 
+debug に協力して欲しいのがやまやまです)。
 #else
 <BR>
-This 3.0pl\d+ packages series is fml stable, 3.0 + bug patches and no
+This fml-stable packages series is fml stable, 3.0 + bug patches and no
 extension.
 <BR>
 3.0.1 is a mile stone of 3.0 stable series.
 <BR>
-We will provide fml-3.0pl\d+.tar.gz (3.0 release + bug fix patches)
-after 3.0.1. Pleaes check the file date and use latest one.
+We will provide fml-3.0.1-stable-YYYYMMDD.tar.gz (3.0 release + bug
+fix patches) after 3.0.1. Pleaes check the file date and use latest
+one.
 <BR>
 If you try to use current working snapshot, please use fml-current,
-which version is 3.0A now. I now develop GUI (WWW's CGI) interface.
+We can provide GUI (WWW's CGI) interface now.
 Please check out ftp and get latest one.
 #endif
 
 #ifdef JAPANESE
 <PRE>
-
         <A HREF="index-e.html">[English] is here.</A>
 
 #ifndef DIST
@@ -115,14 +118,15 @@ Please check out ftp and get latest one.
 #endif
 #endif
 #ifdef DIST
-	<A HREF="http://www.fml.org/fml/">
-	FML HOME PAGE (http://www.fml.org/fml/);
+	<A HREF="http://www.fml.org/">
+	http://www.fml.org/
+	</A>
+	<BR>
 #ifdef JAPANESE 
 	[検索] FMLドキュメントの検索ができます。
 #else
 	[Search] over FML documents
 #endif
-	</A>
 #endif /* ! DIST */
 
 <!-- =================================================================== -->
@@ -270,11 +274,13 @@ Information and HTML version documents in the fml source distribution
 	<LI>
 #ifdef JAPANESE
 #ifdef DIST
-	<A HREF="http://www.fml.org/fml/op/index.html">
-	fml の設計及び運用ガイド
+	<A HREF="http://www.fml.org/fml/Japanese/tutorial.html">
+	fml テュートリアル (http://www.fml.org/)
 	</A>
-	はwww.fml.orgをみにいくかfmlのソースの一番上のディレクトリで
-	make doc を走らせて作ってください。
+	<BR>
+	<A HREF="http://www.fml.org/fml/Japanese/basic_setup/index.html">
+	始めての方はまず fml テュートリアル BASIC コースから御覧下さい
+	</A>
 #else
 	<A HREF="op/index.html">fml の設計及び運用ガイド</A>
 #endif /* DIST */
@@ -341,7 +347,7 @@ http://www.sapporo.iij.ad.jp/staff/fukachan/
 </ADDRESS>
 
 <PRE>
-Copyright (C) 1993-1999 Ken'ichi Fukamachi
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
 
 $Id$
