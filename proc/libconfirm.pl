@@ -88,7 +88,7 @@ sub Confirm
 
 	 # Header
 	 $e{"GH:Subject:"} = "Subscribe confirmation request $ML_FN";
-	 $m .= "To confirm your subscribe request to $MAIL_LIST,\n";
+	 $m .= "To confirm your subscribe request for $MAIL_LIST,\n";
 	 $m .= "please send the following phrase to $CONFIRMATION_ADDRESS\n\n";
 	 $m .= "$CONFIRMATION_KEYWORD $id $name\n";
 	 &Mesg(*e, $m);
