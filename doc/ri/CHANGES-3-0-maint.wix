@@ -5,6 +5,15 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#21 == 3.0.1_BETA #10 ]
+
+	doc/html/
+		update url
+
+	sbin/makefml 
+		doc-template:
+		repl $ctladdr with %config value' sbin/makefml
+		PR from Teruyuki Morimura  fml-support:7244
 
 [ 3.0pl#20 == 3.0.1_BETA #9 ]
 
