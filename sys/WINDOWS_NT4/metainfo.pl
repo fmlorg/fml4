@@ -29,12 +29,12 @@ sub Conv4NT
     print STDERR "\tGenerating $out\n";
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	$PERL_PATH = &search_path('perl.exe');
+	$PERL_PATH = &__SearchPath('perl.exe');
 	print STDERR "set perl_path $PERL_PATH\n";
 	$USER = $ENV{'USERNAME'};
     }
     else {
-	$PERL_PATH = &search_path('perl');
+	$PERL_PATH = &__SearchPath('perl');
 	$uid   = $uid || (getpwuid($<))[2];
 	$gid   = $gid || (getpwuid($<))[3];
     }
