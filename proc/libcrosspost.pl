@@ -47,8 +47,7 @@ sub Init
 
     # Error Handling
     if (! @CROSSPOST_CF) {
-	&Log("ERROR: please define \@CROSSPOST_CF to use \$USE_CROSSPOST",
-	     "see doc/op for more details");
+	&Log("ERROR: please define \@CROSSPOST_CF to use \$USE_CROSSPOST");
 	return;
     }
 

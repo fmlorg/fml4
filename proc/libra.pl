@@ -1121,7 +1121,6 @@ sub ReconfigurableFileP
     $s .= "File to remove is not listed in \@REMOTE_RECONFIGURABLE_FILES.\n";
     $s .= "You can substitute a file of \@REMOTE_RECONFIGURABLE_FILES.\n";
     $s .= "Please set \@REMOTE_RECONFIGURABLE_FILES to permit other files\n";
-    $s .= "See doc/op for more details\n";
 
     &Mesg(*e, $s, 'admin.reconfigurable_error');
 
