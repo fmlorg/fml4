@@ -9,17 +9,34 @@ A: www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを
 
 
 Q: cgi以前に作られたものはどう処理する？自動的に有効か？
-A: admin がWWWの画面で有効にする
-A: makefml mladmin.cgi ML を走らせる。
+A: CGIをいじれる人がそのＭＬの設定の変更はできる。
+   
+CGIをいじれる人は概ねそのサーバに入ってmakefmlでの設定変更を使える人と
+同じ権限が使える。そのユーザリストはhtpasswdに設定する。
+この人たちは以前(makefml)と同じ権限レベルになる。
+
+一方、各ＭＬで admin コマンドを使っている場合にその人たちがCGIを使える
+ようになるか？というと自動ではならない。
+
+1	CGIのメニュー「あるＭＬをCGIで設定可能にする」がある
+2.	makefml mladmin.cgi ML
 
 どちらでも効果は同じ
 
 
-Q: パスワードの設定
-A: CUI: makefml htpasswd ML ユーザ名
+Q: CGI操作ユーザの設定追加/変更/削除
+A: 
 
-A: GUI: メニューの『管理者パスワードの設定』では
-   'admin' コマンドでつかうものを自動的に htpasswd へ反映させる
+XXX  あ、削除ができない --;;
+
+1. CGIからおこなう
+2. makefml htpasswd ML ユーザ名
+
+Q: CGI操作ユーザのパスワードの変更
+A: GUI: メニューの『管理者パスワードの設定』で設定
+
+初期設定の時だけは 'admin' コマンドでつかうものを自動的に htpasswd へ
+反映させる。その後は自動 sync はしない(別のパスワードを使えるように)
 
 
 Q: ＭＬを作るには newaliases と連動させる必要があるが、
@@ -27,19 +44,21 @@ A: aliases コレクタが必要そうだね
 
 
 Q: MTAの設定はいつどこでする？
-A: メインメニュー
+A: メインメニューにいちおうあるが…それがいいのか？
 
-	(こっちのほうが素直な気がする)
-	(途中でMTAが変わるかも知れない)
+   (途中でMTAが変わるかも知れない)
 
 
-Q: WWW下のCGIが利用可能なPATHは？
+Q: WWW下のCGI PATHは？
 A: makefml でインストールする時
 
 
 Q: postfix 特有の事情
-A: postfix がつかう /var/spool/ml/etc/aliases のパスを指定できないとい
-   けない。/etc/aliases.db は postfix だとpermission deniedかも
+A: postalias /var/spool/ml/etc/aliases OK
+
+
+Q: sendmail 特有の事情
+A: /var/spool/ml/etc/aliases.db に root 権限のファイルが必要
 
 
 Q:	qmail
@@ -48,12 +67,13 @@ A: 「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要
 
 
 Q: makefml config メニューを日本語にできるか？
-A: Message Language Extension をつかう 。終了
+A: Message Language Extension をつかう 。対応済み
 
 
 Q: 既存のシステムからの移行は？
-A: デフォールトではサーバ管理者がmakefmlをつかうようにWWWを使用可能
-   各々のＭＬ管理者はWWWはつかえない
+A: ようするに makefml のGUIとおもってほしい
+   デフォールトではサーバ管理者がmakefmlをつかうようにWWWを使用可能
+   各々のＭＬ管理者はWWWはつかえない。
 
 
 Q: 各々のＭＬも自動的にWWW上で操作可能にできないのか？
