@@ -9,6 +9,23 @@
 	* 新しい HOOK が増えました
 		%ADMIN_COMMAND_START_HOOK
 		%ADMIN_COMMAND_END_HOOK
+	* chaddr の送り返す先をカスタマイズできるようにした。
+		$CHADDR_REPLY_TO
+		$ADMIN_CHADDR_REPLY_TO
+
+
+2002/02/21
+
+   enable $CHADDR_REPLY_TO and $ADMIN_CHADDR_REPLY_TO to control
+   recipients for reply message by fml.
+	kern/fml.pl(2.142-2.143)
+	kern/libkernsubr.pl(2.6-2.7)
+	proc/libamctl.pl(2.51-2.52)
+	proc/libfml.pl(2.42-2.43)
+	proc/libra.pl(2.39-2.40)
+	cf/MANIFEST(1.94-1.95)
+
+	chaddr の送り返す先をカスタマイズできるようにする。
 
 2002/02/08
 
@@ -65,7 +82,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.8 2002/02/08 03:39:37 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.9 2002/02/21 14:02:06 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
