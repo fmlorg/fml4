@@ -11,7 +11,7 @@
 #
 # $Id$
 
-$Rcsid   = 'fml 2.2';
+$Rcsid   = 'fml 4.0';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
