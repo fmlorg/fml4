@@ -1084,171 +1084,6 @@ lib Elena は 700、driver は755としておけば、
 
 
 
-
-
-.C	fml のプロセス
-
-.S	律速段階
-.key	何がどこが遅くさせるか？
-
-律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
-この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
-それでもかなりのものです。
-
-論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
-げても ML の配送プロセスには何のメリットも生じないということでもありま
-す。
-
-余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
-ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
-す。
-
-これを改善する方法は基本的に複数の sendmail で作業を分割することです。
-
-１	十分なパワーのマシンで十分な file descriptor や 
-	多くの process が走っても大丈夫であれば、
-	複数の sendmail を起動して配送を試みる。
-	この場合ちゃんと Load Average と sendmail.cf を tune する
-	必要がある。 
-	
-２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
-
-３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
-	一回そのリレーサーバに投げて、そこから再配送をする。
-
-１、２は”MCI_… ” という変数群がそれを可能にします。
-
-リレーサーバは各ユーザごとに”管理者”が設定できます。
-リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
-考慮の上決めるべきです。
-また、fml のリレーハックは RFCにはない % hack を前提にしています。
-そのため、管理者が注意深く設定すべきです。
-
-
-
-.S	プロセスは誰の権限で動くか？
-.key	uid
-.key	setuid
-.key	ユーザー権限ということ
-.label	{fml-uid}
-
-「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
-走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
-システムに「 fml 管理者の プロセスとして走る」用に命令することが
-システムによって違うことがあるので少し厄介なことが発生します。
-
-○ローカルに fml にメールを投げる
-
-	自分のuidで実行します
-
-○外からメールがやってきたら？
-	つまり sendmail がうけとって fml を起動する場合
-
-	外→	
-		sendmail は uid = 0 で待っている(デーモン)
-		＃昔の sendmail だと daemon の場合もあるだろう
-
-		→ setuidしてユーザー権限 (uid=your own) にして
-		   fml.pl を起動し、メールを fml.pl へ渡す
-		＃これは fml.c で作った fml を使うか
-		＃:include list 形
-
-.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
-
-ここでsetuidの話が関係するわけです。
-
-各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
-
-注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
-は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
-いくことにしてます。
-
-
-.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
-
-make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
-fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
-れているはずです。
-
-/etc/aliases では
-	Elena: :include:/some/directory/include-file 
-		もしくは
-	Elena: "|/some/directory/fml-2.1/fml"
-の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
-ます。現在では include-file 形式が普通のような気がします。
-
-sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
-BSD )以外では挙動がまちまちみたいです
-
-問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
-
- [4.3BSD]
-	fml でも :include: でもOKでしょう
-
- [4.4、POSIX準拠のOS、その他]
-	:include: 式か 
-	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
-
-以下は実際にテストされたOS一覧です
-
-	キーワード：
-	uid		ownerが自分自身で 4755 した fml
-	include		sendmail に setuid をまかせる :include:を使う
-	root		ownerがrootで 4755 した fml
-			＃こういうことは最後の手段であまりやりたくない…
-
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-4.3BSD			uid include
-4.4BSD 			include
-BSD386 1.1		include
-SUN4.1.2 - 4.1.3JLE 	uid include
-Solaris 2.4 		include
-Solaris 2.3J 		だめ？
-DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
-OSF/1 Alpha AXP V2.1 	include
-HP UX 9?		[:include でかつ perl -U が必要？]
-			＃なんか、setreuid しかないんだけど…＞HP-UX
-SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
-
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-manualで確認した機種一覧
-4.3BSD系	SONY NEWS 4.x
-		4.1.3JLE
-		SVR3
-
-POSIX準拠	4.4BSD
-		NetBSD 
-		BSD/OS 2.x
-		BSD386 1.1
-		Solaris 2.4	
-
-その他の注意：
-・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
-
-そのときはsetuid する時だけ local ならいいわけで、
-たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
-home とかにおいてある という風にしてあればＯＫでしょう
-
-・NFSごしにファイルが存在すると setuid を認めない機種 もある
-たとえば
-		SUN 4.1.3JLE 4.1.4
-		＃これは fpathconf の return 値が問題
-
-・uid と include を試してみてどっちもうまくいかなかったら
-最後の手段（root）： 
-
-まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
-make OPT=-DPOSIX として make してください
-
-root のケースでは rootでしかかけない /usr/local/ml/driver 
-とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
-は注意してくださいね。管理者とよく相談してみてください（重要）
-＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
-＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
-
-
-
-
 .C	配送のモード
 
 .S	DEFINE_MODE マクロ
@@ -1549,138 +1384,6 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
 詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
 
 
-
-.C	コマンドの実行に関する２、３のこと…
-
-.S	コマンドの # syntax は必要か？ 
-
-“コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
-もし、コマンド専用のアドレスで
-
-	# get 1
-		も
-	get 1
-
-同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
-
-	コマンドラインオプションで --commandonly か
-	$COMMAND_ONLY_SERVER = 1; と config.ph に書く
-
-かしてください。
-
-もっとも、こうしておくと listserv とかわりませんな:-) 
-.seealso fmlserv
-
-
-.S	コマンドは一辺に実行できるか？
-
-	% cat foo
-	# get 1
-	# get 2
-	# get 3
-	# help
-	# summary
-	% cat foo | Mail ＭＬのアドレス
-
-とすると、1 2 3 の記事を取り寄せ、ヘルプとさらにサマリーファイルもとり
-よせるという働きをします。bye を除き 一行一コマンドなら順番にすべて実
-行します。
-
-それは各行ごとにどんどん処理をするようになっているからです。
-＃ ただし # exit はコマンドの終りです。ここで exit = end = quit
-
-
-.S	コマンドは一辺に実行できるか？２
-.label	{command-plural2}
-
-でも、
-	% cat foo
-	uja
-	# get 1
-	# get 2
-
-というファイルだとエラーです。最初の３行のどこかで#ではじまる行があれ
-ばコマンドモードとみなして処理を行なうためです。
-最初の行は空行で２行目に#があるメールが、間違えてながれたりしないため
-の防止機構です。この“３”行の“３”を変えたいときは
-
-config.ph の中の
-	$COMMAND_CHECK_LIMIT = 3;（最初の３行をチェックする）
-を変えます。
-
-
-.S	間違ったコマンドへの警告
-.seealso USE_WARNING 
-
-デフォールトでは警告しません。
-
-$USE_WARNING = 1; でない限り、間違ったコマンドへの警告メールをだすこと
-はありません。これは signature を自動的に付ける設定をしている場合への
-対処です。 
-
-# exit 等で明示的にコマンド指定を終わらせるほうがよりよいでしょうが
-
-
-.S	コマンドの終り（シグニチャア対策）
-.key シグニチャア対策
-
-# exit 
-# end
-# quit
-
-を追加しました。このコマンドのところでアクションは終了します。
-シグニチャアがあってもいいように、こうしました。
-
-
-.S	各種directory ($TMP_DIR = './tmp'; を各種作業に使います…)
-.key	$TMP_DIR
-
-デフォールトでは $DIR/tmp (つまり $TMP_DIR = './tmp';) を使います。
-変更したい場合は 1.3.1.3 からは $TMP_DIR をセットして下さい。
-
-/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
-
-private communication なので public な場所にファイルを残すことはしない
-方針なのです。
-
-その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
-存されています。
-
-
-.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する設定
-
-	$PREAMBLE_MAILBODY	（前）
-	$TRAILER_MAILBODY	（後）
-	を本文の前後に必ず付けます。
-
-つまり、
-	e.g. HELP コマンドにたいして、
-
-	$PREAMBLE_MAILBODY	（前）
-	HELPファイル本文
-	$TRAILER_MAILBODY	（後）
-
-のようにです。
-
-おまけ：
-
-もし、なんらかの理由で普通の配送時のメールになにか付けたいなら
-＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
-＃倫理的に許されないと思うが…世の中いろいろなんだそうです
-
-$SMTP_OPEN_HOOK = q#
-	$Envelope{'Body'} .= $PREAMBLE_BODY.$Envelope{'Body'};
-#;
-
-とでもすればよいでしょう。普通のＭＬのメールに $PREAMBLE_BODY がついて
-配送されます。
-
-これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
-
-$SMTP_OPEN_HOOK = q#
-	$Envelope{'Body'} .= "Mail Count: $ID\n\n".$Envelope{'Body'};
-#;
-
 .# ##########################################################
 .include msend.wix
 .include remote.wix
@@ -1976,6 +1679,305 @@ $START_HOOK  = q#
 #;
 
 ローカルなドメイン は自分のドメイン
+
+
+
+
+.C	fml のプロセス
+
+.S	律速段階
+.key	何がどこが遅くさせるか？
+
+律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
+この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
+それでもかなりのものです。
+
+論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
+げても ML の配送プロセスには何のメリットも生じないということでもありま
+す。
+
+余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
+ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
+す。
+
+これを改善する方法は基本的に複数の sendmail で作業を分割することです。
+
+１	十分なパワーのマシンで十分な file descriptor や 
+	多くの process が走っても大丈夫であれば、
+	複数の sendmail を起動して配送を試みる。
+	この場合ちゃんと Load Average と sendmail.cf を tune する
+	必要がある。 
+	
+２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
+
+３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
+	一回そのリレーサーバに投げて、そこから再配送をする。
+
+１、２は”MCI_… ” という変数群がそれを可能にします。
+
+リレーサーバは各ユーザごとに”管理者”が設定できます。
+リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
+考慮の上決めるべきです。
+また、fml のリレーハックは RFCにはない % hack を前提にしています。
+そのため、管理者が注意深く設定すべきです。
+
+
+
+.S	プロセスは誰の権限で動くか？
+.key	uid
+.key	setuid
+.key	ユーザー権限ということ
+.label	{fml-uid}
+
+「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
+走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
+システムに「 fml 管理者の プロセスとして走る」用に命令することが
+システムによって違うことがあるので少し厄介なことが発生します。
+
+○ローカルに fml にメールを投げる
+
+	自分のuidで実行します
+
+○外からメールがやってきたら？
+	つまり sendmail がうけとって fml を起動する場合
+
+	外→	
+		sendmail は uid = 0 で待っている(デーモン)
+		＃昔の sendmail だと daemon の場合もあるだろう
+
+		→ setuidしてユーザー権限 (uid=your own) にして
+		   fml.pl を起動し、メールを fml.pl へ渡す
+		＃これは fml.c で作った fml を使うか
+		＃:include list 形
+
+.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
+
+ここでsetuidの話が関係するわけです。
+
+各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
+
+注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
+は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
+いくことにしてます。
+
+
+.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
+
+make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
+fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
+れているはずです。
+
+/etc/aliases では
+	Elena: :include:/some/directory/include-file 
+		もしくは
+	Elena: "|/some/directory/fml-2.1/fml"
+の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
+ます。現在では include-file 形式が普通のような気がします。
+
+sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
+BSD )以外では挙動がまちまちみたいです
+
+問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
+
+ [4.3BSD]
+	fml でも :include: でもOKでしょう
+
+ [4.4、POSIX準拠のOS、その他]
+	:include: 式か 
+	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
+
+以下は実際にテストされたOS一覧です
+
+	キーワード：
+	uid		ownerが自分自身で 4755 した fml
+	include		sendmail に setuid をまかせる :include:を使う
+	root		ownerがrootで 4755 した fml
+			＃こういうことは最後の手段であまりやりたくない…
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+4.3BSD			uid include
+4.4BSD 			include
+BSD386 1.1		include
+SUN4.1.2 - 4.1.3JLE 	uid include
+Solaris 2.4 		include
+Solaris 2.3J 		だめ？
+DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+OSF/1 Alpha AXP V2.1 	include
+HP UX 9?		[:include でかつ perl -U が必要？]
+			＃なんか、setreuid しかないんだけど…＞HP-UX
+SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+manualで確認した機種一覧
+4.3BSD系	SONY NEWS 4.x
+		4.1.3JLE
+		SVR3
+
+POSIX準拠	4.4BSD
+		NetBSD 
+		BSD/OS 2.x
+		BSD386 1.1
+		Solaris 2.4	
+
+その他の注意：
+・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
+
+そのときはsetuid する時だけ local ならいいわけで、
+たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
+home とかにおいてある という風にしてあればＯＫでしょう
+
+・NFSごしにファイルが存在すると setuid を認めない機種 もある
+たとえば
+		SUN 4.1.3JLE 4.1.4
+		＃これは fpathconf の return 値が問題
+
+・uid と include を試してみてどっちもうまくいかなかったら
+最後の手段（root）： 
+
+まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
+make OPT=-DPOSIX として make してください
+
+root のケースでは rootでしかかけない /usr/local/ml/driver 
+とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
+は注意してくださいね。管理者とよく相談してみてください（重要）
+＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
+＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
+
+
+
+
+
+
+.C	コマンドの実行に関する２、３のこと…
+
+.S	コマンドの # syntax は必要か？ 
+
+“コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
+もし、コマンド専用のアドレスで
+
+	# get 1
+		も
+	get 1
+
+同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
+
+	コマンドラインオプションで --commandonly か
+	$COMMAND_ONLY_SERVER = 1; と config.ph に書く
+
+かしてください。
+
+もっとも、こうしておくと listserv とかわりませんな:-) 
+.seealso fmlserv
+
+
+.S	コマンドは一辺に実行できるか？
+
+	% cat foo
+	# get 1
+	# get 2
+	# get 3
+	# help
+	# summary
+	% cat foo | Mail ＭＬのアドレス
+
+とすると、1 2 3 の記事を取り寄せ、ヘルプとさらにサマリーファイルもとり
+よせるという働きをします。bye を除き 一行一コマンドなら順番にすべて実
+行します。
+
+それは各行ごとにどんどん処理をするようになっているからです。
+＃ ただし # exit はコマンドの終りです。ここで exit = end = quit
+
+
+.S	コマンドは一辺に実行できるか？２
+.label	{command-plural2}
+
+でも、
+	% cat foo
+	uja
+	# get 1
+	# get 2
+
+というファイルだとエラーです。最初の３行のどこかで#ではじまる行があれ
+ばコマンドモードとみなして処理を行なうためです。
+最初の行は空行で２行目に#があるメールが、間違えてながれたりしないため
+の防止機構です。この“３”行の“３”を変えたいときは
+
+config.ph の中の
+	$COMMAND_CHECK_LIMIT = 3;（最初の３行をチェックする）
+を変えます。
+
+
+.S	間違ったコマンドへの警告
+.seealso USE_WARNING 
+
+デフォールトでは警告しません。
+
+$USE_WARNING = 1; でない限り、間違ったコマンドへの警告メールをだすこと
+はありません。これは signature を自動的に付ける設定をしている場合への
+対処です。 
+
+# exit 等で明示的にコマンド指定を終わらせるほうがよりよいでしょうが
+
+
+.S	コマンドの終り（シグニチャア対策）
+.key シグニチャア対策
+
+# exit 
+# end
+# quit
+
+を追加しました。このコマンドのところでアクションは終了します。
+シグニチャアがあってもいいように、こうしました。
+
+
+.S	各種directory ($TMP_DIR = './tmp'; を各種作業に使います…)
+.key	$TMP_DIR
+
+デフォールトでは $DIR/tmp (つまり $TMP_DIR = './tmp';) を使います。
+変更したい場合は 1.3.1.3 からは $TMP_DIR をセットして下さい。
+
+/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
+
+private communication なので public な場所にファイルを残すことはしない
+方針なのです。
+
+その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
+存されています。
+
+
+.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する設定
+
+	$PREAMBLE_MAILBODY	（前）
+	$TRAILER_MAILBODY	（後）
+	を本文の前後に必ず付けます。
+
+つまり、
+	e.g. HELP コマンドにたいして、
+
+	$PREAMBLE_MAILBODY	（前）
+	HELPファイル本文
+	$TRAILER_MAILBODY	（後）
+
+のようにです。
+
+おまけ：
+
+もし、なんらかの理由で普通の配送時のメールになにか付けたいなら
+＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
+＃倫理的に許されないと思うが…世の中いろいろなんだそうです
+
+$SMTP_OPEN_HOOK = q#
+	$Envelope{'Body'} .= $PREAMBLE_BODY.$Envelope{'Body'};
+#;
+
+とでもすればよいでしょう。普通のＭＬのメールに $PREAMBLE_BODY がついて
+配送されます。
+
+これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
+
+$SMTP_OPEN_HOOK = q#
+	$Envelope{'Body'} .= "Mail Count: $ID\n\n".$Envelope{'Body'};
+#;
 
 
 
