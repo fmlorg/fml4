@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -147,8 +147,11 @@ sub __Notify
     # special flag
     return $NULL if $Envelope{'mode:disablenotify'};
 
-    # refer to the original(NOT h:Reply-To:);
-    $to   = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
+    # refer to the original(NOT h:Reply-To:); (by default)
+    # we do not need this in some cases (e.g. chaddr).
+    unless ($DisableInformToSender) {
+	$to = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
+    }
 
     # once only (e.g. used in chaddr)
     @to   = split(/\s+/, $Envelope{'message:h:@to'}); 

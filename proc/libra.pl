@@ -1,13 +1,13 @@
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libra.pl,v 2.34.2.3 2001/12/27 05:16:35 fukachan Exp $
 #
 
 # LOCAL SCOPE
@@ -433,6 +433,9 @@ sub AdminCommand
 	    }
 	}
 
+	# clean up
+	$DisableInformToSender = 0;
+
 	return $status;
     }
     else {
@@ -769,6 +772,12 @@ sub ProcAdminSetDeliverMode
     # Variable Fixing...; @opt = (address, options(e.g."3u"), ...); 
     $address = $opt; # "address" to operate;
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
+
+    # control recipients for chaddr commands
+    if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
+	$DisableInformToSender = 1;
+	$ChaddrReplyTo = $ADMIN_CHADDR_REPLY_TO || $CHADDR_REPLY_TO;
+    }
 
     if ($proc =~ /^(ON|OFF|SKIP|NOSKIP|MATOME)$/i) {
 	# @Fld = ('#', $proc, $opt[1]) if $proc =~ /MATOME/i;

@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: MANIFEST,v 1.76.2.8 2002/01/09 15:27:47 fukachan Exp $
 #
 
 
@@ -768,6 +768,14 @@ MAXNUM_COMMAND_INPUT:
 # "# chaddr" command name aliases
 # value: regexp string
 CHADDR_KEYWORD:	 chaddr|change\-address|change
+
+# choise of addresses to return for "chaddr" command reply
+# value: newaddr curaddr maintainer
+CHADDR_REPLY_TO: newaddr curaddr
+
+# choise of addresses to return for "admin chaddr" command reply
+# value: newaddr curaddr maintainer
+ADMIN_CHADDR_REPLY_TO: newaddr curaddr
 
 # ## Sub Section: mget ##
 # The default mode of "mget" without mode (default is "tar.gz" form).
