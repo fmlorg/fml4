@@ -655,11 +655,16 @@ sub SetHashDefaults
 		    'dist-encrypt',  'do_dist_encrypt',
 		    'admin-auth',    'do_admin_auth',
 		    'admin-encrypt', 'do_admin_encrypt',
+		    '91#dist-auth.pgp ML args'     => '(abbr. da.pgp) pgp = pgp2 pgp[5kesv] gpg',
+		    '91#dist-encrypt.pgp ML args'  => '(abbr. de.pgp) pgp = pgp2 pgp[5kesv] gpg',
+		    '91#admin-auth.pgp ML args'    => '(abbr. aa.pgp) pgp = pgp2 pgp[5kesv] gpg',
+		    '91#admin-encrypt.pgp ML args' => '(abbr. ae.pgp) pgp = pgp2 pgp[5kesv] gppg',
+
 
 		    # PGP 2
 		    'pgp',	'do_pgp2',
 		    'pgp2',	'do_pgp2',
-		    '90#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
+		    '90#pgp ML args' => 'e.g. admin-auth.pgp2 ML -ka pubkey',
 
 		    # PGP 5
 		    'pgpk',	'do_pgpk',
@@ -691,7 +696,7 @@ sub SetHashDefaults
 
 		    # create document templates
 		    'create-doc-template',    'do_create_doc_template',
-		    '300#create-doc-template ML', 'create document templates e.g. help, guide, ...',
+		    '300#create-doc-template ML', 'create document templates e.g. help, guide',
 
 		    # conversion
 		    'conv',             'do_conv',
@@ -2727,6 +2732,16 @@ sub do_htpasswd
 sub do_info
 {
     $| = 1;
+
+    my ($use_pager) = 0;
+    if ($ENV{'PAGER'}) {
+	if (open(STDOUT, "| $ENV{'PAGER'} ")) {
+	    $use_pager = 1;
+	}
+	else {
+	    &Error("fail to open $ENV{'PAGER'}");
+	}
+    }
     print "*" x 60; print "\n";
     print "makefml Usage:\n\n";
     print "             makefml command\n";
@@ -2754,6 +2769,8 @@ sub do_info
     print "\"perl makefml -W cgi install\" to enable cgi for fml\n";
     print "\"perl makefml config <ML>\" to go to the menu screen\n";
     print "\n";
+
+    if ($use_pager) { close(STDOUT);}
 }
 
 
