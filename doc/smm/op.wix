@@ -21,6 +21,12 @@
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
    http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 
+   Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+   Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+   fml is free software distributed under the terms of the GNU General
+   Public License. see the file COPYING for more details.
+
+
 .~HTML_PRE
 
 ----------目次----------
@@ -3200,3 +3206,7 @@ FILE をその部分に挿入する。
 
 
 .# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
