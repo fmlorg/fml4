@@ -1,0 +1,210 @@
+.C	fml の基本動作と起動オプション…
+.l	fml-process
+
+ＭＬサーバの基本動作を知っておくとカスタマイズの時役にたつでしょう。
+
+
+.S	ＭＬサーバの動作 (fml と sendmail の役割分担)
+.key	ＭＬサーバの動作
+.l	ml-process
+
+   メールが SMTP で送られてくる
+
+             ↓
+
+   SMTP で待ち構えているプログラムがうけとる (例： sendmail)
+
+             ↓
+
+   /etc/aliase から何をすれば良いのかを理解して、
+   setuid 操作等を行なった後
+   fml の STDIN にメールが送り込まれる。
+             ↓
+
+   (sendmail -> fml へ引き渡される。ここからが fml の担当)
+   config.ph による設定に従い、ヘッダの解析、ＭＬメンバーのリストに従い
+   配送 or コマンド要求を処理した結果のメールを
+   sendmail 等のSMTPサーバへ引き渡す
+
+             ↓
+
+   (ここから再び sendmail の担当)
+   sendmail 等のSMTPサーバがメールの配送を行なう。
+
+
+フィルタだけなら sed でも十分だし、“配るだけ”なら Sendmail 8.x でも
+十分でしょう。しかし、＋αでログをとり、スプールし、必要なら取り寄せら
+れるようにちょこっとだけ複雑なことをしようとするならこの サーバ まで必
+要となるわけです。
+
+なお、この図でわかるとおり、まとめおくりはこれとは別のプロセスです。
+.xref msend
+
+
+.S	sendmail -> fml 時の動作
+.k	sendmail -> fml 時の動作
+.l	sendmail2fml
+
+sendmail から fml へメールが渡される時は次のように動作します。
+
+○ まず /etc/aliases にある
+
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
+
+のような部分から /usr/local/list/Elena を実行すればよいことがわかるの
+で、sendmail はこのファイルを実行します。
+
+	/usr/local/list/Elenaの中身は
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+
+のようになっています。
+
+次に fml が上の引数（上例では コマンドラインオプションがないが）は 
+/var/spool/ml/elena/ を Elena ML の home directory だと見なし
+/var/spool/ml/elena/config.ph に従い fml の設定を行います。
+
+そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
+するときは 	/usr/local/list/Elena の中で
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+
+や（デフォールト）
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --distribute "
+
+のように書きます（コマンドラインオプションをつける場合）。
+
+引数の書き方の順番は任意です。引数の最初の directry をMLのホーム
+(config.phのある場所 もしくは spool やメンバーファイルのある場所)と見
+なします。
+
+
+.S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
+.k	fml.plと引数
+.k	DIR
+.k	LIBDIR
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+
+のように起動されるわけですが、この場合
+
+	/usr/libexec/fml/fml.pl 
+の
+	/usr/libexec/fml 
+
+部分をとりだします。そして
+
+	1   /var/spool/ml/elena 
+	2   /usr/libexec/fml 
+
+この順番で dynamic loading するファイルを探します。例えば config.ph や 
+libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
+け加えられていた（複数可能）場合、例えば
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
+
+の時は
+
+	1   /var/spool/ml/elena 
+	2   /usr/libexec/fml 
+	3   /usr/lib/uja
+	4   /lib/uja
+
+のような順番でファイルを探します。
+
+
+.S	オプション設定の優先順位
+.k	オプション設定の優先順位
+
+オプション設定の強い順番に並べると
+
+	1   コマンドラインオプション (fml.pl -d や --distribute 等)
+	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
+	3   各MLごとの config.ph による設定
+	4   fml デフォールト設定
+
+大抵の program と同様ですね。ちなみにインストール時に 
+samples/sitedef.ph が作られますので参考にしてみて下さい。
+とりあえずこれはＭＬごとではなくそのマシン共通の設定になるもの
+
+	tar や gzip はどこにある？
+
+の設定のみを sitedef.ph でしています。
+
+
+
+.# ##########################################################
+.#	command line options
+.include clo.wix
+
+
+.C	Security 
+
+.S	Security Check Routine
+.l	InSecureP
+.k	InSecureP
+.k	SecureP
+
+ファイアウォールでも同様ですが、概念的に２種類の考え方が出来ます。
+
+	1 明らかに危ないものを除いていく
+	2 安全なものを許可していってそれ以外は拒否する
+
+fml-support: 00950 でも述べていますが
+
+	1.x は外掘から埋める方式 (関数 InSecureP)
+	2.y は内掘から埋める方式 (関数 SecureP)
+
+といってます(^^)。1.x と 2.y の関係はそのまま 上の 1 と 2 の違いといっ
+て間違いありません。
+
+
+SecureP は以下のように
+
+   コマンドとしてうけいれる命令(メールの一行全体について実行)の形を限定
+
+します。
+
+    １ 	\w/\w の部分は見逃す。＃ ../ とか .[a.]/ とかはだ〜め
+       	/ でOKのところは消去し、
+
+    ２ 	/^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/
+
+    の形はゆるす。
+    ＃注意： \w は [A-Za-z0-9_] なので、 "-" を加えた
+
+    ３ 	これ以外を含んでいたらエラー
+
+    ４ 	特殊なケース（admin コマンドの admin addr m=3) は
+	事前に例外処理をした後 &SecureP にまわす。
+	
+
+例：	許される例
+
+   # summary
+   # mget 1-20,30,last:20 mp 1
+   # mget 10? mp 1			(default では許さない)
+   # mget 1[012]? mp 1			(default では許さない)
+   # chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp 
+
+
+例：	許されない例
+   # mget `domainname`
+
+
+例外処理として：
+
+   # whois 日本語
+
+をどうしよう？という問題があります。今のところ”通さない”設定のままで
+すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
+.k	whoisと日本語の問題
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.

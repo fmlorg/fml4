@@ -1,0 +1,423 @@
+.C	ヘッダのカスタマイズ
+.l	header-custom
+
+
+.S	ヘッダのフォーマット
+.key	ヘッダの保存
+.key	@HdrFieldsOrder 
+.key	--through
+
+fml はヘッダのフィールドの成形を行います。これは配列変数
+
+	@HdrFieldsOrder 
+
+に従い、その順番に並べかえます。凝る場合:-)は、 @HdrFieldsOrder を 
+config.ph 等で定義してください。
+
+@HdrFieldsOrder で定義された必要なフィー
+ルドのみをきりだしますが、Received: Return-Receipt-To: を除くすべての
+フィールドを使うには
+
+	$SUPERFLUOUS_HEADERS = 1;
+
+かコマンドラインで --through と定義してください。
+例：
+	fml.pl $DIR --through 
+
+
+
+.S	Cc: フィールドを“つけない”
+
+デフォールトではつけますので、切り落とすときは
+
+	$NOT_USE_CC = 1;
+
+
+.S	ヘッダでの MIME 問題
+.key	$PREVENT_MIME
+
+デフォールトでMIME の３つのフィールドを通しています。
+
+	MIME-Version:
+	Content-Type:
+	Content-Transfer-Encoding:
+
+	$PREVENT_MIME = 1; 
+
+とするとこれらのフィールドを切り落とします。
+＃つまり MIME反対派の方は $PREVENT_MIME をセットしてください
+
+
+.S	MIME Decoding を行なう
+.key	MIME
+.label	{MIME-1}
+.key	$USE_MIME
+
+各種の MIME Decoding を行うためには、
+
+	$USE_MIME	= 1;
+
+と定義します。これを定義した場合
+
+	「summaryに書くsubjectをMIME decodeをしてから書き込む」
+
+ようになります。
+
+例：
+	……
+	Subject: Re: TELEPHONE 
+	=?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+
+	……
+というメールが来たとすると、summary ファイルには
+
+	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
+
+と記録されます
+
+注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
+部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
+
+
+.S	MIME Decoding を行なうに関するメモ…
+
+ISO-2022-JP の文字がない限りは require しません（ま、たいして軽くはな
+らんが…）。
+
+.key RFC1522
+RFC1522	2. Syntax of encoded-words
+
+   encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+   charset = token    ; see section 3
+   encoding = token   ; see section 4
+   token = 1*<Any CHAR except SPACE, CTLs, and especials>
+
+
+.S	配送するメールのMIME部分はDecodeしてから配送したい
+.label	{MIME-2}
+.seealso MIME-1
+
+＃注意：以下試していない。
+
+sub Distribute で
+
+    for (@HdrFieldsOrder) {
+	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
+
+という部分を
+
+    for (@HdrFieldsOrder) {
+	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
+
+とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
+実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
+
+
+.S	MIMEのカスタマイズ変数
+.label	{MIME-customizing}
+.key	$MIME_VERSION
+.key	$MIME_CONTENT_TYPE
+.key	$MIME_MULTIPART_BOUNDARY
+.key	$MIME_MULTIPART_PREAMBLE
+.key	$MIME_MULTIPART_TRAILER
+
+右辺はデフォールトの値（Built-in）です。
+
+$MIME_VERSION = '1.0';
+
+$MIME_CONTENT_TYPE = 'multipart/mixed;';
+
+以下は MIME/Multipart で使う変数です。
+
+$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
+
+な形で日付を設定します。
+
+そのあと、これら↓の変数を設定してます。
+
+	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
+	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
+	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
+
+くぎり
+
+$MIME_MULTIPART_BOUNDARY = 
+
+本文の前口上
+
+$MIME_MULTIPART_PREAMBLE = なし
+
+本文の後につく部分
+
+$MIME_MULTIPART_TRAILER = なし
+
+
+.S	Subject: の成形 ([Elena:ID] を抜く)
+.key	Subjectから[Elena:ID]を抜く
+.key	$STRIP_BRACKETS
+
+	$STRIP_BRACKETS = 1;
+
+とすると、Subjectから [ML:fukachan] みたいな部分をカットする。
+これは Subject: [Elena:ID] の形で配送するための前処理です。
+
+	    # e.g. Subject: [Elena:001] Uso...
+	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
+	    $Subject = $contents;
+
+にしちゃいました:-)。つまり multiple Re: 問題はサーバがメール本文をい
+じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
+変更は個人がやってくれると期待して）いじらないことにしました。
+
+
+解説：昔は、
+
+	Subject: Re: [*] Re: サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: Re: [*] サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: [*] サブジェクト
+				→	Subject: サブジェクト
+
+ということをするために
+
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*Re:[\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^[\s\n]*\[[\s\S\n]*\][\s\n]*(.*)/o) {
+		$Subject = $1; next;
+	}
+	$Subject = $contents; next;
+
+こんなけったいな処理をしていましたが、やめました:-)
+＃このコードにもどせばmultiple Re:を削ることができます。
+
+何のために必要な前処理かというと、次を見てみよう(^^;;
+
+
+.S	hml 1.6 のSubjectのフォーマット
+.S	Subject: [Elena:ID] という形にする
+.key	$SUBJECT_HML_FORM
+.key	$BRACKET
+.key	hml形のSubject
+
+オリジナルの hml 1.6 は
+……
+From:	エレナさんＭＬ
+Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
+……
+
+こんな形のヘッダですね。で、私が嫌いなので:-)、
+＃無駄に多いヘッダは嫌いなんですよぉ。To: 見りゃわかるのにX-ML-Nameと
+＃か…X-ML-Count は違う種類の情報（Reference）だからいいんですが…
+
+デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
+ようにしました。
+
+	$SUBJECT_HML_FORM = 1;
+	$BRACKET	  = 'Elena';
+
+で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
+＃今のFrom は ML名 じゃなくて ユーザー名
+
+最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
+つまり（今の場合だと）
+
+	Subject: [Elena:ID] サブジェクト
+#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
+
+の形になります。この場合
+
+	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
+
+にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+
+
+.S	Subject: を (Elena 100) とかの任意の形に成形する
+.l	$SUBJECT_FREE_FORM
+
+	fml 	Subject: はいじらない
+	hml	Subject: [Elena:100]
+
+なんですが、他のフォーマットを使うために 
+例えば、
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '(';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET \\d+\\)";
+
+と定義すると (Elena 100) の形になり、Reply のメールの (Elena 99) をは
+ずし新しい (Elena 100) をつけるようになります。
+
+他の例： Subject: [Elena 100]
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '[';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ']';
+	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+
+
+.S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
+.l	&DEFINE_SUBJECT_TAG
+.k	&DEFINE_SUBJECT_TAG
+.xref	--mode
+
+Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
+タグはつけない。
+
+	(:)
+
+		Subject: (Elena:100)
+
+	[:]
+
+		Subject: [Elena:100]	(HMLタイプ)
+
+	( )
+
+		Subject: (Elena:100)
+
+	[ ]
+
+		Subject: [Elena:100]
+
+
+なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
+れるので注意。例： HML Emulation mode  (--hml)
+
+これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
+できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
+フェイスになるようにしたものです。
+
+config.ph では
+
+	&DEFINE_SUBJECT_TAG("(:)");
+
+コマンドラインでは 
+
+	--tag="(:)"
+	--subjecttag="(:)"
+
+のように呼び出してあげて下さい。
+	
+
+.S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
+.label	{NIFTY}
+.label	{$AGAINST_NIFTY}
+.label	{against-nifty}
+
+注意：もう必要ないらしい
+
+	$AGAINST_NIFTY = 1;（対策をする）
+
+NIFTY は非常識にも、Errors-to という時代おくれの部分しかみてないので;_;、
+config.ph あたりで
+
+	$AGAINST_NIFTY = 1
+
+とするとメール本文に
+
+.key	Errors-To: $MAINTAINER
+	Errors-To: $MAINTAINER
+
+がつきます。これで NIFTY からのエラーメールが $MAINTAINER に返るように
+なってくれます。後向きな解決法ですが;_;。
+＃前向きなのは、みんなで文句をいって直させること
+＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
+らいいいつづけないとだめなんだろうなぁ（はぁ）
+
+
+.S	Message-IDの保存
+.key	Message-ID
+.key	Uniq_Identifier_of_Message-ID
+.key	$USE_ORIGINAL_MESSAGE_ID
+
+$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
+てヘッダにつけます。デフォールトは fml がつけます。
+
+
+.S	Message-IDを個人の趣味でカスタム化する
+.key	Message-IDのカスタム化
+.key	$HEADER_ADD_HOOK
+
+Message-ID: uja@aoi.chan.panic とするなら
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: uja@aoi.chan.panic\n";
+#;
+
+と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
+
+他の例：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	宇宙歴(外国TVシリーズMLで使ってます:-)
+
+   http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+
+config.ph で	$APPEND_STARDATE = 1; とすると宇宙歴がつきます:-)
+
+	Date: Fri, 19 May 95 22:31:09  JST
+	From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
+	Subject: Re: Nantonaku Leonard Nimoy 
+	To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
+	X-ML-Name: Prisoner
+	X-Stardate: [-31]5697.8164
+
+	…本文略…
+
+みたいになります。スタートレックＦＡＱにプログラムがのっています
+libStardate.pl はその perl 版です。
+
+
+.S	1つのMLに複数の投稿用アドレス
+.key	1つのMLに複数の投稿用アドレス
+
+何の意味があるのかは聞かないでください（笑）
+
+例：
+Elena@phys.titech.ac.jp というＭＬで
+Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
+の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
+
+config.ph に次のような設定をしてください
+
+@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
+		'Anna@phys.titech.ac.jp');
+
+# Here is a playing of "To addresses change"; string to eval
+$SMTP_OPEN_HOOK .= q#
+    local($a);
+    foreach (@PLAY_TO) {
+        $a = (split(/\@/, $_))[0];
+        if ($Envelope{"to:"} =~ /$a/) {
+            $MAIL_LIST = $_;
+        }
+    }
+#;
+
+その複数のアドレスを(ループチェックに使うために) @PLAY_TO が必要です。
+配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
+
+こうすると Elena になげても Anna に投げても どっちでもＯＫで、
+to: と reply-to:を変更します。
+＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
+
+＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
+
