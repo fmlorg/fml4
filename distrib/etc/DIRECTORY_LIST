@@ -17,4 +17,5 @@ module
 module/Japanese
 module/Jcode
 module/CPAN
+module/fml-devel
 databases

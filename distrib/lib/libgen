@@ -145,7 +145,7 @@ COPY_SOURCES () {
 	if [ -d module ]; then
 	   echo ""
 	   echo Copying module/
-	   for dir in Japanese Jcode CPAN 
+	   for dir in Japanese Jcode CPAN fml-devel
 	   do
 		echo copy module/$dir/
 		if [ -f module/$dir/files.ignore ];then
