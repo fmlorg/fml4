@@ -1,0 +1,50 @@
+アクセステーブルを変更したら
+
+	# mysqladmin reload  
+
+を忘れずに！ ;-)
+
+◯ 初期化
+
+	# mysql_install_db
+	# mysqlaccess localhost root mysql
+
+
+◯ アクセス制限
+
+	% su
+	# mysql mysql < adduser.sql
+	# mysqladmin reload  
+	# mysqlaccess host user dbname
+
+   Access-rights
+   for USER 'fukachan', from HOST 'beth.fml.org', to DB 'fml'
+        +-----------------+---+ +-----------------+---+
+        | Select_priv     | Y | | Shutdown_priv   | N |
+        | Insert_priv     | Y | | Process_priv    | N |
+        | Update_priv     | Y | | File_priv       | N |
+        | Delete_priv     | Y | | Grant_priv      | N |
+        | Create_priv     | Y | | References_priv | N |
+        | Drop_priv       | N | | Index_priv      | N |
+        | Reload_priv     | N | | Alter_priv      | N |
+        +-----------------+---+ +-----------------+---+
+   NOTE:    A password is required for user `fukachan' :-(
+
+◯ beth.fml.org からやってみる
+
+	% mysql -h mysql.fml.org --password=uja -u fukachan < toymodel.sql
+
+
+-------------------------------------
+Appendix
+ 
+* mysql internal
+	check mysql.user	if not match => reject
+	check mysql.user	match => ok
+	check mysql.db		match => ok
+	check mysql.host
+	check mysql.tables_priv
+	check mysql.columns_priv
+
+
+$Id$
