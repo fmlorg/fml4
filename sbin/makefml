@@ -1177,6 +1177,7 @@ sub FlockP
     # default=flock if first time or no config.ph;
     return 1 unless -f "$mldir/$ml/config.ph";
 
+    # XXX 3.0B-TODO
     open(PH, "$mldir/$ml/config.ph") || 
 	(&Warn("cannot open $mldir/$ml/config.ph[$!]"), return);
     while (<PH>) {
@@ -2944,7 +2945,7 @@ sub CreateDocTemplate
 
     # not exists in the first time
     if (-f "$ML_DIR/$ml/config.ph") {
-	&GetConfigPH($ml);
+	&GetConfigPH($ml); # Value() extracts this value.
 
 	# overwrite %config by evaled (config.ph) values.
 	# since cf has raw value e.g. elena@$DOMAINNAME, so we need to eval it.
@@ -3291,7 +3292,7 @@ sub Load
 
 package main;
 
-
+# XXX 3.0B-TODO
 sub GetConfigPH
 {
     local($ml) = @_;
@@ -4123,6 +4124,7 @@ sub PerlModuleExistP
     1;
 }
 
+# XXX 3.0B-TODO: nothing to do.
 sub MakeConfigPH
 {
     local($config, $manifest, $cf, $config_ph, $preamble) = @_;
@@ -5327,6 +5329,7 @@ sub Mkdir { &main'Mkdir(@_);} #';
 sub MkDirHier  { &main'MkDirHier(@_);} #';
 
 
+# XXX 3.0B-TODO
 sub LoadConfigPH
 {
     local($ml, $mldir) = @_;
