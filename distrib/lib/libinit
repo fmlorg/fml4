@@ -9,8 +9,15 @@ INIT_PACKAGE () {
 		#	echo " "; echo "Fixing rcsid ... " 
 		#	/bin/sh distrib/bin/fix-rcsid.sh
 
-		echo " "; echo "O.K. rcs check in var/doc/ ... ";
-		sh distrib/bin/sync-rcs-of-doc.sh
+		# echo " ";
+		# echo "O.K. rcs check in var/doc/ ... ";
+		# sh distrib/bin/sync-rcs-of-doc.sh
+		echo "------------------------------"
+		echo "Checking CVS commited all?";
+		echo ""
+		make scan
+		echo ""
+		echo "------------------------------"
 
 		echo " "; echo "Fixing permissions ... ";
 		chmod 755 kern/*.pl bin/* sbin/* libexec/*
@@ -79,7 +86,14 @@ INIT_VERSION () {
 		TID=`cat $FML/conf/release`
 		test -d distrib/history      || mkdir distrib/history
 		test -d distrib/history/$TID || mkdir distrib/history/$TID
-		cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
+
+		# not use $RELEASE_MANIFEST
+		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
+
+		# log cvs status
+		perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
+		tee -a distrib/history/$TID/$RID
+
 		(
 		 echo "--------------------------";
 		 echo "";
