@@ -17,3 +17,10 @@ scan:
 
 clean:
 	gar *~ *.bak
+
+toc:
+	@ if [ -f  ../../var/doc/op.jp ] ; then \
+		../../distrib/doc/bin/gen_toc.pl ../../var/doc/op.jp ; \
+	else \
+		echo cannot find ../../var/doc/op.jp;  \
+	fi
