@@ -1384,7 +1384,7 @@ sub LangExtConv
 	if (%LangExtCache) {
 	    return $LangExtCache{$key};
 	}
-	print STDERR "mis hit $key\n" if $debug_cgi || 1;
+	print STDERR "mis hit $key\n" if $debug_cgi;
 	
 	require 'libmesgle.pl';
 
@@ -7423,10 +7423,13 @@ sub FixErrorBuffer
 	}
     }
     else {
-	print "  --- debug\n";
-	print "  (debug)\$HtmlWarnBuffer> $WStatus\n";
-	print "  (debug)\$HtmlExitBuffer> $XStatus\n";
-	print "  --- debug end\n";
+	print $WStatus, "\n";
+	print $XStatus, "\n";
+
+	# print "  --- debug\n";
+	# print "  (debug)\$HtmlWarnBuffer> $WStatus\n";
+	# print "  (debug)\$HtmlExitBuffer> $XStatus\n";
+	# print "  --- debug end\n";
     }
 }
 
