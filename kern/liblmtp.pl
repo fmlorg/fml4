@@ -18,6 +18,7 @@ sub DoSmtpFeed
 
 sub SetupSmtpFeed
 {
+    local($smtpfeed);
     $smtpfeed = &SearchPath("smtpfeed", "/usr/libexec") || 
 	"/usr/libexed/smtpfeed";
 
