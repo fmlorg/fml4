@@ -82,12 +82,13 @@ sub SraqInit
     &GetTime;
 
     # DNS
-    chop($HOSTNAME = `hostname`);
-    local($n, $a) = (gethostbyname($HOSTNAME))[0,1];
-    foreach (split(/\s+/, "$n $a")) { /^$HOSTNAME\./ && ($FQDN = $_);}
+    local($hostname);
+    chop($hostname = `hostname`);
+    local($n, $a) = (gethostbyname($hostname))[0,1];
+    foreach (split(/\s+/, "$n $a")) { /^$hostname\./ && ($FQDN = $_);}
     $FQDN       =~ s/\.$//; # for e.g. NWS3865
     $DOMAINNAME = $FQDN;
-    $DOMAINNAME =~ s/^$HOSTNAME\.//;
+    $DOMAINNAME =~ s/^$hostname\.//;
 
     # config
     $MAINTAINER = "postmaster\@$FQDN";
@@ -207,17 +208,16 @@ sub SetOpts
 }
 
 
-sub Funlock {
+sub Funlock 
+{
     $0 = "--Unlock <$FML $LOCKFILE>";
 
     close(LOCK);
     flock(LOCK, $LOCK_UN);
-    undef $SIGARLM;
 }
 
 sub TimeOut
 {
-    return unless $SIGARLM;
     &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);    
     &Log("Caught ARLM Signal, forward the mail to the maintainer and exit");
     sleep 3;
