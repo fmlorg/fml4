@@ -1,6 +1,9 @@
 .HTML_PRE
 	Fml Operations Guide
 
+				深町 賢一
+				fukachan@sapporo.iij.ad.jp
+
 	[smm/op.wix: smm = System Management Manual]
 	http://www.phys.titech.ac.jp/uja/fml/
 	Last modified: 
@@ -26,135 +29,15 @@
 
 .S	MLサーバは何をすればいいのか？
 
-
-.S	サーバの中身は？
-.label	{fml-mechanism}
-
-ようは Sendmail からパイプで渡されたメールをヘッダと本文にわけて（ヘッ
-ダの解析もして）、メンバーへ配送かコマンドを実行するってだけです
-
-さらっと、fml.plのmain partを説明しましょう。
-
-↓
-	引数からINCLUDE PATHを設定する(config.ph libaries...)
-	基本ライブラリのインクルード(e.g. SMTP)
-
-		&ChkREUid;
-	setuid のチェック、もしだめだと警告を出す
-	＃おそらく、その場合はその後のどこかで止まるでしょうが
-
-↓	ファイルや日付等のチェック
-
-		&InitConfig
-.key		&InitConfig
-
-	最初の空行を境にヘッダー、本体を分ける。
-	コマンドモードか否かを最初の3行が#ではじまっているかどうかで
-	判断（コマンド専用のアドレスも作る方が建設的かと…）。
-
-	見知らぬ人からのガイド要求チェック
-
-		&Parsing
-.key		&Parsing
-
-	From:とかSubject:の中身を切り出す。
-
-		&GetFieldsFromHeader
-.key		&GetFieldsFromHeader
-
-	ロックをして他のプロセスは待たせる（コマンド、配送問わず）。
-
-		(!$USE_FLOCK) ? &Lock : &Flock
-.key		$USE_FLOCK
-.key		Lock
-.key		FLock
-
-	もし、特別なことがしたければｈｏｏｋをしかけておく
-	＃ＭＬ依存のことです。デフォールトは何もしない
-
-		$START_HOOK && &eval($START_HOOK, 'Start hook'); 
-.key		$START_HOOK
-
-	＃＃＃ いよいよ、メインパート↓ ＃＃＃
-
-	もし見知らぬ人からのガイド要求だったら？
-	＃See INSTALL, README, config.ph
-
-		if($GUIDE_REQUEST) { 
-.key		$GUIDE_REQUEST
-
-	ガイドを送ってあげる
-
-		&GuideRequest
-.key		&GuideRequest
-
-	そうでないならＭＬサーバとして動くので、
-	メンバーチェックを実行
-
-		} elsif(&MLMemberCheck) { 
-.key	&MLMemberCheck
-
-	メンバーチェック もしくは チェックして自動登録なら登録
-	＃その区別は この sub MLMemberCheck 内で場合わけしている
-
-	メンバーチェックを通過したら、
-	普通にＭＬへ来たメールなのか？
-		or 
-	コマンド実行する要求なのか？の最終判断をする。
-
-		&AdditionalCommandModeCheck
-.key		&AdditionalCommandModeCheck
-
-	配送以外のなんらかのコマンド要求（LOAD_LIBRARYが空でない）だっ
-	たら
-
-		if($LOAD_LIBRARY) {
-.key		$LOAD_LIBRARY
-
-	$LOAD_LIBRARY(e.g. libfml.pl)を読み込んでコマンドを実行
-	＃デフォールトでは require 'libfml.pl'; と同じ
-
-			require $LOAD_LIBRARY;
-
-	もし、コマンドなら $LOAD_LIBRARY ＝ libfml.pl つまりコマンドを
-	実行する。config.ph等で $LOAD_LIBRARY を設定しておけば常にその
-	ライブラリ（$LOAD_LIBRARY）をよび、○○専用、例えばftpmail専用
-	サーバ等に設定できる（ために汎用化した（1.3.2））。
-
-	コマンドでもなければ配送（ＭＬ本来の挙動）を実行
-
-		} else {
-			&Distribute;
-.key			&Distribute
-
-	ロックを外しておしまい（通常はここで終り）
-
-		(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
-
-	■以下は必要に応じて■
-	なにかユーザーへ伝えることが起きていたらメールを送る
-	例：エラー等の通知。
-	&Notify if $_cf{'return'};	# Reply some report if-needed.
-.key	&Notify
-.key	$_cf{'return'}
-
-	この時点で本体とは直接関係ない残り仕事を”必要”なら実行
-	e.g. コマンドのmget とか まとめおくりver.5 をここで実行
-	
-		&RunHooks;	＃Ｌｉｓｐかいな:-)
-.key		&RunHooks
-
-		exit 0
-
-	
-.S	ＭＬサーバの考え方？（私見）
-.key	ＭＬサーバの理屈
-
 Private Communication を便利にするだけのツール（Filter）
 ＃Private→メンバーチェックという考え方になる。
 
-考え方：
-メール→Sendmailがうけとる
+
+.S	ＭＬサーバの動作理論
+.key	ＭＬサーバの理屈
+
+
+メール → Sendmailがうけとる
              ↓
 	サーバへ渡す。
              ↓
@@ -169,47 +52,82 @@ Private Communication を便利にするだけのツール（Filter）
 け複雑なことをしようとするならこのサーバまで必要です。
 
 
-.S	認証プロセス
-.key	認証プロセス
+.S	fml の動作
 
-せいぜい数百人（←数字100に根拠はありません。ふつうはそんなにいかないも
-の〜ってくらい）程度とおもって線形にファイルを探索します
+sendmail から fml へメールが渡されると 次のように動作します。
 
-メンバー数万のオーダーとかいわない限り関係ないとおもうんですが…
-＃律速段階はやっぱりsendmailでしょう(sub Distribute)
+○ まず /etc/aliases にある
 
-でも、普通 user@foo.bar.uja の user の exact match でreturn しちゃうか
-ら、その後の複雑なマッチング処理はあんまり気にしなくてもよいでしょう
-（期待値としての振舞いは）
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
 
+のような部分から /usr/local/list/Elena を実行すればよいことがわかるの
+で、sendmail はこのファイルを実行します。
+
+	/usr/local/list/Elenaの中身は
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+
+のようになっています。
+
+次に fml が上の引数（上例では コマンドラインオプションがないが）は 
+/var/spool/ml/elena/ を Elena ML の home directory だと見なし
+/var/spool/ml/elena/config.ph に従い fml の設定を行います。
+
+そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
+するときは 	/usr/local/list/Elena の中で
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --distribute "
+
+のように書きます。引数の書き方の順番は任意です。引数の最初の directry 
+を MLのホームと見なします。
+
+
+
+.S	オプション設定の優先順位
+
+強い順番に並べると
+
+１	コマンドラインオプション (fml.pl -d や --distribute 等)
+２	sitedef.ph による設定のoverwrite（サイト共通の設定等が望ましい）
+３	各MLごとの config.ph による設定
+４	fml デフォールト設定
+
+大抵の場合と同様ですね
 
 
 .S	律速段階
 .key	何がどこが遅くさせるか？
 
-律速段階はやっぱりsendmailでしょう。
+律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
+この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
+それでもかなりのものです。
 
-sub Distribute でＭＸ引く時とかサーバプロセスの後のSendmailの配送が遅
-いでしょうねぇ。
-＃アクティブな人たちをmember fileの最初にするとすると少しは早いかな:-)
-＃後、読み込む前に grep 一発かましてからとかね :-)
+論理をひっくりかえすと、fml 自体を tuning して速度を 0.1 sec 上げても
+ML の配送プロセスには何のメリットも生じないということです。
 
-ひっくりかえすと、sub Distribute のループとか認証プロセス以外は、少し
-くらい余計なプロセスがついても、ほとんど効かないということです。
-＃正確なProfileははかってないですけど
+余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
+ことができたほうがおもしろいでしょう？という思想的背景はここに起因して
+います。
 
 
-.S	動く時のuid はどうなってるの？
+.S	プロセスは誰の権限で動くか？
 .key	uid
 .key	setuid
 .key	ユーザー権限ということ
 .label	{fml-uid}
 
-・ローカルに自分が実験したら
+「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
+走っているからで、fml 実行時は fml 管理者の プロセスとして走ります。
+システムに「 fml 管理者の プロセスとして走る」用に命令することが
+システムによって違うことがあるので少し厄介なことが発生します。
 
-	自分のuidで実行
+○ローカルに fml にメールを投げる
 
-・外からメールがやってきたら？
+	自分のuidで実行します
+
+○外からメールがやってきたら？
+	つまり sendmail がうけとって fml を起動する場合
 
 	外→	
 		sendmail は uid = 1で起動（daemon）
@@ -238,8 +156,22 @@ $ML_MEMBER_CHECK が 0 とか "" のようになっている時が
 	で、
 ”それ以外はメンバーチェックをするモードです”。
 
-で、自動登録で使うアドレスと、メールでどういうふうに明示的な意志表示を
-してほしいか？のvariationが以下の話です。
+コマンドラインオプションでは
+
+ --auto
+	投稿者がメンバーでない場合自動的にMLに登録する
+
+ --check 
+	投稿者がMLのメンバーか否かチェックを行う(default)
+
+です。
+
+例：
+	/usr/libexec/fml/fml.pl /var/ML-dir --auto 
+
+
+そして、自動登録で使うアドレスと、メールでどういうふうに明示的な意志表
+示をしてほしいか？のvariationが以下の話です。
 
 .key 登録に使うアドレスはどこから選ぶ？
 登録に使うアドレスはどこから選ぶ？：
@@ -306,10 +238,53 @@ From: を見てメンバーチェックをし、知らない人かどうかを決めています。
 
 になります。
 
-		
-.S	コマンド専用サーバなら "# command" syntax じゃなくてもいいわけで…
 
-	次説参照
+.S	再配送だけをするサーバ（コマンドを必要としないサーバ）
+.key	再配送だけをするサーバ
+.seealso	--distribute
+
+単に配送を待って、それをスプールすることだけを目的にするMLを作ることも
+あるでしょう。つまり ガイドを相手に返すこともなく、単に再配送するだけ
+です。
+
+	コマンドラインオプションの --distribute はそういう目的です。
+
+		
+.S	コマンド専用サーバ
+
+fmlのデフォールトの挙動は
+
+	メールの最所の３行のどこかが 
+	# command（英文字だけの塊）
+	の場合コマンドモードへ移行する
+
+です。これは 配送するのか？コマンドを実行するのか？の切替の合図に #
+command を使っているからです。
+Emacs の C- (control) とか vi のモード切替えみたいなものです。
+
+コマンドしか受け付けないアドレスなら "# command" syntax じゃなくてもい
+いはずでず…	それは次説参照
+
+
+.S	特殊目的専用のサーバへの変更
+.key	特殊目的専用のサーバへの変更
+.label	server-for-command-only
+
+$CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
+別の汎用の仕方として、
+
+	$LOAD_LIBRARY = 'libfml.pl'; 
+
+のようにバインドしたら コマンド専用だし、
+
+	$LOAD_LIBRARY = 'libftpmail.pl'; 
+
+とすれば、ftpmail 専用のアドレスに早変わりです。
+
+それは $LOAD_LIBRARY が設定されていると、配送じゃなくて、そのライブラ
+リを実行するように動くからです
+
+
 
 .S	コマンドの # syntax は必要か？ 
 
@@ -320,13 +295,15 @@ From: を見てメンバーチェックをし、知らない人かどうかを決めています。
 		も
 	get 1
 
-同じに動いて欲しいなら
-＃もちろん off bye 等も同じですが
+同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
 
-$COMMAND_ONLY_SERVER = 1;
+	コマンドラインオプションで --commandonly か
+	$COMMAND_ONLY_SERVER = 1; と config.ph に書く
 
-と config.ph に書いてみてください。
-＃もっとも、こうしておくと listserv とかわりませんな:-)
+かしてください。
+
+もっとも、こうしておくと listserv とかわりませんな:-) 
+.seealso fmlserv
 
 
 .S	コマンドは一辺に実行できるか？
@@ -366,6 +343,18 @@ config.ph の中の
 を変えます。
 
 
+.S	間違ったコマンドへの警告
+.seealso USE_WARNING 
+
+デフォールトでは警告しません。
+
+$USE_WARNING = 1; でない限り、間違ったコマンドへの警告メールをだすこと
+はありません。これは signature を自動的に付ける設定をしている場合への
+対処です。 
+
+# exit 等で明示的にコマンド指定を終わらせるほうがよりよいでしょうが
+
+
 .S	コマンドの終り（シグニチャア対策）
 .key シグニチャア対策
 
@@ -377,52 +366,22 @@ config.ph の中の
 シグニチャアがあってもいいように、こうしました。
 
 
-.S	コマンドのエラー警告
-
-デフォールトではしません。$USE_WARNING =1; とすると変なコマンドがあっ
-たらメールでユーザーへ知らせます。
-.seealso USE_WARNING 
-
-
-.S	$TMP_DIR = './tmp'; を各種作業に使います。
+.S	各種directory ($TMP_DIR = './tmp'; を各種作業に使います…)
 .key	$TMP_DIR
 
-1.3.1.3 からは $TMP_DIR をセットして下さい。
-セットしないと デフォールトでは $DIR/tmp(つまり $TMP_DIR = './tmp';) 
-です。
+デフォールトでは $DIR/tmp (つまり $TMP_DIR = './tmp';) を使います。
+変更したい場合は 1.3.1.3 からは $TMP_DIR をセットして下さい。
 
 /tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
-＃だって private communication だもん
+
+private communication なので public な場所にファイルを残すことはしない
+方針なのです。
+
+その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
+存されています。
 
 
-.S	コマンド専用サーバ
-
-コマンド専用のサーバ（登録とか、get とか…）
-と
-Distribution 担当のサーバ
-の２つということですね
-
-コマンド専用のアドレスときには
-
-	$COMMAND_ONLY_SERVER = 1; 
-
-となるようにする（たとえば config.ph にかく）。この時
-	# command と command 
-は同じです。つまり 
-
-	# get 1 
-も
-	get 1 
-
-は同じです＃以下同様に各コマンド…
-
-ついでに subsribe コマンドも使えたりします。
-
-さらに $ML_MEMBER_CHECK = 1; だと members と actives 両方にアドレスを
-登録します
-
-
-.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する 	
+.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する設定
 
 	$PREAMBLE_MAILBODY	（前）
 	$TRAILER_MAILBODY	（後）
@@ -439,7 +398,7 @@ Distribution 担当のサーバ
 
 もし、なんらかの理由で普通のメールの場合にも付けたいなら
 ＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
-＃倫理的に許されないと思うが…世の中いろいろあるだろう〜？？？
+＃倫理的に許されないと思うが…世の中いろいろなんだそうです
 
 config.ph に $_cf{'ADD2BODY'} = 1; と書いておいてください。
 普通のＭＬのメールですら、INFO?がつくようになります。
@@ -455,9 +414,24 @@ config.ph に $_cf{'ADD2BODY'} = 1; と書いておいてください。
 SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 にはなっていません。リモートで管理もできるようにモードを変えるには、
 
+	コマンドラインオプションで --remote か
+
 	$REMOTE_ADMINISTRATION = 1;
 
-としてください。
+としてください。デフォールトではパスワードを要求する設定です。
+＃つまり   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; の状態
+
+パスワードは $DIR/etc/passwd に crypt された形で保存されます。
+
+新たにパスワードを初期化する場合は
+	bin/passwd -i mail-address new-passwod
+のようにしてください。
+
+例：
+	% bin/passwd -i fukachan@sapporo.iij.ad.jp password
+
+fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
+設定する（実際にこんな間抜けなパスワードを付けてはいけません:-）
 
 カスタマイズするべきファイル等は
 
@@ -468,10 +442,10 @@ SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
     $ADMIN_HELP_FILE	= "$DIR/help-admin";
 
    リモート管理にパスワードを要求する場合には１に
-    $REMORE_AUTH        = 0;
+   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
 
-    その場合のパスワードを保存するファイル
-    $PASSWD_FILE        = "$DIR/etc/passwd";
+   その場合のパスワードを保存するファイル
+   $PASSWD_FILE        = "$DIR/etc/passwd";
 
 詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
 
@@ -488,14 +462,7 @@ SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 .S	Version up
 
 Version up は *.pl をコピーすれば終りです。
-
-さらに RecreateConfig.pl を用いて昔の config.ph の設定を尊重しつつ新し
-い機能のためにconfig.ph を作ることができます(from 1.2.1.7)
-
-注意：（たぶん1.2.1.5 ->） 1.2.1.7以降へのヴァージョンアップでは、
-RecreateConfig.pl を使うべきです。
-（$AUTO_REGISTERD_UNDELIVER_P という変数の設定に関して問題が発生するの
-で）。それより昔のものへのヴァージョンアップなら関係ありません。
+＃fml 1.x 時代への注意は .seealso{appendix:fmlR1}
 
 
 .S	インストール後にサーバの設定（パラメータ）をいじるには？
@@ -507,27 +474,22 @@ RecreateConfig.pl を使うべきです。
 .key	fml.plの引数
 .label	{c-wrapper}
 
-fml.cの中に
+例によって複数のやり方があります:-)
 
-	fml.plの場所   config.phのある場所   ライブラリの場所
+○	ひとつしかMLがない場合
+	
+	config.ph をいじるか コマンドラインオプションで変更します。
+	
 
-の形でexecするように埋め込んで最初にcompileしました。
-directoryを変えるにはここを書き換えてrecompileです。
-＃since 1.1.2.17 1994.3.14 version
+○	複数のMLがある場合
 
-例： fml.c
+	ML固有の変更はそれぞれのMLの config.ph へ変更を加えるか
 
-execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
-      "(fml)", 
-      "/usr/spool/EXP", /* config.ph は どこ？ */
-      "/usr/spool/lib", /* fml packeage の library はどこ？ */
-      NULL);
+	include file 等で fml.pl --distribute のようにコマンドラインオ
+	プションで変更するか？
 
-これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
-イル等を見ながら直してみて下さい。
-
-よってversion upも*.plファイルをコピーすればいきなり使えるようになりま
-す。
+ですが、複数のMLに共通の設定であれば libsmtp.pl 等がおいてある場所に 
+sitedef.ph を作って、これの中にいれておくとよいでしょう。
 
 
 .S	fml.plの呼び方、引数の渡し方(4.3BSD)
@@ -544,8 +506,7 @@ fml.cの中でfml.pl directoryという形で呼ぶようになってます。
 ＃ fml.pl config.phのあるdirectry libaries の形で呼ぶ
 
 上と同じことを↓こういう書き方（ちゃんと動くか否かはsendmail の 
-version依存だろう）でもできる
-＃本当にこれが sendmail 8.x の最終仕様なんだろうか？（みたいだなぁ）
+version依存）ができます。
 
 	/etc/aliases では
 
@@ -554,9 +515,10 @@ version依存だろう）でもできる
 
 	/usr/local/list/Elenaの中身は
 
-	"|/home/axion/fukachan/work/spool/Elena/fml.pl directory"
+	"|/usr/libexec/fml/fml.pl directory"
 
 こうするとElena（ファイル）の所有者のＩＤで動くようになります。
+
 
 
 .S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
@@ -603,76 +565,93 @@ fml ができたら スーパーユーザー権限で
 のみフォワード）に御一報くださいませ _o_
 
 
+.S	binary の driver 
+
+
+	/usr/local/list/Elena というファイルを sendmail が実行し
+	その中身は
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+	のように書いてある。
+
+と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
+があります。
+
+その場合次のような setuid された driver(binary) を使うということになり
+ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
+あなたの環境に併せて変更されていますが、確認はしてみてください。
+
+それは次のような内容です。fml.c の中に
+
+	fml.plの場所   config.phのある場所   ライブラリの場所
+
+の形でexecするように埋め込んで最初にcompileしました。
+directoryを変えるにはここを書き換えてrecompileです。
+＃since 1.1.2.17 1994.3.14 version
+
+例： fml.c
+
+execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+      "(fml)", 
+      "/usr/spool/EXP", /* config.ph は どこ？ */
+      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      NULL);
+
+これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
+イル等を見ながら直してみて下さい。
+
+version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
+の設定を変更する必要ありません。
+
+.S	binary の driver 
+
+
+	/usr/local/list/Elena というファイルを sendmail が実行し
+	その中身は
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+	のように書いてある。
+
+と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
+があります。
+
+その場合次のような setuid された driver(binary) を使うということになり
+ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
+あなたの環境に併せて変更されていますが、確認はしてみてください。
+
+それは次のような内容です。fml.c の中に
+
+	fml.plの場所   config.phのある場所   ライブラリの場所
+
+の形でexecするように埋め込んで最初にcompileしました。
+directoryを変えるにはここを書き換えてrecompileです。
+＃since 1.1.2.17 1994.3.14 version
+
+例： fml.c
+
+execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+      "(fml)", 
+      "/usr/spool/EXP", /* config.ph は どこ？ */
+      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      NULL);
+
+これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
+イル等を見ながら直してみて下さい。
+
+version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
+の設定を変更する必要ありません。
+
+ただ、この binary driver 方式では root に setuid した binary を作る必
+要があります＃ POSIX 準拠の場合
+
+これは、非常にいやらしいし、setuid コマンドは慎重に扱う必要があります。
+それでできれば sendmail が正しく動いて setuid の部分をうけもってくれる
+ことが望ましいとおもわれます。
+
+
 .S	fml.plの呼び方 と OS一覧
 .label	{calling-fml.pl-and-OS}
 .key	OS_dependence
 
 INSTALLにOSのまとめ一覧があります。ご覧ください
-
-
-.S	コマンドライン オプション
-
-コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
-"|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
-
-	fml.pl 	   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
-
-	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
-	注意：fml_local.pl は MH を意識してるので異なります。
-
-オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
-れ以外は Directoryの変数 だと仮定します。順番は関係ありません
-Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
-$LIBDIR にセットされます。
-
-
-	-d		デバッグモード
-			（ＭＬへの配送以外すべてを実行可能）
-	-bt   		アドレステストモード	(Become Test)
-			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
-			いまのところ debug mode とかわらへんねん:-)
-	-bd		デーモンモード	(Become Daemon)
-	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
-	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
-	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
-
-
-注意：sendmail のように『空白なし』です。(だってその方がコードが簡単なんだもん:-)
-
-例：
-	-llibfml.pl とすると、コマンド専用アドレスのできあがりです
-	＃ CONTROL_ADDRESS とおなじ意味ですね
-
-	-llibftpmail.pl ftpmail 専用アドレス
-	-sdebug		debug mode
-	-sFIX_SLOCAL_PIPE	$FIX_SLOCAL_PIPE = 1;と同じ
-
-とかできるわけです
-
-例：
-"|/Baycity/fml.pl /Baycity /Baycity/lib -d -sFIX_SLOCAL_PIPE -sDUMPVAR"
-
-デバッグモード かつ $FIX_SLOCAL_PIPE =1; で 変数のダンプを行なう。
-
-
-.S	コマンド専用のサーバ
-.key	コマンド専用のサーバ
-.label	server-for-command-only
-
-$CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
-別の汎用の仕方として、
-
-	$LOAD_LIBRARY = 'libfml.pl'; 
-
-のようにバインドしたら コマンド専用だし、
-
-	$LOAD_LIBRARY = 'libftpmail.pl'; 
-
-とすれば、ftpmail 専用のアドレスに早変わりです。
-
-それは $LOAD_LIBRARY が設定されていると、配送じゃなくて、そのライブラ
-リを実行するように動くからです
-
 
 
 .S	まとめおくり
@@ -736,7 +715,7 @@ $CONTROL_ADDRESS = 'Elena-ctl';
 
 この場合/etc/aliasesに
 
-	Elena-ctl:"|/home/axion/fukachan/work/spool/Elena/fml"
+	Elena-ctl:"|/usr/libexec/fml/fml"
 
 とか書くことが必要です。
 ＃あ、newaliasesも忘れずにね
@@ -798,6 +777,11 @@ lib Elena は 700、driver は755としておけば、
 	→	
 	ここから後は、lib, Elena は自分のuidになっているので、700でＯ
 	Ｋです。
+
+
+.# ##########################################################
+.#	command line options
+.include clo.wix
 
 
 .# ##########################################################
@@ -2923,9 +2907,8 @@ Current(1.6以降) では、すべての変数は
 
 
 .include ref.wix
-
+.include appendix.wix
 .# FAQ ENDS
 
 
-.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
 .# $Id$
