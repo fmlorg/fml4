@@ -1,0 +1,3 @@
+# [EXAMLE in the case so that A LOT OF msend run ]
+# msend master control daemon over all ML's in _ML_DIR_
+_CRON_TIME_ * * * * _EXEC_DIR_/bin/msend_master.sh -E _EXEC_DIR_ -M _ML_DIR_
