@@ -14,6 +14,15 @@ This document logs CHANGES in fml stable branch.
 See http://www.fml.org/ for CHANGES in fml-current. 
 .fi
 
+   2000/03/08
+
+   kern/fml.pl (2.79-2.80): 
+	fix $REWRITE_TO == 1 behaviour to follow doc/op
+
+   envelope filter
+	check the first paragraphs or first 1024 bytes to count up the
+	number of paragraphs.
+
 [ 3.0.1_RC (release candidate)]
 
    sbin/makefml (2.108-2.109): 
