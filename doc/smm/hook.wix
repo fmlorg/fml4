@@ -58,12 +58,12 @@ $body .= "Message-ID: ".
 ここで、強制的にヘッダの内容を変えたりすると効果的です。
 
 例：
-Reply-To: フィールドをＭＬ自体へ強制書き換え
+Reply-To: フィールドをＭＬ自体へ強制書き換え(1.6, 1.5でもＯＫ)
 Precedence: を bulk へ
 
 $SMTP_OPEN_HOOK = q#
 	$Envelope{'h:reply-to:'}   = $Reply_to = $MAIL_LIST; 
-	$Envelope{'h:Precedence:'} = PRECEDENCE = 'bulk';
+	$Envelope{'h:Precedence:'} = $PRECEDENCE = 'bulk';
 #;
 
 ＊＊＊1.5 と 1.6 と注意＊＊＊ 
@@ -189,7 +189,7 @@ $COMMAND_HOOK =q#
 .seealso	REMOTE-ADMINISTRATION 
 
 "# admin" アドミンコマンド って昔あったんですが、いまは、
-内蔵しちゃったので、わざわざ↓これしなくても、
+内蔵しちゃったので、わざわざ（次節）しなくても、
 
 $REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
 (.seealso REMOTE-ADMINISTRATION )をみてね
@@ -198,3 +198,5 @@ $REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
 .S	"# admin" アドミンの昔の呼出し方
 
 lib/remote/REAMDE をみてもらうとわかりますね。 
+
+
