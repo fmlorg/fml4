@@ -54,6 +54,23 @@ sub SubjectTagDef
 	$END_BRACKET       = ']';
 	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET:\\d+\\]";
     }
+    elsif ($mode eq '[,]') {
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '[';
+	$BRACKET           = $BRACKET || 'Elena';
+	$BRACKET_SEPARATOR = ',';
+	$END_BRACKET       = ']';
+	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET,\\d+\\]";
+    }
+    elsif ($mode eq '(,)') {
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '(';
+	$BRACKET           = $BRACKET || 'Elena';
+	$BRACKET_SEPARATOR = ',';
+	$END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET,\\d+\\)";
+    }
+
 }
 
 1;
