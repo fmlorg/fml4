@@ -468,6 +468,16 @@ the value in the [] is used. These questions are as follows:
    Personal Use or ML-Admin-Group-Shared or fmlserv you use? 
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
 
+注意: 
+	FQDN と DOMAIN NAME の設定は、あなたのドメインの運用方法に依存
+	しています。デフォルト値は最も多いスタイルであろうと推測されて
+	いるケースで、『ドメインに一つのマスターメールサーバがある」よ
+	うな場合です。
+
+	あなたのドメインの運用方法がこの方式とは限らないので、
+	はっきりしない場合は、ネットワーク管理者に相談して下さい。
+
+
 (詳細は前節参照)
 =E
 Please see the previous section!
