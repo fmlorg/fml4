@@ -4422,7 +4422,7 @@ sub do_adduser
 	if (&CheckMember($member, $f)) {
 	    &Debug("   WARN: skip $fn since $member is already member.");
 	    &Log("skip $fn since $member is already member");
-	    &XSWarn("adduser.already_member");
+	    &XSWarn("already_subscribed");
 	    next;
 	}
 
