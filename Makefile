@@ -241,7 +241,7 @@ sync:
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/ eriko:~/.fml
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/drafts/ eriko:~/.fml
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/libexec/ eriko:~/.fml/libexec
-	(echo test of new FML snapshot; echo ; echo "--fukachan")|\
+	(echo test of new FML snapshot; echo ""; echo "--fukachan")|\
 	Mail test@fml.org
 
 test:
