@@ -30,5 +30,5 @@ __initplaindocbuild__:
 	@ test -d var/doc/drafts || mkdir var/doc/drafts
 	@ test -d var/doc || mkdir var/doc
 
-plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__}
+plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} op
 	@ echo --plaindoc done.
