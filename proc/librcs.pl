@@ -1,19 +1,21 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
+
+use vars qw($debug);
+
 
 sub RCSBackUp
 {
-    local($f) = @_;
-    local($mode);
+    my ($f) = @_;
 
     &RCSInit;
 
@@ -30,7 +32,7 @@ sub RCSBackUp
     }
 
     # preserve mode
-    $mode = (stat($f))[2];
+    my $mode = (stat($f))[2];
 
     open(CI, "$CI -l -q $f 2>&1|") || 
 	&Log("RCSBackUp ERROR: cannot exec $CI -q $f");
@@ -53,7 +55,7 @@ sub RCSInit
     # no check
     return if $RCS && $CI;
 
-    local(@path) = ('/usr/bin', '/usr/ucb', '/usr/lib',
+    my (@path) = ('/usr/bin', '/usr/ucb', '/usr/lib',
 		    '/usr/local/bin', '/usr/contrib/bin', '/usr/pkg/bin');
 
     $RCS = $RCS || &SearchPath('rcs', @path);
