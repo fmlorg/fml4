@@ -148,7 +148,6 @@ ftpmail serverへ経由する設定になっていれば、そのサーバーへ
 当然ながら、任意のサイトへ ftp かけられます。
 
 
-
 .S	ftpmail server へのリレーの設定
 
 どこのサーバーを使うのか?
@@ -159,7 +158,6 @@ ftpmail serverへ経由する設定になっていれば、そのサーバーへ
 
 もっとも libhref.pl を読んでちゃんと &Ftpmail(..); へ命令を伝えていれ
 ば…ですね
-
 
 
 .S	URL ftp://host/directory/file へのアクセス 
