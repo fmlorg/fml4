@@ -14,7 +14,7 @@
 unshift(@ARGV, split(/\s+/, $ENV{'FWIX_OPTS'}));
 
 require 'getopts.pl';
-&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:S:Z:F");
+&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:S:Z:Fo:");
 
 $debug=1;
 
@@ -58,6 +58,8 @@ $HtmlDir     = $opt_D;
 $RoffDir     = $opt_R;
 $Title       = $opt_T || "NONE TITLE";
 $TmpDir      = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; 
+
+$OUTPUT_FILE = $opt_o;
 
 $OnFml       = 1 if $opt_F;
 
@@ -129,7 +131,14 @@ All rights of this page is reserved.
 
 sub Init
 {
-    if ($mode eq 'html') {
+    if ($opt_m eq 'htmlconv') {
+	if (! $OUTPUT_FILE) { 
+	    print STDERR "Usage: fwix.pl -m htmlconv -o output.html source\n";
+	    exit 1;
+	}
+	$mode = 'html';
+    }
+    elsif ($mode eq 'html') {
 	$HtmlDir    || 
 	    die("Required! \$HtmlDir for the output of html files\n");
 	-d $HtmlDir || mkdir($HtmlDir, 0755);
@@ -145,6 +154,10 @@ sub Init
 	     'phase2:html',  'OutputFile',
 	     'phase2:roff',  'OutputFile',
 	     'phase2:latex', 'OutputFile',
+
+	     # tricky filter
+	     'phase1:htmlconv',  'ReadFile',
+	     'phase2:htmlconv',  'OutputFile',
 	     );
 
     # jcode.pl
@@ -260,8 +273,14 @@ sub Open4Write
     open(ENG, "> $TmpFile_Eng") || die($!);
     select(ENG); $| = 1; select(STDOUT);
 
-    print TMPF "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
-    print ENG  "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
+    if ($opt_m eq 'htmlconv') {
+	print TMPF "\#.CUT:$OUTPUT_FILE\n";
+	print ENG  "\#.CUT:$OUTPUT_FILE\n";
+    }
+    elsif ($mode eq 'html') {
+	print TMPF "\#.CUT:${HtmlDir}/index.html\n";
+	print ENG  "\#.CUT:${HtmlDir}/index.html\n";
+    }
 
     print STDERR "---Open::($TmpFile $TmpFile_Eng)\n" if $verbose || $debug;
 }
@@ -754,7 +773,7 @@ sub OutputFile
 
     &Debug("---OutputFile: Lang=$Lang");
 
-    if ($mode eq 'html') {
+    if ($mode eq 'html' || $mode eq 'htmlconv') {
 	$Index = "<UL>\n$Index\n</UL>";
 
 	if ($Lang eq 'ENGLISH'){
