@@ -1036,7 +1036,7 @@ thnaks to Maki Watanabe <watanabe.maki@tko.dec-j.co.jp>
 
 fml 2.0 delta on Digital UNIX
 
-./sbin/configure_fml2:
+sbin/configure_fml2:
    CF_LIST に /usr/adm/sendmail/sendmail.cf を追加
 
 ------------------------------------------
