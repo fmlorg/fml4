@@ -3,7 +3,28 @@
 .key	cron.pl
 .k	bin/cron.pl
 .key	etc/crontab
-.key	samples/crontab
+.key	$DIR/crontab
+
+システムにユーザごとに定義できる cron がない場合に使います。
+まずはユーザごとに定義できる cron がないかどうかを調べて下さい。
+まずは man crontab を試してみることからです。
+
+動きとしては system の cron と同じ働きをします。つまり１分に一回おきて 
+crontab をみて、実行する。
+
+管理者が手で起動してもいいし、fml.pl が cron.pl を走らせてもよいです。
+注意として fml.pl から cron.pl を走らせると各ＭＬごとに一つ走ります。
+複数のＭＬがある場合は一つの cron.pl で複数のＭＬを担当するような
+設定ファイルを書くのが良いです。
+
+fml.pl から起動すると何回も cron.pl を起動しますが、複数は走りません。
+$CRON_PIDFILE ($DIR/var/run/cron.pid)というファイルにプロセス番号を保
+存し一意性を保証しています。
+
+また長く走り過ぎておかしくなる場合も考慮してデフォールトでは２４時間で
+次の cron.pl を起動しなおします。これは予防策であって必ずしもする必要
+はありません。-n オプションをつけるとずっと走り続けるようになります。
+
 
 SYNOPSYS
 	cron.pl [-a] [-d] [-b43] [-fcrontab] [-bd] $DIR [$LIBDIR]
@@ -17,24 +38,6 @@ SYNOPSYS
     -bd		      daemon (Become Daemon) 
     -bOSTYPE          -b43(OSTYPE = 43): 4.3BSD Like. not mailed to you 
 
-
-fml.pl が cron.pl を走らせ、そのまま system の cron と同じ働きをします。
-つまり１分に一回おきて crontab をみて、実行する。
-＃単にシステムのcronじゃないだけですね…うじゃ
-
-本来一台あたり一個のcronで十分です。
-
-ちなみに、複数のcron.plは走りませんが、一つの”ＭＬ”につき一つ走りま
-す。というのは $CRON_PIDFILE ($DIR/var/run/cron.pid)というファイルにプ
-ロセス番号を保存し一意性を保証するわけですが、ＭＬごとに corn を起動す
-るとこのファイルを各ＭＬごとに作れてしまうからです。
-
-あと長く走り過ぎておかしくなる場合も考慮してデフォールトでは２４時間く
-らいで次のcron.plを起動しなおしますが、-n オプションをつけるとずっと走
-り続けます。
-
-
-.S	オプションの捕捉
 
 -b43 オプションは 
 .k	-b43
@@ -83,7 +86,7 @@ cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
 .S	cron.plのインストール
 
 システムが定期的に何かをしてくれないので、cron.pl をなんとかして(疑似
-定期的に)起動したいわけです。
+定期的に)起動したいわけです。問題はどう起動するか？だけです。
 
 まず起動自体は
 
@@ -101,10 +104,9 @@ cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
 
    3. MLサーバにメールが来たときに起動させる↓とか…
 
-が考えられます。設定としては
+が考えられます。３の設定としては
 
-
-config.ph の
+config.ph に
 
 .key	$CRON_PIDFILE
 .key	$CRONTAB
@@ -116,53 +118,44 @@ config.ph の
 
 	$FML_EXIT_PROG = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
 
-	をつけたす。
-	＃いずれも適当にパスとかは変えてください
+をつけたします。
+＃いずれも適当にパスとかは変えてください
 
-cron.pid は cron.pl の pid を記録するファイル（ /var/run/cron.pidに相
-当するもの）。
+cron.pid は cron.pl の pid を記録するファイルです(/var/run/cron.pidに
+相当するもの)。
 
-crontab は システムの /etc/crontab に相当するものです。
+crontab は システムの /etc/crontab に相当するものです。makefml newml 
+した時に各ＭＬの HOME (config.phのある場所)には crontab という見本
+(4.4BSD形式) が作られます。4.4BSD 形式ではこれを使えばまとめ送りの設定
+ができます。
+
 ＊＊＊注意＊＊＊
-cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
+cron.pl は 4.4 BSD FORMAT を理解します。4.3BSDの形式ではありません
 
-fml のインストール時に make しているなら、samples/crontab があるはずです。
-これを $DIR/etc/crontab にコピーするなり参考にすれば良いでしょう。
 
 
 .S	cron.pl を使う際の注意
-.label	{Matomeokuri-not-cron_2fix}
-.key	Matomeokuri-not-cron_2fix
-.key	attention-4-cron.pl
 
 
 上述のように cron.pl を sendmail が exec して実行するというのはcrontab 
-をユーザー毎に設定できないOSへの対応です。できるなら、 user ごとに 
-crontab を設定できるほうがいいとおもうんですが世の中そういうOSばっかり
-じゃないわけで
+をユーザー毎に設定できない OS への対応です。できるなら user ごとに 
+crontab を設定できるほうがいいとおもうんですが世の中そういう OS ばっか
+りじゃないわけで困ってしまうわけです。
 
-例えば、24時間でおきかえるっていうのも 安全策なだけで、別に1週間走
-らせてもOKです(-n option)。
+例えば、24時間でおきかえるっていうのも安全策なだけで別に1週間走らせて
+もOKです(-n option)。つまり無理に sendmail にcron.pl を走らせさせなく
+ても、ML管理者が login したときだけ cron.pl をいれかえる(実行すれば勝
+手に入れ替わる)のでも大丈夫です。
 
-だから、別に無理に sendmail にcron.pl を走らせさせなくても、ML管理者
-が login したときだけ cron.pl をいれかえる(実行すれば勝手に入れ替わる)
-のでもいいはずです。
+ただ cron.pl が知らない間に落ちてるかもしれない？という可能性もありま
+す。machine が reboot したら当然落ちています。
+システムの cron は /etc/rc が実行するので、reboot してもいいんですが…
+cron.pl の場合はもしマシンがおちたらそれに気づくまでまとめおくりが実行
+されません。
 
-たまに sendmail とうまくおりあえないこともあるみたいなので、そういう時
-はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね?
-
-
-.S	cron.plのrestart
-
-cron.pl がおちるかもしれない？ という可能性があります。
-
-システムの cron は /etc/rc が実行するので、いいんですが…もしマシンが
-おちたら、それにきづくまで、まとめおくり実行されません
-
-そのため、fml.pl が cron.pl をたちあげなおす という必要があります。
-ここは、別に手動でやってもかまわないわけですが、まぁどっちでもいいと。
-
-それが、HOOK でやってることです。
+そのため、fml.pl が cron.pl をたちあげなおすという技も使えます。
+それは HOOK で実現することができます($FML_EXIT_PROG)。
+.k	$FML_EXIT_PROG
 
 
 .# $Id$
