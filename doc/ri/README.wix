@@ -410,7 +410,7 @@ makefml install を使えば必要な作業を行なってくれます。
 	makefml この src/ bin/ sbin/ cf/ doc/ 群をコピーします。
 
 ことを makefml が行ないます。
-注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
+.# 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
 
 .S	新しい機能を有効にするには？
 =E.S	To make new functions effective
