@@ -59,6 +59,10 @@ $HTML_INDEX_REVERSE_ORDER がセットされていると逆方向に <LI> エントリを
 しています。ファイル .indexcache は $HTML_DATA_CACHE で変更できます。
 .k	$HTML_DATA_CACHE
 
+また、スレッドを生成するためのキャッシュのファイル名は 
+$HTML_DATA_THREAD です。
+.k	$HTML_DATA_THREAD
+
 
 コマンドラインからのためのインターフェイスに spool2html.pl というのも
 あります。

@@ -20,11 +20,6 @@
    FAQ、Setting、改造の仕方等に関するガイドになっています。
    ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
 
-   ****************************************************************
-   *** ごめん、いま大書き直し中…少し順番とか入り乱れてます _o_ ***
-   *** (でも90%くらいは終ったな)			        ***
-   ****************************************************************
-
 .~HTML_PRE
 
 ----------目次----------
@@ -33,6 +28,7 @@
 総索引
 ------------------------
 
+
 
 .# ##########################################################
 .P	Design Overview of the fml 
@@ -68,7 +64,6 @@
 .# ##########################################################
 .P	インストールとカスタマイズ
 
-
 .include install.wix
 
 
@@ -84,17 +79,23 @@
 
 .include fop.wix
 .include function.wix
-.include whois.wix
-.include cwhois.wix
-.include fred.wix
+
+.include popfml.wix
+
 .include hack.wix
-.include ftp.wix
 .include hook.wix
+.include uip.wix
+
 .include wix.wix
 .include smtp.wix
-.include uip.wix
+.include ftp.wix
 .include lib.wix
+
+.include whois.wix
+.include cwhois.wix
+
 .include aucea.wix
+.include fred.wix
 .include pager.wix
 
 
@@ -110,7 +111,7 @@
 .P	あとがき
 
 ＃出典のヒントくらいはするかなっ………と P(^^;;;
-＃この辺の並びで出典がわかる人(おぉ同志よ(笑))メールください(^^)
+＃この辺の並びでそよ風を感じる人(おぉ同志よ:-)メールください(^^)
 
 
 .S	主に言葉ではなくコーディングする姿から伝わってくるもの

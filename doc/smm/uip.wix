@@ -219,6 +219,7 @@ SYNOPSIS
 .xref	WIX
 
 WIX言語のフォーマッタ 
+.k	$LANG
 .k	$COMMENT (bin/fwix.pl)
 .k	$KEYWORD (bin/fwix.pl)
 .k	$FORMAT  (bin/fwix.pl)
@@ -240,6 +241,7 @@ WIX言語のフォーマッタ
 
 	HTMLモード用の予約語
 
+   $LANG は 日本語か英語かが入り動作モードを制御しています。
 
 
 .S	URL の中身を取り出す (bin/geturl.pl)
@@ -247,7 +249,9 @@ WIX言語のフォーマッタ
 .l	bin/geturl.pl
 .key	bin/geturl.pl
 .key	geturl.pl
-
+.k	$WWW_HOME
+.k	$WITH_WWW_WATCH
+.k	$LIBRARY_TO_OVERWRITE
 
 	bin/geturl.pl URL
 
@@ -265,6 +269,9 @@ saveします。画像データや音声データでも同様にファイルに落せます。
    LOG>/var/tmp/href:21452 -> index.html
    % ls -l index.html 
    -rw-r--r--  1 fukachan  wheel  2046 Sep 15 18:41 index.html
+
+なお、引数がないと環境変数 $WWW_HOME の内容を落します。
+
 
 
 .S	ローカルテスト (bin/localtest.pl)

@@ -91,7 +91,25 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 		    ($MGET_TEXT_MODE_DEFAULT || 'mp'): 
 			($MGET_BIN_MODE_DEFAULT || 'uu'); 
 .~q
-	    
+
+
+○	Subject の設定 
+.k	$DEFAULT_MGET_SUBJECT
+
+	$DEFAULT_MGET_SUBJECT モード表示 (1/N) ($ML_FN)
+
+になる。
+デフォールト:
+   Results for 'get' [last:2 MIME/multipart] (1/1) (Elena Lolabrigita ML)
+
+○	Subject からモード表示を取る
+.k	$NOT_SHOW_DOCMODE
+
+	$NOT_SHOW_DOCMODE = 1;
+
+で、
+   Results for 'get' [last:2] (1/1) (Elena Lolabrigita ML)
+
 
 .S	mget3 インターフェイス:パターンマッチ戦略
 .key	mget3

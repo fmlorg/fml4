@@ -1,11 +1,11 @@
 .C	インストールについて
 .l	install
 
+
 .S	makefml: 初心者向けインストール・インターフェイス
 .k	makefml: 初心者向けインストール・インターフェイス
 .k	makefml
 .k	sbin/makefml
-.# .include install-new.wix
 
 fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
 では makefml という対話的にインストールや簡単なＭＬの設定を行なうイン
@@ -13,6 +13,10 @@ fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
 
 INSTALL + α でこの doc/op というファイルと INSTALL の中間に当たるユー
 ザーズガイドが整備される予定です。
+
+config.ph に現れるハッシュ %MAKE_FML は makefml で使うためのものです。
+makefml 以外では使われません。
+.k	%MAKE_FML
 
 
 .S	Version up

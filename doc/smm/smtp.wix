@@ -1,60 +1,54 @@
 .C	Mail Delivery System Tuning
 
-.S	%によるリレー
-.key	%リレー
+.S	リレー(RFC821)
+.key	%リレー (obsolete)
 
-sendmail.cf の問題があります。「厳密にはRFCには従ってない?から%なんざぁ
-理解しなくていいんだぜっ!」ってサイトも世の中にはあることに注意しましょ
-う。
+「厳密にはRFCには従ってない?から%なんざぁ理解しなくていいんだぜっ!」っ
+てサイトも世の中にはあることに注意しましょう。
 
 
-.S	activesファイルによるリレー (sendmail 8.x)
-.key	%リレー
+.S	activesファイルによるリレー 
+
 
 actives には
 
-アドレス			リレーサーバー
-fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+	アドレス			リレーサーバー
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 
 のような書き方ができます。これをするとsendmailには
 
-fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
 
-のように渡されます。	
-だからactivesファイルに
+のように渡されます。	だから actives ファイルに
 
-fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
-…
-Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
-…
-cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+	cocoa@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
 
 なものがあると
 
-fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
-Elena%phys.titech.ac.jp@axion.phys.titech.ac.jp
-cocoa%phys.titech.ac.jp@axion.phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:Elena@phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:cocoa@phys.titech.ac.jp
 
-のように渡されてaxion.phys.titech.ac.jpまで一通にまとめられて来て
-axion.phys.titech.ac.jpで3通にばらけます。
+のように渡されます。sendmali 8.x での配送は axion.phys.titech.ac.jp ま
+で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
+
 パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可
 が得られればどこかでリレーサーバーを使えるといいですね。
 
-#注意:RFCに従うなら、% ではなく : を使った形が正しい。
-%式制御は RFCにはないが、これで動くという類のものです。(see rfc821)
+[捕捉]
 
+fml 1.3.2 からは内部表現が拡張性のため違う形になっています。古いフォー
+マットで書いた場合は、自動的にNEW FORMAT に自動変換して解釈しています。
+気にしないで下さい:-)
 
-.S	activesファイルによるリレー (sendmail 8.x) 捕捉
-.key	リレー
-
-1.3.2 からは内部表現が拡張性のため違う形になっています。が、この章の内
-容は依然として有効です。内部で古いフォーマットも自動的に
-NEW FORMAT に自動変換して解釈しています。気にしないで下さい:-)
+OLD FORMATでは
+	fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
 
 NEW FORMATでは
 
-fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp m=1u 
-#意味:axion をリレーサーバとし、まとめおくりは一時間おきにPLAINで
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 
 
 .S	全てのメールをリレーサーバに投げる
@@ -71,12 +65,44 @@ $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 
 .S	activesファイルによるリレー (sendmail 5.x)
 
-fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
-Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
-cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+	cocoa@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
 
 ↑このように順番に並んでいないと一通になってくれませんので注意。
 それ以外は8.xの時と一緒です。
+
+
+.S	CF (by motonori@wde.ad.jp) 形式による relay 
+.k	CF
+.k	$CF_DEF
+.k	%RELAY_NGW
+.k	%RELAY_GW
+.k	%RELAY_NGW_DOM
+.k	$RELAY_HACK
+
+$RELAY_HACK = 1; がセットされ、$CF_DEF で定義された CF 形式の static 
+配送ルールが設定された場合、それにしたがったリレーサーバの設定がされま
+す。
+
+CF 形式の例：
+
+	GW smtp-ignmx:  mlrelay0.domain0
+	DOM or.jp
+
+or.jp ドメイン宛のメールは mlrelay0.domain0 へ全部送る。それ以外は 
+$HOST (通常自分のマシン) で定義されるマシンで配送を行なう。
+
+	NGW smtp-ignmx: mlrelay.domain
+	DOM co.jp
+	GW smtp-ignmx:  mlrelay0.domain0
+	DOM or.jp
+
+co.jp にマッチしないドメイン宛のメールはすべて mlrelay.domain というマ
+シンへ送る。しかし or.jp ドメイン宛のものは mlrelay0.domain0 へ送る。
+
+リレー情報はハッシュテーブルん %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM に
+入れられ、smtp library で利用されます。
 
 
 .S	同じmxについて
@@ -98,6 +124,10 @@ sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
 	cocoa@phys.titech.ac.jp	
 
 一通にまとめられます。
+
+qmail 1.0 はそうことをせず相手の負荷も回線の太さも考えず、ひたすら一通
+ずつ投げつけます(だ〜っ)。
+
 
 .S	MCI Cache
 
@@ -144,9 +174,10 @@ sendmail 8.7 では標準装備ですが、いまは
 
 ○ １つのメールは常に１か所づつ配送されるのでしょうか？
 
-これは カーネルがある時点ではかならず CurrentProcess を実行しているの
-だから、YES です。ただ 通信はしていなくても Connection 自体は OkN 
-の N 個(MAX) ACTIVE なままです（netstat でみえるもの）
+これは (multithread kernel でないのなら) kernel がある時点ではかならず 
+CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
+ても Connection 自体は OkN の N 個(MAX) ACTIVE なままです（netstat で
+みえるもの）。
 
 これにさらに MX Cache 等が組合わさって、R８はR５にくらべ非常に高速化さ
 れましたね。

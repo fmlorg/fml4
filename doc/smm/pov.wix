@@ -880,6 +880,24 @@ members はメンバーであるか否か？の認証、 actives は配送リストです。
 そのため表現の拡張が必要だったわけです。
 
 
+.S	複数のメンバーリスト、複数の配送リスト
+.l	@ACTIVE_LIST
+.l	@MEMBER_LIST
+
+	@ACTIVE_LIST	複数の配送リスト
+
+	@MEMBER_LIST	複数のメンバーリスト
+
+を定義できます。地方ごととか組織ごとにリストを管理するのに便利かも知れ
+ません。
+
+デフォールトでは @ACTIVE_LIST は使われていません。@MEMBER_LIST は 
+members と members-admin です。
+
+歴史: 最初に管理者を設定して後はリモートですべてをおこなうという目的の
+ために拡張されました。
+
+
 .S	msendrc ファイルのフォーマットと構造
 .k	msednrc ファイルのフォーマットと構造
 
@@ -1220,6 +1238,52 @@ CAVEAT
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
+
+
+.S	Directory Permissions
+
+複数の人が fmlserv と一緒に使う場合 fmlserv はメンバーリストを書き変え
+る等のために group permission が必要です。
+＃ そのために root process を作れば、そうでなくてもできなくはないはず
+＃ ですが、root process を増やすことはやりたくないので
+
+	$USE_FML_WITH_FMLSERV
+.l	$USE_FML_WITH_FMLSERV
+
+変数はそれを意味するための内部変数ですが、普通は fml.pl が $DIR の隣に 
+fmlserv という directory があるなら自動的に設定します。うまくいかない
+ときは explicit に設定して下さい。それから
+
+	$GID
+.l	$GID
+
+も fmlserv のために導入された変数ですね。
+
+
+
+.C	Portings
+
+.S	Micro$oft NT 4.0
+.k	$HAS_GETPWUID
+.k	$HAS_GETPWGID
+.k	$HAS_ALARM
+
+	$HAS_GETPWUID
+	$HAS_GETPWGID
+	$HAS_ALARM
+
+の変数はOFFになります。U*ix ではデフォールトでONです。 
+
+.S	arch/ Directory
+.k	$COMPAT_ARCH
+
+fml.pl の次の行は
+
+    if ($COMPAT_ARCH)  { require "arch/${COMPAT_ARCH}.pl";}
+
+Architecture 依存コードをロードするためのものです。
+
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp

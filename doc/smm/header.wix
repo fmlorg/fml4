@@ -186,6 +186,12 @@ From: $MAINTAINER に限っては $MAINTAINER_SIGNATURE で signature をつけ
 .k	$MAINTAINER_SIGNATURE
 
 
+.S	$REPORT_HEADER_CONFIG_HOOK
+.k	$REPORT_HEADER_CONFIG_HOOK
+
+SMTP 配送ライブラリへ渡す直前に評価されるフック。
+
+
 .S	Subject: を (Elena 100) とかの任意の形に成形する
 .l	$SUBJECT_FREE_FORM
 
