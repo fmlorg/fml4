@@ -89,6 +89,7 @@ sub UpperHalf
     &P("</TITLE>");
     &P("</HEAD>");
     &P("<BODY BGCOLOR=\"E6E6FA\">");
+    &P("<A HREF=\"menu.cgi\">return to menu</A>");
 
     if ($ErrorString) { &Exit($ErrorString);}
 
