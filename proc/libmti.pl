@@ -33,7 +33,7 @@ sub MTICache
     $xsender = &Conv2mailbox($e{'h:x-sender:'}, *e);
 
     ## Analizeing Received:
-    $status = &MTI'GetHostInfo(*hostinfo, *e); #';
+    $status = &MTI::GetHostInfo(*hostinfo, *e); 
     if ($status) {
 	&Log("MTI[$$]: $status"); # Information
     }
@@ -488,7 +488,7 @@ sub MTIHintOut
 ######################################################################
 package MTI;
 
-sub Log { &main'Log(@_);} #';
+sub Log { &main::Log(@_);} 
 sub ABS { $_[0] < 0 ? - $_[0] : $_[0];}
 
 # should we try ?
@@ -505,7 +505,7 @@ sub GetHostInfo
     # We trace Received: chain to detect network error (may be UUCP?)
     # where the threshold is 15 min.
     # NOT USED NOW
-    $threshold = $main'MTI_CACHE_HI_THRESHOLD || 15*60; #'; 15 min.
+    $threshold = $main::MTI_CACHE_HI_THRESHOLD || 15*60; # 15 min.
 
     for (split(/\n\w+:/, $buf)) {
 	undef $host; undef $rdate;
@@ -515,7 +515,7 @@ sub GetHostInfo
 	s/by\s+($host_pat).*(\;.*)/$host = $1, $rdate = $2/e;
 
 	if ($rdate) {
-	    $rdate = &main'Date2UnixTime($rdate); #';
+	    $rdate = &main::Date2UnixTime($rdate);
 	    $rdate || next;	# skip if invalid Date:
 	    $hostinfo{$host} = $rdate;
 
@@ -534,7 +534,7 @@ sub GetHostInfo
 }
 
 
-sub main'MTISimpleBomberP #';
+sub main::MTISimpleBomberP
 {
     local(*e, *MTI, *HI, *addrinfo, *hostinfo) = @_;
     local($soft_limit, $hard_limit, $es, $addr);
@@ -542,17 +542,17 @@ sub main'MTISimpleBomberP #';
 
     # BOMBER OR NOT: the limit is 
     # "traffic over sequential 5 mails with 1 mail for each 5s".
-    $soft_limit = $main'MTI_BURST_SOFT_LIMIT || (5/5);   #';
-    $hard_limit = $main'MTI_BURST_HARD_LIMIT || (2*5/5); #';
+    $soft_limit = $main::MTI_BURST_SOFT_LIMIT || (5/5);  
+    $hard_limit = $main::MTI_BURST_HARD_LIMIT || (2*5/5);
 
     # GLOBAL in this Name Space; against divergence
-    $Threshold = $main'MTI_BURST_MINIMUM || 3; #': 
+    $Threshold = $main::MTI_BURST_MINIMUM || 3;
 
     # addresses
     for $addr (keys %addrinfo) {
 	($cr, $scr)  = &SumUp($MTI{$addr});	# CorRelation 
 
-	if (($cr > 0) && $main'debug_mti) { #';
+	if (($cr > 0) && $main::debug_mti) {
 	    &Log("MTI[$$]: SumUp ". 
 		 sprintf("src_cr=%2.4f dst_cr=%2.4f", $scr, $cr));
 	}
@@ -568,11 +568,11 @@ sub main'MTISimpleBomberP #';
 	    $es .= "   MTI[$$]: <$addr> must be a bomber,\n";
 	    $es .= "   since the evaled costs are ".
 		sprintf("src_cr=%2.4f >= dst_cr=%2.4f\n", $scr, $cr);
-	    &main'MTIHintOut(*e); #';
+	    &main::MTIHintOut(*e);
 	}
     }
 
-    &main'MTILog(*e, $es) if $es; #';
+    &main::MTILog(*e, $es) if $es;
 }
 
 
