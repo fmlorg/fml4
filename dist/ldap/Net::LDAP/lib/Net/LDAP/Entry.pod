@@ -1,0 +1,68 @@
+=head1 NAME
+
+Net::LDAP::Entry -- An LDAP entry object
+
+=head1 SYNOPSIS
+
+  use Net::LDAP::Entry;
+  
+  $entry = Net::LDAP::Entry->new;
+  
+  $entry->add(
+    attr1 => 'value1',
+    attr2 => [qw(value1 value2)]
+  );
+  
+  $entry->delete( 'unwanted' );
+  
+  $entry->replace(
+    attr1 => 'newvalue'
+    attr2 => [qw(new values)]
+  );
+
+=head1 DESCRIPTION
+
+=head1 CONSTRUCTOR
+
+=head1 METHODS
+
+=over 4
+
+=item add ( ATTR => VALUE [, ATTR2 => VALUE2 ... ] )
+
+=item replace ( ATTR => VALUE [, ATTR2 => VALUE2 ... ] )
+
+=item delete ( ATTR [, ATTR2 ... ] )
+
+=item dn ( [ DN ] )
+
+=item update ( [ CLIENT ] )
+
+This method is not implemented yet.
+
+=item attributes
+
+=item get ( ATTR )
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::LDAP>
+
+=head1 ACKNOWLEDGEMENTS
+
+This document is based on a document originally written by Russell Fulton
+E<lt>F<r.fulton@auckland.ac.nz>E<gt>.
+
+=head1 AUTHOR
+
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 1997-1999 Graham Barr. All rights reserved. This program is
+free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
+
+=cut

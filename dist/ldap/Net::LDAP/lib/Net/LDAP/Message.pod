@@ -1,0 +1,84 @@
+=head1 NAME
+
+Net::LDAP::Message -- Message response from LDAP server
+
+=head1 SYNOPSIS
+
+  use Net::LDAP;
+
+=head1 DESCRIPTION
+
+B<Net::LDAP::Message> is a base class for the objects returned by the
+L<Net::LDAP> methods
+L<abandon|Net::LDAP/abandon( ID [, OPTIONS])>,
+L<add|Net::LDAP/add( DN [,OPTIONS ])>,
+L<bind|Net::LDAP/bind( DN [, OPTIONS])>,
+L<compare|Net::LDAP/compare( DN [, OPTIONS])>,
+L<delete|Net::LDAP/delete( DN [, OPTIONS])>,
+L<modify|Net::LDAP/modify( DN [, OPTIONS])>,
+L<moddn|Net::LDAP/moddn( DN [, OPTIONS])>,
+L<search|Net::LDAP/search(OPTIONS)> and
+L<unbind|Net::LDAP/unbind>.
+
+The sub-class L<Net::LDAP::Search> returned by L<search|Net::LDAP/search(OPTIONS)> also
+defines many methods.
+
+If the L<Net::LDAP> object is in async mode then all these methods, except
+C<done>, will cause a wait until the request is completed.
+
+=head1 METHODS
+
+=over 4
+
+=item code
+
+The code value in the result message from the server. Normally for
+a success zero will be returned. L<Constants|Net::LDAP::Constant> for the result codes
+can be imported from the L<Net::LDAP> module.
+
+=item error
+
+The error message in the result message from the server.
+
+=item mesg_id
+
+The message id of the request message sent to the server.
+
+=item done
+
+Returns I<true> if the request has been completed.
+
+=item dn
+
+The DN in the result message from the server.
+
+=item sync
+
+Wait for the server to complete the request.
+
+=item referrals
+
+Returns a list of referrals from the result message.
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::LDAP>, L<Net::LDAP::Search>, L<Net::LDAP::Constants>
+
+=head1 ACKNOWLEDGEMENTS
+
+This document is based on a document originally written by Russell Fulton
+E<lt>F<r.fulton@auckland.ac.nz>E<gt>.
+
+=head1 AUTHOR
+
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1997-1999 Graham Barr. All rights reserved. This program is
+free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
+
+=cut

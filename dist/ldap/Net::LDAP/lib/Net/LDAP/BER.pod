@@ -1,0 +1,245 @@
+=head1 NAME
+
+Net::LDAP::BER -- BER encoding for LDAP
+
+=head1 SYNOPSIS
+
+  use Net::LDAP::BER;
+  
+  $ber = Net::LDAP::BER->new;
+  
+  $ber->encode( # A bind encode
+    SEQUENCE => [
+      INTEGER  => $mesg->mesg_id,
+      REQ_BIND => [
+        INTEGER     => $version,
+        LDAPDN      => $dn || "",
+        $auth_type  => $passwd
+      ],
+      OPTIONAL => [ BER => $ctrl ]
+    ]
+  );
+  
+  $ber->decode( # The decode in Net::LDAP::Message
+    $self->result_tag => [
+      ENUM     => \$code,
+      STRING   => \$dn,
+      STRING   => \$error,
+      OPTIONAL => [ 
+        LDAP_REFERRAL => [
+          STRING => $referral = []
+        ]
+      ]
+    ]
+  );
+
+=head1 DESCRIPTION
+
+C<Net::LDAP::BER> is a sub-class of L<Convert::BER> and inherits all its
+methods from L<Convert::BER>. It defines the following tags
+
+=over 20
+
+=item REQ_BIND
+
+[APPLICATION 0] SEQUENCE
+
+=item REQ_UNBIND
+
+[APPLICATION 2] NULL
+
+=item REQ_SEARCH
+
+[APPLICATION 3] SEQUENCE
+
+=item REQ_MODIFY
+
+[APPLICATION 6] SEQUENCE
+
+=item REQ_ADD
+
+[APPLICATION 8] SEQUENCE
+
+=item REQ_DELETE
+
+[APPLICATION 10] STRING
+
+=item REQ_MODDN
+
+[APPLICATION 12] SEQUENCE
+
+=item REQ_COMPARE
+
+[APPLICATION 15] SEQUENCE
+
+=item REQ_ABANDON
+
+[APPLICATION 16] INTEGER
+
+=item REQ_EXTEND
+
+[APPLICATION 17] SEQUENCE
+
+=item RES_BIND
+
+[APPLICATION 1] SEQUENCE
+
+=item RES_SEARCH_ENTRY
+
+[APPLICATION 4] SEQUENCE
+
+=item RES_SEARCH_RESULT
+
+[APPLICATION 5] SEQUENCE
+
+=item RES_SEARCH_REF
+
+[APPLICATION 19] SEQUENCE
+
+=item RES_MODIFY
+
+[APPLICATION 7] SEQUENCE
+
+=item RES_ADD
+
+[APPLICATION 9] SEQUENCE
+
+=item RES_DELETE
+
+[APPLICATION 11] SEQUENCE
+
+=item RES_MODDN
+
+[APPLICATION 13] SEQUENCE
+
+=item RES_COMPARE
+
+[APPLICATION 15] SEQUENCE
+
+=item RES_EXTEND
+
+[APPLICATION 24] SEQUENCE
+
+=item AUTH_NONE
+
+[CONTEXT 0] STRING
+
+=item AUTH_SIMPLE
+
+[CONTEXT 0] STRING
+
+=item AUTH_KRBV41
+
+[CONTEXT 1] STRING
+
+=item AUTH_KRBV42
+
+[CONTEXT 2] STRING
+
+=item AUTH_SASL
+
+[CONTEXT 3] SEQUENCE
+
+=item SASL_CREDENTIALS
+
+[CONTEXT 7] STRING
+
+=item SASL_MECHANISM
+
+STRING
+
+=item FILTER_AND
+
+[CONTEXT 0] SEQUENCE
+
+=item FILTER_OR
+
+[CONTEXT 1] SEQUENCE
+
+=item FILTER_NOT
+
+[CONTEXT 2] SEQUENCE
+
+=item FILTER_EQ
+
+[CONTEXT 3] SEQUENCE
+
+=item FILTER_SUBSTRS
+
+[CONTEXT 4] SEQUENCE
+
+=item FILTER_GE
+
+[CONTEXT 5] SEQUENCE
+
+=item FILTER_LE
+
+[CONTEXT 6] SEQUENCE
+
+=item FILTER_PRESENT
+
+[CONTEXT 7] STRING
+
+=item FILTER_APPROX
+
+[CONTEXT 8] SEQUENCE
+
+=item SUBSTR_INITIAL
+
+[CONTEXT 0] STRING
+
+=item SUBSTR_ANY
+
+[CONTEXT 1] STRING
+
+=item SUBSTR_FINAL
+
+[CONTEXT 2] STRING
+
+=item LDAPDN
+
+STRING
+
+=item LDAP_CONTROLS
+
+[CONTEXT 0] SEQUENCE
+
+=item LDAP_REFERRAL
+
+[CONTEXT 3] SEQUENCE
+
+=item EXTEND_REQ_NAME
+
+[CONTEXT 0] STRING
+
+=item EXTEND_REQ_VALUE
+
+[CONTEXT 1] STRING
+
+=item MOD_SUPERIOR
+
+[CONTEXT 0] STRING
+
+=back
+
+
+=head1 SEE ALSO
+
+L<Net::LDAP>, L<Convert::BER>
+
+=head1 ACKNOWLEDGEMENTS
+
+This document is based on a document originally written by Russell Fulton
+E<lt>F<r.fulton@auckland.ac.nz>E<gt>.
+
+=head1 AUTHOR
+
+Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 1997-1999 Graham Barr. All rights reserved. This program is
+free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
+
+=cut

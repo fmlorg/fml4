@@ -1,0 +1,54 @@
+Howdy,
+
+Here's my first draft on a new script that I'd like to submit for an example
+script (or at least for general use) for Net::LDAP.
+
+It's called isMember.pl. What it does is tell you if a given user is a member of
+a particular group. You specify the group name and username on the command line
+(and you can also specify the other common LDAP options such as host, binding
+credentials etc via the command line as well).
+
+Here is an example of how to use it and output:
+perl isMember.pl -n "Acounting Managers" -u scarter
+scarter is a member of group Acounting Managers
+
+The script assumes that you make the DN of your groups with the cn attribute
+(e.g. cn=Accounting Managers, ...) and that the group is of object class
+groupOfUniqueNames. You can of course modify the script for your own use. While I
+tested it with Netscape DS 4, it should work with any LDAP server (e.g. I'm not
+relying on anything funky like dynamic groups).
+
+And of course Your Mileage May Vary.
+
+Mark
+
+-----------------------------------------------------------------------------
+
+Hi,
+Here is an update to the isMember.pl script that I submitted last week.
+As per the suggestion of Chris Ridd, the script returns true if the user
+is a member of a group who is a member of the original group. I've
+tested this down to 2 sub-group levels (e.g. user is a member of group C
+which is a member of group B which is a member of the original group,
+group A)
+
+My next option to add is support of Netscape Dynamic Groups.
+
+Here's a small list of the other things that I'm working on (and
+hopefully will be able to submit to the list, some of them are for work
+and may not be able to be released, but since I work for a university I
+don't think there will be a problem):
+
+1) script to add/remove members to a group
+2) script to send mail to a list as long as the orignal email address is
+from the owner of the group
+3) a web LDAP management system. I've written a bare bones one in
+Netscape's PerLDAP API, but I'd like to write something closer to
+Netscape's Directory Server gateway that could possibly combine in
+Text::Template for display & development. If someone would like to help
+with this, let me know. I need it for work, so I'm going to do it (and
+rather soon since it needs to be operational by end of September at the
+latest).
+
+Mark
+

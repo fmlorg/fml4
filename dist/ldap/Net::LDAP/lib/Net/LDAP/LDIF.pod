@@ -1,0 +1,44 @@
+=head1 NAME
+
+Net::LDAP::LDIF -- LDIF reading and writing
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ( [ FILE [, MODE]] )
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item read
+
+=item read_cmd
+
+=item write ( ENTRIES )
+
+=item write_cmd ( ENTRIES )
+
+=back
+
+=head1 AUTHOR
+
+Graham Barr F<L<E<lt>gbarr@pobox.comE<gt>|mailto:gbarr@pobox.com>>.
+
+Please report any bugs, or post any suggestions, to the perl-ldap mailing list
+F<L<E<lt>perl-ldap@mail.med.cornell.eduE<gt>|mailto:perl-ldap@mail.med.cornell.edu>>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 1997-1999 Graham Barr. All rights reserved. This program is
+free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
+
+=cut
