@@ -1,0 +1,123 @@
+NAME
+	ircstat - irc statistics
+
+SYNOPSIS
+	ircstat [-dh] [-I INC] [-t title] [-L file] -f file
+
+DESCRIPTION
+
+IRCに入ってLUSERSコマンドでユーザ数のログをとる。
+
+	1. まず、IRCクライアントででてくるようなパラメータの設定をする。
+
+	2. struct sockaddr のチェックなどマシン固有の環境について設定
+	   する。
+	   本来は fml インストーラが行なうので関係ないが、ircstat を
+	   独立で動かす場合には必要。なお NetBSD がデフォールト環境である。
+
+	3. -H オプションないし @IRCSTAT_HOST で見張るホストを定義する。
+
+	4. log (-L)ファイルには常に吐く。 -S で syslog にも吐くように
+	   なる。
+
+	   perl が syslog を使えるようにするのはインストールする人の役
+	   目である。
+
+	5. 必要なら debug mode (-d) で様子を見るなどする。
+	
+6. Here we go!
+
+
+   共通の設定(ircstat 以外にもこのライブラリは使われる)
+
+	$IRC_CHANNEL = "";
+		join するチャンネル ; ircstat ではどうでもいい 
+
+	$IRC_NAME    = 'spam';
+	$IRC_NICK    = 'spam';
+
+		name, nickname
+	
+	$IRC_SERVER  = "irc-server.spam.org";
+	$IRC_PORT    = 6667;
+
+		connect するIRCサーバとポート
+
+	$IRC_SERVER_TIMEOUT = 1800;
+
+		なんかつながってるようだけどでもDATAがこの時間何もないなら
+		一回セッションを切って reconnect を試みる
+
+	$IRC_TIMEOUT = 2;
+
+		select() のTIMEOUT
+
+	$IRC_SIGNOFF_MSG = 'Seeing you';
+
+		さよなら〜 のメッセージ
+
+	$FP_GET_NEXT_BUFFER
+		関数定義(高度なカスタマイズ用)
+
+
+   IRCSTAT 固有の設定
+
+	@IRCSTAT_HOST
+		見張るホストのリスト(配列)
+		-H host1:host2 で上書きできる
+		e.g. @IRCSTAT_HOST = (hikari, teapot)
+
+   マシン情報(注意: fml ではインストーラが定義するもの)
+
+	$CPU_TYPE_MANUFACTURER_OS
+
+		GNU automake の config.guess の値; sysv/solaris でない
+		のならなくてもいい
+
+	$STRUCT_SOCKADDR = "S n a4 x8";
+		struct sockaddr の定義
+		   4.x BSD では "S n a4 x8"
+		   BSD/OS 3.x 以降では "x C n C4 x8"
+		など
+
+
+  コマンドラインオプション
+
+	ircstat [-dh] [-I INC] [-t title] [-L file] -f file
+	
+	-f file  perl configuration file (required)
+	
+	-L file  log file
+	-I INC   add include path to @INC
+	-t title setproctitle(title)
+	-H a:b:c HOSTS to monitor (ircstat option)
+	
+	-d       debug mode
+	-h       this message
+	-S       use syslog
+
+
+起動スクリプトの例:
+
+   #!/bin/sh
+
+   # list to monitor
+   HOST=hikari.sapporo.iij.ad.jp:teapot.iij-mc.co.jp
+
+   # -d to debug
+   # -S to use syslog()
+   exec ircstat -f /some/where/ircstat.ph -H $HOST -S $*
+
+
+
+AUTHOR
+
+				Ken'ichi Fukamachi
+
+Copyright (C) 1998 Ken'ichi Fukamachi <fukachan@fml.org>
+         All rights reserved. 
+
+libirc.pl (== ircstat) is originally fml distribution. FML is free
+software; you can redistribute it and/or modify it under the terms of
+GNU General Public License. See the file COPYING in fml distribution
+for more details.
