@@ -72,15 +72,15 @@ loop:
 	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
 
 e:	testsetup
-	@ echo 'make m is to re-generate /tmp/e/makefml'
-	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /tmp/e/.fml/system install)
+	@ echo 'make m is to re-generate /usr/local/fml/makefml'
+	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /usr/local/fml/.fml/system install)
 
 cgi:	testsetup cgisetup cgisync
 
 cgisetup:
-	@ echo 'make m is to re-generate /tmp/e/makefml'
+	@ echo 'make m is to re-generate /usr/local/fml/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; \
-		env MKDOC=no perl makefml -W cgi -f /tmp/e/.fml/system install)
+		env MKDOC=no perl makefml -W cgi -f /usr/local/fml/.fml/system install)
 	rm -f /usr/local/fml/share/cgi-bin/fml/admin/.htaccess
 
 cgisync: export
@@ -96,8 +96,8 @@ export: libkern /usr/local/fml/makefml
 m:	testsetup /usr/local/fml/makefml
 
 /usr/local/fml/makefml: sbin/makefml
-	if [ -d /tmp/e ]; then \
-	 perl w/repl.pl sbin/makefml > /tmp/e/makefml ; fi
+	if [ -d /usr/local/fml ]; then \
+	 perl w/repl.pl sbin/makefml > /usr/local/fml/makefml ; fi
 
 
 
