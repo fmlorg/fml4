@@ -581,11 +581,12 @@ sub Parsing { &Parse;}
 sub Parse
 {
     $0 = "$FML: Parsing header and body <$LOCKFILE>";
-    local($bufsiz, $buf, $p, $maxbufsiz);
+    local($bufsiz, $buf, $p, $maxbufsiz, $in_header);
 
     $maxbufsiz = &ATOI($INCOMING_MAIL_SIZE_LIMIT) if $INCOMING_MAIL_SIZE_LIMIT;
 
     undef $Envelope{'Body'};
+    $in_header = 1; # firstly header comes.
     while ($p = sysread(STDIN, $_, 1024)) {
 	$bufsiz += $p; 
 
@@ -595,13 +596,16 @@ sub Parse
 	}
 
 	$Envelope{'Body'} .= $_;
-    }
 
-    # XXX malloc() too much?
-    # Split buffer to Header and Body
-    $p = index($Envelope{'Body'}, "\n\n");
-    $Envelope{'Header'} = substr($Envelope{'Body'}, 0, $p + 1);
-    $Envelope{'Body'}   = substr($Envelope{'Body'}, $p + 2);
+	if ($in_header) {
+	    # separator between header and body is found!
+	    if (($p = index($Envelope{'Body'}, "\n\n", 0)) > 0) {
+		$Envelope{'Header'} = substr($Envelope{'Body'}, 0, $p + 1);
+		$Envelope{'Body'}   = substr($Envelope{'Body'}, $p + 2);
+		$in_header = 0;
+	    }
+	}
+    }
 
     # Really? but check "what happen if no input is given?".
     if ($bufsiz == 0) {
@@ -888,7 +892,7 @@ sub CheckCurrentProc
 	&Log("cannot get boundary string of Content-Type");
 	&Log("Content-Type: $e{'h:content-type:'}");
     }
-    
+
     # Check the range to scan
     $limit =  $GUIDE_CHECK_LIMIT > $COMMAND_CHECK_LIMIT ? 
 	$GUIDE_CHECK_LIMIT  : $COMMAND_CHECK_LIMIT;
@@ -905,14 +909,15 @@ sub CheckCurrentProc
     $limit += 10; # against MIME
     $p = 0;
     while ($limit-- > 0) { 
-	if (index($e{'Body'}."\n", "\n", $p + 1) > 0) {
-	    $p = index($e{'Body'}."\n", "\n", $p + 1);
+	if (index($e{'Body'}, "\n", $p + 1) > 0) {
+	    $p = index($e{'Body'}, "\n", $p + 1);
 	}
 	else {
 	    last;
 	}
     }
-    $buf = substr($e{'Body'}, 0, $p + 1); # +1 for the last "\n";
+    # +1 for the last "\n";
+    $buf = substr($e{'Body'}, 0, $p > 0 ? $p+1 : 1024);
 
     # check only the first $limit lines.
     local($found, $mime_skip);
