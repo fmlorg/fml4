@@ -539,6 +539,8 @@ config.ph あたりで
 
 .S	メールの最後に付加情報をつける設定
 
+注意: 基本的にコマンドの話です。
+
 	$PREAMBLE_MAILBODY	（前）
 	$TRAILER_MAILBODY	（後）
 	を本文の前後に必ず付けます。
@@ -559,10 +561,16 @@ config.ph あたりで
 
 これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
 
+注意： 配送されるメール本体につける方法。これは倫理的な問題があるので
+変数などで容易にできるように実装されていません。
+
    $SMTP_OPEN_HOOK = q# $e{'Body'} .= "Mail Count: $ID\n\n".$e{'Body'}; #;
+   注意：このHOOKが走る関数中では %e == %Envelope 
 
-注意：このHOOKが走る関数中では %e == %Envelope 
-
+例： メール本文にヘルプを常につけたす
+   $SMTP_OPEN_HOOK = 
+       q% $e{'Body'} .= 
+       "\nTo need help, please send '# help' to elena-ctl\@fml.org."; %;
 
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
