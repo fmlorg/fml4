@@ -46,12 +46,18 @@ $MailDate = &GetDate;
 
 $PL = "${PL}pl$patchlevel" if $patchlevel;
 
+$DailyID = $BRANCH. " ". &YYYYMMDD;
+
 if ($SHOW_ID) { 
-    print "fml $ID$PL\n"; 
-    exit 0;
+   if ($MODE eq 'daily') {
+       print "fml $DailyID\n";
+   }
+   else {
+       print "fml $ID$PL\n";
+   }
+   exit 0;
 }
 
-local($dailyid) = $BRANCH. " ". &YYYYMMDD;
 while (<>) {
     if (/^\$Rcsid.*=\s+[\'\"](\S+)/) {
 	$prog = $1;	# reset;
@@ -63,8 +69,8 @@ while (<>) {
 	}
 
 	if ($MODE eq 'daily') {
-		print STDERR "Replaced -> '$prog [fml $dailyid]';\n";
-		print "\$Rcsid   = '$prog [fml $dailyid]';\n";
+		print STDERR "Replaced -> '$prog [fml $DailyID]';\n";
+		print "\$Rcsid   = '$prog [fml $DailyID]';\n";
 	}
 	else {
 		print STDERR "Replaced -> '$prog [fml $ID$PL]';\n";
