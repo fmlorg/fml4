@@ -24,12 +24,12 @@ config.ph 等で定義しなおしてください。
 	 'References', 'Keywords', 'Comments', 'Encrypted',
 	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
 	 'XRef', 'X-Stardate', 'X-ML-Info', ':body:', ':any:', 
-	 'X-Authentification-Warning',
+	 'X-Authentication-Warning',
 	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
 	 'Content-ID', 'Content-Description', # RFC2045
 	 'Precedence', 'Lines');
 
-のように定義されています。X-Authentification-Warning は
+のように定義されています。X-Authentication-Warning は
 PICKY_HELO_CHECK (sendmail) 等で Security の Warning がつくので通すよ
 うにしました。
 
