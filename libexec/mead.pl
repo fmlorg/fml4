@@ -671,7 +671,8 @@ sub DeadOrAlive
 	my ($a);
 	for $a (keys %logaddr) {
 	    if ($addr{"$a $ml"} > 0) {
-		&Log("eval: <$a> = $addr{\"$a $ml\"} points");
+		&Log(sprintf("eval: %-40s = %d points", 
+			     "<$a>", $addr{"$a $ml"}));
 	    }
 	}
     }
@@ -679,7 +680,8 @@ sub DeadOrAlive
     print NEW "#check $now\n";
     close(CACHE_FILE);
 
-    rename($new, $CACHE_FILE) || &Die("CacheOn: cannot rename $new $CACHE_FILE");
+    rename($new, $CACHE_FILE) || 
+	&Die("CacheOn: cannot rename $new $CACHE_FILE");
 
     ### remove address 
     local($addr, $admin);
@@ -874,6 +876,7 @@ sub Mail
     print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
     print MAIL "Subject: fml mail error analyzer (mead) report for ML <$ml>\n";
     print MAIL "To: ". $ml'MAA{$ml} . "\n"; #';
+    print MAIL "X-MLServer: mead\n";
     print MAIL "\n";
     print MAIL $buf;
 
@@ -936,7 +939,12 @@ sub Action
     }
     else{
 	&Log("warn: ml='$ml' is invalid");
-	# return;
+	return;
+    }
+
+    if (&ml::ValidMailListP($addr)) {
+	&Log("warn: <$addr> is a mailing list name (ignored)");
+	return;
     }
 
     if (&ValidAddressP($addr)) {
@@ -1231,6 +1239,13 @@ sub ValidMLP
     $Valid{$mladdr} ? 1 : 0;
 }
 
+
+sub ValidMailListP
+{
+    my ($addr) = @_;
+    $MAIL_LIST{$addr}; 
+}
+
 sub main'MLEntryOn #';
 {
     local($spool) = @_;
@@ -1272,6 +1287,9 @@ sub main'MLEntryOn #';
 	    $MAA{$ml} = $MAINTAINER; # ML Admin Address
 	    $CA{$ml}  = $CONTROL_ADDRESS || $MAINTAINER;
 	    $CTK{$ml} = ($CONTROL_ADDRESS eq $MAIL_LIST) ? '# ' : '';
+
+	    # valid ?
+	    $MAIL_LIST{$MAIL_LIST} = 1;
 	}
 
     }
