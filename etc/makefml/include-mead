@@ -1,4 +1,5 @@
 # MEAD: Mail Error Analyze Daemon ("-m auto" to remove address automatically)
-# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
+# a lot of available options. See the chapter on error mail handlings at
+# http://www.fml.org/software/fml/Japanese/tutorial.html on the usage.
 "|_EXEC_DIR_/libexec/mead.pl -E _EXEC_DIR_ -S _ML_DIR_ -D _ML_DIR_/_ML_"
 
