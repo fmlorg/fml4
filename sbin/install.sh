@@ -1,5 +1,7 @@
 #!/bin/sh
 
+eval umask 022;
+
 DIRS="bin sbin libexec cf etc doc doc/html"
 EXEC_DIR=$1
 ARCH_DIR="$1/arch"

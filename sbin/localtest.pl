@@ -1,10 +1,11 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
 push(@INC, './proc');
+push(@INC, './src');
 
 require 'libkern.pl';
 require 'config.ph';
@@ -31,14 +32,14 @@ if ($MAINTAINER !~ /domain\.uja/) {
 }
 
 
-$FROM            = "$acct\@$FQDN";
+$From            = "$acct\@$FQDN";
 $MAINTAINER      =~ s/domain\.uja/$FQDN/;
 $MAIL_LIST       =~ s/domain\.uja/$FQDN/;
 $CONTROL_ADDRESS =~ s/domain\.uja/$FQDN/;
 
 
-$header = qq#From $FROM
-From: $FROM
+$header = qq#From $From
+From: $From
     (uja)
 To: $MAIL_LIST
 Subject: make localtest 
@@ -50,6 +51,6 @@ Content-type: multipart/mixed; boundary="simple      boundary"
 $body = "test\n";
 
 ##############################
-print "$header\n$body;
+print "$header\n$body";
 
 1;
