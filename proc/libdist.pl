@@ -183,7 +183,10 @@ sub DoDistribute
     # 
     local($umask) = umask(027) if $USE_FML_WITH_FMLSERV;
 
-    if (! -f "$FP_SPOOL_DIR/$ID") {	# not exist
+    if ($NOT_USE_SPOOL) {
+	;
+    }
+    elsif (! -f "$FP_SPOOL_DIR/$ID") {	# not exist
 	&Log("ARTICLE $ID");
 	&Write3(*e, "$FP_SPOOL_DIR/$ID");
     } 
