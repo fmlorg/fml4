@@ -55,6 +55,12 @@ site_init.phに
 
 書いておいて、これとfml.plのsymbolic linkをsmrshのディレクトリにはる
 
+fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl を smrshのディ
+レクトリにリンクしておくことも必要です。例:
+
+	% ln -s /usr/local/fml/libloadconfig.pl smrshのディレクトリ
+
+
 Refercnes:
 
 See fml-support ML:
@@ -62,7 +68,7 @@ See fml-support ML:
 01877,01879,01881
 03942,03944,03965
 05706,05708,05712,05715,05721,05722,05723,05724,05725,05726,05727,05728
-07458
+07458,07733
 
 $Id$
 .~HTML_PRE
