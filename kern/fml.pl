@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.130 2001/05/09 15:22:54 fukachan Exp $
+# $FML: fml.pl,v 2.131 2001/05/11 17:15:21 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -404,7 +404,7 @@ sub SetDefaults
 	 'References', 'Keywords', 'Comments', 'Encrypted',
 	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
 	 'XRef', 'X-Stardate', 'X-ML-Info', 
-	 'X-Mailer',
+	 'X-Mailer', 'X-Dispatcher', 'X-Newsreader', 'User-Agent',
 	 'Mail-Followup-To',	# I-D now?
 	 ':body:', ':any:', 
 	 'X-Authentication-Warning',
