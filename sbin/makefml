@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -13,7 +13,6 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 
-
 &InitMakeFml;
 &InitTTY;
 
@@ -23,9 +22,7 @@ if (@ARGV) {
     &ExecCmd(join(" ",@ARGV));
 }
 else {
-    &InitFmlConfig;
-    &ExecCmd("init");
-    &ExecCmd("install");
+    &ExecCmd("info");
 }
 
 # RESERVED FOR FURTHER EXTENTION;
@@ -50,6 +47,9 @@ sub InitMakeFml
 
     require 'getopts.pl';
     &Getopts("dhf:A:");
+
+    # flush;
+    select(STDOUT); $| = 1;
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -97,8 +97,13 @@ sub InitMakeFml
     # config amd temporary files
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
     $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
-    $FML_CONFIG  = $opt_f || "$CONFIG_DIR/system";
 
+    if ($opt_f) {
+	$FML_CONFIG  = $opt_f;	
+    }
+    else {
+	$FML_CONFIG  = "$CONFIG_DIR/system";
+    }
 
     # initialize files
     if (-f $FML_CONFIG) {
@@ -171,25 +176,41 @@ sub InitMakeFml
 	$Default{'ML_DIR'}   = "$dir\\fml\\ml";
     }
 
-    %MakeFmlProc = ('init',    'do_init',
-		    'install', 'do_install',
-		    'setq',    'do_setq',
-		    'show',    'do_show',
-		    'config',  'do_config',
-		    'new',     'do_newml',
-		    'newml',   'do_newml',
-		    'add',     'do_adduser',
-		    'adduser', 'do_adduser',
-		    'bye',     'do_byeuser',
-		    'byeuser', 'do_byeuser',
+    %MakeFmlProc = ('init',     'do_init',
+		    'install',  'do_install',
+		    '0#install', 'Install the fml system',
+		    'info',     'do_info',
+		    '0#info',    'show this message',
+		    'setq',     'do_setq',
+		    'show',     'do_show',
+		    'config',   'do_config',
+		    'new',      'do_newml',
+		    'newml',    'do_newml',
+		    '1#newml ML',   'make a new Mailing List <ML>',
+		    'add',      'do_adduser',
+		    '2#add ML address',     'add <address> to <ML>',
+		    'adduser',  'do_adduser',
+		    '2#adduser ML address', 'add <address> to <ML>',
+		    'bye',      'do_byeuser',
+		    '3#bye ML address',     'remove <address> from the <ML>',
+		    'byeuser',  'do_byeuser',
+		    '3#byeuser ML address', 'remove <address> from the <ML>',
 		    'addadmin', 'do_addadmin',
+		    '4#addadmin ML address', 'add <address> as an admin to <ML>',
 		    'byeadmin', 'do_byeadmin',
+		    '4#byeadmin ML address', 'remove the administrator of the <ML>',
 		    'help',	'do_help',
+		    '8#help',	'help message',
 		    'passwd',	'do_passwd',
+		    '8#passwd ML address',	'to change the administrator passwd',
 
-		    'fmlserv',   'do_fmlserv',
-		    'listserv',  'do_fmlserv',
-		    'marjodomo', 'do_fmlserv',
+		    'fmlserv',  'do_fmlserv',
+		    'listserv', 'do_fmlserv',
+		    'marjodomo','do_fmlserv',
+
+		    '10#fmlserv', 'set up fmlserv (listserv-like interface)',
+		    '10#listserv','set up fmlserv (listserv-like interface)',
+		    '10#majordomo','set up fmlserv (listserv-like interface)',
 		    );
 
     ### anyway reload and set the present config for convenience;
@@ -838,7 +859,11 @@ sub ResetVariables
     }
 
     # Mailing list name is all lower case;
-    $ml =~ tr/A-Z/a-z/;
+    # $ml =~ tr/A-Z/a-z/;
+
+    if (-f "$MLDir/$ml") {
+	die("Cannot find $ml. you've not created it yet?\n");
+    }
 
     $ML_ETC_DIR = "$MLDir/etc";
 }
@@ -856,16 +881,16 @@ sub GenCrontab
 	(&Warn("cannot open $ML_ETC_DIR/crontab/$USER"), return);
     select(TAB); $| = 1; select(STDOUT);
 
-    opendir(DIRD, $ML_ETC_DIR) || (&Warn("cannot open $ML_ETC_DIR"), return);
+    opendir(DIRD, $MLDir) || (&Warn("cannot open $MLDir"), return);
     for (readdir(DIRD)) {
 	next if /^\./;
 
-	$uid = (stat("$ML_ETC_DIR/$_/crontab"))[4];
+	$uid = (stat("$MLDir/$_/crontab"))[4];
 
 	# if $uid == real-UID;
-	if (($uid == $<) && -f "$ML_ETC_DIR/$_/crontab") {
-	    if (open(IN, "$ML_ETC_DIR/$_/crontab") ) {
-		while (<IN>) {  print TAB $_;}
+	if (($uid == $<) && -f "$MLDir/$_/crontab") {
+	    if (open(IN, "$MLDir/$_/crontab") ) {
+		while (<IN>) { print TAB $_;}
 		close(IN);
 	    }
 	}
@@ -977,9 +1002,9 @@ sub FixIncludeHeader
 
     &ResetVariables;
 
-    print STDERR "\tGenerating $ML_ETC_DIR/$ml/config.h\n";
+    print STDERR "\tGenerating $MLDir/$ml/config.h\n";
 
-    if (open(GUESS, "> $ML_ETC_DIR/$ml/config.h")) {
+    if (open(GUESS, "> $MLDir/$ml/config.h")) {
 	foreach $file (@include) {
 	    if ( -f "$INCDIR/$file" ) {
 		print GUESS "\#include <$file>\n";
@@ -1009,14 +1034,14 @@ sub do_passwd
     local($ml, $member, $passwd) = @_;
     local($passwd_file);
 
-    umask(077);
+    umask(022);
 
     print "---Changing Passwd of Admin $member in $ml mailing list\n";
 
     &ResetVariables;
 
     # $ml/etc
-    -d "$MLDir/$ml/etc" || mkdir("$MLDir/$ml/etc", 0700);
+    -d "$MLDir/$ml/etc" || mkdir("$MLDir/$ml/etc", 0755);
     $passwd_file= "$MLDir/$ml/etc/passwd";
 
     -f $passwd_file || &Touch($passwd_file);
@@ -1083,9 +1108,39 @@ sub do_init
 }
 
 
+sub do_info
+{
+    print STDERR "*" x 60; print STDERR "\n";
+    print STDERR "makefml Usage:\n\n";
+
+    printf STDERR "   makefml %-20s %s\n", "command arguments", "what";
+    print STDERR "   ".("-"x57)."\n\n";
+
+    for (sort {$a <=> $b} keys %MakeFmlProc) {
+	next unless /^\d+\#/;
+	$usage = $MakeFmlProc{$_};
+
+	s/^(\d+\#)//;
+
+	printf STDERR "   makefml %-20s %s\n", $_, $usage;
+    }
+
+    print STDERR "\n";
+    print STDERR "*" x 60; print STDERR "\n";
+    print STDERR "\n";
+    print STDERR "HOW TO INSTALL:\n";
+    print STDERR "Please input \"perl makefml install\" to INSTALL the fml\n";
+    print STDERR "\n";
+}
+
+
 sub do_install
 {
     local($cmd);
+
+    # main proc -> here;
+    &InitFmlConfig;
+    &ExecCmd("init");
 
     print "---Install the Fml system to $CurConfig{'EXEC_DIR'}. O.K.? y/n [n] ";
     $cmd = &GetString;
@@ -1171,11 +1226,8 @@ sub GenerateDirectory
     -d "$ML_ETC_DIR/$ml"     || mkdir("$ML_ETC_DIR/$ml", 0755);
 
     # owner only read-write
-    umask(077);
-    -d "$MLDir/$ml"         || mkdir("$MLDir/$ml", 0700);
-
-
-
+    # umask(077);
+    -d "$MLDir/$ml"         || mkdir("$MLDir/$ml", 0755);
 }
 
 
@@ -1192,10 +1244,10 @@ sub do_newml
     ### cf file; 
     umask(022);
 
-    #print STDERR "$ExecDir/cf/__makefml -> $ML_ETC_DIR/$ml/cf\n";
-    &Conv($ml, "$ExecDir/cf/__makefml", "$ML_ETC_DIR/$ml/cf");
+    #print STDERR "$ExecDir/cf/__makefml -> $MLDir/$ml/cf\n";
+    &Conv($ml, "$ExecDir/cf/__makefml", "$MLDir/$ml/cf");
 
-    if ($OS_TYPE && open(CF, ">> $ML_ETC_DIR/$ml/cf")) {
+    if ($OS_TYPE && open(CF, ">> $MLDir/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
 	&OutPutLocalConfig(*MAKE_FML);
@@ -1206,10 +1258,10 @@ sub do_newml
 
     # include file is public readable;
     # why for () fails?;
-    &Conv($ml, "$ExecDir/etc/makefml/include", "$ML_ETC_DIR/$ml/include");
-    &Conv($ml, "$ExecDir/etc/makefml/aliases", "$ML_ETC_DIR/$ml/aliases");
-    &Conv($ml, "$ExecDir/etc/makefml/crontab", "$ML_ETC_DIR/$ml/crontab");
-    &Conv($ml, "$ExecDir/etc/makefml/fml.c",   "$ML_ETC_DIR/$ml/fml.c");
+    &Conv($ml, "$ExecDir/etc/makefml/include", "$MLDir/$ml/include");
+    &Conv($ml, "$ExecDir/etc/makefml/aliases", "$MLDir/$ml/aliases");
+    &Conv($ml, "$ExecDir/etc/makefml/crontab", "$MLDir/$ml/crontab");
+    &Conv($ml, "$ExecDir/etc/makefml/fml.c",   "$MLDir/$ml/fml.c");
     &FixIncludeHeader;
 
     &GenCrontab;
@@ -1218,13 +1270,13 @@ sub do_newml
     umask(077);
 
     $exec  = "perl $ExecDir/cf/config -m $ExecDir/cf/MANIFEST ";
-    $exec .= "$ML_ETC_DIR/$ml/cf";
+    $exec .= "$MLDir/$ml/cf";
     system "$exec > $MLDir/$ml/config.ph";
 
     # the last info
-    print "\n   Please see several examples in $ML_ETC_DIR/$ml\n";
-    print "\n# Example of Aliases ($ML_ETC_DIR/$ml/aliases)\n";
-    &Cat("$ML_ETC_DIR/$ml/aliases");
+    print "\n   Please see several examples in $MLDir/$ml\n";
+    print "\n# Example of Aliases ($MLDir/$ml/aliases)\n";
+    &Cat("$MLDir/$ml/aliases");
     print "\n";
 }
 
@@ -1240,7 +1292,7 @@ sub do_config
 
     &ResetVariables;
 
-    $cf = "$ML_ETC_DIR/$ml/cf";
+    $cf = "$MLDir/$ml/cf";
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
@@ -1352,7 +1404,7 @@ sub do_adduser
 
     umask(077);
 
-    print "---Addming $member to $ml mailing list\n";
+    print "---Adding $member to $ml mailing list\n";
 
     if ($AdminMode) {
 	@files = ("$MLDir/$ml/members-admin");
@@ -1365,7 +1417,7 @@ sub do_adduser
 
     # mkdir ML Directory
     if (! -d "$MLDir/$ml") {
-	print "***Error: $ml ML NOT CREATED\n";
+	print "\n*****Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	return;
     }
@@ -1431,18 +1483,18 @@ sub do_fmlserv
     # include file is public readable;
     # why for () fails?;
     local($exec_dir) = "$ExecDir/etc/makefml";
-    &Conv($ml, "$exec_dir/fmlserv-include", "$ML_ETC_DIR/$ml/include");
-    &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_ETC_DIR/$ml/aliases");
-    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$ML_ETC_DIR/$ml/fml.c");
+    &Conv($ml, "$exec_dir/fmlserv-include", "$MLDir/$ml/include");
+    &Conv($ml, "$exec_dir/fmlserv-aliases", "$MLDir/$ml/aliases");
+    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$MLDir/$ml/fml.c");
 
     &FixIncludeHeader;
 
     &Copy("$ExecDir/doc/drafts/help-fmlserv", "$MLDir/fmlserv/help");
 
     # the last info
-    print "\n   Please see several examples in $ML_ETC_DIR/$ml\n";
-    print "\n# Example of Aliases ($ML_ETC_DIR/$ml/aliases)\n";
-    &Cat("$ML_ETC_DIR/$ml/aliases");
+    print "\n   Please see several examples in $MLDir/$ml\n";
+    print "\n# Example of Aliases ($MLDir/$ml/aliases)\n";
+    &Cat("$MLDir/$ml/aliases");
     print "\n";
 
 }
