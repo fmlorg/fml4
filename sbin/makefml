@@ -497,6 +497,9 @@ sub SetHashDefaults
 		    'newml',    'do_newml',
 		    '10#newml ML',   'make a new Mailing List <ML>',
 
+		    'destructml',     'do_destructml',
+		    '10#destruct ML', 'destruct Mailing List <ML>',
+
 		    # admin command (main)
 		    'add',      'do_adduser',
 		    '20#add ML address',     'add <address> to <ML>',
@@ -2550,6 +2553,33 @@ sub do_newml
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
 
     # $XStatus = 'OK:';
+}
+
+
+sub do_destructml
+{
+    local($ml) = @_;
+    local($cf, $local_config, $config, @config, %config);
+
+    if (! $ml) {
+	&Log("Error: makefml::newml ML is not defined");
+
+	&Debug("*** Error: no arguments ***");
+	&Debug("Please define ML(mailing-list) arguments");
+	&Debug("\n\tmakefml newml ML\n");
+	$XStatus = 'ERROR: makefml.ml_is_not_defined';
+	return;
+    }
+
+    local($old, $new) = ("$ML_DIR/$ml", "$ML_DIR/\@$ml");
+
+    if (rename($old, $new)) {
+	print STDERR "\trenamed $old to $new (disabled).\n";
+	print STDERR "\tPlease run \"rm -fr $new \" to remove it really.\n";
+    }
+    else {
+	&Error("cannot rename $old $new");
+    }
 }
 
 

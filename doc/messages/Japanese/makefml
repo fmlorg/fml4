@@ -14,6 +14,10 @@ makefml.newml:
 	メーリングリスト: _ARG0_
 	を作成します。
 
+makefml.destructml:
+	メーリングリスト: _ARG0_
+	を削除します。
+
 makefml.passwd:
 	メーリングリスト: _ARG0_ 
 	   Email Address: _ARG1_ 

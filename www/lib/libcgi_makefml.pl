@@ -288,6 +288,9 @@ sub Command
     elsif ($PROC eq 'newml') {
 	&Control($ML, $PROC);
     }
+    elsif ($PROC eq 'destructml') {
+	&Control($ML, $PROC);
+    }
     elsif ($PROC eq 'config') {
 	$PROC = 'html_config';
 

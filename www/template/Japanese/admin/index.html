@@ -160,6 +160,33 @@ _____________________________
 
 
 <HR>
+<A NAME=newml><P>メーリングリストの消去
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> メーリングリスト:
+		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=right>
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+		</TABLE>
+	<TR>
+
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Remove>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
 
 <PRE>
 Copyright (C) 1993-1999 Ken'ichi Fukamachi
