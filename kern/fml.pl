@@ -1274,7 +1274,6 @@ sub Conv2mailbox
     local($mb, *e) = @_;	# original string
     local($addr);
 
-    &Log("try Mail::Address($mb)");
     eval "use Mail::Address;";
 
     # if fails, call fml 3.0 compatible routine.
