@@ -430,7 +430,7 @@ sub DoFmlServProc
 	    &Debug("DoFmlServProc::$_()") if $debug;
 	    
 	    if (/^(guide|info)/i)    { 
-		&GuideRequest; 
+		&GuideRequest(*e); # bug fix 97/10/24 ando@iij-mc.co.jp
 		&Mesg(*e, "   guide is sent to $From_address");
 		next;
 	    }
