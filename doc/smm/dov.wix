@@ -94,14 +94,18 @@ ip-connection を受けるアドレス (include ファイルを呼び出すアドレス)に
 ML server, management tool, .forward 等メールを使う各種インターフェイスの
 集合体です。
 
-特別な場合には(歴史的理由により)デフォールトでは hml 1.6 (正確にはその
-元祖の shell script) というサーバを Emulate します。なお特別な場合とは 
-配送用のアドレス==コマンド用のアドレスの時つまり 
+デフォールトの使い方は
+				設定ファイル(config.ph)の変数
+	配送用のアドレス	$MAIL_LIST	
+	コマンド用のアドレス	$CONTROL_ADDRESS
+.l 	$MAIL_LIST
+.l	$CONTROL_ADDRESS
 
-	$MAIL_LIST == $CONTROL_ADDRESS
-.xref $MAIL_LIST, $CONTROL_ADDRESS
+からなります。特別な場合には(歴史的理由により)デフォールトでは hml 1.6
+(正確にはその元祖の shell script) というサーバを Emulate します。なお
+特別な場合とは 配送用のアドレス==コマンド用のアドレスの時です。
 
-現在の代表的な機能は以下のようなものです。
+ＭＬサーバの現在の代表的な機能は以下のようなものです。
 
    ○ 配送用のアドレスとコマンド用のアドレス
 	それぞれについてアクセス制御や自動登録の設定
@@ -446,7 +450,8 @@ Listserv 形式のシンタックスをうけつけるように拡張されたインターフェイ
 
 
 .S	リモートでＭＬを管理すること
-.xref	remote pgp
+.xref	remote
+.xref	pgp
 
 デフォールトではできません。設定ファイルで
 
