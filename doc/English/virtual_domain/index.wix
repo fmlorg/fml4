@@ -1,0 +1,16 @@
+.HTML_PRE
+		virtual domain ¤ÎÀßÄê
+
+.toc
+.~HTML_PRE
+.include overview.wix
+.include virtual-domain.wix
+
+.appendix
+.include postfix-example.txt
+
+.C	sendmail
+
+.url http://www.sendmail.org/virtual-hosting.html
+
+.include sendmail.wix

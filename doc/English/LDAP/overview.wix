@@ -1,0 +1,54 @@
+.C	Overview
+.l	LDAP
+
+リレーショナルデータベースの呼び出しについては 
+PostgreSQL は .ptr{PostgreSQL}
+MySQL は .ptr{MySQL}
+を参照して下さい。
+
+
+
+.S	Books
+
+"Understanding and Deploying Ldap Directory Services"
+(MacMillan Network Architecture and Development Series)
+
+
+.S	links
+
+Netscape Communicator
+.url http://developer.netscape.com/docs/manuals/communicator/ldap45.htm
+
+on LDAP
+.url http://www.ldapcentral.com/
+.url http://www.openldap.org/
+.url http://www.kingsmountain.com/ldapRoadmap.shtml
+.url http://www.umich.edu/~dirsvcs/ldap/doc/guides/slapd/
+.url http://www.padl.com/
+.url http://www.rage.net/ldap/
+.url http://www.terminator.net/ldapconf/ldap.html
+.url http://people.netscape.com/bjm/whyLDAP.html
+.url http://developer.netscape.com/docs/manuals/ldap/
+.url http://www.sakata.org/ldap/
+
+[LDAP Browser]
+.url http://www.iit.edu/~gawojar/ldap/
+
+NOTE:
+
+Netscape ldap is downloadable and extremely easy to setup and configure.
+Additionally, it doesn't require licenseing for a small amount of users.
+
+RFC's
+
+rfc2255.txt rfc2849.txt rfc2789.txt
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

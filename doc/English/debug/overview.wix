@@ -1,0 +1,31 @@
+.C	Overview
+
+ＭＬサーバ/ドライバ はユーザが直接使うコマンドではありません。
+通常それはメールサーバ（デーモン）が起動するプログラムです。
+
+デバッグするためにはメールサーバがしていることをエミュレーションする必
+要があります。
+
+デバッグといっても多くの場合fmlよりメールサーバの設定でつまづくことが
+多いです。
+
+◯ メールサーバの典型的なエラーについては => .ptr{MTA-TROUBLE}
+
+ メールサーバ → fml へ渡る時/前の話です。
+
+◯ SMTPのやりとりのログ => .ptr{$SMTP_LOG}
+
+ fml -> メールサーバ へメールを渡す時のログが見られます。
+
+◯ エラー事例集は => .ptr{trouble}
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

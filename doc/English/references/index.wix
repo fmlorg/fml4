@@ -1,0 +1,10 @@
+.HTML_PRE
+		リファレンス
+
+.toc
+.~HTML_PRE
+
+.include indexes.wix
+
+.appendix
+.include links.wix

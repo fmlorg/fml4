@@ -1,0 +1,532 @@
+.C	いろいろ
+
+.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+=E.S	Not Deliver From: Field Address Of In-Coming Mail. 
+.k	%SKIP
+.k	$SKIP{アドレス}
+.k	skip
+.k	$START_HOOK
+
+こういう処理を config.ph にかいてください。
+=E
+If you do not deliver an article when you yourself post it, set
+
+$START_HOOK = q#
+	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+
+こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
+↑ここは actives とかに現れるものと同じにして下さい。
+
+複数あるなら 全部を うえのフックに加えて下さい。
+
+
+.S	off と skip
+
+fml-support: 07144
+
+off はメンバ用
+skip は管理者だけが使えるように
+
+Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
+んですが) として on off matome のメンバには定期的に個別にメイルを送って
+ます。(skip の場合には送らないようにしている)
+
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
+
+
+.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+fml-support: 07521 より
+
+Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
+      へ投稿した場合は、
+   [1] members ファイルに自動登録する。
+   [2] 投稿されたメールをmembersに配送する。
+
+これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
+いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+
+B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   へメールを送信した場合は、
+
+   [1] membersに自動登録する。
+
+A: config.ph でちょっと tricky だが 
+   
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+
+のような設定をする。
+
+
+.S	skip コマンドの操作対象のファイルは？
+
+fml-support: 07656, 07716
+
+◯ list1 ,list2 というメーリングリストがあり、list1 の config.ph で
+	push( @MEMBER_LIST, "$DIR/../list2/members" );
+として list1,list2 は 包含関係にある。
+
+◯ list1,list2 両方に 同じアドレスを登録してある人がいる。
+
+どちらのＭＬのアドレスを操作しようとするか？
+
+@MEMBER_LIST 配列の順にさがしていってそのアドレスが最初に見つかったファ
+イルに対して操作を行ないます。
+
+これは config.ph で定義した値は
+
+  loading config.ph
+  @MEMBER_LIST を再設定
+  ...
+
+の順で初期化をしているために list2 list1 の順でさがして list2 でみつかっ
+て list2 のほうにそうさをしようとしてしまいます。
+
+2.2A でなんとかするなら
+
+$START_HOOK = q#
+   push( @MEMBER_LIST, "$DIR/../list2/members" );
+#;
+
+
+.S	メーリングリストに参加可能なユーザのドメインを絞る
+=E.S	Restrict domains of user which joins a mailing list
+
+自動登録やリモートでの登録の際の制限については 
+$REGISTRATION_ACCEPT_ADDR という変数で制限できます。
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+=E
+$REGISTRATION_ACCEPT_ADDR can restrict registration to e.g. we permit
+only persons in some domains can join this mailing list.
+Please see it (this section may be of no use after this).
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+
+直接そういう変数があるわけじゃないですが、特殊な処理をするために HOOK 
+がいっぱいあります。ありうる可能性をすべて変数にしてるといくらあっても
+追いつかないので
+=E
+Several hooks are available to enable a lot of exceptional functions.
+To permit only users on permit_domain.co.jp can join this list, you
+can use $START_HOOK.
+
+$START_HOOK = q#
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+	&Mesg(*Envelope, 
+	   "We permit user@*permit_domain.co.jp can join this list.");
+	$DO_NOTHING = 1;
+   }
+#;
+
+とかすれば、permit_domain.co.jp 以外のユーザには「permit_domainのゆー
+ざだけしか参加できないよん」とメールが返って終りにできます。
+$DO_NOTHING = 1 にすれば配送、自動登録などほとんど全ての処理が行なわれ
+ません。これら全ての場合に共通の設定として利用できます。
+
+	$DO_NOTHING = 1		メインの処理をしない
+				配送、自動登録などほとんど全ての処理が
+				行なわれないことになる
+=E
+	$DO_NOTHING = 1		do not run the main routine
+				* distribute
+				* automatic registration
+				and other almost all functions
+
+で、メインを呼ばなければ自動登録ルーチンも動きません。
+
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+
+が From: が permit_domain 以外のユーザの表現です。後例えば
+=E
+is "addresses(From: address) which do not match permit_domain.co.jp".
+
+   if ($Envelope{'h:sender:'} !~ /permit_domain\.co\.jp/i) {
+
+なら Sender: が permit_domain.co.jp 以外の人は参加できないことになりま
+す。(が Sender: なんて From: == Sender: なら普通つけないからよくない例
+だな)。
+=E
+is "Sender: does not contains permit_domain.co.jp string".
+
+
+.S	『自動登録』かつ『ポストできる人を制限する』設定例その２
+=E.S	Example: "automatic registration" and "restrict members who can post"
+.xref auto_asymmetric_regist
+
+$REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
+ります。これは配送と認証のリストを非対称に使う時に使います。
+.xref auto_asymmetric_regist
+=E
+$REJECT_COMMAND_HANDLER can have a value 'auto_asymmetric_regist'. If
+defined, FML uses delivery list controlled by automatic registration
+and authentication list edited by hand (or makefml).
+.xref auto_asymmetric_regist
+
+これは別の考え方です。elena と elena-regist という２つのＭＬを作る。
+=E
+make "elena" and "elena-regist" ML.
+
+	elena		投稿専用(手動登録)
+	elena-regist	コマンド専用(自動登録に設定しておく)
+=E
+	elena		only for post (by hand or makefml)
+	elena-regist	only for commands
+
+アドレスを書くファイル
+
+	elena-regist/members	MLの配送のリスト(自動登録)
+	elena/members		MLの認証に使うリスト(手動登録)
+				(MLに投稿できる人のリスト)
+=E
+	elena-regist/members	distribution list (automatic registration)
+	elena/members		authentication list (by hand or makefml)
+
+という２つのＭＬを作り設定する。登録用に elena-registを作り elena/cf 
+の ACTIVE_LIST を /var/spool/ml/elena-regist/members にする。
+=E
+We use "elena-regist" for automatic registration to add
+"elena-regist/members". "elena" ML uses plural distribution lists,
+"elena/actives", "elena-regist/members".
+
+   [作業の流れ]
+=E
+   [Example of flow]
+
+	% makefml newml elena
+	% makefml newml elena-regist
+	% cd /var/spool/ml/elena-regist
+	% cp include-ctl include
+
+	*** /etc/aliases を適宜設定する
+=E
+	*** edit /etc/aliases
+
+	% cd /var/spool/ml/elena
+	% makefml edit elena cf
+
+	*** edit cf ふぁいる (ACTIVE_LISTを設定する)
+	elena/cf に
+=E
+	*** edit cf file to append "elena-regist/members" to @ACTIVE_LIST.
+ 
+	ACTIVE_LIST	/var/spool/ml/elena-regist/members
+
+	を加え config.ph を再生成する。
+=E
+	recreate config.ph
+
+	% make config.ph
+	% makefml add elena postable-member-address-1
+	% makefml add elena postable-member-address-2
+	.....
+
+[Discussion]
+elena が elena-regist/members を open する時に elena-regist をロックし
+てない。が、大丈夫だらう:)
+=E
+[Discussion]
+FML cannot lock elena-regist ML in default but works well I believe:)
+
+
+.S	認証する際のドメインのALIAS %DOMAIN_ALIASES
+=E.S	%DOMAIN_ALIASES when authentication
+
+認証する時には ujauja.or.jp  => ujauja.ne.jp に書き換えてTRYしてみる
+=E
+When FML authenticates From: address as a member or not, FML tries
+both who@ujauja.or.jp and who@ujauja.ne.jp.
+
+%DOMAIN_ALIASES = (
+	'ujauja.or.jp', 'ujauja.ne.jp',
+	);
+
+＃ fml.pl 2.0.24.47 へのパッチの例
+=E
+An example of a patch for fml.pl 2.0.24.47
+
+--- fml.pl.org	Fri Nov 21 08:11:10 1997
++++ fml.pl	Sat Nov 22 12:51:33 1997
+@@ -571,6 +571,19 @@
+     &Log("Gecos [$e{'macro:x'}]") if $debug;
+     $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+ 
++    if (%DOMAIN_ALIASES) {
++       local($addr);
++	if (&MailListMemberP($From_address)) {
++	    ; # not rewrite
++	}
++	else {
++	    for (keys %DOMAIN_ALIASES) {
++		if ($From_address =~ /$_$/i) {
++                   $addr = $From_address;
++		    $addr =~ s/$_$/$DOMAIN_ALIASES{$_}/i;
++                   &MailListMemberP($addr) && ($From_address = $addr);
++		}
++	    }
++	}
++    }
++
+     # To: $MAIL_LIST for readability;
+     # &RewriteField(*e, 'Cc') unless $NOT_REWRITE_CC;
+     if ($REWRITE_TO < 0) { 
+
+
+
+.S	メンバーチェックの際のアドレスのチェックの厳しさ
+=E.S	How severely FML checks the validity of the address
+
+アドレスのチェックを緩めたりきつくしたりしたい場合は
+.xref $ADDR_CHECK_MAX
+=E
+* How severely fml.pl checks address syntax
+please see .ptr{$ADDR_CHECK_MAX} for $ADDR_CHECK_MAX.
+
+
+.S	$MAINTAINER というアドレス
+=E.S	$MAINTAINER
+.key	UNIX_FROM
+.key	$MAINTAINER
+
+ＭＬの管理者のアドレスです。エラ−メ−ルの帰る場所もこのアドレスです。
+$MAINTAINER と $MAIL_LIST が同じになっているとエラーメールがＭＬに返っ
+てきて無限ループします。
+=E
+Roughly speaking $MAINTAINER is an address which a user contacts ML
+maintainers with and error mails returns to. In default fml.pl sets up
+listname-admin and listname-request for listname ML. fml.pl uses
+listname-admin as a maintainer address and prepares listname-request
+as an alias. Historically it is good for you to prepare
+listname-request also.
+
+インターネットでは歴史的に listname (MLの名前) に対して
+『listname-request は管理者のアドレス』であることが多いです(絶対ではあ
+りません)。ちょっと request というのが直感に反するところもありますが…
+いつも僕はこの事実との整合性とわかりやすさのために
+
+	listname-admin 		管理者のアドレス
+	listname-request 	listname-adminへフォワード
+
+のように設定しています。そのためどちらのアドレスへ送られても管理者へそ
+のメールは届くわけです。makefml のデフォールトは listname-admin です。
+プロバイダではそれぞれの設定があったりするので注意して下さい。
+=E
+However some ISP services cannot provide listname-request or
+listname-admin. Please consult with your ISP around on this point.
+
+
+.S	アドレスを組織ごとに管理したい
+
+	A社	a.list
+	B社	b.list
+	C社	c.list
+
+各社では自社のメンバーリストを管理する
+
+A: config.ph に
+
+	@MEMBER_LIST = (
+			"$DIR/a.list",
+			"$DIR/b.list",
+			"$DIR/c.list",
+			);
+	@ACTIVE_LIST = (
+			"$DIR/a.list",
+			"$DIR/b.list",
+			"$DIR/c.list",
+			);
+
+.S	意見受付用アドレス？
+
+意見受付用アドレスをMLでうけて、送ってきた人に「ご意見ありがとうござい
+ました。返事はしばらく待ってね。」と自動で応答させる。
+
+改造:
+そのために投稿は誰でもOK。ただし、メンバー以外からの投稿はMLに流し、か
+つ投稿者にguideファイルを返す（自動登録はしない）。
+
+config.phの設定例 1:
+.fi
+.if LANG == ENGLISH
+We accept opinions by mail from anyone and send back the reply "thank
+you for your opinion" to the sender.
+
+object:
+return guide if fml receives post from the member.
+
+config.ph configuration Example 1:
+
+1. permit post from anyone
+2. add $START_HOOK to send back "guide"
+.fi
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$START_HOOK = q# 
+   if (! &MailListMemberP($From_address)) { &GuideRequest(*Envelope);} 
+#;
+.~q
+
+.if LANG == JAPANESE
+config.ph 設定例 2:
+guide ではなくguideとは別に用意したファイルを返す。
+ヘッダもカスタマイズ
+.fi
+.if LANG == ENGLISH
+config.ph configuration Example 2:
+return another file not guilde with the header:
+.fi
+
+From: $MAIL_LIST
+Subject: Thanks you for your mail
+
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$RECRUIT_ACK_STATEMENT = "Thanks you for your mail";
+$RECRUIT_ACK_FILE      = "$DIR/recruit_reply";
+
+$START_HOOK = q#
+    if (! &MailListMemberP($From_address)) {
+	&DEFINE_FIELD_OF_REPORT_MAIL('From', $MAIL_LIST);
+        &SendFile($From_address, $RECRUIT_ACK_STATEMENT, $RECRUIT_ACK_FILE);
+    }
+#;
+.~q
+
+
+.S	複数アドレスから投稿したいがうけとりは一つ( "skip" コマンド)
+=E.S	One recipient for plural addresses to post mails from
+.key	skip
+.key	noskip
+.label	skip
+
+.if LANG == JAPANESE
+複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい、「こ
+の１週間だけこのアドレスも使いたい」などの場合にも効果的です。これらの
+場合を想定して actives(自動登録では members = actives) で
+
+fukachan@phys.titech.ac.jp	skip
+
+と書いておけば認証(新人さんチェック)には使うけど配送はしないという動作
+をします。つまり
+
+	fukachan@phys.titech.ac.jp	skip
+	Elena@phys.titech.ac.jp	
+	Pollyanna@phys.titech.ac.jp	skip
+
+になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
+が、配送はelenaにしか行なわれないということです。
+
+ユーザーがこれを自分でコントロールしたいなら、コマンドは
+＃ Admin command でのみ引数が有効です。
+ 
+skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
+			そこから投稿はできるが、配送はされないものと設定する
+noskip [引数]		上の逆。配送するようにする。
+
+です。例：
+skip 
+	From: のアドレスを skip に
+
+skip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp を skip に
+
+noskip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp へも配送を
+.fi
+.if LANG == ENGLISH
+When one recipient for plural addresses to post mails from, you can
+write 
+
+	# address
+
+format in member or delivery lists. In this comment out style fml.pl
+uses it as an authentication candidate but not delivers articles to
+it. If the list follows
+
+	# addr1
+	# addr2
+	# addr3
+	addr4
+
+Fml delivers mail to addr4 not addr1,addr2,addr3 but accepts post
+from addr1,addr2,addr3,addr4.
+.fi
+
+
+.S	ML-request をコマンド用のアドレスにする
+=E.S	Set up listname-request as a command address
+.k	ML-request をコマンド用のアドレスにする
+
+1 	-request 宛をコマンドにするためには、-request 宛が fml.pl を
+     	呼ぶようにしなければなりません。つまり /etc/aliases を変更し
+	listname-request がコマンド用の include-ctl を呼ぶようにしていないと
+	いけません。例: elena ML の場合
+=E
+   1 set up listname-request to run fml.pl with command mode
+
+	elena-request: :include:/var/spool/ml/elena/include-ctl
+
+   ファイル include-ctl は
+=E
+   The content of file elena-request is such as
+
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr"
+
+のようになっている必要があります。
+
+2 	また配送するメールのヘッダではコマンドの送り先情報を
+	書いています。ユーザの便宜のためアドレスも変えて下さい。
+	config.ph  なら
+=E
+2	FML distribution article has information of commands in the header.
+	Please set 
+
+	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
+.k    	$CONTROL_ADDRESS
+
+と登録する必要があります。問題はこの場合 $MAINTAINER をどうするかです。-
+request のままだとエラーの時恐いので、 elena-admin 等をつくってそれは
+本当の単なる管理者宛のフォワード等にするとよいとおもいます。ちなみにデ
+フォールトは elena-admin なのでそのままで大丈夫でしょう。
+=E
+In config.ph. If $MAINTAINER is the same as $CONTROL_ADDRESS, please
+change it to different one. In default it is o.k. since $MAINTAINER is
+listname-admin.
+
+
+
+$Id$

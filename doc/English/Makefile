@@ -1,0 +1,47 @@
+#
+# $Id$
+#
+
+# disable this since $TOP_DIR/Makefile defines this
+# TUTORIAL_LANGUAGE    = Japanese
+
+DOC_TUTORIAL_RAW_SUBDIR += examples
+
+DOC_TUTORIAL_EXC_SUBDIR += basic_setup
+
+DOC_TUTORIAL_SUBDIR += FAQ
+DOC_TUTORIAL_SUBDIR += GUI
+DOC_TUTORIAL_SUBDIR += Glossary
+DOC_TUTORIAL_SUBDIR += LDAP
+DOC_TUTORIAL_SUBDIR += RDBMS
+DOC_TUTORIAL_SUBDIR += MTA
+DOC_TUTORIAL_SUBDIR += Japanese
+DOC_TUTORIAL_SUBDIR += address_manipulate
+DOC_TUTORIAL_SUBDIR += command
+DOC_TUTORIAL_SUBDIR += daily
+DOC_TUTORIAL_SUBDIR += debug
+DOC_TUTORIAL_SUBDIR += digest
+DOC_TUTORIAL_SUBDIR += documentation
+DOC_TUTORIAL_SUBDIR += encryption
+DOC_TUTORIAL_SUBDIR += errormails
+DOC_TUTORIAL_SUBDIR += filter
+DOC_TUTORIAL_SUBDIR += header_rewrite
+DOC_TUTORIAL_SUBDIR += hooks
+DOC_TUTORIAL_SUBDIR += how_to_subscribe
+DOC_TUTORIAL_SUBDIR += html_convert
+DOC_TUTORIAL_SUBDIR += internals
+DOC_TUTORIAL_SUBDIR += makefml
+DOC_TUTORIAL_SUBDIR += mail2xxx
+DOC_TUTORIAL_SUBDIR += messages
+DOC_TUTORIAL_SUBDIR += misc
+DOC_TUTORIAL_SUBDIR += obsolete
+DOC_TUTORIAL_SUBDIR += references
+DOC_TUTORIAL_SUBDIR += remote_control
+DOC_TUTORIAL_SUBDIR += resource_control
+DOC_TUTORIAL_SUBDIR += smtp
+DOC_TUTORIAL_SUBDIR += troubleshoot
+DOC_TUTORIAL_SUBDIR += utility_programs
+DOC_TUTORIAL_SUBDIR += virtual_domain
+DOC_TUTORIAL_SUBDIR += NT_specific
+
+.include "basic_setup/Makefile"

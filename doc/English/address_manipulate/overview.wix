@@ -1,0 +1,75 @@
+.C	Overview
+
+.S	ＭＬが使うアドレス
+
+elena ML の場合
+
+	elena		投稿用				$MAIL_LIST 
+	elena-ctl	コマンドを投げるアドレス	$CONTROL_ADDRESS
+	elena-admin	管理者				$MAINTAINER
+
+.S	アドレスのチェックの厳しさ
+
+	$ADDR_CHECK_MAX
+.xref	$ADDR_CHECK_MAX
+
+という変数で決まります。
+
+
+.S	メンバーの認証
+
+$MEMBER_LIST (例: /var/spool/ml/elena/members )というファイルにアドレ
+スがあるかないか？で決まります。
+
+$MEMBER_LIST にあっても配送はされません。このファイルにあると fml がメー
+ルを受けとります。つまり拒否をしないだけです。
+
+
+.S	配送先
+
+配送先は $ACTIVE_LIST というファイルにあるアドレスたちです。
+
+
+.S	投稿したいけれど配送は受けたくないアドレス
+
+ファイルが２つに分かれているので、「投稿したいけれど配送は受けたくないアドレ
+ス」は $MEMBER_LIST にだけそのアドレスをかけばOKです。
+
+◯ 管理者は
+
+	% makefml add2members elena アドレス
+
+で members にだけ登録できます。２がうちにくいので
+
+	% makefml addmembers elena アドレス
+
+でもOKです。
+
+◯ ユーザは？
+
+登録した後 skip コマンドを使ってもらうことになるでしょう。
+
+
+
+.S	投稿先は変えずに、配送先だけを増やす
+
+管理者は
+
+	% makefml add2actives elena アドレス
+
+で actives にだけ登録できます。２がうちにくいので
+
+	% makefml addactives elena アドレス
+
+でもOKです。
+
+◯ ユーザは？
+
+単に複数回 subscribe すればいいわけですね
+
+
+.S	削除の時は？
+
+members, actives に対になっているか？などは一切調べず有無を言わさず該
+当するアドレスを消します。なので非対称に登録したか？などはおぼえていな
+くてもかまいません。

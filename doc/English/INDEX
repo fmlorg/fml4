@@ -1,0 +1,69 @@
+# .part はパートのはじまり宣言
+# # はコメント
+#
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+	<HTML>
+	<HEAD>
+	<TITLE>
+	"fml" tutorial (Japanese)
+	</TITLE>
+	<META http-equiv="Content-Type"
+		content="text/html; charset=ISO-2022-JP">
+	</HEAD>
+	<BODY BGCOLOR="#E6E6FA">
+	<CENTER><B>
+	fml チュートリアル
+	</B></CENTER>
+	<BR>まだまだ書きかけです。
+	<BR>見苦しいところがあるとおもうので御指摘をお待ちしております
+
+.part Basic Configuration
+basic_setup		基礎的なこと
+FAQ			一般的な質問について (FAQ)
+Glossary		ミニ用語集
+makefml			makefml の使い方
+GUI			GUI インタフェイス
+how_to_subscribe	メンバーの登録方法などについて
+address_manipulate	アドレスの取り扱いについて
+header_rewrite		ヘッダの書き換え
+remote_control		リモート管理(REMOTE_ADMINISTRATION, adminコマンド)
+messages		fml の返すメッセージをいじる
+filter			フィルタリング
+virtual_domain		バーチャルドメイン (virtual domain)
+command			コマンド、そして拡張について
+hooks			HOOK を使った拡張について
+resource_control	リソースの制御	
+digest			まとめおくり
+html_convert		記事の HTML への変換
+encryption		暗号化関係
+daily			日々の運用についてのTIPS
+documentation		ドキュメントについて
+RDBMS			データベースへのアクセス(リレーショナル: PostgreSQL, MySQL)
+LDAP			データベースへのアクセス(LDAP)
+
+.part OS 依存の話題
+NT_specific		Windows 2000/NT4 依存の話題
+
+
+.part エラー
+errormails		エラーメールをどうするか？
+debug			デバッグについて
+troubleshoot		トラブルシューティング
+
+.part misc
+misc			その他(分類に苦しんだ)改造事例集
+MTA			MTA 依存のTIPS
+smtp			配送関係
+Japanese		日本語処理について
+utility_programs	その他便利かもしれないプログラム
+mail2xxx		メールから別のプログラムへ渡す(参考事例)
+references		参考文献など
+
+.part 開発者向け(旧 doc/smm/ 相当か?)
+internals		内部構造や実装の理屈についてなど
+
+	</HTML>
+	</BODY>
+#
+# $Id$
+#

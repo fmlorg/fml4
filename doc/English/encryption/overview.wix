@@ -1,0 +1,225 @@
+.C	暗号関係の概要
+
+.S	できること
+
+リモート管理のコマンドを PGP で認証する
+.xref remote-control
+
+投稿メールの暗号化
+
+
+.S	暗号関係の概要
+
+◯ PGP2 および PGP5 用です。(以下 {2,5} と略します)
+	OpenPGP, GPG, S/MIME 用のモデュールなどはないです。
+
+◯ コマンドメールの認証にPGP{2,5}を使います。
+   いわゆる『リモート管理の認証』という話の枠組です。
+
+関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
+関連事項:  PGP2        => .ptr{PGP2}
+
+◯ 配送メールの暗号をPGP{2,5}でするというオプションもありますが…
+
+	$USE_ENCRYPTED_DISTRIBUTION
+
+◯ PGPの設定は makefml 経由で設定をして下さい。
+.xref makefml-pgp
+
+
+.C	PGP2
+
+fml 4.0 で整理されました。 
+.ptr{makefml-pgp-howto} を参照して下さい。
+
+.S	makefml による PGP2 の公開鍵の登録
+=E.S	Register PGP2 Public Keys
+.l	makefml-pgp
+
+
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+ので必ず makefml をつかってください。
+
+fml 3.0 までの makefml では
+
+	makefml pgp <ML> PGPのオプション
+=E
+	makefml pgp <ML> PGP's options
+
+例:
+	makefml pgp elena -ka public.asc
+
+
+同じことを fml 4.0 では
+
+	makefml モード.コマンド <ML> PGPコマンドのオプション
+
+というシンタックスになります。
+
+例: admin コマンドの PGP 認証鍵の操作
+
+	makefml admin-auth.pgp <ML> PGPのオプション
+
+例: ＭＬの暗号化の鍵の操作
+
+	makefml dist-encrypt.pgp <ML> PGPのオプション
+
+なお互換性のため
+
+	makefml pgp <ML> PGPのオプション
+
+は
+	makefml admin-auth.pgp <ML> PGPのオプション
+
+と同じです。またあまりに長いので admin-auth を aa で代用できます :-) 
+dist-encrypt は de で代用できます。
+例:
+
+	makefml aa.pgp
+	makefml de.pgp
+
+
+SEE ALSO: 詳しくは .ptr{makefml-pgp-howto} 参照
+
+
+.S	PGP2 管理用のコマンド
+=E.S	PGP2 Commands To Maintain ML'S PGP Keys 
+
+関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
+
+管理者が pgp -kv などをリモートでできるようにしてあります。KEYの編集な
+どはリモートではできません。公開鍵を加える、削除。一覧を見るなどをでき
+るようにしてあります。できるようにしてあるのは
+=E
+Available options via FML are
+
+	-ka
+	-kr
+	-krs
+	-h
+	-kx
+	-kxa
+	-kv
+	-kvv
+	-kvc
+	-kc	
+
+です。コマンドの意味はPGPの本を見て下さい。
+=E
+Please read PGP books if you cannot understand them.
+
+例:
+=E
+Example:
+
+	admin pgp -kvv
+
+.C	PGP5
+
+
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+ので必ず makefml をつかってください。また fml 4.0 では PGP5 の操作も 
+PGP2 同様に整理されました。
+
+fml 3.0 までの makefml では
+
+	makefml pgpk <ML> PGPのオプション
+=E
+	makefml pgpk <ML> PGP's options
+
+などとしています。fml 4.0 では
+
+例: admin コマンドの PGP 認証鍵の操作
+
+	makefml admin-auth.pgpk <ML> PGPのオプション
+
+例: ＭＬの暗号化の鍵の操作
+
+	makefml dist-encrypt.pgpk <ML> PGPのオプション
+
+
+互換性のため
+
+	makefml pgpk <ML> PGPのオプション
+
+は
+	makefml admin-auth.pgpk <ML> PGPのオプション
+
+と同じになります。
+	
+
+SEE ALSO: 詳しくは .ptr{makefml-pgp-howto}  参照
+
+
+.S	makefml
+
+makefml のコマンドは
+
+	pgpk, pgps, pgpv, pgpe
+
+を使い分けて下さい。
+
+例:
+
+	makefml admin-auth.pgpk
+	makefml admin-auth.pgps
+	makefml admin-auth.pgpe
+	makefml admin-auth.pgpv
+
+あまりに長いので admin-auth を aa で代用できます :-) 
+例:
+
+	makefml aa.pgpk
+
+dist-encrypt は de で代用できます。
+例:
+
+	makefml de.pgpk
+
+
+.S	PGP bug (from BUGTRAQ@SECURITYFOCUS.COM)
+
+Message-ID:  <Pine.NEB.4.10.10008241020110.29902-100000@setec.org>
+Message-ID:  <Pine.LNX.4.21.0008260958320.983-100000@hero.lannet.com.au>
+
+だいじょうぶ
+
+PGP-2.6.3ia UNIX    not vulnerable - doesn't support V4 signatures
+PGP-5.0i UNIX       not vulnerable
+GnuPG-1.0.1 UNIX    not vulnerable
+
+だめ
+
+PGP-5.5.3i WINDOWS  VULNERABLE
+PGP-6.5.1i WINDOWS  VULNERABLE
+PGP-6.5.1i for UNIX VULNERABLE
+
+.url http://senderek.de/security/key-experiments.html
+
+.url http://www.pgp.com/other/advisories/adk.asp
+.url http://web.mIt.edu/network/pgp.html
+
+.q
+Message-ID:  <20000826121158.13915.qmail@securityfocus.com>
+To: BUGTRAQ@SECURITYFOCUS.COM
+
+PGP updated softwares (http://web.mIt.edu/network/pgp.html):
+---------------------
+PGP Freeware v6.5.8 is now available for Windows 
+95/98/NT/2000! and the Macintosh
+PGP Freeware v6.5.8 is MacOS 7.6.1+
+PGP Command Line Freeware v6.5.2 is now available for 
+AIX/HP-UX/Linux/Solaris!
+PGP Certificate Server Freeware v2.5.1 is now available for 
+Windows NT/2000 and Solaris!
+.~q
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

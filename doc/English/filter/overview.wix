@@ -1,0 +1,82 @@
+.C	フィルタリングということの概要
+.l	filter
+
+フィルタリングといっても
+
+1. ユーザレベルでのフィルタリング (=> .ptr{user-level-filtering})
+   つまり
+	スプールへ書き込む
+	例: MTA -> フィルタ -> /var/mail/ とか MailDir/
+
+	何かのプログラムを起動する
+	例: MTA -> フィルタ -> fml
+
+	これは一般にはＭＬの話ではなく自分宛のSPAMメールを弾くや自動で
+	フォルダーを変えるようなことです。
+
+2. fml 自身が入力されたメールを解析して弾く => .ptr{EnvelopeFilter}
+
+	MTA -> fml (-> フィルタ -> 配送する/しないを決める)
+	   ＊ つまり ()内は全部fmlの内部動作
+
+の２つの意味合いがあります。fml的にフィルタリングというのは主に後者 2. 
+のことを指しています。
+
+前者 1. については情報へのポインタだけ示すことにします。
+.xref	user-level-filtering
+
+.S	投稿メールのフィルタリング機能を有効にする
+
+	$USE_DISTRIBUTE_FILTER = 1;
+
+.q
+makefml config で
+
+メインメニュー -> セキュリティ -> USE_DISTRIBUTE_FILTER -> ON
+.~q
+
+.S	カスタマイズ
+
+config.ph にフィルタリングの設定を書くことができます。
+例:
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+
+.S	弾けないもの
+
+パラグラフ(空行と空行の間)ごとに判定しているので、弾けないものがありま
+す。ようするにフィルタが見ているのは
+
+	コマンドのパラグラフらしい
+
+	最後のパラグラフはsignature(だろうから除外して考える)
+
+	日本語のはいっているパラグラフらしい
+
+のような各パラグラフがどのようにみえるか？をチェックしています。
+
+例えばこれは弾けない例です。内容としては「コマンドメールとシグニチャア」
+ですが、一つのパラグラフにいろいろ書いてある普通のメールにみなしてしま
+います。
+.q
+# help
+*----------------------------*
+　　しぐにちゃあ
+*----------------------------*
+~.q
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+
+

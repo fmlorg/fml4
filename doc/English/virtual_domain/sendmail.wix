@@ -1,0 +1,45 @@
+.S	CF's USERTABLE_MAPS の例
+
+CF については CF のマニュアル (doc/MANUAL.jpn)をよく読んで下さい。
+読むべきところは USERTABLE_MAPS です。
+
+◯ .def ファイルの変更点
+
+.q
+-##USERTABLE_MAPS='local=hash:/etc/ut.local \
+-##                ut.dom1=btree:/etc/ut.dom1:error \
+-##                ut.dom2=dbm:/etc/ut.dom2 \
+-##                ut.dom3=nis:usertable3'
++USERTABLE_MAPS='fml.org=hash:/root/test/fml'
++
+~.q
+
+◯ /root/test/fml
+.q
+fukachan:maildrop       fukachan@enkai.org
+.~q
+
+◯ db を作る
+# makemap hash /root/test/fml.db < /root/test/fml
+
+◯ sendmail test mode
+% sendmail -bt -C virtual.cf
+> 3,0 fukachan@fml.org
+rewrite: ruleset   3   input: fukachan @ fml . org
+rewrite: ruleset  96   input: fukachan < @ fml . org >
+rewrite: ruleset  96 returns: fukachan < @ fml . org >
+rewrite: ruleset   3 returns: fukachan < @ fml . org >
+rewrite: ruleset   0   input: fukachan < @ fml . org >
+rewrite: ruleset  91   input: fukachan < @ fml . org >
+rewrite: ruleset  91 returns: fukachan @ enkai . org @ < @ fml . org >
+rewrite: ruleset  97   input: fukachan @ enkai . org
+rewrite: ruleset   3   input: fukachan @ enkai . org
+rewrite: ruleset  96   input: fukachan < @ enkai . org >
+rewrite: ruleset  96 returns: fukachan < @ enkai . org >
+rewrite: ruleset   3 returns: fukachan < @ enkai . org >
+rewrite: ruleset   0   input: fukachan < @ enkai . org >
+rewrite: ruleset  88   input: < smtp : enkai . org > . fukachan < @ enkai . org >
+rewrite: ruleset  88 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
+rewrite: ruleset   0 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
+rewrite: ruleset  97 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
+rewrite: ruleset   0 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >

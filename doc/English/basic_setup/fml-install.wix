@@ -1,0 +1,169 @@
+.HTML_PRE
+
+	NetBSD-current 上での fml のインストール
+=E
+	fml installation on NetBSD-current
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+
+ここではＭＬをユーザ fml で行なうとします。
+
+まず最初にインストールする際は /usr/local/fml /var/spool/ml を作ってお
+きます。それらのディレクトリはユーザ fml にしておきます。
+
+% su root
+# mkdir /usr/local/fml /var/spool/ml
+# chown fml  /usr/local/fml /var/spool/ml
+# exit
+
+ダウンロードする場所、広げる場所は読み書きできればどこでもいいです。
+自分のホーム ~/ で行なうのが普通です。レンタルサーバなどでは /var/tmp/ 
+の下で作業してもいいです(礼儀正しく作業後は消してしておきましょう)。
+
+% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/currnet/fml-3.0I-current-20000822.tar.gz
+Connected to ftp.iij.ad.jp.
+
+	.... だ〜 ...
+
+  2% |                                     | 53248       6.50 KB/s    04:23 ETA
+
+	.... だ〜 ...
+
+% tar zxf fml-3.0I-current-20000822.tar.gz
+% cd fml-3.0I-current-20000822
+
+  (できるディレクトリ名はその時時で変わる。
+   名前は『fml-バージョン番号-スナップショット番号』のようになっている)
+
+% make install 
+
+   (インストール場所などを聞かれるので[]内の値でいいなら Enter 
+    ちがうなら別の値を入力する)
+
+  [推奨] fml 4.0 では最初から厳し目の推奨設定をセットアップできます。
+	     % make install RECOMMEND=yes
+	のように指定してインストールして下さい。
+        makefml を実行する場合は 
+	     % env RECOMMEND=yes perl makefml install
+	としてください。
+
+perl ./makefml install
+---NOT USING configuration file (for the first time)
+
+   THIS HOST (beth.fml.org) IS [i386-unknown-netbsd1.4.]
+
+
+---Please Define Your Fml System Configurations
+
+Personal Use or ML-Admin-Group-Shared or fmlserv you use? 
+Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
+DOMAIN NAME               [fml.org] 
+FQDN                      [beth.fml.org] 
+EXEC FILES DIRECTORY      [/usr/local/fml] 
+TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+Language (Japanese or English) [Japanese] 
+
+TimeZone (TZ: e.g. +0900, -0300) [+0900] 
+
+  --- summary ---
+      DOMAIN: fml.org
+        FQDN: beth.fml.org
+    EXEC_DIR: /usr/local/fml
+      ML_DIR: /var/spool/ml
+    Language: Japanese
+    TimeZone: +0900
+
+
+The Current Config is saved in /usr/local/fml/.fml/system
+
+---Install the Fml system to /tmp/e. (y/n) [n] 
+Installing fml system to /tmp/e
+Fixing Path: src .. libexec ..... sbin . cf . bin ...................
+	Done.
+Back-up'ing templates in /tmp/e/drafts ...
+
+Generating nroff manuals:
+	doc/man/fml.8
+	doc/man/makefml.1
+
+Installing bin ...
+Installing sbin ...
+Installing libexec ...
+Installing cf ...
+Installing etc ...
+Installing sys ...
+Installing src ...
+Installing drafts ...
+Installing messages ...
+Installing doc ...
+
+Done.
+-- Enjoy Internetworking!
+
+○ ＭＬを作る (例: elena ＭＬとしよう)
+=E
+** create mailing list (suppose "elena" ML)
+
+% /usr/local/fml/makefml newml elena
+
+	... メッセージ(省略) ...
+=E
+	...
+
+% su root
+Password: 
+
+# cat /var/spool/ml/elena/aliases >> /etc/aliases
+# newaliases
+# exit
+
+○ 自分を登録してみる
+=E
+** add myself to the mailing list
+
+% /usr/local/fml/makefml add elena 自分のメールアドレス
+
+	... メッセージ(省略) ...
+=E
+	...
+
+○ テスト
+=E
+** test
+
+テストメールを elena MLに投げてみるなどする
+=E
+send test mail to "elena" ML 
+
+○ 設定を変更してみる
+=E
+** configure fml
+
+.if LANG == JAPANESE
+.url howto-customize.html
+.fi
+.if LANG == ENGLISH
+.url howto-customize-e.html
+.fi
+
+○ 必要なら本運用の前にカウンターやログをリセットする。
+=E
+To remove log of test mails, please remove the following files.
+
+% cd /var/spool/ml/elena
+% rm -fr seq summary log spool
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

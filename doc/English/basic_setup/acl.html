@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Examples
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+
+<CENTER>
+まとめ: ＭＬのメンバーにできること、できないこと
+</CENTER>
+
+
+<P> デフォールトのメンバーリスト
+<TABLE BORDER=4>
+<TR>
+	<TD> ＭＬのメンバーリスト
+	<TD>
+		@MEMBER_LIST
+		で定義されたファイル群に含まれる
+		有効なメールアドレス
+		<BR>
+		デフォールトでは members と members-admin
+
+<TR>
+	<TD> ＭＬの配送先（受信者）リスト
+	<TD>
+		@ACTIVE_LIST
+		で定義されたファイル群に含まれる
+		有効なメールアドレス
+		<BR>
+		デフォールトでは actives のみ
+
+</TABLE>
+
+
+<P> デフォールトの動作
+<TABLE BORDER=4>
+<TR>
+	<TD> ＭＬに投稿できる人
+	<TD>
+		ＭＬのメンバー
+
+<TR>
+	<TD> ＭＬに投稿できる人
+	<TD>
+		ＭＬのメンバー
+
+</TABLE>
+
+<HR>
+<P> FAQ
+
+<P>Q: リモート管理者はＭＬのメンバーでなくても投稿したい。
+<BR>
+A: それがデフォールトの動作です。
+
+実は投稿できる人は members と members-admin (リモート管理者のメンバーリスト)
+に含まれている人です。
+つまりリモート管理者はＭＬのメンバーでなくても投稿可能です。
+
+これは
+<UL>
+
+	<LI>
+	リモート管理者は単なる世話人に徹していてＭＬの記事自体は読んでない
+
+	<LI>
+	しかし記事をＭＬへフォワードするなどできないと困る
+
+	登録の依頼やエラーメールを受けとるために MAINTAINER と
+	リモート管理者の役割は兼任することが普通です。
+	そこでメンバー以外からの投稿とみなされた記事をＭＬにフォワード
+	する時があります。
+
+</UL>
+というケースを想定して members-admin の人もＭＬに投稿可能になっています。
+
+
+
+<PRE>
+Copyright (C) 1999-2000 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

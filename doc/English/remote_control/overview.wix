@@ -1,0 +1,52 @@
+.C	メールでfmlの設定を変更するには？ (REMOTE_ADMINISTRATION)
+=E.C	how to control fml by mails (remotely)
+.l	remote_control
+.l	remote-control
+
+.S	リモート管理とは？
+=E.S	What is remote administration ?
+
+リモート管理とは「メールでコマンドを elena-ctl へ送り、メッセー
+ジファイルやメンバーリストの変更を行なうこと」を指しています。
+
+デフォールトではこの機能は無効です。
+ 
+
+.S	有効にする手順は？
+=E.S	how to enable remote administration
+.xref	enable-remote-control
+
+この機能を使うためにはまずそのホスト上でリモート管理を許す必要
+があります。以下のような作業が最低限必要です。
+
+   1. リモート管理機能を有効にする。デフォールトでは無効です
+
+	メニュ → REMOTE_ADNISTARTION → REMOTE_ADNISTARTION → y
+
+   2. リモート管理ができる人(Email アドレス)を登録する。
+      こういう権限は少数の人に限るべきでしょう。そのため
+      Email アドレスとパスワードでの認証がかかっています(default) 	 
+
+   3. その Email アドレスごとに初期パスワードを設定します。
+
+この後はＭＬの設定(config.ph)変更以外はそのホストに入らずにある程度で
+きるようになります。
+
+
+.S	メールでの設定ファイル(config.ph)の変更は?
+=E.S	how to configure config.ph by mail remotely 
+
+できません。失敗すると何もできなくなるからです。
+メール以外の方法での config.ph の変更は
+=E
+cannot.
+
+	そのホストに入って行なう
+		makefml を使う
+		直接ファイルを編集する
+
+	WWWでGUI経由で行なう (CGI経由で makefml を使う)
+
+のいづれかになります。
+
+.# $Id$

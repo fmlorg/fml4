@@ -1,0 +1,57 @@
+.C	コマンドの動作
+
+.S	一つのメールで使えるコマンドの数の上限
+=E.S	Maximum Number Of Commands In On Mail
+.k	$MAXNUM_COMMAND_INPUT
+.xref $INCOMING_MAIL_SIZE_LIMIT
+
+一回のメールで使えるコマンドの個数の上限は $MAXNUM_COMMAND_INPUT です。
+もし未定義なら無限大です:)。デフォールトは未定義で何個でも書けます。
+=E
+If $MAXNUM_COMMAND_INPUT is defined, the maximum number of commands in
+on mail is $MAXNUM_COMMAND_INPUT. If not defined, the number is
+infinite:). In default INFINITE!
+
+
+.S	間違ったコマンドを送ってきた人への警告
+=E.S	Warning for Invalid Commands
+
+デフォールトでは警告しません。
+=E
+In default, FML does not warn against invalid commands and ignore
+them. If you want to warn it, set
+
+	$USE_INVALID_COMMAND_WARNING = 1; (default 0)
+.k	$USE_INVALID_COMMAND_WARNING
+.k	USE_WARNING 
+
+を設定すると間違ったコマンドへの警告メールをだします。これは signature 
+を自動的に付ける設定をしている場合への対処です。一般には exit 等で明示
+的にコマンド指定を終わらせるのを推奨するかMUAでシグニチャーを自動的に
+つけないようにするのを推奨するのがよいでしょう。
+
+
+.S	もし有効なコマンドが一つもないメールが来たら？
+=E.S	If an empty effective command mail comes in ?
+
+ＭＬのメンバーからのリクエストであればヘルプファイルを送り返します。
+=E
+FML sends back help file.
+
+ＭＬのメンバー以外からのリクエストであればガイドファイルを送り返します。
+
+
+.S	コマンドの終り(シグニチャア対策)
+=E.S	End of Command Sets Against Signature
+.key	signature 対策
+
+=E
+Please use one of them to show the end of commands sequence. 
+
+	exit 
+	end
+	quit
+
+というコマンドの行でfmlは処理を中止します。signature があってもいいよ
+うに、こうなっています。
+

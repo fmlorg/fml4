@@ -1,0 +1,15 @@
+.C	使ってはいけない変数
+
+.S	記事を強引にMIME decodeする (使ってはいけない)
+=E.S	Decoding articles stored in $DIR/spool.
+
+にふてぃ〜とかのださださ対策の一貫の名残です。
+現代では使うべきではありません。
+
+	$MIME_DECODED_ARTICLE          = 1;
+.k	$MIME_DECODED_ARTICLE
+.l	$MIME_DECODED_ARTICLE
+
+と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
+時に日本語へ逆変換した内容を書き込みます。ただしこれをすると 
+MIME/Multipart とかでエラーになるのでやってはいけません。

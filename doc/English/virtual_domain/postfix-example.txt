@@ -1,0 +1,14 @@
+.C	postfix での virtual domain 設定
+.l	virtual-domain-postfix-example
+
+/etc/postfix/virtual:
+
+	elena@domain-1.org	elena-1
+	elena@domain-2.org	elena-2
+
+/etc/aliases:
+
+	elena-1: :include:/var/spool/ml-virtual-domain-1/elena/include
+	elena-2: :include:/var/spool/ml-virtual-domain-2/elena/include
+
+.# $Id$

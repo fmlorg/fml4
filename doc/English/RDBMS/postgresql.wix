@@ -1,0 +1,57 @@
+.C	PostgreSQL へのアクセス
+.l	PostgreSQL
+
+.S	必要なもの
+
+Pg.pm です。まだ DBI を利用したものは作ってありません。
+＃ DBI 版をつくったひとがいたら、ぱっちをください
+
+
+.S	config.ph の設定例
+
+ポイントは
+
+	$DATABASE_DRIVER
+
+で指定するファイルです。デフォールトでは LDAP のおもちゃのモデル
+( .ptr{sql-toymodel} 参照)を使うようになっています。
+PostgreSQL の玩具モデルの見本は
+
+	/usr/local/fml/databases/postgresql/toymodel.pl
+
+を見て下さい。このファイルには
+
+	どのような SQL 文で呼び出すのか
+	エラー処理はどうするのか
+
+などの泥くさい部分が全て封じ込められています。この toymodel.pl を手本
+に自分の使っているスキーマに合わせて定義を書き換えてみてください。
+そのファイルを
+
+	/var/spool/ml/etc/fml/mysqldriver.pl
+
+などをするとよいでしょう。スキーマの詳細はこの中に封じ込めて下さい。
+
+この場合 config.ph に書くべき項目の見本はこのようになります。
+.q
+$USE_DATABASE        = 1;
+$DATABASE_METHOD     = 'PostgreSQL';
+$SQL_SERVER_HOST     = 'postgres.fml.org';
+$SQL_SERVER_USER     = 'fukachan';
+$SQL_DATABASE_NAME   = 'fml';
+$DATABASE_DRIVER     = 'mysqldriver.pl';
+
+# もしくは FULL PATH か
+$DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
+
+1;
+.~q
+
+.S	some pointers
+
+.url http://www.sra.co.jp/people/t-ishii/
+.url ftp://ring.so-net.ne.jp/
+.url ftp://ring.asahi-net.or.jp/
+.url http://member.nifty.ne.jp/hippo2000/
+
+.# $Id$ 

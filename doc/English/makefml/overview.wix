@@ -1,0 +1,84 @@
+.C	Overview
+.l	makefml
+
+＊＊
+＊＊ makefml の使い方は NSTALL のファイルに詳しいです。
+＊＊ これはもっと特殊な使い方などについて書くつもりのドキュメントです。
+＊＊ 
+
+makefml は fml を設定するための CUI (Chacacter User Interface) インター
+フェイスです。GUIのような華やかさはありませんが、簡潔に必要なことがで
+きるインターフェイスです。
+
+コマンドラインから実行します。
+
+.S	makefml で使えるコマンドは？
+
+makefml help を実行してみて下さい
+.q
+% makefml help
+
+   makefml command arguments         what
+   ---------------------------------------------------------
+
+   makefml info                      show this message
+   makefml install                   Install the fml system
+       ... 以下略 ...
+.~q
+
+.S	makefml config のメニューを日本語にする？
+
+GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
+ドを使うことが可能です。
+
+環境変数を設定して下さい。
+
+.q
+◯ born shell, bash などの場合
+
+~/.profile ~/.bash_profile (?)
+
+  MAKEFML_LANG=euc; export MAKEFML_LANG
+
+◯ csh, tcsh  などの場合
+
+~/.cshrc ~/.tcshrc
+  setenv MAKEFML_LANG euc
+.~q
+
+.S	lock
+
+shell-script を lock 下で実行する
+.q
+% makefml lock elena -e shell-script
+.~q
+
+30秒間 elena を lock する。
+.q
+% makefml lock elena 30
+DO "lock 30" for elena mailing list.
+
+   makefml[10594] succeeded to lock elena
+   I sleep for 30 seconds after now.
+   Please interrupt this by CONTROL-C to stop this lock
+.~q
+
+"succeeded to lock elena" が出たら今ロックをしている状態
+
+
+.S	GUI はないんでしょうか？
+
+fml-current には CGI があります。MTAとWWWサーバの設定変更を忘れずに
+.xref GUI
+
+CGI のメニューは日本語です。
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

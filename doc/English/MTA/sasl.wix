@@ -1,0 +1,8 @@
+.C	SASL
+
+MS Outlook Express requires SASL LOGIN mechanism. 
+
+Eudora 4.x requires SASL CRAM-MD5 mechanism. 
+
+.url http://www.elysium.pl/members/brush/smtp-auth/index.html
+

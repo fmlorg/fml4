@@ -1,0 +1,30 @@
+.HTML_PRE
+
+	ＭＬ全部に共通の設定
+=E
+	enforce the same configuration over all mailing lists 
+
+.include terms.wix
+
+ＭＬ全部に共通の設定をする時は site_force.ph, site_init.ph などを使い
+ます。このファイルはありません。適当な場所に作って下さい。
+
+推奨は
+
+	/var/spool/ml/etc/fml/site_force.ph
+	/var/spool/ml/etc/fml/site_init.ph
+
+です。
+
+[歴史] fml 3.0B 以降は site_force.ph を使います。sitedef.ph も
+	互換性のため使うことができます。
+
+	/var/spool/ml/etc/fml/sitedef.ph
+
+
+
+           Copyright (C) 1999-2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

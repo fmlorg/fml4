@@ -1,0 +1,40 @@
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
+
+all: 
+	@ echo "update	cvs update"
+	@ echo "scan	cvs -n update"
+	@ echo "diag	diagnostic check"
+
+update:
+	@ cvs update -d -P
+
+scan:
+	@ cvs -n update 2>&1|\
+		grep -v ':' |\
+		tee __scan__ || echo 'nothing changes'
+
+clean:
+	gar *~ *.bak
+
+diag:
+	@ sh ../../distrib/doc/bin/diag_tutorial.sh
+	@ echo -------------
+	@ egrep '^\.p ' */*wix || echo ok
+
+test:
+	apply '$(FML)/bin/fwix.pl -f ../../tmp/text_index.ph -n i ' \
+		*/index.wix > /dev/null
+
+fix_jcode:
+	@ echo run ../../distrib/bin/fix_doc_jcode.sh
+	@ ../../distrib/bin/fix_doc_jcode.sh

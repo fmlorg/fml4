@@ -1,0 +1,68 @@
+.C	改造
+
+.S	たわけたHTMLメール対策
+=E.S	Cut off except the first multipart block
+
+現在では汎用 multipart フィルタとして ContentHandler があります
+.xref ContentHandler
+
+古い形は以下の通りです。この変数は ContentHandler でも上位互換で
+有効です。
+
+	$HTML_MAIL_DEFAULT_HANDLER = 'strip'; (default "")
+
+ユーザからのメールでMIME/Multipartは中身を問わず一番最初のマルチパート
+ブロックだけを残して後はぶったぎる。つまり中身が一緒のplainとHTML部分
+を持つメールが来たらplain部分だけを残そうとする。でも常に正しい処理か
+どうかは不明(大抵正しそうだが)。
+=E
+Cut off except the first multipart block if
+1.	Content-Type: mime/multipart
+
+	$HTML_MAIL_DEFAULT_HANDLER = 'strip'; (default strip)
+
+値は strip か reject で、デフォールトはstrip。
+strip はHTML部分を切りとってMLに流す。
+rejectはMLには流さずHTMLメールは拒否すると送り主にメールを送る。
+=E
+where the value is 'strip' or 'reject'. If "strip", fml cuts off the
+second and after multipart blocks and distributes the mail to ML. If
+"reject", fml does not distribute it but tells "denies your html mail"
+to the sender.
+
+[互換性] $AGAINST_HTML_MAIL が古い変数名。この変数を設定していても互換
+性の保証のために'strip'モードで動く。cf/MANFESTでは未定義。
+
+
+.S	In-Reply-To: や References: をつけないREPLYメールを返すMUA対策
+=E.S	Against replied mails without In-Reply-To: nor References:
+
+	$AGAINST_MAIL_WITHOUT_REFERENCE = 1; (default 0)
+
+.if LANG == JAPANESE
+非常〜〜に後ろ向きなオプション
+Eudora 等の In-Reply-To: References: をつけてくれないMUA対策
+0. Subject: にTAGをつけることは前提(not default)
+1. Message-ID: はＭＬ独自のものをつける
+2. Subject: Re: [elena 00100] のようなTAGを解析する
+ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
+元々あった Message-ID: は X-Original-Message-ID: に移動される
+(2.2A#28はbugでつけてない, fixed in 2.2A#29)
+.fi
+.if LANG == ENGLISH
+0. you require to set up 'fml puts the subject tag'.
+1. add ML specific Message-ID: 
+2. analyze the subject tag e.g. Subject: Re: [elena 00100]
+In this mode, fml emulates Message-ID: always based on rule 2. 
+Hence fml can ensure the consistency of ML threads against
+some MUA's e.g. Eudora...
+.fi
+
+.# $Id$
+
+
+
+
+
+
+

@@ -1,0 +1,51 @@
+.C	CGIのよもやまのメモ
+
+たとえば $EXEC_DIR = '/usr/local/fml' 
+
+.S	インストーラ
+
+admin でのアクセスを可能にする。つまりあとはWWWだけで閉じるようにする
+ということ
+
+
+.S	基本的なディレクトリ構成
+
+   $EXEC_DIR/www/ は template やライブラリの場所
+
+   $EXEC_DIR/share/ 以下はWWWで見える場所、つまり httpd の管理下。
+
+   $EXEC_DIR/www/authdb/ パスワードの実体置き場
+
+
+.S	パスワードファイル
+
+	$EXEC_DIR/www/cgi-bin/admin/.htaccess 
+
+の参照するパスワードは 
+
+	$EXEC_DIR/www/db/admin/htpasswd
+
+のような関係になる。デフォールトは
+
+       User: admin
+   Password: admin
+
+が設定されている。インストール時に htpasswd プログラムを発見できたらそ
+れを使って admin パスワードをいれさせる。
+
+
+
+.S	基本設定ファイル
+
+   require $EXEC_DIR/.fml/system
+	このファイルはCGIからは変更不可
+
+[TODO]
+
+   eval("require $EXEC_DIR/.fml/cgi.conf") if -f "$EXEC_DIR/.fml/cgi.conf";
+	別にしておく方がいいだろう
+	このファイルはCGIからも変更可能であるべき
+
+
+
+$Id$

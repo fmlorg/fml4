@@ -1,0 +1,24 @@
+.C	Overview
+
+ここでは その他のユーティリティについてまとめてある。
+
+.S	fmlserv: listserve style interface
+
+listserv のようなインターフェイスが必要という場合のエミュレータ
+.xref fmlserv
+
+.S	popfml: POP3 をつかってＭＬをエミュレーション
+
+NT4 の POP version の実態。
+.xref popfml
+
+UNIX 上でも使えるが嬉しいか？
+
+.S	~/.forward を利用したＭＬ
+
+.xref .forward
+
+.S	その他の便利なプログラム
+
+/usr/local/fml/bin/ などにこまごまとしたものがある。
+.xref uip

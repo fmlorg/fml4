@@ -1,0 +1,27 @@
+.HTML_PRE
+	その他(うまく分類できなかった)いくつかのこと
+
+.toc
+.~HTML_PRE
+
+.P	いろいろ
+.include examples.wix
+.include lock.wix
+.include spool.wix
+.include misc.wix
+.include movement.wix
+.include summary.wix
+.include subject.wix
+ 
+
+.P	レンタルサーバというかISPのサービスというか…
+.include isp_specific.wix
+
+
+.P	examples
+.C	examples
+
+.include sample-sitedef-mnews
+
+
+.# $Id$

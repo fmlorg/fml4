@@ -1,0 +1,37 @@
+.C	デバッグモードとデバッグレベル
+
+.S	デバッグモード
+=E.S	Debug mode
+.k	デバッグモード
+.label	debug-mode
+.k	$debug
+
+	$debug        = 1; (default 0)
+
+デバッグモードのフラッグ。１がデバッグモード。配送以外の設定、コマンド
+操作はすべて有効です。テストに使って下さい。０に設定しないと配送してく
+れません。デバッグの内容をSTDERRに吐きます。
+=E
+In debug mode, fml.pl does not distribute (for test).
+
+.S	デバッグモード レベル２
+=E.S	Debug mode level 2 
+
+$debug を2以上にすると、にデバッグ出力を
+=E
+If $debug >= 2, fml writes debug info the file
+
+	$DEBUG_LOGFILE (default "$DIR/log.debug")
+
+ファイルに吐きます。
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

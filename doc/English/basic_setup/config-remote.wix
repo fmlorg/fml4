@@ -1,0 +1,100 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- リモートで管理する --
+=E
+	fml 3.0 -- control fml by mail in remote --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include config-remote.en.wix
+.return
+.fi
+○ 目的
+
+メーリングリストを走らせるマシンにアクセス権限がない
+
+典型はISPのサービスなど。
+
+
+そのためメールでコマンドを送ることで
+
+	メンバーの登録/削除
+
+などを行なう。認証はパスワードを知っているか？否か？で行なう。
+パスワードは管理者一人一人別のものを選べる。
+
+PGPを選択すればPGPの clear sign でそのメールの認証を行なう。PGPを選択
+すれば設定はPGPの分複雑になるがデフォールトのリモート管理より安全性は
+究めて高い。ここではデフォールトのパスワードの方を説明する。
+
+
+○ メーリングリストを作る (省略)
+
+○ リモート管理を可能にする。
+
+デフォールトではそのようなことは認めていないため明示的に機能をUPさせな
+いとだめ。
+
+% makefml config elena
+
+次のような画面が現れるので数字を入れて選択していく。0 を押すと前の画面
+に戻る。(y/n) という yes or no という選択では y (yes) か n (no) どちら
+かを選ぶ。[]の中がデフォールト値。
+
+   メインメニュ -> 4 -> REMOTE ADMINISTRATION -> "y"
+
+.include main-menu.wix
+
+
+○ 終る直前の画面では
+
+	〜〜〜略〜〜〜
+
+   4    REMOTE ADMINISTRATION              
+                     PERMIT ?              YES
+                     AUTH_TYPE             crypt
+
+	〜〜〜略〜〜〜
+
+○ メールでコマンドを送ることができるメンバーを登録する。
+   少なくとも最初の一人はマシンの上でこの作業が必要だ;)
+
+＊ アドレスの登録
+
+% makefml addadmin elena あどれす
+
+＊ パスワードの設定
+
+% makefml passwd elena
+
+  ... 略 ...
+
+Address: fukachan@fml.org
+Password: 
+Retype Password: 
+   Passwd Changed (/var/spool/ml/elena/etc/passwd).
+---UnLocking elena ML
+Done.
+
+○ 削除	
+
+% makefml byeadmin elena あどれす
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

@@ -1,0 +1,184 @@
+.C	GUI 関係
+
+.S	管理者パスワードを忘れました。
+
+default なら /usr/local/fml/www/authdb/admin/htpasswd というのが
+パスワードファイルです。fml のサーバに入って
+.q
+% htpasswd  /usr/local/fml/www/authdb/admin/htpasswd admin
+New password: 
+~.q
+で、パスワードを再設定してください。ちなみに
+.q
+% htpasswd パスワードファイル ユーザ名
+.~q
+です。どのファイルかは 
+/usr/local/fml/share/cgi-bin/fml/admin/.htaccess を見ると分かります。
+例: .htaccess
+.q
+AuthName ByPassword
+AuthType Basic
+AuthUserFile /usr/local/fml/www/authdb/admin/htpasswd  ←これ
+<Limit GET POST>
+require valid-user
+</Limit>
+.~q
+
+各ＭＬ、例えば elena ML の設定は
+
+   /usr/local/fml/share/cgi-bin/fml/ml-admin/elena/.htaccess
+
+を見ると分かります(以下同様)。
+
+
+.S	newaliases を実行すると permission denied という
+
+root が
+
+       /etc/aliaes.db  /var/spool/ml/etc/aliases.db
+
+というファイルを作るために
+
+       /etc/        /var/spool/ml/etc/
+
+それぞれのディレクトリに書き込めるか？ それができなかった という話です。
+
+sendmail という名前で postfix かも:-) ということもあるので
+sendmail.{com,org} の sendmail と仮定しますが
+＃ ということはきにしなくてもOK？ > FreeBSD 4.0
+
+sendmail では最初の一回  
+
+       /etc/aliaes.db  /var/spool/ml/etc/aliases.db
+
+を作っておけばあとはどのユーザから newaliases を実行しても作ることがで
+きるはずです。ですが root でやる癖をつけるのはそれはそれでOKです。
+
+.q
+FYI:
+逆に CGI を使う時、MTAが postfix なら次のように設定しています。
+この場合は それぞれの .db を作る担当のユーザが別々です。
+
+/etc/aliaes
+	fml はさわらない
+
+/etc/aliaes.db
+	オーナーは root 
+
+/var/spool/ml/etc/aliases
+	fml はここだけを編集する
+
+/var/spool/ml/etc/aliases.db
+	オーナーは fml
+	fml CGI はこの db だけを作り直す
+
+になります。
+.~q
+
+
+.S	apache の permission の問題で動かない？
+
+apache の /usr/local/apache/logs/errors_log ですでにエラーメッセージが
+でている場合、fml の CGI 自体が実行できていません。それは apache の設
+定の問題です。
+
+まず apache は default では nobody で動いています。fml のインストール
+ガイドは fml というユーザでインストールすることになっています。このま
+までは、fml の使うディレクトリへの読み書きができません。
+
+そこで、まずユーザを統一して下さい。例えば
+
+	httpd.conf を User fml
+
+	/usr/local/fml 以下を owner fml
+	/var/spool/ml  以下を owner fml
+
+に統一して実験して下さい。(逆に nobody に統一でもいいですが、とにかく
+統一しないと)
+＃ 例: chown -R fml /usr/local/fml /var/spool/ml
+
+これで動かないなら別の動かない理由があります。
+
+専用サーバでない場合は、apache をもう一つつくって別のポートであげて実
+験するなりしてうまくいくとを確認した後に suexec なりを検討するべきでしょ
+う。
+
+
+.S	symlink ?
+
+/usr/local/www/cgi-bin/fml は /usr/local/fml/share/cgi-bin/fml への 
+symlink ですか？ apache のCGI関係の設定例で symlink はデフォールトでは
+ないです。Options FollowSymLinks 
+
+
+.S	WWWでＭＬを作成したが、aliases のエントリがちゃんとUPDATEされてない？
+
+注意: 以下はたまたま solaris 2.6 の例
+
+◯ fml 側の確認
+
+1. /var/spool/ml/etc/aliases に作成したＭＬのエントリがあるかどうかを確認する。
+
+2. /var/spool/ml/etc/aliases.db の日付を aliases と比べて下さい。
+   aliases を実行しているのなら .db のほうが新しい(か分の精度で同時刻)はずです。
+   ソラリスなんかだと Berkeley DB ではなく
+
+	/var/spool/ml/etc/aliases.pag
+	/var/spool/ml/etc/aliases.dir
+
+   となっていたかもしれません
+
+◯ OS(というかMTA)の設定
+
+1. /etc/mail/sendmail.cf に 
+   /usr/local/fml/www/examples/sendmail/senmail.cf というファイルに書いて
+   ある設定を追加してあるか確認してください。編集するのは、この一行だけですが
+
+	O AliasFile=/etc/aliases,/var/spool/ml/etc/aliases
+
+2. １を確かめた後 /usr/bin/newaliases を実行してみて下さい。
+
+	/etc/mail/aliases: 30 aliases, longest 49 bytes, 886 bytes total
+	/var/spool/ml/aliases: 20 aliases, longest 26 bytes, 239 bytes total
+
+のように２つのファイルの処理をしたという表示がでるはずです。
+＃この例の数字は適当です
+
+.S	Invalid command 'SSLRequireSSL'
+	
+Q: apache のエラーログ /usr/local/apache/logs/error_log をみると 
+
+.q
+[Thu May 25 18:49:40 2000] [alert] [client xxx.xxx.xxx.xxx] \
+                           /usr/local/fml/share/cgi-bin/fml/admin/.htaccess: \
+                           Invalid command 'SSLRequireSSL', perhaps mis-spelled \
+                           or defined by a module not included in the server \ 
+                           configuration
+.~q
+
+こういうエラーログが出ますが何でしょう？
+
+A: 
+
+1. .htaccess にかくのが SSLRequireSSL という呪文ではなくなった。
+   今のところそんな話は聞きませんのでこれはない。＃要 modssl の調査
+
+2. apache がちゃんと作られていない 
+
+.q
+error_log の起動時のログで
+
+Apache/1.3.12 (Unix) configured -- resuming normal operations
+
+こうではなく
+
+SSL がはいってたらSSLはいってるぜといいます。
+
+例:
+[notice] Apache/1.3.12 (Unix) mod_ssl/2.6.4 OpenSSL/0.9.5a configured -- resuming normal operations
+.~q
+
+3. apache startssl していないなど起動手順が違う？
+
+
+

@@ -1,0 +1,40 @@
+.C	変数名や関数名の名付け方の慣習について
+
+.S	関数名
+
+Capital
+
+□ 例外
+
+◯ 関数オーバーロードをちょっと意図している風
+
+use()
+eval()
+system()
+daemon()
+
+◯ mget3_*() 関数群
+
+proc/libsendfile.pl:108:sub mget3 
+proc/libsendfile.pl:334:sub mget3_SendingEntry
+proc/libsendfile.pl:393:sub mget3_unlink
+proc/libsendfile.pl:440:sub mget3_Init
+proc/libsendfile.pl:472:sub mget3_Reset
+proc/libsendfile.pl:483:sub mget3_Getopt
+proc/libsendfile.pl:516:sub mget3_Search
+proc/libsendfile.pl:587:sub mget3_SearchInArchive
+proc/libsendfile.pl:687:sub mget3_MHExpand
+proc/libsendfile.pl:704:sub mget3_V2search
+proc/libsendfile.pl:738:sub mget3_V1search
+
+◯ fml_local ユーザ定義関数の例題 
+   これはユーザ定義関数なので、普通の意味での慣習には従っていない
+
+libexec/fml_local.pl:689:sub sendback
+libexec/fml_local.pl:725:sub getmyspool_nopasswd
+libexec/fml_local.pl:740:sub getmyspool
+libexec/fml_local.pl:799:sub getmyspool2
+libexec/fml_local.pl:829:sub forward
+libexec/fml_local.pl:874:sub discard{ 1;}
+libexec/fml_local.pl:880:sub getback { &sendback(@_);}
+libexec/fml_local.pl:884:sub getmyspool_pw { &getmyspool(@_);}

@@ -1,0 +1,24 @@
+.C	makefml のだすエラーメッセージ
+
+.S	Please check the group permission in /var/spool/ml
+
+owner,group のことではなくて group writable "permission" がやばいとい
+う警告です。
+
+1. もし意図的にそうしていて、それを許す設定が MTA にあるのなら無視して下さい
+
+2. もし、意図せず、このような↓ことになっているなら group writable を
+   はずしてください
+
+>drwxrwxr-x  3 fml   fml    512 Jun  7 23:39 .
+>drwxrwxr-x  7 bin   mail  7168 Jun 13 16:07 ..
+>drwxrwxr-x  2 root  fml    512 Jun  7 23:39 etc
+
+      ↑ここ
+
+	# chmod g-w /var/spool/ml 
+
+などとします。
+
+NOTE: group writable のために動かずに悩む人がいるので FYI?/ warning?
+      として出しています。

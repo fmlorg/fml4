@@ -1,0 +1,32 @@
+.HTML_PRE
+		アドレス関係の操作
+
+.toc
+
+ここではアドレスについての
+
+登録の仕方について詳しくは .ptr{how_to_subscribe} をみてね
+.url ../how_to_subscribe/
+
+特定のアドレスを弾きたいとかはフィルタリング .ptr{filter} を参照して下
+さい。
+
+リモート管理の時の認証については .ptr{remote_control}
+
+.~HTML_PRE
+
+.include overview.wix
+.include howto.wix
+
+.appendix
+.include crosspost.wix
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

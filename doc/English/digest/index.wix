@@ -1,0 +1,9 @@
+.HTML_PRE
+	まとめおくり(ダイジェスト)について
+
+.toc
+.~HTML_PRE
+
+.include overview.wix
+.include cron.wix
+.include msend.wix

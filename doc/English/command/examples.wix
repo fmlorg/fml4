@@ -1,0 +1,115 @@
+.C	事例集
+
+
+.S	メンバーを問わずファイル uja を送り返す例
+=E.S	Send back $DIR/uja for anyone
+
+例:
+１	誰からのリクエストでもOK
+２	本文にキーワード uja とかくこと
+=E
+1	requests from anyone are O.K.
+2	keyword "uja" in the mail body to send back the file "uja".
+
+$START_HOOK = q#
+    $UJA_FILE = "$DIR/uja";
+
+    if ($Envelope{'Body'} =~ /^[\n\s]*\#\s*uja/) {
+	&SendFile($Envelope{'Addr2Reply:'}, "UJA $ML_FN", $UJA_FILE);
+	&Log("UJA");
+	$DO_NOTHING = 1;
+    }
+#;
+
+
+.S	自動送り返しサーバの実装例
+=E.S	Automatic Replay Server
+.key	自動送り返しサーバの実装例
+
+なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
+で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
+=E
+Please set a file to $GUIDE_FILE in config.ph and set up $START_HOOK
+in the following hook:
+
+ポイントは、“$START_HOOK にしかける”ってところです。
+
+例:
+
+1	適当なＭＬ(guide ML)を作成する (makefml newml guide)
+2	普通に aliases を設定する
+3	config.ph に $GUIDE_FILE (guide) の内容をを送り返すなら
+
+	$START_HOOK = q#
+		&SendFile($From_address, "Guide $ML_FN", $GUIDE_FILE);
+		&Log("Guide request from $From_address");
+		$DO_NOTHING = 1;
+	#;
+
+を guide ML の config.ph に付け加える。(おわり)
+
+
+.S	新しく『特定のファイルを送り返す』コマンドを作る
+=E.S	make a new command what send back a file
+.l	my-file-sendback-command
+.xref	%Procedure-special-key
+
+例: コマンド news でニュースというファイルを送り返す。
+=E
+E.g. "news" command is to send back $DIR/news file.
+
+config.ph に
+=E
+In config.ph
+
+%LocalProcedure = (
+		    # help for usage of commands
+		    'news',	'ProcFileSendBack',
+		    '#news',	"$DIR/news",
+
+		);
+
+と書けば news という新しいコマンドのでき上がりです。
+
+
+.S	Get以外のCommandで MLとは別のファイルを取り出すようにするには
+
+こんなんかな。"get-etc passwd" を elena-ctl におくると 
+/var/spool/ml/elena/etc/passwd が返ってくる。
+＃わかるとおり、チェックあまあまですが、まぁ prototype だから
+
+%LocalProcedure = (
+		   'get-spool', 'mySendFile',    # $DIR/spool
+		   'get-archive', 'mySendFile',  # $DIR/archive
+		   'get-etc', 'mySendFile',      # $DIR/etc
+		   );
+
+sub mySendFile
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    if ($proc =~ /^get-([a-z]+)$/io) {
+	local($dir) = $1;
+	if (-f "$dir/$Fld[2]") {
+	    &SendFile($to, "Get $dir/$Fld[2] $ML_FN", "$dir/$Fld[2]");
+	}
+    }
+}
+
+
+.S	get 100 とコマンドを おくるとマルチパート形式で100番の記事がおくられる
+
+答え: get の時も呼び出す関数を mget の関数にしてしまう。
+
+つまり
+1. いつでもmget扱いにして
+2. mgetのデフォールトをmpにする
+
+そういうわけで、以下のperlの文をconfig.phへつけたしてみる。
+=E
+append it to config.ph.
+
+   $MGET_MODE_DEFAULT = "mp";
+   %LocalProcedure = ('get', 'ProcMgetMakeList');
+
+(fml-support: 06997)

@@ -1,0 +1,3 @@
+DOC_EXAMPLES_SUBDIR  += body
+
+DOC_EXAMPLES_SOURCES += body/welcome

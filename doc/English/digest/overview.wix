@@ -1,0 +1,64 @@
+.C	Overview
+
+まとめおくりとは「リアルタイムではなくＮ時間おきにＮ時間分のＭＬの記事
+をまとめて送りつける」ことです。
+
+fml では msend というプログラムを定期的に実行することでまとめおくりを
+行ないます。このためにOSにある"指定されたプログラムを定期的に実行する"
+cron という機能を使います。これは OS の cron という機能を使って設定を
+してください。
+
+msend => .ptr{msend}
+
+cron  => .ptr{cron}
+
+/var/spool/ml/elena/crontab というファイルがOSに設定するべき
+見本のファイルです。設定は crontab というコマンドを使います。
+
+	% crontab /var/spool/ml/elena/crontab
+
+.S	管理者のするべきこと
+
+cron に設定して下さい。それだけです。あとは
+	まとめ送りプログラムがよきにはからいます。
+	ユーザのまとめ送り希望者はコマンドで設定するように教える
+だけです。
+
+% makefml newml elena
+% crontab /var/spool/ml/elena/crontab
+
+もし、複数のＭＬがあるなら /var/spool/ml/etc/crontab/ を利用するのが良
+いでしょう。
+
+% crontab /var/spool/ml/etc/crontab/fml
+                                     ↑
+
+この部分はＭＬを動かすためのユーザです。デフォールトは仮想ユーザ fml 
+です。このファイルは newml を実行するたびに update され存在するすべて
+のＭＬについてまとめ送りを定期的に試みます。
+
+
+.S	ユーザのすること
+
+	matome 3mp
+
+といったコマンドを elena-ctl へおくってもらうことです。一般形は
+
+	matome 時間とオプション
+
+です。ヘルプファイルにせつめいがあります。
+例: /var/spool/ml/elena/help
+
+通常配送に戻す時は
+
+	matome 0
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

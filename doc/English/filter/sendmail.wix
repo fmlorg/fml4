@@ -1,0 +1,16 @@
+.C	Sendmail specific topics
+
+.S	PerlMX
+
+.url http://www.ActiveState.com/Products/PerlMx/
+.q
+ActiveState releases PerlMx 1.0  
+
+PerlMx is a mail filter engine designed to operate under sendmail. 
+Beginning with v8.10, sendmail provides scriptable hooks into all 
+stages of an e-mail transaction, allowing custom actions on any 
+aspect of the transaction, including the content of the message 
+itself. PerlMx allows these hooks to be written in Perl, making for 
+rapid prototyping, debugging, and deployment of custom e-mail 
+filtering solutions.
+.~q

@@ -1,0 +1,73 @@
+.C	Overview
+.l	GUI
+
+.S	GUIとは？
+
+fml のメニュー設定プログラムは２つあります。
+
+	CUI として makefml をコマンドラインで走らせる
+
+	GUI として CGI 経由で makefml を動かすという
+	WWWからの操作
+
+です。GUI はCGIのことをさしています。
+
+.S	インストールの方法は？
+
+PLAINTEXT は
+
+	doc/INSTALL_CGI.jp 
+
+というファイルを見て下さい。HTML なら
+
+.url http://www.fml.org/fml/INSTALL_CGI/
+
+を見て下さい。
+
+.S	fml CGI専用サーバを作らないと駄目ですか？
+
+いいえ。INSTALL_CGI を見て下さい。
+document 本編は fml GUI 専用サーバを作る前提ですが、
+付録で suexec を使う例が説明されています。
+
+default （fml CGI 専用）では apache が CGI を実行する時は
+
+	/usr/local/apache/conf/httpd.conf 
+
+の User 行(nobody が default)で定義されているユーザ権限で実行します。
+当然 apache が実行するCGIもそのユーザの権限になります。よって、そのユー
+ザが /usr/local/fml /var/spool/ml を読み書きできることが必要です。
+
+[ インストールの確認点 ]
+
+(fml の INSTALL ドキュメントにあわせるなら)
+
+0. httpd.conf は User fml にします。
+
+1. /usr/local/fml 以下が 仮想ユーザ fml で見えること 仮想ユーザ fml の
+   人が .cgi のファイルが実行できること
+
+2. /var/spool/ml 以下すべて 仮想ユーザ fml の人に読み書きできるように
+   なっていること
+
+を確認します。
+
+
+.S	apache で SSL がちゃんとうごいているか？
+
+apache で SSL を有効にしてスタートすれば apache/logs/error_log に
+
+[Wed Nov 10 23:27:07 1999] [notice] Apache/1.3.9 (Unix) mod_ssl/2.4.8 OpenSSL/0.9.4 configured -- resuming normal operations
+
+のように SSL が動いてるぜといいます。いってないなら
+apache の作成に失敗している可能性大です。
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

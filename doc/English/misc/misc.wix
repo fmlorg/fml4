@@ -1,0 +1,98 @@
+.C	その他
+
+.S	本当に残しておく必要のあるファイルは？
+=E.S	Core part of FML package
+.l	files-to-need
+
+たまにどこが必要な部分ですか？と聞かれますが、makefml install を使えば
+core の部分だけが概ねインストールされます。
+=E
+"makefml install" action installs core part of FML. It contains a set
+of documents which is large. You can remove it if it is enough for you
+to access the latest version always. The latest version of documents
+are available via WWW. You can access the latest documents but not
+back numbers, so you may lose the version specific descriptions.
+
+makefml でインストールすると document 群も入れます。documents は大きい
+です。インストール先の doc の下にまとまってるので、ここは消して構いま
+せん。ドキュメントは「www.sapporo.iij.ad.jp を見るから doc/html は要ら
+ないから消す」という選択はありうるでしょう。ただ www では常に最新版の
+内容だけが見られるという点に注意してください。ISPのシェルを使ってる場
+合などならISP側ではなく自分の端末のローカルディスクに移しておくとゆう
+手もあります。
+
+それ以外に何を消していいかは機能をどこまで使うかに依存しているので一概
+にはいえません。が document 以外で概ね 1M くらいです。ちなみに
+
+	doc 	ドキュメント
+	libexec 特殊なもの fml_local とかも含む
+		fmlserv があるから消しちゃ駄目かもしれない
+	bin 	fml 自体は使わない user 支援 program 群
+
+etc, sbin, cf は消しちゃダメです。
+=E
+Except for documents, which files you can remove depends on functions
+you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
+
+余談ですがFML.ORGのＭＬで調べるとだいたいMLのホームは 1000通 〜 4M く
+らい必要と評価しておくといいみたいです。
+
+
+.S	特定の一つのＭＬだけを一時停止したい(削除にあらず)
+=E.S	temporary stop an ML
+
+
+配送を止めるだけならデバッグモードにするとやみに葬られます:)
+
+/etc/aliases を編集し、事実上無効にするというのもよいでしょう。
+
+.q
+elena: elena-admin
+elena-ctl: elena-admin
+elena-admin: fml
+.~q
+
+.S	毎日記事番号がリセットされるＭＬ
+=E.S	daily renewal
+
+一日の記事の投稿数が一目でも分かるように夜中の１２時を境に
+記事番号を０に戻す、つまり
+
+	Subject: [elena 00100]
+
+を
+
+	Subject: [elena 00000]
+
+にするわけです。
+
+
+記事番号は多くのファイルに関係しています。
+seq は記事番号のカウンタだし、log や summary には記事ごとの
+データが記録されています。
+spool と seq は整合性チェックをしているので、spool も変えてしまわないと
+記事が重複しているというエラーが発生します。
+これらの関係あるファイルを全部名前を変えてしまうしかありません。
+パート II のテストの項目でＭＬをリセットする話をしましたが、
+それと原理的には同じです。
+
+次のような shell script でもつくって cron ( .ref{cron} 節参照) 
+で毎晩回してみるとできるとおもいます。
+.q
+#!/bin/sh
+   
+ml=elena
+   
+date=`date -u +%C%y%m%d`
+   
+/usr/local/fml/makefml lock $ml 60 &
+   
+cd /var/spool/ml/$ml || exit 1
+   
+for file in seq spool summary log
+do
+   if [ -f $file ];then
+        mv $file $file.$date
+   fi
+done
+.~q
