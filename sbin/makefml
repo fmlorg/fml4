@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2002 Ken'ichi Fukamachi
+# Copyright (C) 1993-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2002 fukachan@sapporo.iij.ad.jp
+#               1996-2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.210.2.12 2002/10/20 14:25:41 fukachan Exp $
+# $FML: makefml,v 2.232 2003/01/23 22:13:28 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -484,6 +484,9 @@ OS_TYPE:
 
     # fix include path for *.pl 
     push(@INC, $EXEC_DIR);
+
+    # for .pm
+    push(@INC, "$EXEC_DIR/module/fml-devel");
 
     if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
 	$GroupWritable = $CurConfig{'PERSONAL_OR_GROUP'};
@@ -2202,11 +2205,62 @@ sub RemoveMember
 }
 
 
+sub is_valid_user_syntax
+{
+    my ($addr) = @_;
+    my ($addr_pattern, $user_pattern) = ();
+
+    eval q{
+	use FML::Restriction::Base;
+	my $obj = new FML::Restriction::Base;
+	my $exp = $obj->basic_variable();
+	$user_pattern = $exp->{  'user' };
+	$addr_pattern = $exp->{ 'address' };
+    };
+    if ($@) {
+	print STDERR "Warning: cannot load FML::Restriction::Base ($@, @INC)\n";
+
+	# see FML::Restriction::Base;
+	my $domain_regexp  = '[-A-Za-z0-9\.]+';
+	my $user_regexp    = '[-A-Za-z0-9\._]+';
+	$user_pattern = $user_regexp;
+	$addr_pattern = "$user_regexp\@$domain_regexp";
+    }
+
+    if ($addr =~ /^($addr_pattern)$/ || $addr =~ /^($user_pattern)$/) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+}
+
+
+sub _exact_match
+{
+    my ($buf, $addr) = @_;
+
+    if ($buf =~ /^\#\s*($addr.*)/i || $buf =~ /^($addr.*)/i) {
+	my ($a) = split(/\s+/, $1);
+	return AddressMatch($a, $addr);
+    }
+
+    return 0;
+}
+
+
 sub CtlAddrList
 {
     local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
     local($found, $buf, $line, $sumbuf, $filenew);
+    my $orig_addr = $addr;
+
+    # check the input
+    unless (is_valid_user_syntax($addr)) {
+	&Error("invalid address");
+	return 0;
+    }
 
     # XXX tricky hack
     $addr =~ s/\./\\\./g;
@@ -2223,7 +2277,8 @@ sub CtlAddrList
     while (<F>) {
 	chop;
 
-	if (/^\#\s*$addr/i || /^$addr/i) {
+	if ((/^\#\s*$addr/i || /^$addr/i) &&
+	    _exact_match( $_, $orig_addr)) {
 	    $line = $_;
 	    $buf .= "\t- $_\n";
 
@@ -4901,6 +4956,12 @@ sub do_adduser
     my ($proc) = $fp;
     $proc =~ s/do_//;
 
+    # check the input
+    unless (is_valid_user_syntax($member)) {
+	&Error("invalid address");
+	return 0;
+    }
+
     if (! $ml || !$member) {
 	&Log("ERROR: makefml::$proc invalid arguments");
 	&Debug("*** SYNTAX ERROR: the number of arguments ***");
@@ -5026,6 +5087,12 @@ sub do_byeuser
     my ($proc) = $fp;
     $proc =~ s/do_//;
 
+    # check the input
+    unless (is_valid_user_syntax($member)) {
+	&Error("invalid address");
+	return 0;
+    }
+
     if (! $ml || !$member) {
 	&Log("ERROR: makefml::$proc invalid arguments");
 	&Debug("*** SYNTAX ERROR: the number of arguments ***");
@@ -5125,6 +5192,12 @@ sub do_ctladdr
     local($ml, $addr, $opt) = @_;
     my (@files, @dbfiles);
     my ($proc) = $fp;
+
+    # check the input
+    unless (is_valid_user_syntax($addr)) {
+	&Error("invalid address");
+	return 0;
+    }
 
     # canonicalize
     $proc =~ s/do_//;
