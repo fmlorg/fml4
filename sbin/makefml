@@ -7049,7 +7049,7 @@ sub SetUpCGIadmin
     if (! -f "$CGI_AUTHDB_DIR/admin/htpasswd") {
 	# we enforce valid-user in .htaccess, so empty htpasswd is invalid :)
         &SetPublicUmask;
-	&MkDir("$CGI_AUTHDB_DIR/admin");
+	&MkDirHier("$CGI_AUTHDB_DIR/admin");
 	&Touch("$CGI_AUTHDB_DIR/admin/htpasswd");
     }
 
