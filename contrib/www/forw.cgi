@@ -24,7 +24,8 @@ $SUBJECT   = "questionnaire of www.sapporo.iij.ad.jp";
 		SCRIPT_FILENAME, DOCUMENT_ROOT, PATH, SCRIPT_NAME, 
 		SERVER_ADMIN, SERVER_SOFTWARE, HTTP_MIME_VERSION, 
 		SERVER_PORT, SERVER_PROTOCOL, HTTP_REFERER, 
-		SERVER_NAME, REQUEST_METHOD, SCRIPT_NAME);
+		SERVER_NAME, REQUEST_METHOD, SCRIPT_NAME,
+		CONTENT_LENGTH);
 
 $REPLY_MESSAGE = "\nYour message has been Sent.\nThanks in advance.\n\n";
 
@@ -94,7 +95,7 @@ sub Forw
 
     print S "\n\# end\n\n";
     print S "-" x 60;
-    print S "\n\nEnverionment Variables Information (for Server Admin):\n\n";
+    print S "\n\nServer Information for Server Administrator:\n\n";
 
     if ($DNS_SPOOF_CHECK) {
 	print S "DNS Cheking ... \n";
@@ -111,8 +112,10 @@ sub Forw
 	else {
 	    print S "Verified: $raddr == $rhost\n";
 	}
+	print S "\n";
     }
 
+    print S "Enverionment Variables Information:\n\n";
     foreach (sort keys %ENV) { 
 	($k, $v) = ($_, $ENV{$_});
 	next if $SKIP_ENV{$k};
