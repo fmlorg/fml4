@@ -71,4 +71,9 @@ FYI: THIS FILE IS "EUC-JAPAN".
    % make release
 
 
+◯ TAGS these days
+
+	cgi-3-0-current は fml 4.0 用の作業に入る時につけたタグ
+	これと diff をとると 4.0 にむけた改造がわかる。
+
 $Id$
