@@ -25,13 +25,39 @@
 fml 3.0 provides new automatic registration.
 
   ユーザにとって(のみかけは)日本語になっていることです。
-  管理者にとっては actives と members を両方とも使うことです。
+  管理者にとっては actives と members を両方とも使う点です。
 =E
   fml 3.0 "auto_subscribe" handler uses both actives and members.
 
-現在自動登録を使っていないなら別に気にしなくて構いません:)
+現在自動登録を使っていないならUPGRADE時に気にすることはないでしょう
 =E
-If you do not use automatic registration, you have nothing to do:)
+If you do not use automatic registration, you have nothing to do.
+
+
+.S	アップグレードの支援ツールについて
+=E.S	Helper tool to upgrade fml 2.x to fml 3.0
+
+ケース1:  makefml config ML
+
+makefml config で
+
+   auto_regist -> auto_subscribe 
+
+を行なえばメニュー終了時に 
+
+	members を actives にコピーするか？
+
+と聞かれるので y と答えればコピーされます。
+
+
+ケース2: makefml upgrade ML
+
+このコマンドで ML メーリングリストに対し
+
+   cf と config.ph の auto_regist を auto_subscribe にさし換える
+   members を actives にコピーする
+
+の操作をします。こっちは対話プログラムではありません。
 
 
 .S	『自動登録』を使っている場合の注意
