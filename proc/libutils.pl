@@ -430,6 +430,23 @@ sub Link
 }
 
 
+sub CleanUpDirectory
+{
+    local($dir) = @_;
+
+    if (opendir($dir, $dir)) {
+	while ($_ = readdir($dir)) {
+	    next if /^\./;
+	    unlink "$dir/$_" if -f "$dir/$_";
+	}
+	closedir($dir);
+    }
+    else {
+	&Log("cannot opendir $dir");
+    }
+}
+
+
 ##### sendmail.cf
 # $w hostname
 # $j fully quarified domain name 
