@@ -55,14 +55,17 @@ overhead をかければ実現はできますが、コストが見合うとは思えないので実
 .k	$USE_ARCHIVE
 
 をセットすれば呼べるようになっています。
-アーカイブが作られる場所は @ARCHIVE_DIR の先頭の内容
+アーカイブが作られる場所は $ARCHIVE_DIR で、
 
-	@ARCHIVE_DIR = ('var/archive');
-.k	@ARCHIVE_DIR
+	$ARCHIVE_DIR = 'var/archive';
+.k	$ARCHIVE_DIR
 
-です。ここでは 'var/archive' です。配列 @ARCHIVE_DIR の内容は複数あっ
-てもいいですがそれは get, mget の時に探す対象となるだけで作る場所とは
-みなされません。
+です。ここでは 'var/archive' です。
+
+この内容はアーカイブの場所のリストである配列 @ARCHIVE_DIR の先頭に代入
+されます。アーカイブの場所は複数あってもいいですがそれは get, mget の
+時に探す対象にはなりますが、自動的に作る場所は $ARCHIVE_DIR ==
+$ARCHIVE_DIR[0] です。
 
 何個ずつ単位でまとめるかは
 
