@@ -47,19 +47,37 @@ exit 0;
 
 sub Parse
 {
-    my($new_block, $gobble, $curf, $first_header_part);
-    my($mp_block);
+    my ($new_block, $gobble, $curf, $first_header_part);
+    my ($mp_block, $p, $pmax);
 
     $new_block = 1;
     $gobble    = 0;
     $curf      = $NULL;
     $first_header_part = 1;
 
+    # gobble error mail
+    {
+	$pmax = sysread(STDIN, 
+			$MessageBuffer, 
+			$MEAD_INCOMING_MAIL_SIZE_LIMIT);
 
-    while (<STDIN>) {
-	$SavedBuffer .= $_ if $InputLines++ < 1024;
+	if ($pmax >= $MEAD_INCOMING_MAIL_SIZE_LIMIT) {
+	    &Log("warn: input mail is too large");
+	    &Log("warn: check the fisrt $MEAD_INCOMING_MAIL_SIZE_LIMIT bytes");
+	}
+	&Log("log: read $pmax bytes") if $debug;
+    }
 
-	chop;
+    my ($msgbufp, $msgbufp1);
+    for ($msgbufp = 0; $msgbufp <= $pmax; ) {
+	$msgbufp1 = index($MessageBuffer, "\n", $msgbufp);
+	last if $msgbufp1 < 0;
+	$_        = substr($MessageBuffer, $msgbufp, $msgbufp1 - $msgbufp);
+	$msgbufp  = $msgbufp1 + 1;
+
+	# reread input buffer since this buffer ends incomletely.
+	# we ends it up with "\n" correctly.
+	$SavedBuffer .= $_."\n" if $InputLines++ < 1024;
 
 	# ignore the first header
 	# we should ignore header for <maintainer>
@@ -792,21 +810,22 @@ sub ShowProfile
 {
     local(*addr) = @_;
     my ($key);
+    my ($max) = ($LIMIT/2);
 
     for $key (keys %addr) {
 	my ($a, $ml) = split(/\s+/, $key);
 
 	# ignore the first case
-	next if $SumUp{$a} < 2;
+	next if $SumUp{$a} < $max;
 
 	my ($profile, $profile_sum);
-	for $when (0 .. 7) {
+	for $when (0 .. 6) {
 	    $profile_sum++ if $Profile{$a}{$when};
 	    $profile .= $Profile{$a}{$when} || '0';
 	    $profile .= " ";
 	}
 
-	&Log("prof: <$a> total=$SumUp{$a} profile_sum=$profile_sum [$profile]");
+	&Log("prof: <$a> sum=$profile_sum/total=$SumUp{$a} [$profile]");
     }
 }
 
@@ -1176,16 +1195,20 @@ sub Init
 	}
     }
 
+    
+    $MEAD_INCOMING_MAIL_SIZE_LIMIT = 64*1024; # 64K bytes 
+
     $LIMIT  = $Forced::LIMIT  || $opt_l || $LIMIT  || 5;
     $EXPIRE = $Forced::EXPIRE || $opt_e || $EXPIRE || 14; # days
     $ACTION = $Forced::ACTION || $opt_k || $ACTION || 'bye';
     $MODE   = $Forced::MODE   || $opt_m || $MODE || 'report'; # mode
 
     # expire check interval
-    $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
+    $CHECK_INTERVAL = $Forced::CHECK_INTERVAL || $opt_i || 
+	$CHECK_INTERVAL || 3*3600;
 
     # directories
-    $ML_DIR     = $FORECE_ML_DIR    || $opt_S || $ML_DIR;
+    $ML_DIR     = $Forced::ML_DIR   || $opt_S || $ML_DIR;
     $EXEC_DIR   = $Forced::EXEC_DIR || $opt_E || $EXEC_DIR;
     $DIR        = $Forced::DIR      || $opt_D || $DIR; # working directory.
     $VAR_DIR    = "$DIR/var" if $DIR;
