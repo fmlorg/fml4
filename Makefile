@@ -30,6 +30,9 @@ BRANCH=`cat conf/branch`
 MODE=`cat conf/mode`
 .endif
 
+# dirty hack
+scan: __scan
+
 # standard includes
 .include "distrib/mk/fml.sys.mk"
 .include "distrib/mk/fml.prog.mk"

@@ -49,7 +49,7 @@ init-makefml:
 simulation:
 	@ env ${EXPORT_ENV} sh $(FML)/.simulation/bootstrap
 
-scan:
+__scan:
 	@ mv -f /tmp/__scan__ /tmp/__scan__.bak || echo ""
 	@ cvs -n update |tee /tmp/__scan__
 	@ echo "--- others ---"
