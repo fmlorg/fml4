@@ -33,16 +33,75 @@ __________________________________________
 __________________________________________
 
 
+.C	ＭＬサーバとは
+=E.C	ML Overview
+
+ＭＬサーバは本質的にフィルタリングをするものです。ＭＬ宛のメールが来た
+ら配送プログラムから起動されいろいろな処理をした後、配送するべき(MLの)
+メンバーリストを配送プログラムへ渡します。後は配送プログラムが配送を行
+ないます。つまり配送はＭＬサーバの役目ではありません。
+=E
+A ML Server is a filtering process. 
+
+[図]
+=E
+[Figure]
+
+あるホスト                                    ＭＬサーバのマシン
+=E
+<a host>                                      <ML Server Host>
+
+ＭＬのメンバーからのメール
+=E
+a mail from a member
+
+   |
+   V
+  MTA (e.g. sendmail)  ------------------>     MTA (e.g. sendmail)
+
+                                                |  kick off the ML server
+                                                V
+
+                                            ＭＬサーバ(ドライバともいう)
+=E
+                                            ML server (driver)
+
+                                                |  
+                                                V
+
+                                    MTA (e.g. sendmail)  配送プロセス
+=E		
+                                    MTA (e.g. sendmail)  distribution process
+
+                                             |  |  |  |  |  |
+                                             V  V  V  V  V  V
+
+                                             ＭＬのメンバー
+=E
+                                             members of the Maling List 
+
+配送プロセスは上図のように動きます。ＭＬサーバが普通のメールではなくあ
+る命令(ＭＬを辞める、過去の記事を読むなど)を含んだメールをうけた場合は、
+それを実行して答えをリクエストした人へ配送します(コマンド)。
+
+また上図からわかるとおりＭＬ宛のメールが来た時だけＭＬサーバは起動され
+ます。つまり"不定期"にです。そのためリアルタイムにＭＬの記事(メール)を
+読みたくない人、例えば3時間に一度過去3時間のメールをまとめて読む「まと
+め送り」の場合は"定期的に"まとめ送り(.ptr{msend})を実行するプログラム
+が起動される必要があります。FMLは定期的に起動しなければならないプログ
+ラム群はcronというオペレーティングシステムが提供する機能を使っています。
+
+
 .C	とりあえずＭＬを動かすためのインストールの仕方
 =E.C	Installing the fml to your system (anyway :-)
 
 
 .S	はじめに
 
-ML の運用を特権ユーザでやるべきではありません。一般ユーザ (例えばあな
-たのアカウント等) でインストールおよび運用をして下さい。一番いいのは 
-ML 用の特別な一般アカウント (e.g. fml 等) を作り、その架空ユーザになっ
-てインストール・設定を行なうことでしょう。
+ML の運用を特権ユーザでやるべきではありません。一般ユーザ(例えばあなた
+のアカウント等)でインストールおよび運用をして下さい。一番いいのは ML 
+用の特別な一般アカウント (e.g. fml 等) を作り、その架空ユーザになって
+インストール・設定を行なうことでしょう。
 =E
 In general you should not run mailing lists as a privileged user.
 Please run mailing lists as a non-privileged user.
@@ -440,6 +499,7 @@ elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac}
 
 .S	まとめおくり
 =E.S	Matome Okuri (Digest delivery)
+.label	msend
 
 まとめおくりは、cronを設定して使用します。
 
@@ -1612,7 +1672,7 @@ FYI. NT Version uses this trick:)
 なお MetaInfo Sendmail 2.x 以外のMTAを使う場合の NT 上ではこの裏技を使
 います:)
 
-.C	HELPなどの取り寄せについてユーザに知らせる方法についての考察
+.C	HELPなどの取り寄せについてユーザに知らせる方法について
 
 ヘッダにはデフォールトで X-ML-Info に書いてあります。当然ＭＬに入った
 時にはそういったことについてメールを書く or 自動的に送られるでしょう。
@@ -1621,6 +1681,76 @@ FYI. NT Version uses this trick:)
 まふ」という倫理的に問題ありまくりの方法もとれなくはありません。詳しく
 は doc/op (http://www.fml.org/fml/op/) をみると「メールの最後に付加情
 報をつける設定」
+
+
+.C	モデレーター
+
+モデレーターは
+
+	1 ＭＬ宛に来たメールは配送されず
+	2 一旦モデレーターへフォワードされます
+	3 モデレーターは内容を査読後承認するなら
+	  あるキーワードをＭＬサーバへ送ることで
+	  ＭＬ全体へ配送されます。	
+
+変数は config.ph で
+
+$PERMIT_POST_FROM              = "moderator";
+
+となっている状態です。makefml config の設定画面では
+
+   [POST]
+
+   1    PERMIT_POST_FROM                   moderators
+
+のようになります。コマンドについても
+
+   [COMMAND]
+
+   3    PERMIT_COMMAND_FROM                moderators
+
+設定はできますがいちいち承認を出すコマンドというのは意味がないでしょう。
+この設定でコマンドを送るとモデレーターにフォワードされて終るだけです。
+
+○ 承認の仕方
+
+$MODERATOR_FORWARD_TYPE という変数があります。デフォールトは２です。
+デフォールトについて説明します。２以外は doc/op (WWW なら 
+http://www.fml.org/fml/op/) を見て下さい。
+
+次のようなメールがモデレーターに来ます。
+   
+   Moderated $MAIL_LIST (elena@fml.org) receives a submit from
+   
+      fukachan@fml.org.
+   
+   Please check it. If you certify the following article, 
+   please send to elena-ctl@fml.org
+   the following line (only this line!)
+   
+   # moderator certified 199711032027.709982
+   
+   ------- Forwarded Message
+   
+   メール本文
+   
+   ------- End of Forwarded Message
+
+メールはＭＬサーバも保存しています。メール本文の内容を承認したなら、
+
+# moderator certified 199711032027.709982
+
+の行だけをコマンド用のアドレスに送って下さい。そうするとＭＬサーバは自
+分が保存しておいたそのメールを配送します。
+
+モデレーターか否かはこの特別な文字列(# moderator certified 数字)を知って
+いるか否かです。この数字は毎回違うもるので、ある意味で暗合レベルの非常
+に低い one time password だとみなすこともできます。
+
+このメールが送られてくる人はは誰でもモデレーターになれます。デフォール
+トは $MAINTAINER ですが、複数の人をモデレーターにするなら moderators 
+というファイルを作り、actives や members のように一行一アドレス書いて
+いって下さい。
 
 
 $Id$
