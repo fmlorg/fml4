@@ -236,9 +236,12 @@ sub GetSubscribeString
     if ($debug_confirm) {
 	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
     }
-    &Debug("--GetSubscribeString(\n$_\n);\n") if $debug;
+    &Debug("--GetSubscribeString(\n$_\n,\n$key\n);\n") if $debug;
 
     if ($key) {	# return lines with $key
+	s/(^\#[\s\n]*|^[\s\n]*)//;
+	s/^\033\050\112\s*//;
+
 	for (split(/\n/, $_)) {
 	    $buf .= "$_\n" if /$key/;
 	}
