@@ -4,6 +4,26 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/13
+
+   proc/libMIME.pl
+	clean up
+	o global declaration: $debug $MIME_BROKEN_ENCODING_FIXUP
+	o remove ProbeMIMEpm(), which is not used any more
+
+	add special code to fix broken mime encoded string.  
+	this hack works when you set $MIME_BROKEN_ENCODING_FIXUP as 1.  
+
+	だめな MUA があるので、むりやりなおす ;)
+	# patch by OGAWA Kunihiko <kuni@edit.ne.jp>
+
+   kern/libenvf.pl
+	DecodeMimeString -> DecodeMimeStrings
+
+   libsynchtml.pl
+	not use	$WriteHtmlFileCount counter but use $mp_count
+	which variable is how many this funciton called.
+
 2001/09/11
 
    libsynchtml.pl
