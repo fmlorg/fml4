@@ -34,7 +34,7 @@ FYI: THIS FILE IS "EUC-JAPAN".
    % cvs -d cvs.fml.org:/cvsroot co fml
    % cd fml
 
-   % cp fml/distrib/mk/fmlmk.conf ~/.fmlmk.conf
+   % cp fml/distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
 
 	~/.fmlmk.conf のディレクトリやプログラムの PATH を編集してね
 
@@ -49,20 +49,16 @@ FYI: THIS FILE IS "EUC-JAPAN".
            /usr/share/mk (dist/NetBSD/src/share/mk)
 
         % cvs -d cvs.fml.org:/cvsroot co fml
-        % cd fml
-        % make bsdmake
+        % (cd fml/dist/NetBSD; make bsdmake)
         % su
-        # install -c -s dist/NetBSD/src/usr.bin/bmake /usr/local/bin
-        # cp -pr dist/NetBSD/src/share/mk /usr/share
+        # install -c -s fml/dist/NetBSD/src/usr.bin/make/bmake /usr/local/bin
+        # cp -pr fml/dist/NetBSD/src/share/mk /usr/share
 
         2. ~/.fmlmk.conf を編集する。
 
         3. make build を bmake で行なう。
+	   PERL は環境変数として export しないとだめそうです。
 
-	% bmake build
-
-        もしかしたら環境変数 PERL と MAKE を指定した方がいいのかも
-        しれません。
 	% env PERL=`which perl` MAKE=bmake bmake build
 
 
