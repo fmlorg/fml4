@@ -117,7 +117,7 @@ launch fml.
 .# ##########################################################
 .P	misc 
 
-.include misc.wix
+.include talk.wix
 .include perl.wix
 
 
