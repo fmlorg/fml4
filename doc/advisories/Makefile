@@ -1,1 +1,3 @@
-DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year2000
+#DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year2000
+DOC_ADVISORY_SOURCES  = FA1999_001 FA1999_002 FA1999_003 FA1999_004 FA1999_005
+DOC_ADVISORY_SOURCES += FA2000_001
