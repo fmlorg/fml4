@@ -21,11 +21,22 @@ if(open(HELP_FILE)) {
 
 # Generate the key
 $Key = <>; chop $Key; chop $Key;
-if($Key =~ /help/oi || (! $Key)) {
+if ($Key =~ /help/oi || (! $Key) ) {
     &Logging("Help");
     print $USAGE;
     exit 0;
-}else {
+}
+elsif (&MetaCharP($Key)) {
+    &Logging("Help for metachars");
+    print ('*' x40);
+    print "\n";
+    print "NOT PERMIT META CHARACTERS\n";
+    print ('*' x40);
+    print "\n\n";
+    print $USAGE;
+    exit 0;
+}
+else {
     $DOMAIN_SEARCH  = 1 if($Key =~ /^\@/oi);
     $ML_LIST_SEARCH = 1 
 	if($Key =~ /^mailinglist/oi || $Key =~ /^mailing-list/oi);
@@ -115,6 +126,20 @@ sub Logging
     open(LOGFILE, ">> $LOGFILE");
     printf LOGFILE "$Now @_ ($clientaddr)\n";
     close(LOGFILE);
+}
+
+# Check the string contains Shell Meta Characters
+# return 1 if match
+sub MetaCharP
+{
+    local($r) = @_;
+
+    if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	&Logging("Match: $r -> $`($&)$'");
+	return 1;
+    }
+
+    0;
 }
 
 1;
