@@ -170,7 +170,7 @@ NOT_USE_UNIX_FROM_LOOP_CHECK:  0
 CHECK_MESSAGE_ID:	1
 
 # Logs the getpeername()
-LOG_CONNECTION:	1
+LOG_CONNECTION:	0
 
 # address check levels, which level is the tree depth from the root.
 ADDR_CHECK_MAX:		3
