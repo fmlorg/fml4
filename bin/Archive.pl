@@ -4,12 +4,10 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 chop ($PWD = `pwd`);
-
 
 require 'getopts.pl';
 &Getopts("dhu:A:U");
@@ -18,7 +16,7 @@ $opt_h && die(&Usage);
 
 $debug       = $opt_d;
 undef $debug if $opt_U;
-$Unit        = $opt_u || 100;
+# $Unit        = $opt_u || 100;
 $ARCHIVE_DIR = "var/archive";
 $DIR         = $PWD;
 
@@ -34,8 +32,17 @@ unshift(@ARCHIVE_DIR, $opt_A) if $opt_A;
 
 # Preliminary
 $i = 1;
+
+# Adjust following config.ph; moved here;
+# fml-support: 02590 <fujita@soum.co.jp>
+$Unit  = $opt_u   || $DEFAULT_ARCHIVE_UNIT || 100;
 $limit = $ARGV[0] || ($Unit * int ($MaxSeq / $Unit )) || 1000;
 
+# useless when seq(103) < unit(1000)
+if ($MaxSeq < $Unit) { 
+    print STDERR "Do nothing when Seq=$MaxSeq < Unit=$Unit\n";
+    exit 0;
+}
 
 # MESSAGE
 &Mesg( "Try archive 1 .. $limit by the unit 100");
