@@ -64,29 +64,29 @@ sub SmtpMCIDeliver
 sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
-    local($autoconv, $count, $boundary);
+    local($autoconv, $count, $boundary, $fn);
 
     $count = scalar(@f) > 1 ? 1 : 0;
 
     foreach $f (@f) {
 	&Debug("SmtpFiles2Socket::($f)") if $debug;
 
-	if ($f{$f, 'zcat'}) {
-	    open(FILE,"-|") || exec($ZCAT, $f) || 
-		(&Log("SmtpFiles2Socket: cannot zcat $f"), close(FILE), next);
+	if ($f{$f, 'zcat'} && open(FILE, " $ZCAT $f|")) {
+	    &Log("SmtpFiles2Socket: cannot zcat $f"); close(FILE); next;
 	}
-	elsif ($f{$f, 'uuencode'}) {
-	    open(FILE,"-|") || exec($UUENCODE, $f, $f) || 
-		(&Log("SmtpFiles2Socket: cannot uuencode $f"), close(FILE), next);
+	elsif ($f{$f, 'uuencode'} && open(FILE, "$UUENCODE $f $f|")) {
+	    &Log("SmtpFiles2Socket: cannot uuencode $f"); close(FILE); next;
 	}
 	else {
-	    &Open(FILE, $f) || (&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
+	    &Open(FILE, $f) || 
+		(&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
 	}
 
 	$autoconv = $f{$f, 'autoconv'};
 
 	if ($count) {		# if more than two files;
-	    $boundary = ('-' x 20).$f.('-' x 20)."\r\n";
+	    $fn = $f; $fn =~ s#$DIR/##;
+	    $boundary = ('-' x 20)." $fn ".('-' x 20)."\r\n";
 	    print S $boundary;
 	    print SMTPLOG $boundary;
 	}
@@ -172,6 +172,9 @@ sub DoNeonSendFile
 
     ### DEFAULT SUBJECT. ABOVE, each subject for each file
     $le{'GH:Subject:'} = $subject;
+    $le{'preamble'} .= $Envelope{'preamble'}.$PREAMBLE_MAILBODY;
+    $le{'trailer'}  .= $Envelope{'trailer'}.$TRAILER_MAILBODY;
+
     &GenerateHeader(*to, *le, *rcpt);
 
     $le = &Smtp(*le, *rcpt, *f);
@@ -200,6 +203,13 @@ sub DoSendFile
     &DoNeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
 }
 
+# Interface for sending plural files;
+sub DoSendPluralFiles
+{
+    local(*to, *subject, *files) = @_;
+    if (! &CheckAddr2Reply(*Envelope, $to, @to)) { return;}
+    &DoNeonSendFile(*to, *subject, *files);
+}
 
 # Sendmail is an interface of Smtp, and accept strings as a mailbody.
 # Sendmail($to, $subject, $MailBody) paramters are only three.
