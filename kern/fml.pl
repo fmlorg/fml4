@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: fml.pl,v 2.124.2.15 2003/04/19 13:27:58 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -700,7 +700,7 @@ sub GetFieldsFromHeader
     if ($ALLOW_WRONG_LINES_IN_HEADER){
 	$s =~ s/(?<=\n)(?=:|[^\s:]+\s)/X-Wrong-Lines: /sg;
     }
-    $s =~ s/\n(\S+):/\n\n$1:\n\n/g; #  trick for folding and unfolding.
+    $s =~ s/\n(\S+?):/\n\n$1:\n\n/g; #  trick for folding and unfolding.
     $s =~ s/^\n*//;		# remove the first null lines;
 
     @hdr = split(/\n\n/, $s);
