@@ -107,6 +107,7 @@ sbin/install.sh
 sbin/makefml
 sbin/config.guess
 sbin/README.config.guess
+sbin/showsystem.pl
 
 
 LIBEXEC_SOURCES:
