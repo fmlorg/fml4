@@ -13,67 +13,6 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
-◯ makefml add$file
-   
-fml-support: 07111
-
-片方だけのファイルを操作するための
-
-   makefml {add,bye}ファイル名
-   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
-
-(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
-がします。
-
-e.g. makefml addactives ML addr
-     makefml addmembers ML addr
-
-なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
-思うので実装しなくてはいけないとおもいました。
-
-
-◯ good bye doc/smm/ 
-
-◯ にほんご
-
-『cf/MANIFEST での全変数定義 & コメント日本語化』は
-cf/MANIFEST.Japanese に定義されている。しかし定義されているだけで
-config.ph には反映されていない。
-
-CGIモードで使うだろう
-
-◯ リモート管理のドキュメント
-
-.if LANG == JAPANESE
->ごめんなさい、その通りです。
->書いたつもりでしたが、読み返すと確かに書かれていませんでした。
->どうもすみません。
->
->自動登録のケースは随所に記述がありますが、管理者登録のケースは
->あまりまとまった情報がなく、試行錯誤が必要になります。
-
-
-◯	ログファイル
-
-log file に年号をつけるモード。backup が楽
-=E
-log filename with year
-
-For example: $DIR/log.1999
-
-$LOG_FILE_SUFFIX = ".%C%y";
-
-(perl5 only solution)
-
-   use POSIX;
-   $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
-
-◯ invalid form variables
-
-Example:
-	_cf (global)
-
-
 
 .# ############################################################
 .C	TODO (特に current)
