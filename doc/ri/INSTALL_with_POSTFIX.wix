@@ -1,0 +1,79 @@
+		fml を postfix と一緒に使う場合
+=E
+		How to configure fml under postfix as MTA
+
+
+				Ken'ichi Fukamachi
+				fukachan@sapporo.iij.ad.jp
+--------------------------
+.toc
+--------------------------
+
+
+.C	Introduction
+
+Postfix (βリリース) は昔 vmailer と呼ばれていました。β公開時に 
+copyright からみで、postfix に改名されました。IBM Secure Mailer とも呼
+ばれます。作者は tcp_wraper で有名な Wietse Venema です。
+
+ソースの入手、インストール方法や詳細は以下のURLを参照してください。
+=E
+Please see the following URL for more information:
+
+.url	http://www.postfix.org/
+
+Sendmailを置き換えるためといっているように互換性はかなりあるので
+fml は sendmail の時と同様に設定します(詳しくは INSTALL ファイル)。
+しかし postfix 側の設定を２、３変更する必要があります。
+=E
+Postfix is almost compatible with sendmail.  You don't need special
+configuration to run fml but need to change postfix configuration.
+
+
+.C	fml を動かすために必要な設定？
+=E.C	How to configure postfix
+
+当然の大前提として、すでにpostfixのインストールが終って、メールを出す、
+受け取ることができているとします。
+=E
+Assume you have already made, installed and run postfix. So you can
+send and receive mails via postfix now. If not, please see postfix
+manual and configure before running fml.
+
+.S	変更するべき設定
+=E.S	How to configure /etc/postfix/main.cf
+  
+/etc/postfix/main.cf  について
+=E
+Consider /etc/postfix/main.cf. Postfix does not permit :include: form
+in /etc/aliaes. You need the following line e.g. 
+
+デフォールトでは :include: が使えないので
+
+allow_mail_to_commands = alias,forward,include
+
+などのように include を許すようにする。
+=E
+in main.cf
+
+また fml プロセスを動かすＭＬ用の特別なユーザを定義する。
+=E
+Also you need set up account for your ML. For exmaple
+
+default_privs = fml
+
+main.cf を変更したら、 postfix reload を忘れずに！
+
+この postfix 特有の設定以外は気にしなくても sendmail と同じだと思って
+構わない。
+
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.#
+.# $Id$
