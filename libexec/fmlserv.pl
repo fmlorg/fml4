@@ -98,6 +98,11 @@ sub InitFmlServ
     # log file of fmlserv
     $LOGFILE       = "$FMLSERV_DIR/log";
     &Touch($LOGFILE) unless -f $LOGFILE;
+
+    # sitedef.ph
+    for (@INC) {
+	if (-f "$_/sitedef.ph") { $SiteDefPH = "$_/sitedef.ph"; last;}
+    }
 }
 
 
@@ -1031,6 +1036,7 @@ sub main'LoadMLNS
     $ml'DIR = $main'DIR;
 
     do $file;
+    do $main'SiteDefPH; #';
 
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
