@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.230 2002/10/20 14:19:19 fukachan Exp $
+# $FML: makefml,v 2.231 2003/01/05 15:17:14 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -2211,24 +2211,26 @@ sub RemoveMember
 sub is_valid_user_syntax
 {
     my ($addr) = @_;
-    my $pattern = undef;
+    my ($addr_pattern, $user_pattern) = ();
 
     eval q{
 	use FML::Restriction::Base;
-	my $obj     = new FML::Restriction::Base;
-	my $regexp  = $obj->basic_variable();
-	   $pattern = $regexp->{ address };
+	my $obj = new FML::Restriction::Base;
+	my $exp = $obj->basic_variable();
+	$user_pattern = $exp->{  'user' };
+	$addr_pattern = $exp->{ 'address' };
     };
     if ($@) {
-	print STDERR "Warning: cannot load FML::Restriction::Base\n";
+	print STDERR "Warning: cannot load FML::Restriction::Base ($@, @INC)\n";
 
 	# see FML::Restriction::Base;
 	my $domain_regexp  = '[-A-Za-z0-9\.]+';
 	my $user_regexp    = '[-A-Za-z0-9\._]+';
-	$pattern = "$user_regexp\@$domain_regexp";
+	$user_pattern = $user_regexp;
+	$addr_pattern = "$user_regexp\@$domain_regexp";
     }
 
-    if ($addr =~ /^($pattern)$/) {
+    if ($addr =~ /^($addr_pattern)$/ || $addr =~ /^($user_pattern)$/) {
 	return 1;
     }
     else {
@@ -2237,11 +2239,25 @@ sub is_valid_user_syntax
 }
 
 
+sub _exact_match
+{
+    my ($buf, $addr) = @_;
+
+    if ($buf =~ /^\#\s*($addr.*)/i || $buf =~ /^($addr.*)/i) {
+	my ($a) = split(/\s+/, $1);
+	return AddressMatch($a, $addr);
+    }
+
+    return 0;
+}
+
+
 sub CtlAddrList
 {
     local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
     local($found, $buf, $line, $sumbuf, $filenew);
+    my $orig_addr = $addr;
 
     # check the input
     unless (is_valid_user_syntax($addr)) {
@@ -2264,7 +2280,8 @@ sub CtlAddrList
     while (<F>) {
 	chop;
 
-	if (/^\#\s*$addr/i || /^$addr/i) {
+	if ((/^\#\s*$addr/i || /^$addr/i) &&
+	    _exact_match( $_, $orig_addr)) {
 	    $line = $_;
 	    $buf .= "\t- $_\n";
 
