@@ -1,0 +1,702 @@
+fml Mailing List Packeges release rivison 1.5   Bulletin
+
+＃バグ、質問等はfml-bugs@phys.titech.ac.jpまでおねがいします。
+
+ちなみに関連アドレスは
+	fml: これ
+	fml-support = fml に関するＭＬ
+	fml-request, fml-bugs: 管理者いき
+	fml-current, fml-src: currentのソースの送り返し
+
+です。
+	使用・改造をなさる場合は
+	それ以降の直し(e.g. Bug fix, Extension)もあるので
+
+	fml-current	を手に入れていただくとよろしいと思います。
+
+なんでもいいからメールを
+
+	fml-current@phys.titech.ac.jp
+
+に送ると自動的に送り返されます。
+ＩＰならanonymous ftpが御利用いただけます。
+
+	ftp.phys.titech.ac.jp:/pub/net/fml-current
+
+の下です。（名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ）
+
+WWW が使えるなら
+	http://www.phys.titech.ac.jp/uja/fml/
+
+という「ＭＬサーバの設計と実装」というところを御覧下さいませ。
+そこで最新版のドキュメントやらソースやらが見られます_o_
+
+========== WHAT'S NEW  1.5 current ==========
+・ bin/inc_via_pop.pl 
+	bin/inc_via_pop.pl -host $HOST
+		は	
+	/usr/local/mh/inc -noaudit -norpop -noapop -host $HOST
+	と同じ（はず）です。
+
+
+・ %SEVERE_ADDR_CHECK_DOMAINS
+
+%SEVERE_ADDR_CHECK_DOMAINS = (
+			      'iijnet.or.jp', 1,
+			      'bekkoame.or.jp', 1,
+			      'rim.or.jp', 1,
+			      'win.or.jp', 1,
+			      );
+
+インターネット・プロバイダーでは 
+	USERNAME@ppp.DOMAIN 
+	USERNAME@MACHINE.DOMAIN 
+で、jpから３階層だけチェックしたのでは充分ではない場合がある。
+例：
+			      'iijnet.or.jp', 1,
+この連想配列は
+	username@.*.iijnet.or.jp にマッチしたら
+	$ADDR_MAX_CHECK を１あげる。
+
+これの応用として、デフォールトを厳しくして、特定のドメインでは -1 する。
+ってのもありですね。
+
+
+・コマンドでは $TRAILER_MAILBODY 等へのインフォがデフォールトでつきます。
+
+
+・コマンドを実行したメールを送り返すとき
+	$PREAMBLE_MAILBODY	（前）
+	$TRAILER_MAILBODY	（後）
+  を本文の前後に必ず付けます。
+もし、なんらかの理由で普通のメールの場合にも付けたいなら
+＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
+＃倫理的に許されないと思うが…世の中いろいろあるだろう〜？？？
+
+
+
+・index コマンド
+# index			get できうるファイルのリストをかえす
+			index ファイルがあるのなら、それを返します
+
+＃SID で使うんです。これ
+
+・SID を正式に標準化する。以下の場所へファイルの移動をしました。
+	libexec/sid.pl
+	etc/sid.ph
+	etc/sidrc
+	etc/help.sid
+
+・admin と approve コマンドで password を要求するなら
+$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; 
+				# require password when use commands above
+
+REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
+バスワードコンパチにしてあるので、どっちの変数でもいいんですけど
+
+・ lib/SID/sid.pl
+
+Listserv-like INTERFACE for libfml.pl and libremote.pl
+
+＊＊＊＊＊＊要注意＊＊＊＊＊＊
+・$REMOTE_ADMINISTRATION 
+
+リモート管理する部分を 正式なコードの一部に変更して、この変数で切り替
+えるようにしたので いままで eval で使ってた人 この変数をセットしてくだ
+さい _o_
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+・$USE_SUBECT_AS_COMMANDS = 1 ;
+
+Subject: 行も コマンドとして使う。
+例：
+Subject; # mget 1-100 
+
+
+・いかなる場合でも UNIX FROM なしのINPUTが来た時は、
+  UNIX FROM をつける（補正）
+
+・$PROHIBIT_COMMAND_FOR_STRANGER (<- $PROHIBIT_COMMAND_MODE)
+
+＋エントリを使って誰にでも投稿可能にするときに 
+	$PROHIBIT_COMMAND_FOR_STRANGER = 1; 
+とすると、
+「外部からは投稿可能＋自動登録なし＋メンバー以外はコマンドを使えない」
+が実現できる。
+
+
+□	libexec/fml_local.pl(独立して作動する)
+~/.forward から使うためのインターフェイス  VER.2 
+でも直接使うと、/usr/libexec/mail.local と同じに動く
+＃でも結果論としてなんか slocal そのものみたいだな…ははは、うじゃ
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、（必要なら fml のlibrary を呼び込んで）perlの関数を直接呼べるとか…
+という upper compatibility です。
+
+例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+# /usr/libexec/mail.local
+From            fukachan        &       MailLocal
+X-MLserver      fml             &       MailLocal
+X-MLserver      SendFile        &       MailLocal
+X-MLserver      MSendv4         &       MailLocal
+
+# MH folders
+From            fukachan@phys   |       /usr/local/lib/mh/rcvstore +inbox
+To              Enterprise@phys |       /usr/local/lib/mh/rcvstore +enterprise
+
+# File Retrieving
+Subject         get\s+(\S+)     |       /usr/bin/Mail -s $F1 $From_address
+
+# Exec ML
+to              (uja)           |       $DIR/fml.pl $DIR $DIR
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+・ＯＳの違いによるソケットまわりのエラー
+libsmtp.pl にその補正機構はbuilt-inされました。
+→ 結果として sys/socket.ph へのリンクをはずす。
+
+・EasyConfigure bug fix（thanks to sengoku@intsys.co.jp）
+
+・ソラリス２．ｘでのソケット対策
+（configure で 自動的に config.ph に $COMPAT_SOLARIS2 という変数がセッ
+トされるはずですが）
+	$COMPAT_SOLARIS2 = 1;
+とセットしてください。
+うまくシステムのsys/socket.phが呼べないときに必要な定義をします。
+
+・bin/vipw.pl	
+	config.ph の edit 用
+	ヴァージョンアップの時のロックにも使えるね(^^)
+
+・UNDERWAY (for 1.5 -> 1.6)
+fml.pl へ Notification してメールをユーザーへ返す関数を移す。
+libfml.pl のstatus report は↑をつかう。
+~/.forward extension fixes
+
+コマンドは user define ができるように、
+まとめおくりと同様に 連想配列で設定できるようにした。
+これにより、簡単にコマンドの名前等の変更もできる。
+
+
+
+whois で sub ipc がうごかないのをＦＩＸ
+
+おまけ： bin/geturl.pl
+% bin/geturl.pl URL 
+で URL の中身をとってくる（TEXTいがいはしらないよん;-) ）
+
+RFC934 ^- -> '- -' syntax conversion
+
+
+1.5からの要注意： 
+
+$MAINTAINER が ML-admin とか ML-request とかになっていないと
+
+	WARNING: UNIX FROM Loop
+
+が log にでます。
+＃対策は -admin みたいにする、or そのチェック部分を削る
+＃ →ＦＡＱのトラブルシューティングをみてね
+
+bug fix 
+ftpmailでuuencodeがうごかない（1.5直前から〜）
+
+========== WHAT'S NEW  1.4 current ==========
+newsyslog e.g. var/log/*.0 -> .1..
+bug fix fml.pl libfml.pl MSendv4.pl
+
+UNIX FROM CHECK
+
+summary コマンドの引数
+
+librfc1153 fix of plural appearing when delivered to two different
+condition persons.
+
+--- fix 1.4.4 
+
+# matome 0 の誤動作をｆｉｘ
+内部 function call を変えたときに 0 用のコードがない
+
+EasyConfigure で config.ph の flock の設定まわりまで 対話的に行うスクリプト
+
+まとめおくりでの User interface のバグｆｉｘ
+＃ 1 byte だけ;-)
+
+MSendv4.pl 1.4.1 -> 1.4.1.1 は必須ですぅ _o_
+条件がおなじで複数マッチしたユーザーへ配送する最後のところが間違ってい
+る。複数マッチしないかぎり動きはただしい
+
+Configure 廃止。新しい sbin/ccfml が cc への前段階処理をする
+
+スタートレックの 宇宙歴 がつくぞ（笑）
+＃ $APPEND_STARDATE = 1; in config.ph 
+
+mget のデフォールトが ちがってた…_o_ ｆｉｘ
+
+おまけ：
+EXPIRE 機能
+libSendBack.pl （あるアドレスに送ると ドキュメントとかを送り返すように
+設定するための）
+
+1.4.1 RELEASE 1995/5/7
+
+mget とまとめおくりでの User interface 
+PLAINTEST 
+	UNIX FROM
+	RFC934	
+	RFC1153
+	MIME/Multipart
+COMPRESSED FILE
+	GZIP of UNIX FROM
+	Lha + Ish 
+
+を ユーザーごとに設定できる
+
+KNOWN BUGS 
+
+まとめ送りのときの RFC1153 のカウントの取り方の問題がある
+＃ISSUE カウントなんて意味ないと思えばかまわないのだが…
+
+config.ph の SECURITY_LEBEL のスペルミスで mget 正規表現 が動かない
+＃ただしくは SECURITY_LEVEL です
+
+
+ファイル構成を一部再構成（ 4.4BSD like ）
+etc/crontab-4.3
+etc/crontab-4.4
+var/run
+
+1.4 RELEASE	1995/04/26 11:59:02 GMT
+＃RCS ID の都合でとりあえず 番号をｆｉｘしただけ
+
+ごめんなさい 1.3.9.4 〜 1.3.9.10 はとってもまずいです。
+入れ換えて下さい_o_
+
+"# matome 0" の時に、いまたまっているメールを送り出します。
+
+MIME-Version:
+Content-Type:
+Content-Transfer-Encoding:
+をデフォールトで通すように変更（もし、あれば）
+
+From と 配送先が一致した時に、配送を止める
+
+~/.forward ＭＬの バグｆｉｘ
+
+libutils.pl syntax bug fix
+SendFile.pl syntax bug fix
+configure_fml syntax bug fix
+
+注意： Configure の意味がちがいます
+GNU なんかのソフトと同じで Configure した後 make です。
+
+・sjis conversion is ish+lzh mode
+^M ^Z もつける。
+
+・extract from archive to expand as tmp/spool/201 ...
+ for '# mget 201-210 ..' not using tmp/extract$$
+
+・fix libsmtp for rfc821 4.5.2
+
+・sub system
+
+・対security
+
+・複数のアドレスが登録がされている時、
+  普通のユーザーにたいしては 一つにマッチするまで頑張る、
+  だめならだめ
+
+・しかし、リモートでの アドミンコマンドでは 複数マッチを許す。
+  OFF 引数 等の 引数も許す。
+
+・ # addr exact-address コマンドは ユーザーが 自分で複数のアドレスの内
+  一つを指定するのに使う。
+
+1.3.2 のメインテーマは“ごたごたしてるコードを整理”とおもって、そうし
+ようとしてます _o_
+
+fix of MSendv4.pl inconsistency between ish and gzip mode when
+sequential calling
+
+自動登録の時 subscribe = # subscribe 
+
+・ ftpmail の修正はまだ途中だす_o_
+
+■fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
+そのまま system の cron と同じ働きをします。
+つまり１分に一回おきて crontab をみて、実行する。
+Fml System Check Routine とか、まとめおくりを crontab に書いておけばい
+いんですね
+
+
+■ 1.3.2.x
+
+libfml.pl はエラー処理を一括しておこなう。そうしないと複数のコマンドミ
+スそれぞれについて警告メールが返ってしまうから
+
+fml の remote control（admin command）
+のパスワード機構
+
+変数名等の変更：
+PRE_HOOK -> START_HOOK
+ExExec -> RunHooks
+"# guide" は本当に知らない人の時だけ特別扱い
+
+まとめおくりのヴァリエーション
+	cron をつかわずに、３通たまったら配送みたいな形式
+	＃でも、１日に終りには rehash するべきだろうな（この部分はま〜
+	だだよん）
+
+	RFC1153 フォーマット、細かい部分は rfc1153.ph の中で変更してく
+	ださい。
+
+ＦＡＱに索引がついたぞ！
+
+おまけ：~/.forward で 使う方法
+
+コマンドの拡張
+特殊目的：
+# addr aoi@chan.panic
+			複数の配送先を持つ人はＯＦＦコマンド等で
+			サーバの設定によっては複数マッチしてしまう
+			e.g. aoi@chan.panic と aoi@hayakawa.chan.panic
+			も両方マッチしてしまう時、
+			今は aoi@chan.panic についてのコマンドを行ないたい時
+			に使うと、このコマンド以降の他のコマンドを 
+			aoi@chan.panic に対してのみ行なうようにする
+
+まとめおくりで、
+# matome 数字i 		とすれば lha + ish で
+# matome 数字(13-29)	上の特別の場合で、一日一回Ｎ時にまとめおくり
+			１３〜３６の数字がこのケースに当てはまります
+			午前５時に一回だけまとめおくり慕いときは、
+			２４＋５＝２９ をおくりこんでください。午後５
+			時は１７でいいんですが、午前中はこうしないと判
+			別がつかないので…
+
+bug fix：
+1.3.2 以前のものは timing のとりかた（普通考えないような組み合わせで）
+で mget の送り返しルーチンの fileへのbuffering と conflict する（して
+中身が消える）ことがあります。
+
+
+■ stat or status コマンド
+# status [引数]
+# stat   [引数]		現在の設定について知らせる（まとめおくりとかOFFとか）
+			デフォールト（# stat(us)）は自分自身の状態
+
+■ for $s in /etc/sendmail.cf
+
+自分じゃ使わないので、ほったらかしといたのをｆｉｘ
+
+
+■直接は関係ないんですが、一応  MIME-decodingでつかう
+	mime_pls の２．０α はｆｔｐにおいてあります。
+
+   パッケージ中で実際に使ってるのは（一緒に配布されているものは）
+	1.11alpha です。
+
+■ master.fml （./lib/Master）
+	www, ftp, wais, gopher とのＩＰＣの中継をする
+	おまけ機能で 
+	subscribe ML-address とか
+	member ML-address とか
+	which とか
+	できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ
+
+
+■ command: "# mget last:10" (mhだね) シンタックス
+＃first: prev: next:なんて意味ないでしょ
+
+■ 祝！INSTALL MANUAL English 版:-)、あと help も英語版がある
+
+でも、この２つしか翻訳が終ってない;_;
+
+■ クロスポスト機能
+
+別にＭＬでやるこっちゃないよなぁ〜これ:-)
+もちろん デファールトの fml.pl には組み込まれていません。
+
+lib/Crosspost/fml.pl lib/Crosspost/*.p[lh] に置き換えると
+クロスポストつまり、複数のＭＬにだしてもユーザーには１通しか配送されな
+い。ということができます。
+
+■ RFC822 を素直に解釈すれば、自動登録のときにreply-toを使うべき（と私
+は読む）ですが、あぶないのでやっぱりやめます。
+自動登録でFROM:フィールドと明示的に別のアドレスで登録したいなら
+subscribe ml-addressを使ってね（この手のは全部 $DEFAULT_うじゃ って変
+数でキーワードは変えられます）
+
+■ $DIRの下の ./tmp を各種作業に使います。
+
+$TMP_DIR をセットして下さい。しないと $DIR/tmp = ($DIR/$TMPDIR)を自動
+的に使います
+
+■ 明示的に $USE_WARNING をセット（e.g. $USE_WARNING = 1;）しないと
+エラーのコマンドは警告するが、
+コマンドメールでの単なるシンタックスエラーの警告をしない（ヘルプを返さ
+ない）
+
+■lzh + ish option
+		# mget 200-210 ish
+
+の用に指定するとlzh して ish(s7 mode)したものを送り返します。
+
+$LHA = "/usr/share/bin/lha a $TMP_DIR/$pipe ";
+$ISH = "/home/axion/fukachan/bin/ish -s7 ";
+
+等をどこかで（config.phとか）で設定して下さい。
+しないと上の↑Built-inデフォールト値になります。
+
+■<コマンド終り>
+# exit 
+# end
+# quit
+
+■ Proceess Table にＭＬ名をつける（８文字もありゃ十分だろう）
+
+	FAQ about auto-regist
+	fml-1.3/bin/Archive.*
+	libutils.pl(Asymmetric code around pack and unpack)
+	libutils.pl(NOT_DELETE_ORIGINAL)
+	fml.pl Strip bracket and Re: actions
+	libutils.pl sub MakeFileWithUnixFrom. bugfix when unpack mode.
+
+■ 間違えコマンド チェックルール
+
+	最初の３行のどこかで ^# syntax
+	やっぱり、もとに戻しました（小細工はやめろ＞おれ）
+	＃$GUIDE_CHECK_LIMIT、$COMMAND_CHECK_LIMIT 等で
+	＃パラメータは変更できます。
+
+■ ログファイルへのメッセージちょっと改変（少し見やすい？）
+
+■ libnounistd.pl はもぉ使わないっす。ただし aish110uを使うという前提
+で。aish や lha のソースは 
+ftp.phys.titech.ac.jp:/pub/net/fml-current に一緒においてあります。
+
+■ 古いライブラリ は lib/Compatibility に移動しておきました。
+
+
+■■■ Bug fix ■■■
+・	２／１１〜１２／１７あたりのfml-currentで
+	『まとめおくりで全てのユーザーに１時間毎にメールが配られる』
+	InitConfigに
+	     $HOUR = (0 == $hour) ? 24 : $hour; 
+	が抜けてるんだと思います。１２／２０から後のなら大丈夫
+	＃これがないと、$HOUR % 数字 が常に 真 になって１時間ごとに配
+	送されてしまいます;_;。
+
+・ no * in sub SendFile
+1.3.1.7のころの libsmtp.pl のfixに fix まちがえがあります。すいません
+(_o_)。ｆｉｘしました。
+
+・マシンによってはプロセス間通信がうまくいかない？
+lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
+＃open2.pl をつかってます
+
+OS:OSF/1 って libo2smtp.pl じゃないとだめなの？
+＃今のところ、こっちじゃないといけないという話しか聞かない…
+
+
+see FAQ
+
+・ libfml.pl
+
+バグじゃないけど… stat の順をちょいといれかえた＃あまり本質的でない
+
+・ MSendrc
+
+もし、リアルタイム配送にきりかえたらちゃんとこっちのエントリも消す
+＃いままで手抜きだっただけか…
+
+========================================
+	1.3 release (94/9/12)
+========================================
+
+
+========== WHAT'S NEW  1.2.2.5 ==========
+
+ＲＥＡＤＭＥとＦＡＱが一部おいついていません。
+わかんないところは聞いて下さいませ(_o_)
+
+・コマンド フック
+
+ＭＬごとに付け加えたいコマンドは config.ph の中に こんなかんじに付け加
+えれば便利
+
+コマンド：リスト取り寄せの例
+
+	$COMMAND_HOOK =q#
+	      if(/list/io) {
+		  &Logging("List ($From_address)");
+		  &SendFile($to, "List $ML_FN", "$DIR/list");
+		  next GivenCommands;
+	      }
+	#;
+
+・明示的な自動登録をする 例えば Subject: subscribe とか書いてもらう
+
+	config.ph で
+	$REQUIRE_SUBSCRIBE = "subscribe"; 
+
+のように好きな言葉を定義して下さい e.g. subscribe, add, append...
+
+・まとめおくり ver.１ でコントロールも本体のＭＬで行なえるようにしまし
+た。		→ まとめおくり ver.２ 
+つまり、まとめ送り専用アドレスは不要です。
+
+・ＩＰでない人用のｈｔｔｐ中継ソフト(contrib/www-mail)
+＃メールｐｒｏｘｙとでもいえばいいの？
+
+・RELEASE_NOTES書きました
+＃PREHISTORYはなくなった
+
+========== WHAT'S NEW  1.2.2 ==========
+
+lock の仕方（対象を）を変えることで、
+・seekをつかわない
+・lock algorithm toggle switching の非対象性をなくした
+
+・Whois が使えます。hml の whois のことじゃなくて
+日本語も使えるようになってるので libutils.pl に加え jcode.pl が必要で
+す。contrib/Whois に jcode.pl は入ってます。
+
+	# whois -h host key 
+
+という本物のコマンドの互換操作がＭＬサーバを通じて任意のサーバに対して
+できます。必要な perl で書いた whois サーバが contrib/Whois にあります
+
+・まとめおくり ver.2  MSend-cron.pl
+
+ユーザーは次のような任意の指定ができます。まだ gzip コードが内蔵されて
+ないので、plain で送り返しちゃいます(_o_)。
+
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+
+			default は gzip した Unix From つきのファイルの固まり
+# matome 数字u 		とすれば plain(unpack) のはずですが、
+			いまは plain だけ(_o_)
+
+# matome 0		普通の配送へ戻す
+
+例：
+# matome 1		まとめ送り １時間に一回
+# matome 2		まとめ送り ２時間に一回
+# matome 17		まとめ送り 一日一回と同じ（この場合は１７時に来る）
+
+・まとめおくりで Unix From つきのファイルの固まり
+	 を ＲＦＣ９３４式 にもなるようにした。
+	MH の burst で展開すればいい
+	$USE_RFC934 = 1
+
+・今は ｇｚｉｐ がデフォールトっす。ソフトウエア特許反対！
+
+・自動登録の時メールそのものを管理者に伝える
+
+========== WHAT'S NEW( 1.2.1 current > 1.2.1) ==========
+
+fml-1.2.1.x series はおわりです。
+fml-1.2.1.7 が fml-1.2.1.x シリーズの最後ですがドキュメントが一部不完
+全です(_o_)
+
+いま fml-1.2.2 をやってる際中ですぅ。
+
+
+・mget ver 2 
+	新しいmget。従来の Bourne shell type regular expressionに加え
+	# mget 1-3,4-100,100-1000 time 
+	のようなシンタックスも自動判別して動きます。
+	e.g. # mget 1-3,4-100,100-1000 time 
+
+	SendFile.pl が新しい下請け サーバです。
+	これで majordomo type vulnerability も消しました
+
+	・get まわり vulnerability をつぶした
+	＃もともとの hml も同じ security hole をもつ
+
+	・# mget 1-3,4-100,100-1000 time 
+	のようなシンタックスも自動判別して動きます。
+
+	・# mget 1-3,4-100,100-1000 time unpack
+	・# mget 1-3,4-100,100-1000 unpack
+	  unpack オプション は tar.gz をしない mget
+	見やすいが、返すファイルサイズも数倍
+
+・投票用サーバのリリースコードが 開発中のヴァージョン でした。
+	＃運用実績のあるコードじゃなくて、僕のパッケージングの間違いです
+
+	今のは、開発コード ver. 1.2 Elena Lolabrigita です:-)
+	＃むかしは、「おさかな」といっていた場所にある
+
+	さらに、vote.pl が変わった(1994/06/09)。
+	＃International 声優コンテスト 企画に合わせて（笑）
+
+・WHOIS Server
+	＃ 開発コード Rin Russel（馬鹿）
+
+・MIME decoding Library が 1.10 に上がった（いただきもの）
+  ftp に一緒に mime_pls.* はおいておきました。
+	＃ありがたいことです
+
+・（自動登録）$AUTO_REGISTERD_UNDELIVER_P = 1;
+	 なら 登録要請をしているメールはＭＬへ流さない
+
+・アドミンコマンド復活計画（not 推奨）
+	Backward compatibility 用の libhml.pl
+	contrib/libhml
+
+・いまならもれなく 謎の ftpmail 互換ライブラリつか（謎＋＋）
+	＃でもβ版くらいなんだなぁ〜ちゃんと動くけど
+
+new options of configuration files
+・ +      in members
+・ skip   in actives
+・ matome in actives（開発中 まとめおくり ver.2）
+
+・RecreateConfig.pl
+	昔の config.ph の設定を尊重しつつ新しい機能のために
+	config.ph につくりかえるための Utility
+
+
+
+
+========== Bug Fix および 仕様変更 ほか( 1.2.1 current) ==========
+
+・SendFile.pl の InitConfig が間違っていた fix(1994/06/16)
+
+・libfml.plのコードで順番をちょっと直して logging をわかりやすくした
+（ちょっとしたこと（気になったので））
+
+・自動登録は reply-to 優先（ははは、この例外処理を考えていなかったぁ）
+
+・（自動登録）Naming Convention がおかしいので Fix
+	$AUTO_REGISTERD_DELIVER_P -> $AUTO_REGISTERD_UNDELIVER_P 
+
+・libfml 1.2.2.4 -> 1.2.2.5  fixed
+	"# mget 1,2,3" not work in libfml 1.2.2.4
+
+●注意
+
+最近 Majordamo vulnerabilityの話がありましたが (CERT Advisary report
+94/6/10)これは違う類。
+Sendmail と直接話すので fml の場合ああいうのは関係なし。
+ただ、似たような形が split_and_sendmail.pl を呼ぶ時にあった(最終fix 06/16)。
+
+Last Modified:	Thu Oct 13 03:16:02 JST 1994
+
+Release Major Revision
+
+	Release Version 1.2 (the same as 1.1.2.17 1994.3.14 version)
+	Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
+
+	Release Version 1.2.1
+	Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+	Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+				fukachan@phys.titech.ac.jp
+				fml-request@phys.titech.ac.jp

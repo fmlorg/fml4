@@ -1,0 +1,1425 @@
+			RELEASE NOTES
+＃referしそこなかったらごめんなさ〜い_o__o__o_
+
+---------------------------
+I also thank Mr. Ikuta (c1977@crcsn82.mdc.crc.co.jp) for private
+communication on mime_pls 1.00a.
+
+---------------------------
+Thanks to a lot of collaborations and patches
+MURAYAMA Fumitaka 村山文孝   <umura@nn.slan.chubu.ac.jp>
+23 May 1995 - 95/6/9
+
+patch for the fixes
+	fml.pl
+	libfml.pl
+	libutils.pl
+	MSendv4.pl
+
+subscribe extension in MEMBER CHECK MODE
+	fml.pl 
+	libutils.pl
+	help.example2
+
+$SMTP_OPEN_HOOK check
+	$To
+	$PRECEDENCE
+
+sub AutoRegist 
+	works for both active and member called in MEMBER_CHECK_MODE
+	@ syntax check
+	check duplication in registration
+
+	REGEXP not works well in some perl version?
+	I change -> first "get a line" and grep
+
+rsummary and summary are combined as [optional]
+
+newsyslog.sh	(umura@nn.slan.chubu.ac.jp)
+newsyslog.pl	(fukachan@phys.titech.ac.jp)
+bye == unsubscribe(fukachan@phys.titech.ac.jp)
+------------------------------
+Thanks to    ushida@kronos.mp.es.osaka-u.ac.jp (Jun Ushida)
+At     Fri, 09 Jun 1995 02:58:36 JST
+
+OSF/1 Alpha AXP V2.1 is OK when using sendmail 8.6.12. 
+
+---------------------------
+At     Mon, 05 Jun 1995 19:42:56 JST
+
+fix around @ARCHIVE_DIR = ('old');
+fix in 1.4 but inconsistent between 1.4 -> 1.5
+
+------------------------------
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Mon, 05 Jun 1995 14:35:36 JST
+
+patch for TYPO	$SUPERFLUOUS_HEADER
+
+------------------------------
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Fri, 02 Jun 1995 18:24:21 JST
+
+first, last, cur syntax
+
+------------------------------
+Thanks to    Yukihiro KIKUCHI <kikuchi@karen.rim.or.jp>
+At     Thu, 01 Jun 1995 03:03:32 JST
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Fri, 02 Jun 1995 18:35:34 JST
+
+COMMENTS ON REQUIRE UNIX FROM LOOP CHECK
+
+------------------------------
+Thanks to    Tsutomu ONODERA <onodera@st.rim.or.jp>
+At     Thu, 01 Jun 1995 20:02:07 JST
+
+local declare problem in RFC1533 (PREAMBLE..) routine
+
+------------------------------
+Thanks to    hogawa@mesh.ad.jp
+At     Wed, 31 May 1995 00:07:21 JST
+
+TZ identifier in SunOS 4.1.3_U1(English)
+$ENV{'TZ'} = 'Japan';
+
+------------------------------
+following to  Katsuya Tachibana <tachib@ic.mi.sanno.ac.jp>
+At     Mon, 29 May 1995 10:53:25 JST
+
+extension for From_address check using  UNIX FROM syntax
+
+------------------------------
+Thanks to    Takashi Shimizu <tshimizu@ss.titech.ac.jp>
+At     Tue, 23 May 1995 21:47:18 JST
+
+fix sbin/ccfml.pl
+
+---------------------------
+Thanks to    Tsutomu ONODERA <onodera@st.rim.or.jp>
+At     Mon, 22 May 1995 12:35:00 JST
+
+now on AGAINST_NIFTY is of no use.  
+
+---------------------------
+Thanks to    MATOBA Hirozumi <matoba@marmalade.rim.or.jp>
+At     Sun, 21 May 1995 00:08:26 JST
+
+on 1.4.1 default configuration bugs
+
+------------------------------
+Thanks to    subuta <t-sumita@ccs.mt.nec.co.jp>
+At     Thu, 18 May 1995 21:43:28 JST
+
+DOCUMENT FIXES
+
+------------------------------
+Thanks to    Kunihiro Ishiguro <kunihiro@nis.co.jp>
+At     Wed, 17 May 1995 13:31:49 JST
+
+on mirror setting 
+Official mirror is set for foreign countries
+
+------------------------------
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Wed, 17 May 1995 03:01:00 JST
+
+DOCUMENT FIXES
+
+------------------------------
+Thanks to    Koichiro MikaMi 三上浩一朗 <mikami@saturn.hcs.ts.fujitsu.co.jp>
+At     Tue, 16 May 1995 23:21:46 JST
+
+support of MIME/Multipart fix patch
+
+------------------------------
+Thanks to    Tsutomu ONODERA <onodera@st.rim.or.jp>
+At     Tue, 16 May 1995 19:48:36 JST
+
+RFC1153 bugs
+
+------------------------------
+Thanks to    Katsuya Tachibana <tachib@ic.mi.sanno.ac.jp>
+At     Fri, 12 May 1995 12:39:40 JST
+
+fix on the explanation of remote administration
+
+------------------------------
+Thanks to    NISHIJIMA Takanori / 西島孝徳 <racsho@pure.cpdc.canon.co.jp>
+At     Thu, 11 May 1995 20:02:28 JST
+
+on enbuged MSendv4 OUTPUT Message 
+
+------------------------------
+Thanks to    NISHIJIMA Takanori / 西島孝徳 <racsho@pure.cpdc.canon.co.jp>
+At     Thu, 11 May 1995 07:52:59 JST
+
+new version of MSendv4.pl bugs on = -> .=
+#correction to " append "
+
+------------------------------
+Thanks to    HARASAWA Yasushi <harasawa@is.titech.ac.jp>
+At     Mon, 08 May 1995 17:30:48 JST
+
+on 1.4.1 default configuration bugs
+
+------------------------------
+Thanks to    Nobuyuki Miura <miura@cs.titech.ac.jp>
+At     Fri, 05 May 1995 14:38:18 JST
+
+$SPOOL_DIR bugs on the built-in "spool" string.
+
+------------------------------
+Thanks to    Katsuya Tachibana <tachib@ic.mi.sanno.ac.jp>
+At     Mon, 01 May 1995 18:59:52 JST
+
+SECURITY_LEBEL TYPO
+
+------------------------------
+Thanks to    "N.Fukuoka" <fuk@hby.toshiba.co.jp>
+At     Fri, 28 Apr 1995 07:35:24 JST
+
+Old verions MSendv4.pl crash in Version 5.001 since 
+the evaluator is insane? 
+
+------------------------------
+Thanks to    Katsuya Tachibana <tachib@ic.mi.sanno.ac.jp>
+At     Wed, 26 Apr 1995 12:57:40 JST
+
+comments on expiration 
+
+------------------------------
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Tue, 25 Apr 1995 04:17:08 JST
+
+MESSAGE-ID
+
+------------------------------
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+At     Tue, 25 Apr 1995 03:43:58 JST
+
+simulation codes are also included in distribution code. 
+fix the security hole
+
+------------------------------
+Thanks to    Koichiro MikaMi 三上浩一朗 <mikami@saturn.hcs.ts.fujitsu.co.jp>
+At     Thu, 20 Apr 1995 00:12:43 JST
+
+around 1521
+
+------------------------------
+Thanks to    Shigeki Morimoto <mori@isc.mew.co.jp>
+At     Fri, 14 Apr 1995 13:59:05 JST
+
+fix lha and ish variable syntax
+
+rehash mechanism comment on # matome 0
+#implemented later
+
+------------------------------
+Thanks to    Shigeki Morimoto <mori@isc.mew.co.jp>
+At     Thu, 20 Apr 1995 10:43:42 JST
+
+suggestion on MIME/decoded spooling 
+
+------------------------------
+Thanks to    Koichiro MikaMi 三上浩一朗 <mikami@saturn.hcs.ts.fujitsu.co.jp>
+At     Wed, 19 Apr 1995 18:51:56 JST
+
+supoort of MIME/Multipart 
+
+------------------------------
+Thanks to    Shigeki Morimoto <mori@isc.mew.co.jp>
+At     Tue, 18 Apr 1995 10:52:35 JST
+
+patch for errors when multiple matched conditions for MSendv4.pl 
+
+------------------------------
+Thanks to    Shigeki Morimoto <mori@isc.mew.co.jp>
+At     Fri, 14 Apr 1995 09:12:54 JST
+
+skip if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+
+------------------------------
+Thanks to    Satoshi Yatagawa <u93b217@cc.teu.ac.jp>
+Thanks to Hitoshi Doi/土井仁志 <doi@jrd.dec-j.co.jp>
+At  Thu, 13 Apr 1995 10:57:54 +0900
+
+on OSF/1 
+
+---------------------------------
+
+---
+At     Thu, 13 Apr 1995 20:31:54 JST
+following Shigeki Morimoto <mori@isc.mew.co.jp>
+
+Not distribute when From == onwer ;
+
+$START_HOOK = q#
+	$skip{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+---
+At     Thu, 13 Apr 1995 15:33:19 JST
+Thanks to    Shigeki Morimoto <mori@isc.mew.co.jp>
+
+fml.pl 's bug on 
+removing  Re:*  Syntax in Subject 
+
+
+---
+At     Mon, 10 Apr 1995 20:54:03 JST
+Thanks to NISHIJIMA Takanori / 西島孝徳 <racsho@pure.cpdc.canon.co.jp>
+
+on  configure_fml 94:if [ -n $D ]
+on libutils.pl 487:	$s .= ' [PLAINTEXT]' <";">?
+
+---
+At     Fri, 07 Apr 1995 20:31:58 JST
+Thanks to    honmat@st.rim.or.jp (Honma Takeru)
+
+an enbug on HML_SUBJECT_FORM
+
+---
+At     Fri, 07 Apr 1995 18:37:20 JST
+Thanks to    "I. Tamagawa" <tama@ihas.nagoya-u.ac.jp>
+
+a case on Solaris 
+SUN SS-20   Solaris 2.4 (SunOS ihas 5.4 Generic_Patch sun4m sparc)
+sendmail.8.6.11+2.5Wbeta2
+perl perl5.001
+
+a comments on Makefile and Configure's bugs description
+
+---
+At     Mon, 03 Apr 1995 23:58:22 JST
+following    koyachi@mel.go.jp (Noriho Koyachi)
+
+>> ># get fy1994/1
+>> ># get fy1994/summary
+
+---
+At     Fri, 31 Mar 1995 18:59:03 JST
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+
+on rfc821  4.5.2 TRANSPARENCY
+
+---
+At     Mon, 27 Mar 1995 23:55:02 JST
+Thanks to    KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+
+spell check :-)
+
+------
+At     Fri, 24 Mar 1995 13:31:45 JST
+following makoto@tsurumi.toshiba.co.jp (Kazunori 'Noriko------
+
+SJIS conversion in ish+lzh mode
+
+------
+At     Thu, 23 Mar 1995 11:28:30 JST
+Thanks to    domeki@m1e08.trd.tmg.nec.co.jp (Tomoyasu Domeki)
+
+MIME decoding of SyncHTMLfiles.pl
+
+------
+At     Wed, 22 Mar 1995 17:30:03 JST
+Thanks to    KGK = Keiji Kosaka <kgk@mp.okayama-u.ac.jp>
+
+in config.ph
+$TZone         = ' JST'; 	#$TZone	= '+0900';
+->
+$TZone         = 'JST'; 	#$TZone	= '+0900';
+
+fixing to the correct RFC822 form.
+
+---
+At     Wed, 22 Mar 1995 13:44:26 JST
+following domeki@m1e08.trd.tmg.nec.co.jp (Tomoyasu Domeki)
+
+on SyncHTMLfiles.ph, fix README and Makefile
+
+---
+At     Wed, 15 Mar 1995 17:45:41 JST
+following Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+> 本文に subscribe と書いて登録してもらいたい時に、他のコマンドメー
+>ルからの類推で "# subscribe" と書いてしまう人が多いようです。こ
+> つまり、"subscribe" でも "# subscribe" でも "#subscribe" でも大
+
+---
+At     Fri, 10 Mar 1995 18:53:14 JST
+Thanks to    KGK = Keiji Kosaka <kgk@mp.okayama-u.ac.jp>
+
+on mget 
+on ftpmail 
+conflict between codes and README
+
+---
+At     Fri, 10 Mar 1995 12:50:00 JST
+Thanks to    Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>
+
+#member nocheck
+return 1 if(/^\+/o);
+fix 'close member file'; in fml.pl
+
+---
+At     Thu, 09 Mar 1995 12:12:12 JST
+Thanks to    KGK = Keiji Kosaka <kgk@mp.okayama-u.ac.jp>
+
+・fml.pl と SendFile.pl の先頭を '#!/usr/local/bin/perl -U' にしないと
+　サーバの実行中にエラーが出て止まってしまう．(cd の辺りだったかな？)
+　perl は GNU の perl-4.036.tar.gz を使ってます．
+
+---
+At     Wed, 08 Mar 1995 15:49:40 JST
+Thanks to    KGK = Keiji Kosaka <kgk@mp.okayama-u.ac.jp>
+
+on  HP9000
+
+'# mget' bug (but must be fixed already in 1.3.1.16 series.)
+
+sent-back name on  spool.tar.gz and  uja.gz 
+on ftpmail
+
+a bug of libsmtp.pl 
+<・一仕事終った後，必ず '500 Command unrecognized' が log に残る．>
+
+---
+At     Wed, 08 Mar 1995 09:25:11 JST
+Thanks to    Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>
+
+should use kanji convertor e.g. nkf when using Cc:mail 
+
+---
+At  Mon, 06 Mar 1995 14:44:21 JST
+Thanks to "Oota Toshiya" <oota@nadia.pes.com1.fc.nec.co.jp> 
+
+Add a close description around passwd to README in lib/libhml. 
+
+---
+At  Mon, 06 Mar 1995 09:42:07 JST
+Thanks to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>
+
+patch in libutils.pl
+$Subject =~ /^[\033\050\112]\s*$REQUIRE_SUBSCRIBE\s*$/i
+agains a bug of CC:Mail
+
+---
+At  Mon, 27 Feb 1995 20:39:12 JST
+
+MSendv4.pl 午前５時一日一回おくりも可能にする。
+cut parameters of e.g. skip, off, ... 
+
+At  Mon, 27 Feb 1995 19:41:25 +0900
+suggested by  to K_Katayama <t91124kk@sfc.keio.ac.jp>
+
+---
+At  Sat, 25 Feb 95 14:16:52  JST
+Following hasegawa@cec.co.jp (Ryouji Hasegawa)
+
+# admin change old-addr new-addr
+
+---
+At  Fri, 24 Feb 95 14:14:02  JST
+Following s-v@utsc.s.u-tokyo.ac.jp (Kobayashi 'COURAGE' Hidetaka)
+
+# admin matome \S+ address
+
+------
+At  Wed, 22 Feb 1995 12:31:36 +0900
+Thanks to makoto@tsurumi.toshiba.co.jp (Kazunori 'makoto' Tsuda)
+
+AddressMatching bug fix
+
+---
+At  Tue, 21 Feb 95 14:34:36  JST
+Thanks to Satoshi Yatagawa <u93b217@ed.teu.ac.jp>
+
+in default, we set $Reply_to = $MAINTAINER in Sendv4.pl 
+
+---
+At  Thu, 9 Feb 1995 18:18:36 +0900
+Thanks to koide@ecs.hiroshima-u.ac.jp
+
+exception for  # GUIDE 
+
+---
+At  Fri, 27 Jan 95 21:39:23  JST
+
+1.3.2 distribution relaase?
+
+---
+At  Sat, 28 Jan 95 00:15:22 +0900
+Thanks to Satoshi Yatagawa <u93b217@ed.teu.ac.jp>
+
+patch for libremote.pl for the case of using "# msg".
+cut off the exception of "# check routine".
+So I create Start_Hopk evaling.
+
+---
+At  Fri, 13 Jan 95 19:40:42 JST
+Thanks to NAKAGAWA Tsuneo <nakagawa@cracker.tokai.jaeri.go.jp>
+
+For Winbiff, recheck libsmtp.pl,
+It seems in winbiff eror when call getpwuid()..
+
+---
+At  Tue, 10 Jan 95 01:07:43  JST
+Following Satoshi Yatagawa <u93b217@ed.teu.ac.jp>
+
+Extension of "get".
+
+# get \d+.tar.gz 
+
+is a syntax of searching \d+.tar.gz in archive directories.
+#automaticaly call "mget" for sending back split-files
+
+---
+At  Sun, 08 Jan 1995 23:31:06 +0900
+Tnanks to toshi@super.win.or.jp
+
+test on OSF/1.
+libR8.pl logs syslog, which is confusing.
+I rewrite libo2smtp.pl.
+
+---
+At  Sat, 07 Jan 1995 23:34:06 +0900
+Thanks to toshi@super.win.or.jp
+
+embugs around GetTime on MSendv4.pl.
+
+---
+At  Wed, 21 Dec 1994 22:13:07 +0900
+Thanks to Kazuhiro KAWAGOME <kawagome@dret.ilab.toshiba.co.jp>
+
+aournd consistency in sub GetFieldsFromHeader.
+
+---
+At  Thu, 15 Dec 94 23:11:22  JST
+
+I thank  
+Takenobu HEAD Shimizugashira <kashira@ss.titech.ac.jp>
+s-v@utsc.s.u-tokyo.ac.jp (Kobayashi Hidetaka)
+,members of crosspost EXPERIMENT team, for a test of crosspost
+operation PHASE II.
+
+
+---
+At  Wed, 7 Dec 94 21:01:13  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+bug fix of FAQ
+
+---
+At  Tue, 22 Nov 1994 22:12:23 +0900
+Thanks to Izuru Shirai <shirai@syrinx.gen.u-tokyo.ac.jp>
+
+on aish, ftp://yseult.gen.u-tokyo.ac.jp/pub/gifts
+
+---
+At  Tue, 22 Nov 94 14:22:56  JST
+Thanks to hasegawa@cec.co.jp (Ryouji Hasegawa)
+
+around the severity of member-check in MatomeOkuri
+
+---
+At  Mon, 21 Nov 94 15:20:30 JST
+
+English version of INSTALL
+
+---
+At  Fri, 18 Nov 1994 06:40:51 JST
+Thanks to Koyama Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+
+rfc821 4.5.2 TRANSPARENCY, but fixed later _o_
+
+---
+At  Wed, 16 Nov 94 16:11:13  JST
+Thanks to hasegawa@cec.co.jp (Ryouji Hasegawa)
+
+patch of libremote.pl(in that days libadmin.pl, I wonder...).
+	# admin on/off/by  (libremote.pl,v 1.0)
+	# mget 1-3 ish   (libnounistd.pl,v 0.4)
+
+---------------------------------------
+Found of enbuged codes in libsmtp.pl Howerver I have found even
+correct stat syntaxes return incorrect values, so I fundamentally
+rewrote codes around stat() calls to use stat() calls explicitly.
+
+At  Thu, 10 Nov 94 03:31:03  JST
+Thanks to s-v@utsc.s.u-tokyo.ac.jp (Kobayashi Hidetaka)
+
+At  Wed, 9 Nov 94 17:16:46  JST
+Thanks to Shuichi Minamino / =?ISO-2022-JP?B?GyRCRm5Mbj0oMGwbKEI=?= <dcshimod@knctgw.cc.knct.ac.jp>
+
+At  Mon, 31 Oct 94 11:49:11  JST
+Thanks to =?ISO-2022-JP?B?GyRCO1Q2NkJuO0obKEI=?= <takuji@med.nagoya-u.ac.jp>
+
+---
+At  Wed, 9 Nov 94 21:31:22  JST
+Thanks to Izuru Shirai <shirai@syrinx.gen.u-tokyo.ac.jp>
+
+about information of "aish".  I suppose "aish" for a new verion of ish
+codes.
+
+---
+At  Wed, 19 Oct 94 01:39:52  JST
+Thanks to Takayuki-Hirai<hirai@emb.ccm.eng.osaka-u.ac.jp>
+
+For jperl and perl each perl has each behaviour for some kinds of
+regular expressions e.g. 
+Subject: [Elena:502] ujauja .... .
+
+So, I rewrite all codes of subject to simplify it. 
+
+------
+At  Tue, 18 Oct 94 09:01:41  JST
+Thanks to Yukihiro Tanaka <tana@ed1.was.fc.nec.co.jp>
+
+I rewrite a new SMTP library using sendmail -bs.
+
+---
+At  Thu, 13 Oct 94 17:30:16  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+Configure bug fix from  NEWS-OS 4.1C test operator
+
+---
+At  Thu, 15 Sep 94 22:14:30 JST
+From: shige@theta.iis.u-tokyo.ac.jp (Shigeki Yoshida)
+Message-Id: <9409151314.AA27134@theta.iis.u-tokyo.ac.jp>
+
+JUS CD
+
+---
+Sat Sep 10 
+Thanks to sha@harl.hitachi.co.jp
+
+contrib/putfiles
+
+	Original: sha@harl.hitachi.co.jp
+	modified by fukachan@phys.titech.ac.jp
+
+----------------------------
+Sat Sep 10 03:08:45 JST 1994
+
+libsmtp.pl checks the return value of sendmail and logs
+
+----------------------------
+At  Fri, 9 Sep 94 15:29:26  JST
+
+FmlRemoteContorl
+
+----------------------------
+revision 1.2.2.7
+date: 1994/09/07 11:39:55;
+
+自動登録オプション
+明示的な自動登録をするが例えばボディに subscribe と書いてもらう
+
+------
+At  Mon, 01 Aug 1994 18:46:48 +0900
+Sender: msi@lakshmi.tdc.unisys.co.jp
+
+Comments on "We should use 'Mail' not 'mail'. " in documents
+
+----------------------------
+revision 1.2.2.5
+date: 1994/08/04 15:55:51;
+
+自動登録オプション
+明示的な自動登録をする 例えば Subject: subscribe とか書いてもらう
+
+-----
+Date: Mon, 01 Aug 1994 18:46:48 +0900
+Thanks to msi@lakshmi.tdc.unisys.co.jp
+
+In the document, we should use another command such as
+mail ->
+	Mail (SUN)
+		mailx (SVR3/4)
+
+#Consider other OS's except for BSD > fukachan@phys.titech.ac.jp:-)
+
+---
+At  Tue, 26 Jul 94 01:57:30  JST
+
+● http://www.phys.titech.ac.jp/uja
+
+●まとめおくり ver.1 形でなおかつ 本体のＭＬサーバでユーザーがまとめお
+くり制御できるようにしました。＃まとめ送り ver.2 
+
+●httpd アクセス ＆＆ 自動シンクロナイズ
+
+---
+At  Tue, 26 Jul 94 01:55:06  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp> 
+
+Bugs of sub Distribute around Auto-registration.
+
+      next line if(/$CONTROL_ADDRESS/io);
+->
+      next line if($CONTROL_ADDRESS && /$CONTROL_ADDRESS/io);
+
+----------------------------
+revision 1.2.2.4
+date: 1994/07/25 16:43:04;
+
+fix around CONTROL_ADDRESS and anti-loopback mechanism
+
+----------------------------
+revision 1.2.2.3
+date: 1994/07/14 12:11:24;
+
+more severe check for loop back
+warning to maintainer
+
+----------------------------
+revision 1.2.2.2
+date: 1994/07/14 11:47:44;
+
+no loop back trap mechanism
+when reply-to: mailing list case under auto-registeration
+
+---
+At    Wed, 13 Jul 1994 04:27:11 JST
+Thanks to asada@icsd6.tj.chiba-u.ac.jp
+
+appreciate the point out of the idea using RFC934 when MatomeOkuri 
+and an example of the code.
+---
+At  Fri, 8 Jul 94 19:37:08  JST
+Thanks to 黒田  久泰  <kuroda@ais.kudpc.kyoto-u.ac.jp>
+
+notify bugs of Makefile
+
+---
+At  Mon, 27 Jun 94 21:33:53  JST
+
+I begin to write this RELEASE_NOTES:-)
+
+---
+At  Mon, 27 Jun 94 17:31:40  JST
+Thanks to Koichiro MikaMi/三上　浩一朗　 <mikami@s42017.hcs.ts.fujitsu.co.jp>
+Sender: mikami@s42017.ss.ts.fujitsu.co.jp
+
+Report and patch on the difference of regrex reutine between perl and
+jperl.
+
+
+---
+At  Sat, 25 Jun 94 15:43:06  JST
+Following Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+Begin to take a fix of "&Logging()" string order e.g. ($From_address)
+FORM
+
+
+----------------------------
+revision 1.2.2.0
+date: 1994/06/24 07:11:00;
+
+lock の仕方（対象を）を変えることで、
+・seekをつかわない
+・lock algorithm toggle switching の非対象性をなくした
+
+----------------------------
+revision 1.2.1.8	
+date: 1994/06/21 14:20:25;
+
+pre release of 1.2.2 with new flock
+use spool directory for flock file
+
+----------------------------
+revision 1.2.1.7
+
+AUTO_REGISTER_DELIVER_P -> UNDELIVER_P
+variable name is changed only.
+
+----------------------------
+revision 1.2.1.6
+date: 1994/06/17 14:14:25;
+
+ＮＩＦ対策
+
+----------------------------
+revision 1.2.1.5
+date: 1994/06/17 12:32:33;
+
+sub CheckMember is changed to
+When Auto-registration mode, #\sEmail-address is effective for check.
+that is OFF is also O.K.
+
+----------------------------
+revision 1.2.1.4
+date: 1994/06/15 18:47:19;
+
+libfml.pl is changed a log.
+SendFile.pl is a new interface for mget.
+maybe matome okuri would use SendFile interface(Msend ver.2)
+
+-----
+Date: Mon, 13 Jun 1994 13:40:47 +0900
+Thanks to  makoto@hby.toshiba.co.jp 
+
+automatic-registration design changes following the point out 
+
+----------------------------
+revision 1.2.1.3
+date: 1994/06/13 13:18:49;
+
+AdditionalCommandCheck is moved to before require libfml
+main sequence is easier to understand , I wonder.
+<STDIN> is required for foreach statement $_ change.
+guide request is 3 lines is built-in parameter.
+
+----------------------------
+revision 1.2.1.2
+date: 1994/06/10 15:28:35;
+
+sub Parsing
+Almost all the codes are changed.
+using ..
+MX-rms descriptor
+
+----------------------------
+revision 1.2.1.4.1.0	
+date: 1994/06/17 10:59:06;
+
+checkmember routine
+is ML_NOCHECK #(.*) in members is effective.
+so new auto-registration is not done.
+
+----------------------------
+revision 1.2.1.2.3.0	
+date: 1994/06/11 20:21:15;
+
+log @_ only
+(in sub Logging)
+Commandmode check is where is appropriate???
+store after cp from paffy in fundamental.
+
+---
+At  Tue, 3 May 94 02:32:16  JST
+Thanks to Nobuyuki Miura <miura@cs.titech.ac.jp>
+
+patch for libsch.pl
+
+
+---
+At  Tue, 26 Apr 94 00:27:35  JST
+Thanks to Nobuyuki Miura <miura@cs.titech.ac.jp>
+
+fml contrib/Schwalben fixes and changes
+on problems of libsch.pl
+
+Finally our fixed is summarized to
+	contrib/Schwalben/example-install.doc.
+
+--------
+Date: Wed, 20 Apr 1994 16:47:16 +0900
+Tnaks to yamane@ngi.co.jp (Satoru Yamane)
+
+Point out  bugs in INSTALL
+source: RMAIL2fml.pl --- RMAIL to fml
+
+---
+At  Sun, 10 Apr 94 22:15:10  JST
+
+fml 1.2 current 今までのところをまとめて fml 1.2.1 にして fj.sources
+へ流しました。
+bug reports、コメント、提案等ありがとうございました。
+
+Release Version 1.2.1, contributed to fj.sources 
+	Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+	Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+●ヘッダフィールドの形の保存
+（fml 1.2では手抜きといっていた部分ですね。これによりサーバのプロセス
+の前半がかなり違います。今度は縦書きSubjectも出来る:-)）
+
+●MIME decoding機能（オプショナル）
+SubjectはMIME decodeをしてsummaryファイルに記録しておく
+＃using mimer.pl and jcode.pl
+
+●サーバで予定していないヘッダフィールドは保存しておいて後でつける
+（オプショナル）
+
+●hml 1.6 形の Subject field（オプショナル）
+＃こんな形→	Subject: [Elena:ID] サブジェクト	
+
+●Documentsの改良。特にFAQは前より充実（したはず）
+
+●ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+・でも 1.2 ではドキュメントでふれてなくてごめんなさい（上と関連）
+・前よりもうすこし改良されてます
+
+
+----------------------------
+revision 1.2.0.9	
+date: 1994/04/08 09:44:57;
+
++ entry for members file
+
+----------------------------
+revision 1.2.0.8
+date: 1994/04/07 09:28:57;
+
+LIBDIR for system (split_and_sendmail)
+
+---
+At  Thu, 7 Apr 94 01:36:45  JST
+
+Added an document on AddressMatching Security Level to FAQ
+Following to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+----------------------------
+revision 1.2.0.7
+date: 1994/04/06 11:18:54;
+
+guide check code in 3 line check
+MX is cut by \s+ (why [ \t\n]+ ?)
+welcome
+
+---
+At  Mon, 4 Apr 94 13:50:05  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+Following his opinion, I changed fml-supoort ML to the real ML's which
+has auto-registration mechanism.
+
+In addition, using WELCOME_FILE mechanism is added.  
+
+
+---
+At  Mon, 4 Apr 94 04:34:18  JST
+
+ライブラリのインクルード
+fml.pl DIR(for config.ph) PERLLIBの置き場所
+
+---
+At  Sun, 3 Apr 94 22:59:15  JST
+
+To handle plural ML's by one. 
+Close descriptoins are added to FAQ. 
+However in this stage, "common library include path" parameters are
+not implemented.
+
+
+---
+At  Sun, 3 Apr 94 22:52:13  JST
+
+A log of FAQ FIX are done after Japanese Physics Society in Kyushuu. 
+
+
+----------------------------
+revision 1.2.0.6
+date: 1994/04/03 19:21:41;
+
+change of parameters
+fml.pl DIR(config.ph) PERLLIB's
+
+----------------------------
+revision 1.2.0.5
+date: 1994/04/02 18:49:48;
+
+a lot of changes
+parsing and header calculus part is all rewritten.
+bug fix of \s\n\s+
+preserving headers
+MIME decode
+[] strip or not
+HML like subject option
+BRACKET variable for [BRACKET:ID} subject
+
+---
+At  Thu, 31 Mar 94 11:56:02  JST
+Thanks to Hisaaki OGURI <oguri@cse.canon.co.jp>
+
+Attention to the setuid problem and private secret problem. 
+I added these points README closely following this suggestion.
+
+---
+At  Wed, 30 Mar 94 19:10:50  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+Attention to Incomplete implementation to handle plural ML's by one
+fml.
+
+---
+At  Wed, 30 Mar 94 16:02:05  JST
+Thanks to Hiroyuki Katayama <kata@rokoh.gen.u-tokyo.ac.jp>
+
+socket.ph 
+
+---
+At  Wed, 23 Mar 94 21:31:10  JST
+Thanks to Toshio Sengoku <sengoku@panda.intelligent-systems.co.jp>
+ <199403230941.SAA06786@axion.phys.titech.ac.jp> 
+
+SunOS Release 4.1.3-JLE1.1.3
+#Incomplete lseek call info
+
+---
+At  Wed, 23 Mar 94 18:41:52  JST
+
+Following the opinion by Toshio Sengoku
+<sengoku@panda.intelligent-systems.co.jp>
+
+$SUBJECT_HML_FORM = 1;（デフォールトは０。hml 1.6形ではない）
+
+---
+At  Wed, 23 Mar 94 12:30:58  JST
+Thanks to Toshio Sengoku <sengoku@panda.intelligent-systems.co.jp>
+
+Socket.ph 
+
+---
+At  Tue, 22 Mar 94 15:56:22  JST
+Thanks to <mikami@s42017.hcs.ts.fujitsu.co.jp>
+	Sender: mikami@s42003.ss.ts.fujitsu.co.jp
+
+The idea using mimer.pl 
+#Historically I have already used them.  
+
+---
+At  Tue, 22 Mar 94 00:34:39  JST
+
+結局Parsing, unfolding, folding全部別のコードに変わっ
+てしまった。
+「基本的にそのまま残す」という方針に切り替わる
+
+例外処理は
+
+１．From_addressというのがmember check, logggin, command modeに使うた
+めアドレスのみを切り出したもの。だからコマンドの結果の返送とかは
+アドレスのみになっちゃいますが…
+
+２．Summary_Subjectは一行にした後flagが立ってればMIME処理を行なった後
+summaryに書きます。
+
+MIME decodingですが、とりあえずperl内でなんとかするヴァージョンを作っ
+てみました。
+
+mimer.pl(fj.lang.perlより）
+jcode.pl(utasiro@sra 歌代さんのやつ)
+
+---
+At  Sat, 19 Mar 94 22:06:11  JST
+
+変更：
+
+$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+マッチしないヘッダーはbodyにつける（１なら）
+
+$USE_LIBMIME	= 1;		# when use MIME Extension in libMIME>pl
+
+MIME decodeをする。とりあえずsummaryに書くsubjectをdecodeする。
+＃一行にしてからdecodeして全部書いてます。subject をちょんぎったりはし
+ませんけど…
+
+複数行の保存も前から
+
+    ($Original_From_address) = 
+	($StoredMailHeaders =~ /.*From:\s*((.*\n\s+)*.*)\n[\n\S]/io);
+
+にすればできるのはわかっていたんですが、きれいじゃないから採用しなかっ
+たんですね
+＃だって、この書き方だと$1とか理解してくんないんだもん。ほんとにどの
+versionでも動くのか不安で不安で…
+
+$Original_From_addressと$Original_Subjectというのを新たに作って
+
+Original form  -> $Original_Subject       -> 配布の時使う
+               -> $Original_From_address  -> 配布の時使う
+parsed headers -> $Subject(i.e. one line) -> サマリーファイルに使う
+
+さらに	$USE_LIBMIME	がセットされていれば
+
+	$Subject = &DecodeMimeStrings($Subject);
+
+という部分（sub GetFieldsFromHeader）をdecodeをします。
+
+---
+At  Fri, 18 Mar 94 19:34:55  JST
+
+・From_full_addressは形を保って温存。
+・Subjectも形を保って温存。
+・ただし、summaryへ書く時は
+	user nameはFrom_addressからひっこぬく
+	subjectはMIME decodeしてから書き込む（モードもつくる）
+
+Preserve the original headers when 
+$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+---
+At  Fri, 18 Mar 94 17:03:49  JST
+Thanks to doukai@ss.ts.fujitsu.co.jp
+
+My misunderstanding on RFC822. 
+Fix 1.2  
+Special thanks to the contrituted Patch.
+
+---
+At  Fri, 18 Mar 94 12:24:10  JST
+Thanks to Manabu Matsui <matsui@moon.ss.ts.fujitsu.co.jp>
+
+My misunderstanding on RFC822. FIX 1.2  
+
+---
+At  Thu, 17 Mar 94 05:52:04  JST
+Thanks to tsuboy@sowa.is.uec.ac.jp 
+
+Some OS's has incorrect system call e.g. lseek
+
+SunOS4.1.3C + 付属の sendmail + perl4.036
+
+-------------------------------------------
+94/03/14
+Release Version 1.2 (the same as 1.1.2.17 1994.3.14 version),
+contributed to fj.sources
+	Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
+
+●モジュール化（しすぎですかね？）・コマンド群の分離（libfml.pl等）
+Configurationsはconfig.phで設定
+＃必要な時だけrequire機能を使い組み込む。
+
+●Contribでの補強。まとめ送り用コード等。詳しくは Contrib/README
+・まとめ送り
+・投票用サーバ
+・その他のいろいろなコードの見本（see FAQ, README in contrib)
+
+●activesファイルで%式リレーを制御
+
+●Makefile, Install Program, 
+・対話式インストールプログラム EasyConfigure
+
+●現在はC wrapperを使いMaintainerの uid,gidで実行するように設定（デフォー
+ルトのインストールではそうなる）
+＃hmlではsendmail -fのためだけに必要なdaemonを使うことの解消。
+（５．ｘの時代のはなし）
+
+●よく見られるコマンドモードと配布モードの間違いを防ぐため最初の３行以
+内に ^#.*$が現れたら自動的にコマンドモードとなり配布しない。
+＃日本を前提にしたこの仕様は失敗かもしれない（つまり日本語のメールなら
+最初の３行のどこかに＃があってもそれは＃であり#ではないだろうと仮定し
+ている）。
+＃”３行”は$COMMAND_CHECK_LIMIT = 3;で設定（see config.ph）
+
+●sendmailとはsmtpポートでＩＰＣ（libsmtp.pl）
+sendmailコマンドを呼ぶのではなく、プロセス間通信でsendmailへ渡す。
+＃IPCはちゃんとesmtpの場合でもうけとるように気を配る(for sendmail 8.x)
+
+●ロック・アルゴリズムはflockとpidを使う２種類（fml.pl liblock.pl）
+
+●Toggle flag configurations
+・メンバーチェックをするか否か？（する＝１）
+	「メンバーチェックをするサーバ」と
+	「自動登録しながら走るサーバ」
+・ロックはflockを使うか、PID式を使うか？（flock＝１）
+・サーバーテスト用デバッグモード（debug mode = 1）
+・コマンドの書き方について。# get 1 と #get 1は同じもの等。
+
+●アドミンコマンド群の削除（libfml.pl）
+＃使わないし、remoteでＭＬサーバはやるべきではない（何かあった時のため
+にも）
+
+●ｗｈｏｉｓ等実績のないコマンドの削除（libfml.pl）
+＃使わんって（やりたいなら専用のをつかえばいいでしょう）
+
+●ｍｇｅｔ（まとめてget :-)）…付け加えたコマンド（libfml.pl）
+“# mget 正規表現 送り返されるメールの送り間隔”
+による大規模な過去のメール取り寄せ機能
+送り返しはそれようのコマンドへ（split_and_sendmail.pl）
+＃ftpmailのようなもの。ＩＰの人だけならpasswdつきのanonymous ftp？:-) 
+にする方がいいとおもう。
+
+●loggingはできるだけする（余計かもしれなくても）。
+（こまめに消して下さい（make cleanで消えます））
+＃なんかあった時便利です。ごみごみするけどメリットはあるとおもう。
+
+●リレーやＭＸについては
+	ファイルFAQ の 5. system tuning
+を見て下さい
+
+
+
+At  Mon, 14 Mar 94 23:47:03  JST
+Thanks to kuroda <kuroda@ais.kudpc.kyoto-u.ac.jp>
+
+Comments on README's 
+
+Fix INSTALL to describe how to regist to actives and members
+
+-------------------------------------------
+94/04/10
+Release Version 1.2.1, contributed to fj.sources 
+	Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+	Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+●ヘッダフィールドの形の保存
+（fml 1.2では手抜きといっていた部分ですね。これによりサーバのプロセス
+の前半がかなり違います。今度は縦書きSubjectも出来る:-)）
+
+●MIME decoding機能（オプショナル）
+SubjectはMIME decodeをしてsummaryファイルに記録しておく
+＃using mimer.pl and jcode.pl
+
+●サーバで予定していないヘッダフィールドは保存しておいて後でつける
+（オプショナル）
+
+●hml 1.6 形の Subject field（オプショナル）
+＃こんな形→	Subject: [Elena:ID] サブジェクト	
+
+●Documentsの改良。特にFAQは前より充実（したはず）
+
+●ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+・でも 1.2 ではドキュメントでふれてなくてごめんなさい（上と関連）
+・前よりもうすこし改良されてます
+
+---
+fml.pl revision 1.2	locked by: fukachan;
+date: 1994/03/14 19:07:29;  
+The release version
+1.1.2.17 is the same as 1.2
+
+---
+fml.pl revision 1.1.2.17	locked by: fukachan;
+date: 1994/03/10 15:45:13;  
+when "# guide" from not member, both check and no check routine send back
+guide file.
+In this case NoCheckAndAdd routine do not add him to the member.
+GUIDE_FILE requires special treatment.
+
+---
+At  Wed, 9 Mar 94 23:57:49  JST
+
+1.1.2.17 Release?
+
+---
+At  Wed, 9 Mar 94 23:10:12  JST
+Thanks to kuroda <kuroda@ais.kudpc.kyoto-u.ac.jp>
+
+Return the Guide when requesteed from unknown users. 
+This is a bug that I forget the implementation.
+
+---
+At  Wed, 9 Mar 94 20:38:48  JST
+Thanks to kuroda <kuroda@ais.kudpc.kyoto-u.ac.jp>
+
+FIX: When the Authentification fails, return $DENY_FILE not $GUIDE_FILE
+README FIX
+Default should be  $ML_MEMBER_CHECK = 1;
+Makefile FIX
+
+---
+At  Sat, 5 Mar 94 23:44:48  JST
+
+1.1.2.16 Release(private communication)
+
+---
+At  Sat, 5 Mar 94 15:10:53  JST
+Thanks to kuroda <kuroda@ais.kudpc.kyoto-u.ac.jp>
+
+Syntax Error of README
+Syntax Error of EasyConfigure.*
+README FIX
+
+---
+fml.pl revision 1.1.2.16
+date: 1994/03/02 16:18:08;  
+mon + 1 in sub InitConfig (fix)
+add: CommandMode check for CONTORL_ADDRESS
+see also config.ph
+Copyright 1994 are added to *pl *ph files.
+
+--------
+Date: Tue, 15 Feb 94 10:08:14 JST
+From: yamane@ngi.co.jp (Satoru Yamane)
+
+Date: Wed, 20 Apr 1994 16:47:16 +0900
+Thanks to  =?ISO-2022-JP?B?GyRCQ3Y8bRsoQg==?=  =?ISO-2022-JP?B?GyRCMVEbKEI=?=
+	=?ISO-2022-JP?B?GyRCSVcbKEI=?=  <ikari@gamera.okilab.oki.co.jp>
+
+Point out of bugs in libhml 0.3.
+
+---
+fml.pl revision 1.1.2.15
+date: 1993/12/21 14:08:49;  
+lock call is changed to the location after getting fields from header
+for general purpose(schwalben chor ML)
+small bug fix
+indent
+I think the flock uses sequence file is a problem yet.
+but it is a symbole of process only.
+
+---
+fml.pl revision 1.1.2.14
+date: 1993/11/26 17:05:49;  
+remove setup.pl
+comment on errors-to
+
+---
+fml.pl revision 1.1.2.13
+date: 1993/11/22 20:40:17;  
+indent in GetFielsFromHeader
+flock and lock asymmetry is modified
+ID increment is done in Distribute
+close(LOCK) is subject perl implementation
+When Command Mode close(LOCK) is done implecitly in exit
+
+---
+fml.pl revision 1.1.2.12
+date: 1993/11/20 19:09:10;  
+fix of syntax error of 11, else
+big bug of flock system call for the change of file descriptor in processing
+it changes the file descriptor locked by flock, it causes fatal error
+implement is changed in Distribute
+IncrementID is simple and the saving is unified to
+printf LOCK $ID form
+
+---
+fml.pl revision 1.1.2.11
+date: 1993/11/08 07:32:56;  
+check of membercheck code is modified to case statement
+in addition if member check is failed, unlock as CHECK flag
+sub HeaderFiltering -> sub Parsing ( strange word )
+wasn't it quere?
+
+---
+fml.pl revision 1.1.2.10
+date: 1993/11/07 16:30:56;  
+if flock, die
+return values check
+index is called once in HeaderFiltering
+Copyright
+indent
+
+---
+fml.pl revision 1.1.2.9
+date: 1993/11/04 15:50:44;  
+ML_MEMBER_CHECK flag is added
+
+---
+fml.pl revision 1.1.2.8
+date: 1993/11/04 09:30:11;  
+Parameter except for DIR are moved to config.pl
+
+---
+fml.pl revision 1.1.2.7
+date: 1993/11/04 07:40:04;  
+subject match bug fixed
+
+---
+fml.pl revision 1.1.2.6
+date: 1993/11/04 06:26:57;  
+fix sequence file bug(flock always increments)
+lock and unlock all routines are moved to liblock.pl
+split is fixed to split(//) forms
+
+---
+fml.pl revision 1.1.2.5
+date: 1993/11/01 16:48:25;  
+move unlock to liblock.pl
+return 0 in the last of AddressMatching
+fix Errors-to
+COMMAND_CHECK_LIMIT
+is moved to config.ph and becomes global variables.
+
+---
+fml.pl revision 1.1.2.4
+date: 1993/10/31 14:26:42;  
+Lock library using process ID is divided to liblock.pl
+this cuts 20 % of fml.pl.
+about 64 / 400 lines
+
+---
+fml.pl revision 1.1.2.3
+date: 1993/10/31 09:24:43;  
+fixes in HeaderFiltering about BodyLines
+with this fix, a little modification for libfml.pl
+
+---
+fml.pl revision 1.1.2.2
+date: 1993/10/21 16:45:21;  
+filed -> field
+return value is 1 for MLMemberNoCheck..
+require above condition.
+
+---
+fml.pl revision 1.1.2.1
+date: 1993/10/21 12:48:06;  
+flock routine is fixed(seek)
+($_) not match
+indentation in HeaderFiltering etc...
+bug fixed, e.g. ID...
+Sendmail or SendFile has a subject with $ML_FN
+
+---
+fml.pl revision 1.1.2.0
+date: 1993/10/19 08:19:31;  
+a lot of bug-fixed
+add a lock algorithm using flock system call
+but consider using SEQUENCE_FILE or not is a problem
+the release version for CPCMP ML
+
+---
+fml.pl revision 1.1.1.2	locked by: fukachan;
+date: 1993/10/01 20:59:44;  
+left problems are only
+check for MX
+Membercheck
+addresscheck routine
+and
+in libcommand.pl, on, off and bye
+Added features:
+ls -> system call using readdir etc...
+Lock algorithm is checked.
+small bug-fix
+indent is a little modified.
+MLMemberCheck and MLNoMemberCheckAndAdd
+add a lot of comment
+regular expressions are modified to /.../o if possible.
+already alpha test stage for fml 1.2
+
+---
+fml.pl revision 1.1.1.1
+date: 1993/08/12 16:19:04;  
+1.1.1.1 is the final rivision of modified hml
+The next rivision will be not modified, the different rivision which is constructed from the beginning.
+
+---
+fml.pl revision 1.1.1.1.1.1
+date: 1993/09/08 18:11:46;  
+revege for the change for On Memory implementation
+
+---
+fml.pl revision 1.1
+date: 1993/08/09 15:59:48;  
+Initial revision
+
+===========================================
+
+The first season of 1993, in this stage, I take apart from hml codes
+and generate the new perl library as "fml".
+The maintenance below in 1993 is for some ML's servers, not related
+with the desing and implementasion of the fml perl library.
+
+-------------------------------------------
+Pre History:
+
+The fundamental design of the server processes
+hml 1.6 (1991/05/01)	hirano@tkl.iis.u-tokyo.ac.jp
+
+1.6++ 92/06    tsubai@phys.titech.ac.jp modified this script
+1.6.1 92/10/17 fukachan@phys modified for schwalben chor ML
+1.7   93/02/06 fukachan@phys.titech.ac.jp 
+      modified for backup-server for YP-ML
+1.7.1 93/02/09 fukachan@phys.titech.ac.jp 
+       implementation of tar, compress and uuencode; as a part of mget
+1.7.2 93/02/11 fukachan@phys.titech.ac.jp 
+       a little modified to record a log etc...
+1.7.3 93/03/10 fukachan@phys.titech.ac.jp 
+       not queueing $QUEUE_FLUSH_COMMAND = '/usr/lib/sendmail -oi -q'
+       and a little modification for another ML server

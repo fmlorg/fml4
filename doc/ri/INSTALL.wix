@@ -1,0 +1,552 @@
+			Ｉｎｓｔａｌｌ
+
+まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
+のdirectoryができてその下にひとセット入ってます。
+＃で、directoryの名前は適当に変えて下さい。
+
+注意： 
+	1.3.9.2 からしばらく Configure 使ってましたが、やめました_o_
+
+
+◎以下での設定例（例えば次のように設定することにしましょう）
+設定するマシン		axion.phys.titech.ac.jp
+Mailing List 		Elena Lolabrigita ML
+address of it		Elena@axion.phys.titech.ac.jp
+Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
+ＭＬの本体のあるdirectoryが
+			/home/axion/fukachan/work/spool/Elena
+
+
+０．installの概略
+
+・ Makefile の設定をなおして make してください	→１
+ＯＳは make の中で自動判定するはずです
+最後に /etc/aliases の書き方についての診断メッセージがでます 
+
+いまはSolaris2も自動的に判定できると思いますけど…
+もしこけたら、
+Solaris2 では make OPT=-DPOSIX として make してください
+なお、 -DBSD43 は 4.3BSD的に compile します。
+Ultrix 4.x では make SH=/bin/sh5 として /bin/sh5 を使って
+Bourne Shell scriptを実行してください。
+デフォールトのSH変数（わざわざSHELLとは別の変数名にした）は 
+当然 /bin/sh です。
+
+・/etc/aliases を設定する（ここがＯＳ依存です）	→２、３
+・config.ph や guide ファイル等の確認をする	→４、５
+
+
+
+１．	Makefile の設定
+
+必須はＭＬのアドレス関係とヘッダのキーワードの５つほどです。
+動かす場合はこれで全てです。
+
+後はすべて細かいヘッダの形の選択等のオプショナルな Advanced Setting で
+すから気になるようになったらＦＡＱをみていじってください。
+＃デフォールトのままで大丈夫ですから、はじめは ほっておいてもいいでしょう
+
+
+設定例が
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+設定するマシン		axion.phys.titech.ac.jp
+Mailing List 		Elena Lolabrigita ML
+address of it		Elena@axion.phys.titech.ac.jp
+Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
+ＭＬの本体が		/home/axion/fukachan/work/spool/Elena
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+ということにしたので、
+
+●次に
+Makefileの中の"######## Please customize below ########"
+の下を書き、
+% make
+すれば一応の出来上がりで、もう使えます。
+
+今の場合
+◎Makefileの例：
+
+	######## Please customize below ########
+	XXML         = Elena@axion.phys.titech.ac.jp			
+	XXMAINTAINER = Elena-request@axion.phys.titech.ac.jp	
+	XXFMLDIR     = /home/axion/fukachan/work/spool/Elena
+
+−−−−−−−−−−−−−−−−
+解説：
+ここではメーリングリストのアドレスが
+
+XXML = Elena@axion.phys.titech.ac.jp			
+
+管理者のアドレスが
+
+XXMAINTAINER = Elena-request@axion.phys.titech.ac.jp	
+
+です。
+＃あなたのアドレスでもいいですが普通は Elena-requestとかElena-adminと
+かを作る方が良いでしょう。後、必ずメーリングリストのアドレスと管理者の
+アドレスは別々にして下さい。そうしないといつかきっと無限ループを起こし
+ます。
+
+
+ＭＬの実体つまりfml.plとかが広がっている場所が
+
+XXFMLDIR = /home/axion/fukachan/work/spool/Elena
+−−−−−−−−−−−−−−−−
+
+○これらを確認したら
+% make
+
+です。なお Solaris2 では make OPT=-DPOSIX として make してください
+＃注意：NEWS-OS 4.1C の test コマンドは -x オプションを解しません。そ
+のため、configure_fml を実行するとtest: too many argumentsというメッセー
+ジが大量に出てしまいます
+
+備考：% make doc
+	"make doc "… とメッセージが出ますが必須じゃないです
+	% make doc すると、texinfo版 と html版 のドキュメントが
+	doc(texinfo version) と http(html version) に生成されます。
+
+
+
+２．	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
+
+make すると fml という "C Wrapper"(setuidをするもの) が生成されます。
+fml（fml.c から作る）自体は、make の時fml.c を自動的に補正してくれてい
+るはずです。
+
+/etc/aliases では
+	Elena: :include:/include-file 
+		もしくは
+	Elena: "|/directory/fml-1.4/fml"
+の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
+ます。
+sendmail が setuid をちゃんと実行できないからで、けっこうターゲットマ
+シンのＢＳＤ以外では挙動がまちまちみたいです
+
+問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
+
+［４．３ＢＳＤ］
+	fml でも :include: でもＯＫでしょう
+
+［４．４、ＰＯＳＩＸ準拠のＯＳ、その他］
+	:include: 式か 
+	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
+
+以下は実際にテストされたＯＳ一覧です
+
+	キーワード：
+	uid		ownerが自分自身で 4755 した fml
+	include		sendmail に setuid をまかせる :include:を使う
+	root		ownerがrootで 4755 した fml
+			＃こういうことは最後の手段であまりやりたくない…
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+4.3BSD			uid include
+4.4BSD 			include
+BSD386 1.1		include
+SUN4.1.2 - 4.1.3JLE 	uid include
+Solaris 2.4 		include
+Solaris 2.3J 		だめ？
+DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+OSF/1 Alpha AXP V2.1 	include
+HP UX 9?		[:include でかつ perl -U が必要？]
+			＃なんか、setreuid しかないんだけど…＞HP-UX
+SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
+
+manualで確認した機種一覧
+4.3BSD系	SONY NEWS 4.x
+		4.1.3JLE
+		SVR3
+POSIX準拠	4.4BSD
+		NetBSD 
+		BSD386 1.1
+		Solaris 2.4	
+
+その他：
+・単にNFSだから という場合もあるでしょう
+
+そのときはsetuid する時だけ local ならいいわけで、
+たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
+home とかにおいてある という風にしてあればＯＫでしょう
+
+・NFSごしにファイルが存在すると setuid を認めない機種 もある
+たとえば
+		SUN 4.1.3JLE 4.1.4
+		＃これは fpathconf の return 値が問題
+
+・uid と include を試してみてどっちもうまくいかなかったら
+最後の手段（root）： 
+
+まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
+make OPT=-DPOSIX として make してください
+
+root のケースでは rootでしかかけない /usr/local/ml/driver 
+とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
+は注意してくださいね。管理者とよく相談してみてください（重要）
+＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
+＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
+
+新しい発見があったら fml-bugs か fml-support Mailing list まで御一報を
+(^^)
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+上の欄 or makeの時のメッセージをみて /etc/aliases の設定を
+
+	Elena:"|/home/axion/fukachan/work/spool/Elena/fml"
+		もしくは
+	Elena::include:/home/axion/fukachan/work/spool/Elena/driver
+
+妥当な方を書いてnewaliasesをかける。
+＃もしくは管理者にしてもらいます。ただ何かあった時のためにＭＬ管理者は
+＃そのマシンの管理者である方が望ましいとおもいますけど。
+
+管理者が関係あるのはここだけです。サーバ自体はあなたのプロセスとして走
+るのでなんかあっても止めるのもあなた次第です
+
+＃ファイルdriverの中身は
+＃"|/home/axion/fukachan/work/spool/Elena/fml.pl /home/axion/fukachan/work/spool/Elena /home/axion/fukachan/work/spool/Elena"
+みたいに書きます
+
+
+３．	setuid のしかたの解説（２と重複してますが…）
+３．１	ＯＳが 4.3BSD の時
+
+ファイルがすべてあなたの所有になっているかどうか調べて下さい。
+fml という fml.c から作られたsetuid する C wrapper の実行ファイルがで
+きているはずです。fmlの属性が4755になっているかどうかもチェックして下
+さい。
+＃つまり
+＃-rwsr-xr-x  1 fukachan guild 24576 Nov 26 04:43 fml
+＃4755についてはFAQ 参照
+
+「うちの sendmail古くて妖しいなぁ」とおもったらとりあえず C wrapper
+fml.c にしておいたほうがいいでしょう
+＃それ以前に 常識的にsendmailのようなものは常に最新版であるべきですが
+
+
+３．２	setuid は Sendmail におまかせ
+
+ちゃんと setuid できる sendmail では
+
+	in /etc/aliases
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
+
+	/usr/local/list/Elenaの中身は
+	"|/home/axion/fukachan/work/spool/Elena/fml.pl directory"
+
+
+３．３	ＯＳが POSIX の時の最後の手段（注意）
+
+とりあえず :include: を試して、うまくいかないときですが、
+make OPT=-DPOSIX で compile してfmlができたら スーパーユーザー権限で
+# chown root fml
+# chmod 4755 fml
+としてください。＃上で述べたとおり取扱は要注意です
+
+
+
+
+４． Configurations for fml.pl and config.ph
+
+config.ph はデフォールトで デバッグモードになっていますから、配送処理
+はしません（注意！）。
+
+config.ph の設定や spool/の下のファイルでヘッダの確認をし、
+debug = 0; にして運用してください。
+
+注意：
+config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailの配布
+をしません。この場合、配布以外のすべての機能は動いています。テストにど
+うぞご利用下さい。
+この状態でどういうメールヘッダになるか等をlogファイルやsummaryファイル
+やspoolの中の様子を見るとよいでしょう。
+
+備考：
+あと、必要最小限の変数だけにしたもの config.ph-fundamental,
+config.ph-fundamental-j(解説が日本語でかいてある:-)）
+というのがあります。
+めんどくさかったらこっちいじるほうが楽かも知れません(^^)
+
+
+●config.phの再確認（と（必要に応じて）カスタマイズ）をしてください
+
+＃こういう風に２段階にしたのはわざとです。メインテナンスを楽にするため
+と、何も考えずに走らせずに一度確認してもらうためです。
+＃楽というのは…例えば、ヴァージョンアップは*.plをコピーするだけとか
+
+確認の必須事項は最初の５つです。
+＃Makefileで設定しましたね？その確認です
+
+◎config.phの例：
+
+・ヘッダのＴｏ：フィールドの指定（"To: $MAIL_LIST $ML_FN"になる）
+
+ＭＬのアドレスと
+
+	$MAIL_LIST    = 'Elena@axion.phys.titech.ac.jp';
+
+ＭＬの名前は
+
+	$ML_FN	      = '(Elena Lolabrigita ML)';
+
+この場合メールで
+
+	To: Elena@axion.phys.titech.ac.jp (Elena Lolabrigita ML)
+
+になって現れる。
+
+・ヘッダにつけるユーザーがつける拡張フィールド
+＃便宜のため。それ以外の理由は特にない。
+
+	$XMLNAME      = 'X-ML-Name: Elena';
+	$XMLCOUNT     = 'X-Mail-Count';
+
+メールの中では
+
+	X-ML-Name: Elena
+	X-Mail-Count; 00100
+
+のようにあらわれます。
+
+・管理者のアドレス。
+
+Elena-request@axion.phys.titech.ac.jpのようなアドレスを別につくりそれ
+にあなたの名前を登録するのが一般的だとおもいます。
+
+	$MAINTAINER   = 'Elena-request@axion.phys.titech.ac.jp';
+
+いわゆるUNIX Fromに使うための設定です。必ずＭＬ本体とは別にしてくださ
+い。(see FAQ 2.8)
+＃Errors-To（もし使うなら）、各種コマンドの送り主等もすべてこの管理者
+アドレスになります。これは手抜きといわれそうですが…
+もし変える時は直接sub Distribute(fml.pl)やlibfml.plの中をいじります
+＃＃Maintainer を Elena-admin に設定しても、
+Elena-request@axion.phys.titech.ac.jp というアドレスもインターネットの
+慣習に従い作っておくほうがよいでしょう。Elena-admin への Alias でもい
+いわけですから
+
+
+
+以下の項目は一応確かめて下さい。
+
+・もしコマンド専用アドレスも作るなら？
+
+	$CONTROL_ADDRESS = '';
+	＃（注意）1.1.2.16から。デフォールトはセットしない
+
+例えば、
+
+	$CONTROL_ADDRESS = 'Elena-ctl';
+
+/etc/aliasesに
+
+	Elena-ctl:"|/home/axion/fukachan/work/spool/Elena/fml"
+
+としておけば
+
+	Elena-ctl@axion.phys.titech.ac.jp
+
+宛のメールは強制的にコマンドとして“のみ”解釈します。
+コマンドのためにコマンド専用アドレスを作りたい時に使います。
+
+ＭＬサーバ本体はメールの配布もコマンドの受け付けも両方こなします。
+サーバの動き方の詳細はFAQ 0.1を見て下さい。
+
+OS による違い：
+	FAQ のトラブルシューティングというところにもいろいろ事例がかい
+	てあります
+
+	Solaris 2.3(SUN OS5) flock がうごかない？
+	flock がだめ ていうエラーメッセージがでたら
+	$USE_FLOCK = 0;にしてみてください
+
+
+■	Advanced Settings
+
+『とりあえずＭＬを動かそう』となさる方は後回しでいいと思います。
+＃デフォールトの設定（私の趣味:-)でちゃんと動きますから
+
+簡易config.ph として config.ph-fundamental というのにもっとも基本的
+なカスタムだけ抜き出したファイルがあります。
+ここにでてくる変数だけをみるほうがわかりやすいかもしれません
+＃つかうなら config.ph-fundamental -> config.ph にしてください
+＃さらに大胆な日本語版 config.ph-fundamental-j もあります（きっと大丈夫）
+
+Advanced Settings については FAQ を見て下さい。
+これらのパラメータ↓についての意味、取り扱い等について触れてあります。
+
+$HOST		= 'localhost';	# どのマシンのSendmailを使う？
+$ML_MEMBER_CHECK = 1;		# メンバーチェックするか否か？
+$USE_FLOCK	= 1;		# ロックアルゴリズムの選択
+$debug		= 1;            # デバッグモード
+$RPG_ML_FORM_FLAG = 1;		# コマンドの書き方
+				# [e.g. # get 1 と #get 1は同じものとみなす]
+$SUPERFLUOUS_HEADERS = 1;	# ヘッダのadditionalなものをそのまま保存
+$USE_LIBMIME	= 1;		# MIME decodingを行なう
+$LIBMIMEDIR	= "$DIR/contrib/MIME";
+				# MIME decodeをするためのライブラリ
+$STRIP_BRACKETS = 0;		# サブジェクト の [Elena:ID] を抜く
+$SUBJECT_HML_FORM = 1;		# Subject: [Elena:ID] サブジェクト
+$BRACKET	= 'Elena';	# Subject: [$BRACKET:$ID] ...
+$AUTO_REGISTERD_UNDELIVER_P = 1;# 自動登録の時、登録願いメールの取り扱い
+$REQUIRE_SUBSCRIBE = "";	# 自動登録でsubjectに "subscribe" が必要
+$REQUIRE_SUBSCRIBE_IN_BODY = 0;	# 自動登録で本文に    "subscribe" が必要
+$AGAINST_NIFTY = 1;		# ＮＩＦＴＹ対策（もう要らないらしいぞ）
+$USE_WHOIS = 0;			# Whois libraryを使うか？
+$DEFAULT_WHOIS_SERVER = "localhost";	# Default whois server
+$USE_RFC934 = 0;		# まとめおくりで９３４フォーマット
+$COMMAND_HOOK 	=q#...		# コマンドの拡張
+$STORED_BOUNDARY = 100;		# 古いメールを gzip し保存する しきい値
+@ARCHIVE_DIR = ('old');		# そのgzipしたファイルのおき場所
+
+
+・ライブラリ群が使うシステムのコマンド（config.phの最後）
+
+	$TAR		= "/usr/gnu/bin/tar cf -";
+	$UUENCODE	= "/bin/uuencode";
+	$RM		= "/bin/rm -fr";
+	$CP		= "/bin/cp";
+	$COMPRESS	= "/usr/ucb/compress -c";
+	$ZCAT		= "/usr/gnu/bin/zcat";
+
+ＢＳＤ（というか私のマシン）を仮定してるのでこの部分を直す必要があるで
+しょう。一応makeの中でconfigure_fmlが自動的に直しているはずですが。
+＃あなたの環境のなかで最初にめぐりあうコマンドのパスを探して設定したは
+ず。
+
+もしおかしかったら./configure_fmlを動かしてチェックしてみて下さい。
+＃注意：config.phは最初に make した時にオリジナルはconfig.PHに置き換え
+られています。
+
+それでもおかしければ、あなたの環境等が関係しています。手で直して下さい。
+＃（注）ＯＳによって、オプションが違うということもあり得る
+
+●これでサーバの設定は終りました
+
+
+５．	メンバーの登録、ガイド等を書く
+
+
+●あとはメンバーの登録をmembers,activesにするだけですね。
+
+それぞれ一行に一人分のアドレスを書きます。#の後はコメントです。 
+
+・メンバーチェックモード：
+メンバー登録は管理者が両方のファイルにアドレスを書いて下さい。
+
+members		メンバーの認証につかうもの。配布、コマンド共にこれを見
+		る。
+actives		配布する時に使うもの。sendmailへ渡すアドレスのリスト
+		リレーサーバ情報とかはここに書く。
+
+・自動登録モード：membersしか使いません。
+members		登録と配布に使う。勝手に登録するのでほっておいていいで
+		す。
+＃メンバーチェックをせず、さらに自動登録もしないやり方もあります（see
+FAQ） ＝ スプールとかコマンドがついた /etc/aliases にずらずら…と同じ
+やね
+
+
+こんな感じのファイルになるはずです。(ON, OFFの意味は下かhelpファイルを
+見てね)
+
+#の後はコメントです。 
+	# actives list
+	
+またＭＬをOFFしている人も↓このようになってます。
+
+	# fukachan@beth.phys.titech.ac.jp
+
+ＭＬを抜けた人はmembers, activesで
+
+	##BYE fukachan
+
+となるようにしてます。その行の消去はしません（脱退した人も一応記録して
+おく）
+
+--------------- members の見本 ---------------
+# Member list. This line is a comment. 
+fukachan@phys.titech.ac.jp
+katori
+# fukachan@beth.phys.titech.ac.jp
+##BYE fukachan
+----------------------------------------------
+
+--------------- actives の見本 ---------------
+# Actives list. This line is a comment.
+fukachan@phys.titech.ac.jp	
+Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
+##BYE fukachan
+#cocoa@phys.titech.ac.jp	axion.phys.titech.ac.jp
+pollyanna	matome 	3
+----------------------------------------------
+
+注意：
+pollyanna	matome 	3 はpollyannaは３時間のまとめ送りの意味です
+
+
+●あとguide,objective,help等もチェック（書き直し）してください。
+
+deny			ＭＬのメンバーでない人へのお断りメール用
+guide			ＭＬのガイド（案内状？）
+help			コマンドリスト
+objective		ＭＬの目的の説明（世界征服とかさぁ〜:-)）
+
+です。
+＃ help.example2 は コマンドの使い方が systematic にかかれた 見本とし
+＃て収録させていただいたものです。立派に作るとこんな感じになるという:-)
+＃thanks to umura@nn.solan.chubu.ac.jp
+＃（カスタマイズされてるのでデフォールトの挙動とは違うことに注意してく
+＃ださい）
+
+
+●インストールはすべておしまいです。 debug modeとかを使いながら慣れて
+下さい。なお、実際に動かすと次のようなファイルやdirectoryができます。
+
+spool		記事のスプール・ディレクトリ（数字のファイル）
+log		fml server's log, mget(libfml.pl)のlog
+summary		記事の ID、Subject
+seq		記事の ID
+var/log/_smtplog
+		sendmailとのやりとりの記録（もっとも最近のものだけ）
+		デバッグに便利。必要なかったら 
+		$NOT_TRACE_SMTP = 1; とconfig.phにかいてください
+
+● % make localtest (95/07/06)
+を実行すると、sendmail をつかわずに、local なテストを実行します。 
+この場合、UNIX FROM と FROM: は makeを実行する環境からuser account名を
+割り出して、To: は config.ph からＭＬ名を使ってます。
+
+
+
+●あ、そうそうコマンドの意味です。helpファイルに一通り書いてあります。
+実際にどうなるか試してみて下さい。
+
+例：
+# help			コマンドのヘルプ
+# objective		メーリング・リストの目的、約束事を読む
+# guide			（非）メンバが案内を得る
+# msg			管理者へメールを送る
+# members		メンバのリストを得る
+# actives		アクティブなメンバのリストを得る
+# summary		過去の記事一覧を得る
+# get ID		過去の記事を得る
+# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
+			まとめてｇｅｔ:-)
+			注意：正規表現はBourne Shellのものです。
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+			default は gzip した Unix From つきのファイルの固まり
+# matome 数字u 		とすれば plain(unpack)、つまりplain textををかえします
+# matome 0		普通の配送へ戻す
+
+# off			ＭＬを一時的に離脱する
+# on			一時的離脱をやめてＭＬに再参加する
+# bye			ＭＬをやめる
+
+
+
+					Please enjoy!
