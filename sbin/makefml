@@ -1428,6 +1428,8 @@ sub do_passwd
     print "---Changing Passwd of Admin $member in $ml mailing list\n";
 
     &ResetVariables;
+    $cf = "$ML_DIR/$ml/cf";
+    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
 
     # $ml/etc
     &MakeSubDir("$ML_DIR/$ml/etc");
@@ -1468,7 +1470,8 @@ sub do_passwd
     require 'libcrypt.pl';
     $init = 1;	# if new-comer, initialize the passwd;
 
-    print "\n";
+    $REMOTE_ADMINISTRATION_AUTH_TYPE = 
+	    $config{'REMOTE_ADMINISTRATION_AUTH_TYPE'} || "crypt";
 
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
@@ -2060,7 +2063,9 @@ sub do_config
 sub EachLevelQuery 
 {
     local(*config, $top_level) = @_;
-    local($r);
+    local($r, $clear_prog);
+    
+    $clear_prog = &search_path('clear');
 
     while ($top_level =~ s|^//|/|) { ;}
 
@@ -2074,7 +2079,17 @@ sub EachLevelQuery
 
 	&EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP);
 
-	print "   ".("*" x 60); print "\n";
+	if ($clear_prog) {
+	    system "$clear_prog" if $TouchCount > 0; $TouchCount++;
+	    print "   ".("*" x 60); print "\n";
+	    print "\n";
+	    print "\t<<< makefml --- FML Configuration Interface --- >>>\n";
+	    print "\n";
+	}
+	else {
+	    print "   ".("*" x 60); print "\n";
+	}
+
 	print "   [$Depth $top_level]\n\n" if $debug;
 	print $MENU{$top_level};
 	print "   ".("*" x 60); print "\n";
