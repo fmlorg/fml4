@@ -581,6 +581,7 @@ The configurations you input are saved here.  After this time,
 configurations (e.g. config.ph, include).
 
 .S	CGIからmakefmlを呼び出す (3.0 current new)
+=E.S	call makefml via CGI
 
 CGIでmakefmlを呼び出す設定の開発は現在進行形です。いまプレβくらい。
 currentにしかありません。
@@ -651,8 +652,8 @@ so, you should edit cf or config.ph file directly => .ptr{config-file}
 Please see "help" file for commands usual users who can use.
 Please see "help-admin" file for ML maintainers commands.
 
-doc/op.jp が内部構造、大まかな機能ごとに章だてされた『設計と実装』につ
-いて書いてあるドキュメントです。印刷するとでかくて死にそうなので注意。
+doc/Japanese/internal が内部構造、大まかな機能ごとに章だてされた『設計
+と実装』について書いてあるドキュメントです。
 =E
 Please see "doc/op.en" for fml internals, whole functions. This file
 is for "design and implementation".  This file contains whole
@@ -661,11 +662,12 @@ variable.
 
 カスタマイズ変数一覧は インストール先(/usr/local/fml)/cf/MANIFEST を見
 てください。各変数の意味、実装上の理念、パラメータについての詳細は 
-doc/op の中をサーチしてください。
+doc/Japanese/internal の中をサーチしてください。
 
-いずれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
-ワードや変数名でサーチして見て下さい。最新版のドキュメント全体へのサー
-チは http://www.fml.org/fml/search-j.html でできます。
+いずれの場合でも分からない時はまず最初に doc/Japanese/ のファイル群を
+適当なキーワードや変数名でサーチして見て下さい。最新版のドキュメント全
+体へのサーチは http://www.fml.org/fml/search-j.html でできます。
+
 =E
 To find information, 
 1.	search keyword or variable name in the doc/op.en
@@ -872,10 +874,10 @@ and deliver articles in one mail.
 .fi
 
 Vixie Cron でない OS についてはマニュアルで cron を調べるとか 
-doc/op.jp の cron の章を見て下さい。
+doc/Japanese/ を見て下さい。
 =E 
 If your OS has not Vixie cron, please see the manual of "crontab" or
-the chapter on "cron" of doc/op.jp in the fml source.
+the chapter on "cron" of doc/op.en in the fml source.
 
 ＊＊＊ MLが多くなってきたら? (ISPのシェルアカウントなどでは初めからこ
 ＊＊＊ のケースでしょう)
@@ -1879,8 +1881,8 @@ and hop count expiration errors. see the next menu.
    Received: を通すなら yes
 
 [参考] これ以上細かいヘッダフィールドのカスタマイズのためには次のよう
-な関数が用意されています。使い方は doc/op.* doc/html/op/ の中をサーチ
-してください。
+な関数が用意されています。使い方は doc/Japanese/header_write 
+doc/html/Japanese/header_rewrite/ の中をサーチしてください。
 =E
 FYI: The following functions are prepared to customize the mail header
 more precisely.
@@ -1970,10 +1972,6 @@ for articles.
    USE_VERP (default: NO)
 	Variable Envelope Return-Paths
 
-詳しくは doc/op.jp などをみてください。
-=E
-Please see doc/op.en for more details.
-
 ○ USE_MEMBER_NAME
 =E
 *  USE_MEMBER_NAME
@@ -1997,10 +1995,6 @@ $LANGUAGE asked and determined in installation.
 =E.S	Security
 .l	SECURITY_AND_FILTER
 .xref	secure-configure
-
-詳細については doc/op.jp を読んで下さい。
-=E
-Please see doc/op.jp for more details.
 
 ○ 様々なセキュリティオプションを一気に設定する
    これは make secure を走らせることと一緒です。 => .ptr{secure-configure}
@@ -2152,8 +2146,7 @@ $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 =E
 *  USE_ENCRYPTED_DISTRIBUTION (default: no)
 
-PGP encrypted ML. Need pgp configuration. Please see doc/op.{jp,en}
-for more details.
+PGP encrypted ML. Need pgp configuration. 
 
 
 
@@ -2270,9 +2263,6 @@ config.ph. It always overwrites config.ph.
 .S	cf ファイルと config.ph のフォーマット
 =E.S	the format of cf and config.ph
 
-詳細は doc/op.jp というファイルのパートIIIなどを見て下さい。
-=E
-Please see doc/op.en for the details.
 
 ○ config.ph 
 書き方は perl の構文そのものです。
@@ -2457,17 +2447,16 @@ Please check items e.g. logfiles referred in CHECK_LIST.en (package),
 http://www.fml.org/fml/CHECK_LIST-e/.
 
 .if LANG == JAPANESE
-doc/opにはトラブル事例集の章があります。
-http://www.fml.org/fml/op/index.html#trouble
+トラブル事例集
+http://www.fml.org/fml/Japanese/troubleshoot/
 .fi
 .if LANG == ENGLISH
-See chapters on troubles in doc/op.
 http://www.fml.org/fml/op-e/index.html#trouble
 .fi
 
 例えばエラーメールの中に含まれる適当な文字列を見つけます。そして、 
 
-	doc/op.jp に対して grep する
+	doc/Japanese/* に対して grep する
 
 	エディタでその文字をサーチする
 
@@ -2476,7 +2465,7 @@ http://www.fml.org/fml/op-e/index.html#trouble
 
 などをするのがまず第一歩です。
 例: エラーメールに unsafe とか permission denied とかでてきた
-	% grep -i unsafe doc/op.jp
+	% grep -i unsafe doc/Japanese/*
 
 ○ perlのエラー
 .q
@@ -2575,7 +2564,7 @@ machine since it requires a lot of attention.
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。compile そのものはその場所で make fml で実行されますが、setuid は
-よ〜く注意して設定しないといけないので doc/op.jp の "fml.c の呼び方"
+よ〜く注意して設定しないといけないので doc/Japanese/* の "fml.c の呼び方"
 あたりを参考に root の人とよく相談しながら設定して下さい。
 ＃注: 2.2 では cc のオプションに -DPOSIX がデフォルトでついています。
 
@@ -2628,7 +2617,7 @@ accept commands, you should set
 =E.C	ML via pop3
 
 sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
-そういうtrickyな話題については doc/op.jp を見てください(^^;)
+そういうtrickyな話題については doc/Japanese/ を見てください(^^;)
 =E
 If sendmail do not run on your machine, you can set ML via POP3.
 Please see doc/op.en for more details. 
@@ -2647,8 +2636,8 @@ FYI. NT Version uses this trick:)
 
 それでもどうしてもだめだとあきらめて、最後の手段「本文に情報をつけてし
 まふ」という倫理的に問題ありまくりの方法もとれなくはありません。詳しく
-は doc/op.jp (http://www.fml.org/fml/op/) をみると「メールの最後に付加
-情報をつける設定」
+は doc/Japanese/ (http://www.fml.org/fml/Jaapnese/) をみると「メールの
+最後に付加情報をつける設定」
 
 
 .C	モデレータ
@@ -2683,9 +2672,9 @@ $PERMIT_POST_FROM              = "moderator";
 
 ○ 承認の仕方
 
-$MODERATOR_FORWARD_TYPE という変数があります。デフォルトは２です。デ
-フォールトについて説明します。２以外は doc/op.jp (WWW なら
-http://www.fml.org/fml/op/) を見て下さい。
+$MODERATOR_FORWARD_TYPE という変数があります。デフォルトは２です。デフォー
+ルトについて説明します。２以外は doc/Japanese/how_to_subscribe (WWW な
+らhttp://www.fml.org/fml/Japanese/how_to_subscribe/) を見て下さい。
 
 次のようなメールがモデレータに来ます。
    
@@ -2804,10 +2793,9 @@ Append in config.ph (before the last "1;")
 	$USE_LOG_MAIL             logging all mails fml received
 .fi
 
-* PGP による暗合化ＭＬ: 配送を暗合化する(詳しくは doc/op.jp)
+* PGP による暗合化ＭＬ: 配送を暗合化する
 =E
-* PGP Encrypted ML: encrypted article is distributed. see doc/op.en
-for more details on how to set up this.
+* PGP Encrypted ML: encrypted article is distributed. 
 
 .if LANG == JAPANESE
 * フィルタリングの補足: 貼付ファイルを禁止する例

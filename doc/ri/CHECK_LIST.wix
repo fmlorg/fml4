@@ -96,12 +96,8 @@ OSによりファイル名は異なります。
 =E.S	Search keywords on problems over FML documents?
 
 配布しているパッケージの中の doc/ の下のドキュメントを開いて検索
-特に doc/op.jp (日本語)。
-=E
-Please see fils in the distribution package
 
-	doc/op.jp  (Japanese)
-	doc/op.en  (English)
+	doc/Japanese/  (Japanese)
 
 FML ドキュメント群へのサーチ
 =E

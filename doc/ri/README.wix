@@ -196,8 +196,7 @@ URL.
 [Documents] 
 
 ドキュメントは fml のソースをひろげると doc/ の下に plain test
-doc/html/ の下にその HTML版があります(doc/op のHTMLは大きいので入って
-いない、作成する必要がある)。
+doc/html/ の下にその HTML版があります。
 =E
 When you expand the fml source, you will find several documents under
 doc/ and html documents under doc/html/.
@@ -454,9 +453,7 @@ INSTALL for more details.
 .S	互換性について
 =E.S	Compatibility
 
-詳細はINSTALL と doc/op.jp の part I に「Version Up と互換性について」
-という章があるので、そちらを読んで下さい。互換性などに関して UPGRADE 
-も見て下さい。
+互換性などに関しては UPGRADE を見て下さい。
 =E
 *** translation is abbreviated ***
 
@@ -467,8 +464,8 @@ FML では config.ph という設定ファイルが振舞いを決めます。config.ph に
 
 config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 いうのはHOOKで使う関数や変数等が今でもサポートされているとは限らないか
-らです。ただ、昔できたことは必ず今の実装でもできるので doc/op.jp を参
-照してみて下さい。
+らです。ただ、昔できたことは必ず今の実装でもできるので doc/Japanese/ 
+を参照してみて下さい。
 
 .S	Changes
 
