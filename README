@@ -1,49 +1,37 @@
-		How to maintain fml CVS repository
+		How to edit fml CVS repository
 
-				Ken'ichi Fukamachi
-				<fukachan@fml.org>
+CAUTION:
+   you need "BSD make" not gmake.
 
-Caution: you need "BSD make" not gmake.
+* For developpers: 
 
------------------------------------------------------------------
-* Firstly cvs checkout !
+check out cvs tree
 
-0.	set up TCP/IP to the Internet if needed. 
+   % cvs -d cvs.fml.org:/cvsroot co fml
 
-1.	checkout fml repository
+edit it and commit it!
 
-	% setenv CVSROOT cvs.fml.org:/cvsroot
-	% cvs co fml
-	% cd fml
+* snapshot maker
 
-2.	If you are the maintainer to make 'snapshot', you need to set up 
-	distrib/history. The repository distrib/history is special. 
-	Please check out it:
+If you are the maintainer to make 'snapshot', 
 
-	% cd distrib
-	% cvs co history
+   % cvs -d cvs.fml.org:/cvsroot co fml
+   % touch CHANGES	(or get the latest CHANGES)
+   % make build
 
-where 'history' is the alias of 'release/history'. This directory is
-ignored in fml/ repository since it is maintained separetely.
+* release maker
 
-3.	run "make build", which process follows:
-
-	% touch CHANGES	(or get the latest CHANGES)
-	% make plaindoc
-	% make htmldoc
-
-which generate basic snapshot without pkgsrc and stop just before
-tar.gz.
-
-4.	O.K., now start your hack!
-
-5.	When you make distribution, you need several programs
-	such as ssh, rsync, .... Please see distrib/mk/fml.prog.mk 
-	for more details.
+   % cvs -d cvs.fml.org:/cvsroot co fml
+   % touch CHANGES	(or get the latest CHANGES)
+   % make build
+   % echo 3.0.x > conf/release
+   % echo 3.0.x > conf/release_version
+   % make release
 
 
 -----------------------------------------------------------------
-* The fml master maintainer who is responsible for e.g. snapshot generation
+* The fml master maintainer who is responsible for 
+  e.g. snapshot generation
   should check the version number
 
 0.	check conf/.
