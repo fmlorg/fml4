@@ -292,6 +292,12 @@ sub InitMakeFml
 	    $guess = "$CONFIG_DIR/../sbin/config.guess";
 	}
 
+	if (! $guess) { 
+	    print STDERR "Error: config.guess NOT FOUND!\n";
+	    print STDERR "       Please validate your source.\n\n";
+	    exit 1;
+	}
+
 	$eval = qq#\$CPU_TYPE_MANUFACTURER_OS = `sh $guess`;#;
 
 	print STDERR "$eval\n" if $debug;
