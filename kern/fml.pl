@@ -1476,6 +1476,10 @@ sub UseSeparateListP
 {
     local($x) = &AutoRegistrableP;
 
+    if ($debug_fml30 == 1) { 
+	&Log("AutoRegistrableP = $x"); $debug_fml30++;
+    }
+
     if ($x eq 'auto_subscribe' || (! $x)) {
 	1;
     }
