@@ -1,13 +1,14 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 #
 # CmpPasswdInFile($file, $from, $passwd);
@@ -200,7 +201,7 @@ sub ModeratedDeliveryTypeII
     $h = $e{'Header'};
     $h =~ s/^From .*\n//;
 
-    # open
+    # save submitted article in the mail queue
     open(APP, "> $f") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
     print APP $h;
@@ -209,6 +210,7 @@ sub ModeratedDeliveryTypeII
 
     require 'libsmtpsubr.pl';
 
+    # make a temporary queue to be forwarded to moderators
     open(APP, "> $f_info") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
     print APP "\n$info\n";
