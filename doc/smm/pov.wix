@@ -1129,6 +1129,18 @@ SecureP は以下のように
    ＃最後のスペース等がありうるのなら、それらも考慮する必要がある
 
 
+.S	投稿メールのサイズの制限
+
+あまり大きいメールを送られてもサーバもメンバーの端末でも負荷が高くなる
+だけです。ＭＬサーバーが受けとる時に切り捨てます。コマンド、投稿を問わ
+ずチェックされます。デフォールトは制限なしで、サイズは byte 単位で
+
+		$INCOMING_MAIL_SIZE_LIMIT
+.k		$INCOMING_MAIL_SIZE_LIMIT
+
+で指定します。なお0は無限大を意味します(デフォールト)。
+
+
 .S	許されるコマンドのシンタックス
 
 Quoted from 4.4BSD:/usr/share/man/cat1/sh.0 
@@ -1159,6 +1171,7 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
        character listed (after the ``!'', if any).  To include a
        minus sign, make it the first or last character listed
 .~q
+
 
 
 .S	DNS Spoofing
