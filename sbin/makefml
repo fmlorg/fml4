@@ -2276,12 +2276,12 @@ sub TrySmtpConnect
     local($host) = @_;
     local($result);
 
-    if ((! $exist_socket_ph) && $COMPAT_SOLARIS2) {
+    if ($OS_TYPE eq 'SOLARIS2') {
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
 	eval $eval;
     }
-    elsif (! $exist_socket_ph) { # 4.4BSD (and 4.x BSD's)
+    else { # 4.4BSD (and 4.x BSD's)
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
 	eval $eval;
