@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: gen_summary.pl,v 2.7 2001/11/28 14:13:42 fukachan Exp $
+# $FML: gen_summary.pl,v 2.8 2001/12/19 12:25:17 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -17,7 +17,7 @@ $rcsid   = q$Id$;
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vVTHM:L:o:m:B");
+&Getopts("d:f:ht:I:D:vVTHM:L:o:mB");
 
 eval(' chop ($PWD = `pwd`); ');
 $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
