@@ -108,7 +108,6 @@ bin/translate.pl
 bin/resend.pl
 
 SBIN_SOURCES:
-sbin/localtest.pl
 sbin/install.sh
 sbin/makefml
 sbin/config.guess

@@ -220,36 +220,6 @@ in fml-support ML's Count: 02393
 	-I lib*.pl locations (required)
 	-m MIME decoding
 
-.S	ローカルテスト (sbin/localtest.pl)
-=E.S	localtest (sbin/localtest.pl)
-.l	sbin/localtest.pl
-.k	localtest.pl
-
-メッセージIDチェックをチェックしている都合上、これを使わずにローカルテ
-ストをするとメールがループしているとみなしてしまいます。そのためこのよ
-うな wrapper が必要になります。あるファイル TEXT を入力するメールの見
-本として使いたい時
-=E
-To inject TEXT as mail input into fml.pl, you cannot test in the
-following:
-
-	cat TEXT | perl fml.pl $PWD 
-
-のようにはできません。Message-Id を一通ごとに変えて突っ込むために 
-localtest.pl を wrapper として利用できます。
-=E
-since FML checks Message-Id duplication. Hence you should do
-
-	bin/localtest.pl -f < TEXT | perl fml.pl $PWD 
-
-のようにしないとテストできません。
-
-でも "makefml test <ML>" が同じことをしてくれます。こっちの方が便利だ
-と思う。
-=E
-"makefml test <ML>" is the same function and more useful I believe.
-
-
 .S	bin/msend_master.sh
 
 example of control over multiple msending processes.

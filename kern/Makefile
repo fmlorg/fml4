@@ -32,32 +32,6 @@ install-withcgi:
 dns_check:
 	@ perl bin/dns_check.pl
 
-localtest: 
-	@ echo " "
-	@ echo "LOCALLY CLOSED TEST in DEBUG MODE(-d option)"
-	@ echo "perl sbin/localtest.pl | perl $(PWD)src/fml.pl -d $(PWD) "
-	@ echo " "
-	@ echo IF YOU WOULD LIKE TO TEST THE DELIVERY WITHOUT Sendmail
-	@ echo JUST TYPE
-	@ echo "perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -udebug $(PWD)"
-	@ echo " "
-	@ echo " "
-	@ echo "O.K.?(wait 3 sec.)"; sleep 3;
-	@ echo INPUT:
-	@ echo "-----------------------------------"
-	@ perl sbin/localtest.pl 
-	@ echo "==================================="
-	@ echo " "
-	@ echo " "
-	@ echo " "
-	@ echo "This Header O.K.?(wait 3 sec.)"; sleep 3;
-	@ echo OUTPUT: debug info from src/fml.pl 
-	@ echo "   *** DEBUG MODE! ***  "
-	@ echo "-----------------------------------"
-	perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -d $(PWD) 
-	@ echo "   DEBUG MODE!   "
-	@ echo "-----------------------------------"
-
 doc: 	html_doc
 
 html_doc:
