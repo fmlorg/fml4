@@ -445,7 +445,7 @@ sub DoFmlServProc
 		next;
 	    }
 
-	    if (/^subscribe\s*(.*)/i){ 
+	    if (/^(subscribe|confirm)\s*(.*)/i){ 
 		$addr = $1; 
 
 		if ($ML_MEMBER_CHECK) {
@@ -455,8 +455,12 @@ sub DoFmlServProc
 		else {
 		    &use('amctl');
 		    $addr = $addr || $From_address;
-		    &Mesg(*e, "   Auto-Register-Routine called for [$addr]");
-		    &AutoRegist(*e, "subscribe $addr");
+		    &Mesg(*e, "\n");
+
+		    $_ =~ s/$ml//;
+		    $e{'tmp:ml'} = $ml;	# for confirmation mode;
+		    &AutoRegist(*e, $_);
+		    undef $e{'tmp:ml'};
 		}
 
 		next;
