@@ -306,4 +306,5 @@ sub GenKey
     $CurrentTime.int(rand($seed + $key));
 }
 
+
 1;
