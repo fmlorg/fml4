@@ -10,10 +10,9 @@
 
 .S	Introduction
 
-Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
-方で実装されていましたが、正式なライブラリとして使えるようにしました。
-別に中身は変わっていません。単にHOOKを書かなくても良くなったということ
-だけです。
+Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK を使う方法
+で実装されていましたが、現在では正式な機能として含まれているので
+USE_EXPIRE 変数で機能の off/on ができます。
 =E
 Expire is to remove old articles in $DIR/spool. If you set $USE_EXPIRE
 in config.ph, FML checks the spool periodically and remove old ones.
@@ -40,20 +39,22 @@ Running archive and expire BY HAND must be safe. FML can expire or
 archive articles automatically.  The variables are $USE_EXPIRE
 (expire) and $USE_ARCHIVE (archive).
 
-expire と アーカイブ は相反する概念です。２つを同時におこ名和させる場
-合はパラメータの選び方に要注意です。デフォールトはそれを考慮した数値に
-なっているため、少しDISK効率が悪いかもしれません。
+expire と アーカイブ は相反する概念です。２つの機能を同時に使う場合、
+パラメータの選び方に要注意です。デフォルトでは、同時に使うことを考慮し
+た数値になっているため、ディスクの使用効率が少し悪いかもしれません。
 =E
 Notions of $USE_EXPIRE (expire) and $USE_ARCHIVE (archive) conflicts
 each other.  If you set both variables, pay attention on the values.
 Default parameters can be considered for this possibility.
 
-「絶対に記事はうしなわれてはいけない」という強い要求がある場合に 
+「絶対に記事は失われてはいけない」という強い要求がある場合に 
 「expire しつつアーカイブも作ることを全自動で行なう」ことは推奨できま
-せん。というのはだれかがOSのtarやgzipを間違えて入れ換えたとかいう場合
-を想定してみると危険性がわかります。expire はそういうものに依存してい
-ないの普通に動いて記事を消していきますが、アーカイブは作成されなくなっ
-てしまいます。よって
+せん。
+
+これは、誰かが OS の tar や gzip を間違えて入れ換えたとかいう場合を想
+定してみれば、その危険性がわかります。expire はそういうコマンドに依存
+していないので、期待通りに動いて記事を消していきますが、アーカイブは作
+成に失敗することがあります。よって
 	『自分の設定は万全、大丈夫』
 	『うちのOSはそんなことはしない、大丈夫』
 	『まぁこのＭＬの記事はちょっとくらい失われてもOK』
