@@ -18,22 +18,22 @@ _ML_ mailing list configuration
 <A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
 
 <P>
-_ML_ メーリングリストの設定
+_ML_ メーリングリストの設定
 </CENTER>
 </H2>
 
 <!-- __START__ -->
-メンバーの登録 (_ML_ ＭＬ)
+メンバーの登録 (_ML_ ＭＬ)
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 <INPUT TYPE=hidden NAME=PROC VALUE=ADD>
 
-Email アドレス:<INPUT NAME=MAIL_ADDR_DEF SIZE=30>
+Email アドレス:<INPUT NAME=MAIL_ADDR_DEF SIZE=30>
 
 <BR>
-	現在のメンバーの確認:
+	現在のメンバーの確認:
 	<SELECT NAME=MAIL_ADDR>
 	__EXPAND_OPTION_MEMBER_LIST__
 	</SELECT>
@@ -42,11 +42,5 @@ Email アドレス:<INPUT NAME=MAIL_ADDR_DEF SIZE=30>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
-<PRE>
-Copyright (C) 1993-2000 Ken'ichi Fukamachi
-         All rights reserved. 
-
-$Id$
-</PRE>
 </BODY>
 </HTML>

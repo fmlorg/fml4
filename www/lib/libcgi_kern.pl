@@ -502,7 +502,7 @@ sub ShowAminMenu
 	}
     }
     else {
-	&Error("insecure xxx.cgi call");
+	&ERROR("insecure xxx.cgi call");
     }
 }
 

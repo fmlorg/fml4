@@ -14,50 +14,50 @@
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <PRE>
-このページはfmlの管理下にある全ＭＬの設定を更新/変更する画面です。
-基本的にサーバにはいって makefml コマンドを使える管理者と同じ権限です。
-＃(makefmlにはあるけどCGIでは用意されていない機能もあります)
+このページはfmlの管理下にある全ＭＬの設定を更新/変更する画面です。
+基本的にサーバにはいって makefml コマンドを使える管理者と同じ権限です。
+＃(makefmlにはあるけどCGIでは用意されていない機能もあります)
 </PRE>
 
 <P>
 <UL>
-	<LI>基本設定
+	<LI>基本設定
 	<UL>
-		<LI><A HREF="#newml">新規ＭＬの作成</A>
-		<LI><A HREF="#add">ＭＬメンバーの登録</A>
-		<LI><A HREF="#bye">ＭＬメンバーの削除</A>
-		<LI><A HREF="#admin.add">ＭＬ管理者の登録</A>
-		<LI><A HREF="#admin.bye">ＭＬ管理者の削除</A>
-		<LI><A HREF="#mlpassword">ＭＬ管理者パスワードの設定</A>
-		<LI><A HREF="#config">ＭＬの詳細設定</A>
-		<LI><A HREF="#destructml">ＭＬの削除</A>
+		<LI><A HREF="#newml">新規ＭＬの作成</A>
+		<LI><A HREF="#add">ＭＬメンバーの登録</A>
+		<LI><A HREF="#bye">ＭＬメンバーの削除</A>
+		<LI><A HREF="#admin.add">ＭＬ管理者の登録</A>
+		<LI><A HREF="#admin.bye">ＭＬ管理者の削除</A>
+		<LI><A HREF="#mlpassword">ＭＬ管理者パスワードの設定</A>
+		<LI><A HREF="#config">ＭＬの詳細設定</A>
+		<LI><A HREF="#destructml">ＭＬの削除</A>
 	</UL>
 
-	<LI>管理メニュー
+	<LI>管理メニュー
 	<UL>
 		<LI>
-		<A HREF="#export">既存ＭＬをCGI操作可能にする</A>
+		<A HREF="#export">既存ＭＬをCGI操作可能にする</A>
 	</UL>
 
-	<LI>サーバの設定
+	<LI>サーバの設定
 	<UL>
-		<LI><A HREF="#cgiadmin">CGIを操作可能なユーザの登録</A>
-		<LI><A HREF="#server_config">MTAの設定(初回の確認必須)</A>
+		<LI><A HREF="#cgiadmin">CGIを操作可能なユーザの登録</A>
+		<LI><A HREF="#server_config">MTAの設定(初回の確認必須)</A>
 	</UL>
 </UL>
 
 
 <HR>
-<CENTER>基本設定</CENTER>
+<CENTER>基本設定</CENTER>
 <UL>
    <A NAME=newml>
-   <LI>新規ＭＬの作成
+   <LI>新規ＭＬの作成
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-	メーリングリスト名:<INPUT NAME=ML SIZE=15>
+	メーリングリスト名:<INPUT NAME=ML SIZE=15>
 
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Create>
@@ -66,16 +66,16 @@
 
    <A NAME=add>
    <A NAME=bye>
-   <LI>ＭＬメンバーの登録・削除
+   <LI>ＭＬメンバーの登録・削除
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>メンバー登録
+	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>メンバー登録
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="bye">メンバー削除
+	<INPUT NAME=PROC TYPE="radio" VALUE="bye">メンバー削除
 	<BR>
-	ＭＬの選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -84,16 +84,16 @@
 
    <A NAME=admin.add>
    <A NAME=admin.bye>
-   <LI>ＭＬ管理者の登録・削除
+   <LI>ＭＬ管理者の登録・削除
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked>管理者の登録
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked>管理者の登録
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">管理者の削除
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">管理者の削除
 	<BR>
-	ＭＬの選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -101,21 +101,21 @@
 	</FORM>
 
     <A NAME=mlpassword>
-	<LI>管理者パスワードの設定
-	これは
+	<LI>管理者パスワードの設定
+	これは
 	<BR>
-	admin と approve コマンドのパスワード
+	admin と approve コマンドのパスワード
 	<BR>
-	およびGUIのメニューに入る
+	およびGUIのメニューに入る
 	<BR>
-	時に使うパスワードです。
+	時に使うパスワードです。
 	<BR>
-	簡単化のためGUIメニューではこの３つに同じパスワードを設定します。
+	簡単化のためGUIメニューではこの３つに同じパスワードを設定します。
 	<BR>
-	CUIの makefml htpasswd を用いることでコマンド用とCGI用と
-	別々のパスワードをつけることが可能です。
+	CUIの makefml htpasswd を用いることでコマンド用とCGI用と
+	別々のパスワードをつけることが可能です。
 	<BR>
-	注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
+	注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
 	<BR>
 
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
@@ -123,7 +123,7 @@
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT NAME=PROC TYPE="hidden" VALUE="mladminpasswd">
 	<BR>
-	ＭＬの選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -132,14 +132,14 @@
 
 
    <A NAME=config>
-   <LI>ＭＬの詳細設定 (makefml config)
+   <LI>ＭＬの詳細設定 (makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-	ＭＬの選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -147,17 +147,17 @@
 	</FORM>
 
    <A NAME=destructml>
-   <LI>ＭＬの消去
+   <LI>ＭＬの消去
 	<BR>	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
 	
 	<TR>
-		<TD ALIGN=right> ＭＬ:
+		<TD ALIGN=right> ＭＬ:
 		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>	ＭＬの選択: 
+			<TD ALIGN=left>	ＭＬの選択: 
 			<TD ALIGN=right>
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
@@ -174,11 +174,11 @@
 
 <!-- ------------------------------------------------------------------>
 <HR>	
-<CENTER>管理メニュー</CENTER>
+<CENTER>管理メニュー</CENTER>
 <UL>
 
    <A NAME=export>
-   <LI>既存メーリングリストをWWWでいじれるように設定する
+   <LI>既存メーリングリストをWWWでいじれるように設定する
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -186,10 +186,10 @@
 
 	<TABLE>
 		<TR>
-			<TD ALIGN=right> メーリングリスト名:
+			<TD ALIGN=right> メーリングリスト名:
 			<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
 				<TABLE>
-				<TD ALIGN=left>既存リストからの選択:
+				<TD ALIGN=left>既存リストからの選択:
 				<TD ALIGN=right>
 				<SELECT NAME=ML>
 				__EXPAND_OPTION_ML__
@@ -207,11 +207,11 @@
 
    <A NAME=cgiadmin>
    <LI>
-	この画面を操作可能な(CGI)管理者アカウントのパスワード設定
+	この画面を操作可能な(CGI)管理者アカウントのパスワード設定
 	<BR>
-	追加: アカウントとパスワードの組を入力すれば追加になります。
+	追加: アカウントとパスワードの組を入力すれば追加になります。
 	<BR>
-	削除: 消したいアカウントを入力し、削除モードにしてGOです。
+	削除: 消したいアカウントを入力し、削除モードにしてGOです。
 	<BR>
 	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
@@ -221,10 +221,10 @@
 	
 	<TABLE>
 		<TR>
-			<TD ALIGN=right> Email アドレス ないしアカウント名:
+			<TD ALIGN=right> Email アドレス ないしアカウント名:
 			<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 			<TABLE>
-				<TD ALIGN=left>既存リストからの選択:
+				<TD ALIGN=left>既存リストからの選択:
 				<TD ALIGN=right>
 				<SELECT NAME=CGI_ADMIN_USER>
 				__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
@@ -233,16 +233,16 @@
 	
 		<TR>
 			<UL>
-			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
-			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
+			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
+			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
 			</UL>
 	
 		<TR>
-			<TD ALIGN=right> パスワード:
+			<TD ALIGN=right> パスワード:
 			<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 	
 		<TR>
-			<TD ALIGN=right> 確認のため同じパスワード:
+			<TD ALIGN=right> 確認のため同じパスワード:
 			<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>
 	_____________________________
@@ -256,10 +256,10 @@
 
 <!-- ------------------------------------------------------------------>
 <HR>
-<CENTER>サーバの設定</CENTER>
+<CENTER>サーバの設定</CENTER>
 <UL>
    <A NAME=server_config>
-   <LI>MTAの設定
+   <LI>MTAの設定
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -290,15 +290,15 @@
 	
 	<TABLE>
 		<TR>
-			<TD ALIGN=right> 現在のaliasesの更新方法:
+			<TD ALIGN=right> 現在のaliasesの更新方法:
 			<TD ALIGN=left> _HOW_TO_UPDATE_ALIAS_
 		<TR>
-			<TD ALIGN=right> 更新方法:
+			<TD ALIGN=right> 更新方法:
 			<TD ALIGN=left>
 			<INPUT NAME=HOW_TO_UPDATE_ALIAS SIZE=80>
 		<TR>
 			<TABLE>
-				<TD ALIGN=left> いくつかの例:
+				<TD ALIGN=left> いくつかの例:
 				<TD ALIGN=right>
 				<SELECT NAME=HOW_TO_UPDATE_ALIAS>
 				__EXPAND_HOW_TO_UPDATE_ALIASES__
@@ -317,7 +317,7 @@
 	<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
 	<INPUT TYPE=hidden NAME=ML VALUE=etc>
 	
-	aliasesを更新する: 
+	aliasesを更新する: 
 	<INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
 	</FORM>
 	
@@ -327,7 +327,6 @@
 <PRE>
 Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
-
 $Id$
 </PRE>
 </BODY>

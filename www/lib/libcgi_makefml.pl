@@ -138,6 +138,7 @@ sub Control
 	close(CTL);
 
 	&OUTPUT_FILE($tmpbuf);
+	$ControlThrough = 1;
     }
     else {
 	&ERROR("cannot execute makefml");
@@ -417,6 +418,9 @@ sub Command
 	$PROC =~ s/_//g;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
+    elsif ($PROC eq 'mladmincgi') {
+	&Control($ML, 'mladmin.cgi');
+    }
     elsif ($PROC eq 'newml') {
 	&P("</PRE>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
@@ -426,16 +430,12 @@ sub Command
 	&Control($ML, $PROC);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
     }
-    elsif ($PROC eq 'mladmincgi') {
-	&Control($ML, 'mladmin.cgi');
-    }
-    elsif ($PROC eq 'destructml') {
-	&P("</PRE>");
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
-	&P("<HR>");
+    elsif ($PROC eq 'destructml' || $PROC eq 'rmml') {
 	&P("<PRE>");
-
 	&Control($ML, $PROC);
+	&P("</PRE>");
+	&P("<HR>");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/rmml.html", 1);
     }
     elsif ($PROC eq 'config') {
 	$PROC = 'html_config';
@@ -517,6 +517,11 @@ sub Finish
 
     &P("</PRE>");
     # &ShowReferer;
+
+    if ($ControlThrough) {	# 
+	#;&P("<META HTTP-EQUIV=refresh CONTENT=\"2; URL=menubar.cgi\">");
+    }
+
     &P("</BODY>");
     &P("</HTML>");
 }
