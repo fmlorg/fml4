@@ -67,10 +67,22 @@ sub SocketInit
 {
     local($eval, $exist_socket_ph);
 
-    ### XXX: Set up @RcptLists ###
+    ## set up @RcptLists which has lists of recipients.
+    ## Its purpose is to split lists to sub-organization but
+    ## deliver to all of them. For example each admin maintains
+    ## each labolatory. 
+    ## @ACTIVE_LIST = (arrays of each laboratory actives).
+    ## It is of no use if @ACTIVE_LIST == ($ACTIVE_LIST)
+    ## which is true in almost cases.
+    # We should sort here? But the order may be of mean ...
     @RcptLists = @ACTIVE_LIST;
     push(@RcptLists, $ACTIVE_LIST) 
 	unless grep(/$ACTIVE_LIST/, @RcptLists);
+
+    ## initialize "Recipient Lists Control Block"
+    ## which saves the read pointer on the file.
+    ## e.g. $RcptListsCB{"${file}:ptr"} => 999; (line number 999)
+    undef %RcptListsCB;
 
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
