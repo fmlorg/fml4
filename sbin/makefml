@@ -1319,15 +1319,15 @@ sub ExecCmd
     local($_) = @_;
     local(@argv, $fp, $ml);
 
-    # XXX 3.0B-TODO: defined to remove dummy "sub DEFINE_*" ...;
-    require 'libloadconfig.pl';
-    &LoadDummyMacros;
-
     # extension: permit ML{::,->}command syntax
     s/^(\S+)::(\S+)/$2 $1/;	# ML::command
     s/^(\S+)\->(\S+)/$2 $1/;	# ML->command
 
     @argv = split(/\s+/, $_);
+
+    # XXX 3.0B-TODO: defined to remove dummy "sub DEFINE_*" ...;
+    require 'libloadconfig.pl';
+    &LoadDummyMacros;
 
     &GetCurConfig;
     &ResetVariables;
