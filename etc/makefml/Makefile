@@ -1,8 +1,8 @@
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -26,6 +26,8 @@ all:
 config.ph: cf
 	@ eval 'cp -p config.ph config.ph.old >/dev/null 2>&1'
 	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph
+	@ touch cf
+	@ perl -c config.ph
 
 fml: fml.c config.h
 	$(CC) $(CFLAGS) -o fml fml.c
@@ -36,9 +38,9 @@ fml: fml.c config.h
 spool2html:
 	perl _EXEC_DIR_/bin/spool2html.pl \
 		-I _EXEC_DIR_ \
-		-d $(PWD)/htdocs \
-		-f $(PWD)/config.ph \
-		$(PWD)/spool
+		-d htdocs \
+		-f config.ph \
+		spool
 
 config:
 	perl _EXEC_DIR_/makefml config _ML_

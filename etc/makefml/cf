@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -10,7 +10,8 @@
 # $Id$
 #
 
-CFVersion			3.1
+CFVersion			3.2
+LANGUAGE			_LANGUAGE_
 
 ### DNS
 DOMAINNAME			_DOMAIN_
@@ -39,6 +40,15 @@ PGP_PATH			$DIR/etc/pgp
 
 ### Automatic Html Generation
 AUTO_HTML_GEN
+HTML_THREAD_REF_TYPE		default
+HTML_STYLESHEET_BASENAME
+
+### Security
+REJECT_ADDR			root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc|\S+\-help|\S+\-subscribe|\S+\-unsubscribe
+ADDR_CHECK_MAX			3
+INCOMING_MAIL_SIZE_LIMIT	
+NOTIFY_MAIL_SIZE_OVERFLOW	1
+
 
 ### Header
 ML_FN				(_ML_ ML)
@@ -47,16 +57,20 @@ XMLCOUNT			X-Mail-Count
 
 BRACKET				_ML_
 
-SUBJECT_TAG_TYPE
-
 REWRITE_TO			0
+SUBJECT_TAG_TYPE
+DATE_TYPE			original-date
+PASS_ALL_FIELDS_IN_HEADER	1
+SKIP_FIELDS			Received|Return-Receipt-To
+
 
 ### lock algorithm
 USE_FLOCK			1
 
 ### Misc
-USE_MIME
+USE_MIME			1
 MAIL_LIST_ACCEPT_COMMAND	0
+AMLIST_NEWSYSLOG_LIMIT		150K
 
 ### Architecture
 CPU_TYPE_MANUFACTURER_OS	_CPU_TYPE_MANUFACTURER_OS_
@@ -64,3 +78,4 @@ STRUCT_SOCKADDR			_STRUCT_SOCKADDR_
 
 
 ### Others
+

@@ -30,14 +30,14 @@ $PWD =~ s#\\#/#g;
 $EXEC_DIR   = shift @ARGV;
 $EXEC_DIR   =~ s#/#\\#g;
 
-$ARCH_DIR   = "$EXEC_DIR\\arch";
+$SYS_DIR    = "$EXEC_DIR\\sys";
 $DOC_DIR    = "$EXEC_DIR\\doc";
 $DRAFTS_DIR = "$EXEC_DIR\\drafts";
 
--d $EXEC_DIR   || mkdir($EXEC_DIR, 0755);
--d $ARCH_DIR   || mkdir($ARCH_DIR, 0755);
--d $DOC_DIR    || mkdir($DOC_DIR, 0755);
--d $DRAFTS_DIR || mkdir($DRAFTS_DIR, 0755);
+-d $EXEC_DIR   || &MkDirHier($EXEC_DIR, 0755);
+-d $SYS_DIR    || &MkDirHier($SYS_DIR, 0755);
+-d $DOC_DIR    || &MkDirHier($DOC_DIR, 0755);
+-d $DRAFTS_DIR || &MkDirHier($DRAFTS_DIR, 0755);
 
 for (@DIRS) {
     print  "Installing $dir ...\n";
@@ -47,21 +47,42 @@ for (@DIRS) {
 print "Installing perl scripts (*.pl) files ...\n";
 
 # since rm -fr ...
--d $DOC_DIR    || mkdir($DOC_DIR, 0755);
--d $DRAFTS_DIR || mkdir($DRAFTS_DIR, 0755);
+-d $DOC_DIR    || &MkDirHier($DOC_DIR, 0755);
+-d $DRAFTS_DIR || &MkDirHier($DRAFTS_DIR, 0755);
 
 &RecursiveCopy("src", ".");
 print "\n";
 system "copy src\\* $EXEC_DIR";
--d "$ARCH_DIR\\WINDOWS_NT4" || mkdir("$ARCH_DIR\\WINDOWS_NT4", 0755);
-system "copy src\\arch\\*\\WINDOWS_NT4\\*.pl $ARCH_DIR\\WINDOWS_NT4";
+-d "$SYS_DIR\\WINDOWS_NT4" || &MkDirHier("$SYS_DIR\\WINDOWS_NT4", 0755);
+system "copy sys\\WINDOWS_NT4\\* $SYS_DIR\\WINDOWS_NT4";
 
 system "copy drafts\\* $DRAFTS_DIR";
-system "copy sys\\arch\\WINDOWS_NT4\\* $EXEC_DIR";
+system "copy sys\\WINDOWS_NT4\\* $EXEC_DIR";
 system "copy sbin\\makefml $EXEC_DIR\\makefml";
 
-&Conv("sys\\arch\\WINDOWS_NT4\\ntfml.cmd", "$EXEC_DIR\\ntfml.cmd");
+&Conv("sys\\WINDOWS_NT4\\ntfml.cmd", "$EXEC_DIR\\ntfml.cmd");
 
+print "Good. Install is done.\n\n";
+
+print "--- Please ignore after this (EVEN IF THIS INSTALLER FAILED).\n";
+print "--- New version (test phase)\n";
+
+# get drive?
+# if we not get it, it must be needed (really ???)
+if ($EXEC_DIR =~ /^(\w:)/) {
+    $DRIVE = $1;
+}
+else {
+    $DRIVE = $NULL;
+}
+
+
+$NEW_DIR = "$SYS_DIR\\WINDOWS_NT4\\NEW";
+
+-d $NEW_DIR || &MkDirHier($NEW_DIR, 0755);
+&Conv("sys\\WINDOWS_NT4\\new\\ntfml.cmd", "$NEW_DIR\\ntfml.cmd");
+&Conv("sys\\WINDOWS_NT4\\new\\ntfmlrm.cmd", "$NEW_DIR\\ntfmlrm.cmd");
+&Conv("sys\\WINDOWS_NT4\\new\\autoexnt.bat", "$NEW_DIR\\autoexnt.bat");
 
 exit 0;
 
@@ -73,7 +94,7 @@ sub RecursiveCopy
     # fix
     $target = $dir unless $target;
 
-    -d "$EXEC_DIR/$target" || mkdir("$EXEC_DIR/$target", 0755);
+    -d "$EXEC_DIR/$target" || &MkDirHier("$EXEC_DIR/$target", 0755);
 
     if (opendir(DIRD, $dir)) {
 	for (readdir(DIRD)) {
@@ -82,7 +103,7 @@ sub RecursiveCopy
 	    if (-d "$dir/$_") {
 		# print STDERR "directory $dir/$_\n";
 
-		-d "$EXEC_DIR/$target/$_" || mkdir("$EXEC_DIR/$target/$_", 0755);
+		-d "$EXEC_DIR/$target/$_" || &MkDirHier("$EXEC_DIR/$target/$_", 0755);
 		&RecursiveCopy("$dir\\$_", "$target\\$_");
 	    }
 	    elsif (-f "$dir/$_") {
@@ -95,10 +116,32 @@ sub RecursiveCopy
 	closedir(DIRD);
 
 	$dir =~ s#/#\\#g;
-	print STDERR "copy $dir\\* $EXEC_DIR\\$target\n";
+
+	print STDERR "del $dir\\*.bak\n";
 	system "del $dir\\*.bak";
+
+	print STDERR "copy $dir\\* $EXEC_DIR\\$target\n";
 	system "copy $dir\\* $EXEC_DIR\\$target";
     }
+}
+
+
+sub MkDirHier
+{
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
+
+    while ($_[0] =~ m:$pat:g) {
+	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
+
+	if ($` ne "" && !-d $`) {
+	    mkdir($`, $_[1] || 0777) || do {
+		&Log("cannot mkdir $`: $!"); 
+		return 0;
+	    };
+	}
+    }
+
+    1;
 }
 
 
@@ -151,6 +194,9 @@ sub Conv
 	s/XXUID/$uid/g;
 	s/XXGID/$gid/g;
 
+	# NT version only
+	s/_DRIVE_/$DRIVE/g;
+
 	print CF $_;
     }
 
@@ -182,6 +228,12 @@ sub wanted
 	print("$name ");
 	unlink $name;
     };
+}
+
+
+sub Log
+{
+    print STDERR "Log> @_\n";
 }
 
 

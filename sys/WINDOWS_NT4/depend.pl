@@ -7,6 +7,8 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
+### Internal Flags 
+$UNISTD = 0;
 
 # Architecture Dependence;
 $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
@@ -15,6 +17,14 @@ $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
 # set fop (File OPeration) default "MIME/multipart" :-)
 $MGET_MODE_DEFAULT  = $MGET_MODE_DEFAULT  || "mp";
 $MSEND_MODE_DEFAULT = $MSEND_MODE_DEFAULT || "mp";
+
+# ensurance :)
+push(@HOSTS, $HOST);
+push(@HOSTS, $FQDN);
+push(@HOSTS, $FQDN);
+
+# lock
+$FlockFile  = ">> $DIR/lockfile";
 
 
 # export
@@ -39,5 +49,10 @@ sub Rename
     rename($from, $to);
 }
 
+
+sub NT4Crypt
+{
+    return $_[0];
+}
 
 1;

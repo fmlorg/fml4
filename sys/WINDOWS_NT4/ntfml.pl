@@ -34,6 +34,7 @@ for (;;) {
 
 	&Log("start $ml pop session") if $debug;
 
+	sleep(1);
 	$p = &ArrangeProc($ml, " -mode POP_ONLY");
 	system $p;
     }
@@ -45,6 +46,7 @@ for (;;) {
 
 	&Log("start $ml exec session") if $debug;
 
+	sleep(1);
 	$p = &ArrangeProc($ml, " -mode EXEC_ONLY_ONCE");
 	system $p;
     }
@@ -66,6 +68,7 @@ for (;;) {
 	    
 	    &Log("start $ml msend session") if $debug;
 
+	    sleep(1);
 	    $p = &ArrangeMSendProc($ml);
 	    system $p;
 	}
@@ -83,10 +86,23 @@ for (;;) {
     if ($opt_o eq 'watch_dog') {
 	print STDERR "msend_watch_dog: $msend_watch_dog\n";
     }
-}
+
+    # fml-support: 04286 <ssk@pfu.co.jp>
+    if (-f "$ML_DIR/exit.sts") {
+	exit 1;
+    }
+
+    # if loop cost time over $unit, sleep 3 anyway
+    if ($loop_cost >= $LOOP_UNIT) {
+	sleep(3);
+    }
+    else {
+	sleep($LOOP_UNIT - $loop_cost);
+    }
+} # infinite loop;
 
 
-exit 0;
+exit 0; # not reached here
 
 
 sub GetConf
@@ -154,10 +170,11 @@ sub SetMSendWatchDog
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("do:");
+    &Getopts("do:xu:");
 
     $debug       = $opt_d;
     $debug_msend = $opt_o eq 'debug_msend' ? 1 : 0;
+    $LOOP_UNIT   = $opt_u || 60*3;
 
     ### COMPAT CODE ###
     if ($ENV{'OS'} =~ /Windows_NT/) {
@@ -273,9 +290,9 @@ sub ArrangeProc
     $qd = "$ML_DIR/$m/var/mq.$ml";
 
     # make queue directory
-    -d $qd || mkdir($qd, 0755);
+    -d $qd || &MkDirHier($qd);
 
-    $p  = "perl $Wrapper -p $PerlProgram ";
+    $p  = "$PerlProgram $Wrapper -p $PerlProgram ";
     $p .= "$PopFmlProg ";
     $p .= "-d " if $debug;
     $p .= "$ML_DIR/popfml $EXEC_DIR ";
@@ -303,7 +320,7 @@ sub ArrangeMSendProc
     local($ml) = @_;
     local($p);
 
-    $p  = "perl $Wrapper -p $PerlProgram ";
+    $p  = "$PerlProgram $Wrapper -p $PerlProgram ";
     $p .= "$EXEC_DIR/msend.pl ";
     $p .= "$ML_DIR/$ml $EXEC_DIR ";
     $p .= "-d " if $debug;
@@ -349,6 +366,25 @@ sub Log
 {
     &GetTime;
     print STDERR ">>> $Now @_\n";
+}
+
+
+sub MkDirHier
+{
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
+
+    while ($_[0] =~ m:$pat:g) {
+	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
+
+	if ($` ne "" && !-d $`) {
+	    mkdir($`, $_[1] || 0777) || do {
+		&Log("cannot mkdir $`: $!"); 
+		return 0;
+	    };
+	}
+    }
+
+    1;
 }
 
 

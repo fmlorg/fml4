@@ -19,13 +19,13 @@ main()
 
 #ifdef POSIX			/* 4.4BSD */
 				/* must be done under setuid-as-root! */
-  setuid(XXUID);
   setgid(XXGID);
+  setuid(XXUID);
 
 #else				/* 4.3BSD */
 
-  setuid(geteuid());
   setgid(getgid());
+  setuid(geteuid());
 
 #endif
 
