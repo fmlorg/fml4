@@ -130,7 +130,7 @@ sub Init
     $password = $mib->{'password'} || $NULL;
     $dsn      = "DBI:$driver:$database:$host";
 
-    $dbh = DBI->connect($dsn, 'fukachan', 'uja');
+    $dbh = DBI->connect($dsn, $user, $password);
     if (! $dbh) { $mib->{'error'} = $DBI::errstr;}
 }
 
