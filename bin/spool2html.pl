@@ -210,13 +210,13 @@ sub _speculate_unixtime
     use FileHandle;
     eval q{
 	use Mail::Header;
-	use FML::Date;
+	use Mail::Message::Date;
     };
 
     my $fh    = new FileHandle $f;
     my $head  = new Mail::Header $fh;
     my $date  = $head->get('date');
-    my $utime = FML::Date::date_to_unixtime($date);
+    my $utime = Mail::Message::Date::date_to_unixtime($date);
 
     return ($date, $utime);
 }
