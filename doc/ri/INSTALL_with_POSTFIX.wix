@@ -3,7 +3,6 @@
 =E
 		fml and postfix as a MTA
 
-
 				Ken'ichi Fukamachi
 
 .~HTML_PRE
@@ -18,15 +17,22 @@ Postfix (βリリース) は昔 vmailer と呼ばれていました。β公開時に
 copyright からみで、postfix に改名されました。IBM Secure Mailer とも呼
 ばれます。作者は tcp_wraper で有名な Wietse Venema です。
 
+
 ソースの入手、インストール方法や詳細は以下のURLを参照してください。
 =E
 Please see the following URL for more information:
 
 .url	http://www.postfix.org/
 
-Sendmailを置き換えるためといっているように互換性はかなりあるので
-fml は sendmail の時と同様に設定します(詳しくは INSTALL ファイル)。
-しかし postfix 側の設定を２、３変更する必要があります。
+.if LANG == JAPANESE
+NetBSDの場合の設定のしか他は以下にあります。
+
+.url http://www.fml.org/fml/examples/postfix-install.html
+.fi
+
+Sendmailを置き換えるためといっているように互換性はかなりあるのでfml は 
+sendmail の時とほとんど同様に設定できます(sendmailの場合については 
+INSTALL ファイル)。
 =E
 Postfix is almost compatible with sendmail.  You don't need special
 configuration to run fml but need to change postfix configuration.
@@ -58,16 +64,19 @@ allow_mail_to_commands = alias,forward,include
 =E
 in main.cf
 
-また fml プロセスを動かすＭＬ用の特別なユーザを定義する。
+(必須ではないが)また fml プロセスを動かすＭＬ用の特別なユーザを定義す
+る。
 =E
 Also you need set up account for your ML. For exmaple
 
 default_privs = fml
 
 main.cf を変更したら、 postfix reload を忘れずに！
+=E
+This is not a must but may be better?
 
 この postfix 特有の設定以外は気にしなくても sendmail と同じだと思って
-構わない。
+いて構わないとおもう。
 
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
