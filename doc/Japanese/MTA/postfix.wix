@@ -1,3 +1,7 @@
+.C	Postfix
+
+.url http://www.postfix.org/
+
 .S	Is there a way to dynamically pause delivery?
 
 To suspend smtp delivery:
