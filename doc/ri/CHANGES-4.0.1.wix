@@ -1,0 +1,69 @@
+.HTML_PRE
+	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
+
+
+2001/02/18
+
+   fix perl search path algorithm
+	thanks Yu Ooasa <you@dearest.net> (fml-support: 09276, 09277)
+
+   fix NT 4.0
+	link($SMTP_LOG, $org_smtp_log) only on unix
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09271)
+
+   fix NT installer bugs
+	install also ("databases", "messages", "drafts", "module")
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09235)
+
+2001/02/07,08
+
+   update documents
+
+2001/02/06
+
+   fml/libexec/fmlserv.pl 
+	s/RunHooks/RunExitHooks/ to fix missing renamed function definition
+	thanks KAWADE Koji <kawade@rd.casio.co.jp> (fml-support: 09238)
+
+2001/02/03
+
+  fmlserv
+	oops, RunHooks() is not used now.
+	fix it to use RunexitHooks().
+
+2001/02/01
+
+  ドキュメント修正
+	オライリー本への補足、誤植等について…
+	welcome ファイルを送り返さない方法
+	DEFINE_MODE(disablenotify) について補足
+
+   makefml
+	fix _PERL_PATH handling
+
+	env _PERL_PATH= makefml ...
+	の指定をする時も perl をさがしてしまうバグをなおす
+
+2001/01/22
+
+   4.0-stable series start
+
+   apply patch to html converter (fml-support:09166) 
+	not to ignore forwarded messages
+
+	KUBO Hiroya <hiroya@netcom.mag.keio.ac.jp>
+
+2001/01/15
+   4.0 release
+
+
+$Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.~HTML_PRE
