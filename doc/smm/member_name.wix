@@ -1,15 +1,35 @@
-.S	メンバーリストファイルの拡張について
+.S	メンバーリストファイルの拡張について (libmember_name.pl)
+=E.S	Extension of member list (libmember_name.pl)
+.l	$USE_MEMBER_NAME
+.l	$MEMBER_NAME_FILE
+.k	$USE_MEMBER_NAME
+.k	$MEMBER_NAME_FILE
 
+1998/01/09 AUTHOR: 福井 誠之 <fukui@sonic.nm.fujitsu.co.jp>
+=E
+1998/01/09 AUTHOR: <fukui@sonic.nm.fujitsu.co.jp>
 
-libmember_name.pl 簡易ドキュメント
-                                           1998/01/09 福井 誠之
-                                              (fukui@sonic.nm.fujitsu.co.jp)
+libmember_name.pl は members にメンバー各個人の名前を付加するモジュー
+ルです。
+=E
+libmember_name.pl provides a member list with member names.
 
+この機能を有効にするには、config.ph にて、
+=E
+Enable this function, please write 
 
-■ libmember_name.pl --- members にメンバー各個人の名前を付加するモジュール
+      $USE_MEMBER_NAME = 1;
+
+の一行を記述するだけで OK です。既に運用中の ML でも OK です。
+makefml config のメニューでもできます。
+=E
+in config.ph. You can use the menu style by "makefml config" to set
+this.
 
 
 [機能説明]
+=E
+DESCRIPTION:
 
   これまでの fml では、メンバー一覧を '# members' コマンドで取り寄せると
 メンバー全員のアドレスが返送されてきますが、アドレスだけでは誰が誰なのか
@@ -19,23 +39,43 @@ libmember_name.pl 簡易ドキュメント
 する機能を付加します。
   このモジュールを有効にすることにより、機能が追加・変更される項目を以下
 に記述します。
+=E
+Fml command "# members" sends a list back but the list contains only
+E-mail addresses. So you cannot identify who is an address? 
+libmember_name.pl module provides a function that "# members" command
+sends back a list with full names where the name is extracted from
+"From:" field e.g. in automatic registration.
+
+=E
+When you enable this function, fml changes like this.
 
 ● 自動登録モード
+=E
+* When automatic registration works
 
     自動登録時 ('# confirm','# subscribe' コマンドによる登録も含む) に、
   mail の From: 行に書かれているアドレスが $MEMBER_LIST に追加されますが、
   その際に From: 行に書かれている名前 (gecos) も保存するようになります。
+=E
+When fml registered a user in automatic registration mode, fml
+extracts GECOS field in From: and caches it to a file
+$MEMBER_NAME_FILE.
 
 ● '# members', '# member' コマンド
+=E
+members / member command
 
     '# members', '# member' コマンドによるメンバー一覧の取り寄せで、メン
   バーのアドレスに対応する名前が登録されている場合には、その名前が付加さ
   れて返送されます。
+=E
+members / member command sends back a list with full names.
 
+.if LANG == JAPANESE
   返送されるメンバー一覧の例 :
 
 	#.FML HEADER
-	# NEW FORMAT FOR FURTHER EXTENTION
+	# NEW FORMAT FOR FURTHER EXTENSION
 	# e.g. fukachan@phys r=relayserver m=3u s=skip 
 	# r= relayserver
 	# m= matomeokuri parameter is time and option
@@ -49,24 +89,47 @@ libmember_name.pl 簡易ドキュメント
 	・
 	・
 	・
-
+.fi
+.if LANG == ENGLISH
+	sakura@card.captor (Sakura Kinomoto)
+	kerochan@fml.org   (Kerbelos)
+	tomoyo@fml.org     (Tomoyo Daijouji)
+.fi
 
 ● '# name' コマンド (新規)
+=E
+"name" command
 
   コマンド文法 : # name [新しい名前]
+=E
+SYNOPSIS: # name new-name
 
     コマンドを送ってきた者の登録されている名前を [新しい名前] に変更します。
   古い名前が登録されていない場合は、新規に登録されます。
   また、[新しい名前] を省略すると、現在登録されている名前を削除します。
+=E
+Replace the full name in the cache file for "From:" address with
+"new-name". If no argument is given, fml removes the full name entry
+in the cache file.
 
 ● '# admin name' コマンド (新規)
+=E
+"admin name" command
 
   コマンド文法 : # admin name アドレス [新しい名前]
+=E
+SYNOPSIS: # admin name address new-name
  
     リモート管理機能を使用している場合に有効になる、管理者用の名前変更コマ
   ンドです。アドレスを指定することにより、各メンバーの名前を変更することが
   できます。([新しい名前] の取り扱いについては、'# name' コマンドと同様)
-
+=E
+In administration mode, overwrite the name for the address. The usage
+is the same way as "name" command. Administrators can use this
+command. This function is useful to overwrite the name cache file not
+only in automatic registration but also in manual registration. Also
+this command overwrite the name to arbitrary ones e.g. nick names,
+handles ...
 
     この '# name' と '# admin name' コマンドを使用することにより、自動登録
   でない ML や、既に運用されている ML でも、名前の新規登録や変更ができるよ
@@ -77,16 +140,7 @@ libmember_name.pl 簡易ドキュメント
       - 職場の ML で、名前だけでなく所属も付加して登録
   等の応用ができます。
 
-
-[使用方法]
-
-  この機能を有効にするには、config.ph にて、
-
-      $USE_MEMBER_NAME = 1;
-
-  の一行を記述するだけで OK です。既に運用中の ML でも OK です。
-
-
+.if LANG == JAPANESE
 [技術的補足]
 
 ● 名前の管理方法
@@ -168,13 +222,14 @@ libmember_name.pl 簡易ドキュメント
   |丈夫だろうとおもってます。
 
   とのことです。
+.fi
 
-
-[謝辞]
-
-    fml 作者の fukachan こと深町殿には、この機能を実現するために、散々
-  わがままを言って fml 本体の改造をしていただきました(^^;)
-  厚く御礼申し上げます。
-
-                                                            - 以上 -
-
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
