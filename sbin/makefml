@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.227 2002/04/07 14:52:49 fukachan Exp $
+# $FML: makefml,v 2.228 2002/06/23 14:33:33 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -2826,7 +2826,7 @@ sub do_htpasswd
     if (! -f $pwf) {
 	$flag = '-c';
 	&MkDirHier($dir);
-	&Touch($pwd);
+	&Touch($pwf);
     }
 
     # perserve the current inode $mode
