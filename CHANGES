@@ -4,6 +4,10 @@
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
 
+2001/03/04
+
+  lowerize the domain part of mail addresses in database access methods 
+
 2001/02/26
 
   apply patch (fml-support: 09289) to the PostgreSQL toymodel 
