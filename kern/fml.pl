@@ -1188,11 +1188,13 @@ sub RewriteField
 sub RuleSetTo
 {
     local(*e) = @_;
-    local($ok, $match, $addr, $x_addr, $ml, $buf);
+    local($ok, $match, $addr, $x_addr, $ml, $buf, $to);
     local(@ml) = ($MAIL_LIST, @MAIL_LIST_ALIASES); # PLAY_TO Trick;
 
     # search $MALI_LIST (+ aliases) contained in To: ?
-    for $addr (split(/[\s,]+/, $e{'h:to:'})) {
+    $to = $e{'h:to:'};
+    $to =~ s/\s*To: /, /gi;
+    for $addr (split(/\s*,\s*/, $to)) {
 	$x_addr = $addr;
 	$addr   = &Conv2mailbox($addr, *e);
 	$match  = 0;
