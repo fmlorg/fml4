@@ -1719,11 +1719,7 @@ sub do_install
 
     &FYI;
 
-    &PolicyMenu; 
-    print "\n---For Your Information:\n";
-    print "The Current Policy to use ML addresses are follows\n";
-    print $SHOW_ONLY_POLICY_MENU;
-    print "\nYou can change this policy settings by \"makefml policy\".\n\n";
+    &FYIPolicy;
 }
 
 
@@ -1969,6 +1965,19 @@ sub do_policy
     &SavePolicy($buf);
 }
 
+
+sub FYIPolicy
+{
+    &PolicyMenu; 
+
+    print "\n---For Your Information:\n";
+    print "The Current Policy to use ML addresses are as follows\n";
+    print "    (DEFAULT POLICY IS BACKWARD COMPATIBLE AS BELOW):\n";
+    print $SHOW_ONLY_POLICY_MENU;
+    print "\nYou can change this policy settings by \"makefml policy\".\n\n";
+}
+
+
 sub PolicyMenu
 {
     for (keys %Marker) {
@@ -1984,7 +1993,7 @@ sub PolicyMenu
 
 
     $MenuPolicy{'MAIL_LIST_MODE'} = qq#; 
-    \t[avialable modes]                  [current setting]
+    \t[available modes]                  [current setting]
     \tdistribute + commands              $Marker{'policy:dm:d+c'};
     \tdistribute (only member can post)  $Marker{'policy:dm:d-c:member'};
     \tdistribute (anyone can post)       $Marker{'policy:dm:d-c:any'};
@@ -1992,7 +2001,7 @@ sub PolicyMenu
    
 
     $MenuPolicy{'CONTROL_ADDRESS_FORMAT'} = qq#;
-    \t[avialable format]                [current setting]
+    \t[available format]                [current setting]
     \t_ML_-ctl (default)                 $Marker{'policy:ca:ctl'};
     \t_ML_ (require distribute+commands) $Marker{'policy:ca:ml'};
     \tfmlserv                            $Marker{'policy:ca:fmlserv'};
@@ -2010,9 +2019,10 @@ sub PolicyMenu
     $POLICY_MENU =~ s/;//g;
 
     $SHOW_ONLY_POLICY_MENU = qq#;
-    \$MAIL_LIST Delivery mode;
+    DELIVERY MODE OF \$MAIL_LIST;
     $MenuPolicy{'MAIL_LIST_MODE'};
-    \$CONTROL_ADDRESS FORMAT\n;$MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
+    FORMAT OF \$CONTROL_ADDRESS (for commands);
+    $MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
     ;
     ;#;
 
