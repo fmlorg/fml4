@@ -56,6 +56,8 @@ tar.gz.
 
 	conf/release			2.2A      ;;; main trunk version
 	conf/release_version		2.2A#100  ;;; snapshot (not in cvs)
+	conf/branch			current, stable, etc...
+					which reflects ftp servre hier(7).
 
 "conf/release" is the main trunk revision, which should be set up by hand.
 distrib/bin/fml_version.pl controls "conf/release_version".
