@@ -14,7 +14,7 @@ sub DoDistribute
 {
     local(*e) = @_;
 
-    $0 = "--Distributing <$FML $LOCKFILE>";
+    $0 = "$FML: Distributing <$LOCKFILE>";
     local($status, $s, $id);
 
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
