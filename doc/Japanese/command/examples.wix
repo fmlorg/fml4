@@ -21,3 +21,21 @@ sub mySendFile
 	}
     }
 }
+
+
+.S	get 100 とコマンドを おくるとマルチパート形式で100番の記事がおくられる
+
+答え: get の時も呼び出す関数を mget の関数にしてしまう。
+
+つまり
+1. いつでもmget扱いにして
+2. mgetのデフォールトをmpにする
+
+そういうわけで、以下のperlの文をconfig.phへつけたしてみる。
+=E
+append it to config.ph.
+
+   $MGET_MODE_DEFAULT = "mp";
+   %LocalProcedure = ('get', 'ProcMgetMakeList');
+
+(fml-support: 06997)
