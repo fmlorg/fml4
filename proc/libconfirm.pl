@@ -244,10 +244,10 @@ sub GenConfirmReplyText
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
 
-	$s .= "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
+	$s .= "Hi, I am fml ML manager for the ML $ML_FN.\n";
 	$s .= "Please reply this mail to confirm your subscribe request\n";
 	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
-	$s .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";
+	$s .= "So, you can be added to MAILING LIST $ML_FN.";
     }
     elsif ($mode eq 'IdCheck::syntax_error') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
