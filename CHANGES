@@ -5,6 +5,17 @@
 	$Date$
 
 
+2001/08/13
+
+   kern/fml.pl
+	load libMIME.pl always when $LANGUAGE is Japanese
+
+2001/08/09
+
+   fix Envelope Filter
+	kern/libenvfsubr.pl
+		quotameta regexp to trap citation 
+
 2001/08/07
 
    proc/libfml.pl (2.39-2.40):
