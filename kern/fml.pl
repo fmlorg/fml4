@@ -633,6 +633,7 @@ sub Parse
     }
 
     # Really? but check "what happen if no input is given?".
+    &Log("read $bufsiz bytes") if $debug_fml_org;
     if ($bufsiz == 0) {
 	&Log("no input, stop");
 	exit(0);
