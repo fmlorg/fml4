@@ -51,18 +51,21 @@ localtest:
 	@ echo "   DEBUG MODE!   "
 	@ echo "-----------------------------------"
 
-link:	etc/list_of_use
-	(cd lib/perl; ln `cat ../../etc/list_of_use` .)
-
 doc: 	htmldoc
 
 roff:	doc/smm/op.wix
+	@ echo "sorry, not yet implemetend but halfly completed?"
+	@ echo ""
 	@ echo "Making nroff of doc/smm/op => var/man"
 	@ test -d var/man || mkdir var/man
 	@ perl bin/fwix.pl -T smm/op -m roff -R var/man -I doc/smm doc/smm/op.wix
 
 texinfo:
-	$(SH) bin/texinfo-driver
+	@ echo sorry, not yet implemetend
+
+
+DISTRIB: distrib 
+
 
 allclean: clean cleanfr
 
@@ -78,7 +81,6 @@ cleanfr:
 
 
 
-DISTRIB: distrib 
 ### ATTENTION! CUT OUT HEREAFTER WHEN RELEASE
 #
 # OLD# 
@@ -88,7 +90,7 @@ DISTRIB: distrib
 local: distrib 
 
 ntdist: 
-	(/bin/sh usr/sbin/release.sh 2>&1| tee /var/tmp/_distrib.log)
+	(/bin/sh .release/generator 2>&1| tee /var/tmp/_distrib.log)
 	(/bin/sh usr/sbin/nt-release.sh /tmp/distrib 2>&1|\
 	 tee -a /var/tmp/_distrib.log)
 	@ usr/sbin/error_report.sh /var/tmp/_distrib.log
@@ -102,11 +104,11 @@ nt:
 
 dist:	distrib 
 distrib:
-	(/bin/sh usr/sbin/release.sh 2>&1| tee /var/tmp/_distrib.log)
+	(/bin/sh .release/generator 2>&1| tee /var/tmp/_distrib.log)
 	@ usr/sbin/error_report.sh /var/tmp/_distrib.log
 
 snapshot: 
-	(/bin/sh usr/sbin/release.sh -ip 2>&1| tee /var/tmp/_release.log)
+	(/bin/sh .release/generator -ip 2>&1| tee /var/tmp/_release.log)
 	@ usr/sbin/error_report.sh /var/tmp/_release.log
 
 faq:	 plaindoc
