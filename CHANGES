@@ -6,6 +6,8 @@
 
 2002/06/23
 
+  qmail/control/virtualdomains を使う設定のテンプレートを作る
+
   proc/libamctl.pl
 	confirmation の時にきちんとメンバー数制限チェックを
 	かける 	
@@ -326,7 +328,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.254 2002/06/17 14:56:19 fukachan Exp $
+	add $FML: CHANGES,v 1.255 2002/06/23 13:38:41 fukachan Exp $
 
 2001/10/03
 
