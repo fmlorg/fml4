@@ -552,17 +552,18 @@ sub DoSetMemberList
 	# addresses
 	if ($curaddr eq '' || $newaddr eq '') {
 	    &Log("$cmd: ERROR: empty address is given");
-	    &Mesg(*e, "$cmd: ERROR: $cmd requires two non-empty addresses.");
-	    &Mesg(*e, "Please use the syntax \"$cmd old-address new-address\"");
-
-	    &Mesg(*e, $NULL, 'chaddr.no_args', $cmd);
+	    my ($r);
+	    $r .= "$cmd: ERROR: $cmd requires two non-empty addresses.\n";
+	    $r .= "Please use the syntax \"$cmd old-address new-address\"";
+	    &Mesg(*e, $r, 'chaddr.no_args', $cmd);
 	    return $NULL;
 	}
 
 	# loop check
 	if (&LoopBackWarn($newaddr)) {
-	    &Mesg(*e, "$cmd: $newaddr may cause a mail loop, reject");
-	    &Mesg(*e, $NULL, 'mailloop');
+	    &Mesg(*e, 
+		  "$cmd: $newaddr may cause a mail loop, reject", 
+		  'mailloop');
 	    &Log("$cmd: $newaddr may cause a mail loop, reject");
 	    return $NULL;
 	}
@@ -573,8 +574,12 @@ sub DoSetMemberList
 	if (! $e{'mode:admin'} && 
 	    (! &AddressMatch($From_address, $Fld[2]))) {
 	    &Log("$cmd: Security ERROR: requests to change another member's address '$Fld[2]'");
-	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$Fld[2]'.");
-	    &Mesg(*e, $NULL, 'chaddr.invalid_addr', $Fld[2]);
+
+	    my($r);
+	    $r .= "$cmd: Security Error:\n";
+	    $r .= "\tYou ($From_address) cannot change\n";
+	    $r .= "\tanother member's address '$Fld[2]'.";
+	    &Mesg(*e, $r, 'chaddr.invalid_addr', $Fld[2]);
 	    return $NULL;
 	}
 
@@ -582,12 +587,16 @@ sub DoSetMemberList
 	local($new_list, $asl);
 
 	if (&ExactAddressMatch($curaddr, $newaddr)) {
+	    my($r);
+	    $r .= "$cmd: ERROR: $curaddr == $newaddr\n";
+	    $r .= "Please send command mail from old-address\n";
+	    $r .= "usage: $cmd old-address new-address";
+
 	    &Log("$cmd: ERROR: $curaddr == $newaddr");
+
 	    &Mesg(*e, $NULL, 'chaddr.same_args', $cmd);
-	    &Mesg(*e, $NULL, 'chaddr.from.oldaddr');
-	    &Mesg(*e, "$cmd: ERROR: $curaddr == $newaddr");
-	    &Mesg(*e, "Please send command mail from old-address");
-	    &Mesg(*e, "usage: $cmd old-address new-address");
+	    &Mesg(*e, $r, 'chaddr.from.oldaddr');
+
 	    return $NULL;
 	}
 

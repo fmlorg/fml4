@@ -1,0 +1,15 @@
+chaddr.no_args:
+	Error: no argument
+	_ARG0_ command syntax is
+	   chaddr old-address new-address
+
+chaddr.same_args:
+	Error: invalid arguments since old-address == new-address
+	_ARG0_ command syntax is
+	   chaddr old-address new-address
+
+chaddr.invalid_addr:
+	Error: You are not <_ARG0_>! Do not change any other than yourself.
+
+chaddr.from.oldaddr:
+	Please send the request from your old-address
