@@ -287,6 +287,8 @@ sub SmtpIO
 
     &ConvHdrCRLF(*e);
 
+    $Total_Rcpt_Count = 0;
+
     if ($e{'mode:__deliver'}) { # consider mci in distribute() 
 	local($n, $i);
 	$n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
@@ -300,6 +302,8 @@ sub SmtpIO
 
 	    # @RcptLists loop under "fixed smtp server"
 	    &__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+            $Total_Rcpt_Count += $Current_Rcpt_Count;
+
 	    &__SmtpIOClose(*e, $smtp_pcb{'ipc'});
 
 	    push(@HOSTS, $HOST); # last resort for insurance :)
@@ -313,6 +317,8 @@ sub SmtpIO
 	return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
 
 	&__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+        $Total_Rcpt_Count += $Current_Rcpt_Count;
+
 	&__SmtpIOClose(*e, $smtp_pcb{'ipc'});
     }
     &RevConvHdrCRLF(*e);
