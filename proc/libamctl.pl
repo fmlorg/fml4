@@ -531,6 +531,13 @@ sub DoSetMemberList
 	#ATTENTION! $newaddr should not be a member.
 	local($new_list, $asl);
 
+	if (&ExactAddressMatch($curaddr, $newaddr)) {
+	    &Log("$cmd: Error: $curaddr == $newaddr");
+	    &Mesg(*e, "$cmd: Error: $curaddr == $newaddr");
+	    &Mesg(*e, "usage: $cmd old-address new-address");
+	    return $NULL;
+	}
+
 	# check the similarity level; (e.g. sub-domain change)
 	# possibility of "chaddr *@uja.x.y.z -> *@kitakitune.z.y.z"
 	$asl = &AddrSimilarity($curaddr, $newaddr);
