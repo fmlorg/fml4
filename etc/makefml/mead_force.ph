@@ -12,19 +12,22 @@
 ### mead (mail error analyzer daemon) configuration ###
 ### THIS FILE CAN OVERWRITE COMMAND LINE OPTIONS    ###
 
+# debug
+# value: 1/0
+$debug    = 0;
 
 # value: number
-$LIMIT  = 5;
+# $LIMIT  = 5;
 
 # the unit is "days"
 # value: number
-$EXPIRE = 14;
+# $EXPIRE = 14;
 
 # value: bye / off 
-$ACTION = "bye";
+# $ACTION = "bye";
 
 # value: report / auto
-$MODE   = "report";
+# $MODE   = "report";
 
 
 ### Section: log
