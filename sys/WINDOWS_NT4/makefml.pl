@@ -60,7 +60,8 @@ sub PopFmlSetUp
 
     close(POP_CF);
 
-    open(POP_CF, "> $EXEC_DIR\\sitedef.ph") || die($!);
+    # XXX: SHOULD NOT OVERWRITE
+    open(POP_CF, ">> $EXEC_DIR\\sitedef.ph") || die($!);
     select(POP_CF); $| = 1; select(STDOUT);
     print POP_CF "\#\#\# include _fml\\pop (DO NOT DELETE THIS BLOCK!)\n";    
     print POP_CF "require '$EXEC_DIR/_fml/pop';\n";
