@@ -105,12 +105,7 @@ programs, and how to launch fml.
 
 .include wix.wix
 .include smtp.wix
-.include ftp.wix
-.include lib.wix
-
-.include whois.wix
-
-
+.include contrib.wix
 
 
 .# ##########################################################
@@ -158,16 +153,21 @@ Can you understand sources of quotations?:-)
 
 
 .# ##########################################################
+.appendix
 .P	Appendix
 
 .include ref.wix
 
 .include cloindex.wix
-
+.include ftp.wix
+.include whois.wix
 .include cwhois.wix
+.include pager.wix
+
 .include aucea.wix
 .include fred.wix
-.include pager.wix
+
+.include mail2news.wix
 
 .include obsoletes.wix
 .include app/fmlR1.wix
