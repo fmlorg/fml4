@@ -272,6 +272,42 @@ $START_HOOK = q#
 #;
 
 
+.S	ＭＬメンバーの人数制限
+
+$START_HOOK = q%;
+
+$MAX_MEMBER = 100;
+
+# このファイルにごめんなさいの文章を書いておく
+$LIMIT_OVER_FILE = "$DIR/limit.over"; 
+
+sub WC
+{
+    local($f) = @_;
+    local($lines) = 0;
+
+    open(TMP, $f) || return 0;
+    while (<TMP>) { 
+	next if /^\#/;
+        $lines++;
+    }
+    close(TMP);
+
+    $lines;
+}
+
+
+if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
+    &SendFile($From_address, 
+	      "Sorry, the mailing list member exceeds the limit $ML_FN", 
+	      $LIMIT_OVER_FILE);
+    $DO_NOTHING = 1;
+}
+
+
+%;
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
