@@ -449,10 +449,13 @@ sub InitProcedure
 		    # Bye - Good Bye Eternally
 		    'chaddr',         'ProcSetMemberList',
 		    'r#chaddr', 1,
+		    'r2a#chaddr', 1,
 		    'change-address', 'ProcSetMemberList',
 		    'r#change-address', 1,
+		    'r2a#change-address', 1,
 		    'change',         'ProcSetMemberList',
 		    'r#change', 1,
+		    'r2a#change', 1,
 		    'bye',            'ProcSetMemberList',
 		    'r#bye',         1,
 		    'r2a#bye',         1,
