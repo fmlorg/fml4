@@ -1,7 +1,9 @@
 #!/usr/local/bin/perl
 #
 # Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
@@ -279,6 +281,7 @@ sub CWhoisCacheSearch
 	/^fcache/         && ($set = 'fcache', next);
 	/^debug/i         && ($debug++, next);
 	/^history/i       && (undef $MATCH_THE_LATEST, next);
+	/^all/i           && (undef $MATCH_THE_LATEST, next);
 	/^(rev|reverse)/i && ($REVERSE_ORDER++, next);
 	/^(normal|historical)/i && ($HISTORICAL_ORDER++, next);
     }
@@ -357,7 +360,9 @@ sub CWhoisUsage
     $rcsid;
     Copyright (C) 1993-1996 fukachan\@phys.titech.ac.jp;
     Copyright (C) 1996      fukachan\@sapporo.iij.ad.jp;
-    Please obey GNU Public License;
+    fml is free software distributed under the terms of the GNU General;
+    Public License. see the file COPYING for more details.;
+
     If you find a bug, please send it to fml-bugs\@phys.titech.ac.jp;
 !;
 
