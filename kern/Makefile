@@ -190,7 +190,7 @@ syncinfo:
 	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
 
 bethdoc: newdoc
-newdoc: plaindoc htmldoc syncwww syncinfo
+newdoc: htmldoc syncwww syncinfo
 
 varcheck:
 	perl usr/sbin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
