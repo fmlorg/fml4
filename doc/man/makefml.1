@@ -1,0 +1,106 @@
+.\" Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.\"          All rights reserved. 
+.\"               1993-1996 fukachan@phys.titech.ac.jp
+.\"               1996-1999 fukachan@sapporo.iij.ad.jp
+.\" 
+.\" FML is free software; you can redistribute it and/or modify
+.\" it under the terms of GNU General Public License.
+.\" See the file COPYING for more details.
+.\"
+.\" $Id$
+.\"
+.Dd April 3, 1999
+.Dt MAKEFML 1
+.Os
+.Sh NAME
+.Nm makefml
+.Nd fml configuration control program
+.Sh SYNOPSIS
+.Nm
+command ML
+.Op arguments
+
+.Nm
+ML::command 
+.Op arguments
+.Sh DESCRIPTION
+.Sy makefml
+command helps you to configure fml and 
+.Sy ML
+maintenance where 
+.Sy ML
+is a mailing list you maintain.
+You can use this program to add a member to 
+.Sy ML
+,
+remove a member to 
+.Sy ML
+, and control fundamental
+.Sy ML
+configuration.
+
+.Bl -tag -width 4n -offset indent -compact
+.Pp
+.It Sy % _EXEC_DIR_/makefml help
+.Pp
+.El
+show available commands.
+
+.Sh EXAMPLE
+.Pp
+to add 
+.Sy address
+to 
+.Sy elena
+mailing list.
+.Bl -tag -width 4n -offset indent -compact
+.Pp
+.It Sy % _EXEC_DIR_/makefml add elena address
+.El
+
+to remove
+.Sy address
+in
+.Sy elena
+mailing list.
+.Bl -tag -width 4n -offset indent -compact
+.Pp
+.It Sy % _EXEC_DIR_/makefml bye elena address
+.El
+
+to run CUI (Character User Interface) to control
+.Sy elena
+mailing list.
+.Bl -tag -width 4n -offset indent -compact
+.Pp
+.It Sy % _EXEC_DIR_/makefml config elena
+.El
+
+This helps you customize 
+.Sy fml
+fundamental configurations. 
+But if you need fine configurations, 
+it is better for you to edit config.ph (perl script) in each 
+.Sy ML
+directory directly. 
+
+.Sh FML DOCUMENTS
+.Pp
+For more details, please see documents installed under 
+.Sy _EXEC_DIR/doc/
+.
+Plain texts are in
+.Sy _EXEC_DIR/doc/
+but
+the HTML version documents are also in
+.Sy _EXEC_DIR/doc/html/
+.
+
+.Pp
+.Sh SEE ALSO
+.Xr fml 8 
+.Sh HISTORY
+A
+.Nm
+utility appeared in
+fml 2.1 release.
