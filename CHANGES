@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/05/01
+
+   virus_check.ph
+	一部のコードを multipart の時だけ働くようにする
+
 2002/04/14
 
    module/fml-devel/
@@ -263,7 +268,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.244 2002/04/07 14:54:14 fukachan Exp $
+	add $FML: CHANGES,v 1.245 2002/04/14 15:56:50 fukachan Exp $
 
 2001/10/03
 
