@@ -40,6 +40,18 @@ sub AutoRegist
     # Confirmation Mode; 
     # check the MailBody to search $CONFIRMATION_KEYWORD
     if ($AUTO_REGISTRATION_TYPE eq "confirmation") {
+	# check resource limit before confirmation
+	if ($MAX_MEMBER_LIMIT) {
+	    if (&CheckResourceLimit(*e, 'member') > $MAX_MEMBER_LIMIT) {
+		&Log("AutoRegist: reject subscribe request",
+		     "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
+		&Mesg(*e, 
+		      'Sorry, deny your request for too many subscribers', 
+		      'resource.exceed_max_member_limit');
+		return 0;
+	    }
+	}
+
 	local($key);
 
 	&use('confirm');
