@@ -2911,9 +2911,15 @@ sub GetConfigPH
 
     $cf  = "$ML_DIR/$ml/config.ph";
     $DIR = "$ML_DIR/$ml";
-    $config_ph'DIR = $main'DIR;
-    $status = &config_ph'Load($cf); #';
-    print STDERR $@ if $@;
+
+    if (-f $cf) {
+	$config_ph'DIR = $main'DIR;
+	$status = &config_ph'Load($cf); #';
+	print STDERR $@ if $@;
+    }
+    else {
+	die("GetConfigPH: $cf does not exists\n");
+    }
 }
 
 
