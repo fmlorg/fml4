@@ -14,8 +14,13 @@
 .key	libsynchtml.pl
 .xref	spool2html.pl
 .k	$AUTO_HTML_GEN
+.k	$HTML_DIR
 
 $AUTO_HTML_GEN = 1; をセットすると、自動的にHTML化された記事も作ります。
+作る場所は $DIR の下の $HTML_DIR (デフォールトは htdocs) という場所です。
+
+	$DIR/htdocs/
+
 この時普通のPLAINTEXTのスプール($SPOOL_DIRへ溜る)も同時に作っています。
 HTML化は全く別のプロセスです。スプールに関しては何もしません。
 必要ならスプールのEXPIRE等は別途明示的に設定する必要があります。
@@ -37,8 +42,8 @@ SYNOPSIS:
 例：
 	$FML_EXIT_HOOK .= q#;
 		&use('synchtml');
-		$HTTP_DIR = 'htdocs';
-		&SyncHtml($HTTP_DIR, $ID, *Envelope);
+		$HTML_DIR = 'htdocs';
+		&SyncHtml($HTML_DIR, $ID, *Envelope);
 	#;
 
 	htdocs/index.html 
