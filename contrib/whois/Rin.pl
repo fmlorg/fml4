@@ -54,9 +54,9 @@ if(open(FILE)) {
 	chop;	chop;	chop;
 	($from) = (/^(.*)\n/);
 	next if $from =~ /^$/o;
+	if(/X-MailingList/io) {	$ML{$from}   = $_; next;} 
+	if(/X-When/io)        { $When{$from} = $_; next;} 
 	$addr{$from} = $_;
-	$ML{$from}   = $_ if /X-MailingList/io;
-	$When{$from} = $_ if /X-When/io;
     }
 
     &Logging($Key);
