@@ -25,6 +25,13 @@ if (! -f $RELEASE_DATE) {
 $Year     = 1900 + $year;
 
 chop($Trunk = `cat $TRUNK_ID`);
+chop($Branch = `cat "$FML/conf/branch" `);
+if ($Branch eq 'stable') {
+    $Branch =~ tr/a-z/A-Z/;
+}
+else {
+    undef $Branch;
+}
 
 if ($opt_T) {
     chop($_ = `cat $TRUNK_ID`);
@@ -53,7 +60,7 @@ $DailyID = $BRANCH. " ". &YYYYMMDD;
 
 # 3.0B new id system
 if ($opt_N || $RCSID_FNAME) {
-    $ID = $Trunk;
+    $ID = $Trunk . " ". $Branch;
     $PL = " (". &__YYYYMMDD .")";
 }
 
