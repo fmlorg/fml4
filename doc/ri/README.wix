@@ -17,10 +17,10 @@
    3.0と2.2.1の主な違い
 .url http://www.fml.org/fml/3.0-new-features.html
 
-   簡単なインストールのアウトラインと基本的な設定例などについて
+   ざっとした感じが掴めるインストールと基本的な設定例のアウトライン
 .url http://www.fml.org/fml/examples/
 
-   あとはここからたどってください。
+   詳細/その他の情報はここからたどってください。
 .url http://www.fml.org/fml/
 
    ソース
@@ -35,7 +35,7 @@
    differences between 2.2.1 and 3.0
 .url http://www.fml.org/fml/3.0-new-features-e.html
 
-   outline of installation and fundamental configurations
+   quick guide: outline of installation and fundamental configurations
 .url http://www.fml.org/fml/examples/index-e.html
 
    home page of fml
