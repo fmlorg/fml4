@@ -140,9 +140,10 @@ COPY_SOURCES () {
 	echo Copying doc/messages/
 	rsync --exclude CVS -av doc/messages/ $DESTDIR/distrib/messages/
 
-	echo ""
-	echo Copying www/
-	rsync --exclude CVS --exclude .cvsignore -av www/ $DESTDIR/distrib/www/
+	# [fml-3-0-maint] has no cgi interface
+	# echo ""
+	# echo Copying www/
+	# rsync --exclude CVS --exclude .cvsignore -av www/ $DESTDIR/distrib/www/
 
 	echo ""
 	echo Copying sys/
@@ -280,7 +281,8 @@ FIX_DISTRIBUTION_PERMISSION () {
 	(
 		cd $DESTDIR/distrib
 		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
-		chmod -R ugo+x www/cgi-bin/
+		# fml-3-0-maint branch has no cgi interface.
+		# chmod -R ugo+x www/cgi-bin/
 	)
 }
 
