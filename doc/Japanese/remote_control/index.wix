@@ -8,6 +8,7 @@
 .# .__repl_include__
 .include overview.wix
 .include howto.wix
+.include QandA.wix
 .include remote.wix
 .include misc.wix
 
