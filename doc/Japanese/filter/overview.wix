@@ -58,13 +58,6 @@ makefml config で
 *----------------------------*
 ~.q
 
-.S	ひっかかりすぎ
-
-Q: Notesのメールでテンプレートか何かを使うと同じMessage-IDになる
-  そのため「Duplicated Message-ID」になるケース
-
-これはなおしようがないです;-) NOTES担当に文句をいいましょう 
-
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -1,6 +1,5 @@
 C	投稿メールのフィルタリング事例
 
-
 .S	Message-Id: がないものを reject
 =E	reject null Message-Id:
 
@@ -151,6 +150,49 @@ $DISTRIBUTE_FILTER_HOOK = q#
         return 'Not addressed to mailing list';
     }
 #;
+
+
+.S	EnvelopeFilterは厳し過ぎる。VBscriptだけ弾きたい
+
+1. Content-Type: に .vbs .js .jse .exe とあるメール
+2. オリジナルのメールは badarticle というファイルに保存して 
+3. ＭＬにはアナウンスを流す。
+   「ウィルスぽいものが来たので、ＭＬに流さずに別途ファイルに落した」 
+
+.q
+# check attatchment of VB script and others :-)
+$START_HOOK .= q#
+    if ($Envelope{'Body'} =~ /Content.*\.(vbs|js|jse|exe)/i ||
+	$Envelope{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
+	my($savefile) = "$FP_TMP_DIR/badarticle.$PCurrentTime";
+	if (open(SAVE, "> $savefile")) {
+	    print SAVE $Envelope{'Header'};
+	    print SAVE "\n";
+	    print SAVE $Envelope{'Body'};
+	    close(SAVE);
+	    $Envelope{'Body'}  = 'WARNING: incoming mail is ignored ';
+	    $Envelope{'Body'} .= 'since it may be with virus.';
+	    $Envelope{'Body'} .= "\n\n";
+	    $Envelope{'Body'} .= "This article is saved in\n";
+	    $Envelope{'Body'} .= $savefile;
+	    $Envelope{'Body'} .= "\n\n";
+	    $Envelope{'Body'} .= "-- $MAIL_LIST maintainer\n";
+	}
+	else {
+	    &Log("system error: pass this article through");
+	}
+    }
+#;
+.~q
+
+
+.S	Notes で「Duplicated Message-ID」になるケース
+
+Q: Notesのメールでテンプレートか何かを使うと同じMessage-IDになるのため
+  「Duplicated Message-ID」になるケースはどうする？
+
+これは直しようがないです;-) NOTES担当に文句をいいましょう 
+
 
 .#
 .# $Id$
