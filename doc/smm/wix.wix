@@ -107,9 +107,9 @@ The keyword  .xref is expanded to the following
 
 のように変換されます。
 =E
-If you use xref: in the middle of a line, you can use .ptr{keyword}.
+If you use xref: in the middle of a line, you can use .ptr command.
 
-	.ptr	KEYWORD
+	\.ptr{KEYWORD}
 
 役目は xref と同じだが see also の部分は付け加えられない。
 =E
