@@ -31,6 +31,34 @@
 .C	とりあえずＭＬを動かすためのインストールの仕方
 =E.C	Installing the fml to your system anyway :-)
 
+.S	ひとつだけ下準備
+
+あなたがインストールしようと思っているマシンでＭＬを走らせる人（オーナー、
+所有者）はあなただけですか？ それともあなた以外の人もＭＬを走らせるで
+しょうか？
+
+＊＊＊注意＊＊＊ 
+ここでいうＭＬのオーナー(所有者?)とはＭＬサーバ プログラムが OSの上で
+走る時のオーナーです。リモート管理できる管理者ことではありません
+
+"あなただけ"なら、すぐ次の節へ飛んで下さい("personal" を選んで下さい(後述))
+
+あなた以外の人もＭＬを作れるが、面倒を見るのがあなたならＭＬのオーナー
+は一人です。やっぱりすぐ次の節へ飛んで下さい:-) (やはり "personal" です)
+
+しかしあなた以外の人も自由に作りたいということであれば、ＭＬのオーナー
+は複数人いるということになります。その場合そのオーナー達を一つのグルー
+プにして、そのグループだけがＭＬの場所をいじれるようにします。
+
+グループのデフォールトは fml です。例えば、 /etc/group に
+
+	fml:*:32765:オーナー１,オーナー２
+	(例えば、fml:*:32765:fukachan,hikari,elena のようにです)
+
+のようにオーナー達のアカウント名を ,で区切って書いて下さい。
+＃この数字(32765)に深い意味はありません。
+
+
 .S	インストーラ makefml によるインストール
 =E.S	Installing by makefml
 
@@ -50,7 +78,7 @@ the fml to your system
 というコマンドを実行して下さい。そのマシンの上に fml システムをインス
 トールします。
 
-この時に次のような項目を聞いて来ます。
+この時に以下のような項目を聞いて来ます。
 =E
 Here you see the following questions.  Please answer them!
 
@@ -72,50 +100,35 @@ These questions are as follows:
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
 =E
    "personal"	if only you use the fml system.
+		irrespctive of using "fmlserv".
 =S
    "group"	if several members in a group (ML operators) 
-		can set up the ML by fml.
+		can set up the ML by fml. "fmlserv" is NOT USED.
 =S
    "fmlserv"	if several members in a group (ML operators) and
-		they use fmlserv interface(== listserv, majordomo)
+		they USE "fmlserv" (fmlserv is listserv, majordomo like)
 	      	which requires group writale permission 
 		since e.g. fmlserv can manage each ML's member files.
 =S
    the write permission of the fml system is changed in each type. 
 
-	personal 自分一人しか使わないなら 
+	personal 自分一人しか使わない(ＭＬ群のオーナーが一人だけ)
+		 この場合 fmlserv もそのオーナー権限で当然使えます
 
-	group	 "特定多数"の人達がＭＬをいじる権限を持つ場合
-		 (例： /etc/groupで管理)
+	group	 "特定多数"のオーナー達がいる場合でfmlservは"使わない"場合
 
-	fmlserv  "特定多数"の人達がＭＬをいじる権限を持ち、
-		 かつ fmlserv (listserv-like interface)も使う場合 
+	fmlserv  "特定多数"のオーナー達がいる場合でfmlservを"使う"場合
 
-   を指定して下さい。作られるdirectoryの write permission が異なります。
+   のいづれかを指定して下さい。
+   作られるdirectoryの write permission が異なる構成になります。
 
-   group と fmlserv の場合の違いは、 
+   ***** ここで、group もしくは fmlserv を定義した場合 *****
+   ***** (personal の人は関係ありません）              *****
 
-	group は各ＭＬはそれぞれのＭＬごとに管理されるので、そのＭＬ管
-	理者のみが read write できます。
+    Please define the group (in /etc/group) ML Operators use
+    Group of Mailing List Operators (fml or GID ([\w\d]+)) [fml] 
 
-	fmlserv は listserv (or majordomo) 的インターフェイスなので、
-	各ＭＬの member file 等もgroup writable である必要があります。
-
-   という違いが発生します。
-
-
-	***** ここで、group もしくは fmlserv を定義した場合 *****
-	***** (personal の人は関係ありません）              *****
-
-	group もしくは fmlserv を定義した場合は次に group 名を聞いてきます。
-	あらかじめ どの group にするか？を決めておいて下さい。
-	新規につくる必要があれば /etc/group に作って置いて下さい。
-	デフォールトは fml です。/etc/groupの例：
-		fml:*:32765:fukachan
-
-	Please define the group (in /etc/group) ML Operators use
-	Group of Mailing List Operators (fml or GID ([\w\d]+)) [fml] 
-
+	あらかじめ決めておいた group を入れて下さい(前節参照)
 
 
    DOMAIN NAME               [sapporo.iij.ad.jp] 
@@ -332,22 +345,11 @@ the chapter on "cron" of doc/op in the fml source.
 .S	fmlserv (Listserv もしくは majordomo的インターフェイス)
 =E.S	fmlserv (Listserv or majordomo like interface for fml)
 
-fmlserv の設定の仕方は２通りあります。そのマシンでＭＬの設定ファイルを
-いじることができる人が、一人だけの場合と、複数人いる場合です。
-
-一人しかいない (personal) 場合は問題はないのですが、複数人いる時は悩ま
-しい permission 問題が発生します。
-
-複数人で fmlserv を使う場合に推奨できる方法はそのマシンに特別のアカウ
-ント(たとえば fml )を作成し、fmlserv も各MLもそのユーザの所有にして 
-personal 扱いで作成する方法だとおもいます。MLの設定をいじる時はいちい
-ち su fml (switch user)するわけです。
-
-setup 自体はいづれの場合も
+fmlserv を setup すること自体はオーナーの数に関わらず
 
 	/usr/local/fml/makefml fmlserv
 
-です。設定見本が
+でできます。permission は適宜変更されます。しして設定見本が
 =E
 You can see the example setting in 
 
@@ -362,16 +364,15 @@ last of "makefml" for /etc/aliases and do "newaliases".
 To check the action of "fmlserv", please send "help" to the
 fmlserv@your-domain.
 
-各ＭＬごとにうけつけるのに加えて、fmlserv 宛の
+コマンドは、各ＭＬごとでもうけつけるますが、加えて fmlserv 宛の
 
-	コマンド   ML  [コマンドのオプションと引数]
+	コマンド   ML  [fml標準のコマンドのオプションと引数]
 
-というコマンドの形を理解するようになります。動作はこのコマンドの書き方
+というコマンド形式を理解するようになります。動作はこのコマンドの書き方
 を除いて、全く同じです。
 
-また、各ＭＬの configuration file に従って実行されるので、各ＭＬのコマ
-ンド用のアドレスに送った時と同じ動きをします。
-
+各ＭＬの configuration file に従って実行されるので、各ＭＬのコマンド用
+のアドレスに送った時と同じ動きをします。
 単にコマンドの書き方にＭＬ名が加わっているだけです。
 
 =E
@@ -382,6 +383,33 @@ syntax above. The part "ML" is added to the default fml commands.
 "config.ph" for each ML defines each Command set for each ML.
 "fmlserv" just implies you can use all commands defined for the ML in
 another "fmlserv" (listserv) syntax.
+
+
+.S	fmlserv -- 複数のＭＬオーナーがいる場合への注意 --
+=E.S	fmlserv (Listserv or majordomo like interface for fml)
+
+前述の通り、fmlserv では次のようなコマンドを処理します。
+
+例：
+	subscribe ML address (あるMLのメンバーリストへaddressを加える)
+
+このためには fmlserv (もまた一つの特殊なＭＬサーバなので)のオーナーと
+違うオーナーのＭＬのメンバーリストをいじる権限が必要になります。
+
+そのためにはＭＬのオーナーグループ全体に write permission をだす必要が
+あります。
+
+複数人で fmlserv を使う場合に推奨できる方法はそのマシンに特別のアカウ
+ント (たとえば fml という特別なアカウント)を作成し、fmlserv も各ＭＬも
+そのユーザ(fml)の所有にして personal 扱いで作成する方法だとおもいます。
+ＭＬの設定をいじる時はいちいち su fml (switch user) するわけです。
+
+
+備考： "group" と "fmlserv" の違いですが、
+
+"group" では「各ＭＬはそれぞれのオーナーのＭＬごとに管理」されます。
+各ＭＬの設定はオーナーグループのメンバーに見せる必要はありません。
+少数の共有されるべき場所に group-writable が必要なだけです
 
 
 .S		＊＊＊ＭＬを作る際の注意＊＊＊
