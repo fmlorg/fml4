@@ -8,6 +8,12 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
 
+2001/08/17
+
+   dynamically change default values for HAS_*  in installation
+	o cf/config      2.8-2.9 
+	o cf/MANIFEST   1.84-1.95
+
 2001/08/13
 
    kern/fml.pl (2.134-2.135): 
@@ -37,7 +43,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.3 2001/08/09 15:26:15 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.4 2001/08/13 14:01:05 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
