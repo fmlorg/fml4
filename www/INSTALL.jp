@@ -1,6 +1,7 @@
 		CGIのインストールについて
 
 1.	fml-snap-日付(YYYYMMDD).tar.gz を入手する
+	(fml-3.0とはちょっと違います) 
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/
 
@@ -61,3 +62,5 @@ httpd の設定によるので適宜マニュアルを参照
 5.2	apache
 
      % rsync -av /usr/local/fml/share/cgi-bin/ /usr/pkg/libexec/cgi-bin/
+
+$Id$
