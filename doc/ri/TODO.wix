@@ -16,9 +16,15 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 
 
-.S	FAQ をつくる
+.S	ドキュメント: FAQ をつくる
 
 .url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+
+.S	ドキュメント: op
+
+２つにわけるべきか？
+	1. fml operations guide
+	2. The design and implementation of ml
 
 
 .S	MIMEライブラリーの書き直し
@@ -46,6 +52,12 @@ $SENDER_AUTH_TYPE = address / pgp
 makefml でのPGP操作をどうするべきなのか？
 ＃makefml pgp は管理者用に使ってしまったから
 ＃一般メンバー操作には適用できない
+
+
+.S	makefml config full menu
+
+All variables can be configurable in the menu? 
+I may not do it since it only confuses the customize.
 
 
 .S	間違いメールのフィルタリング
@@ -165,6 +177,8 @@ NT4 はだめだが NT5 fs には link(2)はある。
     Hence now change it to "appended to it" but it is not essential.
     We should change it to more functional solution.
 
+* more elaborate port on NT4 ?
+
 
 .S	Y2K advisory
 
@@ -182,6 +196,32 @@ log file に年号をつけるモード。backup が楽
 
 
 .S	かるいまとめおくり？
+
+
+.S	より統合されたパッケージ
+
+	サーチエンジンとの連携
+	スケジュールソフト
+	IRC
+
+.S	PGP version
+
+	現状 PGP 2 
+	PGP 5
+	PGP 6
+	OpenPGP ...
+
+何がデファクトになるのか…
+
+
+.appendix
+.C	遠い目標
+
+.S	美しいコード
+
+* all ranges
+
+* clean up mget3 internals
 
 
 .# $Id$
