@@ -169,8 +169,9 @@ executable bit を落してください。/ から全階層をたどって検査して下さい。
 
 .S	   sh: fml.pl not available for sendmail programs
 
-最近では Red Hat Linux ではまるひとが多い(?)のが
-sendmail の smrsh ではまるケースです。
+最近では Red Hat Linux ではまる人が多いのが
+sendmail の smrsh ではまるケースのようです(?)。
+例えばこのようなエラーメールが返ってきます
 
       ----- The following addresses had permanent fatal errors -----
    "|/usr/local/fml/fml.pl /var/spool/ml/elena "
@@ -180,91 +181,72 @@ sendmail の smrsh ではまるケースです。
    sh: fml.pl not available for sendmail programs
    554 "|/usr/local/fml/fml.pl /var/spool/ml/elena "... Service unavailable
 
-これは fml じゃなくて sendmail のエラーです。fmlはそもそもよばれてもい
-ません。
+これは fml じゃなくて sendmail のエラーです。この段階では fml は実行さ
+れてもいません。よって fml のログも残りません。
 
 1. /usr/local/bin/perlなどが存在しない。
-   fml.pl の先頭の #!/usr/local/bin/perl の部分のこのパスにperlがない
+   fml.pl の先頭の #!/usr/local/bin/perl の部分のこのPATHが間違い
 
-2. sendmail restricted shell のせい。最近の linux の distribution のな
-かにはそれがデフォールトのものがあったとおもいます。で、Redhatがまさに
-それだったようなきがします
+   A.  直して下さい
+   A2. インストール時に自動的に修正しているはずなので
+       インストーラがうまく働いてないかもしれません
 
+2. sendmail restricted shell のせい
+
+	最近の linux の distribution のなかにはそれがデフォールトのも
+	のがあったとおもいます。で、Redhat がまさにそれだったようなきが
+	します
+
+.q
 sendmail.cf に
 
 Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
+.~q
+のような行が P=/bin/smrsh になっていればこれです。
 
-のような行が P=/bin/smrsh になってたりしませんか？
+A. 回避策 1
 
-(securityを緩める方向のうしろむきな解決ですが) そこを/bin/shにするとと
-りあえず動くようになるとおもいます。もしこれが正解だったら、Sendmail
-Restricted Shell というものについて調べて下さい。
-そして smrsh について正しい設定をしなおしてみてください。
+	(securityを緩める方向のうしろむきな解決ですが) そこを/bin/sh 
+	にするととりあえず動くようになるとおもいます。もしこれが正解だっ
+	たら、Sendmail Restricted Shell というものについて調べて下さい。
+	そして smrsh について正しい設定をしなおしてみてください。
 
-◯ 
+A2. 回避策 2: link をはりまくる
 
-fml-support:  07458
+   fml-support:  07458
 
 smrshを使っていると @LIBDIR に/usr/local/fmlが入らない。
 このために 
 
 	require default_config.ph 
 
-の場所でエラーになる。
+の場所などでエラーになる。
 
 回避例:
 
-site_init.phに
+/var/spool/ml/etc/fml/site_init.ph というファイルに
+.q
+push(@LIBDIR, "/usr/local/fml");
+push(@INC,   "/usr/local/fml");
+1;
+.~q
+と書いて下さい。そして以下の symbolik link をはって下さい。
 
-	push(@LIBDIR,"/usr/local/fml");
+smrsh のディレクトリが /usr/adm/sm.bin とすると
+.q
+# ln -s /usr/local/fml/fml.pl /usr/adm/sm.bin
+# ln -s /usr/local/fml/libloadconfig.pl /usr/adm/sm.bin/
+.~q
 
-書いておいて、これとfml.plのsymbolic linkをsmrshのディレクトリにはる
+注意: fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl の link 
+が必要です。それ以前の current, fml-3.0-stable などでは必要ありません。
 
-fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl を smrshのディ
-レクトリにリンクしておくことも必要です。例:
+References: fml-support ML:
 
-	% ln -s /usr/local/fml/libloadconfig.pl smrshのディレクトリ
-
-
-Refercnes:
-
-See fml-support ML:
-
-01877,01879,01881
-03942,03944,03965
-05706,05708,05712,05715,05721,05722,05723,05724,05725,05726,05727,05728
-07458,07733
-
-
-.if LANG == JAPANESE
-permission が正しくない場合に出ます。おそらく C Wrapper の設定(特に 
-permission )が間違っている可能性が大です。fml.pl プロセスのユーザに 
-switch user できないので chdir (change directory) できないためです。
-permission の設定を確認して下さい。
-
-C Wrapper => .ptr{c-wrapper}
-   setuid => .ptr{non_privileged_user}
-.fi
-.if LANG == ENGLISH
-Please see .ptr{non_privileged_user} on setuid().
-
-* :include:include-file
-
-check read and write permission through the path of include-file.
-
-* check permission bits for setuid() 
-
-on 4.3BSD
-
-	-rwsr-xr-x  1 fukachan guild 24576 Nov 26 04:43 fml
-
-on 4.4BSD and POSIX basis 
-
-	-rwsr-xr-x  1 root guild 24576 Nov 26 04:43 fml
-
-C Wrapper => .ptr{c-wrapper}
-   setuid => .ptr{non_privileged_user}
-.fi
+	01877,01879,01881
+	03942,03944,03965
+	05706,05708,05712,05715,05721,05722,05723,05724,05725,05726,05727,05728
+	07458,07733
 
 
 .S	:include:何か is unsafe for mailing to program ...
