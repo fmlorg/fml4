@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/12
+
+  apply patch to fix "makefml config-template" clean up code
+	From Naoki IDO <ido@hitachi-ms.co.jp> (fml-support: 08410)
+
 2000/07/09
 
    kern/fml.pl 
