@@ -21,6 +21,7 @@
 =E.S	Macro
 
 &DEFINE_MAILER(); は必要か？
+定義はしてるけど、どうかなぁ
 =E
 &DEFINE_MAILER(); is required ? 
 
@@ -28,6 +29,9 @@
 
 .S	MEAD
 
+sendmailのつける特殊なヘッダについてはトレースする。
+アドレス展開するのが逆追跡できる場合がある。
+=E
 check
 
 	Received: for <ADDRESS>
@@ -56,6 +60,11 @@ proc/libfml.pl:    if (&NonAutoRegistrableP) {
 proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
 .~q
 
+.S	配送関係
+=E.S	Delivery
+
+* VERPs
+
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -64,7 +73,10 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 .S	ドキュメント: FAQ をつくる
 =E.S	Document: make FAQ
 
+ドキュメント関連: FAQ をつくる。がんばろう;)
+
 .url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+
 
 .S	ドキュメント: doc/op
 =E.S	Document: doc/op
@@ -76,6 +88,7 @@ Should we split it to two parts?
 	1. fml operations guide
 	2. The design and implementation of ml
 
+
 .S	MIMEライブラリーの書き直し
 =E.S	rewrite MIME library
 
@@ -84,21 +97,22 @@ Should we split it to two parts?
 =E
 Especially basse64 encoder. RFC2047 is incomplete for Japanese.
 
+
 .S	日本語化問題
 =E.s	Japanese configuration files
 
 cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
 ＃時間次第か？(難易度は低くても辛さ度は最大)
 
-*	cf/MANIFEST 日本語化計画
+*	cf/MANIFEST のコメントの日本語化計画
+	cf/MANIFEST 未定義変数探し
 =E
 *	Japanese cf/MANIFEST
+	search undefined variables on cf/MANIFEST
 
-*	merge mnews help merge
-
-*	cf/MANIFEST 未定義変数探し
+*	ヘルプファイルのupdate, mnews ML版とうまくマージすること
 =E
-*	search undefined variables on cf/MANIFEST
+*	merge mnews help merge
 
 
 .S	[認証] $SENDER_AUTH_TYPE
@@ -114,8 +128,21 @@ makefml pgp ??? This command is for administrators.
 Which command could we use for usual member PGP authentication?
 
 
+.S	暗号化モード (USE_ENCRYPTION_DISTRIBUTION)
+=E.S	USE_ENCRYPTION_DISTRIBUTION
+
+この時に使う PGP は etc/pgp/ ではよくない。別につくるべき。
+この時の makefml のコマンドは？ 
+=E
+DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
+command" to handle pgp key for usual users.
+
+
 .S	makefml config full menu
 
+全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
+のでやらない。そんなことよりWWW
+=E 
 All variables can be configurable in the menu? 
 I may not do it since it only confuses the customize.
 
