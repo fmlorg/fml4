@@ -1,11 +1,9 @@
-.C	改造についていろいろ
+.C	改造について
 .l	hack
 .xref	data-structure
 
-
-なお fml のデータ構造の章は読んでおくとよりわかり易くなります。
+改造の話は fml のデータ構造の章は読んでおくとよりわかり易くなります。
 .xref	data-structure
-
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
 
@@ -18,7 +16,7 @@
 
 もしくは
 
-○ perl -d オプションで perl debugger 使う
+○ perl -d オプションで perl debugger を使う
 
 ○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
 
@@ -30,22 +28,21 @@ SMTP		libsmtp.pl
 	fop = file operation
 
 とか省略系もあるけど… ちなみに
-.ptr{library-lists} にライブラリの説明がありますね。
+.ptr{library-lists} にライブラリの説明一覧があります。
 
 
 .S	消してもいいファイル…
 
-すべてのファイルは手作業でなにしてもいいです。
+プロセスがない時なら、すべてのファイルは手作業でなにしてもいいです。
 
-それは結局メールがきた時”だけ” fml.pl が動いているので、それ以外の時
-は何をしてもＯＫだということですね(^^) 
+結局メールがきた時"だけ" fml.pl が動いているので、それ以外の時は何をし
+てもOKです。まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじっ
+てはいけないのも同様の理由です。そうでないときなら手動 edit できます。
 
-まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじってはいけない
-のも同様
+そりゃさすがに code の debug は今動いているＭＬとは別のところでやった
+ほうがいいですけど…
 
-そりゃさすがに code の debug はＭＬとは別のところでやったほうがいいけど…
-
-間違って消して困りそうなのは seq と var/log/msendrc あたりです :-)
+間違って消して一番困りそうなのは seq と var/log/msendrc あたりです :-)
 ようするにＭＬの今の記事番号や uniqueness を保存しているログですね
 
 seq ファイルの番号が狂うと 記事を overwrite したりはしないかわりに管理
@@ -59,87 +56,21 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
 次回 msend.pl が起動する時に自動復旧されることを期待するか…
 ただ、これは最新のメールしか送らないから↑、たまっていた分はログみない
-と不明のまま
-
+と不明のままになります。
 
 
 .S	MIME文字列を日本語へ変換すること
 .seealso	MIME-1, MIME-2
 
 $MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
-Decodeしてしまうなら、
+Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
+いけないのはとてつもなください通信サービス業者が…の場合です)、
 
 例：	$MailBody をMIME逆変換して日本語にする場合
 	$MailBody = &DecodeMimeStrings($MailBody);
 
 こんな感じのコードを適当な場所に書けばいいわけですね。
 ＃例えば HOOK でしかければよい
-
-
-.S	配送速度の律速段階とハック…
-.key	何がどこが遅くさせるか？
-
-律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
-この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
-それでもかなりのものです。
-
-論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
-げても ML の配送プロセスには何のメリットも生じないということでもありま
-す。
-
-余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
-ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
-す。
-
-これを改善する方法は基本的に複数の sendmail で作業を分割することです。
-
-１	十分なパワーのマシンで十分な file descriptor や 
-	多くの process が走っても大丈夫であれば、
-	複数の sendmail を起動して配送を試みる。
-	この場合ちゃんと Load Average と sendmail.cf を tune する
-	必要がある。 
-	
-２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
-
-３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
-	一回そのリレーサーバに投げて、そこから再配送をする。
-
-１、２は”MCI_… ” という変数群がそれを可能にします。
-
-リレーサーバは各ユーザごとに”管理者”が設定できます。
-リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
-考慮の上決めるべきです。
-また、fml のリレーハックは RFCにはない % hack を前提にしています。
-そのため、管理者が注意深く設定すべきです。
-
-
-なお $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
-
-	$DEFAULT_RELAY_SERVER
-.k	$DEFAULT_RELAY_SERVER
-
-で定義されたリレーサーバへ投げそのサーバに配送してもらうということもで
-きます。
-.xref	DEFAULT_RELAY_SERVER
-
-
-.S	内部で使われている変数を調べる
-.k	$DUMPVAR
-.k	dumpvar.pl
-
-config.ph で 
-	$DUMPVAR = 1;
-
-やコマンドラインで
-	fml.pl --DUMPVAR ...
-
-として fml を呼び出すと、全ての変数を dump します。
-
-この場合はPerlについてくる dumpvar.pl ライブラリを利用し、名前空間から
-変数リストを引っ張り出しています。
-
-この名前空間の仕方という考え方は libexec/fmlserv.pl でも利用されている
-やり方です。
 
 
 .S	改造事例:  sitedef.ph
@@ -405,39 +336,7 @@ $START_HOOK = q#
 複数あるなら 全部を うえのフックに加えて下さい。
 
 
-.S	.forward でMLはできるか？
-
-できます。特別なＭＬ用のUser をつくって ~/.forward を /etc/aliases と
-同じように設定すればいいだけです。
-＃なんらかの形で(お金で解決もあり)/etc/passwdをいじれることが条件です
-
-一つのアドレスで受けて、それを filtering program (fml_local.pl や 
-procmail, mailagent 等)で分離するというのも可能です。
-
-
-.S	multi domain server ではどうすればいいのか
-
-multi domain server といってもいろいろ実装形態はあるとおもうのですが…
-一例だけ
-
-multi domain server でどうすればいいのか、考えてみてたんですが…別にい
-じる必要はないようなきがしてきました。
-
-環境：
-	Multi Domain Server
-	例：
-		＊@nerv.org 宛のメールはひとつのアカウントへ集中する
-
-	対策：
-		.forward で fml_local をしかける
-
-	必要な設定：
-		ループは fml_local が阻止するので
-		問題はどう To: Cc: をみてわけるか？ということになる
-		最大の問題は Bcc: をどうするか？
-		
-
-.S	古典の printf debug 
+.S	古典の printf debug の例
 
 .q
 From: fukachan@phys.titech.ac.jp
@@ -472,56 +371,6 @@ X-Mail-Count: 00702
 .~q
 
 
-.S	複数のマシンの sendmail を使ってパラレルに送信
-.k	$HOSTS
-.k	@HOSTS
-.k	@HOST(@HOSTSの旧変数名)
-
-複数の(sendmailの走っている)マシン（非常時のセカンダリも含む）
-
-	$MCI_SMTP_HOSTS = N;
-
-で指定されたＮ台のマシンを配列 @HOSTS で指定する
-
-   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
-
-$HOST と @HOSTS で与えられる Ｎ個 のマシンの sendmail をパラレルに使っ
-て（理論上での限界は）Ｎ倍配送を高速化する。
-＃ $HOST も使われてしまうのは、もともと @HOSTS はセカンダリだったから
-＃ です（歴史的に）。
-
-もし、指定したサーバ数が N 個に足りない場合は、$HOST が何度も使われま
-す。
-
-
-Ｎは理論上 int と同じだろうが、普通は netmask できまるわな（笑）
-でも、他のドメインでも使えるから、int までいく（理屈、理屈）
-＃とくに actives の最後の方の人はうれしい
-
-actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
-まくいかせない可能性はあります。
-
-
-.S	配送するメールのMIME部分はDecodeしてから配送したい
-.label	MIME-hack
-.xref 	MIME-header
-
-＃注意：以下試していない。
-
-sub Distribute で
-
-    for (@HdrFieldsOrder) {
-	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
-
-という部分を
-
-    for (@HdrFieldsOrder) {
-	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
-
-とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
-実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
-
- 
 .S	fmlのコマンドが送れるページの例 [http://www.j-is.or.jp/fml/]
 
 .q
@@ -544,6 +393,7 @@ exception code いれたけど、裏技なのでdocumentにはかかず状態
 
 
 .S	新しく『特定のファイルを送り返す』コマンドを作る
+.l	my-file-sendback-command
 
 例: コマンド # news でニュースというファイルを送り返す。
 
