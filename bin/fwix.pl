@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -314,6 +314,8 @@ sub Format
 
 sub FormatReset
 {
+    return if $NotFormatReset;	# e.g. =E.\w ;
+
     undef $Tag;
     if ($InPre) {
 	print TMPF "</PRE>\n";
@@ -570,6 +572,7 @@ sub ReadFile
 	chop;
 
 	undef $Both;
+	undef $NotFormatReset;
 
 	# language declared
 	# reset Language if it encounters null line; 
@@ -591,6 +594,7 @@ sub ReadFile
 	if (/^=E/) { 
 	    s/^=E//; 
 	    $LANG = 'ENGLISH';
+	    $NotFormatReset = 1;
 	}
 
 	if (/^==/) { 
