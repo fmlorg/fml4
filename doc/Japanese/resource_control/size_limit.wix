@@ -1,0 +1,61 @@
+.S	投稿メールのサイズの制限
+=E.S	Limit of size for a posted article
+.n	mail_size_limit
+
+あまり大きいメールを送られてもサーバもメンバーの端末でも負荷が高くなる
+だけです。ＭＬサーバーが受けとる時に切り捨てます。コマンド、投稿を問わ
+ずチェックされます。デフォールトは制限なしで、サイズは byte 単位で
+=E
+You can restrict a posted article size. The maximum size is defined by
+
+		$INCOMING_MAIL_SIZE_LIMIT
+.k		$INCOMING_MAIL_SIZE_LIMIT
+.l		$INCOMING_MAIL_SIZE_LIMIT
+
+で指定します。なお0は無限大を意味します(デフォールト)。
+=E
+where the unit of this variable is "bytes". If
+
+		$NOTIFY_MAIL_SIZE_OVERFLOW (default 1)
+.k		$NOTIFY_MAIL_SIZE_OVERFLOW
+.l		$NOTIFY_MAIL_SIZE_OVERFLOW
+
+が設定されていれば送り主に fml が拒否した旨をメールで返します。
+経験的には知らせないと何度も非常に大きいメールを送ってくるので
+非常に迷惑です。
+=E
+is set, fml notifes the rejection to the sender.
+
+message/partial はばらばらにされて送られてくる分の合計のサイズを推定し
+てその値と $INCOMING_MAIL_SIZE_LIMIT を比較します。
+(最後の一通が突破する可能性はある)
+=E
+If message/partial style mail is given, fml speculates the total size.
+fml rejects it if the speculated total size is over
+$INCOMING_MAIL_SIZE_LIMIT.
+
+=E
+If 
+
+		$ANNOUNCE_MAIL_SIZE_OVERFLOW (default 0)
+.k		$ANNOUNCE_MAIL_SIZE_OVERFLOW
+.l		$ANNOUNCE_MAIL_SIZE_OVERFLOW
+
+を 1 に定義すると、ＭＬに「でっかいメールをＭＬへ投げた人がいる」とさ
+らしものにする:)。＃本人に警告すれば十分だとおもうんだが…
+=E
+is defined, announce "somebody sends too big mail to ML" to ML.
+
+
+.S	ＭＬのメンバー数制限(自動登録の時)
+=E.S	Limit of the number of members in a ML
+
+	$MAX_MEMBER_LIMIT
+.k	$MAX_MEMBER_LIMIT
+.l	$MAX_MEMBER_LIMIT
+
+でメンバーの最大数を制限する。認証するメンバーのリストではなく、配送の
+リストをチェックしています。もっとも自動登録の時はほとんど同じことですが
+=E
+is the maximum number of members. It may be useful in automatic
+registration mode.

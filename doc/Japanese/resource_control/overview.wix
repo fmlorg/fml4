@@ -1,0 +1,37 @@
+.C	概要
+
+.S	ＭＬのメンバーの上限数
+.xref	$MAX_MEMBER_LIMIT
+
+デフォールトは無制限
+
+.S	メールサイズの制限
+
+投稿/コマンドメールを問わず入力されるデータの大きさをチェックします。
+デフォールトは無制限
+
+.xref $MAX_MEMBER_LIMIT
+
+.S	トラフィックの制御
+.xref MTI
+
+一気にメールを送ってくる人のメールは拒否します。
+この制御機構の名前は MTI (Mail Traffic Information)と呼ばれています。
+この機構を有効にするには
+
+	$USE_MTI = 1; (default 0)
+
+.q
+makefml config
+メインメニュ → セキュリティ → USE_MTI
+.~q
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
