@@ -130,9 +130,6 @@ sub InitMakeFml
 	$CONFIG_DIR =~ s#\\#/#g;
     }
 
-    # config amd temporary files
-    $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER.$$";
-
     # Anyway try once ... (may be re-installation ?)
     # Dame moto sune:-)
     if (! $CONFIG_DIR) {
@@ -148,6 +145,16 @@ sub InitMakeFml
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
 
     # for ($FML_CONFIG, $FML_POLICY) { &Touch($_) unless -f $_;}
+
+    # config amd temporary files
+    if ($TheFirstTime) {
+	$MAKEFML_LOGFILE  = "/tmp/fml::makefml::log.${USER}.$$";
+	$TempolaryLogfile = $MAKEFML_LOGFILE;
+    }
+    else {
+	$MAKEFML_LOGFILE  = "$CONFIG_DIR/log";
+    }
+    &Touch($MAKEFML_LOGFILE) unless -f $MAKEFML_LOGFILE;
 
 
     ### *Config, %Default, %PolicyDefault;
@@ -521,8 +528,11 @@ sub SavePolicy
 
 sub FlushLog
 {
-    &Cat($CONFIG_LOG);
-    unlink $CONFIG_LOG;
+    if ($TempolaryLogfile eq $MAKEFML_LOGFILE) {
+	print STDERR "--- makefml log ($MAKEFML_LOGFILE) ---\n";
+	&Cat($MAKEFML_LOGFILE);
+	unlink $MAKEFML_LOGFILE if $TheFirstTime;
+    }
 }
 
 
@@ -584,12 +594,11 @@ sub Log
 	&Append2("$Now $str ($from)", $LOGFILE);
 	&Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
     }
-    elsif (-f $CONFIG_LOG && open(APP, ">> $CONFIG_LOG")) {
-	&Append2("$Now $str ($from)", $CONFIG_LOG);
-	&Append2("$Now    $filename:$line% $s", $CONFIG_LOG) if $s;
+    elsif (-f $MAKEFML_LOGFILE && open(APP, ">> $MAKEFML_LOGFILE")) {
+	&Append2("$Now $str ($from)", $MAKEFML_LOGFILE);
+	&Append2("$Now    $filename:$line% $s", $MAKEFML_LOGFILE) if $s;
     }
     else {
-	print STDERR "$Now ($package, $filename, $line) $LOGFILE\n";
 	print STDERR "$Now $str ($from)\n\t$s\n";
     }
 }
@@ -851,9 +860,11 @@ sub ExecCmd
 	}
     }
 
-    # O.K. $ml is defined if $ml is required.
+    # Here $ml and approviate dir/files must be already defined
+    # if $ml is required.
     if ($ml) {
 	$LOGFILE = "$ML_DIR/$ml/log";
+	&Touch($LOGFILE) unless -f $LOGFILE;
     }
 
     # Lock all when "install"
@@ -867,7 +878,7 @@ sub ExecCmd
     if ($MakeFmlProc{$fp}) {
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
 	local($fn) = $fp; $fn =~ s/do_//;
-	&Log("makefml::${fn} @argv ");
+	&Log("makefml::${fn} @argv ") if $fp ne "do_install";
 	&$fp(@argv);
     }
     else {
@@ -1064,7 +1075,7 @@ sub OutPutLocalConfig
     ### %MAKE_FML
     while (($k, $v) = each %MAKE_FML) {
 	next unless $v;
-	print STDERR "MAKE_FML\t$k\t=>$v\n";
+	print STDERR "MAKE_FML\t$k\t=>$v\n" if $debug;
     }
 
 
@@ -1244,7 +1255,8 @@ sub Conv
     local($ml, $example, $out) = @_;
     local($uid, $gid, $format);
 
-    &ApplyPolicy;
+    # &ApplyPolicy;
+
     $format = $Policy{'CONTROL_ADDRESS_FORMAT'};
 
     if ($debug) {
@@ -1606,6 +1618,7 @@ sub GenerateDirectory
     # owner only read-write
     # umask(077);
     &MakeDir("$ML_DIR/$ml");
+    &MakeDir("$ML_DIR/$ml/spool"); # required for further flock
 }
 
 
@@ -1640,7 +1653,7 @@ sub do_newml
 
     print "---Creating $ml mailing list\n";
 
-    &ApplyPolicy;
+    # &ApplyPolicy;
 
     &GenerateDirectory($ml);
     &ResetVariables;
@@ -1943,7 +1956,7 @@ sub do_config
 
     for (keys %config) {
 	if ($config{$_} ne $saved_config{$_}) {
-	    &Log("makefml::config \$${_} [$saved_config{$_} -> $config{$_}]");
+	    &Log("makefml::config \$${_} \"$saved_config{$_}\" -> \"$config{$_}\"");
 	}
     }
     ### MENU END 
@@ -2475,11 +2488,11 @@ sub FLock
 {
     local($ml, $mldir) = @_;
     local($lockdir) = "$mldir/$ml/";
-
+    $lockdir =~ s#$ml/$ml#$ml#;
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
    
     open($lockdir, $lockdir) || do {
-	&Log("Error: cannot open $lockdir");
+	&Log("Error: Flock cannot open $lockdir");
 	return 0;
     };
 
