@@ -35,7 +35,7 @@ Index
 
 .# ##########################################################
 .P	Design Overview of the fml 
-
+.k	Design Overview
 
 パートIでは、fml の設計思想の概略について述べます。
 実際の細かい設定についてはパートII以降へ譲ります。
@@ -64,7 +64,7 @@ I recommend.
 .# ##########################################################
 .P	Process overview of the fml
 .l	process-overview
-
+.k	Process overview
 
 ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
 いて解説します。
@@ -162,12 +162,12 @@ Can you understand sources of quotations?:-)
 .include ftp.wix
 .include whois.wix
 .include cwhois.wix
+
 .include pager.wix
+.include mail2news.wix
 
 .include aucea.wix
 .include fred.wix
-
-.include mail2news.wix
 
 .include obsoletes.wix
 .include app/fmlR1.wix
