@@ -274,6 +274,22 @@ to the address <fml-bugs@ffs.fml.org>.
 .# automatically.
 .fi
 
+.S	fml-FAQのネタ募集について
+=E.S	fml FAQ
+
+fmlのFAQを作成中するプロジェクトが現在進行形です。プロジェクトからのお
+願い/お知らせを以下に引用します。
+=E
+A project to create fml FAQ runs in JWNTUG ntfml-wg. If you have
+queations or answers on some topics, please click here
+
+   JWNTUG ntfml-wg では、fml の FAQ を作成中です。より充実した FAQ を
+   目指すため fml ユーザの皆様からネタを募集しています。以下のサイトに
+   登録ページを用意しましたので、ご協力お願いします。
+
+.url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+
+
 
 .C	インストール
 =E.C	Installation
