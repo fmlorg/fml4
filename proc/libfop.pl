@@ -110,6 +110,11 @@ sub InitDraftGenerate
     $_fp{'retrieve', 'lhaish'} = 'f_LhaAndEncode2Ish';
     $_fp{'split',    'lhaish'} = 'f_SplitFile';
 
+    # PACK: LHA + ISH
+    $_fp{'cnstr',    'lhauu'} = '';
+    $_fp{'retrieve', 'lhauu'} = 'f_LhaAndEncode2UU';
+    $_fp{'split',    'lhauu'} = 'f_SplitFile';
+
     # UUENCODE ONLY
     $_fp{'retrieve', 'uu'}     = 'f_uu';
     $_fp{'split',    'uu'}     = 'f_SplitFile';
@@ -210,10 +215,10 @@ sub Cnstr_mp
     $conf{'trailer'}  .= $MIME_MULTIPART_TRAILER if $MIME_MULTIPART_TRAILER;
 
     # make MIME Header
-    undef $_cf{'header', 'MIME'};
-    $_cf{'header', 'MIME'} .= "MIME-Version: $MIME_VERSION\n";
-    $_cf{'header', 'MIME'} .= "Content-type: $MIME_CONTENT_TYPE\n";
-    $_cf{'header', 'MIME'} .= "\tboundary=\"$MIME_MULTIPART_BOUNDARY\"\n";
+    undef $Envelope{'r:MIME'};
+    $Envelope{'r:MIME'} .= "MIME-Version: $MIME_VERSION\n";
+    $Envelope{'r:MIME'} .= "Content-type: $MIME_CONTENT_TYPE\n";
+    $Envelope{'r:MIME'} .= "\tboundary=\"$MIME_MULTIPART_BOUNDARY\"\n";
 }
 
 
@@ -261,7 +266,7 @@ sub f_RetrieveFile
 	$lines = &WC($file);
 	
 	# open the next file
-	&Debug("open(FILE, $file) || next;") if $debug; 
+	&Debug("open(FILE, $file) || next;") if $debug_rf; 
 	open(FILE, $file) || next; 
 	print OUT $conf{'delimiter'} if $conf{'delimiter'};
 
@@ -280,7 +285,7 @@ sub f_RetrieveFile
 		print OUT $_; $linecounter++;
 	    }
 	}
-	&Debug("close(FILE) [total=$total];") if $debug; 
+	&Debug("close(FILE) [total=$total];") if  $debug_rf; 
 	close(FILE);
 	
 	print OUT "\n"; $linecounter++;
@@ -328,6 +333,13 @@ sub f_LhaAndEncode2Ish
 {
     local(*conf, *r, *misc) = @_;
     &LhaAndEncode2Ish($conf, $r, @conf); # input:$conf;
+}
+
+
+sub f_LhaAndEncode2UU
+{
+    local(*conf, *r, *misc) = @_;
+    &LhaAndEncode2UU($conf, $r, @conf); # input:$conf;
 }
 
 
@@ -533,6 +545,44 @@ sub LhaAndEncode2Ish
 }
 
 
+# Lha + uuencode for $FILE
+# &Lha..( inputfile, encode-name, @list ) ;
+# return ENCODED_FILENAME
+sub LhaAndEncode2UU
+{
+    local($input, $name, @filelist) = @_;
+    local($tmpout);
+
+    &Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
+
+    # SJIS ENCODING
+    if ($USE_SJIS_in_ISH) {
+	require 'jcode.pl';
+	@filelist = &Convert2Sjis(*filelist);
+    }
+
+    &Debug("LhaAndEncode2UU($input, $name, @filelist)") if $debug;
+
+    # Variable setting
+    $name     =~ s#(\S+)/(\S+)#$2.lzh#;
+    $name     =~ s/\.gz$/.lzh/;
+    $name     =~ s/\.lzh\.lzh$/.lzh/;
+    $tmpout   = "$TMP_DIR/$name";
+    $LHA      = $LHA || "$LIBDIR/bin/lha";
+    $COMPRESS = "$LHA a $tmpout ". join(" ", @filelist);
+
+    unlink $tmpout if -f $tmpout; # against strange behaviours by "lha";
+
+    &system($COMPRESS);
+    &system("$UUENCODE $name", $input, $tmpout);
+
+    unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
+    unlink $tmpout unless $debug;	# e.g. unlink msend.lzh
+
+    $input;
+}
+
+
 # Convert @filelist -> 
 # return filelist(may be != given filelist e.g. spool -> tmp/spool)
 # &system 's parameter is ($cmd , $out, $in)
@@ -616,7 +666,12 @@ sub SendingBackInOrder
 	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
 	    " Sending Back $now/$TOTAL";
 	&Log("SendBackInOrder[$$] $now/$TOTAL $to");
-	&SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, @to);
+
+	$subject = "$SUBJECT ($now/$TOTAL) $ML_FN";
+	@files = ($file);
+	&NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
+	#    &SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, @to);
+	# -> &NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
 
 	unlink $file unless $debug;
 
@@ -629,7 +684,7 @@ sub SendingBackInOrder
     unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
     unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
 
-    undef $_cf{'header', 'MIME'}; # destructor
+    undef $Envelope{'r:MIME'}; # destructor
 }
 
 
@@ -663,7 +718,7 @@ sub SendFilebySplit
 	&SendingBackInOrder($tmp, $total, $s, $sleep, @to);
     }
 
-    undef $_cf{'header', 'MIME'}; # destructor. 
+    undef $Envelope{'r:MIME'}; # destructor. 
 }
 
 
