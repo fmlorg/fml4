@@ -84,23 +84,31 @@ versionの数字や作られるディレクトリについては適当に読み変えて下さい。
 
 .q
 ○ ソースを以下のURLから持ってくる。
-% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+
+% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
-…略…
+… (snip) …
 50% |*************************                         | 818 KB 00:40 ETA
-…略…
+… (snip) …
 226 Transfer complete.
 1656664 bytes received in 01:20 (20.02 KB/s)
 221 Goodbye.
 %
 
 ○ ソースを展開する。directoryができる。
-% gunzip fml-current.tar.gz
-% tar xf fml-current.tar
+=E
+extract tar.gz to create the directory.
 
-○ 作られたdirectoryに移る(名前はfml-バージョン-snapshot番号のようになる)
-% cd fml-2.2A-snapshot30 
+% gunzip fml-stable-latest.tar.gz 
+% tar xf fml-stable-latest.tar
+
+○ 作られたdirectoryに移る(名前はfml-バージョン-pl(patch level)番号のようになる)
+=E
+change directory to it. The name format is fml-${version}-pl${number}
+(pl == patch level). 
+
+% cd fml-3.0pl23
 
 ○ インストール開始。インストールする場所等の質問に答える。
 % make install
@@ -108,6 +116,8 @@ Connected to ftp.iij.ad.jp.
 
 ○ fml自体のインストール自体は終了。
    この後ＭＬの作成/設定/メンバー登録等を行なう
+=E
+You installed fml. After it, run makefml to make "elena" ML, for example. 
 
 elena MLを作る。
 % /usr/local/fml/makefml newml elena

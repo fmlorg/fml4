@@ -180,6 +180,13 @@ to ML. MTA 2 (delivery system) can run on another hosts other than MTA
 .S	ソースコードと情報へのポインタ
 =E.S	Source codes and the latest information
 
+.if LANG == JAPANESE
+.url http://www.fml.org/fml/download.html
+.fi
+.if LANG == ENGLISH
+.url http://www.fml.org/fml/download-e.html
+.fi
+
 [Sources]
 
 最新版のソースコードは以下の anonymous ftp から入手可能です。
@@ -188,18 +195,28 @@ You can obtain fml sources at the URL
 
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-です。リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼
-ばれ fml-current.日付.tar.gz という名前で置かれています。日付の新しい
-(生きのいい:-)のをどうぞ。ここの階層以下にはメールに関連するプログラム
-群も置いてあります。最新版は
+この下に stable/ と current/ というディレクトリにそれぞれ安定版と開発
+版のソースがあります。便利なようにそれぞれのシリーズの最新版にはリンク
+がはってあります。
 =E
-Please get the latest one, which is called fml-current. You'll find
-fml-current, official released and other mail related sources at the
-URL. The latest one is
+This directory has stable/ (stable sereis) and current/ (development
+series). I do the following symlink(2) to latest snapshot in both
+serieses.
 
-.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+* 3.0 Releaseにバグ修正だけをほどこしたstableシリーズの最新版
+=E
+* latest stable snapshot
 
-です。
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz
+
+* 開発版(bug fixと機能拡張) 
+=E
+* latest development snapshot
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz 
+
+リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼
+ばれています。
 
 [Documents] 
 
@@ -324,7 +341,6 @@ address <fml-bugs@ffs.fml.org>.
 .fi
 
 .S	fml-FAQ project
-=E.S	fml FAQ
 
 fmlのFAQを作成中するプロジェクトが現在進行形です。
 =E
