@@ -16,6 +16,9 @@ DOC_EXAMPLES_SOURCES += tips/nospam
 DOC_EXAMPLES_SOURCES += tips/postfix-pop-before-smtp
 DOC_EXAMPLES_SOURCES += tips/smrsh
 
+# virtual domain tips
+DOC_EXAMPLES_SOURCES += tips/fml-install-for-virtual-domain
+
 # obsolete
 DOC_EXAMPLES_SOURCES += tips/distribute-emulation
 
