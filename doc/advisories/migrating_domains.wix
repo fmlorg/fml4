@@ -62,6 +62,9 @@ ML作成時のMLのホームにできるMakefileにはdomain-translateというルールが
 
 を実行すれば良い
 
+○ fml 2.2A#41 以降では members-name についても変換を行なう
+   ($USE_MEMBER_NAMEを使っている人だけ関係あり)
+
 
 .S	自動書き変え: fml 2.2A#39
 .xref	fml-2.2A#40
@@ -81,9 +84,9 @@ ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/bin/translate.pl
 
    % cd /var/spool/ml/elena
    % makefml lock elena 120
-   % perl /tmp/translate.pl -f /tmp/mgrdomains actives members members-admin 
+   % perl /tmp/translate.pl -f /tmp/mgrdomains actives members members-admin members-name
 
-などとすれば、actives members members-admin が書き変わる。
+などとすれば、actives members members-admin members-name が書き変わる。
 
 
 .S	問題点
@@ -96,7 +99,10 @@ ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/bin/translate.pl
    といけない。が、とてもそんな真面目に保守してられない。
 
 
-.C	OR.JPでもNE.JPでもどっちでも認証だけは可能にする
+.C	OR.JPでもNE.JPでもどっちでも認証だけは可能にする(非推奨)
+
+こういう非本質的なことをすると何が起こるかわからないので、使わない方が
+いい。
 
 ちなみにこの機能自体は 2月中旬くらいから入っている。でも移行するドメイ
 ンリストは2.2A#39以降にしかないので、適当に作る必要がある。
