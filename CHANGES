@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/02/01
+
+  ドキュメント修正
+	オライリー本への補足、誤植等について…
+	welcome ファイルを送り返さない方法
+	DEFINE_MODE(disablenotify) について補足
+
+   makefml
+	fix _PERL_PATH handling
+
+	env _PERL_PATH= makefml ...
+	の指定をする時も perl をさがしてしまうバグをなおす
+
 2001/01/22
 
    4.0-stable series start
