@@ -1,6 +1,50 @@
 .C	Overview
 
-.S	Overview
+.S	コマンドの一覧
+=E.S	Available command index
+.k	コマンドの一覧->helpファイル
+
+help ファイルを見て下さい:-)
+=E
+Please see "help" file for standard commands list.
+doc/help.jp (Japanese) and doc/help.en (English) are available.
+
+elena ＭＬのヘルプファイルは /var/spool/ml/elena/help
+このファイルは
+
+	makefml newml elena 
+
+を実行した時に /usr/local/fml/drafts/help.jp を元にして生成されます。
+
+
+.S	特定のコマンドだけを許す
+.xref	@PermitProcedure
+
+@PermitProcedure で定義を書きます。
+@PermitProcedure を使うと自動的に 
+
+	1. 全部のコマンドを使用不能にする
+	2. @PermitProcedure で定義されたものコマンドだけを許す
+
+例:
+	@PermitProcedure = ('guide', 'summary');
+
+.S	特定のコマンドだけを使用不能にする
+.xref	@DenyPrecedure
+
+@DenyPrecedure を使います。この配列で指定したコマンド以外は全部使用可
+能のままです
+
+例:
+	@DenyProcedure = ('get', 'send', 'mget', 'msend');
+
+.S	自分自身でカスタマイズしたコマンドを定義する
+.xref	%LocalProcedure
+
+例: 自分で定義した hack コマンドを加える。
+
+	sub myProcHack { なんとかかんとか… }
+	%LocalProcedure = ('hack', 'myProcHack');
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

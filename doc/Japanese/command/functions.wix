@@ -1,0 +1,82 @@
+.C	コマンドの定義/追加/削除等について
+=E.C	Commands
+.n	commands
+
+この章ではコマンドの定義などについて解説します。
+
+.S	ＭＬで使えるコマンドを増やすor減らす
+=E.S	How to Add or Remove Available Commands
+.l	add-procedures
+.xref	add-admin-procedures
+.l	@PermitProcedure
+.l	@DenyProcedure
+
+config.ph でコントロールできます。いくつかの変数がありますが、次のよう
+に作動します
+=E
+You can set up what commands you add or remove in config.ph.
+FML interprets it as follows:
+
+   1	@PermitProcedure が定義してあるなら
+	@PermitProcedure で許しているコマンドだけを設定します。
+	もし、定義されていなければデフォールトのすべてのコマンドが
+	利用可能になります。
+	これらの設定はグローバル変数の %Procedure に定義されます。
+=E
+   1 	If @PermitProcedure is defined, FML disables all commands 
+	and permits commands defined in it. 
+	If not defined, %Procedure (default) is used which is 
+	automatically set in the first phase of FML command routine
+
+   2	%LocalProcedure が定義されているなら
+	1 で定義された %Procedure を %LocalProcedure で上書きします。
+=E
+   2	%LocalProcedure overwrites %Procedure.
+
+   3	@DenyProcedure が定義されているなら
+	@DenyProcedure のコマンドだけを使えなくする
+=E
+   3 	If @DenyProcedure is defined, remove commands defined in
+	@DenyProcedure from %Procedure.
+
+Example:
+
+	○ guide と summary のみを使用可能、それ以外はすべて使用不可
+=E
+	permit only "guide" and "summary", but disables other commands.
+
+	@PermitProcedure = ('guide', 'summary');
+
+	○デフォールトに加え自分で定義した hack コマンドも使える
+=E
+	add my "hack" command. You need to write subroutine "ProcHack".
+
+	%LocalProcedure = ('hack', 'ProcHack');
+.l	%LocalProcedure
+
+	もちろんこの場合はどこかで sub ProcHack { ...; } があって
+	この関数を用意しておく必要がある。
+
+	○デフォールトの中で get 関係は使えなくする
+=E
+	Disable "get" commands but others are available.
+
+	@DenyProcedure = ('get', 'send', 'mget', 'msend');
+
+	○ メンバーリストなどを取れないようにする
+=E
+	Disable commands to retrieve member lists
+
+	@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
+
+
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

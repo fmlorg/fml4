@@ -6,10 +6,14 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.include overview.wix
+.include howto.wix
+.include library.wix
 .include member_name.wix
-.include proc.wix
 .include traffic.wix
 .include whois.wix
+.include misc.wix
+.include internals.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -1,0 +1,67 @@
+.C	その他
+
+.S	index コマンド
+=E.S	index command
+.l	index
+.k	index コマンド
+.k	$INDEX_SHOW_DIRNAME
+.k	$INDEX_FILE 
+
+取り寄せられるファイルの一覧を返します。もし $DIR/index ($INDEX_FILE) 
+が存在する場合はそれを使います。そうでない場合は$SPOOL_DIR
+@ARCHIVE_DIR の内容を調べて返します。
+=E
+If $INDEX_FILE ($DIR/index) exists, FML sends back it as an index of
+archives FML has. If not exists, FML scans $SPOOL_DIR and @ARCHIVE_DIR
+not recursively and reports the result.
+
+$INDEX_SHOW_DIRNAME がセットされている時は ($DIR からの相対的な)
+directory 階層も表示します。デフォールトではファイル名とそのサイズだけ
+です。これ以上細かい制御を行なう場合は $INDEX_FILE を書く方が良いでしょ
+う。
+=E
+If $INDEX_SHOW_DIRNAME is set, FML scan	is recursive.
+
+
+.S	qmail でだけ使える拡張 (アドレス自体がコマンド名になる場合)
+=E.S	listname-command (qmail case; a trick) 
+
+makefml が .listname-default というサンプルを作りますが、これを 
+/var/qmail/alias に入れてさらに config.ph で
+=E
+makefml craetes a sample .listname-default. If you copy it to
+/var/qmail/alias/ and set 
+
+	$USE_DOT_QMAIL_EXT = 1;
+
+を設定すると listname-command のようなシンタックスが使えるようになりま
+す。
+=E
+in config.ph, you can use listname-command-argument for "command
+argument" to listname-ctl. For example, 
+
+	send "get 100 " to elena-ctl@baycity.asia
+
+は次のアドレスと同じにできます。
+=E
+is the same as
+
+	send "" to elena-get-100@baycity.asia
+
+単に qmail をいじくってるうちにできたのでそのままいれてあります。でも 
+mget 100-110 とかはどうしよう:D (getだけは例外にしなきゃだめかのぉ）
+
+またコマンドの - が使えないので
+=E
+"-" is not used, so fml recognizes
+
+	elena-mget--1-3-mp@DOMAIN 
+
+宛のメールを
+=E
+as a command
+
+	"mget 1-3 mp" 
+
+コマンドと解釈するようにしてあります。
+
