@@ -320,9 +320,14 @@ NEWSYSLOG_MAX:			4
 
 
 INFO:
-# Expire 
-DEFAULT_EXPIRE:
+### Expiration Function
 
+USE_EXPIRE:			0
+				# expiration function built-in (2.1 release) 
+
+EXPIRE_LIMIT:			7days
+				# expiration limit, syntax is e.g. 
+				# 7days(days) or 100 (articles left in spool)
 
 
 INFO:
