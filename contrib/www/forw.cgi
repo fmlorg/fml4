@@ -90,7 +90,7 @@ sub Forw
 	($k, $v) = ($_, $input{$_});
 	next if $SKIP_FIELDS{$k};
 	$v =~ s/\n/\n\t/g;
-	print S "$k\t$v\n" if $v;
+	print S "$k\t$v\n" if $v !~ /^\s*$/;
     }
 
     print S "\n\# end\n\n";
