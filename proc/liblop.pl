@@ -224,7 +224,7 @@ sub ResentForwFileInSpool
     $e{"GH:Resent-From:"} = $MAINTAINER;
     $e{"GH:Resent-To:"}   = $e{'Addr2Reply:'};
     $e{"GH:Resent-Date:"} = $MailDate;
-    $e{"GH:Resent-Message-Id:"} = "<$CurrentTime.FML$$\@$FQDN>";
+    $e{"GH:Resent-Message-Id:"} = &GenMessageId;
 
     # sleepy@maekawa.is.uec.ac.jp 97/02/02
     for (('Resent-From','Resent-To', 'Resent-Date', 'Resent-Message-Id')) {
