@@ -20,8 +20,8 @@ __touch_info:
 	touch CHANGES
 
 __init_conf:
-	echo `cat conf/release`"#0" > conf/release_version
-	echo please set up ${FML}/conf/release_version >> /tmp/fml.note
+	echo `cat conf/release`" (`date +%C%y%m%d`)" > conf/release_version
+	@ echo ""; cat conf/release_version ; echo "";
 
 __note_conf:
 	@ echo ""
