@@ -116,6 +116,15 @@ sub LoadDummyMacros
 {
     print STDERR "-- LoadDummyMacros\n" if $debug_30B;
 
+    eval "sub GET_HEADER_FIELD_VALUE { 1;}";
+    eval "sub GET_ORIGINAL_HEADER_FIELD_VALUE { 1;}";
+    eval "sub SET_HEADER_FIELD_VALUE { 1;}";
+    eval "sub GET_ENVELOPE_VALUE { 1;}";
+    eval "sub SET_ENVELOPE_VALUE { 1;}";
+    eval "sub ENVELOPE_APPEND { 1;}";
+    eval "sub ENVELOPE_PREPEND { 1;}";
+    eval "sub GET_BUFFER_FROM_FILE { 1;}";
+
     eval "sub STR2JIS {1;}";
     eval "sub STR2EUC {1;}";
     eval "sub JSTR    {1;}";
@@ -143,13 +152,87 @@ sub LoadDummyMacros
     eval "sub DEFINE_PROCEDURE { 1;}";
 }
 
+# hash control interface
+sub GET_HEADER_FIELD_VALUE
+{ 
+    my ($hf) = @_;
+    $hf = &FieldCapitalize($hf);
+    $Envelope{"h:${hf}:"};
+}
+
+sub GET_ORIGINAL_HEADER_FIELD_VALUE
+{ 
+    my ($hf) = @_;
+    $hf =~ tr/A-Z/a-z/;
+    $Envelope{"h:${hf}:"};
+}
+
+sub SET_HEADER_FIELD_VALUE
+{ 
+    my ($hf, $value) = @_;
+    $hf = &FieldCapitalize($hf);
+    $Envelope{"h:${hf}:"} = $value;
+}
+
+sub GET_ENVELOPE_VALUE
+{ 
+    my ($key) = @_;
+    $Envelope{$key};
+}
+
+sub SET_ENVELOPE_VALUE
+{ 
+    my ($key, $value) = @_;
+    $Envelope{$key} = $value;
+}
+
+sub ENVELOPE_APPEND
+{ 
+    my ($key, $value) = @_;
+
+    if (($key eq 'Body') && $Envelope{'h:Lines:'}) {
+	my ($lines) = ($value =~ tr/\n/\n/);
+	$Envelope{'h:Lines:'} += $lines;
+    }
+
+    $Envelope{$key} .= $value;
+}
+
+sub ENVELOPE_PREPEND
+{ 
+    my ($key, $value) = @_;
+    
+    if (($key eq 'Body') && $Envelope{'h:Lines:'}) {
+	my ($lines) = ($value =~ tr/\n/\n/);
+	$Envelope{'h:Lines:'} += $lines;
+    }
+
+    $Envelope{$key} = $value . $Envelope{$key};
+}
+
+sub GET_BUFFER_FROM_FILE
+{
+    my ($file) = @_;
+    my ($buffer);
+
+    if (open($file, $file)) {
+	while (<$file>) {
+	    $buffer .= $_;
+	}
+	close($file);
+	$buffer;
+    }
+    else {
+	&Log("GET_BUFFER_FROM_FILE: cannot open $file");
+	$NULL;
+    }
+}
 
 sub STR2JIS { &JSTR($_[0], 'jis');}
 sub STR2EUC { &JSTR($_[0], 'euc');}
 sub JSTR
 {
     local($s, $code) = @_;
-    print STDERR "--main->JSTR\n";
     require 'jcode.pl';
     &jcode'convert(*s, $code || 'jis'); #';
     $s;
