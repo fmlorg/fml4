@@ -5,3 +5,4 @@ DOC_DEVEL_SOURCES += qmail-users-assign.txt
 DOC_DEVEL_SOURCES += openssl.txt
 DOC_DEVEL_SOURCES += qmail-internal.txt
 DOC_DEVEL_SOURCES += bind-version.txt
+DOC_DEVEL_SOURCES += OS_and_Perl.txt
