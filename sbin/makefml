@@ -573,8 +573,8 @@ sub SetHashDefaults
 		    'html_config_set', 'do_html_config',
 
 		    # 
-		    'admin-cgi',    'do_new_ml_cgi',
-		    'mladmin.cgi', 'do_setup_mladmin_cgi',
+		    'admin.cgi',    'do_setup_admin_cgi',
+		    'mladmin.cgi',  'do_setup_mladmin_cgi',
 		    '500#mladmin.cgi', 'set up ml-admin/$ml/*.cgi',
 		    );
 
@@ -4146,22 +4146,42 @@ sub do_update
 }
 
 
+sub do_setup_admin_cgi
+{
+    local($ml) = @_;
+
+    &ResetVariables;
+
+    &MkDir("$EXEC_DIR/share/cgi-bin/admin", 0755);
+
+    for $f ("menu.cgi", "makefml.cgi") {
+	$template = "$EXEC_DIR/www/cgi-bin/admin/$f";
+	$outfile  = "$EXEC_DIR/share/cgi-bin/admin/$f";
+	print "\tcreate $outfile\n";
+	&Copy($template, $outfile);
+	chmod 0755, $outfile;
+    }
+
+    print "\n   done.\n";
+}
+
+
 sub do_setup_mladmin_cgi
 {
     local($ml) = @_;
 
     &ResetVariables;
 
-    &MkDir("$EXEC_DIR/share/cgi-bin/ml-admin/$ml");
+    &MkDir("$EXEC_DIR/share/cgi-bin/ml-admin/$ml", 0755);
 
     for $f ("menu.cgi", "makefml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/ml-admin/$f";
 	$outfile  = "$EXEC_DIR/share/cgi-bin/ml-admin/$ml/$f";
 	&Conv($ml, $template, $outfile);
-	chmod 0555, $outfile;
+	chmod 0755, $outfile;
     }
 
-    print "done.\n";
+    print "\n   done.\n";
 }
 
 
