@@ -481,7 +481,7 @@ sub FML_SYS_ChaddrRequest
 	}
     }
     else {
-	&Mesg(*e, "$proc had something error.");
+	&Mesg(*e, "$proc: something error occurs.");
 	&Mesg(*e, $NULL, 'command_something_error', $proc);
     }
 }
@@ -548,7 +548,7 @@ sub MesgChaddrConfirm
     else {
 	&Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
 	&Mesg(*e, "\tsyntax: chaddr old-address new-address");
-	&Mesg(*e, "\told-address should be a member now");
+	&Mesg(*e, "\told-address should be a member");
     }
 }
 

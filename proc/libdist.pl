@@ -43,7 +43,7 @@ sub DoDistribute
 	    }
 	    else {
 		&Log("invalid PGP signature, no delivery");
-		&Mesg(*e, "Your PGP signature seems incorrect, ML delivery is not allowed.");
+		&Mesg(*e, "Your PGP signature seems incorrect. ML delivery is not allowed.");
 		&Mesg(*e, $NULL, "pgp.incorrect_signature");
 		&Mesg(*e, $NULL, 'EAUTH');
 		return 0;

@@ -131,7 +131,7 @@ sub DoApprove
 	if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
 	    &Mesg(*e, $NULL, 'auth.please_use_pgp', $proc);
 	    &Mesg(*e, " BTW why you use password authentication in pgp mode?");
-	    &Mesg(*e, " which is of no use.");
+	    &Mesg(*e, " passwd auth is not needed under pgp mode.");
 	}
     }
 }
@@ -498,7 +498,7 @@ sub AdminAuthP
 	    return 'ok';
 	}
 	else {
-	    &Mesg(*e, "554 PASSWD UNCHANGED");
+	    &Mesg(*e, "554 PASSWD REMAINS UNCHANGED");
 	    &Mesg(*e, $NULL, 'auth.password_unchanged');
 	    return $NULL;
 	}

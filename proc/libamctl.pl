@@ -446,7 +446,7 @@ sub DoSetDeliveryMode
 	if ($NOT_USE_SPOOL) {
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
 	    &Mesg(*e, "Error: $proc is disabled");
-	    &Mesg(*e, "       since we do not spool articles");
+	    &Mesg(*e, "       since we have no spooled articles");
 	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
 	    return $NULL;
 	}
@@ -521,9 +521,9 @@ sub DoSetMemberList
 
     # LOOP CHECK
     if (&LoopBackWarn($curaddr)) {
-	&Mesg(*e, "$cmd: $curaddr may case a mail loop, reject");
+	&Mesg(*e, "$cmd: $curaddr may case a mail loop. fml reject it.");
 	&Mesg(*e, $NULL, 'mailloop', $curaddr);
-	&Log("$cmd: $curaddr may case a mail loop, reject");
+	&Log("$cmd: $curaddr may case a mail loop. fml reject it.");
 	return $NULL;
     }
 
@@ -538,7 +538,7 @@ sub DoSetMemberList
 	&Mesg(*e, $NULL, 'auth.should_be_from_member', $curaddr);
 	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
 	&Mesg(*e, "$cmd requires command from a member address.");
-	&Mesg(*e, "Please check your From: field.");
+	&Mesg(*e, "please check your From: header field.");
 	return $NULL;
     }
 
@@ -598,7 +598,7 @@ sub DoSetMemberList
 
 	if ($new_list = &MailListMemberP($newaddr)) {
 	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");
-	    &Mesg(*e, "$cmd: Error: New address '$newaddr' is already registered as a member.");
+	    &Mesg(*e, "$cmd: Error: New address '$newaddr' is already a member.");
 	    &Mesg(*e, $NULL, 'already_subscribed', $newaddr);
 	    return $NULL;
 	}

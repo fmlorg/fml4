@@ -98,7 +98,7 @@ sub TalkWithHttpServer
     if (! open(HOUT, "> $tmpf")) { 
 	select(HOUT); $| = 1; select(STDOUT);
 	&Log("Cannot open $tmpf"); 
-	&Mesg(*re, "Cannot write to tmporary file"); 
+	&Mesg(*re, "cannot write tmporary file"); 
     }
 
     ### IPC

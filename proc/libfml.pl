@@ -941,7 +941,7 @@ sub ProcSetAddr
     if (&AddressMatch($Fld[2], $From_address)) {
 	$Addr = $Fld[2];
 	$ADDR_CHECK_MAX = 10;	# exact match(trick)
-	&Mesg(*e, "Try exact-match for $Addr.");
+	&Mesg(*e, "try exact matching for $Addr.");
 	&Log("set exact-address $Addr");
     }
     else {

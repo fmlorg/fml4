@@ -285,7 +285,7 @@ sub PgpInit
     # program exeistence check
     if (! -x $PGP) {
 	&Log("PGPGoodSignatureP Error: program \$PGP is NOT DEFINED");
-	&Mesg(*e, "PGP Environment Error");
+	&Mesg(*e, "Error: verify PGP environment");
 	&Mesg(*e, $NULL, 'pgp.env.error');
 	return 0;
     }
@@ -331,8 +331,8 @@ sub PGP
 	    &DoPgp(*e, "$PGP $PgpOpts $cmd $argv[0]");
 	}
 	else {
-	    &Log("Error: such a user does not exist");
-	    &Mesg(*e, "Error: such a user does not exist");
+	    &Log("Error: no such user found");
+	    &Mesg(*e, "Error: no such user found");
 	    &Mesg(*e, $NULL, 'no_such_member');
 	}
     }
