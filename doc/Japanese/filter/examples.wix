@@ -182,6 +182,14 @@ $START_HOOK .= q#
 #;
 .~q
 
+参考:
+
+    .chm    Compiled HTML Help File?
+    .hta    HTML Application?
+    .pif    Program Information File
+    .shb    Shortcut into a document?
+    .vbx    Visual Basic Custom Control
+
 
 .S	Notes で「Duplicated Message-ID」になるケース
 =E.S	Duplicated Message-ID for mails from Notes
