@@ -154,11 +154,15 @@ sub ResentForwFileInSpool
     local($proc, *Fld, *e, *misc, *cat, $ar, $mail_file) = @_;
     local($buffer, $header, $body, $subject, %org_e);
 
-    # backup
-    for (keys %e) { next unless /^GH:/;	$org_e{$_} = $e{$_};}
+    # backup and reset;
+    undef @ResentHdrFieldsOrder;
+    for (keys %e) { 
+	next unless /^GH:/;
+	$org_e{$_} = $e{$_};
+	undef $e{$_};
+    }
 
-    $Envelope{"mode:resent"} = 1;
-
+    # for tar.gz syntax;
     $cat{"$SPOOL_DIR/$ID"} = 1;
 
     if ($ar eq 'TarZXF') {  
@@ -196,7 +200,7 @@ sub ResentForwFileInSpool
 
 	# &GenerateHeader is to a new header not reuse;
 	$contents =~ s/^\s*//;	
-	$e{"GH:$field"} = $contents;
+	$e{"GH:$field"} .= $e{"GH:$field"} ? "\n${_}$contents" : $contents;
 
 	# conserve the original header information
 	$field =~ s/://;
@@ -214,15 +218,16 @@ sub ResentForwFileInSpool
 
     &Sendmail($e{'Addr2Reply:'}, "", $body);
 
-    # restore backup
-    for (keys %org_e) { $e{$_} = $org_e{$_};}
+    # reset for the sequel actions and restore backup
+    for (@ResentForwHdrFieldsOrder) { 
+	print STDERR "undef \$Envelope{\"GH:$_:\"};\n";
+	undef $Envelope{"GH:$_:"};
+    }
+
+    for (keys %org_e) { $Envelope{$_} = $org_e{$_};}
+    undef @ResentForwHdrFieldsOrder; # staced entry
 
     &Log("Get $ID, Success");
-
-    # reset for the sequel actions;
-    for (@ResentForwHdrFieldsOrder) { undef $e{"GH:$_:"};}
-    undef @ResentHdrFieldsOrder;
-
 }
 
 1;
