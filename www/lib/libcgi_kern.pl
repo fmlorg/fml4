@@ -19,8 +19,8 @@ sub Init
     # fml system configuration
     require "$CONFIG_DIR/system";
 
-    if (-f "$CONFIG_DIR/cgiconfig") {
-        eval("require \"$CONFIG_DIR/cgiconfig\"");
+    if (-f "$CONFIG_DIR/cgi.conf") {
+        eval("require \"$CONFIG_DIR/cgi.conf\"");
 	&Err($@) if $@;
     }
 
