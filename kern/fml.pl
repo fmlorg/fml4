@@ -1960,6 +1960,7 @@ sub Log
 sub fml30__Write
 {
     local(*e, *s, *f, $mode, $envelope_hash_key) = @_;
+    local($status);
     
     if ($mode eq "O_APPEND") {
 	$status = open(WRITE2_OUT, ">> $f");
@@ -2378,7 +2379,7 @@ sub MailLoopP
 sub SearchDupKey
 {
     local($key, $file) = @_;
-    local($i);
+    local($status, $i);
 
     # 1. scan current and 
     if (-f $file) { 
