@@ -49,7 +49,75 @@ the design and implementation of Mailing List server, perl, operating
 systems and so on.
 
 
-********** UNTIL 1999/02/17 *************
+********** UNTIL 1999/04/06 *************
+
+
+Date:    Tue, 6 Apr 1999 00:02:37 +0900
+Thanks to: Tomoyuki Asakawa <tomoyuki@poison.marimo.or.jp>
+In fml-support ML's Count: 06076
+
+Date:    Wed, 7 Apr 1999 23:35:05 +0900
+In fml-support ML's Count: 06088
+
+patch to etc/mgrdomains
+
+---------------------------------------
+Date:    Fri, 2 Apr 1999 23:40:15 +0900
+Thanks to: Koji Sudo <koji@cherry.or.jp>
+In fml-support ML's Count: 06047
+
+patch of more_secure_cf.pl
+
+------------------------------------------
+Date:    Wed, 31 Mar 1999 16:09:00 +0900
+Thanks to: Yoshihiro Kawashima <katino@kyushu.iij.ad.jp>
+
+thanks katino for virus research.
+I wrote libvirus.pl based on this research.
+
+------------------------------------------
+Date:    Wed, 31 Mar 1999 13:53:06 +0900
+Thanks to: Ristu Seo <rseo@osa.att.ne.jp>
+In fml-support ML's Count: 06039
+
+modify Makefile to apply translate.pl members-name
+
+------------------------------------------
+Date:    Thu, 25 Feb 1999 11:08:33 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 05923
+
+Date:    Fri, 26 Feb 1999 23:45:38 +0900
+Thanks to: OGAWA Kunihiko <kuni@edit.ne.jp>
+In fml-support ML's Count: 05935
+
+idea
+	change &Debug() debug output at debug level
+	Configurable file to output
+
+------------------------------------------
+Date:    Mon, 22 Feb 1999 23:51:04 +0900
+Thanks to: Yutaka KAWASE <yutaka@mailhost.net>
+In fml-support ML's Count: 05900
+
+modify MTI warn message :)
+
+------------------------------------------
+Date:    Fri, 19 Feb 1999 09:38:25 +0900
+Thanks to: Kuniaki Kondo <kuniaki@iij.ad.jp>
+
+outgoing hack test. thanks 
+
+	Kuniaki Kondo
+	Masato Minda
+
+------------------------------------------
+Date:    Wed, 17 Feb 1999 13:06:43 +0900
+Thanks to: Yuao Tanigawa <yuao@infonia.ne.jp>
+In fml-support ML's Count: 05863
+
+bin/multipart.pl 
+happy99 rejction patch
 
 ---------------------------------------------
 
