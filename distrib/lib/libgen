@@ -457,6 +457,14 @@ GEN_ARCHIVE () {
 		# (uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
 		# cat > $FTP/fml-current.uu
 	   )
+	else
+	   (
+		echo 	chdir $FTP
+		echo 	ln $FMLID.tar.gz old/$FMLID.tar.gz
+
+		chdir $FTP
+		ln $FMLID.tar.gz old/$FMLID.tar.gz
+	   )
 	fi
 
 	echo "Generating $FMLID.zip";
