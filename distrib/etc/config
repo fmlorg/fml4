@@ -9,7 +9,8 @@ branch=0
 
 # prog
 MAKE=/usr/bin/make
-INCLUDE_PROG="perl distrib/bin/_include.pl "
+INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
+VERSION_PL=$FML/distrib/bin/version.pl
 
 FWIX_OPTS=-F
 
