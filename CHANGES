@@ -4,6 +4,15 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/04/14
+
+   module/fml-devel/
+	sync w/ fml-devel 20020414
+
+   switch module: FML::Date -> Mail::Message::Date
+	bin/spool2html.pl
+	proc/libmti.pl
+
 2002/04/07
 
   GNU Privacy Guard Extension
@@ -254,7 +263,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.243 2002/04/05 02:56:07 fukachan Exp $
+	add $FML: CHANGES,v 1.244 2002/04/07 14:54:14 fukachan Exp $
 
 2001/10/03
 
