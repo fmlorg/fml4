@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/29
+
+   makefml html_config
+	fix null value check
+
+
 2000/12/28
 
    makefml

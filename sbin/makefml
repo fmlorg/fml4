@@ -6956,7 +6956,8 @@ sub Bind
 	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr>";
     }
     # elsif ($v = $MAP{$menu, $Count}) {  # SHOW RAW VALUE IN HTML
-    elsif ($v = $MAP{$menu, $Count}) {    # SHOW POINTER IN HTML
+    # elsif ($v = $MAP{$menu, $Count}) {  # SHOW POINTER IN HTML
+    elsif (($v = $MAP{$menu, $Count}) ne ''){ # SHOW POINTER IN HTML
 	local($vn);
 	$ptr = $menu;
 	$ptr =~ s#//#/#g;
