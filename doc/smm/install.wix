@@ -1,10 +1,13 @@
-.C	インストール
+.C	初心者向けインストール・インターフェイス (makefml)
 .l	install
+.include install-new.wix
 
-.S	インストール
+
+.C	より細やかなインストール (旧標準インストールの方法)
+.l	install-advanced
 
 インストールについては(READMEでもそういっていますが)
-INSTALL(doc/INSTALL) を見て下さい。
+INSTALL-advanced (doc/INSTALL-advanced) を見て下さい。
 
 「お手軽なインストール」はfml を広げた directory へいって
 
