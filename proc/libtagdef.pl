@@ -27,7 +27,7 @@ sub SubjectTagDef
 	$BRACKET           = $BRACKET || 'Elena';
 	$BRACKET_SEPARATOR = ' ';
 	$END_BRACKET       = ')';
-	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET \\d+\\)";
+	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET\\s+\\d+\\)";
     }
     # [Elena 100];
     elsif ($mode eq '[ ]') {
@@ -36,7 +36,7 @@ sub SubjectTagDef
 	$BRACKET           = $BRACKET || 'Elena';
 	$BRACKET_SEPARATOR = ' ';
 	$END_BRACKET       = ']';
-	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET\\s+\\d+\\]";
     }
     # (Elena:100) 
     elsif ($mode eq '(:)') {

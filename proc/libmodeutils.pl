@@ -121,7 +121,7 @@ sub EmulateDistributeMode
     $BRACKET           = $name;
     $BRACKET_SEPARATOR = ' ';
     $END_BRACKET       = ']';
-    $SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+    $SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET\\s+\\d+\\]";
 }
 
 
