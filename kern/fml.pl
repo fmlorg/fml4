@@ -319,36 +319,10 @@ sub LoadConfig
 	print STDERR "\nFYI: include's owner != config.ph's owner, O.K.?\n\n";
     }
 
-    require 'default_config.ph';
-
-    # site_init
-    if ($SiteInitPath = &SearchFileInLIBDIR("site_init.ph")) {
-	if (-r $SiteInitPath) { 
-	    &Log("require $SiteInitPath") if $debug;
-	    require($SiteInitPath);
-	}
-    }
-
-    # include fundamental configurations and library
-    if (-r "$DIR/config.ph")  { 
-	require("$DIR/config.ph");
-    }
-    else {
-	print STDERR "I cannot read $DIR/config.ph\n" if !-r "$DIR/config.ph";
-	print STDERR "no $DIR/config.ph exist?\n" if !-f "$DIR/config.ph";
-	print STDERR "FYI: FML Release 2 Release requires \$DIR/config.ph\n";
-	exit 1;
-    }
-
-    # site_force
-    for ("site_force.ph", "sitedef.ph") {
-	($SiteforcePath = &SearchFileInLIBDIR($_)) || next;
-	-r $SiteforcePath || next;
-
-	&Log("require $SiteforcePath") if $debug;
-	require($SiteforcePath);
-	last;
-    }
+    # 3.0B new loading configuration
+    # XXX &__LoadConfiguration('__KERN__'); for main routine: fml.pl, libkern
+    # XXX &__LoadConfiguration;             for other tools: bin/* ...
+    require 'libloadconfig.pl'; &__LoadConfiguration('__KERN__');
 
     require 'libsmtp.pl';		# a library using smtp
 
@@ -432,9 +406,6 @@ sub SetDefaults
     
     # Content Filtering Handler for MIME
     @MailContentHandler = ();	# Default: No filter
-
-    # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
-    &DEFINE_FIELD_LOOP_CHECKED('from');
 }
 
 sub GetTime
@@ -463,6 +434,10 @@ sub InitConfig
 {
     &SetDefaults;
     &LoadConfig;
+
+    # XXX SetDefaults but works after &__LoadConfiguration, so defined here.
+    # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
+    &DEFINE_FIELD_LOOP_CHECKED('from');
 
     # $FML for process table readability
     if ($0 =~ m%^(.*)/(.*)%) { $FML = $2;}
@@ -2666,141 +2641,9 @@ sub CheckResourceLimit
 }
 
 ####### Section: Macros for the use of user-side-definition (config.ph) 
+### moved to "libloadconfig.pl"
 
-sub STR2JIS { &JSTR($_[0], 'jis');}
-sub STR2EUC { &JSTR($_[0], 'euc');}
-sub JSTR
-{
-    local($s, $code) = @_;
-    require 'jcode.pl';
-    &jcode'convert(*s, $code || 'jis'); #';
-    $s;
-} 
-
-sub DEFINE_SUBJECT_TAG { &use('tagdef'); &SubjectTagDef($_[0]);}
-
-sub DEFINE_MAILER
-{
-    local($t) = @_;
-    if ($t eq 'ipc' || $t eq 'prog') { 
-	$Envelope{'mci:mailer'} = $t;
-    }
-    else {
-	&Log("DEFINE_MAILER: unknown type=$t (shuold be 'ipc' or 'prog')");
-    }
-}
-
-sub DEFINE_MODE
-{ 
-    local($m) = @_;
-    print STDERR "--DEFINE_MODE($m)\n" if $debug;
-
-    $m =~ tr/A-Z/a-z/;
-    $Envelope{"mode:$m"} = 1;
-
-    # config.ph CFVersion == 3
-    if ($CFVersion < 3) {
-	&use("compat_cf2");
-	&ConvertMode2CFVersion3($m);
-    }
-
-    if ($m =~ 
-	/^(post=|command=|artype=confirm|ctladdr|disablenotify|makefml)/) {
-	&Log("ignore $m call ModeDef") if $debug;
-    }
-    else {
-	&Log("call ModeDef($m)") if $debug;
-	&use("modedef"); 
-	&ModeDef($m);
-    }
-}
-
-sub DEFINE_FIELD_FORCED 
-{ 
-    local($_) = $_[0]; tr/A-Z/a-z/; $Envelope{"fh:$_:"} = $_[1];
-    &ADD_FIELD(&FieldCapitalize($_));
-}
-
-sub DEFINE_FIELD_ORIGINAL
-{ 
-    local($_) = $_[0]; tr/A-Z/a-z/; $Envelope{"oh:$_:"} = 1;
-    &ADD_FIELD(&FieldCapitalize($_));
-}
-
-sub DEFINE_FIELD_OF_REPORT_MAIL 
-{ 
-    local($_) = $_[0]; $Envelope{"GH:$_:"} = $_[1];
-    &ADD_FIELD(&FieldCapitalize($_));
-}
-
-sub DEFINE_FIELD_PAT_TO_REJECT
-{ 
-    $REJECT_HDR_FIELD_REGEXP{$_[0]} = $_[1];
-    $REJECT_HDR_FIELD_REGEXP_REASON{$_[0]} = $_[2] if $_[2];
-}
-
-sub DEFINE_FIELD_LOOP_CHECKED
-{ 
-    local($_) = $_[0]; tr/A-Z/a-z/;
-    $LOOP_CHECKED_HDR_FIELD{$_} = 1;
-}
-
-sub UNDEF_FIELD_LOOP_CHECKED
-{ 
-    local($_) = $_[0]; tr/A-Z/a-z/;
-    $LOOP_CHECKED_HDR_FIELD{$_} = 0;
-}
-
-sub ADD_FIELD
-{ 
-    grep(/^$_[0]$/i, @HdrFieldsOrder) || push(@HdrFieldsOrder, $_[0]);
-    &Debug("ADD_FIELD $_[0]") if $debug;
-}
-
-sub DELETE_FIELD 
-{
-    local(@h); 
-
-    # If $SKIP_FIELDS has no this entry.
-    # print STDERR "    if ($SKIP_FIELDS !~ /\"\\|$_[0]\\|\"/) { \n";
-    if ($SKIP_FIELDS !~ /\|$_[0]$|\|$_[0]\|/) {
-	$SKIP_FIELDS .= $SKIP_FIELDS ? "|$_[0]" : $_[0];
-    }
-
-    for (@HdrFieldsOrder) { push(@h, $_) if $_ ne $_[0];}
-    @HdrFieldsOrder = @h;
-}
-
-# the value is not inserted now.
-sub COPY_FIELD 
-{ 
-    $HdrFieldCopy{ $_[0] } = $_[1];
-    &ADD_FIELD(&FieldCapitalize($_[1]));
-}
-
-# the value is not inserted now.
-sub MOVE_FIELD 
-{ 
-    &COPY_FIELD(@_);
-    &DELETE_FIELD($_[0]);
-}
-
-# add Content Handler
-sub ADD_CONTENT_HANDLER
-{
-    local($bodytype, $parttype, $action) = @_;
-    local($type, $subtype, $xtype, $xsubtype);
-   
-    if ($bodytype eq '!MIME') {
-	$type = '!MIME';
-	$subtype = '.*';
-    } else {
-	($type, $subtype) = split(/\//, $bodytype, 2);
-    }
-    ($xtype, $xsubtype) = split(/\//, $parttype, 2);
-    push (@MailContentHandler,
-	  join("\t", $type, $subtype, $xtype, $xsubtype, $action));
-}
+####### Section: misc
 
 # "get ID by auto-increment" for user 
 sub GET_ID_AUTOINC

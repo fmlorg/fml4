@@ -3,6 +3,16 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/19
+
+   3.0B new load configuration final stage
+	define prototype library to replace "require config.ph";
+
+   remove contrib/cwhois/
+	a part of clean up campaign
+	cwhois is not maitained now. It is also not related with fml,
+	move it to other ffs/ repository.
+
 2000/03/18
 
    ReReRe problem
