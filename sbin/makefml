@@ -4815,11 +4815,49 @@ sub do_setup_admin_cgi
 }
 
 
+sub __Convert2HTPasswd
+{
+    local($src, $dst) = @_;
+    local($new) = "$dst.new.$$";
+    local($user, $pwd);
+
+    if (open(SRC, $src)) {
+	if (open(DST, "> $new")) {
+	    print STDOUT "\n   add the following users as a $ml cgi-admin\n";
+	    while (<SRC>) {
+		next if /^\#/;
+		next if /^\s*$/;
+		chop;
+
+		($user, $pwd) = split(/\s+/, $_);
+		print DST "${user}:${pwd}\n";
+		print STDOUT "      $user\n";
+	    }
+	    print STDOUT "\n";
+	    close(SRC);
+	    close(DST);
+
+	    if (! rename($new, $dst)) {
+		&Error("cannot rename $new $dst");
+	    }
+	}
+	else {
+	    &Error("cannot open $dst");
+	}
+    }
+    else {
+	&Error("cannot open $src");
+    }
+}
+
+
 sub do_setup_mladmin_cgi
 {
     local($ml) = @_;
 
     &ResetVariables;
+
+    print "\n-- create $ml CGI programs\n";
 
     &MkDir("$REAL_CGI_PATH/ml-admin/$ml", 0755);
 
@@ -4834,9 +4872,26 @@ sub do_setup_mladmin_cgi
     &Conv($ml, "$EXEC_DIR/www/etc/dot_htaccess.ml-admin",
 	  "$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
 
-    # make htpasswd from $DIR/etc/passwd
-    if (-f "$ML_DIR/$ml/etc/passwd") {
-	
+    local($pwdf, $etcpwd);
+    $pwdf   = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
+    $etcpwd = "$ML_DIR/$ml/etc/passwd";
+
+    # 1. use www/authdb/
+    print "\n";
+    if (-f $pwdf) {
+	print "   FYI: use $pwdf\n";
+	print "        as htpasswd for $ml ML\n";
+    }
+    # 2. make htpasswd from $DIR/etc/passwd
+    elsif (-f $etcpwd) {
+	print "   FYI: make $pwdf\n";
+	print "        from $etcpwd\n";
+	&__Convert2HTPasswd($etcpwd, $pwdf);
+    }
+    # 3. 
+    else {
+	print "FYI: no $pwdf !\n";
+	print "     please add admin users for $ml ML!\n";
     }
 
     print "\n   done.\n";
