@@ -5,6 +5,19 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#23 == 3.0.1_BETA #12 ]
+
+	clean up documents
+
+	etc/makefml/menu.conf: (1.18-1.19)
+		fix typo. PR 7165 from OGAWA Kunihiko
+
+[ 3.0pl#22 == 3.0.1_BETA #11 ]
+
+	bin/spool2html
+		sync w/ HEAD (2.11-2.12): fix GetMax()
+		patch from MURASHITA Takuya (fml-support: 7215)
+
 [ 3.0pl#21 == 3.0.1_BETA #10 ]
 
 	doc/html/
