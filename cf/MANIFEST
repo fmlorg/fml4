@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.97 2002/04/07 14:52:47 fukachan Exp $
+# $FML: MANIFEST,v 1.98 2002/04/20 05:52:06 fukachan Exp $
 #
 
 
@@ -1084,6 +1084,10 @@ OUTGOING_ADDRESS:
 #
 # value: 1/0
 USE_VERP:
+
+# try VERPs once a day for efficient delivery.
+# value: 1/0
+TRY_VERP_PER_DAY:
 
 # we use ESMTP pipelining mechanism by default.
 # value: 1/0
