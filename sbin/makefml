@@ -48,18 +48,13 @@ exit 0;
 #################### LIBLARIES ####################
 sub System { system $SYSTEM_ARGV;}
 
+
 sub InitMakeFml
 {
     # flush;
     select(STDOUT); $| = 1;
 
     &GetTime;
-
-    # flock(2)
-    $LOCK_SH                       = 1;
-    $LOCK_EX                       = 2;
-    $LOCK_NB                       = 4;
-    $LOCK_UN                       = 8;
 
     ### signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -374,6 +369,10 @@ sub SetHashDefaults
 		    '10#fmlserv', 'set up fmlserv (listserv-like command interface)',
 		    '10#listserv','set up fmlserv (listserv-like command interface)',
 		    '10#majordomo','set up fmlserv (listserv-like command interface)',
+
+		    # misc
+		    'lock', 'do_lock',
+
 		    );
 
     # variables not to lock
@@ -693,9 +692,16 @@ sub SignalLog
 { 
     local($sig) = @_; 
 
+    # clean up lockfiles
+    if ($CleanUpLockFiles) {
+	&v7'CleanUpLockFiles; #';
+    }
+
     print STDERR "Caught Signal[$sig], shutting down ... \n\n";
+
     # &MakeFmlUnLock; infinite loop?     sleep(1);
     &FlushLog;
+
     exit(1);
 }
 
@@ -2436,13 +2442,27 @@ sub do_adduser
 
     # add 
     local($file);
+    local($acm) = $ADDR_CHECK_MAX;
+    $ADDR_CHECK_MAX = 10;
+
     for (@files) {
 	$file = $_;
 	$file =~ s#.*/(\S+)#$1#;
+
+	# file and member check 
+	&Touch($file) if ! -f $file;
+	if (&CheckMember($member, $file)) {
+	    &Debug("   WARN: skip $file since $member is already member.");
+	    &Log("skip $file since $member is already member");
+	    next;
+	}
+
 	&Log("makefml::$proc append $member to $file");
 	print "Append $member to $_\n" if $debug;
 	&AppendString2File($member, $_);
     }
+
+    $ADDR_CHECK_MAX = $acm;
 }
 
 
@@ -2570,6 +2590,127 @@ sub do_pop_passwd
 	print STDERR "Sorry, Unix Version Interface is not yet.\n";
     }
 }
+
+
+sub do_lock
+{
+    local($ml) = @_;
+    local(@files);
+    local($proc) = $fp;
+    $proc =~ s/do_//;
+
+    if (! $ml) {
+	&Log("Error: makefml::$proc invalid arguments");
+	&Debug("*** Syntax Error: the number of arguments ***");
+	&Debug("\n\tmakefml $proc ML address\n");
+	return;
+    }
+
+    print "\n";
+    print "   lock and sleep for 3600 secs.\n";
+    print "   Please interrupt this by CONTROL-C to stop this lock\n";
+
+    sleep 3600;
+}
+
+
+#################################
+
+
+sub CheckMember
+{
+    local($address, $file) = @_;
+    local($addr, $has_special_char);
+
+    # more severe check;
+    $address =~ s/^\s*//;
+    ($addr) = split(/\@/, $address);
+    
+    # MUST BE ONLY * ? () [] but we enhance the category -> shell sc
+    if ($addr =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+      $has_special_char = 1; 
+    }
+
+    open(FILE, $file) || (&Log("Error: cannot open $file"), return 0);
+
+  getline: while (<FILE>) {
+      chop; 
+
+      if ((!$ML_MEMBER_CHECK) || $SubstiteForMemberListP) { 
+	  /^\#\s*(.*)/ && ($_ = $1);
+      }
+
+      next getline if /^\#/o;        # strip comments
+      next getline if /^\s*$/o; # skip null line
+      /^\s*(\S+)\s*.*$/o && ($_ = $1); # including .*#.*
+
+      # member nocheck(for nocheck but not add mode)
+      # fixed by yasushi@pier.fuji-ric.co.jp 95/03/10
+      # $ENCOUNTER_PLUS             by fukachan@phys 95/08
+      # $Envelope{'mode:anyone:ok'} by fukachan@phys 95/10/04
+      # $Envelope{'trap:+'}         by fukachan@sapporo 97/06/28
+      if (/^\+/o) { 
+	  &Debug("encounter + [$_]") if $debug;
+	  $Envelope{'trap:+'} = 1;
+	  close(FILE); 
+	  return 1;
+      }
+
+      # for high performance(Firstly special character check)
+      if (! $has_special_char) { next getline unless /^$addr/i;}
+
+      # This searching algorithm must require about N/2, not tuned,
+      if (1 == &AddressMatch($_, $address)) {
+   close(FILE);
+    return 1;
+      }
+  }# end of while loop;
+
+    close(FILE);
+    return 0;
+}
+
+# sub AddressMatching($addr1, $addr2)
+# return 1 given addresses are matched at the accuracy of 4 fields
+sub AddressMatching { &AddressMatch(@_);}
+sub AddressMatch
+{
+    local($addr1, $addr2) = @_;
+
+    # canonicalize to lower case
+    $addr1 =~ y/A-Z/a-z/;
+    $addr2 =~ y/A-Z/a-z/;
+
+    # try exact match. must return here in a lot of cases.
+    if ($addr1 eq $addr2) {
+	&Debug("\tAddr::match($addr1) { Exact Match;}") if $debug;
+	return 1;
+    }
+
+    # for further investigation, parse account and host
+    local($acct1, $addr1) = split(/@/, $addr1);
+    local($acct2, $addr2) = split(/@/, $addr2);
+
+    # At first, account is the same or not?;    
+    if ($acct1 ne $acct2) { return 0;}
+
+    # Get an array "jp.ac.titech.phys" for "fukachan@phys.titech.ac.jp"
+    local(@d1) = reverse split(/\./, $addr1);
+    local(@d2) = reverse split(/\./, $addr2);
+
+    # Check only "jp.ac.titech" part( = 3)(default)
+    # If you like to strict the address check, 
+    # change $ADDR_CHECK_MAX = e.g. 4, 5 ...
+    local($i);
+    while ($d1[$i] && $d2[$i] && ($d1[$i] eq $d2[$i])) { $i++;}
+
+    &Debug("\tAddr::match($addr1) { $i >= ($ADDR_CHECK_MAX || 3);}") if $debug;
+
+    ($i >= ($ADDR_CHECK_MAX || 3));
+}
+
+
+################################
 
 
 sub SetWritableUmask
@@ -2742,9 +2883,21 @@ sub main'Dumpvar
 
 package ml;
 
+$FH = "FLOCKDIR000";
+
 sub ml'Log       { &main'Log(@_);}
 sub main'FLock   { &ml'FLock(@_);}
 sub main'FUnLock { &ml'FUnLock(@_);}
+
+sub SetFlockParam
+{
+    # flock(2)
+    $LOCK_SH                       = 1;
+    $LOCK_EX                       = 2;
+    $LOCK_NB                       = 4;
+    $LOCK_UN                       = 8;
+}
+
 
 ###
 ### from libkern.pl
@@ -2757,33 +2910,44 @@ sub main'FUnLock { &ml'FUnLock(@_);}
 sub FLock
 {
     local($ml, $mldir) = @_;
-    local($lockf, $lockdir);
+    local($lockf);
 
     $lockdir  = "$mldir/$ml/";
     $lockdir  =~ s#$ml/$ml#$ml#;
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
-    $lockf    = $UNISTD ? $lockdir : "$mldir/$ml/config.ph";
+    $lockf    = $main'UNISTD ? $lockdir : "$mldir/$ml/config.ph"; #';
 
-    open($lockdir, $lockf) || do {
+    &SetFlockParam;
+
+    # unique file handle in this name space.
+    ++$FH;
+
+    open($FH, $lockf) || do {
 	&Log("Error: Flock cannot open $lockf");
 	return 0;
     };
 
-    eval("flock(\$lockdir, \$LOCK_EX);");
+    print STDERR "flock($FH, $LOCK_EX) for $lockdir;\n" if $debug_lock;
+    eval('flock($FH, $LOCK_EX);');
     print STDERR "\nError: $@\n" if $@;
 
     $FLockP{$ml}   = 1;
-    $LockFile{$ml} = $lockdir;
+    $LockFile{$ml} = $FH;
 }
 
 
 sub FUnLock 
 {
     local($ml) = @_;
-    local($lockdir) = $LockFile{$ml};
 
-    close($lockdir);
-    eval("flock(\$lockdir, \$LOCK_UN);");
+    &SetFlockParam;
+
+    # another handle name $UFH to unlock
+    # since $FH is unique global variable.
+    $UFH = $LockFile{$ml};
+
+    close($UFH);
+    eval('flock($UFH, $LOCK_UN);');
     print STDERR "\nError: $@\n" if $@;
 }
 
@@ -2832,6 +2996,12 @@ sub LoadConfigPH
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
     eval($s) || &Log("FAIL EVAL \$SPOOL_DIR ...");
+
+    # FP-nize
+    if ($LOCK_FILE !~ /$DIR/) {
+	$LOCK_FILE = "$DIR/$LOCK_FILE";
+	$LOCK_FILE =~ s#//#/#g;
+    }
 }
 
 sub MakeFml_V7Lock
@@ -2849,6 +3019,14 @@ sub MakeFml_V7Lock
 
     $FLockP{$ml}   = 0;
     $LockFile{$ml} = $LockFile;
+
+    # sigalarm ; clean up
+    $main'CleanUpLockFiles = 1;
+}
+
+sub CleanUpLockFiles
+{
+    for (keys %LockFile) { unlink $_;}
 }
 
 sub MakeFml_V7UnLock
