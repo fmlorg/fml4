@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/01
+
+  mead.pl
+	pickup information from smtpfeed -F -1 case
+
+	smtpfeed -1 -F の時のエラーメールから情報を拾いだし
+	error_addr.hinsts
+	におく。これでフォワードのフォワードの先のエラーを
+	追跡する。
+
+  confirmd_master.sh	
+	newly added
+
 2000/09/27
 
    nuke <LIMIT> in .htaccess
