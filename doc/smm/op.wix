@@ -44,7 +44,7 @@ III "Install and Customize". (part III, chapter .ptr{install})
 
 
 .# ##########################################################
-.P	Design Overview of the fml 
+.P	Design Overview
 .k	Design Overview
 
 パートIでは、fml の設計思想の概略について述べます。設計思想を知ってい
@@ -74,11 +74,11 @@ just examples, much less I recommend.  It may not be made
 automatically in some cases. Please check them by yourself.
 
 .# DOV == Design OverView
-.include dov.wix
+.include overview.wix
 .include terms.wix
 
 .# ##########################################################
-.P	Process overview of the fml
+.P	FML Internals
 .l	process-overview
 .k	Process overview
 
@@ -88,14 +88,47 @@ automatically in some cases. Please check them by yourself.
 Here we describe the relation between FML processes and other
 programs, and how to launch FML.
 ==
-.include pov.wix
+.include internals.wix
 
 
 .# ##########################################################
-.P	インストールとカスタマイズ
-=E.P      Install and Customize
+.P	各種の設定について
+=E.P	Configurations
 ==
 .include install.wix
+.include clo.wix
+.include acl.wix
+.include msend.wix
+.include remote.wix
+.include pgp.wix
+.include registration.wix
+.include proc.wix
+.include fmlserv.wix
+.include moderator.wix
+.include header.wix
+.include config_ph.wix
+.include archive.wix
+.include expire.wix
+.include href.wix
+.include confirmd.wix
+.include mead.wix
+
+
+.# ##########################################################
+.P	localhack, utilities
+=E.P	localhack, utilities
+==
+
+.include fop.wix
+
+.include popfml.wix
+.include hack.wix
+.include hook.wix
+.include uip.wix
+
+.include wix.wix
+.include smtp.wix
+.include contrib.wix
 
 
 .# ##########################################################
@@ -126,26 +159,10 @@ inconveniences.
 
 
 .# ##########################################################
-.P	ライブラリと hack
-=E.P      FML libraries and hack
-==
-.include fop.wix
-.include function.wix
+.P	misc and others
 
-.include popfml.wix
-
-.include hack.wix
-.include hook.wix
-.include uip.wix
-
-.include wix.wix
-.include smtp.wix
-.include contrib.wix
-
-
-.# ##########################################################
-.P	misc 
-
+.include forward.wix
+.include filter.wix
 .include talk.wix
 .include perl.wix
 
