@@ -1,0 +1,26 @@
+.C	クロスポスト
+.l	crosspost
+
+クロスポストをした場合通常はＭＬすべてに流れてしまいます。
+
+
+.S	$USE_CROSSPOST
+.k	$USE_CROSSPOST
+
+クロスポストをサポートする場合は $USE_CROSSPOST をセットして下さい。
+
+
+.S	@CROSSPOST_CF
+.k	@CROSSPOST_CF
+
+MailingListのAddress	Directory(config.phのある場所)
+
+クロスポストするＭＬのうち fml でないプログラムの場合
+仮想的に config.ph を書いておく必要があります。
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
