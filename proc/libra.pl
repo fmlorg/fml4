@@ -1,13 +1,14 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 # LOCAL SCOPE
 local(%AdminProcedure, $UnderAuth, $AttachRRF);
@@ -411,7 +412,10 @@ sub AdminCommand
 
 	# PROCEDURE
 	# RETURN is 0 == LAST(libfml.pl);
+	eval $ADMIN_COMMAND_START_HOOK{$cmd} if $ADMIN_COMMAND_START_HOOK{$cmd};
 	$status = &$proc($cmd, *Fld, *e, *opt);
+	eval $ADMIN_COMMAND_END_HOOK{$cmd }  if $ADMIN_COMMAND_END_HOOK{$cmd};
+
 	&Log("admin status=$status") if $debug_proc;
 
 	# chaddr and bye
