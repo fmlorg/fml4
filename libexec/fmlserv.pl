@@ -206,6 +206,17 @@ sub NewML
 
     print STDERR "NewML::Check($cf)\n" if $debug;
 
+print STDERR "
+    \$domain      $domain      
+    \$DOMAINNAME  $DOMAINNAME  
+    \$FQDN        $FQDN
+    \$MAIL_LIST   $MAIL_LIST   
+    \$MAINTAINER  $MAINTAINER
+
+->
+
+";  
+
     if (-f $cf) {
 	print STDERR "NewML::Load($cf)\n" if $debug;
 	&LoadMLNS($cf);		# eval("$DIR/config.ph")
@@ -214,6 +225,14 @@ sub NewML
 	print STDERR "NewML::SetMLDefaults($DIR, $ml)\n" if $debug;
 	&SetMLDefaults($DIR, $ml);
     }
+
+print STDERR "
+    \$domain      $domain      
+    \$DOMAINNAME  $DOMAINNAME  
+    \$FQDN        $FQDN
+    \$MAIL_LIST   $MAIL_LIST   
+    \$MAINTAINER  $MAINTAINER
+";  
 
     ### do actions for each $list ###
     # RESET IMPORTANT VARIABLES
@@ -238,9 +257,10 @@ sub NewML
 sub SetMLDefaults
 {
     local($dir, $ml) = @_;
+    local($domain);
 
     # $DOMAINNAME, $FQDN should be used of _main NS
-    $domain      = $FQDN ? $FQDN : $DOMAINAME;
+    $domain      = $FQDN ? $FQDN : $DOMAINNAME;	# preserv original DOMAINNAME
     $MAIL_LIST   = "$ml\@$domain";
     $ML_FN       = "($ml ML)";
     $XMLNAME     = "X-ML-Name: $ml";
