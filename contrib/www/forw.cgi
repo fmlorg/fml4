@@ -2,6 +2,7 @@
 #
 # Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
+#
 
 $rcsid   = q$Id$;
 $rcsid   =~ s/,v//;
