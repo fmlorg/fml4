@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/14
+
+    proc/libMIME.pl
+	ensure jis input for IM (patch by OGAWA Kunihiko)
+
 2001/09/13
 
    proc/libMIME.pl
