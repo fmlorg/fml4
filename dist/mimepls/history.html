@@ -1,0 +1,153 @@
+<HTML>
+<HEAD>
+<TITLE>mime_pls history</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<CENTER>
+<H1>変更履歴</H1>
+<H2>1997年12月30日</H2>
+</CENTER>
+<HR>
+<A HREF="index.html">[Top]</A>
+<A HREF="document.html">[Document]</A>
+History
+<P>
+Ver.2.01 → Ver.2.02 :
+<P>
+<OL>
+<LI><A HREF="document.html#mimer.pl">mimer.pl</A>と
+    <A HREF="document.html#mimew.pl">mimew.pl</A>にバージョン
+    を表わす変数$main'mimer_versionと$main'mimew_versionを
+    それぞれ追加した。
+<P>
+<LI>ドキュメント(<A HREF="document.html#mime_pls.doc">
+    mime_pls.doc</A>)を大幅に見直した。
+<P>
+<LI><A HREF="document.html#html">HTML形式のドキュメント</A>
+    をパッケージに添付した。
+</OL>
+
+<HR>
+Ver.2.00alpha → Ver.2.01 :
+<P>
+<OL>
+<LI>MIME Quoted-Printableのbody encode/decode機能を追加した。
+    具体的には、<A HREF="document.html#mimer.pl">mimer.pl</A>に
+    &AMP;qpdecode関数を追加して
+    <A HREF="document.html#bodydecode">&AMP;bodydecode関数</A>
+    から呼ばれるようにした。また、
+    <A HREF="document.html#mimew.pl">mimew.pl</A>に&AMP;qpencode
+    関数と&AMP;qphex関数を追加し、
+    <A HREF="document.html#bodyencode">&AMP;bodyencode関数</A>
+    および
+    <A HREF="document.html#benflush">&AMP;benflush関数</A>から
+    呼ばれるようにした。
+    <P>
+    これに伴い、
+    <A HREF="document.html#bodydecode">&AMP;bodydecode関数</A>、
+    <A HREF="document.html#bdeflush">&AMP;bdeflush関数</A>、
+    <A HREF="document.html#bodyencode">&AMP;bodyencode関数</A>、
+    <A HREF="document.html#benflush">&AMP;benflush関数</A>が
+    Base64とQuoted-Printableの両方に対応したので、
+    それぞれエンコード形式を表わす引数を追加した。
+<P>
+<LI><A HREF="document.html#rbody">rbody</A>,
+    <A HREF="document.html#wbody">wbody</A>プログラム
+    (Ver.0.02)をQuoted-Printable対応にした。
+</OL>
+
+<HR>
+Ver.1.11a → Ver.2.00alpha :
+<P>
+<OL>
+<LI>MIME Base64のbody encode/decode機能を追加した。具体的には、
+    <A HREF="document.html#mimer.pl">mimer.pl</A>に
+    <A HREF="document.html#bodydecode">&AMP;bodydecode関数</A>と
+    <A HREF="document.html#bdeflush">&AMP;bdeflush関数</A>を、
+    <A HREF="document.html#mimew.pl">mimew.pl</A>に
+    <A HREF="document.html#bodyencode">&AMP;bodyencode関数</A>と
+    <A HREF="document.html#benflush">&AMP;benflush関数</A>を追加した。
+<P>
+<LI>ライブラリの使用例として、
+    <A HREF="document.html#rbody">rbody</A>,
+    <A HREF="document.html#wbody">wbody</A>プログラム(Ver.0.01)を
+    添付した。
+</OL>
+
+<HR>
+Ver.1.11 → Ver.1.11a :
+<P>
+<OL>
+<LI><A HREF="document.html#wmime">wmime</A>で、Mime-Version:
+    ヘッダとContent-Type:ヘッダを付加する機能をオプションとした。
+    (デフォルトでは付加しない。)
+<P>
+<LI>インストールとアーカイブ作成用のMakefileを添付した。
+</OL>
+
+<HR>
+Ver.1.10 → Ver.1.11 :
+<P>
+<OL>
+<LI>行の先頭に長い日本語文字列があるときに分割エンコードされない
+    バグを修正した。(<A HREF="document.html#mimew.pl">mimew.pl</A>)
+<P>
+<LI>ISO-2022-JPのエスケープシーケンスの扱いを変更した。
+    <UL>
+    <LI>デコードしたあと、不必要なエスケープシーケンスを削除する
+        ようにした。(<A HREF="document.html#mimer.pl">mimer.pl</A>)
+    <LI>エンコードする前に、不必要なエスケープシーケンスを除去する
+        ようにした。Ver.1.10 では(不要な)エスケープシーケンスの
+        ところで分割エンコードしていたが、Ver.1.11 では行の長さだけ
+        を考慮して分割するようになった。
+        (<A HREF="document.html#mimew.pl">mimew.pl</A>)
+    </UL>
+<P>
+<LI><A HREF="document.html#rmime">rmime</A>,
+    <A HREF="document.html#wmime">wmime</A>で、メッセージ本文が
+    大きいと大量のメモリが必要になる（と思った）ので小メモリマシン
+    でも実行できるように修正した。
+</OL>
+
+<HR>
+Ver.1.00 → Ver.1.10 :
+<P>
+<OL>
+<LI>ISO-2022-JP のエスケープシーケンスの扱いを変更した。
+    <UL>
+    <LI>無駄なエスケープシーケンスが入っていても正常に扱える
+        ようにした。(2バイトモード中でのESC-$-Bなど)
+    <LI>エスケープシーケンスが連続している場合は最後のものだけ
+        を残して残りを削除するようにした。
+    </UL>
+<P>
+<LI>RFC1522の仕様に完全対応した。(…と思う)
+    <UL>
+    <LI>エンコード時に、長い日本語文字列は分割してエンコード
+        するようにした。また、長い行はencoded-wordの前後で折り
+        返し(行分割)処理をするようにした。
+    <LI>デコード時には、encoded-wordにはさまれたLWS(ここでは、
+        スペース、タブ、折り返し[改行+(スペースまたはタブ)]を
+        指す)を除去するようにした。
+    </UL>
+<P>
+<LI>ライブラリの使用例として、
+    <A HREF="document.html#rmime">rmime</A>と
+    <A HREF="document.html#wmime">wmime</A>の新版を添付した。
+<P>
+<LI>JISコードからSJISコードに変換する部分のバグを修正した。
+</OL>
+<P>
+<A HREF="index.html">[Top]</A>
+<A HREF="document.html">[Document]</A>
+History
+
+<HR>
+<ADDRESS>
+Copyright (C) 1997 生田　昇
+<A HREF="mailto:noboru@ikuta.ichihara.chiba.jp">
+&LT;noboru@ikuta.ichihara.chiba.jp&GT;
+</A>
+</ADDRESS>
+</BODY>
+</HTML>
