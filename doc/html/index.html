@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 <TITLE>
-The Design and Implementation of "fml" Mailing List Server
+"fml" Mailing List Server Package
 </TITLE>
 <META http-equiv="Content-Type"
 #ifdef JAPANESE
@@ -23,60 +23,40 @@ The Design and Implementation of "fml" Mailing List Server
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <H1>
-#ifdef JAPANESE
-	"fml" Mailing List Server の設計と実装
-	<BR>
-#endif
-	The Design and Implementation of "fml" Mailing List Server
+<CENTER>
+"fml" Mailing List Server Package
+</CENTER>
 </H1>
-#ifdef JAPANESE
-<A HREF="index-e.html">[English] is here.</A>
-#else
-<A HREF="index.html">[Japanese] is here.</A>
-#endif
-<!-- =================================================================== -->
-#ifdef JAPANESE
-<PRE>
-	<A HREF=#fml>fml  </A>    <A HREF=INFO.html>What's new</A>
-	<A HREF=links.html>links</A>    <A HREF=history.html>history</A>
-	<A HREF=download.html>download</A>
-</PRE>
-#ifndef DIST
-<PRE>
-	<A HREF=search-j.html>検索</A>
-</PRE>
-#endif
-#else
-<PRE>
-	<A HREF=#fml>fml  </A>    <A HREF=INFO-e.html>What's new</A>
-	<A HREF=links-e.html>links</A>    <A HREF=history-e.html>history</A>
-	<A HREF=download-e.html>download</A>
-</PRE>
-#ifndef DIST
-<PRE>
-	<A HREF=search-e.html>Search</A>
-</PRE>
-#endif
-#endif
-<!-- =================================================================== -->
-<HR>
-#ifdef DIST
-/* fml distribution */
-#else /* DIST */
-/* http://www.fml.org/fml/index.html */
-<PRE>
-* Latest Topics
-The lastest official release is 2.2.1. The fml-current version is 2.2E.
-#ifdef JAPANESE /* JAPANESE */
-○ 1999/05/11 fml 2.2.1 リリース
-○ <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ作成プロジェクトについて</A>
-#else /* ENGLISH */
-* 1999/05/11 fml 2.2.1 release
-* <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ</A>
-#endif
-</PRE>
-#endif /* DIST */
 
+#ifdef JAPANESE
+<PRE>
+        <A HREF="index-e.html">[English] is here.</A>
+
+        <A HREF=#fml>fml</A>            <A HREF=download.html>download</A>
+        <A HREF=INFO.html>What's new</A>     <A HREF=FEATURES/>特徴</A>
+        <A HREF=links.html>links</A>          <A HREF=history.html>history</A>
+        <A HREF=TODO/>TODO</A>
+</PRE>
+#ifndef DIST
+<PRE>
+        <A HREF=search-j.html>検索</A>
+</PRE>
+#endif
+#else
+<PRE>
+        <A HREF="index.html">[Japanese] is here.</A>
+
+        <A HREF=#fml>fml</A>            <A HREF=download-e.html>download</A>
+        <A HREF=INFO-e.html>What's new</A>    <A HREF=FEATURES-e/>Features</A>
+        <A HREF=links-e.html>links</A>          <A HREF=history-e.html>history</A>
+        <A HREF=TODO-e/>TODO</A>
+</PRE>
+#ifndef DIST
+<PRE>
+        <A HREF=search-e.html>Search</A>
+</PRE>
+#endif
+#endif
 #ifdef DIST
 	<A HREF="http://www.fml.org/fml/">
 	FML HOME PAGE (http://www.fml.org/fml/);
@@ -87,18 +67,27 @@ The lastest official release is 2.2.1. The fml-current version is 2.2E.
 #endif
 	</A>
 #endif /* ! DIST */
-
-<P>
-#ifdef JAPANESE
-	<A HREF="CHECK_LIST/">
-	CHECK LIST (質問の前にチェックしてみて欲しいリスト)
-	</A>
-#else
-	<A HREF="CHECK_LIST-e/">
-	CHECK LIST: Please check these before ask
-	</A>
+<!-- =================================================================== -->
+<HR>
+#ifdef DIST
+/* fml distribution */
+#else /* DIST */
+/* http://www.fml.org/fml/index.html */
+#ifdef JAPANESE /* JAPANESE */
+<PRE>
+* Latest Topics
+The lastest official release is 2.2.1. The fml-current version is 2.2F.
+○ 1999/05/11 fml 2.2.1 リリース
+○ <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ作成プロジェクトについて</A>
+</PRE>
+#else /* ENGLISH */
+<PRE>
+* 1999/05/11 fml 2.2.1 release
+* <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ</A>
+</PRE>
 #endif
-
+#endif /* DIST */
+<!-- =================================================================== -->
 <HR>
 <H3>
 <A NAME="fml">
@@ -121,13 +110,24 @@ Information and HTML version documents in the fml source distribution
 
 	<LI>
 #ifdef JAPANESE
-	<A HREF="FEATURES/index.html">
-	特徴について
-#else
-	<A HREF="FEATURES-e/index.html">
-	FEATURES
-#endif
+	<A HREF="CHECK_LIST/">
+	CHECK LIST
 	</A>
+	(質問の前にチェックしてみて欲しいリスト)
+#else
+	<A HREF="CHECK_LIST-e/">
+	CHECK LIST
+	</A>
+	(Please check these before ask)
+#endif
+
+
+<P>
+#ifdef JAPANESE
+<A NAME=#installation>インストールとアップグレード
+#else
+<A NAME=#installation>Installation and Upgrade
+#endif
 
 	<LI>
 #ifdef JAPANESE
@@ -140,30 +140,25 @@ Information and HTML version documents in the fml source distribution
 	</A>
 
 	<LI>
+	<A NAME="#install-on-unix">
 #ifdef JAPANESE
 	<A HREF="INSTALL/index.html">
-	INSTALL ガイド (インストール, makefmlの使い方など)
+	INSTALL ガイド
+	</A>
+	(インストール, makefmlの使い方など全般)
 #else
 	<A HREF="INSTALL-e/index.html">
-	INSTALLATION GUIDE (installation, usage for makefml ...)
-#endif
+	INSTALLATION GUIDE
 	</A>
-	<BR>
-#ifdef JAPANESE
-	<A HREF="INSTALL_on_NT4/index.html">
-	INSTALL ガイド (Windows NT4 の上での fml のインストールについて)
-#else
-	<A HREF="INSTALL_on_NT4-e/index.html">
-	INSTALLATION on WINDOWS NT4 (Beta Test Phase)
+	(installation, usage for makefml ...)
 #endif
-	</A>
-	<BR>
+
+
+<P>
 #ifdef JAPANESE
-	sendmail以外のMTA(Mail Transport Agent)ごとの注意点
-	<BR>
-	sendmail はINSTALLファイルを参照	
+	MTAごとの注意点。sendmail はINSTALLファイルを参照のこと
 #else
-	Tips for each MTA (except sendmail). See INSTALL for sendmail.
+	Tips for each MTA. See INSTALL for sendmail.
 #endif
 	<BR>
 #ifdef JAPANESE
@@ -178,6 +173,27 @@ Information and HTML version documents in the fml source distribution
 	<A HREF="INSTALL_with_QMAIL-e/index.html">qmail</A>
 	<A HREF="INSTALL_with_EXIM-e/index.html">exim</A>
 	<A HREF="INSTALL_with_ZMAILER-e/index.html">zmailer</A>
+#endif
+
+
+<P> Operating systems
+	<LI>
+#ifdef JAPANESE
+	<A HREF="INSTALL/index.html">[UNIXはINSTALLガイド]</A>
+   
+	<A HREF="INSTALL_on_NT4/index.html">[Windows NT4]</A>
+#else
+	<A HREF="INSTALL-e/index.html">[UNIX]</A>
+   
+	<A HREF="INSTALL_on_NT4-e/index.html">[NT4]</A>
+#endif
+
+
+<P>
+#ifdef JAPANESE
+<A NAME=#configuration>設計思想と進んだ設定についてのガイド
+#else
+<A NAME=#configuration>Design and Configuration Guide
 #endif
 
 	<LI>
@@ -207,21 +223,18 @@ Information and HTML version documents in the fml source distribution
 	and the customize and so o....
 #endif /* JAPANESE */
 
-	<LI>
-	<A HREF="RELEASE_NOTES.html">
-	RELEASE_NOTES
-	</A>
+
+<P>
+#ifdef JAPANESE
+<A NAME="#misc">その他
+#else
+<A NAME="#misc">misc
+#endif
 
 	<LI>
-#ifdef JAPANESE
-	<A HREF="TODO/index.html">
-	TODO リスト
-#else
-	<A HREF="TODO-e/index.html">
-	TODO
-#endif
+	<A HREF="RELEASE_NOTES.html">
+	Release Notes
 	</A>
-	(やり残し、やろうとおもっていること、だれか書いて:-) 
 
 	<LI>
 #ifdef DIST
