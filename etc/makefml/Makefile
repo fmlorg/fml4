@@ -19,8 +19,15 @@ MODE   = 4755
 
 all:
 	@ echo ""
-	@ echo \"make config.ph\"	to make config.ph from ./cf
-	@ echo \"make fml\"		to make fml from fml.c
+	@ echo "\"make config.ph\"	make config.ph from ./cf"
+	@ echo "\"make fml\"		make fml from fml.c"
+	@ echo "\"make config\"		\"makefml config _ML_\" # run CUI menu"
+	@ echo "			You can control fundamental parameters"
+	@ echo "\"make spool2html\"	convert spool to html files"
+	@ echo "\"make secure\"		set cf be more secure"
+	@ echo "			e.g. disable a user to get member list"
+	@ echo "			set the mail size limit,"
+	@ echo "			filter on, traffic monitor on ..."
 	@ echo ""
 
 config.ph: cf
@@ -44,3 +51,9 @@ spool2html:
 
 config:
 	perl _EXEC_DIR_/makefml config _ML_
+
+secure:
+	@ echo "Converting cf to be more secure"
+	@ echo " (original is renamed to cf.bak)"
+	@ perl -i.bak _EXEC_DIR_/bin/more_secure_cf.pl cf
+	@ make config.ph
