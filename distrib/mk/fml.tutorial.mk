@@ -91,6 +91,9 @@ tmp/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 	@ for dir in ${__HTML_TUTORIAL_SUBDIRS__} ;\
 	do \
 	   echo -n '.';\
+	   if [ ! -f doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix ]; then \
+		exit 1 ; \
+	   fi ; \
 	   ${FWIX} -m text -i $$dir doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix \
 		>> tmp/text_index.ph.new 2>/dev/null; \
 	done
