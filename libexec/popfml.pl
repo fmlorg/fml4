@@ -39,9 +39,7 @@ require 'proc/libpop.pl';
 chdir $DIR || die "Can't chdir to $DIR\n";
 
 &PopFmlInit;
-$! = "";
 &PopFmlGabble;
-&Log("Gabble Error: $!") if $!;
 &PopFmlProg;
 
 exit 0;
@@ -143,6 +141,9 @@ sub PopFmlInit
 
 sub PopFmlGabble
 {
+    $! = "";
+    &PopFmlLock;
+
     if (($pid = fork) < 0) {
 	&Log("Cannot fork");
     }
@@ -157,6 +158,9 @@ sub PopFmlGabble
     while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
+
+    &Log("Gabble Error: $!") if $!;
+    &PopFmlUnLock;
 }
 
 
@@ -169,9 +173,9 @@ sub PopFmlProgShutdown
     exit(0);
 }
 
-sub PopLock
+sub PopFmlLock
 {
-    local($queue_dir) = @_;
+    local($queue_dir) = $PopConf{'QUEUE_DIR'};
 
     print STDERR "--try lock ... ($$)\n" if $debug;
 
@@ -181,7 +185,7 @@ sub PopLock
     print STDERR "--locked ... ($$)\n" if $debug;
 }
 
-sub PopUnLock
+sub PopFmlUnLock
 {
     close(LOCK);
     flock(LOCK, $LOCK_UN);
@@ -192,7 +196,7 @@ sub PopUnLock
 sub PopFmlProgFreeLock
 {
     $PopFmlProgExitP = 1;
-    &PopUnLock;
+    &PopFmlUnLock;
 }
 
 sub PopFmlProg
@@ -208,7 +212,7 @@ sub PopFmlProg
     # anyway shutdown after 45 sec.
     $SIG{'ALRM'} = "PopFmlProgShutdown";
     alarm($ALARM || 300);
-    &PopLock($queue_dir);
+    &PopFmlLock;
 
     opendir(DIRD, $queue_dir) || &Log("Cannot opendir $queue_dir");
     for $qf (sort {$a <=> $b} readdir(DIRD)) {
@@ -280,7 +284,7 @@ sub PopFmlProg
     undef $SIG{'ALRM'};
     alarm(0);
 
-    &PopUnLock;
+    &PopFmlUnLock;
     closedir(DIRD);
 
     # &Log("fork $ForkCount childrens") if $ForkCount;
