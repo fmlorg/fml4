@@ -17,6 +17,29 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	bug fix Content Hanlder 
+
+Content Hanlder ちょっと変 (allow+multipartの時だけ?)
+=E
+bug fix Content Hanlder ... only in the "allow+multipart" case ?
+
+
+.S	redistribute emulation command
+
+再配送を行なうコマンド
+=E
+command to redistribute an aritcle
+
+Example:
+
+   /usr/local/fml/bin/resend.pl email-address article-number ?
+
+.S	chaddr reply
+
+chaddrのレポートメールのTo: CC: にuniqかける
+=E
+aggregate addresses to reply
+
 .S	mead
 
 mead が判定不能だったメールを知らせる
