@@ -5,7 +5,7 @@
 
 libftp.pl は ftpmail server へリレーすることも出来ます。
 libhref.pl も使えば ftp ftp://ftp.phys.titech.ac.jp/ls-lR.gz を理解できます。
-sid.pl を参考にしてみてください。（Operations Guide をみてね doc/op）
+sid.pl を参考にしてみてください。
 
 config.ph の設定は、次の３つくらいでしょう。
 

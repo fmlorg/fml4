@@ -39,11 +39,11 @@ Language statements is a half of nroff and texinfo. I would like to
 take fwix.pl to generate four kinds of formats but now fwix.pl
 supports text and html.
 
-doc/op.jp などは wix から作られた plain text です。同じ wix ファイルか
-らHTML版(doc/html/)は作られています。html 版はソースを広げたTOP
+doc/ はほとんど全部 wix から作られた plain text です。同じ wix ファイ
+ルからHTML版(doc/html/)は作られています。html 版はソースを広げたTOP
 directoryで『make doc』でつくってください。
 =E
-doc/op.jp is a plain text version of op.wix (fwix.pl translated).
+doc/ is generated from .wix format files (fwix.pl translated).
 Html version can be seen in doc/html/ or http://www.fml.org/fml/.
 
 WIX Language はあくまでも

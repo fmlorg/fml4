@@ -61,9 +61,6 @@ execl("/usr/local/fml/fml.pl", /* 本体 fml.pl はどこ？ */
       "/usr/local/fml",        /* fml package の library はどこ？ */
       NULL);
 
-これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
-イル (doc/op.jp) 等を見ながら直してみて下さい。
-
 fml-ctl.c では
 execl("/usr/local/fml/fml.pl", /* 本体 fml.pl はどこ？ */
       "(fml)", 

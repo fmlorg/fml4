@@ -64,8 +64,6 @@ tricky なことをしているので、ちょっとねぇ…
 =E.S	Certification ($MODERATOR_FORWARD_TYPE == 2 default)
 
 $MODERATOR_FORWARD_TYPE という変数があります。デフォールトは２です。
-デフォールトについて説明します。２以外は doc/op.jp (WWW なら 
-http://www.fml.org/fml/op/) を見て下さい。
 =E
 FML has several kinds of certifications. The type differs following
 $MODERATOR_FORWARD_TYPE. When $MODERATOR_FORWARD_TYPE is type I, you

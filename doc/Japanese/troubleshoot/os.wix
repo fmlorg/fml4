@@ -184,9 +184,6 @@ fml.pl. This set up code depends on operating systems.
 
 各オペレーティングシステムでどう setuid をすればうまくいくか？ は次の
 節にまとめてあります。
-注意: 以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
-は適当な大きさに押えたいので細かいデータはすべてこの doc/op.jp に収録
-していくことに変更されました。
 
 .S	/etc/aliases の書き方と OS 依存性
 =E.S	/etc/aliases syntax problems

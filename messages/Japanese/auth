@@ -41,8 +41,6 @@ auth.admin_not_member:
 	   コマンド    admin addadmin _ARG0_
 	   (shell上で) makefml addadmin _ARG0_
 	などを実行して登録する必要があります。
-	詳しくはインストール・ファイル(doc/INSTALL.jp)やdoc/op.jpなどを
-	見て下さい。
 
 auth.should_be_from_member:
 	エラー: <_ARG0_>はメンバーではありません。

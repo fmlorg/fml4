@@ -487,8 +487,7 @@ advanced settings than INSTALL.
 
 初心者には最初は何をどういじってインストールするのかは良くわからないも
 のです。とりあえず簡単なものはこれでできるはずです。詳細については 
-INSTALL.jp というファイルを見て下さい。より高度な設定についてはこの文
-書/パッケージ中の doc/op.jp 『FML 2.2 の設計と実装)』を読んで下さい。
+INSTALL.jp というファイルを見て下さい。
 
 『ある動作をするか？否か？』については config.ph という設定ファイルで
 操作することができます。アーカイブやスプール、help ファイルの場所 や
@@ -504,17 +503,13 @@ file "config.ph". You can control FML by config.ph.
 
 PLAIN TEXT 版はパッケージ中の doc/ にあらかじめ用意されています。README
 や INSTALLマニュアル の HTML 版も ぱっけーじ/doc/html/ の下に用意され
-ています。doc/op.jp のHTML 版は巨大なのでパッケージにはついていません。
-必要なら
+ています。
 =E
 All documents of plain text version are bundled in a FML distribution
 package. HTML version documents except this "op.*" documents are also
-bundled in it since "op.*" are very large. If you want html version of
-this document, please run
+bundled in it since "op.*" are very large. 
 
-	(shell prompt)% make doc 
-
-でつくって下さい。ドキュメントの最新版は
+ドキュメントの最新版は
 =E
 Latest version of documents are available in
 
