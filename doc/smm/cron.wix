@@ -1,0 +1,91 @@
+.S	CRON (fml original bin/cron.pl)
+.key	cron.pl
+.key	etc/crontab
+
+SYNOPSYS
+	cron.pl [-a] [-d] [-b43] [-fcrontab] [-bd] $DIR [$LIBDIR]
+
+    -d                debug mode 
+    -a                run eternally(default: 180sec. = 60sec. * 3times) 
+    -mtimes           run from now to (60 * times) sec. after 
+    -fcrontab-file    alternative crontab 
+    -h                show this help and exit 
+    -bd		      daemon (Become Daemon) 
+    -bOSTYPE          -b43(OSTYPE = 43): 4.3BSD Like. not mailed to you 
+
+
+fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
+そのまま system の cron と同じ働きをします。
+つまり１分に一回おきて crontab をみて、実行する。
+＃単にシステムのcronじゃないだけですね…うじゃ
+
+ちなみに、複数のcron.plは走りません、cron.pid をみて一つのＭＬにつき一
+つしか走らないようになってます。
+＃あと 長く走り過ぎておかしくなること防止で、２４時間くらいで 次の
+cron.plを起動しなおします。
+
+インストール：
+○システムが定期的に何かをしてくれないので、
+cron.pl をなんとかして（疑似定期的に）起動すればいいわけです。
+
+% cron.pl ML's-Directory(config.phの場所) Library's(libsmtp.plとかの場所) 
+
+で起動します。＃ Argument がないと、その環境の $HOME にいってしまう
+
+１． たとえば ~/.login で cron.pl を起動するとか（すでに走っていれば走
+     らないから大丈夫）…
+
+２．loginしたとき、まめにたちあげるとか…
+
+３．ＭＬサーバにメールが来たときに起動させる↓とか…
+
+config.ph に
+.key	$CRON_PIDFILE
+.key	$CRONTAB
+.key	$DISTRIBUTE_CLOSE_HOOK
+
+$CRON_PIDFILE = "$DIR/var/run/cron.pid";
+$CRONTAB      = "$DIR/etc/crontab-4.4";
+＃ directory がなかったらつくってくださいませ
+
+$DISTRIBUTE_CLOSE_HOOK = q#
+	$_cf{'hook', 'prog'} = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
+#;
+
+をつけたす。＃いずれも適当にパスとかは変えてください
+
+cron.pid は cron.pl の pid を記録するファイル（/var/run/cron.pidに相当
+するもの）。
+
+crontab-4.4  は システムの/etc/crontab  に相当するものです。
+＃注意： cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
+
+適当な設定をして下さい。
+
+余談：	cron.pl は ほんもののcron のクローンですので、at とか 自分用の 
+cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
+あるようだ）
+
+
+.S	cron.plを使う際の注意
+.label	{Matomeokuri-not-cron_2fix}
+.key	Matomeokuri-not-cron_2fix
+.key	attention-4-cron.pl
+
+
+cron.pl を sendmail が  exec して実行するというのは
+crontab をユーザー毎に設定できないＯＳへの対応です。
+できるなら、 user ごとに crontab を設定できるほうがいいとおもうんです
+が世の中そういうＯＳばっかりじゃないわけで
+
+例えば、２４時間でおきかえるっていうのも 安全策なだけで、別に１週間走
+らせてもＯＫです。
+
+だから、別に無理に sendmail にcron.pl を走らせさせなくても、ＭＬ管理者
+が login したときだけ cron.pl をいれかえる（実行すれば勝手に入れ替わる）
+のでもいいはずです。
+
+たまに、 sendmail とうまくおりあえないこともあるみたいなので、そういう
+時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね？
+
+
