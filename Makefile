@@ -57,7 +57,7 @@ FMLMK_CONF=.fmlmk.conf
 .endif
 
 ### export environmental variable
-EXPORT_ENV = FML=${FML} DESTDIR=${DESTDIR}
+EXPORT_ENV = FML=${FML} DESTDIR=${DESTDIR} BRANCH=${BRANCH} MODE=${MODE}
 
 
 ### MAIN ###
