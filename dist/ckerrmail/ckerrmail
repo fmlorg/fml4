@@ -1,0 +1,330 @@
+#!/usr/local/bin/perl
+
+$SENDMAIL="/usr/sbin/sendmail";
+$NKF="/usr/local/bin/nkf";
+$ME="i16\@imasy.or.jp";
+$LOGDIR="/home/imasy/i16/errmaildb";
+
+$dontleave{'i16@imasy.or.jp'} = 1;
+$dontleave{'poet@dream.design.co.jp'} = 1;
+
+($sec, $min, $hour, $day, $mon, $year) = localtime;
+$mon++; $year += 1900;
+$date = sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $day, $hour, $min, $sec);
+
+$dns_seq = 0;
+
+$H{'from'} = $H{'to'} = $H{'subject'} = "";
+
+#system("touch /home/imasy/i16/HEREIS");
+
+while(($line = &nextline) ne "") {
+	$H{&tolower($1)} = $2 if $line =~ /^([^: ]+)\: (.*)$/;
+	}
+
+$from = $H{'from'};
+$to = $H{'to'};
+$sender = $H{'sender'};
+$subject = $H{'subject'};
+$dns_seq = 0;
+@adrs = ();
+
+if($subject eq "actives (cgi ML)"
+&& $from eq "cgi-adm\@y7.net (cgi administrator)") {
+	$count = 0;
+	while(<>) {
+		$count++ if /^\w/;
+		}
+	&showcount($count, "cgi");
+	exit(0);
+	}
+if($from eq "postmaster\@mx2\.dns-ml.co.jp") {
+	if($subject =~ /^Delivery failure \((.*)\)$/i) {
+		&byedns($1, "jbuilder-request\@mx2.dns-ml.co.jp", "jbuilder");
+		}
+	elsif($subject =~ /^Delivery failure$/i) {
+		if(($line = &nextline) =~ /^Your message has encountered delivery problems to ([-\w\.]+\@[-\w\.]+)\./) {
+			&byedns($1, "jbuilder-request\@mx2.dns-ml.co.jp", "jbuilder");
+			}
+		}
+	exit(0);
+	}
+if(($from =~ /^Mail Delivery Subsystem \<MAILER\-DAEMON\@tasogare\.imasy\.or\.jp\>$/i)
+#&& $to eq "i16\@imasy.or.jp"
+&& $subject =~ /^Returned mail:/i) {
+	exit(0);
+	}
+if(($from =~ /^Mail Delivery Subsystem/i || $from =~ /^MAILER\-DAEMON/i)
+&& $subject =~ /^Returned mail:/i) {
+	$line = &nextline while $line !~ /----- The following addresses had permanent fatal errors -----/i;
+	while(($line = &nextline) !~ /^\s+-----[\w\s]*-----\s*$/) {
+		&byeq($1) if $line =~ /\<([-\w\.]+\@[-\w\.]+)\>/;
+		}
+	exit(0);
+	}
+if($from =~ /^The Post Office/i
+&& $sender =~ /^mailer-daemon\@/i
+&& $subject =~ /^your mail was disallowed$/i) {
+	$line = &nextline while $line !~ /^to \<([-\w\.]+\@[-\w\.]+)\>$/;
+	&byeq($1);
+	exit(0);
+	}
+if($from =~ /^Mail Delivery Service/i
+&& $subject =~ /^Delivery Status Notification$/i) {
+	while(($line = &nextline) !~ /^Content-Type:/i) {
+		&byeq($1) if $line =~ /^([-\w\.]+\@[-\w\.]+)\; Action\: Failed\; Status\: 5\.2\.2 \(mailbox full\)$/;
+		}
+	exit(0);
+	}
+if($from =~ /Postmaster\@\w+\.kikakuya\.ne\.jp/i
+&& $subject =~ /^Mail System Error - Returned Mail$/i) {
+	$line = &nextline while $line !~ /^Content-Type: message\/rfc822$/i;
+	$line = &nextline while $line !~ /^Received:/i;
+	while(($line = &nextline) =~ /^\s/) {
+		&byeq($1) if $line =~ /^\s+for \<([-\w\.]+\@[-\w\.]+)\>\;/;
+		}
+	exit(0);
+	}
+if($from =~ /^Mail Administrator/i
+&& $subject =~ /^Mail System Error - Returned Mail$/i) {
+	while(1) {
+		if($line =~ /^The following recipients haven't received this message:$/i) {
+			while(($line = &nextline) ne "") {}
+			while(($line = &nextline) =~ /^ *([-\w\.]+\@[-\w\.]+)$/) {
+				&byeq($1);
+				}
+			exit(0);
+			}
+		if($line =~ /^The following recipients did not receive your message:$/i
+		|| $line =~ /^The following recipients did not receive this message:$/i) {
+			while(($line = &nextline) ne "") {};
+			while(($line = &nextline) =~ /^ *\<([-\w\.]+\@[-\w\.]+)\>$/) {
+				&byeq($1);
+				}
+			exit(0);
+			}
+		if($line =~ /^The following destination addresses were unknown \(please check$/i
+		&& ($line = &nextline) =~ /^the addresses and re-mail the message\):$/i) {
+			$line = &nextline while $line !~ /^SMTP \<([-\w\.]+\@[-\w\.]+)\>$/;
+			&byeq($1);
+			exit(0);
+			}
+		if($line =~ /^    Reason:    RCPT TO:\<([-\w\.]+\@[-\w\.]+)\> User unknown$/) {
+			&byeq($1);
+			exit(0);
+			}
+		if($line =~ /^This Message was undeliverable due to the following reason:/i) {
+			while(($line = &nextline) ne "") {};
+			#(now, $line has "")
+			while(($line = &nextline) ne "") {}; # (skip reason message.)
+			#(now, $line has "")
+#			$m = "";
+			while(($line = &nextline) =~ /^ *\<([-\w\.]+\@[-\w\.]+)\>$/) {
+				&byeq($1);
+				}
+#			exit(0);
+#			while(($line = &nextline) !~ /^The following recipients haven't received this message:$/i) {
+#				exit(0) if $line =~ /^Received:/i;
+#				}
+#			while(($line = &nextline) ne "") {}
+#			while(($line = &nextline) =~ /^ *([-\w\.]+\@[-\w\.]+)$/) {
+#				&byeq($1);
+#				}
+			exit(0);
+			}
+		$line = &nextline;
+		}
+	}
+if($from =~ /^Mailer\-Daemon/i
+&& $subject =~ /^Message rejected by system$/i) {
+	until(($line = &nextline) =~ /-----------------First 8192 bytes of-------------------/i) {
+		&byeq($1) if $line =~ /^Reason: User ([-\w\.]+\@[-\w\.]+) is unknown\.$/;
+		}
+	exit(0);
+	}
+if($from =~ /^MAILER\-DAEMON/i
+&& $subject =~ /^failure notice$/i) {
+	while(($line = &nextline) !~ /--- Below this line is a copy of the message\./i) {
+		push(@adrs, $1) if $line =~ /^\<([-\w\.]+\@[-\w\.]+)\>:$/;
+		}
+	&byeqs();
+	exit(0);
+	}
+if($from =~ /^postmaster\@/i
+&& $subject =~ /^Delivery failure$/i) {
+	$line = &nextline while $line !~ /^\(Originally addressed to ([-\w\.]+\@[-\w\.]+)\)$/;
+	&byeq($1);
+	exit(0);
+	}
+if($from =~ /Postmaster\@\w+\.biglobe\.ne\.jp/i
+&& $subject =~ /^Returned mail: /i) {
+	$line = &nextline while $line !~ /----- The following addresses had delivery problems -----/i;
+	exit(0) unless ($line = &nextline) =~ /^([-\w\.]+\@[-\w\.]+)$/;
+	$a = $1;
+	exit(0) unless ($line = &nextline) =~ /^$/;
+	exit(0) unless ($line = &nextline) =~ /----- Non-delivered information -----/i;
+	$line = &nextline;
+	if($line =~ /The number of messages in recipient's mailbox exceeded the local limit\./i
+	|| $line =~ /Mail Delivery Failed\.\.\. User unknown/i) {
+		&byeq($a) if $a =~ s/\@mwc\.biglobe\.ne\jp$/\@mxb.meshnet.or.jp/i;
+		&byeq($a);
+		}
+	exit(0);
+	}
+if($from =~ /Postmaster\@mail\.nifty\.ne\.jp/i
+&& $subject =~ /Returned mail: [A-Z]{3}[0-9]{5} did not receive a mail/i) {
+	$line = &nextline while $line !~ /----- Unsent message follows -----/;
+	$line = &nextline while $line !~ /^Received:/;
+	$a = "";
+	while(($line = &nextline) ne ""
+	&& ($line =~ /^Received:/ || $line !~ /^[-\w\.]+: /)) {
+		$a = $1 if $line =~ /for\s*\<?([-\w\.]+\@[-\w\.]+)\>?\;/;
+		}
+	byeq($a) if $a;
+	exit(0);
+	}
+if($from =~ /Postmaster\@mail\.nifty\.ne\.jp/i
+&& $subject =~ /^Returned mail: /i) {
+	while(1) {
+		if($line =~ /----- Unsent reason follows -----/i) {
+			&byeq($1) if ($line = &nextline) =~ /^([-\w\.]+\@[-\w\.]+)\.\.\. Unknown user$/;
+			exit(0);
+			}
+		if($line =~ /----- Unsent message follows -----/i) {
+			exit(0);
+			}
+		$line = &nextline;
+		}
+	}
+
+exit(0);
+
+
+sub tolower {
+	local($str) = @_;
+	$str =~ tr/A-Z/a-z/;
+	return $str;
+	}
+
+sub byedns {
+	local($adr, $ctl, $nam) = @_;
+	@adrs = ($adr);
+	&byednss($ctl, $nam);
+	}
+
+sub byednss {
+	local($ctl, $nam) = @_;
+	local($adr);
+	@adrs = grep(!defined($dontleave{$_}), @adrs);
+	return if ! ($#adrs + 1);
+	open(M, "|$SENDMAIL $ctl $ME") || die "can't leave $nam\n";
+	print M <<"MAIL";
+From: $ME
+To: $ctl
+Cc: $ME
+Subject: AUTO leave $nam ERRORs (@adrs)
+
+MAIL
+	foreach $adr (@adrs) {
+		print M "leave $nam $adr\n";
+		}
+	print M "stop\n";
+	close(M);
+	open(E, "|$NKF -em >>$LOGDIR/$nam.log") || die "err file $nam.log\n";
+	foreach $adr (@adrs) {
+		print E $date, " ", $adr, "\n";
+		}
+	close(E);
+	}
+
+sub byeqs {
+	@adrs = grep(!/^$/, @adrs);
+	if(! ($#adrs + 1)) {
+		open(M, "|$SENDMAIL $ME") || die "can't mail me.\n";
+		print M <<"MM";
+Subject: AUTO bye BYEQ NIL ERROR
+To: $ME
+From: $ME
+
+AUTO bye BYEQ NIL ERROR
+MM
+		close(M);
+		}
+	elsif($to =~ /cgi\-adm\@y7\.net/i) {
+		&byefmls("cgi-ctl\@y7.net", "cgi", "XXXXXXXX");
+		}
+	elsif($dns_seq == 2 && $to =~ /i16\@imasy\.or\.jp/i) {
+		# currently no jbuilder check.
+		&byednss("jbuilder-request\@mx2.dns-ml.co.jp", "jbuilder")
+		}
+	}
+
+sub byeq {
+	local($adr) = @_;
+	@adrs = ($adr);
+	&byeqs();
+	}
+
+sub byefml {
+	local($adr, $ctl, $nam, $apas) = @_;
+	@adrs = ($adr);
+	&byefmls($ctl, $nam, $apas);
+	}
+
+sub byefmls {
+	local($ctl, $nam, $apas) = @_;
+	local($adr);
+	@adrs = grep(!defined($dontleave{$_}), @adrs);
+	return if ! ($#adrs + 1);
+	open(M, "|$SENDMAIL $ctl $ME") || die "can't bye $nam\n";
+	print M <<"MAIL2";
+From: $ME
+To: $ctl
+Cc: $ME
+Subject: AUTO bye $nam ERRORs (@adrs)
+
+#admin pass $apas
+MAIL2
+	foreach $adr (@adrs) {
+		print M "#admin bye $adr\n";
+		}
+	print M "#end\n";
+	close(M);
+	open(E, ">>$LOGDIR/$nam.log") || die "err file $nam.log\n";
+	foreach $adr (@adrs) {
+		print E $date, " ", $adr, "\n";
+		}
+	close(E);
+	}
+
+sub nextline {
+	local($lin);
+	exit(0) unless defined($lin = <>);
+	chop($lin);
+	if($dns_seq == 1) {
+		$dns_seq = 0;
+		$dns_seq = 2 if $lin =~ /^from mx2\.dns-ml\.co\.jp/;
+		open(W, ">/home/imasy/i16/DNS_SEQ$dns_seq");
+		print W "$dns_seq\n";
+		close(W);
+		}
+	$dns_seq = 1 if $lin =~ /^The original message was received at /;
+	$lin;
+	}
+
+sub showcount {
+	local($count, $nam) = @_;
+	open(M, "|$SENDMAIL $ME") || die "can't mail count to $ME\n";
+	print M <<"MAIL3";
+From: $ME
+To: $ME
+Subject: AUTO count $nam is $count
+
+Auto count $nam is $count
+MAIL3
+	close(M);
+	open(E, ">>$LOGDIR/$nam.counters") || die "err file $nam.counters\n";
+	print E $date, " ", $count, "\n";
+	close(E);
+	}
+
