@@ -1,0 +1,388 @@
+#!/usr/local/bin/perl
+
+require 'getopts.pl';
+&Getopts("m:hdr:cs");
+
+$debug  = $opt_d;
+$compat = $opt_c;
+
+#############################################################################
+
+
+
+$HEADER = q%#!/usr/local/bin/perl --    # -*-Perl-*-
+# <fml> config header file	
+# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see COPYING)
+%;
+
+&SetDefaults($opt_m);
+
+if ($opt_r) {
+    &reverse($opt_r);
+}
+elsif ($opt_c) { 
+    &compat_output;
+}
+elsif ($opt_s) { 
+    &show_entry;
+}
+else {
+    &readfile(@ARGV);
+    &output;
+}
+
+
+exit 0;
+########################################################################
+
+sub readfile
+{
+    local($file) = @_;
+
+    ($file && open(F, $file)) || die "cannot open $file";
+
+    while (<F>) {
+	/^LOCAL_CONFIG/ && ($local_config = 1) && next;
+
+	if ($local_config) {
+	    $LOCAL .= $_;
+	}
+	else {
+	    next if /^\#/o;		# skip  "^# line" outside the LOCAL_...
+	    s/^\$//;		# strip '$' of "$VARIABLE"
+
+	    if (/(\S+)\s+(.*)/) {	# VARIABLE VALUE
+		local($key, $str) = ($1, $2);
+		$key =~ s/:$//;
+
+		# SPECIAL FUNCTIONS
+		if ($str =~ /^&path\((\S+)\)/) { eval "\$str = &search_path($1);";}
+
+		$str =~ s/@/\\@/g;
+		while ($str =~ s/\\\\@/\\@/g) { 1;}
+		$str = ($str =~ /^\d+$/) ? $str : "\"$str\"";
+
+		$value{$key} = $str;
+	    }
+	}
+    }
+
+    close(F);
+}
+
+
+sub show_entry
+{
+    foreach $k (sort keys %value) {
+	next if $k =~ /^INFO:/;
+	next if $k =~ /^LOCAL_/;
+	printf "%-30s\t%s\n", $k, $value{$k};
+	printf "%s\n\n", $comment{$k};
+    }
+
+    $k = "LOCAL_CONFIG";
+    printf "%-30s\n%s\n", $k, $value{$k};
+}
+
+
+sub compat_output
+{
+    print $HEADER;
+
+    foreach $key (@order) {
+	next if $key eq 'debug';
+	if ($key eq 'LOCAL_CONFIG') {
+	    print "\n\#\#\#LOCAL_CONFIG\n";
+	    print $value{"LOCAL_CONFIG"};
+	}
+	elsif ($key !~ /^INFO:/ && 
+	       (! ($value{$key} eq "0" || $value{$key} eq "\"\""))
+		) { # non-nil variables
+
+	    next if $key =~ /$skip_key/;
+
+	    printf "defined(%s) || (%s = %s);\n", 
+	    "\$$key", "\$$key", $value{$key};
+	}
+    }
+
+    print "\n1;\n";
+}
+
+
+sub output
+{
+    print $HEADER;
+
+    foreach $key (@order) {
+	undef $ncr;
+	undef $comment;
+
+	if ($key =~ /^INFO:/) { print "\n\n\n";}
+
+	if ($_ = $comment{$key}) { $ncr = tr/\n/\n/; $add_n++;}
+	
+	if ($ncr <= 1) {
+	    $s = sprintf("%-30s = %s; %s\n", "\$$key", $value{$key}, $_);
+	    $s = length($s);
+	    if ($s < 80) { $comment = "$_"; undef $add_n;}
+	}
+
+	if ($_ && (! $comment)) {
+	    $_ .= "\n";
+	    while (s/\n\n$/\n/) {;}
+
+	    print $_;
+	    print "\n";
+	}
+
+	if ($key eq "LOCAL_CONFIG") {
+	    print "\n";
+	    print $value{$key};
+	    print "\n";
+	}
+	elsif ($key !~ /^INFO:/) {
+	    printf "%-30s = %s;", "\$$key", $value{$key};
+	    print " $comment" if $comment;
+	    print "\n";
+	    print "\n" if $add_n;
+	}
+    }
+
+
+    ##### LOCAL CONFIG #####
+    if ($LOCAL) {
+	print "\n\n\n";
+	print ('#' x 70); print "\n";
+	print "\#\#\# LOCAL CONFIG\n";
+	print ('#' x 70); print "\n";
+	print $LOCAL;
+    }
+
+    print "\n1;\n";
+}
+
+
+sub DNS
+{
+    chop( $hostname = `hostname` );
+    $HOSTNAME =  $hostname;
+
+    local($name,$aliases,$addrtype,$length,@addrs) = gethostbyname($hostname);
+
+    foreach $host (split(/\s+/, "$name $aliases")) {
+	($host =~ /^$HOSTNAME\./) && ($FQDN = $host);
+    }
+
+    $FQDN       =~ s/\.$//;
+    $DOMAINNAME = $FQDN;
+    $DOMAINNAME =~ s/^$HOSTNAME\.//;
+
+    printf STDERR "%-10s  %s\n", "HOSTNAME", $HOSTNAME     if $opt_d;
+    printf STDERR "%-10s  %s\n", "DOMAINNAME", $DOMAINNAME if $opt_d;
+    printf STDERR "%-10s  %s\n", "FQDN", $FQDN             if $opt_d;
+}
+
+sub host { $HOSTNAME;}
+sub dn   { $DOMAINNAME;}
+sub fqdn { $FQDN;}
+
+sub SetDefaults
+{
+    local($file) = @_;
+    local($key, $local_config);
+
+    foreach ($file, './cf/MANIFEST', './MANIFEST') { 
+	-f $_ && ($file = $_, last);
+    }
+
+    open(MANIFEST, $file) || die "CANNOT OPEN $file\n";
+    select(MANIFEST); $| = 1; select(STDOUT);
+
+    print STDERR "MANIFEST: $file\n\n";
+
+    &DNS;
+
+    while (<MANIFEST>) {
+	next if /^\#C\s+/i;
+
+	undef $local_config if /^(INFO|FML_CONFIG|LOCAL_CONFIG):/;
+
+	if (/^LOCAL_CONFIG/) {
+	    $local_config = 1;
+	    push(@order, "LOCAL_CONFIG");
+	    next;
+	}
+
+	if ($local_config) {
+	    $value{"LOCAL_CONFIG"} .= $_;
+	    next;
+	}
+	elsif (/^(\S+):\s*(.*)/) {	# VARIABLE NAME: DEFAULT VALUE
+	    $key = $1;
+	    $str = $2;
+	    $attach++;
+
+	    if ($str =~ /^&path\((\S+)\)(.*)/) { 
+		$str = &search_path($1) . $2;
+		printf STDERR "%-10s  %s\n", $key, $str if $opt_d;
+	    }
+
+	    if ($str =~ /^&fix:(\S+)\s+(\S+)/) { 
+		$f   = $1;
+		$str = $org = $2;
+		$str = &$f($str);
+		# printf STDERR "%-10s  -> %s\n", $key, $str if $str ne $org;
+	    }
+
+	    if ($key eq 'INFO') {
+		$INFO++;
+		$key = "INFO:$INFO";
+	    }
+
+	    push(@order, $key);
+
+	    $str =~ s/@/\\@/g;
+	    while ($str =~ s/\\\\@/\\@/g) { 1;}
+	    $value{$key} = ($str =~ /^\d+$/) ? $str : "\"$str\"";
+
+	    next;
+	}
+
+	(/^\s*(\#.*)/) && ($comment{$key} .= "$1\n");
+    }
+    
+    close(MANIFEST);
+
+    for (PORT,TAR,UUENCODE,COMPRESS,ZCAT,HOST,
+	 MAIL_LIST,ML_FN,MAINTAINER,XML,
+	 PRECEDENCE,PROC_GEN,CF_VERSION) {
+	$skip_key .= $skip_key ? "|$_" : $_;
+    }
+
+}
+
+sub search_path
+{
+    local($f) = @_;
+    local($path) = $ENV{'PATH'};
+
+    foreach $dir (split(/:/, $path)) { 
+	if (-f "$dir/$f") { return "$dir/$f";}
+    }
+
+    "";
+}
+
+
+
+package rv;
+
+sub main'reverse
+{
+    local($file) = @_;
+
+    ########################################################################
+    ########################################################################
+    ########################################################################
+
+    #  TRICKY;
+    foreach (DIR, CACHE_DIR, FTP_DIR, SPOOL_DIR, TMP_DIR, VAR_DIR, 
+	     VARLOG_DIR, VARRUN_DIR, LIBRARY_DIR, LIBRARY_ARCHIVE_DIR) {
+	eval "\$$_ = '\$$_';\n";
+    }
+
+    do $file;
+
+    foreach (DIR, CACHE_DIR, FTP_DIR, SPOOL_DIR, TMP_DIR, VAR_DIR, 
+	     VARLOG_DIR, VARRUN_DIR, LIBRARY_DIR, LIBRARY_ARCHIVE_DIR) {
+	eval "undef \$$_;";
+    }
+
+    undef $rv'RM; undef $rv'CP;
+    undef $rv'LOCKFILE; undef $rv'LOCKDIR;
+
+    ########################################################################
+    ########################################################################
+    ########################################################################
+
+    (*stab) = eval("*_rv");
+
+    while (($key,$val) = each(%stab)) {
+	local(*entry) = $val;
+
+	print STDERR "$key:"   if $debug;
+	next unless $key =~ /^[A-Z_0-9]+$/;
+	print STDERR "MATCH\n" if $debug;
+
+	if (defined $entry) { 
+	    # print STDERR "$entry eq $main'value{$key};\n";
+	    next if "$entry" eq $main'value{$key};
+	    next if "\"$entry\"" eq $main'value{$key};
+
+	    if ($key  =~ /HOOK/) {
+		if ($entry  !~ /\#/) {
+		    $OUT'HOOK .= "\$$key = q\#$entry\#;\n";
+		}
+		elsif ($entry  !~ /\%/) {
+		    $OUT'HOOK .= "\$$key = q%$entry%;\n";
+		}
+		elsif ($entry  !~ /\@/) {
+		    $OUT'HOOK .= "\$$key = q@$entry@;\n";
+		}
+		else {
+		    print STDERR "CONVERSION ERROR: plaese define [$key]:\n$entry;\n";
+		}
+	    }
+	    else {
+		$entry =~ s/\012/\\n/g;
+		$value{$key} = $entry;
+	    }
+	}
+
+	if (defined @entry) {
+	    undef $num;
+	    $OUT'LOCAL .=  "\@$key = (";
+	    foreach (@entry) {
+		$OUT'LOCAL .= "," if $num++ > 0;
+		$OUT'LOCAL .= "'$_'";
+	    }
+	    $OUT'LOCAL .=  ");\n";
+	}
+
+	# Is there an associative array that isn't the one
+	# we're currently iterating through?
+
+	if ($key ne "_$package" && defined %entry) {
+	    $OUT'LOCAL .= "\%$key = (\n";
+	    foreach $key (sort keys(%entry)) {
+		$OUT'LOCAL .= "'$key', '". $entry{$key} ."',\n";
+	    }
+	    $OUT'LOCAL .=  ");\n";
+	}
+    }
+
+    foreach $key (@main'order) {
+		    if ($key =~ /INFO:/) {
+			print "\n" if $match;
+			undef $match;
+			next;
+		    }
+
+		    if ($value{$key}) {
+			printf "%-20s    %s\n", "$key", $value{$key};
+			$match++;
+		    }
+    }
+
+
+
+    print "\n\nLOCAL_CONFIG\n\n";
+    print $OUT'HOOK;
+    print "\n";
+    print $OUT'LOCAL;
+}
+
+
+1;
