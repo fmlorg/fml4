@@ -397,8 +397,8 @@ accounts on POP server
 =E
 	elena-admin	(MAINTAINER)
 
-が必要です。これらのアカウントをPOPサーバーにつくっておいて下さい。そ
-してそれと同じPOPパスワードを newml の際に入力して下さい。
+が必要です。これらのアカウントをPOPサーバーにつくっておいて下さい。
+そしてそれと同じPOPパスワードを newml の際に入力して下さい。
 =E
 Please create these account on POP server and input the same password
 in "makefml newml elena".
@@ -413,6 +413,9 @@ control address name.
 
 いずれにしろ最初の時は elena-ctl が仮定されています。ダミーでいいので
 パスワードは入れておいて下さい。(ここどうするのがいいのかよくわからない)。
+注意: elena, elena-ctl, elena-admin の権限は最低限のものにしてください。
+      この仮想ユーザたちはメールが読めればいいだけです。
+
 
 .S	POP版での makefml pop_passwd ML名  (POPパスワードの変更)
 =E.S	makefml pop_passwd <ML> (change POP password)

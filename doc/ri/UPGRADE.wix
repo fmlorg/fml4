@@ -364,6 +364,30 @@ config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
 (INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
 設定が必要です。
 
+.#  .S	1.6 以前から最新版にあげる際に config.ph は前のままでもＯＫ？
+.#  =E.S	I can use the same old config.ph when version up?
+.#  
+.#  基本的にそれでいけるはずです。適宜自動補正のルーチンが処理されます。
+.#  ただ、メニューその他一切合財使えませんので結構不便です。
+.#  
+.#  config.ph は $CFVersion という変数の値でバージョンが定められています。
+.#  この値によって互換性を保つルーチンが呼ばれます。2.1 では CFVersion 3.0 
+.#  で現在(2.2ALPHA)の config.ph は 3.2 です。
+.#  =E
+.#  Yes, FML is backward compatible except for contents of your hooks, so
+.#  understand the old config.ph. FML checks $CFVersion in config.ph. Pay
+.#  attention hooks you customized uses obsolete functions in old FML. If
+.#  so, such hooks do not work and you need to write hooks based on
+.#  current functions.
+.#  
+.#  1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
+.#  いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
+.#  使ってない場合はそのままでＯＫです。
+.#  
+.#  ただたまに変数名のスペリングの間違いを直すとか〜で かわっちゃうことが
+.#  ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
+.#  書いておきますので、見てもらえばOKのはずです。
+
 .appendix
 .C	古いfml 1.x から3.0へ
 .l	1.0-to-3.0

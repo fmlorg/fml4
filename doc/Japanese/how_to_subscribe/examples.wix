@@ -487,4 +487,46 @@ from addr1,addr2,addr3,addr4.
 .fi
 
 
+.S	ML-request をコマンド用のアドレスにする
+=E.S	Set up listname-request as a command address
+.k	ML-request をコマンド用のアドレスにする
+
+1 	-request 宛をコマンドにするためには、-request 宛が fml.pl を
+     	呼ぶようにしなければなりません。つまり /etc/aliases を変更し
+	listname-request がコマンド用の include-ctl を呼ぶようにしていないと
+	いけません。例: elena ML の場合
+=E
+   1 set up listname-request to run fml.pl with command mode
+
+	elena-request: :include:/var/spool/ml/elena/include-ctl
+
+   ファイル include-ctl は
+=E
+   The content of file elena-request is such as
+
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr"
+
+のようになっている必要があります。
+
+2 	また配送するメールのヘッダではコマンドの送り先情報を
+	書いています。ユーザの便宜のためアドレスも変えて下さい。
+	config.ph  なら
+=E
+2	FML distribution article has information of commands in the header.
+	Please set 
+
+	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
+.k    	$CONTROL_ADDRESS
+
+と登録する必要があります。問題はこの場合 $MAINTAINER をどうするかです。-
+request のままだとエラーの時恐いので、 elena-admin 等をつくってそれは
+本当の単なる管理者宛のフォワード等にするとよいとおもいます。ちなみにデ
+フォールトは elena-admin なのでそのままで大丈夫でしょう。
+=E
+In config.ph. If $MAINTAINER is the same as $CONTROL_ADDRESS, please
+change it to different one. In default it is o.k. since $MAINTAINER is
+listname-admin.
+
+
+
 $Id$

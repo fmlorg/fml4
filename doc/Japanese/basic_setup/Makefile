@@ -13,6 +13,7 @@ TUTORIAL_BASIC_SOURCES += errormail-handling
 TUTORIAL_BASIC_SOURCES += errormail-handling-qmail
 TUTORIAL_BASIC_SOURCES += files
 TUTORIAL_BASIC_SOURCES += installer-QandA
+TUTORIAL_BASIC_SOURCES += QandA
 
 # samples
 TUTORIAL_BASIC_SAMPLES += sample.aliases

@@ -1,3 +1,10 @@
+.HTML_PRE
+
+	Q & A
+=E
+	a few Q and A
+
+
 Q: この場合、どれが（特定MLで）活動しているFMLか見極める方法
 
 A:  /etc/aliases にある
@@ -14,4 +21,21 @@ elena-ctl: :include:/var/spool/ml/elena/include-ctl
 
 に該当しないディレクトリは無関係です。これでわかるでしょうか？
 
+
+Q: 特定のメンバー($DIR/members-admin)からの投稿は無条件でメーリングリ
+ストへ流し、それ以外からの投稿は拒否し、その旨のメール($DIR/deny)を投
+稿しようとしたアカウントに送信する.
+fml-support: 08019
+
+A: デフォールトです。これは
+
+	% makefml newml elena
+	% makefml addadmin elena 特定のメンバーのアドレスその１
+	% makefml addadmin elena 特定のメンバーのアドレスその２
+	% makefml addadmin elena 特定のメンバーのアドレスその３
+	…
+
+した状態です。
+
 $Id$
+.~HTML_PRE

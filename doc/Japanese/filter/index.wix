@@ -8,6 +8,7 @@
 .# .__repl_include__
 .include overview.wix
 .include examples.wix
+.include QandA.wix
 .include envelope_filter.wix
 .include content-handler.wix
 .include user.wix
