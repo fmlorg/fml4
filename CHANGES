@@ -6,6 +6,10 @@
 
 2002/01/10
 
+  モデレータへの査読依頼を MIME/Multipart で送る
+
+   MIME:: を fml-devel ( fml next generation ) から輸入する
+
    DEFINE_FIELD_PAT_TO_REJECT()
 	bug fix argument
 	ヘッダの指定は大文字でも小文字でもいいようにする
@@ -136,7 +140,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.229 2001/12/28 04:26:04 fukachan Exp $
+	add $FML: CHANGES,v 1.230 2002/01/09 15:11:57 fukachan Exp $
 
 2001/10/03
 

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libmoderated.pl,v 2.18 2001/09/29 10:11:31 fukachan Exp $
 #
 
 #
@@ -213,18 +213,53 @@ sub ModeratedDeliveryTypeII
     # make a temporary queue to be forwarded to moderators
     open(APP, "> $f_info") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
-    print APP "\n$info\n";
 
-    print APP &ForwardSeparatorBegin;
-    print APP $e{'Header'};
-    print APP "\n";
-    print APP $e{'Body'};
-    print APP &ForwardSeparatorEnd;
-    close(APP);
+    eval q{ use MIME::Lite };
+    unless ($@) {
+	my $msg = MIME::Lite->new(Type => 'multipart/mixed');
+	my $str = $msg->as_string;
+	my (@h) = split(/\n/, $str);
+
+	$msg->attach(Type     => 'text/plain;  charset=iso-2022-jp',
+		     Data     => STR2JIS($info),
+		     );
+
+	$msg->attach(Type     => 'message/rfc822; charset=iso-2022-jp',
+		     Data     => $e{'Header'}."\n".$e{'Body'},
+		     );
+
+	$msg->print(\*APP);
+	close(APP);
+
+	use Mail::Header;
+	my $header = new Mail::Header \@h;
+	for my $k ('Mime-Version', 
+		   'Content-Type', 
+		   'Content-Transfer-Encoding') {
+	    my $v = $header->get($k);
+	    $v =~ s/[\s\n]*$//;
+	    $Envelope{"GH:$k:"} = $v if $v;
+	}
+    }
+    # RFC934
+    else {
+	print APP "\n$info\n";
+
+	print APP &ForwardSeparatorBegin;
+	print APP $e{'Header'};
+	print APP "\n";
+	print APP $e{'Body'};
+	print APP &ForwardSeparatorEnd;
+	close(APP);
+    }
 
     &ModeratorNotify(*MODERATOR_MEMBER_LIST, $subject, $f_info);
-
     unlink $f_info;
+
+    # clean up
+    for my $k ('Mime-Version', 'Content-Type', 'Content-Transfer-Encoding') {
+	delete $Envelope{"GH:$k:"};
+    }
 }
 
 
