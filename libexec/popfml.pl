@@ -3,16 +3,17 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 $Rcsid   = 'popfml 4.0';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -364,15 +365,19 @@ sub PopFmlProgShutdown
 
 sub PopFmlLock
 {
-    local($queue_dir) = $PopConf{'QUEUE_DIR'};
+    # lock this file to ensure only I read/write QUEUE_DIR.
+    $PopFmlLockFile = "$PopConf{'QUEUE_DIR'}/lockfile";
+    unless (-f $PopFmlLockFile) {
+	open(TOUCH, ">> $PopFmlLockFile"); close(TOUCH);
+    }
 
     print STDERR "--try lock ... ($$)\n" if $debug;
 
-    if (open(FML_LOCK, $queue_dir)) {
+    if (open(FML_LOCK, $PopFmlLockFile)) {
 	flock(FML_LOCK, $LOCK_EX);
     }
     else {
-	&Log("cannot open $queue_dir");
+	&Log("cannot open $PopFmlLockFile");
     }
 
     print STDERR "--locked ... ($$)\n" if $debug;
@@ -380,8 +385,8 @@ sub PopFmlLock
 
 sub PopFmlUnLock
 {
-    close(LOCK);
-    flock(LOCK, $LOCK_UN);
+    close(FML_LOCK);
+    flock(FML_LOCK, $LOCK_UN);
 
     print STDERR "--unlocked ($$)\n" if $debug;
 }
