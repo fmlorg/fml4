@@ -1,19 +1,21 @@
 .HTML_PRE
-	Fml Operations Guide
+		     Fml Operations Guide
 
-				深町 賢一
-				fukachan@sapporo.iij.ad.jp
+   "The Design and Implementation of the fml Mailing List Server"
 
-	[smm/op.wix: smm = System Management Manual]
-	http://www.phys.titech.ac.jp/uja/fml/
-	Last modified: 
+   			深町 賢一
+   			fukachan@sapporo.iij.ad.jp
 
-	このファイルは昔FAQという名前でした。
-	FAQ、Setting、改造の仕方等に関するガイドになっています。
-	＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+   [smm/op.wix: smm = System Management Manual]
+   http://www.phys.titech.ac.jp/uja/fml/
+   Last modified: 
 
-	ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/
-	http://www.phys.titech.ac.jp/uja/fml/
+   このファイルは昔FAQという名前でした。
+   FAQ、Setting、改造の仕方等に関するガイドになっています。
+   ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+
+   ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/
+   http://www.phys.titech.ac.jp/uja/fml/
 
 .HTML_PRE_END
 
@@ -27,14 +29,440 @@
 .# ##########################################################
 .P	Desing Overview of the fml 
 
-.C	ＭＬサーバ概論
+.C	ＭＬサーバ Overview
+
+.S	ＭＬサーバは何をするのか？何をしてほしいか？
+
+Private Communication を便利にするツール（Filter）です。
+そのためデフォールトでは メンバーチェック をするという考え方を尊重して
+います。
+設定でいくらでも変えられるので、拘る必要はないですが。
+
+むしろ日々の routine work をいかに自動処理化できるか？を考えることが重
+要でしょう。
 
 
-.S	MLサーバは何をすればいいのか？
+.# HIKARI ##########################################################
 
-Private Communication を便利にするだけのツール（Filter）
-＃Private→メンバーチェックという考え方になる。
+.S	fml Histry
 
+これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
+いたいとおもっている方には改造の PLATFORM として利用していただけるかと
+思います。
+＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
+ていると思います。最適解ってわけじゃないけど :-)
+
+基本的な方針は
+   『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
+です。
+
+			＊＊＊注意＊＊＊ 
+
+各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
+カルな再配送』のような場合はコマンド機能を落して使うほうがよいでしょう。
+例： 
+   ip-connection を受けるアドレスに使う時は --distribute モードで使う
+
+
+.S	fml 2.1 Overview
+
+fml 2.1 は Mailing List Server package(Perl Scripts package)で、
+僕が壱から Full Scratch したものです。
+＃おまけCDROMつき雑誌等にある「…の改良」の記述は間違った推測なのです
+
+ML server, management tool, .forward 等メールを使う各種インターフェイスの
+集合体です。
+
+これは（歴史的理由により）デフォールトでは hml 1.6 という Perl Script 
+を Emulationします。
+＃正確にはその元祖の shell script の program というべきであらう
+
+subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
+ように作動させることができます。
+
+デフォールトの挙動はそうですが、さまざまな動作を実行できます
+
+	○コマンド機能等を一切使わずにフォワードするだけ等
+	   配送だけして「spoolingするaliasesと同じ」
+	○hml のシンタックスで使う （Default Emulation）
+	○listserv or majordomo インターフェイス
+	   みかけがあたかも listserv のように fml のコマンド群を使う
+	○forward でのMLのための仕組み(slocal や vacation)
+	   .forward に仕掛けて slocal や
+	   .forward から fml の機能を使うことで自分のaccountでMLを実行
+	○まとめおくり等の配送の仕方の制御
+	   メールをリアルタイムに配送したり、
+	   一定時間ごとにためてまとめておくる
+
+等はすぐに実行できます。例えばリモートでＭＬを管理や HTML へ変換してス
+プールするとか expire をかける等さまざまな機能はモジュールとして配布パッ
+ケージに１セットになっています。
+
+必要に応じて、コマンドラインオプション か Configuration file で機能の
+追加・削減を行うことができます。
+
+ようは、インターフェイスだけを変えて、ユーザにとってどう見えるか？とい
+う部分を用意すればよいので、様々なコマンド、ライブラリ群を好きなインター
+フェイスで使えるということです。
+
+
+.S	インストール
+
+とりあえず非常に細かいチューニングを行なわなくてよいなら
+
+	○対話的プログラムで行なう 
+	○コマンドラインで引数を２つほど指定して make する
+
+ことで、ＭＬの設定は終ります。その時、自動的に環境に合わせた各種見本設
+定も自動生成しますので、それを cut and paste すればインストールは終り
+です。
+
+詳しくは INSTALL というファイルを見て下さい。
+
+
+.S	Update や bug fix等の情報について
+
+最新版の fml-current のソースコードを手に入れてから改造等はしていただ
+けるとよろしいかと存じます(_o_)。
+
+○ fml のWWWのページは http://www.phys.titech.ac.jp/uja/fml/ です。
+   最新のドキュメント、ソースともにここに揃っています。 
+
+○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
+うにしてあります。
+＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
+
+○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
+可能です。
+ftp が使えない場合メールでは、なんでもいいからメールを
+fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
+＃自動的に分割して送り返します。
+
+
+.S	anonymous ftp でのソースの入手方法 
+
+	国内のマスター
+	ftp.phys.titech.ac.jp:/pub/net/fml-current/
+
+	国内のミラー
+	ftp://ftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
+
+	国外用のミラー
+	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
+
+
+＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
+
+
+.S	fml の ＭＬ と bug-reportのアドレス
+
+○バグ、質問、新しい発見があったら fml-support ML（例によって自動登録
+です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
+
+ただ、個人宛にメールがくるとどこかへまぎれたり、
+忙しくて時間が取れない場合も多々あります。
+できるだけ fml-support Mailing List 宛へ投げてください _o_
+ＭＬならわかる人がすぐに答えてくれる可能性があります。
+
+2.1 からはＭＬへ登録して欲しくない方のために
+
+	fml-query@phys.titech.ac.jp 	
+
+を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
+ことなく fml-support へフォワードを行います。
+
+どうしても 内密な相談とか、DMで聞きたいことは 
+
+	fml-bugs@phys.titech.ac.jp
+
+へ投げておいてください。ただ返事は遅れぎみです _o_ 
+＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
+
+	 
+.S	Compatibility
+
+○ fml 1.x を使っていて fml 2.x に入れ換える場合
+   そのまま perl script 群だけを入れ換えれば動きます。
+   config.ph で複雑な HOOK を書けている場合は
+   ちょっと注意がいるかもしれません。
+   ＃詳しくは doc/op 参照
+
+○ hml 1.6 との compatibility
+
+members や log file等をそのままに、*pl 群と config.phを差し替えればい
+きなり動きます。
+
+
+.C	fml でやれること
+
+fml 2.1 が hml 1.6 と同様に目指したものは
+	(以下 hml 1.6 README.jpn より)
+
+	＊ 大規模なメーリング・リストでの使用に耐えます。
+	＊ 豊富なコマンドを持っています。
+	   ヘルプ、過去の記事の一覧、入手、一時的な離脱／再開など。
+	＊ メンバのアドレスのチェックをしていますので、非メンバからの不法な
+	   アクセスを防止することが可能です。
+	＊ perl で書いてあるので改造が容易です。
+
+そして………
+
+○ 簡単なインストーラーによるお手軽インストール から複雑な設定まで
+   サポートすること
+
+○たくさんのドキュメント（複数のフォーマットで）
+
+	PLAINTEXT版はあらかじめ用意されています。
+
+	HTML 版は var/html/ の下に用意されいますが、
+	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
+	shell% make doc でつくってください
+	最新版は
+		http://www.phys.titech.ac.jp/uja/fml/ 
+	をのぞいてみてください
+
+○user 権限で実行します＃ daemon とかではなく
+
+○モジュール化 
+	メンテもしやすいですが、自分だけのモジュールを独立にメンテする
+	ことも容易です。
+	応用として
+	   ・ひとつのfmlで複数のＭＬを扱うように拡張
+	   ・コマンド専用サーバ
+   	   ・特定の目的のサーバ
+		例：ftpmail専用サーバ 
+
+	whois や ftpmail はライブラリモジュールとして提供されています。	
+	その他にもさまざまな改造事例集(contrib/)がついています
+	例： 	投票サーバ例
+		WWW-MAIL(Mail で WWW Server とのリレーをし返送)
+		Whois（ローカルキャッシュと本物の whois の両方）
+
+○容易なカスタマイズ
+	ソースコードを直接いじらなくてもたくさんの制御変数と
+	フックでカスタマイズできます。
+	カスタマイズは config.ph とコマンドラインオプション両方で行えます
+
+○まとめ送り サポート ＃ ユーザごとに細かく設定可能
+
+○自動的にメンバー登録をする。メンバーチェックをする等各種動作モード
+   ・自動登録のし方のカスタマイズ
+	メールだすだけ（もともとオフミ用）
+	Subject: subscribe形
+	本文に Subscribe 形
+	等（キーワードは変えられます）
+
+○豊富なファイル操作
+	mget と まとめおくりでの User interface は次のようなものが取り
+	揃えられています。ユーザーごとに設定できます
+
+	PLAINTEST 
+		UNIX FROM
+		RFC934	
+		RFC1153
+		MIME/Multipart
+	COMPRESSED FILE
+		gzip UNIX FROM file
+		Lha + Ish 	（自動ＳＪＩＳ変換可）
+		Lha + uuencode 	（自動ＳＪＩＳ変換可）
+		tar + gzip
+		uuencode
+
+  ・標準のＭＬの記事スプール以外にもアーカイブは設定できます。
+  ・応用として user が put get できるように拡張されたコマンドも実装
+
+○ MIME の処理 （HTML モードでの画像等の変換処理を含む）
+
+○ コマンド インターフェイス の拡張
+    デフォールトは "# command" syntax だが専用サーバなら#の必要はない 
+    コマンド操作の誤チェック機能
+
+○ リモート管理（アドミンコマンド）での Password system(cryptもする)
+
+○ さまざまなインターフェイス
+	 ~/.forward インターフェイス 	 libexec/fml_lcoal.pl
+	 Listserv 互換用インターフェイス libexec/fmlserv.pl
+
+○ flock によるロック処理（２種類選択式）
+
+○ リレーサーバの処理 ＃ % hack 
+
+○ Expire 機能のサポート
+
+○ newsyslog サポート	e.g. log -> var/log/log.0
+
+○ ＭＬ間クロスポスト サポート ＃サイトにまたがる場合は実験段階
+
+○ sendmail とは IPC
+
+   自分のマシンで sendmail が走っている必要はありません。
+   もっとも SMTP を理解してくれるなら sendmail である必要もないですし
+   配送用に使えるSMTPサーバ があれば動きます。
+
+   例えば 一定時間間隔で POP をかけてＭＬを動かし
+   配送はサイトのSMTPサーバにやらせることでＭＬを実行するこは可能です
+
+○スタートレック宇宙歴サポート（笑）
+	宇宙歴をつけるmh, mh-e user interface つき:-)
+
+○ Sendmail 8.x を意識してつくる…＃(もちろん 5.x でも動きます)
+
+
+.S	Brief History
+
+	1.3 -> 2.0 の道のりを簡単にまとめると
+	1.3 -> 1.4 よく使うコード、普段使わないものを再構成する
+	1.4 -> 1.5 まとめおくりおよびmgetのUser Interface拡張
+	1.5 -> 1.6 call by reference, fml_local.pl, sid.pl
+	1.6 -> 2.0 cf/ doc/ まわりの再構成、
+
+
+
+.C	インストールに必要な環境（条件）
+
+.S	インストールと環境
+
+インストール自体はおおむね make 一発です:-)。
+＃実際のインストールはINSTALLというファイルを見て下さい。
+
+perl は必須です、最も今時最初からOSに入ってるとおもいますが。
+自分のマシンで sendmail が走っている必要は必ずしもありませんし、
+SMTPを喋れるなら sendmail である必要もありません。
+
+pop を使ってＭＬを動かすこともできますし、sendmail以外のMTAもあります
+から拘る必要はありませんが、4.4BSD がターゲットマシンなので sendmail +
+perl を想定してドキュメントの大部分は書いてあります。
+
+実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
+ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
+プロバイダ等では違うこともありえます。その辺の詳細は自分の環境の管理者
+の方に聞いて下さい。
+
+
+.S	参考：ターゲットマシンの環境
+
+fml のターゲットマシンでのテスト環境は
+
+2.1 は
+	sendmail 8.7.5 + perl4.036 on NetBSD 1.2 Beta
+	sendmail 8.7.5 + perl4.036 on NetBSD 1.1B Current
+	(fwtk 1.3 も併用) 
+
+2.0 まで
+	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2.1R 
+	sendmail 8.6.12+2.4W, perl4.036 on NetBSD 1.0
+	sendmail 8.6.12+2.4W, perl5.001 on NetBSD 1.0
+	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-1.0current/sun3/60
+です。
+
+その他のこまごまとしたことについては doc/op (旧 FAQ)というファイルがあ
+ります。INSTALL で説明の足りない部分は doc/op （Operation Manual）を見
+てください。
+
+
+.S	対話式設定プログラム
+
+基本設定を（日本語で）対話的に行なうために、 EasyConfigure.euc (名前の
+とおり EUC の形で配布しています)スクリプトを走らせても良いです。（端末
+に合わせてファイルコードをかえてからどうぞ）。
+
+1.5 以降のスクリプトは flock や自動登録等の設定も対話的に行えます。
+＃将来、全ての変数を対話的に設定できるように拡張する予定です。
+
+
+.S	自分のマシンで sendmail が走っていない場合(例:POP3 経由…)
+
+sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
+もできますが、そういうtrickyな話題は doc/op を見てください。
+
+
+.C	Version up について
+
+.S	cp *.pl your-fml-directory
+
+ひろげて *.pl だけ今使っているところへコピーしてください（おしまひ）
+＃よく使うライブラリは lib/perl/ の下にlinkしてあります。
+＃この下ごと copy するのが楽です
+
+.S	新しい機能を有効にするには？
+
+なお、新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで
+指定するかしないと使えません。
+つまり、新しい機能・オプションは明示的に指定しない限り単に動きません
+
+.S	Backward Compatibility 
+
+Backward Compatibility は保証していますが 万が一 consistencyのないもの
+があったら ＭＬ 等へ御一報ください。
+変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
+なくて大丈夫です。
+＃注意：複雑なフックの場合は注意がいると思います。
+＃
+＃古いライブラリも一応Packageに一緒に入ってます。
+＃lib/Compatibility に移動しておきました。
+＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
+
+.S	1.6より前からの移行について
+
+	＊＊＊注意＊＊＊
+1.6では、基本的なデータ構造を call by reference 用に書き直したので、
+いままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
+libcompat.pl にBackward compatibility のためのコードがあります。
+昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
+る程度まで compatible にできます。
+
+コードの都合上どうしても実現できないカスタマイズもありえます_o_
+昔できたことは必ず今の実装でもできるので doc/op を参照してみて下さい。
+
+.S	document ...
+
+current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
+ファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
+
+最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
+
+
+
+.C	配布条件
+
+GPL(GNU Public License)に従うこと。COPYINGを読んでください
+
+
+.C	Acknowledgement 
+
+I thank a lot of people valuable comments, suggestions, contributions
+of bug reports, fixes and patches both on fml-support ML and with
+private communication.
+I refer each contribution in RELEASE_NOTES. 
+
+It is useful to study several ascpects of 4.4BSD for OS automatic
+detection, and mime_pls 1.00 - 2.00a on MIME.
+For convenience I bundle to my package OS detection codes derived from
+amd package, a few useful codes jcode.pl and mime_pls 1.11a, which you
+can obtain on anonymous ftps.
+I greatly appreciate softwares developed and distributed under freedom
+of programming.
+
+Lastly I am greatful to tsubai@phys.titech.ac.jp for fruitful
+discussion on the design and implementation of Mailing List server,
+perl, operating systems and so on.
+
+
+.C	Changes
+
+Please see CHANGES and RELEASE_NOTES
+
+
+Last Modified
+$Id$
+
+
+
+
+
+
+
+.# HIKARI ##########################################################
 
 .S	ＭＬサーバの動作理論
 .key	ＭＬサーバの理屈
@@ -42,10 +470,10 @@ Private Communication を便利にするだけのツール（Filter）
 
 メール → Sendmailがうけとる
              ↓
-	サーバへ渡す。
+	ＭＬサーバへ渡す。
              ↓
 	フィルター操作（しないなら/etc/aliasesいじるだけ）
-	さらにヘッダーをいじるとか…
+	さらにヘッダをいじるとか…
 	＃これくらいならsed＋αでも十分
              ↓
 	なんらかのリストにしたがって配送
