@@ -4756,6 +4756,9 @@ sub do_log
 	$pat = ($1 - 1900) .'/'.  $2 .'/'.  $3;
 	print STDERR "rewrite $dpat => $pat\n";
     }
+    elsif ($dpat) {
+	$pat = $dpat;
+    }
 
     if ($pat) {
 	print "\% grep $pat $file\n";
