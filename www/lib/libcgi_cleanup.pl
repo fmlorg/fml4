@@ -7,8 +7,26 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libcgi_cleanup.pl,v 1.6 2001/08/20 12:29:52 fukachan Exp $
 #
+
+
+# global variables
+use vars qw($DIR $ML $ML_DIR $EXEC_DIR $CONFIG_DIR $DIR
+	    $CGI_CONF %CGI_CF $CGI_CF $CGI_PATH $CGI_AUTHDB_DIR
+	    $WWW_DIR $WWW_CONF_DIR $HTDOCS_TEMPLATE_DIR
+	    %Config $LANGUAGE
+	    $MTA $MAKE_FML $HOW_TO_UPDATE_ALIAS
+	    $VERSION $VERSION_FILE
+	    @INC $NULL $GETBUFLEN
+	    $SavedML %SavedENV
+	    $ErrorString $WithinPre
+	    $debug
+
+	    $MAIL_ADDR $PROC $VARIABLE $VALUE $PTR $PASSWORD
+	    $PASSWORD_VRFY $OPTION $CGI_ADMIN_USER $ACTION $MESG_FILE
+	    $MESSAGE_LANGUAGE @LIBDIR %SafeConfig
+	    );
 
 
 sub Parse
