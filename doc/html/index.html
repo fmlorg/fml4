@@ -30,36 +30,28 @@
 <P>
 The lastest official release is fml-3.0 (1999/08/15), 
 but please use fml-3.0pl\d+.tar.gz (3.0 release + bug fix patches). 
-Please check out ftp and get lateset one (FYI: fml-3.0pl3 on 1999/09/18).
+Please check out ftp and get lateest one.
 
 #ifdef JAPANESE
 <PRE>
 
         <A HREF="index-e.html">[English] is here.</A>
+#ifndef DIST
+        <A HREF="search-j.html">[検索]</A>
+#endif
+        <A HREF="WHATS_NEW/index.html">What's new</A>     <A HREF="download.html">ダウンロード</A>
+        <A HREF="examples/index.html">チュートリアル/設定ガイド(インストール、設定例など…)</A>
+        <A HREF="advisories/index.html">FML アドバイザリィ</A>
 
         <A HREF="3.0-new-features.html">3.0 highlights (2.2.1と3.0の主な違い)</A>
         <A HREF="UPGRADE-3.0/index.html">3.0へ移行する際の注意 (*** 重要 ***)</A>
         <A HREF="CHANGES-3-0-maint/index.html">3.0pl* (3.0 release+patches) のバグ修正履歴</A>
 
-        <A HREF="WHATS_NEW/index.html">What's new</A>     <A HREF="download.html">ダウンロード</A>
         <A HREF="#fml">fml</A>            <A HREF="FEATURES/index.html">特徴</A>
-        <A HREF="mailinglist.html">Mailing List</A> 
-
-        <A HREF="examples/index.html">設定ガイド(インストール、設定例など…)</A>
-        <A HREF="advisories/index.html">FML アドバイザリィ</A>
-
         <A HREF="roadmap.html">Roadmap</A>        <A HREF="TODO/index.html">TODO(やりのこし/やりたいこと/ほしいもの)</A>
         <A HREF="history.html">History</A>        <A HREF="people.html">People</A>
-        <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>
-
-        <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
-
+        <A HREF="mailinglist.html">Mailing List</A>   <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>
 </PRE>
-#ifndef DIST
-<PRE>
-        <A HREF="search-j.html">[検索]</A>
-</PRE>
-#endif
 #else
 <PRE>
 
@@ -98,19 +90,15 @@ Please check out ftp and get lateset one (FYI: fml-3.0pl3 on 1999/09/18).
 #endif /* ! DIST */
 
 <!-- =================================================================== -->
-<P>* Topics
-<br>
+<P> [Topics]
 #ifdef JAPANESE /* JAPANESE */
-<A HREF="variable-list.ja.html">変数リスト</A>
-<A HREF="sorted-variable-list.ja.html">アルファベット順の変数リスト</A>
-<br>
-<A HREF="INSTALL_on_MacOS_X_Server/index.html">Mac OS X Server でのインストールについて</A>
-<br>
-<A HREF="advisories/year2000/index.html">2000年問題について</A>
+<PRE>
+        <A HREF="variable-list.ja.html">変数リスト</A>   <A HREF="sorted-variable-list.ja.html">アルファベット順の変数リスト</A>
+</PRE>
 #else
-<A HREF="variable-list.html">config.ph variable list</A>
-<A HREF="sorted-variable-list.html">config.ph variable list (alphabetical order)</A>
-<br>
+<PRE>
+        <A HREF="variable-list.html">config.ph variable list</A>   <A HREF="sorted-variable-list.html">config.ph variable list (alphabetical order)</A>
+</PRE>
 #endif
 
 <P> [Project]
@@ -121,21 +109,14 @@ Please check out ftp and get lateset one (FYI: fml-3.0pl3 on 1999/09/18).
 /* http://www.fml.org/fml/index.html */
 #ifdef JAPANESE /* JAPANESE */
 <PRE>
-* CGI interface 計画 (experimental)
-   <A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/>ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/</A>
-   <A HREF="examples/makefml.cgi.txt">メモ(TODO, インストールについて)</A>
-* fml restructuring project (beyond 3.0 Release) but not yet documented
-  fml 再構成計画 -- 3.0を越えて --
-* <A HREF="http://www.jwntug.or.jp/wg/ntfml/faq/announce.html">fml FAQ作成プロジェクトについて</A>
-* Ports: MacOS X, BeOS, OS/2 で試した人いませんか？:)
+        CGI interface (experimental)   <A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/>[download]</A>   <A HREF="examples/makefml.cgi.txt">CGI関連メモ(TODO, インストールについて)</A>
+        fml 再構成計画 -- 3.0を越えて --
+        Ports: Interix, BeOS, OS/2 で試した人いませんか？:)
 </PRE>
-#else /* ENGLISH */
+#else /        ENGLISH */
 <PRE>
-* fml restructuring project (beyond 3.0 Release) but not yet documented
-* CGI interface project (experimental)
-   <A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/>ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/</A>
-   I will not merge it to 3.0 series but fml beyond 3.0
-<A HREF="http://www.jwntug.or.jp/wg/ntfml/faq/announce.html">fml FAQ</A>
+        fml restructuring project (beyond 3.0 Release) but not yet documented
+        CGI interface project (experimental)   <A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/>[download]</A>   I will not merge it to 3.0 series but fml beyond 3.0
 </PRE>
 #endif
 #endif /* DIST */
@@ -300,6 +281,10 @@ Information and HTML version documents in the fml source distribution
 #else
 <A NAME="#misc">misc
 #endif
+#ifdef JAPANESE
+	<LI>
+	<A HREF="advisories/year2000/index.html">2000年問題について</A>
+#endif
 
 	<LI>
 	<A HREF="RELEASE_NOTES.html">
@@ -314,6 +299,14 @@ Information and HTML version documents in the fml source distribution
 #endif
 	GNU PUBLIC LICENSE
 	</A>
+
+	<LI>
+#ifdef JAPANESE
+        <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
+#else
+        <A HREF="links-e.html">mail related links</A>
+#endif
+
 </UL>
 
 <HR>
