@@ -86,6 +86,7 @@
 	_i_  USE_FLOCK                                  $SUMMARY{'USE_FLOCK'}
 	_i_  USE_FML40_PGP_PATH                         $SUMMARY{'USE_FML40_PGP_PATH'}
 	_i_  USE_HANKAKU_CONVERTER                      $SUMMARY{'USE_HANKAKU_CONVERTER'}
+	_i_  USE_INET6                                  $SUMMARY{'USE_INET6'}
 	_i_  USE_LOG_MAIL                               $SUMMARY{'USE_LOG_MAIL'}
 	_i_  USE_MEMBER_NAME                            $SUMMARY{'USE_MEMBER_NAME'}
 	_i_  USE_MIME                                   $SUMMARY{'USE_MIME'}
@@ -830,6 +831,20 @@
 
 =menu
 	USE_HANKAKU_CONVERTER	$SUMMARY{'USE_HANKAKU_CONVERTER'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/USE_INET6
+
+=name
+	USE_INET6
+
+=config
+	USE_INET6
+
+=menu
+	USE_INET6	$SUMMARY{'USE_INET6'}
 
 =query
 	type:	y-or-n
