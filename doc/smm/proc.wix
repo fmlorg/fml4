@@ -6,8 +6,6 @@
 help ファイルを見て下さい:-)
 
 
-
-
 .S	ＭＬで使えるコマンドを増やすor減らす
 .l	add-procedures
 .xref	add-admin-procedures
@@ -97,6 +95,25 @@ makefml が作る listname-ctl アドレスはコマンド専用なので要りません。
 	$COMMAND_SYNTAX_EXTENSION = 1;
 
 両方解釈するなら１、"# summary" みたいな形式だけなら０
+
+
+.S	Subject: にコマンドを書く場合
+.k	$USE_SUBJECT_AS_COMMANDS
+.xref	STDIN->fml
+
+	$USE_SUBJECT_AS_COMMANDS = 1;
+
+の場合は、Subject: の部分をコマンドとみなします。
+.xref	STDIN->fml
+
+	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
+	# で始まり、$CHADDR_KEYWORD のキーワード
+
+$COMMAND_ONLY_SERVER がセットされている場合は、キーワード # の有無に関
+わらず、上記のキーワードを探索します。
+.xref	$COMMAND_ONLY_SERVER
+
+キーワードを見つけた場合は、コマンドモードへ移行します。
 
 
 .S	コマンドは一辺に実行できるか？
