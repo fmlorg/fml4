@@ -1,0 +1,133 @@
+		質問をする前に最低限チェックしておくリスト
+=E
+		CHECK LIST BEFORE ASKING
+
+				深町 賢一
+=E
+				Ken'ichi Fukamachi
+==
+				fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
+
+
+どうしても分からないならしょうがないですが、質問の前に事前に調べられる
+ことは調べておいてもらえると助かります。というリストです。
+
+なお以下で % は shell の prompt です。
+=S
+In these documents, % means a shell prompt, # means a "root" shell
+prompt . 
+
+
+.C	質問の種類にかかわらず共通なチェック項目
+=E.C	Common things over problmes
+
+.S	FML の吐くログは調べたか？
+=E.S	Check FML's logfile ? 
+
+	$DIR/log (config.phのある場所の log ファイル)に何が書いてあるか？
+	(例えば /var/spool/ml/elena/log のようなファイル名)
+
+.S	OS は何か？ その Version は？
+=E.S	What is OS and the version?
+
+   Example:
+	% uname -a
+	NetBSD beth 1.3B NetBSD 1.3B (BETH) #4: Fri Jan 23 14:22:17 JST 1998
+        fukachan@beth:/sys/arch/i386/compile/BETH i386
+
+.S	メール配送システムは何か？ その version は？(必要ならメーカーも)
+=E.S	What is MTA(Mail Transport Agent) and the version?
+
+	sendmail PRO?(Sendmail INC.)
+	sendmail (free?)
+	qmail
+	exim
+	vmailer
+	smail
+	MMDF:)
+	..........
+
+.S	perl の version は？
+=E.S	Perl version?
+
+   Example:
+	% perl4.036 -v
+	This is perl, version 4.0
+
+	$RCSfile$$Revision$$Date$
+	Patch level: 36
+
+	Copyright (c) 1989, 1990, 1991, Larry Wall
+
+	Perl may be copied only under the terms of either the Artistic License or the
+	GNU General Public License, which may be found in the Perl 4.0 source kit.
+
+
+.S	メールシステムのログはどうなっているか？(OSによりファイル名は異なる)
+=E.S	Check MTA's log?
+
+	/var/log/maillog (4.4BSD; NetBSD, OpenBSD, FreeBSD, BSD/OS)
+
+.S	エラーや疑問点についてキーワードについてドキュメントを検索したか？
+=E.S	Search keywords on problems over FML documents?
+
+	配布しているパッケージの中の doc/ の下のドキュメントを開いて検索
+	特に doc/op.jp (日本語)。
+=E
+	doc/op.jp  (Japanese)
+	doc/op.en  (English)
+	in the distribution package
+
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/search-j.html (Japanese)
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/search-e.html (English)
+
+
+
+.C	質問時に最低限用意して欲しい情報は？
+
+	FML version
+	perl version
+	MTA version
+	OS version
+	現象が起きたあたりのFMLのログ
+
+
+
+.C	Sendmail 
+
+.S	/etc/aliases に設定はちゃんとあるか？ newaliases はしたか？
+=E.S	Check entries in /etc/aliases? You did newaliases?
+
+.S	FMLに対しメールを送ったら、エラーメールが返ってきたか？ 
+=E.S	Check error mails if exists?
+
+エラーメールで自明なことはないのか？	
+=E
+Error mails can tell you the reason of errors. Please check it before
+asking.
+
+.if LANG == JAPANESE
+	エラー		原因
+	--------------------------------------------------------
+	unsafe	 	ファイルやdirectoryのpermissionがおかしい 
+	loop		/etc/aliases の設定がおかしい 
+.fi
+.if LANG == ENGLISH
+	error		origin
+	--------------------------------------------------------
+	unsafe		permission of files or directories
+	loop		/etc/aliases miss-configuration
+.fi
+
+
+$Id$
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
