@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/03/09
+
+    コマンドの返事をする時に、
+    もし $LANGUAGE eq 'Japanese' ならいつも
+
+	Mime-Version: 1.0
+	Content-Type: text/plain; charset=iso-2022-jp
+
+	＃ちょっとうそっぽい…      
 
 2001/03/07
 

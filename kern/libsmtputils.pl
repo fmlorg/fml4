@@ -25,7 +25,7 @@ sub DoNeonSendFile
     ### DEBUG INFO;
     &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES:\t") if $debug;
     &Debug(join(" ", @files)) if $debug;
-	
+
     ### check again $file existence
     for $f (@files) {
 	next if $f =~ /^\s*$/;
@@ -248,6 +248,11 @@ sub DoGenerateHeader
 
     $le{'GH:Message-Id:'}  = &GenMessageId;
 
+    if ($LANGUAGE eq 'Japanese') {
+	$le{'GH:Mime-Version:'} = '1.0';
+	$le{'GH:Content-Type:'} = 'text/plain; charset=iso-2022-jp';
+    }
+	
     # Run-Hooks. when you require to change header fields...
     if ($REPORT_HEADER_CONFIG_HOOK) {
 	&eval($REPORT_HEADER_CONFIG_HOOK, 'REPORT_HEADER_CONFIG_HOOK');
