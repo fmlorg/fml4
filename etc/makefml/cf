@@ -12,6 +12,7 @@
 
 CFVersion			4.1
 LANGUAGE			_LANGUAGE_
+MESSAGE_LANGUAGE		_LANGUAGE_
 TZone				_TZ_
 
 ### DNS
