@@ -8,6 +8,8 @@
 	sendmail + apache + fml-current
 	qmail    + apache + fml-current
 
+◯ ＭＬを消したら対応する authdb/ml-admin/$ml/ 以下も消す
+
 ○ apache-ssl (1.3.9 base)の解説の用意をする
 
 ○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといかん
