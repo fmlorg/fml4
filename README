@@ -9,7 +9,7 @@ check out cvs tree
 
    % cvs -d cvs.fml.org:/cvsroot co fml
 
-edit it and commit it!
+edit it and commit it! Please add your changes to "CHANGES".
 
 * snapshot maker
 
@@ -22,7 +22,6 @@ If you are the maintainer to make 'snapshot',
 * release maker
 
    % cvs -d cvs.fml.org:/cvsroot co fml
-   % touch CHANGES	(or get the latest CHANGES)
    % make build
    % echo 3.0.x > conf/release
    % echo 3.0.x > conf/release_version
