@@ -1,17 +1,19 @@
 create table ml (ml text,
 	file text, 
 	address text,
+	off int,
 	option text);
 
 insert into ml
-values ('elena', 'actives', 'rudo@nuinui.fml.org', '');
+values ('elena', 'actives', 'fukachan@sapporo.iij.ad.jp', 0, '');
 insert into ml
-values ('elena', 'members', 'rudo@nuinui.fml.org', '');
+values ('elena', 'members', 'fukachan@sapporo.iij.ad.jp', 0, '');
 
 insert into ml
-values ('elena', 'actives', 'kenken@nuinui.fml.org', '');
+values ('elena', 'actives', 'fukachan@fml.org', 0, '');
 insert into ml
-values ('elena', 'members', 'kenken@nuinui.fml.org', '');
+values ('elena', 'members', 'fukachan@fml.org', 0, '');
+
 
 select oid,* from ml ;
 
