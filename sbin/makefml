@@ -58,8 +58,8 @@ sub System
     local($cmd);
 
     if ($SYSTEM_ARGV_IN) {
-	open(SYS_IN,  "$SYSTEM_ARGV_IN|")   || die($!);
-	open(SYS_OUT, "| $SYSTEM_ARGV_OUT") || die($!);
+	open(SYS_IN,  "$SYSTEM_ARGV_IN|")   || &Die($!);
+	open(SYS_OUT, "| $SYSTEM_ARGV_OUT") || &Die($!);
 	select(SYS_OUT); $| = 1; select(STDOUT);
 
 	while (<SYS_IN>) { print SYS_OUT $_;}
@@ -756,7 +756,7 @@ sub SaveConfig
 
     if (-f $FML_CONFIG) { rename($FML_CONFIG, "${FML_CONFIG}.bak");}
 
-    open(F, ">> $FML_CONFIG") || die("Cannot save config to $FML_CONFIG");
+    open(F, ">> $FML_CONFIG") || &Die("Cannot save config to $FML_CONFIG");
     select(F); $| = 1; select(STDOUT);
     print F "$buf\n";
     print F "\n1;\n";
@@ -802,7 +802,7 @@ sub SavePolicy
 
     if (-f $FML_POLICY) { rename($FML_POLICY, "${FML_POLICY}.bak");}
 
-    open(F, ">> $FML_POLICY") || die("Cannot save POLICY to $FML_POLICY");
+    open(F, ">> $FML_POLICY") || &Die("Cannot save POLICY to $FML_POLICY");
     select(F); $| = 1; select(STDOUT);
     print F "$buf\n";
     print F "\n1;\n";
@@ -984,6 +984,28 @@ sub SignalLog
 }
 
 
+sub Die
+{
+    local($s) = @_;
+    print $s, "\n";
+    &Exit1;
+}
+
+
+sub Exit1
+{ 
+    # clean up lockfiles
+    if ($CleanUpLockFiles) {
+	&v7'CleanUpLockFiles; #';
+    }
+
+    # &MakeFmlUnLock; infinite loop?     sleep(1);
+    &FlushLog;
+
+    exit(1);
+}
+
+
 # dummary
 sub WholeMail { print STDERR "Dummy WholeMail [@_]\n";}
 sub SetEvent  { print STDERR "Dummy SetEvent [@_]\n";}
@@ -1037,7 +1059,7 @@ sub Lock
     return if $NotRequireLock;
 
     if (! -d "$mldir/$ml" && ! -d $mldir) {
-	die("\n\n*** Error: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
+	&Die("\n\n*** Error: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
     }
 
     if (&FlockP($ml, $mldir)) {
@@ -1599,7 +1621,7 @@ sub ResetVariables
     # Mailing list name is all lower case;
     # $ml =~ tr/A-Z/a-z/;
     if ((! $NOT_CHECK_ML_EXIST) && $ml && (! -d "$ML_DIR/$ml")) {
-	die("Cannot find $ml. you've not created it yet?\n");
+	&Die("Cannot find $ml. you've not created it yet?\n");
     }
 }
 
@@ -2546,7 +2568,7 @@ sub do_test
     $exec  = "$EXEC_DIR/fml.pl";
     $dir   = "$ML_DIR/$ml";
 
-    chdir $dir || die("cannot chdir ML directory[$dir]\n");
+    chdir $dir || &Die("cannot chdir ML directory[$dir]\n");
     $SYSTEM_ARGV_IN  = $input;
     $SYSTEM_ARGV_OUT = "$exec $dir $EXEC_DIR -d";
     $SYSTEM_ARGV_QUERY_INPUT = 1;
@@ -2573,7 +2595,14 @@ sub GetCF
 
     # template -> @ConfigOrder (with comments)
     $cf_template = "$EXEC_DIR/etc/makefml/cf";
-    open(CFTMP, $cf_template) || die ("cannot open cf template[$cf_template]");
+
+    if (! -f $cf_template) {
+	print STDERR "I cannot find $cf_template\n";
+	&Exit1;
+    }
+
+    open(CFTMP, $cf_template) || 
+	&Die("cannot open cf template[$cf_template]");
     while (<CFTMP>) {
 	if (/^LOCAL_CONFIG/ .. eof) {
 	    next if /^LOCAL_CONFIG/;
@@ -2608,7 +2637,7 @@ sub GetCF
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
-    open(CF, $cf) || die ("cannot open cf[$cf]");
+    open(CF, $cf) || &Die ("cannot open cf[$cf]");
     while (<CF>) {
 	next if /^\s*$/;
 	chop;
@@ -3662,7 +3691,7 @@ sub do_command
     print STDERR "--- injected to ---\n";
     print STDERR "> \"| $command \"\n";
 
-    open(COM, "| $command") || die("cannot exec [$command]\n");
+    open(COM, "| $command") || &Die("cannot exec [$command]\n");
     select(COM); $| = 1; select(STDOUT);
     print COM "Message-Id: <$$.makefml\@$FQDN>\n";
     print COM "From: $member\n";
@@ -4553,8 +4582,9 @@ sub PermCheck
 ########################################################################
 package Menu;
 
-sub Menu'Log        { &main'Log(@_);}
-sub Warn { &main'Warn(@_);} #';
+sub Menu'Log  { &main'Log(@_);}
+sub Menu'Warn { &main'Warn(@_);}
+sub Menu'Die  { &main'Die(@_);}
 
 sub GetManifest
 {
@@ -4587,7 +4617,7 @@ sub InitMenu
     $EXEC_DIR = $main'EXEC_DIR; #';
     &GetManifest(*MANIFEST, "$EXEC_DIR/cf/MANIFEST");
 
-    open(F, $MENU) || die($!);
+    open(F, $MENU) || &Die($!);
     while (<F>) {
 	next if /^\#/;
 	
@@ -4804,7 +4834,7 @@ sub GenQuery
 	$query{"default"} = $query{"default"} || 0;
     }
     else {
-	die("GenQuery: unknown \$type=[$type]\n");
+	&Die("GenQuery: unknown \$type=[$type]\n");
     }
 }
 
