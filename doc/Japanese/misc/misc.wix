@@ -38,7 +38,8 @@ you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
 らい必要と評価しておくといいみたいです。
 
 
-.S		特定の一つのＭＬだけを一時停止したい(削除にあらず)
+.S	特定の一つのＭＬだけを一時停止したい(削除にあらず)
+=E.S	temporary stop an ML
 
 
 配送を止めるだけならデバッグモードにするとやみに葬られます:)
@@ -49,4 +50,49 @@ you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
 elena: elena-admin
 elena-ctl: elena-admin
 elena-admin: fml
+.~q
+
+.S	毎日記事番号がリセットされるＭＬ
+=E.S	daily renewal
+
+一日の記事の投稿数が一目でも分かるように夜中の１２時を境に
+記事番号を０に戻す、つまり
+
+	Subject: [elena 00100]
+
+を
+
+	Subject: [elena 00000]
+
+にするわけです。
+
+
+記事番号は多くのファイルに関係しています。
+seq は記事番号のカウンタだし、log や summary には記事ごとの
+データが記録されています。
+spool と seq は整合性チェックをしているので、spool も変えてしまわないと
+記事が重複しているというエラーが発生します。
+これらの関係あるファイルを全部名前を変えてしまうしかありません。
+パート II のテストの項目でＭＬをリセットする話をしましたが、
+それと原理的には同じです。
+
+次のような shell script でもつくって cron ( .ref{cron} 節参照) 
+で毎晩回してみるとできるとおもいます。
+.q
+#!/bin/sh
+   
+ml=elena
+   
+date=`date -u +%C%y%m%d`
+   
+/usr/local/fml/makefml lock $ml 60 &
+   
+cd /var/spool/ml/$ml || exit 1
+   
+for file in seq spool summary log
+do
+   if [ -f $file ];then
+        mv $file $file.$date
+   fi
+done
 .~q
