@@ -1796,6 +1796,8 @@ sub __SearchPath
     local($f) = @_;
     local($p, @path);
 
+    if ($ENV{'_PATH_PERL'}) { return $ENV{'_PATH_PERL'};}
+
     # cache on
     if ($PathCache{$f}) { return $PathCache{$f};}
 
