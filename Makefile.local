@@ -1,5 +1,5 @@
 #
-# $FML$
+# $FML: Makefile.local,v 1.45 2001/03/29 16:03:19 fukachan Exp $
 #
 
 check:
@@ -100,6 +100,7 @@ testsetup: libkern
 	rsync -C -a libexec/ /usr/local/fml/libexec/
 	rsync -C -a bin/ /usr/local/fml/bin/
 	rsync -C -a etc/makefml/ /usr/local/fml/etc/makefml/
+	rsync -C -a module /usr/local/fml/
 
 install_current:
 	rsync -C -a kern/ /usr/local/fml-current/
