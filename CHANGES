@@ -3,6 +3,30 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/04/27
+
+   module/Japanese/liblangdep.pl (1.7-1.8): 
+	remove Re> pattern in subject
+
+   proc/libamctl.pl (2.47-2.48):
+	correct subscribe keyword in warning
+
+   kern/libkernsubr2.pl (2.5-2.6):
+	add List-ID
+
+2001/04/17
+
+   www/lib/libcgi_makefml.pl (1.59-1.60):
+	more friendly error message
+
+2001/04/11
+
+   sys/SOLARIS2/depend.pl (1.2-1.3):
+	mkdir $DIR/var/run if not exists for lock
+
+   databases/postgresql/DBI_toymodel.pl (1.3-1.4):
+	nuke MySQL string
+
 2001/04/05
 
    solaris 上でのロックのバグの修正
