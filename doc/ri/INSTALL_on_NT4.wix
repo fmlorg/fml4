@@ -74,7 +74,7 @@ References: fml-support: 7947 7954 7967
 ラムを起動する」そうでこれを使うと fml を起動できます。aliases ファイ
 ルの編集は必要なくなります。
 
-elena ＭＬならプログラムエイリアスに
+elena ＭＬならプログラムエイリアスに(GUIで選んで)
 
   C:\\fml\ml\elena\include.cmd <
 
