@@ -72,7 +72,6 @@ sub __SecureP
 sub __RejectAddrP
 {
     local($from) = @_;
-    local($pat);
 
     if (! -f $REJECT_ADDR_LIST) {
 	&Log("RejectAddrP: \$REJECT_ADDR_LIST NOT EXISTS");
@@ -142,7 +141,6 @@ sub __Write3
 sub __Notify
 {
     local($buf) = @_;
-    local($not_send, $addr);
     local($to, @to, $s, $proc, $m);
 
     # special flag
