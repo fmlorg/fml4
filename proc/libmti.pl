@@ -9,7 +9,7 @@
 #
 # $Id$
 #
-local($MTI_DB, $MTIErrorString, %MTI, %HI);
+local($MTI_DB, $MTI_HI_DB, $MTIErrorString, %MTI, %HI);
 
 
 # MTI: Mail Traffic Information
