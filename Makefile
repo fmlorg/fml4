@@ -113,7 +113,7 @@ release:
 .include "distrib/mk/fml.build.mk"
 build: init_build plaindoc htmldoc __dist ${__BUILD_END__}
 
-doc: init_build plaindoc htmldoc
+doc: plaindoc htmldoc
 
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
