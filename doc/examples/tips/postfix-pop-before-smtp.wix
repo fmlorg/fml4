@@ -46,6 +46,7 @@ patch
         smtpd_recipient_restrictions =
             permit_mynetworks
             check_client_access hash:/etc/mail/dracd
+            check_relay_domains
             reject
 
 4. mkdir /etc/mail. 
