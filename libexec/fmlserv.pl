@@ -64,7 +64,8 @@ exit 0;
 
 ##### FmlServ (Listserv-Emulation) Codes
 #####    the fundamental idea is to use virtual "fmlserv" Maling List;
-#####    of course, group-writable permission is required;_;
+#####    If fmlserv have to handle several owner's ML's, 
+#####    group-writable permission is required;_;
 
 # Fmlserv specific here
 sub InitFmlServ
@@ -150,16 +151,13 @@ sub FmlServ
 
     ### 05: REFUGING THE CURRENT NAME SPACE, GO EACH ML NAME SPACE; 
     ### 
-
     &Save_mainNS; # Save 'main' NameSpace (save the current name space)
 
-    if (debug_dump) { &Dump_mainNS("$FMLSERV_DIR/tmp/main_name_space");}
+    if ($debug_dump) { &Dump_mainNS("$FMLSERV_DIR/tmp/main_name_space");}
 
     $FMLSERV_DIR = $DIR;	# save the $DIR (must be == $FMLSERV_DIR)
 
-    if ($debug) {
-	&DebugEnvelopeDump("pre e");
-    }
+    if ($debug) { &DebugEnvelopeDump("pre e");}
 
     ### 05.01: GO Processing For Each ML's ...;
     # 
@@ -184,6 +182,8 @@ sub FmlServ
 
 	# Load $ml NAME SPACE from $list/config.ph
 	&NewML($DIR, $ml, *e, *MailList);
+
+	&DebugEnvelopeDump("$ml e");
 
 	if ($debug) {
 	    &DebugEnvelopeDump("$ml e");
@@ -514,7 +514,10 @@ sub NewML
 	$ML_MEMBER_CHECK = 0 if -f "${mdir}.auto";
     }
 
-    # Load $DIR/config.ph, if the loading fails, default values are used;
+    # Load config.ph and sitede.ph and record the Name Space 
+    # to reset the Name Space in the end (swap, not stack on). 
+    # 
+    # if the loading fails, default values are used;
     if (-f $cf) {
 	print STDERR "NewML::Load($cf)\n" if $debug;
 	&LoadMLNS($cf);		# eval("$DIR/config.ph")
@@ -666,7 +669,7 @@ sub SortRequest
     local(*e, *MailList, *ML_cmds) = @_;
     local($cmd, $ml, @p, $s, $k, $v);
 
-    foreach (split(/\n/, $e{'Body'})) {
+    for (split(/\n/, $e{'Body'})) {
 	next if /^\s*$/;	# skip null line
 	s/^\#\s*//;		# cut the first #.. syntax
 	next if /^\S+=\S+/;	# variable settings, skip
@@ -876,14 +879,14 @@ sub ProcWhich
 
     &Log($proc);
 
-    &Mesg(*e, "\"$proc $addr\" yields that\n");
-
     for $ml (keys %MailList) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
 
 	$DIR = $MailList{$ml}; # $DIR/Elena/ FORM already;
 
 	&NewML($DIR, $ml, *e, *MailList);
+
+	unshift(@MEMBER_LIST, $MEMBER_LIST);
 
 	# if eval is succeed, get entry for $addr
 	if (&MailListMemberP($addr)) {
@@ -892,16 +895,18 @@ sub ProcWhich
 	}
 
 	&ResetNS;
-    }#FOREACH;
+
+	undef @MEMBER_LIST;
+    } # FOREACH;
 
     if ($hitc) { 
-	&Mesg(*e, "   $addr is registered in the following lists:");
+	&Mesg(*e, "   \"$addr\" is registered in the following lists:\n");
 	&Mesg(*e, sprintf("   %-15s\t%s", 'List', 'Address'));
 	&Mesg(*e, "   ".('-' x 50));
 	&Mesg(*e, $reply);
     }
     else {
-	&Mesg(*e, "*** $addr is not registered in any lists.");
+	&Mesg(*e, "*** \"$addr\" is not registered in any lists.");
     }
 }
 
@@ -1032,7 +1037,9 @@ sub AppendFmlServInfo
 ##################################################################
 package ml;
 
-sub main'LoadMLNS
+# Load config.ph and sitede.ph and record the Name Space 
+# to reset the Name Space in the end (swap, not stack on). 
+sub main'LoadMLNS 
 {
     local($file) = @_;
     local($key, $val, $eval);
@@ -1064,7 +1071,7 @@ sub main'LoadMLNS
 
     while (($key, $val) = each(%stab)) {
 	next if ($key !~ /^[A-Z_0-9]+$/) || $key eq 'ENV' || $key =~ /^_/;
-	local(*entry) = $val;
+	(*entry) = $val;
 		
 	if (defined $entry) { 
 	    $eval .= "\$main'$key = \$ml'$key;\n";
