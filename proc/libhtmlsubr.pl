@@ -1,3 +1,140 @@
+# return hash %mbpcb;
+sub MPBProbe
+{
+    local(*mpbcb, $bh) = @_;
+    local($suffix, $x);
+    
+    # check multipart block (mpb) type
+    # encoding type
+    if ($bh =~ /content-transfer-encoding:\s*base64/i) {
+	$mpbcb{'enc'} = 'base64';
+    }
+    if ($bh =~ /content-transfer-encoding:\s*quoted-printable/i) { 
+	$mpbcb{'enc'} = 'quoted-printable';
+    }
+
+    # speculate type from mime.types
+    if ($bh =~ /Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) { 
+	$suffix = &SearchMimeTypes("$1/$2"); # &Search.. || $2;
+	$x      = $2;
+
+	if ($suffix) {
+	    $suffix =~ s/^x-//i; # remove x- in x-hoehoe type.
+	}
+	elsif ($bh =~ /filename=\".*\.([a-z0-9-]+)\"/) {
+	    $suffix = $1;
+	}
+	elsif ($bh =~ /;\*name=\".*\.([a-z0-9-]+)\"/) {
+	    $suffix = $1;
+	}
+
+	$mpbcb{'suffix'} = $suffix || $x;
+    }
+
+
+    # check image-or-not for the choice to use "<IMAGE" or not
+    if ($bh =~ /Content-Type:\s+image/) { 
+	$mpbcb{'image'} = 1;
+    }
+}
+
+
+sub WriteHtmlFile
+{
+    local(*e, $lpp, $pe) = @_;
+    local($lp, $xbuf);
+
+    while(1) {
+	$lp   = &main'GetLinePtrFromHash(*e, "Body", $lpp);#';
+	$xbuf = substr($e{'Body'}, $lpp, $lp-$lpp+1);
+
+	last if $lp > $pe;
+
+	if ($xbuf =~ /ISO\-/i) { $xbuf = &DecodeMimeStrings($xbuf);}
+	&ConvSpecialChars(*xbuf);
+
+	$xbuf =~ s#([a-z]+://\S+)#&Conv2HRef($1)#eg;
+	print OUT $xbuf;
+	print STDERR ">", $xbuf if $debug;
+
+	$lpp = $lp + 1;
+    }
+}
+
+
+sub FindBase64Decoder
+{
+    local($decode);
+
+    # if not defined, try search bin/base64decede.pl
+    if ($BASE64_DECODE && &ProgExecuteP($BASE64_DECODE)) {
+	$BASE64_DECODE;
+    }
+    elsif (! $BASE64_DECODE) {
+	$decode = &SearchFileInLIBDIR("bin/base64decode.pl");
+
+	if (! $decode) {
+	    &Log("SyncHtml::\$BASE64_DECODE is not defined");
+	    return $NULL;
+	}
+
+	$^X . " " . $decode; # perl base64decode.pl
+    }
+    # when $BASE64_DECODE is defined, but not found
+    elsif (! &ProgExecuteP($BASE64_DECODE)) {
+	&Log("SyncHtml::\$BASE64_DECODE is not found");
+	$NULL;
+    }
+}
+
+
+sub DecodeAndWriteFile
+{
+    local(*e, $lpp, $pe, $file) = @_;
+    local($lp, $xbuf, $decode);
+
+    $decode = &FindBase64Decoder;
+
+    &Log("create $file");
+    &Debug("|$decode > $file") if $debug; 
+    open(IMAGE, "|$decode > $file") || do {
+	&Log($!);
+	return;
+    };
+    select(IMAGE); $| = 1; select(STDOUT);
+    binmode(IMAGE);
+
+    while(1) {
+	$lp   = &main'GetLinePtrFromHash(*e, "Body", $lpp);#';
+	$xbuf = substr($e{'Body'}, $lpp, $lp-$lpp+1);
+
+	last if $lp > $pe;
+	print IMAGE $xbuf;
+	$lpp = $lp + 1;
+    }
+
+    close(IMAGE);
+}
+
+
+sub TagOfDecodedFile
+{
+    local(*mpbcb, $file) = @_;
+
+    # reflect reference to the part in the \d+.html file.
+    if ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'A' || (! $mpbcb{'image'})) {
+	print OUT "<A HREF=\"${file}\">";
+	print OUT "${file}</A>\n";
+    }
+    elsif ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'IMAGE' ||
+	   !$HTML_MULTIPART_IMAGE_REF_TYPE) {
+	print OUT "</PRE>\n";
+	print OUT "<IMAGE SRC=\"${file}\">\n";
+	print OUT "<PRE>\n";
+    }
+}
+
+
 sub AggregateLinks
 {
     local(*links) = @_;

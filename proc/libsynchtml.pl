@@ -586,7 +586,7 @@ sub Write
     ### fclose
     close(OUT);
 
-    &Log("Create $f.html");
+    &Log("create $f.html");
 
     # return the created .html title;
     $title = $HtmlTitleForIndex;
@@ -680,137 +680,60 @@ sub ShowPointer
 sub ParseMultipart
 {
     local($dir, $file, *e) = @_;
-    local($suffix, $mp_count, $ct, $cte);
-    local($boundary);
-    
-    # Header Info
-    $ct  = $e{"content-type:"};
-    $cte = $e{"content-transfer-encoding"};
-
-    if ($ct =~ /boundary=\s*\"(.*)\"/i || $ct =~ /boundary=\s*(\S+)/i) {
-	$boundary = "--".$1;
-	print STDERR "boundary='$boundary'\n" if $debug;
-    }
- 
-    # XXX malloc() too much?
-    # Split Body
+    local($suffix, $mp_count, $ct, $cte, $b);
     local($decode, $sep, $base64, $quoted_printable, $pb);
-    local($buf) = $e{'Body'};
 
-    # remove the preamble before the boundary.
-    $pb  = index($buf, $boundary, $image);
-    $buf = substr($buf, $pb);
-    local(@s) = split(/\n\n|$boundary/, $buf);
+    require 'libhtmlsubr.pl';
 
-    # input each paragraph as one buffer.
-    # 1. --boundary\nContent-* ...
-    # 2. base64/quoted-printable/... encoded part
-    # 3. --boundary--
-    #
-    foreach (@s) {
-	/ISO\-/i && ($_ = &DecodeMimeStrings($_)); 
-
-	if (/^[\s\n]*$/) { next;} # ignore null line
-
-	undef $sep; 
-	undef $match;
-
-	if (/$boundary/) { 
-	    &Log("found boudary ");
-	    &Debug("Found boundary=[$boundary]") if $debug;
-	    s/$boundary\-\-//g;	# the last part
-	    s/$boundary//g;
-	    $sep++;
-	}
-	if (/\nContent-/i)  { $sep++;}
-
-	# encoding type
-	if (/content-transfer-encoding:\s*base64/i) { 
-	    $base64 = 1;
-	} 
-	if (/content-transfer-encoding:\s*quoted-printable/i) { 
-	    $quoted_printable = 1;
-	} 
-
-	## get file type
-	# image
-	if (/Content-Type:\s+image/) { $image = 1;}
-
-	# speculate type from mime.types
-	if (/Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) { 
-	    $suffix = &SearchMimeTypes("$1/$2") || $2;
-	    $suffix =~ s/^x-//i; # remove x- in x-hoehoe type.
-	    $sep++;
-	}
-	## type ends ##
-
-	next if $sep; # avoid the separators.
-
-	# 
-	# DECODE BASE64 encoded parts
-	# 
-	if ($base64) { # now BASE64 strings here
-	    # if not defined, try search bin/base64decede.pl
-	    if ($BASE64_DECODE && &ProgExecuteP($BASE64_DECODE)) {
-		$decode = $BASE64_DECODE;
-	    }
-	    elsif (! $BASE64_DECODE) {
-		$decode = &SearchFileInLIBDIR("bin/base64decode.pl");
-
-		if (! $decode) {
-		    &Log("SyncHtml::\$BASE64_DECODE is not defined");
-		    next;
-		}
-
-		$decode = $^X . " " . $decode; # perl base64decode.pl
-	    }
-	    # when $BASE64_DECODE is defined, but not found
-	    elsif (! &ProgExecuteP($BASE64_DECODE)) {
-		&Log("SyncHtml::\$BASE64_DECODE is not found");
-		next;
-	    }
-
-	    $mp_count++; # global in one mail
-	    &Log("\$mp_count++ => $mp_count") if $debug_html;
-
-	    # write a splitted part of the multipart mail.
-	    &Log("multipart::split to $dir/${file}_$mp_count.$suffix");
-	    &Debug("|$decode > $dir/${file}_$mp_count.$suffix") 
-		if $debug; 
-	    open(IMAGE, "|$decode > $dir/${file}_$mp_count.$suffix") 
-		|| &Log($!);
-	    select(IMAGE); $| = 1; select(STDOUT);
-	    binmode(IMAGE);
-	    print IMAGE $_;
-	    close(IMAGE);
-
-	    # reflect reference to the part in the \d+.html file.
-	    if ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'A' || (!$image)) {
-		print OUT "<A HREF=\"${file}_$mp_count.$suffix\">";
-		print OUT "${file}_$mp_count.$suffix</A>\n";
-	    }
-	    elsif ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'IMAGE' ||
-		   !$HTML_MULTIPART_IMAGE_REF_TYPE) {
-		print OUT "</PRE>\n";
-		print OUT "<IMAGE SRC=\"${file}_$mp_count.$suffix\">\n";
-		print OUT "<PRE>\n";
-	    }
-
-
-	    # reset
-	    undef $base64;
-	    undef $suffix; 
-	    undef $image;
-	    next;
-	}
-
-	&ConvSpecialChars(*_);
-
-	s#(http://\S+)#&Conv2HRef($1)#eg;
-	print OUT "$_\n";
+    # boundary
+    $ct  = $e{"content-type:"};
+    if ($ct =~ /boundary=\s*\"(.*)\"/i || $ct =~ /boundary=\s*(\S+)/i) {
+	$b = "--".$1; print STDERR "boundary='$b'\n" if $debug;
     }
 
-    return $NULL;
+    # XXX malloc() too much? ; local($buf) = $e{'Body'};
+    # 2.2E less memory hack
+    # 0. Get Pointer List of ($pb, $pe) # (begin of block, end of block)
+    local($p, $pp, $pb, $pe, $lp, $lpp, $xbuf, $bh, $xf);
+    local(%mpbcb); # multipart block control block
+    local($gpe);   # end of all blocks
+
+    $gpe  = &main'GetPtrFromHash(*e, 'Body', "$b--", 0); #';
+  mpb1:
+    while (1) {
+	undef %mpbcb;
+	$mp_count++; # global in one mail
+
+	# extract next multipart block info
+	($p,$pb,$pe) = &main'GetBlockPtrFromHash(*e, 'Body', $b, $pp);#';
+
+	if ($debug) {
+	    print STDERR "-"x50, "\n";
+	    print STDERR "last mpb1\n" if $p >= $gpe; # end of all blocks
+	}
+
+	last mpb1 if $p >= $gpe; # end of all blocks
+	last mpb1 if $p < 0;     # end of body
+
+	# extract multipart header info in the block
+	$bh = substr($e{'Body'}, $p, $pb - $p -2);
+	&MPBProbe(*mpbcb, $bh); # => %mpbcb
+
+	# encoded ?
+	if ($mpbcb{'enc'} eq 'base64') {
+	    $xf = "$dir/${file}_$mp_count.$mpbcb{'suffix'}";
+	    &DecodeAndWriteFile(*e, $pb, $pe, $xf);
+	    &TagOfDecodedFile(*mpbcb, $xf);
+	}
+	# plain ?
+	else {
+	    &WriteHtmlFile(*e, $pb, $pe);
+	}
+
+	$pp = $p + 1;
+    }
+
+    $NULL;
 }
 
 
