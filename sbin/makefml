@@ -4784,34 +4784,9 @@ sub GetTime
 }
 
 
-sub MkDir { &Mkdir(@_);}
-sub Mkdir
-{
-    &Log("makefml::mkdir $_[0]");
-
-    if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
-    &MkDirHier($_[0], $USE_FML_WITH_FMLSERV ? 0770 : 0700);
-    if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
-    if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
-}
-
-sub MkDirHier
-{
-    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
-
-    while ($_[0] =~ m:$pat:go) {
-	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
-
-	if ($` ne "" && !-d $`) {
-	    mkdir($`, $_[1] || 0777) || do {
-		&Log("cannot mkdir $`: $!"); 
-		return 0;
-	    };
-	}
-    }
-
-    1;
-}
+sub MkDir { &main'Mkdir(@_);} #';
+sub Mkdir { &main'Mkdir(@_);} #';
+sub MkDirHier  { &main'MkDirHier(@_);} #';
 
 
 sub LoadConfigPH
