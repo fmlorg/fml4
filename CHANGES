@@ -3,7 +3,22 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/05/11
+
+   IPv6 by default
+
+	常に IPv6 でメールサーバに接続することに挑戦してみる。
+	もし、失敗したら IPv4 で挑戦する。
+	これがデフォルト
+
+	$USE_INET6 を 0 にすると IPv4 オンリーに戻ります。
+
 2001/05/10
+
+   kern/libsmtp.pl
+	enable IPv6
+
+	IPv6 を有効にする(fml 5.0 の IPv6 モジュールを使っている)。
 
    messages/Japanese/amctl (1.5-1.6):
 	fix Japanese to be more friendly for newbies
