@@ -66,7 +66,7 @@ sub Init
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 
     # 3.0B
-    $DefaultConfigPH = "$EXEC_DIR/default_config.ph";
+    # $DefaultConfigPH = "$EXEC_DIR/default_config.ph";
 }
 
 
@@ -89,8 +89,8 @@ sub YYYYMMDD
 sub ExpandDate
 {
     local($pat) = @_;
-    local($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime(time);
-    local($x, $a, $b, $y);
+    local($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+    local($x, $a, $b);
 
     if ($pat eq 'YYYY') {
 	for $a (0 .. 10) {
@@ -376,7 +376,7 @@ sub GetBuffer
     }
 
     # pass the called parent url to the current program;
-    $PREV_URL = $s{'PREV_URL'};
+    # $PREV_URL = $s{'PREV_URL'};
 
     $buffer;
 }

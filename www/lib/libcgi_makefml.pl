@@ -357,10 +357,10 @@ sub SecureP
 	&P("ERROR: PTR is insecure.");
 	0;	
     }
-    # 
-    # check @PROC_ARGV
-    # 
     else {
+	# check 'ARGV'
+        if (@PROC_ARGV) { 1;}
+
 	1;
     }
 }
