@@ -1,20 +1,20 @@
 .if LANG == JAPANESE
-$B%a!<%j%s%0%j%9%H$N0lHL8~$1%,%$%I(B($B;22C<T5Z$SHs;22C<T8~$1(B)
+¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Î°ìÈÌ¸þ¤±¥¬¥¤¥É(»²²Ã¼ÔµÚ¤ÓÈó»²²Ã¼Ô¸þ¤±)
 
-$B$3$N%a!<%j%s%0%j%9%H(B<_MAIL_LIST_>$B$O(B
+¤³¤Î¥á¡¼¥ê¥ó¥°¥ê¥¹¥È<_MAIL_LIST_>¤Ï
 
-	$B$&$8$c$&$8$c(B($B$3$3$O4IM}<T$N$"$J$?$,=q$$$F2<$5$$(B)
+	¤¦¤¸¤ã¤¦¤¸¤ã(¤³¤³¤Ï´ÉÍý¼Ô¤Î¤¢¤Ê¤¿¤¬½ñ¤¤¤Æ²¼¤µ¤¤)
 
-$B$K$D$$$F5DO@$9$k%a!<%j%s%0%j%9%H$G$9!#(B
+¤Ë¤Ä¤¤¤ÆµÄÏÀ¤¹¤ë¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Ç¤¹¡£
 
-$B$3$N%a!<%j%s%0%j%9%H%5!<%P$X$N;22C(B($BEPO?(B)$B$O(B
+¤³¤Î¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¥µ¡¼¥Ð¤Ø¤Î»²²Ã(ÅÐÏ¿)¤Ï
 
-	subscribe $B$"$J$?$NL>A0(B($B$3$3$O4IM}<T$N$"$J$?$,=q$$$F2<$5$$(B)
-$BNc(B:
+	subscribe ¤¢¤Ê¤¿¤ÎÌ¾Á°(¤³¤³¤Ï´ÉÍý¼Ô¤Î¤¢¤Ê¤¿¤¬½ñ¤¤¤Æ²¼¤µ¤¤)
+Îã:
 	subscribe Sskura Kinomoto
 
-$B$H$$$&%3%^%s%I$r%a!<%kK\J8$K=q$$$F(B
-$B%"%I%l%9(B <_CTLADDR_> $B$XAw$C$F2<$5$$!#(B
+¤È¤¤¤¦¥³¥Þ¥ó¥É¤ò¥á¡¼¥ëËÜÊ¸¤Ë½ñ¤¤¤Æ
+¥¢¥É¥ì¥¹ <_CTLADDR_> ¤ØÁ÷¤Ã¤Æ²¼¤µ¤¤¡£
 .fi
 .if LANG == ENGLISH
 This list <_MAIL_LIST_> is set up for a purpose "...".
@@ -30,7 +30,7 @@ in the mail body (not subject) to the address <_CTLADDR_>.
 
 
 .if LANG == JAPANESE
-				_MAIL_LIST_ $B4IM}?M(B
+				_MAIL_LIST_ ´ÉÍý¿Í
 				_ML_-admin@_DOMAIN_			
 .fi
 .if LANG == ENGLISH
