@@ -82,30 +82,30 @@
 	<BR>
 	Reply-To: を常にメーリングリストに固定してしまう
 	<BR>
-	&DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
+	&amp;DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
 
 	<LI>
 	X-Organization: My Company というヘッダを付け加える
 	<BR>
-	&DEFINE_FIELD_FORCED('x-organization', "My Company");
+	&amp;DEFINE_FIELD_FORCED('x-organization', "My Company");
 
 	<LI>
 	入ってきたメールのSender:をX-Sender:にCOPYしておく
 	<BR>
-	&COPY_FIELD('Sender', 'X-Sender');
+	&amp;COPY_FIELD('Sender', 'X-Sender');
 
 	<LI>
 	config.ph内で使用可能なヘッダを制御する関数
 	<BR>
 	<PRE>
-        &ADD_FIELD
-        &COPY_FIELD 
-        &DEFINE_FIELD_FORCED 
-        &DEFINE_FIELD_OF_REPORT_MAIL 
-        &DEFINE_FIELD_ORIGINAL
-        &DEFINE_FIELD_PAT_TO_REJECT
-        &DELETE_FIELD 
-        &MOVE_FIELD 
+        &amp;ADD_FIELD
+        &amp;COPY_FIELD 
+        &amp;DEFINE_FIELD_FORCED 
+        &amp;DEFINE_FIELD_OF_REPORT_MAIL 
+        &amp;DEFINE_FIELD_ORIGINAL
+        &amp;DEFINE_FIELD_PAT_TO_REJECT
+        &amp;DELETE_FIELD 
+        &amp;MOVE_FIELD 
 	</PRE>
 
 	<LI>
@@ -125,7 +125,7 @@
 	<LI>
 	Reply-To: を特定のアドレスにする
 	<BR>
-	&DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "特定のアドレス");
+	&amp;DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "特定のアドレス");
 
 	<LI>
 	マニアな設定
