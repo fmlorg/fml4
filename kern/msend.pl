@@ -393,7 +393,9 @@ sub MSending
 
     $tmp   = "$FP_TMP_DIR/MSend$$"; # relative
     $mode  = $mode{$to[0]};
-    $total = &DraftGenerate($tmp, $mode, "matome.gz", @filelist);
+    $total = &DraftGenerate($tmp, $mode, 
+			    &GetProtoByMode('matome', $mode),
+			    @filelist);
 
     ### MSEND header Generation ###
     # Make a subject here since mode::constructor in DraftGenerate. 
