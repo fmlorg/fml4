@@ -1003,6 +1003,9 @@ OUTGOING_ADDRESS:
 # value: 1/0
 USE_VERP:
 
+# smtpfeed special option which provides VERPs like error track trick.
+# value: 1/0
+USE_SMTPFEED_F_OPTION:
 
 #####################################################################
 # ### Section: MISC ###
@@ -1263,6 +1266,53 @@ HTML_DEFAULT_UMASK:
 HTML_WRITE_UMASK:
 
 
+# ### Section: Interface to DataBase Management System ###
+
+# value: 1/0
+USE_DATABASE:
+
+# value: 
+DATABASE_METHOD:
+
+# value:
+DATABASE_CACHE_FILE_SUFFIX:
+
+# value: filename
+DATABASE_DRIVER: toymodel.pl
+
+
+# ## Sub Section: RDBMS
+
+# value: string 
+SQL_SERVER_HOST:
+
+# value: number
+SQL_SERVER_PORT:
+
+# value: string 
+SQL_SERVER_USER:
+
+# value: string 
+SQL_DATABASE_NAME:
+
+# value: string 
+SQL_SERVER_PASSWORD:
+
+# value: string 
+SQL_DATABASE_NAME:
+
+
+# ## Sub Section: LDAP
+
+# value: string
+LDAP_SERVER_HOST:
+LDAP_SERVER_PASSWORD:
+LDAP_SEARCH_BASE:
+LDAP_SERVER_BIND:
+LDAP_QUERY_FILTER:
+
+
+
 # ### Section: Interface to other Services (http,ftp,gopher,www) ###
 
 # "whois": default is search of local database file 
@@ -1357,11 +1407,12 @@ LOCAL_CONFIG:
 # You can set customized hooks here. See doc/op's chapter "HOOKS".
 # For example available hooks are 
 # $START_HOOK, $DISTRIBUTE_START_HOOK, $SMTP_OPEN_HOOK
-# $HEADER_ADD_HOOK, $DISTRIBUTE_CLOSE_HOOK, $COMMAND_HOOK
+# $HEADER_ADD_HOOK, $DISTRIBUTE_CLOSE_HOOK, $DISTRIBUTE_END_HOOK
 # $ADMIN_COMMAND_HOOK, $RFC1153_CUSTOM_HOOK, $MSEND_OPT_HOOK
 # $FML_EXIT_HOOK, $FML_EXIT_PROG, $MSEND_START_HOOK
 # $REPORT_HEADER_CONFIG_HOOK, $AUTO_REGISTRATION_HOOK, $MSEND_HEADER_HOOK
 # $SMTP_CLOSE_HOOK, $MODE_BIFURCATE_HOOK. $HTML_TITLE_HOOK
+# $PROCEDURE_CONFIG_HOOK, $ADMIN_PROCEDURE_CONFIG_HOOK, $COMMAND_HOOK
 #
 # ## Sub Section: Available Arrays and Assoc-Arrays ##
 # Also you can set here arrays and association arrays:
