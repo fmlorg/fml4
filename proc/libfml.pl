@@ -24,19 +24,28 @@ sub Command
 
     # Set candidates
     local(@candidate) = split(/\n/, $MailBody, 999);
-    $_cf{'mget', 'count'} = scalar(grep(/mget/i, @Fld));
+    $_cf{'mget', 'count'} = scalar(grep(/mget/i, @candidate));
 
     # Backward compatibility
     $COMMAND_SYNTAX_EXTENSION = 1 if $RPG_ML_FORM_FLAG;
 
+    # Command Line Options
+    $COMMAND_ONLY_SERVER = 1 if $_cf{'opt', 'c'};
+
   GivenCommands: foreach (@candidate) {
-      next GivenCommands if /^$/o; # skip null line
+      next GivenCommands if /^\s*$/o; # skip null line
+
+      # e.g. *-ctl server, not require '# command' syntax
+      $_ = "# $_" if $COMMAND_ONLY_SERVER && (!/^\#/o); 
+
       if (! /^#/o) {
-	 next GivenCommands unless $USE_WARNING;
-	 &Logging("HELP");
-	 &SendFile($to, "Command Syntax Error $ML_FN", $HELP_FILE);
-	 last GivenCommands;
-     }
+	  next GivenCommands unless $USE_WARNING;
+
+	  &Log("ERROR:Command Syntax without ^#");
+	  $_cf{'return'} .= "Command Syntax Error not with ^#\n";
+
+	  next GivenCommands;	# 'last' in old days 
+      }
 
       # syntax check, and set the array of cmd..
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
@@ -69,35 +78,35 @@ sub Command
       }
 
       # send a guide back to the user
-      if (/guide/io) {
+      if (/^guide/io) {
 	  &Logging("Guide");
 	  &SendFile($to, "Guide $ML_FN", $GUIDE_FILE);
 	  next GivenCommands;
       }
 
       # help for usage of commands
-      if (/help/io) {		# help or HELP
+      if (/^help/io) {		# help or HELP
 	  &Logging("Help");
 	  &SendFile($to, "Help $ML_FN", $HELP_FILE);
 	  next GivenCommands;
       }
       
       # return the objective of Mailing List
-      if (/objective/io) {
+      if (/^objective/io) {
 	  &Logging("Objective");
 	  &SendFile($to, "Objective $ML_FN", $OBJECTIVE_FILE);
 	  next GivenCommands;
       }
 
       # return a  member file of Mailing List
-      if (/member/io) {
+      if (/^member/io) {
 	  &Logging("Members");
 	  &SendFile($to, "Members $ML_FN", $MEMBER_LIST);
 	  next GivenCommands;
       }
       
       # return a active file of Mailing List
-      if (/active/io) {
+      if (/^active/io) {
 	  &Logging("Actives");
 	  &SendFile($to, "Actives $ML_FN", $ACTIVE_LIST);
 	  next GivenCommands;
@@ -105,8 +114,15 @@ sub Command
       
       # return a summary of Mailing List
       if (/^summary$/io) {
-	  &Logging("Summary");
-	  &SendFile($to, "Summary $ML_FN", $SUMMARY_FILE);
+	  if ($Fld[2]) {
+	      $_cf{'return'} .= "\n>>> Summary: Search KEY=$Fld[2]\n\n";
+	      &SearchKeyInSummary($Fld[2], 'rs');
+	      &Log("Restricted Summary [$Fld[2]]");
+	  }
+	  else {
+	      &Log("Summary");
+	      &SendFile($to, "Summary $ML_FN", $SUMMARY_FILE);
+	  }
 	  next GivenCommands;
       }
 
@@ -121,15 +137,9 @@ sub Command
 
       # Search KEYWORD in summary file
       if (/^search$/io) {
-	  local($s);
-	  open(F, $SUMMARY_FILE) || ($s = "Fail");
-	  while (<F>) {
-	      /$Fld[2]/ && ($s .= $_);
-	  }
-	  close(F);
-
-	  &Logging("Search key=$Fld[2]");
-	  $_cf{'return'} .= "\n>>> Search key=$Fld[2]\n$s\n";
+	  $_cf{'return'} .= "\n>>> Search Key=$Fld[2] in Summary file\n\n";
+	  &SearchKeyInSummary($Fld[2], 's');
+	  &Log("Search [$Fld[2]]");
 	  next GivenCommands;
       }
 
@@ -142,6 +152,7 @@ sub Command
       }
 
       # a little modulation for useful conversion between commands.
+      s/send/get/io;
       s/getfile/get/io if $COMMAND_SYNTAX_EXTENSION; # "#getfile 1" is O.K.
 
       # enable us to use "mget 200.tar.gz" = "get 200.tar.gz"
@@ -159,11 +170,11 @@ sub Command
 	      last GivenCommands;
 	  }
 
-	  local($mail_file, $ar) = &ExistP($ID);# return is "spool/ID" form;
+	  local($mail_file, $ar) = &ExistP($ID);# return "$SPOOL_DIR/ID" form
 	  &Debug("GET: local($mail_file, $ar)") if $debug;
 
 	  if ($mail_file) { 
-	      $cat{"spool/$ID"} = 1;
+	      $cat{"$SPOOL_DIR/$ID"} = 1;
 	      if ($ar eq 'TarZXF') {  
 		  require 'libutils.pl';
 		  &Sendmail($to, "Get $ID $ML_FN", 
@@ -173,6 +184,7 @@ sub Command
 		  &SendFile($to, "Get $ID $ML_FN", 
 			    "$DIR/$mail_file", 
 			    $_cf{'libfml', 'binary'});
+		  undef $_cf{'libfml', 'binary'}; # destructor
 	      }
 
 	      &Logging("Get $ID, Success");
@@ -190,29 +202,29 @@ sub Command
       # new version should be used as mget ver.2(mget[ver.2])
       # matomete get articles from the spool, then return them
       if (/^mget$/io || /^mget2$/io) {
-	  $0 = "--Command Mode call mget[@Fld]: $FML $LOCKFILE>";
+	  $0 = "--Command Mode call mget[\@Fld]: $FML $LOCKFILE>";
 
 	  require 'SendFile.pl';
 	  local($Status) = &mget2(@Fld);
 
-	  $0 = "--Command Mode mget[@Fld] status=$Status: $FML $LOCKFILE>";
+	  $0 = "--Command Mode mget[\@Fld] status=$Status: $FML $LOCKFILE>";
 
-	  $Status || ($Status = "Fail");
-	  &Logging("mget:[$$] $Fld[2] $Fld[3] : $Status");
-	  $_cf{'return'} .= "\n>>> $org_str\nmget $Fld[2] $Fld[3] failed.\n"
-	      if ($Status eq 'Fail');
+	  $Status || do {
+	      $Status = "Fail";
+	      $_cf{'return'} .= "\n>>> $org_str\nmget $Fld[2] $Fld[3] failed.\n";
+	  };
 
+	  &Log("mget:[$$] $Fld[2] $Fld[3] : $Status");
 	  next GivenCommands;
       }
 
       ### REPORT ###
       $_cf{'return'} .= "\n>>> $org_str\n";
-      undef $_cf{'retry'};	# reset;
 
       # Set the address to operate e.g. for exact matching
       if (/^addr$/io) { 
-	  $addr = $Fld[2];
-	  if (&AddressMatching($addr, $From_address)) {
+	  if (&AddressMatching($Fld[2], $From_address)) {
+	      $addr = $Fld[2];
 	      $ADDR_CHECK_MAX = 10;	# exact match(trick)
 	      $_cf{'return'} .= "Try exact-match for $addr.\n";
 	      &Logging("Exact addr=$addr");
@@ -230,62 +242,79 @@ sub Command
       # Matome : Matome Okuri ver.2 Control Interface
       # Skip : can post but not be delivered
       # NOSkip : inverse above
-      if (/^off$/io || /^on$/io || /^matome$/io || /^skip$/io || /^noskip$/io) {
+      if (/^off$/io    || 
+	  /^on$/io     || 
+	  /^matome$/io || 
+	  /^skip$/io   || 
+	  /^noskip$/io 
+	  ) {
 	  y/a-z/A-Z/; 
-	  $cmd = $_;
+	  local($cmd) = $_;
 	  local($c);
 	  # $addr = $Fld[2] unless $addr;
 	  local($addr) = $addr ? $addr : $From_address;
 
 	  # Matome Okuri preroutine
-	  if (($Fld[2] =~ /^(\d+)$/)||
-	     ($Fld[2] =~ /^(\d+u)$/oi)||
-	     ($Fld[2] =~ /^(\d+i)$/oi)||
-	     ($Fld[2] =~ /^(\d+)h$/oi)) { 
+	  print STDERR "WARN: $cmd $Fld[2]\n";
+	  if ($cmd eq 'MATOME' && 
+	      (($Fld[2] =~ /^(\d+)$/) || ($Fld[2] =~ /^(\d+[A-Za-z]+)$/oi))) {
+
+	      # set key
 	      $c = $MATOME = $1;
-	      $c = " -> Synchronous Delivery" if 0 == $MATOME;
-	      &Logging("Try matome $MATOME")  if $MATOME;
-	  # }
+
+	      # Exception is synchronous delivery
+	      if (0 == $MATOME) {
+		  $c = " -> Synchronous Delivery";
+	      }
+	      # e.g. 6 , 6u , ...
+	      else {
+		  # KEY MARIEL;
+		  # search this mode exists?
+		  require 'libutils.pl';
+		  local($d, $mode) = &ModeLookup($c);
+
+		  if ((!$d) && (!$mode)) { 
+		      &Logging("MATOME $c fails, not match");
+		      $_cf{'return'} .= "$cmd: $Fld[2] parameter not match.\n";		  
+		      $_cf{'return'} .= "DO NOTHING!\n";
+		      next GivenCommands;
+		  }
+	      }
+	      
+	      &Log("O.K. Try matome $c");
+	  # }# parameter=address
 	  # elsif ($c = $Fld[2]) {
 	  #    # Set or unset Address to SKIP, OFF, ON ...
 	  #    $addr = $c;
 	  }
 	  elsif (/^matome$/io) {
 	      &Log("$cmd: $Fld[2] inappropriate, do nothing");
-	      $_cf{'return'} .= "$cmd: $Fld[2] inappropriate.\nDO NOTHING!\n";
+	      $_cf{'return'} .= "$cmd: $Fld[2] parameter inappropriate.\n";
+	      $_cf{'return'} .= "DO NOTHING!\n";
 	      next GivenCommands;
 	  }
 
 	  # LOOP CHECK
-	  if (&LoopBackWarning($addr)) {
+	  if (&LoopBackWarn($addr)) {
 	      &Log("$cmd: LOOPBACk ERROR, exit");
 	      next GivenCommands;		  
 	  }
 
-	  # Retry when require more severe checking of address
-	  do {
-	      undef $_cf{'retry'};	# reset;
-	      if (&ChangeMemberList($cmd, $addr, $ACTIVE_LIST)) {
-		  &Logging("$cmd [$addr] $c");
-		  $_cf{'return'} .= "$cmd [$addr] $c accepted.\n";
-	      }
-	      else {
-		  if ($_cf{'retry'}) {
-		      &Logging("$cmd [$addr] $c failed, try again");
-		      $_cf{'return'} .= "\n";
-		  }
-		  else {
-		      &Logging("$cmd [$addr] $c failed");
-		      $_cf{'return'} .= "$cmd [$addr] $c failed. check and try again!\n";
-		  }
-	      }
-	  }while ($_cf{'retry'});
+	  if (&ChangeMemberList($cmd, $addr, $ACTIVE_LIST)) {
+	      &Logging("$cmd [$addr] $c");
+	      $_cf{'return'} .= "$cmd [$addr] $c accepted.\n";
+	  }
+	  else {
+	      &Logging("$cmd [$addr] $c failed");
+	      $_cf{'return'} .= "$cmd [$addr] $c failed.\n";
+	  }
 
 	  next GivenCommands;
       }
 
       # Bye - Good Bye Eternally
-      if (/^bye$/io) {
+      if (/^bye$/io || /^unsubscribe$/io) {
+	  local($cmd) = 'BYE';
 	  # $addr = $Fld[2] unless $addr;
 	  local($addr) = $addr ? $addr : $From_address;
 
@@ -295,53 +324,44 @@ sub Command
 	  # }
 
 	  # LOOP CHECK
-	  if (&LoopBackWarning($addr)) {
+	  if (&LoopBackWarn($addr)) {
 	      &Log("$cmd: LOOPBACk ERROR, exit");
 	      next GivenCommands;		  
 	  }
-
-	  # Retry when require more severe checking of address
-	  do {
-	      undef $_cf{'retry'};	# reset;
-	      if (! &ChangeMemberList('BYE', $addr, $ACTIVE_LIST)) {
-		  if ($_cf{'retry'}) {
-		      &Logging("BYE ACTIVE [$addr] $c failed, try again");
-		      $_cf{'return'} .= "\n";
-		  }
-		  else {
-		      &Logging("BYE ACTIVE [$addr] failed[$ACTIVE_LIST]");
-		      $_cf{'return'} .= "BYE ACTIVE [$addr] failed.\ncheck and try again!\n";
-		      last GivenCommands;
-		  }
-	      }
-	  }while ($_cf{'retry'});
-
-	  if ($ML_MEMBER_CHECK){
+	  
+	  # Call recursively
+	  local($r) = 0;
+	  if ($ML_MEMBER_CHECK) {
 	      $ADDR_CHECK_MAX = $_cf{'addr-check'};
-	      undef $_cf{'retry'};	# reset;
-	      do {
-		  if (! &ChangeMemberList('BYE', $addr, $MEMBER_LIST)) {
-		      if ($_cf{'retry'}) {
-			  &Logging("BYE MEMBER [$addr] $c failed, try again");
-			  $_cf{'return'} .= "\n";
-		      }
-		      else {
-			  &Logging("BYE MEMBER [$addr] failed[$MEMBER_LIST]");
-			  $_cf{'return'} .= "BYE MEMBER [$addr] failed. check and try again!\n";
-			  last GivenCommands;
-		      }
-		  }
-	      }while ($_cf{'retry'});
+	      &ChangeMemberList($cmd, $addr, $MEMBER_LIST) && $r++;
+	      &Log("BYE MEMBER [$addr] $c O.K.")   if $r == 1 && $debug2;
+	      &Log("BYE MEMBER [$addr] $c failed") if $r != 1;
+
+	      $ADDR_CHECK_MAX = $_cf{'addr-check'};
+	      &ChangeMemberList($cmd, $addr, $ACTIVE_LIST) && $r++;
+	      &Log("BYE ACTIVE [$addr] $c O.K.")   if $r == 2 && $debug2;
+	      &Log("BYE ACTIVE [$addr] $c failed") if $r != 2;
+	  }
+	  else {
+	      $r++;
+	      &ChangeMemberList($cmd, $addr, $ACTIVE_LIST) && $r++;
+	      &Log("BYE ACTIVE [$addr] $c O.K.")   if $r == 2  && $debug2;
+	      &Log("BYE ACTIVE [$addr] $c failed") if $r != 2;
 	  }
 
-	  &Logging("BYE [$addr]");
-	  $_cf{'return'} .= "Bye [$addr] accepted. So Long!\n";
-	  last GivenCommands;
+	  # Status
+	  if ($r == 2) {
+	      &Log("$cmd [$addr] $c accepted");
+	      $_cf{'return'} .= "$cmd [$addr] $c accepted.\n";
+	  }
+	  else {
+	      &Log("$cmd [$addr] $c failed");
+	      $_cf{'return'} .= "$cmd [$addr] $c failed.\n";
+	  }
+
+	  last GivenCommands;	# should be 'last' when BYE
       }
 
-      # Special hook e.g. "# list",should be used as a ML's specific hooks
-      defined($COMMAND_HOOK) && &eval($COMMAND_HOOK, 'Command hook');
-      
       # these below are not implemented, but implemented in hml 1.6
       # codes only for notifying the alart to the user
       if (/^iam$/io || /^whois$/io || /^who$/io) {
@@ -356,9 +376,26 @@ sub Command
 	  next GivenCommands;
       }
 
+      # IF USED AS ONLY COMMAND SERVER, 
+      if ($COMMAND_ONLY_SERVER) {
+	  local($key) = $REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE;
+	  if (/$key/) {
+	      require 'libutils.pl';
+	      &AutoRegist;
+	      next GivenCommands;
+	  }
+      }
+
+      # Special hook e.g. "# list",should be used as a ML's specific hooks
+      if ($COMMAND_HOOK) {
+	  &CheckCommandHook($_, @Fld) || last GivenCommands;
+	  &eval($COMMAND_HOOK, 'Command hook');
+      }
+
       # if undefined commands, notify the user about it and abort.
       &Logging("Unknown Cmd $_");
       $_cf{'return'} .= "Unknown Command: $_\n";
+      $_cf{'return'} .= "Stop.\n";
 
       last GivenCommands;
 
@@ -389,27 +426,24 @@ $;
 
 
 # ChangeMemberList(cmd, address, file)
-# Comment out or not of $file 
-# Codes may be not insecure, I wonder.
 # If multiply matched for the given address, do Log [$log = "$addr"; $log_c++;]
 sub ChangeMemberList
 {
     local($cmd, $Address, $file) = @_;
-    local($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) 
-	= localtime(time);
+    &GetTime;
     local($Date) = sprintf("%02d%02d", ++$mon, $mday);
-    local($Status, $log, $log_c);
+    local($Status, $log, $log_c, $r);
     &Debug("&ChangeMemberList($cmd, $Address, $file)") if $debug;
     
     if ($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file) {
-	open(BAK, ">> $file.bak") || (&Logging("$!"), return $NULL);
-	select(BAK); $| = 1; select(stdout);
+	open(BAK, ">> $file.bak") || (&Logging($!), return $NULL);
+	select(BAK); $| = 1; select(STDOUT);
 	print BAK "----- Backup on $Now -----\n";
 
-	open(NEW, ">  $file.tmp") || (&Logging("$!"), return $NULL);
-	select(NEW); $| = 1; select(stdout);
+	open(NEW, ">  $file.tmp") || (&Logging($!), return $NULL);
+	select(NEW); $| = 1; select(STDOUT);
 
-	open(FILE,"<  $file") || (&Logging("$!"), return $NULL);
+	open(FILE,"<  $file") || (&Logging($!), return $NULL);
     }
     else {
 	&Logging("Cannot match $file in ChangeMemberList");
@@ -433,15 +467,14 @@ sub ChangeMemberList
 	}
 
 	print BAK "$_\n";
-	next in if /^$/o;
-	next in if /^\s+$/o;
+	next in if /^\s*$/o;
 
 	# get $addr for ^#\s+$addr$. if ^#, skip process except for 'off' 
 	local($addr) = '';
 	if (/^\s*(\S+)\s*.*/o)   { $addr = $1;}
 	if (/^\#\s*(\S+)\s*.*/o) { $addr = $1;}
 
-	if (! &AddressMatch($addr, $Address)) {
+	if (! ($r = &AddressMatch($addr, $Address))) {
 	    print NEW "$_\n"; 
 	    next in;
 	} 
@@ -495,15 +528,23 @@ sub ChangeMemberList
 
 	# Matome Okuri Control
 	if ($cmd eq 'MATOME') {
+	    # Flag on for the next remover
+	    local($org_addr) = $addr;
 	    local($fl) = 1 if $addr =~ /\smatome/oi || $addr =~ /\sm=/;
+
+	    # Remove the present configuration
 	    $addr =~ s/^(.*)matome/$1/oig; # backward compatibility
 	    $addr =~ s/\sm=(\S+)//oig; # remover m= syntax
 
-	    if ($fl) {		# change status of matomeokuri
-		print NEW "$addr\tm=$MATOME\n" if $MATOME;  
-		print NEW "$addr\n"            if 0 == $MATOME;
-		$addr =~ s/\s*//g;
-		&Rehash($addr)                 if 0 == $MATOME;
+	    if ($fl) {		# if modify
+		# change status of matomeokuri
+		if ($MATOME) {
+		    print NEW "$addr\tm=$MATOME\n";
+		}
+		else {
+		    print NEW "$addr\n";
+		    $LOCAL_HACK_HOOK = "&Rehash(\"$org_addr\");";
+		}
 	    } 
 	    else {		# new comer
 		print NEW "$addr\tm=".($MATOME ? $MATOME : 3)."\n";
@@ -514,7 +555,7 @@ sub ChangeMemberList
 		    &Log($s);
 		    $_cf{'return'} .= "$s\n";
 		    $_cf{'return'} .= 
-			"So your request is accept but modified to m=3\n";
+			"So your request is accepted but modified to m=3\n";
 		}
 
 		&Log("ReConfiguring $Address in MSendRC");
@@ -523,7 +564,7 @@ sub ChangeMemberList
 	    $Status = 'done';
 	    $log .= "MATOME $addr; "; $log_c++;
 	}
-    } # end of while loop
+    } # end of while loop;
 
     # CORRECTION; If not registerd, add the Address to SKIP
     if ($cmd eq 'SKIP' && $Status ne 'done') { 
@@ -536,53 +577,43 @@ sub ChangeMemberList
     close NEW; 
     close FILE;
 
-    # ADMIN MODE permit multiplly matching
-    $log_c = 1 if $_cf{'mode', 'com-admin'};
-
     # protection for multipy matching, logs if $log_c > 1(multiple match);
-    if ($log_c > 1) {
+    # ADMIN MODE permit multiplly matching
+    if ($log_c > 1 && $ADDR_CHECK_MAX < 10 && (!$_cf{'mode', 'com-admin'})) {
 	&Log("$cmd: Do nothing muliply matched..");
 	$log =~ s/; /\n/g;
-	$_cf{'return'} .= "Multiply Matched? So DO NOTHING!\n";
-	$_cf{'return'} .= $log;
+	$_cf{'return'} .= "Multiply Matched?\n$log\n";
+	$_cf{'return'} .= "Retry to check your adderss severely\n";
+	$ADDR_CHECK_MAX++;
 
-	if (! $_cf{'retry'}) {
-	    $_cf{'return'} .= "Retry to check your adderss severely\n";
-	    $_cf{'retry'} = 1 if $ADDR_CHECK_MAX < 10; # against infinite loop
-	    $ADDR_CHECK_MAX++;
-	}
-	else {
-	    $_cf{'return'} .= "Hmm... yet ambiguous..So please use \"# addr\" command\n";
-	    $_cf{'return'} .= "\ne.g. use \"# addr ADDR\"\n";
-	    $_cf{'return'} .= "\tto exact-match ADDR(= EXACT FULL ADDRESS here)\n";
-	    undef $_cf{'retry'};
-	}
-	return "";
+	# Recursive Call
+	print STDERR "Call ChangeM...($cmd,..[$ADDR_CHECK_MAX]);\n" if $debug;
+	return &ChangeMemberList($cmd, $Address, $file);
+    }
+    elsif ($ADDR_CHECK_MAX == 10) {
+	&Log("MAXIMUM of ADDR_CHECK_MAX, stop");
     }
     else {
-	# MATCH ONLY ONCE OR NOT-MATCH
-	if ($_cf{'retry'}) {	# must be a lot of a.b.c..? 
-	    undef $_cf{'retry'};
-	    return "";
-	}
-
-	# above code must be not used, so go here...
 	if (($file eq $MEMBER_LIST) || ($file eq $ACTIVE_LIST)) {
-	    if (&FileSizeCheck("$file.tmp", $file)) { 
-		rename("$file.tmp", $file) || 
-		    (&Log("fail to rename $file"), return "");
+	    if (rename("$file.tmp", $file)) {
+		;
 	    }
 	    else {
-		&Log("ChangeMemberList: ERROR of filesize"); 
-		return "";
+		&Log("fail to rename $file");
+		return $NULL;
 	    }
 	}
-	else {
+	else {	# FILE INAPPROPRIATE
 	    &Log("ChangeMemberList:inappropriate to rename $file");
-	    return "";
+	    return $NULL;
 	}
-    }# end of log_c;
+    }#;
 
+    # Only once being called is "Required"
+    $LOCAL_HACK_HOOK && &eval($LOCAL_HACK_HOOK, "ChangeMemberList localhack:");
+    undef $LOCAL_HACK_HOOK;	# should be global for recursive calls.
+
+    $_cf{'return'} .= "O.K.!\n" if $Status eq 'done';
     $Status;
 }
     
@@ -591,28 +622,36 @@ sub ChangeMemberList
 sub Rehash
 {
     local($adr) = @_;
-    local($l, $r, $s);
+    local($l, $r, $s, $d, $mode);
+    ($adr, $mode) = split(/\s+/, $adr, 2);
+
+    print STDERR "\n---Rehash local($adr, $mode)\n\n";
+
+    require 'libutils.pl';
+    require 'SendFile.pl';
+
+    if ($mode =~ /m=(\S+)/) {
+	($d, $mode) = &ModeLookup($1);
+    }
+    else {
+	($d, $mode) = &ModeLookup('');
+    }
 
     $r = &GetID;
-
-    require 'SendFile.pl';
-    require 'MSendv4.pl';
-    $l = &GetDistributeList($adr);
-
-    print STDERR "TRY $l $r\n";
+    $l = &GetPrevID($adr);
     $s = "Rehash: Try send mails[$l - $r] left in spool";
 
     $_cf{'rehash'} = "$l-$r"; # for later use "# rehash" ???
     &Log($s);
     $_cf{'return'} .= "\n$s\n\n";
 
-    if (&mget2('#', 'mget', "$l-$r", '10')) {
-	&Log("Rehash: sending [$l-$r] configured");
+    if ($l <= $r && &mget2('#', 'mget', "$l-$r", '10', "$mode")) {
+	&Log("Rehash: send [$l-$r] mode=$mode configured.");
     }
     else {
-	&Log("Rehash: sending [$l-$r] Fail");
+	&Log("Rehash: send [$l-$r] mode=$mode NOT done.");
     }
-
+    
     1;
 }
 
@@ -622,19 +661,23 @@ sub Rehash
 sub ExistP
 {
     local($fp)      = @_;
-    local($f)       = "spool/$fp";
-    local($ar_unit) = $DEFAULT_ARCHIVE_UNIT ? $DEFAULT_ARCHIVE_UNIT : 100;
+    local($f)       = "$SPOOL_DIR/$fp";
+    local($ar_unit) = ($DEFAULT_ARCHIVE_UNIT || 100);
 
     $_cf{'libfml', 'binary'} = 0; # global binary or not variable on _(previous attached)
 
     # plain and 400 and your file. usually return here;
     stat($f);
     if (-T _ && -r _ && -o _ ) { return $f;}
-    
+
+    # NO!
+    if ($fp < 1) { return $NULL;}
+
+    # SEARCH
     if (defined(@ARCHIVE_DIR)) {
 	local($sp) = (int(($fp - 1)/$ar_unit) + 1) * $ar_unit;
 
-	$_cf{'libfml', 'binary'} = 2;		# 2 is uuencode operation
+	$_cf{'libfml', 'binary'} = 2;		# WHY HERE? 2 is uuencode operation
 
 	foreach $dir ("spool", @ARCHIVE_DIR) {
 	    $f = (-f "$dir/$sp.tar.gz") ? "$dir/$sp.tar.gz" : "$dir/$sp.gz";
@@ -659,11 +702,46 @@ sub InSecureP
 	local($s)  = "INSECURE and ATTACKED WARNING";
 	local($ss) = "Match: $ID  -> $`($&)$'";
 	&Log($s, $ss);
-	&Warn("Insecure $ID from $From_address. $ML_FN", "$s\n$ss");
+	&Warn("Insecure $ID from $From_address. $ML_FN", 
+	      "$s\n$ss\n".('-' x 30)."\n". &WholeMail);
 	return 1;
     }
 
     0;
+}
+
+
+# Check the string contains Shell Meta Characters
+# return 1 if match
+sub MetaCharP
+{
+    local($r) = @_;
+
+    if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	&Log("Match: $r -> $`($&)$'");
+	return 1;
+    }
+
+    0;
+}
+
+
+# Check arguments whether secure or not. 
+# require META-CHAR check against e.g. unlink('log'), getpwuid()...
+# return 1 if secure.
+sub CheckCommandHook
+{
+    local($com, @s) = @_;
+    local($s);
+
+    foreach $s (@s) {
+	if(&MetaCharP($s)) {
+	    $_cf{'return'} .= "NOT permit META Char's in parameters.\n";
+	    return 0;
+	};
+    }
+
+    return 1;
 }
 
 
@@ -688,6 +766,48 @@ sub GetID
 }
 
 
+# 
+# return ID
+sub GetPrevID
+{
+    local($adr) = @_;
+
+    $MSEND_RC = $MSEND_RC || "$DIR/MSendrc";
+    open(MSEND_RC) || return &GetID;
+
+    line: while(<MSEND_RC>) {
+	next line if /^\#/o;	# skip comment and off member
+	next line if /^\s*$/o;	# skip null line
+	chop;
+
+	tr/A-Z/a-z/;		# E-mail form(RFC822)
+	local($rcpt, $rc) = split(/\s+/, $_, 999);
+	return $rc if &AddressMatch($adr, $rcpt);
+    }
+
+    close(MSEND_RC);
+
+    &GetID;
+}
+
+
+# LastID(last:\d+) 
+# mh last:\d+ syntax;
+#
+# return $L, $R
+sub GetLastID
+{
+    local($s) = @_;
+
+    if($s =~ /^last:(\d+)$/) {
+	$R = &GetID;
+	$L = $R - $1;# $ID from &GetID is ++ already;asymmetry is useful;
+    }
+
+    ($L, $R);
+}
+
+
 # for matomeokuri control
 # added the infomation to MSEND_RC
 # return NONE
@@ -697,13 +817,55 @@ sub ConfigMSendRC
     local($ID) = &GetID;
 
     if (open(TMP, ">> $MSEND_RC") ) {
-	select(TMP); $| = 1; select(stdout);
+	select(TMP); $| = 1; select(STDOUT);
 	print TMP "$Address\t$ID\n";
 	close TMP;
     } 
     else { 
 	&Logging("Cannot open $MSEND_RC");
     }
+}
+
+
+# "rsummary" command
+# search keyword in summary 
+# return NONE
+sub SearchKeyInSummary
+{
+    local($s, $fl) = @_;
+    local($a, $b);
+
+    if($fl eq 's') {
+	;
+    }
+    elsif($s =~ /^(\d+)\-(\d+)$/) {
+	$a = $1; 
+	$b = $2; 
+    }
+    elsif($s =~ /^last:\d+$/) {
+	($a, $b) = &GetLastID($s);
+    }
+    else {
+	$_cf{'return'} .= "Restricted Summary: the parameter not matched\n";
+	return;
+    }
+
+    open(TMP, $SUMMARY_FILE) || do { &Log($!); return;};
+    if($fl eq 'rs') {
+	while(<TMP>) {
+	    if(/\[$a:/ .. /\[$b:/) {
+		$_cf{'return'} .= $_;
+	    }
+	}
+    }
+    elsif($fl eq 's') {
+	while(<TMP>) {
+	    if(/$s/) {
+		$_cf{'return'} .= $_;
+	    }
+	}
+    }
+    close(TMP);
 }
 
 
@@ -754,11 +916,23 @@ sub MemberStatus
 	    /\sr=(\S+)/     && ($s .= "\tRelay server is $1\n"); 
 	    /\ss=/          && ($s .= 
 				"\tNOT delivered here, but can post to $ML_FN\n");
-	    /\sm=/          && ($s .= "\tMatome Okuri, every other ");
-	    /\sm=(\d+)\s/o  && ($s .= "$1 hour as GZIPed\n");
-	    /\sm=(\d+)i\s/o && ($s .= "$1 hour as LHA+ISH\n");
-	    /\sm=(\d+)u\s/o && ($s .= "$1 hour as PLAIN TEXT\n");
-	    /\s*/           && ($s .= "\tdeliverd immediately\n");
+	    # KEY MARIEL;
+	    if (/\sm=(\S+)\s/o) {
+		local($d, $mode) = &ModeLookup($1);
+		$s   .= "MATOME OKURI mode = ";
+
+		if ($d) {
+		    $s .= &DocModeLookup("\#$d$mode");
+		}
+		else {
+		    $s .= "Realtime Delivery";
+		}
+
+		$s .= "\n";
+	    }
+	    else {
+		$s .= "Realtime delivery\n";
+	    }
 
 	    $s .= "\n\n";
 	}
@@ -767,26 +941,6 @@ sub MemberStatus
     close(ACTIVE_LIST);
 
     $s ? $s : "$who is NOT matched\n";
-}
-
-
-# Return 1 if Loopback is found in the given address
-# return 1 if loopback, 0 if not
-sub LoopBackWarning { &LoopBackWarn(@_);}
-sub LoopBackWarn
-{
-    local($to) = @_;
-
-    foreach ($MAIL_LIST, $CONTROL_ADDRESS, @Playing_to) {
-	next if /^$/oi;		# for null control addresses
-	if (&AddressMatching($to, $_)) {
-	    &Log("LoopBack Warning: ", "[$From_address] or [$to]");
-	    &Warn("Warning: $ML_FN", &WholeMail);
-	    return 1;
-	}
-    }
-
-    0;
 }
 
 1;

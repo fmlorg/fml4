@@ -5,7 +5,6 @@
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
-$rcsid  .= "(1.4f)";
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
@@ -89,8 +88,8 @@ sub InitConfig
     if (! -d $SPOOL_DIR)     { mkdir($SPOOL_DIR, 0700);}
     $TMP_DIR = ( $TMP_DIR || "./tmp" ); # backward compatible
     if (! -d $TMP_DIR)       { mkdir($TMP_DIR, 0700);}
-    for($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
-	$SEQUENCE_FILE, $SUMMARY_FILE) {
+    for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
+	 $SEQUENCE_FILE, $SUMMARY_FILE) {
 	if (!-f $_) { 
 	    open(TOUCH,">> $_"); close(TOUCH);
 	}
@@ -105,9 +104,14 @@ sub InitConfig
 
     # for backward compatiblity
     push(@ARCHIVE_DIR, @StoredSpool_DIR);
+    $SPOOL_DIR =~ s/$DIR\///;
+    $SMTP_OPEN_HOOK .= $Playing_to;
 
     # Security level (default is 2 [1.4delta])
     $SECURITY_LEVEL = ($SECURITY_LEVEL || 2);
+
+    # FIX INCLUDE PATH
+    push(@INC, $LIBMIMEDIR) if $LIBMIMEDIR;
 }
 
 # one pass to cut out the header and the body
@@ -163,7 +167,13 @@ sub GetFieldsFromHeader
     while (@MailHeaders) {
 	$_ = $field = shift @MailHeaders;
 	print STDERR "FIELD:          >$field<\n" if $debug;
-	next if (/^from\s/io); # UNIX FROM is a special case.
+
+        # UNIX FROM is a special case.
+	# 1995/06/01 check UNIX FROM LoopBack
+	if (/^from\s+(\S+)/io) {
+	    $Unix_From = $1;
+	    next;
+	}
 
 	$contents = shift @MailHeaders;
 	$contents =~ s/^\s+//; # cut the first spaces of the contents.
@@ -173,9 +183,11 @@ sub GetFieldsFromHeader
 
 	# Fields to skip. Please custumize below.
 	next if /^Received:/io;
-	next if /^In-Reply-To:/io && (! $SUPERFLUOUS_HEADER);
+	next if /^In-Reply-To:/io && (! $SUPERFLUOUS_HEADERS);
 	next if /^Return-Path:/io;
-	next if /^X-M\S+:/io;
+	next if /^X-MLServer:/io;
+	next if /^X-ML-Name:/io;
+	next if /^X-Mail-Count:/io;
 	next if /^Precedence:/io;
 	next if /^Lines:/io;
 
@@ -185,7 +197,10 @@ sub GetFieldsFromHeader
 	/^Errors-to:$/io      && ($Errors_to = $contents, next);
 	/^Sender:$/io         && ($Sender = $contents, next);
 	/^X-Distribution:$/io && ($Distribution = $contents, next);
-	/^To:$/io             && ($To_address = $contents, next);
+	/^Apparently-To:$/io  && ($Original_To_address = $To_address = $contents, 
+				  next);
+	/^To:$/io             && ($Original_To_address = $To_address = $contents, 
+				  next);
 	/^Cc:$/io             && ($Cc = $contents, next);
 	/^Message-Id:$/io     && ($Message_Id = $contents, next);
 
@@ -234,7 +249,7 @@ sub GetFieldsFromHeader
 	    next;
 	}
 
-	# when encounters unknown headers, hold if $SUPERFLUOUS_HEADER is 1.
+	# when encounters unknown headers, hold if $SUPERFLUOUS_HEADERS is 1.
 	$SuperfluousHeaders .= "$field $contents\n" if $SUPERFLUOUS_HEADERS;
 
     }# end of while loop;
@@ -252,7 +267,6 @@ sub GetFieldsFromHeader
     # MIME decoding. If other fields are required to decode, add them here.
     # c.f. RFC1522	2. Syntax of encoded-words
     if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
-	push(@INC, $LIBMIMEDIR);
         require 'libMIME.pl';
 	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
     }
@@ -276,6 +290,12 @@ sub GetFieldsFromHeader
 #.endif
 
     $debug && &eval(&FieldsDebug, 'FieldsDebug');
+
+    # now before flock();
+    if (&AddressMatch($Unix_From, $MAINTAINER)) {
+	&Log("WARNING: UNIX FROM Loop");
+	exit 0;
+    }
 }
 
 # When just guide request from unknown person, return the guide only
@@ -465,7 +485,7 @@ sub Distribute
       if ($opt =~ /\sr=(\S+)/i) {
 	  local($relay) = $1;
 	  local($who, $mxhost) = split(/@/, $rcpt, 2);
-	  $rcpt = "$who%$mxhost@$relay";
+	  $rcpt = "$who%$mxhost\@$relay";
       }	# % relay is not refered in RFC, but effective in Sendmail's.
 
       print STDERR "RCPT TO: $rcpt \n\n" if $debug;
@@ -477,8 +497,8 @@ sub Distribute
     ##### Hereafter the body of a mail #####
     push(@headers, "DATA");
 
-    # Playing with To: address, sorry _o_
-    $Playing_to && &eval($Playing_to, 'Playing_to');
+    # If you require to change several header fields...
+    $SMTP_OPEN_HOOK && &eval($SMTP_OPEN_HOOK, 'SMTP_OPEN_HOOK:');
     
 # This is the order recommended in RFC822, p.20. But not clear about X-*
     $body = 
@@ -500,7 +520,7 @@ sub Distribute
     }
 
     $body .= "Sender: $Sender\n" if ($Sender); # Sender is just additional. 
-    $body .= "To: $MAIL_LIST $ML_FN\n";
+    $body .= "To: ".($To || "$MAIL_LIST $ML_FN") ."\n";
     $body .= $Reply_to ? "Reply-To: $Reply_to\n" : "Reply-To: $MAIL_LIST\n";
 
     # Errors-to is not refered in RFC822. 
@@ -566,8 +586,12 @@ sub Distribute
 	close(FILE);
     }
 #.endif
+    if ($APPEND_STARDATE) {
+	require 'libStardate.pl';
+	$body .= "X-Stardate: ".&Stardate."\n";
+    } 
     $body .= "X-MLServer: $rcsid\n" if $rcsid;
-    $body .= "Precedence: list\n"; # for Sendmail 8.x, for delay mail
+    $body .= "Precedence: ".($PRECEDENCE || 'list')."\n"; #Sendmail 8.x for delay mail
     $body .= "Lines: $BodyLines\n\n";
     $body .= $MailBody;
 
@@ -575,10 +599,9 @@ sub Distribute
     if (! -f "$SPOOL_DIR/$ID") {	# not exist
 	&Logging("ARTICLE $ID");
 	open(mail_file, "> $SPOOL_DIR/$ID") || (&Logging($!), return);
-	select(mail_file); $| = 1; select(stdout);
+	select(mail_file); $| = 1; select(STDOUT);
 
 	if ($MIME_DECODED_ARTICLE) { 
-	    push(@INC, $LIBMIMEDIR);
 	    require 'libMIME.pl';
 	    print mail_file &DecodeMimeStrings($body);
 	}
@@ -649,6 +672,7 @@ sub AddressMatch
 
     # try exact match. must return here in a lot of cases.
     if ($addr1 eq $addr2) {
+	&Debug("Exact Match") if $debug;
 	return 1;
     }
 
@@ -691,7 +715,7 @@ sub Logging
     &GetTime;
 
     open(LOGFILE, ">> $LOGFILE");
-    select(LOGFILE); $| = 1; select(stdout);
+    select(LOGFILE); $| = 1; select(STDOUT);
     print LOGFILE "$Now $str ". ((!$e)? "($From_address)\n": "\n");
     close(LOGFILE);
 }
@@ -702,14 +726,14 @@ sub RunHooks
 {
     local($s);
     $0 = "--Run Hooks ".$_cf{'hook', 'prog'}." $FML $LOCKFILE>";
-	
-    if ($s = $_cf{'hook', 'str'}) {
-	print STDERR "\neval >$s<\n\n" if $debug;
+
+    if ($s = ($_cf{'hook', 'str'} . $FML_EXIT_HOOK)) {
+	print STDERR "\nmain::eval >$s<\n\n" if $debug;
 	&eval($s, 'Run Hooks:');
     }
 
     if ($s = $_cf{'hook', 'prog'}) {
-	print STDERR "\nexec $s\n\n" if $debug;
+	print STDERR "\nmain::exec $s\n\n" if $debug;
 	exec $s;
     }
 }
@@ -727,7 +751,7 @@ sub eval
     local($exp, $s) = @_;
 
     eval $exp; 
-    &Log("$s:$@") if $@;
+    &Log("$s:".$@) if $@;
 
     return 1 unless $@;
 }
@@ -736,16 +760,20 @@ sub eval
 sub Opt
 {
     local($opt) = @_;
-    ($opt =~ /^\-(\S)/) && ($_cf{'opt', $1} = 1);
+    ($opt =~ /^\-(\S)/)      && ($_cf{'opt', $1} = 1);
+    ($opt =~ /^\-(\S)(\S+)/) && ($_cf{'opt', $1} = $2);
 
     # Reassign options
     $debug = 1 if $_cf{'opt', 'd'};
+    $LOAD_LIBRARY = $_cf{'opt', 'l'} if $_cf{'opt', 'l'};
 }
 
 # Debug Pattern Custom for &GetFieldsFromHeader
 sub FieldsDebug
 {
 local($s) = q#"
+MailingList:         $MAIL_LIST
+UNIX FROM:           $Unix_From
 From(Original):      $Original_From_address
 From_address:        $From_address
 Original Subject:    $Subject
@@ -755,7 +783,10 @@ To_address:          $To_address
 CONTROL_ADDRESS:     $CONTROL_ADDRESS
 CommandMode:         $CommandMode
 
-SUPERFULOUS:        >$SuperfluousHeaders<
+SUPERFLUOUS:        >$SuperfluousHeaders<
+
+LOAD_LIBRARY:        $LOAD_LIBRARY
+
 "#;
 
 "print STDERR $s";
@@ -774,9 +805,31 @@ sub Debug
 # Check uid == euid && gid == egid
 sub ChkREUid
 {
+    print STDERR "\n";
     print STDERR "setuid is not set $< != $>\n" if $< ne $>;
     print STDERR "setgid is not set $( != $)\n" if $( ne $);
-    print STDERR "";
+    print STDERR "\n";
+}
+
+
+# Check Looping 
+# return 1 if loopback
+sub LoopBackWarning { &LoopBackWarn(@_);}
+sub LoopBackWarn
+{
+    local($to) = @_;
+    local($ml);
+
+    foreach $ml ($MAIL_LIST, $CONTROL_ADDRESS, @Playing_to) {
+	next if $ml =~ /^$/oi;	# for null control addresses
+	if (&AddressMatch($to, $ml)) {
+	    &Log("Loop Back Warning: ", "[$From_address] or [$to]");
+	    &Warn("Loop Back Warning: $ML_FN", &WholeMail);
+	    return 1;
+	}
+    }
+
+    return 0;
 }
 
 

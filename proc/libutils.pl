@@ -17,7 +17,8 @@ sub SendFile2Majority { &SendFile('#dummy', @_);}
 # return 0 or 1 to use the return of &MLMemberCheck
 sub AutoRegist
 {
-    local($from, $s, $b);
+    local($from, $s, $b, $r);
+    local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
 
     if ($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
 	# Syntax e.g. "Subject: subscribe"...
@@ -27,6 +28,9 @@ sub AutoRegist
 	$s = $Subject;
 	$s =~ s/^\#\s*//;
 	$s =~ s/^\033\050\112\s*($REQUIRE_SUBSCRIBE.*)/$1/;
+
+	# multiple lines matching case could happen
+	($s) = grep(/$REQUIRE_SUBSCRIBE/, split(/\n/, $s));
 
 	if ($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*$/i ||
 	   $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i) {
@@ -48,8 +52,11 @@ sub AutoRegist
 	$s = $MailBody;
 	$s =~ s/^\#\s*//;
 
-	if ($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*\n/i ||
-	    $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*\n/i) {
+	# multiple lines matching case could happen
+	($s) = grep(/$REQUIRE_SUBSCRIBE/, split(/\n/, $s));
+
+	if ($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*$/i ||
+	    $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i) {
 	    $from = $1;
 	}
 	else {
@@ -76,30 +83,69 @@ sub AutoRegist
     &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
     $from = ($from || $From_address);
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
-    return 0 if &LoopBackWarn($from); # loop back check
 
-    # ADD the newcomer to the member list
-    open(TMP, ">> $MEMBER_LIST") || do {
-	select(TMP); $| = 1; select(stdout);
-	&Logging($!);
-	&Warn("Auto-Regist: cannot open member file", &WholeMail);
+    return 0 if     &LoopBackWarn($from); 	# loop back check	
+    return 0 unless &Chk822_addr_spec_P($from);	# permit only 822 addr-spec 
+
+    # duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
+    if (&CheckMember($from, $MEMBER_LIST)) {	
+	&Log("Dup: $from");
+        &Sendmail($From_address, "fml Command Status report $ML_FN",
+	   "Address [$from] already subscribed.\n");
+	return 0;
+    }
+
+    ### ADD the newcomer to the member list
+    if (open(TMP, ">> $file_to_regist")) {
+	print TMP $from, "\n";
+	close(TMP);
+	&Log("Added: $from");
+    }
+    else {
+	select(TMP); $| = 1; select(STDOUT);
+	&Log($!);
+	&Warn("Auto-Regist: cannot open $file_to_regist", &WholeMail);
 	return 0;
     };
-    print TMP $from, "\n";
-    close(TMP);
 
-    # Log and Notify 
-    &Logging("Added: $from");
-    &Warn("New added member: $from $ML_FN", &WholeMail);
-    &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
+    ### ADD the newcomer to the active list
+    if ($ML_MEMBER_CHECK) {
+	$file_to_regist = $ACTIVE_LIST;
+	if (open(TMP, ">> $file_to_regist")) {
+	    print TMP $from, "\n";
+	    close(TMP);
+#	    &Log("Added: $from");
+	}
+	else {
+	    select(TMP); $| = 1; select(STDOUT);
+	    &Log($!);
+	    &Warn("Auto-Regist: cannot open $file_to_regist", &WholeMail);
+	    return 0;
+	};
+    }
+
+
     
     # WHETHER DELIVER OR NOT?
     # 7 is body 3 lines and signature 4 lines, appropriate?
     $AUTO_REGISTRATION_LINES_LIMIT||($AUTO_REGISTRATION_LINES_LIMIT=8);
     if ($BodyLines < $AUTO_REGISTRATION_LINES_LIMIT) { 
+	&Log("Not deliver: Lines:$BodyLines < $AUTO_REGISTRATION_LINES_LIMIT");
 	$AUTO_REGISTERD_UNDELIVER_P = 1;
+	$r  = "Mail Lines is too short(< $AUTO_REGISTRATION_LINES_LIMIT),\n";
+	$r .= "So NOT FORWARDED to ML($MAIL_LIST). O.K.?\n\n";
+	$r .= ('-' x 30) . "\n\n";
     }
+    elsif ($AUTO_REGISTERD_UNDELIVER_P) {
+	$r  = "\$AUTO_REGISTERD_UNDELIVER_P is set, \n";
+	$r .= "So NOT FORWARDED to ML($MAIL_LIST).\n\n";
+	$r .= ('-' x 30) . "\n\n";
+    }
+    
+    &Warn("New added member: $from $ML_FN", $r . &WholeMail);
+    &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
 
+    ### Ends.
     return ($AUTO_REGISTERD_UNDELIVER_P ? 0 : 1);
 }
 
@@ -123,7 +169,7 @@ sub DraftGenerate
     $r    = $file;
     $conf{'total'} = 0;
 
-    print STDERR "&DraftGenerate ($tmpf, $mode, $file, @conf)\n" if $debug;
+    print STDERR "&DraftGenerate ($tmpf, $mode, $file, \@conf)\n" if $debug;
 
     &InitDraftGenerate;
 
@@ -139,7 +185,11 @@ sub DraftGenerate
 		    ) {
 
 	$prog = $_fp{$proc, $mode};
-	print STDERR "Call &$prog(*conf, *r, *misc)\n" if $debug;
+	if ($debug) {
+	    print STDERR "Call [$proc]\t";
+	    print STDERR "&$prog(*conf, *r, *misc);" if $prog;
+	    print STDERR "\n";
+	}
 	&$prog(*conf, *r, *misc) if $prog;
     }
 
@@ -173,7 +223,7 @@ sub ModeLookup
     print STDERR "&ModeLookup($opt)\n" if $debug;
 
     # Require called by anywhere
-    &InitDraftGenerate;
+    &MSendModeSet;
 
     # Parse option 
     # return NULL LIST if fails
@@ -210,7 +260,7 @@ sub DocModeLookup
     print STDERR "&DocModeLookup($opt)\n" if $debug;
 
     # Require called by anywhere
-    &InitDraftGenerate;
+    &MSendModeSet;
 
     if ($opt =~ /^\#/ && ($opt = $MSendOpt{$opt})) {
 	($opt =~ /^\#(.*)/) && (return $1);
@@ -221,21 +271,25 @@ sub DocModeLookup
 }
 
 
-sub InitDraftGenerate
+# Setting Mode association list
+# return NONE
+sub MSendModeSet
 {
     #            KEY        MODE
     # DOCUMENT   #KEY       #MODE 
     %MSendOpt = (
-		 '#gz', '#gzipped(UNIX FROM)', 
-		 '',        'gz',
+		 '#gz',     '#gzipped(UNIX FROM)', 
 		 'gz',      'gz',
 
+		 '#tgz',    '#tar + gzip', 
+		 '',        'tgz',
+		 'tgz',     'tgz',
 
-		 '#mp', '#MIME/multipart', 
+		 '#mp',     '#MIME/multipart', 
 		 'mp',      'mp',
 
 
-		 '#uf', '#PLAINTEXT(UNIX FROM)', 
+		 '#uf',     '#PLAINTEXT(UNIX FROM)', 
 		 'u',       'uf', 
 		 'uf',      'uf',
 		 'unpack',  'uf',
@@ -246,17 +300,26 @@ sub InitDraftGenerate
 		 'ish',     'lhaish',
 
 
-		 '#rfc954', '#RFC954(mh-burst)', 
-		 'b',       'rfc954', 
-		 'rfc954',  'rfc954',
+		 '#rfc934', '#RFC934(mh-burst)', 
+		 'b',       'rfc934', 
+		 'rfc934',  'rfc934',
 
 
-		 '#rfc1153', '#Digest (RFC1153)',
+		 '#rfc1153','#Digest (RFC1153)',
 		 'd',       'rfc1153',
 		 'rfc1153', 'rfc1153'
 
 		 );
 
+    $MSEND_OPT_HOOK && &eval($MSEND_OPT_HOOK, 'MSendModeSet:');
+}
+
+
+# Initialization of msending interface. 
+# return NONE
+sub InitDraftGenerate
+{
+    &MSendModeSet;
 
     # PLAIN TEXT with UNIX FROM
     $_fp{'cnstr',    'uf'} = 'Cnstr_uf';
@@ -264,10 +327,10 @@ sub InitDraftGenerate
     $_fp{'split',    'uf'} = '';
     $_fp{'destr',    'uf'} = '';
 
-    # PLAINTEXT by RFC954
-    $_fp{'cnstr',    'rfc954'} = 'Cnstr_rfc954';
-    $_fp{'retrieve', 'rfc954'} = 'f_RetrieveFile';
-#    $_fp{'split',    'rfc954'} = 'f_SplitFile';
+    # PLAINTEXT by RFC934
+    $_fp{'cnstr',    'rfc934'} = 'Cnstr_rfc934';
+    $_fp{'retrieve', 'rfc934'} = 'f_RetrieveFile';
+#    $_fp{'split',    'rfc934'} = 'f_SplitFile';
 
     # PLAINTEXT by RFC1153
     $_fp{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
@@ -287,6 +350,7 @@ sub InitDraftGenerate
     # PACK: TAR + GZIP
     $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
     $_fp{'retrieve', 'tgz'} = 'f_tgz';
+    $_fp{'split',    'tgz'} = 'f_SplitFile';
 
     # PACK: LHA + ISH
     $_fp{'cnstr',    'lhaish'} = '';
@@ -295,7 +359,10 @@ sub InitDraftGenerate
 
 }
 
-				# 
+
+############################## CONSTRUCTORS
+
+
 sub Cnstr_uf
 {
     local(*conf, *r, *misc) = @_;
@@ -311,23 +378,28 @@ sub Cnstr_uf
 sub Cnstr_rfc1153
 {
     local(*conf, *r, *misc) = @_;
+    local($mode) = 'rfc1153';
 
     $conf{'plain'} = 1;
     $conf{'total'} = 1;
     $conf{'delimiter'} = "\n\n".('-' x 30)."\n\n";
 
     require 'librfc1153.pl';
-    local($PREAMBLE, $TRAILER) = &Rfc1153Custom(@conf);
+    local($PREAMBLE, $TRAILER) = &Rfc1153Custom($mode, @conf);
+
+    print STDERR "PREAMBLE $PREAMBLE\nTRALER $TRAILER\n";
 
     $conf{'rfhook'}   = &Rfc1153ReadFileHook;
     $conf{'preamble'} = $PREAMBLE;
     $conf{'trailer'}  = $TRAILER;
 
+    # set Destructor used in MSendv4.pl 
+    # to increment the issue count of the digest
     $_cf{'Destr'} .= "&Rfc1153Destructer;\n";
 }
 
 
-sub Cnstr_rfc954
+sub Cnstr_rfc934
 {
     local(*conf, *r, *misc) = @_;
 
@@ -339,39 +411,55 @@ sub Cnstr_rfc954
 }
 
 
+# patched by mikami@saturn.hcs.ts.fujitsu.co.jp
+# Posted:  Tue, 16 May 1995 23:20:32 JST
+# fml-supoort ML: 00363
+# Following this fix, modify
+# $ORG_MIME_MULTIPART_BOUNDARY -> $MIME_MULTIPART_BOUNDARY
+# $MIME_MULTIPART_BOUNDARY     -> $MIME_MULTIPART_DELIMITER
+#
 sub Cnstr_mp
 {
     local(*conf, *r, *misc) = @_;
+    local($boundary) = "--$MailDate--";
+    $boundary =~ s/,//g; $boundary =~ s/\s+JST//g; $boundary =~ s/ /_/g;
 
-    $conf{'plain'} = 1;
-    $conf{'total'} = 1;
+    # MIME CONFIGURATION
+    $MIME_VERSION              = $MIME_VERSION || '1.0';
+    $MIME_CONTENT_TYPE         = $MIME_CONTENT_TYPE || 'multipart/mixed;';
+    $MIME_MULTIPART_BOUNDARY   = $MIME_MULTIPART_BOUNDARY || $boundary;
+    $MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
+    $MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
+    $MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
 
-    if (! $MIME_MULTIPART_BOUNDARY) {
-	$MIME_MULTIPART_BOUNDARY = "simple boundary\nContent-Type: message/rfc822\n";
-    }
-    else {
-	&eval($MIME_MULTIPART_BOUNDARY, 'MIME/Multipart:');
-    }
+    # configurations 
+    $conf{'plain'}     = 1;
+    $conf{'total'}     = 1;
+    $conf{'delimiter'} = "\n--$MIME_MULTIPART_DELIMITER\n";
+    $conf{'preamble'}  = $MIME_MULTIPART_PREAMBLE if $MIME_MULTIPART_PREAMBLE;
+    $conf{'trailer'}   = "\n--$MIME_MULTIPART_CLOSE_DELIMITER--\n";
+    $conf{'trailer'}  .= $MIME_MULTIPART_TRAILER if $MIME_MULTIPART_TRAILER;
 
-    $conf{'total'} = 1;
-    $conf{'delimiter'} = "\n--$MIME_MULTIPART_BOUNDARY\n";
-    $conf{'preamble'} = q#
-      This is the preamble.  It is to be ignored, though it
-      is a handy place for mail composers to include an
-      explanatory note to non-MIME conformant readers.
-#;
-
-    $conf{'trailer'} = "\n--$MIME_MULTIPART_BOUNDARY--\n";
-    $conf{'trailer'} .= "This is the epilogue.  It is also to be ignored.\n";
-
+    # make MIME Header
     undef $_cf{'header', 'MIME'};
-    $_cf{'header', 'MIME'} .= "MIME-Version: 1.0\n";
-    $_cf{'header', 'MIME'} .= "Content-type: multipart/mixed;\n";
+    $_cf{'header', 'MIME'} .= "MIME-Version: $MIME_VERSION\n";
+    $_cf{'header', 'MIME'} .= "Content-type: $MIME_CONTENT_TYPE\n";
     $_cf{'header', 'MIME'} .= "\tboundary=\"$MIME_MULTIPART_BOUNDARY\"\n";
 }
 
 
 sub Cnstr_gz
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'total'} = 0;
+    $conf{'delimiter'} = "From $MAINTAINER\n";
+    $conf{'preamble'} = '';
+    $conf{'trailer'}  = '';
+}
+
+
+sub Cnstr_tgz
 {
     local(*conf, *r, *misc) = @_;
 
@@ -407,9 +495,9 @@ sub f_RetrieveFile
 	print OUT $conf{'delimiter'} if $conf{'delimiter'};
 
  	if ($conf{'rfhook'}) {
-	    $s = qq#
+	    local($s) = qq#
 		while (<FILE>) { 
-		    \$conf{'rfhook'};
+		    $conf{'rfhook'};
 		    print OUT \$_; \$linecounter++;
 		}
 	    #;
@@ -527,7 +615,7 @@ sub f_SplitFile
 
     $r{'total'} = $total;
 }
-######################################################################
+##############################
 
 
 # Open FILEHANDLE 'OUT'.
@@ -544,7 +632,7 @@ sub OpenStream
 	&log("OpenStream: cannot open $WHERE.$TOTAL");
 	return $NULL;
     };
-    select(OUT); $| = 1; select(stdout);
+    select(OUT); $| = 1; select(STDOUT);
 
     1;
 }
@@ -561,7 +649,7 @@ sub WC
 {
     local($lines) = 0;
 
-    open(TMP, "< @_") || return 0;
+    open(TMP, "< \@_") || return 0;
     while (<TMP>) { 
 	$lines++;
     }
@@ -583,7 +671,7 @@ sub SplitFiles
 
     open(BUFFER,"< $file") || do { &Logging("$!"); return 0;};
     open(OUT,   "> $file.$i") || do { &Logging("$!"); exit 1;};
-    select(OUT); $| = 1; select(stdout);
+    select(OUT); $| = 1; select(STDOUT);
 
     while (<BUFFER>) {
 	print OUT $_; $lines++;
@@ -598,7 +686,7 @@ sub SplitFiles
 
 	    # Next file
 	    open(OUT, "> $file.$i") || do { &Log($!); return 0;};
-	    select(OUT); $| = 1; select(stdout);
+	    select(OUT); $| = 1; select(STDOUT);
 	}
     }# WHILE;
 
@@ -629,7 +717,7 @@ sub LhaAndEncode2Ish
     local($TMPF, $FILE, @filelist) = @_;
     local($COMPRESS, $UUENCODE); # locally define!
 
-    &Debug("LhaAndEncode2Ish($TMPF, $FILE, @filelist)") if $debug;
+    &Debug("LhaAndEncode2Ish($TMPF, $FILE, \@filelist)") if $debug;
 
     # Variable setting
     $FILE =~ s/\.gz$/.lzh/;
@@ -667,7 +755,7 @@ sub Convert2Sjis
     local(*r);
     local($tmp)  = $TMP_DIR;
     local($tmpf) = "$TMP_DIR/$$";
-    $tmp =~ s/^\.\///; # spool/,  tmp/, ..
+    $tmp =~ s/^\.\///; # $SPOOL_DIR/,  tmp/, ..
 
     &Debug("\$tmp = $tmp") if $debug;
 
@@ -678,12 +766,12 @@ sub Convert2Sjis
 
     # GO!
     foreach $r (@f) { 
-	$r =~ s/^\.\///; # spool/,  tmp/, ..
+	$r =~ s/^\.\///; # $SPOOL_DIR/,  tmp/, ..
 
 	&Debug("&file2sjis($r, $tmpf)") if $debug;
 	&file2sjis($r, $tmpf) || next;
 
-	if ($r =~ /^spool/) {
+	if ($r =~ /^$SPOOL_DIR/) {
 	    rename($tmpf, "$TMP_DIR/$r") || &Log("cannot rename $tmf $TMP_DIR/$r");
 	    push(@r, "$TMP_DIR/$r");
 	}
@@ -713,7 +801,7 @@ sub file2sjis
     }
 
     if (open(OUT, "> $out")) {
-	select(OUT); $| = 1; select(stdout);
+	select(OUT); $| = 1; select(STDOUT);
     }
     else {
 	&Log("file2sjis: $out: $!");
@@ -760,34 +848,22 @@ sub SendingBackInOrder
 
 
 # Split the given file and send back them
-# ($f, $PACK_P, $subject, @to)
+# ($f, $mode, $subject, @to)
 # $f          the target file
-# $PACK_P
+# $mode
 # $subject
 # @to 
 # return NONE
 sub SendFilebySplit
 {
-    local($f, $PACK_P, $enc, @to) = @_;
+    local($f, $mode, $enc, @to) = @_;
     local($TOTAL, $s);
     local($tmp) = "$TMP_DIR/$$";
 
     $0 = "--Split and Sendback $f to $to $ML_FN <$FML $LOCKFILE>";
     local($s)   = ($enc || "Matomete Send");
 
-    if ($_cf{'ish'}) {
-	$s .= ' [Ished]';
-	$enc =~ /ish$/ || ($enc .= '.ish');
-    }     
-    elsif ($PACK_P) {
-	$s .= ' [Gziped]';
-	$enc =~ /gz$/ || ($enc .= '.tar.gz');
-    }
-    elsif ($PACK_P == 0) {
-	$s .= ' [PLAINTEXT]';
-    }
-
-    $TOTAL  = &MakeFileWithUnixFrom($tmp, $PACK_P, $enc, $f);
+    $TOTAL  = &MakeFileWithUnixFrom($tmp, $mode, $enc, $f);
     if ($TOTAL) {
 	&SendingBackInOrder($tmp, $TOTAL, $s, ($SLEEPTIME || 3), @to);
     }
@@ -860,7 +936,7 @@ sub TarZXF
     open(TAR, $tarfile) || &Log("TarZXF: Cannot open $tarfile: $!");
     open(TAR, '-|') || exec($ZCAT, $tarfile) || die("zcat: $!\n")
 	if ($tarfile =~ /\.gz$/);
-    select(TAR); $| = 1; select(stdout);
+    select(TAR); $| = 1; select(STDOUT);
 
     if ($outfile) {
 	&OpenStream($outfile, 0, 0, $TOTAL) 
@@ -916,7 +992,8 @@ sub TarZXF
 	print OUT "\n" if $catit;# \nFrom UNIX-FROM;
 
 	if ($catit && ! --$total) {
-	    close TAR, OUT;
+	    close TAR;
+	    close OUT;
 	    return $outfile ? $TOTAL: $BUF;
 	}
     }# end of Tar extract
@@ -943,12 +1020,12 @@ sub ipc
     if ($debug) {
 	&Debug("ipc:");
 	&Debug("\t%ipc". join(",", %ipc));
-	&Debug("\tpack($ipc{pat}, &AF_INET, $port, $addrs)");
+	&Debug("\tpack($ipc{'pat'}, &AF_INET, $port, $addrs)");
     }
 
     socket(S, &PF_INET, &SOCK_STREAM, 6) || (&Log($!), return $err);
     connect(S, $target)                  || (&Log($!), return $err);
-    select(S); $| = 1; select(stdout); # need flush of sockect <S>;
+    select(S); $| = 1; select(STDOUT); # need flush of sockect <S>;
 
     foreach (@ipc) {
 	&Debug("IPC S>$_") if $debug;
@@ -1012,7 +1089,7 @@ sub system
 	}
 
 	exec $s;
-	&Log("Cannot exec $s:$@");
+	&Log("Cannot exec $s:".$@);
     }
 
     # Wait for the child to terminate.
@@ -1029,40 +1106,29 @@ sub MetaP
     local($r) = @_;
 
     if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
-	&Log("Match: $ID  -> $`($&)$'");
+	&Log("Match: $r  -> $`($&)$'");
 	return 1;
     }
 
     0;
 }
 
-### may be a DUPLICATED SUBROLUTINE ###
 
-# Return 1 if Loopback
-if ( (! defined(&LoopBackWarn))
-   &&
-   (! defined(&LoopBackWarning))
-   ) {
-local($hook) = q!
-sub LoopBackWarning { &LoopBackWarn(@_);}
-sub LoopBackWarn
+# check addr-spec in RFC822
+# patched by umura@nn.solan.chubu.ac.jp 95/6/8
+# return 1 if O.K. 
+sub Chk822_addr_spec_P
 {
-    local($to) = @_;
+    local($from) = @_;
 
-    foreach ($MAIL_LIST, $CONTROL_ADDRESS, @Playing_to) {
-	next if /^$/oi;		# for null control addresses
-	if (&AddressMatching($to, $_)) {
-	    &Log("LoopBack Warning: ", "[$From_address] or [$to]");
-	    &Warn("Warning: $ML_FN", &WholeMail);
-	    return 1;
-	}
+    if ($from !~ /@/) {
+	&Log("NO @ mark: $from");
+        &Sendmail($From_address, "fml Command Status report $ML_FN",
+	   "Address [$from] contains no @.\n");
+	return 0;
     }
 
-    return 0;
-}
-!;
-
-&eval($hook, 'Duplicate hook');
+   return 1;
 }
 
 1;

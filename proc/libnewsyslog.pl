@@ -15,7 +15,6 @@ if ($0 eq __FILE__) {
 }
 else {
     # Deault when library is 'require'ed;
-    $debug = 1;
     &FmlNewSyslog;
 }
 
@@ -24,15 +23,21 @@ sub FmlNewSyslog
     local($f) = @_;
     local($file, $new);
 
+    &DebugNewSyslog("Newsyslog library sets in: for $f\n") if $debug;
+
     # DEFAULT ACTION
     if (! $f) {
-	@NEWSYSLOG_FILES = ($MSEND_RC, $MEMBER_LIST, $ACTIVE_LIST)
+	@NEWSYSLOG_FILES = ("$MSEND_RC.bak", 
+			    "$MEMBER_LIST.bak", 
+			    "$ACTIVE_LIST.bak")
 	    unless @NEWSYSLOG_FILES;
 
 	foreach $f (@NEWSYSLOG_FILES) {
-	    &DebugNewSyslog("Call &FmlNewSyslog($f.bak)") 
-		if -f "$f.bak" && $debug;
-	    &FmlNewSyslog("$f.bak") if -f "$f.bak";
+	    next if $f =~ /^\s*$/;
+	    next unless -f $f;
+
+	    &DebugNewSyslog("\nCall &FmlNewSyslog($f)") if $debug;
+	    &FmlNewSyslog($f);
 	}
     }
 
@@ -45,14 +50,20 @@ sub FmlNewSyslog
     if ($new =~ /$DIR/) {
 	$new =~ s/$DIR/$VARLOG_DIR/;
     }
+    else {
+	$new = "$VARLOG_DIR/$new";
+    }
     $new =~ s/\.bak$//;
+
+    print STDERR "$f -> $new\n";
 
     &DoNewSyslog($new);
 
     if (-l $f) {
-	;
+	open(TOUCH,">> $new.0"); close(TOUCH);
     }
-    else {
+    elsif($new) {
+	$new =~ s/$DIR\//.\//;
 	$new = "$new.0";
 	$symlink_exists = (eval 'symlink("", "");', $@ eq "");
 
@@ -86,7 +97,7 @@ sub DoNewSyslog
     do { 
 	$old = "$file.".($max - 1 > 0 ? $max - 1 : 0);
 	$new = "$file.".($max);
-	&DebugNewSyslog("Do rename($old, $new)") if -f $old && $debug;
+	&DebugNewSyslog("rename($old, $new)") if -f $old && $debug;
 	-f $old && rename($old, $new);
     }while($max-- > 0);
 

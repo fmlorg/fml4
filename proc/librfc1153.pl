@@ -31,7 +31,7 @@ sub Rfc1153Custom
     local($mode, @filelist) = @_;
     local($i, $f, $s);
     local($issue, $listname, $vol, $ISSUE_SEQ);
-    local($PREAMBLE, $TRAILER, $TRACK);
+    local($PREAMBLE, $TRAILER, $TRICK);
 
     ########## CUSTOMIZE BELOW ##########
     $issue     = 1;

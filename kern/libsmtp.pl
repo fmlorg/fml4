@@ -7,33 +7,54 @@ $smtpid   = q$Id$;
 ($smtpid) = ($smtpid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid   .= "/$smtpid";
 
+#.IF SMTP
 require 'sys/socket.ph';
+#.ELSE SMTP
+#. $SENDMAIL = "/usr/lib/sendmail -bs ";
+#.FI SMTP
 
 # delete logging errlog file and return error strings.
 sub Smtp # ($host, $headers, $body)
 {
     local($host, $body, @headers) = @_;
     local($pat)  = 'S n a4 x8';
+    # local($pat)  = 'S n C4 x8'; # which is correct?
 
-    # check variables
-    $DIR  = $DIR ? $DIR : $ENV{'PWD'};
-    $host = $host ? $host : 'localhost';
+    # VARIABLES:
+    $host       = $HOST       || $host || 'localhost';
+    $VAR_DIR    = $VAR_DIR    || "$DIR/var";
+    $VARLOG_DIR = $VARLOG_DIR || "$DIR/var/log";#absolute for ftpmail
+    $SMTP_LOG0  = $SMTP_LOG0  || "$DIR/_smtplog"; # Backward compatibility;
+    $SMTP_LOG   = $SMTP_LOG   || "$VARLOG_DIR/_smtplog";
 
-    # for logging of IPC
-    local($SMTP_LOG) = "$DIR/_smtplog";
-    $SMTP_LOG .= ".$Smtp_logging_hook" if($Smtp_logging_hook);
+    # LOG: on IPC
+    (-d $VAR_DIR)    || mkdir($VAR_DIR, 0700);
+    (-d $VARLOG_DIR) || mkdir($VARLOG_DIR, 0700);
+    (-l $SMTP_LOG0)  || do {
+	$symlink_exists = (eval 'symlink("", "");', $@ eq "");
+	unlink $SMTP_LOG0;
+	$symlink_exists && symlink($SMTP_LOG, $SMTP_LOG0);
+	if ($symlink_exists) {
+	    &Log("ln -s $SMTP_LOG $SMTP_LOG0");
+	}
+	else {
+	    &Log("unlink $SMTP_LOG0, log -> $SMTP_LOG");
+	}
+    };
+    $SMTP_LOG .= ".$Smtp_logging_hook" if $Smtp_logging_hook;
     open(SMTPLOG, "> $SMTP_LOG") || 
 	(return "$MailDate: cannot open $SMTP_LOG");
 
+#.IF SMTP
     # DNS. $HOST is global variable
     # it seems gethostbyname does not work if the parameter is dirty?
-    local($name,$aliases,$addrtype,$length,$addrs) = 
-	gethostbyname($HOST ? $HOST : $host);
+    # 
+    local($name,$aliases,$addrtype,$length,$addrs) = gethostbyname($HOST);
     local($name,$aliases,$port,$proto) = getservbyname('smtp', 'tcp');
     $port = 25 unless defined($port); # default port
     local($target) = pack($pat, &AF_INET, $port, $addrs);
 
-    # IPC
+    # IPC open
     if (socket(S, &PF_INET, &SOCK_STREAM, $proto)) { 
 	print SMTPLOG  "socket ok\n";
     } 
@@ -49,9 +70,14 @@ sub Smtp # ($host, $headers, $body)
     }
 
     # need flush of sockect <S>;
-    select(S);       $| = 1; select(stdout);
-    select(SMTPLOG); $| = 1; select(stdout);
+    select(S);       $| = 1; select(STDOUT);
+    select(SMTPLOG); $| = 1; select(STDOUT);
+#.ELSE SMTP
+#.    require 'open2.pl';
+#.    &open2(OUT, S, $SENDMAIL) || return "Cannot exec $SENDMAIL";
+#.FI SMTP
 
+    ###### Here We go! ##### 
     # interacts smtp port, see the detail in $SMTPLOG
     do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
     foreach $s (@headers) {
@@ -78,7 +104,7 @@ sub Smtp # ($host, $headers, $body)
     if ($_cf{'Smtp', 'readfile'}) { # For FILE INPUT
 	print SMTPLOG $body;
 	print S $body;
-	while(<file>) { s/^\./../; print S $_; print SMTPLOG $_;};
+	while(<FILE>) { s/^\./../; print S $_; print SMTPLOG $_;};
 	print SMTPLOG "-------------\n";
 	print S ".\n";
     } 
@@ -123,18 +149,21 @@ sub SendFile
 	$enc = "uja.gz";
     }
 
-    if (open(file) && ($SENDFILE_NO_FILECHECK ? 1 : -T $file)) { 
+    if (open(FILE, $file) && ($SENDFILE_NO_FILECHECK ? 1 : -T $file)) { 
+	;
     }
-    elsif((1 == $zcat) && $ZCAT && -r $file && open(file, "$ZCAT $file|")) {
+    elsif((1 == $zcat) && $ZCAT && -r $file && open(FILE, "$ZCAT $file|")) {
+	;
     }
-    elsif((2 == $zcat) && $ZCAT && -r $file && open(file, "$UUENCODE $file $enc|")) {
+    elsif((2 == $zcat) && $ZCAT && -r $file && open(FILE, "$UUENCODE $file $enc|")) {
+	;
     }
     else { 
 	&Logging("sub SendFile: no $file") if !-f $file;
 	&Logging("sub SendFile: binary?O.K.?: $file [zcat=$zcat]") if (!$zcat) && -B $file;
 	&Logging("sub SendFile: \$ZCAT not defined") unless $ZCAT; 	
 	&Logging("sub SendFile: cannot read $file")  unless -r $file;
-	&Logging("sub SendFile: must be cannot open $file") unless open(file);
+	&Logging("sub SendFile: must be cannot open $file") unless open(FILE, $file);
 	return;
     }
 
@@ -146,7 +175,7 @@ sub SendFile
     &Logging("SendFile:$Status") if $Status;
     undef $_cf{'Smtp', 'readfile'};
 
-    close(file);
+    close(FILE);
 }
 
 
@@ -206,9 +235,10 @@ sub GenerateHeaders
     $body .= "To: $to\n";
     $body .= "Reply-to: $Reply_to\n" if $Reply_to;
     $body .= "X-MLServer: $rcsid\n" if $rcsid;
+    $body .= $_cf{'header', 'MIME'} if $_cf{'header', 'MIME'};
     $body .= "\n";
 
-    print STDERR "GenerateHeaders:($host\n-\n$body\n-\n@headers);\n" if $debug;
+    print STDERR "GenerateHeaders:($host\n-\n$body\n-\n\@headers);\n" if $debug;
 
     return ($host, $body, @headers);
 }
