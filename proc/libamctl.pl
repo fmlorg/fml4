@@ -545,7 +545,9 @@ sub DoSetMemberList
 	# return addrs 
 	# valid for a general user but 
 	# invalid for plural "chaddr" command in admin mode 
-	$e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
+	# XXX: 2.2A#36 to become under $Procedure{"r2a#command"} control
+	# $e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
+	$e{'message:h:@to'} = "$curaddr $newaddr";
 
 	&Log("$cmd: Try change address: $curaddr -> $newaddr");
 	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
@@ -575,7 +577,8 @@ sub DoSetMemberList
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
 	if ($rm == 1) {
 	    &Log($mcs = "$cmd MEMBER [$curaddr] $c O.K.") if $debug_amctl;
-	    &Mesg(*e, "   changed a member list.");
+	    # XXX: no message if succeed
+	    &Mesg(*e, "   changed a member list.") if $debug_amctl;
 	}
 	else {
 	    &Log($mcs = "$cmd MEMBER [$curaddr] $c failed");
@@ -596,7 +599,8 @@ sub DoSetMemberList
     &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $ra == 1 && $debug_amctl;
 
     if ($ra == 1) {
-	&Mesg(*e, "   changed a delivery list.");
+	# XXX: no message if succeed
+	&Mesg(*e, "   changed a delivery list.") if $debug_amctl;
     }
     else {
 	&Log("$cmd ACTIVE [$curaddr] $c failed");
