@@ -130,3 +130,4 @@ body       getmyspools+(S+)     &       getmyspool_pw
 # send a $ARCHIVE_DIR/guide to "From: address"
 Subject    (guide)                  &       sendback
 
+.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 

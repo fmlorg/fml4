@@ -111,3 +111,4 @@ require 'sys/socket.ph';
 @INCの順でファイルを探してそれをperl scriptとして評価する。
 ＃perlはinterpreterなので必要に応じて取り込んで評価した方がいいはず
 
+.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
