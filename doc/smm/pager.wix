@@ -1,0 +1,52 @@
+.C	PAGER (ポケベル) を呼ぶための前処理プログラム
+
+注意: モデムを呼ぶ部分については、ＯＳ、ハード依存なので聞かれても困り
+ます。またきっと pager 依存です。だから聞かないでね(つぅか聞かれてもそ
+の分野は知らない)。ここはあくまで前処理プログラムす
+
+.S	euc2jiskuten.pl 
+.k	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/calling-pager/
+
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/calling-pager/
+
+pager には #0103 のようなJIS句点コードで電話を書ければでます(多分)。
+NTT DOCOMO 北海道の付録のテーブルを見る限りこれで出ます。
+
+EUC(できるだけ事前に全角文字に変換しておいてからいれるのが無難で推奨)
+で euc2jiskuten.pl に突っ込めば、JIS句点コードに変換します。
+
+それをモデムで pager の電話番号にかければOK〜
+
+モデムで電話を書ける部分は自分で工夫して下さい。
+＃↑ここの部分を僕に聞かないようにね。
+＃そんな細かい部分は機種依存・OS依存なので聞かれても知りません
+
+なお、結構うごけばいいや〜っていうのがあるのですごいマニアックな日本語
+表示とかちゃんとでるのかどうかは知りません。
+
+どうすればいいかというと
+
+1 モデムを呼ぶプログラムを用意する (modem2pager としよう)
+
+2 $STATT_HOOK の設定は
+
+	まず、メール本文をEUCにする。
+
+	open(PAGER, "| modem2pager);
+	print PAGER $Envelope{'Body'}:
+	close(PAGER);
+	$DO_NOTHING = 1;
+
+みたいなのを設定。
+
+でも問題はこの modem2pager の部分でしょうね…
+
+この部分は spooler, queuing, Pagerサービスの制御、待ち時間等に合わせて
+細かいチューニングをしないとちゃんと出ないでしょう。
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
