@@ -17,14 +17,6 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
-.S	ドキュメント: FAQ をつくる
-=E.S	Document: make FAQ
-
-ドキュメント関連: FAQ をつくる。がんばろう;)
-
-.url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
-
-
 .S	makefml mkdir()
 
 fml-support:6899
