@@ -509,15 +509,16 @@ sub NewML
     $From_address = $e{'h:From:'} = &Conv2mailbox($e{'from:'});
     $e{'GH:Reply-To:'}            = "fmlserv\@$DOMAINNAME";
 
+    # 
+    unshift(@ARCHIVE_DIR, $ARCHIVE_DIR);    
+
     # Directory *_DIR -> FP_*_DIR (fully pathed)
     local($s);
     for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
-	eval "\$s = \$$_; \$s =~ s#\$DIR/##g; \$s =~ s#$DIR/##g;";
-	&Log($@) if $@;
-	eval "\$FP_$_ = \"$DIR/\$s\";";
-	&Log($@) if $@;
-	eval "-d \$$_||&Mkdir(\$$_);";
-	&Log($@) if $@;
+	&eval("\$s = \$$_; \$s =~ s#\$DIR/##g; \$s =~ s#$DIR/##g;");
+	&eval("\$FP_$_ = \"$DIR/\$s\";");
+	&eval("\$$_ =~ s#\$DIR/##g; \$$_ =~ s#\$DIR/##g;");
+	&eval("-d \$$_||&Mkdir(\$$_);");
     }
 
     ### CF Version 3;
