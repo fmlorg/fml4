@@ -681,15 +681,18 @@ sub OutputHtml
 	    # here the cur_n is the next number (attention) 
 	    # since here is close() phase for the next chapter;
 	    if ($name =~ /^(\d+)\.html/) {
-		&POH(($CurUrlPointer = &ShowPointer($1)));
+		my $n = $1;
+		&POH(($CurUrlPointer = &ShowPointer($n)));
 		&POH(&CopyRight) if $OnFml;
 	    }
 
 	    &POH("</BODY>\n");
 	    &POH("</HTML>\n");
-	    close(OUTHTML);
+
+	    &POH_CLOSE;
 	    open(OUTHTML, "> $outfile") || die "$!\n";
 	    select(OUTHTML); $| = 1;
+	    &POH_Init;
 
 	    &POH("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n");
 	    if ($Lang eq 'ENGLISH') {
@@ -741,7 +744,13 @@ sub OutputHtml
 
 	    &POH("</HEAD>\n");
 	    &POH("\n<BODY BGCOLOR=$BGColor>\n") if $BGColor;
+	    &POH("___SHOW_POINTER___");
 	    # &POH($prev_url_pointer) if $prev_url_pointer;
+
+	    if ($CurUrlPointerTop =~ /NEXT/ &&
+		$CurUrlPointerTop =~ /PREV/) {
+		&POH($CurUrlPointerTop);
+	    }
 
 	    next;		# cut the line "^#.CUT";
 	}
@@ -763,11 +772,12 @@ sub OutputHtml
 	&POH($_);
     }
 
-    close(OUTHTML);
+    &POH_CLOSE('LAST'); # 'LAST' is required exceptionally.
 
     if (%FootNote) {
 	print STDERR "   generating\t$HtmlDir/footnote.html\n";
 	open(OUTHTML, "> ${HtmlDir}/footnote.html") || die "$!\n";
+	&POH_Init;
     
 	&POH("<TITLE>FootNote</TITLE>\n");
 
@@ -779,7 +789,7 @@ sub OutputHtml
 
 	&POH("\n\n");
 
-	close(OUTHTML);
+	&POH_CLOSE;
     }
 
 }
@@ -820,19 +830,44 @@ sub POH
 	&jcode'convert(*s, 'jis'); #';
     }
 
-    print OUTHTML $s;
+    # print OUTHTML $s;
+    $POH_Buffer .= $s;
+}
+
+
+sub POH_Init
+{
+    undef $POH_Buffer;
+    undef $CurUrlPointer;
+}
+
+sub POH_CLOSE
+{
+    my ($mode) = @_;
+
+    if ($mode eq 'LAST') { 
+	$CurUrlPointer = $LastUrlPointer . $CurTOCPointer;
+    }
+
+    $POH_Buffer =~ s/___SHOW_POINTER___/$CurUrlPointer/;
+    $POH_Buffer =~ s/___SHOW_POINTER___//;
+
+    print OUTHTML $POH_Buffer;
+    close(OUTHTML);
+    undef $POH_Buffer;
 }
 
 
 sub ShowPointer
 {
-    local($cur_n) = @_;
-    local($s);
+    # CAUTION: $cur_n == 2 if fwix process 1.html now.
+    my ($cur_n) = @_;
+    my ($s, $n);
 
-    $s .= "</PRE><HR>\n";
+    # $s .= "</PRE><HR>\n";
+    $s .= "</PRE>\n";
 
-
-    if ($cur_n != 2) {
+    if ($cur_n != 2) { # except 1.html
 	$n = $cur_n - 2;
 	$n = $PrevUrlPointer < $n ? $PrevUrlPointer : $n;
 
@@ -840,10 +875,22 @@ sub ShowPointer
 	if ($n > 0) {
 	    $s .= "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
 	}
+	else {
+	    my $n = 'index';
+	    $s   .= "<A HREF=${n}.html>[______TOC_______]</A>\n";
+	}
     }
-
-    print STDERR "   generating\t$outfile (prev-> $n, ";
+    else { # 1.html
+	my $n = 'index';
+	$s   .= "<A HREF=${n}.html>[______TOC_______]</A>\n";
+	$CurTOCPointer = "<A HREF=${n}.html>[______TOC_______]</A>\n";
+    }
     
+    print STDERR "   generating\t$outfile (prev-> $n, ";
+
+    $n = $cur_n - 1;
+    $LastUrlPointer = "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+
     $n = $cur_n;
     $s .= "<A HREF=${n}.html> [NEXT CHAPTER]</A>\n";
 
@@ -1451,7 +1498,15 @@ sub IndexExpand
     print STDERR "\n}\n" if $debug;
 
     if ($mode eq 'html') {
-	$result =~ s#</PRE>#</PRE>$fyi#;
+	if ($InPre) {
+	    $result =~ s#\<\/PRE\>\s*\<PRE\>\s*##;
+	    $result =~ s#\<\PRE\>\s*\<\/PRE\>\s*##;
+	    $result =~ s#\<\/PRE\>##;
+	    $result =~ s#\<PRE\>\s*$##;
+	}
+	else {
+	    $result =~ s#</PRE>#</PRE>$fyi#;
+	}
 	$result;
     }
     else {
