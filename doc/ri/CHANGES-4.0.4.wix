@@ -15,6 +15,12 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/05/31
+
+   proc/libdist.pl (2.31-2.32): 
+	return just before distribute main function if $DO_NOTHING
+	defined.
+
 2002/05/22
 
    libexec/mead.pl (1.33-1.34):
@@ -142,7 +148,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.19 2002/05/20 13:33:04 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.20 2002/05/22 15:27:41 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
