@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libMIME.pl,v 2.17 2001/09/13 08:46:33 fukachan Exp $
 #
 
 use vars qw($debug 
@@ -25,8 +25,8 @@ sub EnvelopeMimeDecode
     local(*e) = @_;
 
     # XXX malloc() too much?
-    $e{'Hdr'}  = &DecodeMimeStrings($e{'Hdr'});
-    $e{'Body'} = &DecodeMimeStrings($e{'Body'});
+    $e{'Hdr'}  = &DecodeMimeString($e{'Hdr'});
+    $e{'Body'} = &DecodeMimeString($e{'Body'});
 }
 
 
@@ -37,12 +37,12 @@ sub StripMIMESubject
     &Debug("MIME  INPUT:      [$_]") if $debug;
     ($_ = $e{'h:Subject:'}) || return;
     &Debug("MIME  INPUT GO:   [$_]") if $debug;
-    $_ = &MIMEDecode($_);
+    $_ = &DecodeMimeString($_);
     &Debug("MIME  REWRITTEN 0:[$_]") if $debug;
 
     # 97/03/28 trick based on fml-support:02372 (uematsu@iname.com)
     $_ = &StripBracket($_);
-    $e{'h:Subject:'} = &mimeencode("$_\n");
+    $e{'h:Subject:'} = &EncodeMimeString("$_\n");
     $e{'h:Subject:'} =~ s/\n$//;
 
     &Debug("MIME OUTPUT:[$_]") if $debug;
@@ -58,8 +58,10 @@ sub StripMIMESubject
 
 # XXX YOU SNOHLD NOT USE THESE FUNCTIONS IN fml main libraries
 # XXX defined just for convenience e.g. for old HOOKS
-sub MimeEncode { &mimeencode(@_); }
-sub MIMEEncode { &mimeencode(@_); }
+sub MimeEncode        { &mimeencode(@_); }
+sub MIMEEncode        { &mimeencode(@_); }
+sub EncodeMimeString  { &mimeencode(@_); }
+sub EncodeMimeStrings { &mimeencode(@_); }
 
 sub mimeencode
 {
@@ -160,10 +162,10 @@ if ($0 eq __FILE__) {
 
 	print "    IN> ", $x, "\n";
 
-	$x = &MimeEncode($x);
+	$x = &EncodeMimeString($x);
 	print "encode> ", $x, "\n";
 
-	$x = &MimeDecode($x);
+	$x = &DecodeMimeString($x);
 	print "decode> ", $x, "\n";
     }
 }
