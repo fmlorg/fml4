@@ -14,13 +14,14 @@
 	<CENTER><B>
 	fml チュートリアル
 	</B></CENTER>
-	<BR>まだまだ見苦しいところがあるとおもうので御指摘をお待ちしております
+	<BR>まだまだ書きかけです。
+	<BR>見苦しいところがあるとおもうので御指摘をお待ちしております
 
 .part Basic Configuration
 basic_setup		基礎的なこと
 FAQ			一般的な質問について (FAQ)
 Glossary		用語集
-makefml			makefml (CUI) interface for fml
+makefml			makefml の使い方
 GUI			GUI インタフェイス
 how_to_subscribe	メンバーの登録方法などについて
 address_manipulate	アドレスの取り扱いについて
@@ -28,7 +29,7 @@ header_rewrite		ヘッダの書き換え
 remote_control		リモート管理(REMOTE_ADMINISTRATION, adminコマンド)
 messages		fml の返すメッセージをいじる
 filter			フィルタリング
-virtual_domain		virtual domain
+virtual_domain		バーチャルドメイン (virtual domain)
 command			コマンド、そして拡張について
 hooks			HOOK を使った拡張について
 resource_control	リソースの制御	

@@ -9,6 +9,7 @@
 .include lock.wix
 .include spool.wix
 .include misc.wix
+.include movement.wix
 
 .P	レンタルサーバというかISPのサービスというか…
 .include isp_specific.wix

@@ -1,53 +1,88 @@
-.C	一般的な質問 (UNIX)
+.C	一般的な質問
 
-.S	UNIX で実績のあるメールサーバは？
+.S	エラーになった。
 
-作者が試したことのあるメールサーバは次の通りです。
+◯ トラブル事例集
 
-	sendmail
-	postfix
-	qmail
-	exim
-	zmailer
+.url http://www.fml.org/fml/Japanese/troubleshoot/
 
-これらについては doc/ の下にそれぞれの MTA ごとの注意点をメモったファ
-イルがあります。
+◯ ドキュメントのサーチ
 
+とりあえずエラーメッセージにでてくる単語でサーチをしてみて、ドキュメン
+トのエラーリストなりに事例がないかを調べて下さい。
 
-.S	ユーザ fml を作らないといけない？
-
-いいえ、そういうことはありません。自分のアカウントでやっても構いません。
-ですがＭＬ専用のアカウント fml を作る方が望ましいでしょう。
+.url http://www.fml.org/fml/search-j.html
 
 
-.S	fml をインストールしたホストからＭＬへは投稿できないもの？
+.S	必要なものは？
 
-いいえ。メールサーバの設定を直して下さい。
-
-sendmail で CF パッケージを使って sendmail.cf を作る場合は
-ALWAYS_APPEND_DOMAIN という項目を読んで下さい。
-
+メールサーバのソフトウエアと perl です。
+詳しくはインストールファイル参照
+.url http://www.fml.org/fml/INSTALL/
 
 
-.C	一般的な質問 (Windows NT4 2000)
+.S	お薦めのバージョンは？
 
-.S	Windows で動きますか？
+fml-stable は最新のリリース版にバグフィックスがされている版です。
+fml-stable の一番新しい日付がお薦めです
+原則として新機能は一切追加されません。bug を直すだけです。
 
-NT4 でも WIN2000 でも動きます。
+一方 fml-current は開発版です。新機能が追加されます。開発サイドとして
+はfml-currentのテストをしてくれる方がもちろんあり難いです。
 
-.S	実績のあるメールサーバは？
+fml-current のダウンロード(日付の新しいのをダウンロードしてね)
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
 
-作者が試したことのあるものは Metainfo sendmail (現在は Sendmail Inc. )
+fml-stable のダウンロード(日付の新しいのをダウンロードしてね)
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/
+
+リリースのされ方について
+.url http://www.fml.org/fml/releng.ja.html
+
+
+.S	自分の使っているバージョンを知りたい
+
+.q
+% makefml showconf 
+.~q
+
+もしこのコマンドがないようなら古い fml なので
+
+.q
+% cat /usr/local/fml/etc/release_version
+.~q
+
+を実行して下さい。
+
+
+.S	バージョン番号の意味は？ (current の場合)
+
+例:
+	3.0A-20000512
+	数字 ＋ 英語 ＋ 日付
+
 です。
 
-fml-support ＭＬでこの話題が出た時には以下の MTA の名前が挙げられてい
-ます。
+英語の部分は単語自体には深い意味はありません。開発のある程度大きな区切
+りが終った時か内部構造が変わった時に一つずつ進められます。
+余談: ちなみに Z の次は ZA になります:)
 
-	Sendmail
-	IMail
-	emwac 
-	emwac ims + SPA SMTP
-	(IIS のおまけ ?)
+「 3.0C-**** では動いたけど 3.0D-**** では動きません」といわれる方が
+単なる日付よりも直観的に分かりやすいので目安として使います。
 
-Exchange はよくわかりませんが、IMail と同様の技が使えるのではないだろ
-うか？という意見もありますが、試した人がいないという status のようです。
+
+.S	最近の current の変更点を知りたい
+
+手元のソース(の日付)と現在との変更点は 
+
+.url http://www.fml.org/fml/WHATS_NEW/
+
+に日付が新しい順にならんでいるので、そこまで日付を遡ってください :D
+
+
+最近の代表的なトピックスは fml のページにも書かれているのでそちら”も”
+見て下さい。
+.url http://www.fml.org/fml/
+
+
+.# $Id$

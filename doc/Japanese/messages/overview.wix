@@ -29,7 +29,7 @@ fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
 .url http://www.fml.org/fml/messages-list.ja.txt
 
 
-.S	テンプレートのファイル？
+.S	長めの返事のテンプレート
 
 makefml newml を実行した際に各ＭＬのHOMEに用意されるテンプレートのファ
 イルは

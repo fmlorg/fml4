@@ -187,6 +187,14 @@ You don't have permission to access /cgi-bin/fml/admin/menu.cgi on this server.
 	そもそも.htaccessを許してない
 	…その他いろいろ…
 
+
+.S	登録作業は独立 ??
+
+もちろん WWW の機構と自動登録機構は独立したものなので、どっちを利用し
+ても登録作業はできます。入りたいユーザにどうしてもらうか？は運用形態の
+問題です(管理者の手間暇をかけるか、かけないかとか…)
+
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

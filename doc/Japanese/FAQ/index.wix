@@ -5,6 +5,9 @@
 .~HTML_PRE
 
 .include general.wix
+.include unix.wix
+.include nt.wix
+.include misc.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
