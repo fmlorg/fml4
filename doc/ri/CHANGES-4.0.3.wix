@@ -15,6 +15,11 @@
 		などが可能になりました。
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
+2001/09/28
+
+   cf/MANIFEST (1.86-1.87):
+	add missing definitions
+
 2001/09/23
 
   bin/base64decode.pl (1.6-1.7)
@@ -174,7 +179,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.21 2001/09/24 13:17:25 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.22 2001/09/24 13:27:46 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp

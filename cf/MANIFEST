@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: MANIFEST,v 1.76.2.4 2001/08/17 14:43:45 fukachan Exp $
 #
 
 
@@ -496,6 +496,28 @@ MTI_WARN_INTERVAL: 3600
 
 # value: filename string 
 MTI_WARN_LASTLOG:
+
+# garbage collection
+# how old data (cache) to remove in clean up 
+# value: number
+MTI_EXPIRE_UNIT: 3600
+
+# low water mark
+# value: number
+MTI_BURST_SOFT_LIMIT: 1
+
+# high water mark
+# value: number
+MTI_BURST_HARD_LIMIT: 2
+
+# function name to evaluate the current traffic load
+# value: funtion string
+MTI_COST_EVAL_FUNCTION: MTISimpleBomberP
+
+# cache of spammer candidates
+# value: filename string
+MTI_MAIL_FROM_HINT_LIST: $DIR/mti_mailfrom.hints
+
 
 # Optional. If UNSUBSCRIBE_AUTH_TYPE is 'confirmation', fml sends back
 # confirmation against a fake. In default, FML does not do confirmation.
