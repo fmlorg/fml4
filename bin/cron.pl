@@ -5,34 +5,56 @@
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
-$rcsid  .= "current";
+
 # For the insecure command actions
+undef %ENV;
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
 $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 
-# Directory of Mailing List Server Libraries
-# format: fml.pl DIR(for config.ph) PERLLIB's
-$DIR		= $ARGV[0] ? $ARGV[0] : '/home/axion/fukachan/work/spool/EXP';
-$LIBDIR		= $ARGV[1] ? $ARGV[1] : $DIR;	# LIBDIR is the second arg. 
-foreach(@ARGV) { /^\-/ && &Opt($_) || push(@INC, $_);}# adding to include path;
+# "Directory of Mailing List(where is config.ph)" and "Library-Paths"
+# format: fml.pl [-options] DIR(for config.ph) [PERLLIB's -options]
+# Now for the exist-check (DIR, LIBDIR), "free order is available"
+foreach (@ARGV) { 
+    /^\-/   && &Opt($_) || push(@INC, $_);
+    $LIBDIR || ($DIR  && -d $_ && ($LIBDIR = $_));
+    $DIR    || (-d $_ && ($DIR = $_));
+}
+$DIR    = $DIR    || '/home/axion/fukachan/work/spool/EXP';
+$LIBDIR	= $LIBDIR || $DIR;
+unshift(@INC, $DIR);
 
 #################### MAIN ####################
 require 'config.ph';
 
-$debug || ($debug = $_cf{'opt', 'd'});
+###### Customizable Varaibles
 
-print STDERR "DEBUG $debug\n";
- 
+$From_address   = "Cron.pl";
+$NOT_TRACE_SMTP = 1;
+$CRON_NOTIFY    = 1;		# if you want to know cron's log, set 1;
+$NOT_USE_TIOCNOTTY = 1;		# no ioctl
+
+##### 
+
+### chdir HOME;
+$_cf{'opt:h'} && die(&USAGE);
 chdir $DIR || die "Can't chdir to $DIR\n";
+$ENV{'HOME'} = $DIR;
 
-$From_address = "Cron.pl";
+### MAIN
+&CronInit; 
+
+print STDERR "DEBUG MODE ON\n" if $debug;
+
+print STDERR "Become Daemon\n" if $debug && $Daemon;
+&daemon if $Daemon;
+
 $pid = &GetPID;
 
-# MAIN
-if($pid > 0 && 1 == kill(0, $pid) && (!&RestartP)) {
+if ($pid > 0 && 1 == kill(0, $pid) && (! &RestartP)) {
     print STDERR "cron.pl Already Running, exit 0\n";
-}else {
+}
+else {
     &Log((&RestartP ? "New day.! " : "")."cron.pl Restart!");
     &OutPID;
     &Cron;
@@ -42,81 +64,154 @@ exit 0;				# the main ends.
 #################### MAIN ENDS ####################
 
 ##### SubRoutines #####
-
-sub GetTime
+sub USAGE 
 {
-    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", $year, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+    ($command = $0) =~ s#.*/##;
+
+    local($s) = qq#syntax: $command DIR [LIBDIR] [options];
+    options;
+    -d                debug mode;
+    -a                run eternally(default: 180sec. = 60sec. * 3times);
+    -mtimes           run from now to (60 * times) sec. after;
+    -fcrontab-file    alternative crontab;
+    -h                show this help and exit;
+    -bd		      daemon (Become Daemon);
+    -bOSTYPE          -b43(OSTYPE = 43): 4.3BSD Like. not mailed to you;
+    ;                  default(4.4BSD): when anything done, mailed to you;
+    -oOPTION	      OPTOIN:;
+    ;		       notty (ioctl)	
+#;
+
+    $s =~ s/;//g;		#for perl-mode;
+    $s;
 }
 
 sub GetPID
 {
+    local($pid);
+
     open(F, $CRON_PIDFILE) || return 0;
-    local($pid) = <F>;
-    chop $pid;
+    chop( $pid = <F> );
     close(F);
 
-    return $pid;
+    $pid;
 }
 
 sub OutPID
 {
-    open(F, "> $CRON_PIDFILE")|| return 0;
+    open(F, "> $CRON_PIDFILE") || return 0;
     select(F); $| = 1; select(STDOUT);	
     print F "$$\n";
     close(F);
 }
 
-sub GetDayofTime
-{
-    local($f) = @_;
-    local($a) = (localtime((stat($f))[9]))[3]; # the last modify time
-
-    return $a;
-}
+# the last modify time
+sub GetDayofTime { (localtime((stat($_[0]))[9]))[3];}
 
 # If the day changes, restart cron.pl
-sub RestartP
-{
-    &GetTime;
-    local($day) = &GetDayofTime($CRON_PIDFILE);
+sub RestartP { (localtime(time))[3] != &GetDayofTime($CRON_PIDFILE);}
 
-    print STDERR "local($day) = &GetDayofTime($CRON_PIDFILE);\n".
-	"return ($day != $mday) = ".($day != $mday)."\n" if $debug;
+sub abs { $_[0] > 0 ? $_[0]: - $_[0];}
 
-    return ($day != $mday);
+sub Opt { 
+    ($_[0] =~ /^\-(\S)/)      && ($_cf{"opt:$1"} = 1);
+    ($_[0] =~ /^\-(\S)(\S+)/) && ($_cf{"opt:$1"} = $2);
 }
+
+
+sub MailTo
+{
+    &use('smtp');
+    local(*to, *e, *rcpt);
+    local($body) = @_;
+
+    # From: and To:. when Environmental varialbe MAILTO, send to it.
+    if ($ENV{'MAILTO'}) {
+	push(@to, $ENV{'MAILTO'});
+    }
+    else {
+	push(@to, $MAINTAINER);
+    }
+
+    # Subject 
+    local($hostname, $user);
+    $user = (getpwuid((stat($CRONTAB))[4]))[0];
+    $ENV{'USER'}    = $user unless $ENV{'USER'};
+    $ENV{'LOGNAME'} = $user unless $ENV{'LOGNAME'};
+
+    chop($hostname = `hostname`);
+    $e{'subject:'} = "Cron <$user\@$hostname>";
+
+    # Header Generator
+    &GenerateHeaders(*to, *e, *rcpt);
+
+    # Environment
+    while (($k, $v) = each %ENV) { $e{'Hdr'} .= "X-Cron-Env: <$k=$v>\n";}
+
+    # Body
+    $e{'Body'}     .= $body;
+
+    # Smtp
+    $e = &Smtp(*e, *rcpt);
+    &Log("Sendmail:$e") if $e;
+}
+
+
+
+sub CronInit
+{
+    # GETOPT
+    $Eternal      = 1 if $_cf{'opt:a'};
+    $debug        = 1 if $_cf{'opt:d'};
+    $CRON_NOTIFY  = 0 if $_cf{'opt:b'} eq '43';
+    $CRONTAB      = $_cf{'opt:f'} || $CRONTAB || "etc/crontab";
+    $Daemon       = 1 if $_cf{'opt:b'} eq 'd';
+    $NOT_USE_TIOCNOTTY = 0 if $_cf{'opt:o'} eq 'notty';
+
+    $VAR_DIR        = $VAR_DIR    || "./var"; # LOG is /var/log (4.4BSD)
+    $VARRUN_DIR     = $VARRUN_DIR || "./var/run"; 
+    $CRON_PIDFILE   = $CRON_PIDFILE || "$VARRUN_DIR/cron.pid"; # default;
+}
+
 
 sub Cron
 {
-    local($max_wait) = ($_cf{'opt', 'm'} || 3);
+    local($max_wait) = ($_cf{'opt:m'} || 3);
+    local($exec, $pid);
 
     # FOR PROCESS TABLE
     $FML .= "[".substr($MAIL_LIST, 0, 8)."]"; # Trick for tracing
 
-  CRON: while($_cf{'opt', 'a'} || $max_wait--> 0) {
+  CRON: while ($Eternal || $max_wait--> 0) {
       $0 = "--Cron <$FML $LOCKFILE>";
-      $0 = "--Cron [$max_wait] times <$FML $LOCKFILE>" unless $_cf{'opt', 'a'}; 
+      $0 = "--Cron [$max_wait] times <$FML $LOCKFILE>" unless $Eternal; 
+      ### Restart if cron may be running over 24 hours
+      $pid = &GetPID;
+      if ($$ != $pid) { last CRON;};
 
-      # Restart if cron may be running over 24 hours
-      local($pid) = &GetPID;
-      if($$ != $pid) { last CRON;};
-      
-      &GetTime;
-      $init_t = time();
-      if($EXEC = &ReadCrontab) {
-	  print STDERR "\nDate $hour:$min:$sec:\n" if $debug;
-	  print STDERR "$EXEC\n" if $debug;
+      ### TIME
+      ($sec,$min,$hour,$mday,$mon,$year,$wday) = 
+	  (localtime($init_t = time))[0..6];
 
-	  &system($EXEC);
-	  &Log($@) if $@;
+      undef $ErrStr;		# new logging;
+
+      ### ANYTHING TO DO?
+      if ($exec = &ReadCrontab) {
+	  $ErrStr .= "[Output from execed processes]\n";
+
+	  open(READ);
+	  &system($exec, "", "", 'READ'); # very slow why?
+	  while (<READ>) { $ErrStr .= $_;} # < STDOUT;
+	  close(READ);
+
+	  if ($debug) {
+	      print STDERR "\n[Date $hour:$min:$sec]\n($exec)\n}\n"; 
+	      print STDERR "\n[Debug Info]\n$ErrStr\n"; 
+	  }
+
+	  &MailTo($ErrStr) if $CRON_NOTIFY;
       }
+      ### NOTHING!
       else {
 	  print STDERR "DO NOTHING\n" if $debug;
       }
@@ -124,37 +219,26 @@ sub Cron
       # next 60sec.
       $0 = "--Cron Sleeping <$FML $LOCKFILE>";
       $0 = "--Cron Sleeping [$max_wait] times <$FML $LOCKFILE>" 
-	  unless $_cf{'opt', 'a'}; 
+	  unless $Eternal; 
       $time = (time() - $init_t);
 
       print STDERR "$time = (time() - $init_t) <= 60) \n" if $debug;
 
-      if($time <= 60) {
+      if ($time <= 60) {
 	  $time = 60 - $time;
 	  print STDERR "Sleeping $time\n" if $debug;
 	  sleep $time;
-      }else {
+      }
+      else {
 	  print STDERR "Hmm exec costs over 60sec... go the next step now!\n"
 	      if $debug;
 	  next CRON;
       }
   }#END OF WHILE;
+
+    print STDERR "cron.pl \$max_wait == 0. exit\n" unless $Eternal;
 }
 
-sub CronChk
-{
-    local($m, $h, $d, $M, $w, $exec, $org) = @_;
-
-    print STDERR "Try ($m, $h, $d, $M, $w, $exec)\n" if $debug;
-
-    if(&Match($m, $h, $d, $M, $w)) {
-	print STDERR "MATCH: return [$exec]\n" if $debug;
-	return $exec;
-    }else {
-	print STDERR "NOT MATCH\n" if $debug;
-	return "";
-    }
-}
 
 sub Match
 {
@@ -164,48 +248,29 @@ sub Match
     # WEEK
     print STDERR "($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)\n" 
 	if $debug;
-    if(($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)) { 
-	;
-    }else { 
-	$nomatch++; 
-    }
+    (($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)) || $nomatch++; 
 
     # MONTH
     print STDERR "($M eq '*') || ($M eq ($mon + 1))\n" if $debug;
-    if(($M eq '*') || ($M eq ($mon + 1))) { 
-	;
-    }else { 
-	$nomatch++; 
-    }
+    (($M eq '*') || ($M eq ($mon + 1))) || $nomatch++; 
 
     # DAY
     print STDERR "($d eq '*') || ($d eq $mday)\n" if $debug;
-    if(($d eq '*') || ($d eq $mday)) { 
-	;
-    }else { 
-	$nomatch++; 
-    }
+    (($d eq '*') || ($d eq $mday)) || $nomatch++; 
 
     # HOUR
     print STDERR "($h eq '*') || ($h eq $hour)\n" if $debug;
-    if(($h eq '*') || ($h eq $hour)) { 
-	;
-    }else { 
-	$nomatch++; 
-    }
+    (($h eq '*') || ($h eq $hour)) || $nomatch++; 
 
     # MINUTE
     print STDERR "($m eq '*') || ($m eq $min)\n" if $debug;
-    if(($m eq '*') || ($m eq $min)) { 
-	;
-    }else { 
-	$nomatch++; 
-    }
+    (($m eq '*') || ($m eq $min)) || $nomatch++; 
 
     # O.K.
-    print STDERR "return $nomatch ? 0 : 1;\n" if $debug;
-    return $nomatch ? 0 : 1;
+    print STDERR "($nomatch ? 0 : 1);\n" if $debug;
+    ($nomatch ? 0 : 1);
 }
+
 
 # Crontab is 4.4BSD syntax 
 #
@@ -213,161 +278,310 @@ sub Match
 #
 sub ReadCrontab
 {
-    undef $EXEC;
+    local($org, $exec, $s) = ();
 
-    open(CRON, "< $CRONTAB");
-    while(<CRON>) {
+    open(CRON, $CRONTAB) || (&Log("Cannot Read crontab:$!"), return 0);
+
+    while (<CRON>) {
 	chop;
-	print STDERR "CRONTAB IN> $_\n" if $debug;
+
 	next if /^\#/o;
 	next if /^\s*$/o;
-	print STDERR "CRONTAB GO> $_\n" if $debug;
 
-	local($m, $h, $d, $M, $w, @com) = split(/\s+/, $_, 99);
-	local($org)  = $_;
-	local($exec) = join(" ", @com);
-	local(@s, $i, $start, $end, $unit);
+	$s .= "CRONTAB ENTRY> $_\n" if $debug;
+	$org  = $_;
 
-	##### SPACIAL SYNTAX 1
-	if($m =~ /(.*)\/(\d+)$/) {
-	    print STDERR "MATCHED CRON MIN:($m =~ /(.*)\/(\d+)\$/);\n" 
-		if $debug;
-	    print STDERR "\$m = $1; \$unit = $2;\n" if $debug;
-	    $m = $1; 
-	    $unit = $2;
-	}
+	local(*m, *h, *d, *M, *w, *com, *e);
+	($m, $h, $d, $M, $w, @com) = split(/\s+/, $_);
 
-	##### SPACIAL SYNTAX 2
-	foreach $m (split(/,/, $m, 9999)) {
-	    if($m =~ /^(\d+)$/) {
-		push(@s, $1);
-	    }elsif($m =~ /^(\d+)\-(\d+)$/) {
-		$start = $1;
-		$end   = $2;
-		for($i = $start; $i <= $end ; $i++) { push(@s, $i);}
+	@m = &CrontabExpand($m, 59) unless $m =~ /^\d+$/;
+	@h = &CrontabExpand($h, 23) unless $h =~ /^\d+$/;
+	@d = &CrontabExpand($d, 31) unless $d =~ /^\d+$/;
+	@M = &CrontabExpand($M, 12) unless $M =~ /^\d+$/;
+	@w = &CrontabExpand($w, 7)  unless $w =~ /^\d+$/;
+	$e = join(" ", @com);
+
+	for $w (@w) { 
+	    for $M (@M) { 
+		for $d (@d) { 
+		    for $h (@h) { 
+			for $m (@m) { 
+			    if (&Match($m, $h, $d, $M, $w)) {
+				$exec .= "$e;\n";
+				$s .= "MATCH Entry [$org]:\n";
+				$s .= "      <=>   [$m $h $d $M $w]\n";
+			    }
+			}
+		    }
+		}
 	    }
 	}
 
-	# Check
-	$unit > 0 || ($unit = 1);
-	foreach $m (@s) {
-	    next unless 0 == ($m % $unit);
-	    print STDERR "$m," if $debug;
-	    if (&CronChk($m, $h, $d, $M, $w, $exec, $org)) {
-		print STDERR "MATCH: &CronChk\n" if $debug;		
-		$EXEC .= "$exec;\n";   
-	    }
-	    else {
-		print STDERR "NO MATCH: &CronChk\n" if $debug;
-	    }
-	}
-    }
+    }# while;
+
     close(CRON);
 
-    return $EXEC;
+    $s =~s/\t/ /g;
+    $ErrStr .= "ReadCrontab Entry Summary:\n$s\n" if $debug;
+    $exec;
 }
 
-sub abs
+
+sub CrontabExpand
 {
-    local($x) = @_;
+    local($_, $max) = @_;
+    local($m,  $unit, $start, *s, *r);
 
-    return $x > 0 ? $x : -$x;
-}
+    return $_ if /^\d+$/;
+    return $_ if /^\*$/;
 
-# Alias but delete \015 and \012 for seedmail return values
-sub Log { 
-    local($str, $s) = @_;
-    $str =~ s/\015\012$//;
-    &Logging($str);
-    &Logging("   ERROR: $s", 1) if $s;
-}
+    s#^(\S+)/(\d+)$#$m = $1, $unit = $2#e;
 
-# Logging(String as message)
-# $errf(FLAG) for ERROR
-sub Logging
-{
-    local($str, $e) = @_;
+    $ErrStr .= "Expand [$_] => \$m = $m, \$unit = $unit;\n" if $debug;
 
-    &GetTime;
-
-    open(LOGFILE, ">> $LOGFILE");
-    select(LOGFILE); $| = 1; select(STDOUT);
-    print LOGFILE "$Now $str ". ((!$e)? "($From_address)\n": "\n");
-    close(LOGFILE);
-}
-
-# Lastly exec to be exceptional process
-sub ExExec { &RunHooks(@_);}
-sub RunHooks
-{
-    local($s);
-    $0 = "--Run Hooks ".$_cf{'hook', 'prog'}." $FML $LOCKFILE>";
-	
-    if($s = $_cf{'hook', 'prog'}) {
-	print STDERR "\nexec sh -c $s\n\n" if $debug;
-	exec "sh", '-c', "$s";
-    }elsif($s = $_cf{'hook', 'str'}) {
-	print STDERR "\neval >$s<\n\n" if $debug;
-	&eval($s, 'Run Hooks:');
+    for (split(/,/, $m)) {
+	if (/^(\d+)$/) {
+	    push(@s, $_);
+	}
+	elsif (/^(\d+)\-(\d+)$/) {
+	    for ($1 .. $2) { push(@s, $_);}
+	}
+	else {# e.g. "*", "1?";
+	    s/\*/.\*/g;
+	    s/\?/.\+/g;
+	    for $s (0 .. $max) { push(@s, $s) if $s =~ /^$_$/;} 
+	}
     }
+
+    @s = sort {$a <=> $b} @s;
+
+    for ($start = $_ = shift @s, push(@s, $_), $i = 0; 
+	 $_ = shift @s; 
+	 $i++) {
+	push(@r, $_) if (($_ - $start) % $unit) == 0;
+    }
+
+    @r;
 }
 
-# Warning to Maintainer
-sub Warn
-{
-    local($s, $b) = @_;
-    &Sendmail($MAINTAINER, $s, $b);
-}
 
-# eval and print error if error occurs.
-sub eval
-{
-    local($exp, $s) = @_;
-    eval $exp; 
-    &Log("$s:$@") if $@;
-}
-
-# Getopt
-sub Opt
-{
-    local($opt) = @_;
-    ($opt =~ /^\-(\S)/) && ($_cf{'opt', $1} = 1);
-}
-
+########## 
+# include: libutils.pl 
+# BUT MODIFILED
+# Pseudo system()
+# fork and exec
+# $s < $in(file) > $out(file)
+#          OR
+# $s < $write(file handle) > $read(file handle)
+# 
+# PERL:
+# When index("$&*(){}[]'\";\\|?<>~`\n",*s)) > 0, 
+#           which implies $s has shell metacharacters in it, 
+#      execl sh -c $s
+# if not in it, (automatically)
+#      execvp($s) 
+# 
+# and wait untile the child process dies
+# 
 sub system
 {
-    local($s, $out, $in) = @_;
+    local($s, $out, $in, $read, $write) = @_;
+    local($c_w, $c_r) = ("cw$$", "cr$$"); # for child handles
 
-    if(($pid = fork) < 0) {
+    &Debug("system ($s, $out, $in, $read, $write)") if $debug;
+
+    # File Handles "pipe(READHANDLE,WRITEHANDLE)"
+    $read  && (pipe($read, $c_w)  || (&Log("ERROR pipe(pr, wr)"), return));
+    $write && (pipe($c_r, $write) || (&Log("ERROR pipe(cr, pw)"), return));
+
+    # Go!;
+    if (($pid = fork) < 0) {
 	&Log("Cannot fork");
-    }elsif(0 == $pid) {
-	if($in){
+    }
+    elsif (0 == $pid) {
+	if ($write){
+	    open(STDIN, "<& $c_r") || die "child in";
+	}
+	elsif ($in){
 	    open(STDIN, $in) || die "in";
-	}else {
+	}
+	else {
 	    close(STDIN);
 	}
 
-	if($out){
-	    open(STDOUT, '>'. $out)|| die "out";
-	}else {
+	if ($read) {
+	    open(STDOUT, ">& $c_w") || die "child out";
+	    $| = 1;
+	}
+	elsif ($out){
+	    open(STDOUT, '>'. $out) || die "out";
+	    $| = 1;
+	}
+	else {
 	    close(STDOUT);
 	}
 
-	if($s =~ /[\<\>\;\|]/) {
-	    print STDERR "exec '/bin/sh', '-c', $s;\n" if $debug;
-	    exec '/bin/sh', '-c', $s;
-	}else {
-	    print STDERR "exec $s;\n" if $debug;
-	    exec split(/\s+/, $s);
-	}	    
-
-	&Log("Cannot exec $s:$@");
+	exec $s;
+	&Log("Cannot exec $s:".$@);
     }
 
+    close($c_w) if $c_w;# close child's handles.
+    close($c_r) if $c_r;# close child's handles.
+    
     # Wait for the child to terminate.
-    while(($dying = wait()) != -1 && ($dying != $pid) ){
+    while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
 }
+
+
+########## 
+#:include: fml.pl
+#:sub Log Debug Logging LogWEnv GetTime Append2 use 
+#:~sub 
+#:replace
+sub GetTime
+{
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+}
+
+
+
+
+# Log: Logging function
+# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
+# delete \015 and \012 for seedmail return values
+# $s for ERROR which shows trace infomation
+sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
+sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
+sub Log { 
+    local($str, $s) = @_;
+    local($package,$filename,$line) = caller; # called from where?
+    local($status);
+
+    &GetTime;
+    $str =~ s/\015\012$//;	# FIX for SMTP
+    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
+	$Envelope{'error'} .= "Sendmail Error:\n";
+	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
+    }
+    
+    $str = "$filename:$line% $str" if $debug_caller;
+
+    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
+    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
+}
+
+
+# append $s >> $file
+# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
+# $nor "set $nor"(NOReturn)
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2
+{
+    local($s, $f, $w, $nor) = @_;
+
+    if (! open(APP, $w ? "> $f": ">> $f")) {
+	local($r) = -f $f ? "cannot open $f" : "$f not exists";
+	$nor ? (print STDERR "$r\n") : &Log($r);
+	return $NULL;
+    }
+    select(APP); $| = 1; select(STDOUT);
+    print APP $s . ($nonl ? "" : "\n") if $s;
+    close(APP);
+
+    1;
+}
+
+
+# eval and print error if error occurs.
+# which is best? but SHOULD STOP when require fails.
+sub use { require "lib$_[0].pl";}
+
+
+sub Debug 
+{ 
+    print STDERR "$_[0]\n";
+    $Envelope{'message'} .= "\nDEBUG $_[0]\n" if $message_debug;
+}
+
+
+
+1;
+#:~replace
+########## 
+#:include: proc/libutils.pl
+#:sub daemon
+#:~sub 
+#:replace
+# NAME
+#      daemon - run in the background
+# 
+# SYNOPSIS
+#     #include <stdlib.h>
+#     daemon(int nochdir, int noclose)
+#
+# C LANGUAGE
+#  f = open( "/dev/tty", O_RDWR, 0);
+#  if( -1 == ioctl(f ,TIOCNOTTY, NULL))
+#    exit(1);
+#  close(f);
+sub daemon
+{
+    local($nochdir, $noclose) = @_;
+    local($s, @info);
+
+    if ($ForkCount++ > 1) {	# the precautionary routine
+	$s = "WHY FORKED MORE THAN ONCE"; 
+	&Log($s, "[ @info ]"); 
+	die($s);
+    }
+
+    if (($pid = fork) > 0) {	# parent dies;
+	exit 0;
+    }
+    elsif (0 == $pid) {		# child is new process;
+	if (! $NOT_USE_TIOCNOTTY) {
+	    eval "require 'sys/ioctl.ph';";
+
+	    if (defined &TIOCNOTTY) {
+		require 'sys/ioctl.ph';
+		open(TTY, "+> /dev/tty")   || die("$!\n");
+		ioctl(TTY, &TIOCNOTTY, "") || die("$!\n");
+		close(TTY);
+	    }
+	}
+
+	close(STDIN);
+	close(STDOUT);
+	close(STDERR);
+	return 1;
+    }
+    else {
+	&Log("daemon: CANNOT FORK");
+	return 0;
+    }
+}
+
+
+
+
 
 1;
