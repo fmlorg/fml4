@@ -4,8 +4,8 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: INET6.pm,v 1.1.1.1 2001/04/03 09:53:30 fukachan Exp $
-# $FML: INET6.pm,v 1.1.1.1 2001/04/03 09:53:30 fukachan Exp $
+# $Id: INET6.pm,v 1.2 2001/05/11 16:11:15 fukachan Exp $
+# $FML: INET6.pm,v 1.2 2001/05/11 16:11:15 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET6;
@@ -89,9 +89,6 @@ sub connect6
 	$self->{_socket} = undef;
 	return undef;
     }
-
-    $self->{_socket} = undef;
-    return undef;
 
     eval q{
 	use IO::Handle;
