@@ -3,7 +3,20 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/11/07
+
+  drafts/English/
+	fix language over these templates
+
+2000/11/06
+
+  makefml
+	consider ? + / in the mailing list address
+
 2000/10/30
+
+  makefml
+	fix to map pgp2 => aa.pgp2 by default
 
   fix pgp around
 	fml/proc: libdist.pl libpgp.pl libra.pl 
