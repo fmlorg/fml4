@@ -583,6 +583,10 @@ sub InitProcedure
 	    printf STDERR "\tProcedure %15s => %s\n", $key, $value;
 	}
     }
+    
+    if ($PROCEDURE_CONFIG_HOOK) {
+	&eval($PROCEDURE_CONFIG_HOOK, 'Procedure hook'); 
+    }
 }
 
 

@@ -305,6 +305,10 @@ sub AdminModeInit
 
 	$AttachRRF = 1;	# ifndef ...:-)
     }
+
+    if ($ADMIN_PROCEDURE_CONFIG_HOOK) {
+	&eval($ADMIN_PROCEDURE_CONFIG_HOOK, 'Admin Procedure hook'); 
+    }
 }
 
 
