@@ -23,8 +23,15 @@
 このページは _ML_ メーリングリストの設定を更新/変更する画面です。
 </PRE>
 
-
 <P>
+<UL>
+<LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
+<LI><A HREF="#config">特定のメーリングリストの設定</A>
+<LI><A HREF="#add.bye">登録/削除 関係</A>
+<LI><A HREF="#adminadd.bye">管理者登録/削除 関係</A>
+<LI><A HREF="#password">管理者パスワードの設定</A>
+<LI><A HREF="#log">ログをみる</A>
+</UL>
 
 <HR>
 <A NAME=config>設定メニュー(makefml config)
@@ -144,6 +151,26 @@ _____________________________
 <INPUT NAME=submit-p TYPE=submit VALUE=Go>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
+
+<HR>
+<A NAME=log><P>メーリングリストのログをみる
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=log>
+<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+
+<BR>
+<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>最後のＮ行
+<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=10>
+<BR>
+<INPUT NAME="OPTION" TYPE="radio" VALUE="all">全部
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
 <PRE>
 Copyright (C) 1993-1999 Ken'ichi Fukamachi
          All rights reserved. 
