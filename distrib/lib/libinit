@@ -83,6 +83,9 @@ INIT_VERSION () {
 			tee -a $RELEASE_MANIFEST
 		done
 
+		############################
+		##### distrib/history/ #####
+		############################
 		TID=`cat $FML/conf/release`
 		test -d distrib/history      || mkdir distrib/history
 		test -d distrib/history/$TID || mkdir distrib/history/$TID
@@ -90,10 +93,11 @@ INIT_VERSION () {
 		# not use $RELEASE_MANIFEST
 		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
 
+		RID=`perl distrib/bin/fml_version.pl -s|awk {print $2}`
+
 		# log cvs status
 		perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
 		tee -a distrib/history/$TID/$RID
-
 		(
 		 echo "--------------------------";
 		 echo "";
