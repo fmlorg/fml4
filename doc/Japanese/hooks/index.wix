@@ -1,0 +1,12 @@
+.HTML_PRE
+	HOOK (カスタマイズ上級編)
+
+.toc
+.~HTML_PRE
+
+.include overview.wix
+.include functions.wix
+.include list.wix
+.include examples.wix
+
+.# $Id$

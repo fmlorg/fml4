@@ -1,0 +1,10 @@
+.C	HOOKの概要
+
+ごめん、まだかいてない
+
+事例集は .ptr{hooks-examples}
+
+HOOK 一覧は .ptr{hooks-list}
+
+HOOK で使うとよい関数 		.ptr{safe-functions}
+	上級編(fml 内部関数) 	.ptr{internal_functions}
