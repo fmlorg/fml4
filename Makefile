@@ -24,54 +24,7 @@ FWIX      = perl bin/fwix.pl
 include .release/mk/prog
 
 all:
-	perl ./makefml
-
-install:
-	perl ./makefml install
-
-dns_check:
-	@ perl bin/dns_check.pl
-
-localtest: 
-	@ echo " "
-	@ echo "LOCALLY CLOSED TEST in DEBUG MODE(-d option)"
-	@ echo "perl sbin/localtest.pl | perl $(PWD)src/fml.pl -d $(PWD) "
-	@ echo " "
-	@ echo IF YOU WOULD LIKE TO TEST THE DELIVERY WITHOUT Sendmail
-	@ echo JUST TYPE
-	@ echo "perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -udebug $(PWD)"
-	@ echo " "
-	@ echo " "
-	@ echo "O.K.?(wait 3 sec.)"; sleep 3;
-	@ echo INPUT:
-	@ echo "-----------------------------------"
-	@ perl sbin/localtest.pl 
-	@ echo "==================================="
-	@ echo " "
-	@ echo " "
-	@ echo " "
-	@ echo "This Header O.K.?(wait 3 sec.)"; sleep 3;
-	@ echo OUTPUT: debug info from src/fml.pl 
-	@ echo "   *** DEBUG MODE! ***  "
-	@ echo "-----------------------------------"
-	perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -d $(PWD) 
-	@ echo "   DEBUG MODE!   "
-	@ echo "-----------------------------------"
-
-doc: 	html_doc
-
-html_doc:
-	$(FWIX) -T op -m html -D doc/html/op -d doc/smm < doc/smm/op.wix
-
-roff:	doc/smm/op.wix
-	@ echo "sorry, not implemetend yet but halfly completed?"
-	@ echo ""
-	@ echo "Making nroff of doc/smm/op => var/man"
-	@ $(MKDIR) var/man
-	@ $(FWIX) -T smm/op -m roff -R var/man -I doc/smm doc/smm/op.wix
-
-texinfo:
-	@ echo sorry, not implemetend yet
+	echo "NO!"
 
 DISTRIB: distrib 
 ### ATTENTION! CUT OUT HEREAFTER WHEN RELEASE
@@ -168,6 +121,9 @@ var/doc/INFO: $(FML)/.info
 		nkf -e |tee var/doc/INFO > /var/tmp/.fml/INFO
 	sh $(DOC_RECONFIGURE) -o var/doc /var/tmp/.fml/INFO 
 
+INFO-e:
+	perl .release/remove_japanese_line.pl \
+		< /var/tmp/.fml/INFO > /var/tmp/.fml/INFO-e
 
 plaindoc: doc/smm/op.wix
 	@ $(MKDIR) /var/tmp/.fml
@@ -235,7 +191,7 @@ syncwww:
 syncinfo:
 	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
 
-bethdoc: INFO syncinfo newdoc search
+bethdoc: INFO INFO-e syncinfo newdoc search
 newdoc: htmldoc syncwww syncinfo 
 
 varcheck:
