@@ -60,7 +60,7 @@ libsendfile.pl では
 
 のようになっています。オプションで明示的な指定がない場合は
 
-	tar して gzip かけるファイルフォーマット
+	tar して gzip をかけたフォーマット(binary)
 
 で送り返されます。このデフォールトは $MGET_MODE_DEFAULT で変更できます。
 定義して意味のある変数は 上述のmgetのオプションと同じ田と思っていれば
@@ -71,9 +71,9 @@ libsendfile.pl では
 .k	%MSendOpt
 
 
-○ アーカイブ (var/archive や library コマンドや…)の encoding デフォールト
+○ アーカイブ(var/archive や library コマンドや…)のencodingのデフォールト
 
-spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
+spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 	電話番号簿(TEXT)
 	１００個ずつにまとめたスプールの記事(BINARY)
@@ -132,7 +132,7 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 		ほとんど Exact にアーカイブ内を探索
 		return
 
-	elsif V1 format 探索もＯＫ？
+	elsif V1 format 探索もOK? (default は禁止)
 		なら、実行
 		return
 
@@ -149,13 +149,16 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 .k	$LHA
 .k	$ISH
 
-多くのプログラムは下請けのプログラムを呼びます。これらはインストールの
-時の make で自動的に検出され設定されるはずです。
+ファイル操作ではいくつか下請けのプログラムを呼びます。これらは makefml 
+が自動的に検出し、設定するはずです。でも一応確認はして下さい。
 
 しかし自分でチェックしながら config.ph に書くのは管理者として望ましい
-態度です。sitede.ph 等で一回ちゃんと記述しておくのもよいです。
+態度です。sitede.ph 等で一回ちゃんと記述してあとはほっておくというのも
+よい手です。
 
 現在自動的に検出し設定されるのは次のコマンドです。 
+
+	変数名				設定例
 
 	$TAR                           = "/usr/bin/tar cf -";
 	$UUENCODE                      = "/usr/bin/uuencode";
@@ -165,8 +168,8 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 	$ISH                           = "/usr/local/bin/ish";
 
 
-.S	mget3の送り返しプロセス
-.k	mget3の送り返しプロセス
+.S	mget3 の送り返しプロセス
+.k	mget3 の送り返しプロセス
 
 いくつかのファイルをまとめて送り返すプロセスの最終ステージは、次のよう
 に行なわれます。
@@ -230,18 +233,12 @@ e.g.
 .S	mget の送り返し時のファイルサイズ
 .key	$MAIL_LENGTH_LIMIT
 
-in libsendfile.pl
+	$MAIL_LENGTH_LIMIT (default は 1000)
 
-	$MAIL_LENGTH_LIMIT = 1000;
+で変更します(libsendfile.pl)。Internetならともかく、パソコン通信の人へ
+も配送する時は気を使いますよね。
 
-を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
-いますよね。
-＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
-＃pc-van は何の問題もなかったと思いました（たしか）
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
-
-   
-1000行でだいたい50kくらいになります。
+目安としては1000行でだいたい50kくらいです。
 
 
 .S	UNIX FROM 形式
@@ -449,8 +446,8 @@ $RFC1153_CUSTOM_HOOK	&Rfc1153Custom($mode, *conf) の中で
 	$LHA = "/usr/share/bin/lha";
 	$ISH = "/home/axion/fukachan/bin/ish";
 
-等をどこかで（config.phとか）で設定して下さい。make 時に自動探索は一応
-して設定されているはずですが確認はして下さい。
+等をどこかで(config.ph or sitedef.ph)で設定して下さい。makefml が自動
+探索て設定されているはずですが確認はして下さい。
 
 
 .S	SJIS にファイルを変換して送る （lzh + ish option）
