@@ -282,20 +282,6 @@ GEN_CONTRIB () {
 }
 
 
-OLD_GEN_CONTRIB () {
-
-	for dir in `cat distrib/etc/contrib_list`
-	do
-		echo " "; 
-		echo "---installing contrib/$dir"
-
-		(cd contrib/$dir;\
-		 make -f $FML/contrib/Makefile.template DESTDIR=$DESTDIR DISTRIB)
-
-	done
-}
-
-
 FIX_DISTRIBUTION_PERMISSION () {
 	echo " "
 	echo "Fixing Permissions ..."
