@@ -45,8 +45,9 @@ $_ = qq#From $USER\@$DOMAINNAME $MailDate
 Date: $MailDate
 From: $From
 Message-Id: $MessageId
-To: (list suppressed)
+To: $To
 Subject: $Subject
+
 #;
 
 $_ .= $AddString if $AddString;
@@ -56,7 +57,7 @@ $_ .= $AddString if $AddString;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:f:s:");
+    &Getopts("dhg:f:s:t:");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
     $Gecos = (getpwuid($<))[6] || $USER;
@@ -77,6 +78,7 @@ sub Init
     # From: Field 
     $From    = $opt_f || "$USER\@$DOMAINNAME";
     $Subject = $opt_s || "test mail";
+    $To      = $opt_t || "(list suppressed)";
 
     if ($opt_g) {
 	$From = "$From (\"$Gecos\")";
