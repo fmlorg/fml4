@@ -88,6 +88,20 @@ sub InitMakeFml
 	$DOMAINNAME =~ s/^$hostname\.//;
     }
 
+    &ProbePerlVersion;
+    if ($UNDER_JPERL) {
+	local($sep) = "*" x 60;
+	local($tab) = "\t\t";
+	print STDERR "\n$sep\n";
+	print STDERR "\n${tab}***** WARNING *****\n";
+	print STDERR "${tab}YOUR PERL LOOKS jperl!\n";
+	print STDERR "${tab}YOU SHOULD USE\n";
+	print STDERR "${tab}perl 4.036 or perl 5\n${tab}NOT jperl!\n";
+	print STDERR "\n\n$sep\n${tab}anyway wait 10 sec...";
+	sleep 5;
+	print STDERR "\n";
+    }
+
     # architecture dependence;
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$CONFIG_DIR =~ s#\\#/#g;
@@ -145,34 +159,56 @@ sub InitMakeFml
 	$TheFirstTime = 1;
     }
 
+    # inspecting cpu-type-manufacturer-operating-system
+    {
+	local($eval, $dir);
+
+	$dir = $0;
+	$dir = $dir =~ m#/# ? $dir : "./$dir";
+	$dir =~ s#(.*)/.*#$1#;
+
+	$eval = qq#\$CPU_TYPE_MANUFACTURER_OS = `sh $dir/sbin/config.guess`;#;
+	print STDERR "$eval\n" if $debug;
+	eval($eval);
+	print STDERR $@ if $@;
+
+	chop $CPU_TYPE_MANUFACTURER_OS;
+	eval("\$Config'CPU_TYPE_MANUFACTURER_OS{'$FQDN'} = '$CPU_TYPE_MANUFACTURER_OS';");
+	print STDERR $@ if $@;
+
+	$OS_TYPE = (split(/\-/, $CPU_TYPE_MANUFACTURER_OS))[2];
+	$OS_TYPE =~ tr/a-z/A-Z/;
+    }
+
+    if ($Config'OS_TYPE{$FQDN}) { #';
+	$OS_TYPE = $Config'OS_TYPE{$FQDN} || $OS_TYPE; #';
+    }
+    else {
+	print STDERR "\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';\n" if $debug;
+	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+    }
+    
     # if not defined this machine OS;
-    if ($OS_TYPE = $opt_O) {
+    if ($opt_O) {
+	$OS_TYPE = $opt_O;
 	$OS_TYPE =~ tr/a-z/A-Z/;
 	print "   YOU DEFINE THIS HOST ($FQDN)'s OS == $OS_TYPE.\n";
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
-    elsif ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
-	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+    elsif ($CPU_TYPE_MANUFACTURER_OS) {
+	print "\n";
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS]\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
+	print "\n";
     }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$OS_TYPE = "WINDOWS_NT4";
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
     else {
-	print "---Try to inspect your Operating System ...\n";
-	local($eval);
-
-	$eval = q#$OS_TYPE = `sh sbin/os-type`;#;
-	eval($eval);
-
-	print STDERR $@ if $@;
-
-	chop $OS_TYPE;
-	$OS_TYPE =~ tr/a-z/A-Z/;
-
-	print "\n   Your OS looks $OS_TYPE\n";
-
-	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+	# print "---Try to inspect your Operating System ...\n";
+	print "\n";
+	print "\n   This machine looks [$CPU_TYPE_MANUFACTURER_OS]\n\n";
     }
 
     ### anyway reload and set the present config for convenience;
@@ -190,13 +226,17 @@ sub InitMakeFml
 
 sub SetHashDefaults
 {
+    # Language Extension for documents;
+    $LANGUAGE  = $FQDN =~ /jp$/i ? "Japanese" : "English";
+
     # configurable variables;
-    @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
+    @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR', 'LANGUAGE');
 
     %Config = ('EXEC_DIR', 'EXEC FILES DIRECTORY',
 	       'ML_DIR',   'TOP LEVEL ML DIRECTORY', 
 	       'DOMAIN',   'DOMAIN NAME', 
 	       'FQDN',     'FQDN', 
+	       'LANGUAGE', 'LANGUAGE',
 	       ); 
 
     %Default = ('PERSONAL_OR_GROUP', 'personal',
@@ -205,6 +245,7 @@ sub SetHashDefaults
 		'DOMAIN',   $DOMAINNAME,
 		'FQDN',     $FQDN,
 		'GROUP',    '',
+		'LANGUAGE', $LANGUAGE,
 		); 
 
     %PolicyDefault = 
@@ -811,6 +852,7 @@ sub OutPutLocalConfig
     print CF "# on $MailDate\n";
     print CF "NON_PORTABILITY\t1\n";
     print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
+    print CF "CPU_TYPE_MANUFACTURER_OS\t$CPU_TYPE_MANUFACTURER_OS\n";
 
     while (($k, $v) = each %MAKE_FML) {
 	next unless $v;
@@ -1317,6 +1359,7 @@ sub ResetVariables
     $DOMAIN   = $CurConfig{'DOMAIN'};
     $FQDN     = $CurConfig{'FQDN'};
     $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
+    $LANGUAGE = $CurConfig{'LANGUAGE'};
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -1664,26 +1707,26 @@ sub do_install
 
     ### Fixing perl path ###
     {
-	print STDERR "   Fixing Path:";
+	print STDERR "Fixing Path:";
 
-	print STDERR " src";
-	&FixPath("src/fml.pl");
-	&FixPath("src/msend.pl");
+	print STDERR " src ";
+	&FixPath("src/fml.pl"); print STDERR ".";
+	&FixPath("src/msend.pl"); print STDERR ".";
+	
+	print STDERR " libexec ";
+	for (<libexec/*.pl>){ &FixPath($_); print STDERR ".";}
 
-	print STDERR " libexec";
-	for (<libexec/*.pl>){ &FixPath($_);}
+	print STDERR " sbin ";
+	&FixPath("sbin/makefml"); print STDERR ".";
 
-	print STDERR " sbin";
-	&FixPath("sbin/makefml");
-
-	print STDERR " cf";
-	&FixPath("cf/config");
+	print STDERR " cf ";
+	&FixPath("cf/config"); print STDERR ".";
 
 	# bin/*.pl
-	print STDERR " bin";
-	for (<bin/*.pl>){ &FixPath($_);}
+	print STDERR " bin ";
+	for (<bin/*.pl>){ &FixPath($_); print STDERR ".";}
 
-	print STDERR " Done.\n";
+	print STDERR "\n\tDone.\n";
     }
 
     &ResetVariables;
@@ -1784,13 +1827,21 @@ sub do_newml
 
     &Conv($ml, "$EXEC_DIR/etc/makefml/cf", "$ML_DIR/$ml/cf");
 
-    if ($OS_TYPE && open(CF, ">> $ML_DIR/$ml/cf")) {
+    if (($OS_TYPE || $CPU_TYPE_MANUFACTURER_OS)
+	 && open(CF, ">> $ML_DIR/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
+	$MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 
 	# conversion here; since cf/config can be overwrittern 
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
+    }
+    else {
+	print STDERR "\n";
+	print STDERR "\$OS_TYPE NOR \$CPU_TYPE_MANUFACTURER_OS NOT DEFINED\n";
+	print STDERR "STOP!\n";
+	return;
     }
 
     ### cf fixed
@@ -1824,12 +1875,21 @@ sub do_newml
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
     # doc/drafts -> help,deny,guide,objective
-    &Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
-    &Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
-    &Conv($ml, "$EXEC_DIR/doc/drafts/guide", "$ML_DIR/$ml/guide");
-    &Conv($ml, "$EXEC_DIR/doc/drafts/welcome", "$ML_DIR/$ml/welcome");
-    &Conv($ml, "$EXEC_DIR/doc/drafts/confirm", "$ML_DIR/$ml/confirm");
-    &Conv($ml, "$EXEC_DIR/doc/drafts/objective", "$ML_DIR/$ml/objective");
+    if ($LANGUAGE eq 'Japanese') {
+	&Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/guide", "$ML_DIR/$ml/guide");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/welcome", "$ML_DIR/$ml/welcome");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/confirm", "$ML_DIR/$ml/confirm");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/objective", "$ML_DIR/$ml/objective");    }
+    else {
+	&Conv($ml, "$EXEC_DIR/doc/drafts/help.English", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/deny.English", "$ML_DIR/$ml/deny");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/guide.English", "$ML_DIR/$ml/guide");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/welcome.English", "$ML_DIR/$ml/welcome");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/confirm.English", "$ML_DIR/$ml/confirm");
+	&Conv($ml, "$EXEC_DIR/doc/drafts/objective.English", "$ML_DIR/$ml/objective");
+    }
 
     # here backed to the writable bit == 077 or 007
     &SetWritableUmask;
@@ -2218,7 +2278,7 @@ sub SaveCF
 	    # skip MIME since thie value set by $MAKE_FML{OPT_MIME}
 	    next if $_ eq 'USE_MIME'; 
 	    next if $_ eq 'NON_PORTABILITY';
-	    next if $_ eq "COMPAT_$OS_TYPE";
+	    next if $_ eq "COMPAT_${OS_TYPE}";
 
 	    # may be 0 is true value ($debug = 0);
 	    printf CF "%-25s\t%s\n", $_, $config{$_};
@@ -2227,6 +2287,7 @@ sub SaveCF
 
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'}         = $OS_TYPE;
+	$MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 	&OutPutLocalConfig(*MAKE_FML);
 
 	close(CF);
@@ -2642,6 +2703,8 @@ sub MakeFml_V7UnLock
     local($ml) = @_;
 
     $LockFile = $LockFile{$ml};
+
+    require 'liblock.pl';
     &V7Unlock;
 }
 
@@ -2653,7 +2716,8 @@ sub TrySmtpConnect
     local($host) = @_;
     local($result);
 
-    if ($OS_TYPE eq 'SOLARIS2') {
+    if ($OS_TYPE eq 'SOLARIS2' || 
+	$CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i) {
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
 	eval $eval;
@@ -2664,7 +2728,7 @@ sub TrySmtpConnect
 	eval $eval;
     }
 
-    local($pat)    = 'n n a4 x8'; 
+    local($pat)    = $STRUCT_SOCKADDR || 'n n a4 x8';
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = $PORT || (getservbyname('smtp', 'tcp'))[2];
@@ -2723,6 +2787,15 @@ sub MX
 	/mail exchanger\s*=\s*(\S+)/ && ($m .= "\t$1\n");
     }
     $m;
+}
+
+sub ProbePerlVersion
+{
+    open(PERL, "perl -v |");
+    while (<PERL>) {
+	$UNDER_JPERL = 1 if /jperl/;
+    }
+    close(PERL);
 }
 
 1;
