@@ -51,7 +51,7 @@ usage:
 	@ echo ""
 
 
-dist:
+_dist:
 	@ make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator 2>&1| tee $(DESTDIR)/_distrib.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_distrib.log
