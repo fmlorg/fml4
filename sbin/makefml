@@ -1895,21 +1895,21 @@ sub do_newml
     # fmlserv (uid != owner ) can read help
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
-    # doc/drafts -> help,deny,guide,objective
+    # drafts -> help,deny,guide,objective
     if ($LANGUAGE eq 'Japanese') {
-	&Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/guide", "$ML_DIR/$ml/guide");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/welcome", "$ML_DIR/$ml/welcome");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/confirm", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/objective", "$ML_DIR/$ml/objective");    }
+	&Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
+	&Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
+	&Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
+	&Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
+	&Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    }
     else {
-	&Conv($ml, "$EXEC_DIR/doc/drafts/help.English", "$ML_DIR/$ml/help");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/deny.English", "$ML_DIR/$ml/deny");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/guide.English", "$ML_DIR/$ml/guide");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/welcome.English", "$ML_DIR/$ml/welcome");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/confirm.English", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/doc/drafts/objective.English", "$ML_DIR/$ml/objective");
+	&Conv($ml, "$EXEC_DIR/drafts/help.English", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/drafts/deny.English", "$ML_DIR/$ml/deny");
+	&Conv($ml, "$EXEC_DIR/drafts/guide.English", "$ML_DIR/$ml/guide");
+	&Conv($ml, "$EXEC_DIR/drafts/welcome.English", "$ML_DIR/$ml/welcome");
+	&Conv($ml, "$EXEC_DIR/drafts/confirm.English", "$ML_DIR/$ml/confirm");
+	&Conv($ml, "$EXEC_DIR/drafts/objective.English", "$ML_DIR/$ml/objective");
     }
 
     # here backed to the writable bit == 077 or 007
@@ -2475,7 +2475,7 @@ sub do_fmlserv
     # fmlserv (uid != owner ) can read help
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
-    &Conv($ml, "$EXEC_DIR/doc/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
+    &Conv($ml, "$EXEC_DIR/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
 
     # the last info
     print "\n   Please see several examples in $ML_DIR/$ml\n";
