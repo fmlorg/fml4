@@ -1,0 +1,65 @@
+.C	ライブラリ関数
+
+ここでは、カスタマイズに役にたちそうなライブラリ関数の説明をします。
+とりあえず、選んで説明:-)
+
+.S	daemon (libutils.pl)
+
+   (4.4BSDにならって)今のプロセスをデーモンにします。
+   #4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
+
+   cron.pl を動かすんなら、これをつかう…とうまくいくといいな…:-)
+   #でも、4.3BSDでしか動作確認してないけど…
+
+なにがうれしいって、mailq にのこらない:-)
+
+本来の使い方は /dev/console とかから たちあげるときに
+
+	&use('utils');
+	&daemon;
+	デーモンになってからする仕事；
+
+みたいにすると、 &daemon; のところで、TTYを切り放し、
+STDIN,STDOUT,STDERRを閉じます。
+＃4.4BSDの setsid()は 新しいセッションをはじめること
+
+例：
+	$FML_EXIT_HOOK = q#
+		&use('utils');
+		&daemon;
+		exec("$LIBDIR/bin/cron.pl $DIR -a");
+	#;
+
+$NOT_USE_TIOCNOTTY を セットしないと、うまく daemonさんになってくれな
+いかもしれませんが…＃このへんの挙動はいまひとつわからない…
+
+４．４ＢＳＤでは setsid() ですが、そのへんの細かいところは無視:-)
+
+
+.S	Sendmail (libsmtp.pl)
+
+SYNOPSIS
+	&Sendmail($to, $subject, $body, @to);
+
+	$to		アドレス
+	$subject	メールのSubject
+	$body		メールの本文
+	@to		上以外の複数のアドレス
+
+
+.S	SendFile (libsmtp.pl)
+
+SYNOPSIS
+	&SendFile($to, $subject, $file, $zcat, @to);
+
+	$to		アドレス
+	$subject	メールのSubject
+	$file		送るべきファイル
+	$zcat		送るべきファイルがgzipしてある場合変換して送る
+			1 zcatを実行
+			2 uuencodeを実行
+	@to		上以外の複数のアドレス
+
+	実際には、$zcat	@to エントリは使ってませんが…
+	＃いつ、第４エントリ以降をなくすか保証しない
+
