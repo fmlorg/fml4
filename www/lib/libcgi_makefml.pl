@@ -322,6 +322,9 @@ sub SecureP
     local($mail_addr)  = '[A-Za-z0-9\.\-_]+\@[A-Za-z0-9\.\-]+';
     local($account)    = '[A-Za-z0-9\-_]+';
 
+    &P("ERROR: ML is empty.") unless $ML;
+    &P("ERROR: PROC is empty.") unless $PROC;
+
     if ($ML !~ /^($secure_pat)$/i) {
 	&P("ERROR: ML is insecure.");
 	0;
@@ -426,7 +429,7 @@ sub Command
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
     elsif ($PROC eq 'mladmincgi') {
-	&Control($ML, 'mladmin.cgi');
+	&Control($ML, 'mladmin.cgi', 'update');
     }
     elsif ($PROC eq 'newml') {
 	&P("</PRE>");
