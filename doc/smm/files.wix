@@ -19,6 +19,8 @@
    libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
    liblibrary.pl	ユーザからのファイルの put と getを可能にする
    liblock.pl		UNIX V7 タイプの lock()
+   liblm.pl		MEMBER_LIST ACTIVE_LIST 等の登録内容変更の関数群
+   liblop.pl		summary ファイル等のログファイルへの operation
    libmladdr.pl		コマンドラインによる簡易設定ルーチン
    libmodedef.pl	簡易 MODE 設定ルーチン
    libnewsyslog.pl	/usr/bin/newsyslog 
