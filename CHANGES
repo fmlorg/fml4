@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/15
+
+  sbin/makefml
+  www/lib/libcgi_makefml.pl
+	apply patch to fix collection of /var/spool/ml/etc/aliases
+	from Naoki IDO <ido@hitachi-ms.co.jp> (fml-support: 08422, 08423)
+
+
 2000/07/12
 
   apply patch to fix "makefml config-template" clean up code
