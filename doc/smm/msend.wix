@@ -31,10 +31,8 @@
 matome もしくは digest というコマンドでできます。
 コマンドについては後の節で説明します。
 
-英語では何というのかよくわかりませんが(苦笑)、たぶん digest とでも呼ん
-でいるんでしょう。
+英語では束は bunch だけど、 digest とか呼んでるような気がする。
 ＃ちなみに matome というコマンドと digest というコマンドは同じです。
-
 
 ちなみにプログラム群のそれぞれどの部分に対応するかというと
 
@@ -90,14 +88,14 @@ $LIBDIR にセットされます。
 .k	crontab(4.4BSD)
 .k	samples/crontab
 
-INSTALL 時に make していれば samples/crontab に cron の設定のしかたの
-見本があります。
+INSTALL 時に make していれば、 samples/crontab に cron の設定のしかた
+の見本ができています。
 
-4.4BSD では各個人ごとに cron の設定が可能ですから、その場合は
+4.4BSD では各個人ごとに cron の設定が可能です。その場合、
 
    (shell prompt)% crontab samples/crontab 
 
-で個人ごとのcronが設定できます。samples/crontab は例えば
+を実行することで個人ごとのcronが設定できます。samples/crontab は例えば
 
 0 * * * * /usr/libexec/fml/msend.pl /var/spool/ml/Elena /usr/libexec/fml
 
@@ -109,16 +107,16 @@ INSTALL 時に make していれば samples/crontab に cron の設定のしかたの
 
 
 
-.S	プログラムの名称の変更 MSendv4.pl -> msend.pl
+.S	プログラムの名称 msend.pl (旧 MSendv4.pl)
 .key	MSendv4.pl->msend.pl
 
 最初実験プロジェクトのつもりではじめた時の version 4 というのがついた
 MSendv4.pl というプログラム名のまま使ってきましたが、msend.pl に正式に
-変更しました。backward compatibility のため MSendv4.pl には link がはっ
-てあります。
+変更しました。ただし backward compatibility のため、 MSendv4.pl には 
+link がはってあります。
 
 
-.S	プログラムのログファイルの名称の変更 $MSEND_RC
+.S	プログラムのログファイル $MSEND_RC (名称が変更されました)
 .key	MSendrc -> var/log/msendrc
 .key	$MSEND_RC
 
@@ -140,11 +138,11 @@ $MSEND_RC を定義してくれと警告を(logファイルへ)吐くでしょう。
 
 .S	コマンドで各ユーザーごとにどういうふうに送るかを決めること
 
-fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
-ます。デフォールトは UNIX FROM の gzip したフォーマットです。
+fml-1.4.1 以降、各ユーザーごとにまとめ送りの様式を決めることができま
+す。デフォールトは UNIX FROM の gzip したフォーマットです。
 
-各ユーザはコマンドをサーバに送ることで自分でユーザごとの設定をすること
-ができます。
+各ユーザはコマンドをサーバに送ることで、自分で設定を変更することがで
+きます。
 
 例： ３時間おきにUNIX FROMの形で送って欲しい場合
 
@@ -152,33 +150,39 @@ fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
 
 をコマンドとして送ります。UNIXのSHELL上なら
 
-   (shell prompt)% echo "# matome 3u" | Mail mail-listのアドレス
+   (shell prompt)% echo "# matome 3u" | Mail コマンド用のアドレス
 
 ですね
 
 
-.S	$MSEND_DEFAULT_SUBJECT
+.S	まとめ送りメールに付くSubjectの設定
 .k	$MSEND_DEFAULT_SUBJECT	
-
-まとめおくりの $MSEND_DEFAULT_SUBJECT を変更する。
 
 syntax:
 	$MSEND_DEFAULT_SUBJECT モード表示 (1/N) ($ML_FN)
 
+で設定します。
 
-.S	$MSEND_START_HOOK
+例：    
+	$MSEND_DEFAULT_SUBJECT = "ML BUNCH SERVICE";
+
+とすると
+
+	ML BUNCH SERVICE Article 311 [PLAINTEXT(UNIX FROM)] (1/1) (Elena Lolabrigita ML)
+
+
+.S	まとめ送り処理をhookする場合
 .k	$MSEND_START_HOOK
 
+$MSEND_START_HOOK 
 実際の配送作業の始まる直前に評価されます。
 
-
-.S	$MSEND_HEADER_HOOK
 .k	$MSEND_HEADER_HOOK
+$MSEND_HEADER_HOOK
+msend の Subject: 等を変更する場合に使用します。
 
-msend の Subject: 等への変更のためのもの。
 
-
-.S	まとめ送りのデフォールト
+.S	まとめ形式のデフォールト
 .k	$MSEND_MODE_DEFAULT
 .xref	$MGET_MODE_DEFAULT
 .k	$USE_RFC1153_DIGEST
@@ -187,8 +191,8 @@ msend の Subject: 等への変更のためのもの。
 
 
 gzip で複数のファイルを一つにして送るのがデフォールトですが、 
-$MSEND_MODE_DEFAULT の値で変更することが出来ます。
-使えるパラメータは $MGET_MODE_DEFAULT と同様です。
+$MSEND_MODE_DEFAULT の値で、まとめ送りサーバの設定を変更することが出来
+ます。使えるパラメータは $MGET_MODE_DEFAULT と同様です。
 
 なお便利なように、これらの簡易設定があります。
 
@@ -196,7 +200,7 @@ $MSEND_MODE_DEFAULT の値で変更することが出来ます。
 	$USE_RFC1153		デフォールトをRFC1153
 	$USE_RFC934		デフォールトをRFC934
 
-に設定する。
+に設定する(詳細以下)。
 
 
 .S	まとめおくりのデフォールトで RFC934 形をつかうか？
@@ -206,7 +210,7 @@ $MSEND_MODE_DEFAULT の値で変更することが出来ます。
 
 まとめおくりで、0はデフォールトのUNIX FROMで区切られたメールを送り出す
 が、1なら次のような形のものを送るようになる。これは mh のburstで複数の
-展開に展開できます。＃あと、どういうソフトがあるのか知らない…:-)
+mailに展開できます。＃あと、どういうソフトがあるのか知らない…:-)
 
 [934形式の例]
 
@@ -229,17 +233,23 @@ $MSEND_MODE_DEFAULT の値で変更することが出来ます。
 .k	$USE_RFC1153
 .k	$USE_RFC1153_DIGEST
 
-これは それぞれに通し番号をつけなければなりませんので、まとめおくりの
-デフォールトを1153にすることになります。
-
-つまりコマンド # matome 3 は gzip ではなく 1153 形を意味するようになり
-ます。
+これには、それぞれまとめた束に、通し番号をつけなければなりません。よっ
+てまとめおくりのデフォールトを1153に統一することになります。ユーザがコ
+マンド # matome 3 としても、 gzip ではなく 1153 形を意味するようになり
+ます。この形式では通し番号はばらばらで各ユーザ毎に適当についてます。
 
 config.ph で $USE_RFC1153 = 1; としてください。
 ＃ Backward Compat で $USE_RFC1153_DIGEST も同じ意味
 
-デフォールト以上の細かい部分は librfc1153.pl でフォーマットを決めてく
+もし細かい所を変えたい場合は、 librfc1153.pl でフォーマットを決めてく
 ださい
+
+RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
+けるので、個人個人に1153で送ると人によって番号が食い違い、矛盾がおきて
+しまいます。
+＃NetNewsなんかで1153形式を見ればわかるとおもうんですが…
+
+まぁ番号を気にしないならいいんですが…
 
 [注意]
 一時期 デフォールトで 3時間に 強制的に設定しておいてある version があ
@@ -257,7 +267,8 @@ config.ph で $USE_RFC1153 = 1; としてください。
 
 # matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
 			だから 17 なんてやっても一日一回と同じです(_o_)
-			default は gzip した Unix From つきのファイルの固まり
+			様式 default は gzip した Unix From つきのファイ
+			ルの固まり
 # matome 数字(13-36)	上の特別の場合で、一日一回Ｎ時にまとめおくり
 			１３〜３６の数字がこのケースに当てはまります
 			午前５時に一回だけまとめおくり慕いときは、
@@ -300,23 +311,13 @@ config.ph で $USE_RFC1153 = 1; としてください。
 			＃matome 5 は５時間“おき” という意味
 
 
-.S	まとめ送りとRFC1153とフォーマット…
-
-RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
-けるので、個人個人に1153で送ると人によって番号が違うはずなので、矛盾が
-おきてしまいます。
-＃NetNewsなんかで1153形式を見ればわかるとおもうんですが…
-
-まぁ番号を気にしないならいいんですが…
-
-
 .S	まとめ送りをしたと msend からメールが出る
 .k	$MSEND_NOTIFICATION
 .k	$MSEND_NOTIFICATION_SUBJECT
 
 	$MSEND_NOTIFICATION = 1;
 
-の時 msend から「まとめ送りをした」メールで管理者へ知らされます。
+の時、 msend は「まとめ送りをした」ことをメールで管理者へ知らせます。
 
 4.3BSD用だとおもえばよいでしょう。あの頃の cron はログをフォワードした
 い時は explicit に書かないといけなかったので…
@@ -336,7 +337,7 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 
 	$MSEND_NOT_USE_X_ML_INFO = 1;
 
-注意： $NO_ML_INFO から名称変更
+で付けないようにします。(注意： $NO_ML_INFO から名称変更)
 
 
 .S	捕捉：まとめおくりと$ACTIVE_LISTと$MSEND_RCと実際の動き…
@@ -382,13 +383,13 @@ activesがこんなかんじだとします。
 
 そのため各個人ごとに送り方を完全にカスタマイズすることが可能になるわけです。
 
-また送る時の記事のまとめ方も mget コマンドと同じだけの自由度が選べます。
+また送る時の記事のまとめ方も、 mget コマンドと同じだけの自由度が選べます。
 .xref	mget
 
 
 .S	まとめおくりの いつ送るか？の判定を変える
 
-msend.pl の sub MSendP を変えることでできますが…。
+msend.pl の sub MSendP で行っています。この変更でできます…。
 
 例：今の設定
 
@@ -436,3 +437,4 @@ cron は 昔からある Unix の Daemon process で １分に一回起きて、やるこ
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
+
