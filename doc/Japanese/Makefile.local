@@ -10,7 +10,10 @@
 # $Id$
 #
 
-all: tutorial.html
+all: 
+	@ echo "update	cvs update"
+	@ echo "scan	cvs -n update"
+	@ echo "diag	diagnostic check"
 
 update:
 	cvs update -dAP
@@ -23,27 +26,5 @@ scan:
 clean:
 	gar *~ *.bak
 
-prep_index:
-	@ apply echo *[a-z0-9]|egrep -v 'CVS|Makefile|INDEX|index'
-
-index:
-	@ perl ../../distrib/bin/mkindex.pl INDEX
-
-tutorial.html: INDEX
-	perl ../../distrib/bin/mkindex.pl INDEX > tutorial.html
-
-subdir_index:
-	for d in Japanese [a-z]* ; \
-	do \
-	  if [ -d $$d -a X$$d != "Xtemplate" -a X$$d != "Xobsolete" ]; \
-	  then \
-	     perl ../../distrib/bin/mkindex.pl -r -f INDEX $$d \
-		> $$d/index.wix.new; \
-	     mv	$$d/index.wix.new $$d/index.wix;\
-	  fi ;\
-	done
-
-entry:
-	apply 'echo DOC_TUTORIAL_SUBDIR += %1' `find [A-Za-z]* -type d -print|grep -v CVS`|\
-	egrep -v 'CVS|/obsolete|template|[a-z]/[a-z]' |\
-	sed 's@\./@@'
+diag:
+	sh ../../distrib/doc/bin/diag_tutorial.sh
