@@ -38,6 +38,32 @@ Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
 ます。(skip の場合には送らないようにしている)
 
 
+.S	登録時の welcome メールが送り返されるのを止める
+.l	not-send-back-welcome-file
+
+* fml 3.0 シリーズ
+
+libamctl.pl というファイル（ 例: /usr/local/fml/libamctl.pl )に sub
+AutoRegist ではじまる関数があって、その最後の方に
+
+   &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
+
+というところがあります。ここを除いてもらうと絶対 welcome は送られませ
+ん。次のような HOOK が 3.0 シリーズにはないので、トリッキーな回避の仕
+方はないです。
+
+
+* fml 4.0
+.q
+fml 4.0 では、非常にトリッキーなやりかたでよくありませんが、
+
+$AUTO_REGISTRATION_HOOK = q#
+        sub SendFile {};
+#;
+
+という HOOK を書くと、welcome がおくられなくなります。
+.~q
+
 .S	登録/削除以外は限りなく不必要
 =E.S	disable all commands except for subscribe/unsubscribe
 
@@ -46,18 +72,26 @@ fml-support: 07271
 条件1. 登録者に一切報告メール(welcome も)は送らない
 条件2. 登録した、退会した、旨のメールのみ送る
 条件3. よってコマンドは subscribe と bye 以外不要だろう
+この３つの条件を実現するのは結構面倒です。
 =E
 disable all commands except for subscribe/unsubscribe
 
+◯ welcome を送らない方法は前レシピも参照して下さい。
+
+◯ 例えば、特定のコマンド( subscribe confirm bye )だけを許すには、次の
+ようにします。これら３つがあれば登録削除だけができるはずです。
+
 @PermitProcedure = ('subscribe', 'confirm', 'bye');
 
-で、この３つ以外のコマンドをdisableして、さらに
+◯ 多くのコマンドは処理を終えるとリクエストを送ってきたユーザへ返事を
+   返しますがそれを抑制するには
 =E
 It is better to set up this to disable "fml status report" reply.
 
      &DEFINE_MODE('disablenotify');
 
-とかするとほとんどなくなるでしょうかね…
+をつかうこともできます。が、あまりにも抑制し過ぎてしまうので
+かなり考え物です…
 
 
 .S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
