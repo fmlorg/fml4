@@ -24,10 +24,9 @@ sub DoDistribute
 
     ##### ML Preliminary Session Phase 01: set and save ID
     # Get the present ID
-    &Open(IDINC, $SEQUENCE_FILE) || return;
-    $ID = <IDINC>;		# get
+    &Open(IDINC, $SEQUENCE_FILE) || return; # test
+    $ID = &GetFirstLineFromFile($SEQUENCE_FILE);
     $ID++;			# increment, GLOBAL!
-    close(IDINC);		# more safely
 
     # ID = ID + 1 (ID is a Count of ML article)
     &Write2($ID, $SEQUENCE_FILE) || return;
