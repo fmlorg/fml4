@@ -5,8 +5,18 @@
 =E
 See .ptr{auto-regist} for automatic registration details.
 
-.S 	手動登録時の挙動について(5 way hand shake)
+.S 	subscribe コマンド(手動登録)時の挙動について(5 way hand shake)
 =E.S	Manual Registration; how to handle subscribe requests
+
+*_*_HANDLER が auto_regist でない場合です。この時は管理者宛に登録依頼
+メールをもらい、それをみて登録作業をします。ユーザーを登録するためには 
+fml の動いているホストで makefml add を使ったり手でファイルを編集する
+必要があります。
+
+しかし、その登録依頼は他人のフリをしているのかもしれません。そのため登
+録の前に本人かどうかの確認をするべきです。confirmation はこの確認作業
+を fml が行なう場合です。forward_to_admin (元々の場合)で管理者がメール
+を書いて正当性チェックをする場合のことをさしています。
 
 	$MANUAL_REGISTRATION_TYPE ('confirmation' or 'forward_to_admin')
 .k	$MANUAL_REGISTRATION_TYPE
