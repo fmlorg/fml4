@@ -73,7 +73,7 @@ exit 0;
 
 sub GetID
 {
-    open(F, $RELEASE_ID) || die $!;
+    open(F, $RELEASE_ID) || die("cannot open $RELEASE_ID :$!");
     chop($ID = <F>);
     $ID =~ s/\s*//g;
 
