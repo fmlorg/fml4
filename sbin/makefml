@@ -1638,9 +1638,15 @@ sub ResetVariables
     $DOMAIN   = $CurConfig{'DOMAIN'};
     $FQDN     = $CurConfig{'FQDN'};
     $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
-    $LANGUAGE = $CurConfig{'LANGUAGE'};
     $TZ       = $CurConfig{'TZ'} || '+0900'; # COMPAT UNTIL FML 2.2;
     $VENDOR   = $CurConfig{'VENDOR'};
+
+    # overwritten for each ml
+    $LANGUAGE = &Value('LANGUAGE') || $CurConfig{'LANGUAGE'};
+
+    # fix path
+    $RP_CGI_PATH = $CGI_PATH;
+    $RP_CGI_PATH =~ s#^/+##;
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -2483,6 +2489,8 @@ sub CreateDocTemplate
 {
     local(*config, $ml) = @_;
     local($x);
+
+    &ResetVariables;
 
     # <Command Trap Keyword>
     # In 'newml', we have no knowledge so that 
