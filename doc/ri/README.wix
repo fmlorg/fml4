@@ -571,7 +571,7 @@ you should enable functions explicitly.
 	揃えられています。ユーザーごとに設定できます
 	＃ lha 系のものはSJISに変換するオプションもあります
 
-	PLAINTEST 
+	PLAINTEXT 
 		UNIX FROM
 		RFC934	
 		RFC1153
