@@ -145,7 +145,14 @@ sub readfile
 
 		$str =~ s/@/\\@/g;
 		while ($str =~ s/\\\\@/\\@/g) { 1;}
-		$str = ($str =~ /^(\-\d+|\d+)$/) ? $str : "\"$str\"";
+
+		# special handling of timezone 
+		if ($key eq 'TZone') {
+		    $str = "\"$str\""; # enforce "string" sytanx.
+		}
+		else {
+		    $str = ($str =~ /^(\-\d+|\d+)$/) ? $str : "\"$str\"";
+		}
 
 		# print STDERR 
 		# "Overwrite $key as $str\n\t(original $value{$key})\n";
