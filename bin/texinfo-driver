@@ -1,0 +1,23 @@
+#!/bin/sh
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
+trap "rm -f _uja_" 0 1 3 6 15
+
+if [ ! -d doc ] 
+then
+	mkdir doc
+fi
+
+# FAQ
+sed -n -e '/^References/,$p' FAQ | sed -e 1d -e '/^\-/d' |\
+jperl -Ilib/AIKO lib/AIKO/aiko2.pl -t -1 '^(\d+)\.\s+(.*)' -2 '^(\d+\.\d+)\s*(.*)' -f fml-FAQ > doc/FAQ.texinfo
+
+# README
+jconv -e README|\
+egrep -v '^\-' |\
+jperl -nle 'tr/£±£²£³£´£µ£¶£·£¸£¹£°¡¥/1234567890./; s/^(\d+\.)/$1 /; print $_' |\
+jperl -Ilib/AIKO lib/AIKO/aiko2.pl -t -1 '^(\d+)\.\s+(.*)' -2 '^(\d+\.\d+)\s*(.*)' \
+-f fml-README > doc/README.texinfo
