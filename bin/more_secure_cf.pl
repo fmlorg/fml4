@@ -58,12 +58,12 @@ while (<>) {
 	print STDERR "  --append the following perl statements\n";
 	print STDERR "\t# Append \@DenyProcedure PPEND FOR SECURITY\n";
 	print STDERR "\t# to disable user to retrieve member list\n";
-	print STDERR "\t\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status');\n";
+	print STDERR "\t\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');\n";
 	print STDERR "\n";
 
 	print "# FOR SECURITY, Disable user to retrieve member list\n";
 	print 
-	    "\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status');\n";
+	    "\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');\n";
     }
 }
 
