@@ -1,35 +1,69 @@
 .C	OS依存性。OSごとのインストールの注意
+=E.C	OS dependence
+.l	os-dependence
+.k	OS dependence
+
+　ここではOSによる各種の設定方法を述べます。ただし全てのOSおよび環境に
+は対応出来ませんので、hintを書いておきますので参考にして設定して下さい。
+あくまで現在確認できている部分なので、このほかにOS依存した不具合、不動
+作、その対策等を発見された方、ご一報下さい。
+
 
 .S	4.4BSD
+.k	4.4BSD
 
-NetBSD 1.1 および 1.2 はターゲットマシンなので、なにもなし
-他の 4.4 BSD based については不明。BSDI 2.1 では動くのを確認ずみ
+NetBSD 1.1 および 1.2 はターゲットマシンなので、なにもなし。BSDI 2.1 
+では動くのを確認済み。他の 4.4 BSD ベースのOS については不明だけどきっ
+と動くでしょう。
+=E
+4.4BSD is the target machine. Nothing annoys you.
+
 
 .S	4.3BSD
+.k	4.3BSD
 
-旧ターゲットマシンなので、多分なにごともなくうまくいくでしょう
+旧ターゲットマシンなので、多分なにごともなくうまくいくでしょう。
+=E
+4.3BSD is the target machine until from the first to FML 2.0 alpha or
+so. We believe Nothing annoys you.
+
 
 .S	SUN OS 4.1.3
+.k	SUN OS 4.1.3
 
-fmlの昔のヴァージョンでは lseek system call をつかうところで、こけてま
-したが、その問題はもう発生しません。
+・sendmail に関して: NFS 越しの fpathconf() がうまく作動しません。対策
+として、ローカルにinclude をもつかFMLを置く場所をローカルにするか等の
+技が必要になるかもしれません。
+=E
+Must be O.K. but SUN OS JLE (Japanese Language Extension) has a lot of
+bugs, which paranoid you.
 
-sendmail: NFS ごしの fpathconf() はうまく作動しません。ローカルに 
-include をもつか、fmlを置く場所をローカルにするか等の技が必要になるか
-もしれません
+・FMLの昔のヴァージョンでは lseek system call をつかうところで、こけて
+ましたが、その問題はもう発生しません。
 
 
 .S	HP-UX 9?
+.k	HP-UX
 
-setuid まわりが 4.3と4.4の中間みたいな感じで止まってます。
+　setuid まわりが 4.3と4.4の中間みたいな感じで止まってます。
 sendmail はいろいろとまわりみちをして、setuid を実行するようですが、
 :include: を使う限りうまくいくらしいです。
 ＃Version依存性がよくわからないんですが…
+=E
+Very strange. I don't know KnowHow on HP.
+Syscalls around setuid is betwen 4.3 and 4.4 ?
+You may or may not require "perl -U"(enable insecure action) or
+that ":include:file" (with ") is required? and so on...
+That is, there is a lot of riddles ...
 
-もし、それでだめなら perl -U をつかってもらうということで
+perl -U を使わないと動かないとか、:include: じゃなくて展開して書くとい
+いとか、":include:ファイル" みたいに書くといいとかいろんな説があってよ
+くわかりません。とりあえず総当り戦で試してみると良いでしょう。
 
 
 .S	SGI Indy (IRIX5.3)
+.k	IRIX5.3
+
 .q
 From:    nino@windy.mech.utsunomiya-u.ac.jp
 
@@ -41,79 +75,145 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 (See fj.sys.sgi)
 
 .~q
+may require kernel reconfig with -D_POSIX_CHOWN_RESTRICTED and 
+replace sendmail, sendmail.cf with latest ones.
+
+.S	UXP/DS V20L10(SVR4.2)
+
+	FUJITSU GRANPOWER 7000(DS/90)
+	UXP/DS V20L10(SVR4.2)
+
+で(インストーラ(config.guess)がどう判定するかはよくわかってないのです
+が)、
+=E
+require
+
+	$COMPAT_SOLARIS2 = 1;
+
+が必要だそうです。
 
 
-.S	プロセスは誰の権限で動くか？
-.key	uid
-.key	setuid
-.key	ユーザー権限ということ
+.S	プロセスは誰の権限で動くか？ −OSの違いにより発生する問題点−
+=E.S	Owner of a FML process 
+.k	uid
+.k	setuid
+.k	ユーザー権限
 .label	{fml-uid}
 
-「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
-走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
-システムに「メーリングリスト管理者のプロセスとして走る」用に命令するこ
-とがシステムによって違うことがあるので厄介なことが発生します。
+「プロセスは誰の権限で動くか？」を意識しなければならないのは、 
+sendmail自体は通常(4.4BSD or POSIX 準拠OSでは) root 権限で走っており、
+FMLの実行時 fml.pl はFMLの管理者のプロセスとして走ります。ここで、シス
+テムに「メーリングリスト管理者のプロセスとして走る」用に命令することが、
+システムによって違うことがあるので厄介な問題が発生します。
+=E
+The owner of a process is important since sendmail requires to use
+setuid(). sendmail setuid() and exec() fml.pl (FML) as the owner of
+include file or sendmail runs C-Wrapper which setuid() and execs
+fml.pl. This set up code depends on operating systems.
+
+例えば次のような動きをします。
 ＃注意: 以下の説明とは異なる場合ももちろんありえます。
 .xref fml-process, msend
 
-○ローカルに fml にメールを投げる
+(a)ローカルで動作している fml にメールを投げる
+=E 
+(a) Local derivary (exec fml)
 
-	自分のuidで実行します
+	全て自分の uid で実行します
+=E
+	The local delivery must be done under your uid.
 
-○外からメールがやってきたら？
-	つまり sendmail がうけとって fml を起動する場合
+(b)外からメールがやってきたら？
+=E
+(b) incoming mails from outside
 
-	外→ sendmail は uid = 0 で待っている(デーモン)
+	※つまり sendmail がうけとって fml を起動する場合
+=E
+	* sendmail receives an in-coming mail and exec() fml
+	here sendmail runs as a root process, so sendmail
+	fork() and setuid() itself to the owner of include file
+	and runs fml.pl.
+
+	外→ sendmail は uid = 0 のプロセスとして待機している(デーモン)
 	     ＃昔の sendmail だと daemon の場合もあるだろう
 
-	     → setuidしてユーザー権限 (uid は include の持ち主)にして
-		fml.pl を起動し、メールを fml.pl へ渡す
-		＃これは fml.c で作った fml を使うか
-		＃:include list 形式での呼びだし
+	     → setuidしてユーザー権限 (uid は aliases で書いた include
+	     　の持ち主)にして fml.pl を起動し、メールを fml.pl へ渡す。
+		＃これは fml.c で作った fml を使うか、
+		＃:include list 形式での呼びだしの時、こうなります。
 
 ここで setuid() の話が関係するわけです。
 
 各オペレーティングシステムでどう setuid をすればうまくいくか？ は次の
 節にまとめてあります。
-注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
+注意: 以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
 は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
-いくことにしてます。
+いくことに変更されました。
 
 
 .S	/etc/aliases の書き方と OS 依存性
+=E.S	/etc/aliases dependence
+.k	/etc/aliases
 
-make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
-makefml が fml.c を自動的に補正してくれているはずです。
+　まず makefml で newml を実行するとそれぞれのＭＬの directory に
+makefml があなたの環境に自動的に適正化してくれた fml.c を用意してくれ
+ます。 fml という program はその場所で make fml (makefml とは違います。
+make という program です)で作れます。デフォールトでは使いません。
 
-/etc/aliases では
+　/etc/aliases では、
+=E
+You may know several formats of of/etc/aliases in several ages.
+
+(a)
 	Elena: :include:/some/directory/include-file 
-		もしくは
+(b)
 	Elena: "|/some/directory/fml-2.1/fml"
 
-の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
-ます。現在では include-file 形式が普通のような気がします。
+(a)(b)両方の書き方ができますが、OSによってうまくいったりいかなかったり
+します。現在では、(a)の include-file 形式が一般的のような気がします。
+=E
+Today :include: format must be general.
 
-ターゲットマシン (4.4 BSD)以外での挙動はよくわかりません。security 上
-からも一番いいのは最新版の sendmail に入れ換える事です。まずはそこから
-でしょう。
+　ターゲットマシン (4.4 BSD)以外での挙動はよくわかりません。security 
+上から考えても一番いいのは、最新版の sendmail に入れ換える事です。まず
+はそこからでしょう。
+=E
+If :include: statement cannot work well, firstly you should update
+your sendmail. If it does not work well, you may try the followings:
 
-OS 附属の sendmail 等を使うと挙動がおかしいのはよくある話です。
-“ setuid のしかた"で大別すると、以下の2種類に別れます。
+※OS 附属の sendmail 等を使うと挙動がおかしいのはよくある話です。
 
- [4.3BSD]
+　sendmailが fml or fml.plを起動する際の、"setuid のしかた"で大別する
+と、以下の2種類に別れます。
+
+(a) [4.3BSD]
+
 	fml (fml.cから作る) でも :include: でもOKでしょう
+=E
+	both C-wrapper and :include: must be available
+	but I recommends :include: form since fml is a setuid.
 
- [4.4、POSIX準拠のOS、その他]
+(b) [4.4、POSIX準拠のOS、その他]
+
 	:include: 式か 
 	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
+	both C-wrapper and :include: must be available
+	but I recommends :include: form since fml is a ROOT-setuid, 
+	which is the last method.
+	YOU SHOULD DECREASE ROOT-setuid programs in your OS, so 
+	you should not such a thing.
 
-以下は実際にテストされたOS一覧です
+　以下は実際にテストされたOS一覧です。
 
-	キーワード：
-	uid		ownerが自分自身で 4755 した fml
-	include		sendmail に setuid をまかせる :include:を使う
+	※キーワード：
+	uid		ownerが自分自身で 4755 した fml を使う
+	include		sendmail に setuid をまかせる。 :include:を使う
 	root		ownerがrootで 4755 した fml
 			＃こういうことは最後の手段であまりやりたくない…
+=E
+	uid		owner(not root) setuid() fml 
+	include		:include: statement is available
+	root		root setuid() fml (VERY DANGEROUS)	
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 4.3BSD			uid include
@@ -121,56 +221,129 @@ OS 附属の sendmail 等を使うと挙動がおかしいのはよくある話です。
 BSD386 1.1		include
 SUN4.1.2 - 4.1.3JLE 	uid include
 Solaris 2.4 		include
+
 Solaris 2.3J 		だめ？ (2.3 以前はまんがいち動けばらっき〜のようだ)
-DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+
+DEC OSF/1		[:include: でかつ perl -U が必要（なぜ;_;？）]
 			-U はいらないこともあるらしい
+=E
+			require both :include: and perl -U ?
+			I heard you may not require -U.
+
 OSF/1 Alpha AXP V2.1 	include
+
 HP UX 9?		[:include でかつ perl -U が必要？]
 			＃なんか、setreuid しかないんだけど…＞HP-UX
+=E
+			require both :include: and perl -U ?
+
 SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
+=E
+SVR3 [4.3BSD とおなじ]	uid must be OK
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-manualで確認した機種一覧
-4.3BSD系	SONY NEWS 4.x
+.k	4.3BSD
+.k	4.4BSD
+.k	BSD386 1.1
+.k	SUN4.1.2 - 4.1.3JLE
+.k	Solaris 2.4
+.k	Solaris 2.3J
+.k	DEC OSF/1
+.k	OSF/1 Alpha AXP V2.1
+.k	HP UX 9?
+.k	SVR3
+
+OS 附属のマニュアルで setuid() の仕様を確認した機種一覧
+=E
+setuid() specifications
+
+4.3BSD based	SONY NEWS 4.x
 		4.1.3JLE
 		SVR3
+.k	SONY NEWS 4.x
+.k	4.1.3JLE
+.k	SVR3
 
-POSIX準拠	4.4BSD
+POSIX based	4.4BSD
 		NetBSD 
 		BSD/OS 2.x
 		BSD386 1.1
 		Solaris 2.4	
+.k	4.4BSD
+.k	NetBSD
+.k	BSD/OS 2.x
+.k	BSD386 1.1
+.k	Solaris 2.4
+	
 
-その他の注意：
+.S	その他の注意
+=E.S	other tips
+
+Please check the following configurations: 
+
 ・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
+=E
+* cannot work well on NFS
 
-setuid に関する限り、「setuid する時だけ local ならいい」なわけで、例
-えば /usr/local/ml/fml とかを作ってもらって fml.pl 自体は NFS ごしの 
-home とかにおいてある という風にしてあればうまくいくでしょう。
+　この場合 setuid に関する限り、「setuid する時だけ local」ならいいわけ
+です。例えば /usr/local/ml/fml と wrapper のみを作ってもらって、 fml.pl 
+自体は NFS 越しの home とかにおいてある、という風にしてあればうまくいく
+でしょう。
+=E
+The path of setuid wrapper or :include: file. The check
+(e.g. permissions, link) is done at each level of the path, so you
+check each directory and file from / to the path.
 
-注意: 起動自体がうまくいっても NFS ごしのため、それ以外の system call 
-がうまく動かない可能性はありえます。
+注意: fml.pl の起動自体がうまくいっても NFS 越しのため、それ以外の 
+system call がうまく動かない可能性はありえます。
 
-・NFSごしにファイルが存在すると setuid を認めない機種 もある
-たとえば
-		SUN 4.1.3JLE 4.1.4
-		＃これは fpathconf の return 値が問題
+・NFS 越しにファイルが存在すると setuid を認めない機種 もある。
+＃security を考えればそれが正しい仕様でしょう。
 
-現実的に uid 管理がどうなされているかを考えれば、設計思想としてそれは
-正しいでしょう。
+例えば、
+	SUN 4.1.3JLE 4.1.4
+	＃これは fpathconf の return 値が問題になる
 
-・ fml と include を試してみてどっちもうまくいかなかったら最後の手段の
-root に setuid した fml を使うという方法があります。
+※現実的に uid 管理がどうなされているかを考えれば、OSの設計思想として
+それは正しいと言えるでしょう。
 
-root のケースでは root しか書けない /usr/local/ml/driver とかにインス
-トールしてもらうとかしたほうがいいとおもいます。取り扱いには注意してく
-ださいね。管理者とよく相談してみてください(重要)
-＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
-＃かもしれないということもあるかもしれない。単にNFSかもしれないが:-)
+・前節の fml と include を試してみて、どっちもうまくいかなかった場合、
+最後の手段の root に setuid した fml を使うという方法があります。
+=E
+ROOT SETUID fml (C Wrapper) is the final method, YOU SHOULD USE ONLY
+THIS METHOD WORKS WELL. Pleasea consult with system administrators on
+this settting up ROOT SETUID fml.
+
+この root に setuid された fml は root 以外のユーザは書きこめない特別
+な場所(e.g. /usr/local/ml/driver)を作ってそこにインストールしてもらっ
+て下さい。管理者とよく相談して取り扱いには十分注意して下さい(重要)
+＃もしかしたら sendmail が呼ぶ関数のどこかで、 root による setuid をみ
+＃とめないかもしれないということもあるかもしれない。単にNFSかもしれな
+＃いが:-)
+
+方法:
+　まず makefml の実行によって作成された、各ＭＬのための fml.c をコンパ
+イルします。各ＭＬの directory で、
+=E
+If you have a "Makefile" generated by "makefml", you can make fml by
+
+	make CFLAGS=-DPOSIX fml
+
+を実行すると fml という実行ファイルができます。root の人がそれにsetuid 
+をします。例: chmod 4555 fml 
+
+これを前述の root だけが読み書きできる場所へ入れて使用します。 
+permission にはくれぐれも注意して下さい。
+=E
+Please install and setuid() it UNDER A LOT OF CARE.
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,8 +1,10 @@
 .C	FRED （汎関数-正規表現-微分）ライブラリ 
 =E.C	Funtional Regular Expressional Derivative
 .l	fred
-
-NOT TRANSLATE THIS SECTION.
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
 
 sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
 つきにくいかも知れません。中身は同じでも違ったインターフェイスは Aucea

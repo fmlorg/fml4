@@ -906,20 +906,29 @@ Date: と Posted: の時間差でネットワークのDELAY情報が分かるのは副次的効
 ＃ See fml-support's ML Count: 01816, 01821 for the discussion
 
 
-.S	Received: をけずる
+.S	Received: を削る
+=E.S	cut out Received: fields
 
 ・出した人〜ＭＬサーバまでのパスの mail reachability は管理者のみが理
 解していればよい。それ以外のメンバーは知らなくてもよい。
+=E
+It is enough to know the mail reachability from a sender to a ML
+server.
 
 ・Too many hops を防ぐためにけずった方がよい
+=E
+To avoid "too many hops".
 
 という考えがあります。
 ＃ See fml-support's ML Count: 01816, 01821 for the discussion
 
 
 .S	Return-Receipt-To: も削るべき
+=E.S	cut out Return-Receipt-To:
 
 配送したメンバー全員からメールが返ってくるからですね。
+=E
+To avoid replies from all ML members.
 
 もちろん本来はヘッダの意味を考えてメールを書かない”そのメールを出した
 人”が悪いのはいうまでもありまん。

@@ -38,12 +38,13 @@ Example:
 
 
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
-=E.S	Archive
+=E.S	Archive Generator
 .l	bin/Archive.pl
 .l	bin/Archive.sh
 .k	Archive.pl
 .k	Archive.sh
-.xref	archive
+.xref	Archive.pl
+
 
 アーカイブの節を参照 (.ptr{archive})
 =E
@@ -171,8 +172,8 @@ debug only.
 
 
 .S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
-=E.S	expire
-.xref	expire
+=E.S	Expire
+.xref	bin/expire.pl
 
 Please see the chapter .ptr{expire}.
 

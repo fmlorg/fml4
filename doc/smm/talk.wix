@@ -1,7 +1,9 @@
 .C	ちょっとした事
 =E.C	little talks around mail
-
-not translate this chapter.
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
 
 .S	Perl5 の余談
 in fml-support: 00645

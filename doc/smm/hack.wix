@@ -339,9 +339,10 @@ $TRF_NAME_HOOK = q#
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
 .key	# replyto コマンド
 
-=E
-* not translate 
-
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.fi
+.if LANG == JAPANESE
 .q
 From:    Yuao Tanigawa <yuao@infonia.or.jp>
 X-ML-Name: fml-support
@@ -384,7 +385,7 @@ MLのアドレスを書くようにしました。
 `#'記号が使えないです。
 
 .~q
-
+.fi
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
 =E.S	not deliver From: field address of in-coming mail. 

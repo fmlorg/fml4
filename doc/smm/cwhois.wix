@@ -3,6 +3,10 @@
 .l	cwhois
 .l	libexec/cwhois.pl
 .k	cwhois.pl
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
 
 .S	Whois Server with Cache
 .k	Whois Server with Cache

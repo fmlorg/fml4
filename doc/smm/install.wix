@@ -6,15 +6,15 @@
 
 とりあえず細かいチューニングを行なわなくてよいなら
 =E
-The simplest way to install Fml system is to do in the top directory
-of the fml source
-# Hence a lot of variables are pre-defined.
+The simplest way to install Fml system is to run 
 
+	make install
+or
 	perl makefml 
 
 =E
-when you make a new ML 
-=S
+in the top directory of the fml source. Please see INSTALL.English for
+more details.
 
 
 .S	makefml: 初心者向けインストール・インターフェイス

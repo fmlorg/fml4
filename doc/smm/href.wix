@@ -1,15 +1,15 @@
-.C	WWW 関係 (HyperReference ...)
+.C	Generating HTML articles 
 .l	href
 .k	WWW
 .k	ローカルスプールへのftp操作
 
-
 注意: HTML を作る場所ですが、デフォールトでは var/htdocs -> htdocs/ に
 変わっています。var は nobody 等へpermission を出していないからです。
 
-
 .S	自動的に スプールを html 化する(Expireはしない)
+=E.S	Automatically generating HTML articles from ML spool ($DIR/spool)
 .l	SyncHtml
+.k	automatic generation of html articles
 .key	自動 html 化
 .key	libsynchtml.pl
 .xref	spool2html.pl
@@ -17,113 +17,179 @@
 .k	$HTML_DIR
 
 $AUTO_HTML_GEN = 1; をセットすると、自動的にHTML化された記事も作ります。
-作る場所は $DIR の下の $HTML_DIR (デフォールトは htdocs) という場所です。
+作る場所は $DIR の下の $HTML_DIR (デフォールトは htdocs) という場所で
+す。この時普通のPLAINTEXTのスプール($SPOOL_DIRへ溜る)も同時に作ってい
+ます。
+=E
+When $AUTO_HTML_GEN = 1;, FML generates both plain articles in
+$DIR/spool and HTML articles in
 
 	$DIR/htdocs/
 
-この時普通のPLAINTEXTのスプール($SPOOL_DIRへ溜る)も同時に作っています。
-HTML化は全く別のプロセスです。スプールに関しては何もしません。
-必要ならスプールのEXPIRE等は別途明示的に設定する必要があります。
-.xref	expire
-
-HTML化の実体は HOOK で呼び出されます。
-fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
-ので;-)、HOOK でやれるように書き直しました。
+HTML化の実体は HOOK で呼び出されます。fml.pl の中から外部の 
+SyncHTMLfiles.pl を呼んでやらせるのは美しくないので;-)、HOOK でやれる
+ように書き直しました。
 注意: libsynchtml.pl により SyncHtml.pl は obsolete になりました
+=E
+The internal design of FML is running HTML generator functions as a
+hook. Running external program SyncHtmlfiles.pl is an old time design,
+which is obsolete.
 
-SYNOPSIS:
-	&SyncHtml(生成されたHTMLを置く場所, $ID, *Envelope);
+記事は htdocs/ の下に階層構造を作りその下に作られます。階層構造は日や
+記事番号100通ごとなどを単位にしています。
+=E
+FML creates HTML articles in sub-directories under htdocs/. The unit
+of sub-directoreis are based on days, weeks, month and article
+sequences.
+
+Example:
+
+	htdocs/
+	htdocs/19980120/
+	htdocs/19980120/1.html
+	htdocs/19980120/2.html
+	.....
+
+
+.S	&SyncHtml($HTML_DIR, $ID, *Envelope);
 .k	&SyncHtml
 
+SYNOPSIS:
+
+	&SyncHtml($HTML_DIR, $ID, *Envelope);
+
+	$HTML_DIR 	HTJL生成されたHTMLを置く場所
 	$ID		記事番号は &Distribute; で
 			グローバル変数 $ID はセットされる。
-	*Envelope	Envelope
+	*Envelope	%Envelope
+=E
+	$HTML_DIR 	HTML articles stored in here.
+	$ID		current article ID. Global variable ID is defined
+			in &Distribute.  
+	*Envelope	%Envelope
 
-例：
+Example: 
+
 	$FML_EXIT_HOOK .= q#;
 		&use('synchtml');
 		$HTML_DIR = 'htdocs';
 		&SyncHtml($HTML_DIR, $ID, *Envelope);
 	#;
 
+&SyncHtml を走らせると
+=E
+Running &SyncHtml makes
+
 	htdocs/index.html 
-	htdocs/記事番号.html 
+	htdocs/ID.html 
 
-を生成します。index.html の中身は
+を生成します。index.html の中身は LIST 構造を成しています。
+=E
+index.html is the follwing listing structure.
 
+	<UL>
 	<LI>
 	<A HREF=1310.html>
 	96/09/16 18:12:33 Subject
 	</A>
 
-のような
-
+.if	LANG == JAPANESE
 	<UL>
 	…
 	<LI> <A HREF=記事番号.html> Summary ファイルもどき </A>
 	…
-
-構造を自動的に作ります。
+.fi
 
 $HTML_INDEX_REVERSE_ORDER がセットされていると逆方向に <LI> エントリを
 作ります。つまり新しい記事が最初に来るわけです。
 .k	$HTML_INDEX_REVERSE_ORDER
+=E
+If $HTML_INDEX_REVERSE_ORDER is set (default), FML generates <LI>
+entries in reverse order. Latest article is on the top of index.html.
 
 この時各 directory の .indexcache にキャッシュされているデータから生成
 しています。ファイル .indexcache は $HTML_DATA_CACHE で変更できます。
 .k	$HTML_DATA_CACHE
+=E
+The cache file is $HTML_DATA_CACHE (default is .indexcache). 
+Each directory has cach file. 
 
 また、スレッドを生成するためのキャッシュのファイル名は 
 $HTML_DATA_THREAD です。
 .k	$HTML_DATA_THREAD
-
+=E
+Also cache file for threading is $HTML_DATA_THREAD.
 
 同じライブラリを呼んで同じことをするコマンドラインからのためのインター
 フェイスに spool2html.pl というのもあります。
 .xref spool2html.pl
+=E
+spool2html.pl is the command line interface.
 
 
 .S	HTML化する単位 (数 or 日)
+=E.S	Unit of HTML directory
 .l	$HTML_INDEX_UNIT
 .key	$HTML_INDEX_UNIT
 
 	$HTML_INDEX_UNIT (default 'day') 
 
-expireしない場合一つの htdocs/ に数千のファイルができることになり
-かねません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをま
-とめておく方が見やすいでしょう。
+expireしない場合一つの htdocs/ に数千のファイルができることになりかね
+ません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをまとめ
+ておく方が見やすいでしょう。現在の標準実装のデフォールトは 
+$HTML_INDEX_UNIT = 'day'; で
+=E
+$HTML_INDEX_UNIT is the unit of sub-directories under htdocs/. The
+default unit is 'day'. FML creates each sub-directory for each day and
+stores HTML articles.
 
-現在の標準実装のデフォールトは $HTML_INDEX_UNIT = 'day'; で
+Example: Creation of HTML articles on 1996/09/16
 
 	htdocs/19960916/index.html
-	htdocs/19960916/記事番号.html
+	htdocs/19960916/100.html
+	htdocs/19960916/101.html
 	…
 
 のように 1996/09/16 日のMLの記事を htdocs/19960916/ 以下にHTML化
-します。
+します。また、
 
-また、
 	$HTML_INDEX_UNIT = 数字 (e.g. 100)
 
 とした場合記事100個ごとに別のdirectoryを作ります。
-  
+=E
+If $HTML_INDEX_UNIT = number (e.g. 100), each sub-direcory is 100 HTML
+articles.
+
+Example:
+
 	htdocs/100/
+	htdocs/100/101.html
+	htdocs/100/102.html
+	…
 	htdocs/200/
+	htdocs/200/201.html
+	htdocs/200/202.html
 	…
 
-.S	スレッド化した index.html を作成する
+.S	thread.html; スレッド化した index を作成する
+=E.S	thread.html
 .k	$HTML_THREAD
 .k	スレッド化したHTML階層を作る
 
 スレッド化 HTML (libsynchtml.pl)
+=E
+Index file for threaded html articles are created when
 
 	$HTML_THREAD = 1; 
 
 にするとスレッド化したindex.html としてthread.html を作ります。両方を
 作るので好きな階層を見ればいいでしょう。
 スレッドには In-Reply-To: と References: の依存関係を使っています。
-
 よって、この場合は	 
+=E
+FML Threading depends on In-Reply-To: and References: fields. 
+Hence FML can recognize mails sent from some MUA's such as Eudora
+since they ignore In-Reply-To: and References: fields.
 
 	thread.html
 	index.html
@@ -136,17 +202,24 @@ expireしない場合一つの htdocs/ に数千のファイルができることになり
 
 
 .S	HTMLファイルのExpire
+=E.S	Expiration over HTML articles
 .k	$HTML_EXPIRE_LIMIT
 .k	$HTML_EXPIRE
 
-$HTML_EXPIRE_LIMIT	(default 0)
-	expire の“日”数。もし０以下ならおこなわない。
-	これが指定されていないときは index.html は増える一方:-)
+	$HTML_EXPIRE_LIMIT	(default 0)
 
+expire の“日”数。もし０以下ならおこなわない。これが指定されていない
+ときは index.html は増える一方:-)
 ＃注意: $HTML_EXPIRE はわかりにくいので $HTML_EXPIRE_LIMIT へ名前を変えた。
 ＃      なお内部では自動変換しているのでどっちでも動く
+=E
+The unit of expiration over HTML articles. If the unit <= 0,
+expiration does not run, so HTML articles breeds only:).
 
 なお今のアルゴリズムは以下のようなものです。htdocs の下は
+=E
+The current expiration algorithm follows: 
+Firstly the HTML directory has the following structure.
 
 	thread.html
 	index.html
@@ -160,23 +233,32 @@ $HTML_EXPIRE_LIMIT	(default 0)
 そうしないと中途半端に記事が欠落するとか、中途半端にファイルがなくなっ
 た状態で thread を再生成しなければならないので、ものすごく複雑な処理が
 必要になるからです。
+=E
+If removing articles one by one, FML requires sub-directory
+consistency checkes for re-creating index.html and so on. 
+It is difficult to keep consistency. 
+Hence our algorighm is "removing the whole sub-directory if all
+articles in the sub-direcoty are expired".
+After removing, FML re-creates the top index.html and thread.html. 
 
 directory ごと expire する根拠はdirectory 中に含まれる全てのファイルが 
 expire だと判定された場合です。よって、ある directory 中の一部のファイ
 ルが expire の日付を過ぎていてもそれらは全てのファイルが expire される
-まで残り続けることに注意して下さい。
-
-なお directory ごと消す時に一番上の index.html thread.html は再構成さ
-れます。
+まで残り続けることに注意して下さい。なお directory ごと消す時に一番上
+の index.html thread.html は再構成されます。
 
 また expire 処理の overhead がかなりかかります。また directry 単位なの
 に毎回 expire するべきか？の判定処理をしてもしょうがありません。デフォー
 ルトは投稿数に対し $HTML_EXPIRE_LIMIT * 5 回に一回 expire code は走り
 ます。
+=E
+Expiration codes requires some overhead. It must be of no use to run
+expiration each time FML runs since our algorighm is applied for each
+directory and so expirations occurs sometimes.
+FML runs expiration codes once $HTML_EXPIRE_LIMIT * 5 times in default.
 
 
-
-.S	BASE64の展開
+.S	BASE64 Decoding
 .k	$BASE64_DECODE
 .k	mewdecode
 
@@ -184,9 +266,12 @@ base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 された base64 decoder を使って展開しその結果をHTMLの中に埋め込みます。
 なお展開した結果はFMLが勝手につけた名前でファイルに落されます。
 ユーザが与えた名前は security 上使いません。
+=E
+If $BASE64_DECODE is defined, FML try to decode BASE64 parts contained
+in a mail when HTML articles is created.
 
-例：
-	BASE64_DECODE = "/usr/local/bin/mewdecode";
+Example:
+	$BASE64_DECODE = "/usr/local/bin/mewdecode";
 
 
 .S	$HTML_OUTPUT_FILTER
@@ -194,30 +279,39 @@ base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 
 index.html を作る時 $HTML_OUTPUT_FILTER というプログラムを通してから作
 る。具体的には 日本語漢字変換やMIME,BASE64 decoder 等が該当するだろう。
+=E
+When creating HTML articles, apply $HTML_OUTPUT_FILTER as a filter.
 
 
 .S	$HTML_TITLE_HOOK
 .k	$HTML_TITLE_HOOK
 
 HTMLに変換された記事をファイルに保存する直前に実行されるフック。
+=E
+$HTML_TITLE_HOOK is evaluated just before saving HTML files.
 
-例：
+例:
+=E
+Example: to change HTML article subject.
+
 	q#$HtmlTitle = sprintf("%s %s", $Now, $HtmlTitle);#;
 
 で、タイトルのシンタックスを日付を付け加える等…変えられる。
 
 
 .S	キーワードによるHTML化の自動分類 （今の実装でOKか未確認？）
+=E.S	Classification by keywords (obsolete?)
 .k	@HTML_FIELD
 .k	Keyword:
 
+.if 	LANG == JAPANESE
 ヘッダの Keyword: エントリが含んでいるキーワードが @HTML_FIELD のどれ
 かにマッチした場合に、キーワード別に別のHTML階層を作ります。
+.fi
 
 
-.S	TalkWithHttpServer
-.l	TalkWithHttpServer
-.k	TalkWithHttpServer
+.S	&TalkWithHttpServer
+.l	&TalkWithHttpServer
 .k	&TalkWithHttpServer
 .xref	bin/geturl.pl
 
@@ -229,18 +323,32 @@ SYNOPSIS:
 	$request	リクエストの内容
 	$tp		TYPE OF PROTOCOL (http, gopher, ftp, ...)
 	*e		答えを入れるためのstab
+=E
+	$host		host	(e.g. www.iij.ad.jp)
+	$port		port	(70, 80, 21, ...)
+	$request	request (e.g. http://www.fml.org/)
+	$tp		TYPE OF PROTOCOL (http, gopher, ftp, ...)
+	*e		stab of the result
 
 
 http:// で始まらない時には、デフォールトで聞きにいくサーバを
+=E
+If the request begins without http://host, the www server to prepend
+is
+
 	$DEFAULT_HTTP_SERVER
 .k	$DEFAULT_HTTP_SERVER
 
 で、またデフォールトを80から変えたい時は
+=E
+the default port number is
 
 	$DEFAULT_HTTP_PORT 
 .k	$DEFAULT_HTTP_PORT 
 
 で変更できます。同様に gopher についても
+=E
+On gopher
 
 	$DEFAULT_GOPHER_SERVER
 	$DEFAULT_GOPHER_PORT 
@@ -249,7 +357,8 @@ http:// で始まらない時には、デフォールトで聞きにいくサーバを
 
 という変数が用意されています。
 
-例：
+Example:
+
     if ($tp =~ /http/i) {
 	$host = $host || $DEFAULT_HTTP_SERVER;
 	$port = $port || $DEFAULT_HTTP_PORT || 80;
@@ -262,6 +371,7 @@ http:// で始まらない時には、デフォールトで聞きにいくサーバを
 	
 
 .S	URLの中身を返すサーバ
+=E.S	Server to get the request URL and send back it
 .k	&HRef
 .k	libhref.pl
 
@@ -274,9 +384,12 @@ $START_HOOK = q#
 #;
 
 です。こうするとメール本文をコマンドレポートの形で送り返します。
+=E
+send backs the URL contents as a "fml status report".
 
 
 .S	HRef関数によるURL先データの引き落とし
+=E.S	Download URL
 .l	HRef
 .k	&HRef
 .k	HRef
@@ -286,6 +399,9 @@ SYNOPSIS:
 
 $request のURLの内容を$Envelope{'message'}に入れて送り返す。
 $request は
+=E
+Download the URL by $request and set it in $Envelope{'message'}.
+Requests below are available.
 
 	http://
 	gopher://
@@ -293,8 +409,12 @@ $request は
 
 を理解します。ftp はローカル or ftpmailへのリレーへ自動的に切替えます。
 また、もしバイナリデータの場合はuuencodeして送り返します。
+=E
+ftp:// automatically changes to local or to be relaied to ftpmail. 
 
 関数の使い方の実例としては bin/geturl.pl 
+=E
+An example of functions is bin/geturl.pl
 .xref bin/geturl.pl
 
 

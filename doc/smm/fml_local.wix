@@ -1,9 +1,13 @@
 .C	libexec/fml_local.pl マニュアル
+=E.C	libexec/fml_local.pl manual
 .l	fml_local
 .l	fml_local.pl
 .key	manual: fml_local.pl
 .label	manual-of-fml_local.pl
-
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
 
 ~/.forward は通常アドレスのフォワードに使われますが、本質的に 
 /etc/aliases と同じように作動しますので、ここにプログラムを設定すれば

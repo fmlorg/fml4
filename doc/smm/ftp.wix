@@ -2,7 +2,7 @@
 =E.C	ftp-like access to local spool (ftpmail)
 .l	ftp
 
-This is an additional bonus program.
+*** This is an additional bonus program. ***
 
 .S	libftp.pl Introduction
 .k	libftp.pl

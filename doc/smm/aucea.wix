@@ -1,9 +1,10 @@
 .C	Aucea (AUtomatic Certification and Alert system)
 .l	aucea
 .k	Aucea (AUtomatic Certification and Alert system)
-
-*** I do not translate this chapter.
-*** This code is not maintained, to ensure nothing now.
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
 
 .S	Introduction to Aucea
 

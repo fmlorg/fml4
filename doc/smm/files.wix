@@ -1,7 +1,8 @@
 .l	library-lists
-.k	FML ライブラリ一覧 
 
+.if LANG == JAPANESE
 	表: FML ライブラリ 一覧 
+.k	FML ライブラリ一覧 
 
    libMIME.pl		MIME 操作関数インターフェイス
    libamctl.pl		actives members ファイルの制御ライブラリ
@@ -52,6 +53,57 @@
    libutils.pl		各種 misc な関数
    libwhois.pl		WHOIS インターフェイス
 
+.fi
+.if LANG == ENGLISH
+	list: FML library 
+
+	libMIME.pl		MIME
+	libamctl.pl		control of distribution and member list
+	libarchive.pl		archiver
+	libcompat.pl		compatible routine
+	libcompat_cf1.pl	compatible routine
+	libcompat_cf2.pl	compatible routine
+	libcompat_fml15.pl	compatible routine
+	libcompat_fml20.pl	compatible routine
+	libconfirm.pl		confirmation when auto registration
+	libcrosspost.pl		crosspost 
+	libcrypt.pl		crypt() utilities
+	libdebug.pl		debug
+	libdist.pl		distribution
+	liberror.pl		error message utilities
+	libexpire.pl		expire
+	libfml.pl		command interface
+	libfop.pl		file operation
+	libftp.pl		obsolete; local access style ftp
+	libftpmail.pl		obsolete; local access style ftp (ftpmail)
+	libhref.pl		functions to get URL
+	libkern.pl		kernel library (== fml.pl)
+	liblibrary.pl		library commands
+	liblock.pl		link(2) style lock for OS' which has no flock
+	liblop.pl		some utilities: local operations
+	libmd5.pl		MD5
+	libmladdr.pl		obsolete
+	libmlcp.pl		Mailing List Control Protocool
+	libmodedef.pl		mode definition
+	libmoderated.pl		moderator mode
+	libmodeutils.pl		moderator mode utilities
+	libmti.pl		Mail Traffic Information
+	libnewsyslog.pl		Newsyslog(8) compatible
+	libpgp.pl		PGP functions
+	libpop.pl		POP3
+	libra.pl		Remote Administration
+	librelayhack.pl		Relay Hack
+	libremote.pl		obsolete; == libra.pl
+	librfc1153.pl		RFC1153 
+	libsendfile.pl		send back files in bundle
+	libsmtpsd.pl		smtpfeed
+	libstardate.pl		Star Trek Stardate
+	libsynchtml.pl		Html generator
+	libtagdef.pl		Subject Tag Definition
+	libutils.pl		utilities
+	libwhois.pl		whois (43/tcp) interface, both tcp and local
+
+.fi
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 

@@ -1,5 +1,16 @@
-.A	コマンドライン一覧
+.C	コマンドライン一覧
+=E.C	Command Line Index
 .l	command-line-option-index
+
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS FUNCTIONS. ***
+
+Except for debugging, the command line arguments to be used is only
+"--ctladdr".
+
+.return
+.fi
+
 
 .k	--distribute
 .l	--distribute

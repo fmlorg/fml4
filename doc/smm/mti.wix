@@ -1,66 +1,246 @@
 .C	Mail Traffic Information
 
-	--- MTI IS NOW UNDERWAY ---
+.S	Traffic Monitor
+
+
+トラフィックのモニターは(学術的興味は別として:)特に必要だとは思いませ
+ん。が、トラフィックをモニタすることでメール爆弾(mail bombing)の自動検
+出への応用などが考えられると思います。さらなる応用としてメールのループ
+なども検出できるでしょう。
+
+
+Bombing チェックの第一歩は直観的に考えると「トラフィックが一気に大きく
+なる時を捉えること」です。しかしこの論理ではUUCPやダイアルアップIPなど
+で溜ったメールを一気に掃き出す必要のあるネットワークから出てくる場合や、
+ネットワークエラーのために溜ったメールが一気に来る場合なども一気にメー
+ルが来るため、正しいメールなのかそれともメール爆弾なのか区別がつかない
+などの問題があります。
+
+
+いづれの場合でも「意図的なアタックを自動検出できるか？」はどの程度 
+fake されたメールが FML につっこまれるかに依存します。これはSMTPに認証
+の能力がないからで、IP Spoofing も可能であれば fml.pl が起動された時刻
+以外は全て fake も理論上有り得ます。
 
 
 .S	Mail Traffic Information
 
 MTI (Mail Traffic Information) はFML内蔵のメールトラフィックモニタシス
-テムです。これは From: Return-Path: Sender: などの address やホスト情
-報を KEY にしてメールがFMLを起動した時間やあるホストの通過時間を cache 
-します。
-
-応用として、この情報を用いて MAIL BOMB ATTACK の監視ができるはずですが、
-うまい評価関数を探すのは非常に大変です。
-それはメールヘッダを fake するのが簡単だからです。
-また本質的に、ネットワークエラーのために溜ったメールが一気に来るのとメー
-ル爆弾をどう区別するのか？という問題も抱えています。
+テムです。MTIは From: Return-Path: Sender: などの address やホスト情報
+を KEY にしてメールがFMLを起動した時間やあるホストの通過時間を cache 
+します。この情報を用いて MAIL BOMB ATTACK の監視ができるはずですが、前
+述の理由により、うまい評価関数を探すのが非常に大変です。
 
 
-.S	BOMBING 判定条件
+.S	メール爆弾 (MAIL BOMBING) 判定評価関数
+
+注意: 以下表記できないので TeX を一部織り混ぜて書く。
 
 メール (m_i) が送られてきてFMLを起動した時間を t_i とし、そのメールの
 ヘッダの Date: を d_i とする。ここで i は単なるインデックスでFMLを起動
-した順番、正確にはFMLを起動してさらにロックがはずれ実際に処理された順
-番。
+した順番(正確にはFMLを起動してさらにロックがはずれ実際に処理された順番
+になるが)としよう。
 
 MTI では cache として それぞれのメールの t_i と d_i を対にしてキャッシュ
-している。一定時間($MTI_EXPIRE_UNIT)経過後 t_i の情報はキャッシュから
-捨てられる。
+している。なお一定時間($MTI_EXPIRE_UNIT)経過後 t_i の情報はキャッシュ
+から捨てられる。
+.k	$MTI_EXPIRE_UNIT
+
 
 MTIのデフォールトの評価関数では
 
-	Σ 1 / | t_i - t_j + ε | > $MTI_BURST_HARD_LIMIT
+	Σ 1 / | t_i - t_j + ε | 
 
-を評価している。ここで ε は発散を防ぐためのものである。t_i - t_j は
+の値を評価する。ここで ε は発散を防ぐためのものである。t_i - t_j は
 FMLを起動した時間差だから、多くのメールが送り付けられ連続して起動した
-場合に小さな値をとる。これを逆数にして和を取るのでFMLを連続して起動し
-た場合は BOMBING だとみなされる。
+場合には小さな値をとる。これを逆数にして和を取るのでFMLを連続して起動
+した場合は大きい値をとることになる。この値がある閾値(threshold)を越え
+ると BOMBING だとみなす。
 
-$MTI_BURST_HADR_LIMIT は 0.2 などの値を設定する。この数字の選び方はは
-かなり微妙ではっきりとした方針は作れない。例えば
+この threshold には 0.2 などの値を設定する。この数字の選び方はかなり微
+妙ではっきりとした方針は作れない。例えば
 
-	i=N
- E{t} =	Σ 1 / | t_i - t_j + ε | > Σ 1/M 〜 N/M
-	i=1
+		i=N
+	E{t} =	Σ 1 / | t_i - t_j + ε | > Σ 1/M 〜 N/M
+		i=1
 
 	| t_i - t_j + ε | < M
 
-と見積もると M = 10, N = 5 でだいたい N/M 〜 0.2 となる。つまり10秒程
-度の短い間隔で来るメールが5通連続で来たら BOMB か否かの判定のLIMITとみ
-なすといえる。
+と見積もると M = 10, N = 5 でだいたい N/M 〜 0.2 となる。つまり 0.2 は
+10秒程度の短い間隔で来るメールが5通連続で来たら BOMB か否かの判定の
+LIMIT程度とみなせる。
 
-この論理の明らかな問題点は 途中のネットワークのエラーやUUCP、DIPなどで
-常に接続されていないようなネットワーク構成の向うからメールが送られる場
-合 queue に溜ったメールが一気に送られてくることがあり得る。上の条件だ
-けではそれも BOMBING だとみなされてしまう。
+この論理の明らかな問題点は 途中のネットワークのエラーやUUCP、DIPなど常
+に接続されていないようなネットワークからメールが送られる場合で、この場
+合は queue に溜ったメールが一気に送られてくることがあり得る。上の条件
+だけではそれも BOMBING だとみなされてしまう。
 
-そのため Date: の値 d_i を用いて同様な判定を下すことを考える。つまり
+そのためメールヘッダの Date: フィールドの値 d_i を用いて同様な判定を下
+すことを考える。つまり
 
- E{d} =	Σ 1 / | d_i - d_j + ε | > $MTI_BURST_HARD_LIMIT
+	E{d} =	Σ 1 / | d_i - d_j + ε |
 
-を考える。普通にメールを書いて queue に溜め一気に送り出す場合 Date: は
+を考えることにしよう。
+
+普通にメールを書いて queue に溜め一気に送り出す場合を考えると Date: は
 かなり飛び飛びの値をとるだろう。そのため E{t} は値が大きくても E{d} の
 値は大きくはならないはずである。当然それがうまく判定されるような 
-$MTI_BURST_HARD_LIMIT をうまく選んでおく必要がある。
+threshold をうまく選んでおく必要がある。
+
+E{d} でも、例えばださいMUAがあって同じ Date: 同じ Message-Id で複数メー
+ルを出してしまうとすると、この時は d_i - d_j 〜 0、E{d} >> 1 になって
+しまい一瞬でメール爆弾だと判定してしまうだろう。そのため実際のコードで
+は発散を防ぐための ε を導入するのではなく
+
+	Σ 1 / ( | d_i - d_j | < 3 ? 3 : | d_i - d_j | )
+
+のように和を取っている。
+
+
+.S	評価関数
+.k	$MTI_BURST_SOFT_LIMIT
+.k	$MTI_BURST_HARD_LIMIT
+
+ここではデフォールトの評価関数について解説する。詳しくは前節参照。
+ここで E{t} E{d} は上述の計算方式で計算したものとする。
+
+	E{t}	fml.pl を起動した時刻の差の逆数を足したもの
+	E{d}	メールヘッダの Date: の差の逆数を足したもの
+
+を計算する。判定は以下のように行なう。
+
+1	soft limit
+
+	メールを出す大元で一辺に出す時は E{d} の方が一般に大きい
+	E{d} < E{t} はネットワークエラーやUUCPの可能性がある
+
+2	hard limit
+
+	条件 1 は Date: が fake されていれば役に立たない。
+	そのため E{d} E{t} どちらかがある threshold を越えたら
+	それ以外の条件を問わず bomb とみなす。
+	
+3 	">" (greater than) 
+	">" (greater than) はある誤差の範囲で greater than 
+	であるべきだろう
+
+
+	if ( E{d} > E{t} ) {
+		if ( E{d} > $MTI_BURST_SOFT_LIMIT) {
+			メール爆弾に違いない
+		} 
+	}
+	else {  # e.g. 条件 1 が成立しないように fake された時
+
+		if ( E{t} > $MTI_BURST_HARD_LIMIT ) {
+			メール爆弾に違いない
+		}
+		if ( E{d} > $MTI_BURST_HARD_LIMIT ) {
+			メール爆弾に違いない
+		}
+	}
+
+
+.S	MTIの設定変数
+
+	$USE_MTI
+
+MTI 機能を ON にする。これを enable しないと以下の機能は全て作動しない。
+
+	$USE_MTI_TEST (ベータテストの間だけ存在)
+
+BOMBING と判定した場合に弾くか否か？βテストの間はこの変数をいれないと
+弾かずにMTIの判断がログに残っていくだけです。ベータテストが終ったらこ
+の変数はなくなり、自動的に弾くように変更されます。
+
+	$MTI_BURST_SOFT_LIMIT
+	$MTI_BURST_HARD_LIMIT
+
+デフォールトの評価関数のパラメータ(上述)
+
+	$MTI_BURST_MINIMUM
+.k	$MTI_BURST_MINIMUM
+
+和を取る時に $MTI_BURST_MINIMUM 以下の値は $MTI_BURST_MINIMUM へ繰り上
+げ。デフォールトは3 (3秒)。
+
+	$MTI_COST_EVAL_FUNCTION
+.k	$MTI_COST_EVAL_FUNCTION
+
+自分でカスタマイズした評価関数を呼び出すならこの変数に関数名をセットす
+る。
+
+	$MTI_COST_EVAL_HOOK
+.k	$MTI_COST_EVAL_HOOK
+
+HOOK
+
+
+.S	トラフィックの最大値
+
+MTIのおまけの機能として評価関数を Σ 1 と取ると単純に単位時間辺りの記
+事数になる。これを評価し、あるLIMITを越えたら reject する。
+
+	$MTI_DISTRIBUTE_TRAFFIC_MAX
+.k	$MTI_DISTRIBUTE_TRAFFIC_MAX
+
+時間あたりの投稿数の最大値。
+
+	$MTI_COMMAND_TRAFFIC_MAX
+.k	$MTI_COMMAND_TRAFFIC_MAX
+
+時間あたりのコマンドメール数の最大値。それぞれについて独立に設定できる。
+単位時間は $MTI_EXPIRE_UNIT (default 3600 sec.) である。
+
+
+
+
+.S	その他
+
+	$MTI_EXPIRE_UNIT
+.k	$MTI_EXPIRE_UNIT
+
+cache life time.
+
+	$MTI_APPEND_TO_REJECT_ADDR_LIST
+.k	$MTI_APPEND_TO_REJECT_ADDR_LIST
+
+bomber と判定されたアドレスを $REJECT_ADDR_LIST ($DIR/spamlist) にも加
+えるか？否か。デフォールトは NO 。というのは必ずしも From: のアドレス
+ではないので $REJECT_ADDR_LIST に入れることに意味があるかどうかは不明
+なので。
+
+
+.S	ファイルなど
+
+	$MTI_DB
+.k	$MTI_DB
+	$MTI_HI_DB
+.k	$MTI_HI_DB
+
+キャッシュ・ファイル:
+
+	$MTI_MAIL_FROM_HINT_LIST
+.k	$MTI_MAIL_FROM_HINT_LIST
+
+
+$DIR/mti_mailfrom.hint というファイルにMTIのログをヒントとして残す。こ
+れをどう使うかはまた別の問題。例えばこれを sendmail に check_mail のデー
+タとして渡すなどの応用が考えられる。
+
+
+.S	カスタマイズ関数とハッシュデータ
+
+ベータテストなので、後で仕様が変わるかもしれなひ:)
+
+    $fp = $MTI_COST_EVAL_FUNCTION || 'MTISimpleBomberP';
+    &$fp(*e, *MTI, *HI, *addrinfo, *hostinfo);
+
+	%Envelope	Envlope
+	%MTI		アドレスと時刻
+	%HI		ホストと時刻
+	%addrinfo	来たメールのヘッダから解析した address 
+	%hostinfo	Received: から割り出したホストの通過時間
+			でも評価関数で使ってない;D
+
 
