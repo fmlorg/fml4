@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ESMTP.pm,v 1.3 2001/07/08 13:35:42 fukachan Exp $
+# $FML: ESMTP.pm,v 1.5 2001/12/26 02:48:50 fukachan Exp $
 #
 
 package Mail::Delivery::ESMTP;
@@ -15,6 +15,11 @@ use Mail::Delivery::SMTP;
 
 @ISA = qw(Mail::Delivery::SMTP);
 
+
+# Descriptions: constructor. forward the request to base class (SMTP).
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: OBJ
 sub new
 {
     my ($self) = @_;
@@ -49,7 +54,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ThreadTrack.pm,v 1.22 2001/11/26 09:12:38 fukachan Exp $
+# $FML: ThreadTrack.pm,v 1.24 2001/12/26 14:23:29 fukachan Exp $
 #
 
 package Mail::ThreadTrack;
@@ -68,9 +68,9 @@ C<$id> is sequential number for input data (article).
 
 
 # Descriptions: constructor
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: object
+# Return Value: OBJ
 sub new
 {
     my ($self, $args) = @_;
@@ -143,16 +143,16 @@ sub DESTROY {}
 
 
 # Descriptions: "mkdir -p" or "mkdirhier"
-#    Arguments: directory [file_mode]
+#    Arguments: STR($dir) STR($mode)
 # Side Effects: set $ErrorString
-# Return Value: succeeded to create directory or not
+# Return Value: 1 or UNDEF
 sub _mkdirhier
 {
     my ($dir, $mode) = @_;
     $mode = defined $mode ? $mode : 0700;
 
     # XXX $mode (e.g. 0755) should be a numeric not a string
-    eval q{ 
+    eval q{
         use File::Path;
         mkpath($dir, 0, $mode);
     };
@@ -161,9 +161,9 @@ sub _mkdirhier
 }
 
 
-# Descriptions: set up directory which is taken from 
+# Descriptions: set up directory which is taken from
 #               $self->{ _db_dir }
-#    Arguments: $self $curproc $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: create a "_db_dir" directory if needed
 # Return Value: 1 (success) or undef (fail)
 sub _init_dir
@@ -188,16 +188,16 @@ sub _init_dir
 
 =head2 C<increment_id(file)>
 
-increment thread number which is taken up from C<file> 
+increment thread number which is taken up from C<file>
 and save its new number to C<file>.
 
 =cut
 
 
 # Descriptions: increment thread number $id holded in $seq_file
-#    Arguments: $self $seq_file
-# Side Effects: increment id holded in $seq_file 
-# Return Value: number
+#    Arguments: OBJ($self) STR($seq_file)
+# Side Effects: increment id holded in $seq_file
+# Return Value: NUM
 sub increment_id
 {
     my ($self, $seq_file) = @_;
@@ -213,7 +213,7 @@ sub increment_id
 	return $rh->{ _info }->{ sequence };
     }
     else {
-	$seq = $rh->{ _info }->{ sequence } = 1; 
+	$seq = $rh->{ _info }->{ sequence } = 1;
     }
 
     $self->db_close();
@@ -224,15 +224,15 @@ sub increment_id
 
 =head2 list_up_thread_id()
 
-return @thread_id ARRAY 
+return @thread_id ARRAY
 
 =cut
 
 
 # Descriptions: return @thread_id ARRAY
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update statistics
+# Return Value: ARRAY_HASH
 sub list_up_thread_id
 {
     my ($self) = @_;
@@ -267,20 +267,20 @@ sub list_up_thread_id
 =head2 set_mode($mode)
 
 specify output format by $mode string.
-"text" and "html" are available. 
+"text" and "html" are available.
 "text" by default.
 
 =head2 get_mode()
 
-get output format. 
+get output format.
 
 =cut
 
 
 # Descriptions: set output format
-#    Arguments: $self $string
+#    Arguments: OBJ($self) STR($mode)
 # Side Effects: none
-# Return Value: string
+# Return Value: STR
 sub set_mode
 {
     my ($self, $mode) = @_;
@@ -289,9 +289,9 @@ sub set_mode
 
 
 # Descriptions: set output format
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: string
+# Return Value: STR
 sub get_mode
 {
     my ($self) = @_;
@@ -301,11 +301,15 @@ sub get_mode
 
 =head2 set_fd( $fd )
 
-=head2 get_fd( $fd )
+=head2 get_fd()
 
 =cut
 
 
+# Descriptions: set output format
+#    Arguments: OBJ($self) HADNLE($fd)
+# Side Effects: none
+# Return Value: STR
 sub set_fd
 {
     my ($self, $fd) = @_;
@@ -314,9 +318,9 @@ sub set_fd
 
 
 # Descriptions: set output format
-#    Arguments: $self $string
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: string
+# Return Value: STR
 sub get_fd
 {
     my ($self) = @_;
@@ -331,6 +335,10 @@ set thread listing order where $order is 'normal' or 'reverse'.
 =cut
 
 
+# Descriptions: set thread listing order
+#    Arguments: OBJ($self) STR($order)
+# Side Effects: none
+# Return Value: none
 sub set_order
 {
     my ($self, $order) = @_;
@@ -349,13 +357,15 @@ sub set_order
 
 =head2 exist($thread_id)
 
+$thread_id exists or not?
+
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $string
-# Side Effects: 
-# Return Value: none
+# Descriptions: $thread_id exists or not?
+#    Arguments: OBJ($self) STR($id)
+# Side Effects: none
+# Return Value: 1 or 0
 sub exist
 {
     my ($self, $id) = @_;
@@ -367,7 +377,7 @@ sub exist
 
     if (defined $rh->{ _articles }) {
 	my $a = $rh->{ _articles };
-	$r = (defined $a->{ $id } ? 1 : 0);	
+	$r = (defined $a->{ $id } ? 1 : 0);
     }
 
     $self->db_close();
@@ -383,6 +393,10 @@ close specified $thread_id.
 =cut
 
 
+# Descriptions: close specified $thread_id.
+#    Arguments: OBJ($self) STR($thread_id)
+# Side Effects: update status
+# Return Value: none
 sub close
 {
     my ($self, $thread_id) = @_;
@@ -408,9 +422,9 @@ C<set_status()> calls db_open() an db_close() automatically within it.
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $curproc $args
-# Side Effects: 
+# Descriptions: set status
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update status
 # Return Value: none
 sub set_status
 {
@@ -424,9 +438,9 @@ sub set_status
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+# Descriptions: set status
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update status
 # Return Value: none
 sub _set_status
 {
@@ -445,13 +459,17 @@ add filter rule to ignore in thread database.
 =cut
 
 
+# Descriptions: add filter rule to ignore in thread database.
+#    Arguments: OBJ($self) HASH_REF($hash)
+# Side Effects: none
+# Return Value: none
 sub add_filter
 {
     my ($self, $hash) = @_;
 
     # update filter list
     my ($k, $v);
-    while (($k, $v) = each %$hash) { 
+    while (($k, $v) = each %$hash) {
 	$self->{ _filterlist }->{ $k } = $v;
     }
 }
@@ -459,11 +477,14 @@ sub add_filter
 
 =head2 log( $str )
 
+log $str
+
 =cut
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+
+# Descriptions: log
+#    Arguments: OBJ($self) STR($str)
+# Side Effects: none
 # Return Value: none
 sub log
 {
@@ -488,7 +509,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000-2001 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SMTP.pm,v 1.9 2001/10/10 09:46:21 fukachan Exp $
+# $FML: SMTP.pm,v 1.12 2002/01/16 13:34:03 fukachan Exp $
 #
 
 
@@ -28,7 +28,7 @@ Mail::Delivery::SMTP - interface for SMTP service
 
 =head1 SYNOPSIS
 
-To initialize, 
+To initialize,
 
     use Mail::Message;
 
@@ -80,7 +80,7 @@ This module provides SMTP/ESMTP mail delivery service.
 It tries IPv6 connection If possible.
 
 The socket creation and tcp connection is controlled by
-sub-classes, 
+sub-classes,
 C<Mail::Delivery::Net::INET4> and
 C<Mail::Delivery::Net::INET6>.
 
@@ -93,7 +93,7 @@ See L<IO::Adapter> for more details.
 
 =head2 C<new($args)>
 
-the constructor. 
+the constructor.
 Please specify it in a hash reference as an argument of new().
 Several parameters on logging and timeout et. al. are avialable.
 
@@ -104,16 +104,17 @@ Several parameters on logging and timeout et. al. are avialable.
    default_io_timeout   default timeout associated with the socket IO
 
 C<log_function()> is the function pointer to write a message in the
-log file.  
+log file.
 C<smtp_log_function()> is special function pointer to log SMTP
 transactions.
 
 =cut
 
+
 # Descriptions: Mail::Delivery::SMTP constructor
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: $self ($me) hash has some default values
-# Return Value: object
+# Return Value: OBJ
 sub new
 {
     my ($self, $args) = @_;
@@ -139,7 +140,7 @@ sub new
 
 
 # Descriptions: send a (SMTP/LMTP) command string to BSD socket
-#    Arguments: $self $command_string
+#    Arguments: OBJ($self) STR($command)
 # Side Effects: log file by _smtplog
 #               set _last_command and _error_action in object itself
 # Return Value: none
@@ -162,7 +163,7 @@ sub _send_command
 
 
 # Descriptions: receive a reply for a (SMTP/LMTP) command
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: log file by _smtplog
 # Return Value: none
 sub _read_reply
@@ -183,7 +184,7 @@ sub _read_reply
     # XXX Attention! dynamic scope by local() for %SIG is essential.
     #     See books on Perl for more details on my() and local() difference.
     eval {
-	local($SIG{ALRM}) = sub { croak("$id socket timeout")}; 
+	local($SIG{ALRM}) = sub { croak("$id socket timeout")};
 	alarm( $self->{_default_io_timeout} );
 	my $buf = '';
 
@@ -198,7 +199,7 @@ sub _read_reply
 	    # check smtp attributes
 	    if ($check_attributes) {
 		if ($buf =~ /^250.PIPELINING/i) {
-		    $self->{'_can_use_pipelining'} = 'yes'; 
+		    $self->{'_can_use_pipelining'} = 'yes';
 		}
 		if ($buf =~ /^250.ETRN/i) {
 		    $self->{'_can_use_etrn'} = 'yes';
@@ -241,7 +242,7 @@ sub _read_reply
 #               1. try connect(2) by IPv6 if we can use Socket6.pm
 #               2. try connect(2) by IPv4
 #                  if $host is not IPv6 raw address e.g. [::1]:25
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: set file handle (BSD socket) in $self->{_socket}
 # Return Value: file handle (created BSD socket) or undef()
 sub _connect
@@ -279,16 +280,21 @@ sub _connect
     }
 }
 
+
 =head2 C<socket_is_connected($socket)>
 
 $socket has peer or not by C<getpeername()>.
 
    XXX sub $socket->connected { getpeername($self);}
-   XXX IO::Socket of old perl have no such method. 
+   XXX IO::Socket of old perl have no such method.
 
 =cut
 
 
+# Descriptions: this socket is connected or not
+#    Arguments: OBJ($self) HANDLE($socket)
+# Side Effects: none
+# Return Value: 1 or 0
 sub socket_is_connected
 {
     my ($self, $socket) = @_;
@@ -308,9 +314,9 @@ close BSD socket
 =cut
 
 # Descriptions: close BSD socket
-#    Arguments: $self
-# Side Effects: 
-# Return Value: none
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: same as close()
 sub close
 {
     my ($self) = @_;
@@ -345,18 +351,18 @@ You can specify the following parameter at C<$args> HASH REFERENCE.
     body               Mail::Message object
 
 C<smtp_servers> is a list of MTA's (Mail Transport Agents).
-The syntax of each MTA is C<host:port> or C<address:port> style. 
-If you use a raw IPv6 address, use C<[address]:port> syntax. 
+The syntax of each MTA is C<host:port> or C<address:port> style.
+If you use a raw IPv6 address, use C<[address]:port> syntax.
 For example, [::1]:25 (IPv6 loopback address).
 You can specify a combination of IPv4 and IPv6 addresses at
 C<smtp_servers>.
 C<deliver()> automatically tries smtp connection on both protocols.
 
-C<smtp_sender> is the sender's email address. 
+C<smtp_sender> is the sender's email address.
 It is used at MAIL FROM: command.
 
 C<recipient_maps> is a list of C<maps>.
-See L<IO::Adapter> for more details. 
+See L<IO::Adapter> for more details.
 For example,
 
 To read addresses from a file, specify the map as
@@ -368,8 +374,8 @@ and to read addresses from /etc/group
          unix.group:fml
 
 C<recipient_limit> is the max number of recipients in one SMTP
-transaction. 1000 by default, 
-which corresponds to the limit by C<Postfix>. 
+transaction. 1000 by default,
+which corresponds to the limit by C<Postfix>.
 
 C<header> is an C<FML::Header> object.
 
@@ -378,6 +384,7 @@ See L<Mail::Message> for more details.
 
 =cut
 
+
 # Descriptions: main delivery loop for each recipient_maps and each mta.
 #               real delivery is done within _deliver() method.
 #               algorithm:
@@ -385,11 +392,11 @@ See L<Mail::Message> for more details.
 #                    for each $mta {
 #                       call _deliver()
 #                       send recipients up to $recipient_limit
-#                    } 
+#                    }
 #                 }
-#                 
-#    Arguments: $self $args
-# Side Effects: See Mail::Delivery::Utils for recipient_map utilities 
+#
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: See Mail::Delivery::Utils for recipient_map utilities
 #               to track the delivery process status.
 # Return Value: none
 sub deliver
@@ -403,7 +410,7 @@ sub deliver
     my %used_mta = ();
     my %used_map = ();
 
-    # prepare loop for each mta and map 
+    # prepare loop for each mta and map
     my @mta  = split(/\s+/, $args->{ smtp_servers } || '127.0.0.1:25');
     my @maps = ();
     if ( $args->{ recipient_maps } ) {
@@ -426,7 +433,7 @@ sub deliver
 	eval q{
 	    use IO::Adapter;
 	    my $obj = new IO::Adapter ($map, $args->{ map_params });
-	    if (defined $obj) { 
+	    if (defined $obj) {
 		$obj->open || croak("cannot open $map");
 	    }
 	};
@@ -434,7 +441,7 @@ sub deliver
 	    Log("Error: cannot open and ignore $map");
 	    next MAP;
 	}
-	
+
 	$self->_set_target_map($map);
 	$self->_set_map_status($map, 'not done');
 	$self->_set_map_position($map, 0);
@@ -470,7 +477,7 @@ sub deliver
 		# remove error messages for the next _deliver() session.
 		$self->error_clear;
 
-		# we read the whole $map now. 
+		# we read the whole $map now.
 		if ($self->_get_map_status($map) eq 'done') {
 		    last MTA;
 		}
@@ -483,7 +490,7 @@ sub deliver
 
 	    # NO effective mta in this inter loop. It impiles that
 	    # we used all MTA candidates. We reuse @mta again.
-	    if ($n_mta == 0) { 
+	    if ($n_mta == 0) {
 		Log("(debug) we used all MTA candidates. reuse \$mta");
 		my (@c) = keys %used_mta;
 		Log("(debug) candidates = (@c)");
@@ -497,7 +504,7 @@ sub deliver
     # CAUTION: this mapinfo tracks the delivery status.
     $self->_reset_mapinfo;
 
-    if ( $self->{ _num_recipients } ) { 
+    if ( $self->{ _num_recipients } ) {
 	Log( "recipients: ". $self->{ _num_recipients } );
     }
 }
@@ -518,7 +525,7 @@ sub deliver
 #              >250 oK
 #              <QUIT
 #              >221 good bye
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: remove error messages when we return from here
 #               for the next _deliver() session.
 # Return Value: none
@@ -530,7 +537,7 @@ sub _deliver
 
     # prepare smtp information
     my $myhostname = $args->{ myhostname } || 'localhost';
-    
+
     # 0. create BSD SOCKET as the communication terminal
     #    IF_ERROR_FOUND: do nothing and return as soon as possible
     my $socket       = $self->_connect($args);
@@ -541,7 +548,7 @@ sub _deliver
     }
 
     # 1. receive the first "220 .." message
-    #    If you faces some error in this stage, you have to do nothing 
+    #    If you faces some error in this stage, you have to do nothing
     #    since smtp connection has not established yet.
     #    IF_ERROR_FOUND: do nothing and return as soon as possible
     $self->_read_reply;
@@ -559,7 +566,7 @@ sub _deliver
     if ($self->error) { $self->_reset_smtp_transaction; return;}
 
     # 4. RCPT TO; ... send list of recipients
-    #    IF_ERROR_FOUND: roll back the process to the state before this 
+    #    IF_ERROR_FOUND: roll back the process to the state before this
     $self->_send_recipient_list($args);
     if ($self->error) {
 	$self->_rollback_map_position;
@@ -583,8 +590,8 @@ sub _deliver
 
 # Descriptions: initialize _deliver() process
 #               this routine is called at the first phase in _deliver()
-#    Arguments: $self $args
-# Side Effects: 
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: initialize object
 # Return Value: none
 sub _initialize_delivery_session
 {
@@ -599,8 +606,9 @@ sub _initialize_delivery_session
 ##### MAIL FROM:
 #####
 
+
 # Descriptions: send SMTP command "MAIL FROM"
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 #     See Also: RFC821, RFC1123
@@ -620,16 +628,17 @@ sub _send_mail_from
 ##### RCPT TO:
 #####
 
-# Descriptions: We evaluate recipient_maps parameter here. 
+
+# Descriptions: We evaluate recipient_maps parameter here.
 #               You can use a lot of classes for this directive: e.g.
 #               file, UNIX's /etc/group, YP, SQL, LDAP, ...
 #               Example: recipient_maps = file:members
 #                                         unix.group:admin
 #                                         mysql:toymodel
-#               IO::Adapter class is essential to handle abstract 
+#               IO::Adapter class is essential to handle abstract
 #               $recipient_map.
-#    Arguments: $self $args
-# Side Effects: $self->{ _retry_recipient_table } has recipients which 
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: $self->{ _retry_recipient_table } has recipients which
 #               causes some errors.
 #               _{set,get}_map_position() and _{set,get}_map_status()
 #               tracks the delivery process.
@@ -640,7 +649,7 @@ sub _send_recipient_list_by_recipient_map
     my $map = $self->_get_target_map;
 
     # open abstract recipient list objects.
-    # $map syntax is "type:parameter", e.g., 
+    # $map syntax is "type:parameter", e.g.,
     # file:$filename mysql:$schema_name
     use IO::Adapter;
     my $obj = new IO::Adapter $map;
@@ -702,13 +711,13 @@ sub _send_recipient_list_by_recipient_map
 
 
 # Descriptions: send "RCPT TO:<recipient>" to MTA
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub _send_recipient_list
 {
     my ($self, $args) = @_;
-    
+
     # evaluate recipient_maps
     if ( $self->_get_target_map ) {
 	$self->_send_recipient_list_by_recipient_map($args);
@@ -722,7 +731,7 @@ sub _send_recipient_list
 #####
 
 # Descriptions: send the header part of the message to socket
-#    Arguments: $self $socket $ref_to_header
+#    Arguments: OBJ($self) HANDLE($socket) OBJ($header)
 #               $ref_to_header is the FML::Header class object.
 # Side Effects: none
 # Return Value: none
@@ -730,7 +739,7 @@ sub _send_header_to_mta
 {
     my ($self, $socket, $header) = @_;
 
-    # get header 
+    # get header
     my $h = $header->as_string($socket);
     $h =~ s/\n/\r\n/g;
     print $socket $h;
@@ -739,7 +748,7 @@ sub _send_header_to_mta
 
 
 # Descriptions: send the body part of the message to socket
-#    Arguments: $self $socket "Mail::Message object"
+#    Arguments: OBJ($self) HANDLE($socket) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub _send_body_to_mta
@@ -754,16 +763,16 @@ sub _send_body_to_mta
 
 
 # Descriptions: send message itself to file handle (BSD socket here)
-#    Arguments: $self $args
-# Side Effects: 
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
 # Return Value: none
 sub _send_data_to_mta
 {
     my ($self, $args) = @_;
 
     # prepare smtp information
-    my $header     = $args->{ message }->rfc822_message_header;
-    my $body       = $args->{ message }->rfc822_message_body;
+    my $header     = $args->{ message }->whole_message_header;
+    my $body       = $args->{ message }->whole_message_body;
     my $socket     = $self->{'_socket'};
 
     if (defined $body) {
@@ -771,8 +780,8 @@ sub _send_data_to_mta
 	$self->_read_reply;
 
 	# XXX if "DATA" transaction cannot start, retry ?
-	if ($self->_get_status_code != '354' || $self->error) { 
-	    Log($self->error); 
+	if ($self->_get_status_code != '354' || $self->error) {
+	    Log($self->error);
 	    return undef;
 	}
 
@@ -798,8 +807,9 @@ sub _send_data_to_mta
 ##### QUIT / RSET
 #####
 
+
 # Descriptions: send the SMTP reset "RSET" command
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub _reset_smtp_transaction
@@ -820,8 +830,8 @@ L<Mail::Delivery::INET4>,
 L<Mail::Delivery::INET6>,
 L<IO::Adapter>
 
-See I<http://www.postfix.org/> on C<Postfix> 
-which replaces sendmail with little effort 
+See I<http://www.postfix.org/> on C<Postfix>
+which replaces sendmail with little effort
 but provides a lot of compatibility except for sendmail.cf.
 
 =head1 AUTHOR
@@ -830,10 +840,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

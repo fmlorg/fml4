@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Adapter.pm,v 1.9 2001/09/17 11:59:23 fukachan Exp $
+# $FML: Adapter.pm,v 1.11 2001/12/24 07:40:55 fukachan Exp $
 #
 
 package IO::Adapter;
@@ -54,17 +54,17 @@ statements.
 
 This is "Adapter" (or "Wrapper") C<design pattern>.
 This is a wrapper of IO for
-e.g. file, 
-unix group, 
-NIS (Network Information System), 
+e.g. file,
+unix group,
+NIS (Network Information System),
 RDBMS (Relational DataBase Management System)
 et. al.
-Once you create and open a C<map>, 
+Once you create and open a C<map>,
 you can use the same methods as usual file IO.
 
 =head2 MAP
 
-C<map> specifies the type of the database we read/write.  
+C<map> specifies the type of the database we read/write.
 
 For example, C<file> map implies we hold our data in a file.
 The format is one line for one entry in a lot of cases.
@@ -74,11 +74,11 @@ The format is one line for one entry in a lot of cases.
 
 To get one entry is to read one line or a part of one line.
 
-This wrapper provides IO like a usual file for the specified C<$map>. 
+This wrapper provides IO like a usual file for the specified C<$map>.
 
 =head2 MAP TYPES
 
-   map name        descriptions or examples        
+   map name        descriptions or examples
    ---------------------------------------------------
    file            file:$file_name
                    For example, file:/var/spool/ml/elena/recipients
@@ -109,10 +109,10 @@ the constructor. The first argument is a map decribed above.
 
 # Descriptions: a constructor, which prepare IO operations for the
 #               given $map
-#    Arguments: $self $map $args
+#    Arguments: OBJ($self) STR($map) HASH_REF($args)
 # Side Effects: @ISA is modified
 #               load and import sub-class
-# Return Value: object
+# Return Value: OBJ
 sub new
 {
     my ($self, $map, $args) = @_;
@@ -178,23 +178,24 @@ sub new
 }
 
 
-=head2 
+=head2
 
 =item C<open([$flag])>
 
-open IO operation for the map. 
+open IO operation for the map.
 C<$flag> is passed to SUPER CLASS open()
-when "file:" map is specified. 
+when "file:" map is specified.
 C<open()> is a dummy function in other maps now.
 
 =cut
 
+
 # Descriptions: open IO, each request is forwraded to each sub-class
-#    Arguments: $self $flag
+#    Arguments: OBJ($self) STR($flag)
 #               $flag is the same as open()'s flag for file: map but
 #               "r" only for other maps.
 # Side Effects: none
-# Return Value: file handle
+# Return Value: HANDLE
 sub open
 {
     my ($self, $flag) = @_;
@@ -220,11 +221,17 @@ sub open
 
 =head2 C<touch()>
 
-create a file if not exists. 
+create a file if not exists.
 This method is avaialble for file: type.
+It is dummy for maps other than file: type.
 
 =cut
 
+
+# Descriptions: create a file if not exists.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: create $map if needed or possible
+# Return Value: none
 sub touch
 {
     my ($self) = @_;
@@ -244,9 +251,9 @@ In other maps, it is the same as C<get_next_value()> method below.
 
 =item C<get_next_value()>
 
-get the next value from the specified database (map). 
+get the next value from the specified database (map).
 For example, this function returns the first column in the next line
-for C<file> map. 
+for C<file> map.
 It return the next element of the array,
 in C<array_reference>, C<unix.group>, C<nis.grouop> maps.
 
@@ -266,9 +273,9 @@ an alias of C<get_next_value()> now.
 
 # Descriptions: aliases for convenience
 #               request is forwarded to get_next_value() method.
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: none
+# Return Value: STR
 sub get_member    { my ($self) = @_; $self->get_next_value;}
 sub get_active    { my ($self) = @_; $self->get_next_value;}
 sub get_recipient { my ($self) = @_; $self->get_next_value;}
@@ -289,10 +296,10 @@ replace lines which matches $regexp with $value.
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $address
-# Side Effects: 
-# Return Value: none
+# Descriptions: add $address to the current map
+#    Arguments: OBJ($self) STR($address)
+# Side Effects: modify map content
+# Return Value: same as add()
 sub add
 {
     my ($self, $address) = @_;
@@ -307,10 +314,10 @@ sub add
 }
 
 
-# Descriptions: 
-#    Arguments: $self $address
-# Side Effects: 
-# Return Value: none
+# Descriptions: delete $address from the current map
+#    Arguments: OBJ($self) STR($regexp)
+# Side Effects: moidfy map content
+# Return Value: same as delete()
 sub delete
 {
     my ($self, $regexp) = @_;
@@ -325,10 +332,10 @@ sub delete
 }
 
 
-# Descriptions: 
-#    Arguments: $self $regexp $value
-# Side Effects: 
-# Return Value: none
+# Descriptions: replace $value for key matching $regexp
+#    Arguments: OBJ($self) STR($regexp) STR($value)
+# Side Effects: modify map content
+# Return Value: replace()
 sub replace
 {
     my ($self, $regexp, $value) = @_;
@@ -359,6 +366,11 @@ If you specify C<all>, you get the result(s) as ARRAY REFERENCE.
 
 =cut
 
+
+# Descriptions: search method
+#    Arguments: OBJ($self) STR($regexp) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR or ARRAY_REF
 sub find
 {
     my ($self, $regexp, $args) = @_;
@@ -367,7 +379,7 @@ sub find
     my (@buf, $x);
 
     # forward the request to SUPER class (md = map dependent)
-    if ($self->SUPER::can('md_find')) { 
+    if ($self->SUPER::can('md_find')) {
 	return $self->md_find($regexp, $args);
     }
 
@@ -390,7 +402,7 @@ sub find
 		last if $x =~ /$regexp/i;
 	    }
 	}
-    }	   
+    }
 
     $self->close;
 
@@ -398,13 +410,13 @@ sub find
 }
 
 
-=head2 C<DESTROY> 
+=head2 C<DESTROY>
 
 =cut
 
 # Descriptions: destructor
 #               request is forwarded to close() method.
-#    Arguments: $self $args
+#    Arguments: OBJ($self)
 # Side Effects: object is undef'ed.
 # Return Value: none
 sub DESTROY
@@ -418,8 +430,15 @@ sub DESTROY
 
 =head2 C<AUTOLOAD(@varargs)>
 
+hook extension for map dependent methods
+
 =cut
 
+
+# Descriptions: hook extension for map dependent methods
+#    Arguments: OBJ($self) ARRAY(@varargs)
+# Side Effects: depend on loaded module
+# Return Value: depend on loaded module
 sub AUTOLOAD
 {
     my ($self, @varargs) = @_;
@@ -457,7 +476,7 @@ Ken'ichi Fukamchi
 Copyright (C) 2001 Ken'ichi Fukamchi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

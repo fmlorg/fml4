@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: DB.pm,v 1.15 2001/11/20 09:43:21 fukachan Exp $
+# $FML: DB.pm,v 1.19 2002/01/13 13:35:30 fukachan Exp $
 #
 
 package Mail::ThreadTrack::DB;
@@ -50,9 +50,9 @@ my @kind_of_databases = qw(thread_id date status sender articles
                            message_id);
 
 
-# Descriptions: 
-#    Arguments: $self
-# Side Effects: 
+# Descriptions: open database by tie()
+#    Arguments: OBJ($self)
+# Side Effects: none
 # Return Value: none
 sub db_open
 {
@@ -89,9 +89,9 @@ sub db_open
 }
 
 
-# Descriptions: 
-#    Arguments: $self
-# Side Effects: 
+# Descriptions: clear database
+#    Arguments: OBJ($self)
+# Side Effects: update database
 # Return Value: none
 sub db_clear
 {
@@ -106,15 +106,15 @@ sub db_clear
 }
 
 
-# Descriptions: 
-#    Arguments: $directory
-# Side Effects: 
+# Descriptions: clear database
+#    Arguments: STR($db_dir)
+# Side Effects: clear database, remove file if needed
 # Return Value: none
 sub _db_clear
 {
     my ($db_dir) = @_;
 
-    eval q{ 
+    eval q{
 	use DirHandle;
 	use File::Spec;
 	my $dh = new DirHandle $db_dir;
@@ -136,16 +136,16 @@ sub _db_clear
 }
 
 
-# Descriptions: 
-#    Arguments: $self
-# Side Effects: 
+# Descriptions: close database by untie()
+#    Arguments: OBJ($self)
+# Side Effects: none
 # Return Value: none
 sub db_close
 {
     my ($self) = @_;
 
     for my $db (@kind_of_databases) {
-        my $str = qq{ 
+        my $str = qq{
             my \$${db} = \$self->{ _hash_table }->{ _$db };
 	    untie \%\$${db};
         };
@@ -160,15 +160,21 @@ sub db_close
 
 =head2 db_mkdb($min, $max)
 
+remake database.
+
 =cut
 
 
+# Descriptions: remake database for messages from $min_id to $max_id
+#    Arguments: OBJ($self) NUM($min_id) NUM($max_id)
+# Side Effects: remake database
+# Return Value: none
 sub db_mkdb
 {
     my ($self, $min_id, $max_id) = @_;
     my $config     = $self->{ _config };
     my $spool_dir  = $config->{ spool_dir };
-    my $saved_args = $self->{ _saved_args }; # original $args 
+    my $saved_args = $self->{ _saved_args }; # original $args
 
     return undef unless (defined $min_id && defined $max_id);
 
@@ -188,6 +194,7 @@ sub db_mkdb
 	# analyze
 	my $file = File::Spec->catfile($spool_dir, $id);
 	my $fh   = new FileHandle $file;
+	next unless (defined $fh);	# for file missing
 	my $msg  = Mail::Message->parse({ fd => $fh });
 	$self->analyze($msg);
 
@@ -201,12 +208,16 @@ sub db_mkdb
 
 =head2 db_dump([$type])
 
-dump hash as text. 
+dump hash as text.
 dump status database if $type is not specified.
 
 =cut
 
 
+# Descriptions: dump data for database $type
+#    Arguments: OBJ($self) STR($type)
+# Side Effects: none
+# Return Value: none
 sub db_dump
 {
     my ($self, $type) = @_;
@@ -227,6 +238,10 @@ return HASH REFERENCE for specified $type.
 =cut
 
 
+# Descriptions: get HASH REFERENCE for specified $type.
+#    Arguments: OBJ($self) STR($db_type)
+# Side Effects: none
+# Return Value: STR or UNDEF
 sub db_hash
 {
     my ($self, $db_type) = @_;
@@ -250,7 +265,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

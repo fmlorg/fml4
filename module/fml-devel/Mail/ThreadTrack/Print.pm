@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Print.pm,v 1.19 2001/11/19 11:26:26 fukachan Exp $
+# $FML: Print.pm,v 1.21 2002/01/13 21:59:08 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print;
@@ -15,7 +15,7 @@ use Mail::ThreadTrack::Print::Utils qw(decode_mime_string STR2EUC);
 
 =head1 NAME
 
-Mail::ThreadTrack::Print - print out thread relation
+Mail::ThreadTrack::Print - dispatcher to print out thread
 
 =head1 SYNOPSIS
 
@@ -23,33 +23,15 @@ Mail::ThreadTrack::Print - print out thread relation
 
 =head1 METHODS
 
-=head2 summary()
+=head2 list()
 
-show the thread summary. 
-Each row that C<show_summary()> returns has a set of 
-C<date>, C<age>, C<status>, C<thread-id> and 
-C<articles>, which is a list of articles with the thread-id.
-
-summary show entries by the thread_id order. For example,
-
-       date    age status  thread id             articles
- ------------------------------------------------------------
- 2001/02/07    3.6  going  elena_#00000450       807 808 809 
- 2001/02/07    3.1   open  elena_#00000451       810 
- 2001/02/07    3.0   open  elena_#00000452       812 
- 2001/02/07    3.0   open  elena_#00000453       813 
- 2001/02/07    3.0  going  elena_#00000454       814 815 
- 2001/02/10    0.1   open  elena_#00000456       821 
-
-=head2 review()
-
-show a chain of article summary in each thread.
+show todo list without article summary.
 
 =cut
 
 
-# Descriptions: top level entrance for "show" mode
-#    Arguments: $self varargs ...
+# Descriptions: show todo list without article summary.
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: none
 sub list
@@ -63,8 +45,30 @@ sub list
 }
 
 
-# Descriptions: top level entrance for "show" mode
-#    Arguments: $self varargs ...
+=head2 summary()
+
+show the thread summary, which is todo list C<with> article summary.
+
+Each row that C<show_summary()> returns has a set of
+C<date>, C<age>, C<status>, C<thread-id> and
+C<articles>, which is a list of articles with the thread-id.
+
+summary show entries by the thread_id order. For example,
+
+       date    age status  thread id             articles
+ ------------------------------------------------------------
+ 2001/02/07    3.6  going  elena_#00000450       807 808 809
+ 2001/02/07    3.1   open  elena_#00000451       810
+ 2001/02/07    3.0   open  elena_#00000452       812
+ 2001/02/07    3.0   open  elena_#00000453       813
+ 2001/02/07    3.0  going  elena_#00000454       814 815
+ 2001/02/10    0.1   open  elena_#00000456       821
+
+=cut
+
+
+# Descriptions: show todo list with article summary.
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: none
 sub summary
@@ -78,8 +82,16 @@ sub summary
 }
 
 
-# Descriptions: top level entrance for "review" mode
-#    Arguments: $self varargs ...
+=head2 review()
+
+show a chain of article summary in each thread.
+This summary is a collection of short summary of articles in one thread.
+
+=cut
+
+
+# Descriptions: show summary for each thread
+#    Arguments: OBJ($self) VARARGS
 # Side Effects: none
 # Return Value: none
 sub review
@@ -94,8 +106,8 @@ sub review
 
 
 
-# Descriptions: dynamic loading of sub modules
-#    Arguments: $self
+# Descriptions: load subclasses, change @INC
+#    Arguments: OBJ($self)
 # Side Effects: @INC modified
 # Return Value: none
 sub _load_library
@@ -105,14 +117,14 @@ sub _load_library
 
     require Mail::ThreadTrack::Print::Message;
     require Mail::ThreadTrack::Print::Sort;
-    my @list = 
+    my @list =
 	qw(Mail::ThreadTrack::Print::Message Mail::ThreadTrack::Print::Sort);
 
-    if ($mode eq 'text') { 
+    if ($mode eq 'text') {
 	require Mail::ThreadTrack::Print::Text;
 	push(@list, 'Mail::ThreadTrack::Print::Text');
     }
-    elsif ($mode eq 'html') { 
+    elsif ($mode eq 'html') {
 	require Mail::ThreadTrack::Print::HTML;
 	push(@list, 'Mail::ThreadTrack::Print::HTML');
     }
@@ -125,6 +137,11 @@ sub _load_library
 # SUMMARY MODE
 #
 
+
+# Descriptions: dispatcher to show todo list with article summary.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
 sub _do_summary
 {
     my ($self) = @_;
@@ -132,6 +149,10 @@ sub _do_summary
 }
 
 
+# Descriptions: dispatcher to show todo list without article summary.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
 sub _do_list
 {
     my ($self) = @_;
@@ -139,9 +160,9 @@ sub _do_list
 }
 
 
-# Descriptions: get thread id list with status != 'open' and
+# Descriptions: get thread id list with status != 'close' and
 #               show summary for the list
-#    Arguments: $self
+#    Arguments: OBJ($self) HASH_REF($option)
 # Side Effects: none
 # Return Value: none
 sub __do_summary
@@ -160,7 +181,7 @@ sub __do_summary
 	$thread->sort_thread_id($thread_id_list);
 
 	# reverse order (first thread is the latest one) if reverse mode
-	if ($config->{ reverse_order }) { 
+	if ($config->{ reverse_order }) {
 	    @$thread_id_list = reverse @$thread_id_list;
 	}
 
@@ -174,9 +195,9 @@ sub __do_summary
 
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+# Descriptions: show thread summary
+#    Arguments: OBJ($self) ARRAY_REF($thread_id_list)
+# Side Effects: none
 # Return Value: none
 sub _print_thread_summary
 {
@@ -216,7 +237,7 @@ sub _print_thread_summary
 
 
 # Descriptions: show the first few lines of the first message in the thread
-#    Arguments: $self $id
+#    Arguments: OBJ($self) STR($thread_id)
 # Side Effects: none
 # Return Value: none
 sub _print_message_summary
@@ -231,8 +252,8 @@ sub _print_message_summary
 #
 
 # Descriptions: show brief summary chain of messages in the thread
-#    Arguments: $self $string $min_num $max_num
-# Side Effects: 
+#    Arguments: OBJ($self) STR($str) NUM($min) NUM($max)
+# Side Effects: none
 # Return Value: none
 sub _do_review
 {
@@ -295,15 +316,21 @@ sub _do_review
 }
 
 
-=head2 show()
+=head2 show($tid)
+
+show all articles in specified thread.
 
 =cut
 
-    
+
+# Descriptions: show all articles in specified thread.
+#    Arguments: OBJ($self) STR($tid)
+# Side Effects: none
+# Return Value: none
 sub show
 {
     my ($self, $tid) = @_;
-    
+
     $self->_load_library();
     $self->db_open();
     $self->show_articles_in_thread($tid);
@@ -311,13 +338,16 @@ sub show
 }
 
 
-=head2 print()
+=head2 print(str)
+
+print str with special effect e.g. quoting if needed.
+The function depends the mode, 'text' or 'html'.
 
 =cut
 
 
 # Descriptions: wrapper of print()
-#    Arguments: $self $str
+#    Arguments: OBJ($self) STR($str)
 # Side Effects: quote if needed
 # Return Value: none
 sub print
@@ -337,10 +367,10 @@ sub print
 }
 
 
-# Descriptions: quote for html
-#    Arguments: $str
-# Side Effects: quote
-# Return Value: string
+# Descriptions: quote for html metachars
+#    Arguments: STR($str)
+# Side Effects: none
+# Return Value: STR
 sub _quote
 {
     my ($str) = @_;
@@ -352,6 +382,29 @@ sub _quote
 
     return $str;
 }
+
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
+=head1 AUTHOR
+
+Ken'ichi Fukamachi
+
+=head1 COPYRIGHT
+
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
+
+All rights reserved. This program is free software; you can
+redistribute it and/or modify it under the same terms as Perl itself.
+
+=head1 HISTORY
+
+Mail::ThreadTrack::Print appeared in fml5 mailing list driver package.
+See C<http://www.fml.org/> for more details.
+
+=cut
 
 
 1;

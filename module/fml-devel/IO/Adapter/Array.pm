@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Array.pm,v 1.19 2001/05/30 14:35:10 fukachan Exp $
+# $FML: Array.pm,v 1.21 2001/12/24 07:40:56 fukachan Exp $
 #
 
 package IO::Adapter::Array;
@@ -16,7 +16,7 @@ use IO::Adapter::ErrorStatus qw(error_set error error_clear);
 
 =head1 NAME
 
-IO::Adapter::Array - IO emulation for the ARRAY
+IO::Adapter::Array - base class for IO emulation for the ARRAY
 
 =head1 SYNOPSIS
 
@@ -41,9 +41,9 @@ constructor.
 =cut
 
 # Descriptions: constructor
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: object
+# Return Value: OBJ
 sub new
 {
     my ($self) = @_;
@@ -57,7 +57,7 @@ sub new
 
 =item C<open($args)>
 
-open IO for the array. $args is a hash reference. 
+open IO for the array. $args is a hash reference.
 The option follows:
 
    $args = {
@@ -70,13 +70,13 @@ $flag is "r" only (read only) now.
 =cut
 
 # Descriptions: open() emulation
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 #               $args = {
 #                              flag => $flag
 #                  _array_reference => ARRAY_REFERENCE
 #               }
 # Side Effects: malloc @elements array
-# Return Value: ARRAY REFERENCE
+# Return Value: ARRAY_REF
 sub open
 {
     my ($self, $args) = @_;
@@ -109,14 +109,18 @@ return the next element of the array
 
 =cut
 
+
 # Descriptions: forwarded to get_next_value()
-sub getline { get_next_value(@_);} 
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: increment the counter in the object
+# Return Value: STR(the next element)
+sub getline { get_next_value(@_);}
 
 
 # Descriptions: return the next element of the array
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: increment the counter in the object
-# Return Value: the next element
+# Return Value: STR(the next element)
 sub get_next_value
 {
     my ($self, $args) = @_;
@@ -138,9 +142,9 @@ set the current position to $pos -th element.
 
 # Descriptions: return the current position in the array, that is,
 #               which element in the array
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: the current number of element
+# Return Value: NUM(the current number of element)
 sub getpos
 {
     my ($self) = @_;
@@ -149,10 +153,10 @@ sub getpos
 
 
 # Descriptions: set the postion in the array
-#    Arguments: $self $pos
+#    Arguments: OBJ($self) NUM($pos)
 #               $pos is the integer number.
 # Side Effects: reset counter in the object
-# Return Value: update position
+# Return Value: NUM(update position)
 sub setpos
 {
     my ($self, $pos) = @_;
@@ -172,9 +176,9 @@ end of IO operation. It is a dummy.
 =cut
 
 # Descriptions: whether end of the array is not now
-#    Arguments: $self
+#    Arguments: OJB($self)
 # Side Effects: none
-# Return Value: 1 or 0. 
+# Return Value: 1 or 0.
 #               return 1 if the element reaches the end of the array.
 sub eof
 {
@@ -184,7 +188,7 @@ sub eof
 
 
 # Descriptions: close() is a fake.
-#    Arguments: $self
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: none
 sub close
@@ -202,7 +206,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

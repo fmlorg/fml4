@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Bounce.pm,v 1.15 2001/10/19 13:14:27 fukachan Exp $
+# $FML: Bounce.pm,v 1.19 2002/01/16 13:43:21 fukachan Exp $
 #
 
 package Mail::Bounce;
@@ -48,13 +48,13 @@ try to analyze the given error message, which is a Mail::Message
 object.
 
 For non DSN pattern,
-try to analyze it by using modules in C<Mail::Bounce::> 
+try to analyze it by using modules in C<Mail::Bounce::>
 which can recognize MTA specific and domian specific patterns.
 
 For example,
 
   Mail::Bounce
-      
+
                 $msg
               --------> Mail::Bounce::DSN::analyze()
               <--------
@@ -91,6 +91,10 @@ standard new() method.
 =cut
 
 
+# Descriptions: constructor
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: OBJ
 sub new
 {
     my ($self) = @_;
@@ -102,46 +106,51 @@ sub new
 
 =head2 C<analyze($msg)>
 
-C<$msg> is a C<Mail::Message> object.  
-This routine is a top level switch which provides the entrance 
+C<$msg> is a C<Mail::Message> object.
+This routine is a top level switch which provides the entrance
 for C<Mail::Bounce::> modules, for example, C<Mail::Bounce::DSN>.
 
-C<Mail::Bounce::$model::analyze( \$msg, \$result )> 
+C<Mail::Bounce::$model::analyze( \$msg, \$result )>
 method in each module is the actual model specific analyzer.
 C<$result> has an answer of analyze if the error message pattern is
 already known.
 
 =cut
 
+
+# Descriptions: top level dispatcher
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: update $self->{ _result }, which holds several info
+# Return Value: none
 sub analyze
 {
     my ($self, $msg) = @_;
     my $result = {};
 
     if ($debug) {
-	my $h = $msg->get_data_type_list( { debug => 1 } );
+	my $h = $msg->data_type_list( { debug => 1 } );
 	print STDERR "   ----- dump msg -----\n";
 	for (@$h) { print STDERR "   ", $_, "\n";}
 	print STDERR "   ----- dump msg end -----\n";
     }
 
     for my $pkg (
-		 'DSN', 
-		 'Postfix19991231', 
-		 'Qmail', 
+		 'DSN',
+		 'Postfix19991231',
+		 'Qmail',
 		 'Exim',
 		 'GOO',
-		 'SimpleMatch', 
+		 'SimpleMatch',
 		 ) {
 	my $module = "Mail::Bounce::$pkg";
 	print STDERR "\n   --- module: $module\n" if $debug;
-	eval qq { 
+	eval qq {
 	    require $module; $module->import();
 	    $module->analyze( \$msg , \$result );
 	};
 	croak($@) if $@;
 
-	if (keys %$result) { 
+	if (keys %$result) {
 	    print STDERR "\n   match $module\n" if $debug;
 	    last;
 	}
@@ -162,6 +171,10 @@ return ARRAY of addresses found in the error message.
 =cut
 
 
+# Descriptions: return ARRAY of addresses found in the error message.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: ARRAY
 sub address_list
 {
     my ($self) = @_;
@@ -173,16 +186,20 @@ sub address_list
 =head2 C<status($addr)>
 
 return status (string) for C<$addr>.
-The status is extracted from C<result> analyze() method gives. 
+The status is extracted from C<result> analyze() method gives.
 
 =head2 C<reason($addr)>
 
 return error reason (string) for C<$addr>.
-It is extracted from C<result> analyze() method gives. 
+It is extracted from C<result> analyze() method gives.
 
 =cut
 
 
+# Descriptions: return status (string) for $addr
+#    Arguments: OBJ($self) STR($addr)
+# Side Effects: none
+# Return Value: STR
 sub status
 {
     my ($self, $addr) = @_;
@@ -193,16 +210,24 @@ sub status
 }
 
 
+# Descriptions: return reason (string) for $addr
+#    Arguments: OBJ($self) STR($addr)
+# Side Effects: none
+# Return Value: STR
 sub reason
 {
     my ($self, $addr) = @_;
     my $reason = $self->{ _result }->{ $addr }->{ 'Diagnostic-Code' };
     $reason =~ s/\s+/ /g;
-    $reason =~ s/\s*$//; 
+    $reason =~ s/\s*$//;
     $reason;
 }
 
 
+# Descriptions: return hints (string) for $addr
+#    Arguments: OBJ($self) STR($addr)
+# Side Effects: none
+# Return Value: STR
 sub hints
 {
     my ($self, $addr) = @_;
@@ -234,6 +259,11 @@ my @REGEXP = (
 	      $RE_JOUT,
 	      );
 
+
+# Descriptions: $buf looks like Japanese ?
+#    Arguments: OBJ($self) STR($buf)
+# Side Effects: none
+# Return Value: 1 or 0
 sub look_like_japanese
 {
     my ($self, $buf) = @_;
@@ -255,6 +285,11 @@ It is rarely used.
 
 =cut
 
+
+# Descriptions: clean up address for further use
+#    Arguments: OBJ($self) STR($hint) STR($addr)
+# Side Effects: none
+# Return Value: STR
 sub address_clean_up
 {
     my ($self, $hint, $addr) = @_;
@@ -263,7 +298,7 @@ sub address_clean_up
 
     # nuke predecing and trailing strings around user@domain pattern
     my $prev_addr = $addr;
-    do { 
+    do {
 	$prev_addr = $addr;
 	print STDERR "    address_clean_up.in: $prev_addr\n" if $debug;
 
@@ -290,10 +325,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

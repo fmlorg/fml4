@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET6.pm,v 1.6 2001/10/10 09:46:22 fukachan Exp $
+# $FML: INET6.pm,v 1.8 2002/01/13 07:09:05 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET6;
@@ -18,16 +18,21 @@ require Exporter;
 @ISA     = qw(Exporter);
 @EXPORT  = qw(is_ipv6_ready is_ipv6_mta_syntax connect6);
 
+
+# Descriptions: we have Socket6.pm or not ?
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
 sub _we_can_use_Socket6
 {
     my ($self, $args) = @_;
 
-    eval q{ 
-	use Socket; 
+    eval q{
+	use Socket;
 	use Socket6;
     };
 
-    if ($@ =~ /Can\'t locate Socket6.pm/) { 
+    if ($@ =~ /Can\'t locate Socket6.pm/) {
 	$self->{_ipv6_ready} = 'no';
     }
     else {
@@ -37,6 +42,10 @@ sub _we_can_use_Socket6
 }
 
 
+# Descriptions: This host supports IPv6 ?
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: 1 or 0
 sub is_ipv6_ready
 {
     my ($self, $args) = @_;
@@ -50,6 +59,11 @@ sub is_ipv6_ready
 }
 
 
+# Descriptions: $host is IPv6 syntax ?
+#               return (host, port) if IPv6 native format
+#    Arguments: OBJ($self) STR($host)
+# Side Effects: none
+# Return Value: ARRAY(host, port)
 sub is_ipv6_mta_syntax
 {
     my ($self, $host) = @_;
@@ -66,6 +80,10 @@ sub is_ipv6_mta_syntax
 }
 
 
+# Descriptions: try connect(2) by IPv6.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: create IPv6 smtp connection
+# Return Value: none
 sub connect6
 {
     my ($self, $args) = @_;
@@ -74,7 +92,7 @@ sub connect6
     # check the mta syntax is $ipv6_addr:$port or not.
     my ($host, $port) = $self->is_ipv6_mta_syntax( $args->{ _mta } );
 
-    # if mta is ipv6 raw address syntax, 
+    # if mta is ipv6 raw address syntax,
     # try to parse $mta to $host:$port style.
     unless ($host) {
 	if ($mta =~ /(\S+):(\S+)/) {
@@ -92,7 +110,7 @@ sub connect6
     my $fh = undef;
     eval q{
 	use IO::Handle;
-	use Socket; 
+	use Socket;
 	use Socket6;
 
 	my ($family, $type, $proto, $saddr, $canonname);
@@ -108,7 +126,7 @@ sub connect6
 	while (scalar(@res) >= 5) {
 	    ($family, $type, $proto, $saddr, $canonname, @res) = @res;
 
-	    my ($host, $port) = 
+	    my ($host, $port) =
 		getnameinfo($saddr, NI_NUMERICHOST | NI_NUMERICSERV);
 
 	    # check only IPv6 case here.
@@ -157,7 +175,7 @@ sub connect6
 
 =head1 NAME
 
-Mail::Delivery::Net::INET6 - establish tcp connection over IPv6 
+Mail::Delivery::Net::INET6 - establish tcp connection over IPv6
 
 =head1 SYNOPSIS
 
@@ -179,17 +197,17 @@ If Socket6 module exists, we assume your operating system is IPv6 ready!
 
 =item C<connect6()>
 
-try L<connect(2)>. 
-If it succeeds, returned 
+try L<connect(2)>.
+If it succeeds, returned
 $self->{ _socket } has true value.
-If not, 
-$self->{ _socket } is undef. 
+If not,
+$self->{ _socket } is undef.
 
 Avaialble arguments follows:
 
     connect6( { _mta => $mta });
 
-$mta is a hostname or [raw_ipv6_addr]:port form, for example, 
+$mta is a hostname or [raw_ipv6_addr]:port form, for example,
 [::1]:25.
 
 =head1 SEE ALSO
@@ -207,10 +225,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

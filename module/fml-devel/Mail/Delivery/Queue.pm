@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Queue.pm,v 1.6 2001/08/24 00:15:49 fukachan Exp $
+# $FML: Queue.pm,v 1.10 2002/01/13 15:46:53 fukachan Exp $
 #
 
 package Mail::Delivery::Queue;
@@ -24,7 +24,7 @@ Mail::Delivery::Queue - hashed directory holding queue files
     use Mail::Delivery::Queue;
     my $queue = new Mail::Delivery::Queue { directory => "/some/where" };
 
-    # queue in a new message 
+    # queue in a new message
     # "/some/where/new/$queue_id" is created.
     $queue->in( $msg ) || croak("fail to queue in");
 
@@ -53,7 +53,7 @@ method.
 
    $queue_dir/new/$qid  --->  $queue_dir/active/$qid
 
-The actual delivery is done by other modules such as 
+The actual delivery is done by other modules such as
 C<Mail::Delivery>.
 C<Mail::Delivery::Queue> manipulats only queue around things.
 
@@ -72,6 +72,10 @@ C<new()> assigns them but do no actual works.
 =cut
 
 
+# Descriptions: constructor.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: initialize object
+# Return Value: OBJ
 sub new
 {
     my ($self, $args) = @_;
@@ -90,7 +94,7 @@ sub new
     $me->{ _info }->{ sender }     = "$dir/info/sender/$id";
     $me->{ _info }->{ recipients } = "$dir/info/recipients/$id";
 
-    for ($dir, 
+    for ($dir,
 	 "$dir/active", "$dir/new", "$dir/deferred",
 	 "$dir/info", "$dir/info/sender", "$dir/info/recipients") {
 	-d $_ || _mkdirhier($_);
@@ -100,14 +104,24 @@ sub new
 }
 
 
+# Descriptions: mkdir recursively
+#    Arguments: STR($dir)
+# Side Effects: none
+# Return Value: ARRAY or UNDEF
 sub _mkdirhier
 {
     my ($dir) = @_;
-    use File::Path;
-    mkpath( [ $dir ], 0, 0755);
+    eval q{
+	use File::Path;
+	mkpath( [ $dir ], 0, 0755);
+    };
 }
 
 
+# Descriptions: return new queue identifier
+#    Arguments: none
+# Side Effects: increment counter $Counter
+# Return Value: STR
 sub _new_queue_id
 {
     $Counter++;
@@ -121,6 +135,11 @@ return the queue id assigned to the object C<$self>.
 
 =cut
 
+
+# Descriptions: return object identifier (queue id)
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub id
 {
     my ($self) = @_;
@@ -134,6 +153,11 @@ return the file name of the queue id assigned to the object C<$self>.
 
 =cut
 
+
+# Descriptions: return queue file name assigned to this object
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub filename
 {
     my ($self) = @_;
@@ -155,6 +179,11 @@ where C<$qid> is like this: 990157187.20792.1
 
 =cut
 
+
+# Descriptions: return queue file list
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: HASH_ARRAY
 sub list
 {
     my ($self) = @_;
@@ -188,6 +217,11 @@ The returned information is
 
 =cut
 
+
+# Descriptions: get information of queue for this object
+#    Arguments: OBJ($self) STR($id)
+# Side Effects: none
+# Return Value: HASH_REF
 sub getidinfo
 {
     my ($self, $id) = @_;
@@ -233,23 +267,23 @@ sub getidinfo
 
 =cut
 
-use POSIX qw(EAGAIN ENOENT EEXIST O_EXCL O_CREAT O_RDONLY O_WRONLY); 
+
 use FileHandle;
-
-sub LOCK_SH {1;}
-sub LOCK_EX {2;}
-sub LOCK_NB {4;}
-sub LOCK_UN {8;}
+use Fcntl qw(:DEFAULT :flock);
 
 
+# Descriptions: lock queue
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: flock queue
+# Return Value: 1 or 0
 sub lock
 {
     my ($self, $args) = @_;
     my $fh   = new FileHandle $self->{ _active_qf };
-    my $wait = defined $args->{ wait } ? $args->{ wait } : 10; 
+    my $wait = defined $args->{ wait } ? $args->{ wait } : 10;
 
     eval {
-	local($SIG{ALRM}) = sub { croak("lock timeout");}; 
+	local($SIG{ALRM}) = sub { croak("lock timeout");};
         alarm( $wait );
 	flock($fh, &LOCK_EX);
 	$self->{ _lock }->{ _fh } = $fh;
@@ -259,6 +293,10 @@ sub lock
 }
 
 
+# Descriptions: unlock queue
+#    Arguments: OBJ($self)
+# Side Effects: unlock queue by flock(2)
+# Return Value: 1 or 0
 sub unlock
 {
     my ($self) = @_;
@@ -269,19 +307,24 @@ sub unlock
 
 =head2 C<in($msg)>
 
-C<in()> creates a queue file in C<new/> directory 
+C<in()> creates a queue file in C<new/> directory
 (C<queue_directory/new/>.
 
 C<$msg> is C<Mail::Message> object by default.
-If C<$msg> object has print() method, 
+If C<$msg> object has print() method,
 arbitrary C<$msg> is acceptable.
 
 REMEMBER YOU MUST DO C<setrunnable()> for the queue to deliver.
 If you not C<setrunnable()> it, the queue file is removed by
-C<DESTRUCTOR>. 
+C<DESTRUCTOR>.
 
 =cut
 
+
+# Descriptions: create a new queue file.
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: none
+# Return Value: 1 or 0
 sub in
 {
     my ($self, $msg) = @_;
@@ -309,6 +352,11 @@ C<info/recipients/> directories.
 
 =cut
 
+
+# Descriptions: set value for key
+#    Arguments: OBJ($self) STR($key) STR($value)
+# Side Effects: none
+# Return Value: same as close()
 sub set
 {
     my ($self, $key, $value) = @_;
@@ -337,7 +385,7 @@ sub set
 =head2 C<setrunnable()>
 
 set the status of the queue assigned to this object C<$self>
-deliverable. 
+deliverable.
 This file is scheduled to be delivered.
 
 In fact, setrunnable() C<rename>s the queue id file from C<new/>
@@ -346,8 +394,8 @@ directory to C<active/> directory like C<postfix> queue strategy.
 =cut
 
 
-# Descriptions: set this object queue to be deliverable 
-#    Arguments: $self $args
+# Descriptions: set this object queue to be deliverable
+#    Arguments: OBJ($self)
 # Side Effects: move $queue_id file from new/ to active/
 # Return Value: 1 (success) or 0 (fail)
 sub setrunnable
@@ -380,6 +428,10 @@ return 1 (valid) or 0.
 =cut
 
 
+# Descriptions: remove queue files for this object (queue)
+#    Arguments: OBJ($self)
+# Side Effects: remove queue file(s)
+# Return Value: none
 sub remove
 {
     my ($self) = @_;
@@ -393,6 +445,10 @@ sub remove
 }
 
 
+# Descriptions: this object (queue) is sane ?
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: 1 or 0
 sub valid
 {
     my ($self) = @_;
@@ -408,6 +464,10 @@ sub valid
 }
 
 
+# Descriptions: clear this queue file
+#    Arguments: OBJ($self)
+# Side Effects: unlink this queue
+# Return Value: NUM
 sub DESTROY
 {
     my ($self) = @_;
@@ -421,10 +481,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

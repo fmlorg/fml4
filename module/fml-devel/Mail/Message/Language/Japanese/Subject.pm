@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Subject.pm,v 1.2 2001/11/09 10:39:05 fukachan Exp $
+# $FML: Subject.pm,v 1.5 2001/12/24 12:52:47 fukachan Exp $
 #
 
 
@@ -36,9 +36,6 @@ in the subject.
 =cut
 
 
-require Exporter;
-@ISA = qw(Exporter);
-
 # XXX we should it in proper way in the future.
 # XXX but we import it anyway for further rewriting.
 my $CUT_OFF_RERERE_PATTERN = '';
@@ -46,7 +43,7 @@ my $CUT_OFF_RERERE_HOOK    = '';
 
 
 # subjec reply pattern
-# apply patch from OGAWA Kunihiko <kuni@edit.ne.jp> 
+# apply patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 #            fml-support:7626 7653 07666
 #            Re: Re2:   Re[2]:     Re(2):     Re^2:    Re*2:
 # i-mode ? (PR fml-help: 00157 by OGAWA Kunihiko)
@@ -67,6 +64,10 @@ For example, it is like this:
 =cut
 
 
+# Descriptions: looks reply message ?
+#    Arguments: OBJ($self) STR($x)
+# Side Effects: none
+# Return Value: 1 or 0
 sub is_reply
 {
     my ($self, $x) = @_;
@@ -87,7 +88,7 @@ within C<Subject:>.
 # fml-support: 07507
 # sub CutOffRe
 # {
-#    いままでどおりの Re: とかとっぱらう 
+#    いままでどおりの Re: とかとっぱらう
 #
 #   if ($LANGUAGE eq 'Japanese') {
 #	日本語処理依存ライブラリへ飛ぶ
@@ -99,6 +100,12 @@ within C<Subject:>.
 #   run-hooks $CUT_OFF_HOOK(ユーザ定義HOOK)
 #}
 # レレレ対策
+
+
+# Descriptions: remove Re:
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
 sub cut_off_reply_tag
 {
     my ($subject) = @_;
@@ -116,7 +123,7 @@ sub cut_off_reply_tag
     # $subject =~ s/^((\s*|(　)*)*($pattern)\s*)+/Re: /oi;
     $subject =~ s/^((\s|(　))*($pattern)\s*)+/Re: /oi;
 
-    if ($CUT_OFF_RERERE_HOOK) { 
+    if ($CUT_OFF_RERERE_HOOK) {
 	eval($CUT_OFF_RERERE_HOOK);
 	&Log($@) if $@;
     }
@@ -135,7 +142,7 @@ sub cut_off_reply_tag
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

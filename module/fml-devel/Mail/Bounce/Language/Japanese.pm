@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Japanese.pm,v 1.2 2001/07/31 23:26:17 fukachan Exp $
+# $FML: Japanese.pm,v 1.4 2001/12/24 02:26:33 fukachan Exp $
 #
 
 #
@@ -39,7 +39,7 @@ See C<Mail::Bounce> for more details.
 =head2 Lotus Notes
 
    送信エラーレポート
-                                                                              
+
     件名:        [XXXXXXX:08268] Re: ぼくルド
 
     送信先:      xxxxxxxx@chuo.tokyo.nuinui.net
@@ -62,6 +62,10 @@ See C<Mail::Bounce> for more details.
 =cut
 
 
+# Descriptions: trap Japanese specific error address
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update $args->{result}
+# Return Value: none
 sub _japanese_address_match
 {
     my ($self, $args) = @_;
@@ -74,7 +78,7 @@ sub _japanese_address_match
     &Jcode::convert(\$buf, 'euc');
 
     print STDERR "rbuf={$buf}\n" if $debug;
-    
+
     # lotus NOTES
     if ($buf =~ /送信先:\s*(\S+)/) {
 	$addr     = $1;
@@ -87,7 +91,7 @@ sub _japanese_address_match
 	$mta_type = 'jp-r.ne.jp';
     }
     # あなたが送ろうとしたアドレス「**@i.pakeo.ne.jp」は、登録されていません
-    elsif ($buf =~ 
+    elsif ($buf =~
 	   /あなたが送ろうとしたアドレス「(.*)」は、登録されていません/) {
 	$addr     = $1;
 	$mta_type = 'pakeo.ne.jp';
@@ -110,7 +114,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: FixBrokenAddress.pm,v 1.3 2001/09/18 03:31:33 fukachan Exp $
+# $FML: FixBrokenAddress.pm,v 1.5 2001/12/23 15:03:27 fukachan Exp $
 #
 
 
@@ -37,13 +37,17 @@ See C<Mail::Bounce> for more details.
 =cut
 
 
+# Descriptions: speculate correct address
+#    Arguments: STR($hint) STR($addr)
+# Side Effects: speculate $addr
+# Return Value: STR($addr)
 sub FixIt
 {
     my ($hint, $addr) = @_;
 
     if ($debug) {
 	print STDERR "FixIt($hint, $addr)\n";
-    }	
+    }
 
     # error address from nifty.ne.jp has no domain part ;)
     if ($hint eq 'nifty.ne.jp' && $addr !~ /\@/) {
@@ -72,7 +76,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
