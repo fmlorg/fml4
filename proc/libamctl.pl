@@ -670,7 +670,7 @@ sub DoChangeMemberList
     if ($cmd eq 'MATOME' && $status eq 'done') {
 	&Log("ReConfiguring $curaddr in \$MSendRC");
 	&Rehash($org_addr) if $org_addr;# info of original mode is required
-	&ConfigMSendRC($curaddr);
+	&ConfigMSendRC($curaddr); # not required in matome 0
     }
     elsif ($cmd eq 'MATOME' && $status ne 'done') {
 	&Log("Matome[Digest]: something Error");
