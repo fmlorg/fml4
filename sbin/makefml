@@ -49,6 +49,12 @@ if ($SavedFP eq 'install') {
 
 &FlushLog;
 
+if ($opt_E eq 'HTTPD') {
+    print "\n";
+    print $WStatus;
+    print "ExitStatus: $XStatus\n";
+    print "\n";
+}
 exit 0;
 
 
@@ -102,11 +108,12 @@ sub InitMakeFml
 	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
     }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:mi:u:UF");
+    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:");
     $debug   = $opt_d;
     $verbose = $opt_v;
     $MailNotify = $opt_m;
     $EnForceMode = $opt_F ? 1 : 0;
+    $Env = $opt_E || 'CUI';
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
@@ -560,6 +567,10 @@ sub SetHashDefaults
 
 		    # upgrade from 2.x to 3.0
 		    'upgrade', 'do_upgrade',
+
+		    # 
+		    'html_config',     'do_html_config',
+		    'html_config_set', 'do_html_config',
 		    );
 
     # functions not to lock
@@ -572,6 +583,7 @@ sub SetHashDefaults
 		 'command', 1,
 		 'edit-template', 1,
 		 'config-template', 1,
+		 'html_config', 1,
 		 );
 
     # <ML> argument is not required.
@@ -904,9 +916,18 @@ sub GetFile
 
 sub Warn 
 {
+    local($s) = @_;
     local(@caller) = caller;
     print STDERR "Warning:(called from @caller)\n@_\n";
     $WarnBuf = "Warning:(called from @caller)\n@_\n";
+    $WStatus .= "ExitStatus: WARN: $s\n";
+}
+
+
+sub XSWarn
+{
+    local($s) = @_;
+    $WStatus .= "ExitStatus: WARN: $s\n";
 }
 
 
@@ -1189,7 +1210,7 @@ sub MakeFmlUnLock
 	closedir(DIRD);
     }
 
-    print "\nDone.\n";
+    print "\nDone.\n" unless $Env eq 'HTTPD';
 }
 
 
@@ -1583,7 +1604,6 @@ sub OutPutLocalConfig
 
     printf STDERR "\n---END OF MAKE_FML OUTPUT\n\n", $k, $v if $debug;
 }
-
 
 
 sub Query
@@ -2310,6 +2330,7 @@ sub do_newml
 	&Debug("*** Error: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
 	&Debug("\n\tmakefml newml ML\n");
+	$XStatus = 'ERROR: makefml.ml_is_not_defined';
 	return;
     }
 
@@ -2434,6 +2455,8 @@ sub do_newml
 
     # permission check only on UNIX's
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
+
+    $XStatus = 'OK:';
 }
 
 
@@ -2858,9 +2881,22 @@ sub do_config_template
 }
 
 
+sub do_html_config
+{
+    local($ml, $ptr, @argv) = @_;
+
+    $MakefmlCGI  = $ENV{'SCRIPT_NAME'}; # thttpd, apache
+    $MakefmlCGI .= "?ML=$ml&PROC=config";
+    $Menu'MakefmlCGI = $main'MakefmlCGI;
+
+    $HtmlConfigMode = 1;
+    &do_config($ml, @argv);
+    $HtmlConfigMode = 0;
+}
+
 sub do_config
 {
-    local($ml) = @_;
+    local($ml, @argv) = @_;
     local($cf, $local_config, $config, @config, %config);
     local(%saved_config, $t_cf, $t_configph);
 
@@ -2912,13 +2948,28 @@ sub do_config
     &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG,*HOOK);#';
 
     # MAIN LOOP 
-    &EachLevelQuery(*config, "/");
+    if ($HtmlConfigMode) {
+	# XXX: html_config is non-interactive for www.
+	# XXX: directly jump to the target level.
+	&HtmlConfigQuery(*config, $ARGV[2], @argv);
+    }
+    else {
+	&EachLevelQuery(*config, "/");
+    }
 
     ### After Care (Logging) ###
+    local($changed_p) = 0;
     for (keys %config) {
 	if ($config{$_} ne $saved_config{$_}) {
 	    &Log("makefml::config \$${_} \"$saved_config{$_}\" -> \"$config{$_}\"");
+	    $changed_p++;
 	}
+    }
+
+    # XXX: html_config do not need to re-create config.ph
+    if ($HtmlConfigMode && (!$changed_p)) {
+	print "\n   *** DO NOT RE-GENERATE config.ph (debug) ***\n";
+	return;
     }
 
     local($change_p);
@@ -3142,6 +3193,105 @@ sub do_edit_template
 }
 
 
+sub SetValue
+{
+    local(*config, $k, $v) = @_;
+
+    $config{$k} = $v;
+
+    if ($debug) {
+	print "*" x60; print "\n";
+	print "\tset variable \$${k} = $v;\n";
+	print "*" x60; print "\n";
+    }
+}
+
+
+# XXX: html_config is non-interactive for www.
+sub HtmlConfigQuery
+{
+    local(*config, $top_level, @argv) = @_;
+    local($variable, $value) = @argv;
+
+    print "<CENTER>\n";
+    print "<H1>fml configuration interface</H1>\n";
+    print "</CENTER>\n";
+    print "<P><B>Mailing List: $config{'_ML_'}</B>\n";
+    print "<HR>\n";
+
+    if ($variable && $value) {
+	if ($value eq 'YES') {
+	    &SetValue(*config, $variable, 1);
+	}
+	elsif ($value eq 'YES') {
+	    &SetValue(*config, $variable, $NULL);
+	}
+	else {
+	    &SetValue(*config, $variable, $value);
+	}
+    }
+
+    while ($top_level =~ s|^//|/|) { ;}
+    &EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP, *query);
+
+    print $MENU{$top_level};
+
+    &Menu'GenQuery(*query, $QUERY{$top_level}, $top_level); #';
+
+    local($menu, $query, $pat, $default) = 
+	($query{'menu'}, $query{'query'}, 
+	 $query{'pat'}, $query{'default'});
+
+    local($v, $ptr, $prev_ptr);
+    $v = $CONFIG{$top_level} || 'unknown';
+    $prev_ptr = $ptr = $top_level;
+    $prev_ptr =~ s#/[^/]+$##;
+
+    print STDERR "
+    --- debug ---
+    CONFIG{$top_level} => $v
+    MAP $top_level => $MAP{$top_level};
+    \$query{'type'} => $query{'type'}
+    --- debug ---
+    " if $debug;
+
+    if ($query{'type'} eq 'select') {
+	# choice in this menu if $MAP is defined
+	if ($MAP{$top_level}) {
+	    ; # but we show menu in &Bind;
+	}
+	# just pointer to next menu
+	else {
+	    ; # do nothing
+	}
+    }
+    elsif ($query{'type'} eq 'y-or-n' ||
+	   $query{"type"} eq "reverse-y-or-n") {
+	$v   = "VARIABLE=$v";
+	print "\t";
+	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=YES>[YES]</A>";
+	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=NO>[NO]</A>";
+	print "\n";
+	print "<A HREF=${MakefmlCGI}&${v}&PTR=$prev_ptr>[BACK] $prev_ptr</A>\n";
+    }
+    elsif ($query{'type'} eq 'number') {
+	print "<FORM ACTION=\"$ENV{'SCRIPT_NAME'}\" METHOD=POST>\n";
+	print "<INPUT TYPE=hidden NAME=PROC VALUE=config>\n";
+	print "<INPUT TYPE=hidden NAME=ML VALUE=$config{'_ML_'}>\n";
+	print "<INPUT TYPE=hidden NAME=VARIABLE VALUE=$v>\n";
+	print "<INPUT TYPE=hidden NAME=PTR VALUE=$top_level>\n";
+	print "<INPUT NAME=VALUE SIZE=10>\n";
+	print "<INPUT NAME=submit-p TYPE=submit VALUE=OK>\n";
+	print "<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>\n";
+	print "</FORM>\n";
+	print "<A HREF=${MakefmlCGI}&${v}&PTR=$prev_ptr>[BACK] $prev_ptr</A>\n";
+    }
+    else {
+	
+    }
+}
+
+
 sub EachLevelQuery 
 {
     local(*config, $top_level) = @_;
@@ -3185,6 +3335,7 @@ sub EachLevelQuery
 	print "   ".("*" x 60); print "\n";
 
 	&Menu'GenQuery(*query, $QUERY{$top_level}, $top_level); #';
+
 	$r = &Query($query{'menu'}, $query{'query'}, 
 		    $query{'pat'}, $query{'default'});
 
@@ -3505,6 +3656,7 @@ sub do_adduser
 	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
+	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
     }
 
@@ -3530,6 +3682,7 @@ sub do_adduser
 	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
 	print "\n*****Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
+	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
     }
 
@@ -3547,6 +3700,7 @@ sub do_adduser
 	if (&CheckMember($member, $f)) {
 	    &Debug("   WARN: skip $fn since $member is already member.");
 	    &Log("skip $fn since $member is already member");
+	    &XSWarn("adduser.already_member");
 	    next;
 	}
 
@@ -3555,6 +3709,7 @@ sub do_adduser
 	&AppendString2File($member, $f);
     }
 
+    $XStatus = 'OK:';
     $ADDR_CHECK_MAX = $acm;
 }
 
@@ -3570,6 +3725,7 @@ sub do_byeuser
 	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
+	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
     }
 
@@ -3596,6 +3752,7 @@ sub do_byeuser
 	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
 	print "***Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
+	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
     }
 
@@ -3611,6 +3768,8 @@ sub do_byeuser
 	    print "\tRemoved $found addrs.\n" if $found > 1;
 	}
     }
+
+    $XStatus = 'OK:';
 }
 
 # on, off, chaddr
@@ -3633,6 +3792,7 @@ sub do_ctladdr
 	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
+	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
     }
 
@@ -3640,6 +3800,7 @@ sub do_ctladdr
 	if ($opt eq '') { # may be "matome 0"
 	    &Log("Error: makefml::$proc has no option");
 	    &Debug("*** Syntax Error: makefml::$proc has no option ***");
+	    $XStatus = 'ERROR: makefml.syntax_error';
 	    return;
 	}
     }
@@ -3648,6 +3809,7 @@ sub do_ctladdr
 	&Debug("*** Error ***");
 	&Debug("*** If you use \$USE_MEMBER_NAME, please use");
 	&Debug("*** \"makefml command $ml $proc addr new-addr\"");
+	    $XStatus = 'ERROR: makefml.syntax_error';
     }
 
     print "---$proc $addr in $ml mailing list\n";
@@ -3676,6 +3838,7 @@ sub do_ctladdr
 	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
 	print "***Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
+	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
     }
 
@@ -3692,8 +3855,11 @@ sub do_ctladdr
 	}
 	else {
 	    print "\t*** Error: Nothing has been changed. ***\n";
+	    $XStatus = 'ERROR: makefml.nothing_changed';
 	}
     }
+
+    $XStatus = 'OK:';
 }
 
 
@@ -3798,6 +3964,7 @@ sub do_lock
 	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
+	&XSWarn("invalid_number_of_argument");
 	return;
     }
 
@@ -3822,6 +3989,7 @@ sub do_command
 	&Debug("\n\tmakefml $proc ML address command-strings");
 	&Debug("\te.g.");
 	&Debug("\tmakefml $proc ML address mget last:100 mp");
+	&XSWarn("invalid_number_of_argument");
 	return;
     }
 
@@ -4882,7 +5050,7 @@ sub InitMenu
     }
 }
 
-sub main'EvalMenu { &EvalMenu(@_);} #";
+sub main'EvalMenu { &EvalMenu(@_);} #';
 sub EvalMenu
 {
     local($menu, *config, *BIND, *MENU, *COUNT, *MAP, *query) = @_;
@@ -4918,8 +5086,7 @@ sub EvalMenu
 	$SUMMARY{'REWRITE_TO'} = "To: MAIL_LIST";
     }
 
-
-
+    local($xlabel);
     for (split(/\n/, $MenuTemplate{$menu})) {
 	# substitute
 	if (/_i_\s+(\S+)/) {
@@ -5023,11 +5190,11 @@ sub Reset
 sub Bind
 {
     local(*bind, $s, $menu) = @_;
-    local($index, $label);
+    local($index, $label, $html_ptr, $xl, $ptr, $v);
 
     if ($s =~ /(_i_\s+)(\S+)/) {
 	$index = $1;
-	$label = $2;
+	$xl = $label = $2;
 
 	$index =~ s/_i_/sprintf("%-3s", $Count)/ge;
 	$bind{$menu, $Count} = $label;
@@ -5036,9 +5203,37 @@ sub Bind
 	$label = $NAME{"/$label"} || $label;
     }
 
+    if ($Count == 0) {
+	$ptr = $menu;
+	$ptr =~ s#/[^/]+$##;
+	$ptr = "/". $ptr;
+	$ptr =~ s#//#/#g;
+	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr>";
+    }
+    elsif ($v = $MAP{$menu, $Count}) {
+	local($vn);
+	$ptr = $menu;
+	$ptr =~ s#//#/#g;
+	$vn = $CONFIG{$menu} || 'unknown';
+	$vn = "VARIABLE=$vn";
+	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr&${vn}&VALUE=$v>";
+    }
+    else {
+	$ptr = "$menu/$xl";
+	$ptr =~ s#//#/#g;
+
+	# select the value (not select menu)
+	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr>";
+    }
+
     $Count++;
 
-    return "$index$label";
+    if ($main'HtmlConfigMode) { #';
+	"${html_ptr}$index$label</A>";
+    }
+    else {
+	"$index$label";
+    }
 }
 
 
