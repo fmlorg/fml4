@@ -1,5 +1,12 @@
 #!/usr/local/bin/perl
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
 
+push(@INC, './proc');
+
+require 'libkern.pl';
 require 'config.ph';
 require 'libcompat_cf1.pl';
 
@@ -30,9 +37,7 @@ $MAIL_LIST       =~ s/domain\.uja/$FQDN/;
 $CONTROL_ADDRESS =~ s/domain\.uja/$FQDN/;
 
 
-$HEADER_INFO = qq#MAIL:  $FROM -> $MAIL_LIST
-#;
-$HEADER = qq#From $FROM
+$header = qq#From $FROM
 From: $FROM
     (uja)
 To: $MAIL_LIST
@@ -42,13 +47,9 @@ MIME-Version: 1.0
 Content-type: multipart/mixed; boundary="simple      boundary"
 #;
 
-$BODY = "test\n";
+$body = "test\n";
 
 ##############################
-print $HEADER;
-print "\n";
-
-# BODY
-print $BODY;
+print "$header\n$body;
 
 1;
