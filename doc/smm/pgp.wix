@@ -1,0 +1,35 @@
+.C	PGP (Pretty Good Privacy)
+
+.S	PGP での認証に基づくリモート管理
+
+
+自明な解が二通りあります。
+
+1	text +  signature で MD5 認証をする。
+
+本文は見えています。まぁパスワードが入ってないので恥ずかしいだけですが:)
+
+これはFrom:をメンバーファイルだけで認証しているものをPGPに拡張したもの
+です。
+
+管理者はPGP公開鍵を管理することでのみ認証する範囲を制御します。
+
+サーバ側は key generation を必要としないという安全性が重要。
+メール本体がどこかで盗聴された場合にすでに行なわれたコマンドを
+もう一度叩き込まれるというDOS的な可能性はありうる。
+
+
+2	encrypt する。
+
+サーバ側で key generation を必要とする。サーバ側は自分の秘密鍵がないと
+読めない。やはり管理者はPGP公開鍵を管理することでのみ認証する範囲を制
+御する。
+
+メール本体がどこかで盗聴された場合にすでに行なわれたコマンドを
+もう一度叩き込まれるというDOS的な可能性はやっぱりありうる。
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
