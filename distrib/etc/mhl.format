@@ -1,0 +1,33 @@
+;
+:------------------------------------------
+width=300,overflowtext="***",overflowoffset=5
+leftadjust,compwidth=9
+ignores=msgid,message-id,return-path,\
+path,\
+Received,\
+Replied,\
+Content-Transfer-Encoding,Content-Length,\
+Precedence,Errors-to,In-reply-to,Sender,\
+Mime-version,Content-Type,Content-Transfer-Encoding,X-Mime-Processing-By,\
+X-authentication-warning,\
+X-Original-Subject,\
+References,Organization,\
+x-ml-info,\
+x-iij-ml-name,x-iij-ml-count,\
+x-cache,\
+x-distribute,\
+x-phone,x-fax,organization,delivered-to,\
+x-address,x-telephone,x-disclaimer,x-url,\
+x-mailer,\
+X400-Received,X400-Originator,X400-MTS-Identifier,\
+X400-Content-Type,Content-Identifier,\
+lines,x-mlserver,to,posted,x-posted,reply-to,\
+X-ML-Nickname,X-ML-name,x-face,\
+subject,cc,posted-date,x-stardate
+Posted:formatfield="%<(nodate{text})%{text}%|%{text}%>"
+Date:formatfield="%<(nodate{text})%{text}%|%{text}%>"
+From:component="Thanks to"
+X-Mail-Count:component="In fml-support ML's Count"
+extras:nocomponent
+:
+body:component=">",overflowtext=,overflowoffset=10,noleftadjust
