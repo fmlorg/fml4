@@ -12,8 +12,6 @@
 
 use MD5;
 
-sub MD5 { &Md5(@_);}
-
 sub Md5
 {
     local($data) = @_;
@@ -25,8 +23,8 @@ sub Md5
     unpack("H*", $digest);
 }
 
-
-sub BodyMD5Cksum
+# XXX: called under perl 5
+sub main::MailBodyMD5Cksum
 {
     local(*e) = @_;
 
