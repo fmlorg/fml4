@@ -12,9 +12,6 @@
 
 SUBDIRS += MIME
 SUBDIRS += utilities
-SUBDIRS += ftpmail
-SUBDIRS += whois
-SUBDIRS += cwhois
 SUBDIRS += www
 SUBDIRS += traffic
 SUBDIRS += localhack/release-1/Elena
