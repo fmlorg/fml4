@@ -1235,7 +1235,7 @@ sub RuleSetTo
 	# IF NOT match one of $MAIL_LIST,
 	# gabble not $MALI_LIST address to $buf
 	if (! $match) {
-	    $buf .= $buf ? ", ". $x_addr : $x_addr;
+	    $buf .= $buf ? ", ". $addr : $addr;
 	    &Log("RuleSetTo: buf = {$buf}") if $debug;
 	}
     }
