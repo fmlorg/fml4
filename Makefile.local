@@ -1,0 +1,111 @@
+### local configuration 
+FTP_DIR      = $(HOME)/.ftp
+SNAPSHOT_DIR = $(FTP_DIR)/snapshot
+WWW          = /home/hikari/sapporo/www/staff/fukachan/href/fml
+WWW_DIR      = $(WWW)
+
+
+check:
+	sh distrib/bin/check.sh
+
+capital:
+	cat `echo *pl proc/*pl |\
+	 sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
+	perl $(DIST_BIN)/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
+
+ntdist: 
+	(/bin/sh distrib/bin/generator 2>&1| tee $(DESTDIR)/_distrib.log)
+	(/bin/sh $(RELBIN)/nt-release.sh /tmp/distrib 2>&1|\
+	 tee -a $(DESTDIR)/_distrib.log)
+	@ $(RELBIN)/error_report.sh $(DESTDIR)/_distrib.log
+	@ echo "(chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)"
+	@ (chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)
+	@ chmod -R 777 /tmp/nt
+
+nt:	dist wintermute
+
+wintermute:
+	chmod -R 777 $(DESTDIR)/fml-current/
+	ssh wintermute 'mv -f /home/nt/fukachan/src /home/nt/fukachan/src$$$$'
+	ssh wintermute mkdir /home/nt/fukachan/src
+	ssh wintermute chmod 777 /home/nt/fukachan/src
+	$(RSYNC) -av $(DESTDIR)/fml-current/ wintermute:/home/nt/fukachan/src/
+
+
+varcheck:
+	perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
+	tee tmp/VARLIST
+	@ wc tmp/VARLIST
+
+v2: varcheck2
+
+varcheck2:
+	perl distrib/bin/search-config-variables.pl -E -D -s -m \
+	*pl libexec/[a-lo-z]*pl proc/*pl bin/*pl |\
+	tee /tmp/VARLIST
+	@ wc /tmp/VARLIST
+
+v3:
+	perl distrib/bin/search-config-variables.pl \
+	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
+	tee tmp/VARLIST
+	@ wc tmp/VARLIST
+
+sync:
+	# scp -v -p $(DESTDIR)/distrib/src/*.pl eriko:~/.fml
+	chmod 755 $(DESTDIR)/fml-current/src/fml.pl \
+		$(DESTDIR)/fml-current/src/msend.pl \
+		$(DESTDIR)/fml-current/libexec/*pl
+	$(RSYNC) -av $(DESTDIR)/fml-current/src/ eriko:~/.fml/
+	$(RSYNC) -av $(DESTDIR)/fml-current/bin/ eriko:~/.fml/bin/
+	$(RSYNC) -av $(DESTDIR)/fml-current/drafts/ eriko:~/.fml/drafts/
+	$(RSYNC) -av $(DESTDIR)/fml-current/libexec/ eriko:~/.fml/libexec
+	(echo "test of new FML snapshot."; echo ""; echo "--fukachan")|\
+	Mail test@fml.org
+
+makefml:
+	sh distrib/bin/reset-makefml
+
+init-makefml:
+	cp sbin/makefml /tmp/distrib
+	(chdir /tmp/distrib ; perl makefml )
+
+simulation:
+	sh $(FML)/.simulation/bootstrap
+
+
+scan:
+	fvs scan kern/* proc/* libexec/* \
+		sbin/makefml doc/ri/*wix doc/smm/*wix doc/master/*wix \
+		doc/html/* \
+		etc/makefml/* cf/* bin/* sys/*/*|\
+	tee /tmp/scanbuffer
+	@ cp /dev/null /tmp/__scan__
+	@ echo "" >> /tmp/__scan__
+	@ echo "--- noid ---" >> /tmp/__scan__
+	@ grep ^noid /tmp/scanbuffer >> /tmp/__scan__ || echo "NO noid OK" >> /tmp/__scan__
+	@ echo "" >> /tmp/__scan__
+	@ echo "--- Modified ---" >> /tmp/__scan__
+	@ grep ^Modified /tmp/scanbuffer >> /tmp/__scan__ || echo "NO Modified OK" >> /tmp/__scan__
+	@ rm /tmp/scanbuffer
+	@ echo "";
+	@ cat /tmp/__scan__
+	@ echo ""; echo "file: /tmp/__scan__"; echo "";
+
+loop:
+	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
+
+e:	testsetup
+	@ echo 'make m is to re-generate /tmp/e/makefml'
+	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /tmp/e/.fml/system install)
+
+m:
+	if [ -d /tmp/e ]; then \
+	 perl w/repl.pl sbin/makefml > /tmp/e/makefml ; fi
+
+testsetup:
+	@ test -d $(TRASH)/FML_TEST || mkdir $(TRASH)/FML_TEST
+	@ test -d $(TRASH)/FML_TEST/e || mkdir $(TRASH)/FML_TEST/e
+	@ test -d $(TRASH)/FML_TEST/s || mkdir $(TRASH)/FML_TEST/s
+	@ test -h /tmp/e || ln -s $(TRASH)/FML_TEST/e /tmp/e
+	@ test -h /tmp/s || ln -s $(TRASH)/FML_TEST/s /tmp/s
