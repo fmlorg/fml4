@@ -48,13 +48,13 @@ sub DataBaseMIBPrepare
 
     my ($suffix) = $DATABASE_CACHE_FILE_SUFFIX || ".dbcache";
     if ($action =~ /active/) {
-	$mib->{'_cache_file'}     = $ACTIVE_LIST. ".". $suffix;
+	$mib->{'_cache_file'}     = $ACTIVE_LIST. $suffix;
     }
     elsif ($action =~ /member/) {
-	$mib->{'_cache_file'}     = $MEMBER_LIST. ".". $suffix;	
+	$mib->{'_cache_file'}     = $MEMBER_LIST. $suffix;	
     }
     else {
-	$mib->{'_cache_file'}     = $MEMBER_LIST. ".". $suffix;
+	$mib->{'_cache_file'}     = $MEMBER_LIST. $suffix;
     }
 
     # LDAP by default (these are templates provided by fml).
