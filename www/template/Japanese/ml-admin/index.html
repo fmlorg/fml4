@@ -25,7 +25,7 @@
 
 <P>
 <UL>
-<LI><A HREF="_CGI_PATH_/ml-admin/_ML_/menu.cgi?LANGUAGE=English">[English]</A>
+<LI><A HREF="menu.cgi?LANGUAGE=English">[English]</A>
 <LI><A HREF="#add.bye">メンバーの登録/削除</A>
 <LI><A HREF="#adminadd.bye">リモート管理者の登録/削除</A>
 <LI><A HREF="#config">_ML_ ＭＬの詳細設定</A>
@@ -39,7 +39,13 @@
 
    <LI>ＭＬメンバーの登録/削除
 
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<BR>
+	メールアドレスをきちんと
+	ユーザ＠ドメイン(例: rudo@nuinui.net)
+	形で入力するか一覧表から指定し、
+	ADD か BYE のどちらかを選択して下さい。
+
+	<FORM ACTION="makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<TABLE>
 	<TR>
@@ -71,7 +77,15 @@
    
    <A NAME=adminadd.bye>
    <LI>リモート管理者の登録/削除
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+
+	<BR>
+	メールアドレスをきちんと
+	ユーザ＠ドメイン(例: rudo@nuinui.net)
+	形で入力するか一覧表から指定し、
+	ユーザ＠ドメイン(例: rudo@nuinui.net)
+	ADD ADMIN か BYE ADMIN のどちらかを選択して下さい。
+
+	<FORM ACTION="makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
@@ -105,7 +119,7 @@
    <A NAME=config>
    <LI>詳細設定 (makefml config)
 	<BR>
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
@@ -119,7 +133,8 @@
 	<A NAME=password>
 	<LI>リモート管理者パスワードの設定
 	<BR>
-	admin ないし approve コマンドのパスワードとGUIのメニューにはいるための
+	admin ないし approve コマンドのパスワードと、
+	GUIのメニューにはいるための
 	パスワードを同時に更新します。
 	<BR>
 	GUIではとりあえずこれらについては同じパスワードです。
@@ -129,7 +144,7 @@
 
 	<!- apply patch by ikeda@meple.or.jp ->
 	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
@@ -156,7 +171,7 @@
    <A NAME=log>
    <LI>メーリングリストのログを見る
 
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>

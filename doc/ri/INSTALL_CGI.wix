@@ -70,6 +70,11 @@ URL で fml CGI を使うことになります(後述)。
 を見て下さい。また、付録のトラブルシュート(=> .ptr{cgi-troubleshoot} )
 も参考にして下さい。
 
+.S	~/public_html 
+
+まず最初に ~/public_html を作成して下さい。
+
+
 
 .S	CGI スクリプトの準備
 
@@ -126,6 +131,7 @@ apache をインストールするところから解説します。suEXEC を有効にするため
 nobody の部分は httpd.conf の User 行とあわせます。デフォルトは nobody 
 です。次に /usr/local/apache/conf/httpd.conf を編集します。
 
+つぎに CGI を有効にするためにディレクトリコンテナを設定します。例えば 
 ユーザ fml のホームディレクトリが /home/fml なら、次のような設定を 
 httpd.conf に追加します。
 
@@ -155,11 +161,47 @@ httpd.conf の編集後、
 ても suEXEC がうまくいかないことは多々あります。
 付録のトラブルシュート例を参考に、設定の確認をして下さい。
 
+
+.S	確認: パスワード
+
+/usr/local/fml/www/authdb ディレクトリ以下をユーザ nobody が読めること
+を確認して下さい。例えば、次の用にします。
+
+	# chmod -R go+rx `find /usr/local/fml/www/authdb -type d -print`
+	# chmod -R go+r /usr/local/fml/www/authdb
+
+注意: ユーザ nobody にも読めるように o+r をする必要がありますが、これ
+      はよくありません。グループ fml に nobody を加え、g+r だけにすることが
+      のぞましいのかもしれません。最終的にどちらが望ましいかは
+      そのホストをどのように運用しているかに依存します。
+
+
+.S	確認: ~fml/public_html/
+
+~/public_html/ 以下のパーミッションの確認をして下さい。
+
+
+	% chmod -R go-w ~/public_html/	
+	% chown -R fml:fml  ~/public_html/	
+
+などとして、不要なパーミッションをおとしてください。
+
+
 .S	テストをする
 
 	http://そのホスト/~fml/cgi-bin/fml/admin/menu.cgi
 
 にアクセスしていろいろ操作してみて下さい。
+
+特に ML を作成してみてください。MLを作成すると、
+/var/spool/ml/etc/aliases にその作成したMLのエントリがあるはずです。そ
+して、/var/spool/ml/etc/aliases.db (普通では読めないバイナリファイルで
+すけど)中にもその作成したMLのエントリがあるはずです。
+
+もし、うまくいってないなら、メールサーバの newaliases の設定がおかしい
+ことになります。makefml admin.cgi config を実行し、項目 ６と７の設定を
+見直して下さい。また、aliases.db のパーミッションを見直して下さい(注意
+点については後述)。
 
 
 
@@ -495,6 +537,9 @@ AddHandler cgi-script .cgi
 使い方は admin.cgi と同様です。1 は SSL を使うか否か？です。2 でユーザ
 とパスワードを設定して下さい。3 で ml-admin/ 以下の CGI スクリプトと 
 .htaccess が再生成されます。
+
+
+階層が異なるだけで、基本的なノウハウは admin.cgi の場合と同様です。
 
 
 

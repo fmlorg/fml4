@@ -288,7 +288,8 @@ sub Command
 
 	&EndPRE;
 	&P("<HR>");
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1)
+	    unless ($SavedML);
 	&P("<HR>");
 	&PRE;
     }
@@ -300,7 +301,8 @@ sub Command
 
 	&EndPRE;
 	&P("<HR>");
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1)
+	    unless ($SavedML);
 	&P("<HR>");
 	&PRE;
     }
@@ -356,7 +358,11 @@ sub Command
 		&Control($ML, $PROC, $CGI_ADMIN_USER || $MAIL_ADDR, $PASSWORD);
 
 		&EndPRE;
-		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${saved_proc}.html", 1);
+
+		# not show when /ml-admin/$ml is processing...
+		unless ($SavedML) {
+		    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${saved_proc}.html", 1);
+		}
 		&P("<HR>");
 		&PRE;
 	    }
