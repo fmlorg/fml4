@@ -64,6 +64,7 @@ FML で"リモート管理"といっているのは、ML管理者が config.ph や members
 	$REMOTE_ADMINISTRATION_AUTH_TYPE = "md5";
 
 の時は MD5 で保存します(旧 $USE_MD5)。
+.l	MD5
 .k	MD5
 
 そのためパスワードファイルの編集には makefml passwd もしくは 
