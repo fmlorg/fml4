@@ -10,13 +10,22 @@
 FMLで”リモート管理”といっているのは、ＭＬ管理者が config.ph や 
 members 等を、そのＭＬサーバのマシンに入って直接いじるのではなく、サー
 バにコマンドメールを送ってＭＬの設定をメインテナンスすることを意図して
-います。
+います。リモート管理ができる人は
 
-しかし SMTP (Simple Mail Transfer Protocol) では原理的に認証はできませ
-ん。パスワードによる認証もまた当てにはなりません。パスワードを含むメー
-ルが FAIL してどこかのポストマスタにうっかり見えてしまう可能性もありま
-す(普通はヘッダだけですが)。でもヘッダの Approval: password フィールド
-は見えちゃいますよね、その場合は。
+	メンバーリストに登録されている
+.xref $ADMIN_MEMBER_LIST
+かつ
+	パスワードを知っている
+	複数人いたらそれぞれに別のパスワードを付けることができます。
+
+現在では makefml があるので、これを使って登録とパスワードの初期化をす
+るとよいでしょう。
+
+問題は SMTP (Simple Mail Transfer Protocol) では原理的に認証はできない
+というところにあります。パスワードによる認証もまた当てにはなりません。
+パスワードを含むメールが FAIL してどこかのポストマスタにうっかり見えて
+しまう可能性もあります(普通はヘッダだけですが)。でもヘッダの Approval:
+password フィールドは見えちゃいますよね、その場合は。
 
 そういう意味で決して”推奨していません”が、実用上しかたなく使うことに
 なるケースも一杯あるらしいので実装しています。そういうものだと心に止め
@@ -42,13 +51,15 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 
 なおマシンの上で他の人に覗かれた場合は少しだけましで、etc/passwd とい
 うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
-います。
+います。$USE_MD5 をセットすれば、MD5 で保存します。
+.xref	MD5
 
-そのためパスワードファイルの編集には bin/passwd.pl を使うと良いでしょ
-う。
+そのためパスワードファイルの編集には makefml もしくは bin/passwd.pl を
+使うと良いでしょう(自分で crypt してもいいですけどね、普通手動ではしな
+かろう:)。
 
 
-.S	リモート管理モード ('remote')
+.S	リモート管理モード
 .k	リモート管理モード
 .k	&DEFINE_MODE('remote')
 
@@ -62,11 +73,15 @@ config.ph に
 	リモート管理を認め
 	管理者であることを証明するためにはパスワード認証が必要
 
-という設定です。パスワード認証を必要としない場合
+という設定です。この２つの設定は
+
+	&DEFINE_MODE('remote');
+
+を書くと ON になります。パスワード認証を必要としない場合は
 
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
 
-ですが、これはするべきではないでしょう。
+とすればそうなりますが、これはするべきではありません。
 
 
 .S	コマンド
@@ -108,7 +123,6 @@ config.ph に
 	# approve パスワード addadmin fukachan@sapporo.iij.ad.jpa
 	# approve パスワード add      fukachan@sapporo.iij.ad.jpa
 
-
 つまり
 
 	# approve password commands 
@@ -126,7 +140,7 @@ config.ph に
 
 
 .S	リモート管理の設定
-.k	$ADMIN_MEMBER_LIST
+.l	$ADMIN_MEMBER_LIST
 .k	$ADMIN_HELP_FILE
 .k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 .k	$PASSWD_FILE
@@ -144,11 +158,12 @@ config.ph に
 
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; 
 
-０にすれば パスワードチェック をおこなわない設定です
-
-このチェックに使うパスワードファイルです。
+0にすればパスワードチェックをおこなわない設定です
+このチェックに使うパスワードファイルが
 
 	$PASSWD_FILE = "$DIR/etc/passwd";
+
+です。
 
 注意：
 $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は $REMOTE_AUTH (TYPO で 
@@ -156,9 +171,9 @@ $REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
 の変数でもいいです。
 
 
-.S	アドミンモードでのアドレスの複数マッチ問題について 
+.S	リモート管理モードでのアドレスの複数マッチ問題について 
 .key	アドレスの複数マッチ
-.key	アドミンコマンド
+.key	admin コマンド
 
 通常のリモートコマンドの場合、 OFF コマンド等での multiple-matching 
 を認めません。つまり、
@@ -323,12 +338,13 @@ fukachan@sapporo.iij.ad.jp を管理者に加える時は
 手で編集することです。
 .xref	bin/passwd.pl etc/passwd 
 
-その場合途中の経路上が暗号化されているとより望ましいです(^^)。
-.xref	Gauntlet
+その場合途中の経路上が暗号化されているとより望ましいです。例えば 
+Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet 
+等もあります。
 
-もっとも暗号化に関しては初期化プロセスだけ暗号化されていても admin コ
-マンドは SMTP 上で動いてるのでパスワード隠蔽に関しては、どのみちあまり
-意味はありませんが…
+暗号化に関しては初期化プロセスだけ暗号化されていても、メールで admin 
+コマンドを送る場合SMTP 上で動いてるのでパスワード隠蔽に関しては、どの
+みちあまり意味はありませんが…
 
 
 .S	リモートで管理する人を削除する時
@@ -344,9 +360,10 @@ fukachan@sapporo.iij.ad.jp を管理者に加える時は
 .label	init-passwd
 .k	etc/passwd
 .k	bin/passwd.pl
+.xref	bin/passwd.pl
 
 例：
-   % passwd.pl -i fukachan@phys.titech.ac.jp uja
+	makefml passwd ML名 ...
 
 fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 初期化はＭＬサーバを edit できる人にしかできません。
@@ -387,4 +404,3 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
-
