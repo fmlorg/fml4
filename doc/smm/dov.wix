@@ -550,6 +550,42 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 美しいでしょうね。
 
 
+.S	newsyslog(8) について
+.k	newsyslog(8)
+.k	/usr/bin/newsyslog
+.k	libnewsyslog.pl
+
+/usr/bin/newsyslog に対応するものとして、libnewsyslog.pl が実装されて
+います。昔の /etc/daily 等では
+
+	…
+	rename log.0 log.1
+	rename log log.0
+	…
+
+とやっていたログファイルの整理を行なうプログラムです。4.4BSDでは、もと
+もと MITのアテナプロジェクトで作られたプログラムが使われています。
+
+newsyslog のパラメータは
+.k	@NEWSYSLOG_FILES
+.k	$NEWSYSLOG_MAX
+.k	&NewSyslog
+
+&NewSyslog の引数(配列)は整理したいファイル群です。
+
+	$NEWSYSLOG_MAX 	
+
+整理するのは何個までか？で、デフォールトは４。つまり
+
+	log.4 log.3 ... log.0 log 
+
+まで保存・整理されます。また、
+
+	@NEWSYSLOG_FILES
+
+は msend が日曜の朝 newsyslog をかけるファイル群を指定しています。
+
+
 
 .C	用語
 
