@@ -39,39 +39,41 @@ $DRAFTS_DIR = "$EXEC_DIR\\drafts";
 -d $DOC_DIR    || &MkDirHier($DOC_DIR, 0755);
 -d $DRAFTS_DIR || &MkDirHier($DRAFTS_DIR, 0755);
 
-for (@DIRS) {
-    print  "Installing $dir ...\n";
-    &RecursiveCopy($_);
+local($dir);
+for $dir (@DIRS) {
+    print STDERR "Installing $dir ";
+    &RecursiveCopy($dir);
+    print STDERR "\n";
 }
-
-print "Installing perl scripts (*.pl) files ...\n";
+print STDERR "\n";
+print STDERR "Installing perl scripts (*.pl) files ...\n";
 
 # since rm -fr ...
 -d $DOC_DIR    || &MkDirHier($DOC_DIR, 0755);
 -d $DRAFTS_DIR || &MkDirHier($DRAFTS_DIR, 0755);
 
 &RecursiveCopy("src", ".");
-print "\n";
-system "copy src\\* $EXEC_DIR";
+print STDERR "\n";
+system "copy src\\* $EXEC_DIR >nul";
 -d "$SYS_DIR\\WINDOWS_NT4" || &MkDirHier("$SYS_DIR\\WINDOWS_NT4", 0755);
-system "copy sys\\WINDOWS_NT4\\* $SYS_DIR\\WINDOWS_NT4";
+system "copy sys\\WINDOWS_NT4\\* $SYS_DIR\\WINDOWS_NT4  >nul";
 
 # install drafts/$LANGUAGE/
 for $dir ('Japanese', 'English') {
     my ($x) = $DRAFTS_DIR . "/$dir";
     -d $x || &MkDirHier($x, 0755);
-    system "copy drafts\\${dir}\\* $DRAFTS_DIR\\${dir}";
+    system "copy drafts\\${dir}\\* $DRAFTS_DIR\\${dir} >nul";
 }
 
-system "copy sys\\WINDOWS_NT4\\* $EXEC_DIR";
-system "copy sbin\\makefml $EXEC_DIR\\makefml";
+system "copy sys\\WINDOWS_NT4\\* $EXEC_DIR >nul";
+system "copy sbin\\makefml $EXEC_DIR\\makefml >nul";
 
 &Conv("sys\\WINDOWS_NT4\\ntfml.cmd", "$EXEC_DIR\\ntfml.cmd");
 
-print "Good. Install is done.\n\n";
+print STDERR "Good. Installation is done.\n\n";
 
-print "--- Please ignore after this (EVEN IF THIS INSTALLER FAILED).\n";
-print "--- New version (test phase)\n";
+print STDERR "--- Please ignore after this (EVEN IF THIS INSTALLER FAILED).\n";
+print STDERR "--- New version (test phase)\n";
 
 # get drive?
 # if we not get it, it must be needed (really ???)
@@ -123,11 +125,20 @@ sub RecursiveCopy
 
 	$dir =~ s#/#\\#g;
 
-	print STDERR "del $dir\\*.bak\n";
-	system "del $dir\\*.bak";
+	my (@f) = <$dir\\*.bak>;
+	if (@f) {
+	    print STDERR "del $dir\\*.bak\n" if $debug_nt;
+	    system "del $dir\\*.bak";
+	    print STDERR "\nfail to del $dir\\*.bak\n" if $?;
+	}
 
-	print STDERR "copy $dir\\* $EXEC_DIR\\$target\n";
-	system "copy $dir\\* $EXEC_DIR\\$target";
+	my (@f) = <$dir\\*>;
+	if (@f) {
+	    print STDERR ".";
+	    print STDERR "copy $dir\\* $EXEC_DIR\\$target\n" if $debug_nt;
+	    system "copy $dir\\* $EXEC_DIR\\$target >nul";
+	    print STDERR "\nfail to copy $dir\\* $EXEC_DIR\\$target\n" if $?;
+	}
     }
 }
 
