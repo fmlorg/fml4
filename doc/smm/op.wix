@@ -92,11 +92,8 @@
 .include lib.wix
 
 .include whois.wix
-.include cwhois.wix
 
-.include aucea.wix
-.include fred.wix
-.include pager.wix
+
 
 
 .# ##########################################################
@@ -137,6 +134,12 @@
 .P	Appendix
 
 .include ref.wix
+
+.include cwhois.wix
+.include aucea.wix
+.include fred.wix
+.include pager.wix
+
 .include app/fmlR1.wix
 .include app/vars.wix
 .include app/misc.wix

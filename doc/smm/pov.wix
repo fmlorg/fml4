@@ -1242,7 +1242,7 @@ CAVEAT
 
 .S	Precedence Priority
 
-sendmail operations manual tells:
+sendmail 8.8.5 operations manual tells:
 
              5.7.  P -- Precedence Definitions
 
