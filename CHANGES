@@ -4,12 +4,26 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/10/14
+
+   cf/MANIFEST 
+	modify MESSAGE_ID_CACHE_BUFSIZE: 60*100 -> 6000
+	to avoid invalid expansion by cf/config.
+
+
+   proc/libsynchtml.pl
+	we should not include these char's in URL.
+	RFC2068 says these special char's are not used.       
+	+ reserved = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"           
+	+ unsafe   = CTL | SP | <"> | "#" | "%" | "<" | ">"           
+	incomplete but may be effective ?
+
 2001/10/13
 
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML$
+	add $FML: CHANGES,v 1.216 2001/10/13 14:24:07 fukachan Exp $
 
 2001/10/03
 
