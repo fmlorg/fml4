@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/01
+
+  rename programs: archive.pl archive.sh with Archive.pl Archive.sh 
+	so remove Archive.pl Archive.sh 
+
 2000/05/31
 
   pgp2 code
