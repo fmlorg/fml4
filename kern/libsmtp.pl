@@ -889,7 +889,7 @@ sub SmtpPutActiveList2Socket
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
-	if ($debug_mci || 1) {
+	if ($debug_mci) {
 	    print STDERR 
 		$mci_count, 
 		":$file:($mci_window_start, $mci_window_end)> $rcpt\n";
