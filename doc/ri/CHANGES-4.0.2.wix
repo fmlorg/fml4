@@ -1,6 +1,13 @@
 .HTML_PRE
 
 	CHANGES-4.0.2 (from 4.0.1 to 4.0.2)
+	$Date$
+
+   [4.0.2 の主な変更点]
+	* 新機能は fml 5.0 のモジュールベースに変更 
+	* IPv6 をデフォルトで使う
+	* サマータイムの考慮
+
 
 2001/05/11
 
@@ -22,7 +29,18 @@
    messages/Japanese/amctl (1.5-1.6):
 	fix Japanese to be more friendly for newbies
 
+   日付関連
+	サマータイムの指定をできるように拡張する。
+	サマータイムらしい場合にはタイムゾーンは $TZONE_DST 
+	の値が GetTime() で使われる :) デフォルトでは未定義
 
+   	fml/bin: cron.pl emumail.pl gen_summary.pl spool2html.pl 
+   	fml/cf: MANIFEST config 
+   	fml/kern: fml.pl 
+   	fml/libexec: mead.pl mead.pl.new 
+   	fml/sbin: makefml 
+   	fml/sys/WINDOWS_NT4: ntfml.pl wrapper.pl 
+   
 2001/05/05
 
    fml 5.0 branch から Mail::* と IO::* クラスを輸入した。
@@ -30,11 +48,10 @@
 	一つは IPv6 のため、もう一つは mead で使う
 	エラーメール解析エンジンの輸入でした。
 
-$FML: CHANGES-4.0.1.wix,v 1.11 2001/05/09 15:45:31 fukachan Exp $
-.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+$FML: CHANGES-4.0.2.wix,v 1.1 2001/05/12 13:02:34 fukachan Exp $
+.# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2001 fukachan@sapporo.iij.ad.jp
+.#               2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
