@@ -48,7 +48,7 @@ GEN_HTML () {
 		test -d var/html/$TARGET || mkdirhier var/html/$TARGET
 
 		perl distrib/bin/fix-wix.pl doc/$SOURCE_DIR/$FILE.wix |\
-		$FWIX -L $LANG -T $FILE -m html -D var/html/$TARGET -d doc/smm
+		$FWIX -L $LANG -T $FILE -m html -D var/html/$TARGET -d doc/$SOURCE_DIR
 	else
 	   echo "doc/$SOURCE_DIR/$FILE.wix !-nt var/html/$TARGET/index.html"
 	fi
