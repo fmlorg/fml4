@@ -272,7 +272,7 @@ REMOTE_ADMINISTRATION:  0
 # The difference of "crypt" and "md5" is $PASSWD_FILE format.
 # HISTORY: $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD <=> "crypt"
 #
-# value: crypt/address/md5/pgp
+# value: crypt/address/md5/pgp/pgp2/pgp5/gpgp
 REMOTE_ADMINISTRATION_AUTH_TYPE:	crypt
 
 # address list of members who can send a command mail from remote
@@ -300,11 +300,17 @@ ADMIN_ADD_SEND_WELCOME_FILE:	0
 # value: number
 ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 
-# PGP directory path
+# PGP directory path (obsolete in fml 4.0)
 # value: filename string 
 PGP_PATH:		$DIR/etc/pgp
 
+# If you enforce the following *KEYRING_PATH in $CFVersion < 6.1,
+# set this variable on.
+# value: 1/0
+USE_FML40_PGP_PATH:	1
+
 # fml 4.0
+# value: directory string
 DIST_AUTH_KEYRING_PATH:		$DIR/etc/dist-auth
 DIST_ENCRYPT_KEYRING_PATH:	$DIR/etc/dist-encrypt
 ADMIN_AUTH_KEYRING_PATH:	$DIR/etc/admin-auth
@@ -517,11 +523,12 @@ LOG_MAIL_FILE_SIZE_MAX:	2048
 # value: 1/0
 USE_ENCRYPTED_DISTRIBUTION:
 
-# value: 2/5/6
-PGP_VERSION:	2
+# value: pgp / pgp2 / pgp5 / gpgp
+ENCRYPTED_DISTRIBUTION_TYPE:	pgp2
 
-# value: pgp
-ENCRYPTED_DISTRIBUTION_TYPE:	pgp
+# obosolete in fml 4.0
+# value: 2/5/6
+# PGP_VERSION:	2
 
 
 #####################################################################

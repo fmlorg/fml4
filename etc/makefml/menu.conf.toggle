@@ -83,6 +83,7 @@
 	_i_  USE_ERRORS_TO                              $SUMMARY{'USE_ERRORS_TO'}
 	_i_  USE_EXPIRE                                 $SUMMARY{'USE_EXPIRE'}
 	_i_  USE_FLOCK                                  $SUMMARY{'USE_FLOCK'}
+	_i_  USE_FML40_PGP_PATH                         $SUMMARY{'USE_FML40_PGP_PATH'}
 	_i_  USE_LOG_MAIL                               $SUMMARY{'USE_LOG_MAIL'}
 	_i_  USE_MEMBER_NAME                            $SUMMARY{'USE_MEMBER_NAME'}
 	_i_  USE_MIME                                   $SUMMARY{'USE_MIME'}
@@ -782,6 +783,20 @@
 
 =menu
 	USE_FLOCK	$SUMMARY{'USE_FLOCK'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/USE_FML40_PGP_PATH
+
+=name
+	USE_FML40_PGP_PATH
+
+=config
+	USE_FML40_PGP_PATH
+
+=menu
+	USE_FML40_PGP_PATH	$SUMMARY{'USE_FML40_PGP_PATH'}
 
 =query
 	type:	y-or-n
