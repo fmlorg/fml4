@@ -3,6 +3,30 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/30
+
+   $LOG_FILE_SUFFIX	(default NULL)
+	$LOG_FILE_SUFFIX = ".%C%y";
+
+	log ファイルにsuffixをつけられる。backup が楽
+	例: log.2000
+
+   mead 
+	clean up a little
+	load /var/spool/ml/etc/mead/mead_config.ph if exists
+	define $OVERWRITE_COMMAND_LINE_OPTIONS
+
+	もし /var/spool/ml/etc/mead/mead_config.ph があれば
+	その設定ファイルをロードする。もし
+	$OVERWRITE_COMMAND_LINE_OPTIONS というオプションが
+	あれば、mead のコマンドラインオプションよりこのファイルが
+	優先される。
+
+   etc/makefml/include-mead
+	remove -m $mode
+
+	mead の変更に伴い include-mead 見本ファイルから -m を削除
+
 2000/04/29
 
    new tutororial documents
