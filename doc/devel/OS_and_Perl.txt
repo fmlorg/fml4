@@ -30,15 +30,18 @@ Debian Gnu/Linux 2.2(potato)	5.004_05(5.005_03)
 Debian Gnu/Linux ???(woody)	5.004_05(5.005_03)
 				unstableなので変わる可能性大
 
+Cobalt RaQ1-J (mips) Linux 2.0.34	5.004_04 built for mips-linux
+Cobalt RaQ2-J (mips) Linux 2.0.34	5.004_04 built for mips-linux
+
 Solaris 2.6			none
 Solaris 7			none
 Solaris 8			5.005_03
 
+Mac OS X			?
 
 # not UNIX-like
 Windows NT4			none
-Windows 2000			5.6.0 ?
-Mac OS X			?	
+Windows 2000			none
 
 ---
 checked by
