@@ -74,6 +74,11 @@ COPY_DOCS () {
 	echo " "; echo "Copying Documents (doc/ri)...";
 	cd var/doc;
 	cp -p $DOC $DESTDIR/distrib/doc;
+
+	if [ -d advisories ]
+	then
+	   rsync -av advisories $DESTDIR/distrib/doc;
+	fi
    )
    (
 	echo " "; echo "Copying 'contrib' Documents (doc/master)...";
@@ -105,6 +110,9 @@ COPY_DOCS () {
 
    echo "rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/"
    rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/
+
+   echo "rsync -av advisories $DESTDIR/distrib/doc/html/"
+   rsync -av var/html/advisories $DESTDIR/distrib/doc/html/
 }
 
 

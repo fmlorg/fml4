@@ -63,12 +63,16 @@ FILES.jp
 FILES.en
 
 
+DOC_ADVISORIES:
+
+
 DOC_CONTRIB:
 doc/ri/COPYING
 doc/ri/CROSSPOST_PROTOCOL.jp
 doc/ri/TODO_LISTS
 doc/drafts/help.eng 
 doc/drafts/help.example2
+
 
 
 DOC_APPENDED:
