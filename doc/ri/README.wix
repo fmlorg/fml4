@@ -257,22 +257,26 @@ documents.
 =E.S	Mailing Lists
 
 .if LANG == JAPANESE
-fmlに関する議論、バグレポート、質問、要望などあらゆる:)目的に
+fml に関する議論、バグレポート、質問、要望などあらゆる:)目的に
 fml-support ML (言語は日本語)が用意されています。
 
 	fml-support@ffs.fml.org (日本語)
 	# FYI: fml-users@ffs.fml.org   (公用語は英語)
 
-fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ
+fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ subscribe 
+の後に自分の名前をローマ字で続けたフレーズをメールの"本文"(注意: メー
+ルの本文)に書いて送って下さい。例えば次のようになります。
 
-   subscribe 自分の名前 (例: subscribe Anne Shirley)
+	To: fml-support-ctl@ffs.fml.org
 
-をメールの本文に書いて送って下さい。登録意志確認のメールが届くのでその
-メールに返事をして下さい。
+	subscribe Anne Shirley
+
+このメールに対し、登録意志確認のメールが届くのでそのメールに返事をする
+とＭＬに登録されます。
 
 バグレポート等では、使用している OS、メールサーバ、fml などの各バージョ
-ンについての情報を付記して下さい。チェックして欲しい項目はたとえ
-ば doc/CHECK_LIST.jp (日本語)を参照して下さい。
+ンについての情報を付記して下さい。チェックして欲しい項目はたとえば 
+doc/CHECK_LIST.jp (日本語)を参照して下さい。
 
 その際に、fml のデフォルトからどのような変更をしたら、どう期待と異なっ
 ていたかなどを書いてもらうと解答の参考になります。
@@ -403,8 +407,8 @@ Please see the file INSTALL for the detail.
 =E.S	On Version Up
 
 ソースを広げてインストールと同様に makefml install (INSTALL というファ
-イルを参照)をして下さい。手動でも十分できますがOSの自動判定なども含め
-て補正が行なわれるので makefml を使うべきです。
+イルを参照)をして下さい。手動でも十分できますが OS の自動判定なども含
+めて補正が行なわれるので makefml を使うべきです。
 =E
 I recommends you use "makefml install" in doing version up since
 makefml tries to adjust fml to fit your OS.
