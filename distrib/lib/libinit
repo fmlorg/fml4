@@ -1,10 +1,9 @@
 INIT_PACKAGE () {
-
 	# initialize
    	cp /dev/null $PATCHLEVEL_DIR/version
 
-	(
-
+	# if conf/mode does NOT EXISTS, we should check 'cvs ci *'.
+	if [ X$MODE = X ]; then
 		### rcsid is not used explicit, so delete here
 		#	echo " "; echo "Fixing rcsid ... " 
 		#	/bin/sh distrib/bin/fix-rcsid.sh
@@ -18,11 +17,13 @@ INIT_PACKAGE () {
 		make scan
 		echo ""
 		echo "------------------------------"
+	else
+		echo ignore make scan check
+	fi
 
-		echo " "; echo "Fixing permissions ... ";
-		chmod 755 kern/*.pl bin/* sbin/* libexec/*
-		chmod 644 kern/lib*.pl proc/*.pl
-	)
+	echo " "; echo "Fixing permissions ... ";
+	chmod 755 kern/*.pl bin/* sbin/* libexec/*
+	chmod 644 kern/lib*.pl proc/*.pl
 }
 
 
@@ -54,7 +55,7 @@ INIT_VERSION () {
 
 	elif [ $init = 1 ]
 	then
-		echo "fml release          Increment() ... "
+ 		echo "fml release          Increment() ... "
 		perl $FML_VERSION -i kern/fml.pl > /dev/null
 	else
 		echo ""
@@ -65,7 +66,7 @@ INIT_VERSION () {
 		echo 	USAGE: $0 -i fml.pl
 	fi
 
-	RID=`perl distrib/bin/fml_version.pl -X $FML -s`
+	RID=`perl $FML_VERSION -s`
 	echo -n $RID     > $RELEASE_MANIFEST
 	echo -n ";"	>> $RELEASE_MANIFEST
 	date 		>> $RELEASE_MANIFEST
@@ -75,8 +76,9 @@ INIT_VERSION () {
 
 	if [ $package = 1 ]
 	then
-		echo "record rcs revision set for the symbol [$RID]"
-		echo " "; 
+		echo ""; 
+		echo "-- export list of RCS ID in snapshot balls for [$RID]"
+		echo ""; 
 		for file in $RS
 		do
 			perl $FML/distrib/bin/show-rcsid.pl $file |\
@@ -95,14 +97,20 @@ INIT_VERSION () {
 
 		RID=`perl distrib/bin/fml_version.pl -s|awk '{print $2}' `
 
-		# log cvs status
-		perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
-		tee -a distrib/history/$TID/$RID
-		(
-		 echo "--------------------------";
-		 echo "";
-		) >> distrib/history/$TID/$RID
-		echo " "; 
+		# log cvs status unless $MODE
+		if [ X$MODE = X ]; then
+		   perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
+		   tee -a distrib/history/$TID/$RID
+			(
+			 echo "--------------------------";
+			 echo "";
+			) >> distrib/history/$TID/$RID
+			echo " "; 
+		else
+			echo "";
+			echo -- ignore cvs status log
+			echo "";
+		fi
 	fi
 
    )
@@ -114,10 +122,15 @@ INIT_VERSION () {
 
 INIT_CLEAN_UP () {
    (
-	chdir $DESTDIR
+	chdir $DESTDIR || exit 1
 
-	echo mv fml-* FML/
-	mv fml-* FML/
+	test -d FML || mkdir FML
+
+	for x in fml-*
+	do
+	   echo mv $x FML/$x.$$
+		mv $x FML/$x.$$
+	done
    )
 
    volume=` df $DESTDIR |grep /dev/|awk '{print $4}' `

@@ -5,10 +5,13 @@ release=0
 branch=0
 
 
+
 ### user defined variables ###
 # prog
 MAKE=/usr/bin/make
 FWIX_OPTS=-F
+BLOCKSIZE=1024; export BLOCKSIZE
+
 
 
 ### imports distrib/mk/fml.sys.mk ###
@@ -16,7 +19,10 @@ FWIX_OPTS=-F
 tmp=/tmp/config$$
 make __import_variables > $tmp
 echo "------------------------------"
+echo "import *_DIR to env variables via fml.sys.mk"
+echo ""
 cat $tmp
+echo ""
 echo "------------------------------"
 . $tmp
 rm -f $tmp
@@ -26,6 +32,18 @@ INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
 VERSION_PL="$FML/distrib/bin/version.pl"
 FML_VERSION="$FML/distrib/bin/fml_version.pl -X $FML"
 
+# modify for daily snapshot system
+if [ X$MODE != X ];then
+	FML_VERSION="$FML_VERSION -m $MODE"
+
+	if [ X$BRANCH != X ];then
+		FML_VERSION="$FML_VERSION -b $BRANCH"
+	fi
+fi
+
+echo "-- run \"$FML_VERSION -s\" "
+FML_VERSION_ID=`$FML_VERSION -s`
+echo ""; echo FML_VERSION_ID=$FML_VERSION_ID; echo "";
 
 TMP=$DESTDIR/release.info.$$ 
 

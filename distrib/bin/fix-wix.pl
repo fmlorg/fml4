@@ -1,10 +1,20 @@
 #!/usr/local/bin/perl
+#
+# $Id$
+#
 
 require 'getopts.pl';
-&Getopts("dRX:");
+&Getopts("dRX:m:b:I:");
 
 $FML = $opt_X || $ENV{'FML'};
-chop($ID = `perl $FML/distrib/bin/fml_version.pl -X $FML -s`);
+
+if ($opt_I) {
+	$ID = $opt_I;
+}
+else {
+	chop($ID = `perl $FML/distrib/bin/fml_version.pl -X $FML -s`);
+}
+
 chop($date = `date`);
 
 while(<>) {

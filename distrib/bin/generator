@@ -1,6 +1,15 @@
 #!/bin/sh
 
+PATH=${PATH}:/usr/local/bin:/usr/pkg/bin:/usr/X11R6/bin; export PATH
+
 umask 022
+
+if [ X$FML != X ]; then
+	chdir $FML || exit 1
+else
+	echo "please define \$FML environment variable";
+	exit 1
+fi
 
 . distrib/etc/config
 . distrib/lib/getopt
@@ -80,3 +89,5 @@ fi
 
 echo " "; echo "Done. "; echo " "
 (echo -n "END:	"; date ) >> $DATE_LOG
+
+exit 0
