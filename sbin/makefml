@@ -1627,7 +1627,12 @@ sub FixPath
 
     while (<PROG>) {
 	if ($. == 1) {
-	    print NEW "\#\!$perl\n" if $perl;
+	    if (/^\#\!\s*\/usr\/local\/bin\/perl/ && $perl) {
+		print NEW "\#\!$perl\n";
+	    }
+	    else {
+		print NEW $_;
+	    }
 	    next;
 	}
 
@@ -2707,8 +2712,8 @@ sub do_install
 	print STDERR "Fixing Path:";
 
 	print STDERR " src ";
-	&FixPath("src/fml.pl");   print STDERR ".";
-	&FixPath("src/msend.pl"); print STDERR ".";
+	&FixPath("src/default_config.ph"); print STDERR ".";
+	for (<src/*.pl>){ &FixPath($_); print STDERR ".";}
 	
 	print STDERR " libexec ";
 	for (<libexec/*.pl>){ &FixPath($_); print STDERR ".";}
@@ -2725,6 +2730,14 @@ sub do_install
 
 	print STDERR " www/cgi-bin ";
 	for (<www/cgi-bin/*/*.cgi>){ &FixPath($_); print STDERR ".";}
+	print STDERR " www/lib ";
+	for (<www/lib/*.pl>){ &FixPath($_); print STDERR ".";}
+
+	print STDERR " sys ";
+	for (<sys/*/*.pl>){ &FixPath($_); print STDERR ".";}
+
+	print STDERR " module ";
+	for (<module/*/*.pl>){ &FixPath($_); print STDERR ".";}
 
 	print STDERR "\n\tDone.\n";
     }
