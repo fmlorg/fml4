@@ -579,6 +579,7 @@ sub IdCheck
 	&Log("confirm[confirm] reset request");
 
 	if (&RemoveAddrInConfirmFile($addr)) {
+	    &Mesg(*e, $NULL, 'confirm.try_again');
 	    &Mesg(*e, "I throw away your subscription request from $addr.");
 	    &Mesg(*e, "Please do it again from the first step.");
 	    if (-f $CONFIRMATION_FILE) {

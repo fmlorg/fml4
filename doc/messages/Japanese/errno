@@ -264,7 +264,7 @@ EFTYPE:
 
 # 80  Authentication error 
 EAUTH:
-	認証エラーです
+	エラー: 認証できませんでした。
 
 # 81  Need authenticator 
 ENEEDAUTH:

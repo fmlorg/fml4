@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -66,12 +66,14 @@ sub Ftp
       # not implemented
       if (/^(ftp|connect)$/io) { 
 	  &Mesg(*e, "\tSorry. $1 is not implemented.");
+	  &Mesg(*e, $NULL, 'not_implemented', $1);
 	  next;
       }
 
       # end of requests
       if (/^(quit|exit)$/io) { 
 	  &Mesg(*e, "\tExit the current process");
+	  &Mesg(*e, $NULL, 'ftp.exit');
 	  last;
       }
 
@@ -111,12 +113,14 @@ sub Ftp
 	  else {
 	      &Log("Cd: Insecure matching: $CurrentDir");
 	      &Mesg(*e, "\tCd: Insecure directory changes");
+	      &Mesg(*e, $NULL, 'ftp.cd.insecure');
 	      last;
 	  }
 
 	  chdir $CurrentDir || do { 
 	      &Log("Can't chdir to $CurrentDir");
 	      &Mesg(*e, "\tCannot chdir /$LocalDir");
+	      &Mesg(*e, $NULL, 'ftp.cannot_chdir');
 	      last;
 	  };
 
@@ -168,6 +172,7 @@ sub Ftp
 	  if (! &SecureP($f)) {
 	      &Log("Get: Insecure matching: $f");
 	      &Mesg(*e, "\tGet: Insecure Variable, STOP!");
+	      &Mesg(*e, $NULL, 'filter.insecure_p.stop');
 	      last;
 	  }
 
@@ -180,6 +185,7 @@ sub Ftp
       # Unknown!
       &Log("Ftp: Unknown Commands [$_]");
       &Mesg(*e, "\tFtp: Unknown Commands [$_]");
+      &Mesg(*e, $NULL, 'no_such_command', $_);
   }# end of while loop;
 
     # Return Original $DIR
@@ -313,6 +319,7 @@ sub Ftpmail
 
 	# Log
 	$body =~ s/\n/\n   /g;
+	&Mesg(*e, $NULL, 'ftpmail.submitted', $FTPMAIL_SERVER);
 	&Mesg(*e, "Your requqst [ftp://$host/$file] is ");
 	&Mesg(*e, "Submitted to Ftpmail Server [$FTPMAIL_SERVER]");
 	&Mesg(*e, "as\n\n$body\n");
@@ -323,6 +330,7 @@ sub Ftpmail
 	&Mesg(*e, "              NOT $MAIL_LIST");
     }
     else {
+	&Mesg(*Envelope, $NULL, 'ftpmail.not_supported');
 	&Mesg(*Envelope, 
 	      "*** Sorry, Relay to Ftpmail Server is NOT SUPPORTED ***");
 	&Log("Please set \$FTPMAIL_SERVER to relay when using ftpmail");

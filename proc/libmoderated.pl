@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -266,7 +266,7 @@ sub ModeratorProcedure
 	return $NULL;
     }
     else {
-	$moderated'Fld{$id} = 1;
+	$moderated'Fld{$id} = 1; #';
     }
 
     if ($Fld[2] eq 'certified') {
@@ -285,18 +285,21 @@ sub ModeratorProcedure
 		&Log("Error: moderator: no such id=$id");
 		&Mesg(*e, ">>> $Fld");
 		&Mesg(*e, "Error: moderator: no such id=$id");
+		&Mesg(*e, $NULL, 'moderator.no_such_id', $id);
 	    }
 	}
 	else {
 	    &Log("Error: moderator: id=$id syntax is illegal");
 	    &Mesg(*e, ">>> $Fld");
 	    &Mesg(*e, "Error: moderator: id=$id syntax is illegal");
+	    &Mesg(*e, $NULL, 'moderator.id.error');
 	}
     }
     else {
 	&Log("Error: moderator: $Fld[2] is unknown command.");
 	&Mesg(*e, ">>> $Fld");
 	&Mesg(*e, "Error: moderator: $Fld[2] is unknown command.");
+	&Mesg(*e, $NULL, 'no_such_command', $Fld[2]);
     }
 }
 
@@ -322,6 +325,7 @@ sub ModeratorResend
     else {
 	&Log("ModeratorResend: cannot open $f");
 	&Mesg(*e, "Error: cannot open the moderated article queue id=$id");
+	&Mesg(*e, $NULL, 'not_found', "queue id=$id");
 	return 0;
     }
 

@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -122,10 +122,12 @@ sub DoApprove
 	return '';
     }
     else {
+	&Mesg(*e, $NULL, 'auth.invalid_password', $proc);
 	&Mesg(*e, "$proc: password unmatched.");
 	&Log("Error: admin ${proc} password unmatches.");
 
 	if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
+	    &Mesg(*e, $NULL, 'auth.please_use_pgp', $proc);
 	    &Mesg(*e, " BTW why you use password authentication in pgp mode?");
 	    &Mesg(*e, " which is of no use.");
 	}
@@ -311,6 +313,7 @@ sub ApproveCommand
 	&use('pgp');
 	$UnderAuth = &PGPGoodSignatureP(*e);
 	&Mesg(*e, "554 YOU CANNOT BE AUTHENTICATED\n\tSTOP!");
+	&Mesg(*e, $NULL, 'auth.fail');
     }
     else {
 	$UnderAuth = 1;
@@ -358,6 +361,7 @@ sub AdminCommand
     local($buf) = join(" ", $cmd, @opt);
     if (! &SecureP($buf, 'admin')) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
 	  &Mesg(*e, "Execuse me. Please check your request.");
 	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
 	  &Log("stop for insecure syntax [ $cmd @opt ]");
@@ -442,6 +446,7 @@ sub AdminAuthP
 	    if (! $opt) {
 		&Log("AdminAuthP: no \$opt");
 		&Mesg(*e, "554 PASS NEEDS PASSWORD parameter\n\tSTOP!");
+		&Mesg(*e, $NULL, 'no_args');
 		return $NULL;
 	    }
 
@@ -449,10 +454,12 @@ sub AdminAuthP
 	    if (&CmpPasswdInFile($PASSWD_FILE, $to, $opt)) {
 		$UnderAuth = 1;
 		&Mesg(*e, "250 PASSWD AUTHENTICATED... O.K.");
+		&Mesg(*e, $NULL, 'auth.ok');
 		return 1;
 	    }
 	    else {
 		&Mesg(*e, "554 Illegal Passwd\n\tSTOP!");
+		&Mesg(*e, $NULL, 'auth.invalid_password');
 		return $NULL;
 	    }
 	}
@@ -470,6 +477,7 @@ sub AdminAuthP
     ### SHOULD BE AFTER AUTH. IF NOT, STOPS(FATAL ERROR)
     if (! $UnderAuth) {
 	&Mesg(*e, "554 YOU CANNOT AUTHENTICATED\n\tSTOP!");
+	&Mesg(*e, $NULL, 'auth.fail');
 	return $NULL;
     }
 
@@ -479,10 +487,12 @@ sub AdminAuthP
 
 	if (&ChangePasswd($PASSWD_FILE, $to, $opt)) {
 	    &Mesg(*e, "250 PASSWD CHANGED... O.K.");
+	    &Mesg(*e, $NULL, 'auth.change_password.ok');
 	    return 'ok';
 	}
 	else {
 	    &Mesg(*e, "554 PASSWD UNCHANGED");
+	    &Mesg(*e, $NULL, 'auth.password_unchanged');
 	    return $NULL;
 	}
     }
@@ -523,6 +533,7 @@ sub ProcAdminInitPasswd
     if (! &CheckMember($who, $ADMIN_MEMBER_LIST)) {
 	&Mesg(*e, "  $who is not a member!!!");
 	&Mesg(*e, "  Firstly 'admin addadmin $who'!!!");
+	&Mesg(*e, $NULL, 'auth.admin_not_member');
 	return 0;
     }
 
@@ -561,6 +572,7 @@ sub ProcAdminSubscribe
     ## duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
     if (&CheckMember($addr, $file_to_regist)) {	
 	&LogWEnv("admin $proc [$addr] is duplicated in the file to regist", *e);
+	&Mesg(*e, $NULL, 'already_subscribed');
 	&Mesg(*e, "   different sub-domain address already exists?");
 	&Mesg(*e, "   \"set exact\" command enforces exact address matching");
 	&Mesg(*e, "   to ignore the difference of sub-domain parts.");
@@ -625,6 +637,7 @@ sub ProcAdminSetDeliverMode
 	&Mesg(*e, "   Please use 'admin command \"address\" options' SYNTAX.");
 	@opt = reverse @opt;
 	&Mesg(*e, "   Anyway try \"admin $proc @opt \" now!");
+	&Mesg(*e, $NULL, 'admin.mandatry_addr_args');
     }
 
     # Variable Fixing...; @opt = (address, options(e.g."3u"), ...); 
@@ -720,6 +733,7 @@ sub ProcAdminLog
 	/^all$/i    && ($all_p = 1)
     }
 
+    &Mesg(*e, $NULL, 'admin.log', $proc);
     &Mesg(*e, "   \"$proc\" show the last $lines lines of log file.");
     &Mesg(*e, "     \"$proc all\" send back the whole log file.");
     &Mesg(*e, "     \"$proc -number\" show the last \"number\" lines.");
@@ -756,6 +770,7 @@ sub ProcAdminReSend
     &Log("admin $proc $file to $addr");
 
     if (! -f "$DIR/$file") {
+	&Mesg(*e, $NULL, 'no_such_file', $file);
 	&Mesg(*e, "file \"$file\" not exists");
 	&Log("admin $proc \"$DIR/$file\" not exists");
 	return;
@@ -1044,6 +1059,7 @@ sub ReconfigurableFileP
     $s .= "Please set \@REMOTE_RECONFIGURABLE_FILES to permit other files\n";
     $s .= "See doc/op for more details\n";
 
+    &Mesg(*e, $NULL, 'admin.reconfigurable_error');
     &Mesg(*e ,$s);
 
     0;

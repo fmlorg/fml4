@@ -189,6 +189,7 @@ sub DoProcedure
 	  &Log("$input_command_count++ >= $MAXNUM_COMMAND_INPUT");
 	  if ($input_command_count++ >= $MAXNUM_COMMAND_INPUT) {
 	      &Log("input commans >= $MAXNUM_COMMAND_INPUT, force to a stop");
+	      &Mesg(*e, $NULL, 'resource.exceed_max_command_input');
 	      &Mesg(*e, "FYI: The following requests are processed.");
 	      &Mesg(*e, $history);
 	      last GivenCommands;
@@ -249,6 +250,7 @@ sub DoProcedure
 		  $s .= "*** for $_ command in one mail up to $limit.\n";
 		  $s .= "*** STOP PROCESSING IMMEDIATELY.\n";
 		  &Mesg(*e, $s);
+		  &Mesg(*e, $NULL, 'resource.exceed_max_proc_req',$_,$limit);
 		  &Mesg(*e, "FYI: The following requests are processed.");
 		  &Mesg(*e, $history);
 		  last GivenCommands;
@@ -276,9 +278,11 @@ sub DoProcedure
 
       # if undefined commands, notify the user about it and abort.
       &Log("unknown command [$_]");
-      &Mesg(*e, ">>> $_\n\tUnknown Command: $_\n\tStop.");
+      &Mesg(*e, ">>> $_\n\tUnknown Command: $_");
+      &Mesg(*e, $NULL, 'no_such_command', $_);
 
       # stops.
+      &Mesg(*e, "\tStop.");
       last GivenCommands;
 
   } # the end of while loop;
@@ -310,11 +314,15 @@ sub DoProcedure
 	    $s .= "Address \"$CONTROL_ADDRESS\" is for fml commands.\n";
 	    $s .= "Your mail DOES NOT include any effective command.\n";
 	    $s .= "Please read the following HELP for FML usage.\n";
+
+	    &Mesg(*e, $NULL, 'info.procfail.ctladdr', $CONTROL_ADDRESS);
 	}
 	else {
 	    $s .= "If you have a problem, ";
 	    $s .= "please make a contact with a ML maintainer.\n";
 	    $s .= "Address for a ML maintainer is <$MAINTAINER>.\n";
+
+	    &Mesg(*e, $NULL, 'info.procfail.noctladdr', $MAINTAINER);
 	}
 	$s .= "*" x 60;
 
@@ -686,7 +694,7 @@ sub ProcModeSet
     }
     elsif (! $e{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTICATION";
-	&Mesg(*e, "$s");
+	&Mesg(*e, $s);
 	&Mesg(*e, $NULL, 'EACCES');
 	&Log($s);
 	return 'LAST';
@@ -759,6 +767,7 @@ sub ProcRetrieveFileInSpool
     } 
     else {				# or null $ID
 	&Mesg(*e, "\n>>> $org_str\nArticle $ID is not found.");
+	&Mesg(*e, $NULL, 'no_such_article', $ID);
 	&Log("Get $ID, Fail");
     }
 }
@@ -913,6 +922,7 @@ sub ProcSetAddr
     $s = "$proc is removed in fml 2.2 Release.\n";
     &Mesg(*e, $s);
     &Log($s);
+    &Mesg(*e, $NULL, 'obsolete_command', $proc, 'fml 2.2');
     return 'LAST';
 
     if (&AddressMatch($Fld[2], $From_address)) {
@@ -939,6 +949,7 @@ sub ProcSubscribe
     if (&NonAutoRegistrableP) {
 	&LogWEnv("$proc request is forwarded to Maintainer", *e);
 	&Mesg(*e, "Please wait a little");
+	&Mesg(*e, $NULL, 'req.subscribe.forwarded_to_admin', $proc);
 	&Warn("$proc request from $From_address", &WholeMail);
     }
     else {
@@ -1221,6 +1232,7 @@ sub ProcConfirmdAckReply
     else {
 	&Log("$proc: ack reply logfile is not defined");
 	&Mesg(*e, "$proc: a configuration error");
+	&Mesg(*e, $NULL, 'configuration_error');
 	0;
     }
 }
@@ -1232,6 +1244,7 @@ sub ProcDeny
 
     &Mesg(*e, "Sorry, YOU CANNOT USE $proc command!");
     &Log("ProcDeny: $proc is disabled");
+    &Mesg(*e, $NULL, 'EPERM');
 }
 
 
@@ -1302,6 +1315,7 @@ sub CheckCommandHook
     foreach $s (@s) {
 	if ($s =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
 	    &Mesg(*e, "Should NOT include META Char's.");
+	    &Mesg(*e, $NULL, 'filter.has_meta_char');
 	    return 0;
 	};
     }

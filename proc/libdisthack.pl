@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -18,6 +18,7 @@ sub AgainstHtmlMail
 
     if ($e{'h:content-type:'} =~ /multipart/i) {
 	if ($HTML_MAIL_DEFAULT_HANDLER eq 'reject') {
+	    &Mesg(*e, $NULL, 'filter.reject_html_mail');
 	    &Mesg(*e, "This mailing list <$MAIL_LIST> denies HTML mail.");
 	    &Mesg(*e, "Please send your mail by PLAIN TEXT!");
 	    &Mesg(*e, &WholeMail);

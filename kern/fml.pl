@@ -713,6 +713,7 @@ sub FixHeaderFields
 	    &Log("\$SENDER_AUTH_TYPE eq 'strict-envelope-from'");
 	    &Log("INVALID Return-Path:<$_>");
 	    &Mesg(*e, "YOU ARE NOT A MEMBER!");
+	    &Mesg(*e, $NULL, 'not_member');
 	    $DO_NOTHING = 1;
 	}
 
@@ -2608,6 +2609,7 @@ sub EnvelopeFilter
 	      "A mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
 
 	if ($FILTER_NOTIFY_REJECTION) {
+	    &Mesg(*e, $NULL, 'filter.rejected', $r);
 	    &Mesg(*e, "Your mail is rejected for '$r'.\n". &WholeMail);
 	}
     }

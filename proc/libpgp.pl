@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -36,6 +36,7 @@ sub PGPGoodSignatureP
     # PGP authenticated
     if (! $no_reply) {
 	&Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
+	&Mesg(*e, $NULL, 'pgp.incorrect_signature') unless $auth;
     }
 
     &Log("Error: PGP no good signature.") unless $auth;
@@ -277,6 +278,7 @@ sub PgpInit
     if ($e{'Body'} =~  /^[\s\n]*$/) {
 	&Log("PGPGoodSignatureP Error: no effective mailbody");
 	&Mesg(*e, "Mail Body has no PGP Signature");
+	&Mesg(*e, $NULL, 'pgp.no_signature');
 	return 0;
     }
 
@@ -284,6 +286,7 @@ sub PgpInit
     if (! -x $PGP) {
 	&Log("PGPGoodSignatureP Error: program \$PGP is NOT DEFINED");
 	&Mesg(*e, "PGP Environment Error");
+	&Mesg(*e, $NULL, 'pgp.env.error');
 	return 0;
     }
 
@@ -330,6 +333,7 @@ sub PGP
 	else {
 	    &Log("Error: such a user does not exist");
 	    &Mesg(*e, "Error: such a user does not exist");
+	    &Mesg(*e, $NULL, 'no_such_member');
 	}
     }
     elsif ($cmd eq '-h'   || 
@@ -347,10 +351,12 @@ sub PGP
 	&Log("\"pgp $cmd @argv\" disabled by FML");
 	&Mesg(*e, "\"pgp $cmd @argv\" disabled by FML");
 	&Mesg(*e, "Please \"pgp $cmd @argv\" on this host NOT by mail.");
+	&Mesg(*e, $NULL, 'pgp.cmd.disabled');
     }
     else {
 	&Log("doing \"pgp $cmd @argv\" not supported by FML");
 	&Mesg(*e, "doing \"pgp $cmd @argv\" not supported by FML");
+	&Mesg(*e, $NULL, 'pgp.cmd.not_supported');
     }
 
 }

@@ -1,0 +1,9 @@
+library.not_permit:
+	library コマンド: _ARG0_コマンドは実行できません。
+
+library.not_unlink:
+	library コマンド: _ARG0_ を消せません
+
+library.article.save:
+	library コマンド: ファイル _ARG0_ をsaveしました。
+

@@ -1,0 +1,26 @@
+amctl.change.ok:
+	配送/メンバーリストは変更しました
+
+amctl.change.fail:
+	配送/メンバーリストの変更に失敗しました。
+
+amctl.change.only_delivery_list:
+	配送リストは変更しました
+	(メンバーリストは変更しませんでした)。
+
+amctl.change.only_member_list:
+	メンバーリストは変更しました
+	(配送リストは変更しませんでした)。
+
+amctl.multiply.match:
+	該当するアドレスが複数あるようです？チェックを厳しくして繰り返します。
+
+amctl.no_args:
+	引数がありません。デフォールト値を使います。
+
+amctl.msend_rehash.send:
+	配送されていない分の記事 _ARG0_ 〜 _ARG1_ 番を送ります。
+
+amctl.msend_rehash.send_nothing:
+	配送されていない記事はありません。
+

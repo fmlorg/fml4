@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -42,8 +42,9 @@ sub DoDistribute
 		&PGPEncode(*e);
 	    }
 	    else {
-		&Log("NOT ALLOW delivery");
+		&Log("invalid PGP signature, no delivery");
 		&Mesg(*e, "Your PGP signature seems incorrect, ML delivery is not allowed.");
+		&Mesg(*e, $NULL, "pgp.incorrect_signature");
 		&Mesg(*e, $NULL, 'EAUTH');
 		return 0;
 	    }

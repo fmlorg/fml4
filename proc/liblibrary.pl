@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -55,6 +55,7 @@ sub ProcLibrary4PlainArticle
 	    if ($p && ($_ =~ /^$p$/i)) {
 		&Log("Library: cannot permit $_ command");
 		&Mesg(*e, "Library: cannot permit $_ command");
+		&Mesg(*e, $NULL, 'library.not_permit', $_);
 		return;
 	    }
 	}
@@ -110,6 +111,7 @@ sub ProcLibrary4PlainArticle
 	}
 
 	if (! &LibraryUnlinkP($From_address, $target)) {
+	    &Mesg(*e, $NULL, 'library.not_unlink', $n);
 	    &Mesg(*e, "Error: library unlink: you cannot unlink $n");
 	    &Log("Error: library unlink: not author try to unlink $n");
 	    &Warn("Warning: illegal request of library unlink $ML_FN",
@@ -154,6 +156,7 @@ sub ProcLibrary4PlainArticle
 	### Write
 	&Write3(*le, "$arc_dir/$id");
 	&Log("Library: ARTICLE $id [saved in $arc_dir/$id]");
+	&Mesg(*e, $NULL, 'library.article.save', $id);
 	&Mesg(*e, "The article is saved as $id in the archive");
 
 	return 'LAST'; # 95/12/25 tanigawa@tribo.mech.nitech.ac.jp;

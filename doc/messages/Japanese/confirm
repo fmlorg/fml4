@@ -82,3 +82,7 @@ confirm.chaddr.syntax_error:
 ##### Section: confirmation その他
 confirm.has_japanese_char:
 	日本語が含まれています。
+
+##### Section: misc
+confirm.try_again:
+	最初からやり直して下さい。

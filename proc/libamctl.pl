@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -134,7 +134,7 @@ sub AutoRegist
 		 "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
 	    &Mesg(*e, "Sorry, the number of this ML exceeds the limit.");
 	    &Mesg(*e, "Hence we cannot accept your request.");
-	    &Mesg(*e, $NULL, 'exceed_max_member_limit');
+	    &Mesg(*e, $NULL, 'resource.exceed_max_member_limit');
 	    return 0;
 	}
     }
@@ -348,6 +348,7 @@ sub Chk822_addr_spec_P
     }
     else {
 	&Mesg(*e, "AUTO REGISTRATION ERROR:");
+	&Mesg(*e, $NULL, 'invalid_addr_syntax', $from);
 	&Mesg(*e, "<$from> is invalid address form.");
 	&Log("<$from> is invalid address form");
 
@@ -413,6 +414,7 @@ sub DoSetDeliveryMode
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
 	    &Mesg(*e, "Error: $proc is disabled");
 	    &Mesg(*e, "       since we do not spool articles");
+	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
 	    return $NULL;
 	}
 
@@ -429,6 +431,7 @@ sub DoSetDeliveryMode
 	    if ((!$d) && (!$mode)) { 
 		&Log("$cmd $c fails, not match");
 		&Mesg(*e, "$cmd: $opt parameter not match.");
+		&Mesg(*e, $NULL, 'invalid_args', $proc);
 		&Mesg(*e, "\tDO NOTHING!");
 		return $NULL;
 	    }			
@@ -442,6 +445,7 @@ sub DoSetDeliveryMode
 	&Log("$cmd: $opt syntax is inappropriate, do nothing");
 	&Mesg(*e, "$cmd: $opt syntax is inappropriate.");
 	&Mesg(*e, "\t$cmd require someting as an option") if $opt eq "";
+	&Mesg(*e, $NULL, 'invalid_args', $proc);
 	&Mesg(*e, "\tDO NOTHING!");
 	return $NULL;
     }
@@ -485,6 +489,7 @@ sub DoSetMemberList
     # LOOP CHECK
     if (&LoopBackWarn($curaddr)) {
 	&Mesg(*e, "$cmd: $curaddr may case a mail loop, reject");
+	&Mesg(*e, $NULL, 'mailloop', $curaddr);
 	&Log("$cmd: $curaddr may case a mail loop, reject");
 	return $NULL;
     }
@@ -497,6 +502,7 @@ sub DoSetMemberList
     if ((! $e{'mode:admin'}) &&
 	(! ($list = &MailListMemberP($curaddr)))) {
 	&Log("$cmd: Error: address '$curaddr' is not a member. STOP");
+	&Mesg(*e, $NULL, 'auth.should_be_from_member');
 	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
 	&Mesg(*e, "$cmd requires command from a member address.");
 	&Mesg(*e, "Please check your From: field.");
@@ -515,12 +521,15 @@ sub DoSetMemberList
 	    &Log("$cmd: Error: empty address is given");
 	    &Mesg(*e, "$cmd: Error: $cmd requires two non-empty addresses.");
 	    &Mesg(*e, "Please use the syntax \"$cmd old-address new-address\"");
+
+	    &Mesg(*e, $NULL, 'chaddr.no_args', $cmd);
 	    return $NULL;
 	}
 
 	# loop check
 	if (&LoopBackWarn($newaddr)) {
 	    &Mesg(*e, "$cmd: $newaddr may cause a mail loop, reject");
+	    &Mesg(*e, $NULL, 'mailloop');
 	    &Log("$cmd: $newaddr may cause a mail loop, reject");
 	    return $NULL;
 	}
@@ -532,6 +541,7 @@ sub DoSetMemberList
 	    (! &AddressMatch($From_address, $Fld[2]))) {
 	    &Log("$cmd: Security Error: requests to change another member's address '$Fld[2]'");
 	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$Fld[2]'.");
+	    &Mesg(*e, $NULL, 'chaddr.invalid_addr');
 	    return $NULL;
 	}
 
@@ -540,6 +550,8 @@ sub DoSetMemberList
 
 	if (&ExactAddressMatch($curaddr, $newaddr)) {
 	    &Log("$cmd: Error: $curaddr == $newaddr");
+	    &Mesg(*e, $NULL, 'chaddr.same_args', $cmd);
+	    &Mesg(*e, $NULL, 'chaddr.from.oldaddr');
 	    &Mesg(*e, "$cmd: Error: $curaddr == $newaddr");
 	    &Mesg(*e, "Please send command mail from old-address");
 	    &Mesg(*e, "usage: $cmd old-address new-address");
@@ -554,6 +566,7 @@ sub DoSetMemberList
 	if ($new_list = &MailListMemberP($newaddr)) {
 	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");
 	    &Mesg(*e, "$cmd: Error: New address '$newaddr' is already registered as a member.");
+	    &Mesg(*e, $NULL, 'already_subscribed', $newaddr);
 	    return $NULL;
 	}
 
@@ -625,21 +638,25 @@ sub DoSetMemberList
     if ($rm && $ra) {
 	&Log("$cmd [$curaddr] $c accepted");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted.");
+	&Mesg(*e, $NULL, 'amctl.change.ok');
     }
     elsif ($rm && (!$ra)) {
 	&Log("$cmd [$curaddr] $c succeed for members not actives");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted".
 	      " for member but not delivery list.");
+	&Mesg(*e, $NULL, 'amctl.change.only_member_list');
     }
     elsif ($ra && (!$rm)) {
 	&Log("$cmd [$curaddr] $c succeed for actives not members");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted".
 	      " for delivery but not member list.");
+	&Mesg(*e, $NULL, 'amctl.change.only_delivery_list');
     }
     else {
 	&Log($mcs);
 	&Log("$cmd [$curaddr] $c failed");
 	&Mesg(*e, "$cmd [$curaddr] $c failed.");
+	&Mesg(*e, $NULL, 'amctl.change.fail');
     }
 
     return 'LAST';
@@ -883,6 +900,7 @@ sub DoChangeMemberList
 	$log =~ s/; /\n/g;
 	&Mesg(*e, "Multiply Matched?\n$log");
 	&Mesg(*e, "Retry to check your adderss severely");
+	&Mesg(*e, $NULL, 'amctl.multiply.match');
 
 	# Recursive Call
 	return 'RECURSIVE';
@@ -914,6 +932,7 @@ sub DoChangeMemberList
     }
     else {
 	&Mesg(*e, "Hmm,.. something fails.");
+	&Mesg(*e, $NULL, 'command_something_error', $cmd);
     }
 
     $status;
@@ -943,6 +962,7 @@ sub CtlMatome
 	    &Log($s);
 	    &Mesg(*e, "$s");
 	    &Mesg(*e, "So your request is accepted but modified to m=3");
+	    &Mesg(*e, $NULL, 'amctl.no_args');
 	}
     }
     elsif ($matome == 0) {
@@ -999,11 +1019,13 @@ sub Rehash
 	$_cf{'rehash'} = "$l-$r"; # for later use "# rehash" ???
 	&Log($s);
 	&Mesg(*e, "\n$s\n");
+	&Mesg(*e, $NULL, 'amctl.msend_rehash.send', $l, $r);
     }
     else { # if $l == $r, no article must be left
 	$s = "Rehash: no article to send you is left in spool.";
 	&Log($s);
 	&Mesg(*e, "\n$s\n");
+	&Mesg(*e, $NULL, 'amctl.msend_rehash.send_nothing');
 	return;
     }
 

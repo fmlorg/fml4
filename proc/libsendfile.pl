@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -307,6 +307,7 @@ sub mget3
 	}
     }
     else {
+	&Mesg(*e, $NULL, 'fop.not_found');
 	&Mesg(*e, "Hmm.. no matched file in mget3 processing");
 	&Mesg(*e, "\tprocessing ends.");
 	return 0;
@@ -418,6 +419,7 @@ sub ExcessMaxFileP
     print STDERR "03 \$c  = $c (sum)\n" if $debug; 
     if ($c > $cf{'MAXFILE'}) {
 	&Log("mget[$$]: files to request > $cf{'MAXFILE'}");
+	&Mesg(*e, $NULL, 'fop.mget.too_many', $cf{'MAXFILE'});
 	&Mesg(*e, "Sorry. your request exceeds $cf{'MAXFILE'}");
 	&Mesg(*e, "Anyway, try to send the first $cf{'MAXFILE'} files");
 	1;
@@ -493,6 +495,7 @@ sub mget3_Getopt
 	}
 	else {
 	    &Mesg(*e, "mget:");
+	    &Mesg(*e, $NULL, 'fop.mget.no_such_mode', $_);
 	    &Mesg(*e, "\tgiven mode[$_] is unknown.");
 	    &Mesg(*e, "\tanyway try [gzip] mode");
 	}
@@ -556,6 +559,7 @@ sub mget3_Search
       else {
 	  &Log("$target IS NOT FOUND");
 	  &Mesg(*e, "$m\tNOT FOUND.\n\tSkip.");
+	  &Mesg(*e, $NULL, 'not_found', $m);
       }
 
       # EMERGENCY STOP FOR SECURITY
@@ -595,6 +599,7 @@ sub mget3_SearchInArchive
       if (! &SecureP($fn)) {
 	  &Log("SECURITY_LEVEL: $SECURITY_LEVEL");
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
 	  &Mesg(*e, "Execuse me. Please check your request.");
 	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
 	  &Log("STOP for insecure [$fn]");
@@ -603,6 +608,7 @@ sub mget3_SearchInArchive
 
       if ($Permit{'ShellMatchSearch'} && (! &SecureP($fn))) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
 	  &Mesg(*e, "Execuse me. Please check your request.");
 	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
 	  &Log("STOP for insecure [$fn]");

@@ -1,8 +1,14 @@
 not_found:
 	_ARG0_がみつかりません。
 
+no_such_file:
+	_ARG0_というファイルは見つかりません。
+
 no_such_directory:
 	_ARG0_というディレクトリはありません。
+
+no_such_article:
+	_ARG0_番の記事はありません。
 
 no_such_command:
 	_ARG0_というコマンドはありません。
@@ -10,17 +16,41 @@ no_such_command:
 no_such_request:
 	そのような _ARG0_ のリクエストはありません。
 
+no_args:
+	_ARG0_: 引数がありません。
+
+invalid_args:
+	_ARG0_: 引数が変です。
+
+not_implemented:
+	_ARG0_ は実装されていません。
+
+obsolete_command:
+	_ARG0_は_ARG1_で削除されたため使用できません。
+
+no_such_member:
+	そのようなメンバーはいません。
+
 already_subscribed:
 	_ARG0_はすでにメンバーに登録されています。
 
-exceed_max_member_limit:
-	登録数の上限を越えたので登録できませんでした。
-
 not_member:
+	メーリングリストのメンバーではありません。
 
+configuration_error:
+	システム内でのエラーが発生しました。
+	管理者に問い合わせをしてみて下さい。
 
 command_something_error:
 	_ARG0_ コマンドで何らかのエラーが発生しました。
 
 command_syntax_error:
 	_ARG0_ コマンドのシンタックスが違います。
+
+invalid_addr_syntax:
+	_ARG0_ のシンタックスは不正です。
+	"アカウント@ドメイン"という形式であるべきです。
+
+mailloop:
+	エラー: アドレス<_ARG0_>はメール・ループを起こす可能性があります。
+

@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -21,18 +21,22 @@ sub DoPasswd
 
     # if you know the old password, you are authenticated.
     if (&CmpPasswdInFile($PASSWD_FILE, $curaddr, $old)) {
+	&Mesg(*e, $NULL, 'auth.ok');
 	&Mesg(*e, "$proc: Authenticated");
 	&Log("$proc; Authenticated");
 	if (&ChangePasswd($PASSWD_FILE, $curaddr, $new)) {
+	    &Mesg(*e, $NULL, 'auth.change_password.ok', $proc);
 	    &Mesg(*e, "$proc; change passwd succeed");
 	    &Log("$proc; change passwd succeed");
 	}
 	else {
+	    &Mesg(*e, $NULL, 'auth.change_password.fail', $proc);
 	    &Mesg(*e, "$proc; change passwd fail");
 	    &Log("$proc; change passwd fail");
 	}
     }
     else {
+	&Mesg(*e, $NULL, 'auth.invalid_password');
 	&Mesg(*e, "$proc: Illegal password");
 	&Log("$proc: Illegal password");
     }
@@ -163,6 +167,7 @@ sub ChangePasswd
 	select(FILE); $| = 1;
 	&Log("Cannot open $file");
 	&Mesg(*Envelope, "Cannot open passwd file");
+	&Mesg(*Envelope, $NULL, 'auth.password.cannot_open');
 	return 0;
     };
 
@@ -170,6 +175,7 @@ sub ChangePasswd
 	select(OUT); $| = 1;
 	&Log("Cannot open $file.new");
 	&Mesg(*Envelope, "Cannot make new passwd file");
+	&Mesg(*Envelope, $NULL, 'auth.password.cannot_mk_pwdb');
 	return 0;
     };
 
@@ -177,6 +183,7 @@ sub ChangePasswd
 	select(BAK); $| = 1;
 	&Log("Cannot open $file.bak");
 	&Mesg(*Envelope, "Cannot make passwd backup");
+	&Mesg(*Envelope, $NULL, 'auth.password.cannot_mk_pwdb.bak');
 	return 0;
     };
 
@@ -216,6 +223,7 @@ sub ChangePasswd
     }else {
 	&Log("Cannot rename $file.new");
 	&Mesg(*Envelope, "Cannot rename passwd backup");
+	&Mesg(*Envelope, $NULL, 'auth.password.rename.fail');
 	return 0;
     }
 }
