@@ -889,6 +889,34 @@ fml-support: 01702
 という verseion があるらしい…で、これどこまで本当なの？（伝聞調）
 
 
+.S	CC:Mail 事件 そのN(泣)
+
+in fml-support: 01813 
+
+普通の addr-spec (Elena@domain) の形式で登録すると
+
+	MLからの受信OK
+	MLへの送信×
+
+CC:MAIL形式のアドレス( abc_def_ghi_jkl@abc.co.jp )で登録すると
+
+	MLからの受信×
+	MLへの送信OK
+
+はぁ？？？？？？？？？？？？？？？？？？？？？＞ Cc:Mail
+
+members には両方のアドレス
+actives には”MLからの受信がOKなアドレス”だけ
+
+を書いておく。あと、
+＃ fml-support: 01818
+
+   @MEMBER_LIST  = (members, members-BAKA-NA-CCMAIL-NO-SHIRINUGUI);
+
+とかにして、認証は両方通すとかするとよいかもしれないですね〜どれが迷惑
+をかけているアドレスつぅかサイトつぅかソフトつぅかが一目でわかるかなと
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
