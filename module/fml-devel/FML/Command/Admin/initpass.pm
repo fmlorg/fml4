@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: initpass.pm,v 1.1 2003/02/02 10:59:19 fukachan Exp $
+# $FML: initpass.pm,v 1.3 2004/01/01 08:48:39 fukachan Exp $
 #
 
 package FML::Command::Admin::initpass;
@@ -17,7 +17,7 @@ use FML::Command::Admin::changepassword;
 @ISA = qw(FML::Command::Admin::changepassword);
 
 
-# Descriptions: initialize admin password of a new user.
+# Descriptions: initialize remote admin password of a new user.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to password module
 # Return Value: none
@@ -62,7 +62,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

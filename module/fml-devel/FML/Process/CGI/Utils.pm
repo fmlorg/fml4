@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.8 2003/10/17 08:16:27 fukachan Exp $
+# $FML: Utils.pm,v 1.11 2004/01/21 03:40:43 fukachan Exp $
 #
 
 package FML::Process::CGI::Utils;
@@ -179,7 +179,7 @@ sub cgi_var_cgi_mode
     my ($curproc) = @_;
     my $hints     = $curproc->hints();
 
-    return $hints->{ cgi_mode };
+    return( $hints->{ cgi_mode } || '' );
 }
 
 
@@ -190,7 +190,7 @@ sub cgi_var_cgi_mode
 sub cgi_var_language
 {
     my ($curproc) = @_;
-    my $lang = $curproc->safe_param_language() || '';
+    my $lang      = $curproc->safe_param_language() || '';
 
     if ($lang =~ /^(Japanese|English)$/io)  {
 	return lc($lang);
@@ -227,6 +227,7 @@ sub cgi_var_navigator_title
 sub cgi_var_fml_project_url
 {
     my ($curproc) = @_;
+
     return '<A HREF="http://www.fml.org/software/fml-devel/">fml</A>';
 }
 
@@ -241,7 +242,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

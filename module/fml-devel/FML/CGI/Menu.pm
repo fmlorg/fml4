@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Menu.pm,v 1.6 2003/11/02 14:45:25 fukachan Exp $
+# $FML: Menu.pm,v 1.9 2004/01/18 13:56:04 fukachan Exp $
 #
 
 package FML::CGI::Menu;
@@ -21,7 +21,7 @@ my $debug = 0;
 
 =head1 NAME
 
-FML::CGI::Menu - provides CGI controll for the specific domain
+FML::CGI::Menu - provides CGI control function for the specific domain
 
 =head1 SYNOPSIS
 
@@ -57,7 +57,7 @@ C<FML::CGI::Menu> is a subclass of C<FML::Process::CGI>.
 
 =head1 METHODS
 
-Almost methods common for CGI or HTML are forwarded to
+Almost cgi common methods are forwarded to
 C<FML::Process::CGI> base class.
 
 This module has routines needed for the admin CGI.
@@ -66,12 +66,12 @@ This module has routines needed for the admin CGI.
 
 
 # Descriptions: print out HTML header + body former part
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: none
 sub html_start
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
     my $config    = $curproc->config();
     my $myname    = $curproc->cgi_var_myname();
     my $ml_name   = $curproc->cgi_var_ml_name();
@@ -90,12 +90,12 @@ sub html_start
 
 
 # Descriptions: print out body latter part
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: none
 sub html_end
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
 
     # o.k. end of html
     print end_html;
@@ -106,17 +106,17 @@ sub html_end
 # Descriptions: main routine for CGI.
 #               kick off suitable FML::Command finally
 #               via cgi_execulte_command().
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: none
 sub run_cgi_main
 {
-    my ($curproc, $args) = @_;
-    my $config  = $curproc->config();
-    my $address = $curproc->cgi_try_get_address();
-    my $ml_name = $curproc->cgi_var_ml_name();
-    my $pcb     = $curproc->pcb();
-    my $mode    = 'admin'; # cgi runs under admin mode (same way as makefml)
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
+    my $address   = $curproc->cgi_try_get_address();
+    my $ml_name   = $curproc->cgi_var_ml_name();
+    my $pcb       = $curproc->pcb();
+    my $mode      = 'admin'; # cgi runs under admin mode (same way as makefml)
 
     # specified command, we need to identify
     # the command specifined in the cgi_navigation and cgi_mein.
@@ -148,7 +148,7 @@ sub run_cgi_main
 	};
 
 	$pcb->set('cgi', 'command_args', $command_args);
-	$curproc->cgi_execute_command($args, $command_args);
+	$curproc->cgi_execute_command($command_args);
     }
     elsif ($command && $address) {
 	print "<br>* case 2 <br>\n" if $debug;
@@ -164,7 +164,7 @@ sub run_cgi_main
 	};
 
 	$pcb->set('cgi', 'command_args', $command_args);
-	$curproc->cgi_execute_command($args, $command_args);
+	$curproc->cgi_execute_command($command_args);
     }
     elsif ($navi_command) {
 	print "<br>* case 3 <br>\n" if $debug;
@@ -205,14 +205,14 @@ sub run_cgi_main
 
 
 # Descriptions: show menu (table based menu)
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: none
 sub run_cgi_navigator
 {
-    my ($curproc, $args) = @_;
-    my $target  = $curproc->cgi_var_frame_target();
-    my $action  = $curproc->cgi_var_action();
+    my ($curproc) = @_;
+    my $target    = $curproc->cgi_var_frame_target();
+    my $action    = $curproc->cgi_var_action();
 
     # natural language-ed name
     my $name_ml_name = $curproc->message_nl('term.ml_name', 'ml_name');
@@ -275,7 +275,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

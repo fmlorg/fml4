@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.93 2003/11/16 11:53:19 fukachan Exp $
+# $FML: Utils.pm,v 1.103 2004/01/24 15:37:03 fukachan Exp $
 #
 
 package FML::Process::Utils;
@@ -45,7 +45,7 @@ return FML::Process::Scheduler object.
 =cut
 
 
-# Descriptions: return FML::Config object
+# Descriptions: return FML::Config object.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -62,7 +62,7 @@ sub config
 }
 
 
-# Descriptions: return FML::PCB object
+# Descriptions: return FML::PCB object.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -79,7 +79,7 @@ sub pcb
 }
 
 
-# Descriptions: return FML::Process::Scheduler object
+# Descriptions: return FML::Process::Scheduler object.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -134,7 +134,7 @@ It is the whole parts of a chain.
 =cut
 
 
-# Descriptions: return incoming_message header object if could
+# Descriptions: return incoming_message header object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -151,7 +151,7 @@ sub incoming_message_header
 }
 
 
-# Descriptions: return incoming_message body object if could
+# Descriptions: return incoming_message body object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -168,7 +168,7 @@ sub incoming_message_body
 }
 
 
-# Descriptions: return incoming_message message object if could
+# Descriptions: return incoming_message message object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -182,6 +182,33 @@ sub incoming_message
     else {
 	return undef;
     }
+}
+
+
+# Descriptions: set the incoming_message cached file path.
+#    Arguments: OBJ($curproc) STR($path)
+# Side Effects: none
+# Return Value: none
+sub set_incoming_message_cache_file_path
+{
+    my ($curproc, $path) = @_;
+    my $pcb = $curproc->pcb();
+    if ($path) {
+	$pcb->set("incoming_message", "file_path", $path);
+    }
+}
+
+
+# Descriptions: get the incoming_message cached file path.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: STR
+sub get_incoming_message_cache_file_path
+{
+    my ($curproc) = @_;
+    my $pcb  = $curproc->pcb();
+    my $path = $pcb->get("incoming_message", "file_path");
+    return( $path || '' );  
 }
 
 
@@ -203,7 +230,7 @@ output.
 =cut
 
 
-# Descriptions: return article header object if could
+# Descriptions: return article header object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -221,7 +248,7 @@ sub article_message_header
 }
 
 
-# Descriptions: return article body object if could
+# Descriptions: return article body object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -239,7 +266,7 @@ sub article_message_body
 }
 
 
-# Descriptions: return article message object if could
+# Descriptions: return article message object if could.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -265,6 +292,7 @@ create directory $dir if needed.
 
 =cut
 
+
 #
 # XXX-TODO: $curproc->mkdir() is strage.
 # XXX-TODO: hmm, we create a new subcleass such as $curproc->util->mkdir() ?
@@ -272,7 +300,8 @@ create directory $dir if needed.
 # XXX-TODO: we need FML::Utils class ?
 #
 
-# Descriptions: create directory $dir if needed
+
+# Descriptions: create directory $dir if needed.
 #    Arguments: OBJ($curproc) STR($dir) STR($mode)
 # Side Effects: create directory $dir
 # Return Value: NUM(1 or 0)
@@ -287,10 +316,10 @@ sub mkdir
 
     unless (-d $dir) {
 	if (defined $mode) {
-	    if ($mode =~ /^\d+$/) { # NUM 0700
+	    if ($mode =~ /^\d+$/o) { # NUM 0700
 		$curproc->_mkpath_num($dir, $mode);
 	    }
-	    elsif ($mode =~ /mode=(\S+)/) {
+	    elsif ($mode =~ /mode=(\S+)/o) {
 		my $xmode = "directory_${1}_mode";
 		if (defined $config->{ $xmode }) {
 		    $curproc->_mkpath_str($dir, $config->{ $xmode });
@@ -303,7 +332,7 @@ sub mkdir
 		$curproc->logerror("mkdir: invalid mode");
 	    }
 	}
-	elsif ($dirmode =~ /^\d+$/) { # STR 0700
+	elsif ($dirmode =~ /^\d+$/o) { # STR 0700
 	    $curproc->_mkpath_str($dir, $dirmode);
 	}
 	else {
@@ -315,7 +344,7 @@ sub mkdir
 }
 
 
-# Descriptions: mkdir with the specified dir mode
+# Descriptions: mkdir with the specified dir mode.
 #    Arguments: OBJ($curproc) STR($dir) NUM($mode)
 # Side Effects: mkdir && chmod
 # Return Value: none
@@ -326,7 +355,7 @@ sub _mkpath_num
 
     umask(0);
 
-    if ($mode =~ /^\d+$/) { # NUM 0700
+    if ($mode =~ /^\d+$/o) { # NUM 0700
 	eval q{ use File::Path;};
 	mkpath([ $dir ], 0, $mode);
 	chmod $mode, $dir;
@@ -340,7 +369,7 @@ sub _mkpath_num
 }
 
 
-# Descriptions: mkdir with the specified dir mode
+# Descriptions: mkdir with the specified dir mode.
 #    Arguments: OBJ($curproc) STR($dir) STR($mode)
 # Side Effects: mkdir && chmod
 # Return Value: none
@@ -351,7 +380,7 @@ sub _mkpath_str
 
     umask(0);
 
-    if ($mode =~ /^\d+$/) { # STR 0700
+    if ($mode =~ /^\d+$/o) { # STR 0700
 	eval qq{
 	    use File::Path;
 	    mkpath([ \$dir ], 0, $mode);
@@ -383,7 +412,7 @@ sub mkfile
 	my $obj = new IO::Adapter $file;
 	$obj->touch();
 
-	# verify 
+	# verify
 	unless (-f $file) {
 	    $curproc->logerror("fail to create file: $file");
 	}
@@ -406,7 +435,7 @@ sub touch
 
 # XXX-TODO: $curproc->cat() is strage.
 
-# Descriptions: concantenate files to STDOUT
+# Descriptions: concantenate files to STDOUT.
 #    Arguments: OBJ($curproc) ARRAY_REF($files) HANDLE($out)
 # Side Effects: none
 # Return Value: none
@@ -421,7 +450,7 @@ sub cat
 }
 
 
-# Descriptions: cat file to STDOUT
+# Descriptions: cat file to STDOUT.
 #    Arguments: STR($file) HANDLE($out)
 # Side Effects: none
 # Return Value: none
@@ -448,7 +477,7 @@ make components in $array unique.
 =cut
 
 
-# Descriptions: make components in $array unique
+# Descriptions: make components in $array unique.
 #    Arguments: OBJ($self) ARRAY_REF($array)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -473,16 +502,22 @@ sub unique
 
 =head1 ml_home_dir handling
 
+=head2 removed_ml_home_dir_path($ml_home_prefix, $ml_name)
+
+return ml_home_dir to be removed.
+
 =cut
 
 
-# Descriptions:
+# Descriptions: return ml_home_dir to be removed.
 #    Arguments: OBJ($curproc) STR($ml_home_prefix) STR($ml_name)
 # Side Effects: none
 # Return Value: STR
 sub removed_ml_home_dir_path
 {
     my ($curproc, $ml_home_prefix, $ml_name) = @_;
+
+    # XXX-TODO: name removed_ml_home_dir_path() is good ?
 
     use Mail::Message::Date;
     my $dobj = new Mail::Message::Date time;
@@ -494,7 +529,7 @@ sub removed_ml_home_dir_path
 }
 
 
-# Descriptions: find the latest removed $ml_home_dir
+# Descriptions: find the latest removed $ml_home_dir.
 #    Arguments: OBJ($curproc) STR($ml_home_prefix) STR($ml_name)
 # Side Effects: none
 # Return Value: STR
@@ -617,7 +652,7 @@ return options, result of getopts() analyze.
 =cut
 
 
-# Descriptions: return fml version
+# Descriptions: return fml version.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -630,7 +665,7 @@ sub fml_version
 }
 
 
-# Descriptions: return fml owner
+# Descriptions: return fml owner.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -643,7 +678,7 @@ sub fml_owner
 }
 
 
-# Descriptions: return fml group
+# Descriptions: return fml group.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -656,7 +691,7 @@ sub fml_group
 }
 
 
-# Descriptions: return the current process name
+# Descriptions: return the current process name.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -668,6 +703,18 @@ sub myname
     return $args->{ myname };
 }
 
+
+# Descriptions: check if $ml_name is mandatory in this process?
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: NUM(1 or 0)
+sub is_need_ml_name
+{
+    my ($curproc) = @_;
+    my $args = $curproc->{ __parent_args };
+
+    return( $args->{ need_ml_name } ? 1 : 0 );
+}
 
 # Descriptions: check $str with $class regexp defined in FML::Restriction.
 #    Arguments: OBJ($curproc) STR($class) STR($str)
@@ -739,7 +786,7 @@ sub command_line_argv_find
 }
 
 
-# Descriptions: return options, which is the result by getopts() analyze
+# Descriptions: return options, which is the result by getopts() analyze.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -752,6 +799,65 @@ sub command_line_options
 }
 
 
+=head2 set_config_files_list($cf_file_path_array)
+
+set configuration file (.cf) to internal list.
+
+=head2 append_to_config_files_list($cf_file_path)
+
+append configuration file (.cf) to internal list.
+
+=head2 get_config_files_list()
+
+get configuration files (*.cf) list as ARRAY_REF.
+
+=cut
+
+
+# Descriptions: set configuration file (.cf) to internal list.
+#    Arguments: OBJ($curproc) ARRAY_REF($path)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub set_config_files_list
+{
+    my ($curproc, $path) = @_;
+    my $args = $curproc->{ __parent_args };
+
+    if (ref($path) eq 'ARRAY') {
+	$args->{ cf_list } = $path || [];
+    }
+    else {
+	$curproc->logerror("set_config_files_list: invalid input");
+    }
+}
+
+# Descriptions: append configuration file (.cf) to internal list.
+#    Arguments: OBJ($curproc) STR($path)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub append_to_config_files_list
+{
+    my ($curproc, $path) = @_;
+    my $args = $curproc->{ __parent_args };
+
+    my $p = $args->{ cf_list } || [];
+    push(@$p, $path);
+    $args->{ cf_list } = $p;
+}
+
+# Descriptions: get configuration files (*.cf) list as ARRAY_REF.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub get_config_files_list
+{
+    my ($curproc) = @_;
+    my $args = $curproc->{ __parent_args };
+
+    return( $args->{ cf_list } || [] );
+}
+
+
 =head2 ml_name()
 
 not yet implemenetd properly. (?)
@@ -759,7 +865,7 @@ not yet implemenetd properly. (?)
 =cut
 
 
-# Descriptions: return ml_name
+# Descriptions: return ml_name.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -785,7 +891,7 @@ properly, return the default domain defined in /etc/fml/main.cf.
 =cut
 
 
-# Descriptions: return my domain
+# Descriptions: return my domain.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -850,7 +956,7 @@ return executable prefix such as "/usr/local".
 =cut
 
 
-# Descriptions: return the path for executables
+# Descriptions: return the path where executables exist.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -871,7 +977,7 @@ return the path where template files used in "newml" method exist.
 
 
 # Descriptions: return the path where template files used
-#               in "newml" method exist
+#               in "newml" method exist.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -910,7 +1016,7 @@ sub ml_home_prefix
 }
 
 
-# Descriptions: return $ml ML's home directory
+# Descriptions: return $ml ML's home directory.
 #    Arguments: OBJ($curproc) STR($ml) STR($domain)
 # Side Effects: none
 # Return Value: STR
@@ -1037,7 +1143,7 @@ return 1 if config.cf exists. 0 if not.
 =cut
 
 
-# Descriptions: return $ml ML's config.cf path
+# Descriptions: return $ml ML's config.cf path.
 #    Arguments: OBJ($curproc) STR($ml) STR($domain)
 # Side Effects: none
 # Return Value: STR
@@ -1070,7 +1176,7 @@ sub is_config_cf_exist
 
 =head2 get_ml_home_prefix_maps()
 
-return ml_home_prefix maps. 
+return ml_home_prefix maps.
 By default, ml_home_prefix and virtual under $fml_config_dir.
 
 =cut
@@ -1096,7 +1202,7 @@ sub __get_ml_home_prefix_maps
 {
     my ($main_cf) = @_;
 
-    if (defined $main_cf->{ ml_home_prefix_maps } && 
+    if (defined $main_cf->{ ml_home_prefix_maps } &&
 	$main_cf->{ ml_home_prefix_maps }) {
 	my (@r) = ();
 	my (@maps) = split(/\s+/, $main_cf->{ ml_home_prefix_maps });
@@ -1131,6 +1237,7 @@ sub is_cgi_process
     my ($curproc) = @_;
     my $name = $curproc->myname() || '';
 
+    # XXX-TODO: HARD CODED
     if ($name =~ /\.cgi$/) {
 	return 1;
     }
@@ -1148,6 +1255,7 @@ sub is_under_mta_process
     my ($curproc) = @_;
     my $name = $curproc->myname() || '';
 
+    # XXX-TODO: HARD CODED
     if ($name eq 'distribute' ||
 	$name eq 'command'    ||
 	$name eq 'digest'     ||
@@ -1160,7 +1268,7 @@ sub is_under_mta_process
 }
 
 
-=head2 get_ml_list()
+=head2 get_ml_list($ml_domain)
 
 get ARRAY_REF of valid mailing lists.
 
@@ -1226,7 +1334,7 @@ get ARRAY_REF of address list for the specified map.
 =cut
 
 
-# Descriptions: get address list for the specified map
+# Descriptions: get address list for the specified map.
 #    Arguments: OBJ($curproc) STR($map)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -1236,9 +1344,12 @@ sub get_address_list
     my $config = $curproc->config();
     my $list   = $config->get_as_array_ref( $map );
 
-    eval q{ use FML::Command::UserControl;};
+
+    # XXX-TODO: moved to FML::User::Control ?
+
+    eval q{ use FML::User::Control;};
     unless ($@) {
-	my $obj = new FML::Command::UserControl;
+	my $obj = new FML::User::Control;
 	return $obj->get_user_list($curproc, $list);
     }
 
@@ -1324,7 +1435,7 @@ return the current article number (sequence number).
 =cut
 
 
-# Descriptions: return the current article number (sequence number)
+# Descriptions: return the current article number (sequence number).
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: NUM
@@ -1345,7 +1456,7 @@ sub article_max_id
 =cut
 
 
-# Descriptions: set print style
+# Descriptions: set print style.
 #    Arguments: OBJ($curproc) STR($mode)
 # Side Effects: none
 # Return Value: STR
@@ -1357,7 +1468,7 @@ sub set_print_style
 }
 
 
-# Descriptions: get print style
+# Descriptions: get print style.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -1376,7 +1487,7 @@ sub get_print_style
 =cut
 
 
-# Descriptions: inform default language
+# Descriptions: inform default language.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -1388,7 +1499,7 @@ sub language_default
 }
 
 
-# Descriptions: language used in html files
+# Descriptions: language used in html files.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
@@ -1399,7 +1510,7 @@ sub language_of_html_file
 }
 
 
-# Descriptions: set the current charset
+# Descriptions: set the current charset.
 #    Arguments: OBJ($curproc) STR($category) STR($charset)
 # Side Effects: none
 # Return Value: none
@@ -1446,7 +1557,7 @@ sub get_charset
 		    last ACCEPT_LANGUAGE;
 		}
 		elsif ($a eq '*') { # any charset is o.k.
-		    last ACCEPT_LANGUAGE;		
+		    last ACCEPT_LANGUAGE;
 		}
 	    }
 	}
@@ -1473,7 +1584,7 @@ The type of return value is ARRAY_REF.
 =cut
 
 
-# Descriptions: return language candidates requested by sender
+# Descriptions: return language candidates requested by sender.
 #    Arguments: OBJ($curproc) ARRAY_REF($list)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -1493,7 +1604,7 @@ sub set_accept_language_list
 }
 
 
-# Descriptions: return language candidates requested by sender
+# Descriptions: return language candidates requested by sender.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -1511,7 +1622,7 @@ sub get_accept_language_list
 }
 
 
-=head2 thread_db_args($args)
+=head2 thread_db_args()
 
 prepare and return information (HASH_REF) needed to manipulate thread
 database.
@@ -1520,12 +1631,12 @@ database.
 
 
 # Descriptions: return information (HASH_REF) needed for thread database.
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: HASH_REF
 sub thread_db_args
 {
-    my ($curproc, $args) = @_;
+    my ($curproc)    = @_;
     my $config       = $curproc->config();
     my $ml_name      = $config->{ ml_name };
     my $html_dir     = $config->{ html_archive_dir };
@@ -1534,8 +1645,8 @@ sub thread_db_args
     my $cur_lang     = $curproc->language_of_html_file();
 
     # whether we should mask address?
-    my $use_address_mask  = 'yes';
-    my $address_mask_type = 'all';
+    my $use_address_mask  = 'no';
+    my $address_mask_type = '';
     if ($config->yes('use_html_archive_address_mask')) {
 	$use_address_mask = 'yes';
 	$address_mask_type
@@ -1622,7 +1733,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

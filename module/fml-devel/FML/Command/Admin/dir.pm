@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: dir.pm,v 1.13 2003/08/29 15:33:58 fukachan Exp $
+# $FML: dir.pm,v 1.16 2004/01/02 14:45:04 fukachan Exp $
 #
 
 package FML::Command::Admin::dir;
@@ -68,8 +68,8 @@ sub process
     use FML::Restriction::Base;
     my $safe = new FML::Restriction::Base;
 
-    # analyze ...
-    # XXX-TODO: "admin ls -i -a tmp" ignores "tmp" but not inform the error.
+    # XXX-TODO analyze arguments. ???
+    # analyze arguments.
     for my $x (@$options) {
 	# XXX-TODO: correct? we restrict the "ls" option pattern here.
 	if ($safe->regexp_match('directory', $x)) {
@@ -80,23 +80,28 @@ sub process
 	}
     }
 
-    # XXX-TODO: $du_args->{ options } is used later for what ?
-    # $du_args->{ options } = \@argv;
+    if (@argv) {
+	my $buf = join(" ", @argv);
+	$curproc->reply_message("error.ignore",
+				"\"buf\" ignored.",
+				{ _arg_argv => $buf },
+				);
+    }
 
+    # XXX-TODO: $dir = new FML::Command::DirUtils $dir_string; $dir->list(). ?
     use FML::Command::DirUtils;
     my $obj = new FML::Command::DirUtils;
     $obj->dir($curproc, $command_args, $du_args);
 }
 
 
-# Descriptions: cgi menu (dummy)
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+# Descriptions: cgi menu (dummy).
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
 
     ;
 }
@@ -112,7 +117,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

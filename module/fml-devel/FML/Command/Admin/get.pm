@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: get.pm,v 1.21 2003/09/04 12:27:53 fukachan Exp $
+# $FML: get.pm,v 1.23 2004/01/21 03:51:16 fukachan Exp $
 #
 
 package FML::Command::Admin::get;
@@ -18,7 +18,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::Admin::get - get arbitrary file in $ml_home_dir
+FML::Command::Admin::get - get arbitrary file(s) in $ml_home_dir
 
 =head1 SYNOPSIS
 
@@ -111,7 +111,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

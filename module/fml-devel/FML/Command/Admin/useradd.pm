@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: useradd.pm,v 1.2 2002/09/11 23:18:09 fukachan Exp $
+# $FML: useradd.pm,v 1.5 2004/01/02 14:42:42 fukachan Exp $
 #
 
 package FML::Command::Admin::useradd;
@@ -17,7 +17,7 @@ use FML::Command::Admin::subscribe;
 @ISA = qw(FML::Command::Admin::subscribe);
 
 
-# Descriptions: subscribe user
+# Descriptions: add a new user.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to subscribe module
 # Return Value: none
@@ -39,13 +39,17 @@ See C<FML::Command> for more details.
 
 an alias of C<FML::Command::Admin::subscribe>.
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

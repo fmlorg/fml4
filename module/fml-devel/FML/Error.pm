@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Error.pm,v 1.26 2003/10/15 01:03:27 fukachan Exp $
+# $FML: Error.pm,v 1.29 2004/02/01 14:35:33 fukachan Exp $
 #
 
 package FML::Error;
@@ -19,7 +19,7 @@ my $debug = 0;
 
 =head1 NAME
 
-FML::Error - front end for the analyze of error messages.
+FML::Error - front end of error messages analyzer.
 
 =head1 SYNOPSIS
 
@@ -38,7 +38,7 @@ FML::Error - front end for the analyze of error messages.
 
 =head2 new()
 
-usual constructor.
+constructor.
 
 =cut
 
@@ -55,8 +55,8 @@ sub new
     my $config = $curproc->config();
     my $fp     = $config->{ error_analyzer_function } || 'simple_count';
 
-    # defautl analyzer function
-    $me->{ _analyzer_function_name } = $fp;
+    # default analyzer function
+    set_analyzer_function($me, $fp);
 
     return bless $me, $type;
 }
@@ -148,8 +148,7 @@ sub db_open
 # Return Value: none
 sub db_close
 {
-    my ($self)  = @_;
-    my $curproc = $self->{ _curproc };
+    my ($self) = @_;
 }
 
 
@@ -220,7 +219,7 @@ sub analyze
 
     use FML::Error::Analyze;
     my $analyzer = new FML::Error::Analyze $curproc;
-    my $fp       = $self->{ _analyzer_function_name };
+    my $fp       = $self->get_analyzer_function();
 
     # critical region: access to db under locked.
     $self->lock();
@@ -288,12 +287,13 @@ sub is_list_address
     my ($self, $addr)  = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
+    my $cred    = $curproc->{ credential };
     my $addrs   = $config->get_as_array_ref('list_addresses');
     my $match   = 0;
 
-    use FML::Credential;
-    my $cred = new FML::Credential $curproc;
+    my $compare_level = $cred->get_compare_level();
     $cred->set_compare_level(100); # match strictly!
+
     for my $sysaddr (@$addrs) {
 	if (defined $sysaddr && $sysaddr) {
 	    $curproc->log("check is_same_address($addr, $sysaddr)") if $debug;
@@ -307,6 +307,7 @@ sub is_list_address
 	}
     }
 
+    $cred->set_compare_level( $compare_level );
     return $match;
 }
 
@@ -328,12 +329,10 @@ list up addresses to remove.
 # Return Value: none
 sub remove_bouncers
 {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $curproc = $self->{ _curproc };
+    my $cred    = $curproc->{ credential };
     my $list    = $self->{ _removal_addr_list };
-
-    use FML::Credential;
-    my $cred = new FML::Credential $curproc;
 
     use FML::Restriction::Base;
     my $safe = new FML::Restriction::Base;
@@ -350,7 +349,8 @@ sub remove_bouncers
 			$self->deluser( $addr );
 		    }
 		    else {
-			$curproc->log("remove_bouncers: <$addr> seems not member");
+			my $s = "remove_bouncers: <$addr> seems not a member";
+			$curproc->logwarn($s);
 		    }
 		}
 		else {
@@ -359,12 +359,13 @@ sub remove_bouncers
 		}
 	    }
 	    else {
-		$curproc->logwarn("remove_bouncers: <$addr> ignored");
+		my $s = "remove_bouncers: <$addr> is one of ml addr. ignored";
+		$curproc->logwarn($s);
 	    }
 	}
     }
     else {
-	$curproc->logerror("undefined list");
+	$curproc->logerror("undefined list to remove");
     }
 }
 
@@ -395,11 +396,12 @@ sub deluser
 	$curproc->log("deluser <$address>");
     }
     else {
-	$curproc->logerror("deluser: invalid address");
+	$curproc->logerror("deluser: invalid address syntax");
 	return;
     }
 
-    # arguments to pass off to each method
+    # we call FML::Command::Admin::unsubscribe not FML::User::Control
+    # since FML::User::Control is too raw.
     my $method       = 'unsubscribe';
     my $command_args = {
         command_mode => 'admin',
@@ -429,7 +431,7 @@ sub deluser
             $curproc->logerror($r);
             if ($r =~ /^(.*)\s+at\s+/) {
                 my $reason = $1;
-                $curproc->log($reason); # pick up reason
+                $curproc->logerror($reason); # pick up reason
                 croak($reason);
             }
         }
@@ -475,7 +477,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

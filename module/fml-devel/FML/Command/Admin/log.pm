@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: log.pm,v 1.21 2003/10/18 06:50:29 fukachan Exp $
+# $FML: log.pm,v 1.25 2004/02/01 14:39:00 fukachan Exp $
 #
 
 package FML::Command::Admin::log;
@@ -61,66 +61,62 @@ sub process
     my ($self, $curproc, $command_args) = @_;
     my $config   = $curproc->config();
     my $log_file = $config->{ log_file };
-    my $options  = $command_args->{ options };
-    my $address  = $command_args->{ command_data } || $options->[ 0 ];
-
-    # XXX-TODO: we should provide $curproc->util->get_print_style() ?
-    my $style    = $curproc->get_print_style();
 
     if (-f $log_file) {
-	$self->{ _curproc } = $curproc;
-	$self->_show_log($log_file, { printing_style => $style });
+	my $style = $curproc->get_print_style();
+	$self->_show_log($curproc, $log_file, { printing_style => $style });
     }
 }
 
 
 # Descriptions: show cgi menu
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $config   = $curproc->config();
     my $log_file = $config->{ log_file };
-    my $style    = $curproc->get_print_style();
 
     if (-f $log_file) {
-	$self->{ _curproc } = $curproc;
-	$self->_show_log($log_file, { printing_style => $style });
+	my $style = $curproc->get_print_style();
+	$self->_show_log($curproc, $log_file, { printing_style => $style });
     }
 }
 
 
-# Descriptions: show log file.
-#    Arguments: OBJ($self) STR($log_file) HASH_REF($args)
+# Descriptions: show log file. 
+#               This function is same as "tail -30 log" by default.
+#    Arguments: OBJ($self) OBJ($curproc) STR($log_file) HASH_REF($sl_args)
 # Side Effects: none
 # Return Value: none
 sub _show_log
 {
-    my ($self, $log_file, $args) = @_;
-    my $is_cgi       = 1 if $args->{ printing_style } eq 'html';
-    my $last_n_lines = 30;
-    my $linecount    = 0;
-    my $maxline      = 0;
-    my $curproc      = $self->{ _curproc };
-    my $charset      = $curproc->get_charset($is_cgi ? "cgi" : "log_file");
+    my ($self, $curproc, $log_file, $sl_args) = @_;
+    my $is_cgi     = 1 if $sl_args->{ printing_style } eq 'html';
+    my $line_count = 0;
+    my $line_max   = 0;
+    my $charset    = $curproc->get_charset($is_cgi ? "cgi" : "log_file");
+
+    # run "tail -30 log" by default.
+    my $config       = $curproc->config();
+    my $last_n_lines = $config->{ log_command_tail_starting_location } || 30;
 
     use Mail::Message::Encode;
-    my $obj = new Mail::Message::Encode;
+    my $encode = new Mail::Message::Encode;
 
     use FileHandle;
     my $fh = new FileHandle $log_file;
     my $wh = \*STDOUT;
 
     if (defined $fh) {
-	while (<$fh>) { $maxline++;}
+	while (<$fh>) { $line_max++;}
 	$fh->close();
 
 	$fh = new FileHandle $log_file;
 	my $s = '';
-	$maxline -= $last_n_lines;
+	$line_max -= $last_n_lines;
 
 	if ($is_cgi) { print $wh "<pre>\n";}
 
@@ -128,9 +124,9 @@ sub _show_log
 	my $buf;
       LINE:
 	while ($buf = <$fh>) {
-	    next LINE if $linecount++ < $maxline;
+	    next LINE if $line_count++ < $line_max;
 
-	    $s = $obj->convert( $buf, $charset );
+	    $s = $encode->convert( $buf, $charset );
 
 	    if ($is_cgi) {
 		print $wh (_html_to_text($s));
@@ -147,7 +143,7 @@ sub _show_log
 }
 
 
-# Descriptions: convert text to html
+# Descriptions: convert text to html.
 #    Arguments: STR($str)
 # Side Effects: none
 # Return Value: STR
@@ -177,7 +173,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

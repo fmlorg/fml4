@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: chaddr.pm,v 1.19 2003/08/29 15:33:58 fukachan Exp $
+# $FML: chaddr.pm,v 1.23 2004/02/01 14:40:01 fukachan Exp $
 #
 
 package FML::Command::Admin::chaddr;
@@ -62,20 +62,28 @@ sub need_lock { 1;}
 sub lock_channel { return 'command_serialize';}
 
 
-# Descriptions: change address from old one to new one
+# Descriptions: change address from old one to new one.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->config();
+    my $config  = $curproc->config();
+    my $options = $command_args->{ options };
+
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $member_map    = $config->{ 'primary_member_map'    };
     my $recipient_map = $config->{ 'primary_recipient_map' };
-    my $options       = $command_args->{ options };
-    my $old_address   = '';
-    my $new_address   = '';
 
+    my $old_address = '';
+    my $new_address = '';
     if (defined $command_args->{ command_data }) {
 	my $x = $command_args->{ command_data };
 	($old_address, $new_address) = split(/\s+/, $x);
@@ -94,7 +102,17 @@ sub process
     croak("\$member_map not specified")    unless $member_map;
     croak("\$recipient_map not specified") unless $recipient_map;
 
-    # uc_args = FML::Command::UserControl specific parameters
+    # check syntax of old or new addresses.
+    use FML::Restriction::Base;
+    my $safe = new FML::Restriction::Base;
+    unless ($safe->regexp_match('address', $old_address)) {
+	croak("chaddr: unsafe old address: $old_address");
+    }    
+    unless ($safe->regexp_match('address', $new_address)) {
+	croak("chaddr: unsafe new address: $new_address");
+    }    
+
+    # uc_args = FML::User::Control specific parameters
     my (@maps) = ($member_map, $recipient_map);
     my $uc_args = {
 	old_address => $old_address,
@@ -104,8 +122,8 @@ sub process
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
 	$obj->user_chaddr($curproc, $command_args, $uc_args);
     };
     if ($r = $@) {
@@ -124,7 +142,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

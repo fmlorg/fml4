@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Cache.pm,v 1.15 2003/10/15 01:03:31 fukachan Exp $
+# $FML: Cache.pm,v 1.18 2004/01/31 14:12:17 fukachan Exp $
 #
 
 package FML::Error::Cache;
@@ -39,6 +39,8 @@ where C<$bounce_info) follows:
 =head1 METHODS
 
 =head2 new()
+
+standard constructor.
 
 =cut
 
@@ -138,12 +140,18 @@ sub add
 	    $reason =~ s/\s+/_/g;
 	}
 	else {
-	    $curproc->logerror("FML::Error::Cache: add: not implemented \$argv type");
+	    my $s = "FML::Error::Cache: unknown type: \$argv";
+	    $curproc->logerror($s);
 	    return undef;
 	}
 
 	if ($address) {
-	    $db->{ $address } = "$unixtime status=$status reason=$reason";
+	    if ($self->_is_valid_address($address)) {
+		$db->{ $address } = "$unixtime status=$status reason=$reason";
+	    }
+	    else {
+		$curproc->logwarn("FML::Error::Cache: add: invalid address");
+	    }
 	}
 	else {
 	    $curproc->logwarn("FML::Error::Cache: add: invalid data");
@@ -178,7 +186,12 @@ sub delete
     my $db = $self->{ _db };
     if (defined $db) {
 	if ($address) {
-	    delete $db->{ $address };
+	    if ($self->_is_valid_address($address)) {
+		delete $db->{ $address };
+	    }
+	    else {
+		croak("FML::Error::Cache: delete: invalid address");
+	    }
 	}
 	else {
 	    $curproc->logwarn("FML::Error::Cache: delete: invalid data");
@@ -208,22 +221,27 @@ following a set of key ($address) and value.
 # Descriptions: open the cache database for File::CacheDir.
 #    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: OBJ
+# Return Value: HASH_REF
 sub _open_cache
 {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $type    = $config->{ error_analyzer_cache_type };
     my $dir     = $config->{ error_analyzer_cache_dir  };
-    my $mode    = $config->{ error_analyzer_cache_mode } || 'temporal';
-    my $days    = $config->{ error_analyzer_cache_size } || 14;
+
+    # parameters: but not used now.
+    my %db   = ();
+    my $type = $config->{ error_analyzer_cache_type };
+    my $mode = $config->{ error_analyzer_cache_mode } || 'temporal';
+    my $days = $config->{ error_analyzer_cache_size } || 14;
+    my $args = {
+	dir   => $dir,
+	unit  => 'day',
+	limit => $days,
+    };
 
     use Tie::JournaledDir;
-
-    # tie style
-    my %db = ();
-    tie %db, 'Tie::JournaledDir', { dir => $dir };
+    tie %db, 'Tie::JournaledDir', $args;
     $self->{ _db } = \%db;
 }
 
@@ -235,7 +253,7 @@ sub _open_cache
 sub _close_cache
 {
     my ($self) = @_;
-    my $db = $self->{ _db };
+    my $db     = $self->{ _db };
 
     if (defined $db) {
 	untie %$db;
@@ -277,14 +295,33 @@ sub get_primary_keys
 # Return Value: HASH_REF
 sub get_all_values_as_hash_ref
 {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $dir     = $config->{ error_analyzer_cache_dir  };
+    my $dir     = $config->{ error_analyzer_cache_dir };
 
     use Tie::JournaledDir;
     my $obj = new Tie::JournaledDir { dir => $dir };
     return $obj->get_all_values_as_hash_ref();
+}
+
+
+# Descriptions: check if the address is valid string?
+#    Arguments: OBJ($self) STR($address)
+# Side Effects: none
+# Return Value: NUM
+sub _is_valid_address
+{
+    my ($self, $address) = @_;
+
+    use FML::Restriction::Base;
+    my $safe = new FML::Restriction::Base;
+    if ($safe->regexp_match('address', $address)) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
 }
 
 
@@ -298,7 +335,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

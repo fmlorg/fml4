@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: adminadd.pm,v 1.2 2002/09/11 23:18:06 fukachan Exp $
+# $FML: adminadd.pm,v 1.5 2003/12/31 04:08:44 fukachan Exp $
 #
 
 package FML::Command::Admin::adminadd;
@@ -17,7 +17,7 @@ use FML::Command::Admin::addadmin;
 @ISA = qw(FML::Command::Admin::addadmin);
 
 
-# Descriptions: add an admin user
+# Descriptions: add a remote administrator
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to subscribe module
 # Return Value: none
@@ -29,7 +29,7 @@ sub process
 
 =head1 NAME
 
-FML::Command::Admin::adminadd - add a new admin
+FML::Command::Admin::adminadd - add a remote administrator
 
 =head1 SYNOPSIS
 
@@ -39,13 +39,17 @@ See C<FML::Command> for more details.
 
 an alias of C<FML::Command::Admin::addadmin>.
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

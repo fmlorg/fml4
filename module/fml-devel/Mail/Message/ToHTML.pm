@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ToHTML.pm,v 1.58 2003/11/07 15:15:26 tmu Exp $
+# $FML: ToHTML.pm,v 1.62 2003/12/29 15:00:08 fukachan Exp $
 #
 
 package Mail::Message::ToHTML;
@@ -17,7 +17,7 @@ my $debug = 0;
 my $URL   =
     "<A HREF=\"http://www.fml.org/software/\">Mail::Message::ToHTML</A>";
 
-my $version = q$FML: ToHTML.pm,v 1.58 2003/11/07 15:15:26 tmu Exp $;
+my $version = q$FML: ToHTML.pm,v 1.62 2003/12/29 15:00:08 fukachan Exp $;
 my $versionid = 0;
 if ($version =~ /,v\s+([\d\.]+)\s+/) {
     $versionid = "$1";
@@ -255,12 +255,17 @@ sub htmlfy_rfc822_message
 	# text/plain case.
 	# XXX inline expansion.
 	elsif ($type eq 'text/plain') {
-	    $self->_text_safe_print({
-		fh       => $wh,                    # parent html
-		data     => $m->message_text(),
-		charset  => $m->charset(),
-		encoding => $m->encoding_mechanism(),
-	    });
+	    if ($self->{ _use_address_mask } eq 'yes') {
+		$self->_text_plain_part_safe_print($wh, $m);
+	    }
+	    else {   # original
+		$self->_text_safe_print({
+		    fh       => $wh,                    # parent html
+		    data     => $m->message_text(),
+		    charset  => $m->charset(),
+		    encoding => $m->encoding_mechanism(),
+		});
+	    }
 	}
 	# create a separete file for attachment
 	else {
@@ -751,7 +756,7 @@ sub _format_safe_header
 	    # mask the raw address against address collector (e.g. spammer).
 	    if ($self->{ _use_address_mask } eq 'yes') {
 		if ($self->_is_mask_address($field)) {
-		    $xbuf = $self->_who_of_address($xbuf);
+		    $xbuf = $self->_address_to_gecos($xbuf);
 		}
 	    }
 
@@ -786,6 +791,38 @@ sub _format_index_navigator
 };
 
 return $str;
+}
+
+
+# Descriptions: print text/plain part by printing each paragraph.
+#               mask raw mail addresses in the signature if could.
+#    Arguments: OBJ($self) HANDLE($wh) OBJ($m)
+# Side Effects: none
+# Return Value: STR
+sub _text_plain_part_safe_print
+{
+    my ($self, $wh, $m) = @_;
+    my $i = 0;
+    my $n = $m->num_paragraph();
+
+    # print each paragraph.
+    for ($i = 1; $i <= $n ; $i++) {
+	my $buf = $m->nth_paragraph($i);
+
+	# try to hide domain since the last paragraph must be signature.
+	if ($self->{ _use_address_mask } eq 'yes') {
+	    if ($i == $n) {
+		$buf =~ s/(\w+\@[\w\.]+)/$self->_address_to_gecos($1)/ge;
+	    }
+	}
+
+	$self->_text_safe_print({
+	    fh       => $wh,                    # parent html
+	    data     => $buf,
+	    charset  => $m->charset(),
+	    encoding => $m->encoding_mechanism(),
+	});
+    }
 }
 
 
@@ -1983,6 +2020,11 @@ sub _print_li_filename
     my $subject  = $db->get('article_subject', $id) ||
 			$db->get('subject', $id) || "no subject";
     my $who      = $db->get('who', $id) || "no sender";
+    if ($self->{ _use_address_mask } ne 'yes' && 
+	$db->get('from', $id) ne '') {
+	$who	 = "" if ($who =~ /\@xxx/);
+	$who	.= " " . $db->get('from', $id);
+    }
 
     _PRINT_DEBUG("-- print_li_filename id=$id file=$filename");
 
@@ -2003,7 +2045,7 @@ sub _print_li_filename
 #    Arguments: OBJ($self) STR($address)
 # Side Effects: none
 # Return Value: STR
-sub _who_of_address
+sub _address_to_gecos
 {
     my ($self, $address) = @_;
 

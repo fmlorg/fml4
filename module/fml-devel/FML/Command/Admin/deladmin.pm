@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: deladmin.pm,v 1.12 2003/09/27 03:00:16 fukachan Exp $
+# $FML: deladmin.pm,v 1.16 2004/01/02 14:45:04 fukachan Exp $
 #
 
 package FML::Command::Admin::deladmin;
@@ -15,7 +15,7 @@ use Carp;
 
 =head1 NAME
 
-FML::Command::Admin::deladmin - remove the specified administrator
+FML::Command::Admin::deladmin - remove the specified remote administrator
 
 =head1 SYNOPSIS
 
@@ -23,7 +23,7 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-remove the specified administrator.
+remove the specified remote administrator.
 
 =head1 METHODS
 
@@ -59,7 +59,7 @@ sub need_lock { 1;}
 sub lock_channel { return 'command_serialize';}
 
 
-# Descriptions: remove the specified administrator
+# Descriptions: remove the specified remote administrator.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
@@ -68,13 +68,19 @@ sub process
     my ($self, $curproc, $command_args) = @_;
     my $config = $curproc->config();
 
-    # target maps
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $member_map    = $config->{ 'primary_admin_member_map' };
     my $recipient_map = $config->{ 'primary_admin_recipient_map' };
     my $options       = $command_args->{ options };
     my $address       = $command_args->{ command_data } || $options->[ 0 ];
 
-    # fundamental check
+    # fundamental sanity check
     croak("address not undefined")       unless defined $address;
     croak("address not specified")       unless $address;
     croak("member_map not undefined")    unless defined $member_map;
@@ -82,7 +88,7 @@ sub process
     croak("recipient_map not undefined") unless defined $recipient_map;
     croak("recipient_map not specified") unless $recipient_map;
 
-    # $uc_args = FML::Command::UserControl specific parameters
+    # $uc_args = FML::User::Control specific parameters
     my $maplist = [ $member_map, $recipient_map ];
     my $uc_args = {
 	address => $address,
@@ -91,8 +97,8 @@ sub process
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
 	$obj->userdel($curproc, $command_args, $uc_args);
     };
     if ($r = $@) {
@@ -101,20 +107,19 @@ sub process
 }
 
 
-# Descriptions: show cgi menu to remove the administrator
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+# Descriptions: show cgi menu to remove the remote administrator.
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $r = '';
 
     eval q{
 	use FML::CGI::User;
 	my $obj = new FML::CGI::User;
-	$obj->cgi_menu($curproc, $args, $command_args);
+	$obj->cgi_menu($curproc, $command_args);
     };
     if ($r = $@) {
 	croak($r);
@@ -132,7 +137,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: file.pm,v 1.14 2003/08/29 15:33:58 fukachan Exp $
+# $FML: file.pm,v 1.17 2004/01/01 23:52:12 fukachan Exp $
 #
 
 package FML::Command::Admin::file;
@@ -23,11 +23,11 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-file a new address.
-
 =head1 METHODS
 
 =head2 process($curproc, $command_args)
+
+dispatch functions for file operations.
 
 =cut
 
@@ -106,14 +106,14 @@ sub process
 
 
 # Descriptions: show cgi menu (dummy)
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
 
+    # XXX-TODO: dummy.?
     ;
 }
 
@@ -128,7 +128,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003,2004 Ken'ichi Fukamachi
 #
-# $FML: Date.pm,v 1.24 2003/09/13 09:02:01 fukachan Exp $
+# $FML: Date.pm,v 1.26 2004/02/04 15:16:25 fukachan Exp $
 #
 
 package Mail::Message::Date;
@@ -67,12 +67,18 @@ use Carp;
 sub new
 {
     my ($self, $time) = @_;
+
+    if (defined($time) && time && $time !~ /^\d+$/o) {
+	my $me = {};
+	$time = date_to_unixtime($me, $time);
+    }
+
     my $type = _date($time);
     return bless $type, $self;
 }
 
 
-# Descriptions: prepare date by several time format
+# Descriptions: prepare date by several time format.
 #    Arguments: NUM($time)
 # Side Effects: create object
 # Return Value: HASH_REF
@@ -88,7 +94,7 @@ sub _date
     my @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
 
-    $TimeZone ||= speculate_timezone();
+    $TimeZone ||= _speculate_timezone();
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time))[0..6];
 
     $date->{'log_file_style'} =
@@ -119,76 +125,106 @@ sub _date
 }
 
 
-# Descriptions: return logfile style
+=head2 set($date)
+
+    $date = new Mail::Message::Date; 
+    $date->set("Tue Dec 30 17:06:34 JST 2003");
+    $date->to_unixtime();
+    print $date->as_str(), "\n";
+
+=cut
+
+
+# Descriptions: 
+#    Arguments: OBJ($self) STR($date)
+# Side Effects: none
+# Return Value: none
+sub set
+{
+    my ($self, $date) = @_;
+    my $time = $self->date_to_unixtime($date);
+    my $type = _date($time);
+    my ($k, $v);
+
+    while(($k, $v) = each %$type) {
+	$self->{ $k } = $v; 
+    }
+
+    # flag on
+    $self->{ _default_unixtime } = $time;
+}
+
+
+# Descriptions: return logfile style.
 #    Arguments: OBJ($self) NUM($time)
 # Side Effects: none
 # Return Value: STR
 sub log_file_style
 {
     my ($self, $time) = @_;
-    my $p = _date($time || time);
+    my $p = _date($time || $self->{ _default_unixtime } || time);
     return $p->{'log_file_style'};
 }
 
 
-# Descriptions: return Date: style date
+# Descriptions: return Date: style date.
 #    Arguments: OBJ($self) NUM($time)
 # Side Effects: none
 # Return Value: STR
 sub mail_header_style
 {
     my ($self, $time) = @_;
-    my $p = _date($time || time);
+    my $p = _date($time || $self->{ _default_unixtime } || time);
     return $p->{'mail_header_style'};
 }
 
 
-# Descriptions: return YYYYMMDD style date
+# Descriptions: return YYYYMMDD style date.
 #    Arguments: OBJ($self) NUM($time)
 # Side Effects: none
 # Return Value: STR
 sub YYYYMMDD
 {
     my ($self, $time) = @_;
-    my $p = _date($time || time);
+    my $p = _date($time || $self->{ _default_unixtime } || time);
     return $p->{'YYYYMMDD'};
 }
 
 
-# Descriptions: return e.g. 1999/09/13 style
+# Descriptions: return e.g. 1999/09/13 style.
 #    Arguments: OBJ($self) NUM($time) STR($sep)
 # Side Effects: none
 # Return Value: STR
 sub YYYYxMMxDD
 {
     my ($self, $time, $sep) = @_;
-    my $date = _date($time || time);
+    my $p = _date($time || $self->{ _default_unixtime } || time);
 
     $sep ||= '/'; # 1999/09/13 by default
-    return $date->{ YYYY }. $sep . $date->{ MM }. $sep. $date->{ DD };
+    return $p->{ YYYY }. $sep . $p->{ MM }. $sep. $p->{ DD };
 }
 
 
-# Descriptions: return YYYYMMDD.HHMM
+# Descriptions: return YYYYMMDD.HHMM.
 #    Arguments: OBJ($self) NUM($time)
 # Side Effects: none
 # Return Value: STR
 sub current_time
 {
     my ($self, $time) = @_;
-    my $p = _date($time || time);
-    return  $p->{'current_time'};
+    my $p = _date($time || $self->{ _default_unixtime } || time);
+    return $p->{'current_time'};
 }
 
 
-# Descriptions: return YYYYMMDD.HHMMSS
+# Descriptions: return YYYYMMDD.HHMMSS.
 #    Arguments: OBJ($self) NUM($time)
 # Side Effects: none
 # Return Value: STR
 sub precise_current_time
 {
     my ($self, $time) = @_;
-    my $p = _date($time || time);
+    my $p = _date($time || $self->{ _default_unixtime } || time);
     return $p->{'precise_current_time'};
 }
 
@@ -197,12 +233,12 @@ sub precise_current_time
 #                  stardate(tm, issue, integer, fraction)
 #                           unsigned long tm;
 #                           long *issue, *integer, *fraction;
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: STR(stardate)
 sub stardate
 {
-    my ($self, $args) = @_;
+    my ($self) = @_;
     my ($issue, $integer, $fraction);
 
     # It would be convenient to calculate the fractional part with
@@ -279,6 +315,99 @@ sub _log
 }
 
 
+# Descriptions: return unix time converted from given date string.
+#    Arguments: OBJ($self) STR($time)
+# Side Effects: none
+# Return Value: NUM
+sub unixtime
+{
+    my ($self, $time) = @_;
+
+    return( $time || $self->{ _default_unixtime } || time );
+}
+
+
+=head1 YET ANOTHER STYLE
+
+=cut
+
+
+# Descriptions: return data as mail_header_style style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_mail_header_style
+{
+     my ($self, $time) = @_;
+     $self->mail_header_style($time);
+}
+
+# Descriptions: return data as YYYYMMDD style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_YYYYMMDD
+{
+     my ($self, $time) = @_;
+     $self->YYYYMMDD($time);
+}
+
+# Descriptions: return data as YYYYxMMxDD style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_YYYYxMMxDD
+{
+     my ($self, $time) = @_;
+     $self->YYYYxMMxDD($time);
+}
+
+# Descriptions: return data as current_time style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_current_time
+{
+     my ($self, $time) = @_;
+     $self->current_time($time);
+}
+
+# Descriptions: return data as precise_current_time style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_precise_current_time
+{
+     my ($self, $time) = @_;
+     $self->precise_current_time($time);
+}
+
+# Descriptions: return data as stardate style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_stardate
+{
+     my ($self, $time) = @_;
+     $self->stardate($time);
+}
+
+# Descriptions: return data as unixtime style
+#    Arguments: OBJ($self) NUM($time)
+# Side Effects: none
+# Return Value: STR
+sub as_unixtime
+{
+     my ($self, $time) = @_;
+     $self->unixtime($time);
+}
+
+
+=head1 UTILITIES
+
+=cut
+
+
 # Descriptions: convert Date: string to UNIXTIME (sec)
 #    Arguments: OBJ($self) STR($in)
 # Side Effects: none
@@ -302,8 +431,8 @@ sub date_to_unixtime
 
     # $in = clean up-ed string. $input = original one.
     my $input = $in;
-    $in =~ s/[\s\n]*$//;
-    if ($in =~ /([A-Z]+)\s*$/) {
+    $in =~ s/[\s\n]*$//o;
+    if ($in =~ /([A-Z]+)\s*$/o) {
 	$zone = $1;
 	if ($zone{$zone} ne "") {
 	    $in =~ s/$zone/$zone{$zone}/;
@@ -393,8 +522,8 @@ sub date_to_unixtime
     }
 
     # calculate shift between local time and UTC
-    $shift_t =~ s/^0*//;
-    $shift_m =~ s/^0*//;
+    $shift_t =~ s/^0*//o;
+    $shift_m =~ s/^0*//o;
     $shift_m = 0 unless $shift_m;
     $shift   = $shift_t + ($shift_m/60);
     $shift   = ($pm eq '+' ? -1 : +1) * $shift;
@@ -419,7 +548,7 @@ sub date_to_unixtime
 #    Arguments: NUM($_offset)
 # Side Effects: none
 # Return Value: STR
-sub speculate_timezone
+sub _speculate_timezone
 {
     my ($_offset) = @_;
 
@@ -441,10 +570,27 @@ sub speculate_timezone
 
 
 if ($0 eq __FILE__) {
-    print "default\ttimezone = ", speculate_timezone(), "\n";
+    print "// 1. time zone.\n";
+    print "default\ttimezone = ", _speculate_timezone(), "\n";
     for my $t (qw(-5400 1800 3600 5400 7200)) {
-	print "$t\ttimezone = ", speculate_timezone($t), "\n";
+	print "$t\ttimezone = ",  _speculate_timezone($t), "\n";
     }
+    print "\n";
+
+    print "// 2. date -> unixtime -> date\n";
+    my $dstr = 'Tue, 03 Feb 2004 10:33:24 +0900';
+    my $date = new Mail::Message::Date;
+
+    print "//    \$date->set(\"$dstr\"); \$date->unixtime(); ... \n";
+    print $dstr, "\n";
+    $date->set($dstr);
+    my $time = $date->unixtime();
+    require 'ctime.pl';
+    my $ctime = ctime($time); chomp $ctime;
+    printf "unixtime=%s\n", $time;
+    printf "   ctime=%s\n", $ctime;
+    printf " precise=%s\n", $date->precise_current_time();
+    print "\n";
 }
 
 
@@ -458,7 +604,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Article.pm,v 1.58 2003/08/23 14:37:58 fukachan Exp $
+# $FML: Article.pm,v 1.61 2004/01/02 14:50:27 fukachan Exp $
 #
 
 package FML::Article;
@@ -38,11 +38,11 @@ FML::Article - manipulate an ML article and related information
 =head1 DESCRIPTION
 
 C<$article> object is just a container which holds
-C<header> and C<body> object as hash keys.
+C<header> and C<body> objects as hash keys.
 The C<header> is an C<FML::Header> object,
 the C<body> is a C<Mail::Message> object
 and
-the C<message> is the head object of object chains.
+the C<message> is the head object of message object chains.
 
 C<new()> method sets up the $curproc as
 
@@ -63,7 +63,7 @@ message $curproc->{ incoming_message }.
 =cut
 
 
-# Descriptions: constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ(FML::Article)
@@ -71,12 +71,12 @@ sub new
 {
     my ($self, $curproc) = @_;
     my ($type) = ref($self) || $self;
-    my $me     = {};
+    my $me     = { _curproc => $curproc };
+    my $msg    = $curproc->incoming_message();
 
-    if (defined $curproc->{ 'incoming_message' }->{ message }) {
-	_setup_article_template($curproc);
+    if (defined $msg) {
+	_setup_article_template($curproc, $msg);
     }
-    $me->{ _curproc } = $curproc;
 
     return bless $me, $type;
 }
@@ -96,17 +96,17 @@ sub get_lock_channel_name
 
 
 # Descriptions: build an article template to distribute.
-#    Arguments: OBJ($curproc)
+#    Arguments: OBJ($curproc) OBJ($msg_in)
 # Side Effects: build $curproc->{ article } HASH_REF.
 # Return Value: none
 sub _setup_article_template
 {
-    my ($curproc) = @_;
+    my ($curproc, $msg_in) = @_;
 
     # create an article template by duplicating the incoming message
-    my $msg_in = $curproc->{ 'incoming_message' }->{ message };
     my $duphdr = $msg_in->dup_header;
     if (defined $duphdr) {
+	# here, we handle raw $curproc to build $curproc->{ article } ...
 	$curproc->{ article }->{ message } = $duphdr;
 	$curproc->{ article }->{ header }  = $duphdr->whole_message_header;
 	$curproc->{ article }->{ body }    = $duphdr->whole_message_body;
@@ -117,9 +117,9 @@ sub _setup_article_template
 }
 
 
-=head2 spool_in(id)
+=head2 spool_in($id)
 
-save the article to the file name C<id> in the article spool.
+save the article to the file name C<$id> in the article spool.
 If the variable C<$use_spool> is 'yes', this routine works.
 
 =cut
@@ -132,12 +132,13 @@ If the variable C<$use_spool> is 'yes', this routine works.
 sub spool_in
 {
     my ($self, $id) = @_;
-    my $curproc    = $self->{ _curproc };
-    my $config     = $curproc->config();
-    my $spool_dir  = $config->{ spool_dir };
-    my $use_subdir = $config->{ spool_type } eq 'subdir' ? 1 : 0;
-    my $channel    = $self->get_lock_channel_name();
+    my $curproc     = $self->{ _curproc };
+    my $config      = $curproc->config();
+    my $spool_dir   = $config->{ spool_dir };
+    my $use_subdir  = $config->{ spool_type } eq 'subdir' ? 1 : 0;
+    my $channel     = $self->get_lock_channel_name();
 
+    # XXX-TODO: use_spool -> use_article_spool ?
     if ($config->yes( 'use_spool' )) {
 	$curproc->lock($channel);
 
@@ -222,22 +223,22 @@ sub subdirpath
 sub _filepath
 {
     my ($self, $id) = @_;
-    my $curproc    = $self->{ _curproc };
-    my $config     = $curproc->config();
-    my $spool_dir  = $config->{ spool_dir };
-    my $use_subdir = $config->{ spool_type } eq 'subdir' ? 1 : 0;
-    my $unit       = $config->{ spool_subdir_unit };
+    my $curproc     = $self->{ _curproc };
+    my $config      = $curproc->config();
+    my $spool_dir   = $config->{ spool_dir };
+    my $use_subdir  = $config->{ spool_type } eq 'subdir' ? 1 : 0;
+    my $unit        = $config->{ spool_subdir_unit };
 
     use Mail::Message::Spool;
-    my $spool = new Mail::Message::Spool;
-    my $args  = {
+    my $spool    = new Mail::Message::Spool;
+    my $mms_args = {
 	base_dir    => $spool_dir,
 	id          => $id,
 	use_subdir  => $use_subdir,
 	subdir_unit => $unit,
     } ;
-    my $file = $spool->filepath($args);
-    my $dir  = $spool->dirpath($args); # spool/ or spool/$subdir/
+    my $file = $spool->filepath($mms_args);
+    my $dir  = $spool->dirpath($mms_args); # spool/ or spool/$subdir/
 
     return ($file, $dir);
 }
@@ -259,7 +260,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

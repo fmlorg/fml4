@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 MURASHITA Takuya
+#  Copyright (C) 2002,2003,2004 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digest.pm,v 1.12 2003/09/27 03:00:16 fukachan Exp $
+# $FML: digest.pm,v 1.17 2004/02/01 14:40:02 fukachan Exp $
 #
 
 package FML::Command::Admin::digest;
@@ -73,15 +73,22 @@ sub process
     my ($self, $curproc, $command_args) = @_;
     my $config  = $curproc->config();
     my $options = $command_args->{ options } || [];
-    my $address = $command_args->{ command_data } || $options->[ 0 ] || undef;
-    my $mode    = $options->[ 1 ] || '';
 
-    # maps
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $recipient_map         = $config->{ primary_recipient_map };
     my $recipient_maps        = $config->get_as_array_ref('recipient_maps');
     my $digest_recipient_map  = $config->{ primary_digest_recipient_map };
     my $digest_recipient_maps =
 	$config->get_as_array_ref('digest_recipient_maps');
+
+    my $address = $command_args->{ command_data } || $options->[ 0 ] || undef;
+    my $mode    = $options->[ 1 ] || '';
 
     # fundamental check
     croak("address not defined")     unless defined $address;
@@ -92,6 +99,13 @@ sub process
 	unless defined $digest_recipient_map;
     croak("digest_recipient_maps not definde")
 	unless defined $digest_recipient_maps;
+
+    use FML::Restriction::Base;
+    my $safe = new FML::Restriction::Base;
+    unless ($safe->regexp_match('address', $address)) {
+	$curproc->logerror("digest: unsafe address <$address>");
+	croak("unsafe address");
+    }
 
     my $digest_args = {
 	address                      => $address,
@@ -188,8 +202,8 @@ sub _useradd
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
 	$obj->useradd($curproc, $command_args, $uc_args);
     };
 
@@ -210,8 +224,8 @@ sub _userdel
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
 	$obj->userdel($curproc, $command_args, $uc_args);
     };
 
@@ -222,13 +236,12 @@ sub _userdel
 
 
 # Descriptions: show cgi menu.
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $r = '';
 
     #
@@ -239,7 +252,7 @@ sub cgi_menu
     eval q{
 	use FML::CGI::User;
 	my $obj = new FML::CGI::User;
-	$obj->cgi_menu($curproc, $args, $command_args);
+	$obj->cgi_menu($curproc, $command_args);
     };
     if ($r = $@) {
 	croak($r);
@@ -257,7 +270,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 MURASHITA Takuya
+Copyright (C) 2002,2003,2004 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

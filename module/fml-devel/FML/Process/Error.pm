@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Error.pm,v 1.34 2003/08/29 15:34:08 fukachan Exp $
+# $FML: Error.pm,v 1.40 2004/01/31 04:06:33 fukachan Exp $
 #
 
 package FML::Process::Error;
@@ -76,13 +76,14 @@ sub prepare
     my $eval = $config->get_hook( 'error_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
     $curproc->scheduler_init();
+    $curproc->log_message_init();
 
     if ($config->yes('use_error_analyzer_program')) {
-	$curproc->parse_incoming_message($args);
+	$curproc->parse_incoming_message();
     }
     else {
 	exit(0);
@@ -190,7 +191,7 @@ sub run
 
 	if ($found) {
 	    $pcb->set("error", "found", 1);
-	    $curproc->_clean_up_bouncers($args);
+	    $curproc->_clean_up_bouncers();
 	}
     }
 
@@ -201,13 +202,13 @@ sub run
 
 # Descriptions: run analyzer() if long time spent after the last
 #               analyze.
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: remove addresses which causes bounces
 # Return Value: none
 sub _clean_up_bouncers
 {
-    my ($curproc, $args) = @_;
-    my $channel = 'erroranalyzer';
+    my ($curproc) = @_;
+    my $channel   = 'erroranalyzer';
 
     if ($curproc->is_event_timeout($channel)) {
 	$curproc->log("(debug) event timeout");
@@ -220,6 +221,7 @@ sub _clean_up_bouncers
 	};
 	$curproc->logerror($@) if $@;
 
+	# XXX-TODO: 3600 customizable.
 	$curproc->set_event_timeout($channel, time + 3600);
     }
     else {
@@ -235,7 +237,7 @@ show help.
 =cut
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -273,9 +275,9 @@ sub finish
     my $eval = $config->get_hook( 'error_finish_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
+    # XXX NOT INFORM ANY RESULTS BUT ONLY LOG IT TO AVOID LOOP.
     if ($pcb->get("error", "found")) {
 	$curproc->log("error message found");
-	# inform ?
     }
     else {
 	$curproc->log("error message not found");
@@ -333,7 +335,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: MimeComponent.pm,v 1.6 2003/10/15 01:03:32 fukachan Exp $
+# $FML: MimeComponent.pm,v 1.10 2004/02/01 14:52:50 fukachan Exp $
 #
 
 package FML::Filter::MimeComponent;
@@ -51,12 +51,23 @@ usual constructor.
 my $debug = 0;
 
 
-# default rules
+# default rules for convenience.
 my $filter_rules = [
 		    ['text/plain',   '*',  'permit'],
 		    ['text/html' ,   '*',  'reject'],
 		    ['multipart/*',  '*',  'reject'],
 		    ];
+
+
+# XXX-TODO: $default_action customizable ?
+my $default_action = 'permit';
+
+# XXX-TODO: $opt_cut_off_empty_part customizable ?
+my $opt_cut_off_empty_part = 1;
+
+# XXX-TODO: $recursive_max_level customizable ?
+my $recursive_max_level    = 10;
+
 
 
 # Descriptions: constructor.
@@ -79,7 +90,7 @@ sub new
 }
 
 
-=head2 mime_component_check($msg, $args)
+=head2 mime_component_check($msg)
 
 C<$msg> is C<Mail::Message> object.
 
@@ -89,7 +100,7 @@ C<Usage>:
     my $obj = new FML::Filter::MimeComponent;
     my $msg = $curproc->incoming_message();
 
-    $obj->mime_component_check($msg, $args);
+    $obj->mime_component_check($msg);
     if ($obj->error()) {
        # do something for wrong formated message ...
     }
@@ -97,89 +108,17 @@ C<Usage>:
 =cut
 
 
-my $default_action = 'permit';
-
-my $opt_cut_off_empty_part = 1;
-
-
-# Descriptions: parser of child multipart
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
-# Side Effects: update $recursive_level
-# Return Value: NUM
-sub _rfc822_mime_component_check
-{
-    my ($self, $msg, $args) = @_;
-    my $recursive_max_level = 10;
-    my $curproc = $self->{ _curproc };
-
-    $recursive_level ||= 0;
-    $recursive_level++;
-
-    if ($debug) {
-	print STDERR "\t_rfc822_mime_component_check ($recursive_level)\n";
-    }
-
-    if ($recursive_level > $recursive_max_level) {
-	croak("too deep recursive call");
-    }
-    else {
-	my $tmpf = $self->_temp_file_path();
-
-	use FileHandle;
-	my $wh = new FileHandle "> $tmpf";
-	if (defined $wh) {
-	    $msg->print($wh);
-	    $wh->close();
-	}
-
-	my $rh = new FileHandle $tmpf;
-	if (defined $rh) {
-	    use Mail::Message;
-	    my $msg0 = new Mail::Message->parse( { fd => $rh } );
-	    $self->mime_component_check($msg0, $args);
-	}
-    }
-
-    $recursive_level--;
-}
-
-
-# Descriptions: return temporary file path to be used.
-#    Arguments: OBJ($self)
-# Side Effects: none
-# Return Value: none
-sub _temp_file_path
-{
-    my ($self) = @_;
-    my $curproc = $self->{ _curproc };
-
-    if (defined $curproc) {
-	return $curproc->temp_file_path();
-    }
-    elsif ($debug) {
-	return "./fileter.debug.$$";
-    }
-    else {
-	$curproc->logerror("\$curproc is mandatory");
-	croak("\$curproc undefined");
-    }
-}
-
-
 # Descriptions: top level dispatcher
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub mime_component_check
 {
-    my ($self, $msg, $args) = @_;
-    my ($data_type, $prevmp, $nextmp, $mp, $action, $reject_reason);
-    my $curproc = $self->{ _curproc };
-    my $is_cutoff = 0; # debug
-    my $i = 1;
-    my $j = 1;
-    my $count  = $self->{ _count };
-    my $reason = $self->{ _reason };
+    my ($self, $msg) = @_;
+    my $curproc      = $self->{ _curproc };
+    my $count        = $self->{ _count };
+    my $reason       = $self->{ _reason };
+    my $is_cutoff    = 0; # debug
 
     # whole message type
     my $whole_data_type = $msg->whole_message_header_data_type();
@@ -189,14 +128,15 @@ sub mime_component_check
 
     $recursive_level ||= 0;
 
+    my ($data_type, $prevmp, $nextmp, $mp, $action, $reject_reason, $i, $j);
   MSG:
-    for ($mp = $msg, $i = 1; $mp; $mp = $mp->{ next }) {
+    for ($mp = $msg, $i = 1, $j = 1; $mp; $mp = $mp->{ next }) {
 	$data_type = $mp->data_type();
 
 	# ignore the header part of the whole RFC822 message.
 	#        and parts of Mail::Message internal use.
 	next MSG if ($data_type eq "text/rfc822-headers");
-	next MSG if ($data_type =~ "multipart\.");
+	next MSG if ($data_type =~ /multipart\./);
 
 	if ($recursive_level > 0) {
 	    __dprint("\n   msg($recursive_level/$i) $data_type");
@@ -206,7 +146,7 @@ sub mime_component_check
 	}
 
 	if ($data_type =~ /message\/rfc822/i) {
-	    $self->_rfc822_mime_component_check($mp, $args);
+	    $self->_rfc822_mime_component_check($mp);
 	    next MSG;
 	}
 
@@ -309,8 +249,8 @@ sub mime_component_check
 sub _rule_match
 {
     my ($self, $msg, $rule, $mp, $whole_type) = @_;
-    my ($r_whole_type, $r_type, $r_action) = @$rule;
-    my $type                               = $mp->data_type() || '';
+    my ($r_whole_type, $r_type, $r_action)    = @$rule;
+    my $type                                  = $mp->data_type() || '';
 
     if (__regexp_match($whole_type, $r_whole_type)) {
 	if (__regexp_match($type, $r_type)) {
@@ -446,6 +386,69 @@ sub _has_effective_part
     }
 
     return( $i ? 1 : 0 );
+}
+
+
+# Descriptions: parser of child multipart
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: update $recursive_level
+# Return Value: NUM
+sub _rfc822_mime_component_check
+{
+    my ($self, $msg) = @_;
+    my $curproc      = $self->{ _curproc };
+
+    $recursive_level ||= 0;
+    $recursive_level++;
+
+    if ($debug) {
+	print STDERR "\t_rfc822_mime_component_check ($recursive_level)\n";
+    }
+
+    if ($recursive_level > $recursive_max_level) {
+	croak("too deep recursive call");
+    }
+    else {
+	my $tmpf = $self->_temp_file_path();
+
+	use FileHandle;
+	my $wh = new FileHandle "> $tmpf";
+	if (defined $wh) {
+	    $msg->print($wh);
+	    $wh->close();
+	}
+
+	my $rh = new FileHandle $tmpf;
+	if (defined $rh) {
+	    use Mail::Message;
+	    my $msg0 = new Mail::Message->parse( { fd => $rh } );
+	    $self->mime_component_check($msg0);
+	}
+    }
+
+    $recursive_level--;
+}
+
+
+# Descriptions: return temporary file path to be used.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub _temp_file_path
+{
+    my ($self) = @_;
+    my $curproc = $self->{ _curproc };
+
+    if (defined $curproc) {
+	return $curproc->temp_file_path();
+    }
+    elsif ($debug) {
+	return "./fileter.debug.$$";
+    }
+    else {
+	$curproc->logerror("\$curproc is mandatory");
+	croak("\$curproc undefined");
+    }
 }
 
 
@@ -617,7 +620,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Summary.pm,v 1.15 2003/10/18 05:07:41 fukachan Exp $
+# $FML: Summary.pm,v 1.19 2004/02/13 14:11:12 fukachan Exp $
 #
 
 package FML::Article::Summary;
@@ -56,7 +56,6 @@ sub print
     my ($self, $wh, $id) = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $file    = $config->{ 'article_summary_file' };
 
     # XXX last resort == STDOUT.
     $wh ||= \*STDOUT;
@@ -88,39 +87,43 @@ sub _prepare_info
 	$article = $self->{ _article };
     }
     else {
+	# XXX we need article object to use $article->filepath() mthod.
 	use FML::Article;
 	$article = new FML::Article $curproc;
     }
 
     my $file = $article->filepath($id);
     if (-f $file) {
-	use Mail::Message;
 	my $msg      = new Mail::Message->parse( { file => $file } );
 	my $header   = $msg->whole_message_header();
-	my $address  = $header->get( 'from' ) || '';
-	my $date     = $header->get( 'date' ) || '';
-	my $obj      = new Mail::Message::Date;
-	my $unixtime = $obj->date_to_unixtime( $date );
+	my $address  = $header->get('from')    || '';
+	my $date_str = $header->get('date')    || '';
+	my $subject  = $header->get('subject') || '';
+
+	# data -> unix time.
+	use Mail::Message;
+	my $date     = new Mail::Message::Date $date_str;
+	my $unixtime = $date->as_unixtime();
 
 	# log the first 15 bytes of user@domain in From: header field.
-	if (defined $address) {
-	    use FML::Header;
-	    my $hdr  = new FML::Header;
-	    my $addr = $hdr->address_clean_up($address);
-	    $address = defined $addr ? substr($addr, 0, $addrlen) : '';
+	if ($address) {
+	    use Mail::Message::Address;
+	    my $addr = new Mail::Message::Address $address;
+	    $addr->clean_up();
+	    $address = $addr->substr(0, $addrlen) || '';
 	}
 
-	# XXX-TODO $subject->clean_up() (object flavour?)
-	use FML::Header::Subject;
-	my $subjobj = new FML::Header::Subject;
-	my $subject = $subjobj->clean_up($header->get('subject'), $tag);
-	$subject =~ s/\s*\n/ /g; # fold "\n".
-	$subject =~ s/\s+/ /g;
-
-	# XXX-TODO "jis-jp" and "euc-jp" is hard-coded.
-	use Mail::Message::Encode;
-	my $enc  = new Mail::Message::Encode;
-	$subject = $enc->convert($subject, "jis-jp", "euc-jp");
+	# de-tag, unfold, and charset conversion.
+	if ($subject) {
+	    use Mail::Message::Subject;
+	    my $sbj = new Mail::Message::Subject $subject;
+	    $sbj->mime_decode();
+	    $sbj->unfold();
+	    $sbj->delete_tag($tag);
+	    $sbj->unfold();
+	    $sbj->charcode_convert();
+	    $subject = $sbj->as_str();
+	}
 
 	my $info = {
 	    id       => $id,
@@ -235,9 +238,12 @@ sub rebuild
 
     use FileHandle;
     my $wh = new FileHandle ">> $tmp";
-
     if (defined $wh) {
 	$wh->autoflush(1);
+
+	# speculate boundary if not specified.
+	$min ||= 1;
+	$max ||= $curproc->article_max_id();
 
 	for my $id ($min .. $max) {
 	    $self->print($wh, $id);
@@ -261,8 +267,8 @@ sub rebuild
 sub dump
 {
     my ($self, $wh) = @_;
-    my $curproc      = $self->{ _curproc };
-    my $config       = $curproc->config();
+    my $curproc     = $self->{ _curproc };
+    my $config      = $curproc->config();
     my $article_summary_file = $config->{ "article_summary_file" };
 
     if (-f $article_summary_file) {
@@ -286,7 +292,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

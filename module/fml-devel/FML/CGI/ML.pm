@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ML.pm,v 1.5 2003/10/15 01:03:28 fukachan Exp $
+# $FML: ML.pm,v 1.8 2004/01/18 13:56:05 fukachan Exp $
 #
 
 package FML::CGI::ML;
@@ -28,15 +28,12 @@ sub new
 
 
 # Descriptions: show menu for subscribe/unsubscribe commands
-#    Arguments: OBJ($self)
-#               OBJ($curproc)
-#               HASH_REF($args)
-#               HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $target       = $curproc->cgi_var_frame_target();
     my $action       = $curproc->cgi_var_action();
     my $ml_domain    = $curproc->cgi_var_ml_domain();
@@ -45,7 +42,10 @@ sub cgi_menu
     my $comname      = $command_args->{ comname };
     my $command_list = [ 'newml', 'rmml' ];
 
+    # XXX-TODO: who verified comname ?
+
     unless ($curproc->cgi_var_cgi_mode() eq "admin") {
+	# XXX-TODO: nl ?
 	croak("Admin::ML::cgi_menu: prohibited in this mode");
     }
 
@@ -108,6 +108,7 @@ sub cgi_menu
 		    );
     }
     else {
+	# XXX-TODO: nl ?
 	croak("Admin::ML::cgi_menu: unknown command");
     }
 
@@ -127,7 +128,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: unsubscribe.pm,v 1.26 2003/09/27 03:00:15 fukachan Exp $
+# $FML: unsubscribe.pm,v 1.30 2004/01/02 14:45:05 fukachan Exp $
 #
 
 package FML::Command::Admin::unsubscribe;
@@ -15,7 +15,7 @@ use Carp;
 
 =head1 NAME
 
-FML::Command::Admin::unsubscribe - remove the specified member
+FML::Command::Admin::unsubscribe - remove the specified user
 
 =head1 SYNOPSIS
 
@@ -68,19 +68,27 @@ sub lock_channel { return 'command_serialize';}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->config();
+    my $config  = $curproc->config();
+    my $options = $command_args->{ options };
+    my $address = $command_args->{ command_data } || $options->[ 0 ];
+
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $member_map    = $config->{ 'primary_member_map' };
     my $recipient_map = $config->{ 'primary_recipient_map' };
-    my $options       = $command_args->{ options };
-    my $address       = $command_args->{ command_data } || $options->[ 0 ];
 
-    # fundamental check
+    # fundamental sanity check
     croak("address not defined")         unless defined $address;
     croak("address not specified")       unless $address;
     croak("member_map not specified")    unless $member_map;
     croak("recipient_map not specified") unless $recipient_map;
 
-    # FML::Command::UserControl specific parameters
+    # $uc_args  = FML::User::Control specific parameters
     my $maplist = [ $member_map, $recipient_map ];
     my $uc_args = {
 	address => $address,
@@ -89,8 +97,8 @@ sub process
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
 	$obj->userdel($curproc, $command_args, $uc_args);
     };
     if ($r = $@) {
@@ -100,19 +108,18 @@ sub process
 
 
 # Descriptions: show cgi menu for unsubscribe
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $r = '';
 
     eval q{
 	use FML::CGI::User;
 	my $obj = new FML::CGI::User;
-	$obj->cgi_menu($curproc, $args, $command_args);
+	$obj->cgi_menu($curproc, $command_args);
     };
     if ($r = $@) {
 	croak($r);
@@ -130,7 +137,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

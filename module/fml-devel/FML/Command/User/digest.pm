@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digest.pm,v 1.8 2003/08/29 15:34:00 fukachan Exp $
+# $FML: digest.pm,v 1.10 2003/12/31 04:04:39 fukachan Exp $
 #
 
 package FML::Command::User::digest;
@@ -24,7 +24,7 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-digest mode change on or off
+change delivery mode among real time and digest.
 
 =head1 METHODS
 
@@ -68,11 +68,16 @@ sub lock_channel { return 'command_serialize';}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->config();
+    my $config = $curproc->config();
+    my $cred   = $curproc->{ credential };
 
-    #
-    # XXX-TODO: correct to use primary_*_map for chaddr ?
-    #
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $member_map    = $config->{ primary_member_map };
     my $recipient_map = $config->{ primary_recipient_map };
     my $cache_dir     = $config->{ db_dir };
@@ -85,10 +90,9 @@ sub process
     croak("\$member_map is not specified")    unless $member_map;
     croak("\$recipient_map is not specified") unless $recipient_map;
 
-    use FML::Credential;
-    my $cred = new FML::Credential $curproc;
-
-    # if not member, "on" request is wrong.
+    # 1. check if the sender is a member or not.
+    #    if not member, "on" request is wrong.
+    # 2. not check if the sender is a recipient or not in this stage.
     unless ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.not_member');
 	$curproc->logerror("digest request from not member");
@@ -103,17 +107,20 @@ sub process
     if ($mode) {
 	$curproc->log("digest $mode");
 
+	# emulate options ARRAY_REF.
 	$command_args->{ command_data } = $address;
 	$command_args->{ options }->[0] = $address;
 	$command_args->{ options }->[1] = $mode;
 
+	# XXX-TODO: direct call of Admin::digest is correct?
+	# XXX-TODO: confirmation ?
 	use FML::Command::Admin::digest;
 	my $obj = new FML::Command::Admin::digest;
 	if ($mode eq "on" || $mode eq 'off') {
 	    $obj->process($curproc, $command_args);
 	}
 	else {
-	    $curproc->logerror("unknown digest mode");
+	    $curproc->logerror("unknown digest mode: $mode");
 	    croak("no such digest mode: off or on");
 	}
     }

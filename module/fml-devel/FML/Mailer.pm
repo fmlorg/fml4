@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Mailer.pm,v 1.23 2003/08/29 15:33:54 fukachan Exp $
+# $FML: Mailer.pm,v 1.26 2004/01/02 16:07:23 fukachan Exp $
 #
 
 package FML::Mailer;
@@ -28,7 +28,7 @@ FML::Mailer - utilities to send mails
     });
 
 where C<$message> is a C<Mail::Message> object to send.
-If you want to sent plural recipinets,
+If you want to sent to plural recipinets,
 specify the recipients as ARRAY REFERENCE at C<recipients> parameter.
 
     $obj->send( {
@@ -49,7 +49,7 @@ If you send a file, you can specify the filename as a data to send.
 
 =head1 DESCRIPTION
 
-It sends Mail::Message objects.
+This module sends Mail::Message object(s).
 
 =head1 METHODS
 
@@ -73,28 +73,28 @@ sub new
 }
 
 
-=head2 send($args)
+=head2 send($send_args)
 
 send the given C<message>.
-$args can take the following arguments:
+$send_args (HASH_REF) can take the following arguments:
 
    ----------------------------------
-   sender             string
-   recipient          string
+   sender             STR
+   recipient          STR
    recipients         ARRAY_REF
-   message            Mail::Message object
-   file               string
+   message            Mail::Message OBJ
+   file               STR
 
 =cut
 
 
 # Descriptions: send messages in the queue (queue flush).
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) HASH_REF($send_args)
 # Side Effects: queue changed
 # Return Value: 1 or 0
 sub send
 {
-    my ($self, $args) = @_;
+    my ($self, $send_args) = @_;
     my $handle     = undef;
     my $fp         = undef;
     my $sfp        = undef;
@@ -126,7 +126,7 @@ sub send
     }
 
     # 1. sender
-    my $sender = (defined $args->{sender} ? $args->{sender} : $maintainer);
+    my $sender = $send_args->{sender} || $maintainer || '';
     unless ($sender) {
 	$curproc->logerror("FML::Mailer: no sender");
 	return 0;
@@ -134,14 +134,31 @@ sub send
 
     # 2. recipient(s)
     my $recipients = [];
-    if (defined $args->{ recipients }) {    # ARRAY_REF
-	$recipients = $args->{ recipients };
+    if (defined $send_args->{ recipients }) {    # ARRAY_REF
+	if (ref($send_args->{ recipients }) eq 'ARRAY') {
+	    $recipients = $send_args->{ recipients };
+	}
+	else {
+	    $curproc->logerror("FML::Mailer: invalid type: recipients");
+	    $recipients = [];
+	}
     }
-    elsif (defined $args->{ recipient }) {  # STR
-	my $recipient = $args->{ recipient };
-	$recipients = [ $recipient ];
+    elsif (defined $send_args->{ recipient }) {  # STR
+	unless (ref($send_args->{ recipient })) {
+	    my $recipient = $send_args->{ recipient };
+	    $recipients = [ $recipient ];
+	}
+	else {
+	    $curproc->logerror("FML::Mailer: invalid type: recipient");
+	    $recipients = [];
+	}
     }
     else {
+	$curproc->logerror("FML::Mailer: no recipient(s)");
+	return 0;
+    }
+
+    unless (@$recipients) {
 	$curproc->logerror("FML::Mailer: no recipient(s)");
 	return 0;
     }
@@ -150,8 +167,8 @@ sub send
     my $message = undef;
 
     # 3.1 message object
-    if (defined($args->{ message })) {
-	$message = $args->{ message };
+    if (defined($send_args->{ message }) && ref($send_args->{ message })) {
+	$message = $send_args->{ message };
     }
     else {
 	$curproc->logerror("FML::Mailer: no message");
@@ -159,8 +176,8 @@ sub send
     }
 
     # 3.2 file
-    if (defined($args->{ file })) {
-	my $file = $args->{ file };
+    if (defined($send_args->{ file })) {
+	my $file = $send_args->{ file };
 	if ($file && -f $file) {
 	    use Mail::Message;
 	    use FileHandle;
@@ -212,7 +229,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: changepassword.pm,v 1.7 2003/08/23 07:24:43 fukachan Exp $
+# $FML: changepassword.pm,v 1.10 2004/02/01 14:40:02 fukachan Exp $
 #
 
 package FML::Command::Admin::changepassword;
@@ -16,7 +16,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::Admin::changepassword - change admin password
+FML::Command::Admin::changepassword - change remote administrator password
 
 =head1 SYNOPSIS
 
@@ -29,6 +29,8 @@ password a new address.
 =head1 METHODS
 
 =head2 process($curproc, $command_args)
+
+change remote administrator password.
 
 =cut
 
@@ -102,15 +104,27 @@ sub process
 	    croak("wrong arguments");
 	}
 
-	$self->_change_password($curproc, $command_args, $address, $password);
+	use FML::Restriction::Base;
+	my $safe = new FML::Restriction::Base;
+	if ($safe->regexp_match('address', $address)) {
+	    $self->_change_password($curproc, 
+				    $command_args, 
+				    $address, 
+				    $password);
+	}
+	else {
+	    croak("unsafe address: $address");
+	    $curproc->logerror("unsafe address: $address");
+	}
     }
     else {
-	$curproc->logerror("myname=$myname unknown program");
+	croak("this program not support this function");
+	$curproc->logerror("myname=$myname not support this function");
     }
 }
 
 
-# Descriptions: change the admin password.
+# Descriptions: change the remote admin password.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 #               STR($address) STR($password)
 # Side Effects: update *admin_member_password_maps
@@ -118,7 +132,15 @@ sub process
 sub _change_password
 {
     my ($self, $curproc, $command_args, $address, $password) = @_;
-    my $config  = $curproc->config();
+    my $config = $curproc->config();
+
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $pri_map = $config->{ primary_admin_member_password_map };
     my $up_args = {
 	map      => $pri_map,
@@ -162,7 +184,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

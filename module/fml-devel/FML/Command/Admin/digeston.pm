@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digeston.pm,v 1.6 2003/09/27 03:00:17 fukachan Exp $
+# $FML: digeston.pm,v 1.9 2004/01/01 23:52:12 fukachan Exp $
 #
 
 package FML::Command::Admin::digeston;
@@ -24,6 +24,7 @@ See C<FML::Command> for more details.
 =head1 DESCRIPTION
 
 enable digest mode for the specified address.
+change delivery mode to this address from real to digest one.
 
 =head1 METHODS
 
@@ -60,6 +61,7 @@ sub lock_channel { return 'command_serialize';}
 
 
 # Descriptions: digest mode off/on for the specified user.
+#               change delivery mode to this address from real to digest one. 
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map,$digest_recipient_maps
 # Return Value: none
@@ -79,19 +81,18 @@ sub process
 
 
 # Descriptions: show cgi menu for digeston
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $r = '';
 
     eval q{
 	use FML::CGI::User;
 	my $obj = new FML::CGI::User;
-	$obj->cgi_menu($curproc, $args, $command_args);
+	$obj->cgi_menu($curproc, $command_args);
     };
     if ($r = $@) {
 	croak($r);
@@ -109,7 +110,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

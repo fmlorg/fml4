@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: File.pm,v 1.48 2003/08/24 14:09:25 fukachan Exp $
+# $FML: File.pm,v 1.52 2004/02/03 04:15:33 fukachan Exp $
 #
 
 package IO::Adapter::File;
@@ -82,7 +82,7 @@ C<flag> is the mode of open().
 =cut
 
 
-# Descriptions: open map
+# Descriptions: open map.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: file opened
 # Return Value: HANDLE
@@ -101,7 +101,7 @@ sub open
 }
 
 
-# Descriptions: open file in "read only" mode
+# Descriptions: open file in "read only" mode.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: file is opened for read
 # Return Value: HANDLE
@@ -124,7 +124,7 @@ sub _read_open
 }
 
 
-# Descriptions: open file in "read/write" mode
+# Descriptions: open file in "read/write" mode.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: file is opened for read
 # Return Value: HANDLE
@@ -149,14 +149,14 @@ create a file if not exists.
 =cut
 
 
-# Descriptions: touch (create a file if needed)
+# Descriptions: touch (create a file if needed).
 #    Arguments: OBJ($self)
 # Side Effects: create a file
 # Return Value: same as close()
 sub touch
 {
     my ($self) = @_;
-    my $file = $self->{_file};
+    my $file   = $self->{_file};
 
     use IO::File;
     my $fh = new IO::File;
@@ -192,15 +192,15 @@ It is the same as usual getline() call for a file.
 =cut
 
 
-# Descriptions: get string for new line
+# Descriptions: get string for new line.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: STR
 sub getline
 {
     my ($self) = @_;
-    my $fh = $self->{_fh};
 
+    my $fh = $self->{_fh};
     if (defined $fh) {
 	$fh->getline;
     }
@@ -210,7 +210,7 @@ sub getline
 }
 
 
-# Descriptions: return the next key
+# Descriptions: return the next key.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: STR
@@ -218,6 +218,17 @@ sub get_next_key
 {
     my ($self) = @_;
     $self->_get_next_xxx('key');
+}
+
+
+# Descriptions: return (key, values, ... ) as ARRAY_REF.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub get_key_values_as_array_ref
+{
+    my ($self) = @_;
+    $self->_get_next_xxx('key,value_as_array_ref');
 }
 
 
@@ -229,16 +240,17 @@ sub _get_next_xxx
 {
     my ($self, $mode) = @_;
     my ($buf) = '';
+    my (@buf) = ();
 
     my $fh = $self->{_fh};
     if (defined $fh) {
-      INPUT:
+      LINE:
 	while ($buf = <$fh>) {
 	    $c++; # for benchmark (debug)
-	    next INPUT if not defined $buf;
-	    next INPUT if $buf =~ /^\s*$/o;
-	    next INPUT if $buf =~ /^\#/o;
-	    last INPUT;
+	    next LINE if not defined $buf;
+	    next LINE if $buf =~ /^\s*$/o;
+	    next LINE if $buf =~ /^\#/o;
+	    last LINE;
 	}
 
 	if (defined $buf) {
@@ -253,8 +265,24 @@ sub _get_next_xxx
 	    elsif ($mode eq 'value_as_array_ref') {
 		$value =~ s/^\s*//;
 		$value =~ s/\s*$//;
-		my (@buf) = split(/\s+/, $value);
+		(@buf) = split(/\s+/, $value);
 		$buf = \@buf;
+	    }
+	    elsif ($mode eq 'key,value_as_array_ref') {
+		@buf = (); # reset;
+
+		if (defined $key && $key) {
+		    if (defined $value && $value) {
+			$value =~ s/^\s*//o;
+			$value =~ s/\s*$//o;
+			(@buf) = split(/\s+/, $value);
+		    }
+		    unshift(@buf, $key);
+		    $buf = \@buf;
+		}
+		else {
+		    $buf = [];
+		}
 	    }
 	    $ec++;
 	}
@@ -276,25 +304,27 @@ set the position in the opened file.
 =cut
 
 
-# Descriptions: return current postion in file descriptor
+# Descriptions: return current postion in file descriptor.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: NUM
 sub getpos
 {
     my ($self) = @_;
+
     my $fh = $self->{_fh};
     defined $fh ? tell($fh) : undef;
 }
 
 
-# Descriptions: reset postion in file descriptor
+# Descriptions: reset postion in file descriptor.
 #    Arguments: OBJ($self) NUM($pos)
 # Side Effects: none
 # Return Value: NUM
 sub setpos
 {
     my ($self, $pos) = @_;
+
     my $fh = $self->{_fh};
     seek($fh, $pos, 0);
 }
@@ -311,25 +341,27 @@ close the opended file.
 =cut
 
 
-# Descriptions: EOF or not
+# Descriptions: check if EOF or not.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: same as eof()
 sub eof
 {
     my ($self) = @_;
+
     my $fh = $self->{_fh};
     $fh->eof if defined $fh;
 }
 
 
-# Descriptions: close map
+# Descriptions: close map.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: same as close()
 sub close
 {
     my ($self) = @_;
+
     $self->{_fh}->close if defined $self->{_fh};
 }
 
@@ -341,7 +373,7 @@ add (append) $address to this map.
 =cut
 
 
-# Descriptions: add $addr into map
+# Descriptions: add $addr into map.
 #    Arguments: OBJ($self) STR($addr) VARARGS($argv)
 # Side Effects: update map
 # Return Value: same as close()
@@ -398,7 +430,7 @@ delete lines with key $key from this map.
 =cut
 
 
-# Descriptions: delete address(es) matching $reexp from map
+# Descriptions: delete address(es) matching $reexp from map.
 #    Arguments: OBJ($self) STR($key)
 # Side Effects: update map
 # Return Value: same as close()
@@ -412,6 +444,7 @@ sub delete
     my $wh = $self->{ _wh };
 
     if (defined $fh) {
+	my $key = quotemeta($key);
 	my $buf;
 
       FILE_IO:
@@ -443,7 +476,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

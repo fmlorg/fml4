@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Header.pm,v 1.5 2003/08/23 04:35:35 fukachan Exp $
+# $FML: Header.pm,v 1.9 2004/02/01 14:52:50 fukachan Exp $
 #
 
 package FML::Filter::Header;
@@ -37,7 +37,7 @@ constructor.
 my $debug = 0;
 
 
-# XXX-TODO: need this default rules here ? (principle of least surprise?)
+# default rules for convenience.
 my (@default_rules) = qw(check_message_id);
 
 
@@ -59,35 +59,41 @@ sub new
 
 
 
-=head2 rules( $rules )
+=head2 set_rules( $rules )
 
 overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 
 =cut
 
 
-# Descriptions: access method to overwrite rule
+# Descriptions: access method to overwrite filter rules.
 #    Arguments: OBJ($self) ARRAY_REF($rarray)
 # Side Effects: overwrite info in object
 # Return Value: ARRAY_REF
-sub rules
+sub set_rules
 {
     my ($self, $rarray) = @_;
-    $self->{ _rules } = $rarray;
+
+    if (ref($rarray) eq 'ARRAY') {
+	$self->{ _rules } = $rarray;
+    }
+    else {
+	carp("rules: invalid input");
+    }
 }
 
 
-=head2 header_check($msg, $args)
+=head2 header_check($msg);
 
 C<$msg> is C<Mail::Message> object.
 
 C<Usage>:
 
     use FML::Filter::Header;
-    my $obj  = new FML::Filter::Header;
-    my $msg  = $curproc->{'incoming_message'};
+    my $obj = new FML::Filter::Header;
+    my $msg = $curproc->incoming_message();
 
-    $obj->header_check($msg, $args);
+    $obj->header_check($msg);
     if ($obj->error()) {
        # do something for wrong formated message ...
     }
@@ -95,13 +101,13 @@ C<Usage>:
 =cut
 
 
-# Descriptions: top level dispatcher
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+# Descriptions: top level dispatcher.
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub header_check
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
     my $hdr   = $msg->whole_message_header();
     my $rules = $self->{ _rules };
 
@@ -113,7 +119,7 @@ sub header_check
 	}
 
 	eval q{
-	    $self->$rule($hdr, $args);
+	    $self->$rule($hdr);
 	};
 
 	if ($@) {
@@ -130,13 +136,13 @@ sub header_check
 
 # Descriptions: validate the message-id in the given message $msg.
 #               This routine checks whether the message-id has @.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: croak()
 # Return Value: none
 sub check_message_id
 {
-    my ($self, $msg, $args) = @_;
-    my $mid = $msg->get('message-id');
+    my ($self, $msg) = @_;
+    my $mid = $msg->get('message-id') || '';
 
     if ($mid !~ /\@/) {
 	croak( "invalid Message-Id" );
@@ -145,14 +151,15 @@ sub check_message_id
 
 # Descriptions: validate the date in the given message $msg.
 #               This routine checks missing date field
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: croak()
 # Return Value: none
 sub check_date
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
+    my $date = $msg->get('date') || '';
 
-    if (! $msg->get('date')) {
+    unless ($date) {
 	croak( "Missing Date: field" );
     }
 }
@@ -168,7 +175,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

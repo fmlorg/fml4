@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Obsolete.pm,v 1.3 2003/09/13 09:06:09 fukachan Exp $
+# $FML: Obsolete.pm,v 1.5 2004/01/02 16:08:39 fukachan Exp $
 #
 
 package FML::Process::Obsolete;
@@ -14,7 +14,7 @@ use Carp;
 
 =head1 NAME
 
-FML::Process::Obsolete - what is this
+FML::Process::Obsolete - show obsolete message (for obsolete module)
 
 =head1 SYNOPSIS
 
@@ -22,12 +22,18 @@ FML::Process::Obsolete - what is this
 
 =head1 METHODS
 
-=head2 new()
+=head2 new($args)
+
+constructor. run help as soon as possible.
+
+=head2 help($args)
+
+show "this module is obsolete.".
 
 =cut
 
 
-# Descriptions: ordinary constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -39,7 +45,7 @@ sub new
 }
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -68,7 +74,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
