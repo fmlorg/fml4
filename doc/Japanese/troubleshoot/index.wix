@@ -13,6 +13,9 @@
 .include misc.wix
 .include os.wix
 
+.appendix
+.include wrapper.wix
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

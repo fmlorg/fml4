@@ -1,72 +1,40 @@
-.S	off と skip
+.C	その他
 
-fml-support: 07144
+.S	本当に残しておく必要のあるファイルは？
+=E.S	Core part of FML package
+.l	files-to-need
 
-off はメンバ用
-skip は管理者だけが使えるように
+たまにどこが必要な部分ですか？と聞かれますが、makefml install を使えば
+core の部分だけが概ねインストールされます。
+=E
+"makefml install" action installs core part of FML. It contains a set
+of documents which is large. You can remove it if it is enough for you
+to access the latest version always. The latest version of documents
+are available via WWW. You can access the latest documents but not
+back numbers, so you may lose the version specific descriptions.
 
-Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
-んですが) として on off matome のメンバには定期的に個別にメイルを送って
-ます。(skip の場合には送らないようにしている)
+makefml でインストールすると document 群も入れます。documents は大きい
+です。インストール先の doc の下にまとまってるので、ここは消して構いま
+せん。ドキュメントは「www.sapporo.iij.ad.jp を見るから doc/html は要ら
+ないから消す」という選択はありうるでしょう。ただ www では常に最新版の
+内容だけが見られるという点に注意してください。ISPのシェルを使ってる場
+合などならISP側ではなく自分の端末のローカルディスクに移しておくとゆう
+手もあります。
 
-.S	登録/削除以外は限りなく不必要
+それ以外に何を消していいかは機能をどこまで使うかに依存しているので一概
+にはいえません。が document 以外で概ね 1M くらいです。ちなみに
 
-fml-support: 07271
+	doc 	ドキュメント
+	libexec 特殊なもの fml_local とかも含む
+		fmlserv があるから消しちゃ駄目かもしれない
+	bin 	fml 自体は使わない user 支援 program 群
 
-条件1. 登録者に一切報告メール(welcome も)は送らない
-条件2. 登録した、退会した、旨のメールのみ送る
-条件3. よってコマンドは subscribe と bye 以外不要だろう
+etc, sbin, cf は消しちゃダメです。
+=E
+Except for documents, which files you can remove depends on functions
+you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
 
-@PermitProcedure = ('subscribe', 'confirm', 'bye');
-
-で、この３つ以外のコマンドをdisableして、さらに
-
-     &DEFINE_MODE('disablenotify');
-
-とかするとほとんどなくなるでしょうかね…
-
-
-.S	command status report をしなくさせる
-
-command status をおくりかえしている部分を disable するには
-＃コマンドの普通の受け答え（？）の類をやみにほうむるには
-
-    &DEFINE_MODE('disablenotify'); 
-
-と config.ph に書くとこの関数がダミーの状態で呼ばれるけど何もしないよ
-うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
-れじゃだめなんですけどね
+余談ですがFML.ORGのＭＬで調べるとだいたいMLのホームは 1000通 〜 4M く
+らい必要と評価しておくといいみたいです。
 
 
-.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
-
-fml-support: 07521 より
-
-Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
-
-   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
-      へ投稿した場合は、
-   [1] members ファイルに自動登録する。
-   [2] 投稿されたメールをmembersに配送する。
-
-これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
-いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
-
-B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
-   へメールを送信した場合は、
-
-   [1] membersに自動登録する。
-
-A: config.ph でちょっと tricky だが 
-   
-    $AUTO_REGISTRATION_LINES_LIMIT = -1;
-    $START_HOOK = q#
-    	if ($Envelope{'mode:ctladdr'}) {
-    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
-    	}
-    	else {
-    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
-    	}
-    #;
-
-のような設定をする。

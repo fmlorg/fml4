@@ -1,0 +1,247 @@
+.C	アドレス関係
+
+.S	コマンドコントロール専用のアドレス
+=E.S	Address for commands
+.l	control-addr
+.xref	calling-fml.pl
+.key	$CONTROL_ADDRESS
+.key	コマンドの専用アドレス
+
+makefml が作るデフォールトの config.ph では
+=E
+In config.ph makefml created, you see
+
+	$CONTROL_ADDRESS = "Elena-ctl\@$DOMAINNAME";
+
+のように設定されています。
+注意: この変数はFMLにどのアドレスを使っているかを知らせるためのもので
+この変数がOSの挙動を変えているわけではありません。ヘッダなどの表示にも
+使われています。
+=E
+$CONTROL_ADDRESS is an address for commands. This variable is used in
+header of reply mails but not concerned with MTA's configurations.
+"makefml newml" creates examples based on $CONTROL_ADDRESS.  MTA's
+configuration is another problem, e.g. sendmail is controlled by
+/etc/aliases. Please set up /etc/aliases properly.
+
+見本では コマンド専用の Elena-ctl アドレス宛のメールは include ではな
+く include-ctl というファイルを :include: 構文で呼び出すように設定され
+ています(include-ctl では fml.pl --ctladdr という形で呼び出す設定がさ
+れているのが重要なポイントです)。
+
+Elena-ctl宛のメールはコマンドのルーチンだけしか呼ばないようになります。
+つまりこのアドレスにくれば間違ったシンタックスのメールがきても配送はし
+ません。ちなみに
+=E
+For $CONTROL_ADDRESS addr-spec style is preferable. But both below for
+$CONTROL_ADDRESS are available.
+
+	'Elena-ctl';
+	'Elena-ctl@axion.phys.titech.ac.jp';
+
+どちらでもいいんですが、フルにアドレスを書く方が良いです。
+
+最もローカルからコマンドメールを出す時のことを考えると、
+フルアドレスじゃないほうが望ましいという意見もあります。
+＃ sendmail.cf 等に依存した話なので断言はできませんが…
+
+.if LANG == JAPANESE
+なお、この場合/etc/aliasesに
+
+	Elena-ctl: :include:/var/spool/ml/elena/include-ctl
+
+とか書いてあることが必要です。ちゃんと書いたかチェックと newaliasesも
+忘れずに。makefml の指示通りにすればこの設定もしているはずですけど。
+.fi
+
+
+.S	メンバーチェックと自動登録について
+=E.S	Member check and automatic registration
+.xref	auto-regist delivery-mode
+
+設計思想としてＭＬサーバはあくまでプライベート・コミュニケイションの延
+長であると考えています。デフォールトではサーバーはメンバーチェックを行
+ないます。また、そういう意味で自動登録よりも管理者がチェックした後に手
+で登録を行なうのがより良いといえるでしょう。それはまた security 上も望
+ましいことです。
+.xref auto-regist
+=E
+We assume as a design policy that ML should be a method for private
+communication. It is preferable to check whether a sender to ML is a
+member or not. ML maintainers should edit and control member list
+manually for subscription requests. It is default but you can change
+this policy in config.ph.
+
+"makefml newml" が終った状態つまりデフォールトの挙動では『メンバーとし
+て登録されているアドレス』からのみ『投稿やコマンドメール』を送ることが
+できます。
+=E
+Just when "makefml newml" is done, default state, FML can permit a
+post and command mail from members registered to ML.
+
+そうでない状態例えば自動登録などに設定を変更するなら"makefml config"を
+使って設定を変更するないしcfやconfig.phを手で編集する必要があります。
+自動登録は『メンバー以外からのメールが来た時に自動登録ルーチンを動かす』
+という風に設定します。
+=E
+If you want to change this configuration, you can use "makefml
+config", editing cf or config.ph manually.  Automatic registration is
+available when you set $REJECT_COMMAND_HANDLER to be "auto_regist".
+
+メンバーのアクセス制御については Chapter .ptr{access_policy} を参照し
+て下さい。『メンバー以外からのメールが来た時に何をするか？』は
+=E
+Access control and the reaction is controlled by $REJECT_*_HANDLER
+variables, like a
+
+[$REJECT_COMMAND_HANDLER]
+
+	$REJECT_COMMAND_HANDLER = "auto_regist"; (default "reject")
+
+という変数で設定しています。
+
+デフォールトは reject でメンバー以外の人がメールをＭＬに投げると『あん
+たはメンバーでないからだめやねん』というメールを送り主に送り返します。
+これを auto_regist に設定すると自動登録を行ないます。
+=E
+The default value is "reject". If ML receives mail from a not
+member, ML rejects the request and sends back warning to a sender.  If
+you set it to be "auto_regist", FML do automatic registration.
+
+自動登録は次のような設定が典型的です。
+=E
+This is a typical case of "automatic registration".
+
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+	$REJECT_COMMAND_HANDLER        = "auto_regist";
+
+「メンバー以外からのメールは拒否するが、その際自動登録処理」に入る。以
+下いくつかの設定パターンについて考えます。
+=E
+If $PERMIT_COMMAND_FROM is "members_only" and mail (subscribe
+request) comes from a not member, fml.pl calls $REJECT_COMMAND_HANDLER
+function. In default $REJECT_COMMAND_HANDLER is "reject", so fml.pl
+notifies denial of service to the requester.  If
+$REJECT_COMMAND_HANDLER is "auto_regist", fml.pl calls auto_regist
+hander to sets in the automatic registration routine.
+
+.# obsolete
+.if LANG == JAPANESE
+なお、昔は $ML_MEMBER_CHECK という変数で決めていましたが、今これは内部
+変数として使われています。HOOK等で使われるだろうということを想定し歴史
+的変数として残っています。$ML_MEMBER_CHECK が重要なのはこの変数によっ
+て メンバーリストと配送リストが異なるからです。
+.fi
+
+[$PERMIT_POST_FROM    だれからの投稿を許すか？]
+[$PERMIT_COMMAND_FROM だれからのコマンドメールを許すか？]
+=E
+[$PERMIT_POST_FROM    permit post from whom ?]
+[$PERMIT_COMMAND_FROM permit command from whom ?]
+
+○ メンバーチェックについて
+=E
+* member check
+
+メンバーか否か？は $MEMBER_LIST (デフォールト members) の中に From: 行
+のアドレスが存在するか否か？を調べています。
+=E
+fml.pl compares From: address and entries in $MEMBER_LIST
+(@MEMBER_LIST if defined).
+
+なお $REJECT_ADDR にマッチするアドレスはメンバーチェックに関わらず拒否
+されます。例えば MAILER-DAEMON からのＭＬへの投稿などがそれに当てはま
+ります。これはループなどの検出にも役に立ちます。
+=E
+fml.pl denies mail from $REJECT_ADDR e.g. root, mailer-daemon. It is
+useful to check mail error loops and also to deny mail from public
+users (mail from "nobody"? who are you?) since we assume ML is private
+communication.
+
+モデレータの場合はちょっと違うのでモデレータの章を参照 .ptr{moderators}。
+=E
+When $PERMIT_POST_FROM == "moderator", please see .ptr{moderators}.
+
+○ 自動登録について
+=E
+* Automatic registration
+
+自動登録はキーワードを必要とするとか登録したいアドレスを指定したい時に
+どうするか？等に関して様々なバリエーションがあります。
+詳細については「自動登録」の章を見て下さい。
+.xref auto-regist
+=E
+See the chapter .ptr{autoregist} for more details of automatic
+registration.
+.xref auto-regist
+
+.if LANG == ENGLISH
+Described above, if $PERMIT_COMMAND_FROM == "members_only", mail
+(subscribe request) comes from a not member and
+$REJECT_COMMAND_HANDLER == "auto_regist", fml.pl calls auto_regist
+hander to set in the automatic registration routine.
+
+$AUTO_REGISTRATION_TYPE controls actions of routines.  If request
+succeeds, fml.pl add From: address to $FILE_TO_REGIST (default is
+$MEMBER_LIST).
+.xref autoregist $AUTO_REGISTRATION_TYPE
+.fi
+
+メンバーチェックは @MEMBER_LIST で定義されたファイル群の中に(デフォー
+ルトでは $FILE_TO_REGIST, $MEMBER_LIST, そして $ADMIN_MEMBER_LIST)の中
+に From: 行のアドレスが存在するか否か？を調べています。そこに存在しな
+い場合は(例えば From: 行の)アドレスを自動的に $FILE_TO_REGIST
+($MEMBER_LISTがデフォールト) に登録し管理者へその旨を知らせます。
+
+配送は $MEMBER_LIST のみに従って配送されます(注意)。つまり自動登録時は 
+$MEMBER_LIST しか使っていないのです。なお、このモードでは $ACTIVE_LIST
+と $MEMBER_LIST は同じものに設定されています。
+=E
+ATTENTION: In automatic registration, fml.pl delivers mail to
+members in $MEMBER_LIST not $ACTIVE_LIST. This is historical (but I
+cannot change it for backward compatibility;-). It does not annoy you
+if you do not edit member lists by hand. Please see .ptr{auto-regist}
+for several subscription styles ($AUTO_REGISTRATION_TYPE).
+
+
+.S	メンバーチェックの際のアドレスのチェックの厳しさ
+=E.S	How severely FML checks the validity of the address
+
+アドレスのチェックを緩めたりきつくしたりしたい場合は
+.xref $ADDR_CHECK_MAX
+=E
+* How severely fml.pl checks address syntax
+please see .ptr{$ADDR_CHECK_MAX} for $ADDR_CHECK_MAX.
+
+
+.S	$MAINTAINER というアドレス
+=E.S	$MAINTAINER
+.key	UNIX_FROM
+.key	$MAINTAINER
+
+ＭＬの管理者のアドレスです。エラ−メ−ルの帰る場所もこのアドレスです。
+$MAINTAINER と $MAIL_LIST が同じになっているとエラーメールがＭＬに返っ
+てきて無限ループします。
+=E
+Roughly speaking $MAINTAINER is an address which a user contacts ML
+maintainers with and error mails returns to. In default fml.pl sets up
+listname-admin and listname-request for listname ML. fml.pl uses
+listname-admin as a maintainer address and prepares listname-request
+as an alias. Historically it is good for you to prepare
+listname-request also.
+
+インターネットでは歴史的に listname (MLの名前) に対して
+『listname-request は管理者のアドレス』であることが多いです(絶対ではあ
+りません)。ちょっと request というのが直感に反するところもありますが…
+いつも僕はこの事実との整合性とわかりやすさのために
+
+	listname-admin 		管理者のアドレス
+	listname-request 	listname-adminへフォワード
+
+のように設定しています。そのためどちらのアドレスへ送られても管理者へそ
+のメールは届くわけです。makefml のデフォールトは listname-admin です。
+プロバイダではそれぞれの設定があったりするので注意して下さい。
+=E
+However some ISP services cannot provide listname-request or
+listname-admin. Please consult with your ISP around on this point.

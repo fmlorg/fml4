@@ -5,7 +5,6 @@
 .part Basic Configuration
 basic_setup		基礎的なこと
 how_to_subscribe	メンバー登録について
-install			インストール
 GUI			GUI (WWW/CGI)
 daily			日々の運用についてのTIPS
 encryption		暗号化関係

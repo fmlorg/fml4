@@ -1,5 +1,23 @@
 .C	いろいろ
 
+
+.S	スプールに記事をためない
+=E.S	Not spooling of articles
+.k	スプールに記事をためない
+.l	$NOT_USE_SPOOL
+
+DISKが足りない等で記事をためずに配送するだけにしたいなら
+=E
+If you have not enough disk, you may not spool articles. If so, set
+
+	$NOT_USE_SPOOL = 1;
+
+と設定してください。もちろんその場合は古い記事の取り寄せ等ができません
+(当たり前)。
+=E
+Of course, "get", "mget" commands do not work.
+
+
 .S	off と skip
 
 fml-support: 07144
@@ -170,3 +188,66 @@ Q: 一日のMail数が 一目でも分かるように…
          cp /dev/null $file
        fi
    done
+
+
+.S	避けた方が良いアドレスはありますか？
+
+RFC2142 に以下のようなリストがあります。一番左の列がそのアドレスです。
+これは(spammer が狙いそうな)各組織に必ず存在しているだろうと思われてい
+るアドレスと考えられます。
+
+企業の場合 info や sales support といったアドレスはまさにこれですが、
+逆に変なフィルタ制限をかけるとはまることがあります。変なメールを送るお
+客さんかもしれないからです。
+
+しかし組織内利用等のＭＬ名にはこれらを避けておく方が吉でしょう。
+
+   アドレス       サービス            仕様について
+   -----------    ----------------    ---------------------------
+   INFO           Marketing           Packaged information about the
+                                      organization, products, and/or
+                                      services, as appropriate
+   MARKETING      Marketing           Product marketing and
+                                      marketing communications
+   SALES          Sales               Product purchase information
+   SUPPORT        Customer Service    Problems with product or
+                                      service
+
+   ABUSE          Customer Relations  Inappropriate public behaviour
+   NOC            Network Operations  Network infrastructure
+   SECURITY       Network Security    Security bulletins or queries
+
+   POSTMASTER     SMTP                [RFC821], [RFC822]
+   HOSTMASTER     DNS                 [RFC1033-RFC1035]
+   USENET         NNTP                [RFC977]
+   NEWS           NNTP                Synonym for USENET
+   WEBMASTER      HTTP                [RFC 2068]
+   WWW            HTTP                Synonym for WEBMASTER
+   UUCP           UUCP                [RFC976]
+   FTP            FTP                 [RFC959]
+
+
+.C	permission について
+
+.S	ＭＬのスプールの read permission
+=E.S	read permission for ML's spool ($SPOOL_DIR)
+
+通常ＭＬ管理者の権限で fml は走っています。そしてＭＬの全てのファイル
+は管理者以外の人が見れない様になっています。
+=E
+FML runs as an owner of a ML maintainer. In default the only maintainer
+can read articles, spools, ...
+
+例外としてメーリングリストの directory でも htdocs だけはすべての人が
+読めるようになっています。これは httpd がどのユーザ権限で走っているか
+わからないためです(通常 nobodyとかで走っている)。
+=E
+Some exceptional files exist. For example directories under htdocs/ is
+world readable for httpd.
+
+セキュリティについては .ptr{security}
+=E
+See .ptr{security} for security.
+
+
+

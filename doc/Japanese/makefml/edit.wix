@@ -1,0 +1,47 @@
+.S	MLを止めて(ロックして) config.phの edit をしたい
+=E.S	Lock ML and edit its config.ph
+.k	vipw.pl
+.l	bin/vipw.pl
+.k	maintenance.pl
+
+ＭＬを動かしたまま config.ph を edit するのちょっと恐いです。夜中とか
+メールがまず来ないと思っている時間ではなく、普通にメールが来得る時間帯
+にメインテナンスをしたい時にはロックを書けた状態で editor を呼び出すこ
+とが必要です。"makefml edit ML [file]" はこの機能を提供します。
+=E
+To edit files (e.g. cf, config.ph) under locking a ML like vipw(8),
+FML provides the mechanism by "makefml".
+
+	% makefml edit ML [file]
+
+file が省略されると config.ph になります。
+
+Example: to edit elena/config.ph 
+	% makefml edit elena
+	% makefml edit elena config.ph
+
+Example: to edit elena/cf
+	% makefml edit elena cf
+
+注意: これを使って config.ph を edit してしまうと makefml config は基
+本的に使えない。ということを意味するので注意して下さい。makefml config 
+は毎回
+=E
+enables you to edit config.ph by hand.
+==
+ATTENTION: "makefml config" edits $DIR/cf and creates $DIR/config.ph
+from $DIR/cf. If you use "makefml config" usually but now need to set
+up FML over "makefml config" spec, you need to edit $DIR/cf manually
+and run "make config.ph".
+
+	 cf -> config.ph 
+
+の生成手順を行なうため、cf ファイルがマスターになります。cf ファイルの
+内容は makefml config でも保存されるので、makefml config を使う場合は 
+cf を設定のマスターファイルにする必要があります。ちょうど sendmail.cf 
+と CFの設定ファイルの関係のようになっています。
+
+注意: 昔あった maintenance.pl や vipw.pl は削除されましたが、それと同
+じことをする機能です。
+
+.# $Id$
