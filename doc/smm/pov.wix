@@ -164,6 +164,53 @@ TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
 知らせます。詳細は liblock.pl を見るとわかるでしょう。
 
 
+.S	ロックの仕方について
+.l	how-to-lock
+.k	ロックの仕方について
+.k	ロックアルゴリズムの選択と変数の設定
+.seealso fml-mechanism, seq-file
+
+
+ロックアルゴリズムは二通り用意されてます。flockがお奨めです。flock(2) 
+参照
+
+.key	$USE_FLOCK
+	$USE_FLOCK    = 1;
+
+で flock system call
+
+	$USE_FLOCK    = 0;
+
+で Unix V7 時代からある link() を使う方式を使います。
+
+この方式はロックするファイルへの link() ができるか否か？を排他制御に使
+います。このロックするファイルは $LockFile で、
+
+	$LOCK_FILE
+
+という変数で変更できます。デフォールトは
+
+	"$FP_VARRUN_DIR/lockfile.v7"
+
+つまり、ＭＬの home の下の var/run/lockfile.v7 です。この方式の問題は
+ＯＳがいきなり落ちた時にこのファイルが残ってしまうので手動でこのファイ
+ル群を消さなければならないという点が最大の問題点です。そのため flock() 
+が望ましいということになります。
+
+そういう場合は reboot 直後に
+
+	"$FP_VARRUN_DIR/lockfile.v7"
+	"$FP_VARRUN_DIR/lockfile.数字"
+
+すべてを消して下さい。数字はプロセス番号ですから、プロセステーブルを見
+て(ps(1))、該当する数字(fml の process)がなければ、そのファイルは消し
+て良いです。
+
+なお通常は $MAX_TIMEOUT 秒後、var/log/ の下にTIMEOUTしたメールは保存さ
+れ、管理者へTIMEOUTが通知されます。
+
+
+
 .S	SMTPライブラリについて
 .k	SMTP
 .k	Simple Mail Transfer Protocol
@@ -188,6 +235,24 @@ $PORT = 25 (25/tcp) で通信しますが、
 .k	$NOT_TRACE_SMTP 
 
 をセットすると、このログは残りません。
+
+また、どのマシンの sendmail を使うかも自由に設定できます。
+デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
+貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
+
+.key	$HOST
+	$HOST         = 'localhost';
+
+そういう場合変数 $HOST を書き換えて、別のマシンに配送を任すこともでき
+ます。その時は
+
+	$HOST         = 'beth.foo.bar.ac.jp';
+
+のようにそのマシン名を書いて下さい。
+
+もちろんアクセスできないマシンとかではできません（あったりする）し勝手
+にそのマシンのパワーを使うことになるのでそのマシンを使う許可を得るべき
+です。
 
 
 .S	予備のSMTPサーバ
@@ -649,6 +714,63 @@ SecureP は以下のように
 をどうしよう？という問題があります。今のところ”通さない”設定のままで
 すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
 .k	whoisと日本語の問題
+
+
+.S	許されるコマンドのシンタックス
+
+Quoted from 4.4BSD:/usr/share/man/cat1/sh.0 
+.q
+       Shell Patterns
+
+       A pattern consists of normal characters, which match them-
+       selves, and meta-characters.   The meta-characters are
+       ``!'', ``*'', ``?'', and ``[''.  These  characters lose
+       there special meanings if they are quoted.  When command
+       or variable substitution is performed and the dollar sign
+       or back quotes are not double quoted, the value of the
+       variable or the output of the command is scanned for these
+       characters and they are turned into meta-characters.
+
+       An asterisk (``*'') matches any string of characters.   A
+       question mark matches any single character. A left bracket
+       (``['') introduces a character class.  The end of the
+       character class is indicated by a ``]''; if the ``]'' is
+       missing then the ``['' matches a ``['' rather than intro-
+       ducing a character class.  A character class matches any
+       of the characters between the square brackets.   A range
+       of characters may be specified using a minus sign.  The
+       character class may be complemented by making an exclama-
+       tion point the first character of the character class.
+
+       To include a ``]'' in a character class, make it the first
+       character listed (after the ``!'', if any).  To include a
+       minus sign, make it the first or last character listed
+.~q
+
+
+.S	mget でユーザから与えることのできるシンタックス
+.k	mget と Shell Match Pattern(e.g. * 1?)
+.key	$SECURITY_LEVEL
+
+$SECURITY_LEVEL < 2 では 
+
+	# mget * 
+とか
+	# mget 10? 
+
+が使えます。デフォールトは"Backward Compatibility を無視して2" です。
+通常 Backward Compatibility は重視されているのですが、security 関係は
+例外です。
+
+また、何もしなくても、
+
+# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
+
+	と
+
+# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔（ｓｅｃ）
+
+の両方を理解します。サーバが自動的に切替えます。
 
 
 .S	DNS Spoofing

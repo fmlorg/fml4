@@ -706,6 +706,41 @@ config.ph でコントロールできます。
 .seealso fmlserv
 
 
+.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
+.k	# help ではなく #help 形式
+
+以下は コマンドの書き方についてのオプションです。
+
+	# get 1
+	# help
+
+のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
+たので、今度は
+
+	# get 1 と #get 1は同じものとみなす（両方使える）
+	すべてのコマンドで同じように "# " -> "#" 解釈する。
+	さらに#getfile ...も# get ...と理解する。
+
+としました。つまり、
+
+	# get 1
+	#get 1
+	# getfile 1
+	#getfile 1
+
+は同じもの。同様に
+
+	# help
+	#help
+
+を同じものにみなします。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+
+両方解釈するなら１、"# summary" みたいな形式だけなら０
+
+
 .S	コマンドは一辺に実行できるか？
 
 例えば
@@ -919,7 +954,7 @@ fml.c を参考にして下さい。fml.c を
 
 .# ##########################################################
 .include header.wix
-.include configmisc.wix
+.# .include configmisc.wix
 .include archive.wix
 .include expire.wix
 .include href.wix

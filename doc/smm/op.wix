@@ -76,6 +76,7 @@
 
 .include fop.wix
 .include function.wix
+.include whois.wix
 .include cwhois.wix
 .include fred.wix
 .include hack.wix

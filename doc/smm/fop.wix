@@ -147,6 +147,39 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 	$ISH                           = "/usr/local/bin/ish";
 
 
+.S	コマンドで単なるシンタックスエラーの警告をしない
+.label	{USE_WARNING}
+.key	$USE_WARNING
+
+明示的に $USE_WARNING をセット
+e.g. in config.ph
+
+	$USE_WARNING = 1;
+
+するとコマンドメールでの単なるシンタックスエラーの警告をしない
+
+e.g. 
+# helps 			←コマンドのエラーは警告
+＃うじゃ			←シンタックスエラー警告なし
+＃しぐにちゃ〜	uja@uja.ac.jp	←シンタックスエラー警告なし
+
+
+.S	mget の送り返し時のファイルサイズ
+.key	$MAIL_LENGTH_LIMIT
+
+in libsendfile.pl
+
+	$MAIL_LENGTH_LIMIT = 1000;
+
+を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
+いますよね。
+＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
+＃参照 http://www.iij.ad.jp/sapporo/staff/fukachan/fml/ の下
+＃pc-van は何の問題もなかったと思いました（たしか）
+   
+1000行でだいたい50kくらいになります。
+
+
 .S	UNIX FROM 形式
 .l	UNIX-FROM
 
@@ -337,6 +370,33 @@ $RFC1153_CUSTOM_HOOK	&Rfc1153Custom($mode, *conf) の中で
     &GetTime;
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
     $issue = &Rfc1153GetSeq($IssueSeq);
+
+
+.S	lzh + ish option
+.key	lzh
+.key	ish
+.key	$LHA
+.key	$ISH
+
+	# mget 200-210 ish
+
+の用に指定するとlzh して ish(s7 mode)したものを送り返します。
+
+	$LHA = "/usr/share/bin/lha";
+	$ISH = "/home/axion/fukachan/bin/ish";
+
+等をどこかで（config.phとか）で設定して下さい。make 時に自動探索は一応
+して設定されているはずですが確認はして下さい。
+
+
+.S	SJIS にファイルを変換して送る （lzh + ish option）
+.key	lzh
+.key	ish
+
+config.ph で $USE_SJIS_IN_ISH = 1; をセットしてください。
+
+使う時は jcode.pl を INCLUDE PATH へいれておいてください。
+^M ^Z もつけます。すべて、外部コマンドを使わずに自力でやります。
 
 
 .# $Id$

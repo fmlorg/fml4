@@ -123,8 +123,31 @@ sub MSendModeSet  という関数を見るとわかるとおもいます。
 
 
 .S	COMMAND_HOOK（コマンドへの追加）
+.label	command-hook
+.key	customize-of-commands
+.key	コマンドのカスタマイズ
+.key	$COMMAND_HOOK
 
-次を参照
+インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
+config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
+様にカスタマイズできる）。
+
+これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
+
+--------- in config.ph ---------
+$COMMAND_HOOK =q#
+      if(/list/io) {
+	  &Log("List ($From_address)");
+	  &SendFile($to, "List $ML_FN", "$DIR/list");
+	  next GivenCommands;
+      }
+#;
+--------- in config.ph ---------
+
+この例だとは # 〜 # の間をquoteしています。#...コメントをとかははさめ
+ません。
+＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
+quoteする関数（本当の意味での関数ではないそうだ）
 
 
 .S	コマンドの増やし方
