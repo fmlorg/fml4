@@ -715,7 +715,8 @@ sub SmtpPutActiveList2Socket
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
-	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n";
+	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n"
+	    if $debug_mci;
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 
