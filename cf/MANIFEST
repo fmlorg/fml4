@@ -579,6 +579,8 @@ DENY_FILE:	 $DIR/deny
 LOGFILE:	 $DIR/log
 MGET_LOGFILE:    $DIR/log
 
+# when -d2 ($debug = 2), logs this file.
+DEBUG_LOGFILE:    $DIR/log.debug
 
 # article summary file
 SUMMARY_FILE: 	 $DIR/summary
