@@ -65,18 +65,30 @@ sub Init
     # /cgi-bin/ in HTML
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 
-    # safe tmp buffer
-    $TmpDir = "/tmp/fmlcgi$$";
-    -d $TmpDir || mkdir($TmpDir, 0700);
-
     # signal handling
     $SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
 }
 
 
+sub SetUpTmpDir
+{
+    # safe tmp buffer
+    my ($xdir);
+    for $xdir ("$ML_DIR/etc/tmp", "$ML_DIR/tmp", 
+	       "$EXEC_DIR/www/tmp") {
+	-d $xdir || mkdir($xdir, 0700);
+	if (-d $xdir) {
+	    $TmpDir = $xdir;
+	    last;
+	}
+    }
+}
+
+
 sub CleanUp
 {
-    -d $TmpDir && rmdir($TmpDir);
+    # try to remove them if defined
+    if ($TmpDir) { -d $TmpDir && rmdir($TmpDir);}
 }
 
 
