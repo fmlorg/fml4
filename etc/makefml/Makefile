@@ -67,5 +67,5 @@ secure:
 	@ make config.ph
 
 domain-translate:
-	perl _EXEC_DIR_/bin/translate.pl -f _EXEC_DIR_/etc/mgrdomains actives members members-admin
-
+	perl _EXEC_DIR_/bin/translate.pl -f _EXEC_DIR_/etc/mgrdomains \
+	actives members members-admin members-name
