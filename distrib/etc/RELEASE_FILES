@@ -103,7 +103,6 @@ bin/more_secure_cf.pl
 SBIN_SOURCES:
 sbin/localtest.pl
 sbin/install.sh
-sbin/install.old.sh
 sbin/makefml
 sbin/config.guess
 sbin/README.config.guess
