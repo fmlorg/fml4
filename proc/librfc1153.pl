@@ -15,22 +15,42 @@
 &use('MIME') if $USE_MIME;
 
 # Skipped field for each mail header
+# FYI:
+#
+# 1. This example below is <left only required fields> strategy such
+# that we preserve From:, Subject:, Date:, X-Mail-Count: and Message-ID:
+# and discard other header fields.
+#
+# 2. If you pass all fields but cut off special fields, like this
+# q#;
+#    if (1 .. /^$/) {
+#        /^(\S+):/ && ($curhf = $1);
+#        next if $curhf =~ /^X-ML-Info/i;
+#        next if $curhf =~ /^X-Faces/i;
+#        next if $curhf =~ /^X-Anime/i;
+#        next if $curhf =~ /^X-Spam/i;
+#    }
+# #;
+#
+# where $curhf trick is needed for unfolded cases. For example,
+# From: Hayakawa aoi
+#      <aoi@chan.panic>
+#
 sub Rfc1153ReadFileHook
 {
-    q#
-    next if /^Return-Path:/oi;
-    next if /^X-ML-Name:/oi;
-    next if /^X-MLServer:/oi;
-    next if /^lines:/oi;
-    next if /^Reply-To:/oi;
-    next if /^Errors-To:/oi;
-    next if /^Precedence:/oi;
-    next if /^To:/oi;
-    next if /^Message-ID:/i;
-    next if /^Posted:/io;
-    next if /^MIME-Version:/io;
-    next if /^Content-Type:/io;
-    next if /^Content-Transfer-Encoding:/io;
+    $_ = q#;
+    if (1 .. /^$/) {
+	if (/^(From|Subject|Date|X-Mail-Count|Message-ID):/io) {
+	    $curhf = $1;
+	}
+	elsif (/^\s+/ && $curhf) {
+	    ;
+	}
+	elsif (! /^$/) {
+	    undef $curhf;
+	    next;
+	}
+    }
     #;
 }
 
