@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libhtmlsubr.pl,v 1.7.2.2 2001/09/13 10:20:48 fukachan Exp $
+# $FML: libhtmlsubr.pl,v 1.7.2.3 2001/09/18 12:21:05 fukachan Exp $
 #
 
 
@@ -201,8 +201,8 @@ sub DecodeAndWriteFile
     $decode = &FindBase64Decoder;
 
     &Log("create $file");
-    &Debug("|$decode > $file") if $debug; 
-    open(IMAGE, "|$decode > $file") || do {
+    &Debug("|$decode -o $file") if $debug; 
+    open(IMAGE, "|$decode -o $file") || do {
 	&Log($!);
 	return;
     };
