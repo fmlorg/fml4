@@ -31,9 +31,15 @@ sub MesgLE
 
     # 1. check whether the message template with the key exists?
     if ($dir = $found) {
-	local($file) = split(/\./, $key);
-	$file = $file || 'kern'; # if without '.', search file "kern".
+	local($file);
+	if ($key =~ /\./) {
+	    ($file) = split(/\./, $key);
+	}
+	else {
+	    $file = 'kern'; # if without '.', search file "kern".
+	}
 
+	&Log("check $dir/$file");
 	if (-f "$dir/$file") {
 	    $msg = &MesgLE'Lookup($key, "$dir/$file"); #';
 	    &Log("MesgLE: found in $dir/$file") if $msg && $debug;
@@ -43,7 +49,9 @@ sub MesgLE
 	    &Log("MesgLE: found in file 'a' o keyword a.b.c.")
 		if $debug_mesgle;
 	}
-	elsif (opendir(DIRD, $dir)) {
+	# XXX temporary disable directory search since
+	# XXX we may use file.org ...
+	elsif (0 && opendir(DIRD, $dir)) {
 	    while ($x = readdir(DIRD)) {
 		next if $x =~ /^\./;
 		$msg = &MesgLE'Lookup($key, "$dir/$x"); #';
