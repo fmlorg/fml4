@@ -68,6 +68,7 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'unsubscribe' ||
 	       $mib->{'_action'} eq 'on'     ||
 	       $mib->{'_action'} eq 'off'    ||
+	       $mib->{'_action'} eq 'chaddr'    ||
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
 	       $mib->{'_action'} eq 'addadmin' ||
@@ -188,6 +189,7 @@ sub __MemberP
     my ($mib, $file, $addr) = @_;
     my ($query, $res, $ml, @row);
 
+    $addr   = &main::LowerDomain($addr);
     $ml     = $mib->{'_ml_acct'};
     $query  = "select address from ml ";
     $query .= " where ml = '$ml' ";
@@ -259,6 +261,7 @@ sub __ListCtl
     my ($ml, $query, $res);
 
     $addr = $addr || $mib->{'_address'};
+    $addr = &main::LowerDomain($addr);
     $ml   = $mib->{'_ml_acct'};
 
     &main::Log("$mib->{'_action'} $addr");
@@ -268,6 +271,7 @@ sub __ListCtl
 
 	$query  = " insert into ml ";
 	$query .= " values ('$ml', 'actives', '$addr', 0, '$NULL') ";
+	&__Execute($mib, $query) || return $NULL;
 
 	$query  = " insert into ml ";
 	$query .= " values ('$ml', 'members', '$addr', 0, '$NULL') ";
@@ -321,8 +325,9 @@ sub __ListCtl
     }
     elsif ($mib->{'_action'} eq 'chaddr') {
 
-	my ($old_addr) = $mib->{'_old_address'};
-	my ($new_addr) = $mib->{'_new_address'};
+	my ($old_addr) = $addr;
+	my ($new_addr) = $mib->{'_value'};
+	$new_addr      = &main::LowerDomain($new_addr);
 
 	for $file ('actives', 'members') {
 	    $query  = " update ml ";
@@ -392,6 +397,7 @@ sub Status
     my ($mll, $query, $res, $addr);
 
     $addr   = $mib->{'_address'};
+    $addr   = &main::LowerDomain($addr);
     $ml     = $mib->{'_ml_acct'};
     $query  = " select address,off,options from ml ";
     $query .= " where file = 'actives' ";
@@ -450,7 +456,7 @@ if ($0 eq __FILE__) {
 
     my (%mib);
     $mib{'dbname'}   = $opt_D || 'fml';
-    $mib{'host'}     = $opt_H || 'postgres';
+    $mib{'host'}     = $opt_H || 'localhost';
     $mib{'user'}     = $opt_U || $ENV{'USER'};
     $mib{'_ml_acct'} = 'elena';
 
