@@ -169,12 +169,21 @@ sub ModeratedDeliveryTypeII
     # log
     &Log("moderator: a submit is queued as id=$id");
 
-    $subject = "a submit to moderators";
+    $subject = "submission to moderators";
+
+    local($r, $info);
+
+    $r = &Translate(*e, $NULL, 
+		    'moderator.submission', 
+		    $e{'CtlAddr:'});
 
     $info  = &GenModeratorInfo;
-    $info .= "Please check it. If you certify the following article, \n";
-    $info .= "please send to $e{'CtlAddr:'}\n";
-    $info .= "the following line (only this line!)\n";
+
+    if (! $r) {
+	$info .= "Please check it. If you certify the following article, \n";
+	$info .= "please send to $e{'CtlAddr:'}\n";
+	$info .= "the following line (only this line!)\n";
+    }
     $info .= "\n$e{'trap:ctk'}moderator certified $id\n\n";
 
     $h = $e{'Header'};
