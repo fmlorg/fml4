@@ -24,6 +24,68 @@ Please see INSTALL for the install flow.
    fml	NT用というのが特別にあるわけではなく、標準ディストリビューション
 	の中にNT用のが入っています。
 
+参考: 	テスト環境
+=E
+NOTE:	Required and Test Environment 
+
+テストには activestate の ntperl を使っています。それ以外の perl ports
+for NT で動くのかどうかは未確認です。動いたら教えて下さい:)
+=E
+You need MTA and ntperl. I tested fml master source using ntperl by
+activestate.com. Other perl ports to NT4 exist but I've not tested
+them. If you try and succeed it, please let me know.
+
+マスターソースのテストは
+=E
+My test environment is 
+
+	i486 architecture
+	NT 4.0 service pack 1
+	Pw32i307.exe
+	ataman rlogind
+	MetaInfo Sendmail 2.x 
+
+で行なったものです。
+
+.S	MTAごとのメモ
+
+pop version はあまり関係ないので省略します。↓確かこれ以外にもあったよ
+うな気もしなくもないんですが、「これで動いてるぞ」というのがあったら教
+えて下さい。
+
+◯ 	MetaInfo Sendmail 2.5 (?)
+
+ターゲットだったもの。
+
+◯ IMail Server GOld
+References: fml-support: 7947 7954 7967 
+
+	OS          Windows NT4.0
+	Mail Server IMail Server Gold 4.1J
+	Perl        ActivePerl 522
+	FML         FML 3.0.1
+
+	開発元: IPSWITCH
+		日本語版はクボタグラフィックス<http://wwwcsoft.kgt.co.jp/>
+
+[解説]
+
+プログラムエイリアスという機能は「そのアドレスにメールが届いたらプログ
+ラムを起動する」そうでこれを使うと fml を起動できます。aliases ファイ
+ルの編集は必要なくなります。
+
+elena ＭＬならプログラムエイリアスに
+
+  C:\\fml\ml\elena\include.cmd <
+
+と書けばいいそうです。こうすると
+
+  C:\\fml\ml\elena\include.cmd < 一時ファイル(STDIN相当)
+
+という形で fml (include.cmd が呼びます)を起動するらしいです。
+
+
+
 .C	FML NT Version について
 =E.C	on FML NT Version
 
@@ -63,29 +125,6 @@ gzip を使う』などの Unix のコマンドに依存したコードは動きません。
 The default in retrieving file is tar.gz on UNIX but MIME/Multipart on
 NT4 since tar, gzip does not exist on standard NT4. The default for
 some functions are changed for this type reasons.
-
-.S	必要なものとテスト環境
-=E.S	Required and Test Environment 
-
-MTA と ntperl が必要です。テストには activestate の ntperl を使ってい
-ます。それ以外の perl ports for NT で動くのかどうかは未確認です。動い
-たら教えて下さい:)
-=E
-You need MTA and ntperl. I tested fml master source using ntperl by
-activestate.com. Other perl ports to NT4 exist but I've not tested
-them. If you try and succeed it, please let me know.
-
-なおマスターソースのテストは
-=E
-My test environment is 
-
-	i486 architecture
-	NT 4.0 service pack 1
-	Pw32i307.exe
-	ataman rlogind
-	MetaInfo Sendmail 2.x 
-
-で行なったものです。
 
 .S	2種類の fml for NT4
 =E.S	Two Kinds of fml for NT4
@@ -485,6 +524,7 @@ newaliasesをかけてください。MLのホームは消さなくても構いません(fml.plな
 =E
 Remove aliases entries. You do not need to remove ML's HOME directory.
 Remove digest delivery setting.
+
 
 .C	トラブルシューティング
 =E.C	Trouble Shooting
