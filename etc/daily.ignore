@@ -98,3 +98,4 @@ HELP
 create \S+.html
 Create \S+.html
 reconfig \S+.html
+read \d+ bytes
