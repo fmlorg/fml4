@@ -67,7 +67,7 @@ exit 0;
 
 sub GetConf
 {
-    local($ml);
+    local($ml, $eval, $ctladdr);
 
     opendir(DIRD, $ML_DIR) || die("Error: cannot open ML_DIR[$ML_DIR];$!");
     for $ml (readdir(DIRD)) {
@@ -80,8 +80,13 @@ sub GetConf
 	$cf = "$ML_DIR/$ml/config.ph";
 
 	if (-f $cf) {
-	    $ctladdr = &Grep('^\$CONTROL_ADDRESS', $cf);
-	    eval $ctladdr;
+	    undef $eval;
+
+	    $eval .= &Grep('^\$FQDN', $cf);
+	    $eval .= &Grep('^\$DOMAINNAME', $cf);
+	    $eval .= &Grep('^\$CONTROL_ADDRESS', $cf);
+	    $eval .= &Grep('^\$MAINTAINER', $cf);
+	    eval $eval; &Log($@) if $@;
 
 	    ($ctladdr) = split(/\@/, $CONTROL_ADDRESS);
 
@@ -95,6 +100,9 @@ sub GetConf
 		if (-f "$ML_DIR/$ml/include-ctl" && 
 		    &GetPopPasswd($ctladdr, $cf)) {
 		    $IncludeFile{$ctladdr} = "$ML_DIR/$ml/include-ctl";
+
+		    # reverse pointer
+		    $ML{$ctladdr} = $ml;
 		}
 	    }
 	}
@@ -219,7 +227,14 @@ sub search_path
 sub ArrangeProc
 {
     local($ml, $ap) = @_;
-    local($p);
+    local($p, $qd);
+
+    # each queue directory for each ML.
+    $m = $ML{$ml} || $ml;
+    $qd = "$ML_DIR/$m/var/mq.$ml";
+
+    # make queue directory
+    -d $qd || mkdir($qd, 0755);
 
     $p  = "perl $Wrapper -p $PerlProgram ";
     $p .= "$PopFmlProg ";
@@ -229,7 +244,9 @@ sub ArrangeProc
     $p .= "-include_file $IncludeFile{$ml} ";
     $p .= "-pop_passwd $ML_DIR/etc/pop_passwd ";
     $p .= "-perl_prog $PerlProgram ";
-    $p .= "-arch $COMPAT_ARCH";
+    $p .= "-arch $COMPAT_ARCH ";
+    $p .= "-queue_dir $qd ";
+    $p .= "-M $MAINTAINER ";
     $p .= "$ap";
 
     if ($debug) {
