@@ -338,12 +338,13 @@ FIX_LANGUATE () {
 }
 
 
+# "make exp" or "make experimental-snapshot"
 GEN_BRANCH_ARCHIVE () {
 	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-	DATE=`date +"%y%m%d"`
-	FMLID=fml-SNAP$DATE
+	DATE=`date +"%C%y%m%d"`
+	FMLID=fml-snap-$DATE
 
 	echo mv distrib $FMLID
 	mv distrib $FMLID

@@ -69,7 +69,8 @@ snapshot:
 	(env IN_RELEASE_BRANCH=$(IN_RELEASE_BRANCH) /bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
-branch: 
+exp: experimental-snapshot
+experimental-snapshot:
 	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator -b 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
