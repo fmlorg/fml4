@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/13
+
+   /bin/fwix.pl 
+	add pointer (to previous, to next) in the top of each page.
+	nuke too many <PRE></PRE> magic code
+
 2000/12/11 --
 
 	clean up, fix, update documents, documents, documents, ...
