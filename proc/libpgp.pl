@@ -18,24 +18,26 @@ sub LoadPGPConfig
     # PGP2 definition
     if ($PGP_VERSION == 2 || (!$PGP_VERSION)) {
 	%PGP = (
-		"pgp -kv"       =>   "$path/pgp $opt -kv", 
-		"pgp -f -sea"   =>   "$path/pgp $opt -f -sea", 
-		"pgp -f -ka"    =>   "$path/pgp $opt -f -ka", 
-		"pgp -f -a"     =>   "$path/pgp $opt -f -a", 
-		"pgp -f"        =>   "$path/pgp $opt -f", 
-		"pgp -o"        =>   "$path/pgp $opt -o",
+		"pgp -kv"     => "$path/pgp $opt -kv",      # view key
+		"pgp -f -ka"  => "$path/pgp $opt -f -ka",   # addkey
+
+		"pgp -f"      => "$path/pgp $opt -f",       # -f: stdout
+		"pgp -o"      => "$path/pgp $opt -o",       # -o out
+
+		"pgp -f -sea" => "$path/pgp $opt -f -sea",  # sign/encrypt
 		);
 
     }
     # PGP5 definition
-    elsif ($PGP_VERSION == 2) {
+    elsif ($PGP_VERSION == 5) {
 	%PGP = (
-		"pgp -kv"       =>   "$path/pgpk $opt -l", 
-		"pgp -f -sea"   =>   "$path/pgp  $opt -f -sea", 
-		"pgp -f -ka"    =>   "$path/pgp  $opt -f -ka", 
-		"pgp -f -a"     =>   "$path/pgp  $opt -f -a", 
-		"pgp -f"        =>   "$path/pgp  $opt -f", 
-		"pgp -o"        =>   "$path/pgp  $opt -o", 
+		"pgp -kv"     => "$path/pgpk $opt -l",       # view key
+		"pgp -f -ka"  => "$path/pgpk $opt -a",       # addkey
+
+		"pgp -f"      => "$path/pgpv $opt -f",       # -f: stdout
+		"pgp -o"      => "$path/pgpv $opt -o",       # -o out
+
+		"pgp -f -sea" => "$path/pgpe $opt -f -s -a", # sign/encrypt
 		);
     }
 }
