@@ -708,6 +708,14 @@ sub ProcLists
 {
     local($proc, *Fld, *e, *misc) = @_;
 
+    # For security, we should unset "lists" command
+    if (! $FMLSERV_PERMIT_LISTS_COMMAND) {
+	&Mesg(*e, "\nExcuse me, we NOT PERMIT $proc COMMAND FOR SECURITY.");
+	&Log("NOT PERMIT $proc COMMAND FOR SECURITY.");
+	&Log("To enable 'lists', set \$FMLSERV_PERMIT_LISTS_COMMAND = 1");
+	return;
+    }
+
     #&Mesg(*e, "\nfmlserv> $proc");
     &Mesg(*e, "  $MAIL_LIST serves the following lists:\n");
     #$e{'message'} .= sprintf("   %s\n", 'Lists:');
