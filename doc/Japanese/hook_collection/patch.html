@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>ソースへのパッチ</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">subscribe 名前 の``名前''を自動取得するパッチ</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●subscribe 名前 の``名前''を自動取得するパッチ</A>
+</B></Font>
+<pre>
+【fml-help:01666】
+《version 4.0 STABLE (20020309/4.0.4_ALPHA)》
+
+confirmation subscribe の時に、普通は
+
+subscribe 名前
+
+とやりますが、名前が書かれていないときに $From_address から取得するよう
+な変更をしてみました。今のところ変な挙動は無いようです。
+
+fml version:           4.0 STABLE (20020309/4.0.4_ALPHA)
+
+--- libconfirm.pl.bak   Wed Mar 20 00:14:34 2002
++++ libconfirm.pl       Wed Mar 20 00:34:00 2002
+@@ -640,6 +640,10 @@
+     if ($buffer =~ /$CONFIRMATION_SUBSCRIBE\s+(\S+.*)/) { # require
+anything;        $name = $1;
+     }
++    elsif ($buffer =~ /$CONFIRMATION_SUBSCRIBE/) { # require anything;
++       $name = $main'From_address; #';
++       $name =~ s/\@/ /g;
++    }
+     else {
+        &Log("confirm buffer SYNTAX ERROR");
+        &Log("wrong buffer \"$buffer\"");
+</pre><Br><Br>
+</Div>
+</Body>
+</Html>
