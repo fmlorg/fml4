@@ -65,18 +65,23 @@ sub InitMakeFml
     $SIG{'ALRM'} = 'TimeOut';
     $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
 
+    # architecture default
+    $UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 1;
+
     ### getopt
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vw");
+    &Getopts("dhf:A:O:p:D:vwV:");
     $debug   = $opt_d;
     $verbose = $opt_v;
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
 
+    $COMPAT_ARCH = $opt_A;
+    $VENDOR      = $opt_V;
+
 
     ### determine Architechure dependence
-    $COMPAT_ARCH = $opt_A;
     if ($ENV{'OS'} =~ /Windows_NT/) {
 	$COMPAT_ARCH  = "WINDOWS_NT4";
 	$COMPAT_WIN32 = 1;
@@ -139,6 +144,9 @@ sub InitMakeFml
     # architecture dependence;
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$CONFIG_DIR =~ s#\\#/#g;
+
+	# Architecture Dependence (import fml.pl);
+	$UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
     }
 
     # Anyway try once ... (may be re-installation ?)
@@ -201,7 +209,7 @@ sub InitMakeFml
     }
 
     # inspecting cpu-type-manufacturer-operating-system
-    {
+    if ($UNISTD) {
 	local($eval, $dir);
 
 	$dir = $0;
@@ -256,6 +264,11 @@ sub InitMakeFml
 	print "\n   This machine looks [$CPU_TYPE_MANUFACTURER_OS]\n\n";
     }
 
+    # vendor info (e.g. used when MetaInfo on NT4)
+    if ($VENDOR) {
+	eval("\$Config'VENDOR = '$VENDOR';");
+    }
+
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
     &ResetVariables;
@@ -291,6 +304,7 @@ sub SetHashDefaults
 		'FQDN',     $FQDN,
 		'GROUP',    '',
 		'LANGUAGE', $LANGUAGE,
+		'VENDOR',   '',
 		); 
 
     %PolicyDefault = 
@@ -456,6 +470,7 @@ sub InitFmlConfig
 	    if (! -d $dir) {
 		# print "   mkdir $dir\n";
 		# here /usr/local/fml;only installer can read-write this;
+		print STDERR "mkdir($dir, 0755);\n";
 		mkdir($dir, 0755); 
 	    }
 	}
@@ -1000,8 +1015,17 @@ sub FixPath
 sub search_path
 {
     local($f) = @_;
-    local($path) = $ENV{'PATH'};
-    local(@path) = split(/:/, $path);
+    local($p, @path);
+
+    # cache on
+    if ($PathCache{$f}) { return $PathCache{$f};}
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	@path = split(/;/, $ENV{'PATH'});
+    }
+    else {
+	@path = split(/:/, $ENV{'PATH'});
+    }
 
     # too pesimistic?
     for ("/usr/local/bin", "/usr/share/bin", 
@@ -1009,12 +1033,21 @@ sub search_path
 	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
 	 # NT Extention
 	 "/perl5/bin", 
-	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin"
+	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
 	 ) {
 	push(@path, $_);
     }
 
-    for (@path) { if (-f "$_/$f") { return "$_/$f";}}
+    for (@path) { 
+	$p = $_ ; $p =~ s#\\#/#g;
+	if (-f "$p/$f") { 
+	    $PathCache{$f} = "$_/$f";
+	    return "$_/$f";
+	}
+    }
+
+    print STDERR "$f is not found\n";
+    $f; # try anyway 
 }
 
 
@@ -1190,6 +1223,7 @@ sub ResetVariables
     $FQDN     = $CurConfig{'FQDN'};
     $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
     $LANGUAGE = $CurConfig{'LANGUAGE'};
+    $VENDOR   = $CurConfig{'VENDOR'};
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -1299,13 +1333,14 @@ sub Conv
     print STDERR "\tGenerating $out\n";
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$PERL_PATH = &search_path('perl.exe');
 	$USER = $ENV{'USERNAME'};
     }
     else {
+	$PERL_PATH = &search_path('perl');
 	$uid   = $uid || (getpwuid($<))[2];
 	$gid   = $gid || (getpwuid($<))[3];
     }
-
 
     while (<EXAMPLE>) {
 	# substitute following the policy default
@@ -1334,7 +1369,11 @@ sub Conv
 		s/_ML_-ctl/$format/g;
 	    }
 	}
-	
+
+	# perl
+	s/_PERL_PATH_/$PERL_PATH/g;
+
+	# config
 	s/_EXEC_DIR_/$EXEC_DIR/g;
 	s/_ML_DIR_/$ML_DIR/g;
 	s/_ML_/$ml/g;
@@ -1619,7 +1658,7 @@ sub do_install
     # CFVersion 2
     # &FYIPolicy;
 
-    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+    if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR ne "METAINFO") {
 	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
 	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
 	&PopFmlSetUp;
@@ -1790,19 +1829,23 @@ sub do_newml
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
 		  "$ML_DIR/$ml/cf", "$ML_DIR/$ml/config.ph");
 
-    # print message;
-    # the last info
-    print "\n   Please see several examples in $ML_DIR/$ml\n";
-    print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
-    &Cat("$ML_DIR/$ml/aliases");
-    print "\n";
-
-
-    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+    if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR eq "METAINFO") {
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/metainfo.pl";
+	&SetUpForMetaInfoSendmail($ml);
+    }
+    elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
 	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
 	&PopFmlInputPasswd($ml);
     }
+
+    # print message;
+    # the last info
+    print "\n\n   Please see several examples in $ML_DIR/$ml\n\n";
+    print "Here is an example of aliases to set.\n";
+    &Cat("$ML_DIR/$ml/aliases"); 
+    print "\n";
 
     # always cf is newer than config.ph (against manual edit check)
     &Touch("$ML_DIR/$ml/cf");
@@ -2577,6 +2620,9 @@ sub main'Dumpvar
 
     while (($key, $val) = each(%stab)) {
 	{
+	    # $_ form
+	    next if $key =~ /^_/;
+
 	    next if @vars && !grep($key eq $_,@vars);
 	    local(*entry) = $val;
 
@@ -3045,7 +3091,7 @@ sub GenQuery
     local(*query, $s, $menu) = @_;
     local($type, $pat);
 
-    undef %query;
+    %query = ();
     print STDERR "GenQuery:\n$s\n" if $debug;
 
     for (split(/\n/, $s)) {
