@@ -6,6 +6,9 @@
    kern/Makefile (2.60-2.61):
 	disable all: rule
 
+   doc/Japanese/internals/overview.wix(1.6-1.7):
+	fix how to install
+
 2001/03/25
 
    cf/MANIFEST (1.79-1.80):

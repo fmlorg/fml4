@@ -412,7 +412,7 @@ The simplest way to install Fml system is to do in the top directory
 of the fml source
 # Hence a lot of variables are pre-defined.
 
-	perl makefml 
+	make install
 
 =E
 when you make a new ML 
