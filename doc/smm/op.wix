@@ -8,25 +8,22 @@
 
    [smm/op.wix: smm = System Management Manual]
    http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
-   Last modified: 
-
-   ****************************************************************
-   *** ごめん、いま大書き直し中…少し順番とか入り乱れてます _o_ ***
-   *** (でも半分以上終ったな)				        ***
-   ****************************************************************
-
-   このドキュメントは昔 FAQ という名前でした。
-   FAQ、Setting、改造の仕方等に関するガイドになっています。
-   ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
-
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-   http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
+   Last modified: 
 
    Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
    Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
    fml is free software distributed under the terms of the GNU General
    Public License. see the file COPYING for more details.
 
+   このドキュメントは昔 FAQ という名前でした。
+   FAQ、Setting、改造の仕方等に関するガイドになっています。
+   ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+
+   ****************************************************************
+   *** ごめん、いま大書き直し中…少し順番とか入り乱れてます _o_ ***
+   *** (でも半分以上終ったな)				        ***
+   ****************************************************************
 
 .~HTML_PRE
 
@@ -1070,8 +1067,8 @@ $CONTROL_ADDRESS = 'Elena-ctl';
 ＃あ、newaliasesも忘れずにね
 
 
-.S	メンバーチェックのはなし
-.seealso	auto-regist
+.S	メンバーチェックについて
+.xref	auto-regist
 
 ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
 た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
@@ -1152,6 +1149,7 @@ lib Elena は 700、driver は755としておけば、
 .C	配送のモード
 
 .S	DEFINE_MODE マクロ
+.xref	auto-regist
 
 マクロというのは正確ではないですが、config.ph で 簡易モード設定ができます。
 
@@ -1268,12 +1266,19 @@ sub ModeDef
 
 
 .S	自動登録について
-.seealso fml-mechanism
-.key $ML_MEMBER_CHECK
-.key 自動登録
-.key 自動登録の仕方のヴァリエーション
+.xref	auto-regist
+.xref	fml-mechanism
+.key	$ML_MEMBER_CHECK
+.key	自動登録
+.key	自動登録の仕方のvariatin
+.k	--auto
+.k	--check
 
-$ML_MEMBER_CHECK が 0 とか "" のようになっている時が
+
+$ML_MEMBER_CHECK という変数が
+	0 とか "" 
+
+のようになっている時が
 ”自動登録モード”
 	で、
 ”それ以外はメンバーチェックをするモードです”。
@@ -1330,35 +1335,6 @@ From: を見てメンバーチェックをし、知らない人かどうかを決めています。
 
 ＃注意：２の”フォワードするか否か？”は１、３、４と独立事象です。つま
 り、２ｘ３＝６通り
-
-基本的な挙動は、
-
-	メンバーチェック（もしくはしない）、失敗したらロックを外して終り
-	見知らぬ人からのガイドの要求ならガイドを送る。
-	＃See INSTALL, README, config.ph
-
-	&MLMemberCheck; が呼ばれると
-
-	ここでは、
-	１．メンバーファイルと比較して
-	２．見知らぬ人なら	
-	３．メンバーファイルに登録して（ここからはlibutils.plを使う）
-	４．管理者へ知らせ
-	５．WELCOME（ぱふぱふぅ〜♪）というメールを返す
-
-というのをします。この５↑のために config.ph に
-	
-	$WELCOME_FILE	= "$DIR/guide";		# could be "$DIR/welcome"
-	$WELCOME_STATEMENT = 
-	"Welcome to our $ML_FN\n You are added automatically\n";
-
-というのがあって $WELCOME_FILE は歓迎の文章を書いたファイル（とりあえ
-ず、guideにしておいてあります）で、そのメールの Subject が
-
-	$WELCOME_STATEMENT = 
-	"Welcome to our $ML_FN\n\sYou are added automatically\n";
-
-になります。
 
 
 .S	再配送だけをするサーバ（コマンドを必要としないサーバ）
@@ -1452,299 +1428,7 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
 .# ##########################################################
 .include msend.wix
 .include remote.wix
-
-
-.C	自動登録
-.label	{auto-regist}
-
-
-.S	基本挙動
-
-	１．メンバーファイルと比較して
-	２．見知らぬ人なら	
-	３．メンバーファイルに登録して
-	４．管理者へ知らせ
-	５．WELCOME（ひゅ〜ひゅ〜どんどんぱふぱふぅ）というメールを返す
-	６．	→ そのメールをＭＬにフォワードする（配送）
-	   or	→ そのメールをＭＬにフォワードしない（配送しない）
-	７．管理者にはいづれの場合でもメールをフォワードする
-
-
-.S	メンバーチェック or 自動登録
-.seealso auto-regist
-
-ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
-た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
-MLMemberCheck)。
-
-チェックするか否かはconfig.phの中で
-
-.key	$ML_MEMBER_CHECK
-$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
-
-で指定します。ここを
-
-$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
-
-にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
-るようになる（subroutine MLMemberCheck）。
-注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
-の両方を兼任する形になっています。
-
-自動登録は３ｘ２種類もヴァリエーションがあるので、詳細については自動登
-録の章を御覧下さい。デフォールトはメンバーチェックをするのですが、上の
-フラッグを変えた時は、「自動登録して、かつそのメールをＭＬに流す」とい
-うＯＦＦ会用の設定になってます。
-.seealso auto-regist
-
-.key reply-to
-それから ＲＦＣ８２２を素直に解釈すれば登録の時に reply-to: をみて明示
-的に登録したいアドレスの変更ができるようにするべきな気がします。
-しかし、実際やってみると結構変なことが置きます。
-ヘッダをいじらない、つまり reply-to は前のメールから何も考えずにつけた
-ままにする人とかいろいろです。
-
-そこで明示的にアドレスを変えたい時は listserve のようにBody に
-
-subscribe Email-address
-
-とかいてあれば変更、ないときは From: からアドレスを決定します。
-このキーワードの変更は
-
-.key	$DEFAULT_SUBSCRIBE
-$DEFAULT_SUBSCRIBE = "subscribe";
-
-です。
-
-注意： 
-	$REQUIRE_SUBSCRIBE = "subscribe";
-
-は自動登録の時に”必ず subscribe syntaxが必須” です。
-
-デフォールトはガイド以外の見知らぬ人からのメールはメールの内容とはかか
-わらず登録です。
-
-
-.S	自動登録した時にそのメールをフォワードするか否か？
-.seealso	{auto-regist}
-.seealso	{auto-regist-3}
-.key	$AUTO_REGISTERED_UNDELIVER_P
-
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-
-自動登録はデフォールトでは登録要請をしているそのメールをＭＬへ流さない。
-つまり、「Subscribe」としか本文にないメールは流さない
-
-メール	→	登録	→ＭＬへ流す（デフォールト、
-					$AUTO_REGISTERED_UNDELIVER_P = 0;）
-
-				→ＭＬへは流さない
-					$AUTO_REGISTERED_UNDELIVER_P = 1;）
-
-注意： この変数をセットしても subscribe だけのメール（じつは８行）は 
-デフォールトでも流しません。管理者以外は見てもうれしくないでしょ？
-８ ＝ １ ＋ ３行本文 ＋４行シグニチャア ってことで
-
-デフォールトは $AUTO_REGISTRATION_LINES_LIMIT = 8; となってます
-これを -1 にしておけば、たとえ 中身なしメールでも流れます:-)
-＃０だと、８に変更されてしまうから
-
-
-.S	自動登録の時にSubject: subscribe と明示的に書いてもらうようにしたい
-.key	Subject: subscribe 
-
-明示的な自動登録をする時にセットして下さい。
-例えば Subject: subscribe とか書いてもらうようにしたい時です。
-
-	config.ph に使いたいキーワード（e.g. subscribe）を次のようにセッ
-	トすると、そのキーワードがある時に登録を行ないます。
-
-.key	$REQUIRE_SUBSCRIBE
-	$REQUIRE_SUBSCRIBE = "subscribe"; 
-
-デフォールトはセットされてません：
-	$REQUIRE_SUBSCRIBE = "";	# e.g.  "subscribe";
-
-例：
-	$REQUIRE_SUBSCRIBE = "subscribe";
-
-ちなみに、このメールを ＭＬ本体にフォワードさせるか否か？
-.key	$AUTO_REGISTERED_UNDELIVER_P
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-とは独立な事象です
-
-
-.S	同様だが自動登録の時にメール本文にsubscribeと明示的に書いてほしい
-.key	$REQUIRE_SUBSCRIBE_IN_BODY
-.key	$REQUIRE_SUBSCRIBE
-
-上と同様に	config.ph で
-	$REQUIRE_SUBSCRIBE = "subscribe"; 
-に加え
-	$REQUIRE_SUBSCRIBE_IN_BODY = 1;
-
-のようにします。すると本文の先頭をみて判断します。（注意！最初の一行だ
-けです）
-
-ちなみに、これを ＭＬ本体にフォワードさせるか否か？
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-とは独立な事象です。
-
-
-.S	メンバーチェックはしないけど自動登録はしたくない(+ trick)
-.label	{auto-regist-1}
-.key	+
-.key	/etc/aliases＋アーカイブ
-
-membersに
-
-	+
-
-とだけ書いて
-
-	$ML_MEMBER_CHECK  = 1;
-
-
-とすると、メンバーチェックはしないけど登録もしないという動きをします。
-＃ＮＩＳにならう:-)
-
-
-.S	自動登録モードで、複数アドレスから投稿だがうけとりは一つ( skip )
-.key	skip
-.key	s=skip
-.key	複数アドレスからの投稿だが受けは一つ
-.label	{auto-regist-2}
-
-自動登録では見知らぬアドレスは全部新しい人とおもってしまうのですが、少
-数の人だけが
-
-	複数アドレスから投稿可能だが
-	うけとりはあるアドレスに送って欲しい
-
-という場合を考えて、members(自動登録では actives と兼任) で
-
-fukachan@phys.titech.ac.jp	skip
-
-と書いておけば認証（新人さんチェック）には使うけど配送はしないというア
-クションをします
-
-つまり
-
-	fukachan@phys.titech.ac.jp	skip
-	Elena@phys.titech.ac.jp	
-	Pollyanna@phys.titech.ac.jp	skip
-
-になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
-が、配送はelenaにしか行なわれないということです。
-
-今の話とは無関係ですが 
-fukachan@phys.titech.ac.jp	matome
-
-の行もスキップしています。まとめ送りの人だから
-
-
-.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
-.key	$skip{'mail-address'}
-.key	skip
-.key	skip-but-determined-dynamically
-.key	$START_HOOK
-
-こういう処理を config.ph にかいてください。
-
-$START_HOOK = q#
-	$skip{'fukachan@phys.titech.ac.jp'} = 1
-		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
-#;
-
-こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
-↑ここは actives とかに現れるものと同じにして下さい。
-
-複数あるなら 全部を うえのフックに加えて下さい。
-
-
-.S	自動的に登録してそのままＭＬにフォワードする
-.label	{auto-regist-4}
-
-これが一番シンプルなやつですね。もともとＯＦＦ会用ＭＬなんです。
-＃「いきます」メールがＭＬにながれると便利だから
-
-
-.S	自動登録モードだと最初のメールから全部流れてしまうのはちょっと…？
-.label	{auto-regist-3}
-.key	$AUTO_REGISTERED_UNDELIVER_P
-
-config.ph の中で 
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-
-なら 登録要請をしている最初のメールはＭＬへ流さないようになります。
-デフォールトは０で 流してしまいます。
-
-ＯＦＦ会用ＭＬなんかだと流れててしまう（「わたしもいきま〜す！」メール）
-方がよいのですが…ケースバイケースですよね
-
-
-.S	ＯＦＦ会とかでも subscribe一行だけのメールはＭＬに流さなくても…？
-.key	$AUTO_REGISTRATION_LINES_LIMIT 
-
-登録要請をするメールで８行に達しない（つまり７行まで）のメールは、大抵
-『subscribe』とsignature４行くらいしか書いてなかったりするので、ＯＦＦ
-会用ならともかく自動登録で使う時は
-
-	$AUTO_REGISTRATION_LINES_LIMIT 
-
-の値以下の行数のメールはＭＬサーバから配送されません。
-＃もちろん管理者には知らせます
-
-$AUTO_REGISTRATION_LINES_LIMIT を明示的にセットしないと、８行にセット
-されます。
-
-config.ph では一応
-
-	$AUTO_REGISTRATION_LINES_LIMIT = 0;
-
-とセットしています。
-
-
-.S	サーバーをインストールしたホストからのメンバーの自動登録ができない
-
-.q
-
-FROM: fukachan@phys.titech.ac.jp
-正確には user@domain フォームでない ILLEGAL なメールアドレスに 対して
-なんらかの Operation を実行するのはよくない。
-という根拠に基づいて…ということですが
-
-localhost とからとか条件をつければ出来るでしょうけど（getpeername()）
-
-user@domain フォームでない ILLEGAL なメールアドレス がすどおりして、サ
-イトを越えて Deliver されてしまうようなこともあるので、
-＃もちろんよくないが実際に出来てしまう。
-
-変な補整を加えてしまうとかえってまずいとおもうんです。
-
-.~q
-
-＃＃＃＃＃＃＃＃＃＃
-
-対策編１：
-ってことなんですが、
-“From行のアドレスに@以下をつけないでメールが送られてくる”
-をやらせないために、
-メール本体に subscribe uja@localhost-name.uja.jp とかかけばＯＫってい
-えばＯＫなんですけどね（↑ From: より優先されるから）
-
-対策編２：
-自動補整も やってやれなくはないです。でも変なこと（or illegal）
-がおこってもおこらないでね:-) YOUR OWN RISK
-
-$START_HOOK  = q#
-	if ($From_address !~ /\@/) {
-		$From_address = "$From_address\@ローカルなドメイン";
-	}
-#;
-
-ローカルなドメイン は自分のドメイン
-
+.include autoregist.wix
 
 
 
@@ -2077,7 +1761,7 @@ $SMTP_OPEN_HOOK = q#
 これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
 
 $SMTP_OPEN_HOOK = q#
-	$Envelope{'Body'} .= "Mail Count: $ID\n\n".$Envelope{'Body'};
+   $Envelope{'Body'} .= "Mail Count: $ID\n\n".$Envelope{'Body'};
 #;
 
 
@@ -2960,7 +2644,7 @@ in libsendfile.pl
 ＃参照 http://www.iij.ad.jp/sapporo/staff/fukachan/fml/ の下
 ＃pc-van は何の問題もなかったと思いました（たしか）
    
-１０００行でだいたい５０ｋくらいになります。
+1000行でだいたい50kくらいになります。
 
 
 
@@ -3045,120 +2729,7 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
 .include hack.wix
 .include ftpmail.wix
 .include hook.wix
-
-
-.# ##########################################################
-.C	WIX Language
-.l	WIX
-.k	WIX Languate
-
-	"WIX" == "With Index and Xreference"
-
-.S	WIX Language Introduction
-
-WIX は４種類のフォーマットのドキュメントを同時生成するために考え出され
-た（妥協ともいう）言語です。名前の通り Index や Xref(Cross Rerefence)
-は重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言
-語です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
-
-言語自体はおおむね nroff like + texinfo like 折衷版くらいです
-
-専用のフォーマッタ bin/fwix.pl を使って４種類のフォーマットで 
-マニュアルを生成します。
-
-plain text は
-	doc/op そのもの 
-
-html 版は
-	make doc でつくってください
-
-nroff と texinfo 版は対応しかけてるところ です。
-
-WIX Language は 
-	１	nroff 覚え直すのも面倒臭い
-	２	texinfo, html, nroff, plain text 
-		４種類を同時に生成する
-
-ために作られたものです。単に僕が書きやすいか否か？で言語仕様が決まって
-ます:-)。ついでに 二か国語対応しかけ code まで入ってたりします;-)
-
-
-.S	WIX 言語仕様
-
-WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
-うなコマンドの後つづく部分は全部が新しい構造の一部とみなされます。
-つまり .S (Section宣言) は新しいsectionの始まりを意味しますが、
-それ以降のパラグラフはどれも新しいセクションの一部です。
-空行があったら次のセクションのようにはカウントしません。
-
-	.P	Part
-	.C	Chapter
-	.S	Section
-	.SS	Sub Section 
-
-TeX も同様なデータ構造を持つので理解はしやすいと思います。
-
-	.key	KEYWORD
-	.k	KEYWORD
-
-KEYWORDと現在の Chapter.Section との対応づけ。
-索引に使われる
-
-	.label	KEYWORD
-	.l	KEYWORD
-
-現在の Chapter.Section にラベルをつけ、xref でたどれるようにするための
-もの。KEYWORDと現在の Chapter.Section との対応づけ。
-xref が使うポインタだが、索引にも使われる
-
-	.xref	KEYWORD
-	.seealso KEYWORD
-
-.label でラベルづけした Chapter.Section への Cross Reference。
-この Cross Reference は分中では
-
-	see also 10.3 
-
-のように変換される
-
-
-	.A	Appendix
-
-	.ptr	KEYWORD
-
-役目は xref と同じだが see also の部分は付け加えられない。
-
-	.q	引用開始
-	.~q	引用終り
-
-これだけがセットで使われているが、.q からは行の最初に3文字スペースでイ
-ンデントし、 .~q のところまでそれが行なわれる。
-＃そのために 終りを示す必要がある。
-
-
-特殊命令：
-
-	.#		COMMENT
-	.comment	COMMENT
-
-この行はコメント
-
-	.include	FILE
-
-FILE をその部分に挿入する。
-
-
-.S	WIX と HTML 例外処理
-
-	.HTML_PRE
-	.~HTML_PRE
-
-<PRE> 〜 </PRE> で展開したい部分。
-
-
-
-.# ##########################################################
-
+.include wix.wix
 .include smtp.wix
 .include uip.wix
 .include lib.wix
