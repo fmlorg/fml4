@@ -1,13 +1,14 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 # Name: Syncronization of spool and html files directory
 #       
@@ -47,13 +48,13 @@ sub SyncHtml
     umask($HTML_DEFAULT_UMASK ? $HTML_DEFAULT_UMASK : 002);
 
     ### Init ###
-    # Original SyncHtml is the Converter2Html of the memory image.
+    # Original SyncHtml is the Converter to Html in the memory image.
     # so $mtime (by stat()) NOT REQUIRED
-    # IF YOU CONVERT THE ARTICLE, stat() info REQUIRED
+    # IF YOU CONVERT THE ARTICLE on the disk, stat() info REQUIRED
     $mtime = $e{'stat:mtime'} if $e{'stat:mtime'};
     $probe = $e{'html:probe'};
 
-    # INIT THE UNIT;
+    # initialize the unit to determine sub-directories.
     $HTML_INDEX_UNIT = $HTML_INDEX_UNIT || 'day';
 
     # MIME Decoding, suggested by domeki@trd.tmg.nec.co.jp, thanks
@@ -448,7 +449,7 @@ package SyncHtml;
 # $HTML_INDEX_TITLE = "THE TITLE of index.html";
 #
 
-@Import = ("debug", "debug_html", "debug_expire",
+@Import = ("debug", "debug_html", "debug_expire", "opt_overwrite",
            From_address, Now, HtmlDataCache, HtmlThreadCache,
            COMPAT_ARCH,
            HTML_EXPIRE, HTML_EXPIRE_LIMIT, ID, ML_FN, USE_MIME, USE_LIBMIME, 
@@ -535,8 +536,12 @@ sub Write
     # write permission is required for only you and nobody read these files;
     umask($HTML_WRITE_UMASK ? $HTML_WRITE_UMASK : 022);
 
-    # file existence check
-    -f "$f.html" && (&Log("Already $f.html exists"), return $NULL);
+    # check the $id.html exists already or not
+    # if --overwrite is specified as arguments for spool2html,
+    # you can overwrite $id.html which exists already.
+    unless ($opt_overwrite) {
+	-f "$f.html" && (&Log("Already $f.html exists"), return $NULL);
+    }
 
     # open
     if ($HTML_OUTPUT_FILTER) {
