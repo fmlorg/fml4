@@ -11,8 +11,8 @@
 .l 	analize_mail_error.pl
 .l	analize_mail_error.sh 
 
-ベータ版。エラーメール(複数でもよい)の入力すると 解析してエラーレポー
-トを吐く。
+ベータテスト版。エラーメール(複数でもよい)を入力すると解析してエラーレ
+ポートを吐く。
 
    analize_mail_error.pl [-c cut_pattern] [-e exluce_pattern]
 		-c アドレスの中から削除するパターン
@@ -28,7 +28,7 @@
 .l	bin/Archive.sh
 .k	Archive.pl
 .k	Archive.sh
-.xref	archive Archive.pl
+.xref	archive
 
 アーカイブの節を参照
 
@@ -82,7 +82,6 @@ main(argc, argv)
 
   exit(0);
 }
-
 .~q
 
 
@@ -97,7 +96,7 @@ main(argc, argv)
 は log ファイル（複数も可）を解析しログの中で普通じゃない行をOUTPUTし
 ます。どういう行を正常の動作とみなして無視するかは
 
-	etc/daily.ignore
+	FMLのインストール先/etc/daily.ignore
 
 というファイルに入っています。各行が無視するキーワードです。
 増やすなら足せばいいし、減らすなら切ってしまえば良いでしょう。
@@ -108,9 +107,9 @@ main(argc, argv)
 .l	bin/dns_check.pl
 .k	dns_check.pl
 
-DNS のテストをする、ちょっとしたプログラム。
+DNS のテストをする、ちょっとしたプログラム。パッケージを広げた場所で
 
-% make dns_check
+	% make dns_check
 
 とするとこのプログラムを実行する。
 
@@ -120,116 +119,11 @@ DNS のテストをする、ちょっとしたプログラム。
 .l	bin/emumail.pl
 
 sendmail -> fml.pl の 「sendmail -> 」の部分を emulation します。
-debug に便利かなと
+debug に使うだけ(なくてもいいけど、あるとたまに便利？)。
 
 
 .S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
-.xref	expire expire.pl
-
-
-.S	FMLのコマンドへのユーザインターフェイス (bin/fmlctl.pl)
-.l	bin/fmlctl.pl
-.k	fmlctl.pl
-.k	.fmlctlrc
-
-通常 fml のコマンドをテストする場合メール経由で実行しますが、ＭＬのホー
-ムで fmlctl を使うと、fml のコマンドをメール経由でなくても実行します。
-
-例えば 
-	# mget last:10 mp
-
-をメールで送らずとも
-
-	% fmlctl.pl mget last:10 mp
-
-をすると、このコマンドを実行して、メールでの返答でなく画面に結果を出し
-ます。長い場合もあるので less 等で見ると良いでしょう。
-
--i オプションの場合インタラクティブ・モードに入るので (perl debugger 
-もどきのインターフェイス)、これで複数のコマンドを実行したりもできます。
-
-SYNOPSIS
-	fmlctl.pl -i [-c configfile] [-d ML_directory] [-h] [DIR] [LIBDIR]
-
-	-a	ADMIN MODE (コマンド は # admin ... が前についてるものと仮定) 
-		つまり help をいれても # admin help のことだと思う。
-	-c	fmlctl の設定ファイル
-		デフォールトでは $HOME/.fmlctlrc を探して評価する
-	-d	ＭＬのホームの指定
-	-h	このメッセージ
-	DIR	ＭＬのホーム (config.ph のある場所)
-	LIBDIR	ＭＬのホームとは他の場所に libfml.pl 等があるならその場所
-
-
-例：	通常は subscribe address をメールで送る場合
-
-	% fmlctl subscribe ひとのあどれす
-
-インタラクティブモード (interactive mode)
-
-	% fmlctl -i 
-	fmlctl<1> subscribe address
-
-例：
-	fmlctl<1> subscribe 	address
-	fmlctl<1> addadmin	address
-
-管理者モードか否かは $ENABLE という変数で決まっているので、
-通常のコマンドを実行したい場合は
-
-	u $ENABLE
-
-管理者モードへ移行したい場合は
-
-	e $ENABLE = 1
-
-を実行すればできます。覚え方は「CISCOと同じenable」です（笑）
-この場合 # admin シンタックスは要らず、その後の部分だけでよいです。
-つまり help といれても admin help の意味になります。
-またパスワードは必要ありません(こちらの方が重要でしょう)。
-
-
-実行例：
-
-   % chdir /var/spool/ml/elena
-   % bin/fmlctl.pl -i $PWD /usr/libexec/fml
-   Fml Control (Interactive Administration Interface)
-   
-    chdir /var/spool/ml/elena
-   
-    Loading the configuration [/var/spool/ml/elena/config.ph]
-   
-   Setting the Mailing List [Elena@axion.phys.titech.ac.jp], O.K.?
-   
- [[[ COMMAND MODE ]]]
-   
-     FmlCtl<0> h
-   
-           !number   do the previous action of the number
-           !string   do the string in the shell
-           e         eval string
-           e.g. e $debug = 1
-           h         help
-           H         history
-           p         print the value
-           e.g. p $debug
-           q         quit
-           u         undef the value
-           e.g. u $debug
-           
-     FmlCtl<1> e $debug = 1
-   eval "$debug = 1;";
-     FmlCtl<2> p $debug
-   1
-     FmlCtl<3> u $debug
-   eval "undef $debug;";
-     FmlCtl<4> H
-   1:h
-   2:e $debug = 1
-   3:p $debug
-   4:u $debug
-   5:H
-
+.xref	expire
 
 
 .S	WIX言語フォーマッタ (bin/fwix.pl)
@@ -240,36 +134,11 @@ SYNOPSIS
 WIX言語のフォーマッタ 
 
 
-.k	$LANG
-.k	$COMMENT (bin/fwix.pl)
-.k	$KEYWORD (bin/fwix.pl)
-.k	$FORMAT  (bin/fwix.pl)
-.k	$HTML_KEYWORD (bin/fwix.pl)
-
-   $COMMENT = '^\.comment|^\.\#';
-
-	コメントを意味する予約語
-
-   $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
-
-	chapter section 等予約語の定義
-	
-   $FORMAT  = 'q|~q';
-
-	quote 等で特殊フォーマット命令を適用するもの		
-
-   $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
-
-	HTMLモード用の予約語
-
-   $LANG は 日本語か英語かが入り動作モードを制御しています。
-
-
 .S	gen_summary.pl (summary ファイルを再生成する)
 .k	gen_summary.pl
 .l	bin/gen_summary.pl
 
-MLの spool から summary を再生成する。
+ML の spool から summary を再生成する。(e.g. summary が壊れた時)
 
 in fml-support ML's Count: 02393
 
@@ -285,6 +154,8 @@ in fml-support ML's Count: 02393
 .k	$WWW_HOME
 .k	$WITH_WWW_WATCH
 .k	$LIBRARY_TO_OVERWRITE
+
+おまけ機能:)
 
 	bin/geturl.pl URL
 
@@ -309,8 +180,8 @@ saveします。画像データや音声データでも同様にファイルに落せます。
 一般には例えば GNU wget 等のWWWデータを落すソフトが多数あります。
 
 
-.S	ローカルテスト (bin/localtest.pl)
-.l	bin/localtest.pl
+.S	ローカルテスト (sbin/localtest.pl)
+.l	sbin/localtest.pl
 .k	localtest.pl
 
 gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
@@ -326,8 +197,8 @@ gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
 のようにしないとテストできません。
 
 
-
 .S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
+.xref	newsyslog
 .l	bin/newsyslog.sh
 .k	newsyslog.sh
 
@@ -359,9 +230,11 @@ Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 .~q
 
 
-.S	SMTPライブラリを使った /usr/bin/Mail のemulation (bin/pmail.pl)
+.S	SMTPライブラリを使った /usr/bin/Mail の emulation (bin/pmail.pl)
 .l	bin/pmail.pl
 .k	pmail.pl
+
+単なる書き方の例
 
 
 .S	パスワードの初期化と変更 (bin/passwd.pl)
@@ -398,7 +271,7 @@ bin/passwd.pl を使って下さい。使い方は、
 	moderated モード
 
 等で使われます。
-.xref REMOTE-ADMINISTRATION &DEFINE_MODE
+.xref REMOTE-ADMINISTRATION
 
 
 .S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/pop2recv.pl)
@@ -412,11 +285,6 @@ libexec/popfml.pl がこの目的の専用プログラムです。
 .xref	popfml
 
 注意： inc_via_pop.pl は昔の名前（今はリンク）
-
-
-.S	POP経由の自動RefileやＭＬの実行 (bin/pop2recv.pl)
-.l	pop2recv.pl
-.xref	popfml cron fml_local
 
 
 .S	与えられたファイルを分割して送り出すプログラム (bin/split_and_msend.pl)
@@ -436,10 +304,10 @@ libexec/popfml.pl がこの目的の専用プログラムです。
 
 SYNOPSIS:
 
-  spool2html.pl [-h] [-I INC] [-f cf] [-d HTTP_DIR] [-t TYPE] [-D DIR] SPOOL
+  spool2html.pl [-h] [-I INC] [-f cf] [-d HTML_DIR] [-t TYPE] [-D DIR] SPOOL
 
     -h    this message
-    -d    $HTTP_DIR
+    -d    $HTML_DIR
     -f    cf (例えばMLの設定ファイルconfig.phを評価する）
     -t    number of day ($HTML_INDEX_UNIT)
     -D    $DIR (fml の $DIR)
@@ -448,7 +316,7 @@ SYNOPSIS:
     SPOOL $SPOOL_DIR
     
 
-ターゲット SPOOL 中のメールを HTML化し $HTTP_DIR 中に変換します。
+ターゲット SPOOL 中のメールを HTML化し $HTML_DIR 中に変換します。
 注意： 2.1GAMMA#103 以降はデフォールトでスレッド処理も実行します。 
 
 変換の仕方については SyncHtml (.ptr{SyncHtml}) を参照してください。
@@ -460,42 +328,12 @@ SYNOPSIS:
 config.ph を評価する場合には気をつけて下さい。
 
 
-.S	MLを止めて(ロックして)config.phの edit をしたい (bin/vipw.pl)
-.k	vipw.pl
-.l	bin/vipw.pl
-.k	maintenance.pl
-
-flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
-スをしたい時は？
-
-% bin/vipw.pl 
-
-とすれば、MLの機能をflockでロックして、
-
-	shell% $EDITOR $PWD/config.ph
-
-を vipw.pl は実行します。
-＃ maintenance.pl の発展版ですね。よって maintenance.pl はもう配布され
-＃ ていません。
-
-vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
-    -h help
-    -d ＭＬのconfig.phのあるdirectory
-    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
-    -f editしたいファイル
-    ＭＬのconfig.phのあるdirectory
-
-すべてを省略した場合 $PWD の config.ph 
-もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
-必要ですね
-
-
 .S	MH scan.format (lib/Utilities/scan.format)
 .l	scan.format 
 .k	scan.format 
 .k	lib/Utilities/scan.format
 
-lib/Utilities/scan.format を あなたの ~/Mail にいれると
+lib/Utilities/scan.format を自分の ~/Mail にいれると
 
   65 -06/14 Horaki Hikari fml-su Subject uja  <<うじゃ…
 
@@ -516,6 +354,7 @@ X-ML-Name: とかと名前が違うフィールドは ↓この辺を
 
 X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 適当に増やして、適当に増やしてください。
+例:
 
 %?(match NetBSD.ORG)NetBSD\
 
@@ -575,14 +414,8 @@ libstardate.pl はコマンドラインで呼ぶと宇宙歴そのものをOUTPUTします。
 stardate.el です。
 
 
-.S	bin/RecreateConfig.pl
-.l	bin/RecreateConfig.pl
-.k	RecreateConfig.pl
-
-fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
-
-
 .S	weekend-msend.sh
+.l	weekend-msend
 .l	bin/weekend-msend.sh
 .k	weekend-msend.sh
 
@@ -629,7 +462,11 @@ X-Stardate: をつけてくれます。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
