@@ -13,7 +13,7 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" チュートリアル: 簡単なインストールの流れや設定のガイド
+"fml" チュートリアル: 簡単なインストールの流れや設定のガイド
 </CENTER>
 </H1>
 
@@ -21,19 +21,19 @@
 
 <BR>
 <!- menu ->
-	<A HREF="#overview">概要</A>
-	<A HREF="#fundamental-config">基本設定</A>
-	<A HREF="#advanced-config">やや進んだ設定</A>
-	<A HREF="#trouble-shooting">トラブルシューティング</A>
+	<A HREF="#overview">概要</A>
+	<A HREF="#fundamental-config">基本設定</A>
+	<A HREF="#advanced-config">やや進んだ設定</A>
+	<A HREF="#trouble-shooting">トラブルシューティング</A>
 <BR>	
-	<A HREF="#more-advanced">より進んだ設定</A>
-	<A HREF="#more-advanced-examples">その実例集</A>
+	<A HREF="#more-advanced">より進んだ設定</A>
+	<A HREF="#more-advanced-examples">その実例集</A>
 <BR>	
-	<A HREF="#server-config">メールサーバ関係の設定例</A>
-	<A HREF="#devel">開発用メモ</A>
+	<A HREF="#server-config">メールサーバ関係の設定例</A>
+	<A HREF="#devel">開発用メモ</A>
 <BR>
         <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
-	[ www.fml.org内ドキュメント検索 ]
+	[ www.fml.org内ドキュメント検索 ]
 	</A>
 <!- menu ->
 
@@ -43,59 +43,59 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	概要:
-	インストール手順の簡単なまとめ
+	概要:
+	インストール手順の簡単なまとめ
 	<BR>
-	(以下pathは適当に読みかえてください)
+	(以下pathは適当に読みかえてください)
 	<UL>
 	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
-		にインストールする/されている
-	<LI> elena MLを作ったら
-		(ディレクトリは 
+		にインストールする/されている
+	<LI> elena MLを作ったら
+		(ディレクトリは 
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
 	<LI> <A HREF="howto-customize.html">
-		/var/spool/ml/elena/config.ph の設定をする
+		/var/spool/ml/elena/config.ph の設定をする
 		</A>	
 	<LI> <A HREF="sample.aliases">/etc/aliases</A>
-		に設定/設定したことを確認する(MTA依存)
+		に設定/設定したことを確認する(MTA依存)
 		
 	</UL>
-	で手順のすべてです。
-	カスタマイズは
-	<A HREF="files.html">設定ファイル</A>
-	config.phで行ないます。
+	で手順のすべてです。
+	カスタマイズは
+	<A HREF="files.html">設定ファイル</A>
+	config.phで行ないます。
 
 	<UL>
 		<LI>
 		<A HREF="fml-install.html">
-		fmlのインストールの概観
+		fmlのインストールの概観
 		</A>
 		<A HREF="../INSTALL/index.html">
-		　(詳細)	
+		　(詳細)	
 		</A>
-		<A HREF="installer-QandA.wix">
-		　[Q and A]
+		<A HREF="installer-QandA.html">
+		　[Q and A]
 		</A>
 		<A HREF="../INSTALL_CGI/index.html">
-		　[CGIのインストール (fml-current only)]
+		　[CGIのインストール (fml-current only)]
 		</A>
 		<BR>
 		<A HREF="../UPGRADE-3.0/index.html">
-		注: fml 2.x から 3.0 へのアップグレード
+		注: fml 2.x から 3.0 へのアップグレード
 		</A>
 
 		<LI>
 		<A HREF="postfix-install.html">
-		Postfix のインストールの例 (NetBSD-currentのpackage system)
+		Postfix のインストールの例 (NetBSD-currentのpackage system)
 		</A>
 		<BR>
-		最近のpostfixはmake installするとインストーラが
-		対話的に聞いてくれる。それに答えていけば
-		基本設定はそれだけで十分だ。
+		最近のpostfixはmake installするとインストーラが
+		対話的に聞いてくれる。それに答えていけば
+		基本設定はそれだけで十分だ。
 
 		<LI>
-		MTA (Mail Transport Agent)別の注意
+		MTA (Mail Transport Agent)別の注意
 		<BR>
 		<A HREF="../INSTALL_with_SENDMAIL/index.html">sendmail</A>
 		<A HREF="../INSTALL_with_POSTFIX/index.html">postfix</A>
@@ -104,195 +104,195 @@
 		<A HREF="../INSTALL_with_ZMAILER/index.html">zmailer</A>
 		<BR>
 		<A HREF="http://www.y-min.or.jp/~nob/qmail/qmail+fml.html">
-		[link]qmailの基本的なインストール・メモ
+		[link]qmailの基本的なインストール・メモ
 		</A>
 
 		<LI>
 		<A HREF=server_movement.html>
-		fmlを別の(新)サーバへ移動させる方法
+		fmlを別の(新)サーバへ移動させる方法
 		</A>
 	</UL>
 
 
 	<LI>
 	<A NAME="fundamental-config">
-	<P> 基本的な設定
+	<P> 基本的な設定
 	<UL>
 		<LI>
 		<A HREF="howto-customize.html">
-		fmlの設定変更の仕方について
+		fmlの設定変更の仕方について
 		</A>
 
 		<LI>
 		<A HREF="../INSTALL/index.html#makefml-config">
-		設定メニュー(makefml config)の使い方
+		設定メニュー(makefml config)の使い方
 		</A>
 		<BR>
-		注: CGIでは日本語のメニューです。
+		注: CGIでは日本語のメニューです。
 		<BR>
-		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義するとその文字コードで表示されます。<A HREF=tips/dot_xxxxshell_rc>例:</A>
+		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義するとその文字コードで表示されます。<A HREF=tips/dot_xxxxshell_rc>例:</A>
 		<BR>
 		<A HREF="../INSTALL/index.html#cf-and-config.ph">
-		設定ファイルについて(cfとconfig.phの違いは?)
+		設定ファイルについて(cfとconfig.phの違いは?)
 		</A>
 		<BR>
 		<A HREF="../variable-list.ja.html">
-		変数リスト
+		変数リスト
 		</A>
 		<A HREF="../sorted-variable-list.ja.html">
-		アルファベット順の変数リスト
+		アルファベット順の変数リスト
 		</A>
 
 		<LI>
 		<A HREF="config-default.html">
-		fmlの設定(生の状態)
+		fmlの設定(生の状態)
 		</A>
 
 		<LI>
 		<A HREF="config-auto-subscribe.html">
-		fmlの設定(自動登録)
-		<A HREF="../op/index.html#auto-subscribe">[詳細]</A>
+		fmlの設定(自動登録)
+		<A HREF="../op/index.html#auto-subscribe">[詳細]</A>
 		</A>
 
 		<LI>
 		<A HREF="config-remote.html">
-		リモートからメールでメーリングリストの設定をいじる
+		リモートからメールでメーリングリストの設定をいじる
 		</A>
 		<BR>
-		"リモート管理"	
-		<A HREF="../op/index.html#remote-admin">[詳細]</A>
+		"リモート管理"	
+		<A HREF="../op/index.html#remote-admin">[詳細]</A>
 
 
 		<LI>
-		ヘッダの書き換え
+		ヘッダの書き換え
 		<BR>
 		<A HREF="header/QandA.html">[Q and A]
 		</A>
 		<A HREF="ptr-customize-header.html">
-		　[もろもろのTIPS]
+		　[もろもろのTIPS]
 		</A>
 
 		<LI>
 		<A HREF="setup-more-secure.html">
-		よりセキュアに
+		よりセキュアに
 		</A>
 		<BR>
-		詳細:
-		<A HREF="../op/index.html#envf">フィルタ</A>
-		<A HREF="../op/index.html#mti">トラフィクモニタ</A>
-		<A HREF="../op/index.html#mail_size_limit">メールサイズ</A>
+		詳細:
+		<A HREF="../op/index.html#envf">フィルタ</A>
+		<A HREF="../op/index.html#mti">トラフィクモニタ</A>
+		<A HREF="../op/index.html#mail_size_limit">メールサイズ</A>
 		<BR>
-		<A HREF="../advisories/index.html">FMLセキュリティアドバイザリィ</A> 
+		<A HREF="../advisories/index.html">FMLセキュリティアドバイザリィ</A> 
 
 		<LI>
-		<A HREF="errormail-handling.html">エラーメールの自動処理</A>
+		<A HREF="errormail-handling.html">エラーメールの自動処理</A>
 		<BR>
-		<A HREF="tips/qmail-mead.html">qmailでのエラーメールの自動処理</A>
+		<A HREF="tips/qmail-mead.html">qmailでのエラーメールの自動処理</A>
 	</UL>
 
 
 	<LI>
 	<A NAME="advanced-config">
-	<P> 少し進んだ設定
+	<P> 少し進んだ設定
 	<UL>
 		<LI>
-		企業のサポート用ＭＬなど
+		企業のサポート用ＭＬなど
 		<A HREF="config-post-from-anyone.html">
-		だれでも投稿可能なＭＬ
+		だれでも投稿可能なＭＬ
 		</A>
 
 		<LI>
-		例えばメールマガジン?
+		例えばメールマガジン?
 		<BR>
 		<A HREF="config-asymmetric-regist.html">
-		メールを一方的に送るような場合にユーザに自分で登録させたい
+		メールを一方的に送るような場合にユーザに自分で登録させたい
 		</A>
-		<A HREF="../op/index.html#auto_asymmetric_regist">[詳細]</A>
+		<A HREF="../op/index.html#auto_asymmetric_regist">[詳細]</A>
 
 		<LI>
-		"モデレータ" 
+		"モデレータ" 
 		<BR>
 		<A HREF="config-moderated.html">
-		メーリングリストの記事はながれる前に査読をうける場合
+		メーリングリストの記事はながれる前に査読をうける場合
 		</A>
 		<BR>
 		<A HREF="tips/nospam.html">
-		SPAMをはじくちょっとしたこつ
+		SPAMをはじくちょっとしたこつ
 		</A>
 		<BR>
-		例えばアナウンス用やSPAMよけ?
+		例えばアナウンス用やSPAMよけ?
 		<A HREF="../op/index.html#moderator">
-		[詳細]
+		[詳細]
 		</A>
 	</UL>
 
 	<LI>
 	<A NAME="trouble-shooting">
-	<P> トラブルシューティング
+	<P> トラブルシューティング
 	<UL>
 		<LI>
 		<A HREF="../INSTALL/index.html#errors">
-		典型的なエラー (INSTALLファイルより)
+		典型的なエラー (INSTALLファイルより)
 		</A>
 
 		<LI>
 		<A HREF="../op/index.html#trouble">
-		トラブルの事例集 [詳細]
+		トラブルの事例集 [詳細]
 		</A>
 	</UL>
 
 	<LI>
 	<A NAME="more-advanced">
-	<P>より進んだ設定
+	<P>より進んだ設定
 
 	<UL>
 		<LI>
 		<A NAME="more-advanced-examples">
 		<A HREF="examples.html">
-		設定の実例 (構築を始めたばかりのページ)
+		設定の実例 (構築を始めたばかりのページ)
 		</A>
 		<BR>
 		<A HREF="tips/misc.html">
-		未整理のよもやまはなし
+		未整理のよもやまはなし
 		</A>
 
 
 		<LI>
-		その他の細かいパラメータ設定をする人は
+		その他の細かいパラメータ設定をする人は
 		<BR>
-		詳しくは
+		詳しくは
 		<A HREF="../op/index.html">doc/op.jp</A>
-		を読んでください。
-		以下はそのうちのいくつかのものへのポインタです。
+		を読んでください。
+		以下はそのうちのいくつかのものへのポインタです。
 		<UL>
 			<LI>
 			<A HREF="../op/index.html#acl">
-			アクセス制御
+			アクセス制御
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#headers">
-			ヘッダ関係の設定
+			ヘッダ関係の設定
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#auto-archive">
-			自動アーカイブ
+			自動アーカイブ
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#auto-expire">
-			自動-expire
+			自動-expire
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#gen_html">
-			HTMLファイルの生成
+			HTMLファイルの生成
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#mead">
-			エラーになるユーザの自動削除
+			エラーになるユーザの自動削除
 			</A>
 
 			<LI>
@@ -302,7 +302,7 @@
 	
 			<LI>
 			<A HREF="../op/index.html#delivery">
-			配送関係について
+			配送関係について
 			</A>
 
 			<LI>
@@ -312,40 +312,40 @@
 
 			<LI>
 			<A HREF="../op/index.html#digest">
-			まとめおくり
+			まとめおくり
 			</A>
 
 			<LI>
 			<A HREF="../op/index.html#fmlserv">
 			fmlserv 
-			(listserv, majordomoのような
-			ユーザインターフェイスエミュレータ)
+			(listserv, majordomoのような
+			ユーザインターフェイスエミュレータ)
 			</A>
 		</UL>	
 	</UL>
 
 	<LI>
 	<A NAME="server-config">
-	<P>メールサーバ関係の設定例
+	<P>メールサーバ関係の設定例
 	<UL>
 		<LI>
 		<A HREF="tips/postfix-pop-before-smtp.html">
-		postfixで pop before smtp
+		postfixで pop before smtp
 		</A>
 
 		<LI>
 		<A HREF="tips/smrsh.html">
-		sendmailとsmrsh
+		sendmailとsmrsh
 		</A>
 	</UL>
 
 	<LI>
 	<A NAME="devel">
-	<P>開発用メモ
+	<P>開発用メモ
 	<UL>
 		<LI>
 		<A HREF="../devel/index.html">
-		いろんなソフトウエアの雑多なメモ(doc/devel/)
+		いろんなソフトウエアの雑多なメモ(doc/devel/)
 		</A>
 	</UL>
 </UL>
