@@ -1,0 +1,76 @@
+		TODO toward 4.0.4
+		Last Modified: $Date$
+
+* コードの clean up
+
+	current-20010823 〜
+
+
+$FML$
+
+
+--------
+CHANGES of clean up
+
+kern/fml.pl 
+	modify EmulRFC2469 to take HASHREF argument
+
+kern/libkernsubr2.pl 
+kern/liblmtp.pl 
+kern/libsmtphack.pl 
+kern/libsmtpmci.pl 
+kern/libsmtpsubr.pl 
+kern/libsmtpsubr2.pl 
+kern/libsmtputils.pl
+	o my()-ify
+	o remove not used variables if exists
+	o use vars qw( ... ) for package local variables
+
+kern/libsmtpsubr.pl 
+kern/libtrap.pl
+	o use vars qw($debug) to avoid warning
+
+kern/libsmtphack.pl
+	o use vars qw($debug $debug_smtp) to avoid warning
+	o remove $debug_smtp_hack
+	o fix close() argument bug
+
+kern/libsmtputils.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $ExistJcode
+	o remove ... if $debug && $rcsid
+
+kern/libsmtpmci.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $CurModulus
+	o remove ... if $debug_mci
+
+kern/libenvf.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $FILTER_ATTR_LEAST_NUM_PARAGRAPHS
+
+kern/libenvfsubr.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+
+kern/libloadconfig.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $debug_30B
+	o pass \$s not *s to jcode.pl
+
+kern/libsmtp.pl 
+	o remove obsolete debug codes
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o fix $SMTP_LOG_ROTATE_TYPE ($USE_SMTP_LOG_ROTATE_TYPE is wrong).
+	o remove %RcptListsCB
+	o change __SmtpIOClose() argument
+	  __SmtpIOClose(*e, $ipc) -> __SmtpIOClose($ipc)
+	o remove $debug_mci, $debug_dla
+
+
+$FML$
