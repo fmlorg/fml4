@@ -276,7 +276,7 @@ sub FmlServ
 	&Unlock;		# UNLOCK
 	### PROCESS ENDS;
 
-	&RunHooks;		# run-hook for each ML
+	&RunExitHooks;		# run-hook for each ML
 
 	undef $FML_EXIT_HOOK;	# unlink each ML hook
 
