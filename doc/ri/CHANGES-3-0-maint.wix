@@ -6,6 +6,17 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+  doc/html/index.html
+	add ptr to Mac OS X Server
+
+  cf/MANIFEST
+	clean up English ;-)
+	sync with fml 3.0 etc/makefml/cf
+
+  cf/MANIFEST.Japanese
+	added. Japanese description for variables
+
+
 [ 3.0pl3 ]
 
    add INSTALLATION NOTES on MacOS X Server
