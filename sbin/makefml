@@ -546,6 +546,9 @@ sub do_install
 	print "\nsbin/install.sh $Config'EXEC_DIR\n"; #';
     }
 
+    &FixPath("src/fml.pl");
+    &FixPath("src/msend.pl");
+
     # $exec_dir/sbin/install.sh is NOT yet installed 
     if (-f "sbin/install.sh") {
 	system "/bin/sh ./sbin/install.sh $Config'EXEC_DIR"; #';
@@ -553,6 +556,50 @@ sub do_install
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
     }
+}
+
+
+sub FixPath
+{
+    local($prog) = @_;
+    local($perl);
+
+    $perl = &search_path('perl');
+
+    open(IN, $prog) || (&Warn("cannot open $prog"), return);
+    open(NEW, "> $prog.new") || (&Warn("cannot open $prog.new"), return);
+    select(NEW); $| = 1; select(STDOUT);
+
+    while (<IN>) {
+	if ($. == 1) {
+	    print NEW "\#\!$perl\n";
+	    next;
+	}
+	print NEW $_;
+    }
+    close(OUT);
+    close(IN);
+
+    rename($prog, "$prog.bak");
+    rename("$prog.new", $prog);
+}
+
+
+sub search_path
+{
+    local($f) = @_;
+    local($path) = $ENV{'PATH'};
+    local(@path) = split(/:/, $path);
+
+    for ("/usr/local/bin", "/usr/share/bin", "/usr/contrib/bin") {
+	push(@path, $_);
+    }
+
+    foreach $dir (@path) { 
+	if (-f "$dir/$f") { return "$dir/$f";}
+    }
+
+    "";
 }
 
 
