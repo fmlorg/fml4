@@ -89,6 +89,10 @@ while (<>) {
 if ($MODE eq 'html') { 
     &FinishHTMLMode;
 }
+elsif ($Key) {
+    print $Key, "\n";
+    print $Variable{$Key};
+}
 else {
     if ($SORT) {
 	&OutputSortedList;
@@ -102,12 +106,20 @@ sub Init
 {
     # getopt()
     require 'getopts.pl';
-    &Getopts("dhm:sL:t:");
+    &Getopts("dhm:sL:t:V:");
 
     $MODE  = $opt_m || 'text';
     $SORT  = $opt_s ? 1 : 0;
     $LANG  = $opt_L || die($!);
     $TITLE = $opt_t || 'variable list (cf/MANIFEST)';
+
+    if ($opt_V) {
+	$Key = $opt_V;
+	if ($Key !~ /^\$/) { 
+	    $Key = "\$".$Key;
+	}
+	$SORT = 1; # fake
+    }
 
     $TmpBuf = "/tmp/manifest$$";
 }
