@@ -1,0 +1,74 @@
+.C	Filtering
+.l	filter
+
+ちなみに Filtering FAQ のURLは
+.url	http://www.cis.ohio-state.edu/hypertext/faq/usenet/mail/filtering-faq/faq.html
+
+その plaintext version は
+.url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
+
+
+.S	MH slcoal interface
+.key	slocal
+.key	.maildelivery
+.label	{slocal-1}
+
+ここでは slocal を用いたやりかたを述べます。
+
+	~/.forward に
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+
+と書きます。よく名前を聞く slocal ってやつですね。
+slocal では、設定は  ~/.maildelivery で設定します。
+例：
+To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
+それ以外は全部スプールに落す（普通の挙動）
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field   pattern   action  result    string
+To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
+
+# drop to the personal mail-spool
+default  -       >       ?      /var/mail/fukachan
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+この場合 PIPE で fml.pl へ渡すとき UNIX FROM がおちてしまうのかもしれ
+ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
+す。
+
+
+.S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
+.label	{libexec/fml_local.pl}
+.key	libexec
+.key	libexec/fml_local.pl
+.key	fml_local.pl
+
+ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
+slocal と同じになっちゃいましたね(馬鹿)
+
+まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
+(開きなおり(苦笑))
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
+という upper compatibility です。
+
+歴史的に(デフォールトでは)「最後にマッチするエントリを実行する」という
+ところが決定的に違います。諸葉の都合で、例えば簡単に学習するvacationプ
+ログラムへと拡張できるための仕様だったのですが、今となっては設計のミス
+のようなきがします。
+
+設定で
+
+	FIRST_MATCH
+
+とすれば 最初にマッチしたパターンを実行するようになります。slocal なん
+かと同じです。
+
+	libexec/fml_local2.pl 
+
+のほうはデフォールトが「最初にマッチしたパターンを実行」するようになっ
+ています。
+＃実は単なるリンクで、自分の名前を見て実行を変えているだけですが
+
+
+.include	fml_local.wix
