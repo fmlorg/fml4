@@ -75,6 +75,7 @@
 	Microsoft Exchange
 	Microsoft SMTPSVC
 	Netscape Messaging Server 3.62
+	Netscape Messaging Server 3.54
 	Norton-AntiVirus
 	SLmail
 	SMI-8.6
@@ -119,4 +120,4 @@
 		今は sendmail みたいだ
 
 
-$FML: STATUS.ja.txt,v 1.11 2001/05/01 14:03:24 fukachan Exp $
+$FML: STATUS.ja.txt,v 1.12 2001/09/22 03:33:53 fukachan Exp $

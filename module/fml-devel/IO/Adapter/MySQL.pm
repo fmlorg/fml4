@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML: MySQL.pm,v 1.13 2001/06/17 08:57:10 fukachan Exp $
+# $FML: MySQL.pm,v 1.16 2001/09/17 11:35:21 fukachan Exp $
 #
 
 
@@ -50,7 +50,7 @@ This module is a top level driver to talk with a MySQL server in SQL
 (Structured Query Language).
 
 The model dependent SQL statement is expected to be holded in
-C<SQL::Schema::> modules. 
+C<IO::Adapter::SQL::> modules. 
 
 You can specify your own module name at $args->{ driver } in
 new($args). 
@@ -63,7 +63,7 @@ C<get_next_value()> method.
 =head2 C<configure($me, $args)>
 
 IO::Adapter::MySQL specific configuration loader.
-It also calles SQL::Schema::$model module for model specific
+It also calles IO::Adapter::SQL::$model module for model specific
 customizatoins and functions.
 
 =cut
@@ -76,8 +76,8 @@ sub configure
     my $params = $config->{ params }; #
 
     # import basic DBMS parameters
-    $me->{ _config }        = $config;
-    $me->{ _params }        = $params;
+    $me->{ _config }        = $config                    || undef;
+    $me->{ _params }        = $params                    || undef;
     $me->{ _sql_server }    = $config->{ sql_server }    || 'localhost';
     $me->{ _database }      = $config->{ database }      || 'fml';
     $me->{ _table }         = $config->{ table }         || 'ml';
@@ -90,14 +90,17 @@ sub configure
     });
     
     # load model specific library
-    my $pkg = $config->{ driver } || 'SQL::Schema::toymodel';
+    my $pkg = $config->{ driver } || 'IO::Adapter::SQL::toymodel';
     eval qq{ require $pkg; $pkg->import();};
 
     # $self->{ _driver } is the $config->{ driver } object.
     unless ($@) {
-	print STDERR "load $pkg\n" if $ENV{ 'debug ' };
+	printf STDERR "%-20s %s\n", "loading", $pkg if $ENV{'debug'};
+
 	@ISA = ($pkg, @ISA);
-	$me->{ _driver } = $pkg;
+	$me->{ _model_specific_driver } = $pkg;
+
+	printf STDERR "%-20s %s\n", "MySQL::ISA:", "@ISA" if $ENV{'debug'};
     }
     else {
 	error_set($self, $@);
@@ -106,101 +109,58 @@ sub configure
 }
 
 
-=head2 C<getline()>
+=head2 C<setpos($pos)>
 
-return the next address.
-
-=head2 C<get_next_value()>
-
-same as C<getline()> now.
+MySQL does not support rollack, so we close and open this transcation.
+After re-opening, we moved to the specified $pos.
 
 =cut
 
 
-sub getline
+sub setpos
 {
-    my ($self, $args) = @_;
-    $self->get_next_value($args);
-}
+    my ($self, $pos) = @_;
+    my $i = 0;
 
-
-sub get_next_value
-{
-    my ($self, $args) = @_;
-
-    # for the first time
-    unless ($self->{ _res }) {
-	# $self->{ _driver } is the $config->{ driver } object.
-	if ( $self->{ _driver }->can('get_next_value') ) {
-	    $self->{ _driver }->get_next_value($args);
-	}
-	else {
-	    my $query = $self->build_sql_query({ 
-		query   => 'get_next_value',
-	    });
-	    $self->execute({ query => $query });
-	}
-    }
-
-    if ($self->{ _res }) {
-	my @row = $self->{ _res }->fetchrow_array;
-	join(" ", @row);
+    # requested position $pos is later here
+    if ($pos > $self->{ _row_pos }) {
+	$i = $pos - $self->{ _row_pos } - 1;
     }
     else {
-	$self->error_set( $DBI::errstr );
-	undef;
+	# hmm, rollback() is not supported on mysql.
+	# we need to restart this session.
+	my $args = $self->{ _args };
+	$self->close($args);
+	$self->open($args);
+	$i = $pos - 1;
     }
+
+    # discard
+    while ($i-- > 0) { $self->get_next_value();}
 }
 
 
-=head2 C<add($addr)>
-
-add C<$addr> to the sql server specified at new().
-SQL::Schema::$model provides model specific SQL query statement.
-If SQL::Schema::add() exists, SQL::Schema::add() is called.
-
-=head2 C<delete($addr)>
-
-delete C<$addr> from the sql server specified at new().
-SQL::Schema::$model provides model specific SQL query statement.
-If SQL::Schema::delete() exists, SQL::Schema::delete() is called.
+=head2 C<getpos()>
 
 =cut
 
 
-sub add
+sub getpos
 {
-    my ($self, $addr) = @_;
-
-    # $self->{ _driver } is the $config->{ driver } object.
-    if ( $self->{ _driver }->can('add') ) {
-	$self->{ _driver }->add($addr);
-    }
-    else {
-	my $query = $self->build_sql_query({ 
-	    query   => 'add',
-	    address => $addr,
-	});
-	$self->execute({ query => $query });
-    }
+    my ($self) = @_;
+    return $self->{ _row_pos };
 }
 
 
-sub delete
-{
-    my ($self, $addr) = @_;
+=head2 C<eof()>
 
-    # $self->{ _driver } is the $config->{ driver } object.
-    if ( $self->{ _driver }->can('delete') ) {
-	$self->{ _driver }->delete($addr);
-    }
-    else {
-	my $query = $self->build_sql_query({ 
-	    query   => 'delete',
-	    address => $addr,
-	});
-	$self->execute({ query => $query });
-    }
+=cut
+
+
+sub eof
+{
+    my ($self) = @_;
+    $self->{ _row_pos } < $self->{ _row_max } ? 0 : 1;
 }
 
 
