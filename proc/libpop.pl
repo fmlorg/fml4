@@ -132,7 +132,7 @@ sub PopPut2Socket
     print S "$s\n";
     print POPLOG $_ = <S>; 
 
-    if (/^\-/o) { &Log($_);}
+    if (/^\-/o) { &Log($_); print STDERR "POP3: $_";}
 
     $_;
 }
