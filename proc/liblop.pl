@@ -52,7 +52,7 @@ sub DoSummary
 # return NONE
 sub SearchKeyInSummary
 {
-    local($a, $b, $s);
+    local($a, $b, $buf);
     local(*e, $s, $fl) = @_;
 
     if ($fl eq 's') {
@@ -72,12 +72,12 @@ sub SearchKeyInSummary
 
     open(TMP, $SUMMARY_FILE) || do { &Log($!); return;};
     if ($fl eq 'rs') {
-	while (<TMP>) { if (/\[$a:/ .. /\[$b:/) { $s .= $_;}}
-	&Mesg(*e, $s);
+	while (<TMP>) { if (/\[$a:/ .. /\[$b:/) { $buf .= $_;}}
+	&Mesg(*e, $buf);
     }
     elsif ($fl eq 's') {
-	while (<TMP>) { if (/$s/) { $s .= $_;}}
-	&Mesg(*e, $s);
+	while (<TMP>) { if (/$s/) { $buf .= $_;}}
+	&Mesg(*e, $buf);
     }
     close(TMP);
 }
