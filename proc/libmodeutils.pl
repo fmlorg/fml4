@@ -47,12 +47,12 @@ sub SpeculateContorolOrDistriuteMode
 {
     $START_HOOK .= q#;
     local($ca) = &CutFQDN($CONTROL_ADDRESS);
-    if (($ca && ($Envelope{'mode:chk'} =~ /$ca/i))) {
+    if (($ca && ($Envelope{'trap:rcpt_fields'} =~ /$ca/i))) {
 	$LOAD_LIBRARY || ($LOAD_LIBRARY = 'libfml.pl'); 
         $COMMAND_ONLY_SERVER = 1; 
     }
     else {
-        &DEFINE_MODE('post=anyone');
+        $PERMIT_POST_FROM = "anyone";
     }
     #;
 }
