@@ -32,6 +32,15 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
+・  尋常でないアドレスからのメールははじく
+    From: が 'root|postmaster|MAILER-DAEMON|msgs|nobody|news'
+    のどれかの場合 管理者へメールをフォワードして サーバは何もしない
+    下手に相手に何かを返すとピンポンするかも知れないので管理者に判断は任す
+
+    植井が伊野アドレスを追加したい場合、そのアドレスを 
+	$REJECT_ADDR = "|nobody|nazo-no-hito";
+   のように書くと追加できる。
+
 ・ libsendfile.pl SendFile.plが旧名称
 
 ・ bin/cron.pl は 実行したらcrontab の持ち主にメールをだす （４．４）
