@@ -32,9 +32,10 @@
 .P	Design Overview of the fml 
 
 
-   パートＩでは、fml の設計思想の概略について述べます。
-   実際の細かい設定についてはパートＩI以降へ譲ります。
-   急ぐ人はパートＩＩ以降へ進んで下さい。
+   パートIでは、fml の設計思想の概略について述べます。
+   実際の細かい設定についてはパートII以降へ譲ります。
+   急ぐ人はパートII以降へ進んで下さい。
+
 
 .C	ＭＬサーバ Overview
 
@@ -1980,6 +1981,236 @@ $SMTP_OPEN_HOOK = q#
 #;
 
 
+.include forward.wix
+.include fml_local.wix
+
+
+.# ##########################################################
+.C	fml 本体一つで複数のメーリングリストを運用する
+.key	複数のメーリングリストの運用
+.label	{plural-handling-1}
+.seealso c-wrapper, calling-fml.pl
+
+
+「	in /etc/aliases
+
+	ML-1: "|fml ML-1"
+	ML-2: "|fml ML-2"
+
+はできるか？もしくはfml を用いて複数のメーリングリストを運用する時に、
+fml 本体は一つに済ませて、メーリングリスト毎に必要なファイルだけを分割
+できるか？」という命題ですが、次をどうぞ(^^;)
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(fml.plの引数について)
+.label	{plural-handling-2}
+.seealso c-wrapper, calling-fml.pl
+
+まずconfigurationはfml.plの引数(/etc/aliases or fml(C wrapper))と
+config.phの２箇所ですべてです。そして基本的に
+
+	fml.pl	config.phのdirectory libraryの場所
+
+の形で与えています（.seealso c-wrapper )。プロセスの最初で directory を評
+価するので、config.phはfml.plの引数のdirectoryのパラメータの下の
+config.ph（members, log等もここのを見ます）をみているわけです。
+
+例えば ＭＬのおき場所が
+＃以下すべて適当に directory 名は省略してます。
+
+	Elena/config.ph
+	manami/config.ph
+	lib/fml.pl
+	lib/libsmtp.pl
+
+なら、次のように起動すれば
+
+	lib/fml.pl Elena  lib 
+	lib/fml.pl manami lib 
+
+上は Elena/config.ph を評価して Elena ＭＬ、
+下は manami/config.ph を評価して manami ＭＬにかわります。
+ライブラリは lib の下の lib*.pl等をみているわけです。
+＃問題はfml.plが使うライブラリがどこにあるかで
+＃	“一番簡単な手は /usr/local/lib/perl にいれてしまう”
+＃というものです:-) ＃これはコンパイルの時 perl にはいっているはず。
+＃それがいやな場合のために
+＃
+＃	fml.pl	"directory(config.ph)"	"Perl libraries"
+＃
+＃と解釈するようにしました。（from 1.2.0.6）
+
+ただ、それぞれ非常に違うＭＬでlibfml.pl等もばらばらのものにしたいなら
+書き換えてそれぞれのdirectry(e.g. Elena)におけばいいでしょう。
+
+include する時は 
+
+	/usr/local/lib/perl   Elena   library
+
+の順で探しますから（先にマッチしたところで取り込むから）
+(see also Appendix about @INC)
+
+注意１：ＭＬ独自の fml.pl にしてしまったら上の論法は使えません（あたり
+まえ）。fml.c も書き換えておく必要があります。
+ただし、コマンドの改造はフックを用いれば簡単です
+.seealso	command-hook
+
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(setuid programをばらばらに作る)
+.key	setuid-program
+.key	setuid-source-exapmles
+.label	{plural-handling-3}
+
+setuid program をばらばらに作ればいいわけです。
+＃可変引数をとる setuid program は security hole になり得るからいちい
+ち作る
+
+で、中身は上と同じことをするように次のように作ります。後は同じです。
+
+例えば、 /usr/spool/driver の下に
+	manami
+	aiko
+というのを作るとしましょう。
+＃manami → ML-1、 aiko → ML-2 :-)
+
+	% cc -s -o manami manami.c
+	% chmod 4755 manami
+	% cc -s -o aiko aiko.c
+	% chmod 4755 aiko
+
+そして /etc/aliases に
+manami:"|/usr/spool/driver/manami"
+aiko:"|/usr/spool/driver/aiko"
+
+＃fml.c を参考にして下さい。これは↓4.3BSDです
+   ------------------- manami.c -------------------
+#include <stdio.h>
+main()
+{
+  setuid(geteuid());
+  setgid(getgid());
+  execl("/usr/spool/lib/fml.pl", 
+	"(fml)", 
+	"/usr/spool/manami", 
+	"/usr/spool/lib", 
+	NULL);
+  exit(1);
+}
+   ------------------- aiko.c -------------------
+#include <stdio.h>
+main()
+{
+  setuid(geteuid());
+  setgid(getgid());
+  execl("/usr/spool/lib/fml.pl", 
+	"(fml)", 
+	"/usr/spool/aiko", 
+	"/usr/spool/lib", 
+	NULL);
+  exit(1);
+}
+   -------------------------------------------------
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(setuid をちゃんとするsendmail）
+	上のセクション及び .seealso calling-fml.pl
+
+上のセクションにならいます。
+
+/etc/aliasesでsetuidをちゃんとやってくれるという自信があれば、
+＃つぅか Sendmail の問題ですが…
+
+例えばこんなかんじでしょう
+＃ほんとに最終仕様かどうかは知りません。将来変わるのかも…
+
+	/usr/spool/driver の下に
+		manami
+		aiko
+
+	/usr/spool/driver/manamiの中身
+	"|fml.pl /usr/spool/manami /usr/spool/lib"
+
+	/usr/spool/driver/aikoの中身
+	"|fml.pl /usr/spool/aiko /usr/spool/lib"
+
+	in /etc/alises
+	
+	manami: :include:/usr/spool/driver/manami
+	owner-manami: fukachan
+
+	aiko: :include:/usr/spool/driver/aiko
+	owner-aiko: fukachan
+
+この場合/usr/spool/driver/manami の所有者権限で実行されるので適宜設定
+してください。あとは上のセクションと同じ。
+
+
+.S	複数のＭＬがあるけど、コマンドの処理は一つのアドレスで一括してやりたい
+.key	コマンド専用アドレスその２
+.comment beth2
+
+今 master.fml というそのためのアドレスを作ったとします。 
+
+解説０：
+ｆｍｌ は メンバーへの配送サーバ ＋ そのサーバの抱えているスプール等へ
+	のコマンドを制御する
+
+解説：で、今の場合（ｍａｓｔｅｒ．ｆｍｌ）は ｆｔｐ、 WWW 等へのアクセ
+スの中継と、（おまけで）ｆｍｌ（ＭＬサーバ）群への中継をおこなう
+
+例：	だから シンタックスは次のようになります。
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+普通のＭＬ宛のメール	→	sakisan@phys...(e.g. サキさん)
+
+サキさんの 記事１をとりよせる。
+
+"# get 1"		→	sakisan@phys...(e.g. サキさん)
+もしくは（推奨↓）
+"# get 1"		→	sakisan-ctl@phys...(e.g. サキさん)
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+一方、一箇所で集中管理したい場合（master.fml）のほうでは
+WWW.phys.titech.ac.jp へのアクセス
+
+"www http://www.phys.titech.ac.jp/"	→	master.fml@phys..
+
+サキさんの 記事１をとりよせる。
+
+"# get sakisan 1"	→	master.fml@phys..
+       ↑ここにはＭＬ名が入る（ここが要注意）
+
+となってます。実は中でＭＬサーバへただ中継してるだけです（笑）
+
+コマンド一覧：（<list>はＭＬ名（アドレスの＠前の部分））
+help		<list>
+objective	<list>
+guide		<list>
+msg		<list>
+member		<list>
+members		<list>
+active		<list>
+actives		<list>
+summary		<list>
+on		<list>
+off		<list>
+bye		<list>
+get		<list> <filename>
+mget		<list> <filename>
+
+end
+quit
+exit	
+
+本来の目的は	www, ftp, wais, gopher とのＩＰＣの中継をする
+おまけ機能で 
+subscribe ML-address とか
+member ML-address とか
+which とか
+できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ:-)
+
+
 
 .# ##########################################################
 .P	カスタマイズ
@@ -2695,13 +2926,6 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
 
 
 
-
-
-.# ##########################################################
-.include hook.wix
-.include os.wix
-.include trouble.wix
-
 .# ##########################################################
 .C	アーカイブ, Archive & Expire
 .label	{archive}
@@ -2948,250 +3172,32 @@ $NOT_USE_NEWSYSLOG = 1; なら実行しません
 
 
 
-.# ##########################################################
-.C	fml 本体一つで複数のメーリングリストを運用する
-.key	複数のメーリングリストの運用
-.label	{plural-handling-1}
-.seealso c-wrapper, calling-fml.pl
-
-
-「	in /etc/aliases
-
-	ML-1: "|fml ML-1"
-	ML-2: "|fml ML-2"
-
-はできるか？もしくはfml を用いて複数のメーリングリストを運用する時に、
-fml 本体は一つに済ませて、メーリングリスト毎に必要なファイルだけを分割
-できるか？」という命題ですが、次をどうぞ(^^;)
-
-
-.S	ひとつのfmlで複数のＭＬを扱う方法(fml.plの引数について)
-.label	{plural-handling-2}
-.seealso c-wrapper, calling-fml.pl
-
-まずconfigurationはfml.plの引数(/etc/aliases or fml(C wrapper))と
-config.phの２箇所ですべてです。そして基本的に
-
-	fml.pl	config.phのdirectory libraryの場所
-
-の形で与えています（.seealso c-wrapper )。プロセスの最初で directory を評
-価するので、config.phはfml.plの引数のdirectoryのパラメータの下の
-config.ph（members, log等もここのを見ます）をみているわけです。
-
-例えば ＭＬのおき場所が
-＃以下すべて適当に directory 名は省略してます。
-
-	Elena/config.ph
-	manami/config.ph
-	lib/fml.pl
-	lib/libsmtp.pl
-
-なら、次のように起動すれば
-
-	lib/fml.pl Elena  lib 
-	lib/fml.pl manami lib 
-
-上は Elena/config.ph を評価して Elena ＭＬ、
-下は manami/config.ph を評価して manami ＭＬにかわります。
-ライブラリは lib の下の lib*.pl等をみているわけです。
-＃問題はfml.plが使うライブラリがどこにあるかで
-＃	“一番簡単な手は /usr/local/lib/perl にいれてしまう”
-＃というものです:-) ＃これはコンパイルの時 perl にはいっているはず。
-＃それがいやな場合のために
-＃
-＃	fml.pl	"directory(config.ph)"	"Perl libraries"
-＃
-＃と解釈するようにしました。（from 1.2.0.6）
-
-ただ、それぞれ非常に違うＭＬでlibfml.pl等もばらばらのものにしたいなら
-書き換えてそれぞれのdirectry(e.g. Elena)におけばいいでしょう。
-
-include する時は 
-
-	/usr/local/lib/perl   Elena   library
-
-の順で探しますから（先にマッチしたところで取り込むから）
-(see also Appendix about @INC)
-
-注意１：ＭＬ独自の fml.pl にしてしまったら上の論法は使えません（あたり
-まえ）。fml.c も書き換えておく必要があります。
-ただし、コマンドの改造はフックを用いれば簡単です
-.seealso	command-hook
-
-
-
-.S	ひとつのfmlで複数のＭＬを扱う方法(setuid programをばらばらに作る)
-.key	setuid-program
-.key	setuid-source-exapmles
-.label	{plural-handling-3}
-
-setuid program をばらばらに作ればいいわけです。
-＃可変引数をとる setuid program は security hole になり得るからいちい
-ち作る
-
-で、中身は上と同じことをするように次のように作ります。後は同じです。
-
-例えば、 /usr/spool/driver の下に
-	manami
-	aiko
-というのを作るとしましょう。
-＃manami → ML-1、 aiko → ML-2 :-)
-
-	% cc -s -o manami manami.c
-	% chmod 4755 manami
-	% cc -s -o aiko aiko.c
-	% chmod 4755 aiko
-
-そして /etc/aliases に
-manami:"|/usr/spool/driver/manami"
-aiko:"|/usr/spool/driver/aiko"
-
-＃fml.c を参考にして下さい。これは↓4.3BSDです
-   ------------------- manami.c -------------------
-#include <stdio.h>
-main()
-{
-  setuid(geteuid());
-  setgid(getgid());
-  execl("/usr/spool/lib/fml.pl", 
-	"(fml)", 
-	"/usr/spool/manami", 
-	"/usr/spool/lib", 
-	NULL);
-  exit(1);
-}
-   ------------------- aiko.c -------------------
-#include <stdio.h>
-main()
-{
-  setuid(geteuid());
-  setgid(getgid());
-  execl("/usr/spool/lib/fml.pl", 
-	"(fml)", 
-	"/usr/spool/aiko", 
-	"/usr/spool/lib", 
-	NULL);
-  exit(1);
-}
-   -------------------------------------------------
-
-
-.S	ひとつのfmlで複数のＭＬを扱う方法(setuid をちゃんとするsendmail）
-	上のセクション及び .seealso calling-fml.pl
-
-上のセクションにならいます。
-
-/etc/aliasesでsetuidをちゃんとやってくれるという自信があれば、
-＃つぅか Sendmail の問題ですが…
-
-例えばこんなかんじでしょう
-＃ほんとに最終仕様かどうかは知りません。将来変わるのかも…
-
-	/usr/spool/driver の下に
-		manami
-		aiko
-
-	/usr/spool/driver/manamiの中身
-	"|fml.pl /usr/spool/manami /usr/spool/lib"
-
-	/usr/spool/driver/aikoの中身
-	"|fml.pl /usr/spool/aiko /usr/spool/lib"
-
-	in /etc/alises
-	
-	manami: :include:/usr/spool/driver/manami
-	owner-manami: fukachan
-
-	aiko: :include:/usr/spool/driver/aiko
-	owner-aiko: fukachan
-
-この場合/usr/spool/driver/manami の所有者権限で実行されるので適宜設定
-してください。あとは上のセクションと同じ。
-
-
-.S	複数のＭＬがあるけど、コマンドの処理は一つのアドレスで一括してやりたい
-.key	コマンド専用アドレスその２
-.comment beth2
-
-今 master.fml というそのためのアドレスを作ったとします。 
-
-解説０：
-ｆｍｌ は メンバーへの配送サーバ ＋ そのサーバの抱えているスプール等へ
-	のコマンドを制御する
-
-解説：で、今の場合（ｍａｓｔｅｒ．ｆｍｌ）は ｆｔｐ、 WWW 等へのアクセ
-スの中継と、（おまけで）ｆｍｌ（ＭＬサーバ）群への中継をおこなう
-
-例：	だから シンタックスは次のようになります。
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-普通のＭＬ宛のメール	→	sakisan@phys...(e.g. サキさん)
-
-サキさんの 記事１をとりよせる。
-
-"# get 1"		→	sakisan@phys...(e.g. サキさん)
-もしくは（推奨↓）
-"# get 1"		→	sakisan-ctl@phys...(e.g. サキさん)
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-一方、一箇所で集中管理したい場合（master.fml）のほうでは
-WWW.phys.titech.ac.jp へのアクセス
-
-"www http://www.phys.titech.ac.jp/"	→	master.fml@phys..
-
-サキさんの 記事１をとりよせる。
-
-"# get sakisan 1"	→	master.fml@phys..
-       ↑ここにはＭＬ名が入る（ここが要注意）
-
-となってます。実は中でＭＬサーバへただ中継してるだけです（笑）
-
-コマンド一覧：（<list>はＭＬ名（アドレスの＠前の部分））
-help		<list>
-objective	<list>
-guide		<list>
-msg		<list>
-member		<list>
-members		<list>
-active		<list>
-actives		<list>
-summary		<list>
-on		<list>
-off		<list>
-bye		<list>
-get		<list> <filename>
-mget		<list> <filename>
-
-end
-quit
-exit	
-
-本来の目的は	www, ftp, wais, gopher とのＩＰＣの中継をする
-おまけ機能で 
-subscribe ML-address とか
-member ML-address とか
-which とか
-できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ:-)
-
 
 
 .# ##########################################################
-.include forward.wix
-.include fml_local.wix
-.include ftpmail.wix
-.include modify.wix
-.include localhack.wix
 .include href.wix
 
 
+.P	トラブル対策
 
-.P	ライブラリ関数資料集
+.include os.wix
+.include trouble.wix
+
+
+.P	ライブラリ と hack
 
 .include mget.wix
 .include function.wix
 .include cwhois.wix
 .include fred.wix
 
+.include modify.wix
+.include localhack.wix
+
+.include ftpmail.wix
+
+.# ##########################################################
+.include hook.wix
 
 .# ##########################################################
 .C	WIX Language
