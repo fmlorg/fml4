@@ -420,7 +420,7 @@ sub CheckQueueIsExpireP
     $cur_time  = time;
     $queue_dir = $PopConf{'QUEUE_DIR'};
 
-    &Log("check queue $queue_dir");
+    &Log("check queue $queue_dir") if $debug;
 
     if ($QUEUE_EXPIRE_LIMIT > 3600) {
 	$qel = sprintf("%.1f hours", $QUEUE_EXPIRE_LIMIT/3600);
