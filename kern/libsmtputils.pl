@@ -71,7 +71,8 @@ sub DoSmtpFiles2Socket
 
     $count = scalar(@f) > 1 ? 1 : 0;
 
-    foreach $f (@f) {
+    for $f (@f) {
+	next if $f =~ /^\s*$/;
 	&Debug("SmtpFiles2Socket::($f)") if $debug;
 
 	if ($f{$f, 'zcat'}) {
@@ -91,9 +92,8 @@ sub DoSmtpFiles2Socket
 
 	$autoconv = $f{$f, 'autoconv'};
 
-	if ($count) {		# if more than two files;
-	    $fn = $f; $fn =~ s#$DIR/##;
-	    $boundary = ('-' x 20)." $fn ".('-' x 20)."\r\n";
+	if ($count) { # append the separator if more than two files;
+	    $boundary = ('-' x 60)."\r\n";
 	    print S $boundary;
 	    print SMTPLOG $boundary;
 	}
