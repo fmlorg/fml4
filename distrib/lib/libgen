@@ -7,8 +7,14 @@ GEN_DOC () {
 	(
 		echo "Making WWW pages of doc/smm/op => var/html/op";
 		chdir $FML; 
-		make htmldoc
+		make htmldoc 
 	)
+}
+
+
+GEN_WWW () {
+	echo "ReGenerating WWW Search Environment";
+	(cd $FML; make syncwww search)
 }
 
 
@@ -77,7 +83,7 @@ COPY_DOCS () {
 	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
 	(chdir $UPDIR/distrib/doc; tar xvf - )
 
-	perl usr/sbin/fix-wix.pl doc/smm/op.wix > $UPDIR/distrib/doc/smm/op.wix
+	perl .release/bin/fix-wix.pl doc/smm/op.wix > $UPDIR/distrib/doc/smm/op.wix
 
 	echo " "; echo "Copying Documents (doc/ri/)...";
 	(chdir doc; tar cf - ri/*.wix) |\
@@ -93,7 +99,7 @@ COPY_DOCS () {
    (
 	chdir var/html;
 	echo "tar cf - INFO.html RE* INSTALL ...";
-	tar cf - INFO.html RE* INSTALL |\
+	tar cf - INFO.html RE* INSTALL* INSTALL_on_NT4* |\
 	(chdir $UPDIR/distrib/doc/html; tar xvf -)
    )	
 
@@ -101,21 +107,29 @@ COPY_DOCS () {
 
 
 COPY_SOURCES () {
+	archsrc=/tmp/archsrc$$
+
 
 	echo ""; echo "Copying Main Sources ... ";
 	cp -p $SOURCES 		$UPDIR/distrib/
 	cp -p $DRAFTS_SOURCES   $UPDIR/distrib/drafts
 	cp -p $C_SOURCES	$UPDIR/distrib/C
 	cp -p $PERL_SOURCES	$UPDIR/distrib/src
-	cp -p $PERL_ARCH_SOURCES $UPDIR/distrib/src/arch
 
-	tar cf - `find $ARCH_SOURCES -type f -print|grep -v RCS`|\
-	(chdir $UPDIR/distrib; tar xvf -)
+	find proc/arch -type f -print|\
+	egrep -v '*~|/RCS' |sed 's#proc/##' > $archsrc
+	(chdir proc; tar cf - `cat $archsrc`)|\
+	(chdir $UPDIR/distrib/src; tar xvf -)
+
+	find $ARCH_SOURCES -type f -print|\
+	egrep -v '*~|/RCS|/FVS|/CVS|WINDOWS_NT4/docs|WINDOWS_NT4/lib|WINDOWS_NT4.old|Makefile' > $archsrc
+
+	tar cf - `cat $archsrc`|(chdir $UPDIR/distrib; tar xvf -)
 
 	# cf
 	echo " "; echo "cf/ ...";
 	(cd cf;
-	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS'|grep -v '~'` \
+	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS|FVS'|grep -v '~'` \
 	$UPDIR/distrib/cf;
 	)
 
@@ -143,6 +157,8 @@ COPY_SOURCES () {
 	(chdir $UPDIR/distrib; tar xvf - )
 
 	# tar cf - etc/samples/[a-z]* | (chdir $UPDIR/distrib; tar xvf - )
+
+	rm -f $archsrc
 }
 
 
@@ -154,13 +170,13 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in fml.pl msend.pl 
 	do
 		echo "   Fixing Rcsid in $file ... ( > src/$file )"
-		perl usr/sbin/fml_version.pl $file > $UPDIR/distrib/src/$file
+		perl .release/bin/fml_version.pl $file > $UPDIR/distrib/src/$file
 	done
 
 	for file in $LIBEXEC_SOURCES 
 	do
 		echo "   Fixing Rcsid in $file ... "
-		perl usr/sbin/fml_version.pl $file > $UPDIR/distrib/$file
+		perl .release/bin/fml_version.pl $file > $UPDIR/distrib/$file
 	done
 }
 
@@ -200,15 +216,9 @@ FIX_DISTRIBUTION_LINKS () {
 
 
    (
-	cd $UPDIR/distrib/doc
-	ln -s op fml_operations_manual
-	ln -s op "Daemon_Book_of_fml"
-   )
-
-   (
 	cd $UPDIR/distrib
 
-	for file in README README.English INSTALL INSTALL.English
+	for file in README.jp README.en INSTALL.jp INSTALL.en
 	do 
 		ln -s doc/$file $file
 	done
@@ -253,17 +263,34 @@ FIX_DISTRIBUTION_PERMISSION () {
 }
 
 
-DISTRIBUTION_PATCHLEVEL_INCREMENT () {
+PATCHLEVEL_INCREMENT () {
    ( 
 	chdir $FML
-	file=fml.pl
-	perl usr/sbin/fml_version.pl -p $PATCHLEVEL $file \
-	> $UPDIR/distrib/src/$file
+	perl .release/bin/fml_version.pl -p $PATCHLEVEL $file |\
+	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
+	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
+	> $UPDIR/distrib/$target
    )
 }
 
 
-GEN_ARCHIVE () {
+DISTRIBUTION_PATCHLEVEL_INCREMENT () {
+	for file in fml.pl msend.pl
+	do
+		target=src/$file
+		PATCHLEVEL_INCREMENT
+	done
+
+	for file in libexec/fmlserv.pl libexec/popfml.pl
+	do
+		target=$file
+		PATCHLEVEL_INCREMENT
+	done
+
+}
+
+
+FIX_LANGUATE () {
    (
 	cd $UPDIR/distrib/drafts
 	echo "Fixing Japanese code: "
@@ -276,7 +303,30 @@ GEN_ARCHIVE () {
 
 	echo " ... Done."
    )
+}
 
+
+GEN_BRANCH_ARCHIVE () {
+	chdir $UPDIR
+
+	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
+	DATE=`date +"%y%m%d"`
+	FMLID=fml-SNAP$DATE
+
+	echo mv distrib $FMLID
+	mv distrib $FMLID
+
+	set -vx
+
+	tar cf $FMLID.tar $FMLID 
+	gzip -9 $FMLID.tar
+	find $FMLID |zip -q -@ $FMLID.zip
+
+	set +vx
+}
+
+GEN_ARCHIVE () {
+	# FIX_LANGUATE
 
 	FTP=/usr/local/ftp/pub/net/fml-current
  	WWW=/home/hikari/sapporo/www/staff/fukachan/href/fml
@@ -296,16 +346,17 @@ GEN_ARCHIVE () {
 	echo "Synchronizing $FTP/snapshot ..."
 	echo " "
 	test -d $FTP/snapshot || mkdir $FTP/snapshot;
-	rsync -aubv distrib/ $HOME/.ftp/snapshot
+	rsync --delete -av distrib/ $HOME/.ftp/snapshot/
 
 	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
 	echo " "
-	echo "nkf -j $UPDIR/distrib/doc/INFO => $FTP/snapshot/info"
-	nkf -j $UPDIR/distrib/doc/INFO > $FTP/snapshot/info
+	echo "nkf -j $UPDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
+	nkf -j $UPDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
 
 	echo "Synchronizing $WWW ..."
 	echo " "
-	(chdir $FML/var/html ; tar cf - .)|(chdir $WWW || exit; tar xvf - )
+	echo rsync -av $FML/var/html/ $WWW/
+	rsync -av $FML/var/html/ $WWW/
 
 	echo " "
 	echo "Unlinking *~ ..."
@@ -341,34 +392,29 @@ GEN_ARCHIVE () {
 	)
 
 
+	echo "Generating $FMLID.zip";
+	find $FMLID |zip -q -@ $FMLID.zip
 	(
-		echo "### NT4.0 VERSION ###"
-		echo "Fixing for NT Version ...";
-		sh $FML/usr/sbin/nt-release.sh $FMLID
-		
-		FTP_NT=$FTP/arch//WINDOWS_NT4
-		NT="nt$FMLID"
+		echo 	chdir $FTP
+		chdir $FTP
 
-
-		echo "Makeing .zip format ...";
-
-		find $FMLID |zip -q -@ $NT.zip
-		tar cf $NT.tar $FMLID
-		gzip -9 $NT.tar
-
-		cp -p $NT.zip 	 $FTP_NT
-		cp -p $NT.tar.gz $FTP_NT
-
-		chdir $FTP_NT
-
-		rm -f ntfml-current*zip
-		rm -f ntfml-current*tar.gz
-
-		ln $NT.zip ntfml-current.$DATE.zip
-		ln $NT.zip ntfml-current.zip
-		ln $NT.tar.gz ntfml-current.$DATE.tar.gz
-		ln $NT.tar.gz ntfml-current.tar.gz
-
-		set +vx
+		echo 	rm -f *.zip
+		rm -f *.zip
 	)
+
+	cp -p $FMLID.zip $FTP
+
+	(
+		echo 	chdir $FTP
+		echo 	ln $FMLID.zip fml-current.zip
+
+		chdir $FTP
+		ln $FMLID.zip fml-current.zip
+	)
+
+	#	echo "Generating ls-lR.gz";
+	#	(
+	#		chdir $FTP
+	#		ls -lR . | gzip -9 > ls-lR.gz
+	#	)
 }

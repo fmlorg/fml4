@@ -7,10 +7,10 @@ INIT_PACKAGE () {
 
 		### rcsid is not used explicit, so delete here
 		#	echo " "; echo "Fixing rcsid ... " 
-		#	/bin/sh usr/sbin/fix-rcsid.sh
+		#	/bin/sh .release/bin/fix-rcsid.sh
 
 		echo " "; echo "O.K. rcs check in var/doc/ ... ";
-		sh usr/sbin/sync-rcs-of-doc.sh
+		sh .release/bin/sync-rcs-of-doc.sh
 
 		echo " "; echo "Fixing permissions ... ";
 		chmod 755 *.pl bin/* sbin/* libexec/*
@@ -33,12 +33,17 @@ INIT_VERSION () {
 	echo " "; 
 	echo "fml release version::Initialize() ... "
 	echo "fml release          Date() ... "
-	perl usr/sbin/fml_version.pl -t fml.pl > /dev/null
+	perl .release/bin/fml_version.pl -t fml.pl > /dev/null
 
-	if [ $init = 1 ]
+	if [ $release = 1 ]
+	then
+		echo "FML Release";
+		perl $FML/.release/bin/fml_version.pl -s
+
+	elif [ $init = 1 ]
 	then
 		echo "fml release          Increment() ... "
-		perl usr/sbin/fml_version.pl -i fml.pl > /dev/null
+		perl .release/bin/fml_version.pl -i fml.pl > /dev/null
 	else
 		echo ""
 		echo "RELEASE VERSION NOT INCREMENTED"
@@ -62,7 +67,7 @@ INIT_VERSION () {
 		echo " "; 
 		for file in $RS
 		do
-			perl usr/sbin/show-rcsid.pl $file |\
+			perl .release/bin/show-rcsid.pl $file |\
 			tee -a $RELEASE_MANIFEST
 		done
 
@@ -78,6 +83,16 @@ INIT_VERSION () {
 }
 
 
+INIT_CLEAN_UP () {
+   (
+	chdir $UPDIR
+
+	echo mv fml-* FML/
+	mv fml-* FML/
+   )
+}
+
+
 INIT () {
 	if [ $package = 0 ]
 	then
@@ -87,6 +102,7 @@ INIT () {
 		INIT_PACKAGE
 	fi
 
-
 	INIT_VERSION
+
+	INIT_CLEAN_UP
 }

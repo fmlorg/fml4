@@ -1,13 +1,16 @@
 ### internal variables
 init=0
 package=0
+release=0
+branch=0
 
 ### user defined variables
 
 # prog
 MAKE=make
-INCLUDE_PROG="perl usr/sbin/_include.pl "
+INCLUDE_PROG="perl .release/bin/_include.pl "
 
+FWIX_OPTS=-F
 
 # working directory
 UPDIR=/var/tmp
@@ -32,7 +35,7 @@ RELEASE_MANIFEST=etc/RELEASE_FILES
 DIRECTORY_LIST=.release/directory_list
 
 
-perl usr/sbin/gen_variable_from_release_files.pl .release/RELEASE_FILES > $TMP
+perl .release/bin/gen_variable_from_release_files.pl .release/RELEASE_FILES > $TMP
 . $TMP
 
 

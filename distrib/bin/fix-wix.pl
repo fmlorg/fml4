@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-$ID = `perl usr/sbin/fml_version.pl -s`;
+$ID = `perl .release/bin/fml_version.pl -s`;
 
 while(<>) {
     if (/^\s+Last modified:/) {

@@ -67,8 +67,13 @@ sub GetID
 {
     open(F, $RELEASE_ID) || die $!;
     chop($ID = <F>);
+    $ID =~ s/\s*//g;
 
-    if ($ID =~ /([\d\._]+\w+\#)(\d+)/) {
+    if ($ID =~ /([\d\._]+[A-Z]\#)(\d+)$/) {
+	$ID = $1;
+	$PL = $2;
+    }
+    elsif ($ID =~ /([\d\._]+[\#\w\.]+)(\d+)$/) {
 	$ID = $1;
 	$PL = $2;
     }
@@ -77,6 +82,7 @@ sub GetID
 	$PL = "";
     }
 
+    print STDERR "GetID: $ID $PL\n";
     ($ID, $PL);
 }
 

@@ -1,4 +1,4 @@
-set -- `getopt ip $*`
+set -- `getopt ipbr $*`
 if test $? != 0
 then
         echo 'Usage: ...'
@@ -10,6 +10,10 @@ do
         in
       -i)
 	    init=1; shift;;
+      -r)
+	    release=1; shift;;
+      -b)
+	    branch=1; shift;;
       -p)
 	    package=1; shift;;
       --)

@@ -48,19 +48,29 @@ echo " "; echo "End of makeing distrib ... "; echo " "
 
 
 
-if [ $package = 0 ]
+if [ $branch = 1 ]
 then
+	FIX_LANGUATE
+	GEN_CONTRIB
+
+	GEN_BRANCH_ARCHIVE
+
+elif [ $package = 0 ]
+then
+	FIX_LANGUATE
 	DISTRIBUTION_PATCHLEVEL_INCREMENT
 
 	(chdir $UPDIR ; rm -f fml-current; ln -s distrib fml-current)
 elif [ $package = 1 ]
 then
+	FIX_LANGUATE
 	GEN_CONTRIB
 	GEN_ARCHIVE
 
 	(chdir $UPDIR ; rm -f fml-current; ln -s $FMLID fml-current)
-fi
 
+	GEN_WWW
+fi
 
 
 echo " "; echo "Done. "; echo " "

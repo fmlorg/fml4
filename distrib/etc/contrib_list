@@ -11,9 +11,12 @@ localhack/release-1/putfiles
 localhack/release-1/schwalben
 localhack/release-2/kizu
 localhack/release-2/doc-changes
+localhack/release-2/mnews
+localhack/release-2/member_name
 lexical
 pager
 mail2fax
 netutils
 mail2news
 msend-anytime
+irc

@@ -7,7 +7,9 @@ DATE=`date +%y%h%d`
 
 
 SOURCES:
-Makefile 
+Makefile
+sys/arch/WINDOWS_NT4/ntinstall.cmd
+
 
 C_SOURCES:
 C/fml.c
@@ -21,50 +23,64 @@ var/doc/drafts/*
 PERL_SOURCES:
 fml.pl
 msend.pl
+liblmtp*.pl
 libsmtp*.pl
 proc/lib*.pl
 net/utashiro/jcode.pl
+net/perl.lib/open3.pl
 contrib/MIME/v1.1a/mime?.pl
+contrib/MIME/2.0alpha/mimew20alpha.pl
 contrib/traffic/libtraffic.pl
+contrib/localhack/release-2/member_name/src/libmember_name.pl
 
 
 PERL_ARCH_SOURCES:
-proc/arch/*.pl
+proc/arch/
 
 ARCH_SOURCES:
 sys/arch
 
 DOC:
-INFO
-op
-op.English
-README
-README.English
-fml_with_NT4
-INSTALL
-INSTALL.English
-INSTALL.eng
-INSTALL_on_NT4
-INSTALL_on_NT4.English
-RELEASE_NOTES
-COPYING
-CHANGES
-CROSSPOST_PROTOCOL
+INFO.jp
+INFO.en
+op.jp
+op.en
+README.jp
+README.en
+INSTALL.jp
+INSTALL.en
+INSTALL_on_NT4.jp
+INSTALL_on_NT4.en
+INSTALL_with_QMAIL.jp
+INSTALL_with_QMAIL.en
+RELEASE_NOTES.jp
+RELEASE_NOTES.en
+CHANGES.jp
+CHANGES.en
+UPGRADE.jp
+UPGRADE.en
+CHECK_LIST.jp
+CHECK_LIST.en
+
 
 DOC_CONTRIB:
+doc/ri/COPYING
+doc/ri/CROSSPOST_PROTOCOL
+doc/ri/FILES
 doc/master/help.eng 
 doc/master/help.example2
 
 
 DOC_APPENDED:
-USERS_GUIDE
-USERS_GUIDE.English
+USERS_GUIDE.jp
+USERS_GUIDE.en
 
 
 
 BIN_SOURCES:
 bin/Archive.pl
 bin/Archive.sh
+bin/base64encode.pl
 bin/pmail.pl
 bin/cron.pl
 bin/newsyslog.sh
@@ -81,7 +97,6 @@ bin/daily.pl
 bin/multipart.pl
 bin/weekend-msend.sh
 bin/emumail.pl
-bin/analize_mail_error.pl
 
 
 SBIN_SOURCES:
@@ -95,6 +110,8 @@ LIBEXEC_SOURCES:
 libexec/fml_local.pl
 libexec/fmlserv.pl
 libexec/popfml.pl
+libexec/confirmd.pl
+libexec/mead.pl
 
 
 ETC_SOURCES:

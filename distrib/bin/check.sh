@@ -8,7 +8,7 @@ echo ""
 echo "Ignore Pattern: $FML/.check_ignore";
 echo ""
 
-for x in *.pl bin/*pl sbin/*pl sbin/ccfml sbin/makefml proc/*.p? libexec/*.p? 
+for x in *.pl bin/*pl sbin/*pl sbin/makefml proc/*.p? libexec/*.p? 
 do 
 	echo "--- $x"
 	echo "s#$x ##g" > $sed
