@@ -1,0 +1,113 @@
+.C	WIX Language
+.l	WIX
+.k	WIX Languate
+
+	"WIX" == "With Index and Xreference"
+
+.S	WIX Language Introduction
+
+WIX は４種類のフォーマットのドキュメントを同時生成するために考え出され
+た（妥協ともいう）言語です。名前の通り Index や Xref(Cross Rerefence)
+は重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言
+語です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
+
+言語自体はおおむね nroff like + texinfo like 折衷版くらいです
+
+専用のフォーマッタ bin/fwix.pl を使って４種類のフォーマットで 
+マニュアルを生成します。
+
+plain text は
+	doc/op そのもの 
+
+html 版は
+	make doc でつくってください
+
+nroff と texinfo 版は対応しかけてるところ です。
+
+WIX Language は 
+	１	nroff 覚え直すのも面倒臭い
+	２	texinfo, html, nroff, plain text 
+		４種類を同時に生成する
+
+ために作られたものです。単に僕が書きやすいか否か？で言語仕様が決まって
+ます:-)。ついでに 二か国語対応しかけ code まで入ってたりします;-)
+
+
+.S	WIX 言語仕様
+
+WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
+うなコマンドの後つづく部分は全部が新しい構造の一部とみなされます。
+つまり .S (Section宣言) は新しいsectionの始まりを意味しますが、
+それ以降のパラグラフはどれも新しいセクションの一部です。
+空行があったら次のセクションのようにはカウントしません。
+
+	.P	Part
+	.C	Chapter
+	.S	Section
+	.SS	Sub Section 
+
+TeX も同様なデータ構造を持つので理解はしやすいと思います。
+
+	.key	KEYWORD
+	.k	KEYWORD
+
+KEYWORDと現在の Chapter.Section との対応づけ。
+索引に使われる
+
+	.label	KEYWORD
+	.l	KEYWORD
+
+現在の Chapter.Section にラベルをつけ、xref でたどれるようにするための
+もの。KEYWORDと現在の Chapter.Section との対応づけ。
+xref が使うポインタだが、索引にも使われる
+
+	.xref	KEYWORD
+	.seealso KEYWORD
+
+.label でラベルづけした Chapter.Section への Cross Reference。
+この Cross Reference は分中では
+
+	see also 10.3 
+
+のように変換される
+
+
+	.A	Appendix
+
+	.ptr	KEYWORD
+
+役目は xref と同じだが see also の部分は付け加えられない。
+
+	.q	引用開始
+	.~q	引用終り
+
+これだけがセットで使われているが、.q からは行の最初に3文字スペースでイ
+ンデントし、 .~q のところまでそれが行なわれる。
+＃そのために 終りを示す必要がある。
+
+
+特殊命令：
+
+	.#		COMMENT
+	.comment	COMMENT
+
+この行はコメント
+
+	.include	FILE
+
+FILE をその部分に挿入する。
+
+
+.S	WIX と HTML 例外処理
+
+	.HTML_PRE
+	.~HTML_PRE
+
+<PRE> 〜 </PRE> で展開したい部分。
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
