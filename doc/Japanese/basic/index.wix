@@ -8,6 +8,7 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.include overview.wix
 .include acl.wix
 .include autoregist.wix
 .include confirmd.wix
@@ -15,7 +16,6 @@
 .include mead.wix
 .include moderator.wix
 .include msend.wix
-.include overview.wix
 .include registration.wix
 .include terms.wix
 
