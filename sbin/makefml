@@ -47,7 +47,7 @@ sub InitMakeFml
     &GetTime;
 
     require 'getopts.pl';
-    &Getopts("dhf:A:O:");
+    &Getopts("dhf:A:O:p:D:");
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -106,19 +106,22 @@ sub InitMakeFml
 
 
     ### FIX VARIABLES
-    $CONFIG_DIR = $CONFIG_DIR || "$HOME/.fml"; # must be no meaning ...
+    $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml"; # must be no meaning ...
     $FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
+
+    for ($FML_CONFIG, $FML_POLICY) { &Touch($_) unless -f $_;}
+
+
+    ### *Config, %Default, %PolicyDefault;
+    ###   REQUIRED HERE BEFORE LOADING;
+    &SetHashDefaults;
 
 
     ### LOADING $FML_POLICY
     if (-f $FML_POLICY) {
-	print STDERR "---Set up POLICY from $FML_POLICY\n";
-
-	package Policy;
-	eval("require \$main'FML_POLICY;\#'");
-	print STDERR $@ if $@;
-	package main;
+	print STDERR "---Load POLICY from $FML_POLICY\n";
+	&GetCurPolicy;
     }
 
     ### LOADING $FML_CONFIG
@@ -172,9 +175,6 @@ sub InitMakeFml
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
 
-    ### *Config, %Default, %PolicyDefault;
-    &SetHashDefaults;
-
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
     &ResetVariables;
@@ -208,7 +208,7 @@ sub SetHashDefaults
 		); 
 
     %PolicyDefault = 
-	('MAIL_LIST',         'listname (distribute+commands)',
+	('MAIL_LIST_MODE',         'listname (distribute+commands)',
 	 'CONTROL_ADDRESS_FORMAT', 'listname-ctl (command only)',
 	 ); 
 
@@ -404,17 +404,25 @@ sub GetCurPolicy
     if (! -f $FML_POLICY) { die("Cannot find the file \$FML_POLICY");}
 
     package Policy;
-    eval("require \$main'FML_POLICY;\#'");
+    eval("do \$main'FML_POLICY;\#'");
     print STDERR $@ if $@;
     package main;
 
     # reset %CurPolicy from Policy Name Space;
     for (keys %PolicyDefault) { 
-	$s .= "\$CurPolicy{'$_'} = \$Policy'$_;\n";
+	$s .= "\$Policy{'$_'} = \$Policy'$_;\n";
     }
 
     eval($s);
     print "$@\n---\n$s\n" if $@;
+
+    if ($debug) {
+	print STDERR "---POLICY LOADING\n";
+	while (($k, $v) =  each %Policy) {
+	    printf STDERR "   debug:\$Policy %-20s -> %s\n", $k, $v;
+	}
+	print STDERR "---POLICY LOADING ENDS\n";
+    }
 }
 
 
@@ -429,6 +437,8 @@ sub SavePolicy
     print F "$buf\n";
     print F "\n1;\n";
     close(F);
+
+    print STDERR "Policy Saved in $FML_POLICY\n";
 }
 
 
@@ -795,7 +805,7 @@ sub OutPutLocalConfig
 
     # always yes;
     print CF "\n\n\# configured by $0\n";
-    print CF "# $MailDate\n";
+    print CF "# on $MailDate\n";
     print CF "NON_PORTABILITY\t1\n";
     print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
 
@@ -814,7 +824,7 @@ sub OutPutLocalConfig
     local($output_count);
     print CF "\n\n\nLOCAL_CONFIG\n\n";
     print CF "\#__MAKEFML_LOCAL_CONFIG__\n";
-    print CF "\# configured by $0 ($MailDate)\n";
+    print CF "\# configured by $0 on $MailDate\n";
     print CF "\# *** DO NOT EDIT MANUALLY THIS BLOCK!!! ***\n";
 
     printf STDERR "\n---MAKE_FML OUTPUT\n\n", $k, $v if $debug;
@@ -823,7 +833,7 @@ sub OutPutLocalConfig
     ### $local_config .= $_ if /\$MAKE_FML/;
     ### 
     while (($k, $v) = each %MAKE_FML) {
-	printf STDERR " =output: %-20s -> %s\n", $k, $v if $debug;
+	printf STDERR "   debug:\$MAKE_FML %-20s -> %s\n", $k, $v if $debug;
 
 	next unless $v;
 
@@ -843,13 +853,22 @@ sub OutPutLocalConfig
 	    print CF "\&DEFINE_MODE('confirm');\n";
 	}
 	elsif ($k eq "DELIVERY_MODE") {
+	    print CF "\# --- MAKEFML_DELIVERY_MODE SETUP ---\n";
+	    print CF "\# *** ATTENTION! ***\n";
+	    print CF "\# ./include-ctl has \"fml.pl --ctladdr\" form\n";
+	    print CF "\# option --ctladdr is stronger than --distribute\n";
+
 	    if ($v eq "distribute") {
 		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
-		print CF "\&DEFINE_MODE('distribute');";
-		print CF "\# MAKEFML_DELIVERY_MODE\n";
-		print CF "\# ***ATTENTION!***\n";
-		print CF "\# ./include-ctl uses --ctl \"fml.pl --ctl\"\n";
-		print CF "\# option --ctl is stronger than --distribute\n";
+		print CF "\&DEFINE_MODE('distribute') ";
+		print CF "unless \$Envelope{'mode:ctladdr'};\n";
+		print CF "\# mode != ctladdr may be always true\n";
+	    }
+	    if ($v eq "distribute_with_member_check") {
+		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
+		print CF "\&DEFINE_MODE('distribute_with_member_check') ";
+		print CF "unless \$Envelope{'mode:ctladdr'};\n";
+		print CF "\# mode != ctladdr may be always true\n";
 	    }
 	    elsif ($v eq "default") {
 		; # do nothing;
@@ -938,7 +957,9 @@ sub ShowMainMenu
     }
 
     # debug
-    while (($k, $v) = each %MAKE_FML) {print STDERR "SMM:MAKEFML $k -> $v\n";}
+    if ($debug) {
+	while (($k,$v)=each %MAKE_FML) {print STDERR "SMM:MAKEFML $k -> $v\n";}
+    }
 
     # change %ShowMenu;
     &MakeOptionShowMenu(*MAKE_FML);
@@ -1076,10 +1097,6 @@ sub MakeOptionShowMenu
 
     undef $r;
 
-    # debug
-    while (($k, $v) = each %MAKE_FML) {print STDERR "MOSM:MAKEFML $k -> $v\n";}
-
-
     for (keys %MAKE_FML) {
 	next unless /^OPT_/;
 
@@ -1155,7 +1172,10 @@ sub ModeString
 {
     local(*MAKE_FML) = @_;
     if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
-	"distribute-only";
+	"distribute-only (anyone can post)";
+    }
+    elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
+	"distribute-only (only member can post)";
     }
     else {
 	"distribute + commands available";
@@ -1165,23 +1185,34 @@ sub ModeString
 sub ShowDeliveryModeMenu
 {
     &MakeOptionShowMenu(*MAKE_FML);
-    local($_, $mode, $mode1, $mode2);
+    local($_, $mode, $mode1, $mode2, $mode3);
+
+    undef $mode1; undef $mode2; undef $mode3;
+
     $mode = &ModeString(*MAKE_FML);
 
-    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
+    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
 	$mode1 = "<===";
     }
-    else {
+    elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
 	$mode2 = "<===";
+    }
+    else {
+	$mode3 = "<===";
     }
 
     $_  = "\n";
     $_ .= "DELIVERY MODE (CURRENT MODE is $mode)\n";
+
     if ($mode1) {
 	$_ .= sprintf(" address %-10s for distribution only\n", $ml);
 	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
     }
     elsif ($mode2) {
+	$_ .= sprintf(" address %-10s for distribution only\n", $ml);
+	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
+    }
+    elsif ($mode3) {
 	$_ .= sprintf(" address %-10s for both distribute and commands\n",$ml);
 	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
     }
@@ -1191,8 +1222,9 @@ sub ShowDeliveryModeMenu
     $_ .= "  ENTRY                           Current Configuration\n";
     $_ .= "-------------------------------------------------------\n";
     $_ .= "0 END\n";
-    $_ .= "1 Distribute Only                  $mode1\n";
-    $_ .= "2 Distribute + Commands (default)  $mode2\n";
+    $_ .= "1 Distribute Only (only member can post)  $mode1\n";
+    $_ .= "2 Distribute Only (anyone can post)       $mode2\n";
+    $_ .= "3 Distribute + Commands (default)         $mode3\n";
 
     $_  =~ s/\n/\n$CurTag/g;
 
@@ -1210,7 +1242,7 @@ sub DeliveryQuery
 
 	$tag = $CurTag;
 	$CurTag .= "   ";
-	$r = &Query("Delivery Mode ", "1-2", "[1-2]", "0");
+	$r = &Query("Delivery Mode ", "1-3", "[1-3]", "0");
 
 	$CurTag .= "   ";
 
@@ -1218,9 +1250,12 @@ sub DeliveryQuery
 	    last;
 	}
 	elsif ($r == 1) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
+	    $MAKE_FML{"DELIVERY_MODE"} = "distribute_with_member_check";
 	}
 	elsif ($r == 2) {
+	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
+	}
+	elsif ($r == 3) {
 	    $MAKE_FML{"DELIVERY_MODE"} = "default";
 	    # loop once again;
 	}
@@ -1374,7 +1409,11 @@ sub Conv
     local($uid, $gid, $format);
 
     &ApplyPolicy;
-    $format = $CONTROL_ADDRESS_FORMAT;
+    $format = $Policy{'CONTROL_ADDRESS_FORMAT'};
+
+    if ($debug) {
+	print STDERR "\tCONTROL_ADDRESS_FORMAT\t$format\n";
+    }
 
     open(EXAMPLE, $example)  || (&Warn("cannot open $example"), return 0);
     open(CF, "> $out")       ||  (&Warn("cannot open $out"), return 0);
@@ -1394,12 +1433,14 @@ sub Conv
     while (<EXAMPLE>) {
 	# substitute following the policy default
 	if ($format) {
+	    # 
 	    # exception: CtlAddr == fmlserv || MAIL_LIST
-	    if ($format eq "fmlserv" ||	$format eq "_ML_") {
-
+	    if ($format =~ /^(fmlserv|_ML_)$/) {
 		# aliases: remove the entry
 		if ($example =~ /aliases$/ && /^_ML_-ctl:/) {
-		    s/^_ML_-ctl/\# _ML_-ctl is not used. comment out\n\# _ML_-ctl/;
+		    local($repl) = 
+			"\# _ML_-ctl is not used. comment out\n\# _ML_-ctl";
+		    s/^_ML_-ctl/$repl/;
 		}
 
 		# cf file: null entry if CtlAddr == _ML_
@@ -1410,8 +1451,10 @@ sub Conv
 		    s/_ML_-ctl/fmlserv/;
 		}
 	    }
+	    # 
+	    # CtlAddr != fmlserv NOR _ML_
 	    else {
-		s/_ML_-ctl/$CONTROL_ADDRESS_FORMAT/g;
+		s/_ML_-ctl/$format/g;
 	    }
 	}
 	
@@ -1721,8 +1764,11 @@ sub do_new { &do_newml(@_);}
 sub do_newml
 {
     local($ml) = @_;
+    local($cf, $local_config, $config, @config, %config);
 
     print "---Creating $ml mailing list\n";
+
+    &ApplyPolicy;
 
     &GenerateDirectory($ml);
     &ResetVariables;
@@ -1741,6 +1787,17 @@ sub do_newml
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
     }
+
+    ### cf fixed
+    if ($MAIL_LIST_MODE) {
+	$cf = "$ML_DIR/$ml/cf";
+	&GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+	$MAKE_FML{"DELIVERY_MODE"} = $MAIL_LIST_MODE;
+	print STDERR "MODE $MAKE_FML{'DELIVERY_MODE'}\n";
+	&SaveCF($cf, *config);
+    }
+
+
 
     &ResetVariables;
     &SetPublicUmask;
@@ -1854,6 +1911,8 @@ sub GetCF
 
 sub do_policy
 {
+    local($buf);
+
     # Variable Settings;
     &ResetVariables;
 
@@ -1865,11 +1924,11 @@ sub do_policy
 	&PolicyMenu;
 
 	### 
-	print "--- Set Up the Policy of Address Syntax\n";
+	print "--- Set Up the Policy of How to use ML Addresses\n";
 	print $POLICY_MENU;
 	
 	### 
-	$r = &Query("Menu ", "number", "\\d+", "0");
+	$r = &Query("Menu ", "0,1,2", "\\d+", "0");
 
 	if ($r == 0) {
 	    last;
@@ -1882,25 +1941,41 @@ sub do_policy
 	}
     }    
 
-    &SavePolicy;
+    while (($k, $v) =  each %Policy) {
+	$buf .= "\$$k = '$v';\n";
+    }
+
+    &SavePolicy($buf);
 }
 
 
 sub PolicyMenu
 {
-    $MenuPolicy{'MAIL_LIST_MODE'} = 
-	"distribution with or without commands server";
-    $MenuPolicy{'CONTROL_ADDRESS_FORMAT'} = 
-	"syntax: listname-ctl(default)? fmlserv? or others?";
-
-    for ('MAIL_LIST_MODE', 'CONTROL_ADDRESS_FORMAT') {
-	$MenuPolicy{$_} = $Policy{$_} if $Policy{$_};
+    for (keys %Marker) {
+	next unless /^policy:/;
+	undef $Marker{$_};
     }
 
+    &ApplyPolicy;
+
+    $MenuPolicy{'MAIL_LIST_MODE'} = qq#;
+    \tdistribute + commands              $Marker{'policy:dm:d+c'};
+    \tdistribute (only member can post)  $Marker{'policy:dm:d-c:member'};
+    \tdistribute (anyone can post)       $Marker{'policy:dm:d-c:any'};
+    ;#;
+
+    $MenuPolicy{'CONTROL_ADDRESS_FORMAT'} = qq#;
+    \t_ML_-ctl (default)                 $Marker{'policy:ca:ctl'};
+    \t_ML_ (require distribute+commands) $Marker{'policy:ca:ml'};
+    \tfmlserv                            $Marker{'policy:ca:fmlserv'};
+    \tOTHER                              $Marker{'policy:ca:other'};
+    ;#;
+
     $POLICY_MENU = qq#;
-    0 ENDS;
-    1 MAIL_LIST_MODE           $MenuPolicy{'MAIL_LIST_MODE'};
-    2 CONTROL_ADDRESS_FORMAT   $MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
+    0 END;
+    1 \$MAIL_LIST Delivery mode (mode of delivery);
+    $MenuPolicy{'MAIL_LIST_MODE'};
+    2 $CONTROL_ADDRESS FORMAT\n;$MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
     ;
     ;#;
     $POLICY_MENU =~ s/;//g;
@@ -1909,17 +1984,33 @@ sub PolicyMenu
 
 sub ApplyPolicy
 {
-    if ($Policy{'MAIL_LIST_MODE'} eq "distribute + commands") {
+    if ($Policy{'MAIL_LIST_MODE'} eq "distribute + commands" ||
+	$Policy{'MAIL_LIST_MODE'} eq ""	) {
 	$MAIL_LIST_MODE = "";
+	$Marker{'policy:dm:d+c'}        = "<===";
     }
     elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (anyone can post)") {
-	$MAIL_LIST_MODE = "--distribute";
+	$MAIL_LIST_MODE = "distribute";
+	$Marker{'policy:dm:d-c:any'}    = "<===";
     }
     elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (only member can post)") {
-	$MAIL_LIST_MODE = "--distribute_with_member_check";
+	$MAIL_LIST_MODE = "distribute_with_member_check";
+	$Marker{'policy:dm:d-c:member'} = "<===";
     }
 
-    $CONTROL_ADDRESS_FORMAT = $Policy{'CONTROL_ADDRESS_FORMAT'};
+    local($_) = $Policy{'CONTROL_ADDRESS_FORMAT'};
+    if ($_ eq '_ML_-ctl' || $_ eq '') {
+	$Marker{'policy:ca:ctl'} = "<===";
+    }
+    elsif ($_ eq '_ML_') {
+	$Marker{'policy:ca:ml'} = "<===";
+    }
+    elsif ($_ eq 'fmlserv') {
+	$Marker{'policy:ca:fmlserv'} = "<===";
+    }
+    elsif ($_ eq 'other') {
+	$Marker{'policy:ca:other'} = "<===";
+    }
 }
 
 
@@ -1928,8 +2019,8 @@ sub PolicyListMode
     local($m) = q#;
     0 ENDS;
     1 distribute and commands available (DEFAULT FOR BACKWARD COMPATIBLE);
-    2 distribute only (ANYBODY CAN POST);
-    3 distribute only (ONLY MEMBER CAN POST);
+    2 distribute only (ONLY MEMBER CAN POST);
+    3 distribute only (ANYBODY CAN POST);
     ;#;
 
     $m =~ s/;//g;
@@ -1944,10 +2035,10 @@ sub PolicyListMode
 	$Policy{'MAIL_LIST_MODE'} = "distribute + commands";
     }
     elsif ($r == 2) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute (anyoen can post)";
+	$Policy{'MAIL_LIST_MODE'} = "distribute (only member can post)";
     }
     elsif ($r == 3) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute (only member can post)";
+	$Policy{'MAIL_LIST_MODE'} = "distribute (anyone can post)";
     }
 }
 
@@ -1958,20 +2049,24 @@ sub PolicyCtlAddr
     default is _ML_-ctl where _ML_ is substituted when "makefml newml";
     ;
     for example;
-    _ML-ctl       ($CONTROL_ADDRESS == _ML_-ctl@your-domain);
-    fmlserv       ($CONTROL_ADDRESS == fmlserv@your-domain);
-    _ML_          ($CONTROL_ADDRESS == $MAIL_LIST);
-    _ML-control   ($CONTROL_ADDRESS == _ML_-control@your-domain);
-    _ML-command   ($CONTROL_ADDRESS == _ML_-command@your-domain);
-    ...;
+    0 END;
+    1 _ML-ctl    ($CONTROL_ADDRESS == _ML_-ctl@your-domain);
+    2 _ML_       ($CONTROL_ADDRESS == $MAIL_LIST);
+    3 fmlserv    ($CONTROL_ADDRESS == fmlserv@your-domain);
+    4 other      (PLEASE INPUT FORMAT);
     ;#;
     $m =~ s/;//g;
     print $m;
 
-    $r = 
-	&Query("\$CONTRO_LADDRESS", "_ML_-ctl", "[\\-\\_\\w\\d]+", "_ML_-ctl");
+    $r = &Query("\$CONTRO_LADDRESS", "0-4", "[\\-\\_\\w\\d]+", "0");
 
-    if ($r) { $Policy{'CONTROL_ADDRESS_FORMAT'} = $r;}
+    %Menu = (0, $Policy{'CONTROL_ADDRESS_FORMAT'},
+	     1, "_ML_-ctl",
+	     2, "_ML_",
+	     3, "fmlserv",
+	     4, $r);
+
+    $Policy{'CONTROL_ADDRESS_FORMAT'} = $Menu{$r};
 }
 
 sub do_config
@@ -2033,10 +2128,26 @@ sub do_config
     eval($eval);
     print $@ if $@;
 
+    if (open(CF, "> $cf")) {
+	&SaveCF($cf, *config);
+    }
+    else {
+	&Warn("Cannot open cf[$cf]");
+	return;
+    }
+
+    # make ml/config.ph
+    &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
+		  $cf, "$ML_DIR/$ml/config.ph");
+}
+
+sub SaveCF
+{
+    local($cf, *config) = @_;
 
     if (open(CF, "> $cf")) {
 	select(CF); $| = 1; select(STDOUT);
-
+	
 	# believe the config conservation
 	# undef $config{'NON_PORTABILITY'};
 	# undef $config{"COMPAT_$OS_TYPE"};
@@ -2064,14 +2175,6 @@ sub do_config
 
 	print "Configuration is saved in $cf\n";
     }
-    else {
-	&Warn("Cannot open cf[$cf]");
-	return;
-    }
-
-    # make ml/config.ph
-    &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
-		  $cf, "$ML_DIR/$ml/config.ph");
 }
 
 sub Uniq
