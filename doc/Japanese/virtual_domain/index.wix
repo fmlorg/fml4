@@ -8,3 +8,7 @@
 
 .appendix
 .include postfix-example.txt
+
+.C	sendmail
+
+.url http://www.sendmail.org/virtual-hosting.html
