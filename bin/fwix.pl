@@ -57,7 +57,7 @@ $DIR         = $opt_d || $opt_I;
 $HtmlDir     = $opt_D;
 $RoffDir     = $opt_R;
 $Title       = $opt_T || "NONE TITLE";
-$TmpDir      = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; 
+$TmpDir      = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './var/tmp'; 
 
 # index list
 $IndexFile   = $opt_f || $NULL; # list of lidex
