@@ -99,7 +99,7 @@ sub GetID
 
 sub GetDate
 {
-    open(F, $RELEASE_DATE) || die $!;
+    open(F, $RELEASE_DATE) || die("cannot open $RELEASE_DATE :$!");
     chop($DATE = <F>);
     $DATE;
 }
@@ -119,7 +119,7 @@ sub PLIncrement
 
 sub StoreID
 {
-    open(F, "> $RELEASE_ID") || die $!;
+    open(F, "> $RELEASE_ID") || die("cannot open $RELEASE_ID :$!");
     select(F); $| = 1; select(STDOUT);
     print F "$ID$PL", "\n";
     close(F);
@@ -130,7 +130,7 @@ sub StoreID
 sub StoreTime
 {
     &GetTime;
-    open(F, "> $RELEASE_DATE") || die $!;
+    open(F, "> $RELEASE_DATE") || die("cannot open $RELEASE_DATE :$!");
     select(F); $| = 1; select(STDOUT);
     print F "$MailDate\n";
     close(F);
