@@ -5,6 +5,18 @@
 	$Date$
 
 
+2001/08/07
+
+   proc/libfml.pl (2.39-2.40):
+	bug fix filter code to accept capital e.g. "Bye".
+
+	大文字ではじまるコマンド(例: Bye)を弾いてしまうのは
+	コマンドの正当性チェックが厳し過ぎるから。
+	これは feature ではなく bug 
+
+   MTI
+	change Date2UnixTime() to use FML::Date::date_to_unixtime()
+
 2001/08/02
 
   sbin/makefml
