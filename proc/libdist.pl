@@ -28,7 +28,7 @@ sub DoDistribute
     # are backward compatible.
     if (@MailContentHandler > 0) {
 	&use('disthack'); 
-    	local($status) = &ContentHandler(*e);
+    	my ($status) = &ContentHandler(*e);
 	if ($status eq 'reject') { return $NULL;}
     }
 
