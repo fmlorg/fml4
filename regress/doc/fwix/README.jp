@@ -1,0 +1,5 @@
+var/html/op-e/*html などに日本語がないかをチェックする
+
+つかいかた:
+
+% perl check-doc-lang.pl var/html/op-e/*html
