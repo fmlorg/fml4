@@ -3,6 +3,24 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/05
+
+   proc/libra.pl
+	define "admin add2actives" "admin add2members"
+
+		admin add2actives
+		admin add2members
+		admin addactives
+		admin addmembers
+
+	という片方のファイルにだけ登録する admin コマンド
+
+   proc/libfml.pl
+	nuke debug code
+
+	ごめんなさい MAXLEN_COMMAND_INPUT のデバッグコード抜き忘れてました
+	current の 20001004 は使わないで下さい。
+
 2000/10/04
 
    proc/libfml.pl
