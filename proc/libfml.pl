@@ -136,7 +136,7 @@ sub DoProcedure
       elsif (($e{'mode:ctladdr'} || $e{'mode:uip'}) && ($xbuf !~ /^\#/o)) {
 	  &Log("Procedure: mode:ctladdr") if $debug;
 	  for $p (keys %Procedure) {
-	      if ($p && $xbuf =~ /^$p/) {
+	      if ($p && $xbuf =~ /^$p/i) {
 		  # &Log("recognize $p => '# $p'"); # XXX: not log
 		  $xbuf = "\# $xbuf"; # XXX: internal representation
 	      }
