@@ -16,7 +16,7 @@ sub SmtpMCIDeliver
     local(*e, *rcpt, *smtp, *files) = @_;
     local($nh, $nm, $i);
 
-    $nh = $MCI_SMTP_HOSTS;
+    $nh = $MCI_SMTP_HOSTS; # may be != scalar(@HOSTS);
     $nm = 0;
 
     # save @rcpt to the local cache entry
@@ -33,6 +33,7 @@ sub SmtpMCIDeliver
 	}
 
 	if (@rcpt) {
+	    &Log("SmtpMCIDeliver::HOST->$HOSTS[0]") if $debug_mci;
 	    $error = &SmtpIO(*e, *rcpt, *smtp, *files);
 	    # If all hosts are down, anyway try $HOST;
 	    if ($error) {
@@ -233,6 +234,11 @@ sub DoGenerateHeader
     $le{'GH:X-MLServer:'}  =  $Rcsid;
     $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug;
     $le{'GH:From:'}      .= " ($MAINTAINER_SIGNATURE)" if $MAINTAINER_SIGNATURE;
+
+    # Run-Hooks. when you require to change header fields...
+    if ($REPORT_HEADER_CONFIG_HOOK) {
+	&eval($REPORT_HEADER_CONFIG_HOOK, 'REPORT_HEADER_CONFIG_HOOK');
+    }
 
     # MEMO:
     # MIME (see RFC1521)
