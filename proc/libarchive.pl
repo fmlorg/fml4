@@ -70,11 +70,6 @@ print STDERR "
     }
 
 
-    $tar_prog  = $TAR;
-    $tar_prog  =~ s/\sxf\s/ cf /;
-    $gzip      = $COMPRESS;
-    
-
     ### HERE WE GO!
     while ($i * $unit <= $limit) {
 	$counter = 0;
@@ -100,10 +95,10 @@ print STDERR "
 		next;
 	    }
 	    else {
-		&Debug("$tar_prog $files |$gzip > $archive_dir/$tar.tar.gz")
+		&Debug("$TAR $files |$COMPRESS > $archive_dir/$tar.tar.gz")
 		    if $debug;
 
-		system("$tar_prog $files |$gzip > $archive_dir/$tar.tar.gz");
+		system("$TAR $files |$COMPRESS > $archive_dir/$tar.tar.gz");
 		&Log("Error: Archive::Archive [$@]") if $@;
 		&Log("$archive_dir/$tar.tar.gz is created") unless $@;
 	    }
