@@ -4741,7 +4741,7 @@ sub do_log
     for (@argv) {
 	/^-i$/       && ($cis_p = 1);
 	/^\-p(\S+)$/ && ($pat = $1);
-	/^\-D(\S+)$/ && ($dpat = $1);
+	/^\-D(\d+)$/ && ($dpat = $1);
 	/^\-(\d+)$/  && ($lines = $1);
 	/^all$/i     && ($all_p = 1)
     }
@@ -4754,6 +4754,7 @@ sub do_log
 
     if ($dpat =~ m@(\d{4})/(\d{2})/(\d{2})@) {
 	$pat = ($1 - 1900) .'/'.  $2 .'/'.  $3;
+	print STDERR "rewrite $dpat => $pat\n";
     }
 
     if ($pat) {
