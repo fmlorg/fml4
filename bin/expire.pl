@@ -1,13 +1,16 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
 # $rcsid   = q$Id$;
-#
+
 
 # CONFIGURATION
 $SPOOL_DIR = $SPOOL_DIR || "spool";	# expire spool articles
 $EXPIRE	   = $EXPIRE    || 7;		# days (7 == one week)
-$ONEDAY    = 24*3600;			# seconds for one day
 
 if ($0 eq __FILE__) {
 	require 'getopts.pl';
@@ -16,12 +19,12 @@ if ($0 eq __FILE__) {
 	die(&USAGE) if $opt_h;
 	$SPOOL_DIR = $opt_s || $SPOOL_DIR;
 	$EXPIRE	   = $opt_e || $EXPIRE;
-	$WITH_NUMBER = $opt_n;	# number
+	$with_number = $opt_n;	# number
 	$debug     = $opt_d;
 	
 	print STDERR "&Expire($SPOOL_DIR, $EXPIRE);\n" if $debug;
-	if ($WITH_NUMBER) {
-	    &Expire($SPOOL_DIR, $EXPIRE, $WITH_NUMBER);
+	if ($with_number) {
+	    &Expire($SPOOL_DIR, $EXPIRE, $with_number);
 	}
 	else {
 	    &Expire($SPOOL_DIR, $EXPIRE);
@@ -37,37 +40,41 @@ else {
 sub Expire_with_date { &Expire(@_);}
 sub Expire
 {
-	local($SPOOL_DIR, $EXPIRE, $WITH_NUMBER) = @_;
-	local($d, *f);
+	local($SPOOL_DIR, $EXPIRE, $with_number) = @_;
+	local($d, $f, @f, %f);
+	local($oneday) = 24*3600; # seconds for one day
 
 	opendir(F, $SPOOL_DIR) || (return $NULL);
 	foreach $f (readdir(F)) {
 		next if $f =~ /^\.$/;
-		next if $f =~ /^\.\.$/;
 
-		if ($WITH_NUMBER)  {
-		    push(@f, "$SPOOL_DIR/$f");
+		if ($with_number)  {
+		    push(@f, $f);
 		}
 		else {
 		    # expire with date(default)
 		    $f = "$SPOOL_DIR/$f";
 		    $d = time - (stat($f))[10];
-		    $d /= $ONEDAY;
-		    print STDERR "unlink $f if $d > $EXPIRE\n" if $debug;
+		    $d /= $oneday;
+		    
+		    print STDERR "?:expire $f if $d > $EXPIRE\n" if $debug; 
+
 		    if ( !$debug && -f $f && $d > $EXPIRE && unlink $f ) {
-			print STDERR "canont unlink $f\n";
+			print STDERR "unlink $f\n";
 		    }
 		}
 	}
 	closedir(F);
 
 	# Suppose I do not believe the counter by $DIR/seq 
-	if ($WITH_NUMBER)  {
+	if ($with_number)  {
 	    # sort ->  1 , 2, 3, ... incresing order.
-	    @f = sort {$a <=> $b} @f;
+	    @f = sort { $a <=> $b;} @f;
 	    $d = scalar(@f) - $EXPIRE;
 
-	    foreach(@f) {
+	    foreach (@f) {
+		$_ = "$SPOOL_DIR/$_";
+		print STDERR "Try    $_ [$d files left]\n" if $debug;
 		last if $d <= 0;
 		print STDERR "unlink $_ [$d files left]\n" if $debug;
 		-f $_ && unlink($_) && $d--;
