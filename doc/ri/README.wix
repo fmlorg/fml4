@@ -12,7 +12,7 @@ fml Mailing List Server Package
 
 
 .C	fml Introduction
-.S	fml 2.1
+.S	fml 2.1 Overview
 
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
@@ -22,33 +22,32 @@ ML server, management tool, .forward 等メールを使う各種インターフェイスの
 集合体です。
 
 これは（歴史的理由により）デフォールトでは hml 1.6 という Perl Script 
-を Emulationします。つまり、ユーザにとっての見かけが同じになるように作
-動します。
+を Emulationします。
 ＃正確にはその元祖の shell script の program というべきであらう
 
-デフォールトの挙動はそうですが、各種の動作モードを設定（コマンドライン
-オプション か Configuration file で行う）することで
-distribute だけをして「spoolingするaliasesと同じ」にするとか 
-listserv のように使うインターフェイス（libexec/fmlserv.pl）
-.forward に仕掛けて slocal や
-.forward から fml の機能を使うことで自分のアカウントでMLを実行する
-等の仕掛けも用意されています。
+subset としてはユーザにとってもＭＬ管理者にとっても使い勝手がが同じに
+なるように作動できます。
 
-インターフェイスだけを変えて、ユーザにとってどう見えるか？という部分を
-用意すればよいので、様々なコマンド、ライブラリ群を好きなインターフェイ
-スで使えるべきだということです。
-
-サーバのコマンドの機能は上述のように
+デフォールトの挙動はそうですが、さまざまな動作を実行できます
 
 	○コマンド機能等を一切使わずにフォワードするだけ等
+	   配送だけして「spoolingするaliasesと同じ」
 	○hml のシンタックスで使う （Default Emulation）
 	○listserv or majordomo インターフェイス
+	   みかけがあたかも listserv のように fml のコマンド群を使う
 	○forward でのMLのための仕組み(slocal や vacation)
+	   .forward に仕掛けて slocal や
+	   .forward から fml の機能を使うことで自分のaccountでMLを実行
+	○まとめおくり等の配送の仕方の制御
+	   メールをリアルタイムに配送したり、
+	   一定時間ごとにためてまとめておくる
 
-です。
+等はすぐに実行できます。
+その設定はコマンドラインオプション か Configuration file で行えます。
 
-また、メールをリアルタイムに配送したり、一定時間ごとにためて
-まとめおくり するようにするサーバも実装しています。
+ようは、インターフェイスだけを変えて、ユーザにとってどう見えるか？とい
+う部分を用意すればよいので、様々なコマンド、ライブラリ群を好きなインター
+フェイスで使えるということです。
 
 
 .S	目的
@@ -59,6 +58,21 @@ listserv のように使うインターフェイス（libexec/fmlserv.pl）
 ＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
 ていると思います。最適解ってわけじゃないけど :-)
 
+各種機能はそれぞれの目的に応じて選んでみて下さい。
+例えば『あるＭＬのローカルな再配送』のような場合はコマンド機能を落して
+使うほうがよいでしょう。例： ip-connection 
+
+
+.S	インストール
+
+とりあえず非常に細かいチューニングを行なわなくてよいなら
+
+	○対話的プログラムで行なう 
+	○コマンドラインで引数を２つほど指定して make 
+
+で、環境に合わせた各種見本設定を自動的に生成します。
+詳しくは INSTALL というファイルを見て下さい。
+
 
 .S	Update や bug fix等の情報について
 
@@ -66,17 +80,20 @@ listserv のように使うインターフェイス（libexec/fmlserv.pl）
 けるとよろしいかと存じます(_o_)。
 
 ○ fml のWWWのページは http://www.phys.titech.ac.jp/uja/fml/ です。
+   最新のドキュメント、ソースともにここに揃っています。 
 
 ○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
 うにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
 
-○ 最新版のfml-currentのソースコードは、なんでもいいからメールを
+○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
+可能です。
+ftp が使えない場合メールでは、なんでもいいからメールを
 fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。
 
 
-.S	ソースの入手方法。anonymous ftp等
+.S	ソースの入手方法 anonymous ftp 
 
 	国内のマスター
 	ftp.phys.titech.ac.jp:/pub/net/fml-current/
@@ -87,53 +104,46 @@ fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
 	国外用のミラー
 	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
 
+
 ＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
-
-
-○ WWWの場合最新のドキュメント、ソースともに 
-
-	http://www.phys.titech.ac.jp/uja/fml/ 
-
-からたどれます。
 
 
 .S	fml の ＭＬ と bug-reportのアドレス
 
-○バグ、質問、新しい発見（笑）があったら fml-support ML（例によって自
-動登録です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
+○バグ、質問、新しい発見があったら fml-support ML（例によって自動登録
+です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
 
-ただ、個人宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れない
-場合も多々あります。
+ただ、個人宛にメールがくるとどこかへまぎれたり、
+忙しくて時間が取れない場合も多々あります。
 できるだけ fml-support Mailing List 宛へ投げてください _o_
-MLならわかる人がすぐに答えてくれる可能性があります。
+ＭＬならわかる人がすぐに答えてくれる可能性があります。
 
-MLへ登録して欲しくない方のために
+2.1 からはＭＬへ登録して欲しくない方のために
 
 	fml-query@phys.titech.ac.jp 	
 
-へ投げていただければ fml-support MLへ登録することなく fml-support へフォ
-ワードを行います。
+を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
+ことなく fml-support へフォワードを行います。
 
 どうしても 内密な相談とか、DMで聞きたいことは 
 
 	fml-bugs@phys.titech.ac.jp
 
-へ投げておいてください。ただ返事がすぐ返ることはあまり期待しないでくだ
-さい。
-＃ときどきタイミングがよいと一瞬ですぐに返せますけど
+へ投げておいてください。ただ返事は遅れぎみです _o_ 
+＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
 
 	 
 .S	Compatibility
 
+○ fml 1.x を使っていて fml 2.x に入れ換える場合
+   そのまま perl script 群だけを入れ換えれば動きます。
+   config.ph で複雑な HOOK を書けている場合は
+   ちょっと注意がいるかもしれません
 
-ユーザーからの見かけとか設定に使うファイル名等の部分には名残が見てとれ
-るでしょうが、中身は別物です。
-＃ "# command" syntax にこだわっているわけでもないし
+○ hml 1.6 との compatibility
 
-今の version は hml 1.6 の Upper Compatible になっているはずです。
-＃つまり members や log file等をそのままに、*pl 群と config.phを差し替
-＃えればいきなり動くということですが。
-＃もし、なってなかったらお叱りのメール下さい(_o_)
+members や log file等をそのままに、*pl 群と config.phを差し替えればい
+きなり動きます。
 
 
 .C	fml でやれること
@@ -150,8 +160,10 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 
 そして………
 
-・たくさんのドキュメント
+○たくさんのドキュメント（複数のフォーマットで）
+
 	PLAINTEXT版はあらかじめ用意されています。
+
 	HTML 版は var/html/ の下に用意されいますが、
 	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 	shell% make doc でつくってください
@@ -159,29 +171,35 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 		http://www.phys.titech.ac.jp/uja/fml/ 
 	をのぞいてみてください
 
-・user権限で実行します
-・モジュール化 
+○user 権限で実行します＃ daemon とかではなく
+
+○モジュール化 
 	メンテもしやすいですが、自分だけのモジュールを独立にメンテする
 	ことも容易です。
+	応用として
+	   ・ひとつのfmlで複数のＭＬを扱うように拡張
+	   ・コマンド専用サーバ
+   	   ・特定の目的のサーバ
+		例：ftpmail専用サーバ 
 
-・Customize 
+○Customize 
 	ソースコードをいじらなくてもたくさんの制御変数と
 	フックでカスタマイズできます。
 	カスタマイズは config.ph とコマンドラインオプション両方で行えます
 
-・まとめ送りサーバ 
+○まとめ送りサーバ 
 	SYSTEM の CRONを使う方法
 			使わない方法（ユーザー権限ということ）
 	Ｎ通たまったら配送する方法
 
-・自動登録モードとメンバーチェックモード
-	自動登録の各種variation
+○自動登録モード、メンバーチェックモード等の設定
+   ・自動登録の各種variation
 	メールだすだけ（もともとオフミ用）
 	Subject: subscribe形
 	本文に Subscribe 形
 	等（キーワードは変えられます）
 
-・豊富なファイル操作
+○豊富なファイル操作
 	mget と まとめおくりでの User interface は次のようなものが取り
 	揃えられています。
 
@@ -198,51 +216,47 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 		uuencode
 	を ユーザーごとに設定できる
 
-・コマンド Syntax の拡張（Interface部分の拡張）
+○コマンド Syntax の拡張（Interface部分の拡張）
 	デフォールトは "# command" syntax
 	e.g. 	コマンドサーバだけに使うとか
 		コマンド専用サーバの時なら 
 		"# command" syntax じゃなくてもいいわけで
 
-・リモート管理（アドミンコマンド）での Password system(cryptもする)
+○リモート管理（アドミンコマンド）での Password system(cryptもする)
 
-・~/.forward インターフェイス libexec/fml_lcoal.pl
+○~/.forward インターフェイス libexec/fml_lcoal.pl
 
-・ Listserv 互換用インターフェイス libexec/fmlserv.pl
+○ Listserv 互換用インターフェイス libexec/fmlserv.pl
 
-・ひとつのfmlで複数のＭＬを扱うように拡張
-	この辺の応用で コマンド専用サーバ、 ftpmail専用サーバ として動
-	かすとかできるように
+○複数行headerの正しい取り扱い
+○ロックのデフォールトはflock（２種類選択式）
+○MIME 処理
+○リレーサーバの処理 ＃ % hack 
 
-・複数行headerの正しい取り扱い
-・ロックのデフォールトはflock（２種類選択式）
-・MIME 処理
-・リレーサーバの処理 ＃ % hack 
-
-・標準の spool と Archive( tar + gzip ed files) spool
+○標準の spool と Archive( tar + gzip ed files) spool
 	およびget等でのアーカイブへのアクセス
 
-・Expire 機能
-・newsyslog 
+○Expire 機能
+○newsyslog 
 	e.g. log -> var/log/log.0
 
-・ＭＬ間クロスポスト
+○ＭＬ間クロスポスト
 
-・compile 時の OS 自動判定等の
+○compile 時の OS 自動判定等の
 
-・コマンド操作の誤チェック機能
+○コマンド操作の誤チェック機能
 
-・sendmail とIPC
+○sendmail とIPC
 
-一定時間間隔でPOPをかければ、sendmail が走っていないマシンでも
-MLを実行するこは可能です
+一定時間間隔で POP をかければ、sendmail が走っていないマシンでもMLを実
+行するこは可能です
 
-・whois 等も汎用IPCルーチンをつかう
+○whois 等も汎用IPCルーチンをつかう
 
-・スタートレック宇宙歴サポート（笑）
+○スタートレック宇宙歴サポート（笑）
 	宇宙歴をつけるmh, mh-e user interface つき:-)
 
-・ライブラリとして
+○ライブラリとして
 	MIME decoding library(including mime_pls 1.11a)
 	ドキュメント Generator
 	いくつかの実装例
@@ -272,27 +286,40 @@ MLを実行するこは可能です
 です
 
 
-.C	How to install
-.S	make 一発
+.C	インストールに必要な環境（条件）
 
-おおむね make 一発です:-)。
+.S	インストールと環境
 
-最も今時最初からOSに入ってるとおもいますが、perl と sendmail が必要で
-す。私のテスト環境は
+インストール自体はおおむね make 一発です:-)。
+＃実際のインストールはINSTALLというファイルを見て下さい。
+
+最も今時最初からOSに入ってるとおもいますが、perl が必須です。
+自分のマシンで sendmail が走っている必要はありません。
+
+pop を使ってＭＬを動かすこともできますし、sendmail以外のMTAもあります
+から拘る必要はありませんが、4.4BSD がターゲットマシンなので sendmail +
+perl を想定してドキュメントの大部分は書いてあります。
+
+実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
+ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
+プロバイダ等では違うこともありえます。
+
+
+.S	参考：ターゲットマシンの環境
+
+fml のターゲットマシンでのテスト環境は
+
 2.1 は
-	sendmail 8.7.5 perl4.036 on NetBSD 1.1B(1.1 Current)
+	sendmail 8.7.5 + perl4.036 on NetBSD 1.1B(1.1 Current)
+	(fwtk 1.3 も併用) 
+
 2.0 まで
 	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2R 
 	sendmail 8.6.12+2.4W, perl4.036 on NetBSD 1.0
 	sendmail 8.6.12+2.4W, perl5.001 on NetBSD 1.0
-	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-current/sun3/60(^^)
+	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-1.0current/sun3/60
 です。
 
-実際のインストールはINSTALLというファイルを見て下さい。
-
-ＯＳも大抵は自動判定して
-make の終りに /etc/alises への設定の仕方の助言を与えてくれるはずです。
-＃判定できない機種レポートをお待ちしております_o_
 
 その他のこまごまとしたことについては doc/op (旧 FAQ)というファイルがあ
 ります。INSTALL で説明の足りない部分は doc/op （Operation Manual）を見
@@ -305,12 +332,13 @@ make の終りに /etc/alises への設定の仕方の助言を与えてくれるはずです。
 に合わせてファイルコードをかえてからどうぞ）。
 
 1.5 以降のスクリプトは flock や自動登録等の設定も対話的に行えます。
-＃全ての変数を対話的に設定できる予定です。
+＃将来、全ての変数を対話的に設定できる予定です。
 
-.S	POP3 経由…
 
-sendmail がなくて、POP でメールを引っ張って実行する等のやり方もできま
-すが、そういうtrickyな話題は doc/op を見てください。
+.S	自分のマシンで sendmail が走っていない場合(例:POP3 経由…)
+
+sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
+もできますが、そういうtrickyな話題は doc/op を見てください。
 
 
 .C	Version up について
@@ -321,11 +349,7 @@ sendmail がなくて、POP でメールを引っ張って実行する等のやり方もできま
 ＃よく使うライブラリは lib/perl/ の下にlinkしてあります。
 ＃この下ごとインストールする方がいちばん楽
 
-ftp.phys.titech.ac.jp:/pub/net/fml-curernt/fml_pl_packages.tar.gz 
-はよく使う *.pl のかたまり（lib/perlの下だけの archive）です。
-*.plを さしかえるだけならこれも便利です(^^)。＃↑これはdocumentなし
-
-.S	config.ph 
+.S	新しい機能を有効にするには？
 
 なお、新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで
 指定するかしないと使えません。
@@ -336,9 +360,14 @@ ftp.phys.titech.ac.jp:/pub/net/fml-curernt/fml_pl_packages.tar.gz
 Backward Compatibility は保証していますが 万が一 consistencyのないもの
 があったら ＭＬ 等へ御一報ください。
 変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
-なくて大丈夫です
+なくて大丈夫です。
+＃注意：複雑なフックの場合は注意がいると思います。
+＃
+＃古いライブラリも一応Packageに一緒に入ってます。
+＃lib/Compatibility に移動しておきました。
+＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
 
-.S	1.6以降の変更について
+.S	1.6より前からの移行について
 
 	＊＊＊注意＊＊＊
 1.6では、基本的なデータ構造を call by reference 用に書き直したので、
@@ -353,11 +382,8 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
 ファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
 
-必要なら、MLで聞くか、fml のホームページを覗いてみてください(^^)。
+最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
 
-＃古いライブラリも一応Packageに一緒に入ってます。
-＃lib/Compatibility に移動しておきました。
-＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
 
 
 .C	配布条件
@@ -372,8 +398,8 @@ of bug reports, fixes and patches both on fml-support ML and with
 private communication.
 I refer each contribution in RELEASE_NOTES. 
 
-It is useful to study amd, in 4.4BSD is for OS automatic detection,
-and mime_pls 1.00 - 2.00a on MIME. 
+It is useful to study several ascpects of 4.4BSD for OS automatic
+detection, and mime_pls 1.00 - 2.00a on MIME.
 For convenience I bundle to my package OS detection codes derived from
 amd package, a few useful codes jcode.pl and mime_pls 1.11a, which you
 can obtain on anonymous ftps.
