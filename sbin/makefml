@@ -5254,73 +5254,24 @@ sub FUnLock
 
 package v7;
 
-
-sub main'V7Lock   { &v7'MakeFml_V7Lock(@_);}
-sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
-
-sub v7'SRand      { &main'SRand(@_);}
-sub v7'Log        { &main'Log(@_);}
-sub v7'Warn       { &main'Warn(@_);}
-sub v7'WarnE      { print STDERR join("\t", @_), "\n";}
-sub v7'WholeMail  { &main'WholeMail(@_);}
-sub v7'SetEvent   { &main'SetEvent(@_);}
-
-
-sub GetTime
-{
-    local($time) = @_;
-
-    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time||time))[0..6];
-    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-		   $year % 100, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
-			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
-
-    # /usr/src/sendmail/src/envelop.c
-    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
-    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-    # 
-    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
-			   1900 + $year, $mon + 1, $mday, $hour, $min);
-
-    $MailDate;
-}
-
-
-sub MkDir { &main'Mkdir(@_);} #';
-sub Mkdir { &main'Mkdir(@_);} #';
-sub MkDirHier  { &main'MkDirHier(@_);} #';
-
+sub WarnE      { print STDERR join("\t", @_), "\n";}
+sub WholeMail  { print STDERR join("\t", @_), "\n";}
+sub SetEvent   { print STDERR join("\t", @_), "\n";}
+sub Sendmail   { print STDERR join("\t", @_), "\n";}
 
 # XXX 3.0B-TODO
-sub LoadConfigPH
+sub FixPath
 {
     local($ml, $mldir) = @_;
 
-    # reset variables used in liblock.pl
-    for (FP_VARLOG_DIR, FP_VARRUN_DIR, LOCK_FILE, MAX_TIMEOUT) {
-	eval "undef \$${_};";
-	&main'Warn($@) if $@; #';
-    }
-
     # global $DIR ;
     chop($CWD = `pwd`); # ATTENTION! ONLY ON UNIX
-    $DIR = "$mldir/$ml";
     chdir $DIR;
-
-    eval ("do $DefaultConfigPH;");
-    eval("do \"$mldir/$ml/config.ph\";");
-    print STDERR "V7Lock::Error $@\n" if $@;
-    &main'Warn($@) if $@; #';
 
     # variable fixes
     local($s);
     for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
+	$s .= "\$$_ = &main'Value('$_');\n"; #';
 	$s .= "\$$_ =~ s\#\\\\\#/\#g;\n";
 	$s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
@@ -5338,24 +5289,25 @@ sub LoadConfigPH
     chdir $CWD;
 }
 
-sub MakeFml_V7Lock
+sub main'V7Lock #';
 {
     local($ml, $mldir) = @_;
+
+    undef %INC;
+    require 'libkern.pl';
+    require 'liblock.pl';
 
     $EXEC_DIR = $main'EXEC_DIR;
     $ML_DIR   = $main'ML_DIR;
     $DIR      = "$mldir/$ml";
 
     &main'GetConfigPH($ml); #';
-    $LOCK_FILE     = &main'Value('LOCK_FILE'); #';
-    $VARRUN_DIR    = &main'Value('VARRUN_DIR'); #';
-    $FP_VARRUN_DIR = "$mldir/$ml/$VARRUN_DIR";
-    $VARLOG_DIR    = &main'Value('VARLOG_DIR'); #';
-    $FP_VARLOG_DIR = "$mldir/$ml/$VARLOG_DIR";
 
-    require 'liblock.pl';
+    $LOCK_FILE   = &main'Value('LOCK_FILE'); #';
+    $MAX_TIMEOUT = &main'Value('MAX_TIMEOUT'); #';
+    &FixPath($ml, $mldir);
 
-    if ($debug || 1) {
+    if ($debug) {
 	print STDERR "\n";
 	print STDERR "LOCK_FILE     $LOCK_FILE\n";
 	print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
@@ -5400,7 +5352,7 @@ sub CleanUpLockFiles
     }
 }
 
-sub MakeFml_V7UnLock
+sub main'V7UnLock #';
 {
     local($ml) = @_;
 
