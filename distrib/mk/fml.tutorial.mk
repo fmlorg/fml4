@@ -4,11 +4,10 @@ TEXT_FILTER = $(FML)/bin/fwix.pl -m text -f tmp/text_index.ph
 WORK_TUTORIAL_DIR = ${WORK_HTML_DIR}/${TUTORIAL_LANGUAGE}
 
 
+# index list dependence
+__TUTORIAL_DOC_TARGETS__ += tmp/text_index.ph
+__HTML_TUTORIAL__        += tmp/html_index.ph
 
-
-# index list
-__HTML_TUTORIAL__ += tmp/text_index.ph
-__HTML_TUTORIAL__ += tmp/html_index.ph
 
 .for dir in ${DOC_TUTORIAL_SUBDIR}
 # prepare directory to be created
