@@ -6,8 +6,6 @@
 # Public License. see the file COPYING for more details.
 
 $rcsid   = q$Id$;
-($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
-$Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 
 ######################################################################
 
