@@ -117,6 +117,10 @@ snapshot:
 	(/bin/sh .release/generator -ip 2>&1| tee /var/tmp/_release.log)
 	@ usr/sbin/error_report.sh /var/tmp/_release.log
 
+release:
+	(/bin/sh .release/generator -rp 2>&1| tee /var/tmp/_release.log)
+	@ usr/sbin/error_report.sh /var/tmp/_release.log
+
 faq:	 plaindoc
 textdoc: plaindoc
 
