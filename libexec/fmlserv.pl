@@ -456,7 +456,7 @@ sub DoFmlServProc
 		    &use('amctl');
 		    $addr = $addr || $From_address;
 		    &Mesg(*e, "   Auto-Register-Routine called for [$addr]");
-		    &AutoRegist(*e, $addr);
+		    &AutoRegist(*e, "subscribe $addr");
 		}
 
 		next;
@@ -528,6 +528,15 @@ sub NewML
     }
     eval($s); 
     &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
+
+    ### CF Version 3;
+    if ($REJECT_POST_HANDLER =~ /auto.*regist/i ||
+	$REJECT_COMMAND_HANDLER =~ /auto.*regist/i) {
+	$ML_MEMBER_CHECK = 0;
+	$touch = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
+	&Touch($touch) if ! -f $touch;
+    }
+
 
     ### Here, all variables must be set already. 
     if ($debug) {
@@ -1036,8 +1045,8 @@ sub main'LoadMLNS
     $ml'DIR = $main'DIR;
 
     do $file;
-    do $main'SiteDefPH; #';
-
+    do $main'SiteDefPH if -f $main'SiteDefPH;
+    
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
     }
