@@ -2764,6 +2764,49 @@ sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
 sub ADD_FIELD     { 1;}
 sub DELETE_FIELD  { 1;}
 
+package config_ph;
+sub DEFINE_SUBJECT_TAG { 1;}
+sub DEFINE_MODE  { 1;}
+sub DEFINE_FIELD_FORCED  { 1;}
+sub DEFINE_FIELD_ORIGINAL { 1;}
+sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
+sub ADD_FIELD     { 1;}
+sub DELETE_FIELD  { 1;}
+sub Load 
+{
+    local($f) = @_;
+    eval require($f);
+    $@;
+}
+
+
+package main;
+
+
+sub GetConfigPH
+{
+    local($ml) = @_;
+    local($status, $cf);
+
+    &ResetVariables;
+
+    $cf = "$ML_DIR/$ml/config.ph";
+    $status = &config_ph'Load($cf); #';
+    print STDERR $@ if $@;
+}
+
+
+sub Value
+{
+    local($key) = @_;
+    local($v);
+    $key || return $NULL;
+    eval("\$v = \$config_ph'$key ;"); #';
+    print STDERR $@ if $@;
+    $v;
+}
+
+
 # makefml pgp elena PGP-OPTIONS
 sub do_pgp
 {
