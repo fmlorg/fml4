@@ -1796,7 +1796,7 @@ sub Mesg { print STDERR "$_[1]\n";}
 sub Conv
 {
     local($ml, $example, $out) = @_;
-    local($uid, $gid, $format, $info, $ctladdr, $mail_list);
+    local($uid, $gid, $format, $info, $ctladdr, $mail_list, $maintainer);
     local($crontime) = 0;
 
     # &ApplyPolicy;
@@ -1855,11 +1855,14 @@ sub Conv
     # $STRUCT_SOCKADDR
     &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
 
-    while (<EXAMPLE>) {
-	# default
-	$mail_list = $config{'MAIL_LIST'} || "$ml\@$DOMAIN";;
-	$ctladdr   = $config{'CONTROL_ADDRESS'} || "$ml-ctl\@$DOMAIN";
+    # XXX %config is passed as global variable but it may be a bug!
+    # XXX e.g. see 'sub do_create_doc_template'
+    # default
+    $mail_list  = $config{'MAIL_LIST'}       || "$ml\@$DOMAIN";;
+    $ctladdr    = $config{'CONTROL_ADDRESS'} || "$ml-ctl\@$DOMAIN";
+    $maintainer = $config{'MAINTAINER'}      || "$ml-admin\@$DOMAIN";
 
+    while (<EXAMPLE>) {
 	# substitute following the policy default
 	if ($format) {
 	    # exception: CtlAddr == fmlserv || MAIL_LIST
@@ -1913,8 +1916,9 @@ sub Conv
 	s/_ML_DIR_/$ML_DIR/g;
 	s/_ML_/$ml/g;
 
-	s/_CTLADDR_/$ctladdr/g;
 	s/_MAIL_LIST_/$mail_list/g;
+	s/_CTLADDR_/$ctladdr/g;
+	s/_MAINTAINER_/$maintainer/g;
 
 	s/_DOMAIN_/$DOMAIN/g;
 	s/_FQDN_/$FQDN/g;

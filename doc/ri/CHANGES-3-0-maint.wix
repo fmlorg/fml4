@@ -14,6 +14,13 @@ This document logs CHANGES in fml stable branch.
 See http://www.fml.org/ for CHANGES in fml-current. 
 .fi
 
+[ 3.0pl#33 == 3.0.1_BETA #22 ]
+
+   sbin/makefml (2.108-2.109): 
+	use _MAINTAINER_ in Conv()
+
+[ 3.0pl#32 == 3.0.1_BETA #21 ]
+
    sbin/makefml (2.107-2.108): 
 	fix to reflect makefml install $CONFIG_DIR
 
