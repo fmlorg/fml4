@@ -3606,7 +3606,7 @@ sub __assymetric_key_maniuplate
     $NewEncryptionDefaultDir = $NewEncryptionHier = $mode;
     $NewEncryptionHier  =~ s/-/_/g;
     $NewEncryptionHier  =~ tr/a-z/A-Z/;
-    $NewEncryptionHier .= "_KEYRING_PATH";
+    $NewEncryptionHier .= "_KEYRING_DIR";
 
     if ($EncryptionMethodHint =~ /pgp$|pgp2$/i) {
 	&do_pgp2($ml, @argv);

@@ -304,17 +304,17 @@ ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 # value: filename string 
 PGP_PATH:		$DIR/etc/pgp
 
-# If you enforce the following *KEYRING_PATH in $CFVersion < 6.1,
+# If you enforce the following *KEYRING_DIR in $CFVersion < 6.1,
 # set this variable on.
 # value: 1/0
 USE_FML40_PGP_PATH:	1
 
 # fml 4.0
 # value: directory string
-DIST_AUTH_KEYRING_PATH:		$DIR/etc/dist-auth
-DIST_ENCRYPT_KEYRING_PATH:	$DIR/etc/dist-encrypt
-ADMIN_AUTH_KEYRING_PATH:	$DIR/etc/admin-auth
-ADMIN_ENCRYPT_KEYRING_PATH:	$DIR/etc/admin-encrypt
+DIST_AUTH_KEYRING_DIR:		$DIR/etc/dist-auth
+DIST_ENCRYPT_KEYRING_DIR:	$DIR/etc/dist-encrypt
+ADMIN_AUTH_KEYRING_DIR:		$DIR/etc/admin-auth
+ADMIN_ENCRYPT_KEYRING_DIR:	$DIR/etc/admin-encrypt
 
 
 #####################################################################

@@ -1312,7 +1312,7 @@ sub __InitPGP
     $PGP_PATH = $PGP_PATH || "$DIR/etc/pgp";
 
     if ($REMOTE_ADMINISTRATION_AUTH_TYPE =~ /pgp|pgp2|pgp5|gpg/) {
-	$_PCB{'asymmetric_key'}{'keyring_dir'} = $ADMIN_AUTH_KEYRING_PATH;
+	$_PCB{'asymmetric_key'}{'keyring_dir'} = $ADMIN_AUTH_KEYRING_DIR;
 
 	if ($CFVersion >= 6.1) {
 	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};

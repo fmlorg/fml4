@@ -41,7 +41,7 @@ sub DoDistribute
 	    require 'libpgp.pl';
 
 	    $_PCB{'asymmetric_key'}{'keyring_dir'} = 
-		$DIST_ENCRYPT_KEYRING_PATH;
+		$DIST_ENCRYPT_KEYRING_DIR;
 
 	    # check PGP signature
 	    if (&PGPGoodSignatureP(*e, 1)) {
