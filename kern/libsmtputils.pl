@@ -72,7 +72,7 @@ sub DoSmtpFiles2Socket
 	$autoconv = $f{$f, 'autoconv'};
 
 	if ($count) {		# if more than two files;
-	    $boundary = ('-' x 20).$f.('-' x 20)."\n";
+	    $boundary = ('-' x 20).$f.('-' x 20)."\r\n";
 	    print S $boundary;
 	    print SMTPLOG $boundary;
 	}
@@ -88,6 +88,7 @@ sub DoSmtpFiles2Socket
 		s/dev\.null\-ctl\@domain.uja/$CONTROL_ADDRESS/g;
 	    }
 
+	    s/\n/\r\n/;
 	    print S $_;
 	    print SMTPLOG $_;
 	    $LastSmtpIOString = $_;
