@@ -2641,22 +2641,24 @@ sub EnvelopeFilter
     elsif (/^[\s\n]*\%\s*echo.*/i) {
 	$r = "invalid command line body";
     }
-    
+
     # JIS: 2 byte A-Z => \043[\101-\132]
+    # JIS: 2 byte a-z => \043[\141-\172]
     # EUC 2-bytes "A-Z" (243[301-332])+
+    # EUC 2-bytes "a-z" (243[341-372])+
     # e.g. reject "SUBSCRIBE" : octal code follows:
     # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
     # 243 305
     if ($FILTER_ATTR_REJECT_2BYTES_COMMAND && 
-	/\033\044\102(\043[\101-\132])+/) { # JIS "2 byte"[A-Z]+
+	/\033\044\102(\043[\101-\132\141-\172])/) { # JIS "2 byte"[A-Za-z]+
 	$s = &STR2EUC($_);
 
 	local($n_pat, $sp_pat);
-	$n_pat  = '\243[\301-\332]';
+	$n_pat  = '\243[\301-\332\341-\372]';
 	$sp_pat = '\241\241'; # 2-byte space
 
 	$s = (split(/\n/, $s))[0]; # check the first line only
-	if ($s =~ /^\s*(($n_pat){1,})[\s$sp_pat]+.*$|^\s*(($n_pat){1,})$/) {
+	if ($s =~ /^\s*(($n_pat){2,})\s+.*$|^\s*(($n_pat){2,})($sp_pat)+.*$|^\s*(($n_pat){2,})$/) {
 	    &Log("2 byte <". &STR2JIS($s) . ">");
 	    $r = '2 byte command';
 	}
