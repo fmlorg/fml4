@@ -11,7 +11,7 @@
 
 	subscribe あなたの名前(ここは管理者のあなたが書いて下さい)
 例:
-	subscribe Sskura Kinomoto
+	subscribe Sakura Kinomoto
 
 というコマンドをメール本文に書いて
 アドレス <_CTLADDR_> へ送って下さい。
@@ -23,7 +23,7 @@ To subscribe this list, please send the following phrase
 
 	subscribe Your-Last-Name Your-First-Name 
 e.g.
-	subscribe Sskura Kinomoto
+	subscribe Sakura Kinomoto
 
 in the mail body (not subject) to the address <_CTLADDR_>.
 .fi
