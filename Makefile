@@ -52,36 +52,36 @@ usage:
 
 
 dist:
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator 2>&1| tee $(DESTDIR)/_distrib.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_distrib.log
 	@ make usage
 
 distsnap:
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
 # If release branch, use this
 #snapshot: __in_release_branch
 snapshot:
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
 	(env IN_RELEASE_BRANCH=$(IN_RELEASE_BRANCH) /bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
 branch: 
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator -b 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
 release:
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator -rp 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
 .PHONY: pkgsrc
 pkgsrc:
-	(cd pkgsrc; make MASTER_SITE=${MASTER_SITE} )
+	(cd pkgsrc; env FML=${FML} make MASTER_SITE=${MASTER_SITE} )
 
 ##### "make build"
 .include "distrib/mk/fml.build.mk"
@@ -94,7 +94,7 @@ newdoc: htmldoc syncwww syncinfo
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
 INFO-common: $(FML)/.info
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	@ $(MKDIR) $(COMPILE_DIR)
 	@ rm -f $(COMPILE_DIR)/INFO
 	($(ECONV) doc/ri/INFO; $(ECONV) .info; $(ECONV) doc/ri/README.wix)|\
@@ -109,15 +109,15 @@ $(WORK_DOC_DIR)/INFO-e: INFO-common
 		< $(COMPILE_DIR)/INFO > $(COMPILE_DIR)/INFO-e
 
 init_dir:
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 
 plaindoc: init_dir INFO doc/smm/op.wix
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 #	@ $(GEN_PLAIN_DOC)
 	@ env FML=${FML} make -f distrib/mk/fml.doc.mk plaindocbuild
 
 htmldoc: init_dir INFO doc/smm/op.wix
-	@ make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |perl -nle unlink
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
 	@ env FML=${FML} make -f distrib/mk/fml.doc.mk htmlbuild
