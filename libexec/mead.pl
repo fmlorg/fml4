@@ -1,16 +1,16 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
 # MEAD: Mail Error Analyze Daemon
-# $FML$
+# $FML: mead.pl,v 1.33 2001/05/09 15:22:56 fukachan Exp $
 #
 
 $Rcsid = 'mead 4.0';
@@ -1326,7 +1326,7 @@ sub Debug
 
     return if $debug < 100;
 
-    open(DEBUG, ">> /tmp/debugbuf");
+    open(DEBUG, ">> $LOGFILE");
     print DEBUG $s, "\n";
     close(DEBUG);
     return unless $debug;
