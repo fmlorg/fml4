@@ -1,11 +1,25 @@
-		CGIのインストールについて (こうしようという構想)
+		CGIのインストールについて (fml-current)
+		〜かぎりなくβバージョン〜
 
-I.	install
+fml-stable でもCGIが使えないことはない:)
 
-普通のfmlと同様にインストール。ただし
+.url http://www.fml.org/fml/examples/tips/fml-stable-with-cgi.html
+
+
+I.	fmlのインストール
+
+current をもってくる。
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+
+普通のfmlと同様にソースを広げてインストール。ただしその時のmakeの引数
+が違って
 
 	make install-withcgi
 	(makefml -W cgi install を実行する)
+
+として実行する。インストールの最後に対話的に２、３のことを聞かれる。
+これは
 
 	$EXEC_DIR/share/cgi-bin/fml/admin/.htacces
 	$EXEC_DIR/share/cgi-bin/fml/admin/*.cgi
@@ -13,106 +27,62 @@ I.	install
 	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
 		admin:$CRYPTED_PASSWORD
 
-の設定を行なう。この時点で admin 権限が使えるようにする。admin には基
-本的に makefml を実行できる権限と一緒の権限範囲を与える。すべてのコマ
-ンドをCGI経由で呼べるようにするということではない
+の設定を行なうためで、このホスト上でmakefmlを使って実行することと同等
+のことを行なえるようにする。例: ＭＬをつくる、けす。どのＭＬでも設定が
+できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
 
-	http://the.fml.host/cgi-bin/fml/admin/menu.cgi
+II.  httpd の設定
 
-からスタートする。
+例えば apache なら
 
-Q: httpd.conf は fml/share/ の下について設定すれば十分か？
-A: たぶんそういう設定を書くことになるのだろう
+	/usr/local/fml/www/examples/apache/httpd.conf.patch
 
-Q: fml/www/ と fml/share/ の違いは？
+というファイルがあるので、このおまじないを 
+/usr/local/apache/conf/httpd.conf に付け足して、
 
-www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを格納
-する場所が fml/www/ 
+	# apachectl configtest
 
+で、OKかどうかをたしかめて
 
-II. 各ＭＬ
+	# apachectl restart
 
-1. adminの人が各ＭＬを作成する。
+する。
 
-WWWでもmakefmlでもやることは同じなので好きな方を選択
+III. アクセスしてみる
 
+例:
 
-Q: cgi以前に作られたものはどう処理する？自動的に有効か？
+    http://the.fml.host/cgi-bin/fml/admin/menu.cgi
 
-A: admin がWWWの画面で有効にする
-A: makefml mladmin.cgi ML を走らせる。
+この後ひととおりのことはWWWでできるはず。できること
 
-どちらでも効果は同じ
+	ＭＬをつくる, 消す
+	ＭＬのユーザ登録,削除
+	ＭＬの管理者の登録,削除
+	ＭＬの設定(makefml config メニューでできることと同じ)
+	ログをみる
+	MTAの設定(特に newaliases のかけ方)
 
-2. 各ＭＬの管理者に渡す
-
-各ＭＬの管理者用ページ
-
-	http://the.fml.host/cgi-bin/fml/ml-admin/$ml/menu.cgi
-
-3. パスワードの設定
-
-CUI: makefml htpasswd ML ユーザ名
-
-GUI: メニューの『管理者パスワードの設定』では
-     'admin' コマンドでつかうものを自動的に htpasswd へ反映させる
+など
 
 
-III. 各ＭＬのユーザ用のページ
+IV. 特定のＭＬだけはCGIでいじれるようにしてあげる
 
-たぶん登録/削除だけか？
+	makefml mladmin.cgi ML
 
-案???
+ないしはCGIの画面
 
-   登録
-	http://the.fml.host/fml/ml/$ml/subscribe.html (?)
+    http://the.fml.host/cgi-bin/fml/admin/menu.cgi
 
-   その他のコマンド
-	http://the.fml.host/cgi-bin/fml/ml/$ml/menu.cgi
+で「メーリングリストをWWWでいじれるように設定する」を使う。
 
+例えば elena ＭＬをWWWからいじれるように設定すると
 
----------->8---------->8---------->8---------->8---------->8----------
-α版での実装
+    http://the.fml.host/cgi-bin/fml/ml-admin/elena/menu.cgi
 
-3.	cgi の生成
+というURLで elena ＭＬの設定だけを特定のユーザに触らせることができる。
 
-3.1	管理者用
-
-   % makefml admin.cgi 
-
-	/usr/local/fml/share/cgi-bin/fml/admin/ 以下にCGIが生成される
-			menu.cgi
-			makefml.cgi
-
-
-3.2	各ＭＬの管理者用
-
-   % makefml mladmin.cgi $ml
-
-	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ 以下にCGIが生成される
-			menu.cgi
-			makefml.cgi
-
-3.3	一般ユーザ用のは未実装
-
-4	パスワードを設定する
-
-httpd の設定によるので適宜マニュアルを参照 
-
-例: thttpd (NetBSD上での例)
-
-	/usr/local/fml/share/cgi-bin/fml/admin/.htpasswd
-
-.htpasswd は
-
-   % cd /usr/local/fml/share/cgi-bin/fml/admin/
-   % touch .htpasswd	
-   % /usr/pkg/sbin/htpasswd -c .htpasswd fukachan@fml.org
-   Adding password for fukachan@fml.org
-   New password:
-   Re-type new password:
-
-などのようにつくればよい
-
+各ＭＬについて細かいアクセス制御(このアドレス空間からのみ認める)などは
+httpd の設定をいじること
 
 $Id$
