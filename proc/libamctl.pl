@@ -734,7 +734,7 @@ sub DoChangeMemberList
     select(NEW); $| = 1; select(STDOUT);
 
     # Input
-    open(FILE,"<  $file") || (&Log($!), return $NULL);
+    open(CHMEM_INPUT,"<  $file") || (&Log($!), return $NULL);
 
 
     ### Process GO!
@@ -743,7 +743,7 @@ sub DoChangeMemberList
     # $c == conserve comment;
     local($c, $rcpt, $o, $comment, $cbuf);
 
-    in: while (<FILE>) {
+    in: while (<CHMEM_INPUT>) {
 	chop;
 
 	print STDERR "TRY       [$_]\n" if $debug;
@@ -751,7 +751,7 @@ sub DoChangeMemberList
 	# If allow all people to post, OK ends here.
 	if (/^\+/o) { 
 	    &Log("NO CHANGE[$file] when no member check");
-	    close(FILE); 
+	    close(CHMEM_INPUT); 
 	    return ($status = 'done'); 
 	}
 
@@ -863,7 +863,7 @@ sub DoChangeMemberList
     }
 
     # END OF FILE OPEN, READ..
-    close(BAK); close(NEW); close(FILE);
+    close(BAK); close(NEW); close(CHMEM_INPUT);
 
     # protection for multiplly matching, 
     # $log_c > 1 implies multiple matching;

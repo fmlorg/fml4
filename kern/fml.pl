@@ -694,7 +694,13 @@ sub FixHeaderFields
     $From_address        = &Conv2mailbox($e{'h:from:'}, *e);
     $e{'macro:x'}        = $e{'tmp:x'}; 
     &Log("Gecos [$e{'macro:x'}]") if $debug;
-    $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+
+    if ($COMMAND_RETURN_ADDR_POLICY eq 'from') {
+	$e{'Addr2Reply:'} = $From_address;
+    }
+    else {
+	$e{'Addr2Reply:'} = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+    }
 
     # KAKUSHI(SECRET) OPTION :) (UNDER DEVELOPMENT)
     # use Return-Path: as the sender for authentication
@@ -1466,8 +1472,11 @@ sub Lookup
 	$has_special_char = 1; 
     }
 
-    &Open(FILE, $file) || return 0;
-  getline: while (<FILE>) {
+    open(LOOKUP_TABLE, $file) || do {
+	&Log("LookUp: cannot open $file");
+	return 0;
+    };
+  getline: while (<LOOKUP_TABLE>) {
       chop; 
 
       if ($auto_registrable || $SubstiteForMemberListP) { 
@@ -1486,7 +1495,7 @@ sub Lookup
       if (/^\+/o) { 
 	  &Debug("encounter + [$_]") if $debug;
 	  $Envelope{'trap:+'} = 1;
-	  close(FILE); 
+	  close(LOOKUP_TABLE);
 	  return 1;
       }
 
@@ -1495,12 +1504,12 @@ sub Lookup
 
       # This searching algorithm must require about N/2, not tuned,
       if (1 == &AddressMatch($_, $address)) {
-	  close(FILE);
+	  close(LOOKUP_TABLE);
 	  return 1;
       }
   }# end of while loop;
 
-    close(FILE);
+    close(LOOKUP_TABLE);
     return 0;
 }
 
