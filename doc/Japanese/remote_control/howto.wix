@@ -1,4 +1,4 @@
-.C	手順の例: メールで guide ファイルを書き換える 
+.C	リモート操作の例: メールで guide ファイルを書き換える 
 .l	enable-remote-control
 
 
@@ -10,7 +10,7 @@
 
    3. その Email アドレスごとに初期パスワードを設定します。
 
-   4. コマンドを送り込む
+   4. guide を上書きするコマンドを送り込む
 
 
 .S	CUI での変更手順
@@ -48,7 +48,7 @@ approve パスワード newguide
 ------------------------------------------------------
 
 
-.S	リモート管理を有効にする
+.S	GUI: リモート管理を有効にする
 
 .q
 メニューバー (左側)
@@ -70,10 +70,10 @@ approve パスワード newguide
 
 	リモート管理 -> リモート管理を使うか？ -> YES
 
-を選択する。
+を選択します。
 
 
-.S	管理者のEmail Addressを登録する (GUI)
+.S	GUI: 管理者のEmail Addressを登録する
 .l	GUI-remote-administration
 
 以下同じ内容をGUIでやる場合について説明します。
@@ -96,7 +96,7 @@ approve パスワード newguide
 
 右側の画面が以下のような感じに変わります。
 .q
-			 elena メーリングリストの設定
+		 elena メーリングリストの設定
 
 管理者メンバーの登録 (elena ＭＬ) 
 Email アドレス:______________________________
@@ -104,8 +104,12 @@ Email アドレス:______________________________
 Submit Reset
 .~q
 
-アドレスを入力して submit を押します。OKといわれたらそのアドレスが
-/var/spool/ml/elena/members-admin に付け加えられたことになります。
+管理者として登録する人のアドレスを入力して submit を押します。
+OKといわれたらそのアドレスが
+
+	/var/spool/ml/elena/members-admin
+
+に付け加えられたことになります。
 
 
 .S	パスワードを設定する (GUI)
@@ -151,11 +155,12 @@ approve パスワード newguide
 ------------------------------------------------------
 
 ここの"パスワード"はもちろんさっき定義したパスワードです。
+以下の例では書いていますが subject は何でも構いません。
 
 メールの例:
 
 	To: elena-ctl@test.fml.org 
-	subject: 
+	subject: overwrite guide
 
 	approve パスワード newguide	
 	これは elena メーリングリストのガイドです。
