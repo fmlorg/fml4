@@ -40,6 +40,11 @@ while (<>) {
 	$mp_block = $1;
     }
 
+    if (/^(Content-Description:\s*Notification).*/i) { 
+	print STDERR "<<< $_ >>>\n";
+	$mp_block = $1;
+    }
+
     # Store Received: field 
     if (! $first_header_part) {
 	if (/^([-A-Za-z]+):(.*)/) {
@@ -127,6 +132,18 @@ while (<>) {
     #####
     ##### MTA szpecific
     #####
+    # postfix
+    # <uja@beth.fml.org>: unknown user
+    if ($mp_block eq 'Content-Description: Notification') {
+	if (/^\s*(\S+\@\S+):\s*unknown user/) {
+	    $CurAddr = $1;
+	    $CurAddr =~ s/[\<\>]//g;
+	    $CurAddr =~ s/\s*//g;	
+	    &Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
+	    $MTA = 'postfix';
+	}
+    }
+
     # exim || qmail
     if ($MTA eq 'exim' || $MTA eq 'qmail') {
 	/^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
@@ -172,6 +189,12 @@ while (<>) {
 	&AnalyzeErrorWord($_, $P_CurAddr); 
 	$found++;	
     }
+
+    ### postfix
+    if (/$TrapWord/i && $MTA eq 'postfix') { 
+	&AnalyzeErrorWord($_, $CurAddr); 
+	$found++;
+    } 
 
     ###
     ### exim
