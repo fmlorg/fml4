@@ -15,12 +15,12 @@
 .if LANG == JAPANESE
 [ガイド]
 
-    *** 重要 *** 
-    3.0へのアップグレードの注意(特に自動登録を使っている人へ)
-.url http://www.fml.org/fml/UPGRADE-3.0/
-
-   感じを掴むためにはまずここ
+   感じを掴むためにはまずここを最初に参照して下さい。
 .url http://www.fml.org/fml/Japanese/basic_setup/
+
+   さまざまなテーマごとに分類されたチュートリアルのページ
+   細かい設定などはここを参照して下さい。
+.url http://www.fml.org/fml/Japanese/tutorial.html
 
    HOME PAGE
 .url http://www.fml.org/fml/
@@ -29,15 +29,10 @@
 [用語]
    以下のドキュメント中ではメーリングリストをＭＬと略しています。
    % はシェルのプロンプトです。
+   # は root のシェルのプロンプトです。
 .fi
 .if LANG == ENGLISH
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
-
-   ***** IMPORTANT!!! *****
-   If you use automatic registration and upgrade fml 2.x to fml 3.0, 
-   please read UPGRADE file firstly. Especially the first part
-
-.url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
 
    For easy guideline of installation and fundamental configuration,
    See
@@ -73,7 +68,7 @@ versionの数字や作られるディレクトリについては適当に読み変えて下さい。
 さい。
 
 .q
-○ ソースを以下のURLから持ってくる。
+○ ソースを以下のURLからダウンロードする。
 % ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
@@ -101,7 +96,7 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 ○ fml自体のインストール自体は終了。
    この後ＭＬの作成/設定/メンバー登録等を行なう。
 
-elena MLを作る。
+例: elena MLを作る。
 % /usr/local/fml/makefml newml elena
 …以下略…
 .~q
@@ -195,6 +190,10 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
    例:
 	% su
 	ユーザ fml とグループ fml を作る (作り方はOSによって違う)
+	# groupadd fml
+	# useradd fml
+
+	ディレクトリを作っておきます。
 	# mkdir /usr/local/fml /var/spool/ml
 	# chown fml /usr/local/fml /var/spool/ml
 	# chgrp fml /usr/local/fml /var/spool/ml

@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML 3.0 Mailing List Server Package
+	FML current Mailing List Server Package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -11,12 +11,12 @@
 .if LANG == JAPANESE
 [ガイド]
 
-    *** 重要 *** 
-    3.0へのアップグレードの注意(特に自動登録を使っている人へ)
-.url http://www.fml.org/fml/UPGRADE-3.0/
-
-   感じを掴むためにはまずここ
+   感じを掴むためにはまずここを最初に参照して下さい。
 .url http://www.fml.org/fml/Japanese/basic_setup/
+
+   さまざまなテーマごとに分類されたチュートリアルのページ
+   細かい設定などはここを参照して下さい。
+.url http://www.fml.org/fml/Japanese/tutorial.html
 
    HOME PAGE
 .url http://www.fml.org/fml/
@@ -208,8 +208,8 @@ The HOME PAGE of the Fml is
 .url	http://www.fml.org/
 
 .if LANG == JAPANESE
-からたどれます。最新のネタはML(後述)かここを見てみて下さい。配布ドキュ
-メント群へのサーチエンジンもあります。
+からたどれます。最新のネタはML(後述)かここを見てみて下さい。
+配布ドキュメント群へのサーチエンジンもあります。
 .fi
 .if LANG == ENGLISH
 You can obtain the latest (fml-)current documents and sources here.
