@@ -111,6 +111,10 @@ sub Convert
 	    s/_EXEC_DIR_/$EXEC_DIR/g;
 	    s/_ML_DIR_/$ML_DIR/g;
 
+	    # PR from ikeda <ikeda@maple.or.jp>
+	    # XXX $ML is global, defined in ml-admin/menu.cgi
+	    s/_ML_/$ML/g;
+
 	    print;
 	}
 	close($file);
