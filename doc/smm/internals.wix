@@ -1768,6 +1768,16 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
        minus sign, make it the first or last character listed
 .~q
 
+NOTE: 1998/11/08 permit "admin add MAR+KUN@DOMAIN " syntax
+
+  +'ed user <addr+ext@domain> (for sendmail users):
+	fix to permit this address syntax when automagic registration.
+	but not fix to permit command with this addr beautifully.
+	# so require more eloborate design
+
+  +'d ユーザのアドレス体系を扱えるように修正
+
+
 .S	投稿メールのサイズの制限
 =E.S	Limit of size for a posted article
 
