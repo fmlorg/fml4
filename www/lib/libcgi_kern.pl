@@ -123,9 +123,13 @@ sub ExpandOption
 	    next if $dir =~ /^\./;
 	    next if $dir =~ /^etc/;
 	    next if $dir =~ /^fmlserv/;
+	    next if $dir =~ /^mead/;
+	    next if $dir =~ /^popfml/;
+	    next if $dir =~ /^\_ML\_/;
 
 	    # @listname@list.com must not exists!
 	    next if $dir =~ /^\@/;
+
 	    $ml{$dir} = $dir;
 	}
 	closedir(DIRD);
@@ -506,7 +510,7 @@ sub ShowAdminMenu
 	}
     }
     else {
-	&ERROR("insecure xxx.cgi call");
+	&ERROR("insecure xxx.cgi call (unknown mode)");
     }
 }
 

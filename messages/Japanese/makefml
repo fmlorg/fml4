@@ -30,3 +30,6 @@ makefml.html_passwd:
 
 makefml.html_config:
 	メーリングリスト: _ARG0_ の設定を変更します
+
+makefml.log:
+	_ARG0_ ML のログです。
