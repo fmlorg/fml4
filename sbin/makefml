@@ -632,7 +632,9 @@ sub SetHashDefaults
 		    'log',          'do_log',
 		    '1000#log',     'log [-i] [-NUMBER] [all] [-pPATTERN]',
 		    'showconfig',   'do_showconfig',
-		    'showconf',     'do_showconfig'
+		    'showconf',     'do_showconfig',
+		    'bug-report-template',     'do_send_pr',
+		    'send-pr',     'do_send_pr',
 		    );
 
     # functions not to lock
@@ -656,6 +658,8 @@ sub SetHashDefaults
 		 'log',    1,
 		 'showconfig', 1,
 		 'showconf', 1,
+		 'send-pr', 1,
+		 'bug-report-template', 1,
 		 );
 
     # <ML> argument is not required.
@@ -669,7 +673,7 @@ sub SetHashDefaults
 	 "admin.cgi", "html_cgiadmin_passwd",
 
 	 # utility
-	 "showconfig", "showconf"
+	 "showconfig", "showconf", 'send-pr', 'bug-report-template'
 	 );
 }
 
@@ -4905,18 +4909,58 @@ sub do_setup_mladmin_cgi
 
 sub do_showconfig
 {
-    local($ml) = @_;
+    local($ml, $want_retval) = @_;
+    local($buf);
+
     &ResetVariables;
 
     $format = "%-20s   %s\n";
     $rel    = &GetFile("$EXEC_DIR/etc/release_version");
     $rel    =~ s/[\s\n]+$//;
 
-    printf $format, "fml Release Version", $rel;
-    printf $format, "OS type", $OS_TYPE;
-    printf $format, "CPU-MANUFACTURER-OS", $CPU_TYPE_MANUFACTURER_OS;
-    printf $format, "DOMAIN", $DOMAIN;
-    printf $format, "FQDN",   $FQDN;
+    $buf .= sprintf($format, "fml version:", $rel);
+    $buf .= sprintf($format, "installation mode:", $CurConfig{'PERSONAL_OR_GROUP'});
+    $buf .= "\n";
+    $buf .= sprintf($format, "OS type:", $OS_TYPE);
+    $buf .= sprintf($format, "CPU-MANUFACTURER-OS:", $CPU_TYPE_MANUFACTURER_OS);
+    $buf .= sprintf($format, "Perl version:", $]);
+    $buf .= "\n";
+
+
+    $buf .= sprintf($format, "MTA:", $NULL);
+    $buf .= sprintf($format, "DOMAIN:", $DOMAIN);
+    $buf .= sprintf($format, "FQDN:",   $FQDN);
+    
+    $want_retval ? $buf : do { print $buf;};
+}
+
+
+sub do_send_pr
+{
+    local($ml) = @_;
+    local($buf, $who);
+
+    $format = "%-20s   %s\n";
+
+    &ResetVariables;
+
+    $buf = &do_showconfig($ml, 1);
+    $who = $USER .'@'. $DOMAIN; 
+
+    print "---------- fml bug report template ----------\n";
+    printf $format, "Template-Version:", "0.8";
+    print $buf;
+    printf $format, "Email-Address:", $who;
+    print "\n";
+    printf $format, "Description:";
+    print "\n";
+    print "\n";
+    printf $format, "How-To-Repeat:";
+    print "\n";
+    print "\n";
+    printf $format, "Fix:";
+    print "\n";
+    print "\n";
 }
 
 
