@@ -447,6 +447,7 @@ sub SetHashDefaults
 		'GROUP',    '',
 		'LANGUAGE', $LANGUAGE,
 		'VENDOR',   '',
+		'TZ',       '+0900',
 		); 
 
     %PolicyDefault = 
@@ -633,6 +634,13 @@ sub InitFmlConfig
 	&do_setq("LANGUAGE", $cmd);
 	$buf .= sprintf("  %10s: %s\n", "Language", $cmd);
 
+	# Time Zone
+	$cmd = &Query("TimeZone", 
+		      "TZ: e.g. +0900, -0300", '[\-+]\d{4}', &ProbeTZ);
+
+	&do_setq("TZ", $cmd);
+	$buf .= sprintf("  %10s: %s\n", "TimeZone", $cmd);
+
 	print "\n$buf\n";
 
     }
@@ -642,7 +650,7 @@ sub InitFmlConfig
 
     if ($go_flag) {
 	print "-" x 60; print "\n";
-	for (@Config, "LANGUAGE") {
+	for (@Config, "LANGUAGE", "TZ") {
 	    printf "\t%-10s   %s\n", $_, $CurConfig{$_};
 	}
 	print "-" x 60; print "\n";
@@ -690,6 +698,28 @@ sub InitFmlConfig
 
     print "\nThe Current Config is saved in $FML_CONFIG\n";
 }
+
+
+sub ProbeTZ
+{
+    local($flag, @x, @p);
+    local($time) = 3931200;
+
+    @x = gmtime($time);
+    @p = localtime($time);
+
+    if ($p[2] - $x[2] != 0) {
+	$flag = ($p[2] - $x[2] > 0) ? "+" : "-";
+    }
+    # +0000 or [+-]0030 ?
+    else {
+	$flag = ($p[1] - $x[1] >= 0) ? "+" : "-";
+    }
+
+    sprintf("%1s%02d%02d", $flag, &ABS($p[2] - $x[2]), &ABS($p[1] - $x[1]));
+}
+
+sub ABS { $_[0] < 0 ? - $_[0] : $_[0];}
 
 
 sub GetCurConfig
@@ -1534,6 +1564,7 @@ sub ResetVariables
     $FQDN     = $CurConfig{'FQDN'};
     $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
     $LANGUAGE = $CurConfig{'LANGUAGE'};
+    $TZ       = $CurConfig{'TZ'} || '+0900'; # COMPAT UNTIL FML 2.2;
     $VENDOR   = $CurConfig{'VENDOR'};
 
     if ($CurConfig{'GROUP'} && !$GID) { 
@@ -1782,6 +1813,9 @@ sub Conv
 
 	# language
 	s/_LANGUAGE_/$LANGUAGE/g;
+
+	# TZ
+	s/_TZ_/$TZ/g;
 
 	# config
 	s/_EXEC_DIR_/$EXEC_DIR/g;
@@ -2362,13 +2396,10 @@ sub QmailSetUp
     $qmail_users_dir = "$ML_ETC_DIR/qmail/users";
 
     # direcotries
+    # need examples for group
+    $GroupWritable ? umask(007) : umask(077); 
     for ($qmail_dir, $qmail_alias_dir, $qmail_users_dir) {
-	if ($GroupWritable eq 'fmlserv') {
-	    &Mkdir($_, 0775) unless -d $_;
-	}
-	else {
-	    &Mkdir($_, 0755) unless -d $_;
-	}
+	&MakeWritableDir($_) unless -d $_;
     }
 
     # setmask
@@ -2545,11 +2576,12 @@ sub GetCF
     eval($local_config);
     &main'Warn($@) if $@; #';
 
+    local($v) = $config{"CFVersion"};
+
     # CFVerion 2 -> 3; Backward Compatilitity 
     if (!$config{"CFVersion"} || 
 	$config{"CFVersion"} < 3 ||
 	$COMPAT_CF2) {
-	print STDERR "   (config.ph; convert \$CFVersion 2 -> 3)\n";
 	&Log("makefml::config convert config.ph::\$CFVersion 2 -> 3");
 	&ConvertCF2to3(*config, *MAKE_FML);
     }
@@ -2558,8 +2590,17 @@ sub GetCF
     }
 
     if ($config{"CFVersion"} < 3.2) {
-	print STDERR "   (config.ph; convert \$CFVersion -> 3.2)\n\n";
 	&ConvertCF3to3_1(*config, *MAKE_FML);
+    }
+
+    if ($config{"CFVersion"} < 4.1 && (! $CurConfig{'TZ'})) {
+	$config{"CFVersion"} = 4.1;
+	$config{'TZone'} = '+0900';
+    }
+
+    if ($v ne $config{'CFVersion'}) {
+	print STDERR "   config.ph: Convert from $v to $config{'CFVersion'}\n";
+	$SetProcTitle = "config.ph: Convert from $v to $config{'CFVersion'}";
     }
 }
 
@@ -2603,6 +2644,7 @@ sub Mkdir
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
 }
 
+
 sub MkDirHier
 {
     local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
@@ -2624,13 +2666,21 @@ sub MkDirHier
 
 sub do_config_template
 {
-    local($ml)     = '@';
+    local($ml)     = '_ML_';
     local($dir)    = "$ML_DIR/$ml";
     local($org_cf) = "$EXEC_DIR/etc/makefml/cf";
     local($tmp_cf) = "$dir/cf";
 
-    # make $ML_DIR/@ (this name MUST NOT EXIST)
-    -d $dir || &Mkdir($dir);
+    if (-d $dir) {
+	print STDERR "Oops, $dir EXISTS ALREADY!!!\n";
+	print STDERR "Sorry, makefml config-template fails since";
+	print STDERR "this command uses \"_ML_\" ML virtually.\n";
+	return;
+    }
+    else {
+	# make $ML_DIR/@ (this name MUST NOT EXIST)
+	&Mkdir($dir);
+    }
 
     $UnderConfigTemplate = 1;
 
@@ -2845,6 +2895,8 @@ sub EachLevelQuery
 	    print "   ".("*" x 60); print "\n";
 	    print "\n";
 	    print "\t<<< makefml --- FML Configuration Interface --- >>>\n";
+	    print "\t    $SetProcTitle\n" if $SetProcTitle;
+	    undef $SetProcTitle;
 	    print "\n";
 	}
 	else {
@@ -3290,7 +3342,13 @@ sub do_ctladdr
     &SetWritableUmask;
 
     # files to change
-    push(@files, ($cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives"));
+    if (&AutoRegistrableP) {
+	push(@files, ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members"));
+
+    }
+    else {
+	push(@files, ($cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives"));
+    }
 
     &ResetVariables;
 
@@ -3316,6 +3374,18 @@ sub do_ctladdr
 	else {
 	    print "\t*** Error: Nothing has been changed. ***\n";
 	}
+    }
+}
+
+
+sub AutoRegistrableP
+{
+    if ($cur_config{'REJECT_POST_HANDLER'} =~ /auto\S+regist/ ||
+	$cur_config{'REJECT_COMMAND_HANDLER'} =~ /auto\S+regist/) {
+	1;
+    }
+    else {
+	0;
     }
 }
 
@@ -3619,14 +3689,16 @@ sub GetGID
 
 sub MakeWritableDir
 {
+    local($dir) = @_;
+
     if ($GroupWritable) {	# for backup files
-	-d $_[0] || &Mkdir($_[0], 0775);
-	chown $<, $GID, $_[0] if $GID ne '';
-	&SetGidBit($_[0]);
+	-d $dir || &Mkdir($dir, 0775);
+	chown $<, $GID, $dir if $GID ne '';
+	&SetGidBit($dir);
     }
     else {
-	-d $_[0] || &Mkdir($_[0], 0755);
-	&SetGidBit($_[0]);
+	-d $dir || &Mkdir($dir, 0755);
+	&SetGidBit($dir);
     }
 }
 

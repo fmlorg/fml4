@@ -49,6 +49,8 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 &Lock;				# Lock!
 
+if ($USE_LOG_MAIL) { &use('logmail'); &MailCacheDir;}
+
 if (! &MailLoopP) {
     &CacheMessageId(*Envelope);
     &RunStartHooks;		# run hooks
@@ -181,6 +183,7 @@ sub ModeBifurcate
 	    return $NULL;
 	}
 
+	
         if ($PERMIT_COMMAND_FROM eq "anyone") {
 	    require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 	    &Command() if $ForceKickOffCommand;
@@ -196,6 +199,23 @@ sub ModeBifurcate
 	    elsif ((! $member_p) &&
 		   ($Envelope{'mode:req:guide'} || $Envelope{'req:guide'})) {
 		&GuideRequest(*Envelope);
+	    }
+	    # MANUAL REGISTRATION REQUEST WITH CONFIRMATION (subscribe)
+	    elsif ((! $member_p) && $Envelope{'mode:req:subscribe'} &&
+		   &NonAutoRegistrableP) {
+		&Log("manual subscribe request");
+		&use('confirm');
+		
+		&ManualRegistConfirm(*Envelope, 'subscribe',
+				     $Envelope{'buf:req:subscribe'});
+	    }
+	    # MANUAL REGISTRATION REQUEST WITH CONFIRMATION (confirm)
+	    elsif ((! $member_p) && $Envelope{'mode:req:confirm'} &&
+		   &NonAutoRegistrableP) {
+		&Log("manual subscribe confirmed");
+		&use('confirm');
+		&ManualRegistConfirm(*Envelope, 'confirm',
+				     $Envelope{'buf:req:confirm'});
 	    }
 	    else {
 		$fp = $RejectHandler{$REJECT_COMMAND_HANDLER}||"RejectHandler";
@@ -320,7 +340,7 @@ sub SetDefaults
     %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', +1, 'ne.jp', +1);
     $REJECT_ADDR  = 'root|postmaster|MAILER-DAEMON|msgs|nobody';
     $REJECT_ADDR .= '|majordomo|listserv|listproc';
-    $REJECT_ADDR .= '|\S+\-subcribe|\S+\-unsubcribe|\S+\-help';
+    $REJECT_ADDR .= '|\S+\-subscribe|\S+\-unsubscribe|\S+\-help';
     $SKIP_FIELDS  = 'Received|Return-Receipt-To';
     $ADD_URL_INFO = $ML_MEMBER_CHECK = $CHECK_MESSAGE_ID = $USE_FLOCK = 1;
     $NOTIFY_MAIL_SIZE_OVERFLOW = 1;
@@ -363,7 +383,7 @@ sub GetTime
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
     $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
 			1900 + $year, $hour, $min, $sec, $TZone);
@@ -420,7 +440,6 @@ sub InitConfig
     # here for command line options --COMPAT_ARCH
     if ($COMPAT_ARCH)  { require "sys/$COMPAT_ARCH/depend.pl";}
 
-    &eval('&GetPeerInfo;') if $LOG_CONNECTION;
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
     if ($debug)   { require 'libdebug.pl';}
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
@@ -429,6 +448,7 @@ sub InitConfig
     if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
     if ($CFVersion < 3) { &use('compat_cf2');}
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
+    if (!$TZone) { $TZone = '+0900';} # TIME ZONE
 
     &GetTime;			        # Time, (may be for compatible codes)
 
@@ -518,6 +538,12 @@ sub Parse
     $p = index($Envelope{'Body'}, "\n\n");
     $Envelope{'Header'} = substr($Envelope{'Body'}, 0, $p + 1);
     $Envelope{'Body'}   = substr($Envelope{'Body'}, $p + 2);
+
+    # Really? but check "what happen if no input is given?".
+    if ($bufsiz == 0) {
+	&Log("no input, stop");
+	exit(0);
+    }
 }
 
 # Phase 2 extract several fields 
@@ -773,7 +799,10 @@ sub CutOffRe
 sub CheckCurrentProc
 {
     local(*e) = @_;
-    
+
+    # connection info
+    &eval('&GetPeerInfo;') if $LOG_CONNECTION;
+
     ##### SubSection: Check Body Contents (For Command Mode)
     local($limit, $p, $buf, $boundary, $nclines, $cc);
 
@@ -818,6 +847,17 @@ sub CheckCurrentProc
     local($found, $mime_skip);
     for (split(/\n/, $buf)) {
 	print STDERR "INPUT BUF> $_\n" if $debug;
+
+	# subscribe trap
+	if (/^(\s*|\#\s*)$CONFIRMATION_SUBSCRIBE\s+/i) {
+	    $e{'mode:req:subscribe'} = 1;
+	    $e{'buf:req:subscribe'} .= $_."\n";
+	}
+	# confirm trap (may be with citatin e.g. ">")
+	if (/$CONFIRMATION_KEYWORD\s+\S+/i) {
+	    $e{'mode:req:confirm'} = 1;
+	    $e{'buf:req:confirm'} .= $_."\n";
+	}
 
 	if ($boundary) { # if MIME skip mode;
 	    if ($_ eq $boundary) { $found++; $mime_skip++; next;}
@@ -1330,7 +1370,8 @@ sub CheckMember
     ($addr) = split(/\@/, $address);
     
     # MUST BE ONLY * ? () [] but we enhance the category -> shell sc
-    if ($addr =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+    # add + (+ed user) 1998/11/08
+    if ($addr =~ /[\+\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
 	$has_special_char = 1; 
     }
 
@@ -1992,11 +2033,6 @@ sub CacheMessageId
 
     $CachedMessageID{$id} = 1;
     &Append2($id." \# pid=$$", $LOG_MESSAGE_ID);
-
-    if ($USE_LOG_MAIL) {
-	&use('logmail');
-	&MailCacheDir;
-    }
 }
 
 sub DupMessageIdP
@@ -2108,17 +2144,27 @@ sub SecureP
     # permit m=12u; e.g. admin subscribe addr m=1;
     # permit m=12 for digest format(subscribe)
     $s =~ s/\s+m=\d+/ /g; $s =~ s/\s+[rs]=\w+/ /g;
-    $s =~ s/\s+[rms]=\d+\w+/ /g; 
+    $s =~ s/\s+[rms]=\d+\w+/ /g;
+
+    # ignore <addr+ext@domain>; but this is ugly hack ;-)
+    if ($command_mode eq 'admin') { 
+	$s =~ s/\+[-\w\.]+\@[-\w\.]+//g;
+    }
 
     # special hooks (for your own risk extension)
     if (%SecureRegExp || %SECURE_REGEXP) { 
-	for (keys %SecureRegExp)  { next if !$_; return 1 if $s =~ /^($_)$/;}
-	for (keys %SECURE_REGEXP) { next if !$_; return 1 if $s =~ /^($_)$/;}
+	for (values %SecureRegExp, values %SECURE_REGEXP) {
+	    next if !$_;
+	    return 1 if $s =~ /^($_)$/;
+	}
     }
 
     # special hooks to reject some patterns
     if (%INSECURE_REGEXP) {
-	for (keys %INSECURE_REGEXP) { next if !$_; return 0 if $s =~ /^($_)$/;}
+	for (values %INSECURE_REGEXP) {
+	    next if !$_; 
+	    return 0 if $s =~ /^($_)$/;
+	}
     }
 
     # permit Email Address, 100.tar.gz, # command, # mget 100,last:10 mp ...
@@ -2149,8 +2195,18 @@ sub ValidAddrSpecP
 
 sub GetPeerInfo
 {
-    local($family, $port, $addr) = unpack($STRUCT_SOCKADDR,getpeername(STDIN));
-    local($clientaddr) = gethostbyaddr($addr, 2);
+    local($family, $port, $addr);
+    local($clientaddr);
+
+    $addr = getpeername(STDIN);
+
+    if (! $addr) {
+	&Log("cannot getpeername()");
+	return;
+    }
+
+    ($family, $port, $addr) = unpack($STRUCT_SOCKADDR, $addr);
+    ($clientaddr) = gethostbyaddr($addr, 2);
 
     if (! defined($clientaddr)) {
 	$clientaddr = sprintf("%d.%d.%d.%d", unpack('C4', $addr));
@@ -2293,6 +2349,9 @@ sub EnvelopeFilter
     local($c); $c = $p = 0;
     $_ =~ s/[\n\s]*$//;		# remove the last spaces
     while (($p = index($_, "\n\n", $p + 1)) > 0) { $c++;}
+
+    # cut off Email addresses (exceptional).
+    s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
 
     &Debug("--EnvelopeFilter::Buffer($_\n);\ncount=$c\n") if $debug;
 
@@ -2448,7 +2507,13 @@ sub ADD_FIELD
 sub DELETE_FIELD 
 {
     local(@h); 
-    $SKIP_FIELDS .= $SKIP_FIELDS ? "|$_[0]" : $_[0];
+
+    # If $SKIP_FIELDS has no this entry.
+    # print STDERR "    if ($SKIP_FIELDS !~ /\"\\|$_[0]\\|\"/) { \n";
+    if ($SKIP_FIELDS !~ /\|$_[0]$|\|$_[0]\|/) {
+	$SKIP_FIELDS .= $SKIP_FIELDS ? "|$_[0]" : $_[0];
+    }
+
     for (@HdrFieldsOrder) { push(@h, $_) if $_ ne $_[0];}
     @HdrFieldsOrder = @h;
 }
@@ -2467,6 +2532,10 @@ sub MOVE_FIELD
     &DELETE_FIELD($_[0]);
 }
 
+
+####### Section: Switch
+sub SaveACL { $ProcCtlBlock{"main:ADDR_CHECK_MAX"} = $ADDR_CHECK_MAX;}
+sub RetACL  { $ADDR_CHECK_MAX = $ProcCtlBlock{"main:ADDR_CHECK_MAX"};}
 
 ####### Section: Event Handling Functions
 
