@@ -396,20 +396,25 @@ GEN_ARCHIVE () {
 	DATE=`date +%y%h%d`
 	DATE=` $FML/distrib/bin/date `
 
-	echo "Synchronizing $FTP/snapshot ..."
-	echo " "
-	test -d $FTP/snapshot || mkdir $FTP/snapshot;
-	rsync --delete -av distrib/ $FTP/snapshot/
+	# for fml 2.x.y branch series
+	# If fml 2.x.y branch series, DO NOT synchronize
+	if [ X$BRANCH_SNAPSHOT = X ]
+	then
+		echo "Synchronizing $FTP/snapshot ..."
+		echo " "
+		test -d $FTP/snapshot || mkdir $FTP/snapshot;
+		rsync --delete -av distrib/ $FTP/snapshot/
 
-	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
-	echo " "
-	echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
-	nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
+		echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
+		echo " "
+		echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
+		nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
 
-	echo "Synchronizing $WWW ..."
-	echo " "
-	echo rsync -av $FML/var/html/ $WWW/
-	rsync -av $FML/var/html/ $WWW/
+		echo "Synchronizing $WWW ..."
+		echo " "
+		echo rsync -av $FML/var/html/ $WWW/
+		rsync -av $FML/var/html/ $WWW/
+	fi
 
 	echo " "
 	echo "Unlinking *~ ..."
