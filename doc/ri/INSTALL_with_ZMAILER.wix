@@ -3,8 +3,12 @@
 =E
 		fml and zmailer as a MTA
 
-				Ken'ichi Fukamachi <fukachan@fml.org> 
+				Ken'ichi Fukamachi
 .~HTML_PRE
+
+.C	Configuration
+
+.S	set up /etc/aliases
 
 当然ですが、まずML以外の機能がちゃんと動くようにzmailerを設定してくだ
 さい。INSTALLを丹念に読みながらやればできます。
@@ -28,6 +32,13 @@ sendmailと同様に動いてくれるようです。
 The differnce between the example makefml generated and db/aliases is
 `"'. This seems required in zmailer but it looks you need only this
 `"'.
+
+
+.S	UCE controls
+
+doc/guides/smtp-policy を読んで設定しよう。
+=E
+see doc/guides/smtp-policy
 
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
