@@ -285,6 +285,7 @@ v3:
 	@ wc tmp/VARLIST
 sync:
 	scp -v -p /tmp/distrib/src/*.pl eriko:~/.fml
+	scp -v -p /tmp/distrib/src/*.pl iris:/usr/local/mail2fax/fml
 
 TEST:
 	tar cf - `find etc/ sbin |grep -v RCS` | ( chdir /tmp/distrib ; tar xvf - )
@@ -323,3 +324,6 @@ rel:
 	show -form $(PWD)/hack/release-notes.format 1501-2000 +release-notes >> /tmp/relnotes
 	show -form $(PWD)/hack/release-notes.format 2001-2500 +release-notes >> /tmp/relnotes
 	show -form $(PWD)/hack/release-notes.format 2501-3000 +release-notes >> /tmp/relnotes
+
+libkern:
+	sed '/^$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
