@@ -6,17 +6,37 @@
 のdirectoryができてその下にひとセット入ってます。
 ＃で、directoryの名前は適当に変えて下さい。
 
+
 .S	以下での設定例（例えば次のように設定することにしましょう）
 
 設定するマシン		axion.phys.titech.ac.jp
 Mailing List 		Elena Lolobrigita ML
 address of it		Elena@axion.phys.titech.ac.jp
 Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
-ＭＬのdirectory		/home/axion/fukachan/work/spool/Elena
+ＭＬのdirectory		/var/spool/ml/Elena
 (fml.plやconfig.ph等がある場所）			
 
 
+.C	お手軽インストール
+
+お手軽インストール教えます:-)。
+
+fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
+
+% make MAIL_LIST=Elena@axion.phys.titech.ac.jp MAINTAINER=Elena-request@axion.phys.titech.ac.jp	
+
+と打ってみてください
+＃実際にはアドレスをあなたの作りたいML名に変えて実行です (^^)
+
+自動的に /var/spool/ml/Elena/etc/samples/ に aliases や include ファイ
+ルの見本ができます。あとは aliases に書いて
+
+					はい、おしまひ(^^)
+
+
 .C	基本設定
+
+より自分好みのMLにしたいあなたの場合は、もちょっと手間をかけてみましょう。
 
 cf directory にいって、sample をコピーして、適当な名前にしておきます。
 ＃ここでは、ファイル名を Elena とします
@@ -211,15 +231,15 @@ C-wrapper を使うべきだという方は、 doc/op を見てください。
 
 具体的に、上述の include-file （see etc/include.example）は
 
-	/home/axion/fukachan/work/spool/Elena/etc/include.example
+	/var/spool/ml/Elena/etc/include.example
 
 というファイルだとしましょう。
-/home/axion/fukachan/work/spool/Elena/driver にコピーしたりするなり 
+/var/spool/ml/Elena/driver にコピーしたりするなり 
 /usr/local/ml-driver/Elena とかにするなりその辺は各自適当にどうぞ
 
 ファイルdriverの中身は
 
-"|/home/axion/fukachan/work/spool/Elena/fml.pl /home/axion/fukachan/work/spool/Elena /home/axion/fukachan/work/spool/Elena"
+"|/var/spool/ml/Elena/fml.pl /var/spool/ml/Elena /var/spool/ml/Elena"
 
 みたいに書きます（これで一行です↑）
 
@@ -237,13 +257,13 @@ includeするファイル（ここでは include.example）の所有者の権限でサーバ
 /etc/aliases にはこう書くことになります。
 ＃ etc/aliases.example に一通り設定されています。それを見てみてください。
 
-	Elena::include:/home/axion/fukachan/work/spool/Elena/driver
+	Elena::include:/var/spool/ml/Elena/driver
 
 その他に MAINTAINER として上で定義したアドレス等も設定することが必要です。
 実際にはこのようになるでしょう。 例によって #ではじまる行 はコメント行です
 
 # ML itself
-Elena: :include:/home/axion/fukachan/work/spool/Elena/etc/include.sample
+Elena: :include:/var/spool/ml/Elena/etc/include.sample
 
 #owner-Elena: your-username (Sendmail R8)
 owner-Elena:fukachan
