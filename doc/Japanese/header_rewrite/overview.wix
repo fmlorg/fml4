@@ -102,6 +102,13 @@ fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
 @HdrFieldsOrder defines the order of header fields.
 
 
+.S	RFC2369 (たとえば list-post )
+=E.S	RFC2369 (e.g. list-post )
+
+$USE_RFC2369 = 1;
+
+XXX: fml 4.0 ではデフォールトで on
+
 
 .C	関連事項
 =E.S	other topics

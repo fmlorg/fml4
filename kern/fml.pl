@@ -2096,6 +2096,7 @@ sub GenInfo
 	    $URLInfo = ";\n\t<mailto:$MAINTAINER>";
 	}
     }
+
     # RFC2369; Proposed Standard (so fml optional)
     if ($USE_RFC2369) { &use('kernsubr2'); &EmulRFC2369;}
 

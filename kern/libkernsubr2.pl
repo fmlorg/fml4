@@ -71,6 +71,9 @@ sub EmulRFC2369
 			    "<mailto:$addr?body=${trap}subscribe>");
     }
     else {
+	&DefineDefaultField("List-Software", $Rcsid);
+	&DefineDefaultField("List-Post", "<mailto:$MAIL_LIST>");
+	&DefineDefaultField("List-Owner", "<mailto:$MAINTAINER>");
 	&DefineDefaultField("List-Help", 
 			    "<mailto:$addr?body=${trap}help>");
 	&DefineDefaultField("List-Unsubscribe", 
