@@ -332,6 +332,10 @@ GEN_BRANCH_ARCHIVE () {
 	DATE=`date +"%C%y%m%d"`
 	FMLID=fml-snap-$DATE
 
+	if [ -d $FMLID ]; then
+		mv $FMLID $FMLID.$$
+	fi
+
 	echo mv distrib $FMLID
 	mv distrib $FMLID
 
@@ -361,42 +365,40 @@ GEN_ARCHIVE () {
 	echo chdir $DESTDIR
 	chdir $DESTDIR || return
 
-	# fml identifier
-	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-	FMLID=`echo $FMLID| sed 's/pl\#/pl/'` 
-	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
-
 	# date YYYYMMDD
 	DATE=` $FML/distrib/bin/date `
 
+	if [ X$MODE = X ]; then
+		# fml identifier
+		FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
+		FMLID=`echo $FMLID| sed 's/pl\#/pl/'` 
+		FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
+	else
+		FMLID=fml-${BRANCH}-${DATE}
+	fi
+
 	# directory
 	FTP=$FTP_DIR/${BRANCH}
- 	WWW=$WWW_DIR
+ 	WWW=$WWW_DIR/${BRANCH}
 
 	# check more
-	if [ -d $FTP_DIR ]; then mkdir $FTP_DIR; fi
-	if [ -d $WWW_DIR ]; then mkdir $WWW_DIR; fi
-	if [ -d $FTP ]; then mkdir $FTP; fi
-
+	test -d $FTP_DIR || mkdir $FTP_DIR
+	test -d $WWW_DIR || mkdir $WWW_DIR
+	test -d $FTP     || mkdir $FTP
+	test -d $WWW     || mkdir $WWW
+	test -d $FTP/src || mkdir $FTP/src
 
 	### Section: export to ftp,www
 	echo " "
 	echo "-- sync w/ ftp server"
 	echo " "
-	test -d $FTP/src || mkdir $FTP/src
-	test -d $WWW || mkdir $WWW
-
 	rsync --delete -C -av distrib/ $FTP/src/
 
 	echo " "
 	echo "-- sync w/ www server"
 	echo " "
-	echo rsync --delete -C -av distrib/doc/html/	$WWW/
+	echo rsync --delete -C -av distrib/doc/html/ $WWW/
 	rsync --delete -C -av distrib/doc/html/	$WWW/
-
-	test -d $WWW/${BRANCH} || mkdir $WWW/${BRANCH}
-	echo rsync --delete -C -av distrib/doc/html/	$WWW/${BRANCH}/
-	rsync --delete -C -av distrib/doc/html/	$WWW/${BRANCH}/
 
 
 	### Section: cleanup
@@ -407,9 +409,18 @@ GEN_ARCHIVE () {
 
 
 	### Section: generate snapshot {tar,zip}balls
+	(
+	   chdir $FTP
+	   rm -f fml-${BRANCH}*tar.gz fml-${BRANCH}*zip
+	)
+
 	echo " "
 	echo "-- make $FMLID.tar.gz ... "
 	echo " "
+	if [ -d $FMLID ]; then
+		mv $FMLID $FMLID.$DATE.$$
+	fi
+
 	mv distrib $FMLID
 	tar cvf $FMLID.tar $FMLID
 	gzip -9 $FMLID.tar
@@ -417,23 +428,13 @@ GEN_ARCHIVE () {
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
 
-	(
-		chdir $FTP
-		rm -f fml-current.*.tar.gz fml-current.tar.gz 
-		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
-		ln $FMLID.tar.gz fml-current.tar.gz
-	)
-
 	echo ""
 	echo "-- make $FMLID.zip";
 	echo ""
+	pwd
 	find $FMLID |zip -q -@ $FMLID.zip
+	echo cp -p $FMLID.zip $FTP/
 	cp -p $FMLID.zip $FTP/
-	(
-		chdir $FTP
-		rm -f *.zip current/fml*zip
-		ln $FMLID.zip fml-current.zip
-	)
 
 	echo ""
 	echo "-- create MD5 check sum"
