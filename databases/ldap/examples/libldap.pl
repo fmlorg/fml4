@@ -11,16 +11,51 @@
 package LDAP;
 
 
+sub Log { &main::Log(@_);}
+
+
+sub DataBases::Execute
+{
+    local(*Envelope, $mib, $result, $misc) = @_;
+
+    if ($main::debug) {
+	while (($k, $v) = each %$mib) { print "LDAP: $k => $v\n";}
+    }
+
+    if ($mib->{'ACTION'}) {
+	# initialize
+	&Init($mib);
+	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
+
+	&LDAP::Connect($mib);
+	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
+
+	&GetActiveList;
+	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
+
+	&Close;
+	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
+
+	# O.K.
+	return 1;
+    }
+    else {
+	&Log("ERROR: LDAP: no given action to do");
+    }
+}
+
+
 sub Init
 {
     my ($mib) = @_;
 
     use Mozilla::LDAP::Conn;
-    $conn = new Mozilla::LDAP::Conn($mib->{'host'} || 'elena',
-				    $mib->{'port'} || 389,
-				    $mib->{'bind'}, 
-				    $mib->{'password'}, 
-				    $mib->{'cert'});
+    $conn = 
+	new Mozilla::LDAP::Conn($mib->{'host'} || 'elena',
+				$mib->{'port'} || 389,
+				$mib->{'bind'}, 
+				$mib->{'password'}, 
+				$mib->{'cert'});
 
     if (! $conn) { 
 	$mib->{'error'} = "cannot connect host $mib->{'host'}";
@@ -32,8 +67,11 @@ sub Init
 sub Connect
 {
     my ($mib) = @_;
+    
+    $entry = $conn->search($mib->{'base'}, 
+			   "subtree",
+			   $mib->{'query_filter'});
 
-    $entry = $conn->search($mib->{'base'}, "subtree", "(objectclass=*)");
     if (! $entry) {
 	$mib->{'error'} = "cannot find base $mib->{'base'}";
 	return;
