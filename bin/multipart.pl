@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#!/usr/local/bin/perl
 # multipart.pl:
 # Converter from Multipart/Mixed or Multipart/Alternative to Text/Plain
 # (C) 1996 Yuao Tanigawa

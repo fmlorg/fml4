@@ -1,3 +1,5 @@
+#!/usr/local/bin/perl
+
 require 'getopts.pl';
 &Getopts("hHd");
 
