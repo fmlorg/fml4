@@ -1,0 +1,366 @@
+.C	インストール事例 (fml-help ML より…)
+
+.S	windows2000server＋exchange2000server での fmlの構築 
+
+.q
+無事以下の環境で構築する事が出来ました。
+
+【環境１】
+Windows2000Server＋SP2
+Exchange2000Server
+fml-4.0.1（POP)
+ActivePerl-5.6.1.628
+exsvc04
+
+調子に乗って以下の環境でも動作する事を確認しました。
+
+【環境２】
+Windows2000Professional
+fml-4.0.1（POP)
+ActivePerl-5.6.1.628
+exsvc04
+※メールサーバーはfmlを削除した環境１のマシンを使用
+
+どちらも殆ど同じ要領でインストール出来ましたが、
+強いて注意する点を挙げれば、環境２の時にメーリングリストユーザを追加するの
+は、
+環境２ではなく、環境１であると言うことです。
+当たり前の事ですが、やっている内に何が何だか分からなくなりました。
+
+それと、話は変わりますが、差出人がメールを送信した人になっているのですが、
+メーリングリストのアカウント名に変更する事は可能でしょうか？
+また、件名に自動採番を付加するような事は出来るのでしょうか？
+ご存知の方ご教授下さい。
+
+今回、Windows2000＋ｆｍｌの構築を１からまとめましたので、
+これから同一環境でfmlをインストールされる方は参考にしてみて下さい。
+
+●fmlインストール
+ 
+ １）fmlユーザの作成
+ fmlをインストールするマシンに、fmlインストール用のユーザを作成します。
+ fml
+ 
+ 
+ ２）メーリングリストユーザの作成
+ まず、SMTP、POPサーバーが稼動しているサーバー（環境１のマシン）に、
+ メーリングリストのユーザを作成します。
+ この時管理ユーザを作成しないと、ntfmlを起動した時にエラーが表示され続けるの
+ で、
+ 管理ユーザも作成しておきましょう。何れもメールボックスを作成して下さい。
+ elena
+ elena-ctl
+ elena-admin
+ 
+ 
+ ※これ移行セキュリティの為？Administrator、fml、elenaユーザを使い分けたの
+ で、
+ 項番右側のAdministrator、fml、elenaを参考にして下さい。
+ ちなみに全作業Administratorで実施しても、メーリングリストは作成出来ました。
+ 
+ 
+ ３）ActivePerl-5.6.1.628-MSWin32-x86-multi-threadをインストール
+ （Administrator）
+ http://aspn.activestate.com/ASPN/Downloads/ActivePerl/ から、
+ 「ActivePerl 5.6.1.628」の「Windows　AS Package 9MB」をダウンロード。
+ ダブルクリックして普通にインストールします。
+ （ExamplesとDocumentationはインストールしなくてもOK)
+ 
+ 
+ ４）Windows2000に対応した圧縮・解凍ソフトをインストール（Administrator）
+ http://www.forest.impress.co.jp/library/lhaz.html から、「lhaz099.exe」をダ
+ ウンロード。
+ 自己解凍のexeファイルなので、ダブルクリックしてインストールします。
+ この後解凍するzip、lzh形式にDLL不要で対応しているので良いと思います。
+ 
+ 
+ ５）fml-4.0.1の展開（fml）
+ ftp://ftp.fml.org/pub/fml/release/ から、「fml-4.0.1.zip」をダウンロード。
+ C:\fml-4.0.1に展開します。(何処でも構わないですがC:\fmlは止めた方が良いで
+ す）
+ 
+ ６）fml-4.0.1をインストール（fml）
+ cmd.exe(DOSプロンプト）を起動、展開された「c:\fml-4.0.1」フォルダに移動し、
+ 以下のコマンドを実行します。
+ C:\fml-4.0.1>ntinstall
+ インストール先はC:\fmlが良いです。（デフォルトでc:\fmlです。）
+ 
+ 以下はインストール内容です。
+ C:\fmlソース\fml-4.0.1>perl sys\WINDOWS_NT4\bootstrap.pl
+ 
+ 0       end
+ 1       Prog Mailer e.g. MetaInfo Sendmail (2.0 after)
+ 2       POP Version
+ 
+ Which one your environment fit? (0-2) [0] 2（POPバージョンなので２を入力）
+ 
+ Starting the installer "sbin\makefml"
+ unshift(@INC, /src)
+ ---NOT USING configuration file (for the first time)
+ ---Please Define Your Fml System Configurations
+ 
+ Personal Use or ML-Admin-Group-Shared or fmlserv you use?
+ Personal, Group, Fmlserv (personal/group/fmlserv) [personal]
+ 
+ DOMAIN NAME               [ドメイン名.co.jp]
+ FQDN                      [マシン名.ドメイン名.co.jp]
+ EXEC FILES DIRECTORY      [C:\fml]
+ TOP LEVEL ML DIRECTORY    [C:\fml\ml]
+ 
+ Language (Japanese or English) [Japanese]
+ 
+ 
+ TimeZone (TZ: e.g. +0900, -0300) [+0900]
+ 
+ 
+   --- summary ---
+       DOMAIN: ドメイン名.co.jp
+         FQDN: マシン名.ドメイン名.co.jp
+     EXEC_DIR: C:\fml
+       ML_DIR: C:\fml\ml
+     Language: Japanese
+     TimeZone: +0900
+ 
+ 
+ The current configuration is saved in C:\fml/_fml/system
+    mkdir C:\fml\ml
+ 
+ ---Install the Fml system to C:\fml. (y/n) [n] y
+ 
+ Installing fml system to C:\fml
+ Fixing Path: src
+ ...............................................................
+ ............. libexec ..... sbin . cf . bin .................... www/cgi-bin
+ ...
+ ...... www/lib ... sys ......... module ..
+         Done.
+ 
+ Generate nroff manuals:
+ 
+ perl sys/WINDOWS_NT4/ntinstall.pl C:\fml
+ Installing bin .
+ Installing sbin .
+ Installing libexec .
+ Installing cf .
+ Installing etc ..
+ Installing databases .......
+ Installing messages ..
+ Installing drafts ..
+ Installing module .......
+ Installing doc
+ .................................................................
+ ............................................................................
+ ....
+ ....
+ Installing var\html
+ 
+ Installing perl scripts (*.pl) files ...
+ .
+         Generating C:\fml\ntfml.cmd
+ Good. Installation is done.
+ 
+ --- Please ignore after this (EVEN IF THIS INSTALLER FAILED).
+ --- New version (test phase)
+         Generating C:\fml\sys\WINDOWS_NT4\NEW\ntfml.cmd
+         Generating C:\fml\sys\WINDOWS_NT4\NEW\ntfmlrm.cmd
+         Generating C:\fml\sys\WINDOWS_NT4\NEW\autoexnt.bat
+ Done.
+ 
+ 
+ ##### POP and SMTP Server Configuration ####
+ 
+    directory C:\fml\ml/popfml is created as USER=fml
+ POP SERVER [マシン名.ドメイン名.co.jp]:
+ 
+ POP SERVER is [マシン名.ドメイン名.co.jp] O.K.?  (y/n) [n] y
+ 
+ SMTP SERVER [マシン名.ドメイン名.co.jp]:
+ 
+ SMTP SERVER is [マシン名.ドメイン名.co.jp] O.K.?  (y/n) [n] y
+ 
+ Warning:(called from main sbin\makefml 2311)
+ cannot find template C:\fml/www/etc/dot_htaccess.admin
+ Warning:(called from main sbin\makefml 2311)
+ cannot find template C:\fml/www/etc/dot_htaccess.admin
+ 
+ Setup CGI examples Warning:(called from main sbin\makefml 2311)
+ cannot find template C:\fml/www/etc/dot_htaccess.admin
+ ..Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/apache/httpd.conf.patch from main
+ sbin\makefml 7
+ 064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/mini_httpd/README from main sbin\makefml
+ 7064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/postfix/main.cf from main sbin\makefml 7064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/qmail/README from main sbin\makefml 7064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/sendmail/README from main sbin\makefml 7064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/sendmail/senmail.cf from main sbin\makefml
+ 7064
+ .Warning:(called from main sbin\makefml 2315)
+ cannot open C:\fml/www/examples/thttpd/README from main sbin\makefml 7064
+ 
+ ※※上で物凄い数のWarningが必ず出ます。
+ ※※これは大丈夫なのでしょうか？
+ ※※取あえず無視して先に進んで下さい。
+ ※※メーリングリストは問題無く？動作します。
+ 
+       CGI configuration is saved in C:\fml/_fml/cgi.conf
+ 
+ 
+  -- Enjoy Internetworking!
+ 
+ 
+ ７）メーリングリストの作成（elena)
+ cmd.exeを起動、「c:\fml」フォルダに移動し以下のコマンド実行します。
+ C:\fml>makefml newml elena
+ 
+ ※インストール中にelenaと、elena-ctlのPOP3パスワードを要求されるので、
+ 事前にメモを取っておきましょう。
+ 
+ 以下はインストール内容です。
+ C:\fml>C:\Perl\bin\Perl.exe C:\fml\makefml -w newml elena
+ DO "newml" for elena mailing list.
+ ---Creating elena mailing list
+    directory C:\fml\ml/elena is created as USER=elena
+    directory C:\fml\ml/elena/spool is created as USER=elena
+ ---Generting configuration examples.
+ 
+    Generate template files in C:\fml\ml/elena/
+          include include-ctl include-mead aliases Makefile crontab
+          fmlwrapper.c fmlwrapper.h
+ 
+    Generate qmail template files in C:\fml\ml/etc/qmail/alias/
+          .qmail-elena .qmail-elena-ctl .qmail-elena-default
+          .qmail-elena-admin .qmail-elena-request .qmail-owner-elena
+          .qmail-owner-elena-ctl
+ On NT4, we do not gerenate qmail/users/assign.
+ 
+    Update C:\fml\ml/etc/crontab/elena
+ 
+    Create config.ph(C:\fml\ml/elena/config.ph):
+         C:\fml\ml/elena/cf  ->  config.ph ... Done.
+ 
+    Create template files for commands (help, guide ...)
+          help help-admin deny guide welcome confirm objective
+ ---Setting POP3 Passwd of the user elena (elena mailing list)
+ 
+ [elena's POP password setting]
+ 
+    Mailing List Name: elena
+        POP3 Password: elena
+ 
+    Passwd Changed (C:\fml\ml/etc/pop_passwd).
+ 
+ [elena-ctl's POP password setting]
+ 
+    Mailing List Name: elena-ctl
+        POP3 Password: elena
+ 
+    Passwd Changed (C:\fml\ml/etc/pop_passwd).
+ 
+    Update C:\fml\ml/etc/aliases
+ 
+    The next step: update your MTA configuration. For example
+         % su root
+         # cat C:\fml\ml/elena/aliases >> /etc/aliases
+         # newaliases
+ 
+    FYI: See templates in 'C:\fml\ml/elena/'
+ done.
+ 
+ 
+ ８）メーリングリストのユーザを追加（elena)
+ cmd.exeを起動、「c:\fml」フォルダに移動し以下のコマンドを実行します。
+ C:\fml>makefml add elena 追加したいメールアドレス
+ 
+ 
+ ９）メーリングリストプログラムの起動（Administrator)
+ cmd.exeを起動、「c:\fml」フォルダに移動し以下のコマンドを実行します。
+ テストの為繰返し時間を10秒にしています。
+ 
+ C:\fml>ntfml.pl -u 10(秒）
+ 
+ 以上でメーリングリストの設定は終了しました。
+ elena@ドメイン宛てにテストメールを投げて見て下さい。
+ 
+ 
+ 
+ ●ntfmlのサービス化
+ メーリングリストが正常に稼動しましたら、ntfmlをサービス化し、
+ 自動起動させるようにしましょう。
+ 
+ 
+ １）exsvc04の展開（Administrator)
+ http://www6.plala.or.jp/k-ssk/download.html から、
+ 「サービス起動コマンド V 0.4(exsvc04.lzh)　(71,302バイト) 最新版」をダウン
+ ロード。
+ C:\exsvc04に展開します。
+ 
+ 
+ ２）サービスを登録（Administrator)
+ cmd.exeを起動、先程展開した「C:\exsvc04」フォルダに移動し、以下のコマンドを
+ 実行します。
+ C:\exsvc04>instsvc -n ntfml c:\exsvc04\execsvc.exe
+ 
+ 正常にインストールされれば、以下のメッセージが出力されます。
+ サービス登録しました
+ サービス名はExecuteService、表示名はntfmlです
+ 
+ 
+ ３）初期設定ファイルを修正（Administrator)
+ 「C:\exsvc04」フォルダのExecSvc.iniファイルを開きntfmlの繰返し時間を修正しま
+ す。
+ ※以下はあくまで私の設定なので、必ず合わせる必要はありません。
+ ※fmlのインストール先が「C:\fml」であれば、デフォルトで問題なく動作します。
+ 
+ ARG = c:\fml\ntfml.pl -u 300
+ 300秒は長いので20秒に修正しました。
+ ARG = c:\fml\ntfml.pl -u 20
+ 
+ 
+ ４）初期設定ファイルの構文チェック（Administrator)
+ cmd.exeを起動、先程展開した「C:\exsvc04」フォルダに移動し、以下のコマンドを
+ 実行します。
+ ※execsvc.iniファイルを修正していなくても念の為に実行しましょう。
+ C:\exsvc04>chkconf.exe -d execsvc.ini
+ 
+ 以下出力内容
+ 2001/07/18 10:05:05.875 INFO: Parse configuration file
+ 2001/07/18 10:05:05.875 DEBUG: found key (LOG) (line=12)
+ 2001/07/18 10:05:05.885 DEBUG: get value (ON) (line=12)
+ 2001/07/18 10:05:05.885 DEBUG: found key (LVL) (line=13)
+ 2001/07/18 10:05:05.885 DEBUG: get value (1) (line=13)
+ 2001/07/18 10:05:05.885 DEBUG: section line [ntfml]] found
+ 2001/07/18 10:05:05.895 INFO: Check multibyte character in section [ntfml]
+ (line
+ =18)
+ 2001/07/18 10:05:05.895 DEBUG: found section [ntfml] (line=18)
+ 2001/07/18 10:05:05.905 DEBUG: found key (EXE) (line=19)
+ 2001/07/18 10:05:05.905 DEBUG: get value (c:\perl\bin\perl.exe) (line=19)
+ 2001/07/18 10:05:05.905 DEBUG: found key (ARG) (line=21)
+ 2001/07/18 10:05:05.915 DEBUG: get value (c:\fml\ntfml.pl -u 20) (line=21)
+ 2001/07/18 10:05:05.915 DEBUG: found key (DIR) (line=22)
+ 2001/07/18 10:05:05.915 DEBUG: get value (c:\fml) (line=22)
+ 2001/07/18 10:05:05.925 INFO: argv[0]=chkconf.exe
+ 2001/07/18 10:05:05.925 INFO: MyPath=.
+ 2001/07/18 10:05:05.925 INFO: ConfPath=.\ExecSvc.ini
+ 2001/07/18 10:05:05.935 INFO: LogPath=.\ExecSvc.log
+ 2001/07/18 10:05:05.935 DEBUG: argc=3, argv[0]=chkconf.exe
+ 2001/07/18 10:05:05.935 DEBUG: MyPath=.
+ 2001/07/18 10:05:05.945 INFO: section [] check command file
+ 2001/07/18 10:05:05.945 INFO: section [ntfml] check command file
+ No fatal errors.
+ 
+ 
+ ５）サービスを自動化する（Administrator)
+ 管理ツールのサービスを起動、サービス表示名「ntfml」をダブルクリックし、
+ スタートアップの種類を「自動」に、サービスの状態にある「開始」ボタンを押下す
+ る。
+ 
+ 以上、でWindows2000+fmlの構築は全て終了です。
+.~q

@@ -6,9 +6,10 @@
 .toc
 .~HTML_PRE
 
+.include internal.wix
 .include mta.wix
 .include utils.wix
 .include examples.wix
-
+.include install_report.wix
 
 .# $Id$
