@@ -10,9 +10,9 @@ fi
 
 GEN="perl distrib/bin/html_split.pl"
 
-if [ -d var/db ]
+if [ -d var/db -a ! -h var/db ]
 then
-	echo "var/db exists! STOP "; 
+	echo "var/db directory exists! STOP "; 
 	exit 1
 else
 	rm -f var/db
