@@ -1,13 +1,13 @@
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libmoderated.pl,v 2.18 2001/09/29 10:11:31 fukachan Exp $
+# $FML: libmoderated.pl,v 2.19 2002/01/10 14:26:32 fukachan Exp $
 #
 
 #
@@ -237,7 +237,7 @@ sub ModeratedDeliveryTypeII
 		   'Content-Type', 
 		   'Content-Transfer-Encoding') {
 	    my $v = $header->get($k);
-	    $v =~ s/[\s\n]*$//;
+	    $v =~ s/[\s\n]*$//g;
 	    $Envelope{"GH:$k:"} = $v if $v;
 	}
     }
@@ -441,8 +441,7 @@ sub ModeratorResend
     }
     else {
 	&FixHeaderFields(*e); # e.g. checking MIME
-
-	# distribute
+	&CheckCurrentProc(*Envelope, 'upper_part_only');
 	&Distribute(*e, 'permit from members_only');
     }
 
