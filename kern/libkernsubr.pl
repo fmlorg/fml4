@@ -1,13 +1,13 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
 
 ###
@@ -16,7 +16,7 @@
 
 sub __SecureP 
 { 
-    local($s, $command_mode) = @_;
+    my ($s, $command_mode) = @_;
 
     $s =~ s#(\w)/(\w)#$1$2#g; # permit "a/b" form
 
@@ -71,7 +71,7 @@ sub __SecureP
 
 sub __RejectAddrP
 {
-    local($from) = @_;
+    my ($from) = @_;
 
     if (! -f $REJECT_ADDR_LIST) {
 	&Log("RejectAddrP: \$REJECT_ADDR_LIST NOT EXISTS");
@@ -106,6 +106,7 @@ sub __RejectAddrP
 # Write3: call by reference for effeciency
 sub __Write3
 { 
+    use vars qw(%me $f);
     local(*e, $f) = @_; 
 
     open(APP, "> $f") || (&Log("cannot open $f"), return '');
@@ -141,8 +142,8 @@ sub __Write3
 # Notification of the mail on warnigs, errors ... 
 sub __Notify
 {
-    local($buf) = @_;
-    local($to, @to, $s, $proc, $m);
+    my ($buf) = @_;
+    my ($to, @to, $s, $proc, $m);
 
     # special flag
     return $NULL if $Envelope{'mode:disablenotify'};

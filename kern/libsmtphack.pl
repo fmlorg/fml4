@@ -7,14 +7,16 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libsmtphack.pl,v 1.5 2001/08/24 11:11:34 fukachan Exp $
 #
 
 use vars qw($debug $debug_smtp);
+use vars qw(@RcptLists
+	    $OUTGOING_RCPTLIST);
 
 sub SmtpHackInit
 {
-    local($howold, $renew);
+    my ($howold, $renew);
 
     if (! $OUTGOING_ADDRESS) {
 	&Log("\$OUTGOING_ADDRESS is not defined.");
@@ -34,7 +36,7 @@ sub SmtpHackInit
     &SmtpHackRebuildList if $renew;
 
     if (-z $OUTGOING_RCPTLIST) {
-	local($f) = $OUTGOING_RCPTLIST;
+	my ($f) = $OUTGOING_RCPTLIST;
 	$f =~ s#^$DIR/##;
 	&Log("ERROR: $f is size 0");
 	&Log("disable \$USE_OUTGOING_ADDRESS and back to normal delivery");
@@ -49,7 +51,7 @@ sub SmtpHackInit
 
 sub SmtpHackRebuildList
 {
-    local($new) = "$OUTGOING_RCPTLIST.new";
+    my ($new) = "$OUTGOING_RCPTLIST.new";
 
     open(OUT, "> $new") || do { 
 	&Log("SmtpHackRebuildList: cannot open $new");

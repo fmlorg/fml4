@@ -1,20 +1,26 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#-*- perl -*-
+# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
 # SMTP recipient arrray Window Control
 
+
+use vars qw($debug $debug_smtp);
+use vars qw(%MCIWindowCB $MCIType);
+
+
 sub LineCount
 {
-    local($f) = @_;
-    local($lines) = 0;
+    my ($f) = @_;
+    my ($lines) = 0;
 
     open(TMP, $f) || return 0;
     while (<TMP>) { 
@@ -31,8 +37,8 @@ sub LineCount
 
 sub GetMCIWindow
 {
-    local($file) = @_;
-    local($n, $size, $start, $end);
+    my ($file) = @_;
+    my ($n, $size, $start, $end);
 
     # The first time, the line number is not set up.
     if ($MCIWindowCB{$file}) {
@@ -68,8 +74,8 @@ sub GetMCIWindow
 
 sub MCIWindowUnit
 {
-    local($n, $u) = @_;
-    local($x);
+    my ($n, $u) = @_;
+    my ($x);
 
     if ($u <= 0) { &Log("N_MCIUnit: $u < 0"); return 0;}
 

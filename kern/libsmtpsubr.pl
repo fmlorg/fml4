@@ -9,10 +9,13 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libsmtpsubr.pl,v 1.8 2001/08/24 11:07:03 fukachan Exp $
 #
 
 use vars qw($debug); 
+use vars qw($LastSmtpIOString);
+use vars qw($MIME_CONVERT_WHOLEMAIL);
+
 
 ### Mail Forwarding
 sub ForwardSeparatorBegin { "\n------- Forwarded Message\n\n";}
@@ -20,9 +23,9 @@ sub ForwardSeparatorEnd { "\n\n------- End of Forwarded Message\n";}
 
 sub DoSmtpFiles2Socket
 {
+    use vars qw(@f $f %f %e);
     local(*f, *e) = @_;
-    local($autoconv, $count, $boundary, $ml);
-    local($hdr_found) = 0;
+    my ($autoconv, $count, $ml, $hdr_found);
 
     $ml    = (split(/\@/, $MAIL_LIST))[0];
     $count = scalar(@f) > 1 ? 1 : 0;
@@ -58,7 +61,7 @@ sub DoSmtpFiles2Socket
 	$autoconv = $f{$f, 'autoconv'};
 
 	if ($count) { # append the separator if more than two files;
-	    $boundary = ('-' x 60)."\r\n";
+	    my $boundary = ('-' x 60)."\r\n";
 	    print S $boundary;
 	    print SMTPLOG $boundary;
 	}
@@ -118,8 +121,8 @@ sub DoSmtpFiles2Socket
 
 sub Copy2SocketFromHash
 {
-    local($key) = @_;
-    local($pp, $p, $maxlen, $len, $buf);
+    my ($key) = @_;
+    my ($pp, $p, $maxlen, $len, $buf);
 
     $pp     = 0;
     $maxlen = length($Envelope{$key});
