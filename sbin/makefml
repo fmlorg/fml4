@@ -1767,7 +1767,10 @@ sub CtlAddrList
     local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
     local($found, $buf, $line, $sumbuf);
-     
+
+    # XXX tricky hack
+    $addr =~ s/\./\\\./g;
+
     open(F, $file)           || (&Warn("cannot open $file"), return 0);
     open(NEW, "> $file.new") || (&Warn("cannot open $file.new"), return 0);
     select(NEW); $| = 1; select(STDOUT);
@@ -1811,7 +1814,7 @@ sub CtlAddrList
 	    }
 	}
 
-	print NEW "$_\n";
+	print NEW $_, "\n";
     }
 
     close(NEW);
