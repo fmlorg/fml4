@@ -5,6 +5,35 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#29 == 3.0.1_BETA #18 ]
+
+   disable to reject "From: $MAIL_LIST" mail in default 
+
+	デフォールトでは From: $MAIL_LIST を弾かないように変更
+	3.0ではループチェックの一部としてこれをしているが
+	企業のサポートＭＬなどではまるのでとりあえず戻す
+
+	明示的にループチェックする場所を指定する関数を用意したので
+	したい人はチェックするとよいとおもう。
+
+   fix to enable $DEFAULT_RELAY_SERVER even if command reply 
+
+	libsmtp.pl      (2.30-2.31)
+	libsmtputils.pl (2.7-2.8)
+
+   dirty hack to resolve 'admin matome 0' sends articles out asap.
+   XXX we should resolve it to modify fml internals but anyway fix
+   XXX it by dirty hack.
+
+	libamctl.pl (2.24-2.25)
+
+[ 3.0pl#28 == 3.0.1_BETA #17 ]
+
+	changed to accpet From: $MAIL_LIST
+
+	3.0 のループチェックではじいている From: $MAIL_LIST のケース
+	をデフォールトでは適用しない
+
 [ 3.0pl#27 == 3.0.1_BETA #16 ]
 
   sbin/makefml (2.65-2.66): 
