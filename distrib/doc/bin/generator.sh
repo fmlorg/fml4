@@ -40,6 +40,10 @@ SOURCE_DIR=$2
 # html subdir "advisory" for doc/advisory/y2k.html
 SUBDIR=$3
 
+if [ X$SUBDIR = X ];then
+	SUBDIR=.
+fi
+
 GEN_HTML () {
 	chdir $FML
 
