@@ -90,7 +90,7 @@ sub CompatFML15_Pre
 $SMTP_OPEN_HOOK .= q#
     if ($STAR_TREK_FORM) {
 	local($mon, $year) = (localtime(time))[4..5];
-	local($ID) = sprintf("%02d%02d.%05d", $year - 90, $mon + 1, $ID);
+	local($ID) = sprintf("%02d%02d.%05d", ($year - 90) % 100, $mon + 1, $ID);
 	$Envelope{'h:Subject:'} = "[$ID] $Subject";
     }
 #;
