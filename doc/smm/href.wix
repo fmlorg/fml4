@@ -12,6 +12,7 @@
 .l	SyncHtml
 .key	自動 html 化
 .key	libsynchtml.pl
+.xref	spool2html.pl
 
 fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
 ので;-)、HOOK でやれるように書き直しました。
@@ -57,6 +58,11 @@ $HTML_INDEX_REVERSE_ORDER がセットされていると逆方向に <LI> エントリを
 この時各 directory の .indexcache にキャッシュされているデータから生成
 しています。ファイル .indexcache は $HTML_DATA_CACHE で変更できます。
 .k	$HTML_DATA_CACHE
+
+
+コマンドラインからのためのインターフェイスに spool2html.pl というのも
+あります。
+.xref spool2html.pl
 
 
 .S	HTML化するUNIT (数 or 日)

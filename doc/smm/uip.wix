@@ -390,6 +390,7 @@ SYNOPSIS:
  
 
 .S	SPOOL -> HTML Hierarchy (bin/spool2html.pl)
+.l	spool2html.pl
 .k	bin/spool2html.pl
 .k	spool2html.pl
 

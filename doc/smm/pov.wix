@@ -215,7 +215,7 @@ $PORT = 25 (25/tcp) で通信しますが、
 
 
 ここでは fml 内部処理におけるデータ構造について解説します。これらの知
-識は改造する上で必須の事柄でしょうが、単に変数を1 or 0 にセットするだ
+識は改造する上で必須の事柄でしょうが、単に変数を 1 or 0 にセットするだ
 けしか config をいじらないなら読む必要はないでしょう。
 
 
@@ -240,6 +240,11 @@ $PORT = 25 (25/tcp) で通信しますが、
 
    %Envelope は最も重要な変数です。
    しかしながら、こういう変数は本来出来るだけ少なくするべきです。
+
+   注意：
+	全部小文字でグローバル変数という例外が歴史的に２つあります。
+	$debug と $rcsid です。歴史的にそうなっているというだけなので
+	今後そういう変数名は作られることはありません。
 
 ○ 小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言
    されています。
@@ -294,9 +299,16 @@ $PORT = 25 (25/tcp) で通信しますが、
 ないままですが:-)
 
 
-.S	%Envelope
+.S	%Envelope (ハッシュテーブル)
 .k	%Envelope
 .k	struct envelope e;
+
+
+%Envelope には今 fml を起動したメールの内容(ヘッダ、ヘッダの各フィール
+ド、本文等)が格納されます。また、そのメールに対しどういうMETHODでREPLY
+を返すべきか？や、sendmail との通信等の設定に関しての付加情報も 
+%Envelope を通じて渡されます。
+それはこのメールに対する METHOD の定義とみなしているからです。
 
 
 sendmail の struct envelople e; に対応するものです。
@@ -304,35 +316,84 @@ sendmail の struct envelople e; に対応するものです。
 
 	$Envelope->$Header->$From = "uja@domain";
 
-のような使い方はしません（できない）。
+のような使い方はしません(できない)。
 これと同様のことを意図したシンタックスが
 
 	$Envelope{"h:From:"}  = "uja@domain";
 
-で表現されています。 h = header で From: はわざとFieldだとわかりやすい
-ように : まで含めています。
+で表現されています。 h = header で From: はわざと Field だとわかりやす
+いように : まで含めています。
 
-   %Envelope
-	ヘッダの各フィールドデータ
+   以下、%EnvelopeのKEYについて説明します。
+   ＃ハッシュなので、KEY => VALUE が $Envelope{KEY} の値が VALUE ですね
+
+	h: ではじまるものKEYは「ヘッダの各フィールドのデータ」です。
 
 	h:Capital:	補正されたデータ
 	h:lower-case:	オリジナルデータ
 
-   例：
-	h:From: は配送されるヘッダ中に現れるフィールドです  
-	
-    $e{'h:Return-Path:'} = "<$MAINTAINER>";        # needed?
-    $e{'h:Date:'}        = $MailDate;
-    $e{'h:To:'}          = "$MAIL_LIST $ML_FN";    # rewrite To:
-    $e{'h:Posted:'}      = $e{'h:date:'} || $MailDate;
-    $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
-    $e{'h:Lines:'}       = $e{'nlines'};
+	それ以外に その Envelope のメールをどういうモードで処理するか？
+	や、そのメールへのREPLY、エラーレポート処理をどうするか？
+	というMETHODの指定等の付加情報も付け加えることもあります。
+.#	hack:
+
+	[ヘッダ関係]
+
+	h:field:	上述のヘッダ：フィールド：設定値
+
+	fh:field:	field(小文字) はfmlがある値を強制する
+
+			例： fh:to: は To: を $Envelope{'fh:to:'} の値にする
+
+	oh:field:	field はOriginalのヘッダフィールドを使う
+
+	GH:field:	コマンドの結果を返すメールは GenerateHeader() という
+			ルーチンでメールヘッダを生成する。
+			そこでの値を変更したいならこのKEYを使う。
+
+	Addr2Reply:	コマンドの結果の返事を返すアドレス
+			reply-to: > From:
+
+	[メールが呼び出すべきモードやメソッドのConfig]
+
+	macro:x		x は sendmail の $x に対応する内容を保存
+
+	mode:x		モード設定値 
+
+	mci:mailer	mci は Mail Connection Information (MCI)
+			mci:mailer は ipc(SMTP) か prog(exec sendmail)
+			のどちらかである
+
+	[内部表現]
+
+	Header		オリジナルのヘッダ
+	Body		オリジナルのメール本文
+	Hdr		送り出すメールのヘッダ（&Smtpの直前に生成される）
+
+	message		メールをサーバへ送ったユーザへのメッセージ
+	error		管理者への(エラー)メッセージ
+
+	MIME		ISO-2022-JP is detected (toggle Flag)
+	UnixFrom	Unix From
+	Hdr2add		$SUPERFLUOUS_HEADER の時につかうバッファ
+	nclines		# command の行数
+	nlines		メール本文の行数
+	preamble	メール本文の前につける文章
+	trailer		メール本文の後につける文章
 
 
+   例： Subject:
 
+    $Envelope{'h:subject:'}	
+	は来たメールそのもの
 
+    $Envelope{'h:Subject:'}	
+	は来たメールの Re: をとり
+	必要なら [Elena 100] のようなものを処理したもの
 
-
+   のような違いがある。	配送されるヘッダは大文字ではじまる単語
+	Date: To: Sujbect: 
+   のようなものからなる。
 
 
 
