@@ -172,6 +172,9 @@ Message-ID:  <20000504163541.D14933@securityfocus.com>
 
 .S	postfix filtering
 
+ATTENTION! postfix-19991231-pl08 has "body_checks" directive for
+content filtering. Please check it out!
+
 .q
 [/etc/postfix/main.cf]
 header_checks = regexp:/etc/postfix/header_checks
