@@ -165,6 +165,12 @@ return message in language defined as $MESSAGE_LANGUAGE.
 The default of $MESSAGE_LANGUAGE is $LANGUAGE. 
 $LANGUAGE is defined in installation.
 
+.S	その他の(目に見える)変更
+
+SKIP_FIELDS のデフォールトを変更して Received: を通すのがデフォールト
+=E
+change $SKIP_FIELDS default to pass through Received:. 
+It causes too many hops but need to check spam or back trace.
 
 
 .C	2.2.1 RELEASE と 2.2 RELEASE の間の差について
