@@ -4,7 +4,7 @@ require 'getopts.pl';
 &Getopts("dRX:");
 
 $FML = $opt_X || $ENV{'FML'};
-chop($ID = `perl "$FML/distrib/bin/fml_version.pl -X $FML" -s`);
+chop($ID = `perl $FML/distrib/bin/fml_version.pl -X $FML -s`);
 chop($date = `date`);
 
 while(<>) {
