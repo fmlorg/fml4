@@ -491,14 +491,16 @@ $CFVersion 3 以前にあった $SUBJECT_HML_FORM は config.ph が CFVersion
 換されます。現在の設定ではすでに無効な変数です。
 .fi
 
-.S	Subject: の成形 ([Elena:ID] フォーマットを抜く)
+.S	Subject: の成形 ([Elena:ID] フォーマットを抜く) [obsolete]
 =E.S	Cut off [Elena:ID] form strings in a subject
 .key	Subjectから[Elena:ID]を抜く
 .k	[Elena:ID]を抜く
 .key	$STRIP_BRACKETS
 
 .if LANG == JAPANESE
-歴史的意味しかないので使うことはないはずです。
+[backward compatible, obsolete]
+歴史的意味しかないので古いconfig.phを使っているならともかく、
+新たに使うことはないはずです(使わないように)。
 
 	$STRIP_BRACKETS = 1;
 
