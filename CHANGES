@@ -5,6 +5,13 @@
 	$Date$
 
 
+2001/08/20
+
+  remove $LOCKFILE in $0 
+
+	$LOCKFILE という変数名が変なので $MyProcessInfo に変更した
+	# See fml-help: 00581, 00593
+
 2001/08/19
 
   module/Japanese/IM

@@ -16,7 +16,7 @@
 # old lock extracted from fml 0.x and revised now :-)
 sub V7Lock
 {
-    $0 = "${FML}: link(2) style Locked and waiting <$LOCKFILE>";
+    $0 = "${FML}: link(2) style Locked and waiting <$MyProcessInfo>";
 
     # set variables
     $LockFile = $LOCK_FILE || "$FP_VARRUN_DIR/lockfile.v7";
@@ -70,7 +70,7 @@ sub V7Lock
 
 sub V7Unlock
 {
-    $0 = "${FML}: link(2) style Unlocked <$LOCKFILE>";
+    $0 = "${FML}: link(2) style Unlocked <$MyProcessInfo>";
     unlink $LockFile if $LockStatus{$LockFile} eq 'locked';
     &Log("cannot unlink $LockFile (unlocked)") if $LockStatus{$LockFile} ne 'locked';
 }

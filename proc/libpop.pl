@@ -121,11 +121,11 @@ sub PopPut2Socket
     return if $s =~ /^\s*$/; # return if null;
 
     if ($s =~ /^PASS/) {
-	$0 = "${FML}: Put2Socket PASS <$LOCKFILE>"; 
+	$0 = "${FML}: Put2Socket PASS <$MyProcessInfo>"; 
 	print POPLOG "PASS ********<INPUT\n";
     }
     else {
-	$0 = "${FML}: Put2Socket $s <$LOCKFILE>"; 
+	$0 = "${FML}: Put2Socket $s <$MyProcessInfo>"; 
 	print POPLOG $s, "<INPUT\n";
     }
 
@@ -170,7 +170,7 @@ sub Gobble
 
     my($time) = time;
     for ($i = 1; $i <= $n; $i++) {
-	$0 = "${FML}: RETR $i <$LOCKFILE>"; 
+	$0 = "${FML}: RETR $i <$MyProcessInfo>"; 
 	print S "RETR $i\r\n";
 	print POPLOG "RETR $i\n";
 	print POPLOG $_ = <S>; /^\-/o && last;
@@ -209,7 +209,7 @@ sub Gobble
 	close(FILE);
 
 	### FILE REMOVE
-	$0 = "${FML}: DELE $i <$LOCKFILE>"; 
+	$0 = "${FML}: DELE $i <$MyProcessInfo>"; 
 	print S "DELE $i\r\n";
 	print POPLOG "DELE $i\n";
 	print POPLOG $_ = <S>; 

@@ -974,7 +974,7 @@ sub DelaySendFileDividedly
     local($sleep) = ($SLEEPTIME || 3);
     local($tmp)   = "$TMP_DIR/sfbs:${DSFD_Counter}:$$";
 
-    $0 = "${FML}: split and send back $f to $to <$LOCKFILE>";
+    $0 = "${FML}: split and send back $f to $to <$MyProcessInfo>";
     $s = $enc || $DEFAULT_MGET_SUBJECT;
 
     ### IF MIME mode, you are afraid of a lot ...
@@ -1049,7 +1049,7 @@ sub SendFileDividedly
     local($sleep) = ($SLEEPTIME || 3);
     local($tmp)   = "$TMP_DIR/sfbs:${SFD_Counter}:$$";
 
-    $0 = "${FML}: split and send back $f to $to <$LOCKFILE>";
+    $0 = "${FML}: split and send back $f to $to <$MyProcessInfo>";
     $s = $enc || $DEFAULT_MGET_SUBJECT;
 
     if ($mode eq 'mp') {

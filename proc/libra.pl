@@ -394,7 +394,7 @@ sub AdminCommand
 
 	# INFO
 	&Debug("Call ". $AdminProcedure{"admin:$cmd"}) if $debug;
-	$0 = "${FML}: Command calling $proc: $LOCKFILE>";
+	$0 = "${FML}: Command calling $proc: $MyProcessInfo>";
 
 	# PROCEDURE
 	# RETURN is 0 == LAST(libfml.pl);

@@ -34,7 +34,7 @@ sub Command
 # return NONE but ,if exist, mail back $e{'message'} to the user
 sub DoProcedure
 {
-    $0 = "${FML}: Command Mode in <$LOCKFILE>";
+    $0 = "${FML}: Command Mode in <$MyProcessInfo>";
 
     # Rcsid offers usefu Information for you;
     # !~ fix (pointed out by ando@iij-mc.co.jp (by irc :))
@@ -219,7 +219,7 @@ sub DoProcedure
       }
 
       ### info
-      $0 = "${FML}: Command Mode processing $xbuf: $LOCKFILE>";
+      $0 = "${FML}: Command Mode processing $xbuf: $MyProcessInfo>";
       &Log("proc debug: eval [$xbuf]") if $debug;
       &Debug("Present command    $xbuf") if $debug;
 
@@ -281,7 +281,7 @@ sub DoProcedure
 
 	  # INFO
 	  &Debug("Call               &$Procedure{$xbuf}") if $debug;
-	  $0 = "${FML}: Command calling $proc: $LOCKFILE>";
+	  $0 = "${FML}: Command calling $proc: $MyProcessInfo>";
 
 	  # PROCEDURE
 	  $status = &$proc($xbuf, *Fld, *e, *misc);
