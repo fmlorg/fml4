@@ -52,9 +52,21 @@ sub PGPDecode
 
     &PgpInit(*e) || return 0;
 
-    # 2>&1 is required to detect "Good signature"
+    # load open2
     require 'open2.pl';
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>$tmpbuf") || &Log("PGPDecode: $!");
+
+    # PGP Signature Check
+    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode: $!");
+    print WPGP "\n$e{'Body'}\n";
+    close(WPGP);
+    while (<RPGP>) {
+	$auth = 1 if /Good\s+signature/i;
+    }
+    close(RPGP);
+
+    # 2>&1 is required to detect "Good signature"
+    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>/dev/null") || 
+	&Log("PGPDecode: $!");
     print WPGP "\n$e{'Body'}\n";
     close(WPGP);
 
@@ -63,7 +75,6 @@ sub PGPDecode
 
     while (<RPGP>) {
 	$e{'pgp:buf'} .= $_;
-	$auth = 1 if /Good\s+signature/i;
 	print STDERR "PGP OUT:$_" if $debug;
     }
     close(RPGP);
@@ -89,9 +100,9 @@ sub PGPEncode
 
     # pgp scan to find myself, 
     # so PLEASE ATTENTION "DO NOT SEND IT TO MYSELF";
-    $connt =  &PgpScan(*e, *whom);
+    $count = &PgpScan(*e, *whom) || 0;
 
-    &Log("scan PGP keyrings: $count found");
+    &Log("scan PGP keyrings: $count keys found");
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
@@ -116,8 +127,6 @@ sub PGPEncode
 
     # PGP authenticated
     # &Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
-
-    &Log("Error: PGP no good signature.") unless $auth;
 
     $auth;
 }
@@ -161,6 +170,14 @@ sub PgpUserExistP
     close(RPGP);
 
     0;
+}
+
+
+sub PgpEncryptedMailBodyP
+{
+    local(*e) = @_;
+
+    $e{'Body'} =~ /\-\-\-\-\-BEGIN PGP MESSAGE\-\-\-\-\-/ ? 1 : 0;
 }
 
 
