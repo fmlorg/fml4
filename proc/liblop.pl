@@ -220,7 +220,7 @@ sub ResentForwFileInSpool
 
     # reset for the sequel actions and restore backup
     for (@ResentForwHdrFieldsOrder) { 
-	print STDERR "undef \$Envelope{\"GH:$_:\"};\n";
+	print STDERR "undef \$Envelope{\"GH:$_:\"};\n" if $debug;
 	undef $Envelope{"GH:$_:"};
     }
 
