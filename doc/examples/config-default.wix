@@ -1,0 +1,104 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- 生の状態 --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+注意: 詳細については
+.url ../INSTALL/index.html
+を参照してください。
+
+.HTML_PRE
+
+elena メーリングリストを例にとろう。生の状態では
+
+	管理者がメンバーの登録/削除
+
+をしなければならない。もっとも安全確実といえる。
+
+
+○ メーリングリストを作る
+
+% makefml newml elena
+% makefml add elena 自分のアドレス
+% su
+# cat /var/spool/ml/elena/aliases >> /etc/aliases
+# newaliases
+# exit
+
+
+○ テスト
+
+% echo test |Mail elena
+
+メールが来ているかメールソフトでみてみる
+
+
+○ メーリングリストの広告(?)をうつ
+
+   例: 
+   ○○○についてのメーリングリストを作りました。
+   参加希望者は<elena-admin@自分のドメイン>宛までメールを…
+
+
+○ 参加希望者を登録する(1)
+
+% makefml add elena 希望者のアドレス
+
+
+○ 削除する(1)
+
+% makefml bye elena アドレス
+
+
+○ 参加希望者を登録/削除する(2)
+
+まとめて登録/削除する時などは、エディタを使う方が早い
+エディタだと２つのファイルをいじることに注意が必要になる。
+
+% makefml lock elena 120 &
+
+	120 秒間ロックする(数字は好きなように)
+
+% cd /var/spool/ml/elena
+% $EDITOR members
+
+	一行一アドレス で書いて保存
+
+% $EDITOR actives
+
+	一行一アドレス で書いて保存
+
+	120 秒後ロックは外れてＭＬは走り出す。
+
+○ 参加希望者を登録/削除する(3)
+
+members と actives が常に一緒という保証があるなら
+
+% cd /var/spool/ml/elena
+% $EDITOR members
+% cp members actives
+
+で構わないだろう。
+
+○ actives は配送先で、members は認証に使うリストである。
+
+members には会社のアドレスと自宅のアドレス両方を登録して
+どちらからでも投稿はできるようにしてほしいが配送先はどちらか片方
+
+などのようなケースがあるため、一般には members の方が大きくなる。
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

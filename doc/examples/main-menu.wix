@@ -1,0 +1,42 @@
+   ************************************************************
+
+        <<< makefml --- FML Configuration Interface --- >>>
+
+   === TOP MENU ===
+
+   Mailing List Addresses
+        FOR POST          elena@fml.org
+        FOR COMMAND       elena-ctl@fml.org
+   _______________________
+
+   0    END		
+   1    POLICY OF ACCESS (WHO CAN POST AND USE COMMANDS)
+
+        [POST]
+          PERMIT_POST_FROM                 members_only
+          WHEN POST FROM NOT MEMBER        reject
+
+        [COMMAND]                          
+          PERMIT_COMMAND_FROM              members_only
+          WHEN COMMAND FROM NOT MEMBER     reject
+
+   2    REGISTRATION METHOD TYPE
+
+        AUTO_REGISTRATION_TYPE             confirmation
+        UNSUBSCRIBE_AUTH_TYPE              
+
+   3    SETTINGS AROUND COMMANDS
+              address for command          elena-ctl@fml.org
+
+   4    REMOTE ADMINISTRATION              
+                     PERMIT ?              NO
+                     AUTH_TYPE             crypt
+
+   5    HEADER CONFIGURATIONS
+
+   6    OPTION                             
+
+   7    SECURITY & FILTERING                
+   ************************************************************
+
+   Which section? (0-7) [0] 

@@ -1,0 +1,47 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- 自動登録番外編: 一方的にメールを送りたい --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+注意: 詳細については
+.url ../INSTALL/index.html
+を参照してください。
+
+.HTML_PRE
+
+○ 目的
+
+一方的にメールを送ることが目的の場合。この場合
+
+	投稿できる人は特定の人だけ
+	配送先は自動的に登録したい
+
+のような要求があるだろう。そういう場合を想定している。自動的に「配送リ
+スト」だけに登録をしていく。当然脱退も「配送リスト」だけに適用される。
+
+
+○ 自動登録にする(が特別な値を選ぶことがポイント)
+
+% makefml config elena
+
+   メインメニュ -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_asymmetric_regist
+
+
+○ 登録時に自動的に送り返されるファイルなどを編集しておく
+
+% $EDITOR /var/spool/ml/elena/welcome
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
