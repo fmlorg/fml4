@@ -140,7 +140,7 @@ sub main'IrcParseArgv #'
     
     $SetProcTitle = $opt_t;
 
-    # load config.ph
+    # load configuration file
     if (!-f $opt_f) { die("cannot load config file, stop.\n");}
     require $opt_f;
 
