@@ -1,0 +1,38 @@
+.C	Examples
+
+.S	日別に生メールをSJIS+CRLFに変換しただけのもの
+
+fml-support: 08941
+
+mailbox 形式でいいんですかね？
+＃それを UNIX でよむならともかく、M$ 環境でも嬉しいかしら？
+
+こんなんでできますかね…
+.q
+$DISTRIBUTE_CLOSE_HOOK = q#
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    my $dir = "$DIR/mailbox";
+    my $mailbox = 
+       $dir .'/'.sprintf("%04d%02d%02d", 1900 + $year, $mon + 1, $mday);
+
+    &Mkdir($dir);
+
+    if ( open($mailbox, ">> $mailbox") ) {
+        my $body = "\n". $Envelope{'Body'};
+        $body =~ s/\nFrom /\n>From /g;
+        $body = &JSTR($body, 'sjis');
+
+        print $mailbox "From $From_address \n";
+        print $mailbox $Envelope{'Hdr'};
+        print $mailbox $body ;
+        print $mailbox "\n";
+        close($mailbox);
+    }
+    else {
+        &Log("ERROR: cannot open $mailbox");
+    }
+#;
+.~q
+
+
+.# $Id$

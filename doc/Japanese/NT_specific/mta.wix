@@ -1,0 +1,21 @@
+.C	メールサーバ
+
+.S	Sendmail for NT
+
+S96 の name server へといあわせるぎょうをコメントアウト
+
+
+.S	EMWAC
+
+% unzip 
+% mv ims.dll \winnt\system32
+% smtprs -install
+% smtpds -install
+% pop3s  -install
+
+
+[control panel] - [EMWAC IMS]
+
+
+
+.# $Id$
