@@ -1,23 +1,33 @@
+#-*- perl -*-
+#
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
+
+use vars qw($debug);
+use vars qw($Rcsid $URLComInfo);
+use vars qw(%RelayRcpt);  # special recipient forwarded to specified relay
+use vars qw($SUN_OS_413); # obsolete but defined for compatibility 
+use vars qw($SENDFILE_NO_FILECHECK); # obsolete
 
 # NEW VERSION FOR MULTIPLE @to and @files (required @files NOT $files) 
 # return NONE
 sub DoNeonSendFile
 {
     local(*to, *subject, *files) = @_;
-    local(@info) = caller;
-    local($le, %le, @rcpt, $error, $n, $f, @f, %f);
+    local($le, %le, @rcpt, $f, @f, %f);
+    my (@info) = caller;
+    my ($n, $error);
 
     # backward compat;
     $SENDFILE_NO_FILECHECK = 1 if $SUN_OS_413;
@@ -48,9 +58,7 @@ sub DoNeonSendFile
 
 		# AUTO CONVERSION 
 		eval "require 'jcode.pl';";
-		$ExistJcode = $@ eq "" ? 1 : 0;
-
-		if ($ExistJcode) {
+		unless ($@) {
 		    &Log("NeonSendFile::AutoConv $n to JIS");
 		    $f{$f, 'autoconv'} = 1;
 		}
@@ -121,11 +129,12 @@ sub DoSendPluralFiles
 sub DoSendmail
 {
     local(@to, %le, @rcpt);
-    local($to, $subject, $body, @to) = @_;
-    push(@to, $to);		# extention for GenerateHeader
+    my ($xto, $subject, $body, @xto) = @_;
+    push(@to, @xto);
+    push(@to, $xto); # extention for GenerateHeader
 
     # (before it, checks whether the return address is not ML nor ML-Ctl)
-    if (! &CheckAddr2Reply(*Envelope, $to, @to)) { return;}
+    if (! &CheckAddr2Reply(*Envelope, $xto, @to)) { return;}
 
     $le{'GH:Subject:'} = $subject;
     &GenerateHeader(*to, *le, *rcpt);
@@ -142,9 +151,9 @@ sub DoSendmail
 sub DoSendmail2
 {
     local(*distfile, $subject, $body) = @_;
-    local(@a, $a);
 
     if (-f $distfile && open(DIST, $distfile)) {
+	my (@a, $a);
 	while (<DIST>) {
 	    next if /^\s*$/;
 	    next if /^\#/;
@@ -194,7 +203,7 @@ sub DoGenerateHeader
     # @Rcpt is passed as "@to" even if @to has one addr;
     # WE SHOULD NOT TOUCH "$to" HERE;
     local(*to, *le, *rcpt) = @_;
-    local($tmpto, %dup);
+    my ($tmpto, %dup);
 
     # Resent (RFC822)
     @ResentHdrFieldsOrder = ("Resent-Reply-To", "Resent-From", "Resent-Sender",
@@ -206,7 +215,7 @@ sub DoGenerateHeader
     @to || do { &Log("GenerateHeader: ERROR: NO \@to"); return;};
 
     # prepare: *rcpt for Smtp();
-    local($x, $lc_rcpt);
+    my ($lc_rcpt);
     for (@to) {
 	# Address Representation Range Check
 	&ValidAddrSpecP($_) || /^[^\@]+$/ || do {
@@ -231,8 +240,7 @@ sub DoGenerateHeader
     $le{'macro:s'}    = $Envelope{'macro:s'};
     $le{'mci:mailer'} = $Envelope{'mci:mailer'};
 
-    local($m);
-    $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
+    my $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
 	($ENV{'USER '}|| $ENV{'USERNAME'});
 
     $le{'GH:From:'}        = $MAINTAINER || "$m\@$DOMAINNAME";
@@ -241,7 +249,6 @@ sub DoGenerateHeader
     $le{'GH:References:'}  = $Envelope{'h:message-id:'};
     $le{'GH:References:'}  =~ s/^\s+//;
     $le{'GH:X-MLServer:'}  = $Rcsid;
-    $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $le{'GH:X-ML-Info:'}   = $URLComInfo if $URLComInfo;
     $le{'GH:From:'}       .= " ($MAINTAINER_SIGNATURE)"
 	if $MAINTAINER_SIGNATURE;
