@@ -16,7 +16,10 @@ FWIX_OPTS=-F
 tmp=/tmp/config$$
 make __import_variables > $tmp
 echo "------------------------------"
+echo "import *_DIR to env variables via fml.sys.mk"
+echo ""
 cat $tmp
+echo ""
 echo "------------------------------"
 . $tmp
 rm -f $tmp
