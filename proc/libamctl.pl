@@ -399,6 +399,11 @@ sub DoSetMemberList
     }
     # NOT CHADDR;
     else {
+	# when not administrator mode
+	if (! $e{'mode:admin'}) { 
+	    $curaddr = $Addr || $From_address;#(From_address when bye)
+	}
+
 	$newaddr = $curaddr; # tricky;
 	&Mesg(*e, "\t set $cmd => BYE") if $cmd ne "BYE";
 	$cmd = 'BYE';
