@@ -6,9 +6,8 @@
 				Ken'ichi Fukamachi
 
 .~HTML_PRE
---------------------------
+
 .toc
---------------------------
 
 
 .C	Introduction
@@ -78,10 +77,10 @@ This is not a must but may be better?
 この postfix 特有の設定以外は気にしなくても sendmail と同じだと思って
 いて構わないとおもう。
 
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

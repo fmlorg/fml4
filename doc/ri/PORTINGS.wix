@@ -1,12 +1,10 @@
-		On Porting to Non UNIX Operating Systems
+	On Porting to Non UNIX Operating Systems
 
 				¿¼Ä® ¸­°ì
 =E
 				Ken'ichi Fukamachi
 			
-__________________________________
 .toc
-__________________________________
 
 
 .C	Windows NT 4.0 Porting Status
@@ -128,10 +126,10 @@ Now I have no plan to change it to GUI since I want to use makefml.
 I hope browsers can handle makefml directly but ....
 
 .# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

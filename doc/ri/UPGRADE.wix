@@ -12,9 +12,7 @@
    I think "principle of least surprise" is most important in upgrade.
 .~HTML_PRE
 
------------------
 .toc
------------------
 
 .# ifdef-3.0
 .C	3.0 RELEASE と 2.2.1 RELEASE の間の違いについて
@@ -384,10 +382,10 @@ fml.orgで動いている古いconfig.phで auto_subscribe にするには３つおまじ
 うので勧められないきがする。
 
 $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
