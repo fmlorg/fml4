@@ -413,7 +413,7 @@ delivery (as both an experiment and a demonstration :-).
    sendmail 8.9.3
    qmail 1.03
    exim 2.04
-   postfix snap-19990322
+   postfix snap-19990601
 
 
 
