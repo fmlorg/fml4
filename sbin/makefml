@@ -4316,7 +4316,7 @@ sub HtmlConfigQuery
 
     if (! $VALID_HIER{$top_level}) {
 	&Log("ERROR: HtmlConfigQuery: invalid level=$top_level");
-	&ERROR("unknown menu hierarchy level");
+	&Error("unknown menu hierarchy level");
 	return;
     }
 
