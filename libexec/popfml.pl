@@ -13,7 +13,7 @@
 # See the file COPYING for more details.
 #
 # $Id$;
-$Rcsid   = 'fmlserv #: Wed, 29 May 96 19:32:37  JST 1996';
+$Rcsid   = 'popfml 4.0';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';

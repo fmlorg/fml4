@@ -11,6 +11,7 @@
 #
 # MEAD: Mail Error Analyze Daemon
 # $Id$
+$Rcsid = 'mead 4.0';
 
 ### VERY FUNDAMENTAL CONFIG ###
 $ErrorCodePat = '55\d|5\.\d\.\d';

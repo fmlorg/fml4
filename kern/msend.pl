@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # q$Id$;
-$Rcsid   = 'msend 2.2';
+$Rcsid   = 'msend 4.0';
 
 # For the insecure command actions
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
