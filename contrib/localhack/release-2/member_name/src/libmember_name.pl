@@ -159,6 +159,7 @@ sub DoSetMemberNameFile
         if ( $e{'mode:admin'} ) {
             # COMMAND 'ADMIN NAME Address [NEWNAME]'
             $newname =~ s/^admin\s+($NAME_KEYWORD)\s+\S+\s*//i;
+            $newname =~ s/^approve\s.+($NAME_KEYWORD)\s+\S+\s*//i;
         } else {
             # COMMAND 'NAME [NEWNAME]'
             $newname =~ s/^($NAME_KEYWORD)\s*//i;
