@@ -24,11 +24,6 @@ echo "------------------------------"
 . $tmp
 rm -f $tmp
 
-if [ "X$MAKE" = X -o "X$PERL" = X ];then
-	echo "MAKE or PERL is not defined";
-	exit 1;
-fi
-
 
 # program (depends on FML)
 INCLUDE_PROG="${PERL} $FML/distrib/bin/_include.pl "
@@ -84,6 +79,25 @@ else
 fi
 
 echo "-- debug";
-echo "(debug)MAKE: $MAKE";
-echo "(debug)PERL: $PERL";
+for x in MAKE PERL RSYNC NKF JCONV ECONV
+do
+	eval "xvar=\$${x}"
+	echo "(debug)${x}: $xvar"
+	if [ "X$xvar" = X ];then
+		echo "variable $x is not defined";
+		xstatus=1;
+	fi
+
+	path=` echo $xvar | awk '{print $1}' `
+	realpath=`which $path`
+	if [ -x $path -o -x $realpath ];then
+		echo "       ${x}: $path found"
+	else
+		echo "$path not exists";
+		xstatus=1;
+	fi
+done
+
+if [ "X$xstatus" != X ];then  exit $xstatus; fi;
 echo "-- etc/config ends";
+

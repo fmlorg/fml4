@@ -6,7 +6,7 @@
 .endif
 
 __EXPORTS_PROGS__  = SH CC CFLAGS MKDIR RSYNC FETCH TAR INSTALL CP PERL
-__EXPORTS_PROGS__ += JCONV ECONV VERSION _FWIX FWIX
+__EXPORTS_PROGS__ += NKF JCONV ECONV VERSION _FWIX FWIX
 
 SH	 ?= /bin/sh
 CC 	 ?= /usr/bin/cc
@@ -20,6 +20,7 @@ PERL     ?= /usr/local/bin/perl
 MKDIR    ?= ${PERL} ${FML}/distrib/bin/mkdirhier.pl
 
 # Convert to Japanese/English
+# NKF      ?= /usr/local/bin/nkf
 JCONV    ?= /usr/local/bin/nkf -j
 ECONV    ?= /usr/local/bin/nkf -e
 
