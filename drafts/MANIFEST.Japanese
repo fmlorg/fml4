@@ -1,0 +1,13 @@
+		drafts/ のテンプレートファイル
+
+confirm             confirm モードの登録用
+confirmd.ackreq     confirm モードの登録継続確認用
+deny                メンバ外
+guide               ML の guide
+help                ML の使い方の help
+help-admin          admin メンバ用 help
+help-fmlserv        fmlserv モード時の help
+objective           ML の objective (目的)
+welcome             入会メッセージ
+
+$Id$
