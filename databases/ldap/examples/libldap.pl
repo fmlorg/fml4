@@ -30,11 +30,22 @@ sub DataBases::Execute
 	&LDAP::Connect($mib);
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
-	if ($mib->{'ACTION'} eq 'get_active_list') {
+	if ($mib->{'ACTION'} eq 'get_active_list' ||
+	    $mib->{'ACTION'} eq 'dump_active_list') {
 	    &GetActiveList;
 	}
-	elsif ($mib->{'ACTION'} eq 'get_member_list') {
+	elsif ($mib->{'ACTION'} eq 'get_member_list' ||
+	       $mib->{'ACTION'} eq 'dump_member_list') {
 	    &GetMemberList;
+	}
+	elsif ($mib->{'ACTION'} eq 'active_p') {
+	    $mib->{'_result'} = &ActiveP($mib, $mib->{'_address'});
+	}
+	elsif ($mib->{'ACTION'} eq 'member_p') {
+	    $mib->{'_result'} = &MemberP($mib, $mib->{'_address'});
+	}
+	elsif ($mib->{'ACTION'} eq 'admin_member_p') {
+	    $mib->{'_result'} = &AdminMemberP($mib, $mib->{'_address'});
 	}
 	elsif ($mib->{'ACTION'} eq 'add' ||
 	       $mib->{'ACTION'} eq 'bye' ||
@@ -45,6 +56,9 @@ sub DataBases::Execute
 	       $mib->{'ACTION'} eq 'digest' ||
 	       $mib->{'ACTION'} eq 'matome') {
 	    &__ListCtl($mib);
+	}
+	else {
+	    &Log("ERROR: LDAP: unkown ACTION $mib->{'ACTION'}");
 	}
 
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
@@ -105,6 +119,16 @@ sub Close
 
 
 ### ***-predicate() ###
+
+
+sub AdminMemberP
+{
+    my ($mib, $addr) = @_;
+
+    &Log("\$entry->hasValue(admin, $addr)") if $main::debug_ldap;
+    &Log("\$entry->hasValue(admin, $addr)");
+    $entry->hasValue("admin", $addr);
+}
 
 
 sub MemberP
