@@ -30,8 +30,8 @@ unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 
 
 #################### MAIN ####################
-require 'proc/libkern.pl';
-require 'proc/libpop.pl';
+require 'libkern.pl';
+require 'libpop.pl';
 
 &CheckUGID;
 
@@ -180,7 +180,7 @@ sub PopFmlLock
 
     # anyway shutdown after 45 sec (60 sec. must be a unit).
     $SIG{'ALRM'} = "PopFmlProgShutdown";
-    alarm($TimeOut{"pop:flock"} || 45);
+    alarm($TimeOut{"pop:flock"} || 45) if $HAS_ALARM;
 
     open(LOCK, $queue_dir);
     flock(LOCK, $LOCK_EX);
@@ -282,7 +282,7 @@ sub PopFmlProg
     
     # O.K. Setup the prog of the queue; GO!
     undef $SIG{'ALRM'};
-    alarm(0);
+    alarm(0) if $HAS_ALARM;
 
     &PopFmlUnLock;
     closedir(DIRD);
