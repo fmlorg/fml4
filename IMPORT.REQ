@@ -9,3 +9,6 @@ bin/weekend-msend.sh             2.1 2.2
 contrib/irc/filter.pl            1.2 1.3
 contrib/irc/libirc.pl            1.7 1.8
 libexec/fml_local.pl             2.5 2.6
+
+# 2000/04/15
+kern/libenvf.pl			 2.8 2.9
