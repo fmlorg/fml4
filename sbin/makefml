@@ -126,6 +126,13 @@ sub InitMakeFml
     $VENDOR      = $opt_V;
     $IN_CHANNEL  = $opt_i;
 
+    # special aliases
+    if ($ARGV[0] =~ /^install\-withcgi/) {
+	$CGIInstallMode = 1;
+    }
+    if ($CGIInstallMode) {
+	print STDERR "  *** installing fml with WWW/CGI interface ***\n";
+    }
 
     ### determine Architechure dependence
     if ($ENV{'OS'} =~ /Windows_NT/) {
