@@ -3211,11 +3211,9 @@ $MAINTAINER	= 'fml-request@phys.titech.ac.jp';
 
 $FML            = '/home/axion/fukachan/work/spool/EXP';
 $GUIDE_FILE	= "$FML/doc/INFO";
-$LOGFILE	= "$FML/doc/fmlinfo-log"; # activity log file
+$LOGFILE	= "$FML/var/log/fmlinfo-log"; # activity log file
 
-$START_HOOK =q#
-	$GUIDE_REQUEST = 1;
-#;
+$START_HOOK     = q# $Envelope{'req:guide'} = 1;#;
 
 1;
 ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
