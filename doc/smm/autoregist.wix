@@ -24,6 +24,12 @@
 とになっています。そのため $ML_MEMBER_CHECK という変数を 0 にすること
 が自動登録を意味することになっています。
 
+このtoggleはほとんど歴史的ななりゆきというべきでしょう。直観的にはこの
+変数をOFFにすると配送するだけつまり &DEFINE_MODE('distribute') になる
+ような気がしますが、違います。
+配送するだけならsendmailで十分という想定があったため初期段階では 
+&DEFINE_MODE('distribute') が想定されていなかったからです。
+
 	
 ○ メンバーチェックおよび登録に使うアドレスは 
 
@@ -31,12 +37,15 @@
 or
 	明示的にメールの本文中で指定されたもの
 
-のいづれかです。論理的には Reply-To: があれば Reply-To: を
-使うべきだと思うのですが、危険なので使いません。
+のいづれかです。RFC822的には Reply-To: があれば Reply-To: を使うべきだ
+と思うのですが、危険なので使いません。それは、例えば Reply-To: ＭＬそ
+れ自身をつけたまま登録要請をしてくる人が存在するために Reply-To: を信
+じるのは危険すぎるためです。
 
-それは、例えば Reply-To: ＭＬそれ自身 をつけたままにするどうしょうもな
-いクラアイントのメールインターフェイス等が存在するために Reply-To: を
-信じるのは危険すぎるためです。
+また、それはユーザ用のメールインターフェイスの設定をなにげなしにうのみ
+にしてしまうようなユーザ教育の敗因ともいえます。
+”郵政省の郵便なら宛先、送り返して欲しい先を確かめないということがあり
+うるでしょうか？…”
 
 
 ○ またガイド等を送り返すわけですが、config.ph には
@@ -47,8 +56,8 @@ or
 
 という変数があります。
 
-$WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
-しておいてあります)で、また、そのメールの Subject が
+$WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
+にしておいてあります) で、また、そのメールの Subject が
 
 	Subject: Welcome to our (Elena ML)
 	 You are added automatically
@@ -72,6 +81,9 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 により何種類も存在します。
 
    0 自動登録の宣言
+.k	&DEFINE_MODE('auto');
+.k	--auto
+.k	$ML_MEMBER_CHECK
 
 	config.ph で &DEFINE_MODE('auto');
 		か
@@ -96,6 +108,7 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 
 
    1 自動登録を設定してそれ以外特に設定をしない時
+.k	$DEFAULT_SUBSCRIBE
 
 	From: からアドレスを割り出してそれを比較・登録に使います。
 	$DEFAULT_SUBSCRIBE (デフォールトは "subscribe") で指定されるキー
@@ -120,6 +133,8 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 
 
    2 自動登録のためには Subject: にキーワードを必要とする場合
+.k	&DEFINE_MODE('autosubject');
+.k	--autosubject
 
 	config.ph で &DEFINE_MODE('autosubject');
 	コマンドラインオプションで --autosubject
@@ -127,6 +142,7 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 
 		$ML_MEMBER_CHECK = 0;
 		$REQUIRE_SUBSCRIBE = "subscribe";
+.k	$REQUIRE_SUBSCRIBE
 
 	と同じです。この場合
 
@@ -140,6 +156,8 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 
 
    3 自動登録のためにはメール本文にキーワードを必要とする場合
+.k	&DEFINE_MODE('autobody');
+.k	--autobody
 
 	config.ph で &DEFINE_MODE('autobody');
 	コマンドラインオプションで --autobody
@@ -148,6 +166,8 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 		$ML_MEMBER_CHECK = 0;
 		$REQUIRE_SUBSCRIBE = "subscribe";
 		$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+.k	$REQUIRE_SUBSCRIBE
+.k	$REQUIRE_SUBSCRIBE_IN_BODY
 
 	と同じです。この場合メールの本文に
 
@@ -164,6 +184,7 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 .S	登録とメンバーチェックに使うファイルについて
 .k	$MEMBER_LIST
 .k	@MEMBER_LIST
+.l	@MEMBER_LIST
 
 自動登録の場合はactivesを使わずmembersファイルがmemberとactivesの両方
 を兼任する形になっています。
@@ -176,6 +197,14 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
 
 のファイル群に対して行ないます。これを利用するといろいろなことができる
 はずです。
+
+簡単な例： 実は fml.pl のデフォールトは
+
+    @MEMBER_LIST = ($MEMBER_LIST, $ADMIN_MEMBER_LIST);
+
+です。つまりリモートで管理する権限のある人をSETUPしたら、メンバーリス
+トがなくてもリモートでＭＬのConfigができます。
+
 
 
 .S	自動登録した際そのメールをフォワードするか否か？
@@ -314,6 +343,8 @@ R$+			$@$1<@$S>			user w/o host
 で、user -> user@domain に変換する。
 ＃事前に DS$m されている（$m == domain である）
 
+○ MHをいじる等のインターフェイスの制御でもＯＫですが、
+   すべての場合にＯＫとは限らない
 
 ○ subscribe 形式の強制
 
