@@ -1,6 +1,12 @@
 .C	PostgreSQL へのアクセス
 .l	PostgreSQL
 
+.S	必要なもの
+
+Pg.pm です。まだ DBI を利用したものは作ってありません。
+＃ DBI 版をつくったひとがいたら、ぱっちをください
+
+
 .S	config.ph の設定例
 
 ポイントは
@@ -41,5 +47,11 @@ $DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
 1;
 .~q
 
+.S	some pointers
+
+.url http://www.sra.co.jp/people/t-ishii/
+.url ftp://ring.so-net.ne.jp/
+.url ftp://ring.asahi-net.or.jp/
+.url http://member.nifty.ne.jp/hippo2000/
 
 .# $Id$ 
