@@ -99,6 +99,9 @@ sub InitMakeFml
 	$CONFIG_DIR =~ s#\\#/#g;
     }
 
+    # mode
+    $FML_MODE;
+
     # config amd temporary files
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
     $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
@@ -214,9 +217,11 @@ sub InitMakeFml
 		    'listserv', 'do_fmlserv',
 		    'marjodomo','do_fmlserv',
 
-		    '10#fmlserv', 'set up fmlserv (listserv-like interface)',
-		    '10#listserv','set up fmlserv (listserv-like interface)',
-		    '10#majordomo','set up fmlserv (listserv-like interface)',
+		    'delivery_mode',  'do_delivery_mode',
+
+		    '10#fmlserv', 'set up fmlserv (listserv-like command interface)',
+		    '10#listserv','set up fmlserv (listserv-like command interface)',
+		    '10#majordomo','set up fmlserv (listserv-like command interface)',
 		    );
 
     ### anyway reload and set the present config for convenience;
@@ -620,18 +625,71 @@ sub OutPutLocalConfig
 {
     local(*MAKE_FML) = @_;
 
-    print CF "\nLOCAL_CONFIG\n\n";
+    # this lefts... ;_;
+    # $MAKE_FML{"SUBJECT_TAG"} =  "$tag{$r}";
+
+    # always yes;
+    print CF "\n\n\# configured by $0\n";
+    print CF "# $MailDate\n";
+    print CF "NON_PORTABILITY\t1\n";
+    print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
+
+    while (($k, $v) = each %MAKE_FML) {
+	next unless $v;
+
+	if ($k eq 'OPT_MIME') {
+	    print CF "USE_MIME\t1\n";
+	    undef $MAKE_FML{$k};
+	}
+	elsif ($k eq "NON_PORTABILITY" || $k eq 'OS_TYPE') {
+	    undef $MAKE_FML{$k};
+	}
+    }
+
+    local($output_count);
+    print CF "\n\n\nLOCAL_CONFIG\n\n";
+    print CF "\# configured by $0 ($MailDate)\n";
     print CF "\#__MAKEFML_LOCAL_CONFIG__\n";
-    print CF "require 'libmakefml.pl';\n";
+
+    ### POINT!!!
+    ### $local_config .= $_ if /\$MAKE_FML/;
+    ### 
+    while (($k, $v) = each %MAKE_FML) {
+	next unless $v;
+	undef $MAKE_FML{$k};
+
+	if ($k eq 'OPT_HTML') {
+	    print CF "\$MAKE_FML{'OPT_HTML'} = 1;\n";
+	    print CF "\$Envelope{'mode:html'} = 1;";
+	    print CF "\# MAKEFML_OPT_HTML\n";
+	}
+	elsif ($k eq "DISTRIBUTE_ONLY") {
+	    print CF "\$MAKE_FML{'DISTRIBUTE_ONLY'} = 1;\n";
+	    print CF "= \$Envelope{'mode:distribute'} = 1;";
+	    print CF "\# MAKEFML_DISTRIBUTE_ONLY\n";
+	}
+	elsif ($k eq "SUBJECT_TAG") {
+	    print CF "\$MAKE_FML{'SUBJECT_TAG'} = '$v';\n";
+	    print CF "require 'libtagdef.pl';";
+	    print CF "&SubjectTagDef('$v');";
+	    print CF "\# MAKEFML_SUBJECT_TAG\n";
+	}
+    }
 
     for (keys %MAKE_FML) {
 	$value = $MAKE_FML{$_};
+	next unless $value;
 	$value = ($value =~ /^\d+$/) ? $value : "\"$value\"";
 	print CF "\$MAKE_FML{'$_'} = $value;\n";
+	$output_count++;
     }
 
-    print CF "&ConfigByMakeFml;\n";
-    print CF "\#__END_OF_MAKEFML_LOCAL_CONFIG__\n";
+    if ($output_count) {
+	print CF "require 'libmakefml.pl';\n";
+	print CF "&ConfigByMakeFml;\n";
+    }
+
+    print CF "\#__END_OF_MAKEFML_LOCAL_CONFIG__\n";    
 }
 
 
@@ -685,6 +743,7 @@ sub ShowMainMenu
     1 MEMBER CHECK or AUTO REGISTRATION        $ShowMenu{'auto_regist'};
     2 SUBJECT TYPE                             $MAKE_FML{'SUBJECT_TAG'};
     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       $ShowMenu{'option_summary'};
+    4 Delivery Mode (distribute-only, distribute+command);
     ;
     ;#;
 
@@ -860,6 +919,34 @@ sub OptionQuery
 }
 
 
+sub DeliveryQuery
+{
+    local($ml, *MAKE_FML) = @_;
+    local($r, $buf);
+
+    ### MAIN ###
+    while (1) {
+	&ShowOptionMenu(*MAKE_FML);
+
+	$tag = $CurTag;
+	$CurTag .= "   ";
+	$r = &Query("OPTIONS ", "1-2", "[1-2]", "0");
+
+	$CurTag .= "   ";
+
+	if ($r == 0) {
+	    last;
+	}
+	elsif ($r == 1) {
+	    $r = &Query("Distribute Only", "y/n", "y|n", "n");
+	    $MAKE_FML{"DISTRIBUTE_ONLY"} = $r eq "y" ?  1 : 0;
+	}
+
+	$CurTag = $tag;
+    }
+}
+
+
 sub ResetVariables
 {
     # anyway set;
@@ -990,6 +1077,7 @@ sub Conv
 	s/_FQDN_/$FQDN/g;
 	s/_USER_/$USER/g;
 	s/_OPTIONS_/$opts/g;
+	s/_MODE_/$FML_MODE/g;
 	s/XXUID/$uid/g;
 	s/XXGID/$gid/g;
 
@@ -1281,11 +1369,13 @@ sub do_newml
     # &SetWritableUmask; &SetPublicUmask;
     &SetPersonalUmask;	# umask 077;
 
-    &Conv($ml, "$EXEC_DIR/cf/__makefml", "$ML_DIR/$ml/cf");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/cf", "$ML_DIR/$ml/cf");
 
     if ($OS_TYPE && open(CF, ">> $ML_DIR/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
+
+	# conversion here; since cf/config can be overwrittern 
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
     }
@@ -1296,6 +1386,7 @@ sub do_newml
     # include file is public readable;
     # why for () fails?;
     &Conv($ml, "$EXEC_DIR/etc/makefml/include", "$ML_DIR/$ml/include");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
     &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
     &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
 
@@ -1309,6 +1400,8 @@ sub do_newml
     &Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
     &Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
     &Conv($ml, "$EXEC_DIR/doc/drafts/guide", "$ML_DIR/$ml/guide");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/welcome", "$ML_DIR/$ml/welcome");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/confirm", "$ML_DIR/$ml/confirm");
     &Conv($ml, "$EXEC_DIR/doc/drafts/objective", "$ML_DIR/$ml/objective");
 
     # here backed to the writable bit == 077 or 007
@@ -1398,6 +1491,9 @@ sub do_config
 	elsif ($r == 3) {
 	    &OptionQuery($ml, *MAKE_FML);
 	}
+	elsif ($r == 4) {
+	    &DeliveryQuery($ml, *MAKE_FML);
+	}
     }
 
 
@@ -1411,9 +1507,13 @@ sub do_config
     if (open(CF, "> $cf")) {
 	select(CF); $| = 1; select(STDOUT);
 
+	undef $config{'NON_PORTABILITY'};
+	undef $config{"COMPAT_$OS_TYPE"};
+
 	for (@config) {
 	    # printf    "%-25s\t%s\n", $_, $config{$_};
-	    printf CF "%-25s\t%s\n", $_, $config{$_};
+	    printf CF "%-25s\t%s\n", $_, $config{$_} if $config{$_};
+	    undef $config{$_};
 	}
 
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
