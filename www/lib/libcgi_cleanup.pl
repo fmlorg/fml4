@@ -56,11 +56,12 @@ sub Parse
     ## REQUEST_URI     => /cgi-bin/fml/../fml/admin/makefml.cgi
 
     # extract $ML name for later use
-    my $req_uri = $SavedENV{'REQUEST_URI'};
-    $req_uri =~	
-	qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
-    my ($cgimode , $cgiml) = ($1, $2);
-    $ML = $cgiml if ($cgimode ne "admin");
+#    my $req_uri = $SavedENV{'REQUEST_URI'};
+#    $req_uri =~	
+#	qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
+#    my ($cgimode , $cgiml) = ($1, $2);
+#    $ML = $cgiml if ($cgimode ne "admin");
+    $ML = $SavedML if $SavedML;
 
     # We should not use raw $LANGUAGE (which is raw input from browser side).
     # We should check it matches something exactly and use it.
