@@ -105,7 +105,7 @@ Password:
 
 ○ 自分を登録してみる
 
-% /usr/local/fml/makefml elena::add 自分のメールアドレス
+% /usr/local/fml/makefml add elena 自分のメールアドレス
 
 	... メッセージ(省略) ...
 
