@@ -26,8 +26,8 @@ if ($opt_I) {
 require 'mimer20alpha.pl';
 
 undef $/;
-$body = <>;
+undef $body;
+while (sysread(STDIN, $_, 4096)) { $body .= $_;}
 print &bodydecode($body);
-
 
 1;
