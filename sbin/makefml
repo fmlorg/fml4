@@ -1511,6 +1511,16 @@ sub do_passwd
 	    chop($passwd = <STDIN>);
 	    print "\n";
 
+	    print "Retype Password: ";
+	    chop($new_passwd = <STDIN>);
+	    print "\n";
+
+	    if ($passwd ne $new_passwd) {
+		undef $passwd;
+		undef $new_passwd;
+		next;
+	    }
+
 	    system "stty", "echo";
 	}
 
@@ -1983,7 +1993,9 @@ sub do_pgp
     $ENV{'PGPPATH'} = $config{'PGP_PATH'};
 
     $| = 1;
-    print "\n--- PGP BEGIN ---\n\n";
+    print "\n--- PGP BEGIN ---\n";
+    print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
+
     &Log("makefml::pgp pgp @argv");
     system("pgp @argv");
     print STDERR "Error: $@" if $@;
@@ -3088,7 +3100,6 @@ sub EvalMenu
     elsif ($config{'REWRITE_TO'} == 2) {
 	$SUMMARY{'REWRITE_TO'} = "To: MAIL_LIST";
     }
-
 
 
     for (split(/\n/, $MenuTemplate{$menu})) {
