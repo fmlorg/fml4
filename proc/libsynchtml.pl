@@ -538,6 +538,7 @@ sub Write
 	    if ($s = $FieldHash{$_}) {
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 		&ConvSpecialChars(*s);
+		$s =~ s/\n(\s+)/$1/g; # 822 unfolding
 		print OUT "<SPAN CLASS=$_>$_</SPAN>: ";
 		print OUT "<SPAN CLASS=$_-value>$s</SPAN>\n";
 	    }
