@@ -25,29 +25,30 @@ FML は僕が壱から Full Scratch した Mailing List Server package です。
 perl を使って書かれています。
 ＃おまけCDROMつき雑誌等にある「hmlの改良」の記述はちょっと誤解を招く
 ＃言い回しですよね…歴史的に hml compatbile な動作ができるだけです
-
 =E 
-Fml 2.1 is a package of Mailing List Server functions. 
-It consists mainly of perl scripts.
+Fml 2.1 is a package/kit of Mailing List Server programs. 
+It consists of perl scripts.
 
 FML は配送プログラム、多くのユーザー用/ＭＬをリモートで管理するための
 コマンド用のサーバ等からなります。またコマンドサーバのインターフェイス
 を listserv(majordomo) 的にすることや、sendmailから起動するだけでなく、
 MTAが走っていないマシン上でも POP3 を使ってＭＬを運用するプログラム等
 もついています。
+=E
+FML includes
+	distributer
+	user command interface
+	remote administration command interface
+	listserv/majordomo style interface (just interface)
+	mailing list server via pop3 (not need MTA->exec FML)
+   etc ...	
+
 
 いろいろなケース用のプログラムがあるのは『趣味も(コンピュータ)環境も人
 それぞれ』ということを大事にするべきだという思想が根底にあるためです。
 よって『カスタマイズの自由度が大きいこと/同じことができるのであればユー
 ザ・インターフェイスはどのようなものでもいい』となっています。
 
-=E
-Fml consits of several Mailing List functions
-=S
-	distributer
-	serveral useful commands
-	Listserv (or majordomo) Interface for Fml system
-	ML using POP(and cron) or .forward
 
 設定項目は多岐に渡りますが、基本的な setup (MLをつくる/登録する)や簡単
 な設定の変更は makefml という対話設定プログラムで変更できます (詳細は 
@@ -63,6 +64,8 @@ INSTALL というファイルを見て下さい)。
 	メール配送プログラム (default は sendmail 8.x を想定)
 
 が必要です。
+=E
+FML requires perl and MTA(e.g. sendmail).  
 
 プロバイダのサービスを利用している場合は(一概にはいえませんが)、通常い
 わゆる「シェルアカウント/シェルサービス」と呼ばれる Unix 上でのアカウ
@@ -76,15 +79,15 @@ INSTALL というファイルを見て下さい)。
 シンがSMTPでメールを受けて、FMLを起動できること」は必要です。これがで
 きない場合は、POP3 を使ってMLを実行するような裏技が必要になります。
 =E
-fml requires perl and MTA like a sendmail which recongizes SMTP(Simple
-Mail Transfer Protocol).
-Sendmail on your machine do not have to run, but your site should be
-at least one machine where MTA like a sendmail runs. 
-Since the target machine is 4.4BSD, the document is based on sendmail
-+ perl enveironment.
+FML sends mails via SMTP, so you do not need sendmail runs on your
+machine.  In addition, you can set up that FML runs on an old machine
+but distribution is done on new machine.
 
 なお、ドキュメントは NetBSD (4.4BSD) がターゲットマシンなのでsendmail 
 を想定して書いてあります。
+=E 
+Since the target machine is 4.4BSD, the document is based on sendmail
+and perl (4 or 5) enveironment.
 
 
 .S	最新の情報とソースコードについて
@@ -101,8 +104,8 @@ The HOME PAGE of the Fml is
 =E
 You can obtaion the latest (fml-current) documents and sources here.
 =S
-You can obtain the latest information on fml to send a mail (any body
-is O.K.) to the address
+You could see the latest topics on fml-support mailing lists and fml
+Home page
 
 最新版のソースコードは、以下の anonymous ftp から入手可能です。国内、
 国外用共にマスターサーバは
@@ -115,6 +118,9 @@ You can obtain sources at the URL
 の新しい(生きのいい:-)のをどうぞ。
 
 ○メールしか使えない人は
+=E
+If you can use only Email, you can obtain the latest information on
+fml to send a mail (any body is O.K.) to the address
 
 [近況情報について]
 
@@ -124,9 +130,6 @@ You can obtain sources at the URL
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
 =E
 Execuse me for may slow updates of documents...
-=S
-You could see the latest topics on fml-support mailing lists and fml
-Home page
 
 [ソースコード]
 また最新版のソースコードは、なんでもいいからメールを
@@ -138,7 +141,7 @@ If you cannot use ftp, please send a mail (body is anything O.K.) to
 に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。なお送り返すのは UNIX Version の方です。
 =E
-You receive auto-suplitted mails of the latest source (Unix version).
+You can receive auto-suplitted mails of the latest source (Unix version).
 
 
 .S	メーリングリストについて
@@ -147,15 +150,11 @@ You receive auto-suplitted mails of the latest source (Unix version).
 ○ FMLに関する議論、バグレポート、質問、要望、新しい発見(謎)があったら 
 fml-support ML (言語は日本語。例によって自動登録(confirmation)です)
 =E
-* The mailing list on fml discussion is the address 
+* The mailing list on FML discussion is the address 
 
 	fml-support@ffs.fml.org (Japanese, Automatically Added)
 
-=E
-# Attention! This address adds your address as a member of fml-support
-ML if you are now not a member and send a mail to this address.
-
-か fml-bugs (作者にのみフォワード) というアドレス
+か fml-bugs という(作者にのみフォワードされる)アドレス
 =E
 * you can make a contact with only the author to send a mail to the address
 
@@ -165,8 +164,34 @@ ML if you are now not a member and send a mail to this address.
 しくて時間が取れない場合も多々あります。できるだけ fml-support Mailing
 List 宛へ投げてもらえると助かります _o_
 ＃ＭＬならわかる人がすぐに答えてくれる可能性もありますし
+=E
+I recommended you've better to send your questions to fml-support or
+fml-query (described below) since I have no time.
+It may be happen that some experts of ML answer your questions if it
+is sent to the mailing list.
 
-FML 2.1 からはＭＬへ登録して欲しくない方のために
+○ fml-support への自動登録は
+=E
+[subscription to fml-support mailing list]
+To subscribe fml-support, you can only send  
+
+	subscribe Ken'ichi Fukamachi 
+
+のような文だけを 
+=E
+to the address
+
+	fml-support-ctl@ffs.fml.org 
+
+へ送って下さい。本当に登録して良いのか？の確認メールが返ります。そのメー
+ルに reply してもらって初めて登録されますので注意して下さい
+(confirmation モード)。
+=E
+The FML server send back the reply to confirm your subscription request. 
+After you reply the confirmation, your subscription succeeds.
+This confirmation is against subscription tricks.
+
+なお FML 2.1 からはＭＬへ登録して欲しくない方のために
 =E
 The address "fml-query" is to forward the in-coming mail to
 fml-support but the sender is not registered automatically.
@@ -177,11 +202,16 @@ fml-support but the sender is not registered automatically.
 ことなく fml-support へ質問のフォワードを行います。
 
 どうしても 内密な相談とか、DMで聞きたいことは 
+=E
+If you have secret questions:) you talk to only me, please send it to 
 
 	fml-bugs@ffs.fml.org
 
 へ投げておいてください。ただ返事はすごく遅れぎみです _o_ 
 .# ＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
+=E
+If I am not busy, you may receive my reply soon but a lot of cases
+very slowly;-)
 
 
 .S	Update について
@@ -205,9 +235,7 @@ Hence it is better to do hasks latest version if you like(^^).
 
 とりあえず
 =E
-The simplest way to install Fml system is to do in the top directory
-of the fml source
-# Hence a lot of variables are pre-defined.
+To install FML, you can only run
 
 	perl makefml install 
 
