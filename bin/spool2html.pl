@@ -17,7 +17,7 @@ $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:");
+&Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
 
 
 $opt_h && do { &Usage; exit 0;};
@@ -33,6 +33,7 @@ $Minimum         = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
 $SleepTime       = $opt_S || 3;
 $HTML_EXPIRE_LIMIT = $opt_E;
+
 push(@INC, $opt_I);
 
 # set opt
@@ -89,6 +90,10 @@ for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
     sleep($SleepTime || 3);
 }
 
+if ($opt_F) {
+    &SyncHtmlExpire($HTTP_DIR, $file, *Envelope);
+}
+
 exit 0;
 
 
@@ -103,8 +108,9 @@ sub Ctl
     return 0 if $_[0] > $_[1];
 
     for ($id = $_[0]; $id < $_[1]; $id++ ) {
-	print STDERR "$label::Ctl  $id processing...\n" if $verbose;
+	print STDERR "${label}::Ctl  $id processing...\n" if $verbose;
 
+	# expired ? 
 	next unless -f "$SPOOL_DIR/$id";
 
 	# tricky
@@ -131,6 +137,11 @@ sub Ctl
 	&SyncHtml($HTTP_DIR, $id, *Envelope);
 
 	# &dumpvar('SyncHtml') if $verbose;
+    }
+
+    # tricky 
+    if (%RequireReGenerateIndex) {
+	&SyncHtmlReGenerateIndex($HTTP_DIR, $id, *Envelope);
     }
 }
 
@@ -239,8 +250,6 @@ sub GetMax
 	open(SEQ, "$dir/../seq");
 	chop($seq2 = <SEQ>);
 
-	print STDERR "if ($seq2 > $seq) { \$seq = $seq2;}\n";
-
 	if ($seq2 > $seq) { $seq = $seq2;}
     }
 
@@ -252,7 +261,14 @@ sub GetMax
 	$try  = int($try - ($try - $left)/2);
     } while( (! -f "$dir/$try") && ($left < $try));
 
-    for ( ; ; $try++) { last unless -f "$dir/$try";}
+
+    ### search
+    if ($try) { # continuous 1 .. $seq
+	for ( ; ; $try++) { last unless -f "$dir/$try";}
+    }
+    else { # not continuous ? .. $seq
+	$try = $seq;
+    }
 
     # print STDERR "return ($try - 1)\n" if $verbose;
     ($try - 1);
