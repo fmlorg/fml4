@@ -263,4 +263,6 @@ asuka:
 	(chdir sbin; ( echo put makefml; echo quit;) | ftp -ivd asuka)
 
 scan:
-	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix
+	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix | tee /tmp/_scan_
+	grep Modified /tmp/_scan_
+	rm /tmp/_scan_
