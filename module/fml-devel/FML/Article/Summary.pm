@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Summary.pm,v 1.8 2002/12/15 14:04:25 fukachan Exp $
+# $FML: Summary.pm,v 1.15 2003/10/18 05:07:41 fukachan Exp $
 #
 
 package FML::Article::Summary;
@@ -24,7 +24,7 @@ FML::Article::Summary - generate article summary
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 standard constructor.
 
@@ -33,8 +33,8 @@ standard constructor.
 
 # Descriptions: standard constructor.
 #    Arguments: OBJ($self) OBJ($curproc)
-# Side Effects:
-# Return Value: none
+# Side Effects: $self->{ _curproc } = $curproc;
+# Return Value: OBJ
 sub new
 {
     my ($self, $curproc) = @_;
@@ -47,16 +47,16 @@ sub new
 }
 
 
-# Descriptions: append summary to $summary_file
+# Descriptions: append summary to $article_summary_file
 #    Arguments: OBJ($self) HANDLE($wh) NUM($id)
-# Side Effects: append summary to $summary_file
+# Side Effects: append summary to $article_summary_file
 # Return Value: none
 sub print
 {
     my ($self, $wh, $id) = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $file    = $config->{ 'summary_file' };
+    my $file    = $config->{ 'article_summary_file' };
 
     # XXX last resort == STDOUT.
     $wh ||= \*STDOUT;
@@ -81,6 +81,7 @@ sub _prepare_info
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
     my $tag     = $config->{ article_subject_tag };
+    my $addrlen = $config->{ article_summary_file_format_address_length };
     my $article = undef;
 
     if (defined $self->{ _article }) {
@@ -96,23 +97,24 @@ sub _prepare_info
 	use Mail::Message;
 	my $msg      = new Mail::Message->parse( { file => $file } );
 	my $header   = $msg->whole_message_header();
-	my $address  = $header->get( 'from' );
-	my $date     = $header->get( 'date' );
-	my $unixtime = Mail::Message::Date::date_to_unixtime( $date );
+	my $address  = $header->get( 'from' ) || '';
+	my $date     = $header->get( 'date' ) || '';
+	my $obj      = new Mail::Message::Date;
+	my $unixtime = $obj->date_to_unixtime( $date );
 
-	# extract the first 15 bytes of user@domain part
-	# from From: header field.
-	# XXX-TODO "15" bytes is hard-coded.
-	use FML::Header;
-	my $hdrobj = new FML::Header;
-	$address = substr($hdrobj->address_clean_up( $address ), 0, 15);
+	# log the first 15 bytes of user@domain in From: header field.
+	if (defined $address) {
+	    use FML::Header;
+	    my $hdr  = new FML::Header;
+	    my $addr = $hdr->address_clean_up($address);
+	    $address = defined $addr ? substr($addr, 0, $addrlen) : '';
+	}
 
-	# fold "\n".
 	# XXX-TODO $subject->clean_up() (object flavour?)
 	use FML::Header::Subject;
-	my $obj     = new FML::Header::Subject;
-	my $subject = $obj->clean_up($header->get('subject'), $tag);
-	$subject =~ s/\s*\n/ /g;
+	my $subjobj = new FML::Header::Subject;
+	my $subject = $subjobj->clean_up($header->get('subject'), $tag);
+	$subject =~ s/\s*\n/ /g; # fold "\n".
 	$subject =~ s/\s+/ /g;
 
 	# XXX-TODO "jis-jp" and "euc-jp" is hard-coded.
@@ -144,33 +146,34 @@ sub print_one_line_summary
     my ($self, $wh, $info) = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $style   = $config->{ 'summary_format_style' };
+    my $style   = $config->{ 'article_summary_file_format_style' };
 
     if ($style eq 'fml4_compatible') {
 	$self->_fml4_compatible_style_one_line_summary($wh, $info);
     }
     else {
-	LogError("unknown \$summary_file_style: $style");
+	$curproc->logerror("unknown \$article_summary_file_style: $style");
     }
 }
 
 
-# Descriptions: write out formatted string into $summary_file.
+# Descriptions: write out formatted string into $article_summary_file.
 #    Arguments: OBJ($self) HANDLE($wh) HASH_REF($info)
-# Side Effects: update $summary_file.
+# Side Effects: update $article_summary_file.
 # Return Value: none
 sub _fml4_compatible_style_one_line_summary
 {
     my ($self, $wh, $info) = @_;
-    my $time  = $info->{ unixtime } || undef;
-    my $rdate = undef;
+    my $curproc = $self->{ _curproc };
+    my $time    = $info->{ unixtime } || undef;
+    my $rdate   = undef;
 
     if ($time) {
 	use Mail::Message::Date;
 	$rdate = new Mail::Message::Date $time;
     }
     else {
-	LogError("unix time undefined");
+	$curproc->logerror("unix time undefined");
     }
 
     if (defined $rdate) {
@@ -183,7 +186,7 @@ sub _fml4_compatible_style_one_line_summary
 	printf $wh $format, $date, $id, $addr, $subj;
     }
     else {
-	LogError("date object undefined.");
+	$curproc->logerror("date object undefined.");
     }
 }
 
@@ -202,7 +205,7 @@ sub append
     my ($self, $article, $id) = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $file    = $config->{ 'summary_file' };
+    my $file    = $config->{ 'article_summary_file' };
 
     if (defined $article) {
 	$self->{ _article } = $article;
@@ -219,7 +222,7 @@ sub append
 
 
 # Descriptions: re-genearete summary from $min to $max.
-#    Arguments: OBJ($self) NUM(min) NUM($max)
+#    Arguments: OBJ($self) NUM($min) NUM($max)
 # Side Effects: re-create $summary file.
 # Return Value: none
 sub rebuild
@@ -227,7 +230,7 @@ sub rebuild
     my ($self, $min, $max) = @_;
     my $curproc = $self->{ _curproc };
     my $config  = $curproc->config();
-    my $file    = $config->{ 'summary_file' };
+    my $file    = $config->{ 'article_summary_file' };
     my $tmp     = "$file.new.$$";
 
     use FileHandle;
@@ -246,7 +249,29 @@ sub rebuild
 	rename($tmp, $file);
     }
     else {
-	LogError("fail to write $tmp");
+	$curproc->logerror("fail to write $tmp");
+    }
+}
+
+
+# Descriptions: print all lines in summary file into file handle $wh.
+#    Arguments: OBJ($self) HANDLE($wh)
+# Side Effects: none
+# Return Value: none
+sub dump
+{
+    my ($self, $wh) = @_;
+    my $curproc      = $self->{ _curproc };
+    my $config       = $curproc->config();
+    my $article_summary_file = $config->{ "article_summary_file" };
+
+    if (-f $article_summary_file) {
+	my $fh = new FileHandle $article_summary_file;
+	if (defined $fh && defined $wh) {
+	    my $buf;
+	    while ($buf = <$fh>) { print $wh $buf;}
+	    $fh->close();
+	}
     }
 }
 
@@ -261,7 +286,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QueueManager.pm,v 1.8 2002/09/11 23:18:16 fukachan Exp $
+# $FML: QueueManager.pm,v 1.15 2003/08/23 08:50:43 fukachan Exp $
 #
 
 package FML::Process::QueueManager;
@@ -35,7 +35,7 @@ queue flush!
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 constructor.
 
@@ -61,7 +61,7 @@ sub new
 }
 
 
-=head2 C<send($curproc, $id)>
+=head2 send($curproc, $id)
 
 try to send all mails in the queue.
 If queue id C<$id> is specified, send queue for C<$id>.
@@ -70,7 +70,7 @@ If queue id C<$id> is specified, send queue for C<$id>.
 
 
 # Descriptions: send message in queue directory sequentially
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($curproc) STR($id)
 # Side Effects: queue flush-ed
 # Return Value: none
 sub send
@@ -93,12 +93,13 @@ sub send
 		$self->_send($curproc, $q) && $q->remove();
 	    }
 	    else {
-		Log("$qid is invalid");
+		# XXX-TODO: $q->remove() if invalid queue ?
+		$curproc->log("$qid is invalid");
 	    }
 	    $q->unlock();
 	}
 	else {
-	    Log("$qid is locked. retry");
+	    $curproc->log("$qid is locked. retry");
 	}
     }
 }
@@ -111,6 +112,7 @@ sub send
 sub _send
 {
     my ($self, $curproc, $q) = @_;
+    my $cred  = $curproc->{ credential };
     my $info  = $q->getidinfo();
     my $qfile = $info->{ 'path' };
     my $qid   = $info->{ 'id' };
@@ -119,7 +121,9 @@ sub _send
     my $msg = Mail::Message->parse( { file => $qfile } );
 
     use FML::Mailer;
-    my $obj = new FML::Mailer;
+    my $obj = new FML::Mailer $curproc;
+
+    # XXX queue is already locked and need no lock for recipient maps here.
     my $r   = $obj->send({
 	sender     => $info->{ sender },
 	recipients => $info->{ recipients },
@@ -128,15 +132,19 @@ sub _send
     });
 
     if ($r) {
-	Log("queue=$qid status=sent");
+	$curproc->log("queue=$qid status=sent");
     }
     else {
-	Log("queue=$qid status=fail");
+	$curproc->log("queue=$qid status=fail");
     }
 
     return $r;
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -144,7 +152,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

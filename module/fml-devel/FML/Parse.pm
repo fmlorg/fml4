@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Parse.pm,v 1.26 2002/09/11 23:18:03 fukachan Exp $
+# $FML: Parse.pm,v 1.31 2003/08/29 15:33:54 fukachan Exp $
 #
 
 package FML::Parse;
@@ -33,10 +33,10 @@ header and body.  C<new()> returns a C<Mail::Message> object.
 
 =head1 METHODS
 
-=item new( fd )
+=item new( $curproc, [$fd] )
 
-C<fd> is the file handle.
-Normally C<fd> is the handle for STDIN channel.
+C<$fd> is the file handle.
+Normally C<$fd> is the handle for STDIN channel.
 
 =cut
 
@@ -56,7 +56,7 @@ sub new
 
 
 # Descriptions: parse message read from file handle $fd
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($curproc) HANDLE($fd)
 # Side Effects: none
 # Return Value: OBJ
 sub _parse
@@ -72,11 +72,16 @@ sub _parse
     # log information
     my $header_size = $msg->whole_message_header_size();
     my $body_size   = $msg->whole_message_body_size();
-    Log("read header=$header_size body=$body_size");
+    $curproc->log("read header=$header_size body=$body_size");
 
     if (defined $msg->envelope_sender()) {
-	my $pcb = $curproc->{ pcb };
-	$pcb->set('credential', 'unix-from', $msg->envelope_sender());
+	my $pcb = $curproc->pcb();
+	if (defined $pcb) {
+	    $pcb->set('credential', 'unix-from', $msg->envelope_sender());
+	}
+	else {
+	    $curproc->logerror("parse: pcb not defined");
+	}
     }
 
     return $msg;
@@ -92,13 +97,17 @@ L<FML::Config>,
 L<FML::Log>
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

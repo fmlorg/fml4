@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Switch.pm,v 1.74 2002/09/11 23:18:16 fukachan Exp $
+# $FML: Switch.pm,v 1.101 2003/10/26 02:20:02 fukachan Exp $
 #
 
 package FML::Process::Switch;
@@ -61,7 +61,7 @@ For example, libexec/distribute (fml.pl) runs in this way.
 
 =head1 FUNCTIONS
 
-=head2 C<main::Bootstrap2()>
+=head2 main::Bootstrap2()
 
 kick off the second phase of bootstrap.
 
@@ -95,6 +95,7 @@ sub main::Bootstrap2
     my $myname      = basename($0); # inspect my name from $0
 
     # 0.1
+    # XXX valid use of STDERR
     print STDERR "\nsetuid is not set $< != $>\n\n" if $< != $>;
     print STDERR "\nsetgid is not set $( != $)\n\n" if $( ne $);
 
@@ -103,13 +104,20 @@ sub main::Bootstrap2
 	print "ARGV: @ARGV\n";
     }
 
+    # 0.3 overload main.cf (defaults/$version/main.cf + main.cf)
+    #     to inherit $default_* variables defined later.
+    #     installer should merget the changes except for $default_*.
+    $main_cf = _overload_main_cf($main_cf);
+
+    # 1.0 $main_cf is already o.k. here.
     # 1.1 parse command line options (preliminary)
     {
-	my (@options) = _module_specific_options($myname);
-	if (@options) {
+	my $options = _module_specific_options($main_cf, $myname);
+
+	if (@$options) {
 	    eval q{
 		use Getopt::Long;
-		GetOptions(\%options, @options);
+		GetOptions(\%options, @$options);
 	    };
 	    croak($@) if $@;
 	}
@@ -118,9 +126,7 @@ sub main::Bootstrap2
     # 2.1 prepare @$cf
     #     XXX hmm, .. '/etc/fml/site_default_config.cf' is good ???
     my $cf = ();
-    my $sitedef =
-      File::Spec->catfile($main_cf->{ config_dir }, 'site_default_config.cf');
-    unshift(@$cf, $sitedef);
+    unshift(@$cf, $main_cf->{ site_default_config_cf });
     unshift(@$cf, $main_cf->{ default_config_cf });
 
     # 3.1 set up @INC
@@ -145,26 +151,30 @@ sub main::Bootstrap2
     #    XXX CAN WE MOVE PARSER TO Process::{Kernel,CGI::Kernel} ?
     #    XXX ml_name, ml_domain, ml_home_prefix, ml_home_dir
     my $args = {
-	fml_version    => $main_cf->{ fml_version },
+	fml_version      => $main_cf->{ fml_version },
 
-	myname         => $myname,
-	program_name   => $myname,
+	myname           => $myname,
+	program_name     => $myname,
+	program_fullname => $ENV{ 'SCRIPT_FILENAME' } || $0,
 
 	#    XXX CAN WE MOVE PARSER TO Process::{Kernel,CGI::Kernel} ?
 	#    XXX ml_name, ml_domain, ml_home_prefix, ml_home_dir
 	# ml_home_prefix => $ml_home_prefix,
 	# ml_home_dir    => $main_cf->{ ml_home_dir },
 
-	cf_list        => $cf,       # site_default + default
-	options        => \%options, # options parsed by getopt()
+	cf_list          => $cf,       # site_default + default
+	options          => \%options, # options parsed by getopt()
 
-	argv           => \@argv,    # pass the original @ARGV
-	ARGV           => \@ARGV,    # @ARGV after getopts()
+	argv             => \@argv,    # pass the original @ARGV
+	ARGV             => \@ARGV,    # @ARGV after getopts()
 
-	main_cf        => $main_cf,
+	main_cf          => $main_cf,
 
 	# options
-	need_ml_name   => _ml_name_is_required($myname),
+	need_ml_name     => 0,         # defined in _module_we_use()
+
+	# curproc back pointer, used in emergency.
+	curproc          => {},
     };
 
     # get the object. The suitable module is speculcated by $0.
@@ -175,18 +185,27 @@ sub main::Bootstrap2
       FML::Process::Flow::ProcessStart($obj, $args);
     };
     if ($@) {
-	my $reason = $@;
-	if ($obj->can('help')) { eval $obj->help();};
+	my $reason   = $@;
+	my $curproc  = $args->{ curproc };
+	my $be_quiet = 0;
+	eval q{ $be_quiet = $curproc->be_quiet(); };
 
 	eval q{ __log($main_cf, $reason);};
 
-	if (defined( $main_cf->{ debug } ) ||
-	    defined $options{debug}) {
-	    croak($reason);
+	if ($be_quiet) {
+	    eval q{ $curproc->finalize();};
 	}
 	else {
-	    $reason =~ s/[\n\s]*\s+at\s+.*$//m;
-	    croak($reason);
+	    if ($obj->can('help')) { eval $obj->help();};
+
+	    if (defined( $main_cf->{ debug } ) ||
+		defined $options{debug}) {
+		croak($reason);
+	    }
+	    else {
+		$reason =~ s/[\n\s]*\s+at\s+.*$//m;
+		croak($reason);
+	    }
 	}
     }
 }
@@ -214,7 +233,7 @@ sub __log
 }
 
 
-=head2 C<ProcessSwitch($args)>
+=head2 ProcessSwitch($args)
 
 load the library and prepare environment to use it.
 C<ProcessSwitch($args)> return process object C<$obj>.
@@ -240,7 +259,7 @@ C<$args> is like this:
 	main_cf        => $main_cf,
 
 	# options
-	need_ml_name   => _ml_name_is_required($myname),
+	need_ml_name   => _ml_name_is_required($args, $myname),
     };
 
     # get the object. The suitable module is speculcated by $0.
@@ -255,7 +274,7 @@ C<$args> is like this:
 # Descriptions: top level process switch
 #               emulates "use $package" but $package is dynamically
 #               determined by e.g. $0.
-#    Arguments: HASH_REF($args)
+#    Arguments: STR($myname) HASH_REF($args)
 # Side Effects: process switching :-)
 #               ProcessSwtich() is exported to main:: Name Space.
 # Return Value: STR(package name)
@@ -280,104 +299,68 @@ sub ProcessSwitch
 }
 
 
-# Descriptions: return the suitable getopt options
-#    Arguments: STR($myname)
+# Descriptions: read defaults/$version/main.cf if exists and merge it
+#               with the specified $main_cf.
+#    Arguments: HASH_REF($main_cf)
 # Side Effects: none
-# Return Value: ARRAY (getopt parameters)
+# Return Value: HASH_REF
+sub _overload_main_cf
+{
+    my ($main_cf) = @_;
+    my $new_main_cf = {};
+    my $config_dir  = $main_cf->{ default_config_dir };
+
+    use File::Spec;
+    my $default_main_cf = File::Spec->catfile($config_dir, 'main.cf');
+    if (-f $default_main_cf) {
+	my ($k, $v);
+
+	use FML::Config::Tiny;
+	my $tinyconfig = new FML::Config::Tiny;
+	$new_main_cf = $tinyconfig->read($default_main_cf);
+
+	# overwrittern by the specified $main_cf (e.g. /etc/fml/main.cf)
+	while (($k, $v) = each %$main_cf) {
+	    $new_main_cf->{ $k } = $v;
+	}
+
+	# variable expansion by the function in libexec/loader.
+	main::loader_expand_variables( $new_main_cf );
+	$main_cf = $new_main_cf;
+    }
+
+    return $main_cf;
+}
+
+
+# Descriptions: return the suitable getopt options
+#    Arguments: HASH_REF($main_cf) STR($name)
+# Side Effects: none
+# Return Value: ARRAY_REF (getopt parameters)
 sub _module_specific_options
 {
-    my ($myname) = @_;
+    my ($main_cf, $name) = @_;
+    my $modconf  = $main_cf->{ default_command_line_option_config };
+    my $fullname = $0;
 
-    # XXX Caution!
-    # XXX xxx.cgi SHOULD NOT ACCPET the same options as command line
-    # XXX program xxx does.
-    if ($myname eq 'fml.pl'     ||
-	$myname eq 'distribute' ||
-	$myname eq 'command'    ||
-	$myname eq 'mead'       ||
-	$myname eq 'error'      ||
-	$myname eq 'loader' ) {
-	return qw(ctladdr! debug! help! params=s -c=s);
-    }
-    elsif ($myname eq 'fmlthread') {
-	return qw(debug! help!
-		  article_id_max=i
-		  spool_dir=s
-		  base_url=s
-		  msg_base_url=s
-		  reverse!
-		  params=s -f=s -c=s);
-    }
-    elsif($myname eq 'thread.cgi'    ||
-	  $myname eq 'fmlthread.cgi' ||
-	  $myname eq 'threadview.cgi') {
-	return ();
-    }
-    elsif ($myname eq 'fmlconf') {
-	return qw(debug! help! params=s -c=s n!);
-    }
-    elsif ($myname eq 'fmldoc') {
-	# perldoc [-h] [-v] [-t] [-u] [-m] [-l]
-	return qw(debug! help! params=s -c=s v! t! u! m! l!);
-    }
-    elsif ($myname eq 'makefml') {
-	return qw(debug! help! force! params=s -c=s);
-    }
-    elsif ($myname eq 'fmlalias') {
-	return qw(debug! help! -c=s n!);
-    }
-    elsif ($myname eq 'config.cgi' || $myname eq 'menu.cgi') {
-	return ();
-    }
-    elsif ($myname eq 'fmlsch') {
-	return qw(debug! help! -D=s -F=s -m=s a! h!);
-    }
-    elsif ($myname eq 'fmlsch.cgi') {
-	return ();
-    }
-    elsif ($myname eq 'fmlhtmlify') {
-	return qw(debug! help! -I=s);
-    }
-    elsif ($myname eq 'fmlspool') {
-	return qw(debug! help! -I=s convert! style=s srcdir=s);
-    }
-    else {
-	croak "no such program $myname.\n";
-    }
+    my (@opts) = _find_longest_matched_entry($modconf, $name, $fullname);
+
+    print STDERR "getopts: @opts\n" if $debug;
+
+    return \@opts;
 }
 
 
 # Descriptions: this program ($0) requires ML name always or not?
-#    Arguments: STR($myname)
+#    Arguments: HASH_REF($args)
 # Side Effects: none
 # Return Value: NUM(1 (require ml name always) or 0)
 sub _ml_name_is_required
 {
-    my ($myname) = @_;
+    my ($args) = @_;
+    my $opt = $args->{ module_info }->{ options } || '';
 
-    if ($myname eq 'fmldoc') {
-	return 0;
-    }
-    elsif ($myname eq 'fmlsch' || $myname eq 'fmlsch.cgi') {
-	return 0;
-    }
-    elsif ($myname eq 'makefml') {
-	return 0;
-    }
-    elsif ($myname eq 'fmlalias') {
-	return 0;
-    }
-    elsif ($myname eq 'fmlhtmlify') {
-	return 0;
-    }
-    elsif ($myname eq 'menu.cgi'   ||
-	   $myname eq 'config.cgi' ||
-	   $myname eq 'thread.cgi') {
-	return 0;
-    }
-    else {
-	return 1;
-    }
+    return($opt =~ /\$ml/o ? 1 : 0);
 }
 
 
@@ -387,72 +370,165 @@ sub _ml_name_is_required
 # Return Value: STR(FML::Process::SOMETHING module name)
 sub _module_we_use
 {
-    my ($args) = @_;
-    my $name   = $args->{ myname };
-    my $pkg    = '';
+    my ($args)   = @_;
+    my $main_cf  = $args->{ main_cf };
+    my $modconf  = $main_cf->{ default_module_config };
+    my $name     = $args->{ myname };
+    my $fullname = $args->{ program_fullname };
 
-    if (($name eq 'fml.pl' && $args->{ options }->{ ctladdr }) ||
-	$name eq 'command' ||
-	($name eq 'loader' && $args->{ options }->{ ctladdr })) {
-	$pkg = 'FML::Process::Command';
+    if (defined $args->{ options }->{ ctladdr } &&
+	$args->{ options }->{ ctladdr }) {
+	$name     .= "__--ctladdr";
+	$fullname .= "__--ctladdr";
     }
-    elsif ($name eq 'fml.pl' || $name eq 'distribute' || $name eq 'loader') {
-	$pkg = 'FML::Process::Distribute';
-    }
-    elsif ($name eq 'mead' || $name eq 'error') {
-	$pkg = 'FML::Process::Error';
-    }
-    elsif ($name eq 'fmlserv') {
-	$pkg = 'FML::Process::ListServer';
-    }
-    elsif ($name eq 'fmldoc') {
-	$pkg = 'FML::Process::DocViewer';
-    }
-    elsif ($name eq 'fmlconf') {
-	$pkg = 'FML::Process::ConfViewer';
-    }
-    elsif ($name eq 'makefml') {
-	$pkg = 'FML::Process::Configure';
-    }
-    elsif ($name eq 'fmlalias') {
-	$pkg = 'FML::Process::Alias';
-    }
-    elsif ($name eq 'fmlthread') {
-	$pkg = 'FML::Process::ThreadTrack';
-    }
-    elsif ($name eq 'fmlthread.cgi' ||
-	   $name eq 'thread.cgi'    ||
-	   $name eq 'threadview.cgi') {
-	$pkg = 'FML::CGI::ThreadTrack';
-    }
-    elsif ($name eq 'qmail-ext') {
-	$pkg = 'FML::Process::QMail';
-    }
-    elsif ($name eq 'menu.cgi') {
-	$pkg = 'FML::CGI::Admin::Menu';
-    }
-    elsif ($name eq 'config.cgi') {
-	$pkg = 'FML::CGI::Admin::Menu';
-    }
-    elsif ($name eq 'fmlsch') {
-	$pkg = 'FML::Process::Calender';
-    }
-    elsif ($name eq 'fmlsch.cgi') {
-	$pkg = 'FML::CGI::Calender';
-    }
-    elsif ($name eq 'fmlhtmlify') {
-	$pkg = 'FML::Process::HTMLify';
-    }
-    elsif ($name eq 'fmlspool') {
-	$pkg = 'FML::Process::Spool';
-    }
-    else {
-	return '';
-    }
+
+    my ($pkg, @opts) = _find_longest_matched_entry($modconf, $name, $fullname);
 
     print STDERR "module = $pkg (for $0)\n" if $debug;
 
+    # saved info
+    $args->{ module_info } = {
+	class   => $pkg,
+	options => join(" ", @opts),
+    };
+    $args->{ need_ml_name } = _ml_name_is_required($args);
+
     return $pkg;
+}
+
+
+# Descriptions: return the longest match-ed entry in $def_file file.
+#    Arguments: STR($def_file) STR($name) STR($fullname)
+# Side Effects: none
+# Return Value: ARRAY
+sub _find_longest_matched_entry
+{
+    my ($def_file, $name, $fullname) = @_;
+    my $ret = [];
+
+    use FileHandle;
+    my $fh = new FileHandle $def_file;
+    if (defined $fh) {
+	my $max_match_level = 0;
+	my $buf;
+
+      LINE:
+	while ($buf = <$fh>) {
+	    next LINE if $buf =~ /^\#/o;
+	    chomp $buf;
+
+	    if (defined $buf && $buf) {
+		my $n = 0;
+		my ($program, @argv) = split(/\s+/, $buf);
+		if ($n = _program_match($program, $name, $fullname)) {
+		    print STDERR "match $program (@argv), n = $n\n" if $debug;
+		    if ($n > $max_match_level) {
+			$max_match_level = $n;
+			$ret             = \@argv;
+		    }
+		}
+	    }
+	}
+	$fh->close();
+    }
+    else {
+	croak("cannot open module config");
+    }
+
+    return @$ret;
+}
+
+
+# Descriptions: compare $program (entry in etc/modules) and $0.
+#               return the number of matched path level.
+#               $program   = entry in etc/modules
+#               $name      = basename($0)
+#               $fullname  = $0
+#    Arguments: STR($program) STR($name) STR($fullname)
+# Side Effects: none
+# Return Value: NUM
+sub _program_match
+{
+    my ($program, $name, $fullname) = @_;
+
+    if ($name =~ /^[\w\d\.]+$/o) {
+	if ($program eq $name) {
+	    return 1;
+	}
+	else {
+	    return _program_subdir_match($program, $name, $fullname);
+	}
+    }
+    else {
+	return _program_subdir_match($program, $name, $fullname);
+    }
+
+    return 0;
+}
+
+
+# Descriptions: compare $program (entry in etc/modules) and $0.
+#               $program   = entry in etc/modules
+#               $name      = basename($0)
+#               $fullname  = $0
+#
+#               return the number of matched path level.
+#    Arguments: STR($program) STR($name) STR($fullname)
+# Side Effects: none
+# Return Value: NUM
+sub _program_subdir_match
+{
+    my ($program, $name, $fullname) = @_;
+
+    # cheap sanity
+    return 0 unless $program;
+    return 0 unless $fullname;
+
+    my (@n) = _filespec_splitdir($program);
+    my (@p) = _filespec_splitdir($fullname);
+
+    # @n is shorter than @p;
+    my $count = 0;
+    my $point = 0;
+    @n = reverse @n;
+    @p = reverse @p;
+    for (my $i = 0; $i <= $#n; $i++) {
+	if ($n[$i] eq $p[$i]) {
+	    $point += 2;
+	    $count++;
+	}
+	elsif ($n[$i] eq '*') {
+	    $point += 1;
+	    $count++;
+	}
+    }
+
+    if ($count == ($#n + 1)) {
+	return $point;
+    }
+
+    return 0;
+}
+
+
+# Descriptions: split filename and return it as ARRAY.
+#    Arguments: STR($fullname)
+# Side Effects: none
+# Return Value: STR
+sub _filespec_splitdir
+{
+    my ($fullname) = @_;
+
+    return () unless defined $fullname;
+    return () unless $fullname;
+
+    if ($] > 5.006) {
+	use File::Spec;
+	return File::Spec->splitdir($fullname);
+    }
+    else {
+	return split(/\\|\//, $fullname);
+    }
 }
 
 
@@ -465,13 +541,17 @@ L<FML::Process::Configure>,
 L<FML::Process::ThreadTrack>,
 L<FML::Process::MailErrorAnalyzer>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,16 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QMail.pm,v 1.13 2002/09/11 23:18:15 fukachan Exp $
+# $FML: QMail.pm,v 1.18 2003/08/29 15:34:09 fukachan Exp $
 #
 
 package FML::Process::QMail;
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
+use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use FML::Log qw(Log LogWarn LogError);
 
 
@@ -53,6 +53,10 @@ C<NOT YET IMPLERMENTED>.
 
 =cut
 
+#
+# XXX-TODO: NOT YET IMPLERMENTED.
+#
+
 
 # Descriptions: qmail style command extention
 #               elena-subscribe@domain implies
@@ -63,17 +67,17 @@ C<NOT YET IMPLERMENTED>.
 sub DotQmailExt
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     # get ?
     my $ext = $ENV{'EXT'};
 
     unless ($ext) {
-	Log("no extension address");
+	$curproc->log("no extension address");
 	return;
     }
 
-    &Log("dot-qmail-ext[0]: $ext");
+    &$curproc->log("dot-qmail-ext[0]: $ext");
     my ($key)    = (split(/\@/, $config->{ address_for_post }))[0];
     my ($keyctl) = (split(/\@/, $config->{ address_for_command }))[0];
 
@@ -84,17 +88,21 @@ sub DotQmailExt
 	return '';
     }
 
-    &Log("dot-qmail-ext: $ext");
+    &$curproc->log("dot-qmail-ext: $ext");
     $ext =~ s/^$key//i;
     $ext =~ s/\-\-/\@/i; # since @ cannot be used
     $ext =~ s/\-/ /g;
     $ext =~ s/\@/-/g;
-    &Log("\$ext -> $ext");
+    &$curproc->log("\$ext -> $ext");
 
     # XXX: "# command" is internal represention
     return sprintf("# %s", $ext);
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -102,7 +110,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

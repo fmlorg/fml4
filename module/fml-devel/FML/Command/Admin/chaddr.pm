@@ -1,16 +1,18 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: chaddr.pm,v 1.7 2002/09/11 23:18:07 fukachan Exp $
+# $FML: chaddr.pm,v 1.19 2003/08/29 15:33:58 fukachan Exp $
 #
 
 package FML::Command::Admin::chaddr;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
+use FML::Log qw(Log LogWarn LogError);
+
 
 =head1 NAME
 
@@ -26,14 +28,14 @@ change address from old one to new one.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 change address from old one to new one.
 
 =cut
 
 
-# Descriptions: standard constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
@@ -53,6 +55,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: change address from old one to new one
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
@@ -60,12 +69,12 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config         = $curproc->{ config };
-    my $member_maps    = $config->get_as_array_ref( 'member_maps' );
-    my $recipient_maps = $config->get_as_array_ref( 'recipient_maps' );
-    my $options        = $command_args->{ options };
-    my $old_address    = '';
-    my $new_address    = '';
+    my $config        = $curproc->config();
+    my $member_map    = $config->{ 'primary_member_map'    };
+    my $recipient_map = $config->{ 'primary_recipient_map' };
+    my $options       = $command_args->{ options };
+    my $old_address   = '';
+    my $new_address   = '';
 
     if (defined $command_args->{ command_data }) {
 	my $x = $command_args->{ command_data };
@@ -76,69 +85,38 @@ sub process
 	$new_address = $options->[ 1 ];
     }
 
-    Log("chaddr: $old_address -> $new_address");
+    $curproc->log("chaddr: $old_address -> $new_address");
 
     # sanity check
     unless ($old_address && $new_address) {
 	croak("chaddr: invalid arguments");
     }
-    croak("\$member_maps is not specified")    unless $member_maps;
-    croak("\$recipient_maps is not specified") unless $recipient_maps;
+    croak("\$member_map not specified")    unless $member_map;
+    croak("\$recipient_map not specified") unless $recipient_map;
 
-    use IO::Adapter;
-    use FML::Credential;
-    use FML::Log qw(Log LogWarn LogError);
+    # uc_args = FML::Command::UserControl specific parameters
+    my (@maps) = ($member_map, $recipient_map);
+    my $uc_args = {
+	old_address => $old_address,
+	new_address => $new_address,
+	maplist     => \@maps,
+    };
+    my $r = '';
 
-    # change all maps
-    my (@maps) = ();
-    push(@maps, @$member_maps);
-    push(@maps, @$recipient_maps);
-    for my $map (@maps) {
-	my $cred = new FML::Credential $curproc;
-
-	# the current member/recipient file must have $old_address
-	# but should not contain $new_address.
-	if ($cred->has_address_in_map($map, $config, $old_address)) {
-	    unless ($cred->has_address_in_map($map, $config, $new_address)) {
-		# remove the old address.
-		{
-		    my $obj = new IO::Adapter $map, $config;
-		    $obj->touch();
-
-		    $obj->open();
-		    $obj->delete( $old_address );
-		    unless ($obj->error()) {
-			Log("delete $old_address from map=$map");
-		    }
-		    else {
-			croak("fail to delete $old_address to map=$map");
-		    }
-		    $obj->close();
-		}
-
-		# restart map to add the new address.
-		# XXX we need to restart or rewrind map.
-		{
-		    my $obj = new IO::Adapter $map, $config;
-		    $obj->open();
-		    $obj->add( $new_address );
-		    unless ($obj->error()) {
-			Log("add $new_address to map=$map");
-		    }
-		    else {
-			croak("fail to add $new_address to map=$map");
-		    }
-		    $obj->close();
-		}
-	    }
-	    else {
-		croak("$new_address is already member (map=$map)");
-		return undef;
-	    }
-	}
+    eval q{
+	use FML::Command::UserControl;
+	my $obj = new FML::Command::UserControl;
+	$obj->user_chaddr($curproc, $command_args, $uc_args);
+    };
+    if ($r = $@) {
+	croak($r);
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -146,7 +124,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: get.pm,v 1.15 2002/09/11 23:18:07 fukachan Exp $
+# $FML: get.pm,v 1.21 2003/09/04 12:27:53 fukachan Exp $
 #
 
 package FML::Command::Admin::get;
@@ -26,14 +26,14 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-get arbitrary file(s) in $ml_home_dir
+get arbitrary file(s) in $ml_home_dir.
 
 =head1 METHODS
 
 =cut
 
 
-# Descriptions: standard constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
@@ -50,7 +50,7 @@ sub new
 #    Arguments: none
 # Side Effects: none
 # Return Value: NUM( 1 or 0)
-sub need_lock { 1;}
+sub need_lock { 0;}
 
 
 # Descriptions: send arbitrary file(s) in $ml_home_dir by
@@ -62,9 +62,9 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config      = $curproc->{ 'config' };
+    my $config      = $curproc->config();
     my $ml_home_dir = $config->{ ml_home_dir };
-    my $command     = $command_args->{ 'command' };
+    my $command     = $command_args->{ command };
     my $options     = $command_args->{ options };
 
     # This module is called after
@@ -76,8 +76,9 @@ sub process
 	use File::Spec;
 	my $filepath = File::Spec->catfile($ml_home_dir, $filename);
 
+	# XXX-TODO: we expect send_file() validates ${filename,filepath}.
 	if (-f $filepath) {
-	    Log("send back $filename");
+	    $curproc->log("send back $filename");
 
 	    $command_args->{ _filename_to_send } = $filename;
 	    $command_args->{ _filepath_to_send } = $filepath;
@@ -88,6 +89,7 @@ sub process
 	    delete $command_args->{ _filepath_to_send };
 	}
 	else {
+	    $curproc->log("$filename not found");
 	    $curproc->reply_message_nl('error.no_such_file',
 				       "no such file $filename",
 				       {
@@ -99,13 +101,17 @@ sub process
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: DataCheck.pm,v 1.5 2002/09/11 23:18:05 fukachan Exp $
+# $FML: DataCheck.pm,v 1.11 2003/09/08 15:06:04 fukachan Exp $
 #
 
 package FML::Command::DataCheck;
@@ -16,7 +16,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::DataCheck - check data as command(s)
+FML::Command::DataCheck - parse, clean up et.al. for command buffer
 
 =head1 SYNOPSIS
 
@@ -42,7 +42,7 @@ sub new
 }
 
 
-# Descriptions: return command name ( ^\S+ in $command ).
+# Descriptions: return command name ( ^\S+ in $command ) and the sub name.
 #               remove the prepending strings such as \s, #, ...
 #    Arguments: OBJ($self) STR($command)
 # Side Effects: none
@@ -57,8 +57,7 @@ sub parse_command_buffer
 }
 
 
-# Descriptions: parse command buffer to make
-#               argument vector after command name
+# Descriptions: return arguments after command name $comname in $command.
 #    Arguments: OBJ($self) STR($command) STR($comname)
 # Side Effects: none
 # Return Value: ARRAY_REF
@@ -68,6 +67,14 @@ sub parse_command_arguments
     my $found = 0;
     my (@options) = ();
 
+    # XXX-TODO: $comname matches exactly.
+    # XXX-TODO: so, you need lower/uppercase before this routine.
+
+    # pick up arguments into @options after $comname.
+    # Example:
+    #    $comname = "subscribe";
+    #    $command = "subscribe rudo von schmit";
+    #    @options = [ 'rudo', 'von', 'shmit' ];
     for my $buf (split(/\s+/, $command)) {
 	push(@options, $buf) if $found;
 	$found = 1 if $buf eq $comname;
@@ -77,15 +84,15 @@ sub parse_command_arguments
 }
 
 
-# Descriptions: check message of the current process
-#               whether it contais keyword e.g. "confirm".
+# Descriptions: check the message of the current process to find
+#               whether it contais some special keyword e.g. "confirm".
 #    Arguments: OBJ($self) OBJ($curproc) ARRAY_REF($ra_data)
 # Side Effects: none
 # Return Value: HASH_REF
 sub find_special_keyword
 {
     my ($self, $curproc, $ra_data) = @_;
-    my $config         = $curproc->{ config };
+    my $config         = $curproc->config();
     my $confirm_prefix = $config->{ confirm_command_prefix };
     my $admin_prefix   = $config->{ privileged_command_prefix };
     my $confirm_found  = '';
@@ -95,6 +102,9 @@ sub find_special_keyword
     $confirm_prefix = $self->clean_up($confirm_prefix);
     $admin_prefix   = $self->clean_up($admin_prefix);
 
+    # XXX $ra_data is not whole body but already parsed and prepared buffer.
+    # XXX See below and FML::Process::Command module, for example.
+    # XXX not use /^$regexp/ due to the case such as "> confirm ...".
     for my $buf (@$ra_data) {
 	if ($buf =~ /$confirm_prefix\s+\w+\s+([\w\d]+)/) {
 	    $confirm_found = $1;
@@ -112,15 +122,15 @@ sub find_special_keyword
 }
 
 
-# Descriptions: check message of the current process
-#               whether it contais keyword e.g. "confirm".
-#    Arguments: OBJ($self) OBJ($curproc) ARRAY_REF($ra_data)
+# Descriptions: check the message of the current process to find
+#               whether it contais special keyword e.g. "confirm".
+#    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: NUM( 1 or )
 sub find_commands_for_stranger
 {
     my ($self, $curproc) = @_;
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $commands = $config->get_as_array_ref('commands_for_stranger');
     my $body     = $curproc->incoming_message_body();
     my $msg      = $body->find_first_plaintext_message();
@@ -133,6 +143,8 @@ sub find_commands_for_stranger
 	next LINE unless defined($comname) && $comname;
 
 	# $comname matches one of $commands_for_stranger ?
+	# XXX-TODO: we need to care for lowercase/uppercase mismtach ?
+	# XXX-TODO: need to define macro EQUAL_CASE_INSENSITIVE(a,b) ?
       COMMAND:
 	for my $proc (@$commands) {
 	    next COMMAND unless defined($proc) && $proc;
@@ -174,7 +186,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: edit.pm,v 1.10 2002/09/11 23:18:07 fukachan Exp $
+# $FML: edit.pm,v 1.17 2003/09/13 09:16:59 fukachan Exp $
 #
 
 package FML::Command::Admin::edit;
@@ -29,7 +29,7 @@ Tool to edit config.cf.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 C<TODO>:
 now we can read and write config.cf, not change it.
@@ -54,43 +54,39 @@ sub new
 #    Arguments: none
 # Side Effects: none
 # Return Value: NUM( 1 or 0)
-sub need_lock { 1;}
+sub need_lock { 0;}
 
 
-# Descriptions: edit config.cf
-#    Arguments: $self $curproc $command_args
+# Descriptions: run "vi" or the specified editor to edit config.cf.
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update config.cf
 # Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
-    my $options       = $command_args->{ options };
-    my $address       = $command_args->{ address } || $options->[ 0 ];
-    my $myname        = $command_args->{ args }->{ myname };
+    my $config      = $curproc->config();
+    my $ml_name     = $curproc->ml_name();
+    my $ml_home_dir = $curproc->ml_home_dir( $ml_name );
 
-    # ML's home directory
     use File::Spec;
-    my $ml_home_dir   = $command_args->{ 'args' }->{ 'ml_home_dir' };
-    my $config_cf     = File::Spec->catfile($ml_home_dir, "config.cf");
+    my $config_cf   = File::Spec->catfile($ml_home_dir, "config.cf");
 
-    use FML::Config;
-    my $c = new FML::Config;
+    # editor
+    my $editor = $ENV{ 'EDITOR' } || 'vi';
 
-    # read configuration. configuration is holded in FML:Config space.
-    $c->read( $config_cf );
-
-    # modify $c (config) object
-    # XXX TODO
-    # XXX ... snip ...
-    # $c->set('key', 'value');  # set up
-    # $c->regist('key');        # add list to write into config.cf
-
-    # ovewrite $config_cf
-    # after old $config_cf is backup'ed to $config_cf.bak
-    $c->write( $config_cf );
+    if (-f $config_cf) {
+	$curproc->ui_message("$editor $config_cf");
+	system $editor, $config_cf;
+    }
+    else {
+	warn("$config_cf not found\n");
+    }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -98,7 +94,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

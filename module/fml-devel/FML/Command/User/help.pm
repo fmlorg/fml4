@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: help.pm,v 1.13 2002/09/11 23:18:10 fukachan Exp $
+# $FML: help.pm,v 1.18 2003/08/23 04:35:33 fukachan Exp $
 #
 
 package FML::Command::User::help;
@@ -31,7 +31,7 @@ See C<FML::Command> for more details.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -53,10 +53,10 @@ sub new
 #    Arguments: none
 # Side Effects: none
 # Return Value: NUM( 1 or 0)
-sub need_lock { 1;}
+sub need_lock { 0;}
 
 
-# Descriptions: send file by FML::Command::SendFile.
+# Descriptions: send help file by FML::Command::SendFile.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: none
@@ -68,13 +68,17 @@ sub process
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

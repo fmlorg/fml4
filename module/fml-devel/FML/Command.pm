@@ -1,17 +1,25 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Command.pm,v 1.32 2002/09/11 23:18:01 fukachan Exp $
+# $FML: Command.pm,v 1.41 2003/08/23 07:24:40 fukachan Exp $
 #
+
+# XXX
+# XXX FML::Command should be simple since all program uses this wrapper.
+# XXX So, complicated checks are moved to FML::Process::* and each module.
+# XXX
 
 package FML::Command;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use FML::Log qw(Log LogWarn LogError);
+
+
+my $debug = 0;
 
 
 =head1 NAME
@@ -28,20 +36,20 @@ FML::Command - fml command dispatcher
 
 C<FML::Command> is a wrapper and dispathcer for fml commands.
 AUTOLOAD() picks up the command request and dispatches
-C<FML::Command::User::somoting> suitable for the request.
-Also, C<FML::Command::Admin::somoting> for the admin command request
-and makefml commands.
+C<FML::Command::User::something> suitable for the request.
+Also, it kicks off C<FML::Command::Admin::something> for the admin
+command request and makefml commands.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
-ordinary constructor.
+constructor.
 
 =cut
 
 
-# Descriptions: ordinary constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
@@ -54,19 +62,22 @@ sub new
 }
 
 
-# Descriptions: ordinary destructor
+# Descriptions: destructor (dummy).
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
 sub DESTROY { ;}
 
 
-=head2 C<rewrite_prompt($curproc, $command_args, $rbuf)>
+=head2 rewrite_prompt($curproc, $command_args, $rbuf)
 
 rewrite the specified buffer $rbuf (STR_REF).
 $rbuf is rewritten as a result.
 For example, this function is used to hide the password in the $rbuf
 buffer.
+
+Each module such as C<FML::Command::$MODE::$SOMETING> specifies
+how to rewrite by rewrite_prompt() method in it.
 
 =cut
 
@@ -90,14 +101,26 @@ sub rewrite_prompt
 	if ($command->can('rewrite_prompt')) {
 	    $command->rewrite_prompt($curproc, $command_args, $rbuf);
 	}
+	else {
+	    $curproc->logerror("call $pkg but rewrite_prompt() not supported") if $debug;
+	}
+    }
+    else {
+	if ($debug) {
+	    $curproc->logerror($@);
+	    $curproc->logerror("cannot load $pkg");
+	}
     }
 }
 
 
 
-=head2 C<notice_cc_recipient($curproc, $command_args, $rbuf)>
+=head2 notice_cc_recipient($curproc, $command_args, $rbuf)
 
 return addresses to inform for the command reply.
+
+Each module such as C<FML::Command::$MODE::$SOMETING> specifies
+recipients by notice_cc_recipient() method in it.
 
 =cut
 
@@ -124,11 +147,11 @@ sub notice_cc_recipient
 }
 
 
-=head2 C<AUTOLOAD()>
+=head2 AUTOLOAD()
 
 the command dispatcher.
-It hooks up the C<command> request and loads the module in
-C<FML::Command::command>.
+It hooks up the C<$command> request and loads the module in
+C<FML::Command::$MODE::$command>.
 
 =cut
 
@@ -157,16 +180,22 @@ sub AUTOLOAD
     $comname =~ s/.*:://;
     my $pkg = "FML::Command::${mode}::${comname}";
 
-    Log("load $pkg") if $myname eq 'loader'; # debug
+    $curproc->log("load $pkg") if $myname eq 'loader'; # debug
 
     my $command = undef;
     eval qq{ use $pkg; \$command = new $pkg;};
     unless ($@) {
-	my $need_lock = 1; # default.
+	my $need_lock    = 0; # no lock by default.
+	my $lock_channel =  'command_serialize';
 
 	# we need to authenticate this ?
 	if ($command->can('auth')) {
 	    $command->auth($curproc, $command_args);
+	}
+
+	if ($command->can('check_limit')) {
+	    my $n = $command->check_limit($curproc, $command_args);
+	    if ($n) { croak("exceed limit");}
 	}
 
 	# this command needs lock (currently giant lock) ?
@@ -179,29 +208,37 @@ sub AUTOLOAD
 	    }
 	}
 	else {
-	    LogError("${pkg} has no need_lock method");
+	    $curproc->logerror("${pkg} has no need_lock method");
 	    $curproc->reply_message("Error: invalid command definition\n");
 	    $curproc->reply_message("       need_lock() is undefined\n");
 	    $curproc->reply_message("       Please contact the maintainer\n");
 	}
 
+	if ($command->can('lock_channel')) {
+	    $lock_channel = $command->lock_channel() || 'command_serialize';
+	}
+
 	# run the actual process
 	if ($command->can('process')) {
-	    $curproc->lock()   if $need_lock;
+	    $curproc->lock($lock_channel)   if $need_lock;
 	    $command->process($curproc, $command_args);
-	    $curproc->unlock() if $need_lock;
+	    $curproc->unlock($lock_channel) if $need_lock;
 	}
 	else {
-	    LogError("${pkg} has no process method");
+	    $curproc->logerror("${pkg} has no process method");
 	}
     }
     else {
-	LogError($@) if $@;
-	LogError("$pkg module is not found");
+	$curproc->logerror($@) if $@;
+	$curproc->logerror("$pkg module is not found");
 	croak("$pkg module is not found"); # upcall to FML::Process::Command
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -209,7 +246,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

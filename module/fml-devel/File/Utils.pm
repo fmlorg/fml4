@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.17 2002/09/11 23:18:19 fukachan Exp $
+# $FML: Utils.pm,v 1.23 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::Utils;
@@ -12,10 +12,13 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $ErrorString);
 use Carp;
 
-
 require Exporter;
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(mkdirhier touch search_program copy append);
+
+#
+# XXX-TODO: we should modify sources not ot use this module ?
+#
 
 =head1 NAME
 
@@ -77,7 +80,7 @@ make a directory C<$dir> by the mode C<$mode> recursively.
 
 
 # Descriptions: "mkdir -p" or "mkdirhier"
-#    Arguments: STR($cdir) STR($mode)
+#    Arguments: STR($dir) STR($mode)
 # Side Effects: set $ErrorString
 # Return Value: 1 or UNDEF
 sub mkdirhier
@@ -137,7 +140,7 @@ sub touch
 }
 
 
-=head2 C<search_program($file [, $path_list ])>
+=head2 search_program($file [, $path_list ])
 
 search C<$file>.
 C<$path_list> is the ARRAY_REF.
@@ -152,11 +155,11 @@ The default search path list is
 
 
 # Descriptions: search executable named as $file
-#    Arguments: STR($file) ARRAY_REF($path_list)
 #               The "path_list" is an ARRAY_REFERENCE.
 #               For example,
 #               search_program('md5');
 #               search_program('md5', [ '/bin', '/sbin' ]);
+#    Arguments: STR($file) ARRAY_REF($path_list)
 # Side Effects: none
 # Return Value: STR
 sub search_program
@@ -234,8 +237,9 @@ sub append
     my $wh = new FileHandle ">> $dst";
 
     if (defined($rh) && defined($wh)) {
-	while (<$rh>) {
-	    print $wh $_;
+	my $buf = '';
+	while ($buf = <$rh>) {
+	    print $wh $buf;
 	}
 	$wh->close();
 	$rh->close();
@@ -247,13 +251,17 @@ sub append
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

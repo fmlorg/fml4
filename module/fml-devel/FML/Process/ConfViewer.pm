@@ -1,16 +1,15 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: ConfViewer.pm,v 1.16 2002/09/11 23:18:14 fukachan Exp $
+# $FML: ConfViewer.pm,v 1.24 2003/08/29 15:34:07 fukachan Exp $
 #
 
 package FML::Process::ConfViewer;
-
-use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 use strict;
 use Carp;
+use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 use FML::Log qw(Log LogWarn LogError);
 use FML::Process::Kernel;
 @ISA = qw(FML::Process::Kernel);
@@ -34,14 +33,18 @@ FML::Process::ConfViewer provides the main function for C<fmlconf>.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 ordinary constructor.
 It make a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
-adjust ml_* and load configuration files.
+fix @INC, adjust ml_* and load configuration files.
+
+=head2 verify_request($args)
+
+show help unless @ARGV.
 
 =cut
 
@@ -60,18 +63,18 @@ sub new
 
 
 # Descriptions: adjust ml_* and load configuration files.
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_prepare_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $curproc->resolve_ml_specific_variables( $args );
@@ -81,13 +84,13 @@ sub prepare
     $eval = $config->get_hook( 'fmlconf_prepare_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
 
 # Descriptions: check @ARGV, call help() if needed
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: exit ASAP.
 #               longjmp() to help() if appropriate
 # Return Value: none
@@ -95,12 +98,12 @@ sub verify_request
 {
     my ($curproc, $args) = @_;
     my $argv   = $curproc->command_line_argv();
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_verify_request_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     if (length(@$argv) == 0 || (not $argv->[0])) {
@@ -111,14 +114,14 @@ sub verify_request
     $eval = $config->get_hook( 'fmlconf_verify_request_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
-the top level dispatcher for C<fmlconf> and C<makefml>.
+the top level dispatcher for C<fmlconf>.
 
 It kicks off internal function C<_fmlconf($args)> for C<fmlconf>.
 
@@ -130,20 +133,20 @@ See <FML::Process::Switch()> on C<$args> for more details.
 
 
 # Descriptions: just a switch, call _fmlconf()
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
     my $eval = $config->get_hook( 'fmlconf_run_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $curproc->_fmlconf($args);
@@ -151,7 +154,7 @@ sub run
     $eval = $config->get_hook( 'fmlconf_run_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
@@ -164,7 +167,7 @@ show help.
 
 
 # Descriptions: show help
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub help
@@ -185,29 +188,29 @@ _EOF_
 
 
 # Descriptions: dummy
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_finish_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $eval = $config->get_hook( 'fmlconf_finish_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
 
-=head2 C<_fmlconf($args)> (INTERNAL USE)
+=head2 _fmlconf($args)
 
 run dump_variables of C<FML::Config>.
 
@@ -215,18 +218,30 @@ run dump_variables of C<FML::Config>.
 
 
 # Descriptions: show configurations variables in the sytle "key = value".
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub _fmlconf
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $mode   = $args->{ options }->{ n } ? 'difference_only' : 'all';
+    my $argv   = $curproc->command_line_argv();
 
-    $config->dump_variables({ mode => $mode });
+    # if variable name is given, show the value.
+    if (defined $argv->[1]) {
+	my $k = $argv->[1];
+	print "$k = ", $config->{ $k }, "\n";
+    }
+    else {
+	$config->dump_variables({ mode => $mode });
+    }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -234,7 +249,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

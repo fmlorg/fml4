@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: file.pm,v 1.5 2002/09/11 23:18:07 fukachan Exp $
+# $FML: file.pm,v 1.14 2003/08/29 15:33:58 fukachan Exp $
 #
 
 package FML::Command::Admin::file;
@@ -27,12 +27,12 @@ file a new address.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
 
-# Descriptions: standard constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
@@ -52,6 +52,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: needs "command subcommand parameters" style or not
 #    Arguments: none
 # Side Effects: none
@@ -66,25 +73,23 @@ sub is_subcommand_style { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $log_file = $config->{ log_file };
     my $options  = $command_args->{ options };
     my $du_args  = {};
     my @argv     = ();
 
     use FML::Restriction::Base;
-    my $safe    = new FML::Restriction::Base;
-    my $regexp  = $safe->basic_variables();
-    my $filereg = $regexp->{ file };
+    my $safe = new FML::Restriction::Base;
 
-    # argv = command subcommand args ...
+    # argv = command subcommand args ... = command options
     my ($subcommand, @args)= @$options;
 
     if ($subcommand eq 'remove' ||
 	$subcommand eq 'delete' ||
 	$subcommand eq 'unlink') {
 	for my $x (@args) {
-	    if ($x =~ /^($filereg)$/) {
+	    if ($safe->regexp_match('file', $x)) {
 		push(@argv, $x);
 	    }
 	}
@@ -101,7 +106,8 @@ sub process
 
 
 # Descriptions: show cgi menu (dummy)
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -112,13 +118,17 @@ sub cgi_menu
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

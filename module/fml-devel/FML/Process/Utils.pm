@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.43 2002/09/15 00:11:12 fukachan Exp $
+# $FML: Utils.pm,v 1.93 2003/11/16 11:53:19 fukachan Exp $
 #
 
 package FML::Process::Utils;
@@ -12,6 +12,8 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use FML::Log qw(Log LogWarn LogError);
+use File::Spec;
+use File::stat;
 
 
 =head1 NAME
@@ -20,11 +22,25 @@ FML::Process::Utils - convenient utilities for FML::Process:: classes
 
 =head1 SYNOPSIS
 
-See FML::Process::Kernel.
+See L<FML::Process::Kernel>.
 
 =head1 DESCRIPTION
 
+See FML:: classes, which uses these function everywhere.
+
 =head1 access METHODS to handle configuration space
+
+=head2 config()
+
+return FML::Config object.
+
+=head2 pcb()
+
+return FML::PCB object.
+
+=head2 schduler()
+
+return FML::Process::Scheduler object.
 
 =cut
 
@@ -84,6 +100,37 @@ sub scheduler
 
 available all processes which eats message via STDIN.
 
+The following functions return the whole or a part of the incoming
+message corresponding to the current process.
+
+The message is a chain of C<Mail::Message> objects such as
+
+   header -> body
+
+   header -> multipart-preamble -> multipart-separator -> part1 -> ...
+
+See L<Mail::Message> for more details.
+
+=head2 incoming_message_header()
+
+return the header part for the incoming message.
+It is the head of a chain of Mail::Message objects.
+
+=head2 incoming_message_body()
+
+return the body part for the incoming message.
+It is the 2nd part of a chain of Mail::Message objects and after.
+For example,
+
+   body
+
+   multipart-preamble -> multipart-separator -> part1 -> ...
+
+=head2 incoming_message()
+
+return the whole message for the incoming message.
+It is the whole parts of a chain.
+
 =cut
 
 
@@ -142,6 +189,17 @@ sub incoming_message
 
 available only in C<libexec/distribute> process.
 
+The usage of these functions is same as that of incoming_message_*()
+methods but article_*() hanldes the article object to distribute now.
+So, incoming_message_*() handles input but article_message_*() handles
+output.
+
+=head2 article_message_header()
+
+=head2 article_message_body()
+
+=head2 article_message()
+
 =cut
 
 
@@ -157,7 +215,7 @@ sub article_message_header
 	return $curproc->{ article }->{ header };
     }
     else {
-	LogError("\$curproc->{ article }->{ header } not defined");
+	$curproc->logerror("\$curproc->{ article }->{ header } not defined");
 	return undef;
     }
 }
@@ -175,7 +233,7 @@ sub article_message_body
 	return $curproc->{ article }->{ body };
     }
     else {
-	LogError("\$curproc->{ article }->{ body } not defined");
+	$curproc->logerror("\$curproc->{ article }->{ body } not defined");
 	return undef;
     }
 }
@@ -193,7 +251,7 @@ sub article_message
 	return $curproc->{ article }->{ message };
     }
     else {
-	LogError("\$curproc->{ article }->{ message } not defined");
+	$curproc->logerror("\$curproc->{ article }->{ message } not defined");
 	return undef;
     }
 }
@@ -201,8 +259,18 @@ sub article_message
 
 =head1 misc METHODS
 
+=head2 mkdir($dir, $mode)
+
+create directory $dir if needed.
+
 =cut
 
+#
+# XXX-TODO: $curproc->mkdir() is strage.
+# XXX-TODO: hmm, we create a new subcleass such as $curproc->util->mkdir() ?
+# XXX-TODO: or $utils = $curproc->utils(); $utils->mkdir(dir, mode); ?
+# XXX-TODO: we need FML::Utils class ?
+#
 
 # Descriptions: create directory $dir if needed
 #    Arguments: OBJ($curproc) STR($dir) STR($mode)
@@ -212,7 +280,7 @@ sub mkdir
 {
     my ($curproc, $dir, $mode) = @_;
     my $config  = $curproc->config();
-    my $dirmode = $config->{ default_directory_mode } || '0700';
+    my $dirmode = $config->{ directory_default_mode } || '0700';
 
     # back up umask
     my $curmask = umask( 077 ); # full open for readability
@@ -220,26 +288,26 @@ sub mkdir
     unless (-d $dir) {
 	if (defined $mode) {
 	    if ($mode =~ /^\d+$/) { # NUM 0700
-		_mkpath_num($dir, $mode);
+		$curproc->_mkpath_num($dir, $mode);
 	    }
 	    elsif ($mode =~ /mode=(\S+)/) {
 		my $xmode = "directory_${1}_mode";
 		if (defined $config->{ $xmode }) {
-		    _mkpath_str($dir, $config->{ $xmode });
+		    $curproc->_mkpath_str($dir, $config->{ $xmode });
 		}
 		else {
-		    LogError("mkdir: invalid mode");
+		    $curproc->logerror("mkdir: invalid mode");
 		}
 	    }
 	    else {
-		LogError("mkdir: invalid mode");
+		$curproc->logerror("mkdir: invalid mode");
 	    }
 	}
 	elsif ($dirmode =~ /^\d+$/) { # STR 0700
-	    _mkpath_str($dir, $dirmode);
+	    $curproc->_mkpath_str($dir, $dirmode);
 	}
 	else {
-	    LogError("mkdir: invalid mode");
+	    $curproc->logerror("mkdir: invalid mode");
 	}
     }
 
@@ -247,38 +315,268 @@ sub mkdir
 }
 
 
+# Descriptions: mkdir with the specified dir mode
+#    Arguments: OBJ($curproc) STR($dir) NUM($mode)
+# Side Effects: mkdir && chmod
+# Return Value: none
 sub _mkpath_num
 {
-    my ($dir, $mode) = @_;
+    my ($curproc, $dir, $mode) = @_;
+    my $cur_mask = umask();
+
+    umask(0);
 
     if ($mode =~ /^\d+$/) { # NUM 0700
 	eval q{ use File::Path;};
 	mkpath([ $dir ], 0, $mode);
-	chmod $mode, $dir; 
-	Log(sprintf("mkdir %s mode=0%o", $dir, $mode));
+	chmod $mode, $dir;
+	$curproc->log(sprintf("mkdir %s mode=0%o", $dir, $mode));
     }
     else {
-	LogError("mkdir: invalid mode (N)");
+	$curproc->logerror("mkdir: invalid mode (N)");
     }
+
+    umask($cur_mask);
 }
 
 
+# Descriptions: mkdir with the specified dir mode
+#    Arguments: OBJ($curproc) STR($dir) STR($mode)
+# Side Effects: mkdir && chmod
+# Return Value: none
 sub _mkpath_str
 {
-    my ($dir, $mode) = @_;
+    my ($curproc, $dir, $mode) = @_;
+    my $cur_mask = umask();
+
+    umask(0);
 
     if ($mode =~ /^\d+$/) { # STR 0700
 	eval qq{
 	    use File::Path;
 	    mkpath([ \$dir ], 0, $mode);
-	    chmod $mode, \$dir; 
-	    Log(\"mkdirhier $dir mode=$mode\");
+	    chmod $mode, \$dir;
+	    \$curproc->log(\"mkdirhier \$dir mode=$mode\");
 	};
-	LogError($@) if $@;
+	$curproc->logerror($@) if $@;
     }
     else {
-	LogError("mkdir: invalid mode (S)");
+	$curproc->logerror("mkdir: invalid mode (S)");
     }
+
+    umask($cur_mask);
+}
+
+
+# XXX-TODO: $curproc->mkfile() is strage.
+
+# Descriptions: create a file.
+#    Arguments: OBJ($curproc) STR($file)
+# Side Effects: none
+# Return Value: none
+sub mkfile
+{
+    my ($curproc, $file) = @_;
+
+    unless (-f $file) {
+	use IO::Adapter;
+	my $obj = new IO::Adapter $file;
+	$obj->touch();
+
+	# verify 
+	unless (-f $file) {
+	    $curproc->logerror("fail to create file: $file");
+	}
+    }
+}
+
+
+# XXX-TODO: $curproc->touch() is strage.
+
+# Descriptions: create a file.
+#    Arguments: OBJ($curproc) STR($file)
+# Side Effects: none
+# Return Value: none
+sub touch
+{
+    my ($curproc, $file) = @_;
+    $curproc->mkfile($file);
+}
+
+
+# XXX-TODO: $curproc->cat() is strage.
+
+# Descriptions: concantenate files to STDOUT
+#    Arguments: OBJ($curproc) ARRAY_REF($files) HANDLE($out)
+# Side Effects: none
+# Return Value: none
+sub cat
+{
+    my ($curproc, $files, $out) = @_;
+    $out ||= \*STDOUT;
+
+    for my $file (@$files) {
+	_cat($file, $out);
+    }
+}
+
+
+# Descriptions: cat file to STDOUT
+#    Arguments: STR($file) HANDLE($out)
+# Side Effects: none
+# Return Value: none
+sub _cat
+{
+    my ($file, $out) = @_;
+
+    use FileHandle;
+    my $fh = new FileHandle $file;
+    if (defined $fh) {
+	my $buf = '';
+	while (sysread($fh, $buf, 4096)) {
+	    syswrite($out, $buf);
+	}
+	$fh->close();
+    }
+}
+
+
+=head2 unique( $array )
+
+make components in $array unique.
+
+=cut
+
+
+# Descriptions: make components in $array unique
+#    Arguments: OBJ($self) ARRAY_REF($array)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub unique
+{
+    my ($self, $array) = @_;
+    my $x     = [];
+    my $cache = {};
+
+    if (ref($array) eq 'ARRAY' && @$array) {
+      COMPONENT:
+	for my $k (@$array) {
+	    next COMPONENT if $cache->{ $k };
+	    push(@$x, $k);
+	    $cache->{ $k } = 1;
+	}
+    }
+
+    return $x;
+}
+
+
+=head1 ml_home_dir handling
+
+=cut
+
+
+# Descriptions:
+#    Arguments: OBJ($curproc) STR($ml_home_prefix) STR($ml_name)
+# Side Effects: none
+# Return Value: STR
+sub removed_ml_home_dir_path
+{
+    my ($curproc, $ml_home_prefix, $ml_name) = @_;
+
+    use Mail::Message::Date;
+    my $dobj = new Mail::Message::Date time;
+    my $date = $dobj->{ YYYYMMDD };
+
+    use File::Spec;
+    my $x = sprintf("%s%s.%d", '@', $ml_name, $date);
+    return File::Spec->catfile($ml_home_prefix, $x);
+}
+
+
+# Descriptions: find the latest removed $ml_home_dir
+#    Arguments: OBJ($curproc) STR($ml_home_prefix) STR($ml_name)
+# Side Effects: none
+# Return Value: STR
+sub find_latest_removed_ml_home_dir
+{
+    my ($curproc, $ml_home_prefix, $ml_name) = @_;
+    my ($entry) = [];
+
+    use DirHandle;
+    my $dh = new DirHandle $ml_home_prefix;
+    if (defined $dh) {
+	my $x;
+
+      ENTRY:
+	while ($x = $dh->read()) {
+	    next ENTRY if $x =~ /^\./o;
+
+	    if ($x =~ /^\@$ml_name$/ || $x =~ /^\@$ml_name\.\d+$/) {
+		push(@$entry, $x);
+	    }
+	}
+	$dh->close();
+    }
+
+    my $name = $curproc->_sort_ml_name($ml_home_prefix, $ml_name, $entry);
+    if ($name) {
+	return File::Spec->catfile($ml_home_prefix, $name);
+    }
+    else {
+	return '';
+    }
+}
+
+
+# Descriptions: sort ml_name entries (@$entry) and return the latest.
+#    Arguments: OBJ($curproc)
+#               STR($ml_home_prefix) STR($ml_name) ARRAY_REF($entry)
+# Side Effects: none
+# Return Value: STR
+sub _sort_ml_name
+{
+    my ($curproc, $ml_home_prefix, $ml_name, $entry) = @_;
+    my $latest   = 0;
+    my $is_found = 0;
+
+    for my $x (@$entry) {
+	if ($x =~ /^\@$ml_name\.(\d+)$/) {
+	    $latest = $1 > $latest ? $1 : $latest;
+	}
+	elsif ($x =~ /^\@$ml_name$/) {
+	    $is_found = $x;
+	}
+    }
+
+    my $latest_name = sprintf("%s%s.%d", '@', $ml_name, $latest);
+    if ($latest && $is_found) {
+	my $mtime_latest = _mtime($ml_home_prefix, $latest_name);
+	my $mtime_exact  = _mtime($ml_home_prefix, $is_found);
+	return( ($mtime_latest > $mtime_exact) ? $latest_name : $is_found );
+    }
+    elsif ($latest) {
+	return $latest_name;
+    }
+    elsif ($is_found) {
+	return $is_found;
+    }
+    else {
+	return '';
+    }
+}
+
+
+# Descriptions: return mtime of $prefix/$x file/dir.
+#    Arguments: STR($prefix) STR($x)
+# Side Effects: none
+# Return Value: NUM
+sub _mtime
+{
+    my ($prefix, $x) = @_;
+    my $p  = File::Spec->catfile($prefix, $x);
+    my $st = stat($p);
+    return $st->mtime;
 }
 
 
@@ -371,6 +669,26 @@ sub myname
 }
 
 
+# Descriptions: check $str with $class regexp defined in FML::Restriction.
+#    Arguments: OBJ($curproc) STR($class) STR($str)
+# Side Effects: none
+# Return Value: NUM(1 or 0)
+sub is_safe_syntax
+{
+    my ($curproc, $class, $str) = @_;
+
+    use FML::Restriction::Base;
+    my $safe = new FML::Restriction::Base;
+
+    if ($safe->regexp_match($class, $str)) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+}
+
+
 # Descriptions: return raw @ARGV of the current process,
 #               where @ARGV is before getopts() applied
 #    Arguments: OBJ($curproc)
@@ -441,14 +759,14 @@ not yet implemenetd properly. (?)
 =cut
 
 
-# Descriptions: return my domain
+# Descriptions: return ml_name
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
 sub ml_name
 {
     my ($curproc) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     if (defined $config->{ ml_name } && $config->{ ml_name }) {
 	return $config->{ ml_name };
@@ -474,7 +792,7 @@ properly, return the default domain defined in /etc/fml/main.cf.
 sub ml_domain
 {
     my ($curproc) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     if (defined $config->{ ml_domain } && $config->{ ml_domain }) {
 	return $config->{ ml_domain };
@@ -515,6 +833,7 @@ sub is_default_domain
     my ($curproc, $domain) = @_;
     my $default_domain = $curproc->default_domain();
 
+    # XXX domain name is case insensitive.
     if ("\L$domain\E" eq "\L$default_domain\E") {
 	return 1;
     }
@@ -571,12 +890,9 @@ return $ml_home_prefix in main.cf.
 
 =cut
 
-######################################################################
-# XXX
-#    __ml_home_prefix_from_main_cf() is not needed.
-#    since FML::Process::Switch calculate this variable and set it to
-#    $curproc->{ main_cf }.
-######################################################################
+# XXX-TODO: __ml_home_prefix_from_main_cf() is not needed.
+# XXX-TODO: since FML::Process::Switch calculate this variable and
+# XXX-TODO: set it to $curproc->{ main_cf }.
 
 
 # Descriptions: front end wrapper to retrieve $ml_home_prefix (/var/spool/ml).
@@ -611,7 +927,7 @@ sub ml_home_dir
 # Descriptions: return $ml_home_prefix defined in main.cf (/etc/fml/main.cf).
 #               return $ml_home_prefix for $domain if $domain is specified.
 #               return default one if $domain is not specified.
-#    Arguments: OBJ($curproc) STR($domain)
+#    Arguments: HASH_REF($main_cf) STR($domain)
 # Side Effects: none
 # Return Value: STR
 sub __ml_home_prefix_from_main_cf
@@ -622,11 +938,11 @@ sub __ml_home_prefix_from_main_cf
     if (defined $domain) {
 	my $found = '';
 
-	my ($virtual_maps) = __get_virtual_maps($main_cf);
-	if (@$virtual_maps) {
-	    $found = __ml_home_prefix_search_in_virtual_maps($main_cf,
-							     $domain,
-							     $virtual_maps);
+	my ($prefix_maps) = __get_ml_home_prefix_maps($main_cf);
+	if (@$prefix_maps) {
+	    $found = ___search_in_ml_home_prefix_maps($main_cf,
+						      $domain,
+						      $prefix_maps);
 	}
 
 	if ($found) {
@@ -659,11 +975,11 @@ sub __ml_home_prefix_from_main_cf
 }
 
 
-# Descriptions: search virtual domain in $virtual_maps.
-#               return $ml_home_prefix for the virtual domain if found.
+# Descriptions: search domain in $prefix_maps.
+#               return $ml_home_prefix for the domain if found.
 #    Arguments: HASH_REF($main_cf)
-#               STR($virtual_domain)
-#               ARRAY_REF($virtual_maps)
+#               STR($domain)
+#               ARRAY_REF($prefix_maps)
 #         bugs: currently support the only file type of IO::Adapter.
 #               This limit comes from the architecture
 #               since this function may be used
@@ -672,27 +988,27 @@ sub __ml_home_prefix_from_main_cf
 #               SUPPORT ONLY FILE TYPE MAPS NOT SQL NOR LDAP.
 # Side Effects: none
 # Return Value: STR
-sub __ml_home_prefix_search_in_virtual_maps
+sub ___search_in_ml_home_prefix_maps
 {
-    my ($main_cf, $virtual_domain, $virtual_maps) = @_;
+    my ($main_cf, $domain, $prefix_maps) = @_;
 
-    if (@$virtual_maps) {
+    if (@$prefix_maps) {
 	my $dir = '';
 	eval q{ use IO::Adapter; };
 	unless ($@) {
 	  MAP:
-	    for my $map (@$virtual_maps) {
+	    for my $map (@$prefix_maps) {
 		# XXX only support file:// map
 		my $obj = new IO::Adapter $map;
 		if (defined $obj) {
 		    $obj->open();
-		    $dir = $obj->find("^$virtual_domain");
+		    $dir = $obj->find("^$domain");
 		}
 		last MAP if $dir;
 	    }
 
 	    if ($dir) {
-		($virtual_domain, $dir) = split(/\s+/, $dir);
+		($domain, $dir) = split(/\s+/, $dir);
 		$dir =~ s/[\s\n]*$// if defined $dir;
 
 		# found
@@ -721,7 +1037,7 @@ return 1 if config.cf exists. 0 if not.
 =cut
 
 
-# Descriptions: return $ml ML's home directory
+# Descriptions: return $ml ML's config.cf path
 #    Arguments: OBJ($curproc) STR($ml) STR($domain)
 # Side Effects: none
 # Return Value: STR
@@ -731,7 +1047,7 @@ sub config_cf_filepath
     my $prefix = $curproc->ml_home_prefix($domain);
 
     unless (defined $ml) {
-	$ml = $curproc->{ config }->{ ml_name };
+	$ml = $curproc->config()->{ ml_name };
     }
 
     use File::Spec;
@@ -739,7 +1055,7 @@ sub config_cf_filepath
 }
 
 
-# Descriptions: return $ml ML's home directory
+# Descriptions: return whether $ml ML's config.cf file exists or not.
 #    Arguments: OBJ($curproc) STR($ml) STR($domain)
 # Side Effects: none
 # Return Value: STR
@@ -752,44 +1068,95 @@ sub is_config_cf_exist
 }
 
 
-=head2 get_virtual_maps()
+=head2 get_ml_home_prefix_maps()
 
-return virtual maps.
+return ml_home_prefix maps. 
+By default, ml_home_prefix and virtual under $fml_config_dir.
 
 =cut
 
 
-# Descriptions: options, which is the result by getopts() analyze
+# Descriptions: return ml_home_prefix maps as array reference.
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: ARRAY_REF
-sub get_virtual_maps
+sub get_ml_home_prefix_maps
 {
     my ($curproc) = @_;
     my $main_cf = $curproc->{ __parent_args }->{ main_cf };
-    __get_virtual_maps($main_cf);
+    __get_ml_home_prefix_maps($main_cf);
 }
 
 
-# Descriptions: return virtual maps as array reference.
+# Descriptions: return ml_home_prefix maps as array reference.
 #    Arguments: HASH_REF($main_cf)
 # Side Effects: none
 # Return Value: ARRAY_REF
-sub __get_virtual_maps
+sub __get_ml_home_prefix_maps
 {
     my ($main_cf) = @_;
 
-    if (defined $main_cf->{ virtual_maps } && $main_cf->{ virtual_maps }) {
+    if (defined $main_cf->{ ml_home_prefix_maps } && 
+	$main_cf->{ ml_home_prefix_maps }) {
 	my (@r) = ();
-	my (@maps) = split(/\s+/, $main_cf->{ virtual_maps });
-	for (@maps) {
-	    if (-f $_) { push(@r, $_);}
+	my (@maps) = split(/\s+/, $main_cf->{ ml_home_prefix_maps });
+	for my $map (@maps) {
+	    if (-f $map) { push(@r, $map);}
 	}
 	return \@r;
     }
     else {
 	return undef;
     }
+}
+
+
+=head2 is_cgi_process()
+
+inform whether this process runs as cgi ?
+
+=head2 is_under_mta_process()
+
+inform whether this process runs under MTA ?
+
+=cut
+
+
+# Descriptions: whether this process runs as cgi ?
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: NUM(1 or 0)
+sub is_cgi_process
+{
+    my ($curproc) = @_;
+    my $name = $curproc->myname() || '';
+
+    if ($name =~ /\.cgi$/) {
+	return 1;
+    }
+
+    return 0;
+}
+
+
+# Descriptions: whether this process runs as cgi ?
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: NUM(1 or 0)
+sub is_under_mta_process
+{
+    my ($curproc) = @_;
+    my $name = $curproc->myname() || '';
+
+    if ($name eq 'distribute' ||
+	$name eq 'command'    ||
+	$name eq 'digest'     ||
+	$name eq 'error'      ||
+	$name eq 'fml.pl'     ) {
+	return 1;
+    }
+
+    return 0;
 }
 
 
@@ -800,13 +1167,13 @@ get ARRAY_REF of valid mailing lists.
 =cut
 
 
-# Descriptions: list up ML for the specified $ml_domain
-#    Arguments: OBJ($curproc) HASH_REF($args) STR($ml_domain)
+# Descriptions: list up ML's within the specified $ml_domain.
+#    Arguments: OBJ($curproc) STR($ml_domain)
 # Side Effects: none
 # Return Value: ARRAY_REF
 sub get_ml_list
 {
-    my ($curproc, $args, $ml_domain) = @_;
+    my ($curproc, $ml_domain) = @_;
     my $ml_home_prefix = $curproc->ml_home_prefix();
 
     if (defined $ml_domain) {
@@ -830,11 +1197,19 @@ sub get_ml_list
     my @dirlist = ();
 
     if (defined $dh) {
-	while ($_ = $dh->read()) {
-	    next if /^\./;
-	    next if /^\@/;
-	    $cf = File::Spec->catfile($prefix, $_, "config.cf");
-	    push(@dirlist, $_) if -f $cf;
+	use FML::Restriction::Base;
+	my $safe    = new FML::Restriction::Base;
+	my $ml_name = '';
+
+	while ($ml_name = $dh->read()) {
+	    next if $ml_name =~ /^\./o;
+	    next if $ml_name =~ /^\@/o;
+
+	    # XXX permit $ml_name matched by FML::Restriction::Base.
+	    if ($safe->regexp_match('ml_name', $ml_name)) {
+		$cf = File::Spec->catfile($prefix, $ml_name, "config.cf");
+		push(@dirlist, $ml_name) if -f $cf;
+	    }
 	}
 	$dh->close;
     }
@@ -858,26 +1233,13 @@ get ARRAY_REF of address list for the specified map.
 sub get_address_list
 {
     my ($curproc, $map) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $list   = $config->get_as_array_ref( $map );
 
-    eval q{ use IO::Adapter;};
+    eval q{ use FML::Command::UserControl;};
     unless ($@) {
-	my $r = [];
-
-	for my $map (@$list) {
-	    my $io  = new IO::Adapter $map, $config;
-	    my $key = '';
-	    if (defined $io) {
-		$io->open();
-		while (defined($key = $io->get_next_key())) {
-		    push(@$r, $key);
-		}
-		$io->close();
-	    }
-	}
-
-	return $r;
+	my $obj = new FML::Command::UserControl;
+	return $obj->get_user_list($curproc, $list);
     }
 
     return [];
@@ -886,7 +1248,7 @@ sub get_address_list
 
 =head2 which_map_nl($map)
 
-which member of maps is this $map ?
+which this $map belongs to ?
 
 =cut
 
@@ -898,11 +1260,11 @@ which member of maps is this $map ?
 sub which_map_nl
 {
     my ($curproc, $map) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $found  = '';
 
   SEARCH_MAPS:
-    for my $mode (qw(member recipient admin_member)) {
+    for my $mode (qw(member recipient admin_member digest_recipient)) {
 	my $maps = $config->get_as_array_ref("${mode}_maps");
 	for my $m (@$maps) {
 	    if ($map eq $m) {
@@ -916,7 +1278,46 @@ sub which_map_nl
 }
 
 
-=head2 article_id_max()
+=head2 convert_to_mail_address($list)
+
+convert_to_mail_address() converts $list to mail addresses.
+For example
+
+    maitainer	=>	$maintainer
+    sender	=>	sender of the current message (From: in header)
+
+=cut
+
+
+# Descriptions: convert to mail addresses.
+#    Arguments: OBJ($curproc) ARRAY_REF($list)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub convert_to_mail_address
+{
+    my ($curproc, $list) = @_;
+    my $config = $curproc->config();
+    my $cred   = $curproc->{ credential };
+    my $result = [];
+
+    for my $rcpt (@$list) {
+	if ($rcpt eq 'maintainer') {
+	    push(@$result, $config->{ maintainer });
+	}
+	elsif ($rcpt eq 'sender') {
+	    my $sender = $cred->sender();
+	    push(@$result, $sender);
+	}
+	else {
+	    $curproc->logerror("unknown recipient type $rcpt");
+	}
+    }
+
+    return $result;
+}
+
+
+=head2 article_max_id()
 
 return the current article number (sequence number).
 
@@ -927,35 +1328,33 @@ return the current article number (sequence number).
 #    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: NUM
-sub article_id_max
+sub article_max_id
 {
     my ($curproc) = @_;
-    my $config   = $curproc->{ config };
-    my $seq_file = $config->{ sequence_file };
-    my $id       = undef;
 
-    use FileHandle;
-    my $fh = new FileHandle $seq_file;
-    if (defined $fh) {
-	$id = $fh->getline();
-	$id =~ s/^\s*//; $id =~ s/[\n\s]*$//;
-	$fh->close();
-    }
-
-    if (defined $id) {
-	return( $id =~ /^\d+$/ ? $id : 0 );
-    }
-    else {
-	return 0;
-    }
+    use FML::Article;
+    my $article = new FML::Article $curproc;
+    return $article->id();
 }
 
 
-=head2 get_print_style()
-
 =head2 set_print_style(mode)
 
+=head2 get_print_style()
+
 =cut
+
+
+# Descriptions: set print style
+#    Arguments: OBJ($curproc) STR($mode)
+# Side Effects: none
+# Return Value: STR
+sub set_print_style
+{
+    my ($curproc, $mode) = @_;
+
+    $curproc->{ __print_style } = $mode;
+}
 
 
 # Descriptions: get print style
@@ -970,15 +1369,196 @@ sub get_print_style
 }
 
 
-# Descriptions: set print style
-#    Arguments: OBJ($curproc) STR($mode)
+=head2 language_default()
+
+=head2 language_of_html_file()
+
+=cut
+
+
+# Descriptions: inform default language
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
-sub set_print_style
+sub language_default
 {
-    my ($curproc, $mode) = @_;
+    my ($curproc) = @_;
 
-    $curproc->{ __print_style } = $mode;
+    return 'euc-jp'; # default
+}
+
+
+# Descriptions: language used in html files
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: STR
+sub language_of_html_file
+{
+    my ($curproc) = @_;
+    $curproc->language_default();
+}
+
+
+# Descriptions: set the current charset
+#    Arguments: OBJ($curproc) STR($category) STR($charset)
+# Side Effects: none
+# Return Value: none
+sub set_charset
+{
+    my ($curproc, $category, $charset) = @_;
+    my $pcb = $curproc->pcb();
+
+    $pcb->set("charset", $category, $charset);
+}
+
+
+# Descriptions: get the current charset.
+#               The default value is given by $template_file_charset.
+#    Arguments: OBJ($curproc) STR($category)
+# Side Effects: none
+# Return Value: STR
+sub get_charset
+{
+    my ($curproc, $category) = @_;
+    my $config  = $curproc->config();
+    my $pcb     = $curproc->pcb();
+    my $keyword = sprintf("%s_default_charset", $category);
+    my $default = $config->{ $keyword } || 'us-ascii';
+    my $charset = $default;
+
+    # if overwritten by some module, we use it always.
+    if (defined($pcb) && $pcb->get("charset", $category)) {
+	$charset = $pcb->get("charset", $category);
+    }
+    # search charset most preferred by Accpet-Language: in our templates.
+    else {
+	# XXX Accept-Language: affets $reply_message_charset and $cgi_charset.
+	# XXX $reply_mesage_charset indirectry affets $template_file_charset.
+	# XXX So, we need to check Accept-Language: information.
+	my $acpt_lang_list = $curproc->get_accept_language_list() || [];
+
+	if (@$acpt_lang_list) {
+	  ACCEPT_LANGUAGE:
+	    for my $a (@$acpt_lang_list) {
+		if ($a eq 'ja' || $a eq 'en') {
+		    my $key  = sprintf("%s_charset_%s", $category, $a);
+		    $charset = $config->{ $key };
+		    last ACCEPT_LANGUAGE;
+		}
+		elsif ($a eq '*') { # any charset is o.k.
+		    last ACCEPT_LANGUAGE;		
+		}
+	    }
+	}
+	else {
+	    $curproc->log("debug: no Accpet-Language:");
+	}
+    }
+
+    $curproc->log("debug: category=$category charset=$charset");
+    return $charset;
+}
+
+
+=head2 get_accept_language_list($list)
+
+set preferred language candidates requested by sender.
+$list is ARRAY_REF.
+
+=head2 get_accept_language_list()
+
+return preferred language candidates requested by sender.
+The type of return value is ARRAY_REF.
+
+=cut
+
+
+# Descriptions: return language candidates requested by sender
+#    Arguments: OBJ($curproc) ARRAY_REF($list)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub set_accept_language_list
+{
+    my ($curproc, $list) = @_;
+    my $pcb = $curproc->pcb();
+
+    if (defined $pcb) {
+	if (ref($list) eq 'ARRAY') {
+	    $pcb->set('incoming_message', 'accept-language', $list);
+	}
+	else {
+	    $curproc->logerror("set_accept_language_list: invalid data");
+	}
+    }
+}
+
+
+# Descriptions: return language candidates requested by sender
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub get_accept_language_list
+{
+    my ($curproc) = @_;
+    my $pcb = $curproc->pcb();
+
+    if (defined $pcb) {
+	return $pcb->get('incoming_message', 'accept-language');
+    }
+    else {
+	return [ '*' ];
+    }
+}
+
+
+=head2 thread_db_args($args)
+
+prepare and return information (HASH_REF) needed to manipulate thread
+database.
+
+=cut
+
+
+# Descriptions: return information (HASH_REF) needed for thread database.
+#    Arguments: OBJ($curproc) HASH_REF($args)
+# Side Effects: none
+# Return Value: HASH_REF
+sub thread_db_args
+{
+    my ($curproc, $args) = @_;
+    my $config       = $curproc->config();
+    my $ml_name      = $config->{ ml_name };
+    my $html_dir     = $config->{ html_archive_dir };
+    my $udb_dir      = $config->{ udb_base_dir };
+    my $index_order  = $config->{ html_archive_index_order_type };
+    my $cur_lang     = $curproc->language_of_html_file();
+
+    # whether we should mask address?
+    my $use_address_mask  = 'yes';
+    my $address_mask_type = 'all';
+    if ($config->yes('use_html_archive_address_mask')) {
+	$use_address_mask = 'yes';
+	$address_mask_type
+	    = $config->{ html_archive_address_mask_type } || 'all';
+    }
+
+    unless (-d $udb_dir) { $curproc->mkdir($udb_dir);}
+
+    # XXX-TODO: care for non Japanese.
+    return {
+
+	charset      => $cur_lang,
+
+	output_dir   => $html_dir, # ~fml/public_html/mlarchive/$domain/$ml/
+	db_base_dir  => $udb_dir,  # /var/spool/ml/@udb@
+	db_name      => $ml_name,  # elena
+
+	index_order  => $index_order,  # normal/reverse
+
+	# address mask = yes/no, _type = all
+	use_address_mask  => $use_address_mask,
+	address_mask_type => $address_mask_type,
+    };
 }
 
 
@@ -1005,13 +1585,44 @@ sub hints
 }
 
 
+=head2 set_debug_level($level)
+
+set debug level (NOT IMPLEMENTED).
+
+=head2 get_debug_level()
+
+return debug level.
+
+=cut
+
+
+# XXX-TODO: set_debug_level() is not implemented.
+
+
+# Descriptions: return debug level.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: NUM
+sub get_debug_level
+{
+    my ($curproc) = @_;
+    my $args = $curproc->{ __parent_args };
+
+    return( $args->{ main_cf }->{ debug } || 0 );
+}
+
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SimpleMatch.pm,v 1.33 2002/12/31 11:25:16 fukachan Exp $
+# $FML: SimpleMatch.pm,v 1.39 2003/05/04 07:57:13 fukachan Exp $
 #
 
 
@@ -91,6 +91,12 @@ my $address_trap_regexp = {
     },
 
 
+    'ybb.ne.jp' => {
+	'start' => 'Unable to deliver message to the following address',
+	'end'   => '= Original message follows',
+    },
+
+
     'smail' => {
 	'start' => 'Failed addresses follow:',
 	'end'   => 'Message text follows:',
@@ -109,14 +115,25 @@ my $address_trap_regexp = {
     },
 
 
-    'smtp32' => {
+    'smtp32(a)' => {
     	'start' => 'undeliverable to',
     	'end'   => 'original message follows',
+    },
+
+    'smtp32(b)' => {
+    	'start' => 'undeliverable to',
+    	'end'   => 'Original message follows',
     },
 
     'smtpsvc' => {
     	'start' => '------Transcript of session follows -------',
     	'end'   => 'Received.*',
+    },
+
+
+    'webshield' => {
+    	'start' => '------ Here is your List of Failed Recipients ------',
+    	'end'   => '-------- Here Is Your Returned Mail --------',
     },
 
 
@@ -144,6 +161,12 @@ my $address_trap_regexp = {
     'unknown3' => {
 	'start' => 'this message was created automatically by mail delivery software',
 	'end'   => 'original message follows',
+    },
+
+    # What is E500 ?
+    'E500_SMTP_Mail_Service' => {
+	'start' => '------ Failed Recipients ------',
+	'end'   => '-------- Returned Mail --------',
     },
 
 };
@@ -266,13 +289,16 @@ sub _address_match
 	my @buf = split(/\n/, $$rbuf);
 
       SCAN:
-	for (@buf) {
-	    print STDERR "scan($args->{ mta_type })|state=$args->{state}> $_\n"
-		if $debug;
-	    # XXX in some cases, $end_regexp not defined.
-	    last SCAN if $end_regexp && /$end_regexp/;
+	for my $buf (@buf) {
+	    if ($debug) {
+		print STDERR
+		    "scan($args->{ mta_type })|state=$args->{state}> $buf\n";
+	    }
 
-	    if (/(\S+\@\S+\w+)/) {
+	    # XXX in some cases, $end_regexp not defined.
+	    last SCAN if $end_regexp && $buf =~ /$end_regexp/;
+
+	    if ($buf =~ /(\S+\@\S+\w+)/) {
 		if ($debug) { print STDERR "trap address ($1)\n";}
 		my $addr = $self->address_clean_up($mta_type, $1);
 		if ($addr) {
@@ -282,7 +308,7 @@ sub _address_match
 		}
 	    }
 
-	    if ($addr_regexp && /$addr_regexp/) {
+	    if ($addr_regexp && $buf =~ /$addr_regexp/) {
 		my $addr = $self->address_clean_up($mta_type, $1);
 		if ($addr) {
 		    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
@@ -305,7 +331,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

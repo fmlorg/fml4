@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: CacheDir.pm,v 1.19 2002/09/15 00:07:53 fukachan Exp $
+# $FML: CacheDir.pm,v 1.25 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::CacheDir;
@@ -43,7 +43,7 @@ You can specify C<file_name> parameter.
 
 If so, the file names become _smtplog.0, _smtplog.1, ...
 
-The C<File::CacheDir> described above is limited by size.
+The cache data is limited by size.
 
 You can use File::CacheDir based on time not size.
 It is time based expiretion.
@@ -88,6 +88,17 @@ direcotry by default) and truncated to 0 by the modulo C<5>.
 
 =head2 new(args)
 
+$args hash can take the following arguments:
+
+	variable		default value
+	--------------------------------
+	directory 		.
+	file_name 		""
+	sequence_file_name 	.seq
+	modulus 		128
+	cache_type 		cyclic
+	dir_mode 		0755
+
 =cut
 
 
@@ -97,7 +108,7 @@ BEGIN {}
 END   {}
 
 
-# Descriptions: constructor
+# Descriptions: constructor.
 #               forward new() request to superclass (IO::File)
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
@@ -128,14 +139,14 @@ sub _take_file_name
     my $sequence_file_name = $args->{ sequence_file_name } || '.seq';
     my $modulus            = $args->{ modulus } || 128;
     my $cache_type         = $args->{ cache_type } || 'cyclic';
+    my $dir_mode           = $args->{ dir_mode } || 0755;
 
     my $file;
     eval q{ use File::Spec;};
 
     unless (-d $directory) {
 	use File::Path;
-	my $mode = $args->{ directory_mode } || 0755;
-	mkpath( [ $directory ], 0, $mode);
+	mkpath( [ $directory ], 0, $dir_mode);
     }
 
     if ($cache_type eq 'temporal') {
@@ -146,6 +157,7 @@ sub _take_file_name
     elsif ($cache_type eq 'cyclic') {
 	my $seq_file = File::Spec->catfile($directory, $sequence_file_name);
 
+	# XXX-TODO: remove File::Sequence dependence. ?
 	my $sfh = undef;
 	eval q{ use File::Sequence;
 		$sfh = new File::Sequence {
@@ -161,12 +173,12 @@ sub _take_file_name
 
     $self->{ _cache_type } = $cache_type || 'cyclic';
     $self->{ _cache_data } = {};
-    $self->{ _directory }  = $directory || '';
-    $self->{ _file }       = $file || '';
+    $self->{ _directory }  = $directory  || '';
+    $self->{ _file }       = $file       || '';
 }
 
 
-=head2 C<open(file, mode)>
+=head2 open(file, mode)
 
 no argument.
 
@@ -205,7 +217,7 @@ sub open
 }
 
 
-=head2 C<close()>
+=head2 close()
 
 no argument.
 
@@ -242,7 +254,8 @@ sub get
 }
 
 
-# Descriptions: get value (latest value in the ring buffer) for key.
+# Descriptions: get value (latest value in the ring buffer) for the
+#               specified key.
 #    Arguments: OBJ($self) STR($key)
 # Side Effects: none
 # Return Value: STR
@@ -265,7 +278,7 @@ sub get_latest_value
     opendir($dh, $dir);
 
     my @dh = ();
-    for (readdir($dh)) { push(@dh, $_) if /^\d+/;}
+    for my $dir (readdir($dh)) { push(@dh, $dir) if $dir =~ /^\d+/;}
     @dh = sort { $b <=> $a } @dh;
 
     eval q{ use File::Spec;};
@@ -274,6 +287,8 @@ sub get_latest_value
     for my $_dir (@dh) {
 	next DIR_ENTRY if $_dir =~ /^\./;
 	next DIR_ENTRY if $_dir !~ /^\d/;
+
+	# XXX-TODO: corrct rule to ignore /^\d{1,2}$/; ?
 	next DIR_ENTRY if $_dir =~ /^\d{1,2}$/;
 
 	$file = File::Spec->catfile($dir, $_dir);
@@ -298,8 +313,12 @@ sub _search
     my $pkey = quotemeta( substr($key, 0, 1) );
     my $buf  = '';
 
-    # negative cache
+    # simple check
+    return '' unless defined $file;
     return '' unless $file;
+
+    # negative cache
+    # XXX-TODO: when negative cache is expired ? this code is correct ?
     return '' if defined $hash->{ $file };
     $hash->{ $file } = 1;
 
@@ -313,7 +332,7 @@ sub _search
 	    next ENTRY unless $x =~ /^$pkey/;
 
 	    if ($x =~ /^$key\s+/ || $x =~ /^$key$/) {
-		chop $x;
+		chomp $x;
 		my ($k, $v) = split(/\s+/, $x, 2);
 		$buf = $v;
 	    }
@@ -367,13 +386,17 @@ sub set
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

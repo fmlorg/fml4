@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Digest.pm,v 1.6 2002/12/22 03:46:20 fukachan Exp $
+# $FML: Digest.pm,v 1.11 2003/08/29 15:34:07 fukachan Exp $
 #
 
 package FML::Process::Digest;
@@ -36,7 +36,7 @@ where C<$obj> is the object C<FML::Process::$module::new()> returns.
 
 =head1 METHOD
 
-=head2 C<new($args)>
+=head2 new($args)
 
 create C<FML::Process::Digest> object.
 C<$curproc> is the object C<FML::Process::Kernel> returns but
@@ -59,7 +59,7 @@ sub new
 }
 
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 forward the request to the base class.
 adjust ml_* and load configuration files.
@@ -76,10 +76,10 @@ fix @INC.
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'digest_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
@@ -87,16 +87,16 @@ sub prepare
     $curproc->scheduler_init();
 
     unless ($config->yes('use_digest_program')) {
-	LogError("use of digest_program prohibited");
+	$curproc->logerror("use of digest_program prohibited");
 	exit(0);
     }
 
     $eval = $config->get_hook( 'digest_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 set up the mail sender.
 
@@ -110,11 +110,11 @@ set up the mail sender.
 sub verify_request
 {
     my ($curproc, $args) = @_;
-    my $config     = $curproc->{ config };
+    my $config     = $curproc->config();
     my $maintainer = $config->{ maintainer };
 
     my $eval = $config->get_hook( 'digest_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # set sender against further errors
     my $cred = new FML::Credential $curproc;
@@ -122,11 +122,11 @@ sub verify_request
     $curproc->{'credential'}->set( 'sender', $maintainer );
 
     $eval = $config->get_hook( 'digest_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args>)
+=head2 run($args)
 
 Firstly it locks (giant lock) the current process.
 
@@ -148,24 +148,24 @@ Lastly we unlock the current process.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config     = $curproc->{ config };
+    my $config     = $curproc->config();
     my $maintainer = $config->{ maintainer };
     my $sender     = $curproc->{'credential'}->{'sender'};
 
     my $eval = $config->get_hook( 'digest_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->lock();
     unless ($curproc->is_refused()) {
 	$curproc->_digest($args);
     }
     else {
-	LogError("ignore this request.");
+	$curproc->logerror("ignore this request.");
     }
     $curproc->unlock();
 
     $eval = $config->get_hook( 'digest_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -191,7 +191,7 @@ _EOF_
 }
 
 
-=head2 C<finish($args)>
+=head2 finish($args)
 
 Finalize the current process.
 If needed, we send back error messages to the mail sender.
@@ -207,16 +207,16 @@ If needed, we send back error messages to the mail sender.
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'digest_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->inform_reply_messages();
     $curproc->queue_flush();
 
     $eval = $config->get_hook( 'digest_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
 }
 
@@ -248,7 +248,7 @@ sub _digest
 	$digest->set_digest_id($aid);
     }
     else {
-	Log("no articles to send as digest");
+	$curproc->log("no articles to send as digest");
     }
 }
 
@@ -263,7 +263,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

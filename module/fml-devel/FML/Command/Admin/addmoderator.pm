@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: addmoderator.pm,v 1.2 2002/09/11 23:18:06 fukachan Exp $
+# $FML: addmoderator.pm,v 1.8 2003/09/27 03:00:16 fukachan Exp $
 #
 
 package FML::Command::Admin::addmoderator;
@@ -27,7 +27,7 @@ add a new moderator address.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -52,6 +52,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: addmoderator a new user
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
@@ -59,7 +66,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
     my $member_map    = $config->{ primary_moderator_member_map };
     my $recipient_map = $config->{ primary_moderator_recipient_map };
     my $options       = $command_args->{ options };
@@ -90,7 +97,8 @@ sub process
 
 
 # Descriptions: cgi menu to add a new user
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -99,8 +107,8 @@ sub cgi_menu
     my $r = '';
 
     eval q{
-	use FML::CGI::Admin::User;
-	my $obj = new FML::CGI::Admin::User;
+	use FML::CGI::User;
+	my $obj = new FML::CGI::User;
 	$obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {
@@ -109,13 +117,17 @@ sub cgi_menu
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: summary.pm,v 1.10 2002/09/11 23:18:10 fukachan Exp $
+# $FML: summary.pm,v 1.17 2003/10/18 05:07:41 fukachan Exp $
 #
 
 package FML::Command::User::summary;
@@ -19,7 +19,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::User::summary - send back summary file
+FML::Command::User::summary - send back ML's summary file
 
 =head1 SYNOPSIS
 
@@ -31,7 +31,7 @@ send back summary file.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -56,18 +56,25 @@ sub new
 sub need_lock { 1;}
 
 
-# Descriptions: send file by FML::Command::SendFile.
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'article_spool_modify';}
+
+
+# Descriptions: send summary file by FML::Command::SendFile.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config       = $curproc->{ config };
-    my $summary_file = $config->{ "summary_file" };
+    my $config       = $curproc->config();
+    my $article_summary_file = $config->{ "article_summary_file" };
 
-    if (-f $summary_file) {
-	$command_args->{ _filepath_to_send } = $summary_file;
+    if (-f $article_summary_file) {
+	$command_args->{ _filepath_to_send } = $article_summary_file;
 	$self->send_file($curproc, $command_args);
     }
     else {
@@ -80,13 +87,17 @@ sub process
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

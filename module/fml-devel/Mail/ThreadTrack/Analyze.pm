@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Analyze.pm,v 1.18 2001/11/27 11:21:46 fukachan Exp $
+# $FML: Analyze.pm,v 1.33 2003/08/23 04:35:48 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Analyze;
@@ -12,7 +12,9 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-my $debug = defined $ENV{'debug'} ? 1 : 0;
+# XXX-TODO: we should remove not used function ?
+
+my $debug = 0;
 
 =head1 NAME
 
@@ -26,7 +28,7 @@ See C<Mail::ThreadTrack> perl module for more detail.
 
 =head1 METHODS
 
-=head2 C<analyze($mesg)>
+=head2 analyze($mesg)
 
 C<$mesg> is Mail::Message object.
 
@@ -42,7 +44,7 @@ This is top level entrance for
 
 
 # Descriptions: top level entrance
-#    Arguments: $self $msg
+#    Arguments: OBJ($self) OBJ($msg)
 #               $msg = "Mail::Messge object"
 # Side Effects: none
 # Return Value: none
@@ -65,9 +67,9 @@ analyze message given by $msg and assign thread id if needed.
 
 
 # Descriptions: given string looks like subject or not
-#    Arguments: $string
+#    Arguments: STR($subject)
 # Side Effects: none
-# Return Value: 1/0
+# Return Value: 1 or 0
 sub _is_reply
 {
     my ($subject) = @_;
@@ -77,24 +79,26 @@ sub _is_reply
 }
 
 
-# Descriptions: assign a new thread id or 
+# Descriptions: assign a new thread id or
 #               extract the existing thread-id from the subject
-#    Arguments: $self $msg
-#                  $msg = Mail::Message object 
+#    Arguments: OBJ($self) OBJ($msg)
+#                  $msg = Mail::Message object
 # Side Effects: a new thread_id may be assigned
 # Return Value: none
 sub assign
 {
     my ($self, $msg) = @_;
-    my $header   = $msg->rfc822_message_header();
+    my $header   = $msg->whole_message_header();
     my $subject  = $header->get('subject');
     my $is_reply = _is_reply($subject);
 
+    # XXX-TODO: who validate $thread_id regexp
+    # XXX-TODO: since $thread_id is given from outside.
     # 1. try to extract $thread_id from header
     my $thread_id = $self->_extract_thread_id_in_subject($header);
     unless ($thread_id) {
-	# we fail to pick up thread id from subject 
-	# but we try to speculate id from other fields in header.
+	# If we fail to pick up thread id from subject,
+	# we try to speculate id from other fields in header.
 	$thread_id = $self->_speculate_thread_id_from_header($header);
 	if ($thread_id) {
 	    $is_reply = 1; # message already have thread_id, so replied one?
@@ -102,22 +106,22 @@ sub assign
 	    $self->log("speculated id=$thread_id");
 	}
 	else {
-	    $self->log("(debug) fail to spelucate thread_id");
+	    $self->log("(debug) fail to spelucate thread_id") if $debug;
 	}
     }
 
-    # 2. check "X-Thread-Pragma:" field, 
+    # 2. check "X-Thread-Pragma:" field,
     #    we ignore this mail if the pragma is specified as "ignore".
     if (defined $header->get('x-thread-pragma')) {
 	my $pragma = $header->get('x-thread-pragma') || '';
-	if ($pragma =~ /ignore/i) {
+	if ($pragma =~ /ignore/io) {
 	    $self->{ _pragma } = 'ignore';
 	    $self->_append_thread_status_info("ignored");
 	    return undef;
 	}
     }
-    
-    # 3. if the header has some thread_id, 
+
+    # 3. if the header has some thread_id,
     #    we do not rewrite the subject but save the extracted $thread_id.
     if ($is_reply && $thread_id) {
 	$self->log("reply message with thread_id=$thread_id");
@@ -131,11 +135,11 @@ sub assign
 	$self->_append_thread_status_info("found");
     }
     else {
-	$self->log("message without thread_id");
+	$self->log("message without thread_id") if $debug;
 
 	my $id = $self->_assign_new_thread_id_number();
 
-	# side effect: 
+	# side effect:
 	# define $self->{ _thread_subject_tag } and $self->{ _thread_id }
 	my $thread_id = $self->_create_thread_id_strings($id);
 	$self->set_thread_id($thread_id);
@@ -144,10 +148,10 @@ sub assign
 }
 
 
-# Descriptions: 
-#    Arguments: $self
-# Side Effects: 
-# Return Value: number
+# Descriptions: assign new thread_id
+#    Arguments: OBJ($self)
+# Side Effects: increment id
+# Return Value: NUM
 sub _assign_new_thread_id_number
 {
     my ($self) = @_;
@@ -163,15 +167,15 @@ sub _assign_new_thread_id_number
 	$id = $self->increment_id();
     }
 
-    $self->log("assign thread_id=$id");
+    $self->log("assign thread_id=$id") if $debug;
     return $id;
 }
 
 
 # Descriptions: update $self->{ _status_info }
-#    Arguments: $self $str
+#    Arguments: OBJ($self) STR($s)
 # Side Effects: update $self->{ _status_info }
-# Return Value: none
+# Return Value: STR
 sub _append_thread_status_info
 {
     my ($self, $s) = @_;
@@ -181,15 +185,19 @@ sub _append_thread_status_info
 
 =head2 get_thread_status()
 
+get thread status.
+
 =head2 set_thread_status($status)
+
+set thread status.
 
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: get thread status
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub get_thread_status
 {
     my ($self) = @_;
@@ -197,10 +205,10 @@ sub get_thread_status
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: set thread status
+#    Arguments: OBJ($self) STR($thread_status)
+# Side Effects: none
+# Return Value: STR
 sub set_thread_status
 {
     my ($self, $thread_status) = @_;
@@ -211,12 +219,17 @@ sub set_thread_status
 
 =head2 update_thread_status($msg)
 
+ignore this procedure if "ignore" pragma is specified.
+
+update status to "close" if "close" pragma or "close" commmand in the
+message is found.
+
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+# Descriptions: update thread status
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: update database
 # Return Value: none
 sub update_thread_status
 {
@@ -241,14 +254,14 @@ sub update_thread_status
 	}
     }
 
-    my $header  = $msg->rfc822_message_header();
-    my $textmsg = $msg->get_first_plaintext_message();
-    $content    = $textmsg->data_in_body_part() if defined $textmsg;
+    my $header  = $msg->whole_message_header();
+    my $textmsg = $msg->find_first_plaintext_message();
+    $content    = $textmsg->message_text() if defined $textmsg;
     $subject    = $header->get('subject') || '';
     $pragma     = $header->get('x-thread-pragma') || $pragma || '';
 
     if ($pragma  =~ /close/     ||
-	$content =~ /^\s*close/ || 
+	$content =~ /^\s*close/ ||
 	$subject =~ /^\s*close/) {
 	$self->set_thread_status("close");
 	$self->_append_thread_status_info("closed");
@@ -260,6 +273,10 @@ sub update_thread_status
 }
 
 
+# Descriptions: check filter whether this $msg should be ignored or not.
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: none
+# Return Value: 1 or 0
 sub _is_ignore
 {
     my ($self, $msg) = @_;
@@ -267,15 +284,15 @@ sub _is_ignore
     my ($field, $rule);
     my $filterlist = $self->{ _filterlist };
 
-    $header  = $msg->rfc822_message_header();
-    $textmsg = $msg->get_first_plaintext_message();
-    $content = $textmsg->data_in_body_part() if defined $textmsg;
+    $header  = $msg->whole_message_header();
+    $textmsg = $msg->find_first_plaintext_message();
+    $content = $textmsg->message_text() if defined $textmsg;
 
     # check header
     while (($field, $rule) = each %$filterlist) {
 	if (defined $header->get($field)) {
 	    my $value = $header->get($field);
-	    if ($ENV{'debug'}) {
+	    if ($debug) {
 		print STDERR "ignore $field: $value\n" if $value =~ /$rule/m;
 	    }
 	    return 1 if $value =~ /$rule/;
@@ -288,15 +305,19 @@ sub _is_ignore
 
 =head2 get_thread_id()
 
+get thread_id in object ($self->{ _thread_id }).
+
 =head2 set_thread_id($thread_id)
+
+set thread_id in object ($self->{ _thread_id }).
 
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: get thread_id in object ($self->{ _thread_id }).
+#    Arguments: OBJ($self)
+# Side Effects: none.
+# Return Value: STR or UNDEF
 sub get_thread_id
 {
     my ($self) = @_;
@@ -304,10 +325,10 @@ sub get_thread_id
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: set thread_id
+#    Arguments: OBJ($self) STR($thread_id)
+# Side Effects: update $self->{ _thread_id }.
+# Return Value: STR
 sub set_thread_id
 {
     my ($self, $thread_id) = @_;
@@ -318,10 +339,10 @@ sub set_thread_id
 
 # Descriptions: create regexp for a subject tag, for example
 #               "[%s %05d]" => "\[\S+ \d+\]"
-#    Arguments: a subject tag string
+#    Arguments: STR($s)
 #               XXX non OO type function
 # Side Effects: none
-# Return Value: a regexp for the given tag
+# Return Value: STR(a regexp for the given tag)
 sub _regexp_compile
 {
     my ($s) = @_;
@@ -343,14 +364,16 @@ sub _regexp_compile
 
 
 # Descriptions: extract message-id list and return it.
-#    Arguments: $header
+#    Arguments: OBJ($header)
 #               function not OO
 # Side Effects: none
-# Return Value: HASH ARRAY
+# Return Value: ARRAY_HASH
 sub _extract_message_id_references
 {
     my ($header) = @_;
     my (@addrs, @r, %uniq) = ();
+
+    # XXX-TODO: Mail::Message should provide this function ?
 
     use Mail::Address;
 
@@ -364,23 +387,23 @@ sub _extract_message_id_references
 	push(@addrs, Mail::Address->parse($buf));
     }
 
-    for my $addr (@addrs) { 
+    for my $addr (@addrs) {
         my $a = $addr->address;
-        unless ($uniq{ $a }) {
+        unless (defined $uniq{ $a } && $uniq{ $a }) {
 	    # RFC822 says msg-id = "<" addr-spec ">" ; Unique message id
             push(@r, "<".$addr->address.">");
             $uniq{ $a } = 1;
         }
     }
 
-    \@r;
+    return \@r;
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: extract thread_id in Subject:
+#    Arguments: OBJ($self) OBJ($header)
+# Side Effects: none
+# Return Value: STR or 0
 sub _extract_thread_id_in_subject
 {
     my ($self, $header) = @_;
@@ -407,28 +430,35 @@ sub _extract_thread_id_in_subject
 	return $id;
     }
     else {
-	$self->log("no thread id /$regexp/ in subject");
+	$self->log("no thread id /$regexp/ in subject") if $debug;
 	return 0;
     }
 }
 
 
-# For example, consider a posting to both elena ML and rudo (DM) from kenken.
+# Descriptions:
+#               For example, consider a posting to both elena ML and
+#               rudo (DM) from kenken.
 #
-#     From: kenken 
-#     To: elena-ml
-#     Cc: rudo
+#                    From: kenken
+#                    To: elena-ml
+#                    Cc: rudo
 #
-# The reply to this DM (direct message) from rudo is
+#                The reply to this DM (direct message) from rudo is
 #
-#     From: rudo
-#     To: elena-ml
+#                    From: rudo
+#                    To: elena-ml
 #
-# This reply message has no thread_id since the message from kenken to
-# rudo comes directly from kenken not through fml driver.
-# In this case, we try to speculdate the reply relation and the thread_id
-# of this thread by using _speculate_thread_id_from_header().
+#                    This reply message has no thread_id since the
+#                    message from kenken to rudo comes directly from
+#                    kenken not through fml driver.  In this case, we
+#                    try to speculdate the reply relation and the
+#                    thread_id of this thread by using _
+#                    speculate_thread_id_from_header().
 #
+#    Arguments: OBJ($self) OBJ($header)
+# Side Effects: none
+# Return Value: STR(message id)
 sub _speculate_thread_id_from_header
 {
     my ($self, $header) = @_;
@@ -442,7 +472,7 @@ sub _speculate_thread_id_from_header
 	my $rh = $self->{ _hash_table };
 
       MSGID_LIST:
-	for my $mid (@$midlist) { 
+	for my $mid (@$midlist) {
 	    $result = $rh->{ _message_id }->{ $mid };
 	    last MSGID_LIST if $result;
 	}
@@ -450,15 +480,17 @@ sub _speculate_thread_id_from_header
 	$self->db_close();
     }
 
-    $self->log("(debug) not speculated") unless $result;
+    if ($debug) {
+        $self->log("(debug) not speculated") unless $result;
+    }
     $result;
 }
 
 
-# Descriptions: 
-#    Arguments: $self $id_num
+# Descriptions: create thread_id
+#    Arguments: OBJ($self) STR($id)
 # Side Effects: update $self->{ _thread_subject_tag }
-# Return Value: thread_id string
+# Return Value: STR(thread_id string)
 sub _create_thread_id_strings
 {
     my ($self, $id) = @_;
@@ -476,12 +508,14 @@ sub _create_thread_id_strings
 
 =head2 update_db($msg)
 
+update database.
+
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+# Descriptions: top level dispatcher to drive database update
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: update databases
 # Return Value: none
 sub update_db
 {
@@ -507,14 +541,19 @@ sub update_db
 }
 
 
+# Descriptions: speculate unixtime from header
+#    Arguments: OBJ($msg)
+# Side Effects: none
+# Return Value: NUM(unix time)
 sub _speculate_time
 {
     my ($msg) = @_;
-    my $header = $msg->rfc822_message_header;
+    my $header = $msg->whole_message_header;
 
     if (defined $header->get('date')) {
 	use Mail::Message::Date;
-	return Mail::Message::Date::date_to_unixtime($header->get('date'));
+	my $obj = new Mail::Message::Date;
+	return $obj->date_to_unixtime($header->get('date'));
     }
     else {
 	return time;
@@ -522,19 +561,19 @@ sub _speculate_time
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: update database
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: update database
+# Return Value: STR
 sub _update_db
 {
     my ($self, $msg) = @_;
     my $config     = $self->{ _config };
     my $article_id = $config->{ article_id };
     my $thread_id  = $self->get_thread_id();
-    
+
     # 0. logging
-    $self->log("article_id=$article_id thread_id=$thread_id");
+    $self->log("article_id=$article_id thread_id=$thread_id") if $debug;
 
     # prepare hash table tied to db_dir/*db's
     my $rh = $self->{ _hash_table };
@@ -545,13 +584,13 @@ sub _update_db
 	return;
     }
 
-    # 1. 
+    # 1.
     $rh->{ _thread_id }->{ $article_id }  = $thread_id;
     $rh->{ _date      }->{ $article_id }  = _speculate_time($msg);
     $rh->{ _articles  }->{ $thread_id  } .= $article_id . " ";
 
     # 2. record the sender information
-    my $header = $msg->rfc822_message_header;
+    my $header = $msg->whole_message_header;
     $rh->{ _sender }->{ $article_id } = $header->get('from');
 
     # 3. update status information
@@ -570,15 +609,19 @@ sub _update_db
     #    message_id hash is { message_id => thread_id };
     # RFC822 says msg-id =  "<" addr-spec ">" ; Unique message id
     my $mid = $header->get('message-id'); $mid =~ s/[\n\s]*$//;
+    if ($mid eq "") {
+	print STDERR "missing message-id $thread_id\n" if $debug;
+	return;
+    }
     $rh->{ _message_id }->{ $mid } = $thread_id;
 }
 
 
 # Descriptions: register myself to index_db for further reference
 #               among mailing lists
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+#    Arguments: OBJ($self)
+# Side Effects: update object
+# Return Value: STR
 sub _update_index_db
 {
     my ($self) = @_;
@@ -594,20 +637,24 @@ sub _update_index_db
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::ThreadTrack::Analyze appeared in fml5 mailing list driver package.
+Mail::ThreadTrack::Analyze first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

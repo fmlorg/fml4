@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Sequence.pm,v 1.26 2002/09/11 23:18:18 fukachan Exp $
+# $FML: Sequence.pm,v 1.34 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::Sequence;
@@ -61,18 +61,18 @@ As an extension, you can generate a cyclic number by this module.
 Please specify C<modulus> parameter in new() method if you want to get
 a cyclic number.
 
-=head2 C<new($args)>
+=head2 new($args)
 
 $args->{ sequence_file } is the file holding the current sequence
 number.
 $args->{ modulus } is the modulus when you want to get a cyclic
 number.
 
-=head2 C<increment_id([$file])>
+=head2 increment_id([$file])
 
 increment the sequence number.
 
-=head2 C<get_id([$file])>
+=head2 get_id([$file])
 
 get the sequence number from specified C<$file>.
 
@@ -97,7 +97,7 @@ sub new
 # Descriptions: increment the sequence number
 #    Arguments: OBJ($self) [STR($file)]
 #               If $file is not specified,
-#               the sequence_file parameter in new().
+#               use the sequence_file parameter in new().
 # Side Effects: the number holded in $file is incremented
 # Return Value: NUM(sequence number)
 sub increment_id
@@ -127,9 +127,11 @@ sub increment_id
     use IO::Adapter::AtomicFile;
     my ($rh, $wh) = IO::Adapter::AtomicFile->rw_open($seq_file);
 
+    # XXX-TODO: share codes between get_id() and increment_id() .
     # read the current sequence number
     if (defined $rh) {
-	$id = $rh->getline;
+	$id = $rh->getline() || 0;
+	$id =~ s/[\s\r\n]*$//;
 	$rh->close;
     }
     else {
@@ -161,10 +163,10 @@ sub increment_id
 }
 
 
-# Descriptions: get sequence
+# Descriptions: get sequence number.
 #    Arguments: OBJ($self) [STR($file)]
 #               If $file is not specified,
-#               the sequence_file parameter in new().
+#               the sequence_file parameter in new() is used.
 # Side Effects: the number holded in $file is incremented
 # Return Value: NUM(sequence number)
 sub get_id
@@ -202,6 +204,54 @@ sub get_id
 	return 0;
     }
 
+    $id =~ s/[\s\r\n]*$//;
+    return $id;
+}
+
+
+# Descriptions: store sequence number into specified $file
+#    Arguments: OBJ($self) NUM($id) [STR($file)]
+#               If $file is not specified,
+#               the sequence_file parameter in new() is used.
+# Side Effects: create sequence file if not found.
+# Return Value: NUM(sequence number)
+sub set_id
+{
+    my ($self, $id, $file) = @_;
+    my $seq_file = defined $file ? $file : $self->{ _sequence_file };
+
+    unless (defined $seq_file) {
+	$self->error_set("the sequence file is undefined");
+	return 0;
+    };
+
+    unless ($seq_file) {
+	$self->error_set("the sequence file is not specified");
+	return 0;
+    };
+
+    # touch the sequence file if it does not exist.
+    unless (-f $seq_file) {
+	eval q{
+	    use File::Utils qw(touch);
+	    touch($seq_file);
+	};
+    };
+
+    use IO::Adapter::AtomicFile;
+    my ($rh, $wh) = IO::Adapter::AtomicFile->rw_open($seq_file);
+
+    # read the current sequence number
+    if (defined $wh) {
+	print $wh $id, "\n";
+	$wh->close;
+    }
+    else {
+	$self->error_set("cannot open the sequence file");
+	return 0;
+    }
+
+    $id =~ s/[\s\r\n]*$//;
     return $id;
 }
 
@@ -315,14 +365,14 @@ sub _search_max_id_from_top
       PEBOT_SEARCH:
 	while ($pebot > 0) {
 	    last PEBOT_SEARCH if defined $hash->{ $pebot - $unit };
-	    last PEBOT_SEARCH if(($pebot - $unit) <= 0);
+	    last PEBOT_SEARCH if ($pebot - $unit) <= 0;
 	    $pebot -= $unit;
 	}
 
 	# decrement by 1.
 	while(! defined $hash->{ $pebot - 1 }) {
 	    $pebot--;
-	    return 0 if($pebot <= 0);
+	    return 0 if $pebot <= 0;
 	}
 
 	return $pebot;
@@ -334,13 +384,17 @@ sub _search_max_id_from_top
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

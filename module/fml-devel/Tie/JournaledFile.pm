@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: JournaledFile.pm,v 1.22 2002/09/11 23:18:30 fukachan Exp $
+# $FML: JournaledFile.pm,v 1.30 2003/10/15 01:03:41 fukachan Exp $
 #
 
 package Tie::JournaledFile;
@@ -42,18 +42,28 @@ for each line. For example
      .....
 
 By default, FETCH() returns the first value with the key.
+It meas first match.
 
    use Tie::JournaledFile;
-   tie %db, 'Tie::JournaledFile', { first_match => 1, file => 'cache.txt' };
+   tie %db, 'Tie::JournaledFile', {
+       match_condition => "first",
+       file            => 'cache.txt',
+   };
    print $db{ rudo }, "\n";
 
-If you print out the latest value for C<$key>
+If you print out the latest value for C<$key>, specify C<last> by
+match_condition. The value returned is the last matched line with the
+key in the file.
 
-   use Tie::JournaledFile;
-   tie %db, 'Tie::JournaledFile', { last_match => 1, file => 'cache.txt' };
-   print $db{ rudo }, "\n";
+=head2 WHEN YOU USE "FIRST MATCH" ?
 
-It is the value at the latest line with the key in the file.
+From the view of journalized data, the last written data is valid, so
+"last match" condition is fundamental. When "first match" condition
+can be used ?
+
+The first match is meaningfull only when you need to check the
+existence of the primary key regardless of the vlaue.
+
 
 =head2 KNOWN BUG
 
@@ -74,7 +84,7 @@ my $debug = 0;
 
 # Descriptions: constructor
 #    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: import _match_style into $self
+# Side Effects: import _match_condition into $self
 # Return Value: OBJ
 sub new
 {
@@ -82,20 +92,16 @@ sub new
     my ($type) = ref($self) || $self;
     my $me     = {};
 
-    $me->{ _file } = $args->{ file };
+    $me->{ _file }            = $args->{ file };
+    $me->{ _match_condition } = 'last'; # "last match" by default.
 
-    # define search strategy: first or last match
-    if (defined $args->{ 'first_match' } && defined $args->{ 'last_match' }) {
-	croak "both first_match and last_match specified\n";
-    }
-    elsif (defined $args->{ 'first_match' }) {
-	$me->{ '_match_style' } = 'first';
-    }
-    elsif (defined $args->{ 'last_match' }) {
-	$me->{ '_match_style' } = 'last';
-    }
-    else {
-	$me->{ '_match_style' } = 'first';
+    # define search strategy: first or last match.
+    if (defined $args->{ 'match_condition' }) {
+	my $condition = $args->{ 'match_condition' } || 'last';
+
+	if ($condition eq 'first' || $condition eq 'last') {
+	    $me->{ '_match_condition' } = $condition;
+	}
     }
 
     return bless $me, $type;
@@ -109,7 +115,7 @@ sub new
 sub TIEHASH
 {
     my ($self, $args) = @_;
-    $args->{ 'last_match' } = 1;
+    $args->{ 'match_condition' } = 'last';
 
     new($self, $args);
 }
@@ -141,7 +147,7 @@ sub STORE
 
 # Descriptions: op for keys() and each()
 #    Arguments: OBJ($self)
-# Side Effects: none
+# Side Effects: initialize $self->{ _hash }.
 # Return Value: ARRAY(STR, STR)
 sub FIRSTKEY
 {
@@ -152,9 +158,11 @@ sub FIRSTKEY
     use IO::File;
     my $fh = new IO::File $file;
     if (defined $fh) {
-	my ($k, $v);
-	while (<$fh>) {
-	    ($k, $v) = split(/\s+/, $_, 2);
+	my ($k, $v, $buf);
+
+	while ($buf = <$fh>) {
+	    # XXX always overwritten. it means "last match" condition.
+	    ($k, $v) = split(/\s+/, $buf, 2);
 	    $hash->{ $k } = $v if $k;
 	}
 	$fh->close();
@@ -215,21 +223,23 @@ which is by default.
 sub get_all_values_as_hash_ref
 {
     my ($self) = @_;
+    my $file   = $self->{ '_file' };
     my $hash   = {};
 
     use IO::File;
     my $fh = new IO::File;
-    $self->{ _fh } = $fh;
 
-    if (-f $self->{ '_file' }) {
-	$fh->open($self->{ '_file' }, "r");
+    if (-f $file && defined $fh) {
+	$fh->open($file, "r");
 
 	if (defined $fh) {
-	    my ($a, $k, $v);
-	    while (<$fh>) {
-		chomp;
+	    $self->{ _fh } = $fh;
 
-		($k, $v) = split(/\s+/, $_, 2);
+	    my ($a, $k, $v, $buf);
+	    while ($buf = <$fh>) {
+		chomp $buf;
+
+		($k, $v) = split(/\s+/, $buf, 2);
 
 		if (defined $hash->{ $k }) {
 		    $a = $hash->{ $k };
@@ -242,6 +252,9 @@ sub get_all_values_as_hash_ref
 		$hash->{ $k } = $a;
 	    }
 	    $fh->close();
+	}
+	else {
+	    $self->{ _fh } = undef;
 	}
 
 	return $hash;
@@ -256,15 +269,15 @@ sub get_all_values_as_hash_ref
 
 return the array of line(s) with the specified C<key>.
 
-The line is either first or last mached line.
-The maching strategy is determined by C<last_match> or C<first_match>
-parameter at C<new()> method. C<first_match> by default.
+The line is either first or last mached line. The maching strategy is
+determined by C<match_condition> parameter at C<new()>
+method. C<last match> by default.
 
 =cut
 
 
 # Descriptions: return the array of line(s) with the specified key.
-#    Arguments: OBJ($self) STR($key)
+#    Arguments: OBJ($self) STR($key) STR($mode)
 # Side Effects: none
 # Return Value: ARRAY_REF
 sub find
@@ -277,7 +290,7 @@ sub find
 # Descriptions: real function to search $key.
 #               This routine is used at find() and FETCH() methods.
 #               return the value with the $key
-#               $self->{ '_match_style' } conrolls the matching algorithm
+#               $self->{ '_match_condition' } conrolls the matching algorithm
 #               is either of the fist or last match.
 #    Arguments: OBJ($self) STR($key) STR($mode)
 #               $key is the string to search.
@@ -302,17 +315,18 @@ sub _fetch
 
     # o.k. we open cache file, here we go for searching
     my ($xkey, $xvalue, $value, @values) = ();
+    my $buf;
 
   SEARCH:
-    while (<$fh>) {
-	next SEARCH if /^\#*$/;
-	next SEARCH if /^\s*$/;
-	next SEARCH unless /^$prekey/i;
-	next SEARCH unless /^$keytrap/i;
+    while ($buf = <$fh>) {
+	next SEARCH if $buf =~ /^\#*$/o;
+	next SEARCH if $buf =~ /^\s*$/o;
+	next SEARCH unless $buf =~ /^$prekey/i;
+	next SEARCH unless $buf =~ /^$keytrap/i;
 
-	chomp;
+	chomp $buf;
 
-	($xkey, $xvalue) = split(/\s+/, $_, 2);
+	($xkey, $xvalue) = split(/\s+/, $buf, 2);
 	if ($xkey eq $key) {
 	    $value = $xvalue; # save the value for $key
 
@@ -321,7 +335,7 @@ sub _fetch
 	    }
 	    if ($mode eq 'scalar') {
 		# firstmatch: exit loop ASAP if the $key is found.
-		if ($self->{ '_match_style' } eq 'first') {
+		if ($self->{ '_match_condition' } eq 'first') {
 		    last SEARCH;
 		}
 	    }
@@ -371,21 +385,22 @@ sub _puts
     if (defined $fh) {
 	$fh->open($file, "a");
 
-	use Time::localtime;
-	my $date = ctime(time);
 	if (defined $string) {
 	    $fh->print($string);
 	    $fh->print("\n") unless $string =~ /\n$/;
 	}
+
 	$fh->close;
-	return 1;
     }
     else {
-	use Carp;
 	croak "cannot open cache file $file\n";
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -393,7 +408,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

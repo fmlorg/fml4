@@ -1,16 +1,16 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Addr.pm,v 1.2 2002/11/10 14:50:19 fukachan Exp $
+# $FML: Addr.pm,v 1.11 2003/08/29 15:34:06 fukachan Exp $
 #
 
 package FML::Process::Addr;
 
-use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 use strict;
 use Carp;
+use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 
 use FML::Log qw(Log LogWarn LogError);
 use FML::Config;
@@ -20,7 +20,7 @@ use FML::Process::Kernel;
 
 =head1 NAME
 
-FML::Process::Addr -- fmladdr main functions
+FML::Process::Addr -- fmladdr, which show all aliases (accounts + aliases).
 
 =head1 SYNOPSIS
 
@@ -32,16 +32,23 @@ FML::Process::Addr -- fmladdr main functions
 
 FML::Process::Addr provides the main function for C<fmladdr>.
 
+C<fmladdr> command shows all aliases (accounts + aliases) but
+C<fmlalias> command shows only aliases without accounts.
+
 See C<FML::Process::Flow> for the flow detail.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 constructor.
 It make a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
+
+load config files and fix @INC.
+
+=head2 verify_request($args)
 
 dummy.
 
@@ -61,24 +68,24 @@ sub new
 }
 
 
-# Descriptions: dummy
+# Descriptions: load config files and fix @INC.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmladdr_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -92,10 +99,10 @@ sub verify_request
     my ($curproc, $args) = @_;
     my $argv = $curproc->command_line_argv();
     my $len  = $#$argv + 1;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     if (0) {
 	print STDERR "Error: missing argument(s)\n";
@@ -104,18 +111,15 @@ sub verify_request
     }
 
     $eval = $config->get_hook( 'fmladdr_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
-the top level dispatcher for C<fmlconf> and C<fmladdr>.
+the top level dispatcher for C<fmladdr>.
 
-It kicks off internal function
-C<_fmlconf($args)> for C<fmlconf>
-    and
-C<_fmladdr($args)> for fmladdr.
+It kicks off C<_fmladdr($args)> for fmladdr.
 
 NOTE:
 C<$args> is passed from parrent libexec/loader.
@@ -131,7 +135,7 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $myname  = $curproc->myname();
     my $argv    = $curproc->command_line_argv();
 
@@ -146,13 +150,13 @@ sub run
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $eval = $config->get_hook( 'fmladdr_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -177,45 +181,42 @@ sub help
 
 print <<"_EOF_";
 
-Usage: $name \$command \$ml_name [options]
+Usage: $name [options]
+
+-n   show fml specific aliases.
+
+[BUGS]
+	support only fml8 + postfix case.
+	also, we assume /etc/passwd exists.
 
 _EOF_
 }
 
 
-=head2 C<_fmladdr($args)> (INTERNAL USE)
+=head2 _fmladdr($args)
 
-switch of C<fmladdr> command.
-It kicks off <FML::Command::$command> corrsponding with
-C<@$argv> ( $argv = $args->{ ARGV } ).
-
-C<Caution:>
-C<$args> is passed from parrent libexec/loader.
-We construct a new struct C<$command_args> here to pass parameters
-to child objects.
-C<FML::Command::$command> object takes them as arguments not pure
-C<$args>. It is a little mess. Pay attention.
+show all aliases (accounts + aliases).
+show only accounts if -n option specified.
 
 See <FML::Process::Switch()> on C<$args> for more details.
 
 =cut
 
 
-# Descriptions: fmladdr top level dispacher
+# Descriptions: show all aliases (accounts + aliases).
+#               show only accounts if -n option specified.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: load FML::Command::command module and execute it.
 # Return Value: none
 sub _fmladdr
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
-    my $myname  = $curproc->myname();
-    my $argv    = $curproc->command_line_argv();
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    # -n
+    # show only accounts if -n option specified.
     my $mode = $args->{ options }->{ n } ? 'fmlonly' : 'all';
 
     use FML::MTAControl;
@@ -225,21 +226,14 @@ sub _fmladdr
 	mode     => $mode,
     });
 
-    # read addresses from password file
-    if (-f "/etc/passwd") {
-	use FileHandle;
-	my $fh = new FileHandle "/etc/passwd";
-	if (defined $fh) {
-	    my ($user);
-	    while (<$fh>) {
-		($user) = split(/:/, $_);
+    use FML::Sys::User;
+    my $sys  = new FML::Sys::User $curproc;
+    my $list = $sys->get_user_list();
 
-		# which definition survives ? alias > user ?
-		unless (defined $aliases->{ $user }) {
-		    $aliases->{ $user } = "$user (LOCAL USER)";
-		}
-	    }
-	    close($fh);
+    for my $user (keys %$list) {
+	# which definition survives ? alias > user ?
+	unless (defined $aliases->{ $user }) {
+	    $aliases->{ $user } = "$user (LOCAL USER)";
 	}
     }
 
@@ -248,7 +242,7 @@ sub _fmladdr
     }
 
     $eval = $config->get_hook( 'fmladdr_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -262,7 +256,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

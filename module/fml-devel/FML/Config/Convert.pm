@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Convert.pm,v 1.10 2002/09/11 23:18:11 fukachan Exp $
+# $FML: Convert.pm,v 1.16 2003/04/19 06:13:01 fukachan Exp $
 #
 
 
@@ -24,8 +24,6 @@ FML::Config::Convert -- variable expansion for __variable__
     my $out = new FileHandle "> $dst.$$";
 
     if (defined $in && defined $out) {
-        chmod 0644, "$dst.$$";
-
         &FML::Config::Convert::convert($in, $out, $config);
 
         $out->close();
@@ -54,7 +52,7 @@ Specify HASH_REF $config as real value.
 =cut
 
 
-# Descriptions: conversion filter.
+# Descriptions: conversion filter for file handles.
 #    Arguments: HANDLE($in) HANDLE($out) HASH_REF($config)
 # Side Effects: print out to handle $out
 # Return Value: none
@@ -63,9 +61,10 @@ sub convert
    my ($in, $out, $config) = @_;
 
    if (defined $in && defined $out && defined $config) {
-       while (<$in>) {
-	   $_ = _replace($_, $config) if /__/;
-	   print $out $_;
+       my $buf;
+       while ($buf = <$in>) {
+	   $buf = _replace($buf, $config) if $buf =~ /__/;
+	   print $out $buf;
        }
    }
    else {
@@ -74,7 +73,7 @@ sub convert
 }
 
 
-# Descriptions: conversion filter.
+# Descriptions: conversion filter for files.
 #    Arguments: STR($src) STR($dst) HASH_REF($config)
 # Side Effects: print out to file $out
 # Return Value: none
@@ -88,7 +87,9 @@ sub convert_file
    my $out = new FileHandle "> " . $dst_tmp;
 
     if (defined $in && defined $out) {
-	chmod 0644, $dst_tmp;
+	use File::stat;
+	my $stat = stat($src);
+	my $mode = $stat->mode;
 
 	eval q{ convert($in, $out, $config);};
 	croak($@) if $@;
@@ -96,6 +97,7 @@ sub convert_file
 	$out->close();
 	$in->close();
 
+	chmod $mode, $dst_tmp;
 	rename($dst_tmp, $dst) || croak("fail to rename $dst");
     }
     else {
@@ -129,6 +131,26 @@ sub _replace
 	$buf =~ s/__ml_name__/$config->{ ml_name }/g;
     }
 
+    if (defined $config->{ _ml_name_admin }) {
+	$buf =~ s/__ml_name_admin__/$config->{ _ml_name_admin }/g;
+    }
+
+    if (defined $config->{ _ml_name_ctl }) {
+	$buf =~ s/__ml_name_ctl__/$config->{ _ml_name_ctl }/g;
+    }
+
+    if (defined $config->{ _ml_name_error }) {
+	$buf =~ s/__ml_name_error__/$config->{ _ml_name_error }/g;
+    }
+
+    if (defined $config->{ _ml_name_post }) {
+	$buf =~ s/__ml_name_post__/$config->{ _ml_name_post }/g;
+    }
+
+    if (defined $config->{ _ml_name_request }) {
+	$buf =~ s/__ml_name_request__/$config->{ _ml_name_request }/g;
+    }
+
     if (defined $config->{ ml_domain }) {
 	$buf =~ s/__ml_domain__/$config->{ ml_domain }/g;
     }
@@ -153,13 +175,17 @@ sub _replace
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Cache.pm,v 1.4 2002/09/11 23:18:11 fukachan Exp $
+# $FML: Cache.pm,v 1.15 2003/10/15 01:03:31 fukachan Exp $
 #
 
 package FML::Error::Cache;
@@ -15,27 +15,30 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Error::Cache - manipulate error/bounce infomation
+FML::Error::Cache - manipulate error/bounce information database.
 
 =head1 SYNOPSIS
 
 	use FML::Error::Cache;
-	my $error = new FML::Error::Cache $curproc;
-	$error->cache_on( $bounce_info );
+	my $db = new FML::Error::Cache $curproc;
+	$db->add( $bounce_info );
 
 where C<$bounce_info) follows:
 
-    $bounce_info = [ { address => 'rudo@nuinui.net',
-		       status  => '5.x.y',
-		       reason  => '... reason ... ',
-		   }
+    $bounce_info = [
+            {
+		address => 'rudo@nuinui.net',
+		status  => '5.x.y',
+		reason  => '... reason ... ',
+	    },
+                  ...
     ];
 
 =head1 DESCRIPTION
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 =cut
 
@@ -49,47 +52,160 @@ sub new
     my ($self, $curproc) = @_;
     my ($type) = ref($self) || $self;
     my $me     = { _curproc => $curproc };
+    my $config = $curproc->config();
+    my $db_dir = $config->{ error_analyzer_cache_dir };
+
+    unless (-d $db_dir) {
+	$curproc->mkdir($db_dir, "mode=private");
+    }
+
     return bless $me, $type;
 }
 
 
-# Descriptions: save bounce info into cache.
-#    Arguments: OBJ($self) HASH_REF($info)
+=head2 open()
+
+dummy.
+
+=head2 close()
+
+dummy.
+
+=head2 touch()
+
+dummy.
+
+=cut
+
+
+# Descriptions: none
+#    Arguments: none
+# Side Effects: none
+# Return Value: none
+sub open  { 1;}
+
+# Descriptions: none
+#    Arguments: none
+# Side Effects: none
+# Return Value: none
+sub close { 1;}
+
+# Descriptions: none
+#    Arguments: none
+# Side Effects: none
+# Return Value: none
+sub touch { 1;}
+
+
+=head2 add($address, $argv)
+
+add data given as hash reference $argv.
+
+    $argv = {
+	address => STR,
+	reason  => STR,
+	status  => STR,
+    };
+
+C<Tie::JournaledDir> is a simple hash, so $argv is converted to the
+following a set of key ($address) and value.
+
+     $address => "$unixtime status=$status reason=$reason"
+
+=cut
+
+
+# Descriptions: add bounce info into cache.
+#    Arguments: OBJ($self) STR($address) HASH_REF($argv)
 # Side Effects: update cache
 # Return Value: none
 sub add
 {
-    my ($self, $info) = @_;
+    my ($self, $address, $argv) = @_;
+    my $curproc = $self->{ _curproc };
 
     $self->_open_cache();
 
     my $db = $self->{ _db };
     if (defined $db) {
-	my ($address, $reason, $status);
+	my ($reason, $status);
 	my $unixtime = time;
 
-	$address = $info->{ address };
-	$reason  = $info->{ reason } || 'unknown';
-	$status  = $info->{ status } || 'unknown';
-
-	if ($address) {
+	if (ref($argv) eq 'HASH') {
+	    $reason = $argv->{ reason } || 'unknown';
+	    $status = $argv->{ status } || 'unknown';
 	    $status =~ s/\s+/_/g;
 	    $reason =~ s/\s+/_/g;
+	}
+	else {
+	    $curproc->logerror("FML::Error::Cache: add: not implemented \$argv type");
+	    return undef;
+	}
+
+	if ($address) {
 	    $db->{ $address } = "$unixtime status=$status reason=$reason";
 	}
 	else {
-	    LogWarn("Error::Cache: cache_on: invalid data");
+	    $curproc->logwarn("FML::Error::Cache: add: invalid data");
 	}
 
 	$self->_close_cache();
     }
     else {
-	croak("add_to_cache: unknown data input type");
+	croak("FML::Error::Cache: add: unknown data input type");
     }
 }
 
 
-# Descriptions: open the cache dir for File::CacheDir
+=head2 delete($address)
+
+delete entry for $address.
+
+=cut
+
+
+# Descriptions: delete entry for $address.
+#    Arguments: OBJ($self) STR($address)
+# Side Effects: update cache
+# Return Value: none
+sub delete
+{
+    my ($self, $address) = @_;
+    my $curproc = $self->{ _curproc };
+
+    $self->_open_cache();
+
+    my $db = $self->{ _db };
+    if (defined $db) {
+	if ($address) {
+	    delete $db->{ $address };
+	}
+	else {
+	    $curproc->logwarn("FML::Error::Cache: delete: invalid data");
+	}
+
+	$self->_close_cache();
+    }
+    else {
+	croak("FML::Error::Cache: delete: unknown data input type");
+    }
+}
+
+
+=head1 CACHE IO MANIPULATION
+
+You need to use primitive methods this class provides for IO into/from
+error data cache.
+
+C<Tie::JournaledDir> is a simple hash, so $argv is converted to the
+following a set of key ($address) and value.
+
+     $address => "$unixtime status=$status reason=$reason"
+
+=cut
+
+
+# Descriptions: open the cache database for File::CacheDir.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
@@ -97,7 +213,7 @@ sub _open_cache
 {
     my ($self) = @_;
     my $curproc = $self->{ _curproc };
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $type    = $config->{ error_analyzer_cache_type };
     my $dir     = $config->{ error_analyzer_cache_dir  };
     my $mode    = $config->{ error_analyzer_cache_mode } || 'temporal';
@@ -112,7 +228,7 @@ sub _open_cache
 }
 
 
-# Descriptions: dummy
+# Descriptions: destruct tied hash.
 #    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: none
@@ -127,13 +243,26 @@ sub _close_cache
 }
 
 
-sub get_addr_list
+=head1 UTILITY FUNCTIONS
+
+=head2 get_primary_keys()
+
+return primary keys in cache as ARRAY_REF.
+
+=cut
+
+
+# Descriptions: return (primary) key list in cache database.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub get_primary_keys
 {
     my ($self) = @_;
 
     $self->_open_cache();
-    my $db = $self->{ _db };
 
+    my $db   = $self->{ _db };
     my @addr = keys %$db;
 
     $self->_close_cache();
@@ -142,28 +271,20 @@ sub get_addr_list
 }
 
 
-sub _new
-{
-    my ($self) = @_;
-    my $curproc = $self->{ _curproc };
-    my $config  = $curproc->{ config };
-    my $type    = $config->{ error_analyzer_cache_type };
-    my $dir     = $config->{ error_analyzer_cache_dir  };
-    my $mode    = $config->{ error_analyzer_cache_mode } || 'temporal';
-    my $days    = $config->{ error_analyzer_cache_size } || 14;
-
-    use Tie::JournaledDir;
-    return new Tie::JournaledDir { dir => $dir };
-}
-
-
-
+# Descriptions: get all values as HASH_REF.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: HASH_REF
 sub get_all_values_as_hash_ref
 {
     my ($self) = @_;
-    my $obj = $self->_new();
+    my $curproc = $self->{ _curproc };
+    my $config  = $curproc->config();
+    my $dir     = $config->{ error_analyzer_cache_dir  };
 
-    $obj->get_all_values_as_hash_ref();
+    use Tie::JournaledDir;
+    my $obj = new Tie::JournaledDir { dir => $dir };
+    return $obj->get_all_values_as_hash_ref();
 }
 
 
@@ -177,7 +298,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

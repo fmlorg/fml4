@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Header.pm,v 1.1 2002/09/30 11:00:54 fukachan Exp $
+# $FML: Header.pm,v 1.5 2003/08/23 04:35:35 fukachan Exp $
 #
 
 package FML::Filter::Header;
@@ -22,14 +22,14 @@ FML::Filter::Header - filter based on mail header content
 
 =head1 DESCRIPTION
 
-C<FML::Filter::Header> is a collectoin of filter rules based on
-mail header content.
+C<FML::Filter::Header> is the collectoin of filter rules based on mail
+header content.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
-usual constructor.
+constructor.
 
 =cut
 
@@ -37,6 +37,7 @@ usual constructor.
 my $debug = 0;
 
 
+# XXX-TODO: need this default rules here ? (principle of least surprise?)
 my (@default_rules) = qw(check_message_id);
 
 
@@ -58,7 +59,7 @@ sub new
 
 
 
-=head2 C<rules( $rules )>
+=head2 rules( $rules )
 
 overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 
@@ -76,7 +77,7 @@ sub rules
 }
 
 
-=head2 C<header_check($msg, $args)>
+=head2 header_check($msg, $args)
 
 C<$msg> is C<Mail::Message> object.
 
@@ -122,7 +123,7 @@ sub header_check
 }
 
 
-=head1 RULES
+=head1 FILTER RULES
 
 =cut
 
@@ -142,6 +143,20 @@ sub check_message_id
     }
 }
 
+# Descriptions: validate the date in the given message $msg.
+#               This routine checks missing date field
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+# Side Effects: croak()
+# Return Value: none
+sub check_date
+{
+    my ($self, $msg, $args) = @_;
+
+    if (! $msg->get('date')) {
+	croak( "Missing Date: field" );
+    }
+}
+
 
 =head1 CODING STYLE
 
@@ -153,7 +168,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

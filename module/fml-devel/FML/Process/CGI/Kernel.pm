@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Kernel.pm,v 1.43 2002/09/11 23:18:17 fukachan Exp $
+# $FML: Kernel.pm,v 1.66 2003/11/02 05:12:37 fukachan Exp $
 #
 
 package FML::Process::CGI::Kernel;
@@ -18,7 +18,8 @@ use CGI qw/:standard/;
 
 use FML::Log qw(Log LogWarn LogError);
 use FML::Process::Kernel;
-@ISA = qw(FML::Process::Kernel);
+use FML::Process::CGI::Utils;
+@ISA = qw(FML::Process::CGI::Utils FML::Process::Kernel);
 
 
 =head1 NAME
@@ -41,7 +42,7 @@ It provides basic functions and flow.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 ordinary constructor which is used widely in FML::Process classes.
 
@@ -70,32 +71,96 @@ sub new
 }
 
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 print HTTP header.
 The charset is C<euc-jp> by default.
+
+adjust ml_*, load config files and fix @INC.
 
 =cut
 
 
 # Descriptions: print html header.
 #               analyze cgi data to determine ml_name et.al.
+#               adjust ml_*, load config files and fix @INC.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config    = $curproc->{ config };
-    my $charset   = $config->{ cgi_charset } || 'euc-jp';
 
     $curproc->_cgi_resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
+    # modified for admin/*.cgi
+    unless ($curproc->cgi_var_ml_name()) {
+	$curproc->_cgi_fix_log_file();
+    }
+
+    # fix charset 
+    $curproc->_set_charset();
+
+    my $charset = $curproc->get_charset("cgi"); # updated charset.
     print header(-type    => "text/html; charset=$charset",
 		 -charset => $charset,
 		 -target  => "_top");
+}
+
+
+# Descriptions: update the current charset
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: none
+sub _set_charset
+{
+    my ($curproc) = @_;
+    my $lang = 
+	$curproc->cgi_var_language() || $curproc->_http_accept_language();
+
+    use Mail::Message::Charset;
+    my $obj     = new Mail::Message::Charset;
+    my $charset = $obj->language_to_internal_charset($lang);
+
+    if ($charset) {
+	$curproc->set_charset("template_file", $charset);
+    }
+    else {
+	my $default = $obj->internal_default_charset();
+	$curproc->set_charset("template_file", $default);
+    }
+}
+
+
+# Descriptions: speculate default language preferred by user browser.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: STR
+sub _http_accept_language
+{
+    my ($curproc) = @_;
+    my $r = '';
+
+    if ($ENV{'HTTP_ACCEPT_LANGUAGE'}) {
+	my $buf = $ENV{'HTTP_ACCEPT_LANGUAGE'};
+
+      LANG:
+	for my $lang (split(/\s*,\s*/, $buf)) {
+	    $lang =~ s/\s*;.*$//;
+	    if ($lang =~ /^ja/) {
+		$r = 'ja';
+		last LANG;
+	    }
+	    elsif ($lang =~ /^en/) {
+		$r = 'en';
+		last LANG;
+	    }
+	}
+    }
+
+    return $r;
 }
 
 
@@ -106,27 +171,19 @@ sub prepare
 sub _cgi_resolve_ml_specific_variables
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
-    my ($ml_home_dir, $config_cf);
+    my $config         = $curproc->config();
+    my $ml_name        = $curproc->cgi_var_ml_name();
+    my $ml_domain      = $curproc->cgi_var_ml_domain();
+    my $ml_home_prefix = $curproc->cgi_var_ml_home_prefix();
 
-    # inherit ml_domain from $hints
-    # which is defined/hard-coded in *.cgi (libexec/loader) script.
-    my $hints          = $curproc->hints();
-    my $ml_domain      = $hints->{ ml_domain };
-    my $ml_home_prefix = $curproc->ml_home_prefix( $ml_domain );
-
-    # cheap sanity
+    # cheap sanity 1.
     unless ($ml_home_prefix) {
 	my $r = "ml_home_prefix undefined";
 	croak("__ERROR_cgi.fail_to_get_ml_home_prefix__: $r");
     }
 
-    # reset
-    $config->set('ml_domain',      $ml_domain);
-    $config->set('ml_home_prefix', $ml_home_prefix);
-
-    # speculate ml_name, which is not used in some cases.
-    my $ml_name = $curproc->safe_param_ml_name() || do {
+    # cheap sanity 2.
+    unless ($ml_name) {
 	my $is_need_ml_name = $args->{ 'need_ml_name' };
 	if ($is_need_ml_name) {
 	    my $r = "fail to get ml_name from HTTP";
@@ -134,29 +191,51 @@ sub _cgi_resolve_ml_specific_variables
 	}
     };
 
+    # reset $ml_domain and $ml_home_prefix.
+    $config->set('ml_domain',      $ml_domain);
+    $config->set('ml_home_prefix', $ml_home_prefix);
+
     # speculate $ml_home_dir when $ml_name is determined.
     if ($ml_name) {
 	use File::Spec;
-	$ml_home_dir = $curproc->ml_home_dir($ml_name, $ml_domain);
+	my $ml_home_dir = $curproc->ml_home_dir($ml_name, $ml_domain);
+	my $config_cf   = $curproc->config_cf_filepath($ml_name, $ml_domain);
 
 	$config->set('ml_name',     $ml_name);
 	$config->set('ml_home_dir', $ml_home_dir);
 
 	# fix $args { cf_list, ml_home_dir };
-	$config_cf = File::Spec->catfile($ml_home_dir, 'config.cf');
 	my $cflist = $args->{ cf_list };
 	push(@$cflist, $config_cf);
+    }
+    else {
+	$curproc->log("debug: no ml_name, overwrite ml_home_dir,log_file");
     }
 
     $curproc->__debug_ml_xxx('cgi:');
 }
 
 
-=head2 C<verify_request()>
+# Descriptions: fix logging system for admin/*.cgi
+#    Arguments: OBJ($curproc)
+# Side Effects: update variables.
+# Return Value: none
+sub _cgi_fix_log_file
+{
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
+
+    $config->set('ml_home_dir', $config->{ domain_local_tmp_dir  });
+    $config->set('log_file',    $config->{ domain_local_log_file });
+    $curproc->log("debug: log_file = $config->{ log_file }");
+}
+
+
+=head2 verify_request()
 
 dummy method now.
 
-=head2 C<finish()>
+=head2 finish()
 
 dummy method now.
 
@@ -175,7 +254,7 @@ sub verify_request { 1;}
 sub finish { 1;}
 
 
-=head2 C<run()>
+=head2 run()
 
 dispatch *.cgi programs.
 
@@ -219,7 +298,7 @@ sub run
 
 
 # Descriptions: show error string
-#    Arguments: STR($r)
+#    Arguments: OBJ($curproc) STR($r)
 # Side Effects: none
 # Return Value: none
 sub _error_string
@@ -242,9 +321,9 @@ sub _error_string
 
     eval q{
 	use FML::Log qw(Log LogError);
-	LogError($r);
+	$curproc->logerror($r);
 	my ($k, $v);
-	while (($k, $v) = each %ENV) { Log("$k => $v");}
+	while (($k, $v) = each %ENV) { $curproc->log("$k => $v");}
     };
 }
 
@@ -258,6 +337,7 @@ sub _drive_cgi_by_table
     my ($curproc, $args) = @_;
     my $r = '';
 
+    # XXX-TODO: hmm, customisable by /etc/fml/cgi.conf ?
     #
     #   nw   north  ne
     #   west center east
@@ -344,8 +424,9 @@ sub cgi_execute_command
     my $config  = $curproc->config();
 
     unless ($config->has_attribute("commands_for_admin_cgi", $comname)) {
-	LogError("cgi deny command: mode=$commode level=cgi");
+	$curproc->logerror("cgi deny command: mode=$commode level=cgi");
 
+	# XXX-TODO: validate $comname (CSS).
 	my $buf = $curproc->message_nl("cgi.deny",
 				       "Error: deny $comname command");
 	print $buf, "<BR>\n";
@@ -353,7 +434,7 @@ sub cgi_execute_command
 	return;
     }
     else {
-	Log("run $comname mode=$commode level=cgi");
+	$curproc->log("run $comname mode=$commode level=cgi");
     }
 
     use FML::Command;
@@ -364,6 +445,7 @@ sub cgi_execute_command
 	    $obj->$comname($curproc, $command_args);
 	};
 	unless ($@) {
+	    # XXX-TODO: validate $comname (CSS).
 	    print "OK! $comname succeed.\n";
 	}
 	else {
@@ -373,6 +455,7 @@ sub cgi_execute_command
 		my ($key, $r) = $curproc->parse_exception($reason);
 		my $buf       = $curproc->message_nl($key);
 
+		# XXX-TODO: validate output.
 		print "<BR>\n";
 		print ($buf || $reason);
 		print "<BR>\n";
@@ -396,15 +479,20 @@ show title.
 sub run_cgi_title
 {
     my ($curproc, $args) = @_;
-    my $myname  = $curproc->myname();
-    my $domain  = $curproc->ml_domain();
-    my $ml_name = $curproc->safe_param_ml_name();
-    my $role    = '';
-    my $title   = '';
+    my $myname    = $curproc->cgi_var_myname();
+    my $ml_domain = $curproc->cgi_var_ml_domain();
+    my $ml_name   = $curproc->cgi_var_ml_name();
+    my $role      = '';
+    my $title     = '';
 
-    $role  = "for thread view"   if $myname =~ /thread/;
-    $role  = "for configuration" if $myname =~ /config|menu/;
-    $title = "${ml_name}\@${domain} CGI $role";
+    if ($myname =~ /thread/) {
+	$role  = "for thread view";
+    }
+    elsif ($myname =~ /config|menu/) {
+	$role  = $curproc->message_nl('term.config_interface');
+    }
+
+    $title = "${ml_name}\@${ml_domain} CGI $role";
     print $title;
 }
 
@@ -423,14 +511,30 @@ help.
 sub run_cgi_help
 {
     my ($curproc, $args) = @_;
-    my $domain = $curproc->ml_domain();
+    my $ml_name   = $curproc->cgi_var_ml_name();
+    my $ml_domain = $curproc->cgi_var_ml_domain();
+    my $mode      = $curproc->cgi_var_cgi_mode();
+    my $role      = $curproc->message_nl('term.config_interface');
+    my $msg_args  = $curproc->_gen_msg_args();
 
-    print "<B>\n";
-    print "<CENTER>fml CGI interface for \@$domain ML's</CENTER><BR>\n";
-    print "</B>\n";
+    print "<B>\n<CENTER>\n";
+    if ($mode eq 'admin') {
+	print "fml CGI $role for \@$ml_domain ML's\n";
+    }
+    else {
+	print "fml CGI $role for $ml_name\@$ml_domain ML\n";
+    }
+    print "</CENTER><BR>\n</B>\n";
 
     # top level help message
-    my $buf = $curproc->message_nl("cgi.top");
+    my $buf  = '';
+    if ($mode eq 'admin') {
+	$buf = $curproc->message_nl("cgi.admin.top", "", $msg_args);
+    }
+    else {
+	$buf = $curproc->message_nl("cgi.ml-admin.top", "", $msg_args);
+    }
+
     print $buf;
 }
 
@@ -452,17 +556,43 @@ sub run_cgi_command_help
     my $buf          = '';
     my $navi_command = $curproc->safe_param_navi_command();
     my $command      = $curproc->safe_param_command();
+    my $msg_args     = $curproc->_gen_msg_args();
+
+    # natural language-ed name
+    my $name_usage   = $curproc->message_nl('term.usage',  'usage');
 
     if ($navi_command) {
-	print "[Usage]<br> <b> $navi_command </b> <br>\n";
-	$buf = $curproc->message_nl("cgi.$navi_command");
+	print "[$name_usage]<br> <b> $navi_command </b> <br>\n";
+	$buf = $curproc->message_nl("cgi.$navi_command", '', $msg_args);
     }
     elsif ($command) {
-	print "[Usage]<br> <b> $command </b> <br>\n";
-	$buf = $curproc->message_nl("cgi.$command");
+	print "[$name_usage]<br> <b> $command </b> <br>\n";
+	$buf = $curproc->message_nl("cgi.$command", '', $msg_args);
     }
 
     print $buf;
+}
+
+
+# Descriptions: prepare arguemnts for message handling.
+#    Arguments: OBJ($curproc) HASH_REF($args)
+# Side Effects: none
+# Return Value: HASH_REF
+sub _gen_msg_args
+{
+    my ($curproc, $args) = @_;
+
+    # natural language-ed name
+    my $name_submit = $curproc->message_nl('term.submit', 'submit');
+    my $name_show   = $curproc->message_nl('term.show',   'show');
+    my $name_map    = $curproc->message_nl('term.map',    'map');
+    my $msg_args    = {
+	_arg_button_submit => $name_submit,
+	_arg_button_show   => $name_show,
+	_arg_scroll_map    => $name_map,
+    };
+
+    return $msg_args;
 }
 
 
@@ -480,6 +610,8 @@ log.
 sub run_cgi_log
 {
     my ($curproc, $args) = @_;
+
+    # XXX-TODO: NOT IMPLEMENTED.
 }
 
 
@@ -497,6 +629,8 @@ dummy.
 sub run_cgi_dummy
 {
     my ($curproc, $args) = @_;
+
+    # XXX-TODO: NOT IMPLEMENTED.
 }
 
 
@@ -515,6 +649,7 @@ sub run_cgi_date
 {
     my ($curproc, $args) = @_;
 
+    # XXX-TODO: NOT IMPLEMENTED. NOT USE `date`;
     print `date`;
 }
 
@@ -533,22 +668,34 @@ show options.
 sub run_cgi_options
 {
     my ($curproc, $args) = @_;
-    my $domain = $curproc->ml_domain();
-    my $action = $curproc->myname();
+    my $domain   = $curproc->cgi_var_ml_domain();
+    my $action   = $curproc->safe_cgi_action_name();
+    my $lang     = $curproc->cgi_var_language();
+    my $config   = $curproc->config();
+    my $langlist = $config->get_as_array_ref('cgi_language_list');
 
-    print "<P> <B> options </B>\n";
+    if ($#$langlist > 0) {
+	# natural language-ed name
+	my $name_options = $curproc->message_nl('term.options',  'options');
+	my $name_lang    = $curproc->message_nl('term.language', 'language');
+	my $name_change  = $curproc->message_nl('term.change',   'change');
+	my $name_reset   = $curproc->message_nl('term.reset',    'reset');
 
-    print start_form(-action=>$action);
+	print "<P> <B> $name_options </B>\n";
 
-    print "Language:\n";
-    my $langlist = [ 'Japanese', 'English' ];
-    print scrolling_list(-name   => 'language',
-			 -values => $langlist,
-			 -size   => 1);
+	print start_form(-action=>$action);
 
-    print submit(-name => 'change');
+	print $name_lang, ":\n";
+	print scrolling_list(-name    => 'language',
+			     -values  => $langlist,
+			     -default => [ $lang ],
+			     -size    => 1);
 
-    print end_form;
+	print submit(-name => $name_change);
+	print reset(-name  => $name_reset);
+
+	print end_form;
+    }
 }
 
 
@@ -561,16 +708,16 @@ execute cgi_menu() given as FML::Command::*
 
 # Descriptions: execute FML::Command
 #    Arguments: OBJ($curproc) HASH_REF($args)
-#               STR($comname) HASH_REF($command_args)
 # Side Effects: load module
 # Return Value: none
 sub run_cgi_menu
 {
     my ($curproc, $args) = @_;
-    my $pcb          = $curproc->{ pcb };
+    my $pcb          = $curproc->pcb();
     my $command_args = $pcb->get('cgi', 'command_args');
 
     if (defined $command_args) {
+	# XXX-TODO: validate $comname
 	my $comname = $command_args->{ comname };
 	my $cmd     = "FML::Command::Admin::$comname";
 	my $obj     = undef;
@@ -596,6 +743,28 @@ sub run_cgi_menu
 }
 
 
+=head1 MISC / UTILITIES
+
+=head2 cgi_hidden_info_language()
+
+=cut
+
+
+# Descriptions: return "<hidden name=language value= ...>" to interact
+#               with user browser.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: STR
+sub cgi_hidden_info_language
+{
+    my ($curproc) = @_;
+    my $lang = $curproc->cgi_var_language();
+
+    return hidden(-name    => 'language',
+		  -default => [ $lang ]);
+}
+
+
 =head2 cgi_try_get_address()
 
 return input address after validating the input
@@ -604,12 +773,12 @@ return input address after validating the input
 
 
 # Descriptions: return input address after validating the input
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: longjmp() if critical error occurs.
 # Return Value: STR
 sub cgi_try_get_address
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
     my $address = '';
     my $a = '';
 
@@ -636,6 +805,15 @@ sub cgi_try_get_address
 	}
     }
 
+    if ($address) {
+	if ($curproc->is_safe_syntax('address', $address)) {
+	    return $address;
+	}
+	else {
+	    croak("__ERROR_cgi\.insecure__: insecure address = $address");
+	}
+    }
+
     return $address;
 }
 
@@ -648,12 +826,12 @@ return input address after validating the input
 
 
 # Descriptions: return input ml_name after validating the input
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: longjmp() if critical error occurs.
 # Return Value: STR
 sub cgi_try_get_ml_name
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
     my $ml_name = '';
     my $a = '';
 
@@ -680,7 +858,43 @@ sub cgi_try_get_ml_name
 	}
     }
 
-    return $ml_name;
+    if ($ml_name) {
+	if ($curproc->is_safe_syntax('ml_name', $ml_name)) {
+	    return $ml_name;
+	}
+	else {
+	    croak("__ERROR_cgi\.insecure__: insecure ml_name = $ml_name");
+	}
+    }
+    else {
+	return '';
+    }
+}
+
+
+=head2 safe_cgi_action_name
+
+return the current action name,
+
+=cut
+
+
+# Descriptions: return the current action name,
+#               which syntax is checked by regexp.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: STR
+sub safe_cgi_action_name
+{
+    my ($curproc) = @_;
+    my $name = $curproc->myname();
+
+    if ($curproc->is_safe_syntax('action', $name)) {
+	return $name;
+    }
+    else {
+	return undef;
+    }
 }
 
 
@@ -713,10 +927,15 @@ sub AUTOLOAD
         return $curproc->$method($varname);
     }
     else {
+	# XXX-TODO: validate $comname
         croak("__ERROR_cgi.unknown_method__: unknown method $comname");
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -724,7 +943,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

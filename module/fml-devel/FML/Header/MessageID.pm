@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: MessageID.pm,v 1.7 2002/09/11 23:18:12 fukachan Exp $
+# $FML: MessageID.pm,v 1.16 2003/11/11 10:26:55 tmu Exp $
 #
 
 package FML::Header::MessageID;
@@ -37,7 +37,7 @@ manipulate Message-Id database.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 standard constructor.
 
@@ -57,9 +57,11 @@ sub new
 }
 
 
-=head2 C<db_open($args)>
+=head2 db_open($args)
 
 open db and return HASH_REF for the db access.
+
+=head2 db_close()
 
 =cut
 
@@ -67,7 +69,7 @@ open db and return HASH_REF for the db access.
 # Descriptions: open message-id database
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
-# Return Value: OBJ
+# Return Value: HASH_ERF
 sub db_open
 {
     my ($self, $args) = @_;
@@ -77,8 +79,11 @@ sub db_open
 
     if ($dir) {
 	unless (-d $dir) {
-	    eval q{ use File::Utils qw(mkdirhier);};
-	    mkdirhier($dir, 0700);
+	    # XXX-TODO: dir_mode is hard-coded ?
+	    my $dir_mode = $self->{ _dir_mode } || 0700;
+
+	    use File::Path;
+	    mkpath( [ $dir ], 0, $dir_mode );
 	}
 
 	my %db = ();
@@ -93,11 +98,20 @@ sub db_open
 }
 
 
-=head2 C<get($key)>
+# Descriptions: close message-id database (dummy).
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub db_close
+{
+}
+
+
+=head2 get($key)
 
 get value for the key $key in message-id database.
 
-=head2 C<set($key, $value)>
+=head2 set($key, $value)
 
 set value for the key $key in message-id database.
 
@@ -113,6 +127,7 @@ sub get
     my ($self, $key) = @_;
     my $db = $self->{ _db };
 
+    # XXX-TODO: what should we do if undefined ?
     if (defined $db) {
 	return $db->{ $key };
     }
@@ -139,7 +154,7 @@ sub set
 }
 
 
-=head2 C<gen_id($curproc, $args)>
+=head2 gen_id($curproc, $args)
 
 generate and return a new message-id.
 
@@ -147,18 +162,22 @@ generate and return a new message-id.
 
 
 # Descriptions: generate new message-id used in reply message
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($config) HASH_REF($args)
 # Side Effects: counter increment
 # Return Value: STR
 sub gen_id
 {
-    my ($self, $curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my ($self, $config, $args) = @_;
 
+    # XXX-TODO: if $config->{ address_for_post } undefined ?
     $Counter++;
-    time.".$$.$Counter\@" . $config->{ address_for_post };
+    return "<".time.".$$.$Counter." . $config->{ address_for_post } . ">";
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -166,7 +185,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Flow.pm,v 1.17 2002/09/11 23:18:15 fukachan Exp $
+# $FML: Flow.pm,v 1.23 2003/09/14 04:05:46 fukachan Exp $
 #
 
 package FML::Process::Flow;
@@ -66,9 +66,8 @@ programs kicked by MTA, command line interfaces and CGI's.
 #               3. start the main transaction
 #                  lock, execute main routine, unlock
 #               4. inform error messages, clean up and more ...
-#    Arguments: $self $args
-# Side Effects:
-#               ProcessSwtich() is exported to main:: Name Space.
+#    Arguments: OBJ($pkg) HASH_REF($args)
+# Side Effects: ProcessSwtich() is exported to main:: Name Space.
 # Return Value: none
 sub ProcessStart
 {
@@ -77,6 +76,9 @@ sub ProcessStart
     # create a new process object
     my $process = $pkg->new($args);
 
+    # curproc back pointer, used in emergency.
+    $args->{ curproc } = $process;
+
     # XXX private method to show help ASAP
     # XXX we need to trap here since $process object is clarified after
     # XXX $pkg->new() above.
@@ -84,6 +86,9 @@ sub ProcessStart
 
     # e.g. parse the incoming message (e.g. STDIN)
     $process->prepare($args);
+
+    # close and reopen STDERR to record log messages written into STDERR.
+    $process->_reopen_stderr_channel();
 
     # validate the request, for example,
     #    permit post from the sender,
@@ -96,10 +101,20 @@ sub ProcessStart
     # closing the process
     $process->finish($args);
 
+    # flush stderr channel log.
+    $process->_finalize_stderr_channel($args);
+
     # clean up tmporary files
     $process->clean_up_tmpfiles();
+
+    # debug
+    $process->finalize();
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -107,7 +122,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

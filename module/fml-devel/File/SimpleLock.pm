@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #
-# $FML: SimpleLock.pm,v 1.13 2002/09/11 23:18:19 fukachan Exp $
+# $FML: SimpleLock.pm,v 1.19 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::SimpleLock;
@@ -11,6 +11,11 @@ use vars qw(%LockedFileHandle %FileIsLocked @ISA $Error);
 use strict;
 use Carp;
 use ErrorStatus qw(error_set error error_clear);
+
+
+#
+# XXX-TODO: merge this module into IO::Adapter.
+#
 
 =head1 NAME
 
@@ -32,11 +37,11 @@ File::SimpleLock module provides simple lock using flock(2).
 
 =head1 METHODS
 
-=head2 C<lock($args)>
+=head2 lock($args)
 
 flock(2) for $args->{ file };
 
-=head2 C<unlock($args)>
+=head2 unlock($args)
 
 unlock flock(2) for $args->{ file };
 
@@ -47,7 +52,7 @@ use Fcntl qw(:DEFAULT :flock);
 
 
 # Descriptions: standard constructor.
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: OBJ
 sub new
@@ -95,7 +100,7 @@ sub _simple_flock
     my ($self, $file) = @_;
 
     use FileHandle;
-    my $fh = new FileHandle $file;
+    my $fh = new FileHandle ">> $file";
 
     if (defined $fh) {
 	$LockedFileHandle{ $file } = $fh;
@@ -153,13 +158,17 @@ sub _simple_funlock
 L<FileHandle>,
 L<ErrorStatus>,
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi <F<fukachan@fml.org>>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

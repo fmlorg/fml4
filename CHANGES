@@ -5,6 +5,10 @@
 	$Date$
 
 
+2003/11/19
+
+   import fml-devel modules (2003/11/19 snapshot).
+
 2003/11/01
 
    updated to im-146.
@@ -471,7 +475,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.278 2003/06/20 16:17:57 fukachan Exp $
+	add $FML: CHANGES,v 1.279 2003/11/01 13:17:43 fukachan Exp $
 
 2001/10/03
 

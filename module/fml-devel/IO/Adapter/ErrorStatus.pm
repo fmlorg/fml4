@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ErrorStatus.pm,v 1.5 2002/09/22 14:56:58 fukachan Exp $
+# $FML: ErrorStatus.pm,v 1.7 2003/08/23 15:33:16 fukachan Exp $
 #
 
 package IO::Adapter::ErrorStatus;
@@ -47,11 +47,11 @@ simple utility functions to manipulate error messages.
 
 =head1 METHODS
 
-=head2 C<error_set($message)>
+=head2 error_set($message)
 
 save $message as an error message.
 
-=head2 C<error()>
+=head2 error()
 
 return $message which is saved by C<error_set($msg)>.
 
@@ -115,7 +115,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

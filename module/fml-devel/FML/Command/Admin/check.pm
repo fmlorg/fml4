@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: check.pm,v 1.3 2002/09/15 00:11:43 fukachan Exp $
+# $FML: check.pm,v 1.9 2003/08/29 15:33:58 fukachan Exp $
 #
 
 package FML::Command::Admin::check;
@@ -16,7 +16,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::Admin::check - checknostic
+FML::Command::Admin::check - cheap diagnostic check.
 
 =head1 SYNOPSIS
 
@@ -24,7 +24,7 @@ See C<FML::Command> for more detaicheck.
 
 =head1 DESCRIPTION
 
-show user check(s).
+cheap diagnostic check.
 
 =cut
 
@@ -61,7 +61,14 @@ my @rules =  qw(
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config = $curproc->{ config };
+    my $ml_name     = $curproc->ml_name();
+    my $ml_domain   = $curproc->ml_domain();
+    my $ml_home_dir = $curproc->ml_home_dir($ml_name, $ml_domain);
+
+    # validate $ml_name existence firstly.
+    unless (-d $ml_home_dir) {
+	croak("no such ml: $ml_name\@$ml_domain");
+    }
 
     for my $rule (@rules) {
 	$self->$rule($curproc, $command_args);
@@ -76,7 +83,7 @@ sub process
 sub check_spool_dir
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $spool_dir = $config->{ spool_dir };
 
     #
@@ -109,7 +116,7 @@ sub check_spool_dir
 sub check_html_archive_dir
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $html_dir = $config->{ html_archive_dir };
 
     print "html_archive_dir ... ";
@@ -131,61 +138,65 @@ sub _dir_mode
 }
 
 
-# Descriptions: check $dir mode is 0700
+# Descriptions: check if $dir mode is 0700
 #    Arguments: STR($dir)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _is_700
 {
     my ($dir) = @_;
-    my $mode = _dir_mode($dir);
+    my $mode  = _dir_mode($dir);
 
     my $smode = sprintf("%o", $mode);
     return ($smode eq '700' ? 1 : 0);
 }
 
 
-# Descriptions: check $dir mode is 0770
+# Descriptions: check if $dir mode is 0770
 #    Arguments: STR($dir)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _is_770
 {
     my ($dir) = @_;
-    my $mode = _dir_mode($dir);
+    my $mode  = _dir_mode($dir);
 
     my $smode = sprintf("%o", $mode);
     return ($smode eq '770' ? 1 : 0);
 }
 
 
-# Descriptions: check $dir mode is 0777
+# Descriptions: check if $dir mode is 0777
 #    Arguments: STR($dir)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _is_777
 {
     my ($dir) = @_;
-    my $mode = _dir_mode($dir);
+    my $mode  = _dir_mode($dir);
 
     my $smode = sprintf("%o", $mode);
     return ($smode eq '777' ? 1 : 0);
 }
 
 
-# Descriptions: check $dir mode is 0755
+# Descriptions: check if $dir mode is 0755
 #    Arguments: STR($dir)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _is_755
 {
     my ($dir) = @_;
-    my $mode = _dir_mode($dir);
+    my $mode  = _dir_mode($dir);
 
     my $smode = sprintf("%o", $mode);
     return ($smode eq '755' ? 1 : 0);
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -193,14 +204,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-FML::Command::Admin::check appeared in fml5 mailing check driver package.
+FML::Command::Admin::check appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more detaicheck.
 
 =cut

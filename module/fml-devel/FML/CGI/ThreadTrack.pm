@@ -1,17 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ThreadTrack.pm,v 1.20 2002/09/11 23:18:03 fukachan Exp $
+# $FML: ThreadTrack.pm,v 1.27 2003/10/15 08:16:23 fukachan Exp $
 #
 
 package FML::CGI::ThreadTrack;
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-
+use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use CGI qw/:standard/; # load standard CGI routines
 
 use FML::Process::CGI;
@@ -55,11 +54,11 @@ C<FML::Process::CGI> base class.
 sub html_start
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $title   = $config->{ thread_cgi_title }   || 'thread system interface';
     my $color   = $config->{ thread_cgi_bgcolor } || '#E6E6FA';
     my $myname  = $curproc->myname();
-    my $charset = $config->{ cgi_charset } || 'euc-jp';
+    my $charset = $curproc->get_charset("cgi");
 
     # o.k start html
     print start_html(-title   => $title,
@@ -83,7 +82,7 @@ sub html_end
 }
 
 
-# Descriptions: main routine for thread control
+# Descriptions: main routine for thread control.
 #               run_cgi() can process request: list, show, change_status
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
@@ -91,8 +90,8 @@ sub html_end
 sub run_cgi_main
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
-    my $myname = $config->{ program_name };
+    my $config = $curproc->config();
+    my $myname = $config->{ program_name }; # XXX-TODO: valid ?
     my $ttargs = $curproc->_build_threadtrack_param($args);
     my $action = $curproc->safe_param_action() || '';
 
@@ -107,6 +106,7 @@ sub run_cgi_main
 	}
 	elsif ($action eq 'show') {
 	    my $id  = $curproc->safe_param_article_id();
+	    # XXX-TODO: do not call _XXX() internal method from outside.
 	    my $tid = $thread->_create_thread_id_strings($id);
 	    $thread->show($tid);
 	}
@@ -123,6 +123,7 @@ sub run_cgi_main
 		    }
 		}
 	    }
+	    # XXX-TODO: ? clarify this message more.
 	    else {
 		print "Warning: only administrator change status\n";
 	    }
@@ -139,22 +140,23 @@ sub run_cgi_main
 }
 
 
-# Descriptions: prepare basic parameter for Mail::ThreadTrack module
+# Descriptions: prepare basic parameters for Mail::ThreadTrack module
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: HASH_REF
 sub _build_threadtrack_param
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $config->{ program_name };
     my $option = $curproc->command_line_options();
 
-    #  argumente for thread track module
+    # prepare arguments for thread track module
+    # XXX-TODO: hmm, we should provide $curproc->util->article_max_id() ?
     my $ml_name       = $curproc->safe_param_ml_name();
     my $thread_db_dir = $config->{ thread_db_dir };
     my $spool_dir     = $config->{ spool_dir };
-    my $max_id        = $curproc->article_id_max();
+    my $max_id        = $curproc->article_max_id();
     my $ttargs        = {
 	myname        => $myname,
 	logfp         => \&Log,
@@ -186,9 +188,10 @@ sub _build_threadtrack_param
 sub run_cgi_navigator
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
-    my $action  = $curproc->myname();
+    my $config  = $curproc->config();
+    my $action  = $curproc->safe_cgi_action_name();
     my $target  = $config->{ thread_cgi_target_window } || '_top';
+    # XXX-TODO: we should provide $curproc->util->get_ml_list() method ?
     my $ml_list = $curproc->get_ml_list($args);
     my $ml_name = $config->{  ml_name };
 
@@ -218,13 +221,17 @@ L<FML::Process::CGI>
 and
 L<FML::Process::Flow>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

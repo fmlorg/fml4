@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Param.pm,v 1.17 2002/09/11 23:18:17 fukachan Exp $
+# $FML: Param.pm,v 1.21 2003/08/25 14:13:59 fukachan Exp $
 #
 
 package FML::Process::CGI::Param;
@@ -17,7 +17,7 @@ use CGI qw/:standard/;
 
 =head1 NAME
 
-FML::Process::CGI::Param - CGI input restriction
+FML::Process::CGI::Param - restric CGI input
 
 =head1 SYNOPSIS
 
@@ -25,11 +25,11 @@ See FML::CGI:: on usage.
 
 =head1 DESCRIPTION
 
-cleaner for data.
+cleaner for input data.
 
 =head1 METHODS
 
-=head2 safe_param(str, key)
+=head2 safe_param(key)
 
 return value for key if the value is appropriate.
 
@@ -77,7 +77,7 @@ sub safe_param
 }
 
 
-=head2 safe_paramlist($self, $numregexp, $key)
+=head2 safe_paramlist($numregexp, $key)
 
 return ARRAY_REF for $key.
 
@@ -102,7 +102,6 @@ sub safe_paramlist
     # match method and return ARRAY_REF with matching values
     $key = $safe_method_regexp->{ $key };
     for my $x (param()) {
-	print STDERR "\n<!-- check param: $x =~ /^$key$/ -->\n";
 	if ($x =~ /^$key$/) {
 	    my $value = defined param($x) ? param($x) : '';
 	    if ($numregexp == 1) { push(@list, [ $1, $value ] );}
@@ -121,13 +120,17 @@ sub safe_paramlist
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

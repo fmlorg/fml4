@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Mailer.pm,v 1.14 2002/09/11 23:18:03 fukachan Exp $
+# $FML: Mailer.pm,v 1.23 2003/08/29 15:33:54 fukachan Exp $
 #
 
 package FML::Mailer;
@@ -15,7 +15,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Mailer - Utilities to send mails
+FML::Mailer - utilities to send mails
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,7 @@ It sends Mail::Message objects.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 standard constructor.
 
@@ -61,19 +61,19 @@ standard constructor.
 
 
 # Descriptions: standard constructor
-#    Arguments: OBJ($self)
+#    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
 sub new
 {
-    my ($self) = @_;
+    my ($self, $curproc) = @_;
     my ($type) = ref($self) || $self;
-    my $me     = {};
+    my $me     = { _curproc => $curproc };
     return bless $me, $type;
 }
 
 
-=head2 C<send($args)>
+=head2 send($args)
 
 send the given C<message>.
 $args can take the following arguments:
@@ -99,46 +99,50 @@ sub send
     my $fp         = undef;
     my $sfp        = undef;
     my $maintainer = undef;
+    my $curproc    = $self->{ _curproc };
 
     # 0. fundamental environment
     #    $curproc is given in usual fml processes.
     #    but not in other programs.
-    if (defined $args->{ curproc }) {
-	my $curproc = $args->{ curproc };
-	my $config  = $curproc->{ config };
+    if (defined $curproc) {
+	my $config  = $curproc->config();
 	$maintainer = $config->{ maintainer } if defined $config;
 
 	# default log functions
-	$fp  = sub { Log(@_);}; # pointer to the log function
+	$fp  = sub { $curproc->log(@_);}; # pointer to the log function
 	$sfp = sub { my ($s) = @_; print $s; print "\n" if $s !~ /\n$/o;};
 
 	# overwrite smtp log channel
 	$handle = \*STDOUT;
 	my $wh  = $curproc->open_outgoing_message_channel();
 	if (defined $wh) {
-	    $sfp = sub { print $wh @_;};
-	    $handle = $wh;
+	    $sfp    = sub { print $wh @_;};
+	    $handle = undef ; # $wh; # to avoid log duplication.
 	}
+    }
+    else {
+	$curproc->logerror("FML::Mailer: curproc not specified");
+	return 0;
     }
 
     # 1. sender
     my $sender = (defined $args->{sender} ? $args->{sender} : $maintainer);
     unless ($sender) {
-	LogError("FML::Mailer: no sender");
+	$curproc->logerror("FML::Mailer: no sender");
 	return 0;
     }
 
     # 2. recipient(s)
     my $recipients = [];
-    if (defined $args->{ recipients }) {
+    if (defined $args->{ recipients }) {    # ARRAY_REF
 	$recipients = $args->{ recipients };
     }
-    elsif (defined $args->{ recipient }) {
+    elsif (defined $args->{ recipient }) {  # STR
 	my $recipient = $args->{ recipient };
 	$recipients = [ $recipient ];
     }
     else {
-	LogError("FML::Mailer: no recipient(s)");
+	$curproc->logerror("FML::Mailer: no recipient(s)");
 	return 0;
     }
 
@@ -150,7 +154,7 @@ sub send
 	$message = $args->{ message };
     }
     else {
-	LogError("FML::Mailer: no message");
+	$curproc->logerror("FML::Mailer: no message");
 	return 0;
     }
 
@@ -164,12 +168,12 @@ sub send
 	    $message = Mail::Message->parse( { fd => $fh } );
 	}
 	else {
-	    LogError("FML::Mailer: no such file ($file)");
+	    $curproc->logerror("FML::Mailer: no such file ($file)");
 	}
     }
 
     unless (defined $message) {
-	LogError("FML::Mailer: no message");
+	$curproc->logerror("FML::Mailer: no message");
 	return 0;
     }
 
@@ -177,15 +181,14 @@ sub send
     #
     # main
     #
-    my $curproc = $args->{ curproc };
-    my $config  = $curproc->{ config };
+    my $config = $curproc->config();
     use Mail::Delivery;
     my $service = new Mail::Delivery {
 	log_function       => $fp,
 	smtp_log_function  => $sfp,
 	smtp_log_handle    => $handle,
     };
-    if ($service->error) { LogError($service->error); return 0;}
+    if ($service->error) { $curproc->logerror($service->error); return 0;}
 
     $service->deliver({
 	'smtp_sender'     => $sender,
@@ -193,11 +196,15 @@ sub send
 	'message'         => $message,
 	map_params        => $config,
     });
-    if ($service->error) { LogError($service->error); return 0;}
+    if ($service->error) { $curproc->logerror($service->error); return 0;}
 
     return 1;
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -205,7 +212,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

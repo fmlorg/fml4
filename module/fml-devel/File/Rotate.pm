@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Rotate.pm,v 1.11 2002/09/11 23:18:18 fukachan Exp $
+# $FML: Rotate.pm,v 1.16 2003/08/24 14:09:25 fukachan Exp $
 #
 
 package File::Rotate;
@@ -81,7 +81,7 @@ sub new
 }
 
 
-=head2 C<is_time_to_rotate()>
+=head2 is_time_to_rotate()
 
 C<stat()> the file correspoinding to the object and
 determine whether the time to do comes or not.
@@ -106,7 +106,7 @@ sub is_time_to_rotate
 }
 
 
-=head2 C<rotate()>
+=head2 rotate()
 
 rename files to rotate it.
 
@@ -138,7 +138,6 @@ sub rotate
     do {
 	my $old = "$file.".($max - 1 > 0 ? $max - 1 : 0);
 	my $new = "$file.".($max);
-	print STDERR "rename($old, $new)" if -f $old;
 	-f $old && rename($old, $new);
 	$max--;
     } while ($max > 0);
@@ -156,7 +155,7 @@ sub _get_param
 }
 
 
-=head2 C<error()>
+=head2 error()
 
 return the error message if exists.
 
@@ -176,14 +175,17 @@ sub error
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
-
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

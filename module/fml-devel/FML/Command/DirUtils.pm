@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: DirUtils.pm,v 1.8 2002/09/11 23:18:05 fukachan Exp $
+# $FML: DirUtils.pm,v 1.15 2003/08/29 15:33:57 fukachan Exp $
 #
 
 package FML::Command::DirUtils;
@@ -24,6 +24,8 @@ FML::Command::DirUtils - utilities for directory handlings
 
 =head1 METHODS
 
+=head2 new()
+
 =cut
 
 
@@ -38,12 +40,14 @@ sub new
     my $me     = {};
 
     use FML::Restriction::Base;
-    my $safe = new FML::Restriction::Base;
-    $me->{ _basic_variable } = $safe->basic_variable();
+    $me->{ _safe } = new FML::Restriction::Base;
 
     return bless $me, $type;
 }
 
+#
+# XXX-TODO: if we can find CPAN module for dir listing, use it.
+#
 
 # Descriptions: show the result by executing "ls"
 #    Arguments: OBJ($self)
@@ -53,57 +57,64 @@ sub new
 sub dir
 {
     my ($self, $curproc, $command_args, $du_args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $path_ls = $config->{ path_ls };
     my $argv    = $du_args->{ argv };
     my $opt_ls  = '';
 
     # option: permit "ls [-A-Za-z]" syntax
     if (defined($du_args->{ opt_ls })) {
-	my $opt = $du_args->{ opt_ls };
-	if ($opt =~ /^-[A-Za-z]+$/) {
+	use FML::Restriction::Base;
+	my $safe = new FML::Restriction::Base;
+	my $opt  = $du_args->{ opt_ls };
+	if ($safe->regexp_match('command_line_options', $opt)) {
 	    $opt_ls = $opt;
 	}
 	else {
-	    LogWarn("deny ls options '$opt'");
+	    $curproc->logwarn("deny ls options '$opt'");
 	}
     }
 
     # regexp allowed to use here
-    my $basic_variable = $self->{ _basic_variable };
-    my $dir_regexp     = $basic_variable->{ directory };
+    my $safe = $self->{ _safe };
 
     # chdir the ml's home dir
     my $ml_home_dir    = $config->{ ml_home_dir };
     chdir $ml_home_dir || croak("cannot chdir \$ml_home_dir");
 
-    # build a safe argument
+    # build safe arguments
     my $y = '';
     for my $x (@$argv) {
-	if ($x =~ /^$dir_regexp$/ || $x =~ /^\s*$/) {
+	if ($safe->regexp_match('directory', $x) || $x =~ /^\s*$/) {
 	    $y .= " ". $x;
 	}
     }
 
     if (-x $path_ls) {
-	Log("$path_ls $opt_ls $y");
+	my $eval = "$path_ls $opt_ls $y";
+	$curproc->log("dir: run \"$eval\"");
 
 	use FileHandle;
-	my $fh = new FileHandle "$path_ls $opt_ls $y|";
+	my $fh = new FileHandle "$eval|";
 	if (defined $fh) {
-	    while (<$fh>) { $curproc->reply_message($_);}
+	    my $buf = undef;
+	    while ($buf = <$fh>) { $curproc->reply_message($buf);}
 	    $fh->close();
 	}
 	else {
-	    LogError("tail to run '$path_ls $opt_ls $y'");
+	    $curproc->logerror("tail to run '$eval'");
 	}
     }
     else {
-	LogError("\$path_ls is not found");
+	$curproc->logerror("\$path_ls is not found");
 	croak("\$path_ls is not found");
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -111,7 +122,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

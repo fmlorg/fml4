@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #
-# $FML: Log.pm,v 1.22 2002/09/11 23:18:03 fukachan Exp $
+# $FML: Log.pm,v 1.27 2003/09/13 09:04:51 fukachan Exp $
 #
 
 package FML::Log;
@@ -42,6 +42,12 @@ or specify arguments in the hash reference
 FML::Log contains several interfaces to write log messages, for
 example, log files, syslog() (not yet implemented).
 
+=cut
+
+#
+# XXX-TODO: FML::Log -> syslog().
+#
+
 =head2 Log( $message [, $args])
 
 The required argument is the message to log.
@@ -59,7 +65,7 @@ $config->{ log_format_type } defines the format sytle.
 C<sender> to log is taken from C<FML::Credential> object.
 
 Key C<log_format_type> changes the log format.
-By default our log format is same as one of fml 4.0.
+By default, our log format is same as fml 4.0 format.
 
 =head2 LogWarn( $message [, $args])
 
@@ -73,7 +79,7 @@ same as Log("error: $message", $args);
 
 
 # Descriptions: write message $msg to logfile
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: update logfile
 # Return Value: none
 sub Log
@@ -101,6 +107,9 @@ sub Log
 	use Mail::Message::Date;
 	$rdate = new Mail::Message::Date;
     };
+    if ($@) {
+	croak("Mail::Message::Date not found");
+    }
 
     # open the $file by using FileHandle.pm
     use FileHandle;
@@ -111,19 +120,25 @@ sub Log
     my $fh     = undef;
     my $sender = FML::Credential->sender;
 
-    if (defined $file && -f $file) {
+    if (defined $file) {
+	my $old_mask = umask(077);
 	$fh = new FileHandle ">> $file";
+	umask($old_mask);
+
+	$fh = \*STDERR unless $fh;
     }
     else {
 	$fh = \*STDERR;
     }
 
     if (defined $fh) {
+	# fml <= 4.x style
 	if ($style eq 'fml4_compatible') {
 	    print $fh $rdate->{'log_file_style'}, " ", $mesg;
 	    print $fh " ($sender)" if defined $sender;
 	    print $fh "\n";
 	}
+	# fml 8.x style
 	else {
 	    use File::Basename;
 	    my $name = basename($0);
@@ -141,7 +156,7 @@ sub Log
 
 # Descriptions: write message "warn: $msg", call Log() ASAP.
 #               send the message into stderr if Log() failed.
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub LogWarn
@@ -152,6 +167,7 @@ sub LogWarn
 	Log("warn: ".$mesg, $args);
     };
     if ($@) {
+	# XXX valid use of STDERR
 	print STDERR "warn: ", $mesg, "\n";
     }
 }
@@ -159,7 +175,7 @@ sub LogWarn
 
 # Descriptions: write message "error: $msg", call Log() ASAP.
 #               send the message into stderr if Log() failed.
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub LogError
@@ -170,6 +186,7 @@ sub LogError
 	Log("error: ".$mesg, $args);
     };
     if ($@) {
+	# XXX valid use of STDERR
 	print STDERR "error: ", $mesg, "\n";
     }
 }
@@ -181,13 +198,17 @@ L<Mail::Message::Date>,
 L<FML::Config>,
 L<FML::Credential>,
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi <F<fukachan@fml.org>>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

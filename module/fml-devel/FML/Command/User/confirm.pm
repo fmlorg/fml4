@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: confirm.pm,v 1.16 2002/09/11 23:18:09 fukachan Exp $
+# $FML: confirm.pm,v 1.25 2003/11/17 13:06:12 fukachan Exp $
 #
 
 package FML::Command::User::confirm;
@@ -27,7 +27,7 @@ execute the actual corresponding process if the confirmation succeeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -52,14 +52,21 @@ sub new
 sub need_lock { 1;}
 
 
-# Descriptions: addresses to inform a message copy to
+# Descriptions: lock channel
 #    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
+# Descriptions: addresses to inform a message copy to
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: ARREY_REF
 sub notice_cc_recipient
 {
    my ($self, $curproc, $command_args) = @_;
-   my $config     = $curproc->{ config };
+   my $config     = $curproc->config();
    my $maintainer = $config->{ maintainer };
 
    return [ $maintainer ];
@@ -74,7 +81,9 @@ sub notice_cc_recipient
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
+
+    # XXX-TODO: correct we handle only primary_*_map here?
     my $member_map    = $config->{ primary_member_map };
     my $recipient_map = $config->{ primary_recipient_map };
     my $cache_dir     = $config->{ db_dir };
@@ -88,6 +97,7 @@ sub process
     # "confirm subscribe 813f42fa2aa84bbba500ed3d2781dea6"
     # XXX $keyword not starts at the begining of this line.
     # XXX for example, "confirm", "> confirm" and "xxx> confirm ..."
+    # XXX-TODO: we should move this check to FML::Command::__SOME_WHERE_ ?
     if ($command =~ /$keyword\s+(\w+)\s+([\w\d]+)/) {
 	($class, $id) = ($1, $2);
     }
@@ -102,21 +112,22 @@ sub process
 
     my $found = '';
     if ($found = $confirm->find($id)) { # if request is found
-	unless ($confirm->is_expired($found, $expire_limit)) {
+	unless ($confirm->is_expired($id, $expire_limit)) {
 	    my $address = $confirm->get_address($id);
 	    $self->_switch_command($class, $address, $curproc, $command_args);
 	}
-	else { # if req is expired
+	else { # if requset is expired
 	    $curproc->reply_message_nl('error.expired', "request expired");
-	    LogError("request expired");
+	    $curproc->logerror("request expired");
 	    croak("request is expired");
 	}
     }
+    # request corresponding to thie confirmation reply is not found
     else {
 	$curproc->reply_message_nl('error.no_such_confirmation',
 				   "no such confirmatoin request id=$id",
 				   { _arg_id => $id });
-	LogError("no such confirmation request id=$id");
+	$curproc->logerror("no such confirmation request id=$id");
 	croak("no such confirmation request id=$id");
     }
 }
@@ -139,6 +150,7 @@ sub _switch_command
     use FML::Command;
     my $obj = new FML::Command;
 
+    # XXX-TODO: command names which need confirmation are hard-coded.
     if ($class eq 'subscribe'   ||
 	$class eq 'unsubscribe' ||
 	$class eq 'chaddr' ||
@@ -150,22 +162,23 @@ sub _switch_command
 	$obj->$class($curproc, $command_args);
     }
     else {
-	LogError("no such rule confirm for '$class' command");
+	$curproc->logerror("no such rule confirm for '$class' command");
 	$curproc->reply_message_nl('error.no_such_confirmation_for_command',
 				   "no such confirmation for command $class",
 				   { _arg_command => $class });
 	croak("no such rule");
     }
 
-    # XXX temporary, please clean up in near future
+    # XXX-TODO: send back welcome file.
+    # XXX-TODO: temporary solution, please clean up in near future!
     if ($class eq 'subscribe') {
 	use File::Spec;
 	use FML::Command::SendFile;
-	push(@ISA,  qw(FML::Command::SendFile));
+	push(@ISA, qw(FML::Command::SendFile));
 
-	my $config = $curproc->config();
+	my $config      = $curproc->config();
 	my $ml_home_dir = $config->{ ml_home_dir };
-	my $file   = File::Spec->catfile($ml_home_dir, "welcome");
+	my $file        = File::Spec->catfile($ml_home_dir, "welcome");
 	$config->set( 'welcome_file', $file );
 
 	if (-f $file) {
@@ -176,13 +189,17 @@ sub _switch_command
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

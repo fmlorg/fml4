@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: on.pm,v 1.3 2002/09/11 23:18:10 fukachan Exp $
+# $FML: on.pm,v 1.11 2003/08/29 15:34:00 fukachan Exp $
 #
 
 package FML::Command::User::on;
@@ -16,7 +16,7 @@ use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
-FML::Command::User::on - on
+FML::Command::User::on - change delivery mode from digest to real time.
 
 =head1 SYNOPSIS
 
@@ -24,12 +24,12 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-Firstly apply confirmation before on.
+"on" command changes delivery mode from digest to real time.
 After confirmation succeeds, on process proceeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -54,8 +54,15 @@ sub new
 sub need_lock { 1;}
 
 
-# Descriptions: on adapter.
-#               we confirm it before real on process.
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
+# Descriptions: change delivery mode from digest to real time
+#               after confirmation.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update database for confirmation.
 #               prepare reply message.
@@ -63,7 +70,11 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
+
+    #
+    # XXX-TODO: correct to use primary_*_map for on/off ?
+    #
     my $member_map    = $config->{ primary_member_map };
     my $recipient_map = $config->{ primary_recipient_map };
     my $cache_dir     = $config->{ db_dir };
@@ -81,8 +92,8 @@ sub process
     # if not member, on request is wrong.
     unless ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.not_member');
-	LogError("on request from not member");
-	croak("not member");
+	$curproc->logerror("on request from not member");
+	croak("on request from not member");
 	return;
     }
 
@@ -97,7 +108,7 @@ sub process
     }
     # if not, try confirmation before on
     else {
-	Log("change on mode, try confirmation");
+	$curproc->log("on request, try confirmation");
 	use FML::Confirm;
 	my $confirm = new FML::Confirm {
 	    keyword   => $keyword,
@@ -113,13 +124,17 @@ sub process
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

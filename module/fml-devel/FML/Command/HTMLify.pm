@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: HTMLify.pm,v 1.9 2002/09/15 00:11:42 fukachan Exp $
+# $FML: HTMLify.pm,v 1.19 2003/09/13 09:14:31 fukachan Exp $
 #
 
 package FML::Command::HTMLify;
@@ -14,9 +14,12 @@ use Carp;
 use File::Spec;
 use FML::Log qw(Log LogWarn LogError);
 
+my $debug = 0;
+
+
 =head1 NAME
 
-FML::Command::HTMLify - utility functions to convert
+FML::Command::HTMLify - utility functions to convert text to html.
 
 =head1 SYNOPSIS
 
@@ -30,28 +33,48 @@ and file in C<$ml_home_dir>.
 =cut
 
 
-# Descriptions:
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects:
+# Descriptions: convert text to html style.
+#    Arguments: OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+# Side Effects: none
 # Return Value: none
 sub convert
 {
     my ($curproc, $args, $optargs) = @_;
+    my $config  = $curproc->config();
+    my $ml_name = $config->{ ml_name };
+    my $udb_dir = $config->{ udb_base_dir };
     my $src_dir = $optargs->{ src_dir };
     my $dst_dir = $optargs->{ dst_dir };
+    my $charset = $curproc->language_of_html_file();
 
     croak("src_dir not defined") unless defined $src_dir;
     croak("src_dir not exists")  unless -d $src_dir;
     croak("dst_dir not defined") unless defined $dst_dir;
     croak("dst_dir not exists")  unless -d $dst_dir;
 
-    # XXX NOT NEED THIS CHECK ?
+    # XXX-TODO: NOT NEED THIS CHECK ? No, it it soog that
+    # XXX-TODO: we can convert MH folder to HTML format files.
     #     unless ($curproc->is_config_cf_exist()) {
     #		croak("invalid ML");
     #    }
 
+    print STDERR "  convert\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
+
+    unless (-d $udb_dir) { $curproc->mkdir($udb_dir);}
+
+    my $index_order    = $config->{ html_archive_index_order_type };
+    my $htmlifier_args = {
+	charset     => $charset,
+
+	output_dir  => $dst_dir,     # ~fml/public_html/mlarchive/$domain/$ml/
+	db_base_dir => $udb_dir,     # /var/spool/ml/@udb@
+	db_name     => $ml_name,     # elena
+
+	index_order => $index_order, # normal/reverse
+    };
+
     my ($is_subdir_exists, $subdirs) = _check_subdir_exists($src_dir);
-    if ($is_subdir_exists) { Log("looks subdir exists");}
+    if ($is_subdir_exists) { $curproc->log("looks subdir exists");}
 
     if (defined $dst_dir) {
         unless (-d $dst_dir) {
@@ -60,23 +83,22 @@ sub convert
 
 	if ($is_subdir_exists) {
 	    my (@x) = sort _sort_subdirs @$subdirs;
-	    print STDERR "subdirs; @x \n";
-	    for my $xdir (sort _sort_subdirs @$subdirs) {
+	    print STDERR "   subdirs: @x\n" if $debug;
+	    for my $xdir (@x) {
 		eval q{
 		    use Mail::Message::ToHTML;
-		    &Mail::Message::ToHTML::htmlify_dir($xdir, {
-			directory => $dst_dir,
-		    });
+		    my $obj = new Mail::Message::ToHTML $htmlifier_args;
+		    $obj->htmlify_dir($xdir, $htmlifier_args);
 		};
 		croak($@) if $@;
 	    }
 	}
 	else {
+	    print STDERR "   hmm, looks not subdir style.\n" if $debug;
 	    eval q{
 		use Mail::Message::ToHTML;
-		&Mail::Message::ToHTML::htmlify_dir($src_dir, {
-		    directory => $dst_dir,
-		});
+		my $obj = new Mail::Message::ToHTML $htmlifier_args;
+		$obj->htmlify_dir($src_dir, $htmlifier_args);
 	    };
 	    croak($@) if $@;
 	}
@@ -131,13 +153,17 @@ sub  _check_subdir_exists
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

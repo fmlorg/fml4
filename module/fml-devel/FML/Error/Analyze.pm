@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Analyze.pm,v 1.5 2002/09/11 23:18:11 fukachan Exp $
+# $FML: Analyze.pm,v 1.24 2003/10/15 01:03:31 fukachan Exp $
 #
 
 package FML::Error::Analyze;
@@ -19,7 +19,7 @@ my $debug = 1;
 
 =head1 NAME
 
-FML::Error::Analyze - analyzer routine for error cache
+FML::Error::Analyze - provide model specific analyzer routines.
 
 =head1 SYNOPSIS
 
@@ -27,7 +27,7 @@ FML::Error::Analyze - analyzer routine for error cache
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 =cut
 
@@ -45,111 +45,136 @@ sub new
 }
 
 
-# *** model specific analyzer ***
-# $data = {
-#    address => [ 
-#           error_string_1,
-#           error_string_2, ... 
-#    ]
-# };
-#
-sub simple_count
+=head1 METHODS
+
+=head2 summary()
+
+return summary of points of addresses as HASH_REF.
+
+    $summary = {
+	address1 => point,
+	address2 => point,
+    };
+
+=head2 removal_address()
+
+return addresses to be removed.
+
+=cut
+
+
+# Descriptions: return summary
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: HASH_REF
+sub summary
 {
-    my ($self, $curproc, $data) = @_;
-    my ($addr, $bufarray, $count);
-    my @removelist = ();
-    my $summary    = {};
-    my $config     = $curproc->config();
-    my $limit      = $config->{ error_analyzer_simple_count_limit } || 5;
+    my ($self) = @_;
+    my $analyzer = $self->{ _analyzer };
 
-    while (($addr, $bufarray) = each %$data) {
-	$count = 0;
-	if (defined $bufarray) {
-	    for my $buf (@$bufarray) {
-		if ($buf =~ /status=5/i) {
-		    $count++;
-		    $summary->{ $addr } = $count;
-		}
-	    }
-	}
-
-	if ($count > $limit) {
-	    push(@removelist, $addr);
-	}
+    if (defined $analyzer) {
+	return $analyzer->summary();
     }
-
-    # debug info
-    if ($debug) {
-	Log("analyze summary");
-	my ($k, $v);
-	while (($k, $v) = each %$summary) {
-	    Log("summary: $k = $v points");
-	}
+    else {
+	return {};
     }
-
-    return \@removelist;
 }
 
 
-sub error_continuity
+# Descriptions: return removal address candidates
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub removal_address
 {
-    my ($self, $curproc, $data) = @_;
-    my ($addr, $bufarray, $count, $i);
-    my ($time, $status, $reason);
-    my @removelist = ();
-    my $summary    = {};
-    my $config     = $curproc->config();
-    my $limit      = $config->{ error_analyzer_simple_count_limit } || 14;
+    my ($self) = @_;
+    my $analyzer = $self->{ _analyzer };
 
-    while (($addr, $bufarray) = each %$data) {
-	$count = 0;
-	if (defined $bufarray) {
-	    for my $buf (@$bufarray) {
-		($time, $status, $reason) = split(/\s+/, $buf);
-
-		if ($buf =~ /status=5/i) {
-		    unless (defined $summary->{ $addr }) {
-			$summary->{ $addr } = [ 0 ];
-		    }
-
-		    # count up the folloging distribution function.
-		    #     *
-		    #    ***
-
-		    # center of distribution function
-		    $i = int( (time - $time ) / (24*3600) );
-		    $summary->{ $addr }->[ $i ] += 2;
-
-		    # +delta
-		    $i = int( (time - $time + 12*3600) / (24*3600) );
-		    $summary->{ $addr }->[ $i ] += 1;
-
-		    # -delta
-		    $i = int( (time - $time - 12*3600) / (24*3600) );
-		    $summary->{ $addr }->[ $i ] += 1 if $i >= 0;
-		}
-	    }
-	}
+    if (defined $analyzer) {
+	return $analyzer->removal_address();
     }
-
-    # debug info
-    {
-	my ($addr, $ra, $sum);
-	while (($addr, $ra) = each %$summary) {
-	    $sum = 0;
-	    for my $v (@$ra) {
-		$sum += 1 if $v >= 2;
-	    }
-
-	    Log("summary: $addr sum=$sum (@$ra)");
-
-	    push(@removelist, $addr) if $sum >= $limit;
-	}
+    else {
+	return [];
     }
-
-    return \@removelist;
 }
 
+
+# Descriptions: print address and the status summary.
+#    Arguments: OBJ($self) STR($addr)
+# Side Effects: none
+# Return Value: none
+sub print
+{
+    my ($self, $addr) = @_;
+    my $analyzer = $self->{ _analyzer };
+
+    if (defined $analyzer) {
+	return $analyzer->print($addr);
+    }
+}
+
+
+=head2 AUTOLOAD()
+
+the command dispatcher.
+It hooks up the C<$command> request and loads the module in
+C<FML::Command::$MODE::$command>.
+
+=cut
+
+
+# Descriptions: run FML::Error::Analyze::XXX()
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($anal_args)
+# Side Effects: load appropriate module
+# Return Value: none
+sub AUTOLOAD
+{
+    my ($self, $curproc, $anal_args) = @_;
+
+    # we need to ignore DESTROY()
+    return if $AUTOLOAD =~ /DESTROY/;
+
+    my $fp = $AUTOLOAD;
+    $fp =~ s/.*:://;
+    my $pkg = "FML::Error::Analyze::${fp}";
+
+    $curproc->log("load $pkg") if 1; # debug
+
+    my $analyzer = undef;
+    eval qq{ use $pkg; \$analyzer = new $pkg;};
+    unless ($@) {
+	# run the actual process
+	if ($analyzer->can('process')) {
+	    $analyzer->process($curproc, $anal_args);
+	    $self->{ _analyzer } = $analyzer;
+	}
+	else {
+	    $curproc->logerror("${pkg} has no process method");
+	}
+    }
+    else {
+	$curproc->logerror($@) if $@;
+	$curproc->logerror("$pkg module is not found");
+	croak("$pkg module is not found"); # upcall to FML::Error
+    }
+}
+
+
+=head1 $data STRUCTURE
+
+C<$data> is passed to the error analyer function
+C<FML::Error::Analyze::${fp}> (as $anal_args in AUTOLOAD()).
+
+	 $data = {
+	    address => [
+	           error_info_1,
+	           error_info_2, ...
+	    ]
+	 };
+
+where the error_info_* has error reasons (STR).  $fp parses it, count
+up.  FML::Error or FML::Error::Analyze can retrieve the result via
+summary() method.
 
 =head1 CODING STYLE
 
@@ -161,7 +186,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

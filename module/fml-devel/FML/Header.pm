@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Header.pm,v 1.48 2002/09/11 23:18:02 fukachan Exp $
+# $FML: Header.pm,v 1.64 2003/09/19 13:30:33 tmu Exp $
 #
 
 package FML::Header;
@@ -16,6 +16,8 @@ use FML::Log qw(Log LogWarn LogError);
 
 use Mail::Header;
 @ISA = qw(Mail::Header);
+
+my $debug = 0;
 
 =head1 NAME
 
@@ -46,7 +48,13 @@ C<unfold()>.
 CAUTION: Pay attention!
 C<FML::Header> overloads C<get()> to remove the trailing "\n".
 
-=head2 C<new()>
+=cut
+
+#
+# XXX-TODO: need to implement copy() and move() ?
+#
+
+=head2 new()
 
 forward the request up to superclass C<Mail::header::new()>.
 
@@ -73,12 +81,12 @@ sub new
 sub DESTROY {}
 
 
-=head2 C<get($key)>
+=head2 get($key)
 
 return the value of C<Mail::Header::get($key)> but without the trailing
 "\n".
 
-=head2 C<set($key, $value)>
+=head2 set($key, $value)
 
 alias of C<Mail::Header::set($key, $value)>.
 
@@ -111,13 +119,17 @@ sub set
 }
 
 
-=head2 C<address_clean_up(address)>
+=head2 address_clean_up(address)
 
-clean up given C<address>.
-It parse it by C<Mail::Address::parse()> and nuke < and >.
+clean up given C<address>. This method parses the given address by
+C<Mail::Address::parse()>, remove < and > and return the result.
 
 =cut
 
+#
+# XXX-TODO: address_clean_up() in this class is apporopriate ?
+# XXX-TODO: is it in some other class such as FML::Address ?
+#
 
 # Descriptions: utility to remove ^\s*< and >\s*$
 #    Arguments: OBJ($self) STR($addr)
@@ -145,14 +157,10 @@ sub address_clean_up
 }
 
 
-=head2 C<data_type()>
+=head2 data_type()
 
 return the C<type> defind in the header's Content-Type field.
 For example, C<text/plain>, C<mime/multipart> and et. al.
-
-=head2 C<mime_boundary()>
-
-return the C<boundary> defind in the header's Content-Type field.
 
 =cut
 
@@ -178,24 +186,6 @@ sub data_type
 }
 
 
-# Descriptions: return boundary defined in Content-Type
-#    Arguments: OBJ($header)
-# Side Effects: none.
-# Return Value: STR or UNDEF
-sub mime_boundary
-{
-    my ($header) = @_;
-    my $content_type = $header->get('content-type');
-
-    if (defined $content_type) {
-	if ($content_type =~ /boundary=\"(.*)\"/) {
-	    return $1;
-	}
-    }
-
-    return undef;
-}
-
 
 ###
 ### FML specific functions
@@ -203,19 +193,24 @@ sub mime_boundary
 
 =head1 FML SPECIFIC METHODS
 
-=head2 C<add_fml_ml_name($config, $args)>
+=head2 add_fml_ml_name($config, $args)
 
 add X-ML-Name:
 
-=head2 C<add_fml_traditional_article_id($config, $args)>
+=head2 add_fml_traditional_article_id($config, $args)
 
 add X-Mail-Count:
 
-=head2 C<add_fml_article_id($config, $args)>
+=head2 add_fml_article_id($config, $args)
 
 add X-ML-Count:
 
 =cut
+
+#
+# XXX-TODO: "x-ml-name: unknown" or "x-ml-name: " if $config is undefined?
+# XXX-TODO: which is better if we follow Principle of Least Surprise ?
+#
 
 
 # Descriptions: add "X-ML-Name: elena" to header
@@ -251,23 +246,27 @@ sub add_fml_article_id
 }
 
 
-=head2 C<add_software_info($config, $args)>
+=head2 add_software_info($config, $args)
 
 add X-MLServer: and List-Software:.
 
 C<MIME::Lite> object as a $args->{ message } can be handled
 when $args->{type} is 'MIME::Lite'.
 
-=head2 C<add_rfc2369($config, $args)>
+=head2 add_rfc2369($config, $args)
 
 add List-* sereies defined in RFC2369 and RFC2919.
 
 C<MIME::Lite> object as a $args->{ message } can be handled
 when $args->{type} is 'MIME::Lite'.
 
-=head2 C<add_x_sequence($config, $args)>
+=head2 add_x_sequence($config, $args)
 
 add X-Sequence.
+
+=head2 add_message_id($config, $args)
+
+add Message-Id.
 
 =cut
 
@@ -309,6 +308,7 @@ sub add_rfc2369
     my $post       = $config->{ address_for_post };
     my $command    = $config->{ address_for_command };
     my $maintainer = $config->{ maintainer };
+    my $use_command_mail_program = $config->yes('use_command_mail_program');
 
     # information for list-id
     my $ml_name = $config->{ ml_name };
@@ -320,7 +320,7 @@ sub add_rfc2369
 	$msg->attr('List-ID'    => $id) if $id;
 	$msg->attr('List-Post'  => "<mailto:${post}>") if $post;
 	$msg->attr('List-Owner' => "<mailto:${maintainer}>") if $maintainer;
-	if ($command) {
+	if ($command && $use_command_mail_program) {
 	    $msg->attr('List-Help' =>  "<mailto:${command}?body=help>");
 	    $msg->attr('List-Subscribe' =>
 		       "<mailto:${command}?body=subscribe>");
@@ -333,13 +333,34 @@ sub add_rfc2369
 	$header->add('List-Post',  "<mailto:${post}>")       if $post;
 	$header->add('List-Owner', "<mailto:${maintainer}>") if $maintainer;
 
-	if ($command) {
+	if ($command && $use_command_mail_program) {
 	    $header->add('List-Help', "<mailto:${command}?body=help>");
 	    $header->add('List-Subscribe',
 			 "<mailto:${command}?body=subscribe>");
 	    $header->add('List-UnSubscribe',
 			 "<mailto:${command}?body=unsubscribe>");
 	}
+    }
+}
+
+# Descriptions: add "Message-ID if not define
+#    Arguments: OBJ($header) OBJ($config) HASH_REF($args)
+# Side Effects: update $header
+# Return Value: none
+sub add_message_id
+{
+    my ($header, $config, $args) = @_;
+    my $object_type = defined $args->{ type } ? $args->{ type } : '';
+
+    use FML::Header::MessageID;
+    my $mid = FML::Header::MessageID->new->gen_id($config,$args);
+
+    if ($object_type eq 'MIME::Lite') {
+	my $msg = $args->{ message };
+	$msg->attr('Message-Id' => $mid);
+    }
+    else {
+	$header->add('Message-Id', $mid);
     }
 }
 
@@ -356,19 +377,30 @@ sub add_x_sequence
 }
 
 
-=head2 C<rewrite_article_subject_tag($config, $args)>
+=head2 rewrite_article_subject_tag($config, $args)
 
 add subject tag like [elena:00010].
 The actual function definitions exist in C<FML::Header::Subject>.
 
-=head2 C<rewrite_reply_to>
+=head2 rewrite_reply_to
 
-add or replace C<Reply-To:>.
+replace C<Reply-To:> with this ML's address for post.
+add reply-to: if not specified.
 
-=head2 C<rewrite_date>
+
+=head2 rewrite_errors_to
+
+replace C<Errors-To:> with this ML's address for post.
+add errors-to: if not specified.
+
+=head2 rewrite_date
 
 replace original C<Date:> to C<X-Date:>.
 and now fml process time add to C<Date:>.
+
+=head2 rewrite_received
+
+replace original C<Received:> to C<X-Received:>.
 
 =cut
 
@@ -382,17 +414,18 @@ sub rewrite_article_subject_tag
     my ($header, $config, $args) = @_;
 
     my $pkg = "FML::Header::Subject";
-    eval qq{ require $pkg; $pkg->import();};
+    eval qq{ use $pkg;};
     unless ($@) {
 	$pkg->rewrite_article_subject_tag($header, $config, $args);
     }
     else {
-	LogError("cannot load $pkg");
+	croak("cannot load $pkg");
     }
 }
 
 
-# Descriptions: rewrite Reply-To: if needed
+# Descriptions: rewrite Reply-To: to this ML's address.
+#               add Reply-To: if not specified.
 #    Arguments: OBJ($header) OBJ($config) HASH_REF($args)
 # Side Effects: update $header
 # Return Value: none
@@ -402,8 +435,20 @@ sub rewrite_reply_to
     my $reply_to = $header->get('reply-to') || '';
 
     unless ($reply_to) {
-	$header->add('reply-to', $config->{ address_for_post });
+	$header->add('Reply-To', $config->{ address_for_post });
     }
+}
+
+
+# Descriptions: rewrite Errors-To: to the maintainer.
+#               add Errors-To: if not specified.
+#    Arguments: OBJ($header) OBJ($config) HASH_REF($args)
+# Side Effects: update $header
+# Return Value: none
+sub rewrite_errors_to
+{
+    my ($header, $config, $args) = @_;
+    $header->add('Errors-To', $config->{ maintainer });
 }
 
 
@@ -422,12 +467,30 @@ sub rewrite_date
 
     $header->add('X-Date', $orgdate) if ($orgdate);
     $header->replace('Date', $newdate);
-    Log("(debug) rewrite the orginal date to 'X-Date: $orgdate'");
-    Log("(debug) rewrite the new date to 'Date: $newdate'");
 }
 
 
-=head2 C<delete_unsafe_header_fields($config, $args)>
+# Descriptions: rewrite Received: to X-Received: if needed
+#    Arguments: OBJ($header) OBJ($config) HASH_REF($args)
+# Side Effects: update $header
+# Return Value: none
+sub rewrite_received
+{
+    my ($header, $config, $args) = @_;
+    my($i,$data);
+    my $org = "Received";
+    my $new = "X-Received";
+    my $num = $header->count($org);
+
+    for ($i = 0; $i < $num; $i++) {
+	$data = $header->get($org, $i);
+	$header->add($new, $data);
+    }
+    $header->delete($org);
+}
+
+
+=head2 delete_unsafe_header_fields($config, $args)
 
 remove header fields defiend in C<$unsafe_header_fields>.
 C<$unsafe_header_fields> is a list of keys.
@@ -447,17 +510,17 @@ sub delete_unsafe_header_fields
     my ($header, $config, $args) = @_;
     my ($fields) = $config->get_as_array_ref('unsafe_header_fields');
 
-    for (@$fields) { $header->delete($_);}
+    for my $field (@$fields) { $header->delete($field);}
 }
 
 
 =head1 MISCELLANEOUS UTILITIES
 
-=head2 C<delete_subject_tag_like_string($string)>
+=head2 delete_subject_tag_like_string($string)
 
 remove subject tag like the string given as C<$string>.
 
-=head2 C<extract_message_id_references()>
+=head2 extract_message_id_references()
 
 return message-id list (ARRAY REFERENCE) extracted from the header
 (C<$self>).  It extracts message-id(s) from In-Reply-To: and
@@ -500,7 +563,7 @@ sub extract_message_id_references
     my %uniq = ();
     foreach my $addr (@addrs) {
 	my $a = $addr->address;
-	unless ($uniq{ $a }) {
+	unless (defined($uniq{ $a }) && $uniq{ $a }) {
 	    push(@r, $addr->address);
 	    $uniq{ $a } = 1;
 	}
@@ -512,18 +575,18 @@ sub extract_message_id_references
 
 =head1 FILTERING FUNCTIONS
 
-=head2 C<check_message_id($config, $args)>
+=head2 check_message_id($config, $args)
 
 check whether message-id is unique or not. If the message-id is found
 in the past message-id cache, the injected message must causes a mail
 loop.
 
-=head2 C<check_x_ml_info($config, $args)>
+=head2 check_x_ml_info($config, $args)
 
 The injected message loops if x-ml-info: has our own
 C<address_for_post> address.
 
-=head2 C<check_list_post($config, $args)>
+=head2 check_list_post($config, $args)
 
 The injected message loops if list-post: has our own
 C<address_for_post> address.
@@ -607,13 +670,17 @@ sub check_list_post
 
 L<Mail::Header>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
