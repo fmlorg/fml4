@@ -1,5 +1,5 @@
 		How to edit fml CVS repository
-		$Date: 2001/07/01 02:23:51 $
+		$Date: 2001/07/22 06:00:14 $
 
 CAUTION: you need "BSD make" not gmake.
 
@@ -141,6 +141,10 @@ postfix-verps	Postfix current VERP's hack branch
 
 	break from main:current-20010722
 
+makefml-rdbms-ext branch
+
+	enable makefml to talk with RDBMS
+
 
 *** HOW TO MERGE ***
 
@@ -158,4 +162,4 @@ postfix-verps	Postfix current VERP's hack branch
 
 	% cvs diff 
 
-$FML: README,v 1.25 2001/07/01 02:23:51 fukachan Exp $
+$FML: README,v 1.26 2001/07/22 06:00:14 fukachan Exp $
