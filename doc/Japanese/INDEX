@@ -36,6 +36,9 @@ html_convert		記事の HTML への変換
 encryption		暗号化関係
 daily			日々の運用についてのTIPS
 documentation		ドキュメントについて
+RDBMS			データベースへのアクセス(リレーショナル: PostgreSQL, MySQL)
+LDAP			データベースへのアクセス(LDAP)
+
 
 .part エラー
 errormails		エラーメールをどうするか？
@@ -53,7 +56,6 @@ references		文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
 internals		内部構造や実装の理屈についてなど
-LDAP			LDAP
 
 	</HTML>
 	</BODY>
