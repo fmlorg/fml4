@@ -43,15 +43,34 @@ sub main::NntpPost
 	    ("from", "newsgroups", "subject", "supersedes", "references");
     }
 
+    # Newsgroup:
+    $e{"h:newsgroups:"} = $e{"h:newsgroups:"} || 
+	$e{"h:Newsgroups:"} || $main::DEFAULT_NEWS_GROUP;
+
+    if (! $e{"h:newsgroups:"}) {
+	&Log("NntpPost: I don\'t know which newsgroup I should post");
+	&Log("NntpPost: critical error");
+	return $NULL;
+    }
+
+    # set up a header
     for $h (@order) {
 	$v = $main::NEWS_FIELD_TO_OVERWRITE{$h} || 
 	    $e{"h:${h}:"} || $main::NEWS_FIELD_DEFAULT{$h};
 	push(@header, "${h}: $v") if $v;
     }
 
-    @body   = split(/\n/, $e{'Body'});
+    @body = split(/\n/, $e{'Body'});
 
-    $c->post(@header, "", @body);
+    # postable?
+    $c->postok || $c->mode_reader; # fml-support: 04471
+
+    if ($c->postok) {
+	$c->post(@header, "", @body);
+    }
+    else {
+	&Log("NntpPost: cannot set post-able");
+    }
 
     if ($debug) {
 	&Log("NNTP debug: " .($c->message));
