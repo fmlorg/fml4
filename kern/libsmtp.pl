@@ -698,14 +698,15 @@ sub WaitFor354
 sub WaitForSmtpReply
 {
     local($ipc, $getretval, $ignore_error) = @_;
+    local($buf);
 
     if ($ipc) {
 	do { 
-	    print SMTPLOG $_ = <S>; 
-	    $RetVal .= $_ if $getretval;
-	    $SoErrBuf = $_  if /^[45]/o;
-	    &Log($_) if /^[45]/o && (!$ignore_error);
-	} while(/^\d+\-/o);
+	    print SMTPLOG ($buf = <S>); 
+	    $RetVal .= $buf if $getretval;
+	    $SoErrBuf = $buf if $buf =~ /^[45]/o;
+	    &Log($buf) if $buf =~ /^[45]/o && (!$ignore_error);
+	} while ($buf =~ /^\d+\-/o);
     }
     else {
 	do { 
@@ -713,7 +714,7 @@ sub WaitForSmtpReply
 	    $RetVal .= $_ if $getretval;
 	    $SoErrBuf = $_  if /^[45]/o;
 	    &Log($_) if /^[45]/o && (!$ignore_error);
-	} while(/^\d+\-/o);
+	} while (/^\d+\-/o);
     }
 }
 
