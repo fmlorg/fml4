@@ -2414,9 +2414,6 @@ sub do_newml
     # fmlserv (uid != owner ) can read help
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
-    # drafts -> help,deny,guide,objective
-    &CreateDocTemplate(*config, $ml);
-
     # qmail setup
     &QmailSetUp($ml);
 
@@ -2428,6 +2425,11 @@ sub do_newml
 
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
 		  "$ML_DIR/$ml/cf", "$ML_DIR/$ml/config.ph");
+
+    # we need config.ph existence.
+    # drafts -> help,deny,guide,objective
+    print STDERR "\n   create template files for help,guide ...\n";
+    &CreateDocTemplate(*config, $ml);
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR eq "METAINFO") {
 	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
@@ -2465,22 +2467,6 @@ sub do_create_doc_template
     local(%config, %cur_config, $cf);
 
     &ResetVariables;
-
-    $cf = "$ML_DIR/$ml/cf";
-    # set %config, eval %MAKE_FML in it;
-    # load $DIR/cf to %config, 
-    # XXX we need to eval contents of %config.
-    &GetCF($cf, $ml, *config, *cur_config);
-
-    &GetConfigPH($ml);
-
-    local($x);
-    # overwrite %config by evaled (config.ph) values.
-    # since cf has raw value e.g. elena@$DOMAINNAME, so we need to eval it.
-    for $x (keys %config) {
-	$config{$x} = &Value($x) || $config{$x};
-    }
-
     &CreateDocTemplate(*config, $ml);
 }
 
@@ -2494,7 +2480,19 @@ sub CreateDocTemplate
 
     &ResetVariables;
 
+    $cf = "$ML_DIR/$ml/cf";
     &GetCF($cf, $ml, *config, *cur_config); 
+
+    # not exists in the first time
+    if (-f "$ML_DIR/$ml/config.ph") {
+	&GetConfigPH($ml);
+
+	# overwrite %config by evaled (config.ph) values.
+	# since cf has raw value e.g. elena@$DOMAINNAME, so we need to eval it.
+	for $x (keys %config) {
+	    $config{$x} = &Value($x) || $config{$x};
+	}
+    }
 
     # <Command Trap Keyword>
     # In 'newml', we have no knowledge so that 
