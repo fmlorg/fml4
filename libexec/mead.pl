@@ -60,6 +60,8 @@ while (<>) {
 
 &DeadOrAlive;
 
+&Report;
+
 exit 0;
 
 
@@ -95,7 +97,7 @@ sub ErrorAnal
 		next if /^\s*$/;
 		next if $_ eq $addr;
 		
-		&CacheOn(sprintf("%s %s\t%s\n", time, $addr, $_))
+		&CacheOn(sprintf("%s %s\t%s", time, $addr, $_))
 		    if $addr && $_;
 	    }
 	}
@@ -109,17 +111,24 @@ sub ErrorAnal
 sub CacheOn
 {
     local($s) = @_;
+    &Append($s, $CACHE);
+}
 
-    open(APP, ">> $CACHE") || die("CacheOn: cannot open CACHE $CACHE\n");
+
+sub Append
+{
+    local($s, $file) = @_;
+
+    open(APP, ">> $file") || die("Append: cannot open $file\n");
     select(APP); $| = 1; select(STDOUT);
-    print APP $s;
+    print APP "$s\n";
     close(APP);
 }
 
 
 sub DeadOrAlive
 {
-    local($buf, $now, $last);
+    local($buf, $now, $last, $prev);
 
     $now = time;
 
@@ -146,29 +155,49 @@ sub DeadOrAlive
 
     ### check whether a user is dead or alive
     ### expire old entries 
-    local($time, $addr, $ml);
+    local($time, $addr, $ml, $expire_range);
     local($new) = "$CACHE.new";
-    local($expire_time) = $now - $EXPIRE*24*3600;
+    local($expire_time) = $now - int($EXPIRE*24*3600);
+
+    &Debug("expire time is". ($EXPIRE*24*3600)/3600 ."hour(s)") if $debug;
 
     open(CACHE, $CACHE) || die("CacheOn: cannot read CACHE $CACHE\n");
     open(NEW, "> $new") || die("CacheOn: cannot open $new\n");
     select(NEW); $| = 1; select(STDOUT);
 
     while (<CACHE>) {
+	# uniq
+	next if $prev eq $_;
+	$prev = $_;
+
 	($time, $addr, $ml) = split;
 
-	if ($time eq '#remove') {
-	    $IgnoreAddr{$addr} = 1;
+	if (/^\#/) {
+	    # remove info is also expired
+	    if ($time eq '#remove') {
+		$IgnoreAddr{$addr} = 1;
+		&Debug("Add \$IgnoreAddr{$addr}");
+	    }
+
+	    # not print within expire range
+	    print NEW $_ unless $expire_range;
+	    next;
+	} 
+
+	# expire check, not print, so remove them
+	if ($time < $expire_time) {
+	    $expire_range = 1;
+	    next;
 	}
+	else {
+	    $expire_range = 0;
 
-	# specaial info
-	next if /^\#/;
+	    # back up (after expired)
+	    print NEW $_;
 
-	# back up (after expired)
-	print NEW $_ if $time > $expire_time;
-
-	# count; sum up for each address
-	$addr{"$addr $ml"}++;
+	    # count; sum up for each address
+	    $addr{"$addr $ml"}++;
+	}
     }
 
     print NEW "#check $now\n";
@@ -176,21 +205,33 @@ sub DeadOrAlive
 
     rename($new, $CACHE) || die("CacheOn: cannot rename $new $CACHE");
 
+    ### remove address 
+    local($addr, $admin);
+
+    # %addr = ("recipients return-address" => number-of-errors); 
     for (keys %addr) {
+	($addr, $admin) = split;
+
  	# already removed address
+	&Debug("ignore $addr (already warned)") if $debug && $IgnoreAddr{$addr};
 	next if $IgnoreAddr{$addr};
 
 	# dead
 	if ($addr{$_} > $LIMIT) {
-	    ($addr, $ml) = split;
-	    $ml = $ml'ML{$ml}; #';
+	    ($addr, $admin) = split;
+
+	    &Debug("\$ml = \$ml'ML{$admin}; #';");
+
+	    $ml = $ml'ML{$admin}; #';
+
+	    &Debug("$admin => $ml map") if $debug;
 
 	    if ($ml) {
-		&Out("dead:\t$_ <$ml>");
-		&MakeFml("bye $ml $addr", $addr);
+		&Debug("dead:\t$_ <$ml>") if $debug;
+		&Action($addr, $ml);
 	    }
 	    else {
-		&Debug("ml is not found, ignore <$_>") if $debug;
+		&Debug("$ml for <$admin> is not found, ignore <$_>") if $debug;
 	    }
 	}
 	# alive
@@ -201,27 +242,156 @@ sub DeadOrAlive
 }
 
 
+### makefml -> $LogBuf{$ml}
+### report     $Template{$ml} (command template)
+###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
+sub Report
+{
+    &GetTime;
+
+    if ($MODE eq 'report') {
+	# make "makefml ..." shell script for convenience
+	# This file includes all ML's script if 
+	# each ML-admin -> mead.pl is not set but 
+	# all erros are input to mead.pl.
+	if (%MakeFmlTemplate) {
+	    local($tmp)  = "$DIR/,mead.sh$$";
+	    local($file) = "$DIR/remove${CurrentTime}.sh";
+
+	    &Append("\#!/bin/sh", $tmp);
+
+	    for $ml (keys %MakeFmlTemplate) {
+		&Append($MakeFmlTemplate{$ml}, $tmp);
+
+		&Mesg($ml, "\n");
+		&Mesg($ml, "2. The script to remove dead users is also generated.");
+		&Mesg($ml, "Please log in the fml server host and run (\% is the prompt):\n");
+		&Mesg($ml, "\t\% cd $DIR");
+		&Mesg($ml, "\t\% sh $file");
+	    }
+
+	    rename($tmp, $file) || &Debug("cannot rename $tmp $file");
+	    chmod 755, $file;
+	}
+    }
+
+    ### send reports by mail.
+
+    if ($MODE eq 'auto') {
+	for $ml (keys %LogBuf) {
+	    &Mail($ml, $LogBuf{$ml});
+	}
+    }
+    elsif ($MODE eq 'report') {    
+	if (%Template) {
+	    for $ml (keys %Template) {
+		$prepend = "Hi, I am fml Mail Error Analyzer Daemon (mead).\n";
+		$prepend .= "I think you should remove mail unreachable addresses\n\n";
+
+		$prepend .= "1. If you use remote administration mode,\n";
+		$prepend .= "send the following command(s) to <";
+		$prepend .= $ml'CA{$ml} .">.\n\n"; #';
+	
+		# prepend
+		$Template{$ml} = $prepend. $Template{$ml};
+		&Mesg($ml, "\n--mead, fml\'s Mail Error Analyze Daemon");
+
+		&Mail($ml, $Template{$ml});
+	    }
+	}
+    }
+    else {
+	;
+    }
+}
+
+
+sub Mesg
+{
+    local($ml, $buf) = @_;
+    $Template{$ml} .= "$buf\n";
+}
+
+
+sub Mail
+{
+    local($ml, $buf) = @_;
+    local($maintainer) = $ml'MAA{$ml} ;#';
+
+    return unless $ml;
+
+    if (! $maintainer) {
+	&Debug("Mail: maintainer is not defined for ML <$ml>");
+	return $NULL;
+    }
+
+    open(MAIL, "| $EXEC_DIR/bin/sendmail -t") || 
+	die("cannot execute $EXEC_DIR/bin/sendmail");
+
+    print MAIL "From: ". $ml'MAA{$ml} . "\n"; #';
+    print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
+    print MAIL "Subject: mead report for ML <$ml>\n";
+    print MAIL "To: ". $ml'MAA{$ml} . "\n"; #';
+    print MAIL "\n";
+    print MAIL $buf;
+
+    close(MAIL);
+}
+
+
+sub Action
+{
+    local($addr, $ml) = @_;
+
+    ### makefml -> $LogBuf{$ml}
+    ### report     $Template{$ml} (command template)
+    ###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
+
+    if ($MODE eq 'auto') {
+	&MakeFml("bye $ml $addr", $addr, $ml);
+    }
+    elsif ($MODE eq 'report') {
+	$Template{$ml} .= "\# admin bye $addr\n";
+	$MakeFmlTemplate{$ml} .= "makefml bye $ml $addr\n";
+    }
+    else {
+	&Debug("mode $MODE is unknown");
+    }
+
+    # record the addr irrespective of succeess or fail
+    # to avoid a log of warning mails "remove ... but fails" ;-)
+    &CacheOn("#remove $addr");
+}
+
+
 sub MakeFml
 {
-    local($buf, $addr) = @_;
-    local($r, $ok);
+    local($buf, $addr, $ml) = @_;
+    local($r, $ok, $logbuf);
 
     $ok = 0;
 
-    if (&open2(RS, S, "$MAKEFML -i -u mead")) { 
+    $LogBuf{$ml} .= "mead> bye $ml $addr\n";
+
+    if (&open2(RS, S, "$MAKEFML -i -u mead 2>&1")) { 
 	select(S); $| = 1; select(STDOUT);
 	print S $buf;
 	close(S);
 	while (<RS>) {
-	    print $_;
+	    $logbuf .= $_;
 
 	    if (/\#\#BYE\s+$addr/i) {
 		$ok = 1;
+		$LogBuf{$ml} .= "\tsucceeds.\n";
+	    }
+	    else {
+		$LogBuf{$ml} .= "\tfails.\n";
+		$LogBuf{$ml} .= "\tPlease remove $addr by hand.\n";
 	    }
 	}
 	close(RS);
 
-	&CacheOn("#remove $addr");
+	$LogBuf{$ml} .= $logbuf;
     }
     else {
 	print "Mead error: cannot execute makefml [$MAKEFML]\n";
@@ -229,12 +399,37 @@ sub MakeFml
 }
 
 
+sub GetTime
+{
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			1900 + $year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime  = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+    $PCurrentTime = sprintf("%04d%02d%02d%02d%02d%02d", 
+			    1900 + $year, $mon + 1, $mday, $hour, $min, $sec);
+}
+
+
 sub Init
 {
+    &GetTime;
     $| = 1;
 
     require 'getopts.pl';
-    &Getopts("dD:e:S:hC:i:l:M:");
+    &Getopts("dD:e:S:hC:i:l:M:m:E:");
     $opt_h && die(&Usage);
     $debug  = $opt_d;
     $EXPIRE = $opt_e || 14; # days
@@ -247,14 +442,18 @@ sub Init
     $DIR    = $opt_D || 
 	die("Please define -D \$DIR, mead.pl working directory\n");
     $ML_DIR = $opt_S || die("Please define -S ML_DIR e.g. -S /var/spool/ml\n");
-    $CACHE  = $opt_C || "$DIR/mead.cache";
+    $CACHE  = $opt_C || "$DIR/errormaillog";
 
     # program
-    $MAKEFML = $0;
-    $MAKEFML =~ s#libexec/mead.pl#sbin/makefml#;
-    $MAKEFML = $opt_M || $MAKEFML;
+    $EXEC_DIR = $0;
+    $EXEC_DIR =~ s#/libexec/mead.pl##;
+    $EXEC_DIR = $opt_E || $EXEC_DIR;
+    $MAKEFML  = $opt_M || "$EXEC_DIR/makefml";
 
-    # 
+    # mode
+    $MODE = $opt_m || 'report';
+
+    # touch
     &Touch($CACHE);
 }
 
@@ -266,14 +465,15 @@ sub Usage
 Options:
     -h              help
     -d              debug mode on
+    -m mode         mode; report or auto ('report' in default).
 
     -e number      expire of error data cache (unit is 'day')
     -i number      check interval (unit is 'second')
 
     -C cachefile    mead data cache file
     -D directory    \$DIR (mead.pl working directory)
+    -E directory    \$EXEC_DIR (e.g. /usr/local/fml)
     -S directory    \$ML_DIR (e.g. /var/spool/ml)
-
     -M path         makefml path
 "
 }
@@ -295,9 +495,16 @@ sub Out
 
 package ml;
 
+sub Debug
+{
+    &main'Debug(@_); #';
+}
+
 sub main'MLEntryOn #';
 {
     local($spool) = @_;
+
+    $ml_debug = $ml'debug = $main'debug;
 
     opendir(DIRD, $spool) || die("cannot opendir $spool");
     for (readdir(DIRD)) {
@@ -310,16 +517,27 @@ sub main'MLEntryOn #';
 	$config = "$spool/$_/config.ph";
 
 	if (-f $config) {
+	    &Debug("eval $config") if $debug;
+
 	    undef $buf;
 	    open(CF, $config);
+	  CF: 
 	    while (<CF>) {
 		$buf .= $_;
-		last if /^\s*\$MAINTAINER/;
+		last CF if /^\s*\$MAINTAINER/;
 	    }
 	    close(CF);
 
 	    eval($buf);
+	    &Debug($@) if $@;
+
+	    # reset required (config.ph overwrite it).
+	    $debug = $ml_debug;
+	    &Debug("\$ML{$MAINTAINER} = $ml;") if $debug;
+
 	    $ML{$MAINTAINER} = $ml;
+	    $MAA{$ml} = $MAINTAINER; # ML Admin Address
+	    $CA{$ml}  = $CONTROL_ADDRESS || $MAINTAINER;
 	}
 
     }
