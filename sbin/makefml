@@ -597,6 +597,8 @@ sub SetHashDefaults
 
 		    # utilities
 		    'resend',       'do_resend',
+		    'log',          'do_log',
+		    'logtail',      'do_log',
 		    );
 
     # functions not to lock
@@ -617,6 +619,7 @@ sub SetHashDefaults
 
 		 # utilities
 		 'resend', 1,
+		 'log',    1,
 		 );
 
     # <ML> argument is not required.
@@ -4499,6 +4502,58 @@ sub do_resend
 
     &ResetVariables;
     system "$EXEC_DIR/bin/resend.pl", @argv;
+}
+
+
+sub do_log
+{
+    local($ml, @argv) = @_;
+    local($lines, $flag, $all_p, $prog, $file, $pat, $cis_p);
+
+    &ResetVariables;
+    &GetConfigPH($ml);
+
+    for (@argv) {
+	/^-i$/       && ($cis_p = 1);
+	/^\-p(\S+)$/ && ($pat = $1);
+	/^\-(\d+)$/  && ($lines = $1);
+	/^all$/i     && ($all_p = 1)
+    }
+
+    # logfile
+    $file = &Value('LOGFILE') || "$ML_DIR/$ml/log";
+
+    # tail options
+    $flag = "-$lines" if $lines;
+
+    if ($pat) {
+	print "\% grep $pat $file\n";
+
+	if (open($file, $file)) {
+	    while (<$file>) {
+		if ($cis_p) {
+		    print $_ if /$pat/i;
+		}
+		else {
+		    print $_ if /$pat/;
+		}
+	    }
+	    close($file);
+	}
+	else {
+	    &Error("cannot open $file");
+	}
+    }
+    elsif ($all_p) {
+	$prog = &search_path('cat');
+	print "\% $prog $flag $file\n";
+	system "$prog $file";
+    }
+    else {
+	$prog = &search_path('tail');
+	print "\% $prog $flag $file\n";
+	system "$prog $flag $file";
+    }
 }
 
 
