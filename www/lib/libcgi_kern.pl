@@ -66,7 +66,7 @@ sub Init
     $HTDOCS_TEMPLATE_DIR = $HTDOCS_TEMPLATE_DIR || "$EXEC_DIR/www/template";
 
     # /cgi-bin/ in HTML
-    $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
+    $CGI_PATH = $CGI_PATH || '..'; # '/cgi-bin/fml';
 
     # signal handling
     $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
@@ -360,7 +360,10 @@ sub Convert
 		next;
 	    }
 
-	    s/_CGI_PATH_/$CGI_PATH/g;
+	    # s/_CGI_PATH_/$CGI_PATH/g;
+	    s@_CGI_PATH_/admin/@@g;
+	    s@_CGI_PATH_/ml-admin/@@g;
+
 	    s/_FML_VERSION_/$VERSION/g;
 	    s/_HOW_TO_UPDATE_ALIAS_/$CGI_CF{'HOW_TO_UPDATE_ALIAS'}/g;
 
