@@ -598,7 +598,7 @@ sub SetHashDefaults
 		    # utilities
 		    'resend',       'do_resend',
 		    'log',          'do_log',
-		    'logtail',      'do_log',
+		    '1000#log',     'log [-i] [-NUMBER] [all] [-pPATTERN]'
 		    );
 
     # functions not to lock
@@ -2251,7 +2251,8 @@ sub do_info
     print STDERR "*" x 60; print STDERR "\n";
     print STDERR "\n";
     print STDERR "HOW TO INSTALL:\n";
-    print STDERR "\"perl makefml install\" to INSTALL the fml\n";
+    print STDERR "\"perl makefml install\" to install fml\n";
+    print STDERR "\"perl makefml -W cgi install\" to enable cgi for fml\n";
     print STDERR "\"perl makefml config <ML>\" to go to the menu screen\n";
     print STDERR "\n";
 }
