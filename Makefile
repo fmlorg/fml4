@@ -234,6 +234,7 @@ v3:
 sync:
 	# scp -v -p /var/tmp/distrib/src/*.pl eriko:~/.fml
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/ eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/drafts/ eriko:~/.fml
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/libexec/ eriko:~/.fml/libexec
 	(sleep 5; echo test|Mail test@fml.org)
 
