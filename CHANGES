@@ -5,6 +5,41 @@
 	$Date$
 
 
+2002/02/16
+
+   Postfix VERPs
+
+	Postfix の XVERP を有効にしました。
+
+	もし $USE_VERP が 1 になっている時に、(最初の EHLO の答で) MTA 
+	が XVERP 対応といってくれたら、verps モードに入ります。
+
+	なお mead でエラーを解析できるように、セパレータは qmail に合
+	わせます。＃ + じゃなくて - にする
+
+2002/02/14
+
+   CHADDR_REPLY_TO
+	chaddr の返事を出す先をカスタマイズできるようにする。
+
+	old new maintainer でそれぞれ
+	旧アドレス、新アドレス、ＭＬ管理者を意味する。
+
+		$CHADDR_REPLY_TO = "old new"; 
+
+	なら、新旧アドレスのみに
+
+		$CHADDR_REPLY_TO = "old new maintainer";
+
+	なら、新旧およびＭＬ管理者の 3 アドレスに。
+
+		old		旧アドレス
+		new		新アドレス
+		maintainer	ＭＬの管理者 ($MAINTAINER)
+
+	のコンビネーションが指定できます
+
+
 2002/02/10
 
    define $SUBSCRIBE_ANNOUNCE_FORWARD_TYPE
@@ -185,7 +220,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.234 2002/02/01 14:25:30 fukachan Exp $
+	add $FML: CHANGES,v 1.235 2002/02/10 13:54:11 fukachan Exp $
 
 2001/10/03
 
