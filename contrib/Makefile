@@ -12,7 +12,6 @@
 
 SUBDIRS += MIME
 SUBDIRS += utilities
-SUBDIRS += ftpmail
 SUBDIRS += whois
 SUBDIRS += www
 SUBDIRS += traffic
