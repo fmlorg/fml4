@@ -215,12 +215,11 @@ eval($evalstr);
 sub GetMax
 {				
     local($dir) = @_;
-    local($i, $try, $right, $seq);
+    local($i, $try, $right, $seq, $p);
 
-    # anyway try;
-    if (-f "$dir/../seq") {
-	if (open(F, "$dir/../seq")) { chop($seq = <F>);}
-    }
+    # anyway try prescan;
+    for ($p = 1; $p < (1 << 16); $p *= 2) { $seq = $p if -f "$dir/$p";}
+    $seq *= 2;
 
     for ($i = 1; ; $i *= 2) { last unless -f "$dir/$i";}
 
@@ -237,6 +236,7 @@ sub GetMax
 
     for ( ; ; $try++) { last unless -f "$dir/$try";}
 
+    # print STDERR "return ($try - 1)\n" if $verbose;
     ($try - 1);
 }
 
