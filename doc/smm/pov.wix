@@ -873,6 +873,11 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 これもカーネルレベルの話。根本的な対策は難しい。
 
 
+.S	Gauntlet
+.l	Gauntlet
+
+http://www.tis.com/
+http://www.iij.ad.jp/service/FIREWALL.html
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
