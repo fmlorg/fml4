@@ -161,7 +161,7 @@ sub Parse
 
 	# smtpfeed -1 -F hack
 	if (/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
-	    &ExtractAddr($1);
+	    &PickUpHint($1);
 	}
 
 	#####
@@ -324,15 +324,32 @@ sub BareAddr
 
 sub ExtractAddr
 {
-    &Debug("ExtractAddr:$new_block,$gabbble> $_[0]") if $debug;
+    my ($addr, $pickup_p) = @_;
+    my ($pickup_addr);
 
-    for (split(/,/, $_[0])) {
+    &Debug("ExtractAddr:$new_block,$gabbble> $addr") if $debug;
+
+    for (split(/,/, $addr)) {
 	s/</ /g; s/>/ /g; s/\.\.\./ /;
 	if (/(\S+\@[\.A-Za-z0-9\-]+)/) { 
 	    $return_addr{$1} = 1;
+	    $pickup_addr = $1 if $pickup_p;
 	    &Debug("add \$return_addr{$1}") if $debug;
 	}
     }
+
+    $pickup_addr;
+}
+
+
+sub PickUpHint
+{
+   my ($addr) = @_;
+   my ($pickup_addr);
+   
+   $pickup_addr = &ExtractAddr($addr, 'pickup');
+   &Touch($HINT);
+   &Append($pickup_addr, $HINT) if -f $HINT;
 }
 
 
@@ -963,9 +980,10 @@ sub Init
     $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
 
     # directories / files
-    $DIR    = $FORCE_DIR     || $opt_D || $DIR;
-    $ML_DIR = $FORECE_ML_DIR || $opt_S || $ML_DIR;
-    $CACHE  = $FORCE_CACHE   || $opt_C || $CACHE || "$DIR/errormaillog";
+    $DIR      = $FORCE_DIR     || $opt_D || $DIR;
+    $ML_DIR   = $FORECE_ML_DIR || $opt_S || $ML_DIR;
+    $CACHE    = $FORCE_CACHE   || $opt_C || $CACHE || "$DIR/errormaillog";
+    $HINT     = $FORCE_HINT    || $opt_C || $HINT  || "$DIR/error_addr.hints";
     $EXEC_DIR = $FORCE_EXEC_DIR || $opt_E || $EXEC_DIR;
 
     # programs
