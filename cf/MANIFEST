@@ -17,7 +17,7 @@ INFO:
 #####################################################################
 # ### Section: DNS and Other Fundamental (CF Version, debug, Language) ### 
 # config.ph configuration version
-CFVersion:	4.1
+CFVersion:	5.0
 
 # global debug option. if non-nil, debug mode.
 # In debug mode, NOT do distribution
