@@ -3,15 +3,14 @@
 
 * postfix 1.1.x VERPs
 
-* chaddr
-
-   [BUG FIX]
-	chaddr を送り返す先の変更を configurable にする
-
 * DBMS
 
    [FEATURE]
 	   toyomodel new なりをかくべきだろう -> generic ?
+
+
+-----------------------------------------------------------------------
+*** done, merge todo ***
 
 
 * new HTML generator
@@ -36,3 +35,16 @@
 
 cvs-update-j 2.50  2.51  proc/libamctl.pl
 cvs-update-j 1.93  1.94  cf/MANIFEST
+
+
+* chaddr
+
+   [BUG FIX]
+	chaddr を送り返す先の変更を configurable にする
+
+cvs-update-j 2.142 2.143 kern/fml.pl
+cvs-update-j 2.6   2.7   kern/libkernsubr.pl
+cvs-update-j 2.51  2.52  proc/libamctl.pl
+cvs-update-j 2.42  2.43  proc/libfml.pl
+cvs-update-j 2.39  2.40  proc/libra.pl
+cvs-update-j 1.94  1.95  cf/MANIFEST
