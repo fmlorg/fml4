@@ -2670,6 +2670,14 @@ sub GetCF
 	print STDERR "   config.ph: Convert from $v to $config{'CFVersion'}\n";
 	$SetProcTitle = "config.ph: Convert from $v to $config{'CFVersion'}";
     }
+
+    # check the validity of ADDR_CHECK_MAX
+    if (! $config{'ADDR_CHECK_MAX'}) {
+	print STDERR "   cf: lack of ADDR_CHECK_MAX definition!\n";
+	print STDERR "   I assume it is 3. Here we go!\n";
+	$config{'ADDR_CHECK_MAX'} = 3;
+	sleep 3;
+    }
 }
 
 
@@ -2836,6 +2844,8 @@ sub do_config
 	    $change_p = 1;
 	}
     }
+    $config{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+
     ### MENU END ###
 
     # set local_config -> %MAKE_FML;
