@@ -1,10 +1,11 @@
-*** CAUTION ***
+***************************** CAUTION *******************************
 
   This master site is moved to
 
      http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/perl.html
 
-***
+$FML$
+*********************************************************************
 
 
 NetBSD				none
@@ -97,4 +98,4 @@ checked by
 	toshi@he.kobelcosys.co.jp
 	Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
 
-$Id$
+$FML$
