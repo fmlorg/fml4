@@ -1,9 +1,12 @@
-.C	PGP (Pretty Good Privacy)
+.# 2.2.1 this file is a one chapter.
+.# be a section for FML 2.1 daemon book (97/08/09)
+.#
+.# .C	PGP (Pretty Good Privacy)
+
+.S	PGP
 .l	pgp
 
 注意: 以下では公開鍵暗合やPGPについては既知のものとしています。
-
-.S	PGP
 
 公開鍵暗合の代表的な応用例。
 PGP自体についてはここでは解説しませんが、例えば参考文献としては
