@@ -14,7 +14,7 @@ This document logs CHANGES in fml stable branch.
 See http://www.fml.org/ for CHANGES in fml-current. 
 .fi
 
-[ 3.0pl#33 == 3.0.1_BETA #22 ]
+[ 3.0.1_RC (release candidate)]
 
    sbin/makefml (2.108-2.109): 
 	use _MAINTAINER_ in Conv()
