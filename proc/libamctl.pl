@@ -119,6 +119,7 @@ sub AutoRegist
     if (&CheckMember($from, $file_to_regist)) {	
 	&Log("AutoRegist: Dup $from");
 	&Mesg(*e, "Address [$from] already subscribed.");
+	&Mesg(*e, $NULL, "already_subscribed", $from);
 	&Mesg(*e, &WholeMail);
 	return 0;
     }
@@ -133,6 +134,7 @@ sub AutoRegist
 		 "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
 	    &Mesg(*e, "Sorry, the number of this ML exceeds the limit.");
 	    &Mesg(*e, "Hence we cannot accept your request.");
+	    &Mesg(*e, $NULL, 'exceed_max_member_limit');
 	    return 0;
 	}
     }
@@ -325,6 +327,11 @@ sub AutoRegistError
     # here the addr is an unknown addr, so should not append "#help" info
     $e{'mode:stranger'} = 1;
 
+    &Mesg(*e, $NULL, 'auto_regist_not_member', 
+	  $MAIL_LIST, 
+	  $AUTO_REGISTRATION_KEYWORD,
+	  $MAINTAINER,
+	  $key);
     &Mesg(*e, $b.&WholeMail);
 }
 
