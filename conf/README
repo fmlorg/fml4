@@ -1,7 +1,14 @@
-conf/
+conf/ repository
 
 file			description
 ------------------------------------------------------
 release			the current main trunk version
-release_version		the snapshot version	(cvs ignored)
+			$major.$minor$n where $n is (A .. Z).
+release_version		the snapshot version	(cvs ignore this)
 
+
+[DESCRIPTION]
+
+conf/release_version is updated when "make snapshot" runs. I ignore
+conf/release_version which file has current snapshot number but the
+information is not needed.
