@@ -658,7 +658,7 @@ sub ShowPointer
 sub ParseMultipart
 {
     local($dir, $file, *e) = @_;
-    local($image, $image_in, $image_count, $s, @s, $ct, $cte);
+    local($image, $image_in, $mp_count, $s, @s, $ct, $cte);
     local($boundary);
     
     # Header Info
@@ -703,9 +703,9 @@ sub ParseMultipart
 	next if $next;
 
 	if ($base64) {		# now BASE64 strings here
-	    $image_count++;		# global in one mail
+	    $mp_count++; # global in one mail
 
-	    &Log("image_count ++");
+	    &Log("mp_count ++") if $debug_html;
 
 	    # if not defined, try search bin/base64decede.pl
 	    if ($BASE64_DECODE && &ProgExecuteP($BASE64_DECODE)) {
@@ -717,26 +717,26 @@ sub ParseMultipart
 
 		if (! $decode) {
 		    &Log("SyncHtml::\$BASE64_DECODE is not defined");
-		    $image_count = 0;
+		    $mp_count = 0;
 		    next;
 		}
 	    }
 	    # when $BASE64_DECODE is defined, but not found
 	    elsif (! &ProgExecuteP($BASE64_DECODE)) {
 		&Log("SyncHtml::\$BASE64_DECODE is not found");
-		$image_count = 0;
+		$mp_count = 0;
 		next;
 	    }
 
-	    &Log("write image > $dir/${file}_$image_count.$image") ;
-	    &Debug("|$decode > $dir/${file}_$image_count.$image") 
+	    &Log("write image > $dir/${file}_$mp_count.$image") ;
+	    &Debug("|$decode > $dir/${file}_$mp_count.$image") 
 		if $debug; 
-	    open(IMAGE, "|$decode > $dir/${file}_$image_count.$image") 
+	    open(IMAGE, "|$decode > $dir/${file}_$mp_count.$image") 
 		|| &Log($!);
 	    select(IMAGE); $| = 1; select(STDOUT);
 
 	    print OUT "</PRE>\n";
-	    print OUT "<IMAGE SRC= ${file}_$image_count.$image>\n";
+	    print OUT "<IMAGE SRC= ${file}_$mp_count.$image>\n";
 	    print OUT "<PRE>\n";
 
 	    print IMAGE $_;
@@ -1351,7 +1351,7 @@ sub OutQueueOn
     # "$i" refers itself only;
     return unless $next{$i}; 
 
-    $queue .= " ( " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_STYLE eq 'UL';
+    $queue .= " ( " if $next{$i} =~ /\d+\s+/ && ($HTML_INDENT_STYLE eq 'UL');
     $queue .= " ( " if $next{$i} =~ /\d+\s+\d+/;
 
     # $i -> somewhere;
@@ -1359,7 +1359,7 @@ sub OutQueueOn
 	&OutQueueOn($_, *next, *queue);
     }
 
-    $queue .= " ) " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_STYLE eq 'UL';
+    $queue .= " ) " if $next{$i} =~ /\d+\s+/ && ($HTML_INDENT_STYLE eq 'UL');
     $queue .= " ) " if $next{$i} =~ /\d+\s+\d+/;
 }
 
