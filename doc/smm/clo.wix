@@ -108,8 +108,6 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 .k	&DEFINE_MODE('mode')
 .k	&DEFINE_SUBJECT_TAG
 
-＃さぁこれで N 秒はやく設定できるぜ（苦笑）
-
 		--mode
 
 の形で 簡単に作動モードを変更することが出来ます。細かい変更をするため
@@ -122,17 +120,39 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 は
 		&DEFINE_MODE('mode');
 
-になります。もっともアドレスによって挙動を変えるとかができない
-（config.phは共通だから）ので、そういう場合は等価ではなくなります。
-その場合はコマンドラインオプションの方が便利ですね。
+になります。なお、コマンドラインの --mode は config.ph で指定する 
+$Envelope{"mode:$mode"} と同じ意味になります。
 
+		＊＊＊注意＊＊＊
 
-注意： 	コマンドラインの  --mode は config.ph で指定する 
-	$Envelope{"mode:$mode"} と同じです。
+config.ph はすべての場合に共通に読み込まれます。そのため配送のモードの
+設定 (特に --distribute, --distribute_with_member_check のこと)につい
+ては、コマンドラインの時と config.ph に書いた時では異なる可能性があり
+ます。その場合はコマンドラインオプションを使っている方がわかりやすいで
+しょう。
+
+配送のモード以外の指定に関してはコマンドラインでもconfig.phどちらでも
+特に問題はないはずです。
+
 
 例：	
 	"| fml.pl  --distribute $DIR " 
-は $DIR/config.ph での $Envelope{'mode:distribute'} = 1; と同じ
+
+は $DIR/config.ph での $Envelope{'mode:distribute'} = 1; と同じ。
+
+しかし、もし include ファイルでなく &DEFINE_MODE('distribute'); を 
+config.ph に書いてしまうと、コマンド用に用意されたアドレスも配送専用に
+なってしまいます。
+
+makefml が作るコマンドサーバ用の include ファイルは --ctladdr というコ
+マンドラインオプションがついています。ctladdr モード指定は配送モードの
+設定より強いので、distribute と ctladdr の両方が指定された場合 ctladdr 
+の方に従いコマンドサーバになるというトリックが使われています。
+
+難しいと思う人はコマンドラインオプションで指定するのが良いでしょう。
+makefml はこのトリックを使っているので makefml の作ったファイルを手で
+いじる際には注意して下さい。
+
 
 .k	--distribute
 .l	--distribute

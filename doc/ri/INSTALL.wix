@@ -14,7 +14,7 @@
    The word "ML" is the abbriviation of "Mailing List" in this document.
 
    NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
-   ＃まだ途中っす;-)
+   ＃まだとってもとっても途中っす;-)
 =E
    INSTALL_on_NT4. English is the install guide for Windows NT4.0.
    NT3.5 may be also O.K (not tested since I do not have the OS).
@@ -41,7 +41,7 @@ Only you
 
 ＊＊＊注意＊＊＊ 
 ここでいうＭＬのオーナー(所有者?)とはＭＬサーバ プログラムが OSの上で
-走る時のオーナーです。リモート管理できる管理者ことではありません
+走る時のオーナーです。リモート管理できる管理者のことではありません
 
 "あなただけ"なら、すぐ次の節へ飛んで下さい("personal" を選んで下さい(後述))
 
@@ -64,7 +64,7 @@ Only you
 .S	インストーラ makefml によるインストール
 =E.S	Installing by makefml
 
-まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.y.. という名前
+まずパッケージ (fml.*.tar.gzとか…) をひろげると fml-x.y.. という名前
 の directory ができてその下にひとセット入ってます。
 
 =E
@@ -218,6 +218,29 @@ The configurations (inputs for "makefml") defined above are save here.
     Config Saved in [/usr/local/fml/.fml] 
 
 ＃つまり上で選んだ実行ファイルをインストールする場所の下の .fml です
+
+.S	POLICY
+
+makefml install の最後に 
+
+---For Your Information:
+The Current Policy to use ML addresses are as follows
+    (DEFAULT POLICY IS BACKWARD COMPATIBLE AS BELOW):
+
+………
+
+という Information が表示されます。これは Policy というか ML を新しく
+作る際のデフォールトを決定するものです。詳しくは後述します。
+"makefml policy" で変更できます。デフォールトの POLICY は
+
+	ＭＬ (listname@domain) の配送は Backward compatilibity のため 
+	配送をしさらにコマンドも実行可能
+
+	コマンドは listname-ctl@domain へコマンドを送ってもらう。
+	＃まんがいち listname@domain に送ってもコマンドは実行可能
+
+という設定です。
+
 
 
 .C	ＭＬを作る。
@@ -425,8 +448,8 @@ another "fmlserv" (listserv) syntax.
 .S		＊＊＊ＭＬを作る際の注意＊＊＊
 
 この簡易インストールでは作られるＭＬの設定で debug モードは切ってある
-のでいきなりメールは配送可能です。またいくつかの点で portability を無
-視してあります。
+のですでにメールは配送可能な状態です。またいくつかの点で portability 
+を無視してあります。
 
 
 
@@ -448,6 +471,27 @@ Samples are the following files:
 	include aliases crontab fml.c config.h cf Makefile
 
 が保存されています。参考にして下さい。
+
+
+.C	ＭＬへのユーザの登録・削除の場合の注意
+
+以下ＭＬへのユーザの登録・削除等について述べますが、もしＭＬサーバを作
+るのと同じマシンルからＭＬへメールを出すとすると、設定によっては
+
+	From: username@domain 
+
+ではなく 
+
+	From: username 
+
+のようなメールがＭＬサーバへ送られます。その場合そのために
+
+	メンバーではない
+or
+	自動登録できない
+
+といわれてしまいます。その場合は username も username@domain も両方と
+も登録して下さい。
 
 
 
@@ -545,9 +589,9 @@ TOP MENU
     0 END
     1 MEMBER CHECK or AUTO REGISTRATION        member_check
     2 SUBJECT TYPE                             
-    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
-    
-    
+    3 OPTIONAL SETTINGS (e.g. MIME, HTML)      
+    4 Delivery Mode                            distribute + commands available
+
     Menu  (number) [0] 
 
 のような画面で、数字を打込むと下の階層に進み、同様の画面が出ます。
@@ -721,6 +765,154 @@ which contains the html'ed articles here. In default articles are
 collected in each day directory below here.  Each directory has
 index.html and thread.html. index.html is the menu for the ML sequence
 order, thread.html is threaded menu for articles.
+
+○    4 Delivery Mode                          distribute + commands available
+=E
+<>    4 Delivery Mode                          distribute + commands available
+
+ＭＬ本体の配送モードを変更できます。この値は newml の時の際のデフォー
+ルトが使われます。デフォールトは makefml policy で変更できます。
+
+
+    ○下の階層の画面
+=E
+	The menu in the lower level
+
+
+        DELIVERY MODE (CURRENT MODE is distribute + commands available)
+         address elena      for both distribute and commands
+         address elena-ctl  for commands
+        
+        -------------------------------------------------------
+          ENTRY                           Current Configuration
+        -------------------------------------------------------
+        0 END
+        1 Distribute Only (only member can post)  
+        2 Distribute Only (anyone can post)       
+        3 Distribute + Commands (default)         <===
+        
+           Delivery Mode  (1-3) [0] 
+
+
+        1 Distribute Only (only member can post)  
+
+	メンバーチェックをし、メンバーであれば配送します。
+	コマンドは使えません。
+
+        2 Distribute Only (anyone can post)       
+
+	メンバーチェックをしません。だれでも投稿でき、配送されます。
+	コマンドは使えません。
+
+
+        3 Distribute + Commands (default)      
+
+	メンバーチェックをし、メンバーであれば配送します。
+	コマンドも使えます。また、自動登録モードに設定されている場合
+	自動登録ルーチンへ入ります。
+
+デフォールトは Backward compatibilitity で Distribute + Commands です。
+またコマンドは listname-ctl 宛を使うことを各ドキュメントのデフォールト
+では推奨しています。しかしＭＬ本体でもコマンドを実行可能です。
+
+
+.C	makefml policy 
+
+ここでいうポリシーは、ＭＬのアドレス群をどう使いわけるか？です。
+具体的には makefml newml を実行する時のデフォールトの設定になります。
+
+例えば
+
+	与えられるアドレスが少ないのでＭＬ本体で配送もコマンド実行も可
+	能だと便利だという場合もあるだろうし
+
+	アドレスを配送専用とコマンド専用とはっきりわける主義
+
+	配送専用のアドレスと、コマンドは一つのアドレスですべて受け付け
+	る listserv type のサーバが好み
+
+等いろいろあるでしょう。policy は newml の際にできる config.ph のデフォー
+ルトを左右するだけです。config.ph の設定次第でどうとでもなります。
+
+
+[TOP MENU]
+
+    0 END
+    1 $MAIL_LIST Delivery mode (mode of delivery)
+     
+        [available modes]                  [current setting]
+        distribute + commands              <===
+        distribute (only member can post)  
+        distribute (anyone can post)       
+    
+    2  FORMAT
+
+        [available format]                [current setting]
+        _ML_-ctl (default)                 <===
+        _ML_ (require distribute+commands) 
+        fmlserv                            
+        other                              
+    
+    Menu  (0,1,2) [0] 
+
+	○ 1 $MAIL_LIST Delivery mode (mode of delivery)
+
+$MAIL_LIST つまりＭＬの投稿用のアドレスについてどうするか？
+
+        [available modes]                  [current setting]
+        distribute + commands              <===
+        distribute (only member can post)  
+        distribute (anyone can post)       
+
+        ・ Distribute + Commands 
+
+	メンバーチェックをし、メンバーであれば配送します。
+	コマンドも使えます。また、自動登録モードに設定されている場合
+	自動登録ルーチンへ入ります。
+
+        ・ distribute (only member can post)  
+	メンバーチェックをし、メンバーであれば配送します。
+	コマンドは使えません。配送専用です。
+
+        ・ Distribute Only (anyone can post)
+
+	メンバーチェックをしません。だれでも投稿できそれは配送されます。
+	コマンドは使えません。配送専用です。
+
+	○    2  FORMAT
+
+        [available format]                [current setting]
+        _ML_-ctl (default)                 <===
+        _ML_ (require distribute+commands) 
+        fmlserv                            
+        other                              
+
+_ML_ の部分は newml の際変換されます。例えば makefml newml elena を実
+行する時 _ML_ の部分は elena に変換され設定ファイル群が生成されます。
+例:	_ML_-ctl	-> 	elena-ctl
+
+        [available format]                [current setting]
+        _ML_-ctl (default)                 <===
+        _ML_ (require distribute+commands) 
+        fmlserv                            
+        other                              
+
+	_ML_-ctl はデフォールト。
+
+	_ML_	を選ぶ場合は １の配送モードで
+	 Distribute + Commands と設定していないとエラーになります。
+
+	fmlserv は コマンドの先として fmlserv を選んだ場合です。
+
+	other だけは上記の場合と違い、好きなフォーマットを入れて下さい。
+	間違うと変なことになるので注意。
+	例: other を選び、 _ML_-command 等の _ML_ を使ったフォーマットで入力
+
+
+なお、このコマンドのアドレス等は X-ML-Info: Field 等にも当然反映される
+ものです。
+
+
 
 
 .A	:include: ではうまく動かない場合 (/etc/aliases)
