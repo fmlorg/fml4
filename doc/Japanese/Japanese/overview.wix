@@ -21,9 +21,10 @@
 
 .S	HOOKで使うと便利な関数: &mimeencode(文字列)
 
+	&DecodeMimeStrings(変換したい文字列);
 	&mimeencode(変換したい文字列);
 
-文字列を MIME encode する。
+文字列を MIME encode する。どっちの関数を呼んでも今は一緒
 
 
 .S	例題: STR2EUC を使う

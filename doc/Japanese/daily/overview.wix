@@ -1,23 +1,41 @@
 .C	概要
 
-.S	記事をまとめる、けす
+.S	記事のスプールをまとめる
 
 tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう
 
 	$USE_ARCHIVE
 .xref	$USE_ARCHIVE
 
-けす
+.S	スプールの古い記事を消す
 
 	$USE_EXPIRE
 .xref	$USE_EXPIRE
 
 .S	ログのチェック
 
-bin/daily.pl というのがある。
+bin/daily.pl というのがある。あきらかに正常という以外の行(例: Article 
+数字)を全部表示する。出過ぎるとおもうときはパターンファイルを変更する。
 
 .xref bin/daily.pl
 
+本質的には、前日のログに対して
+.q
+% egrep -v -f /usr/local/fml/etc/daily.ignore ログファイル
+.~q
+をするのと一緒
+
+.q
+[daily ヘルプ]
+
+daily.pl [-hd] [-f patfile] [-t trap_patfile] [-p days]
+
+	-h	ヘルプ
+	-d	デバッグモード
+	-p	Ｎ日前のログを調べる。デフォールトは１
+
+	-f	無視するパターンのファイル
+.~q
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
