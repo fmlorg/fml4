@@ -1,11 +1,23 @@
 .C	Expire (一定日数より古いファイルは消す)とNewSyslog
 .l	expire
 
+.S	Introduction
 
 Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
 方で実装されていましたが、正式なライブラリとして使えるようにしました。
 別に中身は変わっていません。単にHOOKを書かなくても良くなったということ
 だけです。
+
+$USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。必ず 
+$EXPIRE_LIMIT が記事の数で指定されていて、
+
+	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+
+でなくてはいけません。念のため
+
+	$EXPIRE_LIMIT = $ARCHIVE_UNIT * 2;
+
+くらいにしておくのが良いでしょう。
 
 
 .S	一定日数以上古いファイルを消去
