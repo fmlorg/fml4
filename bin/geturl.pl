@@ -36,7 +36,7 @@ if ($outfile) {
     if ($outfile eq '-') { $UseStdout = 1;}
 } 
 else {
-    if ($req !~ m#/$#) { $req .= "/index.html";}
+    if ($req !~ /(peg|htm)$/ && $req !~ m#/$#) { $req .= "/index.html";}
     if ($req =~ m#/$#) { $req .= "index.html";}
     ($req =~ m@\S+/(\S+)@) && ($outfile = $1);
 }
