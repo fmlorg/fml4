@@ -1,26 +1,14 @@
 		CGIの実装
-		-- βバージョンへの野望 --
-
-○ ターゲットの httpd を apache 1.3.9 (apache-ssl) へ
-
-    templateは
-	$EXEC_DIR/www/examplesapache-httpd.conf.diff (apache, apache-ssl)
-
-
-○ 基本的なディレクトリ構成
 
 たとえば $EXEC_DIR = '/usr/local/fml' 
 
-   $EXEC_DIR/www/
+○ 基本的なディレクトリ構成
 
-	CGIで使うtemplateを収容する場所
-	apache 1.3.9 directory style
+   $EXEC_DIR/www/ は template やライブラリの場所
 
-	   $EXEC_DIR/www/cgi-bin/
-	   $EXEC_DIR/www/htdocs/
-	   $EXEC_DIR/www/examples		(apache/conf/httpd.conf example)
-	   $EXEC_DIR/www/etc/		(.ht{access,passwd} example)
-	   $EXEC_DIR/www/authdb/		パスワードの実体置き場
+   $EXEC_DIR/share/ 以下はWWWで見える場所、つまり httpd の管理下。
+
+   $EXEC_DIR/www/authdb/ パスワードの実体置き場
 
 
 ○ 基本設定ファイル
@@ -33,79 +21,29 @@
 	このファイルはCGIからも変更可能であるべき
 
 
-○ インストーラー
+○ インストーラ
 
-1. make install 時に $EXEC_DIR/www/ 以下に admin 用のものだけは最低構
-築する。
+1. make install 時にひとおり全部設定。
 
-	$EXEC_DIR/www/cgi-bin/admin/.htaccess
-		参照するパスワードは $EXEC_DIR/www/db/admin/htpasswd
+admin でのアクセスを可能にする。つまりあとはWWWだけで閉じるようにする
+ということ
 
-デフォールトは
+
+○ パスワードファイル
+
+	$EXEC_DIR/www/cgi-bin/admin/.htaccess 
+
+の参照するパスワードは 
+
+	$EXEC_DIR/www/db/admin/htpasswd
+
+のような関係になる。デフォールトは
 
        User: admin
    Password: admin
 
-htpasswd プログラムを発見できたらそれを使って admin パスワードをいれさ
-せる。
+が設定されている。インストール時に htpasswd プログラムを発見できたらそ
+れを使って admin パスワードをいれさせる。
 
 
-2. admin 画面
-
-とりあえず admin (一番上の階層)の画面だけは出るように準備をしておく
-
-	パスワードの変更なり管理者アカウントの整理をする
-
-	MLを作る/そこからMLを削除 などのテストを行なう
-
-
-○   makefml コマンド(下請け)
-
-これらは必要ない make install-withcgi が行なう
-   XXX 
-   XXX     * 全体の管理者用 (実装済み)
-   XXX       makefml admin.cgi
-   XXX 	$EXEC_DIR/www/cgi-bin/fml/admin/ 以下にCGIを生成
-   XXX 			menu.cgi
-   XXX 			makefml.cgi
-   XXX 
-   XXX     * 各MLの管理者用 (実装済み)
-   XXX       makefml mladmin.cgi $ml
-   XXX 	$EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
-   XXX 			menu.cgi
-   XXX 			makefml.cgi
-   XXX 
-
-
- * 一般ユーザ用のはどうする? (未実装)
-   makefml ml.cgi $ml とかにするのか?
-
-       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/subscribe/ (without .htaccess)
-
-       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/$command/  (with .htaccess)
-		or
-       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/command/command.cgi ? (with .htaccess)
-
-
-○ 各ディレクトリの権限
-
-   $EXEC_DIR/www/cgi-bin/fml/admin/
- 
-	そのホスト上で makefml を使える人
-	つまり何でもできる権限がある人と等価
-
-	各MLの管理者とは別の集合である可能性がある
-	よってパスワードは別途設定するべき(特にインストール時)
-
-   $EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/
-
-	各MLの管理者の権限
-	メーリングリストサーバのホストに入れるとは限らない
-
-	パスワード認証をともなうべきで
-	adminコマンドと同じパスワード?
- 
-   $EXEC_DIR/www/cgi-bin/fml/ml/$ml/ (仮)
-
-	一般ユーザが入る階層
-	パスワード認証をともなうべき
+$Id$

@@ -6,4 +6,14 @@
 
 ○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといかん
 
+○ 一般ユーザ用のWWWアクセスモデルの構築
+
+どうする? (未実装)
+
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/subscribe/ (without .htaccess)
+
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/$command/  (with .htaccess)
+		or
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/command/command.cgi ? (with .htaccess)
+
 $Id$
