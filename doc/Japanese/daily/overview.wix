@@ -1,16 +1,23 @@
-.C	概要
+.C	TIPS
 
-.S	記事のスプールをまとめる
+.S	自動的に記事のスプールをまとめて小さくする
 
 tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう
 
 	$USE_ARCHIVE
 .xref	$USE_ARCHIVE
 
-.S	スプールの古い記事を消す
+.S	自動的にスプールの古い記事を消す
 
 	$USE_EXPIRE
 .xref	$USE_EXPIRE
+
+.S	ログをみる
+
+.q
+% makefml log elena
+.~q
+(2000/春以降の current only)
 
 .S	ログのチェック
 
