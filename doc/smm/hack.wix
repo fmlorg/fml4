@@ -405,6 +405,16 @@ $START_HOOK = q#
 複数あるなら 全部を うえのフックに加えて下さい。
 
 
+.S	.forward でMLはできるか？
+
+できます。特別なＭＬ用のUser をつくって ~/.forward を /etc/aliases と
+同じように設定すればいいだけです。
+＃なんらかの形で(お金で解決もあり)/etc/passwdをいじれることが条件です
+
+一つのアドレスで受けて、それを filtering program (fml_local.pl や 
+procmail, mailagent 等)で分離するというのも可能です。
+
+
 .S	multi domain server ではどうすればいいのか
 
 multi domain server といってもいろいろ実装形態はあるとおもうのですが…
@@ -560,6 +570,101 @@ $START_HOOK = q#
 	$DO_NOTHING = 1;
     }
 #;
+
+
+.S	自動送り返しサーバってどう実装してるんですか？ その１
+.key	自動送り返しサーバっ実装例１
+
+なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
+で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
+＃いままで、きづかなかった…
+
+ポイントは、“$START_HOOK にしかける”ってところですね。
+
+例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+$MAIL_LIST	= 'fml@phys.titech.ac.jp';
+$ML_FN		= '(fml recent infomation)';
+$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
+
+$FML            = '/home/axion/fukachan/work/spool/EXP';
+$GUIDE_FILE	= "$FML/doc/INFO";
+$LOGFILE	= "$FML/var/log/fmlinfo-log"; # activity log file
+
+$START_HOOK     = q# $Envelope{'req:guide'} = 1;#;
+
+1;
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	自動送り返しサーバってどう実装してるんですか？ その２
+.key	自動送り返しサーバっ実装例２
+
+設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
+てくるのですが、こういったものを作るには、どのような設定をすればいい？
+
+いまでは libSendBack.pl ってのにまとまってます。
+/usr/ucb/vacation ってのはこれとほぼ同じですね。
+＃もっともあれは unix from をみるんですが
+
+理屈は コードをけずっただけ（笑）というだけですが、
+
+０．いつもの通り仕掛ける
+１．ロック
+２．メンバーチェックをしないで
+３．送り返す
+	&SendFile($to, "", 目的のFILE);
+４．ロックをはずす
+
+in fml.pl MAIN PART
+
+(!$USE_FLOCK) ? &Lock : &Flock;	# Locking 
+
+#---------------- CHANGE -------------------------
+
+$MAIL_LIST	= 'fml@phys.titech.ac.jp';
+$ML_FN		= '(fml recent infomation)';
+$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
+
+$INFO_FILE	= "$DIR/INFO";
+
+$LOGFILE	= "$DIR/fmlinfo-log";		# activity log file
+
+$to             = $Reply_to ? $Reply_to : $From_address;
+
+&SendFile($to, "Info $ML_FN", $INFO_FILE);
+&Log("Info request from $From_address");
+
+#---------------- CHANGE ENDS --------------------
+
+(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
+exit 0;				# the main ends.
+
+
+
+.S	たとえば、Received: のようなヘッダを残すには？
+
+2.1 では
+
+    unshift(@HdrFieldsOrder, 'received');
+
+とすればいいでしょう。もっともこの場合一行だけ Received ではなく 
+received になってしまってちょっと情けないかも知れませんが…
+＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
+
+
+.S	今すでにスプールにあるファイルをMIME逆変換する
+
+lib/MIME/rmime を使って、/bin/sh なら
+
+	for file in *
+	do
+	   mv   $file     $file.org
+	   perl rmime $file.org > $file
+	done
+
+くらいでＯＫでしょう
+＃とりあえず .org つきのをバックアップに残すコードつき:-)
 
 
 .# $Id$
