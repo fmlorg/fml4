@@ -546,6 +546,7 @@ sub f_base64
     open(BASE64, "|$BASE64_ENCODE > $tmpf.1") ||
 	&Log("f_base64: cannot open $tmpf.1");
     select(BASE64); $| = 1; select(STDOUT);
+    binmode(BASE64);
     while (<IN>) {
 	print BASE64 $_;
     }

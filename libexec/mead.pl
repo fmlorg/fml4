@@ -605,6 +605,7 @@ sub Mail
     }
 
     open(MAIL, "| $sendmail -t") || &Die("cannot execute $sendmail");
+    binmode(MAIL);
 
     print MAIL "From: ". $ml'MAA{$ml} . "\n"; #';
     print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
