@@ -5,6 +5,46 @@
 =E
 				Ken'ichi Fukamachi
 
+.if LANG == JAPANESE
+3.0 stable branch の CHANGES についてのみ記しています。
+3.0 の CHANGES は http://www.fml.org/fml/ からたどってください。
+.fi
+.if LANG == ENGLISH
+This document logs CHANGES in fml stable branch.
+See http://www.fml.org/ for CHANGES in fml-current. 
+.fi
+
+ 2000/03/09
+
+   proc/libfml.pl
+	check mode:uip to validate input procedure 
+
+   kern/fml.pl:
+	CheckCurrentProc: fix to trap #\s+[\w\-]+ command string
+
+ 2000/03/08
+
+   kern/fml.pl (2.79-2.80): 
+	fix $REWRITE_TO == 1 behaviour to follow doc/op
+
+   envelope filter
+	check the first paragraphs or first 1024 bytes to count up the
+	number of paragraphs.
+
+[ 3.0.1_RC (release candidate)]
+
+   sbin/makefml (2.108-2.109): 
+	use _MAINTAINER_ in Conv()
+
+[ 3.0pl#32 == 3.0.1_BETA #21 ]
+
+   sbin/makefml (2.107-2.108): 
+	fix to reflect makefml install $CONFIG_DIR
+
+[ 3.0pl#31 == 3.0.1_BETA #20 ]
+
+   update/clean up documents	
+
 [ 3.0pl#30 == 3.0.1_BETA #19 ]
 
    sbin/makefml
