@@ -27,7 +27,7 @@ fml-support ＭＬでこの話題が出た時には以下の MTA の名前が挙げられてい
 	IMail
 	emwac 
 	emwac ims + SPA SMTP
-	(IIS のおまけ ?)
+	IIS のおまけ(?) + Aki POP
 
 Exchange はよくわかりませんが、IMail と同様の技が使えるのではないだろ
 うか？という意見もありますが、試した人がいないという status のようです。
