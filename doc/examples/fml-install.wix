@@ -98,7 +98,7 @@ Done.
 Password: 
 
 # cat /var/spool/ml/elena/aliases >> /etc/aliases
-# newaliaes
+# newaliases
 # exit
 
 ○ 自分を登録してみる

@@ -156,6 +156,9 @@ sub DoDistribute
 
     # Subject ReConfigure;
     { 
+	# strip off trailing \s+ against lame MUA ;-)
+	$e{'h:Subject:'} =~ s/\s+$//;
+
 	local($pat);
 	local($subject) = $e{'h:Subject:'} || $Subject; # original
 	$subject =~ s/^\s*//;

@@ -128,7 +128,7 @@ Should we split it to two parts?
 特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
 る。それを考慮すること
 =E
-Especially basse64 encoder. RFC2047 is incomplete for Japanese.
+Especially base64 encoder. RFC2047 is incomplete for Japanese.
 
 Xref: fml-support:05948
 
@@ -204,7 +204,7 @@ I may not do it since it only confuses the customize.
 
 * MTIの理論の解説書(本の厚さとはいわないが…)
 =E
-* MTI documente
+* MTI document
 
 XRef: fml-support:05930
 
@@ -392,7 +392,7 @@ $LOG_FILE_SUFFIX = ".%C%y";
 	fml-support: 05843
 	MANY MANY "; post only (only members can post)"  ...
 
- *  Recieved: handling rule for each distributing article and Saved file
+ *  Received: handling rule for each distributing article and Saved file
 
  *  $REWRITE_TO not number value
 
