@@ -13,6 +13,10 @@
 ### themost important variable ! ###
 FML = ${.CURDIR}
 
+# If release branch, use it
+# .include "distrib/mk/fml.release.mk"
+
+# standard includes
 .include "distrib/mk/fml.sys.mk"
 .include "distrib/mk/fml.prog.mk"
 .include "distrib/mk/fml.doc.mk"
@@ -51,6 +55,8 @@ distsnap:
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
+# If release branch, use this
+#snapshot: __in_release_branch
 snapshot:
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"

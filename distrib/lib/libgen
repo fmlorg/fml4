@@ -378,12 +378,14 @@ GEN_ARCHIVE () {
 	fi
 
 
-	echo ""
-	echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
-	rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
+	if [ X$IN_RELEASE_BRANCH = X ]
+	then
+		echo ""
+		echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
+		rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
+	fi
 
 	echo ""
-
 	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
@@ -391,20 +393,25 @@ GEN_ARCHIVE () {
 	DATE=`date +%y%h%d`
 	DATE=` $FML/distrib/bin/date `
 
-	echo "Synchronizing $FTP/snapshot ..."
-	echo " "
-	test -d $FTP/snapshot || mkdir $FTP/snapshot;
-	rsync --delete -av distrib/ $FTP/snapshot/
+	# for fml 2.x.y branch series
+	# If fml 2.x.y branch series, DO NOT synchronize
+	if [ X$IN_RELEASE_BRANCH = X ]
+	then
+		echo "Synchronizing $FTP/snapshot ..."
+		echo " "
+		test -d $FTP/snapshot || mkdir $FTP/snapshot;
+		rsync --delete -av distrib/ $FTP/snapshot/
 
-	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
-	echo " "
-	echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
-	nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
+		echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
+		echo " "
+		echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
+		nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
 
-	echo "Synchronizing $WWW ..."
-	echo " "
-	echo rsync -av $FML/var/html/ $WWW/
-	rsync -av $FML/var/html/ $WWW/
+		echo "Synchronizing $WWW ..."
+		echo " "
+		echo rsync -av $FML/var/html/ $WWW/
+		rsync -av $FML/var/html/ $WWW/
+	fi
 
 	echo " "
 	echo "Unlinking *~ ..."
@@ -417,15 +424,18 @@ GEN_ARCHIVE () {
 	mv distrib $FMLID
 	tar cvf $FMLID.tar $FMLID
 	gzip -9 $FMLID.tar
-	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
 
-	echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
-	cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+	if [ X$IN_RELEASE_BRANCH = X ]
+	then
+		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 
-	(
+		echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+		cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+
+	   (
 		echo 	chdir $FTP
 		echo    rm -f fml-current.*.tar.gz
 		echo 	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -439,8 +449,8 @@ GEN_ARCHIVE () {
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
 		(uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
 		cat > $FTP/fml-current.uu
-	)
-
+	   )
+	fi
 
 	echo "Generating $FMLID.zip";
 	find $FMLID |zip -q -@ $FMLID.zip
@@ -448,18 +458,23 @@ GEN_ARCHIVE () {
 		echo 	chdir $FTP
 		chdir $FTP
 
-		echo 	rm -f *.zip
-		rm -f *.zip
+		if [ X$IN_RELEASE_BRANCH = X ]
+		then
+			echo 	rm -f *.zip
+			rm -f *.zip
+		fi
 	)
 
 	cp -p $FMLID.zip $FTP
 
 	(
-		echo 	chdir $FTP
-		echo 	ln $FMLID.zip fml-current.zip
-
-		chdir $FTP
-		ln $FMLID.zip fml-current.zip
+		if [ X$IN_RELEASE_BRANCH = X ]
+		then
+			echo 	chdir $FTP
+			echo 	ln $FMLID.zip fml-current.zip
+			chdir $FTP
+			ln $FMLID.zip fml-current.zip
+		fi
 	)
 
 	#	echo "Generating ls-lR.gz";

@@ -69,7 +69,12 @@ then
 
 	(chdir $DESTDIR ; rm -f fml-current; ln -s $FMLID fml-current)
 
-	GEN_WWW
+	# for fml 2.x.y branch series
+	# If fml 2.x.y branch series, DO NOT synchronize
+	if [ X$IN_RELEASE_BRANCH = X ]
+	then
+		GEN_WWW
+	fi
 fi
 
 
