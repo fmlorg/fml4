@@ -16,8 +16,10 @@ GEN_DOC () {
 
 
 GEN_WWW () {
+   if [ X$MODE = X ]; then
 	echo "ReGenerating WWW Search Environment";
 	(cd $FML; make syncwww search)
+   fi
 }
 
 
