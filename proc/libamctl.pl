@@ -149,9 +149,22 @@ sub AutoRegist
 	$r .= "So NOT FORWARDED to ML($MAIL_LIST).\n\n";
 	$r .= ('-' x 30) . "\n\n";
     }
-    
+
     &Warn("New added member: $from $ML_FN", $r . &WholeMail);
+
+    # HOOK's may modified this;
+    local($cur_preamble) = $e{'preamble'};
+    if ($e{'GH:Reply-To:'} eq $MAIL_LIST) {
+	local($p);
+	$p .= "ATTENTION!: IF YOU REPLY THIS MAIL SIMPLY\n";
+	$p .= "YOUR REPLY IS DIRECTLY SENT TO THE MAILING LIST $MAIL_LIST\n";
+	$p .= "-" x 60; $p .= "\n\n";
+	$e{'preamble'} .= $p;
+    }
     &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
+
+    # reset preamble
+    $e{'preamble'} =  $cur_preamble;
 
     ### Ends.
     ($AUTO_REGISTERED_UNDELIVER_P ? 0 : 1);
@@ -174,7 +187,7 @@ sub GetAddr2Regist
     }
 }
 
-# [\033\050\112] is against a bug in cc:Mail
+# [\033\050\112] is against a bug in cc:Mail (must be ATOK specification)
 # patch by yasushi@pier.fuji-ric.co.jp
 sub GetSubscribeString
 {
@@ -293,7 +306,8 @@ sub DoSetDeliveryMode
 	return $NULL;
     }
 
-    if (&ChangeMemberList($cmd, $curaddr, $ACTIVE_LIST, *opt)) {
+    local($list) = &MailListActiveP($curaddr);
+    if (&ChangeMemberList($cmd, $curaddr, $list, *opt)) {
 	&Log("$cmd [$curaddr] $c");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted.");
     }
@@ -344,8 +358,7 @@ sub DoSetMemberList
 	    (return $NULL);
 
 	#ATTENTION! $curaddr or $newaddr should be a member.
-	if (&CheckMember($curaddr, $MEMBER_LIST) || 
-	    &CheckMember($newaddr, $MEMBER_LIST)) {
+	if (&MailListMemberP($curaddr) || &MailListMemberP($newaddr)) {
 	    &Log("$cmd: OK! Either $curaddr and $newaddr is a member.");
 	    &Mesg(*e, "\tTry change\n\n\t$curaddr\n\t=>\n\t$newaddr\n");
 	}
@@ -363,22 +376,25 @@ sub DoSetMemberList
 	$cmd = 'BYE';
     }
 
-    ##### Call recursively
-    local($r) = 0;
+    ### Modification routine is called recursively in ChangeMemberList;
+    local($r, $list);
     if ($ML_MEMBER_CHECK) {
-	&ChangeMemberList($cmd, $curaddr, $MEMBER_LIST, *newaddr) && $r++;
-	&Log("$cmd MEMBER [$curaddr] $c O.K.")   if $r == 1 && $debug2;
+	$list = &MailListMemberP($curaddr);
+	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
+	&Log("$cmd MEMBER [$curaddr] $c O.K.")   if $r == 1 && $debug_amctl;
 	&Log("$cmd MEMBER [$curaddr] $c failed") if $r != 1;
+	&Mesg(*e, "Hmm,.., modifying member list fails.") if $r != 1;
     }
     else {
 	$r++;
     }
 
     return $NULL if $Envelope{'mode:majordomo:chmemlist'};
-
-    &ChangeMemberList($cmd, $curaddr, $ACTIVE_LIST, *newaddr) && $r++;
-    &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $r == 2  && $debug2;
+    $list = &MailListActiveP($curaddr);
+    &ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
+    &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $r == 2 && $debug_amctl;
     &Log("$cmd ACTIVE [$curaddr] $c failed") if $r != 2;
+    &Mesg(*e, "Hmm,.., modifying delivery list fails.") if $r != 2;
 
     # Status
     if ($r == 2) {
@@ -438,6 +454,11 @@ sub DoChangeMemberList
     local($acct) = split(/\@/, $curaddr);
 
     &Debug("DoChangeMemberList($cmd, $curaddr, $file, $misc)") if $debug;
+
+    if (!-f $file) {
+	&Log("DoChangeMemberList::Cannot open file[$file]");
+	return $NULL;
+    }
     
     ### File IO
     # NO CHECK 95/10/19 ($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file)
@@ -605,7 +626,12 @@ sub DoChangeMemberList
 	&Log("Matome[Digest]: something Error");
     }
 
-    &Mesg(*e, "O.K.!") if $status eq 'done';
+    if ($status eq 'done') {
+	&Mesg(*e, "O.K.");
+    }
+    else {
+	&Mesg(*e, "Hmm,.. something fails.");
+    }
 
     $status;
 }

@@ -47,95 +47,20 @@ sub DoDistribute
 		     $Now, $ID, substr($From_address, 0, 15), $s),
 	     $SUMMARY_FILE) || return;
 
-    ##### ML Preliminary Session Phase 03: get @Rcpt
-    &Open(ACTIVE_LIST, $ACTIVE_LIST) || return 0;
-
     # Original is for 5.67+1.6W, but R8 requires no MX tuning tricks.
     # So version 0 must be forever(maybe) :-)
     # RMS = Relay, Matome, Skip; C = Crosspost;
     $Rcsid =~ s/^(.*)(\#\d+\s+.*)/$1.($USE_CROSSPOST?"(rmsc)":"(rms)").$2/e;
     $Rcsid =~ s/\)\(/,/g;
 
-    # Under DLA_HACK($e{'mode:DirectListAccess'}), PreProcessing Section;
-    # Get a member list to deliver
-    # After 1.3.2, inline-code is modified for further extentions.
+    # plural active_list available (97/03/26)
+    # Global Rcpt is already initialized;
+    # Set @Rcpt if not DLA; usually (in DLA), only scan [mrs]= options;
     {
-	local($rcpt, $lc_rcpt, $opt, $w, $relay, $who, $domain, $mxhost, $k, $v);
-
-	# default setting %SKIP and compat (obsolete %Skip);
-	# append something to the current %SKIP;
-	for $k (keys %Skip) { $k =~ tr/A-Z/a-z/; $SKIP{$_} = 1;}
-
-	for ($MAIL_LIST, $CONTROL_ADDRESS) {
-	    $k = $_; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
-	    ($who) = split(/\@/, $_);
-	    $k = "$who\@$DOMAINNAME"; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
-	    $k = "$who\@$FQDN";   $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
-	}
-
-      line: while (<ACTIVE_LIST>) {
-	  chop;
-
-	  next line if /^\#/o;	 # skip comment and off member
-	  next line if /^\s*$/o; # skip null line
-
-	  # strip comment, not \S+ for mx;
-	  s/(\S+)\s+\#.*$/$1/;
-
-	  # Backward Compatibility; tricky "^\s".Code above need no /^\#/o;
-	  s/\smatome\s+(\S+)/ m=$1 /i;
-	  s/\sskip\s*/ s=skip /i;
-
-	  ($rcpt, $opt) = split(/\s+/, $_, 2);
-	  $opt = ($opt && !($opt =~ /^\S=/)) ? " r=$opt " : " $opt ";
-
-	  $lc_rcpt = $rcpt;
-	  $lc_rcpt =~ tr/A-Z/a-z/; # lower case;
-
-	  printf STDERR "%-30s %s\n", $rcpt, $opt if $debug;
-
-	  # Crosspost Extension. if matched to other ML's, no deliber
-	  if ($USE_CROSSPOST && $e{'crosspost'}) {
-	      $w = $lc_rcpt;
-	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
-	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
-	      if ($NoRcpt{$w}) { # no add to @Rcpt
-		  $SKIP{$w} = 1;
-		  next line;
-	      } 
-	  }
-
-	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
-	  next line if $SKIP{$lc_rcpt}; # SKIP FIELD;
-
-	  # Relay server (RFC821 syntax 97/02/01)
-	  # % relay hack is not refered in RFC, but effective in Sendmail's;
-	  if ($opt =~ /\sr=(\S+)/i || $DEFAULT_RELAY_SERVER) {
-	      $relay = $1 || $DEFAULT_RELAY_SERVER;
-	      # % hack
-	      #($who, $mxhost) = split(/@/, $rcpt, 2);
-	      # DLA_HACK: $rcpt is original "addr" in ACTIVE_LIST;
-	      # $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
-	      # $rcpt = "${who}\%${mxhost}\@${relay}";
-	      # "Key" of %RclayRcpt is lower case for convenice;
-	      $RelayRcpt{$lc_rcpt} = "\@${relay}:$rcpt";
-	      $rcpt = "\@${relay}:$rcpt";
-	  }
-
-	  if ($e{'mode:DirectListAccess'}) {
-	      ;# if DirectListAccess (List == ACTIVE_LIST), delivery in Smtp;
-	  }
-	  else {
-	      print STDERR "DoDistribute::RCPT:<$rcpt>\n\n" if $debug;
-	      push(@Rcpt, $rcpt);
-	  }
-
-	  $Rcpt++; # count the number of recipients;
-      }
-
-	close(ACTIVE_LIST);
+	local(@a) = (@ACTIVE_LIST, $ACTIVE_LIST); 
+	&Uniq(*a); # here uniqed
+	for (@a) { &ReadActiveRecipients($_);}
     }
-
 
     ##### ML Distribute Phase 01: Fixing and Adjusting *Header
     # Run-Hooks. when you require to change header fields...
@@ -268,6 +193,99 @@ sub DoDistribute
 	&Deliver;
     }
 }
+
+
+sub ReadActiveRecipients
+{
+    local($active) = @_;
+
+    &Log("ReadActiveRecipients:$active") if $debug_active;
+
+    ##### ML Preliminary Session Phase 03: get @Rcpt
+    &Open(ACTIVE_LIST, $active) || return 0;
+
+    # Under DLA_HACK($e{'mode:DirectListAccess'}), PreProcessing Section;
+    # Get a member list to deliver
+    # After 1.3.2, inline-code is modified for further extentions.
+    {
+	local($rcpt, $lc_rcpt, $opt, $w, $relay);
+	local($who, $domain, $mxhost, $k, $v);
+
+	# default setting %SKIP and compat (obsolete %Skip);
+	# append something to the current %SKIP;
+	for $k (keys %Skip) { $k =~ tr/A-Z/a-z/; $SKIP{$_} = 1;}
+
+	for ($MAIL_LIST, $CONTROL_ADDRESS) {
+	    $k = $_; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    ($who) = split(/\@/, $_);
+	    $k = "$who\@$DOMAINNAME"; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    $k = "$who\@$FQDN";   $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
+	}
+
+      line: while (<ACTIVE_LIST>) {
+	  chop;
+
+	  next line if /^\#/o;	 # skip comment and off member
+	  next line if /^\s*$/o; # skip null line
+
+	  # strip comment, not \S+ for mx;
+	  s/(\S+)\s+\#.*$/$1/;
+
+	  # Backward Compatibility; tricky "^\s".Code above need no /^\#/o;
+	  s/\smatome\s+(\S+)/ m=$1 /i;
+	  s/\sskip\s*/ s=skip /i;
+
+	  ($rcpt, $opt) = split(/\s+/, $_, 2);
+	  $opt = ($opt && !($opt =~ /^\S=/)) ? " r=$opt " : " $opt ";
+
+	  $lc_rcpt = $rcpt;
+	  $lc_rcpt =~ tr/A-Z/a-z/; # lower case;
+
+	  printf STDERR "%-30s %s\n", $rcpt, $opt if $debug;
+
+	  # Crosspost Extension. if matched to other ML's, no deliber
+	  if ($USE_CROSSPOST && $e{'crosspost'}) {
+	      $w = $lc_rcpt;
+	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
+	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
+	      if ($NoRcpt{$w}) { # no add to @Rcpt
+		  $SKIP{$w} = 1;
+		  next line;
+	      } 
+	  }
+
+	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
+	  next line if $SKIP{$lc_rcpt}; # SKIP FIELD;
+
+	  # Relay server (RFC821 syntax 97/02/01)
+	  # % relay hack is not refered in RFC, but effective in Sendmail's;
+	  if ($opt =~ /\sr=(\S+)/i || $DEFAULT_RELAY_SERVER) {
+	      $relay = $1 || $DEFAULT_RELAY_SERVER;
+	      # % hack
+	      #($who, $mxhost) = split(/@/, $rcpt, 2);
+	      # DLA_HACK: $rcpt is original "addr" in ACTIVE_LIST;
+	      # $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
+	      # $rcpt = "${who}\%${mxhost}\@${relay}";
+	      # "Key" of %RclayRcpt is lower case for convenice;
+	      $RelayRcpt{$lc_rcpt} = "\@${relay}:$rcpt";
+	      $rcpt = "\@${relay}:$rcpt";
+	  }
+
+	  if ($e{'mode:DirectListAccess'}) {
+	      ;# if DirectListAccess (List == ACTIVE_LIST), delivery in Smtp;
+	  }
+	  else {
+	      print STDERR "DoDistribute::RCPT:<$rcpt>\n\n" if $debug;
+	      push(@Rcpt, $rcpt);
+	  }
+
+	  $Rcpt++; # count the number of recipients;
+      }
+
+	close(ACTIVE_LIST);
+    }
+}
+
 
 # IF SPEED_HACK, Mail Delivery is done after the unlocked;
 # Thoreticaly all file IO have been done and needed info are on the memory.

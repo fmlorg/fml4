@@ -19,8 +19,9 @@ Addr2Reply:          $Envelope{'Addr2Reply:'}
 DIR                  $DIR
 LIBDIR               $LIBDIR
 ACTIVE_LIST          $ACTIVE_LIST
+\@ACTIVE_LIST        @ACTIVE_LIST
 MEMBER_LIST          $MEMBER_LIST
-\@MEMBER_LIST         @MEMBER_LIST
+\@MEMBER_LIST        @MEMBER_LIST
 
 CONTROL_ADDRESS:     $CONTROL_ADDRESS
 Do uip               $Envelope{'mode:uip'}
