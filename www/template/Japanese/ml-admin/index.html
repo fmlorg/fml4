@@ -20,45 +20,45 @@
 </H2>
 
 <PRE>
-このページは _ML_ メーリングリストの設定を更新/変更する画面です。
+このページは _ML_ メーリングリストの設定を更新/変更する画面です。
 </PRE>
 
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#add.bye">ユーザ登録/削除</A>
-<LI><A HREF="#adminadd.bye">管理者登録/削除</A>
-<LI><A HREF="#config">_ML_ ＭＬの詳細設定</A>
-<LI><A HREF="#password">管理者パスワードの設定</A>
-<LI><A HREF="#log">ログをみる</A>
+<LI><A HREF="#add.bye">ユーザ登録/削除</A>
+<LI><A HREF="#adminadd.bye">管理者登録/削除</A>
+<LI><A HREF="#config">_ML_ ＭＬの詳細設定</A>
+<LI><A HREF="#password">管理者パスワードの設定</A>
+<LI><A HREF="#log">ログをみる</A>
 </UL>
 
 
 <HR>
 <UL>
 
-   <LI>ユーザの登録/削除
+   <LI>ユーザの登録/削除
 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> Email アドレス:
+		<TD ALIGN=right> Email アドレス:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>選択:
+			<TD ALIGN=left>選択:
 			<TD ALIGN=right>
-			<SELECT NAME=MAIL_ADDR>
+			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_MEMBER_LIST__
 			</SELECT>
 		</TABLE>
 	<TR>
-		<TD ALIGN=right> 登録/削除:
+		<TD ALIGN=right> 登録/削除:
 		<TD ALIGN=left> 
 		<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-		<SELECT NAME=PROC>
-		<OPTION VALUE=ADD>登録
-		<OPTION VALUE=BYE>削除
+		<SELECT NAME=PROC SIZE=2 >
+		<OPTION VALUE=ADD>登録
+		<OPTION VALUE=BYE>削除
 		</SELECT>
 	</TABLE>
 	_____________________________
@@ -70,29 +70,29 @@
 
    
    <A NAME=adminadd.bye>
-   <LI>管理者の登録/削除 関係
+   <LI>管理者の登録/削除 関係
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> Email アドレス:
+		<TD ALIGN=right> Email アドレス:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>選択:
+			<TD ALIGN=left>選択:
 			<TD ALIGN=right>
-			<SELECT NAME=MAIL_ADDR>
+			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
 			</SELECT>
 		</TABLE>
 
 	<TR>
-		<TD ALIGN=right> 登録/削除:
+		<TD ALIGN=right> 登録/削除:
 		<TD ALIGN=left> 
-		<SELECT NAME=PROC>
-		<OPTION VALUE=ADD_ADMIN>ADD ADMIN 管理者として登録
-		<OPTION VALUE=BYE_ADMIN>BYE ADMIN 管理者として削除
+		<SELECT NAME=PROC SIZE=2 >
+		<OPTION VALUE=ADD_ADMIN>ADD ADMIN 管理者として登録
+		<OPTION VALUE=BYE_ADMIN>BYE ADMIN 管理者として削除
 		</SELECT>
 	</TABLE>
 	_____________________________
@@ -103,7 +103,7 @@
 
 <HR>
    <A NAME=config>
-   <LI>詳細設定(makefml config)
+   <LI>詳細設定(makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -117,15 +117,15 @@
 
 <HR>
 	<A NAME=password>
-	<LI>管理者パスワードの設定
+	<LI>管理者パスワードの設定
 	<BR>
-	admin ないし approve コマンドのパスワードとGUIのメニューにはいるための
-	パスワードを同時に更新します。
+	admin ないし approve コマンドのパスワードとGUIのメニューにはいるための
+	パスワードを同時に更新します。
 	<BR>
-	GUIではとりあえずこれらについては同じパスワードです。
+	GUIではとりあえずこれらについては同じパスワードです。
 	<BR>
-	CUIの方の makefml htpasswd を用いることで別のパスワードをつけることは
-	可能です。
+	CUIの方の makefml htpasswd を用いることで別のパスワードをつけることは
+	可能です。
 
 	<!- apply patch by ikeda@meple.or.jp ->
 	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
@@ -135,15 +135,15 @@
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> 管理者 Email アドレス:
+		<TD ALIGN=right> 管理者 Email アドレス:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> パスワード:
+		<TD ALIGN=right> パスワード:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> 確認のため同じパスワード:
+		<TD ALIGN=right> 確認のため同じパスワード:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>
 	_____________________________
@@ -154,7 +154,7 @@
 
    <HR>
    <A NAME=log>
-   <LI>メーリングリストのログをみる
+   <LI>メーリングリストのログをみる
 
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -162,24 +162,24 @@
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>最後のＮ行
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>最後のＮ行
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">ある日
-	<SELECT NAME="YYYY" SIZE=4>
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">ある日
+	<SELECT NAME="YYYY" SIZE=2 >
 	__EXPAND_YYYY__
 	</SELECT>
-	<SELECT NAME="MM" SIZE=2>
+	<SELECT NAME="MM" SIZE=2 >
 	__EXPAND_MM__
 	</SELECT>
-	<SELECT NAME="DD" SIZE=2>
+	<SELECT NAME="DD" SIZE=2 >
 	__EXPAND_DD__
 	</SELECT>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">全部
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">全部
 
 	<BR>
-	選択: <SELECT NAME=ML>
+	選択: <SELECT NAME=ML SIZE=2 >
 	__EXPAND_OPTION_ML__
 	</SELECT>
 
