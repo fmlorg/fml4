@@ -40,11 +40,17 @@ sub AutoRegist
     # Confirmation Mode; 
     # check the MailBody to search $CONFIRMATION_KEYWORD
     if ($AUTO_REGISTRATION_TYPE eq "confirmation") {
+	local($key);
+
 	&use('confirm');
 	&ConfirmationModeInit;
 
-	$s    = &GetSubscribeString($set_buf || $e{'Body'}); # the first line
+	# the first line
+	$key  = "^$CONFIRMATION_SUBSCRIBE|$CONFIRMATION_KEYWORD";
+	$s    = &GetSubscribeString($set_buf || $e{'Body'}, $key);
 	$from = $From_address;
+
+	&Debug("confirm input: {\n$s\n}") if $debug;
 
 	if (! &Confirm(*e, $from, $s)) {
 	    $e{'mode:stranger'} = 1;
@@ -213,16 +219,25 @@ sub GetAddr2Regist
 # patch by yasushi@pier.fuji-ric.co.jp
 sub GetSubscribeString
 {
-    local($_) = @_;
+    local($_, $key) = @_;
+    local($buf);
 
     if ($debug_confirm) {
 	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
     }
     &Debug("--GetSubscribeString(\n$_\n);\n") if $debug;
 
-    s/(^\#[\s\n]*|^[\s\n]*)//;
-    s/^\033\050\112\s*//;
-    (split(/\n/, $_))[0]; # GET THE FIRST LINE ONLY
+    if ($key) {	# return lines with $key
+	for (split(/\n/, $_)) {
+	    $buf .= "$_\n" if /$key/;
+	}
+	$buf;
+    }
+    else {
+	s/(^\#[\s\n]*|^[\s\n]*)//;
+	s/^\033\050\112\s*//;
+	(split(/\n/, $_))[0]; # GET THE FIRST LINE ONLY
+    }
 }
 
 # Here the addr is an unknown addr; 
