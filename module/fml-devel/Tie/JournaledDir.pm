@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: JournaledDir.pm,v 1.15 2002/09/11 23:18:30 fukachan Exp $
+# $FML: JournaledDir.pm,v 1.16 2002/09/22 14:57:07 fukachan Exp $
 #
 
 package Tie::JournaledDir;
@@ -370,6 +370,10 @@ sub get_all_values_as_hash_ref
     return $result;
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Credential.pm,v 1.34 2002/09/11 23:18:02 fukachan Exp $
+# $FML: Credential.pm,v 1.36 2002/09/22 15:01:20 fukachan Exp $
 #
 
 package FML::Credential;
@@ -67,7 +67,7 @@ sub new
     $me->{ _user_part_case_sensitive } = 1;
 
     # hold pointer to $curproc
-    $me->{ _curproc } = $curproc if defined $curproc; 
+    $me->{ _curproc } = $curproc if defined $curproc;
 
     return bless $me, $type;
 }
@@ -496,6 +496,10 @@ if ($0 eq __FILE__) {
     print STDERR "\n";
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

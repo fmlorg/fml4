@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Distribute.pm,v 1.96 2002/09/15 00:11:43 fukachan Exp $
+# $FML: Distribute.pm,v 1.99 2002/10/03 22:10:15 fukachan Exp $
 #
 
 package FML::Process::Distribute;
@@ -142,12 +142,11 @@ sub verify_request
 sub _check_filter
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
 
     eval q{
 	use FML::Filter;
 	my $filter = new FML::Filter;
-	my $r = $filter->check($curproc, $args);
+	my $r = $filter->article_filter($curproc, $args);
 
 	# filter traps this message.
 	if ($r = $filter->error()) {
@@ -506,6 +505,12 @@ sub htmlify
     my $article        = $curproc->_build_article_object($args);
     my $article_id     = $pcb->get('article', 'id');
     my $article_file   = $article->filepath($article_id);
+    my $index_order    = $config->{ html_archive_index_order_type };
+    my $htmlifier_args = {
+	directory   => $html_dir,
+	charset     => 'euc-jp',
+	index_order => $index_order,
+    };
 
     $curproc->set_umask_as_public();
 
@@ -519,9 +524,8 @@ sub htmlify
 	}
 
 	eval q{
-	    &Mail::Message::ToHTML::htmlify_file($article_file, {
-		directory => $html_dir,
-	    });
+	    my $obj = new Mail::Message::ToHTML $htmlifier_args;
+	    $obj->htmlify_file($article_file, $htmlifier_args);
 	};
 	LogError($@) if $@;
     }
@@ -532,6 +536,10 @@ sub htmlify
     $curproc->reset_umask();
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

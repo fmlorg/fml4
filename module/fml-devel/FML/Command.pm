@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Command.pm,v 1.32 2002/09/11 23:18:01 fukachan Exp $
+# $FML: Command.pm,v 1.33 2002/09/22 14:56:39 fukachan Exp $
 #
 
 package FML::Command;
@@ -202,6 +202,10 @@ sub AUTOLOAD
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

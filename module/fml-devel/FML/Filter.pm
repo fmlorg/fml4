@@ -4,13 +4,14 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Filter.pm,v 1.10 2002/09/11 23:18:02 fukachan Exp $
+# $FML: Filter.pm,v 1.17 2002/10/26 04:03:31 fukachan Exp $
 #
 
 package FML::Filter;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
+use FML::Log qw(Log LogWarn LogError);
 use ErrorStatus qw(error_set error error_clear);
 
 =head1 NAME
@@ -19,14 +20,7 @@ FML::Filter - entry point for FML::Filter::* modules
 
 =head1 SYNOPSIS
 
-   use FML::Filter;
-   my $filter = new FML::Filter;
-
-   $filter->check( $message );
-
-   if ($filter->error()) {
-       ... error handling ...
-   }
+    ... under reconstruction now. synopsis disabled once ...
 
 where C<$message> is C<Mail::Message> object.
 
@@ -63,80 +57,174 @@ sub new
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: STR or UNDEF, error reason (string). return undef if ok.
-sub check
+sub article_filter
 {
     my ($self, $curproc, $args) = @_;
-    my $message = $curproc->{ 'incoming_message' }->{ message };
-    my $config  = $curproc->{ 'config' };
+    my $message = $curproc->incoming_message();
+    my $config  = $curproc->config();
 
     if (defined $message) {
-	if ($config->yes( 'use_article_header_filter' )) {
-	    use FML::Filter::HeaderCheck;
-	    my $obj = new FML::Filter::HeaderCheck;
+	my $functions = $config->get_as_array_ref('article_filter_functions');
+	my $status = 0;
 
-	    # overwrite filter rules based on FML::Config
-	    if (defined $config->{ article_header_filter_rules }) {
-		my (@rules) = split(/\s+/, $config->{ article_header_filter_rules });
-		$obj->rules( \@rules );
+      FUNCTION:
+	for my $function (@$functions) {
+	    if ($config->yes( "use_${function}" )) {
+		Log("filter(debug): check by $function");
+		my $fp = "_apply_$function";
+		$status = $self->$fp($curproc, $args, $message);
+	    }
+	    else {
+		Log("filter(debug): not check by $function");
 	    }
 
-	    # go check
-	    $obj->header_check($message);
-	    if ($obj->error()) {
-		my $x = $obj->error();
-		$x =~ s/\s*at .*$//;
-		$x =~ s/[\n\s]*$//m;
-		$self->error_set($x);
-		return $x;
-	    }
+	    last FUNCTION if $status;
 	}
 
-	if ($config->yes( 'use_article_body_filter' )) {
-	    use FML::Filter::BodyCheck;
-	    my $obj = new FML::Filter::BodyCheck;
+	return $status if $status;
+    }
+}
 
-	    # overwrite filter rules based on FML::Config
-	    if (defined $config->{ article_body_filter_rules }) {
-		my (@rules) = split(/\s+/, $config->{ article_body_filter_rules });
-		$obj->rules( \@rules );
-	    }
 
-	    # go check
-	    $obj->body_check($message);
-	    if ($obj->error()) {
-		my $x = $obj->error();
-		$x =~ s/\s*at .*$//;
-		$x =~ s/[\n\s]*$//m;
-		$self->error_set($x);
-		return $x;
-	    }
+# Descriptions: header based filter
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Side Effects: none
+# Return Value: STR(reason) or 0 (not trapped, ok)
+sub _apply_article_header_filter
+{
+    my ($self, $curproc, $args, $mesg) = @_;
+    my $config = $curproc->config();
+
+    use FML::Filter::Header;
+    my $obj = new FML::Filter::Header;
+
+    if (defined $obj) {
+	# overwrite filter rules based on FML::Config
+	my $rules = $config->get_as_array_ref('article_header_filter_rules');
+
+	if (defined $rules) {
+	    $obj->rules( $rules );
 	}
 
-	if ($config->yes( 'use_content_filter' )) {
-	    use FML::Filter::ContentCheck;
-	    my $obj = new FML::Filter::ContentCheck;
+	# go check
+	$obj->header_check($mesg);
+	if ($obj->error()) {
+	    my $x = $obj->error();
+	    $x =~ s/\s*at .*$//;
+	    $x =~ s/[\n\s]*$//m;
+	    $self->error_set($x);
+	    return $x;
+	}
+    }
 
-	    # overwrite filter rules based on FML::Config
-	    if (defined $config->{ content_filter_rules }) {
-		my (@rules) = split(/\s+/, $config->{ content_filter_rules });
-		$obj->rules( \@rules );
+    return 0;
+}
+
+
+# Descriptions: filter non MIME format message
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: 0 (always ok, anyway)
+sub _apply_article_non_mime_filter
+{
+    my ($self, $curproc, $args, $mesg) = @_;
+    my $config = $curproc->config();
+
+    if ($config->yes( 'use_article_non_mime_filter' )) {
+	my $rules =
+	    $config->get_as_array_ref('article_none_mime_filter_rules');
+
+      RULE:
+	for my $rule (@$rules) {
+	    if ($rule eq 'permit') {
+		return 0;
 	    }
 
-	    # go check
-	    $obj->content_check($message);
-	    if ($obj->error()) {
-		my $x = $obj->error();
-		$x =~ s/\s*at .*$//;
-		$x =~ s/[\n\s]*$//m;
-		$self->error_set($x);
-		return $x;
+	    # XXX implement this!
+	    if ($rule eq 'reject') {
+		;
 	    }
 	}
     }
 
-    return undef; # O.K.
+    return 0;
 }
 
+
+# Descriptions: syntax check for text(/plain)
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
+sub _apply_article_text_plain_filter
+{
+    my ($self, $curproc, $args, $mesg) = @_;
+    my $config = $curproc->config();
+
+    if ($config->yes( 'use_article_text_plain_filter' )) {
+	use FML::Filter::TextPlain;
+	my $obj = new FML::Filter::TextPlain;
+
+	# overwrite filter rules based on FML::Config
+	my $rules =
+	    $config->get_as_array_ref('article_text_plain_filter_rules');
+	if (defined $rules) {
+	    $obj->rules( $rules );
+	}
+
+	# go check
+	$obj->body_check($mesg);
+	if ($obj->error()) {
+	    my $x = $obj->error();
+	    $x =~ s/\s*at .*$//;
+	    $x =~ s/[\n\s]*$//m;
+	    $self->error_set($x);
+	    return $x;
+	}
+    }
+
+    return 0;
+}
+
+
+# Descriptions: analyze MIME structure and filter it if matched.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
+sub _apply_article_mime_component_filter
+{
+    my ($self, $curproc, $args, $mesg) = @_;
+    my $config = $curproc->config();
+
+    if ($config->yes( 'use_article_mime_component_filter' )) {
+	use FML::Filter::MimeComponent3;
+	my $obj  = new FML::Filter::MimeComponent;
+	my $file = $config->get('article_mime_component_filter_rules');
+
+	if (-f $file) {
+	    $obj->read_filter_rule_from_file($file);
+	    $obj->mime_component_check($mesg);
+	}
+	else {
+	    Log("(debug) disabled since rule file not found");
+	    return 0;
+	}
+
+	if ($obj->error()) {
+	    my $x = $obj->error();
+	    $x =~ s/\s*at .*$//;
+	    $x =~ s/[\n\s]*$//m;
+	    $self->error_set($x);
+	    return $x;
+	}
+    }
+
+    return 0;
+}
+
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

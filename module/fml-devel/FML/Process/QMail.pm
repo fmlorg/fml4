@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QMail.pm,v 1.13 2002/09/11 23:18:15 fukachan Exp $
+# $FML: QMail.pm,v 1.14 2002/09/22 14:56:53 fukachan Exp $
 #
 
 package FML::Process::QMail;
@@ -95,6 +95,10 @@ sub DotQmailExt
     return sprintf("# %s", $ext);
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: newml.pm,v 1.51 2002/09/15 00:11:43 fukachan Exp $
+# $FML: newml.pm,v 1.55 2002/11/10 14:50:18 fukachan Exp $
 #
 
 package FML::Command::Admin::newml;
@@ -145,11 +145,19 @@ sub _init_ml_home_dir
     }
 
     # $ml_home_dir/etc/mail
-    my $dirlist = $config->get_as_array_ref('newml_command_init_dirs');
+    my $dirlist = $config->get_as_array_ref('newml_command_init_public_dirs');
     for my $_dir (@$dirlist) {
 	unless (-d $_dir) {
-	    print STDERR "creating $_dir\n";
+	    print STDERR "creating ", $_dir, "\n";
 	    $curproc->mkdir( $_dir, "mode=public");
+	}
+    }
+
+    $dirlist = $config->get_as_array_ref('newml_command_init_private_dirs');
+    for my $_dir (@$dirlist) {
+	unless (-d $_dir) {
+	    print STDERR "creating ", $_dir, "\n";
+	    $curproc->mkdir( $_dir, "mode=private");
 	}
     }
 }
@@ -177,7 +185,7 @@ sub _install_template_files
 	my $src = File::Spec->catfile($template_dir, $file);
 	my $dst = File::Spec->catfile($ml_home_dir, $file);
 
-	print STDERR "creating $dst\n";
+	print STDERR "creating ", $dst, "\n";
 	_install($src, $dst, $params);
     }
 
@@ -212,6 +220,7 @@ sub _update_aliases
     my $ml_name   = $config->{ ml_name };
     my $ml_domain = $config->{ ml_domain };
     my $alias     = $config->{ mail_aliases_file };
+    my $mask      = umask( 022 );
 
     # append
     if ($self->_is_mta_alias_maps_has_ml_entry($curproc, $params, $ml_name)) {
@@ -239,6 +248,8 @@ sub _update_aliases
 	};
 	croak($@) if $@;
     }
+
+    umask( $mask );
 }
 
 
@@ -282,7 +293,7 @@ sub _setup_mail_archive_dir
     my $dir    = $config->{ html_archive_dir };
 
     unless (-d $dir) {
-	print STDERR "creating $dir\n";
+	print STDERR "creating ", $dir, "\n";
 	$curproc->mkdir($dir, "mode=public");
     }
 }
@@ -311,7 +322,7 @@ sub _setup_cgi_interface
     my $ml_admin_cgi_dir = $config->{ ml_admin_cgi_base_dir };
     for my $dir ($cgi_base_dir, $admin_cgi_dir, $ml_admin_cgi_dir) {
 	unless (-d $dir) {
-	    print STDERR "creating $dir\n";
+	    print STDERR "creating ", $dir, "\n";
 	    $is_dir_exists{ $dir } = 0;
 	    $curproc->mkdir($dir, "mode=public");
 	}
@@ -329,7 +340,7 @@ sub _setup_cgi_interface
 	my $src   = File::Spec->catfile($template_dir, 'dot_htaccess');
 	my $dst   = File::Spec->catfile($cgi_base_dir, '.htaccess');
 
-	print STDERR "creating $dst\n";
+	print STDERR "creating ", $dst, "\n";
 	print STDERR "         (a dummy to disable cgi by default)\n";
 	_install($src, $dst, $params);
     }
@@ -359,7 +370,7 @@ sub _setup_cgi_interface
 		   File::Spec->catfile($admin_cgi_dir, 'config.cgi'),
 		   File::Spec->catfile($admin_cgi_dir, 'thread.cgi')
 		     ) {
-	    print STDERR "creating $dst\n";
+	    print STDERR "creating ", $dst, "\n";
 	    _install($src, $dst, $params);
 	    chmod 0755, $dst;
 	}
@@ -419,7 +430,7 @@ sub _setup_listinfo
 	    my $src   = File::Spec->catfile($template_dir, $file);
 	    my $dst   = File::Spec->catfile($listinfo_dir, $file);
 
-	    print STDERR "creating $dst\n";
+	    print STDERR "creating ", $dst, "\n";
 	    _install($src, $dst, $params);
 	}
     }
@@ -445,6 +456,10 @@ sub cgi_menu
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

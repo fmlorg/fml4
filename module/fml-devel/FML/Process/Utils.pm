@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.43 2002/09/15 00:11:12 fukachan Exp $
+# $FML: Utils.pm,v 1.48 2002/10/29 10:35:30 fukachan Exp $
 #
 
 package FML::Process::Utils;
@@ -247,38 +247,56 @@ sub mkdir
 }
 
 
+# Descriptions: mkdir with the specified dir mode
+#    Arguments: STR($dir) NUM($mode)
+# Side Effects: mkdir && chmod
+# Return Value: none
 sub _mkpath_num
 {
     my ($dir, $mode) = @_;
+    my $cur_mask = umask();
+
+    umask(0);
 
     if ($mode =~ /^\d+$/) { # NUM 0700
 	eval q{ use File::Path;};
 	mkpath([ $dir ], 0, $mode);
-	chmod $mode, $dir; 
+	chmod $mode, $dir;
 	Log(sprintf("mkdir %s mode=0%o", $dir, $mode));
     }
     else {
 	LogError("mkdir: invalid mode (N)");
     }
+
+    umask($cur_mask);
 }
 
 
+# Descriptions: mkdir with the specified dir mode
+#    Arguments: STR($dir) STR($mode)
+# Side Effects: mkdir && chmod
+# Return Value: none
 sub _mkpath_str
 {
     my ($dir, $mode) = @_;
+    my $cur_mask = umask();
+
+    umask(0);
 
     if ($mode =~ /^\d+$/) { # STR 0700
 	eval qq{
 	    use File::Path;
 	    mkpath([ \$dir ], 0, $mode);
-	    chmod $mode, \$dir; 
-	    Log(\"mkdirhier $dir mode=$mode\");
+	    chmod $mode, \$dir;
+	    Log(\"mkdirhier \$dir mode=$mode\");
 	};
 	LogError($@) if $@;
     }
     else {
 	LogError("mkdir: invalid mode (S)");
     }
+
+    umask($cur_mask);
 }
 
 
@@ -1004,6 +1022,10 @@ sub hints
     return $main_cf->{ _hints };
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

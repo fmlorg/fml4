@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: FileUtils.pm,v 1.5 2002/09/11 23:18:05 fukachan Exp $
+# $FML: FileUtils.pm,v 1.6 2002/09/22 14:56:43 fukachan Exp $
 #
 
 package FML::Command::FileUtils;
@@ -115,6 +115,10 @@ sub remove
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

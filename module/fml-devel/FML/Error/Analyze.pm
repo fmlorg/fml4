@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Analyze.pm,v 1.5 2002/09/11 23:18:11 fukachan Exp $
+# $FML: Analyze.pm,v 1.8 2002/10/20 13:33:31 fukachan Exp $
 #
 
 package FML::Error::Analyze;
@@ -45,14 +45,24 @@ sub new
 }
 
 
-# *** model specific analyzer ***
-# $data = {
-#    address => [ 
-#           error_string_1,
-#           error_string_2, ... 
-#    ]
-# };
-#
+=head2 $data STRUCTURE
+
+C<$data> is passed to error analyer function.
+
+	 $data = {
+	    address => [
+	           error_string_1,
+	           error_string_2, ...
+	    ]
+	 };
+
+=cut
+
+
+# Descriptions: count up the nunber of errors
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($data)
+# Side Effects: none
+# Return Value: ARRAY_REF
 sub simple_count
 {
     my ($self, $curproc, $data) = @_;
@@ -91,6 +101,10 @@ sub simple_count
 }
 
 
+# Descriptions: error continuity based cost counting
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($data)
+# Side Effects: none
+# Return Value: ARRAY_REF
 sub error_continuity
 {
     my ($self, $curproc, $data) = @_;
@@ -150,6 +164,10 @@ sub error_continuity
     return \@removelist;
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 CODING STYLE
 

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: JournaledFile.pm,v 1.22 2002/09/11 23:18:30 fukachan Exp $
+# $FML: JournaledFile.pm,v 1.23 2002/09/22 14:57:08 fukachan Exp $
 #
 
 package Tie::JournaledFile;
@@ -386,6 +386,10 @@ sub _puts
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

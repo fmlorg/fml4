@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Postfix.pm,v 1.10 2002/09/11 23:18:13 fukachan Exp $
+# $FML: Postfix.pm,v 1.12 2002/11/07 08:38:23 fukachan Exp $
 #
 
 package FML::MTAControl::Postfix;
@@ -233,7 +233,7 @@ sub postfix_alias_maps
     my $config = $curproc->{ config };
     my $prog   = $config->{ path_postconf };
 
-    my $maps   = `$prog -d alias_maps`;
+    my $maps   = `$prog alias_maps`;
     $maps      =~ s/,/ /g;
     $maps      =~ s/\s+hash:/ /g;
     $maps      =~ s/\s+dbm:/ /g;
@@ -399,6 +399,10 @@ sub postfix_update_virtual_map
     system "$postmap $virtual";
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
