@@ -22,10 +22,6 @@ GEN_WWW () {
 
 
 GEN_LIBRARY () {
-
-	#perl cf/config -cn -I cf/compat.ignore |\
-	#sed 's/sapporo.iij.ad.jp/phys.titech.ac.jp/' > proc/libcompat_cf1.pl
-
 	echo  " ";
 	echo  "Generating libkern.pl  ";
 	sed '/^$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
@@ -123,9 +119,6 @@ COPY_DOCS () {
 
    echo "rsync -av advisories $DESTDIR/distrib/doc/html/"
    rsync -av var/html/advisories $DESTDIR/distrib/doc/html/
-
-   # echo "rsync -av pictures $DESTDIR/distrib/doc/html/"
-   # rsync -av var/html/pictures $DESTDIR/distrib/doc/html/
 }
 
 
@@ -211,18 +204,6 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 
 
 FIX_DISTRIBUTION_FILE_MAKEFILE () { 
-	echo " "; echo "Fixing Makefile"
-
-	# sed '/^DISTRIB/,$d' Makefile |\
-	# sed '/^include/d'|\
-	# sed 's/gar/rm \-f/' |\
-	# sed 's/delete/rm \-f/' > $DESTDIR/distrib/Makefile
-}
-
-
-MAKE_CONFIG_PH_EXAMPLE () {
-	(echo "";echo -n " cf/release -> config.ph  "; date)
-	cf/config cf/release > $DESTDIR/distrib/config.ph
 }
 
 
@@ -252,12 +233,6 @@ FIX_DISTRIBUTION_LINKS () {
 		ln -s doc/$file $file
 	done
    )
-
-	#cd $DESTDIR/distrib/doc/drafts
-	#for file in help guide deny objective confirm welcome 
-	#do
-	#	test -f $file && (chdir ../..; ln -s doc/drafts/$file $file)
-	#done
 }
 
 
@@ -347,7 +322,7 @@ FIX_LANGUATE () {
 }
 
 
-# "make exp" or "make experimental-snapshot"
+# "make exp" or "make current-snapshot"
 GEN_BRANCH_ARCHIVE () {
 	chdir $DESTDIR
 
@@ -367,9 +342,9 @@ GEN_BRANCH_ARCHIVE () {
 	set +vx
 }
 
+
 GEN_ARCHIVE () {
-	if [ X$__FML_MASTER_MACHINE__ = X ]
-	then
+	if [ X$__FML_MASTER_MACHINE__ = X ]; then
 		echo ignore GEN_ARCHIVE not on fml distribution master machine
 		return
 	fi
@@ -379,18 +354,15 @@ GEN_ARCHIVE () {
 	FTP=$FTP_DIR
  	WWW=$WWW_DIR
 
-	if [ ! -d $FTP_DIR ]
-	then
+	if [ ! -d $FTP_DIR ]; then
 		echo ignore GEN_ARCHIVE since \$FTP_DIR is not defined
 		return
 	fi
 
-	if [ ! -d $WWW_DIR ]
-	then
+	if [ ! -d $WWW_DIR ]; then
 		echo ignore GEN_ARCHIVE since \$WWW_DIR is not defined
 		return
 	fi
-
 
 	if [ X$IN_RELEASE_BRANCH = X ]
 	then
@@ -398,6 +370,8 @@ GEN_ARCHIVE () {
 		echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
 		rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
 	fi
+
+	###################################################################
 
 	echo ""
 	chdir $DESTDIR
@@ -414,13 +388,8 @@ GEN_ARCHIVE () {
 	then
 		echo "Synchronizing $FTP/snapshot ..."
 		echo " "
-		test -d $FTP/snapshot || mkdir $FTP/snapshot;
-		rsync --delete -av distrib/ $FTP/snapshot/
-
-		echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
-		echo " "
-		echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
-		nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
+		test -d $FTP/current || mkdir $FTP/current;
+		rsync --delete -av distrib/ $FTP/current/src/
 
 		echo "Synchronizing $WWW ..."
 		echo " "
@@ -446,7 +415,7 @@ GEN_ARCHIVE () {
 	if [ X$IN_RELEASE_BRANCH = X ]
 	then
 		echo ""
-		echo XXX experimental/ branch
+		echo XXX current/ branch
 		echo ""
 
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -461,11 +430,11 @@ GEN_ARCHIVE () {
 		chdir $FTP
 		rm -f fml-current.*.tar.gz fml-current.tar.gz 
 
-		ln $FMLID.tar.gz experimental/$FMLID.tar.gz
+		ln $FMLID.tar.gz current/$FMLID.tar.gz
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
 
-		chdir experimental/
+		chdir current/
 		rm -f fml-current.*.tar.gz fml-current.tar.gz 
 
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -497,8 +466,8 @@ GEN_ARCHIVE () {
 			echo 	rm -f *.zip official/fml*zip
 			rm -f *.zip official/fml*zip
 		else
-			echo 	rm -f *.zip experimental/fml*zip
-			rm -f *.zip experimental/fml*zip
+			echo 	rm -f *.zip current/fml*zip
+			rm -f *.zip current/fml*zip
 		fi
 	)
 
@@ -507,23 +476,23 @@ GEN_ARCHIVE () {
 	then
 		cp -p $FMLID.zip $FTP/official/
 	else
-		cp -p $FMLID.zip $FTP/experimental/
+		cp -p $FMLID.zip $FTP/current/
 	fi
 
 	echo "   relink *zip"
 	(
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
-			echo 	chdir $FTP/experimental
+			echo 	chdir $FTP/current
 			echo 	ln $FMLID.zip fml-current.zip
-			chdir $FTP/experimental
+			chdir $FTP/current
 			ln $FMLID.zip fml-current.zip
 		fi
 	)
 
 	echo "Creating MD5"
 
-	( chdir $FTP;              md5 *gz *zip |sort |tee MD5SUM )
-	( chdir $FTP/experimental; md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP;          md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP/current ; md5 *gz *zip |sort |tee MD5SUM )
 	( chdir $FTP/official;     md5 *gz *zip |sort |tee MD5SUM )
 }
