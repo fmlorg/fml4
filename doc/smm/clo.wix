@@ -165,6 +165,16 @@ P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
 
 	＃ $Envelop{"fh:reply-to:"} = 'uja@domain'; と同じ
 
+ --original:field	
+	＃ キーワード original, org, oh は等価
+
+	MLの配送時 field の値をオリジナルのものを使うように設定する
+	＃注意： field name は小文字である。また、force と違いオリジナ
+	＃ルを使うのだから =value という部分はないことに注意
+
+	例： 事情により To: Cc: のみはオリジナルのものに戻して配送したい
+
+	--force:to --force:cc
 
  --permit:variable
 	$Permit{"variable"} = 1;

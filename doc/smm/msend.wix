@@ -1,11 +1,70 @@
 .C	まとめおくり
 .label	{msend-c}
+.key	samples/crontab
 
-.# さらに詳しくは、lib/MatomeOkuri の下等も御覧下さい。
+
+.S	まとめおくりの仕組み（基本原理、まとめおくり概論)
+
+”まとめおくりのプロセス”がどう動くかというと
+
+	for(;;) {
+		寝て、待つ	（待機）
+		やることがあるかどうかチェックスル	
+		やることがあるなら エントリにしたがって 実行する
+	}
+
+のように動いて、一定時間ごとにまとめて配送しようとするわけです。
+
+これをどう実行するか？ということですが、システムが一定時間ごとにチェッ
+クしてくれるわけではありません。システムに一定時間ごとに仕事がないかチェッ
+クしろ！と教える必要があります。それが「 cron をしかける」という意味です。
 
 
-.S	基本原理(まとめおくり概論)
-.q
+.S	プログラム群との対応
+
+ちなみにプログラム群のそれぞれどの部分に対応するかというと
+
+	for(;;) {		(bin/cron.pl)
+		寝て、待つ	(bin/cron.pl)
+		やることがあるかどうかチェックスル	(msend.pl)
+		やることがあるなら エントリ(actives の m= 部分)にしたがって 
+		実行する(msend.pl -> libsmtp.pl)
+		（で、実行結果の保存 ＞ var/log/msendrc)
+	}
+
+
+です。bin/cron.pl を システムの Cron におきかえれば 同じ論法が成立します。
+
+
+.S	プログラムの名称の変更 MSendv4.pl -> msend.pl
+.key	MSendv4.pl -> msend.pl
+
+最初実験プロジェクトのつもりではじめた時の version 4 というのがついた
+MSendv4.pl というプログラム名のまま使ってきましたが、msend.pl に正式に
+変更しました。backward compatibility のため MSendv4.pl には link がはっ
+てあります。
+
+
+.S	プログラムのログファイルの名称の変更 $MSEND_RC
+.key	MSendrc -> var/log/msendrc
+.key	$MSEND_RC
+
+また デフォールトは MSendrc -> var/log/msendrc です。
+config.ph で $MSEND_RC が明示的に指定していないと msend.pl は
+$MSEND_RC を定義してくれ〜とログを(logファイルへ)吐くでしょう。
+
+まとめおくりが”よきにはかって”動くようにすることはできるのですが、
+「中途半端に動くより今何をやっているか？を管理者が知っていること」を重
+視して、わざと $MSEND_RC を明示的に指定してくれというようになっていま
+す。
+
+＃注意：実は fml の他の部分はほとんどよきにはからえで動きます(^^)
+＃まとめおくりが例外です。それは間違って大量のメールを送ったりしては大
+＃変だからです。
+
+
+.S	システムの cron の代わりに bin/cron.pl を使う場合
+
 歴史的な流れを見てる人には見えてるとおもいますけど、bin/cron.pl って 
 ４．３ＢＳＤ用に開発したものです。Crontab の Syntax は 4.4 ですが
 
@@ -16,27 +75,18 @@ Cron は 昔からある Unix の Daemon process で １分に一回掟、やることが
 ないか調べて、やることがあれば、実行、しなければ、６０秒間ねて待つ と
 いうことをします。
 
+今時の CRON はユーザー権限で走ってくれるとおもうのですが、
+詳しくは man cron でマニュアルを読んでください。
 
-さて、まとめおくりの要点は 
+『ユーザがUnixマシンの機能を使えるサービス内容で、それにお金を払ってい
+る契約の場合』（契約書はよく読んでくださいね、そうでないところもありま
+す）は迷うことなく加入している provider に聞いて見るのが確実でしょう
+(^^)
 
-	for(;;) {
-		寝て、待つ	（待機）
-		やることがあるかどうかチェックスル	
-		やることがあるなら エントリにしたがって 実行する
-	}
-
-を どう実行するか ということです。それぞれどこに対応するかと言うと
-
-	for(;;) {		(bin/cron.pl)
-		寝て、待つ	(bin/cron.pl)
-		やることがあるかどうかチェックスル	(MSendv4.pl)
-		やることがあるなら エントリ(actives の m= 部分)にしたがって 
-		実行する(MSendv4.pl -> libsmtp.pl)
-		（で、実行結果の保存 ＞ MSendrc)
-	}
-
-
-です。bin/cron.pl を システムの Cron におきかえれば 同じ論法が成立します。
+どうしてもわからない時は、そのマシンの管理者に尋ねてみるとよいでしょう。
+ただ volunteer で管理者をやってるケースも多いですからできるだけ自分で
+やることが望ましいです。
+＃ネットワーク管理者は激務なのでいたわってあげてください（お願い）
 
 
 UNIX PROGRAMMING ENVIRONMENT:
@@ -50,42 +100,34 @@ cron.pl がおちるかもしれない？ という可能性があります。
 ここは、別に手動でやってもかまわないわけですが、まぁどっちでもいいと。
 
 それが、HOOK でやってることです。
-.~q
 
 
 .# .S	msend.pl (MSendv4.pl) 
+.# man msend 
 .include msend-pl.wix
 
 
-.S	まとめおくり (Standard)	(旧名称： Release 4)
+.S	まとめおくり 
 .label	{matome-3}
 .key	MSendv4.pl
 .key	crontab	
 .key	MatomeOkuri-ctl.sh
 .key	cron
 
-＃注意:今時の CRON ってユーザー権限ではしるよね(4.4みたいに)。最低でも 
-SONY News(BSDの方)みたいなユーザー権限だよね(crontabは勝手にいじれない
-だろうが)
+＃注意： 旧名称 では Release 4 と呼ばれていました。
 
-MSendv4.pl をつかうものの総称です。
-例： MatomeOkuri-ctl.sh（見本） を crontab に書いて使用します
 
-	fml-1.x.x/etc/crontab-4.3	
-	fml-1.x.x/MatomeOkuri-ctl.sh
-を参考にしてカスタマイズしてみて下さい。
-＃ crontab-4.3	は 4.3BSD の形
-＃ crontab-4.4	は 4.4BSD の形です。あなたのＯＳがどちらの形なのかは
-＃ man crontab とかで調べて下さいませ
+「まとめおくり」とは「msend.pl を使い、メールを一定時間ごとにある程度
+まとめてメンバーへ配送する」システムの総称だと思ってください。
 
-配送情報とかエラーメッセージとかを出力しながらMSendv4.plは走るので、
-cron のなかで、MatomeOkuri-ctl.sh の出力をたえずメールで管理者に送ると
-かしておくとよいとおもいます。
-＃一日２４通増えちゃいますけど、そのくらい誤差でしょ:-)
+まとめおくり を行う時間間隔と まとめるやり方 は ユーザごとに自由に設定
+できます。設定はユーザが自分でリモートでコントロールできます。
+matome もしくは digest というコマンドでです。
+コマンドについては後の節で説明します。
 
-	MSendv4.pl $DIR -q  
-とすると、OUTPUTをだしません（エラーとかは STDERR にだします）
-
+英語では何というのかよくわかりませんが（苦笑）、たぶん digest とでも呼
+んでいるんでしょう。
+＃ちなみに matome というコマンドと digest というコマンドは同じです。
 
 
 .S	まとめおくり（Ｒ４）の仕組み
@@ -139,10 +181,35 @@ pollyanna	m=6u
 mget と同じだけ自由に送り方の設定をユーザーごとに設定することができます（次節）
 ＃ help をみてね
 
+
+
+.S	まとめおくりの設定例
+
 例：
 	３時間おきにUNIX FROMの形で	 
 
 	% echo "# matome 3u"|Mail -v ml-address 
+
+
+
+例： MatomeOkuri-ctl.sh（見本） を crontab に書いて使用します
+
+	fml-1.x.x/etc/crontab-4.3	
+	fml-1.x.x/MatomeOkuri-ctl.sh
+を参考にしてカスタマイズしてみて下さい。
+＃ crontab-4.3	は 4.3BSD の形
+＃ crontab-4.4	は 4.4BSD の形です。あなたのＯＳがどちらの形なのかは
+＃ man crontab とかで調べて下さいませ
+
+配送情報とかエラーメッセージとかを出力しながらmsend.plは走るので、
+cron のなかで、MatomeOkuri-ctl.sh の出力をたえずメールで管理者に送ると
+かしておくとよいとおもいます。
+＃一日２４通増えちゃいますけど、そのくらい誤差でしょ:-)
+
+	msend.pl $DIR -q  
+
+とすると、OUTPUTをだしません（エラーとかは STDERR にだします）
+
 
 
 
@@ -238,7 +305,7 @@ $MATOME_OKURI_SEQ       = "$TMP_DIR/matome-seq";
 
 実行するコマンド	＃-a は anytime という意味だす。
 .key	$MATOME_OKURI_VER5_EXEC
-$MATOME_OKURI_VER5_EXEC = "$LIBDIR/MSendv4.pl $DIR $LIBDIR -a"; 
+$MATOME_OKURI_VER5_EXEC = "$LIBDIR/msend.pl $DIR $LIBDIR -a"; 
 
 store-and-deliver.pl がINCLUDE PATH のどこかにいれて、
 あとは config.ph で
@@ -271,7 +338,7 @@ version 3 ならユーザーに自分がＮ時間おきに配送してほしかったら
 
 .S	まとめおくりの いつ送るか？の判定を変える
 
-MSendv4.pl の sub MSendP を変える。
+msend.pl の sub MSendP を変える。
 例：今の設定
 
 if (($ID - $Request{$who}) >= 0) {
@@ -292,7 +359,7 @@ version 1 一箇所にまとめておいて時間が来たら配送（ユーザーは時間は自由
 に選べない）
 version 2 １の改良型
 version 3 MSend-cron.pl
-version 4 とは MSendv4.pl 3の改良型
+version 4 とは msend.pl 3の改良型
 version 5 は cronを使わずに 10通溜ったらまとめ送りの人へ配送する 
 というタイプで パッチが lib/Matomeokuri-NOCRON にあります。
 version 6 は 1153形の digest機能を提供します。
@@ -300,7 +367,7 @@ version 6 は 1153形の digest機能を提供します。
 Release 1 と呼んでいるのは、架空のアドレスを用いる旧バージョンです。
 version 1, 2 はこの文書には一応書いておきますが、obsolete です。
 Contrib/Matomeokuri、Contrib/Matomeokuri2、
-MSendv4.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
+msend.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
 
 
 .S	以下は OBSOLETEなまとめおくり の記述の再録です…
@@ -354,7 +421,7 @@ Contrib/Matomeokuri、Contrib/Matomeokuri2、の下に一式コードが入ってい
 をかえると“何行か”の制御ができます。
 ＃普通は１０００（だいたい５０ｋくらい）でいいんじゃないかな？
 
-MSendv4.pl は config.ph の$MAIL_LENGTH_LIMIT = 1000; を見ています。こ
+msend.pl は config.ph の$MAIL_LENGTH_LIMIT = 1000; を見ています。こ
 こを変更して下さい。
 
 

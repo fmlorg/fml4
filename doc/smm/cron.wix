@@ -1,6 +1,7 @@
 .S	CRON (fml original bin/cron.pl)
 .key	cron.pl
 .key	etc/crontab
+.key	samples/crontab
 
 SYNOPSYS
 	cron.pl [-a] [-d] [-b43] [-fcrontab] [-bd] $DIR [$LIBDIR]

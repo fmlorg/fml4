@@ -1,11 +1,14 @@
 .A	References
 
+.S	Books
+
 The design and implementation of 4.4BSD
 
 The design and implementation of 4.3BSD
 
 UNIX Network Programing
 
+.S	RFC
 
 rfc822				headers of mail
 rfc821				smtp
@@ -25,6 +28,9 @@ perl texinfo in japanese --- version 4.0.19.2
 
 .# ##########################################################
 .# ##########################################################
+
+
+.S	Released Articles Message-ID's
 
 fj.sources:
 Release Version 1.5
@@ -56,10 +62,26 @@ Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 .# ##########################################################
 
 
-Papers(http://www.phys.titech.ac.jp/uja/PAPERS/):
+.S	１／ｆ ゆらぎ と 論文と fml と…
+.key	1/f fluctuations
+.key	1/f ゆらぎ
+.key	学位論文（理学博士）
+
+URLは http://www.phys.titech.ac.jp/uja/PAPERS/
+
+メーリングリスと１／ｆゆらぎに関しての論文は
+
 Ken'ichi Fukamachi,
 "1/f Fluctuations in Internet Communication"
 Interdisciplinary Information Sciences, vol.1, 157 (1995).
+
+
+日本語での文献として、博士号の学位論文が東京工業大学図書館か国立国会図
+書館で閲覧できます。
+
+Ken'ichi Fukamachi,
+"1/f Fluctuations in Conservative Systems and Internet Communication"
+１９９５年度 学位論文 （理学博士）東京工業大学
 
 
 .# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 

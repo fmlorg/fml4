@@ -51,12 +51,18 @@ fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
 
 ちなみに samples/ の中身は
 
+
    samples/aliases               /etc/aliases の見本
    samples/include               基本的な include の見本（以下同様）
    samples/include-auto          自動登録をするML
    samples/include-distribute    フォワードするだけのML
    samples/include-fmlserv       fmlserv の設定
    samples/include-remote        このマシン以外からメールでMLを管理する場合
+   samples/include-html		 var/htdocs/ の下にメールを html 形式でも保存
+				 spool にも保存（２重になる）
+
+   samples/crontab		まとめ送り用の crontab の見本 (4.4BSD Style)
+
 
 日本語で解説がついてますので、実際にシステムにインストールする前に
 要らない部分は切り取ってからしかけるとよいでしょう。

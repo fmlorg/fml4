@@ -5,6 +5,12 @@
 .key	scan.format 
 .key	lib/Utilities/scan.format
 
+lib/Utilities/scan.format を あなたの ~/Mail にいれると
+
+  65 -06/14 Takashi Yokoyam fml-su Subject uja  <<うじゃ…
+
+のような表示になります。     ↑ここが X-ML-Name: の部分の６文字
+
 暗号のようですが、ポイントは今レジスターに何が入っているかと、
 if	%<
 elif	%?
@@ -84,6 +90,38 @@ vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)]
 すべてを省略した場合 $PWD の config.ph 
 もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
 必要ですね
+
+
+
+.S	bin/passwd.pl
+.l	bin/passwd.pl
+.key	bin/passwd.pl
+.key	passwd.pl
+
+fml でのパスワードは crypt された形で保存されます。つまり UNIX の 
+/etc/passwd と同じようにです。
+
+fmlのソース/bin/passwd.pl 
+
+というのがあります。使い方は、
+
+passwd.pl [-i] [-p password-file] username new-password
+
+例：
+% passwd.pl fukachan@phys.titech.ac.jp uja
+で、
+
+fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
+
+こういう fukachan@phys.titech.ac.jp 用のエントリを 
+
+	fmlのソース/etc/passwd
+
+につくります（デフォールト）。もし、他の場所なら 
+
+% bin/passwd.pl -p /some/directory/passwd fukachan	uja
+
+のように -p オプションで指定してください。
 
 
 .# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 

@@ -136,7 +136,7 @@ fmlのソース/bin/passwd.pl
 
 っていうのがあります。使い方は、
 
-passwd.pl [-p password-file] username new-password
+passwd.pl [-i] [-p password-file] username new-password
 
 例：
 % passwd.pl fukachan@phys.titech.ac.jp uja
