@@ -1503,8 +1503,13 @@ sub RejectHandler
     &Log("Rejected: \"From:\" field is not member");
     &WarnE("NOT MEMBER article from $From_address $ML_FN", 
 	   "NOT MEMBER article from $From_address\n\n");
-    &SendFile($From_address, 
-	      "You $From_address are not member $ML_FN", $DENY_FILE);
+    if (-f $DENY_FILE) {
+	&SendFile($From_address, 
+		  "You $From_address are not member $ML_FN", $DENY_FILE);
+    }
+    else {
+	&Mesg(*Envelope, 'you are not member.', 'info.reject');
+    }
 }
 
 sub IgnoreHandler
