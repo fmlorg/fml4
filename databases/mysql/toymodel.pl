@@ -430,7 +430,7 @@ if ($0 eq __FILE__) {
 
     my (%mib);
     $mib{'dbname'}   = $opt_D || 'fml';
-    $mib{'host'}     = $opt_H || 'postgres';
+    $mib{'host'}     = $opt_H || 'elena';
     $mib{'user'}     = $opt_U || $ENV{'USER'};
     $mib{'_ml_acct'} = 'elena';
 
