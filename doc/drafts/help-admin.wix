@@ -3,11 +3,16 @@
 		Help File For Administrators
 
 ________________________________
-#.index
+.toc
 ________________________________
 
 
 .C	Overview
+
+=E
+"#" is prepended in fml documents for some historically reasons. "#"
+is NOT NEEDED in almost all cases but fml can accepct commands with or
+without '#'.  Please ignore this in default configuration.
 
 .S	コマンドについて
 =E.S	Administrative Commands

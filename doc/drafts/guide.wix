@@ -1,6 +1,7 @@
-メーリングリストの一般向けガイド(非参加者も含む)
+.if LANG == JAPANESE
+メーリングリストの一般向けガイド(参加者及び非参加者向け)
 
-このメーリングリスト(_ML_@_DOMAIN_)は
+このメーリングリスト<_MAIL_LIST_>は
 
 	うじゃうじゃ(ここは管理者のあなたが書いて下さい)
 
@@ -9,9 +10,39 @@
 このメーリングリストサーバへの参加(登録)は
 
 	subscribe あなたの名前(ここは管理者のあなたが書いて下さい)
+例:
+	subscribe Sskura Kinomoto
 
-というコマンドをメール
+というコマンドをメール本文に書いて
+アドレス <_CTLADDR_> へ送って下さい。
+.fi
+.if LANG == ENGLISH
+This list <_MAIL_LIST_> is set up for a purpose "...".
 
-	_ML_-ctl@_DOMAIN_
+To subscribe this list, please send the following phrase
 
-で送って下さい。
+	subscribe Your-Last-Name Your-First-Name 
+e.g.
+	subscribe Sskura Kinomoto
+
+in the mail body (not subject) to the address <_CTLADDR_>.
+.fi
+
+
+.if LANG == JAPANESE
+				_MAIL_LIST_ 管理人
+				_ML_-admin@_DOMAIN_			
+.fi
+.if LANG == ENGLISH
+				_MAIL_LIST_ Maintainer
+				_ML_-admin@_DOMAIN_			
+.fi
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -5,6 +5,16 @@
 This mailing list <_MAIL_LIST_> is set up for ...
 .fi
 
+
+.if LANG == JAPANESE
+				_MAIL_LIST_ 管理人
+				_ML_-admin@_DOMAIN_			
+.fi
+.if LANG == ENGLISH
+				_MAIL_LIST_ Maintainer
+				_ML_-admin@_DOMAIN_			
+.fi
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 

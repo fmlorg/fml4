@@ -1,12 +1,37 @@
-あなたはこのメーリングリスト(_ML_@_DOMAIN_)のメンバーではありません。
+.if LANG == JAPANESE
+あなたはこのメーリングリスト <_MAIL_LIST_> のメンバーではありません。
 
---------- メール本文 --------------
-# help
------------------------------------
+メーリングリストについての一般的な案内はメールの本文に
 
-メール本文が"# help"のメールを
+	# guide
 
-	_ML_-ctl@_DOMAIN_
+と書いたメールを
 
-宛に送ると、このヘルプ・ファイルが送られてきます。またコマンドは help 
-でも HELP でも構いません（大文字小文字を問わない）。
+	_CTLADDR_
+
+宛に送ると送られてきます。
+.fi
+.if LANG == ENGLISH
+You are not a member of this mailing list <_MAIL_LIST_>.
+
+If you know the general guide of this list, please send a mail with
+the mail body 
+
+	# guide
+
+to the address
+
+	_CTLADDR_
+
+where guide is equal to GUIDE for case insensitive.
+.fi
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
