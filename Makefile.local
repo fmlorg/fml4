@@ -93,14 +93,22 @@ cgisetup:
 	@ (cd $(DESTDIR)/fml-current; pwd ; \
 		perl makefml -W cgi -f /tmp/e/.fml/system install)
 
-cgisync:
+cgisync: export
+
+export: libkern /usr/local/fml/makefml
 	@ echo sync cgi with fml-current
 	rsync -C --exclude=cgi-bin -av www/ /usr/local/fml/www/
 	rsync -C -av doc/messages/Japanese/ /usr/local/fml/messages/Japanese/
+	rsync -C -av kern/*pl    /usr/local/fml/
+	rsync -C -av proc/lib*pl /usr/local/fml/
 
-m:	testsetup
+m:	testsetup /usr/local/fml/makefml
+
+/usr/local/fml/makefml: sbin/makefml
 	if [ -d /tmp/e ]; then \
 	 perl w/repl.pl sbin/makefml > /tmp/e/makefml ; fi
+
+
 
 testsetup:
 	@ test -d $(TRASH)/FML_TEST || mkdir $(TRASH)/FML_TEST
