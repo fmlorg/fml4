@@ -13,7 +13,7 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-ヘッダのカスタマイズ
+ヘッダのカスタマイズ
 </CENTER>
 </H1>
 
@@ -22,77 +22,77 @@
 
 <HR>
 <P>
-調べるべき変数へのポインタを以下に示します。
-ファイルの中の変数名を検索してみて下さい。
+調べるべき変数へのポインタを以下に示します。
+ファイルの中の変数名を検索してみて下さい。
 
 <UL>
    <UL>
-   <P>記事として配送される際のメールのヘッダの設定
+   <P>記事として配送される際のメールのヘッダの設定
 
 	<LI>
-	ヘッダの中に現れる順番(例えばFrom:, Subject:などの順番)
+	ヘッダの中に現れる順番(例えばFrom:, Subject:などの順番)
 	<BR>
-	    ヘッダのフィールドの順番は @HdrFieldsOrder (配列)の順番に従います。
+	    ヘッダのフィールドの順番は @HdrFieldsOrder (配列)の順番に従います。
 
 	<LI>
-	ヘッダはすどおしなのか？
+	ヘッダはすどおしなのか？
 	<BR>
 
-	ヘッダは基本的にすどおしです($PASS_ALL_FIELDS_IN_HEADER = 1)。
-	    しかし $SKIP_FIELDS に定義されているフィールドは無視されます。
-	    デフォールトでは Return-Receipt-To: です。
+	ヘッダは基本的にすどおしです($PASS_ALL_FIELDS_IN_HEADER = 1)。
+	    しかし $SKIP_FIELDS に定義されているフィールドは無視されます。
+	    デフォールトでは Return-Receipt-To: です。
 
-	    ヘッダの順番は
-	    @HdrFieldsOrder (配列)の順番に整列されます。
-	    @HdrFieldsOrder (配列)に定義されていないものは最後の方に
-	    まとめられます。
+	    ヘッダの順番は
+	    @HdrFieldsOrder (配列)の順番に整列されます。
+	    @HdrFieldsOrder (配列)に定義されていないものは最後の方に
+	    まとめられます。
 
-	    $PASS_ALL_FIELDS_IN_HEADER = 0 にすると
-	    @HdrFieldsOrder (配列)にあるものだけになります。
+	    $PASS_ALL_FIELDS_IN_HEADER = 0 にすると
+	    @HdrFieldsOrder (配列)にあるものだけになります。
 
 	<LI>
-	Subject: にTAGをつける(例: [Elena 00900]) 
+	Subject: にTAGをつける(例: [Elena 00900]) 
 	<BR>
 	* $SUBJECT_TAG_TYPE
 	<BR>
-	* makefml config のメニューで選択する
+	* makefml config のメニューで選択する
 	<BR>
-	* $SUBJECT_FREE_FORM_REGEXP などをごりごり書いて
-	   自分の好きなフォーマットを作る
+	* $SUBJECT_FREE_FORM_REGEXP などをごりごり書いて
+	   自分の好きなフォーマットを作る
 
 	<LI>
-	Subject:の00900のような数字(記事番号)部分の桁数
+	Subject:の00900のような数字(記事番号)部分の桁数
 	<BR>
-	$SUBJECT_FORM_LONG_ID = 桁数;
+	$SUBJECT_FORM_LONG_ID = 桁数;
 	<BR>
-	* makefml config のメニューで選択する
+	* makefml config のメニューで選択する
 
 	<LI>
-	Subject:の00900のような数字(記事番号)部分の0のパディングをなくす
+	Subject:の00900のような数字(記事番号)部分の0のパディングをなくす
 	<BR>
 	$SUBJECT_FORM_LONG_ID = -1;
 	<BR>
-	* makefml config のメニューで選択する
+	* makefml config のメニューで選択する
 
 	<LI>
-	ヘッダの内容を上書きする
+	ヘッダの内容を上書きする
 	<BR>
-	Reply-To: を常にメーリングリストに固定してしまう
+	Reply-To: を常にメーリングリストに固定してしまう
 	<BR>
 	&DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
 
 	<LI>
-	X-Organization: My Company というヘッダを付け加える
+	X-Organization: My Company というヘッダを付け加える
 	<BR>
 	&DEFINE_FIELD_FORCED('x-organization', "My Company");
 
 	<LI>
-	入ってきたメールのSender:をX-Sender:にCOPYしておく
+	入ってきたメールのSender:をX-Sender:にCOPYしておく
 	<BR>
 	&COPY_FIELD('Sender', 'X-Sender');
 
 	<LI>
-	config.ph内で使用可能なヘッダを制御する関数
+	config.ph内で使用可能なヘッダを制御する関数
 	<BR>
 	<PRE>
         &ADD_FIELD
@@ -106,26 +106,26 @@
 	</PRE>
 
 	<LI>
-	マニアな設定
+	マニアな設定
  	<BR>
 	$HEADER_ADD_HOOK
    </UL>
 
    <UL>
-   <P>コマンドの結果や警告、エラーのメールのヘッダの設定
+   <P>コマンドの結果や警告、エラーのメールのヘッダの設定
 
 	<LI>
-	From: に管理者の名前をいれる
+	From: に管理者の名前をいれる
 	<BR>
 	From: $MAINTAINER ($MAINTAINER_SIGNATURE)
 
 	<LI>
-	Reply-To: を特定のアドレスにする
+	Reply-To: を特定のアドレスにする
 	<BR>
-	&DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "特定のアドレス");
+	&DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "特定のアドレス");
 
 	<LI>
-	マニアな設定
+	マニアな設定
  	<BR>
 	$REPORT_HEADER_CONFIG_HOOK
 
