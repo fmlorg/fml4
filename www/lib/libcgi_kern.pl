@@ -433,7 +433,7 @@ sub SaveCGICF
     local($key, $value);
     local($new);
 
-    $new = $CGI_CF. ".new";
+    $new = $CGI_CF. ".$$.new";
 
     if (open(CFTMP, "> $new")) {
 	foreach $key (sort keys %CGI_CF) {
