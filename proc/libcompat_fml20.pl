@@ -61,10 +61,10 @@ sub DoMLMemberCheck
     &Debug("NOT") if $debug;
 
     ### WHETHER a member or not?, Go ahead! if a member
-    # AUTHENTIFIED Even if the admin member is not a member of MEMBER_LIST
+    # AUTHENTICATED Even if the admin member is not a member of MEMBER_LIST
     &MailListMemberP($From_address) && (return 1);
 
-    # here not authentified;
+    # here not authenticated;
     $Envelope{'mode:stranger'} = 1;
 
     # Hereafter must be a mail from not member
