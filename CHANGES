@@ -5,14 +5,23 @@
 
 2000/07/18
 
-  check sum to validate relation between cf and config.ph
+   fix CGI profile: fml/sbin/makefml, fml/proc/libmesgle.pl 
+
+	define MesgLE::CacheOn() in libmesgle
+	and modify makefml Japanese convertor in html mode which calls
+	translators too much !
+	makefml in html mode uses this CacheOn() like this
+		&MesgLE::CacheOn(*LangExtCache, $msgfile, 'euc');
+	If %LangExtCache is non null, convertor uses this cache not look up
+	this file. This cache accellerate 3 or 4 times faster conversion.
+
+   check sum to validate relation between cf and config.ph
 	(algorithm used by traditional AT&T UNIX)
 	sbin/makefml
 	bin/cksum.pl
 
-  etc/makefml/Makefile
+   etc/makefml/Makefile
 	use 'makefml update-config'
-
 
 2000/07/17
 
