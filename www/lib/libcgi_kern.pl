@@ -193,13 +193,29 @@ sub SaveCGICF
 
     if (open(CFTMP, "> $new")) {
 	foreach $key (sort keys %CGI_CF) {
-	    print CF $key, "\t", $CGI_CF{$key}, "\n";
+	    printf CFTMP "%-20s   %s\n", $key, $CGI_CF{$key};
 	} 
 	close(CFTMP);
 	rename($new, $CGI_CF) || &ERROR("cannot rename $new $CGI_CF");
+
+	&ShowCGICF;
     }
     else {
 	&ERROR("cannot open $CGI_CF");
+    }
+}
+
+
+sub ShowCGICF 
+{
+    if (open(CFTMP, $CGI_CF)) {
+	local($p);
+	print "<PRE>";
+	print "\n\n-- \"$CGI_CF\" configuration --\n\n";
+	while ($p = sysread(CFTMP, $_, 1024)) {
+	    syswrite(STDOUT, $_, $p);
+	}
+	print "</PRE>";
     }
 }
 

@@ -354,6 +354,7 @@ sub Command
     # not "makefml" calls
     elsif ($PROC eq 'mail_server_config') {
 	&MailServerConfig($PROC, $MTA);
+    }
     else {
 	&ERROR("unknown PROC");
     }

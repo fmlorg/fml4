@@ -33,7 +33,7 @@
 <LI><A HREF="#password">パスワードの設定</A>
 <LI><A HREF="#newml">メーリングリストの作成</A>
 <LI><A HREF="#destructml">メーリングリストの削除</A>
-<LI><A HREF="#cgi_config">CGIの設定</A>
+<LI><A HREF="#server_config">サーバの設定関係(初回の確認必須)</A>
 </UL>
 
 <HR>
@@ -188,7 +188,30 @@ _____________________________
 
 
 <HR>
-<A NAME=cgi_config><P>CGIの設定 (まだ_o_)
+<A NAME=server_config><P>サーバの設定
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
+<INPUT TYPE=hidden NAME=ML VALUE=etc>
+
+<TR>
+	<TABLE>
+		<TD ALIGN=left>MTA:
+		<TD ALIGN=right>
+		<SELECT NAME=MTA>
+		<OPTION VALUE=sendmail>sendmail
+		<OPTION VALUE=postfix>postfix
+		<OPTION VALUE=qmail>qmail
+		</SELECT>
+	</TABLE>
+<TR>
+
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
 
 <HR>
 
