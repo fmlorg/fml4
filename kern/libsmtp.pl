@@ -461,13 +461,13 @@ sub __SmtpIO
     # XXX If USE_VERP (e.g. under qmail), you can use VERPs
     # XXX "VERPs == Variable Envelope Return-Path's".
     {
-	local($mail_from);
+	my ($mail_from);
 	if ($USE_VERP) {
-	    $mail_from = $MAINTAINER;
+	    $mail_from = $SMTP_SENDER || $MAINTAINER;
 	    $mail_from =~ s/\@/-\@/;
 	    $mail_from .= '-@[]';
 	} else {
-	    $mail_from = $MAINTAINER;
+	    $mail_from = $SMTP_SENDER || $MAINTAINER;
 	}
 	&SmtpPut2Socket("MAIL FROM:<$mail_from>", $ipc);
     }

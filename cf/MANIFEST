@@ -932,6 +932,10 @@ HOST:		localhost
 # value: number
 PORT:		25
 
+# enforce MAIL FROM:<$SMTP_SENDER> if defined
+# value: address
+SMTP_SENDER:
+
 # IF $NOT_TRACE_SMTP IS 1 (default 0), we log the SMTP session to $SMTP_LOG
 # value: filename string
 SMTP_LOG:		$VARLOG_DIR/_smtplog

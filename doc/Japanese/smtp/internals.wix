@@ -91,6 +91,17 @@ $MCI_SMTP_HOSTS groups. Mail to deliver is injected to each MTA on
 $HOST and @HOSTS. If all connections to hosts fail, FML tries to send
 mail with "sendmail" called as a command.
 
+.S	SMTP の MAIL FROM: を $MAINTAINER 以外にしたい時
+
+$SMTP_SENDER に指定して下さい。	  
+
+例: プロバイダ(例えば fml.org とすると)が不正中継対策のため、MAIL
+FROM: のドメイン名を自由にできない場合などに使います。
+
+	$MAINTAINER  = 'elena-admin@nuinui.net';
+	$SMTP_SENDER = 'elena-admin@fml.org';
+
+
 
 .S	同じmxについて
 =E.S	On The Same Mx
