@@ -104,6 +104,7 @@ FML defines and uses the following special syntaxes.
 	#key		file name
 	r#key		1 or 0
 	r2a#key		1 or 0
+	l#key		the maximum request for key in one mail
 
 ○ #key はファイルを送り返す関数でのファイル名です。実はファイルを送り
 返す関数は共通なので、これを利用すると好きなファイルを送り返す新しいコ
@@ -154,6 +155,12 @@ Example: "bye" and "unsubscribe" to notify the log to maintainers.
 		    'unsubscribe',     'ProcSetMemberList',
 		    'r#unsubscribe',   1,
 		    'r2a#unsubscribe', 1,
+
+例: "get" は１メールで１０個まで
+=E
+Example: "get" command requets is up to 10 in one mail.
+
+	             'l#get',      10,
 
 .S	コマンドの # syntax 
 =E.S	'# syntax' is required?
@@ -354,6 +361,22 @@ $DIR の代わりに対応するものとして次のものがが定義されています。
 =E
 	$LIBRARY_DIR		library HOME  (<=> $DIR)
 	$LIBRARY_ARCHIVE_DIR	library SPOOL (<=> $SPOOL_DIR)
+
+library コマンドの特定のコマンドを使えないようにするには 
+@DenyLibraryProcedure に定義します。シンタックスと理屈は 
+@DenyProcudure と同様です。
+.xref add-procedures
+=E
+To disable one of library commands, set @DenyLibraryProcedure.
+How to use this array is the same as @DenyProcedure. 
+.xref add-procedures
+
+例: 'library put' を使えないようにする。
+=E
+e.g. disable 'library put' command.
+
+	@DenyLibraryProcedure = ('put');
+
 				
 .S	index コマンド
 =E.S	index command

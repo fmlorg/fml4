@@ -67,7 +67,7 @@ $_;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:f:s:t:h:Hr");
+    &Getopts("dhg:f:s:t:hHr");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
     $Gecos = (getpwuid($<))[6] || $USER;
@@ -75,13 +75,18 @@ sub Init
     # HELP Message
     if ($opt_h) { 
 	print <<"EOF";
-	$0 [options]
+$0 [options]
 
-	    -f\tFrom:
-	    -s\tSubject:
-	    -t\tTo:
-	    -g\tGecos Field
+   -f\tFrom:
+   -s\tSubject:
+   -t\tTo:
+   -g\tGecos Field
 
+   -d\tdebug mode(not work)
+   -h\tshow this message
+
+   -r\tappend dummy Received: line
+   -H\tnot append null line in the last
 EOF
 
 	exit 0;

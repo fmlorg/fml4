@@ -5,6 +5,93 @@
 =E
 See .ptr{auto-regist} for automatic registration details.
 
+.S 	手動登録時の挙動について(5 way hand shake)
+=E.S	Manual Registration; how to handle subscribe requests
+
+	$MANUAL_REGISTRATION_TYPE ('confirmation' or 'forward_to_admin')
+.k	$MANUAL_REGISTRATION_TYPE
+.l	$MANUAL_REGISTRATION_TYPE
+
+.if LANG == JAPANESE
+$MANUAL_REGISTRATION_TYPE は confirmation がデフォールトです。
+
+手動で登録作業をするＭＬで、subscribe request をうけたらconfirm を返し、
+confirm が帰ってきたら管理者は手で登録する。デフォールトは 
+confirmation にしてある。＃ 2.2A
+
+     ユーザ			fml			管理者
+     
+     1 ユーザがリクエストをfmlへ送る。
+     subscribe request ->
+     
+     2 fmlは確認のメールを返す
+     		<-  confirm req
+     
+     3 ユーザは確認のメールを返す
+     confirm it       ->  
+     
+     4 fmlは確認したら、管理者に知らせる。
+       ユーザにはちょっと待たれよとメールを送る
+
+     		    confirm Okだったよん、いれてあげてぇ -> 管理者
+     		<-
+     confirmした
+     管理者にしらせたからしばし待たれよ
+      
+     5 管理者が何らかの方法でユーザを加える。手で加えるなりコマンドなりで
+
+     		admin add アドレス		<-
+     		approve パスワード add アドレス
+     
+     (if $ADMIN_ADD_SEND_WELCOME_FILE == 1
+     		<-
+       welcome ♪のメール)
+
+$MANUAL_REGISTRATION_CONFIRMATION_FILE というファイルがある時はこのファ
+イルも送り返します。デフォールトではテンプレートを作ってありません。
+.fi
+.if LANG == ENGLISH
+How to handle 'subscribe' request to ML modified by maintainers' hand. 
+In default fml confirms the will to From: address.
+
+     subscriber           fml            maintainers/administrators
+     
+     1 a subscriber requests 'subscribe NAME' to fml.
+     subscribe request ->
+     
+     2 fml sends back a confirmation of the will.
+     		<-  confirm req
+     
+     3 He/She confirms and replis it.
+     confirm it       ->  
+     
+     4 Fml confirmed the will and let maintainer to know it. 
+       Fml also notifies the request is forwarded to maintainers.
+
+     		    confirmed -------> "please add this subscriber"
+     		<-
+     confirmed
+     Please wait a little.
+
+     5 A maintainer edits the member list by hand or sends 
+       remote administration commands.
+
+     		admin add <address>
+     		approve PASSWORD add <address>
+     
+     (if $ADMIN_ADD_SEND_WELCOME_FILE == 1,
+     		<-
+       "welcome!" mail is also returned)
+
+If $MANUAL_REGISTRATION_CONFIRMATION_FILE file exists, fml sends back
+it to the requester. In default this template does not exist.
+.fi
+
+	$MANUAL_REGISTRATION_CONFIRMATION_FILE (default $DIR/confirm.msub)
+.k	$MANUAL_REGISTRATION_CONFIRMATION_FILE
+.l	$MANUAL_REGISTRATION_CONFIRMATION_FILE
+
+
 .S	ほんとに抜けるか？を確認する unsubscribe 
 =E.S	unsubscribe confirmation
 .l	unsubscribe-confirmation

@@ -711,6 +711,10 @@ $RFC1153_CUSTOM_HOOK	Hook to run &Rfc1153Custom($mode, *conf)
 .key	$LHA
 .key	$ISH
 
+FYI: 一部のOS(Sun OS 4.x ?)で 2.2 でうまく動かない時に 
+$INSECURE_SYSTEM = 1; を設定すると動くことがあります。
+.xref $INSECURE_SYSTEM
+
 	# mget 200-210 ish
 
 の用に指定するとlzh して ish(s7 mode)したものを送り返します。

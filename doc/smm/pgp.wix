@@ -8,9 +8,10 @@
 
 注意: 以下では公開鍵暗合やPGPについては既知のものとしています。
 PGP 2.6.3ui を使っています。PGP 5 には対応していません。
+PGP/MIME なども考慮していません。
 =E
 Attention: I assume you know PGP well. I checked a combination of FML
-and PGP 2.6.3ui but not PGP 5.
+and PGP 2.6.3ui but not PGP 5. Also I do not consider PGP/MIME.
 
 公開鍵暗合の代表的な応用例。
 PGP自体についてはここでは解説しませんが、例えば参考文献としては
@@ -134,6 +135,17 @@ Example: show the public key list of elena ML.
 
 .S	PGPを使って暗号化したメーリングリストにする
 =E.S	Pgp Encrypted Distribution (Mailing List)
+.l	$USE_ENCRYPTED_DISTRIBUTION
+.k	$USE_ENCRYPTED_DISTRIBUTION
+
+makefml のメニューの『セキュリティ』で USE_ENCRYPTED_DISTRIBUTION を設
+定します。PGPの鍵を作る、メンバーに配るの作業が別途必要です。以下で述
+べます。
+=E
+You can set PGP Encrypted ML by "makefml config" menu. When
+$USE_ENCRYPTED_DISTRIBUTION is set, your ML becomes a PGP encrypted
+ML. You need to set up ML PGP keys and the distribution other than
+to enable this option. Please see below on it.
 
 暗号化とかファイアウォールとかは中途半端が一番危ないです。詳しく説明し
 ませんが、これで意味の分からない人は使わない方がいいかもしれません。

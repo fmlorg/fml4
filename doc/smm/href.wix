@@ -74,7 +74,7 @@ SYNOPSIS:
 
 	&SyncHtml($HTML_DIR, $ID, *Envelope);
 
-	$HTML_DIR 	HTJL生成されたHTMLを置く場所
+	$HTML_DIR 	生成されたHTMLを置く場所
 	$ID		記事番号は &Distribute; で
 			グローバル変数 $ID はセットされる。
 	*Envelope	%Envelope
@@ -403,6 +403,14 @@ contained in a mail when a HTML article is created.
 
 Example:
 	$BASE64_DECODE = "/usr/local/bin/mewdecode";
+
+明示的に $BASE64_DECODE を定義されたない場合は bin/base64decode.pl が
+使われます。(2.2A#11以降)
+.xref base64decode.pl
+=E
+Fml uses bin/base64decode.pl as a default when $BASE64_DECODE is not
+defined. (After 2.2A#11)
+.xref base64decode.pl
 
 .S	$HTML_OUTPUT_FILTER
 .k	$HTML_OUTPUT_FILTER

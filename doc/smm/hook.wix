@@ -373,6 +373,7 @@ $START_HOOK = q#
 .S	$START_HOOK でＭＬメンバーの人数制限をする
 =E.S	$START_HOOK: limit the number of member 
 .k	$START_HOOK
+.l	$START_HOOK
 
 ファイル $LIMIT_OVER_FILE にごめんなさいの文章を書いておく。
 =E
@@ -412,6 +413,8 @@ if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
 %;
 
 .S	$MODE_BIFURCATE_HOOK
+.l	$MODE_BIFURCATE_HOOK
+.k	$MODE_BIFURCATE_HOOK
 
 モードが分岐する関数の中で呼ばれるHOOK。ほとんど先頭で呼ばれる。実際に
 は sub ModeBifurcate を見ないと何だか分からないだろう。
@@ -420,10 +423,28 @@ Called in the first stage of &ModeBifurcate where fml.pl running mode
 changes.
 
 .S	$COMMAND_FILTER_HOOK
+.l	$COMMAND_FILTER_HOOK
+.k	$COMMAND_FILTER_HOOK
 .xref	EnvelopeFilter
 
 .S	$REJECT_COMMAND_FILTER_HOOK
+.l	$REJECT_COMMAND_FILTER_HOOK
+.k	$REJECT_COMMAND_FILTER_HOOK
 .xref	EnvelopeFilter
+
+.S	$DISTRIBUTE_SUMMARY_HOOK
+.l	$DISTRIBUTE_SUMMARY_HOOK
+.k	$DISTRIBUTE_SUMMARY_HOOK
+
+$DISTRIBUTE_SUMMARY_HOOK = q#
+	&Append2(sprintf("%s [%d:%s] %s", 
+			 $Now, $ID, substr($From_address, 0, 15), $s),
+		 $SUMMARY_FILE);
+#;
+
+このHOOKが評価される時 $s は subject になっています。
+=E
+$s is the subject when this hook is evaluated.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

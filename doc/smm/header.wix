@@ -513,11 +513,13 @@ Historical, not used today.
 =E.S	Change the digit of the number of a subject tag
 .k	$HML_FORM_LONG_ID
 
-	$SUBJECT_FORM_LONG_ID
-.k	$SUBJECT_FORM_LONG_ID
+	$SUBJECT_FORM_LONG_ID (5; the number > 1)
+.k	$SUBJECT_FORM_LONG_ID 
+.l	$SUBJECT_FORM_LONG_ID 
 
-はSubject:のTAGの数字部分の桁数を定義する。５(桁)がデフォールトだが 
+はSubject:のTAGの数字部分の桁数を定義する。5(桁)がデフォールトだが 
 $SUBJECT_FORM_LONG_ID 桁にする。$SUBJECT_FREE_FORM 使用時に有効な変数。
+2 以上
 =E
 is the digit of the number. Default is 5.
 

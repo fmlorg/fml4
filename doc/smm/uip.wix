@@ -28,6 +28,16 @@ use libexec/mead.pl.
 =E
 Please see the chapter of "archive" (.ptr{archive}).
 
+.S	base64decode.pl base64encode.pl
+.l	base64decode.pl
+.l	base64encode.pl
+.k	base64decode.pl
+.k	base64encode.pl
+.k	bin/base64decode.pl
+.k	bin/base64encode.pl
+
+BASE64 encoder and decoder. A part of library uses this.
+
 .S	cron (bin/cron.pl)
 .l	bin/cron.pl
 .k	cron.pl
@@ -118,6 +128,27 @@ phrases regarded as valid in the context of FML operations. We
 recommend you run daily.pl and check the output. If it has superfluous
 lines, you add needless phrase patterns to "daily.ignore". It is good
 to run daily.pl each morning by cron.
+
+	daily.pl [-hd] [-f patfile] [-t trap_patfile] [-p days]
+
+	-h        this message
+	-d        debug mode
+
+	-f file   pattern file to ignore
+	-t file   pattern file to trap (evaluated before ignore list)
+	-p days   scan at which day (default is 1, that is "yesterday")
+
+Example: for elena ML (/var/spool/ml/elena)
+
+[$HOME/sbin/daily.sh]
+
+	#!/bin/sh
+	/usr/local/fml/bin/daily.pl -f $HOME/etc/daily.ignore \
+		-t $HOME/etc/daily.trap /var/spool/ml/elena/log
+
+[crontab]
+0 5 * * * /bin/sh $HOME/sbin/daily.sh
+
 
 .S	DNS のチェック(bin/dns_check.pl)
 =E.S	Checking DNS
@@ -390,10 +421,12 @@ Obsolete.
 .k	bin/spool2html.pl
 .k	spool2html.pl
 
-ターゲットとなるdirectory中のメールをHTML化します。
+ターゲットとなるdirectory中のメールをHTML化します。MLのホームで
+実行するか、それを-D オプションで指定しなければいけません。
 =E
 make HTML style articles of ML. In default this generates index.html,
-thread.html (thread) and each article.html.
+thread.html (thread) and each article.html. Please run this program in
+ML's HOME DIRECTORY ($DIR) or define -D $DIR.
 
 SYNOPSIS:
 

@@ -92,8 +92,8 @@ members / member command sends back a list with full names.
 .fi
 .if LANG == ENGLISH
 	sakura@card.captor (Sakura Kinomoto)
-	kerochan@fml.org   (Kerbelos)
-	tomoyo@fml.org     (Tomoyo Daijouji)
+	kerochan@fml.org   (Kerberos)
+	tomoyo@fml.org     (Tomoyo Daidouji)
 .fi
 
 ● '# name' コマンド (新規)

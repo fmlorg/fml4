@@ -293,6 +293,9 @@ LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
 NUM_LOG_MAIL:	100
 LOG_MAIL_FILE_SIZE_MAX:	2048
 
+# PGP Encrpyted ML
+USE_ENCRYPTED_DISTRIBUTION:	
+ENCRYPTED_DISTRIBUTION_TYPE:	pgp
 
 #####################################################################
 # ### Section: Header Customization ###

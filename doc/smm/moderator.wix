@@ -119,6 +119,7 @@ the password to add "Approval:" field.
 
 .S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 1 もしくは 未定義)
 =E.S	How to Certify ($MODERATOR_FORWARD_TYPE == 1)
+.l	moderator-type-1
 
 承認を求めるメールがフォワードされるのは $MAINTAINER です。承認したか
 否かはパスワード認証になります。パスワードを知っている人がモデレータと
@@ -170,12 +171,18 @@ Example:
 
 .S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 3 もしくは 未定義)
 =E.S	How to Certify ($MODERATOR_FORWARD_TYPE == 3)
+.xref	moderator-type-1
 
 Type III は I の変形です。パスワードを知っている人(モデレータ)は査読に
-関わらず出せます。
+関わらず出せます。Approval: パスワード つきでメールをだせば査読にまわ
+らずそのまま通過します。
 =E
 Type III is a variation of type I. A mail from a moderator pass
-through without certification.
+through without certification. A mail with Approva: password is not
+checked.
+
+See also "admin forward" command.
+.xref	moderator-type-1
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

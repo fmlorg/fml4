@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML 2.2 Mailing List Server Package
+	FML 2.2 (2.2A) Mailing List Server Package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -183,7 +183,7 @@ fml-support ML (言語は日本語)が用意されています。
 
 fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ
 
-   subscribe 自分の名前 (例: subscribe Sakura Kinomoto)
+   subscribe 自分の名前 (例: subscribe Anne Shirley)
 
 をメールの本文に書いて送って下さい。登録意志確認のメールが届くのでその
 メールに返事をして下さい。
@@ -207,7 +207,7 @@ for it
 
 To join fml-users, send the following phrase in the mail body
 
-	subscribe your-name (e.g. subscribe Sakura Kinomoto)
+	subscribe your-name (e.g. subscribe Anne Shirley)
 
 to the address <fml-users-ctl@ffs.fml.org>. You will receive a
 confirmation of your will to join this. Please reply and send it back
@@ -294,7 +294,7 @@ Please see the file INSTALL for the detail.
 
 UPGRADE というファイルを見て下さい。古い config.ph をそのまま使おうと
 思っている人は(HOOKについてはちょっと気を付けないといけませんが)そのま
-ま使って下さい。
+ま使って下さい。凝ったHOOKをしていない人はそのまま使って大丈夫です。
 .xref compatibility
 
 .S	fmlが動く環境
@@ -396,7 +396,9 @@ you should enable functions explicitly.
 =E
 *  Message-ID Cache, system account rejection, ... against loop
 
-○ トラフィックモニタ(メール爆弾防衛機構) (2.2 new function)
+○ トラフィックモニタ (2.2 new function)
+   トラフィックを監視してバースト的に送ってくる奴は reject する
+   e.g. 複雑でない mail bomb 対策
 =E
 *  Traffic Monitor (2.2 new function)
    which monitors the ML traffic. Fml rejects more articles from a

@@ -17,6 +17,8 @@ $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 ########## MAIN ##########
 &Init;
 
+chdir $DIR || &Die("Can't chdir to $DIR");
+
 ### redefine &Log ...
 &FixProc;
 
@@ -105,19 +107,36 @@ sub Init
 	}
     }
 
+    require 'libkern.pl';
+
     # WARNING;
     -d $SPOOL_DIR || 
-	die("At least one argument is required for \$SPOOL_DIR\n");
+	&Die("At least one argument is required for \$SPOOL_DIR");
     -d $HTML_DIR  || 
-	die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED\n");
+	&MkDir($HTML_DIR);
+	# &Die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED");
 
     # Libraries
+    if (!-f "$DIR/config.ph") {
+	&Die("I cannot find $DIR/config.ph!\n"
+	     ."\t\$DIR = $DIR may be inappropiate.\n"
+	     ."\tPlease define -D ML_HOME_DIR.");
+    }
+
     require $ConfigFile if -f $ConfigFile;
-    require 'libkern.pl';
-    require 'libsynchtml.pl';
 
     # loading MIME libraries (prefetch)
     if ($USE_MIME) { require 'libMIME.pl';}
+
+    require 'libsynchtml.pl';
+}
+
+
+sub Die
+{
+    print STDERR "Error: ", $_[0], "\n\n";
+    &Usage;
+    exit 1;
 }
 
 
@@ -227,10 +246,17 @@ sub Usage
 {
     local($s);
 
-    $s = q#;
-    spool2html.pl [-h] [-I INC] [-f config.ph] [-d HTML_DIR] [-t TYPE] SPOOL;
+    $s = q#Usage: spool2html.pl [-hvV] [-D DIR]
+                  [-I INC] [-f config.ph] [-d HTML_DIR]
+                  [-M minimum] [-S SLEEP_TIME]
+                  [-E limit] [-t type]
+                  [-t TYPE] SPOOL;
+    ;
+    -D    $DIR (ML HOME DIRECTORY)
     ;
     -h    this message;
+    -v    verbose;
+    -V    debug mode on;
     -d    $HTML_DIR;
     -f    config.ph;
     -t    number of day ($HTML_INDEX_UNIT);
@@ -241,8 +267,8 @@ sub Usage
     ;#;
 
     $s =~ s/;//g;
-
-    print "$s\n\n";
+    $s =~ s/\s*$//;
+    print "$s\n";
 }
 
 

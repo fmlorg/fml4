@@ -21,6 +21,9 @@
    Windows NT4 上でのインストールについては INSTALL_on_NT4 も
    見て下さい。NT4 でのUNIXとの違いについての注意が書いてあります。
 
+   バージョンアップに際して困ったらまずはUPGRADEという注意書きを
+   読んでみてください。
+
    なお以下のドキュメント中ではメーリングリストをＭＬと略しています。
    % はシェルのプロンプトです。
 .fi
@@ -349,7 +352,10 @@ Here you see the following questions. Please answer them!
    FQDN                      [beth.fml.org] 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
    TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
-   LANGUAGE                  [Japanese] 
+
+   Language (Japanese or English) [Japanese] 
+
+   TimeZone (TZ: e.g. +0900, -0300) [+0900] 
 
 それぞれ次のような意味です。適当に入れて下さい。単にEnter?(CR) を押す
 と [] の中の値が自動的に設定されます。
@@ -442,6 +448,13 @@ Please see the previous section!
 	"Japanese". If not, "English". If you would like to change,
 	please select "Japanese" or "English".
 .fi
+
+   TimeZone (TZ: e.g. +0900, -0300) [+0900] 
+
+	文字どおり TIME ZONE (一応頑張ります)。 ちなみに日本は +0900 です
+=E
+	Fml tries to speculate your TIME ZONE but may be incorrect.
+	If so, please input your timezone.
 
 .# here after do not use fml.org but baycity.asia e.g. godai-resort :D
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
@@ -961,6 +974,30 @@ and
 Automatic registration is done when a mail comes to an address form
 not member and the mode for the address is "auto_regist".
 
+.if LANG == JAPANESE
+＊ 手動での登録の場合
+
+デフォールトです。subscribe というリクエストには確認のメールがユーザに
+送られます(自動登録の confirmation と同じ(後述))。参加の意志確認がとれ
+たら管理者に「参加希望者がいる」旨が連絡されます。管理者はその後手動で
+登録するなり、管理者コマンドを使うなりします。リモートで管理者コマンド
+を使うには明示的にその機能を有効にする必要があります。
+=> .ptr{REMOTE_ADMINISTRATION}
+.fi
+.if LANG == ENGLISH
+* MANUAL REGISTRATION
+
+It is default. If fml receives subscribe request, fml sends back a
+confirmation to the user. If the user replies it and fml confirms it,
+fml sends "someone wants to join our ML" to ML maintainers. After
+this, ML maintainers adds the user. 
+
+How to add depends on the configuration. In default fml expects a
+maintainer edit member lists by hand. If you use remote administration
+commands, please enable it explicitly. 
+=> .ptr{REMOTE_ADMINISTRATION}
+.fi
+
 ＊ 自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
    [COMMAND]
 
@@ -1138,10 +1175,16 @@ automatic registered.
 $REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
 ります。これは配送と認証のリストを非対称に使う時に使います。ただし 
 listname-ctl (e.g. elena-ctl) を使うことを前提としています。
+これは情報を一方的に送りつけるタイプのMLを作る際に便利でしょう。
+しかし投稿についてはFrom認証でしかないので、さらにセキュリティレベルを
+上げるためにはモデレータやPGPの使用を考えるべきかもしれません。
 =E
 $REJECT_COMMAND_HANDLER can have a value 'auto_asymmetric_regist'. If
 defined, FML uses delivery list controlled by automatic registration
 and authentication list edited by hand (or makefml).
+This configuration may be useful to make one way information delivery.
+But fml checks a poster by From:, so you may have to consider
+moderator or PGP authentication.
 .~q
 
 	elena/actives	MLの配送のリスト(自動登録に使う)
@@ -1578,6 +1621,21 @@ and hop count expiration errors. see the next menu.
 
    Received: を通すなら yes
 
+[参考] これ以上細かいヘッダフィールドのカスタマイズのためには次のよう
+な関数が用意されています。使い方は doc/op.* doc/html/op/ の中をサーチ
+してください。
+=E
+FYI: The following functions are preapred to customize the mail header
+more precisely.
+
+	&ADD_FIELD
+	&DELETE_FIELD 
+	&COPY_FIELD 
+	&MOVE_FIELD 
+	&DEFINE_FIELD_FORCED 
+	&DEFINE_FIELD_ORIGINAL
+	&DEFINE_FIELD_OF_REPORT_MAIL 
+	&DEFINE_FIELD_PAT_TO_REJECT
 
 .########### Menu Section ##########
 .S	その他の設定
@@ -1891,6 +1949,14 @@ corresponds to this in config.ph.
 
 に変換されます。
 
+LOCAL_CONFIG というキーワードから後は生の perl 構文が書けます。ローカ
+ルハックはこの部分に記述しておくと便利。この部分は cf -> config.ph を
+再生成した時に config.ph の最後につけ足されます。
+=E
+You can write raw perl statements after "LOCAL_CONFIG". It is appended
+in the config.ph when you re-create "config.ph" from "cf" file. Here
+is for localhack.
+
 .S	makefml config-template; configの大元のファイルをメニューで編集
 =E.S	makefml config-template
 
@@ -1955,8 +2021,27 @@ Also you can edit files e.g. help, guide in the same way.
 とすると作成される help ファイル(日本語)の template を edit することが
 できます。
 
-.S	動作テスト(デバッグモード)について
-=E.S	Debug Mode
+
+.C	動作のテスト, デバッグについて
+=E.C	How to test and debug
+
+.if LANG == JAPANESE
+1. OSのメールのログを調べる。
+   see Chapter .ptr{maillog-typical-errors}.
+2. fml のログを調べる。$DIR/log (ML's HOME ログファイル)
+3. fml からMTAへちゃんと渡せているかのログを調べる。
+   ($DIR/var/log/_smtplog)
+4. "makefml test ML" で fml 自体が動いているかを調べる。
+   このテストはMTAとは完全に無関係に動くのでこれが動くならMTAの問題
+.fi
+.if LANG == ENGLISH
+1. See system mail log e.g. /var/log/maillog to check your MTA.
+   If you find some errors in it, check MTA configurations.
+   see Chapter .ptr{maillog-typical-errors}.
+2. see $DIR/log (ML's HOME log file) to check fml.
+3. see $DIR/var/log/_smtplog to check SMTP from fml to MTA.
+4. "makefml test ML" to test fml itself apart from MTA.
+.fi
 
 	makefml test ML
 
@@ -1991,6 +2076,7 @@ Example:
 .appendix
 .C	典型的なエラー
 =E.C	Typical Error Cases
+.l	maillog-typical-errors
 
 原因を探るためにはパッケージ附属の CHECK_LIST.jp や
 http://www.fml.org/fml/CHECK_LIST/ にリストアップされている項目をチェッ
@@ -2302,6 +2388,11 @@ Append in config.ph (before the last "1;")
 	$UNSUBSCRIBE_AUTH_TYPE    confirmation of unsubscription
 	$USE_LOG_MAIL             logging all mails fml received
 .fi
+
+* PGP による暗合化ＭＬ: 配送を暗合化する(詳しくは doc/op.jp)
+=E
+* PGP Encrypted ML: encrypted article is distributed. see doc/op.en
+for more details on how to set up this.
 
 .if LANG == JAPANESE
 * フィルタリングの補足: 貼付ファイルを禁止する例

@@ -602,7 +602,7 @@ FML 2.2 以降では
 =E
 After FML 2.2, set
 
-    unshift(@HdrFieldsOrder, 'Received');
+    $SKIP_FIELDS  = 'Return-Receipt-To';
 
 とすればいいでしょう。
 ＃2.1 では子文字じゃないとだめかも unshift(@HdrFieldsOrder, 'received');
@@ -611,6 +611,14 @@ After FML 2.2, set
 ＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
 =E
 to preserve Received: fields in the header. A capital is important.
+
+FML 2.1 ではたぶんこれでいいはず。
+=E
+FML 2.1 Example:
+
+    unshift(@HdrFieldsOrder, 'received');
+    $SKIP_FIELDS  = 'Return-Receipt-To';
+ 
 
 .S	スプールにあるファイルをMIME逆変換する
 =E.S	reconvert MIME characters in the spool
