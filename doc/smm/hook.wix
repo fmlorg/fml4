@@ -42,12 +42,17 @@ $START_HOOK =q%
 現在では $body という変数はこのためだけに使われる。
 ＃注意：昔は違った
 
-例：
+例(昔のやり方)：
     $HEADER_ADD_HOOK = q#
 	$body .= "X-Baycity-Weather: Mizumaki\n";
     #;
 
 ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる(意味不明(笑))
+
+現在では同じことは例えば 
+	&DEFINE_FIELD_FORCED("X-Baycity-Weather","Mizumaki");
+のような関数でできる。
+
 
 例２：
 Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
@@ -90,7 +95,8 @@ $SMTP_OPEN_HOOK = q#
 	$Envelope{'h:Precedence:'} = 'bulk';
 #;
 
-実は config.ph で $PRECEDENCE = 'bulk'; でＯＫです。
+Precedence: に関しては実は config.ph で $PRECEDENCE = 'bulk'; でＯＫで
+す。
 
 
 .S	$SMTP_CLOSE_HOOK
@@ -107,7 +113,7 @@ $SMTP_CLOSE_HOOK は配送が終った後でかつまだロックされている状態で実行
 
 fml.pl が最後に実行する フック。このときすでに 
 
-	”排他制御の lock が解除されている”
+	"排他制御の lock が解除されている"
 
 いることに注意して下さい。
 
@@ -134,6 +140,7 @@ $MSEND_OPT_HOOK = q%
 
 のようにかいてください。なにをやってるのかは、libutils.pl の中の
 sub MSendModeSet  という関数を見るとわかるとおもいます。
+.xref	$MSEND_SUBJECT_TEMPLATE
 
 
 .S	$REPORT_HEADER_CONFIG_HOOK
@@ -178,8 +185,8 @@ quoteする関数（本当の意味での関数ではないそうだ）
 
 config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
 します。こういうことをしてもいいというのは、大抵コマンドは一メールあた
-り１、２回しか呼ばれないので、eval は重たいけど、１、２度ならまぁ便利
-さの方が優先という経験と観察に基づいてます。
+り1、2回しか呼ばれないので、eval は重たいけど、1、2度ならまぁ便利さの
+方が優先という観察と経験に基づいてます。
 
 
 .S	HOOKによるコマンドの実装例： "# list" and "# rsummary"
@@ -261,23 +268,11 @@ $COMMAND_HOOK =q#
 
 
 .S	HOOKによるコマンド実装例： "# admin" アドミンコマンド
-.l	admin-command
-.k	$COMMAND_HOOK
-.k	$ADMIN_MEMBER_LIST
-.k	$ADMIN_HELP_FILE
-.k	$REMORE_AUTH
 .k	admin コマンド
+
+"# admin" アドミンコマンド って昔HOOKで実装していましたが、今は変数が
+あります。
 .xref	REMOTE-ADMINISTRATION 
-
-"# admin" アドミンコマンド って昔あったんですが、今は config.ph で
-
-	$REMOTE_ADMINISTRATION = 1;
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
-
-
-.S	"# admin" アドミンの昔の呼出し方
-
-lib/remote/README をみてもらうとわかりますね。 
 
 
 .S	HOOKの例：ある行数を越えるメールは廃棄する設定
@@ -329,7 +324,11 @@ if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
