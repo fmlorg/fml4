@@ -73,7 +73,7 @@ Example:
 =E
 	Disable commands to retrieve member lists
 
-	@DenyProcedure = ('member', 'active', 'members', 'actives');
+	@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
 
 
 .S	ハッシュ %Procedure の特殊なキー
