@@ -4,11 +4,6 @@
 	やり残し、やろうかなとおもってること
 	(誰かすでにやってたらパッチください)
 
-				深町 賢一
-.fi
-.if LANG == ENGLISH
-				Ken'ichi Fukamachi
-.fi
 
 .toc
 
@@ -55,7 +50,10 @@ $LOG_FILE_SUFFIX = ".%C%y";
    $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
 
 
-.C	current
+
+.# ############################################################
+.C	TODO (特に current)
+=E.C	TODO (current specific)
 
 .S	3.0D (to be 3.0D in the new future)
 
@@ -99,7 +97,7 @@ obsolete ?
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
-=E.C	TODO, WISH LIST
+=E.C	TODO
 
 .S	invalid form variables
 
@@ -224,6 +222,9 @@ Xref: fml-support:05948
 *	cf/MANIFEST 未定義変数探し
 =E
 *	search undefined variables on cf/MANIFEST
+
+
+.S	HELP ファイル
 	
 *	ヘルプファイルのupdate, mnews ML版とうまくマージすること
 =E
@@ -246,7 +247,7 @@ Which command could we use for usual member PGP authentication?
 .S	暗号化モード (USE_ENCRYPTION_DISTRIBUTION)
 =E.S	USE_ENCRYPTION_DISTRIBUTION
 
-この時に使う PGP は etc/pgp/ ではよくない。別につくるべき。
+この時に使う PGP は $DIR/etc/pgp/ ではよくない。別につくるべき。
 この時の makefml のコマンドは？ 
 =E
 DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
@@ -305,16 +306,6 @@ XRef: fml-support:05930
 
 * personal, group の naming convention
    share ?
-
-
-.S	アップグレードについて
-=E.S	upgrade
-
-* fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
-
-* MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
-
-* 今は stat() して reload をするようになっている
 
 
 .S	リモート管理のノウハウについて
@@ -464,10 +455,13 @@ fml-support: 07525
 
  Hmm..., impossible?
 
+
 .S	configure mead 
+
 
 .S	右から左のメニューへ update があがってない
 	e.g. newml
+
 
 .S	script 一発インストーラ (きめうち)
 
@@ -475,19 +469,22 @@ fml-support: 07525
 	sendmail + apache + fml-current
 	qmail    + apache + fml-current
 
+
 .S	ＭＬを消したら対応する authdb/ml-admin/$ml/ 以下も消す
 
 
-.S	apache-ssl の解説の用意をする
+.S	apache with SSL の解説の用意をする
 	1.3.12
 
 	http://www.apache.org/dist/Announcement.html
 	http://www.cert.org/advisories/CA-2000-02.html
 	http://www.apache.org/info/css-security/index.html
 
+
 .S	security check
 
 e.g. SUBJECT_TAG_TYPE is rejected now;_;  for security reason.
+
 
 .S 	CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
 =E.S	Do you construct a host for fml CGI only ?
@@ -504,6 +501,7 @@ A: Ｎ通りについて考えるのが面倒なので
    	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
    
 みたいに決めうちしておく。
+
    
 .S	/cgi-bin/fml/ml/$ml
    
@@ -512,8 +510,8 @@ A: Ｎ通りについて考えるのが面倒なので
    
    *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
    
-.S   	makefml passwd のエミュレーション
-=E.S	emulate "makefml passwd"
+
+.S   	makefml add$file
    
 fml-support: 07111
 
@@ -531,6 +529,7 @@ e.g. makefml addactives ML addr
 なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
 思うので実装しなくてはいけないとおもいました。
 
+
 .S 	CUIとGUIどっちが本体？
 =E.S	whether of CUI and GUI is fundamental 
    
@@ -539,8 +538,9 @@ A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
 利点として makefml config の日本語変換
 Message Language Extensionの関数ライブラリをよぶ
 
-.S	apache-ssl (1.3.12 base)の解説の用意をする
-=E.S	prepare documents to make apache-ssl (1.3.12 base)
+.S	apache with SSL (1.3.12 base)の解説の用意をする
+=E.S	prepare documents to make apache with SSL (1.3.12 base)
+
 
 .S	acl model
 
@@ -603,7 +603,9 @@ XXX 難しくて保守できないようなコードじゃ意味がないわけで
 XXX 「美しいコード」という命題自体がかなり無意味な気がする
 XXX わかりやすいコードというべきなんだろうな
 
-.C	やめやめ
+
+.C	obsolete ?
+
 
 * $OUTGOING_ADDRESSの設定をもっと簡単に？
 =E
@@ -614,6 +616,12 @@ XXX わかりやすいコードというべきなんだろうな
   errorはSMTPでどっかにまるなげ
 =E
 * kick off smtpfeed directly
+
+◯	アップグレードについて
+
+* fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
+  MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
+  今は stat() して reload をするようになっている
 
 
 .# $Id$
