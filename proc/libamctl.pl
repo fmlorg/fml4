@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libamctl.pl,v 2.51 2002/02/10 13:50:04 fukachan Exp $
+# $FML: libamctl.pl,v 2.52 2002/02/16 09:42:12 fukachan Exp $
 #
 
 
@@ -41,6 +41,18 @@ sub AutoRegist
     # Confirmation Mode; 
     # check the MailBody to search $CONFIRMATION_KEYWORD
     if ($AUTO_REGISTRATION_TYPE eq "confirmation") {
+	# check resource limit before confirmation
+	if ($MAX_MEMBER_LIMIT) {
+	    if (&CheckResourceLimit(*e, 'member') > $MAX_MEMBER_LIMIT) {
+		&Log("AutoRegist: reject subscribe request",
+		     "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
+		&Mesg(*e, 
+		      'Sorry, deny your request for too many subscribers', 
+		      'resource.exceed_max_member_limit');
+		return 0;
+	    }
+	}
+
 	local($key);
 
 	&use('confirm');
