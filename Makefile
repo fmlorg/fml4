@@ -128,6 +128,12 @@ release:
 faq:	 plaindoc
 textdoc: plaindoc
 
+INFO:	$(FML)/.info
+	@ $(MKDIR) /var/tmp/.fml
+	@ rm -f /var/tmp/.fml/INFO
+	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
+		nkf -e > /var/tmp/.fml/INFO
+
 plaindoc: doc/smm/op.wix
 	@ $(MKDIR) /var/tmp/.fml
 	@ rm -f /var/tmp/.fml/INFO
@@ -197,7 +203,7 @@ syncwww:
 syncinfo:
 	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
 
-bethdoc: newdoc
+bethdoc: INFO syncinfo newdoc
 newdoc: htmldoc syncwww syncinfo
 
 varcheck:
