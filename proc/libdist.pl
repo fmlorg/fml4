@@ -1,5 +1,5 @@
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -28,7 +28,7 @@ sub DoDistribute
 
     ##### ML Preliminary Session Phase 01: set and save ID
     # Get the present ID
-    open(IDINC, $SEQUENCE_FILE) || (&Log($!), return);
+    &Open(IDINC, $SEQUENCE_FILE) || return;
     $ID = <IDINC>;		# get
     $ID++;			# increment, GLOBAL!
     close(IDINC);		# more safely
@@ -51,7 +51,7 @@ sub DoDistribute
 	     $SUMMARY_FILE) || return;
 
     ##### ML Preliminary Session Phase 03: get @Rcpt
-    open(ACTIVE_LIST) || (&Log("cannot open $ACTIVE_LIST ID=$ID:$!"), return);
+    &Open(ACTIVE_LIST, $ACTIVE_LIST) || return 0;
 
     # Original is for 5.67+1.6W, but R8 requires no MX tuning tricks.
     # So version 0 must be forever(maybe) :-)
@@ -77,7 +77,7 @@ sub DoDistribute
 	  tr/A-Z/a-z/;		 # lower case;
 
 	  # strip comment, not \S+ for mx;
-	  s/(\S+)\s\#.*$/$1/;
+	  s/(\S+)\s+\#.*$/$1/;
 
 	  # Backward Compatibility; tricky "^\s".Code above need no /^\#/o;
 	  s/\smatome\s+(\S+)/ m=$1 /i;
