@@ -840,6 +840,12 @@ DENY_FILE:	 $DIR/deny
 LOGFILE:	 $DIR/log
 MGET_LOGFILE:    $DIR/log
 
+# suffix extension if defined. For example log.2000
+# For example $LOGFILE_SUFFIX = ".%C%y", file name is "log.2000".
+# See UNIX manual "strftime(3)" for more details on format.
+# value: srtings
+LOGFILE_SUFFIX:
+
 # when -d2 ($debug = 2), logs this file for convenience.
 # value: filename string
 DEBUG_LOGFILE:    $DIR/log.debug
