@@ -183,7 +183,6 @@ plaindoc: doc/smm/op.wix
 		nkf -e > /var/tmp/.fml/INFO
 	@ sh usr/sbin/sync-rcs-of-doc.sh
 	@ sh usr/sbin/DocReconfigure
-	@ perl bin/fwix.pl -n i doc/master/help.wix  > doc/master/help
 
 htmldoc:	doc/smm/op.wix
 	@ (chdir doc/html;make)
