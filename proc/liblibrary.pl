@@ -84,8 +84,8 @@ sub ProcLibrary4PlainArticle
 
 	&LogWEnv("Library: submitted entry [mget @p]", *e);
 
-	if ($FML_EXIT_HOOK !~ /LibrarySendingEntry/) {
-	    $FML_EXIT_HOOK .= '&LibrarySendingEntry(*Envelope);';
+	if ($FmlExitHook{'lib_mget3'} !~ /LibrarySendingEntry/) {
+	    $FmlExitHook{'lib_mget3'} .= '&LibrarySendingEntry(*Envelope);';
 	}
 	
 	# save Library Specific space;
