@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libenvf.pl,v 2.17 2001/09/13 09:14:13 fukachan Exp $
+# $FML: libenvf.pl,v 2.18 2001/09/29 10:35:42 fukachan Exp $
 #
 
 use vars qw($debug $debug_filter $debug_envf_rule);
@@ -118,7 +118,6 @@ sub __EnvelopeFilter
     else { # may be null or continuous character buffer?
 	my ($i);
 	for ($i = 0; $i < $#pmap && $pmap[$i] < 1024; $i++) {;}
-	&Log("EnvelopeFilter: check from $pmap[0] to $pmap[$i] since too big");
 	$xbuf = substr($e{'Body'}, $pmap[0], $pmap[$i]);
     }
     $n_paragraph = $#pmap;
