@@ -12,31 +12,53 @@
 # $Id$
 
 ### MAIN ###
+local($pid, $dying);
+
 if ($0 eq __FILE__) {
+    &IrcParseArgv;
+
     if (($pid = fork) < 0) {
 	die("cannot fork\n");
     }
     elsif (0 == $pid) {
-	$stdin2irc'LOGFILE = "$ENV{'PWD'}/log"; #';
-	eval q#sub Log { &stdin2irc'Log(@_);}#; #';
-	
+	$NetIRC'LOGFILE = "$ENV{'PWD'}/log"; #';
+	eval q#sub Log { &NetIRC'Log(@_);}#; #';
+
 	for (;;) {
+	    ### configuration reset ###
 	    # signal handling
 	    $SIG{'HUP'} = $SIG{'INT'} = $SIG{'QUIT'} = 
 		$SIG{'TERM'} = "irc'Exit";#';
 
-	    &IrcParseArgv;
+	    ### (re)start Initialize ###
 	    &IrcInit;
-
 	    &IrcConnect;
-	    &IrcMainLoop; # infinite loop
 
+	    if ($0 =~ /stdin2irc/) {
+		# infinite loop (but it ends up if anything error occurs).
+		# stdin -> buffer <-> irc server
+		&IrcMainLoop;
+	    }
+	    elsif ($0 =~ /q2irc/) {
+		&QueueToIrc;
+	    }
+
+	    ### end ###
 	    close(S);
+	    shutdown(S, 2);
+
 	    sleep 3;
+	    &Log("stdin2irc restarting ...");
 	}
     }
 
-    # parent
+    # In debug mode I do not detach the child process.
+    # Wait for the child to terminate.
+    if ($debug) {
+	while (($dying = wait()) != -1 && ($dying != $pid)){ ;}
+    }
+
+    # parent end
     exit 0;
 }
 else {
@@ -82,19 +104,36 @@ sub main'IrcParseArgv #'
 {
     ### getopts
     require 'getopts.pl';
-    &Getopts("df:I:t:");
+    &Getopts("df:I:t:hL:");
 
-    $debug = $opt_d;
+    if ($opt_h) {
+	$s = $0;
+	$s =~ s#.*/##;
+	$s = qq#USAGE:;
+	$s [-dh] [-I INC] [-t title] [-L file] -f file;
+	;
+	-f file  perl configuration file (required);
+	;
+	-L file  log file;
+	-I INC   add include path to \@INC;
+	-t title setproctitle(title);
+	;
+	-d       debug mode;
+	-h       this message;
+	;#;
+	$s =~ s/;//g;
+	print STDERR $s, "\n";
+	exit 0;
+    }
+
+    # now 'irc' name space;
+    $debug = $NetIRC'debug = $main'debug = $opt_d ? 1 : 0;
+
     $SetProcTitle = $opt_t;
 
     # load config.ph
     if (!-f $opt_f) { die("cannot load config file, stop.\n");}
     require $opt_f;
-
-    # log
-    if (-w "/dev/stderr") {
-	open(SMTPLOG, ">/dev/stderr") || die($!);
-    }
 
     # include path
     push(@INC, $opt_I);
@@ -132,13 +171,16 @@ sub main'IrcInit  #'
 
 sub InitConnection
 {
+    local(@x);
     for ("USER $IRC_USER * * :$IRC_NAME",
 	 "NICK $IRC_NICK",
 	 "PING FML-IRC-FIRST",
 	 "JOIN $IRC_CHANNEL"
 	 ) {
-	push(@Queue, $_);
+	push(@x, $_);
     }
+
+    unshift(@Queue, @x);
 }
 
 
@@ -206,8 +248,11 @@ sub SocketInit
 
 sub main'IrcConnect #'
 {
-    $status = &DoConnect(*IRC_SERVER, *error);
-    &Log($status) if $status;
+    while ($status = &DoConnect(*IRC_SERVER, *error)) {
+	print STDERR "status=$status\n" if $debug;
+	&Log($status) if $status;
+	sleep 1;
+    }
 }
 
 
@@ -232,17 +277,17 @@ sub DoConnect
 
     # IPC open
     if (socket(S, &PF_INET, &SOCK_STREAM, $proto)) { 
-	print SMTPLOG "socket ok\n";
+	&Log("socket ok");
     } 
     else { 
 	return ($error = "Irc::socket->Error[$!]");
     }
     
     if (connect(S, $target)) { 
-	print SMTPLOG "connect ok\n"; 
+	&Log("connect($host:$port) ok");
     } 
     else { 
-	return ($error = "Irc::connect($host)->Error[$!]");
+	return ($error = "Irc::connect($host:$port)->Error[$!]");
     }
 
     ### need flush of sockect <S>;
@@ -256,7 +301,10 @@ sub main'IrcMainLoop  #'
 {
     local($rin, $win, $ein);
     local($rout, $wout, $eout);
-    local($buf, $wbuf);
+    local($buf, $wbuf, $reset, $count);
+
+    # server not recognize me!
+    $TrapPattern = 'not registered';
 
     # server timeout
     $IRC_SERVER_TIMEOUT = $IRC_SERVER_TIMEOUT || 1800;
@@ -271,6 +319,11 @@ sub main'IrcMainLoop  #'
 
     $lasttime_input = time;
     for (;;) {
+	if ($reset) {
+	    $GlobalErrorCount++;
+	    last;
+	}
+
 	$0 = "--stdin2irc $SetProcTitle";
     
 	($nfound, $timeleft) =
@@ -286,16 +339,32 @@ sub main'IrcMainLoop  #'
 	    last;
 	}
 
+	# Server Socket
 	if (vec($rout, $BITS{'S'}, 1)) {
-	    sysread(S, $buf, 4096) || &Log("Error:$!");
+	    print STDERR "S STAND-BY\n" if $debug;
+
+	    sysread(S, $buf, 4096) || do { 
+		if ($!) { &Log("sysread: $!");} 
+		$reset = 1;
+	    };
+
 	    if ($debug) {
 	        &GetTime(time);
-		for (split(/\n/, $buf)) { print STDERR "----- $Now> $_\n";}
+		for (split(/\n/, $buf)) {
+		    if (/$TrapPattern/) { $reset = 1;}
+		    print STDERR "----- $Now> $_\n";
+		}
 	    }
 	}
 
+	# input channel
 	if (vec($rout, $BITS{'STDIN'}, 1)) {
-	    sysread(STDIN, $buf, 4096) || &Log("Error:$!");
+	    print STDERR "STDIN STAND-BY\n" if $debug;
+
+	    sysread(STDIN, $buf, 4096) || do { 
+		if ($!) { &Log("sysread: $!");}
+		$reset = 1;
+	    };
 
 	    for (split(/\n/, $buf)) {
 		print STDERR ">>> $_\n" if $debug;
@@ -303,19 +372,37 @@ sub main'IrcMainLoop  #'
 	    }
 	}
 
+	# debug
+	if ($debug) {
+	    $xxx = length(@Queue);
+	    &Log("wait queue $xxx");
+	}
+
+	### reset flag, not continue ### 
+	next if $reset;
+	# O.K. We can write to IRC server. Trun off error flag.
+	$GlobalErrorCount = 0 if $count > 5;
+
+	# wait
 	sleep 1;
 	sleep int(length(@Queue)/3);
+
+	# write the buffer to server
 	$wbuf = shift @Queue;
 	&SendS($wbuf) if $wbuf;
 
 	# counter
-	$count = @Queue ? 0 : ($count+1);
+	$count++;
 
 	# ping, pong
 	if ($count % 10 == 0) { 
 	    &SendS("PING $IRC_SERVER");
+	    $count = 0;
 	}
     }
+
+    &Log("anyway wait for $GlobalErrorCount sec;");
+    sleep($GlobalErrorCount % 16); # max 15 sec.
 }
 
 
@@ -360,7 +447,9 @@ sub main'Write2Irc #'
 	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
 
 	if (vec($rout, $BITS{'S'}, 1)) {
-	    sysread(S, $buf, 4096) || &Log("Error:$!");
+	    sysread(S, $buf, 4096) || do { 
+		if ($!) { &Log("sysread: $!");} 
+	    };
 	    if ($debug) {
 		for (split(/\n/, $buf)) { print STDERR "--- $_\n";}
 	    }
@@ -369,7 +458,7 @@ sub main'Write2Irc #'
 }
 
 
-package stdin2irc;
+package NetIRC;
 
 sub GetTime
 {
@@ -413,6 +502,8 @@ sub Log
     else {
 	print STDERR "$Now $str\n\t$s\n";
     }
+
+    print STDERR "$Now $str\n\t$s\n" if $debug;
 }
 
 
