@@ -428,6 +428,10 @@ I depends on NetBSD (bsd)make.
 .C	CGI
 .l	CGI
 
+.S	security check
+
+e.g. SUBJECT_TAG_TYPE is rejected now;_;  for security reason.
+
 .S 	CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
 =E.S	Do you construct a host for fml CGI only ?
 
