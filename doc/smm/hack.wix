@@ -355,19 +355,6 @@ From: Yuao Tanigawa <yuao@infonia.or.jp>
 =E
 http://www.j-is.or.jp/fml/
 
-.S	$ProcedureException{"bye", "ignore_list"} (将来もあるかは未定)
-=E.S	$ProcedureException{"bye", "ignore_list"} 
-
-   $ProcedureException{"bye", "ignore_list"} = $MEMBER_LIST;
-
-とかすると、member list に operation したふりだけして何もしないという 
-exception code いれたけど、裏技なのでdocumentにはかかず状態
-このコードはSNMPなMIB的になってしまふのかしらん… あななやまし
-=E
-fake operation to a member list. I cannot ensure this code exists in
-the future. This code enforces FML to ignore $MEMBER_LIST check in
-"unsubscribe" operation.
-
 .S	新しく『特定のファイルを送り返す』コマンドを作る
 =E.S	make a new command what send back a file
 .l	my-file-sendback-command
