@@ -349,12 +349,23 @@ You can find samples for each ML
 
 	/var/spool/ml/MLの名前/サンプルのファイル群
 
-が設定の見本です。ちなみにＭＬを消す時は単に、
+が設定の見本です。入っている(それぞれのＭＬ用にカスタマイズされた内容
+の)サンプルは
+=E
+Samples are the following files:
+
+	include aliases crontab fml.c config.h cf Makefile
+
+が保存されています。参考にして下さい。
+
+
+ちなみにＭＬを消す時は単に、
 
 	rm -fr /var/spool/ml/MLの名前
 
 でファイルを消して下さい。そして、/etc/aliases から該当するＭＬの部分
 を削って newaliases をかけます。
+
 
 
 .S	まとめおくり
@@ -515,28 +526,6 @@ group-writable が必要なだけです
 またいくつかの点で portability を無視してあります。
 
 
-
-.C	設定ファイルの保存
-=E.C	the location where configuration files are saved
-
-	/var/spool/ml/ＭＬの名前/
-
-=E
-You can find setting samples in the directory
-=S
-	/var/spool/ml/listname/
-
-という場所(上の例ではこの場所)に makefml で作った見本が入っています。
-それぞれのＭＬ用にカスタマイズされた内容の
-=E
-Samples are the following files:
-
-	include aliases crontab fml.c config.h cf Makefile
-
-が保存されています。参考にして下さい。
-
-
-
 .C	ＭＬへのユーザの登録・削除
 =E.C	To add and delete a user in the mailing list
 
@@ -616,28 +605,6 @@ e.g.
 =E
 You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
-
-
-.S	設定ファイルについての注意
-
-まず config.ph というファイルが設定ファイルです。makefml は cf という
-ファイルを編集するインターフェイスです。この cf というファイルから 
-config.ph を毎回作っています(cf -> config.ph)。
-
-この画面で設定できない(進んだ)設定をするためには
-
-	1. cf ファイルを編集する。
-	   cf ファイルをいじって config.ph を作る。
-	   make config.ph というコマンドで cf -> config.ph はつくられます。
-
-	2. 今後は cf も makefml も使わない。
-	   config.ph を手で編集することにする。
-
-そういう意味で cf ファイルは config.ph のマスターですが、config.ph を
-直接編集してももちろん構いません。むしろ望ましいです。しかし、
-config.ph を手でいじって、そのあと makefml config を使うとせっかくの設
-定が上書きされて消されてしまうので注意して下さい(この場合 makefml は警
-告を出して一回止まりこのまま進んでいいかどうか尋ねてきます)。
 
 
 .S	TOP メニュー
@@ -1165,6 +1132,79 @@ Remove the user "fukachan@fml.org" who can manage the
 =E
 Please input the "password" of "who" (Email address). 
 
+
+.C	設定ファイルの編集について
+=E.C	Configuration File
+
+
+.S	設定ファイル(cf と config.ph)についての注意 
+
+fml.pl がメーリングリスト本体です。このプログラムにメールを入れるとメー
+リングリストとして作動します。fml.pl の動作は config.ph という設定ファ
+イルで決まります。
+
+makefml config は cf というファイルを編集するインターフェイスです。 
+makefml はこの cf というファイルから config.ph を毎回作っています。
+
+		cf	->	config.ph
+
+makefml config (の画面)で設定できない(より進んだ/凝った)設定をするためには
+
+	1. cf ファイルを編集し、その cf から config.ph を作る。
+	   MLのHOMEで、 make config.ph というコマンドをうつと
+	   cf -> config.ph はつくられます。
+
+	2. 今後は cf も makefml も使わない。
+	   config.ph を手で編集することにする。
+
+そういう意味で cf ファイルは config.ph のマスターですが、config.ph を
+直接編集してももちろん構いません。むしろ望ましいです。しかし、
+config.ph を手でいじって、そのあと makefml config を使うとせっかくの設
+定が上書きされて消されてしまうので注意して下さい(この場合 makefml は警
+告を出して一回止まりこのまま進んでいいかどうか尋ねてきます)。
+
+
+.S	cf ファイルと config.ph のフォーマット
+
+いずれの場合も詳細は doc/op というファイルのパートIIIなどを見て下さい。
+
+○ 単純なものは makefml config で編集できます。
+
+○ config.ph の書き方は perl の構文そのものです。
+
+○ cf はどちらかという機械処理のために単純化された config.ph です。
+   また cf で定義されていないものはデフォールト値が使われます。
+   cf にはデフォールトと異なる差分だけを保守するのに便利です。
+   ＃FMLをインストールした場所/cf/MANIFEST に変数デフォールトの一覧が
+   ＃あります。
+
+   # はコメントで、定義に使う行は
+
+	変数名	適当なスペース	変数の値
+	
+のように書きます。これが config.ph に変換されると
+
+	$変数名 = "変数の値";
+
+のようになります。つまり『変数名は perl の変数名から $ をとったもの』
+です。
+
+例: cf で	
+
+	MAIL_LIST                	elena@$DOMAINNAME
+	PERMIT_POST_FROM         	members_only
+	REJECT_POST_HANDLER      	reject
+
+は config.ph の
+
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
+
+に変換されます。
+
+
+
 .appendix
 .C	:include: ではうまく動かない場合 (/etc/aliases)
 =E.C	You fails to use :include: form in /etc/aliases
@@ -1193,6 +1233,8 @@ machine since it requires a lot of attention.
 
 sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
 そういうtrickyな話題については doc/op を見てください(^^;)
+
+なお NT 上ではこの裏技を使います:)
 
 
 $Id$
