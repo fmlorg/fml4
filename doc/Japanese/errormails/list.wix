@@ -2,6 +2,7 @@
 .l	errorlist
 
 .S	perlのだしているエラー
+=E.S	error messages from perl
 
 これはおそらくMTAの問題ではなくfml自体( fml.pl )を実行し損なっていると
 いう意味です。
@@ -15,7 +16,9 @@ perlが正しくインストールされていません。perlをインストールしなおして
 =E
 The installation of perl fails. Please install perl again!
 
+
 .S	MTAのエラー
+=E.S	error messsages MTA shows
 
 例えばMTAのエラーの場合の典型例は以下のようなものがあります。
 MTA(sendmail など)から返ってきたメールのエラーメッセージの代表例:
@@ -91,13 +94,13 @@ If you fails to use :include: in /etc/aliases, please use the
 C-wrapper program which may be required to be root-setuid.
 The example of the C-wrapper is 
 =S
-	/var/spool/ml/listname/fml.c 
+	/var/spool/ml/listname/fmlwrapper.c 
 =S
 Please compile and set it properly. I recommend you council the
 setting of the C-wrapper with the administrator of the
 machine since it requires a lot of attention.
 
-	/var/spool/ml/ML名/fml.c 
+	/var/spool/ml/ML名/fmlwrapper.c 
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。compile そのものはその場所で make fml で実行されますが、setuid は

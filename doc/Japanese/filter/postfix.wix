@@ -1,6 +1,8 @@
 .C	postfix のフィルタイング
+=E.S	filtering of Postfix
 
-.S	メール本文のフィルタ body_checks
+.S	メール本文のフィルタ body_checks ディレクティブ
+=E.S	body_checks directive
 
 postfix-19991231-pl08 には "body_checks" directive が導入されました。
 まさにメール本文チェック用です。
@@ -8,6 +10,7 @@ postfix-19991231-pl08 には "body_checks" directive が導入されました。
 XXX: This feature is also available in Postfix snapshot 20000528.
 
 .S	ヘッダのフィルタ header_checks
+=E.S	header_checks directive
 
 .q
 [/etc/postfix/main.cf]
@@ -17,7 +20,7 @@ header_checks = regexp:/etc/postfix/header_checks
 /^Subject.*ILOVEYOU/  REJECT
 .~q
 
-.S	フィルタソフトにとおす
+.S	Content Filter
 
 Postfix snapshot 20000529 以降で実装。postfix-users より引用
 詳しくは www.postfix.org なり過去メールを探して読んでね

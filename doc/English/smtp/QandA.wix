@@ -1,9 +1,11 @@
 .C	Q&A
 
 .S	root 権限なしに MTA を交換は？
-
+=E.S	use my own MTA without root priviledge
 
 一般にはできません。
+=E
+not in general.
 
 理論的には配送くらいはあちこちいじり回せばできるようにおもいますが、
 内部構造を非常に良く知らないとできないでしょう。
@@ -16,8 +18,11 @@ fml は queue 管理はしていないので
 smtpfeed を直接実行するという仕組みは実装されていません。
 
 .S	smtpfeed を直接呼べませんか？
+=E.S	call smtpfeed directly?
 
    smtpfeed は配送部分"だけ"のエージェントです。
+=E
+difficult since fml need to do queue management when fml does so.
    
    fork() の数が減って嬉しい:) 再送がないなら嬉しい(というのはちょっとま
    ずいだろう)けどqueue管理はしたくない(実装する側の意見)
@@ -31,9 +36,12 @@ smtpfeed を直接実行するという仕組みは実装されていません。
    
 
 .S	MTA みくじ
-
+=E.S	MTA gambles
 
    	1	@HOSTS で複数のほすとのMTAが使えます
    		@HOSTS = (hostA, hostB, hostC, ...)
    	2	document に書いてないけど hostA のところは 
    		hostA:portA なんて書き方もできたりします:)
+=E
+	@HOSTS = (hostA, hostB, hostC, ...)
+and sort it randomly :-)

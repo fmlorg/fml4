@@ -1,4 +1,5 @@
 .C	事例
+=E.C	Case Study
 
 .S	配送プログラム(e.g. sendmail)との通信のログを残す
 =E.S	SMTP logfile
