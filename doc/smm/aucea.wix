@@ -3,19 +3,68 @@
 
 .S	Introduction to Aucea
 
+[SYNOPSIS]
 	特定のフォーマットで与えられるフィールドが正規表現にマッチする
 	か否かを調べパターンにマッチした時およびしない時にそれぞれ定義
 	された関数を実行する。
 
-例えば
-	項目	値
+例えば ファイルの形式が
 
-のようなものは多くあります。特定の書類、投票やアンケートのフォーマット
-等の一般的に良くありうる形式について当てはまるすべてのものに適用可能で
-す。
+		項目	値
+
+のようなものは世の中に多くあります。特定の書類、投票やアンケートのフォー
+マット等の一般的に良くありうる形式について当てはまるすべてのものに適用
+可能です。
 
 投票システム lib/Elena (VotingSystem) や FRED ライブラリの可読性をあげ、
 汎用的に拡張しなおしたものと考えてよいでしょう。
+
+
+.S	Auceaインターフェイスとデータ構造
+
+   require 'libAucea.pl';
+   &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
+
+   INPUT:	*Envelope を Aucea に入れる
+   OUTPUT:	*Envelope, *Buf, *CF, *Result が変える。
+
+   *Envelope 
+	メールの場合はヘッダ、メール本文の各値
+	コマンドラインではこれの形式に合わせて変換して突っ込む。
+
+   *Result 
+	各種結果、エラーレポート、Trace log 等が変える。
+	現在サポートされているデータは
+
+	%Result の key が Error, Warn, Report, Trace
+	の四種類
+
+
+   *** 附随してくるデータ構造
+
+   *Buf
+	メール本文から CF ファイルの定義に従い得られた各値
+
+   *CF
+	CF ファイルの定義
+
+
+.S	関数呼び出しの例
+    
+    $AUCEA_CF 
+    $AUCEA_SYSCALL_LIBRARY を定義する。
+
+    *CF に定義を読み込む。
+
+    *Envelope にデータを入れる。
+
+    &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
+	処理は Aucea 名前空間で処理される。
+
+	また CF の中で使われる関数は Syscall 名前空間への
+	呼び出し処理で実行される。
+
+    %Result を使って結果を出力する。
 
 
 .S	config の例
@@ -36,6 +85,104 @@ datatype ACTRESS
 		and
 	field-if  "how" match /(\d+)/ required
 		&Err("エラー: best と how は両方の項目が同時に必要です")
+
+.S	構文 (statements)
+
+空白は [\s\t]+ で余計な空白は解釈されない。また空白はいくらあってもよ
+い。
+
+１行１ statements なので、複数行に渡る時は(/etc/disktab みたいに)
+	 \ で終って次の行
+へ渡して下さい
+
+関数の終りは ; で終っても終らなくても良いですが、一行一関数なのは同様
+です。
+
+[基本構文]
+
+・ field-if 
+
+	field-if  項目名 match パターン関数 オプション
+		パターン := 正規表現 / パターン関数 
+
+・ and 
+
+	AND 構文
+
+	field-if ...
+		and
+	field-if ...
+
+・ else
+	ELSE 構文
+
+・ switch 
+	実装途中…（とりあえず使ってないし）
+
+
+.S	field-if 構文
+
+以下では BNF-もどき表現で示す。
+	
+   field-if 項目名 match パターン オプション
+
+	パターン := 正規表現 / パターン関数 
+
+	正規表現 := "/Regexp/"
+ 	Regexp   := Perl's Regexp
+
+	パターン関数  := "&FUNCTION_NAME"
+	FUNCTION_NAME := Perl で使用できる関数クラス
+	  注意：またその関数は Syscall 名前空間で定義されている必要がある。
+
+	オプション := オプション SP /
+		("required" / "plural" / "foldable" / "foldlevel=\d+")
+
+
+.S	Type Predicate Function
+
+パターンマッチでは
+
+	field-if IP-Address match &InetAddrTypeP required
+
+のような関数呼び出しでの判定ができます。この時
+
+	&InetAddrTypeP(IP-Address行の右辺値);
+
+という引数を持ったシンタックスが評価されます。
+
+例：	データが
+
+	IP-Address	192.168.148.1
+
+	&InetAddrTypeP("192.168.148.1");
+
+のように展開され、192.168.148.1 が IP Address Syntax か否か？が評価さ
+れる。non-null な返り値が返ってきた場合はパターンマッチとみなす。
+
+そのため、呼ばれる type-predicate-function はすべてのありうる場合わけ
+をし、それぞれにちゃんと返り値を書くことが要求される。
+
+
+.S	関数呼び出し
+
+例：
+	field-if IP-Address match &InetAddrTypeP required
+		&ConflictCheck("Netmask");
+
+
+この関数呼び出しは、分解され
+	呼び出しのargument "Netmask"
+	その他のすべてのデータ(e.g. 各フィールドのデータ)
+
+と共に、Syscall Name Space 内の関数への呼び出しがかかります。
+
+詳しくは LEX_FUNCTION を参照。
+
+
+.S	例
+
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
