@@ -1,5 +1,5 @@
 .HTML_PRE
-	LIST OF BUG FIXES between 3.0 release and 3.0 patch
+	CHANGES from 3.0 to 3.0.1
 
 				¿¼Ä® ¸­°ì
 =E
@@ -13,6 +13,10 @@
 This document logs CHANGES in fml stable branch.
 See http://www.fml.org/ for CHANGES in fml-current. 
 .fi
+
+2000/03/26
+
+	3.0.1 release
 
 2000/03/18
 

@@ -1,0 +1,25 @@
+.HTML_PRE
+	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
+
+2000/03/31
+
+   EnvelopFilter
+	skip plural null lines between paragraphs
+
+	最初のＮ行のパラグラフをえぐりだす部分を直す
+	FIX: 複数の空行を一行とみなさないとおかしい
+
+2000/03/26
+
+   3.0.1 release
+
+$Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.~HTML_PRE
