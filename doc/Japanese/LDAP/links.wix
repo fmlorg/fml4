@@ -36,3 +36,30 @@ Browser ?
 
 LDAP 関連 RFC の日本語版
 .url  http://www.cysols.com/JLDAPdocs/
+
+
+OID
+.url http://www.openldap.org/doc/admin/schema.html
+
+iplanet 
+.url http://ja.iplanet.com/products/dir_srvr/solarisfaq_enduser.html
+.url http://www.sun.co.jp/solaris/binaries/package.html
+
+?
+.url http://www.arsdigita.com/
+
+
+auth_ldap module
+.url http://www.rudedog.org/auth_ldap/1.4/auth_ldap.html
+
+
+some project
+
+        RFC 2968
+        Title:	    Mesh of Multiple DAG servers - Results from TISDAG
+
+        RFC 2969
+        Title:	    Wide Area Directory Deployment - Experiences from
+
+        RFC 2970
+        Title:	    Architecture for Integrated Directory Services -
