@@ -292,7 +292,9 @@ config.ph では
 
 	例： 事情により To: Cc: のみはオリジナルのものに戻して配送したい
 
-	--force:to --force:cc
+	--oh:to --oh:cc
+
+	＃ $Envelope{"oh:reply-to:"} = 1; とおなじ
 
 .k	--permit:variable
  --permit:variable
