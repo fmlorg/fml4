@@ -95,21 +95,31 @@ spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 
 ○	Subject の設定 
-.k	$DEFAULT_MGET_SUBJECT
+.k	$DEFAULT_MGET_SUBJECT (CFv2)
+.k	$NOT_SHOW_DOCMODE (CFv2)
 
-	$DEFAULT_MGET_SUBJECT モード表示 (1/N) ($ML_FN)
+	$MGET_SUBJECT_TEMPLATE
 
-になる。
-デフォールト:
-   Results for 'get' [last:2 MIME/multipart] (1/1) (Elena Lolabrigita ML)
+という変数を元にいくつかの入れ替えをおこなって subject を作っています。
+これは
 
-○	Subject からモード表示を取る
-.k	$NOT_SHOW_DOCMODE
+   result for mget _DOC_MODE_ _PART_ _ML_FN_
 
-	$NOT_SHOW_DOCMODE = 1;
+のように定義されている場合
 
-で、
-   Results for 'get' [last:2] (1/1) (Elena Lolabrigita ML)
+	   _DOC_MODE_   <=>    [last:10 tar + gzip]
+	   _PART_       <=>    (1/4)
+	   _ML_FN_      <=>    $ML_FN (here is "(Elena Lolabrigita ML)") 
+
+という置換えが行なわれ、最終的に
+
+   Subject: resutl for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
+
+という形で mget の result が送り返されます。よってこの変数を適当に削る
+なりすれば subject をカスタマイズできます。
+
+これにより $NOT_SHOW_DOCMODE (CFVersion 2) と $DEFAULT_MGET_SUBJECT は 
+obsolete になりました。
 
 
 .S	mget3 インターフェイス:パターンマッチ戦略
