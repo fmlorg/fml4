@@ -183,9 +183,10 @@ sub GetTime
 }
 
 
+# return YYYYMMDD at Greenwich standard timezone (tricky:-)
 sub YYYYMMDD
 {
-    local($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime(time);
+    local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
     sprintf("%4d%02d%02d", $year + 1900, $mon + 1, $mday);
 }
 
