@@ -6,6 +6,7 @@
 
 # $Id$;
 
+$ADD_STR = shift;
 
 &Init;
 &GetTime;
@@ -37,14 +38,16 @@ sub GetTime
 
 sub EmuHeader
 {
-qq#From $USER\@$DOMAINNAME $MailDate
+$_ = qq#From $USER\@$DOMAINNAME $MailDate
 Date: $MailDate
 From: $USER\@$DOMAINNAME
 Message-Id: $MessageId
 To: (list suppressed)
 Subject: test mail
-
 #;
+
+$_ .= $ADD_STR if $ADD_STR;
+"$_\n\n";
 }
 
 sub Init
