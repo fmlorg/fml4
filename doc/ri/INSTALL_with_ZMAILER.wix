@@ -6,9 +6,10 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
-.C	Configuration
+.q
+ZMailer Configuration
 
-.S	set up /etc/aliases
+* set up /etc/aliases
 
 当然ですが、まずML以外の機能がちゃんと動くようにzmailerを設定してくだ
 さい。INSTALLを丹念に読みながらやればできます。
@@ -33,12 +34,13 @@ The differnce between the example makefml generated and db/aliases is
 `"'. This seems required in zmailer but it looks you need only this
 `"'.
 
-
-.S	UCE controls
+* UCE controls
 
 doc/guides/smtp-policy を読んで設定しよう。
 =E
 see doc/guides/smtp-policy
+
+.~q
 
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
