@@ -129,7 +129,7 @@ sub PopPut2Socket
 	print POPLOG "$s<INPUT\n";
     }
 
-    print S "$s\n";
+    print S "$s\r\n";
     print POPLOG $_ = <S>; 
 
     if (/^\-/o) { &Log($_); print STDERR "POP3: $_";}
@@ -160,7 +160,7 @@ sub Gabble
     }
 
     for ($i = 1; $i <= $n; $i++) {
-	print S "RETR $i\n";
+	print S "RETR $i\r\n";
 	print POPLOG "RETR $i\n";
 	print POPLOG $_ = <S>; /^\-/o && last;
 
@@ -187,7 +187,7 @@ sub Gabble
 	close(FILE);
 
 	### FILE REMOVE
-	print S "DELE $i\n";
+	print S "DELE $i\r\n";
 	print POPLOG "DELE $i\n";
 	print POPLOG $_ = <S>; 
 
