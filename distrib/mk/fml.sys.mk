@@ -71,7 +71,11 @@ __import_variables:
 
 # dirty hack
 scan: __scan
+clean:__clean
 
 # tricky definition but to overwrite doc/*/Makefile's scan: rules
 scan:
+	@ echo ""
+
+clean:
 	@ echo ""

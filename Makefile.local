@@ -68,6 +68,9 @@ kscan:
 	@ grep '^M' /tmp/__scan__ || echo none.
 	@ echo ""
 
+__clean:
+	find . |grep '/\.#' |${PERL} -nple unlink
+
 loop:
 	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
 

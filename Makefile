@@ -156,9 +156,6 @@ libkern: proc/libkern.pl
 proc/libkern.pl: kern/fml.pl
 	sed '/^$$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
 
-clean:
-	find . |grep '/\.#' |${PERL} -nple unlink
-
 search:
 	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
 
