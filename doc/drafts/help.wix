@@ -5,6 +5,30 @@
 -----------------
 
 
+.C	FYI: 簡単なまとめ
+
+間違えてメーリングリストに登録してしまった、取りあえず停止したい、とい
+う方のために、必要な事項を最初に説明しておきます。
+
+_ML_@_DOMAIN_ メーリングリストから脱退したいときには、本文の先頭に
+# bye と書いたメールを<_ML_-ctl@_DOMAIN_> 宛てに送ってください。
+
+長期出張などで、一時的に配送を停止したいときには、本文の先頭に # off 
+と書いたメールを<_ML_-ctl@_DOMAIN_>宛てに送ってください。再開したいと
+きには、 # on を送ってください。
+
+過去のメールが欲しいときは、まず、本文の先頭に # index と書いたメール
+を<_ML_-ctl@_DOMAIN_>宛てに送って、投稿メール一覧を取り寄せてください。
+その一覧を参考にして、たとえば #get 100-200 というコマンドを送ってくだ
+さい。
+
+メーリングリストサーバは、投稿されたメールの「From」を見て会員かどうか
+をチェックしています。この設定が変わると、投稿が受け付けられなかったり、
+新たに会員登録がなされてしまったりしますので注意が必要です。複数のメー
+ルアドレスをお持ちの方、気をつけてください。
+
+
+
 .C	基本的な使い方
 
 .S	メーリングリストとは？
@@ -36,9 +60,12 @@
 注意: 通常コマンドは英語と数字だけからなります。コマンドは、メール本文
 の先頭から、「# help」という形式で書きます。コマンドは大文字でも小文字
 でも同様に認識しますので、「# help」は「# Help」でも「# HELP」でもかま
-いません。ただし、２バイト文字（いわゆる全角文字）で「＃　ＨＥＬＰ」と
-しても認識しませんのでご注意ください。オプションは通常大文字小文字を"
-区別します"。
+いません。
+ただし、DBCS(２バイト文字, いわゆる全角文字）で「＃　ＨＥＬＰ」として
+も認識しませんのでご注意ください。オプションは通常大文字小文字を"区別
+します"。
+
+
 
 例１:
 --------- メール本文 --------------
@@ -113,7 +140,8 @@
 
 # help			コマンドのヘルプ（このメールの内容）
 # objective		メーリングリストの目的、約束事を読む
-# guide			一般的な案内を得る(メンバでない人でも取り寄せ可能)
+# guide			一般的な案内を得る
+			(メンバでない人でも取り寄せ可能)
 
 
 # msg			管理者へメールを送る
@@ -134,13 +162,14 @@
 # summary  [引数]	過去の記事一覧を得る(Summary全体を送る)
 			引数:  記事の番号、番号の範囲
 			例: 
-			summary		summary ファイル全体
-			summary last:10 最近の10個の記事のサマリ
-			summary 100-200 記事100〜200 のサマリだけをみる
+			summary		全記事の一覧
+			summary last:10 最近10個の記事一覧
+			summary 100-200 記事100〜200 の一覧だけを得る
+
 # exit			コマンド列の終り
 			これ以降にどんな文字があっても、メーリングリス
 			トサーバはコマンドとは認識しません。
-			メールソフトでSignatureが自動につく場合等に便利です
+			メールソフトで Signature が自動につく場合等に便利です
 
 # end			# exitと同じ
 # quit			# exitと同じ
@@ -149,9 +178,9 @@
 
 .S	メンバー情報や配送の停止・脱会等
 
-# members		(投稿できる)メンバのリストを得る
+# members		投稿可能なメンバーリストを得る
 			サーバが自動登録に設定されている場合
-			配送リストと同一です。
+			# actives で得られる配送リストと同一です。
 
 # actives		(実際に配送されている)メンバーのリストを得る
 			管理者が手動で登録しているメーリングリストの場合
@@ -160,20 +189,19 @@
 			がありません。
 
 	注意:メンバーリストのファイルの形式について
-	actives に掲載されているアドレスが実際にメールの配送先になります。
-	行頭に「#」が付いているだけのものは一時的に配送を止めているもので、
-	「# on」によって再開されます。「##BYE」は脱退された方の残骸です。
+ 	actives に掲載されているアドレスが実際にメールの配送先になりま
+	す。
+	行頭に「#」が一つついているアドレスは、一時的に配送を止めてい
+	ます。これは「# on」によって再開されます。
+	「##BYE」はメーリングリストから脱退したメンバーのアドレスです。
 
 
-# status [アドレス]	現在の設定を得る(まとめおくりとかOFFとか)
+# status [アドレス]	現在の設定を得る
+			まとめおくりや配送停止などの設定情報が得られま
+			す。
 			オプションはメールアドレスを指定します。
 			オプションを省略すると自分自身の状態です。
 # stat [アドレス]	# statusと同じ
-
-
-
-# members		(投稿できる)メンバのリストを得る
-# actives		(実際に配送されている)メンバのリストを得る
 
 
 	〜 配送のモード等について 〜
@@ -183,11 +211,14 @@
 	できるまでアドレスのチェックを厳しくしてチャレンジします。
 	＃どうしてもだめな場合だけは管理者へコンタクトして下さい。
 
-# skip	 		複数箇所のアドレスからＭＬへ投稿する場合
+# skip	 		配送は停止されるが、投稿は可能にする
+			複数箇所のアドレスからＭＬへ投稿する場合
 			投稿はできるが、配送はされないアドレスと設定する
-# noskip 		上の設定をやめる。
-# off	 		ＭＬの配送を一時的に止める(e.g. 長期休暇等)
-# on	 		off を解除し、配送を再開させる
+# noskip 		# skip の設定をやめる
+# off	 		ＭＬの配送を一時的に止める
+			長期休暇、出張などでメールボックスの溢れが気に
+			なる場合に利用してください。
+# on	 		# off の設定を解除し、配送を再開する
 # bye	 		ＭＬをやめる
 # unsubscribe 		ＭＬをやめる
 
@@ -230,7 +261,8 @@ SYNOPSIS:
 式です。この N を matome コマンドの引数にして指定して下さい。
 いつ配送されるか?は 0 == (24 % N) の時、つまり modulus です。
 
-注意:以下の説明では「# matome」は「# digest」としても同様の動作になります。
+注意:以下の説明では「# matome」は「# digest」としても同様の動作になり
+ます。
 
 例:
 	# matome 3mp
@@ -239,15 +271,14 @@ SYNOPSIS:
 
 # digest 数字(0-12)	
 # matome 数字(0-12)	配送間隔おきのまとめ送りに設定する
-			ただし、配送間隔は、毎日午前０時を起点としては
-			じまります。ですから、引数に「13」以上の数を指
-			定しても、一日一回の配送になります。
-			default は gzip した Unix From つきのファイルの
-			固まり
+			配送間隔は、毎日午前０時を起点としてはじまりま
+			す。ですから、引数に「13」以上の数を指定しても、
+			一日一回の配送になります。
+ 			default は gzip した Unix From つきのファイルの
+			固まりです。
 
 # digest 数字(13-36)	
-# matome 数字(13-36)	
-			一日一回指定時間のまとめ送りに設定する
+# matome 数字(13-36)	一日一回指定時間のまとめ送りに設定する
 			13〜36の数字がこのケースに当てはまります
 			午前5時のまとめ送りを設定したいときは、24+5=29
 			を指定してください。
@@ -257,20 +288,17 @@ SYNOPSIS:
 # matome 0		普通の配送へ戻す
 
    例:
-   # matome 1		まとめ送り １時間に一回(gzipd)
-   # matome 2		まとめ送り ２時間に一回(gzipd)
-   # matome 2u		まとめ送り ２時間に一回(plain text)
-   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
-   # matome 17		まとめ送り 一日一回と同じ(gzipd)
-			#この場合は１７時に来る
-   # matome 29		まとめ送り 一日一回と同じ(gzipd)
-			#この場合は午前５時に来る
-			＃matome 5 は５時間“おき” という意味
+	# matome 1		まとめ送り １時間に一回(gzipd)
+	# matome 2		まとめ送り ２時間に一回(gzipd)
+	# matome 2u		まとめ送り ２時間に一回(plain text)
+	# matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+	# matome 17		まとめ送り 一日一回と同じ(gzipd)
+				#この場合は１７時に来る
+	# matome 29		まとめ送り 一日一回と同じ(gzipd)
+				#この場合は午前５時に来る
+				＃matome 5 は５時間“おき” という意味
 
-   例:
-	# matome 数字u	plain(unpack)、つまりplain textを
-	# matome 数字i 	lha + ish でまとめて送ります
-   オプション:
+   オプション (数字の後ろにつけるオプション):
 		オプションなしはGZIP(UNIX FROM)
 	u	PLAINTEXT(UNIX FROM)
 	uf	PLAINTEXT(UNIX FROM)
@@ -291,18 +319,23 @@ SYNOPSIS:
 
 .S	過去の記事の取り寄せ方
 
-# index			"# get", "# mget" で取り寄せ可能なファイルのリストを
-			かえす。
+
+# index 		"# get", "# mget" で取り寄せ可能なファイルのリ
+			ストをかえす。
 			index ファイルがあるのなら、それを返します
 
-# get  数字		過去の記事を得る(ひとつずつ plain text で送り返す)
+# get  数字		過去の記事を得る (resend されます)
+			ひとつずつ plain text で返送されます
 # send 数字		同上
 
-# get  1-10,5みたいなsyntax 	[モード]	[時間間隔]
-# mget 1-10,5みたいなsyntax 	[モード]	[時間間隔]
+# get  複数の記事指定 [モード] [時間間隔]
+# mget 複数の記事指定 [モード] [時間間隔]
+			スプールの記事や(もしあれば)アーカイブにあるフ
+			ァイルを一つのメールにまとめて送り返す
+			例：
+			# get 20-30	記事20〜30を得る
+			# mget 1-10,15	記事1〜10、15を得る
 
-			スプールの記事や(もしあれば)アーカイブにあるファイル
-			を一つのメールにまとめて送り返す
 
 注意: "get" コマンドの引数が『数字』ならば、その数字のCountを持つ記事
 が resend されます。"get" コマンドがそれ以外の形式 (e.g. get 1-10) で
@@ -315,15 +348,29 @@ SYNOPSIS:
 のように設定されています。
 
 			
-   get,mgetの引数:
+   ●# get、# mget で複数の記事を取り寄せる場合の引数:
 	範囲を指定	1-10,12,15-100 1,2,10
 			first first:10 last:30 100-last(mh的 Syntax)
 	正規表現	e.g. * ? 1? 1?? 
 	モード		gz tgz ish rfc934 b rfc1153 d unpack uf(default=tgz)
 	時間間隔	送り返すメールが複数の時の間隔(default=300)	
+
+   ●# get と # mgetの違い
+
+	# mget はまとめて記事を得るための専用コマンドですので、記事一
+	つだけを指定した場合には、そのコマンドは無視されます。# get は、
+	一つだけのときと複数の記事が指定されたときでは違う動作になりま
+	す。どちらもまとめて記事が得られるコマンドですが、返送されるファ
+	イルの形式が異なります。
+
+	# get		MIME/Multipart 
+	# mget		tar.gz 形式
+
+	ただし、[モード]を指定することで、形式を変えることも出来ます。
+
    モード:
 		オプションなしは tar+gzip で spool.tar.gz
-	tgz	同上
+	tgz	tar+gzip で spool.tar.gz
 	uf	PLAINTEXT(UNIX FROM)
 	gz	GZIP(UNIX FROM)
 	b	RFC934 format 	PLAINTEXT(mh-burst)
@@ -346,18 +393,27 @@ SYNOPSIS:
 デフォールトでは使わないようになっています。
 
 
-.S	ライブラリ
+.S	ライブラリー
 
 メンバーがファイルを登録したり、それを取り寄せたりするためのものです。
 
-# library 命令		ライブラリへのアクセス。アーカイブとの違いは
-			ほとんどないが、サーバへ put することが可能です。
-			＃ただし security 上ファイル名は記事番号指定のみです
+# library 命令		ライブラリーへのアクセス
+			アーカイブとの違いはほとんどありませんが、put 
+			が可能になっています。
+			＃ただしセキュリティ上、ファイル名は記事番号指
+			定のみです
 
-# library get 数字	mget と同じ引数がつかえます
-# library put 		普通のメールスプールのようにアーカイブしていきます
-# library index		ライブラリにたくわえられているファイルのサマリ
-# library summary	同上
+# library index		ライブラリーにたくわえられているファイルの一覧を得る
+# library summary	# library indexと同じ
+
+# library get 数字	ライブラリーから記事を得る
+			mget と同じ引数がつかえます
+
+# library put 		ライブラリーに記事を保存する
+
+# library unlink [番号]	指定番号の記事をライブラリーから削除する
+# library delete [番号] 同上
+# library rm     [番号] 同上
 
 
 .S	whois database による情報交換
@@ -404,16 +460,18 @@ SYNOPSIS:
 	一つに特定できるまでアドレスのマッチルールを厳しくして
 	コマンドを実行しようとします。通常必要ありません。
 
+
 			複数の配送先を持つ人はＯＦＦコマンド等で
 			サーバの設定によっては複数マッチしてしまう
 			e.g. aoi@chan.panic と aoi@hayakawa.chan.panic
 			も両方マッチしてしまう時、
-			今は aoi@chan.panic についてのコマンドを行ないたい時
-			に使うと、このコマンド以降の他のコマンドを 
-			aoi@chan.panic に対してのみ行なうようにする。
+			今は aoi@chan.panic についてのコマンドを行ない
+			たい時に使うと、このコマンド以降の他のコマンド
+			を aoi@chan.panic に対してのみ行なうようにする。
 			まんがいち複数マッチをしたら サーバは自動的に
 			アドレスのチェックの精度をあげてトライをするの
 			でたぶん必要ないとおもいます。
+
 
 
 .C	コマンドの使い方の具体例
@@ -496,17 +554,21 @@ SYNOPSIS:
 
 History:
 
-97/04/05 imported and merged by fukachan@sapporo.iij.ad.jp
-97/04/04 improved by metalman@kt.rim.or.jp
-97/04/01 improved by metalman@kt.rim.or.jp
+1997/04/17 improved by metalman@kt.rim.or.jp
+1997/04/16 hand-patched by fukachan@sapporo.iij.ad.jp
+1997/04/13 improved by metalman@kt.rim.or.jp
+1997/04/05 imported and merged by fukachan@sapporo.iij.ad.jp
+1997/04/13 improved by metalman@kt.rim.or.jp
+1997/04/04 improved by metalman@kt.rim.or.jp
+1997/04/01 improved by metalman@kt.rim.or.jp
 
-	 help and help.example2 are merged by fukachan@sapporo.iij.ad.jp
+	help and help.example2 are merged by fukachan@sapporo.iij.ad.jp
 				(preparation for 2.1 RELEASE)
 
-         help.example2         contributed by umura@nn.solan.chubu.ac.jp
+	help.example2         contributed by umura@nn.solan.chubu.ac.jp
 	 			(mnews ML's help is contributed) 
 
-         original              by fukachan@phys.titech.ac.jp
+	original              by fukachan@phys.titech.ac.jp
 
 $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
