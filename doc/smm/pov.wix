@@ -443,6 +443,7 @@ sendmail の struct envelople e; に対応するものです。
 
 
 .C	fml 設定ファイルのフォーマットと構造
+.l	fml-file-structure
 .k	fml 設定ファイルのフォーマットと構造
 
 fml の設定ファイル、メンバーリストは基本的に shell like な構造で記述さ
@@ -561,8 +562,7 @@ msend.pl は $ACTIVE_LIST を見て、
 
 .S	パスワードファイルのフォーマットと構造
 .k	パスワードファイルのフォーマットと構造
-.xref	bin/passwd.pl
-.xref	remote
+.xref	bin/passwd.pl remote
 
 パスワードを保存しているファイルは通常 etc/passwd に置かれています。
 
@@ -573,6 +573,7 @@ msend.pl は $ACTIVE_LIST を見て、
 	アドレス	cryptされたパスワード
 
 です。つまり UNIX 伝統のパスワードファイル形式の先頭の部分です。
+＃crypt(3) についてはマニュアル参照
 
 ＭＬサーバのリモート管理で使われます。
 .xref	remote
@@ -583,12 +584,11 @@ msend.pl は $ACTIVE_LIST を見て、
 
 
 
-
-
-
 .C	Security 
+.l	security
 
 .S	Security Check Routine
+.l	SecureP
 .l	InSecureP
 .k	InSecureP
 .k	SecureP
@@ -662,6 +662,22 @@ SecureP は以下のように
 Gauntlet(firewall) 越しだったりすると無意味ですが…
 
 $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
+
+
+.S	Address Spoofing
+.l	Address Spoofing
+.k	Gauntlet
+.k	Firewall
+
+これは無理っす。もっと下のlayerで何とかしてね。
+
+
+.S	SYN Flooding
+.l	SYN Flooding
+.k	SYN Flooding
+
+これもカーネルレベルの話。根本的な対策は難しい。
+
 
 
 .# $Id$

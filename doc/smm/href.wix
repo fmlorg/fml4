@@ -188,7 +188,7 @@ $START_HOOK = q#
 .k	&HRef
 .k	HRef
 
-
+SYNOPSIS:
     &HRef($request, *Envelope);
 
 $request のURLの内容を$Envelope{'message'}に入れて送り返す。
@@ -200,6 +200,9 @@ $request は
 
 を理解します。ftp はローカル or ftpmailへのリレーへ自動的に切替えます。
 また、もしバイナリデータの場合はuuencodeして送り返します。
+
+実例として bin/geturl.pl の中を見ると良いでしょう。
+.xref bin/geturl.pl
 
 
 .# $Id$

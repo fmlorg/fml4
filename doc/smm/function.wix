@@ -362,6 +362,7 @@ SYNOPSIS:
 
 .S	SecureP                (fml.pl)
 .k	SecureP
+.xref	security
 
 SYNOPSIS:
 	&SecureP($request);
