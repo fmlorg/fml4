@@ -2,7 +2,7 @@ create table ml (ml text,
 	file text, 
 	address text,
 	off int,
-	option text);
+	options text);
 
 insert into ml
 values ('elena', 'actives', 'fukachan@sapporo.iij.ad.jp', 0, '');

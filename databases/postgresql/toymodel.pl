@@ -311,7 +311,7 @@ sub __ListCtl
 
 	my ($opt) = $mib->{'_value'};
 	$query  = " update ml ";
-	$query .= " set option  = '$opt' ";
+	$query .= " set options = '$opt' ";
 	$query .= " where ml    = '$ml' ";
 	$query .= " and file    = 'actives' ";
 	$query .= " and address = '$addr' ";
@@ -366,7 +366,7 @@ sub Status
 
     $addr   = $mib->{'_address'};
     $ml     = $mib->{'_ml_acct'};
-    $query  = " select address,off,option from ml ";
+    $query  = " select address,off,options from ml ";
     $query .= " where file = 'actives' ";
     $query .= " and ml = '$ml' ";
     $query .= " and address = '$addr' ";
