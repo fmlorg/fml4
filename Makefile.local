@@ -27,15 +27,14 @@ v3:
 	@ wc tmp/VARLIST
 
 sync:
-	# scp -v -p $(DESTDIR)/distrib/src/*.pl eriko:~/.fml
 	chmod 755 $(DESTDIR)/fml-current/src/fml.pl \
 		$(DESTDIR)/fml-current/src/msend.pl \
 		$(DESTDIR)/fml-current/libexec/*pl
-	$(RSYNC) -av $(DESTDIR)/fml-current/src/ eriko:~/.fml/
-	$(RSYNC) -av $(DESTDIR)/fml-current/bin/ eriko:~/.fml/bin/
-	$(RSYNC) -av $(DESTDIR)/fml-current/drafts/ eriko:~/.fml/drafts/
-	$(RSYNC) -av $(DESTDIR)/fml-current/messages/ eriko:~/.fml/messages/
-	$(RSYNC) -av $(DESTDIR)/fml-current/libexec/ eriko:~/.fml/libexec
+	$(RSYNC) -av $(DESTDIR)/fml-current/src/ ${mlserver}:~/.fml/
+	$(RSYNC) -av $(DESTDIR)/fml-current/bin/ ${mlserver}:~/.fml/bin/
+	$(RSYNC) -av $(DESTDIR)/fml-current/drafts/ ${mlserver}:~/.fml/drafts/
+	$(RSYNC) -av $(DESTDIR)/fml-current/messages/ ${mlserver}:~/.fml/messages/
+	$(RSYNC) -av $(DESTDIR)/fml-current/libexec/ ${mlserver}:~/.fml/libexec
 	( echo -n "[`date`]"; \
 	  echo " test of new FML snapshot."; echo ""; echo "--fukachan")|\
 	  Mail test@fml.org
