@@ -331,7 +331,7 @@ GEN_BRANCH_ARCHIVE () {
 	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-	DATE=`date +"%C%y%m%d"`
+	DATE=`date -u +"%C%y%m%d"`
 	FMLID=fml-snap-$DATE
 
 	if [ -d $FMLID ]; then
