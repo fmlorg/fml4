@@ -77,7 +77,7 @@ MLをリモートで管理するためのもの)などからなります。また対話設定プログ
 .if LANG == ENGLISH
 FML is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
-in Japan from 1993 to 1998. FML contains
+in Japan from 1993 to 2000. FML contains
 
    distributer (filter program which passes articles to MTA to deliver)
    command server for users
@@ -424,9 +424,9 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-   postfix 19990601 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
+   postfix 19991231 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
 
-○ テスト環境: fml 3.0 のターゲットマシン/テスト環境は
+○ テスト環境: fml 3.0.1 のターゲットマシン/テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
@@ -443,12 +443,12 @@ delivery (as both an experiment and a demonstration :-).
    sendmail 8.9.3
    qmail 1.03
    exim 2.04
-   postfix snap-19990601
+   postfix snap-19991231
 
 
 
-.C	FML 3.0 の機能の概要
-=E.C	FML 3.0 Function Overview
+.C	FML 3.0.1 の機能の概要
+=E.C	FML 3.0.1 Function Overview
 
 .include FEATURES.wix
 
