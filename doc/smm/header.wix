@@ -3,8 +3,8 @@
 .l	header-custom
 
 
-.S	ヘッダのフィールドの順番(フォーマット)
-.key	ヘッダのフィールドの順番(フォーマット)
+.S	ヘッダ・フィールドのフォーマット
+.key	ヘッダ・フィールドのフォーマット
 .key	@HdrFieldsOrder 
 .xref	data-structure
 
@@ -42,7 +42,6 @@ or
 	&DEFINE_MODE('through'); (config.ph の最後)
 
 .k	$SUPERFLUOUS_HEADERS
-.k	DEFINE_MODE('through')
 .k	&DEFINE_MODE('through')
 
 
@@ -159,7 +158,7 @@ Received: フィールドをつける時は
 
 
 .S	コマンドの結果やユーザへのメッセージのヘッダのカスタマイズ
-.k	コマンドの結果やユーザへのメッセージのヘッダのカスタマイズ
+.k	コマンドのREPLYメールのヘッダ
 .xref	data-structure
 .k	$Envelope{'GH:field:'} 
 
@@ -197,8 +196,22 @@ Dynamic に補正する必要がある場合は
 で定義するとよい。
 
 
+.S	コマンドメールの結果のメールの Reply-To: を変更する
+.k	$FORCE_COMMAND_REPLY_TO
+.k	$Envelope{'GH:Reply-To:'}
+
+	$Envelope{'GH:Reply-To:'} = "Your Reply-To Address";
+
+Backward compatibility で残っている変数が
+
+	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
+
+です。実際には $Envelope{'GH:Reply-To:'} への代入と全く同じです。
+
+
 .S	Subject: を (Elena 100) とかの任意の形に成形する
 .l	$SUBJECT_FREE_FORM
+.k	$SUBJECT_FREE_FORM
 
 fml デフォールトは「Subject: はいじらない。本来メールソフトが好きな形
 にフォーマットするものをサーバ側でフォーマットを押付けてはいけません」。
@@ -284,6 +297,7 @@ config.ph では
 
 .S	Subject: の成形 ([Elena:ID] フォーマットを抜く)
 .key	Subjectから[Elena:ID]を抜く
+.k	[Elena:ID]を抜く
 .key	$STRIP_BRACKETS
 
 	$STRIP_BRACKETS = 1;
@@ -300,7 +314,7 @@ compatible 以上の意味はないといえます。
 .S	Subject: [Elena:ID] フォーマット
 .key	$SUBJECT_HML_FORM
 .key	$BRACKET
-.key	hml形のSubject
+.key	[Elena:ID] フォーマット
 
 オリジナルの hml 1.6 は
 ……
@@ -350,14 +364,17 @@ $SUBJECT_FREE_FORM 使用時に有効な変数。
 
 
 .S	TAGの [Elena:00001] の 0 パディングをなくす
+.k	[Elena:ID]の0パディングをしない
 
 	$SUBJECT_FORM_LONG_ID = -1;
 	$HML_FORM_LONG_ID = -1;
+.k	$SUBJECT_FORM_LONG_ID
+.k	$HML_FORM_LONG_ID
 
 
 .S	オリジナルの Message-ID
 .key	Message-ID
-.key	Uniq_Identifier_of_Message-ID
+.l	Uniq_Identifier_of_Message-ID
 .key	$USE_ORIGINAL_MESSAGE_ID
 
 	$USE_ORIGINAL_MESSAGE_ID = 1; 
@@ -420,7 +437,7 @@ $HEADER_ADD_HOOK = q#
 
 
 .S	宇宙歴 (外国TVシリーズMLで使ってます:-)
-.k	STAR TREK (StarDate)
+.k	STAR TREK
 .k	StarDate
 .k	$APPEND_STARDATE
 
@@ -446,8 +463,8 @@ libstardate.pl はその perl 版です。
 .k	libstardate.pl
 
 
-.S	メーリングリストに複数の投稿用アドレスがある場合
-.key	メーリングリストに複数の投稿用アドレスがある場合
+.S	一つのメーリングリストに複数の投稿用アドレス
+.key	複数の投稿用アドレス
 
 何の意味があるのかは聞かないでください(笑)
 
@@ -488,19 +505,6 @@ config.ph に次のような設定をしてください
 compatibility のため自動的に @MAIL_LIST_ALIASES に代入されます。
 ＃ libcompat.pl にBackward compatibility のためのコードがありますが…
 .k	$Playing_to
-
-
-.S	コマンドメールの結果のメールの Reply-To: を変更する
-.k	$FORCE_COMMAND_REPLY_TO
-.k	$Envelope{'GH:Reply-To:'}
-
-	$Envelope{'GH:Reply-To:'} = "Your Reply-To Address";
-
-Backward compatibility で残っている変数が
-
-	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
-
-です。実際には $Envelope{'GH:Reply-To:'} への代入と全く同じです。
 
 
 .S	X-ML-Info: の内容を指定する
@@ -573,8 +577,8 @@ config.ph あたりで
 
 とするとメール本文に
 
-.key	Errors-To: $MAINTAINER
 	Errors-To: $MAINTAINER
+.k	Errors-To:
 
 がつきます。これで NIFTY からのエラーメールが $MAINTAINER に返るように
 なってくれます。後向きな解決法ですが;_;。
@@ -583,7 +587,6 @@ config.ph あたりで
 らいいいつづけないとだめなんだろうなぁ（はぁ）
 
 なお、$ERRORS_TO で Errors-To: の部分は $MAINTAINER から変更できます。
-.k	$ERRORS_TO
 
 
 .# $Id$
