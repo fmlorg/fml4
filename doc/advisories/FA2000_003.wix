@@ -20,6 +20,8 @@ Topic:	Love Letter Worm
       }
    #;
 
+   # MIME Multipart のメールをすべて拒否する
+   &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*', 'reject');
 
 [References]
   "CERT Advisory CA-2000-04 Love Letter Worm"
@@ -127,6 +129,15 @@ $DISTRIBUTE_FILTER_HOOK = q#
 を追加。
 =E
 to the last of config.ph (but before the last "1;").
+
+.S	MIME Multipart のメールをすべて拒否する
+
+MIME Multipart のメールはすべからく危ない可能性があるので、拒否すると
+いう大技もある。ＭＬのポリシーとして認めないと宣言しこれを使用すること
+は可能かも知れない。
+.q
+   &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*', 'reject');
+.~q
 
 .appendix
 .C	Information
