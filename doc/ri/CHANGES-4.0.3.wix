@@ -18,6 +18,13 @@
 
 2001/10/14
 
+   proc/libsynchtml.pl (2.45-2.46): 
+	we should not include these char's in URL.
+	RFC2068 says these special char's are not used.
+	+ reserved = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"
+	+ unsafe   = CTL | SP | <"> | "#" | "%" | "<" | ">"
+	incomplete but may be effective ?
+
    kern/libenvf.pl (2.18-2.19):
 	nuke debug 
 
@@ -204,7 +211,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.26 2001/10/10 15:34:26 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.27 2001/10/14 04:24:48 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
