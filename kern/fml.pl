@@ -564,15 +564,15 @@ sub InitConfig
     # MIME Content Handler(include backword compatible)
     if ($AGAINST_HTML_MAIL ||
 	$HTML_MAIL_DEFAULT_HANDLER eq 'strip') {
-	&ADD_CONTENT_HANDLER('multipart/*', 'text/plain', 'allow');
-	&ADD_CONTENT_HANDLER('multipart/*', '*/*',        'strip');
-	&ADD_CONTENT_HANDLER('text/plain',  '*/*',        'allow');
-	&ADD_CONTENT_HANDLER('!MIME',       '*/*',        'allow');
+	&ADD_CONTENT_HANDLER('multipart/.*', 'text/plain', 'allow');
+	&ADD_CONTENT_HANDLER('multipart/.*', '.*/.*',      'strip');
+	&ADD_CONTENT_HANDLER('text/plain',   '.*/.*',      'allow');
+	&ADD_CONTENT_HANDLER('!MIME',        '.*/.*',      'allow');
     } elsif ($HTML_MAIL_DEFAULT_HANDLER eq 'reject') {
-	&ADD_CONTENT_HANDLER('multipart/*', 'text/plain', 'allow');
-	&ADD_CONTENT_HANDLER('multipart/*', '*/*',        'reject');
-	&ADD_CONTENT_HANDLER('text/plain',  '*/*',        'allow');
-	&ADD_CONTENT_HANDLER('!MIME',       '*/*',        'allow');
+	&ADD_CONTENT_HANDLER('multipart/.*', 'text/plain', 'allow');
+	&ADD_CONTENT_HANDLER('multipart/.*', '.*/.*',      'reject');
+	&ADD_CONTENT_HANDLER('text/plain',   '.*/.*',      'allow');
+	&ADD_CONTENT_HANDLER('!MIME',        '.*/.*',      'allow');
     }
 }
 
@@ -3023,7 +3023,7 @@ sub ADD_CONTENT_HANDLER
    
     if ($bodytype eq '!MIME') {
 	$type = '!MIME';
-	$subtype = '*';
+	$subtype = '.*';
     } else {
 	($type, $subtype) = split(/\//, $bodytype, 2);
     }
