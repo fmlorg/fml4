@@ -98,6 +98,10 @@ COPY_DOCS () {
    # http
    echo " ";
 
+   htmlopt='--exclude=op --exclude=op-e'
+   echo "rsync $htmlopt -av var/html/ $DESTDIR/distrib/doc/html/"
+   rsync $htmlopt -av var/html/ $DESTDIR/distrib/doc/html/
+
    CPP="cpp -P -DDIST "
    HTML_DIR=$DESTDIR/distrib/doc/html
    $CPP -DJAPANESE doc/html/index.html > $HTML_DIR/index-j.html
@@ -111,12 +115,6 @@ COPY_DOCS () {
 
    cp doc/html/release-index.html $HTML_DIR/index.html
    cp doc/html/fml.css $HTML_DIR/
-
-   echo "rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/"
-   rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/
-
-   echo "rsync -av advisories $DESTDIR/distrib/doc/html/"
-   rsync -av var/html/advisories $DESTDIR/distrib/doc/html/
 }
 
 
