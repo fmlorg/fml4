@@ -399,6 +399,9 @@ $LOG_FILE_SUFFIX = ".%C%y";
    libexec/popfml.pl:465: 
 	&Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
 
+.S	&Open()
+
+remove &Open()
 
 
 .C	日本特有の問題
