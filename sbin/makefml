@@ -1346,9 +1346,9 @@ sub ExecCmd
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
 	local($fn) = $fp; $fn =~ s/do_//;
 	&Log("makefml::${fn} @argv ") if $fp ne "do_install";
-	if ($Env eq 'HTTPD') { &InitErrorBuffer;}
+	if ($Env eq 'HTTPD') { &InitErrorBuffer($fp);}
 	&$fp(@argv);
-	if ($Env eq 'HTTPD') { &FixErrorBuffer;}
+	if ($Env eq 'HTTPD') { &FixErrorBuffer($fp);}
     }
     else {
 	print "   Command [$fp] NOT DEFINED\n";
@@ -5677,6 +5677,14 @@ sub InitErrorBuffer
 
 sub FixErrorBuffer
 {
+    local($fp) = @_;
+
+    # When html_config works, do not show 'return value' 
+    # since it is the first phase of interactive session.
+    if ($fp eq 'do_html_config') {
+	return;
+    }
+
     if ($WStatus eq $HtmlWarnBuffer && $HtmlExitBuffer eq $XStatus) {
 	if (!$XStatus) {
 	    $XStatus = 'OK:';
