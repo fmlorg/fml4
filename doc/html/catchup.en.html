@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+How to catch up fml source changes
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+<CENTER>
+how to catch up fml source changes
+</CENTER>
+</H1>
+
+   <UL>
+	<LI>
+	<A HREF="ftp://ftp.fml.org/pub/fml/daily-snapshots/fml-4.0-current/source/">
+	fml-4.0-current/
+	</A>
+
+	<LI>
+	<A HREF="ftp://ftp.fml.org/pub/fml/daily-snapshots/fml-4.0-stable/source/">
+	fml-4.0-stable/
+	</A>
+
+	<LI>
+	<A HREF="ftp://ftp.fml.org/pub/fml/daily-snapshots/fml-devel/source/">
+	fml-devel/
+	</A>
+	<BR>
+	(fml next generation)
+   </UL>
+
+Extract it
+<PRE>
+% cd $extracted_directory
+% cvs update -d -P
+</PRE>
+After this
+<PRE>
+% cp distrib/mk/fmlmk.conf.example fmlmk.conf
+% make build
+</PRE>
+
+<PRE>
+$FML: anoncvs.ja.html,v 1.4 2001/07/07 04:02:43 fukachan Exp $
+</PRE>
+</BODY>
+</HTML>
