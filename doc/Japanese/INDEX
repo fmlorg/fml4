@@ -6,7 +6,7 @@
 basic			基礎的なこと
 install			インストール
 daily			日々の運用についてのTIPS
-encrypt			暗号化関係
+encryption		暗号化関係
 header_rewrite		ヘッダの書き換え
 filter			フィルタリング
 remote_control		遠隔からメールでの操作 (REMOTE_ADMINISTRATION)
