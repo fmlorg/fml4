@@ -1,0 +1,12 @@
+.HTML_PRE
+	NT その他(うまく分類できなかった)いくつかのこと
+
+.toc
+.~HTML_PRE
+
+.include mta.wix
+.include utils.wix
+.include examples.wix
+
+
+.# $Id$

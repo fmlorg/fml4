@@ -1,0 +1,12 @@
+.C	ユーティリティ
+
+
+.S	diff をとる
+
+cygnus
+
+テキスト ファイルおよびプロジェクト間の相違点表示機能
+
+.url http://www.asia.microsoft.com/japan/developer/library/technical/ssafe/J/ProdInfo/ssdiff.htm
+
+.url   http://www.vector.co.jp/vpack/browse/software/win95/util/sn072811.html
