@@ -27,8 +27,9 @@ Please see INSTALL for the install flow.
 	5.6.0 ではなく 522 なら動いたという事例もあります。
 	5.6.0 がうまく動かない場合は build 522 を試してみて下さい。
 =E
-   You need perl 5. Please use build 552 if you fail to run fml 
-   by buld 6XX (perl 5.6.0 base).
+   perl 5
+	You need perl 5. Please use build 522 if you fail to run fml 
+	by buld 6XX (perl 5.6.0 base).
 
 .url	http://www.activestate.com/download/ActivePerl/APi522e.exe
 .url	http://www.activestate.com/Products/ActivePerl/Download.html
