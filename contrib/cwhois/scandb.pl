@@ -55,37 +55,41 @@ sub ScanARGV
 # return *entry
 sub ScanDBSetEntry
 {
-    local(*entry, *key, *db, *spool) = @_;
+    local(*entry, *key, *proc, *db, *spool) = @_;
     local($spool, $db, @s, @d);
  
-    if ($WhoisCacheSpool{$proc}) {
-	@s = split(/:/, $db{$key});
-	@d = split(/:/, $spool{$key});
+    @d = split(/:/, $db{$proc});
+    @s = split(/:/, $spool{$proc});
 
-	do {
-	    $spool = shift @s;
-	    $db    = shift @d;
+    do {
+	$spool = shift @s;
+	$db    = shift @d;
 
-	    open(F, $db) || (print "Cannot ScanDB::open($db)\n" , next);
-	    while (<F>) { 
-		if (/^(\d+):.*$key.*/i) {
-		    push(@entry, "$spool/$1") if -f "$spool/$1";
-		}
+	print "open(F, $db);\n" if $debug;
+
+	open(F, $db) || (print "Cannot ScanDB::open($db)\n" , next);
+	while (<F>) { 
+	    if (/^(\d+):.*$key.*/i) {
+		push(@entry, "$spool/$1") if -f "$spool/$1";
+		print "push(\@entry, $spool/$1);\n" if $debug;
 	    }
-	    close(F);
 	}
-	while (@d && @s);
+	close(F);
     }
+    while (@d && @s);
 }
 
 
 sub ScanDB
 {
-    local(*key, *proc, *db, *spool) = $_;
+    local(*key, *proc, *db, *spool) = @_;
     local(@entry);
+    $debug++;
+    @db = %db; @spool = %spool;
+    print "ScanDB:\nk=$key\np=$proc\n@db\n@spool\n" if $debug;
 
     # set *entry
-    &ScanDBSetEntry(*entry, *key, *db, *spool);
+    &ScanDBSetEntry(*entry, *key, *proc, *db, *spool);
 
     # sort by date @entry
     @entry = sort bydate @entry;
