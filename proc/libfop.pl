@@ -93,67 +93,67 @@ sub InitDraftGenerate
 
     # PLAIN TEXT with UNIX FROM
     $_FOPH{'cnstr',    'uf'} = 'Cnstr_uf';
-    $_FOPH{'retrieve', 'uf'} = 'f_RetrieveFile';
+    $_FOPH{'retrieve', 'uf'} = 'FOP_RetrieveFile';
     $_FOPH{'split',    'uf'} = '';
     $_FOPH{'destr',    'uf'} = '';
 
     # PLAINTEXT by RFC934
     $_FOPH{'cnstr',    'rfc934'}  = 'Cnstr_rfc934';
-    $_FOPH{'retrieve', 'rfc934'}  = 'f_RetrieveFile';
+    $_FOPH{'retrieve', 'rfc934'}  = 'FOP_RetrieveFile';
     $_FOPH{'destr',    'rfc934'}  = 'Destr_rfc934';
 
     # PLAINTEXT by RFC1153
     $_FOPH{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
-    $_FOPH{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
+    $_FOPH{'retrieve', 'rfc1153'} = 'FOP_RetrieveFile';
 
     # PLAINTEXT by MIME/Multipart
     $_FOPH{'cnstr',    'mp'} = 'Cnstr_mp';
-    $_FOPH{'retrieve', 'mp'} = 'f_RetrieveFile';
+    $_FOPH{'retrieve', 'mp'} = 'FOP_RetrieveFile';
 
     ### encoding ###
 
     # UUENCODE ONLY
-    $_FOPH{'retrieve', 'uu'}     = 'f_uu';
-    $_FOPH{'split',    'uu'}     = 'f_SplitFile';
+    $_FOPH{'retrieve', 'uu'}     = 'FOP_uu';
+    $_FOPH{'split',    'uu'}     = 'FOP_SplitFile';
 
     # Base64 Encode Only
     $_FOPH{'cnstr',    'base64'} = 'Cnstr_message_partial';
-    $_FOPH{'retrieve', 'base64'} = 'f_RetrieveFile';
-    $_FOPH{'encode',   'base64'} = 'f_base64';
-    $_FOPH{'split',    'base64'} = 'f_SplitFile';
+    $_FOPH{'retrieve', 'base64'} = 'FOP_RetrieveFile';
+    $_FOPH{'encode',   'base64'} = 'FOP_base64';
+    $_FOPH{'split',    'base64'} = 'FOP_SplitFile';
     $_FOPH{'encode_as','base64'} = 'Cnstr_message_partial';
 
     ### compression + encoding ###
 
     # Gzipped UNIX FROM
     $_FOPH{'cnstr',    'gz'} = 'Cnstr_gz';
-    $_FOPH{'retrieve', 'gz'} = 'f_gz';
-    $_FOPH{'encode',   'gz'} = 'f_gz_encode';
-    $_FOPH{'split',    'gz'} = 'f_SplitFile';
+    $_FOPH{'retrieve', 'gz'} = 'FOP_gz';
+    $_FOPH{'encode',   'gz'} = 'FOP_gz_encode';
+    $_FOPH{'split',    'gz'} = 'FOP_SplitFile';
 
     # PACK: TAR + GZIP
     $_FOPH{'cnstr',    'tgz'} = 'Cnstr_tgz';
-    $_FOPH{'retrieve', 'tgz'} = 'f_tgz';
-    $_FOPH{'encode',   'tgz'} = 'f_gz_encode';
-    $_FOPH{'split',    'tgz'} = 'f_SplitFile';
+    $_FOPH{'retrieve', 'tgz'} = 'FOP_tgz';
+    $_FOPH{'encode',   'tgz'} = 'FOP_gz_encode';
+    $_FOPH{'split',    'tgz'} = 'FOP_SplitFile';
 
     # PACK: TAR + GZIP
     $_FOPH{'cnstr',    'zip'} = 'Cnstr_message_partial';
-    $_FOPH{'retrieve', 'zip'} = 'f_zip';
-    $_FOPH{'encode',   'zip'} = 'f_base64';
-    $_FOPH{'split',    'zip'} = 'f_SplitFile';
+    $_FOPH{'retrieve', 'zip'} = 'FOP_zip';
+    $_FOPH{'encode',   'zip'} = 'FOP_base64';
+    $_FOPH{'split',    'zip'} = 'FOP_SplitFile';
 
     # PACK: LHA + ISH
     $_FOPH{'cnstr',    'lhaish'} = '';
-    $_FOPH{'retrieve', 'lhaish'} = 'f_Lha';
-    $_FOPH{'encode',   'lhaish'} = 'f_lha_encode';
-    $_FOPH{'split',    'lhaish'} = 'f_SplitFile';
+    $_FOPH{'retrieve', 'lhaish'} = 'FOP_Lha';
+    $_FOPH{'encode',   'lhaish'} = 'FOP_lha_encode';
+    $_FOPH{'split',    'lhaish'} = 'FOP_SplitFile';
 
     # PACK: LHA + UUENCODE
     $_FOPH{'cnstr',    'lhauu'}  = '';
-    $_FOPH{'retrieve', 'lhauu'}  = 'f_Lha';
-    $_FOPH{'encode',   'lhauu'}  = 'f_lha_encode';
-    $_FOPH{'split',    'lhauu'}  = 'f_SplitFile';
+    $_FOPH{'retrieve', 'lhauu'}  = 'FOP_Lha';
+    $_FOPH{'encode',   'lhauu'}  = 'FOP_lha_encode';
+    $_FOPH{'split',    'lhauu'}  = 'FOP_SplitFile';
 }
 
 
@@ -290,7 +290,7 @@ sub Cnstr_tgz
 
 # DEBUG OPTION: 
 # $debug_rf (RF == Retrive File)?
-sub f_RetrieveFile
+sub FOP_RetrieveFile
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -405,25 +405,25 @@ sub f_RetrieveFile
 }
 
 
-sub f_Lha
+sub FOP_Lha
 {
     local(*conf, *r, *misc) = @_;
     &Lha($conf, $r, @conf); # input:$conf;
 }
 
 
-sub f_gz
+sub FOP_gz
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
 
-    &f_RetrieveFile(*conf, *r, *misc);
+    &FOP_RetrieveFile(*conf, *r, *misc);
     # &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
     &system("$COMPRESS $tmpf.0", $tmpf);
 }
 
 
-sub f_tgz
+sub FOP_tgz
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -433,7 +433,7 @@ sub f_tgz
 }
 
 
-sub f_gz_encode
+sub FOP_gz_encode
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -445,7 +445,7 @@ sub f_gz_encode
 }
 
 
-sub f_zip
+sub FOP_zip
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -456,7 +456,7 @@ sub f_zip
     &DiagPrograms('ZIP');
 
     if (!-x $ZIP) {
-	&Log("f_zip: cannot find zip executable");
+	&Log("FOP_zip: cannot find zip executable");
 	return;
     }
 
@@ -467,7 +467,7 @@ sub f_zip
 }
 
 
-sub f_uu_conf_gobble
+sub FOP_uu_conf_gobble
 {
     local($out, *conf) = @_;
 
@@ -475,7 +475,7 @@ sub f_uu_conf_gobble
     select(OUT); $| = 1; select(STDOUT);
 
     for (@conf) {
-	&Debug("   f_uu_conf_gobble::open($_)\n") if $debug;
+	&Debug("   FOP_uu_conf_gobble::open($_)\n") if $debug;
 	if (open(F, $_)) { 
 	    while (<F>) { print OUT $_;};
 	    close(F);
@@ -486,7 +486,7 @@ sub f_uu_conf_gobble
 }
 
 
-sub f_uu
+sub FOP_uu
 {
     local(*conf, *r, *misc) = @_;
     local($f, $dir, $name, $output, $input);
@@ -498,7 +498,7 @@ sub f_uu
 	$output = $tmpf;
 	$input  = "$TMP_DIR/msend.uu";
 	$name   = $r;
-	&f_uu_conf_gobble($input, *conf);
+	&FOP_uu_conf_gobble($input, *conf);
     }
     # Example: $r=old/100.tar.gz $old=old $f=100.tar.gz if @conf == 1;
     else {
@@ -514,9 +514,9 @@ sub f_uu
     $name =~ s#^.*/(.*)#$1#;
 
     if ($debug) {
-	&Debug("\n   f_uu_conf_gobble::($input @conf)");
-	&Debug("   f_uu::conf=$conf r=$r misc=$misc name=$name");
-	&Debug("   f_uu::system(uuencode < $input > $tmpf)");
+	&Debug("\n   FOP_uu_conf_gobble::($input @conf)");
+	&Debug("   FOP_uu::conf=$conf r=$r misc=$misc name=$name");
+	&Debug("   FOP_uu::system(uuencode < $input > $tmpf)");
 	&Debug("   system($UUENCODE $name, $output, $input);");
     }
 
@@ -543,7 +543,7 @@ sub Cnstr_message_partial
 }
 
 
-sub f_base64
+sub FOP_base64
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -555,9 +555,9 @@ sub f_base64
 
     &DiagPrograms('BASE64_ENCODE');
 
-    open(IN, "$tmpf.0") || &Log("f_base64: cannot open $tmpf");
+    open(IN, "$tmpf.0") || &Log("FOP_base64: cannot open $tmpf");
     open(BASE64, "|$BASE64_ENCODE > $tmpf.1") ||
-	&Log("f_base64: cannot open $tmpf.1");
+	&Log("FOP_base64: cannot open $tmpf.1");
     select(BASE64); $| = 1; select(STDOUT);
     binmode(IN);
     while (<IN>) {
@@ -567,11 +567,11 @@ sub f_base64
     close(BASE64);
 
     &Debug("rename($tmpf.1, $tmpf);") if $debug;
-    rename("$tmpf.1", $tmpf) || &Log("f_base64: cannot rename $tmpf.1 $tmpf");
+    rename("$tmpf.1", $tmpf) || &Log("FOP_base64: cannot rename $tmpf.1 $tmpf");
 }
 
 
-sub f_gzuu
+sub FOP_gzuu
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
@@ -581,27 +581,27 @@ sub f_gzuu
 }
 
 
-sub f_SplitFile
+sub FOP_SplitFile
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
     local($total) = $r{'total'};
 
-    &Debug("f_SplitFile: $r => $tmpf") if $debug;
+    &Debug("FOP_SplitFile: $r => $tmpf") if $debug;
 
     local($totallines) = &WC($tmpf);
     $total = int($totallines/$MAIL_LENGTH_LIMIT + 1);
-    &Debug("f_SplitFile: $total <= $totallines/$MAIL_LENGTH_LIMIT") if $debug;
+    &Debug("FOP_SplitFile: $total <= $totallines/$MAIL_LENGTH_LIMIT") if $debug;
 
     if ($total > 1) {
 	local($s) = &SplitFiles($tmpf, $totallines, $total);
 	if ($s == 0) {
-	    &Log("f_SplitFile: Cannot split $tmpf");
+	    &Log("FOP_SplitFile: Cannot split $tmpf");
 	    return 0;
 	}
     }
     elsif (1 == $total) {# a trick for &SendingBackInOrder;
-	&Debug("f_SplitFile: rename($tmpf, $tmpf.1)") if $debug; 
+	&Debug("FOP_SplitFile: rename($tmpf, $tmpf.1)") if $debug; 
 	rename($tmpf, "$tmpf.1") || &Log("cannot rename $tmpf $tmpf.1"); 
     }
 
@@ -748,7 +748,7 @@ sub Lha
 }
 
 
-sub f_lha_encode
+sub FOP_lha_encode
 {
     local(*conf, *r, *misc) = @_;
     local($name, $input, $tmpout, @unlink);
@@ -784,8 +784,8 @@ sub f_lha_encode
 	    chop($pwd = `pwd`);
 	    (chdir $TMP_DIR) ? 
 		&system($uuencode) :
-		    &Log("f_lha_encode: cannot chdir $TMP_DIR");
-	    chdir $pwd || &Log("f_lha_encode: cannot chdir $pwd");
+		    &Log("FOP_lha_encode: cannot chdir $TMP_DIR");
+	    chdir $pwd || &Log("FOP_lha_encode: cannot chdir $pwd");
 	}
 
 	unlink $tmpout if -f $tmpout; # lha
