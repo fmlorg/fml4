@@ -355,7 +355,7 @@ sub ReadFile
     local($d, $f);
     local($fname) = $file;
 
-    if (! -f "$dir/$file") {
+    if ($file && (! -f "$dir/$file")) {
 	print STDERR "no such file $dir/$file\n";
 	return;
     }

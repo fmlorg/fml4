@@ -5,6 +5,9 @@
 
 2000/04/11
 
+  bin/fwix.pl
+	fix file existence code bug 
+
   sbin/makefml (only on NT4)
 	fix 'no such file' in "makefml passwd ..."
 	by wrap "system stty " with "if $UNISTD"
