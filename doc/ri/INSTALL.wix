@@ -2026,6 +2026,7 @@ cf というファイルは主にメニュープログラムが処理しやすくするために存在
 
 .S	設定ファイル(cf と config.ph)についての注意 
 =E.S	On cf and config.ph
+.n	cf-and-config.ph
 
 fml.pl がメーリングリスト本体です。このプログラムにメールを入れるとメー
 リングリストとして作動します。fml のほとんど全てのプログラムの動作は 
@@ -2308,6 +2309,10 @@ in error mails returned from MTA's.
 	user unknown	そんなユーザーはいない
 			/etc/aliases に設定をしていない
 			newaliases してない
+
+	sh: fml.pl not available
+			smrsh を使ってたりしますか？
+			sendmail.cfをどうやって作ったかを確認
 .fi
 .if LANG == ENGLISH
 	error		origin
@@ -2318,6 +2323,9 @@ in error mails returned from MTA's.
 	user unknown	no such user
 			/etc/aliases miss-configuration
 			did not newaliases
+	sh: fml.pl not available
+			you use smrsh? properly configured?
+			
 .fi
 
 ○	:include: がうまく動かない場合 (/etc/aliases)
