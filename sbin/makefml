@@ -4828,9 +4828,14 @@ sub do_setup_mladmin_cgi
 	chmod 0755, $outfile;
     }
 
+    # make .htaccess
     &Conv($ml, "$EXEC_DIR/www/etc/dot_htaccess.ml-admin",
 	  "$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
 
+    # make htpasswd from $DIR/etc/passwd
+    if (-f "$ML_DIR/$ml/etc/passwd") {
+	
+    }
 
     print "\n   done.\n";
 }
