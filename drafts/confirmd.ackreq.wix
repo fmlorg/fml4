@@ -1,0 +1,39 @@
+_CTK_ack _ML_
+
+.if LANG == JAPANESE
+これからもこのメーリングリスト <_MAIL_LIST_> に入り続けますか？
+
+入り続けたいなら「_CTK_ack _ML_」(このメールの最初の行)という一行だけのメー
+ルを _ARG0_ 以内に <_CTLADDR_> へ送って下さい。
+
+もうメーリングリストから抜けたいなら何もしなくても構いません。
+そのうち自動的に削除されます。
+
+このメーリングリストではあなたが「これからもこのメーリングリストに入り
+続ける意志があるか？」を定期的に確認することにしています。_CTK_ack _ML_ 
+というコマンドを送り返してもらうことでその意思表示とみなしています。
+.fi
+.if LANG == ENGLISH
+Would you continew to join this list <_MAIL_LIST_> ?
+
+If you so, plaese reply this mail and send just "_CTK_ack _ML_" to the
+address <_CTLADDR_>. If you go out this list, you do not have to do
+anything. FML removes you after an interval.
+
+.fi
+			_MAIL_LIST_ 管理者
+			_MAINTAINER_
+=E
+			_MAIL_LIST_ mailing list maintainer
+			_MAINTAINER_
+
+Thanks in advace.
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,75 @@
+<_MAIL_LIST_> メーリングリストへようこそ!
+=E
+Welcome to our mailing list <_MAIL_LIST_> !
+
+このメールはサーバの使い方についての情報を含んでいます。大事にとってお
+いて下さい。
+=E
+This mail contains the fundamental usage of the mailing list server.
+
+１	メーリングリストサーバの使い方
+=E
+1	How to use this server
+
+このメーリングリストサーバへのコマンドはメール本文にコマンドを書いて
+アドレス <_CTLADDR_> へ送って下さい。
+=E
+Plaese send commands in the mail body not subject to the address
+<_CTLADDR_>.
+
+コマンドのシンタックスは英語の単語です。例えば
+=E
+The command syntax is as follows:
+
+	_CTK_help
+
+です。次のようにパラメータがつく場合もあります。
+
+	_CTK_mget last:10 mp
+
+コマンドの一覧とサーバの使い方の解説はアドレス <_CTLADDR_> に
+=E
+Plaese send the "_CTK_help" to the address <_CTLADDR_> for help and
+server functions overview
+
+	_CTK_help
+
+を送ることで得られます。またメーリングリストに関する一般的な情報は
+=E
+to get general information on this list
+
+	_CTK_guide
+
+コマンドを送って下さい。
+
+もしメーリングリストの管理者へ直接聞きたいことがあれば
+=E
+If you want to make a contact with the mailing list maintainer, please
+e-mail to
+
+	_MAINTAINER_
+
+へメールを出して下さい。しかしながら管理者の手間を省くためにメーリング
+リストサーバはあるものです。できるだけサーバを使ってみて下さい。
+=E
+ML server exists to descrease routine works by maintainers. Please try
+to use server functions as could as possible.
+
+.if LANG == JAPANESE
+				_MAIL_LIST_ 管理人
+				_MAINTAINER_			
+.fi
+.if LANG == ENGLISH
+				_MAIL_LIST_ Maintainer
+				_MAINTAINER_			
+.fi
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
