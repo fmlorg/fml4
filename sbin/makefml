@@ -15,11 +15,14 @@
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
 $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
-&InitMakeFml;
 &InitTTY;
+&InitMakeFml;
 
 # info
-if (! @ARGV) { 
+if ($IN_CHANNEL eq 'stdin') {
+    @ARGV = split(/\s+/, <STDIN>);
+}
+elsif (! @ARGV) { 
     &ExecCmd("info");
     &MenuInputLoop if $opt_w;
     exit 0;
@@ -35,10 +38,14 @@ else {
 
 if ($GroupWritable) {
     print STDERR "\n   Please check the group permission in $ML_DIR\n";
-    print STDERR "   Enjoy Internetworking!\n";
 }
 
-&System if $SYSTEM_ARGV;
+# last message
+if ($SavedFP eq 'install') {
+    print STDERR "-- Enjoy Internetworking!\n";
+}
+
+&System if $SYSTEM_ARGV || $SYSTEM_ARGV_IN || $SYSTEM_ARGV_OUT;
 
 &FlushLog;
 
@@ -46,7 +53,34 @@ exit 0;
 
 
 #################### LIBLARIES ####################
-sub System { system $SYSTEM_ARGV;}
+sub System 
+{
+    local($cmd);
+
+    if ($SYSTEM_ARGV_IN) {
+	open(SYS_IN,  "$SYSTEM_ARGV_IN|")   || die($!);
+	open(SYS_OUT, "| $SYSTEM_ARGV_OUT") || die($!);
+	select(SYS_OUT); $| = 1; select(STDOUT);
+
+	while (<SYS_IN>) { print SYS_OUT $_;}
+
+	if ($SYSTEM_ARGV_QUERY_INPUT) {
+	    sleep 1;
+	    print STDERR 
+		"* Enter mailbody, end with \".\" on a line by itself\n";
+	    while (1) {
+		$cmd = &GetString;
+		if ($cmd eq '.') { last;}
+		print SYS_OUT "$cmd\n";
+	    }
+	}
+	    
+	close(SYS_IN);
+	close(SYS_OUT);
+    }
+
+    system $SYSTEM_ARGV if $SYSTEM_ARGV;
+}
 
 
 sub InitMakeFml
@@ -54,7 +88,7 @@ sub InitMakeFml
     # flush;
     select(STDOUT); $| = 1;
 
-    &GetTime;
+    &GetTime(time);
 
     ### signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -64,10 +98,14 @@ sub InitMakeFml
     $UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 1;
 
     ### getopt
+    if ($ENV{'MAKEFML'}) {
+	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
+    }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:");
+    &Getopts("dhf:A:O:p:D:vwV:mi:u:U");
     $debug   = $opt_d;
     $verbose = $opt_v;
+    $MailNotify = $opt_m;
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
@@ -75,11 +113,14 @@ sub InitMakeFml
     $COMPAT_ARCH = $opt_A;
     $VENDOR      = $opt_V;
 
+    $IN_CHANNEL  = $opt_i;
+
 
     ### determine Architechure dependence
     if ($ENV{'OS'} =~ /Windows_NT/) {
 	$COMPAT_ARCH  = "WINDOWS_NT4";
 	$COMPAT_WIN32 = 1;
+	$CPU_TYPE_MANUFACTURER_OS = "unknown-unknown-windowsnt4";
     }
    
     # umask 077?
@@ -89,12 +130,15 @@ sub InitMakeFml
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	# first time if !-d $EXEC_DIR ? (must be true)
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl" if -d $EXEC_DIR;
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl" if -d $EXEC_DIR;
 	$USER = $ENV{'USERNAME'};
     }
     else {
 	$USER = $ENV{'USER'} || (getpwuid($<))[0];
     }
+
+    # overwrite (used in libexec/mead.pl)
+    $USER        = $opt_u || $USER;
 
     { # DNS AutoConfigure to set FQDN and DOMAINNAME; 
 	local(@n, $hostname, $list);
@@ -108,6 +152,8 @@ sub InitMakeFml
 	$FQDN       =~ s/\.$//; # for e.g. NWS3865
 	$DOMAINNAME = $FQDN;
 	$DOMAINNAME =~ s/^$hostname\.//;
+
+	$Config'FQDN = $FQDN; #';
     }
 
     &ProbePerlVersion;
@@ -150,15 +196,18 @@ sub InitMakeFml
 	for ("$HOME/.fml", "/usr/local/fml/.fml") {
 	    $CONFIG_DIR = $_ if -d $_;
 	}
+
+	# re-install case
+	if ($ARGV[0] eq 'install' && $ARGV[1]) {
+	    $CONFIG_DIR = "$ARGV[1]/.fml" if -d "$ARGV[1]/.fml";
+	}
     }
 
 
     ### FIX VARIABLES
-    $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml"; # must be no meaning ...
+    $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml";
     $FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
-
-    # for ($FML_CONFIG, $FML_POLICY) { &Touch($_) unless -f $_;}
 
     # config amd temporary files
     if ($TheFirstTime) {
@@ -175,6 +224,9 @@ sub InitMakeFml
     ###   REQUIRED HERE BEFORE LOADING;
     &SetHashDefaults;
 
+    # not lock in install
+    $NOT_LOCK{$ARGV[0]} = 1 if $opt_U;
+
 
     ### LOADING $FML_POLICY
     if (-f $FML_POLICY) {
@@ -188,7 +240,7 @@ sub InitMakeFml
 
 	package Config;
 	eval("require \$main'FML_CONFIG;\#'");
-	print STDERR $@ if $@;
+	&main'Warn($@) if $@; #';
 
 	$main'debug = $Config'debug;
 	package main;
@@ -199,49 +251,92 @@ sub InitMakeFml
 	&Dumpvar('Config') if $debug;
     }
     else {
-	print STDERR "---NOT USING configuration file\n";
 	$TheFirstTime = 1;
+	print STDERR "---NOT USING configuration file (for the first time)\n";
     }
 
+    # cached
+    $CPU_TYPE_MANUFACTURER_OS = $Config'CPU_TYPE_MANUFACTURER_OS{$FQDN}; #';
+
+    # use os type cache
+    if ($UNISTD && $CPU_TYPE_MANUFACTURER_OS && $ARGV[0] ne 'install') {
+	$CACHED_YES = 1;
+    } 
     # inspecting cpu-type-manufacturer-operating-system
-    if ($UNISTD) {
-	local($eval, $dir);
+    elsif ($UNISTD) {
+	if ($ARGV[0] eq 'install') {
+	    $CACHED_YES = 0; # SHOULD CHECK system by config.guess
+	}
+	elsif ($CPU_TYPE_MANUFACTURER_OS) {
+	    $CACHED_YES = 1;
+	}
+
+	local($eval, $dir, $guess);
 
 	$dir = $0;
 	$dir = $dir =~ m#/# ? $dir : "./$dir";
 	$dir =~ s#(.*)/.*#$1#;
 
-	$eval = qq#\$CPU_TYPE_MANUFACTURER_OS = `sh $dir/sbin/config.guess`;#;
+	if (-f "$dir/sbin/config.guess") {
+	    $guess = "$dir/sbin/config.guess";
+	}
+	elsif (-f "$CONFIG_DIR/../sbin/config.guess") {
+	    $guess = "$CONFIG_DIR/../sbin/config.guess";
+	}
+
+	$eval = qq#\$CPU_TYPE_MANUFACTURER_OS = `sh $guess`;#;
+
 	print STDERR "$eval\n" if $debug;
 	eval($eval);
-	print STDERR $@ if $@;
+	&main'Warn($@) if $@; #';
 
-	chop $CPU_TYPE_MANUFACTURER_OS;
-	$Config'CPU_TYPE_MANUFACTURER_OS{$FQDN} = $CPU_TYPE_MANUFACTURER_OS;#';
-	print STDERR $@ if $@;
+	chop($CPU_TYPE_MANUFACTURER_OS);
 
-	$OS_TYPE = (split(/\-/, $CPU_TYPE_MANUFACTURER_OS))[2];
-	$OS_TYPE =~ tr/a-z/A-Z/;
+	# else
+	if ($CPU_TYPE_MANUFACTURER_OS) {
+	    # import OS_TYPE to %Config is done later (why?)
+	    &DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS, 1);
+	}
+	else {
+	    print STDERR 
+		"   Hmm... inspecting your system by config.guess failed?\n";
+	}
     }
+    else {
+	if ($CPU_TYPE_MANUFACTURER_OS) {
+	    &DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS, 1);
+	}
+    }
+
+OS_TYPE:
 
     print &Dumpvar('Config') if $debug;
 
-    &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
+    ### Now we check 'struct sockaddr' only when needed
+    ### &SetSockAddr($CPU_TYPE_MANUFACTURER_OS); # require OS_TYPE;
 
     if ($Config'OS_TYPE{$FQDN}) { #';
 	$OS_TYPE = $Config'OS_TYPE{$FQDN} || $OS_TYPE; #';
     }
     else {
 	print STDERR "\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';\n" if $debug;
-	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+	&DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS);
     }
     
     # if not defined this machine OS;
+    local($cached_cmo) = $Config'CPU_TYPE_MANUFACTURER_OS{$FQDN}; #';
     if ($opt_O) {
-	$OS_TYPE = $opt_O;
-	$OS_TYPE =~ tr/a-z/A-Z/;
-	print "   YOU DEFINE THIS HOST ($FQDN)'s OS == $OS_TYPE.\n";
-	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+	$CPU_TYPE_MANUFACTURER_OS = $opt_O;
+	&DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS);
+	print "   YOU DEFINED\n";
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS]\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
+    }
+    elsif ($CPU_TYPE_MANUFACTURER_OS && $CACHED_YES) {
+	print "\n";
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS] (cached)\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
+	print "\n";
     }
     elsif ($CPU_TYPE_MANUFACTURER_OS) {
 	print "\n";
@@ -249,20 +344,52 @@ sub InitMakeFml
 	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
 	print "\n";
     }
+    elsif ($cached_cmo) { 
+	$CPU_TYPE_MANUFACTURER_OS = $cached_cmo;
+	$OS_TYPE = $Config'OS_TYPE{$FQDN}; #'; 
+	print "\n";
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS] (cached)\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE] (cached)\n" if $debug;
+	print "\n";
+    }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$OS_TYPE = "WINDOWS_NT4";
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+	&main'Warn($@) if $@; #';
     }
     else {
 	# print "---Try to inspect your Operating System ...\n";
+
+	$CPU_TYPE_MANUFACTURER_OS = "unknown-unknown-unknown";
+	&DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS);
+
+	print "   I failed to inspect your system.\n";
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS]\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
 	print "\n";
-	print "\n   This machine looks [$CPU_TYPE_MANUFACTURER_OS]\n\n";
+
+	print "   PLEASE DEFINE \$CPU_TYPE_MANUFACTURER_OS IF POSSIBLE\n";
+	print "   If you cannot define \$CPU_TYPE_MANUFACTURER_OS\n";
+	print "   FML may work with \"$CPU_TYPE_MANUFACTURER_OS\"\n";
+	print "   (I assume BSD like if \"$CPU_TYPE_MANUFACTURER_OS\")\n";
+	print "   cpu-manufacturer-os [$CPU_TYPE_MANUFACTURER_OS] ";
+	$cmd = &GetString;
+	$cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
+	print "\n";
+
+	$CPU_TYPE_MANUFACTURER_OS = $cmd ? $cmd : "unknown-unknown-unknown";
+	&DefineCMO($FQDN, $CPU_TYPE_MANUFACTURER_OS);
+	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS]\n";
+	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
+	print "\n";
     }
 
     # vendor info (e.g. used when MetaInfo on NT4)
     if ($VENDOR) {
 	eval("\$Config'VENDOR = '$VENDOR';");
+	&main'Warn($@) if $@; #';
     }
+
 
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
@@ -276,20 +403,39 @@ sub InitMakeFml
     }
 }
 
+# CFVersion: 2
+#    OS_TYPE
+#    OS_TYPE is used in the age of "CFVersion 2".
+# CFVersion: 3
+#    CPU_TYPE_MANUFACTURER_OS
+#    This is the current parameter geussed by config.guess (GNU autoconf).
+sub DefineCMO
+{
+    local($fqdn, $cmo, $no_set_os_type) = @_;
+
+    $Config'CPU_TYPE_MANUFACTURER_OS{$fqdn} = $CPU_TYPE_MANUFACTURER_OS ;#';
+
+    # special case
+    return if $no_set_os_type;
+
+    $OS_TYPE = (split(/\-/, $CPU_TYPE_MANUFACTURER_OS))[2];
+    $OS_TYPE =~ tr/a-z/A-Z/;
+
+    print STDERR "\$Config'OS_TYPE{'$fqdn'} = '$OS_TYPE';\n" if $debug;
+    eval("\$Config'OS_TYPE{'$fqdn'} = '$OS_TYPE';");
+    &main'Warn($@) if $@; #';
+}
+
 
 sub SetHashDefaults
 {
-    # Language Extension for documents;
-    $LANGUAGE  = $FQDN =~ /jp$/i ? "Japanese" : "English";
-
     # configurable variables;
-    @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR', 'LANGUAGE');
+    @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
 
     %Config = ('EXEC_DIR', 'EXEC FILES DIRECTORY',
 	       'ML_DIR',   'TOP LEVEL ML DIRECTORY', 
 	       'DOMAIN',   'DOMAIN NAME', 
 	       'FQDN',     'FQDN', 
-	       'LANGUAGE', 'LANGUAGE',
 	       ); 
 
     %Default = ('PERSONAL_OR_GROUP', 'personal',
@@ -323,15 +469,17 @@ sub SetHashDefaults
 		    '0#info',    'show this message',
 		    'setq',     'do_setq',
 		    'show',     'do_show',
-		    'config',   'do_config',
 
+		    'config',   'do_config',
 		    '5#config ML', 'configure the fundamental of <ML>',
 		    'edit',   'do_edit',
-		    '5#edit ML', "edit config.ph of <ML>\'s",
+		    '5#edit ML', "edit <ML>'s file under lock (default config.ph)",
 
 		    'new',      'do_newml',
 		    'newml',    'do_newml',
 		    '1#newml ML',   'make a new Mailing List <ML>',
+
+		    # admin command (main)
 		    'add',      'do_adduser',
 		    '2#add ML address',     'add <address> to <ML>',
 		    'adduser',  'do_adduser',
@@ -340,10 +488,19 @@ sub SetHashDefaults
 		    '3#bye ML address',     'remove <address> from the <ML>',
 		    'byeuser',  'do_byeuser',
 		    '3#byeuser ML address', 'remove <address> from the <ML>',
+
+		    # admin command (sub)
+		    'on',     'do_on',
+		    'off',    'do_off',
+		    'chaddr', 'do_chaddr',
+		    'matome', 'do_matome',
+		    'digest', 'do_digest',
+
 		    'addadmin', 'do_addadmin',
 		    '4#addadmin ML address', 'add <address> as an admin to <ML>',
 		    'byeadmin', 'do_byeadmin',
 		    '4#byeadmin ML address', 'remove the administrator of the <ML>',
+
 		    'help',	'do_info',
 		    '8#help',	'help message',
 		    'passwd',	'do_passwd',
@@ -372,73 +529,123 @@ sub SetHashDefaults
 
 		    # misc
 		    'lock', 'do_lock',
+		    '11#lock ML', 'lock <ML>',
 
+		    # extension/special
+		    'qmail-setup', 'do_qmail_setup',
+
+		    # edit $EXEC_DIR/drafts/* $EXEC_DIR/etc/makefml/cf
+		    'edit-template',   'do_edit_template',
+		    '20#edit-template', 'edit template file under locked state',
+		    'config-template', 'do_config_template',
+		    '20#config-template', 'configure template cf file',
+
+		    'command', 'do_command',
 		    );
 
-    # variables not to lock
+    # functions not to lock
     %NOT_LOCK = ('newml', 1,
 		 'info', 1,
 		 'help', 1,
 		 'listserv', 1,
 		 'majorodomo', 1,
 		 'fmlserv', 1,
+		 'command', 1,
+		 'edit-template', 1,
+		 'config-template', 1,
 		 );
 
+    # <ML> argument is not required.
+    @NOT_REQUIRE_ML_ARG = 
+	(
+	 "newml", "info", "help", "install", 
+	 "fmlserv", "majordomo", "listserv", "popfml",
+	 "edit-template", "config-template"
+	 );
 }
 
 
 sub InitFmlConfig
 {
-    local($cmd, $prompt, $v);
+    local($cmd, $prompt, $v, $go_flag);
 
     print "---Please Define Your Fml System Configurations\n\n";
 
-    # personal or group-shared?
-    printf "%-25s ", 
-    "Personal Use or ML-Admin-Group-Shared or fmlserv you use?";
-
-    $cmd = &Query("Personal, Group, Fmlserv", "personal/group/fmlserv", 
-		  "personal|group|fmlserv", "personal");    
-    $cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
-    &do_setq("PERSONAL_OR_GROUP", $cmd);
-
-    if ($cmd eq 'group' || $cmd eq 'fmlserv') {
-	printf "Please define the group (in /etc/group) ML Operators use";
-	$cmd = &Query("Group of Mailing List Operators", 
-		      "fml or GID ([\\w\\d]+)", "[\\w\\d]+", "fml");    
-	&do_setq("GROUP", $cmd);
-
-	$GID = &GetGID($cmd);
-
-	print "GID\t$cmd\n" if $debug;
-	print "GID\t$GID\n" if $debug;
-
-	if (! $GID) {
-	    print "   *** ERROR ***\n";
-	    print "   I cannot find the group \"$cmd\" in /etc/group.\n";
-	    print "   Please define it!\n";
-	    exit 0;
-	}
+    # -f file case
+    if (-f $opt_f && -f $FML_CONFIG) {
+	print STDERR "O.K. installing by using $FML_CONFIG\n";
+	$go_flag = 1;
     }
+    # STANDARD
+    else {
 
-    # values;
-    for (@Config) {
-	$k = $_;
-	$p = $Config{$_};
-	$v = $CurConfig{$_} ? $CurConfig{$_} : $Default{$_};
+	# personal or group-shared?
+	printf "%-25s ", 
+	"Personal Use or ML-Admin-Group-Shared or fmlserv you use?";
 
-	printf "%-25s %s ", $p, "[$v]";
-
-	$cmd = &GetString;
-	
+	$cmd = &Query("Personal, Group, Fmlserv", "personal/group/fmlserv", 
+		      "personal|group|fmlserv", "personal");    
 	$cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
-	$buf .= sprintf("  set \$%-10s = '%s';\n", $k, $cmd);
-	&do_setq($k, $cmd);
+	&do_setq("PERSONAL_OR_GROUP", $cmd);
+
+	if ($cmd eq 'group' || $cmd eq 'fmlserv') {
+	    printf "Please define the group (in /etc/group) ML Operators use";
+	    $cmd = &Query("Group of Mailing List Operators", 
+			  "fml or GID ([\\w\\d]+)", "[\\w\\d]+", "fml");    
+	    &do_setq("GROUP", $cmd);
+
+	    $GID = &GetGID($cmd);
+
+	    print "GID\t$cmd\n" if $debug;
+	    print "GID\t$GID\n" if $debug;
+
+	    if (! $GID) {
+		print "   *** ERROR ***\n";
+		print "   I cannot find the group \"$cmd\" in /etc/group.\n";
+		print "   Please define it!\n";
+		exit 0;
+	    }
+	}
+
+
+	# values;
+	$buf .= sprintf("  %10s\n", "--- summary ---");
+	local($pat, $k, $v);
+	for (@Config) {
+	    $k = $_;
+	    $p = $Config{$_};
+	    $v = $CurConfig{$_} ? $CurConfig{$_} : $Default{$_};
+
+	    printf "%-25s %s ", $p, "[$v]";
+	    $cmd = &GetString;
+	    $cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
+	    $buf .= sprintf("  %10s: %s\n", $k, $cmd);
+	    &do_setq($k, $cmd);
+	}
+
+	# Language Extension for documents;
+	$deflang  = $FQDN =~ /jp$/i ? "Japanese" : "English";
+
+	$cmd = &Query("Language", 
+		      "Japanese or English", "Japanese|English", $deflang);
+
+	&do_setq("LANGUAGE", $cmd);
+	$buf .= sprintf("  %10s: %s\n", "Language", $cmd);
+
+	print "\n$buf\n";
+
     }
 
-    print "\n$buf\n";
-
+    ### installation main phase ###
     &GetCurConfig;
+
+    if ($go_flag) {
+	print "-" x 60; print "\n";
+	for (@Config, "LANGUAGE") {
+	    printf "\t%-10s   %s\n", $_, $CurConfig{$_};
+	}
+	print "-" x 60; print "\n";
+    }
 
     # print "CONFIG_DIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
     # print "Config Saved in [$CurConfig{'EXEC_DIR'}/.fml] ";
@@ -470,7 +677,7 @@ sub InitFmlConfig
 		# print "   mkdir $dir\n";
 		# here /usr/local/fml;only installer can read-write this;
 		print STDERR "mkdir($dir, 0755);\n";
-		mkdir($dir, 0755); 
+		&Mkdir($dir, 0755); 
 	    }
 	}
     }
@@ -494,7 +701,7 @@ sub GetCurConfig
     }
 
     eval($s);
-    print "$@\n---\n$s\n" if $@;
+    &main'Warn($@) if $@; #';
 }
 
 
@@ -523,7 +730,7 @@ sub GetCurPolicy
 
     package Policy;
     eval("do \$main'FML_POLICY;\#'");
-    print STDERR $@ if $@;
+    &main'Warn($@) if $@; #';
     package main;
 
     # reset %CurPolicy from Policy Name Space;
@@ -532,7 +739,7 @@ sub GetCurPolicy
     }
 
     eval($s);
-    print "$@\n---\n$s\n" if $@;
+    &main'Warn($@) if $@; #';
 
     if ($debug) {
 	print STDERR "---POLICY LOADING\n";
@@ -567,6 +774,23 @@ sub FlushLog
 	&Cat($MAKEFML_LOGFILE);
 	unlink $MAKEFML_LOGFILE if $TheFirstTime;
     }
+
+    # touch
+    if (-d $CONFIG_DIR && !-f "$CONFIG_DIR/log") { 
+	&Touch("$CONFIG_DIR/log");
+    }
+
+    if (-w "$CONFIG_DIR/log" && -f "etc/release_version") {
+	$LOGFILE = "$CONFIG_DIR/log";
+	if (open(V, "etc/release_version")) {
+	    chop($version = <V>);
+	    &Log("installing fml $version is done");
+	    close(V);
+	}
+	else {
+	    &Debug("cannot open etc/release_version");
+	}
+    }
 }
 
 
@@ -585,12 +809,13 @@ sub Copy
 {
     local($in, $out) = @_;
 
-    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return);
-    open(OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return);
+    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
+    open(OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
     select(OUT); $| = 1; select(STDOUT); 
     while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
     close(OUT);
-    close(COPY_IN); 
+    close(COPY_IN);
+    1;
 }
 
 
@@ -609,6 +834,13 @@ sub Warn
 {
     local(@caller) = caller;
     print STDERR "Warning:(called from @caller)\n@_\n";
+    $WarnBuf = "Warning:(called from @caller)\n@_\n";
+}
+
+
+sub Error
+{
+    print STDERR "*** Error: @_\n\n";
 }
 
 
@@ -621,7 +853,7 @@ sub Log
     local($from) = $USER;
     local(@c) = caller;
 
-    &GetTime;
+    &GetTime(time);
 
     # existence and append(open system call check)
     if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
@@ -681,6 +913,7 @@ sub Touch
     close(APP); 
     chown $<, $GID, $_[0] if $GID;
 
+    sleep 1;
     $now = time;
     utime $now, $now, @_;
 
@@ -711,6 +944,14 @@ sub WholeMail { print STDERR "Dummy WholeMail [@_]\n";}
 sub SetEvent  { print STDERR "Dummy SetEvent [@_]\n";}
 
 
+sub SRand
+{
+    local($i) = time;
+    $i = (($i & 0xff) << 8) | (($i >> 8) & 0xff) | 1;
+    srand($i + $$); 
+}
+
+
 ##############################################################################
 ##########
 ########## LOCK LIBRARY
@@ -720,6 +961,9 @@ sub FlockP
 {
     local($ml, $mldir) = @_;
     local($eval);
+
+    # default
+    $eval .= "\$USE_FLOCK = 1;\n";
 
     # default=flock if first time or no config.ph;
     return 1 unless -f "$mldir/$ml/config.ph";
@@ -733,7 +977,7 @@ sub FlockP
     close(PH);
 
     eval("package flockp; eval(\$main'eval); package main; #';");
-    &Warn($@) if $@;
+    &main'Warn($@) if $@; #';
 
     $ml'FLockP{$ml}    = $flockp'USE_FLOCK;
     $ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
@@ -745,7 +989,7 @@ sub Lock
 {
     local($ml, $mldir) = @_;
 
-    return if $InstallMode;
+    return if $NotRequireLock;
 
     if (! -d "$mldir/$ml" && ! -d $mldir) {
 	die("\n\n*** Error: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
@@ -766,7 +1010,7 @@ sub UnLock
     local($ml) = @_;
     local($flockp) = $ml'FLockP{$ml};#'
 
-    return if $InstallMode;
+    return if $NotRequireLock;
 
     if ($flockp) {
 	print STDERR "\n---Flock\n" if $debug_lock;
@@ -781,9 +1025,11 @@ sub UnLock
 sub MakeFmlLock
 {
     local($ml, $mldir) = @_;
-    local($count);
+    local($count, $dir);
 
-    # Lock Algorithm deepnds on each ML's config.ph,
+    return if $NotRequireLock;
+
+    # Lock Algorithm depends on each ML's config.ph,
     # so very complicated (which requires fmlserv's tricks)
     # lock struct
     #    ( flock_p  => lock_file (directory or lockfile) );
@@ -800,16 +1046,19 @@ sub MakeFmlLock
 	print "---Locking $mldir\n\t";
 
 	opendir(DIRD, $mldir);
-	for (readdir(DIRD)) {
+	for $dir (readdir(DIRD)) {
 	    next if /^\./;
-	    next unless -f "$mldir/$_/config.ph";
+	    next unless -f "$mldir/$dir/config.ph";
 
-	    print " $_"; $count++;
-	    
-	    &Lock($_, "$mldir/$_");
-	    $LockList{$ml} = "$mldir/$_";
+	    next if $dir eq 'etc';
+
+	    $count++;
+	    print "$dir ";
+	    &Lock($dir, $mldir);
+	    $LockList{$dir} = "$mldir/$dir";
 	}
 	closedir(DIRD);
+	print "\n";
     }
 
     if ($count) {
@@ -824,6 +1073,8 @@ sub MakeFmlLock
 sub MakeFmlUnLock
 {
     local($ml, $mldir) = @_;
+
+    return if $NotRequireLock;
 
     if ($ml && $LockList{$ml}) {
 	print "---UnLocking $ml ML";
@@ -866,6 +1117,10 @@ sub ExecCmd
     local($_) = @_;
     local(@argv, $fp, $ml);
 
+    # extension: permit ML{::,->}command syntax
+    s/^(\S+)::(\S+)/$2 $1/;	# ML::command
+    s/^(\S+)\->(\S+)/$2 $1/;	# ML->command
+
     @argv = split(/\s+/, $_);
 
     &GetCurConfig;
@@ -902,8 +1157,7 @@ sub ExecCmd
     {
 	local($not_require_ml);
 	$ml = $argv[0];
-	for ("newml", "info", "help", "install", 
-	     "fmlserv", "majordomo", "listserv", "popfml") {
+	for (@NOT_REQUIRE_ML_ARG) {
 	    # print STDERR "check $fp eq $_\n";
 	    $fp eq $_ && $not_require_ml++;
 	}
@@ -928,6 +1182,17 @@ sub ExecCmd
 	&Touch($LOGFILE) unless -f $LOGFILE;
     }
 
+    # uid check
+    {
+	local($mode, $uid, $gid) = (stat("$ML_DIR/$ml/config.ph"))[2,4,5];
+
+	# Case: root but ML's owner IS NOT ROOT
+	if ($< == 0 && $uid != $<) { 
+	    &WarnYourAreRoot;
+	}
+    }
+
+
     # Lock all when "install"
     if ($TheFirstTime || $NOT_LOCK{$fp}) {
 	;
@@ -937,6 +1202,7 @@ sub ExecCmd
     }
 
     if ($MakeFmlProc{$fp}) {
+	$SavedFP = $fp;	# Function Pointer
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
 	local($fn) = $fp; $fn =~ s/do_//;
 	&Log("makefml::${fn} @argv ") if $fp ne "do_install";
@@ -1049,6 +1315,7 @@ sub search_path
     for ("/usr/local/bin", "/usr/share/bin", 
 	 "/usr/contrib/bin", "/usr/gnu/bin", 
 	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
+	 "/usr/ucblib",  # NEC EWS4800 
 	 # NT Extention
 	 "/perl5/bin", 
 	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
@@ -1140,7 +1407,7 @@ sub ConvertCF2to3
     $config{'PGP_PATH'} = "$ML_DIR/$ml/etc/pgp";
 
     ### convertion ends; so we declare now 3!;
-    $config{"CFVersion"} = 3;
+    $config{"CFVersion"} = "3";
 }
 
 
@@ -1155,7 +1422,11 @@ sub ConvertCF3to3_1
     $config{'REWRITE_TO'} = 0 if $config{'NOT_REWRITE_TO'}; 
 
     ### convertion ends; so we declare now 3.1!;
-    $config{"CFVersion"} = 3.1;
+    $config{"CFVersion"} = "3.1";
+
+    # 3.1 -> 3.2
+    $config{'PASS_ALL_FIELDS_IN_HEADER'} = $config{'SUPERFLUOUS_HEADERS'};
+    $config{"CFVersion"} = "3.2";
 }
 
 
@@ -1173,9 +1444,12 @@ sub OutPutLocalConfig
 	print STDERR "MAKE_FML\t$k\t=>$v\n" if $debug;
     }
 
+    print STDERR "--- OUTPUT CF LOCAL CONFIG\n";
 
     ### output of other configurations
-    print CF "\n\n\nLOCAL_CONFIG\n\n";
+    print CF "\n\n\n" unless $UnderConfigTemplate;
+    print CF "\n";
+    print CF "LOCAL_CONFIG\n\n";
     print CF "\#__MAKEFML_LOCAL_CONFIG__\n";
     print CF "\# configured by $0 on $MailDate\n";
     print CF "\# *** DO NOT EDIT MANUALLY THIS BLOCK!!! ***\n";
@@ -1208,7 +1482,10 @@ sub OutPutLocalConfig
     # output to $DIR/cf
     print CF "\#__END_OF_MAKEFML_LOCAL_CONFIG__\n";
     print CF "\n\n\# YOU CAN EDIT MANUALLY AFTER HERE.\n\n";
-    print CF "$USER_DEFINED_LOCAL_CONFIG\n";
+
+    # OUTPUT: USER-DEFINED $DIR/cf local config 
+    print CF $USER_DEFINED_LOCAL_CONFIG;
+    print CF "\n";
 
     printf STDERR "\n---END OF MAKE_FML OUTPUT\n\n", $k, $v if $debug;
 }
@@ -1244,10 +1521,10 @@ sub ResetVariables
     &GetCurConfig;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	$USER = $ENV{'USERNAME'};
+	$USER = $USER || $ENV{'USERNAME'};
     }
     else {
-	$USER = (getpwuid($<))[0];
+	$USER = $USER || (getpwuid($<))[0];
     }
 
     $EXEC_DIR = $CurConfig{'EXEC_DIR'};
@@ -1286,8 +1563,12 @@ sub GenCrontab
     local($uid);
 
     print STDERR "\n";
-    print STDERR "Crontab for all ${USER}'s ML's is saved in";
-    print STDERR " $ML_ETC_DIR/crontab/$USER\n";
+    print STDERR "   crontab: example for all ${USER}'s ML's is saved in\n";
+    print STDERR "\t$ML_ETC_DIR/crontab/$USER\n";
+
+    &Conv('etc', 
+	  "$EXEC_DIR/etc/makefml/msend_master", 
+	  "$ML_ETC_DIR/crontab/$USER.master");
 
     open(TAB, "> $ML_ETC_DIR/crontab/$USER") || 
 	(&Warn("cannot open $ML_ETC_DIR/crontab/$USER"), return);
@@ -1314,20 +1595,63 @@ sub GenCrontab
 }
 
 
-sub Repl
+sub RemoveMember
 {
-    local($member, $file) = @_;
+    local($file, $addr) = @_;
+    &CtlAddrList("bye", $file, $addr);
+}
+
+
+sub CtlAddrList
+{
+    local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
+    local($found, $buf, $line, $sumbuf);
      
     open(F, $file)           || (&Warn("cannot open $file"), return 0);
     open(NEW, "> $file.new") || (&Warn("cannot open $file.new"), return 0);
     select(NEW); $| = 1; select(STDOUT);
 
     while (<F>) {
-	/^$member/ && $found++;
-	s/^\#\s*$member/\#\#BYE $member/i; # off;
-	s/^$member/\#\#BYE $member/i;
-	print NEW $_;
+	chop;
+
+	if (/^\#\s*$addr/i || /^$addr/i) {
+	    $line = $_;
+	    $buf .= "\t- $_\n";
+
+	    if ($proc eq 'bye') {
+		s/^\#\s*($addr)/\#\#BYE $1/i;
+		s/^($addr)/\#\#BYE $1/i;
+	    }
+	    elsif ($proc eq 'on') {
+		s/^\#\s*($addr)/$1/;
+	    }
+	    elsif ($proc eq 'off') {
+		s/^($addr)/\# $1/i;
+	    }
+	    elsif ($proc eq 'chaddr') {
+		s/^(\#\s*)$addr/$1 $opt/i;
+		s/^$addr/$opt/i;
+	    }
+	    elsif ($proc eq 'matome' || $proc eq 'digest') {
+		$opt =~ s/\s*//g;
+		$opt =~ s/^m=//;
+		s/\s+m=\S+//g;
+		s/^(\#\s*$addr)/$1 m=$opt/i;
+		s/^($addr)/$1 m=$opt/i;
+		s/m=0\s*//;
+	    }
+
+	    $buf .= "\t+ $_\n";
+
+	    # difference buffer 
+	    if ($line ne $_) { 
+		$found++;
+		$sumbuf .= $buf;
+	    }
+	}
+
+	print NEW "$_\n";
     }
 
     close(NEW);
@@ -1339,6 +1663,9 @@ sub Repl
 		(&Warn("cannot rename $file.new $file"), return 0);
 
     chmod $mode, $file;
+
+    print $sumbuf if $sumbuf;
+
     $found;
 }
 
@@ -1349,25 +1676,51 @@ sub Mesg { print STDERR "$_[1]\n";}
 sub Conv
 {
     local($ml, $example, $out) = @_;
-    local($uid, $gid, $format);
+    local($uid, $gid, $format, $info, $ctladdr, $mail_list);
+    local($crontime) = 0;
 
     # &ApplyPolicy;
-
-    $format = $Policy{'CONTROL_ADDRESS_FORMAT'};
+    $format    = $Policy{'CONTROL_ADDRESS_FORMAT'};
 
     if ($debug) {
 	print STDERR "\tCONTROL_ADDRESS_FORMAT\t$format\n";
     }
 
-    open(EXAMPLE, $example)  || (&Warn("cannot open $example"), return 0);
+    # Case: under fml-source/drafts/
+    if ($example =~ /\/drafts\//) {
+	# English
+	if ($LANGUAGE eq 'English') {
+	    $example = "$example.en";
+	}
+	# Japanese
+	elsif ($LANGUAGE eq 'Japanese') {
+	    $example = "$example.jp";
+	}
+	else {
+	    &Log("unknown language [$Language]");
+	    return 0;
+	}
+    }
+
+    # open template
+    if (-e $example) {
+	open(EXAMPLE, $example) || 
+	    (&Warn("cannot open $example"), return 0);
+    }
+    else {
+	&Warn("cannot find template $example");
+	return 0;
+    }
+
+
     open(CF, "> $out")       ||  (&Warn("cannot open $out"), return 0);
     select(CF); $| = 1; select(STDOUT);
     
-    print STDERR "\tGenerating $out\n";
+    print STDERR "\t$out\n";
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$PERL_PATH = &search_path('perl.exe');
-	$USER = $ENV{'USERNAME'};
+	$USER = $USER || $ENV{'USERNAME'};
     }
     else {
 	$PERL_PATH = &search_path('perl');
@@ -1375,10 +1728,20 @@ sub Conv
 	$gid   = $gid || (getpwuid($<))[3];
     }
 
+    # crontab time
+    &SRand;
+    $crontime = int(rand(6)) || 0;
+
+    # $STRUCT_SOCKADDR
+    &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
+
     while (<EXAMPLE>) {
+	# default
+	$mail_list = $config{'MAIL_LIST'} || "$ml\@$DOMAIN";;
+	$ctladdr   = "$ml-ctl\@$DOMAIN";
+
 	# substitute following the policy default
 	if ($format) {
-	    # 
 	    # exception: CtlAddr == fmlserv || MAIL_LIST
 	    if ($format =~ /^(fmlserv|_ML_)$/) {
 		# aliases: remove the entry
@@ -1386,30 +1749,47 @@ sub Conv
 		    local($repl) = 
 			"\# _ML_-ctl is not used. comment out\n\# _ML_-ctl";
 		    s/^_ML_-ctl/$repl/;
+
+		    # not used
+		    $ctladdr = $NULL;
 		}
 
 		# cf file: null entry if CtlAddr == _ML_
 		if ($example =~ /cf$/ && $format eq '_ML_') {
 		    s/^(CONTROL_ADDRESS).*/$1/;
+		    $ctladdr = $NULL;
 		}
 		elsif ($example =~ /cf$/ && $format eq 'fmlserv') {
 		    s/_ML_-ctl/fmlserv/;
+		    $ctladdr = "fmlserv\@$DOMAIN";
 		}
 	    }
 	    # 
 	    # CtlAddr != fmlserv NOR _ML_
 	    else {
 		s/_ML_-ctl/$format/g;
+
+		# ctladdr
+		$ctladdr = "_ML_-ctl\@$DOMAIN";
+		$ctladdr =~ s/_ML_-ctl/$format/g;
+		$ctladdr =~ s/_ML_/$ml/g;
 	    }
 	}
 
 	# perl
 	s/_PERL_PATH_/$PERL_PATH/g;
 
+	# language
+	s/_LANGUAGE_/$LANGUAGE/g;
+
 	# config
 	s/_EXEC_DIR_/$EXEC_DIR/g;
 	s/_ML_DIR_/$ML_DIR/g;
 	s/_ML_/$ml/g;
+
+	s/_CTLADDR_/$ctladdr/g;
+	s/_MAIL_LIST_/$mail_list/g;
+
 	s/_DOMAIN_/$DOMAIN/g;
 	s/_FQDN_/$FQDN/g;
 	s/_USER_/$USER/g;
@@ -1418,6 +1798,9 @@ sub Conv
 	s/_STRUCT_SOCKADDR_/$STRUCT_SOCKADDR/g;
 	s/XXUID/$uid/g;
 	s/XXGID/$gid/g;
+
+	##
+	s/_CRON_TIME_/$crontime/g;
 
 
 	if (/dev\.null.*\@domain\.uja/) {
@@ -1430,16 +1813,20 @@ sub Conv
 
     close(EXAMPLE);
     close(CF);
+
+    print STDERR $info if $info;
 }
 
 
 sub GetTime
 {
+    local($time) = @_;
+
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
     
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time||time))[0..6];
     $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
 		   $year, $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
@@ -1452,6 +1839,8 @@ sub GetTime
     # 
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
+
+    $MailDate;
 }
 
 
@@ -1465,7 +1854,7 @@ sub FixIncludeHeader
 
     &ResetVariables;
 
-    print STDERR "\tGenerating $ML_DIR/$ml/config.h\n";
+    print STDERR "\t$ML_DIR/$ml/config.h\n";
 
     if (open(GUESS, "> $ML_DIR/$ml/config.h")) {
 	foreach $file (@include) {
@@ -1486,6 +1875,10 @@ sub FixIncludeHeader
 sub do_help
 {
     print "makefml:\n";
+    print "   SYNOPSIS: makefml command\n";
+    print "             makefml command <ML>  options\n";
+    print "             makefml <ML>::command options\n";
+    print "\n";
     print "   available commands\nt";
     print join("\n\t", (keys %MakeFmlProc));
     print "\n\n";
@@ -1572,6 +1965,10 @@ sub do_info
 {
     print STDERR "*" x 60; print STDERR "\n";
     print STDERR "makefml Usage:\n\n";
+    print STDERR "             makefml command\n";
+    print STDERR "             makefml command <ML>  options\n";
+    print STDERR "             makefml <ML>::command options\n";
+    print STDERR "\n";
 
     printf STDERR "   makefml %-20s %s\n", "command arguments", "what";
     print STDERR "   ".("-"x57)."\n\n";
@@ -1598,10 +1995,11 @@ sub do_install
 {
     local($cmd);
 
-    $InstallMode = 1;
-
     # main proc -> here;
     &InitFmlConfig;
+
+    # initialize
+    $NOT_CHECK_ML_EXIST = 1;
 
     # do_init
     {
@@ -1609,7 +2007,7 @@ sub do_install
 
 	if (! -d $EXEC_DIR) {
 	    print "   mkdir $EXEC_DIR\n";
-	    mkdir($EXEC_DIR, 0755);		
+	    &Mkdir($EXEC_DIR, 0755);		
 	}
 
 	if (! -d $ML_DIR) {
@@ -1618,8 +2016,14 @@ sub do_install
 	}
     }
 
-    $cmd = &Query("---Install the Fml system to $CurConfig{'EXEC_DIR'}.", 
-		  "y/n", "y|n", "n");
+    # installation: -f config file 
+    if (-f $opt_f && -f $FML_CONFIG) {
+	$cmd = "y";
+    }
+    else {
+	$cmd = &Query("---Install the Fml system to $CurConfig{'EXEC_DIR'}.", 
+		      "y/n", "y|n", "n");
+    }
 
     if ($cmd ne 'y') {
 	print "STOP. (DO NOT INSTALLED)\n";
@@ -1669,19 +2073,43 @@ sub do_install
 	&MakeWritableDir($ML_ETC_DIR);
     }
 
+    # backup temlate files when RE-INSTALLATION
+    if (-d "$EXEC_DIR/drafts") {
+	local($d, $f);
+
+	$d = "$EXEC_DIR/drafts";
+	opendir(DIRD, $d) || &Warn("cannot opendir $d");
+
+	print STDERR "Back-up\'ing templates in $d ...\n";
+
+	for $f (readdir(DIRD)) {
+	    next if $f =~ /^\./;
+	    next if $f =~ /\.bak$/i;	# /i for NT4.
+
+	    $f = "$d/$f";
+	    if (-f $f) { 
+		&Copy($f, "$f.bak");
+	    }
+	}
+	closedir(DIRD);
+    }
+
+
     # $EXEC_DIR/sbin/install.sh is NOT yet installed 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	&Log("makefml windows NT4 mode");
-	print "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR\n";
-	system "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR";
+	print "perl sys/WINDOWS_NT4/ntinstall.pl $EXEC_DIR\n";
+	system "perl sys/WINDOWS_NT4/ntinstall.pl $EXEC_DIR";
 
-	&Conv("nfml", "sys/arch/WINDOWS_NT4/makefml.cmd", 
+	# What is "nfml" ??? :D < fukachan@fml.org 
+	&Conv("nfml", "sys/WINDOWS_NT4/makefml.cmd", 
 	      "$EXEC_DIR/makefml.cmd");
     }
     elsif (-f "sbin/install.sh") {
 	$SH = $ENV{'SH'} || "/bin/sh";
 	system "$SH ./sbin/install.sh $EXEC_DIR";
 	eval symlink($CONFIG_DIR, "$EXEC_DIR/Configurations");
+	&main'Warn($@) if $@; #';
     }
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
@@ -1703,8 +2131,8 @@ sub do_install
     # &FYIPolicy;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR ne "METAINFO") {
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/makefml.pl";
 	&PopFmlSetUp;
     }
 }
@@ -1714,7 +2142,7 @@ sub do_setq
 {
     #print STDERR "setq \$Config'$_[0] = '$_[1]';\n"  if $debug;;
     eval("\$Config'$_[0] = '$_[1]';");
-    print "$@\n--@_\n" if $@;
+    &main'Warn($@) if $@; #';
 }
 
 
@@ -1768,19 +2196,7 @@ sub do_newml
 	return;
     }
 
-    if ($< == 0) {
-	&Log("Error: makefml::newml you should not run newml as root.");
-
-	print "************************* WARNING *************************\n";
-	print "\n";
-	print "    YOU WILL OPERATE A MAILING LIST as ROOT?\n";
-	print "    IT IS VERY DANGEROUS!\n";
-	print "    YOU SHOULD RUN MAILING LIST AS A NON-PRIVILEGED USER\n";
-	print "\n";
-	print "***********************************************************\n";
-	sleep 10;
-    }
-
+    if ($< == 0) { &WarnYourAreRoot;}
 
     print "---Creating $ml mailing list\n";
 
@@ -1788,6 +2204,8 @@ sub do_newml
 
     &GenerateDirectory($ml);
     &ResetVariables;
+
+    print STDERR "---Generting configuration examples.\n";
 
     ### cf file; 
     # &SetWritableUmask; &SetPublicUmask;
@@ -1804,7 +2222,15 @@ sub do_newml
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
 
 	# conversion here; since cf/config can be overwrittern 
-	&OutPutLocalConfig(*MAKE_FML);
+	# 1998/04/26 removes here
+	if (! &Grep("^LOCAL_CONFIG", "$ML_DIR/$ml/cf")) {
+	    &OutPutLocalConfig(*MAKE_FML);
+	}
+
+	# cf template's LOCAL_CONFIG
+	# print CF $CF_TEMPLATE_LOCAL_CONFIG;
+	# print CF "\n";
+
 	close(CF);
     }
     else {
@@ -1827,11 +2253,13 @@ sub do_newml
     &ResetVariables;
     &SetPublicUmask;
 
-
     # include file is public readable;
     # why for () fails?;
     &Conv($ml, "$EXEC_DIR/etc/makefml/include", "$ML_DIR/$ml/include");
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/include-mead", 
+	  "$ML_DIR/$ml/include-mead");
+
     &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
     &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
 
@@ -1845,28 +2273,16 @@ sub do_newml
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
     # drafts -> help,deny,guide,objective
-    # Japanese;
-    if ($LANGUAGE eq 'Japanese') {
-	&Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
-	&Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
-	&Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
-	&Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
-	&Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
-	&Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    
-    }
-    # English;
-    else {
-	&Conv($ml, "$EXEC_DIR/drafts/help.English", "$ML_DIR/$ml/help");
-	&Conv($ml, "$EXEC_DIR/drafts/help-admin.English", 
-	      "$ML_DIR/$ml/help-admin");
-	&Conv($ml, "$EXEC_DIR/drafts/deny.English", "$ML_DIR/$ml/deny");
-	&Conv($ml, "$EXEC_DIR/drafts/guide.English", "$ML_DIR/$ml/guide");
-	&Conv($ml, "$EXEC_DIR/drafts/welcome.English", "$ML_DIR/$ml/welcome");
-	&Conv($ml, "$EXEC_DIR/drafts/confirm.English", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/drafts/objective.English", 
-	      "$ML_DIR/$ml/objective");
-    }
+    &Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
+    &Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
+    &Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
+    &Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
+    &Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
+    &Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
+    &Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    
+
+    # qmail setup
+    &QmailSetUp($ml);
 
     # here backed to the writable bit == 077 or 007
     &SetWritableUmask;
@@ -1878,25 +2294,122 @@ sub do_newml
 		  "$ML_DIR/$ml/cf", "$ML_DIR/$ml/config.ph");
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR eq "METAINFO") {
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/metainfo.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/metainfo.pl";
 	&SetUpForMetaInfoSendmail($ml);
     }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/makefml.pl";
 	&PopFmlInputPasswd($ml);
     }
 
     # print message;
     # the last info
-    print "\n\n   Please see several examples in $ML_DIR/$ml\n\n";
-    print "Here is an example of aliases to set.\n";
+    print "\n";
+    print "-" x 60;
+    print "\n*** Please see several examples in $ML_DIR/$ml\n";
+    print "*** Here is an example of aliases to set.\n\n";
     &Cat("$ML_DIR/$ml/aliases"); 
     print "\n";
 
     # always cf is newer than config.ph (against manual edit check)
     &Touch("$ML_DIR/$ml/cf");
+
+    # permission check only on UNIX's
+    &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
+}
+
+
+sub do_qmail_setup
+{
+    local($ml) = @_;
+    local($cf, $local_config, $config, @config, %config);
+
+    if (! $ml) {
+	&Log("Error: makefml::newml ML is not defined");
+
+	&Debug("*** Error: no arguments ***");
+	&Debug("Please define ML(mailing-list) arguments");
+	&Debug("\n\tmakefml newml ML\n");
+	return;
+    }
+
+    &QmailSetUp;
+}
+
+
+sub QmailSetUp
+{
+    local($ml) = @_;
+    &ResetVariables;
+
+    # directory
+    local($mf) = "$EXEC_DIR/etc/makefml";
+    local($qmail_dir, $qmail_alias_dir, $qmail_users_dir);
+    $qmail_dir = "$ML_ETC_DIR/qmail";
+    $qmail_alias_dir = "$ML_ETC_DIR/qmail/alias";
+    $qmail_users_dir = "$ML_ETC_DIR/qmail/users";
+
+    # direcotries
+    for ($qmail_dir, $qmail_alias_dir, $qmail_users_dir) {
+	if ($GroupWritable eq 'fmlserv') {
+	    &Mkdir($_, 0775) unless -d $_;
+	}
+	else {
+	    &Mkdir($_, 0755) unless -d $_;
+	}
+    }
+
+    # setmask
+    umask(022);
+
+    # Generating etc/.qmail*
+    &Conv($ml, "$mf/dot-qmail", "$qmail_alias_dir/.qmail-$ml");
+    &Conv($ml, "$mf/dot-qmail-ctl", "$qmail_alias_dir/.qmail-$ml-ctl");
+    &Conv($ml, "$mf/dot-qmail-default", "$qmail_alias_dir/.qmail-$ml-default");
+
+    print STDERR "\t$qmail_alias_dir/.qmail-$ml-admin\n";
+    &Write2($USER, "$qmail_alias_dir/.qmail-$ml-admin");
+
+    print STDERR "\t$qmail_alias_dir/.qmail-$ml-request\n";
+    &Write2($USER, "$qmail_alias_dir/.qmail-$ml-request");
+
+    # WINDOWS_NT4
+    if ((!$HAS_GETPWUID) && (!$HAS_GETPWGID)) {
+	print STDERR "On NT4, we do not gerenate qmail/users/assign.\n";
+	return $NULL;
+    }
+
+
+    # /var/qmail/users/assign
+    ($GroupWritable eq 'fmlserv') ? umask(002) : umask(022);
+    if (! &Grep("\\+:$USER", "$qmail_users_dir/assign")) {
+	print STDERR "\t$qmail_users_dir/assign\n";
+
+	local($uid, $gid);
+	$uid = (getpwuid($<))[2] || 65535;
+	$gid = (getpwuid($<))[3] || 65535;
+
+	open(IN, "$qmail_users_dir/assign") || 
+	    &Log("cannot open $qmail_users_dir/assign");
+	open(OUT, "> $qmail_users_dir/assign.new") || 
+	    	    &Log("cannot open $qmail_users_dir/assign.new");
+	select(OUT); $| = 1; select(STDOUT);
+
+	while (<IN>) {
+	    next if /^\.$/;
+	    print OUT $_;
+	}
+
+	print OUT "+:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	print OUT ".\n";
+	close(OUT);
+	close(IN);
+
+	rename("$qmail_users_dir/assign.new", "$qmail_users_dir/assign")
+	    || &Log("cannot rename assign.new assign");
+    }
 }
 
 
@@ -1908,7 +2421,7 @@ sub do_test
     print "---Testing $ml mailing list ... \n";
 
     &ResetVariables;
-    &GetTime;
+    &GetTime(time);
 
     local($input, $exec, $dir);
     $input = "$EXEC_DIR/bin/emumail.pl";
@@ -1916,9 +2429,18 @@ sub do_test
     $dir   = "$ML_DIR/$ml";
 
     chdir $dir || die("cannot chdir ML directory[$dir]\n");
-    $SYSTEM_ARGV = "$input|$exec $dir -d";
+    $SYSTEM_ARGV_IN  = $input;
+    $SYSTEM_ARGV_OUT = "$exec $dir $EXEC_DIR -d";
+    $SYSTEM_ARGV_QUERY_INPUT = 1;
 
-    print STDERR "test() { $SYSTEM_ARGV }\n" if $debug;
+    local($r);
+    $r = &Query("Do you test command mode?", "y/n", "y|n", "n");
+
+    if ($r eq 'y') {
+	$SYSTEM_ARGV_OUT .= " --ctladdr";
+    }
+
+   print STDERR "test() { $SYSTEM_ARGV }\n" if $debug;
 }
 
 
@@ -1935,6 +2457,18 @@ sub GetCF
     $cf_template = "$EXEC_DIR/etc/makefml/cf";
     open(CFTMP, $cf_template) || die ("cannot open cf template[$cf_template]");
     while (<CFTMP>) {
+	if (/^LOCAL_CONFIG/ .. eof) {
+	    next if /^LOCAL_CONFIG/;
+	    next if /^\# YOU CAN EDIT MANUALLY AFTER HERE/;
+	    next if /^\# configured by \S+makefml/;
+
+	    # skip the first null lines
+	    next if (!$CF_TEMPLATE_LOCAL_CONFIG) && /^\s*$/;
+
+	    $CF_TEMPLATE_LOCAL_CONFIG .= $_;
+	    next;
+	}
+
 	chop;
 
 	if (/^\#/ || /^\s*$/) {
@@ -1946,6 +2480,9 @@ sub GetCF
 	}
     }
     close(CFTMP);
+
+    # local_config defined in cf_template
+    $local_config .= $CF_TEMPLATE_LOCAL_CONFIG if $CF_TEMPLATE_LOCAL_CONFIG;
 
     # set up a buffer in which we eval the current cf
     undef $evalbuf;
@@ -1991,18 +2528,18 @@ sub GetCF
 
     # set up $evalbuf
     eval($evalbuf);
-    print $@ if $@;
+    &main'Warn($@) if $@; #';
 
     # set local_config -> %MAKE_FML;
     # print $local_config if $debug;
     eval($local_config);
-    print $@ if $@;
+    &main'Warn($@) if $@; #';
 
     # CFVerion 2 -> 3; Backward Compatilitity 
     if (!$config{"CFVersion"} || 
 	$config{"CFVersion"} < 3 ||
 	$COMPAT_CF2) {
-	print STDERR "   (config.ph; connvert \$CFVersion 2 -> 3)\n\n";
+	print STDERR "   (config.ph; convert \$CFVersion 2 -> 3)\n";
 	&Log("makefml::config convert config.ph::\$CFVersion 2 -> 3");
 	&ConvertCF2to3(*config, *MAKE_FML);
     }
@@ -2010,8 +2547,8 @@ sub GetCF
 	print STDERR "   (config.ph; \$CFVersion $config{'CFVersion'})\n\n";
     }
 
-    if ($config{"CFVersion"} < 3.1) {
-	print STDERR "   (config.ph; connvert \$CFVersion 3 -> 3.1)\n\n";
+    if ($config{"CFVersion"} < 3.2) {
+	print STDERR "   (config.ph; convert \$CFVersion -> 3.2)\n\n";
 	&ConvertCF3to3_1(*config, *MAKE_FML);
     }
 }
@@ -2027,7 +2564,7 @@ sub do_pgp
     &GetCF($cf, $ml, *config, *cur_config); 
 
     $ENV{'PGPPATH'} = $cur_config{'PGP_PATH'};
-    &MkDirHier($cur_config{'PGP_PATH'});
+    &MkDirHier($cur_config{'PGP_PATH'}, 0700);
 
     $| = 1;
     print "\n--- PGP BEGIN ---\n";
@@ -2045,47 +2582,60 @@ sub do_pgp
 }
 
 
+sub MkDir { &Mkdir(@_);}
 sub Mkdir
 {
     &Log("makefml::mkdir $_[0]");
 
-    $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
+    if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
+    &MkDirHier($_[0], $USE_FML_WITH_FMLSERV ? 0770 : 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
 }
 
-
 sub MkDirHier
 {
-    local($dir) = @_;
-    local($d);
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
 
-    &Log("makefml::mkdirhier $_[0]");
+    while ($_[0] =~ m:$pat:go) {
+	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
 
-    for (split(/\//, $dir)) {
-	$d .= "/$_";
-	$d =~ s#//#/#g;
-	if (! -d $d) {
-	    print STDERR "making directory $d ...\n";
-	    &Mkdir($d);
+	if ($` ne "" && !-d $`) {
+	    mkdir($`, $_[1] || 0777) || do {
+		&Log("cannot mkdir <$`>: $!"); 
+		return 0;
+	    };
 	}
-    } 
+    }
+
+    1;
 }
 
 
-sub do_edit
+sub do_config_template
 {
-    local($ml) = @_;
-    local($cf, $local_config, $config, @config, %config);
+    local($ml)     = '@';
+    local($dir)    = "$ML_DIR/$ml";
+    local($org_cf) = "$EXEC_DIR/etc/makefml/cf";
+    local($tmp_cf) = "$dir/cf";
 
-    $editor = $ENV{'EDITOR'} || "vi";
+    # make $ML_DIR/@ (this name MUST NOT EXIST)
+    -d $dir || &Mkdir($dir);
 
-    print STDERR "\n\t$editor $ML_DIR/$ml/config.ph\n\n";
-    &Log("makefml::edit $editor $ML_DIR/$ml/config.ph");
+    $UnderConfigTemplate = 1;
 
-    system "$editor $ML_DIR/$ml/config.ph";
+    # reset the current $EXEC_DIR/etc/makefml/cf to $ML_DIR/@/cf
+    unlink $tmp_cf;
+    &Copy($org_cf,  $tmp_cf);
 
-    &Log("makefml::edit operation ends");
+    &do_config($ml);
+
+    &Copy($tmp_cf, $org_cf);
+    $UnderConfigTemplate = 0;
+
+    # clean up
+    unlink $tmp_cf;
+    rmdir $dir;
 }
 
 
@@ -2093,7 +2643,7 @@ sub do_config
 {
     local($ml) = @_;
     local($cf, $local_config, $config, @config, %config);
-    local(%saved_config);
+    local(%saved_config, $t_cf, $t_configph);
 
     # start;
     print "---Configure $ml mailing list ... \n";
@@ -2104,8 +2654,13 @@ sub do_config
 
     # if config.ph is newer than cf?
     if (-f $cf && -f "$ML_DIR/$ml/config.ph") {
-	if ((stat($cf))[9] < (stat("$ML_DIR/$ml/config.ph"))[9]) {
+	$t_cf       = (stat($cf))[9];
+	$t_configph = (stat("$ML_DIR/$ml/config.ph"))[9];
+
+	if ($t_cf < $t_configph) {
 	    print "\n   *** Warning ***\n";
+	    print &GetTime($t_cf); print "\n";
+	    print &GetTime($t_configph); print "\n";
 	    print "   Hmm... \"config.ph\" is newer than \"cf\" file\n";
 	    print "   You had manually edited it, isn\'t it?\n\n";
 	    print "   \"makefml config\" overwrites config.ph.\n";
@@ -2151,9 +2706,10 @@ sub do_config
     # print $local_config;
     $eval = q%eval $local_config;%;
     eval($eval);
-    print $@ if $@;
+    &main'Warn($@) if $@; #';
 
-    if (open(CF, "> $cf")) {
+    if (open(CF, ">> $cf")) {
+	close(CF);
 	&SaveCF($cf, *config);
     }
     else {
@@ -2161,6 +2717,8 @@ sub do_config
 	&Warn("Cannot open cf[$cf]");
 	return;
     }
+
+    return if $UnderConfigTemplate;
 
     # make ml/config.ph
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
@@ -2170,6 +2728,82 @@ sub do_config
 
     # touch for (cf is newer than config.ph always when makefml works)
     &Touch($cf);
+}
+
+
+sub do_edit
+{
+    local($ml, $f) = @_;
+    local($editor, $file);
+
+    if ($ENV{'EDITOR'}) {
+	$editor = $ENV{'EDITOR'} || "vi";
+    }
+    else {
+	print "I cannot find EDITOR (Environment variable).\n";
+	print "Editor you use(e.g. mule, ng, vi, ed ... default \"vi\") [vi] ";
+	$editor = &GetString;
+    }
+
+    $editor = $editor || $ENV{'EDITOR'} || "vi";
+    $file   = $f ? "$ML_DIR/$ml/$f" : "$ML_DIR/$ml/config.ph";
+
+    print STDERR "\n\t$editor $file\n\n";
+    &Log("makefml::edit $editor $file");
+
+    system "$editor $file";
+    print STDERR "\n\t$editor $file\n\n";
+
+    &Log("makefml::edit operation ends");
+}
+
+
+sub do_edit_template
+{
+    local($f) = @_;
+    local($editor, $file, @dir, @file);
+
+    @dir = ("$EXEC_DIR/drafts", "$EXEC_DIR/etc/makefml");
+
+    undef $file; for (@dir) { if (-f "$_/$f") { $file = "$_/$f";}}
+    if (! $file) {
+	&Log("makefml::edit_template cannot find $f");
+
+	print "\nUsage: makefml edit-template TEMPLATE\n";
+	print "   Avaialbe TEMPLATE:\n\n";
+
+	for (@dir) {
+	    if (opendir(DIRD, $_)) {
+		for (readdir(DIRD)) {
+		    next if /^\./;
+		    print "\t$_\n";
+		}
+		closedir(DIRD);
+	    }
+	}
+	print "\n";
+	return $NULL;
+    }
+
+
+    if ($ENV{'EDITOR'}) {
+	$editor = $ENV{'EDITOR'} || "vi";
+    }
+    else {
+	print "I cannot find EDITOR (Environment variable).\n";
+	print "Editor you use(e.g. mule, ng, vi, ed ... default \"vi\") [vi] ";
+	$editor = &GetString;
+    }
+
+    $editor = $editor || $ENV{'EDITOR'} || "vi";
+
+    print STDERR "\n\t$editor $file\n\n";
+    &Log("makefml::edit $editor $file");
+
+    system "$editor $file";
+    print STDERR "\n\t$editor $file\n\n";
+
+    &Log("makefml::edit_template operation ends");
 }
 
 
@@ -2191,10 +2825,13 @@ sub EachLevelQuery
 	# required?
 	# &Log("makefml::config menu $top_level");
 
-	&EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP);
+	&EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP, *query);
 
 	if ($clear_prog) {
-	    system "$clear_prog" if $TouchCount > 0; $TouchCount++;
+	    if (! $debug) {
+		system "$clear_prog" if $TouchCount > 0; $TouchCount++;
+	    }
+
 	    print "   ".("*" x 60); print "\n";
 	    print "\n";
 	    print "\t<<< makefml --- FML Configuration Interface --- >>>\n";
@@ -2203,6 +2840,8 @@ sub EachLevelQuery
 	else {
 	    print "   ".("*" x 60); print "\n";
 	}
+
+	print $WarnBuf if $WarnBuf; undef $WarnBuf;
 
 	print "   [$Depth $top_level]\n\n" if $debug;
 	print $MENU{$top_level};
@@ -2215,7 +2854,7 @@ sub EachLevelQuery
 	if ($query{"type"} eq "y-or-n") {
 	    print "--query y/n\n";
 	    $v   = $CONFIG{$top_level};
-	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;");
+	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;") if $debug;
 
 	    if ($v) {
 		$config{$v} = $r eq "y" ? 1 : 0;
@@ -2229,7 +2868,7 @@ sub EachLevelQuery
 	elsif ($query{"type"} eq "reverse-y-or-n") {
 	    print "--query y/n\n";
 	    $v   = $CONFIG{$top_level};
-	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;");
+	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;") if $debug;
 
 	    if ($v) {
 		$config{$v} = $r eq "y" ? 0 : 1;
@@ -2240,16 +2879,41 @@ sub EachLevelQuery
 
 	    last;
 	}
-	elsif ($query{"type"} eq "select" && ($r == 0)) {
+	elsif ($query{"type"} eq "string") {
+	    print "--query y/n\n";
+
+	    $v   = $CONFIG{$top_level};
+	    $config{$v} = $r;
+	    &Debug("string input> $v => $r");
+
+	    last;
+	}
+	elsif ($query{"type"} eq "number") {
+	    print "--query y/n\n";
+
+	    $v   = $CONFIG{$top_level};
+	    $config{$v} = $r;
+	    &Debug("string input> $v => $r");
+
+	    last;
+	}
+	elsif (($r == 0) && 
+	       ($query{"type"} eq "select" ||
+		$query{"type"} eq "select-direct-map")) {
 	    last;
 	}
 	else {
 	    $lvl = $BIND{$top_level, $r};
 
 	    # check in the current level
+	    # set the value
 	    if ($v = $CONFIG{$top_level}) {
 		$config{$v} = 
 		    $MAP{$top_level, $r} ne "" ? $MAP{$top_level, $r} : $r;
+
+		# $NULL => ""
+		$config{$v} =~ s/\$NULL//; 
+
 		undef $config{$v} if $config{$v} eq "_NULL_";
 	    }
 	    else {
@@ -2268,8 +2932,21 @@ sub SaveCF
     local(%uniq);
 
     # fix
-    $config{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
-    $config{'STRUCT_SOCKADDR'}          = $STRUCT_SOCKADDR;
+    if ($UnderConfigTemplate) {
+	; # cf template replacement should not be done.
+    }
+    else {
+	$config{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+
+	if ($config{'STRUCT_SOCKADDR'}) {
+	    print STDERR "---use STRUCT_SOCKADDR (cache)\n" if $debug;
+	}
+	else {
+	    print STDERR "---use STRUCT_SOCKADDR (no cache)\n" if $debug;
+	    &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
+	    $config{'STRUCT_SOCKADDR'} = $STRUCT_SOCKADDR;
+	}
+    }
 
     if (open(CF, "> $cf")) {
 	select(CF); $| = 1; select(STDOUT);
@@ -2278,7 +2955,9 @@ sub SaveCF
 	# undef $config{'NON_PORTABILITY'};
 	# undef $config{"COMPAT_$OS_TYPE"};
 
-	print CF "\# $MailDate(configured by $0)\n\n";
+	if (! $UnderConfigTemplate) {
+	    print CF "\# $MailDate(configured by $0)\n\n";
+	}
 
 	# configurable variable <=> %config entries;
 	push(@config, keys %config);
@@ -2286,7 +2965,7 @@ sub SaveCF
 
 	for (@ConfigOrder, @config) {
 	    if (/^\#/ || /^\s*$/) {
-		printf CF "$_\n";
+		print CF "$_\n";
 		next;
 	    }
 
@@ -2310,10 +2989,9 @@ sub SaveCF
 	# $MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 
 	&OutPutLocalConfig(*MAKE_FML);
-
 	close(CF);
 
-	print "Configuration is saved in $cf\n";
+	print "---Configuration is saved in $cf\n";
     }
 }
 
@@ -2327,6 +3005,17 @@ sub Uniq
 	$uniq{$_} = 1;
     }
     @config = @new;
+}
+
+sub Grep
+{
+    local($key, $file) = @_;
+
+    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<IN>) { return $_ if /$key/i;}
+    close(IN);
+
+    $NULL;
 }
 
 sub PerlModuleExistP
@@ -2357,33 +3046,59 @@ sub MakeConfigPH
 	return "";
     }
 
-    print STDERR "Generating $config_ph from $cf ...\n";
+    print STDERR "\n";
+    print STDERR "   config.ph($config_ph):\n";
+    print STDERR "\t$cf  ->  config.ph ... ";
 
     for ($config, $manifest, $cf) { # config.ph may not exist; 
 	if (! -e $_) {
 	    print STDERR "***Error: I Cannot find $_, Stop.\n";
-	    return 0;
+	    return $NULL;
 	}
     }
 
     if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
 	&Log("Error: cannot exec $config -m $manifest $cf");
 	&Warn("cannot exec $config -m $manifest $cf");
-	return 0;
+	return $NULL;
     }
 
-    open(SAVE, "> $config_ph") || (&Log("cannot write $config_ph"), return 0);
-    select(SAVE); $| = 1; select(STDOUT);
+    # backup
+    local($back_up) = 0;
+    if (-f $config_ph) {
+	if (&Copy($config_ph, "$config_ph.bak")) { $back_up = 1;}
+	if ($COMPAT_ARCH eq "WINDOWS_NT4") { unlink $config_ph;}
+    }
 
-    # preamble
-    print SAVE $preamble if $preamble;
+    # write
+    if (open(SAVE, "> $config_ph")) {
+	select(SAVE); $| = 1; select(STDOUT);
 
-    while (<EXEC_CF>) { print SAVE $_;}
+	# preamble
+	print SAVE $preamble if $preamble;
 
-    close(SAVE);
-    close(EXEC_CF);
+	while (<EXEC_CF>) { print SAVE $_;}
+	close(EXEC_CF);
 
-    print STDERR "Done.\n\n";
+	close(SAVE);
+    }
+    else {
+	&Log("cannot write $config_ph");
+	return $NULL;
+    }
+
+    print STDERR "Done.\n";
+    print STDERR "\t(back-up is saved in $config_ph.bak)\n" if $back_up;
+
+    # warning
+    if (-z $config_ph) {
+	print STDERR "\n*** Error ***\n$config_ph is size 0.\n\n";
+
+	if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	    print STDERR "failed:";
+	    print STDERR "   $perl $config -m $manifest $cf > $config_ph\n\n";
+	}
+    }
 }
 
 
@@ -2393,6 +3108,7 @@ sub do_addadmin
     &do_adduser(@_);
     $AdminMode = 0;
 }
+
 
 sub do_byeadmin
 {
@@ -2441,25 +3157,25 @@ sub do_adduser
     }
 
     # add 
-    local($file);
+    local($fn, $f);
     local($acm) = $ADDR_CHECK_MAX;
     $ADDR_CHECK_MAX = 10;
 
-    for (@files) {
-	$file = $_;
-	$file =~ s#.*/(\S+)#$1#;
+    for $f (@files) {
+	$fn = $f;
+	$fn =~ s#.*/(\S+)#$1#;
 
 	# file and member check 
-	&Touch($file) if ! -f $file;
-	if (&CheckMember($member, $file)) {
-	    &Debug("   WARN: skip $file since $member is already member.");
-	    &Log("skip $file since $member is already member");
+	&Touch($f) if ! -f $f;
+	if (&CheckMember($member, $f)) {
+	    &Debug("   WARN: skip $fn since $member is already member.");
+	    &Log("skip $fn since $member is already member");
 	    next;
 	}
 
-	&Log("makefml::$proc append $member to $file");
-	print "Append $member to $_\n" if $debug;
-	&AppendString2File($member, $_);
+	&Log("makefml::$proc append $member to $fn");
+	print "Append $member to $fn\n" if $debug;
+	&AppendString2File($member, $f);
     }
 
     $ADDR_CHECK_MAX = $acm;
@@ -2507,12 +3223,88 @@ sub do_byeuser
     }
 
     # delete 
-    local($file);
+    local($file, $found);
     for $file (@files) {
-	if (&Repl($member, $file)) {
+	if ($found = &RemoveMember($file, $member)) {
 	    $file =~ s#.*/(\S+)#$1#;
 	    &Log("makefml::$proc delete $member in $file");
 	    print "Delete $member in $file\n" if $debug;
+
+	    # notify if plural addresses (> 1) has been changed
+	    print "\tRemoved $found addrs.\n" if $found > 1;
+	}
+    }
+}
+
+# on, off, chaddr
+sub do_off    { &do_ctladdr(@_);}
+sub do_on     { &do_ctladdr(@_);}
+sub do_chaddr { &do_ctladdr(@_);}
+sub do_matome { &do_ctladdr(@_);}
+sub do_digest { &do_ctladdr(@_);}
+sub do_ctladdr
+{
+    local($ml, $addr, $opt) = @_;
+    local(@files);
+    local($proc) = $fp;
+
+    # canonicalize
+    $proc =~ s/do_//;
+    $proc =~ tr/A-Z/a-z/; # lower
+
+    if (! $ml || !$addr) {
+	&Log("Error: makefml::$proc invalid arguments");
+	&Debug("*** Syntax Error: the number of arguments ***");
+	&Debug("\n\tmakefml $proc ML address\n");
+	return;
+    }
+
+    if ($proc eq 'chaddr' || $proc eq 'matome' || $proc eq 'digest') {
+	if ($opt eq '') { # may be "matome 0"
+	    &Log("Error: makefml::$proc has no option");
+	    &Debug("*** Syntax Error: makefml::$proc has no option ***");
+	    return;
+	}
+    }
+
+    if ($proc eq 'chaddr' && $config{'USE_MEMBER_NAME'}) {
+	&Debug("*** Error ***");
+	&Debug("*** If you use \$USE_MEMBER_NAME, please use");
+	&Debug("*** \"makefml command $ml $proc addr new-addr\"");
+    }
+
+    print "---$proc $addr in $ml mailing list\n";
+
+    &GetCF($cf, $ml, *config, *cur_config); 
+
+    &SetWritableUmask;
+
+    # files to change
+    push(@files, ($cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives"));
+
+    &ResetVariables;
+
+    # mkdir ML Directory
+    if (! -d "$ML_DIR/$ml") {
+	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
+	print "***Error: $ml ML NOT CREATED\n";
+	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
+	return;
+    }
+
+    # delete 
+    local($file, $found);
+    for $file (@files) {
+	if ($found = &CtlAddrList($proc, $file, $addr, $opt)) {
+	    $file =~ s#.*/(\S+)#$1#;
+	    &Log("makefml::$proc delete $addr in $file");
+	    print "Delete $addr in $file\n" if $debug;
+
+	    # notify if plural addresses (> 1) has been changed
+	    print "\tChanged $found addrs.\n" if $found > 1;
+	}
+	else {
+	    print "\t*** Error: Nothing has been changed. ***\n";
 	}
     }
 }
@@ -2567,8 +3359,8 @@ sub do_popfml
     &ResetVariables;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/makefml.pl";
 	&PopFmlSetUp;
     }
     else {
@@ -2582,8 +3374,8 @@ sub do_pop_passwd
     &ResetVariables;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
-	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/sys/$COMPAT_ARCH/makefml.pl";
 	&PopFmlInputPasswd($ml);
     }
     else {
@@ -2611,6 +3403,77 @@ sub do_lock
     print "   Please interrupt this by CONTROL-C to stop this lock\n";
 
     sleep 3600;
+}
+
+
+sub do_command
+{
+    local($ml, $member, @arg) = @_;
+    local(@files);
+    local($proc) = $fp;
+    $proc =~ s/do_//;
+
+    if (! $ml || !$member) {
+	&Log("Error: makefml::$proc invalid arguments");
+	&Debug("*** Syntax Error: the number of arguments");
+	&Debug("\n\tmakefml $proc ML address command-strings");
+	&Debug("\te.g.");
+	&Debug("\tmakefml $proc ML address mget last:100 mp");
+	return;
+    }
+
+    if ($member !~ /\@/) {
+	&Log("Error: makefml::$proc invalid arguments");
+	&Debug("*** Syntax Error: command ML \"E-Mail Address\" ...");
+	return;	
+    } 
+
+    if (grep(/admin|approve/, @arg)) {
+	&Log("Error: makefml::$proc does not emulate 'admin' command");
+	&Debug("*** Syntax Error: $proc doesn't emulate 'admin' command");
+	&Debug("***               since authentication is requried");
+	return;
+    }
+
+    local($command);
+    $command =  "$EXEC_DIR/fml.pl $ML_DIR/$ml $EXEC_DIR --ctladdr --makefml";
+
+    # "makefml -m command" send a mail to notify the result to a user.
+    if (! $MailNotify) { $command .= " --disablenotify";}
+
+    print STDERR "--- mail to input ---\n";
+    print STDERR "From: $member\n";
+    print STDERR "Subject: @arg \n";
+    print STDERR "\n@arg\n";
+    print STDERR "\n";
+    print STDERR "--- injected to ---\n";
+    print STDERR "> \"| $command \"\n";
+
+    open(COM, "| $command") || die("cannot exec [$command]\n");
+    select(COM); $| = 1; select(STDOUT);
+    print COM "Message-Id: <$$.makefml\@$FQDN>\n";
+    print COM "From: $member\n";
+    print COM "Subject: @arg \n\n";
+    print COM "@arg\n";
+    close(COM);
+}
+
+
+sub WarnYourAreRoot
+{
+    local($f) = $fp;
+    $f =~ s/do_//;
+
+    &Log("Error: makefml::$f you should not run makefml as root.");
+
+    print "************************* WARNING *************************\n";
+    print "\n";
+    print "    YOU WILL OPERATE A MAILING LIST as ROOT?\n";
+    print "    IT IS VERY DANGEROUS!\n";
+    print "    YOU SHOULD RUN MAILING LIST AS A NON-PRIVILEGED USER\n";
+    print "\n";
+    print "***********************************************************\n";
+    sleep 10;
 }
 
 
@@ -2745,12 +3608,12 @@ sub GetGID
 sub MakeWritableDir
 {
     if ($GroupWritable) {	# for backup files
-	-d $_[0] || mkdir($_[0], 0775);
+	-d $_[0] || &Mkdir($_[0], 0775);
 	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
-	-d $_[0] || mkdir($_[0], 0755);
+	-d $_[0] || &Mkdir($_[0], 0755);
 	&SetGidBit($_[0]);
     }
 }
@@ -2761,12 +3624,12 @@ sub MakeDir
     print "---Make Directory ($_[0])\t(UID=$<$info)\n";
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
-	-d $_[0] || mkdir($_[0], 0775);
+	-d $_[0] || &Mkdir($_[0], 0775);
 	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
-	-d $_[0] || mkdir($_[0], 0755);
+	-d $_[0] || &Mkdir($_[0], 0755);
 	&SetGidBit($_[0]);
     }
 }
@@ -2777,12 +3640,12 @@ sub MakeSubDir
     print "---Make Directory ($_[0])\t(UID=$<$info)\n";
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
-	-d $_[0] || mkdir($_[0], 0770);
+	-d $_[0] || &Mkdir($_[0], 0770);
 	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
-	-d $_[0] || mkdir($_[0], 0700);
+	-d $_[0] || &Mkdir($_[0], 0700);
     }
 }
 
@@ -2793,7 +3656,7 @@ sub SetGidBit
     local($mode);
 
     return if $OS_TYPE eq 'BSD44';
-    return if $CPU_TYPE_MANUFACTURER_OS =~ /netbsd|bsdi/;
+    return if $CPU_TYPE_MANUFACTURER_OS =~ /netbsd|bsdi|freebsd|openbsd/;
 
     $mode = (stat($file))[2];
     $mode = $mode | 02000;
@@ -2819,6 +3682,8 @@ sub Rename
 
 #################################################################
 package dumpvar;
+
+sub Warn { &main'Warn(@_);} #';
 
 sub main'Dumpvar 
 {
@@ -2888,6 +3753,7 @@ $FH = "FLOCKDIR000";
 sub ml'Log       { &main'Log(@_);}
 sub main'FLock   { &ml'FLock(@_);}
 sub main'FUnLock { &ml'FUnLock(@_);}
+sub Warn { &main'Warn(@_);} #';
 
 sub SetFlockParam
 {
@@ -2910,12 +3776,18 @@ sub SetFlockParam
 sub FLock
 {
     local($ml, $mldir) = @_;
-    local($lockf);
+    local($lockf, $unistd);
+
+    $FH = $FH || "FLOCKDIR000";
+    $unistd = $main'UNISTD; #';
 
     $lockdir  = "$mldir/$ml/";
-    $lockdir  =~ s#$ml/$ml#$ml#;
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
-    $lockf    = $main'UNISTD ? $lockdir : "$mldir/$ml/config.ph"; #';
+
+    # why $ml/$ml -> $ml conversion? (may be historical reason)
+    # if (!-d $lockdir) { $lockdir  =~ s#$ml/$ml#$ml#;}
+
+    $lockf = $main'UNISTD ? $lockdir : ">> $DIR/lockfile"; #';
 
     &SetFlockParam;
 
@@ -2929,7 +3801,7 @@ sub FLock
 
     print STDERR "flock($FH, $LOCK_EX) for $lockdir;\n" if $debug_lock;
     eval('flock($FH, $LOCK_EX);');
-    print STDERR "\nError: $@\n" if $@;
+    &main'Warn($@) if $@; #';
 
     $FLockP{$ml}   = 1;
     $LockFile{$ml} = $FH;
@@ -2948,7 +3820,7 @@ sub FUnLock
 
     close($UFH);
     eval('flock($UFH, $LOCK_UN);');
-    print STDERR "\nError: $@\n" if $@;
+    &main'Warn($@) if $@; #';
 }
 
 
@@ -2958,20 +3830,42 @@ package v7;
 sub main'V7Lock   { &v7'MakeFml_V7Lock(@_);}
 sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
 
+sub v7'SRand      { &main'SRand(@_);}
 sub v7'Log        { &main'Log(@_);}
 sub v7'Warn       { &main'Warn(@_);}
 sub v7'WholeMail  { &main'WholeMail(@_);}
 sub v7'SetEvent   { &main'SetEvent(@_);}
 
 
+sub MkDir { &Mkdir(@_);}
 sub Mkdir
 {
-    &Log("makefml::v7::mkdir $_[0]");
+    &Log("makefml::mkdir $_[0]");
 
-    $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
+    if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
+    &MkDirHier($_[0], $USE_FML_WITH_FMLSERV ? 0770 : 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
 }
+
+sub MkDirHier
+{
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
+
+    while ($_[0] =~ m:$pat:go) {
+	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
+
+	if ($` ne "" && !-d $`) {
+	    mkdir($`, $_[1] || 0777) || do {
+		&Log("cannot mkdir $`: $!"); 
+		return 0;
+	    };
+	}
+    }
+
+    1;
+}
+
 
 sub LoadConfigPH
 {
@@ -2980,28 +3874,36 @@ sub LoadConfigPH
     # reset variables used in liblock.pl
     for (FP_VARLOG_DIR, FP_VARRUN_DIR, LOCK_FILE, MAX_TIMEOUT) {
 	eval "undef \$${_};";
+	&main'Warn($@) if $@; #';
     }
 
     # global $DIR ;
+    chop($CWD = `pwd`); # ATTENTION! ONLY ON UNIX
     $DIR = "$mldir/$ml";
     chdir $DIR;
 
     eval("do \"$mldir/$ml/config.ph\";");
     print STDERR "V7Lock::Error $@\n" if $@;
+    &main'Warn($@) if $@; #';
 
     # variable fixes
     local($s);
     for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
+	$s .= "\$$_ =~ s\#\\\\\#/\#g;\n";
 	$s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
     eval($s) || &Log("FAIL EVAL \$SPOOL_DIR ...");
+    &main'Warn($@) if $@; #';
 
     # FP-nize
     if ($LOCK_FILE !~ /$DIR/) {
 	$LOCK_FILE = "$DIR/$LOCK_FILE";
 	$LOCK_FILE =~ s#//#/#g;
+	$LOCK_FILE =~ s#\\#/#g;
     }
+
+    chdir $CWD;
 }
 
 sub MakeFml_V7Lock
@@ -3012,8 +3914,11 @@ sub MakeFml_V7Lock
 
     require 'liblock.pl';
 
-    print STDERR "LOCK_FILE     $LOCK_FILE\n";
-    print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
+    if ($debug) {
+	print STDERR "\n";
+	print STDERR "LOCK_FILE     $LOCK_FILE\n";
+	print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
+    }
 
     &V7Lock;
 
@@ -3026,7 +3931,29 @@ sub MakeFml_V7Lock
 
 sub CleanUpLockFiles
 {
-    for (keys %LockFile) { unlink $_;}
+    local($max);
+
+    for (keys %LockFile) { 
+	$max = 10;		# for each lockfile
+	$_ = $LockFile{$_};
+
+	while (-f $_ && $max-- > 0) {
+	    unlink $_;
+	    sleep 1;
+	    
+	    if (-f $_) {
+		print STDERR "Try to unlink $_\n";
+	    }
+	    else {
+		print STDERR "unlink $_\n";
+	    }
+	}
+
+	if ($max <= 0) {
+	    print STDERR "Error: cannot unlink $_, give up!\n";
+	    print STDERR "       Please remove $_ by hand, please\n";
+	}
+    }
 }
 
 sub MakeFml_V7UnLock
@@ -3045,7 +3972,20 @@ package main;
 sub TrySmtpConnect
 {
     local($host) = @_;
-    local($result, $eval, $perl5_socket_ok);
+    local($result, $eval, $perl5_socket_ok, $r);
+
+    # only the first time
+    &SetSockAddr unless $TrySmtpConnect++;
+
+    # check the previous check host, 
+    # cache is effective if probed to the same host.
+    # MUST BE FIRST TIME
+    if ($TSCHost ne $host) {
+	$TSCHost = $host;
+    }
+    elsif ($TSCResult) {
+	return $TSCResult;
+    }
 
     ### PERL 5  
     if (0 && $] =~ /^5\./) { 
@@ -3057,15 +3997,17 @@ sub TrySmtpConnect
 	; # perl 5 Socket.pm must be O.K.;
     }
     elsif ($OS_TYPE eq 'SOLARIS2' || 
-	$CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i) {
+	$CPU_TYPE_MANUFACTURER_OS =~ /solaris2|sysv4/i) {
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
 	eval $eval;
+	&Debug("TrySmtpConnect: $@") if $@;
     }
     else { # 4.4BSD (and 4.x BSD's)
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
 	eval $eval;
+	&Debug("TrySmtpConnect: $@") if $@;
     }
 
     local($pat)    = $STRUCT_SOCKADDR || 'n n a4 x8';
@@ -3075,8 +4017,8 @@ sub TrySmtpConnect
     $port          = 25 unless defined($port); # default port
 
     # Check the possibilities of Errors
-    return ($error = "Cannot resolve the IP address[$host]") unless $addrs;
-    return ($error = "Cannot resolve proto")                 unless $proto;
+    return ($TSCResult = "Cannot resolve the IP address[$host]") unless $addrs;
+    return ($TSCResult = "Cannot resolve proto")                 unless $proto;
 
     # O.K. pack parameters to a struct;
     local($target) = pack($pat, &AF_INET, $port, $addrs);
@@ -3089,7 +4031,7 @@ sub TrySmtpConnect
 	$VERBOSE_STR = 
 	    sprintf("socket(S, %s, %s, %s)", &PF_INET, &SOCK_STREAM, $proto);
 
-	return ($error = "Smtp::socket->Error[$!]");
+	return ($TSCResult = "Smtp::socket->Error[$!]");
     }
     
     if (connect(S, $target)) { 
@@ -3099,10 +4041,12 @@ sub TrySmtpConnect
     else { 
 	$VERBOSE_STR = sprintf("connect(S, %s, %s, %s, %s)\n",
 			       $pat, &AF_INET, $port, $addrs);
-	return ($error = "Smtp::connect($host)->Error[$!]");
+	return ($TSCResult = "Smtp::connect($host)->Error[$!]");
     }
 
-    $result; # success;
+    close(S);
+
+    ($TSCResult = $result); # success;
 }
 
 sub FYI
@@ -3167,6 +4111,8 @@ sub SetSockAddr
     local($ostype) = @_;
     local($r);
 
+    print STDERR "---SetSockAddr\n" if $debug;
+
     $r = &ProbeSockAddr;
 
     return if ($r eq 'connect ok');
@@ -3185,7 +4131,9 @@ sub ProbeSockAddr
     local($r);
     local($tab) = "\#probe sockaddr: ";
 
-    for ($STRUCT_SOCKADDR, "n n a4 x8", "S n a4 x8") {
+    print STDERR "---ProbeSockAddr\n" if $debug;
+
+    for ($STRUCT_SOCKADDR, "n n a4 x8", "S n a4 x8", "x C n C4 x8") {
 	next unless $_;
 	$STRUCT_SOCKADDR = $_;
 
@@ -3214,20 +4162,99 @@ sub ProbePerlVersion
 }
 
 
+sub PermCheck
+{
+    local($path) = @_;
+    local($x, $dir, @p, $hit, $buf);
+    local($mode, $uid, $gid, $owner, $group);
+
+    @p = split(/\//, $path);
+
+    undef $dir;
+    $dir = "/";
+    for $x (@p) {
+	$dir .= $dir ? "/$x" : $x;
+	$dir =~ s#^//+#/#;
+	($mode, $uid, $gid) = (stat($dir))[2,4,5];
+
+	($owner) = (getpwuid($uid))[0];
+	($group) = (getgrgid($gid))[0];
+
+	if ($mode & 0002) { 
+	    $buf .= sprintf("%-20s   %s\n", "$dir", "world writable");
+	    $hit++;
+	}
+
+	if ($mode & 0020) { 
+	    $buf .= sprintf("%-20s   %s\n", "$dir", "group($group) writable");
+	    $hit++;
+	}
+
+	if ($debug && ($mode & 0200)) { 
+	    $buf .= sprintf("%-20s   %s\n", "$dir", "owner($owner) writable");
+	    $hit++;
+	}
+    }
+
+    if ($hit) {
+	print "*** WARNING ***\n";
+	print "[$path] has invalid path directory(ies).\n";
+	print "\n$buf\n";
+	print "Latest MTA's check group writable or not in them\n";
+	print "If you permit this permission for some reason,\n";
+	print "you must need additonal settings in e.g. /etc/sendmail.cf.\n";
+	print "Please read manuals of your MTA for more details.\n";
+    }
+}
+
+
 ########################################################################
 package Menu;
 
 sub Menu'Log        { &main'Log(@_);}
+sub Warn { &main'Warn(@_);} #';
+
+sub GetManifest
+{
+    local(*MANIFEST, $mf) = @_;
+    local($key, $str);
+
+    if (open(MF, $mf)) {
+	while (<MF>) {
+	    if (/^(\S+):\s*(.*)/) { # VARIABLE NAME: DEFAULT VALUE
+		$key = $1;
+		$str = $2;
+		$MANIFEST{$key} = $str;
+		print STDERR "\$MANIFEST{$key} = $str;\n" if $debug;
+	    }
+	}
+	close(MF);
+    }
+    else {
+	&Log("GetManifest: cannot open $mf");
+    }
+}
 
 
 sub InitMenu
 {
+    local($cur_variable);
+
     (*config, *MENU, *FP, *QUERY, *NAME, *MAP, *BIND, *CONFIG) = @_;
+
+    $EXEC_DIR = $main'EXEC_DIR; #';
+    &GetManifest(*MANIFEST, "$EXEC_DIR/cf/MANIFEST");
 
     open(F, $MENU) || die($!);
     while (<F>) {
 	next if /^\#/;
-
+	
+	if (/\$MANIFEST/) {
+	    print STDERR "$_ => " if $debug;
+	    s/\$MANIFEST\{[\'"](\S+)[\'"]\}/sprintf("%s", $MANIFEST{$1})/e;
+	    print STDERR "<$_>(MANIFEST)\n" if $debug;
+	}
+	
 	if (/^==/) {
 	    &Reset;
 	    next;
@@ -3252,6 +4279,11 @@ sub InitMenu
 	    $map_p = 1;
 	    next;
 	}
+	elsif (/^=query_pat/) {
+	    &Reset;
+	    $query_pat_p = 1;
+	    next;
+	}
 	elsif (/^=query/) {
 	    &Reset;
 	    $query_p = 1;
@@ -3264,16 +4296,27 @@ sub InitMenu
 	}
 
 
+
 	if ($menu_p) {
-	    # this Name Space Global
+	    # this Name Space is Global
 	    $MenuTemplate{$hier} .= $_;
 	}
 	elsif ($query_p) {
 	    $QUERY{$hier} .= $_;
+            push(@YES_OR_NO, $cur_variable)
+                 if $cur_variable && /y-or-n/ && 
+                 (! grep(/$cur_variable/, @YES_OR_NO));
 	}
 	elsif ($config_p) {
 	    s/\s//g;
 	    $CONFIG{$hier} .= $_ if $_ !~ /^\s*$/;
+            $cur_variable = $_ if $_ !~ /^\s*$/;
+
+	    ## WHEN $cur_variable is not in $DIR/cf, set default ##
+	    ## Hmm... I should do it? NO! explict $NULL can be overwritten ##
+            ## if ((!$config{$cur_variable}) && $MANIFEST{$cur_variable}) {
+	    ##    $config{$cur_variable} = $MANIFEST{$cur_variable};
+	    ## }
 	}
 	elsif ($name_p) {
 	    next if /^\s*$/;
@@ -3285,34 +4328,44 @@ sub InitMenu
 	    $_ =~ s/^\s+//;
 	    $MAP{$hier} .= $_;
 	}
+	elsif ($query_pat_p) {
+	    $_ =~ s/^\s+//;
+	    $QUERY_PAT{$hier} .= $_;
+	}
     }
 
     close(F);
 
     for $menu (keys %MenuTemplate){
-	&EvalMenu($menu, *config, *BIND, *MENU, *COUNT, *MAP);
+	&EvalMenu($menu, *config, *BIND, *MENU, *COUNT, *MAP, *query);
     }
 }
 
 sub main'EvalMenu { &EvalMenu(@_);} #";
 sub EvalMenu
 {
-    local($menu, *config, *BIND, *MENU, *COUNT, *MAP) = @_;
+    local($menu, *config, *BIND, *MENU, *COUNT, *MAP, *query) = @_;
     local($buf);
 
     # global
     $Count = 0;
 
-    # useful config for menu (dynamic generation)
-    $SUMMARY{'REMOTE_ADMINISTRATION'} = 
-	$config{'REMOTE_ADMINISTRATION'} ? "yes" : "no";
+    ### YES/NO MAP
+    for (REMOTE_ADMINISTRATION, 
+	 PASS_ALL_FIELDS_IN_HEADER,
+	 @YES_OR_NO
+	 ) {
+	$SUMMARY{$_} = $config{$_} ? "YES" : "NO";
+    }
 
-    $SUMMARY{'SPOOLING'} = 
-	$config{'NOT_USE_SPOOL'} ? "not spooling" : "spooling";
+    ### others
+    $SUMMARY{'SPOOLING'} = $config{'NOT_USE_SPOOL'} ? "NO" : "YES";
 
     $SUMMARY{'CONTROL_ADDRESS'} = 
 	$config{'CONTROL_ADDRESS'} || "*** Command Unavailable ***";
 
+    $SUMMARY{'PASS_RECEIVED_THROUGH'} =
+	($config{'SKIP_FIELDS'} =~ /Received/i) ? "NO" : "YES";
 
     if ($config{'REWRITE_TO'} == 0) {
 	$SUMMARY{'REWRITE_TO'} = "To: is original (pass through)";
@@ -3323,6 +4376,7 @@ sub EvalMenu
     elsif ($config{'REWRITE_TO'} == 2) {
 	$SUMMARY{'REWRITE_TO'} = "To: MAIL_LIST";
     }
+
 
 
     for (split(/\n/, $MenuTemplate{$menu})) {
@@ -3336,12 +4390,18 @@ sub EvalMenu
 
     # menu evaluator
     eval("\$buf = \"$buf\";");
+    &main'Warn($@) if $@; #';
 
-    $buf =~ s/(\s)1\s*\n/$1USE\n/g;
-    $buf =~ s/(\s)0\s*\n/$1NOT USE\n/g;
+    # IF type == number, should ignore this conversion.
+    if ($query{'type'} ne 'number') {
+	# $buf =~ s/(\s)1\s*\n/$1USE\n/g;
+	# $buf =~ s/(\s)0\s*\n/$1NOT USE\n/g;
+	$buf =~ s/(\s)1(\s*\n)/${1}YES${2}/g;
+	$buf =~ s/(\s)0(\s*\n)/${1}NO${2}/g;
+    }
+
     $buf =~ s/\$DOMAINNAME/$config{'DOMAINNAME'}/g;
     $buf =~ s/\$FQDN/$config{'FQDN'}/g;
-
 
     $MENU{$menu}  = $buf;
     $COUNT{$menu} = $Count;
@@ -3357,11 +4417,11 @@ sub EvalMenu
 
 sub GenQuery
 {
-    local(*query, $s, $menu) = @_;
+    local(*query, $s, $level) = @_;
     local($type, $pat);
 
     %query = ();
-    print STDERR "GenQuery:\n$s\n" if $debug;
+    print STDERR "GenQuery::(top_level=$level)\ns=$s]\n" if $main'debug; #';
 
     for (split(/\n/, $s)) {
 	if (/(\S+):\s+(.*)\s*$/) {
@@ -3378,8 +4438,8 @@ sub GenQuery
 	$query{"pat"}     = $query{"pat"}     || "y|n";
 	$query{"default"} = $query{"default"} || "n";
     }
-    elsif ($type eq "select") {
-	$max = $COUNT{$menu} - 1;
+    elsif ($type eq "select" || $type eq "select-direct-map") {
+	$max = $COUNT{$level} - 1;
 	for (0 .. $max) { $pat .= $pat ne "" ? "|$_" : $_;}
 
 	$max  = $max == 1 ?  "0-1" : "0-$max";
@@ -3389,7 +4449,21 @@ sub GenQuery
 	$query{"pat"}     = $query{"pat"}     || $pat;
 	$query{"default"} = $query{"default"} || 0;
     }
-
+    elsif ($type eq "string") {
+	$query{"menu"}    = $query{"menu"}    || "Please input a string";
+	$query{"query"}   = $query{"query"}   || '\S+';
+	$query{"pat"}     = $query{"pat"}     || '\S+';
+	$query{"default"} = $query{"default"} || $NULL;
+    }
+    elsif ($type eq "number") {
+	$query{"menu"}    = $query{"menu"}    || "Please input a number";
+	$query{"query"}   = $query{"query"}   || 'e.g. 10 or 10K or 10M';
+	$query{"pat"}     = $query{"pat"}     || '\d+|\d+K|\d+M';
+	$query{"default"} = $query{"default"} || 0;
+    }
+    else {
+	die("GenQuery: unknown \$type\n");
+    }
 }
 
 
@@ -3397,6 +4471,7 @@ sub Reset
 {
     undef $menu_p;
     undef $query_p;
+    undef $query_pat_p;
     undef $name_p;
     undef $map_p;
     undef $config_p;
