@@ -1287,7 +1287,7 @@ sub do_newml
     if ($OS_TYPE && open(CF, ">> $ML_DIR/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
-	$MAKE_FML{'ML_NAME'} = $ML_NAME;
+	$MAKE_FML{'ML_NAME'} = $ml;
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
     }
