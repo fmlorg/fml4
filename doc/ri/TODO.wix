@@ -430,6 +430,7 @@ command to rewrite addresses in one action ?
 
 
 .C	パッケージ
+=E.C	Packages
 
 .S	トラブルチケットシステム
 =E.S	Trouble Ticket System
