@@ -27,7 +27,7 @@ DOC_RI_SOURCES += PORTINGS README UPGRADE FEATURES TODO UPGRADE-3.0
 DOC_RI_EXCEPTIONAL_SOURCES = RELEASE_NOTES INFO
 
 
-## doc/master
+## doc/drafts
 DOC_DRAFT_SOURCES  = confirm confirmd.ackreq deny guide 
 DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 
@@ -36,9 +36,18 @@ DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
 
 
-### special PLAINDOC rurles (depends on *SOURCES*) ###
+### doc/examples
+DOC_EXAMPLE_SOURCES = setup-postfix fml-install
+
+
+### RULES ###
+.include "distrib/mk/fml.sys.mk"
+
+# special PLAINDOC rurles (depends on *SOURCES*)
 .include "distrib/mk/fml.plaindoc.mk"
 
+# examples; I provides this in html format only.
+.include "distrib/mk/fml.examples.mk"
 
-### special HTML rurles (depends on *SOURCES*) ###
+# special HTML rurles (depends on *SOURCES*)
 .include "distrib/mk/fml.htmldoc.mk"
