@@ -131,7 +131,7 @@ fml-suppport: 07638
 .S	Welcome ... and MesgLE()
 
 いまでは MesgLE() をつかって再実装するべきだ
-
+XXX $WELCOME_STATEMENT があるのにか？ 本当かそれ？
 
 .S	chkerror
 
