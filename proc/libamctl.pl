@@ -291,6 +291,14 @@ sub AutoRegist
 	# reset %Envelope
 	%Envelope = %OriginalEnvelope;
     }
+
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'store_subscribe_mail');
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+    }
 }
 
 sub GetAddr2Regist

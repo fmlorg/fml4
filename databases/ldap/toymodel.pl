@@ -73,6 +73,11 @@ sub DataBases::Execute
 	    # If you store ML articles to DB, please write the code here.
 	    ;
 	}
+	elsif ($mib->{'_action'} eq 'store_subscribe_mail') {
+	    # &AutoRegist() calls this function after subscribe the address
+	    # If you store the request mail to DB, please write the code here.
+	    ;
+	}
 	else {
 	    &Log("ERROR: LDAP: unkown ACTION $mib->{'_action'}");
 	}
