@@ -14,42 +14,16 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
-sub PopReadCF
-{
-
-    $UserName = $USER;
-    $Password = $PASS;
-    return;
-
-    local($h) = @_;
-    local($org_sep)  = $/;
-    $/ = "\n\n";
-
-    open(NETRC, "$ENV{'HOME'}/.netrc") || die $!;
-    while(<NETRC>) {
-	s/\n/ /;
-	s/machine\s+(\S+)/$Host = $1/ei;
-	if ($Host eq $h) {
-	    s/login\s+(\S+)/$UserName = $1/ei;
-	    s/password\s+(\S+)/$Password = $1/ei;
-	}
-    }
-    close(NETRC);
-
-    $/ =  $org_sep;
-}
-
-
 sub USAGE
 {
     local($s);
 
     $s = q#;
-    pop2recv.pl [-user username] [-h host] [-fhd];
+    ntfml.pl [-user username] [-h host] [-fhd];
     ;
     -user username;			
-    -pass password;
-    -host host(pop server running);
+    -pwfile password-file;
+    -host host(pop server hostname);
     -f    config-file;
     -h    this message;
     -d    debug mode;#;
@@ -67,11 +41,15 @@ sub PopGetopt
 	$_ =  shift @ARGV;
 	/^\-user/ && ($USER = shift @ARGV) && next; 
 	/^\-pass/ && ($PASS = shift @ARGV) && next; 
-	/^\-host/ && ($Host = shift @ARGV) && next; 
+	/^\-host/ && ($HOST = shift @ARGV) && next; 
 	/^\-f/    && ($ConfigFile = shift @ARGV) && next; 
 	/^\-h/    && do { print &USAGE; exit 0;};
 	/^\-d/    && $debug++;
 	/^\-D/    && $DUMPVAR++;
+
+	/^\-pwfile/ && ($PW_FILE = shift @ARGV) && next; 
+
+	$DIR = $_;
     }
 }
 
@@ -129,23 +107,18 @@ sub PopInit
 sub PopConnect # ($host, $headers, $body)
 {
     local($host) = @_;
-    local($pat)  = 'S n a4 x8';
-    local($time);
 
-    # VARIABLES:
-    $host       = $Host || $host || 'localhost';
-
-    # Initialize
-    &PopInit;			# sys/socket.ph
-    &PopReadCF($host);
-    
-
-    local($name,$aliases,$addrtype,$length,$addrs) = gethostbyname($host);
-    local($name,$aliases,$port,$proto) = getservbyname('pop3', 'tcp');
+    local($pat)   = 'S n a4 x8';
+    local($addrs) = (gethostbyname($host))[4];
+    local($port)  = (getservbyname('pop3', 'tcp'))[2];
     $port = 110 unless defined($port); # default port
     local($target) = pack($pat, &AF_INET, $port, $addrs);
 
+    @addr = unpack('C4',$addr);
 
+    print STDERR "addr=[@addr]";
+    print STDERR " \n"; 
+    print STDERR "pack($pat, &AF_INET, $port, $addrs); \n";
 
     # IPC open
     if (socket(S, &PF_INET, &SOCK_STREAM, $proto)) { 
@@ -206,16 +179,15 @@ sub PopTalk2Server
 	print STDERR $_ = <S>; /^\-/o && last;
 
 	### FILE RETRIEVE
-	#open(FILE, $POP_EXEC) || next;
-	#select(FILE); $| = 1; select(STDOUT);
+	open(FILE, $POP_EXEC) || next;
+	select(FILE); $| = 1; select(STDOUT);
 	for( ; ; ) { 
 	    $_ = <S>; 
 	    s/\015$//;
 	    last if /^\.$/;
-	    print "$_";
-	    #print FILE $_;
+	    print FILE $_;
 	}
-	#close(FILE);
+	close(FILE);
 
 	### FILE REMOVE
 	print S "DELE $i\n";
@@ -225,12 +197,29 @@ sub PopTalk2Server
 }
 
 
-sub Pop
+sub NTFml
 {
-    print "--CHECK if (-f ./$ConfigFile) in ( @INC )\n\n";
+    print "--CHECK if (-f ./$ConfigFile) in ( @INC )\n\n" if $debug;
     if (-f $ConfigFile) { require ($ConfigFile);}
 
-    &PopConnect(@_);
+    # VARIABLES:
+    $host       = $HOST || $host || 'localhost';
+
+    $UserName = $USER;
+    $Password = $PASS;
+
+    if (! $Password) {
+	open(PW, $PW_FILE) || &Log("Cannot open $PW_FILE");
+	chop($Password = <PW>);
+	$Password =~ s/\s*\015$//;
+	$Password =~ s/\s*$//;
+    }
+
+    # Initialize
+    &PopInit;			# sys/socket.ph
+
+    $status = &PopConnect($HOST);
+    &Log($status);
 }
 
 
@@ -249,11 +238,19 @@ sub eval
 
 ############################################################
 if ($0 eq __FILE__) {
-    $DIR   =  $ENV{'PWD'};
-    $debug = 1;
+    print "ARGV\t@ARGV\n";
 
     &PopGetopt(@ARGV); 
-    &Pop($Host || $ARGV[0] || 'localhost');
+
+    chop($PWD = `cd`);
+    $EXEC_DIR =~ s/\\/\//g;
+    print "exec_dir [$EXEC_DIR]\n";
+
+    $POP_EXEC = "|perl fml.pl $PWD/$DIR $PWD . --HOST=$HOST";
+    print STDERR "POP_EXEC\t$POP_EXEC\n";
+
+    # "perl ntfml.pl -host $HOST -user $ML -pwfile $pwfile";
+    &NTFml($HOST || $ARGV[0] || 'localhost');
 
     sub Log { print STDERR "LOG: ".join(" ", @_)."\n";}
 }

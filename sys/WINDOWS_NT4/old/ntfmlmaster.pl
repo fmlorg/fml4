@@ -21,16 +21,29 @@ $NTFML_CHECK_PERIOD = 10;
 # ARGV;
 $ML_DIR = shift;
 
+# try chdir (test of existence)
+chdir $ML_DIR || die("CANNOT CHSIR $ML_DIR\n");
+
 
 for (;;) {
     undef @ML;
     &GetMLLists($ML_DIR, *ML);
 
     for (@ML) {
+	next if $_ eq "etc";
+
 	print "Processing the MaliList [$_]\n";
 
-	
+	$host    = "hikari.sapporo.iij.ad.jp";
+	$host    = "hikari";
+	$pw_file = "$ML_DIR/$_/etc/pop.passwd";
+	$dir     = "$ML_DIR/$_";
 
+	$exec = "perl ntfml.pl -host $host -user $_ -pwfile $pw_file $dir";
+	system $exec;
+
+	$exec = "perl ntmsend.pl -host $host -user $_ -pwfile $pw_file $dir";
+	system $exec;
     }
 
     sleep $NTFML_CHECK_PERIOD;
