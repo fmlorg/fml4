@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libra.pl,v 2.34.2.3 2001/12/27 05:16:35 fukachan Exp $
+# $FML: libra.pl,v 2.34.2.4 2002/02/21 13:59:04 fukachan Exp $
 #
 
 # LOCAL SCOPE
@@ -804,7 +804,8 @@ sub ProcAdminSetDeliverMode
 sub ProcAdminAddAdmin
 {
     local($proc, *Fld, *e, *opt) = @_;
-    local($s) = join("\t", @opt);
+    my ($s)  = join("\t", @opt);
+    my $addr = $opt[0];
 
     &Log("admin $proc $s");
     
@@ -818,16 +819,23 @@ sub ProcAdminAddAdmin
 	    return 0; # return ASAP
 	}
     }
-    elsif (&Append2($s, $ADMIN_MEMBER_LIST)) { 
-	&Log("admin $proc $s >> \$ADMIN_MEMBER_LIST", *e);
-	&Mesg(*e, "   O.K.");
+    elsif (&Lookup($addr, $ADMIN_MEMBER_LIST)) {
+	&Log("already admin member");
+	&Mesg(*e, $NULL, 'already_subscribed', $addr);
     }
     else {
-	local($r) = $!;
-	&LogWEnv("ERROR: admin $proc [$r]", *e);
-	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
-	return $NULL;
+	if (&Append2($s, $ADMIN_MEMBER_LIST)) { 
+	    &Log("admin $proc $s >> \$ADMIN_MEMBER_LIST", *e);
+	    &Mesg(*e, "   O.K.");
+	}
+	else {
+	    local($r) = $!;
+	    &LogWEnv("ERROR: admin $proc [$r]", *e);
+	    &Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
+	    return $NULL;
+	}
     }
+
 
     1;
 }
