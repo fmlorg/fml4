@@ -1,5 +1,7 @@
 .HTML_PRE
 	メールを他のプログラムへ渡す
+=E
+	pass articles to other services/programs
 
 .toc
 .~HTML_PRE

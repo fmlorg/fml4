@@ -1,10 +1,14 @@
 .HTML_PRE
 	リレーショナルデータベースとの連携
+=E
+	Access to relatonal database systems
 
 .toc
 .~HTML_PRE
 
 LDAP の呼び出しについては .ptr{LDAP} 参照
+=E
+See .ptr{LDAP} for LDAP access.
 
 .include postgresql.wix
 .include mysql.wix

@@ -1,9 +1,13 @@
 .C	ネットワーク構成
-
+=E.C	Network
 
 .S	ファイアウォールの内側ではつかえますか？	
+=E.S	Can I use fml within firewall ?
 
 はい。ただ ファイアウォールに負担がかかります。
+=E
+Yes, off course, though the firewall suffers for mail traffic.
+
 .q
 Internet ---  firewall ---  mail server (fml)
 .~q

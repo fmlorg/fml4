@@ -28,7 +28,10 @@ Netscape ldap is downloadable and extremely easy to setup and configure.
 Additionally, it doesn't require licenseing for a small amount of users.
 
 
-ディレクトリ情報をXML文書として記述するためのDTDでしたら，
+ディレクトリ情報をXML文書として記述するための DTD
+=E
+DTD to describe directry information as XML
+
 .url http://www.dsml.org/
 
 PGP (?)
@@ -38,10 +41,16 @@ Browser ?
 .url http://www.iit.edu/~gawojar/ldap/
 
 入門用のドキュメント ?
+=E
+Introduction
+
 .url http://www.openldap.org/doc/admin/
 .url http://www.interq.or.jp/earth/inachi/openldap/admin/index-ja.html
 
 LDAP 関連 RFC の日本語版
+=E
+Japanese LDAP documents
+
 .url  http://www.cysols.com/JLDAPdocs/
 
 
@@ -58,7 +67,6 @@ iplanet
 
 auth_ldap module
 .url http://www.rudedog.org/auth_ldap/1.4/auth_ldap.html
-
 
 some project
 

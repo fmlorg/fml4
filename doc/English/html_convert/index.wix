@@ -1,5 +1,7 @@
 .HTML_PRE
 	メール(投稿された記事)を HTML へ変換する
+=E
+	convert articles to html format ones
 
 .toc
 .~HTML_PRE

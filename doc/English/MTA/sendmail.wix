@@ -1,6 +1,10 @@
 .C	sendmail 特有のはなし
+=E.C	Sendmail specific topics
 
 .S	owner-ml: xxx@yyy.co.jp は消していいですか?
+=E.S	Delete "owner-ml: xxx@yyy.co.jp" in /etc/aliases ?
 
 消さない方がいいです。sendmail の場合に、エンベロープの送信者情報の書き
 換えが"owner-"を設定したことで起こります。
+=E
+It is better not to delete it, since it has special meaning.

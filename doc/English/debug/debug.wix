@@ -1,4 +1,5 @@
 .C	デバッグモードとデバッグレベル
+=E.C	debug mode and debug level
 
 .S	デバッグモード
 =E.S	Debug mode
