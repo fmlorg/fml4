@@ -23,6 +23,11 @@ AccessFileName .htaccess
 
 ScriptAlias /cgi-bin/fml/ "_EXEC_DIR_/www/cgi-bin/"
 
+# ACL example
+#     allow from .ncsa.uiuc.edu
+#     allow from 10.1.0.0/255.255.0.0
+#     allow from 10.1.0
+#     allow from 10.1.0.1
 <Directory "_EXEC_DIR_/www/cgi-bin">
     Options None
     AllowOverride AuthConfig
