@@ -1653,12 +1653,16 @@ sub do_config
     if (open(CF, "> $cf")) {
 	select(CF); $| = 1; select(STDOUT);
 
-	undef $config{'NON_PORTABILITY'};
-	undef $config{"COMPAT_$OS_TYPE"};
+	# believe the config conservation
+	# undef $config{'NON_PORTABILITY'};
+	# undef $config{"COMPAT_$OS_TYPE"};
 
 	for (@config) {
-	    # printf    "%-25s\t%s\n", $_, $config{$_};
-	    printf CF "%-25s\t%s\n", $_, $config{$_} if $config{$_};
+	    next if $_ eq 'NON_PORTABILITY';
+	    next if $_ eq "COMPAT_$OS_TYPE";
+
+	    # may be 0 is true value ($debug = 0);
+	    printf CF "%-25s\t%s\n", $_, $config{$_};
 	    undef $config{$_};
 	}
 
