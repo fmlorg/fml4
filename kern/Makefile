@@ -123,12 +123,9 @@ plaindoc: doc/smm/op.wix
 	@ sh usr/sbin/DocReconfigure
 
 htmldoc:	doc/smm/op.wix
-	@ (chdir doc/html;make)
-	@ echo "Making WWW pages of doc/smm/op => var/html/op"
+	@ (chdir doc/html; make)
 	@ $(MKDIR) var/html/op
-	@ perl doc/ri/conv-install.pl < doc/ri/INSTALL.wix > doc/smm/install-new.wix 
-	@ perl usr/sbin/fix-wix.pl doc/smm/op.wix |\
-	  perl bin/fwix.pl -T smm/op -m html -D var/html/op -I doc/smm
+	@ (chdir doc/html; make op)
 	@ echo "Please see ./var/html/index.html for html version documents"
 
 message: 
@@ -162,7 +159,7 @@ cmp:
 	usr/bin/uncomments.pl libsmtp.pl | wc
 	(usr/sbin/fpp.pl -mCROSSPOST fml.pl; cat libsmtp.pl)|\
 	usr/bin/uncomments.pl|wc
-	usr/bin/uncomments.pl $(HOME)/work/src/USEFUL/hml-1.6/hml.pl |wc
+#	usr/bin/uncomments.pl $(HOME)/work/src/USEFUL/hml-1.6/hml.pl |wc
 
 use:
 	grep require *pl | grep "\'lib"
@@ -182,7 +179,7 @@ capital:
 
 
 syncwww:
-	sh usr/sbin/syncwww
+	rsync -aubv $(FML)/var/html/ $(WWW)
 
 syncinfo:
 	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
