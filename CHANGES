@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/02
+
+  enable installer to search pgp5 programs
+	See fml/cf/MANIFEST
+
+	XXX PGP5 not yet support "admin pgp5 ... "
+
 2000/06/01
 
   enhance PGP code to support PGP 2 and 5
