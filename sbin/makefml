@@ -1854,7 +1854,7 @@ sub Conv
     while (<EXAMPLE>) {
 	# default
 	$mail_list = $config{'MAIL_LIST'} || "$ml\@$DOMAIN";;
-	$ctladdr   = "$ml-ctl\@$DOMAIN";
+	$ctladdr   = $config{'CONTROL_ADDRESS'} || "$ml-ctl\@$DOMAIN";
 
 	# substitute following the policy default
 	if ($format) {
