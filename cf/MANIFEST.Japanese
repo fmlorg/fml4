@@ -785,7 +785,9 @@ USE_ERRORS_TO:
 # value: string
 ERRORS_TO:
 
-.j Original の Message-ID: を使うか？
+.j Original の Message-ID: を使うか？使う(1)がデフォールト
+.j 0にするとfmlが適当な Message-ID: をつける。生成関数はGenMessageID
+.j そのフォーマットは 日づけ.FMLAAA.数字(pid).$MAIL_LIST のようなもの
 # Message-Id: use original Message-Id or Server Defined Message-Id ?
 # value: 1/0
 USE_ORIGINAL_MESSAGE_ID:	1

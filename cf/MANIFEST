@@ -573,6 +573,8 @@ USE_ERRORS_TO:
 ERRORS_TO:
 
 # Message-Id: use original Message-Id or Server Defined Message-Id ?
+# if 1, original and 
+# if 0, fml generates a message-id like $day.FMLAAA.$pid.$MAIL_LIST
 # value: 1/0
 USE_ORIGINAL_MESSAGE_ID:	1
 
