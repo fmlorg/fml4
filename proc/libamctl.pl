@@ -1039,7 +1039,27 @@ sub Rehash
     # make an entry ; XXX: "# command" is internal represention
     local(@fld) = ('#', 'mget', "$l-$r", 10, $mode);
 
-    ($l <= $r) && &ProcMgetMakeList('Rehash:EntryIn', *fld);
+    if ($l <= $r) {
+	# avoid to reset "mget3" already registerd request.
+	local(%backup_mget_list) = %mget_list;
+	local($addr2reply)       = $Envelope{'Addr2Reply:'};
+
+	# reset
+	undef %mget_list;
+	$Envelope{'Addr2Reply:'} = $adr;
+
+	# run mget3 routine asap since aggregation in the same mode occurs
+	# in mget routine. So we need hash mget request now.
+	&ProcMgetMakeList('Rehash:EntryIn', *fld);
+	&use('sendfile');
+	&MgetCompileEntry(*Envelope);
+	eval '&mget3_SendingEntry;';
+	undef %mget_list;
+
+	# back again
+	%mget_list               = %backup_mget_list;
+	$Envelope{'Addr2Reply:'} = $addr2reply;
+    }
 
     1;
 }
