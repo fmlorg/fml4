@@ -785,6 +785,7 @@ sub SmtpPutActiveList2Socket
 	require 'libsmtpsubr2.pl';
 	($size, $mci_window_start, $mci_window_end) = &GetMCIWindow($file);
 	print STDERR "window $file:($start, $end)\n" if $debug_mci;
+	&Log("window size=$size $start/$end") if $debug_fml_org;
 	if ($debug_mci_window2) {
 	    local($fn) = $file;
 	    $fn =~ s#$DIR/##;
