@@ -3,10 +3,24 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/27
+
+   new functions used in config.ph (kern/libloadconfig.pl)
+	add DEFINE_PROCEDURE()
+
+2000/04/26
+
+   new functions used in config.ph
+	PERMIT_PROCEDURE()
+	DENY_PROCEDURE()
+
+   anonymous cvs server ready
+
+	anonoymous 用のCVS準備できた。
 
 2000/04/25
 
-	bin/anoncvs is added. It is a wrapper script to access anoncvs.fml.org
+   bin/anoncvs is added. It is a wrapper script to access anoncvs.fml.org
 
 	anonymous cvs サーバ用のscript 
 
