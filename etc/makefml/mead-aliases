@@ -1,3 +1,4 @@
 # Mail Error Analyzer Daemon
 # If you use mead.pl, comment out _ML_-admin: line and UNCOMMNET OUT here.
-_ML_-admin: _USER_, :include:_ML_DIR_/_ML_/include-mead
+_ML_: :include:_ML_DIR_/_ML_/include-mead
+owner-_ML_: _USER_
