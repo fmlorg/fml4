@@ -1,39 +1,50 @@
 .C	POP による FML の起動
 .l	popfml
 
+.S	Introduction
+
+設定手順は3段階から成ります。
+
+	1 ~/.netrc にPOPサーバとそのパスワード
+	2 ~/.popfmlrc に popfml の設定を書く
+	3 cron で定期的に popfml を呼ぶ
+
+これで、MLが作れました。なお、まとめおくりはまた別です。以下で各STEPを
+説明します。
+
+
 .S	POP経由の自動RefileやＭＬの実行 (bin/popfml.pl)
 
 POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
-れの専用プログラムとして実装されています。
+れの専用プログラムとして実装されています。対象としているケースは
 
-	メールは pop3 で読めるだけ
-	メールをうけた MTA から program を呼べない policy である
-	そういう機能のない Operationg System 附属のメールシステム
+	メールはPOP3で読めるだけ
+	メールを受けとめてプログラムを呼べないという
+		OS附属のメールシステム or ポリシー
 
-等のために存在します。このやり方は汎用なので pop でメールが読める場合
-ならどんなＯＳでも原理的にはＭＬが実行できるということになりますが、あ
-くまで裏技というカテゴリでしょう。
+等のために存在します。このやり方は汎用なのでPOP3でメールが読める場合な
+らどんなＯＳでも原理的にはＭＬが実行できるということになります。
+＃でもまああくまで裏技というカテゴリでしょう。
 
 理屈としては
 
-	pop を使って取り寄せつつ MH の rcvstore へPIPEで投げる(inc)
-	pop を使って取り寄せつつPIPEで fml へ投げる(ML)
+	pop を使って取り寄せつつパイプで MH の rcvstore へ入力(inc)
+	pop を使って取り寄せつつパイプで fml へ投げる (ML)
 
-は同じです。実行する下請けプログラムが違うだけ。後はこれを cron で実行
-すれば、
-
-	サイトに一台 UNIX マシンがあれば
-	sendmail が動いていなくてもＭＬは可能
-だし	
-	自分のマシンがメールを受けられなくても 
-	pop経由で自動的にメールをスプールできます。
+は同じです。実行する下請けプログラムが違うだけです。後はこれを cron で
+実行すれば、サイトに一台 UNIX マシンがあれば自分のマシンがメールを受け
+られなくてもPOP3経由で自動的にメールをスプールできます。
 
 ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
-できるでしょう。なお、MHと同様パスワードは $HOME/.netrc からとられます。
+できるでしょう。なおMHと同様パスワードは $HOME/.netrc からとられます。
+どこかにパスワードを書いておかないといけないことは最大の弱点です。
 
-inc_via_pop.pl は昔の名前（今はリンク）で、pop2recv.pl は backward
+inc_via_pop.pl は昔の名前(今はリンク)で、pop2recv.pl は backward
 compatible の目的で popfml.pl にリンクされています。
 
+
+.S	popfml.pl 
+.l	popfml.pl 
 
 SYNOPSIS:
 
@@ -57,17 +68,14 @@ SYNOPSIS:
 .xref	cron
 .xref	fml_local
 
-設定ファイル： 設定ファイル popfml で実行するコマンドを定義する
+popfml で実行するコマンドを定義する設定ファイルは
 
-   ~/.popexecrc か ~/.popfmlrc のどちらでもよい(backward compat)。
+	~/.popexecrc
+	~/.popfmlrc 
 
-もし、 ~/.popexecrc と ~/.popfmlrc 両方あると .popexecrc が優先されま
-す。
+のいづれかです。どちらでも構いません(backward compatible)。
+もし ~/.popexecrc と ~/.popfmlrc 両方あると .popexecrc が優先されます。
 
-
-設定の仕方：
-	設定ファイルを書いて、Cron を設定する。
-	
 設定例：
 	全部のメールを fml.pl へ渡していいなら、
 
@@ -78,6 +86,7 @@ SYNOPSIS:
 
 でいいわけですが、普通はＭＬと自分宛をわけたりするためにフィルタ
 (e.g. fml_local)が必要な場合もあるでしょうが、基本的には同じです。
+.xref	filter
 
 	$POP_EXEC の中身はフィルタのプログラムになります。
 
@@ -88,9 +97,8 @@ SYNOPSIS:
 * * * * * popfml.pl -user fukachan -host hikari
 
 のような内容の crontab を書いて、crontab crontab とかします。
-この辺はＯＳによって異なります。
+この辺はOSによって異なります。
 .xref cron
-
 
 解説：
 
@@ -190,7 +198,7 @@ POP のサーバとの通信のログ。デフォールトは
 
 	$POP_PORT
 
-110/tcp と違う場合に設定する。
+110/tcp と違う場合に設定する(普通は設定しなくても大丈夫だろう)。
 
 
 .# $Id$
