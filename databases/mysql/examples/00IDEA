@@ -1,11 +1,6 @@
 [ following postfix how-to ... ]
 
 # primary, secondary !
-$SQL_SERVER_HOST @SQL_SERVER_HOST 
-$SQL_SERVER_PORT
-
-$SQL_SERVER_USER
-$SQL_SERVER_PASSWORD
 $SQL_DB_NAME
 $SQL_TABLE
 
@@ -17,9 +12,23 @@ where_field = alias
 additional_conditions = and status = 'paid'
 
 
-
+-------
 [how to select]
 
 select forw_addr 
 	from mxaliases
 	where alias = '$lookup' and status = 'paid'
+
+
+-------
+DBI
+
+DBI->connect( $data_source, $user, $auth, \%attr );
+
+$DBI_DATA_SOURCE
+$DBI_USER
+$DBI_PASSWORD
+
+     dbi:DriverName:database_name
+     dbi:DriverName:database_name@hostname:port
+     dbi:DriverName:database=database_name;host=hostname;port=port
