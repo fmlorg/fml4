@@ -6,6 +6,7 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
+
 $EXIST_CRYPT = eval "crypt('fukachan', 11);", $@ eq "";
 
 
@@ -15,7 +16,6 @@ $EXIST_CRYPT = eval "crypt('fukachan', 11);", $@ eq "";
 sub Crypt
 {
     local($passwd, $salt) = @_;
-    local($salt);
 
     # if not have crypt();
     return $passwd unless $EXIST_CRYPT;
@@ -45,6 +45,7 @@ sub CmpPasswd
     ($c eq $p) ? 1: 0;
 }
 
+
 # in password file $file
 # check '$passwd' for '$from' address
 # return the retult
@@ -60,6 +61,7 @@ sub CmpPasswdInFile
 	if (/^$from\s+(\S+)/) {
 	    #CmpPasswd(encrypt,plain)
 	    &CmpPasswd($1,$passwd) && $ok++;#|| undef($ok);
+	    &Log("O.K. CmpPasswd($1,$passwd)") if $debug && $ok;
 	}
     }
     close(FILE);
@@ -132,19 +134,5 @@ sub ChangePasswd
 	return 0;
     }
 }
-
-
-#########################################################
-if (__FILE__ eq $0) {
-    $debug = 1;
-
-    print "&CmpPasswdInFile('etc/passwd',$ARGV[0], $ARGV[1]) = ";
-    print &CmpPasswdInFile('etc/passwd',$ARGV[0], $ARGV[1]);
-    print ";\n";
-
-    sub Log { print STDERR "LOG:@_\n";}
-}
-#########################################################
-
 
 1;
