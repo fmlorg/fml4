@@ -274,6 +274,16 @@ NT4 はだめだが NT5 fs には link(2)はある。
    $HTML_BASE_URL
 
 
+.S	HTML番外変
+=E.S	HTML again
+
+Content-Type: application/ms-tnef でずっこける場合(たぶんOS依存)って…
+どうなった？
+=E
+Content-Type: application/ms-tnef breaks down fml html generator ;-) .. 
+but it is o.k. now? (on some OS?)
+
+
 .S	ポーティング 
 =E.S	Porting
 
@@ -350,6 +360,24 @@ $LOG_FILE_SUFFIX = ".%C%y";
 	OpenPGP ...
 
 何がデファクトになるのか…
+
+
+.S	ヘッダ関係
+=E.S	Header and the around it
+
+fml-support: 05843
+MANY MANY "; post only (only members can post)"  ...
+
+
+.C	日本特有の問題
+=E.C	Japan Specific problems
+
+=E
+*** not translated ***
+
+fml-support: 06265
+半角カナは勝手に全角カナに、機種依存文字は似た文字に
+
 
 
 .appendix
