@@ -141,6 +141,11 @@ _____________________________
 <HR>
 <A NAME=cgiadmin>
 この画面を操作可能な(CGI)管理者アカウントのパスワード設定
+<BR>
+追加: アカウントとパスワードの組を入力すれば追加になります。
+<BR>
+削除: 消したいアカウントを入力し、削除モードにしてGOです。
+<BR>
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -149,8 +154,8 @@ _____________________________
 
 <TABLE>
 	<TR>
-		<TD ALIGN=right> Email アドレス:
-		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER SIZE=30>
+		<TD ALIGN=right> Email アドレス ないしアカウント名:
+		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 		<TABLE>
 			<TD ALIGN=left>既存リストからの選択:
 			<TD ALIGN=right>
@@ -158,6 +163,12 @@ _____________________________
 			__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
 			</SELECT>
 		</TABLE>
+
+	<TR>
+		<UL>
+		<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
+		<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
+		</UL>
 
 	<TR>
 		<TD ALIGN=right> パスワード:

@@ -2331,7 +2331,7 @@ sub do_html_htpasswd
 # change htpassword for  /cgi-bin/fml/admin/ layer.
 sub do_html_cgiadmin_htpasswd
 {
-    local($ml, $member, $passwd) = @_;
+    local($ml, $member, $passwd, $action) = @_;
     local($f, $x, $fnew);
 
     &ResetVariables;
@@ -2341,12 +2341,22 @@ sub do_html_cgiadmin_htpasswd
     $f    = "$CGI_AUTHDB_DIR/admin/htpasswd";
     $fnew = "$CGI_AUTHDB_DIR/admin/htpasswd.new.$$";
 
-    print STDERR "\n   change htpasswd ($f)\n";
-    $x = $member .":". crypt($passwd, $passwd);
+    print STDERR "\n   change htpasswd ($f)\n\n";
+    $x = $member .":". crypt($passwd, $member);
 
-    if (&__html_htpasswd_repl($f, $fnew, $member, $x)) {
+    # If $action == 'bye', remove $member.
+    # If not, add or change $member.
+    if (&__html_htpasswd_repl($f, $fnew, $member, $x, $action)) {
 	if (-s $fnew) { 
-	    if (! rename($fnew, $f)) {
+	    if (rename($fnew, $f)) {
+		if ($action eq 'bye') {
+		    print "   removed $member\n";
+		}
+		else {
+		    print "   added $member or changed $member password\n";
+		}
+	    }
+	    else {
 		&Error("cannot rename $fnew $f");
 	    }
 	}
@@ -2359,7 +2369,7 @@ sub do_html_cgiadmin_htpasswd
 
 sub __html_htpasswd_repl
 {
-    local($f, $fnew, $member, $x) = @_;
+    local($f, $fnew, $member, $x, $action) = @_;
 
     $x =~ s/\n$//;
     print STDERR "($f, $fnew, $member, $x)\n" if $debug;
@@ -2377,7 +2387,7 @@ sub __html_htpasswd_repl
 	    }
 	    close($f);
 
-	    print $fnew $x, "\n";
+	    print $fnew $x, "\n" unless $action eq 'bye';
 	    close($fnew);
 	}
 	else {

@@ -41,7 +41,9 @@ sub Parse
     $OPTION = $Config{'OPTION'};
 
     # CGI
-    $CGI_ADMIN_USER = $Config{'CGI_ADMIN_USER'};
+    $CGI_ADMIN_USER = 
+	$Config{'CGI_ADMIN_USER_DEF'} || $Config{'CGI_ADMIN_USER'};
+    $ACTION = $Config{'ACTION'};
 
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
@@ -415,6 +417,11 @@ sub Command
     }
     elsif ($PROC eq 'cgiadmin_passwd') {
 	$PROC = 'html_cgiadmin_passwd';
+
+	if ($ACTION eq 'BYE') {
+	    &Control($ML, $PROC, $CGI_ADMIN_USER, "dummympassword", "bye");
+	    return;
+	}
 
 	if ($PASSWORD && $PASSWORD_VRFY) {
 	    if ($PASSWORD eq $PASSWORD_VRFY) {
