@@ -90,7 +90,6 @@ bin/base64decode.pl
 bin/pmail.pl
 bin/cron.pl
 bin/newsyslog.sh
-bin/geturl.pl
 bin/fwix.pl
 bin/split_and_msend.pl
 bin/passwd.pl
@@ -124,9 +123,6 @@ libexec/mead.pl
 
 
 ETC_SOURCES:
-etc/crontab-4.3
-etc/crontab-4.4
-etc/passwd
 etc/daily.ignore
 etc/mime.types
 distrib/compile/RELEASE_FILES
