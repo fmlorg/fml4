@@ -27,6 +27,7 @@ DOC_TUTORIAL_SUBDIR += how_to_subscribe
 DOC_TUTORIAL_SUBDIR += html_convert
 DOC_TUTORIAL_SUBDIR += internals
 DOC_TUTORIAL_SUBDIR += makefml
+DOC_TUTORIAL_SUBDIR += mail2xxx
 DOC_TUTORIAL_SUBDIR += messages
 DOC_TUTORIAL_SUBDIR += misc
 DOC_TUTORIAL_SUBDIR += obsolete

@@ -48,6 +48,7 @@ MTA			MTA 依存のTIPS
 smtp			配送関係
 Japanese		日本語処理について
 utility_programs	その他便利かもしれないプログラム
+mail2xxx		メールから別のプログラムへ渡す(参考事例)
 references		文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
