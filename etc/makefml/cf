@@ -10,8 +10,9 @@
 # $Id$
 #
 
-CFVersion			3.2
+CFVersion			4.1
 LANGUAGE			_LANGUAGE_
+TZone				_TZ_
 
 ### DNS
 DOMAINNAME			_DOMAIN_
