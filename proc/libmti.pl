@@ -130,19 +130,44 @@ sub MTIDBMOpen
 	return $NULL;
     }
 
+    # force the permission
     if ($USE_FML_WITH_FMLSERV) {
 	chmod 0660, $MTI_DB, $MTI_HI_DB;
-	dbmopen(%MTI, $MTI_DB, 0660) || 
-	    ($error++, &Log("MTI[$$]: cannot bind \%MTI"));
-	dbmopen(%HI,  $MTI_HI_DB, 0660) || 
-	    ($error++, &Log("MTI[$$]: cannot bind \%HI"));
     }
     else {
 	chmod 0600, $MTI_DB, $MTI_HI_DB;
-	dbmopen(%MTI, $MTI_DB, 0600) || 
-	    ($error++, &Log("MTI[$$]: cannot bind \%MTI"));
-	dbmopen(%HI,  $MTI_HI_DB, 0600) || 
-	    ($error++, &Log("MTI[$$]: cannot bind \%HI"));
+    }
+
+    ### DBM OPEN ###
+    # perl 5 tie
+    if ($MTI_TIE_TYPE) {
+	eval "use $MTI_TIE_TYPE;"; 
+	&Log($@) if $@;
+
+	local($_) =  q#;
+	tie(%MTI, $MTI_TIE_TYPE, $MTI_DB) || 
+	    ($error++, &Log("MTI[$$]: cannot tie \%MTI as $MTI_TIE_TYPE"));
+	tie(%HI, $MTI_TIE_TYPE, $MTI_HI_DB) || 
+	    ($error++, &Log("MTI[$$]: cannot tie \%HI as $MTI_TIE_TYPE"));
+	#;
+
+	eval($_);
+	&Log($@) if $@;
+    }
+    # perl 4 (default)
+    else {
+	if ($USE_FML_WITH_FMLSERV) {
+	    dbmopen(%MTI, $MTI_DB, 0660) || 
+		($error++, &Log("MTI[$$]: cannot bind \%MTI"));
+	    dbmopen(%HI,  $MTI_HI_DB, 0660) || 
+		($error++, &Log("MTI[$$]: cannot bind \%HI"));
+	}
+	else {
+	    dbmopen(%MTI, $MTI_DB, 0600) || 
+		($error++, &Log("MTI[$$]: cannot bind \%MTI"));
+	    dbmopen(%HI,  $MTI_HI_DB, 0600) || 
+		($error++, &Log("MTI[$$]: cannot bind \%HI"));
+	}
     }
 
     $error ? 0 : 1;
