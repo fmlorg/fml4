@@ -10,16 +10,15 @@
 # See the file COPYING for more details.
 
 
-CONFIG_DIR=`dirname $0`
-CONFIG_DIR="$CONFIG_DIR/../.fml"
-
-if [ -f $CONFIG_DIR/system.sh ];then
-	. $CONFIG_DIR/system.sh
+CONFIG_DIR=`dirname $0`/..
+if [ -f $CONFIG_DIR/sbin/showsystem.pl ];then
+	eval `$CONFIG_DIR/sbin/showsystem.pl $CONFIG_DIR/.fml/system`
+	echo EXEC_DIR=$EXEC_DIR
+	echo ML_DIR=$ML_DIR
 else
-	echo "ERROR: cannot find $CONFIG_DIR/system.sh"
+	echo "ERROR: cannot find $CONFIG_DIR/sbin/showsystem.pl"
 	exit 1
 fi
-
 
 chdir $ML_DIR || cannot_chdir $ML_DIR
 
