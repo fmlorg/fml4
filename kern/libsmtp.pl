@@ -176,17 +176,22 @@ sub SmtpConnect
 
 	    if (defined $service) {
 		$service->connect6( { _mta => $mta } );
-	        &Log( $service->error() ) if $service->error();
 
-		if (defined $service->{ _socket }) {
-		    print SMTPLOG "socket ok (IPv6)\n";
-		    print SMTPLOG "connect ok (IPv6)\n";
-		    *S = $service->{ _socket };
-		    $error = "";
-		    return "";
+		unless ( $service->error() ) {
+		    if (defined $service->{ _socket }) {
+			print SMTPLOG "socket ok (IPv6)\n";
+			print SMTPLOG "connect ok (IPv6)\n";
+			*S = $service->{ _socket };
+			$error = "";
+			return "";
+		    }
+		    else {
+			&Log( $service->error() ) if $service->error();
+			&Log("cannot connect $mta by IPv6");
+		    }
 		}
 		else {
-		    &Log( $service->error() ) if $service->error();
+		    &Log( $service->error() );
 		    &Log("cannot connect $mta by IPv6");
 		}
 	    }
