@@ -258,10 +258,6 @@ admin-ci:
 	ci usr/bin/[^c^r]* usr/sbin/*
 	chmod 755 usr/*bin/*
 
-ci:
-	ci *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
-	chmod 755 fml.pl msend.pl libexec/*pl
-
 rd:
 	perl usr/bin/rdiff.pl *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
 
@@ -280,6 +276,9 @@ asuka:
 
 diff:
 	fvs diff * proc/* libexec/* 
+
+ci:
+	fvs ci * proc/* libexec/* 
 
 docdiff:
 	fvs diff doc/ri/*wix doc/smm/*wix
