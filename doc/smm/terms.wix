@@ -1,7 +1,8 @@
-.C	用語
+.C	用語集
 =E.C	Technical Terms
 
 以下で使う用語について2、3説明しておきます。
+
 
 .S	MLのHOME
 =E.S	HOME of ML
@@ -15,11 +16,12 @@ The HOME of each ML is the location of config.ph. If
 /var/spool/ml/elena/config.ph for elena ML, the home of elena ML is
 /var/spool/ml/elena.
 
+
 .S	SMTP
 .k	SMTP
 .k	Simple Mail Transfer Protocol
 
-SMTP == Simple Mail Transfer Protocol。sendmail 間の通信方式のこと。
+SMTP == Simple Mail Transfer Protocol。MTA間の通信方式のこと。
 =E
 SMTP == Simple Mail Transfer Protocol.
 
@@ -27,10 +29,15 @@ SMTP == Simple Mail Transfer Protocol.
 .S	メールサーバ/SMTPサーバ, MTA
 =E.S	MTA, Mail Server/SMTP Server
 
-sendmail というプログラムが元祖であり、もっとも代表的なプログラムです
-が、SMTPを理解すればうけるのは何でも構いません。より正確には $HOST で
-指定する(デフォールトは自分自身 "localhost")で smtp/tcp ポートがメール
-を受けとってくれれば何が走っていて構わないという意味です。
+sendmail というプログラムが代表格で、SMTPを理解してメール・フォワーディ
+ングを行なうものは何でもMTAと呼ぶ。fml的には、
+1. MTAからfmlを起動できること
+
+2. $HOSTおよび@HOSTSに出てくるホスト(デフォールトは自分自身 
+"localhost")が smtp/tcp ポートがメールを受けとってくれれば何が走ってい
+て構わないという意味です。
+
+の２箇所がMTAとの接点になる。
 =E
 "Mail Server" is a host where MTA runs to receive and deliver mails.
 The most famous MTA is "sendmail", which is the default of BSD
@@ -48,29 +55,37 @@ fwtk of TIS (Trusted Information System Inc.), smtpd for more
 security.  You can use MTA you like if the MTA can receive, send and
 exec ML driver programs from it.
 
-世の中にはそれ以外にも sendmail もどきのプログラムはありますから、
-sendmail に拘る必要はありません。この文書ではターゲットマシンが 4.4BSD 
-なので、sendmail と perl を使う場合について解説しています。
+世の中にはそれ以外にもsendmailもどきのプログラムはありますから、
+sendmailに拘る必要はありません。MTAの設定について言及する必要がある場
+合、便宜上この文書では通常(ターゲットマシンが 4.4BSDなので) sendmail 
+と perl を使う場合について解説しています。
 =E
 FML target is NetBSD, so we explain a case using sendmail and perl in
 this document.
+
+各MTA固有の注意点については『INSTALL_with_MTA名』のファイルがあるので
+そちらを見て下さい。例:
+
+	INSTALL_with_POSTFIX
+	INSTALL_with_QMAIL
+	INSTALL_with_ZMAILER
+
 
 .S	sendmail
 .k	/usr/sbin/sendmail
 .k	sendmail
 
-現在も Eric Allman がメンテしている メール配送エージェントのこと。
-sendmail は BSD の標準装備です。1998 3 月に Sendmail
-Inc. (http://www.sendmail.com/) ができました。
+現在も Eric Allman がメンテしているメール配送エージェントのこと。
+sendmailは4.x BSDの標準装備です。1998年3月に Sendmail
+Inc. (http://www.sendmail.com/)ができました。
 =E
 The most famous MTA (Mail Transport Agent), which is standard of BSD.
 Now Sendmail Inc. (http://www.sendmail.com/) exists and maintains
 sendmail.
 
-どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
-もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
-を使うようにして下さい。
-例えば
+どんな複雑な環境でも適応できる柔軟性を兼ね備えている分セキュリティホー
+ルもありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新
+版を使うようにして下さい。例えば
 
 	ftp://ftp.cert.org/pub/tools/sendmail/
 	ftp://ftp.sendmail.org/
@@ -94,8 +109,8 @@ smtpfeed and so on.
 sendmail をコントロールする configuration file。これの読み書きができな
 いとネットワーク管理者にはなれません(なりたくないって?(泣))。大抵の場
 合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッケージで 
-sendmail.cf を簡単に作ることができるが、この見本で十分実用です。
-詳しくは、このCFパッケージの日本語マニュアルも参照して下さい。
+sendmail.cf を簡単に作ることができる。
+詳しくは、このCFパッケージの日本語マニュアルも参照。
 =E
 You can use CF (by Motonori Nakamura, Kyoto University) to configure
 sendmail.cf. This software works well.
@@ -109,18 +124,17 @@ A mirror in Japan is
 .k	/usr/sbin/newaliases
 .k	newaliases
 
-/etc/aliases から aliases データベースを作るための操作のこと。
-/etc/aliases をいじったら必ず newaliases というコマンドを実行しなけれ
-ばなりません。
+/etc/aliases から aliases データベースを作るコマンド。/etc/aliases を
+変更したら必ず newaliases というコマンドを実行しなければなりません。
 =E
 A program to make aliases database from /etc/aliases. 
 You should run newaliases after you edit /etc/aliases.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -5,11 +5,12 @@
 .if LANG == ENGLISH
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS FUNCTIONS. ***
 
-Except for debugging, I use only "--ctladdr" in standard.
+Except for debugging, you should have only to use only "--ctladdr" in
+standard enveironment.
 .return
 .fi
 
---ctladdr 以外はあくまでもデバッグ用です。developer 以外はこれを使わな
+--ctladdr 以外はあくまでもデバッグ用です。開発する人以外はこれを使わな
 いで下さい。
 
 .k	--distribute
@@ -254,10 +255,10 @@ config.ph では $Envelope{"oh:to:"} = 1; とおなじ。便利なように、
 .k	--debug
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
