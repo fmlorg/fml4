@@ -1,0 +1,693 @@
+#!/usr/local/bin/perl --    # -*-Perl-*-
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
+require 'getopts.pl';
+&Getopts("dh");
+
+&InitMakeFml;
+&InitTTY;
+
+if (@ARGV) {
+    &ExecCmd(join(" ",@ARGV));
+}
+else {
+    &InitFmlConfig;
+    &ExecCmd("init");
+    &ExecCmd("install");
+}
+
+# &Menu;
+
+exit 0;
+
+
+#################### LIBLARIES ####################
+sub InitMakeFml
+{
+    umask(077);
+
+    local($user) = (getpwuid($<))[0];
+
+    $debug = $opt_d;
+
+    $HOME  = $ENV{'HOME'};
+    $PWD   = $ENV{'PWD'};
+
+    {
+	print "---Try to inspect your Operating System ...\n\n";
+	local($eval);
+
+	$eval = q#$OS_TYPE = `sh sbin/os-type`;#;
+	eval($eval);
+
+	print STDERR $@ if $@;
+	print "\n";
+
+	chop $OS_TYPE;
+	$OS_TYPE =~ tr/a-z/A-Z/;
+
+	print "   Your OS looks $OS_TYPE\n";
+	print "\n";
+    }
+
+
+    { # DNS AutoConfigure to set FQDN and DOMAINNAME; 
+	local(@n, $hostname, $list);
+	chop($hostname = `hostname`); # beth or beth.domain may be possible
+	$FQDN = $hostname;
+	@n    = (gethostbyname($hostname))[0,1]; $list .= " @n ";
+	@n    = split(/\./, $hostname); $hostname = $n[0]; # beth.dom -> beth
+	@n    = (gethostbyname($hostname))[0,1]; $list .= " @n ";
+
+	foreach (split(/\s+/, $list)) { /^$hostname\.\w+/ && ($FQDN = $_);}
+	$FQDN       =~ s/\.$//; # for e.g. NWS3865
+	$DOMAINNAME = $FQDN;
+	$DOMAINNAME =~ s/^$hostname\.//;
+    }
+
+    # config amd temporary files
+    $CONFIG_TMP  = "/tmp/.fmlconfig.$user";
+    $CONFIG_LOG  = "/tmp/.fmlconfiglog.$user";
+    $FML_RCDIR   = "$HOME/.fml";
+    $FML_CONFIG  = "$FML_RCDIR/config";
+
+    # directory
+    -d $FML_RCDIR || mkdir($FML_RCDIR, 0755);
+
+    # initialize files
+    if (-f $FML_CONFIG) {
+	package Config;
+
+	eval("require \$main'FML_CONFIG;\#'");
+	print STDERR $@ if $@;
+
+	$main'debug = $Config'debug;
+	package main;
+
+	&Dumpvar('Config') if $debug;
+    }
+    else {
+	$TheFirstTime = 1;
+
+	# touch;
+	print OUT "Creating $FML_CONFIG ...\n";
+	&SaveConfig("1;");
+	sleep 1;
+    }
+
+    @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
+
+    %Config = ('EXEC_DIR', 'EXEC FILES DIRECTORY',
+	       'ML_DIR',   'ML DIR ', 
+	       'DOMAIN',   'DOMAIN NAME', 
+	       'FQDN',     'MACHINE FULL NAME', 
+	       ); 
+
+    %Default = ('EXEC_DIR', '/usr/local/fml',
+		'ML_DIR',   '/var/spool/ml', 
+		'DOMAIN',   $DOMAINNAME,
+		'FQDN',     $FQDN,
+		); 
+
+    %MakeFmlProc = ('init',    'do_init',
+		    'install', 'do_install',
+		    'setq',    'do_setq',
+		    'new',     'do_newml',
+		    'newml',   'do_newml',
+		    'add',     'do_adduser',
+		    'adduser', 'do_adduser',
+		    'bye',     'do_byeuser',
+		    'byeuser', 'do_byeuser',
+		    );
+
+    # signal handling
+    $SIG{'ALRM'} = 'TimeOut';
+    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
+}
+
+
+sub InitFmlConfig
+{
+    local($cmd, $prompt, $v);
+
+    print "---Please Define Your Fml System \n\n";
+
+    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
+    eval($s);
+
+    for (@Config) {
+	$k = $_;
+	$p = $Config{$_};
+	$v = $CurConfig{$_} ? $CurConfig{$_} : $Default{$_};
+
+	printf "%-20s %s ", $p, "[$v]";
+
+	$cmd = &GetString;
+	
+	$cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
+	$buf .= sprintf("  set \$%-10s = '%s';\n", $k, $cmd);
+	&do_setq($k, $cmd);
+    }
+
+    print "\n$buf\n";
+
+    $buf = &Dumpvar('Config');
+    &SaveConfig($buf);
+}
+
+
+sub SaveConfig
+{
+    local($buf) = @_;
+
+    if (-f $FML_CONFIG) { rename($FML_CONFIG, "${FML_CONFIG}.bak");}
+
+    open(F, ">> $FML_CONFIG") || die("Cannot save config to $FML_CONFIG");
+    select(F); $| = 1; select(STDOUT);
+    print F "$buf\n";
+    close(F);
+}
+
+
+sub FlushLog
+{
+    &Cat($CONFIG_LOG);
+
+    unlink $CONFIG_TMP;
+    unlink $CONFIG_LOG;
+}
+
+
+sub Cat
+{
+    local($in) = @_;
+
+    open(IN, $in) || return;
+     $| = 1;
+    while (<IN>) { print OUT $_;}
+    close(IN); 
+}
+
+
+sub Copy
+{
+    local($in, $out) = @_;
+
+    open(IN,  $in)      || (&Log("CopyIN: $!"), return);
+    open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
+    select(OUT); $| = 1; select(STDOUT); 
+    while (<IN>) { print OUT $_;}
+    close(OUT);
+    close(IN); 
+}
+
+
+sub AppendString2File
+{
+    local($s, $file) = @_;
+
+    open(APP, ">> $file") || return 0;
+    select(APP); $| = 1; select(STDOUT);
+    print APP "$s\n" if $s;
+    close(APP);
+}
+
+
+sub Warn { print STDERR @_; print STDERR "\n";}
+
+
+sub Log 
+{ 
+    &AppendString2File($_[0], $CONFIG_LOG);
+}
+
+
+sub SignalLog 
+{ 
+    local($sig) = @_; 
+    print STDERR "Caught Signal[$sig], shutting down ... \n\n";
+    &FlushLog;
+    exit(1);
+}
+
+
+sub InitTTY
+{
+    if (-e "/dev/tty") { $console = "/dev/tty";}
+
+    open(IN, "<$console") || open(IN,  "<&STDIN"); # so we don't dingle stdin
+    open(OUT,">$console") || open(OUT, ">&STDOUT");# so we don't dongle stdout
+    select(OUT); $| = 1; #select(STDOUT); $| = 1;
+}
+
+
+sub InitMenu
+{
+    local($menu);
+
+    open(MENU, "etc/menu") || return;
+
+    while (<MENU>) {
+
+	if (/^\-\-(\S+)/) {
+	    $menu = $1;
+	    next;
+	}
+
+	if (/^\.fp\s+(\S+)/) {
+	    chop;
+	    $FP{$menu} = $1;
+	    next;
+	}
+
+	if (/^\.next\s+(\S+)/) {
+	    chop;
+	    $Next{$menu} = $1;
+	    next;
+	}
+
+	if (/^\.var\s+(\S+)/) {
+	    chop;
+	    $Var{$menu} = $1;
+	    next;
+	}
+
+	if (/^\.prompt\s+(\S+)/) {
+	    chop;
+	    $Prompt{$menu} = $1;
+	    next;
+	}
+
+
+	$Menu{$menu} .= $_;
+
+    }
+    close(MENU);
+}
+
+
+sub Menu
+{
+    local($_) = @_;
+
+    &InitMenu;
+
+    if ($opt_h) {
+	$CurMenuP = "HELP";
+	&ShowMenu;
+    }
+    elsif (@ARGV) {
+	&ExecCmd(join(" ",@ARGV));
+    }
+    else {
+	&Interactive;
+
+	print "\n";
+    }
+}
+
+
+sub ExecCmd
+{
+    local($_) = @_;
+    local(@argv, $fp);
+
+    @argv = split(/\s+/, $_);
+
+    # reset %CurConfig from Config Name Space;
+    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
+    eval($s);
+
+    # function pointer;
+    $fp = shift @argv;
+    $fp = $FP{$fp} ? $FP{$fp} : $fp;
+
+    if ($MakeFmlProc{$fp}) {
+	$fp = $MakeFmlProc{$fp};
+	&$fp(@argv);
+    }
+    else {
+	print "   Command [$fp] NOT DEFINED\n";
+	print "   Please see the document 'INSTALL'\n\n";
+	return;
+    }
+
+}
+
+
+sub DoMenu
+{
+    local($menu) = @_;
+    local($cmd, $prompt, $status);
+
+    $Level++;
+
+    print "DoMenu<$Level> $menu\n" if $debug;
+
+    print "=" x 30;
+    print "\n";
+    print $Menu{$menu};
+
+    # call next menu when not get variables;
+    if ($Next{$menu} && (! $Var{$menu})) {
+	$status = &DoMenu($Next{$menu});
+	return $status;
+    }
+
+    # get variables
+    if ($Var{$menu}) {
+	$prompt = $Prompt{$menu} || 'INPUT';
+	print " $prompt> ";
+
+	$cmd = &GetString;
+	$cmd = "setq $Var{$menu} $cmd";
+
+	push(@History, $cmd) if $cmd;
+
+	return ""     if $cmd =~ /^\S$/;
+	return ""     if $cmd =~ /^\s*$/;
+	return 'LAST' if $cmd eq "q";
+    }
+
+    if ($cmd) {
+	$status = &ExecCmd($cmd);
+    }
+
+    if ($FP{$menu}) { 
+	$cmd = $FP{$menu};
+	$status = &ExecCmd($cmd);
+    }
+
+
+    # next menu;
+    if ($Next{$menu}) { 
+	$status = &DoMenu($Next{$menu});
+    }
+
+    $Level--;
+    $status;
+}
+
+
+sub Interactive 
+{
+    select(OUT);
+
+    local($menu);
+
+    while (1) {
+	# top menu;
+	if ($TheFirstTime) {
+	    $menu = $TheFirstTime++ == 1 ? "INIT": "INIT";
+	}
+	else {
+	    $menu = 'TOP';
+	}
+
+	if ($status eq 'LAST') { last;}
+	$status = &DoMenu($menu);
+
+	sleep 3;
+    }
+}
+
+
+sub gets
+{
+    local($.);
+    $_ = <IN>;
+}
+
+
+sub GetString
+{
+    local($s);
+
+    $s = &gets;
+
+    # ^D
+    if ($s eq "")  { exit 0;}
+    chop $s;
+
+    $s;
+}
+
+
+
+##########################################################
+sub do_init
+{
+    print "do_init: @_\n" if $debug;
+
+    # do_init;
+    print "\n\n";
+
+    for ($Config'EXEC_DIR, $Config'ML_DIR) {
+	if (! -d $_) {
+	    print "\tmkdir $_\n";
+	    mkdir($_, 0755);
+	}
+    }
+
+    return 'LAST';
+}
+
+
+sub do_install
+{
+    local($cmd);
+
+    print "---Ready to install the Fml system, O.K.? [y/n] ";
+    $cmd = &GetString;
+
+    if ($cmd ne 'y') {
+	print "STOP. (DO NOT INSTALLED)\n";
+	return;
+    }
+    else {
+	print "\nsbin/install.sh $Config'EXEC_DIR\n"; #';
+    }
+
+    if (-f "sbin/install.sh") {
+	system "/bin/sh sbin/install.sh $Config'EXEC_DIR"; #';
+    }
+    else {
+	print "Please do \"makefml\" in the top directory of the source\n";
+    }
+}
+
+
+sub do_setq
+{
+    local($k, $v) = @_;
+
+    print "do_setq: @_\n" if $debug;
+
+    eval("\$Config'$k = '$v';");
+    print $@ if $@;
+}
+
+
+sub do_new { &do_newml(@_);}
+sub do_newml
+{
+    local($ml) = @_;
+    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
+
+    print "---Creating $ml mailing list\n";
+
+    $user     = (getpwuid($<))[0];
+    $exec_dir = $CurConfig{'EXEC_DIR'};
+    $ml_dir   = $CurConfig{'ML_DIR'};
+    $domain   = $CurConfig{'DOMAIN'};
+    $fqdn     = $CurConfig{'FQDN'};
+
+    # Mailing list name is all lower case;
+    $ml =~ tr/A-Z/a-z/;
+
+    # mkdir ML Directory
+    mkdir("$ml_dir/$ml", 0700);
+    &Conv($ml, "$exec_dir/cf/__makefml", "$FML_RCDIR/$ml.cf");
+
+    if ($OS_TYPE && open(CF, ">> $FML_RCDIR/$ml.cf")) {
+	print CF "\n\# makefml defines the following.\n";
+	print CF "\$COMPAT_${OS_TYPE} = 1;\n";
+	close(CF);
+    }
+
+    # 
+    # make ml/config.ph
+    system "$exec_dir/cf/config $FML_RCDIR/$ml.cf > $ml_dir/$ml/config.ph";
+
+    # generate samples, includes and aliases in $exec_dir/include
+    mkdir("$exec_dir/include", 0755);
+
+    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$FML_RCDIR/aliases.$ml");
+    &Conv($ml, "$exec_dir/etc/samples/__include", "$exec_dir/include/$ml");
+
+    print "Please see $FML_RCDIR/aliases.$ml (example of the aliases)\n\n";
+    &Cat("$FML_RCDIR/aliases.$ml");
+}
+
+
+sub do_adduser
+{
+    local($ml, $member) = @_;
+    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
+
+    print "---Addming $member to $ml mailing list\n";
+
+    $user     = (getpwuid($<))[0];
+    $exec_dir = $CurConfig{'EXEC_DIR'};
+    $ml_dir   = $CurConfig{'ML_DIR'};
+    $domain   = $CurConfig{'DOMAIN'};
+    $fqdn     = $CurConfig{'FQDN'};
+
+    # Mailing list name is all lower case;
+    $ml =~ tr/A-Z/a-z/;
+
+    # mkdir ML Directory
+    if (! -d "$ml_dir/$ml") {
+	print "$ml ML NOT CREATED\n";
+	return;
+    }
+
+    # add 
+    for ("$ml_dir/$ml/members", "$ml_dir/$ml/actives") {
+	print "Append $member to $member\n" if $debug;
+	&AppendString2File($member, $_);
+    }
+}
+
+
+sub do_byeuser
+{
+    local($ml, $member) = @_;
+    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
+
+    print "---Creating $ml mailing list\n";
+
+    $user     = (getpwuid($<))[0];
+    $exec_dir = $CurConfig{'EXEC_DIR'};
+    $ml_dir   = $CurConfig{'ML_DIR'};
+    $domain   = $CurConfig{'DOMAIN'};
+    $fqdn     = $CurConfig{'FQDN'};
+
+    # Mailing list name is all lower case;
+    $ml =~ tr/A-Z/a-z/;
+
+    # mkdir ML Directory
+    if (! -d "$ml_dir/$ml") {
+	print "$ml ML NOT CREATED\n";
+	return;
+    }
+
+    # delete 
+    for ("$ml_dir/$ml/members", "$ml_dir/$ml/actives") {
+	print "Delete $member in $_\n" if $debug;
+	&Repl($member, $_);
+    }
+}
+
+
+sub Repl
+{
+    local($member, $file) = @_;
+
+    open(F, $file)           || (&Warn("cannot open $file"), return 0);
+    open(NEW, "> $file.new") || (&Warn("cannot open $file.new"), return 0);
+    select(NEW); $| = 1; select(STDOUT);
+
+    while (<F>) {
+	s/^\#\s+$member/\#\#BYE $member/i; # off;
+	s/^$member/\#\#BYE $member/i;
+	print NEW $_;
+    }
+
+    close(NEW);
+    close(F);
+
+    rename($file, "${file}.bak") || 
+	(&Warn("cannot rename $file $file.bak"), return 0);
+    rename("${file}.new", $file) ||
+		(&Warn("cannot rename $file.new $file"), return 0);
+}
+
+
+sub Conv
+{
+    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $user);
+    local($ml, $example, $out) = @_;
+
+    $user     = (getpwuid($<))[0];
+    $exec_dir = $CurConfig{'EXEC_DIR'};
+    $ml_dir   = $CurConfig{'ML_DIR'};
+    $domain   = $CurConfig{'DOMAIN'};
+    $fqdn     = $CurConfig{'FQDN'};
+    $opts     = $CurConfig{'OPTS'};
+
+    # Mailing list name is all lower case;
+    $ml =~ tr/A-Z/a-z/;
+
+    open(NEW, $example)  || &Log("cannot open $example");
+    open(CF, "> $out")   || &Log("cannot open $out");
+    select(CF); $| = 1; select(STDOUT);
+    
+    while (<NEW>) {
+	s/_EXEC_DIR_/$exec_dir/g;
+	s/_ML_DIR_/$ml_dir/g;
+	s/_ML_/$ml/g;
+	s/_DOMAIN_/$domain/g;
+	s/_FQDN_/$fqdn/g;
+	s/_USER_/$user/g;
+	s/_OPTIONS_/$opts/g;
+	print CF $_;
+    }
+    close(NEW);
+    close(CF);
+}
+
+
+#####
+package dumpvar;
+
+sub main'Dumpvar 
+{
+    ($package, @vars) = @_;
+
+    local(*stab) = eval("*_$package");
+
+    while (($key, $val) = each(%stab)) {
+	{
+	    next if @vars && !grep($key eq $_,@vars);
+	    local(*entry) = $val;
+
+	    if (defined $entry) {
+		$buf .= "\$$key = '$entry';\n";
+	    }
+
+	    if (defined @entry) {
+		$buf .= "\@$key = (\n";
+		foreach $num ($[ .. $#entry) {
+		    $buf .= "  $num\t'",$entry[$num],"'\n";
+		}
+		$buf .= ");\n";
+	    }
+
+	    if ($key ne "_$package" && $key ne "_DB" && defined %entry) {
+		$buf .= "\%$key = (\n";
+		foreach $key (sort keys(%entry)) {
+		    $buf .= "  $key\t'",$entry{$key},"'\n";
+		}
+		$buf .= ");\n";
+	    }
+	}
+    }
+
+    return $buf;
+}
+
+1;
