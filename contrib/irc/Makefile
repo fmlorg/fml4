@@ -12,6 +12,6 @@
 
 SOURCES = libirc.pl exports/example.ph exports/stdin2irc.sh
 
-TARGET_DIR = ${CONTRIB_DIR}/irc
+TARGET_DIR = ${CONTRIB_DIR}/mail2irc
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"
