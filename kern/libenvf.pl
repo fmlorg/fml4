@@ -110,7 +110,12 @@ sub __EnvelopeFilter
     }
 
     # extract the buffer to check
-    if ($p >= 0 && $p < 1024) {
+    if ($e{'MIME:boundary'}) {
+	$xbuf    = substr($xbuf, $pmap[0], $pmap[$#pmap]);
+	$fparbuf = substr($xbuf, $pmap[0], $pmap[1]); # first par(agraph)
+	$lparbuf = substr($xbuf, $pmap[ $#pmap - 1 ], $pmap[$#pmap]); # last
+    }
+    elsif ($p >= 0 && $p < 1024) {
 	$xbuf    = substr($e{'Body'}, $pmap[0], $pmap[$#pmap]);
 	$fparbuf = substr($e{'Body'}, $pmap[0], $pmap[1]); # first par(agraph)
 	$lparbuf = substr($e{'Body'}, $pmap[ $#pmap - 1 ], $pmap[$#pmap]); # last
