@@ -1,4 +1,3 @@
-#!/usr/local/bin/perl
 #-*- perl -*-
 #
 # Copyright (C) 2000 Ken'ichi Fukamachi
