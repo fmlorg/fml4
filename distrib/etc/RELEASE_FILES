@@ -100,6 +100,7 @@ bin/popfml_master.sh
 bin/more_secure_cf.pl
 bin/translate.pl
 bin/resend.pl
+bin/confirmd_master.sh
 
 SBIN_SOURCES:
 sbin/install.sh
