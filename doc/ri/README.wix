@@ -177,18 +177,27 @@ You can obtain fml sources at the URL
 
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-です。リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼
-ばれ fml-current.日付.tar.gz という名前で置かれています。日付の新しい
+です。この下には
+
+	release/	正式リリース
+	stable/		正式リリースにバグ修正のみをしたシリーズ
+	current/	開発版
+
+などがあります。説明は例えば
+=E
+See this url for explanation of ftp hierarchy:
+
+.url http://www.fml.org/fml/download.html
+
+リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼ばれファ
+イル名には日付(YYYYMMDD, e.g. 200002029)がついています。日付の新しい
 (生きのいい:-)のをどうぞ。ここの階層以下にはメールに関連するプログラム
-群も置いてあります。最新版は
+群も置いてあります。
 =E
 Please get the latest one, which is called fml-current. You'll find
 fml-current, official released and other mail related sources at the
-URL. The latest one is
+URL. 
 
-.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
-
-です。
 
 [Documents] 
 
