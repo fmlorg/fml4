@@ -17,7 +17,7 @@ sub Split
 {
     local($f) = @_;
 
-    open(F, $f) || die $!;
+    open(F, $f) || die("cannot open $f: $!");
 
     $n =  $f;
     $n =~ s#.*/##;
