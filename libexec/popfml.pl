@@ -598,7 +598,6 @@ sub PopFmlDoExec
     }
 
     if (open(PROG_IN, "|$prog")) {
-	binmode(PROG_IN);
 	&Debug("open |$prog") if $debug;
     }
     else {
