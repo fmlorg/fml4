@@ -1,11 +1,885 @@
 		RELEASE NOTES
 
 				深町 賢一
+=E
+				Ken'ichi Fukamachi
+==
 				fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
+			
 
 refer しそこなかったらごめんなさい _o_
 
-*** until 1997/08/10 17:00
+.if LANG == ENGLISH
+*** EXECUME ME. THE TRANSLATION OF THIS FILE IS INCOMPLETE. ***
+.fi
+
+The original author and the maintainer is Ken'ichi Fukamachi
+<fukachan@fml.org>. 
+
+* the main library includes the following contribution as a standard.
+
+   library			Author
+   -------------------------------------------------------------
+   src/libtraffic.pl          Yuao TANIGAWA <yuao@infonia.or.jp>
+   src/libmember_name.pl      Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+* I use the following MIME library in standard libraries
+
+   src/mime*                  c1977@crcsn82.mdc.crc.co.jp (Noboru Ikuta)
+
+* and also fml packages includes the following famous library for convenience.
+
+   src/jcode.pl               Kazumasa Utashiro <utashiro@iij.ad.jp>
+
+* On documents, the most important "help" file is upgraded by
+
+			umura@nn.solan.chubu.ac.jp
+			metalman@kt.rim.or.jp
+			fukachan@sapporo.iij.ad.jp
+
+  and "FILES" is maintained by Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>.
+
+* contrib/ includes other contributions which must be referred
+hereafter in this document.
+
+* A lot of patches and contributions are referred hereafter in this
+document. Thanks to a lot of contributors.
+
+** Lastly in the first development stage, I am grateful to
+tsubai@iri.co.jp (tsubai@phys.titech.ac.jp) for fruitful discussion on
+the design and implementation of Mailing List server, perl, operating
+systems and so on.
+
+
+********** UNTIL Sat Aug 15 22:09:55 JST 1998 *************
+
+---------------------------------------
+Date:    Thu, 13 Aug 1998 23:48:07 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 04972
+
+modify pattern match for libamctl.pl, libmember_name.pl
+
+---------------------------------------
+Date:    Wed, 12 Aug 1998 20:53:18 +0900 (JST)
+Thanks to: Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>
+
+documents patch
+FILES.jp for fml 2.2
+
+------------------------------------------
+Date:    Mon, 10 Aug 1998 15:01:34 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 04946
+
+patch to bug fix makefml
+
+------------------------------------------
+Date:    Sun, 9 Aug 1998 23:27:06 +0900
+In fml-support ML's Count: 04938
+
+2.2_BETA PHASE sets in
+
+------------------------------------------
+Date:    Fri, 7 Aug 1998 10:14:05 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04931
+
+patch fml.pl's Date:
+
+------------------------------------------
+Date:    Thu, 6 Aug 1998 13:14:05 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 04926
+
+fix typo; include-mead
+
+------------------------------------------
+Date:    Wed, 5 Aug 1998 11:31:35 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 04923
+
+fix typo ; fml.pl install.wix
+
+---------------------------------------------
+
+Date:    Sat, 1 Aug 1998 23:53:05 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 04902
+
+fix document typo
+
+---------------------------------------
+Date:    Fri, 17 Jul 1998 14:42:34 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 04820
+
+fix typo filter.wix mead.wix
+
+------------------------------------------
+Date:    Thu, 16 Jul 1998 11:27:03 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 04808
+
+following this, mead creates absolute path's examples. 
+
+------------------------------------------
+Date:    Fri, 3 Jul 1998 12:05:04 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 04753
+
+bug fix libarchive.pl import function
+
+------------------------------------------
+Date:    Thu, 2 Jul 1998 20:28:34 +0900
+Thanks to: NAKAMURA Kouzi <sleepy@tuna.array.co.jp>
+In fml-support ML's Count: 04751
+
+fix $CPU_TYPE_MANUFACTURER_OS match condition
+
+------------------------------------------
+Date:    Thu, 2 Jul 1998 13:46:34 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04750
+
+bug fix &COPY_FIELD();
+
+fix typo fml.pl
+
+------------------------------------------
+Date:    Sun, 28 Jun 1998 00:46:44 +0900 (JST)
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+remove unused functions in &DoSetMemberList().
+
+------------------------------------------
+Date:    Sat, 27 Jun 1998 21:18:04 +0900
+Thanks to: i16@imasy.or.jp (=?ISO-2022-JP?B?GyRCTlMhITAmMGxPOhsoQg==?=)
+In fml-support ML's Count: 04706
+
+fix confirm id generator to avoid e+\d+ syntax evaluation.
+
+------------------------------------------
+Date:    Wed, 24 Jun 1998 14:40:21 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+elaborate patch of libamctl.pl, mainly be "chaddr" more secure.
+
+------------------------------------------
+Date:    Wed, 24 Jun 1998 11:56:34 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04690
+
+remove "addr" command description from help file.
+bug fix %Procedure in libfml.pl
+
+------------------------------------------
+Date:    Sun, 21 Jun 1998 00:50:52 +0900
+Thanks to: NAKANO Masashi <nakano@airnet.ne.jp>
+
+fix typo of INSTALL.wix
+
+------------------------------------------
+
+Date:    Thu, 4 Jun 1998 16:00:13 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04564
+
+patch for &COPY_FIELDS().
+
+---------------------------------------
+Date:    Wed, 3 Jun 1998 21:56:33 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04559
+
+Following this, change &DELETE_FIELD() specification which is changed
+to "delete tields irrespective of the value of
+$PASS_ALL_FIELDS_IN_HEADER.
+
+------------------------------------------
+Date:    Tue, 2 Jun 1998 11:28:33 +0900
+Thanks to: ssk@pfu.co.jp
+In fml-support ML's Count: 04554
+
+service tool to control fml on control panel on NT4.
+
+http://member.nifty.ne.jp/~ssk/download.html
+
+------------------------------------------
+Date:    Mon, 1 Jun 1998 23:54:04 +0900
+Thanks to: Takuro KITAME / =?ISO-2022-JP?B?GyRCS0xMXBsoQiAbJEJCc086GyhC?=
+	 <kitame@northeye.com>
+In fml-support ML's Count: 04551
+
+add Precedence: in a mail from msend.pl
+
+------------------------------------------
+Date:    Tue, 26 May 1998 21:19:03 +0900
+Thanks to: Masaki Ikeda <masaki@orange.co.jp>
+In fml-support ML's Count: 04508
+
+libsynchtml.pl bug
+
+------------------------------------------
+Date:    Sat, 23 May 1998 00:43:03 +0900
+Thanks to: KOYAMA Youichi <koyama@kuis.kyoto-u.ac.jp>
+In fml-support ML's Count: 04471
+
+following this, libnntp.pl sends MODE READER before main routine.
+
+------------------------------------------
+Date:    Thu, 14 May 1998 16:56:02 +0900
+Thanks to: Mamoru Takeuchi <take@psrc.isac.co.jp>
+In fml-support ML's Count: 04402
+
+fix ntfml bug to detect OS in NT4 case
+
+------------------------------------------
+Date:    Thu, 7 May 1998 23:21:02 +0900
+Thanks to: "UENO Kazuaki" <kazua-u@auaua.ml.org>
+In fml-support ML's Count: 04366
+
+following this, fix libsynchtml.pl special charactor conversion bug
+
+------------------------------------------
+Date:    Fri, 1 May 1998 14:01:02 +0900
+Thanks to: kuni@edit.ne.jp (OGAWA Kunihiko)
+In fml-support ML's Count: 04354
+
+makefml patch to fix Lock() call bug
+
+------------------------------------------
+Date:    Mon, 13 Apr 1998 19:53:02 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04205
+
+patch for cf/config
+
+
+------------------------------------------
+Date:    Mon, 13 Apr 1998 02:12:39 +0900
+In fml-support ML's Count: 04200
+
+add makefml command as follows
+
+	makefml off	ML	address
+	makefml on	ML	address
+	makefml chaddr	ML	old-addr new-addr
+	makefml matome	ML	address 引数 
+	makefml skip	ML	address
+
+------------------------------------------
+Date:    Mon, 6 Apr 1998 15:16:32 +0900
+Thanks to: Mamoru Takeuchi <take@psrc.isac.co.jp>
+In fml-support ML's Count: 04166
+
+patch to fix ntfml.pl's perl path
+
+------------------------------------------
+Date:    Mon, 6 Apr 1998 14:50:05 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04165
+
+msend.pl -q fix patch
+
+------------------------------------------
+Date:    Fri, 3 Apr 1998 20:35:33 +0900
+Thanks to: TAMURA Kent <kent@hauN.org>
+In fml-support ML's Count: 04153
+
+HTML 4.0 and CSS patch
+
+------------------------------------------
+Date:    Tue, 24 Mar 1998 11:37:37 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 04108
+
+libnewmember_name.pl upgrade
+
+------------------------------------------
+Date:    Sat, 21 Mar 1998 01:52:34 +0900
+Thanks to: mike@cradle.titech.ac.jp (Satoru FUJITANI)
+In fml-support ML's Count: 04086
+
+patch for spool21html
+
+------------------------------------------
+Date:    Thu, 19 Mar 1998 19:41:32 +0900
+Thanks to: Wataru Nagata <nagata@tarts.tech-arts.co.jp>
+In fml-support ML's Count: 04080
+
+Message-ID cache bug
+
+---------------------------------------
+Date:    Thu, 12 Mar 1998 09:18:02 +0900
+In fml-support ML's Count: 04020
+
+bug fix makefml example generation for qmail
+We should not create examples for qmail/assign/users on NT.
+
+---------------------------------------
+Date:    Sat, 7 Mar 1998 20:30:22 +0900
+In fml-support ML's Count: 04002
+
+admin members 
+admin actives 
+
+change arguments of &Admin* functions to enable the function to call
+user functions defined as user commands.
+
+------------------------------------------
+Date:    Wed, 4 Mar 1998 08:50:40 +0900
+In fml-support ML's Count: 03979
+
+re-check in arch/WINDOWS_NT4/bootstrap (0 byte! check in miss?)
+
+------------------------------------------
+Date:    Mon, 23 Feb 1998 10:29:33 +0900
+Thanks to: Hisaaki Shibata <shibata@opost1.netspace.or.jp>
+In fml-support ML's Count: 03927
+
+send back warning for "matome 0" request when not spooing
+
+------------------------------------------
+Date:    Sat, 14 Feb 1998 23:25:03 +0900
+In fml-support ML's Count: 03886
+
+>      * 2.1B
+>	デフォールトでこれらの変数(2.1Aではテスト)を
+>	    $MIME_EXT_TEST = 1;
+>	    $FOP_HACK = 1;
+>	    $USE_MTI_TEST = 1;
+>	ON にしています(この三箇所以外は 2.1A#45 と同じ)。
+>
+>いずれも将来消そうと思っている変数を ON にした状態(変数を消したら 1 の
+>状態にするつもりの設定)でテストしたいとおもいます。
+>
+>2.1A は MTI が目標だったので、そろそろ締めたい。
+>2.1B #2 かもちょっとあとあたりで confirmd が import される予定です(謎)
+>2.1B のメインは confirmd です。
+
+------------------------------------------
+Date:    Sun, 25 Jan 1998 01:34:03 +0900
+In fml-support ML's Count: 03782
+
+fix a hook of EvnelopeFilter
+
+---------------------------------------------
+Date:    Mon, 19 Jan 1998 20:53:35 +0900
+In fml-support ML's Count: 03731
+
+in fml-support ML's Count:03730 
+thanks to Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+typo ARLM
+
+---------------------------------------
+Date:    Mon, 19 Jan 1998 17:50:05 +0900
+Thanks to: Masahiro Umegaki <ume@st.rim.or.jp>
+In fml-support ML's Count: 03725
+
+bug of makefml on NT case.
+
+------------------------------------------
+Date:    Mon, 19 Jan 1998 15:11:32 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 03720
+
+patch for makefml GetTime() bug
+
+------------------------------------------
+Date:    Fri, 16 Jan 1998 18:51:32 +0900
+Thanks to: Masahiro Umegaki <ume@st.rim.or.jp>
+In fml-support ML's Count: 03706
+
+following this, ntfml.pl is changed back to sleep in for loop.
+
+------------------------------------------
+Date:    Thu, 15 Jan 1998 12:33:34 +0900
+Thanks to: Masahiro Umegaki <ume@st.rim.or.jp>
+In fml-support ML's Count: 03690
+
+patch of popfml.pl
+
+------------------------------------------
+Date:    Thu, 15 Jan 1998 02:10:35 +0900
+In fml-support ML's Count: 03687
+
+MTI release
+
+------------------------------------------
+Date:    Mon, 12 Jan 1998 16:27:03 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 03674
+
+patch of makefml (permission)
+
+------------------------------------------
+Date:    Thu, 08 Jan 1998 23:04:46 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+Date:    Fri, 09 Jan 1998 21:58:50 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+contrib/localhack/release-2/member_name/
+
+>    member_name/patch/fml.pl.patch      : fml.pl へのパッチ
+>    member_name/patch/libamctl.pl.patch : libamctl.pl へのパッチ
+>    member_name/src/libmember_name.pl   : libmember_name.pl 本体
+>    member_name/readme.euc              : 簡易ドキュメント (EUCコード)
+
+------------------------------------------
+Date:    Thu, 8 Jan 1998 13:14:03 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 03652
+
+patch of libamctl.pl
+
+------------------------------------------
+Date:    Tue, 06 Jan 1998 23:55:53 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+bug of %ExtProcedure
+a lack of %ExtAdminProcedure
+modify &SecureP
+
+------------------------------------------
+Date:    Tue, 6 Jan 1998 23:12:33 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 03650
+
+bug fix libamctl.pl ($AUTO_REGISTRATION_LIMIT)
+
+------------------------------------------
+Date:    Tue, 30 Dec 1997 23:57:32 +0900
+Thanks to: HYOUDOH <hyoudo@kcn.or.jp>
+In fml-support ML's Count: 03634
+
+fix typo of documents
+
+------------------------------------------
+Date:    Tue, 30 Dec 1997 02:00:55 +0900
+Thanks to: Fumitaka Murayama <fm@nn.solan.chubu.ac.jp>
+
+contrib/localhack/release-2/mnews
+
+------------------------------------------
+Date:    Sat, 20 Dec 1997 21:43:34 +0900
+In fml-support ML's Count: 03615
+
+buf fix SendFile3
+
+------------------------------------------
+Date:    Sat, 20 Dec 1997 19:49:33 +0900
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03614
+
+bug fix EnvelopeFilter
+
+------------------------------------------
+Date:    Sat, 20 Dec 1997 10:53:33 +0900
+In fml-support ML's Count: 03610
+
+fix libmoderated.pl typo
+
+------------------------------------------
+Date:    Sun, 14 Dec 1997 21:52:02 +0900
+In fml-support ML's Count: 03569
+
+add $MAX_MEMBER_LIMIT
+add filtering (EnvelopeFilter)
+
+---------------------------------------
+Date:    Sat, 6 Dec 97 16:02:35 +0900
+In fml-support ML's Count: 03525
+
+bug fix Lines:
+
+---------------------------------------
+Date:    Thu, 4 Dec 97 19:15:03 +0900
+Thanks to: Fumitoshi UKAI <ukai@jp.hpl.hp.com>
+In fml-support ML's Count: 03518
+
+patch of gen_summary.pl
+
+------------------------------------------
+Date:    Mon, 1 Dec 97 21:54:34 +0900
+Thanks to: Fumitoshi UKAI <ukai@jp.hpl.hp.com>
+In fml-support ML's Count: 03506
+
+bug fix makefml pgp code
+
+------------------------------------------
+Date:    Mon, 1 Dec 97 11:25:03 +0900
+Thanks to: Tomoyuki Asakawa <tomoyuki@poison.marimo.or.jp>
+In fml-support ML's Count: 03502
+
+bug fix around confirmation codes to recognize .*confirm id.* sequence
+e.g. the case of "> confirm .."
+
+------------------------------------------
+Date:    Sat, 29 Nov 97 05:29:04 +0900
+Thanks to: Kaz Ohwaki <k@yt.com>
+In fml-support ML's Count: 03486
+
+add effective code when  $PERMIT_COMMAND_FROM  = "moderator";
+
+------------------------------------------
+Date:    Mon, 24 Nov 97 10:52:33 +0900
+Thanks to: Hideto Sakaguchi <saka@rikuden.co.jp>
+In fml-support ML's Count: 03478
+
+patch of libra.pl
+
+------------------------------------------
+Date:    Sun, 23 Nov 1997 01:56:29 +0900
+Thanks to: Fumitaka Murayama <fm@nn.solan.chubu.ac.jp>
+
+new help.example2
+
+------------------------------------------
+Date:    Sat, 22 Nov 97 13:05:02 +0900
+In fml-support ML's Count: 03474
+
+in fml-support ML's Count:03467 
+following Kawabe Takayuki <kawabe@kescriv.kj.yamagata-u.ac.jp> 
+
+remove debug code of ntfml (hard IO)
+
+------------------------------------------
+Date:    Wed, 19 Nov 97 23:39:03 +0900
+Thanks to: Manami TSUBOI <tsuboi@po.across.or.jp>
+In fml-support ML's Count: 03451
+
+following the patch, add links to top index
+
+------------------------------------------
+Date:    Mon, 17 Nov 97 16:40:35 JST
+Thanks to: oota toshiya <oota@pes.com1.fc.nec.co.jp>
+In fml-support ML's Count: 03441
+
+patch to use crypt() on FreeBSD
+
+------------------------------------------
+Date:    Mon, 17 Nov 97 00:04:33 JST
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03440
+
+bug fix libMIME.pl Q Encoding bug
+
+------------------------------------------
+Date:    Thu, 13 Nov 97 14:36:33 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 03434
+
+fix log file permission (makefml bug)
+
+------------------------------------------
+Date:    Mon, 10 Nov 97 21:37:33 JST
+In fml-support ML's Count: 03410
+
+downgraded ntfml (pop version)
+
+------------------------------------------
+Date:    Mon, 10 Nov 97 18:36:33 JST
+Thanks to: Masaki Ikeda <masaki@orange.co.jp>
+In fml-support ML's Count: 03409
+
+add spool2html and config to Makefile
+fix typo of doc/op
+
+------------------------------------------
+Date:    Mon, 10 Nov 97 12:26:03 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 03405
+
+thanks to libsynchtml.pl debug info
+
+------------------------------------------
+Date:    Mon, 3 Nov 97 22:27:04 JST
+In fml-support ML's Count: 03378
+
+add description on moderator to INSTALL* and op*
+
+------------------------------------------
+Date:    Mon, 3 Nov 97 00:12:03 JST
+In fml-support ML's Count: 03371
+
+change msend.pl. if -q, it does not show newsyslog message.
+
+------------------------------------------
+Date:    Sun, 2 Nov 97 15:13:03 JST
+In fml-support ML's Count: 03368
+
+fix @sp, %sp in libfop
+
+------------------------------------------
+Date:    Thu, 30 Oct 97 00:43:03 JST
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 03363
+
+remove debug message
+bug fix number handling of cf/config (-1 -> -1, not "-1");
+
+------------------------------------------
+Date:    Mon, 27 Oct 97 00:54:34 JST
+In fml-support ML's Count: 03343
+
+>てなわけでDistributionのドキュメント群の中をサーチするURLを作ってみた
+>あるよ
+>
+>	http://www.fml.org/fml/search-j.html (Japanese のものたち)
+>	http://www.fml.org/fml/search-e.html (English のものたち)
+>
+>深町＠甘辛しゃんにはまっている
+
+------------------------------------------
+Date:    Sun, 26 Oct 97 18:07:03 JST
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03342
+
+patch of fop (file number limit restriction bug)
+
+------------------------------------------
+Date:    Thu, 23 Oct 1997 22:54:13 +0900
+
+define $FLd as "@Fld"
+
+------------------------------------------
+Date:    Mon, 13 Oct 97 21:38:02 JST
+Thanks to: Takashi Yokoyama <yoko@galaxy.imasy.or.jp>
+In fml-support ML's Count: 03292
+
+fix order in cf/MANIFEST
+
+------------------------------------------
+Date:    Sat, 11 Oct 97 19:35:32 JST
+Thanks to: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+In fml-support ML's Count: 03286
+
+fix to avoide errors refered on http://sariel.miyako.co.jp/~mine/fml/.
+
+------------------------------------------
+Date:    Mon, 06 Oct 1997 21:28:58 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+------------------------------------------
+Date:    Sun, 5 Oct 97 23:51:37 JST
+In fml-support ML's Count: 03274
+
+fix popfml.pl, to "remove [\r\n]"
+
+------------------------------------------
+Date:    Sun, 5 Oct 97 22:16:34 JST
+In fml-support ML's Count: 03271
+
+change passwd.pl , which can run without -I
+
+------------------------------------------
+Date:    Wed, 1 Oct 97 16:40:35 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 03234
+
+path of bug fix reverse order of libysnchtml.pl 
+
+
+------------------------------------------
+Date:    Thu, 18 Sep 97 23:44:04 JST
+Thanks to: Fumitaka Murayama <fm@nn.solan.chubu.ac.jp>
+In fml-support ML's Count: 03202
+
+bug fix typo
+
+------------------------------------------
+Date:    Wed, 10 Sep 97 00:30:12 JST
+In fml-support ML's Count: 03152
+
+fix trap_counter
+
+------------------------------------------
+Date:    Wed, 10 Sep 97 00:23:03 JST
+In fml-support ML's Count: 03151
+
+fix sort fucntions of file operationgs ("mget")
+add dup check in archiving
+
+------------------------------------------
+Date:    Tue, 9 Sep 97 22:05:04 JST
+In fml-support ML's Count: 03148
+
+fix fmlserv commands 
+	fmlserv.pl
+	libamctl.pl
+	libconfirm.pl
+
+------------------------------------------
+Date:    Mon, 8 Sep 97 17:21:00 JST
+Thanks to: "Masahiko Iwamoto" <iwamoto@mtc.telcom.oki.co.jp>
+In fml-support ML's Count: 03127
+
+"matome 0" mechanism bug
+
+------------------------------------------
+Date:    Fri, 5 Sep 97 12:14:02 JST
+Thanks to: Seigo Kishiba <kishiba@ipc.hiroshima-u.ac.jp>
+In fml-support ML's Count: 03100
+
+bug fix trap_counter
+
+------------------------------------------
+Date:    Mon, 1 Sep 97 21:58:04 JST
+Thanks to: urat@first.tsukuba.ac.jp (Yutaka Uratochi)
+In fml-support ML's Count: 03088
+
+------------------------------------------
+Date:    Thu, 28 Aug 97 15:10:18 JST
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03077
+
+patch for makefml
+
+------------------------------------------
+Date:    Thu, 28 Aug 1997 19:47:08 +0900 (JST)
+Thanks to: urat@first.tsukuba.ac.jp (Yutaka Uratochi)
+
+fix doc/INSTALL
+
+------------------------------------------
+Date:    17 Aug 1997 18:34:27 GMT
+Thanks to: fukachan@sapporo.iij.ad.jp (Ken'ichi Fukamachi)
+Newsgroups: fj.sources
+Distribution: world
+NNTP-Posting-Host: eve.sapporo.iij.ad.jp
+
+fml 2.1 release 
+
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-2.1.tar.gz
+
+------------------------------------------
+Date:    Wed, 13 Aug 97 23:00:05 JST
+Thanks to: Ritsu Seo <seo@osk.threewebnet.or.jp>
+In fml-support ML's Count: 03046
+
+bug fix INSTALL
+
+------------------------------------------
+Date:    Tue, 12 Aug 1997 22:36:35 +0900 (JST)
+Thanks to: Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>
+
+update doc/FILES
+
+------------------------------------------
+Date:    Tue, 12 Aug 97 12:47:02 JST
+Thanks to: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+In fml-support ML's Count: 03045
+
+>Subject: Re: "Secure Alert" mail. 
+>in fml-support ML's Count:03027 
+>Kenichi Makino <makino@odi.epson.co.jp> さん  wrote:
+>>    &Mesg(*e, ">>> $_\n\tCommand Syntax Error: without ^#") if !/^\#/;
+>>    &Mesg(*e, ">>> $_\n\tCommand Syntax Error: expect \"# English-word\"")
+>>        if /^\#\W*/;
+>
+>FIX
+
+add $MAIL_LIST_ACCEPT_COMMAND 
+modify cf/MANIFEST and doc/ri/INSTALL.wix
+remove obsolete $Permit{'ra:req:passwd'} _o_ 
+
+------------------------------------------
+Date:    Mon, 11 Aug 97 23:51:00 JST
+Thanks to: HYODO Takashi <hyodo@integra.co.jp>
+In fml-support ML's Count: 03044
+
+bug fix libra.pl
+
+------------------------------------------
+Date:    Thu, 7 Aug 97 23:12:02 JST
+In fml-support ML's Count: 03030
+
+$MAIL_LIST_ACCEPT_COMMAND
+
+------------------------------------------
+Date:    Thu, 7 Aug 97 11:20:03 JST
+Thanks to: Kenichi Makino <makino@odi.epson.co.jp>
+In fml-support ML's Count: 03027
+
+change fix warning message condition in &Command()
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 22:29:03 JST
+In fml-support ML's Count: 03023
+
+change &Command() statements to check whether invalid commands or not
+
+   if $COMMAND_ONLY_SERVER (--ctladdrではセットされてない)
+	あらゆる - # あらゆる
+   fi
+
+   if input not match "# [A-Za-z0-9_]+" 
+	if $USE_WARNING
+		warning => ユーザー
+	else 
+		無視して次へゴーゴー
+	fi
+   fi
+
+   # よってここではすでに "# [A-Za-z0-9_]+" format のはず
+   &SecureP	チェック
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 19:15:17 JST
+In fml-support ML's Count: 03022
+
+Toward 2.1 Release
+
+	document の細かい修正
+	こまかい bug fix をしました。
+	明らかな UNIX 依存コードを少し修正
+	architecture dependent code は sys/arch/OSごと/依存コード へ
+
+		* NT4 ports
+		makefml ベースインストーラー
+		new process scheduler on NT based on Win32::Process
+		INSTALL_on_NT4 の修正
+		doc/html/INSTALL_on_NT4/ ブランチを入れました。
+
+	config.ph が cf より新しい時は manual edit したとみなして
+	warning 
+
+あと ftp や www から ntfml を消去しました
+＃同じソースを使うのでもぉ分離している必要はない
+
+bug fix PGP_PATH
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 18:03:03 JST
+Thanks to: Yoshito Takeuchi <kinchan@axio.co.jp>
+In fml-support ML's Count: 03021
+
+bug fix "makefml config " operation mis-handles $AUTO_REGISTRATION_TYPE
+(fix etc/makefml/menu.conf)
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 11:53:17 JST
+Thanks to: Ryosuke OISHI <oru@tsudanuma.org>
+In fml-support ML's Count: 03019
+
+bug fix backward compatible codes in libcompat_cf2.pl
+# subscribe under CFVersion 2, 
+
+------------------------------------------
+Date:    Tue, 5 Aug 97 11:48:02 JST
+Thanks to: yogi@flavono.tis.co.jp (Yogi George)
+In fml-support ML's Count: 03017
+
+------------------------------------------
+Date:    Sat, 2 Aug 97 21:01:03 JST
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03014
+
+bug fix @LIBDIR in msedn.pl
 
 ------------------------------------------
 Date:    Thu, 7 Aug 97 15:01:00 JST
@@ -581,7 +1455,7 @@ config.ph 問題:
 Date:    Tue, 24 Jun 1997 18:22:59 +0900
 Thanks to: Hiroshi KISE <kise@imicom.or.jp>
 
-improve http://www.sapporo.iij.ad.jp/staff/fukachan/fml/index.html
+improve http://www.fml.org/fml/index.html
 
 
 
@@ -634,7 +1508,7 @@ In fml-support ML's Count: 02790
 
 patch to libconfirm.pl
 
-bug fix of http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+bug fix of http://www.fml.org/fml/
 
 
 ------------------------------------------
@@ -1653,9 +2527,8 @@ FIX:
 	のように変更してもらうか config.ph に書く
     
 
-
-.C	COMPATIBILITY について
-.S	Majordomo Compatibility "mode:marjodomo"
+*	COMPATIBILITY について
+*	Majordomo Compatibility "mode:marjodomo"
 
 ○ INFO
 
@@ -1694,7 +2567,7 @@ FIX:
    $listdir/$clean_list.strip   対応するものはなし
 
 
-.S	Distribute との Compatibility 
+*	Distribute との Compatibility 
 
    ややこしいことに
    mode:distribute というのは distribute compatible のことではないのだが
@@ -4440,3 +5313,13 @@ hml 1.6 (1991/05/01)	hirano@tkl.iis.u-tokyo.ac.jp
 1.7.3 93/03/10 fukachan@phys.titech.ac.jp 
        not queueing $QUEUE_FLUSH_COMMAND = '/usr/lib/sendmail -oi -q'
        and a little modification for another ML server
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

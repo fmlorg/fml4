@@ -1,13 +1,755 @@
-CHANGES 0.x(1993) => 97/06
+	CHANGES from 0.x(1993) to 1998/05
 
 				深町 賢一
-				fukachan@sapporo.iij.ad.jp
-
-
-詳細は RELESE_NOTES も御覧下さい (_o_)
 =E
-*** Sorry this document is not fully translated to English.
+				Ken'ichi Fukamachi
+==
+				fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
+			
 
+最新の動向については INFO というファイルを見て下さい。
+.if LANG == ENGLISH
+*** Please see INFO for latest information
+*** (Excuse me, this document is not fully translated to English).
+.fi
+
+
+98/05/26
+	fix libsynchtml.pl
+
+98/05/25
+	change: mkdir -> MkDiHier or Mkdir (SNAP file)
+
+98/05/24
+	add UNSUBSCRIBE_AUTH_TYPE to the menu of "makefml config"
+	ispell check over doc/smm/
+	bug fix unsubscribe confirmation
+
+98/05/22
+	import jcode.pl-2.6
+	"admin remove-article" command:
+		handle to remove html articles at the same time.
+	clean up and add on MetaInfo (INSTALL_on_NT4)
+
+98/05/21
+	bug fix "makefml matome"
+	bug fix bin/fwix.pl Japanese conversion for plural lines in a buffer
+	makefml logs installing in e.g. /usr/local/fml/.fml/log
+
+
+98/05/14-20
+	2.1C#27
+
+	fix "accept local-part recipients" im smtp routine
+	but "not accept local-part only" in automatic-registration
+	bug fix "confirmation mode" 
+	documents updates
+
+	もろもろ
+
+98/05/13
+	add addr-spec check mechanism for the argument of RCPT:
+	
+
+98/05/11
+	modify bin/fwix.pl to import jcode.pl within it.
+	change *_TEMPLATE default
+
+	&DEFINE_FIELD_PAT_TO_REJECT(ヘッダフィールド, 正規表現)
+	例: Subject: に ADULT XXX のいづれかの文字列が入っていたら
+	SPAMとみなして捨てる
+
+     	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'ADULT|XXX');
+
+98/05/08
+	bin/fwix.pl: special character conversion
+	
+
+98/05/01
+	bug fix makefml lock
+
+98/04/30
+	ADMIN_ADD_SEND_WELCOME_FILE "admin add" で $WELCOME_FILE
+	を送る(default はしない)
+	HTML_INDEX_UNIT: 'none' -> 'infinite'
+
+98/04/24-29
+	new handler type: auto_asymmetric_regist
+	fml.css path auto-adjustable and typo fixed(libsynchtml.pl)
+	etc/makefml/menu.conf: add "auto_asymmetric_regist"
+	fml.pl, fml_local.pl: fix typo
+	fml.pl: add "auto_asymmetric_regist"
+	libsynchtml: expiration when HTML_INDEX_UNIT eq 'none' case
+
+	several document upates, English translations (continued)
+
+98/04/23
+	add $HTML_THREAD_REF_TYPE 
+		default
+		prefer-in-reply-to
+
+	bug fix &SyncHtml thread link sequential duplicaton
+		but not unique on different thread lines
+	bug fix typo: sbin/makefml, doc/drafts/help.*
+
+98/04/16-98/04/22
+	bug fix makefml
+	add "makefml command"
+	add $HTML_THREAD_REF_TYPE (available in makefml menu)
+	add controller by service menu ? (NT Version)
+		ntfml.pl
+		ntfml.cmd
+		ntfmlrm.cmd
+		autoexnt.bat
+	fix MIME/Multipart bug (may be in the case of "library get")
+	move non-used user defined variable to global name space
+	with corresponding to fixing documents
+
+	several document upates, English translations (continued)
+
+98/04/15
+	buf fix "matome" command; how to reset msendrc.
+
+98/04/14
+	bug fix "makefml matome"
+
+98/04/13
+	makefml matome,on,off,chaddr,digest
+	add diagnosis to cf/config ()
+	#fml-support: 04205; Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+98/04/12
+	buf fix remote administration authentication bug 
+	(appears in perl 4.036. why?)
+
+98/04/11
+	add $DATE_TYPE
+	apply HTML 4.0 patch
+	add stylsheet sample generation by html generator routine
+
+	add $REGISTRATION_ACCEPT_ADDR, which is applied for both cases,
+	automatic or manual adding a subscriber.
+	(obsoletes $AUTO_REGISTRATION_ACCEPT_ADDR (works for compatibility))
+
+	$SUBJECT_TAG_TYPE: [ID], (ID)
+	newsyslog does not show skip (debug) message
+
+	change 'mget' and 'get' error message
+	
+98/04/01
+	bug fix, clean up, update a few documents (for English translation)
+
+98/03/23
+	apply a patch to fix libmember_name.pl and libfml.pl
+	  ・fix arguments of Admin*
+	  ・$USE_MEMBER_NAME 有効時の admin members コマンド対応
+	  ・admin members & actives コマンドで、送り返すファイル名を
+	    %AdminProcedure から参照せずに %Procedure から参照している
+	    バグ(?)を修正
+	[From:    Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>]
+
+98/03/22
+	bug fix loading bug of spool2html.pl
+
+	$AUTO_REGISTRATION_ACCEPT_ADDR
+	特定のアドレスに対してのみ自動登録を認める場合に便利
+	perl の正規表現で書くこと (case insensitive)
+
+	e.g.
+	   $AUTO_REGISTRATION_ACCEPT_ADDR = 'domain.co.jp';
+	   $AUTO_REGISTRATION_ACCEPT_ADDR = 'domain1.co.jp|domain2.co.jp';
+
+
+98/03/19
+	Multipart の最初のブロックだけを subscribe やフィルタリングの
+	対象にする(たとえ下らない写真とかついてるMultipart で中身が 
+	subscribe 一行だけのメールでもそれをはじく/登録に使うため）
+	handle multipart paragraph for filtering and subscribe
+	bug fix Message-ID caching
+	bug fix conservation of $From_address in libmoderated.pl
+
+98/03/18
+	enhance sbin/makefml guess on your system
+		if config.guess fails, makefml waits for your input
+		If we cannot guess your system, unknown-unknown-unknown:D
+	bug fix sbin/makefml lock
+
+98/03/14
+	2.1C (2.2 ALPHA)
+	Prepare fully Japanese and English support
+
+	'bye' / 'unsubscribe' with confirmation (ALPHA TEST)
+	
+
+98/03/12
+	bug fix "makefml newml" on NT4 (cut off to generate qmail examples)
+
+98/03/09
+	define 'lhaish' for 'mget', 'digest', 'matome' commands
+
+98/03/07
+	doc/op の2か国語化 α版
+	(ispell check'ed)
+	# 2か国語化の難所が終ったので、もうじき 2.1C でしょう。
+	# (事実上 2.1C == 2.2ALPHA)
+
+	bug fix;
+	hack する人への注意: 管理者用のコマンドの argument を
+	一般ユーザ用コマンドの関数とあわせました。
+	($proc, *Fld, *opt, *e) => ($proc, *Fld, *e, *opt)
+
+	$MAXNUM_COMMAND_INPUT が定義されている場合、一回のメールで使え
+	るコマンドの個数の上限。もし未定義なら無限大:)
+
+98/03/04
+	bug fix moderator mode type II's header fields config
+
+98/03/03
+	$HTML_HEADER_TEMPLATE があれば html な article を生成する時
+	そちらを優先する。
+
+	--------------------------------
+	$HTML_HEADER_TEMPLATE 
+
+	メール本文
+	--------------------------------
+
+	例: $HTML_HEADER_TEMPLATE  = q#Subject: $e{'h:Subject:'} #;
+
+
+	qmail 用の見本も makefml newml <ML> で生成
+
+	library コマンドの数を減らす(実装上増やすのはちょっと待った〜)
+	@DenyLibraryProcedure
+
+	モデレーターモードの配送メールのヘッダ設定
+	@ModeratedHdrFieldsOrder
+
+	add $PCurrentTime
+	bug fix &GetTime and compatible modes
+
+98/02/23
+	bug fix confirmation mode (set to ignore Reply-To:)
+	bug fix matome/digest command when $NOT_USE_SPOOL is set.
+
+98/02/20
+	* confirmd "confirm daemon" BETA TEST
+
+98/02/17
+	INSTALL_with_QMAIL; qmail の場合についてのメモ
+
+98/02/16
+	2.1B #2
+
+	* confirmd "confirm daemon" ALPHA TEST
+	  定期的に「これからもＭＬに入り続けるか？」を尋ね
+	  返事がないならそのメンバーを削除する。
+	  まとめおくりと同様に cron から起動する。
+
+	* makefml ML::command syntax
+	* fix moderated type II and html geneartor
+
+
+98/02/11
+	2.1A final is 2.1A#45 and define 2.1B 
+
+      * 2.1B
+	デフォールトでこれらの変数(2.1Aではテスト)を
+	    $MIME_EXT_TEST = 1;
+	    $FOP_HACK = 1;
+	    $USE_MTI_TEST = 1;
+	ON にしています(この三箇所以外は 2.1A#45 と同じ)。
+	これらの変数をONにしてちゃんと動くかどうかのテストしてほしいですが
+	もしうまくいかない/安定性を重視するなら 2.1A final のほうが
+	よいでしょう。 
+
+
+98/02/01
+	$MODERATOR_FORWARD_TYPE III
+
+
+98/01/25 (01/21 - 01/25)
+	English translation in doc/smm (now 80% complete?)
+	modify EnvelopFilter' hook code for perl 4
+	remove $ML_MEMBER_CHECK to replace 
+	&AutoRegistrableP and &NonAutoRegistrableP
+	cut off Re[\d+]: Re^\d+: in Subject:
+	bug fix config.guess search of makefml
+
+98/01/21
+	makefml SECURITY section
+
+		&COPY_FIELD(field, new-field);
+	Example:
+		&COPY_FIELD('Sender', 'X-Sender');
+
+98/01/20
+	rename: compatible なのでどっちでもOK
+		$REJECT_DISTRIBUTE_FILTER_HOOK -> $DISTRIBUTE_FILTER_HOOK
+		$REJECT_COMMAND_FILTER_HOOK    -> $COMMAND_FILTER_HOOK
+
+	$FILTER_ATTR_REJECT_COMMAND
+		$USE_DISTRIBUTE_FILTER 時に "# command" も弾く
+
+98/01/19
+	bug fix: sbin/makefml add_user, time
+
+	$FOP_HACK (将来なくなるん
+	   mgetのPLAINTEXTでヘッダ部分をMIME Decodeする
+
+	command reply に References: をつける
+
+	import patch for libmember_name.pl
+
+
+98/01/17
+	add "makefml lock <ML>"
+
+	* on NT
+	ntfml -u LOOP_UNIT
+	system() argument hack (just one line hack, enough?) 
+
+98/01/15
+	bug fix getting passwd of popfml.pl
+
+98/01/14
+	MTI
+
+98/01/11
+	2.1A#28
+
+	Mail Traffic Information (MTI) beta test phase
+	"admin unlink-article" command (unlink only)	
+	add "clean up temporary file" in pgp's PGPDecode2
+	which was forgotten 2.1A#27
+
+98/01/10
+	libmember_name.pl を import しました
+	(contrib/localhack/release-2/member_name/)。
+	Author: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+	--- README より抜粋 ---
+	libmember_name.pl は、その問題を解決するために、各メンバーの名
+	前 (基本的には、mail の From: ヘッダに書かれている名前(gecos)) 
+	を管理する機能を付加します。
+	…以下略…
+
+	CONFIRMで返すフレーズの改良
+	drafts/confirm も改良
+
+	"admin put" bug fix
+		return status
+		PGPモード
+
+	amctl functions workd for $ADMIN_MEMBER_LIST when admin mode.
+
+
+98/01/07
+	2.1A#26
+	bug fix %ExtProcedure, add %ExtAdminProcedure
+	extend SecureP (for command mode)
+	Mail Traffic Information (MTI) beta phase
+	$AUTO_REGISTRERED_UNDELIVER_P まわりのコードを意味論的に正しくする
+
+98/01/06
+	import examples of mnew ML 
+	$FML_PACKAGE/contrib/localhack/release-2/mnews
+
+98/01/05
+	2.1A#25
+	moderatorsへのメールの unix from 削除
+	some clean up
+	Update Copyright
+
+97/12/26
+	2.1A#24
+	Mail Traffic Information (MTI) alpha
+	＃αなので使うには覚悟がいるぞ:)
+	＃変数名は後で変わるかも知れない
+
+	MTI の番外編
+
+	   $USE_MTI = 1;
+	   $MTI_EXPIRE_UNIT = 3600; # 秒数
+
+	$MTI_EXPIRE_UNIT 内に流れたメールの量の最大値を
+
+	$MTI_DISTRIBUTE_TRAFFIC_MAX	(配送)
+	$MTI_COMMAND_TRAFFIC_MAX	(コマンド)
+
+	のように設定します。トラフィックがこの値を越えると reject する
+	ようになります。$MTI_EXPIRE_UNIT 後には再び投稿できるようにな
+	ります。このアドレスを spamlist ($REJECT_ADDR_LIST) に自動的に
+	追加するには $MTI_APPEND_TO_REJECT_LIST = 1;
+
+
+97/12/14
+	2.1A#21
+	メンバー最大値チェック(自動登録)
+	$MAX_MEMBER_LIMIT
+
+	配送メールのフィルター
+	$USE_DISTRIBUTE_FILTER
+	$REJECT_DISTRIBUTE_FILTER_HOOK
+	$FILTER_NOTIFY_REJECTION
+
+
+97/12/07
+	2.1A#20
+	Commit English Translation Documents (no time, 1/3 completes ;_;)
+	fix %MAP_DB libexec/fmlserv.pl
+	bug fix Date: Lines: (fml.pl)
+	modify injection codes to confirmation codes
+
+97/11/29
+	PGP decoding をBLOCKごとに実行
+	    必要ならパラレルにBLOCKごとに暗号化処理
+	HTML の第2階層にTOPレベルへのポインタを入れる(fml-support: 03451)
+	PERMIT_COMMAND_FROM moderartors の処理を変更し
+	    コマンドの承認？をできるようにする(嬉しいか???)
+	    文字どおりの意味になったといえばそのとおりだが…
+
+97/11/28
+	フィルタリング:
+	unsubscribe だけとか 空のボディ などを reject する
+	カスタマイズは HOOK で呼び出すことにする
+
+
+97/11/25
+	$SMTP_SORT_DOMAIN	smtpfeed ある今限りなく無意味（苦笑）
+		配送リストをソートしてからSMTPで配送プログラムへ渡す。
+		人それを bulk_mailer のようなものともいうが…(ちと違う)
+
+97/11/24
+	add site_init.ph loading code; hence now we evaluate 
+	in the following order: site_init.ph config.ph sitedef.ph
+
+97/11/23
+	2.1A #19	ntfml での まとめおくりの bug fix
+
+97/11/22
+	2.1A #18	ntfml での まとめおくりの bug fix
+
+97/11/21
+	2.1A #17	remove popfml queue_dir debug code
+
+97/11/20
+	2.1A #16	fix FreeBSD crypt(3)
+			fix ntfml.pl queue_dir
+
+97/11/10
+	2.1A #14
+	New NT POP Version (not MetaInfo version)
+	several fixes
+	new moderator mode
+
+97/11/03
+	新しい moderator モード ($MODERATOR_FORWARD_TYPE == 2)
+	$MODERATOR_FORWARD_TYPE = 2 をデフォールトにする
+
+97/11/02
+	msend.pl timeout bug fix
+	define $MODERATOR_FORWARD_TYPE, $MODERATOR_MEMBER_LIST
+	$SLEEPTIME のデフォールトを 60 へ (いままでは 300)
+
+97/10/30
+	smtpfeed direct 呼びだし support α版
+
+97/10/27
+	2.1A#9
+	fix typo of makefml (2.1A#8)
+	bug fix "subscribe" buffer passwd to the Auto Registration Routine
+
+97/10/25
+	makefml config にヘッダ設定の部類を加える。
+	Subject: の選択はここに移動。
+	define $REWRITE_TO (I obsolete $NOT_WRITE_TO).
+	0	original  の To: のまま (2.1A default)
+	1	To: $MAIL_LIST, $MAIL_LIST以外のアドレス(2.1 Release)
+	2	常に To: $MAIL_LIST (大昔）
+
+	1と2はメールを読む時にどこのＭＬのメールか見易いように
+	To: $MAIL_LIST が常に同じ位置に来るようにするためのもの。
+
+97/10/23
+	add %ExtProcedure to libfml.pl for the extension
+	add $Fld as the original string  (libfml.pl)
+
+
+97/10/14
+	MetaInfo Sendmail 2.x on NT 用のコードを作る (arch/NT4)
+	インストーラーが途中で MetaInfo かどうかきくのでそこで分岐して下さい
+	MetaInfo version αテスト
+	
+97/10/11
+	もし help ファイルなどがない場合は 
+	install先/drafts/help (install 用の original テンプレート)
+	をその都度各ＭＬにあわせて convert して送り出す。
+	１ テンプレートをいじれば全ＭＬに反映される
+	という半面
+	２ 各ＭＬごとに helpやguide に懲ることが難しい。
+	懲りたければ書く。そうでないならデフォールトを使うなどができる
+	だろう(ISP向けともいえる）
+	なお makefml newml 時デフォールトではhelp, guide などは作成される
+
+97/10/10
+	fml.pl:
+	   define $UNISTD (1 on unix, 0 on NT)
+	   improve GetFieldsFromHeader
+
+	libexec/fmlserv.pl: clean up
+	proc/libutils.pl: &system bifurcation following UNISTD
+
+97/10/08
+	define $UNISTD
+	fix the split codes for on Unix and on NT
+
+97/10/06 (summary of changes between 97/09/21 and 97/10/06)
+	new Parsing code (fml.pl libkern.pl)
+	   especially for $INCOMING_MAIL_SIZE_LIMIT
+	   notify code is in newly created liberror.pl
+
+	add &RunStartHooks (fml.pl) as split name space of start hooks
+	improve &Append2 error message
+
+	add the exception code ctl:smtp:stdin2socket (libsmtp.pl)
+	   when incoming mail size overflow
+	
+	Q decoding is on in default now (libMIME.pl) 
+	fix notified recipients when chaddr (libamctl.pl)
+	fix Header Field for &DEFINE_FIELD_FORCED
+	fix &StdinLogMode to use &RunStartHooks (split name space)
+	fix &AppendMimeDecodedSubjectMode to use &RunStartHooks
+		(split name space)
+
+	fix the trap ISO-2022-JP -> =?ISO-2022-JP? for MIME
+
+	fix trap keywords for "chaddr" (libra.pl) 
+	   (chaddr's keywords is not included)
+
+	apply the patch (fml-support:03234) to libsynchtml.pl
+	    top dir's {index,thread}.html in $HTML_INDEX_REVERSE_ORDER
+
+	fix &ChAddrModeOK (libutils.pl)
+
+
+97/09/21
+	fix mci:mailer = prog (bug of perl?)
+
+97/09/20
+	impreove mget file search algorihtm
+	fix ARCHIVE_DIR problems
+	improve adjustment after loading configuration files 
+	remove not used Define* functions (libutils.pl)
+
+97/09/17
+	fix http conversion: special chars, http:// syntax 
+	use ">> var/run/flock" on solaris2 if $USE_FLOCK = 1;
+	bug fix rehash problem in "matome 0"
+
+97/09/16
+	define the current as 2.1A
+
+
+97/09/14
+	fmlserv.pl 
+	   remove majordomo compat code (not used now)
+	   improve memory allocation
+
+97/09/13
+	fix append:files code 
+	contrib/mail2irc :-)
+
+97/09/08
+	fix fmlserv when confirmation mode of auto registration
+	fix duplicated return of "mget" when
+		articles in spool and archive are duplicated.
+	fix loading error of libsynchtml.pl (fix pl3)
+
+97/09/07
+	cut out the unix from in ForwMail (forwarding)
+	since MH cannot handle unix from in the spool
+
+	fix the help message reply when the invalid commands inputs
+
+97/09/03
+	comment out owner- syntax in etc/makefml/cf
+	improve input without unixfrom.
+	fix libexec/fmlserv.pl sitedef.ph evaluation
+	fix libamctl.pl for $AUTO_REGISTERED_UNDELIVER_P
+
+
+97/09/02
+	bug fix fmlserv.pl Name Space Syntax
+
+97/09/01
+	fix typo doc/INSTALL
+	$SUBJECT_TAG_TYPE = "[]"; => Subject: [Elena] test
+	$SUBJECT_TAG_TYPE = "()"; => Subject: (Elena) test
+
+97/08/20
+	2.1 REL patchlevel 1
+	fix "make doc" 
+	fix fmlserv/config.ph template
+
+===========================================================
+97/08/19
+	FML 2.1 RELEASE (post the announce to fj.sources)
+
+
+97/08/18 <-> 97/08/03
+
+	upgrade README and README.English
+	modify check limit when user both archive and expire.
+		FML claims that expire_limit > 2 * archive_unit 
+	bug fix automatic html generation
+	bug fix pgp auth type (libra.pl)
+	bug fix md5 auth type (libra.pl and makefml)
+	do not add fmlserv against loop
+	bug fix libra.pl
+	add -w to makefml for "makefml -w config" interactive mode (NT)
+	bug fix bin/fwix.pl for English mode 
+	add commands "subscribe" and "confirm" for auto_regist mode
+	bug fix etc/makefml/menu.conf
+	upgrade and bug fix documents
+	ifdef bifurcation for UNIX and NT4
+
+	--- FML 2.1 RELEASE TEST PHASE ---
+
+97/08/03
+	*clean up several files (for FML 2.1 RELEASE)
+
+	add %SECURE_REGEXP to fml.pl
+	update crosspost code (libcrosspost.pl)
+
+	add &WholeMail $title extension
+	add ifdef branch fo win32 extention
+
+	when auto_regist, touch "actives_is_dummy_when_auto_regist" file.
+
+	check $ENV{'OS'} to determine whether UNIX or NT.
+
+	bug fix msend.pl
+		bug fix -d && push LIBDIR 
+		modify rename() check code for NT
+		since rename(a, b) fails on NT if b exists
+		though it is O.K. on UNIX.
+
+	modify flock (fml.pl)
+		use $DIR/config on open(DIRECTORY) OS
+
+	libsmtp.pl
+		bug fix $Current_Rcpt_Count
+
+	$CryptNoEncryptionMode (libcrypt.pl, for makefml NT mode)
+
+97/07/27
+	REAMDE
+	new crosspost code
+
+97/07/26 - 97/07/20
+
+	FML 2.1 Release Preparation; (final check phase)
+	
+	[fml.pl] $REJECT_ADDR_LIST spammers -> spamlist to adjust CF.
+	
+	Date:    Mon, 21 Jul 97 12:51:52 
+	Modified files:
+		proc/libsynchtml.pl
+	Log Message:
+	NEW EXPIRATION ALGORITHM:
+	    When the thread is used, to expire one file is difficult.
+	    It is too difficult to adjust the relations of thread regenation.
+	    Hence we remove whole the sub-directories in which 
+	    all the files are expired. WE DO NOT REMOVE EACH FILE.
+	    
+	  1 Check all files in the directory (e.g. htdocs/19970721)
+	  2 If all should be expired, rename directory -> directory.expire
+	  3 htdocs/{index,thread}.html is reconfigured
+	    ignoring *.expire directories.
+	  4 after this, *.expire directories is of no use.
+	    So, we remove them in the future or now:) slowly.
+	
+	
+	[proc/libsynchtml.pl]
+	HTML_EXPIRE -> HTML_EXPIRE_LIMIT
+	real removing code of expired directories
+	
+	[fml.pl]
+	x-mlserver field modified
+	check $MALI_LIST eq $CONTROL_ADDRESS to adjust X-MLServer.
+	
+	[sbin/makefml]
+	makefml edit command
+	pgp:
+	if group-writable, chmod 660 etc/pgp/pubring.pgp
+	
+	[proc/libcompat_cf2.pl]
+	$HTML_EXPIRE_LIMIT adjustment
+	
+	[cf/MANIFEST]
+	html generator default config
+	HTML_DIR
+	AUTO_HTML_GEN
+	
+	[bin/emumail.pl]
+	-f -s options
+	
+	[bin/fwix.pl]
+	error message
+	.fig expansion
+	
+	[bin/spool2html.pl]
+	$SleepTme
+	-E (HTML_EXPIRE_LIMIT) option
+	
+	[fml.pl]
+	Rcsid post only from "who" format
+	
+	[fml.pl]
+	Log Message:
+	ignore handler
+	
+	[cf/MANIFEST]
+	LOG_CONNECTION = 0 (default)
+	
+	[fml.pl]
+	subject tag fix (not calling libtagdef)
+	
+	[proc/libutils.pl]
+	remove debug code of template substitute
+	
+	[proc/libsynchtml.pl]
+	Log Message:
+	expire 
+	when expired and error founded, we regenerate index.html subdir/index.html
+	hack for spool2html.pl
+	
+	[sbin/makefml]
+	test ML (help message) fixed
+	help -> do_info not do_help
+	arguments and ml existence check added a lot
+	
+	[proc/libsynchtml.pl]
+	HTML_EXPIRE_SCAN_UNIT
+	skip index.html thread.html when scan directory to check expire or not
+	
+	[sbin/makefml]
+	define reverse-y-or-n type for NOT_USE_SPOOL query
+	delete policy operations
+	add a lot of logging
+	redefine FLushLog using code
+	add Log Code (import fml.pl to here)
+	$CONFIG_LOG -> $MAKEFML_LOGFILE
+	flushlog only if logfile =~ /tmp/ (tempolary)
+	mkdir spool for flock when newml
+	flock bug fix ($mldir/$ml/ -> s#$ml/$ml#$ml#;)
+		
+97/07/20
+	FML 2.1 DELTA based on config.ph CF Version 3
+	a log of codes and documents updates for config.ph CF Version 3
+	new html expire code 
 
 97/06/27
 	admin forward
@@ -1440,7 +2182,7 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 ・リレーやＭＸについては FAQ ファイルを参照して下さい
 
 
-# REFERENCES 
+# REFERENCES (please see doc/op.{jp,en})
 
 Release Version 1.2.1
 
@@ -1450,5 +2192,15 @@ Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
 Subject: fml 1.2 Mailing List Server(upper compatible with hml1.6).  
 Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
 
-Subject: hml1.6: a powerful mailing list server Message-ID:
-<HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
+Subject: hml1.6: a powerful mailing list server
+Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
