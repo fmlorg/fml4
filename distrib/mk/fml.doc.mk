@@ -23,8 +23,8 @@ HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 # doc/ri
 .include "doc/ri/Makefile"
 
-# doc/drafts
-.include "doc/drafts/Makefile"
+# drafts
+.include "drafts/Makefile"
 
 # doc/advisory
 .include "doc/advisories/Makefile"

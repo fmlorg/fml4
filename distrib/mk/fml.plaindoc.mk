@@ -6,11 +6,11 @@ var/doc/op.jp: doc/smm/*wix
 .for file in ${DOC_DRAFT_SOURCES}
 __DOC_TARGETS__ += var/doc/drafts/${file}.jp
 __DOC_TARGETS__ += var/doc/drafts/${file}.en
-var/doc/drafts/${file}.jp: doc/drafts/${file}.wix
-	${FWIX} -n i doc/drafts/${file}.wix > var/doc/drafts/${file}.jp
+var/doc/drafts/${file}.jp: drafts/${file}.wix
+	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/${file}.jp
 
-var/doc/drafts/${file}.en: doc/drafts/${file}.wix
-	${FWIX} -L ENGLISH -n i doc/drafts/${file}.wix > var/doc/drafts/${file}.en
+var/doc/drafts/${file}.en: drafts/${file}.wix
+	${FWIX} -L ENGLISH -n i drafts/${file}.wix > var/doc/drafts/${file}.en
 .endfor
 
 .for file in ${DOC_ADVISORY_SOURCES}
