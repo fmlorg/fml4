@@ -172,7 +172,11 @@ sub InitMakeFml
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	# first time if !-d $EXEC_DIR ? (must be true)
-	require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl" if -d $EXEC_DIR;
+	# XXX perl (< 5.6.0) returns false " if -d '' ", off course !? 
+	# XXX perl 5.6.0 returns true " if -d '' "! correct??? 
+	if ($EXEC_DIR) {
+	    require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl" if -d $EXEC_DIR;
+	}
 	$USER = $ENV{'USERNAME'};
     }
     else {
