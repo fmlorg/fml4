@@ -39,10 +39,20 @@ sub SmtpInit
 	(-d $VAR_DIR)    || &Mkdir($VAR_DIR);
 	(-d $VARLOG_DIR) || &Mkdir($VARLOG_DIR);
 	$SMTP_LOG = $SMTP_LOG || "$VARLOG_DIR/_smtplog";
+
 	if ($USE_SMTP_LOG_ROTATE) {
 	    my ($id) = &IncrementCounter("$VARLOG_DIR/.seq", 
-					 $NUM_SMTP_LOG_ROTATE || 50);
-	    $SMTP_LOG .= ".$id";
+					 $NUM_SMTP_LOG_ROTATE || 8);
+	    $SMTP_LOG .= ".$id" if $SMTP_LOG !~ /\.$id$/;
+
+	    # unlink $SMTP_LOG if first time in this process thread;
+	    if ($IncrementCounterCalled{"$VARLOG_DIR/.seq"} == 1) {
+		&Log("unlink $SMTP_LOG") if $debug_fml_org;
+		unlink $SMTP_LOG if -f $SMTP_LOG;
+	    }
+	}
+	else {
+	    unlink $SMTP_LOG if -f $SMTP_LOG;
 	}
     }
 
@@ -183,7 +193,7 @@ sub Smtp
     &SmtpInit(*e, *smtp);
     
     # open LOG;
-    open(SMTPLOG, "> $SMTP_LOG") || (return "Cannot open $SMTP_LOG");
+    open(SMTPLOG, ">> $SMTP_LOG") || (return "Cannot open $SMTP_LOG");
     select(SMTPLOG); $| = 1; select(STDOUT);
 
     ### cache Message-Id:

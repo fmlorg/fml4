@@ -2232,6 +2232,10 @@ sub IncrementCounter
     my ($f, $modulus) = @_;
     my ($id) = 0;
 
+    # return cached id (against duplicated calls within one thread).
+    $IncrementCounterCalled{$f}++;
+    return $IncrementCounter{$f} if $IncrementCounterCached{$f};
+
     &Touch($f) unless -f $f;
     if (-f $f) {
 	$id = &GetFirstLineFromFile($f);
@@ -2244,6 +2248,8 @@ sub IncrementCounter
 	    rename("${f}.$$.new", $f);
 	}
     }
+    $IncrementCounter{$f}       = $id; # (0 .. modulus-unit)
+    $IncrementCounterCached{$f} = 1;
     $id;
 }
 
