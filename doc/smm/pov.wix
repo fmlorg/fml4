@@ -147,7 +147,8 @@ Consider elena ML again. fml.pl is kicked off like
 リのパスとみなします。
 =E
 fml.pl extracts the directory path (/usr/local/fml) of fml.pl absolute
-path. It searches executable and libraries in the following order
+path. It searches OS for executable and libraries in the following
+order
 
 	1   /var/spool/ml/elena 
 	2   /usr/local/fml 
@@ -162,7 +163,7 @@ If the following arguments are given,
 
 の時は
 =E
-fml.pl searches executable and libraries like this:
+fml.pl searches OS for executable and libraries like this:
 
 	1   /var/spool/ml/elena 
 	2   /usr/local/fml 
@@ -888,7 +889,7 @@ After this, the critical section begins.
 	$LIBDIR	
 		library paths. @LIBDIR is a list of $LIBDIR's.
 		fml pushes $LIBDIR to @LIBDIR.
-		fml searches executable and libraries in @LIBDIR.
+		fml searches @LIBDIR for executable and libraries
 .fi
 
     	$SPOOL_DIR		$DIR/spool

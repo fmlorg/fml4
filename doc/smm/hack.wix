@@ -118,7 +118,7 @@ Removing $DIR/seq, $DIR/actives, $DIR/members and $DIR/var/log/msendrc
 must be critical. "actives" and "members" are the member list of ML.
 "seq" is the current article number and "msendrc" is the log file of
 msend (digest) which log saves the number of msend'ed articles.
-If the content is lost, search the following information.
+If the content is lost, search for the following information.
 The content of "seq" is the maximum number in spool dir articles.
 Each "actives", "members" and "msendrc" has back up each file.
 Restore them.

@@ -263,9 +263,9 @@ obsolete になりました。
 はほっておくというのもよい手です。
 =E
 File operations uses system programs e.g. tar, gzip ....  "makefml"
-searches and defines them in config.ph. It is good for you to check
-them again by yourself. It is useful to define them in common
-definition file "sitedef.ph", "site_init.ph".
+searches the OS for them and caches them in config.ph. It is good for
+you to check them again by yourself. It is useful to define them in
+common definition file "sitedef.ph", "site_init.ph".
 
 現在ファイル操作関係で自動的に検出し設定されるのは次のコマンドです。 
 

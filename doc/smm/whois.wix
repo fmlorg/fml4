@@ -40,7 +40,7 @@ whois を抱えていた (なおかつ security hole だった)
 例1: ローカルなデータベースの中から fukachan を含むデータを探して送り返
 す。
 =E
-Example 1: search fukachan in the local database
+Example 1: search the local database for fukachan
 
    % echo  "# whois fukachan" | Mail Elena@phys.titech.ac.jp
 
