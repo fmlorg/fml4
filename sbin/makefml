@@ -2979,8 +2979,8 @@ sub QmailSetUp
 
 	open(IN, "$qmail_users_dir/assign") || 
 	    &Log("cannot open $qmail_users_dir/assign");
-	open(OUT, "> $qmail_users_dir/assign.new") || 
-	    	    &Log("cannot open $qmail_users_dir/assign.new");
+	open(OUT, "> $qmail_users_dir/assign.new.$$") || 
+	    	    &Log("cannot open $qmail_users_dir/assign.new.$$");
 	select(OUT); $| = 1; select(STDOUT);
 
 	while (<IN>) {
@@ -2999,8 +2999,8 @@ sub QmailSetUp
 	print OUT ".\n";
 	close(OUT);
 
-	rename("$qmail_users_dir/assign.new", "$qmail_users_dir/assign")
-	    || &Log("cannot rename assign.new assign");
+	rename("$qmail_users_dir/assign.new.$$", "$qmail_users_dir/assign")
+	    || &Log("cannot rename assign.new.$$ assign");
     }
 }
 
