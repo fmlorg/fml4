@@ -1,0 +1,4 @@
+index:
+	@ if [ -f overview.wix ]; then echo .include overview.wix; fi
+	@ apply 'echo .include %1' \
+		` echo *.wix|tr ' ' '\012' |egrep -v 'index.wix|overview.wix' `
