@@ -2549,6 +2549,19 @@ $DISTRIBUTE_FILTER_HOOK = q#
     }
 #;
 
+.S	FML Advisories
+
+現在のfml-currentにはFML Advisoriesというドキュメント群があります。旬
+の特定のテーマについてまとめたものです。セキュリティ関係が主なテーマで
+すが、それ以外のテーマもあります。
+例: happy99, Melissa
+=E
+FML advisories are a series of documents to advice some kinds of
+current topics, for example, happy99, Melissa ...
+
+.url	http://www.fml.org/fml/advisories/
+
+
 $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
