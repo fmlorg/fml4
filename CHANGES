@@ -5,6 +5,8 @@
 
 2000/08/12
 
+   "makefml help" show shelp by $ENV{'PAGER'} if defined.
+
    $PGP_VERSION is removed
 
 2000/08/11
