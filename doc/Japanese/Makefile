@@ -10,17 +10,30 @@
 # $Id$
 #
 
-all: scan
+all: tutorial.html
 
 scan:
-	cvs -n update
+	@ cvs -n update 2>&1| grep -v ':' || echo 'nothing changes'
 
 clean:
 	gar *~ *.bak
 
-toc:
-	@ if [ -f  ../../var/doc/op.jp ] ; then \
-		../../distrib/doc/bin/gen_toc.pl ../../var/doc/op.jp ; \
-	else \
-		echo cannot find ../../var/doc/op.jp;  \
-	fi
+prep_index:
+	@ apply echo *[a-z0-9]|egrep -v 'CVS|Makefile|INDEX|index'
+
+index:
+	@ perl ../../distrib/bin/mkindex.pl INDEX
+
+tutorial.html: INDEX
+	perl ../../distrib/bin/mkindex.pl INDEX > tutorial.html
+
+subdir_index:
+	for d in Japanese [a-z]* ; \
+	do \
+	  if [ -d $$d -a X$$d != "Xtemplate" -a X$$d != "Xobsolete" ]; \
+	  then \
+	     perl ../../distrib/bin/mkindex.pl -r -f INDEX $$d \
+		> $$d/index.wix.new; \
+	     mv	$$d/index.wix.new $$d/index.wix;\
+	  fi ;\
+	done
