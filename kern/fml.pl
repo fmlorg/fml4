@@ -633,11 +633,11 @@ sub Parse
     }
 
     # Really? but check "what happen if no input is given?".
-    &Log("read $bufsiz bytes") if $debug_fml_org;
     if ($bufsiz == 0) {
-	&Log("no input, stop");
+	&Log("read 0 bytes, stop");
 	exit(0);
     }
+    $Envelope{'tmp:bufsiz'} = $bufsiz;
 }
 
 # Phase 2 extract several fields 
@@ -905,6 +905,10 @@ sub CutOffRe
 sub CheckCurrentProc
 {
     local(*e, $ccp_mode) = @_;
+    
+    # log
+    &Log("read $e{'tmp:bufsiz'} bytes") if $debug_fml_org;
+    undef $e{'tmp:bufsiz'};
 
     ### SubSection: Log socket connection info
     &eval("&use('kernsubr2'); &GetPeerInfo;") if $LOG_CONNECTION;
