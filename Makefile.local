@@ -1,5 +1,5 @@
 #
-# $FML: Makefile.local,v 1.45 2001/03/29 16:03:19 fukachan Exp $
+# $FML: Makefile.local,v 1.46 2001/05/25 12:08:22 fukachan Exp $
 #
 
 check:
@@ -8,23 +8,6 @@ check:
 #
 # Section: Variable checks
 #
-varcheck:
-	@ env ${EXPORT_ENV} perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
-	tee /tmp/VARLIST
-	@ wc /tmp/VARLIST
-
-v2: varcheck2
-varcheck2:
-	@ env ${EXPORT_ENV} perl distrib/bin/search-config-variables.pl -E -D -s -m \
-	kenn/*pl libexec/[a-lo-z]*pl proc/lib[a-z]*pl bin/*pl |\
-	tee /tmp/VARLIST
-	@ wc /tmp/VARLIST
-
-v3:
-	@ env ${EXPORT_ENV} perl distrib/bin/search-config-variables.pl \
-	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
-	tee /tmp/VARLIST
-	@ wc /tmp/VARLIST
 
 curtest:
 	( echo -n "[`date`]"; \
