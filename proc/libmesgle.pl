@@ -9,6 +9,7 @@
 #
 # $Id$
 
+# @argv may contain Japanese ;-)
 sub MesgLE
 {
     local(*e, $key, @argv) = @_;
@@ -76,6 +77,7 @@ sub MesgLE
 }
 
 
+# @argv may contain Japanese ;-)
 sub MesgLETranslate
 {
     local(*e, $msg, $key, @argv) = @_;
@@ -85,10 +87,12 @@ sub MesgLETranslate
 	eval "&jcode'init;";	
 	&jcode'convert(*msg, 'euc'); #'(trick) -> EUC
 
-	local($t, $i); $i = 0;
+	local($x, $t, $i); $i = 0;
 	for (@argv) {
-	    $t   = "_ARG${i}_";
-	    $msg =~ s/$t/$argv[$i]/g;
+	    $t = "_ARG${i}_";
+	    $x = $argv[$i];
+	    &jcode'convert(*x, 'euc'); #'(trick) -> EUC
+	    $msg =~ s/$t/$x/g;
 	    $i++;
 	}
 
