@@ -1,0 +1,8 @@
+# [Example]
+# add them at the last of config.ph (but before the last "1;").
+#
+
+&ADD_CONTENT_HANDLER('multipart/.*', 'text/plain',   'allow');
+&ADD_CONTENT_HANDLER('multipart/.*', '.*/.*',        'reject');
+&ADD_CONTENT_HANDLER('text/plain',   '.*/.*',        'allow');
+&ADD_CONTENT_HANDLER('!MIME',        '.*/.*',        'allow');
