@@ -1154,6 +1154,15 @@ SecureP は以下のように
 で指定します。なお0は無限大を意味します(デフォールト)。
 
 
+.S	ＭＬのメンバー数制限(自動登録の時)
+
+	$MAX_MEMBER_LIMIT
+.k	$MAX_MEMBER_LIMIT
+
+でメンバーの最大数を制限する。認証するメンバーのリストではなく、配送の
+リストをチェックしています。もっとも自動登録の時はほとんど同じことですが
+
+
 .S	許されるコマンドのシンタックス
 
 Quoted from 4.4BSD:/usr/share/man/cat1/sh.0 
@@ -1356,6 +1365,125 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 .k	$GID
 
 も fmlserv のために導入された変数ですね。
+
+
+.S	配送メールへのフィルタリング
+
+	$USE_DISTRIBUTE_FILTER
+.k	$USE_DISTRIBUTE_FILTER
+
+をセットすると、配送処理に入る直前( &Distribute ルーチンの先頭)で 
+%Envelope のデータ群(ヘッダやメール本文)に対してフィルタリング操作をか
+けます。そして問題のある内容のメールの配送をしないなどができるようにな
+ります。
+
+	$USE_DISTRIBUTE_FILTER
+
+をセットしただけのデフォールトでは(現在(97/12/14))次のようなメールは 
+reject します。
+
+	○ 本文が何もないメール
+	○ help や unsubscribe などの英語一行メール
+	○ %echo ふがほげ の文
+
+これ以外の高度なチェックは
+
+	$REJECT_DISTRIBUTE_FILTER_HOOK
+.k	$REJECT_DISTRIBUTE_FILTER_HOOK
+
+で直接 perl の構文で %e (%Envelope) ハッシュの変数を使って記述して下さ
+い。HOOK 内部では $e{'h:from:'} などでハッシュにアクセスして下さい。
+＃このために独自の言語とかをまた新たに導入するのは面倒だとおもうので
+＃perl で生書きです。
+
+この HOOK では次のようなことを期待しています。
+
+	reject する場合は reject の理由を含む文を return する
+	そうでないなら 何も返さない (return ''; など)
+
+この reject の理由はログに残されます。また、
+
+	$FILTER_NOTIFY_REJECTION
+.k	$FILTER_NOTIFY_REJECTION
+
+という変数が設定されていれば、その理由をそのメールの送り主に送り返しま
+す。
+
+例: (not tested ;-)
+
+○ received: 行のどこかに spam ブラックリストを見つけたら reject する。
+○ 本文に http-equiv=3DContent-Type なHTMLをつけてくる迷惑なメール
+   は reject する
+○ From: のドメインが Message-ID にも含まれているかどうか？
+   含まれていないならメールの偽造とみなして reject
+
+$REJECT_DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'h:received:'} =~ /from spam.co.jp/) {
+	return 'from a host in spam blacklist';
+    }
+
+    if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+	return 'mail with appended HTML documents';
+    }
+
+   local($domain) = (split(/@/, $From_address))[1];
+   if ($e{'h:message-id:'} !~ /$domain/i) {
+	return 'Message-Id conflicts your From: address';
+   }
+
+#;
+
+
+.S	sendmail 8.8 における check_* ルールセットについて
+
+詳しくは CF を読んでね。sendmail 8.8 では様々なアクセス制御を容易にカ
+スタマイズできるように以下のようなルールセットが用意されています。CFで
+物足りない場合（そうはないとおもうぞ）はこれらを使ってごりごり 
+sendmail.cf を書きます。
+
+.q
+check_mail          発信者のチェック
+check_rcpt          受信者のチェック
+check_relay         SMTP接続のチェック
+check_compat        発信者および受信者のペアについてのチェック
+.~q
+
+またSMTPコネクションの接続要求に対して tcp_wrapper のライブラリである
+libwrap.a を使うように sendmail を compile しておけば、
+/etc/hosts.allow などで制御できるようになります。NetBSD 1.3 などの最新
+のOSではこれが配布されるソースでのデフォールトです。
+ちなみに tcp_wrapper におけるデーモン名は sendmail です。
+
+.q
+Example:
+
+[/etc/hosts.allow]
+
+sendmail: mikoto.fml.org
+
+
+[/etc/hosts.deny]
+
+ALL: ALL
+
+.~q
+
+
+check_mail と check_rcpt はSMTP処理ルーチン srvrsmtp() 内でそれぞれ 
+MAIL FROM: と RCPT TO: の命令の引数に対して適用されます。つまりそれぞ
+れ SMTP で渡される MAIL FROM:のアドレス(発信者)と RCPT TO:のアドレス
+(配送先)のチェックに使われます
+
+check_relay はSMTPコネクションが張られた時に適用されます。check_relay 
+は validate_connection() で呼ばれ接続が成立した SMTPコネクションが接続
+を許可されているホストからのものか？などについてチェックをします。
+validate_connection() では tcp_wrapper 形式の制御も可能です(前述)。
+
+check_compat は単純なチェックではなく送信者と受取人の組で判定をしなけ
+ればならないような複雑な判定に使います。
+check_compat は配送ルーチン deliver() で適用されメールの送り主と配送
+先のペアについてSMTP transcation だけでなく配送するメールの全てについ
+て適用されます。
 
 
 
