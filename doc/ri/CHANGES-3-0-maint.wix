@@ -6,6 +6,18 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl10 ]
+
+   bin/fwix.pl
+	fix IndexExpand() avoid to match unexpected '+' string
+
+   doc/
+	add simple installa memo on qmail
+	http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+
+   sbin/makefml (2.43-2.44)
+	define dummy DEFINE_FIELD_PAT_TO_REJECT()
+
 [ 3.0pl9 ] 
 
   fix qmail examples (qmail/users/assign)
