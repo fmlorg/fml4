@@ -881,6 +881,27 @@ sub AppendString2File
 }
 
 
+sub GetFile
+{
+    local($f) = @_;
+    local($s, $dir);
+
+    for $dir (@INC) {
+	if (-f "$dir/$f") { $f = "$dir/$f"; last;}
+    }
+
+    if (open($f, $f)) {
+	while (<$f>) { $s .= $_;}
+	close($f);
+	$s;
+    }
+    else {
+	&Debug("cannot open $f");
+	$NULL;
+    }
+}
+
+
 sub Warn 
 {
     local(@caller) = caller;
@@ -2888,7 +2909,7 @@ sub do_config
 
     # menu.conf version
     $MENU = "$EXEC_DIR/etc/makefml/menu.conf";
-    &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG);#';
+    &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG,*HOOK);#';
 
     # MAIN LOOP 
     &EachLevelQuery(*config, "/");
@@ -3175,6 +3196,14 @@ sub EachLevelQuery
 	    if ($v) {
 		$config{$v} = $r eq "y" ? 1 : 0;
 	    }
+	    elsif ($HOOK{$top_level}) {
+		print STDERR "\trun hook ...\n";
+		eval $HOOK{$top_level};
+		&Debug($@) if $@;
+		&Log($@) if $@;
+		print STDERR "\thook is done.\n";
+		sleep 1;
+	    } 
 	    else {
 		&Debug("EachLevelQuery(y/n): Error, $v is not defined");
 	    }
@@ -4744,7 +4773,7 @@ sub InitMenu
 {
     local($cur_variable);
 
-    (*config, *MENU, *FP, *QUERY, *NAME, *MAP, *BIND, *CONFIG) = @_;
+    (*config, *MENU, *FP, *QUERY, *NAME, *MAP, *BIND, *CONFIG, *HOOK) = @_;
 
     $EXEC_DIR = $main'EXEC_DIR; #';
     &GetManifest(*MANIFEST, "$EXEC_DIR/cf/MANIFEST");
@@ -4781,6 +4810,11 @@ sub InitMenu
 	elsif (/^=map/) {
 	    &Reset;
 	    $map_p = 1;
+	    next;
+	}
+	elsif (/^=hook/) {
+	    &Reset;
+	    $hook_p = 1;
 	    next;
 	}
 	elsif (/^=query_pat/) {
@@ -4831,6 +4865,9 @@ sub InitMenu
 	elsif ($map_p) {
 	    $_ =~ s/^\s+//;
 	    $MAP{$hier} .= $_;
+	}
+	elsif ($hook_p) {
+	    $HOOK{$hier} .= $_;
 	}
 	elsif ($query_pat_p) {
 	    $_ =~ s/^\s+//;
@@ -4979,6 +5016,7 @@ sub Reset
     undef $name_p;
     undef $map_p;
     undef $config_p;
+    undef $hook_p;
 }
 
 
