@@ -51,7 +51,7 @@ Subject: $Subject
 #;
 
 $_ .= $AddString if $AddString;
-"$_\n\n";
+$_;
 }
 
 sub Init
