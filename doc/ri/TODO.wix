@@ -35,6 +35,14 @@
 .C	TODO (特に current)
 =E.C	TODO (current specific)
 
+.S	others
+
+Q: ML管理者からリモートでメンバー登録 admin add した時に返される
+   Welcome メールで、そのメールの Reply-To: のみを $MAIL_LIST に変更したい
+
+A: HOOK でいじればできるようなきはするけど、
+   それよりデフォールトをそう変更した方がいいんですよね？
+
 
 .S	RDBMS
 
@@ -400,6 +408,15 @@ fmlserv じゃない別の admin ML でやるとかのほうが建設的な感じがするなぁ
 .C	CGI
 .l	CGI
 
+.S	remove @elena again where @elena already exists
+
+すでに @elena があれば
+
+	if (-d @elena) { rename(@elena, @elena.日付.$$);}
+	rename( elena, @elena )
+
+とかしないとかな？
+rm -fr でちゃれんじ…してもいいけど、失敗するとこわい〜ん;_;
 
 .S	qmail のばあい
 =E.S	qmail 
