@@ -98,7 +98,7 @@ $EXPIRE_LIMIT で調整します。$EXPIRE_LIMIT のシンタックスは
 .l	expire.pl
 .k	$FML_EXIT_HOOK
 
-expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
+expire.pl [-h] [-e expire_days] [-s spool_directory] [-n]
     -h                 : HELP
     -e expireする日数
     -s スプール

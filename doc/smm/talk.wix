@@ -43,9 +43,9 @@ in fml-support: 00637
 \w=\S+ って形ならどうとでもなるなる:-)＃ための NEW SYNTAX
 ＃ x=extension-string
 
-まとめおくりとかの Mail transpot とかは あきらかに クライアント側で操
-作できないから、設定できたほうがいいだろうし、
-それに 毎日状況がかわるわけでもない。
+まとめおくりとかの Mail transport とかはあきらかにクライアント側で操作
+できないから設定できたほうがいいだろうし、それに 毎日状況がかわるわけ
+でもない。
 
 ファイル Encoding 方式 とかは 今使ってる状況によってかわるとおもうです。
 学校からとか、おうちからだからgzipでまとめて、てもとで展開とか…
@@ -74,7 +74,7 @@ MH だったら
 	fmlのそーす/lib/Utilites/scan.format 
 を ~/Mail にほうりこめば
 
-161 -10/27 Takashi Yokoyam fml-su fml probrems <<はじめまして、横山＠リコ
+161 -10/27 Takashi Yokoyam fml-su fml problems <<はじめまして、横山＠リコ
 
 とかになりますけど、それじゃ だめ？
 

@@ -78,7 +78,7 @@ sendmail から fml.pl へメールが渡される時は次のように動作します。
 
 のように書きます(コマンドラインオプションをつける場合)。
 
-引数の書き方の順番は任意です。引数の最初の directry を ML の HOME
+引数の書き方の順番は任意です。引数の最初の directory を ML の HOME
 (config.phのある場所 もしくは spool やメンバーファイルのある場所) と見
 なします。
 
@@ -466,7 +466,7 @@ sendmail の走っているマシンを定義することが出来ます。
 %Envelope を通じて渡されます。それはこのメールに対する METHOD の定義と
 みなしているからです。
 
-sendmail の struct envelople e; に対応するものです。
+sendmail の struct envelope e; に対応するものです。
 しかし、perl 4 を本来ターゲットにしているため
 
 	$Envelope->$Header->$From = "uja@domain";
@@ -552,7 +552,7 @@ sendmail の struct envelople e; に対応するものです。
 	Date: 		h:Date:
 	From:		h:From:
 	To: 		h:To:
-	Sujbect: 	h:Subject:
+	Subject: 	h:Subject:
 
 
 .S	データ構造の初期化
@@ -1025,7 +1025,7 @@ MD5-1.7.tar.gz のインストールが必要です。MD5-1.7 は fml の directory
 
 .S	fml インストール後の maintenance と version up に関して
 .l	fml-maintenance
-.k	How to maintan the installed fml source
+.k	How to maintain the installed fml source
 .k	インストール後のメインテナンスとversion up
 .k	version up
 .k	maintenance
@@ -1252,7 +1252,7 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 	From: なんか / なんか (なんか)
 
 とかいう怪しげなフィールドを作ると経路の途中でエラーになって、その先に
-配送されないことがあります。 secuirity 関係の話なので詳しいことは説明
+配送されないことがあります。 securiity 関係の話なので詳しいことは説明
 しませんが…
 
 それは(設計思想として)「疑わしきものははじく」ということから来ています。
@@ -1289,7 +1289,7 @@ smrsh.c は、
 .S	access(2) 
 .k	access(2) 
 
-smrsh.c は acceess(2) を使っています。
+smrsh.c は access(2) を使っています。
 
 =E
 smrsh.c uses acceess();

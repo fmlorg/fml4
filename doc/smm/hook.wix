@@ -277,7 +277,7 @@ $COMMAND_HOOK =q#
 
 .S	"# admin" アドミンの昔の呼出し方
 
-lib/remote/REAMDE をみてもらうとわかりますね。 
+lib/remote/README をみてもらうとわかりますね。 
 
 
 .S	HOOKの例：ある行数を越えるメールは廃棄する設定

@@ -11,7 +11,7 @@
 .S	Perl 4 or 5 ?
 
 fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
-れています。5は upper compatibile のはずなので4でも5でもOKです。
+れています。5は upper compatible のはずなので4でも5でもOKです。
 ただOSによっては5でないとそもそもperlがちゃんと動かないことがあるので
 (5の方が新しいからOS適応性が上なのは当然ですが)
 

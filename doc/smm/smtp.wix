@@ -33,7 +33,7 @@ actives には
 	@axion.phys.titech.ac.jp:Elena@phys.titech.ac.jp
 	@axion.phys.titech.ac.jp:cocoa@phys.titech.ac.jp
 
-のように渡されます。sendmali 8.x での配送は axion.phys.titech.ac.jp ま
+のように渡されます。sendmail 8.x での配送は axion.phys.titech.ac.jp ま
 で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
 
 パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可

@@ -69,7 +69,7 @@ I recommend.
 ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
 いて解説します。
 =E
-This section describes the relation between fml proceses and other
+This section describes the relation between fml processes and other
 programs, and how to launch fml.
 ==
 .include pov.wix

@@ -50,8 +50,8 @@
    libstardate.pl	スタートレック宇宙歴ルーチン
    libsubjectform.pl	Subject FORM 設定例
    libsynchtml.pl	HTML (e.g. var/htdocs ) 化インターフェイス
-   libtagdef.pl		Subjec Tag definition
-   libtraffic.pl	traffice コマンド by yuao@infonia.or.jp (Yuao Tanigawa)
+   libtagdef.pl		Subject Tag definition
+   libtraffic.pl	traffic コマンド by yuao@infonia.or.jp (Yuao Tanigawa)
    libutils.pl		各種 misc な関数
    libwhois.pl		WHOIS インターフェイス
 

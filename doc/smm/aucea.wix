@@ -85,7 +85,7 @@
 
 	本来*CFの一部だが、$Aucea::AuceaConfig という変数は
 	現在 *CF 内には	alloc されていない。これは .config で
-	定義される CF の inititialization code である。
+	定義される CF の initialization code である。
 
 
 .S	コマンドの作り方の例
@@ -107,7 +107,7 @@
 
     %Result を使って結果を出力する。
 	%Result	を STDOUT へ入れる or 
-	result としてメールにつけて distributer function へ渡す。
+	result としてメールにつけて distributor function へ渡す。
 
 	例：  &Mesg(*Envelope, $Result{'Error'});
 

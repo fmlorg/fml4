@@ -281,7 +281,7 @@ sendmail.cf および DNS の問題であって fml の問題ではありません。
 
 謎の sendmail.cf だと変な展開をしてくっつけるのかも知れません。ネット
 の管理者の人に聞いてみて下さい。
-＃ DNS の設定が変とか resovler がおかしい OS とか 謎のsendmail とか 謎
+＃ DNS の設定が変とか resolver がおかしい OS とか 謎のsendmail とか 謎
 の sendmail.cf とか 謎のNIS もありうるか？………（おいおい）
 ＃ 管理者に聞いてみませう。一応キーワードは逆引き
 
@@ -331,7 +331,7 @@ UNIX FROM loop の方のチェックは それとはちがって
 	自分＝＝$MAINTAINER 
 だと loop にひっかかるケースもありえます
 
-よって、MAITAINER は -request とかにするのがおすすめです。
+よって、MAINTAINER は -request とかにするのがおすすめです。
 
 なお、
 
@@ -410,9 +410,9 @@ flock がだめというエラーメッセージがでたら
 にしてみてください
 
 
-.S	CC:Mail でのトラブル その１
+.S	cc:Mail でのトラブル その１
 .k	nkf
-.k	CC:Mail
+.k	cc:Mail
 .k	メールソフト
 
 cc:Mail は[\033\050\112]を日本語が絡みそうな部分には強制的に入れている
@@ -486,7 +486,7 @@ sub SendFile
  ”spool/数字” 全体に対して qsort() をかけちゃうんで
 sort 後の結果が間違ってしまいます。
 
-  # sort ->  1 , 2, 3, ... incresing order.
+  # sort ->  1 , 2, 3, ... increasing order.
   @f = sort {$a <=> $b} @f;
 
 は spool/数字 ではなく 数字 だけで実行しなければならないわけです。
@@ -649,9 +649,9 @@ Elena@Baycity.jp  m=1u
 となります。
 
 
-.S	Return-Receipt-To:事件と CC:Mail等ＭＵＡ
-.k	Return-Receipt-To:とCC:Mail等ＭＵＡ
-.k	CC:Mail
+.S	Return-Receipt-To:事件と cc:Mail等ＭＵＡ
+.k	Return-Receipt-To:とcc:Mail等ＭＵＡ
+.k	cc:Mail
 
 Thanks tanigawa@tribo.mech.nitech.ac.jp 
 
@@ -865,8 +865,8 @@ static である必要がありますね
 .~q
 
 
-.S	CC:Mail 事件 そのN(泣)
-.k	CC:Mail
+.S	cc:Mail 事件 そのN(泣)
+.k	cc:Mail
 
 in fml-support: 01813 
 
@@ -875,12 +875,12 @@ in fml-support: 01813
 	MLからの受信OK
 	MLへの送信×
 
-CC:MAIL形式のアドレス( abc_def_ghi_jkl@abc.co.jp )で登録すると
+cc:Mail形式のアドレス( abc_def_ghi_jkl@abc.co.jp )で登録すると
 
 	MLからの受信×
 	MLへの送信OK
 
-はぁ？？？？？？？？？？？？？？？？？？？？？＞ Cc:Mail
+はぁ？？？？？？？？？？？？？？？？？？？？？＞ cc:Mail
 
 members には両方のアドレス
 actives には”MLからの受信がOKなアドレス”だけ

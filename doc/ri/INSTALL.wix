@@ -193,7 +193,7 @@ the value in the [] is used.  These questions are as follows:
 	Where you install executable files of the fml system?  
 	For example, the locations defined by values above are
 
-		/usr/local/fml/fml.pl  (main exectutable file)
+		/usr/local/fml/fml.pl  (main executable file)
 		/usr/local/fml/doc/    (document directory)
 
 	等の場所にインストールされる。
@@ -218,8 +218,8 @@ the value in the [] is used.  These questions are as follows:
    LANGUAGE                  [Japanese] 
 =E
 =S
-	When you make a new ml by "makefml newml", this setteing
-	determines the languge of documents for the maling list.
+	When you make a new ml by "makefml newml", this setting
+	determines the language of documents for the mailing list.
 =S
 	By default, If the target machine to install matches "*.jp",
 	"Japanese". If not, "English". If you would like to change,
@@ -255,7 +255,7 @@ For example,
 	when you are not one of superusers but you can manage
 	directories under /home on providers or universities.
 	You can install fml to directories under your home. You must
-	reqeust adminisitators to edit /etc/aliases.
+	request administrators to edit /etc/aliases.
 =S
 In this case, you change the input for "makefml" to the following
 =S
@@ -303,7 +303,7 @@ The default is
 =S
 	delivery address is listname@domain
 =S
-	For backward compatility, listname can also interprete
+	For backward compatibility, listname can also interpret
 	commands. Please setup how to use addresses by "makefml
 	policy" or "makefml config"(for each mailing list). 
 =S
@@ -311,7 +311,7 @@ The default is
 		ONLY MEMBER CAN POST
 	by "makefml policy".
 
-	ＭＬ (listname@domain) の配送は Backward compatilibity のため 
+	ＭＬ (listname@domain) の配送は Backward compatibility のため 
 	配送をしさらにコマンドも実行可能
 
 	コマンドは listname-ctl@domain へコマンドを送ってもらう。
@@ -322,7 +322,7 @@ The default is
 
 
 .C	ＭＬを作る。
-=E.C	Creationg a new Mailing List
+=E.C	Creating a new Mailing List
 
 いくつかの簡単な設定やメンバー登録等はコマンドで実行できます。
 =E
@@ -357,7 +357,7 @@ e.g. the include sample for elena ML is
 を初め必要なサンプルが /var/spool/ml/elena に作成されます。
 
 これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
-のでそれを cut & paste して/etc/aliases に加えて newalises して下さい。
+のでそれを cut & paste して/etc/aliases に加えて newaliases して下さい。
 ＃まとめ送りについては後述
 
 =E
@@ -372,7 +372,7 @@ action of makefml. Please cut and paste them in /etc/aliases and
 mirei に変えて実行すればよいです。
 
 =E 
-If you create anothe "mirei" ML, you do the same way again for mirei
+If you create another "mirei" ML, you do the same way again for mirei
 in replacing "elena" with "mirei".
 
 =E
@@ -458,7 +458,7 @@ fmlserv は listserv スタイルのインターフェイスです。似たような機能は実
 の意味はないといって良いでしょう。
 =E 
 fmlserv interface is not default but listserv like interface which
-manipulate several mailing lists. In this age I DO NOT recoomend
+manipulate several mailing lists. In this age I DO NOT recommend
 this, but you can setup this if you like this style. 
 
 fmlserv を setup すること自体はオーナーの数に関わらず
@@ -475,7 +475,7 @@ You can see the example setting in
 に張りつけて newaliases してください。後は fmlserv というアドレスに 
 help とか送ってみると分かるでしょう。
 =E
-Please cut and paste the exapmle of "aliases" which is seen in the
+Please cut and paste the example of "aliases" which is seen in the
 last of "makefml" for /etc/aliases and do "newaliases".
 To check the action of "fmlserv", please send "help" to the
 fmlserv@your-domain.
@@ -550,7 +550,7 @@ group-writable が必要なだけです
 	/var/spool/ml/ＭＬの名前/
 
 =E
-You can find settting samples in the directory
+You can find setting samples in the directory
 =S
 	/var/spool/ml/listname/
 
@@ -587,7 +587,7 @@ BUT
 
 のようなメールがＭＬサーバへ送られます。その場合そのために
 =E
-Hence, the server recongizes YOU ARE NOT MEMBER!.  To avoid this
+Hence, the server recognizes YOU ARE NOT MEMBER!.  To avoid this
 error, you can register both addresses "username" and
 "username@domain" by "makefml add listname address"
 
@@ -664,7 +664,7 @@ Remove the user "fukachan@sapporo.iij.ad.jp" who can manage the
 "Elena" ML in remote.
 
 .S	リモート管理の権限をもつユーザのパスワードの設定・変更
-=E.S	To set or change the passwd of the remote-maitenance user 
+=E.S	To set or change the password of the remote-maintenance user 
 
    /usr/local/fml/makefml passwd elena 
 
@@ -694,7 +694,7 @@ e.g.
 を実行すると基本的な設定を対話的に行なうことができます。
 次のような画面が出てくるので適当に答えて下さい。
 =E
-You can configure the "elena" mailing list interectively. You see the
+You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
 
 TOP画面
@@ -812,7 +812,7 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 	You can configure the listname and the sequence number of the article
 	in the subject.
  	e.g. You like Subject: [Elena:00010] ? 
-	(though I like such a syntax does not exists (I recomended))
+	(though I like such a syntax does not exists (I recommended))
 
 	SubjectでのＭＬ名前と記事番号の設定について
 	例えば、Subject: [Elena:00010] のようにするのか？
@@ -948,7 +948,7 @@ order, thread.html is threaded menu for articles.
 	コマンドも使えます。また、自動登録モードに設定されている場合
 	自動登録ルーチンへ入ります。
 
-デフォールトは Backward compatibilitity で Distribute + Commands です。
+デフォールトは Backward compatibility で Distribute + Commands です。
 またコマンドは listname-ctl 宛を使うことを各ドキュメントのデフォールト
 では推奨しています。しかしＭＬ本体でもコマンドを実行可能です。
 

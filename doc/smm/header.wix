@@ -458,7 +458,7 @@ config.ph で
 
 	…本文略…
 
-みたいになります。スタートレックFAQ に C progarm がのっていますが、
+みたいになります。スタートレックFAQ に C program がのっていますが、
 libstardate.pl はその perl 版です。
 .k	libstardate.pl
 

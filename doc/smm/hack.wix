@@ -24,7 +24,7 @@
 SMTP		libsmtp.pl
 ¤½¤ÎÂ¾		lib(¤½¤ì¤Ã¤Ý¤¤Ì¾Á°).pl
 
-	ra  = remote administraion
+	ra  = remote administration
 	fop = file operation
 
 ¤È¤«¾ÊÎ¬·Ï¤â¤¢¤ë¤±¤É¡Ä ¤Á¤Ê¤ß¤Ë
@@ -435,7 +435,7 @@ $START_HOOK = q#
 Îã¡§
 ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
 $MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent infomation)';
+$ML_FN		= '(fml recent information)';
 $MAINTAINER	= 'fml-request@phys.titech.ac.jp';
 
 $FML            = '/home/axion/fukachan/work/spool/EXP';
@@ -474,7 +474,7 @@ in fml.pl MAIN PART
 #---------------- CHANGE -------------------------
 
 $MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent infomation)';
+$ML_FN		= '(fml recent information)';
 $MAINTAINER	= 'fml-request@phys.titech.ac.jp';
 
 $INFO_FILE	= "$DIR/INFO";

@@ -162,7 +162,7 @@ fml.c の内容は
 execl("/usr/local/fml/fml.pl", /* 本体 fml.pl はどこ？ */
       "(fml)", 
       "/var/spool/ml/Elena",   /* config.ph は どこ？ */
-      "/usr/lcoal/fml",        /* fml packeage の library はどこ？ */
+      "/usr/lcoal/fml",        /* fml package の library はどこ？ */
       NULL);
 
 これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
@@ -975,7 +975,7 @@ private communication のファイルを public な場所にファイルを残すことは
 
 INSTALL を見て下さい。メーリングリストを作るには
 
-	makefml newml listnmae
+	makefml newml listname
 
 で listname というメーリングリストが準備されます。/etc/alisaes に設定
 を書いて newaliases を実行すればそれで終りです。
