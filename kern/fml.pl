@@ -134,7 +134,6 @@ sub InitConfig
 	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
-    print $s if $debug;
     eval($s) || &Log("FAIL EVAL SPOOL_DIR ...");
 
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
@@ -432,6 +431,9 @@ sub FixMode
 {
     local($ca) = &CutFQDN($CONTROL_ADDRESS);
 
+    # USED FOR COMMAND ONLY
+    if ($COMMAND_ONLY_SERVER) { $LOAD_LIBRARY || ($LOAD_LIBRARY = 'libfml.pl');}
+
     # Default LOAD_LIBRARY SHOULD NOT BE OVERWRITTEN!
     if ($Envelope{'mode:uip'} || ($ca && ($Envelope{'mode:chk'} =~ /$ca/i))) {
 	&Log("To:$ca detecteed. Mode->Command") unless $Envelope{'mode:uip'}; 
@@ -457,7 +459,7 @@ sub WholeMail
 { 
     $_ = ">".$Envelope{'Header'}."\n".$Envelope{'Body'};
     s/\n/\n\>/g; 
-    "Original Mail:\n$_";
+    "Original Mail:\n$_\n";
 }
 
 # check a mail from members or not? return 1 go on to Distribute or Command!

@@ -10,7 +10,7 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
 ##### local scope in Calss:Smtp #####
-local($SmtpTime, $FixTransparency); 
+local($SmtpTime, $FixTransparency, $LastSmtpIOString); 
 
 
 # sys/socket.ph is O.K.?
@@ -257,12 +257,18 @@ sub SmtpIO
     # BODY ON MEMORY
     else { 
 	print SMTPLOG $e{'Body'}; print S $e{'Body'};
+	$LastSmtpIOString = $e{'Body'}; 
     }
 
     # Trailer
-    if ($e{'trailer'}) { print SMTPLOG $e{'trailer'}; print S $e{'trailer'};}
+    if ($e{'trailer'}) { 
+	$LastSmtpIOString =  $e{'trailer'}; 
+	print SMTPLOG $e{'trailer'}; 
+	print S $e{'trailer'};
+    }
 
     ### close smtp with '.'
+    print S "\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
     print SMTPLOG ('-' x 30)."\n";
     print S ".\n";
 
@@ -323,6 +329,7 @@ sub SmtpFiles2Socket
 	    &jcode'convert(*_, 'jis') if $autoconv;#';
 	    print S $_;
 	    print SMTPLOG $_;
+	    $LastSmtpIOString = $_;
 	};
 
 	close(FILE);
