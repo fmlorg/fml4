@@ -6954,20 +6954,9 @@ sub SetUpCGIadmin
 
     # first time!
     if (! -f "$CGI_AUTHDB_DIR/admin/htpasswd") {
-	&MkDirHier("$CGI_AUTHDB_DIR/admin");
-	&MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
-	if (open(HTPASSWD, ">> $CGI_AUTHDB_DIR/admin/htpasswd")) {
-	    my $p;
-	    srand(time | $$);
-	    $p = sprintf("%s%s%s%s", 
-			 substr(rand($$), 0, 2), 
-			 substr(($ENV{'USER'} || $<), 0, 2), 
-			 substr((time % 100), 0, 2), 
-			 substr($FQDN, 0, 2));
-	    $p = crypt($p, $p) || 'xaF5F0dIN3ZP.';
-	    print HTPASSWD "admin:${p}\n";
-	    close(HTPASSWD);
-	}
+	# we enforce valid-user in .htaccess, so empty htpasswd is invalid :)
+	&MkDir("$CGI_AUTHDB_DIR/admin");
+	&Touch("$CGI_AUTHDB_DIR/admin/htpasswd");
     }
 
     # make cgi-bin/admin/
@@ -7034,15 +7023,16 @@ sub SaveCGIConf
 sub do_admin_cgi_config
 {
     local($ml) = @_;
-
+    local($cf);
     &ResetVariables;
 
     $cf  = $CGI_CONFIG || "$CONFIG_DIR/cgi.conf";
     $new = $cf.".tmp$$";
 
     # import 
+    delete $INC{$cf};
     package cgi;
-    eval require $main::CGI_CONFIG;
+    eval require $main::cf;
     print STDERR $@ if $@;
     $main::REAL_CGI_PATH   = $REAL_CGI_PATH;
     $main::CGI_AUTHDB_DIR  = $CGI_AUTHDB_DIR;
@@ -7081,7 +7071,7 @@ sub do_admin_cgi_config
 
 	%variable = (
 		     0 => "END",
-		     1 => "USE_SSL             $query{'SSL_REQUIRE_SSL'}",
+		     1 => "USE_MOD_SSL         $query{'SSL_REQUIRE_SSL'}",
 		     2 => "REAL_CGI_PATH       $query{'REAL_CGI_PATH'}",
 		     3 => "CGI_AUTHDB_DIR      $query{'CGI_AUTHDB_DIR'}",
 		     4 => "CHANGE PASSWORD",
