@@ -16,35 +16,20 @@
 
 .C	current
 
+.S	3.0C (to be 3.0C in the new future)
+
 .S	3.0B (fukui newconfig)
 
-要いろいろチェック
+* new 3.0B __LoadConfiguration()
 
-package にダミーの default_config.ph をいれよう 
-A: エラーにならないだけなら "1;" だけのものでもいい気はする。
+う〜ん、ＭＬをまたぐものたちはむつかしいなぁ/うまくはまらないかも…?
 
-fml-support: 06987
+   proc/libcrosspost.pl 
+   libexec/fmlserv.pl
+   libexec/mead.pl
 
-  cf/config
-    → fml のインストール時に default_config.ph を作成するための
-       オプションとして '-i' オプションを追加。
-       '-i' オプション指定時は cf ファイル名の指定は不要で、
-       cf/MANIFEST に記述されている全変数を有効にした config.ph を出力する
-    → $DIR/cf ファイル指定時 (各ML での make config.ph 実行時) は、
-       $DIR/cf ファイルで有効になっていない変数をコメントアウトした
-       config.ph を出力するように変更
-
-  sbin/makefml
-    → fml のインストール時に cf/config を呼び出し、
-       $EXEC_DIR/default_config.ph を作成する処理を追加
-    → 上記に伴い sub MakeConfigPH 内を修正
-
-  src/fml.pl
-    → site_init.ph を require する前に、
-       default_config.ph の require を追加
-    → sitedef.ph を obsolete し、site_force.ph に変更
-       (実際には、site_force.ph がなければ、
-        sitedef.ph を require するようになっている)
+ obsolete ?
+   contrib/whois/submit.pl 
 
 
 .S	3.0A (CGI)
@@ -300,7 +285,7 @@ A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 =E
 * $OUTGOING_ADDRESS easy configuration
 
-* smtpfeedを直接叩く
+* smtpfeedを直接叩く?
   kick off smtpfeed, 
   errorはSMTPでどっかにまるなげ
 =E
@@ -567,19 +552,6 @@ Message Language Extensionの関数ライブラリをよぶ
 	tail command emulation
 	fork
 	alarm
-
-
-.C	日本特有の問題
-=E.C	Japan Specific problems
-
-=E
-*** not translated ***
-
-fml-support: 06265
-半角カナは勝手に全角カナに、機種依存文字は似た文字に
-
-Q: 言語依存 repository は必要か？
-A: module/$LANGUAGE/
 
 
 .appendix
