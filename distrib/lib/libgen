@@ -459,6 +459,15 @@ GEN_ARCHIVE () {
 		rm -f $FTP/00LATEST_CURRENT_IS*
 		eval " touch '$FTP/00LATEST_${BRANCH}_SNAPSHOT_IS__${FMLID}__' ";
 		echo ""
+
+		( 
+		   chdir $FTP;
+		   if [ X$ARCHIVE_DIR != X -a -d $ARCHIVE_DIR ]; then
+		      ln $FMLID.tar.gz $ARCHIVE_DIR/$FMLID.tar.gz
+		   else
+			echo 'ignore link since ARCHIVE_DIR is not defind ?'
+		   fi
+		)
 	else
 		echo ""
 		echo "-- make current htdocs tarballs"
