@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.76.2.12 2002/08/10 09:25:56 fukachan Exp $
+# $FML$
 #
 
 
@@ -1088,10 +1088,6 @@ USE_VERP:
 # postfix $verp_delimiters
 # value: string
 POSTFIX_VERP_DELIMITERS: +=
-
-# try VERPs once a day for efficient delivery.
-# value: 1/0
-TRY_VERP_PER_DAY:
 
 # we use ESMTP pipelining mechanism by default.
 # value: 1/0
