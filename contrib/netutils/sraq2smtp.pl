@@ -31,6 +31,7 @@ $0 =~ m#(\S+)/(\S+)# && (unshift(@INC, $1)); #for lower task;
 
 &SraqInit;
 &Log("$0 Started PORT=$PORT");
+&SraqDeliver(@ARGV);
 
 chdir $DIR || do {
     &Log("Can't chdir to $DIR");
@@ -44,7 +45,11 @@ flock(LOCK, $LOCK_EX);
 
 opendir(DIR, $DIR) || die $!;
 
+undef $TimeOutP;
+
 foreach (readdir(DIR)) {
+    last if $TimeOutP; # TIMEOUT;
+
     next if /^\s+$/;
     next if /^\./;
     next if /^\,/; # already delivered file ,\S+
@@ -216,7 +221,10 @@ sub Funlock {
 
 sub TimeOut
 {
-    return unless $SIGARLM;
+    &Log("Caught ARLM Signal of TIMEOUT; Ending the current process ...");   
+    $TimeOutP = 1;
+    return; #return unless $SIGARLM;
+
     &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);    
     &Log("Caught ARLM Signal, forward the mail to the maintainer and exit");
     sleep 3;
