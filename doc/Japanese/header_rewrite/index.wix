@@ -12,6 +12,7 @@
 .include howto.wix
 .include internals.wix
 .include functions.wix
+.include QandA.wix
 
 .appendix
 .include obsolete.wix
