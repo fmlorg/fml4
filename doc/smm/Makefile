@@ -1,30 +1,19 @@
-tmp = $(HOME)/w/trash/___scanbuffer___
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
+
+all: scan
 
 scan:
-	@ fvs scan *wix 2>&1|tee $(tmp)
-	@ grep '^Modifi' $(tmp) || echo OK
-	@ rm -f $(tmp)
-
-check: fix-files 
-
-fix-rcsid:
-	@ sh .list
-
-fix-files:
-	@ sh .fix_files
-
-all:
+	cvs -n update
 
 clean:
 	gar *~ *.bak
-
-wc:
-	@ echo *wix|tr ' ' '\012'| wc -l > /tmp/.wc0
-	@ wc  `egrep '^[a-z]' CHECKLIST `|grep -v total|wc -l  > /tmp/.wc1
-	@ wc  `egrep '^[a-z]' CHECKLIST `|sort -n 
-	@ echo ""; echo -n "	left files: "
-	@ echo -n `cat /tmp/.wc1`; echo -n " / "; echo `cat /tmp/.wc0`
-	@ wc -l *wix |tail -1 > /tmp/.wc0
-	@ wc -l `egrep '^[a-z]' CHECKLIST ` |tail -1 > /tmp/.wc1
-	@ echo ""; echo -n "	left lines: "
-	@ echo -n `cat /tmp/.wc1`; echo -n " / "; echo `cat /tmp/.wc0`
