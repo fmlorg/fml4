@@ -2,7 +2,7 @@ package sd;
 
 sub Log 
 {
-    main'Log(@_); #';
+    &main'Log(@_); #';
 }
 
 sub main'SDInit #';
