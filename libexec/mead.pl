@@ -756,7 +756,6 @@ sub DeadOrAlive
 	    if ($ml) {
 		&Debug("dead($addr{$_}/$LIMIT):\t$_ <$ml>") if $debug;
 		&Action($addr, $ml);
-		&DeadCache($addr);
 	    }
 	    else {
 		&Debug("$ml for <$admin> is not found, ignore <$_>") if $debug;
@@ -1056,6 +1055,8 @@ sub Action
     }
 
     if (&ValidAddressP($addr)) {
+	&DeadCache($addr);
+
 	if ($mode eq 'auto') {
 	    &MakeFml("$ACTION $ml $addr", $addr, $ml);
 	    &Log("action: makefml bye <$ml> $addr");
