@@ -8,7 +8,14 @@
    3.0B new load configuration final stage
 	define prototype library to replace "require config.ph";
 
-   remove contrib/cwhois/
+   removed:
+	contrib/cwhois/
+	contrib/crosspost/
+	contrib/netutils/
+	contrib/Obsolete/
+	bin/Html.pl
+	sbin/localtest.pl
+
 	a part of clean up campaign
 	cwhois is not maitained now. It is also not related with fml,
 	move it to other ffs/ repository.
