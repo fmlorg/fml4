@@ -1,0 +1,78 @@
+UPGRADE する人向けの注意
+
+○ (従来どおりですが)できるだけ互換性を保つように作られていますが、
+HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
+して下さい。
+
+○ upgrade で『config.ph から何から作り直す』人には注意が必要です。古
+い config.ph のまま使うのなら backward compatible になるように動作する
+ので関係ありません。
+
+具体的にどこで区別しているかというと $CFVersion です。FML 2.1 ではこれ
+が 3 になります。3 のものについては以下のような動作をします。
+問題になるのは
+
+   $CFVersion = 3; でなおかつ $MAIL_LIST と $CONTROL_ADDRESS が異なる場合
+
+だけです。
+
+
+2.1 RELEASE のデフォールトは
+
+   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
+
+の時は従来と異なり『配送専用』です。
+
+   『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
+	昔と同じで配送用のアドレス $MAIL_LIST で
+	コマンド(# command の形)を受け付けます。
+   』(HML 1.6 互換モード)
+
+
+となっています。(以下 INSTALL ドキュメントより)
+
+例えば (ドメイン fml.org で)
+
+	makefml newml elena
+
+で elena MLを作ったとします。デフォールト構成は
+
+	elena@fml.org		MLへの投稿用のアドレス
+	elena-ctl@fml.org	MLのコマンドを送るアドレス
+
+を使うように setup されます。ヘルプファイル等の見本もこの選定の元に生
+成されます。ちなみに
+
+	elena-admin@fml.org	MLの管理者宛のアドレス
+				(エラーメールなどが送られてくる)
+
+です。
+
+elena@fml.org でコマンド "# command" を受け付けるようにはなっていませ
+ん。『$COMMAND_ADDRESS = $MAIL_LIST;』と設定することで elena@fml.org 
+がコマンド "# command" をコマンドとして理解するようになります。
+設定は makefml config でもできます。
+
+config.ph で
+
+	$COMMAND_ADDRESS = $MAIL_LIST;
+
+となっていれば elena@fml.org でコマンドを受け付けます。この場合は配送
+メールの X-ML-Info: というフィールドやコマンドのREPLYもすべて 
+elena@fml.org 宛になるように設定されます。(helpファイルは手動で書き直
+してください)
+
+# command というシンタックスのコマンドをelena@fml.org も 
+elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
+
+	$MAIL_LIST_ACCEPT_COMMAND = 1;
+
+とする必要があります。
+# 意味的には Backward Compatible というカテゴリですが、
+# $COMPAT_なんとか にすると何の compatible の話か見えにくくなるので
+# こういう変数名になってます。
+# 以前の version ではヘッダで「elena-ctl へ」とか書いてるのに実は 
+# elena でも受け付けてたという仕様上の問題を再現するためのオプションです。
+# いわば option TCP_COMPAT_42 みないなもんですかね
+
+$Id$
