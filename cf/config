@@ -437,6 +437,18 @@ sub SetDefaults
 	    while ($str =~ s/\\\\@/\\@/g) { 1;}
 	    $value{$key} = ($str =~ /^\d+$/) ? $str : "\"$str\"";
 
+	    ##  XXX 3.0B bug?
+	    ##  It is needed to avoid default_config.ph overwrites
+	    ##  config.ph definitions. For example $CONTROL_ADDRESS
+	    ##  in default_config.ph overwrites config.ph commnted-out
+	    ##  '# $CONTROL_ADDRESS' in config.ph ???
+	    ##  If $install mode (cf/config -i), WE SHOULD NOT
+	    ##    load value like acct@domain form to default_config.ph.
+	    ##  or SHOULD MODIFY cf/MANIFEST ???
+	    # if ($install) {
+	    #   if ($str =~ /\@/) { $value{$key} = "''";}
+	    # }
+
 	    # next; # not next for comments
 	}
 
