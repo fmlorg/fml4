@@ -1455,9 +1455,15 @@ fukachan@phys.titech.ac.jp	skip
 
 fml.pl の次の行は
 
-    if ($COMPAT_ARCH)  { require "arch/${COMPAT_ARCH}.pl";}
+    if ($COMPAT_ARCH)  { require "arch/${COMPAT_ARCH}/depend.pl";}
 
 Architecture 依存コードをロードするためのものです。
+Architecture 依存は
+
+	sys/arch/アーキテクチュア or OS/perlスクリプト
+
+のように並び適宜ローディングされます。
+
 
 
 .C	配送効率についての考察
@@ -1469,9 +1475,8 @@ Architecture 依存コードをロードするためのものです。
 この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
 それでもかなりのものです。
 
-論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
-げても ML の配送プロセスには何のメリットも生じないということでもありま
-す。
+逆にいえば fml 自体を tuning して速度を例えば 0.1 sec 上げても ML の配
+送プロセスには何のメリットも生じないということでもあります。
 
 余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
 ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
