@@ -6,7 +6,7 @@
 
 2. install DRAC (Dynamic Relay Authorization Control)
 
-.url http://www.mbnet.mb.ca/howto/dynamic.htm
+.url http://mail.cc.umanitoba.ca/drac/index.html
 
 .if LANG == JAPANESE
 [drac のつくりかた]
