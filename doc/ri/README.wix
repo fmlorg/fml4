@@ -379,14 +379,14 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-	postfix 19990601 on NetBSD 1.4_BETA
+   postfix 19990601 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
 
 ○ テスト環境: fml 3.0 のターゲットマシン/テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
-	sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.4_BETA
-	sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.4_BETA
+   sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.4_BETA
+   sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.4_BETA
 
 なおFML.ORGの配送システムは5つのMTAを使った並列配送で高速化しています:)。
 (通称MTAみくじです ^^;)
@@ -394,11 +394,12 @@ INSTALL_on_NT4.
 The delivery system on FML.ORG consists of 5 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
-	sendmail 8.8.8 + WIDE patch + smtpfeed
-	sendmail 8.9.3
-	qmail 1.03
-	exim 2.04
-	postfix snap-19990322
+   sendmail 8.8.8 + WIDE patch + smtpfeed
+   sendmail 8.9.3
+   qmail 1.03
+   exim 2.04
+   postfix snap-19990322
+
 
 
 .C	FML 3.0 の機能の概要
