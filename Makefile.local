@@ -61,7 +61,7 @@ simulation:
 	env FML=${FML} sh $(FML)/.simulation/bootstrap
 
 scan:
-	@ mv /tmp/__scan__ /tmp/__scan__.bak
+	@ mv -f /tmp/__scan__ /tmp/__scan__.bak || echo ""
 	@ cvs -n update |tee /tmp/__scan__
 	@ echo "--- others ---"
 	@ grep -v '^M' /tmp/__scan__ || echo none.
