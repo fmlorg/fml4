@@ -19,9 +19,8 @@ sendmail は CF のマニュアルを参照すると良いでしょう。JPCERTの『技術メ
 .fi
 
 .if LANG == ENGLISH
-Fml assumes you use sendmail by default, so see INSTALL file for
-installation with sendmail. The file also assumes sendmail.
-
+Fml assumes fml works with sendmail by default.
+If so,  see INSTALL file for installation with sendmail. 
 .url	../INSTALL-e/index.html
 
 For more details on sendmail configurations, see sendmail.org.

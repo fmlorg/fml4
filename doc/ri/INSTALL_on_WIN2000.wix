@@ -16,7 +16,7 @@ Please see INSTALL for the install flow.
 .toc
 
 .C	動いた実績
-=E.C	verified cases
+=E.C	verified combinations
 
 .S	case 1
 
@@ -30,11 +30,18 @@ fml-current (3.0G 20000716) pop version
 
 .C	installation
 
-
+.if LANG == JAPANESE
 インストールは NT4 用のドキュメントを見て下さい。基本的に一緒です。
 .url ../INSTALL_on_NT4/index.html
 
 今のところ 2000 特有の問題点は見つかっていないと思います。
+.fi
+.if LANG == ENGLISH
+Please install fml in the same way as on NT 4 case.
+No difference is found between NT 4 and 2000 now.
+
+.url ../INSTALL_on_NT4-e/index.html
+.fi
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -10,7 +10,6 @@
 
 
 .C	Introduction
-=E.C	Introduction
 
 Postfix は昔 vmailer と呼ばれていました。β公開時に copyright からみで、
 postfix に改名されました。IBM Secure Mailer とも呼ばれます。作者は 
@@ -34,8 +33,9 @@ Postfix は Sendmail を置き換えるために作られたと主張している通り、
 sendmail との互換性は非常に高く、fml のセットアップは sendmail の場合
 とほとんど同様です(sendmail の場合については INSTALL ファイルを参照)。
 =E
-Postfix is almost compatible with sendmail.  You don't need special
-configuration to run fml but need to change postfix configuration.
+Postfix is almost compatible with sendmail. You don't need special
+configuration to run fml but need to change a few configurations in
+/etc/postfix/main.cf.
 
 
 .C	fml を動かすために必要な設定？
@@ -46,29 +46,26 @@ configuration to run fml but need to change postfix configuration.
 =E
 Assume you have already made, installed and run postfix. So you can
 send and receive mails via postfix now. If not, please see postfix
-manual and configure before running fml.
+manual and configure it before running fml.
 
 .S	変更するべき設定
-=E.S	How to configure /etc/postfix/main.cf
+=E.S	modify /etc/postfix/main.cf a little
   
 デフォルトでは :include: が使えないので /etc/postfix/main.cf を次のよ
-うに変更して下さい。
+うに変更して下さい。これで :include: 命令が有効になります。
 =E
-Consider /etc/postfix/main.cf. Postfix does not permit :include: form
-in /etc/aliaes. You need the following line e.g. 
+By default, postfix does not permit :include: directive in
+/etc/aliases. You need to add the following line to
+/etc/postfix/main.cf:
 
 	allow_mail_to_commands = alias,forward,include
 
-これで :include: 命令が有効になります。
+main.cf を変更後、 postfix reload を忘れずに！
 =E
-in main.cf
+After you modified main.cf, don't forget to run "postfix reload" !
 
-main.cf を変更したら、 postfix reload を忘れずに！
-=E
-This is not a must but may be better?
-
-この postfix 特有の設定以外は気にしなくても sendmail と同じだと思って
-いて構わないとおもいます。
+この postfix 特有の設定以外は sendmail と同じと思って構わないとおもい
+ます。
 
 
 .appendix
@@ -80,7 +77,7 @@ This is not a must but may be better?
 
 sendmail の DefaultUser にあたるものは default_privs です。
 =E
-Also you need set up account for your ML. For exmaple
+DefaultUser of sendmail corresponds to default_privs directive.
 
 default_privs = fml
 
