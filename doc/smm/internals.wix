@@ -2057,14 +2057,28 @@ loads the following filter rule in default.
 	   これ以前はあるパラグラフがこの行そのものの時のみ拒否
 	   つまり『空行＋%echoなんとか行＋空行』の時だけだった
 	○ Message-Id: が朗かに addr-spec でないのは SPAM メール
-	○ ２バイト英文字ではじまる行を拒否
-	   例: ＵＮＳＵＢＳＣＲＩＢＥ ほえほえ
 =E
 	* reject null body
 	* reject one line English words mail
 	  e.g. "help", "unsubscribe"
 	* reject invalid Message-Id mails (may be SPAM mails)
 	* other strange syntaxes
+
+   [options]
+
+	$FILTER_ATTR_REJECT_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_COMMAND
+
+	○ #unsubscribe などのコマンドをはじく
+=E
+	reject '#unsubscribe' like commands
+
+	$FILTER_ATTR_REJECT_2BYTES_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_2BYTES_COMMAND
+
+	○ ２バイト英文字ではじまる行を拒否
+	   例: ＵＮＳＵＢＳＣＲＩＢＥ ほえほえ
+=E
 	* reject a line begining with Japanese 2-byte English Characters
 	  e.g. 2-byte "unsubscribe"
 
