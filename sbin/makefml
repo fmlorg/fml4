@@ -536,23 +536,25 @@ sub SetHashDefaults
 
 		    # admin command (main)
 		    'add',      'do_adduser',
-		    '20#add ML address',     'add <address> to <ML>',
+		    '20#add ML addr',     'add <addr> to <ML>',
 		    'adduser',  'do_adduser',
-		    '20#adduser ML address', 'add <address> to <ML>',
+		    # '20#adduser ML addr', 'add <addr> to <ML>',
 		    'bye',      'do_byeuser',
-		    '30#bye ML address',     'remove <address> from <ML>',
+		    '30#bye ML addr',     'remove <addr> from <ML>',
 		    'byeuser',  'do_byeuser',
-		    '30#byeuser ML address', 'remove <address> from <ML>',
+		    # '30#byeuser ML addr', 'remove <addr> from <ML>',
 
 		    # asymmetric registration
 		    'addmember',      'do_addmembers',
 		    'addmembers',     'do_addmembers',
 		    'add2member',    'do_add2members',
 		    'add2members',   'do_add2members',
+		    '33#add2members ML addr', 'add <addr> to only members',
 		    'addactive',      'do_addactives',
 		    'addactives',     'do_addactives',
 		    'add2active',    'do_add2actives',
 		    'add2actives',   'do_add2actives',
+		    '33#add2actives ML addr', 'add <addr> to only actives',
 
 		    # admin command (sub)
 		    'on',     'do_on',
@@ -560,21 +562,21 @@ sub SetHashDefaults
 		    'chaddr', 'do_chaddr',
 		    'matome', 'do_matome',
 		    'digest', 'do_digest',
-		    '40#on  ML address', 'on  <address>',
-		    '40#off ML address', 'off <address>',
+		    '40#on  ML addr', 'on  <addr>',
+		    '40#off ML addr', 'off <addr>',
 		    '45#chaddr ML old new', 'change address <old> => <new>',
 		    '48#matome ML addr [opt]', 'set up digest(matome) for address <addr>',
 		    '48#digest ML addr [opt]', 'set up digest(matome) for address <addr>',
 
 		    'addadmin', 'do_addadmin',
-		    '60#addadmin ML address', 'add <address> as an admin to <ML>',
+		    '60#addadmin ML addr', 'add <addr> as an admin to <ML>',
 		    'byeadmin', 'do_byeadmin',
-		    '60#byeadmin ML address', 'remove the administrator of <ML>f',
+		    '60#byeadmin ML addr', 'remove the administrator of <ML>',
 
 		    'help',	'do_info',
 		    '80#help',	'help message',
 		    'passwd',	'do_passwd',
-		    '80#passwd ML address',	'to change the administrator passwd',
+		    '80#passwd ML addr',	'to change the administrator passwd',
 
 		    'test',	'do_test',
 		    '80#test ML',	'test ',
@@ -593,9 +595,9 @@ sub SetHashDefaults
 
 		    'delivery_mode',  'do_delivery_mode',
 
-		    '100#fmlserv', 'set up fmlserv (listserv-like command interface)',
-		    # '100#listserv','set up fmlserv (listserv-like command interface)',
-		    # '100#majordomo','set up fmlserv (listserv-like command interface)',
+		    '100#fmlserv', 'set up fmlserv (listserv-like server)',
+		    # '100#listserv','set up fmlserv (listserv-like server)',
+		    # '100#majordomo','set up fmlserv (listserv-like server)',
 
 		    # misc
 		    'lock', 'do_lock',
@@ -611,7 +613,7 @@ sub SetHashDefaults
 		    '200#config-template', 'configure template cf file',
 
 		    'command', 'do_command',
-		    '1000#command ML addr ...', 'e.g. "command ML address mget last:3 mp"',
+		    '1000#command ML addr ...', 'e.g. "command ML addr mget last:3 mp"',
 
 		    # create document templates
 		    'create-doc-template',    'do_create_doc_template',
@@ -621,6 +623,7 @@ sub SetHashDefaults
 		    'conv',             'do_conv',
 		    'update',           'do_update',
 		    'update-config.ph', 'do_update_config_ph',
+		    '400#update-config.ph ML', 'make config.ph (cf -> config_ph)',
 
 		    # upgrade from 2.x to 3.0
 		    'upgrade', 'do_upgrade',
@@ -645,8 +648,9 @@ sub SetHashDefaults
 		    # utilities
 		    'resend',       'do_resend',
 		    'log',          'do_log',
-		    '1000#log',     'log [-i] [-NUMBER] [all] [-pPATTERN]',
+		    '1000#log ML [opt]',  'show log: [-i] [-NUMBER] [all] [-pPATTERN]',
 		    'showconfig',   'do_showconfig',
+		    '8000#showconfig',   'show environment, version, ..',
 		    'showconf',     'do_showconfig',
 		    'bug-report-template',     'do_send_pr',
 		    'send-pr',     'do_send_pr',
@@ -2502,15 +2506,16 @@ sub do_htpasswd
 
 sub do_info
 {
-    print STDERR "*" x 60; print STDERR "\n";
-    print STDERR "makefml Usage:\n\n";
-    print STDERR "             makefml command\n";
-    print STDERR "             makefml command <ML>  options\n";
-    print STDERR "             makefml <ML>::command options\n";
-    print STDERR "\n";
+    $| = 1;
+    print "*" x 60; print "\n";
+    print "makefml Usage:\n\n";
+    print "             makefml command\n";
+    print "             makefml command <ML>  options\n";
+    print "             makefml <ML>::command options\n";
+    print "\n";
 
-    printf STDERR "   makefml %-20s %s\n", "command arguments", "what";
-    print STDERR "   ".("-"x57)."\n\n";
+    printf "   makefml %-25s %s\n", "command arguments", "what";
+    print "   ".("-"x57)."\n\n";
 
     for (sort {$a <=> $b} keys %MakeFmlProc) {
 	next unless /^\d+\#/;
@@ -2518,17 +2523,17 @@ sub do_info
 
 	s/^(\d+\#)//;
 
-	printf STDERR "   makefml %-20s %s\n", $_, $usage;
+	printf "   makefml %-25s %s\n", $_, $usage;
     }
 
-    print STDERR "\n";
-    print STDERR "*" x 60; print STDERR "\n";
-    print STDERR "\n";
-    print STDERR "HOW TO INSTALL:\n";
-    print STDERR "\"perl makefml install\" to install fml\n";
-    print STDERR "\"perl makefml -W cgi install\" to enable cgi for fml\n";
-    print STDERR "\"perl makefml config <ML>\" to go to the menu screen\n";
-    print STDERR "\n";
+    print "\n";
+    print "*" x 60; print "\n";
+    print "\n";
+    print "HOW TO INSTALL:\n";
+    print "\"perl makefml install\" to install fml\n";
+    print "\"perl makefml -W cgi install\" to enable cgi for fml\n";
+    print "\"perl makefml config <ML>\" to go to the menu screen\n";
+    print "\n";
 }
 
 
