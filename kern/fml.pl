@@ -892,21 +892,16 @@ sub StripBracket
 sub CutOffRe
 {
     local($_) = @_;
+    local($pattern);
 
-    # BBS style? CUT OFF 
-    s/^\s*Re\d+:\s+/Re: /gi;     # Re2:
-    s/^\s*Re\[\d+\]:\s+/Re: /gi; # Re[2]:
-    s/^\s*Re\(\d+\):\s+/Re: /gi; # Re(2):
-    s/^\s*Re\^\d+:\s+/Re: /gi;   # Re^2:
-    s/^\s*Re\*\d+:\s+/Re: /gi;   # Re*2:
+              #  Re: Re2:   Re[2]:     Re(2):     Re^2:    Re*2:
+    $pattern  = 'Re:|Re\d+:|Re\[\d+\]:|Re\(\d+\):|Re\^\d+:|Re\*\d+:';
+    s/^(\s*($pattern)\s*)+/Re: /oi;
 
     if ($LANGUAGE eq 'Japanese') { 
 	require("module/$LANGUAGE/liblangdep.pl");
 	$_ = &Japanese'CutOffReReRe($_);
     }
-
-    while (s/^\s*Re:\s*Re:\s*/Re: /gi) { ;} #'/gi' for RE: Re: re: ;
-    s/^\s*Re:\s+/Re: /; # canonicalize it to "Re: ";
 
     $_;
 }

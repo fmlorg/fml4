@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: liblangdep.pl,v 1.2 2000/03/07 17:11:21 fukachan Exp $
+# $Id: liblangdep.pl,v 1.3 2000/03/08 04:57:29 fukachan Exp $
 
 # patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 # fml-support: 07599, 07600
@@ -34,6 +34,7 @@ sub CutOffReReRe
 {
     local($x) = @_;
     local($y, $limit);
+    local($pattern);
 
     require 'jcode.pl'; # not needed but try again
 
@@ -47,18 +48,12 @@ sub CutOffReReRe
 	&jcode'convert(*CUT_OFF_RERERE_PATTERN, 'euc'); #';
     }
 
-    $limit = 10;
-    while ($limit-- > 0) {
-	$y = $x;
-	$x =~ s/^[\s]*//;
-	$x =~ s/^(　)*//;
+              #  Re: Re2:   Re[2]:     Re(2):     Re^2:    Re*2:
+    $pattern  = 'Re:|Re\d+:|Re\[\d+\]:|Re\(\d+\):|Re\^\d+:|Re\*\d+:';
+    $pattern .= '|手慨:|手慨¨|手:|手¨|ＲＥ:|ＲＥ¨|Ｒｅ:|Ｒｅ¨';
+    $pattern .= '|' . $CUT_OFF_RERERE_PATTERN if ($CUT_OFF_RERERE_PATTERN);
 
-	# XXX s/Re: Re:/Re: / after this module. See CutOffRe() in fml.pl
-	$x =~ s/^(\s*|Re:\s*)(手慨:|手慨¨|手:|手¨|ＲＥ:|ＲＥ¨|Ｒｅ:|Ｒｅ¨)/Re:/;
-	if ($CUT_OFF_RERERE_PATTERN) { $x =~ s/^($CUT_OFF_RERERE_PATTERN)//;}
-	last if $y eq $x;
-	&Log("rewrite-subject: {$x}");
-    }
+    $x =~ s/^((\s*|(　)*)*($pattern)\s*)+/Re: /oi;
 
     if ($CUT_OFF_RERERE_HOOK) {
 	eval($CUT_OFF_RERERE_HOOK);
