@@ -16,24 +16,35 @@ anonymous cvs (anoncvs.fml.org) の使い方
 </CENTER>
 </H1>
 
-anoncvs は fml のCVS tree へ read only なアクセスを許します。
+anoncvs は fml の CVS tree へ read only なアクセスを許します。
 ここでは CVS の使い方は知っているものとします。
-<PRE>
 
+<P> 最初の一回目：まず、ろぐいんする。2回目以降は不必要です。
+
+<PRE>
 % cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot login
 
     パスワードを聞かれるので単にリターン(つまりpasswordは空)
     ＃ちなみに ~/.cvspass というファイルにキャッシュされます。
-
-% cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot co fml
-
-   ... snip ...
 </PRE>
 
-つまり最初の login さえしておけば、"-d cvsrootの指定" のところ以外は一緒。
+<P> 次に、ソースを取り出します。
+	例えば fml リポジトリを取り出すには次のようにします。
+<PRE>
+% cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot co fml
 
-fml 4.0 には上記のことを行なう wrapper "anoncvs" コマンド
+	…だ〜っとメッセージが出る…
+</PRE>
+つまり最初の login さえしておけば、"-d cvsrootの指定" のところ以外は一緒です。
+
+
+fml 4.0 には wrapper "anoncvs" コマンド
 ( /usr/local/fml/bin/anoncvs ) が入っています。
+それをつかうと -d 部分は省略できます。
+<PRE>
+% /usr/local/fml/bin/anoncvs login
+% /usr/local/fml/bin/anoncvs co fml
+</PRE>
 
 anoncvs で取り出した後は 
 <PRE>
@@ -52,7 +63,7 @@ NetBSD と GNU Debian/linux (slink) でこの make build が動作することを
 御覧下さい。
 
 <PRE>
-$Id$
+$FML: anoncvs.ja.html,v 1.4 2001/07/07 04:02:43 fukachan Exp $
 </PRE>
 </BODY>
 </HTML>

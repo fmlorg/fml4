@@ -15,205 +15,22 @@
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 
-<CENTER>
 <A HREF="http://www.oreilly.co.jp/BOOK/fml/">
-"fml" バイブル -- fml trekking guide -- 
+fml バイブル
 </A>
-</CENTER>
-への補足
+についての誤植や補足事項については、
+別途ページを作っていくことにしました。
 
-<UL>
-	<LI>
-	<A HREF=#15>15章　fmlの返すメッセージをカスタマイズする
-
-	<LI>
-	<A HREF=#29>29章　バーチャルドメイン
-
-	<LI>
-	<A HREF=#36>36章　データベース
-
-	<LI>
-	<A HREF=#version>バージョン依存性について
-
-	<LI>
-	<A HREF=#rfc> RFC 821,822 と RFC 2821,2822
-</UL>
-
-
-<HR>
-
-
-<!---------- chapter 15 ------>
-<A NAME="15">
-<P>
-『15章　fmlの返すメッセージをカスタマイズする』への補足
-
-<BR> Q: 
-<A HREF="Japanese/how_to_subscribe/index.html#not-send-back-welcome-file">
-welcome を送り返すのを止める。
+<A HREF="http://www.fml.org/home/fukachan/book/fml_bible/">
+http://www.fml.org/home/fukachan/book/fml_bible/
 </A>
-
-<BR>
-Q: コマンドの返事のメッセージを抑制する。
-<BR>
-DEFINE_MODE("disablenotify") 
-を使うとやりすぎになることがあります。
-例えば、自動登録の際の confirmation まで送られなくなることがあります。
-
-
-
-<!---------- chapter 29 ------>
-<P>
-<A NAME="29">
-『29章　バーチャルドメイン』への補足 
-
-
-本文では sendmali で virtusertable を使う話で、マップの扱いの注意点を
-述べています。
-
-そのドメインでうけとるためには、バーチャルドメインのドメイン名を class
-w へ付け足すことも必要です。例えば
-<PRE>
-Cw localhost
-を
-Cw localhost virtual-1.domain
-</PRE>
-にして sendmail に HUP シグナルを送ります。 
-
-
-<!---------- chapter 36 ------>
-<P>
-<A NAME="36">
-
-注意:
-<BR>
-      現在の toymodel は postgresql 7.1 以降では
-      うまく動かないようです。理由は off というエントリが
-      SQL '99 の規格にある予約語とぶつかっているからです。
-
-<P> 
-      とりあえずの回避策は
-<UL>
-	<LI> postgresql 7.0.x を使う
-	<LI> toymodel の off のエントリを他の名前に変える
-</UL>
-
-<P>
-  TODO:
-<BR>
-	互換性のために現在の toymodel はそのままにし、別途 SQL'99 でも
-	使えるドライバを用意しようと思います。
-
-
-<HR>
-<A NAME="version">
-
-<BR>
-Q: 4.0-stable については？
-<BR>
-A:
-4.0 および 4.0-stable 用のドキュメントです。
-もし将来 4.0-stable で相違点が生じることがあれば、適宜 WWW などで
-注意点を補筆するつもりです。
-
-<BR>
-Q: 4.0.1 は？
-<BR>
-A:
-fml バイブルは 4.0.1 もカバーしています。
-4.0.1 は 4.0-stable のある”区切り”、路傍石と考えて下さい。
-
-<P>
-<BR>
-Q: 3.0 シリーズに適用できますか？
-<BR>
-A:
-
-設定やインストールの各論についてはあくまでも 4.0 準拠なので、3.0 シリー
-ズにはあてはまらないところがあります(下記参照)。
-例えば mead のセットアップを例にとると、4.0 では makefml mead というコ
-マンドが用意されていますが、3.0 では少し面倒です。
-そういった違いです。
-
-一方、トラブルシューティング大全(?)や一般的な引越しの作業手順や各メー
-ルサーバの議論などは fml のバージョンにほとんど左右されないとおもいま
-す。
-
-3.0 と 4.0 は機能の追加はあっても、内部構造の変更はほとんどありません。
-そのためほとんどの話題は 4.0 でなくてもあてはまります。
-
-例えば、CGI やデータベースアクセスは 3.0 を変更するものではなく追加に
-あたる機能です。CGI やデータベースアクセスを使わない場合 3.0 と特に
-同じに見えるはずです。
-
-
-3.0 と 4.0 のもっとも大きな違いは特殊な話題ですが、 PGP 関連のコマンド
-等の使い方にあります。詳しくは
-<A HREF="UPGRADE/index.html"> UPGRADE </A>
-を参照してください。これ以外に大きな変更点はないといえます。
-
-
-<P> makefml の場合:
-
-以下に挙げるコマンドは 3.0 や 3.0.1 にはなく、
-次のコマンドは 4.0 にしかありません。
-注意して下さい。
-
-<UL>
-	<LI> ＭＬのセットアップ関係
-	<UL>
-		<LI>makefml update-config
-3.0 などでも
-<PRE>
-% cd /var/spool/ml/elena
-% make config.ph
-</PRE>
-と実行すれば update-config と同じようにアップデートされます。
-単に 4.0 の update-config の方が手順が少し楽になっているというだけです。
-
-		<LI>makefml destructml
-		<LI>makefml recollect-aliases
-		<LI>makefml addmembers
-		<LI>makefml add2members
-		<LI>makefml addactives
-		<LI>makefml add2actives
-	</UL>
-
-	<LI> 4.0 で拡張された pgp 操作コマンド群
-
-	<LI>mead のセットアップ
-	<UL>
-		<LI>makefml mead
-	</UL>
-
-	<LI> CGI 関係
-	<UL>
-		<LI>makefml admin.cgi
-		<LI>makefml mladmin.cgi
-	</UL>
-
-	<LI> その他
-	<UL>
-		<LI>makefml log
-		<LI>makefml tail
-		<LI>makefml resend
-		<LI>makefml showconf
-	</UL>
-</UL>
-
-
-<P>
-<A NAME="rfc">
-	FYI: RFC 821 と 822 は 2821 と 2822 により obsolete になりました。
-	fml ドキュメント中で 821 822 をよく取り上げますが、適宜読み直すなり
-	してください。
-
+へ移しましたので、そちらを参照して下さい。
 
 <PRE>
-Copyright (C) 1993-2001 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
          All rights reserved.
 
-$FML: booknotes.ja.html,v 2.6 2001/06/05 14:05:06 fukachan Exp $
+$FML: booknotes.ja.html,v 2.8 2001/08/07 10:38:01 fukachan Exp $
 </PRE>
 </BODY>
 </HTML>
