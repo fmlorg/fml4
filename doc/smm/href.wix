@@ -16,7 +16,7 @@
 
 fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
 ので;-)、HOOK でやれるように書き直しました。
-注意： libsynchtml.pl により SyncHtml.pl は Obsolete になりました
+注意: libsynchtml.pl により SyncHtml.pl は obsolete になりました
 
 SYNOPSIS:
 	&SyncHtml(生成されたHTMLを置く場所, $ID, *Envelope);
@@ -64,20 +64,20 @@ $HTML_DATA_THREAD です。
 .k	$HTML_DATA_THREAD
 
 
-コマンドラインからのためのインターフェイスに spool2html.pl というのも
-あります。
+同じライブラリを呼んで同じことをするコマンドラインからのためのインター
+フェイスに spool2html.pl というのもあります。
 .xref spool2html.pl
 
 
-.S	HTML化するUNIT (数 or 日)
+.S	HTML化する単位 (数 or 日)
 .l	$HTML_INDEX_UNIT
 .key	$HTML_INDEX_UNIT
 
 	$HTML_INDEX_UNIT (default 'day') 
 
 expireしない場合一つの var/htdocs/ に数千のファイルができることになり
-かねません。これよりはファイル１００個ごと、もしくは日ごとにdirectory
-をまとめておく方が見やすいでしょう。
+かねません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをま
+とめておく方が見やすいでしょう。
 
 現在の標準実装のデフォールトは $HTML_INDEX_UNIT = 'day'; で
 
@@ -85,13 +85,13 @@ expireしない場合一つの var/htdocs/ に数千のファイルができることになり
 	var/htdocs/19960916/記事番号.html
 	…
 
-のように 1996/09/16 日のＭＬの記事を var/htdocs/19960916/ 以下にHTML化
+のように 1996/09/16 日のMLの記事を var/htdocs/19960916/ 以下にHTML化
 します。
 
 また、
 	$HTML_INDEX_UNIT = 数字 (e.g. 100)
 
-とした場合記事１００個ごとに別のdirectoryを作ります。
+とした場合記事100個ごとに別のdirectoryを作ります。
   
 	var/htdocs/100/
 	var/htdocs/200/
@@ -168,7 +168,6 @@ HTMLに変換された記事をファイルに保存する直前に実行されるフック。
 かにマッチした場合に、キーワード別に別のHTML階層を作ります。
 
 
-
 .S	TalkWithHttpServer
 .l	TalkWithHttpServer
 .k	TalkWithHttpServer
@@ -189,7 +188,7 @@ http:// で始まらない時には、デフォールトで聞きにいくサーバを
 	$DEFAULT_HTTP_SERVER
 .k	$DEFAULT_HTTP_SERVER
 
-で、またデフォールトを８０から変えたい時は
+で、またデフォールトを80から変えたい時は
 
 	$DEFAULT_HTTP_PORT 
 .k	$DEFAULT_HTTP_PORT 
