@@ -25,6 +25,7 @@ messages/
 PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
+module/compat/lib*pl
 dist/jcode/jcode.pl
 dist/mimepls/mimer.pl
 dist/mimepls/mimew.pl
