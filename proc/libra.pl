@@ -219,10 +219,13 @@ sub AdminModeInit
 		  'admin:pgp',            'ProcPGP',
 
 		  # user commands
-		  'admin:members', 'ProcFileSendBack',
-		  '#members',     $MEMBER_LIST,
-		  'admin:actives',  'ProcFileSendBack',
-		  '#actives',    $ACTIVE_LIST,
+		  'admin:members',        'ProcFileSendBack',
+		  '#members',             $MEMBER_LIST,
+		  'admin:actives',        'ProcFileSendBack',
+		  '#actives',             $ACTIVE_LIST,
+
+		  # overwrite commands
+		  'admin:iam',            'ProcAdminWhois',
 		  );
     
 
@@ -1238,6 +1241,25 @@ sub RemoveArticleInArchive
     chdir $DIR || return 0;
 
     $fatal ? 0 : 1;
+}
+
+
+### emulator to whois
+sub ProcAdminWhois
+{
+    local($proc, *Fld, *e, *opt) = @_;
+    local($addr) = $Fld[3];
+    local($se_from);
+
+    &Log("whois addr = $addr");
+
+    $se_from      = $e{'h:From:'};
+    $e{'h:From:'} = $e{'tmp:whois:addr'} = $addr;
+
+    &ProcWhoisWrite($proc, *Fld, *e, *opt);
+
+    undef $e{'tmp:whois:addr'};
+    $e{'h:From:'} = $se_from;
 }
 
 

@@ -69,7 +69,7 @@ sub WhoisWrite
     if (! $encount) {	# encount == 1 if the body has "iam".
 	&Mesg(*e, "   Hmm.. your self-introduction is not in it, isn't it?");
 	&Mesg(*e, "   FML removes your entry.");
-	$e{'Whois:addr:remove'} = $From_address;
+	$e{'Whois:addr:remove'} = $e{'tmp:whois:addr'} || $From_address;
 	# return;
     }
 
