@@ -161,6 +161,7 @@ sub GetSubscribeString
     (split(/\n/, $_))[0]; # GET THE FIRST LINE ONLY
 }
 
+# Here the addr is an unknown addr; 
 # &AutoRegistError(*e, 'Subject', $s);
 sub AutoRegistError
 {
@@ -177,8 +178,12 @@ sub AutoRegistError
     &Log($sj, "$key => [$s]");
     &Warn("$sj $ML_FN", &WholeMail);
 
-    # notify
+    # for notify
     $e{'message:h:subject'} .= $sj;
+
+    # here the addr is an unknown addr, so should not append "#help" info
+    $e{'mode:stranger'} = 1;
+
     &Mesg(*e, $b.&WholeMail);
 }
 
