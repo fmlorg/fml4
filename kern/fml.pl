@@ -57,11 +57,12 @@ if (! &MailLoopP) {
     &CacheMessageId(*Envelope);
     &RunStartHooks;		# run hooks
     &ModeBifurcate(*Envelope);	# Main Procedure
+    &RunEndHooks;		# run hooks
 }
 
 &Unlock;			# UnLock!
 
-&RunHooks;			# run hooks after unlocking
+&RunExitHooks;			# run hooks after unlocking
 
 &Notify() if $Envelope{'message'} || $Envelope{'error'};
 				# some report or error message if needed.
@@ -1390,6 +1391,8 @@ sub Distribute
 
 sub RunStartHooks
 {
+    $0 = "$FML: RunStartHooks <$LOCKFILE>";
+
     # additional before action
     $START_HOOK && &eval($START_HOOK, 'Start hook');
 
@@ -1401,12 +1404,27 @@ sub RunStartHooks
     }
 }
 
+sub RunEndHooks
+{
+    $0 = "$FML: RunEndHooks <$LOCKFILE>";
+
+    # additional before action
+    $END_HOOK && &eval($END_HOOK, 'END_HOOK');
+
+    for (keys %FmlEndHook) {
+	print STDERR "Run EndHook $_ -> $FmlEndHook{$_}\n" if $debug;
+	next unless $FmlEndHook{$_};
+	$0 = "$FML: Run FmlEndHook [$_] <$LOCKFILE>";
+	&eval($FmlEndHook{$_}, "Run FmlEndHook [$_]");
+    }
+}
+
 # Lastly exec to be exceptional process
 sub ExExec { &RunHooks(@_);}
-sub RunHooks
+sub RunExitHooks
 {
     local($s);
-    $0 = "$FML: Run Hooks <$LOCKFILE>";
+    $0 = "$FML: RunExitHooks <$LOCKFILE>";
 
     # FIX COMPATIBILITY
     $FML_EXIT_HOOK .= $_PCB{'hook', 'str'};
