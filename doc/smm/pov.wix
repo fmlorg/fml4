@@ -67,16 +67,15 @@ sendmail から fml.pl へメールが渡される時は次のように動作します。
 
 のようになっています。
 
-次に fml が上の引数（上例では コマンドラインオプションがないが）は 
-/var/spool/ml/elena を Elena ML の home directory だと見なし
-/var/spool/ml/elena/config.ph に従い fml の設定を行います。
+次に fml が上の引数は /var/spool/ml/elena を Elena ML の HOME だと見な
+し /var/spool/ml/elena/config.ph に従い fml の設定を行います。
 
 そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
 するときは /usr/local/list/Elena の中で
 
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --ctladdr "
 
-のように書きます(コマンドラインオプションをつける場合)。
+のように書きます(コマンドラインオプションについては Chapter .ptr{clo})。
 
 引数の書き方の順番は任意です。引数の最初の directory を ML の HOME
 (config.phのある場所 もしくは spool やメンバーファイルのある場所) と見
@@ -124,6 +123,7 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 オプション設定の強い順番に並べると
 
 	1   コマンドラインオプション (fml.pl -d や fml.pl --ctladdr 等)
+	    なおコマンドラインオプションについては Chapter .ptr{clo}。
 	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
 	3   各MLごとの config.ph による設定
 	4   fml デフォールト設定
@@ -135,11 +135,6 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 
 等を sitedef.ph に書くと便利でしょう。
 
-
-
-.# ##########################################################
-.#	command line options
-.include clo.wix
 
 
 .S	fmlのプロセス(STDINからの読み込みの第一段階)
@@ -306,63 +301,6 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 排他制御については例えば A. S. Tanenbaum, "Modern Operating Systems"
 
 
-.S	SMTPライブラリについて
-.l	smtp
-.k	SMTP (Simple Mail Transfer Protocol)
-.k	MTA (Mail Transport Agent)
-
-SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
-Transport Agent)と通信するライブラリです。
-
-$PORT = 25 (25/tcp) で通信しますが、
-
-	$PORT 
-.k	$PORT 
-
-を変えることで別のポートで通信することもできます。また、標準で
-
-	$SMTP_LOG (default は "var/log/_smtplog")
-.k	$SMTP_LOG
-
-というファイルに通信のログを残します。このログはデバッグに非常に役立ち
-ます。
-
-	$NOT_TRACE_SMTP 
-.k	$NOT_TRACE_SMTP 
-
-をセットすると、このログは残りません。また、どのマシンの sendmail を使
-うかも自由に設定できます。デフォールトはそのマシンです。もしMLサーバの
-マシン(受けるマシン)が貧弱ならそのマシンが何十通もメールを送り出すのは
-酷です。
-
-	$HOST         = 'localhost';
-.key	$HOST
-
-そういう場合変数 $HOST を書き換えて別のマシンに配送を任すこともできま
-す。その時は
-
-	$HOST         = 'beth.foo.bar.ac.jp';
-
-のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
-ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
-のでそのマシンを使う許可を得るべきです。
-
-
-.S	予備のSMTPサーバ
-.k	予備のSMTPサーバ
-.k	@HOSTS
-
-もし SMTP サーバに何かあった時のために @HOSTS に複数台の予備の 
-sendmail の走っているマシンを定義することが出来ます。
-
-   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
-
-この場合、もし $HOST に connect() できない時は、machine-1 に、
-もし machine-1 に connect() できない時は machine-2 へ…とい
-う風に予備のサーバを使い何とか配送をしようと試みます。
-全部だめだった場合は sendmail コマンドを使って配送します。
-
-
 
 .C	fml 内部におけるデータ構造
 .l	data-structure
@@ -400,6 +338,8 @@ sendmail の走っているマシンを定義することが出来ます。
 	全部小文字でグローバル変数という例外が歴史的に２つあります。
 	$debug と $rcsid です。歴史的にそうなっているというだけなので
 	今後そういう変数名は作られることはありません。
+	また、昔ユーザ定義で今は内部変数扱いになった $ML_MEMBER_CHECK も
+	例外です。
 
 ○ 小文字は基本的にlocal variableで、大抵はsubroutineの先頭でlocal宣言
    されています。
@@ -471,8 +411,8 @@ sendmail の struct envelope e; に対応するものです。
 
 	$Envelope->$Header->$From = "uja@domain";
 
-のような使い方はしません(できない)。
-これと同様のことを意図したシンタックスが
+のような使い方はしません(できない)。これと同様のことを意図したシンタッ
+クスが
 
 	$Envelope{"h:From:"}  = "uja@domain";
 
@@ -656,6 +596,20 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
     	$FP_SPOOL_DIR		$DIR/$SPOOL_DIR
 
 
+.S	$TMP_DIR について
+.key	$TMP_DIR
+
+ＭＬサーバの作業エリアにはデフォールトでは $DIR/tmp (つまり $TMP_DIR =
+'./tmp';) を使います。変更したい場合は $TMP_DIR を変更して下さい。
+
+/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
+private communication のファイルを public な場所にファイルを残すことは
+しないためです。
+
+その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
+存されます。
+
+
 .S	設定ファイル群
 .xref	fml-file-structure
 
@@ -674,8 +628,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 .xref	fml-file-structure
 
 
-	$REJECT_ADDR_LIST	$DIR/spammers
-.l	$REJECT_ADDR_LIST
+	$REJECT_ADDR_LIST	$DIR/spamlist
 .k	$REJECT_ADDR_LIST
 .xref	$REJECT_ADDR_LIST
 
@@ -767,7 +720,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 		message-id cache ファイル
 		(ML自身での無限ループを防ぐためのキャッシュ)
 
-	$INDEX_FILE		$DIR/index (なくてもいっこうに構わない)
+	$INDEX_FILE		$DIR/index (なくても構わない)
 .l	$INDEX_FILE
 .k	$INDEX_FILE
 		indexコマンドで表示したい内容を書く
@@ -877,11 +830,11 @@ $MEMBER_LIST (default members) で定義されるファイルは
 の アドレス1 〜 アドレス5 (4を除いて) すべてがメンバーチェックの際には
 対象となります。
 
-この動作は 1.2 release version の直後、自動登録を拡張する際に導入され
-ました。
 
-［歴史］この導入のため # off と # skip はどう違う？という疑問がその後
-	生まれることになりました。
+［歴史］
+この動作は 1.2 release version の直後、自動登録を拡張する際に導入され
+ました。またこの導入のため # off と # skip はどう違う？という疑問がそ
+の後生まれることになりました。
 
 なおメンバーファイルとしては各行のアドレスより後ろの部分は
 何にも使われていませんので、勝手に使って構いません。
@@ -971,7 +924,6 @@ msendrc は $MSEND_RC で定められる場所におかれます。そのフォーマットは
 	アドレス	次回に送る最初の記事番号
 
 です。msednrc は msend.pl が制御するログファイルです。
-
 msend.pl は $ACTIVE_LIST を見て、
 
 	・あるアドレスがまとめ送りになった
@@ -1005,15 +957,14 @@ msend.pl は $ACTIVE_LIST を見て、
 です。つまり UNIX 伝統のパスワードファイル形式の先頭の部分です。
 ＃crypt(3) についてはマニュアル参照
 
-1997/06/10 以降の current では
-.l	$USE_MD5
+.xref	$REMOTE_ADMINISTRATION_AUTH_TYPE
 
-		$USE_MD5 = 1;
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "md5";
 
-を設定すると fml.pl の crypt 関数は crypt(3) ではなく MD5 の値を返すよ
-うになります。これは MD5.pm を用いた実装なので perl 5 であることと 
-MD5-1.7.tar.gz のインストールが必要です。MD5-1.7 は fml の directory 
-に一緒に置いてあります。
+と設定されている時は fml.pl の crypt 関数は crypt(3) ではなく MD5 の値
+を返すようになります。これは MD5.pm を用いた実装なので perl 5 であるこ
+とと MD5-1.7.tar.gz のインストールが必要です。MD5-1.7 は fml の 
+directory に一緒に置いてあります。
 
 これらの cryptography はＭＬサーバのリモート管理で使われます。
 .xref	remote
@@ -1190,31 +1141,6 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
        character listed (after the ``!'', if any).  To include a
        minus sign, make it the first or last character listed
 .~q
-
-
-.S	mget でユーザから与えることのできるシンタックス
-.k	mget と Shell Match Pattern(e.g. * 1?)
-.key	$SECURITY_LEVEL
-
-$SECURITY_LEVEL < 2 では 
-
-	# mget * 
-とか
-	# mget 10? 
-
-が使えます。デフォールトは"Backward Compatibility を無視して2" です。
-通常 Backward Compatibility は重視されているのですが、security 関係は
-例外です。
-
-また、何もしなくても、
-
-# mget 正規表現 送り返されるメールの時間間隔(sec)
-
-	と
-
-# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔(sec)
-
-の両方を理解します。サーバが自動的に切替えます。
 
 
 .S	DNS Spoofing
@@ -1461,16 +1387,15 @@ fukachan@phys.titech.ac.jp	skip
 .l	$REJECT_ADDR_LIST
 .k	$REJECT_ADDR_LIST
 .k	$REJECT_ADDR
-.l	$DIR/spammers
+.l	$DIR/spamlist
 
 メインのルーチンに飛ぶ前に reject するコードなら入っています(2.1 gamma
-206)。$REJECT_ADDR_LIST (デフォールトは $DIR/spammers) に正規表現で書
+206)。$REJECT_ADDR_LIST (デフォールトは $DIR/spamlist) に正規表現で書
 いたアドレスから来たメールには何もしないで reject するようになります。
 この場合配送、コマンド、自動登録すべての場合にそこへいく前に reject します。
 
    \S+@spam.org (*@spam.org でも補正するので大丈夫)
    manager@\S+  (あらゆるサイトの個人を代表しないアドレスは拒否)
-
 
 みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
 れます。
@@ -1501,7 +1426,7 @@ fml.pl の次の行は
 Architecture 依存コードをロードするためのものです。
 
 
-.C	配送について
+.C	配送効率についての考察
 
 .S	配送プロセスの律速段階とは
 .k	配送プロセスの律速段階
@@ -1606,9 +1531,16 @@ sub Distribute で
 とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
 実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
 
+
+.include clo.wix
+
  
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
