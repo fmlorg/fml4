@@ -3,6 +3,24 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/25
+
+   makefml
+	add prototype of new command "makefml showconfig" to show configuration
+	For example:
+
+	fml Release Version    3.0C (20000319)
+	OS type                NETBSD1.4T
+	CPU-MANUFACTURER-OS    i386-unknown-netbsd1.4T
+	DOMAIN                 fml.org
+	FQDN                   beth.fml.org
+
+   Clean up campaign: remove Open()
+
+2000/03/21
+
+   3.0C start
+
 2000/03/19
 
    3.0B ends

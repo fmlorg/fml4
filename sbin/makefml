@@ -630,7 +630,9 @@ sub SetHashDefaults
 		    # utilities
 		    'resend',       'do_resend',
 		    'log',          'do_log',
-		    '1000#log',     'log [-i] [-NUMBER] [all] [-pPATTERN]'
+		    '1000#log',     'log [-i] [-NUMBER] [all] [-pPATTERN]',
+		    'showconfig',   'do_showconfig',
+		    'showconf',     'do_showconfig'
 		    );
 
     # functions not to lock
@@ -652,6 +654,8 @@ sub SetHashDefaults
 		 # utilities
 		 'resend', 1,
 		 'log',    1,
+		 'showconfig', 1,
+		 'showconf', 1,
 		 );
 
     # <ML> argument is not required.
@@ -662,7 +666,10 @@ sub SetHashDefaults
 	 "edit-template", "config-template",
 
 	 # CGI/
-	 "admin.cgi", "html_cgiadmin_passwd"
+	 "admin.cgi", "html_cgiadmin_passwd",
+
+	 # utility
+	 "showconfig", "showconf"
 	 );
 }
 
@@ -4893,6 +4900,23 @@ sub do_setup_mladmin_cgi
     }
 
     print "\n   done.\n";
+}
+
+
+sub do_showconfig
+{
+    local($ml) = @_;
+    &ResetVariables;
+
+    $format = "%-20s   %s\n";
+    $rel    = &GetFile("$EXEC_DIR/etc/release_version");
+    $rel    =~ s/[\s\n]+$//;
+
+    printf $format, "fml Release Version", $rel;
+    printf $format, "OS type", $OS_TYPE;
+    printf $format, "CPU-MANUFACTURER-OS", $CPU_TYPE_MANUFACTURER_OS;
+    printf $format, "DOMAIN", $DOMAIN;
+    printf $format, "FQDN",   $FQDN;
 }
 
 
