@@ -8,3 +8,10 @@ DOC_EXAMPLES_SOURCES += config-moderated
 DOC_EXAMPLES_SOURCES += setup-more-secure 
 DOC_EXAMPLES_SOURCES += config-post-from-anyone
 DOC_EXAMPLES_SOURCES += howto-customize
+
+# samples
+DOC_EXAMPLES_SAMPLES += sample.aliases
+DOC_EXAMPLES_SAMPLES += sample.include
+DOC_EXAMPLES_SAMPLES += sample.include-ctl
+DOC_EXAMPLES_SAMPLES += sample.ls_elena
+DOC_EXAMPLES_SAMPLES += sample.ls_fml

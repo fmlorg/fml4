@@ -48,3 +48,9 @@ __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}.html
 ${WORK_EXAMPLES_DIR}/${file}.html: doc/examples/${file}.html
 	${JCONV} doc/examples/${file}.html > ${WORK_EXAMPLES_DIR}/${file}.html
 .endfor
+
+.for file in ${DOC_EXAMPLES_SAMPLES}
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}
+${WORK_EXAMPLES_DIR}/${file}: doc/examples/${file}
+	cp -p doc/examples/${file} ${WORK_EXAMPLES_DIR}/${file}
+.endfor
