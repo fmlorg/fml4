@@ -547,6 +547,9 @@ sub SetHashDefaults
 		    # create document templates
 		    'create-doc-template',    'do_create_doc_template',
 		    '30#create-doc-template', 'create document templates e.g. help, guide, ...',
+
+		    # conversion
+		    'conv', 'do_conv',
 		    );
 
     # functions not to lock
@@ -2310,8 +2313,6 @@ sub do_newml
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-mead", 
 	  "$ML_DIR/$ml/include-mead");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/include-disthack", 
-	  "$ML_DIR/$ml/.include-disthack");
 
 
     &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
@@ -3628,6 +3629,20 @@ sub do_command
     print COM "Subject: @arg \n\n";
     print COM "@arg\n";
     close(COM);
+}
+
+
+sub do_conv
+{
+    local($ml, $org, $file) = @_;
+
+    print "\tconvert $org to $file ...\n";
+
+    &ResetVariables;
+
+    &Conv($ml, $org, "$ML_DIR/$ml/$file");
+
+    print "done.\n";
 }
 
 

@@ -53,6 +53,10 @@ spool2html:
 config:
 	perl _EXEC_DIR_/makefml config _ML_
 
+disthack:
+	perl _EXEC_DIR_/makefml conv _ML_ \
+		_EXEC_DIR_/etc/makefml/include-disthack include-disthack
+
 doc-template:
 	perl _EXEC_DIR_/makefml create-doc-template _ML_
 
@@ -61,3 +65,4 @@ secure:
 	@ echo " (original is renamed to cf.bak)"
 	@ perl -i.bak _EXEC_DIR_/bin/more_secure_cf.pl cf
 	@ make config.ph
+
