@@ -9,7 +9,8 @@ DOC_CONV        = $(DOC_GENERATOR)
 FIX_WIX         = $(PERL) ${FML}/distrib/bin/fix-wix.pl -X ${FML}
 
 ### sources ###
-HTML_MISC_SOURCES = roadmap.html nt.html search-j.html search-e.html
+HTML_MISC_SOURCES += roadmap.html nt.html search-j.html search-e.html 
+HTML_MISC_SOURCES += releng.ja.html
 
 ### targets ###
 HTML_REQ_CPP_SOURCES  = index history download links mailinglist people

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Mailing List Server Package
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+<CENTER>
+new "fml" Release Engineering
+</CENTER>
+</H1>
+
+<PRE>
+To: fml-support@ffs.fml.org
+Subject: RFC: new release engineering
+
+[要点]
+
+以前のrelease engineeringは
+
+   current のある程度機能の完成した区切り程度(半年前後が多いが、それは
+   たまたま)をもって 2.x release
+
+だけでしたが、
+
+fml 3.0.x	3.0pl数字* シリーズをある程度区切ってリリースする
+		目標は3〜4カ月程度おき(年3,4回)。stable (と信じている;)
+		(3.0.1 はめざせ 12/15 releaseくらいか？)
+
+fml-current	bug fix と拡張。機能の区切りでrelease
+
+   * 3.0pl数字 == 3.0 release に bug fix だけを適用していったもの
+
+という2系列のrelease engineeringにしようかとおもっていますが、どうでしょ
+うか？特に異論がないなら12月前半は 3.0.1 release (って特別な準備は何も
+ないですが) debug week にあてたいとおもいます。
+
+
+[考察もろもろ]
+
+・fml 3.0pl数字.tar.gzというのがありますが、
+
+	3.0 release		
+	3.0pl数字 (patchもん)
+	あと current
+
+があるときにどれを使うだろうか？という命題ですが普通 release announce 
+とかないものってなかなかつかいづらいですよね？という気がなんとなくして
+るんですがそんなことないですかね
+＃(メール関係以外は)けっこう自分でもそうだからそういうもんじゃないかなと
+
+・ release とかついてたらupdateしてくれないかなと
+   ＃ release といえど細かい bug 多数のはずなのでupdateしてほしい
+   ＃ といってdrasticな変化はちょっと…という人もいるでしょう
+
+・ やりすぎてもしょうがないけど、ある程度区切りがないとだれるんですよねぇ
+   > release engineering
+
+だから正確に3カ月おきとかいうのもまた無意味ですが、bug fix branch では
+3カ月おきにとめて、debug week ののち 3.0.x をつくるとかは悪くないと思
+うんですよね
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

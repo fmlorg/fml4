@@ -7,7 +7,7 @@ SH = /bin/sh
 
 # 
 # HTML_SOURCE = index.html index-e.html roadmap.html
-HTML_SOURCE = roadmap.html
+HTML_SOURCE = roadmap.html releng.ja.html
 SPECIAL_DOC = INDEX SEARCH INFO RELEASE_NOTES 
 CONV_TARGET = README INSTALL INSTALL_on_NT4 INSTALL_with_QMAIL CHECK_LIST UPGRADE
 
