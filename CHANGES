@@ -4,20 +4,26 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/06/23
+
+  proc/libamctl.pl
+	confirmation の時にきちんとメンバー数制限チェックを
+	かける 	
+
 2002/06/17
 
   content filter
-	呼ぶ順番を変更する。
+	フィルタを呼ぶ順番を変更する。
 
 2002/06/16
 
   etc/makefml/
-	.qmail-* のコメントを修正する。
+	HOOK のため .qmail-* のコメントを修正する。
 
 2002/06/12
 
-  proc/libra.pl 
-	check if the adddress for addmin is an admin member.
+  proc/libra.pl
+	addadmin の際に引数がすでに管理者かどうかをチェックする
 
 2002/06/03
 
@@ -320,7 +326,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.253 2002/06/16 12:47:10 fukachan Exp $
+	add $FML: CHANGES,v 1.254 2002/06/17 14:56:19 fukachan Exp $
 
 2001/10/03
 
