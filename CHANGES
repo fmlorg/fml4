@@ -3,7 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
-2000/09/13
+2000/09/24
+
+   fix include-outgoin template permission and other problems
+	PR fml-support:8830 by UENO Kazuaki
+
+   bin/daily_master.sh is added
+
+2000/09/23
 
    makefml resend
 	bug fix
