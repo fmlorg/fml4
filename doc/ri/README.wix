@@ -14,6 +14,9 @@
    3.0へのアップグレードの注意
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
+   3.0と2.2.1の主な違い
+.url http://www.fml.org/fml/3.0-new-features.html
+
    簡単なインストールのアウトラインと基本的な設定例などについて
 .url http://www.fml.org/fml/examples/
 
@@ -28,6 +31,9 @@
 
    Please read when you upgrade from 2.x to 3.0.
 .url http://www.fml.org/fml/UPGRADE-3.0-e/
+
+   differences between 2.2.1 and 3.0
+.url http://www.fml.org/fml/3.0-new-features-e.html
 
    outline of installation and fundamental configurations
 .url http://www.fml.org/fml/examples/index-e.html
@@ -45,7 +51,7 @@ _____________________________________
 _____________________________________
 
 
-.C	FML (a package of programs for mailing lists)
+.C	Overview
 
 .S	はじめに
 =E.S	Introduction
@@ -307,15 +313,10 @@ address <fml-bugs@ffs.fml.org>.
 .S	fml-FAQ project
 =E.S	fml FAQ
 
-fmlのFAQを作成中するプロジェクトが現在進行形です。プロジェクトからのお
-願い/お知らせを以下に引用します。
+fmlのFAQを作成中するプロジェクトが現在進行形です。
 =E
 A project to create fml FAQ runs in JWNTUG ntfml-wg. If you have
 queations or answers on some topics, please click here
-
-   JWNTUG ntfml-wg では、fml の FAQ を作成中です。より充実した FAQ を
-   目指すため fml ユーザの皆様からネタを募集しています。以下のサイトに
-   登録ページを用意しましたので、ご協力お願いします。
 
 .url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
 
