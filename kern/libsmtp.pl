@@ -769,6 +769,17 @@ sub SmtpPutActiveList2Socket
     if (%RELAY_GW)  { $gw_pat  = join("|", sort keys %RELAY_GW);}
     if (%RELAY_NGW) { $ngw_pat = join("|", sort keys %RELAY_NGW);}
 
+    if ($debug_relay) { 
+	local($k, $v);
+	print STDERR "gw_pat=$gw_pat\nngw_pat=$ngw_pat\n";
+	while (($k,$v) = each %RELAY_GW) { 
+	    print STDERR " RELAY_GW: $k => $v\n";
+	}
+	while (($k,$v) = each %RELAY_NGW) { 
+	    print STDERR "RELAY_NGW: $k => $v\n";
+	}
+    }
+
     $MCIType = 'window'; # no more modulus
     if ($smtp_pcb{'mci'}) {
 	require 'libsmtpsubr2.pl';
