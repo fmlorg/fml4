@@ -144,7 +144,7 @@ samples/sitedef.ph が作られますので参考にしてみて下さい。
 .S	fmlのプロセス
 
 .S	fml process の signal handling
-.k	$SIGARLM
+.k	$Sigarlm
 .k	$TIMEOUT
 
 現在は次のように設定されています。

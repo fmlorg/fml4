@@ -792,6 +792,11 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 .xref	rejct-address-in-autoregist
 
 
+.S	JST問題
+
+"  JST"(スペース2個) はだめで、" JST"(スペース1個) はOKな変なメールイン
+ターフェイスあるんだって？？？
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
