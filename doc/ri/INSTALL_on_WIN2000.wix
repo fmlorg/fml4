@@ -1,0 +1,50 @@
+.HTML_PRE
+	INSTALL guide (on WIN2000)
+	--- fml Mailing List Server Package ---
+
+
+				Ken'ichi Fukamachi
+
+このファイルは Unix 版との相違点について記述しています。インストールの
+大枠は INSTALL を見て下さい。
+=E
+This file describes the difference between fml on UNIX and on NT4.
+Please see INSTALL for the install flow.
+
+.~HTML_PRE
+
+.toc
+
+.C	動いた実績
+=E.C	verified cases
+
+.S	case 1
+
+perl 5.005 base
+.url	http://www.activestate.com/download/ActivePerl/APi522e.exe
+
+windows 2000 professional (5.00.2195)
+
+fml-current (3.0G 20000716) pop version 
+
+
+.C	installation
+
+
+インストールは NT4 用のドキュメントを見て下さい。
+基本的に一緒です。
+
+MS-DOS prompt じゃなくて command prompt とか細かい違いはありますが
+その辺はよきにはからってください:)
+
+
+
+$Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
