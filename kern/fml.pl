@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.124.2.13 2002/08/10 09:30:57 fukachan Exp $
+# $FML$
 
 $Rcsid   = 'fml 4.0';
 
@@ -2752,9 +2752,22 @@ sub DBCtl
 sub MailLoopP
 {
     if ($Envelope{'h:x-ml-info:'}) {
-	if ($Envelope{'h:x-ml-info:'} =~ /contact $MAINTAINER/i ||
-	    $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$MAIL_LIST/i ||
-	    $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$CONTROL_ADDRESS/i) {
+	my $error_count = 0;
+
+	if ($MAINTAINER && $Envelope{'h:x-ml-info:'} =~ /contact $MAINTAINER/i) {
+	    $error_count++;
+	}
+	elsif ($MAIL_LIST &&
+	       $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$MAIL_LIST/i) {
+	    $error_count++;
+
+	}
+	elsif ($CONTROL_ADDRESS &&
+	       $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$CONTROL_ADDRESS/i) {
+	    $error_count++;
+	}
+
+	if ($error_count) {
 	    &Log("Loop Alert: dup X-ML-Info:");
 	    &WarnE("Loop Alert: dup X-ML-Info: $ML_FN", 
 		   "fml <$MAIL_LIST> has detected a loop condition so that\n"
