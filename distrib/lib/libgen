@@ -432,10 +432,12 @@ GEN_ARCHIVE () {
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
 
-	echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
-	cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+	if [ X$BRANCH_SNAPSHOT = X ]
+	then
+		echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+		cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
 
-	(
+	   (
 		echo 	chdir $FTP
 		echo    rm -f fml-current.*.tar.gz
 		echo 	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -449,8 +451,8 @@ GEN_ARCHIVE () {
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
 		(uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
 		cat > $FTP/fml-current.uu
-	)
-
+	   )
+	fi
 
 	echo "Generating $FMLID.zip";
 	find $FMLID |zip -q -@ $FMLID.zip
@@ -458,18 +460,23 @@ GEN_ARCHIVE () {
 		echo 	chdir $FTP
 		chdir $FTP
 
-		echo 	rm -f *.zip
-		rm -f *.zip
+		if [ X$BRANCH_SNAPSHOT = X ]
+		then
+			echo 	rm -f *.zip
+			rm -f *.zip
+		fi
 	)
 
 	cp -p $FMLID.zip $FTP
 
 	(
-		echo 	chdir $FTP
-		echo 	ln $FMLID.zip fml-current.zip
-
-		chdir $FTP
-		ln $FMLID.zip fml-current.zip
+		if [ X$BRANCH_SNAPSHOT = X ]
+		then
+			echo 	chdir $FTP
+			echo 	ln $FMLID.zip fml-current.zip
+			chdir $FTP
+			ln $FMLID.zip fml-current.zip
+		fi
 	)
 
 	#	echo "Generating ls-lR.gz";
