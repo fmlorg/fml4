@@ -15,7 +15,7 @@
 sub ModeratedDelivery
 {
     local(*e, $already_auth) = @_;
-    local($passwd); 
+    local($passwd);
 
     if ($MODERATOR_FORWARD_TYPE == 1 || !$MODERATOR_FORWARD_TYPE) {
 	return &ModeratedDeliveryTypeI(@_);
@@ -105,6 +105,35 @@ sub InitModeratedQueueDir
     # moderated articles queue
     $ModeratedQueueDir = "$VAR_DIR/mqueue";
     &Mkdir($ModeratedQueueDir) if !-d $ModeratedQueueDir;
+
+    $FmlExitHook{'moderator::expire'} = q#
+	&ExpireModeratedQueueDir;
+    #;
+}
+
+
+sub ExpireModeratedQueueDir
+{
+    local($f);
+
+    # default: 2 weeks
+    $MODERATOR_EXPIRE_LIMIT = &ATOI($MODERATOR_EXPIRE_LIMIT) || 14;
+
+    opendir(DIRD, $ModeratedQueueDir) || 
+	&Log("cannot open $ModeratedQueueDir");
+
+    while (($_ = readdir(DIRD)) ne '') {
+	next if /^\./;
+
+	# -M how old
+	$f = "$ModeratedQueueDir/$_";
+	if (-M $f > $MODERATOR_EXPIRE_LIMIT) {
+	    &Log("remove old moderator queue $_");
+	    unlink $f;
+	}
+    }
+
+    closedir(DIRD);
 }
 
 
