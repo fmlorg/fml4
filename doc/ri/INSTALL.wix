@@ -1385,7 +1385,7 @@ default is defined as @HdrFiedlsOrder.
      <>   1 MIME
 
 MIME を使うことにすると、ＭＬの記事のサマリ等がMIME decode されたもの
-になる。
+になる。事実上FML内蔵のあらゆるMIME対応機能を有効にすることを意味している。
 =E 
 Using MIME. Summary file of the ML and articles saved in the ML spool
 are MIME-Decoded.
