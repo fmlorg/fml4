@@ -2,6 +2,11 @@
 filter.has_meta_char:
 	エラー:メタキャラクタが含まれています。
 
+filter.rejected.notify_to_admin:
+	以下の _ARG0_ からのメールは
+	   _ARG1_
+	という理由のため拒否されました。	
+
 filter.rejected:
 	あなたのメールは
 	   _ARG0_

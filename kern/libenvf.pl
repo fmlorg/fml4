@@ -213,8 +213,14 @@ sub __EnvelopeFilter
     if ($r) { 
 	$DO_NOTHING = 1;
 	&Log("EnvelopeFilter::reject for '$r'");
-	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", 
-	       "Mail from $From_address\nis rejected for '$r'.\n\n");
+
+	# notification to admins
+	my ($m) = "Mail from $From_address\nis rejected for '$r'.\n\n";
+	&use('mesgle');
+	$m = &MesgLE(*e, 'filter.rejected.notify_to_admin', 
+		     $From_address, $r) || $m;
+	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", $m);
+
 	if ($FILTER_NOTIFY_REJECTION) {
 	    &Mesg(*e, 
 		  "Your mail is rejected for '$r'.\n", 
