@@ -42,8 +42,14 @@ sub InitMemberName
 	$ExtAdminProcedure{'admin:name'} = 'ProcAdminSetMemberNameFile';
 
 	# Off Secure Alert
-	$SECURE_REGEXP{'#*\s*[nN][aA][mM][eE]\s+.*'} = 1;
-	$SECURE_REGEXP{'#*\s*[aA][dD][mM][iI][nN]\s+[nN][aA][mM][eE]\s+.*'} = 1;
+	# $SECURE_REGEXP{'#*\s*[nN][aA][mM][eE]\s+.*'} = 1;
+	# $SECURE_REGEXP{'#*\s*[aA][dD][mM][iI][nN]\s+[nN][aA][mM][eE]\s+.*'} = 1;
+	#
+	# Sorry, fix %SECURE_REGEXP code bug; so modified to the following.
+	# fukachan@fml.org 1998/11/06
+	$SECURE_REGEXP{'member_name_secreg1'} = '#*\s*[nN][aA][mM][eE]\s+.*';
+	$SECURE_REGEXP{'member_name_secreg2'} = 
+		'#*\s*[aA][dD][mM][iI][nN]\s+[nN][aA][mM][eE]\s+.*';
 }
 
 sub AutoRegistMemberName
