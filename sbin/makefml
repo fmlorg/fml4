@@ -2462,7 +2462,18 @@ sub do_create_doc_template
 
     $cf = "$ML_DIR/$ml/cf";
     # set %config, eval %MAKE_FML in it;
+    # load $DIR/cf to %config, 
+    # XXX we need to eval contents of %config.
     &GetCF($cf, $ml, *config, *cur_config);
+
+    &GetConfigPH($ml);
+
+    local($x);
+    # overwrite %config by evaled (config.ph) values.
+    # since cf has raw value e.g. elena@$DOMAINNAME, so we need to eval it.
+    for $x (keys %config) {
+	$config{$x} = &Value($x) || $config{$x};
+    }
 
     &CreateDocTemplate(*config, $ml);
 }
