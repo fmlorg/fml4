@@ -1,6 +1,5 @@
 #!/bin/sh
 #
-# $Id$
 # Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
@@ -9,6 +8,9 @@
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
+#
+# $Id$
+#
 
 #####   functions   #####
 MOVE () {
@@ -76,7 +78,7 @@ do
 
 	# check files to install
 	find $dir -type f -print |\
-	sed s#^$dir/## |grep -v '\.bak' > $list
+	sed -e "s%^$dir/%%" |grep -v '\.bak' > $list
 
 
 	cat $list | while read x
