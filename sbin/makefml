@@ -112,7 +112,7 @@ sub InitMakeFml
 
     # initialize files
     if (-f $FML_CONFIG) {
-	print STDERR "---Loading the configuration file $FML_CONFIG\n\n";
+	print STDERR "---Loading the configuration file $FML_CONFIG\n";
 
 	package Config;
 	eval("require \$main'FML_CONFIG;\#'");
@@ -124,37 +124,34 @@ sub InitMakeFml
 	&Dumpvar('Config') if $debug;
     }
     else {
-	print STDERR "---ignore no configuration file $FML_CONFIG\n\n";
+	print STDERR "---NOT USING configuration file\n";
 	$TheFirstTime = 1;
     }
 
     # if not defined this machine OS;
     if ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
-	print "---THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
     }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$OS_TYPE = "WINDOWS_NT4";
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
     else {
-	print "---Try to inspect your Operating System ...\n\n";
+	print "---Try to inspect your Operating System ...\n";
 	local($eval);
 
 	$eval = q#$OS_TYPE = `sh sbin/os-type`;#;
 	eval($eval);
 
 	print STDERR $@ if $@;
-	print "\n";
 
 	chop $OS_TYPE;
 	$OS_TYPE =~ tr/a-z/A-Z/;
 
-	print "   Your OS looks $OS_TYPE\n";
-	print "\n";
+	print "\n   Your OS looks $OS_TYPE\n";
 
 	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
-
 
     # configurable variables;
     @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
@@ -190,6 +187,7 @@ sub InitMakeFml
 		    'setq',     'do_setq',
 		    'show',     'do_show',
 		    'config',   'do_config',
+		    '5#config ML', 'do configuration of <ML>',
 		    'new',      'do_newml',
 		    'newml',    'do_newml',
 		    '1#newml ML',   'make a new Mailing List <ML>',
@@ -426,7 +424,7 @@ sub MakeFmlLock
 {
     local($dir) = $CurConfig{'ML_DIR'};
 
-    print "\n---Try to LOCK ML Actions...\n\t";
+    print "---Locking\n\t";
 
     opendir(DIRD, $dir);
     for (readdir(DIRD)) {
@@ -442,11 +440,13 @@ sub MakeFmlLock
     }
     closedir(DIRD);
 
+    print "\n";
+
     if ($count) {
-	print "\n   ALL ML ACTIONS ARE LOCKED; GO AHEAD!\n\n";
+	print "   Locked. Go ahead!\n\n";
     }
     else {
-	print "\n   NO ML EXISTS; GO AHEAD!\n\n";
+	print "   Nothing exists. Go ahead anyway!\n\n";
     }
 }
 
@@ -1413,9 +1413,8 @@ sub do_newml
 
     &GenCrontab;
 
-    $exec  = "perl $EXEC_DIR/cf/config -m $EXEC_DIR/cf/MANIFEST ";
-    $exec .= "$ML_DIR/$ml/cf";
-    system "$exec > $ML_DIR/$ml/config.ph";
+    &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
+		  "$ML_DIR/$ml/cf", "$ML_DIR/$ml/config.ph");
 
     # print message;
     # the last info
@@ -1510,9 +1509,7 @@ sub do_config
     }
 
     # set local_config -> %MAKE_FML;
-    print "====\n";
-    print $local_config;
-    print "=======\n";
+    # print $local_config if $debug;
     eval($local_config);
     print $@ if $@;
 
@@ -1571,16 +1568,38 @@ sub do_config
 
 	close(CF);
 
-	print "Saved in $cf\n";
+	print "Configuration is saved in $cf\n";
     }
 
     # make ml/config.ph
-    open(EXEC_CF, "perl $EXEC_DIR/cf/config $cf|");
-    open(SAVE, "> $ML_DIR/$ml/config.ph");
+    &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
+		  $cf, "$ML_DIR/$ml/config.ph");
+}
+
+
+sub MakeConfigPH
+{
+    local($config, $manifest, $cf, $config_ph) = @_;
+
+    print STDERR "Generating $config_ph from $cf ...\n";
+    for ($config, $manifest, $cf) { # config.ph may not exist; 
+	if (! -e $_) {
+	    print STDERR "***Error: I Cannot find $_, Stop.\n";
+	    return 0;
+	}
+    }
+
+    open(EXEC_CF, "perl $config -m $manifest $cf|") || 
+	(&Warn("cannot exec $config -m $manifest $cf"), return 0);
+    open(SAVE, "> $config_ph") || (&Warn("cannot open $config_ph"), return 0);
     select(SAVE); $| = 1; select(STDOUT);
+
     while (<EXEC_CF>) { print SAVE $_;}
+
     close(SAVE);
     close(EXEC_CF);
+
+    print STDERR "Done.\n\n";
 }
 
 
