@@ -4654,7 +4654,7 @@ sub GenQuery
 	$query{"default"} = $query{"default"} || 0;
     }
     else {
-	die("GenQuery: unknown \$type\n");
+	die("GenQuery: unknown \$type=[$type]\n");
     }
 }
 
