@@ -26,7 +26,7 @@ else {
 
 while (<>) {
     if ($raw) {
-	if (m#(http://\S+)#) {
+	if (m#(http://\S+?)"#) {
 	    print $1;
 	}
 	
