@@ -4,6 +4,27 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/02
+
+   libhtmlsubr.pl
+	記事の HTML 化の際にうまく、ファイル拡張子を識別できない時がある
+	.doc などの部分までエンコードするメールソフトがあるので
+	戻してからファイルのタイプを推測するようにする
+
+   CGI のメニューのバグ
+	USE_OUTGOING_ADDRESS の説明が抜けてるので追加
+
+   doc/Japanese/daily
+ 	『日々の運用』編、ちょっとだけ日本語を奇麗に
+
+2001/09/01
+
+   sbin/makefml
+	work around hack
+
+	インストールが perl 5.6.x or 5.7.x の場合にうまくいかない
+	ことがあるのを回避する暫定的な修正
+
 2001/08/31
 
    drafts/help
