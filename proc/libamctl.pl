@@ -171,7 +171,14 @@ sub AutoRegist
     $e{'preamble'} =  $cur_preamble;
 
     ### Ends.
-    ($AUTO_REGISTERED_UNDELIVER_P ? 0 : 1);
+
+    ### distribute when auto_regist?
+    if ($AUTO_REGISTERED_UNDELIVER_P) {
+	; # not delivery
+    }
+    else {
+	&Distribute(*Envelope, 'permit from members_only');
+    }
 }
 
 sub GetAddr2Regist
