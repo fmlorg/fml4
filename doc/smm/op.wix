@@ -94,6 +94,7 @@
 .include smtp.wix
 .include uip.wix
 .include lib.wix
+.include aucea.wix
 
 
 .# ##########################################################
