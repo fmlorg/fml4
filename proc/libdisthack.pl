@@ -68,6 +68,16 @@ sub AgainstReplyWithNoRef
     $e{'h:X-Original-Message-Id:'} = $e{'h:message-id:'};
     $e{'h:Message-Id:'} = "<mid-". $ID . "-". $MAIL_LIST.">";
 
+    # fml-support: 6219; add by kokubo776@okisoft.co.jp 05/15/1999
+    # check subject tag in mis-encoded ASCII char
+    if ($e{'h:subject:'} =~ /=\?ISO\-2022\-JP\?/io
+	&& ($e{'h:subject:'} !~ /($SUBJECT_FREE_FORM_REGEXP)/)) {
+	&use('MIME');
+        $e{'h:subject:'} = &DecodeMimeStrings($e{'h:subject:'});
+        $e{'h:subject:'} = &mimeencode($e{'h:subject:'});
+        $e{'h:subject:'} =~ s/\n$//;
+    }
+
     # extract/speculate referenced Message-ID:
     # IF BOTH Message-ID: and In-Reply-To: DO NOT EXIST!
     # e.g. [Elena 00100] => 00100 => 100
