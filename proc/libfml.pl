@@ -30,6 +30,16 @@ sub Command
 }
 
 
+sub __GetProcedureName
+{
+    my ($xbuf) = @_;
+    $xbuf =~ s/^\#\s*//;
+    if ($xbuf =~ /^(\S+)/) { $xbuf = $1;}
+    $xbuf =~ tr/A-Z/a-z/;
+    return $xbuf;
+}
+
+
 # fml command routine
 # return NONE but ,if exist, mail back $e{'message'} to the user
 sub DoProcedure
@@ -239,6 +249,9 @@ sub DoProcedure
       &MesgSetBreakPoint;
 
       if ($proc = $Procedure{$xbuf}) {
+	  # procedure name for hook
+	  my $pn = &__GetProcedureName($xbuf);
+
 	  $trap_counter++; # found in %Procedure;
 
 	  # REPORT TO ADMINS ALSO 
@@ -284,7 +297,9 @@ sub DoProcedure
 	  $0 = "${FML}: Command calling $proc: $MyProcessInfo>";
 
 	  # PROCEDURE
+	  eval $COMMAND_START_HOOK{$pn} if $COMMAND_START_HOOK{$pn};
 	  $status = &$proc($xbuf, *Fld, *e, *misc);
+	  eval $COMMAND_END_HOOK{$pn}   if $COMMAND_END_HOOK{$n};
 
 	  &Debug("Addr=$Addr") if $Addr;
 	  

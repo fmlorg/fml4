@@ -4,6 +4,28 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+
+2001/09/10
+
+   comnand hook extension
+
+	コマンドのフックの拡張:
+	次のようにコマンドの前後でフックを実行する。
+
+	eval $COMMAND_START_HOOK{$pn} if $COMMAND_START_HOOK{$pn};
+	$status = &$proc($xbuf, *Fld, *e, *misc); # ←コマンドを実行する
+	eval $COMMAND_END_HOOK{$pn}   if $COMMAND_END_HOOK{$n};
+
+	例: 
+
+	$COMMAND_START_HOOK{ 'help' } = q{ なんかをする };
+
+	$COMMAND_END_HOOK{ 'help' } = q{ 
+		if ($status の値) {
+			$status の値によって何か違う動作をする…
+		}
+	};
+
 2001/09/09
 
    bin/confirmd_master.sh
