@@ -37,16 +37,15 @@ fml-help へ投稿していただければと思います。
 
 fml-help 分は見られます。
 fml-support はメールでのみ取り寄せできます。
-fml-support の過去ログを見るためには oget コマンドを使って下さい。
+fml-support の過去ログを見るためには fml-support-ctl 宛に
+get もしくは mget コマンドを使って下さい。
 パラメータは普通の get や mget と同じです。
-
-oget コマンドは fml-support-ctl もしくは fml-help-ctl 宛に送って下さい。
 
 例: fml-support の最近10通分の記事を MIME/multipart で取り寄せる
 
-	To: fml-help-ctl
+	To: fml-support-ctl
 
-	oget last:10 mp
+	get last:10 mp
 
 例: fml-help の最近10通分の記事を MIME/multipart で取り寄せる
 
