@@ -340,6 +340,12 @@ GEN_BRANCH_ARCHIVE () {
 }
 
 GEN_ARCHIVE () {
+	if [ X$FML_MASTER_MACHINE -eq X ]
+	then
+		echo ignore GEN_ARCHIVE not on fml distribution master machine
+		return
+	fi
+
 	# FIX_LANGUATE
 
 	FTP=$FTP_DIR
