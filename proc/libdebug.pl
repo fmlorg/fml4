@@ -50,4 +50,13 @@ sub InitSimulationDebug
     }
 }
 
+
+### logs STDIN (== mail imports itself);
+sub StdinLog
+{
+    local($date) = sprintf("%04d%02d%02d", 1900 + $year, $mon + 1, $mday);
+    &Append2($Envelope{'Header'}."\n".$Envelope{'Body'}, 
+	     "$VARLOG_DIR/STDIN_LOG_$date");
+}
+
 1;
