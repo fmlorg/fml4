@@ -67,6 +67,12 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'byeadmin' ) {
 	    &__ListCtl($mib);
 	}
+	elsif ($mib->{'_action'} eq 'store_article') {
+	    # &Distribute() calls this function after saving article
+	    # at spool/$ID
+	    # If you store ML articles to DB, please write the code here.
+	    ;
+	}
 	else {
 	    &Log("ERROR: LDAP: unkown ACTION $mib->{'_action'}");
 	}

@@ -327,6 +327,16 @@ sub DoDistribute
     if ($DISTRIBUTE_END_HOOK) {
 	&eval($DISTRIBUTE_END_HOOK, 'DISTRIBUTE_END_HOOK');
     }
+
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'store_article');
+	$mib->{'_article_id'} = $ID;
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib->{'error'}) { return 0;}
+    }
 }
 
 
