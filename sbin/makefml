@@ -460,11 +460,11 @@ sub Lock
     local($ml, $mldir) = @_;
 
     if (&FlockP($ml, $mldir)) {
-	print STDERR "---Flock\n";
+	print STDERR "---Flock\n" if $debug_lock;
 	&FLock($ml, $mldir);
     }
     else {
-	print STDERR "---V7 lock\n";
+	print STDERR "---V7 lock\n" if $debug_lock;
 	&V7Lock($ml, $mldir);
     }
 }
@@ -475,11 +475,11 @@ sub UnLock
     local($flockp) = $ml'FLockP{$ml};#'
 
     if ($flockp) {
-	print STDERR "---Flock\n";
+	print STDERR "---Flock\n" if $debug_lock;
 	&FUnLock($ml);
     }
     else {
-	print STDERR "---V7 lock\n";
+	print STDERR "---V7 lock\n" if $debug_lock;
 	&V7UnLock($ml);
     }
 }
