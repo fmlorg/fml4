@@ -486,6 +486,14 @@ actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
 まくいかせない可能性はあります。
 
 
+.S	$LESS_STACK_HACK
+.k	$LESS_STACK_HACK
+
+できるだけメモリを使わないハック。これは $SPEED_HACK と conflict する
+ので同時には使えません。配送リストが小さい場合はどうでもいいオプション
+です。
+
+
 .S	$SPEED_HACK
 .k	$SPEED_HACK
 
@@ -506,6 +514,7 @@ $SPEED_HACK をセットした場合は flock() を外してから配送をします。とい
    3 そもそも何秒間かに一度メールが来る等の激しいＭＬでない限り有効でない
 
 等の理由であくまでも SPEED HACK なのです。
+これもまた、配送リストが小さい場合はどうでもいいオプションです。
 
 
 .S	配送するメールのMIME部分はDecodeしてから配送したい
