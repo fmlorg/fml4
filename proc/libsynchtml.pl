@@ -718,7 +718,7 @@ sub ParseMultipart
 	# extract multipart header info in the block
 	$bh = substr($e{'Body'}, $p, $pb - $p -2);
 	&MPBProbe(*mpbcb, $bh); # => %mpbcb
-
+	
 	# encoded ?
 	if ($mpbcb{'enc'} eq 'base64') {
 	    # the file location
@@ -730,8 +730,16 @@ sub ParseMultipart
 	    &TagOfDecodedFile(*mpbcb, $xf);
 	}
 	# plain ?
+	elsif ($mpbcb{'type'} eq 'text' && $mpbcb{'subtype'} eq 'html') {
+	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
+	}
+	elsif ($mpbcb{'type'} eq 'text' && $mpbcb{'subtype'} eq 'plain') {
+	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
+	}
 	else {
-	    &WriteHtmlFile(*e, $pb, $pe);
+	    print OUT "<PRE>\n";
+	    print OUT "attatchment ($mpbcb{'type'}/$mpbcb{'subtype'}) ignored\n";
+	    print OUT "</PRE>\n";
 	}
 
 	$pp = $p + 1;

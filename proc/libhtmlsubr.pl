@@ -14,7 +14,9 @@ sub MPBProbe
     }
 
     # speculate type from mime.types
-    if ($bh =~ /Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) { 
+    if ($bh =~ /Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) {
+	$mpbcb{'type'}    = $1;
+	$mpbcb{'subtype'} = $2;
 	$suffix = &SearchMimeTypes("$1/$2"); # &Search.. || $2;
 	$x      = $2;
 
@@ -36,13 +38,45 @@ sub MPBProbe
     if ($bh =~ /Content-Type:\s+image/) { 
 	$mpbcb{'image'} = 1;
     }
+
+    $mpbcb{'type'}    =~ tr/A-Z/a-z/;
+    $mpbcb{'subtype'} =~ tr/A-Z/a-z/;
 }
 
 
 sub WriteHtmlFile
 {
-    local(*e, $lpp, $pe) = @_;
-    local($lp, $xbuf);
+    local(*e, *mpbcb, $lpp, $pe, $dir, $file, $mp_count) = @_;
+    local($lp, $xbuf, $fn, $fp, $noconv);
+
+    $WriteHtmlFileCount++;
+
+    &Log("WriteHtmlFile: $mpbcb{'type'}/$mpbcb{'subtype'}") if $debug;
+
+    if ($WriteHtmlFileCount > 1) {
+	$noconv = 1; # always really?
+
+	if ($mpbcb{'subtype'} eq 'html') {
+	    $fn = "${file}_${mp_count}.html";
+	    $fp = "$dir/$fn";
+	}
+	elsif ($mpbcb{'subtype'} eq 'plain') {
+	    $fn = "${file}_${mp_count}.txt";
+	    $fp = "$dir/$fn";
+	}
+	else {
+	    $fn = "${file}_${mp_count}.". $mpbcb{'subtype'};
+	    $fp = "$dir/$fn";
+	}
+
+	if (open($fp, "> $fp")) {
+	    &Log("create $fp");
+	}
+	else {
+	    &Log("cannot open $fp");
+	    undef $fp;
+	}
+    }
 
     while(1) {
 	$lp   = &main'GetLinePtrFromHash(*e, "Body", $lpp);#';
@@ -51,13 +85,26 @@ sub WriteHtmlFile
 	last if $lp > $pe;
 
 	if ($xbuf =~ /ISO\-/i) { $xbuf = &DecodeMimeStrings($xbuf);}
-	&ConvSpecialChars(*xbuf);
+
+	&ConvSpecialChars(*xbuf) unless $noconv;
 
 	$xbuf =~ s#([a-z]+://\S+)#&Conv2HRef($1)#eg;
-	print OUT $xbuf;
+
+	if ($fp) {
+	    print $fp $xbuf;
+	}
+	else {
+	    print OUT $xbuf;
+	}
+
 	print STDERR ">", $xbuf if $debug;
 
 	$lpp = $lp + 1;
+    }
+
+    if ($fp) { 
+	print OUT "\t<P><A HREF=\"$fn\">$fn (attatchment)</A>\n";
+	close($fp);
     }
 }
 
