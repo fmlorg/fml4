@@ -733,9 +733,9 @@ private communication のファイルを public な場所にファイルを残すことは
 
 .S	単に便利なためにある変数
 
-	$DO_NITHING
-.l	$DO_NITHING
-.k	$DO_NITHING
+	$DO_NOTHING
+.l	$DO_NOTHING
+.k	$DO_NOTHING
 
 	何もしないという分岐をするための変数。特殊なサーバを作る時や
 	特別なHOOKをかけたりする場合に有用である。
@@ -1424,11 +1424,12 @@ fukachan@phys.titech.ac.jp	skip
 .l	$DIR/spamlist
 
 メインのルーチンに飛ぶ前に reject するコードなら入っています(2.1 gamma
-206)。$REJECT_ADDR_LIST (デフォールトは $DIR/spamlist) に正規表現で書
-いたアドレスから来たメールには何もしないで reject するようになります。
-この場合配送、コマンド、自動登録すべての場合にそこへいく前に reject します。
+206)。$REJECT_ADDR_LIST (デフォールトは $DIR/spamlist) に perl の正規
+表現で書いたアドレスから来たメールには何もしないで reject するようにな
+ります。この場合配送、コマンド、自動登録すべての場合にそこへいく前に 
+reject します。
 
-   \S+@spam.org (*@spam.org でも補正するので大丈夫)
+   \S+@spam.org (spam.org のアドレスは全部許否)
    manager@\S+  (あらゆるサイトの個人を代表しないアドレスは拒否)
 
 みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
