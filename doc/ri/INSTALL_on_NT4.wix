@@ -89,6 +89,7 @@ elena ＭＬならプログラムエイリアスに(GUIで選んで)
   C:\\fml\ml\elena\include.cmd < 一時ファイル(STDIN相当)
 
 という形で fml (include.cmd が呼びます)を起動するらしいです。
+＃ 4.0J ユーザーズガイドの P.64 にちょっとだけかいてありますね
 
 
 
