@@ -36,5 +36,33 @@ Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
 Restricted Shell というものについて調べて下さい。
 そして smrsh について正しい設定をしなおしてみてください。
 
+◯ 
+
+fml-support:  07458
+
+smrshを使っていると @LIBDIR に/usr/local/fmlが入らない。
+このために 
+
+	require default_config.ph 
+
+の場所でエラーになる。
+
+回避例:
+
+site_init.phに
+
+	push(@LIBDIR,"/usr/local/fml");
+
+書いておいて、これとfml.plのsymbolic linkをsmrshのディレクトリにはる
+
+Refercnes:
+
+See fml-support ML:
+
+01877,01879,01881
+03942,03944,03965
+05706,05708,05712,05715,05721,05722,05723,05724,05725,05726,05727,05728
+07458
+
 $Id$
 .~HTML_PRE
