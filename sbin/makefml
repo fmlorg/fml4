@@ -1458,8 +1458,10 @@ sub FixPath
 	$perl = &search_path('perl');
     }
 
+    local($newprog) = $prog.".new$$";
+
     open(PROG, $prog) || (&Warn("cannot open $prog"), return);
-    open(NEW, "> $prog.new") || (&Warn("cannot open $prog.new"), return);
+    open(NEW, "> $newprog") || (&Warn("cannot open $newprog"), return);
     select(NEW); $| = 1; select(STDOUT);
 
     while (<PROG>) {
@@ -1486,15 +1488,15 @@ sub FixPath
     close(PROG);
     # sleep 1;
 
-    chmod $mode, "${prog}.new";
+    chmod $mode, $newprog;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
-	rename("${prog}.new", $prog) || &Warn("cannot rename $prog.new $prog");
+	rename($newprog, $prog) || &Warn("cannot rename $newprog $prog");
     }
     else {
 	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
-	rename("${prog}.new", $prog) || &Warn("cannot rename $prog.new $prog");
+	rename($newprog, $prog) || &Warn("cannot rename $newprog $prog");
     }
 }
 
@@ -1821,7 +1823,7 @@ sub CollectAliases
     local($ml, $alias, $alias_new);
 
     $alias     = "$ML_ETC_DIR/aliases";
-    $alias_new = "$ML_ETC_DIR/aliases";
+    $alias_new = "$ML_ETC_DIR/aliases.new.$$";
 
     print STDERR "\n";
     print STDERR "   $alias:\n";
@@ -1866,13 +1868,15 @@ sub CtlAddrList
 {
     local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
-    local($found, $buf, $line, $sumbuf);
+    local($found, $buf, $line, $sumbuf, $filenew);
 
     # XXX tricky hack
     $addr =~ s/\./\\\./g;
 
-    open(F, $file)           || (&Warn("cannot open $file"), return 0);
-    open(NEW, "> $file.new") || (&Warn("cannot open $file.new"), return 0);
+    $filenew = $file.".new.$$";
+
+    open(F, $file)          || (&Warn("cannot open $file"), return 0);
+    open(NEW, "> $filenew") || (&Warn("cannot open $filenew"), return 0);
     select(NEW); $| = 1; select(STDOUT);
 
     while (<F>) {
@@ -1922,8 +1926,8 @@ sub CtlAddrList
 
     rename($file, "${file}.bak") || 
 	(&Warn("cannot rename $file $file.bak"), return 0);
-    rename("${file}.new", $file) ||
-		(&Warn("cannot rename $file.new $file"), return 0);
+    rename($filenew, $file) ||
+		(&Warn("cannot rename $filenew $file"), return 0);
 
     chmod $mode, $file;
 
