@@ -1,0 +1,97 @@
+Emulation result: which file we use for delivery?
+
+--- 0 ---
+$REJECT_POST_HANDLER    = 'reject';
+$REJECT_COMMAND_HANDLER = 'reject';
+
+actives
+
+--- 1 ---
+$REJECT_POST_HANDLER    = 'reject';
+$REJECT_COMMAND_HANDLER = 'auto_symmetric_regist';
+
+actives
+
+--- 2 ---
+$REJECT_POST_HANDLER    = 'reject';
+$REJECT_COMMAND_HANDLER = 'auto_regist';
+
+members
+
+--- 3 ---
+$REJECT_POST_HANDLER    = 'reject';
+$REJECT_COMMAND_HANDLER = 'auto_asymmetric_regist';
+
+actives
+
+--- 4 ---
+$REJECT_POST_HANDLER    = 'auto_symmetric_regist';
+$REJECT_COMMAND_HANDLER = 'reject';
+
+actives
+
+--- 5 ---
+$REJECT_POST_HANDLER    = 'auto_symmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_symmetric_regist';
+
+actives
+
+--- 6 ---
+$REJECT_POST_HANDLER    = 'auto_symmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_regist';
+
+members
+
+--- 7 ---
+$REJECT_POST_HANDLER    = 'auto_symmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_asymmetric_regist';
+
+actives
+
+--- 8 ---
+$REJECT_POST_HANDLER    = 'auto_regist';
+$REJECT_COMMAND_HANDLER = 'reject';
+
+members
+
+--- 9 ---
+$REJECT_POST_HANDLER    = 'auto_regist';
+$REJECT_COMMAND_HANDLER = 'auto_symmetric_regist';
+
+actives
+
+--- 10 ---
+$REJECT_POST_HANDLER    = 'auto_regist';
+$REJECT_COMMAND_HANDLER = 'auto_regist';
+
+members
+
+--- 11 ---
+$REJECT_POST_HANDLER    = 'auto_regist';
+$REJECT_COMMAND_HANDLER = 'auto_asymmetric_regist';
+
+members
+
+--- 12 ---
+$REJECT_POST_HANDLER    = 'auto_asymmetric_regist';
+$REJECT_COMMAND_HANDLER = 'reject';
+
+actives
+
+--- 13 ---
+$REJECT_POST_HANDLER    = 'auto_asymmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_symmetric_regist';
+
+actives
+
+--- 14 ---
+$REJECT_POST_HANDLER    = 'auto_asymmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_regist';
+
+members
+
+--- 15 ---
+$REJECT_POST_HANDLER    = 'auto_asymmetric_regist';
+$REJECT_COMMAND_HANDLER = 'auto_asymmetric_regist';
+
+actives
