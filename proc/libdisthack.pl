@@ -47,6 +47,8 @@ sub AgainstEudora
     }
 
     # add "forced Messasge-ID:";
+    &ADD_FIELD('X-Original-Message-Id');
+    $e{'h:X-Original-Message-Id:'} = $e{'h:message-id:'};
     $e{'h:Message-Id:'} = "<mid-". $ID . "-". $MAIL_LIST.">";
 
     # extract/speculate referenced Message-ID:
