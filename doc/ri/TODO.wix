@@ -14,6 +14,8 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
+データベース・アクセス (α クオリティ？)
+	LDAP 
 
 
 
@@ -21,7 +23,6 @@ XXX 一月くらいで消すこと
 .C	TODO (特に current)
 =E.C	TODO (current specific)
 
-.S	にほんごでふぃるた
 
 .S	3.0? (to be 3.0? in the new future)
 
@@ -29,17 +30,10 @@ XXX 一月くらいで消すこと
 
    bin/split_and_msend.pl
    contrib/localhack/release-2/member_name/src/libmember_name.pl
-   kern/fml.pl
-   kern/libsmtp.pl
    kern/msend.pl
-   libexec/fmlserv.pl
-   proc/libamctl.pl
-   proc/libdist.pl
-   proc/libfml.pl
-   proc/liblop.pl
-   proc/libra.pl
    
 [difficult]
+   libexec/fmlserv.pl
    proc/libcrosspost.pl
 
 
@@ -67,9 +61,11 @@ obsolete ?
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO
 
+.S	にほんごでふぃるた
+
 .S	mget "uu" mode
 
-mget の uu って空行が足りなくないかい？
+mget の uu って何か空行が足りなくないかい？
 
 
 .S	MIMEライブラリーの書き直し
@@ -265,15 +261,6 @@ $DIR/$ml/etc/pgp5/
 * 1バイト2バイトいりみだれ文字列ははじけない "chａddr"
 
 * ２バイトはじきすぎ問題
-
-* シグニチャー判定問題
-=E
-* Signature
-
-  今は @ をふくんでいる最後のパラグラフはsignatureのパラグラムだと判定
-  してむしするようになっているが、ひっかかないものもある。
-
-
 
 * cannot reject ;)
 .q
