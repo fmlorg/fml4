@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: spool2html.pl,v 2.20 2001/06/17 14:25:13 fukachan Exp $
+# $FML: spool2html.pl,v 2.20.2.1 2001/07/02 09:41:51 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -203,6 +203,25 @@ sub Die
 }
 
 
+sub _speculate_unixtime
+{
+    my ($f) = @_;
+
+    use FileHandle;
+    eval q{
+	use Mail::Header;
+	use FML::Date;
+    };
+
+    my $fh    = new FileHandle $f;
+    my $head  = new Mail::Header $fh;
+    my $date  = $head->get('date');
+    my $utime = FML::Date::date_to_unixtime($date);
+
+    return ($date, $utime);
+}
+
+
 sub Ctl
 {
     local($id) = @_;
@@ -217,8 +236,19 @@ sub Ctl
 	# expired ? 
 	next unless -f "$SPOOL_DIR/$id";
 
-	# tricky
-	$e{'stat:mtime'} = $mtime = (stat("$SPOOL_DIR/$id"))[9];
+	# XXX At 4.0-current (4.0.2 - 4.0.3) we change algorithm
+	#     to determine Date: for the $id (article).
+	# XXX Historically we speculate Date: for the article
+	# XXX from the file's stat() information.
+	# XXX We get it from the article's Date: directly now.
+
+	# $date  = Mon Jul  2 23:46:46 2001
+	# $mtime = 994085206
+	($date, $mtime) = &_speculate_unixtime("$SPOOL_DIR/$id");
+
+	# XXX disable stat()
+	#  $e{'stat:mtime'} = $mtime = (stat("$SPOOL_DIR/$id"))[9];
+	$e{'stat:mtime'} = $mtime;
 	next if &SyncHtmlProbeOnly($HTML_DIR, $id, *e);
 
 	%Envelope = %e = ();
@@ -241,8 +271,9 @@ sub Ctl
 	$ID = $id;
 	$Envelope{'mode:dist'} = 1;
 
-	# since undef %e above;
-	$Envelope{'stat:mtime'} = (stat("$SPOOL_DIR/$id"))[9]; 
+	# reset mtime informatoin since we undef %e above;
+	# $Envelope{'stat:mtime'} = (stat("$SPOOL_DIR/$id"))[9]; 
+	$Envelope{'stat:mtime'} = $mtime;
 	&SyncHtml($HTML_DIR, $id, *Envelope);
 
 	# &dumpvar('SyncHtml') if $verbose;
