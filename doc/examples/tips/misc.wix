@@ -97,6 +97,24 @@ command status をおくりかえしている部分を disable するには
 れじゃだめなんですけどね
 
 
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
+
+
+
            Copyright (C) 2000 Ken'ichi Fukamachi
                    All rights reserved. 
 
