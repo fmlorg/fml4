@@ -100,12 +100,15 @@ $(WORK_DOC_DIR)/INFO-e: INFO-common
 	perl $(DIST_BIN)/remove_japanese_line.pl \
 		< $(COMPILE_DIR)/INFO > $(COMPILE_DIR)/INFO-e
 
-plaindoc: INFO doc/smm/op.wix
+init_dir:
+	@ make -f distrib/mk/fml.sys.mk __setup
+
+plaindoc: init_dir INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
 #	@ $(GEN_PLAIN_DOC)
 	@ env FML=${FML} make -f distrib/mk/fml.doc.mk plaindocbuild
 
-htmldoc: INFO doc/smm/op.wix
+htmldoc: init_dir INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |perl -nle unlink
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
