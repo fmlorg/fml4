@@ -17,7 +17,7 @@ require 'getopts.pl';
 $opt_h && die(&Usage);
 
 $debug       = $opt_d;
-$UNIT        = $opt_u || 100;
+$Unit        = $opt_u || 100;
 $ARCHIVE_DIR = "var/archive";
 $DIR         = $PWD;
 
@@ -26,14 +26,14 @@ $SPOOL_DIR   = "spool";
 
 # eval config.ph (do the force of eval by "do")
 if (-f "./config.ph")  { do "./config.ph";}
-if (-f $SEQUENCE_FILE) { chop ($MAX_SEQ = `cat $SEQUENCE_FILE`);}
+if (-f $SEQUENCE_FILE) { chop ($MaxSeq = `cat $SEQUENCE_FILE`);}
 
 # CLO
 unshift(@ARCHIVE_DIR, $opt_A) if $opt_A;
 
 # Preliminary
 $i = 1;
-$limit = $ARGV[0] || ($UNIT * int ($MAX_SEQ / $UNIT )) || 1000;
+$limit = $ARGV[0] || ($Unit * int ($MaxSeq / $Unit )) || 1000;
 
 
 # MESSAGE
@@ -57,12 +57,12 @@ foreach (split(/\//, $ARCHIVE_DIR)) {
 }
 
 
-while ($i * $UNIT <= $limit) {
+while ($i * $Unit <= $limit) {
     $counter = 0;
     undef $files;
-    $lower = $UNIT * ($i - 1) + 1;
-    $upper = $UNIT * ($i);
-    $TAR  =  $UNIT * ($i);
+    $lower = $Unit * ($i - 1) + 1;
+    $upper = $Unit * ($i);
+    $tar  =  $Unit * ($i);
     $i++;
     
     foreach ($lower .. $upper) {
@@ -73,13 +73,13 @@ while ($i * $UNIT <= $limit) {
     }
 
     if ($counter > 0) {
-	if (-f "$ARCHIVE_DIR/$TAR.tar.gz") {
-	    &Mesg( "Exists $ARCHIVE_DIR/$TAR.tar.gz, SO SKIPPED");
+	if (-f "$ARCHIVE_DIR/$tar.tar.gz") {
+	    &Mesg( "Exists $ARCHIVE_DIR/$tar.tar.gz, SO SKIPPED");
 	    next;
 	}
 	else {
-	    &Mesg("tar cvf - $files |gzip > $ARCHIVE_DIR/$TAR.tar.gz");
-	    system "tar cvf - $files |gzip > $ARCHIVE_DIR/$TAR.tar.gz"; 
+	    &Mesg("tar cvf - $files |gzip > $ARCHIVE_DIR/$tar.tar.gz");
+	    system "tar cvf - $files |gzip > $ARCHIVE_DIR/$tar.tar.gz"; 
 	}
     }
 
@@ -95,7 +95,7 @@ sub Usage
 
     $0 archives \$SPOOL_DIR in this directory;
     in evaluating ./config.ph.;
-    If exists, evaluate and use \$ARCHIV_DIR, \@ARCHIV_DIR and \$SEQUENCE_FILE;
+    If exists, evaluate and use \$ARCHIVE_DIR, \@ARCHIVE_DIR and \$SEQUENCE_FILE;
 
     unit (default 100);
 
