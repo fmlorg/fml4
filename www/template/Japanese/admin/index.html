@@ -35,6 +35,26 @@
 <LI><A HREF="#server_config">サーバの設定関係(初回の確認必須)</A>
 </UL>
 
+
+<HR>
+<A NAME=newml><P>メーリングリストの作成
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=newml>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> メーリングリスト名:
+		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+</TABLE>
+
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Create>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
 <HR>
 <A NAME=config>
 <P>
@@ -60,26 +80,6 @@
 _____________________________
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=GO>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-
-<HR>
-<A NAME=newml><P>メーリングリストの作成
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=newml>
-
-<TABLE>
-	<TR>
-		<TD ALIGN=right> メーリングリスト名:
-		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
-</TABLE>
-
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Create>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 

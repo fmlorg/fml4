@@ -35,20 +35,6 @@ _ML_ mailing list configuration
 <LI><A HREF="#log">ログをみる</A>
 </UL>
 
-<HR>
-<A NAME=config>
-<P>
-_ML_ メーリングリストの設定(makefml config)
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=config>
-<INPUT TYPE=hidden NAME=PTR  VALUE=/>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-<INPUT NAME=submit-p TYPE=submit VALUE=GO>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
 
 <HR>
 <A NAME=add.bye><P>登録/削除 関係
@@ -86,6 +72,21 @@ _____________________________
 
 
 <HR>
+<A NAME=config>
+<P>
+_ML_ メーリングリストの設定(makefml config)
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=config>
+<INPUT TYPE=hidden NAME=PTR  VALUE=/>
+<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
 <A NAME=adminadd.bye><P>管理者の登録/削除 関係
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
@@ -118,6 +119,7 @@ _____________________________
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
+
 
 
 <HR>
