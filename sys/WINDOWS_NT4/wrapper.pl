@@ -92,7 +92,7 @@ sub GetTime
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
     $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
+		   $year % 100, $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
 			$year, $hour, $min, $sec, $TZone);
