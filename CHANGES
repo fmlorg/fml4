@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/15
+
+ fix list file sendback code (current only)
+
+	currentで members/actives コマンドを使う時に # の行が除かれない
+	bug をなおす。stable は無関係
+
 2000/03/10
 
  libtraffic.pl
