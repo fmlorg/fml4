@@ -124,8 +124,11 @@ INIT_CLEAN_UP () {
    (
 	chdir $DESTDIR
 
-	echo mv fml-* FML/
-	mv fml-* FML/
+	for x in fml-*
+	do
+		echo mv $x $FML/$x.$$
+		mv $x $FML/$x.$$
+	done
    )
 
    volume=` df $DESTDIR |grep /dev/|awk '{print $4}' `
