@@ -3,13 +3,15 @@
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML$
+# $FML: DBI_toymodel.pl,v 1.6 2001/08/25 14:15:02 fukachan Exp $
 #
 
 #
 # Thank Toshimi Aoki <toshi@kinotrope.co.jp>
 # This library is based on the patch ( fml-support: 09069 ) by Toshimi Aoki
 #
+
+use vars qw($debug);
 
 package PostgreSQL;
 
@@ -126,7 +128,7 @@ sub DataBases::Execute
 sub Init
 {
     my ($mib) = @_;
-    my ($driver, $database, $host, $user, $password, $dsn);
+    my ($driver, $database, $host, $user, $port, $password, $dsn);
 
     if ($debug) {
 	for ('host', 'port', 'user', 'password') {
@@ -465,6 +467,7 @@ if ($0 eq __FILE__) {
     eval "sub Log { print \@_, \"\\n\";}";
 
     # getopt()
+    use vars qw($debug $opt_D $opt_H $opt_U);
     use Getopt::Std;
     Getopts("dh");
 
