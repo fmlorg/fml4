@@ -12,8 +12,8 @@
 
 SUBDIRS += MIME
 SUBDIRS += utilities
-SUBDIRS += whois
-SUBDIRS += www
+# SUBDIRS += whois
+# SUBDIRS += www
 SUBDIRS += traffic
 SUBDIRS += localhack/release-1/Elena
 SUBDIRS += localhack/release-1/mnews
