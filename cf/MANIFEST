@@ -708,6 +708,11 @@ GUIDE_CHECK_LIMIT:	3
 # value: string
 GUIDE_KEYWORD:	guide
 
+
+# The maximum length for each command. 128 bytes by default.
+# value: number
+MAXLEN_COMMAND_INPUT: 128
+
 # The maximum number of commands in one command mail.
 # The variable \$MAXNUM_COMMAND_INPUT controls this.
 # If the value is 3, fml permits 3 commands in one command mail.

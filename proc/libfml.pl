@@ -92,6 +92,9 @@ sub DoProcedure
     local($limit, $history);
     $linenum = 0;
 
+    my ($max_len) = &ATOI($MAXLEN_COMMAND_INPUT) || 128; # each line <= 128 bytes 
+    $max_len = 5;
+
     # ATTENTION!
     # if $USE_SUBJECT_AS_COMMANDS != NULL,
     # $mailbody != $Envelope{'Body'};
@@ -100,6 +103,15 @@ sub DoProcedure
       $_PCB{'proc'}{'buf_linep'} = $e{'tmp:line_number'} = $linenum;
 
       &Log("proc debug: input [$xbuf]") if $debug;
+
+      # check each line length
+      if (length($xbuf) > $max_len) {
+	  &Mesg(*e, "> ". $xbuf);
+	  &Mesg(*e, "   ERROR: ignore too long command ( >= $max_len bytes)");
+	  my ($xxbuf) = substr($xbuf, 0, $max_len);
+	  &Log("ignore too long command: ". $xxbuf . " ...");
+	  next;
+      }
 
       # skip null line
       next GivenCommands if $xbuf =~ /^\s*$/o;
