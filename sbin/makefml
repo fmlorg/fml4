@@ -1752,11 +1752,14 @@ sub ResetVariables
     # set up /cgi-bin/ directory directive for www server
     # this directory should be special
     # import environment REAL_CGI_PATH
-    $REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
-    if (! $REAL_CGI_PATH) {
-	$REAL_CGI_PATH = $CGI_PATH;
-	$REAL_CGI_PATH =~ s#^/+##;
-	$REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
+    if ($EXEC_DIR) {
+       $REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
+
+       if (! $REAL_CGI_PATH) {
+   	   $REAL_CGI_PATH = $CGI_PATH;
+	   $REAL_CGI_PATH =~ s#^/+##;
+	   $REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
+       }
     }
 
     # www directory
