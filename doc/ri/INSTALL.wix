@@ -198,10 +198,10 @@ When you create a new "Elena" Mailing List, you do only
 
 を実行すれば終りです。ＭＬ用の include ファイル
 =E
-You can find the samples for each ML under /var/spool/ml/etc/"ML-name"/
+You can find the samples for each ML under /var/spool/ml/"ML-name"/
 e.g. the include sample for elena ML is
 
-	/var/spool/ml/etc/elena/include
+	/var/spool/ml/elena/include
 
 を初め必要なサンプルが作成されます。
 
@@ -214,7 +214,7 @@ You can see a sample to add to /etc/aliases is shown in the last
 action of makefml. Please cut and paste them in /etc/aliases and
 "newaliases". This sample is in /var/spool/ml/etc/elena/aliases.
 
-なおこの aliases の表示内容は /var/spool/ml/etc/elena/aliases に保存さ
+なおこの aliases の表示内容は /var/spool/ml/elena/aliases に保存さ
 れています。
 
 新しく別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を 
@@ -226,11 +226,11 @@ in replacing "elena" with "mirei".
 
 =E
 You can find samples for each ML
-	/var/spool/ml/etc/"the name of ML"/"files of samples"
+	/var/spool/ml/"the name of ML"/"files of samples"
 
 なお、各ＭＬごとに 
 
-	/var/spool/ml/etc/MLの名前/サンプルのファイル群
+	/var/spool/ml/MLの名前/サンプルのファイル群
 
 が設定の見本です。
 注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
@@ -253,17 +253,17 @@ NetBSD のような Vixie Cron がＯＳ附属の場合については
 各ＭＬごとに
 =E
 Your Operating System has Vixie Cron, you can set Matome Okuri with
-	/var/spool/ml/etc/ML-name/crontab 
-here /var/spool/ml/etc/ml-name/crontab is a sample of vixie cron for
+	/var/spool/ml/ML-name/crontab 
+here /var/spool/ml/ml-name/crontab is a sample of vixie cron for
 the ML.
 
-	/var/spool/ml/etc/ＭＬの名前/crontab 
+	/var/spool/ml/ＭＬの名前/crontab 
 
 というファイルができます。また、ＭＬを作成した各ユーザごとそのユーザの
 管理するすべてのＭＬのまとめおくりを設定するための
 =E
 For each user who used "makefml newml ML-Name", the user can find
-	/var/spool/ml/etc/crontab/user-name
+	/var/spool/ml/crontab/user-name
 which entries are automatically added when you create a new ml. 
 This file contains all "Matome Okuri" entries of ML's the user
 administrate.
@@ -305,7 +305,7 @@ yields
 =E
 You can see the example setting in 
 
-	/var/spool/ml/etc/fmlserv
+	/var/spool/ml/fmlserv
 
 に作られ、aliases の見本が表示されるのでそれを /etc/aliases に張りつけ
 て newaliases してください。後は fmlserv というアドレスに help とか送っ
@@ -346,14 +346,12 @@ another "fmlserv" (listserv) syntax.
 .C	設定ファイルの保存
 =E.C	the location where configuration files are saved
 
-	/var/spool/ml/etc/ＭＬの名前/
-		と
-	/var/spool/ml/ＭＬの名前/samples (リンクで上と同じ場所)
+	/var/spool/ml/ＭＬの名前/
+
 =E
 You can find settting samples in the directory
-	/var/spool/ml/etc/ML-Name/
-		and
-	/var/spool/ml/ML-Name/samples (linked to the directory above)
+=S
+	/var/spool/ml/ML-Name/
 
 という場所(上の例ではこの場所)に makefml で作った見本が入っています。
 それぞれのＭＬ用にカスタマイズされた内容の
@@ -646,13 +644,13 @@ If you fails to use :include: in /etc/aliases, please use the
 C-wrapper program which may be required to be root-setuid.
 The example of the C-wrapper is 
 =S
-	/var/spool/ml/etc/ML-Named/fml.c 
+	/var/spool/ml/ML-Named/fml.c 
 =S
 Please compile and set it properly. I recommend you councel the
 setting of the C-wrapper with the administrator of the
 machine since it requires a lot of attention.
 
-	/var/spool/ml/etc/ML名/fml.c 
+	/var/spool/ml/ML名/fml.c 
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
