@@ -3,7 +3,7 @@
 .S	fml のインストールが終りました。その次は？
 =E.S	What to do next after fml installation ?
 
-.url ../INSTALL_CGI/
+.url ../../INSTALL_CGI/
 
 
 .S	何ができますか？

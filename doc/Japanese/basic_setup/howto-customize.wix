@@ -37,7 +37,7 @@ makefmlはメニューで変更された内容を/var/spool/ml/elena/cfにsaveし、自
 動的にconfig.phをcfから再生成する。
 
 設定メニュー(makefml config)の使い方の詳細は
-.url ../INSTALL/index.html#makefml-config
+.url ../../INSTALL/index.html#makefml-config
 
   コマンドラインで makefml を起動するとメニューになる。
   GUIではなくCUIです。＃GUIは開発中
