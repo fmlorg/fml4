@@ -306,4 +306,11 @@ sub DENY_PROCEDURE
     $LocalProcedure{$proc} = 'ProcDeny';
 }
 
+# set up Hash %LocalProcedure
+sub DEFINE_PROCEDURE
+{
+    local($proc, $fp) = @_;
+    $LocalProcedure{$proc} = $fp;
+}
+
 1;
