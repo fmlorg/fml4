@@ -30,7 +30,7 @@ unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 ### MAIN ###
 &InitFmlServ;
 
-umask(007);		# ATTENTION!
+umask(007);		# ATTENTION! require group-writable permission;_:
 
 &CheckUGID;
 
@@ -128,7 +128,7 @@ sub FmlServ
 
 	chdir $DIR || die $!;
 
-	&Mesg(*e, "\n\n--- Requests to ML[$ml]");
+	&Mesg(*e, "\n\n--- Requests to \"$ml\" Mailing List");
 	# $e{'message'} .= $ML_cmds_log{$ml};
 
 	&DoFmlServProc($ml, $proc, *e);
@@ -334,6 +334,8 @@ sub DoFmlServProc
     local($ml, $proc, *e) = @_;
     local($sp, $guide_p, $auth, $badproc);
 
+    $ACTIVE_LIST = $MEMBER_LIST unless $ML_MEMBER_CHECK; # tricky
+
     # check member-lists (2.1 extentions)
     @MEMBER_LIST || do { @MEMBER_LIST = ($MEMBER_LIST);};
 
@@ -371,7 +373,7 @@ sub DoFmlServProc
 		    &Warn("Subscribe Request $ML_FN", &WholeMail);
 		}
 		else {
-		    &use('lm');
+		    &use('amctl');
 		    $addr = $addr || $From_address;
 		    &Mesg(*e, "   Auto-Register-Routine called for [$addr]");
 		    &AutoRegist(*e, $addr);
