@@ -108,19 +108,21 @@ sub InitMakeFml
 	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
     }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:");
-    $debug   = $opt_d;
-    $verbose = $opt_v;
-    $MailNotify = $opt_m;
-    $EnForceMode = $opt_F ? 1 : 0;
-    $Env = $opt_E || 'CUI';
+    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:W:");
 
-    $HOME  = $ENV{'HOME'};
-    $PWD   = $ENV{'PWD'};
+    # toggle flags
+    $CGIInstallMode = ($opt_W =~ /cgi/i) ? 1 : 0;
+    $debug          = $opt_d;
+    $verbose        = $opt_v;
+    $MailNotify     = $opt_m;
+    $EnForceMode    = $opt_F ? 1 : 0;
 
+    # import variables
+    $Env         = $opt_E || 'CUI';
+    $HOME        = $ENV{'HOME'};
+    $PWD         = $ENV{'PWD'};
     $COMPAT_ARCH = $opt_A;
     $VENDOR      = $opt_V;
-
     $IN_CHANNEL  = $opt_i;
 
 
