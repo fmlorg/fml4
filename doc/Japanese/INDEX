@@ -13,7 +13,7 @@ remote_control		遠隔からメールでの操作 (REMOTE_ADMINISTRATION)
 resource_control	リソースの制御	
 
 .part 拡張
-procedure		コマンドについて
+command			コマンドについて
 extension		拡張
 
 .part エラー
