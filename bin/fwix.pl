@@ -544,7 +544,7 @@ sub ReadFile
 
 	# seealso{guide}
 	if (/\.($KEYWORD)\{(\S+)\}/) {
-	    print STDERR "Catch $1{$2}\n";
+	    print STDERR "\tCATCH $1{$2}\n";
 	    s/\.($KEYWORD)\{(\S+)\}/&Expand($1, $2, $file, $mode)/e;
 	}
 
