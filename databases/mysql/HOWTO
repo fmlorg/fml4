@@ -1,7 +1,6 @@
-XXX CAUTION!
-XXX DONT FORGET 
-XXX	# mysqladmin reload  
-XXX when you change access databases.
+CAUTION! DON'T FORGET 
+	# mysqladmin reload  
+when you change access databases.
 
 
 1.	check access control 
@@ -30,10 +29,6 @@ XXX when you change access databases.
 	check mysql.host
 	check mysql.tables_priv
 	check mysql.columns_priv
-
-
-2. 	
-
 
 
 $Id$

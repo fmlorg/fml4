@@ -4,13 +4,14 @@
 
 を忘れずに！ ;-)
 
+
 ◯ 初期化
 
 	# mysql_install_db
 	# mysqlaccess localhost root mysql
 
 
-◯ アクセス制限
+◯ アクセス制限のチェックをする
 
 	% su
 	# mysql mysql < adduser.sql
@@ -30,8 +31,10 @@
         +-----------------+---+ +-----------------+---+
    NOTE:    A password is required for user `fukachan' :-(
 
-◯ beth.fml.org からやってみる
 
+◯ beth.fml.org からテーブルをつくってみる
+
+	% cd examples/mysql-toymodel
 	% mysql -h mysql.fml.org --password=uja -u fukachan < toymodel.sql
 
 
