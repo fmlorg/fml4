@@ -1,4 +1,22 @@
-# return hash %mbpcb;
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+
+# speculate multipart block
+#
+# Parameters:
+#   (%mbpcb, block header for each multipart block)
+#
+# Returns:
+#   hash %mbpcb;
+#
 sub MPBProbe
 {
     local(*mpbcb, $bh) = @_;
@@ -44,6 +62,12 @@ sub MPBProbe
 }
 
 
+# Parameters:
+#   (*envelope, *mpbcb, line pointer, max pointer, sub directory,
+#                article id, number of called)
+#
+# Returns: none
+#
 sub WriteHtmlFile
 {
     local(*e, *mpbcb, $lpp, $pe, $dir, $file, $mp_count) = @_;
@@ -109,6 +133,8 @@ sub WriteHtmlFile
 }
 
 
+# Search base64decoder program
+#
 sub FindBase64Decoder
 {
     local($decode);
@@ -135,6 +161,11 @@ sub FindBase64Decoder
 }
 
 
+# Parameters:
+#   (*envelope, line pointer, max pointer, output file)
+#
+# Returns: none
+#
 sub DecodeAndWriteFile
 {
     local(*e, $lpp, $pe, $file) = @_;
@@ -164,6 +195,14 @@ sub DecodeAndWriteFile
 }
 
 
+# Description:
+#    output image file pointer
+#
+# Parameters:
+#   (*mpbcb, file name to embed)
+#
+# Returns: none
+#
 sub TagOfDecodedFile
 {
     local(*mpbcb, $file) = @_;
@@ -182,6 +221,13 @@ sub TagOfDecodedFile
 }
 
 
+# GenThread() calls this.
+#
+# Parameters:
+#   pointor to %links
+#
+# Returns: none
+#
 sub AggregateLinks
 {
     local(*links) = @_;
@@ -214,6 +260,13 @@ sub AggregateLinks
 }
 
 
+# GenThread() calls AggregateLinks() ( <=> DoAggregateLinks() ).
+#
+# Parameters:
+#   (pointor to %links, pointer to %cache)
+#
+# Returns: none
+#
 sub DoAggregateLinks
 {
     local(*links, *cache) = @_;
@@ -243,6 +296,13 @@ sub DoAggregateLinks
 }
 
 
+# GenThread() calls this.
+#
+# Parameters:
+#   pointor to %links
+#
+# Returns: none
+#
 sub OutPutAggrThread
 {
     local(*list, *links) = @_;
@@ -274,6 +334,10 @@ sub __SortHtmlThread
 }
 
 
+# Description:
+#   output folowing %links thread structure by using <UL> trick ;-)
+#   It is dirty and not true but effective.
+#
 sub ThreadPrint
 {
     local(*list, *links, *already, $np, $offset) = @_;
