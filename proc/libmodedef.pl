@@ -157,7 +157,7 @@ sub ExpireMode
     if ($conflict_p) {
 	&Log("not try to expire");
     }
-    else {
+    elsif (defined $ID) {
 	$check_limit  = $EXPIRE_LIMIT || '7days';
 	$check_limit  = $check_limit =~ /(\d+)days/ ? $1*100: $check_limit;
 	$check_limit  = int($check_limit/10) || 1;
@@ -191,7 +191,7 @@ sub ArchiveMode
     if ($conflict_p) {
 	&Log("not try to archive");
     }
-    else {
+    elsif (defined $ID) {
 	$unit        = $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;
 	$check_limit = int($unit/4) || 1;
 
@@ -235,7 +235,9 @@ sub ArchiveAndExpireConflictP
 sub RegistSmtpLogExpire
 {
     $FmlExitHook{'archive'} .= q#
-	&SmtpLogExpire(); 1 if $ID % 10 == 0;
+	if (defined $ID) {
+	    &SmtpLogExpire() if $ID % 10 == 0;
+	}
     #;
 }
 
