@@ -6,6 +6,7 @@
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
+$Rcsid  = '2.0 delta Internal';
 
 # For the insecure command actions
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -246,7 +247,7 @@ sub GetDistributeList
       # set candidates of delivery
       $RCPT{$rcpt} = $rcpt;
 
-      # Matomeokuri 
+      # Matomeokuri Mode Settings
       if ($opt =~ /\sm=(\d+)\s/i) {
 	  $When{$rcpt}  = $DefaultWhen || $1;
 	  local($d, $m) = &ModeLookup($1.$2);
@@ -259,8 +260,8 @@ sub GetDistributeList
 	  $mode{$rcpt}  = $m;
       }
       else {
-	  print STDERR "ERROR: NO MATCH OPTION[$opt], so => gz mode\n";
-	  $mode{$rcpt} = 'gz';
+	  $mode{$rcpt} = $MSEND_MODE_DEFAULT || 'gz';
+	  print STDERR "ERROR: NO MATCH OPTION[$opt], so => $mode{$rcpt} mode\n";
       }
 
       # Relay
@@ -323,7 +324,7 @@ sub MSending
 
     # matome.gz -> matome.ish in LhaAndEncode2Ish().
     local($total, $tmp, $mode, $name, $s);
-    $tmp   = "$TMP_DIR/MSend$$"; # relative
+    $tmp   = "$FP_TMP_DIR/MSend$$"; # relative
     $mode = $mode{$to[0]};
     $total = &DraftGenerate($tmp, $mode, "matome.gz", @filelist);
 
@@ -333,6 +334,10 @@ sub MSending
     $s   .= " [$name]";
 
     if ($total) {
+print STDERR "
+	&SendingBackInOrder($tmp, $total, $s, ($SLEEPTIME || 3), @to);
+";
+
 	&SendingBackInOrder($tmp, $total, $s, ($SLEEPTIME || 3), @to);
 	$0 = "--MSending to $to $ML_FN ends <$FML $LOCKFILE>";
     }
@@ -520,6 +525,7 @@ sub MSendNotify
 
     # Server info to add
     $Envelope{'Hdr'} .= "$XMLNAME\n";
+    $Envelope{'Hdr'} .= "X-Debug: $rcsid\n" if $debug && $rcsid;
     $Envelope{'Hdr'} .= "X-MLServer: $rcsid\n" if $rcsid;
 	
     # MIME (see RFC1521)
@@ -593,13 +599,65 @@ sub MSendInit
 
 ##################################################################
 #:include: fml.pl
-#:sub GetTime InitConfig Logging Log Append2 Warn eval Opt Flock Funlock
+#:sub LoadConfig SetDefaults BackwardCompat GetTime InitConfig 
+#:sub Logging Log Append2 Warn eval Opt Flock Funlock
 #:sub SetCommandLineOptions AddressMatch Lock Unlock use
 #:sub Touch Write2 RunHooks Notify
 #:~sub
 ##################################################################
 #:replace
 #:replace
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub Flock
+{
+    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
+
+    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
+    flock(LOCK, $LOCK_EX);
+}
+
+
+sub SetDefaults
+{
+    $Envelope{'mci:mailer'} = 'ipc'; # use IPC(default)
+    $Envelope{'mode:uip'}   = '';    # default UserInterfaceProgram is nil.;
+    $Envelope{'req:guide'}  = 0;     # not member && guide request only
+
+    %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', +1);
+    $REJECT_ADDR = 'root|postmaster|MAILER-DAEMON|msgs|nobody';
+    $SKIP_FIELDS = 'Received|Return-Receipt-To';
+
+    @HdrFieldsOrder = 
+	('Return-Path', 'Date', 'From', 'Subject', 'Sender',
+	 'To', 'Reply-To', 'Errors-To', 'Cc', 'Posted',
+	 ':body:', 'Message-Id', ':any:', ':XMLNAME:', 
+	 ':XMLCOUNT:', 'X-MLServer',
+	 'mime-version', 'content-type', 'content-transfer-encoding',
+	 'XRef', 'X-Stardate', 'X-Ml-Info', 
+	 'References', 'In-Reply-To', 'Precedence', 'Lines');
+}
+
+
+sub BackwardCompat
+{
+    if (! @DenyProcedure) { @DenyProcedure = ('library');}
+    if (! @NEWSYSLOG_FILES) { 
+	@NEWSYSLOG_FILES = 
+	    ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak");
+    }
+    push(@ARCHIVE_DIR, @StoredSpool_DIR); # FIX INCLUDE PATH
+    $STRIP_BRACKETS        = 1 if $SUBJECT_HML_FORM;
+    $SENDFILE_NO_FILECHECK = 1 if $SUN_OS_413;
+    $USE_MIME              = 1 if $USE_LIBMIME;
+    $USE_ERRORS_TO         = 1 if $AGAINST_NIFTY;
+    if ($NO_USE_CC) { &Log("Please change \@HdrFieldsOrder in config.ph");}
+    $Permit{'ShellMatchSearch'} = 1 if $SECURITY_LEVEL <= 1; #default=2[1.4d]
+    $Permit{'ra:req:passwd'}    = 1 if $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD;
+    $Permit{'ra:req:passwd'}    = 1 if $REMORE_AUTH || $REMOTE_AUTH;
+}
+
+
 sub GetTime
 {
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
@@ -624,19 +682,21 @@ sub GetTime
 
 sub InitConfig
 {
+    &SetDefaults;
+    &LoadConfig;
+
     # a little configuration before the action
     umask (077);			# rw-------
 
     ### Against the future loop possibility
     if (&AddressMatch($MAIL_LIST, $MAINTAINER)) {
-	&Log("DANGER!\$MAIL_LIST = \$MAINTAINER, STOP!");
+	&Log("DANGER! \$MAIL_LIST = \$MAINTAINER, STOP!");
 	exit 0;
     }
 
-    &SetCommandLineOptions;	        # Options
+    ### Options
+    &SetOpts;
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
-
-    $_cf{'perlversion'} = 5 if ($] =~ /5\.\d\d\d/); # Set Defaults
 
     &GetTime;			        # Time
 
@@ -654,7 +714,7 @@ sub InitConfig
 	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
-    eval($s) || &Log("FAIL EVAL SPOOL_DIR ...");
+    eval($s) || &Log("FAIL EVAL \$SPOOL_DIR ...");
 
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
@@ -667,9 +727,116 @@ sub InitConfig
 	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
     }
 
+    # EMERGENCY CODE against LOOP
+    if (-f "$FP_VARRUN_DIR/emerg.stop") { $DO_NOTHING = 1;}
+
     ### misc 
     $FML .= "[".substr($MAIL_LIST, 0, 8)."]"; # For tracing Process Table
+
+    &BackwardCompat;
 }
+
+
+
+# Log: Logging function
+# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
+# delete \015 and \012 for seedmail return values
+# $s for ERROR which shows trace infomation
+sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
+sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
+sub Log { 
+    local($str, $s) = @_;
+    local($package, $filename, $line) = caller; # called from where?
+    local($status);
+
+    &GetTime;
+    $str =~ s/\015\012$//;	# FIX for SMTP
+    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
+	$Envelope{'error'} .= "Sendmail Error:\n";
+	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
+    }
+    
+    $str = "$filename:$line% $str" if $debug_caller;
+
+    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
+    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
+}
+
+
+# append $s >> $file
+# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
+# $nor "set $nor"(NOReturn)
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2
+{
+    local($s, $f, $w, $nor) = @_;
+    local(@info) = caller;
+    print STDERR "Append2: @info \n" if $debug_caller && (!-f $f);
+
+    if (! open(APP, $w ? "> $f": ">> $f")) {
+	local($r) = -f $f ? "cannot open $f" : "$f not exists";
+	$nor ? (print STDERR "$r\n") : &Log($r);
+	return $NULL;
+    }
+    select(APP); $| = 1; select(STDOUT);
+    print APP "$s\n" if $s;
+    close(APP);
+
+    1;
+}
+
+
+# Warning to Maintainer
+sub Warn { &Sendmail($MAINTAINER, $_[0], $_[1]);}
+
+
+# eval and print error if error occurs.
+sub eval
+{
+    &CompatFML15_Pre  if $COMPAT_FML15;
+    eval $_[0]; 
+    $@ ? (&Log("$_[1]:$@"), 0) : 1;
+    &CompatFML15_Post if $COMPAT_FML15;
+}
+
+
+# Getopt
+sub Opt { push(@SetOpts, @_);}
+    
+
+sub LoadConfig
+{
+    # configuration file for each ML
+    require 'config.ph' if -f "$DIR/config.ph" || -f "$LIBDIR/config.ph";
+
+    eval("require 'sitedef.ph';");      # common defs over ML's
+    require 'libsmtp.pl';		# a library using smtp
+}
+
+
+# Notification of the mail on warnigs, errors ... 
+sub Notify
+{
+    # refer to the original(NOT h:Reply-To:);
+    local($to)   = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
+    local(@to)   = split(/\s+/, $Envelope{'message:h:@to'});
+    local($s)    = $Envelope{'message:h:subject'} || "fml Status report $ML_FN";
+    local($proc) = $PROC_GEN_INFO || 'GenInfo';
+    $GOOD_BYE_PHRASE = $GOOD_BYE_PHRASE  || "\tBe seeing you!   ";
+    
+    if ($Envelope{'message'}) {
+	$Envelope{'message'} .= "\n$GOOD_BYE_PHRASE $FACE_MARK\n";
+	&use('utils');
+	$Envelope{'trailer'}  = &$proc;
+	&Sendmail($to, $s, $Envelope{'message'}, @to);
+    }
+
+    if ($Envelope{'error'}) {
+	&Warn("Fml System Error Message $ML_FN", $Envelope{'error'}. &WholeMail);
+    }
+}
+
 
 
 # sub AddressMatching($addr1, $addr2)
@@ -712,82 +879,22 @@ sub AddressMatch
 }
 
 
-
-# Log: Logging function
-# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
-# delete \015 and \012 for seedmail return values
-# $s for ERROR which shows trace infomation
-sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
-sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
-sub Log { 
-    local($str, $s) = @_;
-    local($package,$filename,$line) = caller; # called from where?
-    local($status);
-
-    &GetTime;
-    $str =~ s/\015\012$//;	# FIX for SMTP
-    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
-	$Envelope{'error'} .= "Sendmail Error:\n";
-	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
-    }
-    
-    $str = "$filename:$line% $str" if $debug_caller;
-
-    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
-    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
-}
+# Strange "Check flock() OK?" mechanism???
+sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
 
 
-# append $s >> $file
-# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
-# $nor "set $nor"(NOReturn)
-# if called from &Log and fails, must be occur an infinite loop. set $nor
-# return NONE
-sub Append2
-{
-    local($s, $f, $w, $nor) = @_;
-    local(@info) = caller;
-    print STDERR "Append2: @info \n" if $debug_caller && (!-f $f);
+sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
 
-    if (! open(APP, $w ? "> $f": ">> $f")) {
-	local($r) = -f $f ? "cannot open $f" : "$f not exists";
-	$nor ? (print STDERR "$r\n") : &Log($r);
-	return $NULL;
-    }
-    select(APP); $| = 1; select(STDOUT);
-    print APP "$s\n" if $s;
-    close(APP);
 
-    1;
-}
+# eval and print error if error occurs.
+# which is best? but SHOULD STOP when require fails.
+sub use { require "lib$_[0].pl";}
 
 
 sub Touch  { &Append2("", $_[0]);}
 
 
 sub Write2 { &Append2(@_, 1);}
-
-
-# Notification of the mail on warnigs, errors ... 
-sub Notify
-{
-    # refer to the original(NOT h:Reply-To:);
-    local($to)   = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
-    local(@to)   = split(/\s+/, $Envelope{'message:h:@to'});
-    local($s)    = $Envelope{'message:h:subject'} || "fml Status report $ML_FN";
-    local($proc) = $PROC_GEN_INFO || 'GenInfo';
-
-    if ($Envelope{'message'}) {
-	$Envelope{'message'} .= "\n\tSee you!   $FACE_MARK\n";
-	&use('utils');
-	$Envelope{'trailer'}  = &$proc;
-	&Sendmail($to, $s, $Envelope{'message'}, @to);
-    }
-
-    if ($Envelope{'error'}) {
-	&Warn("Fml System Error Message $ML_FN", $Envelope{'error'}. &WholeMail);
-    }
-}
 
 
 # Lastly exec to be exceptional process
@@ -813,65 +920,6 @@ sub RunHooks
 	exec $s;
 	&Log("cannot exec $s");	# must be not reached;
     }
-}
-
-
-# Warning to Maintainer
-sub Warn { &Sendmail($MAINTAINER, $_[0], $_[1]);}
-
-
-# eval and print error if error occurs.
-# which is best? but SHOULD STOP when require fails.
-sub use { require "lib$_[0].pl";}
-
-
-# eval and print error if error occurs.
-sub eval
-{
-    &CompatFML15_Pre  if $COMPAT_FML15;
-    eval $_[0]; 
-    &CompatFML15_Post if $COMPAT_FML15;
-
-    $@ ? (&Log("$_[1]:$@"), 0) : 1;
-}
-
-
-# Getopt
-sub Opt { push(@CommandLineOptions, @_);}
-    
-
-# Setting CommandLineOptions after include config.ph
-sub SetCommandLineOptions
-{
-    foreach (@CommandLineOptions) {
-	/^\-(\S)/      && ($_cf{"opt:$1"} = 1);
-	/^\-(\S)(\S+)/ && ($_cf{"opt:$1"} = $2);
-
-	/^\-d|^\-bt/   && ($debug = 1)         && next;
-	/^\-s(\S+)/    && &eval("\$$1 = 1;")   && next;
-	/^\-u(\S+)/    && &eval("undef \$$1;") && next;
-	/^\-l(\S+)/    && ($LOAD_LIBRARY = $1) && next;
-    }
-
-    if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
-}
-
-
-# Strange "Check flock() OK?" mechanism???
-sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
-
-
-sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
-
-
-# lock algorithm using flock system call
-# if lock does not succeed,  fml process should exit.
-sub Flock
-{
-    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
-
-    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
-    flock(LOCK, $LOCK_EX);
 }
 
 
