@@ -113,26 +113,6 @@ Information and HTML version documents in the fml source distribution
 
 	<LI>
 #ifdef JAPANESE
-	<A HREF="INSTALL/">
-	INSTALL ガイド; インストールと makefml の使い方
-#else
-	<A HREF="INSTALL-e/">
-	GUIDE on INSTALLATION and How to use makefml (user interface)
-#endif
-	</A>
-	<BR>
-#ifdef JAPANESE
-	<A HREF="INSTALL_on_NT4/">
-	INSTALL ガイド (Windows NT4 の上での fml のインストールについて)
-	<BR>
-	* MetaInfo Sendmail ではほとんどUNIX Version と同じです。
-#else
-	<A HREF="INSTALL_on_NT4-e/">
-	INSTALLATION on WINDOWS NT4 (Beta Test Phase)
-#endif
-	</A>
-	<BR>
-#ifdef JAPANESE
 	<A HREF="UPGRADE/">
 	アップグレードの際の注意
 #else
@@ -140,15 +120,45 @@ Information and HTML version documents in the fml source distribution
 	ATTENTIONS and TIPS FOR UPGRADE
 #endif
 	</A>
-	<BR>
+
+	<LI>
 #ifdef JAPANESE
-	<A HREF="INSTALL_with_QMAIL/">
-	qmail の場合のインストールメモ
+	<A HREF="INSTALL/">
+	INSTALL ガイド (インストール, makefmlの使い方など)
 #else
-	<A HREF="INSTALL_with_QMAIL-e/">
-	MEMO on when you use fml with MTA "qmail"
+	<A HREF="INSTALL-e/">
+	INSTALLATION GUIDE (installation, usage for makefml ...)
 #endif
 	</A>
+	<BR>
+#ifdef JAPANESE
+	<A HREF="INSTALL_on_NT4/">
+	INSTALL ガイド (Windows NT4 の上での fml のインストールについて)
+#else
+	<A HREF="INSTALL_on_NT4-e/">
+	INSTALLATION on WINDOWS NT4 (Beta Test Phase)
+#endif
+	</A>
+	<BR>
+#ifdef JAPANESE
+	sendmail以外のMTA(Mail Transport Agent)ごとの注意点
+	<BR>
+	sendmail はINSTALLファイルを参照	
+#else
+	Tips for each MTA (except sendmail). See INSTALL for sendmail.
+#endif
+	<BR>
+#ifdef JAPANESE
+	<A HREF="INSTALL_with_SENDMAIL/">sendmail</A>
+	<A HREF="INSTALL_with_POSTFIX/">postfix</A>
+	<A HREF="INSTALL_with_QMAIL/">qmail</A>
+	<A HREF="INSTALL_with_EXIM/">exim</A>
+#else
+	<A HREF="INSTALL_with_SENDMAIL-e/">sendmail</A>
+	<A HREF="INSTALL_with_POSTFIX-e/">postfix</A>
+	<A HREF="INSTALL_with_QMAIL-e/">qmail</A>
+	<A HREF="INSTALL_with_EXIM-e/">exim</A>
+#endif
 
 	<LI>
 #ifdef JAPANESE
