@@ -111,9 +111,13 @@ var/html/${file}: doc/ri/${file}
 	cp -p doc/ri/${file} var/html/${file}
 .endfor
 
+var/html/fml.css: doc/html/fml.css
+	cp -p doc/html/fml.css var/html/fml.css
+
 
 ### main ###
-__htmlbuild__ += __inithtml__ 
+__htmlbuild__ += __inithtml__
+__htmlbuild__ += var/html/fml.css
 __htmlbuild__ += ${HTML_MISC} 
 __htmlbuild__ += ${__HTML_RI__} 
 __htmlbuild__ += ${HTML_SMM} 
