@@ -96,7 +96,7 @@ var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix
 
 var/html/WHATS_NEW-e/index.html: distrib/compile/WHATS_NEW.wix
 	distrib/bin/remove_japanese_line.pl distrib/compile/WHATS_NEW.wix |\
-	${FWIX} -L ENGLISh -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
+	${FWIX} -L ENGLISH -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
 
 
 ### main ###
