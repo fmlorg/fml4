@@ -1,17 +1,6 @@
 .C	trouble shooting
 
 
-.S	KNOWN BUGS
-
-１．
-ひとつのメールで
-# mget 1-10 ish
-# mget 1-10 unpack
-みたいに 種類を混ぜると 中で conflict して挙動がおかしくなるが…
-今の仕様ではとりあえず回避できない _o_ 
-＃って普通そういう変なことをするかね？？？
-
-
 .S	ありそうなこと
 
 う〜ん、動かなくてありそうなことといえば…（詳細はこの後の各sections）
@@ -43,29 +32,24 @@
 
 	-rwsr-xr-x  1 fukachan guild 24576 Nov 26 04:43 fml
 
-のようにｓがありますか？
+のようにｓがありますか？（↑これは 4.3BSD の場合）
 
 解説：（versionによりこまごまと違うんですが…）
-setuidしないと sendmailは daemon（どらえもん:-)）のプロセスなので何箇
-所かdaemon に権限がなければならない変更が出てきます。しかし、それは気
-分が良くありません。それでsetuidということが話題になるわけです。
+setuidしないと sendmailは root (昔 daemon(どらえもん:-))) のプロセスな
+ので何箇所かdaemon に権限がなければならない変更が出てきます。しかし、
+それは気分が良くありません。それでsetuidということが話題になるわけです。
 
-sendmail が
+fml.cはC wrapperでsetuidするため（だけ）のものです。
+使用は必須ではありませんし、どちらかというと苦肉の策的なものです。
 
-	in /etc/aliases
-	Elena:"|/home/axion/fukachan/work/spool/Elena/fml.pl"
-	owner-Elena:fukachan
-
-をちゃんとできれば問題はないんですが…結局、:include形でそれの中身が↑
-に落ち着いちゃったみたいですね。
-
-ちなみにfml.cはC wrapperでsetuidするため（だけ）のものです。中で
+中では
 
   setuid(geteuid());
   setgid(getgid());
 
 をしているだけです。問題は、これを ユーザー ができるのは ４．３ＢＳＤ
 までです。
+
 4.4BSD (POSIX準拠) では
 
   The setuid() function sets the real and effective user IDs and the saved
@@ -75,7 +59,9 @@ sendmail が
 
 というわけで、もしも :include: でもだめなら
 
-一回 root に setuid する必要があります。つまり
+	”一回 root に setuid する”
+
+必要があります。つまり
 
 	-rwsr-xr-x  1 root guild 24576 Nov 26 04:43 fml
 
@@ -159,32 +145,34 @@ forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
 
 .S	ガイドとかが なぜか返送されない（no file in Sub SendFile[logfile]）
 .key	$SUN_OS_413
+.key	$SENDFILE_NO_FILECHECK
 
-妙に SUN OS 4.1.3 (+JLE)  の場合が多かったんですが
-perl の file test operator が（-T なんでもけっこう変みたい）おかしくて
-プレインテキストか否か？のチェックをしているところがちゃんと動作してい
-ません。
+妙に SUN OS 4.1.3 (+JLE) の場合が多かったんですが、perl の file test
+operator が（-T なんでもけっこう変みたい）おかしくて Plain Text か否か？
+のチェックをしているところがちゃんと動作していません。
 
 とりあえず config.ph  の最初の方で
 
 	$SUN_OS_413 = 1;
 
 としておいてください。
-＃この変数の実体は $SENDFILE_NO_FILECHECK という変数を １ にすることで
-す。config.ph の後半で再代入しています。上の名前は単にわかりやすいよう
-にです。
-.key	$SENDFILE_NO_FILECHECK
+
+この変数の実体は $SENDFILE_NO_FILECHECK という変数を １ にすることです。
+config.ph の後半で再代入しています。上の名前は単にわかりやすいようにで
+す。
 
 
-.S	log file の 550...は？
+.S	log ファイルに残るの 550... みたいな数字は何？
 
-Sendmail からのエラーメッセージの記録です。
-メッセージは [45]\d\d 形式です。
-ログの前後を調べて何が原因か調べてみて下さい。
+Sendmail からのエラーメッセージの記録です。メッセージは [45]\d\d 形式
+です。ログの前後を調べて何が原因か調べてみて下さい。
 
 
-.S	 Can't locate sys/socket.ph in @INC
+.S	Can't locate sys/socket.ph in @INC
 .key	sys/socket.ph
+
+今はパッケージを広げるとfml.pl に対して sys/socket.ph という場所に
+一応BSD用の socket.ph があるので何とかなると思うのですが
 
  Can't locate sys/socket.ph in @INC (did you run h2ph?) at ...
  554 "|/usr/spool/driver/fml"... unknown mailer error 2
@@ -201,15 +189,8 @@ perlのインストールの時にh2phを走らせて
 で	/usr/local/lib/perl	に作ってくれると思います。
 ＃% man h2ph
 
-一応、後向きな考えですが
-	contrib/sys/socket.ph
-
-というのを4.3BSDで作って、
-
-	distrib/sys	->	distrib/contrib/sys
-
-へリンクを飛ばしておいたので一応動くでしょうが、こういうsystemからみの
-fileはちゃんとインストールするべきだと思いますよ
+ただ本来は、こういうsystemからみのfileはちゃんとインストールするべきだ
+と思いますけどね？
 
 
 .S	"You should install sys/socket.ph using h2ph."
@@ -221,7 +202,7 @@ fileはちゃんとインストールするべきだと思いますよ
 ＃後向きな解決法なのでインストールを促しているんですね(^^)
 
 
-.S	seq fileの中身がおかしい？
+.S	記事番号が変わらない。seq file の中が数字で一杯です…
 .key	seq
 .key	flock
 .key	lseek
@@ -261,43 +242,48 @@ seq fileがこんなかんじに
 	Sun-OS 4.1.3 JLE1.1.3
 
 
-.S	ヘッダの時間がおかしい？
+.S	ヘッダの時間がおかしい?
 .key	TZ
 .key	sendmail.cf
 
-システムで環境変数ＴＺがちゃんと定義されてない or ちゃんとSendmailに渡
-されない場合
-「変な TZ が設定されているため ＧＭＴ を使ってしまう」
+システムで環境変数 TZ がちゃんと定義されてない or ちゃんと Sendmail に
+渡されない場合
+「変な TZ が設定されているため GMT を使ってしまう」
 
-例えば sendmail.cf が古いとかで sendmailをいれかえたら顕在化したとか、
+例えば sendmail.cf が古いので sendmail を新しくしたらそれが顕在化した
+ケースとかありました。
 
 fml.pl内で呼ばれるlocaltimeが正しい値を返さないため、
-変なＴＺの渡し方をして、結果としてＧＭＴをかえしてしまう
+変な TZ の渡し方をして、結果としてGMTをかえしてしまう
 
 例えば、JLEでないSUN-OS4.1.3でおこる。JLEの場合は正しい値を返す
 
 sendmail.cf に TZ=japan-time みたいに見知らぬものがついてたら削るかそ
-のＯＳの正しい書き方にする。
+のOSの正しい書き方にする。
 
 もうひとつの後向きな考え方は fml.pl で 
 	$ENV{'TZ'} = 'JST';
 のようにセットしてしまうこと
 
 SunOS 4.1.3_U1(English)では、$ENV{'TZ'} = 'Japan';  だそうです。
-＃thanks to hogawa@mesh.ad.jp
+#thanks to hogawa@mesh.ad.jp
 
 .S	Received: from  (localhost.変なドメイン) by ...
 .key	Received:
 .key	sendmail.cf
 
-少なくとも localhost ってところだけは関係ありますが後は sendmail と 
-sendmail.cf の問題であって fml の問題ではありません。
+少なくとも localhost ってところだけは関係ありますが後は sendmail,
+sendmail.cf および DNS の問題であって fml の問題ではありません。
 
 謎の sendmail.cf だと変な展開をしてくっつけるのかも知れません。ネット
 の管理者の人に聞いてみて下さい。
 ＃ DNS の設定が変とか resovler がおかしい OS とか 謎のsendmail とか 謎
 の sendmail.cf とか 謎のNIS もありうるか？………（おいおい）
 ＃ 管理者に聞いてみませう。一応キーワードは逆引き
+
+sendmail.cf をみて、sendmail -d1-100.99 みたいにデバッグモードにして
+変数の中身を確認するのもよいですね
+
 
 解答０： localhost.変なドメイン → マシン名
 
@@ -340,28 +326,27 @@ UNIX FROM loop の方のチェックは それとはちがって
 	自分＝＝$MAINTAINER 
 だと loop にひっかかるケースもありえます
 
-できたら MAITAINER は -request とかにするのがおすすめなんですが、
-いやなら 
+よって、MAITAINER は -request とかにするのがおすすめです。
 
-sub GetFieldsFromHeader の
+なお、
 
-    # now before flock();
-    if (&AddressMatch($Unix_From, $MAINTAINER)) {
-	&Log("WARNING: UNIX FROM Loop");
-	exit 0;
-    }
+ $NOT_USE_UNIX_FROM_LOOP_CHECK = 1;
 
-ってところを削ってみてください 
-
+とすると、このループチェックメカニズムを使わなくなります。
 
 
 .S	Solaris 2.4 でプロセス間通信がうまくいかない時
 
-SOCK_STREAM = 2;   らしいので、
+とりあえず、 config.ph で
 
-ちゃんと /usr/include/sys/socket.h から作った 
-sys/socket.ph （/usr/local/lib/perl(/ＯＳ名)/sys/socket.ph あたり）
-を 呼んでいないと動かないと思います。
+  $COMPAT_SOLARIS2 = 1;
+
+をセットして、ためしてみてください。
+
+ソラリスでは意味不明に(意地悪く?)定数が違うので、ちゃんと 
+/usr/include/sys/socket.h から作った sys/socket.ph
+(/usr/local/lib/perl(/OS名)/sys/socket.ph あたり) を呼んでいないと動き
+ません。
 
 それともちがうなら 次の手段にでるっす↓
 
@@ -374,36 +359,36 @@ sys/socket.ph （/usr/local/lib/perl(/ＯＳ名)/sys/socket.ph あたり）
 .key	libo2smtp.pl
 .key	libR8.pl
 
-“ソケットがつくれまへん”とかいわれてしまったら、
-
+エラーで“ソケットがつくれません”とかいわれてしまったら、
 プロセス間通信をつかわないライブラリに変えてみてください。
-（もしかしたら、このライブラリではsyslogとかにうじゃうじゃでちゃうかも
-しれませんが…）
 
-変え方は、lib/Sendmail/libo2smtp.pl というのをINCLUDE PATHのどっかにおいて
-＃昔の名前は lib/Sendmail/libR8.pl
+config.ph で
 
-fml.plの先頭のあたりの
+	$Envelope{'mci:mailer'} = 'prog';
 
-	require 'libsmtp.pl';
-を
-	require 'libo2smtp.pl';
+とすれば、プロセス間通信ではなくて sendmail を直接実行します。
+この時実行するプログラムは
 
-にしてみてください。
-あと libo2smtp.pl の先頭の /usr/lib/sendmail をＯＳにあわせて変えて下さい。
-libo2smtp.pl は open2.pl をつかっています。これでちゃんと受け答えする
-ようにするようになったはずです。
-＃ただ libsmtp.pl にくらべて ばんばんforkとかするので趣味としては嫌（苦笑）
+	$SENDMAIL 
 
+で定義されたプログラムです。インストール時に自動的に探してこの変数はセッ
+トされているとはおもいますが、念のためチェックして下さい。デフォールトは
 
-.S	Solaris 2.3(SUN OS 5) flock がうごかない？？？
+	$SENDMAIL = "/usr/sbin/sendmail -bs ";
 
-	flock がだめ ていうエラーメッセージがでたら
-	$USE_FLOCK = 0;にしてみてください
+です。
 
 
-.S	パソコンメールとの共存でのトラブル
-.S	cc:Mailでのトラブル
+.S	Solaris 2.3 (SUN OS 5) で flock がうごかない？？？
+
+flock がだめというエラーメッセージがでたら
+
+	$USE_FLOCK = 0;
+
+にしてみてください
+
+
+.S	cc:Mail でのトラブル その１
 .key	nkf
 .key	cc:Mail
 .key	パソコンメールソフト
@@ -422,51 +407,12 @@ e.g.
 private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
 
 
-.comment %%%%% The second %%%%%
-
-
 .S	PC-VANがちゃんとうけとってくれない 事件
 
 message-id で < > がちゃんとついてないと だーめ。
 
 PC-VAN は、<uja@aja.or.jp> という Message-Id: を@の前で切り取って、
 <uja> にする？ んだそうです。＃なんだ、それ？？？
-
-
-
-.S	古典の printf debug 
-
-.q
-From: fukachan@phys.titech.ac.jp
-X-Mail-Count: 00702 
-
-じゃ、
-	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
-を、
-
-&InitConfig;			# initialize date etc..
-&Parsing;			# Phase 1(1st pass), pre-parsing here
-&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
-
-のあいだにはさんで、
-
-	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
-&InitConfig;			# initialize date etc..
-	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
-&Parsing;			# Phase 1(1st pass), pre-parsing here
-	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
-&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
-	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
-
-とかしておいて、
-
-% perl sbin/localtest.pl |sed 's/test/#guide/' | perl fml.pl $PWD -d 
-
-とかして、この REQ:GUIDE の値の変化をみるというのはどうでしょう？
-
-ただしいばあいは &Parsing のあと １になって そのままのはずですよね
-
-.~q
 
 
 .S	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
@@ -484,7 +430,7 @@ Perl 5 が正しくインストールされてないと起きるみたいですね。
 ＃というわけで、 MSendv4 にもフックをつくりました。
 
 
-.S	自動登録したときにファイルが送られない事件(1.6 〜 1.6.1?)
+.S	自動登録したときにファイルが送られない事件 (fml 1.6 〜 1.6.1?)
 
 推測？：
 libutils.pl[AutoRegist] -> libsmtp.pl[SendFile]
@@ -564,31 +510,32 @@ sub fp_sort
 
 .S	503 Need RCPT (recipient) 
 
-そのひとから ＤＭ をもらってみると、なんかわかるんじゃないかな〜と
+そのひとから DM をもらってみると、なんかわかるんじゃないかな〜と
 
 たとえば 
-	ヘッダのどっかが一行あいてる （いいかげんなsendmailがパスのどっかにいる）
+	ヘッダのどっかが一行あいてる (いいかげんなsendmailがパスのどっかにいる)
 		とか
 	From: のかたちが 特殊
 		とか
-	Reply-to: （なにもアドレスなし）になっている
+	Reply-to: (なにもアドレスなし)になっている
 		とか
 
 まぁ〜そういうなんかがあるんではないかとおもうです
 
-８２２でみとめているアドレス形式は もっと いろいろかけるんですが、実用
-的には sendamil.cf のデフォールトのどっちかの形 つまり 4.x BSD の 
-/usr/share/misc/doc/smm/op.me？ にかいてある形式
+822でみとめているアドレス形式は もっと いろいろかけるんですが、実用
+的には sendamil.cf のデフォールトのどっちかの形 つまり 4.4 BSD の 
+/usr/share/doc/smm/08.sendmailop/op.me にかいてある形式
 
 	Full Name <address>
 	address (comment)
 
-を仮定しています。＃完全な８２２サポートはすごくたいへんなので…てぬき
+を仮定しています。#完全な822サポートはすごくたいへんなので…てぬき
 
 だから
 	From: ("< uja ") <uja@uja.baycity.jp> 
 
-とかは間違ってないんだけど… うまく parsing できないということがありえますね…
+とかは間違ってないんだけど… うまく parsing できないということがありえ
+ますね…
 
 
 .S	最新版にバージョンアップする時に、config.ph は前のままでＯＫ？
@@ -600,23 +547,33 @@ sub fp_sort
 使ってない場合はそのままでＯＫです。
 
 ただ、たまぁ〜〜〜〜に 変数名の スペリングの間違いを直すとか〜で かわっ
-ちゃうことがありますけど そういうのは doc/INFO にかいてありますんで、
-みてもらえばＯＫのはずっす
+ちゃうことがありますけど compat はできるだけ補正するし、そういうのは 
+doc/INFO 等に書いておきますので、見てもらえばＯＫのはずです。
 
 
 .S	$Envelope{'macro:s'}  = 'localhost'; にしておくとまずい？
 
-まずくはないですが、この変数は 他にも使っちゃってるんで、Message-ID と
-かも @locahost とかついちゃうから…
-＃そういうことをすると、Message-ID が Unique でなくなるからだめ
+昔はMessage-ID もこの変数使っていたので @locahost とかついちゃいました。
+そういうことをすると、Message-ID が Unique でなくなるからだめです。
 
-そのときは Message-ID をカスタマイズしちゃえばいいんですけどね…
+この辺の話をすると
+
+   Sendmail に HELO と呼びかける時に使う変数が	$Envelope{'macro:s'}
+   Message-ID につけてるのが			$FQDN
+	例： "<$CurrentTime.FML$$\@$FQDN>" フォーム
+
+   fml の $FQDN 	は sendmail.cf の $j
+   fml の $DOMAINNAME	は sendmail.cf の $m
 
 
-.S	fml.pl はうごくのに MSendv4.pl とか cron.pl とかでメールがうまくだせない
+.S	fml.pl はうごくのに msend.pl とか cron.pl とかはちゃんと動かない
 
-そのマシンで sendmail は動いてます？
-動いてないと、log に Smtp:connect:なんとか とかでるんじゃないかとおもいます。
+そのマシンで sendmail は動いてます？ 動いてないと、log に 
+Smtp:connect:なんとか とかエラーがでるんじゃないかとおもいます。
+
+メールを受けて fml.pl を起動するマシンと UNIX の Shell サービスを提供
+しているマシン、つまり msend.pl を動かすマシンが違う場合がありえるとい
+う話です（実話）。
 
 
 .S	553 machine-name host name configuration error
@@ -625,26 +582,27 @@ sendmail R8 では相当するコードが存在しないので…なにがおこっているのか
 わかりません;-)
 
 config.ph の 
-	$Envelope{'macro:s'}（旧 $_Ds） =  'localhost.ドメイン名';
 
-とかにすると ＯＫになるとおもいます
+	$Envelope{'macro:s'} =  'localhost.ドメイン名';
+
+とかにするとＯＫになることもあります。
 
 
-.S	MSendv4.pl の直接 Edit はちょっと書き方が違うんです…
+.S	msend.pl の直接 Edit はちょっと書き方が違うんです…
 
 ある意味では悪いんです;-) すいません_o_
 
-   Elena@Baycity.jp  matome   1u
+   Elena@Baycity.asia  matome   1u
 
-で、実は、 これは古いフォーマットなのですが、fml.pl とか libfml.pl は
-理解するんですが、
+で、実はこれは古いフォーマットなのですが、fml.pl とか libfml.pl は理解
+できます。
 
-メール経由で まとめおくりの命令を与えたら、古いフォーマットになるはず
-がないので、
+普通メール経由で まとめおくりの命令を与えたら、古いフォーマットになる
+はずがないので、
 
    Elena@Baycity.jp  m=1u
 
-となっていなくてはいけないはずです（と MSendv4 は仮定している）。
+となっていなくてはいけないはずです（と msend.pl は仮定している）。
 このときファイル（members とか actives）は
 
 #.FML HEADER
@@ -659,8 +617,8 @@ config.ph の
 #.endFML HEADER
 Elena@Baycity.jp  m=1u
 
-こうなります。そして、MSendv4 はこのフォーマットしか理解しません（てぬ
-きか？）。それで、
+こうなります。そして、msend.pl はこのフォーマットしか理解しません（て
+ぬきか？）。それで、
 
 	WARNING: /usr/local/ml/hitomi/MSend/MSendrc filesize=0 O.K.?
 
@@ -738,7 +696,10 @@ Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
 
 .~q
 
-結論として、『ＭＬサーバは親切に Return-Receipt-To: を取ってあげる』;_; 
+結論として
+
+	『ＭＬサーバは親切に Return-Receipt-To: を取ってあげる』;_; 
+
 を実行するように デフォールトを変更しました。
 
 

@@ -1,14 +1,27 @@
-.A	References
+.A	References (参考文献)
 
-.S	Books
 
-The design and implementation of 4.4BSD Operating System
+.S	Books (参考文献：本)
 
-The design and implementation of 4.3BSD Operating System
+S. J. Leffler, K. Bostic, M. J. Karels and J. S. Quarterman, 
+"The design and implementation of the 4.4BSD UNIX Operating System"
+(Addison-Wesley, , 1996).
 
-UNIX Network Programing
+S. J. Leffler, M. K. McKusick, M. J. Karels and J. S. Quarterman, 
+"The design and implementation of the 4.3BSD UNIX Operating System"
+(Addison-Wesley, , 1989).
 
-.S	RFC
+W. R. Stevens, 
+"UNIX Network Programing" 
+(A Simon \& Schuster Company, NJ, 1990)
+(``UNIXネットワークプログラミング
+W.リチャード・スティーヴンス 著／篠田 陽一 訳
+ プリンティスホール／トッパン 定価7,900円
+ISBN4-8101-8509-5'').
+
+
+
+.S	RFC  (参考文献：RFC)
 
 rfc822				headers of mail
 rfc821				smtp
@@ -25,14 +38,37 @@ rfc1522				MIME part 2
 rfc1594				用語集
 
 perl texinfo in japanese --- version 4.0.19.2
+(ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz)
 
-.# ##########################################################
-.# ##########################################################
+以下RFCのインターネットスタンダード集より関係ありそうな部分のみの抜粋
+＃ 96/9/14記
+
+0001 INTERNET OFFICIAL PROTOCOL STANDARDS. J. Postel, Editor. March
+     1996. (Format: TXT=91936 bytes) (Obsoletes RFC1780, RFC1720, RFC1800
+     RFC1880) (Also RFC1920)
+
+0010 SMTP Service Extensions. J. Klensin, N. Freed, M. Rose, E.
+     Stefferud & D. Crocker. November 1995. (Format: TXT=23299 bytes)
+     (Obsoletes RFC1651) (Also RFC821, RFC1869)
+
+0011 SMTP Service Extension for Message Size Declaration. J. Klensin,
+     N. Freed, & K. Moore. November 1995. (Format: TXT=18226 bytes)
+     (Obsoletes RFC1653) (Also RFC822, RFC1870)
+
+0013 Domain Name System. P. Mockapetris. November 1987. (Format:
+     TXT=248726 bytes) (Also RFC1034, RFC1035)
+
+0014 Mail Routing and the Domain System. C. Partridge. January 1986.
+     (Format: TXT=18182 bytes) (Also RFC0974)
+
+0053 Post Office Protocol - Version 3. J. Myers & M. Rose. May 1996.
+     (Format: TXT=47018 bytes) (Obsoletes RFC1725) (Also RFC1939)
 
 
-.S	Released Articles Message-ID's
 
-fj.sources:
+.S	fj.sourcesに過去リリースした記事のMessage-IDリスト
+
+
 Release Version 1.5
 Message-ID: <FUKACHAN.95Jun13000736@beth.phys.titech.ac.jp>
 Message-ID: <FUKACHAN.95Jun13001452@beth.phys.titech.ac.jp>
@@ -58,23 +94,23 @@ Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
 Subject: hml1.6: a powerful mailing list server
 Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 
-.# ##########################################################
+
+
 .# ##########################################################
 
 
-.S	1/f ゆらぎ と 論文と fml
+.A	メーリングリストの挙動と1/fゆらぎ とDoctor論文と fml
 .key	1/f fluctuations
 .key	1/f ゆらぎ
 .key	学位論文(理学博士)
 
 URLは http://www.iij.ad.jp/sapporo/staff/fukachan/PAPERS/
 
-メーリングリスと1/fゆらぎに関しての論文は
+メーリングリストの挙動と 1/fゆらぎ に関しての論文は
 
 Ken'ichi Fukamachi,
 "1/f Fluctuations in Internet Communication"
 Interdisciplinary Information Sciences, vol.1, 157 (1995).
-
 
 日本語での文献として、博士号の学位論文が東京工業大学図書館か国立国会図
 書館で閲覧できます。
@@ -83,5 +119,8 @@ Ken'ichi Fukamachi,
 "1/f Fluctuations in Conservative Systems and Internet Communication"
 1995年度 学位論文 (理学博士)東京工業大学
 
+上記URLでもこのドクター論文のポストスクリプト版を手に入れることができ
+ます。図がない部分が結構あるので正式版とはやや異なりますが、中身は同じ
+です。
 
 .# $Id$

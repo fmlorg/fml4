@@ -3034,8 +3034,7 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
 .include cwhois.wix
 .include fred.wix
 
-.include modify.wix
-.include localhack.wix
+.include hack.wix
 
 .include ftpmail.wix
 
