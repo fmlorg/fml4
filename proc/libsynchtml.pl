@@ -1130,7 +1130,7 @@ sub ReConfigureIndex
 
     open(LIST, "$dir/$index.list")  || &Log("cannot open $dir/$index.list");
     if ($HTML_OUTPUT_FILTER) {
-	open(OUT, "|$HTML_OUTPUT_FILTER > $dir/$index.new") || do {
+	open(OUT, "|$HTML_OUTPUT_FILTER >> $dir/$index.new") || do {
 	    &Log("cannot open $dir/$index.new");
 	    return $NULL;
 	};
