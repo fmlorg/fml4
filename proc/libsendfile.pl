@@ -405,7 +405,7 @@ sub mget3_unlink
 sub ExcessMaxFileP
 {
     local(*sp, *cf, $c) = @_;
-    local($x);
+    local($x, @xa);
 
     print STDERR "00 \$c += $c\n" if $debug;
 
@@ -413,7 +413,9 @@ sub ExcessMaxFileP
     print STDERR "01 \$c += $x\n" if $debug; 
     
     for (keys %sp) { 
-	$x = split(/\s+/, $sp{$_}); $c += $x;
+	@xa = split(/\s+/, $sp{$_}); 
+	$x  = $#xa + 1; # == scalar(@x);
+	$c += $x;
 	print STDERR "02 \$c += $x ($_ +$x)\n" if $debug; 
     }
 
