@@ -500,13 +500,10 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 
 .C	Version up と Compatibility 
 
-.S	cp -pr *.pl your-fml-directory
+.S	version up
+.xref	version-up
 
-ひろげて src/ の下の階層を今使っているところへコピーしてください(おし
-まひ)。
-
-もっとも /usr/local/bin/perl という場所に perl があるとは限らないので、
-makefml を使ってインストールしてもらう方が確実です。
+makefml を使ってインストールしてもらのが確実です。
 
 
 .S	新しい機能を有効にするには？
