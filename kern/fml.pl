@@ -2173,13 +2173,13 @@ sub SearchFileInINC
 
 sub GetFirstMultipartBlock
 {
-    local(*e, $_) = @_;
+    local(*e) = @_;
+
     if ($e{'MIME:boundary'}) {
-	$pb = index($_, $e{'MIME:boundary'});
-	$pb = index($_, "\n\n", $pb);
-	$pe = index($_, $e{'MIME:boundary'}, $pb);
+	($p, $pb, $pe) = 
+	    &GetBlockPtrFromHash(*e, 'Body', $e{'MIME:boundary'}, 0);	
 	if ($pb > 0 && $pe > 0) { 
-	    $_ = substr($_, $pb, $pe - $pb);
+	    substr($e{'Body'}, $pb, $pe - $pb);
 	}
 	else {
 	    &Log("GetFirstMultipartBlock: invalid MIME/multipart message");
