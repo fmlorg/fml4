@@ -264,8 +264,11 @@ FIX_DISTRIBUTION_PERMISSION () {
 	find $DESTDIR/distrib |\
 	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 
-	find $HOME/.ftp/ |\
-	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+	if [ -d $FTP_DIR ]
+	then
+		find $FTP_DIR |\
+		perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+	fi
 
 	(
 		cd $DESTDIR/distrib
@@ -339,8 +342,21 @@ GEN_BRANCH_ARCHIVE () {
 GEN_ARCHIVE () {
 	# FIX_LANGUATE
 
-	FTP=/usr/local/ftp/pub/net/fml-current
- 	WWW=/home/hikari/sapporo/www/staff/fukachan/href/fml
+	FTP=$FTP_DIR
+ 	WWW=$WWW_DIR
+
+	if [ ! -d $FTP_DIR ]
+	then
+		echo ignore GEN_ARCHIVE since \$FTP_DIR is not defined
+		return
+	fi
+
+	if [ ! -d $WWW_DIR ]
+	then
+		echo ignore GEN_ARCHIVE since \$WWW_DIR is not defined
+		return
+	fi
+
 
 	echo ""
 	echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
@@ -357,7 +373,7 @@ GEN_ARCHIVE () {
 	echo "Synchronizing $FTP/snapshot ..."
 	echo " "
 	test -d $FTP/snapshot || mkdir $FTP/snapshot;
-	rsync --delete -av distrib/ $HOME/.ftp/snapshot/
+	rsync --delete -av distrib/ $FTP/snapshot/
 
 	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
 	echo " "
