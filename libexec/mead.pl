@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # MEAD: Mail Error Analyze Daemon
-# $FML$
+# $FML: mead.pl,v 1.32.2.2 2002/05/22 15:26:42 fukachan Exp $
 #
 
 $Rcsid = 'mead 4.0';
@@ -330,12 +330,24 @@ sub Parse
 	    $addr =~ s/=/\@/;
 	    $addr =~ s/^\S+\-admin\-//; # fml specific 
 
-	    $ra =~ s/admin\-\S+\@/admin@/;
+	    # postfix style
+	    if ($ra =~ /admin\+\S+/) {
+		$ra =~ s/admin\+\S+\@/admin@/;
 
-	    &Debug("qmail:". $addr);
-	    &Debug("qmail return_addr:". $ra);
-	    $return_addr{$ra} = 1;
-	    &CacheOn($addr, " ");
+		&Debug("postfix:". $addr);
+		&Debug("postfix return_addr:". $ra);
+		$return_addr{$ra} = 1;
+		&CacheOn($addr, " ");
+	    }
+	    # qmail style
+	    elsif ($ra =~ /admin\-\S+/) {
+		$ra =~ s/admin\-\S+\@/admin@/;
+
+		&Debug("qmail:". $addr);
+		&Debug("qmail return_addr:". $ra);
+		$return_addr{$ra} = 1;
+		&CacheOn($addr, " ");
+	    }
 	}
     }
 }
@@ -360,9 +372,10 @@ sub ExtractAddr
     for (split(/,/, $addr)) {
 	s/</ /g; s/>/ /g; s/\.\.\./ /;
 	if (/(\S+\@[\.A-Za-z0-9\-]+)/) { 
-	    $return_addr{$1} = 1;
-	    $pickup_addr = $1 if $pickup_p;
-	    &Debug("add \$return_addr{$1}") if $debug;
+	    my $a = $1; $a =~ s/admin\+\S+\=\S+\@/admin/;
+	    $return_addr{$a} = 1;
+	    $pickup_addr = $a if $pickup_p;
+	    &Debug("add \$return_addr{$a}") if $debug;
 	}
     }
 
