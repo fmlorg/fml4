@@ -1,0 +1,122 @@
+.HTML_PRE
+	FML Security Advisory 2000-002: admin/approve remove-article
+	========================================
+
+Topic:	"admin/approve remove-article " command vlunerablility
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 2000 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+
+[Abstract]
+
+"admin remove-article" command のバグについて
+=E
+"admin remove-article" command bug may reveal administrative password
+
+-------------------------
+.toc
+-------------------------
+
+.C	Description
+
+.S	Overview
+
+.if LANG == JAPANESE
+1. 日付区切りでHTML形式への変換をしている
+2. リモート管理を許していている
+3. 管理者用のremove-articleコマンドを使った場合
+
+そのコマンドのメールがHTMLに変換され得る。つまりその管理者のパスワード
+がばれ得る。
+.fi
+.if LANG == ENGLISH
+If you permit html generation, remote administration by password
+authentication, and you use administrative "remove-article",  
+this command mail may appear as a html converted file.
+.fi
+
+
+.S	影響を受ける範囲
+=E.S	Affected Versions
+
+.if LANG == JAPANESE
+   libsynchtml.pl のRCS IDが 2.1.1.19 〜 2.30
+   2.1C#29 から 3.0pl7 ないし 3.0A#3 までの全バージョン
+.fi
+.if LANG == ENGLISH
+   libsynchtml.pl RCS ID: from 2.1.1.19 to 2.30
+   All versions from 2.1C#29 to 3.0pl7, 3.0A#3 are affected.
+.fi
+
+
+.S	条件
+=E.S	Conditions
+
+1.	HTMLファイルを日毎などで作っている
+=E
+1.	enable html archive generation
+
+	$AUTH_HTML_GEN   = 1
+	$HTML_INDEX_UNIT = "day" or "week" or "month"
+
+2. 	パスワードによるリモート管理
+=E
+2.	enable remote administration by password authentication
+
+	$REMOTE_ADMINISTRATION = 1
+	$REMOTE_ADMINISTRATION_TYPE = "crypt" or "md5"
+
+3.	"admin remove-article" or "approve PASSWORD remove-article"
+	を使う
+=E
+3.	use "admin remove-article" or 
+	"approve PASSWORD remove-article"
+
+
+.C	How to resolve
+
+.S	設定による回避
+=E.S	Configuration changes
+
+1.	リモート管理をしない(default)
+=E
+1.	DO NOT USE REMOTE ADMINISTRATION (default)
+
+2.	"remove-article"を禁止してしまう
+=E
+2.	disable "remove-article"
+
+	push(@DenyAdminProcedure, "remove-article");
+	push(@DenyAdminProcedure, "unlink-article");
+
+
+.S	入れ換える
+=E.S	Replacement
+
+1.	3.0pl7 以降ないし 3.0A#4 (current)以降に upgrade
+=E
+1.	upgrade 3.0pl7 or 3.0A#4 (current)
+
+
+2.	libsynchtml.pl だけ入れ換える
+=E
+2.	replace libsyncthml.pl with latest one
+
+
+3.	パッチ (diff between 3.0pl6 and 3.0pl7)
+=E
+3.	patch (diff between 3.0pl6 and 3.0pl7)
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
