@@ -604,6 +604,9 @@ DEFAULT_RELAY_SERVER:
 RELAY_HACK:
 CF_DEF:
 
+# list-dist is a real distributor ( which passes a mail to :include: form).
+# dedicated to minmin sama:D
+DISTRIBUTE_DUMMY_RECIPIENT:
 
 
 #####################################################################
