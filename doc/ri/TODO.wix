@@ -17,6 +17,10 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	msend.pl should not tr/A-Z/a-z/
+
+fml-support: 07262
+
 .S	makefml (bye|chaddr|?) address(regexp)
 
 fml-support: 07101
