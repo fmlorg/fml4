@@ -26,10 +26,8 @@ PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
 dist/jcode/jcode.pl
-pkgsrc/mimepls2/mimer.pl
-pkgsrc/mimepls2/mimew.pl
-pkgsrc/mimepls2/mimer202.pl
-pkgsrc/mimepls2/mimew202.pl
+dist/mimepls/mimer.pl
+dist/mimepls/mimew.pl
 dist/libtraffic/libtraffic.pl 
 contrib/localhack/release-2/member_name/src/libmember_name.pl
 
