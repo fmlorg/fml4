@@ -25,8 +25,11 @@ sub Init
     # fml system configuration
     require "$CONFIG_DIR/system";
 
-    if (-f "$CONFIG_DIR/cgi.conf") {
-        eval("require \"$CONFIG_DIR/cgi.conf\"");
+    $WWW_DIR      = "$EXEC_DIR/www";
+    $WWW_CONF_DIR = "$EXEC_DIR/www/conf";
+
+    if (-f "$WWW_CONF_DIR/cgi_config.ph") {
+        eval("require \"$WWW_CONF_DIR/cgi_config.ph\";");
 	&Err($@) if $@;
     }
 
