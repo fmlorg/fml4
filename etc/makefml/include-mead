@@ -1,2 +1,3 @@
 # MEAD: Mail Error Analize Daemon ("-m auto" to remove addrs automatically)
+# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
 "|_EXEC_DIR_/libexec/mead.pl -m report -S _ML_DIR_ -D _ML_DIR_/_ML_ -E _EXEC_DIR_"
