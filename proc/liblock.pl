@@ -70,7 +70,7 @@ sub V7Unlock
 {
     $0 = "$FML: link(2) style Unlocked <$LOCKFILE>";
     unlink $LockFile if $LockStatus{$LockFile} eq 'locked';
-    &Log("cannot unlink $LockFile (unlocked)") if $LockStatus ne 'locked';
+    &Log("cannot unlink $LockFile (unlocked)") if $LockStatus{$LockFile} ne 'locked';
 }
 
 1;
