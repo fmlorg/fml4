@@ -1195,8 +1195,8 @@ user@domain フォームでない ILLEGAL なメールアドレス がすどおりして、サ
 がおこってもおこらないでね:-) YOUR OWN RISK
 
 $START_HOOK  = q#
-	if ($From_address !~ s/\@/) {
-		$From_address = '$From_address\@ローカルなドメイン";
+	if ($From_address !~ /\@/) {
+		$From_address = "$From_address\@ローカルなドメイン";
 	}
 #;
 
