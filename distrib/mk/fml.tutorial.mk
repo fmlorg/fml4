@@ -1,3 +1,4 @@
+HTML_CONV   = $(FML)/bin/fwix.pl -m htmlconv
 HTML_FILTER = $(FML)/bin/fwix.pl -m html -f tmp/html_index.ph
 TEXT_FILTER = $(FML)/bin/fwix.pl -m text -f tmp/text_index.ph
 
@@ -25,9 +26,11 @@ ${WORK_TUTORIAL_DIR}/${dir}:
 
 # html: creation rule
 ${WORK_TUTORIAL_DIR}/${dir}/index.html: doc/${TUTORIAL_LANGUAGE}/${dir}/*wix
-	${HTML_FILTER} -L ${TUTORIAL_LANGUAGE} \
+	if [ -f doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix ]; then \
+	   ${HTML_FILTER} -L ${TUTORIAL_LANGUAGE} \
 		-D ${WORK_TUTORIAL_DIR}/${dir} \
-		doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix
+		doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix ;\
+	fi
 
 # plaintext:
 __TUTORIAL_DOC_TARGETS__ += var/doc/${TUTORIAL_LANGUAGE}/${dir}
@@ -53,6 +56,26 @@ ${WORK_TUTORIAL_DIR}/${dir}/index.html: doc/${TUTORIAL_LANGUAGE}/${dir}/*
 	${RSYNC} -C -av doc/${TUTORIAL_LANGUAGE}/${dir}/ \
 		${WORK_TUTORIAL_DIR}/${dir}/
 .endfor
+
+# raw copy for ${DOC_TUTORIAL_EXC_SUBDIR}
+.for file in ${TUTORIAL_BASIC_SAMPLES}
+__HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/basic_setup/${file}
+
+${WORK_TUTORIAL_DIR}/basic_setup/${file}: doc/${TUTORIAL_LANGUAGE}/basic_setup/${file}
+	@ test -d ${WORK_TUTORIAL_DIR}/basic_setup || mkdir ${WORK_TUTORIAL_DIR}/basic_setup
+	cp doc/${TUTORIAL_LANGUAGE}/basic_setup/${file} \
+		${WORK_TUTORIAL_DIR}/basic_setup/${file}
+.endfor
+
+.for file in ${TUTORIAL_BASIC_SOURCES}
+__HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/basic_setup/${file}.html
+
+${WORK_TUTORIAL_DIR}/basic_setup/${file}.html: doc/${TUTORIAL_LANGUAGE}/basic_setup/${file}.wix
+	${HTML_CONV} -L ${TUTORIAL_LANGUAGE} -n i \
+		-o ${WORK_TUTORIAL_DIR}/basic_setup/${file}.html \
+		doc/${TUTORIAL_LANGUAGE}/basic_setup/${file}.wix
+.endfor
+
 
 # make $LANGUAGE/tutorial.html
 __HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/tutorial.html
