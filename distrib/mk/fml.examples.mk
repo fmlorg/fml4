@@ -11,4 +11,4 @@ ${WORK_EXAMPLES_DIR}/${file}.html: doc/examples/${file}.wix
 # doc/examples/index.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index.html
 ${WORK_EXAMPLES_DIR}/index.html: doc/examples/index.html
-	cp -p doc/examples/index.html ${WORK_EXAMPLES_DIR}/index.html
+	${JCONV} doc/examples/index.html > ${WORK_EXAMPLES_DIR}/index.html
