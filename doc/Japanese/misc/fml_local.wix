@@ -1,5 +1,5 @@
-.C	libexec/fml_local.pl マニュアル
-=E.C	libexec/fml_local.pl manual
+.C	libexec/fml_local.pl
+=E.C	libexec/fml_local.pl
 .l	fml_local
 .l	fml_local.pl
 .key	manual: fml_local.pl
@@ -8,6 +8,49 @@
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
 .return
 .fi
+
+.S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
+=E.S	slocal-like interface (libexec/fml_local.pl)
+.l	libexec/fml_local.pl
+.key	fml_local.pl
+
+ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
+slocal と同じになっちゃいましたね(馬鹿)。まぁ tk-slocal とか世の中には
+あるんで、perl-slocal があってもいいでしょ(開きなおり(苦笑))
+=E
+Consequently fml_local.pl is similar to slocal ;-). But fml_local.pl
+and slocal differs on formats of configurations and the last match.
+FIRST_MATCH variable changes fml_local to the first match rule (
+slocal rule is the first match). fml_local2.pl is an alias of
+fml_local.pl, which differs in "last match rule" from fml_local.pl.
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
+という upper compatibility です。
+
+歴史的に(デフォールトでは)「最後にマッチするエントリを実行する」という
+ところが決定的に違います。諸葉の都合で、例えば簡単に学習するvacationプ
+ログラムへと拡張できるための仕様だったのですが、今となっては設計のミス
+のような気がします。設定で
+=E
+Variable
+
+	FIRST_MATCH
+
+とすれば 最初にマッチしたパターンを実行するようになります。slocal なん
+かと同じです。
+=E
+changes fml_local to the first_match, which is the same as
+
+	libexec/fml_local2.pl 
+
+のほうはデフォールトが「最初にマッチしたパターンを実行」するようになっ
+ています。
+＃実は単なるリンクで、自分の名前を見て実行を変えているだけです
+=E
+The default of fml_local2.pl is driven by the first match rule.
+
+.S	Overview
 
 ~/.forward は通常アドレスのフォワードに使われますが、本質的に 
 /etc/aliases と同じように作動しますので、ここにプログラムを設定すれば
