@@ -184,6 +184,56 @@ checked.
 See also "admin forward" command.
 .xref	moderator-type-1
 
+
+.S	メンバーを信頼度に応じて3段階に分ける
+=E.S	classify members to 3 groups based on trust-ness
+
+メンバーを3段階に分けることを考える。
+=E
+Consider to split members off to 3 groups such as
+
+group 1: モデレータ(の人々)。無条件に信頼される。
+group 2: 信頼できるメンバ。普通に送ると普通に配送される。
+group 3: 一般メンバ。普通に送るとモデレータに転送され、
+	 通常のモデレータの手順を踏む。
+=E
+group 1: moderators
+group 2: trusted omembers but not moderators
+group 3: untrusted people
+
+通常モデレータモードは３段階ではないので改造が必要である。
+ここではこれをHOOKでこれを実現することにする。
+=E
+Moderator mode described above cannot provide 3 calss trust-ness.
+Here we implement it by a hook.
+
+1. まずデフォールトはモデレータモードにする。makefml config なりcfに書
+くなりして
+=E
+1. set up moderator mode ML.
+
+	$PERMIT_POST_FROM  = "moderator";
+
+になるようにする。
+
+2. priv というファイルをＭＬのHOMEにつくり、group 2 に対応する信頼でき
+るメンバー(だがモデレータではない)の群を登録する(一行一アドレス)。
+=E
+2. prepare $DIR/priv which is a list of trusted members (group 2).
+   The list syntax is the same as members, actives ...
+
+3.  その上で以下のようなHOOKをcfの最後に入れて config.ph を再生成する。
+=E
+3. append the following hook to config.ph (append it to cf and
+   re-create config.ph by "make config.ph" etc..).
+
+$START_HOOK = q#
+     $PRIV_LIST = "$DIR/priv";
+      if (&CheckMember($From_address, $PRIV_LIST)) {
+         $PERMIT_POST_FROM  = "members_only";
+   }
+#;
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
