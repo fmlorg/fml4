@@ -53,9 +53,9 @@ spool2html:
 config:
 	perl _EXEC_DIR_/makefml config _ML_
 
-disthack:
+outgoing:
 	perl _EXEC_DIR_/makefml conv _ML_ \
-		_EXEC_DIR_/etc/makefml/include-disthack include-disthack
+		_EXEC_DIR_/etc/makefml/include-outgoing include-outgoing
 
 doc-template:
 	perl _EXEC_DIR_/makefml create-doc-template _ML_
