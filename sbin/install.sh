@@ -29,7 +29,7 @@ test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 
 cp -p fml.c src/*.pl $EXEC_DIR
 cp -p src/arch/*.pl $ARCH_DIR
-cp -p help* guide deny objective $DRAFTS_DIR
+cp -p help* guide deny objective confirm welcome $DRAFTS_DIR
 cp -p sbin/makefml $EXEC_DIR/makefml
 
 chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml $EXEC_DIR/libexec/fmlserv.pl
