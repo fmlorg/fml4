@@ -166,3 +166,8 @@ proc/libkern.pl: kern/fml.pl
 etc/makefml/menu.conf.toggle: cf/MANIFEST
 	perl distrib/bin/gen_menu.conf.toggle cf/MANIFEST \
 		> etc/makefml/menu.conf.toggle
+
+
+### utils
+bsdmake:
+	(cd dist/NetBSD;make bsdmake)
