@@ -1096,9 +1096,7 @@ sub main'MemberLimitP #';
     @a = @main'ACTIVE_LIST; #';
 
     for (@a) {
-	 print STDERR "ACTIVE_LIST: $_\n";
 	 next unless -f $_;
-
 	 $total += &CountEffectiveMember($_);
     }
 
