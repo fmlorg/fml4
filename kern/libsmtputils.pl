@@ -67,8 +67,8 @@ sub DoNeonSendFile
 				 "$f is not found.",
 				 'not_found', $f);
 	    $error .= "\n[ @info ]\n\n";
-	    &Mesg(*Envelope, "NeonSendFile ERROR:\n\t$f is not found.\n");
-	    &Mesg(*Envelope, $NULL, 'not_found', $f);
+	    &Log("ERROR: NeonSendFile: $f is not found");
+	    &Mesg(*Envelope, "$f is not found.", 'not_found', $f);
 	}
 
 	$error && &Warn("ERROR NeonSendFile", $error);

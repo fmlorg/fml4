@@ -374,8 +374,8 @@ sub ModeratorResend
     }
     else {
 	&Log("ModeratorResend: cannot open $f");
-	&Mesg(*e, "ERROR: cannot open the moderated article queue id=$id");
-	&Mesg(*e, $NULL, 'not_found', "queue id=$id");
+	&Mesg(*e, "ERROR: cannot open the moderated article queue id=$id", 
+	      'not_found', "queue id=$id");
 	return 0;
     }
 

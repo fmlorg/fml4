@@ -384,8 +384,7 @@ sub ManualRegistConfirm
 	    $r .= "Good. Your subscribe request is confirmed ";
 	    $r .= "and forwarded to the maintainer.\n";
 	    $r .= "He/She will subscribe you, so PLEASE WAIT A LITTLE.\n";
-	    &Mesg(*e, $r);
-	    &Mesg(*e, $NULL, 'confirm.manual_regist.confirmed');
+	    &Mesg(*e, $r, 'confirm.manual_regist.confirmed');
 	}
 	else {
 	    &Log("ManualRegistConfirm: confirm fails");
@@ -452,8 +451,8 @@ sub FML_SYS_ChaddrRequest
 	&ValidChaddrRequest(*e, $2, $3) || do {
 	    &Log("invalid chaddr request: $2 => $3");
 	    # &Mesg(*e, ">>> $buf");
-	    &Mesg(*e, "ERROR: invalid chaddr request");
-	    &Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
+	    &Mesg(*e, "ERROR: invalid chaddr request", 
+		  'confirm.chaddr.syntax_error');
 	    &Mesg(*e, $e{'tmp:reason'}) if $e{'tmp:reason'};
 	    &MesgChaddrConfirm(*e);
 	    $e{'mode:in_amctl'} = 0;
@@ -482,8 +481,8 @@ sub FML_SYS_ChaddrRequest
 	}
     }
     else {
-	&Mesg(*e, "$proc: something error occurs.");
-	&Mesg(*e, $NULL, 'command_something_error', $proc);
+	&Mesg(*e, "$proc: something error occurs.", 
+	      'command_something_error', $proc);
     }
 }
 
@@ -500,8 +499,8 @@ sub FML_SYS_ChaddrConfirm
     }
     else {
 	&Log("invalid chaddr-confirm request");
-	&Mesg(*e, "invalid chaddr-confirm request");
-	&Mesg(*e, $NULL, 'command_syntax_error', "chaddr-confirm");
+	&Mesg(*e, "invalid chaddr-confirm request", 
+	      'command_syntax_error', "chaddr-confirm");
 	&MesgChaddrConfirm(*e, 'chaddr-confirm');
 	return $NULL;
     }
@@ -513,8 +512,7 @@ sub FML_SYS_ChaddrConfirm
     }
     else {
 	&Log("no such chaddr request");
-	&Mesg(*e, "ERROR: no such chaddr request");
-	&Mesg(*e, $NULL, 'no_such_request', 'chaddr');
+	&Mesg(*e, "ERROR: no such chaddr request", 'no_such_request', 'chaddr');
 	return $NULL;	
     }
 
@@ -547,8 +545,8 @@ sub MesgChaddrConfirm
 	; # do nothing
     }
     else {
-	&Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
-	&Mesg(*e, "\tsyntax: chaddr old-address new-address");
+	&Mesg(*e, "syntax: chaddr old-address new-address", 
+	      'confirm.chaddr.syntax_error');
     }
 }
 
@@ -581,9 +579,9 @@ sub IdCheck
 	&Log("confirm[confirm] reset request");
 
 	if (&RemoveAddrInConfirmFile($addr)) {
-	    &Mesg(*e, $NULL, 'confirm.try_again');
-	    &Mesg(*e, "I throw away your subscription request from $addr.");
-	    &Mesg(*e, "Please do it again from the first step.");
+	    &Mesg(*e, "ERROR: please do it again from the first step.", 
+		  'confirm.try_again');
+
 	    if (-f $CONFIRMATION_FILE) {
 		$e{'message:append:files'} = $CONFIRMATION_FILE;
 	    }
@@ -651,8 +649,8 @@ sub BufferSyntax
 
 	if ($buffer =~ /($re_jin|$re_euc_c)/) {
 	    &Log("confirm: request includes Japanese character [$&]");
-	    &Mesg(*e, $NULL, 'confirm.has_japanese_char');
-	    &Mesg(*e, "Error! Your request seems to include Japanese.");
+	    &Mesg(*e, "Error! Your request seems to include Japanese.", 
+		  'confirm.has_japanese_char');
 	}
 
 	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'BufferSyntax::Error'));

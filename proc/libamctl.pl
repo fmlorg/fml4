@@ -118,8 +118,8 @@ sub AutoRegist
     ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
     if (&CheckMember($from, $file_to_regist)) {	
 	&Log("AutoRegist: Dup $from");
-	&Mesg(*e, "Address [$from] already subscribed.");
-	&Mesg(*e, $NULL, "already_subscribed", $from);
+	&Mesg(*e, "Address [$from] already subscribed.",
+	      "already_subscribed", $from);
 	&MesgMailBodyCopyOn;
 	return 0;
     }
@@ -340,15 +340,6 @@ sub AutoRegistError
     &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
 
     $sj = "AutoRegist: NOT A ML MEMBER or bad subscribe syntax";
-    $b  = "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
-    $b .= "I find some errors. Please check your mail!\nFor example,\n\n";
-    $b .= "   - The address you used IS NOT A ML MEMBER?\n";
-    $b .= "     (TRUE if you try to subscribe)\n";
-    $b .= "   - You sent a bad subscribe syntax $key?\n";
-    $b .= "\nFYI: subscribe syntax\n";
-    $b .= "${key}: $AUTO_REGISTRATION_KEYWORD [your-email-address]\n";
-    $b .= "\t[] is optional\n";
-    $b .= "\tfor changing your address to regist explicitly.\n";
 
     &Log($sj, "$key => [$s]");
     &WarnE("$sj $ML_FN", $NULL);
@@ -359,12 +350,12 @@ sub AutoRegistError
     # here the addr is an unknown addr, so should not append "#help" info
     $e{'mode:stranger'} = 1;
 
-    &Mesg(*e, $NULL, 'auto_regist_not_member', 
+    &Mesg(*e, 'invalid sender address or would you like to subscribe?',
+	  'amctl.info',
 	  $MAIL_LIST, 
 	  $AUTO_REGISTRATION_KEYWORD,
 	  $MAINTAINER,
 	  $key);
-    &Mesg(*e, $b);
     &MesgMailBodyCopyOn;
 }
 
@@ -380,14 +371,14 @@ sub Chk822_addr_spec_P
 	1;
     }
     else {
-	&Mesg(*e, "AUTO REGISTRATION ERROR:");
-	&Mesg(*e, $NULL, 'invalid_addr_syntax', $from);
-	&Mesg(*e, "<$from> is invalid address form.");
+	&Mesg(*e, "ERROR: invalid address syntax", 'invalid_addr_syntax', $from);
 	&Log("<$from> is invalid address form");
 
 	if ($from !~ /\@/) {
-	    &Mesg(*e, "address <$from> contains NO '\@' STRING.");
-	    &Mesg(*e, "It should be <$from\@$FQDN> form.");
+	    &Mesg(*e, 
+		  "address <$from> contains NO '\@' STRING.".
+		  "It should be <$from\@$FQDN> form.",
+		  'invalid_addr_without_domain', $from);
 	}
 
 	&MesgMailBodyCopyOn;
@@ -464,9 +455,9 @@ sub DoSetDeliveryMode
 
 	    if ((!$d) && (!$mode)) { 
 		&Log("$cmd $c fails, not match");
-		&Mesg(*e, "$cmd: $opt parameter not match.");
-		&Mesg(*e, $NULL, 'invalid_args', $proc);
-		&Mesg(*e, "\tDO NOTHING!");
+		&Mesg(*e, "$cmd: $opt parameter not match.", 
+		      'invalid_args', $proc);
+		# &Mesg(*e, "\tDO NOTHING!", 'stop');
 		return $NULL;
 	    }			
 	}# $c == non-nil;
@@ -476,11 +467,12 @@ sub DoSetDeliveryMode
     }
     ###### [case 2 "matome" call the default slot value]
     elsif (/^(MATOME|DIGEST)$/i) {
-	&Log("$cmd: $opt syntax is inappropriate, do nothing");
-	&Mesg(*e, "$cmd: $opt syntax is inappropriate.");
-	&Mesg(*e, "\t$cmd require someting as an option") if $opt eq "";
-	&Mesg(*e, $NULL, 'invalid_args', $proc);
-	&Mesg(*e, "\tDO NOTHING!");
+	&Log("$cmd: $opt syntax is wrong, stop");
+	&Mesg(*e, "$cmd: $opt syntax is wrong.", 'invalid_args', $cmd);
+	&Mesg(*e, "\t$cmd require a parameter",
+	      'require_args', $cmd) if $opt eq "";
+	&Mesg(*e, 'invalid arguments', 'invalid_args', $proc);
+	# &Mesg(*e, "\tDO NOTHING!");
 	return $NULL;
     }
 
@@ -589,14 +581,12 @@ sub DoSetMemberList
 
 	if (&ExactAddressMatch($curaddr, $newaddr)) {
 	    my($r);
-	    $r .= "$cmd: ERROR: $curaddr == $newaddr\n";
-	    $r .= "Please send command mail from old-address\n";
-	    $r .= "usage: $cmd old-address new-address";
+	    &Log("ERROR: $cmd: $curaddr == $newaddr");
 
-	    &Log("$cmd: ERROR: $curaddr == $newaddr");
-
-	    &Mesg(*e, $NULL, 'chaddr.same_args', $cmd);
-	    &Mesg(*e, $r, 'chaddr.from.oldaddr');
+	    &Mesg(*e, "ERROR: $cmd: $curaddr == $newaddr", 
+		  'chaddr.same_args', $cmd);
+	    &Mesg(*e, "Please send command mail from old-address", 
+		  'chaddr.from.oldaddr');
 
 	    return $NULL;
 	}
@@ -608,8 +598,12 @@ sub DoSetMemberList
 
 	if ($new_list = &MailListMemberP($newaddr)) {
 	    &Log("$cmd: ERROR: newaddr '$newaddr' exist in '$new_list'");
-	    &Mesg(*e, "$cmd: ERROR: New address '$newaddr' is already a member.");
-	    &Mesg(*e, $NULL, 'already_subscribed', $newaddr);
+		  
+	    &Mesg(*e, 
+		  "$cmd: ERROR: New address '$newaddr' is already a member.",
+		  'already_subscribed', 
+		  $newaddr);
+
 	    return $NULL;
 	}
 
@@ -649,8 +643,11 @@ sub DoSetMemberList
 	}
 	else {
 	    &Log($mcs = "$cmd MEMBER [$curaddr] $c failed");
-	    &Mesg(*e, "   Hmm,.., modifying member list fails.");
-	    &Mesg(*e, "   since $curaddr is not found in member list.") unless $list;
+	    &Mesg(*e, "   Hmm,.., modifying member list fails.",
+		  'amctl.member_list.change.fail');
+	    &Mesg(*e, "   since $curaddr is not found in member list.",
+		  'no_such_member') 
+		unless $list;
 	}
     }
     else {
@@ -671,8 +668,11 @@ sub DoSetMemberList
     }
     else {
 	&Log("$cmd ACTIVE [$curaddr] $c failed");
-	&Mesg(*e, "   Hmm,.., modifying delivery list fails.");
-	&Mesg(*e, "   since $curaddr is not found in delivery list.") unless $list;    }
+	&Mesg(*e, "   Hmm,.., modifying delivery list fails.",
+	      'amctl.recipient_list.change.fail');
+	&Mesg(*e, "   since $curaddr is not found in delivery list.",
+	      'no_such_member') 
+	    unless $list;    }
 
     if ($rm && $ra) {
 	&Log("$cmd [$curaddr] $c accepted");
@@ -681,20 +681,18 @@ sub DoSetMemberList
     }
     elsif ($rm && (!$ra)) {
 	&Log("$cmd [$curaddr] $c succeed for members not actives");
-	&Mesg(*e, "$cmd [$curaddr] $c accepted".
-	      " for member but not delivery list.");
+	&Mesg(*e, "$cmd [$curaddr] $c accepted");
 	&Mesg(*e, $NULL, 'amctl.change.only_member_list');
     }
     elsif ($ra && (!$rm)) {
 	&Log("$cmd [$curaddr] $c succeed for actives not members");
-	&Mesg(*e, "$cmd [$curaddr] $c accepted".
-	      " for delivery but not member list.");
+	&Mesg(*e, "$cmd [$curaddr] $c accepted");
 	&Mesg(*e, $NULL, 'amctl.change.only_recipient_list');
     }
     else {
 	&Log($mcs);
 	&Log("$cmd [$curaddr] $c failed");
-	&Mesg(*e, "$cmd [$curaddr] $c failed.");
+	&Mesg(*e, "ERROR: $cmd [$curaddr] $c failed.");
 	&Mesg(*e, $NULL, 'amctl.change.fail');
     }
 
@@ -937,9 +935,9 @@ sub DoChangeMemberList
 	(! $_cf{'mode:addr:multiple'})) {
 	&Log("$cmd: Do NOTHING since Muliply MATCHed..");
 	$log =~ s/; /\n/g;
-	&Mesg(*e, "Multiply Matched?\n$log");
-	&Mesg(*e, "Retry to check your adderss severely");
-	&Mesg(*e, $NULL, 'amctl.multiply.match');
+	&Mesg(*e, "Multiply Matched?\n$log") if $debug_amctl;
+	&Mesg(*e, "retry to check your adderss severely", 
+	      'amctl.multiply.match');
 
 	# Recursive Call
 	return 'RECURSIVE';
@@ -970,8 +968,7 @@ sub DoChangeMemberList
 	;# &Mesg(*e, "O.K.");
     }
     else {
-	&Mesg(*e, "Hmm,.. something fails.");
-	&Mesg(*e, $NULL, 'command_something_error', $cmd);
+	&Mesg(*e, "Hmm,.. something fails.", 'command_something_error', $cmd);
     }
 
     $status;
@@ -997,10 +994,9 @@ sub CtlMatome
 	# new comer, set default
 	else {
 	    $matome = 3;
-	    $s = "Hmm.. no given parameter. use default[m=3]";
+	    $s = "digest: no given parameter. use default[m=3]";
 	    &Log($s);
-	    &Mesg(*e, $s);
-	    &Mesg(*e, $NULL, 'amctl.no_args');
+	    &Mesg(*e, $s, 'amctl.digest.no_args');
 	}
     }
     elsif ($matome == 0) {
@@ -1056,14 +1052,12 @@ sub Rehash
 	$s = "Rehash: Try send mails[$l - $r] left in spool.";
 	$_cf{'rehash'} = "$l-$r"; # for later use "# rehash" ???
 	&Log($s);
-	&Mesg(*e, "\n$s\n");
-	&Mesg(*e, $NULL, 'amctl.msend_rehash.send', $l, $r);
+	&Mesg(*e, $s, 'amctl.msend_rehash.send', $l, $r);
     }
     else { # if $l == $r, no article must be left
 	$s = "Rehash: no article to send you is left in spool.";
 	&Log($s);
-	&Mesg(*e, "\n$s\n");
-	&Mesg(*e, $NULL, 'amctl.msend_rehash.send_nothing');
+	&Mesg(*e, $s, 'amctl.msend_rehash.send_nothing');
 	return;
     }
 

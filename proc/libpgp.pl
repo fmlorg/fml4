@@ -88,7 +88,7 @@ sub PGPGoodSignatureP
     # PGP authenticated
     if (! $no_reply) {
 	&Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
-	&Mesg(*e, $NULL, 'pgp.incorrect_signature') unless $auth;
+	&Mesg(*e, 'incorrect signature', 'pgp.incorrect_signature') unless $auth;
     }
 
     if (! $auth) {
@@ -579,8 +579,7 @@ sub PGP2
 	}
 	else {
 	    &Log("ERROR: no such user found");
-	    &Mesg(*e, "ERROR: no such user found");
-	    &Mesg(*e, $NULL, 'no_such_member');
+	    &Mesg(*e, "ERROR: no such user found", 'no_such_member');
 	}
     }
     elsif ($cmd eq '-h'   || 

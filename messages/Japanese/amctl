@@ -12,10 +12,16 @@ amctl.change.only_member_list:
 	メンバーリストは変更しました
 	(配送リストは変更しませんでした)。
 
+amctl.member_list.change.fail:
+	メンバーリストの変更に失敗しました。
+
+amctl.recipient_list.change.fail:
+	メンバーリストの変更に失敗しました。
+
 amctl.multiply.match:
 	該当するアドレスが複数あるようです？チェックを厳しくして繰り返します。
 
-amctl.no_args:
+amctl.digest.no_args:
 	引数がありません。デフォールト値(3)を使います。
 
 amctl.msend_rehash.send:
@@ -49,6 +55,16 @@ amctl.added.caution:
 
 amctl.mail.undelivered:
 	注:内容が登録依頼だけのメールはメーリングリストに流していません。
+
+amctl.info:
+	こちらは <_ARG0_> メーリングリストのfmlです。
+	エラーです。何か間違っていませんか？
+	例えば
+		- ＭＬに登録したのと違うアドレスでメールを投げていませんか？
+		- それともＭＬに登録したいですか？
+	もし登録したいなら _ARG2_ のあとにあなたの名前(ローマ字)で
+	なげ直して下さい
+	_ARG3_: _ARG2_ YOUR NAME
 
 
 ### Section: others

@@ -67,8 +67,7 @@ sub WhoisWrite
     }
 
     if (! $encount) {	# encount == 1 if the body has "iam".
-	&Mesg(*e, "   Hmm.. your self-introduction is not in it, isn't it?");
-	&Mesg(*e, "   FML removes your entry.");
+	&Mesg(*e, "removed your entry.", 'whois.entry.remove');
 	$e{'Whois:addr:remove'} = $e{'tmp:whois:addr'} || $From_address;
 	# return;
     }
@@ -122,7 +121,7 @@ sub Ipc2Whois
 	&ipc(*ipc, *r);
     }
 
-    &Mesg(*e, "Whois -h $host $req $ML_FN");
+    &Mesg(*e, "whois -h $host $req $ML_FN");
     &Mesg(*e, $r);
 }
 
@@ -167,8 +166,9 @@ sub Append
     local($s) = $e{'whois:buf'} || $e{'Body'};
 
     &BackupDB(*e) || do {
-	&Log("cannot backup \$WHOIS_DB, stop", return 0);
-	&Mesg(*e, "Cannot reset Whois Database of $ML_FN\n");
+	&Log("fail to backup whois db");
+	&Mesg(*e, "fail to backup whois db", 
+	      'whois.backup.fail');
     };
 
     if ($addr = $e{'Whois:addr:remove'}) {
@@ -182,9 +182,8 @@ sub Append
     select(F); $| = 1; select(STDOUT);
 
     print F $e{'h:From:'}, "\n\n";
-    &Mesg(*e, "Your data is registered");
-    &Mesg(*e, "in the ML($ML_FN) whois database as following:\n");
-    &Mesg(*e, "$e{'h:From:'}\n");
+    &Mesg(*e, "your data is registered", 'whois.entry.added');
+    # &Mesg(*e, $e{'h:From:'});
 
     # ^. -> ..
     foreach (split(/\n/, $s)) {
@@ -319,7 +318,7 @@ sub List
 
     &AllocAllEntry(*e, *r);
 
-    &Mesg(*e, "Entry List submitted to Whois Database of $ML_FN\n");
+    &Mesg(*e, "list in whois database", 'whois.entry.list');
     foreach (keys %r) { &Mesg(*e, $_) if $_;}
 }
 

@@ -26,9 +26,11 @@ fop.not_found:
 fop.mget.too_many:
 	(m)getのリクエストが多過ぎます。
 	一回(のメール)で取り寄せ可能なファイル数は _ARG0_ までです。
+	とりあえず _ARG0_ ファイル数まで処理します。
 
 fop.mget.no_such_mode:
 	そのようなファイル取り寄せモード(_ARG0_)は存在しません。
+	デフォールトの _ARG1_ 形式を使います。
 
 fop.summary.not_match:
 	サマリーファイルに該当する項目がないようです。

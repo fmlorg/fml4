@@ -37,6 +37,9 @@ no_such_request:
 no_args:
 	_ARG0_: 引数がありません。
 
+require_args:
+	_ARG0_ には引数が必要です。
+
 error_reason:
 	エラー: _ARG0_ コマンドはエラーです。
 	理由: _ARG1_
@@ -79,6 +82,9 @@ command_syntax_error:
 	_ARG0_ コマンドのシンタックスが違います。
 
 invalid_addr_syntax:
+	_ARG0_ のシンタックスは不正です。
+
+invalid_addr_without_domain:
 	_ARG0_ のシンタックスは不正です。
 	"アカウント@ドメイン"という形式であるべきです。
 

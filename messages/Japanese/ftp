@@ -10,3 +10,14 @@ ftp.cd.insecure:
 ftp.cannot_chdir:
 	ディクレトリに移動できません。
 
+ftp.sendback:
+	_ARG0_ を送り返します。
+
+ftp.set.mode:
+	_ARG0_ モードに設定しました。
+
+ftp.set.return_addr:
+	返送先を _ARG0_ に設定しました。	
+
+ftp.exit:
+	疑似 ftp サーバモードを終了しました

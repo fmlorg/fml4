@@ -33,7 +33,7 @@ sub Ftp
 	$CurrentDir = $TopDir = $FTP_DIR;
     }
     else {
-	&Mesg(*e, $NULL, 'ftp.not_configure');
+	&Mesg(*e, 'ERROR: $FTP_DIR is not defined', 'ftp.not_configure');
 	&Log("ERROR: \$FTP_DIR not defined, STOP!");
 	return;
     }    
@@ -65,15 +65,13 @@ sub Ftp
 
       # not implemented
       if (/^(ftp|connect)$/io) { 
-	  &Mesg(*e, "\tSorry. $1 is not implemented.");
-	  &Mesg(*e, $NULL, 'not_implemented', $1);
+	  &Mesg(*e, "$1 is not implemented", 'not_implemented', $1);
 	  next;
       }
 
       # end of requests
       if (/^(quit|exit)$/io) { 
-	  &Mesg(*e, "\tExit the current process");
-	  &Mesg(*e, $NULL, 'ftp.exit');
+	  &Mesg(*e, "the current process ends", 'ftp.exit');
 	  last;
       }
 
@@ -88,14 +86,15 @@ sub Ftp
 	}
 	  
 	  if (! $ok) {
-	      &Mesg(*e, $NULL, 'no_such_file', "ls-lR(|.gz|.Z)");
+	      &Mesg(*e, "ERROR: cannot find ls-lR(|.gz|.Z)", 
+		    'no_such_file', "ls-lR(|.gz|.Z)");
 	      &Log("ERROR: cannot find ls-lR(|.gz|.Z)");
 	      &Log("Ftp(local): please create ls-lR.gz when use ls-lR");
 	      next;
 	  }
 
 	  &FtpSetFtpEntry('.', $f, $Mode);
-	  &Mesg(*e, "\tTry Send Back ls-lR");
+	  &Mesg(*e, "try send back ls-lR", 'ftp.sendback', 'ls-lR');
 	  next;
       }
 
@@ -113,19 +112,17 @@ sub Ftp
 	  }
 	  else {
 	      &Log("Cd: Insecure matching: $CurrentDir");
-	      &Mesg(*e, "\tCd: Insecure directory changes");
-	      &Mesg(*e, $NULL, 'ftp.cd.insecure');
+	      &Mesg(*e, "cd: Insecure directory changes", 'ftp.cd.insecure');
 	      last;
 	  }
 
 	  chdir $CurrentDir || do { 
 	      &Log("Can't chdir to $CurrentDir");
-	      &Mesg(*e, "\tCannot chdir /$LocalDir");
-	      &Mesg(*e, $NULL, 'ftp.cannot_chdir');
+	      &Mesg(*e, "\tcannot chdir /$LocalDir", 'ftp.cannot_chdir');
 	      last;
 	  };
 
-	  &Mesg(*e, "\tCurrent directory is /$LocalDir");
+	  &Mesg(*e, "\tcurrent directory is /$LocalDir.");
 	  &Log("chdir $LocalDir");
 	  next;
       }
@@ -135,7 +132,7 @@ sub Ftp
 	  &SendFile($Envelope{'Addr2Reply:'}, "Ftp(Local) help $ML_FN", 
 		    $FTP_HELP_FILE || "$TopDir/help");
 	  &Log("Ftp Help");
-	  &Mesg(*e, "\tTry Sent back help file");
+	  &Mesg(*e, "try sendback help file", 'ftp.sendback', 'help');
 	  next;
       }
       
@@ -144,16 +141,16 @@ sub Ftp
 	  $Mode = $Fld[2];
 	  &Log("Ftp Mode -> $Mode");
 	  local($s) = &DocModeLookup("#3$Mode");
-	  &Mesg(*e, "\tFile Encoding Mode set to $Mode[$s]");
-	  &Mesg(*e, "\texcept for explicit command 'get file mode'");
+	  &Mesg(*e, "set mode to $Mode", 'ftp.set.mode', $Mode);
 	  next;
       }
       
       # return address change
       if (/^(mail|reply\-to)$/) {	# help or HELP
 	  local($to) = $Envelope{'Addr2Reply:'} = $Fld[2];
-	  &Mesg(*e, "\tReturn address change\n\t$From_address -> $to");
-	  &Log("Ftp: Recipient changed[$From_address -> $to]");
+	  &Mesg(*e, "return address = $to", 
+		'ftp.set.return_addr', $to);
+	  &Log("ftp: recipient changed $From_address -> $to");
 	  next;
       }
       
@@ -179,21 +176,20 @@ sub Ftp
 	  }
 
 	  &FtpSetFtpEntry($LocalDir, $f, $mode);
-	  &Mesg(*e, "\tTry Send back [$f] in [$LocalDir]");
-	  &Mesg(*e, "\tthe file is set-up with mode == [$mode]");
+	  &Mesg(*e, "\ttry sednback $f in $LocalDir", 'ftp.sendback', $f);
+	  # &Mesg(*e, "\tthe file is set-up with mode == [$mode]");
 	  next;
       }
 
       # Unknown!
-      &Log("Ftp: Unknown Commands [$_]");
-      &Mesg(*e, "\tFtp: Unknown Commands [$_]");
+      &Log("ftp: no such command [$_]");
       &Mesg(*e, $NULL, 'no_such_command', $_);
   }# end of while loop;
 
     # Return Original $DIR
     chdir $DIR || &Log("Can't chdir to $DIR");
 
-    &Mesg(*e, "\n\t*** Pseudo Ftpmail Mode Ends. ***");
+    &Mesg(*e, "pseudo ftp server mode ends", 'ftp.exit');
 
     if ($FML_EXIT_HOOK !~ /\&FtpSendingEntry/) {
 	$FML_EXIT_HOOK .= ' &FtpSendingEntry;';

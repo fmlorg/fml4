@@ -50,7 +50,7 @@ sub DoDistribute
 			  "something PGP error occors, ". 
 			  "so it seems encrpytion fails.\n",
 			  "pgp.encryption.error");
-		    &Mesg(*e, $NULL, 'EAUTH');
+		    &Mesg(*e, 'not authenticated', 'EAUTH');
 		    return 0;
 		}
 	    }
@@ -60,7 +60,7 @@ sub DoDistribute
 		      "Your PGP signature seems incorrect. ".
 		      "ML delivery is not allowed.",
 		      "pgp.incorrect_signature");
-		&Mesg(*e, $NULL, 'EAUTH');
+		&Mesg(*e, 'not authenticated', 'EAUTH');
 		return 0;
 	    }
 	}

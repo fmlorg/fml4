@@ -311,9 +311,8 @@ sub mget3
 	}
     }
     else {
-	&Mesg(*e, $NULL, 'fop.not_found');
-	&Mesg(*e, "Hmm.. no matched file in mget3 processing");
-	&Mesg(*e, "\tprocessing ends.");
+	&Mesg(*e, "no matched file in mget3 processing", 'fop.not_found');
+	# &Mesg(*e, "\tprocessing ends.");
 	return 0;
     }
 
@@ -425,9 +424,8 @@ sub ExcessMaxFileP
     print STDERR "03 \$c  = $c (sum)\n" if $debug; 
     if ($c > $cf{'MAXFILE'}) {
 	&Log("mget[$$]: files to request > $cf{'MAXFILE'}");
-	&Mesg(*e, $NULL, 'fop.mget.too_many', $cf{'MAXFILE'});
-	&Mesg(*e, "Sorry. your request exceeds $cf{'MAXFILE'}");
-	&Mesg(*e, "Anyway, try to send the first $cf{'MAXFILE'} files");
+	&Mesg(*e, "your request exceeds $cf{'MAXFILE'}", 
+	      'fop.mget.too_many', $cf{'MAXFILE'});
 	1;
     }
 
@@ -500,10 +498,7 @@ sub mget3_Getopt
 	    undef $cf{'mode-default'}; # MODE IS GIVEN !
 	}
 	else {
-	    &Mesg(*e, "mget:");
-	    &Mesg(*e, $NULL, 'fop.mget.no_such_mode', $_);
-	    &Mesg(*e, "\tgiven mode[$_] is unknown.");
-	    &Mesg(*e, "\tanyway try [gzip] mode");
+	    &Mesg(*e, $NULL, 'fop.mget.no_such_mode', $_, 'gzip');
 	}
     }
 }
@@ -566,9 +561,8 @@ sub mget3_Search
       }
       # NOTHING IS MATCHED
       else {
-	  &Log("$target IS NOT FOUND");
-	  &Mesg(*e, "$m\tNOT FOUND.\n\tSkip.");
-	  &Mesg(*e, $NULL, 'not_found', $m);
+	  &Log("$target not found");
+	  &Mesg(*e, 'not found', 'not_found', $m);
       }
 
       # EMERGENCY STOP FOR SECURITY

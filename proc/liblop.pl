@@ -69,8 +69,8 @@ sub SearchKeyInSummary
 	($a, $b) = &GetLastID($s);
     }
     else {
-	&Mesg(*e, $NULL, 'fop.summary.not_match');
-	&Mesg(*e, "Restricted Summary: the parameter not matched");
+	&Mesg(*e, "Restricted Summary: the parameter not matched", 
+	      'fop.summary.not_match');
 	return;
     }
 
