@@ -1931,6 +1931,41 @@ $SECURITY_LEVEL < 2 では
 の両方を理解します。サーバが自動的に切替えます。
 
 
+.S	許されるコマンドのシンタックス
+
+Quoted from 4.4BSD:/usr/share/man/cat1/sh.0 
+.q
+       Shell Patterns
+
+       A pattern consists of normal characters, which match them-
+       selves, and meta-characters.   The meta-characters are
+       ``!'', ``*'', ``?'', and ``[''.  These  characters lose
+       there special meanings if they are quoted.  When command
+       or variable substitution is performed and the dollar sign
+       or back quotes are not double quoted, the value of the
+       variable or the output of the command is scanned for these
+       characters and they are turned into meta-characters.
+
+       An asterisk (``*'') matches any string of characters.   A
+       question mark matches any single character. A left bracket
+       (``['') introduces a character class.  The end of the
+       character class is indicated by a ``]''; if the ``]'' is
+       missing then the ``['' matches a ``['' rather than intro-
+       ducing a character class.  A character class matches any
+       of the characters between the square brackets.   A range
+       of characters may be specified using a minus sign.  The
+       character class may be complemented by making an exclama-
+       tion point the first character of the character class.
+
+       To include a ``]'' in a character class, make it the first
+       character listed (after the ``!'', if any).  To include a
+       minus sign, make it the first or last character listed
+.~q
+
+
+
+
+
 .# ##########################################################
 .include mget.wix
 .include hook.wix

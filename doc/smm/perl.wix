@@ -113,3 +113,9 @@ require 'sys/socket.ph';
 
 .# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
 .# $Id$
+
+
+.S	\w
+
+\w ¤Ï [0-9A-Za-z_]  ¤Ç¤¹
+

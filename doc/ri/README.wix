@@ -1,11 +1,11 @@
-		ＲＥＡＤＭＥ　ｏｎ　ｆｍｌ
+		README of fml
 
-fml 1.5 Mailing List Server(upper compatible with hml 1.6).
+fml 2.0 Mailing List Server Package (compatible with hml 1.6).
 				fukachan@phys.titech.ac.jp
 
-０．ｆｍｌ １．５について
+.S	fml 2.0 
 
-fml 1.5 は Mailing List Server package(Perl Scripts package)です。
+fml 2.0 は Mailing List Server package(Perl Scripts package)です。
 ＃ server and management っていうべきなのかな？
 
 これはhml 1.6 という Perl Script をお手本にしています。
@@ -28,7 +28,7 @@ fml 1.5 は Mailing List Server package(Perl Scripts package)です。
 ■［特徴］
 --------------------------------------------------
 hml 1.6については hml 1.6 README.jpnに次のようにあります
-（fml 1.5でもあてはまるところだけ抜粋）。
+（fml 2.0でもあてはまるところだけ抜粋）。
 
 ＊ 大規模なメーリング・リストでの使用に耐えます。
 ＊ 豊富なコマンドを持っています。
@@ -125,18 +125,15 @@ EXTENSIONS：
 		いくつかのＭＬの実装例、実装のドキュメント
 		Utilities
 
-＃できるだけSendmail 8.x を意識してつくる…
-＃(もちろん 5.x でも動きますけど)
+	Sendmail 8.x を意識してつくる…＃(もちろん 5.x でも動きます)
 
-＃perl 5.000 でも動いたけど…全機種でＯＫかの確認はとれていません。
-＃NetBSD と Solaris 2.4 ではＯＫみたいだけど…
-
-＃“その方がおもしろいしぃ”P^^;;（謎の出典（苦笑））
 --------------------------------------------------
 
-なお、1.3 -> 1.5 の道のりを簡単にまとめると
-1.3->1.4 よく使うコード、普段使わないものを再構成する
-1.4->1.5 まとめおくりおよびmgetのUser Interface拡張
+なお、1.3 -> 2.0 の道のりを簡単にまとめると
+1.3 -> 1.4 よく使うコード、普段使わないものを再構成する
+1.4 -> 1.5 まとめおくりおよびmgetのUser Interface拡張
+1.5 -> 1.6 call by reference, fml_local.pl, sid.pl
+1.6 -> 2.0 cf/ doc/ まわりの再構成、
 です
 
 
@@ -284,281 +281,8 @@ discussion on the design and implementation of Mailing List server,
 perl, operating systems and so on.
 
 
+４． Changes
 
-４． Ｃｈａｎｇｅｓ
-＃CHANGESが長いので、CHANGES と Acknowledgeを逆にしました
-＃以下すべて、Changes と 最後に Reference です。
+Please see CHANGES and RELEASE_NOTES
 
-詳細は RELESE_NOTES も御覧下さい (_o_)
 
-
-■変更点(diff between fml 1.5 and fml 1.4)
-
-・newsyslog e.g. var/log/*.0 -> .1..
-
-・UNIX FROM もループ CHECK
-
-・summary コマンドの引数
-
-・Makeのときに ＯＳの自動判別（して設定のアドヴァイスをする）
-
-・EasyConfigure で config.ph の flock の設定まわりまで 対話的に行うス
-クリプト
-
-・Configure 廃止。新しい sbin/ccfml が cc への前段階処理をする
-
-・スタートレックの 宇宙歴 がつく（笑）
-＃ $APPEND_STARDATE = 1; in config.ph 
-
-・EXPIRE 機能
-・libSendBack.pl （あるアドレスに送ると ドキュメントとかを送り返すように
-設定するための）
-
-1.4.1 RELEASE 1995/5/7
-
-・mget とまとめおくりでの User interface 
-	PLAINTEST 
-		UNIX FROM
-		RFC934	
-		RFC1153
-		MIME/Multipart
-	COMPRESSED FILE
-		GZIP of UNIX FROM
-		Lha + Ish 
-		tar + gzip
-
-を ユーザーごとに設定できる
-
-ファイル構成を一部再構成（ like a 4.4BSD like ）
-etc/crontab-4.3
-etc/crontab-4.4
-var/run
-var/log
-_smtplog -> var/log/_smtplog（本体）
-
-■変更点(diff between fml 1.4 and fml 1.3)
-1.4 RELEASE	1995/04/26 11:59:02 GMT
-
-・"# matome 0" の時に、いまたまっているメールを送り出します。
-
-・RFC1521 
-
-・From と 配送先が一致した時に、配送を止める フック
-
-・sjis conversion is ish+lzh mode
-^M ^Z もつける。
-
-・extract from archive to expand as tmp/spool/201 ...
- for '# mget 201-210 ..' not using tmp/extract$$
-
-・fix libsmtp for rfc821 4.5.2
-
-・sub system
-
-・複数のアドレスが登録がされている時、
-  普通のユーザーにたいしては 一つにマッチするまで頑張る、
-  だめならだめ
-  ただし、リモートでの アドミンコマンドでは 複数マッチを許す。
-  OFF 引数 等の 引数も許す。
-
-・まとめおくりのヴァリエーション拡張その１
-
-・コマンドの拡張
-まとめおくりで、Ｎ時間おき（デフォールト）と Ｎ時に一日一回指定
-
-# status [引数]
-# stat   [引数]		現在の設定について知らせる（まとめおくりとかOFFとか）
-			デフォールト（# stat(us)）は自分自身の状態
-# mget last:10 		(mhだね) シンタックス
-# exit 			コマンドの終り
-# end			コマンドの終り
-# quit			コマンドの終り
-
-・libfml.pl はエラー処理を一括しておこなう。そうしないと複数のコマンド
-ミスそれぞれについて警告メールが返ってしまうから
-
-・fml の remote control（admin command）のパスワード機構
-
-・変数名等の変更：
-PRE_HOOK -> START_HOOK
-ExExec -> RunHooks
-"# guide" は本当に知らない人の時だけ特別扱い
-
-・ＦＡＱに索引がついたぞ！
-
-・~/.forward で 使う方法
-
-・ for $s in /etc/sendmail.cf
-
-・ マスターコントロールサーバ (./lib/Master)
-	www, ftp, wais, gopher とのＩＰＣの中継をする
-	おまけ機能で 
-	subscribe ML-address とか
-	member ML-address とか
-	which とか
-	できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ
-
-・INSTALL MANUAL English 版:-)
-
-・クロスポスト機能
-
-・自動登録のときに reply-to を使わず。明示的に登録アドレスを変えるなら 
-subscribe ml-address のようなキーワードを必要とするように
-
-・$TMP_DIR
-
-・明示的に $USE_WARNING をセット（e.g. $USE_WARNING = 1;）しない限りコ
-マンドメールでの単なるシンタックスエラーの警告をしない
-＃ヘルプを返さない。signuatureとかでひっかかるから
-
-・ Proceess Table にＭＬ名をつける（８文字もありゃ十分だろう）
-
-・古いライブラリ は lib/Compatibility に移動
-
-・マシンによってはプロセス間通信がうまくいかない？
-lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
-
-・MSendrc もしリアルタイム配送にきりかえたらちゃんとこっちのエントリも
-消す
-
-
-■変更点(diff between fml 1.3 and fml 1.2)
-
-・まとめおくり ver.1-4
-  ver. 3,4 ではUNIX FROM <-> RFC934 きりかえ等もオプショナルサポート
-
-・より secure に
-
-・標準の spool と Archive( tar + gzip ed files) spool
-	およびget等でのアーカイブへのアクセス
-
-・コマンドフック
-
-・ドキュメント Generator(lib/AIKO) texinfo and html自動 Generator
-
-・自動的にＭＬのspoolをhtml化する
-
-・httpdへの（ＩＰＣ） smtp インターフェイス（というのか？）
-
-・hml とはちがう任意の Whois サーバとのＩＰＣ
-
-・コマンド操作の誤チェック機能
-
-・明示的な自動登録をする（オプショナル）
-	例：	Subject: subscribe
-	本文に subscribe pollyanna@phys.titech.ac.jp 等
-
-・自動登録で登録要請をしているメールはＭＬへ流さないモード（オプショナル）
-
-・ユーザからのリモート制御 
-	# matome 数字(0-23)	コマンド
-
-・mget ver 2 
-	# mget 1-3,4-100,100-1000 time のようなシンタックスも自動判別
-	して動く
-
-・lock algorithm toggle switching の非対象性をなくした
-
-・gzip, zcat を使う
-
-・hml 1.6にあったアドミンコマンド（remote で ＭＬサーバを操作する）
-（オプショナル）
-
-・new options of configuration files
-	・ + in members
-	・ skip in actives
-	・ matome in actives（まとめおくり ver.2-4）
-
-・RecreateConfig.pl	config.ph の自動更新
-
-・ヘッダフィールドの形の保存
-
-・サーバで予定していないヘッダフィールドも保存して活用（オプショナル）
-
-・MIME decoding機能（オプショナル）
-
-・hml 1.6 形の Subject field（オプショナル）
-＃こんな形 → Subject: [Elena:ID] サブジェクト
-
-・Documentsの改良。
-
-・ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
-
-■主な変更点(diff between fml 1.2 and hml 1.6)
-
-・モジュール化
-・コマンド群の分離（libfml.pl等）
-＃必要な時だけrequire機能を使い組み込む。
-
-・Configurationsはconfig.phで設定
-
-・Contribでの補強。まとめ送り用コード等。詳しくは Contrib/README
-・まとめ送り
-・投票用サーバ
-・その他のいろいろなコードの見本
-
-・activesファイルで%式リレーを制御
-
-・Makefile, Install Program, 
-
-・対話式インストールプログラム EasyConfigure
-
-・現在はC wrapperを使いMaintainerの uid,gidで実行するように設定（デフォー
-ルトのインストールではそうなる）
-＃hmlではsendmail -fのためだけに必要なdaemonを使うことの解消。（５．ｘ
-の時代のはなし）
-
-・よく見られるコマンドモードと配布モードの間違いを防ぐため最初の３行以
-内に ^#.*$が現れたら自動的にコマンドモードとなり配布しない。
-＃日本を前提にしたこの仕様は失敗かもしれない（つまり日本語のメールなら
-最初の３行のどこかに＃があってもそれは＃であり#ではないだろうと仮定し
-ている）。
-＃”３行”は$COMMAND_CHECK_LIMIT = 3;で設定（see config.ph）
-
-・sendmailとはsmtpポートでＩＰＣ（libsmtp.pl）sendmailコマンドを呼ぶの
-ではなく、プロセス間通信でsendmailへ渡す。
-＃IPCはちゃんとesmtpの場合でもうけとるように気を配る(for sendmail 8.x)
-
-・ロック・アルゴリズムはflockとpidを使う２種類（fml.pl liblock.pl）
-
-・Toggle flag configurations
-
-・メンバーチェックをするか否か？（する＝１）
-	「メンバーチェックをするサーバ」と
-	「自動登録しながら走るサーバ」
-
-・ロックはflockを使うか、PID式を使うか？（flock＝１）
-
-・サーバーテスト用デバッグモード（debug mode = 1）
-
-・コマンドの書き方について。# get 1 と #get 1は同じもの等。
-
-・ｗｈｏｉｓ等実績のないコマンドの削除（libfml.pl）
-＃使わんって（やりたいなら専用のをつかえばいいでしょう）
-
-・ｍｇｅｔ（まとめてget :-)）…付け加えたコマンド（libfml.pl）
-“# mget 正規表現 送り返されるメールの送り間隔”による大規模な過去のメー
-ル取り寄せ機能送り返しはそれようのコマンドへ
-＃ftpmailのようなもの。ＩＰの人だけならpasswdつきのanonymous ftp？:-) 
-にする方がいいとおもう。
-
-・（余計かもしれなくても）loggingはできるだけする
-＃なんかあった時便利です。ごみごみするけどメリットはあるとおもう。
-
-・リレーやＭＸについては FAQ ファイルを参照して下さい
-
-
-# REFERENCES 
-
-Release Version 1.2.1
-
-Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
-Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
-
-Subject: fml 1.2 Mailing List Server(upper compatible with hml1.6).  
-Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
-
-Subject: hml1.6: a powerful mailing list server Message-ID:
-<HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
-
-Last Modified: 
