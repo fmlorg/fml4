@@ -1,0 +1,20 @@
+Porting Project
+
+.C	Windows NT 4.0 Porting Status
+
+なお 2.1 RELEASE の source tree は Beta のまま release される予定
+
+
+.S	perl
+
+PlISi303.EXE PlSEi303.EXE Pw32i303.EXE あたり。インストールは問題ない。
+イヴェント・コントロールが入る見込みはなさそう。
+
+
+.S	現在の sys/arch/WINDOWS_NT4
+
+libexec/popfml.pl 以前のライブラリコールを使っているので入れ換えたい。
+
+
+
+
