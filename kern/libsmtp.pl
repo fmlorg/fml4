@@ -1,20 +1,39 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
+
+no strict qw(subs);
+use vars qw($debug $debug_smtp $debug_relay $USE_SMTP_PROFILE);  # debug
+use vars qw($Total_Rcpt_Count $Current_Rcpt_Count); # stat information
+use vars qw($IncrementCounterCalled); # global counter used in kern/fml.pl
+use vars qw(%IncrementCounterCalled);
+use vars qw($SmtpFeedMode);           # enforce smtpfeed use
+use vars qw(@HOSTS @HOST);            # @HOST is for compatibility
+use vars qw(%RelayRcpt %RELAY_GW %RELAY_NGW);
+use vars qw(@RcptLists %SKIP);        # recipient not to deliver
+use vars qw(%MCIWindowCB);            # delivery info shared between libsmtpmci
+use vars qw($ExistSocketPH $SocketOK $FixTransparency); # cache
+use vars qw($LastSmtpIOString $SocketTimeOut $SMTP_SORT_DOMAIN
+	    $MCIType);
+
 
 
 ##### local scope in Calss:Smtp #####
-local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus, $Port);
-local($SoErrBuf, $RetVal);
+my ($SoErrBuf, $RetVal, $SmtpTime, $FixTransparency, $Port);
+my ($PipeLineCount, $PipeLineMaxRcvQueue);
+my ($SmtpIOStart);
+local($LastSmtpIOString);
+
 
 # sys/socket.ph is O.K.?
 sub SmtpInit
@@ -44,7 +63,7 @@ sub SmtpInit
 	if ($USE_SMTP_LOG_ROTATE) {
 	    eval { &use('modedef'); &RegistSmtpLogExpire; };
 
-	    if ($USE_SMTP_LOG_ROTATE_TYPE eq 'day') {
+	    if ($SMTP_LOG_ROTATE_TYPE eq 'day') {
 		my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime;
 		$SMTP_LOG .= sprintf(".%04d%02d%02d", 
 				    1900 + $year, $mon + 1, $mday);
@@ -107,11 +126,6 @@ sub SocketInit
     push(@RcptLists, $ACTIVE_LIST) 
 	unless grep(/$ACTIVE_LIST/, @RcptLists);
 
-    ## initialize "Recipient Lists Control Block"
-    ## which saves the read pointer on the file.
-    ## e.g. $RcptListsCB{"${file}:ptr"} => 999; (line number 999)
-    undef %RcptListsCB;
-
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
@@ -159,6 +173,7 @@ sub SocketInit
 # RETURN *error
 sub SmtpConnect
 {
+    use vars qw($host $error);
     local(*host, *error) = @_;
 
     if ($USE_INET6) {
@@ -197,10 +212,10 @@ sub SmtpConnect
 	}
     }
 
-    local($pat)    = $STRUCT_SOCKADDR;
-    local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
-    local($proto)  = (getprotobyname('tcp'))[2];
-    local($port)   = $Port || $PORT || (getservbyname('smtp', 'tcp'))[2];
+    my ($pat)    = $STRUCT_SOCKADDR;
+    my ($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
+    my ($proto)  = (getprotobyname('tcp'))[2];
+    my ($port)   = $Port || $PORT || (getservbyname('smtp', 'tcp'))[2];
     $port          = 25 unless defined($port); # default port
 
     # Check the possibilities of Errors
@@ -208,7 +223,7 @@ sub SmtpConnect
     return ($error = "Cannot resolve proto")                 unless $proto;
 
     # O.K. pack parameters to a struct;
-    local($target) = pack($pat, &AF_INET, $port, $addrs);
+    my ($target) = pack($pat, &AF_INET, $port, $addrs);
 
     # IPC open
     if (socket(S, &PF_INET, &SOCK_STREAM, $proto)) { 
@@ -235,8 +250,9 @@ sub SmtpConnect
 # delete logging errlog file and return error strings.
 sub Smtp 
 {
+    use vars qw(%e @rcpt @files @smtp);
     local(*e, *rcpt, *files) = @_;
-    local(@smtp, $error, $i);
+    local(@smtp);
 
     # Initialize, e.g. use Socket, sys/socket.ph ...
     &SmtpInit(*e, *smtp);
@@ -253,7 +269,7 @@ sub Smtp
     # main delivery routine:
     #    fml 3.0 does not use modulus type MCI.
     #    SmtpIO() handles recipient array window.
-    $error = &SmtpIO(*e, *rcpt, *smtp, *files);
+    my $error = &SmtpIO(*e, *rcpt, *smtp, *files);
     return $error if $error;
 
     # close log
@@ -273,6 +289,7 @@ sub Smtp
 # }
 sub SmtpIO
 {
+    use vars qw(%smtp_pcb);
     local(*e, *rcpt, *smtp, *files) = @_;
     local(%smtp_pcb);
 
@@ -289,8 +306,7 @@ sub SmtpIO
     $Total_Rcpt_Count = 0;
 
     if ($e{'mode:__deliver'}) { # consider mci in distribute() 
-	local($n, $i);
-	$n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
+	my $n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
 
 	for (1 .. $n) { # MCI window loop
 	    undef %smtp_pcb;
@@ -303,7 +319,7 @@ sub SmtpIO
 	    &__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
             $Total_Rcpt_Count += $Current_Rcpt_Count;
 
-	    &__SmtpIOClose(*e, $smtp_pcb{'ipc'});
+	    &__SmtpIOClose($smtp_pcb{'ipc'});
 
 	    push(@HOSTS, $HOST); # last resort for insurance :)
 	}
@@ -318,7 +334,7 @@ sub SmtpIO
 	&__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
         $Total_Rcpt_Count += $Current_Rcpt_Count;
 
-	&__SmtpIOClose(*e, $smtp_pcb{'ipc'});
+	&__SmtpIOClose($smtp_pcb{'ipc'});
     }
     &RevConvHdrCRLF(*e);
 
@@ -335,9 +351,10 @@ sub SmtpIO
 #
 sub __SmtpIOConnect
 {
+    use vars qw($host $error);
     local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
-    local($sendmail, $backoff);
-    local($host, $error, $in_rcpt, $ipc, $try_prog, $retry);
+    local($host, $error);
+    my ($sendmail, $backoff, $ipc, $retry);
 
     # set global variable
     $SocketTimeOut = 0; # against the call of &SocketTimeOut;
@@ -441,7 +458,7 @@ sub __SmtpIOConnect
 
 sub __SmtpIOClose
 {
-    local(*e, $ipc) = @_;
+    my ($ipc) = @_;
 
     ### SMTP Section: QUIT
     # Closing Phase;
@@ -474,12 +491,8 @@ sub RevConvHdrCRLF
 sub __SmtpIO
 {
     local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
-    local($sendmail, $host, $error, $in_rcpt, $ipc, $try_prog, $retry);
-
-    # SMTP PCB
-    $ipc      = $smtp_pcb{'ipc'};
-    $sendmail = $smtp_pcb{'sendmail'};
-    
+    my $retry = 0;
+    my $ipc   = $smtp_pcb{'ipc'}; # SMTP PCB
 
     ### SMTP Section: HELO/EHLO
     $Current_Rcpt_Count = 0;
@@ -547,7 +560,7 @@ sub __SmtpIO
     elsif ($e{'mode:__deliver'}) { 
 	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*RcptLists);}
 
-	local(%a, $a);
+	my (%a, $a);
 	for $a (@RcptLists) { # plural active lists
 	    next if $a{$a}; $a{$a} = 1; # uniq;
 	    &SmtpPutActiveList2Socket(*smtp_pcb, $ipc, $a);
@@ -559,7 +572,7 @@ sub __SmtpIO
 	&SmtpPutActiveList2Socket(*smtp_pcb, $ipc, $e{'mode:delivery:list'});
     }
     else { # [COMPATIBILITY] not-DLA is possible;
-	local($lc_rcpt);
+	my ($lc_rcpt);
 	for (@rcpt) { 
 	    $Current_Rcpt_Count++ if $_;
 
@@ -627,7 +640,7 @@ sub __SmtpIO
 	# We should not reference body itself by s///; since
 	# it leads to big memory allocation.
 	{
-	    local($pp, $p, $maxlen, $len, $buf, $pbuf);
+	    my ($pp, $p, $maxlen, $len, $buf, $pbuf);
 
 	    $pp     = 0;
 	    $maxlen = length($e{'Body'});
@@ -654,9 +667,7 @@ sub __SmtpIO
 
 	# global interrupt;
 	if ($Envelope{'ctl:smtp:stdin2socket'}) {
-	    undef $buf; # reset $buf to use
-	    undef $pbuf;
-
+	    my ($pbuf, $buf);
 	    while (sysread(STDIN, $buf, 1024)) {
 		$buf =~ s/\n/\r\n/g;
 		$buf =~ s/\r\r\n/\r\n/g; # twice reading;
@@ -683,6 +694,7 @@ sub __SmtpIO
 
     # special exceptions;
     if ($e{'Body:append:files'}) {
+	use vars qw(@append);
 	local(@append) = split($;, $e{'Body:append:files'});
 	&SmtpFiles2Socket(*append, *e);
 	undef $e{'Body:append:files'};
@@ -747,8 +759,8 @@ sub SmtpPut2Socket_NoWait
 
 sub GetPipeLineReply
 {
-    local($ipc) = @_;    
-    local($wc)  = int($PipeLineCount/2);
+    my ($ipc) = @_;    
+    my ($wc)  = int($PipeLineCount/2);
     while ($wc-- > 0) {
 	&WaitForSmtpReply($ipc, 1, 0);
 	$PipeLineCount--;
@@ -760,8 +772,8 @@ sub GetPipeLineReply
 # XXX remove it! (must be true in the future. logged on 1999/06/21).
 sub WaitFor354
 {
-    local($ipc) = @_;
-    local($wc) = $PipeLineCount + 1; 
+    my ($ipc) = @_;
+    my ($wc) = $PipeLineCount + 1; 
 
     while ($wc-- > 0) {
 	undef $RetVal;
@@ -775,8 +787,8 @@ sub WaitFor354
 
 sub WaitForSmtpReply
 {
-    local($ipc, $getretval, $ignore_error) = @_;
-    local($buf);
+    my ($ipc, $getretval, $ignore_error) = @_;
+    my ($buf);
 
     if ($ipc) {
 	do { 
@@ -799,7 +811,7 @@ sub WaitForSmtpReply
 
 sub SmtpPut2Socket
 {
-    local($s, $ipc, $getretval, $ignore_error, $no_wait) = @_;
+    my ($s, $ipc, $getretval, $ignore_error, $no_wait) = @_;
 
     # return if $s =~ /^\s*$/; # return if null;
 
@@ -815,7 +827,7 @@ sub SmtpPut2Socket
 
     # Approximately correct :-)
     if ($TRACE_SMTP_DELAY) {
-	$time = time() - $SmtpTime;
+	my $time = time() - $SmtpTime;
 	$SmtpTime = time();
 	&Log("SMTP DELAY[$time sec.]:$s") if $time > $TRACE_SMTP_DELAY;
     }
@@ -827,10 +839,12 @@ sub SmtpPut2Socket
 # %RELAY_SERVER = ('ac.jp', 'relay-server', 'ad.jp', 'relay-server');
 sub SmtpPutActiveList2Socket
 {
+    use vars qw($ipc $file);
     local(*smtp_pcb, $ipc, $file) = @_;
-    local($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
-    local($mci_count, $count, $time, $filename, $xtime);
-    local($size, $mci_window_start, $mci_window_end);
+    my ($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
+    my ($mci_count, $count, $time, $filename, $xtime);
+    my ($size, $mci_window_start, $mci_window_end);
+    my (%WMD, $myml); # for crosspost operation
 
     $filename = $file; $filename =~ s#$DIR/##;
 
@@ -840,7 +854,7 @@ sub SmtpPutActiveList2Socket
     if (%RELAY_NGW) { $ngw_pat = join("|", sort keys %RELAY_NGW);}
 
     if ($debug_relay) { 
-	local($k, $v);
+	my ($k, $v);
 	print STDERR "gw_pat=$gw_pat\nngw_pat=$ngw_pat\n";
 	while (($k,$v) = each %RELAY_GW) { 
 	    print STDERR " RELAY_GW: $k => $v\n";
@@ -879,7 +893,7 @@ sub SmtpPutActiveList2Socket
     while (<ACTIVE_LIST>) {
 	chop;
 
-	print STDERR "\nRCPT ENTRY\t$_\n" if ($debug_smtp || $debug_dla);
+	print STDERR "\nRCPT ENTRY\t$_\n" if ($debug_smtp);
 
 	next if /^\#/o;	 # skip comment and off member
 	next if /^\s*$/o; # skip null line
@@ -923,7 +937,7 @@ sub SmtpPutActiveList2Socket
 	}
 
 	if ($debug_smtp) {
-	    $ok = $rcpt !~ /($ngw_pat)/i ? 1 : 0;
+	    my $ok = $rcpt !~ /($ngw_pat)/i ? 1 : 0;
 	    &Debug("$rcpt !~ /($ngw_pat)[,:]/i rewrite=$ok") if $debug_relay;
 	}
 
@@ -943,10 +957,6 @@ sub SmtpPutActiveList2Socket
 	# count and do delivery for each modulus sets;
 	$mci_count++;
 
-	&Debug("  [$mci_count]  \t$rcpt") if $debug_mci;
-	# &Debug("  $mci_count % $MCI_SMTP_HOSTS != $CurModulus") if $debug_mci;
-
-
 	### Window Control ###
 	# PLURAL SMTP SERVERS
 	if ($smtp_pcb{'mci'}) {
@@ -957,9 +967,6 @@ sub SmtpPutActiveList2Socket
 		next if $mci_count <= $mci_window_start; #   0 100 200
 		last if $mci_count >  $mci_window_end;   # 100 200 300
 	    }
-	    # else { # modulus
-	    #    next if ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
-	    # }
 	}
 	# SINGLE SMTP SERVER
 	else {
@@ -967,16 +974,7 @@ sub SmtpPutActiveList2Socket
 	}
 	### Window Control ends ###
 
-
 	$count++; # real delivery count;
-	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
-	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
-
-	if ($debug_mci) {
-	    print STDERR 
-		$mci_count, 
-		":$file:($mci_window_start, $mci_window_end)> $rcpt\n";
-	}
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 
