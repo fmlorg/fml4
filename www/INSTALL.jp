@@ -54,7 +54,8 @@ A: makefml mladmin.cgi ML を走らせる。
 
 CUI: makefml htpasswd ML ユーザ名
 
-GUI: not yet
+GUI: メニューの『管理者パスワードの設定』では
+     'admin' コマンドでつかうものを自動的に htpasswd へ反映させる
 
 
 III. 各ＭＬのユーザ用のページ
