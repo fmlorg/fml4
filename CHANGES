@@ -5,11 +5,13 @@
 
 2000/04/30
 
-   $LOG_FILE_SUFFIX	(default NULL)
-	$LOG_FILE_SUFFIX = ".%C%y";
+   $LOGFILE_SUFFIX	(default NULL)
+	$LOGFILE_SUFFIX = ".%C%y";
 
 	log ファイルにsuffixをつけられる。backup が楽
 	例: log.2000
+
+	See strftime(3) on the string to be used
 
    mead 
 	clean up a little
