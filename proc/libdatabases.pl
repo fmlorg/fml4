@@ -10,7 +10,7 @@
 
 sub DataBaseMIBPrapare
 {
-    my ($mib) = @_;
+    my ($action, $mib) = @_;
 
     # fundamental information
     $mib->{'MAIL_LIST'}       = $MAIL_LIST;
@@ -22,14 +22,24 @@ sub DataBaseMIBPrapare
     # split $MAIL_LIST
     ($mib->{'ML_ACCT'}, $mib->{'ML_DOMAIN'}) = split(/\@/, $MAIL_LIST);
 
+    # set up action, method, ...
     # cached file which is the dumped data from database server.
-    $mib->{'CACHED_FILE'}     = $ACTIVE_LIST.".dbcache";
+    $mib->{'METHOD'}          = $DATABASE_METHOD;
+    $mib->{'ACTION'}          = $action;
 
-    # custom
-    $mib->{'method'} = 'LDAP';
+    my ($suffix) = $DATABASE_CACHE_FILE_SUFFIX || ".dbcache";
+    if ($action =~ /active/) {
+	$mib->{'CACHE_FILE'}     = $ACTIVE_LIST.".dbcache";
+    }
+    elsif ($action =~ /member/) {
+	$mib->{'CACHE_FILE'}     = $MEMBER_LIST.".dbcache";	
+    }
+    else {
+	$mib->{'CACHE_FILE'}     = $MEMBER_LIST.".dbcache";
+    }
 
     # LDAP by default (these are templates provided by fml).
-    if ($mib->{'method'} =~ /^LDAP$/i) {
+    if ($mib->{'METHOD'} =~ /^LDAP$/i) {
 	&_GenLDAPTemplate($mib);
     }
 }
@@ -77,7 +87,7 @@ sub main::DataBaseCtl
     local(*Envelope, $mib, $result, $misc) = @_;
 
     # Leightweight Directory Access Protocol
-    if ($mib->{'method'} =~ /^LDAP$/i) {
+    if ($mib->{'METHOD'} =~ /^LDAP$/i) {
 	if ($mydb) {
 	    require $mib->{'mylib'};
 	}
@@ -88,11 +98,11 @@ sub main::DataBaseCtl
 	}
     }
     # MySQL
-    elsif ($mib->{'method'} =~  /^MySQL$/i) {
+    elsif ($mib->{'METHOD'} =~  /^MySQL$/i) {
 	;
     }
     # PostgreSQL
-    elsif ($mib->{'method'} =~ /^PostgreSQL$/i) {
+    elsif ($mib->{'METHOD'} =~ /^PostgreSQL$/i) {
 	;
     }
     else {
