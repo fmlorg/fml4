@@ -19,7 +19,7 @@ If you join this list, please just reply this mail and send it back.
 
 	subscribe あなたの名前 (注意: Email Address ではなくあなたの名前)
 例：
-	subscribe Sakura Kinomoto
+	subscribe Anne Shirley
 
 のようなリクエストを送ってもらっています。名前は英語(というかローマ字)
 が期待されています。また全角スペースなどのコードがあるとエラーになりま
@@ -34,13 +34,13 @@ against tricks from others. The first phase in registration is to send
 
 	subscribe your-name (not Email Address)
 e.g.
-	subscribe Sakura Kinomoto
+	subscribe Anne Shirley
 
 If fml receives this content mail, fml sends back a query
 (confirmation request) with the following phase:
 .fi
 
-	confirm 84682771 Sakura Kinomoto
+	confirm 84682771 Anne Shirley
 
 を含む『このメーリングリストに登録をしてもよいか？』という確認を求める
 メールを一度返します。これは「勝手にメーリングリストへ登録されてしまう」
@@ -68,7 +68,7 @@ this mail to the address <_CTLADDR_>.
 If you fails in the registration phase, start again in the first
 phase, that is, to send
 
-	subscribe Sakura Kinomoto
+	subscribe Anne Shirley
 
 を送ることからやり直して下さい。
 
