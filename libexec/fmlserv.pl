@@ -161,7 +161,7 @@ sub FmlServ
 
     if ($debug_dump) { &Dump_mainNS("$FMLSERV_DIR/tmp/main_name_space");}
 
-    $FMLSERV_DIR = $DIR;	# save the $DIR (must be == $FMLSERV_DIR)
+    # $FMLSERV_DIR = $DIR; # save the $DIR (must be == $FMLSERV_DIR)
 
     if ($debug) { &DebugEnvelopeDump("pre e");}
 
