@@ -5020,6 +5020,8 @@ sub do_showconfig
     $buf .= sprintf($format, "OS type:", $OS_TYPE);
     $buf .= sprintf($format, "CPU-MANUFACTURER-OS:", $CPU_TYPE_MANUFACTURER_OS);
     $buf .= sprintf($format, "Perl version:", $]);
+    $buf .= sprintf($format, "Perl Path:", $^X);
+    $buf .= sprintf($format, "\$0:", $0) if $debug;
     $buf .= "\n";
 
 
