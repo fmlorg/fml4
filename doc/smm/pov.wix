@@ -1195,8 +1195,8 @@ RFC822 は BNF表現でできる理論限界を表現している文書です。確かに使って
 .l	Gauntlet
 .l	Firewall
 
-http://www.tis.com/
-http://www.iij.ad.jp/service/FIREWALL.html
+.url	http://www.tis.com/
+.url	http://www.iij.ad.jp/service/FIREWALL.html
 
 
 .S	smrsh.c

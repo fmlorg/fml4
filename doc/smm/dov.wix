@@ -202,7 +202,7 @@ HTML 版は var/html/ の下に用意されいますが、
 operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 shell% make doc でつくってください
 最新版は
-   http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 をのぞいてみてください
 
 

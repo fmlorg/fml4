@@ -377,7 +377,7 @@ $HEADER_ADD_HOOK = q#
 .k	StarDate
 .k	$APPEND_STARDATE
 
-   http://www.sapporo.iij.ad.jp/staff/fukachan/href/Startrek/
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/href/Startrek/
 
 config.ph คว
 

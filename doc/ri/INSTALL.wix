@@ -229,6 +229,10 @@ the value in the [] is used.  These questions are as follows:
 	設定。インストールするマシンが .jp の場合[]の中つまりデフォー
 	ルトは日本語になります。"Japanese" か "English" が選べます。
 
+	「マシン自体は jp ドメインじゃないけど日本人向けＭＬだったら、
+	  help のデフォールトを日本語にするために Japanese としておく
+	  といいでしょう」という話です。
+
 
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
 =E.S	If you cannot manage /usr and /var .. (e.g. on the provider)

@@ -270,7 +270,8 @@ Hence it is better to do hasks latest version if you like(^^).
 =E
 The HOME PAGE of the Fml is 
 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+.url	http://www.fml.org/
 
 =E
 You can obtaion the latest (fml-current) documents and sources here.
@@ -419,7 +420,7 @@ You can read the details on fml in doc/op which is contained in the
 fml source. doc/op is "Devil's Book" for fml. 
 The Html version of doc/op is the following URL:
 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
 
 ○ 様々な機能を簡単に拡張できます。
 	さらなるカスタマイズも perl で書いてあるので改造は容易です。
@@ -450,7 +451,7 @@ make doc でつくってください。最新版は
 =E
 Html version of doc/op is available at the URL
 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 
 をのぞいてみてください
 
