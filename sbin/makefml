@@ -469,6 +469,15 @@ OS_TYPE:
 	&main'Warn($@) if $@; #';
     }
 
+    ### CGI (fml 4.0) 
+    if (-f $CGI_CONFIG) {
+	package CGI_CONFIG;
+	eval("require \"$main::CGI_CONFIG\";");
+	print STDERR $@ if $@;
+	$main::CurConfig{'CGI_PATH'}      = $CGI_PATH;
+	$main::CurConfig{'REAL_CGI_PATH'} = $REAL_CGI_PATH;
+	package main;
+    }
 
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
@@ -1967,7 +1976,8 @@ sub ResetVariables
     # this directory should be special
     # import environment REAL_CGI_PATH
     if ($EXEC_DIR) {
-	$REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
+	$REAL_CGI_PATH = $CurConfig{'REAL_CGI_PATH'} || 
+	    $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
 
 	if (! $REAL_CGI_PATH) {
 	    $REAL_CGI_PATH = $CGI_PATH;
