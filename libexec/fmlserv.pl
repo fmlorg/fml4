@@ -6,7 +6,7 @@
 
 
 $rcsid   = q$Id$;
-($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
+($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
 $Rcsid   = 'fmlserv #: Wed, 29 May 96 19:32:37  JST 1996';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
