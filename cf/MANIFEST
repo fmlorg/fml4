@@ -349,8 +349,10 @@ FILTER_ATTR_REJECT_MS_GUID: 1
 
 # reject HTML mails that the same content exist in the form of both
 # plain and html. e.g. some versions of M$ outlook, netscape mail
-# value: 1/0
-AGAINST_HTML_MAIL:
+# "AGAINST_HTML_MAIL: 1/0" is old style, which works for compatibility though.
+# NULL (default) is "pass through a html mail".
+# value: "strip" / "reject" / ""
+HTML_MAIL_DEFAULT_HANDLER:
 
 # Mail Traffic Information: internal traffic monitor
 # value: 1/0
