@@ -10,8 +10,8 @@ Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
 別に中身は変わっていません。単にHOOKを書かなくても良くなったということ
 だけです。
 
-$USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。必ず 
-$EXPIRE_LIMIT が記事の数で指定されていて、
+$USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。ファイルの取
+り寄せ等に影響があるため必ず $EXPIRE_LIMIT が"記事の数"で指定されていて、
 
 	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
 .k	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
@@ -22,7 +22,10 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 
 	$EXPIRE_LIMIT = $ARCHIVE_UNIT * 2;
 
-くらいにしておくのが良いでしょう。
+くらいにしておくのが良いでしょう。そうでない場合整合性が保証されないの
+でエラーとなります。もちろん毎回ファイルを全て調べる等の莫大な 
+overhead をかければ実現はできますが、コストが見合うとは思えないので実
+装されていません。
 
 
 .S	一定日数以上古いファイルを消去
@@ -105,11 +108,7 @@ expire.pl [-h] [-e expire_days] [-s spool_directory] [-n]
     -n （残すファイル数を設定して、expireするモード）
 
 
-.S	logファイルの整理、消去をする → newsyslog
-.xref	newsyslog
-
-
-.S	newsyslogをする(デフォールト)
+.S	newsyslog/logファイルの整理と消去
 .l	newsyslog
 .k	$NOT_USE_NEWSYSLOG
 .k	@NEWSYSLOG_FILES
@@ -146,19 +145,23 @@ ln -s members.bak 	var/log/members.0
 
 0 6 * * 0 (chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
 
-とか書くわけです。
+とか書くわけです。msend.pl 等では
 
-
-.S	newsyslogをしない
 .l	newsyslog-2
 .xref	newsyslog
 .key	$NOT_USE_NEWSYSLOG
 
-$NOT_USE_NEWSYSLOG = 1; なら実行しません
+	$NOT_USE_NEWSYSLOG = 1; 
+
+とすると newsyslog を実行しません(default は実行)。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
