@@ -74,6 +74,8 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 基本的な方針は
    『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
+   『「明示的な指定があって初めて機能は増やすべきである」と
+   「管理者のルーチンワークを少しでも減らす」間の妥協』
 です。
 
 			＊＊＊注意＊＊＊ 
@@ -340,7 +342,7 @@ fml のターゲットマシンでのテスト環境は
 
 2.1 は
 	sendmail 8.7.6 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.7.6 + perl4.036 on NetBSD 1.1B Current
+	sendmail 8.8.0 + perl4.036 on NetBSD 1.1B Current
 	(fwtk 1.3 も併用) 
 
 2.0 まで
@@ -372,9 +374,11 @@ sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
 
 .C	Version up について
 
-.S	cp *.pl your-fml-directory
+.S	cp -pr src/*.pl your-fml-library-directory
 
-ひろげて *.pl だけ今使っているところへコピーしてください（おしまひ）
+新しいソースを /var/tmp にでも広げて下さい。広げると src に下に perl
+scripts (*.pl) だけが集まっているので、今使っている .pl ファイルを入れ
+ているところへコピーしてください（おしまひ）
 
 
 .S	新しい機能を有効にするには？
