@@ -1275,14 +1275,15 @@ sub AdjustActiveAndMemberLists
 sub DoMailListMemberP
 {
     local($addr, $type) = @_;
-    local($file, @file);
+    local($file, @file, %file);
 
     $SubstiteForMemberListP = 1;
 
     @file = $type eq 'm' ? @MEMBER_LIST : @ACTIVE_LIST;
-    &Uniq(*file); 
+
     for $file (@file) {
 	next unless -f $file;
+	next if $file{$file}; $file{$file} = 1; # uniq 
 
 	# prohibit ordinary people operations (but should permit probing only)
 	# NOT CHECK OUTSIDE "amctl" procedures in &Command;
