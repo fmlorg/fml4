@@ -1796,7 +1796,7 @@ sub GenCrontab
 	if (($uid == $<) && -f "$ML_DIR/$_/crontab") {
 	    if (open(CRONTAB, "$ML_DIR/$_/crontab") ) {
 		while (<CRONTAB>) { print TAB $_;}
-		close(CRAONTAB);
+		close(CRONTAB);
 	    }
 	}
 
