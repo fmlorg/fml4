@@ -187,6 +187,8 @@ sub Open4Write
 
     print TMPF "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
     print ENG  "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
+
+    print STDERR "--Open::($TmpFile $TmpFile_Eng)\n";
 }
 
 
@@ -238,8 +240,8 @@ sub OutputFile
     if ($mode eq 'html') {
 	$Index = "<UL>\n$Index\n</UL>";
 
-	&OutputHtml('TMPF');
 	&OutputHtml('ENG');
+	&OutputHtml('TMPF');
     }
     elsif ($mode eq 'roff') {
 	print ".SH\n$Copyright\n" if $Copyright;
