@@ -1,5 +1,12 @@
 .C	links ?
 
+.S	LDAP and NIS
+
+.url http://www.padl.com/software.html
+
+
+.S	misc
+
 .url http://www.ldapcentral.com/
 .url http://www.openldap.org/
 .url http://www.kingsmountain.com/ldapRoadmap.shtml
