@@ -38,6 +38,18 @@ sub Parse
     $PTR       =~ s#^\/{1,}#\/#;
     $PROC      =~ tr/A-Z/a-z/;
 
+    # For example:
+    #   REQUEST_URI  => /cgi-bin/fml/admin/makefml.cgi
+    #   HTTP_REFERER => https://beth/cgi-bin/fml/admin/menu.cgi
+    #   SCRIPT_NAME  => /cgi-bin/fml/admin/makefml.cgi
+    $SCRIPT_NAME  = $ENV{'SCRIPT_NAME'};
+    $REQUEST_URI  = $ENV{'REQUEST_URI'};
+    $HTTP_REFERER = $ENV{'HTTP_REFERER'};
+
+    # fix (tricky:-)
+    $SCRIPT_NAME  =~ s/makefml.cgi$/menu.cgi/;
+    $HTTP_REFERER =~ s/makefml.cgi$/menu.cgi/;
+    
     # We should not use raw $LANGUAGE (which is raw input from browser side).
     # We should check it matches something exactly and use it.
     if ($LANGUAGE eq 'Japanese') {
@@ -278,6 +290,8 @@ sub SecureP
 
 sub Command
 {
+    &ShowReferer;
+
     if ($PROC eq 'add' || $PROC eq 'bye') {
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
@@ -329,8 +343,21 @@ sub Finish
     if ($ErrorString) { &Exit($ErrorString);}
 
     &P("</PRE>");
+    &ShowReferer;
     &P("</BODY>");
     &P("</HTML>");
+}
+
+
+sub ShowReferer
+{
+    if ($HTTP_REFERER || $SCRIPT_NAME) {
+	print "<H2>\n";
+	print "<A HREF=\"";
+	print $HTTP_REFERER || $SCRIPT_NAME;
+	print "\">[back to menu]</A>\n";
+	print "</H2>\n";
+    }
 }
 
 
