@@ -766,7 +766,9 @@ sub InitFmlConfig
 	}
     }
 
-    $FML_CONFIG  = "$CONFIG_DIR/system";
+    # overwrite
+    $FML_CONFIG = "$CONFIG_DIR/system";
+    $CGI_CONFIG = "$CONFIG_DIR/cgi.conf";
     
     $buf = &Dumpvar('Config');
     &SaveConfig($buf) if $buf;
@@ -1753,17 +1755,17 @@ sub ResetVariables
     # this directory should be special
     # import environment REAL_CGI_PATH
     if ($EXEC_DIR) {
-       $REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
+	$REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
 
-       if (! $REAL_CGI_PATH) {
-   	   $REAL_CGI_PATH = $CGI_PATH;
-	   $REAL_CGI_PATH =~ s#^/+##;
-	   $REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
-       }
+	if (! $REAL_CGI_PATH) {
+	    $REAL_CGI_PATH = $CGI_PATH;
+	    $REAL_CGI_PATH =~ s#^/+##;
+	    $REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
+	}
+
+	# www directory
+	$CGI_AUTHDB_DIR = $CGI_AUTHDB_DIR || "$EXEC_DIR/www/authdb";
     }
-
-    # www directory
-    $CGI_AUTHDB_DIR = $CGI_AUTHDB_DIR || "$EXEC_DIR/www/authdb";
     
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -1953,6 +1955,7 @@ sub Conv
     local($ml, $example, $out) = @_;
     local($uid, $gid, $format, $info, $ctladdr, $mail_list);
     local($crontime) = 0;
+    local(@caller) = caller;
 
     # &ApplyPolicy;
     $format    = $Policy{'CONTROL_ADDRESS_FORMAT'};
@@ -1987,8 +1990,7 @@ sub Conv
 	return 0;
     }
 
-
-    open(CF, "> $out")       ||  (&Warn("cannot open $out"), return 0);
+    open(CF, "> $out") || (&Warn("cannot open $out from @caller"), return 0);
     select(CF); $| = 1; select(STDOUT);
     
     print STDERR "\t$out\n";
@@ -2797,7 +2799,6 @@ sub do_newml
     &SetPersonalUmask;	# umask 077;
 
     &GenCrontab;
-    &CollectAliases;
 
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
 		  "$ML_DIR/$ml/cf", "$ML_DIR/$ml/config.ph");
@@ -2832,6 +2833,8 @@ sub do_newml
     &ConcatenateAliases($ml, 
 			"$ML_ETC_DIR/aliases", 
 			"$ML_DIR/$ml/aliases");
+
+    &CollectAliases;
 
     # always cf is newer than config.ph (against manual edit check)
     &Touch("$ML_DIR/$ml/cf");
@@ -6025,6 +6028,8 @@ sub SetUpCGIadmin
 {
     local($cmd);
 
+    &ResetVariables;
+
     if (-f $CGI_CONFIG) {
 	print STDERR "\n -- load cgi.conf ($CGI_CONFIG)\n";
     }
@@ -6041,7 +6046,15 @@ sub SetUpCGIadmin
 	}
     }
 
+    print STDERR "\n";
+    print STDERR "      EXEC_DIR: $EXEC_DIR\n";
+    print STDERR "CGI_AUTHDB_DIR: $CGI_AUTHDB_DIR\n";
+    print STDERR "\n";
+
     &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
+    &MkDirHier("$EXEC_DIR/share/cgi-bin/admin");
+    &MkDirHier("$REAL_CGI_PATH/admin");
+
     &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
 	  "$EXEC_DIR/www/cgi-bin/admin/.htaccess");
 
