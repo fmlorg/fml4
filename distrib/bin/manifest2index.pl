@@ -14,6 +14,21 @@ while (<>) {
     next if /^INFO:/;
     last if /^LOCAL_CONFIG:/;
 
+    # set up translation alias
+    if (/^\.translate/) { 
+	&SetupTranslationTable($_);
+	next;
+    }
+
+    if ($LANG eq 'Japanese') {
+	if ($EvalBuf) { 
+	    eval $EvalBuf;
+	    print STDERR $@ if $@;
+	    if ($EvalBufTrail) { eval $EvalBufTrail;}
+	    print STDERR $@ if $@;
+	}
+    }
+
     if ($MODE eq 'html') {
 	# &jcode'convert(*s, 'euc'); #';
 	s/&/&amp;/g;
@@ -24,11 +39,15 @@ while (<>) {
     }
 
     if ($LANG eq 'Japanese') {
+	next if /^\#.*Section:/;
+
 	# Section
 	if (/^\.j\s+(Section::\S+)\s+(.*)/) {
 	    &SectionOutput($1, $2);
 	    next;
 	}
+
+	print STDERR ">>> $_\n" if /Section:/;
 
 	# get description
 	if (/^\.j\s+(.*)/) {
@@ -36,15 +55,15 @@ while (<>) {
 	}
     }
     else {
-	next if /^\#.*Sub Section/;
-
-	s/[\#\s]+$//;
+	/\S+[\#\s]{3,}$/ && s/[\#\s]{3,}$//;
 
 	# Section
 	if (/^[\#\s]+(Section:)\s*(.*)/) {
 	    &SectionOutput($1.$2, $2);
 	    next;
 	}
+
+	next if /Sub Section:/;
 
 	# get description
 	if (/^\#\s+(.*)/) {
@@ -139,19 +158,19 @@ sub SectionOutput
 {
     local($section, $buf) = @_;
 
-    return if $SORT;
+    return $NULL if $SORT;
 
     if ($MODE eq 'text') {
 	print "-" x 60;
 	print "\n";
-	print "¡û $buf\n\n";
+	print "* $buf\n\n";
     }
     elsif ($MODE eq 'html') {
 	$section =~ s/::/-/g;
 	$section =~ s/\s+/-/g;
 	$Index .= "   <LI> <A HREF=\"\#${section}\"> $buf</A>\n";
 	print "<A NAME=$section>\n";
-	print "¡û $buf\n\n";
+	print "* $buf\n\n";
     }
 }
 
@@ -167,5 +186,22 @@ sub OutputSortedList
     }
 }
 
+
+sub SetupTranslationTable
+{
+    local($buf) = @_;
+    local(@x);
+
+    $buf =~ s/[\r\n]+$//;
+    ($x0, $x1, $x2, $buf) = split(/\s+/, $buf, 4);
+
+    if ($x0 eq '.translate') {
+	$EvalBuf      .= "/^\\#\\s+$x1/ && do { s/$x2/$buf/g; \$Flag=1;};\n";
+	$EvalBufTrail .= "\$Flag && s/^\\#/.j/; \$Flag=0;\n";
+    }
+    else {
+	die("SetupTranslationTable: invalid input");
+    }
+}
 
 1;

@@ -1,3 +1,8 @@
+.translate value: string 文字列
+.translate value: number 数字
+.translate value: regexp 正規表現
+.translate value: value: 変数がとりうる値:
+
 INFO:
 # FML Configurable Variable Definitions
 #
