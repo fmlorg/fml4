@@ -1,9 +1,4 @@
-.HTML_PRE
-
-.if LANG == JAPANESE
-Q: Welcomeメッセージのカスタマイズについて
-
-A1: welcomeというファイルの内容の前についてしまう部分を削除/編集
+.S	welcomeというファイルの内容の前についてしまう部分を削除/編集
 
 [3.0pl113 以降]
 
@@ -26,7 +21,7 @@ amctl.added.caution:
 それでも英語のwarningがでてしまいます。
 
 A2: 注意書きを後ろに持っていくのはwelcome というファイルを編集しましょう
-.fi
+
 .if LANG == ENGLISH
 Q: customize welcome message in registration
 

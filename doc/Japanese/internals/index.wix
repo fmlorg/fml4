@@ -9,8 +9,6 @@
 .include fop.wix
 .include function.wix
 .include internals.wix
-.include lang-jp.wix
-.include wix.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

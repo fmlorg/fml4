@@ -449,6 +449,7 @@ $APPEND_STARDATE = 1; in config.ph enables
 libstardate.pl はその perl 版です。
 .k	libstardate.pl
 
+
 .S	一つのメーリングリストに複数の投稿用アドレス
 =E.S	One ML has plural addresses for posting 
 .key	複数の投稿用アドレス
@@ -634,69 +635,6 @@ or To: but can understand Errors-To:. Sigh...
 ==
 $USE_ERRORS_TO = 1; if you append Errors-To:.
 
-.S	メールの最後に付加情報をつける設定
-=E.S	Mail Preamble And Trailer
-
-.if LANG == JAPANESE
-注意: 基本的にコマンドの話です。
-
-	$PREAMBLE_MAILBODY	（前）
-	$TRAILER_MAILBODY	（後）
-	を本文の前後に必ず付けます。
-
-つまり、
-	e.g. HELP コマンドにたいして、
-
-	$PREAMBLE_MAILBODY	（前）
-	HELPファイル本文
-	$TRAILER_MAILBODY	（後）
-
-のようになります。昔のやり方は
-
-   $SMTP_OPEN_HOOK = q# $e{'Body'} .= $PREAMBLE_BODY.$e{'Body'}; #;
-   ＃注：普通のＭＬのメールに $PREAMBLE_BODY がついて配送
-
-ですが今は汎用性のためSMTPライブラリ中で処理されます。
-.fi
-.if LANG == ENGLISH
-To append additional information, you can use $PREAMBLE_MAILBODY and
-$TRAILER_MAILBODY. The command mail reply body becomes
-
-	$PREAMBLE_MAILBODY
-	command mail reply
-	$TRAILER_MAILBODY
-.fi
-
-これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
-注意： 配送されるメール本体につける方法。これは倫理的な問題があるので
-変数などで容易にできるように実装されていません。
-=E
-FML DOES NOT IMPLEMENT THE VARIABLE TO REWRITE MAIL BODY IN TO
-PRESERVE MORAL. It is against morals to rewrite mail body even if it
-is an electric mail. We should treat it as the same as a postal mail.
-The rewriting is to cut out a postal mail and rewrite it is mail
-forgery.
-==
-If you rewrite the distribution mail, please use a hook BY YOUR OWN
-RESPONSIBILITY AND RISK.
-
-Example: 注意:このHOOKが走る関数中では %e == %Envelope 
-=E
-Example: In this hook %e == %Envelope. Append "Mail Count:
-sequence-number" in the begging of distributed articles.
-
-   $SMTP_OPEN_HOOK = q# $e{'Body'} .= "Mail Count: $ID\n\n".$e{'Body'}; #;
-
-例： メール本文にヘルプを常につけたす
-=E
-Example: Append "how to get help" to the last of a distributed article.
-
-   $SMTP_OPEN_HOOK = q% 
-
-	$e{'Body'} .= 
-       "\nTo need help, please send 'help' to elena-ctl\@fml.org."; 
-
-   %;
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

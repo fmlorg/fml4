@@ -12,7 +12,7 @@
 関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
 関連事項:  PGP2        => .ptr{PGP2}
 
-◯ 配送メールの暗号をPGP2でする
+◯ 配送メールの暗号をPGP2でするというオプションもありますが…
 
 	$USE_ENCRYPTED_DISTRIBUTION
 .xref	$USE_ENCRYPTED_DISTRIBUTION

@@ -1,5 +1,32 @@
 .C	Overview
 
+本来MIME関係はクライアントプログラムが処理すればいいことなのでサーバと
+しては素通しでいいはずです。fmlのMIME関係の処理は
+
+0.	基本的に素通し
+
+1.	可読性のためにsummary(サマリー)ファイルなどで
+	base64, quoted-printableにエンコードされた
+	Subjectを日本語に戻しておく
+
+2.	MIME/Multipart形式のまとめおくりやファイルの送り返し
+	をオプションとして提供する
+	(デフォールトをMIME/Multipartにすることも可能)
+
+などからなります。それ以外にも『過去に某BBSのせいで流行ったが、本来やっ
+てはいけないオプション』などもあります。
+
+.S	MIME 関係の処理を ON にする (defaultはON)
+
+	$USE_MIME = 1; (default 1)
+.xref	$USE_MIME
+
+.S	記事を強引にMIME decodeする (使ってはいけない)
+
+	$MIME_DECODED_ARTICLE
+.xref	$MIME_DECODED_ARTICLE
+
+
 .S	HOOKで使うと便利な関数: &STR2JIS(文字列)
 
 	&STR2JIS(変換したい文字列);
