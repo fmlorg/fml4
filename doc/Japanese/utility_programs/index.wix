@@ -5,6 +5,7 @@
 .toc
 .~HTML_PRE
 
+.include overview.wix
 .include fml_local.wix
 .include fmlserv.wix
 .include forward.wix
