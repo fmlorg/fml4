@@ -2,7 +2,7 @@
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.preamble:
-	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hi, I am the fml mailing list manager for <_ARG0_>.
 	I would like to verify your will to subscribe this mailing list.
 	If I can confirm your will to subscribe this mailing list,
 	please reply
@@ -16,7 +16,7 @@ confirm.auto_regist.preamble:
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.syntax_error:
-	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hi, I am the fml mailing list manager for <_ARG0_>.
 	I encounter a syntax error. The correct syntax is
 
 	_ARG1_ PASSWORD _ARG2_
@@ -29,7 +29,7 @@ confirm.auto_regist.syntax_error:
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.expired:
-	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hi, I am the fml mailing list manager for <_ARG0_>.
 	I received subscribe request from you but it is done
 	long time ago. So your request is expired.
 
@@ -40,7 +40,7 @@ confirm.auto_regist.expired:
 
 # @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
 confirm.auto_regist.buffer_syntax_error:
-	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hi, I am the fml mailing list manager for <_ARG0_>.
 	Hmm, you may be not a member.
 
 	1. Your mail may come from a bad address which is not 
@@ -56,7 +56,7 @@ confirm.auto_regist.buffer_syntax_error:
 
 # @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
 confirm.auto_regist.invalid_addr:
-	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hi, I am the fml mailing list manager for <_ARG0_>.
 	I expect the following syntax. Please try again!
 
 		_ARG1_ YOUR NAME

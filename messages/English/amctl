@@ -24,7 +24,7 @@ amctl.msend_rehash.send_nothing:
 
 ### Section: subscribe
 amctl.added:
-	I am "fml" for <_ARG1_> mailing list
+	I am the fml for <_ARG1_> mailing list
 	I added the following address as a new member
 
 	     Email address: <_ARG0_>
