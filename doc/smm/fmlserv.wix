@@ -8,6 +8,10 @@
 一番楽なインストール方法は makefml を使ってインストールする方法です。
 詳細は INSTALL というファイルを見て下さい。
 
+	perl makefml fmlserv 
+
+でセットアップされます。
+
 
 .S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)
 
