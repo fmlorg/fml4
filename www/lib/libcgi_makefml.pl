@@ -439,6 +439,7 @@ sub Command
 	&P("</PRE>");
 	&P("<HR>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/rmml.html", 1);
+	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
     }
     elsif ($PROC eq 'config') {
 	$PROC = 'html_config';

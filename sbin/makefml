@@ -3037,11 +3037,11 @@ sub do_destructml
     local($cf, $local_config, $config, @config, %config);
 
     if (! $ml) {
-	&Log("ERROR: makefml::newml ML is not defined");
+	&Log("ERROR: makefml::destructml ML is not defined");
 
 	&Debug("*** ERROR: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
-	&Debug("\n\tmakefml newml ML\n");
+	&Debug("\n\tmakefml destructml ML\n");
 	$XStatus = 'ERROR: makefml.ml_is_not_defined';
 	return;
     }
@@ -3051,6 +3051,8 @@ sub do_destructml
     if (rename($old, $new)) {
 	print STDERR "\trenamed $old to $new (disabled).\n";
 	print STDERR "\tPlease run \"rm -fr $new \" to remove it really.\n";
+
+	&CollectAliases;
     }
     else {
 	&Error("cannot rename $old $new");
