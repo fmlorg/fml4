@@ -1,0 +1,36 @@
+.# .S	fml ライブラリ 一覧 
+
+	表： fml ライブラリ 一覧 
+
+
+   libMIME.pl		MIME 操作関数インターフェイス
+   libcompat.pl		COMPAT コード
+   libcompat_cf1.pl	COMPAT コード
+   libcompat_fml15.pl	COMPAT FML 1.6 以前のもの
+   libcrosspost.pl	クロスポスト
+   libcrypt.pl		暗号化ルーチン
+   libexpire.pl		ＭＬの記事等の expiration を行なう
+   libfml.pl		fml のコマンドインターフェイス および基本関数
+   libfop.pl		ファイル操作関数
+   libfred.pl		汎用正規表現
+   libftp.pl		ftp の操作 ftp://, および、ローカルスプール用
+   libftpmail.pl	ftpmail インターフェイス
+   libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
+   liblibrary.pl	ユーザからのファイルの put と getを可能にする
+   liblock.pl		UNIX V7 タイプの lock()
+   libmladdr.pl		コマンドラインによる簡易設定ルーチン
+   libmodedef.pl	簡易 MODE 設定ルーチン
+   libnewsyslog.pl	/usr/bin/newsyslog 
+   libra.pl		ＭＬをリモート管理するインターフェイス
+   libremote.pl		libra.pl の alias
+   librfc1153.pl	RFC1153 タイプのまとめおくりインターフェイス
+   libsendfile.pl	mget 操作をした後メールを送り返すライブラリ
+   libsid.pl		古いタイプの インターフェイス
+   libstardate.pl	スタートレック宇宙歴ルーチン
+   libsubjectform.pl	Subject FORM 設定例
+   libsynchtml.pl	HTML (e.g. var/htdocs ) 化インターフェイス
+   libutils.pl		各種 misc な関数
+   libwhois.pl		WHOIS インターフェイス
+   libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
+
+.# $Id$
