@@ -128,16 +128,13 @@ roff:	doc/smm/op.wix
 texinfo:
 	$(SH) bin/texinfo-driver
 
-versionup:
-	(cd $(FML); sh usr/sbin/fix-package)
-	(cd ../distrib/lib; tar cvf ../../fml_pl_packages.tar perl)
-	rm -f ../fml_pl_packages.tar.gz 
-	gzip -9 ../fml_pl_packages.tar 
-
 allclean: clean cleanfr
 
 clean:
-	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] NT/*~ tmp/release.info* tmp/sendfilesbysplit* var/queue*/*
+	gar *~ _* proc/*~ \
+	tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] \
+	tmp/release.info* tmp/sendfilesbysplit* \
+	var/simulation/var/queue*/*
 
 cleanfr:
 	gar *.frbak */*.frbak
@@ -316,3 +313,6 @@ rd:
 	perl usr/bin/rdiff.pl *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
 
 
+simulation:
+	sh .simulation/bootstrap
+	grep XXX /tmp/log|Mail -s fml.simulation.log elena
