@@ -243,7 +243,7 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 .l	how-to-lock
 .k	ロックの仕方について
 .k	ロックアルゴリズムの選択と変数の設定
-.seealso fml-mechanism, seq-file
+.xref	fml-mechanism, seq-file
 
 ロックアルゴリズムは二通り用意されてます。flockがお奨めです。flock(2) 
 参照
