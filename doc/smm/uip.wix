@@ -314,9 +314,70 @@ bin/passwd.pl を使って下さい。使い方は、
 	pop経由で自動的にメールをスプールできます。
 
 ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
-できるでしょう。
+できるでしょう。なお、MHと同様パスワードは $HOME/.netrc からとられます。
 
-注意： inc_via_pop.pl が古いプログラムの名前（今はリンク）
+注意： inc_via_pop.pl は昔の名前（今はリンク）
+
+
+SYNOPSIS:
+
+    pop2recv.pl [-user username] [-h host] [-fhd]
+    
+    -user username			
+    -host host(pop server running)
+    -f    config-file
+    -h    this message
+    -d    debug mode
+
+例： ユーザ fukachan が POP Server hikari にアクセスする
+.k	{ユーザ fukachan が POP Server hikari にアクセスする}
+
+	pop2recv.pl -user fukachan -host hikari
+
+
+.S	POP経由の自動RefileやＭＬの実行 (bin/pop2recv.pl)
+.k	POP経由の自動RefileやＭＬの実行
+.k	bin/pop2recv.pl
+.xref	cron
+.xref	fml_local
+
+   ~/.popexecrc という設定ファイルを使って、POP経由でfml_localへ渡す。
+   またcronで pop2recv.pl を動かし、ＭＬと同様のことをすることにする。
+
+   ~/.popexecrc の中は
+
+   $POP_EXEC = "/usr/libexec/fml/fml_local -user fukachan || exit 75";
+   1;
+
+と書いておく。cron で
+
+	pop2recv.pl -user fukachan -host hikari
+
+を一分おきに起こす。
+＃4.4 だと 
+＃	* * * * * pop2recv.pl -user fukachan -host hikari
+＃ですよね。
+
+これで
+	一分に一回 POPサーバへメールが来ているかどうかを見にいって
+	もしメールがあればそれを取り込んで一通ずつfml_local へ渡す
+	fml_local が条件(~/.fmllocalrc)に従いrefile等を行なう
+
+もし、このメールが来ている先が uja-ml で
+
+   $POP_EXEC = "/usr/libexec/fml/fml.pl /var/spool/ml/uja-ml";
+
+になっていれば 
+
+	”POP経由でＭＬ（uja-ml）を運用している”
+
+ことと同じです。
+
+このやりかたを使うことで自分のマシンで sendmail を起こしていてメールを
+受け止められなくてはいけないという制約はなくなります。
+
+これで原理的に perl が動くＯＳなら WINDOWS だろうが Macintosh だろうが
+動くはずですが…？（未確認）
 
 
 
@@ -327,6 +388,36 @@ bin/passwd.pl を使って下さい。使い方は、
 与えられたファイルを分割して送り出すプログラムを太古の昔使ってた名残。
 事実上使ってない。fml 2.x では OBSOLETE
  
+
+.S	SPOOL -> HTML Hierarchy (bin/spool2html.pl)
+.k	bin/spool2html.pl
+.k	spool2html.pl
+
+ターゲットとなるdirectory中のメールをHTML化します。
+
+SYNOPSIS:
+
+  spool2html.pl [-h] [-I INC] [-f cf] [-d HTTP_DIR] [-t TYPE] [-D DIR] SPOOL
+
+    -h    this message
+    -d    $HTTP_DIR
+    -f    cf (例えばMLの設定ファイルconfig.phを評価する）
+    -t    number of day ($HTTP_INDEX_UNIT)
+    -D    $DIR (fml の $DIR)
+    -I    @INC に INCLUDE PATH を付け加える
+    
+    SPOOL $SPOOL_DIR
+    
+
+ターゲット SPOOL 中のメールを HTML化し $HTTP_DIR 中に変換します。
+変換の仕方については SyncHtml (.ptr{SyncHtml}) を参照してください。
+
+ＭＬなら config.ph を評価して実行するので -f config.ph で呼び出しても
+ＯＫです。
+
+なお -D で設定していない場合 $DIR には $PWD が設定されています。
+config.ph を評価する場合には気をつけて下さい。
+
 
 .S	MLを止めて(ロックして)config.phの edit をしたい (bin/vipw.pl)
 .key	vipw.pl
