@@ -18,6 +18,19 @@
 
    makefml ml.cgi $ml (仮) ？
 
+○ ＭＬを作るには newaliases と連動させる必要があるが、
+   MTAの設定はいつどこでする？
+
+	1. makefml admin.cgi
+
+	2. admin/menu.cgi の中でする
+		(こっちのほうが素直な気がする)
+		(途中でMTAが変わるかも知れない)
+		(sendmailはいいとして)
+		(/etc/aliases.db は postfix だとpermission deniedかも)
+		(qmail はどうすればいいんだろぉ…)
+
+
 
 ------------------------------------------------------------------
 [DONE]
