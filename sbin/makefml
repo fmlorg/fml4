@@ -7356,7 +7356,7 @@ sub cgi_menu_mainloop
 	    &Touch($pwd);
 	}
 
-	my $use = &Query("user", $ENV{'USER'}, '[\w\d+\-_\.]+', $ENV{'USER'});
+	my $user = &Query("user", $ENV{'USER'}, '[\w\d+\-_\.]+', $ENV{'USER'});
 
 	print STDERR "\% $prog $flag $pwf $user\n";
 	if ($flag) {
