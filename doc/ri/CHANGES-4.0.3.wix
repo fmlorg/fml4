@@ -15,6 +15,66 @@
 		などが可能になりました。
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
+
+2001/10/15
+
+   4.0.3_BETA starts
+
+   kern/fml.pl (2.138-2.140): 
+	bug fix member check for DBMS
+
+2001/10/14
+
+   proc/libsynchtml.pl (2.45-2.46): 
+	we should not include these char's in URL.
+	RFC2068 says these special char's are not used.
+	+ reserved = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"
+	+ unsafe   = CTL | SP | <"> | "#" | "%" | "<" | ">"
+	incomplete but may be effective ?
+
+   kern/libenvf.pl (2.18-2.19):
+	nuke debug 
+
+2001/10/13
+
+   proc/libamctl.pl
+	bug fix: chaddr error in encountering avoid duplication
+
+2001/10/10
+
+   cf/MANIFEST (1.88-1.89):
+	define MIME_BROKEN_ENCODING_FIXUP
+
+2001/10/03
+
+   kern/libsmtp.pl (2.56-2.57):
+	always update @RcptLists
+
+   proc/libMIME.pl (2.19-2.20):
+	fixing broken MIME encoding
+	apply patch by OGAWA Kunihiko (See fml-help:00907)        
+
+2001/09/28
+
+   cf/MANIFEST (1.86-1.87):
+	add missing definitions
+
+2001/09/23
+
+  bin/base64decode.pl (1.6-1.7)
+  proc/libhtmlsubr.pl (1.10-1.11) 
+	use "base64decode.pl -o OUTFILE" style to avoid error
+	on win32 system
+
+   kern/libkernsubr2.pl
+	sync w/ HEAD (2.9-2.10): fix List-* in anyone mode
+
+2001/09/20
+
+   doc/Japanese/examples/virus_check.ph
+	filter all executables: the pattern is 
+	'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+
 2001/09/18
 
    databases/mysql/toymodel.pl (1.11-1.12)
@@ -158,7 +218,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.19 2001/09/18 15:00:10 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.30 2001/10/15 12:56:14 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
