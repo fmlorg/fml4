@@ -4,35 +4,24 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
-   [4.0.2_ALPHA と 4.0-current が分離した後の主な変更点]
 
-	* spool2html
-		--overwrite
-		記事→HTML 化する際に記事内の Date: ヘッダフィールドを使う
-		
-   [4.0.1 リリース以降の主な変更点]
+2001/07/28
 
-	* 新機能は fml 5.0 のモジュールベースに変更 
-	* ドキュメントの一部を 5.0 branch へ移行
-		doc/devel/OS_and_Perl (OS デフォルトの perl 情報一覧)
-		doc/devel/ 全体
-	* IPv6 をデフォルトで使う
-	* MIME エンコーディングのエンジンを IM ベースへ
-	* X-ML-Info: ループチェックの仕方の微修正
-		今まではアドレスを含むか否か？だったが、
-		それだと引っかかり過ぎることがあるため
-	* サマータイムの考慮
-	* List- ヘッダを個別にカスタマイズ可能にする
-	* 全受信者数を数えている変数を作る
-		$Total_Rcpt_Count
-	* bug fixes
-		FreeBSD での CGI 
-		spool2html で module が @INC にない
-		_smtplog の expire が変なのを修正
+   doc/Japanese/examples/virus_check.ph 
+	discard filename=*.lnk
 
-   [注意]
-	07/02 以降の 4.0-current の変更は 4.0.2 に反映されるものと
-	反映されないものがあります。  
+	.lnk な添付ファイルを持つメールを捨てる。
+	＃ sircam (本家)対策
+
+   proc/libmodedef.pl 
+	Each function should not overwrite $FmlExitHook{'archive'} but
+	append.
+
+	記事のアーカイブの自動作成がうまくいかないのを修正
+
+2001/07/23
+
+   4.0.2 release   
 
 2001/07/22
 
