@@ -16,12 +16,20 @@ local($MTI_DB, $MTIErrorString);
 sub MTICache
 {
     local(*e, $mode) = @_;
-    local($time, $from, $rp, $sender, $db);
+    local($time, $from, $rp, $sender, $db, $host);
 
     $time   = time;
     $from   = &Conv2mailbox($e{'h:from:'}, *e);
     $rp     = &Conv2mailbox($e{'h:return-path:'}, *e);
     $sender = &Conv2mailbox($e{'h:sender:'}, *e);
+
+    $e{"sh:received:"} =~ s/\n\s/ /g;
+    if ($e{"sh:received:"} =~ /by\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$date = $2;
+	&Log("MTI: host=$host [$date]") if $debug_mti;
+	$date = &Date2UnixTime($date);
+    }
 
     if ($mode eq 'distribute') {
 	$MTI_DB = $db = $MTI_DIST_DB || "$FP_VARDB_DIR/mti.dist";
@@ -38,7 +46,7 @@ sub MTICache
     ### also, expire the addresses
     dbmopen(%MTI, $db, 0600);
 
-    for ($from, $rp, $sender) {
+    for ($from, $rp, $sender, $host) {
 	next unless $_;
 	next if $MTI{$_} =~ /$time/; # uniq
 
@@ -161,6 +169,81 @@ sub TrafficInfoEval
 }
 
 sub TrafficInfoFP { 30/(30 + $_[0]);}
+
+sub Date2UnixTime
+{
+    local($in) = @_;
+    local($c, $day, $month, $year, $hour, $min, $sec, $pm, $shift_t, $shift_m);
+    local(%zone);
+
+    require 'timelocal.pl';
+
+    # Hints
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    $c = 0; for (@Month) { $c++; $Month{$_} = $c;}
+    
+    # TIME ZONES: RFC822 except for "JST"
+    %zone = ("JST", "+0900",
+	     "UT",  "+0000",
+	     "GMT", "+0000",
+	     "EST", "-0500",
+	     "EDT", "-0400",
+	     "CST", "-0600",
+	     "CDT", "-0500",
+	     "MST", "-0700",
+	     "MDT", "-0600",	     
+	     "PST", "-0800",
+	     "PDT", "-0700",	     
+	     "Z",   "+0000",	     
+	     );
+
+    if ($in =~ /([A-Z]+)\s*$/) {
+	$zone = $1;
+	if ($zone{$zone} ne "") { 
+	    $in =~ s/$zone/$zone{$zone}/;
+	}
+    }
+
+    # RFC822
+    # date        =  1*2DIGIT month 2DIGIT        ; day month year
+    #                                             ;  e.g. 20 Jun 82
+    # date-time   =  [ day "," ] date time        ; dd mm yy
+    #                                             ;  hh:mm:ss zzz
+    # hour        =  2DIGIT ":" 2DIGIT [":" 2DIGIT]
+    # time        =  hour zone                    ; ANSI and Military
+    # 
+    # RFC1123
+    # date = 1*2DIGIT month 2*4DIGIT
+    # 
+    # 
+    # 
+    if ($in =~ 
+	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
+	$day   = $1;
+	$month = ($Month{$2} || $month) - 1;
+	$year  = $3 > 1900 ? $3 - 1900 : $3;
+	$hour  = $4;
+	$min   = $5;
+	$sec   = $6;	    
+
+	# time zone
+	$pm    = $7;
+	$shift_t = $8;
+	$shift_m = $9;
+	$shift_t =~ s/^0*//; 
+	$shift_m =~ s/^0*//;
+
+	$shift = $shift_t + ($shift_m/60);
+	$shift = ($pm eq '+' ? -1 : +1) * $shift;
+
+	&timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600;
+    }
+    else {
+	&Log("Error Date2UnixTime: cannot resolve [$in]");
+	0;
+    }
+}
 
 
 1;
