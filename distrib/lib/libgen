@@ -93,9 +93,10 @@ COPY_DOCS () {
    echo " "; echo "Copying doc/man/"
    rsync -C -av doc/man/ $DESTDIR/distrib/doc/man/;
 
-   echo " "; echo "Copying Documents (doc/ri/)...";
-   (cd doc; tar cf - ri/*.wix) |\
-   (cd $DESTDIR/distrib/doc; tar xvf - ) 
+# 2000/12/06
+#   echo " "; echo "Copying Documents (doc/ri/)...";
+#   (cd doc; tar cf - ri/*.wix) |\
+#   (cd $DESTDIR/distrib/doc; tar xvf - ) 
 
    # http
    echo " ";
