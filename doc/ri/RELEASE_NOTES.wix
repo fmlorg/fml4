@@ -52,7 +52,41 @@ the design and implementation of Mailing List server, perl, operating
 systems and so on.
 
 
-********** UNTIL Sat Aug 15 22:09:55 JST 1998 *************
+********** UNTIL Sun Sep  6 15:51:59 JST 1998 *************
+
+------------------------------------------
+Date:    Wed, 2 Sep 1998 02:34:05 +0900
+Thanks to: Hideyuki Suzuki <hideyuki@sat.t.u-tokyo.ac.jp>
+In fml-support ML's Count: 05088
+
+follogin this, makefml; add FreeBSD,Openbsd to avoid setgid bit
+
+------------------------------------------
+Date:    Tue, 1 Sep 1998 06:24:35 +0900
+Thanks to: fml-admin@ffs.fml.org
+In fml-support ML's Count: 05075
+
+patch in crypt FreeBSD case (CRYPT CASE)
+
+Date:    Tue, 1 Sep 1998 12:27:07 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 05077
+
+verfied the patch (DES CASE)
+
+------------------------------------------
+Date:    Sat, 29 Aug 1998 22:18:34 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 05068
+
+fix typo  (sub CacheMessageId)
+
+------------------------------------------
+Date:    Tue, 25 Aug 1998 18:40:37 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 05058
+
+add Blame* around on sendmail (INSTALL.wix)
 
 ---------------------------------------
 Date:    Thu, 13 Aug 1998 23:48:07 +0900
