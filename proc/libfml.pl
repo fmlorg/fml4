@@ -869,11 +869,13 @@ sub ProcSetMemberList
     ### CHADDR CONFIRMATION
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';    
     if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
-	if ($CHADDR_AUTH_TYPE eq 'confirmation') {
+	if ((! $e{'mode:admin'}) && 
+	    ($CHADDR_AUTH_TYPE eq 'confirmation')) {
 	    return &Trap__ChaddrRequest(*e);
 	}
     }
-    elsif ($proc eq 'chaddr-confirm') {
+    elsif ((! $e{'mode:admin'}) && 
+	   ($proc eq 'chaddr-confirm')) {
 	return &Trap__ChaddrConfirm(*e);
     }
 

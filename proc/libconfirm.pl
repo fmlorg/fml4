@@ -401,12 +401,15 @@ sub FML_SYS_ChaddrRequest
     $buf =~ s/[\s\n]*$//;
 
     if ($buf =~ /($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/) {
+	$e{'mode:in_amctl'} = 1;
 	&ValidChaddrRequest($2, $3) || do {
 	    &Log("invalid chaddr request: $2 => $3");
 	    &Mesg(*e, ">>> $buf");
 	    &Mesg(*e, "Error: invalid chaddr request");
+	    $e{'mode:in_amctl'} = 0;
 	    return $NULL;
 	};
+	$e{'mode:in_amctl'} = 0;
     }
 
     &ConfirmationModeInit(*e, 'chaddr');
