@@ -1,28 +1,132 @@
-		README of fml
+			README
 
-fml 2.x Mailing List Server Package (compatible with hml 1.6).
-				fukachan@phys.titech.ac.jp
 
-.C	fml 2.0 
+fml Mailing List Server Package 
+
+				fukachan@sapporo.iij.ad.jp
+
+#.index
+
+.C	fml Introduction
+.S	fml 2.0 
 
 fml 2.0 は Mailing List Server package(Perl Scripts package)で、
-壱から Full Scratch したものです。
-＃雑誌等のおまけCDROMの解説は間違いなんです
-＃ server and management っていうべきなのかな？
+僕が壱から Full Scratch したものです。
+＃おまけCDROM雑誌等の解説で「…の改良」等の記述は間違いです。
+＃僕が記述を監修してるわけでもないし
+
+ML server, management tool, .forward 用インターフェイス
+等の集合体です。
 
 これは（歴史的理由等により）デフォールトでは hml 1.6 という Perl
 Script と見かけが同じになるように作動します。
-＃正確にはその元祖の shell script の program というべき
+＃正確にはその元祖の shell script の program というべきであらう
 
-インターフェイスさけ変えてしまえばいいだけの話なので、
-サーバのコマンドの機能は
+いいかえれば デフォールトでは hml 1.6 を Emulation します。しかしなが
+ら、distribute だけするようにして、spoolingするaliasesと同じにするとか 
+listserv のように使うインターフェイス（libexec/fmlserv.pl）も用意され
+ています。
 
-	hml のシンタックスで使う （Default Emulation）
-	listserv or majordomo インターフェイスに見せかける
-	もしくはコマンド機能等を一切使わずにフォワードするだけ等
+結局インターフェイスさけ変えて、ユーザにとってどう見えるか？
+という部分を用意すればよいので、様々なコマンド、ライブラリ群を
+好きなインターフェイスで使えるようにしてあります。
 
-を Emulation します。
+サーバのコマンドの機能は上述のように
 
+	○hml のシンタックスで使う （Default Emulation）
+	○listserv or majordomo インターフェイスに見せかける
+	○もしくはコマンド機能等を一切使わずにフォワードするだけ等
+	○forward でのMLのための仕組み(slocal や vacation)
+
+等を通じてMLサーバへアクセスできるようにできます。
+
+また、メールをリアルタイムに配送したり、一定時間ごとにためて
+まとめおくり するようにするサーバも実装しています。
+
+
+
+.S	目的
+
+これからＭＬをはじめる方にはそのまま、 
+ＭＬサーバをカスタマイズして使いたいとおもっている方には改造のPLATFORM
+としていただけるかと思います。
+＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
+ていると思います。最適解ってわけじゃないけど :-)
+
+
+.S	ソースの入手方法、Update や bug fix等の情報について
+
+最新版のfml-currentのソースコードを手に入れてから改造等はしていただけ
+るとよろしいかと存じます(_o_)。
+＃この一行は各地のarchiveに備えて↑
+
+・fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
+うにしてあります。
+＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
+
+・最新版のfml-currentのソースコードは、なんでもいいからメールを
+fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
+＃自動的に分割して送り返します。
+
+.S	anonymous ftp
+
+	国内
+	master
+	ftp.phys.titech.ac.jp:/pub/net/fml-current/
+
+	mirror
+	ftp://fftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
+
+	国外用のmirror
+	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
+
+＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
+
+
+
+
+・WWWが使えるなら最新のドキュメント、ソースともに 
+	http://www.phys.titech.ac.jp/uja/fml/ 
+からたどれます。
+
+
+.S	fml の ＭＬ と bug-reportのアドレス（ご意見拝聴中）
+
+＃＃＃注意＃＃＃
+とりあえず 今の設定は fml-support は自動登録、fml-bugsは私宛のDMです。
+以下は今後の予定（こころづもり）です。
+＃＃＃＃＃＃＃＃
+
+・バグ、質問、新しい発見（笑）があったら fml-support ML（例によって自
+動登録です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
+
+ただ、個人宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れない
+場合も多々あります。
+できるだけ fml-support Mailing List 宛へ投げてください _o_
+MLならわかる人がすぐに答えてくれる可能性があります。
+
+fml 2.1 以降ではアドレスの設定を変更して
+
+	fml-support@phys.titech.ac.jp 	
+
+を各種議論の場、歴史的事情により自動登録の設定
+MLへ登録して欲しくない方のために
+
+	fml-bugs@phys.titech.ac.jp 	
+
+へ投げていただければ fml-support MLへ登録することなく fml-support へフォ
+ワードを行います。
+
+どうしても 内密な相談とか、DMで聞きたいことは 
+
+	fml-maintainer@phys.titech.ac.jp
+
+へ投げておいてください。ただ返事がすぐ返ることはあまり期待しないでくだ
+さい。
+
+
+	 
+.S	Compatibility
 
 ユーザーからの見かけとか設定に使うファイル名等の部分には名残が見てとれ
 るでしょうが、中身は別物です。
@@ -33,14 +137,9 @@ Script と見かけが同じになるように作動します。
 ＃えればいきなり動くということですが。
 ＃もし、なってなかったらお叱りのメール下さい(_o_)
 
-これからＭＬをはじめる方にはそのまま、 
-ＭＬサーバをカスタマイズして使いたいとおもっている方には改造のPLATFORM
-としていただけるかと思います。
-＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
-ていると思います。最適解ってわけじゃないけど :-)
 
+.C	特徴
 
-■［特徴］
 --------------------------------------------------
 hml 1.6については hml 1.6 README.jpnに次のようにあります
 （fml 2.0でもあてはまるところだけ抜粋）。
@@ -152,58 +251,12 @@ EXTENSIONS：
 です
 
 
-■ソースのUpdateやbug fix等の情報について
-
-最新版のfml-currentのソースコードを手に入れてから改造等はしていただけ
-るとよろしいかと存じます(_o_)。
-＃この一行は各地のarchiveに備えて↑
-
-・fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
-うにしてあります。
-＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
-
-・最新版のfml-currentのソースコードは、なんでもいいからメールを
-fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
-＃自動的に分割して送り返します。
-
-・ＩＰならanonymous ftp 
-	国内
-	master
-	ftp.phys.titech.ac.jp:/pub/net/fml-current/
-
-	mirror
-	ftp://fftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
-
-	国外用のmirror
-	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
-
-＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
-
-
-・WWWが使えるなら最新のドキュメント、ソースともに 
-	http://www.phys.titech.ac.jp/uja/fml/ 
-からたどれます。
-
-
-■ ＭＬ と bug-reportのアドレス
-
-・バグ、質問、新しい発見（笑）があったら fml-support ML（例によって自
-動登録です） か fml-bugs （fukachan@ にのみフォワード）に御一報くださ
-いませ _o_
-
-アドレスの使い分けは
-	fml-bugs@phys.titech.ac.jp → fukachan@phys へフォワード
-か
-	fml-support@phys.titech.ac.jpまでお願いします。
-
-fml-support@phys.titech.ac.jp は fml の議論？のＭＬです
-＃歴史的なりゆき？で混乱した人たちごめんなさい_o_
-
-
-	 
 .C	How to install
 
 まずperlとsendmailが必要です。私のテスト環境は
+2.1 は
+	sendmail 8.6.12 perl4.036 on NetBSD 1.1B(1.1 Current)
+2.0 まで
 	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2R 
 	sendmail 8.6.12+2.4W, perl4.036 on NetBSD 1.0
 	sendmail 8.6.12+2.4W, perl5.001 on NetBSD 1.0
@@ -236,7 +289,7 @@ FAQ(1.4〜)にはキーワード、変数、フック等の索引が新たにつきました。
 1.5 のスクリプトは flock や自動登録等の設定も ついでに対話的に行えます。
 
 
-■ Version up について
+.C	 Version up について
 
 ひろげて *.pl だけ今使っているところへコピーしてください（おしまひ）
 ＃よく使うライブラリは lib/perl/ の下にlinkしてあります。
