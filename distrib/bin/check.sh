@@ -14,7 +14,7 @@ echo "Ignore Pattern: $OK_IGNORE";
 echo ""
 
 for x in kern/*.pl bin/*pl sbin/makefml \
-	proc/*.p? libexec/*.p? module/*/*.p?
+	proc/*.p? libexec/*.p?
 do 
 	echo "--- $x"
 	echo "s#$x ##g" > $sed
