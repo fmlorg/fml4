@@ -177,26 +177,20 @@
 <UL>
 
    <A NAME=export>
-   <LI>既存メーリングリストをWWWでいじれるように設定する
+   <LI> 既存の特定のＭＬを CGI 経由で操作可能にする
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
 
+	メーリングリスト名: <INPUT NAME=ML SIZE=30>
 	<TABLE>
-		<TR>
-			<TD ALIGN=right> メーリングリスト名:
-			<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
-				<TABLE>
-				<TD ALIGN=left>既存リストからの選択:
-				<TD ALIGN=right>
-				<SELECT NAME=ML SIZE=2 >
-				__EXPAND_OPTION_ML__
-				</SELECT>
-			</TABLE>
-		<TR>
+		<TD ALIGN=left>既存リストからの選択:
+		<TD ALIGN=right>
+		<SELECT NAME=ML SIZE=2 >
+		__EXPAND_OPTION_ML__
+		</SELECT>
 	</TABLE>
-	
 	_____________________________
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
@@ -204,6 +198,7 @@
 	</FORM>
 	
 
+<HR>	
    <A NAME=cgiadmin>
    <LI>
 	この画面を操作可能な(CGI)管理者アカウントのパスワード設定
@@ -218,35 +213,26 @@
 	<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
 	<INPUT TYPE=hidden NAME=ML   VALUE=etc>
 	
-	<TABLE>
-		<TR>
-			<TD ALIGN=right> Email アドレス ないしアカウント名:
-			<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
-			<TABLE>
-				<TD ALIGN=left>既存リストからの選択:
-				<TD ALIGN=right>
-				<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
-				__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
-				</SELECT>
-			</TABLE>
-	
-		<TR>
-			<UL>
-			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
-			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
-			</UL>
-	
-		<TABLE>
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
+
+	<BR> Email アドレス ないしアカウント名:
+		<INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
+	<BR>
+		既存のアカウントからの選択:
+		<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
+		__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
+		</SELECT>
+
+	<TABLE>	
 		<TR>
 			<TD ALIGN=right> パスワード:
 			<TD ALIGN=left>
 			<INPUT TYPE=password NAME=PASSWORD SIZE=30>
-	
 		<TR>
 			<TD ALIGN=right> 確認のため同じパスワード:
 			<TD ALIGN=left>
 			<INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
-		</TABLE>
 	</TABLE>
 	_____________________________
 	<BR>
