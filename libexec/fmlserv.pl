@@ -1013,6 +1013,8 @@ sub DEFINE_MODE  { 1;}
 sub DEFINE_FIELD_FORCED  { 1;}
 sub DEFINE_FIELD_ORIGINAL { 1;}
 sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
+sub DEFINE_FIELD_LOOP_CHECKED { 1;}
+sub UNDEF_FIELD_LOOP_CHECKED  { 1;}
 sub ADD_FIELD     { 1;}
 sub DELETE_FIELD  { 1;}
 sub ml'Log { &main'Log(@_);}
