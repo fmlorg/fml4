@@ -7,7 +7,6 @@ A: www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを
    格納する場所が fml/www/
 
 
-
 Q: cgi以前に作られたものはどう処理する？自動的に有効か？
 A: CGIをいじれる人がそのＭＬの設定の変更はできる。
    
@@ -27,8 +26,6 @@ CGIをいじれる人は概ねそのサーバに入ってmakefmlでの設定変更を使える人と
 Q: CGI操作ユーザの設定追加/変更/削除
 A: 
 
-XXX  あ、削除ができない --;;
-
 1. CGIからおこなう
 2. makefml htpasswd ML ユーザ名
 
@@ -39,32 +36,37 @@ A: GUI: メニューの『管理者パスワードの設定』で設定
 反映させる。その後は自動 sync はしない(別のパスワードを使えるように)
 
 
-Q: ＭＬを作るには newaliases と連動させる必要があるが、
-A: aliases コレクタが必要そうだね 
+Q: ＭＬを作るには newaliases と連動させる必要があるが …
+
+WWWで aliases の方法は設定できる。
 
 
-Q: MTAの設定はいつどこでする？
+Q: MTAの設定はいつどこでする？(途中でMTAが変わるかも知れない)
 A: メインメニューにいちおうあるが…それがいいのか？
-
-   (途中でMTAが変わるかも知れない)
-
+   
 
 Q: WWW下のCGI PATHは？
 A: makefml でインストールする時
 
 
 Q: postfix 特有の事情
-A: postalias /var/spool/ml/etc/aliases OK
+A: postalias /var/spool/ml/etc/aliases ではしらえる
 
 
 Q: sendmail 特有の事情
 A: /var/spool/ml/etc/aliases.db に root 権限のファイルが必要
 
+インストール後に root になって
+
+   # touch /var/spool/ml/etc/aliases.db 
+
+しておく必要がある
 
 Q:	qmail
 A: 「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要
     らないのか？というきがする
 
+ためしたことがない;-)
 
 Q: makefml config メニューを日本語にできるか？
 A: Message Language Extension をつかう 。対応済み
