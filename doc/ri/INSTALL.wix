@@ -108,7 +108,7 @@ In this case please create the maintainer group (e.g. fml) in
 Unpack fml-something(usually revision).tar.gz, you can find
 fml-x.y-something directory. Change to the directory, you have a set
 of the fml system.  In this directory, please input the command
-=S
+
 	perl makefml install
 
 というコマンドを実行して下さい。そのマシンの上に FML システムをインス
