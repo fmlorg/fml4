@@ -64,7 +64,7 @@ sub DoNeonSendFile
 	    &Log("NeonSendFile: $n is not found.", "[ @info ]");
 	    $f =~ s/$DIR/\$DIR/;
 	    $error .= &Translate(*Envelope, 
-				 "$f is not found.".
+				 "$f is not found.",
 				 'not_found', $f);
 	    $error .= "\n[ @info ]\n\n";
 	    &Mesg(*Envelope, "NeonSendFile Error:\n\t$f is not found.\n");
