@@ -16,7 +16,7 @@
 
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-$error_code_pat = '55\d|5\.5\.\d';
+$error_code_pat = '55\d|5\.\d\.\d';
 $TrapWord       = 'unknown \S+|\S+ unknown|\S+ not known';
 $new_block = 1;
 $gabble = 0;
@@ -24,6 +24,16 @@ $curf = $NULL;
 
 while (<>) {
     chop;
+
+    # save excursion
+    $PrevLine = $CurLine;
+    $CurLine  = $_;
+
+    # check the current block
+    if (/^Content-Type:\s*(.*)/i) { 
+	print STDERR "<<< $_ >>>\n";
+	$mp_block = $1;
+    }
 
     # Store Received: field 
     if (/^([-A-Za-z]+):(.*)/) {
@@ -82,6 +92,29 @@ while (<>) {
 	next;	
     }
 
+
+
+    ###
+    ### RFC1891,1894 DSN
+    ###
+    if ($mp_block =~ /delivery\-status/i) {
+	if (/^Final-Recipient:.*\s+(\S+\@\S+)/i) {
+	    $DSN_FinalRecipient = &BareAddr($1);
+	}
+	elsif (/^Original-Recipient:.*\s+(\S+\@\S+)/i) {
+	    $DSN_OriginalRecipient =  &BareAddr($1);
+	}
+	elsif (/^Status:\s*5/i) {
+	    if ($DSN_OriginalRecipient) {
+		&CacheOn($DSN_OriginalRecipient, " ");
+	    }
+	    if ($DSN_FinalRecipient) {
+		&CacheOn($DSN_FinalRecipient, " ");
+	    }
+
+	    $found++;	    
+	}
+    }
 
     #####
     ##### MTA szpecific
@@ -189,6 +222,15 @@ while (<>) {
 &Report;
 
 exit 0;
+
+
+sub BareAddr
+{
+    local($s) = @_;
+    $s =~ s/<//g;
+    $s =~ s/>//g;
+    $s;
+}
 
 
 sub ExtractAddr
@@ -849,6 +891,10 @@ Options:
                             ua: unknown address
                             us: service unavaiable 
                             default: default value for phrases not above
+
+    -k action        'bye' is default,  off or bye.
+                     change the action when mead detects a bad address.
+
 "
 }
 
