@@ -297,12 +297,12 @@ sub AdminModeInit
 
 		$FTP_HELP_FILE,
 		$WHOIS_HELP_FILE,
-
 		);
 
 	push(@rrf, @ACTIVE_LIST);
 	push(@rrf, @MEMBER_LIST);
 	push(@REMOTE_RECONFIGURABLE_FILES, @rrf);
+	push(@REMOTE_ACCESSIBLE_FILES, @rrf);
 
 	$AttachRRF = 1;	# ifndef ...:-)
     }
@@ -881,8 +881,14 @@ sub ProcAdminDir
 
     &Log("admin $proc $opt");
 
+    # restrict $opt
+    if ($opt && ($opt !~ /^[-a-zA-Z0-9]+$/)) {
+	&Log("admin ${proc}: invalud opt");
+	return 0;
+    }
+
     $opt  = $opt || '.';
-    $flag = "-lR" if /^dir$/oi || /^ls\-lR$/oi;
+    $flag = "-lR" if $proc =~ /^dir$/oi || $proc =~ /^ls\-lR$/oi;
 
     $prog = &SearchUsualPath('ls');
 
@@ -988,14 +994,14 @@ sub ProcAdminUnlinkArticle
 }
 
 
-
-
 sub ProcAdminRetrieve
 {    
     local($proc, *Fld, *e, *opt) = @_;
     local($file) = "$DIR/$opt";
 
     &Log("admin $proc $file");
+
+    &AccessibleFileP(*e, $DIR, $file) || return 0;
 
     if (-f $file) { 
 	&LogWEnv("admin $proc \$DIR/$opt", *e);
@@ -1140,6 +1146,57 @@ sub NukeDirName
 }
 
 
+sub AccessibleFileP
+{
+    local(*e, $dir, $file) = @_;
+    local($s, $p);
+
+    $file = &NukeDirName($file, $dir);
+    $file = $dir .'/'. $file;
+    $file =~ s#//#/#g;
+
+    for (@REMOTE_INACCESSIBLE_FILES) {
+	&Log(" ---- $file eq <$_>");
+	print STDERR "match $file eq $_\n" if $debug;
+	if ($file eq $_ || 
+	    $file eq $_.'.orig' || 
+	    $file eq $_.'.org' || 
+	    $file eq $_.'.bak' || 
+	    $file eq $_.'.new') {
+	    return 0;
+	}
+    }
+
+    return 1;
+
+    # 
+    # NOT REACHED 
+    # 
+    for (@REMOTE_ACCESSIBLE_FILES) {
+	print STDERR "match $file eq $_\n" if $debug;
+	if ($file eq $_ || 
+	    $file eq $_.'.orig' || 
+	    $file eq $_.'.org' || 
+	    $file eq $_.'.bak' || 
+	    $file eq $_.'.new') {
+	    return 1;
+	}
+    }
+
+    &Log("admin: to reconfigure $file is forbidden.");
+    &Log("FYI: reconfig only files in \@REMOTE_ACCESSIBLE_FILES.");
+
+    $s .= "Remote administraion mode error:\n";
+    $s .= "File to remove is not listed in \@REMOTE_ACCESSIBLE_FILES.\n";
+    $s .= "You can substitute a file of \@REMOTE_ACCESSIBLE_FILES.\n";
+    $s .= "Please set \@REMOTE_ACCESSIBLE_FILES to permit other files\n";
+
+    &Mesg(*e, $s, 'admin.accessible_error');
+
+    0;
+}
+
+
 sub ReconfigurableFileP
 {
     local(*e, $dir, $file) = @_;
@@ -1154,7 +1211,11 @@ sub ReconfigurableFileP
 
     for (@REMOTE_RECONFIGURABLE_FILES) {
 	print STDERR "match $file eq $_\n" if $debug;
-	if ($file eq $_) {
+	if ($file eq $_ || 
+	    $file eq $_.'.orig' || 
+	    $file eq $_.'.org' || 
+	    $file eq $_.'.bak' || 
+	    $file eq $_.'.new') {
 	    return 1;
 	}
     }
@@ -1196,6 +1257,9 @@ sub OverWriteFileToRemove
 
     if (open(OW, "> $f")) {
 	select(OW); $| = 1; select(STDOUT);
+	print OW "From: $MAINTAINER\n";
+	print OW "To: $MAIL_LIST\n";
+	print OW "\n";
 	print OW "This article $opt is removed by an administrator.\n\n";
 	print OW "-- $MAINTAINER\n";
 	close(OW);
