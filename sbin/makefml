@@ -111,6 +111,9 @@ sub InitMakeFml
 	$main'debug = $Config'debug;
 	package main;
 
+	# overwrite configuration debug mode;
+	$debug = 1 if $opt_d;
+
 	&Dumpvar('Config') if $debug;
     }
     else {
@@ -739,13 +742,18 @@ sub OutPutLocalConfig
 
     local($output_count);
     print CF "\n\n\nLOCAL_CONFIG\n\n";
-    print CF "\# configured by $0 ($MailDate)\n";
     print CF "\#__MAKEFML_LOCAL_CONFIG__\n";
+    print CF "\# configured by $0 ($MailDate)\n";
+    print CF "\# *** DO NOT EDIT MANUALLY THIS BLOCK!!! ***\n";
+
+    printf STDERR "\n---MAKE_FML OUTPUT\n\n", $k, $v if $debug;
 
     ### POINT!!!
     ### $local_config .= $_ if /\$MAKE_FML/;
     ### 
     while (($k, $v) = each %MAKE_FML) {
+	printf STDERR " =output: %-20s -> %s\n", $k, $v if $debug;
+
 	next unless $v;
 
 	# ATTENTION! RESET HERE;
@@ -758,6 +766,10 @@ sub OutPutLocalConfig
 	}
 	elsif ($k eq 'OPT_MIME') {
 	    print CF "\$MAKE_FML{'OPT_MIME'} = 1;\n";
+	}
+	elsif ($k eq "AUTO_REGIST_WITH_CONFIRM" && $v == 1) {
+	    print CF "\$MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'} = 1;\n";
+	    print CF "\&DEFINE_MODE('confirm');\n";
 	}
 	elsif ($k eq "DELIVERY_MODE") {
 	    if ($v eq "distribute") {
@@ -784,6 +796,7 @@ sub OutPutLocalConfig
 	$value = $MAKE_FML{$_};
 	next unless $value;
 	$value = ($value =~ /^\d+$/) ? $value : "\"$value\"";
+
 	print CF "\$MAKE_FML{'$_'} = $value;\n";
 	$output_count++;
     }
@@ -793,7 +806,12 @@ sub OutPutLocalConfig
 	print CF "&ConfigByMakeFml;\n";
     }
 
-    print CF "\#__END_OF_MAKEFML_LOCAL_CONFIG__\n";    
+    # output to $DIR/cf
+    print CF "\#__END_OF_MAKEFML_LOCAL_CONFIG__\n";
+    print CF "\n\n\# YOU CAN EDIT MANUALLY AFTER HERE.\n\n";
+    print CF "$USER_DEFINED_LOCAL_CONFIG\n";
+
+    printf STDERR "\n---END OF MAKE_FML OUTPUT\n\n", $k, $v if $debug;
 }
 
 
@@ -836,6 +854,16 @@ sub ShowMainMenu
     }
     else {
 	$ShowMenu{'auto_regist'} = "auto_registation";
+
+	if ($MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"}) {
+	    $ShowMenu{'auto_regist'} .= " (confirmation)"; 
+	}
+	elsif ($config{"REQUIRE_SUBSCRIBE_IN_BODY"}) {
+	    $ShowMenu{'auto_regist'} .= " (body)"; 
+	}
+	else {
+	    $ShowMenu{'auto_regist'} .= " (subject)"; 
+	}
     }
 
     # debug
@@ -870,7 +898,7 @@ sub ShowMainMenu
 
 sub AutoRegistQuery
 {
-    local($ml, *config) = @_;
+    local($ml, *config, *MAKE_FML) = @_;
     local($r, *new);
 
     ### MENU;
@@ -879,7 +907,8 @@ sub AutoRegistQuery
     $MENU{'AUTO_REGIST_TYPE'} .= "Auto Registration Type\n";
     $MENU{'AUTO_REGIST_TYPE'} .= "0 default\n";
     $MENU{'AUTO_REGIST_TYPE'} .= "1 subject\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "2 body\n";	
+    $MENU{'AUTO_REGIST_TYPE'} .= "2 body\n";
+    $MENU{'AUTO_REGIST_TYPE'} .= "3 body with confirmation (RECOMMENDED)\n";
     $MENU{'AUTO_REGIST_TYPE'} .= "\n";
     $MENU{'AUTO_REGIST_TYPE'} =~ s/\n/\n$CurTag/g;
     ### END MENU;
@@ -898,7 +927,7 @@ sub AutoRegistQuery
     if ($r eq "y") {
 	print $MENU{'AUTO_REGIST_TYPE'};
 
-	$r = &Query("Auto Registration Type ", "0,1,2 ", '0|1|2', "0");
+	$r = &Query("Auto Registration Type ", "0,1,2,3", '0|1|2|3', "0");
 
 	if ($r == 1) {
 	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
@@ -907,6 +936,10 @@ sub AutoRegistQuery
 	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
 	    $new{"REQUIRE_SUBSCRIBE_IN_BODY"} = 1;
 	}
+	elsif ($r == 3) {
+	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
+	    $new{"AUTO_REGIST_WITH_CONFIRM"}  = 1;
+	}
     }
 
     # reset;
@@ -914,6 +947,10 @@ sub AutoRegistQuery
 	undef $config{$_};
 	$config{$_} = $new{$_};
     }
+
+    # export;
+    undef $MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"};
+    $MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"} = $new{"AUTO_REGIST_WITH_CONFIRM"};
 }
 
 
@@ -1691,10 +1728,15 @@ sub GetCF
 	}
 	else {
 	    next if /^LOCAL_CONFIG/;
+	    next if /^\# YOU CAN EDIT MANUALLY AFTER HERE/;
+	    next if /^\# configured by \S+makefml/;
 
 	    if (/^\#__MAKEFML_LOCAL_CONFIG__/ .. 
 		/^\#__END_OF_MAKEFML_LOCAL_CONFIG__/) {
 		$local_config .= $_ if /\$MAKE_FML/;
+	    }
+	    else {
+		$USER_DEFINED_LOCAL_CONFIG .= "$_\n";
 	    }
 	}
     }
@@ -1738,7 +1780,7 @@ sub do_config
 	    last;
 	}
 	elsif ($r == 1) {
-	    &AutoRegistQuery($ml, *config);
+	    &AutoRegistQuery($ml, *config, *MAKE_FML);
 	}
 	elsif ($r == 2) {
 	    &SubjectTagQuery($ml, *MAKE_FML);
@@ -1773,7 +1815,7 @@ sub do_config
 	&Uniq(*config);
 
 	for (@config) {
-	    print STDERR "-config: $_\n";
+	    print STDERR "-config: $_\n" if $debug;
 
 	    # skip MIME since thie value set by $MAKE_FML{OPT_MIME}
 	    next if $_ eq 'USE_MIME'; 
