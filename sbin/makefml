@@ -220,6 +220,10 @@ sub InitMakeFml
 	if ($CONFIG_DIR) { $AutoLoad = 1;}
     }
 
+    if ($ARGV[0] eq 'install' && -d 'src') {
+	unshift(@INC, "$ENV{'PWD'}/src");
+	print STDERR "unshift(\@INC, $ENV{'PWD'}/src)\n";
+    }
 
     ### FIX VARIABLES
     $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml";
