@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/14
+
+   fmlwrapper.c (nuke fml.c) and fmlwrapper is used now
+	since the names of fml and fml-ctl are ambiguous.
+
+2000/10/11
+
+   makefml	set umask(022) when &CollectAlaises() runs.
+
+2000/10/10
+
+   mead		a lot of hacks
+
 2000/10/05
 
    proc/libra.pl

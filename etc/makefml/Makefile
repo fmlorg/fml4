@@ -11,8 +11,8 @@
 # $Id$
 
 CC     = cc
-# CFLAGS = -DPOSIX
-CFLAGS = 
+# CFLAGS = 
+CFLAGS = -DPOSIX
 
 CHMOD  = chmod
 MODE   = 4755
@@ -20,7 +20,7 @@ MODE   = 4755
 all:
 	@ echo ""
 	@ echo "\"make config.ph\"	make config.ph from ./cf"
-	@ echo "\"make fml\"		make fml from fml.c"
+	@ echo "\"make fml-wrap\"	make C wrapper from fmlwrapper.c"
 	@ echo "\"make config\"		\"makefml config _ML_\" # run CUI menu"
 	@ echo "			You can control fundamental parameters"
 	@ echo "\"make spool2html\"	convert spool to html files"
@@ -38,12 +38,14 @@ config.ph: cf
 	perl _EXEC_DIR_/makefml update-config _ML_
 
 
-fml: fml-wrap
+fml: fmlwrapper
+fml-wrapper: fml-wrap
+fmlwrapper: fml-wrap
 
-fml-wrap: fml.c config.h
-	$(CC) $(CFLAGS) -o fml-wrap fml.c
+fml-wrap: fmlwrapper.c config.h
+	$(CC) $(CFLAGS) -o fml-wrap fmlwrapper.c
 	$(CHMOD) $(MODE) fml-wrap
-	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrap fml.c
+	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrap fmlwrapper.c
 	$(CHMOD) $(MODE) fml-ctl-wrap
 
 spool2html:

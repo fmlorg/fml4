@@ -140,7 +140,8 @@ sub InitMakeFml
     &Getopts("adhf:A:O:p:D:vwV:mi:u:UFE:W:c:");
 
     # toggle flags
-    $CGIInstallMode = ($opt_W =~ /cgi/i) ? 1 : 0;
+    # $CGIInstallMode = ($opt_W =~ /cgi/i) ? 1 : 0;
+    $CGIInstallMode = 1; # yes always! :-)
     $AutoLoad       = $opt_a ? 1 : 0;
     $debug          = $opt_d;
     $verbose        = $opt_v;
@@ -159,9 +160,6 @@ sub InitMakeFml
     if ($ARGV[0] =~ /^install\-withcgi/) {
 	$CGIInstallMode = 1;
 	$ARGV[0] = 'install'; # fml-support: 7706
-    }
-    if ($CGIInstallMode) {
-	print STDERR "  *** installing fml with WWW/CGI interface ***\n";
     }
 
     ### determine Architechure dependence
@@ -722,7 +720,7 @@ sub SetHashDefaults
 		    'html_cgiadmin_passwd', 'do_html_cgiadmin_htpasswd',
 
 		    # cgi utilities
-		    'admin.cgi',          'do_setup_admin_cgi',
+		    'admin.cgi',          'do_setup_admin_cgi_init',
 		    'mladmin.cgi',        'do_setup_mladmin_cgi',
 		    'ml-admin.cgi',       'do_setup_mladmin_cgi',
 		    '500#mladmin.cgi ML', 'set up ml-admin/$ml/*.cgi',
@@ -787,6 +785,7 @@ sub SetHashDefaults
 
 	 # CGI/
 	 "admin.cgi", "html_cgiadmin_passwd",
+	 'admin.cgi-config', 'admin.cgi_config',
 
 	 # utility
 	 "show", "showconfig", "showconf", 'send-pr', 'bug-report-template',
@@ -926,7 +925,7 @@ sub InitFmlConfig
     $buf = &Dumpvar('Config');
     &SaveConfig($buf) if $buf;
 
-    print "\nThe Current Config is saved in $FML_CONFIG\n";
+    print "\nThe current configuration is saved in $FML_CONFIG\n";
 }
 
 
@@ -1535,6 +1534,9 @@ sub MakeFmlUnLock
     if ($debug0) {
 	print "\nDone.\n" unless $Env eq 'HTTPD';
     }
+    else {
+	print "\n";
+    }
 }
 
 
@@ -1985,7 +1987,7 @@ sub Query
     local($menu, $query, $pat, $default) = @_;
     
     print "Query(debug): ($menu, $query, $pat, $default)\n" if $debug;
-    print "\n";
+    print "\n" unless $MenuNarrowLineSkip;
 
     while (1) {
 	#print "menu={$menu} query={$query}\n";
@@ -2037,7 +2039,7 @@ sub ResetVariables
 	if (! $REAL_CGI_PATH) {
 	    $REAL_CGI_PATH = $CGI_PATH;
 	    $REAL_CGI_PATH =~ s#^/+##;
-	    $REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
+	    $REAL_CGI_PATH = $EXEC_DIR. '/www/share/'.$REAL_CGI_PATH;
 	}
 
 	# www directory
@@ -2393,6 +2395,7 @@ sub Conv
 
 	# www/cgi interface
 	s/_SSL_REQUIRE_SSL_/$SSL_REQUIRE_SSL/g;
+	s/_CGI_AUTHDB_DIR_/$CGI_AUTHDB_DIR/g;
 
 	if (/dev\.null.*\@domain\.uja/) {
 	    s/domain\.uja/$DOMAIN/g;
@@ -2982,7 +2985,7 @@ sub do_install
 
     # cgi mode
     if ($CGIInstallMode) {
-	&SetUpCGIadmin;
+	&SetUpCGIadmin('install');
     }
 }
 
@@ -3135,7 +3138,7 @@ sub do_newml
     &SetPersonalUmask;	# umask 077;
 
     &Conv($ml, "$EXEC_DIR/etc/makefml/crontab", "$ML_DIR/$ml/crontab");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/fml.c",   "$ML_DIR/$ml/fml.c");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/fmlwrapper.c",   "$ML_DIR/$ml/fmlwrapper.c");
 
     &FixIncludeHeader;
 
@@ -5066,7 +5069,7 @@ sub do_fmlserv
     &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_DIR/$ml/aliases");
 
     &SetPersonalUmask;
-    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$ML_DIR/$ml/fml.c");
+    &Conv($ml, "$exec_dir/fmlserv-fmlwrapper.c",   "$ML_DIR/$ml/fmlwrapper.c");
     &FixIncludeHeader;
 
     # fmlserv (uid != owner ) can read help
@@ -5407,6 +5410,30 @@ sub do_log
 }
 
 
+sub do_setup_admin_cgi_init
+{
+    my ($action) = @_;
+
+    if ($action) {
+	if ($action eq 'update') {
+	    &do_setup_admin_cgi($NULL);
+	}
+	elsif ($action eq 'config') {
+	    &do_admin_cgi_config($NULL);
+	}
+	else {
+	    &Error("unknown action=$action");
+	}
+    }
+    else {
+	&Error("Usage: admin.cgi [update|config]");
+	print STDERR "Usage:\n        \n";
+	print STDERR "      admin.cgi update    remake /admin/*.cgi\n";
+	print STDERR "      admin.cgi config    configuration menu\n";
+    }
+}
+
+
 sub do_setup_admin_cgi
 {
     local($ml) = @_;
@@ -5415,16 +5442,23 @@ sub do_setup_admin_cgi
 
     &MkDir("$REAL_CGI_PATH/admin", 0755);
 
+    print STDERR " * create $REAL_CGI_PATH/admin/.htaccess\n"
+	unless $SilentMode;
+    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
+	  "$REAL_CGI_PATH/admin/.htaccess");
+
+    print STDERR " * create CGI scripts in $REAL_CGI_PATH/admin/\n   "
+	unless $SilentMode;
+    
     for $f ("menu.cgi", "makefml.cgi", "mlmenu.cgi",
 	    "menubar.cgi", "index.cgi", "newml.cgi", "rmml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/admin/$f";
 	$outfile  = "$REAL_CGI_PATH/admin/$f";
-	print "\tcreate $outfile\n";
+	print STDERR $f, " " unless $SilentMode;
 	&Copy($template, $outfile);
 	chmod 0755, $outfile;
     }
-
-    print "\n   done.\n";
+    print STDERR "\n" unless $SilentMode;
 }
 
 
@@ -6814,33 +6848,21 @@ package main;
 #    $CGI_AUTHDB_DIR/admin/htpasswd
 sub SetUpCGIadmin
 {
+    my ($mode) = @_;
     local($cmd);
 
     &ResetVariables;
 
+    # ignore cgi examles in upgrade
     if (-f $CGI_CONFIG) {
-	print STDERR "\n -- load cgi.conf ($CGI_CONFIG)\n";
+	return;
     }
-    else {
-	print STDERR "\n -- set up CGI interfaces\n";
-
-	$cmd = &Query("Use SSL? ", "y/n", "y|n", "n");
-
-	if ($cmd eq 'y') { 
-	    $SSL_REQUIRE_SSL = 'SSLRequireSSL';
-	}
-	else {
-	    $SSL_REQUIRE_SSL = '';
-	}
+    elsif ($mode eq 'install') {
+	$SSL_REQUIRE_SSL = 'SSLRequireSSL';
     }
-
-    print STDERR "\n";
-    print STDERR "      EXEC_DIR: $EXEC_DIR\n";
-    print STDERR "CGI_AUTHDB_DIR: $CGI_AUTHDB_DIR\n";
-    print STDERR "\n";
 
     &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
-    &MkDirHier("$EXEC_DIR/share/cgi-bin/admin");
+    &MkDirHier("$EXEC_DIR/www/share/cgi-bin/admin");
     &MkDirHier("$REAL_CGI_PATH/admin");
 
     &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
@@ -6850,35 +6872,36 @@ sub SetUpCGIadmin
 	  "$REAL_CGI_PATH/admin/.htaccess");
 
     # first time!
-    if (-f "$CGI_AUTHDB_DIR/admin/htpasswd") {
-	print STDERR "   FYI: $CGI_AUTHDB_DIR/admin/htpasswd already exists.\n";
-	print STDERR "        not edit $CGI_AUTHDB_DIR/admin/htpasswd\n";
-    } 
-    else {
+    if (! -f "$CGI_AUTHDB_DIR/admin/htpasswd") {
 	&MkDirHier("$CGI_AUTHDB_DIR/admin");
 	&MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
-	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
-	      "$CGI_AUTHDB_DIR/admin/htpasswd");
-
-	local($htp) = &__SearchPath('htpasswd');
-	if (-x $htp) {
-	    print STDERR 
-		"   $htp -c $CGI_AUTHDB_DIR/admin/htpasswd admin\n";
-	    &__system($htp, "-c", "$CGI_AUTHDB_DIR/admin/htpasswd", "admin");
-	}
-	else {
-	    print STDERR "   Warn: cannot find \"htpasswd\" program\n";
+	if (open(HTPASSWD, ">> $CGI_AUTHDB_DIR/admin/htpasswd")) {
+	    my $p;
+	    srand(time | $$);
+	    $p = sprintf("%s%s%s%s", 
+			 substr(rand($$), 0, 2), 
+			 substr(($ENV{'USER'} || $<), 0, 2), 
+			 substr((time % 100), 0, 2), 
+			 substr($FQDN, 0, 2));
+	    $p = crypt($p, $p) || 'xaF5F0dIN3ZP.';
+	    print HTPASSWD "admin:${p}\n";
+	    close(HTPASSWD);
 	}
     }
 
-    &SaveCGIConf;
-
     # make cgi-bin/admin/
-    &do_setup_admin_cgi;
+    print STDERR "\n";
+    print STDERR "Setup CGI examples ";
+    # print STDERR "     $REAL_CGI_PATH/admin/ (CGI)\n";
+    # print STDERR "     $EXEC_DIR/www/examples/ (examples for MTA and httpd)\n";
 
-    # set up examples
-    print STDERR "   - make CGI config examples for MTA and httpd.\n";
-    for (<www/examples/*/*>) { &Conv($NULL, $_, "$EXEC_DIR/$_");}
+    $SilentMode = 1;
+    &do_setup_admin_cgi;
+    print ".";
+    $SilentMode = 0;
+    for (<www/examples/*/*>) { print "."; &Conv($NULL, $_, "$EXEC_DIR/$_");}
+    print "\n";
+    &SaveCGIConf;
 
     print STDERR "\n";
 }
@@ -6918,11 +6941,197 @@ sub SaveCGIConf
     # if valid perl script, rename($new, $cf);
     if (&ValidatePerlScriptP($new)) {
 	if (rename($new, $cf)) {
-	    print STDERR "\tcgi configuration is saved in $cf.\n";
+	    print STDERR "      CGI configuration is saved in $cf\n";
 	}
 	else {
 	    &Log("ERROR: cannot rename($new, $cf)");
 	}
+    }
+}
+
+
+sub do_admin_cgi_config
+{
+    local($ml) = @_;
+
+    &ResetVariables;
+
+    $cf  = $CGI_CONFIG || "$CONFIG_DIR/cgi.conf";
+    $new = $cf.".tmp$$";
+
+    # import 
+    package cgi;
+    eval require $main::CGI_CONFIG;
+    print STDERR $@ if $@;
+    $main::REAL_CGI_PATH   = $REAL_CGI_PATH;
+    $main::CGI_AUTHDB_DIR  = $CGI_AUTHDB_DIR;
+    $main::SSL_REQUIRE_SSL = $SSL_REQUIRE_SSL;
+    package main;
+    &Die($@) if $@;
+
+    &InitTTY;
+    $MenuNarrowLineSkip = 1;
+
+    # "clear" not exist on NT4
+    $clear_prog = $UNISTD ? &__SearchPath('clear') : "cls";
+
+    local(%query) = (
+		     'SSL_REQUIRE_SSL' => $SSL_REQUIRE_SSL,
+		     'REAL_CGI_PATH'   => $REAL_CGI_PATH,
+		     'CGI_AUTHDB_DIR'  => $CGI_AUTHDB_DIR,
+		     );
+    $query{'SSL_REQUIRE_SSL'} = $SSL_REQUIRE_SSL eq 'SSLRequireSSL' ? "YES" : "NO";
+
+    local(%original_query) = %query;
+
+    local(%variable);
+
+    while (1) {
+	if ($clear_prog) {
+	    if (! $debug) { &__system($clear_prog);}
+	    print "   ".("*" x 60); print "\n";
+	    print "\n";
+	    print "\t<<< makefml --- FML CGI Configuration Interface --- >>>\n";
+	    print "\n";
+	}
+	else {
+	    print "   ".("*" x 60); print "\n";
+	}
+
+	%variable = (
+		     0 => "END",
+		     1 => "USE_SSL             $query{'SSL_REQUIRE_SSL'}",
+		     2 => "REAL_CGI_PATH       $query{'REAL_CGI_PATH'}",
+		     3 => "CGI_AUTHDB_DIR      $query{'CGI_AUTHDB_DIR'}",
+		     4 => "CHANGE PASSWORD",
+		     5 => "REMAKE CGI SCRIPTS",
+		     );
+	%varname = (
+		    1 => "SSL_REQUIRE_SSL",
+		    2 => "REAL_CGI_PATH",
+		    3 => "CGI_AUTHDB_DIR",
+		    4 => "CHANGE PASSWORD",
+		    5 => "REMAKE CGI SCRIPTS",
+		    );
+
+
+	&cgi_config_show(*variable);
+
+	$r = &Query("which ?", "0-5", "0|1|2|3|4|5", '0');
+
+	if ($r == 0) {
+	    last;
+	}
+	else {
+	    &cgi_menu_mainloop(*query, $varname{$r});
+	}
+    }
+	
+    
+
+    if (join(" ",%original_query) ne join(" ", %query)) {
+	$SSL_REQUIRE_SSL = $query{'SSL_REQUIRE_SSL'} eq "YES" ? 'SSLRequireSSL' : $NULL;
+	$REAL_CGI_PATH   = $query{'REAL_CGI_PATH'};
+	$CGI_AUTHDB_DIR  = $query{'CGI_AUTHDB_DIR'};
+	&SaveCGIConf;
+	print "\n";
+
+	$r = &Query("Q: Can I recreate cgi scripts?", "y/n", "y|n", 'n');
+	if ($r eq 'y') {
+	    print "\n";
+	    &do_setup_admin_cgi;
+	}
+	else {
+	    print "\n";
+	    print "FYI: If you recreate cgi scripts, please run\n";
+	    print "     $0 admin.cgi\n";
+	    print "\n";
+	}
+    }
+
+    print "done.\n";
+}
+
+
+sub cgi_config_show
+{
+    local(*variable) = @_; 
+
+    my ($k);
+    for $k (sort {$a <=> $b} keys %variable) {
+	printf "%-3d   %s\n", $k, $variable{$k};
+    }
+    print "\n";
+}
+
+
+sub cgi_menu_mainloop
+{
+    local(*query, $which) = @_;
+
+    # SSL ?
+    if ($which eq 'SSL_REQUIRE_SSL') {
+	while (1) {
+	    my $default = $query{SSL_REQUIRE_SSL} ? 'y' : 'n';
+	    $r = &Query("Q: DO YOU USE SSL?", "y/n", "y|n", $default);
+	    if ($r eq 'y' || $r eq 'n') { 
+		$query{'SSL_REQUIRE_SSL'} = $r eq 'y' ? "YES" : "NO";
+		last;
+	    };
+	}
+    }
+    elsif ($which eq 'REAL_CGI_PATH' || $which eq 'CGI_AUTHDB_DIR') {
+	# PATH
+	my $i = 0;
+
+	for $q ($which) {
+	    while (1) {
+		my $r   = $query{ $q };
+		my $buf = &Query("Q: $q", 'directory', '[\d\w\/\\\\]+', $r);
+		$query{$q} = $buf;
+		last;
+
+		# print "   $q = \"$buf\";\n";
+		# $r = &Query("   O.K.?", "y/n", "y|n", 'n');
+		# if ($r eq 'y') {
+		# $query{$q} = $buf;
+		# last;
+		# }
+	    }
+	}
+    }
+    elsif ($which eq "CHANGE PASSWORD") {
+	&ResetVariables;
+	$prog = &__SearchPath('htpasswd');
+
+	if (! ($prog && -x $prog)) {
+	    &Error("cannot find 'htpasswd'");
+	    return;
+	}
+	my ($dir, $pwf);
+	$dir = "$CGI_AUTHDB_DIR/admin/";
+	$pwf = "$CGI_AUTHDB_DIR/admin/htpasswd";
+
+	if (! -f $pwf) {
+	    $flag = '-c';
+	    &MkDirHier($dir);
+	    &Touch($pwd);
+	}
+
+	my $use = &Query("user", $ENV{'USER'}, '[\w\d+\-_\.]+', $ENV{'USER'});
+
+	print STDERR "\% $prog $flag $pwf $user\n";
+	if ($flag) {
+	    &__system($prog, $flag, $pwf, $user);
+	}
+	else {
+	    &__system($prog, $pwf, $user);
+	}
+	sleep 2;
+    }
+    elsif ($which eq "REMAKE CGI SCRIPTS") {
+	&do_setup_admin_cgi($NULL);
+	sleep 2;
     }
 }
 
