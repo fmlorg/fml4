@@ -17,12 +17,20 @@
 # return 0 or 1 to use the return of &MLMemberCheck
 sub AutoRegist
 {
-    local(*e, $set_addr) = @_;
+    local(*e, $set_buf) = @_;
     local($from, $s, $b, $r, @s);
     local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
-    
-    # &AutoRegist("address");
-    if ($set_addr) { undef $AUTO_REGISTRATION_KEYWORD; $from = $set_addr;}
+
+    # ifdef fmlserv
+    # &AutoRegist(*e, "subscribe address");
+    # ignore $AUTO_REGISTRATION_KEYWORD. fmlserv uses hard-coded "subscribe"
+    # In addtion, $set_buf overwrites buffer to ignore the artype
+    # except for confirmation.
+    if ($set_buf) { 
+	$AUTO_REGISTRATION_KEYWORD = "subscribe"; # fmlserv;
+	&Log("set_buf[$set_buf]") if $debug;
+    }
+    # endif fmlserv
 
     # for &Notify,  reply-to ? reply-to : control-address
     $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $MAIL_LIST;#|| $e{'CtlAddr:'};
@@ -35,7 +43,7 @@ sub AutoRegist
 	&use('confirm');
 	&ConfirmationModeInit;
 
-	$s    = &GetSubscribeString($e{'Body'}); # the first line
+	$s    = &GetSubscribeString($set_buf || $e{'Body'}); # the first line
 	$from = $From_address;
 
 	if (! &Confirm(*e, $from, $s)) {
@@ -46,7 +54,7 @@ sub AutoRegist
     elsif ($AUTO_REGISTRATION_TYPE eq "body") {
 	# Syntax e.g. "subscribe" in the body
 
-	$s    = &GetSubscribeString($e{'Body'});
+	$s    = &GetSubscribeString($set_buf || $e{'Body'});
 	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
@@ -57,7 +65,7 @@ sub AutoRegist
     elsif ($AUTO_REGISTRATION_TYPE eq "subject") {
 	# Syntax e.g. "Subject: subscribe"...
 
-	$s    = &GetSubscribeString($e{'h:Subject:'});
+	$s    = &GetSubscribeString($set_buf || $e{'h:Subject:'});
 	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
@@ -70,7 +78,7 @@ sub AutoRegist
 	# use "subscribe your-address" in body.
 	# if not found, use $From-address;
 
-	$s    = &GetSubscribeString($set_addr || $e{'Body'});
+	$s    = &GetSubscribeString($set_buf || $e{'Body'});
 	$from = &GetAddr2Regist($DEFAULT_SUBSCRIBE || "subscribe", $s);
 	$from = $from ? $from : $From_address;
     }
