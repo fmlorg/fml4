@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtpsubr.pl,v 1.8 2001/08/24 11:07:03 fukachan Exp $
+# $FML: libsmtpsubr.pl,v 1.9 2001/08/25 12:12:43 fukachan Exp $
 #
 
 use vars qw($debug); 
@@ -23,7 +23,6 @@ sub ForwardSeparatorEnd { "\n\n------- End of Forwarded Message\n";}
 
 sub DoSmtpFiles2Socket
 {
-    use vars qw(@f $f %f %e);
     local(*f, *e) = @_;
     my ($autoconv, $count, $ml, $hdr_found);
 

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libsmtpmci.pl,v 2.6 2001/08/25 12:14:40 fukachan Exp $
 #
 # SMTP Pararell Delivery Library
 
@@ -18,7 +18,6 @@ use vars qw(@HOSTS); # list of smtp servers
 
 sub SmtpDLAMCIDeliver
 {
-    use vars qw(%e @rcpt @smtp @files);
     local(*e, *rcpt, *smtp, *files) = @_;
     my ($i, $error);
     for ($i = 0; $i < $MCI_SMTP_HOSTS; $i++) {
@@ -29,7 +28,6 @@ sub SmtpDLAMCIDeliver
 
 sub SmtpMCIDeliver
 {
-    use vars qw(%e @rcpt @smtp @files);
     local(*e, *rcpt, *smtp, *files) = @_;
     my ($nh, $nm, $i, $j);
     my (%cache);

@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.56 2001/08/25 12:47:28 fukachan Exp $
+# $FML: libsmtp.pl,v 2.57 2001/09/11 13:32:21 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -180,7 +180,6 @@ sub SocketInit
 # RETURN *error
 sub SmtpConnect
 {
-    use vars qw($host $error);
     local(*host, *error) = @_;
 
     if ($USE_INET6) {
@@ -257,7 +256,6 @@ sub SmtpConnect
 # delete logging errlog file and return error strings.
 sub Smtp 
 {
-    use vars qw(%e @rcpt @files @smtp);
     local(*e, *rcpt, *files) = @_;
     local(@smtp);
 
@@ -296,7 +294,6 @@ sub Smtp
 # }
 sub SmtpIO
 {
-    use vars qw(%smtp_pcb);
     local(*e, *rcpt, *smtp, *files) = @_;
     local(%smtp_pcb);
 
@@ -358,7 +355,6 @@ sub SmtpIO
 #
 sub __SmtpIOConnect
 {
-    use vars qw($host $error);
     local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
     local($host, $error);
     my ($sendmail, $backoff, $ipc, $retry);
@@ -701,7 +697,6 @@ sub __SmtpIO
 
     # special exceptions;
     if ($e{'Body:append:files'}) {
-	use vars qw(@append);
 	local(@append) = split($;, $e{'Body:append:files'});
 	&SmtpFiles2Socket(*append, *e);
 	undef $e{'Body:append:files'};
@@ -846,7 +841,6 @@ sub SmtpPut2Socket
 # %RELAY_SERVER = ('ac.jp', 'relay-server', 'ad.jp', 'relay-server');
 sub SmtpPutActiveList2Socket
 {
-    use vars qw($ipc $file);
     local(*smtp_pcb, $ipc, $file) = @_;
     my ($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
     my ($mci_count, $count, $time, $filename, $xtime);

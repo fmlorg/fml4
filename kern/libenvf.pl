@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libenvf.pl,v 2.16 2001/08/25 12:42:30 fukachan Exp $
+# $FML: libenvf.pl,v 2.17 2001/09/13 09:14:13 fukachan Exp $
 #
 
 use vars qw($debug $debug_filter $debug_envf_rule);
@@ -19,7 +19,6 @@ use vars qw($COMMAND_FILTER_HOOK); # used for compatibility
 # that "filtering for %Envelope hash, not only mail message/body".
 sub __EnvelopeFilter
 {
-    use vars qw(%e $mode @pmap);
     local(*e, $mode) = @_;
     local(@pmap); # paragraph map: the array of the first ptr in paragraph
     my ($xbuf);
@@ -271,7 +270,6 @@ sub __EnvelopeFilter
 # return 0 if reject;
 sub EvalRejectFilterHook
 {
-    use vars qw($filter);
     local(*e, *filter) = @_;
     return $NULL unless $filter;
     my ($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libqmail.pl,v 1.3 2001/09/19 03:39:58 fukachan Exp $
 #
 
 use vars qw($debug $debug_qmail);
@@ -15,7 +15,6 @@ use vars qw($debug $debug_qmail);
 
 sub DotQmailExt
 {
-    use vars qw(%e);
     local(*e) = @_;
     my ($ext, $key, $keyctl);
 

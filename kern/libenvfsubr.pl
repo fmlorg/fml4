@@ -4,7 +4,6 @@ sub Log { &main::Log(@_);}
 
 sub MakeParagraphMap
 {
-    use vars qw(%e @pmap $buf);
     local(*e, *pmap, $buf) = @_;
     my ($p, $rp, $xp, $bodylen);
     my ($debug) = $main::debug;
@@ -103,7 +102,6 @@ sub CleanUpBuffer
 
 sub OneLineCheckP
 {
-    use vars qw(%e @pmap $lparbuf);
     local(*e, *pmap, $lparbuf) = @_;
     my $one_line_check_p = 0;
     my $n_paragraph      = $#pmap;

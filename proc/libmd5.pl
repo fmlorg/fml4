@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libmd5.pl,v 2.7 2001/09/19 03:37:01 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -38,7 +38,6 @@ sub main::Md5
 # XXX: called under perl 5
 sub main::MailBodyMD5Cksum
 {
-    use vars qw(%e);
     local(*e) = @_;
     my ($p, $pe);
 

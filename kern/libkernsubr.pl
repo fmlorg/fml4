@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libkernsubr.pl,v 2.5 2001/08/25 12:17:02 fukachan Exp $
 #
 
 ###
@@ -106,7 +106,6 @@ sub __RejectAddrP
 # Write3: call by reference for effeciency
 sub __Write3
 { 
-    use vars qw(%me $f);
     local(*e, $f) = @_; 
 
     open(APP, "> $f") || (&Log("cannot open $f"), return '');

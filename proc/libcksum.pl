@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libcksum.pl,v 1.7 2001/09/19 03:07:14 fukachan Exp $
 #
 
 
@@ -19,7 +19,6 @@ use vars qw(%CachedMailBodyCksum);
 
 sub MD5_cksum
 {
-    use vars qw(%e $prog);
     local(*e, $prog) = @_;
     my ($cksum, @path);
 
@@ -115,7 +114,6 @@ sub CheckMailBodyCKSUM
 
 sub CacheMailBodyCksum
 {
-    use vars qw(%e $id);
     local(*e, $id) = @_;
     
     $CHECK_MAILBODY_CKSUM || return 0;

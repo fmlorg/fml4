@@ -11,7 +11,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libsmtputils.pl,v 2.15 2001/08/25 12:11:05 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -24,11 +24,6 @@ use vars qw($SENDFILE_NO_FILECHECK); # obsolete
 # return NONE
 sub DoNeonSendFile
 {
-    use vars qw($le %le 
-		$to @to $subject 
-		$f @f %f $files @files %files
-		@rcpt
-		);
     local(*to, *subject, *files) = @_;
     local($le, %le, @rcpt, $f, @f, %f);
     my (@info) = caller;
@@ -106,7 +101,6 @@ sub DoNeonSendFile
 # require $zcat = non-nil and ZCAT is set.
 sub DoSendFile
 {
-    use vars qw($to $subject $file $zcat @to);
     local(@to, %le, @rcpt, @files, %files);
     local($to, $subject, $file, $zcat, @to) = @_;
 
@@ -134,7 +128,6 @@ sub DoSendPluralFiles
 # Sendmail($to, $subject, $MailBody) paramters are only three.
 sub DoSendmail
 {
-    use vars qw(@to %le @rcpt);
     local(@to, %le, @rcpt);
     my ($xto, $subject, $body, @xto) = @_;
     push(@to, @xto);
@@ -157,7 +150,6 @@ sub DoSendmail
 
 sub DoSendmail2
 {
-    use vars qw($distfile $subject $body);
     local(*distfile, $subject, $body) = @_;
 
     if (-f $distfile && open(DIST, $distfile)) {
@@ -187,7 +179,6 @@ sub DoSendFile2 { &DoNeonSendFile(@_);}
 # import $misc{'hook'}
 sub DoSendFile3
 {
-    use vars qw($distfile $subject $files @files %files %misc @f2s);
     local(*distfile, *subject, *files, *misc) = @_;
     local(@to, $to, @f2s);
 
