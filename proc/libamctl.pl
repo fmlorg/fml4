@@ -587,7 +587,7 @@ sub DoSetMemberList
     # Under administration mode, ignore this check.
     # ATTENTION! $curaddr should be a member.
     if ((! $e{'mode:admin'}) &&
-	(! ($list = &MailListMemberP($curaddr)))) {
+	(! ($list = &GetTargetMemberList($curaddr)))) {
 	&Log("$cmd: ERROR: address '$curaddr' is not a member. STOP");
 	&Mesg(*e, $NULL, 'auth.should_be_from_member', $curaddr);
 	&Mesg(*e, "$cmd: ERROR: address '$curaddr' is not a member.");
@@ -657,7 +657,7 @@ sub DoSetMemberList
 	$asl = &AddrSimilarity($curaddr, $newaddr);
 	if ($asl >= $ADDR_CHECK_MAX) { $ADDR_CHECK_MAX = $asl + 1;}
 
-	if ($new_list = &MailListMemberP($newaddr)) {
+	if ($new_list = &GetTargetMemberList($newaddr)) {
 	    &Log("$cmd: ERROR: newaddr '$newaddr' exist in '$new_list'");
 		  
 	    &Mesg(*e, 
@@ -711,7 +711,7 @@ sub DoSetMemberList
 
     # obsolete code but left for compatibility.
     if (&UseSeparateListP) {
-	$list = &MailListMemberP($curaddr);
+	$list = &GetTargetMemberList($curaddr);
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
 	if ($rm == 1) {
 	    &Log($mcs = "$cmd MEMBER [$curaddr] $c O.K.") if $debug_amctl;
