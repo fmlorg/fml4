@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/07
+
+  bin/pmail.pl
+	correct "-f MAIL-FROM" behaviour
+
+  module/Japanese/
+	apply patch fml-support: 7599,7600
+	fix definitions, regexp
+
 2000/03/01
 
   module/$LANGUAGE/: installation and enable them
