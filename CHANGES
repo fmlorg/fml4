@@ -5,7 +5,9 @@
 
 2000/05/31
 
-  pgp2 code: more debug 
+  pgp2 code
+	more debug 
+	modify function/variable names to be easy for eyes
 
   doc/
 	clean up to clarify apache-ssl and apache+mod_ssl

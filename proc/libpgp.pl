@@ -10,7 +10,7 @@
 # $Id$
 
 # Options; e.g. English mode is required
-local($PgpOpts);
+local($PGP_Opts);
 
 sub PGPGoodSignatureP
 {
@@ -19,12 +19,12 @@ sub PGPGoodSignatureP
 
     &Log("PGPGoodSignatureP") if $debug || $debug_pgp;
 
-    &PgpInit(*e) || return 0;
+    &_PGPInit(*e) || return 0;
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
-    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGP: $!");
+    &Log("run $PGP $PGP_Opts -f 2>&1") if $debug || $debug_pgp;
+    &open2(RPGP, WPGP, "$PGP $PGP_Opts -f 2>&1") || &Log("PGP: $!");
     print WPGP $e{'Body'};
     close(WPGP);
 
@@ -77,7 +77,7 @@ sub PGPDecode
     $bs = '-----BEGIN PGP MESSAGE-----';
     $es = '-----END PGP MESSAGE-----';
 
-    &PgpInit(*e) || return 0;
+    &_PGPInit(*e) || return 0;
 
     # check each line and PGP Blocks
     my ($c) = 0;
@@ -124,8 +124,8 @@ sub PGPDecode2
     require 'open2.pl';
 
     # PGP Signature Check
-    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode2: $!");
+    &Log("run $PGP $PGP_Opts -f 2>&1") if $debug || $debug_pgp;
+    &open2(RPGP, WPGP, "$PGP $PGP_Opts -f 2>&1") || &Log("PGPDecode2: $!");
     print WPGP $buf;
     close(WPGP);
 
@@ -138,8 +138,8 @@ sub PGPDecode2
     }
 
     # 2>&1 is required to detect "Good signature"
-    &Log("run $PGP $PgpOpts -o $tmpf") if $debug || $debug_pgp;
-    open(WPGP, "|$PGP $PgpOpts -o $tmpf")||&Log("PGPDecode2: $!");
+    &Log("run $PGP $PGP_Opts -o $tmpf") if $debug || $debug_pgp;
+    open(WPGP, "|$PGP $PGP_Opts -o $tmpf")||&Log("PGPDecode2: $!");
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
     close(WPGP);
@@ -170,8 +170,8 @@ sub DoPGPDecode
     require 'open2.pl';
 
     # PGP Signature Check
-    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode: $!");
+    &Log("run $PGP $PGP_Opts -f 2>&1") if $debug || $debug_pgp;
+    &open2(RPGP, WPGP, "$PGP $PGP_Opts -f 2>&1") || &Log("PGPDecode: $!");
     print WPGP $buf;
     close(WPGP);
 
@@ -186,8 +186,8 @@ sub DoPGPDecode
     }
 
     # 2>&1 is required to detect "Good signature"
-    &Log("run $PGP $PgpOpts -f 2>/dev/null") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>/dev/null")||&Log("PGPDecode: $!");
+    &Log("run $PGP $PGP_Opts -f 2>/dev/null") if $debug || $debug_pgp;
+    &open2(RPGP, WPGP, "$PGP $PGP_Opts -f 2>/dev/null")||&Log("PGPDecode: $!");
     print WPGP $buf;
     close(WPGP);
 
@@ -213,18 +213,18 @@ sub DoPGPEncode
 
     &Log("DoPGPEncode sets in ") if $debug || $debug_pgp;
 
-    &PgpInit(*e) || return 0;
+    &_PGPInit(*e) || return 0;
 
     # pgp scan to find myself, 
     # so PLEASE ATTENTION "DO NOT SEND IT TO MYSELF";
-    $count = &PgpScan(*e, *whom) || 0;
+    $count = &_PGPScan(*e, *whom) || 0;
 
     &Log("scan PGP keyrings: $count keys found");
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
-    &Log("run $PGP $PgpOpts -f -sea $whom 2>$tmpbuf") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f -sea $whom 2>$tmpbuf") || 
+    &Log("run $PGP $PGP_Opts -f -sea $whom 2>$tmpbuf") if $debug || $debug_pgp;
+    &open2(RPGP, WPGP, "$PGP $PGP_Opts -f -sea $whom 2>$tmpbuf") || 
 	&Log("PGPEncode: $!");
     print WPGP $buf;
     close(WPGP);
@@ -261,15 +261,15 @@ sub PGPEncode
 }
 
 
-sub PgpScan
+sub _PGPScan
 {
     local(*e, *whom) = @_;
     local($count, $in);
 
-    &Log("PgpScan sets in") if $debug || $debug_pgp;
+    &Log("_PGPScan sets in") if $debug || $debug_pgp;
 
     # 2>&1 is required to detect "Good signature"
-    open(RPGP, "$PGP $PgpOpts -kv 2>&1|") || &Log("PGP: $!");
+    open(RPGP, "$PGP $PGP_Opts -kv 2>&1|") || &Log("PGP: $!");
     while (<RPGP>) {
 	$in = 1 if m#Type\s+Bits/KeyID\s+Date\s+User ID#;
 
@@ -284,13 +284,13 @@ sub PgpScan
 }
 
 
-sub PgpUserExistP
+sub _PGPUserExistP
 {
     local(*e, $user) = @_;
     local($count, $in);
 
     # 2>&1 is required to detect "Good signature"
-    open(RPGP, "$PGP $PgpOpts -kv 2>&1|") || &Log("PGP: $!");
+    open(RPGP, "$PGP $PGP_Opts -kv 2>&1|") || &Log("PGP: $!");
     while (<RPGP>) {
 	$in = 1 if m#Type\s+Bits/KeyID\s+Date\s+User ID#;
 
@@ -306,19 +306,19 @@ sub PgpUserExistP
 }
 
 
-sub PgpEncryptedMailBodyP
+sub _PGPEncryptedMailBodyP
 {
     local(*e) = @_;
     $e{'Body'} =~ /\-\-\-\-\-BEGIN PGP MESSAGE\-\-\-\-\-/ ? 1 : 0;
 }
 
 
-sub PgpInit
+sub _PGPInit
 {
     local(*e) = @_;
 
     # Set Language for easy analize by fml.
-    $PgpOpts = "+Language=en";
+    $PGP_Opts = "+Language=en";
 
     if ($e{'Body'} =~  /^[\s\n]*$/) {
 	&Log("PGPGoodSignatureP ERROR: no effective mailbody");
@@ -351,12 +351,12 @@ sub PGP
 
     &Log("$proc $cmd @argv");
 
-    &PgpInit(*e) || return 0;
+    &_PGPInit(*e) || return 0;
 
     ### switch
     if ($cmd eq '-ka') {
 	require 'open2.pl';
-	&open2(RPGP, WPGP, "$PGP $PgpOpts -f -ka") || 
+	&open2(RPGP, WPGP, "$PGP $PGP_Opts -f -ka") || 
 	    &Log("PGP: $!");
 
 	print WPGP $e{'Body'};
@@ -370,8 +370,8 @@ sub PGP
 	close(RPGP);
     }
     elsif ($cmd eq '-kr' || $cmd eq '-krs') {
-	if (&PgpUserExistP($argv[0])) {
-	    &DoPgp(*e, "$PGP $PgpOpts $cmd $argv[0]");
+	if (&_PGPUserExistP($argv[0])) {
+	    &Do_PGP(*e, "$PGP $PGP_Opts $cmd $argv[0]");
 	}
 	else {
 	    &Log("ERROR: no such user found");
@@ -386,7 +386,7 @@ sub PGP
 	   $cmd eq '-kvv' || 
 	   $cmd eq '-kvc' ||
 	   $cmd eq '-kc') {
-	&DoPgp(*e, "$PGP $PgpOpts -a -f $cmd");
+	&Do_PGP(*e, "$PGP $PGP_Opts -a -f $cmd");
     }
     elsif ($cmd eq '-ks' || 
 	   $cmd eq '-ke' ||
@@ -406,7 +406,7 @@ sub PGP
 }
 
 
-sub DoPgp
+sub Do_PGP
 {
     local(*e, $command) = @_;
 
