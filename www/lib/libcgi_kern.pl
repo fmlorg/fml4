@@ -80,6 +80,7 @@ sub ExpandOption
 
 sub ExpandMemberList
 {
+    local($mode) = @_;
     local($config_ph, @list, $list, $addr);
     local(%uniq, %addr);
 
@@ -97,7 +98,12 @@ sub ExpandMemberList
 	&ERROR("cannot open $config_ph");
     }
 
-    @list = ($config_ph'MEMBER_LIST, @config_ph'MEMBER_LIST);
+    if ($mode eq 'admin_member_list') {
+	@list = ($config_ph'ADMIN_MEMBER_LIST, @config_ph'ADMIN_MEMBER_LIST);
+    }
+    else {
+	@list = ($config_ph'MEMBER_LIST, @config_ph'MEMBER_LIST);
+    }
 
     undef %uniq;
     undef %addr;
@@ -154,6 +160,11 @@ sub Convert
 
 	    if (/__EXPAND_OPTION_MEMBER_LIST__/) {
 		&ExpandMemberList;
+		next;
+	    }
+
+	    if (/__EXPAND_OPTION_ADMIN_MEMBER_LIST__/) {
+		&ExpandMemberList('admin_member_list');
 		next;
 	    }
 
