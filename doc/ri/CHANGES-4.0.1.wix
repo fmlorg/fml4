@@ -6,6 +6,10 @@
    sbin/makefml (2.212-2.214):
 	SetPublicUmask in mkdir-ing www/authdb/
 
+	CGI で: htpasswd のデフォルト permission をユーザ nobody でも
+		見えるように修正する。
+		＃いいのか？それで、という気もするのだが…
+
 2001/05/10
 
    messages/Japanese/amctl (1.5-1.6):
@@ -185,7 +189,7 @@
    4.0 release
 
 
-$FML: CHANGES-4.0.1.wix,v 1.1.2.13 2001/05/09 15:47:47 fukachan Exp $
+$FML: CHANGES-4.0.1.wix,v 1.1.2.14 2001/05/20 02:44:54 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
