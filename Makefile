@@ -133,8 +133,9 @@ allclean: clean cleanfr
 clean:
 	gar *~ _* proc/*~ \
 	tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] \
-	tmp/release.info* tmp/sendfilesbysplit* \
-	var/simulation/var/queue*/*
+	tmp/release.info* tmp/sendfilesbysplit* 
+	(chdir $(HOME)/var/simulation/var; gar queue*/*)
+
 
 cleanfr:
 	gar *.frbak */*.frbak
@@ -314,11 +315,7 @@ rd:
 
 
 simulation:
-	cp /tmp/log /tmp/log.old
-	sh .simulation/bootstrap
-	grep XXX $(HOME)/var/simulation/log.bak > /var/tmp/log.bak
-	grep XXX $(HOME)/var/simulation/log     > /var/tmp/log
-	diff -u /var/tmp/log.bak /var/tmp/log|Mail -s fml.simulation.log elena
+	sh $(FML)/.simulation/bootstrap
 
 rel:
 	rm -f /tmp/relnotes
