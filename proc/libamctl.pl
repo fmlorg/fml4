@@ -64,7 +64,7 @@ sub AutoRegist
 	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
-	    &AutoRegistError(*e, 'Body', $s);
+	    &AutoRegistError(*e, 'Body', $s, $AUTO_REGISTRATION_KEYWORD);
 	    return 0;
 	}
     }
@@ -75,7 +75,7 @@ sub AutoRegist
 	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
-	    &AutoRegistError(*e, 'Subject', $s);
+	    &AutoRegistError(*e, 'Subject', $s, $AUTO_REGISTRATION_KEYWORD);
 	    return 0;
 	}
     }
@@ -374,7 +374,7 @@ sub GetSubscribeString
 # &AutoRegistError(*e, 'Subject', $s);
 sub AutoRegistError
 {
-    local(*e, $key, $s) = @_;
+    local(*e, $key, $s, $correct_key) = @_;
     local($b, $sj);
 
     &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
@@ -394,7 +394,7 @@ sub AutoRegistError
 	  'amctl.info',
 	  $MAIL_LIST, 
 	  $AUTO_REGISTRATION_KEYWORD,
-	  $s || 'subscribe',
+	  $correct_key || 'subscribe',
 	  $key);
     &MesgMailBodyCopyOn;
 }
