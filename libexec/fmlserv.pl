@@ -28,11 +28,13 @@ unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 ### MAIN ###
 &InitFmlServ;
 
-umask(007);		# ATTENTION! require group-writable permission;_:
+umask(007);			# ATTENTION! require group-writable perm;_:
 
 &CheckUGID;
 
-chdir $DIR || die "Can't chdir to $DIR\n";
+chdir $DIR || die("Can't chdir to DIR[$DIR]\n");
+
+				### fml parsing process (the same as fml.pl)
 
 &InitConfig;			# initialize date etc..
 
@@ -42,7 +44,9 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 &CheckCurrentProc(*Envelope);	# Phase 4, fixing environment and check loops
 				# If an error is found, exit here.
 
-&FmlServ(*Envelope);
+				### fml parsing process ends
+
+&FmlServ(*Envelope);		### GO actual fmlserv process
 
 &RunHooks;			# run hooks after unlocking
 
@@ -52,11 +56,14 @@ exit 0;
 ### MAIN ENDS ###
 
 
-##### FmlServ Emulation Codes
+##### FmlServ (Listserv-Emulation) Codes
+#####    the fundamental idea is to use virtual "fmlserv" Maling List;
+#####    of course, group-writable permission is required;_;
 
 # Fmlserv specific here
 sub InitFmlServ
 {
+    # fml main (kernel) library (libkern.pl from fml.pl)
     require 'libkern.pl';
 
     # Check-routine before "chdir $DIR";
@@ -76,9 +83,10 @@ sub InitFmlServ
     unshift(@INC, $FMLSERV_DIR);
 
     # Directory check
-    $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
+    -d $FMLSERV_DIR || die("Cannot find FMLSERV_DIR[$FMLSERV_DIR]\n");
 
     # 0700 is enough for fmlserv, since fmlserv controls other ML's;
+    # 0770 requires other ML's;_; (So, I dislike listserv type ...)
     if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
 
     # log file of fmlserv
@@ -92,82 +100,103 @@ sub FmlServ
     local(*e) = @_;
     local($eval, $hook);
 
-    ### initialize fmlserv procedures;
-    $FmlServProcExitPat	= 'quit|end|exit';
-    $FmlServProcPat = 
-	'guide|info|help|lists|which|href|http|gopher|ftp|ftpmail';
-    &SetFmlServProcedure;
+    ### 00: Load Command Library 
+    require 'libfml.pl'; # if %ReqInfo;
 
-    ### The first reply message;
-    &MakePreambleOfReply(*e);
+    ### 01: Configuration ...;
+    &InitFmlServProcedure; # initialize fmlserv procedures;
+    &MakePreambleOfReply(*e); # The first reply message;
 
-    # Declare 
-    $e{'mode:fmlserv'} = 1;
+    $e{'mode:fmlserv'} = 1; # Declare (for e.g. mkdir permission change)
 
+    ### 02: alloc virtual "fmlserv" ML 
     # ML::constructor() for fmlserv@$DOMAIN
+    #   fmlserv = new ML(Fmlserv);
+    # 
     &NewML($FMLSERV_DIR, 'fmlserv', *e);
 
-    # for logging all log's in fmlserv/log, too
+    # for logging all log's in fmlserv/log, SET AGAIN
+    # &InitFmlServ: LOGFILE = $FMLSERV_DIR/log 
+    # 
     $FMLSERV_LOGFILE = $LOGFILE;
 
-    # Alloc %MailList {list => directory_of_list} Global Variable
+    ### 03: GENERATE "AVAILABLE MAILING LISTS TABLE";
+    # Alloc Association Array %MailList {list => directory_of_list} (global)
     # checks -d $MAIL_LIST_DIR/* -> %MailList (generated from the data)
     #           except for "^@\w+"
+    # 
     &NewMLAA($MAIL_LIST_DIR, *MailList);
 
-    # Summary of requested procedures for each ML
+    ### 04: SORT REQUEST: Sorting requests for each ML
     # Envelope{Body} => %ReqInfo (Each ML)
     #                   @ReqInfo (fmlserv commands) 
+    # 
     &SortRequest(*Envelope, *MailList, *ReqInfo);
 
-    require 'libfml.pl';# if %ReqInfo;
+    ### 05: REFUGING THE CURRENT NAME SPACE, GO EACH ML NAME SPACE; 
+    ### 
 
-    # Save 'main' NameSpace
-    &Save_mainNS;			
-    #&Dump_mainNS("$FMLSERV_DIR/tmp/main_name_space") if debug_dump;
+    &Save_mainNS; # Save 'main' NameSpace (save the current name space)
 
-    $FMLSERV_DIR = $DIR;	# save $DIR
+    if (debug_dump) { &Dump_mainNS("$FMLSERV_DIR/tmp/main_name_space");}
 
-    ###
-    ### Processing For Each ML's
-    ###
-    foreach $ml (keys %ReqInfo) {
-	next if $ml eq 'fmlserv'; # fmlserv is the last (internal functions);
-	next if $ml =~ /^majordomo:/; # exceptions
+    $FMLSERV_DIR = $DIR;	# save the $DIR (must be == $FMLSERV_DIR)
 
-	$DIR  = $MailList{$ml};	# reset $DIR for each ML's $DIR
-	$cf   = "$DIR/config.ph";
-	$proc = $ReqInfo{$ml};
+    ### 05.01: GO Processing For Each ML's ...;
+    # 
+    # Requests to $ml are available if %MailList has the entry;
+    # Do aggregated requests (plural lines) $ReqInfo{$ml} for each $ml;
+    # 
+    for $ml (keys %ReqInfo) {
+	# Exceptions: fmlserv is later processed (internal functions);
+	#             majordomo:$ml is $ml majordomo(<1.91?)-compat flags;
+	next if $ml eq 'fmlserv'; 
+	next if $ml =~ /^majordomo:/;
 
-	$CurrentProcML = $ml;	# for logfile
+	# reset the current procs for each ML
+	$DIR  = $MailList{$ml};	  # ML's $DIR
+	$cf   = "$DIR/config.ph"; # config.ph
+	$proc = $ReqInfo{$ml};	  # requests
 
 	if ($debug) {
 	    &Debug("---Processing ML $ml");
 	    &Debug("DIR\t$DIR\ncf\t$cf\nprocs\t$proc\n");
 	}
 
-	# Load 'ml' NS from $list/config.ph
+	# Load $ml NAME SPACE from $list/config.ph
 	&NewML($DIR, $ml, *e, *MailList);
 
-	&Lock;			# LOCK
-
+	# test chdir $DIR, next if it fails;
+	# if it succeeds, lock and do the processing;
 	chdir $DIR || do {
-	    &Log("cannot chdir $DIR, ignore given commands for $ml");
-	    &Mesg(*e, "Hmm, ... I cannot find $ml. really?");
+	    &Log("cannot chdir DIR[$DIR], ignore given commands for $ml");
+	    &Mesg(*e, "Hmm, ... I cannot find $ml. $ml really exists?");
 	    next;
 	};
 
-	# &Mesg(*e, "\n===Requested Commands for \"$ml\" Mailing List");
-	# $e{'message'} .= $ML_cmds_log{$ml};
+	### PROCESS BEGIN; 
+	&Lock;			# LOCK each ML (lock $FP_SPOOL_DIR)
+
+	if ($debug) {
+	    &Mesg(*e, "\ndebug> requests for \"$ml\" Mailing List");
+	    # &Mesg(*e, $ML_cmds_log{$ml});
+	    &Debug("FmlServ::DoFmlServProc($ml, $proc, *e);");
+	}
 
 	### Processing $proc For $ml ###
-	&Debug("FmlServ::DoFmlServProc($ml, $proc, *e);") if $debug;
+	# DoFmlServProc emulation;
 	&DoFmlServProc($ml, $proc, *e);
 
-	### mget ... for $ml;
+	### alloc $ml NAME SPACE for mget;
+	# attention here; we do not set $FML_EXIT_HOOK
+	# aggregate the mget requests, after this routine,
+	# we set $FML_EXIT_HOOK;
 	if ($FML_EXIT_HOOK =~ /mget3_SendingEntry/) {
+	    local($n);
+
 	    undef $eval;
-	    foreach $n ('SendingEntry', 'SendingArchiveEntry') {
+
+	    for $n ('SendingEntry', 'SendingArchiveEntry') {
 		$eval .= sprintf("\@%s'$n = \@main'$n;\n", $ml);
 		$eval .= sprintf("%%%s'$n = %%main'$n;\n", $ml);
 		$hook .= sprintf("\@main'$n = \@%s'$n;\n", $ml);
@@ -185,6 +214,7 @@ sub FmlServ
 	}	
 
 	&Unlock;		# UNLOCK
+	### PROCESS ENDS;
 
 	&RunHooks;		# run-hook for each ML
 
@@ -193,22 +223,22 @@ sub FmlServ
 	# Reload NS from main'NS
 	&DestructCompatMajordomo if $e{'mode:majordomo'};
 	&ResetNS;
+    } # each ML ends;
 
-	undef $CurrentProcML;
-    }# each MLs
-
+    ### 06: FMLSERV INTERNAL (ITSELF) FUNCTIONS;
+    # reset global variable
     $FML_EXIT_HOOK = $hook;
-    $DIR           = $FMLSERV_DIR; #reset global variable
+    $DIR           = $FMLSERV_DIR; 
 
-    ###
-    ### FMLSERV INTERNAL (ITSELF) FUNCTIONS; ###
-    ###
     if ($debug) { &Debug("---Processing ML fmlserv");}
 
-    chdir $DIR || die $!;
+    # chdir $FMLSERV_DIR; 
+    chdir $DIR || die("$!:cannot chdir FMLSERV_DIR[$DIR]\n");
 
+    # alloc virtual "fmlserv";
     &NewML($FMLSERV_DIR, 'fmlserv', *e, *MailList);
 
+    # request using internal functions or e.g. to get fmlserv/help;
     if ($ReqInfo{'fmlserv'}) {
 	&Debug("FmlServ::DoFmlServItselfFunctions") if $debug;
 	&DoFmlServItselfFunctions(*ReqInfo, *e);
@@ -234,8 +264,10 @@ sub FmlServ
 sub Opt { push(@SetOpts, @_);}
 
 
-#########################################################################
-##### LIBRARY OF FMLSERV #####
+#####
+##### LIBRARY FUNCTIONS OF FMLSERV 
+#####
+
 sub MakePreambleOfReply
 {
     local(*e) = @_;
@@ -245,7 +277,7 @@ sub MakePreambleOfReply
 sub DoFmlServItselfFunctions
 {
     local(*proc, *e) = @_;
-    local($procs2fml);
+    local($procs2fml, $org_str, @Fld);
 
     if ($proc{'fmlserv'}) {
 	&use('fml');
@@ -267,9 +299,9 @@ sub DoFmlServItselfFunctions
 	    ### Procedures is lower-case;
 	    tr/A-Z/a-z/;
 
-	    # FIRST fmlserv:command form here
+	    # FIRST TRY fmlserv:command form here
 	    if ($proc = $Procedure{"fmlserv:$_"}) {
-		$0 = "--Command calling $proc: $FML $LOCKFILE>";
+		$0 = "--Fmlserv command $proc: $FML $LOCKFILE>";
 		&Debug("Call $proc for [$org_str]") if $debug;
 		
 		# PROCEDURE
@@ -297,21 +329,30 @@ sub DoFmlServProc
     local($ml, $proc, *e) = @_;
     local($sp, $guide_p, $auth, $badproc);
 
-    $ACTIVE_LIST = $MEMBER_LIST unless $ML_MEMBER_CHECK; # tricky
+    # reset arrays since fmlserv handles several different ML's;
+    undef @MEMBER_LIST;
+    undef @ACTIVE_LIST;
 
-    # check member-lists (2.1 extentions)
-    @MEMBER_LIST || do { @MEMBER_LIST = ($MEMBER_LIST);};
+    # already $DIR/$ml/file form; 
+    # initialize some arrays; if auto-regist is clear here, we reset;
+    if (! $ML_MEMBER_CHECK) { $ACTIVE_LIST = $MEMBER_LIST;}
+    push(@MEMBER_LIST, $MEMBER_LIST);
+    push(@ACTIVE_LIST, $ACTIVE_LIST);
 
-    foreach $file (@MEMBER_LIST, $MEMBER_LIST) {
-	if ($debug) {
-	  &Debug("---DoFmlServProc::MLMemberCheck(");
-	  &Debug("\n\tml=$ml\n\taddr=$From_address in $file)");
-	}
-	-f $file && &CheckMember($From_address, $file) && ($auth++, last);
+    if (! $ML_MEMBER_CHECK) {
+	$ACTIVE_LIST = $MEMBER_LIST;
+	push(@ACTIVE_LIST, @MEMBER_LIST);
     }
 
+    $auth = &MailListMemberP($From_address);
+
     if ($auth) {
-	foreach (split(/\n/, $proc)) { &Mesg(*e, "${ml}> $_");}
+	local($req);
+	for $req (split(/\n/, $proc)) {
+	    for (split(/\n/, $req)) {
+		&Mesg(*e, "${ml}> $_");
+	    }
+	}
 	&Command($proc);
     }
     else {
@@ -319,8 +360,9 @@ sub DoFmlServProc
 	$mesg  = "\n   Your subscribe request is forwarded to the maintainer.";
 	$mesg .= "\n   Please wait a little.";
 
-	&Debug("ERROR: CheckMember($From_address, @MEMBER_LIST)") if $debug;
-	foreach (split(/\n/, $proc)) {
+	&Debug("Error: MailListMemberP($From_address) fails") if $debug;
+
+	for (split(/\n/, $proc)) {
 	    &Debug("DoFmlServProc($_)") if $debug;
 	    s/\s+$//;		# cut the \s+
 
@@ -366,25 +408,58 @@ sub NewML
     local($DIR, $ml, *e, *MailList) = @_;
     local($cf)  = "$DIR/config.ph";
 
+    &GetTime;
+
     # reset
     undef $e{'mode:majordomo:chmemlist'};
 
-    print STDERR "NewML::Check($cf)\n" if $debug;
+    if ($debug) {
+	print STDERR "NewML::Check($cf)\n";
 
-    # Define Defaults against "no $MAIL_LIST_DIR/$ml/config.ph"
-    print STDERR "NewML::SetMLDefaults($DIR, $ml)\n" if $debug;
+	# Define Defaults against "no $MAIL_LIST_DIR/$ml/config.ph"
+	print STDERR "NewML::SetMLDefaults($DIR, $ml)\n";
+    }
 
+    # default before loading $DIR/config.ph;
     &SetMLDefaults($DIR, $ml);
+
+    # compatible (required?)
     if ($e{'mode:majordomo'} && $MailList{"majordomo:$ml"}) { 
 	&CompatMajordomo($DIR, $ml);
     }
-    &FixMLMode($DIR, $ml);	# check $DIR/$ml.auto ...
 
+    # compatible $DIR/$ml.auto ...?
+    # inlined &FixMLMode($DIR, $ml);
+    {
+	local($mdir) = "$MAIL_LIST_DIR/$ml";
+	$ML_MEMBER_CHECK = 1 if -f "${mdir}.closed";
+	$ML_MEMBER_CHECK = 0 if -f "${mdir}.auto";
+    }
+
+    # Load $DIR/config.ph, if the loading fails, default values are used;
     if (-f $cf) {
 	print STDERR "NewML::Load($cf)\n" if $debug;
 	&LoadMLNS($cf);		# eval("$DIR/config.ph")
     }
 
+    # RESET IMPORTANT VARIABLES (direct reply e.g. get, ... )
+    # IMPORTANT: Foce Reply-To: be fmlserv@fqdn in &Notify;
+    # 
+    $COMMAND_ONLY_SERVER          = 1;
+    $COMMAND_SYNTAX_EXTENSION     = 1;
+    $e{'h:Reply-To:'}             = $e{'Addr2Reply:'};
+    $From_address = $e{'h:From:'} = &Conv2mailbox($e{'from:'});
+    $e{'GH:Reply-To:'}            = "fmlserv\@$DOMAINNAME";
+
+    # Directory *_DIR -> FP_*_DIR (fully pathed)
+    for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
+	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
+	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
+    }
+    eval($s); 
+    &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
+
+    ### Here, all variables must be set already. 
     if ($debug) {
 	for (FQDN, DOMAINNAME, MAIL_LIST, CONTROL_ADDRESS, 
 	     ML_FN, XMLNAME, XMLCOUNT, MAINTAINER,
@@ -392,41 +467,7 @@ sub NewML
 	    eval("printf STDERR \"%-20s %s\\n\", '$_', \$$_;");
 	}
     }
-
-    ### do actions for each $list ###
-    # RESET IMPORTANT VARIABLES
-    # direct reply e.g. get, ... 
-    $e{'h:Reply-To:'}             = $e{'Addr2Reply:'};
-    $From_address = $e{'h:From:'} = &Conv2mailbox($e{'from:'});
-
-    &GetTime;
-
-    # required settings
-    $COMMAND_ONLY_SERVER      = 1;
-    $COMMAND_SYNTAX_EXTENSION = 1;
-
-    for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
-	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
-	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
-    }
-
-    eval($s); 
-    &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
-
-    # Foce Reply-To: be fmlserv@fqdn in &Notify;
-    $e{'GH:Reply-To:'}  = "fmlserv\@$DOMAINNAME";
 }
-
-
-sub FixMLMode
-{
-    local($dir, $ml) = @_;
-    local($mdir) = "$MAIL_LIST_DIR/$ml";
-
-    $ML_MEMBER_CHECK = 1 if -f "${mdir}.closed";
-    $ML_MEMBER_CHECK = 0 if -f "${mdir}.auto";
-}
-
 
 sub SetMLDefaults
 {
@@ -443,30 +484,30 @@ sub SetMLDefaults
     $MAINTAINER      = "fmlserv-admin\@$domain";
 
     # Directory
-    $SPOOL_DIR                     = "spool";
-    $TMP_DIR                       = "tmp"; # tmp, after chdir, under DIR
-    $VAR_DIR                       = "var"; # LOG is /var/log (4.4BSD)
-    $VARLOG_DIR                    = "var/log";
-    $VARRUN_DIR                    = "var/run";
+    $SPOOL_DIR       = "spool";
+    $TMP_DIR         = "tmp"; # tmp, after chdir, under DIR
+    $VAR_DIR         = "var"; # LOG is /var/log (4.4BSD)
+    $VARLOG_DIR      = "var/log";
+    $VARRUN_DIR      = "var/run";
+    $VARDB_DIR       = "var/db";
 
-    # files
-    $MEMBER_LIST                   = "$DIR/members"; # member list
-    $ACTIVE_LIST                   = "$DIR/actives"; # active member list
-    $OBJECTIVE_FILE                = "$DIR/objective"; # objective file
-    $GUIDE_FILE                    = "$DIR/guide";
-    $HELP_FILE                     = "$DIR/help";
-    $DENY_FILE                     = "$DIR/deny"; # attention to illegal access
-    $WELCOME_FILE                  = "$DIR/guide"; # could be $DIR/welcome
-    $LOGFILE                       = "$DIR/log"; # activity log file
-    $MGET_LOGFILE                  = "$DIR/log"; # log file for mget routine
-    $SMTP_LOG                      = "$VARLOG_DIR/_smtplog";
-    $SUMMARY_FILE                  = "$DIR/summary"; # article summary file
-    $SEQUENCE_FILE                 = "$DIR/seq"; # sequence number file
-    $MSEND_RC                      = "$VARLOG_DIR/msendrc";
-    $LOCK_FILE                     = "$VARRUN_DIR/lockfile.v7"; # liblock.pl
+    # Files
+    $MEMBER_LIST     = "$DIR/members"; # member list
+    $ACTIVE_LIST     = "$DIR/actives"; # active member list
+    $OBJECTIVE_FILE  = "$DIR/objective"; # objective file
+    $GUIDE_FILE      = "$DIR/guide";
+    $HELP_FILE       = "$DIR/help";
+    $DENY_FILE       = "$DIR/deny"; # attention to illegal access
+    $WELCOME_FILE    = "$DIR/guide"; # could be $DIR/welcome
+    $LOGFILE         = "$DIR/log"; # activity log file
+    $MGET_LOGFILE    = "$DIR/log"; # log file for mget routine
+    $SMTP_LOG        = "$VARLOG_DIR/_smtplog";
+    $SUMMARY_FILE    = "$DIR/summary"; # article summary file
+    $SEQUENCE_FILE   = "$DIR/seq"; # sequence number file
+    $MSEND_RC        = "$VARLOG_DIR/msendrc";
+    $LOCK_FILE       = "$VARRUN_DIR/lockfile.v7"; # liblock.pl
 
-
-    # IF NOT EXIST;
+    # FIXING IF *FILE NOT EXIST;
     -f $GUIDE_FILE   || ($GUIDE_FILE   = "$FMLSERV_DIR/help");
     -f $HELP_FILE    || ($HELP_FILE    = "$FMLSERV_DIR/help");
     -f $DENY_FILE    || ($DENY_FILE    = "$FMLSERV_DIR/help");
@@ -665,8 +706,12 @@ sub ResetNS
 # SYNTAX
 # $s = $_;(present line of the given mail body)
 # $ProcFileSendBack($proc, *s);
-sub SetFmlServProcedure
+sub InitFmlServProcedure
 {
+    $FmlServProcExitPat	= 'quit|end|exit';
+    $FmlServProcPat = 
+	'guide|info|help|lists|which|href|http|gopher|ftp|ftpmail';
+
     # ATTENTION: Viatually
     #    fmlserv:help == fmlserv-mailing-list/help
     #    so, fmlserv own function is fmlsrev:which only
@@ -742,39 +787,23 @@ sub ProcWhich
     local($addr) = $Fld[2] || $From_address;
 
     &Log($proc);
-    #&Mesg(*e, "\nfmlserv> $proc");
+
     &Mesg(*e, "\"$proc $addr\" yields that\n");
 
-    foreach $ml (keys %MailList) {
+    for $ml (keys %MailList) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
 
-	$DIR = $MailList{$ml};
+	$DIR = $MailList{$ml}; # $DIR/Elena/ FORM already;
 
-	# get MEMBER_LIST
-	if ("$DIR/config.ph") {
-	    $s = "$DIR/config.ph";
-	    $s = &GetEntryByName($s, '^\$MEMBER_LIST');
-	    $s =~ s/\$DIR/$DIR/g;	# expand $DIR
-	    $s .= ' 1;';
-	    
-	    # and eval it
-	    eval $s;
-	    $r = 1 if $@ eq "";	# $r is a result
-	}
-	elsif (-f "$DIR/members") {
-	    # sub NewML:: default is
-	    # $MEMBER_LIST = "$DIR/members"; # member list
-	    $r = $MEMBER_LIST = "$DIR/members";
-	}
-	else {
-	    &Mesg(*e, "*** $ml Mailing List has a Configuration Error");
-	}
+	&NewML($DIR, $ml, *e, *MailList);
 
 	# if eval is succeed, get entry for $addr
-	if ($r && ($s = &CheckMember($addr, $MEMBER_LIST))) {
+	if (&MailListMemberP($addr)) {
 	    $reply .= sprintf("   %-15s\t%s\n", $ml, $addr);
 	    $hitc++;
 	}
+
+	&ResetNS;
     }#FOREACH;
 
     if ($hitc) { 
@@ -821,9 +850,9 @@ sub CompatMajordomo
 
     print STDERR "MAJORDOMO::($dir, $ml) = @_; mldir=$mldir\n" if $debug;
 
-    $MEMBER_LIST                   = "$mldir/$ml"; # member list
-    $ACTIVE_LIST                   = "$mldir/$ml"; # active member list
-    $GUIDE_FILE                    = "$mldir/$ml.info";
+    $MEMBER_LIST      = "$mldir/$ml"; # member list
+    $ACTIVE_LIST      = "$mldir/$ml"; # active member list
+    $GUIDE_FILE       = "$mldir/$ml.info";
 
     push(@ARCHIVE_DIR, "$mldir/$ml.archive");
     $Envelope{'mode:majordomo:chmemlist'} = 1;
