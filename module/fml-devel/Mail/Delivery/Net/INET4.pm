@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET4.pm,v 1.4 2002/01/13 07:09:05 fukachan Exp $
+# $FML: INET4.pm,v 1.5 2002/09/11 23:18:24 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET4;
@@ -108,7 +108,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Delivery::Net::INET4 appeared in fml5 mailing list driver package.
+Mail::Delivery::Net::INET4 first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: FixBrokenAddress.pm,v 1.6 2002/02/01 12:04:00 fukachan Exp $
+# $FML: FixBrokenAddress.pm,v 1.7 2002/09/11 23:18:22 fukachan Exp $
 #
 
 
@@ -80,7 +80,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Bounce::FixBrokenAddress appeared in fml5 mailing list driver package.
+Mail::Bounce::FixBrokenAddress first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

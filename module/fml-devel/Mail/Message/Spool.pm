@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2002 Ken'ichi Fukamachi
 #
-# $FML: Spool.pm,v 1.8 2002/04/22 04:59:37 fukachan Exp $
+# $FML: Spool.pm,v 1.9 2002/09/11 23:18:27 fukachan Exp $
 #
 
 package Mail::Message::Spool;
@@ -169,7 +169,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::Spool appeared in fml5 mailing list driver package.
+Mail::Message::Spool first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Text.pm,v 1.9 2002/03/31 02:25:45 fukachan Exp $
+# $FML: Text.pm,v 1.10 2002/09/11 23:18:30 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print::Text;
@@ -219,7 +219,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::ThreadTrack::Print::Text appeared in fml5 mailing list driver package.
+Mail::ThreadTrack::Print::Text first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ToHTML.pm,v 1.20 2002/05/16 08:00:38 fukachan Exp $
+# $FML: ToHTML.pm,v 1.22 2002/09/11 23:18:27 fukachan Exp $
 #
 
 package Mail::Message::ToHTML;
@@ -17,7 +17,7 @@ my $debug = 0;
 my $URL   =
     "<A HREF=\"http://www.fml.org/software/\">Mail::Message::ToHTML</A>";
 
-my $version = q$FML: ToHTML.pm,v 1.20 2002/05/16 08:00:38 fukachan Exp $;
+my $version = q$FML: ToHTML.pm,v 1.22 2002/09/11 23:18:27 fukachan Exp $;
 if ($version =~ /,v\s+([\d\.]+)\s+/) {
     $version = "$URL $1";
 }
@@ -2453,7 +2453,9 @@ sub htmlify_file
 	warn("not process $id (already exists)") if $debug;
     }
     else {
-	printf STDERR "   converted( id=%-6s src=%s )\n", $id, $file;
+	if ($debug) {
+	    printf STDERR "   converted( id=%-6s src=%s )\n", $id, $file;
+	}
     }
 }
 
@@ -2564,7 +2566,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::ToHTML appeared in fml5 mailing list driver package.
+Mail::Message::ToHTML first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 This class is renamed from C<Mail::HTML::Lite> 1.40 (2001-2002).
