@@ -377,6 +377,13 @@ sub ValidChaddrRequest
     &LoopBackWarn($oldaddr) && (return 0);
     &LoopBackWarn($newaddr) && (return 0);
 
+    # should be oldaddr != newaddr
+    if (&ExactAddressMatch($oldaddr, $newaddr)) {
+	&Log("$cmd: Error: $oldaddr == $newaddr");
+	$e{'tmp:reason'} = "Error: $oldaddr == $newaddr";
+	return $NULL;
+    }
+
     # $oldaddr should be a member.
     &MailListMemberP($oldaddr) || do {
 	&Log("$oldaddr is NOT a member");
