@@ -117,11 +117,11 @@ doc: plaindoc htmldoc
 
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
-INFO-common: $(FML)/.info
+INFO-common: $(FML)/CHANGES
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
 	@ $(MKDIR) $(COMPILE_DIR)
 	@ rm -f $(COMPILE_DIR)/INFO
-	($(ECONV) doc/ri/INFO; $(ECONV) .info; $(ECONV) doc/ri/README.wix)|\
+	($(ECONV) doc/ri/INFO; $(ECONV) CHANGES; $(ECONV) doc/ri/README.wix)|\
 		$(ECONV) |\
 		tee $(WORK_DOC_DIR)/INFO > $(COMPILE_DIR)/INFO
 

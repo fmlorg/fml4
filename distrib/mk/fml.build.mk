@@ -1,4 +1,4 @@
-.if ! exists(.info)
+.if ! exists(CHANGES)
 __BUILD_INIT__ += __touch_info
 .endif
 
@@ -17,7 +17,7 @@ world: build
 
 __touch_info:
 	echo ${FML}
-	touch .info
+	touch CHANGES
 
 __init_conf:
 	echo `cat conf/release`"#0" > conf/release_version

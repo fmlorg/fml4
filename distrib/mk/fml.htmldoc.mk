@@ -101,10 +101,10 @@ var/html/op-e/index.html: doc/smm/*wix
 	${FIX_WIX} doc/smm/op.wix |\
 	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
 
-distrib/compile/WHATS_NEW.wix: .info
+distrib/compile/WHATS_NEW.wix: CHANGES
 	rm -f distrib/compile/WHATS_NEW.wix
 	echo '.HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
-	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix || echo ""
+	grep -v -e ------- CHANGES >> distrib/compile/WHATS_NEW.wix || echo ""
 	echo '.~HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
 
 var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix

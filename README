@@ -28,7 +28,7 @@ ignored in fml/ repository since it is maintained separetely.
 
 3.	run "make build", which process follows:
 
-	% touch .info	(or get the latest .info)
+	% touch CHANGES	(or get the latest CHANGES)
 	% make plaindoc
 	% make htmldoc
 

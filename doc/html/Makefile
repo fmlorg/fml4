@@ -33,12 +33,12 @@ SEARCH:
 INFO: INFO.html INFO-e.html
 
 
-INFO.html: $(FML)/.info
+INFO.html: $(FML)/CHANGES
 	cat $(FML)/doc/html/INFOpre $(FML)/var/doc/INFO.jp \
 	> $(FML)/var/html/INFO.html
 
 
-INFO-e.html: $(FML)/.info
+INFO-e.html: $(FML)/CHANGES
 	cat $(FML)/doc/html/INFOpre $(FML)/var/doc/INFO.en \
 	> $(FML)/var/html/INFO-e.html
 
