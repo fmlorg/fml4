@@ -36,6 +36,12 @@ INIT_VERSION () {
 	then
 		echo "FML Release";
 		$FML_VERSION -s
+		$FML_VERSION -i conf/release_version
+		echo ""
+		head conf/[a-z]*
+		echo ""
+		echo "FML Release initialized";
+		sleep 1;
 
 	elif [ $init = 1 ]
 	then
