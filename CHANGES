@@ -4,6 +4,17 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/28
+
+   cf/MANIFEST
+	add missing definitions
+
+	+MTI_EXPIRE_UNIT: 3600
+	+MTI_BURST_SOFT_LIMIT: 1
+	+MTI_BURST_HARD_LIMIT: 2
+	+MTI_COST_EVAL_FUNCTION: MTISimpleBomberP
+	+MTI_MAIL_FROM_HINT_LIST: $DIR/mti_mailfrom.hints
+
 2001/09/23
 
    kern/libkernsubr2.pl
