@@ -40,7 +40,7 @@ if($0 =~ 'summary.pl') {
     $SUMMARY_MODE = 1;
 
     if($TODAY) {# today's status report
-	$TODAY = sprintf("%2d/%02d/%02d", $year, $mon + 1, $mday);
+	$TODAY = sprintf("%02d/%02d/%02d", $year % 100, $mon + 1, $mday);
 	print STDERR "TODAY $TODAY\n\n";
 	if(open(TMP, "$DIR/summary")) {
 	    while(<TMP>) {
@@ -96,7 +96,7 @@ sub VoteInitConfig
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     $Date = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-		    $mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+		$mday, $Month[$mon], $year + 1900, $hour, $min, $sec, $TZone);
 
     if($USE_LIBMIME) {
 	push(@INC, $LIBMIMEDIR) if $LIBMIMEDIR;
