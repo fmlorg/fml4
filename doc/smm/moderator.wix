@@ -240,6 +240,7 @@ $START_HOOK = q#
 
 
 .S	queue¤Îexpire
+=E.S	Expire moderator queue
 
 	$MODERATOR_EXPIRE_LIMIT (default 14 == 2 weeks)
 

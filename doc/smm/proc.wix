@@ -163,6 +163,17 @@ Ex 2: "chaddr" case.
 		    'chaddr',         'ProcSetMemberList',
 		    'r#chaddr', 1,
 
+○ l#key
+
+一通のメールの中のコマンド 'command' リクエストを最大でも
+$Procedure{"l#command"} 個までに制限する。コマンドごとに制限は変えられ
+る。$MAXNUM_COMMAND_INPUT は一つのメールの中のコマンドの合計への制限に
+なっている(種別を問わず足し合わせた値)。
+=E
+Restrict 'command' requests in one mail up to $Procedure{"l#command"}
+$MAXNUM_COMMAND_INPUT is another issue which restrict the
+total number of commands in on email.
+
 例: "get" は１メールで１０個まで
 =E
 Example: "get" command requets is up to 10 in one mail.

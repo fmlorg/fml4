@@ -438,6 +438,7 @@ dbmopen(). This is used only on perl 5. What you use depends on
 your operating system. Please see your OS manuals and perl.
 
 .S	警告の negative cache
+=E.S	Negative cache of warning mails
 
 １時間に１度しか警告メールを管理者に通知しない。mail bombのそれぞれの
 メールに対しそれぞれ警告メールを出すと自分で自分に爆撃してしまうことに

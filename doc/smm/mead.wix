@@ -178,6 +178,18 @@ Options:
     -k action        'bye' is default,  off or bye.
                      change the action when mead detects a bad address.
 
+○ -k オプション
+
+1998/10/1
+   mead.pl -k command option (default 'bye')
+
+If you 'off' the users who causes "unknown user" error "not reachable",
+you can  use '-k off' option.
+
+-k off とすると(デフォールトではユーザを自動的に抜いてしまいますが)
+それを OFF の状態にします。
+
+
 .S	問題点
 =E.S	Discussion
 
@@ -197,6 +209,16 @@ The error mail says for the delivered address <a@b.org>
 これは fml 側の配送リストにはないので削除できないわけです。
 =E
 which is not on $ACTIVE_LIST nor $MEMBER_LIST.
+
+.S	A few tips
+
+1998/10/10
+   mead.pl (Mail Error Analyze Daemon);
+	Ignore Japanese Strings (which may cause an error)
+
+	日本語を無視(誤動作する)。可能性のある文字列を全部見て
+	sort |uniq してキャッシュする(first match では user unknownが
+	上書きされたりするかもしれないのを回避)
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
