@@ -1,17 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Checksum.pm,v 1.1 2001/12/22 16:07:09 fukachan Exp $
+# $FML: Checksum.pm,v 1.10 2003/08/23 05:15:14 fukachan Exp $
 #
 
 package Mail::Message::Checksum;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
@@ -25,7 +24,7 @@ Mail::Message::Checksum - utilities for check sum
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 the constructor.
 It checks we can use MD5 perl module or we need to use external programs
@@ -34,6 +33,10 @@ such as C<md5>, C<cksum>, et.al.
 =cut
 
 
+# Descriptions: ordinary constructor
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: OBJ
 sub new
 {
     my ($self, $args) = @_;
@@ -46,6 +49,11 @@ sub new
 }
 
 
+# Descriptions: initialization routine called at new().
+#               search a md5 module or program.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
 sub _init
 {
     my ($self, $args) = @_;
@@ -61,28 +69,36 @@ sub _init
 	$self->{ _type } = 'native';
     }
     else {
-	eval qq{ require File::Utils; import File::Utils qw(search_program);};
-	my $prog = search_program('md5') || search_program('md5sum');
-	if (defined $prog) {
-	    $self->{ _program } = $prog;
-	}
+	eval q{
+	    use Mail::Message::Utils;
+	    my $prog = Mail::Message::Utils::search_program('md5') ||
+	      Mail::Message::Utils::search_program('md5sum');
+
+	    if (defined $prog) {
+		$self->{ _program } = $prog;
+	    }
+	};
+	carp($@) if $@;
     }
 }
 
 
-
-=head2 C<md5(\$string)>
+=head2 md5(\$string)
 
 return the md5 checksum of the given string C<$string>.
 
 =cut
 
 
+# Descriptions: dispatcher to calculate the md5 checksum
+#    Arguments: OBJ($self) STR_REF($r_data)
+# Side Effects: none
+# Return Value: STR(md5 sum)
 sub md5
 {
     my ($self, $r_data) = @_;
 
-    if ($self->{ _type } eq 'native') {
+    if (defined($self->{ _type }) && ($self->{ _type } eq 'native')) {
 	$self->_md5_native($r_data);
     }
     else {
@@ -92,6 +108,10 @@ sub md5
 }
 
 
+# Descriptions: calculate the md5 checksum by MD5 module
+#    Arguments: OBJ($self) STR_REF($r_data)
+# Side Effects: none
+# Return Value: STR(md5 sum)
 sub _md5_native
 {
     my ($self, $r_data) = @_;
@@ -106,15 +126,19 @@ sub _md5_native
     $p = 0;
     while (1) {
 	last if $p > $pe;
-	$_  = substr($$r_data, $p, 128);
-	$p += 128;
-	$md5->add($_);
+	$buf = substr($$r_data, $p, 128);
+	$p  += 128;
+	$md5->add($buf);
     }
 
     $md5->hexdigest();
 }
 
 
+# Descriptions: calculate the md5 checksum by md5 (external) program
+#    Arguments: OBJ($self) STR_REF($r_data)
+# Side Effects: none
+# Return Value: STR(md5 sum)
 sub _md5_by_program
 {
     my ($self, $r_data) = @_;
@@ -133,6 +157,7 @@ sub _md5_by_program
 	    my $cksum = 0;
 	    sysread($rh, $cksum, 1024);
 	    $cksum =~ s/[\s\n]*$//;
+	    if ($cksum =~ /^(\S+)/) { $cksum = $1;}
 	    close($rh);
 	    return $cksum if $cksum;
 	}
@@ -142,7 +167,7 @@ sub _md5_by_program
 }
 
 
-=head2 C<cksum1($file)>
+=head2 cksum1($file)
 
 C<not implemented>.
 
@@ -150,7 +175,7 @@ This is a 16-bit checksum. The algorithm used by historic BSD systems
 as the sum(1) algorithm and by historic AT&T System V UNIX systems as
 the sum algorithm when using the C<-r> option.
 
-=head2 C<cksum2($file)>
+=head2 cksum2($file)
 
 return the traditional checksum of the given C<$file>.
 
@@ -162,14 +187,18 @@ See POSIX 1003.2 for more details.
 =cut
 
 
+# Descriptions: return the traditional checksum of the given $file
+#    Arguments: OBJ($self) STR($file)
+# Side Effects: none
+# Return Value: ARRAY(STR, STR)
 sub cksum2
 {
-    my ($self, $f) = @_;
+    my ($self, $file) = @_;
     my ($crc, $total, $nr, $buf, $r);
 
     $crc = $total = 0;
-    if (open($f, $f)) {
-        while (($nr = sysread($f, $buf, 1024)) > 0) {
+    if (open($file, $file)) {
+        while (($nr = sysread($file, $buf, 1024)) > 0) {
             my ($i) = 0;
             $total += $nr;
 
@@ -178,19 +207,19 @@ sub cksum2
                 $crc += ord($r);
             }
         }
-        close($f);
+        close($file);
         $crc = ($crc & 0xffff) + ($crc >> 16);
         $crc = ($crc & 0xffff) + ($crc >> 16);
     }
     else {
-        Log("ERROR: no such file $f");
+        croak("ERROR: no such file $file");
     }
 
-    ($crc, $total);
+    return ($crc, $total);
 }
 
 
-=head2 C<crc($file)>
+=head2 crc($file)
 
 C<not implemented>.
 
@@ -222,20 +251,24 @@ The coefficients of R(x) are considered to be a 32-bit sequence.
 
 The bit sequence is complemented and the result is the CRC.
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::Checksum appeared in fml5 mailing list driver package.
+Mail::Message::Checksum first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 Algorithm used here is based on NetBSD cksum library (C program).

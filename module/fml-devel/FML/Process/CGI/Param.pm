@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Param.pm,v 1.19 2002/12/22 03:46:21 fukachan Exp $
+# $FML: Param.pm,v 1.21 2003/08/25 14:13:59 fukachan Exp $
 #
 
 package FML::Process::CGI::Param;
@@ -102,7 +102,6 @@ sub safe_paramlist
     # match method and return ARRAY_REF with matching values
     $key = $safe_method_regexp->{ $key };
     for my $x (param()) {
-	print STDERR "\n<!-- check param: $x =~ /^$key$/ -->\n";
 	if ($x =~ /^$key$/) {
 	    my $value = defined param($x) ? param($x) : '';
 	    if ($numregexp == 1) { push(@list, [ $1, $value ] );}
@@ -131,7 +130,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

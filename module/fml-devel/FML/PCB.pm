@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: PCB.pm,v 1.13 2002/12/15 13:43:37 fukachan Exp $
+# $FML: PCB.pm,v 1.15 2003/08/23 15:33:11 fukachan Exp $
 #
 
 package FML::PCB;
@@ -45,7 +45,7 @@ Typically, $curproc is composed like this:
 
 =head1 METHODS
 
-=head2 C<new( $args )>
+=head2 new( $args )
 
 initialize the C<pcb> memory area.
 If $args HASH REFERENCE is specified, initialize C<pcb> area by it.
@@ -74,15 +74,15 @@ sub new
 }
 
 
-=head2 C<dump_variables()>
+=head2 dump_variables()
 
 show all {key => value} for debug.
 
-=head2 C<get( category, key )>
+=head2 get( category, key )
 
 You must specify C<category> and C<key>.
 
-=head2 C<set( category, key, value)>
+=head2 set( category, key, value)
 
 You must specify C<category>, C<key> and the C<value>.
 
@@ -140,7 +140,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

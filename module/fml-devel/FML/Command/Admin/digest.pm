@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digest.pm,v 1.5 2002/12/24 10:19:44 fukachan Exp $
+# $FML: digest.pm,v 1.12 2003/09/27 03:00:16 fukachan Exp $
 #
 
 package FML::Command::Admin::digest;
@@ -32,7 +32,7 @@ change digest mode for the specified address to off/on.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -57,9 +57,17 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: toggle delivery mode between real time and digest.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map,$digest_recipient_maps
+# Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
@@ -69,17 +77,16 @@ sub process
     my $mode    = $options->[ 1 ] || '';
 
     # maps
-    my $primary_recipient_map = $config->{ primary_recipient_map };
+    my $recipient_map         = $config->{ primary_recipient_map };
     my $recipient_maps        = $config->get_as_array_ref('recipient_maps');
     my $digest_recipient_map  = $config->{ primary_digest_recipient_map };
     my $digest_recipient_maps =
 	$config->get_as_array_ref('digest_recipient_maps');
 
     # fundamental check
-    croak("address not defined")   unless defined $address;
+    croak("address not defined")     unless defined $address;
     croak("address not specified")   unless $address;
-    croak("primary_recipient_map not defined")
-	unless defined $primary_recipient_map;
+    croak("primary_recipient_map not defined") unless defined $recipient_map;
     croak("recipient_maps not defined") unless defined $recipient_maps;
     croak("digest_recipient_map not defined")
 	unless defined $digest_recipient_map;
@@ -87,9 +94,9 @@ sub process
 	unless defined $digest_recipient_maps;
 
     my $digest_args = {
-	address => $address,
-	mode    => $mode,
-	primary_recipient_map        => $primary_recipient_map,
+	address                      => $address,
+	mode                         => $mode,
+	primary_recipient_map        => $recipient_map,
 	recipient_maps               => $recipient_maps,
 	primary_digest_recipient_map => $digest_recipient_map,
 	digest_recipient_maps        => $digest_recipient_maps,
@@ -115,22 +122,21 @@ sub process
 
 
 # Descriptions: change delivery mode to real time.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($command_args) HASH_REF($dargs)
 # Side Effects: update $recipient_map
+# Return Value: none
 sub _digest_on
 {
     my ($self, $curproc, $command_args, $dargs) = @_;
     my $address               = $dargs->{ address };
-    my $mode                  = $dargs->{ mode };
-    my $primary_recipient_map = $dargs->{ primary_recipient_map };
-    my $recipient_maps        = $dargs->{ recipient_maps };
+    my $recipient_map         = $dargs->{ primary_recipient_map };
     my $digest_recipient_map  = $dargs->{ primary_digest_recipient_map };
-    my $digest_recipient_maps = $dargs->{ digest_recipient_maps };
 
-    # move $address from normal $recipient_maps to $digest_recipient_maps
+    # move $address from normal $recipient_map to $digest_recipient_map
     my $uc_normal_args = {
 	address => $address,
-	maplist => $recipient_maps,
+	maplist => [ $recipient_map ],
     };
 
     my $uc_digest_args = {
@@ -138,37 +144,34 @@ sub _digest_on
 	maplist => [ $digest_recipient_map ],
     };
 
-    # XXX-TODO: we expect userdel() and useradd() validate $address.
     $self->_userdel($curproc, $command_args, $uc_normal_args);
     $self->_useradd($curproc, $command_args, $uc_digest_args);
 }
 
 
 # Descriptions: change delivery mode to digest.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($command_args) HASH_REF($dargs)
 # Side Effects: update $recipient_map
+# Return Value: none
 sub _digest_off
 {
     my ($self, $curproc, $command_args, $dargs) = @_;
     my $address               = $dargs->{ address };
-    my $mode                  = $dargs->{ mode };
-    my $primary_recipient_map = $dargs->{ primary_recipient_map };
-    my $recipient_maps        = $dargs->{ recipient_maps };
+    my $recipient_map         = $dargs->{ primary_recipient_map };
     my $digest_recipient_map  = $dargs->{ primary_digest_recipient_map };
-    my $digest_recipient_maps = $dargs->{ digest_recipient_maps };
 
     # move $address from normal $digest_recipient_maps to $prmary_recipient_map
     my $uc_normal_args = {
 	address => $address,
-	maplist => [ $primary_recipient_map ],
+	maplist => [ $recipient_map ],
     };
 
     my $uc_digest_args = {
 	address => $address,
-	maplist => $digest_recipient_maps,
+	maplist => [ $digest_recipient_map ],
     };
 
-    # XXX-TODO: we expect userdel() and useradd() validate $address.
     $self->_userdel($curproc, $command_args, $uc_digest_args);
     $self->_useradd($curproc, $command_args, $uc_normal_args);
 }
@@ -176,7 +179,7 @@ sub _digest_off
 
 # Descriptions: add the specified user.
 #    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($uc_args)
+#               OBJ($curproc) HASH_REF($command_args) HASH_REF($uc_args)
 # Side Effects: update address list(s).
 # Return Value: none
 sub _useradd
@@ -198,7 +201,7 @@ sub _useradd
 
 # Descriptions: remove the specified user.
 #    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($uc_args)
+#               OBJ($curproc) HASH_REF($command_args) HASH_REF($uc_args)
 # Side Effects: update address list(s).
 # Return Value: none
 sub _userdel
@@ -219,7 +222,8 @@ sub _userdel
 
 
 # Descriptions: show cgi menu.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -233,8 +237,8 @@ sub cgi_menu
     return;
 
     eval q{
-	use FML::CGI::Admin::User;
-	my $obj = new FML::CGI::Admin::User;
+	use FML::CGI::User;
+	my $obj = new FML::CGI::User;
 	$obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {
@@ -253,7 +257,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

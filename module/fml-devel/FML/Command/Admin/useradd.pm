@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: useradd.pm,v 1.4 2002/12/15 13:46:29 fukachan Exp $
+# $FML: useradd.pm,v 1.2 2002/09/11 23:18:09 fukachan Exp $
 #
 
 package FML::Command::Admin::useradd;
@@ -17,7 +17,7 @@ use FML::Command::Admin::subscribe;
 @ISA = qw(FML::Command::Admin::subscribe);
 
 
-# Descriptions: add a new user.
+# Descriptions: subscribe user
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to subscribe module
 # Return Value: none
@@ -38,10 +38,6 @@ See C<FML::Command> for more details.
 =head1 DESCRIPTION
 
 an alias of C<FML::Command::Admin::subscribe>.
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

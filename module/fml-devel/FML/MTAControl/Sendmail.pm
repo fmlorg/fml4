@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Sendmail.pm,v 1.2 2003/01/07 08:38:33 fukachan Exp $
+# $FML: Sendmail.pm,v 1.7 2003/09/13 09:17:00 fukachan Exp $
 #
 
 package FML::MTAControl::Sendmail;
@@ -28,6 +28,9 @@ set up aliases and virtual maps for sendmail.
 =head1 METHODS
 
 =cut
+
+# BUGS
+#XXX-TODO: We should check "Tfml" in sendmail.cf in installation.
 
 
 # Descriptions: install new alias entries
@@ -62,12 +65,17 @@ sub sendmail_remove_alias
 sub sendmail_update_alias
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $prog   = $config->{ path_sendmail };
     my $alias  = $config->{ mail_aliases_file };
 
-    print STDERR "updating $alias database\n";
-    system "$prog -bi -oA$alias";
+    $curproc->ui_message("updating $alias database");
+    if (-x $prog) {
+	system "$prog -bi -oA$alias";
+    }
+    else {
+	warn("sendmail='$prog' not found");
+    }
 }
 
 
@@ -144,16 +152,15 @@ sub sendmail_install_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
     my $template_dir = $curproc->template_files_dir_for_newml();
-    my $config       = $curproc->{ config };
+    my $config       = $curproc->config();
     my $ml_name      = $config->{ ml_name };
     my $ml_domain    = $config->{ ml_domain };
-    my $postmap      = $config->{ path_postmap };
 
     use File::Spec;
     my $virtual = $config->{ sendmail_virtual_map_file };
     my $src     = File::Spec->catfile($template_dir, 'postfix_virtual');
     my $dst     = $virtual . "." . $$;
-    print STDERR "updating $virtual\n";
+    $curproc->ui_message("updating $virtual");
 
     # at the first time
     unless( -f $virtual) {
@@ -185,7 +192,7 @@ sub sendmail_install_virtual_map
 sub sendmail_remove_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $map     = $config->{ sendmail_virtual_map_file };
     my $key     = $params->{ ml_name };
     my $p       = {
@@ -204,14 +211,19 @@ sub sendmail_remove_virtual_map
 sub sendmail_update_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $makemap = $config->{ path_makemap };
     my $virtual = $config->{ sendmail_virtual_map_file };
 
     # XXX-TODO: NOT IMPLEMENTED
     if (-f $virtual) {
-	print STDERR "updating $virtual database\n";
-	system "$makemap hash $virtual < $virtual";
+	$curproc->ui_message("updating $virtual database");
+	if (-x $makemap) {
+	    system "$makemap hash $virtual < $virtual";
+	}
+	else {
+	    warn("makemap='$makemap' not found");
+	}
     }
 }
 
@@ -233,7 +245,7 @@ get map types supported by makemap.
 sub sendmail_supported_map_types
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $makemap = $config->{ path_makemap };
 
     if (-x $makemap) {

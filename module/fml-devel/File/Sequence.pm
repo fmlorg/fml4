@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Sequence.pm,v 1.30 2002/12/23 14:35:32 fukachan Exp $
+# $FML: Sequence.pm,v 1.34 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::Sequence;
@@ -61,18 +61,18 @@ As an extension, you can generate a cyclic number by this module.
 Please specify C<modulus> parameter in new() method if you want to get
 a cyclic number.
 
-=head2 C<new($args)>
+=head2 new($args)
 
 $args->{ sequence_file } is the file holding the current sequence
 number.
 $args->{ modulus } is the modulus when you want to get a cyclic
 number.
 
-=head2 C<increment_id([$file])>
+=head2 increment_id([$file])
 
 increment the sequence number.
 
-=head2 C<get_id([$file])>
+=head2 get_id([$file])
 
 get the sequence number from specified C<$file>.
 
@@ -130,7 +130,7 @@ sub increment_id
     # XXX-TODO: share codes between get_id() and increment_id() .
     # read the current sequence number
     if (defined $rh) {
-	$id = $rh->getline;
+	$id = $rh->getline() || 0;
 	$id =~ s/[\s\r\n]*$//;
 	$rh->close;
     }
@@ -365,14 +365,14 @@ sub _search_max_id_from_top
       PEBOT_SEARCH:
 	while ($pebot > 0) {
 	    last PEBOT_SEARCH if defined $hash->{ $pebot - $unit };
-	    last PEBOT_SEARCH if(($pebot - $unit) <= 0);
+	    last PEBOT_SEARCH if ($pebot - $unit) <= 0;
 	    $pebot -= $unit;
 	}
 
 	# decrement by 1.
 	while(! defined $hash->{ $pebot - 1 }) {
 	    $pebot--;
-	    return 0 if($pebot <= 0);
+	    return 0 if $pebot <= 0;
 	}
 
 	return $pebot;
@@ -394,7 +394,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

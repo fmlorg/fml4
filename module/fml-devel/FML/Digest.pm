@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Digest.pm,v 1.7 2003/01/11 16:05:12 fukachan Exp $
+# $FML: Digest.pm,v 1.14 2003/10/15 11:57:03 fukachan Exp $
 #
 
 package FML::Digest;
@@ -27,7 +27,7 @@ FML::Digest - create digest, a subset of articles.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 constructor.
 
@@ -45,6 +45,19 @@ sub new
     my $me     = {};
     $me->{ _curproc } = $curproc;
     return bless $me, $type;
+}
+
+
+# Descriptions: get lock channel name.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub get_lock_channel_name
+{
+    my ($self) = @_;
+
+    # XXX_LOCK_CHANNEL: digest_sequence
+    return 'digest_sequence';
 }
 
 
@@ -84,7 +97,7 @@ sub get_digest_id
 {
     my ($self) = @_;
     my $curproc  = $self->{ _curproc };
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $seq_file = $config->{ digest_sequence_file };
 
     return $self->_get_id($seq_file);
@@ -98,11 +111,9 @@ sub get_digest_id
 sub get_article_id
 {
     my ($self) = @_;
-    my $curproc  = $self->{ _curproc };
-    my $config   = $curproc->{ config };
-    my $seq_file = $config->{ article_sequence_file };
+    my $curproc = $self->{ _curproc };
 
-    return $self->_get_id($seq_file);
+    return $curproc->article_max_id();
 }
 
 
@@ -113,29 +124,23 @@ sub get_article_id
 sub _get_id
 {
     my ($self, $seq_file) = @_;
+    my $curproc = $self->{ _curproc };
 
     # XXX-TODO: we should enhance IO::Adapter module to handle
     # XXX-TODO: sequential number.
-    use File::Sequence;
-
-    # XXX-TODO: defined() check for $sfh.
     if (-f $seq_file) {
+	use File::Sequence;
 	my $sfh = new File::Sequence { sequence_file => $seq_file };
-	my $id  = $sfh->get_id();
-	if ($sfh->error) { LogError( $sfh->error ); }
+	if (defined $sfh) {
+	    my $id  = $sfh->get_id();
+	    if ($sfh->error) { $curproc->logerror( $sfh->error ); }
 
-	return $id;
+	    return $id;
+	}
     }
-    else {
-	Log("$seq_file not found") if 0;
 
-	# XXX-TODO: defined() check for $sfh.
-	my $sfh = new File::Sequence { sequence_file => $seq_file };
-	my $id  = $sfh->increment_id();
-	if ($sfh->error) { LogError( $sfh->error ); }
-
-	return 1;
-    }
+    # return default value if something fails.
+    return 1;
 }
 
 
@@ -147,16 +152,22 @@ sub set_digest_id
 {
     my ($self, $id) = @_;
     my $curproc  = $self->{ _curproc };
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $seq_file = $config->{ digest_sequence_file };
+    my $channel  = $self->get_lock_channel_name();
 
     # XXX-TODO: we should enhance IO::Adapter module to handle
     # XXX-TODO: sequential number.
     # XXX-TODO: defined() check for $sfh.
     use File::Sequence;
+
+    $curproc->lock($channel);
+
     my $sfh = new File::Sequence { sequence_file => $seq_file };
     $sfh->set_id($id);
-    if ($sfh->error) { LogError( $sfh->error ); }
+    if ($sfh->error) { $curproc->logerror( $sfh->error ); }
+
+    $curproc->unlock($channel);
 
     return $id;
 }
@@ -171,10 +182,9 @@ sub create_multipart_message
     my ($self, $optargs) = @_;
     my $range     = $optargs->{ range };
     my $curproc   = $self->{ _curproc };
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $ml_name   = $config->{ ml_name };
     my $ml_addr   = $config->{ address_for_post };
-    my $charset   = $config->{ template_file_charset };
     my $seq_file  = $config->{ digest_sequence_file };
     my $rcptmaps  = $config->get_as_array_ref('digest_recipient_maps');
     my $count_ok  = 0;
@@ -188,7 +198,7 @@ sub create_multipart_message
 	}
     };
 
-    Log("send back articles range=$range");
+    $curproc->log("send back articles range=$range");
 
     my $filelist = $self->_expand_range($range);
     for my $filename (@$filelist) {
@@ -197,7 +207,7 @@ sub create_multipart_message
 	my $filepath = $article->filepath($filename);
 	if (-f $filepath) {
 	    $curproc->reply_message( {
-		type        => "message/rfc822; charset=$charset",
+		type        => "message/rfc822",
 		path        => $filepath,
 		filename    => $filename,
 		disposition => "$ml_name ML article $filename",
@@ -205,12 +215,12 @@ sub create_multipart_message
 	    $count_ok++;
 	}
 	else {
-	    Log("no such file: $filepath");
+	    $curproc->log("no such file: $filepath");
 	    $count_err++;
 	}
     }
 
-    Log("eat articles ok=$count_ok error=$count_err");
+    $curproc->log("eat articles ok=$count_ok error=$count_err");
 }
 
 

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: AtomicFile.pm,v 1.6 2002/12/23 15:15:08 fukachan Exp $
+# $FML: AtomicFile.pm,v 1.9 2003/08/23 04:35:43 fukachan Exp $
 #
 
 package IO::Adapter::AtomicFile;
@@ -75,7 +75,7 @@ The C<atomic> feature is based on C<rename(2)> system call.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 The ordinary constructor.
 The request is forwarded to SUPER CLASS's new().
@@ -228,7 +228,8 @@ sub copy
     my $wh = $self->open($dst);
 
     if (defined($rh) && defined($wh)) {
-	while (sysread($rh, $_, 4096)) { print $wh $_;}
+	my $buf = '';
+	while (sysread($rh, $buf, 4096)) { print $wh $buf;}
 	$wh->close;
 	$rh->close;
 
@@ -240,11 +241,11 @@ sub copy
 }
 
 
-=head2 C<error()>
+=head2 error()
 
 return the error.
 
-=head2 C<rollback()>
+=head2 rollback()
 
 stop the operation and remove the temporary file to back to the first
 state.
@@ -303,7 +304,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: File.pm,v 1.44 2003/01/11 15:22:26 fukachan Exp $
+# $FML: File.pm,v 1.48 2003/08/24 14:09:25 fukachan Exp $
 #
 
 package IO::Adapter::File;
@@ -53,7 +53,7 @@ prefix.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 standard constructor.
 
@@ -73,7 +73,7 @@ sub new
 }
 
 
-=head2 C<open($args)>
+=head2 open($args)
 
 $args HASH REFERENCE must have two parameters.
 C<file> is the target file to open.
@@ -142,7 +142,7 @@ sub _rw_open
 }
 
 
-=head2 C<touch()>
+=head2 touch()
 
 create a file if not exists.
 
@@ -184,7 +184,7 @@ sub line_count
 }
 
 
-=head2 C<getline()>
+=head2 getline()
 
 return one line.
 It is the same as usual getline() call for a file.
@@ -254,7 +254,6 @@ sub _get_next_xxx
 		$value =~ s/^\s*//;
 		$value =~ s/\s*$//;
 		my (@buf) = split(/\s+/, $value);
-		print STDERR "[ @buf ]\n";
 		$buf = \@buf;
 	    }
 	    $ec++;
@@ -266,92 +265,11 @@ sub _get_next_xxx
 }
 
 
-=head2 get_value_as_str($key)
-
-return value(s) for the next key as STR.
-
-=head2 get_value_as_array_ref($key)
-
-return value(s) for the next key as ARRAY_REF.
-
-=cut
-
-
-# Descriptions: return value(s) for the next key
-#    Arguments: OBJ($self) STR($key)
-# Side Effects: none
-# Return Value: STR
-sub get_value_as_str
-{
-    my ($self, $key) = @_;
-    $self->_get_value($key, 'value_as_array_str');
-}
-
-
-# Descriptions: return value(s) for the next key
-#    Arguments: OBJ($self) STR($key)
-# Side Effects: none
-# Return Value: ARRAY_REF
-sub get_value_as_array_ref
-{
-    my ($self, $key) = @_;
-    $self->_get_value($key, 'value_as_array_ref');
-}
-
-
-# Descriptions: return value(s) for the next key.
-#               XXX "key" should be uniq since "key" is used as a primary key.
-#    Arguments: OBJ($self) STR($key) STR($style)
-# Side Effects: none
-# Return Value: STR or ARRAY_REF
-sub _get_value
-{
-    my ($self, $key, $style) = @_;
-    my $xkey   = '';
-    my $buf    = '';
-    my $curpos = $self->getpos();
-
-    my $fh = $self->{_fh};
-    if (defined $fh) {
-	$self->setpos(0);
-
-      LOOP:
-	while (<$fh>) {
-	    ($xkey, $buf) = split(/\s+/, $_, 2);
-	    if ($key eq $xkey) { last LOOP;}
-	}
-
-	$fh->close();
-
-	if ($style eq 'value_as_str') {
-	    return $buf
-	}
-
-	if ($style eq 'value_as_array_ref') {
-	    $buf =~ s/^\s*//;
-	    $buf =~ s/\s*$//;
-	    my @a = split(/\s+/, $buf);
-
-	    $self->setpos( $curpos );
-	    return \@a;
-	}
-
-    }
-    else {
-	carp("cannot defined \$fh");
-    }
-
-
-    $self->setpos( $curpos );
-    return $buf;
-}
-
-
-=head2 C<getpos()>
+=head2 getpos()
 
 get the position in the opened file.
 
-=head2 C<setpos(pos)>
+=head2 setpos(pos)
 
 set the position in the opened file.
 
@@ -382,11 +300,11 @@ sub setpos
 }
 
 
-=head2 C<eof()>
+=head2 eof()
 
 Eof Of File?
 
-=head2 C<close()>
+=head2 close()
 
 close the opended file.
 
@@ -416,7 +334,7 @@ sub close
 }
 
 
-=head2 C<add($address, ... )>
+=head2 add($address, ... )
 
 add (append) $address to this map.
 
@@ -437,9 +355,11 @@ sub add
     my $wh = $self->{ _wh };
 
     if (defined $fh && defined $wh) {
+	my $buf;
+
       FILE_IO:
-	while (<$fh>) {
-	    print $wh $_;
+	while ($buf = <$fh>) {
+	    print $wh $buf;
 	}
 	$fh->close;
 
@@ -471,7 +391,7 @@ sub add
 }
 
 
-=head2 C<delete($key)>
+=head2 delete($key)
 
 delete lines with key $key from this map.
 
@@ -492,10 +412,12 @@ sub delete
     my $wh = $self->{ _wh };
 
     if (defined $fh) {
+	my $buf;
+
       FILE_IO:
-	while (<$fh>) {
-	    next FILE_IO if /^$key\s+\S+|^$key\s*$/;
-	    print $wh $_;
+	while ($buf = <$fh>) {
+	    next FILE_IO if $buf =~ /^$key\s+\S+|^$key\s*$/;
+	    print $wh $buf;
 	}
 	$fh->close;
 	$wh->close;

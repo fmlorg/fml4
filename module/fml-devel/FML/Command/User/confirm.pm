@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: confirm.pm,v 1.19 2002/12/24 10:19:45 fukachan Exp $
+# $FML: confirm.pm,v 1.25 2003/11/17 13:06:12 fukachan Exp $
 #
 
 package FML::Command::User::confirm;
@@ -27,7 +27,7 @@ execute the actual corresponding process if the confirmation succeeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -52,14 +52,21 @@ sub new
 sub need_lock { 1;}
 
 
-# Descriptions: addresses to inform a message copy to
+# Descriptions: lock channel
 #    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
+# Descriptions: addresses to inform a message copy to
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: ARREY_REF
 sub notice_cc_recipient
 {
    my ($self, $curproc, $command_args) = @_;
-   my $config     = $curproc->{ config };
+   my $config     = $curproc->config();
    my $maintainer = $config->{ maintainer };
 
    return [ $maintainer ];
@@ -74,7 +81,7 @@ sub notice_cc_recipient
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     # XXX-TODO: correct we handle only primary_*_map here?
     my $member_map    = $config->{ primary_member_map };
@@ -105,13 +112,13 @@ sub process
 
     my $found = '';
     if ($found = $confirm->find($id)) { # if request is found
-	unless ($confirm->is_expired($found, $expire_limit)) {
+	unless ($confirm->is_expired($id, $expire_limit)) {
 	    my $address = $confirm->get_address($id);
 	    $self->_switch_command($class, $address, $curproc, $command_args);
 	}
 	else { # if requset is expired
 	    $curproc->reply_message_nl('error.expired', "request expired");
-	    LogError("request expired");
+	    $curproc->logerror("request expired");
 	    croak("request is expired");
 	}
     }
@@ -120,7 +127,7 @@ sub process
 	$curproc->reply_message_nl('error.no_such_confirmation',
 				   "no such confirmatoin request id=$id",
 				   { _arg_id => $id });
-	LogError("no such confirmation request id=$id");
+	$curproc->logerror("no such confirmation request id=$id");
 	croak("no such confirmation request id=$id");
     }
 }
@@ -155,7 +162,7 @@ sub _switch_command
 	$obj->$class($curproc, $command_args);
     }
     else {
-	LogError("no such rule confirm for '$class' command");
+	$curproc->logerror("no such rule confirm for '$class' command");
 	$curproc->reply_message_nl('error.no_such_confirmation_for_command',
 				   "no such confirmation for command $class",
 				   { _arg_command => $class });
@@ -192,7 +199,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Credential.pm,v 1.40 2003/01/11 06:58:44 fukachan Exp $
+# $FML: Credential.pm,v 1.48 2003/11/17 15:38:16 fukachan Exp $
 #
 
 package FML::Credential;
@@ -43,7 +43,7 @@ So this hash is accessible in public.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 bind $self to the module internal C<\%Credential> hash and return the
 hash reference as an object.
@@ -118,7 +118,18 @@ sub set_user_part_case_insensitive
 }
 
 
-=head2 C<is_same_address($addr1, $addr2 [, $level])>
+# Descriptions: whether we should handle user part case insensitively.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub is_user_part_case_sensitive
+{
+    my ($self) = @_;
+    $self->{ _user_part_case_sensitive } ? 1 : 0;
+}
+
+
+=head2 is_same_address($addr1, $addr2 [, $level])
 
 return 1 (same) or 0 (different).
 It returns 1 if C<$addr1> and C<$addr2> looks same within some
@@ -168,12 +179,13 @@ sub is_same_address
     my ($xuser, $xdomain) = split(/\@/, $xaddr);
     my ($yuser, $ydomain) = split(/\@/, $yaddr);
     my $level             = 0;
-    my $is_case_sensitive = $self->{ _user_part_case_sensitive };
+    my $is_case_sensitive = $self->is_user_part_case_sensitive();
 
     # the max recursive level in comparison
     $max_level = $max_level || $self->{ _max_level } || 3;
 
     # rule 1: case sensitive
+    print STDERR "1. check only account part\n" if $debug;
     if ($is_case_sensitive) {
 	if ($xuser ne $yuser) { return 0;}
     }
@@ -181,18 +193,26 @@ sub is_same_address
 	if ("\L$xuser\E" ne "\L$yuser\E") { return 0;}
     }
 
+    # XXX adjust to avoid undefined warning.
+    $xdomain ||= '';
+    $ydomain ||= '';
+
     # rule 2: case insensitive
+    print STDERR "2. eq domain ?\n" if $debug;
     if ("\L$xdomain\E" eq "\L$ydomain\E") { return 1;}
 
     # rule 3: compare a.b.c.d.jp in reverse order
+    print STDERR "3. compare each part in domain ?\n" if $debug;
     my (@xdomain) = reverse split(/\./, $xdomain);
     my (@ydomain) = reverse split(/\./, $ydomain);
     for (my $i = 0; $i < $#xdomain; $i++) {
 	my $xdomain = $xdomain[ $i ];
 	my $ydomain = $ydomain[ $i ];
+	print STDERR "    $xdomain eq $ydomain ?\n" if $debug;
 	if ("\L$xdomain\E" eq "\L$ydomain\E") { $level++;}
     }
 
+    print STDERR "result: $level >= $max_level ?\n" if $debug;
     if ($level >= $max_level) { return 1;}
 
     # fail
@@ -200,7 +220,7 @@ sub is_same_address
 }
 
 
-=head2 C<is_member($curproc, $args)>
+=head2 is_member($curproc, $args)
 
 return 1 if the sender is an ML member.
 return 0 if not.
@@ -216,7 +236,7 @@ sub is_member
 {
     my ($self, $address) = @_;
     my $curproc     = $self->{ _curproc };
-    my $config      = $curproc->{ config };
+    my $config      = $curproc->config();
     my $member_maps = $config->get_as_array_ref('member_maps');
 
     $self->_is_member({
@@ -234,7 +254,7 @@ sub is_privileged_member
 {
     my ($self, $address) = @_;
     my $curproc     = $self->{ _curproc };
-    my $config      = $curproc->{ config };
+    my $config      = $curproc->config();
     my $member_maps = $config->get_as_array_ref('admin_member_maps');
 
     $self->_is_member({
@@ -252,7 +272,7 @@ sub is_recipient
 {
     my ($self, $address) = @_;
     my $curproc        = $self->{ _curproc };
-    my $config         = $curproc->{ config };
+    my $config         = $curproc->config();
     my $recipient_maps = $config->get_as_array_ref('recipient_maps');
 
     $self->_is_member({
@@ -289,8 +309,6 @@ sub _is_member
 	return $status;
     }
 
-    use IO::Adapter;
-
   MAP:
     for my $map (@$member_maps) {
 	if (defined $map) {
@@ -313,6 +331,10 @@ sub has_address_in_map
     my ($self, $map, $config, $address) = @_;
     my ($user, $domain) = split(/\@/, $address);
     my $status          = 0;
+    my $curproc         = $self->{ _curproc };
+
+    # reset the matched result;
+    $self->_save_address('');
 
     use IO::Adapter;
     my $obj = new IO::Adapter $map, $config;
@@ -322,7 +344,10 @@ sub has_address_in_map
     if ($debug) {
 	print STDERR "find( $user , { want => 'key', all => 1 });\n";
     }
+
+    # $curproc->lock($lock_channel);   # READER LOCK
     my $addrs = $obj->find( $user , { want => 'key', all => 1 });
+    # $curproc->unlock($lock_channel); # READER LOCK
 
     if (ref($addrs) && $debug) {
 	print STDERR "cred: match? [ @$addrs ]\n";
@@ -337,6 +362,7 @@ sub has_address_in_map
 	    if ($self->is_same_address($r, $address)) {
 		print STDERR "\tmatch!\n" if $debug;
 		$status = 1; # found
+		$self->_save_address($r);
 		last LOOP;
 	    }
 	    else {
@@ -346,6 +372,7 @@ sub has_address_in_map
     }
 
     unless ($status) {
+	$domain ||= '';
 	$self->error_set("user=$user domain=$domain not found");
     }
 
@@ -353,12 +380,62 @@ sub has_address_in_map
 }
 
 
-=head2 C<match_system_accounts($addr)>
+=head2 matched_address()
+
+return the latest matched address.
+
+=cut
+
+
+# XXX-TODO: matched_address() returns the latest one but
+# XXX-TODO: wrong if x@A.B and x@A.b matches.
+
+
+# Descriptions: return the latest matched address.
+#               used together with has_address_in_map().
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub matched_address
+{
+    my ($self) = @_;
+    return $self->_get_address();
+}
+
+
+# Descriptions: save the last matched address
+#    Arguments: OBJ($self) STR($address)
+# Side Effects: update $self->{ _last_matched_address };
+# Return Value: STR
+sub _save_address
+{
+    my ($self, $address) = @_;
+    $self->{ _last_matched_address } = $address if defined $address;
+}
+
+
+# Descriptions: return the last matched address
+#    Arguments: OBJ($self) STR($address)
+# Side Effects: none
+# Return Value: STR
+sub _get_address
+{
+    my ($self, $address) = @_;
+
+    if (defined $self->{ _last_matched_address }) {
+	return $self->{ _last_matched_address };
+    }
+
+    return '';
+}
+
+
+=head2 match_system_accounts($addr)
 
 C<addr> matches a system account or not.
 The system accounts are given as
 
-     $curproc->{ config }->{ system_accounts }.
+     $curproc->config()->{ system_accounts }.
 
 =cut
 
@@ -372,7 +449,7 @@ sub match_system_accounts
 {
     my ($self, $addr) = @_;
     my $curproc = $self->{ _curproc };
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
 
     # compare $user part of the sender address
     my ($user, $domain) = split(/\@/, $addr);
@@ -388,7 +465,7 @@ sub match_system_accounts
 }
 
 
-=head2 C<sender()>
+=head2 sender()
 
 return the mail address of the mail sender who kicks off this fml
 process.
@@ -406,12 +483,12 @@ sub sender
 }
 
 
-=head2 C<set_compare_level( $level )>
+=head2 set_compare_level( $level )
 
 set C<level>, how many sub-domains from top level we compare, in
 C<in_same_address()> address comparison.
 
-=head2 C<get_compare_level()>
+=head2 get_compare_level()
 
 get level in C<in_same_address()> address comparison.
 return the number of C<level>.
@@ -448,11 +525,11 @@ sub get_compare_level
 
 
 
-=head2 C<get(key)>
+=head2 get(key)
 
    XXX NUKE THIS ?
 
-=head2 C<set(key, value)>
+=head2 set(key, value)
 
    XXX NUKE THIS ?
 

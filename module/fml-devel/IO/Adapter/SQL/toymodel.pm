@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
-#          All rights reserved.
+# Copyright (C) 2000,2001 Ken'ichi Fukamachi
+#          All rights reserved. 
 #
-# $FML: toymodel.pm,v 1.9 2002/02/02 08:04:54 fukachan Exp $
+# $FML: toymodel.pm,v 1.4 2001/09/17 11:31:51 fukachan Exp $
 #
 
 
@@ -12,8 +12,6 @@ package IO::Adapter::SQL::toymodel;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-
-my $debug = 0;
 
 =head1 NAME
 
@@ -34,18 +32,13 @@ model.
 =cut
 
 
-# Descriptions: add $addr
-#               create an SQL query and exetute it
-#    Arguments: OBJ($self) STR($addr)
-# Side Effects: update DB via SQL
-# Return Value: STR
 sub add
 {
     my ($self, $addr) = @_;
 
-    print STDERR "add( $addr )\n" if $debug;
+    print STDERR "add( $addr )\n" if $ENV{'debug'};
 
-    my $query = $self->_build_sql_query({
+    my $query = $self->_build_sql_query({ 
 	query   => 'add',
 	address => $addr,
     });
@@ -53,18 +46,13 @@ sub add
 }
 
 
-# Descriptions: delete $addr
-#               create an SQL query and exetute it
-#    Arguments: OBJ($self) STR($addr)
-# Side Effects: update DB via SQL
-# Return Value: STR
 sub delete
 {
     my ($self, $addr) = @_;
 
-    print STDERR "delete( $addr )\n" if $debug;
+    print STDERR "delete( $addr )\n" if $ENV{'debug'};
 
-    my $query = $self->_build_sql_query({
+    my $query = $self->_build_sql_query({ 
 	query   => 'delete',
 	address => $addr,
     });
@@ -72,27 +60,17 @@ sub delete
 }
 
 
-# Descriptions: get one entry from DBMS
-#               create an SQL query and exetute it
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: update DB via SQL
-# Return Value: STR
 sub fetch_all
 {
     my ($self, $args) = @_;
 
-    my $query = $self->_build_sql_query({
+    my $query = $self->_build_sql_query({ 
 	query   => 'get_next_value',
     });
     $self->execute({ query => $query });
 }
 
 
-# Descriptions: search, md = map dependent
-#               create an SQL query and exetute it
-#    Arguments: OBJ($self) STR($regexp) HASH_REF($args)
-# Side Effects: update DB via SQL
-# Return Value: STR or ARRAY_REF
 sub md_find
 {
     my ($self, $regexp, $args) = @_;
@@ -100,7 +78,7 @@ sub md_find
     my $show_all       = $args->{ all } ? 1 : 0;
     my (@buf, $x);
 
-    my $query = $self->_build_sql_query({
+    my $query = $self->_build_sql_query({ 
 	query  => 'search',
 	regexp => $regexp,
     });
@@ -137,7 +115,7 @@ sub md_find
 }
 
 
-# Descriptions: build SQL statement, (not execute but build SQL string only)
+# Descriptions: 
 #
 #                   $args = {
 #               	query   => 'add',
@@ -147,10 +125,10 @@ sub md_find
 #               	    file    => 'actives',
 #               	},
 #                   }
-#
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
-# Return Value: STR(SQL statement)
+#   
+#    Arguments: $self $args
+# Side Effects: 
+# Return Value: none
 sub _build_sql_query
 {
     my ($self, $args) = @_;
@@ -162,7 +140,7 @@ sub _build_sql_query
     my $file    = $self->{ _params }->{ file };
     my $table   = $self->{ _table };
 
-    print STDERR "_build_sql_query( query=$query )\n" if $debug;
+    print STDERR "_build_sql_query( query=$query )\n" if $ENV{'debug'};
 
     if ($query eq 'add') {
 	"insert into $table values ('$ml_name', '$file', '$address', 0, 0)";
@@ -179,23 +157,5 @@ sub _build_sql_query
     }
 }
 
-
-=head1 AUTHOR
-
-Ken'ichi Fukamchi
-
-=head1 COPYRIGHT
-
-Copyright (C) 2001,2002 Ken'ichi Fukamchi
-
-All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
-
-=head1 HISTORY
-
-IO::Adapter appeared in fml5 mailing list driver package.
-See C<http://www.fml.org/> for more details.
-
-=cut
 
 1;

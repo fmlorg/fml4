@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Array.pm,v 1.27 2002/12/22 02:54:37 fukachan Exp $
+# $FML: Array.pm,v 1.32 2003/08/23 04:35:43 fukachan Exp $
 #
 
 package IO::Adapter::Array;
@@ -109,15 +109,11 @@ sub open
 
 =item C<getline()>
 
-the same as get_next_value().
+should not use this ?
 
 =item C<get_next_key()>
 
 return the next element of the array.
-
-=item C<get_next_value()>
-
-undef. ambigous in array case.
 
 =cut
 
@@ -145,21 +141,11 @@ sub get_next_key
 }
 
 
-# Descriptions: undefined function
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
-# Return Value: UNDEF
-sub get_next_value
-{
-    return undef;
-}
-
-
-=head2 C<getpos()>
+=head2 getpos()
 
 return the current position in the array.
 
-=head2 C<setpos($pos)>
+=head2 setpos($pos)
 
 set the current position to $pos -th element.
 
@@ -189,12 +175,12 @@ sub setpos
 }
 
 
-=head2 C<eof()>
+=head2 eof()
 
 whether the current position reaches the end of the array or not.
 If it already reaches the end, return 1.
 
-=head2 C<close()>
+=head2 close()
 
 end of IO operation. It is a dummy.
 
@@ -232,7 +218,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

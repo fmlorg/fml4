@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: UnixGroup.pm,v 1.18 2002/12/22 02:54:38 fukachan Exp $
+# $FML: UnixGroup.pm,v 1.20 2003/08/23 15:33:16 fukachan Exp $
 #
 
 package IO::Adapter::UnixGroup;
@@ -44,7 +44,7 @@ C<CAUTION: this map is read only>.
 
 =head1 METHOD
 
-=head2 C<configure($obj)>
+=head2 configure($obj)
 
 Configure object for array IO operation.
 
@@ -81,7 +81,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Base.pm,v 1.17 2003/01/03 07:04:08 fukachan Exp $
+# $FML: Base.pm,v 1.25 2003/10/15 01:03:36 fukachan Exp $
 #
 
 package FML::Restriction::Base;
@@ -26,6 +26,12 @@ FML::Restriction::Base -- define safe data representations
 	# o.k. do something ...
     }
 
+or
+
+    if ($safe->regexp_match('address', $data)) {
+	# o.k. do something ...
+    }
+
 =head1 DESCRIPTION
 
 FML::Restriction::Base provides data regexp considered as safe.
@@ -35,7 +41,7 @@ a variable is safe or not.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 usual constructor.
 
@@ -83,10 +89,11 @@ Of cource, "user@domain", described above.
 =cut
 
 my $domain_regexp  = '[-A-Za-z0-9\.]+';
-my $user_regexp    = '[-A-Za-z0-9\._]+';
+my $user_regexp    = '[-A-Za-z0-9\._\+]+';
 my $command_regexp = '[-A-Za-z0-9_]+';
 my $file_regexp    = '[-A-Za-z0-9_]+';
 my $dir_regexp     = '[-A-Za-z0-9_]+';
+my $option_regexp  = '[-A-Za-z0-9]+';
 my %basic_variable =
     (
      # address, user and domain et.al.
@@ -108,6 +115,12 @@ my %basic_variable =
      'directory'         => $dir_regexp,
      'file'              => $file_regexp,
      'map'               => $file_regexp,
+
+     # unix command switch
+     'command_line_options' => $option_regexp,
+
+     # misc
+     'language'          => $option_regexp,
      );
 
 
@@ -151,6 +164,82 @@ sub regexp
     else {
 	return undef;
     }
+}
+
+
+=head2 regexp_match( class, string )
+
+check if C<string> matches regexp specified by C<class>.
+return 1 or undef.
+
+    my $obj = new FML::Restriction::Base;
+    if ($obj->regexp_match( "address", $address ) {
+	... do something ...
+    }
+
+C<regexp_match> can handle some special class not based on regexp:
+C<fullpath>.
+
+=cut
+
+
+# Descriptions: return allowed regexp for $class.
+#    Arguments: OBJ($self) STR($class) STR($string)
+# Side Effects: none
+# Return Value: 1 or UNDEF
+sub regexp_match
+{
+    my ($self, $class, $string) = @_;
+
+    if (defined $class && defined $string) {
+	if ($class eq 'fullpath') {
+	    return $self->_regexp_match_fullpath($string);
+	}
+
+	if (defined $basic_variable{ $class }) {
+	    my $regexp = $basic_variable{ $class };
+
+	    if ($string =~ /^($regexp)$/) {
+		return 1;
+	    }
+	    else {
+		return undef;
+	    }
+
+	}
+	else {
+	    return undef;
+	}
+    }
+
+    return undef;
+}
+
+
+# Descriptions: return allowed regexp for full path.
+#               XXX special handling of fully path-ed directory.
+#    Arguments: OBJ($self) STR($string)
+# Side Effects: none
+# Return Value: 1 or UNDEF
+sub _regexp_match_fullpath
+{
+    my ($self, $string) = @_;
+    my $regexp = $basic_variable{ 'directory' };
+    my $level  = 0;
+    my $ok     = 0;
+
+    # remove volume of M$-DOS style.
+    $string =~ s/^[A-Za-z]://;
+
+    for my $dir (split(/\/|\\/, $string)) {
+	$level++;
+
+	if ($dir =~ /^($regexp)$/ || $dir =~ /^\s*$/o) {
+	    $ok++;
+	}
+    }
+
+    return( $level == $ok ? 1 : undef );
 }
 
 

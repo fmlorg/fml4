@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: HTMLify.pm,v 1.27 2003/01/11 16:05:19 fukachan Exp $
+# $FML: HTMLify.pm,v 1.30 2003/08/29 15:34:08 fukachan Exp $
 #
 
 package FML::Process::HTMLify;
@@ -35,11 +35,11 @@ This class drives thread tracking system in the top level.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 create a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare()>
+=head2 prepare()
 
 adjust ml_*, load configuration files and fix @INC.
 
@@ -66,17 +66,17 @@ sub new
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlhtmlify_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmlhtmlify_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -87,17 +87,17 @@ sub prepare
 sub verify_request
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlhtmlify_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $eval = $config->get_hook( 'fmlhtmlify_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
 call &FML::Command::HTMLify::convert().
 
@@ -111,7 +111,7 @@ call &FML::Command::HTMLify::convert().
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $argv    = $curproc->command_line_argv();
     my $options = $curproc->command_line_options();
     my $src_dir = $argv->[0];
@@ -120,7 +120,7 @@ sub run
     print STDERR "htmlify\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
 
     my $eval = $config->get_hook( 'fmlhtmlify_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # prepend $opt_I as @INC
     if (defined $options->{ I }) {
@@ -136,7 +136,7 @@ sub run
     });
 
     $eval = $config->get_hook( 'fmlhtmlify_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -168,13 +168,13 @@ _EOF_
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlhtmlify_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $eval = $config->get_hook( 'fmlhtmlify_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 

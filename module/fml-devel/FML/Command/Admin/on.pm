@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: on.pm,v 1.5 2002/12/20 03:40:12 fukachan Exp $
+# $FML: on.pm,v 1.12 2003/09/27 03:00:17 fukachan Exp $
 #
 
 package FML::Command::Admin::on;
@@ -27,7 +27,7 @@ change delivery mode from digest to real time.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -52,6 +52,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: change delivery mode from digest to real time.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map
@@ -59,9 +66,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
-
-    # XXX-TODO: use of $primary_recipient_map is correct here?
+    my $config        = $curproc->config();
     my $recipient_map = $config->{ primary_recipient_map };
     my $options       = $command_args->{ options };
     my $address       = $command_args->{ command_data } || $options->[ 0 ];
@@ -79,7 +84,6 @@ sub process
     };
     my $r = '';
 
-    # XXX-TODO: we expect useradd() validates $address.
     eval q{
 	use FML::Command::UserControl;
 	my $obj = new FML::Command::UserControl;
@@ -92,7 +96,8 @@ sub process
 
 
 # Descriptions: show cgi menu for on
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -101,8 +106,8 @@ sub cgi_menu
     my $r = '';
 
     eval q{
-	use FML::CGI::Admin::User;
-	my $obj = new FML::CGI::Admin::User;
+	use FML::CGI::User;
+	my $obj = new FML::CGI::User;
 	$obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {
@@ -121,7 +126,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

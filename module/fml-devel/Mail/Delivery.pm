@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Delivery.pm,v 1.8 2002/12/20 03:50:26 fukachan Exp $
+# $FML: Delivery.pm,v 1.10 2003/02/11 09:48:18 fukachan Exp $
 #
 
 package Mail::Delivery;
@@ -31,11 +31,10 @@ Mail::Delivery - mail delivery system interface
     # specify IO::Adapter parameters if needed.
     $map_params = {
 	'mysql:toymodel' => {
-	    getline        => "select ... ",
-	    get_next_value => "select ... ",
-	    add            => "insert ... ",
-	    delete         => "delete ... ",
-	    replace        => "set address = 'value' where ... ",
+	    sql_get_next_key => "select ... ",
+	    sql_add          => "insert ... ",
+	    sql_delete       => "delete ... ",
+	    sql_find         => "...";
 	},
     };
 
@@ -140,7 +139,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

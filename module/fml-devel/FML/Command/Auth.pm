@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Auth.pm,v 1.20 2003/01/11 16:05:14 fukachan Exp $
+# $FML: Auth.pm,v 1.28 2003/08/29 15:33:57 fukachan Exp $
 #
 
 package FML::Command::Auth;
@@ -13,9 +13,9 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD $debug);
 use Carp;
 use FML::Log qw(Log LogWarn LogError);
 
-# always use this module's crypt
-BEGIN { $Crypt::UnixCrpyt::OVERRIDE_BUILTIN = 1 }
-use Crypt::UnixCrypt;
+
+# XXX_LOCK_CHANNEL: auth_map_modify
+my $lock_channel = "auth_map_modify";
 
 
 =head1 NAME
@@ -86,7 +86,7 @@ sub permit_admin_member_maps
     my $match  = $cred->is_privileged_member($sender);
 
     if ($match) {
-	Log("found in admin_member_maps");
+	$curproc->log("found in admin_member_maps");
 	return 1;
     }
 
@@ -106,7 +106,7 @@ sub reject_system_accounts
     my $match  = $cred->match_system_accounts($sender);
 
     if ($match) {
-	Log("reject_system_accounts: matches the sender");
+	$curproc->log("reject_system_accounts: matches the sender");
 	return '__LAST__';
     }
 
@@ -131,8 +131,9 @@ check the password if it is valid or not as an administrator.
 sub check_admin_member_password
 {
     my ($self, $curproc, $args, $optargs) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $maplist = $config->get_as_array_ref('admin_member_password_maps');
+    my $status  = 0;
 
     # simple sanity check: verify non empty input or not?
     return 0 unless $optargs->{ address };
@@ -152,6 +153,8 @@ sub check_admin_member_password
     use FML::Credential;
     my $cred = new FML::Credential $curproc;
 
+    $curproc->lock($lock_channel);
+
     # search $user in password database map, which has a hash of
     # { $user => $encryptd_passwrod }.
     for my $map (@$maplist) {
@@ -162,10 +165,13 @@ sub check_admin_member_password
 	# if this $map has this $user entry,
 	# try to check { user => password } relation.
 	if (defined $pwent) {
+	    use FML::Crypt;
+	    my $crypt = new FML::Crypt;
+
 	  PASSWORD_ENTRY:
 	    for my $r (@$pwent) {
 		my ($u, $p_infile) = split(/\s+/, $r);
-		my $p_input        = crypt( $password, $p_infile );
+		my $p_input        = $crypt->unix_crypt($password, $p_infile);
 
 		# XXX-TODO: is_same_assress() validates input ???
 		# XXX-TODO: we need to validate addresses here ???
@@ -173,16 +179,86 @@ sub check_admin_member_password
 		if ($cred->is_same_address($u, $address)) {
 		    # 1.2 password match ?
 		    if ($p_infile eq $p_input) {
-			Log("check_admin_member_password: password match") if $debug;
-			return 1;
+			if ($debug) {
+			    $curproc->log("check_admin_member_password: password match");
+			}
+			$status = 1;
+			last PASSWORD_ENTRY;
 		    }
 		}
             }
         }
     }
 
-    LogWarn("check_admin_member_password: password not match");
-    return 0;
+    $curproc->unlock($lock_channel);
+
+    $curproc->logwarn("check_admin_member_password: password not match") unless $status;
+    return $status;
+}
+
+
+=head2 change_password($curproc, $command_args, $up_args)
+
+    $up_args = {
+	maplist  => $maps,
+	address  => $address,
+	password => $password,
+    };
+
+=cut
+
+
+# Descriptions:
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($command_args) HASH_REF($up_args)
+# Side Effects: admin password modified.
+# Return Value: NUM
+sub change_password
+{
+    my ($self, $curproc, $command_args, $up_args) = @_;
+    my $map      = $up_args->{ map };
+    my $address  = $up_args->{ address  };
+    my $password = $up_args->{ password };
+    my $status   = 0;
+
+    # crypt-fy password.
+    use FML::Crypt;
+    my $crypt = new FML::Crypt;
+    my $cp    = $crypt->unix_crypt($password, $$);
+
+    $curproc->lock($lock_channel);
+
+    use IO::Adapter;
+    my $obj = new IO::Adapter $map;
+    if (defined $obj) {
+	$obj->open();
+
+	# delete
+	if ($obj->find( $address )) {
+	    $obj->delete( $address );
+	    if ($obj->error()) {
+		$curproc->logerror("cannot delete $address from=$map");
+	    }
+	    else {
+		$curproc->log("delete $address from=$map");
+	    }
+	}
+
+	# add
+	$obj->add( $address, [ $cp, "UNIX_CRYPT" ] ) && $status++;
+	if ($obj->error()) {
+	    $curproc->logerror("cannot add $address to=$map");
+	}
+	else {
+	    $curproc->log("add password for $address to=$map");
+	}
+
+	$obj->close();
+    }
+
+    $curproc->unlock($lock_channel);
+
+    return $status;
 }
 
 

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Header.pm,v 1.2 2002/12/20 03:41:28 fukachan Exp $
+# $FML: Header.pm,v 1.5 2003/08/23 04:35:35 fukachan Exp $
 #
 
 package FML::Filter::Header;
@@ -27,7 +27,7 @@ header content.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 constructor.
 
@@ -59,7 +59,7 @@ sub new
 
 
 
-=head2 C<rules( $rules )>
+=head2 rules( $rules )
 
 overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 
@@ -77,7 +77,7 @@ sub rules
 }
 
 
-=head2 C<header_check($msg, $args)>
+=head2 header_check($msg, $args)
 
 C<$msg> is C<Mail::Message> object.
 
@@ -143,6 +143,20 @@ sub check_message_id
     }
 }
 
+# Descriptions: validate the date in the given message $msg.
+#               This routine checks missing date field
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+# Side Effects: croak()
+# Return Value: none
+sub check_date
+{
+    my ($self, $msg, $args) = @_;
+
+    if (! $msg->get('date')) {
+	croak( "Missing Date: field" );
+    }
+}
+
 
 =head1 CODING STYLE
 
@@ -154,7 +168,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Error.pm,v 1.25 2002/12/22 03:46:20 fukachan Exp $
+# $FML: Error.pm,v 1.34 2003/08/29 15:34:08 fukachan Exp $
 #
 
 package FML::Process::Error;
@@ -35,7 +35,7 @@ dispatcher for commands.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 make fml process object, which inherits C<FML::Process::Kernel>.
 
@@ -55,7 +55,7 @@ sub new
 }
 
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 parse argv, load config files and fix @INC.
 
@@ -71,10 +71,10 @@ if $use_error_analyzer_program, parse incoming message.
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'error_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
@@ -89,11 +89,11 @@ sub prepare
     }
 
     $eval = $config->get_hook( 'error_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 dummy.
 
@@ -107,17 +107,24 @@ dummy.
 sub verify_request
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config     = $curproc->config();
+    my $maintainer = $config->{ maintainer };
 
     my $eval = $config->get_hook( 'error_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
+
+    # set dummy sender to avoid unexpected error
+    use FML::Credential;
+    my $cred = new FML::Credential $curproc;
+    $curproc->{'credential'} = $cred;
+    $curproc->{'credential'}->set( 'sender', $maintainer );
 
     $eval = $config->get_hook( 'error_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
 dispatcher to run correspondig C<FML::Error::command> for
 C<command>. Standard style follows:
@@ -138,52 +145,57 @@ XXX Each command determines need of lock or not.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $found  = 0;
-    my $pcb    = $curproc->{ pcb };
+    my $pcb    = $curproc->pcb();
     my $msg    = $curproc->incoming_message();
 
     my $eval = $config->get_hook( 'error_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    eval q{
-	use Mail::Bounce;
-	my $bouncer = new Mail::Bounce;
-	$bouncer->analyze( $msg );
+    $curproc->_forward_error_message();
 
-	use FML::Error::Cache;
-	my $errorcache = new FML::Error::Cache $curproc;
+    unless ($curproc->is_refused()) {
+	eval q{
+	    use Mail::Bounce;
+	    my $bouncer = new Mail::Bounce;
+	    $bouncer->analyze( $msg );
 
-	for my $address ( $bouncer->address_list ) {
-	    my $status = $bouncer->status( $address );
-	    my $reason = $bouncer->reason( $address );
+	    use FML::Error;
+	    my $error = new FML::Error $curproc;
+	    $error->db_open();
 
-	    if ($address) {
-		Log("bounced: address=<$address>");
-		Log("bounced: status=$status");
-		Log("bounced: reason=\"$reason\"");
+	    for my $address ( $bouncer->address_list ) {
+		my $status = $bouncer->status( $address );
+		my $reason = $bouncer->reason( $address );
 
-		$curproc->lock('errorcache');
-		$errorcache->add({
-		    address => $address,
-		    status  => $status,
-		    reason  => $reason,
-		});
-		$curproc->unlock('errorcache');
+		if ($address) {
+		    $curproc->log("bounced: address=<$address>");
+		    $curproc->log("bounced: status=$status");
+		    $curproc->log("bounced: reason=\"$reason\"");
 
-		$found++;
+		    $error->add({
+			address => $address,
+			status  => $status,
+			reason  => $reason,
+		    });
+
+		    $found++;
+		}
 	    }
-	}
-    };
-    LogError($@) if $@;
 
-    if ($found) {
-	$pcb->set("error", "found", 1);
-	$curproc->_clean_up_bouncers($args);
+	    $error->db_close();
+	};
+	$curproc->logerror($@) if $@;
+
+	if ($found) {
+	    $pcb->set("error", "found", 1);
+	    $curproc->_clean_up_bouncers($args);
+	}
     }
 
     $eval = $config->get_hook( 'error_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -198,24 +210,20 @@ sub _clean_up_bouncers
     my $channel = 'erroranalyzer';
 
     if ($curproc->is_event_timeout($channel)) {
-	Log("(debug) event timeout");
+	$curproc->log("(debug) event timeout");
 
 	eval q{
 	    use FML::Error;
 	    my $error = new FML::Error $curproc;
-
-	    $curproc->lock('errorcache');
 	    $error->analyze();
-	    $curproc->unlock('errorcache');
-
 	    $error->remove_bouncers();
 	};
-	LogError($@) if $@;
+	$curproc->logerror($@) if $@;
 
 	$curproc->set_event_timeout($channel, time + 3600);
     }
     else {
-	Log("(debug) event not timeout");
+	$curproc->log("(debug) event not timeout");
     }
 }
 
@@ -244,7 +252,7 @@ _EOF_
 }
 
 
-=head2 C<finish($args)>
+=head2 finish($args)
 
     $curproc->inform_reply_messages();
 
@@ -259,22 +267,59 @@ _EOF_
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
-    my $pcb    = $curproc->{ pcb };
+    my $config = $curproc->config();
+    my $pcb    = $curproc->pcb();
 
     my $eval = $config->get_hook( 'error_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     if ($pcb->get("error", "found")) {
-	Log("error message found");
+	$curproc->log("error message found");
 	# inform ?
     }
     else {
-	Log("error message not found");
+	$curproc->log("error message not found");
     }
 
+    $curproc->inform_reply_messages();
+    $curproc->queue_flush();
+
     $eval = $config->get_hook( 'error_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
+}
+
+
+=head1 message forwarding
+
+forward the error message.
+
+=cut
+
+
+# Descriptions: forward the error message.
+#    Arguments: OBJ($curproc)
+# Side Effects: update reply message queue
+# Return Value: none
+sub _forward_error_message
+{
+    my ($curproc)  = @_;
+    my $config     = $curproc->config();
+    my $maintainer = $config->{ maintainer };
+    my $maps       = $config->{ maintainer_recipient_maps } || '';
+    my $msg        = $curproc->incoming_message();
+
+    if ($maps) {
+	my $maps     = $config->get_as_array_ref('maintainer_recipient_maps');
+	my $msg_args = {
+	    sender         => $maintainer,
+	    recipient_maps => $maps,
+	    header         => {
+		from => $maintainer,
+		to   => $maintainer,
+	    },
+	};
+	$curproc->reply_message($msg, $msg_args);
+    }
 }
 
 
@@ -288,7 +333,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

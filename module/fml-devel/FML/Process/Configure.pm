@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Configure.pm,v 1.49 2003/01/11 06:58:46 fukachan Exp $
+# $FML: Configure.pm,v 1.57 2003/11/16 12:23:48 fukachan Exp $
 #
 
 package FML::Process::Configure;
@@ -36,16 +36,16 @@ See C<FML::Process::Flow> for the flow detail.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 constructor.
 It make a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 fix @INC, adjust ml_* and load configuration files.
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 show help if needed.
 
@@ -72,17 +72,17 @@ sub new
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'makefml_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'makefml_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -96,10 +96,10 @@ sub verify_request
     my ($curproc, $args) = @_;
     my $argv   = $curproc->command_line_argv();
     my $len    = $#$argv + 1;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'makefml_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     if ($len <= 1) {
 	$curproc->help();
@@ -107,11 +107,11 @@ sub verify_request
     }
 
     $eval = $config->get_hook( 'makefml_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
 the top level dispatcher for C<makefml>.
 
@@ -132,7 +132,7 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
@@ -147,13 +147,13 @@ sub run
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'makefml_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $eval = $config->get_hook( 'makefml_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -199,9 +199,13 @@ FYI:
 \"makefml\" and \"fml\" are same program except for the argument order.
 So, available commands are same as makefml.
 
-Usage: 
+Usage:
    fml     \$ml_name \$command [command_options]
    makefml \$command \$ml_name [command_options]
+
+ * newdomain and rmdomain commands are irregular.
+   fml     \$ml_domain \$command
+   makefml \$command \$ml_domain
 
 _EOF_
 }
@@ -229,7 +233,7 @@ _EOF_
 # Side Effects: none
 # Return Value: none
 sub _makefml_help
-{	
+{
     my ($name) = @_;
 
 print <<"_EOF_";
@@ -247,7 +251,7 @@ _EOF_
 }
 
 
-=head2 C<_makefml($args)> (INTERNAL USE)
+=head2 _makefml($args)
 
 switch of C<makefml> command.
 It kicks off <FML::Command::$command> corrsponding with
@@ -272,7 +276,7 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub _makefml
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $ml_name = $config->{ ml_name };
     my $myname  = $curproc->myname();
     my $argv    = $curproc->command_line_argv();
@@ -294,11 +298,16 @@ sub _makefml
 	ml_name      => $ml_name,
 	options      => \@options,
 	argv         => $argv,
+	canon_argv   => {           # saved for {new,rm}domain commands.
+	    ml_name  => $argv_ml_name,
+	    method   => $method,
+	    options  => \@options,
+	},
 	args         => $args,
     };
 
     my $eval = $config->get_hook( 'makefml_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # here we go
     require FML::Command;
@@ -314,18 +323,18 @@ sub _makefml
 	}
 	else {
 	    my $r = $@;
-	    LogError("command $method fail");
-	    LogError($r);
+	    $curproc->logerror("command $method fail");
+	    $curproc->logerror($r);
 	    if ($r =~ /^(.*)\s+at\s+/) {
 		my $reason = $1;
-		Log($reason); # pick up reason
+		$curproc->log($reason); # pick up reason
 		croak($reason);
 	    }
 	}
     }
 
     $eval = $config->get_hook( 'makefml_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 

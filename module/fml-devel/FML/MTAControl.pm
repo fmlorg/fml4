@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: MTAControl.pm,v 1.17 2003/01/11 16:05:13 fukachan Exp $
+# $FML: MTAControl.pm,v 1.21 2003/09/13 09:16:59 fukachan Exp $
 #
 
 package FML::MTAControl;
@@ -16,10 +16,12 @@ use FML::MTAControl::Postfix;
 use FML::MTAControl::Qmail;
 use FML::MTAControl::Procmail;
 use FML::MTAControl::Sendmail;
+use FML::MTAControl::Utils;
 @ISA = qw(FML::MTAControl::Postfix
 	  FML::MTAControl::Qmail
 	  FML::MTAControl::Procmail
 	  FML::MTAControl::Sendmail
+	  FML::MTAControl::Utils
 	  );
 
 my $debug = 0;
@@ -295,7 +297,7 @@ sub _remove_postfix_style_virtual
     my $virtual_new = $virtual . 'new'. $$;
 
     if (-f $virtual) {
-	print STDERR "removing $key in $virtual\n";
+	$curproc->ui_message("removing $key in $virtual");
     }
     else {
 	return;
@@ -305,24 +307,30 @@ sub _remove_postfix_style_virtual
     my $rh = new FileHandle $virtual;
     my $wh = new FileHandle "> $virtual_new";
     if (defined $rh && defined $wh) {
+	my $buf;
+
       LINE:
-	while (<$rh>) {
-	    if (/\<VIRTUAL\s+$key\@/ .. /\<\/VIRTUAL\s+$key\@/) {
+	while ($buf = <$rh>) {
+	    if ($buf =~ /\<VIRTUAL\s+$key\@/
+		   ..
+		$buf =~ /\<\/VIRTUAL\s+$key\@/) {
 		$removed++;
 		next LINE;
 	    }
 
-	    print $wh $_;
+	    print $wh $buf;
 	}
 	$wh->close;
 	$rh->close;
 
 	if ($removed > 3) {
 	    if (rename($virtual_new, $virtual)) {
-		print STDERR "\tremoved.\n";
+		$curproc->ui_message("removed");
 	    }
 	    else {
-		print STDERR "\twarning: fail to rename virtual files.\n";
+		my $s = "fail to rename virtual files";
+		$curproc->ui_message("error: $s");
+		$curproc->logerror($s);
 	    }
 	}
     }

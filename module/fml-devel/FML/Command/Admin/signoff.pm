@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: signoff.pm,v 1.10 2002/12/15 13:46:29 fukachan Exp $
+# $FML: signoff.pm,v 1.8 2002/09/11 23:18:08 fukachan Exp $
 #
 
 package FML::Command::Admin::signoff;
@@ -17,7 +17,7 @@ use FML::Command::Admin::unsubscribe;
 @ISA = qw(FML::Command::Admin::unsubscribe);
 
 
-# Descriptions: remove the specified user.
+# Descriptions: unsubscribe user
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to unsubscribe module
 # Return Value: none
@@ -39,10 +39,6 @@ See C<FML::Command> for more details.
 =head1 DESCRIPTION
 
 all requests are forwarded to C<FML::Command::Admin::unsubscribe>.
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

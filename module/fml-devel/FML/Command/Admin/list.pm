@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: list.pm,v 1.10 2002/12/20 03:40:12 fukachan Exp $
+# $FML: list.pm,v 1.17 2003/09/27 03:00:16 fukachan Exp $
 #
 
 package FML::Command::Admin::list;
@@ -78,21 +78,21 @@ sub process
 sub _show_list
 {
     my ($self, $curproc, $command_args, $options) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $maplist = undef;
 
-    for (@$options) {
-	if (/^recipient|active/i) {
+    for my $option (@$options) {
+	if ($option =~ /^recipient|active/i) {
 	    $maplist = $config->get_as_array_ref( 'recipient_maps' );
 	}
-	elsif (/^member/i) {
+	elsif ($option =~ /^member/i) {
 	    $maplist = $config->get_as_array_ref( 'member_maps' );
 	}
-	elsif (/^adminmember|^admin_member/i) {
+	elsif ($option =~ /^adminmember|^admin_member/i) {
 	    $maplist = $config->get_as_array_ref( 'admin_member_maps' );
 	}
 	else {
-	    LogWarn("list: unknown type $_");
+	    $curproc->logwarn("list: unknown type $option");
 	}
     }
 
@@ -120,7 +120,8 @@ sub _show_list
 
 
 # Descriptions: show cgi menu.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -128,7 +129,7 @@ sub cgi_menu
     my ($self, $curproc, $args, $command_args) = @_;
     my $map_default = $curproc->safe_param_map() || 'member';
     my $options     = [ $map_default ];
-    my $ml_name     = $curproc->cgi_try_get_ml_name($args);
+    my $ml_name     = $curproc->cgi_var_ml_name($args);
     my $r           = '';
 
     # declare CGI mode now.
@@ -136,8 +137,8 @@ sub cgi_menu
 
     # navigation bar
       eval q{
-	use FML::CGI::Admin::List;
-	my $obj = new FML::CGI::Admin::List;
+	use FML::CGI::List;
+	my $obj = new FML::CGI::List;
 	$obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {
@@ -166,7 +167,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: CGI.pm,v 1.9 2002/12/15 15:17:18 fukachan Exp $
+# $FML: CGI.pm,v 1.7 2002/09/11 23:18:18 fukachan Exp $
 #
 
 package FML::Restriction::CGI;
@@ -24,10 +24,6 @@ FML::Restriction::CGI -- define safe data regexp for CGI modules
     use FML::Restriction::CGI;
     $safe = new FML::Restriction::CGI;
     my $regexp = $safe->method_regexp();
-
-    if ($data =~ /^($regexp)$/) {
-	# o.k. do something ...
-    }
 
 =head1 DESCRIPTION
 
@@ -111,10 +107,6 @@ if ($0 eq __FILE__) {
     }
 }
 
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
