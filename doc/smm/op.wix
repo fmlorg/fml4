@@ -133,14 +133,14 @@
 .# ##########################################################
 .P	Appendix
 
-.include ref.wix
+.include cloindex.wix
 
 .include cwhois.wix
 .include aucea.wix
 .include fred.wix
 .include pager.wix
 
-.include cloindex.wix
+.include ref.wix
 
 .include app/fmlR1.wix
 .include app/vars.wix
