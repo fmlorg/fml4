@@ -6,10 +6,19 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl3 ]
+
+   proc/libsynchtml.pl 
+	fix dup check of htdocs/index.html
+
+   proc/libmesgle.pl 
+	&Mesg() repl may has invalid input
+	check the input and wrap repl in euc and back to jis
+
    sbin/makefml
 	modify jperl check code
 
-   fix distribution miss package
+   fix distribution package lacks some plaintext
 	distribute all INSTALL* (plaintext) 
 
    proc/libra.pl
