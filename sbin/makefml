@@ -2048,7 +2048,7 @@ sub do_passwd
 
 	if (! $passwd) {
 	    # no echo
-	    system "stty", "-echo";
+	    system "stty", "-echo" if $UNISTD;
 
 	    print "Password: ";
 	    chop($passwd = <STDIN>);
@@ -2064,7 +2064,7 @@ sub do_passwd
 		next;
 	    }
 
-	    system "stty", "echo";
+	    system "stty", "echo" if $UNISTD;
 	}
 
 	if (!$member || !$passwd) {
