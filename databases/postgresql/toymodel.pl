@@ -71,6 +71,8 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'chaddr'    ||
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
+	       $mib->{'_action'} eq 'addmembers' ||
+	       $mib->{'_action'} eq 'addactives' ||
 	       $mib->{'_action'} eq 'addadmin' ||
 	       $mib->{'_action'} eq 'byeadmin' ) {
 	    &__ListCtl($mib);
