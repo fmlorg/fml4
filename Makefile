@@ -57,7 +57,7 @@ FMLMK_CONF=.fmlmk.conf
 .endif
 
 ### export environmental variable
-EXPORT_ENV = FML=${FML} DESTDIR=${DESTDIR} BRANCH=${BRANCH} MODE=${MODE}
+EXPORT_ENV = MAKE=${MAKE} FML=${FML} DESTDIR=${DESTDIR} BRANCH=${BRANCH} MODE=${MODE} FMLMK_CONF=${FMLMK_CONF}
 
 
 ### MAIN ###
@@ -80,20 +80,19 @@ usage:
 	@ echo "\"make sync\"      to syncrhonize -> fml.org mail server"
 	@ echo ""
 
-	
 __dist:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator 2>&1| tee $(DESTDIR)/_distrib.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_distrib.log
-	@ env ${EXPORT_ENV} make usage
+	@ env ${EXPORT_ENV} ${MAKE} usage
 
 distsnap:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
 # If release branch, use this
 snapshot:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ if [ "X`tty`" != X ]; then \
 	     ssh-add -l |\
 	     grep `hostname -s` >/dev/null || printf "\n ! please ssh-add.\n\n";\
@@ -101,9 +100,9 @@ snapshot:
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
 
-	
+
 release:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -rp 2>&1|\
 		tee $(DESTDIR)/_release.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
@@ -118,7 +117,7 @@ doc: plaindoc htmldoc
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
 INFO-common: $(FML)/CHANGES
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ $(MKDIR) $(COMPILE_DIR)
 	@ rm -f $(COMPILE_DIR)/INFO
 	($(ECONV) doc/ri/INFO; $(ECONV) CHANGES; $(ECONV) doc/ri/README.wix)|\
@@ -133,17 +132,17 @@ $(WORK_DOC_DIR)/INFO-e: INFO-common
 		< $(COMPILE_DIR)/INFO > $(COMPILE_DIR)/INFO-e
 
 init_dir:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 
 plaindoc: init_dir INFO doc/smm/op.wix
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.doc.mk plaindocbuild
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild
 
 htmldoc: init_dir INFO doc/smm/op.wix
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |${PERL} -nle unlink
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.doc.mk htmlbuild
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk htmlbuild
 
 syncwww: doc
 	$(RSYNC) -av $(WORK_HTML_DIR)/ ${WWW_DIR}/
