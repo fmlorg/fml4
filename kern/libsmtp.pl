@@ -58,14 +58,6 @@ sub SmtpInit
 	}
     }
 
-    # ANYTIME, Try fixing since plural mails are delivered
-    if (index($e{'Body'}, "\n\.") > 0) {
-	$e{'Body'} =~ s/\n\./\n../g;           # enough for body ^. syntax
-	$e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
-    }
-    local($buf) = substr($e{'Body'}, -2);
-    $e{'Body'} .= "\n" unless $buf =~ /\n$/o;	# without the last "\n"
-
     return 1 if $SocketOK;
     return ($SocketOK = &SocketInit);
 }
@@ -482,24 +474,61 @@ sub SmtpIO
     }
     # BODY ON MEMORY
     else { 
-	$e{'Body'} =~ s/\n/\r\n/g;
-	$e{'Body'} =~ s/\r\r\n/\r\n/g;  # twice reading;
-	print SMTPLOG $e{'Body'}; 
-	print S $e{'Body'};
+	# Essentially we request here only "s/\n/\r\n/ && print"!
+	# We should not reference body itself by s///; since
+	# it leads to big memory allocation.
+	{
+	    local($pp, $p, $maxlen, $len, $buf, $pbuf);
+
+	    $pp     = 0;
+	    $maxlen = length($e{'Body'});
+
+	    # write each line in buffer
+	  smtp_io:
+	    while (1) {
+		$p   = index($e{'Body'}, "\n", $pp);
+		$len = $p  - $pp + 1;
+		$buf = substr($e{'Body'}, $pp, ($p < 0 ? $maxlen-$pp : $len));
+		if ($buf !~ /\r\n$/) { $buf =~ s/\n$/\r\n/;}
+
+		# ^. -> ..
+		$buf =~ s/^\./../;
+
+		print SMTPLOG $buf;
+		print S $buf;
+		$LastSmtpIOString = $buf;
+
+		last smtp_io if $p < 0;
+		$pp = $p + 1;
+	    }
+	}
 
 	# global interrupt;
 	if ($Envelope{'ctl:smtp:stdin2socket'}) {
-	    while (sysread(STDIN, $_, 1024)) {
-		s/\n/\r\n/g;
-		s/\r\r\n/\r\n/g; # twice reading;
-		print S $_;
+	    undef $buf; # reset $buf to use
+	    undef $pbuf;
+
+	    while (sysread(STDIN, $buf, 1024)) {
+		$buf =~ s/\n/\r\n/g;
+		$buf =~ s/\r\r\n/\r\n/g; # twice reading;
+
+		# ^. -> .. 
+		$buf =~ s/\n\./\n../g;
+
+		# XXX: 1. "xyz\n.abc" => "xyz\n" + ".abc"
+		# XXX: 2. "xyz..abc" => "xyz." + ".abc"
+		if ($pbuf =~ /\n$/) { $buf =~ s/^\./../g;}
+		if ($pbuf eq '') { $buf =~ s/^\./../g;} # the first time
+
+		print S $buf;
+		$pbuf = substr($buf, -4); # the last buffer
 	    }
 
 	    print SMTPLOG "\n\n... truncated in log for file system ...\n";
-	    $LastSmtpIOString = $_;
+	    $LastSmtpIOString = substr($_, -16);
 	}
 	else {
-	    $LastSmtpIOString = substr($e{'Body'}, -128);
+	    $LastSmtpIOString = substr($e{'Body'}, -16);
 	}
     }
 
@@ -532,7 +561,7 @@ sub SmtpIO
 
     # reverse \r\n -> \n
     $e{'Hdr'}  =~ s/\r\n/\n/g;
-    $e{'Body'} =~ s/\r\n/\n/g;
+    # $e{'Body'} =~ s/\r\n/\n/g; # XXX 2.2D no more reference of $e{'Body'}
 
     # 
     if ($USE_SMTP_PROFILE) { 

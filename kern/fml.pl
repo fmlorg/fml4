@@ -1992,10 +1992,19 @@ sub Write3			# call by reference for effeciency
 	&use('MIME');
 	local(%me) = %e;
 	&EnvelopeMimeDecode(*me);
-	print APP "$me{'Hdr'}\n$me{'Body'}";
+
+	# XXX 2.2E split code to 3 phases
+	# we should not make string to avoid malloc()
+	print APP $me{'Hdr'};
+	print APP "\n";
+	print APP $me{'Body'};
     }
     else {
-	print APP "$e{'Hdr'}\n$e{'Body'}";
+	# XXX 2.2E split code to 3 phases
+	# we should not make string to avoid malloc()
+	print APP $e{'Hdr'};
+	print APP "\n";
+	print APP $e{'Body'};
     }
 
     close(APP);
