@@ -42,8 +42,7 @@ sub main::MailBodyMD5Cksum
 	$md5->add($_);
     }
 
-    $digest = $md5->digest();
-    unpack("H*", $digest);
+    $digest = $md5->hexdigest();
 }
 
 
