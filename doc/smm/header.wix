@@ -77,7 +77,7 @@ config.ph で
 .k	--fh:field
 
 SYNOPSIS:
-	&DEFINE_FIELD_FORCED('field') = "field-contents";
+	&DEFINE_FIELD_FORCED('field', "field-contents");
 
 これは
 
@@ -87,7 +87,7 @@ SYNOPSIS:
 と同じです。フィールドの内容を強制操作します。
 
 例：
-	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+	&DEFINE_FIELD_FORCED('x-ml-info', "書きたいこと");
 
 X-Ml-Info: の内容を"書きたいこと"に設定する。
 
@@ -597,9 +597,9 @@ Backward compatibility で残っている変数が
 
 .S	X-ML-Info: の内容を指定する
 .k	$X_ML_INFO_MESSAGE
-.k	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+.k	&DEFINE_FIELD_FORCED('x-ml-info', "書きたいこと");
 
-	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+	&DEFINE_FIELD_FORCED('x-ml-info', "書きたいこと");
 
 で強制的に指定すれば良いでしょう。一応昔風に変数
 
