@@ -65,8 +65,8 @@ sub SearchInterests
     eval $eval;
 
     if (! $Count) {
-	$Report .= 
-	    sprintf("%-20s\thas No Possible Item of Interest\n\n", $file);
+	#$Report .= 
+	#sprintf("%-20s\thas No Possible Item of Interest\n\n", $file);
     }
 }
 
