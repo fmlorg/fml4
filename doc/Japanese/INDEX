@@ -31,7 +31,8 @@ messages		fml の返すメッセージをいじる
 filter			フィルタリング
 virtual_domain		バーチャルドメイン (virtual domain)
 command			コマンド、そして拡張について
-hooks			HOOK を使った拡張について
+hooks			HOOK の使い方
+hook_collection		HOOK コレクション
 resource_control	リソースの制御	
 digest			まとめおくり
 html_convert		記事の HTML への変換

@@ -6,6 +6,7 @@
 # TUTORIAL_LANGUAGE    = Japanese
 
 DOC_TUTORIAL_RAW_SUBDIR += examples
+DOC_TUTORIAL_RAW_SUBDIR += hook_collection
 
 DOC_TUTORIAL_EXC_SUBDIR += basic_setup
 
