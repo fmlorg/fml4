@@ -23,7 +23,7 @@ do
 	rm -fr $EXEC_DIR/$dir
 	find $dir -type f -print |grep -v '\.bak' > $list
 
-	echo "----"; echo $dir; cat $list; echo "--------";
+	# echo "----"; echo $dir; cat $list; echo "--------";
 
 	tar cf - `cat $list` | (cd $EXEC_DIR; tar xf - )
 done
@@ -51,11 +51,11 @@ test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 	rm -f libexec/majordomo_compat.pl
 	ln libexec/fmlserv.pl libexec/majordomo_compat.pl
 
-	rm -f libexec/fml_local2.pl 
-	ln libexec/fml_local.pl libexec/fml_local2.pl 
+	rm -f libexec/fml_local2.pl
+	ln libexec/fml_local.pl libexec/fml_local2.pl
 
-	rm -f bin/fml_local.pl 
-	ln libexec/fml_local.pl bin/fml_local.pl 
+	rm -f bin/fml_local.pl
+	ln libexec/fml_local.pl bin/fml_local.pl
 
 	rm -f bin/pop2recv.pl
 	ln libexec/popfml.pl bin/pop2recv.pl
@@ -66,11 +66,13 @@ test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 	rm -f bin/inc_via_pop.pl
 	ln bin/pop2recv.pl bin/inc_via_pop.pl
 
-	rm -f doc/fml_operations_manual
-	ln -s doc/op doc/fml_operations_manual
+	(chdir doc;
+		rm -f doc/fml_operations_manual
+		ln -s op fml_operations_manual
 
-	rm -f "doc/Daemon_Book_of_fml"
-	ln -s doc/op "doc/Daemon_Book_of_fml"
+		rm -f "doc/Daemon_Book_of_fml"
+		ln -s op "Daemon_Book_of_fml"
+	)
 )
 
 
