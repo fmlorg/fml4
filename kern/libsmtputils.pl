@@ -68,7 +68,7 @@ sub DoSmtpFiles2Socket
 }
 
 
-# NEW VERSION FOR MULTIPLE @to and @files
+# NEW VERSION FOR MULTIPLE @to and @files (required @files NOT $files) 
 # return NONE
 sub DoNeonSendFile
 {
@@ -216,18 +216,21 @@ sub DoSendmail2
 sub DoSendFile2 { &DoNeonSendFile(@_);}
 
 # SendFile2(*distfile, *subject, *files);
+# import $misc{'hook'}
 sub DoSendFile3
 {
-    local(*distfile, *subject, *files) = @_;
-    local(@to, $to);
+    local(*distfile, *subject, *files, *misc) = @_;
+    local(@to, $to, @f2s);
 
     $REPORT_HEADER_CONFIG_HOOK = qq#;
-    print STDERR \$REPORT_HEADER_CONFIG_HOOK;
+    $misc{'hook'};
     \$le{'mode:delivery:list'} = \"$distfile\";
     #;
 
     @to = ($MAINTAINER); # dummy
-    &DoNeonSendFile(*to, *subject, *files);
+    push(@f2s, $files);
+    push(@f2s, @files);
+    &DoNeonSendFile(*to, *subject, *f2s);
 }
 
 
