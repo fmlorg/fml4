@@ -1,13 +1,36 @@
-TODO
+		CGI TODO
 
-admin/ を触れる人の権限は
-   『 makefml でできることが全部できる人』
+○ makefml コマンド
 
-htdocs/ は廃止
+   makefml admin.cgi
 
-/cgi-bin/admin/menu.cgi => /cgi-bin/admin/makefml.cgi
+	/usr/local/fml/share/cgi-bin/admin/ を生成
+			menu.cgi
+			makefml.cgi
+
+  makefml mladmin.cgi $ml
+
+	/usr/local/fml/share/cgi-bin/ml-admin/$ml/ を生成
+			menu.cgi
+			makefml.cgi
+
+
+ ＊ インストーラ
+
+	admin/.htpasswd を生成するようにしたい
+
+
+○ admin/ を触れる人の権限は
+ 
+	makefml でできることが全部できる人
+
+○ htdocs/
+
+	廃止 (share/ の下にはない)
+	templateにのみ使う
+
+○ /cgi-bin/admin/makefml.cgi
+
+	/cgi-bin/admin/menu.cgi => /cgi-bin/admin/makefml.cgi
 
 	必要ならこの時にパスワード制限をかける
-
-インストーラが admin/.htpasswd を生成するように
-したい
