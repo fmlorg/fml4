@@ -1,41 +1,44 @@
 .C	PGP (Pretty Good Privacy)
 .l	pgp
 
+注意: 以下では公開鍵暗合やPGPについては既知のものとしています。
+
 .S	PGP
 
-公開鍵暗合の代表的な応用例。PGP自体についてはたとえば O'Reilly の PGP 
-とか MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？) とかで
-勉強して下さい。ここでは PGP とはなにか？については既知のものとしてい
-ます。
+公開鍵暗合の代表的な応用例。
+PGP自体についてはここでは解説しませんが、例えば参考文献としては
+
+	O'Reilly の PGP
+	MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？) 
 
 
 .S	PGP での認証に基づくリモート管理
 
-
-自明な解が二通りあります。
+PGPベースで考えると簡単に思いつく自明な解が二通りあります。
 
 1	text +  signature で MD5 認証をする。
 
-本文は見えています。まぁパスワードが入ってないので恥ずかしいだけですが:)
-
 これはFrom:をメンバーファイルだけで認証しているものをPGPに拡張したもの
-です。
+です。管理者はPGP公開鍵を管理することでのみ認証する範囲を制御します。
 
-管理者はPGP公開鍵を管理することでのみ認証する範囲を制御します。
+sniffer すれば本文は見えますが、暗合の鍵は破れないということです。
 
-サーバ側は key generation を必要としないという安全性が重要。
-メール本体がどこかで盗聴された場合にすでに行なわれたコマンドを
-もう一度叩き込まれるというDOS的な可能性はありうる。
+この方式はサーバ側は key generation を必要としないという安全性が重要で
+す。
 
-
-2	encrypt する。
+2	サーバの公開鍵で本文全体を encrypt する。
 
 サーバ側で key generation を必要とする。サーバ側は自分の秘密鍵がないと
 読めない。やはり管理者はPGP公開鍵を管理することでのみ認証する範囲を制
-御する。
+御する。ただ秘密鍵やパスフレーズの気密保持の問題が附随して発生するので
+大掛りな割に嬉しくない。
 
-メール本体がどこかで盗聴された場合にすでに行なわれたコマンドを
-もう一度叩き込まれるというDOS的な可能性はやっぱりありうる。
+
+いずれにしても一方通行に送るプロトコルではなんでもそうですが、メール本
+体がどこかで盗聴された場合にすでに行なわれたコマンドをもう一度叩き込ま
+れるという可能性はありえます。それ以外のことができないというだけ
+＃毎回 session key が違うとかしない限りこれは排除できません。
+
 
 
 .S	PGP の公開鍵の登録
@@ -49,11 +52,20 @@
 
 	public.asc
 
-とし、elena MLのリモート管理者を増やす場合は
+とし elena MLのリモート管理者を増やす場合は
 
 	makefml pgp elena -ka public.asc
 
 です。
+
+なお makefml は
+
+	makefml pgp elena PGPのオプション
+
+の形で使います。『PGPのオプション』部分は pgp でそのまま使われます。
+例: elena ＭＬのリモート管理者たちの公開鍵一覧は
+
+	makefml pgp elena -kv
 
 
 .S	PGP によるリモート管理
@@ -71,7 +83,11 @@
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
