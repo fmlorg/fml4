@@ -1,4 +1,4 @@
-* assymetric registration
+* asymmetric registration
 
 	1. some restricted people can post to ML
 
@@ -14,5 +14,5 @@ registration described above.
 
 % makefml config elena
 
-   MAIN MANU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_asymmetric_regist
+   MAIN MENU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_asymmetric_regist
 

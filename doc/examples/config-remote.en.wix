@@ -46,7 +46,7 @@ Example 2. apporove PASSWORD command
 * set up remote administration
 
 Firstly you (or administrator for "fml" running host) need to enable
-"remote administratin" function. "fml" default disables this for
+"remote administration" function. "fml" default disables this for
 security reason.
 
 % makefml config elena
@@ -65,7 +65,7 @@ In the end of operation, you will find
                      PERMIT ?              YES
                      AUTH_TYPE             crypt
 
-Secondaly you need to add at lease one person who can control fml from
+Secondary you need to add at lease one person who can control fml from
 remote.
 
 * add first person as an administrator for the "elena" ML.
@@ -91,7 +91,7 @@ Done.
 * After here, the first person can add/remove another administrators
 from remote. 
 
-See help-admin (/var/spool/ml/elena/help-admin) for availble commands. 
+See help-admin (/var/spool/ml/elena/help-admin) for available commands. 
 "makefml newml elena" generates help file /var/spool/ml/elena/help-admin.
 
 .# $Id$

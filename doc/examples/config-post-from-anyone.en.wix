@@ -29,7 +29,7 @@ but it may be not required, I think.
 
 * Ensure nobody can use command.
 
-Appearnetly the best method is "remove elena-ctl in /etc/aliases". It
+Clearly the best method is "remove elena-ctl in /etc/aliases". It
 disables elena-ctl, address for command.
 
 Please check /etc/aliases or equivalent for your MTA.
