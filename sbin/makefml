@@ -81,7 +81,7 @@ sub InitMakeFml
     $CONFIG_TMP  = "/tmp/.fmlconfig.$user";
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$user";
     $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
-    $FML_CONFIG  = "$CONFIG_DIR/config";
+    $FML_CONFIG  = "$CONFIG_DIR/system";
 
     # initialize files
     if (-f $FML_CONFIG) {
@@ -204,7 +204,7 @@ sub InitFmlConfig
 	}
     }
 
-    $FML_CONFIG  = "$CONFIG_DIR/config";
+    $FML_CONFIG  = "$CONFIG_DIR/system";
 
     $buf = &Dumpvar('Config');
     &SaveConfig($buf);
@@ -543,9 +543,12 @@ sub do_newml
 
     # mkdir ML Directory
     mkdir("$ml_dir/$ml", 0700);
-    &Conv($ml, "$exec_dir/cf/__makefml", "$CONFIG_DIR/$ml.cf");
+    mkdir("$CONFIG_DIR/$ml", 0700);
 
-    if ($OS_TYPE && open(CF, ">> $CONFIG_DIR/$ml.cf")) {
+    print STDERR "$exec_dir/cf/__makefml -> $CONFIG_DIR/$ml/cf\n";
+    &Conv($ml, "$exec_dir/cf/__makefml", "$CONFIG_DIR/$ml/cf");
+
+    if ($OS_TYPE && open(CF, ">> $CONFIG_DIR/$ml/cf")) {
 	print CF "\nLOCAL_CONFIG\n\n";
 	print CF "\# makefml TENUKI;-) Config\n";
 	print CF "\$NON_PORTABILITY = 1;\n";
@@ -557,7 +560,7 @@ sub do_newml
     # 
     # make ml/config.ph
     $exec  = "perl $exec_dir/cf/config -m $exec_dir/cf/MANIFEST ";
-    $exec .= "$CONFIG_DIR/$ml.cf";    
+    $exec .= "$CONFIG_DIR/$ml/cf";    
     system "$exec > $ml_dir/$ml/config.ph";
 
     ### generate samples, includes and aliases in $exec_dir/include ###
@@ -572,6 +575,7 @@ sub do_newml
 
     # directory to store the config for each ML
     mkdir("$CONFIG_DIR/$ml", 0700);
+    symlink("$CONFIG_DIR/$ml", "$ml_dir/$ml/samples");
 
     # generating samples ...;
     &Conv($ml, "$exec_dir/etc/samples/__aliases", "$CONFIG_DIR/$ml/aliases");
@@ -594,20 +598,23 @@ sub do_config
     local($ml) = @_;
     local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
     local($cf, $local_config, $config);
+    local(@config, %config);
 
     print "---Configure $ml mailing list ... \n";
 
     &InitLocalVariables;
 
     # without LOCAL_CONFIG;
-    open(CF, "$CONFIG_DIR/$ml.cf") || die ("cannot find $CONFIG_DIR/$ml.cf");
+    open(CF, "$CONFIG_DIR/$ml/cf") || die ("cannot find $CONFIG_DIR/$ml/cf");
     while (<CF>){
-	next if /---SUBSTITUTE BY makefml/;
-	next if /---END OF SUBSTITUTE BY makefml/;
+	next if /^#/;
+	next if /^\s*$/;
 
 	if (1 .. /LOCAL_CONFIG/) {
 	    next if /LOCAL_CONFIG/;
-	    $config .= $_;
+	    ($key, $value) = split(/\s+/, $_, 2);
+	    $config{$key} = $value;
+	    push(@config, $key);
 	}
 	else {
 	    $local_config .= $_;
@@ -615,27 +622,31 @@ sub do_config
 
     }
 
-    $config .= "### ---SUBSTITUTE BY makefml ($MailDate)---\n";
-    $config .= &AutoRegistQuery($ml);
-    $config .= "### ---END OF SUBSTITUTE BY makefml ($MailDate)---\n";
 
-    $local_config .= "### ---SUBSTITUTE BY makefml ($MailDate)---\n";
-    $local_config .= "\n\# makefml defines the following.\n";
+    $config = &AutoRegistQuery($ml);
+
+
+    $eval = q%;
+    package MLConfig;
+    eval $main'local_config;#';
+    package main;
+    %;
+    eval($eval);
+    print $@ if $@;
+
     $local_config .= "\$COMPAT_${OS_TYPE} = 1;\n";
     $local_config .= &SubjectTagQuery($ml);
-    $local_config .= "### ---END OF SUBSTITUTE BY makefml ($MailDate)---\n";
 
-    print "Saved in $CONFIG_DIR/$ml.cf\n";
+    print "Saved in $CONFIG_DIR/$ml/cf\n";
 
-    if (open(CF, "> $CONFIG_DIR/$ml.cf")) {
+    if (open(CF, "> $CONFIG_DIR/$ml/cf")) {
 	print CF $config;
 	print CF "\nLOCAL_CONFIG\n$local_config\n";
 	close(CF);
     }
 
-    # 
     # make ml/config.ph
-    $exec = "perl $exec_dir/cf/config $CONFIG_DIR/$ml.cf ";
+    $exec = "perl $exec_dir/cf/config $CONFIG_DIR/$ml/cf ";
     system "$exec > $ml_dir/$ml/config.ph";
 }
 
