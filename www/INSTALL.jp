@@ -1,11 +1,53 @@
-		CGIのインストールについて
+		CGIのインストールについて (こうしようという構想)
 
-1.	fml-snap-日付(YYYYMMDD).tar.gz を入手する
-	(fml-3.0とはちょっと違います) 
+I.	install
 
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/
+普通のfmlと同様にインストール。ただし
 
-2.	普通のfmlと同様にインストール
+	make install-withcgi
+	(makefml -W cgi install を実行)
+
+	$EXEC_DIR/www/cgi-bin/admin/.htacces
+	$EXEC_DIR/www/cgi-bin/admin/*.cgi
+
+	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
+		admin:$CRYPTED_PASSWORD
+
+の設定を行なう。この時点で admin 権限が使えるようにする。admin には基
+本的に makefml を実行できる権限と一緒の権限範囲を与える。すべてのコマ
+ンドをCGI経由で呼べるようにするということではない
+
+	http://the.fml.host/cgi-bin/fml/admin/menu.cgi
+
+からスタート
+
+
+II. 各ＭＬ
+
+1. adminが各ＭＬを作成する。
+
+Q: cgi以前に作られたものはどう処理する？自動的に有効か？
+
+2. 各ＭＬの管理者に渡す
+
+各ＭＬの管理者用ページ
+
+	http://the.fml.host/cgi-bin/fml/ml-admin/$ml/menu.cgi
+
+
+III. 各ＭＬのユーザ用ページ
+
+案???
+
+   登録
+	http://the.fml.host/fml/ml/$ml/subscribe.html (?)
+
+   その他のコマンド
+	http://the.fml.host/cgi-bin/fml/ml/$ml/menu.cgi
+
+
+---------->8---------->8---------->8---------->8---------->8----------
+α版での実装
 
 3.	cgi の生成
 
@@ -47,20 +89,5 @@ httpd の設定によるので適宜マニュアルを参照
 
 などのようにつくればよい
 
-
-5.	httpd でcgiをつかえるようにする
-
-以下ではCGIを走らせるときのユーザ権限はfmlと仮定する。
-
-5.1	thttpd (target)
-
-     /usr/pkg/sbin/thttpd -nor -u fml \
-	-d /usr/local/fml/share -c 'cgi-bin/fml/admin/*cgi'
-
-ここでは /usr/local/fml/share をそのまま使うと仮定している
-
-5.2	apache
-
-     % rsync -av /usr/local/fml/share/cgi-bin/ /usr/pkg/libexec/cgi-bin/
 
 $Id$
