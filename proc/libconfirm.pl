@@ -45,6 +45,7 @@ sub Confirm
     local(*e, $addr, $buffer) = @_;
     local($id, $r, @r, %r, $time, $m, $gh_subject, $type);
 
+    $e{'GH:Reply-To:'} = $e{'GH:Reply-To:'} || $e{'CtlAddr:'};
     $e{"GH:Subject:"} = "Subscribe request result $ML_FN";
 
     # current time
