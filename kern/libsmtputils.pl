@@ -193,7 +193,7 @@ sub DoSendmail2Rcpts
     local(*distfile, $subject, $body) = @_;
     local(@a, $a);
 
-    if (-f $distfile && Open(DIST, $distfile)) {
+    if (-f $distfile && open(DIST, $distfile)) {
 	while (<DIST>) {
 	    next if /^\s*$/;
 	    next if /^\#/;
