@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 $rcsid   = q$Id$;
@@ -25,7 +26,6 @@ unshift(@INC, $DIR);
 
 #################### MAIN ####################
 # including libraries
-require 'config.ph';		# configuration file for each ML
 require 'config.ph';		# configuration file for each ML
 eval("require 'sitedef.ph';");  # common defs over ML's
 &use('smtp');			# a library using smtp
@@ -125,8 +125,8 @@ sub InitConfig
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
     
     ### Initialize DIR's and FILE's of the ML server
-    for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR, $VARRUN_DIR) { 
-	-d $_ || mkdir($_, 0700);
+    for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
+	eval("-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;");
     }
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
@@ -252,7 +252,7 @@ sub FixHeaders
     # Some Fields need to "Extract the user@domain part"
     # $e{'h:Reply-To:'} is "reply-to-user"@domain FORM
     $From_address        = &Conv2mailbox($e{'h:from:'});
-    $e{'h:Reply-To:'}    = &Conv2mailbox($e{'h:reply-to:'});
+    $e{'h:Reply-To:'}    = $e{'h:reply-to:'}; # &Conv2mailbox($e{'h:reply-to:'});
     $e{'Addr2Reply:'}    = $e{'h:Reply-To:'} || $From_address;
 
     # Subject:
@@ -336,12 +336,58 @@ sub CheckEnv
 }
 
 
+# RFC822;
+# comment     =  "(" *(ctext / quoted-pair / comment) ")"
+# ctext       =  <any CHAR excluding "(",     ; => may be folded
+#                 ")", "\" & CR, & including
+#                 linear-white-space>
+# quoted-pair =  "\" CHAR                     ; may quote any char
+# 
+#     quoted-string = <"> *(qtext/quoted-pair) <">; Regular qtext or
+#                                                 ;   quoted chars.
+#     qtext       =  <any CHAR excepting <">,     ; => may be folded
+#                     "\" & CR, and including
+#                     linear-white-space>
+#
+sub Strip822Comments
+{
+    local($os) = @_;		# original string
+    local($in) = 0;
+    local($mb, $c, $qs, $qp);		# mailbox, comment
+
+    foreach $c (split(/\s{0,0}/, $os)) {
+	if ($c =~ /[\(\)]/ && $qs) { # encounter ( or ) in quoted-string?
+	    ;
+	}
+	elsif ($c =~ /[\(\)]/) { # start and end of comment
+	    ($c =~ /\(/) && ($in++, next);
+	    ($c =~ /\)/) && ($in--, next);
+	}
+
+	if ($in == 0) {		# if not in comment
+	    $c =~ /\"/ && ($mb .= $c, $qs = $qs ? 0 : 1, next);
+	    $c =~ /\\/ && ($qp = 2); # quoted-pair
+	    
+	    $mb .= $c if $c !~ /\s/ || ($c =~ /\s/ && $qp == 1); # for "\ "
+
+	    $qp--;
+	}
+    }
+
+    &Log("Unbalanced ".($in > 0 ? ") " : "( ") ) if $in != 0;
+
+    $mb;
+}
+
 # Expand mailbox in RFC822
 # From_address is user@domain syntax for e.g. member check, logging, commands
 # return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
+# 
 sub Conv2mailbox
 {
-    local($mb) = @_;
+    local($mb) = @_;		# original string
+
+    # $mb = &Strip822Comments($mb);
 
     # NULL is given, return NULL
     ($mb =~ /^\s*$/) && (return $NULL);
@@ -371,9 +417,11 @@ sub GuideRequest
 # the To_address is for command or not.
 sub FixMode
 {
+    local($ca) = &CutFQDN($CONTROL_ADDRESS);
+
     # Default LOAD_LIBRARY SHOULD NOT BE OVERWRITTEN!
-    if ($Envelope{'mode:uip'} || 
-       ($CONTROL_ADDRESS && ($Envelope{'mode:chk'} =~ /$CONTROL_ADDRESS/i))) {
+    if ($Envelope{'mode:uip'} || ($ca && ($Envelope{'mode:chk'} =~ /$ca/i))) {
+	&Log("To:$ca detecteed. Mode->Command") unless $Envelope{'mode:uip'}; 
 	$LOAD_LIBRARY || ($LOAD_LIBRARY = 'libfml.pl'); 
     }
 
@@ -561,8 +609,8 @@ sub Distribute
     # Run-Hooks. when you require to change header fields...
     $SMTP_OPEN_HOOK && &eval($SMTP_OPEN_HOOK, 'SMTP_OPEN_HOOK:');
 
-    # set Reply-To:, use "original Reply-To:" if exists
-    $Envelope{'h:Reply-To:'} = $Envelope{'h:reply-to:'} || $MAIL_LIST;
+    # set Reply-To:, use "ORIGINAL Reply-To:" if exists ??? (96/2/18, -> Reply)
+    $Envelope{'h:Reply-To:'} = $Envelope{'h:Reply-to:'} || $MAIL_LIST;
     
     if ($SUBJECT_HML_FORM) {# hml 1.6 form: (95/07/03) kise@ocean.ie.u-ryukyu.ac.jp
 	local($ID) = sprintf("%05d", $ID) if $HML_FORM_LONG_ID;
@@ -606,13 +654,14 @@ sub Distribute
 	elsif (/^:any:$/ && $Envelope{'Hdr2add'}) {
 	    $Envelope{'Hdr'} .= $Envelope{'Hdr2add'};
 	}
-	elsif (/^Message-Id$/ && ($Envelope{'Hdr'} !~ /Message-Id:/i)) { # UNIQUE!
-	    $Envelope{'Hdr'} .= "$_: $Envelope{\"h:$_:\"}\n";
+	elsif (/^Message\-Id/i && ($body =~ /Message\-Id:/i)) { # ALRAEDY EXIST?
+	    ;
 	}
 	elsif (/^:XMLNAME:$/o) {
 	    $Envelope{'Hdr'} .= "$XMLNAME\n";
 	}
 	else {
+	    print STDERR "DEFAULT:<$_>\n";
 	    $Envelope{'Hdr'} .= "$_: $Envelope{\"h:$_:\"}\n" if $Envelope{"h:$_:"};
 	}
     }
@@ -635,8 +684,18 @@ sub Distribute
     ##### ML Distribute Phase 04: SMTP
     # IPC. when debug mode or no recipient, no distributing 
     if ($num_rcpt && (! $debug)) {
-	$status = &Smtp(*Envelope, *Rcpt);
-	&Log("Smtp:$status") if $status;
+	if (($pid = fork) < 0) {
+	    &Log("Cannot fork");
+	} 
+	elsif ($pid == 0) {	# child; for sequential incoming mails
+	    $FML .= "[Child]";
+	    &Log("fork [pid=$pid]") if $debug_fork;
+	    $status = &Smtp(*Envelope, *Rcpt);
+	    &Log("Smtp:$status") if $status;
+	}
+    }
+    elsif ($debug) {
+	&Log("DEBUG MODE: NO DELIVER rcpt=[$num_rcpt] debug=[$debug]");
     }
 
     ##### ML Distribute Phase 05: ends
@@ -1053,7 +1112,11 @@ sub CheckUGID
 }
 
 # which address to use a COMMAND control.
-sub CtlAddr { $CONTROL_ADDRESS =~ /\@/ ? $CONTROL_ADDRESS : "$CONTROL_ADDRESS\@$FQDN";}
+sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
+
+# Do FQDN of the given Address 1. $addr is set and has @, 2. MALI_LIST
+sub Addr2FQDN { $_[0] ? ($_[0] =~ /\@/ ? $_[0] : $_[0]."\@$FQDN") : $MAIL_LIST;}
+sub CutFQDN   { $_[0] =~ /(\S+)\@(\S+)/ ? $1 : $_[0];}
 
 # Security 
 sub SecureP 

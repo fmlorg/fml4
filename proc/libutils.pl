@@ -1,5 +1,6 @@
 # Library of fml.pl
-# Copyright (C) 1994-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 local($id);
@@ -19,7 +20,7 @@ sub AutoRegist
 
     # for &Notify,  reply-to ? reply-to : control-address
     $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'Reply2:'};
-
+    &Log("\$AUTO_REGISTERD_UNDELIVER_P is $AUTO_REGISTERD_UNDELIVER_P");#UJA
     if ($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
 	# Syntax e.g. "Subject: subscribe"...
 	# 
@@ -143,7 +144,7 @@ sub AutoRegist
     # 7 is body 3 lines and signature 4 lines, appropriate?
     local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
     &Log("Deliver? $e{'nlines'} <=> $limit") if $debug;
-
+    &Log("\$AUTO_REGISTERD_UNDELIVER_P is $AUTO_REGISTERD_UNDELIVER_P");#UJA
     if ($e{'nlines'} < $limit) { 
 	&Log("Not deliver: lines:$e{'nlines'} < $limit");
 	$AUTO_REGISTERD_UNDELIVER_P = 1;

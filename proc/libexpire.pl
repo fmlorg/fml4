@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1995-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 
 local($id);
 $id = q$Id$;

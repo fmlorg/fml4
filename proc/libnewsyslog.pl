@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl
-# Copyright (C) 1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1995-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 # q$Id$;
 
@@ -7,7 +8,7 @@
 ### public
 sub NewSyslog 
 {
-    local(*f);
+    local($f);
     local(@f) = @_;
 
     # Default

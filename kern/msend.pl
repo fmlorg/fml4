@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 $rcsid   = q$Id$;
@@ -35,15 +36,19 @@ umask (077);			# rw-------
 
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-&MSendInit;
+&MSendInit;			# IF $MSEND_RC is NOT SET, exit
 
 ########## PROCESS GO! ##########
 if ($0 eq __FILE__) {
     &InitConfig;			# initialize date etc..
 
-    $Quiet = 1 if $_cf{"opt:q"}; # quiet mode;
+    $Quiet      = 1 if $_cf{"opt:q"}; # quiet mode;
+    $SLEEPTIME  = 5;
 
     print STDERR "MatomeOkuri Control Program Rel.4 for $ML_FN\n\n" unless $Quiet;
+
+    require 'libnewsyslog.pl';
+    &NewSyslog(@NEWSYSLOG_FILES);
 
     if ($_cf{"opt:b"} eq 'd' || $_cf{"opt:b"} eq 'sr') {# Daemon or Self Running;
 	local($t);
@@ -80,14 +85,14 @@ sub ExecMSend
     
     $Hour || die "Not Set \$Hour Variable\n";
 
-    $START_HOOK && &eval($START_HOOK, 'Start hook'); # additional before action
+    $MSEND_START_HOOK && &eval($MSEND_START_HOOK, 'Start hook'); # additional before action
 
     # NOTIFICATION of NO TRAFFIC
     $MSEND_NOTIFICATION && &MSendNotifyP && &MSendNotify;
 
     &MSend4You;			        # MAIN
 
-    &RunHooks;			        # run hooks after unlocking
+    #&MSendRunHooks;			        # run hooks after unlocking
 
     &Notify if $Envelope{'message'};    # Reply some report if-needed.
 	                                # should be here for e.g. mget..
@@ -170,7 +175,8 @@ sub GetDistributeList
 	print STDERR "WARNING: $MSEND_RC filesize=0 O.K.?\n" unless $Quiet;
     }
 
-    open(MSEND_RC) || do {
+    if (! open(MSEND_RC, $MSEND_RC)) {
+	print STDERR "not found $MSEND_RC\n" unless -f $MSEND_RC;
 	print STDERR "cannot open $MSEND_RC:$!\n";
 	&Log("cannot open $MSEND_RC:$!");
 	return;
@@ -195,6 +201,8 @@ sub GetDistributeList
 	local($rcpt, $rc) = split(/\s+/, $_, 999);
 	$RCPT{$rcpt}    = $rcpt;
 	$Request{$rcpt} = $rc;
+
+	print STDERR "RC:\t$RCPT{$rcpt}\t$Request{$rcpt}\n" if $debug;
 
 	$rehash = $rc if $who && &AddressMatch($who, $rcpt);
     }
@@ -552,7 +560,11 @@ sub MSendInit
 
     $MSendTouchFile = "$TMP_DIR/msend_last_touch";
 
-    ### SET DEFAULT MODE
+    ### SET DEFAULT MODE 
+    # Default setting should be HERE 96/02/13 kishiba@ipc.hiroshima-u.ac.jp
+    # DEFAULT ACTION is not 'mget'. 
+    $MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'gz';%;
+
     if ($USE_RFC1153_DIGEST || $USE_RFC1153) {# 1153 digest;
 	# the standard for 1153-counter, but required?
 	# anyway comment out below 95/6/27
@@ -564,14 +576,15 @@ sub MSendInit
 	$MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'rfc934';%;
     }
 
-    # DEFAULT ACTION is not 'mget'. 
-    $MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'gz';%;
-
-    if (-f "$DIR/MSendrc") {
-	&use('utils');
-	&Move("$DIR/MSendrc", $MSEND_RC);
-	&Link($MSEND_RC, "$DIR/MSendrc");
+    # CHECK MSEND_RC DEFINED OR NOT? for fml 1.x (96/02/13)
+    # Using the default value is dangerous. This variable should be not automatic-fixed
+    # for the continuous use of msend.pl even in 1.x -> 2.x installing process ...
+    if (! $MSEND_RC) {
+	&Log("\$MSEND_RC IS NOT DEFINED", "Please Define \$MSEND_RC in config.ph");
+	die "\$MSEND_RC IS NOT DEFINED, SO EXIT!\nPlease define $MSEND_RC.\n";
     }
+
+    print STDERR "\$MSEND_RC = $MSEND_RC\n";
 }
 
 
@@ -629,8 +642,8 @@ sub InitConfig
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
     
     ### Initialize DIR's and FILE's of the ML server
-    for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR, $VARRUN_DIR) { 
-	-d $_ || mkdir($_, 0700);
+    for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
+	eval("-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;");
     }
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {

@@ -1,6 +1,7 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 local($id);
@@ -19,6 +20,7 @@ sub SmtpInit
 
     # IF NOT SPECIFIED, [IPC]
     $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
+    $e{'macro:s'}    = $e{'macro:s'}    || $FQDN;
 
     @smtp = ("HELO $e{'macro:s'}", "MAIL FROM: $MAINTAINER");
 
@@ -59,16 +61,15 @@ sub SmtpInit
 sub SocketInit
 {
     ##### PERL 5  
-    local($eval, $ok);
-    if ($_cf{'perlversion'} == 5) { 
-	eval "use Socket;", ($ok = $@ eq "");
-	&Log($ok ? "Socket O.K.": "Socket fails. Try socket.ph") if $debug;
-	return 1 if $ok;
-    }
+    local($eval, $ok, $ExistSocket_ph);
+
+    $ok = eval "use Socket;", ($@ eq "");
+    &Log($ok ? "Socket(XS) O.K.": "Socket(XS) fails. Try socket.ph") if $debug;
+    return 1 if $ok;
 
     ##### PERL 4
-    local($ExistSocket_ph) = eval("require 'sys/socket.ph';"), ($@ eq "");
-    &Log("sys/socket.ph is O.K.") if $ExistSocket_ph && $debug;
+    $ExistSocket_ph = eval("require 'sys/socket.ph';"), ($@ eq "");
+    &Log("\"eval sys/socket.ph\" O.K.") if $ExistSocket_ph && $debug;
     return 1 if $ExistSocket_ph; 
 
     if ((! $ExistSocket_ph) && $COMPAT_SOLARIS2) {
@@ -210,12 +211,13 @@ sub SmtpIO
 
     foreach $s (@smtp, 'm_RCPT', @rcpt, 'm_RCPT', 'DATA') {
 	next if $s =~ /^\s*$/o;
-	$0 = "-- $s <$FML $LOCKFILE>";
 
 	# RCPT TO:; trick for the less memory use;
 	if ($s eq 'm_RCPT') { $in_rcpt = $in_rcpt ? 0 : 1; next;}
 	$s = "RCPT TO: $s" if $in_rcpt;
 	
+	$0 = "-- $s <$FML $LOCKFILE>"; 
+
 	print SMTPLOG ($s . "<INPUT\n");
 	print S ($s . "\n");
 
@@ -334,7 +336,7 @@ sub NeonSendFile
     local($e, %e, @rcpt, $error, $f, @f, %f);
 
     ### INFO
-    # &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES\t@files\n") if $debug;
+    &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES\t@files\n");# if $debug;
 
     ### check again $file existence
     foreach $f (@files) {

@@ -1,4 +1,5 @@
-# Copyright (C) 1994-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public Licence(see ./COPYING)
 # q$Id$;
 

@@ -1,5 +1,6 @@
 # Library of fml.pl 
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 local($id);
@@ -415,6 +416,8 @@ sub ProcRetrieveFileInSpool
 
     local($mail_file, $ar) = &ExistP($ID);# return "$SPOOL_DIR/ID" form;
     &Debug("GET: local($mail_file, $ar)") if $debug;
+
+    &Log(" $mail_file >< $ar ");
 
     if ($mail_file) { 
 	$cat{"$SPOOL_DIR/$ID"} = 1;
@@ -1290,7 +1293,7 @@ sub Rehash
 
 
 # Exist a file or not, a binary or not, your file? read permitted?
-# return filename or NULL
+# return full path filename or NULL
 sub ExistP
 {
     local($fp)      = @_;
@@ -1508,7 +1511,7 @@ sub MemberStatus
 	local($rcpt, $opt) = split(/\s+/, $_, 2);
 	$opt = ($opt && !($opt =~ /^\S=/)) ? " r=$opt " : " $opt ";
 
-	if($rcpt =~ /$who/) {
+	if($rcpt =~ /$who/i) {	# koyama@kutsuda.kuis 96/01/30
 	    $s .= "$rcpt:\n";
 	    $s .= "\tpresent not participate in. (OFF)\n" if $sharp;
 

@@ -1,5 +1,6 @@
 # Library of fml.pl
-# Copyright (C) 1994-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 local($id);
@@ -370,7 +371,9 @@ sub f_uu
 
     $r =~ s#(\S+)/(\S+)#$dir=$1, $f=$2#e;
 
-    &system("chdir $dir; $UUENCODE $f $f", $tmpf);
+    # uuencode soure-file file-label
+    # &system("chdir $dir; $UUENCODE $f $f", $tmpf);
+    &system("$UUENCODE $dir/$f $f", $tmpf); 
 }
 
 
@@ -511,17 +514,17 @@ sub MakeFileWithUnixFrom  { &DraftGenerate(@_);}
 sub LhaAndEncode2Ish
 {
     local($input, $name, @filelist) = @_;
-    local($tmpout);
+    local($tmpout, @unlink);
 
     &Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
 
     # SJIS ENCODING
     if ($USE_SJIS_in_ISH) {
 	require 'jcode.pl';
-	@filelist = &Convert2Sjis(*filelist);
+	@filelist = &Convert2Sjis(*filelist); # reset 
+	push(@unlink, @filelist);
+	&Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
     }
-
-    &Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
 
     # Variable setting
     $name     =~ s#(\S+)/(\S+)#$2.lzh#;
@@ -529,9 +532,13 @@ sub LhaAndEncode2Ish
     $name     =~ s/\.lzh$//i;
     $tmpout   = "$TMP_DIR/$name.lzh";
     $tmpish   = "$TMP_DIR/$name.ish";
+    push(@unlink, $tmpuot);	# unlink
 
     $LHA      = $LHA || "$LIBDIR/bin/lha";
     $ISH      = $ISH || "$LIBDIR/bin/ish";
+
+    # FIX for 'aish' when NOT "aish -d"
+    ($ISH =~ /aish/) && ($ISH !~ /\s+\-d\s+/) && ($ISH .= " -d ");
 
     $COMPRESS = "$LHA a $tmpout @filelist ";
     $UUENCODE = "$ISH -s7 $name.lzh"; # since in $TMP_DIR
@@ -545,8 +552,7 @@ sub LhaAndEncode2Ish
     system("(cd $TMP_DIR; $UUENCODE)"); # ish cannot understand ">tmp/*.lzh.ish"
     rename($tmpish, $input) || &Log("canot rename $tmpish $input");
 
-    unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
-    unlink $tmpout unless $debug;	# e.g. unlink msend.lzh
+    if ($debug) { print STDERR "   Unlink @unlink \n";} else { unlink @unlink;}
 
     $input;
 }
@@ -558,33 +564,41 @@ sub LhaAndEncode2Ish
 sub LhaAndEncode2UU
 {
     local($input, $name, @filelist) = @_;
-    local($tmpout);
+    local($tmpout, @unlink);
 
-    &Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
+    &Debug("LhaAndEncode2UU($input, $name, @filelist)") if $debug;
 
     # SJIS ENCODING
     if ($USE_SJIS_in_ISH) {
 	require 'jcode.pl';
 	@filelist = &Convert2Sjis(*filelist);
+	push(@unlink, @filelist); 
+	&Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
     }
 
     &Debug("LhaAndEncode2UU($input, $name, @filelist)") if $debug;
 
     # Variable setting
     $name     =~ s#(\S+)/(\S+)#$2.lzh#;
-    $name     =~ s/\.gz$/.lzh/;
-    $name     =~ s/\.lzh\.lzh$/.lzh/;
-    $tmpout   = "$TMP_DIR/$name";
+    $name     =~ s/\.gz$//i;
+    $name     =~ s/\.lzh$//i;
+    $tmpout   = "$TMP_DIR/$name.lzh";
+    $tmpish   = "$TMP_DIR/$name.ish";
+    push(@unlink, $tmpuot);	# unlink
+
+    unlink $tmpout, $tmpish;
+
     $LHA      = $LHA || "$LIBDIR/bin/lha";
+    ($ISH =~ /aish/) && ($ISH .= " -d "); # FIX for 'aish'
+
     $COMPRESS = "$LHA a $tmpout ". join(" ", @filelist);
 
     unlink $tmpout if -f $tmpout; # against strange behaviours by "lha";
 
     &system($COMPRESS);
-    &system("$UUENCODE $name", $input, $tmpout);
+    &system("$UUENCODE $name.lzh", $input, $tmpout);
 
-    unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
-    unlink $tmpout unless $debug;	# e.g. unlink msend.lzh
+    if ($debug) { print STDERR "   Unlink @unlink \n";} else { unlink @unlink;}
 
     $input;
 }
