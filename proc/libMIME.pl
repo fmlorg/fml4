@@ -20,8 +20,26 @@ if ($0 eq __FILE__) {
 }
 
 
+sub ProbeMIMEpm
+{
+    ### PERL 5  
+    if ($] =~ /^5\./) {
+	if (! $HAS_MIME_BASE64_PM) {
+	    eval("use MIME::Base64;");
+	    $HAS_MIME_BASE64_PM =  ($@ eq '') ? 1 : -1;
+	}
+	if (! $HAS_MIME_QUOTED_PRINT_PM) {
+	    eval(" use MIME::QuotedPrint;");
+	    $HAS_QUOTED_PRINT_PM =  ($@ eq '') ? 1 : -1;
+	}
+    }    
+}
+
+
 sub DecodeMimeStrings 
 { 
+    # &ProbeMiIMEpm;
+
     # 2.1A4 test phase (2.1REL - 2.1A3 requires explicit $MIME_EXT_TEST=1)
     if (1) {
 	&MIME'MimeDecode(@_);
