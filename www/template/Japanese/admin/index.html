@@ -54,7 +54,7 @@
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-	メーリングリスト名:<INPUT NAME=ML SIZE=30>
+	メーリングリスト名:<INPUT NAME=ML SIZE=15>
 
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Create>
@@ -63,7 +63,7 @@
 
    <A NAME=add>
    <A NAME=bye>
-   <LI>ＭＬのメンバー
+   <LI>ＭＬメンバーの登録・削除
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
 		TARGET="right" METHOD=POST>
@@ -99,7 +99,7 @@
 	</FORM>
 
    <A NAME=destructml>
-   <LI>既存ＭＬの消去
+   <LI>ＭＬの消去
 	<BR>	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -122,6 +122,7 @@
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
 </UL>	
+
 
 <!-- ------------------------------------------------------------------>
 <HR>	
@@ -155,6 +156,7 @@
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
 	
+
    <A NAME=cgiadmin>
    <LI>
 	この画面を操作可能な(CGI)管理者アカウントのパスワード設定
@@ -203,12 +205,13 @@
 	
 </UL>
 
+
+<!-- ------------------------------------------------------------------>
 <HR>
 <CENTER>サーバの設定</CENTER>
 <UL>
    <A NAME=server_config>
-   <LI>
-	MTA
+   <LI>MTAの設定
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -230,7 +233,8 @@
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
 	
-	<LI>newaliases
+
+   <LI>newaliases
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
@@ -254,14 +258,12 @@
 			</TABLE>
 	</TABLE>
 	
-	
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
 	
-	<HR>
-	<LI><P>
+   <LI>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
