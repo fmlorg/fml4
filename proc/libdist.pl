@@ -60,7 +60,7 @@ sub DoDistribute
     $Rcsid =~ s/^(.*)(\#\d+:\s+.*)/$1.($USE_CROSSPOST?"(rmsc)":"(rms)").$2/e;
     $Rcsid =~ s/\)\(/,/g;
 
-    # Under DLA_HACK, PreProcessing Section;
+    # Under DLA_HACK($e{'mode:DirectListAccess'}), PreProcessing Section;
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
     {
@@ -117,14 +117,13 @@ sub DoDistribute
 	      $relay = $1 || $DEFAULT_RELAY_SERVER;
 	      ($who, $mxhost) = split(/@/, $rcpt, 2);
 
-	      if ($DLA_HACK) { # $rcpt is original "addr" in ACTIVE_LIST;
-		  $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
-	      }
+	      # DLA_HACK: $rcpt is original "addr" in ACTIVE_LIST;
+	      $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
 
 	      $rcpt = "${who}\%${mxhost}\@${relay}";
 	  }
 
-	  if ($DLA_HACK) {
+	  if ($e{'mode:DirectListAccess'}) {
 	      ;# if DirectListAccess (List == ACTIVE_LIST), delivery in Smtp;
 	  }
 	  else {
