@@ -3,6 +3,17 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/11
+
+  sbin/makefml (only on NT4)
+	fix 'no such file' in "makefml passwd ..."
+	by wrap "system stty " with "if $UNISTD"
+
+	NT4 上で『そんなコマンドはない』というエラーメッセージが出る
+	のを直す。
+	ただし以前からメッセージがでるけどパスワードの変更はできてい
+	るという状態のはずなので、無視して使う分には別に問題はない;)
+
 2000/04/10
 
   bin/fwix.pl
