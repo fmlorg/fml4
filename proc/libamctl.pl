@@ -164,7 +164,7 @@ sub AutoRegist
     }
 
     local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
-    &Log("Deliver? $e{'nlines'} <=> $limit") if $debug;
+    &Log("AutoRegist: Deliver? $e{'nlines'} <=> $limit") if $debug;
 
     if ($AUTO_REGISTERED_UNDELIVER_P) {
 	&Log("AutoRegist: not deliver since \$AUTO_REGISTERED_UNDELIVER_P is on");
@@ -175,10 +175,17 @@ sub AutoRegist
     # IF $AUTO_REGISTERED_UNDELIVER_P NOT DEFINED, check Lines: 
     elsif ($e{'nlines'} < $limit) { 
 	&Log("AutoRegist: not deliver since lines:$e{'nlines'} < $limit");
-	$r  = "The number of mail body-line is too short(< $limit),\n";
-	$r .= "So NOT FORWARDED to ML($MAIL_LIST). O.K.?\n";
-	$r .= "(FYI: \$AUTO_REGISTERED_UNDELIVER_P is set)\n" 
-	    if $AUTO_REGISTERED_UNDELIVER_P;
+	$r  = "The number of lines in the mailbody is too short(< $limit),\n";
+	$r .= "So NOT FORWARDED to ML ($MAIL_LIST). O.K.?\n";
+
+	if ($AUTO_REGISTRATION_LINES_LIMIT) {
+	    $r .= "(FYI: limit \limit is \$AUTO_REGISTRATION_LINES_LIMIT)\n";
+	}
+	else {
+	    $r .= "(FYI: limit $limit is default value, ";
+	    $r .= "since \$AUTO_REGISTRATION_LINES_LIMIT is not defined)\n";
+	}
+
 	$r .= "\n".('-' x 30) . "\n\n";
 	$AUTO_REGISTERED_UNDELIVER_P = 1;
     }
