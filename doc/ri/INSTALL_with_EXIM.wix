@@ -1,0 +1,39 @@
+		fml を exim と一緒に使う場合
+=E
+		fml and exim as a MTA
+
+				Ken'ichi Fukamachi <fukachan@fml.org> 
+
+
+exim は sendmail と同様にすればできます。(sendmailを前提に書かれている)
+INSTALL ファイルに従ってやってみてください。exim の設定での注意点は以
+下の通りです。
+=E
+Exim is almost compatible with sendmail, so see INSTALL for installation.
+You can use the same samples as sendmail with exim.  
+However don't forget the following configuratino change.
+
+1. fmlはSMTPでMTAと通信するのでリレーの許可を出して下さい。
+   つまりlocalhostからのリレーを許可するように変更を加えて下さい。 
+=#
+
+1.  Permit relay from localhost to recipients, since fml uses loopback
+    interface (default) to connect to MTA (delivery system)
+    But the latest MTA rejects such mail relay, so please permit relay
+    via localhost.
+
+[Example]
+
+   sender_host_accept_relay = localhost
+   # sender_host_reject_relay = *
+
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.#
+.# $Id$
