@@ -64,10 +64,16 @@ sub AgainstReplyWithNoRef
 	$buf = $buf[1] || $buf[0] || $buf;
 	$buf =~ s/\D//g;
 	$buf =~ s/^0+//;
-    
+
+	local($xref) = "<mid-${buf}-$MAIL_LIST>";
+
 	# append it to References:.
-	if ($buf) {
-	    $e{'h:References:'} .= " <mid-${buf}-$MAIL_LIST>";
+	# If we can emulate Message-ID: and the references: does not
+	# contain it, we add it. fml-support: 05852
+	if ($buf &&
+	    ($e{'h:references:'} !~ /$xref/i) &&
+	    ($e{'h:in-reply-to:'} !~ /$xref/i)) {
+	    $e{'h:References:'} .= " ". $xref;
 	}
     }
     else {
