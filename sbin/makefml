@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: makefml,v 2.210.2.5 2001/07/08 14:17:06 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -1391,6 +1391,9 @@ sub LangExtConv
         &MesgLE::CacheOn(*LangExtCache, $msgfile, 'euc');
 	return $LangExtCache{$key};
     }
+    elsif ($LANGUAGE eq 'English' || $LANGUAGE eq '') {
+	return;	# return with undef value
+    }
     else {
         $key;
     }
@@ -1661,7 +1664,10 @@ sub ExecCmd
 
     # Lock all when "install"
     if ($TheFirstTime || $NOT_LOCK{$fp}) {
-	;
+	# XXX TODO for 4.0.3 
+	# XXX I don't understand why this hack locates here ???
+	# XXX reload $LANGUAGE to translate messages on Web CGI
+	# XXX &GetConfigPH($ml) if (!$TheFirstTime);
     }
     else {
 	&MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR);
@@ -4333,6 +4339,7 @@ sub HtmlConfigQuery
 	return;
     }
 
+    # Example: variable = SUBJECT_TAG_TYPE, value = 1 (before expansion)
     if ($variable && $value) {
 	if ($variable eq 'unknown') {
 	    if ($HOOK{$top_level}) {
@@ -4347,6 +4354,7 @@ sub HtmlConfigQuery
 		print "ERROR: invalid request";
 	    }
 	}
+	# XXX toggle variable: yes/no
 	elsif ($value eq 'YES') {
 	    &SetValue(*config, $variable, 1);
 	}
@@ -4357,6 +4365,9 @@ sub HtmlConfigQuery
 	    # XXX USE POINTER NOT RAW VALUE IN HTML
 	    $value = $MAP{$top_level, $value} || $MAP_RAW_VALUE{$top_level, $value};
 	    print "<BR>&SetValue(*config, $variable, $value);<BR>\n" if $debug;
+
+	    # XXX: switch type variable: speciail treat for null value
+	    if ($value eq '_NULL_') { $value = '';}
 	    &SetValue(*config, $variable, $value);
 	}
     }
@@ -4549,6 +4560,7 @@ sub EachLevelQuery
 
 		# $NULL => ""
 		$config{$v} =~ s/\$NULL//; 
+		$config{$v} =~ s/_NULL_//; 
 
 		undef $config{$v} if $config{$v} eq "_NULL_";
 	    }
@@ -6981,6 +6993,7 @@ sub Bind
     }
     # elsif ($v = $MAP{$menu, $Count}) {  # SHOW RAW VALUE IN HTML
     # elsif ($v = $MAP{$menu, $Count}) {  # SHOW POINTER IN HTML
+    # elsif (defined ($v = $MAP{$menu, $Count})){ # SHOW POINTER IN HTML
     elsif (($v = $MAP{$menu, $Count}) ne ''){ # SHOW POINTER IN HTML
 	local($vn);
 	$ptr = $menu;
