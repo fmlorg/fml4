@@ -55,6 +55,7 @@ sub PGPGoodSignatureP
     local($auth) = 0;
 
     &Log("PGPGoodSignatureP") if $debug || $debug_pgp;
+    &Log("PGPPATH = $ENV{'PGPPATH'}") if $debug || $debug_pgp;
 
     &_PGPInit(*e) || return 0;
 
@@ -529,7 +530,10 @@ sub _PGPInit
     }
 
     # fml 4.0 new-pgp-hier
-    if ($CFVersion >= 6.1) {
+    if (! $USE_FML40_PGP_PATH) {
+	$ENV{'PGPPATH'} = $PGP_PATH;
+    }
+    else {
 	if ($_PCB{'asymmetric_key'}{'keyring_dir'}) {
 	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
 	}
@@ -539,11 +543,10 @@ sub _PGPInit
 	    return 0;
 	}
     }
-    else {
-	$ENV{'PGPPATH'} = $PGP_PATH;
-    }
 
-    # Set Language for easy analize by fml.
+    &Log("\$ENV{'PGPPATH'} = $ENV{'PGPPATH'}") if $debug;
+
+    # Set Language for easy analyze by fml.
     &LoadPGPConfig($path, "+Language=en");
 
     1;
@@ -551,11 +554,8 @@ sub _PGPInit
 
 
 ##### Administrator Commands 
-# defualt / backward compatible
-sub PGP
-{
-    &PGP2(@_);
-}
+# default / backward compatible
+sub PGP { &PGP2(@_);}
 
 sub PGP2
 {
