@@ -618,8 +618,9 @@ sub SetHashDefaults
 		    '300#create-doc-template', 'create document templates e.g. help, guide, ...',
 
 		    # conversion
-		    'conv',   'do_conv',
-		    'update', 'do_update',
+		    'conv',             'do_conv',
+		    'update',           'do_update',
+		    'update-config.ph', 'do_update_config_ph',
 
 		    # upgrade from 2.x to 3.0
 		    'upgrade', 'do_upgrade',
@@ -4726,6 +4727,13 @@ sub do_conv
 }
 
 
+sub do_update_config_ph
+{
+    local($ml) = @_;
+    &do_update($ml, 'config.ph');
+}
+
+
 sub do_update
 {
     local($ml, $file) = @_;
@@ -4737,6 +4745,16 @@ sub do_update
     # file: $x
     $x =~ s#.*/##;
     $target = "$ML_DIR/$ml/$x";
+
+    if ($x eq 'config.ph') {
+	print "O.K. Try to re-create $target !!!\n";
+	# make ml/config.ph
+	&MakeConfigPH("$EXEC_DIR/cf/config", 
+		      "$EXEC_DIR/cf/MANIFEST", 
+		      "$ML_DIR/$ml/cf", 
+		      "$ML_DIR/$ml/config.ph");	
+	return 1;
+    }
 
     if (-f "$EXEC_DIR/etc/makefml/$x") {
 	$t = "$EXEC_DIR/etc/makefml/$x";
