@@ -207,6 +207,11 @@ COPY_SOURCES () {
 
 	# tar cf - etc/samples/[a-z]* | (cd $DESTDIR/distrib; tar xvf - )
 
+	echo ""
+	echo Copying databases/
+	rsync --exclude CVS -av databases/ $DESTDIR/distrib/databases/
+
+
 	echo  " ";
 	echo  "Generating default_config.ph  ";
 	${PERL} cf/config -m cf/MANIFEST -i /dev/null |\
