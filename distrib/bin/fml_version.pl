@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML: fml_version.pl,v 1.19 2001/04/05 12:06:01 fukachan Exp $
+# $FML: fml_version.pl,v 1.20 2001/07/23 13:49:49 fukachan Exp $
 #
 
 require 'getopts.pl';
@@ -30,8 +30,8 @@ $Year     = 1900 + $year;
 
 chop($Trunk = `cat $TRUNK_ID`);
 chop($Branch = `cat "$FML/conf/branch" `);
-
 if ($ENV{'RELEASE'}) {
+    chop($Trunk  = `cat $STATUS`);
     $Branch = "release";
 }
 elsif ($Branch eq 'stable') {
