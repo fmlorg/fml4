@@ -18,18 +18,36 @@ I think "principle of least surprise" is most important in upgrade.
 .C	fml 3.0 から fml 4.0 へのアップグレードの際の注意点
 =E.C	upgrade to fml 4.0
 
+
 4.0 の主な新機能とアップグレードの際の注意についてまとめます。
+
+.S	fml 4.0 works with perl 5 only 
+
+.if LANG == JAPANESE
+もっとも大事な点は perl 5 でしか動かないことです。
+3.0.1 までは perl 4 でも動きました。perl 5 に入れ換えて下さい。
+ちなみに、各 OS のデフォールトの perl はどうなっているか？
+のリストは以下の URL にあります。
+.url http://www.fml.org/fml/devel/OS_and_Perl.txt
+.fi
+.if LANG == ENGLISH
+CAUTION: fml 4.0 works with only perl 5 not perl 4.
+
+FYI: Here is the list of the default perl version built-in each OS.
+.url http://www.fml.org/fml/devel/OS_and_Perl.txt
+.fi
+
 
 .S	fml CGI インタフェイス
 =E.S	fml CGI interface
 
 .if LANG == JAPANESE
 詳しくは
-.url ../Japanese/GUI/
+.url http://www.fml.org/fml/Japanese/GUI/
 .fi
 .if LANG == ENGLISH
 See
-.url ../English/GUI/
+.url http://www.fml.org/fml/English/GUI/
 for more details.
 .fi
 
@@ -53,6 +71,12 @@ CGI はオプションです。無理に使う必要はありません。
 
 従来のコードへの追加という位置付けになります。
 アップグレードに際し特別な注意点はありません。
+
+リレーショナルデータベース
+.url	http://www.fml.org/fml/Japanese/RDBMS/
+
+LDAP
+.url	http://www.fml.org/fml/Japanese/LDAP/
 
 
 .S	PGP 関連の機能の変更点
@@ -104,8 +128,9 @@ fml 4.0 ではPGP キーをおくディレクトリと makefml のコマンドの拡張があ
 あまり目に見えない差ですが、将来の拡張性のために、設定ファイルを読み込
 む順番が少し異なります。
 
-注: あえて 4.0 風にする必要はありません。従来の config.ph ファイルを
-    そのまま使い続けて構いません。
+注: 
+あえて 4.0 風にする必要はありません。従来の config.ph ファイル
+をそのまま使い続けて構いません。
 
 
 
