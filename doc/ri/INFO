@@ -32,6 +32,10 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.5 current ==========
+
+・TYPO-FIX: $USE_SUBJECT_AS_COMMANDS が正しい、$USE_SUBECT_AS_COMMANDS 
+	じゃなくて
+
 ・ bin/inc_via_pop.pl 
 	bin/inc_via_pop.pl -host $HOST
 		は	
@@ -106,7 +110,7 @@ Listserv-like INTERFACE for libfml.pl and libremote.pl
 さい _o_
 ＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
 
-・$USE_SUBECT_AS_COMMANDS = 1 ;
+・$USE_SUBJECT_AS_COMMANDS = 1 ;
 
 Subject: 行も コマンドとして使う。
 例：
