@@ -292,6 +292,7 @@ sub SyncHtmlGenDirId
     # (ignoring the boundary between days, weeks, and years).
     $mtime = $mtime ? $mtime : time;
     ($mday, $mon, $year, $wday) = (localtime($mtime))[3..6];
+    $year += 1900;
     $mon++;
 
     if ($HTML_INDEX_UNIT =~ /^\d+$/) { 
@@ -306,7 +307,7 @@ sub SyncHtmlGenDirId
 	$li     = "Count $first -- $last";
     }
     elsif ($HTML_INDEX_UNIT eq 'day') {
-	$id = sprintf("%04d%02d%02d", 1900 + $year, $mon, $mday);
+	$id = sprintf("%04d%02d%02d", $year, $mon, $mday);
 	$li = "in $year/$mon/$mday";
     }
     elsif ($HTML_INDEX_UNIT eq 'week') { # wday == 0 (sunday)
@@ -318,13 +319,15 @@ sub SyncHtmlGenDirId
 	($f_mday, $f_mon, $f_year) = (localtime($s_time))[3..5];
 	($l_mday, $l_mon, $l_year) = (localtime($s_time + $week_unit))[3..5];
 	$f_mon++;
+	$f_year += 1900;
 	$l_mon++;
+	$l_year += 1900;
 
-	$id = sprintf("%04d%02d%02d.week", 1900 + $f_year, $f_mon, $f_mday);
+	$id = sprintf("%04d%02d%02d.week", $f_year, $f_mon, $f_mday);
 	$li = "in the week $f_year/$f_mon/$f_mday -- $l_year/$l_mon/$l_mday";
     }
     elsif ($HTML_INDEX_UNIT eq 'month') {
-	$id = sprintf("%04d%02d.month", 1900 + $year, $mon);
+	$id = sprintf("%04d%02d.month", $year, $mon);
 	$li = "in the month $year/$mon";
     }
     elsif ($HTML_INDEX_UNIT eq 'infinite') {
