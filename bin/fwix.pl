@@ -621,7 +621,7 @@ sub ReadFile
 }
 
 
-sub GabbleUntil
+sub GobbleUntil
 {
     local($last_key, $s) = @_;
     local($flag);

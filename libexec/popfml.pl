@@ -47,8 +47,8 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 ### POPFML Win32 Version
 if ($COMPAT_WIN32) {
     if ($Mode eq 'POP_ONLY') {
-	### &PopFmlGabble; (without fork version)
-	$status = &Pop'Gabble(*PopConf);#';
+	### &PopFmlGobble; (without fork version)
+	$status = &Pop'Gobble(*PopConf);#';
 	if ($status) { die("Error: $status\n");}
 	&PopFmlScan if $debug;
     }
@@ -56,7 +56,7 @@ if ($COMPAT_WIN32) {
 	&PopFmlProg;
     }
     else {
-	$status = &Pop'Gabble(*PopConf);#';
+	$status = &Pop'Gobble(*PopConf);#';
 	if ($status) { die("Error: $status\n");}
 	&PopFmlProg;
     }
@@ -75,7 +75,7 @@ else {
     }
 
     # spool -POP3-> pop.queue
-    &PopFmlGabble;
+    &PopFmlGobble;
     &ClearEvent($evid) if $HAS_ALARM && $evid; # alarm(3) schduling reset;
 
     # scan pop.queue and fork() and exec()
@@ -316,7 +316,7 @@ sub EvalIncludeFile
 }
 
 
-sub PopFmlGabble
+sub PopFmlGobble
 {
     $! = "";
     &PopFmlLock;
@@ -326,7 +326,7 @@ sub PopFmlGabble
     }
     elsif (0 == $pid) {
 	# go !
-	$status = &Pop'Gabble(*PopConf);#';
+	$status = &Pop'Gobble(*PopConf);#';
 	if ($status) { die "Error: $status\n";}
 	exit 0;
     }
@@ -336,7 +336,7 @@ sub PopFmlGabble
 	;
     }
 
-    &Log("Gabble Error: $!") if $!;
+    &Log("Gobble Error: $!") if $!;
 
 
     &PopFmlUnLock;

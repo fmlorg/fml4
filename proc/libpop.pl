@@ -138,7 +138,7 @@ sub PopPut2Socket
 }
 
 
-sub Gabble
+sub Gobble
 {
     local(*conf) = @_;
     local($i, $tmpf, $queue);
@@ -153,7 +153,7 @@ sub Gabble
 
     if (/^\+OK\s+(\d+)/) {
 	$n = $1;
-	# &Log("Pop::Gabble STAT $n") if $n > 0;
+	# &Log("Pop::Gobble STAT $n") if $n > 0;
     }
     else {
 	&Log("Pop::fails to STAT the pop server[$POP_SERVER].");
