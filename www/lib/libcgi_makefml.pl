@@ -367,6 +367,12 @@ sub Translate2LogOption
 	    "-$Config{'TAIL_SIZE'}";
 	}
     }
+    elsif ($x eq 'day') {
+	$Config{'YYYYMMDD'} =~ s@/@@g;
+	if ($Config{'YYYYMMDD'} =~ /^\d+$/) {
+	    "-D$Config{'YYYYMMDD'}";
+	}
+    }
 }
 
 

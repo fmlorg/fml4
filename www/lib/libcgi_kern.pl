@@ -73,6 +73,44 @@ sub ShowHeader
 }
 
 
+# return YYYYMMDD at Greenwich standard timezone (tricky:-)
+sub YYYYMMDD
+{
+    sprintf("%4d%02d%02d.%02d%02d",
+            $year + 1900, $mon + 1, $mday,
+          $hour, 0);
+}
+
+
+sub ExpandDate
+{
+    local($pat) = @_;
+    local($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime(time);
+    local($x, $a, $b);
+
+    if ($pat eq 'YYYY') {
+	$a = $year - 10;
+	$b = $year;
+	for $x ($a .. $b) { 
+	    print "\t\t<OPTION VALUE=$x>$x\n";
+	}
+    }
+    elsif ($pat eq 'MM') {
+	for $x (01 .. 12) { 
+	    print "\t\t<OPTION VALUE=$x>$x\n";
+	}
+    }
+    elsif ($pat eq 'DD') {
+	for $x (01 .. 31) { 
+	    print "\t\t<OPTION VALUE=$x>$x\n";
+	}
+    }
+    else {
+	$NULL;
+    }
+}
+
+
 sub ExpandOption
 {
     local($dir);
@@ -198,10 +236,16 @@ sub Convert
 {
     local($file, $inline) = @_;
 
+    $TODAY = &YYYYMMDD;
+
     if (open($file, $file)) {
 	while (<$file>) {
 	    if ($inline) {
 		next if 1 .. /__START__/;
+	    }
+
+	    if (/__EXPAND_(YYYY|MM|DD)__/) {
+		&ExpandDate($1);
 	    }
 
 	    if (/__EXPAND_OPTION_ML__/) {
@@ -241,6 +285,9 @@ sub Convert
 	    # XXX or $ML is passed from /admin/menu.cgi
 	    # http://www.maple.or.jp/~ikeda/diffs/fml/
 	    s/_ML_/$ML/g;
+
+	    # 
+	    s/__TODAY__/$TODAY/g;
 
 	    print;
 	}
