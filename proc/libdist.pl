@@ -152,6 +152,7 @@ sub DoDistribute
 	    if ($HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID) {
 		$id = &LongId($ID, $HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID);
 	    }
+	    $pat = "[$BRACKET:$id]";
 	    $e{'h:Subject:'} = "[$BRACKET:$id] $subject";
 	}
 	elsif ($SUBJECT_FREE_FORM) {
@@ -171,8 +172,18 @@ sub DoDistribute
 		}
 	    }
 
-
 	    $e{'h:Subject:'} = "$pat $subject";
+	}
+
+	if ($AGAINST_MAIL_WITHOUT_REFERENCE) {
+	    if ($pat) {
+		&use('distsubr');
+		&AgainstEudora(*e, $pat);
+	    }
+	    else {
+		&Log("\$AGAINST_MAIL_WITHOUT_REFERENCE not work of no defined subject tag");
+
+	    }
 	}
     }
 
