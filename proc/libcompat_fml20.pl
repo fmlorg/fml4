@@ -31,7 +31,7 @@ sub ProcRetrieveFileInSpool_FML_20
 }
 
 
-# check a mail from members or not? return 1 go on to Distribute or Command!
+# check mail from members or not? return 1 go on to Distribute or Command!
 sub MLMemberNoCheckAndAdd { &DoMLMemberCheck;}; # backward compatibility
 sub DoMLMemberCheck
 {
@@ -67,7 +67,7 @@ sub DoMLMemberCheck
     # here not authenticated;
     $Envelope{'mode:stranger'} = 1;
 
-    # Hereafter must be a mail from not member
+    # Hereafter must be mail from not member
     # Crosspost extension.
     if ($USE_CROSSPOST && $Envelope{'crosspost'}) {
 	&Log("Crosspost from not member");	    

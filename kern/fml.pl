@@ -1193,7 +1193,7 @@ sub Distribute
     local(*e, $mode, $compat_hml) = @_;
     local($ml) = (split(/\@/, $MAIL_LIST))[0];
 
-    # Filtering a mail body from members but not check other cases
+    # Filtering mail body from members but not check other cases
     # e.g. null body subscribe request in "no-keyword" case
     if ($USE_DISTRIBUTE_FILTER) {
 	&EnvelopeFilter(*e, 'distribute');
@@ -2606,7 +2606,7 @@ sub EnvelopeFilter
 
 	&Log("EnvelopeFilter::reject for '$r'");
 	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
-	      "A mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
+	      "Mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
 
 	if ($FILTER_NOTIFY_REJECTION) {
 	    &Mesg(*e, $NULL, 'filter.rejected', $r);
