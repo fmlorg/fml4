@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/03
+
+   sbin/makefml   
+	define "skip" as an alias of "off" command
+
+	makefml skip コマンドを makefml off と同じ意味にしました
+
+
 2000/08/25
 
    sbin/makefml
