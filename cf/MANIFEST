@@ -183,12 +183,12 @@ AUTO_REGISTRATION_KEYWORD:	subscribe
 
 # when automatic registration,
 # we apply $AUTO_REGISTRATION_DEFAULT_MODE e.g. "m=3mp s=1" to the address.
-# Please see "file operation" in doc/op.{jp,en} for more details.
+# Please see "file operation" in doc/tutorial for more details.
 # value: string
 AUTO_REGISTRATION_DEFAULT_MODE:
 
 # "confirmation" (default) mode configurations
-# please see doc/op for the detail of "confirmation"
+# please see doc/tutorial for the detail of "confirmation"
 # value: string 
 CONFIRMATION_ADDRESS:
 CONFIRMATION_SUBSCRIBE:		subscribe
@@ -580,7 +580,7 @@ XMLCOUNT:	 X-Mail-Count
 # The available type is [:] [,] [ ] (:) (,) ( ).
 # e.g. [:]  => [Elena:00100] format (here $BRACKET is "Elena").
 # But you can customize SUBJECT_FREE_* series variables.
-# Please see doc/op for the detail
+# Please see doc/tutorial for the detail
 #
 # value:  (:) / [:] / () / [] / (,) / [,] / () / [] / (ID) / [ID] / ""
 SUBJECT_TAG_TYPE:	
@@ -596,7 +596,7 @@ BRACKET:	 Elena
 STRIP_BRACKETS:  0
 
 # You can customize your own bracket by these variables.
-# See doc/op and libtagdef.pl on examples.
+# See doc/tutorial and libtagdef.pl on examples.
 # value: regexp string
 BRACKET_SEPARATOR:
 SUBJECT_FREE_FORM:
@@ -745,7 +745,7 @@ SLEEPTIME:		60
 # almost obsolete
 # special case of "mget" routine uses these variables. 
 # It is not user defined variable.
-# See doc/op and libfop.pl for the detail. You change MIME/Multipart default.
+# See doc/tutorial and libfop.pl for the detail. You change MIME/Multipart default.
 # value: string
 MIME_VERSION:
 MIME_CONTENT_TYPE:
@@ -760,7 +760,7 @@ MIME_MULTIPART_TRAILER:
 # value: 1/0
 USE_SJIS_IN_ISH:
 
-# RFC1153 configurations; see doc/op for the detail
+# RFC1153 configurations; see doc/tutorial for the detail
 # value: number
 RFC1153_ISSUE:
 
@@ -1043,7 +1043,7 @@ MIME_DECODED_ARTICLE:
 # $SMTP_OPEN_HOOK = q# 
 #   $e{'Body'} = $PREAMBLE_MAILBODY. $e{'Body'} .$TRAILER_MAILBODY;
 # #;
-# Please see doc/op.$language for our policy behind this.
+# Please see doc/tutorial for our policy behind this.
 #
 # value: string
 PREAMBLE_MAILBODY:
@@ -1202,7 +1202,7 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 
 # ### Section: Html Configurations ###
 #
-# HTML article generator: Please see doc/op for the details.
+# HTML article generator: Please see doc/tutorial for the details.
 # AUTO_HTML_GEN == AUTOmatic HTML GENeration
 # if $AUTO_HTML_GEN, we generate html'ed articles in $DIR/$HTML_DIR
 # value: 1/0
@@ -1220,7 +1220,7 @@ HTML_DIR:			htdocs
 
 # expire old html articles if non-zero value is defined.
 # not expire in default since the value is 0 or NULL.
-# options: Please see doc/op for the details.
+# options: Please see doc/tutorial for the details.
 # value: number
 HTML_EXPIRE_LIMIT:
 
@@ -1408,7 +1408,7 @@ MD5:		&path(md5:md5sum)
 LOCAL_CONFIG:
 
 # ## Sub Section: Available Hooks ##
-# You can set customized hooks here. See doc/op's chapter "HOOKS".
+# You can set customized hooks here. See doc/tutorial's chapter "HOOKS".
 # For example available hooks are 
 # $START_HOOK, $DISTRIBUTE_START_HOOK, $SMTP_OPEN_HOOK
 # $HEADER_ADD_HOOK, $DISTRIBUTE_CLOSE_HOOK, $DISTRIBUTE_END_HOOK

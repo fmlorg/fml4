@@ -253,7 +253,7 @@ AUTO_REGISTRATION_KEYWORD:	subscribe
 AUTO_REGISTRATION_DEFAULT_MODE:
 
 # "confirmation" (default) mode configurations
-# please see doc/op for the detail of "confirmation"
+# please see doc/tutorial for the detail of "confirmation"
 .j 登録の意思を確認するモードで使うパラメータ
 .j   $CONFIRMATION_SUBSCRIBE       登録依頼メールのキーワード
 .j   $CONFIRMATION_KEYWORD         登録意思確認メールで使うキーワード
@@ -740,7 +740,7 @@ XMLCOUNT:	 X-Mail-Count
 # The available type is [:] [,] [ ] (:) (,) ( ).
 # e.g. [:]  => [Elena:00100] format (here $BRACKET is "Elena").
 # But you can customize SUBJECT_FREE_* series variables.
-# Please see doc/op for the detail
+# Please see doc/tutorial for the detail
 .j Subject:のタグの種類。デフォールトは何もつけない
 .j 
 .j 重要な情報が減るだけなので本来こんなTAGはつけるべきではない。
@@ -765,7 +765,7 @@ STRIP_BRACKETS:  0
 .j $SUBJECT_TAG_TYPE はこれの簡易版である。
 .j $SUBJECT_TAG_TYPE を使わずにこれらの変数を使って
 .j 自分でタグを定義することも出来る。
-# "Free Subject Tag" settings (see doc/op and libtagdef.pl on examples)
+# "Free Subject Tag" settings (see doc/tutorial and libtagdef.pl on examples)
 # value: regexp string
 BRACKET_SEPARATOR:
 SUBJECT_FREE_FORM:
@@ -937,7 +937,7 @@ SLEEPTIME:		60
 
 .j mget で使うMIMEパラメータ。未定義
 .j mgetのファイルモードが初期化される時に必要なら初期化される
-# See doc/op and libfop.pl for the detail. You change MIME/Multipart default.
+# See doc/tutorial and libfop.pl for the detail. You change MIME/Multipart default.
 # value: string
 MIME_VERSION:
 MIME_CONTENT_TYPE:
@@ -954,7 +954,7 @@ MIME_MULTIPART_TRAILER:
 USE_SJIS_IN_ISH:
 
 .j mget のRFC1153 formatのパラメータ
-# RFC1153 configurations; see doc/op for the detail
+# RFC1153 configurations; see doc/tutorial for the detail
 # value: number
 RFC1153_ISSUE:
 
@@ -1261,7 +1261,7 @@ MIME_DECODED_ARTICLE:
 # $SMTP_OPEN_HOOK = q# 
 #   $e{'Body'} = $PREAMBLE_MAILBODY. $e{'Body'} .$TRAILER_MAILBODY;
 # #;
-# Please see doc/op.$language for our policy behind this.
+# Please see doc/tutorial for our policy behind this.
 #
 .j コマンドの結果などを返す時にメール本文の
 .j    $PREAMBLE_MAILBODY   本文の前
@@ -1479,7 +1479,7 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 # ### Section: Html Configurations ###
 .j Section::HTML 記事をHTMLに自動変換する
 # HTML Mode Configurations (libsynchtml.pl)
-# Please see doc/op for the details.
+# Please see doc/tutorial for the details.
 # AUTO_HTML_GEN == AUTOmatic HTML GENeration
 # if $AUTO_HTML_GEN, we generte html'ed articles in $DIR/$HTML_DIR
 .j 記事をHTMLに自動変換する ($AUTO_HTML_GEN)
@@ -1497,7 +1497,7 @@ HTML_INDEX_REVERSE_ORDER:	1
 HTML_DIR:			htdocs
 
 .j 古いHTML化された記事を消すか？ (消さないのがデフォールト)
-# options: Please see doc/op for the details.
+# options: Please see doc/tutorial for the details.
 # value: number
 HTML_EXPIRE_LIMIT:
 
@@ -1558,7 +1558,7 @@ HTML_WRITE_UMASK:
 .j 
 .j 名前の通り:-)
 .j
-# Please see doc/op for the details.
+# Please see doc/tutorial for the details.
 # *_DIR    value: directory string
 # *_FILE   value: filename string
 # *_SERVER value: string
@@ -1674,7 +1674,7 @@ MD5:		&path(md5:md5sum)
 LOCAL_CONFIG:
 
 # ## Sub Section: Available Hooks ##
-# You can set customized hooks here. See doc/op's chapter "HOOKS".
+# You can set customized hooks here. See doc/tutorial's chapter "HOOKS".
 # For example available hooks are 
 # $START_HOOK, $DISTRIBUTE_START_HOOK, $SMTP_OPEN_HOOK
 # $HEADER_ADD_HOOK, $DISTRIBUTE_CLOSE_HOOK, $COMMAND_HOOK
