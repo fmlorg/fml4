@@ -3,90 +3,89 @@
 
 fml Mailing List Server Package 
 
+				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
 #.index
+
+
+
 
 .C	fml Introduction
 .S	fml 2.0 
 
 fml 2.0 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
-＃おまけCDROM雑誌等の解説で「…の改良」等の記述は間違いです。
-＃僕が記述を監修してるわけでもないし
+＃おまけCDROM雑誌等の解説で「…の改良」等の記述は推測間違い
 
-ML server, management tool, .forward 用インターフェイス
-等の集合体です。
+ML server, management tool, .forward 用インターフェイスの集合体です。
 
-これは（歴史的理由等により）デフォールトでは hml 1.6 という Perl
-Script と見かけが同じになるように作動します。
+これは（歴史的理由により）デフォールトでは hml 1.6 という Perl Script 
+と見かけが同じになるように作動します。
 ＃正確にはその元祖の shell script の program というべきであらう
 
-いいかえれば デフォールトでは hml 1.6 を Emulation します。しかしなが
+言いかえれば デフォールトでは hml 1.6 を Emulation します。しかしなが
 ら、distribute だけするようにして、spoolingするaliasesと同じにするとか 
 listserv のように使うインターフェイス（libexec/fmlserv.pl）も用意され
 ています。
 
-結局インターフェイスさけ変えて、ユーザにとってどう見えるか？
-という部分を用意すればよいので、様々なコマンド、ライブラリ群を
-好きなインターフェイスで使えるようにしてあります。
+インターフェイスだけを変えて、ユーザにとってどう見えるか？という部分を
+用意すればよいので、様々なコマンド、ライブラリ群を好きなインターフェイ
+スで使えるようにしてあります。
 
 サーバのコマンドの機能は上述のように
 
+	○コマンド機能等を一切使わずにフォワードするだけ等
 	○hml のシンタックスで使う （Default Emulation）
-	○listserv or majordomo インターフェイスに見せかける
-	○もしくはコマンド機能等を一切使わずにフォワードするだけ等
+	○listserv or majordomo インターフェイス
 	○forward でのMLのための仕組み(slocal や vacation)
 
-等を通じてMLサーバへアクセスできるようにできます。
+等が用意されています。
 
 また、メールをリアルタイムに配送したり、一定時間ごとにためて
 まとめおくり するようにするサーバも実装しています。
 
 
-
 .S	目的
 
-これからＭＬをはじめる方にはそのまま、 
-ＭＬサーバをカスタマイズして使いたいとおもっている方には改造のPLATFORM
-としていただけるかと思います。
+これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
+いたいとおもっている方には改造の PLATFORM としていただけるかと思います。
 ＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
 ていると思います。最適解ってわけじゃないけど :-)
 
 
-.S	ソースの入手方法、Update や bug fix等の情報について
+.S	Update や bug fix等の情報について
 
 最新版のfml-currentのソースコードを手に入れてから改造等はしていただけ
 るとよろしいかと存じます(_o_)。
-＃この一行は各地のarchiveに備えて↑
 
-・fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
+○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
 うにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
 
-・最新版のfml-currentのソースコードは、なんでもいいからメールを
+○ 最新版のfml-currentのソースコードは、なんでもいいからメールを
 fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。
 
-.S	anonymous ftp
 
-	国内
-	master
+.S	ソースの入手方法。anonymous ftp等
+
+	国内のマスター
 	ftp.phys.titech.ac.jp:/pub/net/fml-current/
 
-	mirror
-	ftp://fftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
+	国内のミラー
+	ftp://ftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
 
-	国外用のmirror
+	国外用のミラー
 	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
 
 ＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
 
 
+○ WWWの場合最新のドキュメント、ソースともに 
 
-
-・WWWが使えるなら最新のドキュメント、ソースともに 
 	http://www.phys.titech.ac.jp/uja/fml/ 
+
 からたどれます。
 
 
@@ -121,8 +120,8 @@ MLへ登録して欲しくない方のために
 
 	fml-maintainer@phys.titech.ac.jp
 
-へ投げておいてください。ただ返事がすぐ返ることはあまり期待しないでくだ
-さい。
+へ投げておいてください。
+ただ返事がすぐ返ることはあまり期待しないでください。
 
 
 	 
