@@ -395,6 +395,8 @@ INFO:
 ### SECURITY: Level for Commands.
 ### REMOTE ADMINISTRATION CONFIGURATIONS:
 
+REJECT_ADDR_LIST:	$DIR/spammers
+			# list of spammers to be rejected
 
 REMOTE_ADMINISTRATION:  0
 			# admin and approve command if non-nil
