@@ -1,50 +1,65 @@
-			CGIの実装について
+		CGIの実装
+		-- βバージョンへの野望 --
+
+○ ターゲットの httpd を apache 1.3.9 (apache-ssl) へ
 
 ○ 基本的なディレクトリ構成
 
-   /usr/local/fml/www/
+たとえば $EXEC_DIR = '/usr/local/fml' 
+
+   $EXEC_DIR/www/
 
 	CGIで使うtemplateを収容する場所
+	apache 1.3.9 directory style
 
-   /usr/local/fml/share/
+	   $EXEC_DIR/www/cgi-bin/
+	   $EXEC_DIR/www/conf/		(apache/conf/httpd.conf example)
+	   $EXEC_DIR/www/etc/		(.ht{access,passwd} example)
+	   $EXEC_DIR/www/htdocs/
 
-	makefmlがCGIを生成する場所
+	   $EXEC_DIR/www/db/
+		パスワードの実体置き場
 
-	httpdはこの場所を直接使ってもいいし、
-	ここからさらに生成してもよい
+○ 基本設定ファイル
 
-  例: thttpd (target httpd) 
-     /usr/pkg/sbin/thttpd -nor -u fml \
-	-d /usr/local/fml/share -c 'cgi-bin/fml/admin/*cgi'
+   require $EXEC_DIR/.fml/system
+	このファイルはCGIからは変更不可
 
-  例2: apache
-     % rsync -av /usr/local/fml/share/cgi-bin/ /usr/pkg/libexec/cgi-bin/
+   eval("require $EXEC_DIR/.fml/cgi.conf");
+	別にしておく方がいいだろう
+	このファイルはCGIからも変更可能であるべき
 
-○ makefml コマンド
+○ make install 時に $EXEC_DIR/www/ 以下に構築するだけ構築したい
+
+とりあえず一番上の階層の画面だけは出るように準備をしておく？
+	そこからＭＬを作る/初期化(既存のＭＬをWWWインターフェイスでも？)
+	そこからＭＬを削除	  
+
+   makefml コマンド(下請け)
 
  * 全体の管理者用 (実装済み)
    makefml admin.cgi
 
-	/usr/local/fml/share/cgi-bin/fml/admin/ 以下にCGIを生成
+	$EXEC_DIR/www/cgi-bin/fml/admin/ 以下にCGIを生成
 			menu.cgi
 			makefml.cgi
 
  * 各ＭＬの管理者用 (実装済み)
    makefml mladmin.cgi $ml
 
-	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
+	$EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
 			menu.cgi
 			makefml.cgi
 
  * 一般ユーザ用のはどうする？ (未実装)
    makefml ml.cgi $ml とかにするのか？
 
-       /usr/local/fml/share/cgi-bin/fml/ml/$ml/ (仮) 以下にCGIを生成？
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/ (仮) 以下にCGIを生成？
 
 
 ○ 各ディレクトリの権限
 
-   /usr/local/fml/share/cgi-bin/fml/admin/
+   $EXEC_DIR/www/cgi-bin/fml/admin/
  
 	そのホスト上で makefml を使える人
 	つまり何でもできる権限がある人と等価
@@ -52,7 +67,7 @@
 	各ＭＬの管理者とは別の集合である可能性がある
 	よってパスワードは別途設定するべき(特にインストール時)
 
-   /usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/
+   $EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/
 
 	各ＭＬの管理者の権限
 	メーリングリストサーバのホストに入れるとは限らない
@@ -60,7 +75,7 @@
 	パスワード認証をともなうべきで
 	adminコマンドと同じパスワード？
  
-   /usr/local/fml/share/cgi-bin/fml/ml/$ml/ (仮)
+   $EXEC_DIR/www/cgi-bin/fml/ml/$ml/ (仮)
 
 	一般ユーザが入る階層
 	パスワード認証をともなうべき
