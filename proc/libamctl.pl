@@ -1159,19 +1159,26 @@ sub Log
 } 
 
 
-sub main'MemberLimitP #';
+sub main::MemberLimitP
 {
     local(*e) = @_;
     local($total, @a);
 
-    @a = @main'ACTIVE_LIST; #';
-
-    for (@a) {
-	 next unless -f $_;
-	 $total += &CountEffectiveMember($_);
+    if ($main::USE_DATABASE) {
+	&main::use('databases');
+	my (%mib, %result, %misc, $error);
+	&main::DataBaseMIBPrepare(\%mib, 'num_active');
+	&main::DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	$result{'_num_active'};
     }
-
-    $total;
+    else {
+	@a = @main'ACTIVE_LIST; #';
+	for my $f (@a) {
+	    next unless -f $f;
+	    $total += &CountEffectiveMember($f);
+	}
+	$total;
+    }
 }
 
 
