@@ -1,116 +1,165 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
-
-$rcsid   = q$Id$;
-($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && "$1[$2]");
-$rcsid  .= '(1.6beta)';
+#
+# $rcsid   = q$Id$;
+# ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
 
 @ARGV || die(&USAGE);
-require 'getopts.pl';		# Getopt
-&Getopts('s:f:hv8');
-die(&USAGE) if $opt_h;
-
-# variables
-$DIR        = $ENV{'PWD'};
-$e{'mci:mailer'} = 'ipc';
-
-$user  = (split(/:/, getpwuid($<), 999))[0];
-$domain = &domain || 'phys.titech.ac.jp';
-eval "$machine = `hostname`;";
-
-$HOST = `hostname`;
-
-# default
-$debug = 1;
+&Init;
+require 'libkern.pl';
+require 'libsmtp.pl';
+&__GenerateHeader(*e);
+&STDIN2Body(*e);
+&Deliver(*e);
+exit 0;
 
 
-# From
-$MAINTAINER = "$user\@".($machine ? "$machine.$domain" : $domain);
-$from = $opt_f || $MAINTAINER;
+########## Section: pmail specific 
+sub Init
+{
+    ### set defaults ###
+    $DIR             = $ENV{'PWD'};
+    $e{'mci:mailer'} = 'ipc';
+    $debug           = 1;
+    $debug_smtp      = 1;
+    $SMTP_LOG        = -w "/dev/stderr" ? "/dev/stderr" : "/dev/null";
+    $VAR_DIR         = "/tmp/var";
+    $VARLOG_DIR      = "/tmp/var/log";
 
-# To and SMTP
-foreach (@ARGV) {
-    $to .= $to ? ", $_" : $_;
-    push(@Rcpt, "RCPT TO: $_");
+    # DNS
+    &InitDNS;
+
+    ### getopts() ###
+    require 'getopts.pl';		# Getopt
+    &Getopts('s:f:hv8I:D:H:d');
+    die(&USAGE) if $opt_h;
+
+    push(@INC, $opt_I) if $opt_I;
+
+    # variables
+    $user    = (split(/:/, getpwuid($<), 999))[0];
+    $domain  = $opt_D || $DOMAINNAME;
+    $verbose = ($opt_v || $opt_d) ? 1 : 0;
+    $opt_d   = 0; # reset
+
+    # From
+    $From_address = $user;
+    $MAINTAINER   = "$user\@$domain";
+    $from         = $opt_f || $MAINTAINER;
+
+    # To and SMTP
+    foreach (@ARGV) {
+	$to .= $to ? ", $_" : $_;
+	push(@Rcpt, $_);
+    }
+
+    # SMTP
+    $HOST  = $opt_H || $FQDN;
+    @HOSTS = $opt_H ? ($opt_H) : ($HOST);
 }
 
 
+# DNS AutoConfigure to set FQDN and DOMAINNAME; 
+sub InitDNS
+{ 
+    local(@n, $hostname, $list);
+    chop($hostname = `hostname`); # beth or beth.domain may be possible
+    $FQDN = $hostname;
+    @n    = (gethostbyname($hostname))[0,1]; $list .= " @n ";
+    @n    = split(/\./, $hostname); $hostname = $n[0]; # beth.dom -> beth
+    @n    = (gethostbyname($hostname))[0,1]; $list .= " @n ";
 
-##### MAIN #####
-require 'libsmtp.pl';
+    for (split(/\s+/, $list)) { /^$hostname\.\w+/ && ($FQDN = $_);}
+    $FQDN       =~ s/\.$//; # for e.g. NWS3865
+    $DOMAINNAME = $FQDN;
+    $DOMAINNAME =~ s/^$hostname\.//;
+}
 
-# Header
-$e{'Hdr'} .= "Return-Path: $MAINTAINER\n";
-$e{'Hdr'} .= "From: $from\n";
-$e{'Hdr'} .= "Subject: $opt_s\n";
-$e{'Hdr'} .= "To: $to\n";
-$e{'Hdr'} .= "X-MLServer: $rcsid\n" if $rcsid;
 
-# Get Body
-while(<STDIN>) { $e{'Body'} .= $_;}
+sub __GenerateHeader
+{
+    local(*e) = @_;
 
-### Smtp
-if ($opt_v) {
-    $\ = "\n";
-    $, = "\n";
+    $e{'Hdr'} .= "From: $from\n";
+    $e{'Hdr'} .= "Subject: $opt_s\n";
+    $e{'Hdr'} .= "To: $to\n";
+    $e{'Hdr'} .= "X-MLServer: $rcsid\n" if $rcsid;
+}
 
-    print STDERR "In verbose mode, not connect smtp port";
-    print STDERR "*** Recipients ***:";
-    print STDERR @Rcpt;
-    print STDERR "*** *e ***:";
-    while(($k, $v) = each %e) {
-	$v =~ s/\n/\n\t/g;
-	print '-' x 30;
-	printf "%s =>\n%s\n", $k, $v;
+
+sub STDIN2Body
+{
+    local(*e) = @_;
+
+    # Get Body
+    while(<STDIN>) { $e{'Body'} .= $_;}
+}
+
+
+sub Deliver
+{
+    local(*e) = @_;
+
+    print STDERR qq#
+In verbose mode, SMTP does not connect $HOST:25
+
+=== variables
+Recipients => @Rcpt
+\$SMTP_LOG  => $SMTP_LOG
+\$HOST      => $HOST
+\@HOSTS     => @HOSTS
+
+=== Envelope
+#;
+
+   if ($verbose) {
+	while(($k, $v) = each %e) {
+	    print STDERR '-' x 30, "\n";
+	    printf STDERR "[%s]\n%s\n", $k, $v;
+	}
+    }
+    else {
+	&Smtp(*e, *Rcpt);
     }
 }
-else {
-    &Smtp(*e, *Rcpt);
-}
-
-exit 0;
-##############################
 
 
-###### Library
+
+########## Section: misc
 # Alias but delete \015 and \012 for seedmail return values
-sub Log { 
+sub __Log
+{ 
     local($str) = @_;
     $str =~ s/\015\012$//;
 
     print STDERR ">>> $str\n";
 }
 
-sub domain
-{
-    if (! $domain) {
-	$domain = (gethostbyname('localhost'))[1];
-	($domain)    = ($domain =~ /(\S+)\.$/i) if $domain =~ /\.$/i;
-	($domain)    = ($domain =~ /localhost\.(\S+)/i); 
-    }
-
-    $domain;
-}
 
 sub USAGE
 {
-q#
-$0 address(waiting STDIN INPUT)
-Options
+local($prog) = $0;
+$prog =~ s#.*/##;
+
+qq#
+$prog [-vh] [-s subject] [-f envelop-from] addr
+[option]
+
 \t-s subject
 \t-v verbose
 \t-f UNIX from
 \t-h this help
 #;
 }
+
 
 1;
