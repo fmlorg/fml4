@@ -663,27 +663,28 @@ sub ResetNS
 # $ProcFileSendBack($proc, *s);
 sub SetFmlServProcedure
 {
+    # ATTENTION: Viatually
+    #    fmlserv:help == fmlserv-mailing-list/help
+    #    so, fmlserv own function is fmlsrev:which only
+    # Today we should disable all functions except for "which";
     %Procedure = (
 		  'fmlserv:lists',	'ProcLists',
 		  'fmlserv:which',	'ProcWhich',
 
 		  # WWW Interface
 		  # WWW Interface
-		  'fmlserv:href',	'ProcHRef',
-		  'r#fmlserv:href',	1,
-
-		  'fmlserv:http',	'ProcHRef',
-		  'r#fmlserv:http',	1,
-
-		  'fmlserv:gopher',	'ProcHRef',
-		  'r#fmlserv:gopher',	1,
-
-		  'fmlserv:ftp',	'ProcHRef',
-		  'r#fmlserv:ftp',	1,
-
+		  # 'fmlserv:href',	'ProcHRef',
+		  # 'r#fmlserv:href',	1,
+		  # 'fmlserv:http',	'ProcHRef',
+		  # 'r#fmlserv:http',	1,
+		  # 'fmlserv:gopher',	'ProcHRef',
+		  # 'r#fmlserv:gopher',	1,
+		  # 'fmlserv:ftp',	'ProcHRef',
+		  # 'r#fmlserv:ftp',	1,
+		  #
 		  # ftpmail == ftp ( anyway.. 95/10)
-		  'fmlserv:ftpmail',	'ProcHRef',
-		  'r#fmlserv:ftpmail',	1,
+		  # 'fmlserv:ftpmail',	'ProcHRef',
+		  # 'r#fmlserv:ftpmail',	1,
 		  );
 }
 
