@@ -103,13 +103,19 @@ sub Replace
 sub ExpandSubDir
 {
     local($hier) = @_;
-    local($f);
+    local($f, %uniq);
 
     opendir(DIRD, $hier);
-    for $f (sort readdir(DIRD)) {
+    for $f ('overview.wix', sort readdir(DIRD)) {
+	# uniq;
+	next if $uniq{$f}; $uniq{$f} = 1;
+
 	next if $f !~ /wix$/;
 	next if $f eq 'index.wix';
-	print ".include $f\n";
+
+	if (-f "$hier/$f") {
+	    print ".include $f\n";
+	}
     }
 
     closedir($hier);
