@@ -1,0 +1,80 @@
+		おもちゃのモデル
+
+
+えらくいい加減な schema をでっちあげて考えてみよう。
+どういう schema になってるかはこのディレクトリの LDIF を参照。
+標準化なんてかけらもかんがえてませんな、これ;)
+
+しかし off on を表現するためにこういふうになってしまうかなぁ ;-)
+
+
+◯ fml 側 の実装
+
+DataBaseCtl -> それぞれのドライバ -> サーバ
+		ldap, sql
+のように構成されます。%MIB hash への reference 渡しで呼び出しています。 
+＃ sysctl(2) のように
+
+必要な場所に、このような HOOK が入ります。
+
+    if ($USE_DATABASE) {
+	&use('databases');
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'member_p', {'address' => $From_address});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+    }
+
+
+◯ 階層のモデル
+
+elena@fml.org の階層構造をこう考えると
+cn=elena, dc=fml, dc=org でいいだろう。
+
+     org
+     /
+   fml 
+   /
+elena
+
+
+じゃ、virtual domain はどうするの？ もし mailserv.fml.org で 
+elena@enkai.org の virtual domain をやっているとすると？
+こんなんにするかい？
+
+cn=elena, dc=enkai, dc=org, cn=virtual, dc=fml, dc=org
+        
+             org
+             /
+           fml 
+           /
+        virtual
+         /
+       org
+       /
+    enkai
+     /
+  elena
+
+
+◯ LDIF
+
+#  search_base: cn=elena, dc=fml, dc=org
+# query_filter: (objectclass=*)
+
+dn: cn=elena, dc=fml, dc=org
+cn: elena@fml.org
+o: fml.org
+objectclass: maillist
+member: fukachan@fml.org
+member: fukachan@sapporo.iij.ad.jp
+active: fukachan@fml.org
+active: fukachan@sapporo.iij.ad.jp
+admin: fukachan@sapporo.iij.ad.jp
+
+
+
+◯ References
+
+http://home.netscape.com/eng/server/directory/schema/oc_msgto.htm
+
+$Id$
