@@ -32,3 +32,8 @@ Q:	qmail
 ○ makefml config メニューを日本語にできるか？
 
 	Message Language Extension をつかう
+
+Q: 既存のシステムからの移行は？
+
+現行のシステムでは cgi 中から makefml newml をよんでしまうが…
+
