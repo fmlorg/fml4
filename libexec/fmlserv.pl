@@ -581,36 +581,17 @@ sub SetMLDefaults
 }
 
 
-sub ML_MAPopen  { dbmopen(ML_MAP, "$FMLSERV_DIR/mlmap", 0644);}
-sub ML_MAPclose { dbmclose(ML_MAP);}
-
 sub MLExistP
 {
     local($ml) = @_;
 
-    &ML_MAPopen;
-
-    # cache hit; return;
-    if ($ML_MAP{$ml}) {
-	dbmclose(ML_MAP);
-	return 1;
+    # [0-9A-Za-z_-]+
+    if ($ml =~ /^[\w\-]+$/) {
+	return 1 if -d "$MAIL_LIST_DIR/$ml";
     }
-
-    opendir(DIRD, $MAIL_LIST_DIR) || &Log("cannot open \$MAIL_LIST_DIR");
-    for (readdir(DIRD)) {
-	next if /^\./;	# this skip is important for the further trick (^^)
-	next if $_ eq "etc"; # etc is the special directory
-
-	# alloc a new ml map (entry); page in
-	if ($_ eq $ml && -d "$MAIL_LIST_DIR/$_") {
-	    $ML_MAP{$ml} = $ml;
-	}
+    else {
+	0;
     }
-    closedir(DIRD);
-
-    &ML_MAPclose;
-
-    return 1 if $ML_MAP{$ml};
 }
 
 
