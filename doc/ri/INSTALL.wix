@@ -1769,10 +1769,10 @@ If MIME/Multipart mail is input, fml checks only the first block.
    Do you use filter? answer "yes" if you use this (recommended).
 
 ○ FILTER_ATTR_REJECT_COMMAND (default: no)
-   投稿用のＭＬに #help などが来たら拒否
+   投稿用のＭＬに #help などが来たら拒否 (yes 推奨)
 =E
 *  FILTER_ATTR_REJECT_COMMAND (default: no)
-   reject "#help" posted to a ML.
+   reject "#help" posted to a ML. ("yes" is recommended)
 
 ○ FILTER_NOTIFY_REJECTION (default: no)
    拒否した旨をその送り主に伝える
@@ -2422,10 +2422,21 @@ elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac} 参照。
 .l	secure-configure
 
 ○ MLのHOMEで make secure とすると代表的な設定は有効になるように
-   cf を書きかえます(ここにあげられているものの部分集合)。
+   cf を書きかえます。現在付け加えられる設定は以下のようなものです。
 =E
-run "make secure" in your ML HOME to enable typical secure options. 
-These are a part of the following ones.
+run "make secure" in your ML HOME to enable typical secure
+options. These are a part of the following ones. Configurations to add
+follow:
+
+.q
+$INCOMING_MAIL_SIZE_LIMIT	= 512000;
+$USE_LOG_MAIL			= 1;
+$USE_DISTRIBUTE_FILTER		= 1;
+$FILTER_ATTR_REJECT_COMMAND	= 1;
+#USE_MTI			= 1;
+
+@DenyProcedure = ('member', 'active', 'members', 'actives', 'status');
+.~q
 
 .if LANG == JAPANESE
 ○ メンバーファイルを取り寄せるコマンドなどを使えないようにする。
