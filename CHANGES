@@ -3,6 +3,16 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/13
+
+   makefml resend
+	bug fix
+
+   admin get
+	controlled under @REMOTE_INACCESSIBLE_FILES
+
+	でもこんな変数名でいいのかなぁ 
+
 2000/09/19
 
    define IncrementCounter()
