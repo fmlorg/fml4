@@ -11,7 +11,7 @@ FAQ、Setting、改造の仕方等に関する読みものになっています。
 
 
 ----------目次----------
-.index
+#.index
 
 総索引
 ------------------------
@@ -635,7 +635,8 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 
 .S	コマンド専用のサーバ
-.label	{control-addr}
+.key	コマンド専用のサーバ
+.label	server-for-command-only
 
 $CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
 別の汎用の仕方として、
@@ -701,7 +702,8 @@ Contrib/Matomeokuri-NOCRONの下に
 .label	{control-addr}
 .seealso calling-fml.pl
 .key	$CONTROL_ADDRESS
-.key	コマンド専用アドレス
+.key	コマンドの専用アドレス
+.key	コントロール専用アドレス
 
 config.phの中で
 
@@ -1740,7 +1742,8 @@ config.ph で $USE_RFC1153_DIGEST = 1; としてください。
 
 .S	コマンドのフック
 .label	{command-hook}
-.label	{customize}
+.key	customize-of-commands
+.key	コマンドのカスタマイズ
 .key	$COMMAND_HOOK
 
 インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
@@ -5008,6 +5011,36 @@ lib/Utilities/stardate.el を load してください
 
 とすると mh-comp の draft buffer をつくるときに 
 X-Stardate: をつけてくれます。
+
+
+.S	POP3
+
+まだカスタマイズまで考えてないから、
+	bin/inc_via_pop.pl
+で、
+
+$POP_EXEC = "|/どっかにおいて/fml_local.pl -user yamazaki";
+
+を、ファイルの先頭辺りに書いて
+
+	bin/inc_via_pop.pl -host popする先のホスト名
+
+ってのを起動してみてください。
+
+pop のパスワードは ~/.netrc のエントリをみるようにしてあります。
+
+$POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
+ただコマンドラインで
+
+	bin/inc_via_pop.pl -host popする先のホスト名
+
+とすると、
+
+	/usr/local/mh/inc -noapop -norpop -host popする先のホスト名
+
+とおなじ（まず、これがうごかなきゃだめだね〜）
+＃もっともmhがいんすとーるしてなきゃ意味ないけど…
+
 
 
 
