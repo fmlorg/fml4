@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML current Mailing List Server Package
+	fml 4.0_ALPHA Mailing List Server Package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -58,7 +58,7 @@ MLをリモートで管理するためのもの)などからなります。また対話設定プログ
 にするエミュレータなどの多くの補助プログラムなどもついています。
 .fi
 .if LANG == ENGLISH
-FML 3.0 is a package of mailing list server and utility programs. It
+FML 4.0 is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
 in Japan from 1993 to 1998. FML contains
 
@@ -368,9 +368,6 @@ Please see the file INSTALL for the detail.
 
 .url	http://www.fml.org/fml/UPGRADE/
 
-   2.x to 3.0 の部分だけ以下のURLに抜き出してあります。
-.url	http://www.fml.org/fml/UPGRADE-3.0/
-
 UPGRADE というファイルを見て下さい。古い config.ph をそのまま使おうと
 思っている人は(HOOKについてはちょっと気を付けないといけませんが)そのま
 ま使って下さい。凝ったHOOKをしていない人はそのまま使って大丈夫です。
@@ -417,8 +414,8 @@ delivery (as both an experiment and a demonstration :-).
    postfix 19991231-pl04
 
 
-.C	FML 3.0 の機能の概要
-=E.C	FML 3.0 Function Overview
+.C	FML 4.0 の機能の概要
+=E.C	FML 4.0 Function Overview
 
 .include FEATURES.wix
 

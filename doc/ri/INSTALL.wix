@@ -590,7 +590,7 @@ The configurations you input are saved here.  After this time,
 "makefml" uses this configurations to generate each mailing list
 configurations (e.g. config.ph, include).
 
-.S	CGIからmakefmlを呼び出す (3.0 current new)
+.S	CGIからmakefmlを呼び出す (4.0 new)
 =E.S	call makefml via CGI
 
 CGIでmakefmlを呼び出す設定の開発は現在進行形です。いまプレβくらい。
