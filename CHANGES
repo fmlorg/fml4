@@ -5,10 +5,16 @@
 
 2000/03/18
 
+   ReReRe problem
+	apply patch from OGAWA Kunihiko (fml-support:7626,7653)
+
    $USE_HANKAKU_CONVERTER
 	add $USE_HANKAKU_CONVERTER (Japanese specific)
 
 	半角→全角コンバータを組み込む (optional)
+
+   relay hack
+	fix config file reading bug
 
 2000/03/16
 
