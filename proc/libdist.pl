@@ -31,6 +31,18 @@ sub DoDistribute
     # ID = ID + 1 (ID is a Count of ML article)
     &Write2($ID, $SEQUENCE_FILE) || return;
 
+    # wait for sync against duplicated ID for slow IO or broken calls
+    {
+	local($newid, $waitc);
+	while (1) {
+	    $newid = &GetFirstLineFromFile($SEQUENCE_FILE);
+	    last if $newid == $ID;
+	    last if $waitc++ > 10;
+	    sleep 1;
+	}
+	&Log("FYI: $waitc secs for SEQUENCE_FILE SYNC") if $waitc > 1;
+    }
+
     ##### ML Preliminary Session Phase 02: $DIR/summary
     # save summary and put log
     $s = $e{'h:Subject:'};
