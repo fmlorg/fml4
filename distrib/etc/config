@@ -30,7 +30,7 @@ rm -f $tmp
 # program (depends on FML)
 INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
 VERSION_PL="$FML/distrib/bin/version.pl"
-FML_VERSION="$FML/distrib/bin/fml_version.pl -X $FML"
+FML_VERSION="$FML/distrib/bin/fml_version.pl -N -X $FML"
 
 # modify for daily snapshot system
 if [ X$MODE != X ];then

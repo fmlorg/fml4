@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:X:Tm:b:");
+&Getopts("iqtsp:L:X:Tm:b:N");
 
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
@@ -22,6 +22,8 @@ if (! -f $RELEASE_DATE) {
 
 &GetTime;
 $Year     = 1900 + $year;
+
+chop($Trunk = `cat $TRUNK_ID`);
 
 if ($opt_T) {
     chop($_ = `cat $TRUNK_ID`);
@@ -47,6 +49,12 @@ $MailDate = &GetDate;
 $PL = "${PL}pl$patchlevel" if $patchlevel;
 
 $DailyID = $BRANCH. " ". &YYYYMMDD;
+
+# 3.0B new id system
+if ($opt_N) {
+    $ID = $Trunk;
+    $PL = " (". &__YYYYMMDD .")";
+}
 
 if ($SHOW_ID) { 
    if ($MODE eq 'daily') {
@@ -89,6 +97,8 @@ exit 0;
 
 sub GetID
 {
+    return ($NULL, $NULL) if $opt_N;
+
     open(F, $RELEASE_ID) || die("cannot open $RELEASE_ID :$!");
     chop($ID = <F>);
     $ID =~ s/\s*//g;
@@ -188,6 +198,16 @@ sub YYYYMMDD
 {
     local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
     sprintf("%4d%02d%02d.%02d%02d",
+		$year + 1900, $mon + 1, $mday,
+		$hour, 0);
+}
+
+
+# return YYYYMMDD at Greenwich standard timezone (tricky:-)
+sub __YYYYMMDD
+{
+    local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
+    sprintf("%4d%02d%02d",
 		$year + 1900, $mon + 1, $mday,
 		$hour, 0);
 }

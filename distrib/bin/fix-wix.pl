@@ -9,10 +9,10 @@ require 'getopts.pl';
 $FML = $opt_X || $ENV{'FML'};
 
 if ($opt_I) {
-	$ID = $opt_I;
+    $ID = $opt_I;
 }
 else {
-	chop($ID = `perl $FML/distrib/bin/fml_version.pl -X $FML -s`);
+    chop($ID = `perl $FML/distrib/bin/fml_version.pl -N -X $FML -s`);
 }
 
 chop($date = `date`);

@@ -380,17 +380,8 @@ GEN_ARCHIVE () {
 	echo chdir $DESTDIR
 	chdir $DESTDIR || return
 
-	# date YYYYMMDD
-	DATE=`date -u +"%C%y%m%d"`
-
-	if [ X$MODE = X ]; then
-		# fml identifier
-		FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-		FMLID=`echo $FMLID| sed 's/pl\#/pl/'` 
-		FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
-	else
-		FMLID=fml-${BRANCH}-${DATE}
-	fi
+	# DATE, FMLID
+	GEN_FMLID
 	export FMLID
 
 	# directory

@@ -46,6 +46,7 @@ INIT_VERSION () {
 	echo " "; 
 	echo "fml release version::Initialize() ... "
 	echo "fml release          Date() ... "
+	echo "FML_VERSION={ $FML_VERSION }"
 	perl $FML_VERSION -t kern/fml.pl > /dev/null
 
 	if [ $release = 1 ]
