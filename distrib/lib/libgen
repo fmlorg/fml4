@@ -67,7 +67,7 @@ MKDIR_DISTRIBUTION () {
 		mkdir $DESTDIR/distrib/$dir
 	done
 
-	(cd $DESTDIR/distrib; ln -s contrib lib )
+	# (cd $DESTDIR/distrib; ln -s contrib lib )
 	(cd $DESTDIR/distrib/doc; ln -s ../drafts drafts )
 }
 
