@@ -1004,6 +1004,13 @@ $SMTP_OPEN_HOOK = q#
 fml-support: 02353
 ＃ふりーのEudoraで Bcc: -> Reply-To: とするパッチがあるらしい…
 
+
+.S	perl 5.003 flock と そらりす 2.5 2.5.1 ?
+
+flock やってるふりして、できてない？そのため SEQUENCE_FILE がちゃんと
+更新されなくて article ID duplication error が出る？
+＃参照: fml-support:241? あたり
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
