@@ -1,13 +1,13 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#-*- perl -*-
+#
+# Copyright (C) 2000-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
-#               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
 
 ##
@@ -56,6 +56,8 @@ sub __LoadConfiguration
 
     require 'default_config.ph';
 
+    &LoadSystemParams; # NOT USER BUT SYSTEM DEFINED PARAMETERS 
+
     # If this routine is used not within libkern.pl, 
     # fml.pl, we enforce to use dummy definitions to avoid errors.
     &LoadDummyMacros if $space ne '__KERN__';
@@ -96,6 +98,20 @@ sub __LoadConfiguration
     }
 
     $LoadConfigurationDone = 1;
+}
+
+
+# Descriptions: define global system parameters
+#               USER SHOULD NOT CHANGE THESE PARAMETERS.
+#    Arguments: none
+# Side Effects: define global system parameters
+# Return Value: none
+sub LoadSystemParams
+{
+    # $debug options
+    # XXX avoid the last 3 bit anyway.
+    $DEBUG_OPT_VERBOSE_LEVEL_2 = 0x0002;
+    $DEBUG_OPT_DELIVERY_ENABLE = 0x1000; # enabele delivery
 }
 
 

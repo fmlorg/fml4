@@ -5,6 +5,22 @@
 	$Date$
 
 
+2001/08/21
+
+  $debug exteision ???
+
+	デバッグの仕方を指定できると嬉しいだろうか？
+
+	# いわゆるデバッグモードに入る
+	$debug = 1;
+
+	# デバッグを有効にするが、
+	# デバッグモードでも配送をする( デフォルトは配送をしない )
+	$debug = $DEBUG_OPT_DELIVERY_ENABLE;
+
+	# ２つ以上のデバッグオプションを指定する場合
+	$debug = $DEBUG_OPT_DELIVERY_ENABLE | $DEBUG_OPT_なんか;
+
 2001/08/20
 
   bug fix cgi list check in initial state without members/actives 

@@ -437,10 +437,15 @@ sub ReadActiveRecipients
 sub Deliver
 {
     local($status, $smtp_time);
-    
+
     if ($debug) {
-	&Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
-	return 1;
+	if ($debug & $DEBUG_OPT_DELIVERY_ENABLE) {
+	    &Log("info: debug mode but deliver article");
+	}
+	else {
+	    &Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
+	    return 1;
+	}
     }
     elsif ($Envelope{'mode:article_spooling_only'}) {
 	&Log("not deliver in article spooling only mode");
