@@ -150,6 +150,11 @@ sub LoadDummyMacros
     eval "sub PERMIT_PROCEDURE { 1;}";
     eval "sub DENY_PROCEDURE { 1;}";
     eval "sub DEFINE_PROCEDURE { 1;}";
+
+    # for convenience
+    eval "sub DUMMY { ;}";
+    eval "sub TRUE  { 1;}";
+    eval "sub FALSE { \$NULL;}";
 }
 
 # hash control interface
@@ -414,5 +419,10 @@ sub DEFINE_PROCEDURE
 }
 
 sub Debug { print STDERR "@_\n";}
+
+# for conveinience
+sub DUMMY { ;}
+sub TRUE  { 1;}
+sub FALSE { $NULL;}
 
 1;
