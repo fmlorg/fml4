@@ -1,0 +1,33 @@
+# .part はパートのはじまり宣言
+# # はコメント
+#
+
+.part Basic Configuration
+basic			基礎的なこと
+install			インストール
+daily			日々の運用についてのTIPS
+encrypt			暗号化関係
+header_rewrite		ヘッダの書き換え
+filter			フィルタリング
+remote_control		遠隔からメールでの操作 (REMOTE_ADMINISTRATION)
+resource_control	リソースの制御	
+
+.part 拡張
+procedure		コマンドについて
+extension		拡張
+
+.part エラー
+debug			デバッグについて
+troubleshoot		トラブルシューティング
+
+.part misc
+misc			その他
+smtp			配送関係
+Japanese		日本語処理について
+
+.part 開発者向け(旧 doc/smm/ 相当か?)
+develope		開発者向け
+
+#
+# $Id$
+#
