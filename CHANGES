@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+
+2003/11/01
+
+   updated to im-146.
+
 2003/6/20
 
    content filter
@@ -466,7 +471,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.277 2003/06/07 14:55:40 fukachan Exp $
+	add $FML: CHANGES,v 1.278 2003/06/20 16:17:57 fukachan Exp $
 
 2001/10/03
 
