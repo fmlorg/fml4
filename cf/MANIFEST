@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.84 2001/06/18 15:20:29 fukachan Exp $
+# $FML: MANIFEST,v 1.85 2001/08/17 10:41:46 fukachan Exp $
 #
 
 
@@ -473,6 +473,10 @@ FILTER_ATTR_REJECT_ONE_LINE_BODY:	1
 # value: 1/0
 FILTER_ATTR_REJECT_MS_GUID: 1
 
+# reject not ascii nor ISO-2022-JP
+# value: 1/0
+FILTER_ATTR_REJECT_INVALID_JAPANESE: 0
+
 # try to convert Japanese HANKAKU chars in the mail body to ZENAKKU
 # value: 1/0
 USE_HANKAKU_CONVERTER:	0
@@ -876,6 +880,10 @@ MSEND_NOT_USE_NEWSYSLOG:
 # value: filename string
 LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
 
+# cache size of Message-ID: negative cache
+# value: number
+MESSAGE_ID_CACHE_BUFSIZE:	60*100
+
 # cache file of mailbody cksum mail loop check
 # value: filename string
 LOG_MAILBODY_CKSUM:	$VARRUN_DIR/bodycksumcache
@@ -1031,6 +1039,10 @@ OUTGOING_ADDRESS:
 #
 # value: 1/0
 USE_VERP:
+
+# we use ESMTP pipelining mechanism by default.
+# value: 1/0
+NOT_USE_ESMTP_PIPELINING: 0
 
 # smtpfeed special option which provides VERPs like error track trick.
 # value: 1/0
@@ -1407,6 +1419,11 @@ HAS_GETPWGID:	&is_unix
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
 HAS_ALARM:	&is_unix
+
+# On Unix, always yes set 1 in &SetDefaults;
+# value: 1/0
+UNISTD:		&is_unix
+
 
 # program paths fml uses
 # Usually "makefml newml" checks and expands this value. 
