@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML$
+# $FML: fml_version.pl,v 1.19 2001/04/05 12:06:01 fukachan Exp $
 #
 
 require 'getopts.pl';
@@ -20,7 +20,7 @@ $MODE          = $opt_m;
 $BRANCH        = $opt_b;
 
 if (! -f $RELEASE_DATE) {
-	system "date > $RELEASE_DATE";
+   system "date > $RELEASE_DATE";
 }
 
 &StoreTime if $opt_t;
@@ -30,7 +30,11 @@ $Year     = 1900 + $year;
 
 chop($Trunk = `cat $TRUNK_ID`);
 chop($Branch = `cat "$FML/conf/branch" `);
-if ($Branch eq 'stable') {
+
+if ($ENV{'RELEASE'}) {
+    $Branch = "release";
+}
+elsif ($Branch eq 'stable') {
     $Branch =~ tr/a-z/A-Z/;
 }
 else {
