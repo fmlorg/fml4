@@ -1,1 +1,1 @@
-|_EXEC_DIR_/fml.pl _ML_DIR_/_ML_ _OPTIONS_ --ctladdr
+|_EXEC_DIR_/libexec/mead.pl -m report -S _ML_DIR_ -D _ML_DIR_/_ML_ -E _EXEC_DIR_
