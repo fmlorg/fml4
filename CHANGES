@@ -3,6 +3,10 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/04/05
+
+   solaris 上でのロックのバグの修正
+
 2001/04/02
 
    proc/libamctl.pl
