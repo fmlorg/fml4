@@ -2,6 +2,9 @@
 
 [NOT YET]
 
+○  右から左のメニューへ update があがってない
+	e.g. newml
+
 ○  script 一発インストーラ (きめうち)
 
 	postfix  + apache + fml-current
