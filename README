@@ -82,17 +82,6 @@ off from the main trunk. For example
 	                      |			(* == fml-2-2-bb0)
 	                  2.2.1 Release
 
-If you do "make snapshot", the following "make_wrapper" may be useful.
-
-	#!/bin/sh
-	FML=$PWD;            export FML
-	BRANCH_SNAPSHOT=yes; export BRANCH_SNAPSHOT
-	exec make $*
-
-If $BRANCH_SNAPSHOT is set, distrib/bin/generator does not synchronize
-the fml distribution with www and ftp/snapshot/ directory.
-
-
 [ALREADY ASSIGNED TAGS]
 
 fml-2-1		2.1 Release
@@ -111,3 +100,4 @@ fml-3-0-maint	3.0 release branch
 fml-3-0-bb0	3.0_BETA start point
 fml-3-0		3.0 release
 		XXX: update -j fml-3-0-maint:"1999-8-16 00:39" -j fml-3-0-maint
+fml-3-0-1	3.0.1 release tag
