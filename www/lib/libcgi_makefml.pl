@@ -136,15 +136,33 @@ sub Control
 sub MailServerConfig
 {
     local($proc, $mta) = @_;
-    local(%config);
 
-    if ($mta =~ /^(sendmail|postfix|qmail)$/) {
-	$CGI_CF{'MTA'} = $mta;
-	&SaveCGICF;
+    if ($proc eq 'mail_server_config') {
+	if ($mta =~ /^(sendmail|postfix|qmail)$/) {
+	    $CGI_CF{'MTA'} = $mta;
+	    &SaveCGICF;
+	}
+	else {
+	    &ERROR("unknown MTA (Mail Trasnport Agent)");
+	    &ERROR("I have preparations for sendmail, postfix, qmail.");
+	}
+    }
+    elsif ($proc eq 'newaliases') {
+	if ($CGI_CF{'MTA'} eq 'sendmail') {
+	    &SpawnProcess('newaliases');
+	}
+	elsif ($CGI_CF{'MTA'} eq 'postfix') {
+	    ;
+	}
+	elsif ($CGI_CF{'MTA'} eq 'qmail') {
+	    ;
+	}
+	else {
+	    ;
+	}
     }
     else {
-	&ERROR("unknown MTA (Mail Trasnport Agent)");
-	&ERROR("I have preparations for sendmail, postfix, qmail.");
+	&ERROR("MailServerConfig: unknown $proc");
     }
 }
 
@@ -358,8 +376,11 @@ sub Command
     elsif ($PROC eq 'mail_server_config') {
 	&MailServerConfig($PROC, $MTA);
     }
+    elsif ($PROC eq 'newaliases') {
+	&MailServerConfig($PROC, $CGI_CF{'MTA'});
+    }
     else {
-	&ERROR("unknown PROC");
+	&ERROR("Command: unknown PROC");
     }
 }
 

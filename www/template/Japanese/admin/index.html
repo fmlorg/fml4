@@ -15,7 +15,7 @@
 <!-- =================================================================== -->
 <H2>
 <CENTER>
-"fml" _FML_VERSION_ Configuration Interface
+<A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
 </CENTER>
 </H2>
 
@@ -205,18 +205,26 @@ _____________________________
 		</SELECT>
 	</TABLE>
 <TR>
-
 _____________________________
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
+<P>
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=newaliases>
+<INPUT TYPE=hidden NAME=ML VALUE=etc>
+aliasesを更新する: 
+<INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
+</FORM>
+
 
 <HR>
 
 <PRE>
-Copyright (C) 1993-1999 Ken'ichi Fukamachi
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
 
 $Id$
