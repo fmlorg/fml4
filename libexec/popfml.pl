@@ -42,8 +42,23 @@ require 'libpop.pl';
 chdir $DIR || die "Can't chdir to $DIR\n";
 
 &PopFmlInit;
-&PopFmlGabble;
-&PopFmlProg;
+
+if ($COMPAT_WIN32) {
+    # require 'arch/Win32/libwin32.pl';
+    require 'libwin32.pl';
+
+    ### &PopFmlGabble; (without fork version)
+    $status = &Pop'Gabble(*PopConf);#';
+    if ($status) { die("Error: $status\n");}
+
+    ### &PopFmlProg;
+
+}
+# UNIX
+else {
+    &PopFmlGabble;
+    &PopFmlProg;
+}
 
 exit 0;
 
@@ -55,7 +70,7 @@ sub PopFmlGetPasswd
     local($org_sep)  = $/;
     $/ = "\n\n";
 
-    open(NETRC, $config_file) || die $!;
+    open(NETRC, $config_file) || die("Error::Open $config_file [$!]");
     while(<NETRC>) {
 	s/\n/ /;
 	s/machine\s+(\S+)/$Host = $1/ei;
@@ -80,6 +95,15 @@ sub PopFmlGetOpts
 	/^\-h/    && do { print &USAGE; exit 0;};
 	/^\-d/    && $debug++;
 	/^\-D/    && $DUMPVAR++;
+
+	/^\-conf/   && ($PopConf{'POPFML_RC'} = shift @ARGV) && next; 
+	/^\-pwfile/ && ($PopConf{'NETRC'}     = shift @ARGV) && next; 
+    }
+
+    if ($debug) {
+	while (($k, $v) = each %ENV) {
+	    print STDERR "$k\t=>\t$v\n";
+	}
     }
 }
 
@@ -106,17 +130,26 @@ sub PopFmlInit
     $PopConf{"PROG"}      = "/usr/local/mh/lib/rcvstore";
 
     # search config file
-    for ("$ENV{'HOME'}/.popfmlrc", "$ENV{'HOME'}/.popexecrc") { 
+    for ($PopConf{'POPFML_RC'}, 
+	 "$ENV{'HOME'}/.popfmlrc", "$ENV{'HOME'}/.popexecrc") { 
 	if (-f $_) { $ConfigFile = $_;}
     }
 
     &PopFmlGetOpts;
 
+    ### NTFML ###
+    if ($ENV{'OS'} =~ /Windows_NT/) {
+	$HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
+	$COMPAT_WIN32 = 1;
+    }
+    ### NTFML ENDS ###
+
     # debug 
     # for (keys %PopConf) { print STDERR "$_\t$PopConf{$_}\n" if $debug;}
 
     # get password for the host;
-    &PopFmlGetPasswd($PopConf{'SERVER'}, "$ENV{'HOME'}/.netrc");
+    &PopFmlGetPasswd($PopConf{'SERVER'}, 
+		     $PopConf{'NETRC'} || "$ENV{'HOME'}/.netrc");
     $PopConf{"PASSWORD"}  = $Password;
 
 
@@ -163,6 +196,8 @@ sub PopFmlGabble
     }
 
     &Log("Gabble Error: $!") if $!;
+
+
     &PopFmlUnLock;
 }
 
@@ -259,6 +294,7 @@ sub PopFmlProg
 	}
 	elsif (0 == $pid) {
 	    print STDERR "--PopFmlProg [$qf] ... ($$)\n" if $debug;
+	    print STDERR "   $prog" if $debug;
 
 	    if (! open(QUEUE_IN, $queue)) {
 		&Log("Cannot open $queue");
