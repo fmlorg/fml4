@@ -268,6 +268,8 @@ FIX_DISTRIBUTION_PERMISSION () {
 	then
 		find $FTP_DIR/${BRANCH} |\
 		perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+	else
+		echo ignore fix permisson for $FTP_DIR/${BRANCH}
 	fi
 
 	echo "   enable some executables"
@@ -371,16 +373,11 @@ GEN_ARCHIVE () {
 	FTP=$FTP_DIR/${BRANCH}
  	WWW=$WWW_DIR
 
+	# check more
+	if [ -d $FTP ]; then mkdir $FTP; fi
+
 
 	### Section: export to ftp,www
-	if [ -d $FTP_DIR ]; then
-		mkdir $FTP_DIR
-	fi
-
-	if [ -d $WWW_DIR ]; then
-		mkdir $WWW_DIR
-	fi
-
 	echo " "
 	echo "-- sync w/ ftp server"
 	echo " "
