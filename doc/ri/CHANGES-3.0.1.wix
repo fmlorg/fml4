@@ -1,0 +1,244 @@
+.HTML_PRE
+	Changes from 3.0 to 3.0.1 release 
+
+				深町 賢一
+=E
+				Ken'ichi Fukamachi
+
+[ 3.0pl14 ]
+
+   DEFINE_FIELD_LOOP_CHECKED()
+   UNDEF_FIELD_LOOP_CHECKED()
+
+	Define DEFINE_FIELD_LOOP_CHECKED() and UNDEF_FIELD_LOOP_CHECKED() to
+	be controllable by maintainer since customer support mailing
+	list may need this function. Define default
+	DEFINE_FIELD_LOOP_CHECKED('from') to be 3.0.1 compatible with
+	3.0's "From: $MAIL_LIST" rejection.
+
+	3.0 では From: $MAIL_LIST はループの可能性を避けるために
+	拒否するようになっているが、サポートＭＬなどでは必要かも知れないので
+	管理者がその設定を解除できるようにする
+
+	update dummy {DEFINE,UNDEF}_FIELD_LOOP_CHECKED()
+		bin/Archive.pl
+		bin/spool2html.pl
+		libexec/fmlserv.pl
+		sbin/makefml
+
+[ 3.0pl13 ]
+
+  member_name extension
+	cutoff approve password in logfile
+	(not appear in mail but logfile)
+
+	ログファイルに approve パスワードが残らないように
+
+  messages language extension (MesgLE)
+	fix amctl.added.caution controll
+
+	自動登録の時の welcome というファイルを返すが
+	その前につく警告文が MesgLE だけで制御できないのを修正
+	今は messages/Japanese/amctl だけでコントロールできる
+
+  moderator mode
+	try to check default $MODERATOR_MEMBER_LIST if not defined
+
+[ 3.0pl12 ]
+
+   sbin/makefml
+	import a subset of 2.49-2.50: Conv() preserves file mode
+
+   sbin/install.sh
+	you can use both MKDOC=no and MKDOC=NO to disable doc installation.
+
+   proc/libmoderated.pl (2.10-2.11)
+
+	missing Japanese message
+	apply patch by Satoshi Tatsuoka <satoshi@softagency.co.jp>
+
+   sbin/makefml	(2.44-2.45)
+	validate config.guess existence
+
+[ 3.0pl11 ]
+
+   proc/libra.pl
+	fix typo
+	by <yuao@infonia.ne.jp> fml-support:06999 
+
+   kenn/fml.pl
+	if handler == ignore in command mode, ignore all requests
+
+   bin/spool2html.pl
+	define $Envelope{'mode:dist'} to avoid libsynchtml check
+
+	SyncHtml()の新しいチェックにひっかかる
+
+   etc/makefml/Makefile (1.16-1.17)
+	validate config.ph.new before mv .ph.new to .ph
+
+[ 3.0pl10 ]
+
+   bin/fwix.pl
+	fix IndexExpand() avoid to match unexpected '+' string
+
+   doc/
+	add simple installa memo on qmail
+	http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+
+   sbin/makefml (2.43-2.44)
+	define dummy DEFINE_FIELD_PAT_TO_REJECT()
+
+[ 3.0pl9 ] 
+
+  fix qmail examples (qmail/users/assign)
+
+[ 3.0pl8 ] 
+
+   fix "admin remove-article" command bug with html creation mode
+
+	XXX should not run &SyncHtml() under command mode
+
+	HTMLスプールを生成することになっている場合に"admin remove-article"
+	command を使うとその命令を送ったメールもついでに再生成されてしまうbug
+
+[ 3.0pl7 ] 
+
+   etc/makefml/dot-qmail-default 
+
+	s/USE_QMAIL_EXTENSION/USE_DOT_QMAIL_EXT/
+	$USE_QMAIL_EXTENSION is renamed to $USE_DOT_QMAIL_EXT.
+
+	$USE_QMAIL_EXTENSION は $USE_DOT_QMAIL_EXT に改名されている。
+
+   proc/libexpire.pl 
+	expire spooled articles based on mtime not ctime
+	fml-support: 6867
+
+	なぜかexpireのコードのところ一箇所でだけ判定の基準が異なることを修正
+
+  libexec/mead.pl
+	trap postfix error messages (true?)
+	trap more qmail error messages (sync w/ HEAD 1.8-1.9)
+
+  libexec/mead.pl, doc/smm/mead.wix
+	add missing options mead.pl help shows
+
+[ 3.0pl6 ] 
+
+  clean up/changes documents mainly
+
+  doc/examples/
+	Please refer www.fml.org for current tutorial
+
+  doc/
+	regenerate HTML documents since fwix.pl converter changed.
+
+  bin/fwix.pl
+	not expand .ptr with <PRE>
+
+
+[ 3.0pl5 ]
+
+  sbin/makefml
+	PR: fml-support:06764
+	fix "auto_asymmetic_regist" behaviour
+	which affects libexec/mead.pl remove user process ;-)
+
+  doc/ri/INSTALL.wix
+	 add note on "makefml -U install" (unlock mode)
+
+  examples/fml-install.wix
+	unify makefml syntax example to be easy for beginners
+
+  proc/libra.pl
+	fix file validation check" in the case regexp-like directory name
+
+  update (sync with HEAD (cvs main trunk))
+	INSTALL_on_MacOS_X_Server
+
+
+[ 3.0pl4 ]
+
+  etc/makefml/include-mead
+	fix spelling 
+
+  doc/html/index.html
+	add ptr to Mac OS X Server
+
+  cf/MANIFEST
+	clean up English ;-)
+	sync with fml 3.0 etc/makefml/cf
+
+  cf/MANIFEST.Japanese
+	added. Japanese description for variables
+
+
+[ 3.0pl3 ]
+
+   add INSTALLATION NOTES on MacOS X Server
+
+   proc/libsynchtml.pl 
+	fix dup check of htdocs/index.html
+
+   proc/libmesgle.pl 
+	&Mesg() repl may has invalid input
+	check the input and wrap repl in euc and back to jis
+
+   sbin/makefml
+	modify jperl check code
+
+   fix distribution package lacks some plaintext
+	distribute all INSTALL* (plaintext) 
+
+   proc/libra.pl
+	remove-article always checks spool and archive (tar.gz)
+
+   doc/ri/README.wix
+   doc/ri/INSTALL.wix
+	fix 2 bytes "-" statements (Japanese specific)
+
+[ 3.0pl2 ]
+
+   doc/ri/
+   doc/examples/
+
+	sync with cvs main-trunk
+
+   libmember_name.pl
+
+	correct handling of "apporove PASSWORD name ..." case
+
+[ 3.0pl1 ]
+
+   cf/config
+
+	TZone cannot accpet -0800 style.
+
+   doc/examples/index*html
+
+	remove fml.css stylesheet definition since fml.css does not exist
+
+   doc/ri/INSTALL.wix
+
+	add how to pass perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+   sbin/makefml
+
+	fix perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+	add COPY_FIELD() to avoid evaluation of config.ph loading
+
+$Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+
+.~HTML_PRE
