@@ -25,7 +25,7 @@
    もう少し詳細なものがこのドキュメント(INSTALL)です。
 
    デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
-   doc/op.jp というファイルをみてください
+   doc/op.jp というファイルをみてください。
 .url http://www.fml.org/fml/op/
 
    細かいカスタマイズは part III「インストールとカスタマイズ」を
@@ -99,7 +99,7 @@ Connected to ftp.iij.ad.jp.
 % gunzip fml-current.tar.gz
 % tar xf fml-current.tar
 
-○ 作られたdirectoryに移る(名前はfml-バージョン-snapshot番号のようになる)
+○ 作られたdirectoryに移る(名前はfml-バージョン-snapshot番号のようになる)。
 % cd fml-2.2A-snapshot30 
 
 ○ インストール開始。インストールする場所等の質問に答える。
@@ -107,7 +107,7 @@ Connected to ftp.iij.ad.jp.
 …メッセージ省略…
 
 ○ fml自体のインストール自体は終了。
-   この後ＭＬの作成/設定/メンバー登録等を行なう
+   この後ＭＬの作成/設定/メンバー登録等を行なう。
 
 elena MLを作る。
 % /usr/local/fml/makefml newml elena
@@ -203,7 +203,7 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 ML の運用を特権ユーザでやるべきではありません。一般ユーザ(例えばML専用
 のアカウントやあなたのアカウント等)でインストールおよび運用をして下さ
 い。ML 用の特別な一般アカウント (e.g. fml 等) を作りその架空ユーザになっ
-てインストール・設定を行なうことでしょう。
+てインストール・設定を行なうとよいでしょう。
 =E
 In general you should not run mailing lists as a privileged user.
 Please run mailing lists as a non-privileged user.
@@ -252,8 +252,8 @@ it may be effective to enforce
 .S	運用ポリシー(特に管理者が複数人の場合について)
 =E.S	A few checks before installation
 
-デフォールトでは fml は各MLの所有者にしかMLの記事などが見られないよう
-な permission でMLを作成します。あなたがインストールしようと思っている
+デフォルトでは fml は各MLの所有者にしかMLの記事などが見られないような
+ permission でMLを作成します。あなたがインストールしようと思っている
 マシンでMLを走らせる人(オーナー、所有者)は
 
 	自分だけ?
@@ -286,18 +286,18 @@ personal 	自分一人しか使わない(ＭＬ群のオーナーは自分だけ)場合。
 		すべてのファイルやディレクトリはそのアカウントだけで読
 		み書き可能です。fmlserv を使うならそのアカウントで走らせます。
 
-group		 "特定多数"のオーナー達がいる場合でfmlservは"使わない"場合
+group		 "特定多数"のオーナー達がいる場合でfmlservは"使わない"場合。
 		ある group に属する人達は自由にＭＬを作成できます。
 		各ＭＬはそのＭＬの所有者だけが読み書きできます。
 		/var/spool/ml が group writable 以外は personal と変わ
 		りません。
 
-fmlserv  	"特定多数"のオーナー達がいる場合でfmlservも"使う"場合
+fmlserv  	"特定多数"のオーナー達がいる場合でfmlservも"使う"場合。
 		ある group に属する人達は自由にＭＬを作成できます。
 		/var/spool/ml だけでなく一部のファイルは group の
 		人なら誰でも読み書きできるようになります。
 		これは fmlserv のために必要な設定です。
-		ただ設定ファイルは各ＭＬのオーナーだけが変更できます。
+		ただ、設定ファイルは各ＭＬのオーナーだけが変更できます。
 .fi
 .if LANG == ENGLISH
 personal	only you use the fml system. In this case you 
@@ -356,7 +356,7 @@ this case please create the maintainer group (e.g. fml) in /etc/group
 
 ○ グループIDについて
 
-グループのデフォールトは fml です。例えば、 /etc/group に
+グループのデフォルトは fml です。例えば、 /etc/group に
 
 	fml:*:32765:オーナー1,オーナー2
 	(例えば、fml:*:32765:fukachan,hikari,elena のようにです)
@@ -414,7 +414,7 @@ to install the fml to your system.
 
 補足1: perlのpathの書換えをします。これは通常自動探索ですが、もし特定
 のもの(例 /usr/local/bin/perl5)にしたいなら次のように環境変数を指定し
-て下さい
+て下さい。
 =E
 Note 1: To replace perl path with some special path
 (e.g. /usr/local/bin/perl5), run
@@ -460,7 +460,7 @@ Please see the previous section!
 
    *** ここで、group もしくは fmlserv を定義した場合には group ID
    *** の入力を促されます。
-   *** あらかじめ決めておいた group を入れて下さい(前節参照)
+   *** あらかじめ決めておいた group を入れて下さい(前節参照)。
 
     Please define the group (in /etc/group) ML Operators use
     Group of Mailing List Operators (fml or GID ([\w\d]+)) [fml] 
@@ -471,8 +471,8 @@ Please see the previous section!
    DOMAIN NAME               [fml.org] 
 
 	ドメイン名。
-	メーリングリストのアドレスの @ から後ろで使う部分
-	いろいろなアドレスはデフォールトではこの値を使っています。
+	メーリングリストのアドレスの @ から後ろで使う部分。
+	いろいろなアドレスはデフォルトではこの値を使っています。
 	もしアドレスにマシン名まで含めたものを使いたいならここで
 	fake ですが FQDN を入れてしまって構いません。
 	virtual domain の場合も同様にここで virtual domain 名を入れます。
@@ -552,7 +552,7 @@ Please see the previous section!
 例えばprovider や大学の一般ユーザで
 
    /home の下だけならいじってよい。   
-   /etc/aliases 等はマシンの管理者にいじってもらう
+   /etc/aliases 等はマシンの管理者にいじってもらう。
 
 というケースがありえます。その場合は
 
@@ -582,7 +582,7 @@ In this case, you change the input for "makefml" to the following
 
 設定した directory 等の情報はこの場所に格納されます。次回以降 newml
 (後述)する時などはいつもこの値が使われます。
-＃つまり上で選んだ EXEC FILES DIRECTORYで指定した場所の下の .fml です
+＃つまり上で選んだ EXEC FILES DIRECTORYで指定した場所の下の .fml です。
 =E
 The configurations you input are saved here.  After this time,
 "makefml" uses this configurations to generate each mailing list
@@ -593,7 +593,7 @@ configurations (e.g. config.ph, include).
 CGIでmakefmlを呼び出す設定の開発は現在進行形です。いまプレβくらい。
 currentにしかありません。
 
-インストールについてのメモはここにあります
+インストールについてのメモはここにあります。
 
 .url http://www.fml.org/fml/examples/cgi-INSTALL.txt
 
@@ -622,7 +622,7 @@ running host. "makefml" command helps you to do them.
 
 「メールでfmlにコマンドを送り込み、ユーザの登録/削除などを行なう」こと
 もできます。ドキュメント中では『リモート管理』と呼ばれています。リモー
-ト管理はデフォールトの動作ではありません。明示的にこの動作を許すように
+ト管理はデフォルトの動作ではありません。明示的にこの動作を許すように
 設定を変更しなければいけません。 => .ptr{REMOTE_ADMINISTRATION}
 =E
 The term "remote administration" implies "to control fml by sending
@@ -630,7 +630,7 @@ administrative commands to fml". It is not default. You need to set it
 explicitly. => .ptr{REMOTE_ADMINISTRATION}
 
 コマンドを送り込むことのできる人は(各ＭＬごとに設定できる)パスワードを
-知っている必要があります。認証をPGPで行なうオプションもあります => .ptr{configure-remote-administrators}
+知っている必要があります。認証をPGPで行なうオプションもあります。 => .ptr{configure-remote-administrators}
 =E
 The ML maintainer can send the commands to fml if he/she knows the
 password. The authentication is based by password or PGP, you can
@@ -654,7 +654,7 @@ You may not find advanced configurations in "makefml config" menu.  If
 so, you should edit cf or config.ph file directly => .ptr{config-file}
 
 一般ユーザの使うコマンドの詳細は help ファイルを見て下さい。
-管理者用の コマンドは help-admin です。
+管理者用のコマンドは help-admin です。
 =E
 Please see "help" file for commands usual users who can use.
 Please see "help-admin" file for ML maintainers commands.
@@ -671,7 +671,7 @@ variable.
 てください。各変数の意味、実装上の理念、パラメータについての詳細は 
 doc/op の中をサーチしてください。
 
-いづれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
+いずれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
 ワードや変数名でサーチして見て下さい。最新版のドキュメント全体へのサー
 チは http://www.fml.org/fml/search-j.html でできます。
 =E
@@ -714,9 +714,9 @@ e.g. the include sample for elena ML is
 
 	/var/spool/ml/elena
 
-の下に include や aliases を初め必要なサンプルが作成されます。
+の下に include や aliases をはじめ、必要なサンプルが作成されます。
 (sendmailの場合)見本の aliases ファイルを /etc/aliases に追加して 
-newaliases したら終りです。まとめ送りについては後述(.ptr{msend})
+newaliases したら終りです。まとめ送りについては後述(.ptr{msend})。
 ＃その時 unsafe などのエラーがでたら？ → .ptr{unsafe}
 =E
 You can see a sample to add to /etc/aliases is shown in the last
@@ -724,7 +724,7 @@ action of makefml. Please cut and paste them in /etc/aliases and
 "newaliases". This sample is in /var/spool/ml/etc/elena/aliases.
 If you encounter some errors, see .ptr{unsafe}
 
-/var/spool/ml/elena がすでにある場合は上書きできないようエラーになるよ
+/var/spool/ml/elena がすでにある場合は上書きせず、エラーになるよ
 うになっています。意図的に上書きするなら
 =E
 If /var/spool/ml/elena already exists, makefml stops to avoid
@@ -750,8 +750,8 @@ qmail		INSTALL_with_QMAIL
 exim		INSTALL_with_EXIM
 .~q
 
-最近のMTAは不正中継を防止するのがデフォールトだったりするので、配送す
-るためには設定を変更する必要が必要なことが多々あります。詳細については
+最近のMTAは不正中継を防止するのがデフォルトだったりするので、配送する
+ためには設定を変更する必要が必要なことが多々あります。詳細については
 各MTAのマニュアルやFAQを読んで設定して下さい。
 =E
 Don't forget to permit relay from localhost since fml uses SMTP since
@@ -775,7 +775,7 @@ Created samples are the following files:
 	include		include file 投稿するアドレスのためのもの
 	include-ctl	include file コマンド用のアドレスのためのもの
 	include-mead 	mead (エラーを解析してエラーを起こすアドレスを削
-			除するプログラム)を使う時(デフォールトは使わない)
+			除するプログラム)を使う時(デフォルトは使わない)
 
 	cf		config.ph の元 (See .ptr{config-file})
 	config.ph	メーリングリストの設定ファイル
@@ -895,7 +895,7 @@ the chapter on "cron" of doc/op.jp in the fml source.
 でまとめおくりをしている場合、全員が cron で毎時0分に msend を走らせる
 とシステムの負荷が瞬間最大風速的に上がります。cron はいわれた通り走る
 だけでチューニングはしてくれません。システム管理者が2、3分ずつずらして
-走るなどの運用的なシステムチューニングに気を配ることが重要です。
+走らせるなどの運用的なシステムチューニングに気を配ることが重要です。
 =E
 When in operational point of view, as usual to say, a lot of people
 should avoid to run programs simultaneously on one machine. Plural
@@ -983,7 +983,7 @@ fmlserv just offers in another "fmlserv" (listserv) syntax.
 See .ptr{config-file} on config.ph syntaxes.
 .fi
 
-○ 複数のＭＬオーナーがいる場合への注意
+○ 複数のＭＬオーナーがいる場合の注意
 
 fmlserv は各ＭＬの記事が読めたりログファイルの読み書きができる必要があ
 ります。複数人で fmlserv を使う場合に推奨できる方法はそのマシンに特別
@@ -1004,7 +1004,7 @@ writable であるような設定が必要なことに注意して下さい。最初に fmlserv
 =E.S	Attention When To Add And Delete A User
 
 以下ＭＬへのユーザの登録・削除等について述べますが、もしＭＬサーバを作
-るのと同じマシンルからＭＬへメールを出すとすると、設定によっては
+るマシンと同じマシンからＭＬへメールを出すとすると、設定によっては
 =E
 When you send e-mail to a mailing list server on the same machine as
 one running mailing list servers, your mail header may have NOT
@@ -1140,7 +1140,7 @@ FML 2.1 以降では投稿とコマンドそれぞれについて以下の項目が設定できます。
 	・誰からの投稿を許すか？
 		だれでもOK			anyone
 		登録されているメンバーだけ	members_only
-		モデレータだけ		moderator
+		モデレータだけ			moderator
 =E
 The list of choice is 
 =S
@@ -1160,7 +1160,7 @@ If mail comes from not a ML member, what action should be done?
 	automatic registration/subscription		auto_subscribe
 	ignore the mail					ignore
 	
-デフォールトはいずれも
+デフォルトはいずれも
 =E
 In default, the mode of FML is 
 	post from only a member			members_only
@@ -1180,7 +1180,7 @@ member and the mode for the address is "auto_subscribe".
 .if LANG == JAPANESE
 ＊ 手動での登録の場合
 
-デフォールトです。subscribe というリクエストには確認のメールがユーザに
+デフォルトです。subscribe というリクエストには確認のメールがユーザに
 送られます(自動登録の confirmation と同じ(後述))。参加の意志確認がとれ
 たら管理者に「参加希望者がいる」旨が連絡されます。管理者はその後手動で
 登録するなり、管理者コマンドを使うなりします。リモートで管理者コマンド
@@ -1220,7 +1220,7 @@ commands, please enable it explicitly.
         UNSUBSCRIBE_AUTH_TYPE              address
 
 上述のアクセス制御で auto_subscribe を選んだ場合に自動登録の仕方を選ぶ
-ことができます。デフォールト(confirmation)は 「確認」を求めるやり方です。
+ことができます。デフォルト(confirmation)は 「確認」を求めるやり方です。
 =E
 The automatic registration type. The default is "confirm" which
 requires the confirmation of subscription will.
@@ -1231,7 +1231,7 @@ requires the confirmation of subscription will.
    3    SETTINGS AROUND COMMANDS
               address for command          elena-ctl@baycity.asia
 
-デフォールトでは listname に対し listname-ctl を使います。また、
+デフォルトでは listname に対し listname-ctl を使います。また、
 	listname でコマンドも受け付けるようにする
 	コマンドは fmlserv を使う
 等の設定変更ができます(fmlservを使うにはfmlservの設定が別途必要です)。
@@ -1248,7 +1248,7 @@ You can select e.g.
                      PERMIT ?              NO
                      AUTH_TYPE             crypt
 
-リモートでＭＬの設定を変更を可能にするか？(デフォールトは"できない")
+リモートでＭＬの設定を変更を可能にするか？(デフォルトは"できない")
 =E
 You maintain the ML in remote? or not. And the default type is
 "crypt". This is "password authentication" and the password is saved
@@ -1256,12 +1256,12 @@ as a crypted. (=> Section .ptr{REMOTE_ADMINISTRATION})
 
                     AUTH_TYPE              crypt
 
-リモート管理の場合の認証方式の設定。デフォールトはパスワード認証。
+リモート管理の場合の認証方式の設定。デフォルトはパスワード認証。
 
 
 ○ ヘッダの設定 (=> Section .ptr{HEADER_CONFIG})
 
-   例: Subject: につけるタグ(デフォールトはつけない) (後述)
+   例: Subject: につけるタグ(デフォルトはつけない) (後述)
 =E
 Header configuration, e.g. Subject Tag Type (=> Section .ptr{HEADER_CONFIG}).
 
@@ -1314,7 +1314,7 @@ FML 2.1 以降では投稿とコマンドそれぞれについて以下の
 	・誰からの投稿を許すか？
 		だれでもOK			anyone
 		登録されているメンバーだけ	members_only
-		モデレータだけ		moderator
+		モデレータだけ			moderator
 =E
 The permission for post address has the following choice:
 	post from anyone			anyone
@@ -1522,7 +1522,7 @@ enable confirmation in "chaddr" command?(default "NO")
               address for command          elena-ctl@baycity.asia
 
 .if LANG == JAPANESE
-デフォールトのアドレスは
+デフォルトのアドレスは
 
 	elena		投稿先
 	elena-ctl	コマンド用
@@ -1594,12 +1594,13 @@ We suppose several environments,
       which type (0-4) [0] 
 
    のような画面です。この設定はＭＬの記事のメールヘッダやＭＬサーバへ
-   送ったコマンドへのREPLYに付加される情報に利用されます。注意: つまり 
-   sendmail 等のMTAへの設定は別途必要です。
+   送ったコマンドへのREPLYに付加される情報に利用されます。
+
+   注意: つまり sendmail 等のMTAへの設定は別途必要です。
 
    ・ elena-ctl@$DOMAINNAME タイプ
 
-	デフォールトではエレナさんＭＬ(elena@baycity.asia)に対し、
+	デフォルトではエレナさんＭＬ(elena@baycity.asia)に対し、
 	elena-ctl@baycity.asia がコマンド専用に設定されています。
 
    ・ elena@$DOMAINNAME タイプ (backward compatible)
@@ -1607,7 +1608,7 @@ We suppose several environments,
 	もし、コマンドのアドレスに elena を設定するつまり投稿用のアド
 	レスとコマンド用のアドレスが同じ場合は # command 形のコマンド
 	をメール本文に書いて、送るとサーバはコマンドとして理解するとい
-	う動きをします
+	う動きをします。
 
    ・ fmlserv@$DOMAINNAME タイプ
 
@@ -1631,7 +1632,7 @@ elena と elena-ctl と両方のアドレスがあって、なおかつ elena でもコマン
 ドを受けたい(つまり両方とも "# command" コマンドトラップを起こせる)場
 合はYES。
 
-なお、デフォールトでは # は不必要なのでドキュメント(helpなど)は # 抜き
+なお、デフォルトでは # は不必要なのでドキュメント(helpなど)は # 抜き
 のものが生成されます。この変更や、MAIL_LIST == CONTROL_ADDRESS への設
 定の変更を行なうとドキュメントを再生成するか？と尋ねられます。
 make doc-template でもドキュメント再生成はできます。
@@ -1646,7 +1647,7 @@ for backward compatibility.
 =E.S	Remote Administration
 .l	REMOTE_ADMINISTRATION
 
-セキュリティ上デフォールトではリモート管理はできないようにしています。
+セキュリティ上デフォルトではリモート管理はできないようにしています。
 なおリモート用のコマンドについては help-admin を見て下さい。
 =E
 In default we do not permit remote administration for security.  You
@@ -1679,7 +1680,7 @@ commands.
 =E
 *  REMOTE_ADMINISTRATION_AUTH_TYPE (default: crypt)
 
-認証タイプを設定します。デフォールトは crypt(パスワード認証)。認証の画
+認証タイプを設定します。デフォルトは crypt(パスワード認証)。認証の画
 面は次のようなものです。
 =E
 set up the authentication type in remote administration.
@@ -1821,7 +1822,7 @@ the following types.
    * pass through the original To: 
 
 	original  の To: のまま
-	(fml 2.2のデフォールト、正確には2.1A以降のデフォールト)
+	(fml 2.2のデフォルト、正確には2.1A以降のデフォルト)
 =E
 	original To: (fml 2.2 default)
 
@@ -1829,7 +1830,7 @@ the following types.
 =E
 *  DATE_TYPE (default: original-date)
 
-	Date; は素通し？ Date: は fmlが起動した時間で、originalのDate:は
+	Date: は素通し？ Date: は fmlが起動した時間で、originalのDate:は
 	X-Posted:, X-Original-Date: などに設定するか？など
 =E
 	Date: is original? Date: is the time when fml is kicked off and
@@ -1909,7 +1910,7 @@ more precisely.
 .if LANG == JAPANESE
 MIME変換した記事を作るなら AUTO_HTML_GEN を yes 。その場合MLの記事を
 HTMLに変換して /var/spool/ml/ML名/htdocs/ の下に html 化された階層を作
-る。デフォールトではその日ごとに別の階層にまとめて
+る。デフォルトではその日ごとに別の階層にまとめて
 	   index.html  (記事を新しい順にならべたもの)
 	   thread.html (スレッド化された記事)
 の階層構造を作る。HTML_THREAD_REF_TYPE はスレッドを作る際 In-Reply-To: 
@@ -1930,7 +1931,7 @@ for articles.
 =E
 *  SPOOLING (default: yes)
 
-   スプールに記事を貯めるか？しないか？デフォールトは yes
+   スプールに記事を貯めるか？しないか？デフォルトは yes
 =E
    articles is spooled in $DIR/spool or not?
 
@@ -1952,7 +1953,7 @@ for articles.
    USE_VERP (default: NO)
 	Variable Envelope Return-Paths
 
-詳しくは doc/op.jp などをみてください
+詳しくは doc/op.jp などをみてください。
 =E
 Please see doc/op.en for more details.
 
@@ -1968,7 +1969,7 @@ Please see doc/op.en for more details.
    MESSAGE_LANGUAGE (default: Japanese or English determined in installation)
 	Message Language Extension
 
-エラーなどを何語で返すか？デフォールトはインストール時の言語選択と一緒
+エラーなどを何語で返すか？デフォルトはインストール時の言語選択と一緒。
 =E
 Which language you use in error reply? Default language is the same as
 $LANGUAGE asked and determined in installation.
@@ -1985,7 +1986,7 @@ $LANGUAGE asked and determined in installation.
 Please see doc/op.jp for more details.
 
 ○ 様々なセキュリティオプションを一気に設定する
-   これは make secure を走らせることと一緒です => .ptr{secure-configure}
+   これは make secure を走らせることと一緒です。 => .ptr{secure-configure}
 =E
 *  set up several parameters related with security.
    If you run "make secure", you can get the same effect.
@@ -2024,7 +2025,7 @@ If MIME/Multipart mail is input, fml checks only the first block.
 
   ＵＮＳＵＢＳＣＲＩＢＥ とかだけのメールを弾く。
   しかし弾き過ぎることがある(例: 最初の段落が『ＵＪＡ です。』というメー
-  ルはコマンドと引数なのか区別できない)
+  ルはコマンドと引数なのか区別できない)。
 =E
    Japanese specific
 
@@ -2036,8 +2037,8 @@ If MIME/Multipart mail is input, fml checks only the first block.
 
  * FILTER_ATTRIBUTE => FILTER_ATTR_REJECT_MS_GUID (default: no)
 
-   M$関係のマクロ入りに見えるファイルを弾く(e.g Melissa virus)
-   一般には弾き過ぎることになる
+   M$関係のマクロ入りに見えるファイルを弾く(e.g Melissa virus)。
+   一般には弾き過ぎることになる。
    (が普通のファイルにはマクロなんて使わないだろうに)
 =E
    reject files with M$ GUID, which may be a file with macro definition,
@@ -2062,7 +2063,7 @@ regard it as mail bomb and rejects mails from the sender.
 *  MAX_MAIL_SIZE (default: nothing, == infinite)
 
 .q
-メールサイズの最大値(デフォールトでは無制限)。貼付ファイルを許すか否か
+メールサイズの最大値(デフォルトでは無制限)。貼付ファイルを許すか否か
 でサイズ制限は決まるだろう。ちなみに fml.org では500K bytes にしている。
 =E
 The maximum size of mail (for both article and command mail). This
@@ -2124,7 +2125,7 @@ and jo.lw.fml.org is same in 3 level comparison.
 
 .q
 var/Mail/ の下に最近Ｎ通のメールの先頭2Kバイト程度を保存するヘッダ情報
-を保存してデバッグなどに用いるとよい
+を保存してデバッグなどに用いるとよい。
 =E
 For debug (and against tricks), it may be useful to save the latest
 $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
@@ -2234,11 +2235,11 @@ To configure advanced settings,
 =E
 	2. edit config.ph by hand ALWAYS.
 
-cf ファイルは config.ph のマスターですが config.ph を直接編集し構いま
-せん。むしろ望ましいです。しかし config.ph を手でいじって、そのあと 
-makefml config を使うとせっかくの設定が上書きされて消されてしまいます。
-この場合 makefml は警告を出して一回止まりこのまま進んでいいかどうか尋
-ねてきます。
+cf ファイルは config.ph のマスターですが config.ph を直接編集しても
+構いません。むしろ望ましいです。しかし config.ph を手でいじって、
+そのあと makefml config を使うとせっかくの設定が上書きされて消されて
+しまいます。この場合 makefml は警告を出して一回止まりこのまま進んで
+いいかどうか尋ねてきます。
 =E
 Pay attention! cf is the master file of config.ph. It is better to
 edit config.ph by hand. makefml is easy interface for
@@ -2259,11 +2260,11 @@ config.ph is perl statements.
 
 ○ cf ファイル
 『変数名 値』をスペースかタブで区切って書く UNIX 伝統のスタイルです。 
-行の # 以降はコメントです。cf で定義されていないものはデフォールト値が
-使われます。つまり cf にはデフォールトと異なる差分だけを保守するのに便
+行の # 以降はコメントです。cf で定義されていないものはデフォルト値が
+使われます。つまり cf にはデフォルトと異なる差分だけを保守するのに便
 利です。
 
-＃/usr/local/fml/cf/MANIFEST に変数の一覧とデフォールト値があります。
+＃/usr/local/fml/cf/MANIFEST に変数の一覧とデフォルト値があります。
 =E
 -- cf file
 The format of cf is "variable the value of it", UNIX traditional
@@ -2294,10 +2295,10 @@ corresponds to this in config.ph.
 	$PERMIT_POST_FROM              = "members_only";
 	$REJECT_POST_HANDLER           = "reject";
 
-に変換されます。cf に現れない変数は config.ph にデフォールト値を持って
+に変換されます。cf に現れない変数は config.ph にデフォルト値を持って
 生成されます。config.phに設定される変数一覧は cf/MANIFEST にあります。
-デフォールト及び変数一覧はこのcf/MANIFEST(例:
-/usr/local/fml/cf/MANIFEST) というファイルを読んで下さい。
+デフォルト及び変数一覧はこのcf/MANIFEST(例: /usr/local/fml/cf/MANIFEST)
+というファイルを読んで下さい。
 
 cf ファイルではLOCAL_CONFIG というキーワードから後は生の perl 構文が書
 けます。ローカルハックはこの部分に記述しておくと便利。この部分は cf ->
@@ -2325,7 +2326,7 @@ yourself. e.g. the default is "automatic registration".
 は特定のＭＬではなくこのファイル($EXEC_DIR/etc/makefml/cf) に対して
 "makefml config" 同様のメニュー編集機能を提供します。_ML_ などのテンプ
 レートで使われている生の記号が出てきますが、その辺は触らないようにして
-下さい。例えば自動登録をデフォールトにしてしまうなどに用いることができ
+下さい。例えば自動登録をデフォルトにしてしまうなどに用いることができ
 ます。
 =E
 provides the "makefml config" like interface to edit the template file
@@ -2404,7 +2405,7 @@ works. When the following prompt appears, select "y" (command test) or
 	test of command? (y/n) [n] 
 
 	y	コマンドのテスト
-	n	配送のテスト (デフォールト)
+	n	配送のテスト (デフォルト)
 
 どちらかを選んで下さい。この後メール本文の入力を求められるので入れて下
 さい。本文入力の終りは . (ピリオド)だけの行の入力です。
@@ -2446,7 +2447,7 @@ http://www.fml.org/fml/op-e/index.html#trouble
 
 	doc/op.jp に対して grep する
 
-	エディターでその文字をサーチする
+	エディタでその文字をサーチする
 
 	http://www.fml.org/fml/ でドキュメントのサーチをしてみる。
 	＃最新版のドキュメントにはそのエラーについて言及されてるかも
@@ -2461,8 +2462,8 @@ http://www.fml.org/fml/op-e/index.html#trouble
   Can't locate getopts.pl in @INC at makefml line 104.
 .~q
 
-perlが正しくインストールされていません。perlをインストールしなしてくだ
-さい。
+perlが正しくインストールされていません。perlをインストールしなおして
+ください。
 =E
 The installation of perl fails. Please install perl again!
 
@@ -2532,8 +2533,8 @@ The following reasons are possible:
 などが考えられます。include ファイルの置き場所は可能な限り permission 
 を落したローカル(NFSではない)場所(そこまでの階層すべての permission に
 配慮する)に include ファイルを置いてみて下さい。例えば /usr/local が 
-local disk の上にあるとして /usr/local/include/ の下に置いておくなどで
-す。＃注意: そもそも NFS ごしに setuid しようというのが間違い
+local disk の上にあるとして /usr/local/include/ の下に置いておくなどです。
+＃注意: そもそも NFS ごしに setuid しようというのが間違い
 
 C Wrapper については
 =E
@@ -2553,7 +2554,7 @@ machine since it requires a lot of attention.
 す。compile そのものはその場所で make fml で実行されますが、setuid は
 よ〜く注意して設定しないといけないので doc/op.jp の "fml.c の呼び方"
 あたりを参考に root の人とよく相談しながら設定して下さい。
-＃注: 2.2 では cc のオプションに -DPOSIX がデフォールトでついています。
+＃注: 2.2 では cc のオプションに -DPOSIX がデフォルトでついています。
 
 FYI: OSによってはインストール情報が提供されていることもあります。チェッ
 クしてみて下さい。
@@ -2583,7 +2584,7 @@ elena@baycity.asia accepts the command such as "# help" ("# command" form).
 Both X-ML-Info: and command server replies shows the pointer to
 elena@baycity.asia on the use of commands.
 
-# command というシンタックスのコマンドをelena@baycity.asia も 
+# command というシンタックスのコマンドをelena@baycity.asia と
 elena-ctl@baycity.asia どっちでも受け付けるようにするためには、config.ph で
 =E
 If you configure that both elena@baycity.asia and elena-ctl@baycity.asia can
@@ -2597,7 +2598,7 @@ accept commands, you should set
 ＃ こういう変数名になってます。
 ＃ 以前の version ではヘッダで「elena-ctl へ」とか書いてるのに実は 
 ＃ elena でも受け付けてたという仕様上の問題を再現するためのオプションです。
-＃ いわば option TCP_COMPAT_42 みないなもんですかね
+＃ いわば option TCP_COMPAT_42 みたいなもんですかね。
 
 
 .C	POP3 を利用してのML(sendmail等を経由して起動しないorできない場合)
@@ -2618,7 +2619,7 @@ FYI. NT Version uses this trick:)
 .C	HELPなどの取り寄せについてユーザに知らせる方法について
 =E.C	Header information to notify information
 
-ヘッダにはデフォールトで X-ML-Info に書いてあります。当然ＭＬに入った
+ヘッダにはデフォルトで X-ML-Info に書いてあります。当然ＭＬに入った
 時にはそういったことについてメールを書く or 自動的に送られるでしょう。
 
 それでもどうしてもだめだとあきらめて、最後の手段「本文に情報をつけてし
@@ -2659,7 +2660,7 @@ $PERMIT_POST_FROM              = "moderator";
 
 ○ 承認の仕方
 
-$MODERATOR_FORWARD_TYPE という変数があります。デフォールトは２です。デ
+$MODERATOR_FORWARD_TYPE という変数があります。デフォルトは２です。デ
 フォールトについて説明します。２以外は doc/op.jp (WWW なら
 http://www.fml.org/fml/op/) を見て下さい。
 
@@ -2689,12 +2690,12 @@ moderator certified 199711032027.709982
 分が保存しておいたそのメールを配送します。
 
 モデレータか否かはこの特別な文字列(# moderator certified 数字)を知って
-いるか否かです。この数字は毎回違うもるので、ある意味で暗合レベルの非常
+いるか否かです。この数字は毎回違うもので、ある意味で暗合レベルの非常
 に低い one time password だとみなすこともできます。
 
-このメールが送られてくる人はは誰でもモデレータになれます。デフォール
-トは $MAINTAINER ですが、複数の人をモデレータにするなら moderators 
-というファイルを作り、actives や members のように一行一アドレス書いて
+このメールが送られてくる人は誰でもモデレータになれます。デフォルトは
+ $MAINTAINER ですが、複数の人をモデレータにするなら moderators 
+というファイルを作り、actives や members のように１行１アドレス書いて
 いって下さい。
 
 
@@ -2706,7 +2707,7 @@ moderator certified 199711032027.709982
 
 	makefml newml elena
 
-で elena MLを作ったとします。デフォールト構成は
+で elena MLを作ったとします。デフォルト構成は
 
 	elena@baycity.asia	ＭＬへの投稿用のアドレス
 	elena-ctl@baycity.asia	ＭＬのコマンドを送るアドレス
