@@ -1292,6 +1292,9 @@ DATABASE_CACHE_FILE_SUFFIX:
 # value: filename
 DATABASE_DRIVER: toymodel.pl
 
+# attributes to inform database drivers
+# value: 
+DATABASE_DRIVER_ATTRIBUTES: always_lower_domain
 
 # ## Sub Section: RDBMS
 

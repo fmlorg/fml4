@@ -1890,8 +1890,14 @@ sub LowerDomain
 {
     my ($addr) = @_;
     my (@addr) = split(/\@/, $addr);
-    $addr[1] =~ tr/A-Z/a-z/;
-    return $addr[0].'@'.$addr[1];
+
+    if ($DATABASE_DRIVER_ATTRIBUTES =~ /always_lower_domain/) {
+	$addr[1] =~ tr/A-Z/a-z/;
+	return $addr[0].'@'.$addr[1];
+    }
+    else {
+	return $addr;
+    }
 }
 
 ####### Section: Info
