@@ -963,7 +963,7 @@ private communication のファイルを public な場所にファイルを残すことは
 
 
 .include forward.wix
-.include fml_local.wix
+.include filter.wix
 .include fmlserv.wix
 
 
