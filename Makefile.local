@@ -77,22 +77,7 @@ simulation:
 
 
 scan:
-	fvs scan kern/* proc/* libexec/* \
-		sbin/makefml doc/ri/*wix doc/smm/*wix doc/master/*wix \
-		doc/html/* \
-		etc/makefml/* cf/* bin/* sys/*/*|\
-	tee /tmp/scanbuffer
-	@ cp /dev/null /tmp/__scan__
-	@ echo "" >> /tmp/__scan__
-	@ echo "--- noid ---" >> /tmp/__scan__
-	@ grep ^noid /tmp/scanbuffer >> /tmp/__scan__ || echo "NO noid OK" >> /tmp/__scan__
-	@ echo "" >> /tmp/__scan__
-	@ echo "--- Modified ---" >> /tmp/__scan__
-	@ grep ^Modified /tmp/scanbuffer >> /tmp/__scan__ || echo "NO Modified OK" >> /tmp/__scan__
-	@ rm /tmp/scanbuffer
-	@ echo "";
-	@ cat /tmp/__scan__
-	@ echo ""; echo "file: /tmp/__scan__"; echo "";
+	cvs -n update | tee /tmp/scanbuffer
 
 loop:
 	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
