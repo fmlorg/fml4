@@ -4232,7 +4232,7 @@ sub MakeFml_V7Lock
 	print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
     }
 
-    &GetTime;
+    &GetTime(time);
 
     &V7Lock;
 
