@@ -101,7 +101,8 @@ m:	testsetup /usr/local/fml/makefml
 
 /usr/local/fml/makefml: sbin/makefml
 	if [ -d /usr/local/fml ]; then \
-	 perl w/repl.pl sbin/makefml > /usr/local/fml/makefml ; fi
+	  perl distrib/bin/_makefml_conv.pl sbin/makefml > /usr/local/fml/makefml ;\
+	fi
 
 testsetup: libkern
 	rsync -C -a kern/ /usr/local/fml/
