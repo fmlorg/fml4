@@ -20,7 +20,10 @@
      INFO.*                FML サポート情報＆メモ (HTML版有)
      INSTALL.*             FML installマニュアル (HTML版有)
      INSTALL_on_NT4.*      NT 固有の install 情報 (HTML版有)
-     INSTALL_with_QMAIL.*  qmail 固有の情報
+     INSTALL_with_SENDMAIL.* sendmail 固有の情報
+     INSTALL_with_POSTFIX.*  postfix 固有の情報
+     INSTALL_with_QMAIL.*    qmail 固有の情報
+     INSTALL_with_ZMAILER.*  zmailer 固有の情報
      README.*              README(--) (HTML版有)
      RELEASE_NOTES.*       変更履歴(^^; (HTML版有)
      UPGRADE.*             UPGRADEする人向けへの注意
@@ -107,6 +110,9 @@
      INFO.*
      INSTALL.*
      INSTALL_on_NT4.*
+     INSTALL_with_SENDMAIL.*
+     INSTALL_with_POSTFIX.*
+     INSTALL_with_ZMAILER.*
      INSTALL_with_QMAIL.*
      README.*
      RELEASE_NOTES.*
@@ -174,3 +180,11 @@
 1997/08/12 by Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>
  
 $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
