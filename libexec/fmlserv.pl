@@ -285,7 +285,7 @@ sub FmlServ
 	# reset %Envelope;
 	if ($debug) {
 	    &Debug("$ml::message: ---\n$Envelope{'message'}\n---\n");
-	    &Debug("$ml::error:   ---\n$Envelope{'error'}\n---\n");
+	    &Debug("$ml::ERROR:   ---\n$Envelope{'error'}\n---\n");
 	}
 
 	$apfiles .= "$;$Envelope{'message:append:files'}"
@@ -306,7 +306,7 @@ sub FmlServ
 
     if ($debug) {
 	&Debug("fmlserv::message: ---\n$Envelope{'message'}\n---\n");
-	&Debug("fmlserv::error:   ---\n$Envelope{'error'}\n---\n");
+	&Debug("fmlserv::ERROR:   ---\n$Envelope{'error'}\n---\n");
 	&DebugEnvelopeDump("fmlserv e");
 	&Debug("---Processing ML fmlserv");
     }
@@ -453,7 +453,7 @@ sub ProcessEachMLReq
 	$mesg  = "\n   Your subscribe request is forwarded to the maintainer.";
 	$mesg .= "\n   Please wait a little.";
 
-	&Debug("Error: MailListMemberP($From_address) fails") if $debug;
+	&Debug("ERROR: MailListMemberP($From_address) fails") if $debug;
 
 	for (split(/\n/, $proc)) {
 	    $buf = $_; # preserve;
@@ -833,7 +833,7 @@ sub InitFmlServProcedure
 sub CreateMLMap 
 {
     opendir(DIRD, $MAIL_LIST_DIR) || do {
-	&Mesg(*Envelope, "\tError: cannot opendir ML MAP"); 
+	&Mesg(*Envelope, "\tERROR: cannot opendir ML MAP"); 
 	&Log("cannot open $dir");
 	return;
     };

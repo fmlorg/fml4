@@ -873,7 +873,7 @@ sub MakeFml
 	$LogBuf{$ml} .= $logbuf;
     }
     else {
-	print "Mead error: cannot execute makefml [$MAKEFML]\n";
+	print "Mead ERROR: cannot execute makefml [$MAKEFML]\n";
     }
 }
 

@@ -330,7 +330,7 @@ sub GenConfirmReplyText
 	      $key);
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Syntax Error! Please check your mail\n\n";
+	$s .= "SYNTAX ERROR! Please check your mail\n\n";
 	$s .= "   - The address you used IS NOT A ML MEMBER?\n";
 	$s .= "     (TRUE if you try to subscribe)\n";
 	$s .= "   - You sent a bad subscribe syntax?\n\n";
@@ -628,7 +628,7 @@ sub IdCheck
 	return 1;
     }
     else {
-	&Log("Confirm::IdCheck syntax error");
+	&Log("Confirm::IdCheck SYNTAX ERROR");
 	&Log("Confirm::IdCheck request[$buffer]") if $debug_confirm;
 	$cf{'name'} = $name;
 	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'IdCheck::syntax_error'));
@@ -671,8 +671,8 @@ sub BufferSyntax
 	$name = $1;
     }
     else {
-	&Log("confirm buffer syntax error");
-	&Log("error buffer [$buffer]");
+	&Log("confirm buffer SYNTAX ERROR");
+	&Log("wrong buffer \"$buffer\"");
 
 	local($re_euc_c) = '[\241-\376][\241-\376]';
 	local($re_jin)   = '\033\$[\@B]';
@@ -891,7 +891,7 @@ sub GenUnsubscribeConfirmReplyText
     }
     elsif ($mode eq 'BufferSyntax::Error') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "SYNTAX ERROR! Please use the following syntax\n\n";
 	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
 	$s .= "(Name NOT E-Mail Address)\n";
 	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
@@ -979,7 +979,7 @@ sub GenChaddrConfirmReplyText
     }
     elsif ($mode eq 'BufferSyntax::Error') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "SYNTAX ERROR! Please use the following syntax\n\n";
 	$s .= "   $CONFIRMATION_SUBSCRIBE OLD_ADDRESS NEW_ADDRESS ";
 	$s .= "For example,\n\n";
 	$s .= "   $CONFIRMATION_SUBSCRIBE oldaddr\@baycity.asia newaddr\@baycity.asia\n";

@@ -454,7 +454,7 @@ sub __SmtpIO
     }
     
     if ($SoErrBuf =~ /^[45]/) {
-	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
+	&Log("SmtpIO ERROR: smtp session stop and NOT SEND ANYTHING!");
 	&Log("reason: $SoErrBuf");
 	return $NULL;
     }

@@ -259,7 +259,7 @@ sub ModeBifurcate
 	    &ModeratedDelivery(*Envelope); # Moderated: check Approval;
 	}
 	else {
-	    &Log("Error: \$PERMIT_COMMAND_FROM is unknown type.");
+	    &Log("ERROR: \$PERMIT_COMMAND_FROM is unknown type.");
 	}
     }
     # distribute
@@ -285,7 +285,7 @@ sub ModeBifurcate
 	    &ModeratedDelivery(*Envelope); # Moderated: check Approval;
 	}
 	else {
-	    &Log("Error: \$PERMIT_POST_FROM is unknown type.");
+	    &Log("ERROR: \$PERMIT_POST_FROM is unknown type.");
 	}
 
 	# to ensure the unique Date: (since the smallest unit is second).
@@ -1442,7 +1442,7 @@ sub AdjustActiveAndMemberLists
 	grep(/$f/, @ACTIVE_LIST) || push(@ACTIVE_LIST, $f);
     }
     elsif (-f $FILE_TO_REGIST) {
-	&Log("Error: \$FILE_TO_REGIST NOT EXIST");
+	&Log("ERROR: \$FILE_TO_REGIST NOT EXIST");
     }
 
     # ONLY IF EXIST ALREADY, add the admin list (if not, noisy errors...;-)
@@ -2000,7 +2000,7 @@ sub Log
     $str =~ s/\015\012$//; # FIX for SMTP (cut \015(^M));
 
     if ($debug_smtp && ($str =~ /^5\d\d\s/)) {
-	$error .= "Sendmail Error:\n";
+	$error .= "Sendmail ERROR:\n";
 	$error .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
     }
 
@@ -2167,8 +2167,8 @@ sub Copy
 {
     local($in, $out) = @_;
     local($mode) = (stat($in))[2];
-    open(COPYIN,  $in)      || (&Log("Error: Copy::In [$!]"), return 0);
-    open(COPYOUT, "> $out") || (&Log("Error: Copy::Out [$!]"), return 0);
+    open(COPYIN,  $in)      || (&Log("ERROR: Copy::In [$!]"), return 0);
+    open(COPYOUT, "> $out") || (&Log("ERROR: Copy::Out [$!]"), return 0);
     select(COPYOUT); $| = 1; select(STDOUT);
     chmod $mode, $out;
     while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}
@@ -2348,7 +2348,7 @@ sub eval
 sub PerlModuleExistP
 {
     local($pm) = @_;
-    if ($] !~ /^5\./) { &Log("Error: using $pm requires perl 5"); return 0;}
+    if ($] !~ /^5\./) { &Log("ERROR: using $pm requires perl 5"); return 0;}
     eval("use $pm");
     if ($@) { &Log("${pm}5.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
     1;
@@ -2552,9 +2552,9 @@ sub CheckAddr2Reply
     ### 01: check recipients == myself?
     for $addr (@addr_list) {
 	if (&LoopBackWarn($addr)) {
-	    &Log("Notify: Error: the mail is not sent to $addr",
+	    &Log("Notify: ERROR: the mail is not sent to $addr",
 		 "since the addr to reply == ML or ML-Ctl-Addr");
-	    $m .= "\nNotify: Error: the mail is not sent to [$addr]\n";
+	    $m .= "\nNotify: ERROR: the mail is not sent to [$addr]\n";
 	    $m .= "since the addr to reply == ML or ML-Ctl-Addr.\n";
 	    $m .= "-" x60; $m .= "\n";
 	}
@@ -2566,7 +2566,7 @@ sub CheckAddr2Reply
     ### 02: check the recipents
     for $addr (@addr_list) {
 	if ($addr =~ /^($REJECT_ADDR)\@/i) {
-	    $m .= "\nNotify: Error: the mail should not be sent to [$addr]\n";
+	    $m .= "\nNotify: ERROR: the mail should not be sent to [$addr]\n";
 	    $m .= "since the addr is not-personal or other agent softwares\n";
 	    $m .= "-" x60; $m .= "\n";
 	}

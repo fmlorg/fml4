@@ -276,7 +276,8 @@ sub InitMakeFml
 
     ### LOADING $FML_CONFIG
     if (-f $FML_CONFIG) {
-	print STDERR "---Loading the configuration file $FML_CONFIG\n";
+	print STDERR "---Loading the configuration file $FML_CONFIG\n"
+	    if $debug0;
 
 	package Config;
 	eval("require \$main'FML_CONFIG;\#'");
@@ -325,7 +326,7 @@ sub InitMakeFml
 	}
 
 	if (! $guess) { 
-	    print STDERR "Error: config.guess NOT FOUND!\n";
+	    print STDERR "ERROR: config.guess NOT FOUND!\n";
 	    print STDERR "       Please validate your source.\n\n";
 	    exit 1;
 	}
@@ -379,10 +380,12 @@ OS_TYPE:
 	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
     }
     elsif ($CPU_TYPE_MANUFACTURER_OS && $CACHED_YES) {
-	print "\n";
-	print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS] (cached)\n";
-	print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
-	print "\n";
+	if ($debug0) {
+	    print "\n";
+	    print "   THIS HOST ($FQDN) IS [$CPU_TYPE_MANUFACTURER_OS] (cached)\n";
+	    print "   THIS HOST ($FQDN) OS [$OS_TYPE]\n" if $debug;
+	    print "\n";
+	}
     }
     elsif ($CPU_TYPE_MANUFACTURER_OS) {
 	print "\n";
@@ -975,8 +978,8 @@ sub Copy
     local($in, $out) = @_;
     local($mode) = (stat($in))[2];
 
-    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
-    open(COPY_OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
+    open(COPY_IN,  $in) || (&Log("ERROR: Copy < $in [$!]"), return 0);
+    open(COPY_OUT, "> $out") || (&Log("ERROR: Copy > $out [$!]"), return 0);
     select(COPY_OUT); $| = 1; select(STDOUT); 
     chmod $mode, $out;
 
@@ -1039,7 +1042,7 @@ sub XSWarn
 sub Error
 {
     local($buf) = @_;
-    print STDERR "*** Error: $buf\n\n";
+    print STDERR "*** ERROR: $buf\n\n";
     $XStatus .= "ERROR: $buf\n";
 }
 
@@ -1090,7 +1093,7 @@ sub Write2
     }
     else {
 	local(@caller) = caller;
-	print STDERR "Append2(@_)::Error [@caller] \n";
+	print STDERR "Append2(@_) ERROR [@caller] \n";
     }
 
     1;
@@ -1235,7 +1238,7 @@ sub Lock
     return if $NotRequireLock;
 
     if (! -d "$mldir/$ml" && ! -d $mldir) {
-	&Die("\n\n*** Error: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
+	&Die("\n\n*** ERROR: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
     }
 
     if (&FlockP($ml, $mldir)) {
@@ -1280,7 +1283,7 @@ sub MakeFmlLock
     ### Lock Type Probe 
     # only one
     if ($ml) {
-	print "---Locking $ml ML"; $count++;
+	print "---Locking $ml ML" if $debug0; $count++;
 	
 	&Lock($ml, $mldir);
 	$LockList{$ml} = $mldir;
@@ -1306,7 +1309,7 @@ sub MakeFmlLock
     }
 
     if ($count) {
-	print "\n   Locked. Go ahead!\n\n";
+	print "\n   Locked. Go ahead!\n\n" if $debug0;
     }
     else {
 	print "\n   Nothing exists. Go ahead anyway!\n\n";
@@ -1321,7 +1324,7 @@ sub MakeFmlUnLock
     return if $NotRequireLock;
 
     if ($ml && $LockList{$ml}) {
-	print "---UnLocking $ml ML";
+	print "---UnLocking $ml ML" if $debug0;
 	&UnLock($ml);
     }
     else {
@@ -1340,7 +1343,9 @@ sub MakeFmlUnLock
 	closedir(DIRD);
     }
 
-    print "\nDone.\n" unless $Env eq 'HTTPD';
+    if ($debug0) {
+	print "\nDone.\n" unless $Env eq 'HTTPD';
+    }
 }
 
 
@@ -1395,7 +1400,7 @@ sub ExecCmd
 
     # valid command?
     if (! $MakeFmlProc{$fp}) {
-	&Debug("\n*** Error: command [$fp] NOT DEFINED ***");
+	&Debug("\n*** ERROR: command [$fp] NOT DEFINED ***");
 	&Debug("   run \"makefml help\"");
 	&Debug("        or ");
 	&Debug("   see the document 'INSTALL' for more details\n");
@@ -1416,7 +1421,7 @@ sub ExecCmd
 		; # O.K.;
 	    }
 	    else {
-		&Debug("\n*** Syntax Error ***");
+		&Debug("\n*** SYNTAX ERROR ***");
 		&Debug("    makefml $fp mailing-list\n");
 		&Debug("arguments of mailing-list is required\n");
 		return;
@@ -1457,8 +1462,15 @@ sub ExecCmd
 	local($fn) = $fp; $fn =~ s/do_//;
 	&Log("makefml::${fn} @argv ") if $fp ne "do_install";
 	if ($Env eq 'HTTPD') { &InitErrorBuffer($fp);}
+
+	my ($ml, @opts) = @argv;
+
+	print "DO \"$SavedFP @opts\" for $ml mailing list.\n";
+
 	&$fp(@argv);
 	if ($Env eq 'HTTPD') { &FixErrorBuffer($fp);}
+
+	print "done.\n";
     }
     else {
 	print "   Command [$fp] NOT DEFINED\n";
@@ -1993,7 +2005,10 @@ sub CtlAddrList
 
     chmod $mode, $file;
 
-    print $sumbuf if $sumbuf;
+    if ($sumbuf) {
+	print "\t--- $file\n";
+	print $sumbuf;
+    }
 
     $found;
 }
@@ -2231,7 +2246,8 @@ sub do_passwd
     local($ml, $member, $passwd) = @_;
     local($passwd_file);
 
-    print "---Changing Passwd of Admin $member in $ml mailing list\n";
+    print "---Changing Passwd of Admin $member in $ml mailing list\n"
+	if $debug0;
 
     &ResetVariables;
     $cf = "$ML_DIR/$ml/cf";
@@ -2279,7 +2295,7 @@ sub do_passwd
 	}
 
 	if (!$member || !$passwd) {
-	    &Warn("Error: Please input NOT NULL Address and Password.");
+	    &Warn("ERROR: Please input NOT NULL Address and Password.");
 	    &Log("makefml::passwd address is not defined")  if !$member;
 	    &Log("makefml::passwd password is not defined") if !$passwd;
 	}
@@ -2311,7 +2327,8 @@ sub do_html_passwd
     local($ml, $member, $passwd) = @_;
     local($passwd_file, %config, %cur_config);
 
-    print "---Changing Passwd of Admin $member in $ml mailing list\n";
+    print "---Changing Passwd of Admin $member in $ml mailing list\n"
+	if $debug0;
 
     &Error("empty password") unless $passwd;
 
@@ -2479,7 +2496,7 @@ sub do_htpasswd
     local($dir, $pwf);
 
     if (! $user) {
-	print STDERR "   Error!\n";
+	print STDERR "   ERROR!\n";
 	print STDERR "   Usage: htpasswd $ml user\n\n";
 	return;
     }
@@ -2762,9 +2779,9 @@ sub do_newml
     local($cf, $local_config, $config, @config, %config);
 
     if (! $ml) {
-	&Log("Error: makefml::newml ML is not defined");
+	&Log("ERROR: makefml::newml ML is not defined");
 
-	&Debug("*** Error: no arguments ***");
+	&Debug("*** ERROR: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
 	&Debug("\n\tmakefml newml ML\n");
 	$XStatus = 'ERROR: makefml.ml_is_not_defined';
@@ -2911,9 +2928,9 @@ sub do_destructml
     local($cf, $local_config, $config, @config, %config);
 
     if (! $ml) {
-	&Log("Error: makefml::newml ML is not defined");
+	&Log("ERROR: makefml::newml ML is not defined");
 
-	&Debug("*** Error: no arguments ***");
+	&Debug("*** ERROR: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
 	&Debug("\n\tmakefml newml ML\n");
 	$XStatus = 'ERROR: makefml.ml_is_not_defined';
@@ -3032,9 +3049,9 @@ sub do_qmail_setup
     local($cf, $local_config, $config, @config, %config);
 
     if (! $ml) {
-	&Log("Error: makefml::newml ML is not defined");
+	&Log("ERROR: makefml::newml ML is not defined");
 
-	&Debug("*** Error: no arguments ***");
+	&Debug("*** ERROR: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
 	&Debug("\n\tmakefml newml ML\n");
 	return;
@@ -3372,7 +3389,7 @@ sub do_pgp
 
     &Log("makefml::pgp pgp @argv");
     system("pgp @argv");
-    print STDERR "Error: $@" if $@;
+    print STDERR "ERROR: $@" if $@;
 
     print "\n--- PGP END ---\n\n";
 
@@ -3576,7 +3593,7 @@ sub do_config
 	&SaveCF($cf, *config);
     }
     else {
-	&Log("Error makefml::config cannot save to cf file");
+	&Log("ERROR makefml::config cannot save to cf file");
 	&Warn("Cannot open cf[$cf]");
 	return;
     }
@@ -4125,8 +4142,8 @@ sub Replace
     local($in, $out, $key, $newkey) = @_;
     local($mode) = (stat($in))[2];
 
-    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
-    open(COPY_OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
+    open(COPY_IN,  $in) || (&Log("ERROR: Copy < $in [$!]"), return 0);
+    open(COPY_OUT, "> $out") || (&Log("ERROR: Copy > $out [$!]"), return 0);
     select(COPY_OUT); $| = 1; select(STDOUT); 
     chmod $mode, $out;
 
@@ -4144,7 +4161,7 @@ sub Replace
 sub PerlModuleExistP
 {
     local($pm) = @_;
-    if ($] !~ /^5\./) { &Log("Error: using $pm requires perl 5"); return 0;}
+    if ($] !~ /^5\./) { &Log("ERROR: using $pm requires perl 5"); return 0;}
     eval("use $pm");
     if ($@) { &Log("${pm}5.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
     1;
@@ -4164,7 +4181,7 @@ sub MakeConfigPH
     }
 
     if (! $perl) { 
-	&Log("Error: makefml cannot find perl");
+	&Log("ERROR: makefml cannot find perl");
 	print STDERR "I cannot find perl!! Dead Ends!\n";
 	print STDERR "Hence I cannot make config.ph.\n";
 	return "";
@@ -4178,7 +4195,7 @@ sub MakeConfigPH
 
     for ($config, $manifest, $cf) { # config.ph may not exist; 
 	if ($_ && ! -e $_) {
-	    print STDERR "***Error: I Cannot find $_, Stop.\n";
+	    print STDERR "***ERROR: I Cannot find $_, Stop.\n";
 	    return $NULL;
 	}
     }
@@ -4186,7 +4203,7 @@ sub MakeConfigPH
     $cf = $cf || "-i";
 
     if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
-	&Log("Error: cannot exec $config -m $manifest $cf");
+	&Log("ERROR: cannot exec $config -m $manifest $cf");
 	&Warn("cannot exec $config -m $manifest $cf");
 	return $NULL;
     }
@@ -4241,7 +4258,7 @@ sub MakeConfigPH
 
     # warning
     if (-z $config_ph) {
-	print STDERR "\n*** Error ***\n$config_ph is size 0.\n\n";
+	print STDERR "\n*** ERROR ***\n$config_ph is size 0.\n\n";
 
 	if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	    print STDERR "failed:";
@@ -4291,8 +4308,8 @@ sub do_adduser
     $proc =~ s/do_//;
 
     if (! $ml || !$member) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: the number of arguments ***");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
@@ -4303,7 +4320,7 @@ sub do_adduser
 
     &SetWritableUmask;
 
-    print "---Adding $member to $ml mailing list\n";
+    print "---Adding $member to $ml mailing list\n" if $debug0;
 
     if ($AdminMode) {
 	@files = (&Value('ADMIN_MEMBER_LIST') ||
@@ -4332,8 +4349,8 @@ sub do_adduser
 
     # mkdir ML Directory
     if (! -d "$ML_DIR/$ml") {
-	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
-	print "\n*****Error: $ml ML NOT CREATED\n";
+	&Log("ERROR: makefml::$proc cannot find $ML_DIR/$ml");
+	print "\n*****ERROR: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
@@ -4375,14 +4392,14 @@ sub do_byeuser
     $proc =~ s/do_//;
 
     if (! $ml || !$member) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: the number of arguments ***");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
     }
 
-    print "---Delete $member in $ml mailing list\n";
+    print "---Delete $member in $ml mailing list\n" if $debug0;
 
     # &GetCF($cf, $ml, *config, *cur_config); 
     &GetConfigPH($ml);
@@ -4404,8 +4421,8 @@ sub do_byeuser
 
     # mkdir ML Directory
     if (! -d "$ML_DIR/$ml") {
-	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
-	print "***Error: $ml ML NOT CREATED\n";
+	&Log("ERROR: makefml::$proc cannot find $ML_DIR/$ml");
+	print "***ERROR: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
@@ -4444,8 +4461,8 @@ sub do_ctladdr
     $proc =~ tr/A-Z/a-z/; # lower
 
     if (! $ml || !$addr) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: the number of arguments ***");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	$XStatus = 'ERROR: makefml.invalid_arg';
 	return;
@@ -4453,21 +4470,21 @@ sub do_ctladdr
 
     if ($proc eq 'chaddr' || $proc eq 'matome' || $proc eq 'digest') {
 	if ($opt eq '') { # may be "matome 0"
-	    &Log("Error: makefml::$proc has no option");
-	    &Debug("*** Syntax Error: makefml::$proc has no option ***");
+	    &Log("ERROR: makefml::$proc has no option");
+	    &Debug("*** SYNTAX ERROR: makefml::$proc has no option ***");
 	    $XStatus = 'ERROR: makefml.syntax_error';
 	    return;
 	}
     }
 
     if ($proc eq 'chaddr' && &Value('USE_MEMBER_NAME')) {
-	&Debug("*** Error ***");
+	&Debug("*** ERROR ***");
 	&Debug("*** If you use \$USE_MEMBER_NAME, please use");
 	&Debug("*** \"makefml command $ml $proc addr new-addr\"");
 	    $XStatus = 'ERROR: makefml.syntax_error';
     }
 
-    print "---$proc $addr in $ml mailing list\n";
+    print "---$proc $addr in $ml mailing list\n" if $debug0;
 
     # &GetCF($cf, $ml, *config, *cur_config);
     &GetConfigPH($ml);
@@ -4494,8 +4511,8 @@ sub do_ctladdr
 
     # mkdir ML Directory
     if (! -d "$ML_DIR/$ml") {
-	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
-	print "***Error: $ml ML NOT CREATED\n";
+	&Log("ERROR: makefml::$proc cannot find $ML_DIR/$ml");
+	print "***ERROR: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	$XStatus = 'ERROR: makefml.no_such_ml';
 	return;
@@ -4513,7 +4530,7 @@ sub do_ctladdr
 	    print "\tChanged $found addrs.\n" if $found > 1;
 	}
 	else {
-	    print "\t*** Error: Nothing has been changed. ***\n";
+	    print "\t*** ERROR: Nothing has been changed. ***\n";
 	    $XStatus = 'ERROR: makefml.nothing_changed';
 	}
     }
@@ -4534,8 +4551,8 @@ sub AutoRegistrableP
 	print STDERR "REJECT_{POST,COMMAND}_HANDLER is vaild\n" if $debug;
     }
     else {
-	print STDERR "Error: REJECT_{POST,COMMAND}_HANDLER is invaild\n";
-	&Log("Error: REJECT_{POST,COMMAND}_HANDLER is invaild");
+	print STDERR "ERROR: REJECT_{POST,COMMAND}_HANDLER is invaild\n";
+	&Log("ERROR: REJECT_{POST,COMMAND}_HANDLER is invaild");
     }
 
     if ($REJECT_POST_HANDLER =~ /auto\S+regist/ &&
@@ -4588,7 +4605,7 @@ sub UseSeparateListP
 
 sub do_fmlserv
 {
-    print "---Configure fmlserv mailing list ... \n";
+    print "---Configure fmlserv mailing list ... \n" if $debug0;
 
     # special assigned ML;
     $ml = "fmlserv";
@@ -4672,8 +4689,8 @@ sub do_lock
     $timeout = $timeout || 3600;
 
     if (! $ml) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: the number of arguments ***");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	&XSWarn("invalid_number_of_argument");
 	return;
@@ -4695,8 +4712,8 @@ sub do_command
     $proc =~ s/do_//;
 
     if (! $ml || !$member) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: the number of arguments");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: the number of arguments");
 	&Debug("\n\tmakefml $proc ML address command-strings");
 	&Debug("\te.g.");
 	&Debug("\tmakefml $proc ML address mget last:100 mp");
@@ -4705,14 +4722,14 @@ sub do_command
     }
 
     if ($member !~ /\@/) {
-	&Log("Error: makefml::$proc invalid arguments");
-	&Debug("*** Syntax Error: command ML \"E-Mail Address\" ...");
+	&Log("ERROR: makefml::$proc invalid arguments");
+	&Debug("*** SYNTAX ERROR: command ML \"E-Mail Address\" ...");
 	return;	
     } 
 
     if (grep(/admin|approve/, @arg)) {
-	&Log("Error: makefml::$proc does not emulate 'admin' command");
-	&Debug("*** Syntax Error: $proc doesn't emulate 'admin' command");
+	&Log("ERROR: makefml::$proc does not emulate 'admin' command");
+	&Debug("*** SYNTAX ERROR: $proc doesn't emulate 'admin' command");
 	&Debug("***               since authentication is requried");
 	return;
     }
@@ -4828,7 +4845,7 @@ sub do_update
     }
     else {
 	print "\n";
-	print "*** Error: I cannot find the template\n";
+	print "*** ERROR: I cannot find the template\n";
 	print "***        FAILS TO UPDATE $file\n";
 	print "\n";
     }
@@ -5076,7 +5093,7 @@ sub WarnYourAreRoot
     local($f) = $fp;
     $f =~ s/do_//;
 
-    &Log("Error: makefml::$f you should not run makefml as root.");
+    &Log("ERROR: makefml::$f you should not run makefml as root.");
 
     print "************************* WARNING *************************\n";
     print "\n";
@@ -5106,7 +5123,7 @@ sub CheckMember
       $has_special_char = 1; 
     }
 
-    open(FILE, $file) || (&Log("Error: cannot open $file"), return 0);
+    open(FILE, $file) || (&Log("ERROR: cannot open $file"), return 0);
 
   getline: while (<FILE>) {
       chop; 
@@ -5213,7 +5230,7 @@ sub GetGID
     local($gid);
 
     $gid = (getgrnam($_[0]))[2];
-    print STDERR "Error: No such group '$_[0]'\n" if $gid eq '';
+    print STDERR "ERROR: No such group '$_[0]'\n" if $gid eq '';
     $gid;
 }
 
@@ -5235,7 +5252,7 @@ sub MakeWritableDir
 sub MakeDir
 {
     local($info) = " GID=$GID" if $GID ne '';
-    print "---Make Directory ($_[0])\t(UID=$<$info)\n";
+    print "---Make Directory ($_[0])\t(UID=$<$info)\n" if $debug0;
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || &Mkdir($_[0], 0775);
@@ -5246,12 +5263,14 @@ sub MakeDir
 	-d $_[0] || &Mkdir($_[0], 0755);
 	&SetGidBit($_[0]);
     }
+
+    print "   directory $_[0] is created as UID=$<$info\n";
 }
 
 sub MakeSubDir
 {
     local($info) = " GID=$GID" if $GID ne '';
-    print "---Make Directory ($_[0])\t(UID=$<$info)\n";
+    print "---Make Directory ($_[0])\t(UID=$<$info)\n" if $debug0;
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || &Mkdir($_[0], 0770);
@@ -5261,6 +5280,8 @@ sub MakeSubDir
     else {
 	-d $_[0] || &Mkdir($_[0], 0700);
     }
+
+    print "   directory $_[0] is created as UID=$<$info\n";
 }
 
 
@@ -5306,7 +5327,7 @@ sub main'Dumpvar
     $package = 'Config';
 
     if ($] =~ /5\.\d\d\d/) { 
-	*stab = *{"${package}::"}; # syntax Error? but this {} is required;
+	*stab = *{"${package}::"}; # SYNTAX ERROR? but this {} is required;
     }
     else {
 	(*stab) = eval("*_$package");
@@ -5409,7 +5430,7 @@ sub FLock
     ++$FH;
 
     open($FH, $lockf) || do {
-	&Log("Error: Flock cannot open $lockf");
+	&Log("ERROR: Flock cannot open $lockf");
 	return 0;
     };
 
@@ -5532,7 +5553,7 @@ sub CleanUpLockFiles
 	}
 
 	if ($max <= 0) {
-	    print STDERR "Error: cannot unlink $_, give up!\n";
+	    print STDERR "ERROR: cannot unlink $_, give up!\n";
 	    print STDERR "       Please remove $_ by hand, please\n";
 	}
     }
@@ -5622,7 +5643,7 @@ sub DoTrySmtpConnect
     else { 
 	$VERBOSE_STR = 
 	    sprintf("socket(S, %s, %s, %s)", &PF_INET, &SOCK_STREAM, $proto);
-	return ("Smtp::socket->Error[$!]");
+	return ("Smtp::socket->ERROR[$!]");
     }
     
     if (connect(S, $target)) { 
@@ -5632,7 +5653,7 @@ sub DoTrySmtpConnect
     else { 
 	$VERBOSE_STR = sprintf("connect(S, %s, %s, %s, %s)\n",
 			       $pat, &AF_INET, $port, $addrs);
-	return ("Smtp::connect($host)->Error[$!]");
+	return ("Smtp::connect($host)->ERROR[$!]");
     }
 
     close(S);
@@ -6347,7 +6368,7 @@ sub SaveCGIConf
 	    print STDERR "\tcgi configuration is saved in $cf.\n";
 	}
 	else {
-	    &Log("Error: cannot rename($new, $cf)");
+	    &Log("ERROR: cannot rename($new, $cf)");
 	}
     }
 }

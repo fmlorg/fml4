@@ -50,7 +50,7 @@ sub DoSetAdminMode
 	    return 'LAST';
 	}
 	elsif (! $status)  {
-	    &Log("Error: admin command mode error, ends");
+	    &Log("ERROR: admin command mode error, ends");
 	    # not required since return value ends command
 	    $e{'mode:admin'} = 0;
 	    return 'LAST';
@@ -116,7 +116,7 @@ sub DoApprove
 	    return 'LAST';
 	}
 	elsif (! $status)  {
-	    &Log("Error: admin command mode error, ends");
+	    &Log("ERROR: admin command mode error, ends");
 	    return 'LAST';
 	};
 
@@ -126,7 +126,7 @@ sub DoApprove
     else {
 	&Mesg(*e, $NULL, 'auth.invalid_password', $proc);
 	&Mesg(*e, "$proc: password unmatched.");
-	&Log("Error: admin ${proc} password unmatches.");
+	&Log("ERROR: admin ${proc} password unmatches.");
 
 	if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
 	    &Mesg(*e, $NULL, 'auth.please_use_pgp', $proc);
@@ -355,7 +355,7 @@ sub AdminCommand
     # ALREADY whether member (in member-admin) or not is checked.
     # 
     $UnderAuth || &AdminAuthP($cmd, *Fld, *e, *opt) || do {
-	&Log("Error: admin mode authentication fails");
+	&Log("ERROR: admin mode authentication fails");
 	return $NULL;
     };
 
@@ -571,7 +571,7 @@ sub ProcAdminSubscribe
 
     if ($REGISTRATION_ACCEPT_ADDR) {
 	if ($addr !~ /$REGISTRATION_ACCEPT_ADDR/i) {
-	    &Log("Error: AutoRegist: address [$addr] is not acceptable");
+	    &Log("ERROR: AutoRegist: address [$addr] is not acceptable");
 	    return 0;
 	}
     }
@@ -608,7 +608,7 @@ sub ProcAdminSubscribe
     }
     else {
 	local($r) = $!;
-	&LogWEnv("Error: admin $proc [$r]",*e);
+	&LogWEnv("ERROR: admin $proc [$r]",*e);
 	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	$swf = 0;
     }
@@ -690,7 +690,7 @@ sub ProcAdminAddAdmin
     }
     else {
 	local($r) = $!;
-	&LogWEnv("Error: admin $proc [$r]", *e);
+	&LogWEnv("ERROR: admin $proc [$r]", *e);
 	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	return $NULL;
     }
@@ -767,7 +767,7 @@ sub ProcAdminLog
 	&Mesg(*e, $_ = `$prog $flag $LOGFILE`);
 
 	if ($@) {
-	    &LogWEnv("Error: admin $proc $opt", *e);
+	    &LogWEnv("ERROR: admin $proc $opt", *e);
 	    &Mesg(*e, $NULL, 'error', "admin $proc");
 	}
     }
@@ -849,7 +849,7 @@ sub ProcAdminDir
 
     &Mesg(*e, $_ = `$prog $flag $opt`); # this cast (->scaler)is required;
     if ($@) {
-	&LogWEnv("Error: admin $proc $opt", *e);
+	&LogWEnv("ERROR: admin $proc $opt", *e);
 	&Mesg(*e, $NULL, 'error', "admin $proc");
     }
 
@@ -911,7 +911,7 @@ sub ProcAdminUnlinkArticle
 	if ($b > 0) {
 	    if ($opt <= $b) { 
 		&RemoveArticleInArchive($opt) || do {
-		    &Mesg(*e, "Error: removing article $opt in archive fails.");
+		    &Mesg(*e, "ERROR: removing article $opt in archive fails.");
 		    &Mesg(*e, "       See logfile for more details");
 		    return $NULL;
 		};
@@ -1013,7 +1013,7 @@ sub ProcAdminPutFile
 	    &LogWEnv("admin $proc $file -> $file.bak", *e);
 	}
 	else {
-	    &LogWEnv("Error: admin $proc cannot rename $file -> $file.bak",*e);
+	    &LogWEnv("ERROR: admin $proc cannot rename $file -> $file.bak",*e);
 	    &Mesg(*e, $NULL, 'fop.rename.fail', $file, $file.".bak");
 	}
 
@@ -1026,7 +1026,7 @@ sub ProcAdminPutFile
 	1;
     }
     else {
-	&LogWEnv("Error: admin $proc >> \$DIR/$opt FAILS", *e);
+	&LogWEnv("ERROR: admin $proc >> \$DIR/$opt FAILS", *e);
 	&Mesg(*e, $NULL, 'fop.write.fail', "\$DIR/$opt");
 	0; # should stop Body is to put, not commands.
     }
@@ -1055,7 +1055,7 @@ sub ProcAdminRename
 	    local($mode) = (stat($new))[2];
 
 	    rename($new, "$new.bak") || do {
-		&LogWEnv("Error: admin $proc $new -> $new.bak Fails, stop",*e);
+		&LogWEnv("ERROR: admin $proc $new -> $new.bak Fails, stop",*e);
 		&Mesg(*e, $NULL, 'fop.rename.fail', $new, $new.".bak");
 	    };
 
@@ -1069,14 +1069,14 @@ sub ProcAdminRename
 	    &LogWEnv("admin $proc $opt to $new", *e);
 	}
 	else {
-	    &LogWEnv("Error: admin $proc $opt to $new FAILS", *e);
+	    &LogWEnv("ERROR: admin $proc $opt to $new FAILS", *e);
 	    &Mesg(*e, $NULL, 'fop.rename.fail', $file, $new);
 	}
 
 	chmod $mode, $file;
     }
     else {
-	&LogWEnv("Error: admin $proc cannot find \$DIR/$opt", *e);
+	&LogWEnv("ERROR: admin $proc cannot find \$DIR/$opt", *e);
 	&Mesg(*e, $NULL, 'no_such_file', "\$DIR/$opt");
     }
 

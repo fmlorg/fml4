@@ -477,7 +477,7 @@ sub Log {
     &GetTime;
     $str =~ s/\015\012$//;	# FIX for SMTP
     if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
-	$Envelope{'error'} .= "Sendmail Error:\n";
+	$Envelope{'error'} .= "Sendmail ERROR:\n";
 	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
     }
     

@@ -489,7 +489,7 @@ sub ReadFile
 		}
 		elsif ($PrevCSPrequireECSP) {
 		    if (! /^=E\.[CSP]/) {
-			print STDERR "--Error: missing =E.[CSP]?\n";
+			print STDERR "--ERROR: missing =E.[CSP]?\n";
 			print STDERR "         prev: $PrevCSPrequireECSP\n";
 			print STDERR "          now: $_\n";
 		    }
@@ -692,7 +692,7 @@ sub OutputHtml
 		&POH("   content=\"text/html; charset=ISO-2022-JP\">\n");
 	    }
 	    else {
-		print STDERR "error: http-equiv lang=$Lang";
+		print STDERR "ERROR: http-equiv lang=$Lang";
 	    }
 
 	    # <LINK ... > element
@@ -902,7 +902,7 @@ sub OutputFile
 	    s/^(\#\.index|\.toc)/$Index{$Lang}/; 
 	    s/^=S//;
 
-	    print STDERR "==Error:\n- $prev\n+ $_\n" if $Error; 
+	    print STDERR "==ERROR:\n- $prev\n+ $_\n" if $Error; 
 	    $prev = $_;
 
 	    print $_;
@@ -937,7 +937,7 @@ sub OutputLatex
 	s/^(\#\.index|\.toc)/$Index{$Lang}/; 
 	s/^=S//;
 
-	print STDERR "==Error:\n- $prev\n+ $_\n" if $Error; 
+	print STDERR "==ERROR:\n- $prev\n+ $_\n" if $Error; 
 	$prev = $_;
 
 	print $_;
@@ -1242,7 +1242,7 @@ sub Expand
 	&Log(".ps{$s} -> $Chapter.$Figure") if $debug;
 
 	if ($figure_index{$s}) {
-	    &Log("Error: $s is already assinged as $figure_index{$s}");
+	    &Log("ERROR: $s is already assinged as $figure_index{$s}");
 	}
 	else {
 	    $figure_index{$s} = "$Chapter.$Figure";
