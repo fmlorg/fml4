@@ -5139,11 +5139,25 @@ sub FixDefault
     local(*query, *config, $top_level) = @_;
     local(@x, $x);
 
+    print STDERR "change default: ($top_level)\n" if $debug;
+
     if ($query{"type"} eq "y-or-n" || 
 	$query{"type"} eq "reverse-y-or-n") {
 	@x = split(/\//, $top_level);
 	$x = $x[$#x];
-	$query{'default'} = $config{$x} ? 'y' : 'n';
+	$x = $Menu'CONFIG{$top_level} ? $Menu'CONFIG{$top_level} : $x;
+
+	print STDERR "   $x => $config{$x} ? 'y' : 'n'\n" ; # if $debug; 
+
+	if ($query{"type"} eq "y-or-n") {
+	    $query{'default'} = $config{$x} ? 'y' : 'n';
+	}
+	else {
+	    $query{'default'} = $config{$x} ? 'n' : 'y';
+	}
+    }
+    else {
+	print STDERR "   no operation (no conversion)\n";
     }
 }
 
