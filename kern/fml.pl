@@ -2068,6 +2068,40 @@ sub GetFirstLineFromFile
     $_;
 }
 
+# For Example, 
+# $pp = $p = 0;
+# while (1) { 
+#   $p = &GetLinePtrFromHash(*Envelope, "Body", $pp);
+#   print substr($Envelope{'Body'}, $pp, $p-$pp+1);
+#   last if $p < 0; 
+#   $pp = $p + 1;
+# }
+sub GetLinePtrFromHash
+{
+    local(*e, $key, $ptr) = @_;
+    index($e{$key}, "\n", $ptr);
+}
+
+# For example,
+# ($p, $pb, $pe) = &GetBlockPtrFromHash(*Envelope, 'Body', $b, $pp);
+# last if $p < 0;
+# print substr($Envelope{'Body'}, $pb, $pe - $pb);
+sub GetBlockPtrFromHash
+{
+    local(*e, $key, $b, $ptr) = @_;
+    local($p, $pb, $pe);
+    $p  = &GetPtrFromHash(*e, 'Body', $b, $ptr);
+    $pb = &GetPtrFromHash(*e, 'Body', "\n\n", $p + 1);
+    $pe = &GetPtrFromHash(*e, 'Body', $b, $pb + 1);
+    ($p, $pb + 2, $pe)
+}
+
+sub GetPtrFromHash
+{
+    local(*e, $key, $pat, $ptr) = @_;
+    index($e{$key}, $pat, $ptr);
+}
+
 # useful for "Read Open"
 sub Open
 {
