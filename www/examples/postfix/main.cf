@@ -1,2 +1,4 @@
 alias_database = hash:/etc/aliases, 
 	hash:/var/spool/ml/etc/aliases
+# gateway, you should also include $mydomain. Do not specify the
+allow_mail_to_commands = alias,forward,include
