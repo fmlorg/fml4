@@ -6,8 +6,8 @@
 
 # $Id$;
 
-### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
-$CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
+### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
+$CONFIG_DIR = '/tmp/-e/.fml'; # __MAKEFML_AUTO_REPLACED_HERE__
 
 &InitMakeFml;
 &InitTTY;
@@ -1535,6 +1535,8 @@ sub do_install
 	$cmd = &Query("Set up \"fmlserv\" system now? ", "y/n", "y|n", "n");
 	if ($cmd eq 'y') { &ExecCmd("fmlserv");}
     }
+
+    &FYI;
 }
 
 
@@ -2054,6 +2056,8 @@ sub SetGidBit
 }
 
 
+
+
 #################################################################
 package dumpvar;
 
@@ -2207,6 +2211,86 @@ sub MakeFml_V7UnLock
 
     $LockFile = $LockFile{$ml};
     &V7Unlock;
+}
+
+
+package main;
+
+sub TrySmtpConnect
+{
+    local($host) = @_;
+    local($result);
+
+    if ((! $exist_socket_ph) && $COMPAT_SOLARIS2) {
+	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
+	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
+	eval $eval;
+    }
+    elsif (! $exist_socket_ph) { # 4.4BSD (and 4.x BSD's)
+	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
+	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
+	eval $eval;
+    }
+
+    local($pat)    = 'S n a4 x8'; # 'S n C4 x8'? which is correct? 
+    local($addrs)  = (gethostbyname($host || 'localhost'))[4];
+    local($proto)  = (getprotobyname('tcp'))[2];
+    local($port)   = $PORT || (getservbyname('smtp', 'tcp'))[2];
+    $port          = 25 unless defined($port); # default port
+
+    # Check the possibilities of Errors
+    return ($error = "Cannot resolve the IP address[$host]") unless $addrs;
+    return ($error = "Cannot resolve proto")                 unless $proto;
+
+    # O.K. pack parameters to a struct;
+    local($target) = pack($pat, &AF_INET, $port, $addrs);
+
+    # IPC open
+    if (socket(S, &PF_INET, &SOCK_STREAM, $proto)) { 
+	$result = "socket ok";
+    } 
+    else { 
+	return ($error = "Smtp::socket->Error[$!]");
+    }
+    
+    if (connect(S, $target)) { 
+	$result = "connect ok";
+     } 
+    else { 
+	return ($error = "Smtp::connect($host)->Error[$!]");
+    }
+
+    $result; # success;
+}
+
+sub FYI
+{
+    local($r, $m);
+
+    $r = &TrySmtpConnect('localhost');
+
+    if ($r eq 'connect ok') {
+	# $m .= "OK...sendmail RUN on this machine.\n";
+    }
+    else {
+	$m .= "Hmm...sendmail DOES NOT RUN on this machine.\n";
+	$m .= 
+	    "(\$HOST in config.ph should be a machine where sendmail runs)\n";
+	$m .= &MX;
+    }
+
+    print STDERR "\nFYI: $m\n" if $m;
+}
+
+sub MX
+{
+    local($mx, $m);
+    $mx = `nslookup -q=mx "$DOMAIN."`;
+    $m .= "\tsendmail may run in your $DOMAIN:\n";
+    for (split(/\n/, $mx)) {
+	/mail exchanger\s*=\s*(\S+)/ && ($m .= "\t$1\n");
+    }
+    $m;
 }
 
 1;
