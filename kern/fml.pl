@@ -203,12 +203,13 @@ sub ModeBifurcate
 	       $PERMIT_COMMAND_FROM eq "members"
 	       ) {
 	    if ($member_p) {
-		require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
-
 		if ($Envelope{'mode:req:unsubscribe-confirm'}) {
+		    undef $LOAD_LIBRARY;
+		    require 'libfml.pl';
 		    &Command($Envelope{'buf:req:unsubscribe-confirm'});
 		}
 		else {
+		    require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 		    &Command() if $ForceKickOffCommand;
 		}
 	    }
