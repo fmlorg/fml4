@@ -387,6 +387,7 @@ GEN_ARCHIVE () {
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
 	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
 	DATE=`date +%y%h%d`
+	DATE=` $FML/distrib/bin/date `
 
 	echo "Synchronizing $FTP/snapshot ..."
 	echo " "
