@@ -43,10 +43,10 @@ __EXPORTS_DIR__ = FML COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
 ### if ($0 eq __FILE__)
 ###
 __ALL__  = $(DESTDIR) $(FTP_DIR) $(SNAPSHOT_DIR) $(WWW_DIR)
-__ALL__  = $(DESTDIR) $(TMP_DIR) $(VAR_DIR)
-__ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_DRAFTS_DIR)
-__ALL__ +=  $(WORK_HTML_DIR) $(WORK_HTML_ADV_DIR)
-__ALL__ += $(TMP_DIR) $(COMPILE_DIR)
+__ALL__ += $(TMP_DIR) $(VAR_DIR)
+__ALL__ += $(WORK_DOC_DIR) $(WORK_DRAFTS_DIR)
+__ALL__ += $(WORK_HTML_DIR) $(WORK_HTML_ADV_DIR)
+__ALL__ += $(COMPILE_DIR)
 
 .for dir in ${__ALL__}
 .PHONY: ${dir}
