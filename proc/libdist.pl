@@ -20,6 +20,10 @@ sub DoDistribute
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
     @Rcpt = (); $Rcpt = 0;
 
+    # cut off the html mail's second (and after ) multipart parts
+    # e.g. mails from outlook
+    if ($AGAINST_HTML_MAIL) { &use('disthack'); &AgainstHtmlMail(*e);}
+
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {
 	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp') {
@@ -178,7 +182,7 @@ sub DoDistribute
 	if ($AGAINST_MAIL_WITHOUT_REFERENCE) {
 	    if ($pat) {
 		&use('disthack');
-		&AgainstEudora(*e, $pat);
+		&AgainstReplyWithNoRef(*e, $pat);
 	    }
 	    else {
 		&Log("\$AGAINST_MAIL_WITHOUT_REFERENCE not work of no defined subject tag");
