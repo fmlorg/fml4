@@ -1,0 +1,106 @@
+.C	IRC(Internet Relay Chat)
+
+何の役に立つのか分からないのがおしゃれ(爆笑)
+
+.S	IRCへのリレー
+
+IRCへ入って、書いて、抜けるという一撃離脱の処理をするルーチンがありま
+す。
+
+.q
+fml.pl -> 処理
+	
+	IRCへ入る。
+	connect -> irc server:6667
+
+	IRC protocol
+
+	&Write2Irc(IRCへ書き込みたい内容)
+
+	IRCから抜ける 	
+.~q
+
+
+.S	変数
+
+# irc server 
+$IRC_SERVER  = "irc.server";
+.k	$IRC_SERVER
+
+# irc port
+$IRC_PORT    = 6667;
+.k	$IRC_PORT
+
+# irc channel to write
+$IRC_CHANNEL = '#test';
+.k	$IRC_CHANNEL
+
+# Your Name
+$IRC_NAME    = "test";
+.k	$IRC_NAME
+
+# Nickname
+$IRC_NICK    = "test";
+.k	$IRC_NICK
+
+# the last message of the end of irc session
+$IRC_SIGNOFF_MSG = "そ、そなの？";
+.k	$IRC_SIGNOFF_MSG
+
+.~q
+
+
+.S	設定例
+
+
+config.phに付け加える例:
+
+メーリングリストに来た記事をIRCへリレーする
+
+
+$IRC_SERVER  = "hikari.sapporo.iij.ad.jp";
+$IRC_PORT    = 6667;
+$IRC_CHANNEL = '#test';
+$IRC_NAME    = "test";
+$IRC_NICK    = "test";
+
+$FML_EXIT_HOOK = q!
+	local($buf);
+
+	$IRC_SIGNOFF_MSG = "End of Article $ID";
+	require 'contrib/irc/libirc.pl';
+
+	$buf .= "From: $Envelope{'h:From:'}\n";
+	$buf .= "Subject: $Envelope{'h:Subject:'}\n";
+	$buf .= "Article: $ID\n";
+	$buf .= "\n";
+	$buf .= $Envelope{'Body'};
+
+	&Write2Irc($buf);
+!;
+
+
+.S	stdin2irc.pl
+
+
+STDIN からほうり込んだ文字列をIRCへ書き込みます。
+前述のものと異なり、この stdin2irc.pl ではIRCには入りっぱなしで、
+入力を待つものです。典型的な使い方は
+
+.q
+tail -f 何かのログファイル | perl stdin2irc.pl -f 設定ファイル
+.~q
+
+のように使います。例えば /var/log/messages をIRCの画面で見張りたいなど
+に使います(何だそりゃ:)
+
+
+.# $Id$
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
