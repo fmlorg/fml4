@@ -4,6 +4,13 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/23
+
+   kern/libkernsubr2.pl
+	fix List-* header for mail submission from stranges in
+	"anyone" mode. 
+	PR by KITAZIMA Tuneki <tuneki-k@ksp.nis.nec.co.jp> (fml-help: 00899) 
+
 2001/09/21
 
    modify HTML-ify for win32 system
