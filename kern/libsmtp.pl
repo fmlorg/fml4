@@ -162,7 +162,7 @@ sub SmtpConnect
 {
     local(*host, *error) = @_;
 
-    if (1 || $USE_INET6) {
+    eval {
 	my $mta = 'localhost:25' || '[::1]:25';
 	my $obj;
 	my $pkg = "Mail::Delivery";
@@ -188,7 +188,7 @@ sub SmtpConnect
 		}
 	    }
 	}
-    }
+    };
 
     local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
