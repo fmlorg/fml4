@@ -22,9 +22,11 @@ if ($opt_f) {
     @list = split(/[\s\n]+/, `cat $opt_f`);
     print STDERR "cvsscan: cvs status @list\n";
     open(CVS, "cvs status @list|") || die($!);
+    print STDERR "cvs status @list\n";
 }
 else {
     open(CVS, "cvs status @ARGV|") || die($!);
+    print STDERR "cvs status @ARGV\n";
 }
 
 while (<CVS>) {
