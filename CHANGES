@@ -7,6 +7,9 @@
 
 2002/02/16
 
+   4.0D
+	bump up to 4.0D (XVERP)
+
    Postfix VERPs
 
 	Postfix の XVERP を有効にしました。
@@ -220,7 +223,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.235 2002/02/10 13:54:11 fukachan Exp $
+	add $FML: CHANGES,v 1.236 2002/02/16 14:24:18 fukachan Exp $
 
 2001/10/03
 
