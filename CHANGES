@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/02
+
+   sbin/makefml
+	preserver inode permission in manipulate *passwd.
+	modify lockfile only if virtual ml is 'etc' (that is
+	/var/spool/ml/etc).
 
 2000/11/30
 
