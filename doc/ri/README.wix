@@ -154,6 +154,12 @@ You can obtaion the latest (fml-current) documents and sources here.
 You could see the latest topics on fml-support mailing lists and fml
 Home page
 
+なお試験的に配布ドキュメント群へのサーチができるようになっています。
+キーワードのサーチに使えるといいな。
+=E
+You can use search engine over distributed documents in
+http://www.fml.org/fml/ .
+
 
 ○メールしか使えない人向け
 
@@ -281,13 +287,24 @@ Please see the file INSTALL for the detail.
 =E.S	Target machine environment
 
 fml 2.1 のターゲットマシン/テスト環境は
+=E
+The target and experimental machines are
 
-	sendmail 8.8.7 + perl5.003 on NetBSD 1.2 RELEASE
-	sendmail 8.8.7 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.8.7 + exim1.70 + qmail 1.01 + perl4.036 on NetBSD 1.1B
-	sendmail 8.8.7 + exim1.70 + qmail 1.01 + perl5.003 on NetBSD 1.1B
+	sendmail 8.8.8 + perl5.003 on NetBSD 1.2 RELEASE
+	sendmail 8.8.8 + perl4.036/perl5.003 on NetBSD 1.2 Beta
 
-です。
+なおFML.ORGの配送システムは
+=E
+and the delivery system on FML.ORG is combination of 4 MTA's:
+
+	sendmail 8.8.7+smtpfeed α 
+	生 sendmail 8.8.8
+	exim 1.70
+	qmail 1.01
+
+の4つのMTAを使った並列配送で数十倍速になっています:)。
+=E
+which accelerate the delivery.
 
 
 .S	Supporeted Architectures
