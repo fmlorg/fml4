@@ -653,7 +653,7 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 .S	how to version up
 .xref	version-up
 
-makefml を使ってインストールしてもらのが確実です。
+makefml を使ってインストールしてもらうのが確実です。
 makefml の使い方については INSTALL マニュアルを見て下さい。
 
 
@@ -678,7 +678,7 @@ config.ph にも version という概念があります。
 る場合、ほとんどの変数について自動的に補正が加えられ昔作った config.ph 
 をそのまま使っても大丈夫なようになっています。
 
-config.ph でちょっと複雑な HOOK を書けている場合はちょっと注意がいるで
+config.ph でちょっと複雑な HOOK をかけている場合はちょっと注意がいるで
 しょう。というのはHOOKで使う関数や変数等が今でもサポートされているとは
 限らないからです。
 
