@@ -260,21 +260,33 @@ documents.
 
 .if LANG == JAPANESE
 fml に関する議論、バグレポート、質問、要望などあらゆる:)目的に
-fml-support ML (言語は日本語)が用意されています。
+fml-help ML (言語は日本語)が用意されています。
 
-	fml-support@ffs.fml.org (日本語)
-	# FYI: fml-users@ffs.fml.org   (公用語は英語)
+	fml-help@ffs.fml.org (日本語)
 
-fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ subscribe 
+fml-help MLへの自動登録は fml-help-ctl@ffs.fml.org へ subscribe 
 の後に自分の名前をローマ字で続けたフレーズをメールの"本文"(注意: メー
 ルの本文)に書いて送って下さい。例えば次のようになります。
 
-	To: fml-support-ctl@ffs.fml.org
+	To: fml-help-ctl@ffs.fml.org
 
 	subscribe Anne Shirley
 
 このメールに対し、登録意志確認のメールが届くのでそのメールに返事をする
 とＭＬに登録されます。
+
+注意: 今まで fml-support ML を同じ運用していました。今でも
+      fml-support ML は使われています。fml-help との違いは
+
+	fml-help    WWW でログを公開
+  	fml-support メンバーのみメールで過去ログを参照可能
+
+という点だけです。どちらも登録されているメンバーのみが投稿・コマンドの
+利用ができます。
+
+自分の設定は WWW で公開したくないなどの理由がない限り、
+fml-help へ投稿していただければと思います。
+
 
 バグレポート等では、使用している OS、メールサーバ、fml などの各バージョ
 ンについての情報を付記して下さい。チェックして欲しい項目はたとえば 
@@ -294,7 +306,7 @@ your corrections, comments, and suggestions. I set up the following ML
 for it
 
 	fml-users@ffs.fml.org   (Language is English)
-	# FYI: fml-support@ffs.fml.org (Language is Japanese)
+	# FYI: fml-help@ffs.fml.org (Language is Japanese)
 
 To join fml-users, send the following phrase in the mail body
 
@@ -319,13 +331,13 @@ lists.
 作者個人宛のメールは <fml-bugs@ffs.fml.org> に送って下さい。しかし個人
 宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れないことがよく
 あります。 ML ならわかる人がすぐに答えてくれる可能性もありますから、で
-きるだけ fml-support ML宛へ投げてもらえると助かります。"どうしても"内
+きるだけ fml-help ML宛へ投げてもらえると助かります。"どうしても"内
 密な相談とか、DMで聞きたいことは投げてもらっても構いませんが、返事はも
 のすごく遅いかもしれません _o_
 
 fml-bugs はあくまでもＤＭのアドレスです。情報は埋もれ共有されません。
-一方 fml-query@ffs.fml.org へ送ると、そのメールは fml-support MLへフォ
-ワードされ ML の記事として扱われます。fml-support に参加したくないが、
+一方 fml-query@ffs.fml.org へ送ると、そのメールは fml-help MLへフォ
+ワードされ ML の記事として扱われます。fml-help に参加したくないが、
 ML に公開してもよい情報なら是非 fml-query を使って下さい。
 .fi
 .if LANG == ENGLISH
@@ -333,6 +345,12 @@ If you want to contact only the author, please send e-mail to the
 address <fml-bugs@ffs.fml.org>. 
 .fi
 
+
+○ メーリングリストのログは WWW で見られますか？
+
+.url	http://www.fml.org/mlarchives/
+
+fml-help 分は見られます。fml-support はメールでのみ取り寄せできます。
 
 
 .C	インストール
@@ -530,7 +548,7 @@ $Id$
 .# .C	Acknowledgments 
 .# 
 .# I thank a lot of people for valuable comments, suggestions, bug
-.# reports, contributions, fixes and patches both on fml-support ML and
+.# reports, contributions, fixes and patches both on fml-help ML and
 .# in private communication. I distribute some contributed codes as a
 .# part of fml distribution. I refer each contribution in RELEASE_NOTES.
 .# 

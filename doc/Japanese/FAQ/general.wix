@@ -1,6 +1,44 @@
 .C	一般的な質問
 =E.C	General questions
 
+.S	メーリングリストはありますか？
+
+fml に関する議論、バグレポート、質問、要望などあらゆる:)目的に
+fml-help ML (言語は日本語)が用意されています。
+登録は fml-help-ctl@ffs.fml.org へ subscribe の後に自分の名前をローマ
+字で続けたフレーズをメールの"本文"(注意: メールの本文)に書いて送って下
+さい。例えば次のようになります。
+
+	To: fml-help-ctl@ffs.fml.org
+
+	subscribe Anne Shirley
+
+このメールに対し、登録意志確認のメールが届くのでそのメールに返事をする
+とＭＬに登録されます。
+
+.S	メーリングリスト: fml-help と fml-support はどう違いますか？
+
+今まで fml-support ML を同じ運用していました。今でも
+fml-support ML は使われています。fml-help との違いは
+
+	fml-help    WWW でログを公開
+  	fml-support メンバーのみメールで過去ログを参照可能
+
+という点だけです。どちらも登録されているメンバーのみが投稿・コマンドの
+利用ができます。
+
+自分の設定は WWW で公開したくないなどの理由がない限り、
+fml-help へ投稿していただければと思います。
+
+
+.S	メーリングリストのログは WWW で見られますか？
+
+.url	http://www.fml.org/mlarchives/
+
+fml-help 分は見られます。
+fml-support はメールでのみ取り寄せできます。
+
+
 .S	エラーになった。
 =E.S	something error occurs ?
 
