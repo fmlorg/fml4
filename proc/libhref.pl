@@ -101,7 +101,11 @@ sub TalkWithHttpServer
 	select(S); $| = 1; select(STDOUT); # need flush of sockect <S>;
 
 	### INPUT 
-	if ($tp eq 'http') {
+	if ($e{"special:probehttp"} && $tp eq 'http') {
+	    $body = '/index.html' unless $body;
+	    print S "HEAD $body HTTP 1.0\n\n"; 
+	}
+	elsif ($tp eq 'http') {
 	    $body = '/index.html' unless $body;
 	    print S "GET $body\n"; 
 	}
