@@ -5,6 +5,8 @@
 Topic:	Melissa Macro Virus 対策
 	Melissa に感染した Microsoft Word 97 or Word 2000 がばらまくメー
 	ルを拒否する。
+=E
+Topic:	Melissa Macro Virus
 
 			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
 
@@ -15,6 +17,9 @@ Topic:	Melissa Macro Virus 対策
 [Abstract]
 
 Melissaが何か？については Cert Advisory を参照
+=E
+What is Melissa?
+
 .url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
 
 fmlのレベルでの対策は「特定のSubject:でフィルタリング」になる。できれ
@@ -25,6 +30,9 @@ fmlのレベルでの対策は「特定のSubject:でフィルタリング」になる。できれ
 -------------------------
 
 手順の意味についてはINSTALLマニュアルを参照して下さい
+=E
+See INSTALL manual for more details on how to configure fml.
+
 .url	http://www.fml.org/fml/INSTALL/
 
 
@@ -35,19 +43,29 @@ fmlのレベルでの対策は「特定のSubject:でフィルタリング」になる。できれ
 
 
 .C	フィルタリングに新ルールを加える
+=E.C	Add a new filtering rule
 
 どちらでも作業の結果は同じですが、使いなれている方法でどうぞ。
+=E
+The following ruels are the same. Please use one you are familliar with.
 
 .S	cfを使う人
+=E.S	cf
+
+=E
+To add the rule to "cf", 
 
 &DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
 
 をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
-に 
+に
+=E
+run to remake config.ph
 
 	% make config.ph
 
 .S	config.phを使う人
+=E.S	config.ph
 
 config.ph生書きの人は
 
@@ -57,6 +75,7 @@ config.ph生書きの人は
 
 
 .C	MTAで弾く
+=E.C	How MTA rejects
 
 .S	sendmail
 
@@ -69,6 +88,8 @@ config.ph生書きの人は
 .C	Further investigations
 
 より組織だったフィルタリングルール集を作れるか？
+=E
+Hmm, could we make filtering rule collection?
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi

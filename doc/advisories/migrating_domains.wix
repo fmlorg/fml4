@@ -3,10 +3,20 @@
 	========================================
 
 Topic: OR.JP => NE.JP ÂÐºö
+=E
+Topic: OR.JP => NE.JP
 
 	Copyright (C) 1999 Ken'ichi Fukamachi
 		All rights reserved.
 .~HTML_PRE
+
+.if LANG == ENGLISH
+***
+*** NOT TRANSLATE THIS DOCUMENT SINCE THIS TOPIC IS JAPAN SPECIFIC.
+***
+.return
+.fi
+
 -------------------------
 .toc
 -------------------------

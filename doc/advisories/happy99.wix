@@ -3,6 +3,8 @@
 	========================================
 
 Topic:	happy99対策
+=E
+Topic:	happy99
 
 			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
 
@@ -14,6 +16,9 @@ Topic:	happy99対策
 -------------------------
 
 手順の意味についてはINSTALLマニュアルを参照して下さい
+=E
+See INSTALL manual for more details on how to configure fml.
+
 .url	http://www.fml.org/fml/INSTALL/
 
 
@@ -24,36 +29,56 @@ Topic:	happy99対策
 
 
 .C	フィルタリングに新ルールを加える
+=E.C	Add a new filtering rule
 
 どちらでも作業の結果は同じですが、使いなれている方法でどうぞ。
+=E
+The following ruels are the same. Please use one you are familliar with.
 
 .S	cfを使う人
+=E.S	cf
+
+=E
+To add
 
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
 
 をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
 に 
+=E
+to the last of "cf" (after "LOCAL_CONFIG" line) and run
 
 	% make config.ph
 
 .S	config.phを使う人
+=E.S	config.ph
 
 config.ph生書きの人は
+=E
+To write 
 
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
 
 を追加。
+=E
+to the last of config.ph (but before the last "1;").
 
 
 .P	fml以外の部分で弾く
+=E.P	To reject except for fml
 
 .C	前処理プログラム bin/multipart.pl を使う場合
+=E.C	bin/multipart.pl
+
+=E
+Put multipart.pl between MTA and fml.pl. 
 
      MTA -> bin/multipart.pl -> fml.pl
 
-のように、前処理フィルタリングがある場合。
-multipart.pl については op.jpを参照
-http://www.fml.org/fml/op/
+のように、前処理フィルタリングがある場合。multipart.pl については 
+op.jpを参照
+
+.url	http://www.fml.org/fml/op/
 
 2.2A#34 以降のものにいれかえると happy99 が uuencode されたものがくっ
 ついてたらその部分を切りとる。
@@ -68,6 +93,8 @@ http://www.fml.org/fml/op/
 .C	Further investigations
 
 より組織だったフィルタリングルール集を作れるか？
+=E
+Hmm, could we make filtering rule collection?
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
