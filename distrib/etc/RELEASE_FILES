@@ -103,6 +103,7 @@ bin/emumail.pl
 bin/msend_master.sh
 bin/more_secure_cf.pl
 bin/translate.pl
+bin/resend.pl
 
 SBIN_SOURCES:
 sbin/localtest.pl
