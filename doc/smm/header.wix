@@ -96,7 +96,6 @@ X-Ml-Info: の内容を"書きたいこと"に設定する。
 .l	&DEFINE_FIELD_ORIGINAL
 .k	--oh:field
 
-
 SYNOPSIS:
 	&DEFINE_FIELD_ORIGINAL('field');
 
@@ -134,17 +133,18 @@ Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
 .S	Received: ヘッダを残す
 .k	Received: ヘッダを残す
 
-歴史的に「サーバで受けたところまではＯＫなんだから、管理者が責任を持っ
-て、ユーザにはＭＬサーバからユーザまでの配送分を見せれば十分だろう(余
-計なものは見せてもらわない方が幸せだろう)」という思想に基づき、デフォー
-ルトでは Received: はつけていません。またそれは too many hops を避ける
-ためにも有効です。
+歴史的に「サーバで受けたところまではOKなんだから、管理者が責任を持って、
+ユーザにはMLサーバからユーザまでの配送分を見せれば十分だろう(余計なも
+のは見せてもらわない方が幸せだろう)」という思想に基づき、デフォールト
+では Received: はつけていません。またそれは too many hops を避けるため
+にも有効です。
 
 念のためログを取るためには
 
 	&DEFINE_MODE("stdinlog");
 
-というモードがあります。これは入力を日毎にログファイルに残しておきます。
+というモードがあります。これは入力を日毎にログファイル(var/logの下)に
+残しておきます。
 
 なお Posted: (user が出した時間)と Date: (サーバが配送した時間) の違い
 を見るとサーバにたどり着くまでの時間差(Network 的にどのくらい遠いか？)
@@ -189,20 +189,19 @@ From: $MAINTAINER に限っては $MAINTAINER_SIGNATURE で signature をつけ
 .k	$MAINTAINER
 .k	$MAINTAINER_SIGNATURE
 
+Dynamic に補正する必要がある場合は
 
-.S	$REPORT_HEADER_CONFIG_HOOK
-.k	$REPORT_HEADER_CONFIG_HOOK
+	$REPORT_HEADER_CONFIG_HOOK
+.xref	$REPORT_HEADER_CONFIG_HOOK
 
-SMTP 配送ライブラリへ渡す直前に評価されるフック。
+で定義するとよい。
 
 
 .S	Subject: を (Elena 100) とかの任意の形に成形する
 .l	$SUBJECT_FREE_FORM
 
-	fml 	Subject: はいじらない
-	hml	Subject: [Elena:100]
-
-なんですが、他のフォーマットを使うために 
+fml デフォールトは「Subject: はいじらない。本来メールソフトが好きな形
+にフォーマットするものをサーバ側でフォーマットを押付けてはいけません」。
 例えば、
 
 	$SUBJECT_FREE_FORM = 1;
@@ -224,8 +223,8 @@ SMTP 配送ライブラリへ渡す直前に評価されるフック。
 	$END_BRACKET       = ']';
 	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
 
-なお、このやりかたは複雑なので次の節のような簡易インターフェイスが用意
-されています。
+なおこのやりかたは複雑なので次の節のような簡易インターフェイスが用意さ
+れています。
 
 
 .S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
@@ -283,16 +282,14 @@ config.ph では
 のように呼び出してあげて下さい。
 	
 
-
 .S	Subject: の成形 ([Elena:ID] フォーマットを抜く)
 .key	Subjectから[Elena:ID]を抜く
 .key	$STRIP_BRACKETS
 
 	$STRIP_BRACKETS = 1;
 
-とすると、Subjectから [ML:fukachan] みたいな部分をカットする。
-これは Subject: [Elena:ID] の形で配送するための前処理です。
-現在では汎用の
+とすると Subjectから [ML:fukachan] みたいな部分をカットする。これは 
+Subject: [Elena:ID] の形で配送するための前処理です。現在では汎用の
 
 	&DEFINE_SUBJECT_TAG("[:]"); (config.ph の最後)
 
@@ -370,8 +367,9 @@ $SUBJECT_FREE_FORM 使用時に有効な変数。
 	&DEFINE_FIELD_ORIGINAL('Message-Id');
 
 と同じです(ヘッダフィールドを扱う関数が汎用でなかった時代の変数の名残)。
+オリジナルを使うべきか？サーバでつけるべきか？どっちがいいかという議論
+ですが
 
-で、どっちがいいかというと、
 in fml-support ML's Count: 02687
 .q
 >| デフォールトは fml がつけます。それはオリジナルを通すより、強制的につ
@@ -446,120 +444,6 @@ config.ph で
 みたいになります。スタートレックFAQ に C progarm がのっていますが、
 libstardate.pl はその perl 版です。
 .k	libstardate.pl
-
-
-.S	ヘッダと MIME Decoding してログをとること
-.key	MIME
-.label	MIME-header
-.l	MIME-1
-.l	$USE_MIME
-.xref	MIME-hack
-
-本来 MIME をクライアントプログラムが処理すればいいことなので、サーバと
-しては素通しでいいはずです。が、ログを日本語変換してから保存したいとい
-う要求があるらしいので、これらの機能が実装されています。
-
-まず各種の MIME Decoding を行うためには、
-
-	$USE_MIME	= 1;
-
-を定義します。これがないと必要なライブラリをロードしません。
-
-
-.S	summary に書くsubjectをMIME decodeをしてから書き込む
-.k	summary に書くsubjectをMIME decodeをしてから書き込む
-
-これは
-
-	$USE_MIME	= 1;  
-
-が設定されていれば実行されます。
-
-例：
-	……
-	Subject: Re: TELEPHONE 
-	   =?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
-
-	……
-というメールが来たとすると、summary ファイルには
-
-	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
-
-と記録されます
-
-注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
-部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
-
-
-.S	記事をMIME Decoding してから保存する場合
-.k	$MIME_DECODED_ARTICLE
-
-	$MIME_DECODED_ARTICLE          = 1;
-
-と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
-時に日本語へ逆変換した内容を書き込みます。
-
-
-.S	ISO-2022-JP trap
-.l	MIME-Memo
-
-ISO-2022-JP の文字がない限りは require しません(たいして軽くはならない
-でしょうが…)。
-
-.key RFC1522
-RFC1522	2. Syntax of encoded-words
-
-   encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
-   charset = token    ; see section 3
-   encoding = token   ; see section 4
-   token = 1*<Any CHAR except SPACE, CTLs, and especials>
-
-
-.S	MIME処理に関するカスタマイズ変数
-.k	MIME処理に関するカスタマイズ変数
-.label	MIME-customizing
-.label	MIME-2
-.key	$MIME_VERSION
-.key	$MIME_CONTENT_TYPE
-.key	$MIME_MULTIPART_BOUNDARY
-.key	$MIME_MULTIPART_PREAMBLE
-.key	$MIME_MULTIPART_TRAILER
-
-以下はＭＬ本来の配送には普通関係ないです。
-
-右辺はデフォールトの値（Built-in）です。
-ファイルの取り寄せ等のモードにMIME関係もありますが、その時に使われてい
-ます。
-
-   Mime-Version:
-   Content-Type:
-
-	$MIME_VERSION = '1.0';
-	$MIME_CONTENT_TYPE = 'multipart/mixed;';
-
-以下は MIME/Multipart で使う変数です。
-
-	$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
-
-な形で日付を設定します。
-
-そのあと、これら↓の変数を設定してます。
-
-	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
-	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
-	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
-
-くぎり
-
-	$MIME_MULTIPART_BOUNDARY = "--日付--"
-
-本文の前口上
-
-	$MIME_MULTIPART_PREAMBLE = なし
-
-本文の後につく部分
-
-	$MIME_MULTIPART_TRAILER = なし
 
 
 .S	メーリングリストに複数の投稿用アドレスがある場合
