@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: SMTP.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
+# $FML: SMTP.pm,v 1.7 2001/07/08 13:37:22 fukachan Exp $
 #
 
 
@@ -91,7 +91,7 @@ See L<IO::Adapter> for more details.
 
 =head1 METHODS
 
-=item C<new($args)>
+=head2 C<new($args)>
 
 the constructor. 
 Please specify it in a hash reference as an argument of new().
@@ -271,6 +271,12 @@ sub _connect
 }
 
 
+=head2 C<close()>
+
+close BSD socket
+
+=cut
+
 # Descriptions: close BSD socket
 #    Arguments: $self
 # Side Effects: 
@@ -294,7 +300,7 @@ sub close
 ##### SMTP delivery main loop
 #####
 
-=item C<deliver($args)>
+=head2 C<deliver($args)>
 
 start delivery process.
 You can specify the following parameter at C<$args> HASH REFERENCE.
@@ -745,7 +751,7 @@ sub _send_data_to_mta
 	$self->_send_body_to_mta($socket, $body);
 
 	# end "DATA" transaction
-	$self->_send_command(".");
+	$self->_send_command("\r\n.");
 	$self->_read_reply;
     }
 }

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: ESMTP.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
+# $FML: ESMTP.pm,v 1.3 2001/07/08 13:35:42 fukachan Exp $
 #
 
 package Mail::Delivery::ESMTP;
@@ -13,7 +13,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use Mail::Delivery::SMTP;
 
-@ISA = qw(Mail::Delivery::SMTP Exporter);
+@ISA = qw(Mail::Delivery::SMTP);
 
 sub new
 {

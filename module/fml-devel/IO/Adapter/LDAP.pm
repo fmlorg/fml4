@@ -4,8 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: LDAP.pm,v 1.1.1.1 2001/05/10 04:55:22 fukachan Exp $
-# $FML: LDAP.pm,v 1.1.1.1 2001/05/10 04:55:22 fukachan Exp $
+# $FML: LDAP.pm,v 1.8 2001/06/17 08:57:10 fukachan Exp $
 #
 
 package IO::Adapter::LDAP;

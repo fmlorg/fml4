@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $Id: DBI.pm,v 1.1.1.2 2001/06/04 04:47:01 fukachan Exp $
+# $FML: DBI.pm,v 1.6 2001/06/17 08:57:10 fukachan Exp $
 #
 
 package IO::Adapter::DBI;

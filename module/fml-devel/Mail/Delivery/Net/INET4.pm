@@ -4,8 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: INET4.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
-# $FML: INET4.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
+# $FML: INET4.pm,v 1.2 2001/06/17 08:57:12 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET4;
