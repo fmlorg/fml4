@@ -113,7 +113,7 @@ In this part we describe FML internals more deeply.
 .include confirmd.wix
 .include mead.wix
 .include fop.wix
-.include lock.wix
+.# .include lock.wix
 .include lang-jp.wix
 
 
