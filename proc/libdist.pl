@@ -7,7 +7,6 @@ local($id);
 
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
-$Rcsid =~ s/\#:/(fml command mode)#:/;
 
 
 sub DoDistribute
@@ -57,7 +56,7 @@ sub DoDistribute
     # Original is for 5.67+1.6W, but R8 requires no MX tuning tricks.
     # So version 0 must be forever(maybe) :-)
     # RMS = Relay, Matome, Skip; C = Crosspost;
-    $Rcsid =~ s/^(.*)(\#\d+:\s+.*)/$1.($USE_CROSSPOST?"(rmsc)":"(rms)").$2/e;
+    $Rcsid =~ s/^(.*)(\#\d+\s+.*)/$1.($USE_CROSSPOST?"(rmsc)":"(rms)").$2/e;
     $Rcsid =~ s/\)\(/,/g;
 
     # Under DLA_HACK($e{'mode:DirectListAccess'}), PreProcessing Section;
@@ -111,16 +110,17 @@ sub DoDistribute
 	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
 	  next line if $SKIP{$rcpt}; # SKIP FIELD;
 
-	  # Relay server
+	  # Relay server (RFC821 syntax 97/02/01)
 	  # % relay hack is not refered in RFC, but effective in Sendmail's;
 	  if ($opt =~ /\sr=(\S+)/i || $DEFAULT_RELAY_SERVER) {
 	      $relay = $1 || $DEFAULT_RELAY_SERVER;
-	      ($who, $mxhost) = split(/@/, $rcpt, 2);
-
+	      # % hack
+	      #($who, $mxhost) = split(/@/, $rcpt, 2);
 	      # DLA_HACK: $rcpt is original "addr" in ACTIVE_LIST;
-	      $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
-
-	      $rcpt = "${who}\%${mxhost}\@${relay}";
+	      # $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
+	      # $rcpt = "${who}\%${mxhost}\@${relay}";
+	      $RelayRcpt{$rcpt} = "\@${relay}:$rcpt";
+	      $rcpt = "\@${relay}:$rcpt";
 	  }
 
 	  if ($e{'mode:DirectListAccess'}) {
@@ -232,6 +232,9 @@ sub DoDistribute
 	    $e{'Hdr'} .= "$_:".($e{"fh:$lcf:"} || $e{"h:$_:"})."\n";
 	}
     }
+
+    # fixing;
+    $e{'Hdr'} =~ s/[\s\n]*$/\n/;
 
     ##### ML Distribute Phase 03: Spooling
     # spooling, check dupulication of ID against e.g. file system full
