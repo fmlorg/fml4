@@ -33,7 +33,6 @@ GEN_LIBRARY () {
 	echo  " ";
 	echo  "Generating libkern.pl  ";
 	sed '/^$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
-
 }
 
 
@@ -183,6 +182,14 @@ COPY_SOURCES () {
 	(chdir $DESTDIR/distrib; tar xvf - )
 
 	# tar cf - etc/samples/[a-z]* | (chdir $DESTDIR/distrib; tar xvf - )
+
+	echo  " ";
+	echo  "Generating default_config.ph  ";
+	cf/config -m cf/MANIFEST -i /dev/null |\
+	sed 's@sapporo.iij.ad.jp"@installer.fml.org"@g' \
+		> $DESTDIR/distrib/src/default_config.ph
+
+	echo  " ";
 
 	rm -f $archsrc
 }
