@@ -1,0 +1,25 @@
+Q: httpd.conf は fml/share/ の下について設定すれば十分か？
+A: たぶんそういう設定を書くことになる
+
+
+Q: fml/www/ と fml/share/ の違いは？
+A: www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを
+   格納する場所が fml/www/
+
+
+
+Q: cgi以前に作られたものはどう処理する？自動的に有効か？
+A: admin がWWWの画面で有効にする
+A: makefml mladmin.cgi ML を走らせる。
+
+どちらでも効果は同じ
+
+
+Q: パスワードの設定
+
+A: CUI: makefml htpasswd ML ユーザ名
+
+A: GUI: メニューの『管理者パスワードの設定』では
+   'admin' コマンドでつかうものを自動的に htpasswd へ反映させる
+
+$Id$
