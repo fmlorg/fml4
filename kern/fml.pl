@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.140 2001/10/15 12:10:08 fukachan Exp $
+# $FML: fml.pl,v 2.141 2001/12/19 13:13:07 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -1103,7 +1103,7 @@ sub CheckCurrentProc
 	    # WARNING in n ==1 partial case.
 	    if ($n == 1 && $NOTIFY_MAIL_SIZE_OVERFLOW) {
 		&use('error');
-		&NotifyMailSizeOver;
+                &NotifyMailSizeOverFlow(*e);
 	    } 
 
 	    if ($n == 1 && $ANNOUNCE_MAIL_SIZE_OVERFLOW) {
