@@ -83,11 +83,12 @@ sub Init
 {
     # getopt()
     require 'getopts.pl';
-    &Getopts("dhm:sL:");
+    &Getopts("dhm:sL:t:");
 
-    $MODE = $opt_m || 'text';
-    $SORT = $opt_s ? 1 : 0;
-    $LANG = $opt_L || die($!);
+    $MODE  = $opt_m || 'text';
+    $SORT  = $opt_s ? 1 : 0;
+    $LANG  = $opt_L || die($!);
+    $TITLE = $opt_t || 'variable list (cf/MANIFEST)';
 
     $TmpBuf = "/tmp/manifest$$";
 }
@@ -97,6 +98,9 @@ sub InitHTMLMode
 {
     select(STDOUT);
     print "<HTML>\n";
+    print "<TITLE>\n";
+    print $TITLE, "\n";
+    print "</TITLE>\n";
     print "<BODY>\n";
     print "<PRE>\n";
 
