@@ -108,7 +108,7 @@ sub InitMakeFml
 	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
     }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:W:");
+    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:W:c:");
 
     # toggle flags
     $CGIInstallMode = ($opt_W =~ /cgi/i) ? 1 : 0;
@@ -218,6 +218,7 @@ sub InitMakeFml
     $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml";
     $FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
+    $CGI_CONFIG = $opt_c || "$CONFIG_DIR/cgi.conf";
 
     # config amd temporary files
     if ($TheFirstTime) {
@@ -1732,9 +1733,13 @@ sub ResetVariables
     # overwritten for each ml
     $LANGUAGE = &Value('LANGUAGE') || $CurConfig{'LANGUAGE'};
 
-    # fix path
-    $RP_CGI_PATH = $CGI_PATH;
-    $RP_CGI_PATH =~ s#^/+##;
+    # set up /cgi-bin/ directory directive for www server
+    # this directory should be special
+    if (! $REAL_CGI_PATH) {
+	$REAL_CGI_PATH = $CGI_PATH;
+	$REAL_CGI_PATH =~ s#^/+##;
+	$REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
+    }
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -2405,7 +2410,9 @@ sub do_install
     }
 
     # cgi mode
-    &SetUpCGIadmin;
+    if ($CGIInstallMode) {
+	&SetUpCGIadmin;
+    }
 }
 
 
@@ -4499,11 +4506,11 @@ sub do_setup_admin_cgi
 
     &ResetVariables;
 
-    &MkDir("$EXEC_DIR/share/$RP_CGI_PATH/admin", 0755);
+    &MkDir("$REAL_CGI_PATH/admin", 0755);
 
-    for $f ("menu.cgi", "makefml.cgi") {
+    for $f ("menu.cgi", "makefml.cgi", "mlmenu.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/admin/$f";
-	$outfile  = "$EXEC_DIR/share/$RP_CGI_PATH/admin/$f";
+	$outfile  = "$REAL_CGI_PATH/admin/$f";
 	print "\tcreate $outfile\n";
 	&Copy($template, $outfile);
 	chmod 0755, $outfile;
@@ -4519,11 +4526,11 @@ sub do_setup_mladmin_cgi
 
     &ResetVariables;
 
-    &MkDir("$EXEC_DIR/share/$RP_CGI_PATH/ml-admin/$ml", 0755);
+    &MkDir("$REAL_CGI_PATH/ml-admin/$ml", 0755);
 
     for $f ("menu.cgi", "makefml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/ml-admin/$f";
-	$outfile  = "$EXEC_DIR/share/$RP_CGI_PATH/ml-admin/$ml/$f";
+	$outfile  = "$REAL_CGI_PATH/ml-admin/$ml/$f";
 	&Conv($ml, $template, $outfile);
 	chmod 0755, $outfile;
     }
@@ -5734,19 +5741,25 @@ package main;
 
 # set up cgi for admin (full access for fml system)
 #    $EXEC_DIR/www/cgi-bin/admin/.htaccess
-#    $EXEC_DIR/www/dn/admin/htpasswd
+#    $EXEC_DIR/www/authdb/admin/htpasswd
 sub SetUpCGIadmin
 {
     local($cmd);
-    print STDERR "\n---Setup CGI interfaces\n";
 
-    $cmd = &Query("Use SSL? ", "y/n", "y|n", "n");
-
-    if ($cmd eq 'y') { 
-	$SSL_REQUIRE_SSL = 'SSLRequireSSL';
+    if (-f $CGI_CONFIG) {
+	print STDERR "\n -- load cgi.conf ($CGI_CONFIG)\n";
     }
     else {
-	$SSL_REQUIRE_SSL = '';
+	print STDERR "\n -- set up CGI interfaces\n";
+
+	$cmd = &Query("Use SSL? ", "y/n", "y|n", "n");
+
+	if ($cmd eq 'y') { 
+	    $SSL_REQUIRE_SSL = 'SSLRequireSSL';
+	}
+	else {
+	    $SSL_REQUIRE_SSL = '';
+	}
     }
 
     &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
@@ -5755,8 +5768,8 @@ sub SetUpCGIadmin
 
     # first time!
     if (-f "$EXEC_DIR/www/authdb/admin/htpasswd") {
-	print STDERR "\t$EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
-	print STDERR "\tnot edit $EXEC_DIR/www/authdb/admin/htpasswd\n";
+	print STDERR "   FYI: $EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
+	print STDERR "        not edit $EXEC_DIR/www/authdb/admin/htpasswd\n";
     } 
     else {
 	&MkDirHier("$EXEC_DIR/www/authdb/admin");
@@ -5765,15 +5778,19 @@ sub SetUpCGIadmin
 
 	local($htp) = &search_path('htpasswd');
 	if (-x $htp) {
-	    print STDERR "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
+	    print STDERR 
+		"   $htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
 	    system "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin";
 	}
 	else {
-	    print STDERR "cannot find \"htpasswd\" program\n";
+	    print STDERR "   Warn: cannot find \"htpasswd\" program\n";
 	}
     }
 
     &SaveCGIConf;
+
+    # make cgi-bin/admin/
+    &do_setup_admin_cgi;
 
     print STDERR "\n";
 }
@@ -5781,8 +5798,8 @@ sub SetUpCGIadmin
 
 sub LoadCGIConf
 {
-    if (-f "$CONFIG_DIR/cgi.conf") {
-        eval("require \"$CONFIG_DIR/cgi.conf\";");
+    if (-f $CGI_CONFIG) {
+        eval("require \"$CGI_CONFIG\";");
 	&Log($@) if $@;
     }
 }
@@ -5790,16 +5807,19 @@ sub LoadCGIConf
 
 sub SaveCGIConf
 {
-    local($cf) = "$CONFIG_DIR/cgi.conf";
-    local($new) = $cf.".new$$";
+    local($cf, $new);
+
+    $cf  = $CGI_CONFIG || "$CONFIG_DIR/cgi.conf";
+    $new = $cf.".new$$";
 
     if (open(CF, "> $new")) {
 	select(CF); $| = 1; select(STDOUT);
 
 	# log date 
 	print CF "\# $MailDate(configured by $0)\n\n";
+	print CF "\$REAL_CGI_PATH   = \"$REAL_CGI_PATH\";\n";
 	print CF "\$SSL_REQUIRE_SSL = \"$SSL_REQUIRE_SSL\";\n";
-	print CF "1;";
+	print CF "1;\n";
 	close(CF);
     }
     else {
@@ -5823,6 +5843,7 @@ sub ValidatePerlScriptP
     local($cf) = @_;
 
     system "perl -c $cf >/dev/null 2>&1";
+    &Error("$cf is broken as perl script.") if $?;
     &Log("$cf is broken as perl script.") if $?;
 
     $? ? 0 : 1; # $? is 0 if normal. 
