@@ -1,5 +1,5 @@
 whois.entry.added:
-	add your submitted data to whois database.
+	added your submitted data to the whois database.
 	The data follows:
 
 whois.entry.list:
@@ -9,4 +9,4 @@ whois.entry.remove:
 	removed your entry
 
 whois.backup.fail:
-	ERROR: fail to back up whois db
+	ERROR: failed to back up whois db

@@ -2,94 +2,98 @@
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.preamble:
-	Hi, I am the fml mailing list manager for <_ARG0_>.
-	I would like to verify your will to subscribe this mailing list.
-	If I can confirm your will to subscribe this mailing list,
-	please reply
+	Hi, I am the fml Mailing List Manager for <_ARG0_>.
+	I would like to verify your intention to subscribe to this mailing list.
+	Please reply to this email to confirm subscription.
+
+	Please ensure 
 
 	_ARG1_
 
-	in the mail body to the address
+	is in the body of the email and that 
 
 	_ARG2_ 
+
+is the recipient.
 
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.syntax_error:
-	Hi, I am the fml mailing list manager for <_ARG0_>.
-	I encounter a syntax error. The correct syntax is
+	Hi, I am the fml Mailing List Manager for <_ARG0_>.
+	I encountered a syntax error. The correct syntax is
 
 	_ARG1_ PASSWORD _ARG2_
 
-	in the mail body.
-	The address to send it back is <_ARG3_>.
+	in the message body.
+	The address to send the message to is <_ARG3_>.
 
-	Please check again your mail.
+	Please check your message and try again.
 	
 
 # @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
 confirm.auto_regist.expired:
-	Hi, I am the fml mailing list manager for <_ARG0_>.
-	I received subscribe request from you but it is done
-	long time ago. So your request is expired.
+	Hi, I am the fml Mailing List Manager for <_ARG0_>.
+	I received a subscribe request from you but it is dated a
+	long time ago so your request has expired.
 
-	Please start subscribe process by sending the mail back again
-	with the folllowing new identifier.
+	Please start the subscribe process again by sending this message back again
+	with the folllowing in the body:
 	
 	_ARG1_
 
 # @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
 confirm.auto_regist.buffer_syntax_error:
-	Hi, I am the fml mailing list manager for <_ARG0_>.
+	Hi, I am the fml Mailing List Manager for <_ARG0_>.
 	Hmm, you may be not a member.
 
-	1. Your mail may come from a bad address which is not 
-	   registered in this mailing list
 
-	2. Your mail has a syntax error.
-	   If you would like to subscribe this mailing list
+	Possible causes:
+	1. Your sender address may not be registered for this list
+
+	2. Your message contains a syntax error.
+	   If you would like to subscribe to this mailing list, send a 
+	   messgae containing the following:
 
 		_ARG1_ YOUR NAME
 
 	     For example
-		_ARG1_ Hayakawa Aoi
+		_ARG1_ Joe Bloggs
 
 # @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
 confirm.auto_regist.invalid_addr:
-	Hi, I am the fml mailing list manager for <_ARG0_>.
-	I expect the following syntax. Please try again!
+	Hi, I am the fml Mailing List Manager for <_ARG0_>.
+	I expected the following syntax. Please try again!
 
 		_ARG1_ YOUR NAME
 
 	     For example
-		_ARG1_ Hayakawa Aoi
+		_ARG1_ Joe Bloggs
 
 ##### Section: 管理者が手動登録するケース
 confirm.manual_regist.forward_to_admin:
-	your confirmation request is forwarded to the maintainer
+	your confirmation request has been forwarded to the maintainer
 	of this mailing list.
-	Please wait a little since this process is not automatically done.
+	There may be a delay while the request is manually reviewed.
 
 confirm.manual_regist.preamble:
 	CAUTION: the subscribe process for this mailing list is not automatic.
-	I would like to verify your will to subscribe this mailing list.
-	If I can confirm your will to subscribe this mailing list,
-	I forward your request to the maintainer.
+	I would like to verify your intention to subscribe this mailing list.
+	If you reply to this message as confirmation, your request will be
+	forwarded to the list maintainer.
 
-	Please reply this mail to send back confirmation to Reply-To:
+	Please reply to this message to confirm you would like to subscribe.
 
 confirm.manual_regist.confirmed:
-	I confirm your will to subscribe this mailing list,
-	Please wait a little since this process is not automatically done.
+	I have recieved your confirmation.
+	Please wait while your request is manually reviewed.
 
 ##### Section: CHADDRコマンド
 confirm.chaddr.syntax_error:
-	syntax error of "chaddr command".
-
+	Your address change request had a syntax error.
+	Syntax:
 		"chaddr old-address new-address"
 
-	but old-address must be an address registered in this mailing list 
-	already.
+	Note: The old address must curtrently be subscribed to the list.
 
 ##### Section: confirmation その他
 confirm.has_japanese_char:
@@ -97,4 +101,4 @@ confirm.has_japanese_char:
 
 ##### Section: misc
 confirm.try_again:
-	Please try again from the start point.
+	Please try again from the beginning.

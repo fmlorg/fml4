@@ -4,12 +4,12 @@ chaddr.no_args:
 	   chaddr old-address new-address
 
 chaddr.same_args:
-	Error: invalid arguments since old-address == new-address
+	Error: invalid arguments, same address specified for old and new address.
 	_ARG0_ command syntax is
 	   chaddr old-address new-address
 
 chaddr.invalid_addr:
-	Error: You are not <_ARG0_>! Do not change any other than yourself.
+	Error: You are not <_ARG0_>! Do not attempt to change any other user.
 
 chaddr.from.oldaddr:
 	Please send the request from your old-address

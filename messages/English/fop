@@ -3,7 +3,7 @@
 ###
 
 fop.receive.submit:
-	receive your submit _ARG0_
+	receive your submition _ARG0_
 
 fop.no_numeric_filename:
 	_ARG0_: filename is not numeric
@@ -12,24 +12,23 @@ fop.unlink:
 	remove _ARG0_ file
 
 fop.unlink.fail:
-	fail to remove _ARG0_ file
+	failed to remove _ARG0_ file
 
 fop.rename.fail:
-	fail to rename _ARG0_ (_ARG0_ => _ARG1_)
+	failed to rename _ARG0_ (_ARG0_ => _ARG1_)
 
 fop.write.fail:
 	cannot write_ARG0_ 
 
 fop.not_found:
-	no such files for request
+	no such file for request
 
 fop.mget.too_many:
-	(m)get request is too many!
-	the maximum number of files in one request (mail) is
-	up to _ARG0_ files.
+	(m)get request is too large!
+	the maximum number of files in one request (mail) is  _ARG0_ files.
 
 fop.mget.no_such_mode:
-	no such mode (_ARG0_) of "mget" command
+	mget: no such mode (_ARG0_)
 
 fop.summary.not_match:
 	no such entry in summary file

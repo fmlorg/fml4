@@ -4,10 +4,10 @@ cgi.ok:
 	request succeed
 
 cgi.password.different:
-	Error: wrong CGI password
+	Error: CGI password invalid
 
 cgi.password.empty:
-	Error: empty CGI password
+	Error: No CGI password supplied
 
 cgi.adduser.already_member:
-	Error: a member already
+	Error: You are already a member.
