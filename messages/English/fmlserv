@@ -1,0 +1,20 @@
+fmlserv.ml.not_found:
+	_ARG0_ not exists
+
+fmlserv.guide.sent:
+	sent mailing list guide to <_ARG0_>
+
+fmlserv.done:
+	done
+
+fmlserv.stop:
+	Error: stop
+
+fmlserv.serv:
+	_ARG0_ serves the following mailing lists
+
+fmlserv.not_any_member:
+	<_ARG0_> is not any member for all mailing lists served by this host.
+
+fmlserv.subscribed_lists:
+	<_ARG0_> is a member of the following mailing lists
