@@ -133,6 +133,7 @@ sub PopFmlGetOpts
 	/^\-perl_prog/    && ($PerlProg = shift @ARGV) && next;
 
 	/^\-arch/         && ($COMPAT_ARCH = shift @ARGV) && next;
+	/^\-expire/       && ($QUEUE_EXPIRE_LIMIT = shift @ARGV) && next;
 
 	### mode
 	/^\-mode/ && ($MODE = shift @ARGV) && next; 
@@ -388,7 +389,7 @@ sub PopFmlScan
              $atime,$mtime,$ctime,$blksize,$blocks) = stat("$queue_dir/$qf");
 	    
 	    $Queue{$qf} = $ctime;
-	    print STDERR "   debug scan: $qf ($ctime)\n";
+	    print STDERR "   debug scan: $qf ($ctime)\n" if $debug;
 	}
     }
     closedir(DIRD);
@@ -413,7 +414,6 @@ sub CheckQueueIsExpireP
     &PopFmlScan;
 
     # 3 hours
-    $QUEUE_EXPIRE_LIMIT = 120;
     $QUEUE_EXPIRE_LIMIT = $QUEUE_EXPIRE_LIMIT || 3*3600;
 
     # current time
@@ -440,7 +440,7 @@ sub CheckQueueIsExpireP
 	&Log("check queue $qf") if $debug;
 
 	# created time is 3 hours before.
-	if ($cur_time - $Queue{$qf} > $QUEUE_EXPIRE_LIMIT) {
+	if (($cur_time - $Queue{$qf}) > $QUEUE_EXPIRE_LIMIT) {
 	    &Log("queue $qf is timed out.");
 
 	    eval("require \"$uiq\";") if -f $uiq;
