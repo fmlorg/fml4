@@ -445,6 +445,10 @@ sub SetDefaults
 		$FixError{$key}      = 1 unless $str;
 	    }
 
+	    if ($str =~ /^&is_unix/) {
+		$str = ($ENV{'OS'} =~ /Windows_NT/) ? 0 : 1;
+	    }
+
 	    if ($key eq 'INFO') {
 		$INFO++;
 		$key = "INFO:$INFO";
