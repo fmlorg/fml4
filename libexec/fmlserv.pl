@@ -498,10 +498,13 @@ sub ProcessEachMLReq
 }
 
 
+#
+# switch to each ML configuration space
+#
 sub MLContextSwitch
 {
     local($DIR, $ml, *e) = @_;
-    local($cf)  = "$DIR/config.ph";
+    local($cf) = "$DIR/config.ph";
 
     &GetTime;
 
@@ -958,24 +961,8 @@ sub main'LoadMLNS
     $ml'DIR = $main'DIR;
 
     delete $INC{$file};
-    if ($INC{$file}) { # if failed, mandatory loading config.ph
-	$file = $history{$file} ? "/../$file" : $file;
-    }
     $history{$file} = 1;
-    eval("require '$file';");
-    &Log($@) if $@;
-
-    # daity trick ;-) 
-    # do "file" statement seems 
-    # gobble it to the buffer, and eval buffer
-    # so, it always cost a lot of stacks.
-    # we cannot permit it!. so here I use dirty(;_;) trick
-    # based on "require checkes the full-pathed file name". ;D
-    if ($SiteDefPH && -f $SiteDefPH) {
-	$SiteDefPH = "/../$SiteDefPH";
-	eval("require '$SiteDefPH';");
-	&Log($@) if $@;
-    }
+    require 'libloadconfig.pl'; &__LoadConfiguration;
 
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
@@ -1008,16 +995,6 @@ sub main'LoadMLNS
     }
 }
 
-sub DEFINE_SUBJECT_TAG { 1;}
-sub DEFINE_MODE  { 1;}
-sub DEFINE_FIELD_FORCED  { 1;}
-sub DEFINE_FIELD_ORIGINAL { 1;}
-sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
-sub DEFINE_FIELD_LOOP_CHECKED { 1;}
-sub UNDEF_FIELD_LOOP_CHECKED  { 1;}
-sub ADD_FIELD     { 1;}
-sub DELETE_FIELD  { 1;}
 sub ml'Log { &main'Log(@_);}
-
 
 1;
