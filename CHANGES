@@ -4,6 +4,10 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/12/22
+
+   updated MailTools to 1.52
+
 2002/10/20
 
    sbin/makefml
@@ -385,7 +389,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.264 2002/09/29 15:43:53 fukachan Exp $
+	add $FML: CHANGES,v 1.265 2002/10/20 14:21:53 fukachan Exp $
 
 2001/10/03
 
