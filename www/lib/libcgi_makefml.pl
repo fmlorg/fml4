@@ -44,25 +44,26 @@ sub Parse
 	$Config{'CGI_ADMIN_USER_DEF'} || $Config{'CGI_ADMIN_USER'};
     $ACTION = $Config{'ACTION'};
 
-    # fix
+    # fix variable values for later use
     $PTR       =~ s#^\/{1,}#\/#;
     $PROC      =~ tr/A-Z/a-z/;
 
-    # For example:
-    # * input ../ syntax  
-    # SCRIPT_FILENAME => /usr/local/fml/www/cgi-bin/admin/makefml.cgi
-    # SCRIPT_NAME => /cgi-bin/fml/admin/makefml.cgi
-    # HTTP_REFERER => http://beth.fml.org/cgi-bin/fml/admin/makefml.cgi
-    # REQUEST_URI => /cgi-bin/fml/../fml/admin/makefml.cgi
-    # 
+
+    ## Example:
+    ## SCRIPT_FILENAME => /usr/local/fml/www/cgi-bin/admin/makefml.cgi
+    ## SCRIPT_NAME     => /cgi-bin/fml/admin/makefml.cgi
+    ## HTTP_REFERER    => http://beth.fml.org/cgi-bin/fml/admin/makefml.cgi
+    ## REQUEST_URI     => /cgi-bin/fml/../fml/admin/makefml.cgi
+
+    # extract $ML name for later use
     my $REQUEST_URI = $ENV{'REQUEST_URI'};
     $REQUEST_URI =~ qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
     my ($cgimode , $cgiml) = ($1,$2);
-    $ML = $cgiml if($cgimode ne "admin");
+    $ML = $cgiml if ($cgimode ne "admin");
 
     # We should not use raw $LANGUAGE (which is raw input from browser side).
     # We should check it matches something exactly and use it.
-    if ($LANGUAGE eq 'Japanese') {
+    if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {
 	push(@INC, $EXEC_DIR);
 	require 'jcode.pl';
 	eval "&jcode'init;";
@@ -102,11 +103,12 @@ sub UpperHalf
 # I'll try to show what do we do now?
 sub MakefmlInputTranslate
 {
-    local($command, $ml, @argv) = @_;
-    local($buf, %xe);
+    my ($command, $ml, @argv) = @_;
+    my ($buf);
+    local(%xe);
 
-    return unless $MESSAGE_LANGUAGE;
-    return if $ml eq 'etc';
+    return $NULL unless $MESSAGE_LANGUAGE;
+    return $NULL if $ml eq 'etc';
 
     # print "(debug) &MesgLE(*xe, makefml.$command, $ml, @argv);\n";
     $buf = &MesgLE(*xe, "makefml.$command", $ml, @argv);
