@@ -196,7 +196,7 @@ sub Parse
 	# postfix
 	# <uja@beth.fml.org>: unknown user
 	if ($mp_block eq 'Content-Description: Notification') {
-	    if (/^\s*(\S+\@\S+):\s*unknown user/) {
+	    if (/^\s*(\S+\@\S+):\s*(unknown user|.*:\s+5\d\d\s+.*)/) {
 		$CurAddr = $1;
 		$CurAddr =~ s/[\<\>]//g;
 		$CurAddr =~ s/\s*//g;	
