@@ -1,520 +1,114 @@
-		fml INSTALL guide
+		fml INSTALL guide (New Version Draft)
+
 
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
-#.index
+
+   昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
+   INSTALL.advanced はより高度なインストールのためのドキュメント
+   です。以下がわかりにくい場合は INSTALL.advanced を参照して下さ
+   い _o_ このインストール方式はまだα版なので…
 
 
 
-.C	Introduction
+.C	とりあえずＭＬを動かすためのインストールの仕方
 
 まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
 の directory ができてその下にひとセット入ってます。
-directory の名前は作りたいＭＬに関係する適当な名前に変えて下さい。
 
-その時にdirectoryの名前は普通の 英数字 _ - くらいの文字の中から組合せ
-て下さい。シェルが特別なものとみなす類をつけると何かのプロセスが誤解す
-るおそれがあります。例えば、Uja$Palla#90 のような文字列は×です。
-ここでは /var/spool/ml/Elena という名前に変えたとすることにします。
+この directory に移動して、
 
+	perl makefml 
 
-.S	以下での設定例（例えば次のように設定することにしましょう）
+というコマンドを実行して下さい。そのマシンの上に fml システムをインス
+トールします。
 
-設定するマシン		axion.phys.titech.ac.jp
-Mailing List 		Elena Lolobrigita ML
-address of it		Elena@axion.phys.titech.ac.jp
-Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
-ＭＬのdirectory		/var/spool/ml/Elena
-			config.ph 等が広がっている場所です。今は
-			fml.pl やライブラリは /var/spool/ml/Elena/src です
+この時に次のような項目を聞いて来ます。
 
-なお便宜上以下 % を shell の prompt 、 # を root の時のshell promptと
-することにします。
+   DOMAIN NAME          [sapporo.iij.ad.jp] 
+   MACHINE FULL NAME    [beth.sapporo.iij.ad.jp] 
+   EXEC FILES DIRECTORY [/usr/local/fml] 
+   ML DIR               [/var/spool/ml] 
 
+それぞれ、次のような意味ですので、適当に入れて下さい。単に
+Enter?(CR) を押すと [] の中の値が設定されます。
 
-.C	お手軽インストール
-.S	お手軽インストール その１ 
+   ・DOMAIN NAME          [sapporo.iij.ad.jp] 
 
-お手軽インストール教えます:-)。
+	ドメイン名。
+	メーリングリストのアドレスの @ から後ろで使う部分
 
-fml を広げた directory へいって、（今の例では /var/spool/ml/Elena です）
+   ・MACHINE FULL NAME    [beth.sapporo.iij.ad.jp] 
 
-% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
+	マシンのインターネット上での完全表記。
 
-とうってみてください。
-＃実際にはアドレスをあなたの作りたいML名に変えて実行です (^^)
+   ・EXEC FILES DIRECTORY [/usr/local/fml] 
 
-例：
-% make MAIL_LIST=Elena@axion.phys.titech.ac.jp MAINTAINER=Elena-request@axion.phys.titech.ac.jp	
+	実行ファイル等の fml system をインストールする場所。
+	例えば、この値の場合 
 
-自動的に /var/spool/ml/Elena/samples/ に aliases や include ファイルの
-見本ができます。あとは aliases を適当に切り剥ぎして、/etc/aliases に書
-いて、newaliases をします＃注意：% man newalises
+		/usr/local/fml/fml.pl 
+		/usr/local/fml/doc/ 
 
-そして members と actives にあなたのアドレス、メンバーのアドレス等を書
-いたら…
-					はい、おしまひ(^^)
+	等の場所にインストールされる。
 
+   ・ML DIR               [/var/spool/ml] 
 
-ちなみに samples/ の中身は
+	ML(複数)はこの階層の下に作られる。例えば
 
+	   Elena ＭＬを作る場合は /var/spool/ml/Elena 
+	   Mirei ＭＬを作る場合は /var/spool/ml/Mirei
 
-   samples/aliases               /etc/aliases の見本
-   samples/include               基本的な include の見本（以下同様）
-   samples/include-auto          自動登録をするML
-   samples/include-distribute    フォワードするだけのML
-   samples/include-fmlserv       fmlserv の設定 (listservもどきinterface)
-   samples/include-remote        このマシン以外からメールでMLを管理する場合
-   samples/include-html		 var/htdocs/ の下にメールを html 形式でも保存
-				 spool にも保存（２重になる）
+	といった具合に複数のＭＬがこの場所の下に作られていく。
+	ここは各ＭＬごとの設定ファイルや記事を保存する場所である。
 
-   samples/crontab		まとめ送り用の crontab の見本 (4.4BSD Style)
 
+.C	ＭＬを作る。
 
-日本語で解説がついてますので、実際にシステムにインストールする前に
-要らない部分は切り取ってからしかけるとよいでしょう。
+いくつかの簡単なものはコマンドで実行できます。
 
+   sbin/fmladmin コマンド [引数]
 
-このやり方の他に、EasyConfigure.euc という基本設定を(日本語で)対話的に
-行なうお手軽インストールのインターフェイス(端末に合わせてファイルコー
-ドをかえてからどうぞ)もあります。
 
+.S	新しくＭＬを作る場合
 
-＊＊＊注意＊＊＊
-お手軽インストールは最初のインストールを想定しています。複数ＭＬのイン
-ストールを自動的に行なうようにはできていません。詳しくは doc/op を参照
-して下さい。
+もちろんはじめて作る場合も同様ですね。
 
+例： Elena と Mirei ＭＬを作ろうと思ったら
 
-以下の数節はよりきめの細かい設定のための解説です。
-細かいチューニングは後回し、とりあえずMLを動かすというのなら
-.ptr{start-of-check} 節（このファイルの最後の方）へ飛んで下さい。
+   /usr/local/fml/sbin/fmladmin newml elena
+と
+   /usr/local/fml/sbin/fmladmin newml mirei
 
+を実行すれば終りです。それぞれのＭＬ用の include ファイルの
 
+	/usr/local/fml/include/elena
+	/usr/local/fml/include/mirei
 
+がそれぞれできます。それを呼ぶように設定された aliases の見本が
 
-.C	基本設定
+  ~/.fml/aliases.elena と ~/.fml/aliases.mirei
 
-.S	cf/Elena に変更したい設定だけをまとめてみる
+にできているので、それを /etc/aliases に加えて下さい。
 
-より自分好みのMLにしたい場合は、もちょっと手間をかけて config.ph を設
-定して下さい。
-お手軽設定より少し複雑ですが、その分きめの細かい設定が出来ます。
-お手軽インストールをしておいて、ＭＬの運用に慣れたら config.ph を書く 
-でもいいとおもいます。
 
-Directory /var/spool/ml/Elena/cf 
-にいって、sample をコピーして、適当な名前にしておきます。
-＃ここでは、ファイル名をＭＬ名の Elena とすることにします(^^)
+.S	ユーザをＭＬに加える場合（未実装）
 
-% cd cf
-% cp sample Elena
+   /usr/local/fml/sbin/fmladmin adduser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/sbin/fmladmin add elena fukachan@sapporo.iij.ad.jp
 
-cf/Elena は デフォールトの設定とどこが異なるのか？”だけ” を記述する
-ためのファイルになります。
-後々のメンテ（複数のメーリングリストを管理する や version up等）を考え
-ると、大元の configuration files を一箇所でメンテするのが良いだろう
-という発想からきています。
+	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
 
-Elena の中身は必須の変数の設定だけが書かれています。
 
-例：
-	FQDN		axion.phys.titech.ac.jp
-	MAIL_LIST	Elena@axion.phys.titech.ac.jp
-	ML_FN		(Elena Lolobrigita ML)
-	XMLNAME	 	X-ML-Name: Elena
-	XMLCOUNT	X-Mail-Count
-	MAINTAINER	Elena-request@axion.phys.titech.ac.jp
+.S	ユーザをＭＬに加える場合（未実装）
 
-perl と同様に行の # 以降の部分はコメントです。無視してください。
-シンタックスは
+   /usr/local/fml/sbin/fmladmin byeuser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/sbin/fmladmin bye elena fukachan@sapporo.iij.ad.jp
 
-	最初のキーワード 空白（SPACEかTAB) キーワードの内容
+	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
 
-です。空白はいくつあっても構いません。
 
-以下、変数の意味を順番に説明します。
-
-	FQDN		axion.phys.titech.ac.jp
-
-FQDN(Fully Qualified Domain Name) には fml を設定するマシンのドメイン
-名まで含む Full Name を書いてください。
-＃この名前は sendmail に「自分はこのマシンからメールをだしています」と
-＃告げるために使われます。
-
-	MAIL_LIST	Elena@axion.phys.titech.ac.jp
-
-メーリングリストのアドレスが Elena@axion.phys.titech.ac.jp になります。
-つまり、このアドレスにきたメールがメンバーに配送されます。
-	
-	ML_FN		(Elena Lolobrigita ML)
-
-この変数は、配送されるメールの To: の部分を書き換えるために使われます。
-今の場合、
-
-	To: Elena@axion.phys.titech.ac.jp (Elena Lolobrigita ML)
-
-に置き換えられます
-＃置き換えには 上の MAIL_LIST と ML_FN が使われています
-
-	XMLNAME	 	X-ML-Name: Elena
-	XMLCOUNT	X-Mail-Count
-
-この２つのフィールドはおまけのフィールドですが、便利なものです。
-配送されるメールには
-
-	X-ML-Name: Elena
-	X-Mail-Count: 記事の番号
-
-がついて、メーリングリストからのメールだとしらせます。
-
-	MAINTAINER	Elena-request@axion.phys.titech.ac.jp
-
-もっとも大事なアドレスです。メーリングリストの管理者のアドレスが 
-Elena-request@axion.phys.titech.ac.jp という意味です。
-sendmailからの配送エラーメールや、メーリングリストのエラー情報等は
-このアドレスに送られます。
-
-あなたのアドレスを直接書いてもいいのですが、普通は慣習的に 
-Elena-requestとかElena-adminとかを作り、あなた宛にフォワードするように
-設定します。
-
-必ずメーリングリストのアドレスと管理者のアドレスは別々にして下さい。
-そうしないとメールの無限ループを起こすからです。
-＃別にしていないと fml サーバは エラーだといって、動かないようになっています
-
-
-
-.C	config.ph 
-
-.S	config.ph を作る
-
-fml.pl が メーリングリスト（ＭＬ）ごとの設定をするために使う config.ph 
-というファイルを使います。このファイルを 上の Elena というファイルでカ
-スタマイズした内容で生成するために
-
-	% ./config Elena > config.ph
-
-を実行してください。今 cf にいるので 一つ上（..）がＭＬのホームなので
-そこへ移してください。
-
-	% cp config.ph ..
-
-ＭＬの home (/var/spool/ml/Elena)にいるなら、
-
-	% cf/config cf/Elena > config.ph 
-
-ですね。
-この config.ph には つかえるすべての変数が適当なデフォールト設定で入っ
-ています。とりあえずは、デフォールトのまま使えばいいでしょう。
-細かいカスタマイズは、doc/op に書いてあります。
-
-
-.S	config.ph の確認
-
-作ったら一応、以下の確認をしてください。
-これら以外の変数はすべてデフォールトのままにまだなってます。
-
-上の Elena から作られた config.ph の例：
-
-ファイル Elena での上述の設定は以下のようになっていますか？
-(perl で行の # 以降の部分はコメントです。無視してください)
-("と"の間では @ には "\@" のように前に \ が必要です。)
-＃以下の例では実際にはあるコメントが省いてあります。
-
-
-$FQDN                          = "axion.phys.titech.ac.jp";
-$MAIL_LIST                     = "Elena\@axion.phys.titech.ac.jp";
-$ML_FN                         = "(Elena Lolobrigita ML)";
-$XMLNAME                       = "X-ML-Name: Elena";
-$XMLCOUNT                      = "X-Mail-Count";
-
-$MAINTAINER                    = "Elena-request\@axion.phys.titech.ac.jp";
-
-
-.S	コマンドのパス
-
-ファイル操作に必要な uuencode や gzip の絶対パスファイルの確認もしてく
-ださい。config.ph の最後に、cf/config が自動的に生成した（必要な引数も
-ついた）コマンドのパスが設定されています。適切なものかどうかチェックし
-てください。現在設定する変数は
-
-TAR		/some/directory/tar cf -
-UUENCODE	/some/directory/uuencode
-COMPRESS	/some/directory/gzip -c
-ZCAT		/some/directory/zcat
-LHA		/some/directory/lha
-ISH		/some/directory/aish
-
-です。必要なら ファイル cf/Elena に 
-
-TAR		/usr/local/bin/gtar cf -
-
-のように書いて、もう一度、config.ph を作り直してください。
-
-
-
-.C	make
-
-make してください。
-
-ＯＳは make の中で自動判定するはずです
-最後に /etc/aliases の書き方についての診断メッセージがでます 
-
-Solaris2も自動的に判定できると思いますけど…
-Ultrix 4.x では make SH=/bin/sh5 として /bin/sh5 を使って
-Bourne Shell scriptを実行してください。
-デフォールトのSH変数（わざわざSHELLとは別の変数名にした）は 
-当然 /bin/sh です。
-
-
-
-.C	/etc/aliases への設定 ( :include:/some/path/include-file )
-.key	start-of-check
-
-.S	fml.c and include.example
-
-make すると fml という "C Wrapper"(setuidをするもの) の 実行ファイルが 
-fml.c から生成されます。さらに samples/ にサンプル一式が生成されます。
-
-
-   samples/aliases               /etc/aliases の見本
-
-   samples/include               基本的な include の見本（以下同様）
-   samples/include-auto          自動登録をするML
-   samples/include-distribute    フォワードするだけのML
-   samples/include-fmlserv       fmlserv の設定 (listservもどきinterface)
-   samples/include-remote        このマシン以外からメールでMLを管理する場合
-   samples/include-html		 var/htdocs/ の下にメールを html 形式でも保存
-				 spool にも保存（２重になる）
-
-   samples/crontab		まとめ送り用の crontab の見本 (4.4BSD Style)
-
-
-これらの内容を参考にしながらこの章は読んでみてください。
-/etc/aliases では次のような2通りの書き方ができます。
-
-	Elena: :include:/usr/local/fml/include-file 
-	Elena: "|/usr/local/fml/fml"
-
-しかし、ＯＳによってうまくいったりいかなかったりします。ここでは、
-
-	 :include:/usr/local/fml/include-file 
-
-のタイプだけを説明します。
-これでうまくいかないＯＳ もしくは 個人のポリシーとして setuid された 
-C-wrapper を使うべきだという方は、 doc/op を見てください。
-＃doc/op に書かれていない新しい発見があったら fml-bugs か fml-support
-＃Mailing list まで御一報を(^^)
-
-
-.S	:include:するべきファイル
-
-:include:するべきファイルの中身は
-
-"|/var/spool/ml/Elena/src/fml.pl /var/spool/ml/Elena"
-
-みたいに書きます（これで一行です↑）。samples/ の下の各ファイルを見ると
-わかるとおもいます。
-
-
-.S	:include:するべきファイルの所有者
-
-includeするファイル（ここでは include.example）の所有者の権限でサーバ
-は走ります。（そのファイルの所有者ユーザのuidにsetuidされる）。
-ファイルの所有者が あなた自身であることを確認してください。
-
-
-
-.S	/etc/aliases 
-
-/etc/aliases には次のような行を書くことになります。
-samples/aliases に一通り設定されています。
-それを見て cut & paste してみてください。
-
-	Elena::include:/var/spool/ml/Elena/driver
-
-その他に MAINTAINER として上で定義したアドレス等も設定することが必要です。
-実際にはこのようになるでしょう。 例によって #ではじまる行 はコメント行です
-
-# ML itself
-Elena: :include:/var/spool/ml/Elena/etc/include.sample
-
-#owner-Elena: your-username (Sendmail R8)
-owner-Elena:fukachan
-
-#Conventionally we should also make ML-request
-#ML-request is a receipt of ML
-#It is O.K where ML-request is an alias of MAINTAINER
-Elena-request: fukachan
-
-
-
-.C	Configurations for fml.pl and config.ph
-
-
-config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailのメン
-バーへの配送処理をしません。この場合、配送以外のすべての機能は動いてい
-ます。テストにどうぞご利用下さい。
-この状態でどういうメールヘッダになるか等をlogファイルやsummaryファイル
-やspoolの中の様子を見るとよいでしょう。
-
-config.ph の設定や spool/の下のファイルでヘッダの確認をし、
-
-		debug = 0; 
-
-にして運用してください。
-
-
-これでサーバとＯＳの設定は終りました。あとはＭＬの細部の設定です。
-
-
-
-.C	メンバーの登録、ガイド等を書く
-
-.S	メンバーの登録
-
-あとはメンバーの登録を members と actives にするだけですね。
-
-それぞれ一行に一人分のアドレス（必要なら、と付加情報）を書きます。
-# の後はコメントになります。
-
-.S	メンバーチェックモード
-
-メンバー登録は管理者が両方のファイルにアドレスを書いて下さい。
-
-members		メンバーの認証につかうもの。配布、コマンド共にこれを見
-		る。
-
-actives		配布する時に使うもの。sendmailへ渡すアドレスのリスト
-		リレーサーバ情報とかはここに書く。
-
-.S	自動登録モード
-
-membersのみを使います。
-
-members		登録と配布に使う。勝手に登録するのでほっておいていいで
-		す。
-
-メンバーチェックをせず、さらに自動登録もしないやり方もあります
-スプールとかコマンドがついた /etc/aliases にずらずら…と同じケース等
-＃くわしくは doc/op を参照してください。
-
-
-.S	配送するメールアドレス等の設定例：
-
-こんな感じのファイルになるはずです。
-	
-またＭＬをOFF(いまは一時的に配送してしない)している人も↓このようになってます。
-
-	# fukachan@beth.phys.titech.ac.jp
-
-ＭＬを抜けた人はmembers, activesで
-
-	##BYE fukachan
-
-となるようにしてます。
-その行の消去はしません（脱退した人も一応記録しておく）
-
---------------- members の見本 ---------------
-# Member list. This line is a comment. 
-fukachan@phys.titech.ac.jp
-katori
-# fukachan@beth.phys.titech.ac.jp
-##BYE fukachan
-----------------------------------------------
-
---------------- actives の見本 ---------------
-# Actives list. This line is a comment.
-fukachan@phys.titech.ac.jp	
-Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
-##BYE fukachan
-#cocoa@phys.titech.ac.jp	axion.phys.titech.ac.jp
-pollyanna	m=3
-----------------------------------------------
-
-注意：
-pollyanna	m=3 はpollyannaは３時間のまとめ送りの意味です
-
-
-.S	ＭＬのファイルの設定
-
-guide, objective, help等もチェック（書き直し）してください。
-
-deny			ＭＬのメンバーでない人へのお断りメール用
-guide			ＭＬのガイド（案内状？）
-help			コマンドリスト
-objective		ＭＬの目的の説明（世界征服とかさぁ〜:-)）
-
-です。
-＃ help.example2 は コマンドの使い方が systematic にかかれた 見本とし
-＃ て収録させていただいたものです。立派に作るとこんな感じになるという:-)
-＃ thanks to umura@nn.solan.chubu.ac.jp
-＃（カスタマイズされてるのでデフォールトの挙動とは違うことに注意）
-
-
-.S	おしまひ
-
-ここまでで、インストールはすべておしまいです。 
-debug modeとかを使いながら慣れて下さい。
-
-
-.S	ログファイル等
-
-なお、実際に動かすと次のようなファイルやdirectoryができます。
-
-spool		記事のスプール・ディレクトリ（数字のファイル）
-log		fml server's log, mget(libfml.pl)のlog
-summary		記事の ID、Subject
-seq		記事の ID
-var/log/	この下にログファイルがいろいろ
-		sendmailとのやりとりの記録（もっとも最近のものだけ）、
-		古い configuration 情報や loop check につかう情報等
-		例： var/log/_smtplog は デバッグに便利。
-var/run		（もし使うなら）ロックファイル等
-var/htdocs 	html モードを使うとデフォールトではここにＭＬの記事を
-		html化して保存する
-tmp		temporary に使う
-
-
-.C	ローカルなテスト
-
-.S	 ローカルなテスト
-
-	% make localtest 
-
-を実行すると、sendmail をつかわずに、local にテストを実行します。
-この場合 変数は config.ph からとられます。
-
-
-.S	コマンド一覧
-
-コマンドは、helpファイルに一通り書いてあります。
-実際にどうなるか試してみて下さい。
-
-
-.C	まとめおくり
-
-samples/crontab に cron の設定のしかたの見本があります。
-4.4BSD では各個人ごとに cron の設定が可能です。
-
-% crontab samples/crontab 
-
-です。samples/crontab は例えば
-
-0 * * * *	/var/spool/ml/Elena/msend.pl /var/spool/ml/Elena
-
-とかきます。
-
-まとめおくりは msend.pl が行ないますが、自動では行ないません。
-1時間に一回 msend.pl を実行しなさいとマシンに教える設定が必要です。
-それがこの cron の設定です。
-
-doc/op に まとめおくり の章があります。詳しくはそちらを見てください。
-
-
-					Please enjoy!
 
 $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
