@@ -1,6 +1,10 @@
 #!/usr/local/bin/perl
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
+
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && "$1[$2]");
@@ -19,6 +23,8 @@ $e{'mci:mailer'} = 'ipc';
 $user  = (split(/:/, getpwuid($<), 999))[0];
 $domain = &domain || 'phys.titech.ac.jp';
 eval "$machine = `hostname`;";
+
+$HOST = `hostname`;
 
 # default
 $debug = 1;

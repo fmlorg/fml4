@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -8,6 +8,7 @@
 push(@INC, $ENV{'FML'});
 push(@INC, "$ENV{'FML'}/proc");
 
+require 'libkern.pl';
 require 'libsmtp.pl';
 require 'libhref.pl';
 
@@ -15,6 +16,8 @@ $DIR     = $FP_TMP_DIR = $TMP_DIR = ($ENV{'TMPDIR'} || '.');
 $req     = shift @ARGV || 'http://www.phys.titech.ac.jp/uja/';
 $outfile = shift @ARGV;
 $debug   = 1;
+$debug_caller   = 1;
+$LOGFILE = "/tmp/.geturllog";
 
 if ($outfile) {
     if (-f $outfile) { die("$outfile already exists, exit!\n");}

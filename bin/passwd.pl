@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 #
@@ -42,7 +42,7 @@ while (!$to || !$p) {
 	# no echo
 	system "stty", "-echo";
 
-	print "Passwd: ";
+	print "Password: ";
 	chop($p = <STDIN>);
 	print "\n";
 

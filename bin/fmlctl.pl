@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -44,7 +44,7 @@ sub MainFC
 {
     eval &OverwriteLibraries;
 
-    if ($$InteractiveMode) {
+    if ($InteractiveMode) {
 	&Interactive;
     }
     else {
@@ -76,13 +76,13 @@ sub InitFC
 {
     $HOME         = $ENV{'HOME'};
     $PWD          = $ENV{'PWD'};
-    $$InteractiveMode  = 1 if $opt_i;
+    $InteractiveMode  = 1 if $opt_i;
     $ENABLE       = 0;		# 
     $From_address = "fmlctl";
     $rc_file = $opt_c ? $opt_c : "$HOME/.fmlctlrc";
 
     print "Fml Control ";
-    print "(Interactive Interface)\n" if $$InteractiveMode;
+    print "(Interactive Interface)\n" if $InteractiveMode;
     print "\n";
     print " chdir $DIR\n\n";
 

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -12,11 +12,12 @@ chop ($PWD = `pwd`);
 
 
 require 'getopts.pl';
-&Getopts("dhu:A:");
+&Getopts("dhu:A:U");
 
 $opt_h && die(&Usage);
 
 $debug       = $opt_d;
+undef $debug if $opt_U;
 $Unit        = $opt_u || 100;
 $ARCHIVE_DIR = "var/archive";
 $DIR         = $PWD;
@@ -72,6 +73,8 @@ while ($i * $Unit <= $limit) {
 	}
     }
 
+    &Mesg("Cheking\t$lower -> $upper ($counter hits)");
+
     if ($counter > 0) {
 	if (-f "$ARCHIVE_DIR/$tar.tar.gz") {
 	    &Mesg( "Exists $ARCHIVE_DIR/$tar.tar.gz, SO SKIPPED");
@@ -108,10 +111,6 @@ sub Usage
     $_;
 }
 
-sub Mesg
-{
-    local($s) = @_;
-    print STDERR "$s\n";
-}
+sub Mesg { print STDERR "@_\n";}
 
 1;
