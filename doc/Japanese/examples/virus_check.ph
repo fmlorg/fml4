@@ -1,4 +1,4 @@
-# $FML: virus_check.ph,v 1.15 2002/05/23 14:57:57 fukachan Exp $
+# $FML: virus_check.ph,v 1.16 2002/05/24 10:47:20 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -112,7 +112,7 @@ $DISTRIBUTE_FILTER_HOOK .= q{
 $DISTRIBUTE_FILTER_HOOK .= q#
     if ($e{'h:content-type:'} =~ /multipart/i) {
 	my $re = ';\s*(file)?name='
-	    .'("(DELETED\d+\.TXT|.*\.($extension))"|.*\.($extension))';
+            .'("(DELETED\d+\.TXT|.*\.('.$extension.'))"|.*\.('.$extension.'))';
 	if ($e{'Body'} =~ /$re/i) {
 	    return 'disabled virus attachment';
 	}
