@@ -46,6 +46,9 @@ init-makefml:
 simulation:
 	@ env ${EXPORT_ENV} sh $(FML)/.simulation/bootstrap
 
+update:
+	cvs -n update -dAP
+
 __scan: update_configuration
 	@ mv -f /tmp/__scan__ /tmp/__scan__.bak || echo ""
 	@ cvs -n update |tee /tmp/__scan__
@@ -106,7 +109,7 @@ testsetup: libkern
 	rsync -C -a libexec/ /usr/local/fml/libexec/
 	rsync -C -a bin/ /usr/local/fml/bin/
 
-update:
+install_current:
 	rsync -C -a kern/ /usr/local/fml-current/
 	rsync -C -a proc/ /usr/local/fml-current/
 	rsync -C -a libexec/ /usr/local/fml-current/libexec/
