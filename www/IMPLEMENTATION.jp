@@ -1,29 +1,58 @@
 		CGIの実装について
 
+○ 基本的なディレクトリ構成
+
+   /usr/local/fml/www/
+
+	CGIで使うtemplateを収容する場所
+
+   /usr/local/fml/share/
+
+	makefmlが生成する場所
+	この場所を直接使ってもいいし、
+	ここからさらにせいせいしてもよい
+
+  例: thttpd (target httpd) 
+     /usr/pkg/sbin/thttpd -nor -u fml \
+	-d /usr/local/fml/share -c 'cgi-bin/fml/admin/*cgi'
+
+  例2: apache
+     % rsync -av /usr/local/fml/share/cgi-bin/ /usr/pkg/libexec/cgi-bin/
+
 ○ makefml コマンド
 
+ * 全体の管理者用 (実装済み)
    makefml admin.cgi
 
-	/usr/local/fml/share/cgi-bin/fml/admin/ を生成
+	/usr/local/fml/share/cgi-bin/fml/admin/ 以下にCGIを生成
 			menu.cgi
 			makefml.cgi
 
+ * 各ＭＬの管理者用 (実装済み)
    makefml mladmin.cgi $ml
 
-	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ を生成
+	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
 			menu.cgi
 			makefml.cgi
 
- ＊ インストーラが
+ * 一般ユーザ用のはどうする？ (未実装)
+   makefml ml.cgi $ml とかにするのか？
+
+
+
+○ インストーラがどうパスワードを生成するべきか？
 
    makefml admin.cgi
 
-	admin/.htpasswd を生成するようにしたい
+	この時に admin/.htpasswd を生成するようにしたい
+
 
    makefml mladmin.cgi $ml
 
-	$DIR/$ml/etc/passwd から生成か？
-	リモートでいじる権限という観点から同じでいいだろう
+	この時に $DIR/$ml/etc/passwd から生成か？
+	リモートでいじる権限という観点から同じでいいだろうとおもう
+	share/ 以下を直接使わないなら
+	別の手段で保守するという案もあるだろう。
 
 
 
