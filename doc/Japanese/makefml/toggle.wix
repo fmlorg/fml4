@@ -1,0 +1,20 @@
+.C	メニューで変数の off /on をする
+.l	toggle-variable-on-menu
+.n	toggle-variable-on-menu
+
+◯    7    VARIABLE_OFF_ON               off/on toggle variables
+
+off / on する ( 1 or 0 を定義する) だけの変数(toggle な変数)なら全部メ
+ニューで off / on できるようにしてみました。ちなみに toggle 変数の一覧
+なので他の階層と重複があったりしますが、そういうものです。
+
+注意: 画面が縦に長いとなにかと面倒なので、アルファベット順で、前半後半
+      に分かれています。便宜上前半は A (^A .. ^K) 後半は L (^L .. ^Z)と
+      いう別れ道の階層を一回はさみます。
+
+例: リモート管理 REMOTE_ADMINISTRATION を 1 にする。次の２つはどっちで
+    も一緒です。
+
+    メインメニュ → OPTION → VARIABLE_OFF_ON → L → REMOTE_ADMINISTRATION → 1
+    メインメニュ → リモート管理 → REMOTE_ADMINISTRATION → 1 
+

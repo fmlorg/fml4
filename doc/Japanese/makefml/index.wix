@@ -9,5 +9,6 @@
 	←←← 引分引分踏五銨戶匹允 ←←←
 
 .include overview.wix
+.include toggle.wix
 .include edit.wix
 .include getopts.wix
