@@ -406,6 +406,7 @@ sub ModeratorResend
 	&FixHeaderFields(*e); # e.g. checking MIME
 
 	# distribute
+	&CheckCurrentProc(*Envelope, 'upper_part_only');
 	&Distribute(*e, 'permit from members_only');
     }
 
