@@ -4,6 +4,18 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/06/03
+
+  VEPRs bug fixes
+	handle postfix style
+	$USE_VEPR handling in Smtp()
+
+2002/05/31
+
+   $DO_NOTIHNG によるチェックを配送処理の直前にも挿入する。
+   これにより $START_HOOK より後の HOOK (の一部)でも
+   $DO_NOTHING による大域脱出ができるケースが増えました。
+
 2002/05/24
 
    kern/libsmtp.pl
@@ -290,7 +302,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.248 2002/05/23 15:07:24 fukachan Exp $
+	add $FML: CHANGES,v 1.249 2002/05/24 15:41:47 fukachan Exp $
 
 2001/10/03
 
