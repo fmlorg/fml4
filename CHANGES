@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/25
+
+   kern/libloadconfig.pl
+	define DUMMY,TRUE,FALSE for convenience
+
 2000/07/24
 
    makefml
