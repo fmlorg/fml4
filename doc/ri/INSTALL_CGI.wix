@@ -381,10 +381,10 @@ newaliases を実行できません。
 /etc/postfix/main.cf を次のように変更した後、
 "postfix reload" を実行して下さい。
 
-	alias_database = hash:/etc/aliases, 
+	alias_maps = hash:/etc/aliases, 
 		hash:/var/spool/ml/etc/aliases
 
-	# gateway, you should also include $mydomain. Do not specify the
+	# permit :include: operation in aliases
 	allow_mail_to_commands = alias,forward,include
 
 
@@ -681,7 +681,7 @@ UID が 1000、GID が 1000 であることを suEXEC は期待していますが、ディ
 リのオーナ（UID）とグループID（GID）を確認してください。
 
 
-$FML: INSTALL_CGI.wix,v 1.24 2001/05/27 01:39:00 fukachan Exp $
+$FML: INSTALL_CGI.wix,v 1.25 2001/07/07 08:07:07 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
