@@ -181,6 +181,10 @@ sub Confirm
 
 	&Mesg(*e, $m);
 
+	# XXX this check "elsif (! $ConfirmationReplyWithHelpP) {" is
+	# XXX not beautiful but dirty hack to avoid duplicated
+	# XXX forces of message:append:files at several places in this file.
+	# XXX PLEASE CLEAN UP THEM.
  	if (-f $CONFIRMATION_FILE && $ConfirmationReplyWithHelpP) {
 	    $e{'message:append:files'} = $CONFIRMATION_FILE;
 	}
