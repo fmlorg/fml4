@@ -529,6 +529,29 @@ lib/Utilitites/packmbox.pl を使って、
 うことができて便利でしょう。
 
 
+.S	配送するメールのMIME部分はDecodeしてしまいたい
+.label	{MIME-2}
+.seealso MIME-1
+
+では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
+例えば、fml.pl の sub GetFieldsFromHeaderで
+
+    if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+    }
+
+を
+
+    if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+	$MailBody = &DecodeMimeStrings($MailBody);
+    }
+
+で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
