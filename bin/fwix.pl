@@ -355,10 +355,13 @@ sub ReadFile
     local($d, $f);
     local($fname) = $file;
 
-    if ($file && (! -f "$dir/$file")) {
-	print STDERR "no such file $dir/$file\n";
-	return;
-    }
+    # XXX 2000/04/11 by fukachan@cvs.fml.org
+    # XXX This existence check is too strict ?
+    # XXX 
+    # if ($file && (! -f "$dir/$file")) {
+    # print STDERR "no such file $dir/$file\n";
+    # return;
+    # }
 
     $ReadFileRecursiveLevel++;
 

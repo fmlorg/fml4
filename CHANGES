@@ -6,7 +6,7 @@
 2000/04/11
 
   bin/fwix.pl
-	fix file existence code bug 
+	disable file existence introduced at 2000/04/10
 
   sbin/makefml (only on NT4)
 	fix 'no such file' in "makefml passwd ..."
