@@ -174,6 +174,9 @@ sub DoSendFile
 
     @to || push(@to, $to); # extention for GenerateHeader
 
+    # (before it, checks whether the return address is not ML nor ML-Ctl)
+    if (! &CheckAddr2Reply(*Envelope, $to, @to)) { return;}
+
     push(@files, $file);
     (1 == $zcat) && ($files{$f, 'zcat'} = 1);
     (2 == $zcat) && ($files{$f, 'uuencode'} = 1);
@@ -189,6 +192,9 @@ sub DoSendmail
     local(@to, %le, @rcpt);
     local($to, $subject, $body, @to) = @_;
     push(@to, $to);		# extention for GenerateHeader
+
+    # (before it, checks whether the return address is not ML nor ML-Ctl)
+    if (! &CheckAddr2Reply(*Envelope, $to, @to)) { return;}
 
     $le{'GH:Subject:'} = $subject;
     &GenerateHeader(*to, *le, *rcpt);
