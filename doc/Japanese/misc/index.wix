@@ -11,6 +11,7 @@
 .include misc.wix
 .include movement.wix
 .include summary.wix
+.include subject.wix
  
 
 .P	レンタルサーバというかISPのサービスというか…

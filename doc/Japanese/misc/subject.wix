@@ -1,0 +1,51 @@
+.C	Subject はっく
+
+.S	すれっどの先頭にだけ番号をふる？
+
+fml-support: 07772 近辺
+
+Q: スレッドの先頭の記事にだけ Subject: に通し番号を振り、返信メールに
+   関しては Subject: はいじらない
+
+A: とても面倒のようです。
+
+   1通目: Subject: [ML:1] 元の件名
+   2通目: Subject: Re: [ML:1] 元の件名
+   3通目: Subject: Re: [ML:1] 元の件名
+   4通目: Subject: [ML:4] 別の件名
+   5通目: Subject: Re: [ML:4] 別の件名
+
+なら
+
+   $SMTP_OPEN_HOOK = q#
+       if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
+           $Envelope{'h:Subject:'} = $Envelope{'h:subject:'};
+   	undef $SUBJECT_FREE_FORM;
+       }
+   #;
+   
+でいけます。
+
+しかし、4 通目は [ML:2] とカウントしてほしいなら、
+いわゆる記事番号とは別にカウントするしかありません。
+例えば別の sequence ファイルをつくってカウントをしていきます。
+   
+.q   
+   $SMTP_OPEN_HOOK = q`
+       undef $SUBJECT_FREE_FORM;
+       if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
+           $Envelope{'h:Subject:'} = $Envelope{'h:subject:'};
+       } else {
+           $SEQ_SUBJ_FILE = "$DIR/seqsubj";
+           &Touch($SEQ_SUBJ_FILE) unless -f $SEQ_SUBJ_FILE;
+           $IDSUBJ = &GetFirstLineFromFile($SEQ_SUBJ_FILE);
+           $IDSUBJ++;
+           &Write2($IDSUBJ, $SEQ_SUBJ_FILE);
+           #&Log("IDSUBJ=[$IDSUBJ]");
+           $Envelope{'h:Subject:'} =~ s/^\s+//;
+           $Envelope{'h:Subject:'} = "[$BRACKET:$IDSUBJ] $Envelope{'h:Subject:'}";
+       }
+   `;
+.q   
+
+注: この例でも動きますが、エラーチェックは不十分といえます。

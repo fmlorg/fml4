@@ -38,3 +38,15 @@ you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
 らい必要と評価しておくといいみたいです。
 
 
+.S		特定の一つのＭＬだけを一時停止したい(削除にあらず)
+
+
+配送を止めるだけならデバッグモードにするとやみに葬られます:)
+
+/etc/aliases を編集し、事実上無効にするというのもよいでしょう。
+
+.q
+elena: elena-admin
+elena-ctl: elena-admin
+elena-admin: fml
+.~q

@@ -107,3 +107,29 @@ to
 で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
 
 
+.S	confirm の確認メッセージを MAINTAINER へ転送する
+
+fml-support: 08960
+
+Q: fml の自動登録のモードで confirmation をしているとします。この時、
+confirm の確認メッセージは投稿者に対して返信されます。これを、管理者宛
+に送信し、管理者が返信することにより登録が完了するような形にするにはど
+うすれば良いでしょうか？
+
+Q: 管理者宛に転送されるメール
+
+  例(メール本文):
+
+	confirm 200010302002481472410938048 Tomoyo Daidouji
+
+を横取りして、管理者がこのメールへの返答を elena-ctl へ送ってあげると
+いうことでいいんでしょうか？確かにそういうことはできないんですけど、
+HOOK をつかえば横取りができます :-) そのメールに返事をすればOK 
+
+.q
+$FML_EXIT_HOOK = q#
+   if (! &MailListMemberP($From_address)) {
+        $Envelope{'message:h:to'} = $MAINTAINER;
+   }
+#;
+.~q
