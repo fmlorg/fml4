@@ -318,3 +318,11 @@ simulation:
 	sh .simulation/bootstrap
 	diff -u /tmp/log.old /tmp/log|Mail -s Diff:fml.simulation.log elena
 	grep XXX /tmp/log|Mail -s fml.simulation.log elena
+
+rel:
+	rm -f /tmp/relnotes
+	show -form $(PWD)/hack/release-notes.format  501-1000 +release-notes    >> /tmp/relnotes
+	show -form $(PWD)/hack/release-notes.format 1001-1500 +release-notes >> /tmp/relnotes
+	show -form $(PWD)/hack/release-notes.format 1501-2000 +release-notes >> /tmp/relnotes
+	show -form $(PWD)/hack/release-notes.format 2001-2500 +release-notes >> /tmp/relnotes
+	show -form $(PWD)/hack/release-notes.format 2501-3000 +release-notes >> /tmp/relnotes
