@@ -4225,7 +4225,7 @@ This is a bug that I forget the implementation.
 At  Wed, 9 Mar 94 20:38:48  JST
 Thanks to kuroda <kuroda@ais.kudpc.kyoto-u.ac.jp>
 
-FIX: When the Authentification fails, return $DENY_FILE not $GUIDE_FILE
+FIX: When the Authentication fails, return $DENY_FILE not $GUIDE_FILE
 README FIX
 Default should be  $ML_MEMBER_CHECK = 1;
 Makefile FIX
