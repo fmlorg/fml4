@@ -1,0 +1,17 @@
+.HTML_PRE
+	Received: -> X-Received:
+
+.if LANG == JAPANESE
+投稿された記事のヘッダの Received: を X-Received: にコピーしてその元の 
+Received: は消す。
+.fi
+.if LANG == ENGLISH
+Copy Received: of the input article to X-Received: and remove the
+field.
+.fi
+
+[Example]
+
+.include config/x-received
+
+.~HTML_PRE
