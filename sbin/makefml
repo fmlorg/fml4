@@ -1823,6 +1823,18 @@ sub do_newml
     local($ml) = @_;
     local($cf, $local_config, $config, @config, %config);
 
+    if ($< == 0) {
+	print "************************* WARNING *************************\n";
+	print "\n";
+	print "    YOU WILL OPERATE A MAILING LIST as ROOT?\n";
+	print "    IT IS VERY DANGEROUS!\n";
+	print "    YOU SHOULD RUN MAILING LIST AS A NON-PRIVILEGED USER\n";
+	print "\n";
+	print "***********************************************************\n";
+	sleep 10;
+    }
+
+
     print "---Creating $ml mailing list\n";
 
     &ApplyPolicy;
@@ -2797,18 +2809,22 @@ sub FYI
     }
     elsif ($r =~ /Smtp\:\:socket/) {
 	$m .= "Hmm... perl's socket() fails on this machine.\n";
-	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
+	$m .= "But don't worry!\n";
+	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
     }
     elsif ($r =~ /Smtp\:\:connect.*connection refused/) {
 	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
-	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
+	$m .= "But don't worry!\n";
+	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
+
 	$m .= 
 	    "(\$HOST in config.ph should be a machine where sendmail runs)\n";
 	$m .= &MX;
     }
     else {
 	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
-	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
+	$m .= "But don't worry!\n";
+	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
     }
 
     if ($m || $verbose) {
