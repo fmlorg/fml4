@@ -62,11 +62,18 @@ sub InitMakeFml
     ### getopt
     require 'getopts.pl';
     &Getopts("dhf:A:O:p:D:v");
+    $debug   = $opt_d;
+    $verbose = $opt_v;
+
+    $HOME  = $ENV{'HOME'};
+    $PWD   = $ENV{'PWD'};
+
 
     ### determine Architechure dependence
     $COMPAT_ARCH = $opt_A;
     if ($ENV{'OS'} =~ /Windows_NT/) {
-	$COMPAT_ARCH = "WINDOWS_NT4";
+	$COMPAT_ARCH  = "WINDOWS_NT4";
+	$COMPAT_WIN32 = 1;
     }
    
     # umask 077?
@@ -75,17 +82,13 @@ sub InitMakeFml
     umask(002);
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	# first time if !-d $EXEC_DIR ? (must be true)
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl" if -d $EXEC_DIR;
 	$USER = $ENV{'USERNAME'};
     }
     else {
 	$USER = $ENV{'USER'} || (getpwuid($<))[0];
     }
-
-    $debug   = $opt_d;
-    $verbose = $opt_v;
-
-    $HOME  = $ENV{'HOME'};
-    $PWD   = $ENV{'PWD'};
 
     { # DNS AutoConfigure to set FQDN and DOMAINNAME; 
 	local(@n, $hostname, $list);
@@ -338,6 +341,10 @@ sub SetHashDefaults
 		    'listserv', 'do_fmlserv',
 		    'majordomo','do_fmlserv',
 
+		    # NT extensin
+		    'popfml',     'do_popfml',
+		    'pop_passwd', 'do_pop_passwd',
+
 		    # PGP
 		    'pgp',	'do_pgp',
 		    '9#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
@@ -420,7 +427,12 @@ sub InitFmlConfig
     # $cmd = ($cmd !~ /^\s*$/) ? $cmd : "$CurConfig{'EXEC_DIR'}/.fml";
     # $CONFIG_DIR = $cmd;
 
-    $CONFIG_DIR = "$CurConfig{'EXEC_DIR'}/.fml";
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$CONFIG_DIR = "$CurConfig{'EXEC_DIR'}/_fml";
+    }
+    else {
+	$CONFIG_DIR = "$CurConfig{'EXEC_DIR'}/.fml";
+    }
 
     # mkdir CONFIG_DIR;
     {
@@ -553,8 +565,8 @@ sub Copy
 {
     local($in, $out) = @_;
 
-    open(COPY_IN,  $in)      || (&Log("CopyIN: $!"), return);
-    open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
+    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return);
+    open(OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return);
     select(OUT); $| = 1; select(STDOUT); 
     while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
     close(OUT);
@@ -844,7 +856,7 @@ sub ExecCmd
 	local($not_require_ml);
 	$ml = $argv[0];
 	for ("newml", "info", "help", "install", 
-	     "fmlserv", "majordomo", "listserv") {
+	     "fmlserv", "majordomo", "listserv", "popfml") {
 	    # print STDERR "check $fp eq $_\n";
 	    $fp eq $_ && $not_require_ml++;
 	}
@@ -926,7 +938,7 @@ sub FixPath
     local($perl);
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
-	$perl = "";
+	$perl = &search_path('perl.exe');
     }
     else {
 	$perl = &search_path('perl');
@@ -961,9 +973,8 @@ sub FixPath
     # sleep 1;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
-	unlink "${prog}.bak" if -f "${prog}.bak";
-	&Copy($prog, "${prog}.bak");
-	&Copy("${prog}.new", $prog);
+	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
+	rename("${prog}.new", $prog) || &Warn("cannot rename $prog.new $prog");
     }
     else {
 	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
@@ -983,7 +994,9 @@ sub search_path
 	 "/usr/contrib/bin", "/usr/gnu/bin", 
 	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
 	 # NT Extention
-	 "/perl5/bin" ) {
+	 "/perl5/bin", 
+	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin"
+	 ) {
 	push(@path, $_);
     }
 
@@ -1560,6 +1573,9 @@ sub do_install
 	&Log("makefml windows NT4 mode");
 	print "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR\n";
 	system "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR";
+
+	&Conv("nfml", "sys/arch/WINDOWS_NT4/makefml.cmd", 
+	      "$EXEC_DIR/makefml.cmd");
     }
     elsif (-f "sbin/install.sh") {
 	$SH = $ENV{'SH'} || "/bin/sh";
@@ -1575,10 +1591,21 @@ sub do_install
 	if ($cmd eq 'y') { &ExecCmd("fmlserv");}
     }
 
-    &FYI;
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	;
+    }
+    else {
+	&FYI;
+    }
 
     # CFVersion 2
     # &FYIPolicy;
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	&PopFmlSetUp;
+    }
 }
 
 
@@ -1751,6 +1778,13 @@ sub do_newml
     print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
     &Cat("$ML_DIR/$ml/aliases");
     print "\n";
+
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	&PopFmlInputPasswd($ml);
+    }
 }
 
 
@@ -2138,10 +2172,15 @@ sub PerlModuleExistP
 
 sub MakeConfigPH
 {
-    local($config, $manifest, $cf, $config_ph) = @_;
+    local($config, $manifest, $cf, $config_ph, $preamble) = @_;
     local($perl);
 
-    $perl = &search_path('perl');
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	$perl = &search_path('perl.exe');
+    }
+    else {
+	$perl = &search_path('perl');
+    }
 
     if (! $perl) { 
 	&Log("Error: makefml cannot find perl");
@@ -2167,6 +2206,9 @@ sub MakeConfigPH
 
     open(SAVE, "> $config_ph") || (&Log("cannot write $config_ph"), return 0);
     select(SAVE); $| = 1; select(STDOUT);
+
+    # preamble
+    print SAVE $preamble if $preamble;
 
     while (<EXEC_CF>) { print SAVE $_;}
 
@@ -2303,7 +2345,7 @@ sub do_fmlserv
     # include file is public readable;
     # why for () fails?;
     local($exec_dir) = "$EXEC_DIR/etc/makefml";
-    &Conv($ml, "$exec_dir/fmlserv-config.ph", "$ML_DIR/$ml/config.ph");
+
     &Conv($ml, "$exec_dir/fmlserv-include", "$ML_DIR/$ml/include");
     &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_DIR/$ml/aliases");
 
@@ -2316,11 +2358,46 @@ sub do_fmlserv
 
     &Conv($ml, "$EXEC_DIR/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
 
+    ### config.ph generation
+    ### config.ph is fmlserv-specific + ordinary config.ph
+    &Conv($ml, "$exec_dir/fmlserv-config.ph", "$ML_DIR/$ml/config.ph");
+    ### config.ph ends
+
     # the last info
     print "\n   Please see several examples in $ML_DIR/$ml\n";
     print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
     &Cat("$ML_DIR/$ml/aliases");
     print "\n";
+}
+
+
+sub do_popfml
+{
+    &ResetVariables;
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	&PopFmlSetUp;
+    }
+    else {
+	print STDERR "Sorry, Unix Version Interface is not yet.\n";
+    }
+}
+
+
+sub do_pop_passwd
+{
+    &ResetVariables;
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/depend.pl";
+	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
+	&PopFmlInputPasswd($ml);
+    }
+    else {
+	print STDERR "Sorry, Unix Version Interface is not yet.\n";
+    }
 }
 
 
