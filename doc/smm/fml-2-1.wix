@@ -3,7 +3,7 @@
 この章は再録です。多くのものは歴史的に削除されたがメモ/記録としてある
 とよいかもしれないというものです。
 
-.S	モードについて
+.S	DEFINE_MODEによる配送モード設定について(obsolete)
 
 以下では配送のモードについて解説します。fml の設定変数は非常に多岐に渡っ
 ています。またメタレベルで設計されている部分もあります。そのため設定の
@@ -16,8 +16,7 @@
 いので、もっと細かくいじりたくなった時にその設定の意味を調べれば良いと
 おもいます。
 
-
-.S	DEFINE_MODE
+	DEFINE_MODE
 .k	DEFINE_MODE
 .k	&DEFINE_MODE
 .xref	auto-regist
@@ -51,7 +50,7 @@ backward compatible のため 2.1 release でも設定は有効ですができるだけ
 使うべきではありません。
 
 
-.S	&DEFINE_MODE の定義について
+	&DEFINE_MODE の定義について
 .l	&DEFINE_MODE
 
 以下 ＭＬ = 
@@ -137,7 +136,7 @@ backward compatible のため 2.1 release でも設定は有効ですができるだけ
 	artype って makefml では confirm くらいしか使ってないのだが…
 
 
-.S	配送だけをするサーバ
+.S	配送だけをするサーバ(&DEFINE_MODEによる)
 
 makefml は makefml newml listname で listname (配送用), listname-ctl
 (コマンド用)という２つのアドレスを作ります。config.ph では 
@@ -157,7 +156,7 @@ OR
 listname-ctl を使ってもらうことになります。
 
 
-.S	再配送だけをするサーバ
+.S	再配送だけをするサーバ(&DEFINE_MODEによる)
 
 単に配送を待って、それをスプールすることだけを目的にするメーリングリス
 トを作ることもあるでしょう。つまり ガイドを相手に返すこともなく、単に
@@ -179,8 +178,152 @@ makefml newml elena で elena メーリングリストを作る。/etc/aliases で
 
 
 
+.S	bin/fmlctl.pl (obsolete)
+.l	bin/fmlctl.pl
+.k	fmlctl.pl
+.k	.fmlctlrc
+
+obsolete なのは今後は makefml しか保守されないから。
+同じような機能のものが複数あってもしょうがない。
+
+通常 fml のコマンドをテストする場合メール経由で実行しますが、ＭＬのホー
+ムで fmlctl を使うと、fml のコマンドをメール経由でなくても実行します。
+
+例えば 
+	# mget last:10 mp
+
+をメールで送らずとも
+
+	% fmlctl.pl mget last:10 mp
+
+をすると、このコマンドを実行して、メールでの返答でなく画面に結果を出し
+ます。長い場合もあるので less 等で見ると良いでしょう。
+
+-i オプションの場合インタラクティブ・モードに入るので (perl debugger 
+もどきのインターフェイス)、これで複数のコマンドを実行したりもできます。
+
+SYNOPSIS
+	fmlctl.pl -i [-c configfile] [-d ML_directory] [-h] [DIR] [LIBDIR]
+
+	-a	ADMIN MODE (コマンド は # admin ... が前についてるものと仮定) 
+		つまり help をいれても # admin help のことだと思う。
+	-c	fmlctl の設定ファイル
+		デフォールトでは $HOME/.fmlctlrc を探して評価する
+	-d	ＭＬのホームの指定
+	-h	このメッセージ
+	DIR	ＭＬのホーム (config.ph のある場所)
+	LIBDIR	ＭＬのホームとは他の場所に libfml.pl 等があるならその場所
+
+
+例：	通常は subscribe address をメールで送る場合
+
+	% fmlctl subscribe ひとのあどれす
+
+インタラクティブモード (interactive mode)
+
+	% fmlctl -i 
+	fmlctl<1> subscribe address
+
+例：
+	fmlctl<1> subscribe 	address
+	fmlctl<1> addadmin	address
+
+管理者モードか否かは $ENABLE という変数で決まっているので、
+通常のコマンドを実行したい場合は
+
+	u $ENABLE
+
+管理者モードへ移行したい場合は
+
+	e $ENABLE = 1
+
+を実行すればできます。覚え方は「CISCOと同じenable」です（笑）
+この場合 # admin シンタックスは要らず、その後の部分だけでよいです。
+つまり help といれても admin help の意味になります。
+またパスワードは必要ありません(こちらの方が重要でしょう)。
+
+
+実行例：
+
+   % chdir /var/spool/ml/elena
+   % bin/fmlctl.pl -i $PWD /usr/libexec/fml
+   Fml Control (Interactive Administration Interface)
+   
+    chdir /var/spool/ml/elena
+   
+    Loading the configuration [/var/spool/ml/elena/config.ph]
+   
+   Setting the Mailing List [Elena@axion.phys.titech.ac.jp], O.K.?
+   
+ [[[ COMMAND MODE ]]]
+   
+     FmlCtl<0> h
+   
+           !number   do the previous action of the number
+           !string   do the string in the shell
+           e         eval string
+           e.g. e $debug = 1
+           h         help
+           H         history
+           p         print the value
+           e.g. p $debug
+           q         quit
+           u         undef the value
+           e.g. u $debug
+           
+     FmlCtl<1> e $debug = 1
+   eval "$debug = 1;";
+     FmlCtl<2> p $debug
+   1
+     FmlCtl<3> u $debug
+   eval "undef $debug;";
+     FmlCtl<4> H
+   1:h
+   2:e $debug = 1
+   3:p $debug
+   4:u $debug
+   5:H
+
+
+.S	bin/RecreateConfig.pl (obsolete)
+.l	bin/RecreateConfig.pl
+.k	RecreateConfig.pl
+
+fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
+
+
+
+.S	mget でユーザから与えることのできるシンタックス(2.1 では削除)
+.k	mget と Shell Match Pattern(e.g. * 1?)
+.key	$SECURITY_LEVEL
+
+$SECURITY_LEVEL < 2 では 
+
+	# mget * 
+とか
+	# mget 10? 
+
+が使えます。デフォールトは"Backward Compatibility を無視して2" です。
+通常 Backward Compatibility は重視されているのですが、security 関係は
+例外です。
+
+また、何もしなくても、
+
+# mget 正規表現 送り返されるメールの時間間隔(sec)
+
+	と
+
+# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔(sec)
+
+の両方を理解します。サーバが自動的に切替えます。
+
+
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
