@@ -19,7 +19,11 @@ $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 &InitTTY;
 
 # info
-if (! @ARGV) { &ExecCmd("info"); exit 0;}
+if (! @ARGV) { 
+    &ExecCmd("info");
+    &MenuInputLoop if $opt_w;
+    exit 0;
+}
 
 if (@ARGV) {
     &ExecCmd(join(" ",@ARGV));
@@ -27,6 +31,7 @@ if (@ARGV) {
 else {
     &ExecCmd("info");
 }
+# unlocked here (in ExecCmd).
 
 if ($GroupWritable) {
     print STDERR "\n   Please check the group permission in $ML_DIR\n";
@@ -36,6 +41,7 @@ if ($GroupWritable) {
 &System if $SYSTEM_ARGV;
 
 &FlushLog;
+
 exit 0;
 
 
@@ -61,7 +67,7 @@ sub InitMakeFml
 
     ### getopt
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:v");
+    &Getopts("dhf:A:O:p:D:vw");
     $debug   = $opt_d;
     $verbose = $opt_v;
 
@@ -3086,6 +3092,38 @@ sub Bind
     $Count++;
 
     return "$index$label";
+}
+
+
+####### NT 
+package main;
+
+sub MenuInputLoop
+{
+    local($cmd, $menu);
+
+    $menu = qq#;
+    Please input makefml\'s command and the arguments;
+    For example, for the ML \"elena\"; 
+    \tnewml elena  (makefml newml elena);
+    \tconfig elena (makefml config elena);
+    ;#;
+    $menu =~ s/;//g;
+
+    while (1) {
+	print "\n"; print "-" x 60; print "\n";
+	print $menu;
+
+	$cmd = &Query("Input", "command arguments", 
+		      '.*', "help");
+
+	$cmd =~ s/^\s*(makefml|makefml\.\S+)\s//;
+
+	system "perl $0 $cmd";
+
+	$cmd = &Query("Do you continue?", "y/n", "y|n", "y");
+	if ($cmd eq 'n') { last;}
+    }
 }
 
 
