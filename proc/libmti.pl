@@ -271,14 +271,14 @@ sub MTIWarn
 	  $atime,$mtime,$ctime,$blksize,$blocks);
     local($cont, $s);
 
-    $MTI_WARN_LOG_FILE = $MTI_WARN_LOG_FILE || "$FP_VARLOG_DIR/mti.lastwarn";
+    $MTI_WARN_LASTLOG  = $MTI_WARN_LASTLOG  || "$FP_VARLOG_DIR/mti.lastwarn";
     $MTI_WARN_INTERVAL = $MTI_WARN_INTERVAL || 3600;
 
     # already exists (some errors occured in the past)
-    if (-f $MTI_WARN_LOG_FILE) {
+    if (-f $MTI_WARN_LASTLOG) {
 	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
 	 $atime,$mtime,$ctime,$blksize,$blocks)
-	    = stat($MTI_WARN_LOG_FILE);
+	    = stat($MTI_WARN_LASTLOG);
 
 	# ignore until the next waning time.
 	if ((time - $mtime) < $MTI_WARN_INTERVAL) { 
@@ -286,12 +286,12 @@ sub MTIWarn
 	}
 	elsif ((time - $mtime) < 2*$MTI_WARN_INTERVAL) { 
 	    $cont = 1;
-	    &Append2(time, $MTI_WARN_LOG_FILE);
+	    &Append2(time, $MTI_WARN_LASTLOG);
 	}
     }
     # the first time
     else {
-	&Append2(time, $MTI_WARN_LOG_FILE);
+	&Append2(time, $MTI_WARN_LASTLOG);
     }
 
     $s = "FML Mail Traffic Monitor System:\n\n".
