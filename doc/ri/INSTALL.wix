@@ -104,6 +104,7 @@ Here you see the following questions.  Please answer them!
    FQDN                      [beth.sapporo.iij.ad.jp] 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
    TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+   LANGUAGE                  [Japanese] 
 
 それぞれ、次のような意味ですので、適当に入れて下さい。単に
 Enter?(CR) を押すと [] の中の値が自動的に設定されます。
@@ -189,6 +190,18 @@ These questions are as follows:
 
 	といった具合に複数のＭＬがこの場所の下に作られていく。
 	ここは各ＭＬごとの設定ファイルや記事を保存する場所です。
+
+   LANGUAGE                  [Japanese] 
+=E
+	When you make a new ml by "makefml newml", 
+	this setteing determines the languge of documents for the ml.
+	By default, If the target machine to install is "*.jp", "Japanese".
+	If not, "English". 
+	If you would like to change, please select "Japanese" or "English" 
+
+	"makefml newml" (後述)の際にＭＬ用に作られるドキュメントの言語
+	設定。実はインストールするマシンが .jp ならデフォールトが日本
+	語になります。"Japanese" か "English" が選べます。
 
 
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
