@@ -1,7 +1,24 @@
 ---------------------------------------------------------------------------
 [FOR YOUR INFORMATION]
 
-	 MEMO AROUND RECENTLY UPDATED or FIXED;
+	MEMO AROUND RECENTLY UPDATED or FIXED
+	$Date$
+
+   [4.0.1 リリース以降の主な変更点]
+
+	* 新機能は fml 5.0 のモジュールベースに変更 
+	* ドキュメントの一部を 5.0 branch へ移行
+		doc/devel/OS_and_Perl (OS デフォルトの perl 情報一覧)
+		doc/devel/ 全体
+	* IPv6 をデフォルトで使う
+	* サマータイムの考慮
+	* List- ヘッダを個別にカスタマイズ可能にする
+	* 全受信者数を数えている変数を作る
+		$Total_Rcpt_Count
+	* bug fixes
+		FreeBSD での CGI 
+		spool2html で module が @INC にない
+
 
 2001/06/18
 
@@ -19,6 +36,18 @@
 	@INC に module/* を入れるように修正
 	これをしないと Mail::Address が見つからないなどという
 	エラーが出る（が、spool2html は動くけど）
+
+2001/06/14
+
+   kern/fml.pl
+	apply patch by OGAWA Kunihiko <kuni@edit.ne.jp> (fml-support: 09378)
+	add X-Dispatcher, X-Newsreader, User-Agent to @HdrFieldsOrder
+
+	@HdrFieldsOrder に追加する。元々ヘッダは素通しなので、
+	並ぶ順がきれいか否か程度の意味しかない:)
+
+   www/lib/libcgi_makefml.pl (1.60-1.61)
+	add /usr/local/sbin as a search path for postalias
 
 2001/06/10
 
@@ -40,5 +69,44 @@
 2001/06/03
 
    4.0.1 release
+
+2001/05/11
+
+   IPv6 by default
+
+	常に IPv6 でメールサーバに接続することに挑戦してみる。
+	もし、失敗したら IPv4 で挑戦する。
+	これがデフォルト
+
+	$USE_INET6 を 0 にすると IPv4 オンリーに戻ります。
+
+2001/05/10
+
+   kern/libsmtp.pl
+	enable IPv6
+
+	IPv6 を有効にする(fml 5.0 の IPv6 モジュールを使っている)。
+
+   messages/Japanese/amctl (1.5-1.6):
+	fix Japanese to be more friendly for newbies
+
+   日付関連
+	サマータイムの指定をできるように拡張する。
+	サマータイムらしい場合にはタイムゾーンは $TZONE_DST 
+	の値が GetTime() で使われる :) デフォルトでは未定義
+
+   	fml/bin: cron.pl emumail.pl gen_summary.pl spool2html.pl 
+   	fml/cf: MANIFEST config 
+   	fml/kern: fml.pl 
+   	fml/libexec: mead.pl mead.pl.new 
+   	fml/sbin: makefml 
+   	fml/sys/WINDOWS_NT4: ntfml.pl wrapper.pl 
+   
+2001/05/05
+
+   fml 5.0 branch から Mail::* と IO::* クラスを輸入した。
+
+	一つは IPv6 のため、もう一つは mead で使う
+	エラーメール解析エンジンの輸入でした。
 
 ---------------------------------------------------------------------------
