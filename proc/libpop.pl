@@ -149,6 +149,7 @@ sub Gabble
     &MakeConnection(*conf);
 
     $_ =  &PopPut2Socket("STAT");
+    &Log("STAT $_") if $debug;
 
     if (/^\+OK\s+(\d+)/) {
 	$n = $1;
@@ -166,6 +167,7 @@ sub Gabble
 	print POPLOG $_ = <S>; /^\-/o && last;
 
 	$tmpf       = "$POP_QUEUE_DIR/in.pop$$.$i";
+	$uif        = "$POP_QUEUE_DIR/pq$$.$i.prog.ui";
 	$queue      = "$POP_QUEUE_DIR/pq$$.$i";
 	$CurTmpFile = $tmpf;
 
@@ -176,8 +178,18 @@ sub Gabble
 	$SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'Shutdown';
 	alarm($POP_TIMEOUT || 30) if $HAS_ALARM;
 
+	### LOG INFORMATION FOR $queue
+	if (open(FILE, "> $uif")) {
+	    print FILE "\$MAINTAINER = \'$conf{'MAINTAINER'}\';\n";
+	    print FILE "1;\n";
+	    close(FILE);
+	}
+	else { 
+	    &Log("cannot create $uif");
+	}
+
 	### FILE RETRIEVE
-	open(FILE, "> $tmpf") || next;
+	open(FILE, "> $tmpf") || (&Log("cannot create $tmpf"), next);
 	select(FILE); $| = 1; select(STDOUT);
 	for (;;) { 
 	    $_ = <S>; 
