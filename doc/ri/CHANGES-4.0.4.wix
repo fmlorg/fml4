@@ -15,6 +15,19 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/05/22
+
+   libexec/mead.pl (1.33-1.34):
+	log to $LOGFILE
+
+2002/05/20
+
+   proc/libsynchtml.pl (2.48-2.49):
+	bug fix url extraction
+
+   proc/liblop.pl (2.11-2.12):
+	fix header boundary
+
 2002/05/18
 
    updated IM to im141 + local patch
@@ -129,7 +142,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.17 2002/05/18 11:24:16 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.20 2002/05/22 15:27:41 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
