@@ -175,8 +175,9 @@
 	
 	<HR>
 	<A NAME=server_config>
-	<LI><P>
-	サーバの設定
+	<LI>
+	MTA
+
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
@@ -193,14 +194,11 @@
 			</SELECT>
 		</TABLE>
 	<TR>
-	_____________________________
-	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
 	
-	<HR>
-	<LI><P>
+	<LI>newaliases
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
