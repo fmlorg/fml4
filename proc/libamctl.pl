@@ -317,8 +317,11 @@ sub GetSubscribeString
     local($_, $key) = @_;
     local($buf);
 
-    # evalute the first multipart block
-    if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e);}
+    if (! ($AUTO_REGISTRATION_TYPE eq "subject")) {
+	# evalute the first multipart block
+	# XXX try to do here only when we DO NOT parse the subject.
+	if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e);}
+    }
 
     if ($debug_confirm) {
 	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
