@@ -23,13 +23,16 @@ sub StripMIMESubject
     local(*e) = @_;
     local($r)  = 10;	# recursive limit against infinite loop
 
+    &Debug("MIME  INPUT:      [$_]") if $debug;
     ($_ = $e{'h:Subject:'}) || return;
-    &Debug("MIME  INPUT:[$_]") if $debug;
+    &Debug("MIME  INPUT GO:   [$_]") if $debug;
     $_ = &mimedecode($_);
-    &Debug("MIME  INPUT:[$_]") if $debug;
+    &Debug("MIME  REWRITTEN 0:[$_]") if $debug;
 
+    # 97/03/28 trick based on fml-support:02372 (uematsu@iname.com)
     $_ = &StripBracket($_);
-    $e{'h:Subject:'} = &mimeencode($_);
+    $e{'h:Subject:'} = &mimeencode("$_\n");
+    $e{'h:Subject:'} =~ s/\n$//;
 
     &Debug("MIME OUTPUT:[$_]") if $debug;
     &Debug("MIME OUTPUT:[". $e{'h:Subject:'}."]") if $debug;
