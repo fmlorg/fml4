@@ -97,7 +97,7 @@ sub PopFmlGetPasswd
     local($org_sep)  = $/;
     $/ = "\n\n";
 
-    open(NETRC, $config_file) || die("Error::Open $config_file [$!]");
+    open(NETRC, $config_file) || die("Error: cannot open $config_file [$!]");
     while(<NETRC>) {
 	s/\n/ /;
 	s/machine\s+(\S+)/$Host = $1/ei;
