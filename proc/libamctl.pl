@@ -794,9 +794,6 @@ sub ChangeMemberList
 
     $ADDR_CHECK_MAX = $org_addr; # reset;
 
-    # special handling for recursive errors
-    if ($status ne 'RECURSIVE') { undef $status;}
-
     $status;
 }
 
@@ -1006,7 +1003,7 @@ sub DoChangeMemberList
     ## IF TOO RECURSIVE
     # elsif ($ADDR_CHECK_MAX >= 10) {
     elsif ($ChMemCount >= 10) {
-
+	return $NULL;
 	&Log("MAXIMUM of ADDR_CHECK_MAX, STOP");
     }
     ## DEFAULT 
