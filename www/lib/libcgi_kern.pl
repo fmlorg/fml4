@@ -122,7 +122,7 @@ sub ExpandMemberList
     }
 
     # XXX oops, I wanna less malloc() version ;-)
-    for $addr (sort keys %addr) {
+    for $addr (sort {$a <=> $b} keys %addr) {
 	print "\t\t\t<OPTION VALUE=$addr>$addr\n";
     }
 }
