@@ -119,15 +119,6 @@ $USE_OUTGOING_ADDDRESS changes from zero/null to 1.
 
 PIPELINE が可能な場合でも使わない
 
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
-.#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
-.# 
-.# FML is free software; you can redistribute it and/or modify
-.# it under the terms of GNU General Public License.
-.# See the file COPYING for more details.
 
 .S	複数のマシンの sendmail を使ってパラレルに送信
 =E.S	Use Plural Mta'S On Plural Hosts
@@ -164,6 +155,7 @@ If the total number of $HOST and @HOSTS < N, fml.pl uses $HOST again
 and again. This technique is used as a secondary server in delivery.
 When you setup @HOSTS and unset $MCI_SMTP_HOSTS, fml.pl uses $HOST in
 usual, but @HOSTS if $HOST is down.
+
 
 .S	VERPs
 

@@ -74,6 +74,7 @@ NEW FORMATでは
 	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 .fi
 
+
 .S	全てのメールをリレーサーバに投げる
 =E.S	Default relay server	
 
@@ -102,6 +103,7 @@ r=$DEFAULT_RELAY_SERVER.
 =E
 In Sendmail 5.x, you require additional orderings by relay server in
 "actives". 
+
 
 .S	CF (by motonori@wide.ad.jp) 形式による relay 
 =E.S	Cf (By motonori@wide.ad.jp) Style Relay Configurations

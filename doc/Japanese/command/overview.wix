@@ -1,10 +1,24 @@
 .C	Overview
 
+コマンドとは「メールでfmlに何かをさせること」です。一般ユーザの使うコ
+マンドと、管理者だけが使えるコマンドというのがあります。
+
+一般ユーザ向けの代表的な機能は
+
+	メーリングリストに入る、抜ける
+	あるファイルを見る (例:  サマリをみる )
+	過去の記事を取り寄せる
+
+のようなことを指します。
+
+管理者用のものについては参照 => .ptr{remote_control}
+
+
 .S	コマンドの一覧
 =E.S	Available command index
 .k	コマンドの一覧->helpファイル
 
-help ファイルを見て下さい:-)
+各HOMEディレクトリにある help ファイルを見て下さい:-)
 =E
 Please see "help" file for standard commands list.
 doc/help.jp (Japanese) and doc/help.en (English) are available.

@@ -1,6 +1,15 @@
 .C	Overview
 
-.S	Overview
+＊＊
+＊＊ makefml の使い方は NSTALL のファイルに詳しいです。
+＊＊ これはもっと特殊な使い方などについて書くつもりのドキュメントです。
+＊＊ 
+
+makefml は fml を設定するための CUI (Chacacter User Interface) インター
+フェイスです。GUIのような華やかさはありませんが、簡潔に必要なことがで
+きるインターフェイスです。
+
+コマンドラインから実行します。
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

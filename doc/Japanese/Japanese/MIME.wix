@@ -1,6 +1,6 @@
-.C	MIME関係の変数
+.C	MIME関係の諸機能
 
-.S	MIME 関係の処理を ON にする
+.S	MIME 関係の処理を ON にする (defaultはON)
 
 	$USE_MIME = 1; (default 1)
 .xref	$USE_MIME
@@ -11,9 +11,7 @@
 .xref	$MIME_DECODED_ARTICLE
 
 
-.C	MIME関係の解説
-
-.S	MIME処理
+.S	MIMEの処理
 =E.S	Header Mime Decoding (To Japanese)
 .# .k	MIME
 .# .l	MIME-header

@@ -1,2 +1,7 @@
-.include overview.wix
+.HTML_PRE
+		リファレンス
+
+.toc
+.~HTML_PRE
+
 .include indexes.wix

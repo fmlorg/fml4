@@ -45,6 +45,7 @@ doc/op.jp というファイルと INSTALL の中間に当たるユーザーズガイドのよ
 I wound like to do re-structuring over documents but have no time.
 If you would like to maintain them :-), I welcome it always.
 
+
 .S	Version up について
 =E.S	Version up
 .l	version-up
@@ -74,6 +75,7 @@ previous time.
 
 などです。これらを makefml install が行なってくれます。
 注意: fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
+
 
 .S	本当に残しておく必要のあるファイルは？
 =E.S	Core part of FML package
@@ -111,6 +113,7 @@ you want to use. DO NOT REMOVE "etc", "sbin", "cf" to use "makefml".
 
 余談ですがFML.ORGのＭＬで調べるとだいたいMLのホームは 1000通 〜 4M く
 らい必要と評価しておくといいみたいです。
+
 
 .S	インストール後にＭＬの設定をいじる時
 =E.S	Customize configurations
@@ -233,6 +236,7 @@ Example: to enforce MTA's HOST to use as a distributor. in
 
 とか共通の設定を書く(この例では↑は配送に使うマシンをデフォールトから
 mlrelay.dokka.org(注意:これは架空のホストです)というマシンに変更。
+
 
 .S	:include: ファイル (fml.plの呼び方、引数の渡し方)
 =E.S	:include: file

@@ -1,4 +1,4 @@
-.C	事例
+.C	設定事例集
 
 .S	一つのメールで使えるコマンドの数の上限
 =E.S	Maximum Number Of Commands In On Mail
@@ -31,12 +31,15 @@ them. If you want to warn it, set
 つけないようにするのを推奨するのがよいでしょう。
 
 
-.S	もし有効なコマンドがないメールが来たら？
+.S	もし有効なコマンドが一つもないメールが来たら？
 =E.S	If an empty effective command mail comes in ?
 
-ヘルプファイルを送り返します。
+ＭＬのメンバーからのリクエストであればヘルプファイルを送り返します。
 =E
 FML sends back help file.
+
+ＭＬのメンバー以外からのリクエストであればガイドファイルを送り返します。
+
 
 .S	コマンドの終り(シグニチャア対策)
 =E.S	End of Command Sets Against Signature
@@ -49,5 +52,6 @@ Please use one of them to show the end of commands sequence.
 	end
 	quit
 
-というコマンドを追加しました。このコマンドのところでアクションは終了し
-ます。signature があってもいいように、こうしました。
+というコマンドの行でfmlは処理を中止します。signature があってもいいよ
+うに、こうなっています。
+

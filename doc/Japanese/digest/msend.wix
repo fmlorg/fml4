@@ -8,10 +8,6 @@
 .k	$DIR/crontab
 
 
-まとめおくりとは「リアルタイムではなくＮ時間おきにＮ時間分のＭＬの記事
-をまとめて送りつける」ことです。
-
-
 .S	まとめおくりの基本原理
 =E.S	Mechanism Of Digest Delivery
 

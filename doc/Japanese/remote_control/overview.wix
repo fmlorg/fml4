@@ -1,4 +1,5 @@
 .C	メールでfmlの設定を変更するには？ (REMOTE_ADMINISTRATION)
+.l	remote_control
 
 .S	リモート管理とは？
 
@@ -36,6 +37,6 @@
 
 	WWWでGUI経由で行なう (CGI経由で makefml を使う)
 
-かになります。
+のいづれかになります。
 
 .# $Id$

@@ -1,0 +1,13 @@
+.C	コマンドラインオプション
+
+.S	-f systemファイル
+
+◯ -f 設定ファイル
+
+	makefml -f /some/where/fml/.fml/system install
+
+.S	 -i コマンド入力チャンネル
+
+◯ -i STDIN は CGI なんかが使ってます。
+
+  CGI -> 入力チェック -> open(MAKEFML, "|  makefml -i STDIN  ") ..

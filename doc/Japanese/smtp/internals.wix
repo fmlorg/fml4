@@ -67,6 +67,7 @@ You can use MTA with another port (not 25/tcp). For example, 10025/tcp
 
 	$HOST         = 'beth.foo.bar.ac.jp:10025'; 
 
+
 .S	予備のSMTPサーバ
 =E.S	Secondary SMTP Servers
 .k	予備のSMTPサーバ
@@ -89,6 +90,7 @@ to use machine-* parallelly. FML breaks out recipients up to
 $MCI_SMTP_HOSTS groups. Mail to deliver is injected to each MTA on
 $HOST and @HOSTS. If all connections to hosts fail, FML tries to send
 mail with "sendmail" called as a command.
+
 
 .S	同じmxについて
 =E.S	On The Same Mx
@@ -184,11 +186,13 @@ CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
 れましたね。
 .fi
 
+
 .S	配送効率についての考察
 
 配送効率についての考察
 =E
 Discussion On Delivery Efficiency
+
 
 .S	配送プロセスの律速段階とは
 =E.S	Blocking Stage Of Delivery Process

@@ -1,6 +1,20 @@
 .C	Overview
 
-.S	Overview
+まとめおくりとは「リアルタイムではなくＮ時間おきにＮ時間分のＭＬの記事
+をまとめて送りつける」ことです。
+
+fml では msend というプログラムを定期的に実行することでまとめおくりを
+行ないます。このためにOSにある"指定されたプログラムを定期的に実行する"
+cron という機能を使います。そのためOSへの設定が必要です。
+
+msend => .ptr{msend}
+
+cron  => .ptr{cron}
+
+	/var/spool/ml/elena/crontab というファイルがOSに設定するべき
+	見本のファイルです。設定は crontab というコマンドを使います。
+
+	% crontab /var/spool/ml/elena/crontab
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
