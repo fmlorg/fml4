@@ -2206,6 +2206,19 @@ http://www.fml.org/fml/CHECK_LIST/.
 例: エラーメールに unsafe とか permission denied とかでてきた
 	% grep -i unsafe doc/op.jp
 
+○ perlのエラー
+.q
+%perl makefml install
+  Can't locate getopts.pl in @INC at makefml line 104.
+.~q
+
+perlが正しくインストールされていません。perlをインストールしなしてくだ
+さい。
+=E
+The installaion of perl fails. Please install perl again!
+
+○ MTAのエラー
+
 例えばMTAのエラーの場合の典型例は以下のようなものがあります。
 MTA(sendmail など)から返ってきたメールのエラーメッセージの代表例:
 =E
