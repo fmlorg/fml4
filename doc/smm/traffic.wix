@@ -51,8 +51,8 @@ The usage of libtraffic.pl is
 ます。デフォルトでは、-m 25 と同じです。
 .~q
 
-.S	#traffic で 複数のアドレスを持つ人物を同一視してカウントする 技
-=E.S	#traffic; how to identify one person who has plural Email addresses
+.S	traffic で 複数のアドレスを持つ人物を同一視してカウントする 技
+=E.S	traffic; how to identify one person who has plural Email addresses
 
 	Author: Yuao Tanigawa <yuao@infonia.or.jp>
 	fml-support: 00736

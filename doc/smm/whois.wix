@@ -34,21 +34,22 @@ This is based on the FML design policy that you can use additional
 functions if you explicitly permit it.
 
 ローカルデータベースの形式も本物の任意のwhois serverとの通信をする点に
-ついてhmlのwhoisとは全く互換性はありません。# hml は独自に自分だけの 
-whois を抱えていた (なおかつ security hole だった)
+ついてhmlのwhoisとは全く互換性はありません。
+＃ hml は独自に自分だけの whois を抱えていた (なおかつ security hole 
+＃ だった)
 
 例1: ローカルなデータベースの中から fukachan を含むデータを探して送り返
 す。
 =E
 Example 1: search the local database for fukachan
 
-   % echo  "# whois fukachan" | Mail Elena@phys.titech.ac.jp
+   % echo  "whois fukachan" | Mail Elena-ctl@phys.titech.ac.jp
 
 例2: host の whois に聞きにいきます。
 =E
 Example 2: query fukachan to whois of the host 
 
-   % echo "# whois -h host fukachan" | Mail Elena@phys.titech.ac.jp
+   % echo "whois -h host fukachan" | Mail Elena-ctl@phys.titech.ac.jp
 
 .S	Whois のカスタマイズすべき変数
 =E.S	Whois Customizing Variables

@@ -54,8 +54,8 @@ Example:
 .S	時間の変数
 =E.S	Variables 
 
-confirmd は入り続けるという意思表示(具体的には '# ack'コマンドを返した
-時)から
+confirmd は入り続けるという意思表示(具体的には 'ack'コマンドを返した時)
+から
 
 	$CONFIRMD_ACK_EXPIRE_UNIT (デフォールトは2ヶ月)
 =E
@@ -105,8 +105,8 @@ is a template confirmd uses for the query.
 	$CONFIRMD_ACK_LOGFILE
 .k	$CONFIRMD_ACK_LOGFILE
 
-には返事('# ack')のログが残り、いつ返事をしたかのデータとして confirmd 
-が用いる。
+には返事('ack'コマンド)のログが残り、いつ返事をしたかのデータとして 
+confirmd が用いる。
 =E
 is the log file of replies.
 

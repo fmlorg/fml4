@@ -696,8 +696,8 @@ regist. When you do not want forwarding, set
 
 そうでないなら 0 です。
 =E
-# when an address is AUTOmatic REGISTERED, UNDELIVER-PREDICATE ?;-)
-# Naming convention is historical.
+Comment: when an address is AUTOmatic REGISTERED, UNDELIVER-PREDICATE ?;-)
+Naming convention is historical.
 
 しかしながら、流すという設定をしても、subscribe だけのメール (じつは8
 行)は流しません。管理者以外は見てもうれしくないという配慮からです。
