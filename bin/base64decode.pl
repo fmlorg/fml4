@@ -28,6 +28,7 @@ require 'mimer20alpha.pl';
 undef $/;
 undef $body;
 while (sysread(STDIN, $_, 4096)) { $body .= $_;}
+binmode(STDOUT);
 print &bodydecode($body);
 
 1;
