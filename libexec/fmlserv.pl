@@ -63,7 +63,7 @@ sub FmlServ
     local($eval, $hook);
 
     # Declare 
-    $Envelope{'mode:fmlserv'} = 1;
+    $e{'mode:fmlserv'} = 1;
 
     # Directory check
     $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
@@ -114,7 +114,7 @@ sub FmlServ
 
 	chdir $DIR || die $!;
 
-	$e{'message'} .= "\n\n   Requests to $ml:\n";
+	$e{'message'} .= "\n\n\#\#\# Requests to $ml ML \#\#\#\n";
 	$e{'message'} .= $ML_cmds_log{$ml};
 
 	&DoFmlServProc($ml, $proc, *e);
@@ -157,7 +157,9 @@ sub FmlServ
 
     &NewML($FMLSERV_DIR, 'fmlserv', *e);
 
-    $e{'F:From'} = $MAIL_LIST;	# special case when fmlserv
+    $e{'h:From'} = $MAIL_LIST;	# special case when fmlserv
+
+    &AppendFmlServInfo(*e);
 
     # Already '_main' ENVIRONMENT
     # DONE;
@@ -206,33 +208,21 @@ sub NewML
 
     print STDERR "NewML::Check($cf)\n" if $debug;
 
-print STDERR "
-    \$domain      $domain      
-    \$DOMAINNAME  $DOMAINNAME  
-    \$FQDN        $FQDN
-    \$MAIL_LIST   $MAIL_LIST   
-    \$MAINTAINER  $MAINTAINER
-
-->
-
-";  
+    # Define Defaults against "no $MAIL_LIST_DIR/$ml/config.ph"
+    print STDERR "NewML::SetMLDefaults($DIR, $ml)\n" if $debug;
+    &SetMLDefaults($DIR, $ml);
 
     if (-f $cf) {
 	print STDERR "NewML::Load($cf)\n" if $debug;
 	&LoadMLNS($cf);		# eval("$DIR/config.ph")
     }
-    elsif (! -f $cf) {	# no $MAIL_LIST_DIR/$ml/config.ph
-	print STDERR "NewML::SetMLDefaults($DIR, $ml)\n" if $debug;
-	&SetMLDefaults($DIR, $ml);
-    }
 
-print STDERR "
-    \$domain      $domain      
-    \$DOMAINNAME  $DOMAINNAME  
-    \$FQDN        $FQDN
-    \$MAIL_LIST   $MAIL_LIST   
-    \$MAINTAINER  $MAINTAINER
-";  
+    if ($debug) {
+	for (FQDN, DOMAINNAME, MAIL_LIST, CONTROL_ADDRESS, 
+	     ML_FN, XMLNAME, XMLCOUNT, MAINTAINER) {
+	    eval "printf STDERR \"%-20s %s\\n\", '$_', \$$_;";
+	}
+    }
 
     ### do actions for each $list ###
     # RESET IMPORTANT VARIABLES
@@ -250,7 +240,11 @@ print STDERR "
 	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
+
     eval($s); &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
+
+    # FORCE Reply-TO
+    $e{'h:Reply-To:'}  = "fmlserv\@$DOMAINNAME";
 }
 
 
@@ -260,12 +254,13 @@ sub SetMLDefaults
     local($domain);
 
     # $DOMAINNAME, $FQDN should be used of _main NS
-    $domain      = $FQDN ? $FQDN : $DOMAINNAME;	# preserv original DOMAINNAME
-    $MAIL_LIST   = "$ml\@$domain";
-    $ML_FN       = "($ml ML)";
-    $XMLNAME     = "X-ML-Name: $ml";
-    $XMLCOUNT    = "X-Mail-Count";
-    $MAINTAINER  = "fmlserv-admin\@$domain";
+    $domain          = $DOMAINNAME || $FQDN; # preserv original DOMAINNAME
+    $MAIL_LIST       = "$ml\@$domain";
+    $ML_FN           = "($ml ML)";
+    $XMLNAME         = "X-ML-Name: $ml";
+    $XMLCOUNT        = "X-Mail-Count";
+    $CONTROL_ADDRESS = "fmlserv\@$domain";
+    $MAINTAINER      = "fmlserv-admin\@$domain";
 
     # Directory
     $SPOOL_DIR                     = "spool";
@@ -475,11 +470,43 @@ sub main'LoadMLNS
     $eval .= "\%main'ML_NSAA = \%ml'ML_NSAA;\n";
     
     &Debug($eval) if $debug_ns;
-    eval($eval); &main'Log($@) if $@; #';
+    eval($eval); 
+    &main'Log($@) if $@; #';
 }
 
 
+# package ml Above;
 package main;
+
+
+sub AppendFmlServInfo
+{
+    local(*e) = @_;
+    local($m);
+
+    $m = qq#;
+    Fmlserv command syntax is a fml-command with ml-name.;
+    ;
+    ;   COMMAND ML [OPTIONS];
+    ;
+    e.g. the commands for 'elena' mailing list(ML);
+    help    elena;
+    ;       help file of 'elena' ML;
+    members elena;
+    ;       members file of 'elena' ML;
+    actives elena;
+    ;       actives file of 'elena' ML;
+    get     elena 1;
+    ;       get the article 1 of 'elena' ML;
+    mget    elena last:10 mp;
+    ;       get the latest 10 articles of 'elena' ML;
+    ;
+    #;
+
+    $m =~ s/;//g;
+    $e{'message'} .= $m;
+}
+
 
 # Log is special for fmlserv.
 sub Log { 
@@ -518,7 +545,7 @@ sub Log {
 #
 #:include: fml.pl
 #:sub LoadConfig SetDefaults BackwardCompat GetTime InitConfig SetOpts
-#:sub Logging LogWEnv Log 
+#:sub Logging LogWEnv
 #:sub CacheMessageId TimeOut GuideRequest
 #:sub Notify ExExec RunHooks FieldsDebug Conv2mailbox GetTime Parsing Parse
 #:sub WholeMail eval CheckMember AddressMatch Logging 
@@ -527,7 +554,8 @@ sub Log {
 #:sub Touch Write2 Append2 use Debug InitConfig Warn ChkREUid CheckUGID
 #:sub FixHeaders CheckEnv CtlAddr Addr2FQDN CutFQDN SecureP
 #:replace
-sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
+# Strange "Check flock() OK?" mechanism???
+sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
 
 
 sub SetDefaults
@@ -651,7 +679,6 @@ sub InitConfig
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
-    $SIG{'USR1'} = 'Caller';
 }
 
 
@@ -679,10 +706,10 @@ sub SetOpts
 	/^\-u(\S+)/    && &eval("undef \$$1;") && next;
 	/^\-l(\S+)/    && ($LOAD_LIBRARY = $1) && next;
     }
-
+    
+    if ($Envelope{'mode:fmlserv'}) { &use("mladdr"); &FmlServMode;}
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
 }
-
 
 
 
@@ -692,28 +719,6 @@ sub SetOpts
 # $s for ERROR which shows trace infomation
 sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
 sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
-sub Log { 
-    local($str, $s) = @_;
-    local($package, $filename, $line) = caller; # called from where?
-    local($status);
-    
-    &GetTime;
-    $str =~ s/\015\012$//;	# FIX for SMTP
-    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
-	$Envelope{'error'} .= "Sendmail Error:\n";
-	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
-    }
-    
-    $str = "$filename:$line% $str" if $debug_caller;
-
-    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
-    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
-
-    if ($Envelope{'mode:caller'}) {
-	&Append2("$Now ($package, $filename, $line)", $LOGFILE, 0, 1);
-	&Debug("$Now ($package, $filename, $line) $LOGFILE, 0, 1");
-    }
-}
 
 
 # If O.K., record the Message-Id to the file $LOG_MESSAGE_ID);
@@ -724,6 +729,10 @@ sub CacheMessageId
     $id        =~ /\s*\<(\S+)\>\s*/;
     &Append2($id, $LOG_MESSAGE_ID);
 }
+
+
+# which address to use a COMMAND control.
+sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
 
 
 
@@ -1132,10 +1141,6 @@ sub LoopBackWarn
 }
 
 
-# Strange "Check flock() OK?" mechanism???
-sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
-
-
 sub LoadConfig
 {
     # configuration file for each ML
@@ -1246,7 +1251,6 @@ sub InitConfig
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
-    $SIG{'USR1'} = 'Caller';
 }
 
 
@@ -1381,8 +1385,7 @@ sub CheckEnv
 }
 
 
-# which address to use a COMMAND control.
-sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
+sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
 
 
 # lock algorithm using flock system call
@@ -1392,6 +1395,7 @@ sub Flock
     $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
 
     eval alarm(3600);
+    $SIGARLM = 1;
     open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
     flock(LOCK, $LOCK_EX);
 }
@@ -1402,11 +1406,13 @@ sub Funlock {
 
     close(LOCK);
     flock(LOCK, $LOCK_UN);
+    undef $SIGARLM;
 }
 
 
 sub TimeOut
 {
+    return unless $SIGARLM;
     &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);    
     &Log("Caught ARLM Signal, forward the mail to the maintainer and exit");
     sleep 3;
