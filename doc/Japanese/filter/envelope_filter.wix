@@ -105,6 +105,28 @@ in one sense. If you want to notify the rejection to the sender, set
 す。デフォールトでは単に無視するだけです。
 
 
+.S	signature かどうか？を判定する
+
+fml-support: 08182
+.q
+if ( メール本文が 1 paragraph のみ ) { 
+	ちぇっくしてみる (signature なしかな)
+}
+elsif ( メール本文が 2 paragraphs ) {
+	最後のパラグラフをちぇっくしてみる (本文 と signature かな？)
+
+  if ( 引用ぽいかな？ ) {
+
+  }
+  elsif ( 最後のパラグラフは 
+	  @ とか :// とか TEL: とか FAX: とかを含んでいる？ 
+	account＠domain なんかもためしてみよう？ ) {
+  }
+ 
+}	
+.~q
+
+
 .S	特定のフィールドの内容によっては拒否する
 =E.S	Reject if a field matches reject patterns
 
