@@ -1,6 +1,14 @@
-		TODO List
+.HTML_PRE
+	TODO of FML Mailing List Server Package
+.if LANG == JAPANESE
+	やり残し、やろうかなとおもってること
+	(誰かやってたらパッチください:-)
 
+				深町 賢一
+.fi
+.if LANG == ENGLISH
 				Ken'ichi Fukamachi
+.fi
 
 -------------------------------
 .toc
@@ -71,6 +79,25 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 	Warn() 
 
   remove WholeMail(), ForwMail()
+
+.S	HTML around
+
+* <DIV>の定義に反する使い方？
+=E
+* <DIV> 
+
+
+.S	Y2K advisory
+
+* GetTimeを入れ換えるキット
+=E
+* &GetTime 
+
+* アドヴァイザリィ
+=E
+* y2k advisory
+
+
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -242,8 +269,6 @@ CGI => inject input to "makefml -i stdin".
 =E
 * kick off smtpfeed directly
 
-* VERPs
-
 * $smtpd_recipient_restriction
 see /etc/postfix/sample*cf
 
@@ -284,10 +309,6 @@ NT4 はだめだが NT5 fs には link(2)はある。
 .S	HTML関係
 =E.S	HTML
 
-* <DIV>の定義に反する使い方？
-=E
-* <DIV> 
-
 * BASE_URL な変数
 =E
 * BASE_URL 
@@ -323,15 +344,7 @@ but it is o.k. now? (on some OS?)
 * more elaborate port on NT4 ?
 
 
-.S	Y2K advisory
-
-* GetTimeを入れ換えるキット
-=E
-* &GetTime 
-
-* アドヴァイザリィ
-=E
-* y2k advisory
+.S	Y2K
 
 * RFC1153のライブラリはどうする？
 =E
@@ -358,23 +371,6 @@ $LOG_FILE_SUFFIX = ".%C%y";
 .S	かるいまとめおくり？
 =E.S	lightweight digest
 
-
-.S	トラブルチケットシステム
-=E.S	Trouble Ticket System
-
-
-.S	より統合されたパッケージ
-=E.S	fully integrated package
-
-	サーチエンジンとの連携
-	スケジュールソフト
-	IRC
-	...
-=E
-	search engine
-	scheduler
-	IRC
-	...
 
 .S	PGP version
 
@@ -431,6 +427,26 @@ remove &Open()
 command to rewrite addresses in one action ?
 
 	admin rewrite s/domain-A/domain-B/ 
+
+
+.C	パッケージ
+
+.S	トラブルチケットシステム
+=E.S	Trouble Ticket System
+
+
+.S	より統合されたパッケージ
+=E.S	fully integrated package
+
+	サーチエンジンとの連携
+	スケジュールソフト
+	IRC
+	...
+=E
+	search engine
+	scheduler
+	IRC
+	...
 
 
 .C	Windows NT 固有の問題
