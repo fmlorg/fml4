@@ -219,6 +219,15 @@ sub InitMakeFml
 		    '10#majordomo','set up fmlserv (listserv-like command interface)',
 		    );
 
+    # variables not to lock
+    %NOT_LOCK = ('newml', 1,
+		 'info', 1,
+		 'help', 1,
+		 'listserv', 1,
+		 'majorodomo', 1,
+		 'fmlserv', 1,
+		 );
+
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
     &ResetVariables;
@@ -423,40 +432,55 @@ sub SignalLog
 }
 
 
+
+##############################################################################
+##########
+########## LOCK LIBRARY
+##########
+
 sub FlockP
 {
-    local($config_ph) = @_;
+    local($ml, $mldir) = @_;
     local($eval);
 
-    open(PH, $config_ph) || 
-	(&Warn("cannot open config.ph[$config_ph]:$!"), return);
+    open(PH, "$mldir/$ml/config.ph") || 
+	(&Warn("cannot open $mldir/$ml/config.ph[$!]"), return);
     while (<PH>) {
 	/\$USE_FLOCK/ && ($eval .= $_);
+	/\$SPOOL_DIR/ && ($eval .= $_);
     }
     close(PH);
 
-    eval("package flockp; $main'eval; package main; #';");
+    eval("package flockp; eval(\$main'eval); package main; #';");
     &Warn($@) if $@;
+
+    $ml'FLockP{$ml}    = $flockp'USE_FLOCK;
+    $ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
+
+    print STDERR "
+    \$ml'FLockP{$ml}    = $flockp'USE_FLOCK;
+    \$ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
+";
 
     return $flockp'USE_FLOCK; #';
 }
 
 sub Lock
 {
-    local($ml, $dir) = @_;
+    local($ml, $mldir) = @_;
 
-    if (&FlockP("$dir/$ml/config.ph")) {
-	&FLock($ml, "$dir/$ml");
+    if (&FlockP($ml, $mldir)) {
+	&FLock($ml, "$mldir/$ml");
     }
     else {
-	&V7Lock($ml, "$dir/$ml");
+	&V7Lock($ml, "$mldir/$ml");
     }
 }
 
 sub UnLock
 {
     local($ml) = @_;
-    local($flockp) = $ml'FlockP{$ml};#'
+    local($flockp) = $ml'FLockP{$ml};#'
 
     if ($flockp) {
 	&FUnLock($ml);
@@ -468,8 +492,7 @@ sub UnLock
 
 sub MakeFmlLock
 {
-    local($ml) = @_;
-    local($dir) = $CurConfig{'ML_DIR'};
+    local($ml, $mldir) = @_;
     local($count);
 
     # Lock Algorithm deepnds on each ML's config.ph,
@@ -481,19 +504,19 @@ sub MakeFmlLock
     # only one
     if ($ml) {
 	print "---Locking $ml ML"; $count++;
-	&Lock($ml, $dir);
+	&Lock($ml, $mldir);
     }
     else {
 	print "---Locking\n\t";
 
-	opendir(DIRD, $dir);
+	opendir(DIRD, $mldir);
 	for (readdir(DIRD)) {
 	    next if /^\./;
-	    next unless -f "$dir/$_/config.ph";
+	    next unless -f "$mldir/$_/config.ph";
 
 	    print " $_"; $count++;
 	    
-	    &Lock($_, "$dir/$_");
+	    &Lock($_, "$mldir/$_");
 	}
 	closedir(DIRD);
     }
@@ -509,29 +532,30 @@ sub MakeFmlLock
 
 sub MakeFmlUnLock
 {
-    local($ml) = @_;
-    local($dir) = $CurConfig{'ML_DIR'};
+    local($ml, $mldir) = @_;
 
     if ($ml) {
-	print "---UnLocking $ml ML\n";
-	print $ml;
+	print "---UnLocking $ml ML";
 	&UnLock($ml);
     }
     else {
-	opendir(DIRD, $dir);
+	print "---UnLocking\n\t";
+
+	opendir(DIRD, $mldir);
 	for (readdir(DIRD)) {
 	    next if /^\./;
-	    next unless -f "$dir/$_/config.ph";
-
+	    next unless -f "$mldir/$_/config.ph";
+	    print " $_";
 	    &UnLock($_);
 	}
 	closedir(DIRD);
     }
 
-    print "Done.\n";
+    print "\nDone.\n";
 }
 
 
+########################################################################
 
 
 sub InitTTY
@@ -573,10 +597,11 @@ sub ExecCmd
     $fp = $FP{$fp} ? $FP{$fp} : $fp;
 
     # Lock all when "install"
-    &MakeFmlLock($fp eq 'install' ? "" : $argv[0]);
+    &MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR)
+	unless $NOT_LOCK{$fp};
 
     if ($MakeFmlProc{$fp}) {
-	$fp = $MakeFmlProc{$fp};
+	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
 	&$fp(@argv);
     }
     else {
@@ -586,7 +611,8 @@ sub ExecCmd
     }
 
     # Unlock;
-    &MakeFmlUnLock($fp eq 'install' ? "" : $ml);
+    &MakeFmlUnLock($fp eq 'install' ? "" : $argv[0], $ML_DIR)
+	unless $NOT_LOCK{$fp};
 }
 
 
@@ -674,7 +700,7 @@ sub search_path
 	push(@path, $_);
     }
 
-    foreach $dir (@path) { if (-f "$dir/$f") { return "$dir/$f";}}
+    for (@path) { if (-f "$_/$f") { return "$_/$f";}}
 }
 
 
@@ -2001,22 +2027,69 @@ sub main'FUnLock { &ml'FUnLock(@_);}
 sub FLock
 {
     local($ml, $mldir) = @_;
-    local($lockdir)    = "$mldir/spool";
+    local($lockdir) = "$mldir/";
+
+    $lockdir .= $SPOOL_DIR{$ml} || "spool";
    
     open($lockdir, $lockdir);
     flock($lockdir, $LOCK_EX);
 
-    $FLockP{$ml}    = 1;
-    $FLockFile{$ml} = $lockdir;
+    $FLockP{$ml}   = 1;
+    $LockFile{$ml} = $lockdir;
 }
 
 sub FUnLock 
 {
     local($ml) = @_;
+    local($lockdir) = $LockFile{$ml};
 
-    $lockdir = $FLockFile{$ml};
     close($lockdir);
     flock($lockdir, $LOCK_UN);
+}
+
+
+package v7;
+
+sub main'V7Lock   { &v7'V7Lock(@_);}
+sub main'V7UnLock { &v7'V7UnLock(@_);}
+
+sub LoadConfigPH
+{
+    local($ml, $mldir) = @_;
+
+    # reset variables used in liblock.pl
+    for (FP_VARLOG_DIR, FP_VARRUN_DIR, LOCK_FILE, MAX_TIMEOUT) {
+	eval "undef \$${_};";
+    }
+
+    eval("do(\"$mldir/$Ml/config.ph\");");
+    print STDERR "V7Lock::Error $@" if $@;
+
+    # variable fixes
+    local($s);
+    for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
+	$s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
+	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
+    }
+    eval($s) || &Log("FAIL EVAL \$SPOOL_DIR ...");
+}
+
+sub V7Lock
+{
+    local($ml, $mldir) = @_;
+
+    &LoadConfigPH($ml, $mldir);
+
+    require 'liblock.pl';
+    &V7Lock;
+}
+
+sub V7UnLock
+{
+    local($ml) = @_;
+
+    $LockFile = $LockFile{$ml};
+    &V7UnLock;
 }
 
 1;
