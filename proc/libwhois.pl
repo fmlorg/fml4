@@ -1,6 +1,6 @@
 # Library of fml.pl 
 # Copyright (C) 1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Please obey GNU Public License(see ./COPYING)
 
 local($id);
 $id = q$Id$;
@@ -78,7 +78,9 @@ sub WhoisWrite
 
     # open $WHOIS_DB
     open(F, $WHOIS_DB) || (&Log("Cannot open $WHOIS_DB"), return 0);
-    print F "$From_address\n$Original_From_address\n$s\n";
+    print F "$From_address\n";
+    print F $Envelope{'from:'};
+    print F "\n$s\n";
     print F "\.\n\n";     # ATTENTION! $/ = ".\n\n";
     close(FILE);
 

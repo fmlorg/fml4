@@ -1,11 +1,12 @@
 # Lock library functions, 
 # This lock functions uses proceses ID
 # Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Please obey GNU Public License(see ./COPYING)
 
-$lockid   = q$Id$;
-($lockid) = ($lockid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
-$rcsid   .= "/$lockid";
+local($id);
+$id = q$Id$;
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+
 
 # if the younger process number exists in $LOCKDIR, return 1;
 # using system call is four or five times faster than `ls`.
@@ -64,7 +65,7 @@ sub Lock
     if ($timeout >= $MAX_TIMEOUT) {
 	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
 			   $year, $mon+1, $mday, $hour, $min, $sec);
-	open(TIMEOUT, "> $TIMEOUT") || (&Logging("$!"), return);
+	open(TIMEOUT, "> $TIMEOUT") || (&Log($!), return);
 	while(<>) { print TIMEOUT $_;}
 	close(TIMEOUT);
 	&Sendmail($MAINTAINER, "Locked:<$LOCKFILE>. $TIMEOUT $ML_FN");

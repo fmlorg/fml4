@@ -1,10 +1,10 @@
 # Library of fml.pl
 # Copyright (C) 1994-1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Please obey GNU Public License(see ./COPYING)
 
-$libuid   = q$Id$;
-($libuid) = ($libuid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
-$rcsid  .= "/$libuid";
+local($id);
+$id = q$Id$;
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
 # Aliases
 sub SendFileMajority  { &SendFile('#dummy', @_);}
@@ -25,7 +25,7 @@ sub AutoRegist
 	# 
 	# [\033\050\112] is against a bug in cc:Mail
 	# patch by yasushi@pier.fuji-ric.co.jp
-	$s = $Subject;
+	$s = $Envelope{'h:Subject'};
 	$s =~ s/^\#\s*//;
 	$s =~ s/^\033\050\112\s*($REQUIRE_SUBSCRIBE.*)/$1/;
 
@@ -49,7 +49,7 @@ sub AutoRegist
     }
     elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
 	# Syntax e.g. "subscribe" in body
-	$s = $MailBody;
+	$s = $Envelope{'Body'};
 	$s =~ s/^\#\s*//;
 
 	# multiple lines matching case could happen
@@ -77,7 +77,8 @@ sub AutoRegist
 	# use "subscribe your-address" in body.
 
 	$DEFAULT_SUBSCRIBE || ($DEFAULT_SUBSCRIBE = "subscribe");
-	($MailBody =~ /^\s*$DEFAULT_SUBSCRIBE\s*(\S+)/i) && ($from = $1);
+	($Envelope{'Body'} =~ /^\s*$DEFAULT_SUBSCRIBE\s*(\S+)/i) && 
+	    ($from = $1);
     }# end of REQUIRE_SUBSCRIBE;
 	
     &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
@@ -125,14 +126,14 @@ sub AutoRegist
     }
 
 
-    
+
     # WHETHER DELIVER OR NOT?
     # 7 is body 3 lines and signature 4 lines, appropriate?
-    $AUTO_REGISTRATION_LINES_LIMIT||($AUTO_REGISTRATION_LINES_LIMIT=8);
-    if ($BodyLines < $AUTO_REGISTRATION_LINES_LIMIT) { 
-	&Log("Not deliver: Lines:$BodyLines < $AUTO_REGISTRATION_LINES_LIMIT");
+    local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
+    if ($Envelope{'nline'} < $limit) { 
+	&Log("Not deliver: lines:$Envelope{'nline'} < $limit");
 	$AUTO_REGISTERD_UNDELIVER_P = 1;
-	$r  = "Mail Lines is too short(< $AUTO_REGISTRATION_LINES_LIMIT),\n";
+	$r  = "The number of mail body-line is too short(< $limit),\n";
 	$r .= "So NOT FORWARDED to ML($MAIL_LIST). O.K.?\n\n";
 	$r .= ('-' x 30) . "\n\n";
     }
@@ -154,7 +155,7 @@ sub AutoRegist
 # $tmpf     : a temporary file
 # $mode     : mode 
 # $file     : filename of encode e.g. uuencode , ish ...
-# @filelist : filelist of packing and encodeing
+# @filelist : filelist of packing and encodeing. !REQUIRE push(@here,$file)!
 #
 # INSIDE VARIABLES:
 # *conf : input 
@@ -169,7 +170,7 @@ sub DraftGenerate
     $r    = $file;
     $conf{'total'} = 0;
 
-    print STDERR "&DraftGenerate ($tmpf, $mode, $file, \@conf)\n" if $debug;
+    &Debug("&DraftGenerate ($tmpf, $mode, $file, @conf)") if $debug;
 
     &InitDraftGenerate;
 
@@ -281,9 +282,11 @@ sub MSendModeSet
 		 '#gz',     '#gzipped(UNIX FROM)', 
 		 'gz',      'gz',
 
+
 		 '#tgz',    '#tar + gzip', 
 		 '',        'tgz',
 		 'tgz',     'tgz',
+
 
 		 '#mp',     '#MIME/multipart', 
 		 'mp',      'mp',
@@ -298,6 +301,7 @@ sub MSendModeSet
 		 '#lhaish', '#LHA+ISH', 
 		 'i',       'lhaish',
 		 'ish',     'lhaish',
+		 'wait#lhaish', 1,
 
 
 		 '#rfc934', '#RFC934(mh-burst)', 
@@ -305,6 +309,16 @@ sub MSendModeSet
 		 'rfc934',  'rfc934',
 
 
+		 '#uu',      '#Uuencoded(USENET Traditional)', 
+		 'uu',       'uu', 
+
+
+		 '#ui',      '#Ished(for BBS use)', 
+		 'ui',       'ui', 
+		 'uish',     'uish', 
+		 'wait#uish', 1,
+
+		 '#rfc1153','#Digest (RFC1153)',
 		 '#rfc1153','#Digest (RFC1153)',
 		 'd',       'rfc1153',
 		 'rfc1153', 'rfc1153'
@@ -328,19 +342,17 @@ sub InitDraftGenerate
     $_fp{'destr',    'uf'} = '';
 
     # PLAINTEXT by RFC934
-    $_fp{'cnstr',    'rfc934'} = 'Cnstr_rfc934';
-    $_fp{'retrieve', 'rfc934'} = 'f_RetrieveFile';
-#    $_fp{'split',    'rfc934'} = 'f_SplitFile';
+    $_fp{'cnstr',    'rfc934'}  = 'Cnstr_rfc934';
+    $_fp{'retrieve', 'rfc934'}  = 'f_RetrieveFile';
+    $_fp{'destr',    'rfc934'}  = 'Destr_rfc934';
 
     # PLAINTEXT by RFC1153
     $_fp{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
     $_fp{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
-#    $_fp{'split',    'rfc1153'} = 'f_SplitFile';
 
     # PLAINTEXT by MIME/Multipart
     $_fp{'cnstr',    'mp'} = 'Cnstr_mp';
     $_fp{'retrieve', 'mp'} = 'f_RetrieveFile';
-#    $_fp{'split',    'mp'} = 'f_SplitFile';
 
     # Gzipped UNIX FROM
     $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
@@ -356,6 +368,10 @@ sub InitDraftGenerate
     $_fp{'cnstr',    'lhaish'} = '';
     $_fp{'retrieve', 'lhaish'} = 'f_LhaAndEncode2Ish';
     $_fp{'split',    'lhaish'} = 'f_SplitFile';
+
+    # UUENCODE ONLY
+    $_fp{'retrieve', 'uu'}     = 'f_uu';
+    $_fp{'split',    'uu'}     = 'f_SplitFile';
 
 }
 
@@ -384,7 +400,7 @@ sub Cnstr_rfc1153
     $conf{'total'} = 1;
     $conf{'delimiter'} = "\n\n".('-' x 30)."\n\n";
 
-    require 'librfc1153.pl';
+    &use('rfc1153');
     local($PREAMBLE, $TRAILER) = &Rfc1153Custom($mode, @conf);
 
     print STDERR "PREAMBLE $PREAMBLE\nTRALER $TRAILER\n";
@@ -408,6 +424,18 @@ sub Cnstr_rfc934
     $conf{'delimiter'} = "\n------- Forwarded Message\n\n";
     $conf{'preamble'} = '';
     $conf{'trailer'}  = '';
+
+    $conf{'rfhook'} = q#
+	s/^-/- -/;
+    #;
+}
+
+
+sub Destr_rfc934
+{
+    local(*conf, *r, *misc) = @_;
+
+    undef $conf{'rfhook'};
 }
 
 
@@ -479,7 +507,8 @@ sub f_RetrieveFile
 
     # OPEN
     &OpenStream($tmpf, 0, 0, $total) || (return 0);
-
+    &Debug("&OpenStream($tmpf, 0, 0, $total), success") if $debug; 
+    
     # PREAMBLE
     if ($conf{'preamble'}) {
 	print OUT $conf{'preamble'};
@@ -491,6 +520,7 @@ sub f_RetrieveFile
 	$lines = &WC($file);
 	
 	# open the next file
+	&Debug("open(FILE, $file) || next;") if $debug; 
 	open(FILE, $file) || next; 
 	print OUT $conf{'delimiter'} if $conf{'delimiter'};
 
@@ -509,6 +539,7 @@ sub f_RetrieveFile
 		print OUT $_; $linecounter++;
 	    }
 	}
+	&Debug("close(FILE) [total=$total];") if $debug; 
 	close(FILE);
 	
 	print OUT "\n"; $linecounter++;
@@ -580,12 +611,24 @@ sub f_tgz
 }
 
 
+sub f_uu
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+    local($f, $dir);
+
+    $r =~ s#(\S+)/(\S+)#$dir=$1, $f=$2#e;
+
+    &system("chdir $dir; $UUENCODE $f $f", $tmpf);
+}
+
+
 sub f_gzuu
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
 
-    &system("$COMPRESS $tmp.0|$UUENCODE $r", $tmpf);
+    &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
 }
 
 
@@ -595,7 +638,7 @@ sub f_SplitFile
     local($tmpf) = $conf;
     local($total) = $r{'total'};
 
-    print STDERR "f_SplitFile: $tmpf -> $r \n" if $deubg;
+    print STDERR "f_SplitFile: $tmpf -> $r \n" if $debug;
 
     local($totallines) = &WC($tmpf);
     $total = int($totallines/$MAIL_LENGTH_LIMIT + 1);
@@ -647,9 +690,10 @@ sub CloseStream_OUT { close(OUT);}
 # return lines
 sub WC
 {
+    local($f) = @_;
     local($lines) = 0;
 
-    open(TMP, "< \@_") || return 0;
+    open(TMP, $f) || return 0;
     while (<TMP>) { 
 	$lines++;
     }
@@ -669,8 +713,8 @@ sub SplitFiles
     local($lines) = 0;
     local($i)     = 1;		# split to (1 .. $TOTAL)
 
-    open(BUFFER,"< $file") || do { &Logging("$!"); return 0;};
-    open(OUT,   "> $file.$i") || do { &Logging("$!"); exit 1;};
+    open(BUFFER,"< $file")    || do { &Log($!); return 0;};
+    open(OUT,   "> $file.$i") || do { &Log($!); exit 1;};
     select(OUT); $| = 1; select(STDOUT);
 
     while (<BUFFER>) {
@@ -694,6 +738,7 @@ sub SplitFiles
 
     # delete original source
     unlink $file unless $_cf{'splitfile', 'NOT unlink'}; 
+    &Debug("SplitFiles:unlink $file") if $debug;
 
     $i;
 }
@@ -717,7 +762,7 @@ sub LhaAndEncode2Ish
     local($TMPF, $FILE, @filelist) = @_;
     local($COMPRESS, $UUENCODE); # locally define!
 
-    &Debug("LhaAndEncode2Ish($TMPF, $FILE, \@filelist)") if $debug;
+    &Debug("LhaAndEncode2Ish($TMPF, $FILE, @filelist)") if $debug;
 
     # Variable setting
     $FILE =~ s/\.gz$/.lzh/;
@@ -739,7 +784,8 @@ sub LhaAndEncode2Ish
     &system($COMPRESS);
     &system($UUENCODE);
 
-    unlink @filelist if $debug;
+    unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
+    unlink $tmp unless $debug;	# e.g. unlink msend.lzh
 
     $TMPF;
 }
@@ -834,15 +880,20 @@ sub SendingBackInOrder
 	local($file) = "$DIR/$returnfile.$now";
 	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
 	    " Sending Back $now/$TOTAL";
-	&Logging("SBO:[$$] Send $now/$TOTAL ($to)", 1);
+	&Log("SendBackInOrder[$$] $now/$TOTAL $to");
 	&SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0, @to);
 
 	unlink $file unless $debug;
+
+	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
+	    " Sleeping [".($SLEEPTIME ? $SLEEPTIME : 3)."] $now/$TOTAL";
 	sleep($SLEEPTIME ? $SLEEPTIME : 3);
     }
 
+    &Debug("SBO:unlink $returnfile $returnfile.[0-9]*") if $debug;
     unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
     unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
+
     undef $_cf{'header', 'MIME'}; # destructor
 }
 
@@ -857,62 +908,27 @@ sub SendingBackInOrder
 sub SendFilebySplit
 {
     local($f, $mode, $enc, @to) = @_;
-    local($TOTAL, $s);
-    local($tmp) = "$TMP_DIR/$$";
+    local($total, $s);
+    local($sleep) = ($SLEEPTIME || 3);
+    local($tmp)   = "$TMP_DIR/$$";
 
     $0 = "--Split and Sendback $f to $to $ML_FN <$FML $LOCKFILE>";
     local($s)   = ($enc || "Matomete Send");
 
-    $TOTAL  = &MakeFileWithUnixFrom($tmp, $mode, $enc, $f);
-    if ($TOTAL) {
-	&SendingBackInOrder($tmp, $TOTAL, $s, ($SLEEPTIME || 3), @to);
+    # local($tmpf, $mode, $file, @conf)
+    # $tmpf     : a temporary file 
+    # $mode     : mode 
+    # $file     : filename of encode e.g. uuencode , ish ...
+    &Debug("SendFilebySplit::DraftGenerate($tmp, $mode, $f, $f)") if $debug;
+    $total  = &DraftGenerate($tmp, $mode, $f, $f);
+
+    &Debug("SendFilebySplit::($tmp, $total, $s, $sleep, @to)") if $debug;
+    if ($total) {
+	&SendingBackInOrder($tmp, $total, $s, $sleep, @to);
     }
-    undef $_cf{'header', 'MIME'}; # destructor
+
+    undef $_cf{'header', 'MIME'}; # destructor. 
 }
-
-
-# WHOIS INTERFACE using IPC
-# return the answer
-sub Whois
-{
-    local($sharp, $_, @who) = @_;
-    local($REQUEST, $h);
-
-    if (! /whois/oi) { 
-	&Log($_." is not implemented"); 
-	return "Sorry, $_ is not implemented";
-    }
- 
-
-    # Parsing
-    foreach (@who) { 
-	/^-h/ && (undef $h, next);
-	$h || ($h = $_, next); 
-	$REQUEST .= " $_";
-    }
-
-    # IPC
-    $ipc{'host'}   = ($host || $DEFAULT_WHOIS_SERVER);
-    $ipc{'pat'}    = 'S n a4 x8';
-    $ipc{'serve'}  = 'whois';
-    $ipc{'proto'}  = 'tcp';
-
-    &Log("whois -h $host: $REQUEST");
-
-    # Go!
-    require 'jcode.pl';
-    &jcode'convert(*REQUEST, 'euc'); #'(trick) -> EUC
-
-    # After code-conversion!
-    # '#' is a trick for inetd
-    @ipc = ("$REQUEST#\n");
-    local($r) = &ipc(*ipc);
-
-    &jcode'convert(*r, 'jis'); #'(trick) -> JIS
-
-    "Whois $host $REQUEST $ML_FN\n$r\n";
-}
-
 
 
 # I learn "how to extract from a tar file " from taro-1.3 by
@@ -953,6 +969,7 @@ sub TarZXF
 	@header = unpack($header_format, $header);
 	
 	($name = $header[0]) =~ s/\0*$//;
+	&Debug("Extracting $name ...\n") if $debug;
 	local($catit) = $cat{$name};
 
 	local($bufsize) = 8192;
@@ -994,12 +1011,14 @@ sub TarZXF
 	if ($catit && ! --$total) {
 	    close TAR;
 	    close OUT;
-	    return $outfile ? $TOTAL: $BUF;
+	    return $outfile ? $TOTAL : $BUF;
 	}
     }# end of Tar extract
     
-    close TAR; close OUT;
-    return $outfile ? $TOTAL: $BUF;
+    close TAR; 
+    close OUT;
+
+    return $outfile ? $TOTAL : $BUF;
 }
 
 # InterProcessCommunication
@@ -1122,13 +1141,157 @@ sub Chk822_addr_spec_P
     local($from) = @_;
 
     if ($from !~ /@/) {
-	&Log("NO @ mark: $from");
+	&Log("NO \@ mark: $from");
         &Sendmail($From_address, "fml Command Status report $ML_FN",
-	   "Address [$from] contains no @.\n");
+	   "Address [$from] contains no \@.\n");
 	return 0;
     }
 
    return 1;
+}
+
+
+# ALIASES
+sub GetFQN_Dj { &GetFQN;}                      # $j in sendmail.cf
+sub GetFQN_Dm { (split(/\@/, $MAIL_LIST))[1];} # $m in sendmail.cf (or $j)
+sub GetFQCtlAddr { 
+    $CONTROL_ADDRESS ? "$CONTROL_ADDRESS\@".&GetFQN_Dm : $MAIL_LIST;
+}
+
+# $j in /etc/sendmail.cf
+# seems $DOMAIN   = (gethostbyname('localhost'))[1]; do not work
+# So, we make domainname via $MAIL_LIST(must be user@domain form)
+sub GetFQN
+{
+    local($domain, $hostname);
+    $domain = &GetFQN_Dm;
+
+    # Get HOSTNAME 
+    # WARN:4.4BSD getdomainname return 'domain', but 4.3 return NIS domain
+    chop($hostname = `hostname`); # must be /bin/hostname
+
+    ($domain =~ /^$hostname/i) ? $domain : "$hostname.$domain";
+}
+
+
+# Generate additional information for command mail reply.
+# return the STRING
+sub GenInfo
+{
+    local($addr)  = $MAIL_LIST;
+    local($s, $c, $d);
+
+    $c = &GetFQCtlAddr if $CONTROL_ADDRESS;
+    
+    $s .= "\n".('*' x 60)."\n";
+    $s .= "If you have any questions or problems,\n";
+    $s .= "   please make a contact with $MAINTAINER\n";
+    $s .= "       or \n";
+    $s .= "   send a mail with the body '# help' to \n";
+    $s .= "   $addr".($c && "\nor $c (preferable)")."\n\n";
+    $s .= "e.g. \n";
+    $s .= "(shell prompt)\% echo \# help |Mail ".($c || $addr);
+    $s .= "\n\n".('*' x 60)."\n";
+
+    $s;
+}
+
+
+# "# chaddr"  command
+sub ChAddrModeOK
+{
+    local($a) = @_;
+    chop $a;
+    local($old, $new);
+    local($addr_chk, $mem_chk);
+    local($C) = 'ChAddr';
+
+    # GET PARAM
+    $a =~ /^\#\s*($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/i;
+    ($old, $new) = ($2, $3);
+
+    # NOTIFY
+    $Envelope{'message:h:@to'} = "$old $new $MAINTAINER";
+
+    &AddressMatch($old, $From_address) && $addr_chk++;
+    &AddressMatch($new, $From_address) && $addr_chk++;
+    &CheckMember($old, $MEMBER_LIST)   && $mem_chk++;
+    &CheckMember($new, $MEMBER_LIST)   && $mem_chk++;
+
+    &Log("$C:addr   ".($addr_chk ? "ok": "fail")) if $debug;
+    &Log("$C:member ".($mem_chk  ? "ok": "fail")) if $debug;
+
+    if ($addr_chk && $mem_chk) {
+	&Log("ChAddr: Either $old and $new Authentified!");
+	return 1;
+    } 
+    else {
+	&Log("$C:addr   ".($addr_chk ? "ok\n": "fail\n"));
+	&Log("$C:member ".($mem_chk  ? "ok\n": "fail\n"));
+    }
+
+    0;
+}
+
+
+# Lock UNIX V7 age like..
+# old lock extracted from fml 0.x and revised now :-)
+sub V7Lock
+{
+    $0 = "--V7 Locked and waiting <$FML $LOCKFILE>";
+
+    # setting Signal Handler
+    $SIG{'HUP'}  = 'handler';
+    $SIG{'INT'}  = 'handler';
+    $SIG{'QUIT'} = 'handler';
+    $SIG{'HUP'}  = 'handler';
+
+    # set variables
+    $LockFile = "$TMP_DIR/lockfile.v7";
+    $LockTmp  = "$TMP_DIR/lockfile.$$";
+    $rcsid .= ' :V7L';
+    local($timeout) = 0;
+
+    # create tmpfile
+    &Touch($LockTmp) || die "Can't make LOCK\n";
+    &Append2(&WholeMail."[$$]", $LockTmp) if $debug;
+
+    # try within about 10min.
+    for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
+	if (link($LockTmp, $LockFile) == 0) {	# if lock fails, wait&try
+	    sleep (rand(3)+5);
+	} else {
+	    last;
+	}
+    }
+    
+    unlink $LockTmp;
+
+    if ($timeout >= $MAX_TIMEOUT) {
+	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
+			   $year, $mon+1, $mday, $hour, $min, $sec);
+
+	open(TIMEOUT, "> $VARLOG_DIR/$TIMEOUT");
+	select(TIMEOUT); $| = 1; select(STDOUT);
+	print TIMEOUT &WholeMail;
+	close(TIMEOUT);
+
+	&Warn("V7 LOCK TIMEOUT", 
+	      "saved in $VARLOG_DIR/$TIMEOUT\n\n".&WholeMail);
+    }
+}
+
+sub handler {  # 1st argument is signal name
+    local($sig) = @_;
+    &Log("Caught a SIG$sig--shutting down");
+    unlink $LockFile;
+    exit(0);
+}
+
+sub V7Unlock
+{
+    $0 = "--V7 Unlocked <$FML $LOCKFILE>";
+    unlink $LockFile;
 }
 
 1;

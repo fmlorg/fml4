@@ -1,8 +1,8 @@
 # Copyright (C) 1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Please obey GNU Public License(see ./COPYING)
 # $rcsid   = q$Id$;
 
-require 'libMIME.pl' if $USE_LIBMIME;
+&use('MIME') if $USE_LIBMIME;
 
 # Skipped field for each mail header
 sub Rfc1153ReadFileHook
@@ -47,9 +47,9 @@ sub Rfc1153Custom
 
     # MAIL SUBJECT 
     # example "Subject: Info-IBMPC Digest V95 #22"
-    $_cf{'subject', $mode} = "$listname Digest V$vol #$issue";
+    $_cf{'subject', $mode} = "$listname Digest V$vol \#$issue";
 
-	print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n";
+    print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n";
 
     # FIRST LINE
     $PREAMBLE .= "$listname DIGEST\t";

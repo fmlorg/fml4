@@ -1,6 +1,6 @@
 # Library of fml.pl 
 # Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+# Please obey GNU Public License(see ./COPYING)
 
 local($id);
 $id = q$Id$;
@@ -85,21 +85,21 @@ sub ChangePasswd
     open(FILE, "< $file")      || do {
 	select(FILE); $| = 1;
 	&Log("Cannot open $file");
-	$_cf{'return'} .= "Cannot open passwd file\n";
+	$Envelope{'message'} .= "Cannot open passwd file\n";
 	return 0;
     };
 
     open(OUT,  "> $file.new")  || do {
 	select(OUT); $| = 1;
 	&Log("Cannot open $file.new");
-	$_cf{'return'} .= "Cannot make new passwd file\n";
+	$Envelope{'message'} .= "Cannot make new passwd file\n";
 	return 0;
     };
 
     open(BAK,  ">> $file.bak") || do {
 	select(BAK); $| = 1;
 	&Log("Cannot open $file.bak");
-	$_cf{'return'} .= "Cannot make passwd backup\n";
+	$Envelope{'message'} .= "Cannot make passwd backup\n";
 	return 0;
     };
 
@@ -130,7 +130,7 @@ sub ChangePasswd
 	return 1;
     }else {
 	&Log("Cannot rename $file.new");
-	$_cf{'return'} .= "Cannot rename passwd backup\n";
+	$Envelope{'message'} .= "Cannot rename passwd backup\n";
 	return 0;
     }
 }

@@ -41,7 +41,7 @@ sub AdminCommand
     # PASSWD     new-password(change the password)
     # 
     if($REMOTE_AUTH) {
-	require 'libcrypt.pl';
+	&use('crypt');
 
 	if((/^PASS$/oi || /^PASSWORD$/oi) && $parameter) {
 	    # 95/09/07 libcrypt.pl
@@ -318,7 +318,7 @@ sub AdminCommand
 	local($r) = "ADMIN: put $targetfile";
 	local($not_in) = 1;
 
-	foreach(split(/\n/, $MailBody, 9999)) {
+	foreach(split(/\n/, $Envelope{'Body'}, 9999)) {
 	    print STDERR "PUT>$_\n";
 
 	    if($not_in && /^\#\s*admin\s*put/i) {
