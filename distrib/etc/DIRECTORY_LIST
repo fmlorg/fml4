@@ -15,5 +15,6 @@ contrib
 www
 module
 module/Japanese
+module/Jcode
 module/CPAN
 databases
