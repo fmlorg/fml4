@@ -6,6 +6,7 @@ chdir /home/axion/fukachan/work/spool/Cache
 
 rm -f Cache
 
+# mladdr directory -ext
 cat Config.fml | while read a b c
 do
 	F="$DIR/$b/members"
