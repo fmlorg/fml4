@@ -14,7 +14,7 @@ INIT_PACKAGE () {
 		echo "------------------------------"
 		echo "Checking CVS commited all?";
 		echo ""
-		make scan
+		${MAKE} scan
 		echo ""
 		echo "------------------------------"
 	else
@@ -30,7 +30,7 @@ INIT_PACKAGE () {
 INIT_DIST () {
 	test -d $PATCHLEVEL_DIR || mkdir $PATCHLEVEL_DIR
 
-	( chdir $PATCHLEVEL_DIR; $VERSION_PL )
+	( cd $PATCHLEVEL_DIR; $VERSION_PL )
 
 	PATCHLEVEL=`cat $PATCHLEVEL_FILE`
 
@@ -47,17 +47,17 @@ INIT_VERSION () {
 	echo "fml release version::Initialize() ... "
 	echo "fml release          Date() ... "
 	echo "FML_VERSION={ $FML_VERSION }"
-	perl $FML_VERSION -t kern/fml.pl > /dev/null
+	$FML_VERSION -t kern/fml.pl > /dev/null
 
 	if [ $release = 1 ]
 	then
 		echo "FML Release";
-		perl $FML_VERSION -s
+		$FML_VERSION -s
 
 	elif [ $init = 1 ]
 	then
  		echo "fml release          Increment() ... "
-		perl $FML_VERSION -i kern/fml.pl > /dev/null
+		$FML_VERSION -i kern/fml.pl > /dev/null
 	else
 		echo ""
 		echo "RELEASE VERSION NOT INCREMENTED"
@@ -67,7 +67,7 @@ INIT_VERSION () {
 		echo 	USAGE: $0 -i fml.pl
 	fi
 
-	RID=`perl $FML_VERSION -s`
+	RID=`$FML_VERSION -s`
 	echo -n $RID     > $RELEASE_MANIFEST
 	echo -n ";"	>> $RELEASE_MANIFEST
 	date 		>> $RELEASE_MANIFEST
@@ -82,7 +82,7 @@ INIT_VERSION () {
 		echo ""; 
 		for file in $RS
 		do
-			perl $FML/distrib/bin/show-rcsid.pl $file |\
+			${PERL} $FML/distrib/bin/show-rcsid.pl $file |\
 			tee -a $RELEASE_MANIFEST
 		done
 
@@ -95,12 +95,12 @@ INIT_VERSION () {
 
 		# not use $RELEASE_MANIFEST
 		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
-		RID=`perl distrib/bin/fml_version.pl -r`
+		RID=`${PERL} distrib/bin/fml_version.pl -r`
 
 		# log cvs status unless $MODE
 		if [ X$MODE = X ]; then
 		   echo "save cvs status to distrib/history/$TID/$RID"
-		   perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
+		   ${PERL} distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
 		   tee -a distrib/history/$TID/$RID
 			(
 			 echo "--------------------------";
@@ -123,7 +123,7 @@ INIT_VERSION () {
 
 INIT_CLEAN_UP () {
    (
-	chdir $DESTDIR || exit 1
+	cd $DESTDIR || exit 1
 
 	test -d FML || mkdir FML
 

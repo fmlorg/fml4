@@ -1,5 +1,5 @@
 ### procs
-HTML_CONV = $(FML)/bin/fwix.pl -m htmlconv
+HTML_CONV = ${_FWIX} -m htmlconv
 
 ### fundamental rules
 .for dir in ${DOC_EXAMPLES_SUBDIR}

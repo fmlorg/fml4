@@ -127,8 +127,8 @@ libexec/mead.pl
 ETC_SOURCES:
 etc/daily.ignore
 etc/mime.types
-distrib/compile/RELEASE_FILES
-distrib/compile/release_date
+var/tmp/RELEASE_FILES
+var/tmp/release_date
 conf/release_version
 etc/mgrdomains
 

@@ -11,5 +11,5 @@ install: ${SOURCES}
 
 distribution:
 .for dir in ${SUBDIRS}
-	(cd ${dir}; make install)
+	(cd ${dir}; ${MAKE} install)
 .endfor

@@ -45,11 +45,11 @@ if [ X$SUBDIR = X ];then
 fi
 
 GEN_HTML () {
-	chdir $FML
+	cd $FML
 
 	if [ doc/$SOURCE_DIR/$FILE.wix -nt var/html/$TARGET/index.html -o $always ]
 	then
-		test -d var/html/$TARGET || mkdirhier var/html/$TARGET
+		test -d var/html/$TARGET || $PERL distrib/bin/mkdirhier.pl var/html/$TARGET
 
 		perl distrib/bin/fix-wix.pl doc/$SOURCE_DIR/$FILE.wix |\
 		$FWIX -L $LANG -T $FILE -m html -D var/html/$TARGET -d doc/$SOURCE_DIR
@@ -59,7 +59,7 @@ GEN_HTML () {
 
 	if [ "X$LINK" != "X" ]
 	then
-		(chdir var/html;
+		(cd var/html;
 		   ln -s $TARGET $LINK
 		)
 	fi

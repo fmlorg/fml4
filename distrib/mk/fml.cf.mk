@@ -1,6 +1,6 @@
 # $Id$
 
-MANIFEST2INDEX = ./distrib/bin/manifest2index.pl
+MANIFEST2INDEX = ${PERL} ./distrib/bin/manifest2index.pl
 
 var/html/variable-list.ja.html: cf/MANIFEST.Japanese
 	$(ECONV) cf/MANIFEST.Japanese |\

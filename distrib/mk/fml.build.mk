@@ -30,7 +30,7 @@ __note_conf:
 	@ echo ""
 
 __init_build:
-	@ env FML=${FML} make -f distrib/mk/fml.sys.mk __setup
+	@ env FML=${FML} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 
 init_build: __init_build ${__BUILD_INIT__}
 	echo COMPILE_DIR ${COMPILE_DIR}

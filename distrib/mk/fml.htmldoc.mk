@@ -8,7 +8,8 @@ var/html/${file}: doc/html/${file}
 HTML_MISC += var/html/pictures/index.html
 var/html/pictures/index.html: doc/html/pictures/index.html
 	@ test -d var/html/pictures || mkdir var/html/pictures
-	${CPP} -P -UDIST doc/html/pictures/index.html > var/html/pictures/index.html
+	${CPP} -P -UDIST doc/html/pictures/index.html |\
+		${JCONV} > var/html/pictures/index.html
 
 # history
 HTML_MISC += var/html/p_list.gif
@@ -97,22 +98,22 @@ var/html/op/index.html: doc/smm/*wix
 
 var/html/op-e/index.html: doc/smm/*wix
 	test -d var/html/op-e || mkdir var/html/op-e
-	test -h var/html/op-en || (chdir var/html; ln -s op-e op-en)
+	test -h var/html/op-en || (cd var/html; ln -s op-e op-en)
 	${FIX_WIX} doc/smm/op.wix |\
 	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
 
-distrib/compile/WHATS_NEW.wix: CHANGES
-	rm -f distrib/compile/WHATS_NEW.wix
-	echo '.HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
-	grep -v -e ------- CHANGES >> distrib/compile/WHATS_NEW.wix || echo ""
-	echo '.~HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
+${TMP_DIR}/WHATS_NEW.wix: CHANGES
+	rm -f ${TMP_DIR}/WHATS_NEW.wix
+	echo '.HTML_PRE'  >> ${TMP_DIR}/WHATS_NEW.wix
+	grep -v -e ------- CHANGES >> ${TMP_DIR}/WHATS_NEW.wix || echo ""
+	echo '.~HTML_PRE'  >> ${TMP_DIR}/WHATS_NEW.wix
 
-var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix
-	${JCONV} distrib/compile/WHATS_NEW.wix |\
+var/html/WHATS_NEW/index.html: ${TMP_DIR}/WHATS_NEW.wix
+	${JCONV} ${TMP_DIR}/WHATS_NEW.wix |\
 	${FWIX} -L JAPANESE -T WHATS_NEW -m html -D var/html/WHATS_NEW
 
-var/html/WHATS_NEW-e/index.html: distrib/compile/WHATS_NEW.wix
-	distrib/bin/remove_japanese_line.pl distrib/compile/WHATS_NEW.wix |\
+var/html/WHATS_NEW-e/index.html: ${TMP_DIR}/WHATS_NEW.wix
+	${PERL} distrib/bin/remove_japanese_line.pl ${TMP_DIR}/WHATS_NEW.wix |\
 	${FWIX} -L ENGLISH -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
 
 

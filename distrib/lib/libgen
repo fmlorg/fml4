@@ -2,15 +2,15 @@ GEN_DOC () {
 
 	echo "Generating Plain Doc"
 	( 
-		chdir $FML
-		make plaindoc
+		cd $FML
+		${MAKE} plaindoc
 	)
 
 	echo "Generating WWW Doc"
 	(
 		echo "Making WWW pages of doc/smm/op => var/html/op";
-		chdir $FML; 
-		make htmldoc 
+		cd $FML; 
+		${MAKE} htmldoc 
 	)
 }
 
@@ -22,7 +22,7 @@ GEN_WWW () {
 	echo 
 	return
 	echo "ReGenerating WWW Search Environment";
-	(cd $FML; make syncwww search)
+	(cd $FML; ${MAKE} syncwww search)
    else
 	echo ignore www updates
    fi
@@ -58,7 +58,7 @@ MKDIR_DISTRIBUTION () {
 		echo ""
 	fi
 
-	echo make a directory $DESTDIR/distrib; 
+	echo ${MAKE} a directory $DESTDIR/distrib; 
 	mkdir $DESTDIR/distrib;
 
 	for dir in `cat $DIRECTORY_LIST`
@@ -67,8 +67,8 @@ MKDIR_DISTRIBUTION () {
 		mkdir $DESTDIR/distrib/$dir
 	done
 
-	(chdir $DESTDIR/distrib; ln -s contrib lib )
-	(chdir $DESTDIR/distrib/doc; ln -s ../drafts drafts )
+	(cd $DESTDIR/distrib; ln -s contrib lib )
+	(cd $DESTDIR/distrib/doc; ln -s ../drafts drafts )
 }
 
 
@@ -98,8 +98,8 @@ COPY_DOCS () {
    rsync -C -av doc/man/ $DESTDIR/distrib/doc/man/;
 
    echo " "; echo "Copying Documents (doc/ri/)...";
-   (chdir doc; tar cf - ri/*.wix) |\
-   (chdir $DESTDIR/distrib/doc; tar xvf - ) 
+   (cd doc; tar cf - ri/*.wix) |\
+   (cd $DESTDIR/distrib/doc; tar xvf - ) 
 
    # http
    echo " ";
@@ -116,7 +116,7 @@ COPY_DOCS () {
    $CPP -DJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-j.html
    $CPP -UJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-e.html
 
-   test -d $HTML_DIR/pictures || mkdirhier $HTML_DIR/pictures
+   test -d $HTML_DIR/pictures || $MKDIR $HTML_DIR/pictures
    $CPP doc/html/pictures/index.html > $HTML_DIR/pictures/index.html
 
    cp doc/html/release-index.html $HTML_DIR/index.html
@@ -203,13 +203,13 @@ COPY_SOURCES () {
 	echo " "; echo "Copying etc/ ";
 	cp -p $ETC_SOURCES $DESTDIR/distrib/etc;
 	tar cf - etc/makefml/Makefile etc/makefml/[0-9a-z]* |\
-	(chdir $DESTDIR/distrib; tar xvf - )
+	(cd $DESTDIR/distrib; tar xvf - )
 
-	# tar cf - etc/samples/[a-z]* | (chdir $DESTDIR/distrib; tar xvf - )
+	# tar cf - etc/samples/[a-z]* | (cd $DESTDIR/distrib; tar xvf - )
 
 	echo  " ";
 	echo  "Generating default_config.ph  ";
-	cf/config -m cf/MANIFEST -i /dev/null |\
+	${PERL} cf/config -m cf/MANIFEST -i /dev/null |\
 	sed 's@sapporo.iij.ad.jp"@installer.fml.org"@g' \
 		> $DESTDIR/distrib/src/default_config.ph
 
@@ -229,7 +229,7 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in fml.pl msend.pl 
 	do
 		echo "   Fixing Rcsid in $file ... ( > src/$file )"
-		perl $FML_VERSION $file > $DESTDIR/distrib/src/$file
+		$FML_VERSION $file > $DESTDIR/distrib/src/$file
 	done
 
    )
@@ -237,12 +237,13 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in $LIBEXEC_SOURCES 
 	do
 		echo "   Fixing Rcsid in $file ... "
-		perl $FML_VERSION $file > $DESTDIR/distrib/$file
+		$FML_VERSION $file > $DESTDIR/distrib/$file
 	done
 }
 
 
 FIX_DISTRIBUTION_FILE_MAKEFILE () { 
+	echo '';
 }
 
 
@@ -277,7 +278,7 @@ FIX_DISTRIBUTION_LINKS () {
 
 # XXX: need DESTDIR !!!
 GEN_CONTRIB () {
-   ( cd $FML/contrib; make FML=${FML} DESTDIR=${DESTDIR} distribution )
+   ( cd $FML/contrib; ${MAKE} FML=${FML} DESTDIR=${DESTDIR} distribution )
 }
 
 
@@ -287,12 +288,12 @@ FIX_DISTRIBUTION_PERMISSION () {
 	echo "   disable all"
 
 	find $DESTDIR/distrib |\
-	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+	${PERL} -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 
 	if [ -d $FTP_DIR/${BRANCH} ]
 	then
 		find $FTP_DIR/${BRANCH} |\
-		perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+		${PERL} -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 	else
 		echo ignore fix permisson for $FTP_DIR/${BRANCH}
 	fi
@@ -310,9 +311,9 @@ FIX_DISTRIBUTION_PERMISSION () {
 
 PATCHLEVEL_INCREMENT () {
 	echo "$src => $dst"
-	perl $FML_VERSION -p $PATCHLEVEL $src |\
-	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
-	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
+	$FML_VERSION -p $PATCHLEVEL $src |\
+	${PERL} -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
+	${PERL} -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
 	> $dst
 }
 
@@ -374,9 +375,9 @@ FIX_LANGUATE () {
 }
 
 
-# "make exp" or "make current-snapshot"
+# "${MAKE} exp" or "${MAKE} current-snapshot"
 GEN_BRANCH_ARCHIVE () {
-	chdir $DESTDIR
+	cd $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
 	DATE=`date -u +"%C%y%m%d"`
@@ -419,8 +420,8 @@ GEN_ARCHIVE () {
 	fi
 
 	echo ""
-	echo chdir $DESTDIR
-	chdir $DESTDIR || return
+	echo cd $DESTDIR
+	cd $DESTDIR || return
 
 	# DATE, FMLID
 	GEN_FMLID
@@ -449,17 +450,17 @@ GEN_ARCHIVE () {
 	echo " "
 	echo "-- unnlink *~ ..."
 	echo " "
-	find distrib -name '*~' -print|perl -nple unlink
+	find distrib -name '*~' -print|${PERL} -nple unlink
 
 
 	### Section: generate snapshot {tar,zip}balls
 	(
-	   chdir $FTP
+	   cd $FTP
 	   rm -f fml-${BRANCH}*tar.gz fml-${BRANCH}*zip fml-${BRANCH}*bz2
 	)
 
 	echo " "
-	echo "-- make $FMLID.tar.gz ... "
+	echo "-- ${MAKE} $FMLID.tar.gz ... "
 	echo " "
 	if [ -d $FMLID ]; then
 		mv $FMLID $FMLID.$DATE.$$
@@ -482,22 +483,22 @@ GEN_ARCHIVE () {
 
 	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
 	   (
-	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
-	      chdir archives/these_days || exit 1
+	      cd $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      cd archives/these_days || exit 1
 	      rm -f fml-current.tar.gz
 	      ln -s ../../current/$FMLID.tar.gz fml-current.tar.gz
 	   )
 	elif [ X$MODE = X -a X$BRANCH = Xstable ]; then
 	   (
-	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
-	      chdir archives/these_days || exit 1
+	      cd $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      cd archives/these_days || exit 1
 	      rm -f fml-stable-latest.tar.gz
 	      ln -s ../../stable/$FMLID.tar.gz fml-stable-latest.tar.gz
 	   )
 	fi
 
 	echo ""
-	echo "-- make $FMLID.zip";
+	echo "-- ${MAKE} $FMLID.zip";
 	echo ""
 	pwd
 	find $FMLID |zip -q -@ $FMLID.zip
@@ -508,7 +509,7 @@ GEN_ARCHIVE () {
 	echo "-- create MD5 check sum"
 	echo ""
 	( 
-		chdir $FTP;
+		cd $FTP;
 		md5 *gz *zip |sort |tee MD5SUM
 	)
 
@@ -521,7 +522,7 @@ GEN_ARCHIVE () {
 		echo ""
 
 		( 
-		   chdir $FTP;
+		   cd $FTP;
 		   if [ X$ARCHIVE_DIR != X -a -d $ARCHIVE_DIR ]; then
 		      ln $FMLID.tar.gz $ARCHIVE_DIR/$FMLID.tar.gz
 		   else
@@ -530,14 +531,14 @@ GEN_ARCHIVE () {
 		)
 	else
 		echo ""
-		echo "-- make current htdocs tarballs"
+		echo "-- ${MAKE} current htdocs tarballs"
 		echo ""
 		test -d $FTP/htdocs || mkdir $FTP/htdocs
 		rsync --delete -C -av $FML/var/html/ $FTP/htdocs/
 		(
 			TB=htmldocs-${BRANCH}-${DATE}
 
-			chdir $FTP
+			cd $FTP
 
 			rm -f htmldocs-${BRANCH}-*
 

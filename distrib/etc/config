@@ -8,16 +8,13 @@ branch=0
 
 ### user defined variables ###
 # prog
-MAKE=/usr/bin/make
 FWIX_OPTS=-F
 BLOCKSIZE=1024; export BLOCKSIZE
-
-
 
 ### imports distrib/mk/fml.sys.mk ###
 #    e.g. working directory
 tmp=/tmp/config$$
-make __import_variables > $tmp
+${MAKE} __import_variables > $tmp
 echo "------------------------------"
 echo "import *_DIR to env variables via fml.sys.mk"
 echo ""
@@ -27,10 +24,19 @@ echo "------------------------------"
 . $tmp
 rm -f $tmp
 
+if [ "X$MAKE" = X -o "X$PERL" = X ];then
+	echo "MAKE or PERL is not defined";
+	exit 1;
+else
+	echo "MAKE: $MAKE";
+	echo "PERL: $PERL";
+fi
+
+
 # program (depends on FML)
-INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
-VERSION_PL="$FML/distrib/bin/version.pl"
-FML_VERSION="$FML/distrib/bin/fml_version.pl -N -X $FML"
+INCLUDE_PROG="${PERL} $FML/distrib/bin/_include.pl "
+VERSION_PL="${PERL} $FML/distrib/bin/version.pl"
+FML_VERSION="${PERL} $FML/distrib/bin/fml_version.pl -N -X $FML"
 
 # modify for daily snapshot system
 if [ X$MODE != X ];then
@@ -53,11 +59,11 @@ BAKID=`date +%y%m%d.%H%M%S`
 DATE_LOG=$DESTDIR/_datelog_
 
 # patch level (only for internal use snapshot)
-PATCHLEVEL_DIR=distrib/compile
+PATCHLEVEL_DIR=var/tmp
 PATCHLEVEL_FILE=$PATCHLEVEL_DIR/version
 
 # distribution list
-RELEASE_MANIFEST=distrib/compile/RELEASE_FILES
+RELEASE_MANIFEST=var/tmp/RELEASE_FILES
 
 # distribution directory of snapshot
 DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST
@@ -67,7 +73,7 @@ DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST
 ### MAIN ###
 
 # generating list to export from "distrib/etc/RELEASE_FILES"
-perl distrib/bin/gen_variable_from_release_files.pl \
+${PERL} distrib/bin/gen_variable_from_release_files.pl \
 	distrib/etc/RELEASE_FILES > $TMP
 . $TMP
 

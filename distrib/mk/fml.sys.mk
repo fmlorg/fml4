@@ -14,8 +14,6 @@ DIST_DIR     = $(FML)/distrib
 DIST_BIN     = $(DIST_DIR)/bin
 DIST_DOC_BIN = $(DIST_DIR)/doc/bin
 
-COMPILE_DIR  = $(DIST_DIR)/compile
-
 
 ### exports  ###
 FTP_DIR      = $(DESTDIR)/exports/ftp
@@ -24,8 +22,9 @@ SNAPSHOT_DIR = $(FTP_DIR)/current/src
 WWW          = ${DESTDIR}/exports/www
 WWW_DIR      = ${WWW}
 
-TMP_DIR           = ${FML}/tmp
 VAR_DIR           = ${FML}/var
+TMP_DIR           = ${FML}/var/tmp
+COMPILE_DIR       = ${TMP_DIR}
 WORK_DOC_DIR      = ${VAR_DIR}/doc
 WORK_DOC_DIR_JP   = ${VAR_DIR}/doc/Japanese
 WORK_HTML_DIR     = ${VAR_DIR}/html
@@ -35,15 +34,14 @@ WORK_DRAFTS_DIR   = ${WORK_DOC_DIR}/drafts
 
 
 __EXPORTS_DIR__ = FML COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
-		DIST_DOC_BIN FTP_DIR SNAPSHOT_DIR TMP_DIR \
-		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR \
-		WORK_HTML_DIR \
+		DIST_DOC_BIN FTP_DIR SNAPSHOT_DIR \
+		VAR_DIR TMP_DIR \
+		WORK_DOC_DIR WORK_DRAFTS_DIR \
 		WORK_DOC_DIR_JP \
 		WORK_EXAMPLES_DIR \
-		WORK_HTML_DIR WORK_HTML_ADV_DIR WWW_DIR WWW_DB_DIR \
+		WORK_HTML_DIR WORK_HTML_ADV_DIR WWW_DIR \
 		ARCHIVE_DIR \
-		BRANCH MODE URL_PREFIX
-
+		BRANCH MODE
 
 ######################################################################
 ###
@@ -59,16 +57,19 @@ __ALL__ += $(COMPILE_DIR)
 .PHONY: ${dir}
 ${dir}: 
 	@ if [ ! -d ${dir} ]; then \
-		echo creating ${dir} ;\
+		echo "creating ${dir}";\
 		$(MKDIR) ${dir} ; fi
 .endfor
 
-__setup: $(__ALL__)
+__setup: __debug $(__ALL__)
+
+__debug:
+	@ echo "(debug) MKDIR=${MKDIR}"
 
 
 __import_variables:
-.for dir in ${__EXPORTS_DIR__}
-	@ echo ${dir}=${$(dir)}
+.for dir in ${__EXPORTS_DIR__} ${__EXPORTS_PROGS__}
+	@ echo ${dir}=\"${$(dir)}\"
 .endfor
 
 

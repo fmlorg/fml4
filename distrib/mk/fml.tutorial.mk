@@ -1,13 +1,13 @@
-HTML_CONV   = $(FML)/bin/fwix.pl -m htmlconv
-HTML_FILTER = $(FML)/bin/fwix.pl -m html -f tmp/html_index.ph
-TEXT_FILTER = $(FML)/bin/fwix.pl -m text -f tmp/text_index.ph
+HTML_CONV   = ${_FWIX} -m htmlconv
+HTML_FILTER = ${_FWIX} -m html -f ${TMP_DIR}/html_index.ph
+TEXT_FILTER = ${_FWIX} -m text -f ${TMP_DIR}/text_index.ph
 
 WORK_TUTORIAL_DIR = ${WORK_HTML_DIR}/${TUTORIAL_LANGUAGE}
 
 
 # index list dependence
-__TUTORIAL_DOC_TARGETS__ += tmp/text_index.ph
-__HTML_TUTORIAL__        += tmp/html_index.ph
+__TUTORIAL_DOC_TARGETS__ += ${TMP_DIR}/text_index.ph
+__HTML_TUTORIAL__        += ${TMP_DIR}/html_index.ph
 
 
 .for dir in ${DOC_TUTORIAL_SUBDIR}
@@ -86,7 +86,7 @@ ${WORK_TUTORIAL_DIR}/tutorial.html: doc/${TUTORIAL_LANGUAGE}/INDEX
 
 
 # %index list
-tmp/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
+${TMP_DIR}/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 	@ echo creating text_index.ph
 	@ for dir in ${__HTML_TUTORIAL_SUBDIRS__} ;\
 	do \
@@ -95,25 +95,25 @@ tmp/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 		exit 1 ; \
 	   fi ; \
 	   ${FWIX} -m text -i $$dir doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix \
-		>> tmp/text_index.ph.new 2>/dev/null; \
+		>> ${TMP_DIR}/text_index.ph.new 2>/dev/null; \
 	done
 	@ echo ""
-	@ mv tmp/text_index.ph.new tmp/text_index.ph
-	@ perl -cw tmp/text_index.ph
+	@ mv ${TMP_DIR}/text_index.ph.new ${TMP_DIR}/text_index.ph
+	@ ${PERL} -cw ${TMP_DIR}/text_index.ph
 	@ echo done.
 
-tmp/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
+${TMP_DIR}/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 	@ echo creating html_index.ph
 	@ for dir in ${__HTML_TUTORIAL_SUBDIRS__} ;\
 	do \
 	   echo -n '.';\
 	   ${FWIX} -D /tmp -m html -i $$dir \
 		doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix \
-		>> tmp/html_index.ph.new 2>/dev/null; \
+		>> ${TMP_DIR}/html_index.ph.new 2>/dev/null; \
 	done
 	@ echo ""
-	@ mv tmp/html_index.ph.new tmp/html_index.ph
-	@ perl -cw tmp/html_index.ph
+	@ mv ${TMP_DIR}/html_index.ph.new ${TMP_DIR}/html_index.ph
+	@ ${PERL} -cw ${TMP_DIR}/html_index.ph
 	@ echo done.
 
 

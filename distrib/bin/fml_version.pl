@@ -6,7 +6,7 @@ require 'getopts.pl';
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
 $RELEASE_ID    = "$FML/conf/release_version";
-$RELEASE_DATE  = "$FML/distrib/compile/release_date";
+$RELEASE_DATE  = "$FML/var/tmp/release_date";
 $SHOW_ID       = $opt_s;
 $RCSID_FNAME   = $opt_r;
 $query         = $opt_q;
