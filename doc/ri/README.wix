@@ -340,7 +340,7 @@ INSTALL and INSTALL_on_NT4.
 =E
 * Development Environment:
 
-	postfix 19990325 on NetBSD 1.4_ALPHA 
+	postfix 19990325 on NetBSD 1.4_BETA
 
 ○ テスト環境: fml 2.2 のターゲットマシン/テスト環境は
 =E
