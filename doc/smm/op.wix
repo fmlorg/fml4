@@ -46,7 +46,17 @@
 
 とすることにします。また directory 等はあくまで見本だということに注意
 して下さい。そこに自動的に作られるわけでも、推奨なわけでもありません。
+各々自分の環境に合わせて読み替えて下さい。
 
+=E
+  In the first part, there describes the design concept of the fml.
+Detailed configurations are in the second part or later.
+
+  In these documents, % means a shell prompt, # means a shell prompt
+when root. And you please keep in mind that these directories and so 
+on as follows are only samples, not be made automatically , much 
+less I recommend.
+==
 
 .# DOV == Design OverView
 .include dov.wix
@@ -59,26 +69,32 @@
 
 ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
 いて解説します。
-
+=E
+  Relation between fml proceses and other programs, and how to 
+launch fml.
+==
 .include pov.wix
 
 
 .# ##########################################################
 .P	インストールとカスタマイズ
-
+=E.P      Install and Customize
+==
 .include install.wix
 
 
 .# ##########################################################
 .P	トラブルシューティング
-
+=E.P      Trouble Shooting
+==
 .include os.wix
 .include trouble.wix
 
 
 .# ##########################################################
 .P	ライブラリと hack
-
+=E.P      FML libraries and hack
+==
 .include fop.wix
 .include function.wix
 
@@ -136,14 +152,14 @@
 .# ##########################################################
 .P	Appendix
 
+.include ref.wix
+
 .include cloindex.wix
 
 .include cwhois.wix
 .include aucea.wix
 .include fred.wix
 .include pager.wix
-
-.include ref.wix
 
 .include app/fmlR1.wix
 .include app/vars.wix
@@ -158,3 +174,4 @@
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
+
