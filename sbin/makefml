@@ -3456,6 +3456,10 @@ sub do_ctladdr
     }
     else {
 	push(@files, ($cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives"));
+
+	if ($proc eq 'chaddr') {
+	    push(@files, ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members"));
+	}
     }
 
     &ResetVariables;
