@@ -64,6 +64,10 @@ $DIR/$ml/etc/pgp5/
 .C	TODO (特に current)
 =E.C	TODO (current specific)
 
+.S	RDBMS
+
+	PostgreSQL は DBD 化へ
+
 
 .S	3.0? (to be 3.0? in the new future)
 
