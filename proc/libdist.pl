@@ -160,7 +160,7 @@ sub DoDistribute
 	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
 
 	if ($e{"fh:$lcf:"}) {	# force some value to a field
-	    $e{'Hdr'} .= "$_:". $e{"fh:$lcf:"} ."\n";
+	    $e{'Hdr'} .= "$_: ". $e{"fh:$lcf:"} ."\n";
 	}
 	elsif ($e{"oh:$lcf:"}) { # original fields
 	    $e{'Hdr'} .= "$_:". $e{"h:$lcf:"} ."\n" if $e{"h:$lcf:"};
