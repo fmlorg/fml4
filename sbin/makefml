@@ -3595,6 +3595,7 @@ sub EachLevelQuery
 	print "   ".("*" x 60); print "\n";
 
 	&Menu'GenQuery(*query, $QUERY{$top_level}, $top_level); #';
+	&Menu'FixDefault(*query, *config, $top_level);
 
 	$r = &Query($query{'menu'}, $query{'query'}, 
 		    $query{'pat'}, $query{'default'});
@@ -5476,6 +5477,17 @@ sub EvalMenu
 	    $MAP{$menu, $1} =~ s/\$config{\'_ML_\'}/$config{'_ML_'}/g;
 	}
     }
+}
+
+
+sub FixDefault
+{
+    local(*query, *config, $top_level) = @_;
+    local(@x, $x);
+
+    @x = split(/\//, $top_level);
+    $x = $x[$#x];
+    $query{'default'} = $config{$x} ? 'y' : 'n';
 }
 
 
