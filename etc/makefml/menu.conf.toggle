@@ -77,6 +77,7 @@
 	_i_  REMOTE_ADMINISTRATION                      $SUMMARY{'REMOTE_ADMINISTRATION'}
 	_i_  USE_ARCHIVE                                $SUMMARY{'USE_ARCHIVE'}
 	_i_  USE_CROSSPOST                              $SUMMARY{'USE_CROSSPOST'}
+	_i_  USE_DATABASE                               $SUMMARY{'USE_DATABASE'}
 	_i_  USE_DISTRIBUTE_FILTER                      $SUMMARY{'USE_DISTRIBUTE_FILTER'}
 	_i_  USE_DOT_QMAIL_EXT                          $SUMMARY{'USE_DOT_QMAIL_EXT'}
 	_i_  USE_ENCRYPTED_DISTRIBUTION                 $SUMMARY{'USE_ENCRYPTED_DISTRIBUTION'}
@@ -91,7 +92,9 @@
 	_i_  USE_MTI                                    $SUMMARY{'USE_MTI'}
 	_i_  USE_ORIGINAL_MESSAGE_ID                    $SUMMARY{'USE_ORIGINAL_MESSAGE_ID'}
 	_i_  USE_OUTGOING_ADDRESS                       $SUMMARY{'USE_OUTGOING_ADDRESS'}
+	_i_  USE_RFC2369                                $SUMMARY{'USE_RFC2369'}
 	_i_  USE_SJIS_IN_ISH                            $SUMMARY{'USE_SJIS_IN_ISH'}
+	_i_  USE_SMTPFEED_F_OPTION                      $SUMMARY{'USE_SMTPFEED_F_OPTION'}
 	_i_  USE_SMTP_LOG_ROTATE                        $SUMMARY{'USE_SMTP_LOG_ROTATE'}
 	_i_  USE_SUBJECT_AS_COMMANDS                    $SUMMARY{'USE_SUBJECT_AS_COMMANDS'}
 	_i_  USE_VERP                                   $SUMMARY{'USE_VERP'}
@@ -705,6 +708,20 @@
 =query
 	type:	y-or-n
 
+/OPTION/VARIABLE_OFF_ON/L/USE_DATABASE
+
+=name
+	USE_DATABASE
+
+=config
+	USE_DATABASE
+
+=menu
+	USE_DATABASE	$SUMMARY{'USE_DATABASE'}
+
+=query
+	type:	y-or-n
+
 /OPTION/VARIABLE_OFF_ON/L/USE_DISTRIBUTE_FILTER
 
 =name
@@ -901,6 +918,20 @@
 =query
 	type:	y-or-n
 
+/OPTION/VARIABLE_OFF_ON/L/USE_RFC2369
+
+=name
+	USE_RFC2369
+
+=config
+	USE_RFC2369
+
+=menu
+	USE_RFC2369	$SUMMARY{'USE_RFC2369'}
+
+=query
+	type:	y-or-n
+
 /OPTION/VARIABLE_OFF_ON/L/USE_SJIS_IN_ISH
 
 =name
@@ -911,6 +942,20 @@
 
 =menu
 	USE_SJIS_IN_ISH	$SUMMARY{'USE_SJIS_IN_ISH'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/USE_SMTPFEED_F_OPTION
+
+=name
+	USE_SMTPFEED_F_OPTION
+
+=config
+	USE_SMTPFEED_F_OPTION
+
+=menu
+	USE_SMTPFEED_F_OPTION	$SUMMARY{'USE_SMTPFEED_F_OPTION'}
 
 =query
 	type:	y-or-n
