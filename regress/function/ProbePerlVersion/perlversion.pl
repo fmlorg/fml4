@@ -14,9 +14,9 @@
 &ProbePerlVersion;
 
 printf "%10s   %s\n",  "Version", $];
-printf "%10s   %s\n",  "jperl?", ($UNDER_JPERL ? "yes" : "no");
-if ($UNDER_JPERL) {
-    printf "%10s   %s\n",  "jperl mode", $JPERL_MODE;
+printf "%10s   %s\n",  "jperl?", ($UnderJPerl ? "yes" : "no");
+if ($UnderJPerl) {
+    printf "%10s   %s\n",  "jperl mode", $JPerlMode;
 }
 	
 exit 0;
@@ -24,29 +24,31 @@ exit 0;
 
 sub ProbePerlVersion
 {
+    local($jperl4);
+
     print STDERR "ProbePerlVersion: $^X -v \n" if $debug;
     open(PERL, "$^X -v |");
     while (<PERL>) {
-	$UNDER_JPERL = 1 if /jperl/;
+	$UnderJPerl = 1 if /jperl/;
     }
     close(PERL);
 
     # if jperl 4, always bad.
-    if ($UNDER_JPERL && ($] =~ /Revision.*4\.0/)) { $jperl4 = 1;}
+    if ($UnderJPerl && ($] =~ /Revision.*4\.0/)) { $jperl4 = 1;}
 
     # if jperl 5, check jperl or perl ?
     # try to check regexp working
     if ("\xa4\xa2" =~ m/^.$/) {
-	$JPERL_MODE = "euc";
+	$JPerlMode = "euc";
     }
     elsif ("\x80\xa0" =~ m/^.$/) {
-	$JPERL_MODE = "sjis";
+	$JPerlMode = "sjis";
     }
     else { # must be usual perl
-	$JPERL_MODE = "unknown"; # jperl4 matches here?
-	$UNDER_JPERL = 0;
+	$JPerlMode = "unknown"; # jperl4 matches here?
+	$UnderJPerl = 0;
     }
 
     # if jperl 4, always jperl is jperl.
-    $UNDER_JPERL = 1 if $jperl4;
+    $UnderJPerl = 1 if $jperl4;
 }
