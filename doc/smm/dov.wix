@@ -487,7 +487,8 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 
 .S	cp *.pl your-fml-directory
 
-ひろげて *.pl だけ今使っているところへコピーしてください（おしまひ）
+ひろげて src/ の下にある *.pl だけ今使っているところへコピーしてくださ
+い(おしまひ)。
 
 
 .S	新しい機能を有効にするには？
@@ -500,13 +501,32 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 
 Backward Compatibility は保証していますが 万が一 consistencyのないもの
 があったら ＭＬ 等へ御一報ください。
-変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
-なくて大丈夫です。
+変数の定義の仕方の変更等はあっても基本的に内部で自動的に補整してますの
+で気にしなくて大丈夫です。
+他の定義方法に replcase されたため削除したものについてはこのドキュメン
+ト中でふれられています。
 ＃注意：複雑なフックの場合は注意がいると思います。
 ＃
 ＃古いライブラリも一応Packageに一緒に入ってます。
 ＃lib/Compatibility に移動しておきました。
 ＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
+
+
+.S	CF VERSION による Backward Compatibility 
+.k	$CF_VERSION
+.k	$COMPAT_CF1 
+
+fml 2.1 の標準の config.ph は $CF_VERSION = 2; です。これは cf/config 
+を使って生成されるものです。これ以前の config.ph を使っている場合は
+
+	$COMPAT_CF1 = 1;
+
+がセットされているか $CF_VERSION が２より小さい場合は自動的に
+
+	libcompat_cf1.pl
+.k	libcompat_cf1.pl
+
+が dynamic loading されます。
 
 
 .S	1.6より前からの移行について
@@ -521,26 +541,30 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 と書くと複雑なフックをしかけていない限り compatible にできます。
 コードの都合上どうしても実現できないカスタマイズもありえます_o_
 
-昔できたことは必ず今の実装でも必ずできるので以下を参照してみて下さい。
+昔できたことは今の実装でも必ずできるのでこのドキュメントを参照してみて
+下さい。
 
 
 
-.C	設計に関するいくつかの考察…
+.C	設計指針に関するいくつかの考察…
 
 .S	From: はすべてを認めるべきだろうか？
 .k	$REJECT_ADDR
 
 現在は $REJECT_ADDR で定義されたアドレス群を From: に含むものはエラー
 として管理者へフォワードされます。それは個人を代表しているとみなされな
-いアドレスにたいしてです。というのはＭＬとは個人と個人を結び付けるべき
-ものだと思われるからです。現在は
+いアドレスにたいしてです。というのはＭＬとは個人と個人を結び付けるもの
+だと思われるからです。現在は
 
     $REJECT_ADDR = 'root|postmaster|MAILER-DAEMON|msgs|nobody';
 
-のように設定されています。この他にも uudecode や sysdiag(苦笑) のよう
-な attack で出てきそうなアドレスもありますが、まぁまず使ってないでしょ
-う。果たしてこれは増やすべきなのか、減らすべきなのか？
-私見としては、もっと増やすべきではないだろうかと思うのですが…
+のように設定されています。From:がこれらのアドレスだった場合管理者へフォ
+ワードし伺いを立てます。そこから後はＭＬ管理者の判断でしょう。
+
+この他にも uudecode や sysdiag(苦笑) のような attack で出てきそうなア
+ドレスもありますが、まぁまず使ってないでしょう。果たしてこれは増やすべ
+きなのか、減らすべきなのか？私見としては、もっと増やすべきではないだろ
+うかと思うのですが…
 
 
 .S	ML無限ループのチェックメカニズム
@@ -568,23 +592,32 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 	rename log log.0
 	…
 
-とやっていたログファイルの整理を行なうプログラムです。4.4BSDでは、もと
-もと MITのアテナプロジェクトで作られたプログラムが使われています。
+とやっていたログファイルの整理を行なうプログラムです。4.4BSD では、も
+ともと MITの Athena Project で作られたプログラムが使われています。
 
-newsyslog のパラメータは
+fml.pl がnewsyslog を使って処理するデフォールトのファイル群は
 .k	@NEWSYSLOG_FILES
 .k	$NEWSYSLOG_MAX
 .k	&NewSyslog
 
-&NewSyslog の引数(配列)は整理したいファイル群です。
+で次のファイルに定められています。
 
+    @NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak");
+
+つまり、まとめおくり、配送・認証リスト等の変更があった時にできるバック
+アップファイルです。
+
+また関数コール自体(&NewSyslog)の引数(配列)は整理したいファイル群です。
+
+変数
 	$NEWSYSLOG_MAX 	
 
-整理するのは何個までか？で、デフォールトは４。つまり
+は「整理するのは何個までか？」を決めます。デフォールトは４、つまり
 
 	log.4 log.3 ... log.0 log 
 
-まで保存・整理されます。また、
+まで順番にまわって保存・整理されます。また、
 
 	@NEWSYSLOG_FILES
 
@@ -596,24 +629,20 @@ newsyslog のパラメータは
 
 以下で使う用語について2、3説明しておきます。
 
-なお 便宜上以下
-	% を shell の prompt
-	# を root の時のshell prompt
-
-とすることにします。
-
-
 .S	MLのHOME
+.k	MLのHOME
 
-ML(fml) の HOME は config.ph のある場所です。例えば 
-config.ph が /var/spool/ml/elena/config.ph にあるとすると、
-directory /var/spool/ml/elena をＭＬのＨＯＭＥと呼んでいます。
+ML(fml) の HOME は config.ph のある場所です。例えば config.ph が 
+/var/spool/ml/elena/config.ph にあるとすると、directory
+/var/spool/ml/elena をMLのHOMEと呼んでいます。
 
 現在の実装は config.ph はなくてもかまいません。ですから spool
 (/var/spool/ml/elena/spool) や log (/var/spool/ml/elena/log)が作られる
 directory (/var/spool/ml/elena) のことだとおもってください。
 
 .S	SMTP
+.k	SMTP
+.k	Simple Mail Transfer Protocol
 
 SMTP == Simple Mail Transfer Protocol。 sendmail 間の通信方式のこと。
 
@@ -632,28 +661,52 @@ sendmail に拘る必要はありません。
 
 
 .S	sendmail
+.k	/usr/sbin/sendmail
+.k	sendmail
 
-現在も Eric Allman がメンテしている メール配信エージェントのこと。
-sendmail は BSDの標準装備です。
+現在も Eric Allman がメンテしている メール配送エージェントのこと。
+sendmail は BSD の標準装備です。
 
 どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
 もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
 を使うようにして下さい。
+例えば
+
+	ftp://ftp.cert.org/pub/tools/sendmail/
+	ftp://ftp.sendmail.org/
+
+国内のミラーは例えば
+
+	ftp://ftp.iij.ad.jp/pub/network/sendmail/
+
+です。
+
 
 .S	sendmail.cf 
+.k	/etc/sendmail.cf 
+.k	sendmail.cf 
 
 sendmail をコントロールする configration file。これの読み書きができな
-いとネットワーク管理者にはなれない（なりたくないって？（泣））。通常は 
-motonori さん（motonori@wide.ad.jp）のメンテしている CF パッケージで 
-sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
+いとネットワーク管理者にはなれません(なりたくないって?(泣))。
 
-詳しくは、このCFパッケージの日本語マニュアルも参照されたい。
+大抵の場合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッ
+ケージで sendmail.cf を簡単に作ることができるが、この見本で十分実用で
+す。
+
+詳しくは、このCFパッケージの日本語マニュアルも参照して下さい。
+
+国内のミラーは例えば
+
+	ftp://ftp.iij.ad.jp/pub/network/sendmail/
+
 
 .S	newaliases
+.k	/usr/sbin/newaliases
+.k	newaliases
 
 /etc/aliases から aliases データベースを作るための操作のこと。
-/etc/aliases をいじったら newaliases というコマンドを実行することのこ
-と。
+/etc/aliases をいじったら必ず newaliases というコマンドを実行しなけれ
+ばなりません。
 
 
 .# $Id$
@@ -661,4 +714,3 @@ sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
-

@@ -41,6 +41,14 @@
 パートIでは、fml の設計思想の概略について述べます。
 実際の細かい設定についてはパートII以降へ譲ります。
 
+なおこのドキュメント中では便宜上
+
+	% を shell の prompt
+	# を root の時のshell prompt
+
+とすることにします。また directory 等はあくまで見本だということに注意
+して下さい。そこに自動的に作られるわけでも、推奨なわけでもありません。
+
 
 .# DOV == Design OverView
 .include dov.wix

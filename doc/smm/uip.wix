@@ -75,6 +75,22 @@ main(argc, argv)
 .~q
 
 
+.S	Daily （日々のログ解析）
+.k	bin/daily.pl
+.k	etc/daily.ignore
+
+	% bin/daily.pl -f etc/daily.ignore log
+
+は log ファイル（複数も可）を解析しログの中で普通じゃない行をOUTPUTし
+ます。どういう行を正常の動作とみなして無視するかは
+
+	etc/daily.ignore
+
+というファイルに入っています。各行が無視するキーワードです。
+増やすなら足せばいいし、減らすなら切ってしまえば良いでしょう。
+毎朝 cron で実行するといいとおもいます。
+
+
 .S	DNS のチェック (bin/dns_check.pl)
 .key	bin/dns_check.pl
 .key	dns_check.pl

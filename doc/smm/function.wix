@@ -343,6 +343,17 @@ $PROC_GEN_INFO (default 'GenInfo') で生成されるヘルプメッセージをつけ
 
 また、$Envelope{'error'} があればそれを管理者へ送る。
 
+この時のメールの最後に現れる「さようなら」メッセージには
+
+	$GOOD_BYE_PHRASE
+
+で変更できます。また $FACE_MARK という変数もあります（謎）
+.k	$GOOD_BYE_PHRASE
+.k	$FACE_MARK
+
+	$GOOD_BYE_PHRASE = "\tBe seeing you!   ";
+	$FACE_MARK	 = "(^^)P〜";
+
 
 .S	RunHooks               (fml.pl)
 .k	RunHooks

@@ -1,4 +1,10 @@
-~.C	FRED （汎関数-正規表現-微分）ライブラリ
+.C	FRED （汎関数-正規表現-微分）ライブラリ (AREF 0)
+.k	FRED
+
+sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
+つきにくいかも知れません。中身は同じでも違ったインターフェイスは AREF 
+ライブラリが提供します。
+.xref	AREF
 
 .S	Funtional Regular Expressional Derivative
 
