@@ -1,0 +1,117 @@
+.C	Overview
+
+
+.S	httpd.conf は fml/share/ の下について設定すれば十分か？
+
+そういう設定を書く
+
+
+.S	fml/www/ と fml/share/ の違いは？
+
+www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを格納
+する場所が fml/www/
+
+
+.S	CGI導入以前に作られたものはどう処理する？自動的に有効か？
+
+CGIをいじれる人がそのＭＬの設定の変更はできる。
+   
+CGIをいじれる人は概ねそのサーバに入ってmakefmlでの設定変更を使える人と
+同じ権限が使える。そのユーザリストはhtpasswdに設定する。
+この人たちは以前(makefml)と同じ権限レベルになる。
+
+一方、各ＭＬで admin コマンドを使っている場合にその人たちがCGIを使える
+ようになるか？というと自動ではならない。
+
+1	CGIのメニュー「あるＭＬをCGIで設定可能にする」がある
+2.	makefml mladmin.cgi ML
+
+どちらでも効果は同じ
+
+
+.S	CGI操作ユーザの設定追加/変更/削除
+
+1. CGIからおこなう
+2. makefml htpasswd ML ユーザ名
+
+.S	CGI操作ユーザのパスワードの変更
+
+GUI: メニューの『管理者パスワードの設定』で設定
+
+初期設定の時だけは 'admin' コマンドでつかうものを自動的に htpasswd へ
+反映させる。その後は自動 sync はしない(別のパスワードを使えるように)
+
+
+.S	ＭＬを作るには newaliases と連動させる必要があるが …
+
+WWWで aliases の方法は設定できる。MTAと対で設定する必要があるだろう。
+たとえば postfix と sendmail では同じDBを見るが program の構造が違う 
+
+
+.S	MTAの設定はいつどこでする？(途中でMTAが変わるかも知れない)
+A: メインメニューにいちおうあるが…それがいいのか？
+   
+
+.S	WWW下のCGI PATHは？
+
+makefml でインストールする時に決まる
+
+
+.S	MTA 依存の問題: postfix 特有の事情
+
+postalias /var/spool/ml/etc/aliases ではしらえる
+
+
+.S	sendmail 特有の事情
+
+/var/spool/ml/etc/aliases.db に root 権限のファイルが必要
+
+インストール後に root になって
+
+   # touch /var/spool/ml/etc/aliases.db 
+
+しておく必要がある
+
+.S	qmail
+
+「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要らな
+いのか？という気がするが、ためしたことがない;-)
+
+
+.S	makefml config メニューを日本語にできるか？
+
+Message Language Extension をつかう 。対応済み
+
+
+.S	既存のシステムからの移行は？
+
+ようするに makefml のGUIとおもってほしい。
+デフォールトではサーバ管理者がmakefmlをつかうようにWWWを使用可能
+各々のＭＬ管理者はWWWはつかえない。
+
+
+.S	各々のＭＬも自動的にWWW上で操作可能にできないのか？
+
+サーバ管理者はなんでも可能だが、あるＭＬの管理者にWWWアクセセウを許す
+かは明示的に設定が必要
+
+画面ないしmakefml mladmin.cgi ML で設定する
+
+つまり
+
+1. そのＭＬをWWWでいじれるようにするか否かはサーバ全体の管理者が決定する。
+   デフォールトはさせない
+
+2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
+   WWWでそのＭＬをいじらせることができる。
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

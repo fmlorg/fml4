@@ -1,6 +1,16 @@
 .C	Overview
 
-.S	Overview
+.S	GUIとは？
+
+fml のメニュー設定プログラムは２つあります。
+
+	CUI として makefml をコマンドラインで走らせる
+
+	GUI として CGI 経由で makefml を動かすという
+	WWWからの操作
+
+です。
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

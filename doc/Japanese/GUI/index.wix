@@ -1,10 +1,13 @@
 .HTML_PRE
-.__repl_title__
+	GUI (WWW/CGI)の設定について
 
 .toc
 .~HTML_PRE
 
 .__repl_include__
+.include overview.wix
+.include QandA.wix
+.include gui.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
