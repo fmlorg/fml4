@@ -1,4 +1,9 @@
-alias_database = hash:/etc/aliases, 
+# In postfix, alias_database != alias_map
+# "newaliases" or "sendmail -bi" sees $alias_database
+# but lookup is based on $alias_maps.
+# $alias_maps is not necessarily all under control by Postfix.
+alias_maps = hash:/etc/aliases, 
 	hash:/var/spool/ml/etc/aliases
+
 # gateway, you should also include $mydomain. Do not specify the
 allow_mail_to_commands = alias,forward,include
