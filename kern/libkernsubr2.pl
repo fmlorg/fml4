@@ -78,6 +78,9 @@ sub EmulRFC2369
 			    "<mailto:$addr?body=${trap}help>");
 	&DefineDefaultField("List-Unsubscribe", 
 			    "<mailto:$addr?body=${trap}unsubscribe>");
+	my $id = $MAIL_LIST;
+	$id =~ s/\@/./g;
+	&DefineDefaultField("List-ID", $id);
     }
 
 }
