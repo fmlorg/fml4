@@ -1,13 +1,16 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
+#
+
+use vars qw($debug $debug_smtp);
 
 sub SmtpHackInit
 {
@@ -73,7 +76,7 @@ sub SmtpHackRebuildList
 	}
     }
 
-    close(NEW);
+    close(OUT);
 
     if (-z $new) { 
 	&Log("\$OUTGOING_RCPTLIST.new is size 0, not replaced");
@@ -82,7 +85,7 @@ sub SmtpHackRebuildList
 	rename($new, $OUTGOING_RCPTLIST) ||
 	    &Log("fail to rename $OUTGOING_RCPTLIST");
 
-	&Log("rebuild $OUTGOING_RCPTLIST") if $debug_smtp_hack;
+	&Log("rebuild $OUTGOING_RCPTLIST") if $debug_smtp;
     }
 }
 
