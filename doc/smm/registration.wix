@@ -1,0 +1,45 @@
+.C	メンバーの登録について
+=E.C	Registration
+
+自動登録については次章の .ptr{auto-regist} を見て下さい。
+=E
+See .ptr{auto-regist} for automatic registration details.
+
+.S	ほんとに抜けるか？を確認する unsubscribe 
+=E.S	unsubscribe confirmation
+.l	unsubscribe-confirmation
+
+自動登録には confirmation がありますが、その逆に抜ける時にも 
+confirmation を求めるモードです。デフォールトではしません。
+.xref confirmation
+=E
+"confirmation" mode is also available in "unsubscribe". FML uses the
+same routine of "confirmation" in automatic registration.  Hence you
+can restrict "unsubscribe" in the same way as in the case of automatic
+registration.
+.xref confirmation
+
+設定するためには
+
+	$UNSUBSCRIBE_AUTH_TYPE = "confirmation";
+
+とします。やり方は confirmation と同様です。「本当に抜けるのね？」と確
+認を求めるメールが返るので、そのメールに reply してもらうと本当に抜け
+ることができます。
+=E
+When "unsubscribe" request comes in, FML sends back a confirmation
+request to verify the will. See .ptr{autoregist} and speculate the
+action.
+
+.# 自動登録
+.include autoregist.wix
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
