@@ -2,16 +2,23 @@
 
    The Design, Implementation and Configurations
 		of
-   FML 2.2 current Mailing List Server
+   FML 3.0.1 Mailing List Server
    Last modified: 
 
 	   			深町 賢一
 
+   
    http://www.fml.org/fml/
    http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
-   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/
 
-   Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.if LANG == JAPANESE
+   チュートリアル。まずここを読んでみて欲しいです。
+   この設定ガイドラインを越えるものがこのファイルとみてよいです。
+.url http://www.fml.org/fml/examples/
+.fi
+
+   Copyright (C) 1993-2000 Ken'ichi Fukamachi
             All rights reserved. 
    
    FML is free software; you can redistribute it and/or modify
@@ -192,10 +199,10 @@ Can you understand sources of quotations?:-)
 
 
 .# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
