@@ -46,13 +46,13 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 ### POPFML Win32 Version
 if ($COMPAT_WIN32) {
-    if ($MODE eq 'POP_ONLY') {
+    if ($Mode eq 'POP_ONLY') {
 	### &PopFmlGabble; (without fork version)
 	$status = &Pop'Gabble(*PopConf);#';
 	if ($status) { die("Error: $status\n");}
 	&PopFmlScan if $debug;
     }
-    elsif ($MODE eq 'EXEC_ONLY_ONCE') {
+    elsif ($Mode eq 'EXEC_ONLY_ONCE') {
 	&PopFmlProg;
     }
     else {
@@ -133,10 +133,10 @@ sub PopFmlGetOpts
 	/^\-perl_prog/    && ($PerlProg = shift @ARGV) && next;
 
 	/^\-arch/         && ($COMPAT_ARCH = shift @ARGV) && next;
-	/^\-expire/       && ($QUEUE_EXPIRE_LIMIT = shift @ARGV) && next;
+	/^\-expire/       && ($POPFML_QUEUE_EXPIRE_LIMIT = shift @ARGV) && next;
 
 	### mode
-	/^\-mode/ && ($MODE = shift @ARGV) && next; 
+	/^\-mode/ && ($Mode = shift @ARGV) && next; 
     }
 
     if (0 && $debug) {
@@ -217,7 +217,7 @@ sub PopFmlInit
 	$COMPAT_ARCH  = "WINDOWS_NT4";
 	$COMPAT_WIN32 = 1;
 
-	require "arch/$COMPAT_ARCH/depend.pl";
+	require "sys/$COMPAT_ARCH/depend.pl";
     }
     ### NTFML ENDS ###
 
@@ -269,6 +269,11 @@ sub PopFmlInit
     }
     else {
 	&Log("not found $ConfigFile");
+    }
+
+    # make directories
+    for ($VAR_DIR, $PopConf{'QUEUE_DIR'}) {
+	-d $_ || &Mkdir($_, 0755) || die("popfml: cannot mkdir $_\n");
     }
 
     if ($debug) {
@@ -414,7 +419,7 @@ sub CheckQueueIsExpireP
     &PopFmlScan;
 
     # 3 hours
-    $QUEUE_EXPIRE_LIMIT = $QUEUE_EXPIRE_LIMIT || 3*3600;
+    $POPFML_QUEUE_EXPIRE_LIMIT = $POPFML_QUEUE_EXPIRE_LIMIT || 3*3600;
 
     # current time
     $cur_time  = time;
@@ -422,14 +427,14 @@ sub CheckQueueIsExpireP
 
     &Log("check queue $queue_dir") if $debug;
 
-    if ($QUEUE_EXPIRE_LIMIT > 3600) {
-	$qel = sprintf("%.1f hours", $QUEUE_EXPIRE_LIMIT/3600);
+    if ($POPFML_QUEUE_EXPIRE_LIMIT > 3600) {
+	$qel = sprintf("%.1f hours", $POPFML_QUEUE_EXPIRE_LIMIT/3600);
     }
-    elsif ($QUEUE_EXPIRE_LIMIT == 3600) {
+    elsif ($POPFML_QUEUE_EXPIRE_LIMIT == 3600) {
 	$qel = "1 hour";
     }
     else {
-	$qel = "$QUEUE_EXPIRE_LIMIT secs";
+	$qel = "$POPFML_QUEUE_EXPIRE_LIMIT secs";
     }
 
     # check the current queue
@@ -440,7 +445,7 @@ sub CheckQueueIsExpireP
 	&Log("check queue $qf") if $debug;
 
 	# created time is 3 hours before.
-	if (($cur_time - $Queue{$qf}) > $QUEUE_EXPIRE_LIMIT) {
+	if (($cur_time - $Queue{$qf}) > $POPFML_QUEUE_EXPIRE_LIMIT) {
 	    &Log("queue $qf is timed out.");
 
 	    eval("require \"$uiq\";") if -f $uiq;
@@ -545,7 +550,7 @@ sub PopFmlProg
 
 	$ForkCount++; # parent;
 
-	if ($MODE eq 'EXEC_ONLY_ONCE') {
+	if ($Mode eq 'EXEC_ONLY_ONCE') {
 	    &Log("ends for EXEC_ONLY_ONCE");
 	}
     }

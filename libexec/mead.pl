@@ -170,7 +170,7 @@ sub AnalyzeErrorWord
 	&CacheOn($addr = $1, &AnalWord($_));
     }
     elsif ($addr = $_[1]) {
-	    &CacheOn($addr, &AnalWord($_));
+	&CacheOn($addr, &AnalWord($_));
     }
 }
 
@@ -206,6 +206,14 @@ sub Append
 }
 
 
+sub Die
+{
+    &GetTime;
+    &Append("$Now $_[0]", "$DIR/meadlog");
+    exit 0;
+}
+
+
 sub DeadOrAlive
 {
     local($buf, $now, $last, $prev);
@@ -214,7 +222,7 @@ sub DeadOrAlive
 
     ### check time arrival?
 
-    open(CACHE, $CACHE) || die("CacheOn: cannot read CACHE $CACHE\n");
+    open(CACHE, $CACHE) || &Die("CacheOn: cannot read CACHE $CACHE\n");
     while (<CACHE>) { 
 	$buf = $_ if /^\#check/;
     }
@@ -236,13 +244,13 @@ sub DeadOrAlive
     ### check whether a user is dead or alive
     ### expire old entries 
     local($time, $addr, $ml, $expire_range);
-    local($new) = "$CACHE.new";
+    local($new) = "$CACHE.".$$."new";
     local($expire_time) = $now - int($EXPIRE*24*3600);
 
     &Debug("expire time is". ($EXPIRE*24*3600)/3600 ."hour(s)") if $debug;
 
-    open(CACHE, $CACHE) || die("CacheOn: cannot read CACHE $CACHE\n");
-    open(NEW, "> $new") || die("CacheOn: cannot open $new\n");
+    open(CACHE, $CACHE) || &Die("CacheOn: cannot read CACHE $CACHE\n");
+    open(NEW, "> $new") || &Die("CacheOn: cannot open $new\n");
     select(NEW); $| = 1; select(STDOUT);
 
     while (<CACHE>) {
@@ -288,7 +296,7 @@ sub DeadOrAlive
     print NEW "#check $now\n";
     close(CACHE);
 
-    rename($new, $CACHE) || die("CacheOn: cannot rename $new $CACHE");
+    rename($new, $CACHE) || &Die("CacheOn: cannot rename $new $CACHE");
 
     ### remove address 
     local($addr, $admin);
@@ -417,7 +425,7 @@ sub Mail
     }
 
     open(MAIL, "| $EXEC_DIR/bin/sendmail -t") || 
-	die("cannot execute $EXEC_DIR/bin/sendmail");
+	&Die("cannot execute $EXEC_DIR/bin/sendmail");
 
     print MAIL "From: ". $ml'MAA{$ml} . "\n"; #';
     print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
@@ -451,7 +459,7 @@ sub Action
 
     # record the addr irrespective of succeess or fail
     # to avoid a log of warning mails "remove ... but fails" ;-)
-    &CacheOn("#remove $addr");
+    &DoCacheOn("#remove $addr");
 }
 
 

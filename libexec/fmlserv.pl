@@ -27,7 +27,7 @@ foreach (@ARGV) {
 }
 $DIR    = $DIR    || die "\$DIR is not Defined, EXIT!\n";
 $LIBDIR	= $LIBDIR || $DIR;
-$0 =~ m#(\S+)/(\S+)# && (unshift(@INC, $1)); #for lower task;
+$0 =~ m#^(.*)/(.*)# && do { unshift(@INC, $1); unshift(@LIBDIR, $1);};
 unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 
 
@@ -49,14 +49,20 @@ chdir $DIR || die("Can't chdir to DIR[$DIR]\n");
 &FixHeaderFields(*Envelope);	# Phase 3, fixing fields information
 &CheckCurrentProc(*Envelope);	# Phase 4, fixing environment and check loops
 				# If an error is found, exit here.
+				# FML parsing process ends
 
-				### fml parsing process ends
+if (! &MailLoopP) {		# TEMPFAIL ERROR may cause a virtual loop.
+    &FmlServ(*Envelope);	# GO an actual fmlserv process
+}
 
-&FmlServ(*Envelope);		### GO actual fmlserv process
+&RunHooks;			# run hooks after unlock
 
-&RunHooks;			# run hooks after unlocking
-
-&Notify if $Envelope{'message'};# Reply some report if-needed.
+if ($Envelope{'mode:fmlserv:disable_notify'}) {
+    print STDERR "ignore &Notify\n";
+}
+elsif ($Envelope{'message'}) { # Reply some report if-needed.
+    &Notify;
+}
 
 exit 0;
 ### MAIN ENDS ###
@@ -94,7 +100,7 @@ sub InitFmlServ
 
     # 0700 is enough for fmlserv, since fmlserv controls other ML's;
     # 0770 requires other ML's;_; (So, I dislike listserv type ...)
-    if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
+    if (! -d $FMLSERV_DIR) { &Mkdir($FMLSERV_DIR, 0700);}
 
     # log file of fmlserv
     $LOGFILE       = "$FMLSERV_DIR/log";
@@ -110,12 +116,11 @@ sub InitFmlServ
     }
 
     # ml cache
-    $MAP_DB = "$FMLSERV_DIR/mlmap";
+    $MAP_DB = $MAP_DB || "$FMLSERV_DIR/mlmap";
 
     # if Berkeley DB is not used, reset always ;-)
     if ((stat($MAIL_LIST_DIR))[9] >  (stat("$MAP_DB.db"))[9]) {
-	print STDERR "RESET $MAP_DB\n";
-	&CreateML_MAP($FMLSERV_DIR, $MAP_DB);
+	&CreateMLMap($FMLSERV_DIR, $MAP_DB);
     }
 }
 
@@ -156,7 +161,7 @@ sub FmlServ
     # 
     # not use &MLContextSwitchAA($MAIL_LIST_DIR, *MailList);
     # since it will require a large memory if a lot of mail lists exist.
-    # Now we use %ML_MAP (stored in "fmlsrev/mlmap.db" as Berkeley db)
+    # Now we use %MLMap (stored in "fmlsrev/mlmap.db" as Berkeley db)
 
     ### 04: SORT REQUEST: Sorting requests for each ML
     # Envelope{Body} => %ReqInfo (Each ML)
@@ -187,6 +192,9 @@ sub FmlServ
 	# reset the current procs for each ML
 	$DIR  = "$MAIL_LIST_DIR/$ml";	  # ML's $DIR
 	$cf   = "$DIR/config.ph"; # config.ph
+
+	if ($proc) { $proc_count++;}
+
 	$proc = $ReqInfo{$ml};	  # requests
 
 	# Load $ml NAME SPACE from $list/config.ph
@@ -208,7 +216,7 @@ sub FmlServ
 	    next;
 	};
 
-	### PROCESS BEGIN; 
+	### PROCESS BEGIN;
 	&Lock;			# LOCK each ML (lock $FP_SPOOL_DIR)
 
 	### Processing $proc For $ml ###
@@ -312,6 +320,10 @@ sub FmlServ
 	# Report Mail is From and Reply-To MAIL_LIST;
 	$e{'GH:From:'}          = $MAIL_LIST;# special case when fmlserv
 	$e{'message:h:subject'} = "Fmlserv command status report";
+
+	if ($ReqInfo{'fmlserv'} =~ /^[\s\n]*help[\s\n]*$/i) {
+	    $help_only = 1;
+	}
     }
 
     ### We ALWAYS append the simple help ###
@@ -319,7 +331,12 @@ sub FmlServ
 	$e{'message:append:files'} .= "$;$FMLSERV_DIR/help";
     }
 
-    &Mesg(*e, "Processing Done.");
+    &Mesg(*e, "*** Processing Done.");
+
+    # IF HELP ONLY, DO NOT &Notify
+    if ($help_only && (! $proc_count)) {
+	$e{'mode:fmlserv:disable_notify'} = 1;
+    }
 
     # The first reply message;
     # preparation for &Notify;
@@ -416,10 +433,12 @@ sub DoFmlServProc
     if ($auth) {
 	local($req);
 	$MesgTag = $ml;
-	&Mesg(*e, "*** Processing command(s) for $ml");
+	&Mesg(*e, "*** Processing command(s) for <$ml> ML");
+
 	# for $req (split(/\n/, $proc)) {
 	# for (split(/\n/, $req)) { &Mesg(*e, "${ml}> $_");}
 	# }
+
 	&Command($proc);
 	undef $MesgTag;
     }
@@ -616,7 +635,22 @@ sub SortRequest
 	next if /^\S+=\S+/;	# variable settings, skip
 
 	($cmd, $ml, @p) = split(/\s+/, $_);
-	$ml =~ tr/A-Z/a-z/;
+	$ml  =~ tr/A-Z/a-z/;
+	$cmd =~ tr/A-Z/a-z/;
+
+	if ($cmd eq 'lists' && (!$FMLSERV_PERMIT_WHICH_COMMAND)) {
+	    &Log("invalid [$cmd] command request");
+	    &Mesg(*e, "lists command is prohibited.");
+	    &Mesg(*e, "*** Processing stops for critical error");
+	    last;
+	}
+	if ($cmd eq 'which' && (!$FMLSERV_PERMIT_WHICH_COMMAND)) {
+	    &Log("invalid [$cmd] command request");
+	    &Mesg(*e, "which command is prohibited.");
+	    &Mesg(*e, "*** Processing stops for critical error");
+	    last;
+	}
+
 
 	# EXPILICIT ML DETECTED. 
 	# $ml is non-nil and the ML exists
@@ -633,7 +667,7 @@ sub SortRequest
 	    # 'guide|info|help|lists|which';
 	    # We use "virtual fmlserv ML"
 	    # 
-	    # In addition, we desable "which addr".
+	    # In addition, we disable "which addr".
 	    # 
 	    if (/^\s*($FmlServProcPat)\s*$/i) { 
 		$ML_cmds{'fmlserv'} .= "$_\n";
@@ -776,10 +810,17 @@ sub InitFmlServProcedure
 		  # 'fmlserv:ftpmail',	'ProcHRef',
 		  # 'r#fmlserv:ftpmail',	1,
 		  );
+
+    if (! $FMLSERV_PERMIT_WHICH_COMMAND) {
+	undef $Procedure{'which'}; 
+    }
+    if (! $FMLSERV_PERMIT_LISTS_COMMAND) {
+	undef $Procedure{'which'}; 
+    }
 }
 
-
-sub CreateML_MAP 
+# accelerate "lists" command
+sub CreateMLMap 
 {
     opendir(DIRD, $MAIL_LIST_DIR) || do {
 	&Mesg(*Envelope, "\tError: cannot opendir ML MAP"); 
@@ -787,21 +828,21 @@ sub CreateML_MAP
 	return;
     };
 
-    &ML_MAPopen;
+    &MLMapopen;
 
     for (readdir(DIRD)) {
 	print STDERR "MAP SCAN $_\n" if $debug;
 	next if /^\./;
 	next if /^(fmlserv|etc)/;
-	$ML_MAP{$_} = $_;
+	$MLMap{$_} = $_;
     }
 
-    &ML_MAPclose;
+    &MLMapclose;
     closedir(DIRD);
 }
 
-sub ML_MAPopen  { dbmopen(%ML_MAP, $MAP_DB, 0644);}
-sub ML_MAPclose { dbmclose(%ML_MAP);}
+sub MLMapopen  { dbmopen(%MLMap, $MAP_DB, 0644);}
+sub MLMapclose { dbmclose(%MLMap);}
 
 sub ProcLists
 {
@@ -820,15 +861,15 @@ sub ProcLists
 
     &Mesg(*e, "  $MAIL_LIST serves the following lists:\n");
 
-    &ML_MAPopen;
+    &MLMapopen;
 
-    while (($ml, $value) = each %ML_MAP) {
+    while (($ml, $value) = each %MLMap) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
 	next if $ml eq 'etc';     # etc is special.
 	$e{'message'} .= sprintf("\t%-15s\t%s\n", $ml);
     }
 
-    &ML_MAPclose;
+    &MLMapclose;
 
     &Mesg(*e, "\n");
 }
@@ -842,9 +883,17 @@ sub ProcWhich
 
     &Log($proc);
 
-    &ML_MAPopen;
+    # For security, we should unset "which" command
+    if (! $FMLSERV_PERMIT_WHICH_COMMAND) {
+	&Mesg(*e, "*** We do not permit \"$proc\" FOR SECURITY.");
+	&Log("not permit $proc for security.");
+	&Log("To enable 'which', set \$FMLSERV_PERMIT_WHICH_COMMAND = 1");
+	return;
+    }
 
-    while (($ml, $value) = each %ML_MAP) {
+    &MLMapopen;
+
+    while (($ml, $value) = each %MLMap) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
 	next if $ml eq 'etc';     # etc is special.
 
@@ -867,7 +916,7 @@ sub ProcWhich
 	undef @MEMBER_LIST;
     } # FOREACH;
 
-    &ML_MAPclose;
+    &MLMapclose;
 
     if ($hitc) { 
 	&Mesg(*e, "   \"$addr\" is registered in the following lists:\n");

@@ -46,8 +46,6 @@ sub Init
 
     # varialbes: argv[1] must be $DIR.
     $DIR  = shift @ARGV;
-    $IAM  = $DIR;
-    $IAM  =~ s#./(\S+)#$1#;
 
     # fix include path
     local($libdir) = $0;
@@ -59,6 +57,10 @@ sub Init
     # initialize
     require 'libsmtp.pl';
     require 'libkern.pl';
+
+    # chdir (required here before &InitConfig)
+    chdir $DIR || die "Can't chdir to $DIR\n";
+
     &InitConfig;
 
     # I am
