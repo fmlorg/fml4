@@ -30,7 +30,7 @@ sub DoSmtpFiles2Socket
 		(&Log("SmtpFiles2Socket: cannot uuencode $f"), close(FILE), next);
 	}
 	else {
-	    open(FILE, $f) || (&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
+	    &Open(FILE, $f) || (&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
 	}
 
 	$autoconv = $f{$f, 'autoconv'};
@@ -64,7 +64,7 @@ sub DoSmtpFiles2Socket
 
 # NEW VERSION FOR MULTIPLE @to and @files
 # return NONE
-sub NeonSendFile
+sub DoNeonSendFile
 {
     local(*to, *subject, *files) = @_;
     local(@info) = caller;
@@ -167,8 +167,8 @@ sub DoSendmail
 
 
 # Generating Headers, and SMTP array
-sub GenerateMail    { &GenerateHeaders(@_);}
-sub GenerateHeaders { &GenerateHeader(@_);}
+sub GenerateMail    { &DoGenerateHeaders(@_);}
+sub GenerateHeaders { &DoGenerateHeader(@_);}
 sub DoGenerateHeader
 {
     # old format == local(*to, $subject) 
