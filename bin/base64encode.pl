@@ -23,7 +23,7 @@ if ($opt_I) {
     for (split(/:/, $opt_I)) { push(@INC, $_);}
 }
 
-require 'mimew20alpha.pl';
+require 'mimew202.pl';
 
 undef $/;
 $body = <>;
