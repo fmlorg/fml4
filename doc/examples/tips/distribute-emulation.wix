@@ -1,8 +1,20 @@
-.C	Emulate "distribute"
-.if LANG == ENGLISH
-*** NOT TRANSLATE SINCE THIS CHAPTER IS ADDITIONAL AND OBSOLETE ***
-.return
-.fi
+.HTML_PRE
+
+	distribute emulation (but who uses this?)
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+
+          ( moved here from doc/op )
 
 以下ある時いきおいで作った対応表。さらに、ややこしいことに distribute 
 モードというのは distribute compatible のことではないのです
@@ -78,12 +90,9 @@ Compiler options：
 	-Z index			$INDEX_FILE
 					ない場合はその場で生成している
 
-.# $Id$
-.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
-.#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1997 fukachan@sapporo.iij.ad.jp
-.# 
-.# FML is free software; you can redistribute it and/or modify
-.# it under the terms of GNU General Public License.
-.# See the file COPYING for more details.
+$Id$
+Copyright (C) 1993-1997 Ken'ichi Fukamachi
+          All rights reserved. 
+
+$Id$
+.~HTML_PRE

@@ -16,6 +16,10 @@ DOC_EXAMPLES_SOURCES += tips/nospam
 DOC_EXAMPLES_SOURCES += tips/postfix-pop-before-smtp
 DOC_EXAMPLES_SOURCES += tips/smrsh
 
+# obsolete
+DOC_EXAMPLES_SOURCES += tips/distribute-emulation
+
 DOC_EXAMPLES_RAW_SOURCES += tips/qpopper-patch-by-drac.txt
 DOC_EXAMPLES_RAW_SOURCES += tips/myGenConfirmReplySubject.pl
 DOC_EXAMPLES_RAW_SOURCES += tips/dot_xxxxshell_rc
+
