@@ -33,7 +33,8 @@ all:
 
 config.ph: cf
 	@ eval 'cp -p config.ph config.ph.old >/dev/null 2>&1'
-	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph
+	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph.new
+	mv config.ph.new config.ph
 	@ touch cf
 	@ perl -c config.ph
 
