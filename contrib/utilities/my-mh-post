@@ -1,0 +1,114 @@
+#!/bin/sh
+# $Id$
+DEBUG=0
+TMPDIR=/tmp
+TMPFILE=${TMPDIR}/mh.$$
+CONV=/usr/bin/cat
+MHPOST=/free/lib/mh/post
+SDCMD=/free/bin/stardate
+
+
+if [ ${DEBUG} -ne 0 ]
+then
+	echo "$0" >> $HOME/tmp/mh.log
+	echo "$*" >> $HOME/tmp/mh.log
+	echo "" >> $HOME/tmp/mh.log
+fi
+
+rmtmps(){
+	rm -f ${TMPFILE}
+}
+
+trap 'rmtmps' 1 2 3 5 9 15
+
+ALIAS=""
+FILTER=""
+FORMAT=""
+MIME=""
+MSGID=""
+VERBOSE=""
+WATCH=""
+
+mhdraft=""
+
+LIBRARY=""
+HENCODE=""
+DIST=""
+IDANNO=""
+WHOM=""
+
+while [ $# -gt 0 ]
+do
+	case $1 in
+	-alias)		shift; ALIAS="-alias $1";;
+	-filter)	shift; FILTER="-filter $1";;
+	-nofilter)	FILTER="-nofilter";;
+	-format)	FORMAT="-format";;
+	-noformat)	FORMAT="-noformat";;
+	-mime)		MIME="-mime";;
+	-nomime)	MIME="-nomime";;
+	-msgid)		MSGID="-msgid";;
+	-nomsgid)	MSGID="-nomsgid";;
+	-verbose)	VERBOSE="-verbose";;
+	-noverbose)	VERBOSE="-noverbose";;
+	-watch)		WATCH="-watch";;
+	-nowatch)	WATCH="-nowatch";;
+	-width)		shift; WIDTH="-width $1";;
+
+	-library)	shift; LIBRARY="-library $1";;
+	-hencode)	HENCODE="-hencode";;
+	-dist)		DIST="-dist";;
+	-idanno)	shift; IDANNO="-idanno $1";;
+	-whom)		WHOM="whom";;
+
+	*)		mhdraft="$1";;
+	esac
+	shift
+done
+
+TMPFILE="#$mhdraft#"
+
+if [ -f ${mhdraft} ]
+then
+	if [ "x${WHOM}" != "xwhom" ]
+	then
+		${CONV} ${mhdraft} > ${TMPFILE}
+	fi
+else
+	rmtmps
+	exit 0
+fi
+
+if [ $? -ne 0 ]; then
+	echo 'X-stardate conversion failed' >&2
+	rmtmps
+	exit 1
+fi
+
+if [ "x${WHOM}" != "xwhom" ]
+then
+	rm -f ${mhdraft}
+	grep '^X-Stardate:' ${TMPFILE} >/dev/null 2>&1 
+	if [ $? -ne 0 ]
+	then
+		STARDATE=`${SDCMD}`
+		ed ${TMPFILE} >/dev/null 2>&1 <<EOT
+1
+/^--\*\$
+i
+X-Stardate: ${STARDATE}
+.
+w
+q
+EOT
+	fi
+	echo "---"
+	cat $TMPFILE
+	echo "---"
+	mv ${TMPFILE} ${mhdraft}
+else
+	WHOM="-whom"
+fi
+
+rmtmps
+exec ${MHPOST} ${WHOM} ${ALIAS} ${FILTER} ${FORMAT} ${MIME} ${MSGID} ${VERBOSE} ${WATCH} ${LIBRARY} ${HENCODE} ${DIST} ${IDANNO} ${mhdraft}

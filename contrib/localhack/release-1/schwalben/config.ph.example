@@ -1,0 +1,132 @@
+# <fml> config header file
+# Copyright (C) 1993 fukachan@phys.titech.ac.jp
+# Copyright (C) 1994 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
+# Id should be set to the same as one of fml.pl?
+# $rcsid   = q$Id$;
+
+# For the insecure command actions
+$ENV{'PATH'}	= '/bin:/usr/ucb:/usr/bin';	# or whatever you need
+$ENV{'SHELL'}	= '/bin/sh' if $ENV{'SHELL'} ne '';
+$ENV{'IFS'}	= '' if $ENV{'IFS'} ne '';
+
+######################################################################
+          ##### configurations you custums(required) #####
+
+# Header variables of your Mailing List 
+# The mail Header has "To: $MAIL_LIST $ML_FN" in Mail Header
+# and additional fields for convenience 
+# X-ML-Name: Erica
+# X-Mail-Count: Count of ML article
+
+$ADDR		= 'all';
+$MAIL_LIST	= "schwalben-$ADDR@cs.titech.ac.jp";
+$ML_FN		= '(TIT Schwalben Chor ML)';
+$XMLNAME	= "X-ML-Name: Schwalben-$ADDR";
+$XMLCOUNT	= 'X-Mail-Count';
+$INFO_Requested = 0;
+$LIST_Requested = 0;
+$Anonymous_Requested = 0;
+
+# Maintainer Email Address
+# In order to avoid mail bauncing, this should be different from $MAIL_LIST.
+# I recommend to define ADMIN address rather than your address so that
+# someone can become a maintainer for you easily in future.
+
+$MAINTAINER	= 'schwalben-request@cs.titech.ac.jp';
+$CONTROL_ADDRESS = '';
+
+######################################################################
+################### Hereafter "Advanced Settings" ####################
+######################################################################
+
+# Configuration for Smtp library
+# $host is an arbitrary host(if you can access it)
+# If the Mailing List Server has only weak power, 
+# you can use the sendmail of another powerful host($host). 
+
+$HOST		= 'localhost';		# e.g. write 'beth.foo.bar.ac.jp' here.
+
+# FLAGS(Toggle) and Variables to be checked 
+# choice of member check, lock algorithm and debug option
+
+$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+$USE_FLOCK	= 1;		# use flock for lock algorithm if non-nil
+$debug		= 0;            # global debug option. if non-nil, debug mode.
+				# In debug mode, NOT sendmail in distributing
+$RPG_ML_FORM_FLAG = 1;		# if non-nil, convert "#member" -> "# member"
+				# in libfml.pl
+$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+$USE_LIBMIME	= 1;		# when use MIME Extension in libMIME.pl
+$LIBMIMEDIR	= "$DIR/../contrib/MIME";
+				# location in libMIME.pl
+$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
+$SUBJECT_HML_FORM = 1;		# if non-nil , Subject: [ID:User] Subject
+				# like the form of "Subject" in hml 1.6.
+$BRACKET	= 'Erica';	# Subject: [$BRACKET:$ID] ...
+
+# a little modification for the settings above.
+if($SUBJECT_HML_FORM) { $STRIP_BRACKETS = 1;}
+
+# the first 3 lines is checked for mistakes whether the command mode or not?
+# at &Parsing in fml.pl, 
+
+$COMMAND_CHECK_LIMIT = 3;
+
+# Lock timeout 100*(5+0) sec to 100*(5+3) sec
+# when not using flock
+
+$MAX_TIMEOUT	= 200;			# hml 1.6 is 100
+
+# Timezone
+
+$TZone		= ' JST'; 		#$TZone	= '+0900';
+
+##### THESE FILES SHOULD BE CHECKED. #####
+
+$FML		= 'fml.pl'; 		# driver name (don't add '/')
+$SPOOL_DIR	= "$DIR/../spools/spool-$ADDR"; 	# article spool directory
+$MEMBER_LIST 	= "$DIR/../members/members"; 	# member list
+$ACTIVE_LIST 	= "$DIR/../actives/actives-$ADDR";	# active member list
+
+$OBJECTIVE_FILE	= "$DIR/../objective"; 	# objective file
+$GUIDE_FILE	= "$DIR/../guide";		# the guide file of our Mailing List 
+$HELP_FILE	= "$DIR/../help";		# the help file for useful commands
+$DENY_FILE	= "$DIR/../deny";		# attention to illegal access
+
+$LOGFILE	= "$DIR/../log";		# activity log file
+$MGET_LOGFILE   = "$DIR/../log_mget";	# log file for mget routine
+$SUMMARY_FILE 	= "$DIR/../summaries/summary-$ADDR";	# article summary file
+$SEQUENCE_FILE 	= "$DIR/../seqs/seq-$ADDR";	# sequence number file
+
+$LOCKDIR	= "$DIR/../LOCK";		# lock directory lock using process ID 
+$LOCKFILE	= "$$";			# 
+
+# Global Variables
+$Subject 	= '';			# Subject field
+$From_address	= 'not.found';		# Address of "From" field
+$User		= 'not.found';		# username, the first 15 characters
+$Date		= 'not.found';		# when posted to ML
+$BodyLines	= 0;			# number of lines of a mailbody
+
+# Useful Constants
+$NULL		= '';
+
+##### System parameters #####
+# flock system call
+$LOCK_SH 	= 1;
+$LOCK_EX 	= 2;
+$LOCK_NB 	= 4;
+$LOCK_UN 	= 8;
+
+##### Configure #####
+# System commands following 4.3 BSD. Please check when it does not work.
+# used in libfml.pl and split_and_sendmail.pl
+# ./Configure must generate below :-)
+#CONFIGURE
+$TAR		= "/usr/local/bin/gtar chf -";
+$UUENCODE	= "/usr/bin/uuencode";
+$RM		= "/usr/bin/rm -fr";
+$CP		= "/usr/bin/cp";
+$COMPRESS	= "/usr/ucb/compress -c";
+1;

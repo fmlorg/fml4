@@ -1,0 +1,246 @@
+Schwalben Chor MLでは，以下の14種類のML(一部MLもどき)を，
+ひとつのfmlシステムでサポートしています．
+
+schlwaben-all@cs.titech.ac.jp       : 配布先 全員
+schwalben-top@cs.titech.ac.jp       : 配布先 Top Tenor の人
+schwalben-sec@cs.titech.ac.jp       : 配布先 Second Tenor の人
+schwalben-bari@cs.titech.ac.jp      : 配布先 Baritone の人
+schwalben-bass@cs.titech.ac.jp      : 配布先 Bass の人
+schwalben-student@cs.titech.ac.jp   : 配布先 今だにどっかで学生している人
+schwalben-1986@cs.titech.ac.jp      : 配布先 1986年入学の人
+schwalben-1987@cs.titech.ac.jp      : 配布先 1987年入学の人
+schwalben-1988@cs.titech.ac.jp      : 配布先 1988年入学の人
+schwalben-1989@cs.titech.ac.jp      : 配布先 1989年入学の人
+schwalben-1990@cs.titech.ac.jp      : 配布先 1990年入学の人
+schwalben-list@cs.titech.ac.jp      : member list 自動返送用 address
+schwalben-info@cs.titech.ac.jp      : schwalben 情報 取り寄せ用address
+schwalben-anonymous@cs.titech.ac.jp : 非メンバーでも情報取り寄せ可能なaddress
+
+特徴は，
+
+・member check fileは，基本的に同一．メンバーなら，どこのMLにもpost可，
+  どこのMLにもコマンドモード使用可．
+・schwalben-{list,info,anonymous}などの特別なaddressを用意．
+  (詳しくは，auto-return.doc 参照)
+・なるべくメンテナンスしやすいように，spoolやactivesのファイルの置き場所を
+  考えた．
+
+ぐらいしかありません．:-)
+以下に，インストール例を書きますが，分かりにくくてすみません．
+FAQの
+  2.10	fml 本体一つで複数のメーリングリストを運用する
+  2.11	ひとつのfmlで複数のＭＬを扱う方法(fml.plの引数について)
+  2.12	ひとつのfmlで複数のＭＬを扱う方法(setuipd programをばらばらに作る)
+  2.13	ひとつのfmlで複数のＭＬを扱う方法(setuid をちゃんとするsendmail）
+を理解していることが前提っぽく書かれているので，参照して下さい．
+適宜，お問い合わせ下さい．(schwalben-requestr@cs.titech.ac.jp)
+
+(1) /etc/aliasesの設定 (sendmail 8.X です)
+
+# for schwalben ML
+owner-schwalben-all: schwalben-request
+owner-schwalben-top: schwalben-request
+owner-schwalben-sec: schwalben-request
+owner-schwalben-bari: schwalben-request
+owner-schwalben-bass: schwalben-request
+owner-schwalben-student: schwalben-request
+owner-schwalben-1986: schwalben-request
+owner-schwalben-1987: schwalben-request
+owner-schwalben-1988: schwalben-request
+owner-schwalben-1989: schwalben-request
+owner-schwalben-1990: schwalben-request
+owner-schwalben-anonymous: schwalben-request
+owner-schwalben-list: schwalben-request
+owner-schwalben-info: schwalben-request
+schwalben-request: :include:/usr/lib/mail-list/schwalben/schwalben-request
+schwalben-all: "|/usr/lib/mail-list/schwalben/fml-all"
+schwalben-top: "|/usr/lib/mail-list/schwalben/fml-top"
+schwalben-sec: "|/usr/lib/mail-list/schwalben/fml-sec"
+schwalben-bari: "|/usr/lib/mail-list/schwalben/fml-bari"
+schwalben-bass: "|/usr/lib/mail-list/schwalben/fml-bass"
+schwalben-student: "|/usr/lib/mail-list/schwalben/fml-student"
+schwalben-1986: "|/usr/lib/mail-list/schwalben/fml-1986"
+schwalben-1987: "|/usr/lib/mail-list/schwalben/fml-1987"
+schwalben-1988: "|/usr/lib/mail-list/schwalben/fml-1988"
+schwalben-1989: "|/usr/lib/mail-list/schwalben/fml-1989"
+schwalben-1990: "|/usr/lib/mail-list/schwalben/fml-1990" 
+schwalben-anonymous: "|/usr/lib/mail-list/schwalben/fml-anonymous"
+schwalben-list: "|/usr/lib/mail-list/schwalben/fml-list"
+schwalben-info: "|/usr/lib/mail-list/schwalben/fml-info"
+
+(2) config.phの用意．
+
+    originalのconfig.phに以下のように修正・追加しました．
+
+$ADDR		= 'all';
+$MAIL_LIST	= "schwalben-$ADDR@cs.titech.ac.jp";
+$ML_FN		= '(TIT Schwalben Chor ML)';
+$XMLNAME	= "X-ML-Name: Schwalben-$ADDR";
+$XMLCOUNT	= 'X-Mail-Count';
+$INFO_Requested = 0;
+$LIST_Requested = 0;
+$Anonymous_Requested = 0;
+
+$INFO_Requested, $LIST_Requested, $Anonymous_Requested については，
+auto-return.doc 参照．$ADDRをschwalben-allなら，'all'，schwalben-1989なら
+'1989'などとします．
+
+あとは，メンバーファイルなどの設定．これは，どのaddressのconfig.phも同一．
+
+$SPOOL_DIR	= "$DIR/../spools/spool-$ADDR"; 	# article spool directory
+$MEMBER_LIST 	= "$DIR/../members/members"; 	# member list
+$ACTIVE_LIST 	= "$DIR/../actives/actives-$ADDR";	# active member list
+
+$OBJECTIVE_FILE	= "$DIR/../objective"; 	# objective file
+$GUIDE_FILE	= "$DIR/../guide";		# the guide file of our Mailing List 
+$HELP_FILE	= "$DIR/../help";		# the help file for useful commands
+$DENY_FILE	= "$DIR/../deny";		# attention to illegal access
+
+$LOGFILE	= "$DIR/../log";		# activity log file
+$MGET_LOGFILE   = "$DIR/../log_mget";	# log file for mget routine
+$SUMMARY_FILE 	= "$DIR/../summaries/summary-$ADDR";	# article summary file
+$SEQUENCE_FILE 	= "$DIR/../seqs/seq-$ADDR";	# sequence number file
+
+objective, guide, help, deny, log, log_mgetは全てのＭＬについて同じものを
+使っています．お好みに合わせて変えることはもちろん可能です．
+詳しくは，あとのdir構成のところで触れます．
+
+＃要は，addressごとに違うのは，
+	$ADDR		= 'all';
+	$INFO_Requested = 0;
+	$LIST_Requested = 0;
+	$Anonymous_Requested = 0;
+  だけなので，それ以外の部分を，別途requireするようにした方が，
+  もちろん，メンテしやすい．(そのうち，しようっと．)
+
+(3) config.phを必要な場所に置く．
+
+    schwalben-all/config.ph
+    schwalben-top/config.ph
+    schwalben-sec/config.ph
+    schwalben-bari/config.ph
+
+    とか．メンテのことを考えて，configs/config.ph.allとかに実体を置いといて，
+    schwalben-all/config.phにシンボリックリンクを張った方がいいかも．
+
+(4) setuid programの用意．
+
+    sendmail 8.X だし，
+      2.13 ひとつのfmlで複数のＭＬを扱う方法(setuid をちゃんとするsendmail）
+    に従ってもいいのですが，ここは古風にsetuid programをばらばらに作りました．
+
+    [fml-all.c]
+
+    #include <stdio.h>
+
+    static char rcsid[] = "$Id$";
+
+    main()
+    {
+      setuid(geteuid());
+      setgid(getgid());
+      execl("/usr/lib/mail-list/schwalben/fml.pl", "(fml)", "/usr/lib/mail-list/schwalben/schwalben-all", "/usr/lib/mail-list/schwalben", NULL);
+      exit(1);
+    }
+
+    とかを一つづつつくって，
+    % cc -s -O fml-all.c -o fml-all
+    % chmod 4755 fml-all
+    とせっせと，すべてのＭＬについて行います．
+
+(5) libfml.pl の改造
+
+    config.phで指定したようなspool dirにしたので，以下のような改造が必要です．
+
+at sub mget
+    "(cd $DIR;$TAR ./spool/$Fld[2])|$COMPRESS|$UUENCODE spool.tar.Z";
+-->
+#    "(cd $DIR;$TAR ./spool/$Fld[2])|$COMPRESS|$UUENCODE spool.tar.Z";
+# for Schwalben-ML configuration
+    "(cd $DIR/../spools;$TAR ./spool-$ADDR/$Fld[2])|$COMPRESS|$UUENCODE spool-$ADDR.tar.Z";
+
+(6) dir構成
+
+    以下のようになってます．要は，actives, config.ph, members, seq, spool
+    summary をＭＬごとに分けて置いておくのではなく，activesならactivesだけ
+    集めて置いておくことにより，メンテをしやすくしています．
+
+    あと，_smtpもＭＬごとにしてもいいのですが，すべてのＭＬで共通のひとつしか
+    保存していません．以下のようにしてしまいました．
+    [libsmtp.pl]
+    local($SMTP_LOG) = "$DIR/../_smtplog";
+
+    今のところ，spools以下を除いて，約 700KB 占有しています．
+
+% ls -F /usr/lib/mail-list/schwalben
+Configure*              fml-bass*               schwalben-1987/
+LOCK/                   fml-info*               schwalben-1988/
+Makefile                fml-list*               schwalben-1989/
+_smtplog                fml-sec*                schwalben-1990/
+actives/                fml-student*            schwalben-all/
+atama_log               fml-top*                schwalben-anonymous/
+c_sources/              fml.c                   schwalben-bari/
+config.PH               fml.pl*                 schwalben-bass/
+config.ph               guide                   schwalben-info/
+configs/                help                    schwalben-list/
+contrib/                help.orig               schwalben-request
+deny                    libfml.pl*              schwalben-sec/
+doc/                    liblock.pl*             schwalben-student/
+fml*                    libsch.pl*              schwalben-top/
+fml-1986*               libsmtp.pl*             sendmail.pl*
+fml-1987*               log                     seqs/
+fml-1988*               log_mget                split_and_sendmail.pl*
+fml-1989*               maintenance.pl*         spools/
+fml-1990*               members/                summaries/
+fml-all*                objective               sys/
+fml-anonymous*          pmail.pl*
+fml-bari*               schwalben-1986/
+% ls -F /usr/lib/mail-list/schwalben/actives
+actives-1986            actives-all             actives-list
+actives-1987            actives-anonymous       actives-sec
+actives-1988            actives-bari            actives-student
+actives-1989            actives-bass            actives-top
+actives-1990            actives-info
+% ls -F /usr/lib/mail-list/schwalben/c_sources
+fml-1986.c      fml-1989.c      fml-anonymous.c fml-info.c      fml-student.c
+fml-1987.c      fml-1990.c      fml-bari.c      fml-list.c      fml-top.c
+fml-1988.c      fml-all.c       fml-bass.c      fml-sec.c
+% ls -F /usr/lib/mail-list/schwalben/configs
+config.ph.1986          config.ph.all           config.ph.list
+config.ph.1987          config.ph.anonymous     config.ph.sec
+config.ph.1988          config.ph.bari          config.ph.student
+config.ph.1989          config.ph.bass          config.ph.top
+config.ph.1990          config.ph.info
+% ls -F /usr/lib/mail-list/schwalben/contrib
+MIME/   README  sys/
+% ls -F /usr/lib/mail-list/schwalben/contrib/MIME
+README          libMIME.pl      mime_pls.doc    mimer.pl        mimew.pl
+% ls -F /usr/lib/mail-list/schwalben/contrib/sys
+socket.ph
+% ls -F /usr/lib/mail-list/schwalben/doc (略)
+% ls -F /usr/lib/mail-list/schwalben/members
+members                 members-anonymous       members-info
+% ls -l /usr/lib/mail-list/schwalben/schwalben-1986
+   いろいろあるけど略       config.ph@ -> ../configs/config.ph.1986
+% ls -l /usr/lib/mail-list/schwalben/schwalben-{1987,1988,1989,1990,
+                       all,top,sec,bari,bass,student,list,info,anonymous} (略)
+% ls -F /usr/lib/mail-list/schwalben/seqs
+seq-1986        seq-1989        seq-anonymous   seq-info        seq-student
+seq-1987        seq-1990        seq-bari        seq-list        seq-top
+seq-1988        seq-all         seq-bass        seq-sec
+% ls -F /usr/lib/mail-list/schwalben/spools
+spool-1986/             spool-all/              spool-list/
+spool-1987/             spool-anonymous/        spool-sec/
+spool-1988/             spool-bari/             spool-student/
+spool-1989/             spool-bass/             spool-top/
+spool-1990/             spool-info/
+% ls -F /usr/lib/mail-list/schwalben/summaries
+summary-1986            summary-all             summary-list
+summary-1987            summary-anonymous       summary-sec
+summary-1988            summary-bari            summary-student
+summary-1989            summary-bass            summary-top
+summary-1990            summary-info
+
+
+当然ながら，まだまだ refine すべきところは多いのですが，とりあえず，
+これで動いています．
