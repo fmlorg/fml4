@@ -204,6 +204,24 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 .k	$FIRST_CACHE_TIMEOUT
 
 
+○ 	一次キャッシュデータの有効期限
+
+	$FIRST_CACHE_EXPIRE
+.k	$FIRST_CACHE_EXPIRE
+
+
+○ 	一次キャッシュのデータベースファイル
+
+	$FIRST_CACHE_DB
+.k	$FIRST_CACHE_DB
+
+
+○ 	一次キャッシュのデータ格納場所
+
+	$FIRST_CACHE_SPOOL
+.k	$FIRST_CACHE_SPOOL
+
+
 
 .S	Cwhois の Search Algorithm
 
@@ -366,6 +384,12 @@ caching whois の main routine に入る。
 	$CWHOIS_CACHE_SEARCH_HOOK = q#
 	    if ($set eq "uja") { undef $MATCH_THE_LATEST;}
 	#:
+
+
+.S	$CWHOIS_TCP_EXIT_HOOK
+.k	$CWHOIS_TCP_EXIT_HOOK
+
+TCPコネクションが終った直後に評価されるフック
 
 
 .S	$CWHOIS_EXIT_HOOK

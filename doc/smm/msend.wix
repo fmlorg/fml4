@@ -52,8 +52,8 @@ matome もしくは digest というコマンドでできます。
 
 
 .S	まとめおくりサーバ  msend.pl 
-.S	msend.pl
-.S	MSendv4.pl
+.k	msend.pl
+.k	MSendv4.pl
 
 まとめおくりを実行する スクリプト
 
@@ -156,6 +156,14 @@ fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
 
 ですね
 
+.S	まとめ送りのデフォールト
+.k	$MSEND_MODE_DEFAULT
+.xref	$MGET_MODE_DEFAULT
+
+gzip で複数のファイルを一つにして送るのがデフォールトですが、 
+$MSEND_MODE_DEFAULT の値で変更することが出来ます。
+使えるパラメータは $MGET_MODE_DEFAULT と同様です。
+
 
 .S	msend.pl のコマンド一覧 (help fileより)
 .k	まとめ送りコマンド一覧
@@ -216,6 +224,35 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 ＃NetNewsなんかで1153形式を見ればわかるとおもうんですが…
 
 まぁ番号を気にしないならいいんですが…
+
+
+.S	まとめ送りをしたと msend からメールが出る
+.k	$MSEND_NOTIFICATION
+.k	$MSEND_NOTIFICATION_SUBJECT
+
+	$MSEND_NOTIFICATION = 1;
+
+の時 msend から「まとめ送りをした」メールで管理者へ知らされます。
+
+4.3BSD用だとおもえばよいでしょう。あの頃の cron はログをフォワードした
+い時は explicit に書かないといけなかったので…
+
+僕は 4.4BSD の cron なので、cron のログを見てますけどね(^^)
+
+また、
+	$MSEND_NOTIFICATION_SUBJECT 
+	(デフォールトは "Notification $ML_FN")
+
+はその時のメールの Subject: です。
+
+
+.S	まとめ送りの時には X-ML-Info: は必要ない
+.k	$MSEND_NOT_USE_X_ML_INFO
+.k	$NO_ML_INFO
+
+	$MSEND_NOT_USE_X_ML_INFO = 1;
+
+注意： $NO_ML_INFO から名称変更
 
 
 .S	捕捉：まとめおくりと$ACTIVE_LISTと$MSEND_RCと実際の動き…

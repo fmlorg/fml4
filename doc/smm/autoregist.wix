@@ -156,6 +156,7 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 .seealso	{auto-regist}
 .seealso	{auto-regist-3}
 .key	$AUTO_REGISTERED_UNDELIVER_P
+.k	$AUTO_REGISTERD_UNDELIVER_P
 
 	$AUTO_REGISTERED_UNDELIVER_P = 1;
 
@@ -175,6 +176,8 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 デフォールトは $AUTO_REGISTRATION_LINES_LIMIT = 8; となってます
 これを -1 にしておけば、たとえ 中身なしメールでも流れます:-)
 ＃０だと、８に変更されてしまうから
+
+注意：TYPOで $AUTO_REGISTERD_UNDELIVER_P に昔のfmlはなっているversionがある
 
 
 .S	自動登録の時にSubject: subscribe と明示的に書いてもらうようにしたい

@@ -87,6 +87,19 @@ $HTML_EXPIRE	(default 0)
 	これが指定されていないときは index.html は増える一方:-)
 
 
+.S	BASE64の展開
+.k	$BASE64_DECODE
+.k	mewdecode
+
+base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
+された base64 decoder を使って展開しその結果をHTMLの中に埋め込みます。
+なお展開した結果はfmlが勝手につけた名前でファイルに落されます。
+ユーザが与えた名前は security 上使いません。
+
+例：
+	BASE64_DECODE = "/usr/local/bin/mewdecode";
+
+
 .S	TalkWithHttpServer
 .l	TalkWithHttpServer
 .k	TalkWithHttpServer

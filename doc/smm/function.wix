@@ -437,6 +437,7 @@ SYNOPSIS:
 
 .S	WholeMail              (fml.pl)
 .k	WholeMail
+.k	$MIME_CONVERT_WHOLEMAIL
 
 SYNOPSIS:	
 	&WholeMail;
@@ -446,6 +447,12 @@ SYNOPSIS:
 
 エラーメール等で使う場合が多いため、変なフォーマットにする等の小細工は
 せず単純なインデントですませるべきであろう。
+
+$MIME_CONVERT_WHOLEMAIL をセットした場合MIME逆変換をしたメールも付加さ
+れるが、エラーメール等では変なメールもありうるため推奨しない。
+
+エラーデバッグのためには、できるだけ生のメールを管理者へフォワードする
+べきだと思う。
 
 
 .S	eval                   (fml.pl)

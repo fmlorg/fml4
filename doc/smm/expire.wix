@@ -34,6 +34,14 @@ SYNOPSIS:
 (いきなり消します。注意)。
 
 
+.S	Expire 時に Summary ファイルも作り直す
+.k	$EXPIRE_SUMMARY
+
+	$EXPIRE_SUMMARY = 1;
+
+とすると Expire 時に Summary ファイルも作り直します。
+
+
 .S	expire.pl コマンドラインオプション (bin/expire.pl)
 .k	bin/expire.pl
 .label	expire_getopt

@@ -47,6 +47,52 @@ help ファイルより抜粋
 に関して記述します。
 
 
+.S	mget3 のデフォールトの変更
+.k	mget3のデフォールトの変更
+.k	$MGET_MODE_DEFAULT
+.l	$MGET_MODE_DEFAULT
+
+○ 複数のファイルを一つにする時のまとめ方のデフォールト
+
+libsendfile.pl では
+
+    local($mode)   = $MGET_MODE_DEFAULT || 'tgz'; # default
+
+のようになっています。オプションで明示的な指定がない場合は
+
+	tar して gzip かけるファイルフォーマット
+
+で送り返されます。このデフォールトは $MGET_MODE_DEFAULT で変更できます。
+定義して意味のある変数は 上述のmgetのオプションと同じ田と思っていれば
+良いです。
+
+正確には(libutils.pl中で定義されている) %MSendOpt というハッシュテーブ
+ルのKEYです。
+.k	%MSendOpt
+
+
+○ アーカイブ (var/archive や library コマンドや…)の encoding デフォールト
+
+spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
+
+	電話番号簿(TEXT)
+	１００個ずつにまとめたスプールの記事(BINARY)
+
+このアーカイブを取り寄せる時のデフォールトは
+
+	テキスト	$MGET_TEXT_MODE_DEFAULT
+			(デフォールトは 'mp' MIME/Multipart)
+			
+	バイナリ	$MGET_BIN_MODE_DEFAULT
+			(デフォールトは 'uu' uuencode された状態); 
+
+.q
+		$mode = -T $opt ? 
+		    ($MGET_TEXT_MODE_DEFAULT || 'mp'): 
+			($MGET_BIN_MODE_DEFAULT || 'uu'); 
+.~q
+	    
+
 .S	mget3 インターフェイス:パターンマッチ戦略
 .key	mget3
 .label	mget3

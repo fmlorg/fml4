@@ -309,6 +309,21 @@ config.ph では
 のように呼び出してあげて下さい。
 	
 
+.S	$HML_FORM_LONG_ID
+.k	$HML_FORM_LONG_ID
+
+
+５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
+$SUBJECT_HML_FORM = 1; の時にのみ有効。
+
+
+.S	$SUBJECT_FORM_LONG_ID
+.k	$SUBJECT_FORM_LONG_ID
+
+５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
+$SUBJECT_FREE_FORM 使用時に有効なの変数。
+
+
 .S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
 .label	{NIFTY}
 .label	{$AGAINST_NIFTY}

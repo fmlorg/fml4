@@ -140,6 +140,68 @@ samples/sitedef.ph が作られますので参考にしてみて下さい。
 .include clo.wix
 
 
+.S	fmlのプロセス
+
+.S	fml process の signal handling
+.k	$SIGARLM
+.k	$TIMEOUT
+
+現在は次のように設定されています。
+これは alarm(3) を使ういつものやり方です。
+TIMEOUTを待つ時間は $MAX_TIMEOUT で決まります。
+
+    # signal handling
+    $SIG{'ALRM'} = 'TimeOut';
+    $SIG{'INT'}  = $SIG{'QUIT'} = 'SignalLog';
+
+$TIMEOUT 後 $SIG{'ALRM'} で定義された関数(TimeOut)を実行します。
+
+TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
+これがないとずっとロック(flock)がかかったままになるからです。
+
+なお、flock を使わない時はTIMEOUTしたメールを保存し、管理者へTIMEOUTを
+知らせます。詳細は liblock.pl を見るとわかるでしょう。
+
+
+.S	SMTPライブラリについて
+.k	SMTP
+.k	Simple Mail Transfer Protocol
+.k	MTA
+.k	Mail Transport Agent
+
+SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
+Transport Agent)と通信するライブラリです。
+
+$PORT = 25 (25/tcp) で通信しますが、
+
+	$PORT 
+
+を変えることで別のポートで通信することもできます。また、標準で
+
+	$SMTP_LOG
+
+というファイルに通信のログを残します。このログはデバッグに非常に役立ち
+ます。
+
+	$NOT_TRACE_SMTP 
+.k	$NOT_TRACE_SMTP 
+
+をセットすると、このログは残りません。
+
+
+.S	予備のSMTPサーバ
+.k	@HOSTS
+
+もしSMTPサーバに何かあった時のために @HOSTS に複数台の sendmail の走っ
+ているマシンを定義することが出来ます。
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+この場合、もし machine-1 に connect() できない時は machine-2 へ…とい
+う風に予備のサーバを使い何とか配送をしようと試みます。
+
+
+
 .C	Security 
 
 .S	Security Check Routine

@@ -138,8 +138,22 @@ require 'sys/socket.ph';
 
 \w は [0-9A-Za-z_]  です
 
-.# $Id$
 
+.S	単語
+.k	@ARGV
+.k	%ENV
+
+@ARGV	Argument Vector
+	K&R (Programming Language C)
+
+%ENV	環境変数のハッシュテーブル	
+	env(1), environ(7), getenv(3) 
+
+%SIG	SIGNAL
+	signal(3)
+
+
+.# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General

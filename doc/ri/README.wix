@@ -16,11 +16,11 @@ fml Mailing List Server Package
 
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
-＃おまけCDROMつき雑誌等にある「hmlの改良」の記述は誤解を招く言い回しで
-＃すよね…
+＃おまけCDROMつき雑誌等にある「hmlの改良」の記述はちょっと誤解を招く
+＃言い回しですよね…
 
-ML server 本体、ML management tool、.forward や POP経由でMLを実行等メー
-ルを使う各種インターフェイスの集合体です。
+ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
+メールを使う各種インターフェイスの集合体です。
 
 これは（歴史的理由により）デフォールトでは hml 1.6 のEmulationをします。
 ＃正確にはその元祖の shell script の program というべきであらう
@@ -132,7 +132,7 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 
 .S	fml の ＭＬ と bug-reportのアドレス
 
-○バグ、質問、新しい発見があったら 
+○バグ、質問、要望、新しい発見(謎)があったら 
 	fml-support ML(例によって自動登録です)
 	fml-support@axion.phys.titech.ac.jp
 
@@ -165,9 +165,9 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 	 
 .S	Compatibility
 
-○ fml 1.x を使っていて fml 2.x に入れ換える場合
+○ fml 1.x を使っていて fml 2.y に入れ換える場合
    そのまま perl script 群だけを入れ換えれば動きます。
-   config.ph で複雑な HOOK を書けている場合は
+   config.ph で複雑な HOOK を掛けている場合は
    ちょっと注意がいるかもしれません。
    ＃詳しくは doc/op 参照
 
@@ -426,10 +426,10 @@ Public License. see the file COPYING for more details.
 
 .C	Acknowledgement 
 
-I thank a lot of people valuable comments, suggestions, contributions
-of bug reports, fixes and patches both on fml-support ML and with
-private communication.
-I refer each contribution in RELEASE_NOTES. 
+I thank a lot of people for valuable comments, suggestions,
+contributions of bug reports, fixes and patches both on fml-support ML
+and with private communication.  
+I refer each contribution in RELEASE_NOTES.
 
 It is useful to study several ascpects of 4.4BSD for OS automatic
 detection, and mime_pls 1.00 - 2.00a on MIME.

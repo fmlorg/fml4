@@ -57,6 +57,18 @@ fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp m=1u
 #意味:axion をリレーサーバとし、まとめおくりは一時間おきにPLAINで
 
 
+.S	全てのメールをリレーサーバに投げる
+.l	DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+
+$DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
+
+	$DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+
+で定義されたリレーサーバへ投げそのサーバに配送します。
+
+
 .S	activesファイルによるリレー (sendmail 5.x)
 
 fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp

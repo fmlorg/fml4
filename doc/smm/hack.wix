@@ -82,6 +82,28 @@ Global Variables。
 ざってます:-)
 #おおむねX11風ですね
 
+なお、Directory を定義する $*_DIR タイプの変数には
+
+	$*_DIR 		$DIR からの相対パス
+	$FP_*_DIR 	絶対パス
+
+の２種類があります。 $FP_*_DIR タイプの変数は自動的に変換され定義され
+ます。基本的には絶対パスが使われます。
+
+	$FP_TMP_DIR
+	$FP_VARDB_DIR
+	$FP_VARLOG_DIR
+	$FP_VARRUN_DIR
+	$FP_VAR_DIR
+    	$FP_SPOOL_DIR
+.k	$FP_TMP_DIR
+.k	$FP_VARDB_DIR
+.k	$FP_VARLOG_DIR
+.k	$FP_VARRUN_DIR
+.k	$FP_VAR_DIR
+.k    	$FP_SPOOL_DIR
+
+
 .S	変数の名前つけの例外
 
 fml 1.5 以降では若干例外があります。まとめ送り関係の関数で
@@ -146,6 +168,34 @@ Decodeしてしまうなら、
 また、fml のリレーハックは RFCにはない % hack を前提にしています。
 そのため、管理者が注意深く設定すべきです。
 
+
+なお $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
+
+	$DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+
+で定義されたリレーサーバへ投げそのサーバに配送してもらうということもで
+きます。
+.xref	DEFAULT_RELAY_SERVER
+
+
+.S	内部で使われている変数を調べる
+.k	$DUMPVAR
+.k	dumpvar.pl
+
+config.ph で 
+	$DUMPVAR = 1;
+
+やコマンドラインで
+	fml.pl --DUMPVAR ...
+
+として fml を呼び出すと、全ての変数を dump します。
+
+この場合はPerlについてくる dumpvar.pl ライブラリを利用し、名前空間から
+変数リストを引っ張り出しています。
+
+この名前空間の仕方という考え方は libexec/fmlserv.pl でも利用されている
+やり方です。
 
 
 .S	改造事例:  sitedef.ph
@@ -446,6 +496,50 @@ X-Mail-Count: 00702
 ただしいばあいは &Parsing のあと １になって そのままのはずですよね
 
 .~q
+
+
+.S	複数のマシンの sendmail を使ってパラレルに送信
+.k	$HOSTS
+
+複数の(sendmailの走っている)マシン（非常時のセカンダリも含む）
+
+	$MCI_SMTP_HOSTS = N;
+
+で指定されたＮ台のマシンを配列 @HOSTS で指定する
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+@HOSTS で与えられる Ｎ個 のマシンの sendmail をパラレルに使って（理論上
+での限界は）Ｎ倍配送を高速化する。
+
+Ｎは理論上 int と同じだろうが、普通は netmask できまるわな（笑）
+でも、他のドメインでも使えるから、int までいく（理屈、理屈）
+＃とくに actives の最後の方の人はうれしい
+
+actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
+まくいかせない可能性はあります。
+
+
+.S	$SPEED_HACK
+.k	$SPEED_HACK
+
+$SPEED_HACK をセットした場合は flock() を外してから配送をします。とい
+うのは基本的に On Memory でデータを持っているので Distribute(); が終っ
+た時すでにログや記事の保存等のIO（書くべきこと）は全て終っています。
+そのため flock() を外してから配送しても大丈夫です。
+
+また、flock() を外して複数の fml プロセスの実行を許すと理論的にはパラ
+レルに配送されるので高速化されるはずです。
+
+しかしながら、いくつかの問題が発生します。
+
+   0 ログファイル等で順番が入れ替わる or 混ざる等があり得る。
+   1 HOOK等で何をやっているか？等について完全に理解してない場合は危ない。
+   2 sendmail に負荷がかかって XLA の 8, 12 に触れてマシン性能に
+     影響を与えるかも知れない
+   3 そもそも何秒間かに一度メールが来る等の激しいＭＬでない限り有効でない
+
+等の理由であくまでも SPEED HACK なのです。
 
 
 .# $Id$
