@@ -16,29 +16,49 @@
 
 .toc
 
+注意: このドキュメントは fml GUI 専用サーバを作る前提で書かれています。
+もっと高度なユーザごとの権限の使い分けは、専用サーバを動かすことができ
+た後で考えればいいでしょう というスタンスです。
+
+うまくいかない時はまず間違いなく fml 自体ではなくWWWサーバの設定でつま
+づいているので、まずWWWサーバの設定の仕方、方法についてマニュアルや文
+献を確認して下さい。
+
+まま、メールサーバの単なる設定の付け加え忘れもあるようです。
+
 
 .C	おおざっぱな手順
 =E.C	Overview
 
-fml-current をインストールする。
-
-/usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに付け
-足す。
+fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
+分をWWWサーバやメールサーバに適宜付け足す。
 
 例: apache と sendmail を使っている場合
 
-   /usr/local/apache/conf/httpd.conf に
+◯ /usr/local/apache/conf/httpd.conf を編集
+
+	User fml
+
+   つまり /usr/local/fml /var/spool/ml のオーナーと同じにしてください。
+
 	/usr/local/fml/www/examples/apache/httpd.conf.patch
-	をつけたす。そしてリスタート
 
-   /etc/sendmail.cf を編集する。編集する内容は
+   を付け足して下さい。
 
-	/usr/local/fml/www/examples/sendmail/senmail.cf	
+	付け足しただけでうまくいくかもしれないしすでにCGIの設定がある
+	ならそれとうまくマージしないといけないです。
+	分からなかったら apache デフォールトに戻して httpd.conf.patch
+	を付け足してみて下さい。そしてリスタートするのがいいのではないかと
 
-   にある alias ファイルの定義をつけたしてほしい。
+◯ /etc/sendmail.cf を編集する。編集する内容は
+
+	/usr/local/fml/www/examples/sendmail/sendmail.cf	
+
+   にある alias ファイルの定義に差し替えて下さい。
 		
 
-このあとはWWW画面で一通りできるようになる。"一通り"できることの範囲は
+◯ このあとはWWW画面で一通りできるようになります。"一通り"できることの
+範囲は
 
 	ＭＬの新規作成/削除
 	ユーザの登録/削除
@@ -74,15 +94,8 @@ current をもってくる。
 できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
 
 
-.C	httpd の設定
+.C	httpd のリスタート
 =E.C	configure httpd
-
-例えば apache なら
-
-	/usr/local/fml/www/examples/apache/httpd.conf.patch
-
-というファイルがあるので、このおまじないを 
-/usr/local/apache/conf/httpd.conf に付け足して、
 
 	# apachectl configtest
 
@@ -109,7 +122,7 @@ current をもってくる。
 	ログをみる
 	MTAの設定(特に newaliases のかけ方)
 
-など
+などです。
 
 
 .C	特定のＭＬだけはCGIでいじれるようにしてあげる
@@ -131,6 +144,7 @@ current をもってくる。
 
 各ＭＬについて細かいアクセス制御(このアドレス空間からのみ認める)などは
 httpd の設定をいじること
+
 
 .C	各ディレクトリの権限について
 

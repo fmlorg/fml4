@@ -108,6 +108,35 @@ Message Language Extension をつかう 。対応済み
    WWWでそのＭＬをいじらせることができる。
 
 
+.S	apache が Forbidden とエラーをはく
+
+例: /usr/local/apache/logs/error_log で
+
+You don't have permission to access /cgi-bin/fml/admin/menu.cgi on this server.
+
+0. apache の User と /usr/local/fml のオーナーは一緒ですか？
+
+   もしそうでないなら、suexec なり何か拡張をしているとおもいますが
+   その設定は正しいですか？
+
+1. /usr/local/fml/share/ の menu.cgi に permission がない(?)
+
+   その menu.cgi を apache の User が実行可能ですか？
+
+2. ディレクトリに permission がない
+
+	/usr/local/fml/share/
+	/usr/local/fml/www/
+
+   以下の permission を確認して下さい。
+
+3. apache のCGIまわりの設定 (/usr/local/apache/conf/)
+
+	Directory ディレクティブ
+	.htaccess ?
+	そもそも.htaccessを許してない
+	…その他いろいろ…
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
