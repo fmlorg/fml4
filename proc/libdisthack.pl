@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libdisthack.pl,v 1.17 2003/01/09 14:58:23 fukachan Exp $
 #
 
 
@@ -32,6 +32,7 @@ sub ContentHandler
     # Split Bodie's Content-Type($paramaters is dummy) '
     ($type, $subtype, $paramaters) = split(/[\/;]/, $e{'h:content-type:'}, 3);
     $type    =~ s/\s//g;
+    $type    = lc($type);
     $subtype =~ s/\s//g;
     $nonMime = 1 if ($type eq '');
 
