@@ -1189,7 +1189,8 @@ sub MakeFmlLock
 
 	opendir(DIRD, $mldir);
 	for $dir (readdir(DIRD)) {
-	    next if /^\./;
+	    next if $dir =~ /^\./;
+	    next if $dir =~ /^\@/;
 	    next unless -f "$mldir/$dir/config.ph";
 
 	    next if $dir eq 'etc';
@@ -1228,6 +1229,7 @@ sub MakeFmlUnLock
 	opendir(DIRD, $mldir);
 	for (readdir(DIRD)) {
 	    next if /^\./;
+	    next if /^\@/;
 	    next unless -f "$mldir/$_/config.ph";
 	    next unless $LockList{$_}; # skip if not locked;
 
@@ -1734,6 +1736,7 @@ sub GenCrontab
     opendir(DIRD, $ML_DIR) || (&Warn("cannot open $ML_DIR"), return);
     for (readdir(DIRD)) {
 	next if /^\./;
+	next if /^\@/;
 
 	$uid = (stat("$ML_DIR/$_/crontab"))[4];
 
@@ -3375,6 +3378,7 @@ sub do_edit_template
 	    if (opendir(DIRD, $_)) {
 		for (readdir(DIRD)) {
 		    next if /^\./;
+		    next if /^\@/;
 		    print "\t$_\n";
 		}
 		closedir(DIRD);
