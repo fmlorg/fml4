@@ -157,13 +157,12 @@
 <CENTER> administration menu </CENTER>
 <UL>
    <A NAME=export>
-   <LI> 既存の特定の ML を CGI 経由で操作可能にするには
-	以下の 2 ステップからなります。
-	enable some ML CGI controllableし、
-	CGI 操作可能な member を登録して下さい。
+   <LI> You need 2 step to make some ML CGI controllable.
+	Firstly, enable some ML CGI controllable, 
+	Secondaly add a member which uses CGI.
 	
    <UL>
-	<LI> 既存の特定の ML を CGI 経由で操作可能にする
+	<LI> enable some ML CGI controllable
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
@@ -184,20 +183,21 @@
 
 	<LI>     
 	<A HREF="#mlpassword">
-	既存の特定の ML を CGI 操作可能な人の add/remove 
+	add/remove a member which uses CGI for some ML
 	</A>
 	<BR>
-	注:  add a new remote administrator と同じ menu です。
+	Caution: This is the same menu of "add a new remote administrator".
     </UL>
 
 <HR>	
    <A NAME=cgiadmin>
    <LI>
-	この画面を操作可能な(CGI) administration 者 account の password setup 
+	add/remove a user which uses this CGI.
+	Please input a mail address and the password
 	<BR>
-	追加:  account と password の組を入力すれば追加になります。
+	add: input a set of account and password
 	<BR>
-	削除: 消したい account を入力し、削除モードにしてGOです。
+	remove: remove an account and click "GO"
 	<BR>
 	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
@@ -205,13 +205,13 @@
 	<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
 	<INPUT TYPE=hidden NAME=ML VALUE=etc>
 	
-	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
-	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>add
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">remove
 
-	<BR> Email address  ないし account name:
+	<BR> Email address / account name:
 		<INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 	<BR>
-		既存の account から choice:
+		choice from the current list:
 		<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
 		__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
 		</SELECT>
