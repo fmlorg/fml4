@@ -48,15 +48,15 @@ $NOT_USE_TIOCNOTTY = 1;		# no ioctl
 ##### 
 
 # GETOPT
-$Eternal      = 1 if $_cf{'opt:a'};
-$debug        = 1 if $_cf{'opt:d'};
-$CRON_NOTIFY  = 0 if $_cf{'opt:b'} eq '43';
-$CRONTAB      = $_cf{'opt:f'} || $CRONTAB || "etc/crontab";
-$Daemon       = 1 if $_cf{'opt:b'} eq 'd';
-$NOT_USE_TIOCNOTTY = 0 if $_cf{'opt:o'} eq 'notty';
+$Eternal      = 1 if $Opt{'opt:a'};
+$debug        = 1 if $Opt{'opt:d'};
+$CRON_NOTIFY  = 0 if $Opt{'opt:b'} eq '43';
+$CRONTAB      = $Opt{'opt:f'} || $CRONTAB || "etc/crontab";
+$Daemon       = 1 if $Opt{'opt:b'} eq 'd';
+$NOT_USE_TIOCNOTTY = 0 if $Opt{'opt:o'} eq 'notty';
 
 ### chdir HOME;
-$_cf{'opt:h'} && die(&USAGE);
+$Opt{'opt:h'} && die(&USAGE);
 chdir $DIR || die "Can't chdir to $DIR\n";
 $ENV{'HOME'} = $DIR;
 
@@ -131,8 +131,8 @@ sub RestartP { (localtime(time))[3] != &GetDayofTime($CRON_PIDFILE);}
 sub abs { $_[0] > 0 ? $_[0]: - $_[0];}
 
 sub Opt { 
-    ($_[0] =~ /^\-(\S)/)      && ($_cf{"opt:$1"} = 1);
-    ($_[0] =~ /^\-(\S)(\S+)/) && ($_cf{"opt:$1"} = $2);
+    ($_[0] =~ /^\-(\S)/)      && ($Opt{"opt:$1"} = 1);
+    ($_[0] =~ /^\-(\S)(\S+)/) && ($Opt{"opt:$1"} = $2);
 }
 
 
@@ -176,7 +176,7 @@ sub MailTo
 
 sub Cron
 {
-    local($max_wait) = ($_cf{'opt:m'} || 3);
+    local($max_wait) = ($Opt{'opt:m'} || 3);
     local($exec, $pid);
 
     # FOR PROCESS TABLE
