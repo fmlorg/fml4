@@ -305,6 +305,8 @@ sub f_RetrieveFile
 
     # Retrieve files
     local($s);
+    local($curhf); # alloc special variable for rfhook
+
     for $file (@conf) {
 	$lines = &WC($file);
 	
@@ -314,10 +316,10 @@ sub f_RetrieveFile
 	print OUT $conf{'delimiter'} if $conf{'delimiter'};
 
  	if ($conf{'rfhook'}) {
+	    # rfhook is evaluated after (1 .. /^$/) condition
+	    # since eval() influences this $. check?
 	    $s = qq#
 		while (<FILE>) { 
-		    $conf{'rfhook'};
-
 		    if (1 .. /^\$/) {
 			if (\$FOP_HACK && \$USE_MIME &&
 			    \$conf{'MimeDecodable'} && 
@@ -326,6 +328,8 @@ sub f_RetrieveFile
 			    \$_ = &DecodeMimeStrings(\$_);
 			}
 		    }
+
+		    $conf{'rfhook'};
 
 		    print OUT \$_; 
 		    \$linecounter++;
