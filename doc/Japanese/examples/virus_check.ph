@@ -71,7 +71,7 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .scr: win32/MTX
 #   .lnk: sircam ?  
 $DISTRIBUTE_FILTER_HOOK .= q#
-    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf|pif|scr|lnk';
+    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf|pif|scr|lnk|bat';
 
     if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';
