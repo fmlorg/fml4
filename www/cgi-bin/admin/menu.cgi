@@ -21,7 +21,7 @@ require 'libcgi_kern.pl';
 &Init;
 &GetBuffer(*Config);
 
-&P("Content-Type: text/html\n");
+&ShowHeader;
 
 if ($ErrorString) { &Exit($ErrorString);}
 

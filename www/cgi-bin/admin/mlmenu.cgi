@@ -22,7 +22,7 @@ require 'libcgi_kern.pl';
 &GetBuffer(*Config);
 $ML = $Config{'ML'};
 
-&P("Content-Type: text/html\n");
+&ShowHeader;
 
 if ($ErrorString) { &Exit($ErrorString);}
 

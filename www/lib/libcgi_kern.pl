@@ -61,6 +61,13 @@ sub Init
 }
 
 
+sub ShowHeader
+{
+    &P("Content-Type: text/html");
+    &P("Pragma: no-cache\n");
+}
+
+
 sub ExpandOption
 {
     local($dir);

@@ -80,7 +80,9 @@ sub Parse
 
 sub UpperHalf
 {
-    &P("Content-Type: text/html\n");
+    &P("Content-Type: text/html");
+    &P("Pragma: no-cache");
+    &P("");
     &P("<HTML>");
     &P("<HEAD>");
     &P("<TITLE>");
