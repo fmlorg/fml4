@@ -16,24 +16,23 @@ _____________________________________
 _____________________________________
 
 
-.C	FML (a package or tool kits for mailing lists)
+.C	FML (a package or tool kit for mailing lists)
 
 .S	はじめに
 =E.S	Introduction
 
-FML は僕が壱から Full Scratch した Mailing List Server package です。
-perl を使って書かれています。
+FML は僕が壱から Full Scratch した Mailing List (以下 ML) Server
+package です。perl を使って書かれています。
 ＃おまけCDROMつき雑誌等にある「hmlの改良」の記述はちょっと誤解を招く
 ＃言い回しですよね…歴史的に hml compatbile な動作ができるだけです
 =E 
-Fml 2.1 is a package/kit of Mailing List Server programs. 
-It consists of perl scripts.
+FML 2.1 is a package or tool kit of Mailing List Server programs. It
+consists of perl scripts.
 
-FML は配送プログラム、多くのユーザー用/ＭＬをリモートで管理するための
-コマンド用のサーバ等からなります。またコマンドサーバのインターフェイス
-を listserv(majordomo) 的にすることや、sendmailから起動するだけでなく、
-MTAが走っていないマシン上でも POP3 を使ってＭＬを運用するプログラム等
-もついています。
+FML は配送プログラムや多くのコマンド用のサーバ(ユーザー用やMLをリモー
+トで管理するためのもの)などからなります。コマンドサーバのインターフェ
+イスを listserv(majordomo) 的にすることや、サーバをsendmailからkickで
+きない場合のためのプログラム等もついています(例えばPOPですね)。
 =E
 FML includes
 	distributer
@@ -43,53 +42,80 @@ FML includes
 	mailing list server via POP3 (not need MTA->exec FML)
    etc ...	
 
-
 いろいろなケース用のプログラムがあるのは『趣味も(コンピュータ)環境も人
-それぞれ』という前提が根底にあるためです。よって『カスタマイズの自由度
-が大きいこと/同じことができるのであればユーザ・インターフェイスはどの
-ようなものでもいい』と思うからです。
+それぞれ』という前提が根底にあり『カスタマイズの自由度が大きいこと/同
+じことができるのであればユーザ・インターフェイスはどのようなものでもい
+い』と思うからです。
+=E
+FML is based on that "each man/women, each environment", so the degree
+of freedom is important.
+
+なおデフォールトでは Private Communication を前提としています。よって
+メンバーは手動で登録しメンバーだけが投稿やコマンド操作などができる状態
+です。必要なら"明示的に"(例えば自動登録やリモート管理)機能を有効にした
+り、また逆に使えるコマンドを制限するなどは設定ファイルで適宜変更するor
+つけ加えて下さい。妙に凝った:)設定でないなら設定ファイルだけでなんとか
+なるはずです。
+=E
+I suppose that ML is a private communication so the default is you add
+a new member in hand, only members can post and user commands.  If you
+use extension functions, you modify or add the configurations to
+config.ph(FML configuration file) EXPLICITLY.
 
 
-.S	必要な環境について
+.S	必要な環境
 
 基本的な前提は
 
-   Unix マシンに自分のアカウントがあること
+   UNIX マシンに(自分もしくはML専用の)アカウントがあること
    perl 4 もしくは perl 5 (今時perlは最初からOSに入ってるとおもうが)
-   メール配送プログラムがあること(default は sendmail 8.x を想定)
+   メール配送プログラムがあること(default は sendmail R8 を想定)
 
-が必要です。
+です。
 =E
-FML requires perl and MTA(e.g. sendmail).  
+FML requires 
+	UNIX acount
+	perl
+	MTA (e.g. sendmail).
 
-プロバイダのサービスを利用している場合一概にはいえませんが、いわゆる
-「シェルアカウント/シェルサービス」と呼ばれる Unix 上でのアカウントが
-使える必要があるはずです。詳しくは自分の使っているプロバイダに聞いて下
-さい。
+プロバイダのサービスを利用している場合どうすればよいかは一概にはいえま
+せん。詳しくは自分の使っているプロバイダに聞いて下さい。
 
-ホームページレンタルサービスなどでFTP等でファイルを送り込むタイプのも
-のなどの"シェルサービスのついていない"サービスではおそらくは実行できま
-せん。
+一般にはいわゆる「シェルアカウント/シェルサービス」などと呼ばれる UNIX 
+マシンを使えるサービスを利用している必要があるはずです。ホームページレ
+ンタルサービスなどでFTP等でファイルを送り込むタイプのものなどの"シェル
+サービスのついていない"サービスだけではおそらく無理でしょう。
 
-メールシステム(同じマシンでなくても良い)は
+MLは本質的にフィルタリングなので、メールシステムは(間にfmlを夾んで)
+=E
+ML is a filtering process, so it consists of
 
-	"メールを受けてfmlをkickする"
-	"SMTPを理解すること"
+	"メールを受けてfmlをkickするプロセス"
+	"SMTPを理解する配送プロセス"
+=E
+	the process receives an incoming mail and kicks a fml process off
+	the delivery process kicked by fml
 
-ことが必要です。メールを受けることと配送することは概念的に別のものです。
-原則的に fml はメールを受けるホスト上で動きます。配送を担当するホスト
-は、メールを受けるホストと同じでなくても構いません。配送系はSMTPを理解
-してくれればなんでも構いません。sendmail, qmail, exim, ...
+の２つの動作からなります。メールを受けることと配送することは概念的に別
+のものです。原則的に fml はメールを受けるホスト上で動きます。ただ配送
+を担当するホストはメールを受けるホストと同じでなくても構いません。配送
+系はSMTPを理解してくれればなんでも構いません sendmail, qmail, exim, ...
+=E
+The delivery and kick-off processes are essentially different
+ones. FML runs on the host which receives in-coming mails. The
+delivery system can be another host other than the host which receives
+in-coming mails.  You can use arbitrary delivery system which can
+understand SMTP.
 
 メールを受けるホストでfmlをkickすることができない場合はPOP3を使ってML
-を実行するような裏技が必要になります(裏技なのでちょっとねぇ)。
+を実行するような裏技が必要になります(でもしょせん裏技なのでちょっと…)。
 =E
 FML sends mails via SMTP, so you do not need sendmail runs on your
 machine.  In addition, you can set up that FML runs on an old machine
 but distribution is done on new machine.
 
-なお、ドキュメントは NetBSD(4.4BSD)がターゲットマシンなのでsendmail を
-想定して書いてあります。
+なおありうる環境はいろいろですが、ドキュメントはターゲットの NetBSD
+(4.4BSD) を想定して書いてあります。
 =E 
 Since the target machine is 4.4BSD, the document is based on sendmail
 and perl (4 or 5) enveironment.
@@ -101,15 +127,23 @@ and perl (4 or 5) enveironment.
 最新版のソースコードは、以下の anonymous ftp から入手可能です。
 =E
 You can obtain sources at the URL
-
+=E
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-です。最新版は fml-current.日付.tar.gz という名前になっているので日付
-の新しい(生きのいい:-)のをどうぞ。関連プログラム群も置いてあります。ま
-た、以下のURLに最新のドキュメント・ソース共に以下にあります。最新のネ
-タはML(後述)か以下のURLをどうぞ
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+
+です。リリースはリリース名付き、リリース以降に手が入ったもの/作業中の
+最新版は fml-current と呼ばれ、fml-current.日付.tar.gz という名前で置
+かれています。日付の新しい(生きのいい:-)のをどうぞ。ここの階層以下には
+メールに関連するプログラム群も置いてあります。
+
+また以下のURLには最新のドキュメント・ソース共にあります。最新のネタは
+ML(後述)かここへどうぞ
 =E
 The HOME PAGE of the Fml is 
+=S
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/index-e.html (English)
+	http://www.fml.org/index-e.html (English)
 
 .url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 .url	http://www.fml.org/
@@ -122,89 +156,91 @@ Home page
 
 
 ○メールしか使えない人向け
-=E
-If you can use only Email, you can obtain the latest information on
-fml to send a mail (any body is O.K.) to the address
 
 fml@ffs.fml.org へ何でもいいからメールを送ると最新情報を返すようにして
 あります。
 ＃ただ大抵ドキュメントのupdateは間に合っていません(そこまで手は回らない)
 =E
-Execuse me for may slow updates of documents...
+If you can use only Email, you can obtain the latest information on
+fml to send a mail (any body is O.K.) to the address fml@ffs.fml.org
+though my updates of documents is slow.
 
 また最新版のソースコードは、なんでもいいからメールを
 fml-current@ffs.fml.org に送ると自動的に(50Kbytes程度で分割して)送り返
 されます。
 =E
 If you cannot use ftp, please send a mail (body is anything O.K.) to
-fml-current@ffs.fml.org You can receive auto-suplitted mails of the
-latest source (Unix version).
+fml-current@ffs.fml.org. You can receive auto-suplitted mails of the
+latest source (UNIX version).
 
 
 .S	メーリングリストについて
 =E.S	on Mailing Lists
 
-○ FMLに関する議論、バグレポート、質問、要望、新しい発見(謎)があったら 
-fml-support ML (言語は日本語。例によって自動登録(confirmation)です)
+○ FMLに関する議論、バグレポート、質問、要望などあらゆる:)目的に
+fml-support ML (言語は日本語。自動登録(confirmationモード))
+が用意されています。
 =E
 * The mailing list on FML discussion is the address 
 
 	fml-support@ffs.fml.org (Japanese, Automatically Added)
 
-か fml-bugs という(作者にのみフォワードされる)アドレス
+また別途 fml-bugs という(作者にのみフォワードされる)アドレス
 =E
 * you can make a contact with only the author to send a mail to the address
 
 	fml-bugs@ffs.fml.org (forwarded to the author only)
 
-にメールを投げてください。個人宛にメールがくるとどこかへまぎれたり、忙
-しくて時間が取れない場合も多々あります。できるだけ fml-support Mailing
-List 宛へ投げてもらえると助かります _o_
-＃ＭＬならわかる人がすぐに答えてくれる可能性もありますし
+があります。しかし個人宛にメールがくるとどこかへまぎれたり、忙しくて時
+間が取れない場合も多々あります。できるだけ fml-support Mailing List 宛
+へ投げてもらえると助かります _o_
+＃ＭＬならわかる人がすぐに答えてくれる可能性もありますから
 =E
 I recommended you've better to send your questions to fml-support or
-fml-query (described below) since I have no time.
+fml-query (described below) than fml-bugs since I have no time.
 It may be happen that some experts of ML answer your questions if it
 is sent to the mailing list.
 
-fml-support への自動登録は
+fml-support MLへの自動登録は
 =E
 [subscription to fml-support mailing list]
-To subscribe fml-support, you can only send  
+To subscribe fml-support, you should send the following mail body 
 
-	subscribe Ken'ichi Fukamachi 
+	subscribe Firstname Lastname (e.g. subscribe Elena Lolabrigita)
 
-のような文だけを
+のようにキーワードと自分の名前を書いた文字列をメールの本文に書いて
 =E
 to the address
 
 	fml-support-ctl@ffs.fml.org 
 
 へ送って下さい。本当に登録して良いのか？の確認メールが返ります。そのメー
-ルに reply してもらって初めて登録されますので注意して下さい(自動登録の 
-confirmation モード)。
+ルに reply してもらうとそこで初めて登録されますので注意して下さい(自動
+登録の confirmation モード)。
 =E
 The FML server send back the reply to confirm your subscription request. 
 After you reply the confirmation, your subscription succeeds.
 This confirmation is against subscription tricks.
 
-fml-support ＭＬへ登録して欲しくない方向けに
+また fml-support MLへ登録して欲しくない方向けには
 =E
 The address "fml-query" is to forward the in-coming mail to
 fml-support but the sender is not registered automatically.
 
 	fml-query@ffs.fml.org 	
 
-もあります。ここへ投げていただければ fml-support MLへ自動登録すること
-なく fml-support へ質問のフォワードを行います。
+があります。ここへ投げていただければ fml-support へ質問のフォワードを
+行います。情報は原則的に全て fml-support へ全部送り込んでいます。個人
+宛の fml-bugs だと話が埋もれるので fml-bugs より fml-query の方が望ま
+しいと思っています。
 
-"どうしても"内密な相談とか、DMで聞きたいことは 
+"どうしても"内密な相談とか、DMで聞きたいことを
 =E
 If you have secret questions:) you talk to only me, please send it to 
 
 	fml-bugs@ffs.fml.org
 
-へ投げておいてください。ただ返事はものすごく遅いでしょう _o_ 
+へ投げて下さい。ただ返事はものすごく遅いでしょう _o_ 
 =E
 If I am not busy, you may receive my reply soon but a lot of cases
 very slowly;-)
@@ -216,7 +252,7 @@ very slowly;-)
 設定項目は多岐に渡りますが、基本的なセットアップ(MLをつくる/登録する)
 や簡単な設定の変更は makefml という対話設定プログラムで行なえます。
 
-.S	makefml 
+.S	makefml (インストーラー及び設定インターフェイス)
 
 とりあえず
 =E
@@ -224,6 +260,9 @@ To install FML, you can only run
 
 	perl makefml install 
 
+でインストールできます。ML の作成は
+
+	perl makefml newml ＭＬの名前
 =E
 when you make a new ML 
 =S
@@ -232,10 +271,6 @@ when you make a new ML
 e.g. to make elena@your-domain mailng list
 =S
 	perl makefml newml elena
-
-でインストールできます。ML の作成は
-
-	perl makefml newml ＭＬの名前
 
 で何個でも作れます。詳細については INSTALL というファイルを見て下さい。
 =E
@@ -249,8 +284,8 @@ fml 2.1 のターゲットマシン/テスト環境は
 
 	sendmail 8.8.7 + perl5.003 on NetBSD 1.2 RELEASE
 	sendmail 8.8.7 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.8.7 + perl4.036 on NetBSD 1.1B(fwtk も併用)
-	sendmail 8.8.7 + perl5.003 on NetBSD 1.1B(fwtk も併用)
+	sendmail 8.8.7 + perl4.036 on NetBSD 1.1B
+	sendmail 8.8.7 + perl5.003 on NetBSD 1.1B
 
 です。
 
@@ -258,24 +293,32 @@ fml 2.1 のターゲットマシン/テスト環境は
 .S	Supporeted Architectures
 =E.S	Supporeted Architectures
 
-基本的にターゲットは 4.4BSD ですが最近の Unix であればインストーラが自
-動判定するので特別なことをしなくても動くはずです。
+ターゲットは NetBSD (4.4BSD) ですが最近の UNIX であれば動くでしょう。
+補正が必要なものはインストーラの自動判定で大抵はなんとかなってると思い
+ます。
 ＃ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
 ＃判定できないようなどマイナ〜だったらわかりませんが
+=E
+The target OS is NetBSD (4.4BSD). You may use FML on almost UNIX. 
+The installer (makefml) ajdust FML when installing.
 
 sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 ドが入っています。そもそも NT 上の perl, sendmail などが何となく動いて
-るような動いてないような変なところはいろいろあるので、まぁ動いたららっ
-き〜と思ってください。Unix version との違いについてINSTALL_on_NT4 に捕
-捉が書いてあるので、INSTALL と INSTALL_on_NT4 両方を参照して下さい。注
-意:なおNT上の perl sendmail bind についてぼくに聞かれても困ります。
+るような動いてないような変なところはいろいろあるので、まぁ動いたらラッ
+キ〜と思ってください。UNIX version との違いについて INSTALL_on_NT4 に
+補足説明が書いてあります。インストールは INSTALL と INSTALL_on_NT4 両
+方を参照して下さい。
+=E
+sys/arch src/arch have Windows NT4.0 dependent codes. 
+If FML runs well on NT, you are lucky:).
 
 
 .S	アップグレード・インストールをしようとしている人へ
 
-アップグレードする人で「新たに config.ph を作り直すところからやろう」
-と思っている人は UPGRADE というファイルも見て下さい。古い config.ph を
-そのまま使おうと思っている人はそのまま使って下さい(HOOKは別として)。
+アップグレードする人で「新たに config.ph を作り直すところから始めよう」
+と思っている人は注意が必要です。UPGRADE というファイルも見て下さい。古
+い config.ph をそのまま使おうと思っている人はそのまま使って下さい(HOOK
+は別として)。
 
 
 
@@ -283,29 +326,62 @@ sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 =E.C	Overview on FML 2.1
 
 
+基本的な設計方針は
+   『可能な限りユーザおよび ＭＬ管理者 にとっての自由度をあげる』
+   『「明示的な指定があって初めて機能は増やすべきである」と
+   「管理者のルーチンワークを少しでも減らす」間の妥協』
+です。
+=E
+fml has been developed to offer 
+=S
+	extend the degrees of freedom for users and maintainers as
+	could as possible.
+=S
+	require explicit definitions in the configuration file when
+	extension.
+=S
+	decrease the routine work
+
 ○ makefml 対話設定プログラム
+=E
+* makefml (interactive install and customizing interface)
 
 ○ 配送用アドレス、コマンド用アドレスごとのアクセス制御
 	アクセス制御(anyone/members_only/moderator)
+=E
+* access control for each delivery and command servers 
+	anyone/members_only/moderator available
 
 ○ 自動的にメンバー登録をする機能
 	登録への確認/Subject: subscribe/本文に Subscribe/キーワードなし
 =E
 * Automatic Registration
+	confirmation, keyword in body or subject, no-keyword
 
-○ Listserv(Majordomo) 互換インターフェイス
-
-○ まとめ送り ユーザごとに細かく設定可能
+○ コマンドサーバの Listserv(Majordomo) 互換インターフェイス
 =E
-* Matome Okuri (Digest Delivery)
+* listserv/majordomo compatible interface 
 
-○ リモート管理 アドレス認証/パスワード保存(crypt or MD5)/PGP認証
+○ まとめ送り (ユーザごとに細かく設定可能)
+=E
+* Digest Delivery (Matome Okuri)
+
+○ リモート管理 
+   認証方式はアドレス認証/パスワード保存(crypt or MD5)/PGPベースの認証
+=E
+* Remote Administration
+    authentication type: 
+	address
+	password (config is saved by crypt or MD5)
+	PGP(Pretty Good Privacy) based
 
 ○ 配送メールのヘッダフィールドのきめこまかい設定
+=E
+* Header customizing in detail
 
 ○ 豊富なファイル操作 (まとめおくりや mget, get コマンド等で使われる)
 =E
-* multiplf functions to handle a bundle of articles
+* Multiple functions to handle a bundle of articles
 
 	mget と まとめおくりでの User interface は次のようなものが取り
 	揃えられています。ユーザーごとに設定できます
@@ -323,63 +399,53 @@ sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 		uuencode
 
   ・標準のＭＬの記事スプール以外にもアーカイブは設定できます。
-  ・応用として user が put get できるように拡張されたコマンドも実装
-
-
-○ スプールする/しない	archive expiration newsyslog(8)
-   スプールの自動HTML化
-
-○ sendmail は IPC (InterProcess Communication) 呼びだし
-
-   自分のマシンで sendmail が走っている必要はありません。
-   もっとも SMTP を理解してくれるなら sendmail である必要もないですし
-   配送用に使えるSMTPサーバ があれば動きます。
-
-○ リレーサーバの処理 ＃ % hack 
-
-○ スタートレック宇宙歴サポート(笑)
-	宇宙歴をつけるmh, mh-e user interface つき:-)
-
-○ POPによるＭＬ
-
-   例えば 一定時間間隔で POP をかけてＭＬを動かし
-   配送はサイトのSMTPサーバにやらせることでＭＬを実行するこは可能です
-
-○ その他
-	MIME逆変換したサマリーファイルの作成
-
-
-これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
-いたいとおもっている方には改造の PLATFORM として利用していただけるかと
-思います。
-＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
-ていると思います。最適解ってわけじゃないけど :-)
-
-基本的な方針は
-   『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
-   『「明示的な指定があって初めて機能は増やすべきである」と
-   「管理者のルーチンワークを少しでも減らす」間の妥協』
-といえるでしょう。
 =E
-fml has been developed to offer 
-=S
-	automatic-maintained as could as possible 
-	to release administrators from the cost of the maintenace
-=S
-	the balance of functions between automatic(less maintenance by hand)
-	and convenicence
-	When you hope more convenience, 
-	fml should soon offer the useful functions.
-=S	
-	A user can use the ML server by his way as could as possible.
+  <> you can user archive other than the default spool
+
+○ スプール   する/しない。自動アーカイブ、expiration、自動HTML化
+=E
+* Spooling or not, automatic archive, expire, article html generation
+
+○ ログへの newsyslog(8)
+
+=E
+* Newsyslog(8) support for log files
+
+○ メール配送は直接SMTPを張る(デフォールト)/sendmailを起動する
+=E
+* Deliver a mail to distribute by SMTP not exec(2) sendmail.
+  So you can use another hosts for delivery.
+
+   SMTPを直接張るため自分のマシンで sendmail が走っている必要はありません。
+   そして SMTP を理解してくれるなら sendmail である必要もないです。
+   そのためメール配送系のシステムは入れ換えても問題はありません。
+
+○ リレー	リレーサーバ、
+=E
+* Relay
+
+○ スタートレック宇宙歴サポート:D
+	宇宙歴をつけるmh, mh-e user interface つき:-)
+=E
+* Startrek Stardate :D
+
+○ POP3によるML
+   例えば 一定時間間隔で POP をかけてMLを動かし
+   配送はサイトのSMTPサーバにやらせることでMLを実行する裏技。
+=E
+* ML by POP3
+
+他
+
+これからMLをはじめる方にはそのまま、MLサーバをカスタマイズして使いたい
+とおもっている方には改造のプラットホームとして利用できるかと思います。
+＃現状のMLサーバに求められる基本機能のコード(の“一例")は一通り揃って
+＃いると思います。最適解ってわけじゃないけど :-)
+
 	
-
-.C	Version Up と互換性(Compatibility)
-	 
-
-この類いの「外部のサイトとの通信を行なうプログラム」は全てそうですが最
-新版のソースコードを手に入れて使うべきだとおもいます。また改造も最新版
-についてしていただけるとよろしいかと存じます (_o_)
+また、この類いの「外部のサイトとの通信を行なうプログラム」は全てそうで
+すが最新版のソースコードを手に入れて使うべきです。また改造も最新版につ
+いてした方がよいとおもいます。
 =E
 Please use the latest version since programs which contact external
 worlds should be always latest e.g. for security, evoluting
@@ -387,17 +453,25 @@ environments, ....
 Hence it is better to do hasks latest version if you like(^^). 
 
 
-.S	Version up について
-=E.S	on Version up
 
-ソースを広げてインストールと同様に makefml install をして下さい。手動
-でも十分できますがOSの自動判定なども含めて補正が行なわれる makefml の
-方がよいでしょう。makefml install を使えば必要な作業を行なってくれます。
-実作業としては
+.C	Version Up と互換性(Compatibility)
+=E.C	Version Up and Compatibility
 
-	(ソースの下の src 階層以下に perl scripts は集められています)
-	makefml この src/ bin/ sbin/ cf/ doc/ 群をコピーします。
-	OSに依存した補正
+.S	Version Up について
+=E.S	On Version Up
+
+ソースを広げてインストールと同様に makefml install (INSTALL というファ
+イルを参照)をして下さい。手動でも十分できますがOSの自動判定なども含め
+て補正が行なわれる makefml の方がよいでしょう。makefml install を使え
+ば必要な作業を行なってくれます。実作業としては
+=E
+It is better to user "makefml install" since makefml fix the FML to
+adjust your OS.
+
+   1 OSに依存した補正を実行
+
+   2 makefml は src/ bin/ sbin/ cf/ doc/ 階層をインストール
+     ＃ソースの下の src 階層以下にメインの perl scripts 群があります。
 
 などを makefml が行ないます。
 
@@ -405,66 +479,62 @@ Hence it is better to do hasks latest version if you like(^^).
 .S	新しい機能を有効にするには？
 =E.S	To make new functions effective
 
-新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで指定す
-るかしないと使えません。つまり、新しい機能・オプションは明示的に指定し
-ない限り単に動きません
+新しい機能・オプションは明示的に指定しない限り動きません。config.ph の
+中の変数設定を変えてください。HOOKなどは差分を一番最後に付け加えてくだ
+さい。config.ph については INSTALL も参照して下さい。
+=E
+Please define new options in config.ph explicitly. In default, new
+mechanism does not work if not defined.
 
 
-.S	過去のヴァージョンとの互換性について
+.S	互換性について
 =E.S	Compatibility
 
-詳細は doc/op の part I に「Version Up と互換性について」という章があ
-るので、そちらを読んで下さい。
+詳細はINSTALL と doc/op の part I に「Version Up と互換性について」と
+いう章があるので、そちらを読んで下さい。
 
-FML では config.ph という設定ファイルが振舞いを決めます。
-config.ph にも version という概念があります。
+FML では config.ph という設定ファイルが振舞いを決めます。config.ph に
+も version ($CFVerion)という概念があります。この $CFVersion を利用し設
+定ファイルの昔の変数名などは変わっていても、基本的に自動補正/変換が加
+えられ昔作った config.ph をそのまま使っても大丈夫なようになっています。
 
-設定ファイルの昔の変数名等は変わっていても、ほとんどの変数について自動
-的に補正が加えられ昔作った config.ph をそのまま使っても大丈夫なように
-なっています。
+config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
+いうのはHOOKで使う関数や変数等が今でもサポートされているとは限らないか
+らです。ただ、昔できたことは必ず今の実装でもできるので doc/op を参照し
+てみて下さい。
 
-config.ph でちょっと複雑な HOOK を書けている場合はちょっと注意がいるで
-しょう。というのはHOOKで使う関数や変数等が今でもサポートされているとは
-限らないからです。
-
-ただ、昔できたことは必ず今の実装でもできるので doc/op を参照してみて下
-さい。
-
-できるだけ互換性を保つように作られていますが、2.1 RELEASE で
+できるだけ互換性を保つように作られていますが、2.1 RELEASE では
    『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
-の時は従来と異なり『配送専用』です。
+が昔と異なり『配送専用』です。
    『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
 	昔と同じで配送用のアドレス $MAIL_LIST で
 	コマンド(# command の形)を受け付けます。
    』(HML 1.6 互換モード)
 
 
-○ hml 1.6 との compatibility
+○ fml 1.6 より前からの移行について
+
+HOOKについて注意が必要です。FML 1.6 で基本的なデータ構造を call by
+reference に書き直しました。それ以前の HOOK はまずそのままでは反映され
+ないでしょう。libcompat.pl などを参考に書き直すなどが必要でしょう。
+
+○ hml 1.6 的インターフェイスとの互換性
 =E
 *  compatibility with hml 1.6
 
-hml 1.6 から直接 FML 2.1 へ移行する場合は、members や log file等はその
-ままで構いません。そのままに、*pl 群と config.phを差し替えればいきなり
-動くはずです。ただ FML 2.1 では makefml config (INSTALL参照)でコマンド
-用のアドレスを配送用のアドレスにするという設定が必要です。
-
-○	fml 1.6 より前からの移行について
-
-	＊＊＊注意＊＊＊
-
-1.6では、基本的なデータ構造を call by reference 用に書き直したので、い
-ままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
-libcompat.pl にBackward compatibility のためのコードがあります。昔の設
-定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとある程度
-まで compatible にできます。コードの都合上どうしても実現できないカスタ
-マイズもありえます _o_
+歴史的に hml 1.6 を基本的にemulationできます。直接 FML 2.1 へ移行する
+場合は、members や log ファイル等はそのままで構いません。*pl 群と 
+config.ph を差し替えれば動くはずです。ただ FML 2.1 では makefml config
+(INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
+設定が必要です。
 
 
 .S	Changes
 =E.S	Changes
 
 CHANGES と RELEASE_NOTES を参照のこと。
-
+=E
+Please see CHANGES and RELEASE_NOTES.
 
 
 .C	配布について
@@ -501,26 +571,24 @@ Initiative Japan Inc.).
 
 
 
-.C	Acknowledgements 
-=E.C	Acknowledgements 
+.C	Acknowledgments 
+=E.C	Acknowledgments 
 
-I thank a lot of people for valuable comments, suggestions,
-contributions of bug reports, fixes and patches both on fml-support ML
-and with private communication.  
-I refer each contribution in RELEASE_NOTES.
+I thank a lot of people for valuable comments, suggestions, bug
+reports, contributions, fixes and patches both on fml-support ML and
+with private communication. I distribute some contributed codes as a
+part of FML distribution. I refer each contribution in RELEASE_NOTES.
 
-It is useful to study several ascpects of 4.4BSD for OS automatic
-detection, and mime_pls 1.00 - 2.00a on MIME.
-For convenience I bundle to my package OS detection codes derived from
-amd package, a few useful codes jcode.pl and mime_pls 1.11a, which you
-can obtain on anonymous ftps.
+
 I greatly appreciate softwares developed and distributed under freedom
-of programming.
+of programming.  For convenience I bundle to my package, config.guess
+(GNU autoconf), a few useful codes jcode.pl and mime_pls 1.11a, which
+you can obtain on anonymous ftp's. 4.4BSD has been a start point to
+study several aspects of OS details.
 
-Lastly I am greatful to tsubai@yokyun.rim.or.jp
-(tsubai@phys.titech.ac.jp) for fruitful discussion on the design and
-implementation of Mailing List server, perl, operating systems and so
-on.
+Lastly I am grateful to tsubai@iri.co.jp (tsubai@phys.titech.ac.jp)
+for fruitful discussion on the design and implementation of Mailing
+List server, perl, operating systems and so on.
 
 
 $Id$
