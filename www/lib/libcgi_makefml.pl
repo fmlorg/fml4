@@ -361,6 +361,7 @@ sub SecureP
 sub Translate2LogOption
 {
     local($x) = @_;
+    local($s);
 
     if ($x eq 'tail') {
 	if ($Config{'TAIL_SIZE'} =~ /^\d+$/) {
@@ -368,10 +369,9 @@ sub Translate2LogOption
 	}
     }
     elsif ($x eq 'day') {
-	$Config{'YYYYMMDD'} =~ s@/@@g;
-	if ($Config{'YYYYMMDD'} =~ /^\d+$/) {
-	    "-D$Config{'YYYYMMDD'}";
-	}
+	$s = sprintf("%04d%02d%02d", 
+		     $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
+	if ($s =~ /^\d+$/) { "-D$s";}
     }
 }
 

@@ -86,12 +86,11 @@ sub ExpandDate
 {
     local($pat) = @_;
     local($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime(time);
-    local($x, $a, $b);
+    local($x, $a, $b, $y);
 
     if ($pat eq 'YYYY') {
-	$a = $year - 10;
-	$b = $year;
-	for $x ($a .. $b) { 
+	for $a (0 .. 10) {
+	    $x = (1900 + $year) - $a;
 	    print "\t\t<OPTION VALUE=$x>$x\n";
 	}
     }
@@ -246,6 +245,7 @@ sub Convert
 
 	    if (/__EXPAND_(YYYY|MM|DD)__/) {
 		&ExpandDate($1);
+		next;
 	    }
 
 	    if (/__EXPAND_OPTION_ML__/) {
