@@ -58,6 +58,7 @@ __scan:
 	@ echo "--- Modified: ---"
 	@ grep '^M' /tmp/__scan__ || echo none.
 	@ echo ""
+	@ cp /tmp/__scan__ .
 
 kscan:
 	@ (cvs -n update kern; cvs -n update proc) |tee /tmp/__scan__
