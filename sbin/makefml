@@ -424,9 +424,7 @@ sub SignalLog
     local($sig) = @_; 
 
     print STDERR "Caught Signal[$sig], shutting down ... \n\n";
-    &MakeFmlUnLock;
-    sleep(1);
-
+    # &MakeFmlUnLock; infinite loop?     sleep(1);
     #&FlushLog;
     exit(1);
 }
@@ -470,10 +468,10 @@ sub Lock
     local($ml, $mldir) = @_;
 
     if (&FlockP($ml, $mldir)) {
-	&FLock($ml, "$mldir/$ml");
+	&FLock($ml, $mldir);
     }
     else {
-	&V7Lock($ml, "$mldir/$ml");
+	&V7Lock($ml, $mldir);
     }
 }
 
@@ -2027,7 +2025,7 @@ sub main'FUnLock { &ml'FUnLock(@_);}
 sub FLock
 {
     local($ml, $mldir) = @_;
-    local($lockdir) = "$mldir/";
+    local($lockdir) = "$mldir/$ml/";
 
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
    
@@ -2050,8 +2048,16 @@ sub FUnLock
 
 package v7;
 
-sub main'V7Lock   { &v7'V7Lock(@_);}
-sub main'V7UnLock { &v7'V7UnLock(@_);}
+sub main'V7Lock   { &v7'MakeFml_V7Lock(@_);}
+sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
+
+sub Mkdir
+{
+    $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
+    if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
+    if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
+}
+
 
 sub LoadConfigPH
 {
@@ -2062,8 +2068,12 @@ sub LoadConfigPH
 	eval "undef \$${_};";
     }
 
-    eval("do(\"$mldir/$Ml/config.ph\");");
-    print STDERR "V7Lock::Error $@" if $@;
+    # global $DIR ;
+    $DIR = "$mldir/$ml";
+    chdir $DIR;
+
+    eval("do \"$mldir/$ml/config.ph\";");
+    print STDERR "V7Lock::Error $@\n" if $@;
 
     # variable fixes
     local($s);
@@ -2074,7 +2084,7 @@ sub LoadConfigPH
     eval($s) || &Log("FAIL EVAL \$SPOOL_DIR ...");
 }
 
-sub V7Lock
+sub MakeFml_V7Lock
 {
     local($ml, $mldir) = @_;
 
@@ -2084,7 +2094,7 @@ sub V7Lock
     &V7Lock;
 }
 
-sub V7UnLock
+sub MakeFml_V7UnLock
 {
     local($ml) = @_;
 
