@@ -7,8 +7,19 @@ $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 # Aliases
-sub SendFileMajority  { &SendFile('#dummy', @_);}
-sub SendFile2Majority { &SendFile('#dummy', @_);}
+# sub SendFileMajority  { &SendFile('#dummy', @_);}
+# sub SendFile2Majority { &SendFile('#dummy', @_);}
+sub SendFileMajority  { &SendFile2Majority(@_);}
+
+# ($subject, $file, 0, @to);
+sub SendFile2Majority 
+{ 
+    local($subject, $file, @to) = @_;
+    local(@files) = $file;
+
+    &NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
+}
+
 
 &use('utils');
 
@@ -605,7 +616,7 @@ sub SendingBackInOrder
 	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
 	    " Sending Back $now/$TOTAL";
 	&Log("SendBackInOrder[$$] $now/$TOTAL $to");
-	&SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0, @to);
+	&SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, @to);
 
 	unlink $file unless $debug;
 
