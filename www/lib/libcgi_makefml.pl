@@ -9,23 +9,23 @@
 
 sub Parse
 {
-    &GetBuffer(*config);
+    &GetBuffer(*Config);
 
-    $ML        = $config{'ML_DEF'} || $config{'ML'};
-    $MAIL_ADDR = $config{'MAIL_ADDR'};
-    $PROC      = $config{'PROC'};
-    $LANGUAGE  = $config{'LANGUAGE'};
+    $ML        = $Config{'ML_DEF'} || $Config{'ML'};
+    $MAIL_ADDR = $Config{'MAIL_ADDR'};
+    $PROC      = $Config{'PROC'};
+    $LANGUAGE  = $Config{'LANGUAGE'};
 
-    @PROC_ARGV = split(/\s+/, $config{'ARGV'});
+    @PROC_ARGV = split(/\s+/, $Config{'ARGV'});
 
     # menu
-    $VARIABLE  = $config{'VARIABLE'};
-    $VALUE     = $config{'VALUE'};
-    $PTR       = $config{'PTR'};
+    $VARIABLE  = $Config{'VARIABLE'};
+    $VALUE     = $Config{'VALUE'};
+    $PTR       = $Config{'PTR'};
 
     # password
-    $PASSWORD      = $config{'PASSWORD'};
-    $PASSWORD_VRFY = $config{'PASSWORD_VRFY'};
+    $PASSWORD      = $Config{'PASSWORD'};
+    $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
 
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
@@ -58,7 +58,7 @@ sub UpperHalf
 
     if ($debug) {
 	while (($k, $v) = each %ENV)    { &P("ENV: $k => $v");}
-	while (($k, $v) = each %config) { &P("config: $k => $v");}
+	while (($k, $v) = each %Config) { &P("Config: $k => $v");}
     }
 }
 

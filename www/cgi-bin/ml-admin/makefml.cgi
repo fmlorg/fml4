@@ -25,7 +25,7 @@ require 'libcgi_makefml.pl';
 
 ### MAIN ###
 &Init;
-&Parse; # set %config
+&Parse; # set %Config
 
 &UpperHalf;
 
