@@ -28,79 +28,27 @@ sub AutoRegist
     # for &Notify,  reply-to ? reply-to : control-address
     $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'CtlAddr:'};
 
-    if ($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
-	# Syntax e.g. "Subject: subscribe"...
-	# 
-	# [\033\050\112] is against a bug in cc:Mail
-	# patch by yasushi@pier.fuji-ric.co.jp
-	$s = $e{'h:Subject:'};
-	$s =~ s/(^\#[\s\n]*|^[\s\n]*)//;
-	$s =~ s/^\033\050\112\s*//;
-	@s = split(/\n/, $s); # GET THE FIRST LINE ONLY
-	$s = shift @s;
+    if ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
+	# Syntax e.g. "subscribe" in the body
+	$s = &GetSubscribeString($e{'Body'});
 
-	&Debug("AUTO REGIST SUBJECT ENTRY [$s]") if $debug;
-
-	if ($s =~ /^$REQUIRE_SUBSCRIBE\s+(\S+).*/i) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	}
-	elsif ($s =~ /^$REQUIRE_SUBSCRIBE\s*/i) { 
+	if ($from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s)) {
 	    ;
 	}
 	else {
-	    &Debug("AUTO REGIST SUBJECT[$s] SYNTAX ERROR") if $debug;
-	    $sj = "Bad syntax subject in autoregistration";
-	    $b  = "Subject: $REQUIRE_SUBSCRIBE [your-email-address]\n";
-	    $b .= "\t[] is optional\n";
-	    $b .= "\tfor changing your address to regist explicitly.\n";
-
-	    &Log($sj, "Subject => [$s]");
-	    &Warn("$sj $ML_FN", &WholeMail);
-
-	    # notify
-	    $e{'message:h:subject'} .= $sj;
-	    $e{'mode:stranger'}      = 1;
-	    &Mesg(*e, $b.&WholeMail);
-
+	    &AutoRegistError(*e, 'Body', $s);
 	    return 0;
 	}
     }
-    elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
-	# Syntax e.g. "subscribe" in body
-	$s = $e{'Body'};
-	$s =~ s/(^\#[\s\n]*|^[\s\n]*)//;
-	$s =~ s/^\033\050\112\s*//;
-	@s = split(/\n/, $s); # GET THE FIRST LINE ONLY
-	$s = shift @s;
+    elsif ($REQUIRE_SUBSCRIBE) {
+	# Syntax e.g. "Subject: subscribe"...
+	$s = &GetSubscribeString($e{'h:Subject:'});
 
-	&Debug("AUTO REGIST BODY ENTRY [$s]") if $debug;
-
-	if ($s =~ /^$REQUIRE_SUBSCRIBE\s+(\S+).*/i) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	}
-	elsif ($s =~ /^$REQUIRE_SUBSCRIBE\s*/i) { 
+	if ($from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s)) {
 	    ;
 	}
 	else {
-	    &Debug("AUTO REGIST BODY[$s] SYNTAX ERROR") if $debug;
-	    $sj = "Bad syntax body in autoregistration";
-	    $b  = "Body: $REQUIRE_SUBSCRIBE [your-email-address]\n";
-	    $b .= "\t[] is optional\n";
-	    $b .= "\tfor changing your address to regist explicitly.\n";
-
-	    &Log($sj, "Body => [$s]");
-	    &Warn("$sj $ML_FN", &WholeMail);
-
-	    # notify
-	    $e{'message:h:subject'} .= $sj;
-	    &Mesg(*e, $b.&WholeMail);
-
+	    &AutoRegistError(*e, 'Subject', $s);
 	    return 0;
 	}
     }
@@ -109,21 +57,14 @@ sub AutoRegist
 	# Determine the address to check
 	# In default, when changing your registered address
 	# use "subscribe your-address" in body.
+
 	$s = $set_addr || $e{'Body'};
 	$s =~ s/(^\#\s*|^\s*)//;
-	
-	$DEFAULT_SUBSCRIBE || ($DEFAULT_SUBSCRIBE = "subscribe");
+	$from = &GetAddr2Regist($DEFAULT_SUBSCRIBE || "subscribe", $s);
 
-	if ($s =~ /^${DEFAULT_SUBSCRIBE}\s+(\S+)\s*/i) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
-	}
     }# end of REQUIRE_SUBSCRIBE;
-	
-    &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
-    $from = ($from || $From_address);
+
+    # already $from = $From_address appliced in &GetAddr2Regist;
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
 
     return 0 if     &LoopBackWarn($from); 	# loop back check	
@@ -189,6 +130,56 @@ sub AutoRegist
 
     ### Ends.
     ($AUTO_REGISTERED_UNDELIVER_P ? 0 : 1);
+}
+
+sub GetAddr2Regist
+{
+    local($key, $s) = @_;
+    local($from);
+
+    &Debug("AUTO REGIST BODY ENTRY [$s]") if $debug;
+
+    if ($s =~ /^$key\s+(\S+).*/i) { 
+	return $1;
+    }
+    elsif ($s =~ /^$key\s*/i) { 
+	return $From_address;
+    }
+    else {
+	0;
+    }
+}
+
+# [\033\050\112] is against a bug in cc:Mail
+# patch by yasushi@pier.fuji-ric.co.jp
+sub GetSubscribeString
+{
+    local($_) = @_;
+
+    s/(^\#[\s\n]*|^[\s\n]*)//;
+    s/^\033\050\112\s*//;
+    (split(/\n/, $s))[0]; # GET THE FIRST LINE ONLY
+}
+
+# &AutoRegistError(*e, 'Subject', $s);
+sub AutoRegistError
+{
+    local(*e, $key, $s) = @_;
+    local($b, $sj);
+
+    &Debug("AUTO REGIST $key[$s] SYNTAX ERROR") if $debug;
+
+    $sj = "Bad Syntax $key in AutoRegistration";
+    $b  = "${key}: $REQUIRE_SUBSCRIBE [your-email-address]\n";
+    $b .= "\t[] is optional\n";
+    $b .= "\tfor changing your address to regist explicitly.\n";
+
+    &Log($sj, "$key => [$s]");
+    &Warn("$sj $ML_FN", &WholeMail);
+
+    # notify
+    $e{'message:h:subject'} .= $sj;
+    &Mesg(*e, $b.&WholeMail);
 }
 
 
