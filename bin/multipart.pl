@@ -1,5 +1,5 @@
 #! /usr/local/bin/perl
-# multipart.pl: Multipart Canceler ver1.01
+# multipart.pl: Multipart Canceler ver1.02
 # Converter from Multipart/Mixed or Multipart/Alternative to Text/Plain
 # (C) 1996,1997 Yuao Tanigawa
 
@@ -36,6 +36,20 @@ while (<STDIN>) {
 			print;
 		}
 	} else {# body
+		if ($Happy99) {
+			if (/^end/) {
+				$Happy99 = 0;
+				print " - - - >8 - - - >8 - - - >8 - - - >8 - - - >8 - - -\n";
+				print "Happy99.exe worm was attached to this mail here.\n";
+				print "multipart.pl removed it.\n";
+				print " - - - >8 - - - >8 - - - >8 - - - >8 - - - >8 - - -\n";
+			}
+			next;
+		}
+		if (/^begin 644 Happy99\.exe/) {
+			$Happy99 = 1;
+			next;
+		}
 		if ($type eq 'Multipart/Mixed') {
 			chop;
 			if (index($_, $boundary) >= 0) {
