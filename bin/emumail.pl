@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: emumail.pl,v 2.9 2001/05/09 15:22:50 fukachan Exp $
 
 &Init;
 &GetTime;
@@ -50,7 +50,7 @@ From: $From
 Message-Id: $MessageId
 To: $To
 Subject: $Subject
-#;
+_OPTS_#;
 
 
     $_ .= "Reply-To: $opt_R\n" if $opt_R;
@@ -68,6 +68,16 @@ else {
     s/_RECEIVED_//;
 }
 
+if ($opt_M) {
+    my $mime;
+    $mime .= "Mime-Version: 1.0\n";
+    $mime .= "Content-Type: $opt_M; charset=iso-2022-jp\n";
+    s/_OPTS_/$mime/;
+}
+else {
+    s/_OPTS_//;
+}
+
 
 $_ .= $AddString if $AddString;
 $_;
@@ -76,7 +86,7 @@ $_;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:f:s:t:hHrR:B:");
+    &Getopts("dhg:f:s:t:hHrR:B:M:");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
     $Gecos = (getpwuid($<))[6] || $USER;
