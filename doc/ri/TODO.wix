@@ -39,7 +39,14 @@ XRef: fml-support:05930
 .C	TODO (特に current)
 =E.C	TODO (current specific)
 
+.S	4.0-current
+
+	more restrict 822 address syntax checker ?
+
+
 .S	RDBMS
+
+	one table ( members == actives ) version toy model
 
 	PostgreSQL は DBD 化へ
 
