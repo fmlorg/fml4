@@ -40,7 +40,7 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
    FQDN                      [beth.sapporo.iij.ad.jp] 
 
-	マシンのインターネット上での完全表記。
+	マシンのインターネット上での完全名
 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
 
@@ -56,17 +56,19 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 	ML(複数)はこの階層の"下"に作られる。例えば
 
-	   Elena ＭＬを作る場合は /var/spool/ml/Elena 
-	   Mirei ＭＬを作る場合は /var/spool/ml/Mirei
+	   Elena ＭＬを作る場合は /var/spool/ml/elena 
+	   Mirei ＭＬを作る場合は /var/spool/ml/mirei
 
 	といった具合に複数のＭＬがこの場所の下に作られていく。
-	ここは各ＭＬごとの設定ファイルや記事を保存する場所である。
+	ここは各ＭＬごとの設定ファイルや記事を保存する場所です。
 
 
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
 
-	例えば provider や大学の一般ユーザで /home の下だけならいじっ
-	てよい。aliases は root の人に書いてもらう
+例えば、
+
+   provider や大学の一般ユーザで /home の下だけならいじってよい。
+   aliases 等は root の人に書いてもらう
 
 というケースもありうるでしょう。その場合は
 
@@ -78,7 +80,7 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 .S	設定の保存
 
-なお、これらの↑設定はある場所に格納されるので次回以降 newml （後述）
+なお、上で設定した項目はある場所に格納されるので次回以降 newml (後述)
 する時などはいつもこの値が使われます。
 
 これらの↑設定の後これらの設定を保存する directory をどこに置くか？尋
@@ -87,18 +89,20 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
     CONFIG_DIR (e.g. /home/beth/fukachan/.fml, /usr/local/fml/.fml ...)
     Config Saved in [/usr/local/fml/.fml] 
 
-デフォールトは、上で選んだ実行ファイルをインストールする場所の下の .
-fml 階層になっています。個人的にインストールする場合には $HOME の下 
-(例えば ~/.fml ) がよかったりするでしょうから、適当な directory 名を入
-れて下さい。
+デフォールトは、上で選んだ実行ファイルをインストールする場所の下の 
+ .fml という階層になっています。個人的にインストールする場合には $HOME 
+の下 (例えば ~/.fml ) がよかったりするでしょうから、適当な directory 
+名を入れて下さい。
 
 
 
 .C	ＭＬを作る。
 
-いくつかの簡単なものはコマンドで実行できます。
+いくつかの簡単な設定やメンバー登録等はコマンドで実行できます。
 
-   makefml コマンド [引数]
+コマンドのシンタックス：
+
+	makefml コマンド [引数]
 
 
 .S	新しくＭＬを作る場合
@@ -107,7 +111,7 @@ fml 階層になっています。個人的にインストールする場合には $HOME の下
 
 例： Elena ＭＬを作ろうと思ったら
 
-	/usr/local/fml/sbin/makefml newml elena
+	/usr/local/fml/makefml newml elena
 
 を実行すれば終りです。ＭＬ用の include ファイルの
 
@@ -131,6 +135,13 @@ newalises して下さい。
 注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
 小文字の ML 名で作成されます。
 
+また、分かりやすいように
+
+	/var/spool/ml/ＭＬの名前/samples 
+
+というdirectoryはこの /usr/local/fml/.fml/ＭＬの名前/ にlinkされていま
+す。
+
 
 .S	まとめおくり
 
@@ -145,7 +156,7 @@ NetBSD のような Vixie Cron がＯＳ附属の場合については
 というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
 起動されて配送するようになります。
 
-Vixie Cron でないOSについては man crontab で調べる or doc/op の cron 
+Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron 
 の章を見る等して下さい。
 
 
@@ -160,20 +171,22 @@ Vixie Cron でないOSについては man crontab で調べる or doc/op の cron
 .C	設定ファイルの保存
 
 	/usr/local/fml/.fml/ＭＬの名前/
+		と
+	/var/spool/ml/ＭＬの名前/samples (リンクで上と同じ場所)
 
-という場所に makefml で作った見本が入っています。
-がそれぞれのＭＬ用にカスタマイズされた内容の
+という場所(上の例ではこの場所)に makefml で作った見本が入っています。
+それぞれのＭＬ用にカスタマイズされた内容の
 
 	aliases          crontab         fml.c           include 
 
-が保存されています。
+が保存されています。参考にして下さい。
 
 
 
 .C	ユーザをＭＬに加える場合
 
-   /usr/local/fml/sbin/makefml adduser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/sbin/makefml add elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml adduser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml add elena fukachan@sapporo.iij.ad.jp
 
 	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
 
@@ -181,14 +194,145 @@ Vixie Cron でないOSについては man crontab で調べる or doc/op の cron
 
 .C	ユーザをＭＬから削除する場合
 
-   /usr/local/fml/sbin/makefml byeuser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/sbin/makefml bye elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml byeuser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml bye elena fukachan@sapporo.iij.ad.jp
 
 	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
 
 
+.C	ＭＬの基本的ないくつかの設定
 
-.C	include ではうまく動かない場合
+   /usr/local/fml/makefml config ML名
+   例：
+	/usr/local/fml/makefml config elena
+
+を実行すると基本的な設定を対話的に行なうことができます。
+次のような画面が出てくるので適当に答えて下さい。
+
+TOP画面
+
+    ********************************************************************
+    Which entry do you change?
+    --------------------------------------------------------------------
+      ENTRY                                   Current Configuration
+    --------------------------------------------------------------------
+    
+    0 END
+    1 MEMBER CHECK or AUTO REGISTRATION        member_check
+    2 SUBJECT TYPE                             
+    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+    
+    
+    Menu  (number) [0] 
+
+のような画面で、数字を打込むと下の階層に進み、同様の画面が出ます。
+やはり同様に数字かy/nならy(yes)かn(no)を入れて下さい。
+
+単語の意味は次のようなものです（以下、一覧）。
+
+
+.S	TOP画面
+
+なお、以下の日本語部分はここでの説明用のものです。実際の画面には表示さ
+れません。
+
+    ********************************************************************
+    Which entry do you change?
+    --------------------------------------------------------------------
+      ENTRY                                   Current Configuration
+      ↑項目                                  ↑現在の設定
+    --------------------------------------------------------------------
+    
+    0 END
+    1 MEMBER CHECK or AUTO REGISTRATION        member_check
+    2 SUBJECT TYPE                            
+    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+    
+    Menu  (number) [0] 
+                    ↑単に叩くとこの値になります（０は終了）
+
+ ○ 1 MEMBER CHECK or AUTO REGISTRATION        member_check   
+
+	メンバー以外からメールが来たら自動的に登録するのか？
+	メンバー以外からのメールは拒否するか？
+
+    ○下の階層の画面
+
+        Auto Registration  (y/n) [n] y
+		y なら自動登録 n ならメンバーチェックする
+
+        Auto Registration Type
+        0 default	メンバーでないなら登録
+        1 subject	Subject: subscribe と書いてあるメールなら登録
+			そうでないなら登録を許否
+        2 body		本文に subscribe と書いてあるメールなら登録
+			そうでないなら登録を許否
+        
+        Auto Registration Type  (0,1,2 ) [0] 
+
+
+ ○ 2 SUBJECT TYPE                            
+
+	SubjectでのＭＬ名前と記事番号の設定について
+	例えば、Subject: [Elena:00010] のようにするのか？
+	何もつけないのか？（推奨は何もつけない）
+
+    ○下の階層の画面
+
+        Subject TAG TYPE [0-6]:
+        
+        TYPE    Subject Example
+        ----------------------------
+        0       Subject: NO TAG (Default, Fml recommends)
+        
+        1       Subject: (Elena:100)
+        
+        2       Subject: [Elena:100]    (hml 1.6 compat)
+        
+        3       Subject: (Elena 100)
+        
+        4       Subject: [Elena 100]
+        
+        5       Subject: [Elena,100]
+        
+        6       Subject: (Elena,100)
+
+
+ ○     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+
+	それ以外の設定
+	   MIME処理をするか？
+	   HTML変換した記事の保存もするか？
+
+    ○下の階層の画面
+
+        OPTIONS
+        
+        ------------------------------------
+          ENTRY                Current Configuration
+        ------------------------------------
+        0 END
+        1 MIME                 
+        2 HTML CONVERSION      
+        
+           OPTIONS  (1-2) [0] 
+
+	MIME を使うことにすると、ＭＬの記事のサマリや保存する記事は
+	MIME decode されたものになる。
+
+	HTML自動変換は 
+
+		/var/spool/ml/ML名/var/htdocs/ 
+
+	の下に html 化された階層を作る。
+	デフォールトではその日ごとに別の階層にまとめて
+	   index.html  で記事を新しい順にならべてもの
+	   thread.html でスレッド化された記事	
+	の階層構造を作る。
+
+
+
+.A	include ではうまく動かない場合
 
 大抵は include でうまくいくはずですが、どうしてもだめな場合は 
 
