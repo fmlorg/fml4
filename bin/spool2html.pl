@@ -338,7 +338,9 @@ sub GetMax
 	for ( ; ; $try++) { last unless -f "$dir/$try";}
     }
     else { # not continuous ? .. $seq
-	$try = $seq;
+	# XXX '+1' require to sync with "if" condition above.
+	# patch from MURASHITA Takuya (fml-support: 7215)
+	$try = $seq + 1;
     }
 
     # print STDERR "return ($try - 1)\n" if $verbose;
