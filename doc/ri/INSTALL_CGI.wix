@@ -15,10 +15,16 @@
 
 注: 以下の $EXEC_DIR は /usr/local/fml です。
 
+捕捉: fml CGI インタフェイスは Unix でしかテストされたことがありません。
+      なんとなく apache for NT があれば 2000/NT でも動く気がしますが
+      試したことはありません。チャレンジャーを募集中です:)
+
+
 
 .C	Overview
 
-.S	overview
+.S	はじめに
+=E.S	Introduction
 
 fml CGI インターフェイスは makefml の代表的な機能を CGI 経由で可能にす
 るものです。あなた自身が使うかどうかはともかく、この fml CGI インター
@@ -34,6 +40,7 @@ sendmail か postfix です。
 
 
 .S	CGI のセットアップ
+=E.S	step of CGI setup
 
 	CGI スクリプトの準備	htpasswd .htaccess などの設定
 	apache の変更		(設定変更の見本があります)
@@ -53,6 +60,7 @@ sendmail か postfix です。
 
 
 .S	トラブルシュート
+=E.S	troubleshoot
 
 うまくいかない時は fml 自体ではなく WWW サーバもしくはメールサーバの
 設定でつまづいていることが多いようです。
@@ -62,6 +70,7 @@ sendmail か postfix です。
 
 
 .C	CGI 階層のモデル
+=E.C	hierarychy of CGI model
 
 URL の階層がどういう前提で分けられているか、各ディレクトリの権限につい
 てまとめます。
@@ -95,6 +104,7 @@ URL の階層がどういう前提で分けられているか、各ディレクトリの権限につい
 
 
 .C	CGI スクリプトをつくる
+=E.C	prepare CGI scripts
 
 まず、fml 管理者用のスクリプトを用意します。
 
@@ -145,11 +155,14 @@ postfix にするには 6, 7 をそれぞれ変更して下さい。
 
 
 .C	WWW サーバの設定の変更 (apache 1.3.x)
+=E.C	modify apache's httpd.conf
 
 /usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに適宜
 付け足す。
 
+
 .S	apache と sendmail を使っている場合
+=E.S	the case when you use apache and sendmail 
 
 まず /usr/local/apache/conf/httpd.conf を編集します。
 
@@ -188,10 +201,20 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 	ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
 
 
+.S	apache と postfix を使っている場合
+=E.S	the case when you use apache and postfix 
+
+同上
+=E
+same as description above.
+
+
 
 .C	メールサーバの設定
+=E.C	Configure MTA's
 
-.S	sendmail 8.9 まで の場合
+.S	sendmail 8.9.3 まで の場合
+=E.S	untile sendmali 8.9.3 
 
    /etc/sendmail.cf を編集する。編集する内容は
 
@@ -209,6 +232,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
    sendmail を restart
 
 .S	sendmail 8.10 以降の場合
+=E.S	after sendmail 8.10
 
 	/etc/mail/sendmail.cf に trusted user として fml を付け足す。
 
@@ -219,6 +243,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 	
 .S	postfix の場合
+=E.S	postfix
 
    /etc/postfix/main.cf を
 
@@ -233,7 +258,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 
 .C	httpd のリスタート
-=E.C	configure httpd
+=E.C	restart apache (httpd)
 
 	# apachectl configtest
 
@@ -245,7 +270,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 
 .C	WWWにアクセスしてみる
-=E.C	go to cgi menu!
+=E.C	Here we go to access CGI menu
 
 例:
 
@@ -273,7 +298,8 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 .appendix
 
-.C	suexec を使う場合
+.C	suEXEC を使う場合
+=E.C	When you use suEXEC
 .l	suexec
 
    http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
@@ -291,6 +317,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 	
 .S	前提
+=E.S	Condition for suEXEC
 
 ユーザ fml は
 
@@ -302,6 +329,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 
 .S	apache で suexec を可能にする。
+=E.S	enable apache to use suEXEC
 
 suexec のログや /usr/local/apache/logs/error_log を見ながら
 suexec がうごくことを確認して下さい。
@@ -329,6 +357,7 @@ AddHandler cgi-script .cgi
 
 
 .S	~/public_html/ の準備
+=E.S	prepare ~/public_html/
 
 % su fml
 % mkdir ~/public_html
@@ -336,6 +365,7 @@ AddHandler cgi-script .cgi
 
 
 .S	/usr/local/fml/.fml/cgi.conf の編集
+=E.S	modify /usr/local/fml/.fml/cgi.conf
 
 cgi.conf に
 
@@ -383,3 +413,4 @@ $Id$
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+
