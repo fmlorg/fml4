@@ -983,7 +983,7 @@ sub ProcAdminPutFile
     # newinfo newguide mode:majordomo
     if ($proc =~ /(newinfo|newguide)/i) { 
 	$opt = $file = $GUIDE_FILE;
-	$opt =~ s#$DIR/##;
+	$opt = &NukeDirName($opt, $DIR);
     }
 
     &ReconfigurableFileP(*e, $DIR, $file) || return 0;
@@ -1080,16 +1080,29 @@ sub ProcAdminRename
 }
 
 
+sub NukeDirName
+{
+    local($file, $dir) = @_;
+
+    # remove the first directory (which may be regexp ;-)
+    if (($p = index($file, $dir)) >= 0) {
+	$file = substr($file, $p + length($dir));
+    }
+    $file =~ s#^/##g; # superflous since s#//#/# below is done the same way.
+    $file;
+}
+
+
 sub ReconfigurableFileP
 {
     local(*e, $dir, $file) = @_;
-    local($s);
+    local($s, $p);
 
-    print STDERR "input $file == file\n" if $debug;
+    print STDERR "ReconfigurableFileP(*e, \$dir = $dir, \$file = $file)\n"
+	if $debug;
 
-    $file =~ s/$dir//g;
-    $file =~ s#^/##g; # superflous since s#//#/# below is done the same way.
-    $file = "$dir/$file";
+    $file = &NukeDirName($file, $dir);
+    $file = $dir .'/'. $file;
     $file =~ s#//#/#g;
 
     for (@REMOTE_RECONFIGURABLE_FILES) {
