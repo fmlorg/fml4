@@ -24,6 +24,38 @@ PLAINTEXT は
 
 を見て下さい。
 
+.S	fml CGI専用サーバじゃないとだめですか？
+
+だめではないです。しかしdocument は fml GUI 専用サーバを作る前提で書か
+れています。もっと高度な権限の使い分けは、専用サーバを動かすことができ
+た後で考えればいいでしょう という考えです。。
+
+apache の詳しい knowhow は専門書なり専門家(?)なりに聞いてみて下さい。
+例: apache 自体は nobody, CGIは各ユーザ権限とか suexec なり cgiwrap ?
+＃僕はそこまで詳しくないので）
+
+default では apache が CGI を実行する時は
+
+	/usr/local/apache/conf/httpd.conf 
+
+の User 行(nobody が default)で定義されているユーザ権限で実行します。
+当然 apache が実行するCGIもそのユーザの権限になります。よって、そのユー
+ザが /usr/local/fml /var/spool/ml を読み書きできることが必要です。
+
+[ インストールの確認点 ]
+
+(fml の INSTALL ドキュメントにあわせるなら)
+
+0. httpd.conf は User fml にします。
+
+1. /usr/local/fml 以下が 仮想ユーザ fml で見えること 仮想ユーザ fml の
+   人が .cgi のファイルが実行できること
+
+2. /var/spool/ml 以下すべて 仮想ユーザ fml の人に読み書きできるように
+   なっていること
+
+を確認します。
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
