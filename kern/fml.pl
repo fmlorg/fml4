@@ -2028,7 +2028,7 @@ sub Log
 }
 
 # $mode: see open(2) 
-sub fml30__Write
+sub __Write30
 {
     local(*e, *s, *f, $mode, $envelope_hash_key) = @_;
     local($status);
@@ -2063,7 +2063,7 @@ sub HashValueAppend
 {
     local(*e, $key, $f) = @_;
 
-    &fml30__Write(*e, *NULL, *f, "O_APPEND", $key) || do {
+    &__Write30(*e, *NULL, *f, "O_APPEND", $key) || do {
 	local(@caller) = caller;
 	print STDERR "HashValueAppend(@_)::Error caller=<@caller>\n";
     };
@@ -2076,7 +2076,7 @@ sub Append2
 { 
     local($s, $f, $o_append) = @_;
 
-    ($s && &fml30__Write(*NULL, *s, *f, "O_APPEND")) || do {
+    ($s && &__Write30(*NULL, *s, *f, "O_APPEND")) || do {
 	local(@caller) = caller;
 	print STDERR "Append2(@_)::Error caller=<@caller>\n";
     };
@@ -2089,7 +2089,7 @@ sub Write2
     if ($o_append) {
 	return &Append2(@_);
     }
-    elsif ($s && &fml30__Write(*NULL, *s, *f, "O_RWONLY")) {
+    elsif ($s && &__Write30(*NULL, *s, *f, "O_RWONLY")) {
 	;
     }
     else {
