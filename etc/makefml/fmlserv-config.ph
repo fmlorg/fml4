@@ -24,7 +24,7 @@ $FMLSERV_LOGFILE   = "$FMLSERV_DIR/log";
 # In default, "lists" command is NOT AVAILABLE FOR SECURITY.
 # If you permit "lists" command in fmlserv, you set 1.
 $FMLSERV_PERMIT_LISTS_COMMAND = 0;
-
+$FMLSERV_PERMIT_WHICH_COMMAND = 0;
 
 ##################################################################
 # global debug option. if non-nil, debug mode.
