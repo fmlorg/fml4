@@ -99,3 +99,12 @@ testsetup:
 search:
 	@ echo ""
 	@ sh $(DIST_DOC_BIN)/search_doc_generator ${WWW_DB_DIR}
+
+rcsid_check:
+	@ echo ""
+	grep '$$Id' `find . -type f -print ` |\
+	egrep -v '/\.#|~|/var/|libkern.pl|\.orig:|\.rej:|find ' |\
+	grep -v ,v |tee /tmp/list.emplyrcsid
+	@ echo ""
+	@ cat /tmp/list.emplyrcsid
+	@ echo "see /tmp/list.emplyrcsid"
