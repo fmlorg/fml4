@@ -519,7 +519,7 @@ ENCRYPTED_DISTRIBUTION_TYPE:	pgp
 # value: original-date/distribute-date+posted/distribute-date+x-posted
 #	 /distribute-date+x-original-date/received-date+posted
 #	 /received-date+x-posted/received-date+x-original-date
-DATE_TYPE:	received-date+posted
+DATE_TYPE:	original-date
 
 # In article header, fml adds following header fields.
 #
@@ -615,12 +615,12 @@ TZone:		 +0900
 # when $PASS_ALL_FIELDS_IN_HEADER is set. 
 # The old variable name is $SUPERFLUOUS_HEADERS.
 # value: 1/0
-PASS_ALL_FIELDS_IN_HEADER: 0
+PASS_ALL_FIELDS_IN_HEADER: 1
 
 # ignore header field irrespective of @HdrFieldsOrder and
 # $PASS_ALL_FIELDS_IN_HEADER setting
 # value: regexp string
-SKIP_FIELDS:	Received|Return-Receipt-To
+SKIP_FIELDS:	Return-Receipt-To
 
 
 #####################################################################
