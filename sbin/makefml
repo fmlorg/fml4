@@ -4,6 +4,8 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
+### not beatiful yet;_; ...
+
 local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
@@ -170,6 +172,7 @@ sub InitMakeFml
 		'ML_DIR',   '/var/spool/ml', 
 		'DOMAIN',   $DOMAINNAME,
 		'FQDN',     $FQDN,
+		'GROUP',    '',
 		); 
 
     # $COMPAT_ARCH eq "WINDOWS_NT4"
@@ -225,8 +228,8 @@ sub InitMakeFml
     # fix include path for *.pl
     push(@INC, $EXEC_DIR);
 
-    if ($CurConfig{'PERSONAL_OR_GROUP'} eq 'group') {
-	$GroupWritable = 1;
+    if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
+	$GroupWritable = $CurConfig{'PERSONAL_OR_GROUP'};
     }
 
     ### signal handling
@@ -242,11 +245,30 @@ sub InitFmlConfig
     print "---Please Define Your Fml System Configurations\n\n";
 
     # personal or group-shared?
-    printf "%-25s ", 'Personal Use? or ML-Admin-Group-Shared?';
-    $cmd = &Query("Personal or Group ", "personal/group", 
-		  "personal|group", "personal");    
+    printf "%-25s ", 'Personal Use or ML-Admin-Group-Shared or fmlserv you use?';
+    $cmd = &Query("Personal, Group, Fmlserv", "personal/group/fmlserv", 
+		  "personal|group|fmlserv", "personal");    
     $cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
     &do_setq("PERSONAL_OR_GROUP", $cmd);
+
+    if ($cmd eq 'group' || $cmd eq 'fmlserv') {
+	printf "Please define the group (in /etc/group) ML Operators use";
+	$cmd = &Query("Group of Mailing List Operators", 
+		      "fml or GID ([\\w\\d]+)", "[\\w\\d]+", "fml");    
+	&do_setq("GROUP", $cmd);
+
+	$GID = &GetGID($cmd);
+
+	print "GID\t$cmd\n" if $debug;
+	print "GID\t$GID\n" if $debug;
+
+	if (! $GID) {
+	    print "   *** ERROR ***\n";
+	    print "   I cannot find the group \"$cmd\" in /etc/group.\n";
+	    print "   Please define it!\n";
+	    exit 0;
+	}
+    }
 
     # values;
     for (@Config) {
@@ -290,7 +312,8 @@ sub InitFmlConfig
 
 	    if (! -d $dir) {
 		print "   mkdir $dir\n";
-		mkdir($dir, 0755);
+		# here /usr/local/fml;only installer can read-write this;
+		mkdir($dir, 0755); 
 	    }
 	}
     }
@@ -343,10 +366,10 @@ sub Cat
 {
     local($in) = @_;
 
-    open(IN, $in) || return;
+    open(CAT_OUT, $in) || return;
     select(STDOUT); $| = 1;
-    while (<IN>) { print $_;}
-    close(IN); 
+    while (<CAT_OUT>) { print $_;}
+    close(CAT_OUT); 
 }
 
 
@@ -354,12 +377,12 @@ sub Copy
 {
     local($in, $out) = @_;
 
-    open(IN,  $in)      || (&Log("CopyIN: $!"), return);
+    open(COPY_IN,  $in)      || (&Log("CopyIN: $!"), return);
     open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
     select(OUT); $| = 1; select(STDOUT); 
-    while (sysread(IN, $_, 4096)) { print OUT $_;}
+    while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
     close(OUT);
-    close(IN); 
+    close(COPY_IN); 
 }
 
 
@@ -521,7 +544,7 @@ sub GetString
     $s = &gets;
 
     # ^D
-    if ($s eq "")  { exit 0;}
+    if ($s eq "")  { print STDERR "'^D' Trapped.\n"; exit 0;}
     chop $s;
 
     $s;
@@ -540,11 +563,11 @@ sub FixPath
 	$perl = &search_path('perl');
     }
 
-    open(IN, $prog) || (&Warn("cannot open $prog"), return);
+    open(PROG, $prog) || (&Warn("cannot open $prog"), return);
     open(NEW, "> $prog.new") || (&Warn("cannot open $prog.new"), return);
     select(NEW); $| = 1; select(STDOUT);
 
-    while (<IN>) {
+    while (<PROG>) {
 	if ($. == 1) {
 	    print NEW "\#\!$perl\n" if $perl;
 	    next;
@@ -555,7 +578,7 @@ sub FixPath
 	# recreate my own;
 	if ($prog =~ /makefml/ && 
 	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$CONFIG_DIR/) {
-	    print STDERR "-----Replace makefml::\$CONFIG_DIR -> $CONFIG_DIR\n";
+	    #print STDERR "----Replace makefml::\$CONFIG_DIR -> $CONFIG_DIR\n";
 	    print NEW "### AUTOMATICALLY REPLACED by makefml ($MailDate)\n";
 	    print NEW "\$CONFIG_DIR = '$CONFIG_DIR'; ";
 	    print NEW "\# __MAKEFML_AUTO_REPLACED_HERE__\n";
@@ -565,7 +588,7 @@ sub FixPath
 	print NEW $_;
     }
     close(NEW);
-    close(IN);
+    close(PROG);
     sleep 1;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
@@ -630,7 +653,7 @@ sub Query
 	if ($cmd =~ /^($pat)$/) { last;}
 	if ($cmd =~ /^\s*$/) { $cmd = $default; last;}
 
-	print "$CurTag   ***Warning!!! Please input ($query)\n";
+	print "$CurTag   ***Warning!!! Please input one of ($query)\n";
     }    
 
     $cmd;
@@ -848,16 +871,23 @@ sub ResetVariables
 	$USER = $ENV{'USERNAME'};
     }
     else {
-	$USER    = (getpwuid($<))[0];
+	$USER = (getpwuid($<))[0];
     }
 
     $EXEC_DIR = $CurConfig{'EXEC_DIR'};
     $ML_DIR   = $CurConfig{'ML_DIR'};
     $DOMAIN   = $CurConfig{'DOMAIN'};
     $FQDN     = $CurConfig{'FQDN'};
+    $GID      = &GetGID($CurConfig{'GROUP'});
 
-    if ($CurConfig{'PERSONAL_OR_GROUP'} eq 'group') {
-	$GroupWritable = 1;
+    if ($CurConfig{'GROUP'} && !$GID) { 
+	print "Group of ML operatos is not defined in /etc/group\n";
+	print "Please define it in first!\n";
+	exit 0;
+    }
+
+    if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
+	$GroupWritable = $CurConfig{'PERSONAL_OR_GROUP'};
     }
     else {
 	$GroupWritable = 0;	
@@ -893,9 +923,9 @@ sub GenCrontab
 
 	# if $uid == real-UID;
 	if (($uid == $<) && -f "$ML_DIR/$_/crontab") {
-	    if (open(IN, "$ML_DIR/$_/crontab") ) {
-		while (<IN>) { print TAB $_;}
-		close(IN);
+	    if (open(CRONTAB, "$ML_DIR/$_/crontab") ) {
+		while (<CRONTAB>) { print TAB $_;}
+		close(CRAONTAB);
 	    }
 	}
 
@@ -940,7 +970,7 @@ sub Conv
 {
     local($ml, $example, $out) = @_;
     local($uid, $gid);
-    open(IN, $example)  || &Log("cannot open $example");
+    open(EXAMPLE, $example)  || &Log("cannot open $example");
     open(CF, "> $out")   || &Log("cannot open $out");
     select(CF); $| = 1; select(STDOUT);
     
@@ -954,7 +984,7 @@ sub Conv
 	$gid   = $gid || (getpwuid($<))[3];
     }
 
-    while (<IN>) {
+    while (<EXAMPLE>) {
 	s/_EXEC_DIR_/$EXEC_DIR/g;
 	s/_ML_DIR_/$ML_DIR/g;
 	s/_ML_/$ml/g;
@@ -967,7 +997,7 @@ sub Conv
 	print CF $_;
     }
 
-    close(IN);
+    close(EXAMPLE);
     close(CF);
 }
 
@@ -1043,12 +1073,7 @@ sub do_passwd
     &ResetVariables;
 
     # $ml/etc
-    if ($GroupWritable) {	# for backup files
-	-d "$ML_DIR/$ml/etc" || mkdir("$ML_DIR/$ml/etc", 0775);
-    }
-    else {
-	-d "$ML_DIR/$ml/etc" || mkdir("$ML_DIR/$ml/etc", 0755);
-    }
+    &MakeWritableDir("$ML_DIR/$ml/etc");
 
     $passwd_file= "$ML_DIR/$ml/etc/passwd";
 
@@ -1104,17 +1129,9 @@ sub do_init
     }
 
     if (! -d $ML_DIR) {
-	if ($GroupWritable) {
-	    print "   mkdir $ML_DIR (0775)\n";
-	    mkdir($ML_DIR, 0775);
-	}
-	else {
-	    print "   mkdir $ML_DIR (0755)\n";
-	    mkdir($ML_DIR, 0755);
-	}
+	print "   mkdir $ML_DIR\n";
+	&MakeWritableDir($ML_DIR);
     }
-
-    print "\n";
 }
 
 
@@ -1152,15 +1169,15 @@ sub do_install
     &InitFmlConfig;
     &ExecCmd("init");
 
-    print "---Install the Fml system to $CurConfig{'EXEC_DIR'}. O.K.? y/n [n] ";
-    $cmd = &GetString;
+    $cmd = &Query("---Install the Fml system to $CurConfig{'EXEC_DIR'}.", 
+		  "y/n", "y|n", "n");
 
     if ($cmd ne 'y') {
 	print "STOP. (DO NOT INSTALLED)\n";
 	return;
     }
     else {
-	print "\nInstalling ... to $Config'EXEC_DIR\n"; #';
+	print "Installing ... to $Config'EXEC_DIR\n"; #';
     }
 
     &FixPath("src/fml.pl");
@@ -1172,15 +1189,16 @@ sub do_install
     &ResetVariables;
 
     # /var/spool/ml/etc/
+    # etc can be group-writable for crontab/each-user
     if ($GroupWritable) {
 	print STDERR "Group Writable\n" if $debug;
 	print STDERR "mkdir $ML_ETC_DIR\n" if $debug;;
-	-d $ML_ETC_DIR || mkdir($ML_ETC_DIR, 0775);
+	&MakeWritableDir($ML_ETC_DIR);
     }
     else {
 	print STDERR "Personal Use\n" if $debug;;
 	print STDERR "mkdir $ML_ETC_DIR\n" if $debug;;
-	-d $ML_ETC_DIR || mkdir($ML_ETC_DIR, 0755);
+	&MakeWritableDir($ML_ETC_DIR);
     }
 
     # $EXEC_DIR/sbin/install.sh is NOT yet installed 
@@ -1195,6 +1213,11 @@ sub do_install
     }
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
+    }
+
+    if ($GroupWritable eq 'fmlserv') {
+	$cmd = &Query("Set up \"fmlserv\" system now? ", "y/n", "y|n", "n");
+	if ($cmd eq 'y') { &ExecCmd("fmlserv");}
     }
 }
 
@@ -1218,30 +1241,23 @@ sub GenerateDirectory
 
     ### mkdir ML Directory
     # group writable;
+    # etc, etc/crontab can be group-writable for crontab/each-user
     if ($GroupWritable) {
 	print STDERR "Group Writable\n"  if $debug;;
 	print STDERR "mkdir etc crontab\n" if $debug;;
-	-d $ML_ETC_DIR           || mkdir($ML_ETC_DIR, 0775);
-	-d "$ML_ETC_DIR/crontab" || mkdir("$ML_ETC_DIR/crontab", 0775);
+	&MakeWritableDir($ML_ETC_DIR);
+	&MakeWritableDir("$ML_ETC_DIR/crontab");
     }
     else {
 	print STDERR "Personal Use\n" if $debug;;
 	print STDERR "mkdir etc crontab\n" if $debug;;
-	-d $ML_ETC_DIR           || mkdir($ML_ETC_DIR, 0755);
-	-d "$ML_ETC_DIR/crontab" || mkdir("$ML_ETC_DIR/crontab", 0755);
+	&MakeWritableDir($ML_ETC_DIR);
+	&MakeWritableDir("$ML_ETC_DIR/crontab");
     }
-
-    # group read but not-write apermission;
-    # -d "$ML_ETC_DIR/$ml"     || mkdir("$ML_ETC_DIR/$ml", 0755);
 
     # owner only read-write
     # umask(077);
-    if ($GroupWritable) {	# for backup files
-	-d "$ML_DIR/$ml"         || mkdir("$ML_DIR/$ml", 0775);
-    }
-    else {
-	-d "$ML_DIR/$ml"         || mkdir("$ML_DIR/$ml", 0755);	
-    }
+    &MakeDir("$ML_DIR/$ml");
 }
 
 
@@ -1256,8 +1272,8 @@ sub do_newml
     &ResetVariables;
 
     ### cf file; 
-    &SetWritableUmask;
-    &SetPublicUmask;
+    # &SetWritableUmask; &SetPublicUmask;
+    &SetPersonalUmask;	# umask 077;
 
     #print STDERR "$EXEC_DIR/cf/__makefml -> $ML_DIR/$ml/cf\n";
     &Conv($ml, "$EXEC_DIR/cf/__makefml", "$ML_DIR/$ml/cf");
@@ -1271,18 +1287,25 @@ sub do_newml
     }
 
     &ResetVariables;
+    &SetPublicUmask;
 
     # include file is public readable;
     # why for () fails?;
     &Conv($ml, "$EXEC_DIR/etc/makefml/include", "$ML_DIR/$ml/include");
     &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
+
+    &SetPersonalUmask;	# umask 077;
+
     &Conv($ml, "$EXEC_DIR/etc/makefml/crontab", "$ML_DIR/$ml/crontab");
     &Conv($ml, "$EXEC_DIR/etc/makefml/fml.c",   "$ML_DIR/$ml/fml.c");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
     &FixIncludeHeader;
+
+    &Copy("$EXEC_DIR/doc/drafts/help", "$ML_DIR/fmlserv/help");
 
     # here backed to the writable bit == 077 or 007
     &SetWritableUmask;
+    &SetPersonalUmask;	# umask 077;
 
     &GenCrontab;
 
@@ -1492,18 +1515,22 @@ sub do_fmlserv
     &ResetVariables;
 
     ### cf file; 
-    &SetWritableUmask;
-
     &ResetVariables;
+
+    &SetPublicUmask;
 
     # include file is public readable;
     # why for () fails?;
     local($exec_dir) = "$EXEC_DIR/etc/makefml";
     &Conv($ml, "$exec_dir/fmlserv-include", "$ML_DIR/$ml/include");
     &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_DIR/$ml/aliases");
-    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$ML_DIR/$ml/fml.c");
 
+    &SetPersonalUmask;
+    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$ML_DIR/$ml/fml.c");
     &FixIncludeHeader;
+
+    # fmlserv (uid != owner ) can read help
+    ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
     &Copy("$EXEC_DIR/doc/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
 
@@ -1512,13 +1539,12 @@ sub do_fmlserv
     print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
     &Cat("$ML_DIR/$ml/aliases");
     print "\n";
-
 }
 
 
 sub SetWritableUmask
 {
-    if ($GroupWritable) {
+    if ($GroupWritable eq 'fmlserv') {
 	umask(007);
     }
     else {
@@ -1526,9 +1552,47 @@ sub SetWritableUmask
     }
 }
 
+sub SetPersonalUmask
+{
+    umask(077);
+}
+
 sub SetPublicUmask
 {
     umask(022);
+}
+
+sub GetGID
+{
+    open(GROUP, "/etc/group") || (&Log("cannot open /etc/group"), return '');
+    while (<GROUP>) { /^$_[0]/ && (return (split(/:/, $_))[2]);}
+    close(GROUP);
+
+    "";
+}
+
+sub MakeWritableDir
+{
+    if ($GroupWritable) {	# for backup files
+	-d $_[0] || mkdir($_[0], 0775);
+	chown $<, $GID, $_[0] if $GID;
+    }
+    else {
+	-d $_[0] || mkdir($_[0], 0755);
+    }
+}
+
+sub MakeDir
+{
+    print "---MakeDir($_[0])\t(UID=$< GID=$GID)\n";
+
+    if ($GroupWritable eq 'fmlserv') {	# for backup files
+	-d $_[0] || mkdir($_[0], 0775);
+	chown $<, $GID, $_[0] if $GID;
+    }
+    else {
+	-d $_[0] || mkdir($_[0], 0755);
+    }
 }
 
 #################################################################
