@@ -111,7 +111,7 @@ sub OneLineCheckP
     if ($n_paragraph == 2) { 
 	my($buf) = &main::STR2EUC($lparbuf);
 	my($pat); 
-	if ($buf =~ /(\n.)/) { $pat = $1;}
+	if ($buf =~ /(\n.)/) { $pat = quotemeta($1);}
 
 	# basic citation ?
 	if ($buf =~ /\n>/) {
