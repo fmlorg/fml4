@@ -206,7 +206,7 @@ sub DoGenerateHeader
     @to || do { &Log("GenerateHeader: ERROR: NO \@to"); return;};
 
     # prepare: *rcpt for Smtp();
-    local($x, $lc_rcpt);
+    my ($lc_rcpt);
     for (@to) {
 	# Address Representation Range Check
 	&ValidAddrSpecP($_) || /^[^\@]+$/ || do {
