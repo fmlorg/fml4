@@ -2,13 +2,27 @@
 
 .S	ドキュメントはどこにありますか？
 
+インストールしたドキュメントをみましょう。
+
 /usr/local/fml/doc/
 
-をみましょう。
+などです。
 
-なお http://www.fml.org/fml/ が常に最新版です。
-そのため手元の fml と異なっているかも知れません。
+なお http://www.fml.org/fml/ は常に最新版の current のドキュメントです。
+そのためあなたの手元の fml と異なっているかも知れません。
 
+
+.S	fml-current の最新版のドキュメントはどこにありますか？
+
+.url http://www.fml.org/fml/
+
+は常に最新版の current です。
+注: リアルタイムに最新版ということではありません
+
+
+.S	fml-stable の一番新しいドキュメントはどこにありますか？
+
+.url http://www.fml.org/fml/sources/stable/src/doc/html/index-j.html
 
 .S	http://www.fml.org/fml/ をダウンロードしたい
 
