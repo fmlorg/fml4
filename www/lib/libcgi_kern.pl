@@ -514,12 +514,17 @@ sub SpawnProcess
 {
     local($prog) = @_;
 
-    if (open(PROG, "$prog 2>&1 |")) {
+    # open(PROG, "$prog 2>&1 |")
+    open(PROG, "-|") || exec $prog, "2>&1";
+
+    if ($? || $!) {
+	&Err("cannot open $prog\n");
+	&Err($!."\n");
+	&Err("exit (" .($? & 255). ")") if $? & 255;
+    }
+    else {
 	while (<PROG>) { &P($_);}
 	close(PROG);
-
-	&ERROR("exit (" .($? & 255). ")") if $? & 255;
-	# &ERROR($!) if $!;
     }
 }
 

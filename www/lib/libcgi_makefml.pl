@@ -95,11 +95,6 @@ sub UpperHalf
     if ($ErrorString) { &Exit($ErrorString);}
 
     &P("<PRE>");
-
-    if ($debug) {
-	while (($k, $v) = each %ENV)    { &P("ENV: $k => $v");}
-	while (($k, $v) = each %Config) { &P("Config: $k => $v");}
-    }
 }
 
 
@@ -156,13 +151,14 @@ sub Control
 sub MailServerConfig
 {
     local($proc, *config) = @_;
-    local($s);
 
     if ($proc eq 'run_newaliases') {
-	&P(""); &P("*** setup aliases ***"); &P("");
-	&P("-- run newaliases");
+	&P($NULL); &P("*** update aliases ***"); &P($NULL);
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
+	    # /usr/sbin/postalias
+	    $ENV{'PATH'} = '/bin:/usr/ucb:/usr/bin:/sbin:/usr/sbin';
+
 	    &P("run \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\"");
 	    &P($NULL);
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
@@ -175,6 +171,8 @@ sub MailServerConfig
     else {
 	&ERROR("MailServerConfig: unknown $proc");
     }
+
+    if ($ErrorString) { &Exit($ErrorString);}
 }
 
 
@@ -452,6 +450,7 @@ sub Command
 
 sub Finish
 {
+    &P("-- FINISH --");
     if ($ErrorString) { &Exit($ErrorString);}
 
     &P("</PRE>");
