@@ -921,6 +921,15 @@ PORT:		25
 # value: filename string
 SMTP_LOG:		$VARLOG_DIR/_smtplog
 
+# rotate use of var/log/_smtplog.$i (where $i is the number)
+# value: 1/0
+USE_SMTP_LOG_ROTATE:	1
+
+# the number of var/log/_smtplog.$i files. This is the value of modulus.
+# value: number
+NUM_SMTP_LOG_ROTATE:	8
+
+
 # IF $NOT_TRACE_SMTP IS 1 (default 0), we log the SMTP session to $SMTP_LOG
 # IF $TRACE_SMTP_DELAY IS 1, we log the delay of response between SMTP server.
 # value: 1/0
