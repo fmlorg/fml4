@@ -404,6 +404,8 @@ sub AdminCommand
     else {
 	# if undefined commands, notify the user about it and abort.
 	&LogWEnv("*** unknown admin command $cmd ***", *e);
+	&Mesg(*e, "   FYI: To get help for administrators,");
+	&Mesg(*e, "   send 'admin help' or 'approve PASSWORD help' to $CONTROL_ADDRESS.");
 	return 0; # 0 == LAST(libfml.pl);
     }
 } # admin mode ends;
