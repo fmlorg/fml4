@@ -10,6 +10,10 @@
 # $FML$
 #
 
+# local scope in html routines ( libsynchtml libhtmlsubr )
+local($WriteHtmlFileCount) = 0;
+
+
 # Name: Syncronization of spool and html files directory
 #       
 # Parameters:
@@ -27,6 +31,9 @@ sub SyncHtml
     local($dir, $file, *e) = @_;
     local($id, $subdir, $title, $list, $mtime, $probe, $li, $html_dir);
     local($remake_index, $subdir_first_time);
+
+    # initialize counter to count up number of attachments
+    $WriteHtmlFileCount = 0;
 
     # work in distribution mode only
     if (! $e{'mode:dist'}) { # flag on when through Distribute()
