@@ -359,7 +359,7 @@ sub MSendReadActiveList
 	  $MRcpt{$rcpt} = "\@$relay:$rcpt";
       }	# % relay is not refered in RFC, but effective in Sendmail's.
 
-      $When{$rcpt} = 1 if $_cf{'opt:a'}; # opttion -a always(for Ver.5);
+      $When{$rcpt} = 1 if $Opt{'opt:a'}; # opttion -a always(for Ver.5);
 
   }# end of while;
 

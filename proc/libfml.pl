@@ -351,7 +351,7 @@ sub InitProcedure
     $COMMAND_SYNTAX_EXTENSION = 1 if $RPG_ML_FORM_FLAG;
 
     # Command Line Options
-    $COMMAND_ONLY_SERVER = 1 if $_cf{'opt:c'};
+    $COMMAND_ONLY_SERVER = 1 if $Opt{'opt:c'};
 
     # Initialize for libmember_name.pl
     &use('member_name') if $USE_MEMBER_NAME;
