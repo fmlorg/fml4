@@ -366,6 +366,13 @@ GEN_BRANCH_ARCHIVE () {
 
 	tar cf $FMLID.tar $FMLID 
 	gzip -9 $FMLID.tar
+
+	bzip=`which bzip2`
+	if [ "X$bzip" != X ];then
+		tar cf $FMLID.tar $FMLID 
+		bzip2 $FMLID.tar
+	fi
+
 	find $FMLID |zip -q -@ $FMLID.zip
 
 	set +vx
@@ -437,6 +444,14 @@ GEN_ARCHIVE () {
 
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
+
+	bzip=`which bzip2`
+	if [ "X$bzip" != X ];then
+		tar cf $FMLID.tar $FMLID 
+		bzip2 $FMLID.tar
+		cp -p $FMLID.tar.bz2 $FTP
+	fi
+
 
 	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
 	   (

@@ -25,3 +25,4 @@ SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 PERL  = /usr/local/bin/perl
 RSYNC = /usr/local/bin/rsync
 ZIP   = /usr/local/bin/zip
+BZIP2 = /usr/bin/bzip2
