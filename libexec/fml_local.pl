@@ -174,7 +174,6 @@ sub FmlLocalInitilize
 sub FmlLocalReadCF
 {
     local($INFILE) = @_;
-    local($eval);
 
     $INFILE = $INFILE || $FML_LOCAL_RC;
     
@@ -204,14 +203,15 @@ sub FmlLocalReadCF
 		eval "\$$VAR = '$1';";
 		next;
 	    }
+
+	    $VAR =~ tr/A-Z/a-z/; # lower
+	    $VAR{$VAR} = 1;
 	}
 
 	# store configurations
 	push(@CF, $_);
     }
     close(CF);
-    
-    "$eval\n1;\n";
 }
 
 
@@ -265,8 +265,6 @@ sub FmlLocalPatternMatch
 {
     # IF WITHOUT UNIX FROM e.g. for slocal bug??? 
     if (! ($MailHeaders =~ /^From\s+\S+/i)) {
-	local($USER) = 
-	    $ENV{'USER'}|| getlogin || (getpwuid($<))[0] || $MAINTAINER;
 	$MailHeaders = "From $USER $MailDate\n".$MailHeaders;
     }
 
@@ -333,48 +331,80 @@ sub Expand_mailbox
 sub FmlLocalEntryMatch
 {
     local($field, $pattern, $type, $exec, @exec, $pat);
-    local($SUCSSESIVE_CONDITION, $AND_COUNTER);
+    local($AND_UNMATCH) = 0;
 
-  CF: foreach $pat (@CF) {
-      ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
-      $field =~ tr/A-Z/a-z/;
-      $exec  = join(" ", @exec);
+  CF: while(@CF) {
+      print STDERR "CF\t" if $debug;
 
-      if ($pat =~ /^\s*$/o) {
-	  undef $SUCSSESIVE_CONDITION;
-	  undef $AND_COUNTER;      
-      }
-      elsif ($pat =~ /^\#/o) {
-	  ;			# do nothing
-      }
-      else {
-	  $SUCSSESIVE_CONDITION++;
-      }
+      # get
+      ($field, $pattern, $type, $exec) = &FmlLocal_get($pat = shift @CF);
+      next CF if $VAR{$field};
 
-      # debug
-      print STDERR "($field, $pattern, $type, $exec)\n" if $debug;
+      # skip
+      next CF if $pat =~ /^\s*$/o;
+      next CF if $pat =~ /^\#/o;
+
+      ##### FOR AND SYNTAX #####
+      $AND_UNMATCH = 0;
 
       # HEADER MATCHING PATTERN
       if ($field{"$field:"} =~ /$pattern/) {
-	  $AND_COUNTER++;
-	  &FmlLocalSet($type, $exec, $1, $2, $3) if $exec;
+	  &FmlLocalSet($type, $exec, $1, $2, $3) if $type;
       }
 
       # BODY MATCHING PATTERN
-      if ($field =~ /^body$/i && 
+      elsif ($field =~ /^body$/i && 
 	  &FmlLocalMatchInBody($pattern, $type, $exec)) {
-	  $AND_COUNTER++;
-	  &FmlLocalSet($type, $exec, $1, $2, $3) if $exec;
+	  &FmlLocalSet($type, $exec, $1, $2, $3) if $type;
+      }
+      else {
+	  $AND_UNMATCH = 1;
       }
 
-      ################################################### 
-      if ($AND_COUNTER == $SUCSSESIVE_CONDITION) {
-	  &Log("\$AND_COUNTER == \$SUCSSESIVE_CONDITION") if $debug;
-      }
-      ################################################### 
-  }# FOREACH;
+    AND: while(! $type) {
+	# get
+	print STDERR "AND\t" if $debug;
+	($field, $pattern, $type, $exec) = &FmlLocal_get($pat = shift @CF);
+
+	# skip
+	next AND if $pat =~ /^\s*$/o;
+	next AND if $pat =~ /^\#/o;
+
+	# HEADER MATCHING PATTERN
+	if ($field{"$field:"} =~ /$pattern/) {
+	    &FmlLocalSet($type, $exec, $1, $2, $3) if $type && (!$AND_UNMATCH);
+	    next AND;
+	}
+
+	# BODY MATCHING PATTERN
+	if ($field =~ /^body$/i && 
+	    &FmlLocalMatchInBody($pattern, $type, $exec)) {
+	    &FmlLocalSet($type, $exec, $1, $2, $3) if $type && (!$AND_UNMATCH);
+	    next AND;
+	}
+
+	print STDERR "AND\tUNMATCH\t1n" if $debug;
+	$AND_UNMATCH = 1;# must be 'not matched field exists'.
+    }# AND;
+  }# CF;
 }
 
+
+sub FmlLocal_get
+{
+    local($pat) = @_;
+    
+    # get variables
+    ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
+    $field =~ tr/A-Z/a-z/;
+    $exec  = join(" ", @exec);
+
+    print STDERR "($field, $pattern, $type, $exec)\n" if $debug;
+    ($field, $pattern, $type, $exec);
+}
+
+
+sub FmlLocalUnSet{ undef $TYPE, $EXEC, $F1, $F2, $F3;}
 
 sub FmlLocalSet
 {
@@ -389,11 +419,11 @@ sub FmlLocalSet
     $F3  = $f3;
 
     if ($debug) {
-	print STDERR "MATCH\t$field =~ /$pattern/\n";
-	print STDERR "DO\t$TYPE$EXEC\n";
-	print STDERR "F1\t$F1\n" if $F1;
-	print STDERR "F2\t$F2\n" if $F2;
-	print STDERR "F3\t$F3\n" if $F3;
+	print STDERR "\tMATCH\t$field =~ /$pattern/\n";
+	print STDERR "\tDO\t$TYPE$EXEC\n";
+	print STDERR "\tF1\t$F1\n" if $F1;
+	print STDERR "\tF2\t$F2\n" if $F2;
+	print STDERR "\tF3\t$F3\n" if $F3;
     }
 
     undef $UNMATCH_P;
@@ -403,6 +433,7 @@ sub FmlLocalSet
 sub FmlLocalMatchInBody
 {
     local($pat, $type, $exec) = @_;
+    local($result) = 0;
     local(@MailBody) = split(/\n/, $MailBody);
 
     while(@MailBody) {
@@ -411,24 +442,24 @@ sub FmlLocalMatchInBody
 
 	  return 1 if /$pat/i;	# match!
 
-	  if (/^#\s*PASS\s+(.*)/ || /^#\s*PASSWORD\s+(.*)/) {
-	      &Log("AUTHENTIFIED");
-	      $AUTH++ if $1 eq $PASSWORD;
-	      next;
+	  if (/^\#\s*PASS\s+(.*)/ || /^\#\s*PASSWORD\s+(.*)/) {
+	      ($1 eq $PASSWORD) && $AUTH++ && 
+		  &Log("AUTHENTIFIED") && $result++;
 	  }
 
-	  if (/^#\s*PASSWD\s+(.*)/) {
+	  if (/^\#\s*PASSWD\s+(.*)/) {
 	      if (! $AUTH) {
 		  &Log("NOT AUTHENTIFIED BUT PASSWD REQUEST. STOP!");
+		  undef $result;
 		  last;
 	      }
-	      &Log("CHANGE PASSWD [$PASSWORD] -> [$1]");
+	      &Log("PASSWD [$PASSWORD] -> [$1]");
 	      &FmlLocalAppend2CF("\nPASSWORD $1\n"); # additional '\n'
-	      next;
+	      $result++;
 	  }
       }
 
-    0;
+    $result;
 }
 
 
