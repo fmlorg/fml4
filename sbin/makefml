@@ -9,6 +9,11 @@ $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
+### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
+$FML_RCDIR = ""; # __MAKEFML_AUTO_REPLACED_HERE__
+
+
+
 &InitMakeFml;
 &InitTTY;
 
@@ -34,6 +39,8 @@ exit 0;
 #################### LIBLARIES ####################
 sub InitMakeFml
 {
+    &GetTime;
+
     require 'getopts.pl';
     &Getopts("dh");
 
@@ -50,24 +57,6 @@ sub InitMakeFml
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
-
-    {
-	print "---Try to inspect your Operating System ...\n\n";
-	local($eval);
-
-	$eval = q#$OS_TYPE = `sh sbin/os-type`;#;
-	eval($eval);
-
-	print STDERR $@ if $@;
-	print "\n";
-
-	chop $OS_TYPE;
-	$OS_TYPE =~ tr/a-z/A-Z/;
-
-	print "   Your OS looks $OS_TYPE\n";
-	print "\n";
-    }
-
 
     { # DNS AutoConfigure to set FQDN and DOMAINNAME; 
 	local(@n, $hostname, $list);
@@ -86,11 +75,8 @@ sub InitMakeFml
     # config amd temporary files
     $CONFIG_TMP  = "/tmp/.fmlconfig.$user";
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$user";
-    $FML_RCDIR   = "$HOME/.fml";
+    $FML_RCDIR   = $FML_RCDIR || "$HOME/.fml";
     $FML_CONFIG  = "$FML_RCDIR/config";
-
-    # directory
-    -d $FML_RCDIR || mkdir($FML_RCDIR, 0755);
 
     # initialize files
     if (-f $FML_CONFIG) {
@@ -106,12 +92,31 @@ sub InitMakeFml
     }
     else {
 	$TheFirstTime = 1;
-
-	# touch;
-	print OUT "Creating $FML_CONFIG ...\n";
-	&SaveConfig("1;");
-	sleep 1;
     }
+
+    # if not defined this machine OS;
+    if ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
+	print "---THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+    }
+    else {
+	print "---Try to inspect your Operating System ...\n\n";
+	local($eval);
+
+	$eval = q#$OS_TYPE = `sh sbin/os-type`;#;
+	eval($eval);
+
+	print STDERR $@ if $@;
+	print "\n";
+
+	chop $OS_TYPE;
+	$OS_TYPE =~ tr/a-z/A-Z/;
+
+	print "   Your OS looks $OS_TYPE\n";
+	print "\n";
+
+	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
+    }
+
 
     @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
 
@@ -138,9 +143,8 @@ sub InitMakeFml
 		    'byeuser', 'do_byeuser',
 		    );
 
-    # CurConfig
-    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
-    eval($s);
+    # anyway set;
+    &GetCurConfig;
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -153,9 +157,6 @@ sub InitFmlConfig
     local($cmd, $prompt, $v);
 
     print "---Please Define Your Fml System \n\n";
-
-    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
-    eval($s);
 
     for (@Config) {
 	$k = $_;
@@ -173,8 +174,49 @@ sub InitFmlConfig
 
     print "\n$buf\n";
 
+    &GetCurConfig;
+
+    print "FML_RCDIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
+    print "Config Saved in [$CurConfig{'EXEC_DIR'}/.fml] ";
+
+    $cmd = &GetString;
+    $cmd = ($cmd !~ /^\s*$/) ? $cmd : "$CurConfig{'EXEC_DIR'}/.fml";
+    $FML_RCDIR = $cmd;
+
+    # mkdir FML_RCDIR;
+    {
+	local($dir);
+	for (split(/\//, $FML_RCDIR)) {
+	    $dir .= "/$_";
+	    $dir =~ s#//#/#g;
+
+	    if (! -d $dir) {
+		print "   mkdir $dir\n";
+		mkdir($dir, 0700);
+	    }
+	}
+    }
+
+    $FML_CONFIG  = "$FML_RCDIR/config";
+
     $buf = &Dumpvar('Config');
     &SaveConfig($buf);
+
+    print "\nThe Current Config is saved in $FML_CONFIG\n";
+}
+
+
+sub GetCurConfig
+{
+    local($s);
+
+    # reset %CurConfig from Config Name Space;
+    for (keys %Default) { 
+	$s .= "\$CurConfig{'$_'} = \$Config'$_;\n";
+    }
+
+    eval($s);
+    print "$@\n---\n$s\n" if $@;
 }
 
 
@@ -187,6 +229,7 @@ sub SaveConfig
     open(F, ">> $FML_CONFIG") || die("Cannot save config to $FML_CONFIG");
     select(F); $| = 1; select(STDOUT);
     print F "$buf\n";
+    print F "\n1;\n";
     close(F);
 }
 
@@ -262,7 +305,8 @@ sub MakeFmlLock
     opendir(DIRD, $dir);
     for (readdir(DIRD)) {
 	next if /^\./;
-
+	next unless -f "$dir/$_/config.ph";
+	$count++;
 	print " $_";
 
 	$FP_SPOOL_DIR = "$dir/$_/spool";
@@ -272,7 +316,12 @@ sub MakeFmlLock
     }
     closedir(DIRD);
 
-    print "\n   ALL ML ACTIONS ARE LOCKED; GO AHEAD!\n\n";
+    if ($count) {
+	print "\n   ALL ML ACTIONS ARE LOCKED; GO AHEAD!\n\n";
+    }
+    else {
+	print "\n   NO ML EXISTS; GO AHEAD!\n\n";
+    }
 }
 
 
@@ -384,7 +433,6 @@ sub Menu
     }
 }
 
-
 sub ExecCmd
 {
     local($_) = @_;
@@ -392,9 +440,7 @@ sub ExecCmd
 
     @argv = split(/\s+/, $_);
 
-    # reset %CurConfig from Config Name Space;
-    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
-    eval($s);
+    &GetCurConfig;
 
     # function pointer;
     $fp = shift @argv;
@@ -518,15 +564,15 @@ sub do_init
     print "do_init: @_\n" if $debug;
 
     # do_init;
-    print "\n\n";
-
+    print "\n";
+    
     for ($Config'EXEC_DIR, $Config'ML_DIR) {
 	if (! -d $_) {
-	    print "\tmkdir $_\n";
+	    print "   mkdir $_\n";
 	    mkdir($_, 0755);
 	}
     }
-
+    print "\n";
     return 'LAST';
 }
 
@@ -535,7 +581,7 @@ sub do_install
 {
     local($cmd);
 
-    print "---Ready to install the Fml system, O.K.? [y/n] ";
+    print "---Install the Fml system to $CurConfig{'EXEC_DIR'}. O.K.? [y/n] ";
     $cmd = &GetString;
 
     if ($cmd ne 'y') {
@@ -548,6 +594,8 @@ sub do_install
 
     &FixPath("src/fml.pl");
     &FixPath("src/msend.pl");
+    &FixPath("sbin/makefml");
+    &FixPath("cf/config");
 
     # $exec_dir/sbin/install.sh is NOT yet installed 
     if (-f "sbin/install.sh") {
@@ -575,6 +623,16 @@ sub FixPath
 	    print NEW "\#\!$perl\n";
 	    next;
 	}
+
+	# recreate my own;
+	if ($prog =~ /makefml/ && 
+	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$FML_RCDIR/) {
+	    print NEW "### AUTOMATICALLY REPLACED by makefml ($MailDate)\n";
+	    print NEW "\$FML_RCDIR = \"$FML_RCDIR\"; ";
+	    print NEW "\# __MAKEFML_AUTO_REPLACED_HERE__\n";
+	    next;
+	}
+
 	print NEW $_;
     }
     close(OUT);
@@ -622,14 +680,7 @@ sub do_newml
 
     print "---Creating $ml mailing list\n";
 
-    $user     = (getpwuid($<))[0];
-    $exec_dir = $CurConfig{'EXEC_DIR'};
-    $ml_dir   = $CurConfig{'ML_DIR'};
-    $domain   = $CurConfig{'DOMAIN'};
-    $fqdn     = $CurConfig{'FQDN'};
-
-    # Mailing list name is all lower case;
-    $ml =~ tr/A-Z/a-z/;
+    &InitLocalVariables;
 
     # mkdir ML Directory
     mkdir("$ml_dir/$ml", 0700);
@@ -643,7 +694,7 @@ sub do_newml
 
     # 
     # make ml/config.ph
-    system "$exec_dir/cf/config $FML_RCDIR/$ml.cf > $ml_dir/$ml/config.ph";
+    system "perl $exec_dir/cf/config $FML_RCDIR/$ml.cf > $ml_dir/$ml/config.ph";
 
     ### generate samples, includes and aliases in $exec_dir/include ###
     umask(022);
@@ -668,8 +719,22 @@ sub do_newml
 
     # the last info
     print "Please see several examples in $FML_RCDIR/$ml\n";
-    print "   Example of Aliases ($FML_RCDIR/$ml/aliases)\n\n";
+    print "\n# Example of Aliases ($FML_RCDIR/$ml/aliases)\n";
     &Cat("$FML_RCDIR/$ml/aliases");
+    print "\n";
+}
+
+
+sub InitLocalVariables
+{
+    $user     = (getpwuid($<))[0];
+    $exec_dir = $CurConfig{'EXEC_DIR'};
+    $ml_dir   = $CurConfig{'ML_DIR'};
+    $domain   = $CurConfig{'DOMAIN'};
+    $fqdn     = $CurConfig{'FQDN'};
+
+    # Mailing list name is all lower case;
+    $ml =~ tr/A-Z/a-z/;
 }
 
 
@@ -814,6 +879,27 @@ sub Conv
 }
 
 
+sub GetTime
+{
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+}
+
 #####
 package dumpvar;
 
@@ -843,7 +929,7 @@ sub main'Dumpvar
 	    if ($key ne "_$package" && $key ne "_DB" && defined %entry) {
 		$buf .= "\%$key = (\n";
 		foreach $key (sort keys(%entry)) {
-		    $buf .= "  $key\t'",$entry{$key},"'\n";
+		    $buf .= "\t '$key', '$entry{$key}', \n";
 		}
 		$buf .= ");\n";
 	    }
