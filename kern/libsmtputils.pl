@@ -75,7 +75,7 @@ sub DoNeonSendFile
 	return $NULL if $error;	# END if only one error is found. Valid?
     } # for loop;
 
-    ### DEFAULT SUBJECT. ABOVE, each subject for each file
+    ### DEFAULT SUBJECT. ABOVE, each subject for each file 
     $le{'GH:Subject:'} = $subject;
     $le{'preamble'} .= $Envelope{'preamble'}.$PREAMBLE_MAILBODY;
     $le{'trailer'}  .= $Envelope{'trailer'}.$TRAILER_MAILBODY;
