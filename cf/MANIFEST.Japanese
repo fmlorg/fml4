@@ -6,10 +6,10 @@
 INFO:
 # FML Configurable Variable Definitions
 #
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -641,7 +641,7 @@ UNSUBSCRIBE_AUTH_TYPE:
 
 .j "chaddr アドレスを変更するコマンド" にも confirmation を用いるか？
 .j defualt は使わない
-# chaddr checks confirmation (not implemented)
+# chaddr checks confirmation
 # value: confirmation / ""
 CHADDR_AUTH_TYPE:
 
@@ -664,7 +664,7 @@ LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
 
 .j 保存するファイル数(default 100)
 .j 101 通めは 1 になる。つまり modulus により円管バッファになっている
-.j 大きいメールは先頭の $LOG_MAIL_FILE_SIZE_MAX (2048) bytes分だけ
+.j 大きいメールは本文先頭の $LOG_MAIL_FILE_SIZE_MAX (2048) bytes分だけ
 .j 保存する(ヘッダ等の方が重要なので大きいメール本文は途中まででも構わない)
 # value: number
 NUM_LOG_MAIL:	100
