@@ -448,7 +448,7 @@ _CTK_matome 0		普通の配送へ戻す
 	uf	PLAINTEXT(UNIX FROM)
 	i	lha + ish 
 	ish	lha + ish 
-	mp	MIME/mMultipart	PLAINTEXT
+	mp	MIME/Multipart	PLAINTEXT
 	d	RFC1153 format 	PLAINTEXT
 	b	RFC934 format 	PLAINTEXT(mh-burst)
 	rfc934	
