@@ -1,6 +1,22 @@
 .C	インストールについて
 .l	install
 
+
+.S	makefml によるインストール
+
+とりあえず細かいチューニングを行なわなくてよいなら
+=E
+The simplest way to install Fml system is to do in the top directory
+of the fml source
+# Hence a lot of variables are pre-defined.
+
+	perl makefml 
+
+=E
+when you make a new ML 
+=S
+
+
 .S	makefml: 初心者向けインストール・インターフェイス
 .k	makefml: fmlのインストーラ
 .l	sbin/makefml
@@ -667,31 +683,15 @@ $CONTROL_ADDRESS にアドレスを登録するとコマンド専用のＭＬサーバが作れ
 listname-ctl アドレスを使うのが良いでしょう。
 
 
-.S	Subject: にコマンドを書く場合
-.k	$USE_SUBJECT_AS_COMMANDS
-.xref	STDIN->fml
-
-	$USE_SUBJECT_AS_COMMANDS = 1;
-
-の場合は、Subject: の部分をコマンドとみなします。
-.xref	STDIN->fml
-
-	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
-	# で始まり、$CHADDR_KEYWORD のキーワード
-
-$COMMAND_ONLY_SERVER がセットされている場合は、キーワード # の有無に関
-わらず、上記のキーワードを探索します。
-.xref	$COMMAND_ONLY_SERVER
-
-キーワードを見つけた場合は、コマンドモードへ移行します。
-
-
-.S	リモートで管理する設定
+.S	リモートで管理する際のアクセス制御
 .xref	REMOTE-ADMINISTRATION pgp bin/passwd.pl
 
 SMTPでは所詮どうしようもないのでデフォールトではリモートでサーバを管理
 するようにはなっていません。可能な限り避けるべきです。リモート管理より
 Secure Shell で makefml を起動させるような仕組みがあるとよいですね。
+
+Email Address と秘密鍵の組合せ もしくは 公開鍵暗合によりアクセス制御を
+行なっています。
 
 詳細は「リモート管理」の章を見てください。
 .xref REMOTE-ADMINISTRATION 
