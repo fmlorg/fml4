@@ -179,6 +179,10 @@ sub PopFmlLock
 
     print STDERR "--try lock ... ($$)\n" if $debug;
 
+    # anyway shutdown after 45 sec (60 sec. must be a unit).
+    $SIG{'ALRM'} = "PopFmlProgShutdown";
+    alarm($ALARM || 45);
+
     open(LOCK, $queue_dir);
     flock(LOCK, $LOCK_EX);
 
@@ -209,9 +213,6 @@ sub PopFmlProg
 
     print STDERR "--PopFmlProg (queue_dir=$queue_dir prog=$prog)\n" if $debug;
 
-    # anyway shutdown after 45 sec.
-    $SIG{'ALRM'} = "PopFmlProgShutdown";
-    alarm($ALARM || 300);
     &PopFmlLock;
 
     opendir(DIRD, $queue_dir) || &Log("Cannot opendir $queue_dir");
