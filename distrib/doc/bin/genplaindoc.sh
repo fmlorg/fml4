@@ -39,13 +39,13 @@ gendoc ()
 		echo "";
 		echo "________________________";
 		echo "";
-		echo "$x	=>	./$OUT_DIR/$file"
+		echo "$x	=>	$OUT_DIR/$file"
 
-		if [ $x -nt ./$OUT_DIR/${file}.jp -o ! -e ./$OUT_DIR/${file}.jp ]
+		if [ $x -nt $OUT_DIR/${file}.jp -o ! -e $OUT_DIR/${file}.jp ]
 		then
 		   test -d $OUT_DIR || mkdirhier $OUT_DIR
-		   $FORMATTER -n i < $x > ./$OUT_DIR/${file}.jp
-		   $FORMATTER -L ENGLISH -n i < $x > ./$OUT_DIR/${file}.en
+		   $FORMATTER -n i < $x > $OUT_DIR/${file}.jp
+		   $FORMATTER -L ENGLISH -n i < $x > $OUT_DIR/${file}.en
 		fi
 	else
 		echo "cannot found $x"
