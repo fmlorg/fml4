@@ -1,15 +1,15 @@
-#!/usr/local/bin/perl --    # -*-Perl-*-
+# -*-Perl-*-
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: libcompat_cf1.pl,v 1.11 1998/11/20 16:29:28 fukachan Exp fukachan $
+# $Id: libcompat_cf1.pl,v 1.1.1.1 2000/02/20 15:49:55 fukachan Exp $
 
 
 $DOMAINNAME          || ($DOMAINNAME = "domain.uja");
@@ -74,7 +74,7 @@ $LOCK_UN             || ($LOCK_UN = 8);
 ############################################################################
 # FML R2 CONFIGURATIONS
 # libcompat_cf1.pl is generated from cf/MANIFEST
-#    $Id: libcompat_cf1.pl,v 1.11 1998/11/20 16:29:28 fukachan Exp fukachan $
+#    $Id: libcompat_cf1.pl,v 1.1.1.1 2000/02/20 15:49:55 fukachan Exp $
 # @ARCHIVE_DIR  = ('var/archive', 'old');
 
 

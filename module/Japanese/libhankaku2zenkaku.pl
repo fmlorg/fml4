@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#-*- perl -*-
 #
 # Covert Shift-JIS(MachineDependCode, Hankaku-Kana) to
 #	JIS Code(NonMachineDepend, Zenkaku-Kana)
@@ -10,7 +10,7 @@
 #		Input and Output => JIS
 
 #
-# $Id: libhankaku2zenkaku.pl,v 1.4 2000/06/12 11:23:28 fukachan Exp $
+# $Id: libhankaku2zenkaku.pl,v 1.5 2000/07/17 14:23:44 fukachan Exp $
 #
 
 sub FixJapaneseMDChars
