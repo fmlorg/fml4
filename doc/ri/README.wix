@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML 2.2 (2.2A) Mailing List Server Package
+	FML 2.2.1 Mailing List Server Package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -28,7 +28,7 @@ MLをリモートで管理するためのもの)などからなります。また対話設定プログ
 にするエミュレータなどの多くの補助プログラムなどもついています。
 .fi
 .if LANG == ENGLISH
-FML 2.2 is a package of mailing list server and utility programs. It
+FML 2.2.1 is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
 in Japan from 1993 to 1998. FML contains
 
@@ -342,7 +342,7 @@ INSTALL and INSTALL_on_NT4.
 
 	postfix 19990325 on NetBSD 1.4_ALPHA 
 
-○ テスト環境: fml 2.2 のターゲットマシン/テスト環境は
+○ テスト環境: fml 2.2.1 のターゲットマシン/テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
@@ -362,8 +362,8 @@ delivery (as both an experiment and a demonstration :-).
 	postfix snap-19990322
 
 
-.C	FML 2.2A の機能の概要
-=E.C	FML 2.2A Function Overview
+.C	FML 2.2.1 の機能の概要
+=E.C	FML 2.2.1 Function Overview
 
 .if LANG == JAPANESE
 基本的な設計方針は
