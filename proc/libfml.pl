@@ -380,12 +380,19 @@ sub InitProcedure
 		    '#members',     $MEMBER_LIST,
 		    'member', 'ProcFileSendBack',
 		    '#member',     $MEMBER_LIST,
+		    # Database Access
+		    'dbd#members',  'dump_member_list',
+		    'dbd#member',   'dump_member_list',
 
 		    # return a active file of Mailing List
 		    'actives',  'ProcFileSendBack',
 		    '#actives',    $ACTIVE_LIST,
 		    'active',  'ProcFileSendBack',
 		    '#active',    $ACTIVE_LIST,
+		    # Database Access
+		    'dbd#actives',  'dump_active_list',
+		    'dbd#active',   'dump_active_list',
+
 
 		    # MODE switch(users not require to know this option.)
 		    'mode',    'ProcModeSet',
@@ -614,6 +621,11 @@ sub ProcFileSendBack
     local($proc, *Fld, *e, *misc) = @_;
     local(@to, $subject, $f, @files, $draft, $draft_dir, @tmp);
     local($ignore_mode);
+
+    if ($USE_DATABASE) {
+	my ($dbdirective) = $Procedure{"dbd#$proc"};
+	&Log("Directive => $dbdirective") if $dbdirective;
+    }
 
     # file to send back
     # ADMIN MODE

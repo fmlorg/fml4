@@ -221,6 +221,11 @@ sub AdminModeInit
 		  '#members',             $MEMBER_LIST,
 		  'admin:actives',        'ProcFileSendBack',
 		  '#actives',             $ACTIVE_LIST,
+		  # Database Access to user member/active lists
+		  'dbd#admin:members',  'dump_member_list',
+		  'dbd#admin:member',   'dump_member_list',
+		  'dbd#admin:actives',  'dump_active_list',
+		  'dbd#admin:active',   'dump_active_list',
 
 		  # overwrite commands
 		  'admin:iam',            'ProcAdminWhois',
@@ -594,8 +599,7 @@ sub ProcAdminSubscribe
 	&DataBaseMIBPrepare(\%mib, 'subscribe', {'address' => $addr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
 	if ($mib{'error'}) {
-	    &Log("ERROR: database server is down ?");
-	    &Mesg(*Envelope, 'configuration_error');
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
 	    return 0; # return ASAP
 	}
     }
@@ -698,7 +702,17 @@ sub ProcAdminAddAdmin
 
     &Log("admin $proc $s");
     
-    if (&Append2($s, $ADMIN_MEMBER_LIST)) { 
+    if ($USE_DATABASE) {
+	&use('databases');
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'addadmin', { 'address' => $opt[0] });
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
+	    return 0; # return ASAP
+	}
+    }
+    elsif (&Append2($s, $ADMIN_MEMBER_LIST)) { 
 	&Log("admin $proc $s >> \$ADMIN_MEMBER_LIST", *e);
 	&Mesg(*e, "   O.K.");
     }
@@ -720,15 +734,27 @@ sub ProcAdminAddAdmin
 sub ProcAdminByeAdmin
 {
     local($proc, *Fld, *e, *opt) = @_;
-    local($ok);
+    my ($ok);
+
     $proc = 'BYE';
+    &Log("admin $proc @opt");
 
-    &Log("admin $proc $s");
-
-    &use('amctl');
-    &ChangeMemberList($proc, $opt, $ADMIN_MEMBER_LIST, *misc) && $ok++;
-    &LogWEnv("admin $proc ".($ok || "Fails ")."[$opt]");
-    &Mesg(*e, $NULL, 'error', "admin $proc") unless $ok;
+    if ($USE_DATABASE) {
+	&use('databases');
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'byeadmin', { 'address' => $opt[0] });
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
+	    return 0; # return ASAP
+	}
+    }
+    else {
+	&use('amctl');
+	&ChangeMemberList($proc, $opt, $ADMIN_MEMBER_LIST, *misc) && $ok++;
+	&LogWEnv("admin $proc ".($ok || "Fails ")."[$opt]");
+	&Mesg(*e, $NULL, 'error', "admin $proc") unless $ok;
+    }
 
     1;
 }
