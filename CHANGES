@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/02/03
+
+  fmlserv
+	oops, RunHooks() is not used now.
+	fix it to use RunexitHooks().
+
 2001/02/01
 
   ドキュメント修正
