@@ -130,6 +130,7 @@ etc/mime.types
 distrib/compile/RELEASE_FILES
 distrib/compile/release_date
 conf/release_version
+etc/mgrdomains
 
 
 OBSOLETE_SBIN_SOURCES:
