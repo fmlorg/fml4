@@ -123,4 +123,4 @@ syncinfo:
 	$(JCONV) $(WORK_DOC_DIR)/INFO > $(SNAPSHOT_DIR)/info
 
 libkern:
-	sed '/^$$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
+	sed '/^$$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
