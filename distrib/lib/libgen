@@ -491,6 +491,8 @@ GEN_ARCHIVE () {
 
 			chdir $FTP
 
+			rm -f htmldocs-${BRANCH}-*
+
 			mv htdocs ${TB}
 			tar cvf ${TB}.tar ${TB}
 			gzip -9 -f -v ${TB}.tar
