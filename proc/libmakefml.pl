@@ -7,6 +7,7 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
+# do not change here for backward compat ;_;
 sub ConfigByMakeFml
 {
     $UnderMakeFml = 1; # Set Global Identifier;
@@ -32,6 +33,7 @@ sub ConfigByMakeFml
 	if ($MAKE_FML{'SUBJECT_TAG'}) {
 	    require 'libtagdef.pl';
 	    &SubjectTagDef($MAKE_FML{'SUBJECT_TAG'});
+
 	    # below is not required now (97/01/30) but backward-compatibility;
 	    $BRACKET = $MAKE_FML{'ML_NAME'}; 
 	}
