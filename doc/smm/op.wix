@@ -2048,15 +2048,21 @@ Archive.pl が gzip化 のメインなのでこれのおき場所をちゃんとセットして
 .label	{expire}
 .key	$FML_EXIT_HOOK
 
+形式： &Expire(場所, 日数(以上古いファイルを消す));
+
 $FML_EXIT_HOOK = q#
-	require 'expire.pl';
-	$EXPIRE = 7;
-	&Expire($SPOOL_DIR, $EXPIRE);
+	&use('expire');
+	&Expire($SPOOL_DIR, 7);
 #;
 
-と設定すれば、$SPOOL_DIR 以下のファイルにたいして $EXPIRE 以上古いファ
-イルを消します（いきなり消します。注意）
-＃ expire.pl を perl の inlcude pathのどこかにいれてください
+と設定すれば、$SPOOL_DIR 以下のファイルにたいして 7日以上古いファイル
+を消します（いきなり消します。注意）
+
+今： libexpire.pl を作った。
+旧： expire.pl を perl の inlcude pathのどこかにいれてください
+
+まぁこれだと、毎回起動するたびに一個ずつ消すことになるので、やることの
+わりにおおげさですね。
 
 cron で 
 	expire.pl -s spool-directory -e expire-period 
@@ -2067,20 +2073,29 @@ cron で
 .label	{expire_with_number}
 .key	$FML_EXIT_HOOK
 
+形式： &Expire(場所, 残すファイル数 , 1（ファイルで実行を指示するため）);
+
 $FML_EXIT_HOOK = q#
-	require 'expire.pl';
-	$EXPIRE = 50;
-	&Expire($SPOOL_DIR, $EXPIRE, 1);
+	&use('expire');
+	&Expire($SPOOL_DIR, 50, 1);
 #;
 
+今： libexpire.pl を作った。
+旧： expire.pl を perl の inlcude pathのどこかにいれてください
+
 と設定すれば、$SPOOL_DIR 以下のファイルにたいして 
-	”$EXPIRE 個残して”（注意）
+	”５０個残して”（注意）
 それ以外の古いファイルを消します（いきなり消します。注意）
-＃ expire.pl を perl の inlcude pathのどこかにいれてください
 
 cron で 
 	expire.pl -s spool-directory -e expire-period 
 とかを設定して、週一くらいで動かせばいいのでは？
+
+
+.S 	いきなりExpireの実験はしないほうが…
+
+$SPOOL_DIR じゃなくて tmp の下に tmp/spool とか作って、実験したほうが
+いいですね。
 
 
 .S	expire.pl コマンドラインオプション
@@ -2096,7 +2111,7 @@ expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
 
 
 
-.S	logファイルの整理、消去をする
+.S	logファイルの整理、消去をする → newsyslog
 .seealso	newsyslog
 
 
