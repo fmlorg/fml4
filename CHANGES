@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/08/22
+
+   fix "admin put" removes (^admin|^# admin) lines
+	fml-support:8435
+
 2000/08/21
    update virus_check.ph
 
