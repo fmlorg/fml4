@@ -1,4 +1,4 @@
-.C	めーる配送システムのチューニング
+.C	メール配送について
 =E.C	Mail Delivery System Tuning
 
 .S	リレー(RFC821)
@@ -186,6 +186,31 @@ CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
 
 これにさらに MX Cache 等が組合わさって、R８はR５にくらべ非常に高速化さ
 れましたね。
+
+
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+.key	lib/Utilitites/packmbox.pl
+.key	packmbox.pl
+
+lib/Utilitites/packmbox.pl を使って、
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+
+.S	配送プログラム(e.g. sendmail)との通信のログ
+.key	var/log/_smtplog
+.key	_smtplog
+.key	$NOT_TRACE_SMTP
+
+sendmailとのやりとりの記録(もっとも最近のものだけ)デバッグに便利です。
+(デバッグとか終わっちゃって)必要ないなら
+
+	$NOT_TRACE_SMTP = 1; 
+
+と config.ph にかいてください。ログをとらなくなります。
 
 
 .# $Id$
