@@ -3,6 +3,8 @@ CC 	  = /usr/bin/cc
 CFLAGS	  = -s -O -DPOSIX
 MKDIR     = mkdirhier
 RSYNC     = rsync --rsh ssh
+FETCH     = /usr/bin/ftp
+TAR       = /usr/bin/tar
 
 # Convert to Japanese/English
 JCONV     = nkf -j
