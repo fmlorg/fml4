@@ -3576,7 +3576,7 @@ sub do_adduser
     else {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
-	    if (! &AutoRegistrableP);
+	    if &UseSeparateListP;
     }
 
     &ResetVariables;
@@ -3644,7 +3644,7 @@ sub do_byeuser
     else {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
-	    if (! &AutoRegistrableP);
+	    if &UseSeparateListP;
     }
 
     &ResetVariables;
@@ -3716,7 +3716,10 @@ sub do_ctladdr
     &SetWritableUmask;
 
     # files to change
-    if (&AutoRegistrableP) {
+    # XXX 1999/09/25
+    # we control actives/both also in "auto_asymmetric_regist" mode,
+    # so we should use *SeparateList*() functions.
+    if (&NotUseSeparateListP) {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 
     }
@@ -3756,18 +3759,65 @@ sub do_ctladdr
 }
 
 
+sub NonAutoRegistrableP { ! &AutoRegistrableP;}
 sub AutoRegistrableP
 {
-    local($rph, $rch);
-    $rph = &Value('REJECT_POST_HANDLER');
-    $rch = &Value('REJECT_COMMAND_HANDLER');
+    local($REJECT_POST_HANDLER)    = &Value('REJECT_POST_HANDLER') || 
+	$config{'REJECT_POST_HANDLER'};
+    local($REJECT_COMMAND_HANDLER) = &Value('REJECT_COMMAND_HANDLER') ||
+	$config{'REJECT_COMMAND_HANDLER'};
 
-    if ($rph =~ /auto\S+regist/ || $rch =~ /auto\S+regist/) {
-	print STDERR "\tAutoRegistrableP\n" if $debug;
+    if ($REJECT_POST_HANDLER && $REJECT_COMMAND_HANDLER) {
+	print STDERR "REJECT_{POST,COMMAND}_HANDLER is vaild\n" if $debug;
+    }
+    else {
+	print STDERR "Error: REJECT_{POST,COMMAND}_HANDLER is invaild\n";
+	&Log("Error: REJECT_{POST,COMMAND}_HANDLER is invaild");
+    }
+
+    if ($REJECT_POST_HANDLER =~ /auto\S+regist/ &&
+	 $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist') {
+	&Log("These HANDLER configuration may not work well");
+    }
+
+    if ($Envelope{'mode:ctladdr'} && 
+	($REJECT_POST_HANDLER    eq 'auto_asymmetric_regist' ||
+	 $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist')) {
+	"auto_asymmetric_regist";
+    }
+    elsif ($Envelope{'mode:ctladdr'} && 
+	($REJECT_POST_HANDLER    eq 'auto_subscribe' ||
+	 $REJECT_COMMAND_HANDLER eq 'auto_subscribe')) {
+	"auto_subscribe";
+    }
+    elsif ($REJECT_COMMAND_HANDLER =~ /auto_regist/i ||
+	   $REJECT_COMMAND_HANDLER =~ /auto_subscribe/i ||
+	   $REJECT_COMMAND_HANDLER =~ /autoregist/i) {
+	$REJECT_COMMAND_HANDLER;
+    }
+    elsif ($REJECT_POST_HANDLER =~ /auto_regist/i ||
+	   $REJECT_POST_HANDLER =~ /auto_subscribe/i ||
+	   $REJECT_POST_HANDLER =~ /autoregist/i) {
+	   $REJECT_POST_HANDLER;
+    }
+    else {
+	0;
+    }
+}
+
+sub NotUseSeparateListP { ! &UseSeparateListP;}
+sub UseSeparateListP
+{
+    local($x) = &AutoRegistrableP;
+
+    if ($debug_fml30 == 1) { 
+	&Log("AutoRegistrableP = $x"); $debug_fml30++;
+    }
+
+    if ($x eq 'auto_subscribe' || (! $x)) {
 	1;
     }
     else {
-	print STDERR "\tNot AutoRegistrableP\n" if $debug;
 	0;
     }
 }
