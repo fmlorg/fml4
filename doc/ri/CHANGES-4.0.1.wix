@@ -1,6 +1,13 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+2001/03/23
+
+   proc/libamctl.pl (2.45-2.46):   
+	apply patch by shigetoshi hirano (fml-support: 09336)         
+	add the missing member check at subscribe request when we use
+	DBMS. 
+
 2001/03/15
 
    databases/postgresql/toymodel.pl (1.6-1.9):
