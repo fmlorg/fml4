@@ -105,7 +105,15 @@ sub DoDistribute
 	    if ($SUBJECT_FORM_LONG_ID) {
 		$id = &LongId($ID, $SUBJECT_FORM_LONG_ID);
 	    }
-	    $pat = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
+
+	    if ($BRACKET_SEPARATOR ne '') {
+		$pat = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
+	    }
+	    else {
+		$pat = $BEGIN_BRACKET.$BRACKET.$END_BRACKET;
+	    }
+
+
 	    $e{'h:Subject:'} = "$pat $subject";
 	}
     }
