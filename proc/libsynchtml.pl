@@ -87,7 +87,7 @@ sub SyncHtml
 	    # $id (HREF of $subdir) is included in top_dir index.html ? 
 	    # index.html must exist. If not, it must be an error.
 	    if (-f "$html_dir/index.html" &&
-		(! &Grep($id, "$html_dir/index.html"))) { 
+		(! &Grep("HREF=\\S+$id/", "$html_dir/index.html"))) { 
 		&Log("Warning: $id is not in $html_dir/index.html") if $debug_html;
 		$remake_index = 1; # expire flag (irrespective of first time)
 	    }
@@ -214,7 +214,7 @@ sub SyncHtml
     # reconfig "htdocs/index.html". where $id is for "htdocs/$id/index.html".
     # It is a trick to use probe mode, since probe mode is a probe but 
     # is used to adjust the htdocs/ if required.
-    if (! &Grep($id, "$html_dir/index.html")) {
+    if (! &Grep("HREF=\\S+$id/", "$html_dir/index.html")) {
 	&Debug("no $id in index.html, reconfig") if $debug;
 	$e{'html:probe'} = 1;
 	&SyncHtml($html_dir, $file, *e);
@@ -293,6 +293,9 @@ sub SyncHtmlGenDirId
 	$first  = $id > 0 ? $id : 1;
 	$last   = $id + $HTML_INDEX_UNIT - 1;
 
+	# directory = 1 only if $id == 0;
+	# $id     = $id > 0 ? $id : 1;
+
 	# Reconfigure TOP Directory index.html when mkdir ..
 	$li     = "Count $first -- $last";
     }
@@ -331,7 +334,8 @@ sub Grep
 {
     local($key, $file) = @_;
 
-    &Log("Grep $key $file") if $verbose;
+    print STDERR "Grep /$key/i $file\n" if $debug_html;
+    &Log("Grep /$key/i $file") if $verbose;
 
     open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
     while (<IN>) { return $_ if /$key/i;}
