@@ -7,8 +7,11 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
+
+use vars qw($debug);
+no strict qw(subs);
 
 sub DoSmtpFeed
 {
@@ -18,8 +21,7 @@ sub DoSmtpFeed
 
 sub SetupSmtpFeed
 {
-    local($smtpfeed);
-    $smtpfeed = &SearchPath("smtpfeed", "/usr/libexec") || 
+    my $smtpfeed = &SearchPath("smtpfeed", "/usr/libexec") || 
 	"/usr/libexed/smtpfeed";
 
     require 'open2.pl';
@@ -37,15 +39,18 @@ package lmtp;
 
 sub Copy
 {
-    local($in, $out) = @_;
-    local($mode) = (stat($in))[2];
+    my ($in, $out) = @_;
+    my ($mode) = (stat($in))[2];
+
     open(COPYIN,  $in)      || (&Log("ERROR: Copy::In [$!]"), return 0);
     open(COPYOUT, "> $out") || (&Log("ERROR: Copy::Out [$!]"), return 0);
     select(COPYOUT); $| = 1; select(STDOUT);
+
     chmod $mode, $out;
     while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}
     close(COPYOUT);
     close(COPYIN); 
+
     1;
 }
 
