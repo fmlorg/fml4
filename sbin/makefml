@@ -2565,6 +2565,7 @@ sub SetGidBit
     local($mode);
 
     return if $OS_TYPE eq 'BSD44';
+    return if $CPU_TYPE_MANUFACTURER_OS =~ /netbsd|bsdi/;
 
     $mode = (stat($file))[2];
     $mode = $mode | 02000;
