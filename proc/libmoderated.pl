@@ -261,6 +261,9 @@ sub ModeratorNotify
     $cp = $Envelope{'preamble'};
     $Envelope{'preamble'} = $preamble;
 
+    # default declaration
+    $distfile = $distfile || "$DIR/moderators";
+
     if ($debug_moderator) {
 	if ($distfile) { 
 	    if (-f $distfile) {
