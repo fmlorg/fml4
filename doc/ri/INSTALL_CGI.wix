@@ -1,14 +1,11 @@
 .HTML_PRE
 .if LANG == JAPANESE
-	CGIのインストールについて (fml-current)
-
-	〜かきかけ〜
-
+	fml CGI インターフェイスのインストールについて
 
 				深町 賢一
 .fi
 .if LANG == ENGLISH
-	CGI installation guide on Unix
+	fml CGI interface setup guide on Unix
 
 				Ken'ichi Fukamachi
 .fi
@@ -16,78 +13,118 @@
 
 .toc
 
-
 .C	Overview
 
-おおまかには
+.S	overview
 
-	fml のインストール
-	apache の変更		(設定変更の sample patch あり)
-	メールサーバの変更	(設定変更の sample patch あり)
+fml CGI インターフェイスは makefml の代表的な機能を CGI 経由で可能にす
+るものです。あなた自身が使うかどうかはともかく、この fml CGI インター
+フェイスにより UNIX に不慣れな人にも各自の WWW ブラウザによるメンバー
+の登録と削除などが可能になります。
 
-の3ステップからなります。
+また makefml config で可能なカスタマイズ項目は CGI のメニュー設定画面
+でも利用できます。
+
+現在想定されているサーバ構成は WWW は apache (1.3.x)、メールサーバは、
+sendmail か postfix です。
+＃ qmail はどう組み合わせるのがよいかを検討中です。
+
+
+.S	CGI のセットアップ
+
+	CGI スクリプトの準備	htpasswd .htaccess などの設定
+	apache の変更		(設定変更の見本があります)
+	メールサーバの変更	(設定変更の見本があります)
+
+の３ステップからなります。
 
 注意:
 
-1. このドキュメントは fml GUI 専用サーバを作る前提で書かれています。
+1. 本ドキュメント本編は fml GUI 専用サーバを作る前提で書かれています。
 
-2. すでに WWW サーバが動いてるところへ fml CGIも入れる場合
-
-   http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
+2. もし、稼働中の WWW サーバを大きく改造することができない場合
+   例: いまさら User nobody は変更できない
 
 たぶん suexec を使ってユーザ fml のページで fml CGI を動かすとなるので
-しょう。これは簡単に付録で解説してあります。例えばすでに WWW サーバが
-動いているので改造ができない状態で、fml CGIを追加する場合を想定してい
-ます。本ドキュメントの本編は fml 専用サーバのためのガイドです。
-	
-
-トラブルシュート: うまくいかない時はまず間違いなく fml 自体ではなくWWW
-サーバもしくはメールサーバ絡みの設定でつまづいているので、まずそれぞれ
-のサーバのエラー等を良く見て下さい。
-
-各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマニュ
-アルや文献を確認して下さい。
-メールサーバの単なる設定の付け加え忘れもあるようです。
+しょう。これは簡単に付録で解説してあります。
 
 
+.S	トラブルシュート
 
-.C	fml のインストール手順
-=E.C	Overview
+うまくいかない時は fml 自体ではなく WWW サーバもしくはメールサーバの
+設定でつまづいていることが多いようです。
+まずそれぞれのサーバのログを確認しエラー等がないかを確認して下さい。
+また各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマ
+ニュアルや文献を確認して下さい。
+
+.S	CGI 階層のモデル
+
+.C	各ディレクトリの権限について
+
+以下たとえば $EXEC_DIR は /usr/local/fml です。
+
+   $EXEC_DIR/www/share/cgi-bin/fml/admin/
+
+	fml 管理者用画面といえる
+	そのホスト上で makefml を使える人
+	つまり何でもできる権限がある人と等価
+
+	各MLの管理者とは別の集合である可能性がある
+	よってパスワードは別途設定するべき(特にインストール時)
+
+   $EXEC_DIR/www/share/cgi-bin/fml/ml-admin/$ml/
+
+	各MLの管理者の権限
+	メーリングリストサーバのホストに入れるとは限らない
+
+	パスワード認証をともなうべきで
+	adminコマンドと同じパスワード?
+ 
+   $EXEC_DIR/www/share/cgi-bin/fml/ml/$ml/ (仮) 未実装
+
+	一般ユーザが入る階層
+	パスワード認証をともなうべき
 
 
-.S	概要
 
-	fml-current をインストール
+.C	CGI スクリプトをつくる
 
+まず、fml 管理者用のスクリプトを用意します。
 
-.S	fml-current のインストール
-=E.S	installation of fml-current
+% makefml admin.cgi config
 
-current をもってくる。
+を実行すると以下のような画面になります。
 
-.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
+   ************************************************************
 
-普通のfmlと同様にソースを広げてインストール。ただしその時のmakeの引数
-が違って
+        <<< makefml --- FML CGI Configuration Interface --- >>>
 
-	make install-withcgi
-	(makefml -W cgi install を実行する)
+0     END
+1     USE_MOD_SSL         NO
+2     REAL_CGI_PATH       /usr/local/fml/www/share/cgi-bin/fml
+3     CGI_AUTHDB_DIR      /usr/local/fml/www/authdb
+4     CHANGE PASSWORD
+5     REMAKE CGI SCRIPTS
 
-として実行する。インストールの最後に対話的に２、３のことを聞かれる。
-これは
-
-	$EXEC_DIR/share/cgi-bin/fml/admin/.htacces
-	$EXEC_DIR/share/cgi-bin/fml/admin/*.cgi
-
-	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
-		admin:$CRYPTED_PASSWORD
-
-の設定を行なうためで、このホスト上でmakefmlを使って実行することと同等
-のことを行なえるようにする。例: ＭＬをつくる、けす。どのＭＬでも設定が
-できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
+which ? (0-5) [0] 
 
 
-.C	WWW サーバの設定の変更
+使い方も意味は何となくわかるとおもいます。
+
+1. ssl をつかうかいなか
+2. WWW サーバにとって /cgi-bin/fml/ になるディレクトリです。
+3. htpasswd をおくディレクトリです。
+
+1. 2. 3. は基本的な設定といえます。この３つの設定後
+
+4. でユーザとパスワードをつけます。
+
+終了する時に CGI スクリプトを作りなおすか？と聞かれるので y と答えると
+
+$REAL_CGI_PATH 以下のスクリプトを再生成します。
+
+
+.C	WWW サーバの設定の変更 (apache 1.3.x)
 
 /usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに適宜
 付け足す。
@@ -119,12 +156,12 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 場合はその行より前に
 
-	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/share/cgi-bin/fml/"
+	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/www/share/cgi-bin/fml/"
 
 を足して下さい。
 
 例:
-	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/share/cgi-bin/fml/"
+	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/www/share/cgi-bin/fml/"
 
 	... 略 ...
 
@@ -209,48 +246,10 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 .C	特定のＭＬだけはCGIでいじれるようにしてあげる
 =E.C	enable a mailing list to be configured on cgi menu
 
-	makefml mladmin.cgi ML
+	% makefml ml-admin.cgi elena config
 
-ないしはCGIの画面
+使い方は admin.cgi と同様です。
 
-    http://the.fml.host/cgi-bin/fml/admin/menu.cgi
-
-で「メーリングリストをWWWでいじれるように設定する」を使う。
-
-例えば elena ＭＬをWWWからいじれるように設定すると
-
-    http://the.fml.host/cgi-bin/fml/ml-admin/elena/menu.cgi
-
-というURLで elena ＭＬの設定だけを特定のユーザに触らせることができる。
-
-各ＭＬについて細かいアクセス制御(このアドレス空間からのみ認める)などは
-httpd の設定をいじること
-
-
-.C	各ディレクトリの権限について
-
-以下たとえば $EXEC_DIR は /usr/local/fml です。
-
-   $EXEC_DIR/share/cgi-bin/fml/admin/
- 
-	そのホスト上で makefml を使える人
-	つまり何でもできる権限がある人と等価
-
-	各MLの管理者とは別の集合である可能性がある
-	よってパスワードは別途設定するべき(特にインストール時)
-
-   $EXEC_DIR/share/cgi-bin/fml/ml-admin/$ml/
-
-	各MLの管理者の権限
-	メーリングリストサーバのホストに入れるとは限らない
-
-	パスワード認証をともなうべきで
-	adminコマンドと同じパスワード?
- 
-   $EXEC_DIR/share/cgi-bin/fml/ml/$ml/ (仮) 未実装
-
-	一般ユーザが入る階層
-	パスワード認証をともなうべき
 
 .appendix
 
@@ -327,7 +326,7 @@ cgi.conf に
 
 例:
 .q
-$REAL_CGI_PATH   = "/usr/local/fml/share/cgi-bin/fml";
+$REAL_CGI_PATH   = "/usr/local/fml/www/share/cgi-bin/fml";
 $CGI_AUTHDB_DIR  = "/usr/local/fml/www/authdb";
 $SSL_REQUIRE_SSL = "";
 
