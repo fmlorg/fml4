@@ -67,8 +67,9 @@ sub SmtpMCIDeliver
 sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
-    local($autoconv, $count, $boundary, $fn);
+    local($autoconv, $count, $boundary, $fn, $ml);
 
+    $ml    = (split(/\@/, $MAIL_LIST))[0];
     $count = scalar(@f) > 1 ? 1 : 0;
 
     for $f (@f) {
@@ -103,10 +104,10 @@ sub DoSmtpFiles2Socket
 	    &jcode'convert(*_, 'jis') if $autoconv;#';
 
 	    # guide, help, ...
-	    if (/dev/ && $Envelope{'mode:doc:repl'}) {
-		s/dev\.null\@domain.uja/$MAIL_LIST/g;
-		s/dev\.null\-admin\@domain.uja/$MAINTAINER/g;
-		s/dev\.null\-ctl\@domain.uja/$CONTROL_ADDRESS/g;
+	    if ($Envelope{'mode:doc:repl'}) {
+		s/_ML_/$ml/g;
+		s/_DOMAIN_/$DOMAINNAME/g;
+		s/_FQDN_/$FQDN/g;
 	    }
 
 	    s/\n/\r\n/;
