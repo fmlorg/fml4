@@ -1232,6 +1232,25 @@ sub ExecNewProcess
     }
 }
 
+sub SpawnProcess
+{
+    local($p) = @_;
+    $0 = "$FML: Spawn Process <$LOCKFILE>";
+
+    if (open(PROC, "| $p")) {
+	select(PROC); $| = 1; select(STDOUT);
+
+	print PROC $Envelope{'Hdr'};
+	print PROC "\n";
+	print PROC $Envelope{'Body'};
+
+	close(PROC);
+    }
+    else {
+	&Log("cannot execute $p");
+    }
+}
+
 ####### Section: Member Check
 # fix array list;
 #
