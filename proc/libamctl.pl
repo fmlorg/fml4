@@ -279,7 +279,7 @@ sub GetSubscribeString
     local($buf, $pb, $pe);
 
     # evalute the first multipart block
-    if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e, $_);}
+    if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e);}
 
     if ($debug_confirm) {
 	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
