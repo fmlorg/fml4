@@ -596,7 +596,14 @@ CRONTAB:			etc/crontab
 CRON_NOTIFY:			1
 CRON_PIDFILE:			var/run/cron.pid
 
+# cross operations
 USE_CROSSPOST:
+
+# Under $USE_MEMBER_NAME is set, commands on member lists
+# are with Gecos Fields which are extracted from From: field 
+# in the time of auto registration.
+# Author: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+USE_MEMBER_NAME:
 
 
 #####################################################################
