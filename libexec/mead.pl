@@ -809,7 +809,7 @@ sub SearchPath
 }
 
 
-sub ValidAddressP($addr)
+sub ValidAddressP
 {
     my ($a) = @_;
     $a =~ /^[-a-z0-9\._]+\@[a-z0-9\.-]+$/i ? 1 : 0;
