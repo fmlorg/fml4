@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/03/25
+
+   cf/MANIFEST 
+	ML_FN = null by default
+
 2001/03/23
 
    proc/libamctl.pl

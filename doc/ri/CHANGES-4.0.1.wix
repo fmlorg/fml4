@@ -1,6 +1,12 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+
+2001/03/25
+
+   cf/MANIFEST (1.79-1.80):
+	ML_FN = null by default
+
 2001/03/23
 
    proc/libamctl.pl (2.45-2.46):   
