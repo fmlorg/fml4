@@ -80,6 +80,7 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
 
 
 .S	自動登録を有効にする
+.xref	access_policy
 
 デフォールトのＭＬサーバの挙動は
 
