@@ -1,6 +1,8 @@
 .HTML_PRE
 
 	fml 3.0 の設定 -- リモートで管理する --
+=E
+	fml 3.0 -- control fml by mail in remote --
 
  [用語]
    % はユーザの prompt
@@ -15,7 +17,10 @@
 .include ptr.wix
 
 .HTML_PRE
-
+.if LANG == ENGLISH
+.include config-remote.en.wix
+.return
+.fi
 ○ 目的
 
 メーリングリストを走らせるマシンにアクセス権限がない
@@ -35,20 +40,12 @@ PGPを選択すればPGPの clear sign でそのメールの認証を行なう。PGPを選択
 究めて高い。ここではデフォールトのパスワードの方を説明する。
 
 
-○ メーリングリストを作る
-
-% makefml newml elena
-% makefml add elena 自分のアドレス
-% su
-# cat /var/spool/ml/elena/aliases >> /etc/aliases
-# newaliases
-# exit
+○ メーリングリストを作る (省略)
 
 ○ リモート管理を可能にする。
 
 デフォールトではそのようなことは認めていないため明示的に機能をUPさせな
 いとだめ。
-
 
 % makefml config elena
 
