@@ -20,6 +20,8 @@ $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
 $FORMAT  = 'q|~q';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
+$BGColor   = "E6E6FA";# lavender ("E0FFFF" == lightcyan)
+
 
 # Alphabetical Order Table
 for('A'..'Z') { push(@AlpTable, $_);}
@@ -155,8 +157,8 @@ sub CleanUp
 
     print STDERR "Caught a SIG$sig--shutting down\n" if $sig;
 
-#    unlink $TmpFile;
-#    unlink $TmpFile_Eng;
+    unlink $TmpFile;
+    unlink $TmpFile_Eng;
 
     exit(0);
 }
@@ -216,6 +218,7 @@ sub OutputHtml
 	    close(OUTHTML);
 	    open(OUTHTML, "> $outfile") || die "$!\n";
 	    print OUTHTML "<TITLE>$Title $name</TITLE>";
+	    print OUTHTML "<BODY BGCOLOR=$BGColor>\n" if $BGColor;
 
 	    next;		# cut the line "^#.CUT";
 	}
