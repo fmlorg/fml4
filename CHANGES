@@ -36,6 +36,12 @@
 
 
 
+2001/07/16
+
+  proc/libmesgle.pl
+
+	$LANGUAGE に English を指定した時にエラーメッセージが出るのを修正
+
 2001/07/12
 
    4.0.2_BETA
