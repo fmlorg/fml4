@@ -196,6 +196,7 @@ SYNOPSIS
 
 
 .S	WIX言語フォーマッタ (bin/fwix.pl)
+.l	fwix.pl
 .key	bin/fwix.pl
 .key	fwix.pl
 .xref	WIX
@@ -204,6 +205,7 @@ WIX言語のフォーマッタ
 
 
 .S	URL の中身を取り出す (bin/geturl.pl)
+.l	geturl.pl
 .key	bin/geturl.pl
 .key	geturl.pl
 
