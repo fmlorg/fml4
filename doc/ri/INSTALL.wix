@@ -1,15 +1,26 @@
 .HTML_PRE
-	INSTALL guide (FML Unix Version)
+.if LANG == JAPANESE
+	fml インストールガイド (Unixの場合)
 	--- fml Mailing List Server Package ---
 
-.if LANG == JAPANESE
 				深町 賢一
 .fi
 .if LANG == ENGLISH
+	fml installation guide on Unix
+	--- fml Mailing List Server Package ---
+
 				Ken'ichi Fukamachi
 .fi
 
 .if LANG == JAPANESE
+   ******************* 重要 ***********************
+
+   自動登録を使っていてなおかつ 2.x から 3.0 へ移行する人は
+   必ずUPGRADEを呼んで下さい。特に最初の部分を
+.url	http://www.fml.org/fml/UPGRADE-3.0/
+
+   ***********************************************
+   
    このドキュメントで説明しているのは基本的なことに絞っています。
    よりすすんだ設定については 
 	doc の下にある op.jp というファイル
@@ -27,6 +38,14 @@
 .fi
 .if LANG == ENGLISH
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
+
+   ************** IMPORTANT!!! *******************
+   If you use automatic registration and upgrade fml 2.x to fml 3.0, 
+   please read UPGRADE file firstly. Especially the first part
+
+.url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
+
+   ***********************************************
 
    For more details on advanced settings, please see the part III of
 	FML_SOURCE/doc/op.en		(plain text)
@@ -1076,14 +1095,14 @@ The list of choice is
 
 	・もし登録されているメンバー以外から来た場合にはどうするか？
 		拒否				reject
-		自動登録			auto_regist
+		自動登録			auto_subscribe
 		無視(管理者へ報告だけする)	ignore
 =E
 If mail comes from not a ML member, what action should be done?
 (=> Section .ptr{ACCESS_POLICY})
 =S
 	send back "deny" file to notify "reject"	reject
-	automatic registration/subscription		auto_regist
+	automatic registration/subscription		auto_subscribe
 	ignore the mail					ignore
 	
 デフォールトはいずれも
@@ -1096,12 +1115,12 @@ and
 	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
 	もしメンバー以外から来たら拒否(reject)
 
-です。自動登録は"投稿がメンバーだけ"(members_only)のままauto_regist に
-設定して下さい。『もしメンバー以外からメールが来たら自動登録処理ルーチ
-ン』へいって登録処理が行なわれます。
+です。自動登録は"投稿がメンバーだけ"(members_only)のままauto_subscribe 
+に設定して下さい。『もしメンバー以外からメールが来たら自動登録処理ルー
+チン』へいって登録処理が行なわれます。
 =E
-Automatic registration is done when mail comes to an address form
-not member and the mode for the address is "auto_regist".
+Automatic registration is done when mail comes to an address form not
+member and the mode for the address is "auto_subscribe".
 
 .if LANG == JAPANESE
 ＊ 手動での登録の場合
@@ -1131,7 +1150,7 @@ commands, please enable it explicitly.
    [COMMAND]
 
    3    PERMIT_COMMAND_FROM                members_only
-   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_regist
+   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_subscribe
 
 つまり 2.1 以降では「投稿用のアドレスは拒否、コマンド用のアドレスで自
 動登録」のような非対称な設定も「両方のアドレスで自動登録」のような設定
@@ -1145,8 +1164,8 @@ commands, please enable it explicitly.
         AUTO_REGISTRATION_TYPE             confirmation
         UNSUBSCRIBE_AUTH_TYPE              address
 
-上述のアクセス制御で auto_regist を選んだ場合に自動登録の仕方を
-選ぶことができます。デフォールトは 「確認」 を求めるやり方です。
+上述のアクセス制御で auto_subscribe を選んだ場合に自動登録の仕方を選ぶ
+ことができます。デフォールトは 「確認」 を求めるやり方です。
 =E
 The automatic registration type. The default is "confirm" which
 requires the confirmation of subscription will.
@@ -1247,18 +1266,18 @@ The permission for post address has the following choice:
 
 	・もし、登録されているメンバー以外から来た場合にはどうするか？
 		拒否				reject
-		自動登録			auto_regist
+		自動登録			auto_subscribe
 		無視(管理者へ報告だけする)	ignore
 =E
 If mail comes from not a ML member, what action should be done?
 =S
 	send back "deny" file to notify "reject"	reject
-	automatic registration/subscription		auto_regist
+	automatic registration/subscription		auto_subscribe
 	ignore the mail					ignore
 
 を設定できます。自動登録は"投稿がメンバーだけ"(members_only)の場合に
 
-	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+	もしメンバー以外から来たら自動登録 → auto_subscribe へ変更
 
 することで行ないます。
 自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
@@ -1266,7 +1285,7 @@ If mail comes from not a ML member, what action should be done?
 The example of an automatic registration setting.
 
    3    PERMIT_COMMAND_FROM                members_only
-   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_regist
+   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_subscribe
 
 画面のそれぞれの行は
 
@@ -1352,10 +1371,10 @@ in fact, not define $REJECT_ADDR in config.ph.
 =E.S	The type of Automatic Registration
 .l	REGISTRATION_METHOD
 
-上述のアクセス制御で auto_regist を選んだ場合に自動登録モードになりま
-す。自動登録の手続きのやりかたを選択できます。
+上述のアクセス制御で auto_subscribe を選んだ場合に自動登録モードになり
+ます。自動登録の手続きのやりかたを選択できます。
 =E
-If you select "auto_regist" in either REJECT_POST_HANDLER or
+If you select "auto_subscribe" in either REJECT_POST_HANDLER or
 REJECT_COMMAND_HANDLER, you can see the following menu
 
    ************************************************************
