@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl
-# multipart.pl:
+# multipart.pl: Multipart Canceler ver1.01
 # Converter from Multipart/Mixed or Multipart/Alternative to Text/Plain
-# (C) 1996 Yuao Tanigawa
+# (C) 1996,1997 Yuao Tanigawa
 
 $count = 0;
 while (<STDIN>) {
@@ -45,7 +45,7 @@ while (<STDIN>) {
 				print "# End of Document No.$count.\n--\n\n" if $count > 0;
 				$count++;
 			} else {
-				print $_."\n";
+				print $_."\n" if $count > 0;
 			}
 		} elsif ($type eq 'Multipart/Alternative') {
 			chop;
@@ -56,7 +56,7 @@ while (<STDIN>) {
 				}
 				$count++;
 			} else {
-				print $_."\n";
+				print $_."\n" if $count > 0;
 			}
 		} else {
 			print;
