@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/04
+
+   proc/libsynchtml.pl
+	apply patch by fml-support:8935
+		 ( Tomoki Ichinoseki <ichinskt@synap.co.jp> )
+
 2000/12/03
 
    help file
