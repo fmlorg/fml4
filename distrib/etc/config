@@ -6,15 +6,12 @@ branch=0
 
 
 ### user defined variables ###
-
 # prog
 MAKE=/usr/bin/make
-INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
-VERSION_PL=$FML/distrib/bin/version.pl
-
 FWIX_OPTS=-F
 
-# imports distrib/mk/fml.sys.mk
+
+### imports distrib/mk/fml.sys.mk ###
 #    e.g. working directory
 tmp=/tmp/config$$
 make __import_variables > $tmp
@@ -23,6 +20,12 @@ cat $tmp
 echo "------------------------------"
 . $tmp
 rm -f $tmp
+
+# program (depends on FML)
+INCLUDE_PROG="perl $FML/distrib/bin/_include.pl "
+VERSION_PL="$FML/distrib/bin/version.pl"
+FML_VERSION="$FML/distrib/bin/fml_version.pl -X $FML"
+
 
 TMP=$DESTDIR/release.info.$$ 
 
