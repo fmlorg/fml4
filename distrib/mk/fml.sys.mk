@@ -38,7 +38,7 @@ __EXPORTS_DIR__ = FML COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
 		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR \
 		WORK_EXAMPLES_DIR \
 		WORK_HTML_DIR WORK_HTML_ADV_DIR WWW_DIR \
-		BRANCH
+		BRANCH MODE
 
 
 ######################################################################
