@@ -261,7 +261,7 @@ your-email-address
 .C	listname-command
 
 /var/qmail/alias/.listname-default を応用すると、elena ML に 
-elena-help というコマンドを送ると elena-ctl に '# help' を送るのと同じ
+elena-help というコマンドを送ると elena-ctl に 'help' を送るのと同じ
 ことができます。.qmail-elena-default は newml 時に見本が生成されます。
 このファイルを /var/qmail/alias/ に入れた上で $USE_DOT_QMAIL_EXT = 1; 
 を設定するとこの listname-command@domain が使えるようになります。
@@ -270,7 +270,7 @@ elena-help というコマンドを送ると elena-ctl に '# help' を送るのと同じ
 If you use .qmail-elena-default for elena ML, which is created in
 "makefml newml", your fml provides another command syntax. For example,
 address elena-help@domain returns help file to the sender. That is
-elena-command@domain is equal to to send "# command" to elena-ctl@domain.
+elena-command@domain is equal to to send "command" to elena-ctl@domain.
 When you use this function, please set $USE_DOT_QMAIL_EXT = 1;
 
 

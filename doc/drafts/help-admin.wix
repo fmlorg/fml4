@@ -12,9 +12,7 @@ ________________________________
 歴史的に # をコマンドの前につけても構いませんが;-)、デフォールト設定で
 は必要ありません。e.g. #unsubscribe, #help
 =E
-Also you can send "_CTK_unsubscribe". "#" is prepended in fml
-documents for some historically reasons. "#" is NOT NEEDED in default
-configuration, but fml can accept commands with or without '#'.
+Also you can send "_CTK_unsubscribe". 
 
 .S	コマンドについて
 =E.S	Administrative Commands
@@ -29,8 +27,8 @@ or
 =E
 syntaxes are available where the password (PASSWORD) is plain.
 
-#approve 形式は各行にパスワードを書く必要がありますが、
-#admin 形式の方では最初にだけパスワードの認証が必要なだけです。
+approve 形式は各行にパスワードを書く必要がありますが、
+admin 形式の方では最初にだけパスワードの認証が必要なだけです。
 
 なおPGPモードでパスワードを書く必要はありません。よってPGPの場合 admin
 pass 行は必要ないし、approve コマンドは無意味です(無意味にパスワード打

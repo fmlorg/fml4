@@ -25,14 +25,6 @@ _CTK_bye と書いたメールを
 To unsubscribe ML <_MAIL_LIST_>, send "_CTK_unsubscribe" in the mail body
 to the address <_CTLADDR_>. 
 
-歴史的に # をコマンドの前につけても構いませんが;-)、デフォールト設定で
-は必要ありません。e.g. #unsubscribe, #help
-=E
-Also you can send "_CTK_unsubscribe". "#" is prepended in fml
-documents for some historically reasons. "#" is NOT NEEDED in default
-configuration, but fml can accept commands with or without '#'.
-
-
 長期出張などで、一時的に配送を停止したいときには、本文の先頭に _CTK_off 
 と書いたメールを<_CTLADDR_>宛てに送ってください。
 再開したいときには _CTK_on を送ってください。
