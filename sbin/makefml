@@ -108,10 +108,11 @@ sub InitMakeFml
 	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
     }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:mi:u:UFE:W:c:");
+    &Getopts("adhf:A:O:p:D:vwV:mi:u:UFE:W:c:");
 
     # toggle flags
     $CGIInstallMode = ($opt_W =~ /cgi/i) ? 1 : 0;
+    $AutoLoad       = $opt_a ? 1 : 0;
     $debug          = $opt_d;
     $verbose        = $opt_v;
     $MailNotify     = $opt_m;
@@ -216,9 +217,16 @@ sub InitMakeFml
 
     ### FIX VARIABLES
     $CONFIG_DIR = $opt_D || $CONFIG_DIR || "$HOME/.fml";
-    $FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
     $CGI_CONFIG = $opt_c || "$CONFIG_DIR/cgi.conf";
+
+    # in default, disable to load .fml/system in 'make install'
+    if ($ARGV[0] eq 'install') {
+	$FML_CONFIG = $opt_f || "$CONFIG_DIR/system" if $AutoLoad || $opt_f;
+    }
+    else {
+	$FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
+    }
 
     # config amd temporary files
     if ($TheFirstTime) {
