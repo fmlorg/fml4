@@ -887,6 +887,23 @@ sub ProcSetMemberList
     $status;
 }
 
+
+sub FML_SYS_SetMemberList
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local($status);
+
+    &use('amctl');
+    $e{'mode:in_amctl'} = 1;
+    &SaveACL;
+    $status = &DoSetMemberList($proc, *Fld, *e, *misc);
+    &RetACL;
+    $e{'mode:in_amctl'} = 0;
+
+    $status;
+}
+
+
 # Set the address to operate e.g. for exact matching
 sub ProcSetAddr
 {
