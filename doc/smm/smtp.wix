@@ -440,6 +440,14 @@ $USE_OUTGOING_ADDDRESS を1にします。
 =E
 $USE_OUTGOING_ADDDRESS changes from zero/null to 1.
 
+
+.S	PIPELININGを使わなくする
+=E.S	Disable PIPELINING
+
+	$NOT_USE_ESMTP_PIPELINING = 1;
+
+PIPELINE が可能な場合でも使わない
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
