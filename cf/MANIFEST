@@ -996,7 +996,7 @@ HTML_OUTPUT_FILTER:
 HTML_STYLESHEET_BASENAME:	
 
 # value: default / prefer-in-reply-to
-HTML_THREAD_REF_TYPE:		default
+HTML_THREAD_REF_TYPE:		prefer-in-reply-to
 
 # value: number / day / week / month / infinite
 HTML_INDEX_UNIT:		day

@@ -42,7 +42,7 @@ PGP_PATH			$DIR/etc/pgp
 
 ### Automatic Html Generation
 AUTO_HTML_GEN
-HTML_THREAD_REF_TYPE		default
+HTML_THREAD_REF_TYPE		prefer-in-reply-to
 HTML_STYLESHEET_BASENAME
 
 ### Security
