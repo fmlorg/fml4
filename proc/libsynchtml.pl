@@ -681,7 +681,7 @@ sub ParseMultipart
     local($buf) = $e{'Body'};
 
     # remove the preamble before the boundary.
-    $pb  = index($buf, $boundary);
+    $pb  = index($buf, $boundary, $image);
     $buf = substr($buf, $pb);
     local(@s) = split(/\n\n|$boundary/, $buf);
 
@@ -715,12 +715,17 @@ sub ParseMultipart
 	    $quoted_printable = 1;
 	} 
 
-	# get file type
+	## get file type
+	# image
+	if (/Content-Type:\s+image/) { $image = 1;}
+
+	# speculate type from mime.types
 	if (/Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) { 
 	    $suffix = &SearchMimeTypes("$1/$2") || $2;
 	    $suffix =~ s/^x-//i; # remove x- in x-hoehoe type.
 	    $sep++;
 	}
+	## type ends ##
 
 	next if $sep; # avoid the separators.
 
@@ -761,7 +766,7 @@ sub ParseMultipart
 	    close(IMAGE);
 
 	    # reflect reference to the part in the \d+.html file.
-	    if ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'A') {
+	    if ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'A' || (!$image)) {
 		print OUT "<A HREF=\"${file}_$mp_count.$suffix\">";
 		print OUT "${file}_$mp_count.$suffix</A>\n";
 	    }
@@ -776,6 +781,7 @@ sub ParseMultipart
 	    # reset
 	    undef $base64;
 	    undef $suffix; 
+	    undef $image;
 	    next;
 	}
 
