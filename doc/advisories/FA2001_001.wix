@@ -1,5 +1,5 @@
 .HTML_PRE
-	(非最終版)
+	(非最終版、2nd version)
 	FML Advisory 2001-001: $AUTO_HTML_GEN pass through invalid URL
 	========================================
 
@@ -18,7 +18,8 @@ Topic:		HTMLifier (SyncHtml()) can pass through invalid URL
 
 $AUTO_HTML_GEN を利用して、HTML 化機構を利用している場合、不正な URL 
 が通過して HTML 化されたファイルに現れ得えます。
-対象範囲は $AUTO_HTML_GEN を ON にして運用しているＭＬです。
+対象範囲は $AUTO_HTML_GEN を ON にして運用している場合と、
+spool2html.pl を利用して HTML 化を実行する場合が該当します。
 
 
 .toc
@@ -63,10 +64,9 @@ fml 内蔵の HTML 化機構において、Subject: に含まれる <> がインデックス
 SyncHtml を捨てて別のモジュールに移行する案を考えています。
 
 このモジュールは先週末(2001/10/20)から fml-devel (fml 5.0 branch) の中
-に存在しています。が、まだ開発中のステータスです。
+に存在しています。が、まだ試行錯誤(?)に開発中というところでしょう。
 
 .url	http://www.fml.org/software/fml-devel/CHANGES.txt
-.url	http://www.fml.org/software/fml-devel/fml/lib/Mail/HTML/Lite.pm
 
 
 .C	Acknowledgement
@@ -78,4 +78,4 @@ fml-help: 01093 (From: KOJIMA Hajime / 小島肇 <kjm@rins.ryukoku.ac.jp>)
 を参照してください。problem report およびパッチ案を頂いた小島さんに感
 謝致します。
 
-$FML$
+$FML: FA2001_001.wix,v 1.1 2001/10/26 17:17:07 fukachan Exp $
