@@ -1456,6 +1456,7 @@ sub search_path
 	 "/usr/contrib/bin", "/usr/gnu/bin", 
 	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
 	 "/usr/ucblib",  # NEC EWS4800 
+	 "/usr/pkg/bin", # NetBSD pkgsrc
 	 # NT Extention
 	 "/perl5/bin", 
 	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
@@ -2341,7 +2342,9 @@ sub do_install
     &SetUpCGIadmin;
 }
 
-
+# set up cgi for admin (full access for fml system)
+#    $EXEC_DIR/www/cgi-bin/admin/.htaccess
+#    $EXEC_DIR/www/dn/admin/htpasswd
 sub SetUpCGIadmin
 {
     print STDERR "---Setup CGI interfaces\n";
@@ -2353,6 +2356,8 @@ sub SetUpCGIadmin
     &MkDirHier("$EXEC_DIR/www/db/admin");
     &Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
 	  "$EXEC_DIR/www/db/admin/htpasswd");
+
+
 
     print STDERR "\n";
 }
