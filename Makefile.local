@@ -81,6 +81,7 @@ cgisetup:
 	@ echo 'make m is to re-generate /tmp/e/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; \
 		env MKDOC=no perl makefml -W cgi -f /tmp/e/.fml/system install)
+	rm -f /usr/local/fml/share/cgi-bin/fml/admin/.htaccess
 
 cgisync: export
 
@@ -90,6 +91,7 @@ export: libkern /usr/local/fml/makefml
 	rsync -C -av doc/messages/Japanese/ /usr/local/fml/messages/Japanese/
 	rsync -C -av kern/*pl    /usr/local/fml/
 	rsync -C -av proc/lib*pl /usr/local/fml/
+	rm -f /usr/local/fml/share/cgi-bin/fml/admin/.htaccess
 
 m:	testsetup /usr/local/fml/makefml
 
