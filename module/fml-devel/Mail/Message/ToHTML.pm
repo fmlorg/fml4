@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ToHTML.pm,v 1.10 2002/04/14 08:10:11 fukachan Exp $
+# $FML: ToHTML.pm,v 1.19 2002/04/27 05:25:03 fukachan Exp $
 #
 
 package Mail::Message::ToHTML;
@@ -12,14 +12,14 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-# BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File); }
+BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File); }
 
 my $is_strict_warn = 0;
 my $debug = 0;
 my $URL   =
     "<A HREF=\"http://www.fml.org/software/\">Mail::Message::ToHTML</A>";
 
-my $version = q$FML: ToHTML.pm,v 1.10 2002/04/14 08:10:11 fukachan Exp $;
+my $version = q$FML: ToHTML.pm,v 1.19 2002/04/27 05:25:03 fukachan Exp $;
 if ($version =~ /,v\s+([\d\.]+)\s+/) {
     $version = "$URL $1";
 }
@@ -333,7 +333,7 @@ sub html_filename
     if (defined($id) && ($id > 0)) {
 	if ($use_subdir eq 'yes') {
 	    my $r = $self->_html_file_subdir_name($id);
-	    # print STDERR "xdebug: $id => $r\n"; 
+	    # print STDERR "xdebug: $id => $r\n";
 	    return $r;
 	}
 	else {
@@ -372,7 +372,7 @@ sub _html_file_subdir_name
 		$subdir_db->{ $id } = $subdir; # cache subdir info into DB.
 		# print STDERR "xdebug: \$subdir_db->{ $id } = $subdir\n";
 	    }
-	    
+
 	    use File::Spec;
 	    my $xsubdir = File::Spec->catfile($html_base_dir, $subdir);
 	    unless (-d $xsubdir) {
@@ -1027,17 +1027,24 @@ sub cache_message_info
 sub _msg_time
 {
     my ($self, $type) = @_;
-    my $hdr = $self->{ _current_hdr  };
+    my $hdr  = $self->{ _current_hdr  };
 
-    use Time::ParseDate;
-    my $unixtime = parsedate( $hdr->get('date') );
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime( $unixtime );
+    if (defined($hdr) && $hdr->get('date')) {
+	use Time::ParseDate;
+	my $unixtime = parsedate( $hdr->get('date') );
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime( $unixtime );
 
-    if ($type eq 'yyyymm') {
-	return sprintf("%04d%02d", 1900 + $year, $mon + 1);
+	if ($type eq 'yyyymm') {
+	    return sprintf("%04d%02d", 1900 + $year, $mon + 1);
+	}
+	elsif ($type eq 'yyyy/mm') {
+	    return sprintf("%04d/%02d", 1900 + $year, $mon + 1);
+	}
     }
-    elsif ($type eq 'yyyy/mm') {
-	return sprintf("%04d/%02d", 1900 + $year, $mon + 1);
+    else {
+	my $id = $self->{ _current_id };
+	warn("cannot pick up Date: field id=$id");
+	return '';
     }
 }
 
@@ -1243,8 +1250,8 @@ sub _update_relation
     _PRINT_DEBUG("_update_relation $id");
 
     use FileHandle;
-    my $file        = $args->{ file };
-    if (defined $file) {
+    my $file = $args->{ file };
+    if (defined $file && $file && -f $file) {
 	my ($old, $new) = ($file, "$file.new.$$");
 	my $rh = new FileHandle $old;
 	my $wh = new FileHandle "> $new";
@@ -1789,7 +1796,7 @@ sub _update_id_montly_index_master
 
     _print_raw_str($wh, "<TABLE>", $code);
 
-    for my $year (@$years) {
+    for my $year (sort {$b <=> $a} @$years) {
 	_print_raw_str($wh, "<TR>", $code);
 
 	for my $month (1 .. 12) {
@@ -2409,8 +2416,18 @@ sub htmlify_file
     my ($file, $args) = @_;
     my $dst_dir = $args->{ directory };
 
+    unless (-f $file) {
+	print STDERR "no such file: $file\n" if $debug;
+	return;
+    }
+
+    unless (-s $file) {
+	print STDERR "empty file: $file\n" if $debug;
+	return;
+    }
+
     use File::Basename;
-    my $id = basename($file);
+    my $id   = basename($file);
     my $html = new Mail::Message::ToHTML {
 	charset   => "euc-jp",
 	directory => $dst_dir,
@@ -2425,6 +2442,9 @@ sub htmlify_file
 	src => $file,
     });
 
+    if ($debug) {
+	printf STDERR "htmlify_file( id=%-6s ) update relation\n", $id;
+    }
     $html->update_relation( $id );
     $html->update_id_monthly_index({ id => $id });
     $html->update_id_index({ id => $id });
@@ -2447,8 +2467,12 @@ sub htmlify_file
 sub htmlify_dir
 {
     my ($src_dir, $args) = @_;
-    my $dst_dir = $args->{ directory };
-    my $max     = 0;
+    my $dst_dir  = $args->{ directory };
+    my $min      = 0;
+    my $max      = 0;
+    my $has_fork = 1; # ok on unix and perl>5.6 on wine32.
+
+    print STDERR "src = $src_dir\ndst = $dst_dir\n" if $debug;
 
     use DirHandle;
     my $dh = new DirHandle $src_dir;
@@ -2456,14 +2480,43 @@ sub htmlify_dir
       FILE:
 	for my $file ( $dh->read() ) {
 	    next FILE unless $file =~ /^\d+$/;
+
+	    # initialize $min
+	    unless ($min) { $min = $file;}
+
 	    $max = $max < $file ? $file : $max;
+	    $min = $min > $file ? $file : $min;
 	}
     }
 
-    for my $id ( 1 .. $max ) {
+    # overwride
+    $has_fork = $args->{ has_fork } if defined $args->{ has_fork };
+    $max      = $args->{ max } if defined $args->{ max };
+
+    print STDERR "   scan ( $min .. $max ) for $src_dir\n";
+    for my $id ( $min .. $max ) {
 	use File::Spec;
 	my $file = File::Spec->catfile($src_dir, $id);
-	htmlify_file($file, { directory => $dst_dir });
+
+	unless ( $has_fork ) {
+	    htmlify_file($file, { directory => $dst_dir });
+	}
+	else {
+	    my $pid = fork();
+	    if ($pid < 0) {
+		croak("cannot fork");
+	    }
+	    elsif ($pid == 0) {
+		htmlify_file($file, { directory => $dst_dir });
+		exit 0;
+	    }
+
+	    # parent
+	    my $dying;
+	    while (($dying = wait()) != -1 && ($dying != $pid) ){
+		;
+	    }
+	}
     }
 }
 
@@ -2472,7 +2525,9 @@ sub htmlify_dir
 # debug
 #
 if ($0 eq __FILE__) {
-    my $dir = "/tmp/htdocs";
+    my $dir      = "/tmp/htdocs";
+    my $has_fork = defined $ENV{'HAS_FORK'} ? 1 : 0;
+    my $max      = defined $ENV{'MAX'} ? $ENV{'MAX'} : 1000;
 
     eval q{
 	for my $x (@ARGV) {
@@ -2480,7 +2535,11 @@ if ($0 eq __FILE__) {
 		htmlify_file($x, { directory => $dir });
 	    }
 	    elsif (-d $x) {
-		htmlify_dir($x, { directory => $dir });
+		htmlify_dir($x, {
+		    directory => $dir,
+		    has_fork  => $has_fork,
+		    max       => $max,
+		});
 	    }
 	}
     };
