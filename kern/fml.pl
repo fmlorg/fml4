@@ -208,10 +208,12 @@ sub ModeBifurcate
 	    }
 	    # chaddr-confirm
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr-confirm'}) {
+		&use('trap');
 		&Trap__ChaddrConfirm(*Envelope);
 	    }
 	    # chaddr
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr'}) {
+		&use('trap');
 		&Trap__ChaddrRequest(*Envelope);
 	    }
 	    # we should return reply for "guide" request from even "stranger";
@@ -1327,7 +1329,9 @@ sub RunHooks
 
 sub ExecNewProcess
 {
-    local(@xargv) = @_; &use('kernsubr2'); &__ExecNewProcess(@xargv);
+    $0 = "$FML: Run New Process <$LOCKFILE>";
+    $FML_EXIT_PROG .= $_cf{'hook', 'prog'};
+    if ($FML_EXIT_PROG) { &use('kernsubr2'); &__ExecNewProcess;}
 }
 
 sub SpawnProcess
@@ -2687,49 +2691,11 @@ sub GetNextMultipartBlock
     }
 }
 
-
-####### Section: TRAP
-### Hmm, I call this section locore but .. :-)
-sub Trap__ChaddrConfirm
-{
-    local(*e) = @_;
-
-    &Log("Trap__ChaddrConfirm");
-
-    if ($CHADDR_AUTH_TYPE ne 'confirmation') {
-	&Log("Trap__ChaddrConfirm: invalid trap");
-	&Log("\$CHADDR_AUTH_TYPE != confirmation");
-	return $NULL;
-    }
-
-    &Log("chaddr-confirm request") if $debug;
-    &use('confirm');
-    &FML_SYS_ChaddrConfirm(*e, $e{'buf:req:chaddr-confirm'});
-}
-
-sub Trap__ChaddrRequest
-{
-    local(*e) = @_;
-
-    &Log("Trap__ChaddrRequest");
-
-    if ($CHADDR_AUTH_TYPE ne 'confirmation') {
-	&Log("Trap__ChaddrConfirm: invalid trap");
-	&Log("\$CHADDR_AUTH_TYPE != confirmation");
-	return $NULL;
-    }
-
-    &Log("chaddr request") if $debug;
-    &use('confirm');
-    &FML_SYS_ChaddrRequest(*e, $e{'buf:req:chaddr'});
-}
-
 ####### Section: Switch
 sub SaveACL { $ProcCtlBlock{"main:ADDR_CHECK_MAX"} = $ADDR_CHECK_MAX;}
 sub RetACL  { $ADDR_CHECK_MAX = $ProcCtlBlock{"main:ADDR_CHECK_MAX"};}
 
 ####### Section: Event Handling Functions
-
 sub SignalLog 
 { 
     local($sig) = @_; 

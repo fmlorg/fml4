@@ -13,9 +13,6 @@
 sub __ExecNewProcess
 {
     local($s);
-    $0 = "$FML: Run New Process <$LOCKFILE>";
-
-    $FML_EXIT_PROG .= $_cf{'hook', 'prog'};
 
     if ($s = $FML_EXIT_PROG) {
 	print STDERR "\nmain::exec $s\n\n" if $debug;
