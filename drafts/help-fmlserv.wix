@@ -1,0 +1,70 @@
+*** fmlserv (fml listserv風インターフェイス) の使い方 ***
+=E
+*** fmlserv (fml listserv interface) ***
+
+fmlserv は fml の listserv風インターフェイスです。fml のコマンドはすべ
+て使えますが、コマンド命令形式が一箇所だけ異なります。
+=E
+fmlserv is just fml's listserv style interface emulation. 
+All fml commands are avaialbe but the syntax is extended.
+
+.if LANG == JAPANESE
+fml では(各MLごとに設定するのが基本なので)
+
+   コマンド 			引数 or オプション 	(fml)
+
+のような形ですが、fmlserv では
+
+   コマンド メーリングリスト名	引数 or オプション 	(fmlserv)
+
+のようにどのメーリングリスト宛の命令かを間に夾みます。fmlserv へ異なる
+メーリングリスト宛の命令を混在させて送りつけても構いません。
+.fi
+.if LANG == ENGLISH
+fml's command form is 
+
+	command argument
+
+When you use fmlserv.pl, the syntax is extended to
+
+	command ML argument
+
+That's all. Please see each ML's help file for more details. You can
+retrieve it by sending "help <ML>" to <_MAIL_LIST_>.
+.fi
+
+For example,
+
+	guide <ML>
+		guide for a stranger
+
+	help <ML>
+		help
+	
+	subscribe <ML> Anne Shirley
+		subscribe request
+
+	unsubscribe <ML>
+		unsubscribe request
+
+	get <ML> NUM
+		retrieve article NUM
+
+	mget <ML> arguments
+		e.g. "mget <M>> NUM1-NUM2 mp"
+		   retrieve article from NUM1 to NUM2 in MIME/Multipart format
+
+	end 
+	quit
+	exit
+		end of command
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,913 @@
+.# FYI: for peopel to hack this document.
+.# _CTK_ : Command Trap Keyword
+.#
+	_MAIL_LIST_ メーリングリスト の使い方について
+=E
+	HELP FILE of <_MAIL_LIST_> ML
+
+----- Index -----
+.toc
+-----------------
+
+.C	FYI: 簡単なまとめ
+=E.C	FYI: Brief Summary
+
+間違えてメーリングリストに登録してしまった、取りあえず停止したい、とい
+う方のために、必要な事項を最初に説明しておきます。
+=E
+Here I introduce the brief summary for you which may join this mailing
+list in error.
+
+_MAIL_LIST_ メーリングリストから脱退したいときには、本文の先頭に
+_CTK_bye と書いたメールを
+<_CTLADDR_> 宛てに送ってください。
+=E
+To unsubscribe ML <_MAIL_LIST_>, send "_CTK_unsubscribe" in the mail body
+to the address <_CTLADDR_>. 
+
+長期出張などで、一時的に配送を停止したいときには、本文の先頭に _CTK_off 
+と書いたメールを<_CTLADDR_>宛てに送ってください。
+再開したいときには _CTK_on を送ってください。
+=E
+To stop the delivery for a vacation, send "_CTK_off" in the mail body to
+<_CTLADDR_>. 
+To start the delivery again, send "_CTK_on" in the same way.
+
+過去のメールが欲しいときは、まず、本文の先頭に _CTK_index と書いたメール
+を<_CTLADDR_>宛てに送って、
+投稿メール一覧を取り寄せてください。その一覧を参考にして、たとえば 
+_CTK_get 100-200 というコマンドを送ってください。
+=E
+To get the past articles, firstly send "_CTK_index" in the mail body to
+the address <_CTLADDR_> to retrieve 
+the list of articles. It shows the list this ML stores. To retrieve
+articles, use "_CTK_get" or "_CTK_mget" command. For example, send "_CTK_mget
+100-200" to retrieve articles from 100 to 200.
+
+メーリングリストサーバは、投稿されたメールの「From」を見て会員かどうか
+をチェックしています。この設定が変わると、投稿が受け付けられなかったり、
+新たに会員登録がなされてしまったりしますので注意が必要です。複数のメー
+ルアドレスをお持ちの方、気をつけてください。
+=E
+Fml compares From: field in a posted article with member list. If you
+have several mail addresses, pay attention!
+
+
+
+.C	基本的な使い方
+=E.C	Fundamental Usage
+
+.S	メーリングリストとは？
+=E.S	What is a mailing list?
+
+メーリングリスト(以下適宜メーリングリストをＭＬと略す)とはあるアドレス
+=E
+A mailing list (ML) is mail forwarding mechanism. When you send mail
+to the address
+
+		_MAIL_LIST_ 
+
+に送ったメールがメーリングリストのメンバー全員に配送される仕組みです。
+=E
+the mail is forwarded to all members of this ML.
+
+.S	コマンドの使い方
+=E.S	Usage of Commands
+
+このメーリングリストサーバには、さまざまな機能が搭載されています。その
+機能を使うときは『英単語からなる命令（以下、「コマンド」と呼びます）』
+の内容のメールを、指定されたメールアドレスに送って下さい。
+=E
+This ML server has a lot of functions. Please send English command
+phrases/words to <_CTLADDR_>.
+
+メーリングリストサーバにコマンドを送り、過去の記事を取り寄せたり、配送
+を一時停止するためには、アドレス
+
+	_CTLADDR_ 
+
+にコマンドを含むメールを送って下さい。送るべき内容は
+=E
+A command has a command keyword and the options.
+
+	_CTK_コマンド オプション 
+=E
+	_CTK_command options
+
+の形です。
+
+注意: 通常コマンドは英語と数字だけからなります。コマンドは、メール本文
+の先頭から、「_CTK_help」という形式で書きます。コマンドは大文字でも小文字
+でも同様に認識しますので、「_CTK_help」は「_CTK_Help」でも「_CTK_HELP」でもかま
+いません。
+ただし、DBCS(２バイト文字, いわゆる全角文字）で「＃　ＨＥＬＰ」として
+も認識しませんのでご注意ください。オプションは通常大文字小文字を"区別
+します"。
+=E
+Depends on the configuration of the ML server, '_CTK_help' and '_CTK_help'
+may be treated as the same. (if USE_RPG_ML_FLAG is non-nil) Note that
+commands are case-insensitive, i.e. _CTK_help = $ Help = _CTK_HELP [Option]
+means optional.  % is shell prompt.
+
+
+.if LANG == JAPANESE
+例１:
+--------- メール本文 --------------
+_CTK_help
+-----------------------------------
+.fi
+.if LANG == ENGLISH
+Example 1:
+
+--------- mail body  --------------
+_CTK_help
+-----------------------------------
+.fi
+メール本文が↑のメール(内容が"_CTK_help"だけを含むメール)を送ると、このヘ
+ルプ・ファイルが送られてきます。またコマンドは help でも HELP でも構い
+ません（大文字小文字を問わない）。
+=E
+Send "_CTK_help" to <_CTLADDR_>, 
+you obtain the help file of this ML.
+
+.if LANG == JAPANESE
+例２:
+
+以下は、過去の１０番目の投稿から５つ分を取り出して、参加しているメンバー
+のリストを取り寄せるコマンドメールの例です。
+--------- メール本文 --------------
+.fi
+.if LANG == ENGLISH
+Example 2:
+
+To retrieve 
+
+	help
+	articles from 10 to 14
+	member list
+
+.fi
+--------- mail body  --------------
+_CTK_help
+_CTK_get 10-14
+_CTK_members
+_CTK_exit
+-----------------------------------
+
+.S	もし、わからなくなったら？
+=E.S	When you confused ...
+
+基本的な情報はメーリングリストから送られてくるメールを見てみて下さい。
+=E
+Please see the mail header, you will find the basic information.
+
+"メールを読むためのソフト"の中には、これらの X-なんとか という行を勝手
+に削るものがあります。またさらにひどいことに X-なんとか 行を残すように
+設定変更すらできない場合もあります。その場合これらの有益な情報は見えま
+せん。
+
+例 1:
+   意訳:↓ このアドレスでは配送とコマンドともにうけつけます。
+
+   X-MLServer: fml [fml 2.1_RELEASE](distribute + commands available mode)
+   X-ML-Info: If you have a question, 
+   	send "_CTK_help" to the address _CTLADDR_
+
+   意訳:↑わからんかったら _CTLADDR_ へ "_CTK_help" を送ってね
+
+例 2:
+   X-MLServer: fml [fml 2.1_RELEASE](distribute only mode)
+
+   意訳:↑ このアドレスは配送専用です。
+
+どうしてもわからないとか、エラーメール等が返ってきたりした場合は、メー
+リングリストの管理者
+=E
+If you are confused and have no clue, you can take a contact with the
+ML maintainer at the address
+
+	_MAINTAINER_
+
+までメールを送って下さい。出来るだけ、
+=E
+When you make the contact, you should write
+
+	何をして、そうなったのか？
+	その時投げたメール、返ってきたメール
+=E
+	What you did?
+	Error/ returned mails if exist
+
+をつけてメールしてもらえると、問題解決の手掛かりになりますので、よろし
+くお願いします。
+
+
+
+.C	コマンドの一覧
+=E.C	Commands List
+
+.if LANG == JAPANESE
+以下の説明は
+
+コマンド		説明と具体例
+
+の形でならんでいます。具体例は次の章で説明します。
+なお、[]で囲まれた部分は省略可能です。
+.fi
+.if LANG == ENGLISH
+The command syntax is 
+
+command		description
+
+[] is optional.
+.fi
+
+.S	情報の取り寄せ・基本的なコマンド
+=E.S	How to retrieve files; basic commands
+
+.if LANG == JAPANESE
+_CTK_help			コマンドのヘルプ（このメールの内容）
+_CTK_objective		メーリングリストの目的、約束事を読む
+_CTK_guide			一般的な案内を得る
+			(メンバでない人でも取り寄せ可能)
+
+
+_CTK_msg			管理者へメールを送る
+			「_CTK_msg」コマンドが含まれているメールは、管理
+			者にそのまま転送されます。
+			なお、「_CTK_msg」コマンドの後のコマンドはすべて
+			無視されます。
+			例:
+				_CTK_guide
+				_CTK_msg
+				こんにちは。ここがメッセージです。
+				_CTK_objective
+			この例では「_CTK_guide」は実行されて案内の文書が
+			取り寄せられますが、「_CTK_objective」は実行され
+			ません。
+
+_CTK_summary  [引数]	過去の記事一覧を得る(Summary全体を送る)
+			引数:  記事の番号、番号の範囲
+			例: 
+			summary		全記事の一覧
+			summary last:10 最近10個の記事一覧
+			summary 100-200 記事100〜200 の一覧だけを得る
+.fi
+.if LANG == ENGLISH
+_CTK_help              Get command help (this file)
+_CTK_objective         Get ML objective
+_CTK_guide             Get ML guide (non-members are allowed to use
+                    this command)
+
+_CTK_msg               Send mail to ML administrator
+
+_CTK_summary [arg]     Get a summary of ML articles
+                    arg: range of the ML articles
+                    Ex.
+                    summary          whole summary (1-last)
+                    summary last:10  summary of last 10 articles
+                    summary 100-200  summary of article 100-200
+.fi
+
+.if LANG == JAPANESE
+_CTK_exit			コマンド列の終り
+			これ以降にどんな文字があっても、メーリングリス
+			トサーバはコマンドとは認識しません。
+			メールソフトで Signature が自動につく場合等に便利です
+_CTK_end			_CTK_exitと同じ
+_CTK_quit			_CTK_exitと同じ
+.fi
+.if LANG == ENGLISH
+_CTK_exit
+_CTK_end
+_CTK_quit              Terminate command processing (so that your signature
+                    will not get processed)
+.fi
+
+.S	メンバー情報や配送の停止・脱会等
+=E.S	How to get member list and unsubscribe
+
+_CTK_members		投稿可能なメンバーリストを得る
+			サーバが自動登録に設定されている場合
+			_CTK_actives で得られる配送リストと同一です。
+=E
+_CTK_members           Get member list
+
+_CTK_actives		(実際に配送されている)メンバーのリストを得る
+			管理者が手動で登録しているメーリングリストの場合
+			は配送リストそのものです。
+			自動登録の場合はこれで取り寄せられる一覧は意味
+			がありません。
+=E
+_CTK_actives           Get active member list
+
+	注意:メンバーリストのファイルの形式について
+ 	actives に掲載されているアドレスが実際にメールの配送先になりま
+	す。
+	行頭に「_CTK_」が一つついているアドレスは、一時的に配送を止めてい
+	ます。これは「_CTK_on」によって再開されます。
+	「_CTK__CTK_BYE」はメーリングリストから脱退したメンバーのアドレスです。
+
+
+_CTK_status [アドレス]	現在の設定を得る
+			まとめおくりや配送停止などの設定情報が得られま
+			す。
+			オプションはメールアドレスを指定します。
+			オプションを省略すると自分自身の状態です。
+_CTK_stat [アドレス]	_CTK_statusと同じ
+=E
+_CTK_status [arg]
+_CTK_stat   [arg]      Get current status of a member (batch send mode or
+                    OFF etc.)
+                    arg: the member's address (myself if not specified)
+
+
+	〜 配送のモード等について 〜
+
+	複数のアドレスが登録してある場合の ON, OFF, MATOME 等の操作は、
+	操作するべきアドレスが一つに特定できるまでアドレスを一意に特定
+	できるまでアドレスのチェックを厳しくしてチャレンジします。
+	＃どうしてもだめな場合だけは管理者へコンタクトして下さい。
+
+.if LANG == JAPANESE
+_CTK_skip	 		配送は停止されるが、投稿は可能にする
+			複数箇所のアドレスからＭＬへ投稿する場合
+			投稿はできるが、配送はされないアドレスと設定する
+_CTK_noskip 		_CTK_skip の設定をやめる
+_CTK_off	 		ＭＬの配送を一時的に止める
+			長期休暇、出張などでメールボックスの溢れが気に
+			なる場合に利用してください。
+_CTK_on	 		_CTK_off の設定を解除し、配送を再開する
+_CTK_bye	 		ＭＬをやめる
+_CTK_unsubscribe 		ＭＬをやめる
+.fi
+.if LANG == ENGLISH
+_CTK_skip             Make the address of From: in your mail a posting only
+                   address; mails will not be sent to this address any more
+_CTK_noskip           Reverse of _CTK_skip
+_CTK_off              Sign off ML temporarily (stop receiving mails)
+_CTK_on               Resume receiving mails after _CTK_off
+_CTK_bye              Sign off ML permanently
+_CTK_unsubscribe      Sign off ML permanently
+.fi
+
+・メンバーリストのファイルの形式について
+  (fml 2.2 では一般に見えません)
+
+　actives に掲載されているアドレスが実際にメイルの配送される先になり
+　ます。行頭に「_CTK_」が付いているだけのものは一時的に配送を止めているもの
+　で、「_CTK_on」によって再開されます。「_CTK__CTK_BYE」は脱退された方の残骸です。
+
+
+.S	ドメイン名が変更になった場合
+=E.S	When your email address changed 
+
+.if LANG == JAPANESE
+.fi
+.if LANG == ENGLISH
+To change the address which you use to join this ML, you can use '
+chaddr' command. The form is
+
+	_CTK_chaddr old-address new-address
+
+Please send this form from OLD-ADDRESS (fml 2.2 specification).
+.fi
+
+	old-address を new-address へ変える
+
+メーリングリストに参加するアドレスを変更するには
+
+_CTK_chaddr 古いメールアドレス 新しいメールアドレス
+
+という内容のメールを送るとメールアドレスを変更することができます。
+.# 必ず『古いアドレスか新しいアドレスの"どちらか"から』このコマンドを送っ
+.# てください。
+
+必ず『古いアドレスから』このコマンドを送ってください(fml 2.2 の仕様)。
+
+.# このコマンドは、オプションが以下の条件を満たしたときに実行されます。
+.# 
+.# １、コマンドを送ったメールのFrom: に設定したアドレスが、オプションに指
+.# 　　定したアドレスのどちらかと一致する
+.# ２、オプションに指定したアドレスのどちらかはすでにメンバー
+
+結果にかかわらず、新旧両方のアドレスとＭＬサーバの管理者の３人に変更の
+通知がメールで送られます。
+
+
+.S	まとめ送り
+=E.S	Digest Delivery
+
+.if LANG == JAPANESE
+まとめ送りは、即時配送ではなく、Ｎ時間“おき”にまとめて送られる配送方
+式です。この N を matome コマンドの引数にして指定して下さい。
+いつ配送されるか?は 0 == (24 % N) の時、つまり modulus です。
+
+注意:以下の説明では「_CTK_matome」は「_CTK_digest」としても同様の動作になり
+ます。
+
+例:
+	_CTK_matome 3mp
+	3時間おきに MIME/Multipart 形式でおくる。
+
+
+_CTK_digest 数字(0-12)	
+_CTK_matome 数字(0-12)	配送間隔おきのまとめ送りに設定する
+			配送間隔は、毎日午前０時を起点としてはじまりま
+			す。ですから、引数に「13」以上の数を指定しても、
+			一日一回の配送になります。
+ 			default は gzip した Unix From つきのファイルの
+			固まりです。
+
+_CTK_digest 数字(13-36)	
+_CTK_matome 数字(13-36)	一日一回指定時間のまとめ送りに設定する
+			13〜36の数字がこのケースに当てはまります
+			午前5時のまとめ送りを設定したいときは、24+5=29
+			を指定してください。
+			午後5時は17時なので 17 で指定して下さい。
+
+_CTK_undigest
+_CTK_unmatome
+_CTK_digest 0		
+_CTK_matome 0		普通の配送へ戻す
+
+   例:
+	_CTK_matome 1		まとめ送り １時間に一回(gzipd)
+	_CTK_matome 2		まとめ送り ２時間に一回(gzipd)
+	_CTK_matome 2u		まとめ送り ２時間に一回(plain text)
+	_CTK_matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+	_CTK_matome 17		まとめ送り 一日一回と同じ(gzip-d)
+				_CTK_この場合は１７時に来る
+	_CTK_matome 29		まとめ送り 一日一回と同じ(gzip-d)
+				_CTK_この場合は午前５時に来る
+				＃matome 5 は５時間“おき” という意味
+
+   オプション (数字の後ろにつけるオプション):
+		オプションなしはGZIP(UNIX FROM)
+	u	PLAINTEXT(UNIX FROM)
+	uf	PLAINTEXT(UNIX FROM)
+	i	lha + ish 
+	ish	lha + ish 
+	mp	MIME/mMultipart	PLAINTEXT
+	d	RFC1153 format 	PLAINTEXT
+	b	RFC934 format 	PLAINTEXT(mh-burst)
+	rfc934	
+	tgz	tar+gzip で spool.tar.gz
+	ish	lha + ish 
+	lhaish
+	i
+	li
+	lu	lha + uuencode
+	lhauu
+	unpack	PLAINTEXT(UNIX FROM)
+	zip	zip して base64 で送る
+.fi
+.if LANG == ENGLISH
+<<<<< Batch mail mode (approximately every N hours)
+
+_CTK_matome <num>[opt]  Send batch mail at approximately every <num> hours
+                     To be exact, mail are sent at N clock where
+                          0 == N (mod <num>)    N=1..24
+                     When <num> is between 13 to 36, mail batch will be
+                     sent once a day at 
+                          <num>    if  <num>=13..24
+                          <num>-24 if  <num>=25..36
+
+        Ex.
+            _CTK_matome <num>u   plain(unpack) format
+            _CTK_matome <num>i   lha+ish format
+        [opt]:
+            (no option)   gzip(with UNIX From:)
+            u             PLAINTEXT(with UNIX From:) 
+            uf            PLAINTEXT(with UNIX From:)
+            tgz           'tar+gzip' -> spool.tar.gz
+            i             lha+ish
+            ish           lha+ish
+            b             RFC934 format   PLAINTEXT
+            d             RFC1153 format  PLAINTEXT
+            mp            MIME/Multipart PLAINTEXT
+
+_CTK_matome 0         Cancel batch mode.  Return to normal distribution
+        Ex.
+        _CTK_matome 1        Mail batch every 1 hour  (gzip-ped)
+        _CTK_matome 2        Mail batch every 2 hours (gzip-ped) 
+        _CTK_matome 2u       Mail batch every 2 hours (plain text)
+        _CTK_matome 2mp      Mail batch every 2 hours (MIME/Multipart)
+        _CTK_matome 17       Mail batch once a day at 17:00 (gzip-ped)
+        _CTK_matome 29       Mail batch once a day at  5:00 (gzip-ped)
+.fi
+
+.S	過去の記事の取り寄せ方
+=E.S	How to retrieve past articles
+
+
+_CTK_index 		"_CTK_get", "_CTK_mget" で取り寄せ可能なファイルのリ
+			ストをかえす。
+			index ファイルがあるのなら、それを返します
+=E
+_CTK_index             Get a list of files which you can _CTK_get
+                    Index file will be returned if it exists
+
+
+_CTK_get  数字		過去の記事を得る (resend されます)
+			ひとつずつ plain text で返送されます
+_CTK_send 数字		同上
+=E
+_CTK_get ID
+_CTK_send ID           Get a ML article (sends back in plain text)
+
+.if LANG == JAPANESE
+_CTK_get  複数の記事指定 [モード] [時間間隔]
+_CTK_mget 複数の記事指定 [モード] [時間間隔]
+			スプールの記事や(もしあれば)アーカイブにあるフ
+			ァイルを一つのメールにまとめて送り返す
+			例：
+			_CTK_get 20-30	記事20〜30を得る
+			_CTK_mget 1-10,15	記事1〜10、15を得る
+
+
+注意: "get" コマンドの引数が『数字』ならば、その数字のCountを持つ記事
+が resend されます。"get" コマンドがそれ以外の形式 (e.g. get 1-10) で
+あれば mget と同じ動作をします。その場合 "get" と "mget" の違いはファ
+イルの形式で
+
+	get  	のデフォールトは MIME/Multipart 
+	mget	のデフォールトは tar.gz 形式
+
+のように設定されています。
+
+			
+   ●_CTK_get、_CTK_mget で複数の記事を取り寄せる場合の引数:
+	範囲を指定	1-10,12,15-100 1,2,10
+			first first:10 last:30 100-last(mh的 Syntax)
+	モード		gz tgz ish rfc934 b rfc1153 d unpack uf(default=tgz)
+	時間間隔	送り返すメールが複数の時の間隔(default=300)	
+
+   ●_CTK_get と _CTK_mgetの違い
+
+	_CTK_mget はまとめて記事を得るための専用コマンドですので、記事一
+	つだけを指定した場合には、そのコマンドは無視されます。_CTK_get は、
+	一つだけのときと複数の記事が指定されたときでは違う動作になりま
+	す。どちらもまとめて記事が得られるコマンドですが、返送されるファ
+	イルの形式が異なります。
+
+	_CTK_get		MIME/Multipart 
+	_CTK_mget		tar.gz 形式
+
+	ただし、[モード]を指定することで、形式を変えることも出来ます。
+
+   モード:
+		オプションなしは tar+gzip で spool.tar.gz
+	tgz	tar+gzip で spool.tar.gz
+	uf	PLAINTEXT(UNIX FROM)
+	gz	GZIP(UNIX FROM)
+	b	RFC934 format 	PLAINTEXT(mh-burst)
+	rfc934	
+	ish	lha + ish 
+	lhaish
+	i
+	li
+	lu	lha + uuencode
+	lhauu
+	unpack	PLAINTEXT(UNIX FROM)
+	uu	UUENCODE
+	d	RFC1153 format 	PLAINTEXT
+	rfc1153	RFC1153 format 	PLAINTEXT
+.fi
+.if LANG == ENGLISH
+_CTK_mget <range list>          [mode] [interval]
+_CTK_mget <regular expression>  [mode] [interval]
+                    Get multiple files (ML articles or archive files)
+     Arg:
+       <range list>  Ex. 1-10,12,15-100  1,2,10
+                         first first:10 last:30 100-last  (MH syntax)
+       <regular exp> Ex. * ? 1? 1??
+       [mode]        gz tgz ish rfc934 b rfc1153 d unpack uf (default=tgz)
+       [interval]    mail time interval if the reply spans multiple mails
+                     (default=300)
+     Mode:
+      (No option)  'tar+gzip' -> spool.tar.gz
+       tgz         'tar+gzip' -> spool.tar.gz
+       uf          PLAINTEXT(with UNIX From:)
+       gz          GZIP(with UNIX From:)
+       b           lha+ish
+       ish         lha+ish
+       rfc934      RFC934 format   PLAINTEXT
+       unpack      PLAINTEXT(with UNIX From:)
+       uu          UUENCODE
+       d           RFC1153 format  PLAINTEXT
+       rfc1153     RFC1153 format  PLAINTEXT
+.fi
+
+
+
+.C	標準でないコマンド
+=E.C	Not standard commands
+
+以下のコマンドは管理者のポリシーによって使っていないこともあります。
+デフォールトでは使わないようになっています。
+=E
+These commands may be unavailable for maintainer's policy. In default
+fml disables these functions.
+
+.S	ライブラリー
+=E.S	Library commands
+
+メンバーがファイルを登録したり、それを取り寄せたりするためのものです。
+=E
+To add a file to the archive area of this ML and retrieve them.
+
+_CTK_library 命令		ライブラリーへのアクセス
+			アーカイブとの違いはほとんどありませんが、put 
+			が可能になっています。
+			＃ただしセキュリティ上、ファイル名は記事番号指
+			定のみです
+=E
+_CTK_library command [options]
+
+.if LANG == JAPANESE
+_CTK_library index		ライブラリーにたくわえられているファイルの一覧を得る
+_CTK_library summary	_CTK_library indexと同じ
+
+_CTK_library get 数字	ライブラリーから記事を得る
+			mget と同じ引数がつかえます
+
+_CTK_library put 		ライブラリーに記事を保存する
+
+_CTK_library unlink [番号]	指定番号の記事をライブラリーから削除する
+_CTK_library delete [番号] 同上
+_CTK_library rm     [番号] 同上
+.fi
+.if LANG == ENGLISH
+_CTK_library index		get index list in library archive area
+_CTK_library summary	the same as "_CTK_library index"
+
+_CTK_library get [NUM]	retrieve NUM file in library archive area
+			options used in "mget" are available.
+
+_CTK_library put 		add the mail to library archive area.
+
+_CTK_library unlink [NUM]	remove NUM file in library archive area.
+_CTK_library delete [NUM]  
+_CTK_library rm     [NUM]
+.fi
+
+.S	whois database による情報交換
+=E.S	whois database (ML local)
+
+.if LANG == JAPANESE
+_CTK_whois [-h host] key	whois で key を探す。
+			host が与えられた場合はそのhostへIPCで、
+			もしそうでない場合は
+			ＭＬサーバ local な whois database 中を探します
+
+_CTK_whois -a		特殊オプションで、すべての登録エントリを表示する
+_CTK_iam			自己紹介を登録する
+_CTK_who			自己紹介の一覧を得る
+.fi
+.if LANG == ENGLISH
+_CTK_whois [-h host] key  Look up whois database with key
+                       When host is given, look up is done on the host
+                       through IPC.  Otherwise the search is performed
+                       in ML local whois database
+_CTK_iam                  Put self-introduction (ML local whois database)
+
+_CTK_who
+_CTK_whois-index
+_CTK_whois-list           Get the list of available whois entries
+.fi
+
+.S	traffic コマンド(投稿量の統計)
+=E.S	Traffic command
+
+SYNOPSIS:
+_CTK_traffic [-n <best?>] [-m <mails>] [-d]
+
+=E
+"traffic" command gives the traffic information.
+
+オプション -n は、5. の投稿量の多い人のベスト何人まで表示するかを数字
+で指定します。デフォルトでは、-n 10 と同じです。
+オプション -m は、4. の何通以上あった日を表示するかを数字で指定します。
+省略時は「-m 25」と同じです。
+
+オプションをすべて省略して、「_CTK_traffic」として送ると、以下の情報が得られます。
+
+     1. 月毎のメール投稿量
+     2. メール投稿量毎の日数
+     3. 時間帯別の投稿量
+     4. 1 日 25 通以上投稿があった日
+     5. 投稿者ベストテン
+     6. 1 日当たりの平均投稿量と最大投稿量
+
+オプションで「-d」を指定すると、以下の情報が得られます。
+
+     0. 日毎の投稿量
+
+
+.C	コマンドの使い方の具体例
+=E.C	Command Usage Examples 
+
+.S	過去のメールの取り寄せ方
+=E.S	Retrieve past articles
+
+.if LANG == JAPANESE
+コマンドは
+
+     _CTLADDR_
+
+宛てに送ってください。
+
+○ 個々に取り寄せる場合
+
+過去のメールを一通単位で取り寄せるには「_CTK_get」を使います。
+以下にメールの本文に書く例を示します。
+
+　(1) 1 番目のメールが欲しい
+
+     _CTK_get 1
+
+　(2) 1 〜 3 番目のメールが欲しい
+
+     _CTK_get 1
+     _CTK_get 2
+     _CTK_get 3
+  
+   ○ まとめて取り寄せる場合
+
+　　まとめて過去のメールを取り寄せるには「_CTK_mget」を使います。以下にメ
+　イルの本文に書く例を示します。
+
+　(1) 100 〜 200 番目のメールが欲しい
+
+     _CTK_mget 100-200
+
+　(2) 100 〜 200 番目のメールを複数になる場合は 30 秒間隔で欲しい
+
+     _CTK_mget 100-200 30
+
+　(3) 100 〜 200 番目のメールを PLAIN TEXT で欲しい
+
+     _CTK_mget 100-200 unpack
+
+　(4) 100 〜 200 番目のメールを LHA + ISH で欲しい
+
+     _CTK_mget 100-200 ish
+
+　(5) 100 〜 200 番目のメールを 30 秒間隔、PLAIN TEXT で欲しい
+
+     _CTK_mget 100-200 30 unpack
+
+　　返送されるメールは 1000 行で切ってバラバラに送られるので、送り返さ
+　れてくるメールとメールの時間間隔を指定して下さい。先の例では 30 なの
+　で 30 秒間隔で送り返されます。
+
+　　指定しなかった場合の時間間隔は 5 分です。
+
+　　フォーマットを指定しなかった場合、ファイルは tar でまとめられ gzip
+　され uuencode されて送り返されます。
+
+　　1000 行を越える場合は複数のメールに分けますので、自分でつなげて(^^;
+　例えば bar というファイルにしたとします。
+＃uuencode されている場合は uudecode を使えば順番さえ合わせれば自動展開
+＃されます。
+
+     % uudecode bar
+     % ls 
+     spool.tar.gz
+     % gzip -cd spool.tar.gz | tar xf - 
+     % ls 
+     spool.tar.gz spool
+     % ls -l
+     -rw-r--r-- .......................... spool.tar.gz
+     drwxr-xr-x .......................... spool
+
+　という具合に spool ディレクトリというのが出来ます。この中に取り寄せた
+　メールがしまわれています。
+.fi
+.if LANG == ENGLISH
+In the following, 'mail' refers to /usr/ucb/mail, Mail(SUN),
+malix(SYSR3/4) /usr/bin/Mail(4.4BSD), /usr/bin/mail(4.4BSD)
+
+* Get article number 1
+          % echo "_CTK_get 1" | mail <ML address>
+          % echo "_CTK_get 1"  | mail <ML address>
+
+* Get article number 100-200
+          % echo "_CTK_mget 100-200" | mail <ML address>
+
+* Get article number 100-200.  In the case where the reply consists of
+  multiple mails, send each one at an interval of 30 seconds
+          % echo "_CTK_mget 100-200 30" | mail <ML address>
+
+* Get article number 100-200 in PLAINTEXT format
+          % echo "_CTK_mget 100-200 unpack" | mail <ML address>
+
+* Get article number 100-200 in lha+ish format
+          % echo "_CTK_mget 100-200 ish" | mail <ML address>
+
+* Get article number 100-200 in PLAINTEXT (mail interval = 30sec)
+          % echo "_CTK_mget 100-200 30 unpack" | mail <ML address>
+
+* Get files matching ?  (i.e. article 1-9)
+          % echo "_CTK_mget ?" | mail <ML address>
+
+* Get files matching *  (i.e. all articles)
+          % echo "_CTK_mget *" | mail <ML address>
+
+<<<<< Explanation of the example
+
+(1) Get the article of X-Mail-Count: 1 (article 1)
+    NOTE:  All command mail must begin with '_CTK_'  If illegal commands are
+           found, the server will send back this help file
+
+    The following way is recommended:
+
+     % echo "_CTK_get 1" | mail <ML address>
+
+    If you want to get article 1-3
+     % cat > foo
+     _CTK_get 1
+     _CTK_get 2
+     _CTK_get 3
+     ^D
+     % cat foo
+     _CTK_mget 1
+     _CTK_mget 2
+     _CTK_mget 3
+     % cat fpp | mail <ML address>
+
+    Then the server will send article 1, 2, 3 in separate mails
+
+    The problem with this scheme is that, for each get command the server
+    has to start a sendmail process.  Imagine you try to get 1-100 articles
+    in this way.  It will be a big burden for the server machine.
+
+    The solution is to use _CTK_mget
+    For example, we want to get article 1-9:
+     % echo "_CTK_mget ? 30" | mail <ML address>
+
+    Like ftp mget command, you can use regular expression.  In this case,
+    ? will match all files with single character file name, therefore it
+    matches 1 to 9 in spool directory.  Likewise, * will match all articles,
+    ?? will match article 10-99
+
+    Mail interval argument is not necessarily needed.  If a reply
+    is longer than 1000 lines, ML server will split it into multiple
+    mails every 1000 lines.  In this example, the server will send
+    each of these mails at the specified interval of 30 seconds (default
+    is 5 minutes)  This argument is usually used in the case like : you
+    only want to receive 2-3 mails for each UUCP polling interval.  If your
+    machine is IP-reachable and you are confident that it can handle
+    lots of incoming mails at the same time, probably you don't need to
+    worry about this argument.
+
+    The requested files will be tar+gzip+uuencode-d.  If the result file
+    is longer than 1000 lines, the server will split it.  You'll have
+    to concatenate them into one file, say bar, and then decode,
+    decompress, extract the original files from it (uumerge.pl is very
+    convenient for this purpose)
+
+    % uudecode bar
+    % ls
+    spool.tar.Z
+    % zcat spool.tar.Z | tar xf -
+    % ls
+    spool.tar.Z spool
+    % ls -l
+     rw-r--r-- ............................ spool.tar.Z
+    drwxr-xr-x ............................ spool
+
+    spool/ contains the files you want
+.fi
+
+History:
+
+1998/08/17 translated by fukachan@sapporo.iij.ad.jp
+1998/08/16 merge Jason.Chen@efi.com's Translation (95/11)
+		by fukachan@sapporo.iij.ad.jp
+1997/04/17 improved by metalman@kt.rim.or.jp
+1997/04/16 hand-patched by fukachan@sapporo.iij.ad.jp
+1997/04/13 improved by metalman@kt.rim.or.jp
+1997/04/05 imported and merged by fukachan@sapporo.iij.ad.jp
+1997/04/13 improved by metalman@kt.rim.or.jp
+1997/04/04 improved by metalman@kt.rim.or.jp
+1997/04/01 improved by metalman@kt.rim.or.jp
+
+	help and help.example2 are merged by fukachan@sapporo.iij.ad.jp
+				(preparation for 2.1 RELEASE)
+
+	help.example2         contributed by umura@nn.solan.chubu.ac.jp
+	 			(mnews ML's help is contributed) 
+
+	original              by fukachan@phys.titech.ac.jp
+
+$Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
