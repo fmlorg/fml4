@@ -1,13 +1,14 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 
 # Auto registraion procedure
@@ -658,7 +659,8 @@ sub DoSetMemberList
 	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
 	&Mesg(*e, "\tTry change\n\n\t$curaddr\n\t=>\n\t$newaddr\n");
 	$cmd = 'CHADDR';
-    } else {
+    }
+    else {
 	# NOT CHADDR -> BYE or UNSUBSCRIBE
 	$newaddr = $curaddr; # tricky;
 
@@ -712,7 +714,8 @@ sub DoSetMemberList
 	      'amctl.recipient_list.change.fail');
 	&Mesg(*e, "   since $curaddr is not found in delivery list.",
 	      'no_such_member') 
-	    unless $list;    }
+	    unless $list;
+    }
 
     if ($rm && $ra) {
 	&Log("$cmd [$curaddr] $c accepted");
@@ -793,6 +796,10 @@ sub ChangeMemberList
     }
 
     $ADDR_CHECK_MAX = $org_addr; # reset;
+
+    # special handling for recursive errors
+    if ($status ne 'RECURSIVE') { undef $status;}
+
     $status;
 }
 
@@ -990,10 +997,10 @@ sub DoChangeMemberList
     if ($log_c > 1 && 
 	($ChMemCount < 10) && # ($ADDR_CHECK_MAX < 10) && 
 	(! $_PCB{'mode:addr:multiple'})) {
-	&Log("$cmd: Do NOTHING since Muliply MATCHed..");
+	&Log("$cmd: DO NOTHING due to multiple matching.");
 	$log =~ s/; /\n/g;
-	&Mesg(*e, "Multiply Matched?\n$log") if $debug_amctl;
-	&Mesg(*e, "retry to check your adderss severely", 
+	&Mesg(*e, "multiple matching?\n$log") if $debug_amctl;
+	&Mesg(*e, "retry to check your address severely", 
 	      'amctl.multiply.match');
 
 	# Recursive Call
