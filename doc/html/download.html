@@ -28,30 +28,63 @@ download
 <A HREF="download.html">[Japanese] is here.</A>
 #endif
 
-<BR>
-<BR>
-<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-[master ftp server] ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+<P>DOWNLOAD:
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/">
+[fml-stable]
 </A>
 
-<BR>
-<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-[master www server]
-http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/">
+[fml-current]
 </A>
 
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/">
+[fml official release]
+</A>
+<HR>
+<PRE>
+        ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/ の下の階層について
+        
+        	current/		開発コード
+        	stable/			3.0リリースのバグつぶしシリーズ
+        
+        current/ も stable/ も daily ではなくある程度区切りのついたところで僕
+        が作っています。そのためそれなりにちゃんと動くはずです。
+        
+        	daily-snapshots/	"daily" snapshots
+        		current/	current branch の daily snapshots
+        		stable/		stable  branch の daily snapshots
+        
+        daily なので中途半端なところでパッケージを生成視してしまって失敗してい
+        る可能性あり。おっかけむき。
+        
+        	utils/			mail related softwares
+        	archives/		old snapshots for a study of history
+</PRE>
 <!- ----------------------------------------------------------------- ->
 <HR>
-
 #ifdef JAPANESE
-<LI>
 <CENTER>
 <H3>
 ソースのダウンロード
 </H3>
 </CENTER>
-<UL>
 
+<P>SITE:
+<UL>
+<LI>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+[master ftp server] ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+</A>
+
+<LI>
+<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+[master www server]
+http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+</A>
+</UL>
+
+<P>DESCRIPTION:
+<UL>
 <LI>
 3.0 Release にバグ修正だけをほどこしたstableシリーズ
 <BR>
@@ -156,6 +189,7 @@ for hierarchy on ftp server.
 #endif
 	
 <PRE>
+
 Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
 
