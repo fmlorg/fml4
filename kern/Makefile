@@ -132,10 +132,10 @@ faq:	 plaindoc
 textdoc: plaindoc
 
 INFO:	$(FML)/.info
-	@ $(MKDIR) /var/tmp/.fml
-	@ rm -f /var/tmp/.fml/INFO
-	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
-		nkf -e > /var/tmp/.fml/INFO
+	$(MKDIR) /var/tmp/.fml
+	rm -f /var/tmp/.fml/INFO
+	(nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
+		nkf -e |tee var/doc/INFO > /var/tmp/.fml/INFO
 
 plaindoc: doc/smm/op.wix
 	@ $(MKDIR) /var/tmp/.fml
