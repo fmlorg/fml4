@@ -721,8 +721,8 @@ sub SetHashDefaults
 
 		    # cgi utilities
 		    'admin.cgi',          'do_setup_admin_cgi_init',
-		    'mladmin.cgi',        'do_setup_mladmin_cgi',
-		    'ml-admin.cgi',       'do_setup_mladmin_cgi',
+		    'mladmin.cgi',        'do_setup_mladmin_cgi_init',
+		    'ml-admin.cgi',       'do_setup_mladmin_cgi_init',
 		    '500#mladmin.cgi ML', 'set up ml-admin/$ml/*.cgi',
 
 		    # cui htpasswd wrapper
@@ -5497,7 +5497,7 @@ sub do_setup_admin_cgi_init
 
     if ($action) {
 	if ($action eq 'update') {
-	    &do_setup_admin_cgi($NULL);
+	    &do_setup_admin_cgi_scripts($NULL);
 	}
 	elsif ($action eq 'config') {
 	    &do_admin_cgi_config($NULL);
@@ -5515,7 +5515,7 @@ sub do_setup_admin_cgi_init
 }
 
 
-sub do_setup_admin_cgi
+sub do_setup_admin_cgi_scripts
 {
     local($ml) = @_;
 
@@ -5579,31 +5579,64 @@ sub __Convert2HTPasswd
 }
 
 
-sub do_setup_mladmin_cgi
+sub do_setup_mladmin_cgi_init
+{
+    my ($ml, $action, @argv) = @_;
+
+    if ($action) {
+	if ($action eq 'update') {
+	    &do_setup_mladmin_cgi_scripts($ml);
+	}
+	elsif ($action eq 'config') {
+	    &do_admin_cgi_config($ml);
+	}
+	else {
+	    &Error("unknown action=$action");
+	}
+    }
+    else {
+	&Error("Usage: admin.cgi [update|config]");
+	print STDERR "Usage:\n        \n";
+	print STDERR "      admin.cgi update    remake /admin/*.cgi\n";
+	print STDERR "      admin.cgi config    configuration menu\n";
+    }
+}
+
+
+sub do_setup_mladmin_cgi_scripts
 {
     local($ml) = @_;
 
     &ResetVariables;
 
-    print "\n-- create $ml CGI programs\n" if $debug0;
-    print "\n   create $ml CGI programs\n";
-
     &MkDir("$REAL_CGI_PATH/ml-admin/$ml", 0755);
+    &Mkdir("$CGI_AUTHDB_DIR/ml-admin/$ml", 0755);
 
+    # make .htaccess
+    print STDERR " * create $REAL_CGI_PATH/ml-admin/$ml/.htaccess\n";
+    &Conv($ml, "$EXEC_DIR/www/etc/dot_htaccess.ml-admin",
+	  "$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
+
+    print STDERR " * create CGI scripts for $ml ML\n";
+    print STDERR "   in $REAL_CGI_PATH/ml-admin/$ml/\n";
+    print STDERR "   ";
     for $f ("menu.cgi", "makefml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/ml-admin/$f";
 	$outfile  = "$REAL_CGI_PATH/ml-admin/$ml/$f";
 	&Conv($ml, $template, $outfile);
+	print STDERR "$f ";
 	chmod 0755, $outfile;
     }
-
-    # make .htaccess
-    &Conv($ml, "$EXEC_DIR/www/etc/dot_htaccess.ml-admin",
-	  "$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
 
     local($pwdf, $etcpwd);
     $pwdf   = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
     $etcpwd = "$ML_DIR/$ml/etc/passwd";
+
+    &SetPublicUmask;
+    &Touch($pwdf);
+    chmod 0644, $pwdf;
+    print STDERR "\n";
+    return ;
 
     # 1. use www/authdb/
     print "\n";
@@ -5613,7 +5646,7 @@ sub do_setup_mladmin_cgi
     }
     # 2. make htpasswd from $DIR/etc/passwd
     elsif (-f $etcpwd) {
-	print "   FYI: make $pwdf\n";
+	print "   FYI: import $pwdf\n";
 	print "        from $etcpwd\n";
 	&__Convert2HTPasswd($etcpwd, $pwdf);
     }
@@ -7046,6 +7079,14 @@ sub do_admin_cgi_config
     # "clear" not exist on NT4
     $clear_prog = $UNISTD ? &__SearchPath('clear') : "cls";
 
+    # overwrite SSL configuratino.
+    if ($ml){
+	my ($s) = &Grep('^SSLRequireSSL', 
+			"$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
+	$s =~ s/\s*$//;
+	$SSL_REQUIRE_SSL = $s;
+    }
+
     local(%query) = (
 		     'SSL_REQUIRE_SSL' => $SSL_REQUIRE_SSL,
 		     'REAL_CGI_PATH'   => $REAL_CGI_PATH,
@@ -7069,39 +7110,61 @@ sub do_admin_cgi_config
 	    print "   ".("*" x 60); print "\n";
 	}
 
-	%variable = (
-		     0 => "END",
-		     1 => "USE_MOD_SSL         $query{'SSL_REQUIRE_SSL'}",
-		     2 => "REAL_CGI_PATH       $query{'REAL_CGI_PATH'}",
-		     3 => "CGI_AUTHDB_DIR      $query{'CGI_AUTHDB_DIR'}",
-		     4 => "CHANGE PASSWORD",
-		     5 => "REMAKE CGI SCRIPTS",
-		     );
-	%varname = (
-		    1 => "SSL_REQUIRE_SSL",
-		    2 => "REAL_CGI_PATH",
-		    3 => "CGI_AUTHDB_DIR",
-		    4 => "CHANGE PASSWORD",
-		    5 => "REMAKE CGI SCRIPTS",
-		    );
-
+	if ($ml) {
+	    %variable = (
+			 0 => "END",
+			 1 => "USE_MOD_SSL         $query{'SSL_REQUIRE_SSL'}",
+			 2 => "CHANGE PASSWORD",
+			 3 => "REMAKE CGI SCRIPTS",
+			 );
+	    %varname = (
+			1 => "SSL_REQUIRE_SSL",
+			2 => "CHANGE PASSWORD",
+			3 => "REMAKE CGI SCRIPTS",
+			);
+	}
+	else {
+	    %variable = (
+			 0 => "END",
+			 1 => "USE_MOD_SSL         $query{'SSL_REQUIRE_SSL'}",
+			 2 => "REAL_CGI_PATH       $query{'REAL_CGI_PATH'}",
+			 3 => "CGI_AUTHDB_DIR      $query{'CGI_AUTHDB_DIR'}",
+			 4 => "CHANGE PASSWORD",
+			 5 => "REMAKE CGI SCRIPTS",
+			 );
+	    %varname = (
+			1 => "SSL_REQUIRE_SSL",
+			2 => "REAL_CGI_PATH",
+			3 => "CGI_AUTHDB_DIR",
+			4 => "CHANGE PASSWORD",
+			5 => "REMAKE CGI SCRIPTS",
+			);
+	}
 
 	&cgi_config_show(*variable);
-
-	$r = &Query("which ?", "0-5", "0|1|2|3|4|5", '0');
+	if ($ml) {
+	    $r = &Query("which ?", "0-3", "0|1|2|3", '0');
+	}
+	else {
+	    $r = &Query("which ?", "0-5", "0|1|2|3|4|5", '0');
+	}
 
 	if ($r == 0) {
 	    last;
 	}
 	else {
-	    &cgi_menu_mainloop(*query, $varname{$r});
+	    &cgi_menu_mainloop(*query, $varname{$r}, $ml);
 	}
-    }
-	
-    
 
+	# update config for other menu's
+	$SSL_REQUIRE_SSL = $query{'SSL_REQUIRE_SSL'} eq "YES" ? 
+	    'SSLRequireSSL' : $NULL;
+    }
+
+    # save config
     if (join(" ",%original_query) ne join(" ", %query)) {
-	$SSL_REQUIRE_SSL = $query{'SSL_REQUIRE_SSL'} eq "YES" ? 'SSLRequireSSL' : $NULL;
+	$SSL_REQUIRE_SSL = $query{'SSL_REQUIRE_SSL'} eq "YES" ? 
+	    'SSLRequireSSL' : $NULL;
 	$REAL_CGI_PATH   = $query{'REAL_CGI_PATH'};
 	$CGI_AUTHDB_DIR  = $query{'CGI_AUTHDB_DIR'};
 	&SaveCGIConf;
@@ -7110,17 +7173,26 @@ sub do_admin_cgi_config
 	$r = &Query("Q: Can I recreate cgi scripts?", "y/n", "y|n", 'n');
 	if ($r eq 'y') {
 	    print "\n";
-	    &do_setup_admin_cgi;
+
+	    if ($ml) {
+		&do_setup_mladmin_cgi_scripts($ml);
+	    }
+	    else {
+		&do_setup_admin_cgi_scripts($NULL);
+	    }
 	}
 	else {
 	    print "\n";
 	    print "FYI: If you recreate cgi scripts, please run\n";
-	    print "     $0 admin.cgi\n";
+	    if ($ml) {
+		print "     $0 admin.cgi update\n";
+	    }
+	    else {
+		print "     $0 ml-admin.cgi $ml update\n";
+	    }
 	    print "\n";
 	}
     }
-
-    print "done.\n";
 }
 
 
@@ -7138,7 +7210,7 @@ sub cgi_config_show
 
 sub cgi_menu_mainloop
 {
-    local(*query, $which) = @_;
+    local(*query, $which, $ml) = @_;
 
     # SSL ?
     if ($which eq 'SSL_REQUIRE_SSL') {
@@ -7180,8 +7252,15 @@ sub cgi_menu_mainloop
 	    return;
 	}
 	my ($dir, $pwf);
-	$dir = "$CGI_AUTHDB_DIR/admin/";
-	$pwf = "$CGI_AUTHDB_DIR/admin/htpasswd";
+
+	if ($ml) {
+	    $dir = "$CGI_AUTHDB_DIR/ml-admin/$ml";
+	    $pwf = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
+	}
+	else {
+	    $dir = "$CGI_AUTHDB_DIR/admin/";
+	    $pwf = "$CGI_AUTHDB_DIR/admin/htpasswd";
+	}
 
 	if (! -f $pwf) {
 	    $flag = '-c';
@@ -7201,7 +7280,12 @@ sub cgi_menu_mainloop
 	sleep 2;
     }
     elsif ($which eq "REMAKE CGI SCRIPTS") {
-	&do_setup_admin_cgi($NULL);
+	if ($ml) {
+	    &do_setup_mladmin_cgi_scripts($ml);
+	}
+	else {
+	    &do_setup_admin_cgi_scripts($NULL);
+	}
 	sleep 2;
     }
 }
