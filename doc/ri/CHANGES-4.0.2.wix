@@ -4,11 +4,16 @@
 	$Date$
 
    [4.0.2 の主な変更点]
+
 	* 新機能は fml 5.0 のモジュールベースに変更 
 	* ドキュメントの一部を 5.0 branch へ移行
 		doc/devel/OS_and_Perl (OS デフォルトの perl 情報一覧)
 		doc/devel/ 全体
 	* IPv6 をデフォルトで使う
+	* MIME エンコーディングのエンジンを IM ベースへ
+	* X-ML-Info: ループチェックの仕方の微修正
+		今まではアドレスを含むか否か？だったが、
+		それだと引っかかり過ぎることがあるため
 	* サマータイムの考慮
 	* List- ヘッダを個別にカスタマイズ可能にする
 	* 全受信者数を数えている変数を作る
@@ -16,7 +21,35 @@
 	* bug fixes
 		FreeBSD での CGI 
 		spool2html で module が @INC にない
+		_smtplog の expire が変なのを修正
 
+2001/06/30
+
+   X-ML-Info: ループチェックの仕方の微修正
+	今まではアドレスを含むか否か？だったが、
+	それだと引っかかり過ぎることがあるため
+
+2001/06/28
+
+   MIME まわり
+
+	すまん IM:: が EXEC_DIR にインストールされないや、修正
+	注意: つまり 20010627-current では mimew.pl を使ってしまう
+
+	デフォルトで module/Japanese/ を @INC に追加 
+
+2001/06/27
+
+   proc/libmodedef.pl
+	fix _smtplog expiration
+
+	_smtplog の expire の bug fix	
+
+   proc/libMIME.pl 
+
+	mimeencode uses IM::Iso2022jp not mimew.pl by default.
+	If it fails to load IM:: modules, fall back to old
+	mimeencode() by mimew.pl
 
 2001/06/18
 
@@ -68,46 +101,9 @@
 
    4.0.1 release
 
-2001/05/11
+---------------------------------------------------------------------------
 
-   IPv6 by default
-
-	常に IPv6 でメールサーバに接続することに挑戦してみる。
-	もし、失敗したら IPv4 で挑戦する。
-	これがデフォルト
-
-	$USE_INET6 を 0 にすると IPv4 オンリーに戻ります。
-
-2001/05/10
-
-   kern/libsmtp.pl
-	enable IPv6
-
-	IPv6 を有効にする(fml 5.0 の IPv6 モジュールを使っている)。
-
-   messages/Japanese/amctl (1.5-1.6):
-	fix Japanese to be more friendly for newbies
-
-   日付関連
-	サマータイムの指定をできるように拡張する。
-	サマータイムらしい場合にはタイムゾーンは $TZONE_DST 
-	の値が GetTime() で使われる :) デフォルトでは未定義
-
-   	fml/bin: cron.pl emumail.pl gen_summary.pl spool2html.pl 
-   	fml/cf: MANIFEST config 
-   	fml/kern: fml.pl 
-   	fml/libexec: mead.pl mead.pl.new 
-   	fml/sbin: makefml 
-   	fml/sys/WINDOWS_NT4: ntfml.pl wrapper.pl 
-   
-2001/05/05
-
-   fml 5.0 branch から Mail::* と IO::* クラスを輸入した。
-
-	一つは IPv6 のため、もう一つは mead で使う
-	エラーメール解析エンジンの輸入でした。
-
-$FML: CHANGES-4.0.2.wix,v 1.3 2001/06/17 04:58:13 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.2 2001/07/01 13:31:47 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp

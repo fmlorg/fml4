@@ -24,6 +24,13 @@
 		spool2html で module が @INC にない
 		_smtplog の expire が変なのを修正
 
+2001/07/01
+
+   4.0.2_ALPHA
+
+	4.0 stable ブランチに current からコードを
+	輸入し、4.0.2 リリースの準備を始めました。   
+
 2001/06/30
 
    X-ML-Info: ループチェックの仕方の微修正
