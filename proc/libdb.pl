@@ -1,17 +1,18 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
+#
 
 sub FML_SYS_DBCtl
 {
-    local($type, $file, $action, $buf) = @_;
+    my ($type, $file, $action, $buf) = @_;
 
     if ($action eq 'add') {
 	&TextDBAppend($file, $buf);
@@ -24,7 +25,7 @@ sub FML_SYS_DBCtl
 
 sub TextDBAppend
 {
-    local($file, $buf) = @_;
+    my ($file, $buf) = @_;
 
     if (open(SAVE_ENV, ">> $file")) {
 	print SAVE_ENV time, "\t", $buf, "\n";
@@ -38,8 +39,8 @@ sub TextDBAppend
 
 sub TextDBGet
 {
-    local($file, $key) = @_;
-    local($time, $x_id, $x_buf);
+    my ($file, $key) = @_;
+    my ($time, $x_id, $x_buf);
 
     if (open(SAVE_ENV, $file)) {
 	while (<SAVE_ENV>) {
