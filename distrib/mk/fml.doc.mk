@@ -45,6 +45,7 @@ DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year200
 .include "doc/examples/Makefile"
 .include "doc/examples/filter/Makefile"
 .include "doc/examples/tips/Makefile"
+.include "doc/examples/header/Makefile"
 
 
 ### RULES ###
