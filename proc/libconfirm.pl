@@ -371,21 +371,21 @@ sub ManualRegistConfirm
 ##### Section: CHADDR confirmation
 sub ValidChaddrRequest
 {
-    local($addr0, $addr1) = @_;
+    local($oldaddr, $newaddr) = @_;
 
     # loop check
-    &LoopBackWarn($addr0) && (return 0);
-    &LoopBackWarn($addr1) && (return 0);
+    &LoopBackWarn($oldaddr) && (return 0);
+    &LoopBackWarn($newaddr) && (return 0);
 
-    # addr0 should be a member.
-    &MailListMemberP($addr0) || do {
-	&Log("$addr0 is NOT a member");
+    # $oldaddr should be a member.
+    &MailListMemberP($oldaddr) || do {
+	&Log("$oldaddr is NOT a member");
 	return 0;
     };
 
-    # one of addr0 and addr1 should be == From: .
-    if (&AddressMatch($From_address, $addr0) || 
-	&AddressMatch($From_address, $addr1)) {
+    # one of $oldaddr and $newaddr should be == From: .
+    if (&AddressMatch($From_address, $oldaddr) || 
+	&AddressMatch($From_address, $newaddr)) {
 	1;
     }
     else {
@@ -868,16 +868,14 @@ sub GenChaddrConfirmReplyText
     elsif ($mode eq 'BufferSyntax::Error') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "Syntax Error! Please use the following syntax\n\n";
-	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
-	$s .= "(Name NOT E-Mail Address)\n";
-	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE OLD_ADDRESS NEW_ADDRESS ";
 	$s .= "For example,\n\n";
-	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE oldaddr\@baycity.asia newaddr\@baycity.asia\n";
     }
     elsif ($mode eq 'BufferSyntax::InvalidAddr') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Please use your name NOT E-Mail Address! like \n\n";
-	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+	$s .= "For example,\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE oldaddr\@baycity.asia newaddr\@baycity.asia\n";
     }
 
     $s;
