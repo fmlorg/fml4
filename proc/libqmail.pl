@@ -1,19 +1,22 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
+
+use vars qw($debug $debug_qmail);
+
 
 sub DotQmailExt
 {
     local(*e) = @_;
-    local($ext, $key, $keyctl);
+    my ($ext, $key, $keyctl);
 
     # get ?
     ($ext = $ENV{'EXT'}) || return $NULL;
@@ -26,7 +29,7 @@ sub DotQmailExt
     if ($ext =~ /^($key)$/i) {
 	return $NULL;
     }
-    elsif ($keyctl&& ($ext =~ /^($keyctl)$/i)) {
+    elsif ($keyctl && ($ext =~ /^($keyctl)$/i)) {
 	return $NULL;
     }
 
