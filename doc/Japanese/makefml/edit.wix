@@ -41,6 +41,14 @@ and run "make config.ph".
 cf を設定のマスターファイルにする必要があります。ちょうど sendmail.cf 
 と CFの設定ファイルの関係のようになっています。
 
+* 2000/05/09 以降の fml-current には make config.ph 同じことをする 
+
+  % makefml update-config.ph ML
+
+というコマンドが用意されています。でもこれならMLのHOME以外からの実行も、 
+make がないOSでもOKです。
+
+
 注意: 昔あった maintenance.pl や vipw.pl は削除されましたが、それと同
 じことをする機能です。
 

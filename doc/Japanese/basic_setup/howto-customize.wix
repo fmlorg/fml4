@@ -62,6 +62,13 @@ makefmlはメニューで変更された内容を/var/spool/ml/elena/cfにsaveし、自
 この2段階の処理は「機械処理するため」「デフォールトとの差分だけを書い
 ておきたい」という用途のために存在します。
 
+* 2000/05/09 以降の fml-current には同じことをする 
+
+  % makefml update-config.ph ML
+
+というコマンドが用意されています。でもこれならMLのHOME以外からの実行も、 
+make がないOSでもOKです。
+
 cfの構文はperlではありません。機械処理しやすいフォーマットになっていま
 す。構文とcfとconfig.phの違いについては
 .url ../../INSTALL/index.html#cf-and-config.ph

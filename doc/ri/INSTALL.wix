@@ -2248,6 +2248,11 @@ To configure advanced settings,
 	   you can re-generate config.ph by 
 		(prompt)% make config.ph
 
+	* 2000/05/09 以降の fml-current には同じことをする 
+	  % makefml update-config.ph ML
+	  というコマンドが用意されています。でもこれなら
+	  MLのHOME以外からの実行も、 make がないOSでもOKです。
+
 	2. 今後は cf も makefml も使わず config.ph を手で編集する。
 =E
 	2. edit config.ph by hand ALWAYS.
