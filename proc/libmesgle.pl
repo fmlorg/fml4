@@ -31,7 +31,10 @@ sub MesgLE
     # 1. check whether the message template with the key exists?
     if ($dir = $found) {
 	local($file) = split(/\./, $key);
-	$msg = &MesgLE'Lookup($key, "$dir/$file"); #';
+
+	if (-f "$dir/$file") {
+	    $msg = &MesgLE'Lookup($key, "$dir/$file"); #';
+	}
 
 	if ($msg) {
 	    &Log("MesgLE: found in file 'a' o keyword a.b.c.")
