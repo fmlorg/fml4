@@ -335,7 +335,7 @@ sub SetDefaults
     }
 
     # Architecture Dependence;
-    $UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 1;
+    $UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = $HAS_GETGRENT = 1;
     
     # REQUIRED AS DEFAULTS
     %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', +1, 'ne.jp', +1);
