@@ -2,7 +2,9 @@
 
 				Ken'ichi Fukamachi
 
-CVS TAG: fnf-1-0
+CVS TAG: fnf-1-0 (just before rewriting)
+	run the following to check difference before/after FNF 
+	% cvs diff -r fnf-1-0
 
 * emphasis ERROR message
 
