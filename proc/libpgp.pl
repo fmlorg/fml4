@@ -17,21 +17,28 @@ sub PGPGoodSignatureP
     local(*e, $no_reply) = @_;
     local($auth) = 0;
 
-    &Log("PGPGoodSignatureP") if $debug;
+    &Log("PGPGoodSignatureP") if $debug || $debug_pgp;
 
     &PgpInit(*e) || return 0;
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
+    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGP: $!");
     print WPGP $e{'Body'};
     close(WPGP);
 
     while (<RPGP>) {
 	$auth = 1 if /Good\s+signature/i;
-	print STDERR "PGP OUT:$_" if $debug;
+	chop;
+	print STDERR "PGP OUT:", $_, "\n" if $debug;
+	&Log("PGP OUT:$_") if $debug || $debug_pgp;
     }
     close(RPGP);
+
+    if ($debug_pgp) {
+	&Log($auth ? "PGP: Good signature." : "PGP: No good signature.");
+    }
 
     # PGP authenticated
     if (! $no_reply) {
@@ -48,6 +55,8 @@ sub PGPGoodSignatureP
 sub PGPDecodeAndEncode
 {
     local(*e) = @_;
+
+    &Log("PGPDecodeAndEncode sets in") if $debug || $debug_pgp;
     &PGPDecode(*e, 1);
 
     # buffer replacement
@@ -68,28 +77,37 @@ sub PGPDecode
     $bs = '-----BEGIN PGP MESSAGE-----';
     $es = '-----END PGP MESSAGE-----';
 
-    &Log("PGPDecode") if $debug;
-
     &PgpInit(*e) || return 0;
 
     # check each line and PGP Blocks
+    my ($c) = 0;
     for (split(/\n/, $e{'Body'})) {
 	if (/^$bs/ .. /^$es/) {
-	    $pgp_buf .= "$_\n";
+	    $pgp_buf .= $_."\n";
 	}
 	else {
-	    $e{'pgp:buf'}    .= "$_\n";
-	    $e{'pgp:encbuf'} .= "$_\n";
+	    $e{'pgp:buf'}    .= $_."\n";
+	    $e{'pgp:encbuf'} .= $_."\n";
 	}
 
 	# pgp decode
 	if (/^$es/) {
-	    $_ = &DoPGPDecode($pgp_buf);
-	    undef $pgp_buf;
-	    $e{'pgp:buf'}    .= $_;
-	    $e{'pgp:encbuf'} .= &DoPGPEncode($_) if $encode;
+	    $c++;
+	    if (! $pgp_buf) {
+		&Log("Error: PGPDecode: empty PGP block");
+	    }
+
+	    my ($buf) = &DoPGPDecode($pgp_buf);
+	    undef $pgp_buf; # reset buffer
+
+	    $e{'pgp:buf'}    .= $buf;
+	    $e{'pgp:encbuf'} .= &DoPGPEncode($buf) if $encode;
 	}
     }
+
+    if ($c == 0) {
+	&Log("Error: PGPDecode: cannot find PGP block(s) to decode");
+    } 
 }
 
 # using the temporary file.
@@ -97,23 +115,30 @@ sub PGPDecode
 sub PGPDecode2
 {
     local($buf) = @_;
-    local($auth, $dcbuf);
-    local($tmpf) = "$FP_TMP_DIR/pgp$$";
+    my($auth, $dcbuf);
+    my($tmpf) = "$FP_TMP_DIR/pgp$$";
+
+    &Log("PGPDecode2 sets in") if $debug || $debug_pgp;
 
     # load open2
     require 'open2.pl';
 
     # PGP Signature Check
+    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode2: $!");
     print WPGP $buf;
     close(WPGP);
 
-    while (<RPGP>) {
-	$auth = 1 if /Good\s+signature/i;
-    }
+    $auth = 0;
+    while (<RPGP>) { $auth = 1 if /Good\s+signature/i;}
     close(RPGP);
 
+    if (! $auth) {
+	&Log("Error: PGPDecode2: cannot find good PGP signature");
+    }
+
     # 2>&1 is required to detect "Good signature"
+    &Log("run $PGP $PgpOpts -o $tmpf") if $debug || $debug_pgp;
     open(WPGP, "|$PGP $PgpOpts -o $tmpf")||&Log("PGPDecode2: $!");
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
@@ -133,25 +158,35 @@ sub PGPDecode2
     $dcbuf;
 }
 
+
 sub DoPGPDecode
 {
     local($buf) = @_;
     local($auth, $dcbuf);
 
+    &Log("DoPGPDecode sets in") if $debug || $debug_pgp;
+
     # load open2
     require 'open2.pl';
 
     # PGP Signature Check
+    &Log("run $PGP $PgpOpts -f 2>&1") if $debug || $debug_pgp;
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode: $!");
     print WPGP $buf;
     close(WPGP);
 
+    $auth = 0;
     while (<RPGP>) {
 	$auth = 1 if /Good\s+signature/i;
     }
     close(RPGP);
 
+    if (! $auth) {
+	&Log("Error: DoPGPDecode: cannot find good PGP signature");
+    }
+
     # 2>&1 is required to detect "Good signature"
+    &Log("run $PGP $PgpOpts -f 2>/dev/null") if $debug || $debug_pgp;
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>/dev/null")||&Log("PGPDecode: $!");
     print WPGP $buf;
     close(WPGP);
@@ -163,6 +198,7 @@ sub DoPGPDecode
     close(RPGP);
 
     &Log("ERROR: PGP no good signature.") unless $auth;
+    &Log("ERROR: decoded buffer is empty") unless $dcbuf;
 
     $dcbuf;
 }
@@ -175,7 +211,7 @@ sub DoPGPEncode
     local($whom, $encbuf);
     local($tmpbuf) = "$FP_TMP_DIR/pgp:tmpbuf";
 
-    &Log("DoPGPEncode") if $debug;
+    &Log("DoPGPEncode sets in ") if $debug || $debug_pgp;
 
     &PgpInit(*e) || return 0;
 
@@ -187,6 +223,7 @@ sub DoPGPEncode
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
+    &Log("run $PGP $PgpOpts -f -sea $whom 2>$tmpbuf") if $debug || $debug_pgp;
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f -sea $whom 2>$tmpbuf") || 
 	&Log("PGPEncode: $!");
     print WPGP $buf;
@@ -195,10 +232,16 @@ sub DoPGPEncode
     while (<RPGP>) { $encbuf .= $_;}
     close(RPGP);
 
+    if (-z $tmpbuf) {
+	&Log("ERROR: DoPGPEncode: empty temporary file");
+    }
+
     open(EPGP, $tmpbuf) || &Log("PGPEncode: $!");
     while (<EPGP>) { $e{'pgp:errbuf'} .= $_;}
     close(EPGP);
     unlink $tmpbuf;
+
+    &Log("ERROR: encoded buffer is empty") unless $encbuf;
 
     $encbuf;
 }
@@ -211,8 +254,6 @@ sub PGPEncode
 {
     local(*e) = @_;
 
-    &Log("PGPEncode") if $debug;
-
     ### replacement
     # buffer replacement
     $e{'OriginalBody'} = $e{'Body'};
@@ -224,6 +265,8 @@ sub PgpScan
 {
     local(*e, *whom) = @_;
     local($count, $in);
+
+    &Log("PgpScan sets in") if $debug || $debug_pgp;
 
     # 2>&1 is required to detect "Good signature"
     open(RPGP, "$PGP $PgpOpts -kv 2>&1|") || &Log("PGP: $!");
@@ -256,6 +299,8 @@ sub PgpUserExistP
 	}
     }
     close(RPGP);
+
+    &Log("PGP: no such user $user");
 
     0;
 }
