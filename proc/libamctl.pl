@@ -567,7 +567,7 @@ sub DoSetMemberList
 	# check the similarity level; (e.g. sub-domain change)
 	# possibility of "chaddr *@uja.x.y.z -> *@kitakitune.z.y.z"
 	$asl = &AddrSimilarity($curaddr, $newaddr);
-	if ($asl > $ADDR_CHECK_MAX) { $ADDR_CHECK_MAX = $asl + 1;}
+	if ($asl >= $ADDR_CHECK_MAX) { $ADDR_CHECK_MAX = $asl + 1;}
 
 	if ($new_list = &MailListMemberP($newaddr)) {
 	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");
