@@ -73,7 +73,7 @@ compatible の目的で popfml.pl にリンクされています。
 
 SYNOPSIS:
 
-    popfml.pl [-user username] [-h host] [-f config-file] -[hd]
+    popfml.pl [-hd] [-user username] [-host host] [-f config-file]
     
     -user username			
     -host host(pop server running)

@@ -236,7 +236,7 @@ Solaris 2.3J 		だめ?(2.3 以前はまんがいち動けばらっき〜のようだ)
 DEC OSF/1		[:include: でかつ perl -U が必要(なぜ;_;?)]
 			-U はいらないこともあるらしい
 =E
-			require both :include: and perl -U ?
+DEC OSF/1		require both :include: and perl -U ?
 			I heard you may not require -U.
 
 OSF/1 Alpha AXP V2.1 	include
@@ -244,11 +244,11 @@ OSF/1 Alpha AXP V2.1 	include
 HP UX 9?		[:include でかつ perl -U が必要?]
 			#なんか、setreuid しかないんだけど…>HP-UX
 =E
-			require both :include: and perl -U ?
+HP UX 9?		require both :include: and perl -U ?
 
 SVR3 [4.3BSD とおなじ]	uidでOKのはず
 =E
-SVR3 [4.3BSD とおなじ]	uid must be OK
+SVR3 [same as 4.3BSD]	uid must be OK
 ______________________________
 .k	4.3BSD
 .k	4.4BSD
