@@ -1,6 +1,37 @@
 .C	事例集
 
-.S	例: fmlでのwelcomeメールの本文をハックする
+.S	例: fmlでの confirm のメールの本文をハックする (ひとつのＭＬだけ)
+
+fml-support: 07974, 07975
+「FMLから確認のメールの内容を、一つのメーリングリストだけ変えたい」
+
+日本語で返事を返すテンプレートが /usr/local/fml/messages/ にあります。
+
+	% cp -pr /usr/local/fml/messages /var/spool/ml/elena 
+
+してください。confirmation 関係は
+
+	/var/spool/ml/elena/messages/Japanese/confirm 
+
+というテンプレートがあります。
+このファイルの一番上のテンプレートを変更してみて下さい。
+
+confirm.auto_regist.preamble:
+	こちらは<_ARG0_>メーリングリスト(ＭＬ)のfmlです。
+	これはＭＬに登録する意志の確認をするメールです。
+	このＭＬに登録していいなら
+	...
+
+という部分があります、そこを編集してみてください。
+/var/spool/ml/elena/messages が /usr/local/fml/messages に優先されます。
+
+NOTE: 現在の実装(2000/05: 3.0-current も 3.0-stable も)ではこのように
+して下さい。しかし、これでは upgrade した時にそのＭＬだけ upgrade され
+なくなってしまいます。もうちょっと検索の仕方を工夫する余地があります。
+将来の version ではもうちょっと賢くならないかと検討しています。
+
+
+.S	例: fmlでのwelcomeメールの本文をハックする (全ＭＬ共通)
 
 ◯ $DIR/welcome ファイルをいじる
 
@@ -130,16 +161,4 @@ Example: Append "how to get help" to the last of a distributed article.
 
    %;
 
-
-
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
-#          All rights reserved. 
-#               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
-# 
-# FML is free software; you can redistribute it and/or modify
-# it under the terms of GNU General Public License.
-# See the file COPYING for more details.
-#
-# $Id$
-.~HTML_PRE
+.# $Id$
