@@ -183,6 +183,20 @@ header_checks = regexp:/etc/postfix/header_checks
 
 .url http://www.sendmail.com/loveletter/
 
+.S	uuencoded ?
+
+.q
+To: postfix-users@postfix.org
+Message-ID: <20000505100443.N3160@alcove.wittsend.com>
+
+... snip ...
+
+they are using Microsoft Information Server and it's configured to send
+attachments to exterior addresses in uuencoded form.  
+
+... snip ...
+.~q
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
