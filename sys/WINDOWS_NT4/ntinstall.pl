@@ -56,7 +56,13 @@ system "copy src\\* $EXEC_DIR";
 -d "$SYS_DIR\\WINDOWS_NT4" || &MkDirHier("$SYS_DIR\\WINDOWS_NT4", 0755);
 system "copy sys\\WINDOWS_NT4\\* $SYS_DIR\\WINDOWS_NT4";
 
-system "copy drafts\\* $DRAFTS_DIR";
+# install drafts/$LANGUAGE/
+for $dir ('Japanese', 'English') {
+    my ($x) = $DRAFTS_DIR . "/$dir";
+    -d $x || &MkDirHier($x, 0755);
+    system "copy drafts\\${dir}\\* $DRAFTS_DIR\\${dir}";
+}
+
 system "copy sys\\WINDOWS_NT4\\* $EXEC_DIR";
 system "copy sbin\\makefml $EXEC_DIR\\makefml";
 
