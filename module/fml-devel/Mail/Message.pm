@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.20 2001/04/15 15:29:29 fukachan Exp $
+# $FML: Message.pm,v 1.24 2001/05/18 03:50:16 fukachan Exp $
 #
 
 package Mail::Message;
@@ -29,27 +29,36 @@ Mail::Message -- manipulate mail messages (parse, analyze and compose)
 
 =head1 SYNOPSIS
 
-To make a message with one part of data and print it.
+To parse the stdin and print it,
 
-    # make a message
-    my $m1 = new Mail::Message { data => \$body1 };
-
-    # another method to make a message
-    my $m2 = new Mail::Message;
-    $m2->create(  { data => \$body2 } );
-
-    # print the mail message.
-    # If it is a chain of body-parts, print() shows $m1, $m2 ... 
-    # in the chain order
+    use Mail::Message;
+    my $m = Mail::Message->parse({  fh => \*STDIN });
     $m1->print;
 
-To make a multipart message, do this.
+To make a message of the body part,
 
-    # make a multipart message. It consists of a chain of $m1, $m2, ...
-    my $m1 = new Mail::Message { data => \$body1 };
-    my $m2 = new Mail::Message { data => \$body2 };
-    $m1->next_message( $m2 );
+    my $msg = new Mail::Message {
+	boundary  => $mime_boundary,
+	data_type => $data_type_defined_in_header_content_type,
+	data      => \$message_body,
+    };
 
+Please specify SCALAR REFERENCE as C<data>.
+
+To make a message of the header,
+
+    my $msg = new Mail::Message {
+	boundary  => $mime_boundary,
+	data_type => 'text/rfc822-headers',
+	data      => $header,
+    };
+
+Please specify C<Mail::Header> or C<FML::Header> object as C<data>.
+
+   TODO:
+
+    It is useful to C<parse()> the message but inconvenient to build a
+    message from scratch.
 
 =head1 DESCRIPTION
 
@@ -178,23 +187,36 @@ C<multipart.something> is a faked type to treat both real content,
 MIME delimiters and others in the same Mail::Message framework.
 
 
-=head1 METHODS to create an object
+=head1 METHODS to create a message object
 
 =head2 C<new($args)>
 
-constructor. 
-If $args is given, C<create($args)> method is called.
+constructor which makes C<a> message object.
 
-=head2 C<create($args)>
+In almost cases, new() is used to a message object of a message body
+part.
 
-build a template message object to follow the given $args (a hash
-reference).
+You can use this to make a header object by specifying
+
+       data_type => text/rfc822-headers,
+       data      => Mail::Header or FML::Header object,
+
+in $args (HASH REFERENCE). Pay attention the type of C<data>.
+
+  WARNING:
+
+    If you build a message by scratch, you must compose a header
+    object.  When C<parse()> method is called, you need to consider
+    the header object.
+
+    It is useful to treate the message header and body in separate
+    way when we compose the message by sequential attachments.
 
 =cut
 
 
 # Descriptions: usual constructor
-#               call $self->create($args) if $args is given.
+#               call $self->_build_message($args) if $args is given.
 #    Arguments: $self $args
 # Side Effects: none
 # Return Value: Mail::Message object
@@ -206,7 +228,7 @@ sub new
 
     bless $me, $type;
 
-    if ($args) { create($me, $args);}
+    if ($args) { _build_message($me, $args);}
 
     return bless $me, $type;
 }
@@ -214,12 +236,24 @@ sub new
 
 # Descriptions: adapter to forward the request to make a message object.
 #               It forwards each request by each content-type.
-#               parse_and_build_mime_multipart_chain() works for a multipart message
-#               and _create() for a plain message.
+#               parse_and_build_mime_multipart_chain() is applied
+#               for a multipart message
+#               and __build_message() for a plain/* message.
+#
+#               This is a primitive method to build a template message object
+#               to follow the given $args (a hash reference).
+#
+#               In almost cases, _build_message() is used to make a
+#               message body part object. We use this to make a header object
+#               by specifying { 
+#                           data_type => text/rfc822-headers,
+#                           data      => Mail::Header or FML::Header object,
+#               } in $args.
+#
 #    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
-sub create
+sub _build_message
 {
     my ($self, $args) = @_;
 
@@ -230,8 +264,9 @@ sub create
     if ($args->{ data_type } =~ /multipart/i) {
 	$self->parse_and_build_mime_multipart_chain($args);
     }
+    # parse the mail data.
     else {
-	$self->_create($args);
+	$self->__build_message($args);
     }
 }
 
@@ -270,7 +305,7 @@ sub _set_up_template
 #    Arguments: $self $args
 # Side Effects: set up the default values if needed
 # Return Value: none
-sub _create
+sub __build_message
 {
     my ($self, $args) = @_;
 
@@ -303,13 +338,29 @@ sub _create
 	    $self->{ _on_memory } = 0; # flag to indicate data is not on memory
 	}
 	else {
-	    carp("_create: $filename not exist");
+	    carp("__build_message: $filename not exist");
 	}
     }
     else {
-	carp("_create: neither data nor filename specified");
+	carp("__build_message: neither data nor filename specified");
     }
 }
+
+
+=head2 C<dup_header()>
+
+duplicate a message chain. Precisely speaking, it duplicates the
+header object but not duplicate body parts of a message object chain.
+So, the next object of the duplicated header, C<dup_header0> in the
+following figure, is the first body part C<part1> of the origianl
+chain.
+
+    header0 ----> part1 -> part2 -> ...
+                   A
+                   |
+    dup_header0 ---
+
+=cut
 
 
 sub dup_header
@@ -343,17 +394,35 @@ sub dup_header
 
 =head1 METHODS to parse
 
-=head2 C<parse($fd)>
+=head2 C<parse($args)>
 
 read data from file descriptor C<$fd> and parse it to the mail header
 and the body.
+
+    parse({ 
+	fd => $fd,
+    });
+
+You can specify file not file descriptor.
+
+    parse({
+	file => $file,
+    });
 
 =cut
 
 sub parse
 {
     my ($self, $args) = @_;
-    my $fd  = $args->{ fd }  || \*STDIN;
+    my $fd;
+
+    if (defined($args->{ 'file' })) {
+	use FileHandle;
+	$fd = new FileHandle $args->{ 'file' };
+    }
+    else {
+	$fd = $args->{ fd } || \*STDIN;
+    }
 
     # make an object
     my ($type) = ref($self) || $self;
@@ -461,7 +530,7 @@ sub _build_header_object
     croak($@) if $@;
 
     my $data_type = $self->_header_data_type($header_obj);
-    _create($self, {
+    __build_message($self, {
 	base_data_type => $data_type,
 	data_type      => "text/rfc822-headers",
 	data           => $header_obj,
@@ -555,7 +624,7 @@ sub find
 	my $mp   = $self;
 	for ( ; $mp; $mp = $mp->{ next }) {
 	    if ($debug) { print "   msg->find(", $type, " eq $type)\n";}
-	    if ($type eq $mp->data_type()) {
+	    if ($type eq $mp->get_data_type()) {
 		if ($debug) { print "   msg->find($type match) = $mp\n";}
 		return $mp;
 	    }
@@ -565,7 +634,7 @@ sub find
 	my $regexp = $args->{ data_type_regexp };
 	my $mp     = $self;
 	for ( ; $mp; $mp = $mp->{ next }) {
-	    my $type = $mp->data_type();
+	    my $type = $mp->get_data_type();
 	    if ($debug) { print "   msg->find(", $type, "=~ /$regexp/)\n";}
 	    if ($type =~ /$regexp/i) {
 		if ($debug) { print "   msg->find($type match) = $mp\n";}
@@ -578,18 +647,19 @@ sub find
 }
 
 
-=head2 C<data_type(header)>
+=head2 C<header_data_type()>
 
-return the C<type> string.
-It is extracted from C<header> object.
+return the C<type> string. It is the whole message type which is
+speculated from header C<Content-Type:>.
 
 =cut
 
 
-sub data_type
+sub header_data_type
 {
     my ($self) = @_;
-    $self->{ data_type } || undef;
+    my $hdr = $self->rfc822_message_header();
+    $self->_header_data_type($hdr);
 }
 
 
@@ -1266,7 +1336,7 @@ sub _alloc_new_part
     my ($self, $args) = @_;
     my $me = {};
 
-    _create($me, $args);
+    __build_message($me, $args);
     return bless $me, ref($self);
 }
 
@@ -1675,6 +1745,27 @@ sub get_data_type_list
     }
     \@buf;
 }
+
+
+=head1 METHODS to make a whole mail message
+
+Please use C<Mail::Message::Compose> class.
+This is an adapter for C<MIME::Lite>, so  
+your request is forwarded to C<MIME::Lite> class :-)
+
+    use Mail::Message::Compose;
+    $msg = Mail::Message::Compose->new(
+       From     => 'fukachan@fml.org',
+       To       => 'rudo@nuinui.net',
+       Cc       => 'kenken@nuinui.net',
+       Subject  => 'help',
+       Type     => 'text/plain',
+       Path     => 'help',
+    );
+    $msg->attr('content-type.charset' => 'us-ascii');
+
+    # show message;
+    print $msg->as_string;
 
 
 =head1 APPENDIX (RFC2046 Appendix A)
