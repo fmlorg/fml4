@@ -1,0 +1,42 @@
+.HTML_PRE
+
+	CHANGES-4.0.2 (from 4.0.1 to 4.0.2)
+
+2001/05/11
+
+   IPv6 by default
+
+	常に IPv6 でメールサーバに接続することに挑戦してみる。
+	もし、失敗したら IPv4 で挑戦する。
+	これがデフォルト
+
+	$USE_INET6 を 0 にすると IPv4 オンリーに戻ります。
+
+2001/05/10
+
+   kern/libsmtp.pl
+	enable IPv6
+
+	IPv6 を有効にする(fml 5.0 の IPv6 モジュールを使っている)。
+
+   messages/Japanese/amctl (1.5-1.6):
+	fix Japanese to be more friendly for newbies
+
+
+2001/05/05
+
+   fml 5.0 branch から Mail::* と IO::* クラスを輸入した。
+
+	一つは IPv6 のため、もう一つは mead で使う
+	エラーメール解析エンジンの輸入でした。
+
+$FML: CHANGES-4.0.1.wix,v 1.11 2001/05/09 15:45:31 fukachan Exp $
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.~HTML_PRE
