@@ -787,6 +787,11 @@ sub DoChangeMemberList
     if ($USE_DATABASE) {
 	&use('databases');
 	my (%mib, %result, %misc, $error);
+
+	if ($cmd eq 'MATOME' && $misc) { 
+	    $mib{'_value'} = $misc ? "m=$misc" : NULL;
+	}
+
 	&DataBaseMIBPrepare(\%mib, $cmd, {'address' => $curaddr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
 	&Log("fail to $cmd for $curaddr") if $mib{'error'};

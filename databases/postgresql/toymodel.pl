@@ -37,7 +37,7 @@ sub DataBases::Execute
 	}
 
 	if ($mib->{'_action'} eq 'get_status') {
-	    &Log("not yet implemented");
+	    &Status($mib);
 	}
 	elsif ($mib->{'_action'} eq 'num_active') {
 	    &Count($mib, 'actives');
@@ -306,8 +306,17 @@ sub __ListCtl
 	    &__Execute($mib, $query) || return $NULL;
 	}
     }
-    elsif ($mib->{'_action'} eq 'digest') {
-	&Log("not yet implemented");
+    elsif ($mib->{'_action'} eq 'digest' ||
+	   $mib->{'_action'} eq 'matome') {
+
+	my ($opt) = $mib->{'_value'};
+	$query  = " update ml ";
+	$query .= " set option  = '$opt' ";
+	$query .= " where ml    = '$ml' ";
+	$query .= " and file    = 'actives' ";
+	$query .= " and address = '$addr' ";
+	&__Execute($mib, $query) || return $NULL;
+
     }
     elsif ($mib->{'_action'} eq 'addadmin') {
 
@@ -347,6 +356,27 @@ sub Count
     &Log($query) if $debug;
     @row = $res->fetchrow();
     $mib->{'_result'} = $row[0];
+}
+
+
+sub Status
+{
+    my ($mib, $file) = @_;
+    my ($mll, $query, $res, $addr);
+
+    $addr   = $mib->{'_address'};
+    $ml     = $mib->{'_ml_acct'};
+    $query  = " select address,off,option from ml ";
+    $query .= " where file = 'actives' ";
+    $query .= " and ml = '$ml' ";
+    $query .= " and address = '$addr' ";
+    ($res = &__Execute($mib, $query)) || return $NULL;
+
+    &Log($query) if $debug;
+    my ($a, $off, $option) = $res->fetchrow();
+
+    $mib->{'_result'} .= "off "  if $off;
+    $mib->{'_result'} .= $option if $option;
 }
 
 

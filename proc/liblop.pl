@@ -104,7 +104,7 @@ sub MemberStatus
 	# members
 	&DataBaseMIBPrepare(\%mib, 'get_status');
 	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
-	return;
+	return $mib{'_result'};
     }
 
     &use('utils');
