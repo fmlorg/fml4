@@ -840,9 +840,9 @@ sub ProcSetMemberList
     }
 
     ### CHADDR CONFIRMATION
-    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';    
-    if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
-	if ($CHADDR_AUTH_TYPE eq 'confirmation') {
+    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
+    if ($CHADDR_AUTH_TYPE eq 'confirmation') {
+	if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
 	    &use('confirm');
 	    &ConfirmationModeInit(*e, 'chaddr');
 
@@ -851,11 +851,11 @@ sub ProcSetMemberList
 
 	    &Confirm(*e, $From_address, $s) || return $NULL;
 	}
-    }
-    elsif ($proc eq 'chaddr-confirm') {
-	&use('confirm');
-	&ConfirmationModeInit(*e, 'chaddr');
-	&Confirm(*e, $From_address, join(" ", @Fld)) || return $NULL;
+	elsif ($proc eq 'chaddr-confirm') {
+	    &use('confirm');
+	    &ConfirmationModeInit(*e, 'chaddr');
+	    &Confirm(*e, $From_address, join(" ", @Fld)) || return $NULL;
+	}
     }
 
     &use('amctl');
