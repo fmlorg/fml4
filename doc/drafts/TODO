@@ -1,0 +1,8 @@
+* Can we use _ML_ ?? Consider virtual domain cases but ...
+
+  e.g. fml-support: 7569
+
+doc/drafts/confirmd.ackreq.wix only uses _ML_ since confirmd uses this
+variable.
+
+$Id$
