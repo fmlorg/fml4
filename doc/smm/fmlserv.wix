@@ -28,14 +28,12 @@
 
 ことで最初の10個の記事を取り寄せることができます。これを同じことが
 
-
    "# get elena 1-10 mp" 	というメールを
    fmlserv@baycity.asia		へ送る
 
-ことで実行できるようになります。これだけ書くと全然ありがたみがないです
-ね;-)。
+ことで実行できるようになります。こう書くと全然ありがたみがないですね;-)。
 
-違う点はコマンドのシンタックスが拡張されて
+違う点は単にコマンドのシンタックスが拡張されて
 
 	コマンド	ＭＬ	オプション
 
@@ -48,11 +46,9 @@
 と、一通のメールで Freekick と Elena それぞれのＭＬの最初の10通の記事
 を取り寄せることができるようになります。
 
-
 オプションが後に来るとか、いろいろシンタックスが異なりますが、これはこ
-れで便利なような気がします。おそらく最大の問題（ずっと実装されなかった
-最大の理由は） security の問題でしょう（後述）。
-
+れで便利なような気がします。おそらく最大の問題(ずっと実装されなかった
+最大の理由は)security の問題でしょう(後述)。
 
 
 .S	一番簡単な設定
@@ -83,9 +79,8 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 
 	"|/usr/libexec/fml/libexec/fmlserv.pl /var/spool"
 
-のようになります。見かけは同じように見えますが、引数の意味は少し違いま
-す。引数は通常の fml.pl の one level 上の directory を定義します。
-
+のようになります。見かけは同じように見えますが引数の意味は少し違います。
+引数は通常の fml.pl の一つ上の directory を定義します。
 今 /var/spool/ を定義したので、その下の階層に
 
 	/var/spool/fmlserv
@@ -102,9 +97,7 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 	/var/spool/Freekick/spool/
 	…
 
-のような感じになります。
-
-ここで
+のような感じになります。ここで
 
 	/var/spool/fmlserv
 
@@ -138,15 +131,14 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 
 	$FMLSERV_PERMIT_LISTS_COMMAND  = 1;
 
-で使えるようになります(default は0)
+で使えるようになります(default は 0 で使えない)
 ＃余談： もともと mailing-list, mailing-list-ctl を使い、
 ＃       公開しない限りアドレスは分からないのが標準スタイルなので
 ＃       この lists を使わせないというのは思想的には矛盾しないで
 ＃       むしろよろこばしいとおもいます。
 
 
-○ fml で使えるコマンドすべて
-   ただし、
+○ fml で使えるコマンドすべてが使えます。ただし、
 
 	コマンド ＭＬ オプション
 
@@ -155,18 +147,10 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 ○ fmlserv 独自のコマンド
 
 	help		fmlserv のHELP
-	lists		fmlserv のコントロール下にあるＭＬ一覧
 	which		From: のアドレスがどのＭＬに属しているかを表示
 
-	href		URL を引数にとりその中身を返す。		
-	http		以下同様
-	gopher
-	ftp
-	ftpmail		
-
-
-.S	listserv と Security
-
+        ●デフォールトでは使えないコマンド
+	lists		fmlserv のコントロール下にあるＭＬ一覧
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
