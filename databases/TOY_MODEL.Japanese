@@ -116,13 +116,28 @@ $mib->{'_action'} には次のようなものがあります。
 	unsubscribe
 	on
 	off
-	digest
-	matome
 	addadmin
 	byeadmin
 
+		$mib->{'_address'} アドレスについて
+		データベースをいじってください。
 		* makefml やコマンドメールで使っているコマンドと同じ意味です。
 
+
+	chaddr
+
+		_old_address と _new_address が渡されます。
+		データベース上の _old_address を _new-address に
+		差し替えて下さい。
+
+		* makefml やコマンドメールで使っているコマンドと同じ意味です。
+
+	digest
+	matome
+
+		未実装です。
+		どうやってオプションのパラメータを渡すか決まっていません。
+		* makefml やコマンドメールで使っているコマンドと同じ意味です。
 
 ----------
 $Id$
