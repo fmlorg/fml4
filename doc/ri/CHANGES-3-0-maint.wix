@@ -6,6 +6,10 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+   proc/libra.pl
+	fix typo
+	by <yuao@infonia.ne.jp> fml-support:06999 
+
    kenn/fml.pl
 	if handler == ignore in command mode, ignore all requests
 
