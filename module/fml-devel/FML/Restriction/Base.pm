@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Base.pm,v 1.25 2003/10/15 01:03:36 fukachan Exp $
+# $FML: Base.pm,v 1.28 2004/02/04 14:41:47 fukachan Exp $
 #
 
 package FML::Restriction::Base;
@@ -94,12 +94,14 @@ my $command_regexp = '[-A-Za-z0-9_]+';
 my $file_regexp    = '[-A-Za-z0-9_]+';
 my $dir_regexp     = '[-A-Za-z0-9_]+';
 my $option_regexp  = '[-A-Za-z0-9]+';
+my $number_regexp  = '\d+';
+my $address_regexp = sprintf("%s\@%s", $user_regexp, $domain_regexp);
 my %basic_variable =
     (
      # address, user and domain et.al.
-     'address'           => $user_regexp.'\@'.$domain_regexp,
-     'address_specified' => $user_regexp.'\@'.$domain_regexp,
-     'address_selected'  => $user_regexp.'\@'.$domain_regexp,
+     'address'           => $address_regexp,
+     'address_specified' => $address_regexp,
+     'address_selected'  => $address_regexp,
      'domain'            => $domain_regexp,
      'user'              => $user_regexp,
      'ml_name'           => $user_regexp,
@@ -109,7 +111,7 @@ my %basic_variable =
      'action'            => $command_regexp,
      'command'           => $command_regexp,
      'navi_command'      => $command_regexp,
-     'article_id'        => '\d+',
+     'article_id'        => $number_regexp,
 
      # file, directory et.al.
      'directory'         => $dir_regexp,
@@ -124,9 +126,16 @@ my %basic_variable =
      );
 
 
+#
+# XXX-TODO: remove methods except for regexp_match() ???
+#
+
+
 =head2 basic_variable()
 
 return basic variable regexp list as HASH_REF.
+
+NOT USE THIS OUTSIDE FML::Restiction::* classes.
 
 =cut
 
@@ -263,7 +272,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

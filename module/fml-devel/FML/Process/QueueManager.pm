@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QueueManager.pm,v 1.15 2003/08/23 08:50:43 fukachan Exp $
+# $FML: QueueManager.pm,v 1.18 2004/01/02 16:08:39 fukachan Exp $
 #
 
 package FML::Process::QueueManager;
@@ -18,13 +18,15 @@ FML::Process::QueueManager - provide queue manipulation functions
 
 =head1 SYNOPSIS
 
+To flush all entries in the queue, 
+
     use FML::Process::QueueManager;
-    my $obj = new FML::Process::QueueManager { directory => $queue_dir };
-    $obj->send($curproc);
+    my $queue = new FML::Process::QueueManager { directory => $queue_dir };
+    $queue->send($curproc);
 
 or if you send specific queue C<$queue_id>, use
 
-    $obj->send($curproc, $queue_id);
+    $queue->send($curproc, $queue_id);
 
 where C<$queue_id> is queue id such as 1000390413.14775.1,
 not file path.
@@ -35,27 +37,27 @@ queue flush!
 
 =head1 METHODS
 
-=head2 new()
+=head2 new($qm_args)
 
 constructor.
 
 =cut
 
 
-use FML::Log qw(Log LogWarn LogError);
+# XXX-TODO: new FML::Process::QueueManager $curproc
 
 
 # Descriptions: standard constructor
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) HASH_REF($qm_args)
 # Side Effects: none
 # Return Value: OBJ
 sub new
 {
-    my ($self, $args) = @_;
+    my ($self, $qm_args) = @_;
     my ($type) = ref($self) || $self;
     my $me     = {};
 
-    $me->{ _directory } = $args->{ directory };
+    $me->{ _directory } = $qm_args->{ directory };
 
     return bless $me, $type;
 }
@@ -63,13 +65,13 @@ sub new
 
 =head2 send($curproc, $id)
 
-try to send all mails in the queue.
-If queue id C<$id> is specified, send queue for C<$id>.
+try to send all messages in the queue. If the queue id C<$id> is
+specified, send only the queue corresponding to C<$id>.
 
 =cut
 
 
-# Descriptions: send message in queue directory sequentially
+# Descriptions: send message(s) in queue directory sequentially.
 #    Arguments: OBJ($self) OBJ($curproc) STR($id)
 # Side Effects: queue flush-ed
 # Return Value: none
@@ -152,7 +154,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

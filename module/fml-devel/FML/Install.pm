@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Install.pm,v 1.8 2003/10/26 02:04:08 fukachan Exp $
+# $FML: Install.pm,v 1.11 2004/01/21 03:45:03 fukachan Exp $
 #
 
 package FML::Install;
@@ -41,8 +41,6 @@ FML::Install - utility functions used in installation
 	    print STDERR "ok $path\n" if $debug;
 	}
     }
-
-    # XXX-TODO: check uid, gid
 
     $installer->install_main_cf();
     $installer->install_sample_cf_files();
@@ -93,6 +91,9 @@ sub new
 
     return bless $me, $type;
 }
+
+
+# XXX-TODO: check uid, gid method
 
 
 =head1 CONFIG
@@ -243,7 +244,7 @@ install sample .cf files:
 # Return Value: none
 sub install_sample_cf_files
 {
-    my ($self) = @_;
+    my ($self)     = @_;
     my $config     = $self->{ _config };
     my $config_dir = $self->path( 'config_dir' );
     my $samples    = $config->get_as_array_ref('sample_cf_files');
@@ -288,15 +289,26 @@ sub install_default_config_files
 
     $self->disable_message();
 
+    # XXX change file name of components of $nl_template_files into
+    # XXX ${file_name}.{ja,en,...}
     my $nl_template_files = $config->get_as_array_ref('nl_template_files');
+    my $nl_language       = $config->{ nl_default_language } || 'en';
     for my $file (@$nl_template_files) {
-	# XXX-TODO: how should we handle natural language .cf ?
 	# XXX src = relative path, dst = absolute path
-	my $src = File::Spec->catfile("fml", "etc", $file . ".ja");
+	my $src = File::Spec->catfile("fml", "etc", $file);
 	my $dst = File::Spec->catfile($config_dir, $file);
 
 	# always override.
 	$self->convert($src, $dst, 0644);
+
+	# XXX-TODO: fix tricky installation of default_config.cf.
+	# always override.
+	# XXX we need install default_config.cf too! (caution: mandatory)
+	if ($dst =~ /\.$nl_language$/) {
+	    my $xxx = $dst;
+	    $xxx =~ s/\.$nl_language$//;
+	    $self->convert($src, $xxx, 0644);
+	}
     }
 
     my $template_files = $config->get_as_array_ref('template_files');
@@ -320,7 +332,7 @@ sub install_default_config_files
 sub install_mtree_dir
 {
     my ($self) = @_;
-    my $config  = $self->{ _config };
+    my $config = $self->{ _config };
 
     # XXX src = relative path, dst = absolute path
     my $dst_dir = File::Spec->catfile($self->path( 'default_config_dir' ),
@@ -353,7 +365,7 @@ install files under fml/share/.
 # Return Value: none
 sub install_lib_dir
 {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $config  = $self->{ _config };
     my $dst_dir = $self->path( 'lib_dir' );
     my $src_dir = '';
@@ -747,9 +759,9 @@ return the absolute directory path for the specified type C<$dir>.
 sub path
 {
     my ($self, $dir) = @_;
-    my $config     = $self->{ _config };
-    my $version    = $self->get_version();
-    my $config_dir = $config->{ config_dir };
+    my $config       = $self->{ _config };
+    my $version      = $self->get_version();
+    my $config_dir   = $config->{ config_dir };
 
     if ($dir eq 'prefix'      ||
 	$dir eq 'exec_prefix' ||
@@ -1016,7 +1028,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

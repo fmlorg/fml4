@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QMail.pm,v 1.18 2003/08/29 15:34:09 fukachan Exp $
+# $FML: QMail.pm,v 1.20 2004/01/02 14:50:37 fukachan Exp $
 #
 
 package FML::Process::QMail;
@@ -61,13 +61,13 @@ C<NOT YET IMPLERMENTED>.
 # Descriptions: qmail style command extention
 #               elena-subscribe@domain implies
 #               "mail message body with subscribe to elena-ctl@domain"
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: none
 # Return Value: STR
 sub DotQmailExt
 {
-    my ($curproc, $args) = @_;
-    my $config = $curproc->config();
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
 
     # get ?
     my $ext = $ENV{'EXT'};
@@ -110,7 +110,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

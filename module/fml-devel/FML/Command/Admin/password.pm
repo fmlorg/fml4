@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: password.pm,v 1.10 2003/08/23 04:35:31 fukachan Exp $
+# $FML: password.pm,v 1.13 2004/01/01 08:48:39 fukachan Exp $
 #
 
 package FML::Command::Admin::password;
@@ -15,7 +15,7 @@ use Carp;
 
 =head1 NAME
 
-FML::Command::Admin::password - authenticate the admin password
+FML::Command::Admin::password - authenticate the remote admin password
 
 =head1 SYNOPSIS
 
@@ -23,11 +23,11 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-password a new address.
-
 =head1 METHODS
 
 =head2 process($curproc, $command_args)
+
+authenticate the remote admin password.
 
 =cut
 
@@ -104,7 +104,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

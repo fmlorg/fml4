@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Menu.pm,v 1.27 2003/09/25 11:40:58 fukachan Exp $
+# $FML: Menu.pm,v 1.29 2004/01/21 03:45:04 fukachan Exp $
 #
 
 package FML::CGI::Admin::Menu;
@@ -19,7 +19,7 @@ use FML::CGI::Menu;
 
 =head1 NAME
 
-FML::CGI::Admin::Menu - provides CGI controll for the specific domain
+FML::CGI::Admin::Menu - provides CGI control function for the specific domain
 
 =head1 SYNOPSIS
 
@@ -80,7 +80,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

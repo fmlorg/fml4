@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Configure.pm,v 1.58 2003/11/29 10:24:28 fukachan Exp $
+# $FML: Configure.pm,v 1.63 2004/01/31 04:06:32 fukachan Exp $
 #
 
 package FML::Process::Configure;
@@ -52,7 +52,7 @@ show help if needed.
 =cut
 
 
-# Descriptions: ordinary constructor
+# Descriptions: constructor.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: OBJ
@@ -77,8 +77,8 @@ sub prepare
     my $eval = $config->get_hook( 'makefml_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
     $curproc->log_message_init();
 
@@ -141,7 +141,7 @@ sub run
 }
 
 
-# Descriptions: dummy
+# Descriptions: dummy.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -165,7 +165,7 @@ show help.
 =cut
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -187,7 +187,7 @@ sub help
 }
 
 
-# Descriptions: show FYI help
+# Descriptions: show FYI help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -212,7 +212,7 @@ _EOF_
 }
 
 
-# Descriptions: show help usage
+# Descriptions: show help usage.
 #    Arguments: STR($name)
 # Side Effects: none
 # Return Value: none
@@ -270,7 +270,7 @@ See <FML::Process::Switch()> on C<$args> for more details.
 =cut
 
 
-# Descriptions: makefml top level dispacher
+# Descriptions: makefml top level dispacher.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: load FML::Command::command module and execute it.
 # Return Value: none
@@ -283,6 +283,7 @@ sub _makefml
     my $argv    = $curproc->command_line_argv();
     my ($method, $argv_ml_name, @options);
 
+    # XXX hmm, HARD-CODED but no idea.
     if ($myname eq 'makefml') {
 	($method, $argv_ml_name, @options) =  @$argv;
     }
@@ -290,7 +291,7 @@ sub _makefml
 	($argv_ml_name, $method, @options) =  @$argv;
     }
 
-    # arguments to pass off to each method
+    # build arguments to pass off to each method.
     # XXX-TODO: command = [ $method, @options ]; ? (no, used only for message?)
     my $command_args = {
 	command_mode => 'admin',
@@ -299,12 +300,14 @@ sub _makefml
 	ml_name      => $ml_name,
 	options      => \@options,
 	argv         => $argv,
-	canon_argv   => {           # saved for {new,rm}domain commands.
+
+	# save raw argv for {new,rm}domain commands, which need to
+	# interpret $ml_name as ml_domain.
+	canon_argv   => {
 	    ml_name  => $argv_ml_name,
 	    method   => $method,
 	    options  => \@options,
 	},
-	args         => $args,
     };
 
     my $eval = $config->get_hook( 'makefml_run_start_hook' );
@@ -349,7 +352,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

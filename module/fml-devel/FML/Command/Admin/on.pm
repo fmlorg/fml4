@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 MURASHITA Takuya
+#  Copyright (C) 2002,2003,2004 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: on.pm,v 1.13 2003/11/23 03:54:46 fukachan Exp $
+# $FML: on.pm,v 1.16 2004/01/02 14:45:04 fukachan Exp $
 #
 
 package FML::Command::Admin::on;
@@ -66,10 +66,18 @@ sub lock_channel { return 'command_serialize';}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->config();
+    my $config  = $curproc->config();
+    my $options = $command_args->{ options };
+    my $address = $command_args->{ command_data } || $options->[ 0 ];
+
+    # XXX We should always add/rewrite only $primary_*_map maps via 
+    # XXX command mail, CUI and GUI.
+    # XXX Rewriting of maps not $primary_*_map is
+    # XXX 1) may be not writable.
+    # XXX 2) ambigous and dangerous 
+    # XXX    since the map is under controlled by other module.
+    # XXX    for example, one of member_maps is under admin_member_maps. 
     my $recipient_map = $config->{ primary_recipient_map };
-    my $options       = $command_args->{ options };
-    my $address       = $command_args->{ command_data } || $options->[ 0 ];
 
     # fundamental check
     croak("address not defined")           unless defined $address;
@@ -96,19 +104,18 @@ sub process
 
 
 # Descriptions: show cgi menu for on
-#    Arguments: OBJ($self)
-#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $r = '';
 
     eval q{
 	use FML::CGI::User;
 	my $obj = new FML::CGI::User;
-	$obj->cgi_menu($curproc, $args, $command_args);
+	$obj->cgi_menu($curproc, $command_args);
     };
     if ($r = $@) {
 	croak($r);
@@ -126,7 +133,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 MURASHITA Takuya
+Copyright (C) 2002,2003,2004 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

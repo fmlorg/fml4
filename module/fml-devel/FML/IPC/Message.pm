@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.2 2003/12/06 04:48:20 fukachan Exp $
+# $FML: Message.pm,v 1.4 2004/01/02 16:08:38 fukachan Exp $
 #
 
 package FML::IPC::Message;
@@ -22,8 +22,8 @@ FML::IPC::Message - basic message abstaction for IPC.
 
 =head1 DESCRIPTION
 
-FML::IPC::Message provides basic message abstraction and queue
-operations.
+FML::IPC::Message provides basic message abstraction suitable for
+message queue library.
 
 =head1 METHODS
 
@@ -77,7 +77,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

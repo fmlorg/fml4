@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET6.pm,v 1.11 2002/12/20 03:50:28 fukachan Exp $
+# $FML: INET6.pm,v 1.14 2004/01/24 09:03:58 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET6;
@@ -14,9 +14,8 @@ use Carp;
 use Mail::Delivery::Utils;
 
 require Exporter;
-
-@ISA     = qw(Exporter);
-@EXPORT  = qw(is_ipv6_ready is_ipv6_mta_syntax connect6);
+@ISA    = qw(Exporter);
+@EXPORT = qw(is_ipv6_ready is_ipv6_mta_syntax connect6);
 
 
 # Descriptions: we have Socket6.pm or not ?
@@ -32,7 +31,7 @@ sub _we_can_use_Socket6
 	use Socket6;
     };
 
-    if ($@ =~ /Can\'t locate Socket6.pm/) {
+    if ($@ =~ /Can\'t locate Socket6.pm/o) {
 	$self->{_ipv6_ready} = 'no';
     }
     else {
@@ -70,7 +69,7 @@ sub is_ipv6_mta_syntax
     my ($x_host, $x_port);
 
     # check the mta syntax whether it is ipv6 form or not.
-    if ( $host =~ /\[([\d:]+)\]:(\d+)/) {
+    if ($host =~ /\[([\d:]+)\]:(\d+)/) {
 	($x_host, $x_port) = ($1, $2);
 	return ($x_host, $x_port);
     }
@@ -122,8 +121,7 @@ sub connect6
 	# clean up
 	delete $self->{_socket} if defined $self->{_socket};
 
-	# XXX-TODO: "LOOP" is an appropriate label ?
-      LOOP:
+      ADDR_ENTRY:
 	while (scalar(@res) >= 5) {
 	    ($family, $type, $proto, $saddr, $canonname, @res) = @res;
 
@@ -131,17 +129,17 @@ sub connect6
 		getnameinfo($saddr, NI_NUMERICHOST | NI_NUMERICSERV);
 
 	    # check only IPv6 case here.
-	    next LOOP if $family != AF_INET6;
+	    next ADDR_ENTRY if $family != AF_INET6;
 
 	    $fh = new IO::Socket;
 	    socket($fh, $family, $type, $proto) || do {
 		Log("Error: cannot create IPv6 socket");
 		$self->error_set("Error: cannot create IPv6 socket");
-		next LOOP;
+		next ADDR_ENTRY;
 	    };
 	    if (connect($fh, $saddr)) {
 		Log("(debug6) o.k. connect [$host]:$port");
-		last LOOP;
+		last ADDR_ENTRY;
 	    }
 	    else {
 		Log("Error: cannot connect [$host]:$port via IPv6");
@@ -230,7 +228,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

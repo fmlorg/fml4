@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Calendar.pm,v 1.6 2003/09/02 09:18:45 fukachan Exp $
+# $FML: Calendar.pm,v 1.12 2004/01/31 04:06:31 fukachan Exp $
 #
 
 package FML::Process::Calendar;
@@ -39,9 +39,21 @@ standard constructor.
 
 =head2 prepare($args)
 
-dummy.
+load default configuration file to use path_* variables.
 
 =head2 verify_request($args)
+
+dummy.
+
+=head2 run($args)
+
+main routine.
+
+parse files under ~$user/.schedule/ directory and summarize it.
+
+Lastly, use w3m to show schedul as html table. 
+
+=head2 finish($args)
 
 dummy.
 
@@ -50,14 +62,17 @@ dummy.
 
 # Descriptions: dummy constructor.
 #               avoid the default fml new() since we do not need it.
-#    Arguments: OBJ($self)
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: OBJ
 sub new
 {
-    my ($self) = @_;
+    my ($self, $args) = @_;
     my ($type) = ref($self) || $self;
     my $me     = {};
+    $me->{ main_cf }       = $args->{ main_cf };
+    $me->{ __parent_args } = $args;
+
     return bless $me, $type;
 }
 
@@ -73,7 +88,7 @@ sub prepare
     # load default configurations.
     use FML::Config;
     $curproc->{ config } = new FML::Config;
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->load_config_files();
 }
 
 
@@ -100,8 +115,8 @@ sub run
 {
     my ($curproc, $args) = @_;
     my $config = $curproc->config();
-    my $argv   = $args->{ argv };
-    my $option = $args->{ options };
+    my $argv   = $curproc->command_line_raw_argv();
+    my $option = $curproc->command_line_options();
     my $mode   = 'text';
 
     # -h or --help
@@ -126,10 +141,16 @@ sub run
     my $tmpf     = $schedule->tmpfilepath;
     my $wh       = new FileHandle $tmpf, "w";
 
+    unless (defined $wh) {
+	my $s = "cannot open temporary file";
+	$curproc->logerror($s);
+	croak($s);
+    }
+
     # set output mode
     $schedule->set_mode( $mode );
 
-    # -a option: show three calendar for this, next and last month.
+    # -a option: show three calendars for this, next and last month.
     if (defined($option->{ a })) {
 	for my $month ('this', 'next', 'last') {
 	    $schedule->print_specific_month($wh, $month);
@@ -150,7 +171,12 @@ sub run
 
     if ($mode eq 'text') {
 	my $w3m = $config->{ path_w3m } || 'w3m';
-	system "$w3m -dump $tmpf";
+	if (-x $w3m) {
+	    system "$w3m -dump $tmpf";
+	}
+	else {
+	    $curproc->logerror("w3m not found");
+	}
     }
     else {
 	$curproc->cat( [ $tmpf ] );
@@ -203,7 +229,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

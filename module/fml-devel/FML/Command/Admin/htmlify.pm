@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: htmlify.pm,v 1.22 2003/09/08 15:06:04 fukachan Exp $
+# $FML: htmlify.pm,v 1.25 2004/01/18 03:34:44 fukachan Exp $
 #
 
 package FML::Command::Admin::htmlify;
@@ -24,7 +24,7 @@ See C<FML::Command> for more detaihtmlify.
 
 =head1 DESCRIPTION
 
-show user htmlify(s).
+convert text articles to html style.
 
 =cut
 
@@ -49,15 +49,16 @@ sub new
 sub need_lock { 0;}
 
 
-# Descriptions: convert article format from text to html.
+# Descriptions: convert article(s) from text to html format.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: forward request to dir module
 # Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $args    = $command_args->{ args };
     my $config  = $curproc->config();
+
+    # XXX-TODO: $spool_dir -> $article_spool_dir ?
     my $src_dir = $config->{ spool_dir };
     my $dst_dir = $config->{ html_archive_dir };
     my $debug   = 0;
@@ -70,7 +71,7 @@ sub process
 
     # main converter
     use FML::Command::HTMLify;
-    &FML::Command::HTMLify::convert($curproc, $args, {
+    &FML::Command::HTMLify::convert($curproc, {
 	src_dir => $src_dir,
 	dst_dir => $dst_dir,
     });
@@ -87,7 +88,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

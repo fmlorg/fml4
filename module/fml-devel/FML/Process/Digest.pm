@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Digest.pm,v 1.11 2003/08/29 15:34:07 fukachan Exp $
+# $FML: Digest.pm,v 1.16 2004/01/31 04:06:32 fukachan Exp $
 #
 
 package FML::Process::Digest;
@@ -45,7 +45,7 @@ we bless it as C<FML::Process::Digest> object again.
 =cut
 
 
-# Descriptions: ordinary constructor.
+# Descriptions: constructor.
 #               sub class of FML::Process::Kernel
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
@@ -81,8 +81,8 @@ sub prepare
     my $eval = $config->get_hook( 'digest_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
     $curproc->scheduler_init();
 
@@ -140,7 +140,7 @@ Lastly we unlock the current process.
 =cut
 
 
-# Descriptions: the main routine, kick off _digest()
+# Descriptions: the main routine, kick off _digest().
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: distribution of articles.
 #               See _digest() for more details.
@@ -157,7 +157,7 @@ sub run
 
     $curproc->lock();
     unless ($curproc->is_refused()) {
-	$curproc->_digest($args);
+	$curproc->_digest();
     }
     else {
 	$curproc->logerror("ignore this request.");
@@ -174,7 +174,7 @@ sub run
 =cut
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -222,12 +222,12 @@ sub finish
 
 
 # Descriptions: primitive digest delivery.
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: update digest sequence.
 # Return Value: none
 sub _digest
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
 
     use FML::Digest;
     my $digest = new FML::Digest $curproc;
@@ -237,7 +237,7 @@ sub _digest
     # run digest proceess if article(s) not to send found.
     if ($aid > $did) {
 	$did++; # start = last digest id + 1
-	my $range  = "$did-$aid";
+	my $range = "$did-$aid";
 
 	# XXX-TODO: $range = "100-200" -> $range = [ 100, 101, ... ]; ?
 	# create multipart of articles as a digest.
@@ -263,7 +263,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: newdomain.pm,v 1.4 2003/11/16 23:49:12 fukachan Exp $
+# $FML: newdomain.pm,v 1.7 2004/01/02 16:08:38 fukachan Exp $
 #
 
 package FML::Command::Admin::newdomain;
@@ -23,7 +23,7 @@ See C<FML::Command> for more detainewdomain.
 
 =head1 DESCRIPTION
 
-an alias of C<FML::Command::Admin::dir>.
+declare a new domain we use.
 
 =cut
 
@@ -61,8 +61,8 @@ sub process
     my $error      = '';
 
     if ($domain && $prefix) {
-	use FML::HomeDir::Prefix;
-	my $ml_home_prefix = new FML::HomeDir::Prefix $curproc;
+	use FML::ML::HomePrefix;
+	my $ml_home_prefix = new FML::ML::HomePrefix $curproc;
 	$ml_home_prefix->add($domain, $prefix);
     }
     elsif ($domain && (! $prefix)) {
@@ -92,7 +92,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

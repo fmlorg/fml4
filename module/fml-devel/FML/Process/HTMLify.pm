@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: HTMLify.pm,v 1.30 2003/08/29 15:34:08 fukachan Exp $
+# $FML: HTMLify.pm,v 1.35 2004/01/31 04:06:33 fukachan Exp $
 #
 
 package FML::Process::HTMLify;
@@ -23,7 +23,7 @@ my $debug = 0;
 
 =head1 NAME
 
-FML::Process::HTMLify -- htmlify articles
+FML::Process::HTMLify -- convert articles to html format.
 
 =head1 SYNOPSIS
 
@@ -46,7 +46,7 @@ adjust ml_*, load configuration files and fix @INC.
 =cut
 
 
-# Descriptions: standard constructor
+# Descriptions: standard constructor.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: inherit FML::Process::Kernel
 # Return Value: OBJ
@@ -71,8 +71,8 @@ sub prepare
     my $eval = $config->get_hook( 'fmlhtmlify_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmlhtmlify_prepare_end_hook' );
@@ -104,7 +104,7 @@ call &FML::Command::HTMLify::convert().
 =cut
 
 
-# Descriptions: convert text format article to HTML by Mail::Message::ToHTML
+# Descriptions: convert text format article to HTML by Mail::Message::ToHTML.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: load modules, create HTML files and directories
 # Return Value: none
@@ -114,8 +114,8 @@ sub run
     my $config  = $curproc->config();
     my $argv    = $curproc->command_line_argv();
     my $options = $curproc->command_line_options();
-    my $src_dir = $argv->[0];
-    my $dst_dir = $argv->[1];
+    my $src_dir = $argv->[0] || '';
+    my $dst_dir = $argv->[1] || '';
 
     print STDERR "htmlify\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
 
@@ -128,9 +128,10 @@ sub run
 	unshift(@INC, $options->{ I });
     }
 
+    # XXX-TODO: no check of $src_dir, $dst_dir, ok?
     # main converter
     use FML::Command::HTMLify;
-    &FML::Command::HTMLify::convert($curproc, $args, {
+    &FML::Command::HTMLify::convert($curproc, {
 	src_dir => $src_dir,
 	dst_dir => $dst_dir,
     });
@@ -140,7 +141,7 @@ sub run
 }
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -195,7 +196,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Filter.pm,v 1.36 2003/10/15 01:03:28 fukachan Exp $
+# $FML: Filter.pm,v 1.40 2004/02/01 14:52:49 fukachan Exp $
 #
 
 package FML::Filter;
@@ -58,13 +58,13 @@ sub new
 }
 
 
-# Descriptions: entry point for FML::Filter::* modules
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args)
+# Descriptions: entry point for FML::Filter::* modules.
+#    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: STR or UNDEF, error reason (string). return undef if ok.
 sub article_filter
 {
-    my ($self, $curproc, $args) = @_;
+    my ($self, $curproc) = @_;
     my $message = $curproc->incoming_message();
     my $config  = $curproc->config();
 
@@ -76,11 +76,13 @@ sub article_filter
 	for my $function (@$functions) {
 	    if ($config->yes( "use_${function}" )) {
 		$curproc->log("filter(debug): check by $function") if $debug;
-		my $fp = "_apply_$function";
-		$status = $self->$fp($curproc, $args, $message);
+		my $fp  = "_apply_$function";
+		$status = $self->$fp($curproc, $message);
 	    }
 	    else {
-		$curproc->log("filter(debug): not check by $function") if $debug;
+		if ($debug) {
+		    $curproc->log("filter(debug): $function check disabled.");
+		}
 	    }
 
 	    last FUNCTION if $status;
@@ -93,13 +95,13 @@ sub article_filter
 }
 
 
-# Descriptions: size based filtering
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Descriptions: size based filtering.
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: STR(reason) or 0 (not trapped, ok)
 sub _apply_article_size_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     use FML::Filter::Size;
@@ -113,15 +115,16 @@ sub _apply_article_size_filter
 
 	# overwrite rules
 	if (defined $rules) {
-	    $obj->rules( $rules );
+	    $obj->set_rules( $rules );
 	}
 
 	# go check
 	$obj->size_check($mesg);
 	if ($obj->error()) {
-	    my $x = $obj->error();
-	    $x =~ s/\s*at .*$//;
-	    $x =~ s/[\n\s]*$//m;
+	    my $x;
+	    $x =  $obj->error();
+	    $x =~ s/\s*at .*$//o;
+	    $x =~ s/[\n\s]*$//mo;
 	    $self->error_set($x);
 	    return $x;
 	}
@@ -131,13 +134,13 @@ sub _apply_article_size_filter
 }
 
 
-# Descriptions: header based filter
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Descriptions: header based filter.
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: STR(reason) or 0 (not trapped, ok)
 sub _apply_article_header_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     use FML::Filter::Header;
@@ -149,15 +152,16 @@ sub _apply_article_header_filter
 
 	# overwrite rules
 	if (defined $rules) {
-	    $obj->rules( $rules );
+	    $obj->set_rules( $rules );
 	}
 
 	# go check
 	$obj->header_check($mesg);
 	if ($obj->error()) {
-	    my $x = $obj->error();
-	    $x =~ s/\s*at .*$//;
-	    $x =~ s/[\n\s]*$//m;
+	    my $x;
+	    $x =  $obj->error();
+	    $x =~ s/\s*at .*$//o;
+	    $x =~ s/[\n\s]*$//mo;
 	    $self->error_set($x);
 	    return $x;
 	}
@@ -167,28 +171,37 @@ sub _apply_article_header_filter
 }
 
 
-# Descriptions: filter non MIME format message
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Descriptions: filter non MIME format message.
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: 0 (always ok, anyway)
 sub _apply_article_non_mime_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     if ($config->yes( 'use_article_non_mime_filter' )) {
+	my $hdr   = $curproc->incoming_message_header();
 	my $rules =
-	    $config->get_as_array_ref('article_none_mime_filter_rules');
+	    $config->get_as_array_ref('article_non_mime_filter_rules');
 
       RULE:
 	for my $rule (@$rules) {
+	    $curproc->log("article_non_mime_filter.check $rule") if $debug;
+
 	    if ($rule eq 'permit') {
 		return 0;
 	    }
 
-	    # XXX-TODO: implement this!
-	    if ($rule eq 'reject') {
-		;
+	    if ($rule eq 'reject_empty_content_type') {
+		if (defined $hdr) {
+		    my $type  = $hdr->get('content-type') || '';
+		    unless ($type) {
+			my $s = "no Content-Type:";
+			$self->error_set($s);
+			return $s;
+		    }
+		}
 	    }
 	}
     }
@@ -197,13 +210,13 @@ sub _apply_article_non_mime_filter
 }
 
 
-# Descriptions: syntax check for text(/plain)
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Descriptions: syntax check for text(/plain).
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: none
 sub _apply_article_text_plain_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     if ($config->yes( 'use_article_text_plain_filter' )) {
@@ -214,15 +227,16 @@ sub _apply_article_text_plain_filter
 	my $rules =
 	    $config->get_as_array_ref('article_text_plain_filter_rules');
 	if (defined $rules) {
-	    $obj->rules( $rules );
+	    $obj->set_rules( $rules );
 	}
 
 	# go check
 	$obj->body_check($mesg);
 	if ($obj->error()) {
-	    my $x = $obj->error();
-	    $x =~ s/\s*at .*$//;
-	    $x =~ s/[\n\s]*$//m;
+	    my $x;
+	    $x =  $obj->error();
+	    $x =~ s/\s*at .*$//o;
+	    $x =~ s/[\n\s]*$//mo;
 	    $self->error_set($x);
 	    return $x;
 	}
@@ -233,12 +247,12 @@ sub _apply_article_text_plain_filter
 
 
 # Descriptions: analyze MIME structure and filter it if matched.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: none
 sub _apply_article_mime_component_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     if ($config->yes( 'use_article_mime_component_filter' )) {
@@ -251,14 +265,18 @@ sub _apply_article_mime_component_filter
 	    $obj->mime_component_check($mesg);
 	}
 	else {
-	    $curproc->log("(debug) disabled since rule file not found") if $debug;
+	    if ($debug) {
+		$curproc->log("(debug) disabled since rule file not found");
+	    }
+
 	    return 0;
 	}
 
 	if ($obj->error()) {
-	    my $x = $obj->error();
-	    $x =~ s/\s*at .*$//;
-	    $x =~ s/[\n\s]*$//m;
+	    my $x;
+	    $x =  $obj->error();
+	    $x =~ s/\s*at .*$//o;
+	    $x =~ s/[\n\s]*$//mo;
 	    $self->error_set($x);
 	    return $x;
 	}
@@ -348,22 +366,28 @@ sub _filter_reject_notice
 	$curproc->reply_message(sprintf("\n\n%s", $s), $msg_args);
     }
     else {
-	$curproc->logerror("unknown ${class}_filter_reject_notice_data_type: $type");
+	my $s = "unknown ${class}_filter_reject_notice_data_type: $type";
+	$curproc->logerror($s);
     }
 }
 
 
 =head1 COMMAND MAIL
 
+=head2 command_mail_filter($curproc)
+
+entry point for FML::Filter::* modules.
+
 =cut
 
-# Descriptions: entry point for FML::Filter::* modules
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args)
+
+# Descriptions: entry point for FML::Filter::* modules.
+#    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: STR or UNDEF, error reason (string). return undef if ok.
 sub command_mail_filter
 {
-    my ($self, $curproc, $args) = @_;
+    my ($self, $curproc) = @_;
     my $message = $curproc->incoming_message();
     my $config  = $curproc->config();
 
@@ -376,11 +400,13 @@ sub command_mail_filter
 	for my $function (@$functions) {
 	    if ($config->yes( "use_${function}" )) {
 		$curproc->log("filter(debug): check by $function") if $debug;
-		my $fp = "_apply_$function";
-		$status = $self->$fp($curproc, $args, $message);
+		my $fp  = "_apply_$function";
+		$status = $self->$fp($curproc, $message);
 	    }
 	    else {
-		$curproc->log("filter(debug): not check by $function") if $debug;
+		if ($debug) {
+		    $curproc->log("filter(debug): $function check disabled.");
+		}
 	    }
 
 	    last FUNCTION if $status;
@@ -393,13 +419,13 @@ sub command_mail_filter
 }
 
 
-# Descriptions: size based filtering
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) OBJ($mesg)
+# Descriptions: size based filtering.
+#    Arguments: OBJ($self) OBJ($curproc) OBJ($mesg)
 # Side Effects: none
 # Return Value: STR(reason) or 0 (not trapped, ok)
 sub _apply_command_mail_size_filter
 {
-    my ($self, $curproc, $args, $mesg) = @_;
+    my ($self, $curproc, $mesg) = @_;
     my $config = $curproc->config();
 
     use FML::Filter::Size;
@@ -414,15 +440,16 @@ sub _apply_command_mail_size_filter
 
 	# overwrite rules
 	if (defined $rules) {
-	    $obj->rules( $rules );
+	    $obj->set_rules( $rules );
 	}
 
 	# go check
 	$obj->size_check($mesg);
 	if ($obj->error()) {
-	    my $x = $obj->error();
-	    $x =~ s/\s*at .*$//;
-	    $x =~ s/[\n\s]*$//m;
+	    my $x;
+	    $x =  $obj->error();
+	    $x =~ s/\s*at .*$//o;
+	    $x =~ s/[\n\s]*$//mo;
 	    $self->error_set($x);
 	    return $x;
 	}
@@ -442,7 +469,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

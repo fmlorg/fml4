@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Size.pm,v 1.5 2003/10/15 01:03:32 fukachan Exp $
+# $FML: Size.pm,v 1.9 2004/02/01 14:52:50 fukachan Exp $
 #
 
 package FML::Filter::Size;
@@ -37,7 +37,7 @@ constructor.
 my $debug = 0;
 
 
-# XXX-TODO: need this default rules here ? (principle of least surprise?)
+# default rules for convenience.
 my (@default_rules) = qw(check_header_size check_body_size);
 
 
@@ -61,22 +61,27 @@ sub new
 }
 
 
-
-=head2 rules( $rules )
+=head2 set_rules( $rules )
 
 overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 
 =cut
 
 
-# Descriptions: access method to overwrite rule
+# Descriptions: overwrite rules.
 #    Arguments: OBJ($self) ARRAY_REF($rarray)
 # Side Effects: overwrite info in object
 # Return Value: ARRAY_REF
-sub rules
+sub set_rules
 {
     my ($self, $rarray) = @_;
-    $self->{ _rules } = $rarray;
+
+    if (ref($rarray) eq 'ARRAY') {
+	$self->{ _rules } = $rarray;
+    }
+    else {
+	carp("rules: invalid input");
+    }
 }
 
 
@@ -98,7 +103,7 @@ sub set_class
 }
 
 
-=head2 size_check($msg, $args)
+=head2 size_check($msg)
 
 C<$msg> is C<Mail::Message> object.
 
@@ -108,7 +113,7 @@ C<Usage>:
     my $obj  = new FML::Filter::Size;
     my $msg  = $curproc->{'incoming_message'};
 
-    $obj->Size_check($msg, $args);
+    $obj->Size_check($msg);
     if ($obj->error()) {
        # do something for wrong formated message ...
     }
@@ -116,13 +121,13 @@ C<Usage>:
 =cut
 
 
-# Descriptions: top level dispatcher
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+# Descriptions: top level dispatcher.
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub size_check
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
     my $rules = $self->{ _rules };
 
   RULE:
@@ -132,7 +137,7 @@ sub size_check
 	}
 
 	eval q{
-	    $self->$rule($msg, $args);
+	    $self->$rule($msg);
 	};
 
 	if ($@) {
@@ -144,12 +149,12 @@ sub size_check
 
 =head1 FILTER RULES
 
-=head2 check_header_size($msg, $args)
+=head2 check_header_size($msg)
 
 check the size of mail header.
 throw reason via croak() if the size exceeds the limit.
 
-=head2 check_body_size($msg, $args)
+=head2 check_body_size($msg)
 
 check the size of mail body.
 throw reason via croak() if the size exceeds the limit.
@@ -158,23 +163,23 @@ throw reason via croak() if the size exceeds the limit.
 
 
 # Descriptions: check the size of mail header.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub check_header_size
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
     $self->_check_mail_size($msg, "header");
 }
 
 
 # Descriptions: check the size of mail body.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub check_body_size
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
     $self->_check_mail_size($msg, "body");
 }
 
@@ -197,13 +202,13 @@ sub _check_mail_size
 
     if ($type eq 'header') {
 	if ($hdr_size > $limit) {
-	    $reason = "header size exceeds the limit: $hdr_size > $limit";
+	    $reason     = "header size exceeds the limit: $hdr_size > $limit";
 	    $errmsg_key = 'error.header_size_limit';
 	}
     }
     elsif ($type eq 'body') {
 	if ($body_size > $limit) {
-	    $reason = "body size exceeds the limit: $body_size > $limit";
+	    $reason     = "body size exceeds the limit: $body_size > $limit";
 	    $errmsg_key = 'error.body_size_limit';
 	}
     }
@@ -228,7 +233,7 @@ check the length limit of one command request.
 =cut
 
 
-# Descriptions: check the total number of command requests
+# Descriptions: check the total number of command requests.
 #    Arguments: OBJ($self) OBJ($msg) STR($type)
 # Side Effects: croak() if condition matched.
 # Return Value: none
@@ -239,8 +244,8 @@ sub check_command_limit
 
     use FML::Command::Filter;
     my $_msg   = $curproc->incoming_message_body();
-    my $obj    = new FML::Command::Filter;
-    my $reason = $obj->check_command_limit($curproc, $_msg);
+    my $obj    = new FML::Command::Filter $curproc;
+    my $reason = $obj->check_command_limit($_msg);
 
     if ($reason) {
 	$self->error_set($reason);
@@ -260,8 +265,8 @@ sub check_line_length_limit
 
     use FML::Command::Filter;
     my $_msg   = $curproc->incoming_message_body();
-    my $obj    = new FML::Command::Filter;
-    my $reason = $obj->check_line_length_limit($curproc, $_msg);
+    my $obj    = new FML::Command::Filter $curproc;
+    my $reason = $obj->check_line_length_limit($_msg);
 
     if ($reason) {
 	$self->error_set($reason);
@@ -280,7 +285,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

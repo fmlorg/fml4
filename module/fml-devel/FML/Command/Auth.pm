@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Auth.pm,v 1.29 2003/11/30 09:59:18 fukachan Exp $
+# $FML: Auth.pm,v 1.33 2004/01/21 03:45:08 fukachan Exp $
 #
 
 package FML::Command::Auth;
@@ -51,36 +51,36 @@ sub new
 
 
 # Descriptions: virtual reject handler, just return __LAST__ :-)
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: STR (__LAST__, a special upcall)
 sub reject
 {
-    my ($self, $curproc, $args, $optargs) = @_;
+    my ($self, $curproc, $optargs) = @_;
 
     return '__LAST__';
 }
 
 
 # Descriptions: permit anyone
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: NUM
 sub permit_anyone
 {
-    my ($self, $curproc, $args, $optargs) = @_;
+    my ($self, $curproc, $optargs) = @_;
 
     return 1;
 }
 
 
 # Descriptions: permit if admin_member_maps has the sender
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: NUM
 sub permit_admin_member_maps
 {
-    my ($self, $curproc, $args, $optargs) = @_;
+    my ($self, $curproc, $optargs) = @_;
     my $cred   = $curproc->{ credential };
     my $sender = $cred->sender();
     my $match  = $cred->is_privileged_member($sender);
@@ -95,12 +95,12 @@ sub permit_admin_member_maps
 
 
 # Descriptions: reject if the mail address looks like system accounts.
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: NUM or STR (__LAST__, a special upcall)
 sub reject_system_special_accounts
 {
-    my ($self, $curproc, $args, $optargs) = @_;
+    my ($self, $curproc, $optargs) = @_;
     my $cred   = $curproc->{ credential };
     my $sender = $cred->sender();
     my $match  = $cred->match_system_special_accounts($sender);
@@ -114,7 +114,7 @@ sub reject_system_special_accounts
 }
 
 
-=head2 check_admin_member_password($curproc, $args, $optargs)
+=head2 check_admin_member_password($curproc, $optargs)
 
 check the password if it is valid or not as an administrator.
 
@@ -124,39 +124,47 @@ check the password if it is valid or not as an administrator.
 # Descriptions: check the password if it is valid or not.
 #    Arguments: OBJ($self)
 #               HASH_REF($curproc)
-#               HASH_REF($args)
 #               HASH_REF($optargs)
 # Side Effects: none
 # Return Value: NUM
 sub check_admin_member_password
 {
-    my ($self, $curproc, $args, $optargs) = @_;
-    my $config  = $curproc->config();
-    my $maplist = $config->get_as_array_ref('admin_member_password_maps');
-    my $status  = 0;
+    my ($self, $curproc, $optargs) = @_;
+    my $function = "check_admin_member_password";
+    my $cred     = $curproc->{ credential };
+    my $config   = $curproc->config();
+    my $status   = 0;
 
     # simple sanity check: verify non empty input or not?
+    return 0 unless defined $optargs->{ address };
     return 0 unless $optargs->{ address };
+    return 0 unless defined $optargs->{ password };
     return 0 unless $optargs->{ password };
 
     # get a set of address and password
     my $address  = $optargs->{ address };
     my $password = $optargs->{ password };
     unless ($address && $password) {
+	# XXX-TODO: please return error message.
 	return 0;
     }
 
-    # XXX-TODO: validate $address here ?
-    # get candidates
+    # 1. validate address. address representation is restricted.
+    # 2. but, password should be allowed arbitrary syntax.
+    use FML::Restriction::Base;
+    my $safe = new FML::Restriction::Base;
+    unless ($safe->regexp_match('address', $address)) {
+	$curproc->logerror("FML::Command::Auth: unsafe address input");
+	return 0;
+    }
     my ($user, $domain) = split(/\@/, $address);
 
-    use FML::Credential;
-    my $cred = new FML::Credential $curproc;
-
+    # o.k. start ...
     $curproc->lock($lock_channel);
 
     # search $user in password database map, which has a hash of
-    # { $user => $encryptd_passwrod }.
+    # { $user => $encrypted_passwrod }.
+    my $maplist = $config->get_as_array_ref('admin_member_password_maps');
     for my $map (@$maplist) {
 	use IO::Adapter;
 	my $obj   = new IO::Adapter $map, $config;
@@ -173,14 +181,12 @@ sub check_admin_member_password
 		my ($u, $p_infile) = split(/\s+/, $r);
 		my $p_input        = $crypt->unix_crypt($password, $p_infile);
 
-		# XXX-TODO: is_same_assress() validates input ???
-		# XXX-TODO: we need to validate addresses here ???
-		# 1.1 user match ?
+		# 1.1 user match ? ($address syntax is checked above.)
 		if ($cred->is_same_address($u, $address)) {
 		    # 1.2 password match ?
 		    if ($p_infile eq $p_input) {
 			if ($debug) {
-			    $curproc->log("check_admin_member_password: password match");
+			    $curproc->log("$function: password match");
 			}
 			$status = 1;
 			last PASSWORD_ENTRY;
@@ -192,7 +198,7 @@ sub check_admin_member_password
 
     $curproc->unlock($lock_channel);
 
-    $curproc->logwarn("check_admin_member_password: password not match") unless $status;
+    $curproc->logerror("$function: password mismatch") unless $status;
     return $status;
 }
 
@@ -272,7 +278,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: signoff.pm,v 1.12 2002/12/15 13:46:31 fukachan Exp $
+# $FML: signoff.pm,v 1.14 2003/12/31 04:08:45 fukachan Exp $
 #
 
 package FML::Command::User::signoff;
@@ -39,6 +39,7 @@ See C<FML::Command> for more details.
 =head1 DESCRIPTION
 
 an alias of C<FML::Command::User::unsubscribe>.
+This request is forwarded to C<FML::Command::User::unsubscribe> module.
 
 =head1 CODING STYLE
 
@@ -50,7 +51,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

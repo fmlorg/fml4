@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: List.pm,v 1.7 2003/10/17 08:16:28 fukachan Exp $
+# $FML: List.pm,v 1.10 2004/01/18 14:05:05 fukachan Exp $
 #
 
 package FML::CGI::List;
@@ -28,15 +28,12 @@ sub new
 
 
 # Descriptions: show address list
-#    Arguments: OBJ($self)
-#               OBJ($curproc)
-#               HASH_REF($args)
-#               HASH_REF($command_args)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: none
 # Return Value: none
 sub cgi_menu
 {
-    my ($self, $curproc, $args, $command_args) = @_;
+    my ($self, $curproc, $command_args) = @_;
     my $config      = $curproc->config();
     my $target      = $curproc->cgi_var_frame_target();
     my $action      = $curproc->cgi_var_action();
@@ -47,11 +44,13 @@ sub cgi_menu
     use FML::Restriction::Base;
     my $safe = new FML::Restriction::Base;
     unless ($safe->regexp_match('ml_name', $ml_name)) {
+	# XXX-TODO: nl ?
 	croak("invalid ml_name");
     }
 
     # check $map_default included in $map_list.
-    unless ($config->has_attribute("cgi_menu_address_map_list", $map_default)) {
+    unless ($config->has_attribute("cgi_menu_address_map_list", 
+				   $map_default)) {
 	croak("invalid map: $map_default");
     }
 
@@ -99,7 +98,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

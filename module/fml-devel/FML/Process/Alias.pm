@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Alias.pm,v 1.12 2003/08/29 15:34:06 fukachan Exp $
+# $FML: Alias.pm,v 1.18 2004/01/31 04:06:31 fukachan Exp $
 #
 
 package FML::Process::Alias;
@@ -46,6 +46,10 @@ It make a C<FML::Process::Kernel> object and return it.
 
 =head2 prepare($args)
 
+load config files and fix @INC.
+
+=head2 verify_request($args)
+
 dummy.
 
 =cut
@@ -76,8 +80,8 @@ sub prepare
     my $eval = $config->get_hook( 'fmlalias_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    # $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    # $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmlalias_prepare_end_hook' );
@@ -93,8 +97,8 @@ sub prepare
 sub verify_request
 {
     my ($curproc, $args) = @_;
-    my $argv = $curproc->command_line_argv();
-    my $len  = $#$argv + 1;
+    my $argv   = $curproc->command_line_argv();
+    my $len    = $#$argv + 1;
     my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlalias_verify_request_start_hook' );
@@ -133,11 +137,18 @@ sub run
     my $myname  = $curproc->myname();
     my $argv    = $curproc->command_line_argv();
 
-    $curproc->_fmlalias($args);
+    $curproc->_fmlalias();
 }
 
 
-# Descriptions: dummy
+=head2 finish($args)
+
+dummy.
+
+=cut
+
+
+# Descriptions: dummy.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -161,7 +172,7 @@ show help.
 =cut
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -186,39 +197,24 @@ _EOF_
 }
 
 
-=head2 _fmlalias($args)
-
-switch of C<fmlalias> command.
-
-C<Caution:>
-C<$args> is passed from parrent libexec/loader.
-We construct a new struct C<$command_args> here to pass parameters
-to child objects.
-C<FML::Command::$command> object takes them as arguments not pure
-C<$args>. It is a little mess. Pay attention.
-
-See <FML::Process::Switch()> on C<$args> for more details.
-
-=cut
-
-
-# Descriptions: fmlalias top level dispacher
-#    Arguments: OBJ($curproc) HASH_REF($args)
+# Descriptions: fmlalias top level dispacher.
+#    Arguments: OBJ($curproc)
 # Side Effects: load FML::Command::command module and execute it.
 # Return Value: none
 sub _fmlalias
 {
-    my ($curproc, $args) = @_;
+    my ($curproc) = @_;
     my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlalias_run_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # show fmlonly aliases if -n option specified.
-    my $mode = $args->{ options }->{ n } ? 'fmlonly' : 'all';
+    my $options = $curproc->command_line_options();
+    my $mode    = $options->{ n } ? 'fmlonly' : 'all';
 
-    use FML::MTAControl;
-    my $mta     = new FML::MTAControl;
+    use FML::MTA::Control;
+    my $mta     = new FML::MTA::Control;
     my $aliases = $mta->get_aliases_as_hash_ref($curproc, {}, {
         mta_type => 'postfix',
 	mode     => $mode,
@@ -243,7 +239,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Addr.pm,v 1.11 2003/08/29 15:34:06 fukachan Exp $
+# $FML: Addr.pm,v 1.17 2004/01/31 04:06:31 fukachan Exp $
 #
 
 package FML::Process::Addr;
@@ -80,8 +80,8 @@ sub prepare
     my $eval = $config->get_hook( 'fmladdr_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    # $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    # $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmladdr_prepare_end_hook' );
@@ -97,8 +97,8 @@ sub prepare
 sub verify_request
 {
     my ($curproc, $args) = @_;
-    my $argv = $curproc->command_line_argv();
-    my $len  = $#$argv + 1;
+    my $argv   = $curproc->command_line_argv();
+    my $len    = $#$argv + 1;
     my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_verify_request_start_hook' );
@@ -119,7 +119,7 @@ sub verify_request
 
 the top level dispatcher for C<fmladdr>.
 
-It kicks off C<_fmladdr($args)> for fmladdr.
+It kicks off C<_fmladdr()> for fmladdr.
 
 NOTE:
 C<$args> is passed from parrent libexec/loader.
@@ -135,15 +135,22 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->config();
-    my $myname  = $curproc->myname();
-    my $argv    = $curproc->command_line_argv();
+    my $config = $curproc->config();
+    my $myname = $curproc->myname();
+    my $argv   = $curproc->command_line_argv();
 
-    $curproc->_fmladdr($args);
+    $curproc->_fmladdr();
 }
 
 
-# Descriptions: dummy
+=head2 finish
+
+dummy.
+
+=cut
+
+
+# Descriptions: dummy.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -193,34 +200,33 @@ _EOF_
 }
 
 
-=head2 _fmladdr($args)
+=head2 _fmladdr()
 
 show all aliases (accounts + aliases).
 show only accounts if -n option specified.
-
-See <FML::Process::Switch()> on C<$args> for more details.
 
 =cut
 
 
 # Descriptions: show all aliases (accounts + aliases).
 #               show only accounts if -n option specified.
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: load FML::Command::command module and execute it.
 # Return Value: none
 sub _fmladdr
 {
-    my ($curproc, $args) = @_;
-    my $config = $curproc->config();
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
 
     my $eval = $config->get_hook( 'fmladdr_run_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # show only accounts if -n option specified.
-    my $mode = $args->{ options }->{ n } ? 'fmlonly' : 'all';
+    my $options = $curproc->command_line_options();
+    my $mode    = $options->{ n } ? 'fmlonly' : 'all';
 
-    use FML::MTAControl;
-    my $mta     = new FML::MTAControl;
+    use FML::MTA::Control;
+    my $mta     = new FML::MTA::Control;
     my $aliases = $mta->get_aliases_as_hash_ref($curproc, {}, {
         mta_type => 'postfix',
 	mode     => $mode,
@@ -256,7 +262,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

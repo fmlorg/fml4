@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003,2004 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Command.pm,v 1.92 2003/11/30 09:59:19 fukachan Exp $
+# $FML: Command.pm,v 1.98 2004/01/31 04:06:31 fukachan Exp $
 #
 
 package FML::Process::Command;
@@ -80,14 +80,14 @@ sub prepare
     my $eval = $config->get_hook( 'command_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
-    $curproc->resolve_ml_specific_variables( $args );
-    $curproc->load_config_files( $args->{ cf_list } );
+    $curproc->resolve_ml_specific_variables();
+    $curproc->load_config_files();
     $curproc->fix_perl_include_path();
     $curproc->scheduler_init();
     $curproc->log_message_init();
 
     if ($config->yes('use_command_mail_program')) {
-	$curproc->parse_incoming_message($args);
+	$curproc->parse_incoming_message();
     }
     else {
 	$curproc->logerror("use of command_mail_program prohibited");
@@ -121,7 +121,7 @@ sub verify_request
     $curproc->verify_sender_credential();
 
     unless ($curproc->is_refused()) {
-	$curproc->_check_filter($args);
+	$curproc->_check_filter();
     }
 
     $eval = $config->get_hook( 'command_verify_request_end_hook' );
@@ -129,19 +129,19 @@ sub verify_request
 }
 
 
-# Descriptions: filter
-#    Arguments: OBJ($curproc) HASH_REF($args)
+# Descriptions: apply several filters.
+#    Arguments: OBJ($curproc)
 # Side Effects: set flag to ignore this process if it should be filtered.
 # Return Value: none
 sub _check_filter
 {
-    my ($curproc, $args) = @_;
-    my $config = $curproc->config();
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
 
     eval q{
 	use FML::Filter;
 	my $filter = new FML::Filter;
-	my $r = $filter->command_mail_filter($curproc, $args);
+	my $r = $filter->command_mail_filter($curproc);
 
 	# filter traps this message.
 	if ($r = $filter->error()) {
@@ -180,14 +180,14 @@ XXX Each command determines need of lock or not.
 =cut
 
 
-# Descriptions: call _evaluate_command_lines()
+# Descriptions: call _evaluate_command_lines().
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub run
 {
     my ($curproc, $args) = @_;
-    my $pcb = $curproc->pcb();
+    my $pcb    = $curproc->pcb();
     my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'command_run_start_hook' );
@@ -195,19 +195,21 @@ sub run
 
     unless ($curproc->is_refused()) {
 	# permit_xxx() sets the error reason at "check_restriction" in pcb.
-	if ($curproc->permit_command($args)) {
-	    $curproc->_evaluate_command_lines($args);
+	if ($curproc->permit_command()) {
+	    $curproc->_evaluate_command_lines();
 	}
 	# XXX reject command use irrespective of requests from admins/users.
 	# XXX rejection of admin use occurs in _evaluate_command_lines()
 	# XXX not here.
-	# XXX possible cases are from "system_special_accounts" or from a not member.
+	# XXX possible cases are from "system_special_accounts" or 
+	# XXX from a not member.
 	else {
 	    # check the error reason by permit_command().
 	    my $reason = $pcb->get("check_restrictions", "deny_reason");
-	    if (defined($reason) && ($reason eq 'reject_system_special_accounts')) {
+	    if (defined($reason) && 
+		($reason eq 'reject_system_special_accounts')) {
 		my $s = "deny request from system accounts";
-		$curproc->reply_message_nl("error.system_special_accounts", $s);
+		$curproc->reply_message_nl("error.system_special_accounts",$s);
 	    }
 	    else {
 		$curproc->reply_message_nl("error.not_member",
@@ -241,7 +243,7 @@ show help.
 =cut
 
 
-# Descriptions: show help
+# Descriptions: show help.
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -311,12 +313,12 @@ sub _check_context
 
 # Descriptions: check command (specified in $opts) is valid and permitted
 #               in the configuration.
-#    Arguments: OBJ($curproc) HASH_REF($args) STR($level) HASH_REF($opts)
+#    Arguments: OBJ($curproc) STR($level) HASH_REF($opts)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _config_permit_command
 {
-    my ($curproc, $args, $level, $opts) = @_;
+    my ($curproc, $level, $opts) = @_;
     my $config  = $curproc->config();
     my $cred    = $curproc->{ credential }; # user credential
     my $prompt  = $config->{ command_mail_reply_prompt } || '>>>';
@@ -348,13 +350,12 @@ sub _config_permit_command
 
 
 # Descriptions: validate command syntax by FML::Restriction.
-#    Arguments: OBJ($curproc)
-#               HASH_REF($args) HASH_REF($status) HASH_REF($cominfo)
+#    Arguments: OBJ($curproc) HASH_REF($status) HASH_REF($cominfo)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _is_safe_syntax
 {
-    my ($curproc, $args, $status, $cominfo) = @_;
+    my ($curproc, $status, $cominfo) = @_;
     my $config  = $curproc->config();
     my $prompt  = $config->{ command_mail_reply_prompt } || '>>>';
     my $level   = $status->{ level };
@@ -386,12 +387,12 @@ sub _is_safe_syntax
 
 # Descriptions: parse command buffer to prepare several info
 #               after use. return info as HASH_REF.
-#    Arguments: OBJ($curproc) HASH_REF($args) STR($fixed_command)
+#    Arguments: OBJ($curproc) STR($fixed_command)
 # Side Effects: none
 # Return Value: HASH_REF
 sub _parse_command_args
 {
-    my ($curproc, $args, $fixed_command) = @_;
+    my ($curproc, $fixed_command) = @_;
     my $config  = $curproc->config();
     my $ml_name = $config->{ ml_name };
     my $argv    = $curproc->command_line_argv();
@@ -410,7 +411,6 @@ sub _parse_command_args
 
 	ml_name    => $ml_name,
 	argv       => $argv,
-	args       => $args,
 
 	msg_args   => {},
     };
@@ -434,13 +434,13 @@ sub _get_command_name
 }
 
 
-# Descriptions: authenticate the currrent process sender as an admin
-#    Arguments: OBJ($curproc) HASH_REF($args) HASH_REF($optargs)
+# Descriptions: authenticate the currrent process sender as an admin.
+#    Arguments: OBJ($curproc) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _try_admin_auth
 {
-    my ($curproc, $args, $optargs) = @_;
+    my ($curproc, $optargs) = @_;
     my $is_auth = 0;
     my $obj     = undef;
 
@@ -452,7 +452,7 @@ sub _try_admin_auth
 	my $config = $curproc->config();
 	my $rules  = $config->get_as_array_ref('admin_command_restrictions');
 	for my $rule (@$rules) {
-	    $is_auth = $obj->$rule($curproc, $args, $optargs);
+	    $is_auth = $obj->$rule($curproc, $optargs);
 
 	    # reject as soon as possible
 	    if ($is_auth eq '__LAST__') {
@@ -481,13 +481,12 @@ sub _try_admin_auth
 # Descriptions: determine $mode and $level for the current command (line).
 #               We apply this function for each line in command request.
 #               $mode and $level change line by line.
-#    Arguments: OBJ($curproc)
-#               HASH_REF($args) HASH_REF($status) HAS_REF($command_info)
+#    Arguments: OBJ($curproc) HASH_REF($status) HAS_REF($command_info)
 # Side Effects: update $status, $command_info
 # Return Value: STR
 sub _get_command_mode
 {
-    my ($curproc, $args, $status, $command_info) = @_;
+    my ($curproc, $status, $command_info) = @_;
     my $config     = $curproc->config();
     my $command    = $command_info->{ command };
     my $comname    = $command_info->{ comname };
@@ -526,7 +525,7 @@ sub _get_command_mode
 	#    since $commands_for_stranger contains "confirm" command :-)
 	#    It is effective but wrong since we set $level = stranger
 	#    though we should set up $level = user.
-	if ($curproc->_config_permit_command($args, "stranger", $opts)) {
+	if ($curproc->_config_permit_command("stranger", $opts)) {
 	    $status->{ mode }  = 'user';
 	    $status->{ level } = 'stranger';
 	}
@@ -552,7 +551,7 @@ sub _get_command_mode
 	    my $optargs = { address => $sender, password => $data };
 
 	    # XXX simple state machine: update $status->{ is_auth }
-	    $is_auth = $curproc->_try_admin_auth($args, $optargs);
+	    $is_auth = $curproc->_try_admin_auth($optargs);
 	    $status->{ is_auth } = $is_auth;
 	    $curproc->log("admin: o.k. auth-ed as an ML admin") if $is_auth;
 	}
@@ -564,7 +563,7 @@ sub _get_command_mode
 	    my $opts = { comname => $comname, command => $command };
 
 	    my $xmode = 'privileged_user';
-	    if ($curproc->_config_permit_command($args, $xmode, $opts)) {
+	    if ($curproc->_config_permit_command($xmode, $opts)) {
 		$status->{ mode }          = 'admin';
 		$status->{ level }         = 'admin';
 		$command_info->{ command } = $command;
@@ -608,7 +607,7 @@ sub _get_command_mode
     else {
 	if ($is_member) {
 	    my $opts = { comname => $comname, command => $command };
-	    if ($curproc->_config_permit_command($args, "user", $opts)) {
+	    if ($curproc->_config_permit_command("user", $opts)) {
 		$status->{ mode }  = 'user';
 		$status->{ level } = 'user';
 	    }
@@ -620,7 +619,7 @@ sub _get_command_mode
 	}
 	else {
 	    my $opts = { comname => $comname, command => $command };
-	    if ($curproc->_config_permit_command($args, "stranger", $opts)) {
+	    if ($curproc->_config_permit_command("stranger", $opts)) {
 		$status->{ mode }  = 'user';
 		$status->{ level } = 'stranger';
 	    }
@@ -645,7 +644,7 @@ sub _get_command_mode
 }
 
 
-# Descriptions: this command is allowd under the current $mode and $level
+# Descriptions: this command is allowd under the current $mode and $level.
 #    Arguments: OBJ($curproc)
 #               STR($mode)
 #               HASH_REF($status)
@@ -696,7 +695,7 @@ within $command_args to share some data between modules called in it.
 =cut
 
 
-# Descriptions: build $command_args for FML::Command execution
+# Descriptions: build $command_args for FML::Command execution.
 #    Arguments: OBJ($curproc) HASH_REF($status) HASH_REF($cominfo)
 # Side Effects: none
 # Return Value: HASH_REF
@@ -717,7 +716,7 @@ sub _gen_command_args
 }
 
 
-# Descriptions: remove the superflous string before the actual command
+# Descriptions: remove the superflous string before the actual command.
 #    Arguments: STR($buf)
 # Side Effects: none
 # Return Value: STR
@@ -729,14 +728,14 @@ sub __clean_up
 }
 
 
-# Descriptions: set up error message to inform emergency stop
-#    Arguments: OBJ($curproc) HASH_REF($args)
+# Descriptions: set up error message to inform emergency stop.
+#    Arguments: OBJ($curproc)
 #               HASH_REF($status) HASH_REF($cominfo) STR($orig_command)
 # Side Effects: update reply messages
 # Return Value: none
 sub __stop_here
 {
-    my ($curproc, $args, $status, $cominfo, $orig_command) = @_;
+    my ($curproc, $status, $cominfo, $orig_command) = @_;
     my $config  = $curproc->config();
     my $prompt  = $config->{ command_mail_reply_prompt } || '>>>';
     my $key     = $status->{ _stop_reason_key };
@@ -758,20 +757,20 @@ sub __stop_here
 # Descriptions: scan message body and execute approviate command
 #               with dynamic loading of command definition.
 #               It resolves your customized command easily.
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc)
 # Side Effects: loading FML::Command::command.
 #               prepare messages to return.
 # Return Value: none
 sub _evaluate_command_lines
 {
-    my ($curproc, $args) = @_;
-    my $config  = $curproc->config();
-    my $ml_name = $config->{ ml_name };
-    my $argv    = $curproc->command_line_argv();
-    my $prompt  = $config->{ command_mail_reply_prompt } || '>>>';
-    my $mode    = 'unknown';
-    my $rbody   = $curproc->incoming_message_body();
-    my $msg     = $rbody->find_first_plaintext_message();
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
+    my $ml_name   = $config->{ ml_name };
+    my $argv      = $curproc->command_line_argv();
+    my $prompt    = $config->{ command_mail_reply_prompt } || '>>>';
+    my $mode      = 'unknown';
+    my $rbody     = $curproc->incoming_message_body();
+    my $msg       = $rbody->find_first_plaintext_message();
 
     # preliminary scanning for message to find "confirm" or "admin"
     my $command_lines = $msg->message_text_as_array_ref();
@@ -816,8 +815,8 @@ sub _evaluate_command_lines
 
 	# Example: if orig_command = "# help", comname = "help"
 	$fixed_command = __clean_up($orig_command);
-	$cominfo       = $curproc->_parse_command_args($args, $fixed_command);
-	$mode          = $curproc->_get_command_mode($args, $status, $cominfo);
+	$cominfo       = $curproc->_parse_command_args($fixed_command);
+	$mode          = $curproc->_get_command_mode($status, $cominfo);
 
 	# 1. check $mode if the further processing is allowed
 	if ($mode eq '__NEXT__') {
@@ -826,7 +825,7 @@ sub _evaluate_command_lines
 	}
 	elsif ($mode eq '__LAST__') {
 	    $curproc->logerror("command processing stop.");
-	    $curproc->__stop_here($args, $status, $cominfo, $orig_command);
+	    $curproc->__stop_here($status, $cominfo, $orig_command);
 	    last COMMAND;
 	}
 
@@ -839,7 +838,7 @@ sub _evaluate_command_lines
 	# 1.3 valid mode
 	unless ($mode eq 'user' || $mode eq 'admin') {
 	    $curproc->logerror("command processing stop.");
-	    $curproc->__stop_here($args, $status, $cominfo, $orig_command);
+	    $curproc->__stop_here($status, $cominfo, $orig_command);
 	    last COMMAND;
 	}
 
@@ -853,7 +852,7 @@ sub _evaluate_command_lines
 	}
 
 	# 3. simple syntax check
-	unless ($curproc->_is_safe_syntax($args, $status, $cominfo)) {
+	unless ($curproc->_is_safe_syntax($status, $cominfo)) {
 	    $curproc->logerror("invalid/unsafe syntax");
 	    $curproc->log("(debug) ignore $fixed_command");
 	    $num_ignored++;
@@ -957,7 +956,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

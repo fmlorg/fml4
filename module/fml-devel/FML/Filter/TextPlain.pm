@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: TextPlain.pm,v 1.6 2003/12/06 04:48:20 fukachan Exp $
+# $FML: TextPlain.pm,v 1.10 2004/02/01 14:52:50 fukachan Exp $
 #
 
 package FML::Filter::TextPlain;
@@ -16,7 +16,7 @@ use ErrorStatus qw(error_set error error_clear);
 
 =head1 NAME
 
-FML::Filter::TextPlain - analyze the first plain text part in mail.
+FML::Filter::TextPlain - analyze the first plain text part in message.
 
 =head1 SYNOPSIS
 
@@ -34,8 +34,7 @@ constructor.
 =cut
 
 
-# default rules to apply
-# XXX-TODO: need this default rules here ? (principle of least surprise?)
+# default rules for convenience.
 my (@default_rules) = qw(reject_not_iso2022jp_japanese_string
 			 reject_null_mail_body
 			 reject_one_line_message
@@ -62,7 +61,7 @@ sub new
 }
 
 
-=head2 rules( $rules )
+=head2 set_rules( $rules )
 
 overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 
@@ -73,14 +72,20 @@ overwrite rules by specified C<@$rules> ($rules is ARRAY_REF).
 #    Arguments: OBJ($self) ARRAY_REF($rarray)
 # Side Effects: overwrite info in object
 # Return Value: ARRAY_REF
-sub rules
+sub set_rules
 {
     my ($self, $rarray) = @_;
-    $self->{ _rules } = $rarray;
+
+    if (ref($rarray) eq 'ARRAY') {
+	$self->{ _rules } = $rarray;
+    }
+    else {
+	carp("rules: invalid input");
+    }
 }
 
 
-=head2 body_check($msg, $args)
+=head2 body_check($msg)
 
 C<$msg> is C<Mail::Message> object.
 
@@ -90,7 +95,7 @@ C<Usage>:
     my $obj = new FML::Filter::TextPlain;
     my $msg = $curproc->incoming_message_body();
 
-    $obj->body_check($msg, $args);
+    $obj->body_check($msg);
     if ($obj->error()) {
        # do something for wrong formated message ...
     }
@@ -99,12 +104,12 @@ C<Usage>:
 
 
 # Descriptions: top level dispatcher
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
+#    Arguments: OBJ($self) OBJ($msg)
 # Side Effects: none
 # Return Value: none
 sub body_check
 {
-    my ($self, $msg, $args) = @_;
+    my ($self, $msg) = @_;
 
     ## 0. preparation
     # local scope after here
@@ -148,7 +153,7 @@ sub body_check
 
 	if ($self->can($rule)) {
 	    eval q{
-		$self->$rule($msg, $args, $first_msg);
+		$self->$rule($msg, $first_msg);
 	    };
 	    if ($@) {
 		$self->error_set($@);
@@ -163,14 +168,15 @@ sub body_check
 
 
 # Descriptions: reject if not Japanese in JIS is included in the message.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_not_iso2022jp_japanese_string
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
     my $buf = $first_msg->nth_paragraph(1);
 
+    # XXX-TODO: is_iso2022jp_or_ascii_string() ?
     use Mail::Message::Encode;
     my $obj = new Mail::Message::Encode;
     unless ($obj->is_iso2022jp_string($buf)) {
@@ -180,12 +186,12 @@ sub reject_not_iso2022jp_japanese_string
 
 
 # Descriptions: reject if mail body is empty
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_null_mail_body
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
 
     if ($first_msg->is_empty) {
 	my $size = $first_msg->size();
@@ -202,12 +208,12 @@ sub reject_null_mail_body
 #               helps me to speculate the virus family?
 #               This GUID trap idea is based on ZDNet news information.
 #               Thanks hama@sunny.co.jp on M$ GUID pattern.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_ms_guid
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
 
     for (my $mp = $msg->{ next }; $mp ; $mp = $mp->{ next } ) {
 	# XXX croak() if GUID found.
@@ -289,12 +295,12 @@ sub _decode_mime_buffer
 #               XXX e.g. "chaddr a@d1 b@d2".
 #               If we include them,
 #               we cannot identify a command or an English phrase ;D
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_one_line_message
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
     my $buf = $first_msg->nth_paragraph(1);
 
     if ( $self->need_one_line_check($first_msg) ) {
@@ -309,12 +315,12 @@ sub reject_one_line_message
 #               XXX fml 4.0: fml.pl (distribute) should not accpet commands
 #               XXX: "# command" is internal represention
 #               XXX: but to reject the old compatible syntaxes.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_old_fml_command_syntax
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
     my $buf = $first_msg->message_text;
 
     if ($buf =~ /^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
@@ -327,12 +333,12 @@ sub reject_old_fml_command_syntax
 
 
 # Descriptions: reject if $msg looks command (wrong fml command).
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_invalid_fml_command_syntax
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
     my $buf = $first_msg->message_text;
 
     if ($buf =~ /^[\s\n]*\%\s*echo.*/i) {
@@ -349,17 +355,18 @@ sub reject_invalid_fml_command_syntax
 #                e.g. reject "SUBSCRIBE" : octal code follows:
 #                243 323 243 325 243 302 243 323 243 303
 #                243 322 243 311 243 302 243 305
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_japanese_command_syntax
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
     my $buf = $first_msg->message_text;
 
     if ($buf =~ /\033\044\102(\043[\101-\132\141-\172])/) {
 	# trap /JIS"2byte"[A-Za-z]+/
 
+	# XXX-TODO: Mail::Message::String->to_euc_jp() ?
 	# EUC-fy for further investigation
 	use Mail::Message::Encode;
 	my $obj = new Mail::Message::Encode;
@@ -418,7 +425,7 @@ sub need_one_line_check
 sub is_citation
 {
     my ($self, $data) = @_;
-    my $trap_pat = ''; # keyword to trap citation at the head of the line
+    my $trap_pat      = ''; # keyword to trap citation at the head of the line.
 
     if ($data =~ /(\n.)/) { $trap_pat = quotemeta($1);}
 
@@ -443,16 +450,16 @@ sub is_signature
 {
     my ($self, $data) = @_;
 
-    if ($data =~ /\@/ ||
-	$data =~ /TEL:/i ||
-	$data =~ /FAX:/i ||
-	$data =~ /:\/\// ) {
+    if ($data =~ /\@/o    ||
+	$data =~ /TEL:/oi ||
+	$data =~ /FAX:/oi ||
+	$data =~ /:\/\//o ) {
 	return 1;
     }
 
     # -- fukachan ( usenet style signature ? )
     # // fukachan ( signature derived from what ? )
-    if ($data =~ /^--/ || $data =~ /^\/\//) {
+    if ($data =~ /^--/o || $data =~ /^\/\//o) {
 	return 1;
     }
 
@@ -462,7 +469,7 @@ sub is_signature
     $data   = $obj->convert( $data, 'euc-jp' );
 
     # "2-byte @"domain where "@" is a 2-byte "@" character.
-    if ($data =~ /[-A-Za-z0-9]\241\367[-A-Za-z0-9]/) {
+    if ($data =~ /[-A-Za-z0-9]\241\367[-A-Za-z0-9]/o) {
 	return 1;
     }
 
@@ -491,6 +498,7 @@ sub clean_up_buffer
     $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
 
     # 2. remove invalid syntax seen in help file with the bug? ;D
+    #    which derives from fml help file at the old age.
     $xbuf =~ s/^_CTK_//g;
     $xbuf =~ s/\n_CTK_//g;
 
@@ -499,12 +507,12 @@ sub clean_up_buffer
 
 # Descriptions: virus check against uuencode
 #               Even if Multipart, evaluate all blocks agasint virus checks.
-#    Arguments: OBJ($self) OBJ($msg) HASH_REF($args) OBJ($first_msg)
+#    Arguments: OBJ($self) OBJ($msg) OBJ($first_msg)
 # Side Effects: croak if error
 # Return Value: none
 sub reject_uuencode
 {
-    my ($self, $msg, $args, $first_msg) = @_;
+    my ($self, $msg, $first_msg) = @_;
 
     for (my $mp = $msg->{ next }; $mp ; $mp = $mp->{ next } ) {
 	$self->_probe_uuencode($mp);
@@ -559,7 +567,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

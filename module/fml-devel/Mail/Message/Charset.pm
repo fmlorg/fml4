@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2003 Ken'ichi Fukamachi
+# Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #
-# $FML: Charset.pm,v 1.1 2003/10/18 04:43:52 fukachan Exp $
+# $FML: Charset.pm,v 1.3 2004/02/06 13:29:47 fukachan Exp $
 #
 
 package Mail::Message::Charset;
@@ -183,6 +183,18 @@ my %message_charset_map  = (
 			    'english'  => 'us-ascii',
 			    );
 
+my %rev_message_charset_map  = (
+				'euc-jp'      => 'ja',
+				'euc'         => 'ja',
+				'sjis-jp'     => 'ja',
+				'sjis'        => 'ja',
+				'jis-jp'      => 'ja',
+				'jis'         => 'ja',
+				'iso-2022-jp' => 'ja',
+
+				'us-ascii'    => 'en',
+				);
+
 
 # Descriptions: constructor.
 #    Arguments: OBJ($self)
@@ -219,7 +231,7 @@ sub message_default_charset
 }
 
 
-# Descriptions: get charset info: e.g. japanese => euc-jp
+# Descriptions: get charset info: e.g. japanese => euc-jp.
 #    Arguments: OBJ($self) STR($language)
 # Side Effects: none
 # Return Value: STR
@@ -227,11 +239,11 @@ sub language_to_internal_charset
 {
     my ($self, $language) = @_;
 
-    return $internal_charset_map{ lc($language) };
+    return( $internal_charset_map{ lc($language) } || '' );
 }
 
 
-# Descriptions: get charset info: e.g. japanese => iso-2022-jp
+# Descriptions: get charset info: e.g. japanese => iso-2022-jp.
 #    Arguments: OBJ($self) STR($language)
 # Side Effects: none
 # Return Value: STR
@@ -239,7 +251,19 @@ sub language_to_message_charset
 {
     my ($self, $language) = @_;
 
-    return $message_charset_map{ lc($language) };
+    return( $message_charset_map{ lc($language) } || '' );
+}
+
+
+# Descriptions: charset to language: e.g. iso-2022-jp => japanese.
+#    Arguments: OBJ($self) STR($charset)
+# Side Effects: none
+# Return Value: STR
+sub message_charset_to_language
+{
+    my ($self, $charset) = @_;
+
+    return( $rev_message_charset_map{ lc($charset) } || '' );
 }
 
 
@@ -253,7 +277,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

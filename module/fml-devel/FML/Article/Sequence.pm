@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2003 Ken'ichi Fukamachi
+#  Copyright (C) 2003,2004 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Sequence.pm,v 1.5 2003/08/23 14:37:59 fukachan Exp $
+# $FML: Sequence.pm,v 1.9 2004/02/01 15:54:45 fukachan Exp $
 #
 
 package FML::Article::Sequence;
@@ -42,11 +42,11 @@ This routine uses C<File::Sequence> module.
 # Return Value: NUM(sequence identifier)
 sub increment_id
 {
-    my ($self) = @_;
+    my ($self)   = @_;
     my $curproc  = $self->{ _curproc };
     my $config   = $curproc->config();
     my $pcb      = $curproc->pcb();
-    my $seq_file = $config->{ sequence_file };
+    my $seq_file = $config->{ article_sequence_file };
 
     $curproc->lock($lock_channel);
 
@@ -78,10 +78,10 @@ return the current article sequence number.
 # Return Value: NUM(sequence number)
 sub id
 {
-    my ($self) = @_;
-    my $curproc  = $self->{ _curproc };
-    my $config   = $curproc->config();
-    my $pcb      = $curproc->pcb();
+    my ($self)  = @_;
+    my $curproc = $self->{ _curproc };
+    my $config  = $curproc->config();
+    my $pcb     = $curproc->pcb();
 
     my $n = $pcb->get('article', 'id');
 
@@ -91,7 +91,7 @@ sub id
     }
     # processes not Process::Distribute
     else {
-	my $seq_file = $config->{ sequence_file };
+	my $seq_file = $config->{ article_sequence_file };
 	my $n        = 0;
 
 	use File::Sequence;
@@ -141,7 +141,7 @@ sub speculate_max_id
 
 	  ENTRY:
 	    while (defined($fn = $dh->read)) {
-		next ENTRY unless $fn =~ /^\d+$/;
+		next ENTRY unless $fn =~ /^\d+$/o;
 
 		use File::Spec;
 		$subdir = File::Spec->catfile($spool_dir, $fn);
@@ -166,8 +166,9 @@ sub speculate_max_id
 	my $max = 0;
 	my $fn  = ''; # file name
 
+      ENTRY:
 	while (defined($fn = $dh->read)) {
-	    next unless $fn =~ /^\d+$/;
+	    next ENTRY unless $fn =~ /^\d+$/o;
 	    $max = $max < $fn ? $fn : $max;
 	}
 
@@ -190,7 +191,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2003 Ken'ichi Fukamachi
+Copyright (C) 2003,2004 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
