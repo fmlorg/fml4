@@ -14,34 +14,39 @@ __________________________________
 
 .C	Windows NT 4.0 Porting Status
 
-なお 2.2 RELEASE の source tree は Beta のまま release される予定
+2.2 RELEASE の source tree は Beta です。2.2.1 も同様です。
 =E
-I released 2.2 with sys/WINDOWS_NT4 as beta release. 
+I released 2.2 and 2.2.1 with sys/WINDOWS_NT4 as beta release status.
 
 
 .S	おまけ:基本原理	
 =E.S	Mechanisms on NT4
 
 .if LANG == JAPANESE
-[doc/smm/popfml.wix より引用。
+MTA からプログラムを起動する機能は sendmail には昔からありますが、
+一般にはありません。NT版の最大の問題点はここにあります。
+MetaInfo Sendmail以外のMTAを使用している場合は、POPを使ってメール配送
+全般に渡って一種のエミュレーションを行なうしかありません。
 
-	NT 版でも同じことをすればよい。prog mailer で駆動できればいい
-	のだが、どっかの Sendmail ($495) はsendmail.cf もまったくおな
-	じなので、できるような気配なんだけどなぁ…
-]
+そこで次のようなことをしています。
 
-POP経由の自動RefileやＭＬの実行 (libexec/popfml.pl)
+○POP経由の自動RefileやＭＬの実行 (libexec/popfml.pl)
 
-POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
-れの専用プログラムとして実装されています。対象としているケースは
+POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl が
+それの専用プログラムとして実装されています。対象としているケースは
 
 	メールはPOP3で読めるだけ
 	メールを受けとめてプログラムを呼べないという
 		OS附属のメールシステム or ポリシー
 
-等のために存在します。このやり方は汎用なのでPOP3でメールが読める場合な
-らどんなOSでも原理的にはMLが実行できるということになります。
-＃でもまああくまで裏技というカテゴリでしょう。
+等です。裏技というカテゴリでしょうが、このやり方は汎用なのでPOP3でメー
+ルが読める場合ならどんなOSでも原理的にはMLが実行できるということになり
+ます。OS/2とかBeOSでもできるのかもしれませんが…
+
+ちなみに現在までのところBeOSはperlのsocketがちゃんと動かないようなので
+だめでした。
+
+○POPでのエミュレーション
 
 理屈としては
 
@@ -124,17 +129,17 @@ makefml -w (-w is for WINDOWS options).
 
 makefml が下でよぶものは専用に install.cmd 等が用意される
 
-GUI 化する予定はない（作り方知らないし）。 makefml を drive できればい
-いんだけど…
+GUI 化する予定はない(作り方知らないし)。 makefml を drive できればいい
+んだけど… ＃密かに活動中らしい？
 =E
 Now I have no plan to change it to GUI since I want to use makefml. 
 I hope browsers can handle makefml directly but ....
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
