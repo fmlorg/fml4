@@ -1,8 +1,10 @@
+.HTML_PRE
 		fml を zmailer と一緒に使う場合
 =E
 		fml and zmailer as a MTA
 
 				Ken'ichi Fukamachi <fukachan@fml.org> 
+.~HTML_PRE
 
 当然ですが、まずML以外の機能がちゃんと動くようにzmailerを設定してくだ
 さい。INSTALLを丹念に読みながらやればできます。

@@ -1,8 +1,10 @@
+.HTML_PRE
 		fml を sendmail と一緒に使う場合
 =E
 		fml and sendmail as a MTA
 
 				Ken'ichi Fukamachi <fukachan@fml.org> 
+.~HTML_PRE
 
 fml は歴史的に sendmail を使う環境をデフォールトにしています。よって 
 INSTALL ファイルは sendmail を使うことを前提に書かれています。

@@ -1,3 +1,4 @@
+.HTML_PRE
 	MTA に qmail を使う場合
 =E
 	FML under qmail environment
@@ -5,6 +6,8 @@
 
 				Ken'ichi Fukamachi
 				fukachan@sapporo.iij.ad.jp
+.~HTML_PRE
+
 --------------------------
 .toc
 --------------------------

@@ -1,3 +1,4 @@
+.HTML_PRE
 		fml を postfix と一緒に使う場合
 =E
 		fml and postfix as a MTA
@@ -5,6 +6,7 @@
 
 				Ken'ichi Fukamachi
 				fukachan@sapporo.iij.ad.jp
+.~HTML_PRE
 --------------------------
 .toc
 --------------------------
