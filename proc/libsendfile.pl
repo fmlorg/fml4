@@ -67,7 +67,7 @@ sub MgetCompileEntry
 	    # XXX: remove '# command' part if exist since not essential
 	    $fld =~ s/^\#\s*//;
 	    &Mesg(*e, "\n>>> $fld");
-	    &Mesg(*e, "\tfailed.", 'failed');
+	    &Mesg(*e, "\tfailed.", 'fail');
 	};
 
 	&Log("$proc:[$$] $key $fld: $status");

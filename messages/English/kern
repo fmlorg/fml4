@@ -7,10 +7,10 @@ unlink.fail:
 wait_a_little:
 	Please wait a little
 
-failed:
+fail:
 	failed
 
-failed4xxx:
+fail4xxx:
 	failed for _ARG0_
 
 not_found:
