@@ -657,7 +657,10 @@ sub SetHashDefaults
 		    # utilities
 		    'resend',       'do_resend',
 		    'log',          'do_log',
+		    'tail',         'do_log',
 		    '1000#log ML [opt]',  'show log: [-i] [-NUMBER] [all] [-pPATTERN]',
+		    '1000#tail ML [opt]',  'syntax sugar of log',
+
 		    'showconfig',   'do_showconfig',
 		    '8000#showconfig',   'show environment, version, ..',
 		    'showconf',     'do_showconfig',
