@@ -113,7 +113,10 @@ sub MimeDecode
 
     while (s/($MimeBEncPat)[ \t]*\n?[ \t]+($MimeBEncPat)/$1$3/o) {;}
 
-    s/$MimeBEncPat/&kconv(&mimedecode($1))/geo;
+    # XXX: 1.11a
+    # s/$MimeBEncPat/&kconv(&mimedecode($1))/geo;
+    # XXX: 2.02
+    s/$MimeBEncPat/&kconv(&base64decode($1))/geo;
     s/$MimeQEncPat/&kconv(&MimeQDecode($1))/geo;
 
     s/(\x1b[\$\(][BHJ@])+/$1/g;
