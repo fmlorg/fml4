@@ -1178,9 +1178,7 @@ smrsh.c は、
 の program が何を実行するか？ではなく program の名前が /usr/adm/sm.bin 
 の中にあるかどうか？を見ています。＃ access(2) で、
 
-よって、link するのが perl なら include を perl fml.pl のように書き直
-す必要があります。もしくはインストールしてしまって 
-/usr/adm/sm.bin/fml.pl ですね:-)
+よって、/usr/adm/sm.bin/fml.pl ですね:-)
 
 
 .S	access(2) 
