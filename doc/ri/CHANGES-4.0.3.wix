@@ -15,6 +15,11 @@
 		などが可能になりました。
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
+2001/09/23
+
+   kern/libkernsubr2.pl
+	sync w/ HEAD (2.9-2.10): fix List-* in anyone mode
+
 2001/09/20
 
    doc/Japanese/examples/virus_check.ph
@@ -164,7 +169,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.19 2001/09/18 15:00:10 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.20 2001/09/20 12:47:29 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
