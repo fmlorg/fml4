@@ -67,6 +67,22 @@ After you modified main.cf, don't forget to run "postfix reload" !
 この postfix 特有の設定以外は sendmail と同じと思って構わないとおもい
 ます。
 
+.S	注意点
+
+postfix では SMTP で通信する時（デフォルトです）に
+一回の SMTP トランザクションで受け付ける受信者数は 1000 です。
+これは smtpd_recipient_limit という変数で決まっています。
+
+	% postconf smtpd_recipient_limit
+	smtpd_recipient_limit = 1000
+
+大規模配送サーバでは、この値を大きくしておくことが必要です。
+値を /etc/postfix/main.cf で変更し postfix reload して下さい。 
+
+＃これを $inet_interfaces ごとに変更できるといいんですけどねぇ。
+＃これは、ななめよみするかぎり release でもできないとおもいました。
+＃ release はソース読んでないので嘘かもしれず
+
 
 .appendix
 
