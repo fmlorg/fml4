@@ -15,7 +15,7 @@ $rcsid   = q$Id$;
 $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 
 ########## MAIN ##########
-&Init;
+&InitS2P;
 
 chdir $DIR || &Die("Can't chdir to $DIR");
 
@@ -71,25 +71,16 @@ exit 0;
 
 ##### LIBRARY #####
 
-sub Init
+sub InitS2P
 {
     require 'getopts.pl';
     &Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
 
-    $opt_h && do { &Usage; exit 0;};
-    $HTML_INDEX_UNIT = $opt_t || 'day';
-    $DIR             = $opt_D || $ENV{'PWD'};
-    $HTML_DIR        = $opt_d;
-    $SPOOL_DIR       = shift @ARGV;
-    $ConfigFile      = $opt_f;
-    $verbose         = $opt_v;
-    $debug           = $opt_V;
-    $HTML_THREAD     = 1; # $opt_T;
-    $Minimum         = $opt_M > 0 ? $opt_M : 1;
-    $LastRange       = $opt_L;
-    $SleepTime       = $opt_S || 3;
-    $HTML_EXPIRE_LIMIT = $opt_E;
+    $DIR = $opt_D || $ENV{'PWD'};
+    $ConfigFile = $opt_f;
 
+    # include search path
+    $opt_h && do { &Usage; exit 0;};
     push(@INC, $opt_I);
 
     local($inc) = $0;
@@ -109,13 +100,6 @@ sub Init
 
     require 'libkern.pl';
 
-    # WARNING;
-    -d $SPOOL_DIR || 
-	&Die("At least one argument is required for \$SPOOL_DIR");
-    -d $HTML_DIR  || 
-	&MkDir($HTML_DIR);
-	# &Die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED");
-
     # Libraries
     if (!-f "$DIR/config.ph") {
 	&Die("I cannot find $DIR/config.ph!\n"
@@ -125,6 +109,26 @@ sub Init
 
     require $ConfigFile if -f $ConfigFile;
 
+    # command line options overwrite variables
+    $HTML_INDEX_UNIT = $opt_t || 'day';
+    $HTML_DIR        = $opt_d;
+    $SPOOL_DIR       = shift @ARGV;
+    $verbose         = $opt_v;
+    $debug           = $opt_V ? 1 : 0;
+    $HTML_THREAD     = 1; # $opt_T;
+    $Minimum         = $opt_M > 0 ? $opt_M : 1;
+    $LastRange       = $opt_L;
+    $SleepTime       = $opt_S || 3;
+    $HTML_EXPIRE_LIMIT = $opt_E;
+
+    # WARNING;
+    -d $SPOOL_DIR || 
+	&Die("At least one argument is required for \$SPOOL_DIR");
+    -d $HTML_DIR  || 
+	&MkDir($HTML_DIR);
+	# &Die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED");
+
+    ########## library loading ##########
     # loading MIME libraries (prefetch)
     if ($USE_MIME) { require 'libMIME.pl';}
 
@@ -168,6 +172,9 @@ sub Ctl
 	&Parse;	# close(STDIN) here
 	&GetFieldsFromHeader;	# -> %Envelope
 	&Fix(*Envelope);
+
+	# emulate Hdr key in &Distribute (for %FieldHash)
+	$Envelope{'Hdr'} = $Envelope{'Header'};
 
 	$0 = "spool2html: $label $id/($_[0] -> $_[1])";
 
