@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+The Design and Implementation of "fml" Mailing List Server
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+
+<H3>
+	Contributors
+</H3>
+<UL>
+	<LI>
+	<P> <H2> Original design and main code maintainer </H2>
+	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/">
+	Ken'ichi Fukamachi
+	</A>
+
+	<LI>
+	<P> <H2>Contributed independent functions and files </H2>
+	<BR>		
+	the main library includes the following contribution as a standard
+	   (in historical order).
+	<UL>
+		<LI>
+		<P>
+		traffic command
+		<BR>
+		Author: Yuao TANIGAWA <yuao@infonia.or.jp>
+		<BR>
+		  file: src/libtraffic.pl
+
+		<LI>
+		<P>
+		Member file extension ($USE_MEMBER_NAME)
+		<BR>
+		Author: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+		<BR>
+		  file: src/libmember_name.pl
+
+		<LI>
+		<P>
+		ContentHanlder()
+		<BR>
+		Author: <t-nakano@imasy.or.jp>
+		<BR>
+		  file: within src/libdisthack.pl
+
+		<LI>
+		<P>
+		help file
+		<BR>
+		the most important "help" file is upgraded by
+		<BR>
+			umura@nn.solan.chubu.ac.jp
+		<BR>
+			metalman@kt.rim.or.jp
+		<BR>
+			fukachan@sapporo.iij.ad.jp (original)
+		<BR>
+		also English "help" file is based on 
+		<BR>
+			Jason.Chen@efi.com's Translation (1995/11)
+	</UL>
+
+	<LI>
+	<P> <H2> Patches </H2>
+	A lot of patch contributions is refered in RELEASE_NOTES.
+	Thank you for contributions.
+	<BR>
+	<A HREF="RELEASE_NOTES.html">RELEASE_NOTES [Japanese]</A>
+	<BR>
+	<A HREF="RELEASE_NOTES-e.html">RELEASE_NOTES [English part only]</A>
+
+<HR>
+<PRE>
+<P>
+Fml uses these programs in standard distribution.
+I am appriciate for Internet Community.
+
+* I use the following MIME library in standard libraries
+
+   src/mime*                  c1977@crcsn82.mdc.crc.co.jp (Noboru Ikuta)
+
+* and also fml packages includes the following famous library for convenience.
+
+   src/jcode.pl               Kazumasa Utashiro <utashiro@iij.ad.jp>
+
+</PRE>
+<PRE>
+Copyright (C) 1993-1999 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
