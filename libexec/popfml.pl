@@ -67,7 +67,7 @@ else {
 
     if ($HAS_ALARM) {
 	# see libkern.pl (Global Jump)
-	$Sigarlm = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut');
+	$Sigalrm = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut');
 
 	# POP
 	# anyway shutdown after 45 sec (60 sec. must be a unit).
@@ -631,7 +631,7 @@ sub GetPopPasswd
     local($buf, @buf);
 
     $buf = &Grep("^$ml", $f);
-    $buf =~ s/^[\r\n]+$//g;
+    $buf =~ s/[\r\n]+$//g;
     (split(/\s+/, $buf, 2))[1];
 }
 
