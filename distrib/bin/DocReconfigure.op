@@ -6,7 +6,7 @@ sh distrib/bin/make-fmllocal.man.sh
 
 echo "Makeing var/doc/op"
 
-(cd var/doc; version.pl)
+(cd var/doc; $(FML)/distrib/bin/version.pl)
 
 perl distrib/bin/fix-wix.pl doc/smm/op.wix |\
 perl bin/fwix.pl -M tmp/MANIFEST -d doc/smm > var/doc/op.jp
