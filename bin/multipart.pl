@@ -1,7 +1,10 @@
-#! /usr/local/bin/perl
-# multipart.pl: Multipart Canceler ver1.02
+#!/usr/local/bin/perl
+# multipart.pl: Multipart Canceler
 # Converter from Multipart/Mixed or Multipart/Alternative to Text/Plain
-# (C) 1996,1997 Yuao Tanigawa
+# (C) 1996-1999 Yuao Tanigawa
+#
+# $Id: multipart.pl,v 1.3.1.2 1999/04/24 10:41:37 yuao Exp $
+#
 
 $count = 0;
 while (<STDIN>) {
@@ -13,11 +16,11 @@ while (<STDIN>) {
 				if ($CT_Field) {
 					if ($Content_Type =~ /multipart\/mixed/i) {
 						$type = 'Multipart/Mixed';
-						$Content_Type =~ /boundary=\"([^\"]+)\"/;
+						$Content_Type =~ /boundary=\"([^\"]+)\"/i;
 						$boundary = '--'.$1;
 					} elsif ($Content_Type =~ /multipart\/alternative/i) {
 						$type = 'Multipart/Alternative';
-						$Content_Type =~ /boundary=\"([^\"]+)\"/;
+						$Content_Type =~ /boundary=\"([^\"]+)\"/i;
 						$boundary = '--'.$1;
 					}
 					if (length($type) > 0) {
