@@ -51,6 +51,7 @@ print "Installing perl scripts (*.pl) files ...\n";
 -d $DRAFTS_DIR || mkdir($DRAFTS_DIR, 0755);
 
 &RecursiveCopy("src", ".");
+print "\n";
 system "copy src\\* $EXEC_DIR";
 -d "$ARCH_DIR\\WINDOWS_NT4" || mkdir("$ARCH_DIR\\WINDOWS_NT4", 0755);
 system "copy src\\arch\\*\\WINDOWS_NT4\\*.pl $ARCH_DIR\\WINDOWS_NT4";
