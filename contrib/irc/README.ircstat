@@ -119,7 +119,7 @@ IRCに入ってLUSERSコマンドでユーザ数のログをとる。
    #!/bin/sh
 
    # list to monitor
-   HOST=hikari.sapporo.iij.ad.jp:teapot.iij-mc.co.jp
+   HOST=hikari.fml.org:teapot.fml.org
 
    # -d to debug
    # -S to use syslog()

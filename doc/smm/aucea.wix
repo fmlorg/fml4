@@ -284,11 +284,11 @@ whether the function call is &InetAddrTypeP(pattern-matched variable).
 =E
 Example:
 
-	IP-Address	192.168.148.1
+	IP-Address	192.168.1.1
 
-	&InetAddrTypeP("192.168.148.1");
+	&InetAddrTypeP("192.168.1.1");
 
-のように展開され、192.168.148.1 が IP Address Syntax か否か？が評価さ
+のように展開され、192.168.1.1 が IP Address Syntax か否か？が評価さ
 れる。non-null な返り値が返ってきた場合はパターンマッチとみなす。
 
 そのため、呼ばれる type-predicate-function はすべてのありうる場合わけ
