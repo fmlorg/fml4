@@ -1,0 +1,22 @@
+	WANTED / TODO LIST TOWARD fml 2.3
+
+.C	TODO
+
+.S	more beautiful codes
+
+.S	documents
+
+   * especially split doc/op to 
+
+	operations guide
+	The design and implementation 
+
+   * want FAQ
+
+.S	WWW Interface ?
+
+.S	makefml menu extension ?
+
+.S	more elaborate port on NT4 ?
+
+$Id$
