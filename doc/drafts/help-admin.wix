@@ -160,6 +160,20 @@ pass $B9T$OI,MW$J$$$7!"(Bapprove $B%3%^%s%I$OL50UL#$G$9(B($BL50UL#$K%Q%9%o!
 $B$N%U%!%$%k$G$J$$$H$$$1$J$$$?$a;H$$F;$O$"$^$j$J$$$@$m$&!#(B
 
 
+.S	PGP (Pretty Good Privacy)
+
+# admin pgp -ka 
+
+$B%a!<%k$N$3$N9T0J9_$NItJ,$r(B pubric key $B$H$7$F#M#L%5!<%P$N(B pubring $B$K2C$($k(B
+
+# admin pgp -kv
+
+$B8=:_$N(B keyring $B$r8+$k(B 
+
+$B!v$;$C$+$/(BPGP$B;H$&$s$@$+$i!"%j%b!<%H4IM}$NG'>Z%b!<%I$O(BPGP$B$,K>$^$7$$$G$7$g(B
+$B!v$&$M(B
+
+
 .S	$BFC<l$J$b$N(B
 
 admin $B$O$D$+$J$$$1$I!D(B

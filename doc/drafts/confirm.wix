@@ -1,26 +1,33 @@
-Confirmation (登録の確認) について
+*** Confirmation (登録の確認)  ***
 
-このメーリングリスト(_ML_@_DOMAIN_) では自動登録をいきなりは行ないませ
-ん。まず最初に
+このメールはメーリングリスト(_ML_@_DOMAIN_) へ本当に登録してよいかの確
+認です。本当に登録して良いのならこのメールにREPLYしてそのまま送って下
+さい。
+
+
+*** Confirmation (登録の確認) について ***
+
+自動登録の場合、まず最初に
 
 	subscribe あなたの名前 (注意: Email Address ではなくあなたの名前)
 例：
 	subscribe Ken'ichi Fukamachi
 
-のようなリクエストを送ってもらいます。その一度めの登録リクエストに対し
-次のような行(この数字↓はあくまでも例です)を含む
+のようなリクエストを送ってもらっています。その一度めの登録リクエストに
+対し次のようなフレーズ(この数字↓はあくまでも例です)
+
 
 	confirm 84682771 Ken'ichi Fukamachi
 
-このメーリングリストに登録をしてもよいか？を確認するメールを一度返しま
-す。これは「勝手にメーリングリストへ登録されてしまう」等のいたずらへの
-予防策です。
+を含む『このメーリングリストに登録をしてもよいか？』という確認を求める
+メールを一度返します。これは「勝手にメーリングリストへ登録されてしまう」
+等のいたずらへの予防策です。
 
 あなたがこのメーリングリストへの参加確認のメールを受けとったなら、
 
 	confirm パスワード(数字) あなたの名前
 
-”この行だけ" を含むメールをもう一度登録用のアドレス
+このフレーズを含むメールをもう一度登録用のアドレス
 
 	_ML_-ctl@_DOMAIN_
 
@@ -38,3 +45,13 @@ Confirmation (登録の確認) について
 	subscribe Ken'ichi Fukamachi
 
 を送ることからやり直して下さい。
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
