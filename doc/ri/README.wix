@@ -35,6 +35,8 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 	○hml のシンタックスで使う （Default Emulation）
 	○listserv or majordomo インターフェイス
 	   みかけがあたかも listserv のように fml のコマンド群を使う
+	○ moderated モード
+	   一回管理者へフォワードし、管理者が査読しOKならＭＬへ流す
 	○forward でのMLのための仕組み(slocal や vacation)
 	   .forward に仕掛けて slocal や
 	   .forward から fml の機能を使うことで自分のaccountでMLを実行
