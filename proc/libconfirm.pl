@@ -371,7 +371,7 @@ sub ManualRegistConfirm
 ##### Section: CHADDR confirmation
 sub ValidChaddrRequest
 {
-    local($oldaddr, $newaddr) = @_;
+    local(*e, $oldaddr, $newaddr) = @_;
 
     # loop check
     &LoopBackWarn($oldaddr) && (return 0);
@@ -380,6 +380,14 @@ sub ValidChaddrRequest
     # $oldaddr should be a member.
     &MailListMemberP($oldaddr) || do {
 	&Log("$oldaddr is NOT a member");
+	$e{'tmp:reason'} = "Error: $oldaddr is NOT a member";
+	return 0;
+    };
+
+    # $newaddr should be a NOT member.
+    if (&MailListMemberP($newaddr)) {
+	&Log("$newaddr should not be a member");
+	$e{'tmp:reason'} = "Error: $newaddr exists in a member list.";
 	return 0;
     };
 
@@ -402,10 +410,12 @@ sub FML_SYS_ChaddrRequest
 
     if ($buf =~ /($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/) {
 	$e{'mode:in_amctl'} = 1;
-	&ValidChaddrRequest($2, $3) || do {
+	&ValidChaddrRequest(*e, $2, $3) || do {
 	    &Log("invalid chaddr request: $2 => $3");
-	    &Mesg(*e, ">>> $buf");
+	    # &Mesg(*e, ">>> $buf");
 	    &Mesg(*e, "Error: invalid chaddr request");
+	    &Mesg(*e, $e{'tmp:reason'}) if $e{'tmp:reason'};
+	    &MesgChaddrConfirm(*e);
 	    $e{'mode:in_amctl'} = 0;
 	    return $NULL;
 	};
@@ -428,6 +438,7 @@ sub FML_SYS_ChaddrRequest
 	}
 	else {
 	    &Log("ChaddrRequest: invalid buffer syntax");
+	    &MesgChaddrConfirm(*e);
 	}
     }
     else {
@@ -449,6 +460,7 @@ sub FML_SYS_ChaddrConfirm
     else {
 	&Log("invalid chaddr-confirm request");
 	&Mesg(*e, "invalid chaddr-confirm request");
+	&MesgChaddrConfirm(*e, 'chaddr-confirm');
 	return $NULL;
     }
 
@@ -480,6 +492,19 @@ sub FML_SYS_ChaddrConfirm
     }
     else {
 	0;
+    }
+}
+
+
+sub MesgChaddrConfirm
+{
+    local(*e, $mode) = @_;
+
+    if ($mode eq 'chaddr-confirm') {
+    }
+    else {
+	&Mesg(*e, "\tsyntax: chaddr old-address new-address");
+	&Mesg(*e, "\told-address should be a member now");
     }
 }
 
