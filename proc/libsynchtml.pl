@@ -708,7 +708,7 @@ sub ParseMultipart
 	    &Log("image_count ++");
 
 	    # if not defined, try search bin/base64decede.pl
-	    if ($BASE64_DECODE && -x $BASE64_DECODE) {
+	    if ($BASE64_DECODE && &ProgExecuteP($BASE64_DECODE)) {
 		$decode = $BASE64_DECODE;
 	    }
 	    elsif (! $BASE64_DECODE) {
@@ -722,7 +722,7 @@ sub ParseMultipart
 		}
 	    }
 	    # when $BASE64_DECODE is defined, but not found
-	    elsif (! -x $BASE64_DECODE) {
+	    elsif (! &ProgExecuteP($BASE64_DECODE)) {
 		&Log("SyncHtml::\$BASE64_DECODE is not found");
 		$image_count = 0;
 		next;
