@@ -56,8 +56,14 @@ sub Parse
     $LANGUAGE  = $config{'LANGUAGE'};
     @PROC_ARGV = split(/\s+/, $config{'ARGV'});
 
+    # menu
+    $VARIABLE  = $config{'VARIABLE'};
+    $VALUE     = $config{'VALUE'};
+    $PTR       = $config{'PTR'};
+
     # fix
-    $PROC =~ tr/A-Z/a-z/;
+    $PTR       =~ s#^\/{1,}#\/#;
+    $PROC      =~ tr/A-Z/a-z/;
 
     if ($LANGUAGE eq 'Japanese') {
 	push(@INC, $EXEC_DIR);
@@ -206,6 +212,18 @@ sub SecureP
 	&P("ERROR: \$MAIL_ADDR is insecure.");
 	0;
     }
+    elsif ($VARIABLE !~ /^($secure_pat)$/i) {
+	&P("ERROR: VARIABLE is insecure.");
+	0;	
+    }
+    elsif ($VALUE !~ /^($secure_pat)$/i) {
+	&P("ERROR: VALUE is insecure.");
+	0;	
+    }
+    elsif ($PTR !~ /^([0-9A-Z_\/]+)$/i) {
+	&P("ERROR: PTR is insecure.");
+	0;	
+    }
     # 
     # check @PROC_ARGV
     # 
@@ -233,19 +251,16 @@ sub Command
     }
     elsif ($PROC eq 'config') {
 	$PROC = 'html_config';
-	local($ptr) = $config{'PTR'};
-	$ptr =~ s#^\/{1,}#\/#;
 
-	if ($config{'VARIABLE'} && $config{'VALUE'}) {
-	    &Control($ML, "html_config_set", $ptr, 
-		     $config{'VARIABLE'}, $config{'VALUE'});
+	if ($VARIABLE && $VALUE) {
+	    &Control($ML, "html_config_set", $PTR, $VARIABLE, $VALUE);
 	}
 	else {
-	    &Control($ML, $PROC, $ptr);
+	    &Control($ML, $PROC, $PTR);
 	}
     }
     else {
-	&ERROR("unknown PROC=$PROC");
+	&ERROR("unknown PROC");
     }
 }
 
