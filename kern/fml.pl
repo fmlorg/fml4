@@ -1773,11 +1773,11 @@ sub GenInfo
     }
 
     $s .= "If you have any questions or problems,\n";
-    $s .= "   please make a contact with $MAINTAINER\n";
+    $s .= "   please contact $MAINTAINER\n";
 
     if (! $Envelope{'mode:stranger'} && $has_ctladdr_p) { # a member
 	$s .= "       or \n";
-	$s .= "   send a mail with the body \"$message\"(without quotes) to\n";
+	$s .= "   send e-mail with the body \"$message\"(without quotes) to\n";
 	$s .= "      $addr\n";
 	$s .= "      (here is the automatic reply, so more preferable)\n\n";
 	$s .= "e.g. on a Unix Machine\n";
@@ -1797,11 +1797,11 @@ sub GenXMLInfo
     elsif ($Envelope{'mode:stranger'} ||
 	   (!$CONTROL_ADDRESS && 
 	      $PERMIT_POST_FROM =~ /^(anyone|members_only)$/)) {
-	"If you have a question,\n\tplease make a contact with $MAINTAINER".
+	"If you have a question,\n\tplease contact $MAINTAINER".
 	    ";\n\t<mailto:$MAINTAINER>";
     }
     else {
-	"If you have a question, send a mail with the body\n".
+	"If you have a question, send e-mail with the body\n".
 	    "\t\"". $Envelope{'trap:ctk'}.
 		"help\" (without quotes) to the address ". &CtlAddr .
 		$URLInfo;
