@@ -43,7 +43,7 @@ ftp://host/something は libftp.pl へ引き渡します。
 ftpmail server ($FTPMAIL_SERVER を設定していないとエラー) へのリレー
 するインターフェイス（ＯＫ）
 	と
-local spool への ftp interface （未完成）
+local spool への ftp interface 
 
 
 ・fml_local は分割してファイルを送り返す関数をBuilt-IN しました。
