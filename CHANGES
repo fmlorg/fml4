@@ -11,6 +11,7 @@
 		doc/devel/OS_and_Perl (OS デフォルトの perl 情報一覧)
 		doc/devel/ 全体
 	* IPv6 をデフォルトで使う
+	* MIME エンコーディングのエンジンを IM ベースへ
 	* サマータイムの考慮
 	* List- ヘッダを個別にカスタマイズ可能にする
 	* 全受信者数を数えている変数を作る
@@ -19,6 +20,15 @@
 		FreeBSD での CGI 
 		spool2html で module が @INC にない
 		_smtplog の expire が変なのを修正
+
+2001/06/28
+
+   MIME まわり
+
+	すまん IM:: が EXEC_DIR にインストールされないや、修正
+	注意: つまり 20010627-current では mimew.pl を使ってしまう
+
+	デフォルトで module/Japanese/ を @INC に追加 
 
 2001/06/27
 
