@@ -55,7 +55,7 @@ if (! &MailLoopP) {		# TEMPFAIL ERROR may cause a virtual loop.
     &FmlServ(*Envelope);	# GO an actual fmlserv process
 }
 
-&RunHooks;			# run hooks after unlock
+&RunExitHooks;			# run hooks after unlock
 
 if ($Envelope{'mode:fmlserv:disable_notify'}) {
     print STDERR "ignore &Notify\n";
