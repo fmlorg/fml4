@@ -27,4 +27,4 @@ select oid,* from ml
 
 \copy ml to /tmp/sql.dat
 
-drop table ml ;
+-- drop table ml ;
