@@ -77,15 +77,18 @@ sub main'MStat #";
     open(STAT, "ps -u -p $$|"); 
     while (<STAT>) { 
 	next if /USER/;
+	chop;
 
 	@x = split;
 	$p = $x[4] - $px[4];
 	$q = $x[5] - $px[5];
 	$px[4] = $x[4];
 	$px[5] = $x[5];
-	printf STDERR "%4d\t%4d\n", $p, $q;
+	printf STDERR "%1s %4d\t%4d\n", ($touch ? "+" : ""), $p, $q;
     }
     close(STAT); 
+
+    $touch++;
 }
 
 1;
