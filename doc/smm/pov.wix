@@ -967,6 +967,18 @@ maintenance は コマンドのパスやＭＬ全体共通の設定は
 .C	Security 
 .l	security
 
+
+.S	Security 関係の基本思想
+
+基本的に
+
+   1	デフォールトではすべてを認めない
+   2	大丈夫と思われるものを通すようにする
+   3	疑わしきものははじいて判断をＭＬの管理者へあおぐ
+
+という風に構成されています。
+
+
 .S	Security Check Routine
 .l	SecureP
 .l	InSecureP
@@ -1119,8 +1131,32 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 これもカーネルレベルの話。根本的な対策は難しい。
 
 
-.S	Gauntlet
+.S	アドレス表現とRFC822
+.k	アドレス表現
+.k	RFC822
+
+	From: なんか / なんか (なんか)
+
+とかいう怪しげなフィールドを作ると経路の途中でエラーになって、その先に
+配送されないことがあります。 secuirity 関係の話なので詳しいことは説明
+しませんが…
+
+それは(設計思想として)「疑わしきものははじく」ということから来ています。
+sendmail のソースを読めばなぜ弾くのか理解できます。
+
+
+RFC822 は BNF表現でできる理論限界を表現している文書です。確かに使って
+も構わないのですが、表現のクラスをかなり制限したアドレスを使っていない
+と通信できない可能性はあります。
+
+では、どういうものならよいのか？というとすべてを網羅した表現はうまくで
+きませんが…
+
+
+
+.S	Gauntlet Firewall
 .l	Gauntlet
+.l	Firewall
 
 http://www.tis.com/
 http://www.iij.ad.jp/service/FIREWALL.html

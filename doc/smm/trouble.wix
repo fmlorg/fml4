@@ -827,6 +827,13 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 のように permission が表示されるかどうかを確認する。
 ＃ chmod(1) chmod(2) chown(8)
 
+
+.S	Re: でなく Re[2] 等の変換を勝手にやるらしいクライアント
+
+fml-support Count: 01640
+	・ Becky! ver 1.10
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
