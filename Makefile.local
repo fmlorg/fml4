@@ -31,6 +31,11 @@ curtest:
 	  echo " test of new FML snapshot."; echo ""; echo "--fukachan")|\
 	  Mail curtest@fml.org
 
+test:
+	( echo -n "[`date`]"; \
+	  echo " test of new FML snapshot."; echo ""; echo "--fukachan")|\
+	  Mail test@fml.org
+
 makefml:
 	@ env ${EXPORT_ENV} sh distrib/bin/reset-makefml
 
