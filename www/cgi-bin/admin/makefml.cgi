@@ -75,7 +75,7 @@ sub Control
     local($ml, $command, @argv) = @_;
     local($tmpbuf) = "/tmp/makefml.ctlbuf.$$";
 
-    if (open(CTL, "|$MAKE_FML -i stdin > $tmpbuf 2>&1")) {
+    if (open(CTL, "|$MAKE_FML -E HTTPD -i stdin > $tmpbuf 2>&1")) {
 	select(CTL); $| = 1; select(STDOUT);
 
 	print CTL $command, "\t", $ml, "\t";
@@ -136,8 +136,9 @@ sub Command
 	&P("&Control($ML, $PROC, $MAIL_ADDR);") if $debug;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
-    elsif ($PROC eq 'new') {
+    elsif ($PROC eq 'newml') {
 	&P("&Control($ML, $PROC);") if $debug;
+	&P("&Control($ML, $PROC);");
 	&Control($ML, $PROC);
     }
     elsif ($PROC eq 'config') {
