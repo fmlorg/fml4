@@ -10,6 +10,8 @@
 .include spool.wix
 .include misc.wix
 .include movement.wix
+.include summary.wix
+ 
 
 .P	レンタルサーバというかISPのサービスというか…
 .include isp_specific.wix
