@@ -2,25 +2,29 @@
 .l	clo
 .k	コマンドライン オプション
 
-.S	コマンドラインについて
+.S	コマンドライン オプションについて
 
 コマンドラインといっても、/etc/aliases から呼ばれるinclude file の
+
 	"|/usr/libexec/fml/fml.pl $DIR $LIBDIR -option" 
+
 のオプションの話のことです。
-デバッグの時に shell 上で手動実行する時でも同様です。
+当然デバッグの時に shell 上で手動実行する時でも同様に使えます。
 
 makefml は config.ph の中の変数を書き換えるので、通常設定をいじる時は
 config.ph の中にすべての設定を書くようにして下さい。コマンドラインはデ
 バッグ以外の目的では使わない方が無難です。
 
-コマンドラインは使い方によってはとっても便利ですが、よくわからない場合
-は使わないで下さい。
+コマンドラインは使い方(e.g. デバッグ)によってはとっても便利ですが、
+どういうものかよくわからない人は使わないで下さい。
 
 			＊＊＊注意＊＊＊
+
 なお makefml で作る include-ctl というファイル中には --ctladdr という
 オプションがついていますが、これは外さないで下さい。
 
-.S	コマンドライン シンタックス
+
+.S	コマンドラインのシンタックス
 
 SYNOPSIS:
    fml.pl   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
@@ -28,12 +32,16 @@ SYNOPSIS:
 	fml.pl msend.pl sid.pl は同じ引数のとりかたをします。
 	注意：fml_local.pl は MH を意識してるので異なります。
 
-オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
-れ以外は Directoryの変数 だと仮定します。順番は関係ありません
-Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
-$LIBDIR にセットされます。
+オプションと引数が共存する時は
 
-DESCRIPTION
+	引数が -ではじまるならオプション
+	それ以外は directory の変数
+
+だと仮定します。順番は関係ありません。directory に関しては その 
+directory が存在すれば引数の順に $DIR、$LIBDIR にセットされます。
+
+
+[DESCRIPTION]
 	-d		デバッグモード
 			（ＭＬへの配送以外すべてを実行可能）
 
@@ -74,24 +82,20 @@ DESCRIPTION
 	--MAINTAINER=fukachan@sapporo.iij.ad.jp
 
 $MAINTAINER の値を fukachan@sapporo.iij.ad.jp で Overwrite します。
-config.ph の後評価されるので、ロングラインオプションを使って ある値だ
-けを変更することが可能です。
+config.ph の後評価されるので、ロングラインオプションを使ってある値だけ
+を変更することが可能です。
 
 
 .S	設定ファイルとコマンドラインオプション
 
-各ＭＬの場所に config.ph を置く代わりにfmlのライブラリが置いてある場所
-にocnfig.ph もしくは sitedef.ph をひとつだけ置いてそれだけを保守するの
-も便利です。この場合は
+各ＭＬの場所に config.ph を置く代わりに FML のライブラリが置いてある場
+所に ocnfig.ph もしくは sitedef.ph をひとつだけ置いてそれだけを保守す
+るのも便利です。この場合評価される順番は次のようになります。
+普通の program と同じようにコマンドラインが一番最後に評価されます。
 
    1	(もしあれば) 共用directory の config.ph  を loading
    2	(もしあれば) 共用directory の sitedef.ph を loading
    3	その後コマンドラインオプションを評価
-
-なので、例えばコマンドの設定パス ($TAR $UUENCODE) 等はマシンが同じなら
-一回設定すれば後は同じなので、コマンドラインオプションでＭＬ名を決める
-とかすると設定が一瞬で終るという応用もありえますね:-)
-＃これをやると makefml でＭＬ名等の config はできない点に注意↑。
 
 
 .S	簡易モード設定 (ロングラインオプション) --\S+
@@ -102,18 +106,16 @@ config.ph の後評価されるので、ロングラインオプションを使って ある値だ
 
 		--mode
 
-の形で 簡単に作動モードを変更することが出来ます。細かい変更をするため
-には config.ph をいじるべきですが、config.ph に慣れていない人や、お手
-軽に変更する、２つ目以降の簡易ＭＬ作成 には非常に便利です。
-
-同じことを config.ph でする時は
+の形で 簡単に作動モードを変更することが出来ます。同じことを config.ph 
+でする時は
 
 		--mode
 は
 		&DEFINE_MODE('mode');
 
 になります。なお、コマンドラインの --mode は config.ph で指定する 
-$Envelope{"mode:$mode"} と同じ意味になります。
+$Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外は 
+&DEFINE_MODE('mode'); を使って一箇所で集中管理するのが良いでしょう。
 
 例:
 		fml.pl --html
@@ -162,24 +164,24 @@ listname というアドレスでの再配送だけに専念するのが良いでしょう。例え
 
 
 
-さて以下では理屈を説明します。config.ph はすべての場合に常に読み込まれ
-るファイルです。そのため makefml が作るコマンドサーバ用の include-ctl 
-というファイルには "--ctladdr" というコマンドラインオプションがついて
-います。
+さてさて --ctladdr ですが、次のような理由で使われています。
 
-もしこの ctladdr 指定がないと配送モード指定 
+   config.ph はすべての場合に常に読み込まれるファイルです。そのため 
+   makefml が作るコマンドサーバ用の include-ctl というファイルには 
+   "--ctladdr" というコマンドラインオプションがついています。もしこの 
+   ctladdr 指定がないと配送モード指定
 
 	&DEFINE_MODE('post=anyone'); 
 
-により listname も listname-ctl も配送専用になってしまいます。そのため
+   により listname も listname-ctl も配送専用になってしまいます。そのため
 
 		--ctladdr 
 
-で listname-ctl 宛にきたメールの場合起動する fml.pl はコマンド処理に専
-念するという宣言を ctladdr はしているわけです。
+   で listname-ctl 宛にきたメールの場合起動する fml.pl はコマンド処理
+   に専念するという宣言を ctladdr はしているわけです。
 
 
-.S	コマンドラインの一覧
+.S	コマンドラインオプションの一覧
 .xref	command-line-option-index
 
 .# $Id$
