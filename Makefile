@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: Makefile,v 2.99 2001/07/22 02:40:06 fukachan Exp $
+# $FML: Makefile,v 2.100 2001/07/23 13:48:28 fukachan Exp $
 
 ### themost important variable ! ###
 FML  = ${.CURDIR}
@@ -131,12 +131,12 @@ $(WORK_DOC_DIR)/INFO.en: $(COMPILE_DIR)/INFO.src
 init_dir:
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 
-plaindoc: init_dir INFO doc/smm/op.wix
+plaindoc: init_dir INFO
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild TUTORIAL_LANGUAGE=Japanese
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild TUTORIAL_LANGUAGE=English
 
-htmldoc: init_dir INFO doc/smm/op.wix
+htmldoc: init_dir INFO
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |${PERL} -nle unlink
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
