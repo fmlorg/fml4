@@ -10,6 +10,7 @@
 .include howto.wix
 .include internals.wix
 .include relay.wix
+.include QandA.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -196,3 +196,10 @@ Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
 FML cuts off Return-Receipt-To:! If with it, e.g. Cc:Mail causes an
 mail loop.
 .fi
+
+
+.S	i-mode ではだめ？
+
+どうも、ふつうのメールソフトと挙動が違うものがあるようで、そういった 
+i-mode 端末ではＭＬのメールを受けるのはお薦めできないようです。
+そういった機種はどうしようもなくベンダに対応してもらうしかありません。
