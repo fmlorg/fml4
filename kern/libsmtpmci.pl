@@ -1,33 +1,38 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
 # SMTP Pararell Delivery Library
 
+
+use vars qw($debug $debug_smtp);
+use vars qw(@HOSTS); # list of smtp servers  
+
+
 sub SmtpDLAMCIDeliver
 {
+    use vars qw(%e @rcpt @smtp @files);
     local(*e, *rcpt, *smtp, *files) = @_;
-    local($i, $error);
-
-    # set current modulus 0, 1, ... , ($MCI_SMTP_HOSTS - 1)
+    my ($i, $error);
     for ($i = 0; $i < $MCI_SMTP_HOSTS; $i++) {
-	$CurModulus = ($i + 1) % $MCI_SMTP_HOSTS; 
-	&Debug("\n---SmtpDLAMCIDeliver::CurModulus=$CurModulus") if $debug_mci;
 	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
     }
 }
 
+
 sub SmtpMCIDeliver
 {
+    use vars qw(%e @rcpt @smtp @files);
     local(*e, *rcpt, *smtp, *files) = @_;
-    my ($nh, $nm, $i);
+    my ($nh, $nm, $i, $j);
+    my (%cache);
 
     if ($e{'mode:__deliver'}) {
 	return &SmtpDLAMCIDeliver(*e, *rcpt, *smtp, *files);
@@ -50,8 +55,9 @@ sub SmtpMCIDeliver
 	}
 
 	if (@rcpt) {
-	    &Log("SmtpMCIDeliver::HOST->$HOSTS[0]") if $debug_mci;
-	    $error = &SmtpIO(*e, *rcpt, *smtp, *files);
+	    &Log("SmtpMCIDeliver::HOST->$HOSTS[0]") if $debug_smtp;
+	    my $error = &SmtpIO(*e, *rcpt, *smtp, *files);
+
 	    # If all hosts are down, anyway try $HOST;
 	    if ($error) {
 		push(@HOSTS, $HOST);
