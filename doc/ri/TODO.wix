@@ -442,6 +442,10 @@ clean up distribution generator
 
 I depends on NetBSD (bsd)make.
 
+.S	cf/MANIFEST.obsolete
+
+obsolete list of variables
+
 
 .C	CGI
 .l	CGI
