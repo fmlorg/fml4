@@ -141,6 +141,8 @@ sub IdCheck
     local($time, $a, $id, $name)  = @r;
     local($m);
 
+    &Debug("Confirm::IdCheck(addr=$addr) {\n$buffer\n}") if $debug;
+
     # reset anyway;
     if ($buffer =~ /$CONFIRMATION_RESET_KEYWORD/) {
 	&Log("confirm[confirm] reset request");
@@ -174,15 +176,17 @@ sub IdCheck
     }
 }
 
+# the check order is reversed to check all buffer lines.
+# 1 confirm 2 subscribe
 sub BufferSyntaxType
 {
     local(*e, $buffer) = @_;
 
-    if ($buffer =~ /$CONFIRMATION_SUBSCRIBE/) {
-	return 'subscribe';
-    }
-    elsif ($buffer =~ /$CONFIRMATION_KEYWORD/) {
+    if ($buffer =~ /$CONFIRMATION_KEYWORD/) {
 	return 'confirm';
+    }
+    elsif ($buffer =~ /$CONFIRMATION_SUBSCRIBE/) {
+	return 'subscribe';
     }
     else {
 	return '';
