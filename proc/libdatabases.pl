@@ -22,6 +22,9 @@ sub DataBaseMIBPrapare
     # split $MAIL_LIST
     ($mib->{'ML_ACCT'}, $mib->{'ML_DOMAIN'}) = split(/\@/, $MAIL_LIST);
 
+    # cached file which is the dumped data from database server.
+    $mib->{'CACHED_FILE'}     = $ACTIVE_LIST.".dbcache";
+
     # custom
     $mib->{'method'} = 'LDAP';
 

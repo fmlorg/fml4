@@ -84,11 +84,23 @@ sub GetActiveList
     $max = $entry->size("maildrop");
     &main::Log("maildrop max = $max");
 
-    for my $i (0 .. $max) {
-	if ($entry->{maildrop}[$i]) {
-	    print $entry->{maildrop}[$i];
-	    print "\n";
+    my ($orgf) = $mib->{'CACHED_FILE'};
+    my ($newf) = $mib->{'CACHED_FILE'}.".new";
+
+    if (open(OUT, "> $newf")) {
+	for my $i (0 .. $max) {
+	    if ($entry->{maildrop}[$i]) {
+		print OUT $entry->{maildrop}[$i], "\n";
+	    }
 	}
+	close(OUT);
+
+	if (! rename($newf, $orgf)) {
+	    &Log("ERROR: LDAP: cannot rename $newf $orgf");
+	}
+    }
+    else {
+	&Log("ERROR: LDAP: cannot open $newf");
     }
 }
 
