@@ -1,5 +1,3 @@
-.include "$(FML)/distrib/mk/fml.prog.mk"
-
 .if !defined(FML)
 FML     = $(PWD)
 .endif
@@ -7,6 +5,8 @@ FML     = $(PWD)
 .if !defined(DESTDIR)
 DESTDIR = /var/tmp/fml
 .endif
+
+.include "$(FML)/distrib/mk/fml.prog.mk"
 
 
 ### generators to export ###
@@ -31,7 +31,7 @@ WORK_HTML_DIR   = ${VAR_DIR}/html
 WORK_DRAFTS_DIR = ${WORK_DOC_DIR}/drafts
 
 
-__EXPORTS_DIR__ = COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
+__EXPORTS_DIR__ = FML COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
 		DIST_DOC_BIN FTP_DIR SNAPSHOT_DIR TMP_DIR \
 		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR WORK_HTML_DIR WWW_DIR
 
