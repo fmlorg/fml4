@@ -71,6 +71,16 @@ sub _GenLDAPTemplate
 }
 
 
+sub _GenSQLTemplate
+{
+    my ($mib) = @_;
+
+    $mib->{'host'}         = $SQL_SERVER_HOST;
+    $mib->{'user'}         = $SQL_SERVER_USER;
+    $mib->{'password'}     = $SQL_SERVER_PASSWORD;
+}
+
+
 package DataBases;
 
 
