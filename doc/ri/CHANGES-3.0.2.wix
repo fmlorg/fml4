@@ -1,0 +1,32 @@
+.HTML_PRE
+	CHANGES from 3.0.1 to 3.0.2
+
+				深町 賢一
+=E
+				Ken'ichi Fukamachi
+
+.if LANG == JAPANESE
+3.0 stable branch の 3.0.1 〜 3.0.2 の間の CHANGES についてのみ記して
+います。3.0, 3.0.1 の CHANGES は http://www.fml.org/fml/ からたどって
+ください。
+.fi
+.if LANG == ENGLISH
+This document logs CHANGES in fml stable branch.
+See http://www.fml.org/ for CHANGES in fml-current. 
+.fi
+
+
+2000/03/26
+
+	3.0.1 release
+
+$Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.~HTML_PRE
