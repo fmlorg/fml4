@@ -28,6 +28,7 @@
 </CENTER>
 </H1>
 
+
 #ifdef JAPANESE
 <P><A HREF="index-e.html">[English]</A> is here. 
 <A HREF="menu.html" TARGET="_top">Japenese FRAME version</A> is here.
@@ -37,7 +38,7 @@
 <A HREF="Japanese/tutorial.html">[チュートリアル]</A>
 <A HREF="download.html">[ダウンロード]</A>
 <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>
-<A HREF="anoncvs.ja.html">[annymous CVS]</A>
+<A HREF="anoncvs.ja.html">[anoncvs]</A>
 <A HREF="Japanese/troubleshoot/index.html">[トラブルシュート]</A>
 <BR>
 チュートリアルの 
@@ -57,34 +58,16 @@ Tutorials and Guides for fml beginners
 #ifdef JAPANESE
 <P>最近のトピックス
 <UL>
-   <LI>
-   <A HREF="UPGRADE-4.0/1.html">3.0I の PGP まわりは互換性がありません</A>
+   <LI><A HREF="ftp://ftp.fml.org/pub/fml/">
+	ftp.fml.org 正式にオープンです
+	</A>
 
    <LI>
    データベースへのアクセス
-   <A HREF="Japanese/LDAP/index.html">[LDAP の例]</A>
-   <A HREF="Japanese/RDBMS/index.html">[ PostgreSQL と MySQL の例]</A>
-   <BR>
+   <A HREF="Japanese/LDAP/index.html">[LDAP]</A>
+   <A HREF="Japanese/RDBMS/index.html">[PostgreSQL/MySQL]</A>
    <A HREF="Japanese/examples/DATABASE_TOY_MODEL.txt">
-   見本となるおもちゃのモデル
-   </A>
-
-   <LI>
-   <A HREF="Japanese/examples/virus_check.ph">
-   virus_check.ph (virus check 関係をまとめた例)
-   </A>
-
-   <LI>
-   <A HREF="good_bye_perl4.html">
-   fml-current は perl 5 only
-   </A>
-   <A HREF="devel/OS_and_Perl.txt">
-   [各 OS default perl version リスト]
-   </A>
-
-   <LI>
-   <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/">
-   3.0.1 release
+   [玩具モデル]
    </A>
 
    <LI>
@@ -152,29 +135,64 @@ Please check out ftp and get latest one.
 
 <!-- =================================================================== -->
 #ifdef JAPANESE
-<PRE>
 <P>ドキュメント
-        <A HREF="WHATS_NEW/index.html">What's new</A>        <A HREF="download.html">ダウンロード</A>   
-	<A HREF="Japanese/tutorial.html">チュートリアル/ガイド</A>  <A HREF="advisories/index.html">FML アドバイザリィ</A>   
-        <A HREF="FEATURES/index.html">特徴</A>               <A HREF="#fml">パッケージ附属ドキュメント類</A>
-        <A HREF="mailinglist.html">Mailing List</A>      <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>   
-        <A HREF="TODO/index.html">やりたいと思うこと</A>     <A HREF="WISH_LIST/index.html">WISHLIST(助けが欲しいもの)</A>
-        <A HREF="history.html">History</A>           <A HREF="people.html">People</A>   
-        <A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/fml/sources/stable/src/doc/html/index-j.html">fml-stable/doc/</A>
+<TABLE>
+<TR>
+	<TD><A HREF="WHATS_NEW/index.html">What's new</A></TD>
+	<TD><A HREF="FEATURES/index.html">特徴</A></TD>
 
+<TR>
+	<TD><A HREF="download.html">ダウンロード</A></TD>
+	<TD><A HREF="Japanese/tutorial.html">チュートリアル</A></TD>
+
+<TR>
+	<TD><A HREF="#fml">配布ドキュメント(current)</A></TD>
+	<TD><A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/fml/sources/stable/src/doc/html/index-j.html"> 配布ドキュメント(stable) </A></TD>
+	<TD><A HREF="advisories/index.html">FML アドバイザリィ</A></TD>
+
+<TR>
+	<TD><A HREF="mailinglist.html">Mailing List</A></TD>
+	<TD><A HREF="TODO/index.html">TODO</A></TD>
+	<TD><A HREF="WISH_LIST/index.html">WISHLIST</A></TD>
+
+<TR>
+	<TD><A HREF="history.html">History</A></TD>
+	<TD><A HREF="people.html">People</A></TD>
+	<TD><A HREF="pictures/index.html">fmlのマスコットキャラクタ</A></TD>
+
+<TR>
+</TABLE>
 <P>config.ph で設定可能な変数名
-        <A HREF="variable-list.ja.html">[一覧</A> <A HREF="sorted-variable-list.ja.html">|アルファベット順 ]</A>
-        <A HREF="Japanese/internals/index.html#functions">HOOKに便利かもしれない関数たち</A>
+<TABLE>
+        <TD><A HREF="variable-list.ja.html">[一覧]</A>
+	<TD><A HREF="sorted-variable-list.ja.html">[アルファベット順 ]</A>
+        <TD><A HREF="Japanese/internals/index.html#functions">HOOKに便利かもしれない関数</A>
+</TABLE>
 
-<P>アップグレード
-        <A HREF="3.0-new-features.html">3.0 highlights (2.2.1と3.0の主な違い)</A>   
-        <A HREF="UPGRADE-3.0/index.html">3.0へ移行する際の注意 (*** 重要 ***)</A>   
-        <A HREF="CHANGES-3.0.2/index.html">fml-stable CHANGES (from 3.0.1 to 3.0.2)</A>   
-        <A HREF="CHANGES-3.0.1/index.html">3.0.1 CHANGES (3.0 to 3.0.1)</A>   
-</PRE>
+<P> アップグレード
+<UL>
+        <LI>
+	<A HREF="3.0-new-features.html">
+	3.0 highlights (2.2.1と3.0の主な違い)
+	</A>
+
+        <LI>
+	<A HREF="UPGRADE-3.0/index.html">
+	3.0へ移行する際の注意 (*** 重要 ***)
+	</A>
+
+        <LI>
+	<A HREF="CHANGES-3.0.2/index.html">
+	fml-stable CHANGES (from 3.0.1 to 3.0.2)
+	</A>
+
+        <LI>
+	<A HREF="CHANGES-3.0.1/index.html">
+	3.0.1 CHANGES (3.0 to 3.0.1)
+	</A>
+</UL>
 #else
 <PRE>
-
         <A HREF="index.html">[Japanese] is here.</A>
 
         <A HREF="3.0-new-features-e.html">3.0 feature highlights</A>
@@ -184,7 +202,7 @@ Please check out ftp and get latest one.
 
         <A HREF="WHATS_NEW-e/index.html">What's new</A>     <A HREF="download-e.html">download</A>
         <A HREF="#fml">fml</A>            <A HREF="FEATURES-e/index.html">Features</A>
-        <A HREF="mailinglist-e.html">Mailing List</A> 
+        <A HREF="mailinglist-e.html">Mailing List</A>
 
         <A HREF="TODO-e/index.html">TODO</A>           <A HREF="roadmap.html">roadmap and schedule</A>
         <A HREF="examples/index-e.html">fml easy tutorial</A>
@@ -212,7 +230,7 @@ Please check out ftp and get latest one.
 #ifdef DIST
 	<A HREF="http://www.fml.org/fml/">
 	FML HOME PAGE (http://www.fml.org/fml/);
-#ifdef JAPANESE 
+#ifdef JAPANESE
 	[検索] FMLドキュメントの検索ができます。
 #else
 	[Search] over FML documents
@@ -228,7 +246,7 @@ Please check out ftp and get latest one.
 #ifdef JAPANESE
 fml-current 最新版のパッケージ附属ドキュメント(HTML版)より…
 #else
-Information and HTML version documents in the fml source distribution 
+Information and HTML version documents in the fml source distribution
 #endif
 </H3>
 <UL>
@@ -291,7 +309,7 @@ Information and HTML version documents in the fml source distribution
 	(installation, usage for makefml ...)
 	<BR>
 	<A HREF="INSTALL_CGI-e/index.html">
-	CGI INSTALLATION GUIDE 
+	CGI INSTALLATION GUIDE
 	</A>
 #endif
 
@@ -327,7 +345,7 @@ Information and HTML version documents in the fml source distribution
 	<A HREF="INSTALL_on_MacOS_X_Server/index.html">[Mac OS X Server]</A>
 #else
 	<A HREF="INSTALL-e/index.html">[UNIX]</A>
-   
+
 	<A HREF="INSTALL_on_NT4-e/index.html">[NT4]</A>
 #endif
 
@@ -393,7 +411,7 @@ http://www.sapporo.iij.ad.jp/staff/fukachan/
 
 <PRE>
 Copyright (C) 1993-2000 Ken'ichi Fukamachi
-         All rights reserved. 
+         All rights reserved.
 
 $Id$
 </PRE>
