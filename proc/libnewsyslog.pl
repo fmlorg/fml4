@@ -16,7 +16,7 @@ sub NewSyslog
 
     foreach $f (@f) {
 	next if $f =~ /^\s*$/;
-	-f $f || (&Log("newsyslog: cannot find $f, skip"), next);
+	-f $f || ($f =~ s/$DIR/\$DIR/, &Log("newsyslog: cannot find $f, skip"), next);
 
 	&Debug("\nCall NewSyslog::Fml($f)") if $debug;
 	&NewSyslog'Fml($f);#';
@@ -30,38 +30,33 @@ package NewSyslog;
 
 $NEWSYSLOG_MAX = $main'NEWSYSLOG_MAX;#';
 $TMP_DIR       = $main'TMP_DIR;#';
+$FP_TMP_DIR    = $main'FP_TMP_DIR;#';
 $debug         = $main'debug;#';
 $DIR           = $main'DIR;#';
 $VARLOG_DIR    = $main'VARLOG_DIR;#';
+$FP_VARLOG_DIR = $main'FP_VARLOG_DIR;#';
 
 sub Fml
 {
     local($org) = @_;
     local($original) = $org;
-    local($in_varlog);
+    local($orgd, $orgf);
 
     &Debug("Try NewSyslog::Fml $org") if $debug;
-    
+
     # Fix $org for FML *.bak files
-    ($org =~ /$VARLOG_DIR/) && $in_varlog++;
-    ($org =~ s/\.bak$//) && ($org !~ /$VARLOG_DIR/) && ($org = "./$VARLOG_DIR/$org");
-    $org =~ s/$DIR/./g;
-    $org =~ s/$VARLOG_DIR/./g if $in_varlog;
-    $org =~ s#//#/#g;
-    $org =~ s#\./\./#./#g;
-    &Debug("                -> $org") if $debug;
-
-    # First Time EXCEPTION;
-    &Debug("rename($original, $org.0)") if $debug;
-
-    # link ? unlink : rename; 
-    # IF NOT, file -> var/log/file.0 IN var/log(ERROR)
-    if (-l $original) {
-	unlink $original;
+    $org =~ s/.bak$//;
+    if ($org =~ m#(.*)/(\S+)# ) {
+	$orgd = $1,  $orgf = $2;
     }
     else {
-	rename($original, "$org.0");
+	$orgd = ".", $orgf = $org;
     }
+    
+    $org = "$VARLOG_DIR/$orgf";	# should be both org and original full-path?
+    
+    # First Time EXCEPTION;
+    &Debug("rename($original, $org.0)") if $debug;
 
     # $org = var/log/file
     # turn over var/log/file(not var/log/file.bak)
@@ -69,29 +64,20 @@ sub Fml
 
     ### MUST BE "NO original, file.0 EXISTS" (file = $org)
     # O.K. after turn over var/log/file
-    # ln -s var/log/file.0 var/log/file.bak 
-    # firstly, check "ln -s" O.K.?
-    # NOTICE: symlink(ORGFILE,NEWFILE)
-    $symlink_exists = (eval 'symlink("", "");', $@ eq "");
+    # mv var/log/file.bak var/log/file.0
+    $org0 = "$org.0";
 
-    $org = "$org.0";
-    -f $org || &Touch($org);
+    -f $org0 || &Touch($org0);
 
-    # O.K. ln -s file file.0
-    if ($symlink_exists) {
-	symlink($org, $original) && $ok++;
-	&Log("ln -s $org $original".($ok ? "OK" : ". Fails!"));
-    }
-    else {
-	&Log("unlink $org, log -> $target");
-    }
+    &Debug("NewSyslog::Fml::rename($original, $org0)") if $debug;
+    rename($original, $org0) || &Log("Fail rename($original, $org0)");
 }
 
 
 # Turning Over 
 # rm file.4
 # file.3 -> file.4 ...
-# file(original) -> file.0
+# DO NOT "file(original) -> file.0"
 # so must be 
 # NO original, file.0 EXISTS
 # return NONE
@@ -117,7 +103,16 @@ sub TurnOver
 	-f $old && rename($old, $new);
     } while ($max-- > 0);
 
-    # var/log/file(present log file) -> var/log/file.0
+}
+
+
+# turn over log.msgid (this is exception for file without .0)
+sub TurnOverW0
+{
+    local($file) = @_;
+
+    &TurnOver($file);
+
     if (-f $file) {
 	&Debug("rename($file, $file.0)") if $debug;
 	rename($file, "$file.0");
@@ -129,9 +124,9 @@ sub TurnOver
 # DEBUG in NewSyslog NAME SPACE;
 if ($0 eq __FILE__) {
     $DIR        =  $ENV{'PWD'};
-    $TMP_DIR    = $TMP_DIR    || "./tmp" ; # backward compatible
-    $VAR_DIR    = $VAR_DIR    || "$DIR/var"; # LOG is /var/log (4.4BSD)
-    $VARLOG_DIR = $VARLOG_DIR || "$DIR/var/log"; # absolute for ftpmail
+    $TMP_DIR    = $TMP_DIR    || "tmp" ; # backward compatible
+    $VAR_DIR    = $VAR_DIR    || "var"; # LOG is /var/log (4.4BSD)
+    $VARLOG_DIR = $VARLOG_DIR || "var/log"; # absolute for ftpmail
 
     $debug = 1;
 

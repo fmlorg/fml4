@@ -15,7 +15,7 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 # return the answer
 sub WhoisSearch
 {
-    local(*r, *pat, *host);
+    local($r, @r, %r, $pat, $host);
     local(*e, *Fld) = @_;
 
     shift @Fld; shift @Fld;
@@ -72,7 +72,7 @@ sub WhoisList
 sub Ipc2Whois
 {
     local(*e, *Fld, *host, *req) = @_;
-    local(@ipc, *r);
+    local(@ipc, $r, @r, %r);
 
     # IPC
     $ipc{'host'}   = $host || $DEFAULT_WHOIS_SERVER || 'localhost';
@@ -114,6 +114,7 @@ $Counter   = 0;
 
 @ImportProc = ('Debug', 'Log', 'DecodeMimeStrings', LogWEnv);
 
+
 sub Import
 { 
     %Whois'Envelope  = %main'Envelope;
@@ -123,8 +124,8 @@ sub Import
     for (@Import) { eval("\$Whois'$_ = \$main'$_;");}
     for (@ImportProc) { eval("sub Whois'$_ { &main'$_(\@_);};");}
 
-    $DEFAULT_WHOIS_SERVER = $DEFAULT_WHOIS_SERVER || 'localshot';
-    $WHOIS_DB             = $WHOIS_DB             || "$VARLOG_DIR/whoisdb";
+    $DEFAULT_WHOIS_SERVER = $DEFAULT_WHOIS_SERVER || 'localhost';
+    $WHOIS_DB             = $WHOIS_DB             || "$FP_VARLOG_DIR/whoisdb";
     $WHOIS_HELP_FILE      = $WHOIS_HELP_FILE      || "$DIR/etc/help.whois";
 }
 
@@ -133,11 +134,25 @@ sub Write { &Append(@_);}
 sub Append
 {
     local(*e) = @_;
+    local($s) = $e{'Whois:Body'} || $e{'Body'};
+
+    &BackupDB || do {
+	&Log("cannot backup \$WHOIS_DB, stop", return 0);
+	$e{'message'} .= "Cannot reset Whois Database of $ML_FN\n\n";
+    };
 
     # open $WHOIS_DB
     open(F, ">> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB"), return 0);
+    select(F); $| = 1; select(STDOUT);
+
     print F "$e{'h:From:'}\n\n";
-    print F ($e{'Whois:Body'} || $e{'Body'});
+
+    # ^. -> ..
+    foreach (split(/\n/, $s)) {
+	s/^\./\.\./;
+	print F "$_\n";
+    }
+
     print F $Separator;     # ATTENTION! $/ = $Separator = ".\n\n";
     close(F);
 
@@ -149,13 +164,15 @@ sub Help
 {
     local($r);
     open(F, $WHOIS_HELP_FILE) && ($r = <F>) && close(F);
-    $r || "whois -h host pattern\n";
+    $r || "whois [-h host] pattern\n";
 }
 
 
 sub Search
 {
     local(*pat, *r) = @_;
+    local($from, $match_entry);
+    $match_entry = 0;
 
     # open $WHOIS_DB
     open(F, $WHOIS_DB) || do {
@@ -170,32 +187,47 @@ sub Search
 
     # CODE IS NOT OPTIMIZED for security reasons
     while (<F>) {
-	next     if /^\s*$/;
+	next if /^\s*$/;
 
-	if (/$pat/) {
+	($from) = split(/\n\n/, $_);
+
+	if (/$pat/) {# ($from =~ /$pat/) matches only Address space
+	    $match_entry++;
+
 	    /(\S+\@\S+)/ && ($addr = $1);
 	    $addr        || /^(.*)\n/ && ($addr = $1);
 	    s/$Separator$//g;
 
-	    $r{$addr} = $_;
+	    undef $r{$addr};	# delete if matched entry exists;
+	    foreach (split(/\n/, $_)) {
+		s/^\.\./\./;
+		$r{$addr} .= "$_\n";
+	    }
+
 	} 
     }
     close(F);
 
-    while (($k, $v) = each %r) { 
-	$Counter++;
-	$r .= ('*' x 30)."\nMatched Entry[$Counter]> $k\n\n$v\n";
-    }
-
     # SEPARATOR RESET
     $/ = $sep_org;
+
+    if ($match_entry == 0) {
+	$r .= "\n\tNO MATCHED ENTRY\n";	
+	&Log("Whois::Search no matches /$pat/");
+    }
+    else {
+	while (($k, $v) = each %r) { 
+	    $Counter++;
+	    $r .= ('*' x 30)."\nMatched Entry[$Counter]> $k\n\n$v\n";
+	}
+	&Log("Whois::Search $Counter matched for /$pat/");
+    }
 }
 
 
-sub List
+sub AllocAllEntry
 {
-    local(*r);
-    local(*e) = @_;
+    local(*e, *r) = @_;
 
     # SEPARATOR CHANGE;
     local($sep_org) = $/;
@@ -208,7 +240,9 @@ sub List
     while (<F>) {
 	next if /^\s*$/;
 
-	/(\S+\@\S+)/ && ($addr = $1);
+	($from) = split(/\n\n/, $_);
+	($from =~ /(\S+\@\S+)/) && ($addr = $1);
+
 	$addr        || /^(.*)\n/ && ($addr = $1);
 	s/$Separator$//g;
 	$r{$addr} = $_;
@@ -217,9 +251,56 @@ sub List
 
     # SEPARATOR RESET
     $/ = $sep_org;
+}
+
+
+sub List
+{
+    local($r, @r, %r);
+    local(*e) = @_;
+
+    &AllocAllEntry(*e, *r);
 
     $e{'message'} .= "Entry List submitted to Whois Database of $ML_FN\n\n";
     foreach (keys %r) { $e{'message'} .= "$_\n" if $_;}
+}
+
+
+sub BackupDB
+{
+    local($r, @r, %r);
+    local(*e) = @_;
+
+    &AllocAllEntry(*e, *r);
+
+    $Now = $main'Now;#';
+    
+    # open $WHOIS_DB
+    open(F, $WHOIS_DB) || (&Log("Cannot open $WHOIS_DB"), return 0);
+    select(F); $| = 1; select(STDOUT);
+
+    # backup
+    open(BAK, ">> $WHOIS_DB.bak") || (&Log("Cannot open $WHOIS_DB.bak"), return 0);
+    select(BAK); $| = 1; select(STDOUT);
+    print BAK "----- Backup on $Now -----\n";
+    while (<F>) {
+	print BAK $_;
+    }
+    close(BAK);
+
+    # set the present entries
+    open(NEW, "> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB.bak"), return 0);
+    select(NEW); $| = 1; select(STDOUT);
+
+    while (($k, $v) = each %r) { 
+	print NEW $v;
+	print NEW $Separator;
+    }
+
+    close(NEW);
+ 
+    &Log("Whois::BackupDB succeeds");
+    1;
 }
 
 

@@ -242,7 +242,11 @@ sub ProcAdminSetDeliverMode
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
 
     if ($proc =~ /^(ON|OFF|SKIP|NOSKIP|MATOME)$/oi) {
-	@Fld = ('#', $proc, $opt[1]) if $proc =~ /MATOME/oi;
+	# @Fld = ('#', $proc, $opt[1]) if $proc =~ /MATOME/oi;
+	# FIX: (96/02/08) by kishiba@ipc.hiroshima-u.ac.jp
+	@Fld = ('#', $proc, $opt[0]) if $proc =~ /MATOME/oi;
+	$misc = $opt[1]  if $proc =~ /MATOME/oi;
+
 	&Debug("ProcSetDeliveryMode($proc, (@Fld), *e, $misc);") if $debug;
 	&ProcSetDeliveryMode($proc, *Fld, *e, *misc);
     }

@@ -15,8 +15,8 @@ sub V7Lock
     $0 = "--V7 Locked and waiting <$FML $LOCKFILE>";
 
     # set variables
-    $LockFile = $LOCK_FILE || "$VAR_DIR/run/lockfile.v7";
-    $LockTmp  = "$VAR_DIR/run/lockfile.$$";
+    $LockFile = $LOCK_FILE || "$FP_VARRUN_DIR/lockfile.v7";
+    $LockTmp  = "$FP_VARRUN_DIR/lockfile.$$";
     $rcsid .= ' :V7L';
     local($timeout) = 0;
 
@@ -39,13 +39,13 @@ sub V7Lock
 	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
 			   $year, $mon+1, $mday, $hour, $min, $sec);
 
-	open(TIMEOUT, "> $VARLOG_DIR/$TIMEOUT");
+	open(TIMEOUT, "> $FP_VARLOG_DIR/$TIMEOUT");
 	select(TIMEOUT); $| = 1; select(STDOUT);
 	print TIMEOUT &WholeMail;
 	close(TIMEOUT);
 
 	&Warn("V7 LOCK TIMEOUT", 
-	      "saved in $VARLOG_DIR/$TIMEOUT\n\n".&WholeMail);
+	      "saved in $FP_VARLOG_DIR/$TIMEOUT\n\n".&WholeMail);
     }
 }
 

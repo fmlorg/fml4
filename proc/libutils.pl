@@ -746,13 +746,13 @@ sub EmergencyNotify
 
 sub EmergencyRestart 
 { 
-    unlink "$TMP_DIR/emerg.stop";
+    unlink "$FP_VARRUN_DIR/emerg.stop";
     &LogWEnv("ML Server Restart!", *Envelope);
 }
 
 sub EmergencyStop  
 { 
-    &Touch("$TMP_DIR/emerg.stop");
+    &Touch("$FP_VARRUN_DIR/emerg.stop");
     &LogWEnv("O.K. ML Server stop!", *Envelope);
 }
 

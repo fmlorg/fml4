@@ -123,11 +123,20 @@ sub InitConfig
     # COMPATIBILITY
     if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
-    
+
+    # spelling miss
+    (defined $AUTO_REGISTERD_UNDELIVER_P) &&
+	($AUTO_REGISTERED_UNDELIVER_P = $AUTO_REGISTERD_UNDELIVER_P);
+
     ### Initialize DIR's and FILE's of the ML server
+    local($s);
     for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
-	eval("-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;");
+	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
+	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
+    print $s if $debug;
+    eval($s) || &Log("FAIL EVAL SPOOL_DIR ...");
+
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
 	-f $_ || &Touch($_);	
@@ -136,7 +145,7 @@ sub InitConfig
     # Turn Over log file (against too big)
     if ((stat($LOG_MESSAGE_ID))[7] > 25*100) { # once per about 100 mails.
 	&use('newsyslog');
-	&NewSyslog'TurnOver($LOG_MESSAGE_ID);#';
+	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
     }
 
     ### misc 
@@ -247,6 +256,8 @@ sub FixHeaders
     $e{'h:Posted:'}      = $e{'h:date:'} || $MailDate;
     $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
     $e{'h:Lines:'}       = $e{'nlines'};
+    $e{'h:References:'}  = $e{'h:references:'};       
+    $e{'h:In-Reply-To:'} = $e{'h:in-reply-to:'};     
     $e{'h:Subject:'}     = $e{'h:subject:'};       # anyway save
 
     # Some Fields need to "Extract the user@domain part"
@@ -260,7 +271,8 @@ sub FixHeaders
     # 2. while ( Re: Re: -> Re: ) 
     # Default: not remove multiple Re:'s),
     # which actions may be out of my business
-    if (($_ = $e{'h:Subject:'}) && $STRIP_BRACKETS) {
+    if (($_ = $e{'h:Subject:'}) && 
+	($STRIP_BRACKETS || $SUBJECT_HML_FORM || $SUBJECT_FREE_FORM_REGEXP)) {
 	if ($e{'MIME'}) { # against cc:mail ;_;
 	    &use('MIME'); 
 	    &StripMIMESubject(*e);
@@ -269,7 +281,8 @@ sub FixHeaders
 	    local($r)  = 10;	# recursive limit against infinite loop
 
 	    # e.g. Subject: [Elena:003] E.. U so ...
-	    s/\[$BRACKET:\d+\]\s*//g;
+	    $pat = $SUBJECT_HML_FORM ? "\\[$BRACKET:\\d+\\]" : $SUBJECT_FREE_FORM_REGEXP;
+	    s/$pat\s*//g;
 
 	    #'/gi' is required for RE: Re: re: format are available
 	    while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
@@ -516,7 +529,7 @@ sub MLMemberCheck
 sub Distribute
 {
     $0 = "--Distributing <$FML $LOCKFILE>";
-    local($status, $num_rcpt, $s, @Rcpt);
+    local($status, $num_rcpt, $s, @Rcpt, $id);
 
     $DISTRIBUTE_START_HOOK && 
 	&eval($DISTRIBUTE_START_HOOK, 'Distribute Start hook'); 
@@ -525,7 +538,7 @@ sub Distribute
     $Envelope{'mode:dist'} = 1;
 
     ### EMERGENCY CODE against LOOP
-    if (-f "$TMP_DIR/emerg.stop") { &use('utils'); &EmergencyNotify; return;}
+    if (-f "$FP_VARRUN_DIR/emerg.stop") { &use('utils'); &EmergencyNotify; return;}
 
     ##### ML Preliminary Session Phase 01: set and save ID
     # Get the present ID
@@ -613,21 +626,18 @@ sub Distribute
     $Envelope{'h:Reply-To:'} = $Envelope{'h:Reply-to:'} || $MAIL_LIST;
     
     if ($SUBJECT_HML_FORM) {# hml 1.6 form: (95/07/03) kise@ocean.ie.u-ryukyu.ac.jp
-	local($ID) = sprintf("%05d", $ID) if $HML_FORM_LONG_ID;
-	$Envelope{'h:Subject:'} = "[$BRACKET:$ID] ".($Envelope{'h:Subject:'} || $Subject); 
+	if ($HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID) {
+	    $id = &LongId($ID, $HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID);
+	}
+	$Envelope{'h:Subject:'} = "[$BRACKET:$id] ".($Envelope{'h:Subject:'} || $Subject); 
     }
-
-    # Message ID: e.g. 199509131746.CAA14139@axion.phys.titech.ac.jp
-    # 95/09/14 add the fml Message-ID for more powerful loop check
-    # /etc/sendmail.cf H?M?Message-Id: <$t.$i@$j>
-    # <>fix by hyano@cs.titech.ac.jp 95/9/29
-    if (! $USE_ORIGINAL_MESSAGE_ID) { 
-	$Envelope{'h:Message-Id:'}  = "<$CurrentTime.FML$$\@$FQDN>"; 
-	&Append2("$CurrentTime.FML$$\@$s", $LOG_MESSAGE_ID);
+    elsif ($SUBJECT_FREE_FORM) {
+	if ($SUBJECT_FORM_LONG_ID) {
+	    $id = &LongId($ID, $SUBJECT_FORM_LONG_ID);
+	}
+	local($pat) = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
+	$Envelope{'h:Subject:'} = "$pat ".($Envelope{'h:Subject:'} || $Subject); 
     }
-
-    # STAR TREK SUPPORT:-)
-    if ($APPEND_STARDATE) { &use('stardate'); $Envelope{'h:X-Stardate:'} = &Stardate;}
 
 #.IF CROSSPOST
     # Crosspost info
@@ -640,9 +650,24 @@ sub Distribute
     # Run-Hooks
     $HEADER_ADD_HOOK && &eval($HEADER_ADD_HOOK, 'Header Add Hook');
 
+    # Message ID: e.g. 199509131746.CAA14139@axion.phys.titech.ac.jp
+    # 95/09/14 add the fml Message-ID for more powerful loop check
+    # /etc/sendmail.cf H?M?Message-Id: <$t.$i@$j>
+    # <>fix by hyano@cs.titech.ac.jp 95/9/29
+    # e.g. for the change of $Envelope{'h:Message-Id:'} in HOOK...
+    if (! $USE_ORIGINAL_MESSAGE_ID) {
+	$Envelope{'h:Message-Id:'}  = 
+	    ($Envelope{'h:Message-Id:'} ne $Envelope{'h:message-id:'}) ?
+		$Envelope{'h:Message-Id:'} : "<$CurrentTime.FML$$\@$FQDN>";
+ 	&Append2($Envelope{'h:Message-Id:'}, $LOG_MESSAGE_ID);
+    }
+
+    # STAR TREK SUPPORT:-)
+    if ($APPEND_STARDATE) { &use('stardate'); $Envelope{'h:X-Stardate:'} = &Stardate;}
+
     # Server info to add
     $Envelope{'h:X-MLServer:'} = $rcsid if $rcsid;
-    $Envelope{"h:$XMLCOUNT:"}  = sprintf("%05d", $ID); # 00010 
+    $Envelope{"h:$XMLCOUNT:"}  = $id || sprintf("%05d", $ID); # 00010 
     $Envelope{'h:X-Ml-Info:'}  = "If you have a question, %echo \# help|Mail ".&CtlAddr;
 
     ##### ML Distribute Phase 02: Generating Hdr
@@ -670,15 +695,15 @@ sub Distribute
     # spooling, check dupulication of ID against e.g. file system full
     # not check the return value, ANYWAY DELIVER IT!
     # IF THE SPOOL IS MIME-DECODED, NOT REWRITE %e, so reset %me <- %e;
-    if (! -f "$SPOOL_DIR/$ID") {	# not exist
+    if (! -f "$FP_SPOOL_DIR/$ID") {	# not exist
 	&Log("ARTICLE $ID");
-	&Write3(*Envelope, "$SPOOL_DIR/$ID");
+	&Write3(*Envelope, "$FP_SPOOL_DIR/$ID");
     } 
     else { # if exist, warning and forward againt DISK-FULL;
 	&Log("ARTICLE $ID", "ID[$ID] dupulication");
-	&Append2("$Envelope{'Hdr'}\n$Envelope{'Body'}", "$VARLOG_DIR/DUP$CurrentTime");
+	&Append2("$Envelope{'Hdr'}\n$Envelope{'Body'}", "$FP_VARLOG_DIR/DUP$CurrentTime");
 	&Warn("ERROR:ARTICLE ID dupulication $ML_FN", 
-	      "Try save > $VARLOG_DIR/DUP$CurrentTime\n$Envelope{'Hdr'}\n$Envelope{'Body'}");
+	      "Try save > $FP_VARLOG_DIR/DUP$CurrentTime\n$Envelope{'Hdr'}\n$Envelope{'Body'}");
     }
 
     ##### ML Distribute Phase 04: SMTP
@@ -702,6 +727,18 @@ sub Distribute
     $DISTRIBUTE_CLOSE_HOOK .= $SMTP_CLOSE_HOOK;
     $DISTRIBUTE_CLOSE_HOOK && 
 	&eval($DISTRIBUTE_CLOSE_HOOK, 'Distribute close Hook');
+}
+
+# return Long ID FORM
+sub LongId
+{
+    local($id, $howlong) = @_;
+    local($s);
+
+    $howlong = $howlong < 2 ? 5 : $howlong; # default is 5;
+    $s = "\$id = sprintf(\"%0". $howlong. "d\", $id);";
+    eval $s;
+    $id;
 }
 
 #.IF CROSSPOST
@@ -766,10 +803,10 @@ sub GetXRef
 {
     local($body);
     local($XRef)   = $Envelope{'xref:'};
-    local($touchf) = "$TMP_DIR/crosspost";
-    local($contf)  = "$TMP_DIR/crosspost-c";
-    local($fcount) = "$TMP_DIR/crosspost-first-count";
-    local($lcount) = "$TMP_DIR/crosspost-last-count";
+    local($touchf) = "$FP_TMP_DIR/crosspost";
+    local($contf)  = "$FP_TMP_DIR/crosspost-c";
+    local($fcount) = "$FP_TMP_DIR/crosspost-first-count";
+    local($lcount) = "$FP_TMP_DIR/crosspost-last-count";
 
     &Debug("\$Envelope{'crosspost'}\t$Envelope{'crosspost'}");
     &Debug("-f $touchf") if -f $touchf;
@@ -1166,7 +1203,7 @@ sub Flock
 {
     $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
 
-    open(LOCK, $SPOOL_DIR); # spool is also a file!
+    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
     flock(LOCK, $LOCK_EX);
 }
 

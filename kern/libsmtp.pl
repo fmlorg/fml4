@@ -47,11 +47,12 @@ sub SmtpInit
 
 	if ($e{'preamble'}) { $e{'preamble'} =~ s/\n\./\n../g; $e{'preamble'} =~ s/\.\.$/./g;}
 	if ($e{'trailer'})  { $e{'trailer'} =~ s/\n\./\n../g;  $e{'trailer'} =~ s/\.\.$/./g;}
-
-	$e{'Body'} =~ s/\n\./\n../g;               # enough for body ^. syntax
-	$e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
-	$e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
     }
+
+    # ANYTIME, Try fixing since plural mails are delivered
+    $e{'Body'} =~ s/\n\./\n../g;               # enough for body ^. syntax
+    $e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
+    $e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
 
     return 1 if $SocketOK;
     return ($SocketOK = &SocketInit);
@@ -64,7 +65,7 @@ sub SocketInit
     local($eval, $ok, $ExistSocket_ph);
 
     $ok = eval "use Socket;", ($@ eq "");
-    &Log($ok ? "Socket(XS) O.K.": "Socket(XS) fails. Try socket.ph") if $debug;
+    &Log($ok ? "Socket(XS) O.K.": "Socket(Perl 5 XS) fails. Try socket.ph") if $debug;
     return 1 if $ok;
 
     ##### PERL 4
@@ -191,6 +192,8 @@ sub SmtpIO
 	    last         if $error eq ""; # O.K.
 	    &Log($error) if $error;       # error log %BAD FREE()%;
 	    sleep(1);		          # sleep and try the secondaries
+
+	    last         unless @HOSTS;	  # trial ends if no candidate
 	}
     }
     ### not IPC, try popen(sendmail) ...

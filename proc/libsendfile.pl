@@ -133,6 +133,7 @@ sub mget3
     ### TMP 
     # SETTINGS affected by config.ph
     # ATTENTION: in SendingBackOrderly $DIR/$returnfile
+    # relative path for all modes availability
     local($returnfile)	 = "$TMP_DIR/m:$opt:$$return";
 
     ##### mget interface 
@@ -588,7 +589,7 @@ sub GetArchiveBoundary
     if ($id = &GetID){
 	for ($i = $ar_unit; $i < $id; $i += $ar_unit) {
 	    foreach $dir ($SPOOL_DIR, @ARCHIVE_DIR) {
-		$bound += $ar_unit if -f "$dir/$i.tar.gz" || -f "$dir/$i.gz";
+		$bound += $ar_unit if -f "$DIR/$dir/$i.tar.gz" || -f "$DIR/$dir/$i.gz";
 	    }
 	}
     }
@@ -620,7 +621,7 @@ sub ExistCheck
     # meaningless?
     if ($left == $right) {
 	# if an article in spool
-	if ($left > $ArchiveBoundary && (-f "$SPOOL_DIR/$left")) { 
+	if ($left > $ArchiveBoundary && (-f "$FP_SPOOL_DIR/$left")) { 
 	    push(@flist, "$SPOOL_DIR/$left");
 	}
 	else {			       # if stored as an archive 
@@ -645,7 +646,7 @@ sub ExistCheck
 
 	# store the candidates
 	for ($i = $left; $i < $right + 1; $i++) { 
-	    push(@flist, "$SPOOL_DIR/$i") if -f "$SPOOL_DIR/$i";
+	    push(@flist, "$SPOOL_DIR/$i") if -f "$FP_SPOOL_DIR/$i";
 	}
 
 	print STDERR "$EC:\$left <= $ArchiveBoundary\n" if $debug;
@@ -702,7 +703,7 @@ sub ExtractFiles
     foreach $f (keys %c) {
 	next if $f eq 'Binary';	# special for e.g. archive/summary-old-ml
 
-	$s = "cd $TMP_DIR; $ZCAT $DIR/$f|$cmd ". $c{$f};
+	$s = "chdir $FP_TMP_DIR; $ZCAT $DIR/$f|$cmd ". $c{$f};
 	print STDERR "Extract: sh -c $s\n" if $debug;
 	&system($s);
 

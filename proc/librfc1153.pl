@@ -41,7 +41,7 @@ sub Rfc1153Custom
     $issue     = 1;
     $listname  = "UJA";
     $vol       = $year;
-    $IssueSeq = "$VARLOG_DIR/IssueSeq"; # file to remember count;
+    $IssueSeq = "$FP_VARLOG_DIR/IssueSeq"; # file to remember count;
 
     &GetTime;
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');

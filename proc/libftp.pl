@@ -195,7 +195,7 @@ sub FtpSetFtpEntry
     local($dir, $file, $mode) = @_;
     local($total);
     local($ftpdir) = $FTP_DIR;
-    local($tmpf)   = "$TMP_DIR/Ftp$$:$FtpEntry";
+    local($tmpf)   = "$TMP_DIR/Ftp$$:$FtpEntry"; # relative for all modes availability
 
     printf STDERR "FtpEntry %-15s => %s\n", $dir, $file if $debug;
 

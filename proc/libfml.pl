@@ -22,7 +22,7 @@ sub Command
     $0 = "--Command Mode in <$FML $LOCKFILE>";
 
     ### against loop 
-    if (-f "$TMP_DIR/emerg.stop") { 
+    if (-f "$FP_VARRUN_DIR/emerg.stop") { 
 	$e{'message'} .= "*** Server is now UNDER EMERGENCY STOP ***\n";
 	$e{'message'} .= 
 	    "Distribute function of ML Server is unavailable.\n";
@@ -857,13 +857,13 @@ sub ProcIndexSearchMinCount
     local($try)  = &GetID - 1;# seq is already +1;
     local($last) = $try;
 
-    while(-f "$SPOOL_DIR/$try") {
+    while(-f "$FP_SPOOL_DIR/$try") {
 	last if $try <= 1;	# ERROR
 	$try  = int($try/2);
 	print STDERR "ExistCheck: min /2 $try\n" if $debug;
     } 
     
-    for ((!-f "$SPOOL_DIR/$try"); (!-f "$SPOOL_DIR/$try"); $try++) {
+    for ((!-f "$FP_SPOOL_DIR/$try"); (!-f "$FP_SPOOL_DIR/$try"); $try++) {
 	last if $try > $last; # ERROR
 	print STDERR "ExistCheck: min ++ $try\n" if $debug;
     }
@@ -922,6 +922,7 @@ sub ProcWhoisWrite
 { 
     local($proc, *Fld, *e, *misc) = @_;
 
+    &Log("$proc @Fld[2..$#Fld]");
     &use('whois');
     &WhoisWrite(*e);
     return 'LAST';
@@ -932,6 +933,7 @@ sub ProcWhoisList
 {
     local($proc, *Fld, *e, *misc) = @_;
 
+    &Log("$proc @Fld[2..$#Fld]");
     &use('whois');
     &WhoisList(*e);
 }
@@ -941,6 +943,7 @@ sub ProcWhoisSearch
 { 
     local($proc, *Fld, *e, *misc) = @_;
 
+    &Log("$proc @Fld[2..$#Fld]");
     &use('whois'); 
     &WhoisSearch(*e, *Fld);
 }
@@ -1297,7 +1300,7 @@ sub Rehash
 sub ExistP
 {
     local($fp)      = @_;
-    local($f)       = "$SPOOL_DIR/$fp";
+    local($f)       = "$SPOOL_DIR/$fp";	# return string is "spool/100" form not fullpath-ed
     local($ar_unit) = ($DEFAULT_ARCHIVE_UNIT || 100);
 
     $_cf{'libfml', 'binary'} = 0; # global binary or not variable on _(previous attached)

@@ -47,9 +47,6 @@ if ($0 eq __FILE__) {
 
     print STDERR "MatomeOkuri Control Program Rel.4 for $ML_FN\n\n" unless $Quiet;
 
-    require 'libnewsyslog.pl';
-    &NewSyslog(@NEWSYSLOG_FILES);
-
     if ($_cf{"opt:b"} eq 'd' || $_cf{"opt:b"} eq 'sr') {# Daemon or Self Running;
 	local($t);
 	while (1) {
@@ -91,6 +88,12 @@ sub ExecMSend
     $MSEND_NOTIFICATION && &MSendNotifyP && &MSendNotify;
 
     &MSend4You;			        # MAIN
+
+    if ($_cf{"opt:n"}|| $debug && ($ID % 3 == 0)) {     # debug mode
+	print STDERR "DEBUG MODE try turn over @NEWSYSLOG_FILES\n";
+	require 'libnewsyslog.pl'; 
+	&NewSyslog(@NEWSYSLOG_FILES);
+    }
 
     #&MSendRunHooks;			        # run hooks after unlocking
 
@@ -320,7 +323,7 @@ sub MSending
 
     # matome.gz -> matome.ish in LhaAndEncode2Ish().
     local($total, $tmp, $mode, $name, $s);
-    $tmp   = "$TMP_DIR/MSend$$";
+    $tmp   = "$TMP_DIR/MSend$$"; # relative
     $mode = $mode{$to[0]};
     $total = &DraftGenerate($tmp, $mode, "matome.gz", @filelist);
 
@@ -558,7 +561,7 @@ sub MSendInit
     $Hour = (localtime(time))[2];	# Only this differ from &GetTime in fml.pl
     $Hour = (0 == $Hour) ? 24 : $Hour;
 
-    $MSendTouchFile = "$TMP_DIR/msend_last_touch";
+    $MSendTouchFile = "$TMP_DIR/msend_last_touch"; # what for ?
 
     ### SET DEFAULT MODE 
     # Default setting should be HERE 96/02/13 kishiba@ipc.hiroshima-u.ac.jp
@@ -640,7 +643,11 @@ sub InitConfig
     # COMPATIBILITY
     if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
-    
+
+    # spelling miss
+    (defined $AUTO_REGISTERD_UNDELIVER_P) &&
+	($AUTO_REGISTERED_UNDELIVER_P = $AUTO_REGISTERD_UNDELIVER_P);
+
     ### Initialize DIR's and FILE's of the ML server
     for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
 	eval("-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;");
@@ -653,7 +660,7 @@ sub InitConfig
     # Turn Over log file (against too big)
     if ((stat($LOG_MESSAGE_ID))[7] > 25*100) { # once per about 100 mails.
 	&use('newsyslog');
-	&NewSyslog'TurnOver($LOG_MESSAGE_ID);#';
+	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
     }
 
     ### misc 
@@ -859,7 +866,7 @@ sub Flock
 {
     $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
 
-    open(LOCK, $SPOOL_DIR); # spool is also a file!
+    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
     flock(LOCK, $LOCK_EX);
 }
 
