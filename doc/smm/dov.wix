@@ -1,4 +1,5 @@
 .C	ＭＬサーバ Overview
+=E.C	ML Overview
 
 -- ＭＬサーバとは何をすればいいのだろうか？
 
@@ -17,7 +18,65 @@
     ………
 
 
-.S	Introduction
+.S	ML Server Process Overview
+
+ＭＬサーバは本質的にフィルタリングをするものです。ＭＬ宛のメールが来た
+ら配送プログラムから起動されいろいろな処理をした後、配送するべき(MLの)
+メンバーリストを配送プログラムへ渡します。後は配送プログラムが配送を行
+ないます。つまり配送はＭＬサーバの役目ではありません。
+=E
+A ML Server is a filtering process. 
+
+[図]
+=E
+[Figure]
+
+あるホスト                                    ＭＬサーバのマシン
+=E
+<a host>                                      <ML Server Host>
+
+ＭＬのメンバーからのメール
+=E
+a mail from a member
+
+   |
+   V
+  MTA (e.g. sendmail)  ------------------>     MTA (e.g. sendmail)
+
+                                                |  kick off the ML server
+                                                V
+
+                                            ＭＬサーバ(ドライバともいう)
+=E
+                                            ML server (driver)
+
+                                                |  
+                                                V
+
+                                    MTA (e.g. sendmail)  配送プロセス
+=E		
+                                    MTA (e.g. sendmail)  distribution process
+
+                                             |  |  |  |  |  |
+                                             V  V  V  V  V  V
+
+                                             ＭＬのメンバー
+=E
+                                             members of the Maling List 
+
+配送プロセスは上図のように動きます。ＭＬサーバが普通のメールではなくあ
+る命令(ＭＬを辞める、過去の記事を読むなど)を含んだメールをうけた場合は、
+それを実行して答えをリクエストした人へ配送します(コマンド)。
+
+また上図からわかるとおりＭＬ宛のメールが来た時だけＭＬサーバは起動され
+ます。つまり"不定期"にです。そのためリアルタイムにＭＬの記事(メール)を
+読みたくない人、例えば3時間に一度過去3時間のメールをまとめて読む「まと
+め送り」の場合は"定期的に"まとめ送り(.ptr{msend})を実行するプログラム
+が起動される必要があります。FMLは定期的に起動しなければならないプログ
+ラム群はcronというオペレーティングシステムが提供する機能を使っています。
+
+
+.S	Historical View
 
 FML 2.1 は Mailing List Server の package (Perl Scripts package) で、
 僕が壱から Full Scratch したものです。
@@ -375,7 +434,7 @@ config.ph 中に簡単な説明とともに書いてあるのでこれを変更することで行な
 	・誰からの投稿を許すか？
 		だれでもOK			anyone
 		登録されているメンバーだけ	members_only
-		モデレーターだけ		moderator
+		モデレーターだけ		moderator (.ptr{moderators})
 
 	・もし、登録されているメンバー以外から来た場合にはどうするか？
 		許否				reject
