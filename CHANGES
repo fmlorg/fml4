@@ -4,6 +4,12 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2003/01/15
+
+   update databases/TOY_MODEL.*
+	bug fix
+	translation to English.
+
 2003/01/14
 
    messages/English/
@@ -410,7 +416,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.268 2003/01/09 14:58:25 fukachan Exp $
+	add $FML: CHANGES,v 1.269 2003/01/14 14:18:38 fukachan Exp $
 
 2001/10/03
 
