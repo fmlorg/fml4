@@ -187,9 +187,9 @@ COPY_SOURCES () {
 
 	echo  " ";
 	echo  "Generating default_config.ph  ";
-	cf/config -m cf/MANIFEST -i /dev/null |\
-	sed 's@sapporo.iij.ad.jp"@installer.fml.org"@g' \
-		> $DESTDIR/distrib/src/default_config.ph
+	# cf/config -m cf/MANIFEST -i /dev/null |\
+	# sed 's@sapporo.iij.ad.jp"@installer.fml.org"@g' \
+	echo '1;' > $DESTDIR/distrib/src/default_config.ph
 
 	echo  " ";
 
