@@ -2730,7 +2730,7 @@ sub DEFINE_FIELD_PAT_TO_REJECT
 
 sub ADD_FIELD
 { 
-    grep(/$_[0]/, @HdrFieldsOrder) || push(@HdrFieldsOrder, $_[0]);
+    grep(/^$_[0]$/i, @HdrFieldsOrder) || push(@HdrFieldsOrder, $_[0]);
     &Debug("ADD_FIELD $_[0]") if $debug;
 }
 
