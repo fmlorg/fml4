@@ -103,6 +103,8 @@ Should we split it to two parts?
 =E
 Especially basse64 encoder. RFC2047 is incomplete for Japanese.
 
+Xref: fml-support:05948
+
 
 .S	日本語化問題
 =E.S	Japanese configuration files
@@ -176,6 +178,9 @@ I may not do it since it only confuses the customize.
 * MTIの理論の解説書(本の厚さとはいわないが…)
 =E
 * MTI documente
+
+XRef: fml-support:05930
+
 
 
 .S	Naming Convention
