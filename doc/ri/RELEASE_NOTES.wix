@@ -1,6 +1,545 @@
 			RELEASE NOTES
 ¡ôrefer¤·¤½¤³¤Ê¤«¤Ã¤¿¤é¤´¤á¤ó¤Ê¤µ¡Á¤¤_o__o__o_
 
+*** UNTIL 11/25 ***
+
+------------------------------
+At  Tue, 21 Nov 95 18:24:40  JST
+
+libsmtp.pl,v 1.6.2.4 
+	resolves the problem on the error in sending-back $DIR/welcome file.
+&daemon (libutils.pl)
+	4.4BSD daemon() emulation
+
+------------------------------
+At  Tue, 21 Nov 1995 12:51:09 +0900
+Thanks to  Yoshihiko Yamada <yyamada@blue.giken.cac.co.jp>
+
+FIX doc/op bug
+
+------------------------------
+At  Mon, 20 Nov 95 21:39:37  JST
+
+$START_HOOK in MSendv4.pl
+
+------------------------------
+At  Mon, 20 Nov 95 20:19:30  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX fml.pl
+      next line if /^$MAIL_LIST/io; # no loop back
+
+------------------------------
+At  Sat, 18 Nov 95 01:07:23  JST
+
+Move the file operation functions to libfop.pl 
+FIX libra.pl help, log
+FIX libfml.pl approve 
+
+New Mode:	lha + uuencode 
+
+@HOST is the secondary servers of SMTP
+
+------------------------------
+At  Wed, 15 Nov 1995 10:52:03 +0900
+Thanks to  Keiji Satoh <sato@abiko.denken.or.jp>
+
+fix libremote.pl 
+                     '#admin:help',       $ADMIN_HELP_FILE,
+
+fix libutils.pl
+!     if ($Envelope{'nlines'} < $limit) { 
+!       &Log("Not deliver: lines:$Envelope{'nlines'} < $limit");
+
+
+------------------------------
+At  Tue, 14 Nov 1995 21:42:59 +0900
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX 	TYPO (doc/op)
+	$AUTO_REGISTRATION_LINES_LIMIT (doc/op)
+	inconsistency between config.ph and doc/op
+		$SECURITY_LEBEL                                      ...   6.14
+
+------------------------------
+At  Tue, 14 Nov 1995 20:33:41 +0900
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX link dependence in doc, %ln -s files ../
+	e.g. README, FAQ
+
+fix strange permission 
+
+------------------------------
+At  Mon, 13 Nov 1995 22:33:28 JST
+
+# library (liblibrary.pl)
+	put, get, index, summary
+
+# whois 
+# iam 
+# who 
+
+Extension:  whois -h host
+if the option "host" is given, try to connect the host via TCP/IP. 
+
+# traffic 
+AUTHOR: Ã«Àî É´ÌÀÀ¸ ¤µ¤ó  tanigawa@tribo.mech.nitech.ac.jp 
+   
+REJECT ILLEGAL Addresses
+	$REJECT_ADDR = "|nobody|nazo-no-hito";
+
+libsendfile.pl (Old name is SendFile.pl)
+
+4.4BSD like bin/cron.pl 
+   cron.pl DIR -b43 when you use 4.3BSD-like cron
+
+libsmtp.pl autoconversion to JIS.
+
+libutils.pl ish+lzh mode bug fix
+
+libref.pl  	¡Êlibexec/sid.pl Standard)
+	library to understand URL
+	http://host/something  
+	gopher://host/something 
+	ftp://host/something -> libftp.pl
+
+	if the result is binary, uuencode and send back it
+
+
+libftp.pl   	¡Êlibexec/sid.pl Standard)
+	relay to the ftpmail server ($FTPMAIL_SERVER)
+	local spool access (ftp interface)
+
+fml_local:
+	Built-IN function which split and send the given file 
+
+Compatibilty code for before fml 1.5
+	($COMPAT_FML15)
+
+------------------------------
+At  Sun, 12 Nov 1995 02:28:49 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+localhack/mnews-*
+
+------------------------------
+At  Fri, 10 Nov 1995 16:08:06 +0900
+Thanks to  Masanori Saito <saito@cad.umeda.omronsoft.co.jp>
+
+FIX
+    if ($Envelope{'nline'} < $limit) { 
+                   ^^^^^
+        &Log("Not deliver: lines:$Envelope{'nline'} < $limit");
+                                            ^^^^^
+------------------------------
+At  Wed, 8 Nov 1995 16:15:00 +0900
+Thanks to  toshi@he.kobelcosys.co.jp (Toshihiko Ueki/¿¢ÌÚÉÒÉ§)
+
+FIX  sbin/configure_ph
+	trap "rm -f $TEXT" 0 1 3 5 15
+
+------------------------------
+At  Wed, 08 Nov 1995 14:10:41 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+We do not change the present implementation for sendmail 8.7.x
+
+        Add NoRecipientAction option to handle the case where there is
+                no legal recipient header in the message.  It can take
+		¡Ä¡Ä¡Ä
+
+------------------------------
+At  Wed, 08 Nov 1995 03:52:30 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+update help.example2 
+
+------------------------------
+At  Wed, 08 Nov 1995 02:59:21 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+	 mail: unknown mailer error 139) 
+
+FIX  &AutoRegist(*Envelope); in fml.pl
+              ^^^^^^^^^^^
+	 
+------------------------------
+At  Tue, 7 Nov 95 18:10:40 JST
+Thanks to  tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
+
+libtraffic1.0.0.4.tar.gz
+
+------------------------------
+At  Tue, 31 Oct 1995 01:38:58 JST
+
+libsynchtml.pl
+&SyncHtml($HTTP_DIR, "$HTTP_DIR/$ID", *Envelope);
+
+------------------------------
+At  Sat, 28 Oct 1995 00:14:29 JST
+
+fml-RCS#"COMPILED_NUMBER".tar.gz
+ 
+------------------------------
+At  Fri, 27 Oct 1995 15:27:10 +0900
+Thanks to  Naoto_Sudoh <l_sudo@nkjew55.nims.nec.co.jp>
+
+libsmtp.pl:    print SMTPLOG ('-' x30)."\n";
+x30 -> x 30. it seems a bug of the old perl 4.x.
+So jperl cannot handle it correctly.
+Anyway we should use the "x 30" form.
+
+------------------------------
+At  Wed, 25 Oct 1995 11:40:40 +0900
+Thanks to  Kohji Yamazaki <yamazaki@fne.fujitsu.co.jp>
+Thanks to  Yu Ooasa <y0u@pisces.bekkoame.or.jp>
+
+libexec/fml_local.pl bug fix series:-)
+
+------------------------------
+At  Mon, 23 Oct 1995 02:00:59 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+A bug of the $Envelope{'Hdr'}
+
+------------------------------
+At  Sat, 21 Oct 1995 21:27:32 JST
+Thanks to MURAYAMA Fumitaka =?ISO-2022-JP?B?GyRCQjw7M0o4OScbKEI=?= <umura@nn.solan.chubu.ac.jp> 
+
+fix configure_fml for tr's difference in several platform.
+tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+
+bug fix of a ChangeMemberList when unsubscribe
+# unsubscribe != bye in it
+
+At  Mon, 16 Oct 1995 17:55:30 +0900
+/etc/mail/sendmail.cf in Solaris2 
+
+------------------------------
+At  Sat, 14 Oct 1995 23:58:25 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+fix reply-to: in handling Envelope{'message'}
+
+configure_fml can operate the block to overwrite not remove all the last block in the file.
+
+------------------------------
+At  Sat, 14 Oct 1995 21:07:13 JST
+
+new libftpmail.pl using libhref.pl
+	$FTP_DIR        = '/var/local/ftpmail';
+	$FTP_HELP_FILE  = '/var/local/ftpmail/help';
+
+------------------------------
+At  Sat, 14 Oct 1995 13:12:38 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+Fix the order in &Distribute for MIME decoding.
+
+------------------------------
+At  Sat, 14 Oct 1995 12:13:19 +0900
+Thanks to star@eos.hokudai.ac.jp
+
+Fix the error of handling $Reply_to in libcompat.pl
+
+------------------------------
+At  Sat, 14 Oct 1995 09:19:53 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+    $s .= "   ".($c || $addr)"."\n\n"; in GenInfo 
+
+------------------------------
+At  Sat, 07 Oct 1995 23:27:04 JST
+
+Data structure is "call by reference"
+
+------------------------------
+At  Mon, 2 Oct 95 13:49:29  JST
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+FIX 
+	sub Lock 
+	{ 
+	    require 'liblock.pl' unless $USE_FLOCK;
+	    $USE_FLOCK ? &Flock : &Lock;
+	}
+
+------------------------------
+At  Mon, 2 Oct 95 01:43:58  JST
+
+%Envelope 
+
+------------------------------
+At  Mon, 2 Oct 95 01:32:57  JST
+
+snapshot/ of Current: fml-current*.tar.gz 
+
+------------------------------
+At  Fri, 29 Sep 95 20:47:44  JST
+
+Check $MAIL_LIST != $MAINTAINER at the first stage
+
+Message-ID Duplication Check against loop check
+
+Generate Original Message-ID for the loop check
+
+
+Fully Qualified Name via $MALI_LIST not via gethostbyname
+
+fml_local 1.1 bug fix 
+
+chaddr old-address new-address
+
+    # Exceptional procedure KEYWORD to detect before &CheckMember
+    # CHECK KEYWORDS. Default is 'guide'
+    $GUIDE_KEYWORD  = $GUIDE_KEYWORD  || 'guide'; 
+
+sitedef.ph 
+
+bin/inc_via_pop.pl 
+	/usr/local/mh/inc -noapop -norpop -host .. 
+
+------------------------------
+At  Fri, 29 Sep 95 14:54:38  JST
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+FIX libfml.pl	
+SHOULD RESET REPLY-TO: which is "to: maintainer";
+
+------------------------------
+At  Fri, 29 Sep 1995 09:34:12 +0900
+Thanks to  YANO Hirokuni <hyano@cs.titech.ac.jp>
+
+<> of $Message_Id 
+
+------------------------------
+At  Sun, 17 Sep 95 15:25:23  JST
+Thanks to  Shoichi SAITO <saito@sol.cs.ritsumei.ac.jp>
+
+Count the number of recipients in &Distibute for Matome-Okuri-Only-Mailing-list
+
+------------------------------
+At  Sat, 16 Sep 95 22:19:44  JST
+
+mget3 
+
+bin/vipw.pl -f members $DIR 
+
+# index			the list you can get via fml
+
+SID:
+	libexec/sid.pl 	etc/sid.ph 	etc/sidrc	etc/help.sid
+
+$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD 
+	OBSOLUTE: REMOTE_AUTH (TYPO ¤Ç REMORE_AUTH) ¤¬¸Å¤¤ÊÑ¿ôÌ¾¡£
+$REMOTE_ADMINISTRATION ¤¬¿·¤·¤¤ÊÑ¿ôÌ¾
+¤É¤Ã¤Á¤ÎÊÑ¿ô¤Ç¤âOK:-)
+
+INFO in using $TRAILER_MAILBODY 
+
+	$PREAMBLE_MAILBODY
+	$TRAILER_MAILBODY
+
+------------------------------
+At  Sat, 16 Sep 1995 14:51:35 +0900
+Thanks to  "H.Sumida" <alta@ryozan.bekkoame.or.jp>
+
+Address check for specific domains 
+	%SEVERE_ADDR_CHECK_DOMAINS = (
+			      'iijnet.or.jp', 1,
+			      'bekkoame.or.jp', 1,
+			      'rim.or.jp', 1,
+			      'win.or.jp', 1,
+			      );
+
+Against dupilicate user-account-name in network-provider
+e.g. 
+	account@ppp.domain
+	account@uucp.domain
+	account@cc.domain
+are available even today. 
+
+------------------------------
+At  Sat, 16 Sep 95 02:19:30  JST
+
+X-ML-INFO
+
+------------------------------
+At  Wed, 13 Sep 95 13:03:31  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX 
+    $GUIDE_REQUEST = 1 if /\#\s*guide\s*$/io;
+	and
+    Subject: guide 
+    problem
+	
+------------------------------
+At  Thu, 7 Sep 95 22:19:14  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX 	fml-1.5.5/lib/Whois/help
+
+------------------------------
+At  Mon, 28 Aug 1995 04:30:24 +0900
+Thanks to  YANO Hirokuni <hyano@cs.titech.ac.jp>
+
+FIX fml.pl
+   -> if ($LOAD_LIBRARY && $PROHIBIT_COMMAND_MODE && $ENCOUNTER_PLUS) {
+
+------------------------------
+At  Wed, 23 Aug 95 15:43:32  JST
+
+Add  UNIX FROM if the mail header has no UNIX FROM. 
+	remove $SLOCAL_FIX_PIPE 
+
+&SendFile:
+	if no \n = \012 in the last of the file, add them
+
+$PROHIBIT_COMMAND_MODE
+
+libexec/fml_local.pl
+	for ~/.forward 
+
+------------------------------
+At  Thu, 17 Aug 95 16:40:51  JST
+
+/bin/sh5 when ultrix 4.x 
+TYPO FIX  for 1.5.2.x(x¡å£³) 
+
+------------------------------
+At  Thu, 10 Aug 95 20:49:00  JST
+
+Resolve Socket problem for SOlaris 2.x
+	$COMPAT_SOLARIS2 
+
+bin/vipw.pl	
+
+------------------------------
+At  Thu, 10 Aug 1995 15:13:50 +0900
+Thanks to  YANO Hirokuni <hyano@cs.titech.ac.jp>
+
+FIX %Procedure entry in libfml.pl
+
+------------------------------
+At  Tue, 8 Aug 95 11:16:46  JST
+Thanks to  ÀçÀÐÉÒÃË <sengoku@intsys.co.jp>
+
+FIX sbin/configure_ph
+
+	trap "rm -f __*__  /tmp/fml$$ $MYREAD $TEXT $CONFIGURE" 0 1 3 15
+	and TYPO on ";"
+
+------------------------------
+At  Thu, 03 Aug 1995 17:33:02 JST
+
+"make SH=/bin/sh5 " is available
+
+------------------------------
+At  Tue, 01 Aug 1995 20:13:56 +0900
+Sender: Watanabe.Maki@tko.dec-j.co.jp
+
+Fix Configure for ULTRIX 4.x
+
+------------------------------
+At  Thu, 20 Jul 95 20:27:13  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+Extension of libftpmail.pl (old type, not using libhref.pl)
+#This patch is unified to libhref.pl today.
+
+------------------------------
+At  Tue, 18 Jul 95 14:57:53  JST
+Thanks to kasa@komae.denken.or.jp
+
+FIX the generation process of helps for phys.titech.ac.jp local
+
+------------------------------
+At  Mon, 17 Jul 95 18:19:02  JST
+
+umask 022 at the first stage of SyncHTMLfiles.pl 
+	for nobody permission
+
+$NOT_USE_UNIX_FROM_LOOP_CHECK 
+
+------------------------------
+At  Sat, 8 Jul 95 17:40:33  JST
+
+Fix the scope of @ipc
+
+"#number" form of FAQ (FAQ additional version control)
+
+bin/geturl.pl 
+
+------------------------------
+At  Thu, 06 Jul 1995 00:27:58 +0900
+Thanks to  hiraki@bcl.t.u-tokyo.ac.jp  
+
+Fix $exec_key -> $forward_key 
+
+------------------------------
+At  Mon, 3 Jul 95 17:04:19  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+when $SUBJECT_HML_FORM
+	local($ID) = sprintf("%05d", $ID);
+
+------------------------------
+At  Sun, 02 Jul 1995 09:20:44 +0900
+Thanks to  MURAYAMA Fumitaka Â¼»³Ê¸¹§   <umura@nn.solan.chubu.ac.jp>
+
+FIX " mv $1 $2 " of bin/Archive.cron
+
+------------------------------
+At  Wed, 28 Jun 95 11:52:10  JST
+Thanks to  Seigo Kishiba <kishiba@ipc.hiroshima-u.ac.jp>
+
+FIX libsmtp.pl
+	replacement from '------' to  '- ------' of RFC934 
+
+------------------------------
+At  Tue, 27 Jun 95 19:12:57  JST
+Thanks to  kise@ocean.ie.u-ryukyu.ac.jp
+
+FIX MSendv4.pl around Default of $DEFAULT_WHEN variable
+
+------------------------------
+At  Sat, 24 Jun 95 03:23:47  JST
+Thanks to  KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+
+Fix Makefile ( what is "gar":-)
+
+------------------------------
+At  Fri, 23 Jun 95 23:42:13  JST
+
+UNIX FROM loop check
+variable scope of www-mail 
+fix &system of libftpmail.pl
+
+&conv2mailbox for reply-to and to
+
+------------------------------
+At  Thu, 22 Jun 1995 19:44:09 JST
+Thanks to  mikami@ss.ts.fujitsu.co.jp
+
+FIX guide of fml-support ML
+
+------------------------------
+At  Thu, 15 Jun 1995 10:34:14 +0900
+Thanks to  Yukio Endo/±óÆ£Í³ÈÞÉ×  <endo@engvan.isdg.ho.nec.co.jp>
+
+Fix the bug of patch below
+
+	At  Wed, 14 Jun 1995 20:48:27 JST
+	FIX around Reply-to (fukachan@phys.titech.ac.jp)
+
+------------------------------
+At  Sun, 11 Jun 1995 03:32:13 JST
+Thanks to  KOYAMA Youichi <koyama@kutsuda.kuis.kyoto-u.ac.jp>
+
+FIX fml 1.4.9.4  FAQ 
+
+
 ---------------------------
 I also thank Mr. Ikuta (c1977@crcsn82.mdc.crc.co.jp) for private
 communication on mime_pls 1.00a.
