@@ -16,3 +16,6 @@
 
 .p	»öÎã½¸
 .include examples.wix
+
+.appendix
+.include 00terms.wix

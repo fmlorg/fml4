@@ -86,8 +86,7 @@ Example:
 	fop = file operation
 	...
 
-とか省略系もあるけど… ちなみに
-.ptr{library-lists} にライブラリの説明一覧があります。
+とか省略系もあるけど… 
 
 .S	古典の printf debug の例
 =E.S	printf debug

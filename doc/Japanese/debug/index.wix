@@ -9,3 +9,4 @@
 .include overview.wix
 .include debug.wix
 .include howto.wix
+.include clo.wix
