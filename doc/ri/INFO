@@ -4,11 +4,15 @@ fml Mailing List Packeges release rivison 2.1   Bulletin
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
-＃バグ、質問等はfml-bugs@phys.titech.ac.jpまでおねがいします。
+＃バグ、質問等は fml-query@phys.titech.ac.jp までおねがいします。
 
 ちなみに関連アドレスは
 	fml: これ
-	fml-support = fml に関するＭＬ
+	fml-support = fml に関するＭＬ(自動登録)
+	fml-query     fml-support へフォワードする(＊＊登録はしない＊＊)
+		      DM は見落とす恐れもあるし、情報が二元化されてしまうので
+		      できるだけ ML に反映されたいので、bugs (下述) より query
+		      へお願いします。	
 	fml-request, fml-bugs: 管理者いき
 	fml-current, fml-src: currentのソースの送り返し
 
@@ -38,6 +42,12 @@ WWW が使えるなら
 
 
 === WHAT'S NEW  fml 2.0 current (version 2 pre release version) ===
+
+この2カ月くらい このファイルに反映されてません _o_ #暇なし
+fml-support ML には情報を投げていますけど…
+
+===
+
 04/25
 
 libexec/fml_local.pl
