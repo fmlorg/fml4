@@ -417,6 +417,10 @@ OS_TYPE:
     if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
 	$GroupWritable = $CurConfig{'PERSONAL_OR_GROUP'};
     }
+
+    # 3.0B
+    $DefaultConfigPH = "$EXEC_DIR/default_config.ph"
+	if -f "$EXEC_DIR/default_config.ph";
 }
 
 # CFVersion: 2
@@ -3043,6 +3047,11 @@ sub GetConfigPH
 
     if (-f $cf) {
 	$config_ph'DIR = $main'DIR;
+
+	# 3.0B
+	$status = &config_ph'Load($DefaultConfigPH); #';
+	print STDERR $@ if $@;
+
 	$status = &config_ph'Load($cf); #';
 	print STDERR $@ if $@;
     }
@@ -4949,6 +4958,7 @@ sub LoadConfigPH
     $DIR = "$mldir/$ml";
     chdir $DIR;
 
+    eval ("do $DefaultConfigPH;");
     eval("do \"$mldir/$ml/config.ph\";");
     print STDERR "V7Lock::Error $@\n" if $@;
     &main'Warn($@) if $@; #';
