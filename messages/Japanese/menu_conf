@@ -1,0 +1,258 @@
+menu_conf.:
+	とっぷめにゅー
+
+menu_conf.END:
+	戻る
+
+menu_conf.ACCESS_POLICY:
+	アクセス制御(誰が投稿できる？/コマンドを使える？登録の仕方は？)
+
+
+menu_conf.ACCESS_POLICY.PERMIT_POST_FROM:
+	誰が投稿できる？
+
+
+menu_conf.ACCESS_POLICY.PERMIT_COMMAND_FROM:
+	誰がコマンドを使える？
+
+
+menu_conf.ACCESS_POLICY.WHEN_POST_FROM_NOT_MEMBER:
+	メンバー以外からの投稿メールはどう処理する？
+
+
+menu_conf.ACCESS_POLICY.WHEN_COMMAND_FROM_NOT_MEMBER:
+	メンバー以外からのコマンドメールはどう処理する？
+
+
+menu_conf.REGISTRATION_METHOD:
+	登録方法の詳細
+
+
+menu_conf.REGISTRATION_METHOD.AUTO_REGISTRATION_TYPE:
+	自動登録のタイプ
+
+
+menu_conf.REGISTRATION_METHOD.UNSUBSCRIBE_AUTH_TYPE:
+	脱会時の認証タイプ
+
+
+menu_conf.REGISTRATION_METHOD.CHADDR_AUTH_TYPE:
+	CHADDR(アドレス変更)コマンドの認証タイプ
+
+
+menu_conf.COMMAND_ADDRESS_POLICY:
+	コマンドの設定
+
+
+menu_conf.COMMAND_ADDRESS_POLICY.CONTROL_ADDRESS:
+	コマンドのアドレス
+
+
+menu_conf.COMMAND_ADDRESS_POLICY.MAIL_LIST_ACCEPT_COMMAND:
+	
+
+
+menu_conf.REMOTE_ADMINISTRATION:
+	リモートからの管理
+
+
+menu_conf.REMOTE_ADMINISTRATION.REMOTE_ADMINISTRATION:
+	リモート管理を認めるか？
+
+
+menu_conf.REMOTE_ADMINISTRATION.REMOTE_ADMINISTRATION_AUTH_TYPE:
+	リモート管理の認証タイプ
+
+
+menu_conf.REMOTE_ADMINISTRATION.ADMIN_ADD_SEND_WELCOME_FILE:
+	admin addコマンドで登録した時にWELCOMEファイルを送りつける？
+
+
+menu_conf.HEADER_CONFIG:
+	ヘッダの設定
+
+
+menu_conf.HEADER_CONFIG.REWRITE_TO:
+	To:の書き換え処理
+
+
+menu_conf.HEADER_CONFIG.SUBJECT_TAG_TYPE:
+	Subjectにつけるタグのタイプ 
+
+
+menu_conf.HEADER_CONFIG.SUBJECT_TAG_FIGURE:
+	Subjectにつけるタグにつける数字の桁数
+
+
+menu_conf.HEADER_CONFIG.DATE_TYPE:
+	Date:日付のタイプ
+
+
+menu_conf.HEADER_CONFIG.PASS_ALL_FIELDS:
+	ヘッダはす通しでよいですか？
+
+
+menu_conf.HEADER_CONFIG.PASS_RECEIVED_THROUGH:
+	Received: をそのまま通しますか？
+
+
+menu_conf.SECURITY_AND_FILTER:
+	セキュリティ関係
+
+
+menu_conf.SECURITY_AND_FILTER.MORE_SECURE:
+	もっとセキュアにする(一方通行の処理です)
+
+
+menu_conf.SECURITY_AND_FILTER.USE_DISTRIBUTE_FILTER:
+	メール本文へのフィルタを使いますか？
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE:
+	メール本文へのフィルタの詳細
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_COMMAND:
+	コマンドぽい文字列を弾く
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_2BYTES_COMMAND:
+	日本語英文字でのコマンドぽい文字列を弾く
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_NOTIFY_REJECTION:
+	弾いたことをメールの送り主に知らせるか？
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_NULL_BODY:
+	中身のないメールは弾くか？
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_ONE_LINE_BODY:
+	一行メールのメールは弾くか？
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_INVALID_COMMAND :
+	不正なコマンドメールは弾くか？
+
+
+menu_conf.SECURITY_AND_FILTER.FILTER_ATTRRIBUTE.FILTER_ATTR_REJECT_MS_GUID:
+	MS_GUIDを含むメールは弾く
+
+
+menu_conf.SECURITY_AND_FILTER.USE_MTI:
+	トラフィックモニタを使うか？(例: 対メール爆撃)
+
+
+menu_conf.SECURITY_AND_FILTER.PERMIT_MEMBER_LIST_COMMANDS:
+	actives/membersコマンドの使用を許すか？
+
+
+menu_conf.SECURITY_AND_FILTER.MAX_MAIL_SIZE:
+	投稿できるメールの最大値
+
+
+menu_conf.SECURITY_AND_FILTER.NOTIFY_MAIL_SIZE_OVERFLOW:
+	メールのサイズが溢れたら送り主に知らせるべきか？
+
+
+menu_conf.SECURITY_AND_FILTER.ANNOUNCE_MAIL_SIZE_OVERFLOW:
+	巨大なメールなので弾いた旨をＭＬに知らせるべきか？	
+
+
+menu_conf.SECURITY_AND_FILTER.REJECT_ADDR:
+	特殊なシステムアカウント(弾かれる)
+
+
+menu_conf.SECURITY_AND_FILTER.ADDR_CHECK_MAX:
+	アドレスのドメイン部のチェックの厳しさ
+
+
+menu_conf.SECURITY_AND_FILTER.MAXNUM_COMMAND_INPUT:
+	一通のメールに書けるコマンド数の上限
+
+
+menu_conf.SECURITY_AND_FILTER.USE_LOG_MAIL:
+	メールを var/Mail/ に保存する
+
+
+menu_conf.SECURITY_AND_FILTER.USE_ENCRYPTED_DISTRIBUTION:
+	暗号化をするか？
+
+
+menu_conf.SECURITY_AND_FILTER.CHECK_MAILBODY_CKSUM:
+	メール本文のMD5チェックサムによるループチェックをするか？
+
+
+menu_conf.OPTION:
+	その他のオプション
+
+
+menu_conf.OPTION.HTML_GENERATION:
+	投稿記事のHTML版の作成関係
+
+
+menu_conf.OPTION.HTML_GENERATION.AUTO_HTML_GEN:
+	投稿記事のHTML版も作るか？
+
+
+menu_conf.OPTION.HTML_GENERATION.HTML_THREAD_REF_TYPE:
+	threadをどのようにつくるか？
+
+
+menu_conf.OPTION.HTML_GENERATION.HTML_STYLESHEET_BASENAME:
+	HTML4.0のスタイルシート
+
+
+menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT:
+	HTMLのディレクトリの単位
+
+
+menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT.TIME_RANGE:
+	htdocs/以下のディレクトリ作成の単位(日/週/月)
+
+
+menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT.NUMBER_OF_ARTICLES:
+	htdocs/以下のディレクトリ作成の単位(記事の数)
+
+menu_conf.OPTION.HTML_GENERATION.HTML_INDENT_STYLE:
+	indentのスタイル
+
+menu_conf.OPTION.MIME:
+	MIME処理
+
+
+menu_conf.OPTION.SPOOLING:
+	投稿記事をスプールに保存するか？
+
+
+menu_conf.OPTION.FLOCK:
+	flock(2)によるロックを使うか？
+
+
+menu_conf.OPTION.USE_MEMBER_NAME:
+	USE_MEMBER_NAMEを使うか？
+
+
+menu_conf.OPTION.LOGFILE_NEWSYSLOG_LIMIT:
+	logファイルをぐるぐる回す(?)
+
+
+menu_conf.OPTION.AMLIST_NEWSYSLOG_LIMIT:
+	members/activesファイルをぐるぐる回す(?)
+
+
+menu_conf.OPTION.SMTP:
+	メール配送関係
+
+menu_conf.OPTION.SMTP.USE_OUTGOING_ADDRESS:
+	
+
+menu_conf.OPTION.SMTP.USE_VERP:
+	VERPsを使う
+
+menu_conf.OPTION.LANGUAGE:
+	言語
+
+menu_conf.OPTION.LANGUAGE.MESSAGE_LANGUAGE:
+	エラーメールなどで使う言語

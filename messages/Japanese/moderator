@@ -1,0 +1,11 @@
+moderator.submission:
+	モデレータの方へ: 
+	リクエストをフォワードします。
+	以下のメールが適当でメーリングリストへ流してよいなら
+	次のキーワード(の行だけ)を<_ARG0_>宛に送って下さい。
+
+moderator.no_such_id:
+	そのようなID=_ARG0_は存在しません。
+
+moderator.id.error:
+	ID=_ARG0_は間違っているようです。

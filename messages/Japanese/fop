@@ -1,0 +1,50 @@
+###
+### libfop.pl liblop.pl
+###
+
+fop.no_numeric_filename:
+	_ARG0_: ファイル名が数字ではありません
+
+fop.unlink:
+	_ARG0_ ファイルを消去しました。
+
+fop.unlink.fail:
+	_ARG0_ ファイルの消去に失敗しました。
+
+fop.rename.fail:
+	_ARG0_ ファイルのrename(_ARG0_ => _ARG1_)に失敗しました。
+
+fop.write.fail:
+	_ARG0_ ファイルに書き込めませんでした。
+
+ftp.not_configure:
+	fmlの設定が不充分です。
+
+fop.not_found:
+	該当するファイルが一つも見つかりませんでした。
+
+fop.mget.too_many:
+	(m)getのリクエストが多過ぎます。
+	一回(のメール)で取り寄せ可能なファイル数は _ARG0_ までです。
+
+fop.mget.no_such_mode:
+	そのようなファイル取り寄せモード(_ARG0_)は存在しません。
+
+fop.summary.not_match:
+	サマリーファイルに該当する項目がないようです。
+
+ftp.exit:
+	終了します。
+
+ftp.cd.insecure:
+	不正なディレクトリの移動です。終了します。
+
+ftp.cannot_chdir:
+	ディクレトリに移動できません。
+
+ftpmail.submitted:
+	ftpmail サーバ _ARG0_ へのリクエストを受理しました。
+	少し待って下さい。
+
+ftpmail.not_supported:
+	ftpmail サーバへのリレーはサポートされていません。
