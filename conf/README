@@ -4,7 +4,12 @@ file			description
 ------------------------------------------------------
 release			the current main trunk version
 			$major.$minor$n where $n is (A .. Z).
+
 release_version		the snapshot version	(cvs ignore this)
+
+mode			null (default) or "daily"
+
+branch			"current" or "stable"
 
 
 [DESCRIPTION]
