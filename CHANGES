@@ -4,6 +4,10 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2003/6/07
+
+  update im to 145.
+
 2003/05/10
 
    enhance postfix verps
@@ -457,7 +461,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.275 2003/01/23 22:19:10 fukachan Exp $
+	add $FML: CHANGES,v 1.276 2003/05/10 15:29:15 fukachan Exp $
 
 2001/10/03
 
