@@ -19,6 +19,7 @@ INDEX:
 	cp $(HTML_SOURCE) $(FML)/var/html/ 
 	cpp -P -DJAPANESE index.html |nkf -j> $(FML)/var/html/index.html
 	cpp -P -UJAPANESE index.html > $(FML)/var/html/index-e.html
+	cp -p nt.html $(FML)/var/html/
 
 SEARCH:
 	cp search*.html $(FML)/var/html/
@@ -75,3 +76,7 @@ CHECK_LIST:
 
 do_CHECK_LIST:
 	(FML=$(FML);  export FML; $(SH) Converter.sh CHECK_LIST ri)
+
+clean:
+	gar *~ *.bak
+
