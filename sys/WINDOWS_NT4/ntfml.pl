@@ -128,6 +128,7 @@ sub GetConf
 	    # evaluate
 	    $eval  = q#$DIR = "$ML_DIR/$ml";#;
 	    $eval .= "\n";
+	    $eval .= &Grep($pat, "$EXEC_DIR/default_config.ph");
 	    $eval .= &Grep($pat, $cf);
 	    eval $eval; &Log($@) if $@;
 
