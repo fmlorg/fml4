@@ -1,6 +1,8 @@
 .HTML_PRE
 
 	fml 3.0 の設定 -- メーリングリストの記事はながれる前に査読をうける --
+=E
+	fml 3.0 -- moderator mode --
 
  [用語]
    % はユーザの prompt
@@ -15,7 +17,10 @@
 .include ptr.wix
 
 .HTML_PRE
-
+.if LANG == ENGLISH
+.include config-moderated.en.wix
+.return
+.fi
 ○ 目的
 
 メーリングリストに流す前に記事を査読する。例えば
@@ -58,7 +63,7 @@
 モデレータにはこれ以外にもいくらかバリエーションがあるが、
 これ以外のものについては doc/op.jp を参照のこと 
 .~HTML_PRE
-.url ../op/index.html
+.url ../op/index.html#moderator
 .HTML_PRE
 
            Copyright (C) 1999 Ken'ichi Fukamachi

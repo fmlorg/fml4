@@ -15,7 +15,10 @@
 .include ptr.wix
 
 .HTML_PRE
-
+.if LANG == ENGLISH
+.include config-asymmetric-regist.en.wix
+.return
+.fi
 ○ 目的
 
 一方的にメールを送ることが目的の場合。この場合

@@ -1,0 +1,41 @@
+* purpose to use moderator
+
+	ML for announce only
+
+	against SPAM
+
+* configure
+
+   MAIN MENU -> PERMIT_POST_FROM -> moderators 
+
+* how works
+
+1 submitted to ML
+
+2 the submission mail is forwarded to moderators with each OTP (one
+  time password) for each submission.
+
+   if $DIR/moderators file exists
+
+	fml forwards the submitted mail to all members in it
+
+   else
+
+	forwarded to only $MAINTAINER
+
+3 moderator certifies the content. If he accepts it,
+  he sends back the OTP (one time password).
+
+FML has several kinds of certifications. The type differs following
+$MODERATOR_FORWARD_TYPE. When $MODERATOR_FORWARD_TYPE is type I, you
+send back a submitted mail to ML with a field "Approval:
+remote-administrator-password" in the header.  When
+$MODERATOR_FORWARD_TYPE is type II, you receive the following mail
+from FML when an article is submitted.
+
+For more details, see
+.~HTML_PRE
+.url ../op-e/index.html#moderator
+.HTML_PRE
+
+.# $Id$

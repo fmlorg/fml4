@@ -17,7 +17,10 @@
 .include ptr.wix
 
 .HTML_PRE
-
+.if LANG == ENGLISH
+.include config-post-from-anyone.en.wix
+.return
+.fi
 ○ 目的
 
 誰でも投稿ができる。こういう設定が必要なのは

@@ -1,0 +1,53 @@
+* anyone can post to mailing list
+
+For example, anyone can post to mailing list for support purpose.
+This configuration may induces spam and mail bomb.  The value of this
+configuration depends on traffic and operation policy.
+
+* how to configure
+
+% makefml config elena
+
+   MAIN MENU -> 1 -> PERMIT_POST_FROM -> anyone
+
+* anyone can use "command" for mailing list ?
+
+Restriction over post and command differs, so 
+
+   MAIN MENU -> 1 -> PERMIT_POST_FROM -> anyone
+
+enables "anyone can post" but not "anyone can use command".  fml in
+default restricts only member contained in $MEMBER_LIST can use
+command.
+
+If you need "anyone can use command", configure
+
+   MAIN MENU -> 1 -> PERMIT_COMMAND_FROM -> anyone
+
+but it may be not required, I think.
+
+
+* Ensure nobody can use command.
+
+Appearnetly the best method is "remove elena-ctl in /etc/aliases". It
+disables elena-ctl, address for command.
+
+Please check /etc/aliases or equivalent for your MTA.
+
+
+* SPAM/mail bomb
+
+1. ignore ;-)
+
+fml MTI (Mail Traffic Information) may help you in some cases.
+
+.url ../op-e/index.html#mti
+
+2. not use "anyone" but "moderator" if traffic is small.
+
+.url config-moderated-e.html
+
+.# $Id$
+
+
+

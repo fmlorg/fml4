@@ -1,0 +1,18 @@
+* assymetric registration
+
+	1. some restricted people can post to ML
+
+	2. recipients are automatically maintained by fml.
+
+$REJECT_COMMAND_HANDLER = "auto_subscribe" (default automatic
+registration) adds a new-comer as both a member who can post to ML and
+a recipient. But "auto_asymmetric_regist" provides asymmetric
+registration described above.
+
+
+* configure
+
+% makefml config elena
+
+   MAIN MANU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_asymmetric_regist
+
