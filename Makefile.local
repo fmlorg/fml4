@@ -77,7 +77,13 @@ simulation:
 
 
 scan:
-	cvs -n update | tee /tmp/scanbuffer
+	@ cvs -n update |tee /tmp/__scan__
+	@ echo "--- others ---"
+	@ grep -v '^M' /tmp/__scan__ || echo none.
+	@ echo ""
+	@ echo "--- Modified: ---"
+	@ grep '^M' /tmp/__scan__ || echo none.
+	@ echo ""
 
 loop:
 	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
