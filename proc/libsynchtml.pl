@@ -30,7 +30,7 @@ sub SyncHtml
 
     # work in distribution mode only
     if (! $e{'mode:dist'}) { # flag on when through Distribute()
-	&Log("SyncHtml does not run under non distribute mode");
+	&Log("SyncHtml does not run under non distribute mode") if $debug;
 	return ;
     }
 
