@@ -23,14 +23,6 @@ exit 0;
 
 sub MailLocal
 {
-    local($mail) = &WholeMail;
-
-    # fix UNIX FROM if not exists.
-    if (! ($mail =~ /^From\s+/i)) {
-	&GetTime;
-	$mail = "From $USER $MailDate\n$mail";
-    }
-
     # UMASK
     umask(077);
 
@@ -41,37 +33,38 @@ sub MailLocal
     $LOCK_UN = 8;
 
     # Do FLOCK
-    flock(MBOX, $LOCK_EX);
-    seek(MBOX, 0, 2);
-
-    # APPEND!
     if ( open(MBOX, ">> $MAIL_SPOOL") ) {
-	select(MBOX); $| = 1;
-	&Log("> $MAIL_SPOOL")   if $debug2;
-	print MBOX &WholeMail;
-
-	# not newline terminated
-	print MBOX "\n" unless $MailBody =~ /\n$/;
-
-	# "\n"; allow empty message
-	print MBOX "\n";
+ 	flock(MBOX, $LOCK_EX);
+	seek(MBOX, 0, 2);
     }
     elsif ( open(MBOX, ">> $HOME/dead.letter") ) {
-	select(MBOX); $| = 1;
-	&Log("> ~/dead.letter") if $debug;
-	print MBOX &WholeMail;
-
-	# not newline terminated
-	print MBOX "\n" unless $MailBody =~ /\n$/;
-
-	# "\n"; allow empty message
-	print MBOX "\n";
+	flock(MBOX, $LOCK_EX);
+	seek(MBOX, 0, 2);
     }
     else {
 	&Log("Can't open mailbox: $!");
 	return 0;
     }
 
+    # APPEND!
+    select(MBOX); $| = 1;
+    &Log("> $MAIL_SPOOL") if $debug;
+
+    print MBOX $MailHeaders;
+    local(@s) = split(/\n/, $MailBody);
+    while(@s) {
+	$_ = shift @s;
+	print MBOX ">" if /^From /i; # '>From'
+	print MBOX $_;
+    }
+
+    # not newline terminated
+    print MBOX "\n" unless $_ =~ /\n$/;
+
+    # "\n"; allow empty message
+    print MBOX "\n";
+
+    # Unlock
     flock(MBOX, $LOCK_UN);
     close(MBOX);
 }
@@ -226,6 +219,13 @@ sub FmlLocalConfigure
 
 sub FmlLocalPatternMatch
 {
+    # IF WITHOUT UNIX FROM e.g. for slocal bug??? 
+    if (! ($MailHeaders =~ /^From\s+\S+/i)) {
+	local($USER) = 
+	    $ENV{'USER'}|| getlogin || (getpwuid($<))[0] || $MAINTAINER;
+	$MailHeaders = "From $USER $MailDate\n".$MailHeaders;
+    }
+
     local($field, $pattern, $type, $exec, $pat);
     local($MATCH_P, $AND, $PREV_MATCH);
     local($s) = $MailHeaders;
