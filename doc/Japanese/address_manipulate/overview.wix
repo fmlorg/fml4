@@ -1,0 +1,25 @@
+ここではアドレスについての
+
+登録の仕方については .ptr{how_to_subscribe} をみてね
+.url ../how_to_subscribe/
+
+フィルタリングは .ptr{filter}
+
+
+.C	Overview
+
+.S	ＭＬが使うアドレス
+
+elena ML の場合
+
+	elena		投稿用				$MAIL_LIST 
+	elena-ctl	コマンドを投げるアドレス	$CONTROL_ADDRESS
+	elena-admin	管理者				$MAINTAINER
+
+.S	アドレスのチェックの厳しさ
+
+	$ADDR_CHECK_MAX
+.xref	$ADDR_CHECK_MAX
+
+という変数で決まります。
+
