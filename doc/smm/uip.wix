@@ -1,4 +1,4 @@
-.C	ユーザーインターフェイス
+.C	各種 Utilities および User Interfaces
 
 .S	MH scan.format (lib/Utilities/scan.format)
 .label	scan.format 
@@ -7,9 +7,9 @@
 
 lib/Utilities/scan.format を あなたの ~/Mail にいれると
 
-  65 -06/14 Takashi Yokoyam fml-su Subject uja  <<うじゃ…
+  65 -06/14 Horaki Hikari fml-su Subject uja  <<うじゃ…
 
-のような表示になります。     ↑ここが X-ML-Name: の部分の６文字
+のような表示になります。    ↑ここが X-ML-Name: の部分の６文字
 
 暗号のようですが、ポイントは今レジスターに何が入っているかと、
 if	%<
@@ -38,10 +38,14 @@ lib/Utilitites/packmbox.pl を使って、
 	(cd spool; packmbox.pl ) > ~/mbox
 
 として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
-うことができて便利でしょう。
+うことができて便利でしょう。MH なら例えば mbox を作った後
+
+	inc -file ~/mbox -truncate 
+
+のようにすれば、mbox から inbox へ入ります。
 
 
-.S	maintenance.pl
+.S	メールが来る時間帯にＭＬを止めてメンテしたい時(maintenance.pl)
 .key	maintenance.pl
 
 flockを使っていて夜中とかじゃなくてメールが来得る時間帯にメインテナン
@@ -64,7 +68,7 @@ flock 使わずに pid 式の ロックを使っているなら
 とでもして、作業の後それを消せばいいわけです。
 
 
-.S	ロックしてconfig.phのｅｄｉｔをしたい
+.S	MLを止めて(ロックして)config.phの edit をしたい
 .key	vipw.pl
 .key	bin/vipw.pl
 .key	maintenance.pl

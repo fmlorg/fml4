@@ -128,8 +128,16 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 
 .S	fml の ＭＬ と bug-reportのアドレス
 
-○バグ、質問、新しい発見があったら fml-support ML（例によって自動登録
-です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
+○バグ、質問、新しい発見があったら 
+	fml-support ML(例によって自動登録です)
+	fml-support@axion.phys.titech.ac.jp
+
+	
+か 
+	fml-bugs (作者にのみフォワード)
+	fml-bugs@axion.phys.titech.ac.jp
+
+に御一報くださいませ。
 
 ただ、個人宛にメールがくるとどこかへまぎれたり、
 忙しくて時間が取れない場合も多々あります。

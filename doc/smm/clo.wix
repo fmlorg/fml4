@@ -163,7 +163,7 @@ P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
 	reply-to: を常にMLにしてしまう
 	--force:reply-to=uja@domain
 
-	＃ $Envelop{"fh:reply-to:"} = 'uja@domain'; と同じ
+	＃ $Envelope{"fh:reply-to:"} = 'uja@domain'; と同じ
 
  --original:field	
 	＃ キーワード original, org, oh は等価

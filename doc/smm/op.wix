@@ -40,39 +40,57 @@
 
 .S	Brief Hisotry and Overview
 
-『bug っているサーバ、機能の足りないサーバ、直すより自分で書いた方が早
-い』単にそういう話でした。
+最初の発端は例によって
+
+	bug っているサーバ、
+	機能の足りないサーバ、
+	直すより自分で書いた方が早い
+
+単にそういう話でした。
 
 歴史的に hml 1.6 を一時期使っていて、その設定ファイルをコンバートする
 のは面倒でした。そのため デフォールトの emulation は hml 1.6 を 
 support しています。
 
 また、Mailing List == Private Communication を便利にするツール（Filter） 
-という観点を重視しました。
-そのためデフォールトでは メンバーチェック をするという考え方を尊重して
-います。
+という観点を重視しているため、デフォールトでは メンバーチェック をする
+という考え方を尊重しています。
 
 その辺は設定(config file or command line option)でいくらでも変えられる
-ので、拘る必要はないのですが、設定のデフォールトがどうなっているかが
-推測できるでしょう。
+ので拘る必要はないのですが、設計思想をしっていると設定のデフォールトが
+どうなっているかを推測するに役立つでしょう。
 
-日々の routine work をいかに自動処理化できるか？を考えることが重要
-なような気がします。
 
-サーバの一番肝心な部分はかなり簡単ですが、実際にはそれ以外のさまざまな
-例外処理は発生します。
+結局のところ、日々の routine work をいかに自動処理化できるか？が重要な
+ので、ユーザにみえるインターフェイスはどうでもいいわけです。
 
+デフォールトが hml 1.6 ですが、単なる distributer （配送プログラム）に
+することもコマンドだけを実行するようにすることも、伝統の味（謎）の 
+listserv のように動かすこともできます。
+
+
+ＭＬサーバというものは一番肝心な部分はかなり簡単なのですが、実際にはそ
+れ以外のさまざまな例外処理は発生します。それをノウハウというわけですが…
 また、環境による違いを吸収するためにさまざまな関数をサポートする必要が
-ありした。e.g. ish, lha サポート
+あります。例えば ish, lha サポート
 
-基本的な方針は
+
+これらを踏まえて基本的方針は
    『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
-です。
+のようになります。
 そして、それらの Configuration を簡単に設定できるようにするべきです。
 
-これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
-いたいとおもっている方には改造の PLATFORM として利用していただけるかと
-思います。
+そのことは、これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタ
+マイズして使いたいとおもっている方には改造の PLATFORM として利用しても
+らうことを想定しています。
+
+多くの変数があるのは、簡単に例えばある変数の値を変えるだけで挙動が変え
+られるようにするためで、変数については、このドキュメントに述べられてい
+ます。
+
+また、このドキュメントはそれ以上のことをするための、関数の説明、設計思
+想 について議論するためでもあります。
+
 
 各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
 カルな再配送』のような場合はコマンド機能を落して使うほうがよいでしょう。
@@ -600,6 +618,9 @@ sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
 
 .P	fml の起動、起動オプション、Configuration file による設定
 
+ここでは fml の起動の仕方、起動時の設定の有効になる順番について述べます。
+
+
 .C	fml の基本動作と起動オプション…
 
 .S	ＭＬサーバの動作
@@ -630,9 +651,9 @@ sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
 要です。
 
 
-.S	fml に渡された後の動作
+.S	sendmail -> fml の時の動作
 
-sendmail から fml へメールが渡されると 次のように動作します。
+sendmail から fml へメールが渡される時は次のように動作します。
 
 ○ まず /etc/aliases にある
 
@@ -668,16 +689,47 @@ sendmail から fml へメールが渡されると 次のように動作します。
 なします。
 
 
+.S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+
+のように起動されるわけですが、この場合
+
+	/usr/libexec/fml/fml.pl 
+の
+	/usr/libexec/fml 
+部分をとりだします。そして
+
+	1   /var/spool/ml/elena 
+	2   /usr/libexec/fml 
+
+この順番で dynamic loading するファイルを探します。例えば config.ph や 
+libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
+け加えられていた（複数可能）場合、例えば
+
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
+
+の時は
+
+	1   /var/spool/ml/elena 
+	2   /usr/libexec/fml 
+	3   /usr/lib/uja
+	4   /lib/uja
+
+のような順番でファイルを探します。
+
+
 .S	オプション設定の優先順位
 
 強い順番に並べると
 
-１	コマンドラインオプション (fml.pl -d や --distribute 等)
-２	sitedef.ph による設定のoverwrite（サイト共通の設定等が望ましい）
-３	各MLごとの config.ph による設定
-４	fml デフォールト設定
+	1   コマンドラインオプション (fml.pl -d や --distribute 等)
+	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
+	3   各MLごとの config.ph による設定
+	4   fml デフォールト設定
 
 大抵の program と同様ですね。
+
 
 
 .# ##########################################################
@@ -685,7 +737,7 @@ sendmail から fml へメールが渡されると 次のように動作します。
 .include clo.wix
 
 
-.C	fml プロセス
+.C	fml のプロセス
 
 .S	律速段階
 .key	何がどこが遅くさせるか？
@@ -694,12 +746,35 @@ sendmail から fml へメールが渡されると 次のように動作します。
 この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
 それでもかなりのものです。
 
-論理をひっくりかえすと、fml 自体を tuning して速度を 0.1 sec 上げても
-ML の配送プロセスには何のメリットも生じないということでもあります。
+論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
+げても ML の配送プロセスには何のメリットも生じないということでもありま
+す。
 
 余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
 ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
 す。
+
+これを改善する方法は基本的に複数の sendmail で作業を分割することです。
+
+１	十分なパワーのマシンで十分な file descriptor や 
+	多くの process が走っても大丈夫であれば、
+	複数の sendmail を起動して配送を試みる。
+	この場合ちゃんと Load Average と sendmail.cf を tune する
+	必要がある。 
+	
+２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
+
+３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
+	一回そのリレーサーバに投げて、そこから再配送をする。
+
+１、２は”MCI_… ” という変数群がそれを可能にします。
+
+リレーサーバは各ユーザごとに”管理者”が設定できます。
+リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
+考慮の上決めるべきです。
+また、fml のリレーハックは RFCにはない % hack を前提にしています。
+そのため、管理者が注意深く設定すべきです。
+
 
 
 .S	プロセスは誰の権限で動くか？
@@ -721,10 +796,10 @@ ML の配送プロセスには何のメリットも生じないということでもあります。
 	つまり sendmail がうけとって fml を起動する場合
 
 	外→	
-		sendmail は uid = 0 daemon で待っている。
+		sendmail は uid = 0 で待っている(デーモン)
 		＃昔の sendmail だと daemon の場合もあるだろう
 
-		→ setuidしてユーザー権限(uid=your own)にして
+		→ setuidしてユーザー権限 (uid=your own) にして
 		   fml.pl を起動し、メールを fml.pl へ渡す
 		＃これは fml.c で作った fml を使うか
 		＃:include list 形
@@ -799,7 +874,7 @@ POSIX準拠	4.4BSD
 		Solaris 2.4	
 
 その他の注意：
-・単にNFSだから という場合もあるでしょう
+・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
 
 そのときはsetuid する時だけ local ならいいわけで、
 たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
@@ -825,7 +900,123 @@ root のケースでは rootでしかかけない /usr/local/ml/driver
 
 
 
-.C	配送モード
+.C	配送のモード
+
+.S	DEFINE_MODE マクロ
+
+マクロというのは正確ではないですが、config.ph で 簡易モード設定ができます。
+
+特に歴史的な理由で自動登録とメンバーチェックをするモードの設定はわかり
+にくいので、このモード設定をつかうと楽かも知れません。
+
+モード設定は config.ph を評価した後行なわれます。そのため、
+
+config.ph の中で
+
+	メンバーチェック
+	&DEFINE_MODE('autoregist'); # 自動登録
+
+とか書くと、自動登録モードになり、メンバーチェックと宣言したことは 
+overwrite されてしまいます。
+
+注意：コマンドラインオプションはこの定義よりも強いのに注意して下さい。
+
+config.ph の中で
+	メンバーチェック
+	&DEFINE_MODE('autoregist'); # 自動登録
+
+でもコマンドラインで
+
+	fml.pl --distribute ...
+
+のようになっていた場合は、distribute モード（メンバーチェックも自動登
+録もせずに、配送しスプールするだけのモード）に設定されます。
+
+モード一覧は コマンドラインオプションを見て下さい。
+コマンドラインで
+
+	--mode
+
+のように指定する内容を config.ph 中では同じことを
+
+	&DEFINE_MODE('mode');
+
+のように書けば実現できます。
+
+例：
+
+	"| /uja/fml.pl /DIR --distribute  "
+は
+	/DIR/config.ph で &DEFINE_MODE('distribute');
+
+と同じ
+
+
+.S	簡易モード一覧
+
+詳細はコマンドラインオプションの項を見てね。
+また、ソースを見るなら、libmodedef.pl です。
+
+	distribute	配送だけ
+	hack		ローカルハック用
+	fmlserv		listserv emulation
+	fml		デフォールト
+	hml		hml emulation
+	emudistribute	distribute を emulate(配送だけ＋ヘッダ変換等)
+			注意：↑ distribute というprogramもあるのである 
+	html		var/html に html 化した記事も作っていく
+	check		メンバーチェック
+	commandonly	コマンドだけを実行するサーバ
+	mime		MIME 変換した記事等を置くなど MIME オプション
+	through		すどおし
+	auto		自動登録（どういうメールが来ても登録）
+	autosubject	subject: subscribe のキーワードを必要とする
+	autobody	メール本文にsubscribe のキーワードを必要とする
+	cack		コマンドをだれでも実行できる（ + trick の時有用）
+
+
+ソースより(以下 libmodedef.pl 2.0.2)：
+.q
+sub ModeDef
+{
+    local($mode) = @_;
+
+    &Debug("ModeDef::$mode()") if $debug;
+
+    require 'libhack.pl' if $mode eq 'hack';
+
+    &FmlServMode    if $mode eq 'fmlserv';
+    &FmlMode        if $mode eq 'fml';
+    &HmlMode        if $mode eq 'hml';
+    &EmulateDistributeMode if $mode eq 'emudistribute';
+    &HtmlMode       if $mode eq 'html';
+
+    if ($mode eq 'check')       { $ML_MEMBER_CHECK = 1;}
+    if ($mode eq 'commandonly') { $COMMAND_ONLY_SERVER = 1;}
+    if ($mode eq 'mime')        { $USE_MIME = 1;}
+    if ($mode eq 'through')     { $SUPERFLUOUS_HEADERS = 1;}
+    if ($mode eq 'auto')        { $ML_MEMBER_CHECK = 0;}
+
+    if ($mode eq 'autosubject') { 
+	$ML_MEMBER_CHECK = 0;
+	$REQUIRE_SUBSCRIBE = "subscribe";
+    }
+
+    if ($mode eq 'autobody')     { 
+	$ML_MEMBER_CHECK = 0;
+	$REQUIRE_SUBSCRIBE = "subscribe";
+	$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+    }
+
+    if ($mode eq 'caok') {	# command anyone ok
+	$Envelope{'mode:anyoneok'} = 1;
+	$PROHIBIT_COMMAND_FOR_STRANGER = 0;
+    }
+
+    1;
+}
+.~q
+
 
 .S	自動登録について
 .seealso fml-mechanism
@@ -844,7 +1035,7 @@ $ML_MEMBER_CHECK が 0 とか "" のようになっている時が
 	投稿者がメンバーでない場合自動的にMLに登録する
 
  --check 
-	投稿者がMLのメンバーか否かチェックを行う(default)
+	投稿者がMLのメンバーか否かチェックを行う
 
 です。
 
@@ -967,6 +1158,50 @@ $CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
 リを実行するように動くからです
 
 
+.S	リモートで管理する設定
+.seealso	REMOTE-ADMINISTRATION
+
+SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
+にはなっていません。リモートで管理もできるようにモードを変えるには、
+
+	コマンドラインオプションで --remote か
+
+	$REMOTE_ADMINISTRATION = 1;
+
+としてください。デフォールトではパスワードを要求する設定です。
+＃つまり   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; の状態
+
+パスワードは $DIR/etc/passwd に crypt された形で保存されます。
+
+新たにパスワードを初期化する場合は
+	bin/passwd -i mail-address new-passwod
+のようにしてください。
+
+例：
+	% bin/passwd -i fukachan@sapporo.iij.ad.jp password
+
+fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
+設定する（実際にこんな間抜けなパスワードを付けてはいけません:-）
+
+カスタマイズするべきファイル等は
+
+   アドミンと認めるメンバーのリスト（Email-address）
+   $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+
+   アドミンのコマンドのHELPファイル
+   $ADMIN_HELP_FILE	= "$DIR/help-admin";
+
+   リモート管理にパスワードを要求する場合には１に
+   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+
+   その場合のパスワードを保存するファイル
+   $PASSWD_FILE        = "$DIR/etc/passwd";
+
+詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
+
+
+
+.C	コマンドの実行に関する２、３のこと…
 
 .S	コマンドの # syntax は必要か？ 
 
@@ -1098,48 +1333,9 @@ $SMTP_OPEN_HOOK = q#
 #;
 
 
-.S	リモートで管理する設定
-.seealso	REMOTE-ADMINISTRATION
+.P	インストール
 
-SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
-にはなっていません。リモートで管理もできるようにモードを変えるには、
-
-	コマンドラインオプションで --remote か
-
-	$REMOTE_ADMINISTRATION = 1;
-
-としてください。デフォールトではパスワードを要求する設定です。
-＃つまり   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; の状態
-
-パスワードは $DIR/etc/passwd に crypt された形で保存されます。
-
-新たにパスワードを初期化する場合は
-	bin/passwd -i mail-address new-passwod
-のようにしてください。
-
-例：
-	% bin/passwd -i fukachan@sapporo.iij.ad.jp password
-
-fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
-設定する（実際にこんな間抜けなパスワードを付けてはいけません:-）
-
-カスタマイズするべきファイル等は
-
-   アドミンと認めるメンバーのリスト（Email-address）
-   $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
-
-   アドミンのコマンドのHELPファイル
-   $ADMIN_HELP_FILE	= "$DIR/help-admin";
-
-   リモート管理にパスワードを要求する場合には１に
-   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
-
-   その場合のパスワードを保存するファイル
-   $PASSWD_FILE        = "$DIR/etc/passwd";
-
-詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
-
-
+ここではインストールについて
 
 .C	Install && Configurations
 .label	{configuration}
@@ -3210,95 +3406,6 @@ fukachan@phys.titech.ac.jp	skip
 ですね
 
 
-.S	.forwardでのＭＬ	その２
-.label	{dot-forard}
-.key	.forwardでのＭＬ
-
-どういうケースが考えられるかよくわからないので、こんなのを考えてみました
-＃他にどういうのがあるのかおしえてくださいね
-
-！！どういうふうにすると無限ループしちゃうかをよく考えた上で使って下さい！！
-
-rosy という人が、beth.phys.titech.ac.jp というマシンで 個人的にＭＬをつくるとします。
-で、
-To: rosy@beth.phys.titech.ac.jp (uja)
-                                ＾＾＾
-				ここの部分でＭＬなのかＤＭなのかを区別するとする
-もしくは
-X-ML: uja 
-というのも考えられますね（いまのところ、どっちかをつかう、どっちでもＯＫ）
-＃他のヴァリエーションとしてヘッダに何かつけて区別とかもありえますよね？
-＃どういうのがいいんでしょ？？？
-
-このときは （~ = $HOME です）
-
-~/.forward に
-rosy@beth.phys.titech.ac.jp
-"|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml -F||exit 75"
-
-としかけます。ここで -F は.forwardでの利用を fml.pl に教えています。
-＃これで loop しないはずですね。
-
-~/.forward はどのマシンからも呼ばれちゃうので、どのマシンで使うか？を
-定義しておきます。＃大文字子文字もあわせてね hostname と
-
-$DOT_FORWARD_EXEC_HOST = "beth";
-
-＃ beth はマシン名 (Elizabeth March:-))
-
-/home/beth/rosy/ml/config.ph に次のように書いておきます
-
-そのキーワードの時に実行するコマンド（↓注意：-Fはつかず、普通のｆｍｌ起動）
-$forward_key{'uja'} = 
-"/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml";
-
-つまり
-	sendmail	１-> localにユーザーへ
-
-			２-> fml.pl -F を起動
-			  -> (uja) を検出したら（キーワード）
-			  -> fml.pl を起動してＭＬとしてはたらく
-
-くれぐれも配送先に自分を指定しないようにしてください（無限ループ）
-あとは普通と同じです。
-
-あと この場合、***-requestとかじゃなくて$MAIL_LIST, $MAINTAINERとかも
-自分のアドレスですね。 この場合の追加ヘッダ処理は
-
-sub MultipleMLForwarding
-の中で
-
-    $Reply_to = "Reply-To: $MAIL_LIST ($KEY)\n";
-                            ↑
-			本人のアドレスのはず
-
-    $HEADER_ADD_HOOK = q#
-	$body .= "X-ML: $KEY";
-    #;
-
-			X-ML: uja とかつける
-
-をしてます。＃いじるならここです。
-
-fml.pl への patch が lib/Utilities にあります。あてて、つかってください
-
-
-.S	あんまり意味ないけど…
-
-上と同じことをして、
-$address_key{rosy} = "fml.pl rosy rosy";
-$address_key{rosy} = "/bin/cat > /home/beth/rosy/uja";
-
-/etc/aliases で
-uja:"|fml.pl $DIR $DIR"
-aja:uja
-aoi:uja
-rosy:uja
-
-とかける（あまり建設的とは思えないのだが…どうせ/etc/aliasesいじるのは一緒なんだから）
-
-
-
 .S	自動送り返しサーバってどう実装してるんですか？ その１
 .key	自動送り返しサーバっ実装例１
 
@@ -3412,45 +3519,13 @@ $POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
 
 .S	たとえば、Received: のようなヘッダを残すには？
 
-Current(1.6以降) では、すべての変数は 
+2.1 では
 
-	$Envelope{"field名を小文字にした単語:"}
-	＃ いまのばあい、$Envelope{'received:'}
+    unshift(@HdrFieldsOrder, 'received');
 
-に、はいってるので、 これを どっかの hook で Add するとかでＯＫでしょう。
-もっとも、
-
-	$Envelope{'received:'} =~ s/(\w)Received:/$1\nReceived:/g;
-
-とかして、（つながってますんで、）複数行にもどさないと あきまへん…
-
-古いやつだと、直接 next if /^Received:/ をけずって、addするしかありま
-せんが
-.q
---- fml.pl	Tue Nov 14 16:49:28 1995
-+++ fml.pl.new	Tue Nov 14 16:49:02 1995
-@@ -173,6 +173,11 @@
- 
- 	# Fields to skip. Please custumize below.
- 	next if /^Received:/io;
-+
-+	if (/^Received:/io) {
-+	    $ReceivedHeaders .= "X-Received: $contents\n"; #?
-+	}
-+
- 	next if /^In-Reply-To:/io && (! $SUPERFLUOUS_HEADER);
- 	next if /^Return-Path:/io;
- 	next if /^X-M\S+:/io;
-@@ -518,6 +523,8 @@
-     $body .= $_cf{'MIME', 'header'} if (!$PREVENT_MIME) && $_cf{'MIME', 'header'};
-     $body .= $SuperfluousHeaders    if $SUPERFLUOUS_HEADERS;
- 
-+    $body .= $ReceivedHeaders;
-+
-     # Additional hook;
-     $body .= "Message-Id: $Message_Id\n" if $USE_ORIGINAL_MESSAGE_ID;
-     $HEADER_ADD_HOOK && &eval($HEADER_ADD_HOOK, 'Header Add Hook');
-.~q
+とすればいいでしょう。もっともこの場合一行だけ Received ではなく 
+received になってしまってちょっと情けないかも知れませんが…
+＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
 
 
 
