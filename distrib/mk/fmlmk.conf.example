@@ -7,17 +7,20 @@
 
 ### [LOCATIONS] ###
 
+#
+TOP_DIR	     =
+
 # exports for ftp 
-FTP_DIR      = /var/spool/ftp/pub/fml
+FTP_DIR      = $(TOP_DIR)/var/spool/ftp/pub/fml
 ARCHIVE_DIR  = ${FTP_DIR}/archives/these_days
 SNAPSHOT_DIR = ${FTP_DIR}/snapshot
 
 # exports for www
-WWW_BASE_DIR = /var/www/htdocs/fml
-WWW_DIR      = /var/www/htdocs/fml
+WWW_BASE_DIR = $(TOP_DIR)/var/www/htdocs/fml
+WWW_DIR      = $(TOP_DIR)/var/www/htdocs/fml
 
 # (temporary) working directory for make "snapshot", "build" and "release"
-DESTDIR      = /var/tmp/daily_fml_snapshots
+DESTDIR      = $(TOP_DIR)/var/tmp/daily_fml_snapshots
 
 
 
