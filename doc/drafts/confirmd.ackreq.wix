@@ -1,22 +1,22 @@
-# ack _ML_
+_CTK_ack _ML_
 
 .if LANG == JAPANESE
 これからもこのメーリングリスト <_MAIL_LIST_> に入り続けますか？
 
-入り続けたいなら「# ack _ML_」(このメールの最初の行)という一行だけのメー
+入り続けたいなら「_CTK_ack _ML_」(このメールの最初の行)という一行だけのメー
 ルを _ARG0_ 以内に <_CTLADDR_> へ送って下さい。
 
 もうメーリングリストから抜けたいなら何もしなくても構いません。
 そのうち自動的に削除されます。
 
 このメーリングリストではあなたが「これからもこのメーリングリストに入り
-続ける意志があるか？」を定期的に確認することにしています。# ack _ML_ 
+続ける意志があるか？」を定期的に確認することにしています。_CTK_ack _ML_ 
 というコマンドを送り返してもらうことでその意思表示とみなしています。
 .fi
 .if LANG == ENGLISH
 Would you continew to join this list <_MAIL_LIST_> ?
 
-If you so, plaese reply this mail and send just "# ack _ML_" to the
+If you so, plaese reply this mail and send just "_CTK_ack _ML_" to the
 address <_CTLADDR_>. If you go out this list, you do not have to do
 anything. FML removes you after an interval.
 

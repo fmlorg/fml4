@@ -9,20 +9,22 @@ ________________________________
 
 .C	Overview
 
+歴史的に # をコマンドの前につけても構いませんが;-)、デフォールト設定で
+は必要ありません。e.g. #unsubscribe, #help
 =E
-"#" is prepended in fml documents for some historically reasons. "#"
-is NOT NEEDED in almost all cases but fml can accepct commands with or
-without '#'.  Please ignore this in default configuration.
+Also you can send "_CTK_unsubscribe". "#" is prepended in fml
+documents for some historically reasons. "#" is NOT NEEDED in default
+configuration, but fml can accept commands with or without '#'.
 
 .S	コマンドについて
 =E.S	Administrative Commands
 
-"# admin コマンド" == "# approve パスワード コマンド" 
+"_CTK_admin コマンド" == "_CTK_approve パスワード コマンド" 
 と同じです。パスワードは平文で書いてください。
 =E
-	# admin command arguments
+	_CTK_admin command arguments
 or
-	# approve PASSWORD command arguments	 
+	_CTK_approve PASSWORD command arguments	 
 
 =E
 syntaxes are available where the password (PASSWORD) is plain.
@@ -39,18 +41,18 @@ In PGP mode, you should do clear sign but no plain password.
 コマンドの例:
 =E 
 Example:
-	# admin pass パスワード
+	_CTK_admin pass パスワード
 =E
-	# admin pass PASSWORD
-	# admin ls
+	_CTK_admin pass PASSWORD
+	_CTK_admin ls
 
 は次の行と同じです。
 =E
 is the same as
 
-	# approve パスワード ls
+	_CTK_approve パスワード ls
 =E
-	# approve PASSWORD ls
+	_CTK_approve PASSWORD ls
 
 
 .C	コマンドリスト
@@ -59,38 +61,38 @@ is the same as
 .S	パスワード関係
 =E.S	Around Password 
 
-# admin pass パスワード
-# admin password パスワード
+_CTK_admin pass パスワード
+_CTK_admin password パスワード
 	もしパスワードを必要とする設定なら必ず先頭にこれがないといけま
 	せん。キーワードはpasswdにしようかと思ったけど、
 	そうすると、コマンドラインとごっちゃになるからftpからとって
 	きてpassというキーワードを使います。
 =E
-# admin pass PASSWORD
-# admin password PASSWORD
+_CTK_admin pass PASSWORD
+_CTK_admin password PASSWORD
 	In the first phase before the administrative commands begin,
 	you need to show the password PASSWORD.
 
-# admin passwd 新しいパスワード
+_CTK_admin passwd 新しいパスワード
 	パスワードの変更
 	shell% passwd ってやつとおなじっす(複数回は要求されませんが)。
 =E
-# admin passwd PASSWORD
+_CTK_admin passwd PASSWORD
 	"passwd" command to set new password where PASSWORD is the new one. 
 	% passwd
 
-# admin initpass アドレス パスワード
+_CTK_admin initpass アドレス パスワード
 	アドレスに対するパスワードを"パスワード"で初期化する
 	初期化は変更と違い特別扱いです。bin/passwd -i とおなじです。
 =E
-# admin initpass ADDRESS PASSWORD
+_CTK_admin initpass ADDRESS PASSWORD
 	Initialize PASSWORD for ADDRESS in remote.
 	% "bin/passwd -i".
 
 .S	ヘルプ
 =E.S	Help
 
-# admin help
+_CTK_admin help
 	管理者コマンドヘルプを取り寄せる(このファイル)
 =E
 	get help file for administrators
@@ -98,17 +100,17 @@ is the same as
 .S	ログファイル
 =E.S	Log File
 
-# admin log
+_CTK_admin log
 	ログの最近の100行を取り寄せる
 =E
 	get the latest 1000 lines in the log file.
 
-# admin log -N
+_CTK_admin log -N
 	ログの最近の N行を取り寄せる。例 admin log -40 (最近の40行)
 =E
 	get the latest N lines in the log file (N is the number).
 	
-# admin log all
+_CTK_admin log all
 	ログファイル全体を取り寄せる。とても大きいかも知れないので注意。
 =E
 	get the whole log file.
@@ -116,45 +118,45 @@ is the same as
 .S	メンバーリストの変更
 =E.S	Change member/active lists 
 
-# admin add address
+_CTK_admin add address
 	address の人をMLに登録する
 =E
 	register address to ML
 
-# admin off address
+_CTK_admin off address
 	address の人をML一時おやすみにする
 	(actives file にのみ作用する)
 =E
 	remove address from a recipient of ML but the address remains
-	as a ML member. "# admin on" command enables again address as a
+	as a ML member. "_CTK_admin on" command enables again address as a
 	recipient.
 
-# admin on address
+_CTK_admin on address
 	address の人のML一時おやすみを解除
 	(actives file にのみ作用する)
 =E
 	enables address as a recipient which is disabled by "admin off".
 	
-# admin bye address
+_CTK_admin bye address
 	address の人をMLメンバーから削除
 =E
 	remove address from a ML member and recipient
 
-# admin chaddr old-addr new-addr
-# admin change old-addr new-addr
-# admin change-address old-addr new-addr
+_CTK_admin chaddr old-addr new-addr
+_CTK_admin change old-addr new-addr
+_CTK_admin change-address old-addr new-addr
 	old-addrを削除して、new-addrを登録する
 =E
 	change address old-addr (old address) to new-addr (new address)
 
-# admin matome address 引数 
+_CTK_admin matome address 引数 
 	address の人を まとめおくりに
 	引数は 6 6u 6i 等
 =E
-# admin matome address argument
+_CTK_admin matome address argument
 	set address to the digest mode. The argument is digest mode option.
 
-# admin skip address
+_CTK_admin skip address
 	この address を配送はしないけど投稿はできるようにする
 =E
 	set this address to be not a recipient but remains as a ML member.
@@ -162,14 +164,14 @@ is the same as
 .S	管理者メンバーリストの変更
 =E.S	Change Administrator Lists
 
-# admin addadmin address
-# admin addpriv  address
+_CTK_admin addadmin address
+_CTK_admin addpriv  address
 	address の人を管理者メンバーとして登録
 =E
 	add address to an administrator
 
-# admin byeadmin address
-# admin byepriv  address
+_CTK_admin byeadmin address
+_CTK_admin byepriv  address
 	address の人を管理者メンバーから削除
 =E
 	remove address to an administrator
@@ -177,7 +179,7 @@ is the same as
 .S	ファイル操作
 =E.S	File Operations
 
-# admin dir
+_CTK_admin dir
 	MLのある場所の階層全部のリスト(ls -lR)
 	注意: $DIR 下全部なのででっかいかもしれない
 =E
@@ -185,27 +187,27 @@ is the same as
 	Attention: the result may be big!
 	% ls -lR ML's HOME
 
-# admin ls options
+_CTK_admin ls options
 	MLのある場所のリスト(ls)
 =E
 	list up options(files/directories)
 	% ls options in $DIR (ML's HOME)
 
-	# admin ls -l
-	# admin ls -l spool
+	_CTK_admin ls -l
+	_CTK_admin ls -l spool
 	のようにオプション(一行に書く限りいくつあってもいい)も使える
 
-# admin get filename
+_CTK_admin get filename
 	MLのある場所の filename というファイルをとってくる
 =E
 	get back filename under $DIR
 
-# admin resend filename address
+_CTK_admin resend filename address
 	MLのある場所の filename というファイルを address へ送る。
 =E
 	send filename in $DIR to address
 
-# admin forward
+_CTK_admin forward
 	admin forward 行より後ろをＭＬへフォワードする
 	本来モデレータモードで使うためのもの
 	でもこのコマンドをTYPOして…という危険はありうるので注意
@@ -213,8 +215,8 @@ is the same as
 	forward the mail body after 'admin forward' line to ML,
 	that is an article. It is useful in moderator mode.
 
-# admin newinfo
-# admin newguide
+_CTK_admin newinfo
+_CTK_admin newguide
 	この命令に続くメール本文の残り部分を新しい GUIDE ファイルとして
 	入れ換える
 =E
@@ -229,19 +231,19 @@ is the same as
 To remove and overwrite files in $DIR must be insecure. 
 The files in @REMOTE_RECONFIGURABLE_FILES can be changed. 
 
-# admin put filename
+_CTK_admin put filename
 	MLのある場所の filename というファイルを置く。
 	もし filename というファイルがある場合は、
 	古い filename は filename.bak に変えておく
 =E
 	overwrite $DIR/filename and change the old filename to filename.bak
 
-# admin remove filename
+_CTK_admin remove filename
 	MLのある場所の filename というファイルを削除
 =E
 	remove $DIR/filename 
 
-# admin rename filename1 filename2
+_CTK_admin rename filename1 filename2
 	MLのある場所の filename1 というファイルを filename2 という名
 	前にする。
 =E
@@ -253,8 +255,8 @@ The files in @REMOTE_RECONFIGURABLE_FILES can be changed.
 Both files should be in @REMOTE_RECONFIGURABLE_FILES, so this command
 may be not useful.
 
-# admin unlink-article ID
-# admin remove-article ID
+_CTK_admin unlink-article ID
+_CTK_admin remove-article ID
 	記事番号 ID の記事を削除して、ファイルの中身は "removed by an
 	administrator" というフレーズに置き換えられる。html 形式のファ
 	イルも作ることになっていればそれも置き換える。なおexpireを考慮
@@ -268,13 +270,13 @@ may be not useful.
 
 .S	PGP (Pretty Good Privacy)
 
-# admin pgp -ka 
+_CTK_admin pgp -ka 
 	メールのこの行以降の部分を pubric key としてＭＬサーバの 
 	pub-ring に加える
 =E
 	add the key in this mail to a pubring
 
-# admin pgp -kv
+_CTK_admin pgp -kv
 	現在の key-ring を見る 
 =E
 	see the current keyring list
@@ -287,18 +289,18 @@ may be not useful.
 
 admin はつかないけど…
 
-# set debug		
+_CTK_set debug		
 	デバッグモードをオン
 =E
 	debug on
 
-# set addr_check_max LEVEL
+_CTK_set addr_check_max LEVEL
 	アドレスのチェックを LEVEL(数字)へ。つまり
 	$ADDR_CHECK_MAX = LEVEL へ
 =E
 	$ADDR_CHECK_MAX = LEVEL;
 
-# set exact
+_CTK_set exact
 	アドレスのチェックをExact へ
 	実は $ADDR_CHECK_MAX = 9; です:-)
 =E
