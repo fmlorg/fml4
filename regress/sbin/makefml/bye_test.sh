@@ -5,25 +5,25 @@
 #
 # $Id$
 
-# set -- `getopt d:h:v $*`
-# if test $? != 0; then echo 'Usage: ...'; exit 2; fi
-# for i
-# do
-# 	case $i
-# 	in
-# 	-d)
-# 		DIR=$2; 
-# 		shift;	shift;;
-# 	-h)
-# 		HOST=$2; 
-# 		shift;	shift;;
-# 	-v)
-# 		set -x 
-# 		shift;;
-# 	--)
-# 		shift; break;;
-# 	esac
-# done
+
+GETOPT () {
+   set -- `getopt c:dv $*`
+   if test $? != 0; then echo 'Usage: ...'; exit 2; fi
+   for i
+   do
+   	case $i
+   	in
+   	-c)
+   		command=$2; 
+   		shift;	shift;;
+   	-v | -d)
+   		set -x 
+   		shift;;
+   	--)
+   		shift; break;;
+   	esac
+   done
+}
 
 
 DIFF () {
@@ -47,12 +47,17 @@ INIT () {
    cd /var/spool/ml/elena || exit 1
    echo "create/reset elena ML"
    makefml -F newml elena >/dev/null 2>&1
+
+   # default is "bye" test
+   command=bye
 }
 
 
 ### MAIN ###
 
 INIT
+
+GETOPT $*
 
 for x in reject auto_subscribe auto_asymmetirc_regist auto_regist
 do
@@ -72,7 +77,7 @@ do
 
    RESET
 
-   makefml bye elena fukachan@sapporo.iij.ad.jp >/dev/null
+   makefml $command elena fukachan@sapporo.iij.ad.jp >/dev/null
    DIFF
 done
 
