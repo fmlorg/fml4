@@ -122,7 +122,8 @@ COPY_DOCS () {
    cp doc/html/fml.css $HTML_DIR/
 
    echo "rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/"
-   rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/
+   echo "XXX no no, we exclude var/html/Japanese/ temporary!!!"
+   rsync --exclude=Japanese -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/
 
    echo "rsync -av advisories $DESTDIR/distrib/doc/html/"
    rsync -av var/html/advisories $DESTDIR/distrib/doc/html/
