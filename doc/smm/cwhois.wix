@@ -179,6 +179,13 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	$TIMEOUT            = 5;#20;
 .k	$TIMEOUT
 
+○ whois のHELPファイル が定義されている場合は help# で
+   このファイルを表示する。
+
+	$CWHOIS_HELP_FILE
+.k	$CWHOIS_HELP_FILE
+
+
 
 .S	Cwhois の Search Algorithm
 
@@ -322,6 +329,31 @@ sub CacheOn
 
 	require $CWHOIS_SEARCH_PROG;
 	&ScanDB(*key, *set, *db, *spool, *misc);
+
+
+.S	$CWHOIS_START_HOOK
+.k	$CWHOIS_START_HOOK
+
+keyword が help 要求でない場合まずこのフックを評価し、この後
+caching whois の main routine に入る。
+
+
+.S	$CWHOIS_CACHE_SEARCH_HOOK
+.k	$CWHOIS_CACHE_SEARCH_HOOK
+
+例：uja データベースの検索の時はデータ全部を表示する
+    ちなみに $MATCH_THE_LATEST = 1;（つまり一番新しいもののみ表示）
+    がデフォールト
+
+	$CWHOIS_CACHE_SEARCH_HOOK = q#
+	    if ($set eq "uja") { undef $MATCH_THE_LATEST;}
+	#:
+
+
+.S	$CWHOIS_EXIT_HOOK
+.k	$CWHOIS_EXIT_HOOK
+
+終了する時に評価
 
 
 .# $Id$
