@@ -1,3 +1,5 @@
+#### SIMULATION DEBUG #####
+
 # Debug Pattern Custom for &GetFieldsFromHeader
 sub FieldsDebug
 {
@@ -36,6 +38,15 @@ sub OutputEventQueue
     for ($qp = 1; $qp ne ""; $qp = $EventQueue{"next:${qp}"}) {
 	&Debug(sprintf("\tqp=%-2d link->%-2d fp=%s",
 		       $qp, $EventQueue{"next:$qp"}, $EventQueue{"fp:$qp"}));
+    }
+}
+
+sub InitSimulationDebug
+{
+    if ($debug_on_target) {
+	push(@HdrFieldsOrder, 'X-Simulation-ID');
+	$e{'GH:X-Simulation-ID:'} = $e{'h:X-Simulation-ID:'} 
+	= $e{'h:x-simulation-id:'};
     }
 }
 
