@@ -18,8 +18,7 @@ sub MTICache
     local(*e, $mode) = @_;
     local($time, $from, $rp, $sender, $db, $xsender);
     local($host, $date, $rdate, $buf, $status);
-    local(%hostinfo);
-    local(%addrinfo);
+    local(%hostinfo, %addrinfo);
 
     ### Extract Header Fields
     $time    = time;
@@ -29,27 +28,20 @@ sub MTICache
     $sender  = &Conv2mailbox($e{'h:sender:'}, *e);
     $xsender = &Conv2mailbox($e{'h:x-sender:'}, *e);
 
-    ## Received:
+    ## Analizeing Received:
     $status = &MTI'GetHostInfo(*hostinfo, *e); #';
     if ($status) {
 	&Log("MTI[$$]: $status"); # Information
     }
-    
-    ### OPEN HASH TABLES (SWITCH)
-    if ($mode eq 'distribute') {
-	$MTI_DB    = $db = $MTI_DIST_DB || "$FP_VARDB_DIR/mti.dist";
-	$MTI_HI_DB = $MTI_HI_DIST_DB || "$FP_VARDB_DIR/mti.hi.dist";
-    }
-    elsif ($mode eq 'command') {
-	$MTI_DB    = $db = $MTI_COMMAND_DB || "$FP_VARDB_DIR/mti.command";
-	$MTI_HI_DB = $MTI_HI_COMMAND_DB || "$FP_VARDB_DIR/mti.hi.command";
-    }
-    else {
-	&Log("MTI[$$] Error: MTICache called under an unknown mode");
-	return $NULL;
+
+    ## additonal checks
+    ## 1 check the consistency between Return-Path: and From:
+    if ($rp && $From_address && !&AddressMatch($rp, $From_address)) {
+	&Log("MTI[$$]: Warning; Return-Path:<$rp> != From:");
     }
 
-    &MTIDBMOpen;
+    
+    &MTIDBMOpen($mode) || return $NULL;
 
     ### CACHE ON
     ### cache on addresses with the current time; also, expire the addresses
@@ -57,7 +49,7 @@ sub MTICache
     ## cache addresses info
     for ($from, $rp, $sender, $xsender) {
   	next unless $_;
-	next if $addrinfo{$_};
+	next if $addrinfo{$_};	# for uniqueness
 	next if $MTI{$_} =~ /$time:/; # unique;
     
         &MTICleanUp(*MTI, $_, $time);
@@ -65,12 +57,8 @@ sub MTICache
 	$addrinfo{$_} = $_;
     }
 
+    ## UNDER CURRENT IMPLEMENTATION, HOST INFO IS JUST ADDITONAL FYI.
     ## cache host info with Date: or Received: 
-    # Under the in-coming mail date CORRELATION CHECKS,
-    # if a host sent queued mails when UUCP or DIP wakes up,
-    # we cannot determine whether he is a real bomber
-    # or to be a bomber by a mistake.
-    # Here we record time estimated as when the mail left the host.
     if (%hostinfo) {
 	local($host, $rdate);
 	while (($host, $rdate) = each %hostinfo) {
@@ -81,10 +69,11 @@ sub MTICache
 
     ### CLOSE HASH (save once anyway), AND RE-OPEN
     &MTIDBMClose;
-    &MTIDBMOpen;
+    &MTIDBMOpen($mode) || return $NULL;
+
 
     ### GARBAGE COLLECTION FROM TIME TO TIME
-    # Expire all caches (require to preserve the db size is small.)
+    # Expire all caches (require to preserve the db size is small).
     # default is one week
     if ((time % 50) == 25) { # random, about once per 50;
 	&MTIGabageCollect(*MTI, $time);
@@ -92,18 +81,18 @@ sub MTICache
     }
 
 
-    #######################################################
     ### CHECK ROUTINES
     ## BUILT_IN 
     if (($mode eq 'distribute' && $MTI_DISTRIBUTE_TRAFFIC_MAX) || 
 	($mode eq 'command' && $MTI_COMMAND_TRAFFIC_MAX)) {
-	for ($from, $rp, $sender) {
-	    next unless $_;
-	    &MTIProbe(*MTI, $_, "${mode}:max_traffic");
+	for (keys %addrinfo) {
+	    &MTIProbe(*MTI, $_, "${mode}:max_traffic");	# open, close;
 	}
     }
 
     ## SPECULATE BOMBERS
+    &MTIDBMOpen($mode) || return $NULL;
+
     local($fp) = $MTI_COST_EVAL_FUNCTION || 'MTISimpleBomberP';
     &$fp(*e, *MTI, *HI, *addrinfo, *hostinfo);
 
@@ -120,9 +109,35 @@ sub MTICache
 
 sub MTIDBMOpen
 {
-    dbmopen(%MTI, $db, 0600);
-    dbmopen(%HI, $MTI_HI_DB, 0600);
+    local($mode) = @_;
+
+    ### OPEN HASH TABLES (SWITCH)
+    if ($mode eq 'distribute') {
+	$MTI_DB    = $MTI_DIST_DB    || "$FP_VARDB_DIR/mti.dist";
+	$MTI_HI_DB = $MTI_HI_DIST_DB || "$FP_VARDB_DIR/mti.hi.dist";
+    }
+    elsif ($mode eq 'command') {
+	$MTI_DB    = $MTI_COMMAND_DB    || "$FP_VARDB_DIR/mti.command";
+	$MTI_HI_DB = $MTI_HI_COMMAND_DB || "$FP_VARDB_DIR/mti.hi.command";
+    }
+    else {
+	&Log("MTI[$$] Error: MTICache called under an unknown mode");
+	return $NULL;
+    }
+
+    if ($USE_FML_WITH_FMLSERV) {
+	chmod 0660, $MTI_DB, $MTI_HI_DB;
+	dbmopen(%MTI, $MTI_DB, 0660);
+	dbmopen(%HI,  $MTI_HI_DB, 0660);
+    }
+    else {
+	chmod 0600, $MTI_DB, $MTI_HI_DB;
+	dbmopen(%MTI, $MTI_DB, 0600);
+	dbmopen(%HI,  $MTI_HI_DB, 0600);
+    }
+
 }
+
 
 sub MTIDBMClose
 {
@@ -130,10 +145,13 @@ sub MTIDBMClose
     dbmclose(%HI);
 }
 
+
 sub MTIProbe
 {
-    local(*MTI, $addr, $mode, $db) = @_;
+    local(*MTI, $addr, $mode) = @_;
     local($c, $s, $ss);
+
+    &MTIDBMOpen($mode =~ /^(\w+):/ && $1) || return $NULL;
 
     if ($mode eq "distribute:max_traffic") {
 	$c = split(/\s+/, $MTI{$addr});	# count irrespective of contents
@@ -159,6 +177,8 @@ sub MTIProbe
 	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_LIST;
 	}
     }
+
+    &MTIDBMClose;
 
     $s ? ($MTIErrorString = "$s\n$ss") : $NULL; # return;
 }
@@ -268,18 +288,51 @@ sub Date2UnixTime
 	$pm    = $7;
 	$shift_t = $8;
 	$shift_m = $9;
-	$shift_t =~ s/^0*//; 
-	$shift_m =~ s/^0*//;
+    }
+    elsif ($in =~ 
+	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
+	$day   = $1;
+	$month = ($Month{$2} || $month) - 1;
+	$year  = $3 > 1900 ? $3 - 1900 : $3;
+	$hour  = $4;
+	$min   = $5;
+	$sec   = 0;
 
-	$shift = $shift_t + ($shift_m/60);
-	$shift = ($pm eq '+' ? -1 : +1) * $shift;
+	# time zone
+	$pm    = $6;
+	$shift_t = $7;
+	$shift_m = $8;
+    }
+    # INVALID BUT MANY Only in Japan ???
+    elsif ($in =~ /(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\d\d\d\d)\s*/) {
+	$month = ($Month{$1} || $month) - 1;
+	$day   = $2;
+	$hour  = $3;
+	$min   = $4;
+	$sec   = $5;
+	$year  = $6 > 1900 ? $6 - 1900 : $6;
 
-	&timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600;
+	# time zone
+	$pm    = '+';
+	$shift_t = '09';
+	$shift_m = '00';	   
+    }
+    elsif ($in =~ /\;\s*(\d\d\d\d\d\d\d\d\d+)\s*$/) {
+	if (&ABS($1 - time) < 7*24*3600) { return $1;}
     }
     else {
 	&Log("Date2UnixTime: invalid date-time [$in]");
-	0;
+	return 0;
     }
+
+    # get gmtime
+    $shift_t =~ s/^0*//; 
+    $shift_m =~ s/^0*//;
+
+    $shift = $shift_t + ($shift_m/60);
+    $shift = ($pm eq '+' ? -1 : +1) * $shift;
+
+    &timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600;
 }
 
 
@@ -423,7 +476,7 @@ sub COST
 sub SumUp
 {
     local($buf) = @_;
-    local($time, $date);
+    local($cr, $d_cr, $time, $date, $p_time, $p_date);
 
     for (split(/\s+/, $buf)) {
 	next unless $_;
