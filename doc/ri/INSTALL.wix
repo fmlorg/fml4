@@ -25,6 +25,16 @@
    ホームページ
 .url http://www.fml.org/fml/
 
+   動作テスト、代表的なトラブルの事例とその解決方法
+
+    うまくいかない場合には、以下のチェックリストに沿って設定を確認し、
+    www.fml.org のサーチエンジンで過去の事例を検索して下さい。
+.url	http://www.fml.org/fml/CHECK_LIST/
+
+    なお、過去数年間の代表的なトラブル事例は書籍「fml バイブル」（オラ
+    イリージャパン刊）中に集約されています。
+.url http://www.fml.org/fml/treking_guide.ja.html
+
 
 [用語]
    以下のドキュメント中ではメーリングリストを ML と略しています。
