@@ -4,6 +4,31 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/01/21
+
+   import modules from fml-devel-20020120
+	Time::
+	HTML::
+
+   USE_NEW_HTML_GEN
+	という変数を定義してみました。メニューにも現れます。
+		これは fml-devel-20020120 から輸入した
+		新記事 → HTML 変換ルーチンを使うための布石です。
+
+	有効にしました。
+
+		$AUTO_HTML_GEN	   = 1;
+		$USE_NEW_HTML_GEN  = 1;
+
+	両方とも有効にすると、fml-devel の HTML 変換モジュール
+	を
+
+2002/01/20
+
+	import fml-devel-20020120
+		FNF
+		update Mail::*
+
 2002/01/10
 
   モデレータへの査読依頼を MIME/Multipart で送る
@@ -140,7 +165,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.230 2002/01/09 15:11:57 fukachan Exp $
+	add $FML: CHANGES,v 1.231 2002/01/10 14:27:39 fukachan Exp $
 
 2001/10/03
 
