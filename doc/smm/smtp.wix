@@ -114,7 +114,7 @@ and configure an array @HOSTS filled with at least N hostnames.
 $HOST と @HOSTS で与えられる N個 のマシンの sendmail をパラレルに使っ
 て(理論上での限界は)N倍配送を高速化する。
 ＃ $HOST も使われてしまうのは、もともと @HOSTS はセカンダリだったから
-＃ です（歴史的に）。
+＃ です(歴史的に)。
 =E
 fml.pl uses MTA's on $HOST and @HOSTS in delivery.
 
@@ -127,11 +127,6 @@ If the total number of $HOST and @HOSTS < N, fml.pl uses $HOST again
 and again. This technique is used as a secondary server in delivery.
 When you setup @HOSTS and unset $MCI_SMTP_HOSTS, fml.pl uses $HOST in
 usual, but @HOSTS if $HOST is down.
-
-actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
-まくいかせない可能性はあります。
-=E
-Attention: This technique may break host cache of sendmail R8.
 
 .S	VERPs
 
