@@ -102,9 +102,10 @@ sub Confirm
 	 # Header
 	 &FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	 $e{"GH:Subject:"} = "Subscribe confirmation request $ML_FN";
-	 $m .= "To confirm your subscribe request for $MAIL_LIST,\n";
-	 $m .= "please send the following phrase to $CONFIRMATION_ADDRESS\n\n";
-	 $m .= "$CONFIRMATION_KEYWORD $id $name\n";	     
+	 $m .= "$CONFIRMATION_KEYWORD $id $name\n\n";
+	 $m .= "Please reply this mail to confirm your subscribe request\n";
+	 $m .= "and send this to $CONFIRMATION_ADDRESS\n";
+	 $m .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";
 	 &Mesg(*e, $m);
 
 	 $e{'message:append:files'} = $CONFIRMATION_FILE;
