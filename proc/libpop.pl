@@ -160,6 +160,7 @@ sub Gobble
 	return 'ERROR of POP SERVER';
     }
 
+    my($time) = time;
     for ($i = 1; $i <= $n; $i++) {
 	$0 = "$FML: RETR $i <$LOCKFILE>"; 
 	print S "RETR $i\r\n";
@@ -167,8 +168,8 @@ sub Gobble
 	print POPLOG $_ = <S>; /^\-/o && last;
 
 	$tmpf       = "$POP_QUEUE_DIR/in.pop$$.$i";
-	$uif        = "$POP_QUEUE_DIR/pq$$.$i.prog.ui";
-	$queue      = "$POP_QUEUE_DIR/pq$$.$i";
+	$uif        = "$POP_QUEUE_DIR/pq$$.$time.$i.prog.ui";
+	$queue      = "$POP_QUEUE_DIR/pq$$.$time.$i";
 	$CurTmpFile = $tmpf;
 
 	# If occurs, we regard it as a critical error 
