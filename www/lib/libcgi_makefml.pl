@@ -369,9 +369,21 @@ sub Translate2LogOption
 	}
     }
     elsif ($x eq 'day') {
-	$s = sprintf("%04d%02d%02d", 
-		     $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
-	if ($s =~ /^\d+$/) { "-D$s";}
+	if (($Config{'YYYY'} =~ /^\d+$/) &&
+	    ($Config{'MM'}   =~ /^\d+$/) &&
+	    ($Config{'DD'}   =~ /^\d+$/)) {
+	    $s = sprintf("%04d%02d%02d", 
+			 $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
+	    if ($s =~ /^\d+$/) { return "-D$s";}
+	}
+	else {
+	    &ERROR("invalid date YYYYMMDD input");
+	    return $NULL;
+	}
+    }
+    else {
+	&ERROR("invalid 'log' option");
+	return $NULL;	
     }
 }
 
