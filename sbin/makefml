@@ -1100,6 +1100,36 @@ sub SRand
 }
 
 
+########## Message Language Extension
+sub LangExtConv
+{
+    local($key) = @_; # /a/b/c style menu layer
+    local($x, $msgfile);
+
+    $msgfile = "$EXEC_DIR/messages/$LANGUAGE/menu_conf";
+    while ($key =~ s@//@/@g) { 1;}
+    $key =~ s@/@.@g;
+    $key = 'menu_conf' .$key;
+
+    if ($LANGUAGE eq 'Japanese') {
+	require 'libmesgle.pl';
+	require 'jcode.pl';
+
+        $x = &MesgLE'Lookup($key, $msgfile); #';
+	$x =~ s/^[\s\n]+$//;
+        return $NULL unless $x;
+
+        &jcode'convert(*x, 'euc'); #';
+	$x =~ s/^[\s\n]*//;
+	$x =~ s/[\s\n]*$//;
+        $x;
+    }
+    else {
+        $key;
+    }
+}
+
+
 ##############################################################################
 ##########
 ########## LOCK LIBRARY
@@ -5586,6 +5616,7 @@ sub Bind
 {
     local(*bind, $s, $menu) = @_;
     local($index, $label, $html_ptr, $xl, $ptr, $v);
+    local($le_label); # message language extension
 
     if ($s =~ /(_i_\s+)(\S+)/) {
 	$index = $1;
@@ -5593,6 +5624,9 @@ sub Bind
 
 	$index =~ s/_i_/sprintf("%-3s", $Count)/ge;
 	$bind{$menu, $Count} = $label;
+
+	# message language extension (/a/b/c -> Japanese)
+	$le_label = &main'LangExtConv("$menu/$xl"); #';
 
 	# return value is rewritten .
 	$label = $NAME{"/$label"} || $label;
@@ -5624,7 +5658,10 @@ sub Bind
     $Count++;
 
     if ($main'HtmlConfigMode) { #';
-	"${html_ptr}$index$label</A>";
+	"${html_ptr}$index". ($le_label || $label) . "</A>";
+    }
+    elsif ($ENV{'MAKEFML_LANG'}) {
+	$le_label ? "${index}${le_label}" : "${index}${label}";
     }
     else {
 	"$index$label";
