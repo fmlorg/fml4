@@ -1,39 +1,17 @@
-#BETH
-PWD      = $(UPDIR)/EXP/contrib/fml_R1_localhack/schwalben
-UPSCH    = $(UPDIR)/distrib/contrib/fml_R1_localhack/schwalben
-SOURCES  = Makefile README auto-return.doc config.ph.example example-install.doc libsch.pl patch.sed
-RCSID=`sed -n 's/\(.*\)Id\(.*\)fml\.pl,v \(.*\) 19\(.*\)/\3/p' $(PWD)/fml.pl`
-#BETH
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
 
-all:	config fml.c fml.pl config.ph
-	cc -s -O fml.c -o fml
-	chown $(XXUID) fml
-	chmod 6755 fml
-	chmod 755 *.pl
+SOURCES = Makefile README auto-return.doc config.ph.example example-install.doc libsch.pl patch.sed
 
-config: fml.c fml.pl setup.pl
-	sed 's/FMLDIR/$(FMLDIR)/' fml.c |\
-	sed 's/XXUID/$(XXUID)/' > __TMP__
-	mv __TMP__ fml.c 
-	sed 's/FMLDIR/$(FMLDIR)/' fml.pl > __TMP__
-	mv __TMP__ fml.pl
-	sed 's/XXML/$(XXML)/' config.ph |\
-	sed 's/XXMAINTAINER/$(XXMAINTAINER)/'	> __TMP__
-	mv __TMP__ config.ph
-	sed 's/FMLDIR/$(FMLDIR)/' setup.pl > __TMP__
-	mv __TMP__ setup.pl
-	sed 's/FMLDIR/$(FMLDIR)/' split_and_sendmail.pl > __TMP__
-	mv __TMP__ split_and_sendmail.pl
+TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/schwalben
 
-clean:
-	rm -f *~ _* mget* core
-
-DISTRIB: distrib
-
-distrib: $(SOURCES)
-	@if [ ! -d $(UPDIR)/distrib/contrib ];\
-	then mkdir $(UPDIR)/distrib/contrib; fi;
-	rm -fr $(UPSCH)
-	mkdir $(UPSCH)
-	cp -p $(SOURCES) $(UPSCH)
-#	sed '/^DISTRIB/,$$d' Makefile | sed 's/delete/rm \-f/' | sed '/#BETH/,/#BETH/d' > $(UPSCH)/Makefile
+.include "$(FML)/distrib/mk/fml.contrib.mk"

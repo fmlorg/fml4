@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = FILES libtraffic.help libtraffic.install traffic.help VER_UP
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/traffic
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = aucea.pl libAucea.pl libAuceaCF.pl libAuceaSyscall.pl libaref.pl libfred.pl
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/lexical
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = config.ph gendb.ph gendb.pl scandb.pl
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/cwhois
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = config.ph-diff
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/localhack/release-2/doc-changes
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

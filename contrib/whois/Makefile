@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = Rin.pl README help submit.pl
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/whois
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

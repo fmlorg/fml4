@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = patch/libamctl.pl.patch patch/libfml.pl.patch src/libmember_name.pl readme.euc FILES.euc
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/localhack/release-2/member_name
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -1,8 +1,17 @@
-all:
-	nohup /bin/sh _bootstrap.sh &
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
 
-export:
-	rsync -C -av . /home/hikari/fukachan/irc/
+SOURCES = libirc.pl exports/example.ph exports/stdin2irc.sh
 
-clean:
-	gar *~
+TARGET_DIR = ${CONTRIB_DIR}/irc
+
+.include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = README Rmail2fml.pl babyl2mh filter my-mh-post my-mh-post.pl packmbox.pl rmail2mbox.el scan.format stardate.el
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/utilities
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"

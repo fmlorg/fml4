@@ -1,16 +1,17 @@
-#BETH
-PWD      = $(UPDIR)/EXP/contrib/fml_R1_localhack/putfiles
-UPMATOME = $(UPDIR)/distrib/contrib/fml_R1_localhack/putfiles
-SOURCES  = INSTALL Makefile README restructure-summary.pl
-#BETH
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
 
-DISTRIB: distrib
+SOURCES = INSTALL Makefile README restructure-summary.pl
 
-distrib: $(SOURCES)
-	@if [ ! -d $(UPDIR)/distrib/contrib ];\
-	then mkdir $(UPDIR)/distrib/contrib; fi;
-	rm -fr $(UPMATOME)
-	mkdir $(UPMATOME)
-	cp -p $(SOURCES) $(UPMATOME)
-	sed '/^DISTRIB/,$$d' Makefile | sed 's/delete/rm \-f/' > $(UPMATOME)/Makefile | sed '/#BETH/,/#BETH/d' > $(UPMATOME)/Makefile
-	(cd $(UPMATOME); ln -s INSTALL patch-config.ph)
+TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/putfile
+
+.include "$(FML)/distrib/mk/fml.contrib.mk"

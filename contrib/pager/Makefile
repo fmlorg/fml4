@@ -1,20 +1,17 @@
-all:
-	rm -f db/table
-	perl conv.pl -k 1 db/kuten-1 >> db/table
-	perl conv.pl -k 2 db/kuten-2 >> db/table
-	perl conv.pl -k 3 db/kuten-3 >> db/table
-	perl conv.pl -k 6 db/kuten-6 >> db/table
-	perl conv.pl -k 7 db/kuten-7 >> db/table
-	perl conv.pl -k 8 db/kuten-8 >> db/table
-	perl table2assoc.pl db/table > db/assoc.pl
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
 
-dist:
-	rcp euc2jiskuten.pl README eriko:~/.ftp/pager-calling
+SOURCES = euc2jiskuten.pl
 
-clean:
-	gar *~
+TARGET_DIR = ${CONTRIB_DIR}/pager
 
-CONTRIB: contrib
-
-contrib:
-	
+.include "$(FML)/distrib/mk/fml.contrib.mk"

@@ -10,8 +10,8 @@
 # $Id$
 #
 
-SOURCES = README README.mnews-ml patch.mnews-ml
+SOURCES = libkizu.pl patch1 patch2
 
-TARGET_DIR = ${CONTRIB_DIR}/localhack/release-1/mnews
+TARGET_DIR = ${CONTRIB_DIR}/localhack/release-2/kizu
 
 .include "$(FML)/distrib/mk/fml.contrib.mk"
