@@ -178,6 +178,19 @@ pages. This site provides the search engine over fml distribution
 documents. 
 .fi
 
+.S	FML Advisories
+
+現在のfml-currentにはFML Advisoriesというドキュメント群があります。旬
+の特定のテーマについてまとめたものです。セキュリティ関係が主なテーマで
+すが、それ以外のテーマもあります。
+例: happy99, Melissa
+=E
+FML advisories are a series of documents to advice some kinds of
+current topics, for example, happy99, Melissa ...
+
+.url	http://www.fml.org/fml/advisories/
+
+
 .S	メーリングリストについて
 =E.S	Mailing Lists
 
@@ -349,8 +362,8 @@ delivery (as both an experiment and a demonstration :-).
 	postfix snap-19990322
 
 
-.C	FML 2.2 の機能の概要
-=E.C	FML 2.2 Function Overview
+.C	FML 2.2A の機能の概要
+=E.C	FML 2.2A Function Overview
 
 .if LANG == JAPANESE
 基本的な設計方針は
