@@ -1,13 +1,14 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:X:Tm:b:N");
+&Getopts("iqtsp:L:X:Tm:b:Nr");
 
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
 $RELEASE_ID    = "$FML/conf/release_version";
 $RELEASE_DATE  = "$FML/distrib/compile/release_date";
 $SHOW_ID       = $opt_s;
+$RCSID_FNAME   = $opt_r;
 $query         = $opt_q;
 $patchlevel    = $opt_p;
 $Label         = $opt_L;
@@ -51,17 +52,23 @@ $PL = "${PL}pl$patchlevel" if $patchlevel;
 $DailyID = $BRANCH. " ". &YYYYMMDD;
 
 # 3.0B new id system
-if ($opt_N) {
+if ($opt_N || $RCSID_FNAME) {
     $ID = $Trunk;
     $PL = " (". &__YYYYMMDD .")";
 }
 
-if ($SHOW_ID) { 
+if ($SHOW_ID || $RCSID_FNAME) {
    if ($MODE eq 'daily') {
        print "fml $DailyID\n";
    }
    else {
-       print "fml $ID$PL\n";
+       if ($RCSID_FNAME) {
+	   $PL =~ s/[\s\(\)]//g;
+	   print $PL, "\n";
+       }
+       else {
+	   print "fml $ID$PL\n";
+       }
    }
    exit 0;
 }

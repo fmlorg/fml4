@@ -95,11 +95,11 @@ INIT_VERSION () {
 
 		# not use $RELEASE_MANIFEST
 		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
-
-		RID=`perl distrib/bin/fml_version.pl -s|awk '{print $2}' `
+		RID=`perl distrib/bin/fml_version.pl -r`
 
 		# log cvs status unless $MODE
 		if [ X$MODE = X ]; then
+		   echo "save cvs status to distrib/history/$TID/$RID"
 		   perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
 		   tee -a distrib/history/$TID/$RID
 			(
