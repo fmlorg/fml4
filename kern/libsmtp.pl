@@ -70,7 +70,9 @@ sub SocketInit
     local($eval, $exist_socket_ph);
 
     # SMTP HACK
-    if ($DISTRIBUTE_DUMMY_RECIPIENT) { require 'libsmtphack.pl'; &SmtpHackInit;}
+    if ($DISTRIBUTE_DUMMY_RECIPIENT) { 
+	require 'libsmtphack.pl'; &SmtpHackInit;
+    }
 
     for (@INC) { if (-r "$_/sys/socket.ph") { $ExistSocketPH = 1;}}
 
