@@ -528,8 +528,7 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 .S	cp *.pl your-fml-directory
 
 ひろげて *.pl だけ今使っているところへコピーしてください（おしまひ）
-＃よく使うライブラリは lib/perl/ の下にlinkしてあります。
-＃この下ごと copy するのが楽です
+
 
 .S	新しい機能を有効にするには？
 
