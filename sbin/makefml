@@ -1340,12 +1340,15 @@ sub ExecCmd
 	&MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR);
     }
 
+
     if ($MakeFmlProc{$fp}) {
 	$SavedFP = $fp;	# Function Pointer
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
 	local($fn) = $fp; $fn =~ s/do_//;
 	&Log("makefml::${fn} @argv ") if $fp ne "do_install";
+	if ($Env eq 'HTTPD') { &InitErrorBuffer;}
 	&$fp(@argv);
+	if ($Env eq 'HTTPD') { &FixErrorBuffer;}
     }
     else {
 	print "   Command [$fp] NOT DEFINED\n";
@@ -2112,6 +2115,8 @@ sub do_passwd
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
 	&Log("makefml::passwd changing $passwd_file succeed");
+	print "xstatus ok\n";
+	# $XStatus = 'OK:';
     }
     else {
 	print "   Passwd Change Fails ($passwd_file).\n";
@@ -2544,7 +2549,7 @@ sub do_newml
     # permission check only on UNIX's
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
 
-    $XStatus = 'OK:';
+    # $XStatus = 'OK:';
 }
 
 
@@ -2891,6 +2896,10 @@ sub GetCF
 	$config{'ADDR_CHECK_MAX'} = 3;
 	sleep 3;
     }
+
+    if ($HtmlConfigMode) {
+	print "\#\#\# End of HtmlConfigMode Header\n";
+    }
 }
 
 # dummy functions agasint the compile errors of config.ph
@@ -3066,6 +3075,7 @@ sub do_html_config
     &do_config($ml, @argv);
     $HtmlConfigMode = 0;
 }
+
 
 sub do_config
 {
@@ -3904,7 +3914,7 @@ sub do_adduser
 	&AppendString2File($member, $f);
     }
 
-    $XStatus = 'OK:';
+    # $XStatus = 'OK:';
     $ADDR_CHECK_MAX = $acm;
 }
 
@@ -3966,7 +3976,7 @@ sub do_byeuser
 	}
     }
 
-    $XStatus = 'OK:';
+    # $XStatus = 'OK:';
 }
 
 # on, off, chaddr
@@ -4060,7 +4070,7 @@ sub do_ctladdr
 	}
     }
 
-    $XStatus = 'OK:';
+    # $XStatus = 'OK:';
 }
 
 
@@ -5655,6 +5665,29 @@ sub ValidatePerlScriptP
     &Log("$cf is broken as perl script.") if $?;
 
     $? ? 0 : 1; # $? is 0 if normal. 
+}
+
+
+sub InitErrorBuffer
+{ 
+    $HtmlWarnBuffer = $WStatus;
+    $HtmlExitBuffer = $XStatus;
+}
+
+
+sub FixErrorBuffer
+{
+    if ($WStatus eq $HtmlWarnBuffer && $HtmlExitBuffer eq $XStatus) {
+	if (!$XStatus) {
+	    $XStatus = 'OK:';
+	}
+    }
+    else {
+	print "  --- debug\n";
+	print "  (debug)\$HtmlWarnBuffer> $WStatus\n";
+	print "  (debug)\$HtmlExitBuffer> $XStatus\n";
+	print "  --- debug end\n";
+    }
 }
 
 
