@@ -1,62 +1,28 @@
 		TODO toward 4.0.3
 		Last Modified: $Date$
 
-* sbin/makefml
-
-    # Lock all when "install"
-    if ($TheFirstTime || $NOT_LOCK{$fp}) {
-	# XXX TODO for 4.0.3 
-	# XXX I don't understand why this hack locates here ???
-	# XXX reload $LANGUAGE to translate messages on Web CGI
-	# XXX &GetConfigPH($ml) if (!$TheFirstTime);
-    }
-
 * chaddr
-
 	dupilication してるとき chaddr がうまくおごかない
 	エラーメッセージが正しくないバグ _o_
 
 	送り返す先の変更
 
-* 並行開発 ブランチはどうする？
+* SMTP
+	kern/libsmtp.pl (2.56-2.57)
+	define __UpdateRcptLists() to update @RcptLists always
+	when Smtp() starts.
 
-	sendmail 8.12 は？
-
-	postfix-verps	Postfix current VERP's hack branch
-		break from main:current-20010722
+------
+4.0.4 でいいかな？
 
 * DBMS
 
    toyomodel new なりをかくべきだろう -> generic ?
-
 
 * Config 名前空間の汚染問題
 
 	X-ML-Name: fml-help
 	X-Mail-Count: 00692
 
-* SMTP
 
-   SMTP
-	define __UpdateRcptLists() to update @RcptLists always when
-	Smtp() starts.
-
-	kern/libsmtp.pl (2.56-2.57)
-	define __UpdateRcptLists() to update @RcptLists always
-	when Smtp() starts.
-
-
-* HTML-ify
-
-	proc/libhtmlsubr.pl
-		1.8-1.9
-
-		fix multipart counter
-
-	proc/libsynchtml.pl
-		2.44 -> 2.45
-
-		remove $WriteHtmlFileCount
-
-
-$FML: TODO-4.0.3,v 1.13 2001/09/12 10:56:55 fukachan Exp $
+$FML: TODO-4.0.3,v 1.14 2001/09/13 03:40:32 fukachan Exp $
