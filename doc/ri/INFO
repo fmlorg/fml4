@@ -32,6 +32,20 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
+・libref.pl  	（libexec/sid.pl の標準装備）
+
+URL を理解するための ライブラリ
+http://host/something や gopher://host/something は自力で取りにいって、
+必要なら、binaryをuuencode や、ファイル分割をして送り返す。
+ftp://host/something は libftp.pl へ引き渡します。 
+
+・libftp.pl   	（libexec/sid.pl の標準装備）
+ftpmail server ($FTPMAIL_SERVER を設定していないとエラー) へのリレー
+するインターフェイス（ＯＫ）
+	と
+local spool への ftp interface （未完成）
+
+
 ・fml_local は分割してファイルを送り返す関数をBuilt-IN しました。
 ＃ libutils.pl を使うので、INCLUDE-PATH を設定する必要があります
 

@@ -340,5 +340,5 @@ body            getmyspool\s+(\S+)	&	getmyspool_pw
 
 
 .S	BUILD-IN Functions
-.include smm/smm/fml_local_builtin.txt
+.include fml_local_builtin.txt
 
