@@ -1,0 +1,51 @@
+###
+### libfop.pl liblop.pl
+###
+
+fop.no_numeric_filename:
+	_ARG0_: filename is not numeric
+
+fop.unlink:
+	remove _ARG0_ file
+
+fop.unlink.fail:
+	fail to remove _ARG0_ file
+
+fop.rename.fail:
+	fail to rename _ARG0_ (_ARG0_ => _ARG1_)
+
+fop.write.fail:
+	cannot write_ARG0_ 
+
+ftp.not_configure:
+	inmature fml configuration
+
+fop.not_found:
+	no such files for request
+
+fop.mget.too_many:
+	(m)get request is too many!
+	the maximum number of files in one request (mail) is
+	up to _ARG0_ files.
+
+fop.mget.no_such_mode:
+	no such mode (_ARG0_) of "mget" command
+
+fop.summary.not_match:
+	no such entry in summary file
+
+ftp.exit:
+	exit
+
+ftp.cd.insecure:
+	insecure change-directory. exit
+
+ftp.cannot_chdir:
+	cannot move to the directory
+
+ftpmail.submitted:
+	receives your request to ftpmail server <_ARG0_>
+	Please wait a little
+
+ftpmail.not_supported:
+	not permit relay to ftpmail server
