@@ -35,24 +35,26 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 	   メールをリアルタイムに配送したり、
 	   一定時間ごとにためてまとめておくる
 
-	○ コマンド機能等を一切使わずにフォワードするだけ等
-	   配送だけして「spoolingするaliasesと同じ」
-
-	○ hml のコマンドシンタックスを理解する（Default Emulation）
+	○ 様々なモード(配送・管理の仕方)
+	   リモート管理、moderated、member check、自動登録、
+	   コマンド機能等を一切使わずにフォワードするだけ
+	   (配送だけして「spoolingするaliasesと同じ」)等…
 
 	○ listserv or majordomo インターフェイス
 	   みかけがあたかも listserv のように fml のコマンド群を使う
-
-	○ 様々なモード
-	   リモート管理、moderated、member check, 自動登録…
 
 	○ forward でのMLのための仕組み (slocal や vacation)
 	   .forward に仕掛けて slocal や
 	   .forward から fml の機能を使うことで自分のaccountでMLを実行
 
-等はすぐに実行できます。例えばリモートでＭＬを管理や HTML へ変換してス
-プールするとか自動的に expire しながら走る等さまざまな機能はモジュール
-として配布パッケージにセットにされています。
+	○ 様々な Emulation コード
+	   (歴史的にDefaultでは) hml のコマンドシンタックスを理解する
+
+等は簡単に実行できます。
+
+それ以外には、例えばリモートでＭＬを管理や HTML へ変換してスプールする
+とか自動的に expire しながら走る等さまざまな機能はモジュールとして配布
+パッケージにセットにされています。
 
 必要に応じて、コマンドラインオプション か Configuration file で機能の
 追加・削減を行うことができます。
@@ -136,7 +138,6 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 	fml-support ML(例によって自動登録です)
 	fml-support@axion.phys.titech.ac.jp
 
-	
 か 
 	fml-bugs (作者にのみフォワード)
 	fml-bugs@axion.phys.titech.ac.jp
@@ -174,7 +175,7 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ○ hml 1.6 との compatibility
 
 members や log file等をそのままに、*pl 群と config.phを差し替えればい
-きなり動きます。
+きなり動きます
 
 
 .S	使用上の注意
@@ -187,6 +188,9 @@ members や log file等をそのままに、*pl 群と config.phを差し替えればい
 
 
 .C	fml でやれること
+
+詳細については doc/op ("The Design and Implementation of the fml
+Mailing List Server") を読んで下さいね(^^;)
 
 fml 2.1 が hml 1.6 と同様に目指したものは
 	(以下 hml 1.6 README.jpn より)
@@ -286,7 +290,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 
 ○ ＭＬ間クロスポスト サポート ＃サイトにまたがる場合は実験段階
 
-○ sendmail とは IPC
+○ sendmail とは IPC(InterProcess Communication)
 
    自分のマシンで sendmail が走っている必要はありません。
    もっとも SMTP を理解してくれるなら sendmail である必要もないですし
@@ -295,7 +299,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
    例えば 一定時間間隔で POP をかけてＭＬを動かし
    配送はサイトのSMTPサーバにやらせることでＭＬを実行するこは可能です
 
-○スタートレック宇宙歴サポート（笑）
+○スタートレック宇宙歴サポート(笑)
 	宇宙歴をつけるmh, mh-e user interface つき:-)
 
 ○ Sendmail 8.x を意識してつくる…＃(もちろん 5.x でも動きます)
@@ -318,7 +322,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 インストール自体はおおむね make 一発です:-)。
 ＃実際のインストールはINSTALLというファイルを見て下さい。
 
-perl は必須です、最も今時最初からOSに入ってるとおもいますが。
+今時最初からOSに入ってるとおもいますが perl は必須です、
 自分のマシンで sendmail が走っている必要は必ずしもありませんし、
 SMTPを喋れるなら sendmail である必要もありません。
 
@@ -348,9 +352,8 @@ fml のターゲットマシンでのテスト環境は
 	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-1.0current/sun3/60
 です。
 
-その他のこまごまとしたことについては doc/op (旧 FAQ)というファイルがあ
-ります。INSTALL で説明の足りない部分は doc/op （Operation Manual）を見
-てください。
+その他のこまごまとしたことについては doc/op というファイルがあります。
+INSTALL で説明の足りない部分は doc/op を見てください。
 
 
 .S	対話式設定プログラム
@@ -366,7 +369,7 @@ fml のターゲットマシンでのテスト環境は
 .S	自分のマシンで sendmail が走っていない場合(例:POP3 経由…)
 
 sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
-もできますが、そういうtrickyな話題は doc/op を見てください。
+もできますが、そういうtrickyな話題については doc/op を見てください(^^;)
 
 
 .C	Version up について
@@ -378,21 +381,19 @@ sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
 
 .S	新しい機能を有効にするには？
 
-なお、新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで
-指定するかしないと使えません。
-つまり、新しい機能・オプションは明示的に指定しない限り単に動きません
+新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで指定す
+るかしないと使えません。つまり、新しい機能・オプションは明示的に指定し
+ない限り単に動きません
+
 
 .S	Backward Compatibility 
 
 Backward Compatibility は保証していますが 万が一 consistencyのないもの
-があったら ＭＬ 等へ御一報ください。
+があったら上述のＭＬ等へ御一報ください。
 変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
-なくて大丈夫です。
-＃注意：複雑なフックの場合は注意がいると思います。
-＃
-＃古いライブラリも一応Packageに一緒に入ってます。
-＃lib/Compatibility に移動しておきました。
-＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
+なくて普通は大丈夫です。
+＃注意：複雑なフックの場合は注意がいるとは思いますが…
+
 
 .S	1.6より前からの移行について
 
@@ -423,6 +424,7 @@ Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 fml is free software distributed under the terms of the GNU General
 Public License. see the file COPYING for more details.
+
 
 .C	Acknowledgement 
 

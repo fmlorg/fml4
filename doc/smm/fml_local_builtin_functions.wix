@@ -1,7 +1,7 @@
 
- fml_local 2.0.3.1 
+ fml_local 2.0.4.0 
 
-USAGE: fml_local.pl [-Ddh] [-f config_file] [-user username]
+USAGE: fml_local.pl [-Ddh] [-f ConfigFile] [-user username]
     -h     this help
     -d     debug mode on
     -D     dump variable 
@@ -12,7 +12,7 @@ FILE:  $HOME/.fmllocalrc
 
                   Please read FAQ for the details.
 
-VARIABLES (set in $HOME/.fmllocalrc):
+variables (set in $HOME/.fmllocalrc):
  HOME  DIR  LIBDIR  FML_PL  USER  MAIL_SPOOL  LOG  TMP  TMP_DIR  PASSWORD  DEBUG  AND  ARCHIVE_DIR  VACATION  MAINTAINER  MAINTAINER_SIGNATURE  FS  LOG_MESSAGE_ID  SECURE_FML_LOCAL  FIRST_MATCH  SLOCAL  MY_FUNCTIONS  CASE_INSENSITIVE  MAIL_LENGTH_LIMIT 
 
 BUILT-IN FUNCTIONS:
