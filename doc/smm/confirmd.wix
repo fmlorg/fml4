@@ -1,0 +1,68 @@
+.C	Confirmation Deamon (libexec/confirmd.pl)
+
+注意: FML 2.1B#2 以降の機能です。
+
+.S	Introduction
+
+ＭＬによっては定期的にメンバーをチェックしたい場合があります。confirmd 
+はメンバーに「これからもＭＬに入り続けるか？」を尋ねます。一定期間内
+(default は２週間)にメンバーから返事があればOK、もし返事がなければその
+メンバーを削除します。返事があった場合その後2カ月(デフォールト)間は有
+効です。2カ月たつと再び「これからもＭＬに入り続けるか？」を尋ねられま
+す。
+
+ocnfirmd.pl はまとめおくりの msend.pl 同様に cron から起動するように設
+定します。起動間隔は crontab でコントロールします。明らかに『2カ月』お
+よび『2週間』より短い間隔で起動しないと意味がありません。
+
+.S	設定のしかた
+
+makefml が作る crontab の見本 $DIR/crontab では confirmd の行はコメン
+トアウトされています。このコメントをはずし crontab でシステムの cron 
+にセットします。デフォールトでは一日一回朝5時に confirmd が起動という
+設定になっています。
+.q
+# confirmd
+# * 5 * * * _EXEC_DIR_/libexec/confirmd.pl _ML_DIR_/_ML_ _EXEC_DIR_
+.~q
+
+.S	時間の変数
+
+confirmd は入り続けるという意思表示(具体的には '# ack'コマンドを返した
+時)から
+
+	$CONFIRMD_ACK_EXPIRE_UNIT (デフォールトは2ヶ月)
+
+期間の間その意思表示を有効とみなします。この期間が過ぎると「これからも
+ＭＬに入り続けるか？」という確認を送ります。このメールの返事を
+
+	$CONFIRMD_ACK_WAIT_UNIT (デフォールトは2週間)
+
+期間待ちます。この期間内に返事がないなら confirmd はこのメンバーをＭＬ
+から削除します。
+
+.S	ファイル
+
+	$CONFIRMD_ACK_REQ_FILE ($DIR/confirmd.ackreq)
+.k	$CONFIRMD_ACK_REQ_FILE
+
+がユーザーに「これからもＭＬに入り続けるか？」という確認を送る際のメー
+ルのテンプレートです。このファイルがない場合(makefml newml では生成さ
+れない)は fml のインストール先の drafts/confirmd.ackreq
+(e.g. /usr/local/fml/drafts/confirmd.ackreq) が使われる。
+
+	$CONFIRMD_ACK_LOGFILE
+.k	$CONFIRMD_ACK_LOGFILE
+
+には返事('# ack')のログが残り、いつ返事をしたかのデータとして confirmd 
+が用いる。
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
