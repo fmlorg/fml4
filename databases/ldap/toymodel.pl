@@ -147,6 +147,7 @@ sub AdminMemberP
 {
     my ($mib, $addr) = @_;
 
+    $addr = &main::LowerDomain($addr);
     &Log("\$entry->hasValue(admin, $addr)") if $main::debug_ldap;
     &Log("\$entry->hasValue(admin, $addr)");
     $entry->hasValue("admin", $addr);
@@ -157,6 +158,7 @@ sub MemberP
 {
     my ($mib, $addr) = @_;
 
+    $addr = &main::LowerDomain($addr);
     &Log("\$entry->hasValue(member, $addr)") if $main::debug_ldap;
     &Log("\$entry->hasValue(member, $addr)");
     $entry->hasValue("member", $addr);
@@ -167,6 +169,7 @@ sub ActiveP
 {
     my ($mib, $addr) = @_;
 
+    $addr = &main::LowerDomain($addr);
     &Log("\$entry->hasValue(member, $addr)") if $main::debug_ldap;
     &Log("\$entry->hasValue(member, $addr)");
     $entry->hasValue("member", $addr);
@@ -227,6 +230,7 @@ sub __ListCtl
     my ($status);
 
     $addr = $addr || $mib->{'_address'};
+    $addr = &main::LowerDomain($addr);
 
     &main::Log("$mib->{'_action'} $addr");
 
@@ -266,6 +270,8 @@ sub __ListCtl
     }
     elsif ($mib->{'_action'} eq 'chaddr') {
 	my $new_addr = $mib->{'_value'};
+	$new_addr = &main::LowerDomain($new_addr);
+
 	$entry->removeValue("member", $addr) ||
 	    &__Error("fail to remove $addr");
 	$entry->addValue("member",    $new_addr) ||

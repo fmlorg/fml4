@@ -196,6 +196,7 @@ sub __MemberP
     my ($mib, $file, $addr) = @_;
     my ($query, $res, $ml, @row);
 
+    $addr   = &main::LowerDomain($addr);
     $ml     = $mib->{'_ml_acct'};
     $query  = "select address from ml ";
     $query .= " where ml = '$ml' ";
@@ -267,6 +268,7 @@ sub __ListCtl
     my ($ml, $query, $res);
 
     $addr = $addr || $mib->{'_address'};
+    $addr = &main::LowerDomain($addr);
     $ml   = $mib->{'_ml_acct'};
 
     &main::Log("$mib->{'_action'} $addr");
@@ -332,6 +334,7 @@ sub __ListCtl
 
 	my ($old_addr) = $addr;
 	my ($new_addr) = $mib->{'_value'};
+	$new_addr      = &main::LowerDomain($new_addr);
 
 	for $file ('actives', 'members') {
 	    $query  = " update ml ";
@@ -401,6 +404,7 @@ sub Status
     my ($mll, $query, $res, $addr);
 
     $addr   = $mib->{'_address'};
+    $addr   = &main::LowerDomain($addr);
     $ml     = $mib->{'_ml_acct'};
     $query  = " select address,off,options from ml ";
     $query .= " where file = 'actives' ";
