@@ -621,6 +621,18 @@ action of makefml. Please cut and paste them in /etc/aliases and
 "newaliases". This sample is in /var/spool/ml/etc/elena/aliases.
 => .ptr{unsafe}
 
+/var/spool/ml/elena がすでにある場合は上書きできないようエラーになるよ
+うになっています。意図的に上書きするなら
+=E
+If /var/spool/ml/elena already exists, makefml stops to avoid
+overwriting. If you want to force to overwrite elena ML, run 
+
+	/usr/local/fml/makefml -F newml elena
+
+を実行して下さい。
+=E
+where -F is 'force'.
+
 /var/spool/ml/etc/qmail/ には qmail 用の見本が作成されます。いくつかの
 MTAについては別途解説のドキュメントがあります。そちらも見て下さい。
 =E
