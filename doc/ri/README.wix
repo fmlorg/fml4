@@ -263,26 +263,18 @@ Please see the file INSTALL for the detail.
 INSTALL_advanced is a document for you to customize more closely.
 
 
-.S	ターゲットマシンの環境
+.S	ターゲットマシン/テスト環境
 =E.S	Target machine environment
 
-fml のターゲットマシンでのテスト環境は
+fml 2.1 のターゲットマシン/テスト環境は
 
-2.1 は
-	sendmail 8.8.6 + perl5.003 on NetBSD 1.2 RELEASE
-	sendmail 8.8.6 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.8.6 + perl4.036 on NetBSD 1.1B(fwtk も併用)
-	sendmail 8.8.6 + perl5.003 on NetBSD 1.1B(fwtk も併用)
+	sendmail 8.8.7 + perl5.003 on NetBSD 1.2 RELEASE
+	sendmail 8.8.7 + perl4.036 on NetBSD 1.2 Beta
+	sendmail 8.8.7 + perl4.036 on NetBSD 1.1B(fwtk も併用)
+	sendmail 8.8.7 + perl5.003 on NetBSD 1.1B(fwtk も併用)
 
-2.0 まで
-	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2.1R 
-	sendmail 8.6.12+2.4W, perl4.036 on NetBSD 1.0
-	sendmail 8.6.12+2.4W, perl5.001 on NetBSD 1.0
-	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-1.0current/sun3/60
-です。
-
-その他のこまごまとしたことについては doc/op というファイルがあります。
-INSTALL で説明の足りない部分は doc/op を見てください。
+です。その他のこまごまとしたことについては doc/op というファイルがあり
+ます。INSTALL で説明の足りない部分は doc/op を見てください。
 
 
 .S	Supporeted Architectures
@@ -291,15 +283,13 @@ INSTALL で説明の足りない部分は doc/op を見てください。
 基本的にメインターゲットは 4.4BSD です。ですが最近の Unix であれば動く
 はずです。ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
 
-
 Unix 上でのインストールは INSTALL というファイルを参照して下さい。
 
-WINDOWS NT 4.0 で動くようにした(基本的な部分が動くことは確認しています
-が)ベータテストの ports を中に含んでいます。
-NT でも同じ makefml を使ってインストールをします。基本的に同じですが、
-いくつか Unix version との違いがあります。それについては 
-INSTALL_on_NT4 に捕捉が書いてあるので、INSTALL と INSTALL_on_NT4 両方
-を参照して下さい。
+sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
+ドが入っています。NT でも同じ makefml を使ってインストールをします。基
+本的に同じですが、いくつか Unix version との違いがあります。それについ
+ては INSTALL_on_NT4 に捕捉が書いてあるので、INSTALL と INSTALL_on_NT4 
+両方を参照して下さい。
 
 
 
