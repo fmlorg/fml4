@@ -1,11 +1,10 @@
 .HTML_PRE
-	(非最終版、2nd version)
-	FML Advisory 2001-001: $AUTO_HTML_GEN pass through invalid URL
+	FML Advisory 2001-001: Internal HTMLifier can pass through invalid URL
 	========================================
 
-Topic:		HTML 化機構が悪意ある URL を通過させ得る
+Topic:	HTML 化機構が悪意ある URL を通過させ得る
 =E
-Topic:		HTMLifier (SyncHtml()) can pass through invalid URL
+Topic:	Internal HTMLifier can pass through invalid URL
 
 			Ken'ichi Fukamachi <fukachan@fml.org>
 
@@ -16,10 +15,16 @@ Topic:		HTMLifier (SyncHtml()) can pass through invalid URL
 
 [Abstract]
 
-$AUTO_HTML_GEN を利用して、HTML 化機構を利用している場合、不正な URL 
-が通過して HTML 化されたファイルに現れ得えます。
-対象範囲は $AUTO_HTML_GEN を ON にして運用している場合と、
-spool2html.pl を利用して HTML 化を実行する場合が該当します。
+fml 内蔵の HTML 化機構を利用している場合に、不正な URL がて HTML 化さ
+れたファイルに現れえます。これは $AUTO_HTML_GEN を ON にしてＭＬを運用
+している場合と、spool2html.pl を利用して HTML 化を実行する場合にありえ
+ます。
+=E
+If you use fml internal htmlifier mechanism for articles (when
+$AUTO_HTML_GEN is on), fml htmlifier passes through message with
+invalid URL. This condition is satisfied when $AUTO_HTML_GEN is on or
+you use utility program called spool2html, which is a wrapper for
+internal htmlifier engine.
 
 
 .toc
@@ -29,42 +34,77 @@ spool2html.pl を利用して HTML 化を実行する場合が該当します。
 
 fml 内蔵の HTML 化機構において、Subject: に含まれる <> がインデックス
 ページではエスケープされない。
+=E
+fml internal mechanism to convert text (article) to html does not 
+escape meta characters for subject.
 
 
 .C	修正の仕方 (暫定案)
-=E.C	workaround fix
+=E.C	workaround
 
-.S	$AUTO_HTML_GEN = 0;
+.S	set $AUTO_HTML_GEN = 0; anyway
 
-まずは一旦 $AUTO_HTML_GEN = 0; にしてください。
-これで HTML 化機構が動作しなくなります。
+自動的に記事の HTML 化をしている場合、まずは一旦 $AUTO_HTML_GEN = 0; 
+にしてください。これで自動 HTML 化機構が動作しなくなります。
+=E
+Firstly, disable this automatic conversion mechanism if your ml
+converts incoming article to html automatically. To disable it, set
 
-ですが、このままでは HTML 化が止まったままですから、将来、次の 2) 案を
-行ない、make spool2html を実行することで続きの記事の再生成をしてくださ
-い。
+	$AUTO_HTML_GEN = 0;
+
+=E
+This setting disables automatic conversion for incoming messages.
+
+メニューでは
+=E
+In menu, 
+
+	TOP -> OPTION -> HTML_GENERATION -> AUTO_HTML_GEN -> n
+
+です。
+
+なお自動処理を再開しても再開するまでの分はHTML 化が止まったままです。
+HTML 化しそこなった分については、新しいライブラリに入れ替えた後(次の 
+2) 案)、make spool2html を実行することで続きの記事の再生成が可能です。
+=E
+To re-html-ify articles arrived among htmlifier mechanism is disabled,
+run "make spool2html" after updating libraries.
+
 
 .S	入れ替える(1)
+=E.S	update libraries (1)
 
-	libsynchtml.pl libhtmlsubr.pl を最新のものにする
+libsynchtml.pl libhtmlsubr.pl を最新のものにする
+=E
+replace libsynchtml.pl libhtmlsubr.pl with latest one.
+See the following URL.
 
 .url ftp://ftp.fml.org/pub/fml/workaround-fix2/
 	
 	
 .S	入れ替える(2)
+=E.S	update libraries (2)
 
-	じきに出る 4.0.3 release (現在 4.0.3_BETA)
-
+じきに出る 4.0.3 release (現在 4.0.3_BETA)
+=E
+use upcoming 4.0.3 release.
 
 
 .C	その他
+=E.C	misc
 
-.S	現在進行中の計画
+.S	将来計画
+=E.S	future plan
 
 今週末(2001/10/27)に言おうと思って bug 取りしていたのですが ;) 、
 SyncHtml を捨てて別のモジュールに移行する案を考えています。
 
 このモジュールは先週末(2001/10/20)から fml-devel (fml 5.0 branch) の中
 に存在しています。が、まだ試行錯誤(?)に開発中というところでしょう。
+=E
+fml next generation project developments a module for conversion from
+text to html.  I plan to replace the current htmlifier with this when
+this new module becomes enough mature.
 
 .url	http://www.fml.org/software/fml-devel/CHANGES.txt
 
@@ -74,8 +114,13 @@ SyncHtml を捨てて別のモジュールに移行する案を考えています。
 Problem Report は 
 
 fml-help: 01093 (From: KOJIMA Hajime / 小島肇 <kjm@rins.ryukoku.ac.jp>)
+=E
+See thread beginning at fml-help: 01093 for further reference.
 
 を参照してください。problem report およびパッチ案を頂いた小島さんに感
 謝致します。
+=E
+I am appreciate for KOJIMA Hajime <kjm@rins.ryukoku.ac.jp> on
+problem reports and workaround patch to fix this.
 
-$FML: FA2001_001.wix,v 1.2 2001/10/27 10:38:21 fukachan Exp $
+$FML: FA2001_001.wix,v 1.3 2001/10/30 04:12:43 fukachan Exp $
