@@ -38,11 +38,13 @@ config.ph: cf
 	perl _EXEC_DIR_/makefml update-config _ML_
 
 
-fml: fml.c config.h
-	$(CC) $(CFLAGS) -o fml fml.c
-	$(CHMOD) $(MODE) fml
-	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl fml.c
-	$(CHMOD) $(MODE) fml-ctl
+fml: fml-wrap
+
+fml-wrap: fml.c config.h
+	$(CC) $(CFLAGS) -o fml-wrap fml.c
+	$(CHMOD) $(MODE) fml-wrap
+	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrap fml.c
+	$(CHMOD) $(MODE) fml-ctl-wrap
 
 spool2html:
 	perl _EXEC_DIR_/bin/spool2html.pl \
