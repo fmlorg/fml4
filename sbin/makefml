@@ -646,6 +646,14 @@ sub SetHashDefaults
 		    'fmlserv',  'do_fmlserv',
 		    'listserv', 'do_fmlserv',
 		    'majordomo','do_fmlserv',
+		    '100#fmlserv', 'set up fmlserv (listserv-like server)',
+		    # '100#listserv','set up fmlserv (listserv-like server)',
+		    # '100#majordomo','set up fmlserv (listserv-like server)',
+
+		    # mead
+		    'mead',    'do_mead',
+		    '99#mead', 'set up mead (error mail analyzer)',
+
 
 		    # NT extension
 		    'popfml',     'do_popfml',
@@ -674,10 +682,6 @@ sub SetHashDefaults
 		    'pgpv',	'do_pgpv',
 
 		    'delivery_mode',  'do_delivery_mode',
-
-		    '100#fmlserv', 'set up fmlserv (listserv-like server)',
-		    # '100#listserv','set up fmlserv (listserv-like server)',
-		    # '100#majordomo','set up fmlserv (listserv-like server)',
 
 		    # misc
 		    'lock', 'do_lock',
@@ -741,7 +745,8 @@ sub SetHashDefaults
 		    'bug-report-template', 'do_send_pr',
 
 		    # update /var/spool/ml/etc/aliases
-		    'recollect-aliases',   'do_collect_aliases'
+		    'recollect-aliases',   'do_collect_aliases',
+		    '401#recollect-aliases', 'remake $ML_DIR/etc/aliases',
 		    );
 
     # functions not to lock
@@ -751,6 +756,7 @@ sub SetHashDefaults
 		 'listserv', 1,
 		 'majorodomo', 1,
 		 'fmlserv', 1,
+		 'mead', 1,
 		 'command', 1,
 		 'edit-template', 1,
 		 'config-template', 1,
@@ -777,6 +783,7 @@ sub SetHashDefaults
 	 "newml", "info", "help", "install", 
 	 "fmlserv", "majordomo", "listserv", "popfml",
 	 "edit-template", "config-template",
+	 "mead",
 
 	 # CGI/
 	 "admin.cgi", "html_cgiadmin_passwd",
@@ -4992,6 +4999,39 @@ sub UseSeparateListP
     else {
 	0;
     }
+}
+
+
+sub do_mead
+{
+    print "-- prepare mead home directory ... \n" if $debug0;
+
+    # special assigned ML;
+    $ml = "mead";
+
+    local($status);
+    $status = &GenerateDirectory($ml);
+    return if $status eq 'FATAL';
+    &ResetVariables;
+
+    ### cf file; 
+    &ResetVariables;
+
+    &SetPublicUmask;
+
+    # include file is public readable;
+    # why for () fails?;
+    local($exec_dir) = "$EXEC_DIR/etc/makefml";
+
+    &Conv($ml, "$exec_dir/include-mead", "$ML_DIR/$ml/include-mead");
+    &Conv($ml, "$exec_dir/mead-aliases", "$ML_DIR/$ml/aliases");
+
+    print "\n";
+    print "   The next step: update your MTA configuration. For example\n";
+    print "\t% su\n";
+    print "\t# cat $ML_DIR/$ml/aliases >> /etc/aliases\n";
+    print "\t# newaliases\n";
+    print "\n   FYI: See templates in '$ML_DIR/$ml/'\n";
 }
 
 
