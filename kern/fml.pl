@@ -100,14 +100,6 @@ sub ModeBifurcate
 	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
 	    return 0; # return ASAP
 	}
-
-	# dump recipients
-	if ($member_p) {
-	    my (%mib, %result, %misc, $error);
-	    &DataBaseMIBPrepare(\%mib, 'dump_active_list');
-	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
-	    &Log("fail to dump active list") if $mib{'error'};
-	}
     }
 
     # member ot not?
@@ -1383,6 +1375,16 @@ sub Distribute
 
     if ($MAIL_LIST eq $CONTROL_ADDRESS) {
         $Rcsid =~ s/post only (from.*)/post $1 + commands/;
+    }
+
+
+    # Dabasase access: dump recipients
+    if ($USE_DATABASE) {
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'dump_active_list');
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	&Log("fail to dump active list") if $mib{'error'};
+	return $NULL if  $mib{'error'};
     }
 
     require 'libdist.pl';
