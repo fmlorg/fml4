@@ -1237,6 +1237,8 @@ sub SpawnProcess
     local($p) = @_;
     $0 = "$FML: Spawn Process <$LOCKFILE>";
 
+    $p =~ s/^\s*\|\s*//;
+
     if (open(PROC, "| $p")) {
 	select(PROC); $| = 1; select(STDOUT);
 
@@ -2483,7 +2485,8 @@ sub EnvelopeFilter
     # e.g. reject "SUBSCRIBE" : octal code follows:
     # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
     # 243 305
-    if (/\033\044\102(\043[\101-\132])+/) { # JIS "2 byte"[A-Z]+
+    if ($FILTER_ATTR_REJECT_2BYTES_COMMAND && 
+	/\033\044\102(\043[\101-\132])+/) { # JIS "2 byte"[A-Z]+
 	$s = &STR2EUC($_);
 
 	local($n_pat, $sp_pat);
