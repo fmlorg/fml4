@@ -793,6 +793,10 @@ sub ChangeMemberList
     }
 
     $ADDR_CHECK_MAX = $org_addr; # reset;
+
+    # special handling for recursive errors
+    if ($status ne 'RECURSIVE') { undef $status;}
+
     $status;
 }
 
