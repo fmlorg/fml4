@@ -5,6 +5,7 @@ MKDIR     = mkdirhier
 RSYNC     = rsync --rsh ssh
 FETCH     = /usr/bin/ftp
 TAR       = /usr/bin/tar
+INSTALL   = /usr/bin/install -c 
 
 # Convert to Japanese/English
 JCONV     = nkf -j
@@ -17,6 +18,6 @@ VERSION   = $(FML)/distrib/bin/version.pl
 #
 # [fwix]
 #     -Z address
-#    -S stylesheet
+#     -S stylesheet
 #
 FWIX      =  $(FML)/bin/fwix.pl -F -Z fml-bugs@fml.org 
