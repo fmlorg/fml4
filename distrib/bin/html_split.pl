@@ -31,7 +31,7 @@ sub Split
 	    s/(href=\")/$1$href_repl/i;
 	}
 
-	if (/NAME=\"([A-Z]\S+)\"/) {
+	if (/NAME=\"([A-Z]\d+\S+)\"/) {
 	    $title = $file = $1;
 	    $title =~ s/C/Chapter /;
 	    $title =~ s/S/ Section /;
