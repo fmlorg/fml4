@@ -1,15 +1,11 @@
 .l	library-lists
-.k	fml ライブラリ一覧 
+.k	FML ライブラリ一覧 
 
-	表： fml ライブラリ 一覧 
+	表: FML ライブラリ 一覧 
 
-   libAucea.pl		Aucea
-   libAuceaCF.pl	Aucea	
-   libAuceaSyscall.pl	Aucea
    libMIME.pl		MIME 操作関数インターフェイス
    libamctl.pl		actives members ファイルの制御ライブラリ
    libarchive.pl	Archive ライブラリ
-   libaref.pl		AREF Library
    libcompat.pl		COMPAT コード
    libcompat_cf1.pl	COMPAT コード
    libcompat_cf2.pl	config.ph CFVersion 3 以前の場合の補正コード
@@ -20,17 +16,17 @@
    libcrypt.pl		暗号化ルーチン
    libdebug.pl		not used (デバッグ用)
    libdist.pl		配送ルーチン
+   liberror.pl		Error Handling
    libexpire.pl		ＭＬの記事等の expiration を行なう
    libfml.pl		fml のコマンドインターフェイス および基本関数
    libfop.pl		ファイル操作関数
-   libfred.pl		汎用正規表現
    libftp.pl		ftp の操作 ftp://, および、ローカルスプール用
    libftpmail.pl	ftpmail インターフェイス
    libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
    libkern.pl		kernel library (== fml.pl)
    liblibrary.pl	ユーザからのファイルの put と getを可能にする
-   liblm.pl		MEMBER_LIST ACTIVE_LIST 等の登録内容変更の関数群
-   liblock.pl		UNIX V7 タイプの lock()
+   liblmtp.pl		Local Mail Transfer Protocol	
+   liblock.pl		rename(2) 依存の昔なじみのロック機構
    liblop.pl		summary ファイル等のログファイルへの operation
    libmakefml.pl	not used (backward)
    libmd5.pl		MD5 (perl 5 only)
@@ -39,18 +35,17 @@
    libmoderated.pl	moderated mode
    libmodeutils.pl	簡易 MODE 設定ルーチン backward
    libnewsyslog.pl	/usr/bin/newsyslog 
-   libpgp.pl		PGP認証ルーチン
-   libpop.pl		popfml のライブラリ
+   libpgp.pl		PGP (Pretty Good Privacy) 関連関数群
+   libpop.pl		POP3 ライブラリ関数
    libra.pl		ＭＬをリモート管理するインターフェイス
    librelayhack.pl	relay hack
    libremote.pl		not used (backward, libra.pl の alias)
    librfc1153.pl	RFC1153 タイプのまとめおくりインターフェイス
    libsendfile.pl	mget 操作をした後メールを送り返すライブラリ
-   libsid.pl		not used (古いタイプの インターフェイス)
    libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
    libsmtputils.pl	SMTP utility functions
+   libsmtpmci.pl	SMTP plural connections
    libstardate.pl	スタートレック宇宙歴ルーチン
-   libsubjectform.pl	Subject FORM 設定例
    libsynchtml.pl	HTML (e.g. var/htdocs ) 化インターフェイス
    libtagdef.pl		Subject Tag definition
    libtraffic.pl	traffic コマンド by yuao@infonia.or.jp (Yuao Tanigawa)

@@ -34,6 +34,10 @@ Index
 パートI は設計思想、II は内部構造等について述べています。
 設定そのものについて知りたい人はパートIIIの「インストールとカスタマイ
 ズ」へ一気に進んで下さい。(part III .ptr{install})
+=E
+We describe design policy at part I, the internal structure at part II. 
+If you would like to know how to configure anyway, go to part III
+"Install and Customize". (part III .ptr{install})
 
 
 .# ##########################################################
@@ -42,7 +46,11 @@ Index
 
 パートIでは、fml の設計思想の概略について述べます。設計思想を知ってい
 ると設定のデフォールトがどうなっているかを推測するに役立つでしょう。
-実際の細かい設定についてはパートII以降へ譲ります。
+実際の細かい設定についてはパートIII以降へ譲ります。
+=E
+Here at part I, we describe overview of design policy, which helps you
+to speculate the FML internals. Please refer to Part III on the
+details of confiturations.
 
 なおこのドキュメント中では便宜上
 
@@ -53,13 +61,13 @@ Index
 して下さい。そこに自動的に作られるわけでも、推奨なわけでもありません。
 各々自分の環境に合わせて読み替えて下さい。
 =E
-In the first part, there describes the design concept of the fml.
+In this document, there describes the design concept of the fml.
 Detailed configurations are in the second part or later.
 =S
-In these documents, % means a shell prompt, # means a shell prompt
-when root. And you please keep in mind that these directories and so
-on as follows are only samples, not be made automatically , much less
-I recommend.  
+In these documents, % means a shell prompt, # means a "root" shell
+prompt . And you please keep in mind that these directories and so on
+as follows are only samples, not be made automatically , much less I
+recommend.
 
 .# DOV == Design OverView
 .include dov.wix
@@ -73,7 +81,7 @@ I recommend.
 ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
 いて解説します。
 =E
-This section describes the relation between fml processes and other
+Here we describe the relation between fml processes and other
 programs, and how to launch fml.
 ==
 .include pov.wix

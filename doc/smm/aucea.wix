@@ -2,9 +2,18 @@
 .l	aucea
 .k	Aucea (AUtomatic Certification and Alert system)
 
+*** I do not translate this chapter.
+*** This code is not maintained, to ensure nothing now.
+
 .S	Introduction to Aucea
 
 例えば ファイルの形式が
+=E
+When a file format is "field value", you can apply "aucea" library 
+to do something for data. 
+You can set up aucea to run a particular function for a particular
+field.
+
 
 		項目	値
 
@@ -20,15 +29,20 @@
 
 ものです。例えば、投票や アンケート といった一般的に良くありうる形式に
 ついて当てはまるすべてのものに適用可能なように設計されています。
+=E
+For example, voting, questionnaire ...
 
 投票システム lib/Elena (VotingSystem) や FRED ライブラリの可読性をあげ、
 汎用的に拡張しなおしたものと考えればよいでしょう。
 
 
-.S	config と入力 の簡単な例
+.S	configurations と入力 の簡単な例
+=E.S	configurations and input example
 .k	Aucea config の例
 
 例：人気投票…
+=E
+e.g. vote
 
 	datatype 	ACTRESS
 	data-begin	\[ACTORESS\]
@@ -43,19 +57,33 @@
 		and
 	field-if  "how" match /(\d+)/ required
 		&Err("エラー: best と how は両方の項目が同時に必要です")
+=E
+	field-if  "best" match /.*/ required
+		and
+	field-if  "how" match /(\d+)/ required
+		&Err("Error: require both 'best' an 'how'")
 
    INPUTのメール本文が
+=E
+for an input mail
 
 		………
 	[ACTRESS]
 	best	西原久美子
 	best	こおろぎさとみ
 		………
+=E
+	[ACTRESS]
+	best	Kumiko Nishihara
+	best	Satomi Koorogi
 
 
 .S	Auceaインターフェイスとデータ構造
+=E.S	Aucea Interface and Data Structure
 
    [呼び出し方・書き方の例]
+=E
+   calling Aucea()
 
    require 'libAucea.pl';
    &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
@@ -64,24 +92,40 @@
    OUTPUT:	*Envelope, *Buf, *CF, *Result が返る
 
    *Envelope 
+
 	メールの場合はヘッダ、メール本文の各値
 	コマンドラインではこれの形式に合わせて変換して突っ込む
 	通常データは $Envelope{'Body'} (メール本文)から
 	*CF に従い解析され、各 *Buf 内に alloc される。
+=E
+	pass *Envelope for an mail
 
    *Result 
+
 	各種結果、エラーレポート、Trace log 等が返る
 	現在サポートされているデータは 
 	%Result の key が Error, Warn, Report, Trace
 	の四種類
+=E
+	get *Result, 
+	%Result with keys "Error", "Warn", "Report", "Trace" 
+
 
    *** 附随してくるデータ構造 ***
+=E
+   *** additional data structure ***
 
    *Buf
+
 	メール本文から CF ファイルの定義に従い得られた各値
+=E
+	variables of CF
 
    *CF
+
 	CF ファイルの定義
+=E
+	CF file variables
 
 	本来*CFの一部だが、$Aucea::AuceaConfig という変数は
 	現在 *CF 内には	alloc されていない。これは .config で
@@ -89,48 +133,78 @@
 
 
 .S	コマンドの作り方の例
+=E.S	How to make Aucea commands
+
     
     $AUCEA_CF 			Configuration file
+
     $AUCEA_SYSCALL_LIBRARY 	ユーザ用の関数
+=E
+    $AUCEA_SYSCALL_LIBRARY 	define user defined functions
 
 	を定義する(getopts.pl でも使えば良いでしょう)。
 
     *CF に定義を読み込む (Configuration fileから)。
+=E
+    read $AUCEA_CF to inject configurations into *CF.
 
     *Envelope にデータを入れる。
+=E
+    inject data into *Envelope 
 
     &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
+
 	処理は Aucea 名前空間で処理される。
+=E
+	runs Aucea processing in Aucea Name Space.
 
 	また CF の中で使われる関数は Syscall 名前空間への
 	呼び出し処理で実行される。
+=E
+	process functions used in CF in Syscall Name Space
 
     %Result を使って結果を出力する。
 	%Result	を STDOUT へ入れる or 
 	result としてメールにつけて distributor function へ渡す。
+=E
+	print out %Reult
 
-	例：  &Mesg(*Envelope, $Result{'Error'});
+例:
+=E
+Example:
+
+	&Mesg(*Envelope, $Result{'Error'});
 
 
 .S	Configuration file と ライブラリ
+=E.S	configuration file and libraries
 
 特定の目的に対する cf と 対応する各ターゲットごとに異なる関数ライブラ
 リはそれぞれに保守されるべきであり、共通の部分は再利用可能 (それぞれの
 なライブラリとして保守し、各ライブラリは最初に include すればよい)なよ
 うに作るべきであろう。
+=E
+We should maintain "cf"'s for specific objects and common re-use
+libraries separately.
 
 
 .S	Aucea の構文 (statements)
+=E.S	Aucea statements
 
 空白は [\s\t]+ で余計な空白は解釈されない。また空白はいくらあってもよ
 い。
+=E
+* Not interprete [\s\t]+ and empty lines.
 
 １行１ statements なので、複数行に渡る時は(/etc/disktab みたいに)
 	 \ で終って次の行
 へ渡して下さい
+* write \ at the last line to continue the next line if you use plural
+lines.
 
 関数の終りは ; で終っても終らなくても良いですが、一行一関数なのは同様
 です。
+* one line, one function 
 
 [基本構文]
 
@@ -138,27 +212,40 @@
 
 	field-if  項目名 match パターン関数 オプション
 		パターン := 正規表現 / パターン関数 
+=E
+	field-if field match pattern-function option
 
 ・ and 
 
 	AND 構文
+=E
+	AND statement
 
 	field-if ...
 		and
 	field-if ...
 
 ・ else
+
 	ELSE 構文
+=E
+	ELSE
 
 ・ switch 
+
 	実装途中…（とりあえず使ってないし）
+=E
+	not implemented yet
 
 
 .S	field-if 構文
+=E.S	field-if statement
 
 以下では BNF(もどき)表現で示す。
 	
    field-if 項目名 match パターン オプション
+=E
+   field-if field match pattern option
 
 	パターン := 正規表現 / パターン関数 
 
@@ -176,16 +263,22 @@
 .S	Type Predicate Function
 
 パターンマッチでは
+=E
+The pattern match is 
 
 	field-if IP-Address match &InetAddrTypeP required
 
 のような関数呼び出しでの判定ができます。この時
+=E
+wheter the function call is &InetAddrTypeP(pattern-matched variable). 
 
 	&InetAddrTypeP(IP-Address行の右辺値);
 
 という引数を持ったシンタックスが評価されます。
 
 例：	データが
+=E
+Example:
 
 	IP-Address	192.168.148.1
 
@@ -199,8 +292,12 @@
 
 
 .S	関数呼び出し
+=E.S	Function calls
 
 例：
+=E
+Example:
+
 	field-if IP-Address match &InetAddrTypeP required
 		&ConflictCheck("Netmask");
 

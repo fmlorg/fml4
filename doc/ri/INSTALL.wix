@@ -235,8 +235,13 @@ the value in the [] is used.  These questions are as follows:
 
 	ドメイン名。
 	メーリングリストのアドレスの @ から後ろで使う部分
+	いろいろなアドレスはデフォールトではこの値を使っています。
+	もしアドレスにマシン名まで含めたものを使いたいならここで
+	fake ですが FQDN を入れてしまって構いません。
 =E
 	Domain Name. The part after "@" of the Mailing List Address.
+	If you use FQDN as e.g. the mailing list address, please input
+	FQDN as "DOMAIN NAME". It is a fake :) but works well.
 
    FQDN                      [beth.fml.org] 
 
@@ -465,10 +470,10 @@ To remove ML,
 =E
 	rm -fr /var/spool/ml/listname
 
-でファイルを消して下さい。そして、/etc/aliases から該当するＭＬの部分
-を削って newaliases をかけます。
+でファイル群を消し、そして /etc/aliases から該当するＭＬの部分を削って 
+newaliases をかけます。
 =E
-and delete the entries in /etc/aliases
+and delete the entries in /etc/aliases.
 
 
 .S	作ったＭＬの使い方について (特に upgrade する人向けの注意)
@@ -650,10 +655,18 @@ mailing list owners.
 group-writable が必要なだけです
 
 
-.S		＊＊＊ＭＬを作る際の注意＊＊＊
+.S	makefml について２、３のこと
 
-以上の簡易インストールでは作られるＭＬの設定で debug モードは切ってあ
-るのですでにメールは配送可能な状態です。
+以前は debug モードがデフォールトになっていましたが、現在の makefml を
+使ったインストールでは debug モードは切ってある状態でＭＬは作成されま
+す。つまり、すでにメールは配送可能な状態です(どじを踏むとエラーメール
+がポストマスターへ飛んだりするぞ:-)。
+
+makefml newml で作成されるファイルのデフォールトをいじりたい場合は、
+
+   cf や include などの見本	FMLのインストール先/etc/makefml
+   help などの見本			FMLのインストール先/drafts 
+
 
 
 .C	ＭＬへのユーザの登録・削除

@@ -1,4 +1,9 @@
 .C	perl 豆知識
+=E
+.C	perl small small tips :)
+
+=E
+I omit here since here perl tips is well known, I wonder...
 
 以下引用部分は 
 
@@ -11,9 +16,9 @@
 .S	Perl 4 or 5 ?
 
 fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
-れています。5は upper compatible のはずなので4でも5でもOKです。ただOS
-によっては5でないとそもそもperlがちゃんと動かないことがあります(5の方
-が新しいからOS適応性が上なのは当然ですが)。
+れています。5は"ほとんど" upper compatible なので4でも5でもOKです。た
+だOSによっては5でないとそもそもperlがちゃんと動かないことがあります(5
+の方が新しいからOS適応性が上なのは当然ですが)。
 
 例: 64ビットマシンやソラリス2なんかは5の方が無難だろう。
 

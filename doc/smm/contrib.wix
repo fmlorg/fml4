@@ -2,9 +2,13 @@
 .l	contrib
 
 lib/ == contrib/ の階層のリストと簡単な説明です。
+=E
+Here is a list of contrib
 
 .S	contrib 一覧
 .k	contrib 一覧
+=E
+.S	contrib list
 
 .q
 MIME				
@@ -12,14 +16,15 @@ cwhois				(.ptr{cwhois})
 ftpmail				(.ptr{ftp})
 lexical				(.ptr{aucea}, .ptr{fred})
 localhack
-localhack/release-1		FML release-1 用
+localhack/release-1		contrib for FML release-1
 localhack/release-1/mnews	mnews ML
 localhack/release-1/putfile	(.ptr{contrib/localhack/release-1/putfile})
 localhack/release-1/schwalben	(.ptr{contrib/localhack/release-1/schwalben})
 localhack/release-1/vote	(.ptr{contrib/localhack/release-1/vote})
-localhack/release-2		FML release-2 用
+localhack/release-2		contrib for FML release-2
 localhack/release-2/kizu	
 localhack/release-2/doc-changes	doc-changes@ffs.fml.org
+mail2irc			(.ptr{mail2irc})	
 mail2fax			
 mail2news			(.ptr{mail2news})
 msend-anytime 			(.ptr{msend-anytime})

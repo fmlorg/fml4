@@ -5,9 +5,15 @@
 .S	Filtering FAQ
 
 メール関係の Filtering FAQ というものもあります。URLは
+=E
+Filtering FAQ is
+
 .url	http://www.cis.ohio-state.edu/hypertext/faq/usenet/mail/filtering-faq/faq.html
 
 plaintext version は
+=E
+Plain text version is 
+
 .url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
 
 
@@ -17,8 +23,13 @@ plaintext version は
 .l	slocal-1
 
 ここでは slocal を用いたやりかたを述べます。
+=E
+MH slocal is used like
 
 	~/.forward に
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+=E
+	in ~/.forward 
 	"|/usr/local/lib/mh/slocal -user username || exit 75"
 
 と書きます。よく名前を聞く slocal ってやつですね。
@@ -40,11 +51,17 @@ default  -       >       ?      /var/mail/fukachan
 
 
 .S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
+=E.S	slocal-like interface (libexec/fml_local.pl)
 .l	libexec/fml_local.pl
 .key	fml_local.pl
 
 ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
 slocal と同じになっちゃいましたね(馬鹿)
+=E
+Consequently fml_local.pl is similar to slocal ;-). But fml_local.pl
+and slocal differs on formats of configurations and the last match.
+FIRST_MATCH variable changes fml_local to the first match rule (
+slocal rule is the first match).
 
 まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
 (開きなおり(苦笑))
@@ -59,18 +76,23 @@ slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 のようなきがします。
 
 設定で
+=E
+Variable
 
 	FIRST_MATCH
 
 とすれば 最初にマッチしたパターンを実行するようになります。slocal なん
 かと同じです。
+=E
+changes fml_local to the first_match, which is the same as
 
 	libexec/fml_local2.pl 
 
 のほうはデフォールトが「最初にマッチしたパターンを実行」するようになっ
 ています。
 ＃実は単なるリンクで、自分の名前を見て実行を変えているだけですが
-
+=E
+The defaul of fml_local2.pl is driven by the first match rule.
 
 .include	fml_local.wix
 

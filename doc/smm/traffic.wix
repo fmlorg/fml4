@@ -1,4 +1,5 @@
 .S	Traffic を調べる (libtraffic.pl)
+=E.S	Traffic Command to examine the ML traffic
 .l	libtraffic.pl
 .k	traffic コマンド
 
@@ -10,6 +11,8 @@ AUTHOR: yuao@infonia.or.jp (Yuao Tanigawa)
   メイルの投稿量の統計をとるコマンドです。
 
   使い方は、
+=E
+The usage of libtraffic.pl is 
 
 % libtraffic.pl [-n <best?>] [-m <mails>] [-d] [where is summary?]
 

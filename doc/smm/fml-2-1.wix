@@ -1,7 +1,12 @@
 .C	FML 2.1 RELEASE への付録
+=E.C	Appendix to FML 2.1 Release
 
 この章は再録です。多くのものは歴史的に削除されたがメモ/記録としてある
 とよいかもしれないというものです。
+=E
+We do not translate this chapter since FML 2.1 Release support both
+Japanese and English incompletely.
+
 
 .S	DEFINE_MODEによる配送モード設定について(obsolete)
 

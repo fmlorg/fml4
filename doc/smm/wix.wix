@@ -3,7 +3,7 @@
 .k	WIX Languate
 .xref	bin/fwix.pl
 
-	"WIX" == "With Index and Xreference"
+   "WIX" == "With Index and Xreference"
 
 .S	WIX Language Introduction
 
@@ -11,6 +11,12 @@ WIX は4種類のフォーマットのドキュメントを同時生成するために考え出され
 た(妥協ともいう)言語です。名前の通り Index や Xref(Cross Rerefence)は
 重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言語
 です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
+=E
+WIX is a language that generates documents which support Index and
+Xref (Cross Reference) and are not concerned with looks such as
+Capital, Bold, Italic. It support minimum sets of a language.
+It is similar to half nroff + half texinfo.
+fwix.pl (bin/fwix.pl) translates *.wix to a text and html documents.
 
 言語自体はおおむね nroff like + texinfo like 折衷版くらいです
 
@@ -36,6 +42,7 @@ WIX Language は
 
 
 .S	WIX 言語仕様
+=E.S	WIX Specifications
 .k	WIX 言語仕様
 
 WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
@@ -43,24 +50,41 @@ WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
 まり .S (Section宣言) は新しいセクションの始まりを意味します。それ以降
 のパラグラフはどれも新しいセクションの一部です。空行があったら次のセク
 ションのようにはカウントしません。
+=E
+A WIX command is a line with the first character ".", which command is
+.command syntax such as:
 
 [章立て/構造]
+=E
+[Structures]
+
 	.P	Part
 	.C	Chapter
 	.S	Section
 	.SS	Sub Section 
 
 	.A	Appendix	Appendix (付録)。
+=E
+	.A	Appendix	Appendix
 
 TeX も同様なデータ構造を持つので理解はしやすいと思います。
+=E
+The structure of WIX is similar to that of TeX.
 
 [索引]
+=E
+[Index]
+
 	.key	KEYWORD
 	.k	KEYWORD
 
 KEYWORDと現在の Chapter.Section との対応づけ。索引に使われる
+=E
+WIX bind the keyword to the current Chapter.Section index.
 
 [ラベルづけ]
+=E
+[Label]
 
 	.label	KEYWORD
 	.l	KEYWORD
@@ -68,43 +92,64 @@ KEYWORDと現在の Chapter.Section との対応づけ。索引に使われる
 現在の Chapter.Section にラベルをつけ、xref でたどれるようにするための
 もの。KEYWORDと現在の Chapter.Section との対応づけに使われます。
 xref が使うポインタで索引にも使われます。ラベルの参照は
+=E
+XRef uses this labels and the pointer to Chapter.Section.
 
 	.xref	KEYWORD
 	.seealso KEYWORD
 
 .label でラベルづけした Chapter.Section への Cross Reference です。
 この Cross Reference は分中では
+=E
+.xref is expanded to the following
 
 	see also 10.3 
 
 のように変換されます。
+=E
+If you use xref: in the middle of a line, you can use .ptr{keyword}.
 
 	.ptr	KEYWORD
 
 役目は xref と同じだが see also の部分は付け加えられない。
+=E
+It is the same in essential, but without "see also".
 
 
 [引用]
+=E
+[Quotation]
 
 	.q	引用開始
 	.~q	引用終り
+=E
+	.q	the beginning of quotation
+	.~q	the end of quotation
 
 これだけがセットで使われているが、.q からは行の最初に3文字スペースでイ
 ンデントし、 .~q のところまでそれが行なわれる。
 ＃そのために 終りを示す必要がある。
+=E
+In the quotation block, the indent is 3 spaces. If LaTeX, these
+corresponds to
 
 LaTex でいえば 
+
 	\begin{quote}
 	\end{quote}
+
 構文にあたる。
 
-
 ○特殊な命令
+=E
+* special statements, comments
 
 	.#		COMMENT
 	.comment	COMMENT
 
 この行はコメント
+=E
+and "include" command is to replace here contents of FILE.
 
 	.include	FILE
 
@@ -112,19 +157,33 @@ FILE をその部分に挿入する。
 
 
 .S	WIXの多国語対応
+=E.S	Plural Language Extension to WIX
 .k	WIXの多国語対応
 
 文章の構造を越えたメタなレベルで2か国語(日本語、英語)を対和訳的に記述
 し、あとで分離生成する機能があります。対にしておかないとどの文章の翻訳
 がどこに当たるのかわからなくなるので;-)、一つのファイルに対訳で表現し
 後で分離しています。
+=E
+The current support to Languages is both Japanese and English.  You
+can write the simultaneous interpretation with the separator "=E".
+WIX prapares another statements apart from commands such as .C, .S, ... 
 
 構造とは別のレベルの話なので別の構文が用意されています。
 
 ○記述方法
+=E
+* Statements
 
 行の最初の=コマンドもしくは空行を区切りとみなし、区切りで挟まれた
 文章("パラグラフ")を単位として切りわけます。"パラグラフ"中、
+=E
+Language context switches are "=command" syntax. Language switch
+occurs in the unit of blocks (paragraphs).
+That is that "empty line"(null line) is also a separator.
+The block with a Japanese EUC code character appears in Japanese mode.
+The block containing English characters only appears both in Japanese
+and English.
 
 	1)EUCを含まないもので、=E〜(区切り)で囲まれた部分→英語のみ
 	　　　　　〃　　　　 、上記以外　　　　　　　　　→日英両方
@@ -137,6 +196,12 @@ FILE をその部分に挿入する。
 
 	=E
 	以降、EUC文字を含む"パラグラフ"前の区切りまでを英語と見なす。
+=E
+	=E
+	English Block declaration
+=S
+	empty line
+	empty line is the reset of Language mode.
 
    例:
 	=E
@@ -147,19 +212,30 @@ FILE をその部分に挿入する。
 	==
 	言語を日本語に戻す
 	(English区間の終わりの区切りを明示したい場合)
+=E
+	==
+	the end of English mode.
 
 	=S
 	は、"パラグラフ"内の空行に変換されます。英語文章中、空行を区切
 	りにしたくない場合に使用します。
 	実のところなくてもいいのですが、あるとたまに便利なことがあります。
+=E
+	=S
+	is a syntax sugar, which is translated to an empty line.
+	It is useful in some times though this is not essential.
 
 
 .S	WIX と HTML 例外処理
+=E.S	WIX and HTML Exceptions
 
 	.HTML_PRE
 	.~HTML_PRE
 
 <PRE> 〜 </PRE> で展開したい部分。
+=E
+which is translated to <PRE> </PRE> statements.
+WIX ignore this block not in html mode.
 
 
 .# $Id$

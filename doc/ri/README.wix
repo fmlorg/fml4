@@ -296,7 +296,7 @@ fml 2.1 のターゲットマシン/テスト環境は
 =E
 The target and experimental machines are
 
-	sendmail 8.8.8 + perl5.003 on NetBSD 1.2 RELEASE
+	sendmail 8.8.8 + perl5.003 on NetBSD 1.3_BETA
 	sendmail 8.8.8 + perl5.003 on NetBSD 1.2 Beta
 	sendmail 8.8.8 + perl4.036/perl5.003 on NetBSD 1.1B
 

@@ -1,9 +1,11 @@
 .C	各種ユーザ用ユーティリティ等 (bin/, lib/Utilities/ ...)
+=E.C	Several Utilities (bin/, lib/Utilities/ ...)
 .l	uip
 
 ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
 について解説します。
-
+=E
+bin/ and lib/Utilities/
 
 .S 	analize_mail_error.pl, analize_mail_error.sh 
 .k 	analize_mail_error.pl

@@ -126,7 +126,12 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 	    なおコマンドラインオプションについては Chapter .ptr{clo}。
 	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
 	3   各MLごとの config.ph による設定
-	4   fml デフォールト設定
+	4   site_init.ph によるデフォールト設定	
+	5   fml デフォールト設定
+.l	site_init.ph
+.l	sitedef.ph
+.k	site_init.ph
+.k	sitedef.ph
 
 普通の program と同様ですね。ＭＬごとではなくそのマシン共通の設定にな
 るもの
@@ -134,6 +139,11 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 	tar や gzip はどこにある？
 
 等を sitedef.ph に書くと便利でしょう。
+
+site_init.ph は各MLの config.ph の前に評価されデフォールトを決めます。
+sitedef.ph は各MLの config.ph の評価後に適用され、各ＭＬの設定を強制的
+に書き換えることもできます。それぞれ使いわけると良いでしょう。いずれに
+しろ config.ph にない変数であればどちらを使っても同じことです。
 
 
 

@@ -1,10 +1,12 @@
 .C	改造について
+=E.C	Hack Tips
 .l	hack
 
 改造の話はFMLのデータ構造の章は読んでおくとよりわかり易くなります。
 .xref	data-structure
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
+=E.S	How to debug
 .k	debug
 
    fml-support: 01411 より
@@ -13,12 +15,21 @@
 
 ○ 私 printf デバッグがすきなので $debug = 1; にした時の画面に出るエラー
 情報から推測するのが多いです。
+=E
+* printf debug is fundamental. FML uses $debug variable. If you know
+the details of processing, set $debug = 1, which helps your debug.
 
 もしくは
 
 ○ perl -d オプションで perl debugger を使う
+=E
+* perl -d enables perl debugger.
 
 ○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
+=E
+* which file is libraries for an object?
+  A lib"NAME".pl library corresponds to functions on "NAME".
+  e.g. libsmtp.pl is SMTP (Simple Mail Tranfer Protocol) routines.
 
 基本関数	fml.pl
 SMTP		libsmtp.pl
@@ -32,8 +43,14 @@ SMTP		libsmtp.pl
 
 
 .S	消してもいいファイル…
+=E.S	I can remove this file or not?
 
 プロセスがない時なら、すべてのファイルは手作業でなにしてもいいです。
+=E
+If no process runs, you can edit any files :-). Howerver in general
+you require "LOCK FML" to edit files though FML runs when a mail comes
+in but I don't know when a mail comes. "makefml" locks before the
+operations.
 
 結局メールがきた時"だけ" fml.pl が動いているので、それ以外の時は何をし
 てもOKです。まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじっ
@@ -41,9 +58,17 @@ SMTP		libsmtp.pl
 
 そりゃさすがに code の debug は今動いているMLとは別のところでやったほ
 うがいいですけど…
+=E
+I reccomends the debug of codes apart from the current working ML :D
 
 間違って消して一番困りそうなのは seq と var/log/msendrc あたりです :-)
+もちろんメンバーリストも消すとやっかいです。
 ようするにＭＬの今の記事番号や uniqueness を保存しているログですね。
+=E
+Removing $DIR/seq, $DIR/actives, $DIR/members and $DIR/var/log/msendrc
+must be critical where actives and members are the member list of ML.
+seq is the current article number and msendrc is the log file of msend
+(digest) which log saves the number of msend'ed articles.
 
 seq ファイルの番号が狂うと記事を上書きしたりはしないかわりに管理者にエ
 ラーメールがきます。var/log にメールは保存されるので、復旧は簡単ですが
@@ -51,6 +76,13 @@ seq ファイルの番号が狂うと記事を上書きしたりはしないかわりに管理者にエ
 
 間違って seq を消してしまった時は 即効で spool の一番大きい番号を調べて
 その値を seq へ書き込めばよいです。
+=E
+If you remove seq in accident, you should write the largest article
+number in the spool as soon as possible. In the case of msendrc, you
+have to write msendrc by reading log file ;_; If msendrc is lack,
+msend.pl reconfigures the msendrc. But this msendrc must be not
+continuous to msend'ed users since msendrc creates a new msendrc with
+the latest article number.
 
 msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
@@ -60,6 +92,7 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
 
 .S	MIME文字列を日本語へ変換すること
+=E.S	Convert MIME strings to Japanese
 .xref	MIME-1, MIME-2
 
 $MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
@@ -71,15 +104,26 @@ Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
 
 こんな感じのコードを適当な場所に書けばいいわけですね。
 ＃例えば HOOK でしかければよい
+=E
+To convert MIME strings to Japanese, you can use codes like
+=S
+	$MailBody = &DecodeMimeStrings($MailBody);
 
 
 .S	改造事例:  sitedef.ph
+=E.S	example: sitedef.ph
 .k	sitedef.ph
 
 # Subject の [ML 数字] や (ML 数字) は切り落とし
 # Subject のオリジナルは X-Original-Subject に保存して
 # みやすい Subject を提供する
 # 
+=E
+# To provide a subject for your eys, 
+# cut [ML number] or (ML number) in subjects and 
+# preserve the original subject to X-Original-Subject.
+# 
+
 # Subject Hack
 $Envelope{'h:X-Original-Subject:'} = $Envelope{'h:Subject:'};
 $Envelope{'h:Subject:'} =~ s/\[\S+\s+\d+\]//g;
@@ -93,6 +137,9 @@ if ($Envelope{'h:X-Original-Subject:'} eq $Envelope{'h:Subject:'}) {
 !;
 
 # received 行を保存
+=E
+# save received: lines
+
 @HdrFieldsOrder = 
 ('received',
  'Return-Path', 'Date', 'From', 'Subject',
@@ -107,32 +154,48 @@ if ($Envelope{'h:X-Original-Subject:'} eq $Envelope{'h:Subject:'}) {
  'References', 'In-Reply-To', 'Precedence', 'Lines');
 
 # 念のため最後に記事を 644 にして誰でも読めるようにする
+=#
+# chmod 644 articles in the spool
+
 $DISTRIBUTE_CLOSE_HOOK = q#
 	chmod 0644, "$FP_SPOOL_DIR/$ID";
 #;
 
 
-.S	改造事例:  axion.phys.titech.ac.jp
+.S	改造事例: axion.phys.titech.ac.jp
+=E.S	example:  axion.phys.titech.ac.jp
 
 .q	
 
 このマシンのすべてのＭＬサーバで共通の設定(sitedef.ph)
 別に config.ph でいいんだけど、
-ＭＬが多いもんで、共通の設定はここでいっきにしてしまう。	
+ＭＬが多いもんで、共通の設定はここでいっきにしてしまう。
 
 #!/usr/local/bin/perl --    # -*-Perl-*-
+
 # コマンド実行時の返答の時のフェイスマーク(^^)
+=E
+# face marks
+
 $FACE_MARK = '(o)^^)';
 
 # ish の時は SJIS自動変換
+=#
+# SJIS auto conversion when ish
+
 $USE_SJIS_IN_ISH = 1;
 
 # host_map_lookup での DNS 遅延情報を トレースする、
 # １０秒かかるホストはログに残す
+=E
+# trace slow smtp session infomation
+
 $TRACE_SMTP_DELAY = 10;		# 10 sec.
 
 # インターネットプロバイダ (or.jp のアドレスを持つユーザ)に対しては 
 # addrのチェックを厳しく
+=E
+# check ISP users severely
 
 %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', 1);
 
@@ -141,6 +204,10 @@ $TRACE_SMTP_DELAY = 10;		# 10 sec.
 
 
 .S	改造事例:  mnews-ml
+=E.S	example: mnews-ml
+
+=E
+* not translate 
 
 .q
 
@@ -272,6 +339,9 @@ $TRF_NAME_HOOK = q#
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
 .key	# replyto コマンド
 
+=E
+* not translate 
+
 .q
 From:    Yuao Tanigawa <yuao@infonia.or.jp>
 X-ML-Name: fml-support
@@ -317,6 +387,7 @@ MLのアドレスを書くようにしました。
 
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+=E.S	not deliver From: field address of in-coming mail. 
 .k	%SKIP
 .k	$SKIP{アドレス}
 .k	skip
@@ -336,6 +407,7 @@ $START_HOOK = q#
 
 
 .S	古典の printf debug の例
+=E.S	printf debug
 .k	debug: printf
  
 .q
@@ -343,7 +415,9 @@ From: fukachan@phys.titech.ac.jp
 X-Mail-Count: 00702 
 
 じゃ、
+
 	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
 を、
 
 &InitConfig;			# initialize date etc..
@@ -372,6 +446,7 @@ X-Mail-Count: 00702
 
 
 .S	fmlのコマンドが送れるページの例
+=E.S	URL where you can send FML commands
 .url	http://www.j-is.or.jp/fml/
 
 .q
@@ -382,23 +457,32 @@ From: Yuao Tanigawa <yuao@infonia.or.jp>
 
 …
 .~q
-
+=E
+http://www.j-is.or.jp/fml/
 
 .S	$ProcedureException{"bye", "ignore_list"} (将来もあるかは未定)
+=E.S	$ProcedureException{"bye", "ignore_list"} 
 
    $ProcedureException{"bye", "ignore_list"} = $MEMBER_LIST;
 
 とかすると、member list に operation したふりだけして何もしないという 
 exception code いれたけど、裏技なのでdocumentにはかかず状態
 このコードはSNMPなMIB的になってしまふのかしらん… あななやまし
-
+=E
+fake operation to a member list. I cannot ensure this code exists in
+the future.
 
 .S	新しく『特定のファイルを送り返す』コマンドを作る
+=E.S	make a new command what send back a file
 .l	my-file-sendback-command
 
 例: コマンド # news でニュースというファイルを送り返す。
+=E
+E.g. "# news" command is to send back $DIR/news file.
 
 config.ph に
+=E
+In config.ph
 
 %LocalProcedure = (
 		    # help for usage of commands
@@ -410,11 +494,15 @@ config.ph に
 と書けば news という新しいコマンドのでき上がりです。
 
 
-.S	メンバーを問わずファイル news を送り返す例
+.S	メンバーを問わずファイル uja を送り返す例
+=E.S	to send back $DIR/uja for anyone
 
 例:
 １	誰からのリクエストでもOK
 ２	本文にキーワード uja とかくこと
+=E
+1	requests from anyone are O.K.
+2	keyword "# uja" in the mail body to send back "uja"
 
 $START_HOOK = q#
     $UJA_FILE = "$DIR/uja";
@@ -428,10 +516,14 @@ $START_HOOK = q#
 
 
 .S	自動送り返しサーバの実装例
+=E.S	Automatic Replay Server
 .key	自動送り返しサーバの実装例
 
 なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
 で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
+=E
+Please set a file to $GUIDE_FILE in config.ph and set up $START_HOOK
+in the following hook:
 
 ポイントは、“$START_HOOK にしかける”ってところです。
 
@@ -451,20 +543,28 @@ $START_HOOK = q#
 
 
 .S	たとえば、Received: のようなヘッダを残すには？
+=E.S	Preserve Received: lines
 
 FML 2.1 では
+=E
+After FML 2.1, set
 
     unshift(@HdrFieldsOrder, 'received');
 
 とすればいいでしょう。もっともこの場合一行だけ Received ではなく 
 received になってしまってちょっと情けないかも知れませんが…
 ＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
+=E
+to preserve Received: fields in the header. A capital is important.
 
 
 .S	スプールにあるファイルをMIME逆変換する
+=E.S	reconvert MIME characters in the spool
 .k	スプールにあるファイルをMIME逆変換
 
 lib/MIME/rmime を使って、/bin/sh なら
+=E
+use lib/MIME/rmime and runs shell scripts like 
 
 	for file in *
 	do
@@ -477,10 +577,13 @@ lib/MIME/rmime を使って、/bin/sh なら
 
 
 .S	mget でえた spool の下のファイルを mh 以外で読む時
+=E.S	read not MH in the spool which is sent back by "mget".
 .l	lib/Utilitites/packmbox.pl
 .k	packmbox.pl
 
 lib/Utilitites/packmbox.pl を使って、
+=E
+To create "mbox", you use lib/Utilitites/packmbox.pl and runs 
 
 	(cd spool; packmbox.pl ) > ~/mbox
 
@@ -489,10 +592,13 @@ lib/Utilitites/packmbox.pl を使って、
 
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
+=E.S	MIME-Decode MIME parts of a mail to distribute
 .xref	MIME-1
 
 では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
 例えば、fml.pl の sub GetFieldsFromHeaderで
+=E
+To MIME-Decode MIME parts of a mail to distribute is to change
 
     if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
         require 'libMIME.pl';
@@ -500,6 +606,8 @@ lib/Utilitites/packmbox.pl を使って、
     }
 
 を
+=E
+to
 
     if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
         require 'libMIME.pl';
@@ -511,14 +619,20 @@ lib/Utilitites/packmbox.pl を使って、
 
 
 .S	認証する際のドメインのALIAS %DOMAIN_ALIASES
+=E.S	%DOMAIN_ALIASES when autentication
 
 認証する時には ujauja.or.jp  => ujauja.ne.jp に書き換えてTRYしてみる
+=E
+When FML authenticates From: address as a member or not, FML tries
+both who@ujauja.or.jp and who@ujauja.ne.jp.
 
 %DOMAIN_ALIASES = (
 	'ujauja.or.jp', 'ujauja.ne.jp',
 	);
 
 ＃ fml.pl 2.0.24.47 へのパッチの例
+=E
+An example of a patch for fml.pl 2.0.24.47
 
 --- fml.pl.org	Fri Nov 21 08:11:10 1997
 +++ fml.pl	Sat Nov 22 12:51:33 1997

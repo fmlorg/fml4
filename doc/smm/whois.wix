@@ -1,9 +1,16 @@
 .C	WHOIS データベースとサーバ
+=E.C	whois database
 .k	whois 
 .l	whois
 .xref	whois-security
 
 FML の whois コマンドは
+=E
+whois command of FML is local data access (var/db/whoisdb) and relay
+to whois servers at other hosts. The data format is plain text not
+usual DB such as Berkeley DB. "-h host" option makes FML to relay the
+query to the host whois. If without -h option, FML uses the local
+database.
 
 	本物の whois server とプロセス間通信して内容を送り返す
 	ＭＬローカルに持っているデータベースへのアクセス
@@ -21,6 +28,10 @@ FML の whois コマンドは
 0 なら FML のデフォールト(whoisは使わない) 1 なら使うようになります。
 これは基本的なポリシー「明示的に許さない限り機能は増やさない」に沿うも
 のです。
+=E
+If 0 (default), FML does not use whois database. If you use it, set 1.
+This is based on the FML design policy that you can use additional
+functions if you explicitly permit it.
 
 ただし、これはhmlとは違い、本物の任意のwhois serverとプロセス間通信を
 するためのものです。
@@ -28,16 +39,22 @@ FML の whois コマンドは
 た)
 
 例：
+=E
+Example 1: search fukachan in the local database
+
    % echo  "# whois fukachan" | Mail Elena@phys.titech.ac.jp
 
 ローカルなデータベースの中から fukachan を含むデータを探して送り返す。
+=E
+Example 2: query fukachan to whois of the host 
 
-   % echo "# whois -h どっかのwhoisサーバ fukachan" | Mail Elena@phys.titech.ac.jp
+   % echo "# whois -h host fukachan" | Mail Elena@phys.titech.ac.jp
 
-は ”どっかのwhois” に聞きにいきます。
+は host の whois に聞きにいきます。
 
 
 .S	Whois のカスタマイズすべき変数
+=E.S	whois customizing variables
 .l	$DEFAULT_WHOIS_SERVER
 
 	$DEFAULT_WHOIS_SERVER = "localhost";
@@ -45,11 +62,16 @@ FML の whois コマンドは
 
 で デフォールトの whois サーバを変更できます。コマンドの -h オプション
 でも変更できます。その場合はコマンドの -h オプションが優先します。
+=E
+default whois sever but now without -h option is local database
+search, so the default of whois server is of no mean.
 
 	$WHOIS_DB
 .k	$WHOIS_DB
 
 ローカルにもっているデータベースです。デフォールトは "$FP_VARLOG_DIR/whoisdb" 
+=E
+local database file (default $FP_VARLOG_DIR/whoisdb).
 
 	$WHOIS_HELP_FILE
 .k	$WHOIS_HELP_FILE
@@ -58,9 +80,11 @@ FML の whois コマンドは
 	"# whois help" 
 
 コマンドで送り返されるヘルプメッセージ。デフォールトは "$DIR/etc/help.whois"
+=E
+whois help message (default $DIR/etc/help.whois).
 
-
-.S	Whois と答えの日本語変換
+.S	Whois と答えの日本語文字コード変換
+=E.S	whois and Japanese Code translation 
 .k	$WHOIS_JCODE_P
 
 	$WHOIS_JCODE_P
@@ -69,6 +93,8 @@ FML の whois コマンドは
 として実装されているのは変な答えを変換しようとして落ちたりすることもあ
 りうるようなので、たまにおちるかもしれないRISKを負う覚悟があるか否か？
 を表現している toggle です;-)
+=E
+using jcode to translate the result to JIS. Default is 0.
 
 
 .# $Id$

@@ -1,9 +1,11 @@
 .C	クロスポスト
+=E.C	Crosspost
 .k	クロスポスト
 .l	crosspost
 .k	crosspost
 
 .S	クロスポスト Introduction
+=E.S	Crosspost Introduction
 
 クロスポストをした場合通常はＭＬすべてに流れてしまいます。ニュースシス
 テムはニュースサーバがクロスポストを処理していますが、ＭＬサーバはそれ

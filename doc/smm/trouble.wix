@@ -971,6 +971,35 @@ root で install してたりしたら(そもそもそんなことは本来してはいけませ
 をして ML を作ってみる。
 
 
+.S	550 User %s@%s doesn't have a valid shell for mailing to programs
+.k	doesn't have a valid shell
+
+FMLプロセスの所有者のシェルが /etc/shells にないためです。
+使っているシェルを /etc/shells に登録して下さい。
+
+/usr/src/usr.sbin/sendmail/src/ を漁る
+
+	else if (bitset(QBOGUSSHELL, a->q_alias->q_flags)) {
+	  a->q_flags |= QBADADDR;
+	  a->q_status = "5.7.1";
+	  if (a->q_alias->q_ruser == NULL)
+	    usrerr("550 UID %d is an unknown user: cannot mail to programs",
+		   a->q_alias->q_uid);
+	  else
+	    usrerr("550 User %s@%s doesn't have a valid shell for mailing to programs",
+		   a->q_alias->q_ruser, MyHostName);
+	}
+	else if (bitset(QUNSAFEADDR, a->q_alias->q_flags))
+			       
+
+とか
+
+  if (!usershellok(pw->pw_name, pw->pw_shell)) {
+    a->q_flags |= QBOGUSSHELL;
+  }
+
+とか…
+
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 

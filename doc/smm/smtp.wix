@@ -2,12 +2,17 @@
 =E.C	Mail Delivery System Tuning
 
 .S	SMTPライブラリについて
+=E.S	SMTP library
 .l	smtp
 .k	SMTP (Simple Mail Transfer Protocol)
 .k	MTA (Mail Transport Agent)
 
 SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
 Transport Agent)と通信するライブラリです。
+=E
+FML can connet MTA (Mail Transport Agent) via SMTP (IPC).
+libsmtp*.pl are SMTP libraries. The default port is 25/tcp.
+You can control the port as $PORT. 
 
 $PORT = 25 (25/tcp) で通信しますが、
 
@@ -15,12 +20,16 @@ $PORT = 25 (25/tcp) で通信しますが、
 .k	$PORT 
 
 を変えることで別のポートで通信することもできます。また、標準で
+=E
+In default you can take a debug of SMTP sessions in
 
 	$SMTP_LOG (default は "var/log/_smtplog")
 .k	$SMTP_LOG
 
 というファイルに通信のログを残します。このログはデバッグに非常に役立ち
 ます。
+=E
+If you do not need th session log, set 
 
 	$NOT_TRACE_SMTP 
 .k	$NOT_TRACE_SMTP 
@@ -29,6 +38,9 @@ $PORT = 25 (25/tcp) で通信しますが、
 うかも自由に設定できます。デフォールトはそのマシンです。もしMLサーバの
 マシン(受けるマシン)が貧弱ならそのマシンが何十通もメールを送り出すのは
 酷です。
+=E
+Which host FML uses as a distributor. In default, $HOST is localhost
+(ML server itself), but you can use another host as $HOST.
 
 	$HOST         = 'localhost';
 .key	$HOST
@@ -41,6 +53,8 @@ $PORT = 25 (25/tcp) で通信しますが、
 のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
 ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
 のでそのマシンを使う許可を得るべきです。
+=E
+$HOST you use should be that $HOST permits you to use MTA on $HOST.
 
 
 .S	予備のSMTPサーバ

@@ -1,4 +1,5 @@
-.S	cron (fml original bin/cron.pl)
+.S	cron (FML original bin/cron.pl)
+=E.S	cron (FML original bin/cron.pl)
 .l	cron
 .k	cron.pl
 .k	bin/cron.pl
@@ -8,23 +9,42 @@
 システムにユーザごとに定義できる cron がない場合に使います。
 まずはユーザごとに定義できる cron がないかどうかを調べて下さい。
 まずは man crontab を試してみることからです。
+=E
+The present OS may have a cron for users. Please check it in the
+first.  e.g. man crontab
+If OS has only cron defined by the root and not have a user-defined
+cron, you can use FML cron (clone of 4.4BSD cron).
 
 動きとしては system の cron と同じ働きをします。つまり１分に一回おきて 
 crontab をみて、実行する。
+=E
+FML cron also sleep and runs once a miniute.
+If the crontab entry has a job now, cron run it.
 
 管理者が手で起動してもいいし、fml.pl が cron.pl を走らせてもよいです。
 注意として fml.pl から cron.pl を走らせると各ＭＬごとに一つ走ります。
 複数のＭＬがある場合は一つの cron.pl で複数のＭＬを担当するような
 設定ファイルを書くのが良いです。
+=E
+You can run cron manually, fml.pl can run cron.pl automatically. 
+If fml.pl automatically runs cron.pl under it, 
+it runs each cron.pl for each ML. It is of no use. 
+It is enough that one cron.pl for one user.
 
 fml.pl から起動すると何回も cron.pl を起動しますが、複数は走りません。
 $CRON_PIDFILE ($DIR/var/run/cron.pid)というファイルにプロセス番号を保
 存し一意性を保証しています。
+=E
+fml.pl runs only one cron.pl, not plural. fml.pl checks $CRON_PIDFILE
+($DIR/var/run/cron.pid) to ensure only one cron.pl running.
 
 また長く走り過ぎておかしくなる場合も考慮してデフォールトでは２４時間で
 次の cron.pl を起動しなおします。これは予防策であって必ずしもする必要
 はありません。-n オプションをつけるとずっと走り続けるようになります。
-
+=E
+In default cron.pl itself exits, and new cron.pl runs to avoid strange
+behavior when a process runs long long time.
+However -n option enables long time jobs of one process.
 
 SYNOPSYS
 	cron.pl [-a] [-d] [-b43] [-fcrontab] [-bd] $DIR [$LIBDIR]
@@ -41,20 +61,30 @@ SYNOPSYS
 
 -b43 オプションは 
 .k	-b43
+=E
+-b43 option set
 
 	$CRON_NOTIFY    = 0; (デフォールトは 1)
 .k	$CRON_NOTIFY
 
 ということをします。デフォールトでは cron が何らかの処理をした場合はそ
 のログをそのユーザに知らせます。
+=E
+In default, cron.pl notify the cron job log to the owner of the
+process by mail (4.4BSD).
 
 また、デフォールトでは cron.pl はデーモン化しません。
+=E
+Also in default, cron.pl does not detach the current tty, that is,
+not become daemon since becoming daemon does not work well on an OS.
 
 	-onotty
 .k	-onotty
 
 オプションをつけると自分でデーモン化します。
 うまくいかないＯＳがありうることを考慮してデフォールトでは
+=E
+cron.pl becomes daemon by itself. In default
 
 	$NOT_USE_TIOCNOTTY = 1;		# no ioctl
 .k	$NOT_USE_TIOCNOTTY
@@ -69,6 +99,9 @@ SYNOPSYS
 4.4BSD には Paul Vixie の書いた各ユーザごとに cron を定義できる cron 
 が入っています。これがあるなら cron.pl は要らないです。詳しくはシステ
 ムのマニュアルを見て下さい。
+=E
+4.4BSD has Vixie Cron, so you can use it for yourself. Please use it
+on 4.4BSD.
 
 .q
 cron (8) - daemon to execute scheduled commands (Vixie Cron)
@@ -78,35 +111,61 @@ crontab (5) - tables for driving cron
 
 古いＯＳにはありません。しかし元々入っていなくても管理者の人がインストー
 ルしているかもしれません。探してみる価値はあります。
+=E
+An old OS has no such cron. However an administrator installed Vixie
+cron. It is of value to trek your system:-)
 
 cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
 をしたい場合のためのものです。
+=E
+cron.pl is a clone for such an old OS.
 
 
 .S	cron.plのインストール
+=E.S	How to install cron.pl
 
 システムが定期的に何かをしてくれないので、cron.pl をなんとかして(疑似
 定期的に)起動したいわけです。問題はどう起動するか？だけです。
+=E
+The system in the bootstrap time does not run cron.pl automatically.
+We would like to run cron.pl anyway. What should we do?
 
 まず起動自体は
+=E
+To run cron.pl, the arguments are
 
 	% cron.pl $DIR(config.phの場所) $LIBDIR(libsmtp.plとかの場所) 
+=E
+	% cron.pl $DIR(config.ph location) $LIBDIR(lib*.pl location)
 
 の形で起動します。
 ＃注意： Argument がないと、その環境の $HOME にいってしまう
 
 問題はどうやって定期的に起動をトライするかですが、例えば
+=E
+For example, you can set up the following ways:
 
    1. たとえば ~/.login で cron.pl を起動するとか(すでに走っていれば走
       らないから大丈夫)…
+=E
+   1.	set up your ~/.login which run cron.pl so that 
+	you can log in the system, you can run cron.pl.
+	cron.pl always checks other cron.pl runs or not, so
+	only one cron.pl runs.
 
    2. loginしたとき、まめに(手動で)たちあげるとか…
+=E
+   2. runs cron.pl manually :)
 
    3. MLサーバにメールが来たときに起動させる↓とか…
+=E
+   3. fml.pl runs cron.pl when a mail comes in.
 
 が考えられます。３の設定としては
 
 config.ph に
+=E
+config.ph example is 
 
 .k	$CRON_PIDFILE
 .k	$CRONTAB
@@ -114,7 +173,6 @@ config.ph に
 
 	$CRON_PIDFILE = "$DIR/var/run/cron.pid";
 	$CRONTAB      = "$DIR/etc/crontab";
-	＃ directory がなかったらつくってくださいませ
 
 	$FML_EXIT_PROG = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
 
@@ -123,22 +181,31 @@ config.ph に
 
 cron.pid は cron.pl の pid を記録するファイルです(/var/run/cron.pidに
 相当するもの)。
+=E
+cron.pid corresponds to /var/run/cron.pid but exists for each ML.
 
 crontab は システムの /etc/crontab に相当するものです。makefml newml 
 した時に各ＭＬの HOME (config.phのある場所)には crontab という見本
 (4.4BSD形式) が作られます。4.4BSD 形式ではこれを使えばまとめ送りの設定
 ができます。
+=E
+When you run "makefml newml", FML sets up each crontab for each ML.
+It is 4.4BSD format. You can use it on 4.4BSD, but you may have to
+edit crontab to match your OS in other OS.
 
 ＊＊＊注意＊＊＊
 cron.pl は 4.4 BSD FORMAT を理解します。4.3BSDの形式ではありません
 
 
 .S	cron.pl を使う際の注意
+=E.S	Attentions to cron.pl using
 
 上述のように cron.pl を sendmail が exec して実行するというのはcrontab 
 をユーザー毎に設定できない OS への対応です。できるなら user ごとに 
 crontab を設定できるほうがいいとおもうんですが世の中そういう OS ばっか
 りじゃないわけで困ってしまうわけです。
+=E
+You should use system cron if possible, cron.pl is a clone for old OS.
 
 例えば、24時間でおきかえるっていうのも安全策なだけで別に1週間走らせて
 もOKです(-n option)。つまり無理に sendmail にcron.pl を走らせさせなく
@@ -150,6 +217,10 @@ crontab を設定できるほうがいいとおもうんですが世の中そういう OS ばっか
 システムの cron は /etc/rc が実行するので、reboot してもいいんですが…
 cron.pl の場合はもしマシンがおちたらそれに気づくまでまとめおくりが実行
 されません。
+=E
+cron.pl may be down. OS does not run cron.pl automatically, so 
+digest delivery does not run until you are aware of it. 
+For it, you can set up fml.pl runs cron.pl when a mail comes in.
 
 そのため、fml.pl が cron.pl をたちあげなおすという技も使えます。
 それは HOOK で実現することができます($FML_EXIT_PROG)。
