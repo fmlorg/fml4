@@ -704,6 +704,22 @@ sub OutputHtml
 		print STDERR "ERROR: http-equiv lang=$Lang";
 	    }
 
+	    # META keywords
+	    {
+		my ($keyword) = $Title;
+		$keyword     .= ",". $ENV{'FWIX_META_KEYWORD'};
+		if ($Lang eq 'ENGLISH') {
+		    &POH("<META name=\"keywords\"");
+		    &POH("   lang=\"en\"\n");
+		    &POH("   content=\"$keyword\">\n");
+		}
+		elsif ($Lang eq 'JAPANESE') {
+		    &POH("<META name=\"keywords\"");
+		    &POH("   lang=\"ja\"\n");
+		    &POH("   content=\"$keyword\">\n");
+		}
+	    }
+
 	    # <LINK ... > element
 	    if ($LINK_ELEMENT || $LINK_MAILTO || $LINK_STYLESHEET) {
 		if ($LINK_MAILTO) {
