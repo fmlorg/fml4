@@ -39,7 +39,7 @@ sub GetMCIWindow
 	($size, $start, $end) = split(/:/, $MCIWindowCB{$file});
     }
     else {
-	$MCIWindowCB{$file} = $n = &LineCount($file);
+	$n = &LineCount($file);
     }
 
     # initialize when $MCI_TYPE eq 'window'
