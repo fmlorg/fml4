@@ -2744,6 +2744,17 @@ sub STR2EUC
 
 sub DEFINE_SUBJECT_TAG { &use('tagdef'); &SubjectTagDef($_[0]);}
 
+sub DEFINE_MAILER
+{
+    local($t) = @_;
+    if ($t eq 'ipc' || $t eq 'prog') { 
+	$Envelope{'mci:mailer'} = $t;
+    }
+    else {
+	&Log("DEFINE_MAILER: unknown type=$t (shuold be 'ipc' or 'prog')");
+    }
+}
+
 sub DEFINE_MODE 
 { 
     local($m) = @_;
