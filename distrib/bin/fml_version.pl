@@ -1,20 +1,27 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:X:");
+&Getopts("iqtsp:L:X:T");
 
-$FML          = $opt_X || $ENV{'FML'};
-$RELEASE_ID   = "$FML/etc/release_version";
-$RELEASE_DATE = "$FML/etc/release_date";
-$SHOW_ID      = $opt_s;
-$query        = $opt_q;
-$patchlevel   = $opt_p;
-$Label        = $opt_L;
+$FML           = $opt_X || $ENV{'FML'};
+$TRUNK_ID      = "$FML/conf/release";
+$RELEASE_ID    = "$FML/conf/release_version";
+$RELEASE_DATE  = "$FML/distrib/compile/release_date";
+$SHOW_ID       = $opt_s;
+$query         = $opt_q;
+$patchlevel    = $opt_p;
+$Label         = $opt_L;
 
 &StoreTime if $opt_t;
 
 &GetTime;
 $Year     = 1900 + $year;
+
+if ($opt_T) {
+    chop($_ = `cat $TRUNK_ID`);
+    print $_, "\n";
+    exit 0;
+}
 
 if ($Label) {
 	$ID = $Label;

@@ -39,7 +39,7 @@ PATCHLEVEL_DIR=distrib/compile
 PATCHLEVEL_FILE=$PATCHLEVEL_DIR/version
 
 # distribution list
-RELEASE_MANIFEST=etc/RELEASE_FILES
+RELEASE_MANIFEST=distrib/compile/RELEASE_FILES
 
 # distribution directory of snapshot
 DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST

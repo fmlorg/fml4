@@ -58,7 +58,7 @@ INIT_VERSION () {
 		echo 	USAGE: $0 -i fml.pl
 	fi
 
-	RID=`cat etc/release_version`
+	RID=`perl distrib/bin/fml_version.pl -s`
 	echo -n $RID     > $RELEASE_MANIFEST
 	echo -n ";"	>> $RELEASE_MANIFEST
 	date 		>> $RELEASE_MANIFEST
@@ -76,8 +76,14 @@ INIT_VERSION () {
 			tee -a $RELEASE_MANIFEST
 		done
 
-		cat $RELEASE_MANIFEST >> doc/rcs/$RID
-		(echo "--------------------------"; echo "";) >> doc/rcs/$RID
+		TID=`cat $FML/conf/release`
+		test -d distrib/history      || mkdir distrib/history
+		test -d distrib/history/$TID || mkdir distrib/history/$TID
+		cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
+		(
+		 echo "--------------------------";
+		 echo "";
+		) >> distrib/history/$TID/$RID
 		echo " "; 
 	fi
 

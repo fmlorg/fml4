@@ -121,11 +121,11 @@ ETC_SOURCES:
 etc/crontab-4.3
 etc/crontab-4.4
 etc/passwd
-etc/RELEASE_FILES
-etc/release_date
-etc/release_version
 etc/daily.ignore
 etc/mime.types
+distrib/compile/RELEASE_FILES
+distrib/compile/release_date
+conf/release_version
 
 
 OBSOLETE_SBIN_SOURCES:

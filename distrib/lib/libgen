@@ -327,7 +327,7 @@ FIX_LANGUATE () {
 GEN_BRANCH_ARCHIVE () {
 	chdir $DESTDIR
 
-	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
+	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
 	DATE=`date +"%y%m%d"`
 	FMLID=fml-SNAP$DATE
 
@@ -376,7 +376,7 @@ GEN_ARCHIVE () {
 
 	chdir $DESTDIR
 
-	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
+	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
 	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
 	DATE=`date +%y%h%d`
 
