@@ -1,0 +1,32 @@
+LDIF:
+
+elena@fml.org の階層構造をこう考えると
+cn=elena, dc=fml, dc=org でいいだろう。
+
+     org
+     /
+   fml 
+   /
+elena
+
+
+じゃ、virtual domain はどうするの？ もし mailserv.fml.org で 
+elena@enkai.org の virtual domain をやっているとすると？
+こんなんにするかい？
+
+cn=elena, dc=enkai, dc=org, cn=virtual, dc=fml, dc=org
+        
+             org
+             /
+           fml 
+           /
+        virtual
+         /
+       org
+       /
+    enkai
+     /
+  elena
+
+
+$Id$
