@@ -15,7 +15,7 @@ Topic:	Love Letter Worm
    &DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
 
    $DISTRIBUTE_FILTER_HOOK = q#
-      if ($e{'Body'} =~ /Content.*\.vbs/i) {
+      if ($e{'Body'} =~ /Content.*\.vbs|filename=.*\.vbs/i) {
            return 'VB script attatchment';
       }
    #;
@@ -93,10 +93,12 @@ To add
 
 &DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
 
-亜種がでるだろうとおもわれるので、汎用的にはVBスクリプト全部を弾く
+亜種がでるだろうとおもわれるので、やらないよりはやった方がましという程度。
+
+汎用的にはVBスクリプト全部を弾く必要があるだろう。
 
 $DISTRIBUTE_FILTER_HOOK = q#
-      if ($e{'Body'} =~ /Content.*\.vbs/i) {
+      if ($e{'Body'} =~ /Content.*\.vbs|filename=.*vbs/i) {
            return 'VB script attatchment';
       }
 #;
@@ -118,10 +120,11 @@ To write
 
 &DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
 
-亜種がでるだろうとおもわれるので、汎用的にはVBスクリプト全部を弾く
+亜種がでるだろうとおもわれるので、やらないよりはやった方がましという程度。
+汎用的にはVBスクリプト全部を弾く必要があるだろう。
 
 $DISTRIBUTE_FILTER_HOOK = q#
-      if ($e{'Body'} =~ /Content.*\.vbs/i) {
+      if ($e{'Body'} =~ /Content.*\.vbs|filename=.*vbs/i) {
            return 'VB script attatchment';
       }
 #;
