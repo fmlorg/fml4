@@ -36,6 +36,50 @@
 です。bin/cron.pl を システムの Cron におきかえれば 同じ論法が成立します。
 
 
+ .S	まとめおくりサーバ msend.pl 
+
+まとめおくりを実行する スクリプト
+
+SYNOPSIS
+	msend.pl    [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
+
+	fml.pl MSendv4.pl fmlserv.pl は同じ引数のとりかたをします。
+	注意：fml_local.pl は MH を意識してるので異なります。
+
+オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
+れ以外は Directoryの変数 だと仮定します。順番は関係ありません
+Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
+$LIBDIR にセットされます。
+
+
+	-d		デバッグモード
+			（ＭＬへの配送以外すべてを実行可能）
+	-bt   		アドレステストモード	(Become Test)
+			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
+			いまのところ debug mode とかわらへんねん:-)
+	-bd		デーモンモード	(Become Daemon)
+	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
+	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
+	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
+	-q		quiet mode (エラーとかWarnig以外は何も出力しない)
+			POSIX の cron では OUTPUT をひろうので、-q なら
+			エラー時以外はメールが来ないようにするため
+
+	○これ以外に long line options が使えます。
+
+注意：sendmail のように『空白なし』です。(だってその方がコードが簡単なんだもん:-)
+
+
+AUTHOR
+	fukachan@phys.titech.ac.jp
+
+.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
+.# $Id$
+
+
+
+
+
 .S	プログラムの名称の変更 MSendv4.pl -> msend.pl
 .key	MSendv4.pl -> msend.pl
 

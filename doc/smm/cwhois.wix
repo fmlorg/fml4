@@ -21,11 +21,45 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 自動的に ローカルサーチ に切替えることができます。
 
 
+.S	一次キャッシュと２次キャッシュも含む探索アルゴリズム
+
+一次キャッシュと２次キャッシュも含む探索アルゴリズムは次のようになる。
+
+0	一時間以内に全く同じキーワードでひいていたら
+	そのデータを表示(一次キャッシュ)
+
+1	whois -h $WHOIS_SERVER keyword
+	TIMEOUT した場合は
+	ローカルサーチ(2次キャッシュ)
+
+2	#keyword で2次キャッシュサーチ
+
+	なお、これらは一番新しいデータだけを表示。
+	明示的に関連データ全部を出すためには
+
+	all#keyword
+	all#apply#keyword 
+
+	のようにオプション( all# ) をつける
+
+
+.S	キャッシュの表示
+
+デフォールトではキャッシュは一番新しいデータのみを表示する。
+そのキーワードにマッチしたものすべてを表示するためには
+
+	all#keyword 
+
+のような引き方をする必要がある。なおデータの表示の順番は新しい方から古
+い方へという向きです。
+
+
 .S	/etc/inetd.conf 
 
 例：
 	whois stream tcp nowait fukachan \
 	/usr/local/libexec/cwhois.pl cwhois.pl /var/spool/whois
+
 
 .S	configuration file (config.ph)
 
@@ -60,12 +94,13 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 
 	% whois -h whois-server #KEYWORD
 
-'local' で定義されたキャッシュ データベースを検索
+'opt' で定義されたキャッシュ データベースを検索
 
 	% whois -h whois-server opt#KEYWORD
 
-'opt' で定義されたキャッシュ データベースを検索
 例：
+'local' で定義されたキャッシュ データベースを検索
+
 	whois -h whois-server local#uja
 
 
@@ -78,6 +113,7 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 
 	$CACHE_SEARCH_PROG  = "/usr/local/fml/bin/scandb.pl";
 
+＃ ちなみに &ScanDB(*key, *set, *db, *spool, *misc); のように呼び出します
 
 ○キャッシュスプールとデータベース対応させる配列（連想配列）
 
@@ -90,16 +126,16 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 というついになったデータを利用します。
 
 例：
-	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply');
-	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb');
+	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply');
+	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb');
 
 
 必要なら（対応する） spool1:spool2 という形で
 
 	 一つのキーワード <=> 複数の database と spool の対応関係
 例：
-	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply:/var/spool/cache');
-	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb:/var/db/cachedb');
+	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply:/var/spool/cache');
+	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb:/var/db/cachedb');
 
 が定義できます。
 
@@ -107,9 +143,14 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	デフォールトでは proc#keyword 形	
 
 	$CHMODE             = '#';
-	$LOCAL_HELP_KEYWORD = "help$CHMODE";
-	$LOCAL_CACHE_SEARCH = "$CHMODE(\\S+)";
-	$LOCAL_COMMAND_MODE = "(\\S+)$CHMODE(\\S+)";
+
+オプションとキーワードの区切り。ここでは # なので	
+
+	help#
+	   #keyword
+	opt#keyword
+
+のようなシンタックスを受け付けます。
 
 ○デフォールトフォワード先の whois server
 
@@ -138,7 +179,7 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 
 	fml の Whois ライブラリを呼び初期化する
 
-	TCP/43 で通信
+	43/tcp で通信
 	&Ipc2Whois(*e, *Fld, *host, *pat)
 
 	返り値は %e 内部変数へ返す。
@@ -253,8 +294,8 @@ sub CacheOn
 
 .S	scandb.pl (lib/cwhois/scandb.pl)
 
-    require scandb.pl;
-    &ScanDB(*key, *proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
+	require $CWHOIS_SEARCH_PROG;
+	&ScanDB(*key, *set, *db, *spool, *misc);
 
 
 
