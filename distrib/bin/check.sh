@@ -2,13 +2,15 @@ buf=/tmp/buf$$
 tmp=/tmp/p$$
 sed=/tmp/sed$$
 
+CHECK_IGNORE=distrib/etc/check.ignore
+
 trap "rm -f $buf $tmp $sed" 0 1 3 15
 
 echo ""
 echo "Ignore Pattern: $FML/.check_ignore";
 echo ""
 
-for x in *.pl bin/*pl sbin/*pl sbin/makefml proc/*.p? libexec/*.p? 
+for x in kern/*.pl bin/*pl sbin/*pl sbin/makefml proc/*.p? libexec/*.p? 
 do 
 	echo "--- $x"
 	echo "s#$x ##g" > $sed
@@ -27,9 +29,17 @@ do
 done
 
 echo ""
-echo "--- summary ---"
+echo "--- summary (expected) ---"
+cp $tmp /tmp/fml.check
+sort -n $tmp | egrep -f $CHECK_IGNORE
 echo ""
-sort -n $tmp
+echo "--- summary (unexpected) ---"
+echo ""
+sort -n $tmp | egrep -v -f $CHECK_IGNORE
+echo ""
 echo "gmake varcheck IS ALSO USEFUL"
+
+
+
 
 exit 0
