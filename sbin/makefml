@@ -43,7 +43,7 @@ sub InitMakeFml
     &GetTime;
 
     require 'getopts.pl';
-    &Getopts("dhf:A:");
+    &Getopts("dhf:A:O:");
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -131,7 +131,10 @@ sub InitMakeFml
     }
 
     # if not defined this machine OS;
-    if ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
+    if ($OS_TYPE = $opt_O) {
+	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+    }
+    elsif ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
 	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
     }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
