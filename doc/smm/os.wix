@@ -43,7 +43,6 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 .~q
 
 
-
 .S	プロセスは誰の権限で動くか？
 .key	uid
 .key	setuid
@@ -52,8 +51,9 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 
 「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
 走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
-システムに「 fml 管理者の プロセスとして走る」用に命令することが
-システムによって違うことがあるので少し厄介なことが発生します。
+システムに「メーリングリスト管理者のプロセスとして走る」用に命令するこ
+とがシステムによって違うことがあるので厄介なことが発生します。
+＃注意: 以下の説明とは異なる場合ももちろんありえます。
 .xref fml-process, msend
 
 ○ローカルに fml にメールを投げる
@@ -63,44 +63,45 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 ○外からメールがやってきたら？
 	つまり sendmail がうけとって fml を起動する場合
 
-	外→	
-		sendmail は uid = 0 で待っている(デーモン)
-		＃昔の sendmail だと daemon の場合もあるだろう
+	外→ sendmail は uid = 0 で待っている(デーモン)
+	     ＃昔の sendmail だと daemon の場合もあるだろう
 
-		→ setuidしてユーザー権限 (uid=your own) にして
-		   fml.pl を起動し、メールを fml.pl へ渡す
+	     → setuidしてユーザー権限 (uid は include の持ち主)にして
+		fml.pl を起動し、メールを fml.pl へ渡す
 		＃これは fml.c で作った fml を使うか
-		＃:include list 形
+		＃:include list 形式での呼びだし
 
-ここでsetuidの話が関係するわけです。
+ここで setuid() の話が関係するわけです。
 
-各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
-
+各オペレーティングシステムでどう setuid をすればうまくいくか？ は次の
+節にまとめてあります。
 注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
 は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
 いくことにしてます。
 
 
-.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
+.S	/etc/aliases の書き方と OS 依存性
 
 make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
-fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
-れているはずです。
+makefml が fml.c を自動的に補正してくれているはずです。
 
 /etc/aliases では
 	Elena: :include:/some/directory/include-file 
 		もしくは
 	Elena: "|/some/directory/fml-2.1/fml"
+
 の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
 ます。現在では include-file 形式が普通のような気がします。
 
-sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
-BSD )以外では挙動がまちまちみたいです
+ターゲットマシン (4.4 BSD)以外での挙動はよくわかりません。security 上
+からも一番いいのは最新版の sendmail に入れ換える事です。まずはそこから
+でしょう。
 
-問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
+OS 附属の sendmail 等を使うと挙動がおかしいのはよくある話です。
+“ setuid のしかた"で大別すると、以下の2種類に別れます。
 
  [4.3BSD]
-	fml でも :include: でもOKでしょう
+	fml (fml.cから作る) でも :include: でもOKでしょう
 
  [4.4、POSIX準拠のOS、その他]
 	:include: 式か 
@@ -120,8 +121,9 @@ BSD )以外では挙動がまちまちみたいです
 BSD386 1.1		include
 SUN4.1.2 - 4.1.3JLE 	uid include
 Solaris 2.4 		include
-Solaris 2.3J 		だめ？
+Solaris 2.3J 		だめ？ (2.3 以前はまんがいち動けばらっき〜のようだ)
 DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+			-U はいらないこともあるらしい
 OSF/1 Alpha AXP V2.1 	include
 HP UX 9?		[:include でかつ perl -U が必要？]
 			＃なんか、setreuid しかないんだけど…＞HP-UX
@@ -142,26 +144,29 @@ POSIX準拠	4.4BSD
 その他の注意：
 ・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
 
-そのときはsetuid する時だけ local ならいいわけで、
-たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
-home とかにおいてある という風にしてあればＯＫでしょう
+setuid に関する限り、「setuid する時だけ local ならいい」なわけで、例
+えば /usr/local/ml/fml とかを作ってもらって fml.pl 自体は NFS ごしの 
+home とかにおいてある という風にしてあればうまくいくでしょう。
+
+注意: 起動自体がうまくいっても NFS ごしのため、それ以外の system call 
+がうまく動かない可能性はありえます。
 
 ・NFSごしにファイルが存在すると setuid を認めない機種 もある
 たとえば
 		SUN 4.1.3JLE 4.1.4
 		＃これは fpathconf の return 値が問題
 
-・uid と include を試してみてどっちもうまくいかなかったら
-最後の手段（root）： 
+現実的に uid 管理がどうなされているかを考えれば、設計思想としてそれは
+正しいでしょう。
 
-まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
-make OPT=-DPOSIX として make してください
+・ fml と include を試してみてどっちもうまくいかなかったら最後の手段の
+root に setuid した fml を使うという方法があります。
 
-root のケースでは rootでしかかけない /usr/local/ml/driver 
-とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
-は注意してくださいね。管理者とよく相談してみてください（重要）
+root のケースでは root しか書けない /usr/local/ml/driver とかにインス
+トールしてもらうとかしたほうがいいとおもいます。取り扱いには注意してく
+ださいね。管理者とよく相談してみてください(重要)
 ＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
-＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
+＃かもしれないということもあるかもしれない。単にNFSかもしれないが:-)
 
 
 .# $Id$

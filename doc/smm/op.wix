@@ -5,6 +5,7 @@
 
    			深町 賢一
    			fukachan@sapporo.iij.ad.jp
+			fukachan@fml.org
 
    [smm/op.wix: smm = System Management Manual]
    http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
@@ -16,8 +17,9 @@
    fml is free software distributed under the terms of the GNU General
    Public License. see the file COPYING for more details.
 
-   このドキュメントは昔 FAQ という名前でした。
-   FAQ、Setting、改造の仕方等に関するガイドになっています。
+
+   このドキュメントは昔 FAQ という名前でしたが中身は理念、デザイン、実
+   装を初め FAQ、設定、改造の仕方等に関するガイドになっています。
    ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
 
 .~HTML_PRE
@@ -110,6 +112,7 @@
 ＃出典のヒントくらいはするかなっ………と P(^^;;;
 ＃この辺の並びでそよ風を感じる人(おぉ同志よ:-)メールください(^^)
 
+.C	あしたリリースオフ
 
 .S	主に言葉ではなくコーディングする姿から伝わってくるもの
 
@@ -124,7 +127,7 @@
 「…流の意地ってやつなのかな」(謎)
 あくまでも枠組、メタレベルの実装をすべきだと…
 
-.C	あしたリリースオフ
+.S	あしたリリースオフ
 
 深い意味はないんだけど…:-) まぁいいんじゃないの(謎++)
 
