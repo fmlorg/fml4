@@ -853,7 +853,7 @@ sub OutPutLocalConfig
     # always yes;
     print CF "\n\n\# configured by $0\n";
     print CF "# on $MailDate\n";
-    print CF "NON_PORTABILITY\t1\n";
+    # print CF "NON_PORTABILITY\t1\n";
     print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
     print CF "CPU_TYPE_MANUFACTURER_OS\t$CPU_TYPE_MANUFACTURER_OS\n";
 
@@ -2721,9 +2721,18 @@ package main;
 sub TrySmtpConnect
 {
     local($host) = @_;
-    local($result);
+    local($result, $eval, $perl5_socket_ok);
 
-    if ($OS_TYPE eq 'SOLARIS2' || 
+    ### PERL 5  
+    if ($] =~ /^5\./) { 
+	eval("use Socket;");
+	$perl5_socket_ok = 1 if ($@ eq '');
+    }
+	
+    if ($perl5_socket_ok) {
+	; # perl 5 Socket.pm must be O.K.;
+    }
+    elsif ($OS_TYPE eq 'SOLARIS2' || 
 	$CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i) {
 	$eval  = "sub AF_INET {2;}; sub PF_INET { 2;};";
 	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
