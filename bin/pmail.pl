@@ -59,8 +59,8 @@ sub Init
 
     # From
     $From_address = $user;
-    $MAINTAINER   = "$user\@$domain";
-    $from         = $opt_f || $MAINTAINER;
+    $MAINTAINER   = $opt_f || "$user\@$domain";
+    $from         = $MAINTAINER;
 
     # To and SMTP
     foreach (@ARGV) {
