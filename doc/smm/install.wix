@@ -1080,7 +1080,7 @@ fml.c を参考にして下さい。fml.c を
 
 .# ##########################################################
 .include header.wix
-.# .include configmisc.wix
+.include config_ph.wix
 .include archive.wix
 .include expire.wix
 .include href.wix
