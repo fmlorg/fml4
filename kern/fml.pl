@@ -1800,7 +1800,7 @@ sub Lookup
       # $ENCOUNTER_PLUS             by fukachan@phys 95/08
       # $Envelope{'mode:anyone:ok'} by fukachan@phys 95/10/04
       # $Envelope{'trap:+'}         by fukachan@sapporo 97/06/28
-      if (/^\+/o) { 
+      if (/^\+\s*$/o) { 
 	  &Debug("encounter + [$_]") if $debug;
 	  $Envelope{'trap:+'} = 1;
 	  close(LOOKUP_TABLE);
