@@ -1,10 +1,9 @@
 #!/usr/local/bin/perl
+#
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
-
-
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
@@ -82,13 +81,12 @@ sub SraqInit
     &GetTime;
 
     # DNS
-    local($hostname);
-    chop($hostname = `hostname`);
-    local($n, $a) = (gethostbyname($hostname))[0,1];
-    foreach (split(/\s+/, "$n $a")) { /^$hostname\./ && ($FQDN = $_);}
+    chop($HOSTNAME = `hostname`);
+    local($n, $a) = (gethostbyname($HOSTNAME))[0,1];
+    foreach (split(/\s+/, "$n $a")) { /^$HOSTNAME\./ && ($FQDN = $_);}
     $FQDN       =~ s/\.$//; # for e.g. NWS3865
     $DOMAINNAME = $FQDN;
-    $DOMAINNAME =~ s/^$hostname\.//;
+    $DOMAINNAME =~ s/^$HOSTNAME\.//;
 
     # config
     $MAINTAINER = "postmaster\@$FQDN";
@@ -208,16 +206,17 @@ sub SetOpts
 }
 
 
-sub Funlock 
-{
+sub Funlock {
     $0 = "--Unlock <$FML $LOCKFILE>";
 
     close(LOCK);
     flock(LOCK, $LOCK_UN);
+    undef $SIGARLM;
 }
 
 sub TimeOut
 {
+    return unless $SIGARLM;
     &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);    
     &Log("Caught ARLM Signal, forward the mail to the maintainer and exit");
     sleep 3;
