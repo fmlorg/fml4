@@ -405,20 +405,8 @@ etc, sbin, cf は消しちゃダメです。
 
 
 
-.C	配送のモード
+.C	配送とコマンド、そしてそのアクセス制御
 .l	delivery-mode
-
-
-以下では配送のモードについて解説します。fml の設定変数は非常に多岐に渡っ
-ています。またメタレベルで設計されている部分もあります。そのため設定の
-自由度は高いのですが、一つの内容に複数の設定変数が附随してきます。
-
-しかし多くの場合一つ一つの変数を設定しなくてもデフォールトの値で決め打
-ちでも動かすことはできます。むしろ初心者にはその方がわかりやすいでhそ
-う。そこで、代表的なモードは”簡易モード設定”という形でわかりやすいユー
-ザインターフェイスを提供するようになっています。初めはわからなくてもい
-いので、もっと細かくいじりたくなった時にその設定の意味を調べれば良いと
-おもいます。
 
 
 .S	デバッグモード
@@ -433,184 +421,159 @@ etc, sbin, cf は消しちゃダメです。
 れません。
 
 
-.S	DEFINE_MODE
-.k	DEFINE_MODE
-.k	&DEFINE_MODE
-.xref	auto-regist
+.S	アクセス制御のポリシー
+.l	access_policy
 
-config.ph で簡易モード設定をするための関数です。以下のような理由のため
-に導入されました。
+FML 2.1 (config.ph の CFVersion が 3)では 
 
-○ 歴史的な理由で自動登録とメンバーチェックをするモードの設定等で同時
-にいくつかの変数を設定する必要がある時にTYPOの可能性を低くする
+	$PERMIT_POST_FROM
+	$REJECT_POST_HANDLER
+	$PERMIT_COMMAND_FROM
+	$REJECT_COMMAND_HANDLER
+.l	$PERMIT_POST_FROM
+.l	$REJECT_POST_HANDLER
+.l	$PERMIT_COMMAND_FROM
+.l	$REJECT_COMMAND_HANDLER
+.k	$PERMIT_POST_FROM
+.k	$REJECT_POST_HANDLER
+.k	$PERMIT_COMMAND_FROM
+.k	$REJECT_COMMAND_HANDLER
 
-○ 変数の設定の中には 1 or 0 だけでは不充分な場合がある
+という４つの変数がアクセス制御の鍵を握っています。また自動登録をするか
+否か？もアクセス制御の一部としてこれらの変数で制御されます。
+それぞれの意味は
 
-&DEFIN_MODE(mode-name); は必ず config.ph の最後 (1; より前) に書いて下
-さい。というのはモード設定の中には config.ph の値を overwrite する必要
-のあるものがあるからです(もちろん必要のないものもあります)。
+   $PERMIT_POST_FROM		だれからの投稿を許すか?
+   $REJECT_POST_HANDLER		メンバー以外からの投稿があったらどうするか?
+   $PERMIT_COMMAND_FROM		だれからのコマンドを許すか?
+   $REJECT_COMMAND_HANDLER	メンバー以外からのコマンドが来たらどうするか?
 
-conflict する例(古い例):
+です。ありえる設定は
 
-	$ML_MEMBER_CHECK = 1; (上の方)
-…
-	&DEFINE_MODE('autoregist'); （autoregistは古い変数名。一番最後）
+   [だれから？]
 
-と書くと、$ML_MEMBER_CHECK は 0 に overwrite され自動登録モードになっ
-てしまいます。
+	anyone			だれでもOK
+	members_only		ＭＬのメンバーのみ
+	moderator		モデレーターのみ
 
-これはこの時はよいのですが、後で trouble が発生した時に見通しを悪くし
-ます。そのためこういう変数の conflict が発生しないようなものに限って使
-うべきです。またこれらの理由により、2.1 gamma にあった、いくつかのもの
-を除いて多くのモード設定は 2.1 release ではobsolete になりました。
-backward compatible のため 2.1 release でも設定は有効ですができるだけ
-使うべきではありません。
+   [HANDLERの種類]
+	reject			許否 (deny というファイルが送り返される)
+	auto_regist		自動登録
+	ignore			無視 
 
+＊ HANDLER はいずれの場合も管理者へメールでの報告はいきます。
 
-.S	&DEFINE_MODE の定義について
-.l	&DEFINE_MODE
+デフォールトのＭＬサーバの挙動は
 
-以下 ＭＬ = 
+	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
+	もしメンバー以外から来たら許否(reject)
 
-	listname@domain		include     ファイルを呼ぶ
-	listname-ctl@domain	include-ctl ファイルを呼ぶ(ctladdr mode)
+です。つまり config.ph で
 
-とする。前提条件としてＭＬは通常そのメンバーだけが投稿する。
-メンバーでない人が投稿という概念はない。
+（デフォールト）
 
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
 
-(歴史的な)メンバーチェックの定義:＃ほんと歴史的だな、これ…
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+	$REJECT_COMMAND_HANDLER        = "reject";
 
-	$ML_MEMBER_CHECK = 1	メンバーチェックを通った人は投稿可
-				違うなら reject 
+のようになっています(elena MLの場合)。
 
-	$ML_MEMBER_CHECK = 0	メンバーチェックを通らないなら
-				メンバーに加える or confirm に回して配送しない
-				メンバーでない人が投稿という概念ははないので
-				no check という意味にはとらない
+○ 自動登録
 
-	例外処理: post=anyone で listname 宛の挙動は変えられる。
-	listname-ctl は $ML_MEMBER_CHECK の設定に従い振舞いを変える。
+自動登録は
 
+	"投稿がメンバーだけ"(members_only)の場合に
+	もしメンバー以外から来たら自動登録 → auto_regist へ変更
 
-定義:
-	&DEFINE_MODE(DEFINE_SYNTAX)
+という設定をすることで行ないます(makefmlで制御できます)。config.ph 中
+では
 
-	DEFINE_SYNTAX := ACTION "=" RESTRICTION / 
-			 AUTOREGIST_TYPE "=" AUTOREGIST_TYPE_KINDS /
-			 BACKWARD_MODE_DEFINITION
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
 
-	ACTION        := "post" / "command"
-	RESTRICTION   := "anyone" / "members_only" / "moderated"
-	
-	AUTOREGIST_TYPE       := "artype"
-	AUTOREGIST_TYPE_KINDS := "confirm" / "subject" / "body"
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+注意→	$REJECT_COMMAND_HANDLER        = "auto_regist";
 
-	BACKWARD_MODE_DEFINITION := いままで [a-z_]+ のやつを押込める
+のようになることです。この場合はメンバー以外の人が
 
+	投稿した場合		→	許否(メンバーでないというメールが返る)
 
-解説:
+	コマンド用のアドレスへメール
+				→	自動登録
 
-○ listname
+のような動きをします。
 
-	・ post=
-	post= syntax は listname 宛の振舞いを変える
-	宣言しないならデフォールトの listname = distribute + command
+	$REJECT_POST_HANDLER           = "auto_regist";
 
-	・ listname のメンバーチェックで reject 時の振舞いは
-	 $ML_MEMBER_CHECK の設定に従い変わる。
-
-
-○ listname-ctl
-
-	・ command=
-	command= syntax は listname-ctl 宛の振舞いを変える
-
-	デフォールトは「メンバーだけがコマンドを使える」なので
-	command=anyone だけが例外
-	注意:一般に誰でもコマンドが使えるのは推奨しないが、
-	自動送り返しサーバ等の応用がありうる。
-
-	・ listname-ctl のメンバーチェックで reject 時の振舞いは
-	 $ML_MEMBER_CHECK の設定に従い変わる。
+にすれば「投稿用のアドレスにメンバー以外からメールが来たら自動登録」に
+することもできます。
 
 
-○ 自動登録のタイプ
-
-	・ artype=
-	$ML_MEMBER_CHECK = 0 の時の AUTO REGISTRATION TYPE を決める。
-	タイプを決めるだけなので 0 は必要。makefml interface でない時
-	は要注意。
-
-	--auto* は便利なように $ML_MEMBER_CHECK の overwrite をしてい
-	るがそれだと config.ph と dup するのでよくない。
-
-	矛盾を防ぐためにモード設定は config.ph (cf/MANIFEST 内の定義)
-	と直交している必要がある。その意味で confirm 以外の artype= は
-	本当はよくない。
-
-	備考:
-	artype って makefml では confirm くらいしか使ってないのだが…
-
-
-.S	配送だけをするサーバ
+.S	配送用のアドレス ($MAIL_LIST)
+.k	配送用のアドレス ($MAIL_LIST)
+.k	$MAIL_LIST
 .k	distribute-only
 
-makefml は makefml newml listname で listname (配送用), listname-ctl
-(コマンド用)という２つのアドレスを作ります。config.ph では 
-$CONTROL_ADDRESS も listname-ctl として設定されています。
+$CFVerson 3 の config.ph では
 
-listname のデフォールトの挙動は (backward compatibleのため) サーバは一
-つのアドレスで配送もコマンドも受け持ちます。
+   ・$MAIL_LIST と $CONTROL_ADDRESS が異なる場合(デフォールト)
+	$MAIL_LIST は配送だけです。
 
-listname のアドレスでコマンドを使えなくし配送専用のアドレスにするため
-には
+   ・$MAIL_LIST と $CONTROL_ADDRESS が同じ場合
+	$MAIL_LIST は配送もコマンドも受け付けます。
+	"# command"を見つけるとコマンドモードになります。
 
-	&DEFINE_MODE("post=anyone");       (誰でも投稿できる)
-OR
-	&DEFINE_MODE("post=members_only"); (メンバーだけが投稿できる)
+投稿できる人の範囲(だれでも/メンバーだけ)は $PERMIT_POST_FROM で変更し
+ます。デフォールトは members_only
 
-を設定してみて下さい。listname は配送専用になります。コマンドは 
-listname-ctl を使ってもらうことになります。
+どこかにＭＬがあってそれをフォワードするだけのアドレス/ＭＬ(再配送専用
+のアドレス)を作る場合は
+.k	再配送専用のアドレス
+
+	$PERMIT_POST_FROM = "anyone";
+
+とするべきです。
 
 
-.S	再配送だけをするサーバ
-.key	再配送だけをするサーバ
-
-単に配送を待って、それをスプールすることだけを目的にするメーリングリス
-トを作ることもあるでしょう。つまり ガイドを相手に返すこともなく、単に
-再配送するだけです。それは上述のように &DEFINE_MODE("post=anyone"); を
-設定することで実現されます。
-
-例: 	elena メーリングリストを再配送専用に設定する
-
-makefml newml elena で elena メーリングリストを作る。/etc/aliases で
-
-	elena: :include:/var/spool/ml/elena/include
-
-となっているとします。 /var/spool/ml/elena/config.ph に
-
-	&DEFINE_MODE("post=anyone");
-
-を書く。別の言い方をすれば、/etc/aliases でやってるただのフォワードに
-スプール機能がついてるような状態ですね。
-
-		
-.S	コマンド専用のサーバ (e.g. listname-ctl)
+.S	コマンド専用のアドレス ($CONTROL_ADDRESS)
 .k	$COMMAND_CHECK_LIMIT
 
-makefml は listname-ctl というアドレスを用意します。これはコマンド専用
-です。listname-ctl 用に include-ctl というファイルを :include: するよ
-うに設定されています。include-ctl では --ctladdr というオプションがつ
-いているのがコマンド専用として fml.pl を起動するためのオプションです。
-このオプションを消さないで下さい。
+makefml は listname-ctl というアドレスを用意します。$CONTROL_ADDRESS 
+という変数がそれです。
+
+これはコマンド専用です。listname-ctl 用に include-ctl というファイルを 
+:include: するように設定されています。include-ctl では --ctladdr とい
+うオプションがついているのがコマンド専用として fml.pl を起動するための
+オプションです。このオプションを消さないで下さい。
+
+コマンドを実行できる人の範囲(だれでも/メンバーだけ)は 
+$PERMIT_COMMAND_FROM で変更します。特別な場合を除きこの変数を変えるこ
+とはないでしょう。デフォールトは members_only
 
 
-.S	配送およびコマンドのサーバ (default for backward compatible)
+.S	配送とコマンドを同じアドレスで行なう場合
 .k	$COMMAND_CHECK_LIMIT
 
-fml のデフォールトの挙動は(Backward compatible)で サーバは一つのアドレ
-スで配送もコマンドも受け持ちます。
+2.1 RELEASE 以前の fml のデフォールトの挙動(Backward compatible)では 
+サーバは一つのアドレスで配送もコマンドも受け持ちます。
+
+2.1 RELEASE では $CONTROL_ADDRESS と $MAIL_LIST を同じにすることで実現
+することができますが、↑ makefml 等で明示的に設定変更が必要なことに注
+意して下さい。
+
+なお、2.1 RELEASE の config.ph は $CFVersion 3 です。以前の config.ph 
+は 3 より小さい version か定義されていないかどちからです。3 より以前の
+ものだと判断した場合は $MAIL_LIST で配送もコマンドも受け付けます。これ
+は backward compatibility のためです。
+
+配送とコマンドを同じアドレスで受けとる場合にはコマンドなのかどうか？を
+判定する必要があります。判定基準は
 
 	メールの最初の３行のどこかが 
 	# command（英文字だけの塊）
