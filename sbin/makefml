@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2002 Ken'ichi Fukamachi
+# Copyright (C) 1993-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2002 fukachan@sapporo.iij.ad.jp
+#               1996-2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.229 2002/08/10 13:59:52 fukachan Exp $
+# $FML: makefml,v 2.230 2002/10/20 14:19:19 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -484,6 +484,9 @@ OS_TYPE:
 
     # fix include path for *.pl 
     push(@INC, $EXEC_DIR);
+
+    # for .pm
+    push(@INC, "$EXEC_DIR/module/fml-devel");
 
     if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
 	$GroupWritable = $CurConfig{'PERSONAL_OR_GROUP'};
@@ -2205,11 +2208,46 @@ sub RemoveMember
 }
 
 
+sub is_valid_user_syntax
+{
+    my ($addr) = @_;
+    my $pattern = undef;
+
+    eval q{
+	use FML::Restriction::Base;
+	my $obj     = new FML::Restriction::Base;
+	my $regexp  = $obj->basic_variable();
+	   $pattern = $regexp->{ address };
+    };
+    if ($@) {
+	print STDERR "Warning: cannot load FML::Restriction::Base\n";
+
+	# see FML::Restriction::Base;
+	my $domain_regexp  = '[-A-Za-z0-9\.]+';
+	my $user_regexp    = '[-A-Za-z0-9\._]+';
+	$pattern = "$user_regexp\@$domain_regexp";
+    }
+
+    if ($addr =~ /^($pattern)$/) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+}
+
+
 sub CtlAddrList
 {
     local($proc, $file, $addr, $opt) = @_;
     local($mode) = (stat($file))[2];
     local($found, $buf, $line, $sumbuf, $filenew);
+
+    # check the input
+    unless (is_valid_user_syntax($addr)) {
+	&Error("invalid address");
+	return 0;
+    }
 
     # XXX tricky hack
     $addr =~ s/\./\\\./g;
@@ -4953,6 +4991,12 @@ sub do_adduser
     my ($proc) = $fp;
     $proc =~ s/do_//;
 
+    # check the input
+    unless (is_valid_user_syntax($member)) {
+	&Error("invalid address");
+	return 0;
+    }
+
     if (! $ml || !$member) {
 	&Log("ERROR: makefml::$proc invalid arguments");
 	&Debug("*** SYNTAX ERROR: the number of arguments ***");
@@ -5078,6 +5122,12 @@ sub do_byeuser
     my ($proc) = $fp;
     $proc =~ s/do_//;
 
+    # check the input
+    unless (is_valid_user_syntax($member)) {
+	&Error("invalid address");
+	return 0;
+    }
+
     if (! $ml || !$member) {
 	&Log("ERROR: makefml::$proc invalid arguments");
 	&Debug("*** SYNTAX ERROR: the number of arguments ***");
@@ -5177,6 +5227,12 @@ sub do_ctladdr
     local($ml, $addr, $opt) = @_;
     my (@files, @dbfiles);
     my ($proc) = $fp;
+
+    # check the input
+    unless (is_valid_user_syntax($addr)) {
+	&Error("invalid address");
+	return 0;
+    }
 
     # canonicalize
     $proc =~ s/do_//;
