@@ -44,6 +44,10 @@ else {
 }
 
 
+# FIX
+$Key =~ s/^\s*(.*)\s*$/$1/;
+
+
 $EXEC = q#
     $Key =~ s/\*/\\\*/g;
     foreach (keys %addr) {
@@ -115,13 +119,6 @@ sub InitConfig
 # Logging(String as message)
 sub Logging
 {
-    local($family, $port, $addr) = unpack('S n a4 x8', getpeername(STDIN));
-    local($clientaddr) = gethostbyaddr($addr, 2);
-
-    if (! defined($clientaddr)) {
-	$clientaddr = sprintf("%d.%d.%d.%d", unpack('C4', $addr));
-    }
-
     open(LOGFILE, ">> $LOGFILE");
     printf LOGFILE "$Now ".@_." ($clientaddr)\n";
     close(LOGFILE);

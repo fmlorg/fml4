@@ -21,7 +21,7 @@ umask (077);			# rw-------
 
 &InitConfig;			# initialize date etc..
 
-$pat = 'S n a4 x8';
+$pat  = $STRUCT_SOCKADDR || 'n n a4 x8';
 $inet = 2;
 $port = 2345;
 $host = 'axion.phys.titech.ac.jp';

@@ -33,14 +33,18 @@ $0 =~ m#(\S+)/(\S+)# && (unshift(@INC, $1)); #for lower task;
 exit 0;
 ###### MAIN ENDS #####
 
-###### EXAMPLE of apply@iij.ad.jp #####
+### Search Function is a reference to this function
+### So, you can customize this in any way as you feel so good.
+### EXAMPLE #####
+# 
+# return matched strings
 sub CacheOn
 {
     local(*hdr, *body) = @_;
-    local($s);
+    local($s, $nic);
 
-    $DISCARD_HDR_PAT  = 'Subject:.*IIJ Project';
-    $DISCARD_BODY_PAT = 'c.\s+\[Project\]\s+IIJ Internet';
+    $DISCARD_HDR_PAT  = 'Subject:.*uja';
+    $DISCARD_BODY_PAT = 'c.\s+\[Project\]\s+.*';
 
     # 822 unfolding
     $hdr  =~ s/\n\s+/\n/g;
@@ -48,22 +52,22 @@ sub CacheOn
 
     for (split(/\n/, $hdr)) {
 	return 0 if /^($DISCARD_HDR_PAT)/i;
+	$nic++ if /^From:.*nic.net/i;
     }
+
+    return unless $nic;
 
     for (split(/\n/, $body)) {
 	return 0 if /^($DISCARD_BODY_PAT)/i;
 
-	if (/(\S+\.jp)/i && 
-	    (! /\S+nic.ad.jp/i) && 
-	    (! /\S+iij-mc.co.jp/i) && 
-	    (! /\S+iij.ad.jp/i)) {
-	    s/ドメイン//g;
+	if (/ matched_pattern /) {
 	    $s .= "$1 ";
 	}
 
-	/\[Organization\]\s+(.*)/ && ($s .= "$1 ");
+	/\[wanted_pattern\]\s+(.*)/ && ($s .= "$1 ");
     }
 
+    while ($s =~ s/\s+/ /g) { 1;}
     $s;
 }
 
@@ -97,6 +101,7 @@ sub GenDB
 
     if ($seq < $max) {
 	&DoScanNewFiles($DIR, $seq, $max);
+	&DBAppend("$max:");
     }
     else {
 	print STDERR "DO NOTHING($seq >= $max)\n";
@@ -134,6 +139,7 @@ sub DoScanNewFiles
 	undef $body;
 
 	$f = "$dir/$file";
+	next unless -f $f;
 
 	open(F, (-e $NKF ? "$NKF -e $f|" : $f)) || next;
 	while (<F>) {
@@ -149,6 +155,8 @@ sub DoScanNewFiles
 sub DBAppend
 {
     local($s) = @_;
+
+    print "$s\n" if $Envelope{'mode:diff'};
 
     open(APP, ">> $DB") || &Log($!);
     select(APP); $| = 1; select(STDOUT);
@@ -196,11 +204,6 @@ sub Opt { push(@SetOpts, @_);}
 # Setting CommandLineOptions after include config.ph
 sub SetOpts
 {
-    for (@SetOpts) { 
-	/^\-\-MLADDR=(\S+)/i && (&use("mladdr"), &MLAddr($1));
-	/^\-\-([a-z0-9]+)$/  && (&use("modedef"), &ModeDef($1));
-    }
-
     for (@SetOpts) {
 	if (/^\-\-(force|fh):(\S+)=(\S+)/) { # "foreced header";
 	    $h = $2; $h =~ tr/A-Z/a-z/; $Envelope{"fh:$h:"} = $3;

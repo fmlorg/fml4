@@ -127,7 +127,9 @@ sub Forw
 
 sub GetPeerInfo
 {
-    local($family, $port, $addr) = unpack('S n a4 x8', getpeername(STDIN));
+    $STRUCT_SOCKADDR = $STRUCT_SOCKADDR || 'n n a4 x8';
+    local($family, $port, $addr) = 
+	unpack($STRUCT_SOCKADDR, getpeername(STDIN));
     local($clientaddr) = gethostbyaddr($addr, 2);
 
     if (! defined($clientaddr)) {

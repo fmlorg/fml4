@@ -16,7 +16,7 @@ $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 ##### MAIN #####
 if ($0 eq __FILE__) {
     &ScanARGV;
-    &ScanDB(*proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
+    &ScanDB(*key, *proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
     exit 0;
 }
 
@@ -26,9 +26,9 @@ if ($0 eq __FILE__) {
 sub ScanARGV
 {
     for (@ARGV) {
-	if (/^\-\-local/)      { $LOCAL++; next;}
-	if (/^\-\-reverse/)    { $REVERSE_ORDER++; next;}
-	if (/^\-\-historical/) { $HISTORICAL_ORDER++; next;}
+	if (/^\-\-local/)      { $CWhoisOpt{'db:local'} = 1; next;}
+	if (/^\-\-reverse/)    { $CWhoisOpt{'order:reverse'} = 1; next;}
+	if (/^\-\-historical/) { $CWhoisOpt{'order:historical'} = 1; next;}
 
 	if (/^(\S+)=(\S+)/) {
 	    $KEY   = $1;
@@ -82,11 +82,8 @@ sub ScanDBSetEntry
 
 sub ScanDB
 {
-    local(*key, *proc, *db, *spool) = @_;
+    local(*key, *proc, *db, *spool, *misc) = @_;
     local(@entry);
-    $debug++;
-    @db = %db; @spool = %spool;
-    print "ScanDB:\nk=$key\np=$proc\n@db\n@spool\n" if $debug;
 
     # set *entry
     &ScanDBSetEntry(*entry, *key, *proc, *db, *spool);
@@ -99,7 +96,7 @@ sub ScanDB
 	print "\n\n";
 	print "*" x 55, "\n";
 
-	if (! $LOCAL) {
+	if (! $CWhoisOpt{'db:reverse'}) {
 	    print "*****  ATTENTION!! CACHE YIELDS THESE DATA!       *****\n";
 	    print "*****  PLEASE VERIFY THE LATEST INFORMATION, TOO  *****\n";
 	}
@@ -107,12 +104,12 @@ sub ScanDB
 	print "\n       matched file";
 	print ($count > 1 ? "s are $count" : " is 1") . ".\n";
 
-	if ($REVERSE_ORDER) {
+	if ($CWhoisOpt{'order:reverse'}) {
 	    print "       listed in the reverse historical order\n";
 	    print "       (the latest file is the first below).\n";
 
 	}
-	elsif ($HISTORICAL_ORDER) {
+	elsif ($CWhoisOpt{'order:historical'}) {
 	    print "       listed in the historical order.\n";
 	}
 
