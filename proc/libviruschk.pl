@@ -25,7 +25,7 @@ sub VirusCheck
 	'\{([0-9A-F]{8}\-[0-9A-F]{4}\-[0-9A-F]{4}\-[0-9A-F]{4}\-[0-9A-F]{12})\}';
 
     if ($e{'Body'} =~ 
-	/Content-Transfer-Encoding:\s*(base64|quoted-prinsiple)/i) {
+	/Content-Transfer-Encoding:\s*(base64|quoted-principle)/i) {
 	require 'mimer.pl';
     }
 
@@ -43,7 +43,7 @@ sub VirusCheck
 	    $xbuf .= &bdeflush;
 	}
 	elsif ($xhdr =~ 
-	    /Content-Transfer-Encoding:\s*quoted-prinsiple/i) {
+	    /Content-Transfer-Encoding:\s*quoted-principle/i) {
 	    $xbuf  = &bodydecode($xbuf, "qp");
 	    $xbuf .= &bdeflush;
 	}
