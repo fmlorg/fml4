@@ -150,6 +150,31 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 	#ip-connections ML のようなものの受け口に使う場合には
 	#このモードを使うようにするべきである。
 
+
+.k	--distribute_with_member_check
+.l	--distribute_with_member_check
+ --distribute_with_member_check
+
+	メンバーチェックをしてメンバーであればスプールして配送する
+	コマンドは使えない。
+
+	--distribute は再配送専用(誰から来てもOKなのはそのため)、
+	--distribute_with_member_check をつけると
+		メンバーチェックをする
+		コマンドは使えない配送専用のサーバ
+	という違いがあります。
+
+	listname-ctl を明示的に使うので、listname はコマンドを使えなくする
+	場合に使うとよいでしょう。
+	makefml は明示的に -ctl を使う設定で設定ファイルを作るが、
+	デフォールトは backward compat のためにコマンドは使える点に注
+	意して下さい。
+
+	なおもし、メンバー以外からメールが来たら管理者に知らせるだけ
+	です。自動登録ルーチンとかには自動的に入ったりはしません。
+	それは -ctl 宛に出し直してもらうべきでしょう。
+
+
 .k	--mladdr=uja@domain	
  --mladdr=uja@domain	
 
