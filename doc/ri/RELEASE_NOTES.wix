@@ -5,6 +5,884 @@
 
 refer しそこなかったらごめんなさい _o_
 
+*** until 1997/08/10 17:00
+
+------------------------------------------
+Date:    Thu, 7 Aug 97 15:01:00 JST
+Thanks to: Kenichi Makino <makino@odi.epson.co.jp>
+In fml-support ML's Count: 03028
+
+add $MAIL_LIST_ACCEPT_COMMAND for backward compatibility
+
+------------------------------------------
+Date:    Thu, 7 Aug 97 11:20:03 JST
+Thanks to: Kenichi Makino <makino@odi.epson.co.jp>
+In fml-support ML's Count: 03027
+
+typo libfml.pl
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 19:15:17 JST
+In fml-support ML's Count: 03022
+
+2.1 RELEASE にむけて
+
+	document の細かい修正
+	こまかい bug fix をしました。
+	明らかな UNIX 依存コードを少し修正
+	architecture dependent code は sys/arch/OSごと/依存コード へ
+
+		* NT4 ports
+		makefml ベースインストーラー
+		new process scheduler on NT based on Win32::Process
+		INSTALL_on_NT4 の修正
+		doc/html/INSTALL_on_NT4/ ブランチを入れました。
+
+	config.ph が cf より新しい時は manual edit したとみなして
+	warning 
+
+あと ftp や www から ntfml を消去しました
+＃同じソースを使うのでもぉ分離している必要はない
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 18:03:03 JST
+Thanks to: Yoshito Takeuchi <kinchan@axio.co.jp>
+In fml-support ML's Count: 03021
+
+fix etc/makefml/menu.conf
+
+------------------------------------------
+Date:    Wed, 6 Aug 97 11:53:17 JST
+Thanks to: Ryosuke OISHI <oru@tsudanuma.org>
+In fml-support ML's Count: 03019
+
+patch to libcompat_cf2.pl
+
+------------------------------------------
+Date:    Sat, 2 Aug 97 21:01:03 JST
+Thanks to: Masaaki Hirono <hirono@highway.or.jp>
+In fml-support ML's Count: 03014
+
+patch to msend.pl arguments scan bug
+
+
+------------------------------------------
+Date:    Fri, 1 Aug 97 12:35:17 JST
+Thanks to: Kenichi Makino <makino@odi.epson.co.jp>
+In fml-support ML's Count: 03007
+
+remove debug code of librfc1153.pl
+
+------------------------------------------
+Date:    Tue, 29 Jul 97 20:52:02 JST
+Thanks to: Kenichi Makino <makino@odi.epson.co.jp>
+In fml-support ML's Count: 02995
+
+fix libfml.pl &SecureP code and the around
+
+------------------------------------------
+Date:    Wed, 23 Jul 97 16:45:05 JST
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 02952
+
+buf fix cf/MANIFEST Section Order
+
+------------------------------------------
+Date:    Wed, 23 Jul 97 00:54:03 JST
+In fml-support ML's Count: 02942
+
+FML 2.1 GAMMA -> DELTA の変数間の変換テーブル
+＃う〜ん、この自動登録って説明がむつかしいかな…
+
+基本的に同じ役割をする別の変数が必ずあるので、変換テーブルが書けます。
+↓ようは libcompat_cf2.pl の中身です($CFVersion < 3 の時に呼ばれる変換
+ルーチン)。
+＃削除されている変数は duplicated してる変数なので 3 では使わない
+＃version が3以下なら、libcompat_cf2 が version 3 の変数へ変換する。
+
+
+■ makefml 
+
+これに従い makefml config のテーブル等が書き直されています。
+なので INSTALL ファイルもかなり違います(やることは同じ)。 
+
+
+■ 配送モード
+
+15.2	アクセス制御のポリシー
+
+FML 2.1 (config.ph の CFVersion が 3)では 
+
+	$PERMIT_POST_FROM
+	$REJECT_POST_HANDLER
+	$PERMIT_COMMAND_FROM
+	$REJECT_COMMAND_HANDLER
+
+という4つの変数がアクセス制御の鍵を握っています。また自動登録をするか
+否か?もアクセス制御の一部としてこれらの変数で制御されます。それぞれの
+意味は
+
+   $PERMIT_POST_FROM		だれからの投稿を許すか?
+   $REJECT_POST_HANDLER		メンバー以外からの投稿があったらどうするか?
+   $PERMIT_COMMAND_FROM		だれからのコマンドを許すか?
+   $REJECT_COMMAND_HANDLER	メンバー以外からのコマンドが来たらどうするか?
+
+です。ありえる設定は
+
+   [だれから？]
+
+	anyone			だれでもOK
+	members_only		ＭＬのメンバーのみ
+	moderator		モデレーターのみ
+
+   [HANDLERの種類]
+	reject			許否 (deny というファイルが送り返される)
+	auto_regist		自動登録
+	ignore			無視 
+
+＊ HANDLER はいずれの場合も管理者へメールでの報告はいきます。
+
+デフォールトのＭＬサーバの挙動は
+
+	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
+	もしメンバー以外から来たら許否(reject)
+
+です。つまり config.ph で
+
+（デフォールト）
+
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
+
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+	$REJECT_COMMAND_HANDLER        = "reject";
+
+のようになっています(elena MLの場合)。
+
+○ &DEFINE_MODE の変換テーブル
+
+    'post=anyone'          → ($PERMIT_POST_FROM = "anyone");
+    'post=members_only'    → ($PERMIT_POST_FROM = "members_only");
+    'post=moderated'       → ($PERMIT_POST_FROM = "moderator");
+    'command=anyone'       → ($PERMIT_COMMAND_FROM = "anyone");
+    'command=members_only' → ($PERMIT_COMMAND_FROM = "members_only");
+    'artype=confirm'       → ($AUTO_REGISTRATION_TYPE = "confirmation");
+
+
+■ 自動登録
+
+15.3	自動登録とアクセス制御
+See also: 19 
+
+自動登録は
+
+	"投稿がメンバーだけ"(members_only)の場合に
+	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+
+という設定をすることで行ないます(makefmlで制御できます)。config.ph 中
+では
+
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
+
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+注意→	$REJECT_COMMAND_HANDLER        = "auto_regist";
+
+のようになることです。この場合はメンバー以外の人が
+
+	投稿した場合		→	許否(メンバーでないというメールが返る)
+
+	コマンド用のアドレスへメール
+				→	自動登録
+
+のような動きをします。
+
+	$REJECT_POST_HANDLER           = "auto_regist";
+
+にすれば「投稿用のアドレスにメンバー以外からメールが来たら自動登録」に
+することもできます。
+
+
+○ $ML_MEMBER_CHECK = 0; は
+
+	    $REJECT_POST_HANDLER    = "auto_regist";
+	    $REJECT_COMMAND_HANDLER = "auto_regist";
+
+   と解釈する
+
+○ $REQUIRE_SUBSCRIBE →     $AUTO_REGISTRATION_KEYWORD
+
+○ $REQUIRE_SUBSCRIBE →
+		$AUTO_REGISTRATION_TYPE = "subject";
+
+○ $REQUIRE_SUBSCRIBE かつ $REQUIRE_SUBSCRIBE_IN_BODY →
+
+		$AUTO_REGISTRATION_TYPE = "body";
+
+○ デフォールトは
+
+	$AUTO_REGISTRATION_TYPE = "no-keyword";
+
+■ リモート管理
+
+	$REMOTE_ADMINISTRATION = 1; なのは同じ
+	タイプの設定は	$REMOTE_ADMINISTRATION_AUTH_TYPE へ
+
+
+○ $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1 →
+
+	    $REMOTE_ADMINISTRATION_AUTH_TYPE = "crypt";
+
+○ REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0 →
+
+	    $REMOTE_ADMINISTRATION_AUTH_TYPE = "address";
+
+○ $USE_MD5	→
+
+	    $REMOTE_ADMINISTRATION_AUTH_TYPE = "md5";
+
+■ まとめおくり
+
+$MGET_SUBJECT_TEMPLATE の導入
+$MSEND_MODE_DEFAULT への一元化
+
+○ $USE_RFC1153_DIGEST もしくは 
+	$USE_RFC1153 → $MSEND_MODE_DEFAULT = "rfc1153";
+
+○ $USE_RFC934	→ $MSEND_MODE_DEFAULT = "rfc934";
+
+○ $NOT_USE_NEWSYSLOG → $MSEND_NOT_USE_NEWSYSLOG
+
+○ $NOT_SHOW_DOCMODE  → $MGET_SUBJECT_TEMPLATE の編集
+
+
+■ コマンドその他
+
+○ $Permit{'command'} →    $PERMIT_COMMAND_FROM = "anyone";
+
+○ $PROHIBIT_COMMAND_FOR_STRANGER → $PERMIT_COMMAND_FROM = "members_only";
+
+
+■ 削除
+
+	$USE_LIBMIME
+	$AGAINST_NIFTY
+	$RPG_ML_FORM_FLAG
+	$HML_FORM_LONG_ID
+	$SUN_OS_413
+	$NOT_SHOW_DOCMODE
+
+■ 内部変数へ
+
+	$ML_MEMBER_CHECK
+
+------------------------------------------
+Date:    Wed, 23 Jul 97 00:31:05 JST
+In fml-support ML's Count: 02941
+
+というわけで、2.1 DELTA も docuemnts 等の細かい修正まで一通り終って実
+際に running をずっとしてます。
+＃これでいいなら基本的に DELTA == RELEASE になります。
+＃ documents とかはまだ細かい修正は必要だろう…
+
+@*.fml.org は全部昔の config.ph で走らせてるので昔とおなじ風に動いてる
+と思います。
+
+注意点として(ちょっと説明が難しいけど) $CFVersion 3 の config.ph では
+
+   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
+
+のところの互換性がありません。
+＃ version 3 でも 
+＃ if ($MAIL_LIST == $CONTROL_ADDRESS) なら前と同じなんだけど…
+
+以下解説は doc/op より抜粋
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+3.3	互換性について
+
+FML では config.ph という設定ファイルが振舞いを決めます。
+config.ph にも version という概念があります。
+
+	$CFVersion
+
+という変数で指定されています。現在の version は 3 です。version が異な
+る場合、ほとんどの変数について自動的に補正が加えられ昔作った config.ph 
+をそのまま使っても大丈夫なようになっています。
+
+config.ph でちょっと複雑な HOOK を書けている場合はちょっと注意がいるで
+しょう。というのはHOOKで使う関数や変数等が今でもサポートされているとは
+限らないからです。
+
+できるだけ互換性を保つように作られています。ただ 
+
+    config.ph の $CFVersion が 3
+
+で、なおかつ
+
+   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
+
+の時は従来と異なり『配送専用』です。ここだけは互換性がありません。しか
+し
+
+	$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
+	昔と同じで配送用のアドレス $MAIL_LIST で
+	コマンド(# command の形)を受け付けます。
+
+従来 $MAIL_LIST != $CONTROL_ADDRESS の場合にヘッダやHELP等では「コマン
+ドは $CONTROL_ADDRESS へ送ってね」と書いてあるにも関わらず $MAIL_LIST 
+でもコマンドは受けられたという変な挙動がありました。これを互換性と解釈
+するかバグと解釈するかは微妙ですが、FML 2.1 のアクセス制御ルールの導入
+時に上記の解釈になりました。
+
+______________________________________________________
+[比較表]
+
+	elena		配送専用
+	elena-ctl	コマンドだけ
+
+になります。2.1 リリース以前(2.1 Gamma series)では 
+
+	elena		配送もコマンドも処理する
+	elena-ctl	コマンドだけ
+
+のように振舞いました。elena でのコマンドの「配送とコマンドの切り分け」
+はメール本文が"# command"であるか？否か？で決めています。
+
+2.1 でも配送用とコマンド用のアドレスが同じ場合は
+
+	elena		配送もコマンドも処理する
+
+になります。この場合「コマンドなのか？否か？はメール本文が"# command"
+であるか？否か？」で決まります。これがもともとの hml 1.6 互換のスタイ
+ルです。
+______________________________________________________
+
+
+3.4	補正ライブラリのダイナミック・ローディング
+
+cf/config という生成コマンドで作るようになった時 $CFVersion = 2; とい
+う version が与えられました。さらに、それ以前の手動編集のみだった時代
+の config.ph を使っている場合は 1 と定義されています。
+
+	$COMPAT_CF1 = 1;
+
+がセットされているか $CFVersion が２より小さい場合は自動的に
+
+	libcompat_cf1.pl
+
+が dynamic loading されます。また 3 以下と判定された場合は
+
+	libcompat_cf2.pl
+
+が自動的にローディングされます。
+
+------------------------------------------
+Date:    Tue, 1 Jul 97 12:36:18 JST
+Thanks to: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+In fml-support ML's Count: 02878
+
+1	config.ph CFVersion 3 について
+
+backward compatibility のため CFVersion 3 以前の config.ph を使って 
+CFVersion 3 の fml.pl を使う場合の変換については、「libcompat_cf2.pl 
+が変換」する。
+
+
+1.1	アドレスについて
+
+	$MAIL_LIST
+	$CONTROL_ADDRESS
+
+	はヘッダ等で使われる。実際の(配送/コマンド)プロセスとしての区別は
+
+	1 ctladdr モードか否か？で決まる(default)。
+
+	2 $MAIL_LIST == $CONTROL_ADDRESS なら "# command" をTRAP
+
+	3 if CFVersion < 3
+		NULL == $CONTROL_ADDRESS は
+		$MAIL_LIST == $CONTROL_ADDRESS と同じで "# command" をTRAP
+	  endif
+
+
+1.2	$ML_MEMBER_CHECK (内部変数,HOOKが今までどおり動くために）
+
+	$ML_MEMBER_CHECK
+
+	config.ph にあっても使わない（たぶんコメントとしては残る）
+	内部的には現状のまま toggle flag として使う。
+	ML_MEMBER_CHECKで
+		1	メンバーチェック actives members
+		0	自動登録         members のみ
+
+	の区別
+
+	COMMAND_ONLY_SERVER は…とりあえず command mode を on にする
+	(これ意味的には	$PERMIT_POST_FROM = nobody ?)
+
+
+1.3	アクセスコントロール(新変数)
+
+	○ 配送のアクセス制御(ようは $MAIL_LIST 宛メールのアクセス制御)
+
+	$PERMIT_POST_FROM	= anyone|members_only|moderator
+
+		(&DEFINE_MODE("post=なんとか") から変換される)
+
+	$REJECT_POST_HANDLER    = reject | auto_regist | ignore;
+
+		メンバーでない場合にどうするか？
+
+
+	○ コマンドの時(ようは $CONTROL_ADDRESS 宛メール、ctladdr mode 
+	   で動いてるプロセスのアクセス制御
+
+	$PERMIT_COMMAND_FROM	 = anyone|members_only|moderator 
+
+		(&DEFINE_MODE("command=なんとか") から変換される)
+		
+
+	$REJECT_COMMAND_HANDLER  = reject | auto_regist | ignore;
+
+		メンバーでない場合にどうするか？
+
+	(PROHIBIT_COMMAND_FOR_STRANGER が要らなくなるはず
+	 $PERMIT_COMMAND_FROM	= members_only へ自動変換)
+
+
+1.4	Subject の種類
+	
+	$SUBJECT_TAG_TYPE	&SubjectTagDef の引数を格納
+
+SUBJECT_HML_FORM は [:] と等価のため消去。cf2->3 で自動変換をかける。
+
+
+1.5	自動登録の種類
+
+自動登録するか？否か？は $REJECT_*_HANDLER で決まる。種類は以下の変数
+で決まる
+
+	$AUTO_REGISTRATION_TYPE	= confirm | subject | body | nokeyword
+
+$AUTO_REGISTRATION_KEYWORD は $REQUIRE_SUBSCRIBE なので、自動変換(cf 2
+-> 3)。$REQUIRE_SUBSCRIBE_IN_BODY は自動変換(cf 2 -> 3) -> "body"
+
+備考: 実装したら使わなかった案 $REGISTRATION_BY = manual | auto
+
+
+1.6	リモート管理
+
+	$REMOTE_ADMINISTRATION		= 1 | 0 (同じ)
+
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = address | crypt | md5 | pgp
+
+address はアドレスだけの認証。REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
+=> type crypt と同じ
+
+正確には 
+	crypt = crypt + address 
+	md5   = md5   + address 		
+というべきだけど…
+
+
+1.7	Discussion
+
+○ USE_SUBJECT_AS_COMMANDS は… COMMAND_TRAP_TYPE とか導入しても
+   この変数しかないので数が減らないからこのままがいいだろう
+
+○ 使ってないから消すべきだ
+
+	USE_WHOIS
+
+------------------------------------------
+Date:    Tue, 01 Jul 1997 09:04:46 +0900
+Thanks to: Genji Goto <goto@so.fjh.se.fujitsu.co.jp>
+
+	     Machine  : FUJITSU GRANPOWER 7000(DS/90)
+	     OS       : UXP/DS V20L10(SVR4.2)
+	     sendmail : 8.7.6+2.6Wbeta
+	     perl     : perl-5.002
+
+is Solaris-Wise.
+
+add the descriptions to doc/os.wix
+
+------------------------------------------
+Date:    Fri, 27 Jun 1997 13:06:56 +0900
+Thanks to: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+
+add pgp.wix
+
+
+------------------------------------------
+Date:    Fri, 27 Jun 97 02:09:03 JST
+In fml-support ML's Count: 02867
+
+config.ph 問題:
+
+こんなこともあろうかと…の config.ph $CFVersion なんだけど、
+という真田さん:)なあれですが、本質的な話だす。
+
+さんざかんがえたすけど、現時点でいやなのは、
+
+１	makefml にインターフェイスを一極集中したほうがメンテは楽
+	これを driver するいんたーふぇいすがかければなんでもあり
+
+２	そのためには &DEFINE_MODE を makefml が操作するのはめんどくさすぎる
+	内部表現とかとしてはいいんだけど、LOCAL_CONFIG は
+	まさに local hack ようなので、こんなところをいじるのはいやすぎるす
+
+３	backward compat のため(e.g. HOOK) 意味はどうあれ
+	$ML_MEMBER_CHECK はどうやっても歴史的に残る
+	あとは config.ph の問題に還元される
+
+４	$ML_MEMBER_CHECK を見かけ上やめるなら
+	$CFVersion で定義を変えるしかない
+
+	もしくはすべて makefml に押付ける(現状方針)
+
+５	もしくは CFVersion 3 をする。削りたい config を落す。
+	排他制御なものは うじゃうじゃTYPE とかに統合とか
+	e.g. $REMOTE_ADMIN_AUTH_TYPE とか〜
+	HMLうじゃうじゃ とか…ですな(meta に SUBJECT_TAG_TYPE でOKじゃん)
+	if (CFVersion < 3) は compat_cf20to30 とかで CF３へ変換する。
+	例えば 概念的には POLICY を拡張して(あくまで例よ)
+
+	# これは同じなのに別のものを import はまぎわらしいから
+	# 導入しないほうがいいだらう
+	# $POST_ADDR	= $MAIL_LIST
+	# $COMMAND_ADDR	= ($MAIL_LIST | $COMMAND_ADDRESS)
+
+	$PERMIT_POST_FROM	= (anyone|members_only|moderator) 
+		# config.ph 中ではなくfml.pl中で &DEFINE_MODE に読み替え
+		# config.ph で手で書いてもいいけどさ
+
+	$PERMIT_COMMAND_FROM	= (anyone|members_only|moderator) 
+
+	$REGISTATION_TYPE	= manual | auto ?
+	$AUTO_REGIST_TRAP_BY	= ($MAIL_LIST | $COMMAND_ADDRESS)
+					        --ctladdr (でくべつ)
+
+	$ML_MEMBER_CHECK 自体は別に構わない。最終的に内部的な自動登録
+	をするか否かの toggle flag になるので、
+	ほとんどすべてのコードはいまのままで変更しない
+	＃そうしないとHOOKとかで compat にならない
+
+
+６	2.2 の課題なんじゃないか？こういうのは…
+
+
+------------------------------------------
+Date:    Tue, 24 Jun 1997 18:22:59 +0900
+Thanks to: Hiroshi KISE <kise@imicom.or.jp>
+
+improve http://www.sapporo.iij.ad.jp/staff/fukachan/fml/index.html
+
+
+
+------------------------------------------
+Date:    Tue, 24 Jun 97 02:18:05 JST
+Thanks to: Kaz Ohwaki <k@yt.com>
+In fml-support ML's Count: 02846
+
+Japanese typo in doc/op
+
+------------------------------------------
+Date:    Sun, 22 Jun 97 02:39:19 JST
+In fml-support ML's Count: 02840
+
+fix typo doc/smm/remote.wix # already commints in doc-changes
+
+------------------------------------------
+Date:    Sat, 21 Jun 97 16:24:04 JST
+In fml-support ML's Count: 02835
+
+	# admin log
+		ログの最近の100行を取り寄せる
+
+	# admin log -N(数字)
+		ログの最近の N行を取り寄せる。例 admin log -40 (最近の40行)
+		＃数字以外のまっちんぐぱたーんは将来の課題
+	
+	# admin log all
+		ログファイル全体を取り寄せる。
+		とても大きいかも知れないので注意。
+
+
+------------------------------------------
+Date:    Wed, 18 Jun 97 16:41:02 JST
+Thanks to: AOKI Tetsuo <aoki@crl.go.jp>
+In fml-support ML's Count: 02818
+
+Japanise TYPO fix doc/INSTALL
+
+------------------------------------------
+Date:    Tue, 17 Jun 1997 13:22:55 +0900
+
+add "admin log"
+
+
+------------------------------------------
+Date:    Fri, 13 Jun 97 10:02:02 JST
+Thanks to: Fuminori Uematsu <uematsu@iname.com>
+In fml-support ML's Count: 02790
+
+patch to libconfirm.pl
+
+bug fix of http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+
+
+------------------------------------------
+Date:    Wed, 11 Jun 97 16:40:03 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 02774
+
+patch to libsynchtml.pl (remove \r)
+in fact bug fix libsmtp.pl
+
+------------------------------------------
+Date:    Mon, 9 Jun 97 21:58:02 JST
+In fml-support ML's Count: 02766
+
+	$REJECT_ADDR_LIST ("$DIR/spammers")
+
+97/06/08
+	Expire 機能の built-in 化
+	USE_EXPIRE	1 (0 がdefault)
+	EXPIRE_LIMIT	数字days(日数)か数字(記事の数) default は 7days
+	cf/MANIFESTも変更
+
+97/06/07
+	%FmlExitHook (internal use)
+	expire mode (defult is '7days')
+		$EXPIRE_LIMIT = e.g. "7days"(day), "100"(count) ...
+
+97/06/02
+	$REJECT_ADDR_LIST ("$DIR/spammers")
+	reject するアドレス From: と UNIX FROM に対して適用される。
+	デフォールトの $REJECT_ADDR はこれとは別に適用される。
+
+	%ProcedureException
+
+	doc/smm, doc/ri a little improved
+
+
+97/05/18
+	$NOT_USE_SPOOL = 1; ＃DISKが足りない等で記事をためずに配送するだけ
+	すべてのメンバーリスト等の操作で $FILE_TO_REGIST の値を考慮する
+	
+
+
+------------------------------------------
+Date:    Mon, 9 Jun 97 21:52:18 JST
+In fml-support ML's Count: 02765
+
+create 
+	doc-changes@ffs.fml.org
+	tech@ffs.fml.org
+
+------------------------------------------
+Date:    Tue, 3 Jun 97 14:13:02 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 02729
+
+patch to libsynchtml.pl
+
+------------------------------------------
+Date:    Mon, 2 Jun 97 00:45:03 JST
+In fml-support ML's Count: 02715
+
+add $ProcedureException{"bye", "ignore_list"} = $MEMBER_LIST;
+
+
+------------------------------------------
+Date:    Tue, 27 May 1997 19:25:08 +0900 (JST)
+Thanks to: Hiroshi NAKATA <hnakata@su2-1.cc.gunma-u.ac.jp>
+
+patch to doc/wmm/os.wix
+patch to doc/wmm/op.wix
+patch to doc/ri/INSTALL.wix
+
+------------------------------------------
+Date:    Mon, 26 May 1997 17:25:51 +0900
+Thanks to: Hiroshi NAKATA <hnakata@su2-1.cc.gunma-u.ac.jp>
+
+patch to doc/smm on WIX
+
+------------------------------------------
+Date:    Wed, 21 May 97 17:56:02 JST
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 02674
+
+patch to doc/op typo
+
+------------------------------------------
+Date:    Tue, 13 May 97 16:19:02 JST
+Thanks to: Hiroshi NAKATA <hnakata@su2-1.cc.gunma-u.ac.jp>
+In fml-support ML's Count: 02617
+
+fix typo bin/fwix.pl
+
+	\n
+	link relation
+
+------------------------------------------
+Date:    Wed, 7 May 97 23:00:08 JST
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 02603
+
+bug fix libamctl.pl (comment handling)
+
+------------------------------------------
+Date:    Wed, 7 May 97 19:33:03 JST
+Following to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 02597
+
+add and define the use of %Envelope's  macro:x ($x) and tmp:x 
+
+------------------------------------------
+Date:    Wed, 7 May 97 19:06:02 JST
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 02596
+
+patch to etc/makefml/Makefile
+
+------------------------------------------
+Date:    Tue, 6 May 97 14:48:02 JST
+Thanks to: =?ISO-2022-JP?B?GyRCRiNFRE9CTXgbKEI=?= <fujita@soum.co.jp>
+In fml-support ML's Count: 02590
+
+patch to bin/Archive.pl
+
+------------------------------------------
+Date:    Thu, 1 May 97 14:27:02 JST
+Following to: Yuao Tanigawa <yuao@infonia.or.jp>
+In fml-support ML's Count: 02579
+
+Date:    Sat, 3 May 97 01:55:07 JST
+In fml-support ML's Count: 02587
+
+add the check routine "struct sock_addr" to sbin/makefml
+
+
+------------------------------------------
+Date:    Thu, 1 May 1997 14:46:37 +0900
+Thanks to: Yuao Tanigawa <yuao@infonia.or.jp>
+
+import bin/multipart.pl
+
+http://www.na.rim.or.jp/~yuao/fmlutils.html
+
+------------------------------------------
+Date:    Tue, 29 Apr 97 21:29:02 JST
+Thanks to: KIZU takashi <kizu@ics.es.osaka-u.ac.jp>
+In fml-support ML's Count: 02570
+
+bug fix flock()
+add $LOCKFILE to SetDeafults()
+
+
+------------------------------------------
+Date:    Tue, 29 Apr 97 15:52:17 JST
+Following to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 02565
+
+cf/config search_path takes plural arguments
+
+------------------------------------------
+Date:    Tue, 29 Apr 97 14:59:17 JST
+Folloing to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 02563
+
+makefml check jperl or not
+
+------------------------------------------
+Date:    Fri, 25 Apr 97 17:46:04 JST
+Thanks to: KIZU takashi <kizu@ics.es.osaka-u.ac.jp>
+In fml-support ML's Count: 02550
+
+import http://www-kasi.ics.es.osaka-u.ac.jp/kizu/fml to contrib
+
+------------------------------------------
+Date:    Fri, 25 Apr 97 00:48:02 JST
+Thanks to: hirono@torii.nuie.nagoya-u.ac.jp
+In fml-support ML's Count: 02547
+
+bug fix libra.pl
+
+------------------------------------------
+Date:    Tue, 22 Apr 97 12:33:02 JST
+Thanks to: Hiroshi NAKATA <hnakata@su2-1.cc.gunma-u.ac.jp>
+In fml-support ML's Count: 02542
+
+fix doc/INSTALL
+
+------------------------------------------
+Date:    Mon, 21 Apr 97 23:50:03 JST
+Thanks to: Hisaaki Shibata <shibata@opost1.netspace.or.jp>
+In fml-support ML's Count: 02541
+
+fix typo doc/INSTALL
+
+
+------------------------------------------
+Date:    Mon, 21 Apr 97 22:44:17 JST
+Thanks to: hirono@torii.nuie.nagoya-u.ac.jp
+In fml-support ML's Count: 02540
+
+bug fix fml_local.pl typo
+
+------------------------------------------
+Date:    Wed, 16 Apr 97 22:39:02 JST
+In fml-support ML's Count: 02515
+
+add "admin resend"
+
+------------------------------------------
+Date:    Wed, 16 Apr 97 02:48:02 JST
+In fml-support ML's Count: 02503
+
+add @REMOTE_CONFIGURABLE_FILES 
+
+------------------------------------------
+Date:    Sun, 13 Apr 97 17:20:04 JST
+Thanks to: "Metalman(YAMZAKI Kazuyuki)" <metalman@kt.rim.or.jp>
+In fml-support ML's Count: 02489
+
+Date:    Tue, 15 Apr 97 19:37:02 JST
+Thanks to: "Metalman(YAMZAKI Kazuyuki)" <metalman@kt.rim.or.jp>
+In fml-support ML's Count: 02500
+
+help improvement 
+
+------------------------------------------
+Date:    Thu, 10 Apr 97 19:14:06 JST
+Thanks to: "Metalman(YAMZAKI Kazuyuki)" <metalman@kt.rim.or.jp>
+In fml-support ML's Count: 02470
+
+help improvement
+
+------------------------------------------
+Date:    Wed, 9 Apr 97 00:56:01 JST
+Thanks to: Takashi Yokoyama <yoko@galaxy.imasy.or.jp>
+In fml-support ML's Count: 02464
+
+improve X-ML-Info:
+
+------------------------------------------
+Date:    Fri, 4 Apr 97 23:41:01 JST
+Thanks to: "Metalman(YAMZAKI Kazuyuki)" <metalman@kt.rim.or.jp>
+In fml-support ML's Count: 02441
+
+help impovement
+
+------------------------------------------
+
 97/03/26
 	fml.org へ移行
 
