@@ -15,6 +15,7 @@ sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
     local($autoconv, $count, $boundary, $fn, $ml);
+    local($hdr_found) = 0;
 
     $ml    = (split(/\@/, $MAIL_LIST))[0];
     $count = scalar(@f) > 1 ? 1 : 0;
@@ -46,15 +47,43 @@ sub DoSmtpFiles2Socket
 	    print SMTPLOG $boundary;
 	}
 
+	$hdr_found = 0;
 	while (<FILE>) { 
 	    s/^\./../; 
 	    &jcode'convert(*_, 'jis') if $autoconv;#';
 
+	    # header
+	    $hdr_found  = 1 if /^\#\.FML HEADER/;
+	    
+	    # guide, help, ...
+	    if ($Envelope{'mode:doc:ignore#'}) {
+		next if $hdr_found && (1 .. /^\#\.endFML HEADER/);
+		next if /^\#/   && $Envelope{'mode:doc:ignore#'} eq 'a';
+		next if /^\#\#/ && $Envelope{'mode:doc:ignore#'} eq 'm';
+		if ($Envelope{'mode:doc:ignore#'} eq 'm') {
+		    s/^\#\s+//;
+		}
+	    }
+
 	    # guide, help, ...
 	    if ($Envelope{'mode:doc:repl'}) {
-		s/_ML_/$ml/g;
 		s/_DOMAIN_/$DOMAINNAME/g;
 		s/_FQDN_/$FQDN/g;
+
+		s/_ML_/$ml/g;
+		s/_CTLADDR_/$Envelope{'CtlAddr:'}/g;
+		s/_MAIL_LIST_/$MAIL_LIST/g;
+
+		s/_ARG0_/$Envelope{'doc:repl:arg0'}/g;
+		s/_ARG1_/$Envelope{'doc:repl:arg1'}/g;
+		s/_ARG2_/$Envelope{'doc:repl:arg2'}/g;
+		s/_ARG3_/$Envelope{'doc:repl:arg3'}/g;
+		s/_ARG4_/$Envelope{'doc:repl:arg4'}/g;
+		s/_ARG5_/$Envelope{'doc:repl:arg5'}/g;
+		s/_ARG6_/$Envelope{'doc:repl:arg6'}/g;
+		s/_ARG7_/$Envelope{'doc:repl:arg7'}/g;
+		s/_ARG8_/$Envelope{'doc:repl:arg8'}/g;
+		s/_ARG9_/$Envelope{'doc:repl:arg9'}/g;
 	    }
 
 	    s/\n/\r\n/;
@@ -74,7 +103,7 @@ sub DoNeonSendFile
 {
     local(*to, *subject, *files) = @_;
     local(@info) = caller;
-    local($le, %le, @rcpt, $error, $f, @f, %f);
+    local($le, %le, @rcpt, $error, $n, $f, @f, %f);
 
     # backward compat;
     $SENDFILE_NO_FILECHECK = 1 if $SUN_OS_413;
@@ -84,8 +113,9 @@ sub DoNeonSendFile
     &Debug(join(" ", @files)) if $debug;
 	
     ### check again $file existence
-    foreach $f (@files) {
+    for $f (@files) {
 	next if $f =~ /^\s*$/;
+	$n = $f; $n =~ s#^/*$DIR/##;
 
 	if (-f $f) {		# O.K. anyway exists!
 	    push(@f, $f);	# store it as a candidate;
@@ -96,33 +126,36 @@ sub DoNeonSendFile
 	    next if $SENDFILE_NO_FILECHECK; # Anytime O.K. if no checked;
 
 	    # Check whether JIS or not
-	    if (-B $f) {
-		&Log("ERROR: NeonSendFile: $f != JIS ?");
+	    if (-z $f) {
+		&Log("NeonSendFile::Error $n is 0 bytes");
+	    }
+	    elsif (-B $f) {
+		&Log("NeonSendFile::Error $n is not JIS");
 
 		# AUTO CONVERSION 
 		eval "require 'jcode.pl';";
 		$ExistJcode = $@ eq "" ? 1 : 0;
 
 		if ($ExistJcode) {
-		    &Log("NeonSendFile: $f != JIS ? Try Auto Code Conversion");
+		    &Log("NeonSendFile::AutoConv $n to JIS");
 		    $f{$f, 'autoconv'} = 1;
 		}
 	    }
 
 	    # misc checks
-	    &Log("NeonSendFile: cannot read $file")  unless -r $f;
+	    &Log("NeonSendFile: cannot read $n") if !-r $f;
 	}
 	### NOT EXISTS 
 	else {
-	    &Log("NeonSendFile: $f is not found.", "[ @info ]");
+	    &Log("NeonSendFile: $n is not found.", "[ @info ]");
 	    $f =~ s/$DIR/\$DIR/;
 	    $error .=  "$f is not found.\n[ @info ]\n\n";
-	    &Mesg(*Envelope, "Sorry.\nError NeonSendFile: $f is not found.\n");
+	    &Mesg(*Envelope, "NeonSendFile Error:\n\t$f is not found.\n");
 	}
 
 	$error && &Warn("ERROR NeonSendFile", $error);
 	return $NULL if $error;	# END if only one error is found. Valid?
-    }
+    } # for loop;
 
     ### DEFAULT SUBJECT. ABOVE, each subject for each file
     $le{'GH:Subject:'} = $subject;
@@ -255,7 +288,13 @@ sub DoGenerateHeader
     @to || do { &Log("GenerateHeader:ERROR: NO \@to"); return;};
 
     # prepare: *rcpt for Smtp();
-    foreach (@to) {
+    for (@to) {
+	# Address Representation Range Check
+	&ValidAddrSpecP($_) || /^[^\@]+$/ || do {
+	    &Log("GenerateHeaders: <$_> is invalid");
+	    next;
+	};
+
 	push(@rcpt, $_); # &Smtp(*le, *rcpt);
 	$tmpto .= $tmpto ? ", $_" : $_; # a, b, c format
     }
@@ -273,8 +312,10 @@ sub DoGenerateHeader
     $le{'GH:From:'}        = $MAINTAINER || "$m\@$DOMAINNAME";
     $le{'GH:To:'}          = $tmpto;
     $le{'GH:Date:'}        = $MailDate;
+    $le{'GH:References:'}  = $Envelope{'h:message-id:'};
     $le{'GH:X-MLServer:'}  = $Rcsid;
     $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
+    $le{'GH:X-ML-Info:'}   = $URLComInfo if $URLComInfo;
     $le{'GH:From:'}       .= " ($MAINTAINER_SIGNATURE)"
 	if $MAINTAINER_SIGNATURE;
 

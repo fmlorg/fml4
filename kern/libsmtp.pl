@@ -13,8 +13,7 @@
 
 
 ##### local scope in Calss:Smtp #####
-local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus);
-local($Port);
+local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus, $Port);
 
 # sys/socket.ph is O.K.?
 sub SmtpInit
@@ -43,8 +42,8 @@ sub SmtpInit
     if (! $FixTransparency) {
 	$FixTransparency = 1;	# Fixing is done once!
 
-	undef $e{'preamble'} if  $e{'mode:dist'};
-	undef $e{'trailer'}  if  $e{'mode:dist'};
+	undef $e{'preamble'} if $e{'mode:dist'};
+	undef $e{'trailer'}  if $e{'mode:dist'};
 
 	if ($e{'preamble'}) { 
 	    $e{'preamble'} =~ s/\n\./\n../g; $e{'preamble'} =~ s/\.\.$/./g;
@@ -92,7 +91,7 @@ sub SocketInit
 
     # COMPAT_SOLARIS2 is for backward compatibility.
     if ((! $exist_socket_ph) && 
-	($COMPAT_SOLARIS2 || $CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i)) {
+	($COMPAT_SOLARIS2 || $CPU_TYPE_MANUFACTURER_OS =~ /solaris2|sysv4/i)) {
 	eval "sub AF_INET {2;}; sub PF_INET { 2;};";
 	eval "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
 	&Log("Set socket [Solaris2]") if $debug;
@@ -114,7 +113,7 @@ sub SmtpConnect
     local(*host, *error) = @_;
 
     local($pat)    = $STRUCT_SOCKADDR;
-    local($addrs)  = (gethostbyname($host || 'localhost'))[4];
+    local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = $Port || $PORT || (getservbyname('smtp', 'tcp'))[2];
     $port          = 25 unless defined($port); # default port
@@ -131,14 +130,14 @@ sub SmtpConnect
 	print SMTPLOG "socket ok\n";
     } 
     else { 
-	return ($error = "Smtp::socket->Error[$!]");
+	return ($error = "SmtpConnect: socket() error [$!]");
     }
     
     if (connect(S, $target)) { 
 	print SMTPLOG "connect ok\n"; 
     } 
     else { 
-	return ($error = "Smtp::connect($host)->Error[$!]");
+	return ($error = "SmtpConnect: connect($host/$port) error[$!]");
     }
 
     ### need flush of sockect <S>;
@@ -164,6 +163,11 @@ sub Smtp
     # primary, secondary -> @HOSTS (ATTENTION! THE PLURAL NAME)
     push(@HOSTS, @HOST); # the name of the variable should be plural
     unshift(@HOSTS, $HOST);
+
+    ### cache Message-Id:
+    if ($e{'h:Message-Id:'} || $e{'GH:Message-Id:'}) {
+	&CacheMessageId(*e, $e{'h:Message-Id:'} || $e{'GH:Message-Id:'});
+    }
 
     # when @rcpt is non-zero, !mode:DirectListAcess
     if ($MCI_SMTP_HOSTS > 1) {
@@ -230,6 +234,7 @@ sub SmtpIO
 	# (PROBE AND) MAKE A CONNECTTION;
 	# primary, secondary, ...;already unshift(@HOSTS, $HOST);
 	for ($host = shift @HOSTS; scalar(@HOSTS) >= 0; $host = shift @HOSTS) {
+	    undef $Port; # reset
 
 	    if ($host =~ /(\S+):\#smtpfeed/) { # anyway skip here
 		next;
@@ -320,6 +325,11 @@ sub SmtpIO
     }
 
     &SmtpPut2Socket("MAIL FROM:<$MAINTAINER>", $ipc);
+    if ($SoErrBuf =~ /^[45]/) {
+	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
+	&Log("reason: $SoErrBuf");
+	return $NULL;
+    }
 
     # DLA is effective in processing deliver();
     local(%a, $a);
@@ -457,10 +467,16 @@ sub SmtpPut2Socket
     print S "$s\r\n";
 
     if ($ipc) {
-	do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
+	do { 
+	    print SMTPLOG $_ = <S>; 
+	    &Log($SoErrBuf = $_) if /^[45]/o;
+	} while(/^\d+\-/o);
     }
     else {
-	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
+	do { 
+	    print SMTPLOG $_ = <RS>; 
+	    &Log($SoErrBuf = $_) if /^[45]/o;
+	} while(/^\d+\-/o);
     }
 
     # Approximately correct :-)
@@ -478,7 +494,9 @@ sub SmtpPutActiveList2Socket
 {
     local($ipc, $file) = @_;
     local($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
-    local($mci_count, $count, $time);
+    local($mci_count, $count, $time, $filename);
+
+    $filename = $file; $filename =~ s#$DIR/##;
 
     # Relay Hack
     if ($CF_DEF && $RELAY_HACK) { require 'librelayhack.pl'; &RelayHack;}
@@ -512,6 +530,13 @@ sub SmtpPutActiveList2Socket
 
 	# O.K. Checking delivery and addrs to skip;
 	($rcpt) = split(/\s+/, $_);
+
+	# Address Representation Range Check
+	# local-part is /^\S+$/ && /^[^\@]$/ is enough effective, is'nt it?
+	&ValidAddrSpecP($rcpt) || ($rcpt =~ /^[^\@]+$/) || do {
+	    &Log("$filename:$. <$rcpt> is invalid");
+	    next;
+	};
 
 	$lc_rcpt = $rcpt;
 	$lc_rcpt =~ tr/A-Z/a-z/; # lower case;
