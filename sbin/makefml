@@ -435,6 +435,9 @@ sub FlockP
     local($ml, $mldir) = @_;
     local($eval);
 
+    # default=flock if first time or no config.ph;
+    return 1 unless -f "$mldir/$ml/config.ph";
+
     open(PH, "$mldir/$ml/config.ph") || 
 	(&Warn("cannot open $mldir/$ml/config.ph[$!]"), return);
     while (<PH>) {
@@ -457,9 +460,11 @@ sub Lock
     local($ml, $mldir) = @_;
 
     if (&FlockP($ml, $mldir)) {
+	print STDERR "---Flock\n";
 	&FLock($ml, $mldir);
     }
     else {
+	print STDERR "---V7 lock\n";
 	&V7Lock($ml, $mldir);
     }
 }
@@ -470,9 +475,11 @@ sub UnLock
     local($flockp) = $ml'FLockP{$ml};#'
 
     if ($flockp) {
+	print STDERR "---Flock\n";
 	&FUnLock($ml);
     }
     else {
+	print STDERR "---V7 lock\n";
 	&V7UnLock($ml);
     }
 }
@@ -584,8 +591,12 @@ sub ExecCmd
     $fp = $FP{$fp} ? $FP{$fp} : $fp;
 
     # Lock all when "install"
-    &MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR)
-	unless $NOT_LOCK{$fp};
+    if ($TheFirstTime || $NOT_LOCK{$fp}) {
+	;
+    }
+    else {
+	&MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR);
+    }
 
     if ($MakeFmlProc{$fp}) {
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
@@ -598,8 +609,12 @@ sub ExecCmd
     }
 
     # Unlock;
-    &MakeFmlUnLock($fp eq 'install' ? "" : $argv[0], $ML_DIR)
-	unless $NOT_LOCK{$fp};
+    if ($TheFirstTime || $NOT_LOCK{$fp}) {
+	;
+    }
+    else {
+	&MakeFmlUnLock($fp eq 'install' ? "" : $argv[0], $ML_DIR);
+    }
 }
 
 
@@ -2098,6 +2113,7 @@ sub MakeFml_V7Lock
     &LoadConfigPH($ml, $mldir);
 
     require 'liblock.pl';
+
     &V7Lock;
 
     $FLockP{$ml}   = 0;
