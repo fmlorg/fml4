@@ -202,8 +202,8 @@ sub ResentForwFileInSpool
     $e{"GH:Resent-Date:"} = $MailDate;
     $e{"GH:Resent-Message-Id:"} = "<$CurrentTime.FML$$\@$FQDN>";
 
-    # rewritten;
-    $e{'GH:Subject:'} = "Get $ID $ML_FN\n\t".$e{'GH:Subject:'};
+    # rewritten ?;
+    # $e{'GH:Subject:'} = "Get $ID $ML_FN\n\t".$e{'GH:Subject:'};
 
     &Sendmail($e{'Addr2Reply:'}, "", $body);
 
