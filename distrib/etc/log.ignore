@@ -5,6 +5,10 @@ Japanese/basic_setup/errormail-handling.*wix *[0-9]\.[0-9][0-9]*
 Japanese/troubleshoot/errormails.wix *[0-9]\.[0-9][0-9]*
 Japanese/errormails
 Japanese/basic_setup/errormail-handling-qmail
+English/basic_setup/errormail-handling.*wix *[0-9]\.[0-9][0-9]*
+English/troubleshoot/errormails.wix *[0-9]\.[0-9][0-9]*
+English/errormails
+English/basic_setup/errormail-handling-qmail
 analyze_mail_error
 liberror.pl
 RCS
