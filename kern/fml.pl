@@ -86,6 +86,20 @@ sub ModeBifurcate
     # Do nothing. Tricky. Please ignore 
     if ($DO_NOTHING) { return 0;}
 
+    # DataBase Access
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my (%mib, %result, %misc);
+	# members
+	&DataBaseMIBPrapare('get_member_list', \%mib);
+	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
+
+	# recipients
+	&DataBaseMIBPrapare('get_active_list', \%mib);
+	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
+    }
+
     # member ot not?
     &AdjustActiveAndMemberLists;
     $member_p = &MailListMemberP($From_address);
