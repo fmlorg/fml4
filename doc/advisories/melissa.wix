@@ -1,0 +1,110 @@
+.HTML_PRE
+	FML Security Advisory 1999-003: melissa
+	========================================
+
+Topic:	Melissa 対策
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 1999 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+-------------------------
+.toc
+-------------------------
+
+手順の意味についてはINSTALLマニュアルを参照して下さい
+http://www.fml.org/fml/INSTALL/
+
+何か？については Cert Advisory を参照
+.url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
+
+
+.P	フィルタリング
+
+.C	フィルタリング機能
+
+.S	fml フィルタリング機能について
+
+fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
+つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
+る」などができます。
+＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
+＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
+＃動くバージョンです。
+
+この機能の一例としてmelissaによるメールを拒否する方法について、以下で
+は述べます。
+
+まずフィルタリングをONにする必要があります(以下elena MLを例にとる)。
+以下の節のいづれか一つの方法を行ないます。
+どれも作業の結果は同じですが、使いなれている方法でどうぞ。
+
+.S	makefml config を使う人
+
+   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
+
+.S	cf 書きの人
+
+   USE_DISTRIBUTE_FILTER 1
+
+を書く。その後
+
+	% make config.ph
+
+で config.ph を作り直す。
+
+.S	config.ph 生書きの人
+
+   $USE_DISTRIBUTE_FILTER = 1;
+
+.S	make secure
+
+この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
+部有効にする
+
+   % cd /var/spool/ml/elena
+   % make secure
+
+するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
+やってる設定は画面に表示される。
+
+
+.C	フィルタリングに新ルールを加える
+
+どちらでも作業の結果は同じですが、使いなれている方法でどうぞ。
+
+.S	cfを使う人
+
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
+
+をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
+に 
+
+	% make config.ph
+
+.S	config.phを使う人
+
+config.ph生書きの人は
+
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
+
+を追加。
+
+
+.C	MTAで弾く
+
+.S	sendmail
+
+.url http://www.sendmail.com/blockmelissa.html
+
+.url ftp://ftp.cert.org/pub/cert_advisories/Patches/CA-99-04-sendmail-melissa-filter.txt
+
+.P	Considerations
+
+.C	Further investigations
+
+より組織だったフィルタリングルール集を作れるか？
+
+
+$Id$
