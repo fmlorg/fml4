@@ -4138,22 +4138,32 @@ sub MakeFml_V7UnLock
 
 package main;
 
+
 sub TrySmtpConnect
+{
+    $TSCResult{$STRUCT_SOCKADDR} = &DoTrySmtpConnect(@_);
+}    
+
+
+sub DoTrySmtpConnect
 {
     local($host) = @_;
     local($result, $eval, $perl5_socket_ok, $r);
 
+    print STDERR "--\$TrySmtpConnect = $TrySmtpConnect\n" if $debug;
+
     # only the first time
-    &SetSockAddr unless $TrySmtpConnect++;
+    # &SetSockAddr unless $TrySmtpConnect++;
 
     # check the previous check host, 
     # cache is effective if probed to the same host.
-    # MUST BE FIRST TIME
+    # should reset %TSCResult (sockaddr check result) for each host to check.
     if ($TSCHost ne $host) {
 	$TSCHost = $host;
+	undef %TSCResult;
     }
-    elsif ($TSCResult) {
-	return $TSCResult;
+    elsif ($TSCResult{$STRUCT_SOCKADDR}) {
+	return $TSCResult{$STRUCT_SOCKADDR};
     }
 
     ### PERL 5  
@@ -4186,8 +4196,8 @@ sub TrySmtpConnect
     $port          = 25 unless defined($port); # default port
 
     # Check the possibilities of Errors
-    return ($TSCResult = "Cannot resolve the IP address[$host]") unless $addrs;
-    return ($TSCResult = "Cannot resolve proto")                 unless $proto;
+    return ("Cannot resolve the IP address[$host]") unless $addrs;
+    return ("Cannot resolve proto")                 unless $proto;
 
     # O.K. pack parameters to a struct;
     local($target) = pack($pat, &AF_INET, $port, $addrs);
@@ -4199,7 +4209,7 @@ sub TrySmtpConnect
     else { 
 	$VERBOSE_STR = 
 	    sprintf("socket(S, %s, %s, %s)", &PF_INET, &SOCK_STREAM, $proto);
-	return ($TSCResult = "Smtp::socket->Error[$!]");
+	return ("Smtp::socket->Error[$!]");
     }
     
     if (connect(S, $target)) { 
@@ -4209,18 +4219,19 @@ sub TrySmtpConnect
     else { 
 	$VERBOSE_STR = sprintf("connect(S, %s, %s, %s, %s)\n",
 			       $pat, &AF_INET, $port, $addrs);
-	return ($TSCResult = "Smtp::connect($host)->Error[$!]");
+	return ("Smtp::connect($host)->Error[$!]");
     }
 
     close(S);
 
-    ($TSCResult = $result); # success;
+    $result; # success;
 }
 
 sub FYI
 {
     local($r, $m);
 
+    &SetSockAddr;
     $r = &TrySmtpConnect('localhost');
 
     if ($r eq 'connect ok') {
@@ -4281,6 +4292,10 @@ sub SetSockAddr
 
     print STDERR "---SetSockAddr\n" if $debug;
 
+    if ($CorrectStructSockAddr) { return $CorrectStructSockAddr;}
+
+    print STDERR "---SetSockAddr => ProbeSockAddr\n" if $debug;
+
     $r = &ProbeSockAddr;
 
     return if ($r eq 'connect ok');
@@ -4298,8 +4313,12 @@ sub ProbeSockAddr
 {
     local($r);
     local($tab) = "\#probe sockaddr: ";
-
+    
     print STDERR "---ProbeSockAddr\n" if $debug;
+
+    if ($CorrectStructSockAddr) { return $CorrectStructSockAddr;}
+
+    print STDERR "---ProbeSockAddr scan ...\n" if $debug;
 
     for ($STRUCT_SOCKADDR, "n n a4 x8", "S n a4 x8", "x C n C4 x8") {
 	undef $STRUCT_SOCKADDR;
@@ -4309,6 +4328,7 @@ sub ProbeSockAddr
 	$r = &TrySmtpConnect("localhost");
 
 	if ($r eq 'connect ok') { 
+	    $CorrectStructSockAddr = $STRUCT_SOCKADDR;;
 	    print STDERR "${tab}OK  '$_'\n" if $verbose;
 	    return $r;
 	}
