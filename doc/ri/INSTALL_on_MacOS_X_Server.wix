@@ -2,16 +2,20 @@
 
 	INSTALL guide on Mac OS X Server
 
+.if LANG == JAPANESE
 このファイルは Mac OS X Server 上で fml をセットアップする際に、Unix 
 版とどこが異なるかという相違点について記述しています。Mac OS X Server 
 は基本的に BSD なので、インストールの大枠は INSTALL と同様です。
-=E
+.url http://www.fml.org/fml/INSTALL/
+.fi
+.if LANG == ENGLISH
 This file describes the difference between fml on UNIX and on Mac OS X
 Server. Please see INSTALL for the install flow.
-
-.~HTML_PRE
+.url http://www.fml.org/fml/INSTALL-e/
+.fi
 
 .toc
+.~HTML_PRE
 
 
 .C	Mac OS X Server
@@ -35,9 +39,9 @@ difference with INSTALL between Mac OS and usual UNIX-like system.
 
 デフォルトのソフトウエアを使っても fml を動かすことはできます。しかし
 デフォルトでインストールされているソフトウエアは古いバージョンのような
-ので新しいものにアップグレードして下さい。
+ので、新しいものにアップグレードすることが望まれます。
 =E
-You can use fml on default OS. But we recommend upgrade of some
+You can use fml on OS by default, but we recommend you upgrade server
 programs.
 
 .S	/etc/sendmail.cf
@@ -47,8 +51,8 @@ sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fml のドキュ
 メントでは設定を /etc/aliases に書くということになっていますが、デフォー
 ルトの sendmail.cf では /etc/aliases というファイルを見ていません。
 =E
-Default sendmail des not see /etc/aliases. You need to modify
-/etc/sendmail.cf.
+The built-in sendmail does not see /etc/aliases by default. You need
+to modify /etc/sendmail.cf.
 
 修正の仕方は
 
@@ -65,9 +69,7 @@ Default sendmail des not see /etc/aliases. You need to modify
 
 .q
 # O AliasFile=/etc/aliases
-
      =>
-
 O AliasFile=/etc/aliases
 .~q
 
@@ -79,21 +81,23 @@ O AliasFile=/etc/aliases
 
 .url ftp://ftp.kyoto.wide.ad.jp/pub/mail/CF/
 
-CFで作りなおせば sendmail は /etc/aliases を見るようになるので、あとは 
-INSTALL マニュアルの通りです。CFの使い方は附属のマニュアル
-(doc/MANUAL.jpn)などをみて下さい。
+	CFで作りなおせば sendmail は /etc/aliases を見るようになるので、
+	あとは INSTALL マニュアルの通りです。CFの使い方は附属のマニュ
+	アル(doc/MANUAL.jpn)などをみて下さい。
+
+.url http://www.sendmail.org/
 
 
 .C	fmlのインストール時の注意点
-=E.C	Cautions
+=E.C	Cautions in installation
 
 インストール作業(make installを走らせる)の前に作成する項目、確認する項
 目が2、3あります。確認後、INSTALL ファイルにしたがってインストールをし
 て下さい。
 =E
 Installation of Mac OS X server differs little from usual UNIX like
-system. Please see INSTALL file without the following some
-differences.
+system. Please follow the instruction described in the INSTALL file
+except for the following some differences.
 
 INSTALL ドキュメントの UNIX でのシェル上での操作を、Mac OS X Server 上では 
 
@@ -102,16 +106,15 @@ INSTALL ドキュメントの UNIX でのシェル上での操作を、Mac OS X Server 上では
 
 と読みかえて下さい。
 =E
-You need terminal to input answers to some questions. Please use
-Terminal.app
+You need the terminal to input answers to some questions. Please use
+Terminal.app if needed.
 
 .S	/etc/aliases
-.xref /etc/sendmail.cf
 
-まず /etc/sendmail.cf は /etc/aliases を見るようになっている必要があり
-ます(前述)。
+まず /etc/sendmail.cf (.ptr{/etc/sendmail.cf} 節参照)は /etc/aliases 
+を見るようになっている必要があります(前述)。
 =E
-/etc/sendmail.cf does not see /etc/aliases in default.
+/etc/sendmail.cf does not see /etc/aliases by default.
 Please see => .ptr{/etc/sendmail.cf}.
 
 NetInfo というものを使ってもできるようだけど普通にやるとうまくいかない

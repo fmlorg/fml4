@@ -1,10 +1,10 @@
 .HTML_PRE
-	TODO of fml Mailing List Server Package
-.if LANG == JAPANESE
 	やり残し、やろうかなとおもってること
 	(誰かすでにやってたらパッチ下さい)
+=E
+	TODO of fml Mailing List Server Package
 
-＃ WISH_LIST は WISH_LIST のほうを…
+＃ WISH_LIST は WISH_LIST のほうをごらんください
 
 .toc
 
@@ -15,6 +15,8 @@
 	XXX 一月くらいで消すこと
 
 *	にほんごでふぃるた
+=E
+*	Filter by Japanese
 
 *	configure mead
 	mead_init.ph
@@ -22,6 +24,11 @@
 
 	項目が少しだけなので
 	とりあえずメニュー画面などなくてもOKだろう
+
+*	PostgreSQL は DBD 化へ
+=E
+*	PostgreSQL DBI version
+
 
 
 .# ############################################################
@@ -32,9 +39,6 @@
 .S	RDBMS
 
 	one table ( members == actives ) version toy model
-
-	PostgreSQL は DBD 化へ
-
 
 .S	3.0? (to be 3.0? in the new future)
 
@@ -55,14 +59,11 @@
 
 う〜ん、 ML をまたぐものたちはむつかしいなぁ/うまくはまらないかも…?
 
-not_needed:
-   libexec/mead.pl
-
-done (?): require more check ?
+   done (?): require more check ?
 	   proc/libcrosspost.pl 	
 	   libexec/fmlserv.pl
 
-obsolete ?
+   obsolete ?
 	contrib/whois/submit.pl 
 
 
@@ -73,10 +74,12 @@ obsolete ?
 .S	mget "uu" mode
 
 mget の uu って何か空行が足りなくないかい？
+=E
+format bug for mget "uu" ?
 
 
 .S	MIMEライブラリーの書きなおし
-=E.S	rewrite MIME library
+=E.S	rewrite MIME libraries
 
 特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
 る。それを考慮すること
@@ -109,8 +112,11 @@ fml-support ML's Count: 05639
 .S	spool2html
 
 fml-suppport: 07638
+
 ソートは stat(2) の結果をつかうけど、表面的な Date: くらいはファイルの
 中からひろいあげるべき？
+=E
+pick Date: from spool/ to generate the html article.
 
 
 .S	Subject: unsubscribe で自動削除?
@@ -120,23 +126,26 @@ fml-suppport: 07638
 動的にTRAPして削除処理をしよう」っていう変数があるとしあわせ？
 そんな気がするよね〜 :-)
 
-これがデフォルトはまずいとおもうんだが、optional ならOK？
+これがデフォルトはまずいとおもうんだが、オプショナルならOK？
+では、コマンドメールとはっきりしていれば OK ？
 
 
 .S	Welcome ... and MesgLE()
 
 いまでは MesgLE() をつかって再実装するべきだ
 XXX $WELCOME_STATEMENT があるのにか？ 本当かそれ？
+=E
+should use MesgLE() but now $WELCOME_STATEMENT.
 
 
-.S	chkerror
+.S	import chkerror to as a package ?
 
 Author: i16@forest.ne.jp
 
 package としてくみこむ作業がのこってる
 
 
-.S	msend.pl should not tr/A-Z/a-z/
+.S	msend.pl should not do tr/A-Z/a-z/
 
 fml-support: 07262
 
@@ -145,19 +154,20 @@ fml-support: 07262
 
 fml-support: 07101
 fml-support: 07104
-Incomplate but effective fix is done.
-We should rewrite address match routine.
+
+Incomplate but effective fix is done.  We should rewrite address match
+routine.
 
 
 .S	makefml add ML addr options ?
 
-for example,
+For example,
 
-	makefml add ML addr s=skip 
+	% makefml add ML addr s=skip 
 
 ? 
 
-.S	bug fix Content Hanlder 
+.S	bug fix Content Hanlder ? 
 
 Content Hanlder ちょっと変 (allow+multipartの時だけ?)
 あーでも、そんなことないかも…
@@ -175,6 +185,8 @@ aggregate addresses to reply
 .S	$DEFAULT_DIR_MODE in makefml ?
 
 makefml 内での $DEFAULT_DIR_MODE の取り扱い
+=E
+consider $DEFAULT_DIR_MODE behaviour in makefml
 
 .if LANG == JAPANESE
 fml-support: 06899
@@ -196,9 +208,8 @@ fml-support:6899
 4817:      $s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 
 
-.S	日本語化問題
+.S	日本語に関連する問題
 =E.S	Japanese configuration files
-
 
 *	cf/MANIFEST 未定義変数探し
 =E
@@ -206,8 +217,10 @@ fml-support:6899
 
 
 .S	HELP ファイル
+=E.S	merge HELP files
 	
-*	ヘルプファイルのupdate, mnews ML版とうまくマージすること
+*	ヘルプファイルのアップデート
+	mnews ML 版とうまくマージすること
 =E
 *	merge mnews help merge
 
@@ -215,13 +228,15 @@ fml-support:6899
 .S	[認証] $SENDER_AUTH_TYPE
 =E.S	Authentication: $SENDER_AUTH_TYPE
 
-$SENDER_AUTH_TYPE = address / pgp
+	$SENDER_AUTH_TYPE = address / pgp
 
-S/MIME
+	S/MIME
 
 
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
+
+
 
 * 1バイト2バイトいりみだれ文字列ははじけない "chａddr"
 
@@ -236,14 +251,14 @@ fml-support: 7155
 .~q
 
 * ?
-
 	 # unsubscribe xxx@aa.bb.co.jp
 
 
 .S	Naming Convention
 
-* personal, group の naming convention
-   share ?
+* personal, group の名前？  share が適当?
+=E
+* personal, group, ? 
 
 
 .S	配送関係
@@ -256,9 +271,9 @@ see /etc/postfix/sample*cf
 .S	ファイル操作
 =E.S	file operation
 
-tar.gz の中に spool/file tmp/spool/file が混在する問題
-
 See fml-support: 5564 
+
+tar.gz の中に spool/file tmp/spool/file が混在する問題
 but ファイル操作の link(2) version がのぞましい。
 
 .if LANG == JAPANESE
@@ -268,8 +283,8 @@ NT4 はだめだが NT5 fs には link(2)はある。
 .fi
 
 
-.S	HTML関係
-=E.S	HTML
+.S	HTML 関係
+=E.S	HTML related topics
 
 * BASE_URL 変数をつくるべき (fml-support: 05984)
 =E
@@ -293,7 +308,7 @@ but it is o.k. now? (on some OS?)
 
 * RFC1153のライブラリはどうする？
 =E
-* RFC1153 library
+* rewrite RFC1153 library ?
 
 
 .S	かるいまとめ送り？
@@ -302,21 +317,16 @@ but it is o.k. now? (on some OS?)
 
 .S	PGP version
 
-	現状は PGP 2, PGP 5 
-=E	
-	now PGP2 PGP 5
-
 not yet	
 	PGP 6
 	OpenPGP ...
-	GNU Privacy Gaurd.
+	GNU Privacy Gaurd
 
-?
-	RFC2015
+	RFC2015 ?
 
 
 .S	ヘッダ関係
-=E.S	Header and the around it
+=E.S	topics around a header
 
  *  bug ???
 	fml-support: 05843
@@ -336,12 +346,8 @@ command to rewrite addresses in one action ?
 
 	admin rewrite s/domain-A/domain-B/ 
 
-.S	BSD make dependence
 
-I depends on NetBSD (bsd)make.
-
-
-.S	cf/MANIFEST.obsolete
+.S	cf/MANIFEST.obsolete (required ?)
 
 obsolete list of variables
 
@@ -364,19 +370,22 @@ fml-support: 07525
 
 
 .S	よくわからない --;;
+=E.S	???
 
 fml-support: 7790
 
-makefml remove-article ってあるべきなんかなぁ…
-そんなに需要があるんでしょうか…
+makefml remove-article ってあるべ？そんなに需要がありますか？
+=E
+need "makefml remove-article" ?
 
 
 .S	show members
 
 fml-support: 08199
 
-
 Q: あるアドレスが所属しているMLを表示させるには
+=E
+Q: which ML an address belongs to 
 
 A: grep
 
@@ -391,34 +400,41 @@ fmlserv じゃない別の admin ML でやるとかのほうが建設的な感じがするなぁ
 .C	CGI
 .l	CGI
 
+
 .S	qmail のばあい
+=E.S	qmail 
 
 例:  FreeBSD + Apache + qmail  で、Rootの権限が無い場合
+=E
+Example:  FreeBSD + Apache + qmail (without root priviledge)
+
 .url http://www.nmt.ne.jp/~myone/fml.shtml
 
 
 .S	script 一発インストーラ (きめうち)
+=E.S	installer for a combination of some httpd and MTA
 
 	postfix  + apache + fml-current
 	sendmail + apache + fml-current
 	qmail    + apache + fml-current
 
 
-.S	modify file (e.g. help) ?
+.S	modify file (e.g. help) by CGI ?
 
 Hmm..., impossible?
 
 
 .S	右から左のメニューへ update があがってない
+=E.S	cannot update the trigger from the right to left screen
 
 e.g. newml
+Reference: fml-support: 08449
 
 右の画面の newml の結果が出る時に左のメニュバーのフレームに強制的に 
 TARGET 指定をして reload はできないのか？
 ＃規格的にはできなさそうだけど… 
 ＃全体を一括管理されたものとかにしてゴリゴリしないとだめなのか？
 
-Reference: fml-support: 08449
 ＃たぶん間違いなくだめ、他の技を考えるように
 ＃うーん、でも Java Script とか実装依存ぽいのは考えたくないねぇ
 ＃それよりは table でなんとかならんかなとかとにかく
@@ -426,18 +442,24 @@ Reference: fml-support: 08449
 
 
 .S	 ML を消したら対応する authdb/ml-admin/$ml/ 以下も消す
+=E.S	remove authdb/ml-admin/$ml/ when ML is removed
+
 
 .S	apache with SSL の解説の用意をする
-	1.3.12
+=E.S	documentation for apache with SSL
+
+for apache 1.3.x
 
 	http://www.apache.org/dist/Announcement.html
 	http://www.cert.org/advisories/CA-2000-02.html
 	http://www.apache.org/info/css-security/index.html
 
 
-.S	acl model
+.S	ACL model
 
 ○ ML名つきで、その下のアクセス権限は各 ML ごとに自由に変更できないといけない
+=E
+* CGI for non-privileded users ?
 
 ○ 一般ユーザ用のWWWアクセスモデルの構築
 
@@ -453,13 +475,14 @@ Reference: fml-support: 08449
 .S	トラブルチケットシステム
 =E.S	Trouble Ticket System
 
-	http://www.fsck.com/projects/rt/
-	http://sourceforge.net/
-	http://freshmeat.net/
-	http://linas.org/linux/pm.html
+.url	http://www.fsck.com/projects/rt/
+.url	http://sourceforge.net/
+.url	http://freshmeat.net/
+.url	http://linas.org/linux/pm.html
+
 
 .S	より統合されたパッケージ
-=E.S	fully integrated package
+=E.S	more fully integrated packages
 
 	サーチエンジンとの連携
 	スケジュールソフト
@@ -477,14 +500,16 @@ Reference: fml-support: 08449
 	fork()
 	alarm()
 
+
 .S	Exchange でうごくのかなぁ？
+=E.S	Exchange Server and fml ?
 
 .url http://www.microsoft.com/japan/backoffice/exchange/DeployAdmin/eventscr.htm
 
 
 .appendix
 .C	遠い目標
-=E.C	far far away goal
+=E.C	Goal far far away
 
 .S	美しいコード
 =E.S	more beautiful codes
@@ -506,7 +531,7 @@ XXX わかりやすいコードというべきなんだろうな
 
 * $OUTGOING_ADDRESSの設定をもっと簡単に？
 =E
-* $OUTGOING_ADDRESS easy configuration
+* easy configuration for $OUTGOING_ADDRESS 
 
 * smtpfeedを直接叩く?
   kick off smtpfeed, 
@@ -515,21 +540,21 @@ XXX わかりやすいコードというべきなんだろうな
 * kick off smtpfeed directly
 
 
-◯	アップグレードについて
+* アップグレードについて
+=E
+* upgradeing
 
-* fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
+  fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
   MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
   今は stat() して reload をするようになっている
 
-
-◯ 	makefml config full menu
+* makefml config full menu
 
 全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
 のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
 =E 
 All variables can be configurable in the menu? 
 I may not do it since it only confuses the customize.
-
 
 
 .# $Id$

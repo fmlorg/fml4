@@ -11,14 +11,12 @@
 This file describes the difference between fml on UNIX and on NT4.
 Please see INSTALL for the install flow.
 
-.~HTML_PRE
-
 .toc
+.~HTML_PRE
 
 
 .C	必要なソフトウエア
 =E.C	Required Softwares
-
 
 .S	必要なソフトウエア
 =E.S	Required Softwares
@@ -28,6 +26,9 @@ Please see INSTALL for the install flow.
 	5.6.0 では今一つうまくいかなかったという報告もあり、また
 	5.6.0 ではなく 522 なら動いたという事例もあります。
 	5.6.0 がうまく動かない場合は build 522 を試してみて下さい。
+=E
+   You need perl 5. Please use build 552 if you fail to run fml 
+   by buld 6XX (perl 5.6.0 base).
 
 .url	http://www.activestate.com/download/ActivePerl/APi522e.exe
 .url	http://www.activestate.com/Products/ActivePerl/Download.html
@@ -36,17 +37,25 @@ Please see INSTALL for the install flow.
 	２つのタイプがあります(後述)。
 	プログラムが使えるか否かを確認して下さい。
 	それによってタイプが異なります。
+=E
+   MTA
+	There is two kinds of MTA's.
+	a. one type which runs programs
+	b. another type which cannot run programs
 
 
 .S	NT 用の fml ?
 =E.S	fml for NT ?
 
- fml に NT 用のものが特にあるわけではなく、標準ディストリビューションの
+fml に NT 用のものが特にあるわけではなく、標準ディストリビューションの
 中に NT 用は含まれています。
+=E
+There is no fml special for Windows 2000/NT. Please use the standard
+distribution.
 
 
 .S	メールサーバごとのメモ
-=E.S	memo for each MTA
+=E.S	tips for each MTA
 
 NT 用のメールサーバは大抵配送システム兼POPサーバです。そのため、fml
 POP バージョンはどんなメールサーバでもうごくでしょう。
