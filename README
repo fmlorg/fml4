@@ -92,8 +92,9 @@ Appendix D: CVS TAGS, BRANCH
      -------------------
     |
 ------------
-  A A
-  | |- fml-4-0-1-pre-alpha (tag)
+  A A A
+  | | |--- fml-4-0-1-alpha-0   (tag for diff, tagged on 2001/03/19)
+  | |----- fml-4-0-1-pre-alpha (tag for diff, to be removed 2001/03/19)
   |
  fml-4-0 (tag)
 
