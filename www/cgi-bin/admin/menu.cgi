@@ -18,11 +18,22 @@ $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 &P("Content-Type: text/html\n");
 
+if ($ErrorString) { &Exit($ErrorString);}
+
+
 if ($Config{'LANGUAGE'} eq 'Japanese') {
-   &Convert("$HTDOCS_DIR/Japanese/admin/index.html");
+    &Convert("$HTDOCS_DIR/Japanese/admin/index.html");
+}
+elsif ($Config{'LANGUAGE'} eq 'English') {
+    &Convert("$HTDOCS_DIR/English/admin/index.html");
 }
 else {
-   &Convert("$HTDOCS_DIR/English/admin/index.html");
+    if ($LANGUAGE eq 'Japanese') {
+	&Convert("$HTDOCS_DIR/Japanese/admin/index.html");
+    }    
+    else {
+	&Convert("$HTDOCS_DIR/English/admin/index.html");
+    }
 }
 
 exit 0;
@@ -89,6 +100,8 @@ sub GetBuffer
 {
     local(*s) = @_;
     local($buffer, $k, $v);
+
+    $GETBUFLEN = $GETBUFLEN || 2048;
     
     $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
 
@@ -97,6 +110,10 @@ sub GetBuffer
     }
     else {
 	$buffer = $ENV{'QUERY_STRING'};
+    }
+
+    if (length($buffer) > $GETBUFLEN) {
+	&Err("Error: input data is too large");
     }
 
     foreach (split(/&/, $buffer)) {
@@ -112,6 +129,22 @@ sub GetBuffer
     $PREV_URL = $s{'PREV_URL'};
 
     $buffer;
+}
+
+sub Err
+{
+    local($s) = @_;
+    $ErrorString .= $s;
+}
+
+sub Exit
+{
+    local($s) = @_;
+    print "<PRE>";
+    print $s;
+    print "\nStop.\n";
+    print "</PRE>";
+    exit 0;
 }
 
 sub ERROR { &P(@_);}

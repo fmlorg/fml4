@@ -76,6 +76,9 @@ sub UpperHalf
     &P("</TITLE>");
     &P("</HEAD>");
     &P("<BODY>");
+
+    if ($ErrorString) { &Exit($ErrorString);}
+
     &P("<PRE>");
 
     if ($debug) {
@@ -245,6 +248,8 @@ sub GetBuffer
 {
     local(*s) = @_;
     local($buffer, $k, $v);
+
+    $GETBUFLEN = $GETBUFLEN || 2048;
     
     $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
 
@@ -253,6 +258,10 @@ sub GetBuffer
     }
     else {
 	$buffer = $ENV{'QUERY_STRING'};
+    }
+
+    if (length($buffer) > $GETBUFLEN) {
+	&Err("Error: input data is too large");
     }
 
     foreach (split(/&/, $buffer)) {
@@ -268,6 +277,22 @@ sub GetBuffer
     $PREV_URL = $s{'PREV_URL'};
 
     $buffer;
+}
+
+sub Err
+{
+    local($s) = @_;
+    $ErrorString .= $s;
+}
+
+sub Exit
+{
+    local($s) = @_;
+    print "<PRE>";
+    print $s;
+    print "\nStop.\n";
+    print "</PRE>";
+    exit 0;
 }
 
 sub ERROR { &P(@_);}
