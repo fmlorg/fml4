@@ -1,0 +1,354 @@
+.C	まとめおくり
+.label	{msend-c}
+
+さらに詳しくは、lib/MatomeOkuri の下等も御覧下さい。
+
+
+.S	まとめおくり概論
+
+.S	まとめおくり	Release 1
+.label	{matome-1}
+.http lib/MatomeOkuri/README
+.key	msend.pl
+
+「特定時間になるとそれまでためたメールを送る」というシンプルなコード。
+本質的に fml 本体とは独立した別のサーバというべきものです
+１時間おきと３時間おきのまとめ送りがしたいときは別の架空アドレス等が必要
+になります。
+
+fml の actives のエントリーをみながら走ります。その意味で fml とは一体
+型です。基本的に３時間に一度のような走らせ方しかできません。
+-------- actives --------
+katri
+pollyanna	matome 6u
+-------- actives --------
+
+のように matome のキーワードが書いてある人について配送をします。
+まとめおくりをする or 解除は普通のコマンドで行なえます
+＃helpファイルを御覧下さい
+
+e.g.
+% echo "# matome 6" |Mail -v Elena@phys.titech.ac.jp
+
+Contrib/Matomeokuri、Contrib/Matomeokuri2、の下に一式コードが入ってい
+ます。Ｒ１の詳細についてはContrib/Matomeokuri/READMEを読んで下さい。
+
+
+.S	まとめおくり	Release 4
+.label	{matome-3}
+.key	MSendv4.pl
+.key	crontab	
+.key	MatomeOkuri-ctl.sh
+.key	cron
+
+＃注意:今時の CRON ってユーザー権限ではしるよね(4.4みたいに)。最低でも 
+SONY News(BSDの方)みたいなユーザー権限だよね(crontabは勝手にいじれない
+だろうが)
+
+MSendv4.pl をつかうものの総称です。
+MatomeOkuri-ctl.sh を crontab に書いて使用します
+
+	fml-1.x.x/etc/crontab-4.3	
+	fml-1.x.x/MatomeOkuri-ctl.sh
+を参考にしてみて下さい。
+＃ crontab-4.3	は 4.3BSD の形
+＃ crontab-4.4	は 4.4BSD の形です。あなたのＯＳがどちらの形なのかは
+＃ man crontab とかで調べて下さいませ
+
+配送情報とかエラーメッセージとかを出力しながらMSendv4.plは走るので、
+cron のなかで、MatomeOkuri-ctl.sh の出力をたえずメールで管理者に送ると
+かしておくとよいとおもいます。
+＃一日２４通増えちゃいますけど、そのくらい誤差でしょ:-)
+
+仕組み：
+
+activesがこんなかんじだとしましょう。
+-------- actives --------
+katri
+pollyanna	matome 6u
+-------- actives --------
+
+	cron で一時間に一度 MatomeOkuri-ctl.sh を呼びます。
+			↓
+
+	activesをしらべて pollyanna はまとめおくりで６時間に一度で
+	gzipかけないで配送（uがついてる）希望だとわかる。
+	＃このとき各ユーザーにどういうふうに送るかも読み取る
+			↓
+
+	もし 今の時間 % 6 が０（ｍｏｄ　６） なら、つまり、６、１２、
+	１８、２４時なら、配送することにして
+	＃２９なら 一日一回午前５時です。
+			↓
+
+	MSendrcという、今までの配送記録を見て、スプールとくらべ
+	送ってない分を決定する
+			↓
+
+	そして、その送ってない分をスプールから掘り出して配送する。
+
+「特定時間になるとそれまでためたメールを送る」
+のではなく、
+「特定時間になるとactivesの情報に基づき、その時間におくることになって
+いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
+
+ただし、Ｒ１にくらべてかなり重いことになります、
+送る人一人一人について独立に走るので。
+その代わりに、１時間〜２３時間おき（＝一日一回とおなじ、無意味:-)）まで
+任意の時間指定が可能になります。
+
+	% echo "# matome 6"|Mail -v ml-address 
+
+のように、ユーザー個人がまとめおくりのコントロールをすることができます。
+
+gzipかけずに送ることもできます。(u option)
+
+	% echo "# matome 3u"|Mail -v ml-address 
+
+.S	各ユーザーごとにどういうふうに送るかを決める
+
+1.4.1 からは できるようになりました。
+デフォールトは UNIX FROM の gzip したやつです。
+
+ただし、RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に
+番号をつけるので、この機能と矛盾してしまいます。
+まぁ番号きにしないならいいんですが…
+
+
+.S	Rel.4 のコマンド一覧(help fileより)
+
+まとめ送り希望の方へ：（基本的に Ｎ時間“おき”）
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+			default は gzip した Unix From つきのファイルの固まり
+# matome 数字(13-29)	上の特別の場合で、一日一回Ｎ時にまとめおくり
+			１３〜３６の数字がこのケースに当てはまります
+			午前５時に一回だけまとめおくり慕いときは、
+			２４＋５＝２９ をおくりこんでください。午後５
+			時は１７でいいんですが、午前中はこうしないと判
+			別がつかないので…
+
+# matome 数字オプション
+# matome 数字u		とすれば plain(unpack)、つまりplain textををかえします
+# matome 数字i 		とすれば lha + ish で
+
+			オプションなしは GZIP(UNIX FROM) と同じ
+			u	PLAINTEXT(UNIX FROM)
+			uf	PLAINTEXT(UNIX FROM)
+			i	lha + ish 
+			ish	lha + ish 
+			b	RFC934 format 	PLAINTEXT
+			d	RFC1153 format 	PLAINTEXT
+			mp	MIME/Muptilpart	PLAINTEXT
+
+# matome 0		普通の配送へ戻す
+
+   例：
+   # matome 1		まとめ送り １時間に一回(gzipd)
+   # matome 2		まとめ送り ２時間に一回(gzipd)
+   # matome 2u		まとめ送り ２時間に一回(plain text)
+   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+   # matome 17		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は１７時に来る
+   # matome 29		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は午前５時に来る
+			＃matome 5 は５時間“おき” という意味
+
+			
+
+.S	CRON(Systemのcron)を使わないまとめおくり その1
+.label	{Matomeokuri-not-cron_1}
+.key	Matomeokuri-not-cron_1
+.key	store-and-deliver.ph
+.key	store-and-deliver.pl
+.key	$START_HOOK
+
+cronを使わずに、Ｎ通溜ったら まとめ送りの人に配送 という動作をする
+
+例： 10通たまったら配送としましょう
+＃もっとも10にみたない時は 日が開ける時に deliverします
+
+store-and-deliver.ph	(configuration file)
+store-and-deliver.pl
+が lib/MatomeOkuri-NOCRON に入っています。
+
+各ＭＬごとのまとめおくりのし方は store-and-deliver.ph というファイルで
+設定してください（ＭＬごとに設定は変えられる）
+＃ lib/Matomeokuri-NOCRON/store-and-deliver.ph に見本があります
+
+何通おきに配送するか？	
+.key	$MATOME_OKURI_VER5
+$MATOME_OKURI_VER5      = 10; 
+
+前回のまとめおくりのときどこまで送ったかのカウント
+.key	$MATOME_OKURI_SEQ
+$MATOME_OKURI_SEQ       = "$TMP_DIR/matome-seq";
+
+実行するコマンド	＃-a は anytime という意味だす。
+.key	$MATOME_OKURI_VER5_EXEC
+$MATOME_OKURI_VER5_EXEC = "$LIBDIR/MSendv4.pl $DIR $LIBDIR -a"; 
+
+store-and-deliver.pl がINCLUDE PATH のどこかにいれて、
+あとは config.ph で
+
+	$START_HOOK = q#
+		require 'store-and-deliver.pl';
+	#;
+
+と書いておけばＯＫです。
+
+
+.S	CRON(Systemのcron)を使わないまとめおくり その２
+.label	{Matomeokuri-not-cron_2}
+.key	Matomeokuri-not-cron_2
+.key	cron.pl
+
+fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
+そのまま system の cron と同じ働きをします。
+つまり１分に一回おきて crontab をみて、実行する。
+＃単にシステムのcronじゃないだけですね…うじゃ
+
+ちなみに、複数のcron.plは走りません、cron.pid をみて一つのＭＬにつき一
+つしか走らないようになってます。
+＃あと 長く走り過ぎておかしくなること防止で、２４時間くらいで 次の
+cron.plを起動しなおします。
+
+インストール：
+
+config.ph に
+.key	$CRON_PIDFILE
+.key	$CRONTAB
+.key	$DISTRIBUTE_CLOSE_HOOK
+
+$CRON_PIDFILE = "$DIR/var/run/cron.pid";
+$CRONTAB      = "$DIR/etc/crontab-4.4";
+＃ directory がなかったらつくってくださいませ
+
+$DISTRIBUTE_CLOSE_HOOK = q#
+	$_cf{'hook', 'prog'} = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
+#;
+
+をつけたす。＃いずれも適当にパスとかは変えてください
+
+cron.pid は cron.pl の pid を記録するファイル（/var/run/cron.pidに相当
+するもの）。
+
+crontab-4.4  は システムの/etc/crontab  に相当するものです。
+＃注意： cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
+
+適当な設定をして下さい。
+
+余談：	cron.pl は ほんもののcron のクローンですので、at とか 自分用の 
+cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
+あるようだ）
+
+
+.S	cron.plを使う際の注意
+.label	{Matomeokuri-not-cron_2fix}
+.key	Matomeokuri-not-cron_2fix
+.key	cron.pl
+
+
+cron.pl を sendmail が  exec して実行するというのは
+crontab をユーザー毎に設定できないＯＳへの対応です。
+できるなら、 user ごとに crontab を設定できるほうがいいとおもうんです
+が世の中そういうＯＳばっかりじゃないわけで
+
+例えば、２４時間でおきかえるっていうのも 安全策なだけで、別に１週間走
+らせてもＯＫです。
+
+だから、別に無理に sendmail にcron.pl を走らせさせなくても、ＭＬ管理者
+が login したときだけ cron.pl をいれかえる（実行すれば勝手に入れ替わる）
+のでもいいはずです。
+
+たまに、 sendmail とうまくおりあえないこともあるみたいなので、そういう
+時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね？
+
+
+.S	まとめおくりだと３００行越えちゃいますけど？（まとめおくり Rel.1）
+.label	{msend-1}
+
+＃いまどき３００行は関係ないと思うぞ＞おれ。ＮＩＦだって３０００かな？
+
+確かに「特定時間になるとそれまでためたメールを送る」というシンプルなコー
+ドだと、３００行って何にも考えてないんですよね。でも、うかつに切るのは
+メールのないように手を加えるみたいで気が引けますが…とりあえず
+
+	msend-300.pl	or msend2-300.pl
+
+ってのが強引に３００（ヘッダがあるので念のため２７５行）行で複数のメー
+ルに分ける処理をします。
+
+	$MATOMEOKURI_MAXLINE = 275;
+
+をかえると“何行か”の制御ができます。
+＃普通は１０００（だいたい５０ｋくらい）でいいんじゃないかな？
+
+MSendv4.pl は config.ph の$MAIL_LENGTH_LIMIT = 1000; を見ています。こ
+こを変更して下さい。
+
+
+.S	まとめおくりで３時間おきとかはどうしましょう？（まとめおくり Rel.1）
+.label	{msend-2}
+
+Ｒ４を使うというのが前向きですが。１、２でやりたいなら
+
+----- control -----
+#!/bin/sh
+
+HOUR=`date '+%h'`
+X=`expr  $HOUR / 3`
+P=`expr $HOUR - 3 \* $X`
+
+if [ 0 -eq  $P ] 
+then
+	perl msend.pl DIR LIBDIR
+fi
+---------------
+
+とかをcronに仕掛けて…でいいんじゃないでしょうか？
+
+
+.S	まとめおくりで１、３、６時間おきとか任意時間選択したい（まとめおくり Rel.4）
+.label	{msend-3}
+
+version 3 ならユーザーに自分がＮ時間おきに配送してほしかったら
+コマンド "# matome N（数字）" を使ってもらえばいいだけです。
+
+でも、１、２だとそれぞれに架空アドレスとコントロールアドレスが必要です
+ね（めんどうくさい）。
+
+
+.S	まとめおくりの いつ送るか？の判定を変える
+
+MSendv4.pl の sub MSendP を変える。
+例：今の設定
+
+if(($ID - $Request{$who}) >= 0) {
+送るべきメールがあるか？
+
+	return 1 if(0 == ($HOUR % $When{$who}));
+	$When{$who} おきに送るのだが、いまの時間は？
+		
+	return 1 if($When{$who} > 12 && ($HOUR + 24 == $When{$who}));
+	一日一回送る人には 今がその時か？
+…
+
+
+.S	まとめおくり一応旧名称との対応表
+
+version 1 一箇所にまとめておいて時間が来たら配送（ユーザーは時間は自由
+に選べない）
+version 2 １の改良型
+version 3 MSend-cron.pl
+version 4 とは MSendv4.pl 3の改良型
+version 5 は cronを使わずに 10通溜ったらまとめ送りの人へ配送する 
+というタイプで パッチが lib/Matomeokuri-NOCRON にあります。
+version 6 は 1153形の digest機能を提供します。
+
+Release 1 と呼んでいるのは、架空のアドレスを用いる旧バージョンです。
+version 1, 2 はこの文書には一応書いておきますが、obsolete です。
+Contrib/Matomeokuri、Contrib/Matomeokuri2、
+MSendv4.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
+
+
