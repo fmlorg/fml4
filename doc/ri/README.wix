@@ -1,16 +1,15 @@
 .HTML_PRE
 
-	fml 4.0 メーリングリスト サーバ/マネージャ
-=E
-	fml 4.0 mailing list server/manager package
-
 .if LANG == JAPANESE
+	fml 4.0 メーリングリスト サーバ/マネージャ
+
 				深町 賢一
 .fi
 .if LANG == ENGLISH
+	fml 4.0 mailing list server/manager package
+
 				Ken'ichi Fukamachi
 .fi
-
 .if LANG == JAPANESE
 [ガイド]
 
@@ -39,6 +38,7 @@
 .fi
 
 .toc
+
 .~HTML_PRE
 
 
@@ -202,7 +202,12 @@ You can obtain fml sources at the URL
 =E
 See this url for explanation of ftp hierarchy:
 
+.if LANG == JAPANESE
 .url http://www.fml.org/fml/download.html
+.fi
+.if LANG == ENGLISH
+.url http://www.fml.org/fml/download.en.html
+.fi
 
 それぞれのディレクトリにあるファイル名は少しずつ異なります。しかし、基
 本的に
@@ -369,7 +374,13 @@ Please see the file INSTALL for the detail.
 3.0 以前からのアップグレード(例: 2.2.1 -> 4.0)の際には必ず UPGRADE を
 参照して下さい。自動登録を使っている場合に、重要な注意点があります。
 
+.if LANG == JAPANESE
 .url	http://www.fml.org/fml/UPGRADE/
+.fi
+.if LANG == ENGLISH
+.url	http://www.fml.org/fml/UPGRADE-e/
+.fi
+
 
 古い config.ph をそのまま使おうと思っている人は(HOOKについてはちょっと
 気を付けないといけませんが)そのまま使って下さい。凝った HOOK をしてい

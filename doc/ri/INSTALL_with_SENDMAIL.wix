@@ -4,32 +4,35 @@
 		fml and sendmail as a MTA
 
 				Ken'ichi Fukamachi
+
+.if LANG == JAPANESE
 fml は歴史的に sendmail を使う環境をデフォルトにしています。よって 
 INSTALL ファイルは sendmail を使うことを前提に書かれています。
 よってsendmailの場合の詳細は INSTALL ファイルを見て下さい。
-=E
-Fml assumes you use sendmail in default, so see INSTALL file for
-installation with sendmail. The file also assumes sendmail.
 
-.toc
-
-.if LANG == JAPANESE
 .url	../INSTALL/index.html
-.fi
-.if LANG == ENGLISH
-.url	../INSTALL-e/index.html
-.fi
 
 sendmail は CF のマニュアルを参照すると良いでしょう。JPCERTの『技術メ
 モ - sendmail バージョンアップマニュアル -』も非常に参考になります。
 
-.url http://www.jpcert.or.jp/tech/98-0001/
+.url http://www.jpcert.or.jp/ed/
+.fi
+
+.if LANG == ENGLISH
+Fml assumes you use sendmail by default, so see INSTALL file for
+installation with sendmail. The file also assumes sendmail.
+
+.url	../INSTALL-e/index.html
+
+For more details on sendmail configurations, see sendmail.org.
+.url 	http://www.sendmail.org/
+.fi
 
 .~HTML_PRE
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -11,6 +11,7 @@
 .toc
 
 .C	注意点
+=E.C	Caution
 
 .if LANG == JAPANESE
 参考: 簡単なqmail上でのfmlの設定の仕方のメモがあります。大雑把な流れが
@@ -19,6 +20,7 @@
 .fi
 
 .S	ML 作成時
+=E.S	when you make a new ML
 
 .if LANG == JAPANESE
 qmail ではそのマシンにアカウントがあればそのユーザへ送られます(rootは
@@ -40,6 +42,7 @@ Please see manuals and http://www.qmail.org/ and so on.
 .fi
 
 .S	メール転送の設定について
+=E.S	mail forwarding
 
 qmail-smtpd は /var/qmail/control/rcpthosts に書かれているホストあての
 メイルしか受け取りません。fml はSMTPでMTAと通信するのでMLの配送をその
@@ -103,6 +106,7 @@ elena メーリングリストを作ることを考えます。いろいろなパターンが考えら
 =E
 Consider creating elena ML. Several types are available.  It must be
 functional to use "qmail-users" described just below.
+
 
 .S	qmail-users (owner は fml など or 自由)
 =E.S	qmail-users 

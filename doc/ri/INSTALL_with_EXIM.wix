@@ -22,8 +22,7 @@ However don't forget the following configuratino change.
 
 1. fmlはSMTPでMTAと通信するのでリレーの許可を出して下さい。
    つまりlocalhostからのリレーを許可するように変更を加えて下さい。 
-=#
-
+=E
 1.  Permit relay from localhost to recipients, since fml uses loopback
     interface (default) to connect to MTA (delivery system)
     But the latest MTA rejects such mail relay, so please permit relay

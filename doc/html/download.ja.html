@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+download
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="download-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+
+<A HREF="download-e.html">[English] is here.</A>
+
+<CENTER>
+<EM>
+fml のソースのダウンロード
+</EM>
+</CENTER>
+
+<TABLE>
+<TR>
+   <TD>
+	<A HREF="ftp://ftp.fml.org/pub/fml/stable/">
+	[stable]
+	</A>
+   <TD>
+	<A HREF="ftp://ftp.fml.org/pub/fml/current/">
+	[current]
+	</A>
+   <TD>
+	<A HREF="ftp://ftp.fml.org/pub/fml/release/">
+	[公式リリース]
+	</A>
+</TABLE>
+
+<HR>
+<P>ftp://ftp.fml.org/pub/fml/ 下の階層について
+
+<TABLE BORDER=4>
+	<TR>
+	<TD>ディレクトリ
+	<TD>説明
+	<TD>備考
+
+	<TR>
+	<TD> <A HREF="ftp://ftp.fml.org/pub/fml/stable/">stable/</A>
+	<TD> 	正式リリースにバグ修正だけを施したもの
+		<BR>
+		この stable がお薦めです。
+	<TD>
+		ファイル名に日付(YYYYMMDD, 例: 20000229)
+		が入っているので新しいものをどうぞ
+
+	<TR>
+	<TD> <A HREF="ftp://ftp.fml.org/pub/fml/release/">release/</A>
+	<TD> 正式リリース
+	<TD> 
+
+	<TR>
+	<TD> <A HREF="ftp://ftp.fml.org/pub/fml/current/">current/</A>
+	<TD> 開発版。
+		新機能は開発版にのみ追加されていきます。
+		<BR>
+		もちろん、利用するに当たってのお薦めは stable です。
+		ですが、開発サイドとしては
+		次のリリースのクオリティ向上のため、
+		 current を使って、
+		テストをしてくださる方が多いことに期待しています。
+	<TD>
+		ファイル名に日付(YYYYMMDD, 例: 20000229)
+		が入っているので新しいものをどうぞ
+
+	<TR>
+	<TD> 
+		<A HREF="ftp://ftp.fml.org/pub/fml/daily-snapshots/">
+		daily-snapshots/
+		</A>
+	
+	<TD> 毎日作るスナップショット
+	<TD> この下の階層はさらに current/ と stable/ に分かれています
+
+	<TR>
+	<TD> <A HREF="ftp://ftp.fml.org/pub/fml/utils/">utils/</A>
+	<TD> メール関係のユーティリティ
+	<TD>
+   
+	<TR>
+	<TD> <A HREF="ftp://ftp.fml.org/pub/fml/archives/">archives/</A>
+	<TD> 過去のスナップショット
+	<TD>
+
+</TABLE>
+
+current/ も stable/ も daily ではなくある程度区切りのついたところで僕
+が作っています。そのためそれなりにちゃんと動くはずです。
+
+一方 daily-snapshots/ は全自動で毎日作っています。daily なので中途半端
+なところでパッケージを生成視してしまって失敗している可能性あり。
+おっかけをしたい人向きです。
+
+<!- ----------------------------------------------------------------- ->
+<HR>
+
+<P> ftp サーバ
+
+プライマリは 
+<A HREF="ftp://ftp.fml.org/pub/fml/">
+ftp://ftp.fml.org/pub/fml/
+</A>
+セカンダリは
+<A HREF="ftp://ftp.fml.org/pub/fml/">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+</A>
+です。
+
+
+<P> 解説
+
+currentもある程度まとまったところで作るのでそれなりに動きますが、たま
+に失敗していることもあります。テストをしてくれる人が多ければ多いほどリ
+リースが充実するのでcurrentでひとみ悟空になっていただける、もしくは
+stable以外にcurrentもちょっとくらい失敗してもいいＭＬで使ってみてもら
+えると非常にあり難いです。
+
+<P> ドキュメントのダウンロードについて
+
+毎日 http://www.fml.org/fml/ 以下のHTMLドキュメントを一塊にしています。
+
+<A HREF="ftp://ftp.fml.org/pub/fml/daily-snapshots/current/">
+"htmldocs-current-YYYYMMDD.tar.gz"
+</A>
+
+<PRE>
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
+    All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
+

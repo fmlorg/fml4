@@ -1,153 +1,74 @@
 .HTML_PRE
 .if LANG == JAPANESE
-		UPGRADE をする人向けの注意
+	fml 4.0 へのアップグレード・インストールの際の注意
 
 				深町 賢一
 .fi
 .if LANG == ENGLISH
-		UPGRADE
-				Ken'ichi Fukamachi
+	UPGRADE to fml 4.0
 
+				Ken'ichi Fukamachi
 .fi
-   I think "principle of least surprise" is most important in upgrade.
-.~HTML_PRE
+
+I think "principle of least surprise" is most important in upgrade.
 
 .toc
 
-.P	4.0 へのアップグレードについて
 
-.C	PGP まわり ( fml-current (3.0I) 2000/08/12 以降 )
+.C	fml 3.0 から fml 4.0 へのアップグレードの際の注意点
+=E.C	upgrade to fml 4.0
 
-.S	ディレクトリについて
+4.0 の主な新機能とアップグレードの際の注意についてまとめます。
 
-   fml 3.0 までは $DIR/etc/pgp だけでした。
-   例: /var/spool/ml/elena/etc/pgp/
+.S	fml CGI インタフェイス
+=E.S	fml CGI interface
 
-   fml 4.0 では PGP の鍵の置き場所が意味的に４つに分かれました。
+.if LANG == JAPANESE
+詳しくは
+.url ../Japanese/GUI/
+.fi
+.if LANG == ENGLISH
+See
+.url ../English/GUI/
+for more details.
+.fi
 
-	$DIST_AUTH_KEYRING_DIR     = "$DIR/etc/dist-auth";
-	$DIST_ENCRYPT_KEYRING_DIR  = "$DIR/etc/dist-encrypt";
-	$ADMIN_AUTH_KEYRING_DIR    = "$DIR/etc/admin-auth";
-	$ADMIN_ENCRYPT_KEYRING_DIR = "$DIR/etc/admin-encrypt";
+4.0 で追加された操作インタフェイスです。アップグレードに際し特別な注意
+点はありません。
 
-   実際に意味があるのは次の2つだけです。
+CGI はオプションです。無理に使う必要はありません。
 
-     * 投稿記事の暗号化の際に用いる PGP の鍵の置き場所
-	$DIST_ENCRYPT_KEYRING_DIR	
-	例: /var/spool/ml/elena/etc/dist-encrypt/
+4.0 以前に作った ML を fml CGI インタフェイスでも操作可能かどうかは従
+来から makefml メニューで操作していたか否か次第です。しかし config.ph 
+を生編集していたのなら、CGI からのメニュー操作はできません。config.ph 
+を生編集していたのなら、CGI からのメニュー操作はmakefml config と操作
+がぶつかることと理由は同じです。
 
-     * admin コマンドメールの PGP 認証の際に用いる PGP の鍵の置き場所
-	$ADMIN_AUTH_KEYRING_DIR
-	例: /var/spool/ml/elena/etc/admin-auth/
-
-   NOTE: 他の2つの変数は使ってないけど将来のために予約します。
-
-
-.S	makefml の使い方 （互換性について)
-
- fml 4.0 では
-
-	makefml	モード.pgpコマンド名
-
-になります。またモードのデフォルト値は環境変数 
-MAKEFML_PGP_DEFAULT_MODEで指定できます。
-
-例:	真面目に書くとこのように書きます。
-
-	% makefml admin-auth.pgp2 elena [pgpのオプションがつづく…]
-
-  しかし認証にしか使わないのであれば
-  環境変数で admin-auth と指定しておくと便利です。
-
-	% setenv MAKEFML_PGP_DEFAULT_MODE admin-auth
-	% makefml pgp elena
-
-  上の例と同じ動きをします。
-  この場合 makefml pgp elena は	makefml admin-auth.pgp2 elena と
-  再解釈されています。
-
-注意: MAKEFML_PGP_DEFAULT_MODE を明示的に指定しない場合のデフォー
-ルトモードはadmin-auth になっています。そのため
-
-	% makefml pgp elena
-
-  は
-	% makefml admin-auth.pgp elena
-
-  と同じです。
+なお、オーナさえ一致させればメンバーの登録/削除等は問題なく使えるはず
+です。
 
 
-.S	省略しない makefml の使い方 （admin コマンドの認証鍵の操作）
+.S	データベースアクセス
+=E.S	Database Access
 
-  fml 3.0 では makefml pgp により admin コマンドの認証鍵を操作しました。
-  fml 4.0 では
-
-	makefml	モード.pgpコマンド
-
-  形になります。つまり次のような組合せがあります。
-  歴史的に pgp は pgp2 を意味します。
-
-	makefml admin-auth.pgp
-	makefml admin-auth.pgp2
-	makefml admin-auth.pgp5
-	makefml admin-auth.pgpk
-	makefml admin-auth.pgps
-	makefml admin-auth.pgpe
-	makefml admin-auth.pgpv
-	makefml admin-auth.gpg
-
-   あまりに長いので admin-auth を aa で代用できます :-) 
-   例:
-
-	makefml aa.pgp2
-	makefml aa.pgp5
-	makefml aa.gpg
+従来のコードへの追加という位置付けになります。
+アップグレードに際し特別な注意点はありません。
 
 
-.S	省略しない makefml の使い方 （ ML の暗号化の鍵の操作）
+.S	PGP 関連の機能の変更点
+=E.S	PGP restructuring between fml 3.0 and 4.0
 
-  fml 3.0 では makefml pgp により ML の暗号化のため鍵を操作しました。
-  fml 4.0 では
+fml 4.0 ではPGP キーをおくディレクトリと makefml のコマンドの拡張があ
+ります。
 
-	makefml	モード.pgpコマンド
-
-  形になります。つまり次のような組合せがあります。
-  歴史的に pgp は pgp2 を意味します。
-
-	makefml dist-encrypt.pgp
-	makefml dist-encrypt.pgp2
-	makefml dist-encrypt.pgp5
-	makefml dist-encrypt.pgpk
-	makefml dist-encrypt.pgps
-	makefml dist-encrypt.pgpe
-	makefml dist-encrypt.pgpv
-	makefml dist-encrypt.gpg
-
-   de で代用できます。例:
-
-	makefml de.pgp2
-	makefml de.pgp5
-	makefml de.gpg
+3.0 までは例えば elena ML の PGP 認証( admin コマンド)および
+ ML の暗号化のキーは、ともに /var/spool/ml/elena/etc/pgp/ におかれてい
+ました。これでは２つの機能「admin コマンドの PGP 認証」「 ML の暗号化」
+を同時に使いたい場合に、キーが混在せざるを得ません。また makefml pgp 
+もこの混在したファイルを操作しなくてはなりません。
 
 
-.C	解説: 3.0 と 4.0 とのちがいについて
-
-  3.0 までは例えば elena  ML の PGP 認証( admin コマンド)および
-   ML の暗号化のキーがともに
-
-		/var/spool/ml/elena/etc/pgp/
-
-  におかれていました。これでは
-	
-		admin コマンドの PGP 認証
-		 ML の暗号化のキー
-
-  を同時には使えないことになります。同様で makefml pgp もこのディレク
-  トリにあるファイルを操作することを意図しています。4.0 ではこれをきち
-  んと整理したということです。
-
-
-  ◯ fml を今迄通り使いたい場合
+◯ fml を今迄通り使いたい場合
 
 	1. /var/spool/ml/etc/fml/site_force.ph に
 
@@ -165,7 +86,7 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 	    でも 3.0H までと同じことになります。
 
-  ◯ makefml を今迄通り使いたい場合
+◯ makefml を今迄通り使いたい場合
 
 	makefml pgp elena
 
@@ -177,399 +98,158 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 	PGP version 2 で admin コマンドメールの PGP 認証
 	のために PGP2 の鍵を操作することになります。
 
+.S	ローディング
+=E.S	how to load configuration files
 
-.appendix
-.# ifdef-3.0
-.C	3.0 RELEASE と 2.2.1 RELEASE の間の違いについて
-=E.C	The difference between 2.2.1 and 3.0
+あまり目に見えない差ですが、将来の拡張性のために、設定ファイルを読み込
+む順番が少し異なります。
 
-自動登録が新しくなります。
-=E
-fml 3.0 provides new automatic registration.
-
-  ユーザにとって(のみかけは)日本語になっていることです。
-  管理者にとっては actives と members を両方とも使う点です。
-=E
-  fml 3.0 "auto_subscribe" handler uses both actives and members.
-
-現在自動登録を使っていないならUPGRADE時に気にすることはないでしょう
-=E
-If you do not use automatic registration, you have nothing to do.
-
-大きく分けると
-	fml 2.x の設定ファイル(config.ph)をそのまま使う
-	fml 3.0 に移行する
-
-fml 3.0 に移行する場合の支援ツールを用意してあります(次節)
-
-注意: fml 1.x のconfig.phをそのまま使うにはtrickyなことが必要です。
-      たぶん3.0に書き換える方がやさしいです。
-.# endif-3.0
-      => .ptr{1.0-to-3.0}
-.# ifdef-3.0
-
-.S	アップグレードの支援ツールについて
-=E.S	Helper tool to upgrade fml 2.x to fml 3.0
-
-注意: 以下のmakefmlは fml 3.0 のmakefmlをさしています。
-      以前のversionのmakefmlに upgrade などのコマンドが密かに
-      組み込まれていたという意味ではありません
-
-ケース1:  makefml config ML
-
-makefml config で
-
-   auto_regist -> auto_subscribe 
-
-を行なえばメニュー終了時に 
-
-	members を actives にコピーするか？
-
-と聞かれるので y と答えればコピーされます。
+注: あえて 4.0 風にする必要はありません。従来の config.ph ファイルを
+    そのまま使い続けて構いません。
 
 
-ケース2: makefml upgrade ML
 
-このコマンドで ML メーリングリストに対し
+.C	PGP まわり ( fml-current (3.0I) 2000/08/12 以降 )
+=E.C	PGP around
 
-   cf と config.ph の auto_regist を auto_subscribe にさし換える
-   members を actives にコピーする
+.S	ディレクトリの階層構造について
+=E.S	directory hierarchy
 
-の操作をします。こっちは対話プログラムではなく上記のアクションが確認を
-求められることもなく一気に行なわれます。
+ fml 3.0 までは $DIR/etc/pgp だけでした。
+ 例: /var/spool/ml/elena/etc/pgp/
 
-.S	『自動登録』を使っている場合の注意
-=E.S	Caution to automatic registration
+ fml 4.0 では PGP の鍵の置き場所が意味的に４つに分かれました。
 
-3.0での「自動登録」は auto_subscribe というハンドラーを使うとmembers 
-と actives を両方使います。これが3.0以降の推奨ハンドラです。互換性を保
-つために auto_regist も使うことができます。
-=E
-How to handle member and actives files is different from fml 2.x to
-3.0. If you do not use automatic registration, you feel no difference. 
-I recommend you use "auto_subscribe" handler but you can continue to
-use "auto_regist" in fml 2.x.
+	$DIST_AUTH_KEYRING_DIR     = "$DIR/etc/dist-auth";
+	$DIST_ENCRYPT_KEYRING_DIR  = "$DIR/etc/dist-encrypt";
+	$ADMIN_AUTH_KEYRING_DIR    = "$DIR/etc/admin-auth";
+	$ADMIN_ENCRYPT_KEYRING_DIR = "$DIR/etc/admin-encrypt";
 
-この点が最も注意が必要です。選択肢は大きく二通り
-=E
-Your choice follows
+ 実際に意味があるのは次の2つだけです。
 
-	auto_subscribe へ移行する
-	auto_regist を使い続ける
-=E
-	switch to use "auto_subscribe" handler (3.0)
-	continue to use "auto_regist" handler  (2.x)
+   * 投稿記事の暗号化の際に用いる PGP の鍵の置き場所
+	$DIST_ENCRYPT_KEYRING_DIR	
+	例: /var/spool/ml/elena/etc/dist-encrypt/
 
-あります。
+   * admin コマンドメールの PGP 認証の際に用いる PGP の鍵の置き場所
+	$ADMIN_AUTH_KEYRING_DIR
+	例: /var/spool/ml/elena/etc/admin-auth/
 
-* 1. auto_subscribeを使う == 3.0 の設定へ移行
-=E
-* 1. use "auto_subscribe" handler == move from 2.x to 3.0
-
-3.0 の自動登録では auto_regist の代わりに auto_subscribe というハンド
-ラが推奨です。このハンドラは actives と members 両方を使います。
-(途中で登録方法を手動に変更しても特に問題がないので推奨ということです)
-=E
-fml 3.0 automatic registration uses "auto_subscribe" handler
-irrespective of "auto_regist". When you use "auto_subscribe", you
-should copy members to actives before you change "auto_regist" to
-"auto_subscribe".
-
-auto_regist から auto_subscribe へ切り替える前に 各MLのHOME directoryで 
-members を actives にコピーすることが必要です。
-=E
-Firstly copy members to actives. You have only to do this.
-
-	% cp members actives
-
-この後 auto_subscribe へ切り替えて下さい。
+ NOTE: 他の2つの変数は使ってないけど将来のために予約します。
 
 
-* 2. auto_regist を使い続ける。
-   つまり fml 1.x 2.x の設定ファイルをそのまま使う場合で
-   この場合特にすることはない。
-=E
-* 2. You can continue to use "auto_regist" in fml 3.0 too.
-   You have nothing to do in this case.
+.S	makefml の使い方 （互換性について)
+=E.S	how to use makefml to manipulate PGP keys
 
-つまり設定は何もいじらないという自信があるならそのままで構わない:)
+ fml 4.0 では
 
-注意: その時はそうおもっても後で変更をする際にはまる可能性大なので
-      案2はあまりお勧めできない気がします。
-=E
-Caution: but I do not recommend case 2 since your policy will change.
+	makefml	モード.pgpコマンド名
 
+になります。またモードのデフォルト値は環境変数 
+MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
-.S	変更点について
-=E.S	Changes from 2.2.1 to 3.0
+例:	真面目に書くとこのように書きます。
 
-○ 自動登録の際のファイルの扱いについて
-   自動か否かを問わず常に members と actives 両方を使う
-   この仕様は正しいが、過去との互換性はない点に注意が必要。
-=E
-* automatic subscribe handles both members and actives.
-  It is correct design but not compatible with past fml release.
+	% makefml admin-auth.pgp2 elena [pgpのオプションがつづく…]
 
-$REJECT_POST_HANDLER, $REJECT_COMMAND_HANDLERには新しいハンドラー名を
-使うことでそう振る舞うように設定する。
+しかし認証にしか使わないのであれば
+環境変数で admin-auth と指定しておくと便利です。
 
-ドキュメントでは「自動登録には新ハンドラーを使う」ように書いてあるが、
-3.0でもわざわざ古い auto_regist というハンドラーを選ぶことで古い挙動を
-させることができる。よって、3.0をインストールしても以前の config.ph を
-そのまま使えばmembers だけを使う振る舞いになる点に注意されたい。
+	% setenv MAKEFML_PGP_DEFAULT_MODE admin-auth
+	% makefml pgp elena
 
-.# endif-3.0
+上の例と同じ動きをします。
+この場合 makefml pgp elena は	makefml admin-auth.pgp2 elena と
+再解釈されています。
 
-○ 返されるメッセージの日本語化/英語化
-=E
-* make messages returned from fml be Japanese.
+注意: MAKEFML_PGP_DEFAULT_MODE を明示的に指定しない場合のデフォー
+ルトモードはadmin-auth になっています。そのため
 
-$MESSAGE_LANGUAGE で指定された言語でメッセージを返す$MESSAGE_LANGUAGE 
-はデフォルトではインストール時に指定する$LANGUAGEと同じ値に設定され
-る。$MESSAGE_LANGUAGE を English にすれば昔の挙動になる。
-=E
-return message in language defined as $MESSAGE_LANGUAGE.
-The default of $MESSAGE_LANGUAGE is $LANGUAGE. 
-$LANGUAGE is defined in installation.
+	% makefml pgp elena
 
-.S	その他の(目に見える)変更
-=E.S	Other Changes
+は
+	% makefml admin-auth.pgp elena
 
-SKIP_FIELDS のデフォルトを変更して Received: を通すのがデフォルト
-=E
-change $SKIP_FIELDS default to pass through Received:. 
-It causes too many hops but need to check spam or back trace.
+と同じです。
 
 
-.C	2.2.1 RELEASE と 2.2 RELEASE の間の差について
-=E.C	The difference between 2.2.1 and 2.2
+.S	省略しない makefml の使い方 （admin コマンドの認証鍵の操作）
+=E.S	correct syntax to manipulate PGP keys for admin commands
 
-○ ドキュメント(例えば help ファイル)には # command シンタックスの見本
-が書かれなくなった。デフォルトでは無意味なので。
-=E
-* remove hml command emulation in documents
+fml 3.0 では makefml pgp により admin コマンドの認証鍵を操作しました。
+fml 4.0 では
 
-makefml config で $MAIL_LIST == $CONTROL_ADDRESS に変更した場合にhelp 
-ファイルなどの再生成が行なわれる。また逆の場合($MAIL_LIST ==
-$CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
-元のhelpはhelp.bak等になるので必要なら戻すなりmergeなりをして欲しい。
+	makefml	モード.pgpコマンド
 
-○ HTMLのスレッドの仕方が異なる。
-<UL><LI>を利用したあまりお行儀のよい作法ではない
-=E
-* change HTML thread default
+形になります。つまり次のような組合せがあります。
+歴史的に pgp は pgp2 を意味します。
 
-○ 2.2までは『自動登録ではない場合にsubscribeコマンドをもらった』時は
-管理者へフォワードするだけだった。2.2.1, 2.2A (fml-current) ではそのメー
-ルに対し自動登録時のようなconfirmation を行ない、confirmされた後管理者
-に「登録希望者がいる」旨を伝える。
-=E
-* confirmation in not automatic subscribe mode.
+	makefml admin-auth.pgp
+	makefml admin-auth.pgp2
+	makefml admin-auth.pgp5
+	makefml admin-auth.pgpk
+	makefml admin-auth.pgps
+	makefml admin-auth.pgpe
+	makefml admin-auth.pgpv
+	makefml admin-auth.gpg
 
-○ SMTPはPIPELININGをする。まんがいちPIPELININGでMTAとの合性などがあっ
-たら教えて欲しい。
-=E
-* enable PIPELINING
+ あまりに長いので admin-auth を aa で代用できます :-) 
+ 例:
 
-○ %SECURE_REGEXP のbug fix。op.jp の記述が正しくなるようになおした。
-=E
-* fix %SECURE_REGEXP design so that documents become correct.
+	makefml aa.pgp2
+	makefml aa.pgp5
+	makefml aa.gpg
+
+
+.S	省略しない makefml の使い方 （ ML の暗号化の鍵の操作）
+=E.S	correct syntax to manipulate PGP keys for ML encryption
+
+fml 3.0 では makefml pgp により ML の暗号化のため鍵を操作しました。
+fml 4.0 では
+
+	makefml	モード.pgpコマンド
+
+形になります。つまり次のような組合せがあります。
+歴史的に pgp は pgp2 を意味します。
+
+	makefml dist-encrypt.pgp
+	makefml dist-encrypt.pgp2
+	makefml dist-encrypt.pgp5
+	makefml dist-encrypt.pgpk
+	makefml dist-encrypt.pgps
+	makefml dist-encrypt.pgpe
+	makefml dist-encrypt.pgpv
+	makefml dist-encrypt.gpg
+
+ de で代用できます。例:
+
+	makefml de.pgp2
+	makefml de.pgp5
+	makefml de.gpg
+
+.C	3.0 以前から 4.0 へのアップグレード
+=E.S	upgrade from 3.0 before to 4.0 
+
+.if LANG == JAPANESE
+
+上述のように4.0 へのアップグレードは PGP 関連以外に特別な注意点はあり
+ません。3.0 以前から 4.0 へのアップグレードは、むしろ 3.0 以前と 3.0 
+との自動登録の差がむしろ問題でしょう。
+
+3.0 へのアップグレードについては、こちらを参照して下さい。
+.url ../UPGRADE-3.0/
+.fi
 
 .if LANG == ENGLISH
-*** FML 2.2 is the first international version.            ***
-*** Hence this file is not translated here after.          ***
-***                                                        ***
-*** EXCUSE ME. THE TRANSLATION OF THIS FILE IS INCOMPLETE. ***
-***                                                        ***
-.return
+See
+.url ../UPGRADE-3.0-e/
+for more details.
 .fi
 
 
-.C	2.2 RELEASE と 2.1 RELEASE の間の差について
-
-新機能は README や op.jp を読んで下さい。ここではデフォルト値の違い
-について説明します。古い config.ph を使う場合には関係ありません。
- ML を新たに壱から作ると2.1の時と何が違うか？について記述します。
-
-○ 一般ユーザの使う members, actives コマンドの返答からは
-   # で始まる行は削除されています。管理者モードではファイルそのものが
-   返されます。セキュリティの上からもやめてしまったユーザの情報を
-   流すべきではないでしょう。
-
-○ chaddr old-address new-address しかできません。つまり移行する場合は
-   移行する前に古いアドレスから新しいアドレスへ変更しておかなければ
-   いけません。   
-
-○ モデレータは3種類あります。デフォルトは Approval: password という
-ヘッダの一部を使う方法ではなく、各モデレータ依頼のメールの承認KEYを与
-えます。confirmation と似ています。
-
-○ デフォルトではサイズチェックなどは特にかけていません。
-   members.bak actives.bak は１５０ｋをめやすに members.0 などへ
-   移動して古いものから順にログは消されていきます。
-
-
-○ デフォルトで Date: は original をとおします。Posted: はなくなりま
-した。前と同じにするには $DATE_TYPE で設定します。
-
-○ To: は元の値のままとおします。2.1 のようにするには $REWRITE_TO で制
-御します。
- 
-○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER
- 
-○ USE_MIME はデフォルトで on です。
-
-○ HTML記事を作ると HTML 4.0 です。スタイルシートがないと自動的に見本が
-   インストールされます。
-
-○ mgetの一部 ish などがうまく動かなくなったら？
-
-一部のOSでは mgetの一部 ish などがうまく動かない場合もあるようです。そ
-の時は
-
-	$INSECURE_SYSTEM = 1;
-
-を設定すると直ることもあります。
-
-
-.C	2.1 とそれ以前との互換性について
-
-○ (従来どおりですが)できるだけ互換性を保つように作られていますが、
-HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
-して下さい。
-
-○ upgrade で『config.ph から何から作りなおす』人には注意が必要です。古
-い config.ph のまま使うのなら backward compatible になるように動作する
-ので関係ありません。
-
-具体的にどこで区別しているかというと $CFVersion です。FML 2.1 RELEASE 
-ではこれが 3 になります。3 のものについては以下のような動作をします。
-問題になるのは
-
-   $CFVersion = 3; でなおかつ $MAIL_LIST と $CONTROL_ADDRESS が異なる場合
-
-だけです。
-
-2.1 RELEASE のデフォルトは
-
-   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
-
-の時は従来と異なり『配送専用』です。
-
-   『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
-	昔と同じで配送用のアドレス $MAIL_LIST で
-	コマンド(# command の形)を受け付けます。
-   』(HML 1.6 互換モード)
-
-
-となっています。(以下 INSTALL ドキュメントより)
-
-例えば (ドメイン fml.org で)
-
-	makefml newml elena
-
-で elena MLを作ったとします。デフォルト構成は
-
-	elena@fml.org		MLへの投稿用のアドレス
-	elena-ctl@fml.org	MLのコマンドを送るアドレス
-
-を使うように setup されます。ヘルプファイル等の見本もこの選定の元に生
-成されます。ちなみに
-
-	elena-admin@fml.org	MLの管理者宛のアドレス
-				(エラーメールなどが送られてくる)
-
-です。
-
-elena@fml.org でコマンド "# command" を受け付けるようにはなっていませ
-ん。『$COMMAND_ADDRESS = $MAIL_LIST;』と設定することで elena@fml.org 
-がコマンド "# command" をコマンドとして理解するようになります。
-設定は makefml config でもできます。
-
-config.ph で
-
-	$COMMAND_ADDRESS = $MAIL_LIST;
-
-となっていれば elena@fml.org でコマンドを受け付けます。この場合は配送
-メールの X-ML-Info: というフィールドやコマンドのREPLYもすべて 
-elena@fml.org 宛になるように設定されます。(helpファイルは手動で書き直
-して下さい)
-
-# command というシンタックスのコマンドをelena@fml.org も 
-elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
-
-	$MAIL_LIST_ACCEPT_COMMAND = 1;
-
-とする必要があります。
-# 意味的には Backward Compatible というカテゴリですが、
-# $COMPAT_なんとか にすると何の compatible の話か見えにくくなるので
-# こういう変数名になってます。
-# 以前の version ではヘッダで「elena-ctl へ」とか書いてるのに実は 
-# elena でも受け付けてたという仕様上の問題を再現するためのオプションです。
-# いわば option TCP_COMPAT_42 みないなもんですかね
-
-
-.C	その他互換性について
-=E.C	Compatibility
-
-.S	fml 1.6 より前からの移行について (2.1 READMEより)
-
-HOOKについて注意が必要です。FML 1.6 で基本的なデータ構造を call by
-reference に書きなおしました。それ以前の HOOK はまずそのままでは反映され
-ないでしょう。libcompat.pl などを参考に書きなおすなどが必要でしょう。
-
-
-.S	hml 1.6 的インターフェイスとの互換性 (2.1 READMEより)
-=E
-*  compatibility with hml 1.6
-
-歴史的に hml 1.6 を基本的にemulationできます。直接 FML 2.2 へ移行する
-場合は、members や log ファイル等はそのままで構いません。*pl 群と 
-config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
-(INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
-設定が必要です。
-
-.#  .S	1.6 以前から最新版にあげる際に config.ph は前のままでもＯＫ？
-.#  =E.S	I can use the same old config.ph when version up?
-.#  
-.#  基本的にそれでいけるはずです。適宜自動補正のルーチンが処理されます。
-.#  ただ、メニューその他一切合財使えませんので結構不便です。
-.#  
-.#  config.ph は $CFVersion という変数の値でバージョンが定められています。
-.#  この値によって互換性を保つルーチンが呼ばれます。2.1 では CFVersion 3.0 
-.#  で現在(2.2ALPHA)の config.ph は 3.2 です。
-.#  =E
-.#  Yes, FML is backward compatible except for contents of your hooks, so
-.#  understand the old config.ph. FML checks $CFVersion in config.ph. Pay
-.#  attention hooks you customized uses obsolete functions in old FML. If
-.#  so, such hooks do not work and you need to write hooks based on
-.#  current functions.
-.#  
-.#  1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
-.#  いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
-.#  使ってない場合はそのままでＯＫです。
-.#  
-.#  ただたまに変数名のスペリングの間違いをなおすとか〜で かわっちゃうことが
-.#  ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
-.#  書いておきますので、見てもらえばOKのはずです。
-
-.C	古いfml 1.x から3.0へ
-.l	1.0-to-3.0
-
-fml.orgで動いている古いconfig.phで auto_subscribe にするには３つおまじ
-ないが必要でした;-)
-
-.q
-   $COMPAT_CF1 = 1;
-   $CFVersion  = 4;
-   $REJECT_COMMAND_HANDLER = "auto_subscribe";
-.~q
-
-たぶんこれだけでいけますが、小手先をいじくるよりは3.0に書き換える方が
-いいきがしています。きっと将来呪文が意味不明だと自分で思う日が来ると思
-うので勧められないきがする。
-
 $Id$
+
+.~HTML_PRE
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
