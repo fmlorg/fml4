@@ -39,6 +39,34 @@
 
    メインメニュ -> 1 -> PERMIT_POST_FROM -> anyone
 
+○ コマンドについて
+
+この状態ではメンバーに登録されている人だけがコマンドを使える。しかし、
+誰でも投稿できるＭＬでコマンドが必要だろうか？
+
+企業のサポート用などならむしろ不必要だろう。コマンドを使えなくするため
+にアドレスその物を使えなくしておくといいだろう。
+
+   メインメニュ -> SETTINGS AROUND COMMANDS -> CONTROL_ADDRESS -> NOT USE
+
+この場合
+	
+   メインメニュ -> POLICY OF ACCESS の
+
+        [COMMAND]                          
+          PERMIT_COMMAND_FROM              members_only
+          WHEN COMMAND FROM NOT MEMBER     reject
+
+は無意味な設定ということになる。
+
+注意: /etc/aliases からも削除されていることを確認しよう。
+     デフォールトのものをそのまま使っていると入ったままになっているか
+     も知れない。
+
+     例: elena ML の場合なら
+     /etc/aliases の elean-ctl という行が存在しないことをチェック 
+     存在したら削って、newaliases をかけなおす
+
 
 ○ SPMAなどの場違いなもの、メール爆弾については
 
@@ -54,6 +82,8 @@
 
 
 2. 流量が少ないならモデレータにしてしまう
+
+＃しかしすぐ面倒と思うようになる気がする…
 
 .url config-moderated.html
 
