@@ -382,6 +382,16 @@ GEN_BRANCH_ARCHIVE () {
 	DATE=`date -u +"%C%y%m%d"`
 	FMLID=fml-snap-$DATE
 
+	if [ $release = 1 ]
+	then
+		echo "Fix etc/release_version (trick for release)"
+		$FML_VERSION -s > distrib/etc/release_version
+	fi
+	echo ========================================
+	echo -n 'release_version: '
+	cat distrib/etc/release_version 
+	echo ========================================
+
 	if [ -d $FMLID ]; then
 		mv $FMLID $FMLID.$$
 	fi
@@ -457,6 +467,16 @@ GEN_ARCHIVE () {
 	   cd $FTP
 	   rm -f fml-${BRANCH}*tar.gz fml-${BRANCH}*zip fml-${BRANCH}*bz2
 	)
+
+	if [ $release = 1 ]
+	then
+		echo "Fix etc/release_version (trick for release)"
+		$FML_VERSION -s > distrib/etc/release_version
+	fi
+	echo ========================================
+	echo -n 'release_version: '
+	cat distrib/etc/release_version 
+	echo ========================================
 
 	echo " "
 	echo "-- ${MAKE} $FMLID.tar.gz ... "
