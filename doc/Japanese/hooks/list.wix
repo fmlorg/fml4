@@ -256,11 +256,39 @@ $DISTRIBUTE_SUMMARY_HOOK = q#
 =E
 $s is the subject when this hook is evaluated.
 
-.# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+
+.S	%COMMAND_START_HOOK  %COMMAND_END_HOOK
+
+2001/09/11 以降の 4.0 stable/current で使用可能です。
+4.0.3 リリースには入っています。
+
+	eval $COMMAND_START_HOOK{ コマンド }
+	コマンドを実行
+	eval $COMMAND_START_HOOK{ コマンド }
+
+  例:
+
+	$COMMAND_END_HOOK{ 'chaddr' } = q{
+	    chaddr コマンド特有のなにかをする。
+	    例えばメッセージの送り返す先を変更するなど
+	};
+
+
+.S	%ADMIN_COMMAND_START_HOOK  %ADMIN_COMMAND_END_HOOK
+
+2001/12/27 以降の 4.0 stable/current で使用可能です。
+
+	eval $ADMIN_COMMAND_START_HOOK{ コマンド }
+	admin コマンドを実行
+	eval $ADMIN_COMMAND_START_HOOK{ コマンド }
+
+.#
+.# $FML$
+.#
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
