@@ -887,7 +887,7 @@ sub ProcAdminUnlinkArticle
     if ($opt =~ /^\d+$/) {
 	if (-f $f) {
 	    if (&OverWriteFileToRemove("$FP_SPOOL_DIR/$opt")) {
-		&LogWEnv("admin $proc $opt", *e);
+		&LogWEnv("admin $proc $opt in spool", *e);
 	    }
 	    else {
 		&LogWEnv("admin $proc: cannot find $opt, STOP!", *e);
@@ -897,12 +897,19 @@ sub ProcAdminUnlinkArticle
 	}
 	# not exist
 	else {
-	    &use('sendfile');
-	    $b = &GetArchiveBoundary;
+	    &LogWEnv("admin $proc: no such article $opt in spool", *e);
+	    &LogWEnv("admin $proc: ignore to remove $opt", *e);
+	}
+
+	# remove archive \d+.tar.gz
+	&use('sendfile');
+	$b = &GetArchiveBoundary;
+	if ($b > 0) {
 	    if ($opt <= $b) { 
 		&RemoveArticleInArchive($opt) || do {
-		    &Mesg(*e, "Error: something fails. See logfile for more details");
-		    return 0;
+		    &Mesg(*e, "Error: removing article $opt in archive fails.");
+		    &Mesg(*e, "       See logfile for more details");
+		    return $NULL;
 		};
 	    }
 	}
