@@ -213,6 +213,11 @@ sub ResentForwFileInSpool
     $e{"GH:Resent-Date:"} = $MailDate;
     $e{"GH:Resent-Message-Id:"} = "<$CurrentTime.FML$$\@$FQDN>";
 
+    # sleepy@maekawa.is.uec.ac.jp 97/02/02
+    for (('Resent-From','Resent-To', 'Resent-Date', 'Resent-Message-Id')) {
+	push(@ResentForwHdrFieldsOrder, $_);
+    }
+
     # rewritten ?;
     # $e{'GH:Subject:'} = "Get $ID $ML_FN\n\t".$e{'GH:Subject:'};
 
