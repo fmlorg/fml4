@@ -6,6 +6,9 @@
 
 2001/09/11
 
+   4.0C
+	SMTP: fix @RcptLists update
+
    makefml can use RDBMS 
 
 	fml-support: 09357 のパッチをマージして少し整理しました。
@@ -18,6 +21,9 @@
 
 	が可能になりました。
 
+   SMTP
+	define __UpdateRcptLists() to update @RcptLists always when
+	Smtp() starts.
 
 2001/09/10
 
