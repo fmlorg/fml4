@@ -19,9 +19,10 @@
 .part Basic Configuration
 basic_setup		基礎的なこと
 Glossary		用語集
-how_to_subscribe	メンバー登録について
 makefml			makefml (CUI) interface for fml
 GUI			GUI インタフェイス
+how_to_subscribe	メンバーの登録方法などについて
+address_manipulate	アドレスの取り扱いについて
 header_rewrite		ヘッダの書き換え
 remote_control		リモート管理(REMOTE_ADMINISTRATION, adminコマンド)
 messages		fml の返すメッセージをいじる
