@@ -79,8 +79,6 @@ sub SendFax
 
     close(TMP);
 
-    return;
-
     # sending fax
     open(SENDFAX, "|$SENDFAX -d $faxnumber -f $notify_address") || die($!);
     select(SENDFAX); $| = 1; select(STDOUT);
