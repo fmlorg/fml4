@@ -70,7 +70,7 @@ sub SocketInit
     local($eval, $exist_socket_ph);
 
     # SMTP HACK
-    if ($DISTRIBUTE_DUMMY_RECIPIENT) { 
+    if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
     }
 
@@ -362,12 +362,12 @@ sub SmtpIO
 
     if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT  IN>$MailDate\n";}
 
-    if ($e{'mode:_Deliver'} && $DISTRIBUTE_DUMMY_RECIPIENT) { 
+    if ($e{'mode:_Deliver'} && $USE_OUTGOING_ADDRESS) { 
 	if ($e{'mci:pipelining'}){
-	    &SmtpPut2Socket_NoWait("RCPT TO:<$DISTRIBUTE_DUMMY_RECIPIENT>", $ipc);
+	    &SmtpPut2Socket_NoWait("RCPT TO:<$OUTGOING_ADDRESS>", $ipc);
 	}
 	else {
-	    &SmtpPut2Socket("RCPT TO:<$DISTRIBUTE_DUMMY_RECIPIENT>", $ipc);
+	    &SmtpPut2Socket("RCPT TO:<$OUTGOING_ADDRESS>", $ipc);
 	}
 	    
 	$Current_Rcpt_Count = 1;

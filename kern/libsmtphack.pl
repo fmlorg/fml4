@@ -13,25 +13,40 @@ sub SmtpHackInit
 {
     local($howold, $renew);
 
-    if (! $DISTRIBUTE_DUMMY_RECIPIENT) {
-	&Log("\$DISTRIBUTE_DUMMY_RECIPIENT is not defined.");
+    if (! $OUTGOING_ADDRESS) {
+	&Log("\$OUTGOING_ADDRESS is not defined.");
     }
     
-    $DISTRIBUTE_DUMMY_RCPTLIST = $DISTRIBUTE_DUMMY_RCPTLIST || "$VARDB_DIR/rcptlist";
+    $OUTGOING_RCPTLIST = $OUTGOING_RCPTLIST || "$VARDB_DIR/rcptlist";
 
-    -f $DISTRIBUTE_DUMMY_RCPTLIST || &Touch($DISTRIBUTE_DUMMY_RCPTLIST);
+    -f $OUTGOING_RCPTLIST || do {
+	$renew++;
+	&Touch($OUTGOING_RCPTLIST);
+    };
 
-    $howold = -M $DISTRIBUTE_DUMMY_RCPTLIST;
+    $howold = -M $OUTGOING_RCPTLIST;
 
     for (@ACTIVE_LIST) { if ($howold > (-M $_)) { $renew = 1;}}
 
     &SmtpHackRebuildList if $renew;
+
+    if (-z $OUTGOING_RCPTLIST) {
+	local($f) = $OUTGOING_RCPTLIST;
+	$f =~ s#^$DIR/##;
+	&Log("Error: $f is size 0");
+	&Log("disable \$USE_OUTGOING_ADDRESS and back to normal delivery");
+	undef $USE_OUTGOING_ADDRESS;
+	0;
+    }
+    else {
+	1;
+    }
 }
 
 
 sub SmtpHackRebuildList
 {
-    local($new) = "$DISTRIBUTE_DUMMY_RCPTLIST.new";
+    local($new) = "$OUTGOING_RCPTLIST.new";
 
     open(OUT, "> $new") || do { 
 	&Log("SmtpHackRebuildList: cannot open $new");
@@ -61,13 +76,13 @@ sub SmtpHackRebuildList
     close(NEW);
 
     if (-z $new) { 
-	&Log("\$DISTRIBUTE_DUMMY_RCPTLIST.new is size 0, not replaced");
+	&Log("\$OUTGOING_RCPTLIST.new is size 0, not replaced");
     }
     else {
-	rename($new, $DISTRIBUTE_DUMMY_RCPTLIST) ||
-	    &Log("fail to rename $DISTRIBUTE_DUMMY_RCPTLIST");
+	rename($new, $OUTGOING_RCPTLIST) ||
+	    &Log("fail to rename $OUTGOING_RCPTLIST");
 
-	&Log("rebuild $DISTRIBUTE_DUMMY_RCPTLIST") if $debug_smtp_hack;
+	&Log("rebuild $OUTGOING_RCPTLIST") if $debug_smtp_hack;
     }
 }
 
