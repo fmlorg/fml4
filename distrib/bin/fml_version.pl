@@ -12,6 +12,10 @@ $query         = $opt_q;
 $patchlevel    = $opt_p;
 $Label         = $opt_L;
 
+if (! -f $RELEASE_DATE) {
+	system "date > $RELEASE_DATE";
+}
+
 &StoreTime if $opt_t;
 
 &GetTime;
