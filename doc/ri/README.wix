@@ -132,7 +132,7 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
 
 
-.S	fml のＭＬと bug-report のアドレス
+.S	fml の ML と bug-report のアドレス
 
 ○ バグ、質問、要望、新しい発見(謎)があったら 
 	fml-support ML(例によって自動登録です)
