@@ -534,6 +534,7 @@ sub DoSetMemberList
 	if (&ExactAddressMatch($curaddr, $newaddr)) {
 	    &Log("$cmd: Error: $curaddr == $newaddr");
 	    &Mesg(*e, "$cmd: Error: $curaddr == $newaddr");
+	    &Mesg(*e, "Please send command mail from old-address");
 	    &Mesg(*e, "usage: $cmd old-address new-address");
 	    return $NULL;
 	}
