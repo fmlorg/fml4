@@ -35,6 +35,16 @@
 	反映されないものがあります。  
 
 
+2001/07/06
+
+  bin/lntgz.pl is added: symlink *.tar.gz with *.tgz
+	PR by fml-help: 00409 (Masaki Hojo <hojo@CyberAssociates.co.jp>)
+
+  doc/ri/INSTALL_on_WIN2000
+	thank Masaya Mase
+
+	2000 で実際に動いた環境の例を追加
+
 2001/07/03
 
    proc/libdist.pl 
