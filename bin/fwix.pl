@@ -1172,6 +1172,8 @@ sub Expand
 	$ForcePrint = 1;
 
 	if ($mode eq 'html') {
+	    print STDERR "url::html {\$s = <$s>}\n" if $debug;
+
 	    $index{"url=$s"} = "<A HREF=$s>$s</A>";
 	    $index{"url=$s"} = "</PRE>".$index{"url=$s"}."<PRE>" if $In_PRE;
 	    $s = "\#.url url=$s";
@@ -1322,9 +1324,9 @@ sub IndexExpand
 
     $fyi = "See also: " unless $show_only;
 
-    print STDERR "IndexExpand: [$x] -> [" if $debug;
+    print STDERR "IndexExpand($x) => {\n" if $debug;
 
-    @index = split(/\s*[,\s+]\s*/, $x);
+    @index = split(/\s*[,\s{1,}]\s*/, $x);
     foreach (@index) {
 	$org = $_;
 	$r = $index{$_} || $_;
@@ -1332,12 +1334,12 @@ sub IndexExpand
 	$result .= "$r ";
 
 	if (index($r, $org) == 0) {
-	    &Log("[$. lines] error or not defined? $org => $r\n");
+	    &Log("[$. lines] error or not defined?\n[$org] => [$r]\n");
 	    $Error = 1;
 	}
     }
 
-    print STDERR "]\n" if $debug;
+    print STDERR "\n}\n" if $debug;
 
     if ($mode eq 'html') {
 	$result =~ s#</PRE>#</PRE>$fyi#;
