@@ -16,7 +16,7 @@ _____________________________________
 _____________________________________
 
 
-.C	FML 2.1
+.C	FML (a package or tool kits for mailing lists)
 
 .S	はじめに
 =E.S	Introduction
@@ -45,56 +45,69 @@ FML includes
 
 
 いろいろなケース用のプログラムがあるのは『趣味も(コンピュータ)環境も人
-それぞれ』ということを大事にするべきだという思想が根底にあるためです。
-よって『カスタマイズの自由度が大きいこと/同じことができるのであればユー
-ザ・インターフェイスはどのようなものでもいい』となっています。
-
-
-設定項目は多岐に渡りますが、基本的な setup (MLをつくる/登録する)や簡単
-な設定の変更は makefml という対話設定プログラムで変更できます (詳細は 
-INSTALL というファイルを見て下さい)。
+それぞれ』という前提が根底にあるためです。よって『カスタマイズの自由度
+が大きいこと/同じことができるのであればユーザ・インターフェイスはどの
+ようなものでもいい』と思うからです。
 
 
 .S	必要な環境について
 
-原則として 
+基本的な前提は
 
-	Unix マシンに自分のアカウントがあること
-	perl 4 もしくは perl 5 (今時は最初からOSに入ってるとおもう)
-	メール配送プログラム (default は sendmail 8.x を想定)
+   Unix マシンに自分のアカウントがあること
+   perl 4 もしくは perl 5 (今時perlは最初からOSに入ってるとおもうが)
+   メール配送プログラムがあること(default は sendmail 8.x を想定)
 
 が必要です。
 =E
 FML requires perl and MTA(e.g. sendmail).  
 
-プロバイダのサービスを利用している場合は(一概にはいえませんが)、通常い
-わゆる「シェルアカウント/シェルサービス」と呼ばれる Unix 上でのアカウ
-ントが使える必要があります。シェルサービスのない(つまりFTP等で遠隔メイ
-ンテナンスする)ホームページレンタルサービス等では実行できません。詳し
-くは自分の使っているプロバイダに聞いて下さい。
+プロバイダのサービスを利用している場合一概にはいえませんが、いわゆる
+「シェルアカウント/シェルサービス」と呼ばれる Unix 上でのアカウントが
+使える必要があるはずです。詳しくは自分の使っているプロバイダに聞いて下
+さい。
 
-また、メール配送プログラムは sendmail のようなSMTPを理解してくれるサー
-バも必要です。メールの配送を担当するマシンは、インストールしようとして
-いるマシンである必要はありません。一方「インストールしようとしているマ
-シンがSMTPでメールを受けて、FMLを起動できること」は必要です。これがで
-きない場合は、POP3 を使ってMLを実行するような裏技が必要になります。
+ホームページレンタルサービスなどでFTP等でファイルを送り込むタイプのも
+のなどの"シェルサービスのついていない"サービスではおそらくは実行できま
+せん。
+
+メールシステム(同じマシンでなくても良い)は
+
+	"メールを受けてfmlをkickする"
+	"SMTPを理解すること"
+
+ことが必要です。メールを受けることと配送することは概念的に別のものです。
+原則的に fml はメールを受けるホスト上で動きます。配送を担当するホスト
+は、メールを受けるホストと同じでなくても構いません。配送系はSMTPを理解
+してくれればなんでも構いません。sendmail, qmail, exim, ...
+
+メールを受けるホストでfmlをkickすることができない場合はPOP3を使ってML
+を実行するような裏技が必要になります(裏技なのでちょっとねぇ)。
 =E
 FML sends mails via SMTP, so you do not need sendmail runs on your
 machine.  In addition, you can set up that FML runs on an old machine
 but distribution is done on new machine.
 
-なお、ドキュメントは NetBSD (4.4BSD) がターゲットマシンなのでsendmail 
-を想定して書いてあります。
+なお、ドキュメントは NetBSD(4.4BSD)がターゲットマシンなのでsendmail を
+想定して書いてあります。
 =E 
 Since the target machine is 4.4BSD, the document is based on sendmail
 and perl (4 or 5) enveironment.
 
 
-.S	最新の情報とソースコードについて
+.S	ソースコードと情報へのポインタ
 =E.S	How to get the latest information
 
-最新のドキュメント・ソース共に以下にあります。最新のネタは ML(後述)で
-聞くか、fml のホームページを覗いてみるというのも有効です(^^)。
+最新版のソースコードは、以下の anonymous ftp から入手可能です。
+=E
+You can obtain sources at the URL
+
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+
+です。最新版は fml-current.日付.tar.gz という名前になっているので日付
+の新しい(生きのいい:-)のをどうぞ。関連プログラム群も置いてあります。ま
+た、以下のURLに最新のドキュメント・ソース共に以下にあります。最新のネ
+タはML(後述)か以下のURLをどうぞ
 =E
 The HOME PAGE of the Fml is 
 
@@ -107,41 +120,25 @@ You can obtaion the latest (fml-current) documents and sources here.
 You could see the latest topics on fml-support mailing lists and fml
 Home page
 
-最新版のソースコードは、以下の anonymous ftp から入手可能です。国内、
-国外用共にマスターサーバは
-=E
-You can obtain sources at the URL
 
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-
-です。最新版は fml-current.日付.tar.gz という名前になっているので日付
-の新しい(生きのいい:-)のをどうぞ。
-
-○メールしか使えない人は
+○メールしか使えない人向け
 =E
 If you can use only Email, you can obtain the latest information on
 fml to send a mail (any body is O.K.) to the address
 
-[近況情報について]
-
-	fml@ffs.fml.org
-
-へ何でもいいからメールを送ると最新情報を返すようにしてあります。
-＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
+fml@ffs.fml.org へ何でもいいからメールを送ると最新情報を返すようにして
+あります。
+＃ただ大抵ドキュメントのupdateは間に合っていません(そこまで手は回らない)
 =E
 Execuse me for may slow updates of documents...
 
-[ソースコード]
 また最新版のソースコードは、なんでもいいからメールを
+fml-current@ffs.fml.org に送ると自動的に(50Kbytes程度で分割して)送り返
+されます。
 =E
-If you cannot use ftp, please send a mail (body is anything O.K.) to 
-
-	fml-current@ffs.fml.org 
-
-に送ると自動的に送り返されます。
-＃自動的に分割して送り返します。なお送り返すのは UNIX Version の方です。
-=E
-You can receive auto-suplitted mails of the latest source (Unix version).
+If you cannot use ftp, please send a mail (body is anything O.K.) to
+fml-current@ffs.fml.org You can receive auto-suplitted mails of the
+latest source (Unix version).
 
 
 .S	メーリングリストについて
@@ -170,66 +167,54 @@ fml-query (described below) since I have no time.
 It may be happen that some experts of ML answer your questions if it
 is sent to the mailing list.
 
-○ fml-support への自動登録は
+fml-support への自動登録は
 =E
 [subscription to fml-support mailing list]
 To subscribe fml-support, you can only send  
 
 	subscribe Ken'ichi Fukamachi 
 
-のような文だけを 
+のような文だけを
 =E
 to the address
 
 	fml-support-ctl@ffs.fml.org 
 
 へ送って下さい。本当に登録して良いのか？の確認メールが返ります。そのメー
-ルに reply してもらって初めて登録されますので注意して下さい
-(confirmation モード)。
+ルに reply してもらって初めて登録されますので注意して下さい(自動登録の 
+confirmation モード)。
 =E
 The FML server send back the reply to confirm your subscription request. 
 After you reply the confirmation, your subscription succeeds.
 This confirmation is against subscription tricks.
 
-なお FML 2.1 からはＭＬへ登録して欲しくない方のために
+fml-support ＭＬへ登録して欲しくない方向けに
 =E
 The address "fml-query" is to forward the in-coming mail to
 fml-support but the sender is not registered automatically.
 
 	fml-query@ffs.fml.org 	
 
-を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
-ことなく fml-support へ質問のフォワードを行います。
+もあります。ここへ投げていただければ fml-support MLへ自動登録すること
+なく fml-support へ質問のフォワードを行います。
 
-どうしても 内密な相談とか、DMで聞きたいことは 
+"どうしても"内密な相談とか、DMで聞きたいことは 
 =E
 If you have secret questions:) you talk to only me, please send it to 
 
 	fml-bugs@ffs.fml.org
 
-へ投げておいてください。ただ返事はすごく遅れぎみです _o_ 
-.# ＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
+へ投げておいてください。ただ返事はものすごく遅いでしょう _o_ 
 =E
 If I am not busy, you may receive my reply soon but a lot of cases
 very slowly;-)
 
 
-.S	Update について
-=E.S	on updates and bug-fixes of sources
-
-この類いの「外部のサイトとの通信を行なうプログラム」は全てそうですが最
-新版のソースコードを手に入れて使うべきだとおもいます。また改造も最新版
-についてしていただけるとよろしいかと存じます (_o_)
-=E
-Please use the latest version since programs which contact external
-worlds should be always latest e.g. for security, evoluting
-environments, ....
-Hence it is better to do hasks latest version if you like(^^). 
-
-
-
 .C	インストール
 =E.C	Install
+
+設定項目は多岐に渡りますが、基本的なセットアップ(MLをつくる/登録する)
+や簡単な設定の変更は makefml という対話設定プログラムで行なえます。
 
 .S	makefml 
 
@@ -256,12 +241,6 @@ e.g. to make elena@your-domain mailng list
 =E
 Please see the file INSTALL for the detail.
 
-これだけで十分動くようになりますが初心者用に簡単なものだけに限っている
-ため分いろいろな値を決め打ちしています。よりすすんだ設定については
-
-=E
-INSTALL_advanced is a document for you to customize more closely.
-
 
 .S	ターゲットマシン/テスト環境
 =E.S	Target machine environment
@@ -273,24 +252,31 @@ fml 2.1 のターゲットマシン/テスト環境は
 	sendmail 8.8.7 + perl4.036 on NetBSD 1.1B(fwtk も併用)
 	sendmail 8.8.7 + perl5.003 on NetBSD 1.1B(fwtk も併用)
 
-です。その他のこまごまとしたことについては doc/op というファイルがあり
-ます。INSTALL で説明の足りない部分は doc/op を見てください。
+です。
 
 
 .S	Supporeted Architectures
 =E.S	Supporeted Architectures
 
-基本的にメインターゲットは 4.4BSD です。ですが最近の Unix であれば動く
-はずです。ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
-
-Unix 上でのインストールは INSTALL というファイルを参照して下さい。
+基本的にターゲットは 4.4BSD ですが最近の Unix であればインストーラが自
+動判定するので特別なことをしなくても動くはずです。
+＃ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
+＃判定できないようなどマイナ〜だったらわかりませんが
 
 sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
-ドが入っています。NT 上の perl, sendmail などが何となく動いてるような
-動いてないような変なところはいろいろあるので、まぁ動いたららっき〜と思っ
-てください。Unix version との違いについてINSTALL_on_NT4 に捕捉が書いて
-あるので、INSTALL と INSTALL_on_NT4 両方を参照して下さい。
-注意:なおNT上の perl sendmail bind についてぼくに聞かれても困ります。
+ドが入っています。そもそも NT 上の perl, sendmail などが何となく動いて
+るような動いてないような変なところはいろいろあるので、まぁ動いたららっ
+き〜と思ってください。Unix version との違いについてINSTALL_on_NT4 に捕
+捉が書いてあるので、INSTALL と INSTALL_on_NT4 両方を参照して下さい。注
+意:なおNT上の perl sendmail bind についてぼくに聞かれても困ります。
+
+
+.S	アップグレード・インストールをしようとしている人へ
+
+アップグレードする人で「新たに config.ph を作り直すところからやろう」
+と思っている人は UPGRADE というファイルも見て下さい。古い config.ph を
+そのまま使おうと思っている人はそのまま使って下さい(HOOKは別として)。
+
 
 
 .C	FML 2.1 の機能の概要
@@ -390,20 +376,31 @@ fml has been developed to offer
 
 .C	Version Up と互換性(Compatibility)
 	 
+
+この類いの「外部のサイトとの通信を行なうプログラム」は全てそうですが最
+新版のソースコードを手に入れて使うべきだとおもいます。また改造も最新版
+についてしていただけるとよろしいかと存じます (_o_)
+=E
+Please use the latest version since programs which contact external
+worlds should be always latest e.g. for security, evoluting
+environments, ....
+Hence it is better to do hasks latest version if you like(^^). 
+
+
 .S	Version up について
 =E.S	on Version up
 
-ソースを広げてインストールと同様に makefml install をして下さい。
-手動でも十分できますが、makefml の方がよいでしょう。
-makefml install を使えば必要な作業を行なってくれます。
-
+ソースを広げてインストールと同様に makefml install をして下さい。手動
+でも十分できますがOSの自動判定なども含めて補正が行なわれる makefml の
+方がよいでしょう。makefml install を使えば必要な作業を行なってくれます。
 実作業としては
 
 	(ソースの下の src 階層以下に perl scripts は集められています)
 	makefml この src/ bin/ sbin/ cf/ doc/ 群をコピーします。
+	OSに依存した補正
 
-ことを makefml が行ないます。
-.# 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
+などを makefml が行ないます。
+
 
 .S	新しい機能を有効にするには？
 =E.S	To make new functions effective
@@ -462,10 +459,11 @@ libcompat.pl にBackward compatibility のためのコードがあります。昔の設
 まで compatible にできます。コードの都合上どうしても実現できないカスタ
 マイズもありえます _o_
 
+
 .S	Changes
 =E.S	Changes
 
-Please see CHANGES and RELEASE_NOTES
+CHANGES と RELEASE_NOTES を参照のこと。
 
 
 
