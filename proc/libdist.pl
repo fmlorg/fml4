@@ -300,9 +300,12 @@ sub LongId
     local($id, $howlong) = @_;
     local($s);
 
-    $howlong = $howlong < 2 ? 5 : $howlong; # default is 5;
-    $s = "\$id = sprintf(\"%0". $howlong. "d\", $id);";
-    eval $s;
+    if ($howlong > 0) {
+	$howlong = $howlong < 2 ? 5 : $howlong; # default is 5;
+	$s = "\$id = sprintf(\"%0". $howlong. "d\", $id);";
+	eval $s;
+    }
+
     $id;
 }
 
