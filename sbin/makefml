@@ -4179,7 +4179,7 @@ sub TrySmtpConnect
 	&Debug("TrySmtpConnect: $@") if $@;
     }
 
-    local($pat)    = $STRUCT_SOCKADDR || 'n n a4 x8';
+    local($pat)    = $STRUCT_SOCKADDR || 'S n a4 x8';
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = $PORT || (getservbyname('smtp', 'tcp'))[2];
@@ -4199,7 +4199,6 @@ sub TrySmtpConnect
     else { 
 	$VERBOSE_STR = 
 	    sprintf("socket(S, %s, %s, %s)", &PF_INET, &SOCK_STREAM, $proto);
-
 	return ($TSCResult = "Smtp::socket->Error[$!]");
     }
     
@@ -4303,6 +4302,7 @@ sub ProbeSockAddr
     print STDERR "---ProbeSockAddr\n" if $debug;
 
     for ($STRUCT_SOCKADDR, "n n a4 x8", "S n a4 x8", "x C n C4 x8") {
+	undef $STRUCT_SOCKADDR;
 	next unless $_;
 	$STRUCT_SOCKADDR = $_;
 
