@@ -136,8 +136,8 @@ sub IdCheck
 	return 0;
     }
 
-
-    if ($buffer =~ /$CONFIRMATION_KEYWORD $id $name/) {
+    # since some user set Japanese strings as $name, it becomes errors;_;
+    if ($buffer =~ /$CONFIRMATION_KEYWORD $id/) {
 	return 1;
     }
     else {
@@ -298,8 +298,10 @@ sub GenKey
     local($seed) = @_;
     local($key)  = time|$$;
 
+    &GetTime;
+
     srand($key);
-    int(rand($seed + $key));
+    $CurrentTime.int(rand($seed + $key));
 }
 
 1;
