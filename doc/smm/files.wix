@@ -12,6 +12,7 @@
    libaref.pl		AREF Library
    libcompat.pl		COMPAT コード
    libcompat_cf1.pl	COMPAT コード
+   libcompat_cf2.pl	config.ph CFVersion 3 以前の場合の補正コード
    libcompat_fml15.pl	COMPAT FML 1.6 以前のもの
    libcompat_fml20.pl	COMPAT FML between 2.0 and 2.1
    libconfirm.pl	自動登録の confirmation mode 
@@ -38,6 +39,7 @@
    libmoderated.pl	moderated mode
    libmodeutils.pl	簡易 MODE 設定ルーチン backward
    libnewsyslog.pl	/usr/bin/newsyslog 
+   libpgp.pl		PGP認証ルーチン
    libpop.pl		popfml のライブラリ
    libra.pl		ＭＬをリモート管理するインターフェイス
    librelayhack.pl	relay hack
@@ -56,7 +58,11 @@
    libwhois.pl		WHOIS インターフェイス
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
