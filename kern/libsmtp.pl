@@ -79,11 +79,6 @@ sub SocketInit
     push(@RcptLists, $ACTIVE_LIST) 
 	unless grep(/$ACTIVE_LIST/, @RcptLists);
 
-    ## initialize "Recipient Lists Control Block"
-    ## which saves the read pointer on the file.
-    ## e.g. $RcptListsCB{"${file}:ptr"} => 999; (line number 999)
-    undef %RcptListsCB;
-
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
@@ -174,74 +169,101 @@ sub Smtp
     local(*e, *rcpt, *files) = @_;
     local(@smtp, $error, %cache, $nh, $nm, $i);
 
-    ### Initialize, e.g. use Socket, sys/socket.ph ...
+    # Initialize, e.g. use Socket, sys/socket.ph ...
     &SmtpInit(*e, *smtp);
     
-    ### open LOG;
+    # open LOG;
     open(SMTPLOG, "> $SMTP_LOG") || (return "Cannot open $SMTP_LOG");
     select(SMTPLOG); $| = 1; select(STDOUT);
 
-    # primary, secondary -> @HOSTS (ATTENTION! THE PLURAL NAME)
-    push(@HOSTS, @HOST); # the name of the variable should be plural
-    unshift(@HOSTS, $HOST);
-
-    ### cache Message-Id:
+    # cache Message-Id:
     if ($e{'h:Message-Id:'} || $e{'GH:Message-Id:'}) {
 	&CacheMessageId(*e, $e{'h:Message-Id:'} || $e{'GH:Message-Id:'});
     }
 
-    # when @rcpt is non-zero, !mode:DirectListAcess
-    if ($MCI_SMTP_HOSTS > 1) {
-	require 'libsmtpmci.pl';
-	if ($error = &SmtpMCIDeliver(*e, *rcpt, *smtp, *files)) {
-	    return $error;
-	}
-    }
-    else { # not use pararell hosts to deliver;
-	$error = &SmtpIO(*e, *rcpt, *smtp, *files);
-	return $error if $error;
-    }
+    # main delivery routine:
+    #    fml 3.0 does not use modulus type MCI.
+    #    SmtpIO() handles recipient array window.
+    $error = &SmtpIO(*e, *rcpt, *smtp, *files);
+    return $error if $error;
 
-    ### SMTP CLOSE
+    # close log
     close(SMTPLOG);
     0; # return status BAD FREE();
 }
 
-# 
-# SMTP chat with given channel <S>; from HELO to QUIT
-#
-# Deliver using one of $HOSTS or prog mailer
-# This routine ignore the contents of a set of recipients,
-# which is controlled by the parent routine calling this routine.
-# In default, no control. In MCI_SMTP_HOSTS > 1, $CurModulus controlls 
-# the set of recipients (SmtpIO not concern this set).
-#
+# for (MCIWindow loop (1 times in almost cases)) {
+#    open one of smtp servers (one of @HOSTS)
+#        for $list (recipient lists) { # at fixed smtp server
+#            set up window for each $list (window==0..end in almost cases)
+#            send "RCPT TO:<$rcpt>" to socket;
+#            # that is "send N-th region assigned for N-th server"
+#            # but the N-th region (window) size varies from files to files. 
+#        }
+#    close smtp server
+# }
+sub SmtpIO
+{
+    local(*e, *rcpt, *smtp, *files) = @_;
+    local(%smtp_pcb);
+
+    # for (@HOSTS) { try to connect SMTP server ... }
+    push(@HOSTS, @HOST);    # [COMPATIBLITY]
+    unshift(@HOSTS, $HOST); # ($HOSTS, @HOSTS, ...);
+
+    if ($USE_SMTP_PROFILE) { $SmtpIOStart = time;}
+
+    undef %MCIWindowCB; # initialize MCI Control Block;
+
+    if ($e{'mode:__deliver'}) { # consider mci in distribute() 
+	local($n, $i);
+	$n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
+
+	for (1 .. $n) { # MCI window loop
+	    undef %smtp_pcb;
+	    $smtp_pcb{'mci'} = 1 if $n > 1;
+
+	    &__SmtpIOConnect(*e, *smtp_pcb, *rcpt, *smtp, *files);
+	    return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
+
+	    # @RcptLists loop under "fixed smtp server"
+	    &__SmtpIO_1(*e, *smtp_pcb);
+	    &__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+	    &__SmtpIOClose(*e, $smtp_pcb{'ipc'});
+
+	    push(@HOSTS, $HOST); # last resort for insurance :)
+	}
+    }
+    else { # e.g. command, message by Notify(), ...
+	undef %smtp_pcb;
+	$smtp_pcb{'mci'} = 0; # not use mci
+
+	&__SmtpIOConnect(*e, *smtp_pcb, *rcpt, *smtp, *files);
+	return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
+
+	&__SmtpIO_1(*e, *smtp_pcb);
+	&__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+	&__SmtpIOClose(*e, $smtp_pcb{'ipc'});
+    }
+
+    if ($USE_SMTP_PROFILE) { &Log("SMTPProf: ".(time-$SmtpIOStart)."sec.");}
+
+    $NULL;
+}
+
+
 # FYI: programs which accpets SMTP from stdio.
 #   sendmail: /usr/sbin/sendmail -bs
 #   qmail: /var/qmail/bin/qmail-smtpd (-bs?)
 #   exim: /usr/local/exim/bin/exim -bs
 #
-# FYI2:
-#   Already given $CurModulus by SmtpDLAMCIDeliver
-#     SmtpDLAMCIDeliver 
-#        for (@HOSTS) { 
-#             set $CurModulus (global variable)
-#             => SmtpIO
-#             <=
-#        }
-#
-sub SmtpIO
+sub __SmtpIOConnect
 {
-    local(*e, *rcpt, *smtp, *files) = @_;
-    local($sendmail);
-    local($host, $error, $in_rcpt, $ipc, $try_prog, $retry, $backoff);
-
-    ### SMTP Section: initialize and set up
-
-    if ($USE_SMTP_PROFILE) { $SmtpIOStart = time;}
+    local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
+    local($sendmail, $backoff);
+    local($host, $error, $in_rcpt, $ipc, $try_prog, $retry);
 
     # set global variable
-    $SmtpFeedMode  = 0; # reset;
     $SocketTimeOut = 0; # against the call of &SocketTimeOut;
     # &SetEvent($TimeOut{'socket'} || 1800, 'SocketTimeOut') if $HAS_ALARM;
 
@@ -249,25 +271,13 @@ sub SmtpIO
     $backoff = 2;
     
     # IPC 
-    if ($e{'mci:mailer'} eq 'smtpfeed' || $HOSTS[0] =~ /(\S+):\#smtpfeed/) {
-	# calling smtpfeed in the last
-	require 'liblmtp.pl';
-	&SetupSmtpFeed;
-	$SmtpFeedMode = 1;
-	$ipc = 0;	
-    }
-    elsif ($e{'mci:mailer'} eq 'ipc' || $e{'mci:mailer'} eq 'smtp') {
-	$ipc = 1;		# define [ipc]
+    if ($e{'mci:mailer'} eq 'ipc' || $e{'mci:mailer'} eq 'smtp') {
+	$ipc = 1; # define [ipc]
 
-	# (PROBE AND) MAKE A CONNECTTION;
-	# primary, secondary, ...;already unshift(@HOSTS, $HOST);
-	for ($host = shift @HOSTS; scalar(@HOSTS) >= 0; $host = shift @HOSTS) {
+	for ($host = shift @HOSTS; scalar(@HOSTS) >=0 ; $host = shift @HOSTS) {
 	    undef $Port; # reset
 
-	    if ($host =~ /(\S+):\#smtpfeed/) { # anyway skip here
-		next;
-	    }
-	    elsif ($host =~ /(\S+):(\d+)/) {
+	    if ($host =~ /(\S+):(\d+)/) {
 		$host = $1;
 		$Port = $2 || $PORT || 25;
 	    }
@@ -296,17 +306,22 @@ sub SmtpIO
 		last;
 	    }
 
-	    sleep($backoff);              # sleep and try the secondaries
+	    sleep($backoff);	# sleep and try the secondaries
 
-	    last         unless @HOSTS;	  # trial ends if no candidate
+	    last unless @HOSTS;	# trial ends if no candidate of @HOSTS
 	}
     }
+
+
+    ###
+    ### reaches here if mailer == prog or "smtp connection fails"
+    ###
 
     # not IPC, try popen(sendmail) ... OR WHEN ALL CONNEVTION FAIL;
     # Only on UNIX
     if ($e{'mci:mailer'} eq 'prog' || $error) {
-	$host = '';
-	&Log("Try mci:prog since smtp connections cannot be opened") if $error;
+	undef $host;
+	&Log("Try mci:prog since smtp connections not established") if $error;
 
 	if ($UNISTD) {
 	    $sendmail = $SENDMAIL || &SearchPath("sendmail") || 
@@ -321,23 +336,22 @@ sub SmtpIO
 	    }
 	    else {
 		&Log("SmtpIO: cannot exec $sendmail");
-		return "SmtpIO: cannot exec $sendmail";
+		$smtp_pcb{'error'} = "SmtpIO: cannot exec $sendmail";
+		return $NULL;
 	    };
 
 	    $ipc = 0;
 	}
 	else {
-	    &Log("delivery fails since cannot open prog mailer");
-	    return 0;
+	    &Log("cannot open prog mailer not under UNIX");
+	    $smtp_pcb{'error'} = "SmtpIO: cannot prog mailer on not unix";
+	    return $NULL;
 	}
     }
 
-    if ($USE_SMTP_PROFILE) {
-	&Log("SMTP::Prof:connect $host/$Port");
-    }
+    if ($USE_SMTP_PROFILE) { &Log("SMTP::Prof:connect $host/$Port");}
 
-    ### Do talk with sendmail via smtp connection
-    # interacts smtp port, see the detail in $SMTPLOG
+    # receive "220 ... sendmail ..." greeting
     if ($ipc) {
 	do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
     }
@@ -345,10 +359,49 @@ sub SmtpIO
 	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
     }
 
+    $smtp_pcb{'ipc'}      = $ipc;
+    $smtp_pcb{'sendmail'} = $sendmail;
+}
+
+sub __SmtpIO_1
+{
+    local(*e, *smtp_pcb) = @_;
+
+    $e{'Hdr'} =~ s/\n/\r\n/g; 
+    $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
+
+    $NULL;
+}
+
+sub __SmtpIOClose
+{
+    local(*e, $ipc) = @_;
+
+    ### SMTP Section: QUIT
+    # Closing Phase;
+    &SmtpPut2Socket('.', $ipc);
+    &SmtpPut2Socket('QUIT', $ipc);
+
+    close(S);
+
+    ### SMTP Section: save-excursion(?)
+    # reverse \r\n -> \n
+    $e{'Hdr'} =~ s/\r\n/\n/g;
+
+    $NULL;
+}
+
+sub __SmtpIO
+{
+    local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
+    local($sendmail, $host, $error, $in_rcpt, $ipc, $try_prog, $retry);
+
+    # SMTP PCB
+    $ipc      = $smtp_pcb{'ipc'};
+    $sendmail = $smtp_pcb{'sendmail'};
+    
 
     ### SMTP Section: HELO/EHLO
-    # SMTP connection starts
-
     $Current_Rcpt_Count = 0;
     $e{'mci:pipelining'} = 0; # reset EHLO information
 
@@ -374,7 +427,7 @@ sub SmtpIO
 
     ### SMTP Section: MAIL FROM:
 
-    ## [VERPs]
+    # [VERPs]
     # XXX MAIL FROM:<mailing-list-maintainer@domain>
     # XXX If USE_VERP (e.g. under qmail), you can use VERPs
     # XXX "VERPs == Variable Envelope Return-Path's".
@@ -399,9 +452,6 @@ sub SmtpIO
 
     ### SMTP Section: RCPT TO:
 
-    # DLA is effective in processing deliver();
-    local(%a, $a);
-
     if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT  IN>$MailDate\n";}
 
     if ($e{'mode:__deliver'} && $USE_OUTGOING_ADDRESS) { 
@@ -417,15 +467,16 @@ sub SmtpIO
     elsif ($e{'mode:__deliver'}) { 
 	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*RcptLists);}
 
+	local(%a, $a);
 	for $a (@RcptLists) { # plural active lists
 	    next if $a{$a}; $a{$a} = 1; # uniq;
-	    &SmtpPutActiveList2Socket($ipc, $a);
+	    &SmtpPutActiveList2Socket(*smtp_pcb, $ipc, $a);
 	}
 
 	if ($SMTP_SORT_DOMAIN) { &SDFin(*RcptLists);}
     }
     elsif ($e{'mode:delivery:list'}) { 
-	&SmtpPutActiveList2Socket($ipc, $e{'mode:delivery:list'});
+	&SmtpPutActiveList2Socket(*smtp_pcb, $ipc, $e{'mode:delivery:list'});
     }
     else { # [COMPATIBILITY] not-DLA is possible;
 	for (@rcpt) { 
@@ -449,14 +500,8 @@ sub SmtpIO
 	return;
     }
 
-    # check critical error: comment out (99/01/25)
-    # XXX this condition is too restrict since this traps
-    # XXX direct local delivery errors ;D
-    # if ($SoErrBuf =~ /^[45]/) {
-    # &Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
-    # &Log("reason: $SoErrBuf");
-    # return $NULL;
-    # }
+
+    ### SMTP Section: DATA
 
     if ($e{'mci:pipelining'}) {
 	&SmtpPut2Socket_NoWait('DATA', $ipc);
@@ -466,21 +511,11 @@ sub SmtpIO
 	&SmtpPut2Socket('DATA', $ipc, 1);
     }
 
-    print SMTPLOG ('-' x 30), "\n";
-
-    ## (HELO .. DATA) sequence ends
-
-
-    ### SMTP Section: DATA
-    # 
     # "DATA" Session BEGIN; no reply via socket
-    #
     # BODY INPUT ; putheader()
-    # 
-
+    print SMTPLOG ('-' x 30), "\n";
     $0 = "$FML:  BODY <$LOCKFILE>";
-    $e{'Hdr'} =~ s/\n/\r\n/g; 
-    $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
+
     print SMTPLOG $e{'Hdr'};
     print S $e{'Hdr'};	# "\n" == separator between body and header;
     print SMTPLOG "\r\n";
@@ -603,23 +638,7 @@ sub SmtpIO
 
     ## "DATA" Session ENDS; ##
 
-    ### SMTP Section: QUIT
-    # Closing Phase;
-    &SmtpPut2Socket('.', $ipc);
-    &SmtpPut2Socket('QUIT', $ipc);
-
-    close(S);
-
-    ### SMTP Section: save-excursion(?)
-    # reverse \r\n -> \n
-    $e{'Hdr'} =~ s/\r\n/\n/g;
-    # $e{'Body'} =~ s/\r\n/\n/g; # XXX 2.2D no more reference of $e{'Body'}
-
-    if ($USE_SMTP_PROFILE) { 
-	&Log("SMTP::Prof::IO: ". (time - $SmtpIOStart)." secs.");
-    }
-
-    0;
+    $NULL;
 }
 
 
@@ -718,9 +737,10 @@ sub SmtpPut2Socket
 # %RELAY_SERVER = ('ac.jp', 'relay-server', 'ad.jp', 'relay-server');
 sub SmtpPutActiveList2Socket
 {
-    local($ipc, $file) = @_;
+    local(*smtp_pcb, $ipc, $file) = @_;
     local($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
     local($mci_count, $count, $time, $filename, $xtime);
+    local($size, $mci_window_start, $mci_window_end);
 
     $filename = $file; $filename =~ s#$DIR/##;
 
@@ -729,13 +749,12 @@ sub SmtpPutActiveList2Socket
     if (%RELAY_GW)  { $gw_pat  = join("|", sort keys %RELAY_GW);}
     if (%RELAY_NGW) { $ngw_pat = join("|", sort keys %RELAY_NGW);}
 
-    $time  = time;
-    $mci_count = $count = 0;
-
-    if ($SMTP_SORT_DOMAIN && $MCI_SMTP_HOSTS) {
-	$MCIType = 'window';
-	&GetMCIWindow;
-	print STDERR "new:($MCIWindowStart, $MCIWindowEnd)\n" if $debug_mci;
+    $MCIType = 'window'; # no more modulus
+    if ($smtp_pcb{'mci'}) {
+	require 'libsmtpsubr2.pl';
+	($size, $mci_window_start, $mci_window_end) = &GetMCIWindow($file);
+	print STDERR "window $file:($start, $end)\n" if $debug_mci;
+	print STDERR "window $file:($mci_window_start, $mci_window_end)\n";
     }
 
     # when crosspost, delivery info is saved in crosspost.db;
@@ -745,12 +764,19 @@ sub SmtpPutActiveList2Socket
 	$myml =~ tr/A-Z/a-z/;
     }
 
-    if ($debug_smtp) {
-	&Log("SmtpPutActiveList2Socket:open $file");
-	print STDERR "SmtpPutActiveList2Socket::open $file\n";
-    }
 
-    &Open(ACTIVE_LIST, $file) || return 0;
+    ##                                                          ##
+    ## MAIN IO from recipients list to Socket (SMTP Connection) ##
+    ##                                                          ##
+    if ($debug_smtp) { &Log("--SmtpPutActiveList2Socket:open $file");}
+    $time = time;
+    $mci_count = $count = 0;
+
+    open(ACTIVE_LIST, $file) || do {
+	&Log("SmtpPutActiveList2Socket: cannot open $file");
+	return 0;
+    };
+
     while (<ACTIVE_LIST>) {
 	chop;
 
@@ -819,25 +845,39 @@ sub SmtpPutActiveList2Socket
 	$mci_count++;
 
 	&Debug("  [$mci_count]  \t$rcpt") if $debug_mci;
-	&Debug("  $mci_count % $MCI_SMTP_HOSTS != $CurModulus") if $debug_mci;
+	# &Debug("  $mci_count % $MCI_SMTP_HOSTS != $CurModulus") if $debug_mci;
 
-	if ($MCIType eq 'window' && $MCI_SMTP_HOSTS) {
-	    # $mci_count++ before but $count++ after here.
-	    # Suppose (first, last) = (0, 100), (100, 200), ...
-	    # we pass throught 0-99, 100-199, ...
-	    next if $mci_count <= $MCIWindowStart; #   0 100 200
-	    last if $mci_count >  $MCIWindowEnd;   # 100 200 300
+
+	### Window Control ###
+	# PLURAL SMTP SERVERS
+	if ($smtp_pcb{'mci'}) {
+	    if ($MCIType eq 'window') {
+		# $mci_count++ before but $count++ after here.
+		# Suppose (first, last) = (0, 100), (100, 200), ...
+		# we pass throught 0-99, 100-199, ...
+		next if $mci_count <= $mci_window_start; #   0 100 200
+		last if $mci_count >  $mci_window_end;   # 100 200 300
+	    }
+	    # else { # modulus
+	    #    next if ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
+	    # }
 	}
-	elsif (($MCIType eq 'modulus') || $MCI_SMTP_HOSTS) {
-	    next if ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
+	# SINGLE SMTP SERVER
+	else {
+	    ;
 	}
+	### Window Control ends ###
+
 
 	$count++; # real delivery count;
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
-	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n"
-	    if $debug_mci;
+	if ($debug_mci || 1) {
+	    print STDERR 
+		$mci_count, 
+		":$file:($mci_window_start, $mci_window_end)> $rcpt\n";
+	}
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 

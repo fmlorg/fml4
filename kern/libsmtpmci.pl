@@ -64,38 +64,4 @@ sub SmtpMCIDeliver
 }
 
 
-sub GetMCIWindow
-{
-    local($n)  = $sd'NumSortedRecipient; #';
-    require 'libsmtpmci.pl';
-
-    # initialize when $MCI_TYPE eq 'window'
-    if ($MCIType eq 'window') {
-	# first time 
-	if ($MCIWindowSize == 0) {
-	    # 100 for 399/4;
-	    $MCIWindowSize = &MCIWindowUnit($n, $MCI_SMTP_HOSTS);
-	    $MCIWindowStart = 0;
-	    $MCIWindowEnd   = $MCIWindowSize;
-
-	}
-	else {
-	    $MCIWindowStart += $MCIWindowSize;
-	    $MCIWindowEnd   += $MCIWindowSize;
-	}
-    }
-}
-
-
-sub MCIWindowUnit
-{
-    local($n, $u) = @_;
-    local($x);
-
-    if ($u <= 0) { &Log("N_MCIUnit: $u < 0"); return 0;}
-    # e.g. &N_MCIUnit(399,  4) return 100;
-    $x = ($u > 0) ? int(($n+1)/ $u) : $n;
-}
-
-
 1;
