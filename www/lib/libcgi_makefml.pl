@@ -15,68 +15,6 @@
 # SecureP()
 require 'libcgi_cleanup.pl';
 
-sub Parse
-{
-    &GetBuffer(*Config);
-
-    $ML        = $Config{'ML_DEF'} || $Config{'ML'};
-    $MAIL_ADDR = $Config{'SPECIFIC_MAIL_ADDR'} || $Config{'MAIL_ADDR'};
-    $PROC      = $Config{'PROC'};
-    $LANGUAGE  = $Config{'LANGUAGE'};
-
-    # @PROC_ARGV = split(/\s+/, $Config{'ARGV'});
-
-    # menu
-    $VARIABLE  = $Config{'VARIABLE'};
-    $VALUE     = $Config{'VALUE'};
-    $PTR       = $Config{'PTR'};
-
-    # password
-    $PASSWORD      = $Config{'PASSWORD'};
-    $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
-
-    # MTA
-    $MTA    = $MTA || $Config{'MTA'};
-
-    # misc
-    $OPTION = $Config{'OPTION'};
-
-    # CGI
-    $CGI_ADMIN_USER = 
-	$Config{'CGI_ADMIN_USER_DEF'} || $Config{'CGI_ADMIN_USER'};
-    $ACTION = $Config{'ACTION'};
-
-    # fix variable values for later use
-    $PTR       =~ s#^\/{1,}#\/#;
-    $PROC      =~ tr/A-Z/a-z/;
-
-
-    ## Example:
-    ## SCRIPT_FILENAME => /usr/local/fml/www/cgi-bin/admin/makefml.cgi
-    ## SCRIPT_NAME     => /cgi-bin/fml/admin/makefml.cgi
-    ## HTTP_REFERER    => http://beth.fml.org/cgi-bin/fml/admin/makefml.cgi
-    ## REQUEST_URI     => /cgi-bin/fml/../fml/admin/makefml.cgi
-
-    # extract $ML name for later use
-    my $req_uri = $SavedENV{'REQUEST_URI'};
-    $req_uri =~	
-	qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
-    my ($cgimode , $cgiml) = ($1, $2);
-    $ML = $cgiml if ($cgimode ne "admin");
-
-    # We should not use raw $LANGUAGE (which is raw input from browser side).
-    # We should check it matches something exactly and use it.
-    if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {
-	push(@INC, $EXEC_DIR);
-	require 'jcode.pl';
-	eval "&jcode'init;";
-	require 'libmesgle.pl';
-	$MESG_FILE        = "$EXEC_DIR/messages/$LANGUAGE/cgi";
-	$MESSAGE_LANGUAGE = $LANGUAGE;
-	push(@LIBDIR, $EXEC_DIR);
-    }
-}
-
 
 sub UpperHalf
 {
@@ -311,16 +249,18 @@ sub Translate2LogOption
     local($x) = @_;
 
     if ($x eq 'tail') {
-	if ($Config{'TAIL_SIZE'} =~ /^\d+$/) {
-	    "-$Config{'TAIL_SIZE'}";
+	if ($SafeConfig{'TAIL_SIZE'} =~ /^\d+$/) {
+	    "-$SafeConfig{'TAIL_SIZE'}";
 	}
     }
     elsif ($x eq 'day') {
-	if (($Config{'YYYY'} =~ /^\d+$/) &&
-	    ($Config{'MM'}   =~ /^\d+$/) &&
-	    ($Config{'DD'}   =~ /^\d+$/)) {
+	if (($SafeConfig{'YYYY'} =~ /^\d+$/) &&
+	    ($SafeConfig{'MM'}   =~ /^\d+$/) &&
+	    ($SafeConfig{'DD'}   =~ /^\d+$/)) {
 	    my $s = sprintf("%04d%02d%02d", 
-			    $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
+			    $SafeConfig{'YYYY'}, 
+			    $SafeConfig{'MM'}, 
+			    $SafeConfig{'DD'});
 	    if ($s =~ /^\d+$/) { return "-D$s";}
 	}
 	else {

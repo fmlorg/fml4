@@ -1,0 +1,27 @@
+◯ libcgi_makefml.pl は makefml をよぶインターフェイス
+
+	この中では
+
+		%SafeConfig
+		%SavedEnv 
+
+	および libcgi_cleanup.pl の Parse() と SecureP() をくぐりぬけ
+	た変数しか使ってはならない。
+
+◯ libcgi_kern.pl では %Config を使うが
+
+	   if ($Config{'LANGUAGE'} eq 'Japanese') {
+	        elsif ($Config{'LANGUAGE'} eq 'English') {
+
+	の単純比較だけなので、まぁいいでしょう。
+
+
+◯ libcgi_cleanup.pl
+
+	変数の表現範囲のチェックをすること
+
+	パスワードだけはするわけにはいかないが、
+	STDIN でそのまま makefml へわたす
+
+
+$Id$
