@@ -146,6 +146,9 @@ Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
 .S	Cc: フィールドを“つけない”
 .k	$NOT_USE_CC
 
+96/11/2 $NOT_USE_CC を削除しました。@HdrFieldsOrder を直接いじるか 
+&DELETE_FIELD('Cc') を使って下さい。
+
 今では単に @HdrFieldsOrder から Cc を落せばＯＫです。
 デフォールトではつけますので、切り落とすときは $NOT_USE_CC = 1; でも落
 せます。
