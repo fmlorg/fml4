@@ -32,6 +32,7 @@ cp -p src/arch/*.pl $ARCH_DIR
 cp -p help* guide deny objective confirm welcome $DRAFTS_DIR
 cp -p sbin/makefml $EXEC_DIR/makefml
 
-chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml $EXEC_DIR/libexec/fmlserv.pl
+chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml 
+chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 
 exit 0;
