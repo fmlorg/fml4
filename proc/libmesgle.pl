@@ -58,12 +58,12 @@ sub MesgLE
 	}
 	else {
 	    &Log("MesgLE: language '$MESSAGE_LANGUAGE' is unknown");
-	    return $NULL;
+	    return undef;
 	}
     }
     else {
 	&Log("MesgLE: no template for key='$key'");
-	return $NULL;
+	return undef;
     }
 }
 
@@ -95,7 +95,7 @@ sub MesgLESearchInMessagesDir
     }
     else {
 	&Log("MesgLE: key='$key' NOT FOUND") if $debug_mesgle;
-	return $NULL;
+	return undef;
     }
 }
 
@@ -105,7 +105,8 @@ sub MesgLETranslate
 {
     local(*e, $msg, $key, @argv) = @_;
 
-    if ($MESSAGE_LANGUAGE eq 'Japanese') {
+    if ($MESSAGE_LANGUAGE eq 'Japanese' ||
+	$MESSAGE_LANGUAGE eq 'English') {
 	require 'jcode.pl';
 	eval "&jcode'init;";	
 	&jcode'convert(*msg, 'euc'); #'(trick) -> EUC
@@ -152,7 +153,7 @@ sub Lookup
 
     if (! -f $file) {
 	&Log("ERROR: MesgLE::Lookup no such file $file");
-	return $NULL;
+	return undef;
     }
 
     if (open(LE_TMPL, $file)) {
