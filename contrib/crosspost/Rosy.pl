@@ -3,8 +3,8 @@
 # copyright (c) 1994-1995 fukachan@phys.titech.ac.jp
 # please obey gnu public licence(see ./copying)
 
-$rcsid   = q$id: fml.pl,v 1.3.1.17 1994/12/14 15:23:51 fukachan exp fukachan $;
-($rcsid) = ($rcsid =~ /id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
+$rcsid   = q$Id$;
+($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 
 # for the insecure command actions
 $env{'path'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -16,6 +16,7 @@ $env{'ifs'}   = '' if $env{'ifs'} ne '';
 $ML_SPOOL    = "/home/axion/fukachan/work/spool";
 $CACHE_DIR   = "/home/axion/fukachan/work/spool/Cache";
 $PASSWD_FILE = "$CACHE_DIR/etc/passwd";
+$LOGFILE     = "/home/axion/fukachan/work/spool/Crosspost/log";
 
 # PRELIMINARY CONFIGBURATION
 #&ReadEval("$CACHE_DIR/Config.fml");
@@ -34,7 +35,7 @@ chdir $CACHE_DIR || die "Can't chdir to $DIR\n";
 $|=1;
 $AUTH = 0;
 
-print "220 ML-Crosspost Primary Data Server listen\n"; 
+print "220 ML-Crosspost Primary Data Server($rcsid) listen\n"; 
 
 in: while(<STDIN>) {
     chop;
@@ -55,7 +56,7 @@ in: while(<STDIN>) {
 	    $passwd = $1;
 	    if(&Crypt($from, $passwd)) {
 		$AUTH = 1;
-		print  "250 PASSWD AUTHENTIFIED... O.K.\n";
+		print  "250 PASSWD AUTHENTICATED... O.K.\n";
 	    }else {
 		print  "554 Illegal Passwd\n";
 	    }
@@ -93,7 +94,7 @@ in: while(<STDIN>) {
 
 	    print  "500 Command not found\n";
 	} else {
-	    print  "554 Not Authentified\n";
+	    print  "554 Not Authenticated\n";
 	    print  "221 closing connection\n";
 	    last in;
 	}#AUTH;
@@ -314,8 +315,9 @@ sub InitConfig
 # Logging(String as message)
 sub Logging
 {
-#    local($family, $port, $addr) = unpack('S n a4 x8', getpeername(STDIN));
-#    local($clientaddr) = gethostbyaddr($addr, 2);
+# $STRUCT_SOCKADDR = $STRUCT_SOCKADDR || 'n n a4 x8';
+# local($family, $port, $addr) = unpack($STRUCT_SOCKADDR, getpeername(STDIN));
+# local($clientaddr) = gethostbyaddr($addr, 2);
 
     if (! defined($clientaddr)) {
 	$clientaddr = sprintf("%d.%d.%d.%d", unpack('C4', $addr));
