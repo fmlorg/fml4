@@ -51,7 +51,7 @@ Please run mailing lists as a non-privileged user.
 The best way is to set up a non-privileged user (e.g. fml) for the
 mailing lists.
 
-「makefml install (fml 本体のインストール,後述) 自体は root で実行し、
+「makefml install (FML 本体のインストール,後述) 自体は root で実行し、
 他の人にはいじれないようにする」という仕方はありえます。しかし、それ以
 外の操作、例えば makefml newml (MLの作成,後述)は一般ユーザで実行して下
 さい。
@@ -119,7 +119,7 @@ to install the fml to your system
 
 	perl makefml install
 
-というコマンドを実行して下さい。そのマシンの上に fml システムをインス
+というコマンドを実行して下さい。そのマシンの上に FML システムをインス
 トールします。
 
 この時に以下のような項目を聞いて来ます。
@@ -165,7 +165,7 @@ the value in the [] is used.  These questions are as follows:
 	fmlserv  "特定多数"のオーナー達がいる場合でfmlservを"使う"場合
 
    のいづれかを指定して下さい。
-   作られるdirectoryの write permission が異なる構成になります。
+   作られる FML の directory の write permission がそれぞれ設定されます。
 
    ***** ここで、group もしくは fmlserv を定義した場合 *****
    ***** (personal の人は関係ありません）              *****
@@ -193,7 +193,7 @@ the value in the [] is used.  These questions are as follows:
 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
 
-	実行ファイル等の fml system をインストールする場所。
+	実行ファイル等の FML system をインストールする場所。
 	例えば、この値の場合 
 =E
 	Where you install executable files of the fml system?  
@@ -347,7 +347,13 @@ You can find samples for each ML
 
 	/var/spool/ml/MLの名前/サンプルのファイル群
 
-が設定の見本です。
+が設定の見本です。ちなみにＭＬを消す時は単に、
+
+	rm -fr /var/spool/ml/MLの名前
+
+でファイルを消して下さい。そして、/etc/aliases から該当するＭＬの部分
+を削って newaliases をかけます。
+
 
 .S	まとめおくり
 =E.S	Matome Okuri (Digest delivery)
@@ -418,8 +424,8 @@ the chapter on "cron" of doc/op in the fml source.
 
 fmlserv は listserv スタイルのインターフェイスです。似たような機能は実
 装していますが security 上デフォールトの機能はかなり制限されています。
-もはや単に複数のＭＬ宛のコマンドを一つのメールにまとめるか？否か？以上
-の意味はないといって良いでしょう。
+もはや単に、複数のＭＬ宛のコマンドを一つのメールアドレスにまとめるか？
+否か？以上の意味はないといって良いでしょう。
 =E 
 fmlserv interface is not default but listserv like interface which
 manipulate several mailing lists. In this age I DO NOT recommend
@@ -603,7 +609,8 @@ e.g.
    /usr/local/fml/makefml config elena
 
 を実行すると基本的な設定を対話的に行なうことができます。
-次のような画面が出てくるので適当に答えて下さい。
+この章では config 画面と、そのパラメータを説明してあるので、適当に答え
+て設定してみて下さい。
 =E
 You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
@@ -620,7 +627,7 @@ following recursive menu, so please select one and answer it.
    _______________________
 
    0    END             
-   1    POLICY OF POST AND COMMANDS
+   1    POLICY OF ACCESS (WHO CAN POST AND USE COMMANDS)
 
         [POST]
           PERMIT_POST_FROM                 members_only
@@ -665,7 +672,7 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 
 ○ アクセス制御
 
-   1    POLICY OF POST AND COMMANDS
+   1    POLICY OF ACCESS (WHO CAN POST AND USE COMMANDS)
 
 FML 2.1 では投稿とコマンドそれぞれについて以下の
 
@@ -684,9 +691,9 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
 	もしメンバー以外から来たら許否(reject)
 
-です。自動登録は"投稿がメンバーだけ"(members_only)の場合に
+です。自動登録は"投稿がメンバーだけ"(members_only)とし、
 
-	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+	auto_regist に設定 → もしメンバー以外から来たら自動登録
 
 することで行ないます。
 
@@ -717,7 +724,7 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
    3    COMMAND ADDRESS 
               address for command          elena-ctl@fml.org
 
-デフォールトでは listname に対し listname-ctl を使います。
+デフォールトでは listname に対し listname-ctl を使います。また、
 	listname でコマンドも受け付けるようにする
 	コマンドは fmlserv を使う
 等の設定変更ができます。
@@ -728,11 +735,10 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
    4    REMOTE_ADMINISTRATION              no
 
 リモートでＭＬの設定をいじることを可能にするか？(デフォールトはしない)
-リモート管理の場合の認証方式は
 
                     AUTH_TYPE              crypt
 
-デフォールトはパスワード認証。
+これはリモート管理の場合の認証方式の設定。デフォールトはパスワード認証。
 
 
 ○ Subject: につけるタグ(デフォールトはつけない) (後述)
@@ -948,7 +954,7 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 
    ************************************************************
    REMOTE ADMINISTRATION
-   Do you maintenance the ML in remote?    no
+   Do you maintain the ML in remote?        no
 
    0    END
    1    REMOTE_ADMINISTRATION               no
@@ -1116,7 +1122,7 @@ manage the mailing list server in remote.
 
    /usr/local/fml/makefml byeadmin elena fukachan@fml.org
 
-Elena ＭＬのリモート管理者から fukachan@fml.org を消す。
+Elena ＭＬのリモート管理者から fukachan@fml.org を外す。
 =E
 Remove the user "fukachan@fml.org" who can manage the
 "Elena" ML in remote.
@@ -1165,6 +1171,8 @@ sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
 
 
 $Id$
+
+
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
