@@ -1200,6 +1200,39 @@ sub SRand
 }
 
 
+##### Section: IO misc
+sub ResetAlignedBuffer
+{
+    $OutBufferLine = 0;
+    undef $OutBuffer;
+    undef @OutBuffer;
+    undef %OutBuffer;
+}
+
+sub GobbleAlignedBuffer
+{
+    my ($s) = @_;
+
+    my($x) = $OutBuffer[$OutBufferLine];
+
+    # next line
+    if (length($x) + length($s) > 75) { 
+	$OutBufferLine++;
+	$OutBuffer[$OutBufferLine] = "        ";
+    }
+    elsif (! $x) {
+	$OutBuffer[$OutBufferLine] = "        ";
+    }
+
+    $OutBuffer[$OutBufferLine] .= " ". $s;
+}
+
+sub PrintAlignedBuffer
+{
+    for (@OutBuffer) { print $_, "\n";}
+}
+
+
 ########## Message Language Extension
 sub LangExtConv
 {
@@ -1885,9 +1918,7 @@ sub GenCrontab
 {
     local($uid);
 
-    print STDERR "\n";
-    print STDERR "   crontab: example for all ${USER}'s ML's is saved in\n";
-    print STDERR "\t$ML_ETC_DIR/crontab/$USER\n";
+    print STDERR "\n   Update $ML_ETC_DIR/crontab/$USER\n";
 
     &Conv('etc', 
 	  "$EXEC_DIR/etc/makefml/msend_master", 
@@ -1926,9 +1957,7 @@ sub CollectAliases
     $alias     = "$ML_ETC_DIR/aliases";
     $alias_new = "$ML_ETC_DIR/aliases.new.$$";
 
-    print STDERR "\n";
-    print STDERR "   $alias:\n";
-    print STDERR "     rebuild from mailing lists under $ML_DIR/.\n";
+    print STDERR "\n   Update $alias\n";
 
     open(ALIAS, "> $alias_new") || 
 	(&Warn("cannot open $alias_new"), return);
@@ -2043,13 +2072,18 @@ sub CtlAddrList
 
 sub Mesg { print STDERR "$_[1]\n";}
 
-
 sub Conv
 {
     local($ml, $example, $out) = @_;
     local($uid, $gid, $format, $info, $ctladdr, $mail_list, $maintainer);
     local($crontime) = 0;
     local(@caller) = caller;
+
+    {
+	my ($s) = $out;
+	$s =~ s@.*/@@;
+	&GobbleAlignedBuffer($s);
+    }
 
     # &ApplyPolicy;
     $format    = $Policy{'CONTROL_ADDRESS_FORMAT'};
@@ -2087,7 +2121,7 @@ sub Conv
     open(CF, "> $out") || (&Warn("cannot open $out from @caller"), return 0);
     select(CF); $| = 1; select(STDOUT);
     
-    print STDERR "\t$out\n";
+    print STDERR "\t$out\n" if $debug0;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$PERL_PATH = &search_path('perl.exe');
@@ -2237,7 +2271,7 @@ sub FixIncludeHeader
 
     &ResetVariables;
 
-    print STDERR "\t$ML_DIR/$ml/config.h\n";
+    &GobbleAlignedBuffer('config.h');
 
     if (open(GUESS, "> $ML_DIR/$ml/config.h")) {
 	foreach $file (@include) {
@@ -2698,7 +2732,7 @@ sub do_install
 	closedir(DIRD);
     }
 
-    print STDERR "\nGenerating nroff manuals:\n";
+    print STDERR "\nGenerate nroff manuals:\n";
     for $f (<doc/man/*.?>) {
 	&Copy($f, "$f.bak");
 	&Conv('elena', "$f.bak", $f);
@@ -2886,6 +2920,8 @@ sub do_newml
 
     # include file is public readable;
     # why for () fails?;
+    &ResetAlignedBuffer;
+    print "\n   Generate template files in $ML_DIR/$ml/\n";
     &Conv($ml, "$EXEC_DIR/etc/makefml/include", "$ML_DIR/$ml/include");
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-mead", 
@@ -2899,7 +2935,12 @@ sub do_newml
 
     &Conv($ml, "$EXEC_DIR/etc/makefml/crontab", "$ML_DIR/$ml/crontab");
     &Conv($ml, "$EXEC_DIR/etc/makefml/fml.c",   "$ML_DIR/$ml/fml.c");
+
     &FixIncludeHeader;
+
+    $OutBuffer =~ s@$ML_DIR/@@g;
+    &PrintAlignedBuffer; 
+
 
     # fmlserv (uid != owner ) can read help
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
@@ -2918,7 +2959,7 @@ sub do_newml
 
     # we need config.ph existence.
     # drafts -> help,deny,guide,objective
-    print STDERR "\n   create template files for help,guide ...\n";
+    print STDERR "\n   Create template files for commands (help, guide ...)\n";
     &CreateDocTemplate(*config, $ml);
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4" && $VENDOR eq "METAINFO") {
@@ -2934,14 +2975,14 @@ sub do_newml
 
     # print message;
     # the last info
-    print "\n";
-    print "-" x 60;
-    print "\n*** Please see several examples in directory '$ML_DIR/$ml'\n";
-    print "# from '#' to the end of this line is a comment.\n";
-    print "# ---------- /etc/aliases example      ----------\n";
-    &Cat("$ML_DIR/$ml/aliases"); 
-    print "# ---------- /etc/aliases example ends ----------\n";
-    print "\n";
+    if ($debug0) {
+	print "\n";
+	print "# from '#' to the end of this line is a comment.\n";
+	print "# ---------- /etc/aliases example      ----------\n";
+	&Cat("$ML_DIR/$ml/aliases"); 
+	print "# ---------- /etc/aliases example ends ----------\n";
+	print "\n";
+    }
 
     &ConcatenateAliases($ml, 
 			"$ML_ETC_DIR/aliases", 
@@ -2956,6 +2997,13 @@ sub do_newml
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
 
     # $XStatus = 'OK:';
+
+    print "\n";
+    print "   The next step: update your MTA configuration. For example\n";
+    print "\t% su\n";
+    print "\t# cat $ML_DIR/$ml/aliases >> /etc/aliases\n";
+    print "\t# newaliases\n";
+    print "\n   FYI: See templates in '$ML_DIR/$ml/'\n";
 }
 
 
@@ -3031,6 +3079,7 @@ sub CreateDocTemplate
     local($x, $cf, %config, %cur_config);
 
     &ResetVariables;
+    &ResetAlignedBuffer;
 
     $cf = "$ML_DIR/$ml/cf";
     &GetCF($cf, $ml, *config, *cur_config); 
@@ -3067,6 +3116,7 @@ sub CreateDocTemplate
 	&Conv($ml, "$EXEC_DIR/drafts/$x", "$ML_DIR/$ml/$x");
     }
 
+    &PrintAlignedBuffer;
     return;
 
     # not reach here
@@ -3120,22 +3170,28 @@ sub QmailSetUp
     # setmask
     umask(022);
 
+    &ResetAlignedBuffer;
+    print "\n   Generate qmail template files in $qmail_alias_dir/\n";
+
     # Generating etc/.qmail*
     &Conv($ml, "$mf/dot-qmail", "$qmail_alias_dir/.qmail-$ml");
     &Conv($ml, "$mf/dot-qmail-ctl", "$qmail_alias_dir/.qmail-$ml-ctl");
     &Conv($ml, "$mf/dot-qmail-default", "$qmail_alias_dir/.qmail-$ml-default");
 
-    print STDERR "\t$qmail_alias_dir/.qmail-$ml-admin\n";
+    &GobbleAlignedBuffer(".qmail-$ml-admin");
     &Write2($USER, "$qmail_alias_dir/.qmail-$ml-admin");
 
-    print STDERR "\t$qmail_alias_dir/.qmail-$ml-request\n";
+    &GobbleAlignedBuffer(".qmail-$ml-request");
     &Write2($USER, "$qmail_alias_dir/.qmail-$ml-request");
 
-    print STDERR "\t$qmail_alias_dir/.qmail-owner-$ml\n";
+    &GobbleAlignedBuffer(".qmail-owner-$ml");
     &Write2($USER, "$qmail_alias_dir/.qmail-owner-$ml");
 
-    print STDERR "\t$qmail_alias_dir/.qmail-owner-$ml-ctl\n";
+    &GobbleAlignedBuffer(".qmail-owner-$ml-ctl");
     &Write2($USER, "$qmail_alias_dir/.qmail-owner-$ml-ctl");
+
+    &PrintAlignedBuffer;
+    &ResetAlignedBuffer;
 
     # WINDOWS_NT4
     if ((!$HAS_GETPWUID) && (!$HAS_GETPWGID)) {
@@ -3149,7 +3205,7 @@ sub QmailSetUp
 
     # if (! &Grep("\\+:$USER", "$qmail_users_dir/assign")) {
     {
-	print STDERR "\t$qmail_users_dir/assign\n";
+	print STDERR "\n   Update $qmail_users_dir/assign\n";
 
 	local($uid, $gid);
 	$uid = (getpwuid($<))[2] || 65535;
@@ -3329,7 +3385,8 @@ sub GetCF
 	&ConvertCF2to3(*config, *MAKE_FML);
     }
     else {
-	print STDERR "   (config.ph; \$CFVersion $config{'CFVersion'})\n\n";
+	print STDERR "   (config.ph; \$CFVersion $config{'CFVersion'})\n\n"
+	    if $debug;
     }
 
     if ($config{"CFVersion"} < 3.2) {
@@ -4240,8 +4297,7 @@ sub MakeConfigPH
     }
 
     if ($cf) {
-	print STDERR "\n";
-	print STDERR "   config.ph($config_ph):\n";
+	print STDERR "\n   Create config.ph($config_ph):\n";
 	print STDERR "\t$cf  ->  config.ph ... ";
     }
 
