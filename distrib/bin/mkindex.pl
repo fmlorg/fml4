@@ -58,6 +58,9 @@ while (<$FILE>) {
 		print "\t$2\n";
 		print "\t</A>\n";
 	    }
+	    if (/^\s+\S+/) {
+		print ;
+	    }
 	}
     }
 }
