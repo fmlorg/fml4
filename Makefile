@@ -316,8 +316,9 @@ rd:
 simulation:
 	cp /tmp/log /tmp/log.old
 	sh .simulation/bootstrap
-	diff -u /tmp/log.old /tmp/log|Mail -s Diff:fml.simulation.log elena
-	grep XXX /tmp/log|Mail -s fml.simulation.log elena
+	grep XXX $(HOME)/var/simulation/log.bak > /var/tmp/log.bak
+	grep XXX $(HOME)/var/simulation/log     > /var/tmp/log
+	diff -u /var/tmp/log.bak /var/tmp/log|Mail -s fml.simulation.log elena
 
 rel:
 	rm -f /tmp/relnotes
