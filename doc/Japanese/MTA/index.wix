@@ -4,9 +4,11 @@
 .toc
 .~HTML_PRE
 
-.P	∞Ï»Ã
-.include common.wix
+.# .P	∞Ï»Ã
+.# .include common.wix
 
+.P	Sendmail
+.include sendmail.wix
 
 .P	Postfix
 .include postfix.wix
