@@ -3626,7 +3626,7 @@ sub do_config_template
     $UnderConfigTemplate = 0;
 
     # clean up
-    unlink $tmp_cf;
+    unlink $tmp_cf, "${tmp_cf}.bak";
     rmdir $dir;
 }
 
