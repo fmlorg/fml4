@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/10
+
+  doc/Japanese/examples/virus_check.ph is added
+
+	virus check の設定見本例
+	(site_force.ph などにつかうといいだろうとおもう)
+
+  bin/spool2html.pl (2.16-2.17):
+	mkdir htdocs/ by 0755 explicitly
+
+	spool2html をつかってはじめて htdocs/ をつくると
+	700 でディレクトリができてしまうのを 755 に修正
+
 2000/05/09
 
   kern/fml.pl 
