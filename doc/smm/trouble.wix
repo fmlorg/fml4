@@ -3,7 +3,7 @@
 
 .S	ありそうなこと
 
-う〜ん、動かなくてありそうなことといえば…（詳細はこの後の各sections）
+動かなくてまずありそうなことといえば…（詳細はこの後の各sections）
 
 ・setuid problem
 	でもケースバイケースなんですよねぇ
@@ -271,6 +271,7 @@ sendmail.cf に TZ=japan-time みたいに見知らぬものがついてたら削るかそ
 SunOS 4.1.3_U1(English)では、$ENV{'TZ'} = 'Japan';  だそうです。
 #thanks to hogawa@mesh.ad.jp
 
+
 .S	Received: from  (localhost.変なドメイン) by ...
 .key	Received:
 .key	sendmail.cf
@@ -476,8 +477,7 @@ sub SendFile
 .~q
 
 
-
-.S	bin/expire.plを“Ｎ個のファイルを残す”のを間違えます
+.S	bin/expire.plで“Ｎ個のファイルを残す”のを間違えます
 
 	該当範囲：libexpire.pl のないバージョン(95/11/11以前)
 
@@ -516,8 +516,7 @@ sub fp_sort
 .~q
 
 
-
-.S	ファイルがちゃんとおくりかえされない（自動登録とかガイド請求の時）
+.S	ファイルがちゃんとおくりかえされない(自動登録とかガイド請求の時)
 
 なんなんでしょうねぇ〜 1.6.{0,1} の頃の話なんですが… 1.6.2 Current 以
 降はＯＫみたいです。
@@ -532,8 +531,7 @@ sub fp_sort
 .S	503 Need RCPT (recipient) 
 .k	503 Need RCPT (recipient) 
 
-
-そのひとから DM をもらってみると、なんかわかるんじゃないかな〜と
+そのひとから DM をもらってみると、なんかわかるんじゃないかな〜と。
 
 たとえば 
 	ヘッダのどっかが一行あいてる (いいかげんなsendmailがパスのどっかにいる)
@@ -958,9 +956,7 @@ ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
 	fml.pl を起動する。
 
 これで pop でメールを読む環境ならＯＫっす。
-
-詳しくは pop2recv.pl の部分を読んで下さい↓
-.xref	pop2recv.pl
+.xref	popfml
 
 
 .S	勝手についてしまう signature を取る
@@ -1023,7 +1019,6 @@ in fml-support: 02475, 02469, 02472 あたり
 root で install してたりしたら(そもそもそんなことは本来してはいけませ
 ん）、root で makefml newml とかしないで、一般ユーザで makefml newml 
 をして ML を作ってみる。
-
 
 
 .# $Id$
