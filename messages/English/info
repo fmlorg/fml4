@@ -1,0 +1,23 @@
+### Section: General Information
+info.procfail.ctladdr:
+	your mail has no effective commands
+	please read the following help and send requests to
+	<_ARG0_>
+
+info.procfail.noctladdr:
+	If you have any problems, please contact mailing list maintainer
+	which addres is <_ARG0_>
+
+info.ra:
+	[remote administration]
+	Description: send requests by mail to fml to add or remove mermber lists
+	If you want help file for remote administration
+	send the following help to <_ARG0_>
+	   admin help
+	   approve PASSWORD help 
+
+info.reject:
+	You are not a member of this mailing list.
+	So you cannot post here.
+	If you want to subscribe, 
+	please verify how to subscribe this mailing list.

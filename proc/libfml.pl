@@ -323,19 +323,17 @@ sub DoProcedure
 	    $s .= "Address \"$CONTROL_ADDRESS\" is for fml commands.\n";
 	    $s .= "Your mail DOES NOT include any effective command.\n";
 	    $s .= "Please read the following HELP for FML usage.\n";
-
-	    &Mesg(*e, $NULL, 'info.procfail.ctladdr', $CONTROL_ADDRESS);
+	    $s .= "*" x 60;
+	    &Mesg(*e, $s, 'info.procfail.ctladdr', $CONTROL_ADDRESS);
 	}
 	else {
 	    $s .= "If you have a problem, ";
 	    $s .= "please contact ML maintainer.\n";
 	    $s .= "Address for a ML maintainer is <$MAINTAINER>.\n";
-
-	    &Mesg(*e, $NULL, 'info.procfail.noctladdr', $MAINTAINER);
+	    $s .= "*" x 60;
+	    &Mesg(*e, $s, 'info.procfail.noctladdr', $MAINTAINER);
 	}
-	$s .= "*" x 60;
 
-	&Mesg(*e, $s);
 	$e{'message:append:files'} = $HELP_FILE;
     }
 }

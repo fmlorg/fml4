@@ -410,10 +410,13 @@ sub AdminCommand
     else {
 	# if undefined commands, notify the user about it and abort.
 	&Mesg(*e, $NULL, 'no_such_admin_command', $cmd);
-	&LogWEnv("*** unknown admin command $cmd ***", *e);
-	&Mesg(*e, $NULL, 'info.ra', $CONTROL_ADDRESS);
-	&Mesg(*e, "   FYI: To get help for administrators,");
-	&Mesg(*e, "   send 'admin help' or 'approve PASSWORD help' to $CONTROL_ADDRESS.");
+	&Log("Error: unknown admin command $cmd");
+	my($s);
+
+	$s .= "   FYI: To get help for administrators,\n";
+	$s .= "   send 'admin help' or 'approve PASSWORD help' to $CONTROL_ADDRESS.";
+	&Mesg(*e, $s, 'info.ra', $CONTROL_ADDRESS);
+
 	return 0; # 0 == LAST(libfml.pl);
     }
 } # admin mode ends;
