@@ -1,0 +1,95 @@
+.C	MEAD (Mail Error Analyze Deamon)
+
+まだアルファテストだよん
+
+.S	Introdution
+
+エラーメールは普通 $MAINTAINER に帰ってきます。
+
+Example:
+.q
+From:    Mail Delivery Subsystem <MAILER-DAEMON@DOMAIN.OR.JP>
+Subject: Returned mail: User unknown
+To:      xxx-admin@shumi.fml.org
+Date:    Sun, 21 Jun 1998 16:17:22 +0900 (JST)
+
+... while talking to mail.domain.or.jp.:
+>>> RCPT To:<xyz@ar.domain.or.jp>
+<<< 553 <xyz@ar.domain.or.jp>... User Unknown
+550 xyz@ar.domain.or.jp... User unknown
+~.q
+
+帰ってくるメールはデフォールトではMLを作成したユーザへフォワードされる
+ように設定されています(aliasesファイルを参照)。
+
+この user unknown などの情報を自動的に拾い上げ、Ｎ回(デフォールトは5回)
+エラーが帰ってきたらそのユーザを削除するためのプログラムが mead.pl
+(libexec/mead.pl) です。
+
+設定の手違などあるととても困るのであまりお勧めしません。が年度末などに
+連絡もなく勝手にいなくなるユーザ多数なのでこういうった処理が必要だとい
+う人もいるでしょう。
+
+.S	設定
+
+makefml newml を実行すると
+
+	include-mead
+
+が作られます。また生成される見本の aliases ファイルには mead を使う設
+定がコメントアウトされた状態で入っています。
+
+elena ML の例:
+
+	elena-admin: fukachan
+
+	# MEAD; If you use mead.pl, 
+	#elena-admin: fukachan, :include:/tmp/s/elena/include-mead
+
+を
+
+	# elena-admin: fukachan
+
+	# MEAD; If you use mead.pl, 
+	elena-admin: fukachan, :include:/tmp/s/elena/include-mead
+
+のように入れ換えます。:include:/tmp/s/elena/include-mead は mead.pl を
+起動するように設定されています。
+
+.S	理論
+
+帰ってきたエラーメールが mead.pl に入力として渡される。5XX のような行
+からエラーになるアドレスを割だし、キャッシュします。5(がデフォールト)
+回エラーが来たら
+	『そのアドレスを削除すべきことをしらせる』(デフォールト)
+か
+	『makefmlを呼び出して自動的に削除する』
+ことをします。
+
+.S	mead.pl コマンドラインオプション
+
+Usage: mead.pl [options]
+
+Options:
+    -h              help
+    -d              debug mode on
+    -m mode         mode; report or auto ('report' in default).
+
+    -e number      expire of error data cache (unit is 'day')
+    -i number      check interval (unit is 'second')
+
+    -C cachefile    mead data cache file
+    -D directory    $DIR (mead.pl working directory)
+    -E directory    $EXEC_DIR (e.g. /usr/local/fml)
+    -S directory    $ML_DIR (e.g. /var/spool/ml)
+    -M path         makefml path
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
