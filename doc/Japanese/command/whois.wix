@@ -1,4 +1,4 @@
-.C	whois (locally)
+.C	whois (local whois-like database)
 =E.C	Whois Database
 .n	whois
 .k	whois 

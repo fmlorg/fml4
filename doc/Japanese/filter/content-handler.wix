@@ -1,5 +1,7 @@
-.HTML_PRE
-		ContentHandler
+.C	ContentHandler
+.l	ContentHandler
+
+Author: t-nakano@marimo.org
 
 # [Example]
 # add them at the last of config.ph (but before the last "1;").
@@ -85,6 +87,3 @@ reject			reject this whole mail if only one block matches
 
 .fi
 
-----------
-Author: t-nakano@marimo.org
-.~HTML_PRE

@@ -3,10 +3,10 @@
 
 フィルタリングといっても
 
-1. ユーザレベルでのフィルタリング
+1. ユーザレベルでのフィルタリング (=> .ptr{user-level-filtering})
    つまり
 	スプールへ書き込む
-	例: MTA -> フィルタ -> /var/mail/とかMailDir/
+	例: MTA -> フィルタ -> /var/mail/ とか MailDir/
 
 	何かのプログラムを起動する
 	例: MTA -> フィルタ -> fml
@@ -14,10 +14,10 @@
 	これは一般にはＭＬの話ではなく自分宛のSPAMメールを弾くや自動で
 	フォルダーを変えるようなことです。
 
-2. fml 自身が入力されたメールを解析して弾く
+2. fml 自身が入力されたメールを解析して弾く => .ptr{EnvelopeFilter}
 
 	MTA -> fml (-> フィルタ -> 配送する/しないを決める)
-		＊ つまり ()内は全部fmlの内部動作
+	   ＊ つまり ()内は全部fmlの内部動作
 
 の２つの意味合いがあります。fml的にフィルタリングというのは主に後者 2. 
 のことを指しています。
@@ -34,6 +34,16 @@ makefml config で
 
 メインメニュー -> セキュリティ -> USE_DISTRIBUTE_FILTER -> ON
 .~q
+
+.S	カスタマイズ
+
+config.ph にフィルタリングの設定を書くことができます。
+例:
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
 
 .S	弾けないもの
 

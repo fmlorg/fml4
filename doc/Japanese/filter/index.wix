@@ -9,6 +9,7 @@
 .include overview.wix
 .include examples.wix
 .include envelope_filter.wix
+.include content-handler.wix
 .include user.wix
 
 .# $Id$

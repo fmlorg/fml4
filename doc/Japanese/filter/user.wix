@@ -1,8 +1,8 @@
 .C	ユーザレベルでのフィルタリング
 .l	user-level-filtering
 
-UNIXなら procmail や mailagent, MHの slocal などをはじめそういうものは
-世の中いっぱいあります。
+UNIXなら procmail (http://www.procmail.org/) や mailagent, MHの slocal 
+などをはじめそういうものは世の中いっぱいあります。
 
 一般論として
 
@@ -79,3 +79,6 @@ default  -       >       ?      /var/mail/fukachan
 ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
 す。
 
+.#
+.# $Id$
+.#

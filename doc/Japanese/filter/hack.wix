@@ -1,7 +1,13 @@
-.C	hack
+.C	改造
 
 .S	たわけたHTMLメール対策
 =E.S	Cut off except the first multipart block
+
+現在では汎用 multipart フィルタとして ContentHandler があります
+.xref ContentHandler
+
+古い形は以下の通りです。この変数は ContentHandler でも上位互換で
+有効です。
 
 	$HTML_MAIL_DEFAULT_HANDLER = 'strip'; (default "")
 
@@ -51,4 +57,12 @@ In this mode, fml emulates Message-ID: always based on rule 2.
 Hence fml can ensure the consistency of ML threads against
 some MUA's e.g. Eudora...
 .fi
+
+.# $Id$
+
+
+
+
+
+
 
