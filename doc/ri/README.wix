@@ -1,5 +1,5 @@
 .HTML_PRE
-	fml 4.0	"mailing list server/driver/manager" package
+	fml 4.0 mailing list manager package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -11,14 +11,14 @@
 .if LANG == JAPANESE
 [ガイド]
 
-   感じを掴むためにはまずここを最初に参照して下さい。
+   大まかな流れを掴むためには、まずここを最初に参照して下さい。
 .url http://www.fml.org/fml/Japanese/basic_setup/
 
-   さまざまなテーマごとに分類されたチュートリアルのページ
-   細かい設定などはここを参照して下さい。
+   チュートリアルは様々なテーマごとにまとめられたページです。
+   細かい設定はこちらを参照して下さい。
 .url http://www.fml.org/fml/Japanese/tutorial.html
 
-   HOME PAGE
+   fml のホームページ
 .url http://www.fml.org/fml/
 
    ソース
@@ -27,41 +27,38 @@
 .fi
 .if LANG == ENGLISH
 [Guide]
-
-   Please read when you upgrade from 2.x to 3.0.
-.url http://www.fml.org/fml/UPGRADE-3.0-e/
-
-   quick guide: outline of installation and fundamental configurations
-.url http://www.fml.org/fml/examples/index-e.html
-
    home page of fml
 .url http://www.fml.org/fml/
 
    download from here
+.url	ftp://ftp.fml.org/pub/fml/
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
-
 .~HTML_PRE
 
 .toc
 
 
-.C	Overview
+.C	概要
+=E.C	Overview
 
 .S	はじめに
 =E.S	Introduction
 
 .if LANG == JAPANESE
-fml は Mailing List (以下 ML) Server package です。perl を使って書かれ
-ています。fml は配送プログラムや多くのコマンド用のサーバ(ユーザー用や
-MLをリモートで管理するためのもの)などからなります。また対話設定プログ
-ラムやコマンドサーバのインターフェイスを listserv / majordomo スタイル
-にするエミュレータなどの多くの補助プログラムなどもついています。
+fml はメーリングリスト(以下 ML)を作るためのパッケージです。perl を使っ
+て書かれています。fml は、配送とコマンドメールに対応するプログラムを中
+心に、多くのプログラムから構成されます。
+
+fml のセットアップやカスタマイズは makefml というプログラムにより、メ
+ニューで対話的に行なうこともできます。fml 4.0 からは CGI から makefml 
+の代表的な機能(登録、削除、メニューによる ML のカスタマイズ)を使う仕組
+みが導入されています。
 .fi
 .if LANG == ENGLISH
 fml 4.0 is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
-in Japan from 1993 to 1998. fml contains
+in Japan from 1993 to 2000. fml contains
 
    distributer (filter program which passes articles to MTA to deliver)
    command server for users
@@ -73,20 +70,18 @@ in Japan from 1993 to 1998. fml contains
    other utility programs
 .fi
 
-いろいろなケース用のプログラムがあるのは『趣味も(コンピュータ)環境も人
-それぞれ』という前提が根底にあり『カスタマイズの自由度が大きいこと/同
-じことができるのであればユーザ・インターフェイスはどのようなものでもい
-い』と思うからです(そういう意味ではいかにも perl ぽいですですかね:)。
+fml のデザインの根幹をなす思想は
+『趣味やコンピュータ環境は人それぞれであり、それを尊重すること』です。
+そのため、様々なカスタマイズをする自由度があります。
 =E
 fml design policy is based on the degree of freedom, so that I respect
 "each environment for each man/women".
 
-デフォールトでは
-	ＭＬの参加希望者のアドレスを管理者が登録する
-	登録された人だけが投稿やコマンド操作などができる
-設定です。必要なら makefml (対話設定プログラム) で"明示的に"(例えば自
-動登録やリモート管理)機能を有効にできます。細かいパラメータのチューニ
-ングや高度な設定は設定ファイルに変更を加えます。
+デフォールトの ML の運用スタイルは ML サーバのホスト上で、fml の管理者
+が makefml コマンドを使うことです。makefml を使いメンバーの登録や削除、
+そして細かなカスタマイズを行なうことが期待されています。
+別の運用スタイル(自動登録、モデレータ、メールマガジン型)への
+変更も makefml のメニューで行なうことができます。
 =E
 I assume that ML is a private communication so that the default fml
 policy is manual edit: "you add a new member in hand, only members can
@@ -102,18 +97,19 @@ edit of config.ph.
 =E.S	Environment you need in installation of fml
 
 .if LANG == JAPANESE
-インストール作業については INSTALL というファイルを読んで下さい。
-インストール作業の前準備として次のものが必要があります。
+fml のインストールとメールサーバの設定作業については 
+INSTALL というファイルを読んで下さい。
 
-   インストール先のマシンに(自分もしくはML専用の)アカウントがある
+この作業の前にインストールするホストに
+   ユーザ fml というアカウント
+があり、
    perl 5
-   メール配送プログラムがあること(default は sendmail R8 を想定)
+   メール配送プログラム
+がインストールされていることを確認して下さい。
 
-です。必要ならこれらをインストールしてちゃんと動くようにセットアップし
-てからfml のインストールに進んで下さい。Windows NT4 上での fmlについて
-は INSTALL_on_NT4 を参照してください。いくつかのMTA(現在は sendmail,
-postfix, qmail and exim)についての注意点が INSTALL_with_MTA名 というファ
-イルにあります。
+Windows NT4 上での fmlについては INSTALL_on_NT4 を参照してください。
+いくつかのMTA(現在は sendmail, postfix, qmail and exim)についての注意
+点が INSTALL_with_MTA名 というファイルにあります。
 .fi
 .if LANG == ENGLISH
 fml fundamentally needs
@@ -170,7 +166,7 @@ to ML. MTA 2 (delivery system) can run on another hosts other than MTA
 =E
 You can obtain fml sources at the URL
 
-.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+.url	ftp://ftp.fml.org/pub/fml/
 
 です。この下には
 
@@ -315,20 +311,13 @@ address <fml-bugs@ffs.fml.org>.
 .# automatically.
 .fi
 
-.S	fml-FAQ project
-=E.S	fml FAQ
 
-fmlのFAQを作成中するプロジェクトが現在進行形です。
-=E
-A project to create fml FAQ runs in JWNTUG ntfml-wg. If you have
-questions or answers on some topics, please click here
-
-.url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
 
 
 
 .C	インストール
 =E.C	Installation
+
 
 設定項目は多岐に渡りますが、基本的なセットアップ(MLをつくる/登録する)
 や簡単な設定の変更は makefml という対話設定プログラムで行なえます。
@@ -514,6 +503,7 @@ of programming. For convenience I bundle to my package, config.guess
 (GNU autoconf), a few useful codes jcode.pl and mime_pls, which you
 can obtain on anonymous ftp's. 4.4BSD has been a start point to study
 several aspects of OS details. 
+
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
