@@ -2178,7 +2178,7 @@ sub do_install
 	for (<bin/*.pl>){ &FixPath($_); print STDERR ".";}
 
 	print STDERR " www/cgi-bin ";
-	for (<www/cgi-bin/admin/*>){ &FixPath($_); print STDERR ".";}
+	for (<www/cgi-bin/*/*.cgi>){ &FixPath($_); print STDERR ".";}
 
 	print STDERR "\n\tDone.\n";
     }
