@@ -6,6 +6,12 @@
 
 2003/01/15
 
+   bug fix makefml newml (cf/config) et.al. for ^\d+$ ML name handling.
+
+	数字だけのＭＬ名をうまく扱えない問題を修正
+
+2003/01/15
+
    update databases/TOY_MODEL.*
 	bug fix
 	translation to English.
@@ -416,7 +422,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.269 2003/01/14 14:18:38 fukachan Exp $
+	add $FML: CHANGES,v 1.270 2003/01/14 23:08:12 fukachan Exp $
 
 2001/10/03
 
