@@ -293,7 +293,9 @@ FIX_DISTRIBUTION_PERMISSION () {
 	(
 		cd $DESTDIR/distrib
 		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
-		chmod -R ugo+x www/cgi-bin/
+		if [ -d www ];then
+		   chmod -R ugo+x www/cgi-bin/
+		fi
 	)
 }
 
