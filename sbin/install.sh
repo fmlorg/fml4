@@ -1,4 +1,15 @@
 #!/bin/sh
+#
+# $Id$
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+
 
 list=/tmp/.fml-install$$
 
@@ -66,7 +77,7 @@ test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 	rm -f bin/inc_via_pop.pl
 	ln bin/pop2recv.pl bin/inc_via_pop.pl
 
-	(chdir doc;
+	(cd doc;
 		rm -f doc/fml_operations_manual
 		ln -s op fml_operations_manual
 
@@ -77,9 +88,9 @@ test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 
 
 cp C/fml.c $EXEC_DIR
-cp -p sbin/makefml  $EXEC_DIR/makefml
+cp -p sbin/makefml*  $EXEC_DIR
 
-chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml 
+chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml*
 chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 
 exit 0;
