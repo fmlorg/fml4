@@ -8,6 +8,8 @@
    fmlwrapper.c (nuke fml.c) and fmlwrapper is used now
 	since the names of fml and fml-ctl are ambiguous.
 
+	config.h is removed but now fmlwrapper.h is used.
+
 2000/10/11
 
    makefml	set umask(022) when &CollectAlaises() runs.

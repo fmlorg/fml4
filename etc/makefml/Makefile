@@ -42,7 +42,7 @@ fml: fmlwrapper
 fml-wrapper: fml-wrap
 fmlwrapper: fml-wrap
 
-fml-wrap: fmlwrapper.c config.h
+fml-wrap: fmlwrapper.c fmlwrapper.h
 	$(CC) $(CFLAGS) -o fml-wrap fmlwrapper.c
 	$(CHMOD) $(MODE) fml-wrap
 	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrap fmlwrapper.c

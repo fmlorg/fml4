@@ -2448,15 +2448,15 @@ sub FixIncludeHeader
 
     &ResetVariables;
 
-    &GobbleAlignedBuffer('config.h');
+    &GobbleAlignedBuffer('fmlwrapper.h');
 
-    if (open(GUESS, "> $ML_DIR/$ml/config.h")) {
+    if (open(GUESS, "> $ML_DIR/$ml/fmlwrapper.h")) {
 	foreach $file (@include) {
 	    if ( -f "$INCDIR/$file" ) {
 		print GUESS "\#include <$file>\n";
 	    }
 	    else {
-		# print STDERR "Not Found $INCDIR/$file\n";
+		; # print STDERR "$INCDIR/$file not found\n";
 	    }
 	}
 
