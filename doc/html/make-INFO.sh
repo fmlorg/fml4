@@ -8,5 +8,5 @@ chdir $FML;
 
 (
 	cat doc/html/INFOpre
-	cat var/doc/INFO
+	cat var/doc/INFO.jp
 ) > var/html/INFO.html

@@ -8,5 +8,5 @@ chdir $FML;
 
 (
 	cat doc/html/RELEASE_NOTESpre
-	cat var/doc/RELEASE_NOTES
+	cat var/doc/RELEASE_NOTES.jp
 ) > var/html/RELEASE_NOTES.html

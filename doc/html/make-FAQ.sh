@@ -9,8 +9,8 @@ chdir $FML
 
 test -d var/html/FAQ || mkdir var/html/FAQ
 
-perl usr/sbin/fix-wix.pl <doc/smm/op.wix |\
-perl bin/fwix.pl -T FAQ  -m html -D var/html/op -d doc/smm -N op.wix
+perl .release/bin/fix-wix.pl <doc/smm/op.wix |\
+perl bin/fwix.pl -F -T FAQ -m html -D var/html/op -d doc/smm -N op.wix
 
 
 # cat  var/doc/op |\
