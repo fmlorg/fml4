@@ -12,22 +12,24 @@
 # $Id$
 #
 
-######### CONFIGURATION ##########
-# fml system (executables) directory
-EXEC_DIR=/usr/local/fml
-
-# ML's parent directory
-ML_DIR=/var/spool/ml
-######### CONFIGURATION ENDS ##########
-
-##### LIBRARIES
-ERROR () {
-	echo "cannot chdir $ML_DIR";
+### LIBS
+cannot_chdir () {
+	local dir=$1
+	echo "cannot chdir $dir";
 	exit 1;
 }
 
+### MAIN ###
 
-##### MAIN PRE; GETOPT
+CONFIG_DIR=`dirname $0`
+CONFIG_DIR="$CONFIG_DIR/../.fml"
+
+if [ -f $CONFIG_DIR/system.sh ];then
+	. $CONFIG_DIR/system.sh
+else
+	echo "ERROR: cannot find $CONFIG_DIR/system.sh"
+	exit 1
+fi
 
 while [ $# -gt 0 ]
 do
@@ -57,7 +59,7 @@ done
 # renice +18 $$ >/dev/null 2>&1
 #
 
-chdir $ML_DIR || ERROR
+chdir $ML_DIR || cannot_chdir $ML_DIR
 
 for ml in *
 do
