@@ -1385,6 +1385,7 @@ reject します。
 	○ 本文が何もないメール
 	○ help や unsubscribe などの英語一行メール
 	○ %echo ふがほげ の文
+	○ Message-Id: が朗かに addr-spec でないのは SPAM メール
 
 これ以外の高度なチェックは
 
@@ -1432,6 +1433,17 @@ $REJECT_DISTRIBUTE_FILTER_HOOK = q#
    }
 
 #;
+
+
+例2:	sendmail の option で PICKY_HELO_CHECK をかけている場合
+
+    # PICKY_HELO_CHECK
+    if ($e{'h:x-authentication-warning:'} !~ /Host \S+ claimed to be \S+/) {
+	$r = "Your SMTP session or your host config is invalid";
+    }
+
+でもメールを出す人が virutal domain とかだとバソバソ reject されて困っ
+ちゃうだろう ＃それでも構わないという人は使ってみよう(強引)
 
 
 .S	sendmail 8.8 における check_* ルールセットについて
