@@ -246,7 +246,7 @@ AUTO_REGISTRATION_KEYWORD:	subscribe
 # when auto-registered, 
 # we apply $AUTO_REGISTRATION_DEFAULT_MODE e.g. "m=3mp s=1" to the address.
 .j 登録する際に強制するパラメータ。使えるパラメータはactivesに使えるもの
-.j 詳しくは doc/op.jp 
+.j 詳しくは doc/Japanese/ 以下のファイルなどを参照 
 .j   例: デフォールトはまとめ送りにする
 .j
 # value: string
@@ -566,7 +566,7 @@ USE_DISTRIBUTE_FILTER:
 
 .j フィルタリングのフック。
 .j perlで複雑な条件文を各ために用いる
-.j 詳細は doc/op.jp 参照
+.j 詳細は doc/Japanese/ 以下のファイルなどを参照 参照
 # value: string
 DISTRIBUTE_FILTER_HOOK:
 
@@ -1354,7 +1354,7 @@ USE_CROSSPOST:
 
 .j アドレスと本名の対応リストを使う
 .j   
-.j -- doc/op.jp より
+.j -- doc/Japanese/ 以下のファイルなどを参照
 .j
 .j   これまでの fml では、メンバー一覧を 'members' コマンドで取り寄せると
 .j メンバー全員のアドレスが返送されてきますが、アドレスだけでは誰が誰なのか
