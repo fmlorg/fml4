@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/11
+
+  sbin/makefml
+	disable info in makefml -w (runs on NT) mode
+
 2000/05/10
 
   doc/Japanese/examples/virus_check.ph is added
