@@ -3,6 +3,7 @@
 .# move the old smtp.wix content to delivery.wix
 .# Also FML internals this SMTP overview.
 .#
+.n	smtp
 .C	Simple Mail Transfer Protocol
 =E.C	Simple Mail Transfer Protocol
 

@@ -1,3 +1,4 @@
+.n	headers
 .C	ヘッダのカスタマイズ
 =E.C	Customize Fields of the Mail Header 
 .l	header-custom

@@ -1,3 +1,4 @@
+.n	auto-expire
 .C	Expire (一定日数より古いファイルは消す)とNewSyslog
 =E.C	Expire and Newsyslog(8)
 .l	expire
