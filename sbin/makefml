@@ -309,7 +309,7 @@ sub InitFmlConfig
 	    $dir =~ s#//#/#g;
 
 	    if (! -d $dir) {
-		print "   mkdir $dir\n";
+		# print "   mkdir $dir\n";
 		# here /usr/local/fml;only installer can read-write this;
 		mkdir($dir, 0755); 
 	    }
@@ -1077,7 +1077,7 @@ sub do_passwd
     &ResetVariables;
 
     # $ml/etc
-    &MakeWritableDir("$ML_DIR/$ml/etc");
+    &MakeSubDir("$ML_DIR/$ml/etc");
 
     # here we go! 
     &SetWritableUmask;
@@ -1594,7 +1594,7 @@ sub MakeWritableDir
 
 sub MakeDir
 {
-    print "---MakeDir($_[0])\t(UID=$< GID=$GID)\n";
+    print "---Make Directory ($_[0])\t(UID=$< GID=$GID)\n";
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || mkdir($_[0], 0775);
@@ -1602,6 +1602,19 @@ sub MakeDir
     }
     else {
 	-d $_[0] || mkdir($_[0], 0755);
+    }
+}
+
+sub MakeSubDir
+{
+    print "---Make Directory ($_[0])\t(UID=$< GID=$GID)\n";
+
+    if ($GroupWritable eq 'fmlserv') {	# for backup files
+	-d $_[0] || mkdir($_[0], 0770);
+	chown $<, $GID, $_[0] if $GID;
+    }
+    else {
+	-d $_[0] || mkdir($_[0], 0700);
     }
 }
 
