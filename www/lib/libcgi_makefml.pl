@@ -55,18 +55,11 @@ sub Parse
     # HTTP_REFERER => http://beth.fml.org/cgi-bin/fml/admin/makefml.cgi
     # REQUEST_URI => /cgi-bin/fml/../fml/admin/makefml.cgi
     # 
-    $SCRIPT_NAME  = $ENV{'SCRIPT_NAME'};
-    $HTTP_REFERER = $ENV{'HTTP_REFERER'};
-    my $REQUEST_URI  = $ENV{'REQUEST_URI'};
-    $REQUEST_URI  =~ qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
+    my $REQUEST_URI = $ENV{'REQUEST_URI'};
+    $REQUEST_URI =~ qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
     my ($cgimode , $cgiml) = ($1,$2);
     $ML = $cgiml if($cgimode ne "admin");
 
-    # fix (tricky:-)
-    $SCRIPT_NAME  =~ s/makefml.cgi$/menu.cgi/;
-    $SCRIPT_NAME  =~ s/makefml.cgi.+$/menu.cgi/;
-    $HTTP_REFERER =~ s/makefml.cgi.+$/menu.cgi/;
-    
     # We should not use raw $LANGUAGE (which is raw input from browser side).
     # We should check it matches something exactly and use it.
     if ($LANGUAGE eq 'Japanese') {
@@ -401,8 +394,6 @@ sub Translate2LogOption
 
 sub Command
 {
-    # &ShowReferer;
-
     if ($PROC eq 'add' || $PROC eq 'bye') {
 	&Control($ML, $PROC, $MAIL_ADDR);
 
@@ -527,7 +518,6 @@ sub Finish
     if ($ErrorString) { &Exit($ErrorString);}
 
     &P("</PRE>");
-    # &ShowReferer;
 
     if ($ControlThrough) {	# 
 	#;&P("<META HTTP-EQUIV=refresh CONTENT=\"2; URL=menubar.cgi\">");
@@ -535,18 +525,6 @@ sub Finish
 
     &P("</BODY>");
     &P("</HTML>");
-}
-
-
-sub ShowReferer
-{
-    if ($SCRIPT_NAME) {
-	print "<H2>\n";
-	print "<A HREF=\"";
-	print $SCRIPT_NAME;
-	print "\">[back to main menu]</A>\n";
-	print "</H2>\n";
-    }
 }
 
 
