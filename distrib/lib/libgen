@@ -16,7 +16,7 @@ GEN_DOC () {
 
 
 GEN_WWW () {
-
+	return
 }
 
 
