@@ -541,33 +541,63 @@ configurations (e.g. config.ph, include).
 .C	fml の扱い方の概要について
 =E.C	Overview on how to treat fml 
 
-MLの設定のカスタマイズやユーザの登録/削除などはfml の動いているホスト
-に入り、設定ファイルやメンバーリストを変更することで行ないます。これが
-もっとも安全な方法でしょう。直接手で編集もしくは makefml (使い方は後述)
-という操作するためのフロントエンドもあります。
+
+(MLの管理者の作業として) MLの設定のカスタマイズやユーザの登録/削除など
+はfml の動いているホストに入り、設定ファイルやメンバーリストを変更する
+ことで行ないます。これがもっとも安全な方法でしょう。直接手で編集もしく
+は makefml (使い方は後述)という操作するためのフロントエンドもあります。
+=E
+It is better for the ML maintainer to log in the fml running host to
+customize ML configurations and change ML member lists on the fml
+running host. "makefml" command helps you to do them.
 
 「メールでfmlにコマンドを送り込み、ユーザの登録/削除などを行なう」こと
 もできます。ドキュメント中では『リモート管理』と呼ばれています。リモー
 ト管理はデフォールトの動作ではありません。明示的にこの動作を許すように
 設定を変更しなければいけません。 => .ptr{REMOTE_ADMINISTRATION}
+=E
+The term "remote administration" implies "to control fml by sending
+administrative commands to fml". It is not default. You need to set it
+explicitly. => .ptr{REMOTE_ADMINISTRATION}
 
 コマンドを送り込むことのできる人は(各ＭＬごとに設定できる)パスワードを
 知っている必要があります。お紆余として認証をPGPで行なうオプションなど
 も使えます。 => .ptr{configure-remote-administrators}
+=E
+The ML maintainer can send the commands to fml if he/she knows the
+password. The authentication is based by password or PGP, you can
+select. => .ptr{configure-remote-administrators}
 
 代表的な設定項目の変更はメニューで選択できます。=> .ptr{makefml-config}
+=E
+You can use makefml to set up the fundamental configuration 
+=> .ptr{makefml-config}
 
 メンバーリストは手で書くか、makefml add/bye などを駆使して登録なりを行
 ないます。=> .ptr{add-user}
+=E
+To regist and remove a member, you can edit member list files directly
+or use "makefml" command. => .ptr{add-user}
 
 メニューないような細かいパラメータの調整などは設定ファイルを編集する必
 要があります。ファイルのフォーマットは => .ptr{config-file}
+=E
+You may not find advanced configurations in "makefml config" menu.  If
+so, you should edit cf or config.ph file directly => .ptr{config-file}
 
-コマンドの詳細は help ファイルを見て下さい。
+一般ユーザの使うコマンドの詳細は help ファイルを見て下さい。
 管理者用の コマンドは help-admin です。
+=E
+Please see "help" file for commands usual users who can use.
+Please see "help-admin" file for ML maintainers commands.
 
 doc/op.jp が内部構造、大まかな機能ごとに章だてされた『設計と実装』につ
 いて書いてあるドキュメントです。印刷するとでかくて死にそうなので注意。
+=E
+Please see "doc/op.en" for fml internals, whole functions. This file
+is for "design and implementation".  This file contains whole
+variables you can customize. See "doc/op.en" for details of each
+variable.
 
 カスタマイズ変数一覧は インストール先(/usr/local/fml)/cf/MANIFEST を見
 てください。各変数の意味、実装上の理念、パラメータについての詳細は 
@@ -576,6 +606,11 @@ doc/op の中をサーチしてください。
 いづれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
 ワードや変数名でサーチして見て下さい。最新版のドキュメント全体へのサー
 チは http://www.fml.org/fml/serach-j.html でできます。
+=E
+To find information, 
+1.	search keyword or variable neame in the doc/op.en
+2.	use http://www.fml.org/fml/serach-e.html 
+Check your system following doc/CHECK_LIST.en.
 
 
 
