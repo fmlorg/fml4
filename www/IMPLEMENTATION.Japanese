@@ -1,0 +1,28 @@
+Q: なんで &__LoadConfiguration() をよぶねん？
+
+A: メンバーリストを展開するためやて
+
+	Command()
+	ShowAdminMenu()
+
+が ◯◯.html の __*LIST__ 行を自動展開する時に呼ばれ得る。
+＃呼ばれる”かも”知れないだけで絶対呼ばれるとは限らないが
+
+つまり <SELECT ..> になる部分
+
+とはいうもの、こいつらにはあるので〜 (2000/07/08)
+
+	www/template/Japanese/admin/add.html
+	www/template/Japanese/admin/addadmin.html
+	www/template/Japanese/admin/bye.html
+	www/template/Japanese/admin/byeadmin.html
+	www/template/Japanese/admin/config.html
+	www/template/Japanese/admin/index.html
+	www/template/Japanese/admin/mladminpasswd.html
+	www/template/Japanese/admin/mlindex.html
+	www/template/Japanese/ml-admin/index.html
+
+だからまぁほとんど常によばれるもんなんだね
+
+
+$Id$
