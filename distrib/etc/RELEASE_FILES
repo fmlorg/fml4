@@ -24,10 +24,10 @@ PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
 pkgsrc/jcode/jcode.pl
-pkgsrc/mimepls/mimer.pl
-pkgsrc/mimepls/mimew.pl
-pkgsrc/mimepls2/mimer20alpha.pl
-pkgsrc/mimepls2/mimew20alpha.pl
+pkgsrc/mimepls2/mimer.pl
+pkgsrc/mimepls2/mimew.pl
+pkgsrc/mimepls2/mimer202.pl
+pkgsrc/mimepls2/mimew202.pl
 pkgsrc/traffic/libtraffic.pl 
 contrib/localhack/release-2/member_name/src/libmember_name.pl
 
