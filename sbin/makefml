@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.210.2.8 2001/09/11 11:26:38 fukachan Exp $
+# $FML$
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -7494,7 +7494,7 @@ sub cgi_menu_mainloop
     }
     elsif ($which eq 'REAL_CGI_PATH' || $which eq 'CGI_AUTHDB_DIR') {
 	my $r   = $query{ $which };
-	my $buf = &Query("Q: $which", 'directory', '[\d\w\/\\\\\-]+', $r);
+	my $buf = &Query("Q: $which", 'directory', '[\.\d\w\/\\\\\-]+', $r);
 	$query{$which} = $buf;
     }
     elsif ($which eq "MTA") {
