@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl
+#
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
 
-
 $rcsid   = q$Id$;
-($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
+$rcsid .= " :".($id =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 # For the insecure command actions
 undef %ENV;
