@@ -8,7 +8,8 @@
 
 CC     = cc
 CFLAGS = -DPOSIX
-
+CHMOD  = chmod
+MODE   = 4755
 
 all:
 	@ echo ""
@@ -22,3 +23,4 @@ config.ph: cf
 
 fml: fml.c config.h
 	$(CC) $(CFLAGS) -o fml fml.c
+	$(CHMOD) $(MODE) fml
