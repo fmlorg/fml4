@@ -86,24 +86,28 @@ sub ModeBifurcate
     # Do nothing. Tricky. Please ignore 
     if ($DO_NOTHING) { return 0;}
 
-    # DataBase Access
+    # DataBase Access Probe()
+    # return ASAP if database server is inaccessible.
     if ($USE_DATABASE) {
 	&use('databases');
 
+	# try to probe server
 	my (%mib, %result, %misc, $error);
-
-	# try to access database to verify the server is alive
-	# and try to verify the address is member or not.
-	&DataBaseMIBPrapare('member_p', \%mib);
+	&DataBaseMIBPrepare(\%mib, 'member_p', {'address' => $From_address});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Log("ERROR: database server is down ?");
+	    &Mesg(*Envelope, 'configuration_error');
+	    return 0; # return ASAP
+	}
 
-	# members
-	&DataBaseMIBPrapare('get_member_list', \%mib);
-	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
-
-	# recipients
-	&DataBaseMIBPrapare('get_active_list', \%mib);
-	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	# dump recipients
+	if ($member_p) {
+	    my (%mib, %result, %misc, $error);
+	    &DataBaseMIBPrepare(\%mib, 'dump_active_list');
+	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	    &Log("fail to dump active list") if $mib{'error'};
+	}
     }
 
     # member ot not?
@@ -1484,6 +1488,23 @@ sub DoMailListMemberP
     local($addr, $type) = @_;
     local($file, @file, %file);
 
+    # DataBase Access
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my ($action) = $type eq 'm' ? 'member_p' : 'active_p';
+
+	# try to access database to verify the server is alive
+	# and try to verify the address is member or not.
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, $action, {'address' => $addr});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	$Envelope{'database:cache:$action'} = 1 if $mib{'_result'};
+
+	return $mib{'_result'};
+    }
+    # XXX  not reach here when you use $USE_DATABASE
+
     $SubstiteForMemberListP = 1;
 
     @file = $type eq 'm' ? @MEMBER_LIST : @ACTIVE_LIST;
@@ -1529,7 +1550,25 @@ sub DoMailListMemberP
 sub MailListMemberP { return &DoMailListMemberP(@_, 'm');}
 sub MailListActiveP { return &DoMailListMemberP(@_, 'a');}
 
-sub MailListAdminMemberP { &Lookup($_[0], $ADMIN_MEMBER_LIST);}
+sub MailListAdminMemberP
+{ 
+    my ($addr) = @_;
+
+    # DataBase Access
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'admin_member_p', {'address' => $addr});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	$Envelope{'database:cache:admin_member_p'} = 1 if $mib{'_result'};
+
+	return $mib{'_result'};
+    }
+    else {
+	&Lookup($addr, $ADMIN_MEMBER_LIST);
+    }
+}
 
 sub NonAutoRegistrableP { ! &AutoRegistrableP;}
 sub AutoRegistrableP
@@ -1579,6 +1618,17 @@ sub UseSeparateListP
     else {
 	0;
     }
+}
+
+# canonicalize address for database storing 
+# since we search it in case sensitive mode.
+# preserve case in localpart but not in domain part
+sub TrivialRewrite
+{
+    my ($addr) = @_;
+    my ($local, $domain) = split(/\@/, $addr);
+    $domain =~ tr/A-Z/a-z/;
+    $local. '@'. $domain;
 }
 
 sub AutoRegistHandler
