@@ -63,6 +63,10 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 
 * VERPs
 
+.S	Memory Usage
+
+	MD5
+
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -370,7 +374,6 @@ MANY MANY "; post only (only members can post)"  ...
 .S	Memory Usage
 
 	PGP
-	MD5
 	Sendmail()
 	WholeMail()
 	Forw()
