@@ -167,12 +167,14 @@ INSTALL はインストールの手続き全般について述べています。
 
 という名のファイルにまとめられています。
 UNIX 系の OS 上では手順等に特別な違いはありません。
+
+注意: perl 5 でも 5.00404 以降でないとうまく動かないようです(?)
 .fi
 .if LANG == ENGLISH
 fml fundamentally needs
 
 	a UNIX account
-	perl5
+	perl5 (recommend 5.004 after)
 	MTA (e.g. postfix,sendmail,qmail,exim,...).
 
 See INSTALL for more details on installation.

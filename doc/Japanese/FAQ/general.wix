@@ -23,8 +23,9 @@
 .S	必要なものは？
 =E.S	What I need ?
 
-メールサーバのソフトウエアと perl5 です。
-詳しくはインストールファイル参照
+メールサーバのソフトウエアと perl5 です
+(詳しくはインストールファイル参照)。
+注意: perl 5 でも 5.00404 以降でないとうまく動かないようです(?)
 =E
 You need a mail server (e.g. sendmail, postfix, qmail, exim, zmailer, ...) 
 and perl5.
