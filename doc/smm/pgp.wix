@@ -1,5 +1,13 @@
 .C	PGP (Pretty Good Privacy)
 
+.S	PGP
+
+公開鍵暗合の代表的な応用例。PGP自体についてはたとえば O'Reilly の PGP 
+とか MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？) とかで
+勉強して下さい。ここでは PGP とはなにか？については既知のものとしてい
+ます。
+
+
 .S	PGP での認証に基づくリモート管理
 
 
@@ -27,6 +35,39 @@
 
 メール本体がどこかで盗聴された場合にすでに行なわれたコマンドを
 もう一度叩き込まれるというDOS的な可能性はやっぱりありうる。
+
+
+.S	PGP の公開鍵の登録
+
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+ので、必ず
+
+	makefml pgp mailing-list pgpのオプション
+
+のような使い方をして下さい。たとえば公開鍵を入れたファイルを
+
+	public.asc
+
+とし、elena MLのリモート管理者を増やす場合は
+
+	makefml pgp elena -ka public.asc
+
+です。
+
+
+.S	PGP によるリモート管理
+
+1	admin コマンドを書く
+2	clearsign をする
+
+例えば、mailcrypt なら C-c / s です。この時に秘密鍵を入力。
+
+3	clearsign をしたメールを送る
+
+4	ＭＬサーバは登録された公開鍵を元に本人が書いたものかどうか？
+	をチェックし、本人からのものだと認証されれば
+	コマンド群を実行する。
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
