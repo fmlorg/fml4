@@ -1,99 +1,116 @@
-	fml $B$H(B happy99 $B$K$D$$$F(B
+.HTML_PRE
+	========================================
+	fml advisory 99-01: happy99.exe
+	fml¤Èhappy99¤Ë¤Ä¤¤¤Æ
+	========================================
 
-			Ken'ichi Fukamachi
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
 
+	Copyright (C) 1999 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+-------------------------
 .toc
+-------------------------
 
-$B<j=g$N0UL#$K$D$$$F$O(BINSTALL$B%^%K%e%"%k$r;2>H$7$F2<$5$$(B
+¼ê½ç¤Î°ÕÌ£¤Ë¤Ä¤¤¤Æ¤ÏINSTALL¥Þ¥Ë¥å¥¢¥ë¤ò»²¾È¤·¤Æ²¼¤µ¤¤
 http://www.fml.org/fml/INSTALL/
 
 
-.P	$B%U%#%k%?%j%s%0(B
+.P	¥Õ¥£¥ë¥¿¥ê¥ó¥°
 
-.C	$B%U%#%k%?%j%s%05!G=(B
+.C	¥Õ¥£¥ë¥¿¥ê¥ó¥°µ¡Ç½
 
-.S	fml $B%U%#%k%?%j%s%05!G=$K$D$$$F(B
+.S	fml ¥Õ¥£¥ë¥¿¥ê¥ó¥°µ¡Ç½¤Ë¤Ä¤¤¤Æ
 
-fml 2.2$B0J9_$K$O%X%C%@$d%a!<%kK\J8$K4p$E$/%U%#%k%?%j%s%05!9=$,$"$j$^$9!#(B
-$B$D$^$j!V%X%C%@$KFCDj$N%Q%?!<%s$,$"$C$?$iCF$/!W$H$+!V0l9T%a!<%k$r5qH]$9(B
-$B$k!W$J$I$,$G$-$^$9!#(B
-$B!t@5<0$J%j%j!<%9$H$7$F$O(B2.2$B$G$9$,EvA3(B 2.1 current $B$+$i$"$j$^$9!#(B
-$B!t%I%-%e%a%s%H$J$$$7%=!<%9$K(BUSE_DISTRIBUTE_FILTER$B$H$$$&$N$,$"$l$P(B
-$B!tF0$/%P!<%8%g%s$G$9!#(B
+fml 2.2°Ê¹ß¤Ë¤Ï¥Ø¥Ã¥À¤ä¥á¡¼¥ëËÜÊ¸¤Ë´ð¤Å¤¯¥Õ¥£¥ë¥¿¥ê¥ó¥°µ¡¹½¤¬¤¢¤ê¤Þ¤¹¡£
+¤Ä¤Þ¤ê¡Ö¥Ø¥Ã¥À¤ËÆÃÄê¤Î¥Ñ¥¿¡¼¥ó¤¬¤¢¤Ã¤¿¤éÃÆ¤¯¡×¤È¤«¡Ö°ì¹Ô¥á¡¼¥ë¤òµñÈÝ¤¹
+¤ë¡×¤Ê¤É¤¬¤Ç¤­¤Þ¤¹¡£
+¡ôÀµ¼°¤Ê¥ê¥ê¡¼¥¹¤È¤·¤Æ¤Ï2.2¤Ç¤¹¤¬ÅöÁ³ 2.1 current ¤«¤é¤¢¤ê¤Þ¤¹¡£
+¡ô¥É¥­¥å¥á¥ó¥È¤Ê¤¤¤·¥½¡¼¥¹¤ËUSE_DISTRIBUTE_FILTER¤È¤¤¤¦¤Î¤¬¤¢¤ì¤Ð
+¡ôÆ°¤¯¥Ð¡¼¥¸¥ç¥ó¤Ç¤¹¡£
 
-$B$3$N5!G=$N0lNc$H$7$F(Bhappy99$B$r5qH]$9$kJ}K!$K$D$$$F!"0J2<$G$O=R$Y$^$9!#(B
+¤³¤Îµ¡Ç½¤Î°ìÎã¤È¤·¤Æhappy99¤òµñÈÝ¤¹¤ëÊýË¡¤Ë¤Ä¤¤¤Æ¡¢°Ê²¼¤Ç¤Ï½Ò¤Ù¤Þ¤¹¡£
 
-$B$^$:%U%#%k%?%j%s%0$r(BON$B$K$9$kI,MW$,$"$j$^$9(B($B0J2<(Belena ML$B$rNc$K$H$k(B)$B!#(B
-$B0J2<$N@a$N$$$E$l$+0l$D$NJ}K!$r9T$J$$$^$9!#(B
+¤Þ¤º¥Õ¥£¥ë¥¿¥ê¥ó¥°¤òON¤Ë¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹(°Ê²¼elena ML¤òÎã¤Ë¤È¤ë)¡£
+°Ê²¼¤ÎÀá¤Î¤¤¤Å¤ì¤«°ì¤Ä¤ÎÊýË¡¤ò¹Ô¤Ê¤¤¤Þ¤¹¡£
+¤É¤ì¤âºî¶È¤Î·ë²Ì¤ÏÆ±¤¸¤Ç¤¹¤¬¡¢»È¤¤¤Ê¤ì¤Æ¤¤¤ëÊýË¡¤Ç¤É¤¦¤¾¡£
 
-.S	makefml config $B$r;H$&?M(B
+.S	makefml config ¤ò»È¤¦¿Í
 
    "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
 
-.S	cf $B=q$-$N?M(B
+.S	cf ½ñ¤­¤Î¿Í
 
    USE_DISTRIBUTE_FILTER 1
 
-$B$r=q$/!#$=$N8e(B
+¤ò½ñ¤¯¡£¤½¤Î¸å
 
 	% make config.ph
 
-$B$G(B config.ph $B$r:n$jD>$9!#(B
+¤Ç config.ph ¤òºî¤êÄ¾¤¹¡£
 
-.S	config.ph $B@8=q$-$N?M(B
+.S	config.ph À¸½ñ¤­¤Î¿Í
 
    $USE_DISTRIBUTE_FILTER = 1;
 
 .S	make secure
 
-$B$3$N:]$J$N$G%U%#%k%?%j%s%0$r$O$8$a!"%;%-%e%j%F%#4XO"$N4pK\E*$JItJ,$rA4(B
-$BItM-8z$K$9$k(B
+¤³¤ÎºÝ¤Ê¤Î¤Ç¥Õ¥£¥ë¥¿¥ê¥ó¥°¤ò¤Ï¤¸¤á¡¢¥»¥­¥å¥ê¥Æ¥£´ØÏ¢¤Î´ðËÜÅª¤ÊÉôÊ¬¤òÁ´
+ÉôÍ­¸ú¤Ë¤¹¤ë
 
    % cd /var/spool/ml/elena
    % make secure
 
-$B$9$k$H$$$m$$$m$J@_Dj$r<+F0E*$K(Bcf$B$K=q$$$F(Bconfig.ph$B$r(BUPDATE$B$9$k!#(B 
-$B$d$C$F$k@_Dj$O2hLL$KI=<($5$l$k!#(B
+¤¹¤ë¤È¤¤¤í¤¤¤í¤ÊÀßÄê¤ò¼«Æ°Åª¤Ëcf¤Ë½ñ¤¤¤Æconfig.ph¤òUPDATE¤¹¤ë¡£ 
+¤ä¤Ã¤Æ¤ëÀßÄê¤Ï²èÌÌ¤ËÉ½¼¨¤µ¤ì¤ë¡£
 
 
-.C	$B%U%#%k%?%j%s%0$K?7%k!<%k$r2C$($k(B
+.C	¥Õ¥£¥ë¥¿¥ê¥ó¥°¤Ë¿·¥ë¡¼¥ë¤ò²Ã¤¨¤ë
 
-.S	cf$B$r;H$&?M(B
+¤É¤Á¤é¤Ç¤âºî¶È¤Î·ë²Ì¤ÏÆ±¤¸¤Ç¤¹¤¬¡¢»È¤¤¤Ê¤ì¤Æ¤¤¤ëÊýË¡¤Ç¤É¤¦¤¾¡£
+
+.S	cf¤ò»È¤¦¿Í
 
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
 
-$B$r(Bcf$B$N:G8e(B(LOCAL_CONFIG$B9T$N8e(B)$B$KDI2C$7$F(B config.ph $B$r(B update $B$9$k$?$a(B
-$B$K(B 
+¤òcf¤ÎºÇ¸å(LOCAL_CONFIG¹Ô¤Î¸å)¤ËÄÉ²Ã¤·¤Æ config.ph ¤ò update ¤¹¤ë¤¿¤á
+¤Ë 
 
 	% make config.ph
 
-.S	config.ph$B$r;H$&?M(B
+.S	config.ph¤ò»È¤¦¿Í
 
-config.ph$B@8=q$-$N?M$O(B
+config.phÀ¸½ñ¤­¤Î¿Í¤Ï
 
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
 
-$B$rDI2C!#(B
+¤òÄÉ²Ã¡£
 
 
-.P	fml$B0J30$NItJ,$GCF$/(B
+.P	fml°Ê³°¤ÎÉôÊ¬¤ÇÃÆ¤¯
 
-.C	$BA0=hM}%W%m%0%i%`(B bin/multipart.pl $B$r;H$&>l9g(B
+.C	Á°½èÍý¥×¥í¥°¥é¥à bin/multipart.pl ¤ò»È¤¦¾ì¹ç
 
      MTA -> bin/multipart.pl -> fml.pl
 
-$B$N$h$&$K!"A0=hM}%U%#%k%?%j%s%0$,$"$k>l9g!#(B
-multipart.pl $B$K$D$$$F$O(B op.jp$B$r;2>H(B
+¤Î¤è¤¦¤Ë¡¢Á°½èÍý¥Õ¥£¥ë¥¿¥ê¥ó¥°¤¬¤¢¤ë¾ì¹ç¡£
+multipart.pl ¤Ë¤Ä¤¤¤Æ¤Ï op.jp¤ò»²¾È
 http://www.fml.org/fml/op/
 
-2.2A#34 $B0J9_$N$b$N$K$$$l$+$($k$H(B happy99 $B$,(B uuencode $B$5$l$?$b$N$,$/$C(B
-$B$D$$$F$?$i$=$NItJ,$r@Z$j$H$k!#(B
-$B!t(B by Yuao Tanigawa <yuao@infonia.ne.jp>: fml-support ML's Count:05863 
+2.2A#34 °Ê¹ß¤Î¤â¤Î¤Ë¤¤¤ì¤«¤¨¤ë¤È happy99 ¤¬ uuencode ¤µ¤ì¤¿¤â¤Î¤¬¤¯¤Ã
+¤Ä¤¤¤Æ¤¿¤é¤½¤ÎÉôÊ¬¤òÀÚ¤ê¤È¤ë¡£
+¡ô by Yuao Tanigawa <yuao@infonia.ne.jp>: fml-support ML's Count:05863 
 
-$B$?$@(Bmultipart.pl$B$G$d$k$3$H$K$D$$$F$O0UL#O@E*$K5?Ld$O$"$k(B(e.g. $B$3$N>l=j(B
-$B$G$=$&$$$&$3$H$r$9$k$Y$-$+!):#8e$O!)$J$I$K$D$$$F(B)
+¤¿¤Àmultipart.pl¤Ç¤ä¤ë¤³¤È¤Ë¤Ä¤¤¤Æ¤Ï°ÕÌ£ÏÀÅª¤Ëµ¿Ìä¤Ï¤¢¤ë(e.g. ¤³¤Î¾ì½ê
+¤Ç¤½¤¦¤¤¤¦¤³¤È¤ò¤¹¤ë¤Ù¤­¤«¡©º£¸å¤Ï¡©¤Ê¤É¤Ë¤Ä¤¤¤Æ)
+
+
+.P	Considerations
+
+.C	Further investigations
+
+¤è¤êÁÈ¿¥¤À¤Ã¤¿¥Õ¥£¥ë¥¿¥ê¥ó¥°¥ë¡¼¥ë½¸¤òºî¤ì¤ë¤«¡©
 
 
 $Id$
-Copyright (C) 1999 Ken'ichi Fukamachi
-          All rights reserved. 
