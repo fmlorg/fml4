@@ -220,6 +220,8 @@ sub SmtpIO
 
     undef %MCIWindowCB; # initialize MCI Control Block;
 
+    &ConvHdrCRLF(*e);
+
     if ($e{'mode:__deliver'}) { # consider mci in distribute() 
 	local($n, $i);
 	$n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
@@ -232,7 +234,6 @@ sub SmtpIO
 	    return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
 
 	    # @RcptLists loop under "fixed smtp server"
-	    &__SmtpIO_1(*e, *smtp_pcb);
 	    &__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
 	    &__SmtpIOClose(*e, $smtp_pcb{'ipc'});
 
@@ -246,10 +247,10 @@ sub SmtpIO
 	&__SmtpIOConnect(*e, *smtp_pcb, *rcpt, *smtp, *files);
 	return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
 
-	&__SmtpIO_1(*e, *smtp_pcb);
 	&__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
 	&__SmtpIOClose(*e, $smtp_pcb{'ipc'});
     }
+    &RevConvHdrCRLF(*e);
 
     if ($USE_SMTP_PROFILE) { &Log("SMTPProf: ".(time-$SmtpIOStart)."sec.");}
 
@@ -368,16 +369,6 @@ sub __SmtpIOConnect
     $smtp_pcb{'sendmail'} = $sendmail;
 }
 
-sub __SmtpIO_1
-{
-    local(*e, *smtp_pcb) = @_;
-
-    $e{'Hdr'} =~ s/\n/\r\n/g; 
-    $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
-
-    $NULL;
-}
-
 sub __SmtpIOClose
 {
     local(*e, $ipc) = @_;
@@ -388,6 +379,21 @@ sub __SmtpIOClose
     &SmtpPut2Socket('QUIT', $ipc);
 
     close(S);
+}
+
+sub ConvHdrCRLF
+{
+    local(*e) = @_;
+
+    $e{'Hdr'} =~ s/\n/\r\n/g; 
+    $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
+
+    $NULL;
+}
+
+sub RevConvHdrCRLF
+{
+    local(*e) = @_;
 
     ### SMTP Section: save-excursion(?)
     # reverse \r\n -> \n
@@ -760,6 +766,11 @@ sub SmtpPutActiveList2Socket
 	($size, $mci_window_start, $mci_window_end) = &GetMCIWindow($file);
 	print STDERR "window $file:($start, $end)\n" if $debug_mci;
 	print STDERR "window $file:($mci_window_start, $mci_window_end)\n";
+	if ($debug_mci_window2) {
+	    local($fn) = $file;
+	    $fn =~ s#$DIR/##;
+	    &Log("mci_window $fn:($mci_window_start, $mci_window_end)");
+	}
     }
 
     # when crosspost, delivery info is saved in crosspost.db;
