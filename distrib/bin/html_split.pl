@@ -3,7 +3,7 @@
 require 'getopts.pl';
 &Getopts("dB:D:U:R:");
 
-$dir       = $opt_D || "var/db/$db";
+$dir       = $opt_D || die("require -D TARGET_DIR");
 $url_base  = $opt_U || die("Please define URL_BASE");
 $href_repl = $opt_R; 
 
