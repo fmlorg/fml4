@@ -75,6 +75,36 @@ sub ExpandOption
 }
 
 
+sub ExpandMemberList
+{
+    local($config_ph, @list, $list, $addr);
+
+    if (-f "$ML_DIR/$ML/config.ph") {
+	$config_ph = "$ML_DIR/$ML/config.ph";
+	package config_ph;
+	eval require $main'config_ph; #';
+	package main;
+    }
+
+    @list = @config_ph'MEMBER_LIST; #';
+
+    for $list (@list) {
+	if (open(LIST, $list)) {
+	    while (<LIST>) {
+		next if /^\#/;
+
+		($addr) = split;
+		print "\t\t\t<OPTION VALUE=$addr>$addr\n";
+	    }
+	    close(LIST);
+	}
+	else {
+	    &ERROR("cannot open \$ML_DIR/$ML/config.ph");
+	}
+    }
+}
+
+
 sub ExpandHowToUpdateAliases
 {
     local($s);
@@ -96,6 +126,11 @@ sub Convert
 	while (<$file>) {
 	    if (/__EXPAND_OPTION_ML__/) {
 		&ExpandOption;
+		next;
+	    }
+
+	    if (/__EXPAND_OPTION_MEMBER_LIST__/) {
+		&ExpandMemberList;
 		next;
 	    }
 
