@@ -3,7 +3,8 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 #
-# $Id$;
+# libconfirm.pl,v 1.14 1997-05-31 22:30:51+0900 fukachan Exp fukachan;
+
 
 sub ConfirmationModeInit
 {
