@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -36,6 +36,24 @@ sub ConfirmationModeInit
 	    "Confirm'GenUnsubscribeConfirmReplyText";	    
 	$CONFIRM_REPLAY_SUBJECT_FUNCTION = 
 	    "Confirm'GenUnsubscribeConfirmReplySubject";
+    }
+    elsif ($mode eq 'chaddr') {
+	&Log("ConfirmationModeInit: mode=$mode");
+	$CONFIRMATION_KEYWORD = "chaddr-confirm";
+
+	$CONFIRMATION_ENV_SAVED_FILE = "$VARLOG_DIR/$mode.info";
+
+	$CONFIRMATION_FILE = "$DIR/chaddr.confirm";
+	$CONFIRMATION_LIST = "$FP_VARLOG_DIR/chaddr.confirm";
+	$CONFIRMATION_SUBSCRIBE = "chaddr";
+
+	$CONFIRMATION_RESET_KEYWORD = 
+	    $CONFIRMATION_RESET_KEYWORD || "chaddr-confirm reset";
+
+	$CONFIRM_REPLAY_TEXT_FUNCTION    = 
+	    "Confirm'GenChaddrConfirmReplyText";	    
+	$CONFIRM_REPLAY_SUBJECT_FUNCTION = 
+	    "Confirm'GenChaddrConfirmReplySubject";
     }
     else {
 	# save the request and given identifier;
@@ -137,8 +155,8 @@ sub Confirm
 	    &Append2("$time\t$addr\t$id\t$name", $CONFIRMATION_LIST);
 
 	    # Generating preamble of confirmation
-	    $cf{'id'}   = $id; 
-	    $cf{'name'} = $name;
+	    $cf{'id'}   = $e{'buf:confirmation:id'}   = $id; 
+	    $cf{'name'} = $e{'buf:confirmation:name'} = $name;
 
 	    # create new "id"
 	    $e{"GH:Subject:"} = 
@@ -347,6 +365,20 @@ sub ManualRegistConfirm
 
     # back store
     ($CONFIRMATION_FILE, $CONFIRMATION_WELCOME_STATEMENT) = ($org_cf, $org_ws);
+}
+
+
+##### Section: CHADDR confirmation
+sub FML_SYS_ChaddrConfirm
+{
+    local(*e, $buf) = @_; # $e{'buf:req:chaddr-confirm'});
+
+}
+
+
+sub FML_SYS_ChaddrRequest
+{
+    local(*e, $buf) = @_; # $e{'buf:req:chaddr'});
 }
 
 
@@ -576,11 +608,12 @@ sub GenKey
     local($key)  = time|$$;
 
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
-    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
-			   1900 + $year, $mon + 1, $mday, $hour, $min);
 
     &main'SRand(); #';
-    $CurrentTime.int(rand($seed + $key));
+
+    sprintf("%04d%02d%02d%02d%02d%02d", 
+	    1900 + $year, $mon + 1, $mday, $hour, $min, $sec)
+	.$$.int(rand($seed + $key));
 }
 
 
@@ -644,6 +677,88 @@ sub GenUnsubscribeConfirmReplyText
     }
     elsif ($mode eq 'Confirm::expired') {
 	$s .= "Your confirmation for \"unsubscribe request for $MAIL_LIST\"\n";
+	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
+	$s .= "So we treat you request is the first time request.\n";
+	$s .= "Please try again. The new confirm key is as follows\n\n";
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
+	$s .= "(Name NOT E-Mail Address)\n";
+	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
+	$s .= "For example,\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Please use your name NOT E-Mail Address! like \n\n";
+	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+
+    $s;
+}
+
+sub GenChaddrConfirmReplySubject
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    &Log("GenChaddrConfirmReplySubject: $mode") if $mode ne 'Default';
+
+    if ($mode eq 'Default') {
+	$s = "Chaddr request result $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Confirmed') {
+	$s = "Chaddr and confirmation result $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Error') {
+	$s = "Chaddr with confirmation error $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::GenPreamble') {
+	$s = "Chaddr confirmation request $ML_FN";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	;
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	;
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	;
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	;
+    }
+
+    $s || "Chaddr request result $ML_FN";
+}
+
+
+sub GenChaddrConfirmReplyText
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    &Log("GenChaddrConfirmReplyText: $mode");
+
+    if ($mode eq 'Confirm::GenPreamble') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	$s .= "Please reply this mail to confirm your Chaddr request\n";
+	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
+	$s .= "If confirmed, you are removed from MAILING LIST <$MAIL_LIST>.";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Confirmation Syntax or Password Error:\n";
+	$s .= "Syntax is following style, check again syntax and password\n\n";
+	$s .= "$CONFIRMATION_KEYWORD password $cf{'name'}\n";
+	$s .= "\nwhere this \"password\" can be seen\n";
+	$s .= "in the confirmation request mail from MAILING LIST <$MAIL_LIST>.\n";
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	$s .= "Your confirmation for \"Chaddr request for $MAIL_LIST\"\n";
 	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
 	$s .= "So we treat you request is the first time request.\n";
 	$s .= "Please try again. The new confirm key is as follows\n\n";

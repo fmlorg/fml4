@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -220,7 +220,12 @@ sub DoProcedure
 	  $trap_counter++; # found in %Procedure;
 
 	  # REPORT TO ADMINS ALSO 
-	  if ($Procedure{"r2a#$_"}) { $e{'mode:notify_to_admin_also'} = 1;}
+	  if ($Procedure{"r2a#$_"}) { &EnableReportForw2Admin(*e);}
+
+	  if ($Procedure{"confirm#$_"} &&
+	      (! $Procedure{"confirm_r2a#$_"})) { 
+	      &DisableReportForw2Admin(*e);
+	  }
 
 	  # REPORT
 	  if ($Procedure{"r#$_"}) {
@@ -456,6 +461,21 @@ sub InitProcedure
 		    'change',         'ProcSetMemberList',
 		    'r#change', 1,
 		    'r2a#change', 1,
+
+		    # if under confirmation, do not report
+		    'confirm#chaddr',         $CHADDR_AUTH_TYPE,
+		    'confirm#change-address', $CHADDR_AUTH_TYPE,
+		    'confirm#change',         $CHADDR_AUTH_TYPE,
+		    'confirm_r2a#chaddr',         ($CHADDR_AUTH_TYPE ? 0 : 1),
+		    'confirm_r2a#change-address', ($CHADDR_AUTH_TYPE ? 0 : 1),
+		    'confirm_r2a#change',         ($CHADDR_AUTH_TYPE ? 0 : 1),
+
+		    # confirmation mode chaddr
+		    'chaddr-confirm',  'ProcSetMemberList',
+		    'r#chaddr-confirm', 1,
+		    'r2a#chaddr-confirm', 1,
+
+
 		    'bye',            'ProcSetMemberList',
 		    'r#bye',         1,
 		    'r2a#bye',         1,
@@ -463,9 +483,16 @@ sub InitProcedure
 		    'r#unsubscribe', 1,
 		    'r2a#unsubscribe', 1,
 
+		    # if under confirmation, do not report
+		    'confirm_r2a#bye', ($UNSUBSCRIBE_AUTH_TYPE ? 0 : 1),
+		    'confirm_r2a#unsubscribe', ($UNSUBSCRIBE_AUTH_TYPE? 0 : 1),
+		    'confirm#bye',         $UNSUBSCRIBE_AUTH_TYPE,
+		    'confirm#unsubscribe', $UNSUBSCRIBE_AUTH_TYPE,
+
 		    # confirmation mode unsubscribe
 		    'unsubscribe-confirm',  'ProcSetMemberList',
 		    'r#unsubscribe-confirm', 1,
+		    'r2a#unsubscribe-confirm', 1,
 
 		    # Subscribe
 		    ($REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE || 'subscribe'), 'ProcSubscribe',
@@ -843,19 +870,11 @@ sub ProcSetMemberList
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';    
     if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
 	if ($CHADDR_AUTH_TYPE eq 'confirmation') {
-	    &use('confirm');
-	    &ConfirmationModeInit(*e, 'chaddr');
-
-	    local(@addr) = split(/\@/, $From_address);
-	    $s = join(" ", "chaddr", @addr);
-
-	    &Confirm(*e, $From_address, $s) || return $NULL;
+	    return &Trap__ChaddrRequest(*e);
 	}
     }
     elsif ($proc eq 'chaddr-confirm') {
-	&use('confirm');
-	&ConfirmationModeInit(*e, 'chaddr');
-	&Confirm(*e, $From_address, join(" ", @Fld)) || return $NULL;
+	return &Trap__ChaddrConfirm(*e);
     }
 
     &use('amctl');
