@@ -90,6 +90,9 @@ sub TalkWithHttpServer
     $port   = 80 unless defined($port); # default port
     $target = pack($pat, &AF_INET, $port, $addrs);
 
+    # reset
+    undef $e{'http:status'};
+
     # temporary
     &Debug("open(HOUT, > $tmpf") if $debug;
     if (! open(HOUT, "> $tmpf")) { 
@@ -115,9 +118,16 @@ sub TalkWithHttpServer
 	    print S "$body\n";
 	}
 
-
 	### RETRIEVE (sysread for binary)
-	while (sysread(S, $_, 4096)) { print HOUT $_;}
+	while (sysread(S, $_, 4096)) {
+	    if ($e{"special:probehttp"} && $tp eq 'http') {
+		if (/^HTTP\/[\d\.]+\s+(\d+\s+\S+)/) {
+		    $e{'http:status'} = $1;
+		}
+	    }
+
+	    print HOUT $_;
+	}
 
 	### CLOSE 
 	close(HOUT);
