@@ -4,6 +4,14 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+
+2002/02/10
+
+   define $SUBSCRIBE_ANNOUNCE_FORWARD_TYPE
+	how to announce the new comer if $AUTO_REGISTERED_UNDELIVER_P
+	is 0. 
+	$SUBSCRIBE_ANNOUNCE_FORWARD_TYPE = raw / prepend_info 
+
 2002/02/01
 
   bug fix Envelope Filter
@@ -177,7 +185,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.233 2002/01/25 15:27:10 fukachan Exp $
+	add $FML: CHANGES,v 1.234 2002/02/01 14:25:30 fukachan Exp $
 
 2001/10/03
 
