@@ -7,14 +7,14 @@ INIT_PACKAGE () {
 
 		### rcsid is not used explicit, so delete here
 		#	echo " "; echo "Fixing rcsid ... " 
-		#	/bin/sh .release/bin/fix-rcsid.sh
+		#	/bin/sh distrib/bin/fix-rcsid.sh
 
 		echo " "; echo "O.K. rcs check in var/doc/ ... ";
-		sh .release/bin/sync-rcs-of-doc.sh
+		sh distrib/bin/sync-rcs-of-doc.sh
 
 		echo " "; echo "Fixing permissions ... ";
-		chmod 755 *.pl bin/* sbin/* libexec/*
-		chmod 644 lib*.pl proc/*.pl
+		chmod 755 kern/*.pl bin/* sbin/* libexec/*
+		chmod 644 kern/lib*.pl proc/*.pl
 	)
 }
 
@@ -33,17 +33,17 @@ INIT_VERSION () {
 	echo " "; 
 	echo "fml release version::Initialize() ... "
 	echo "fml release          Date() ... "
-	perl .release/bin/fml_version.pl -t fml.pl > /dev/null
+	perl $FML/distrib/bin/fml_version.pl -t kern/fml.pl > /dev/null
 
 	if [ $release = 1 ]
 	then
 		echo "FML Release";
-		perl $FML/.release/bin/fml_version.pl -s
+		perl $FML/distrib/bin/fml_version.pl -s
 
 	elif [ $init = 1 ]
 	then
 		echo "fml release          Increment() ... "
-		perl .release/bin/fml_version.pl -i fml.pl > /dev/null
+		perl $FML/distrib/bin/fml_version.pl -i kern/fml.pl > /dev/null
 	else
 		echo ""
 		echo "RELEASE VERSION NOT INCREMENTED"
@@ -59,7 +59,7 @@ INIT_VERSION () {
 	date 		>> $RELEASE_MANIFEST
 	echo "" 	>> $RELEASE_MANIFEST
 
-	RS="???*.pl proc/*.pl bin/*.pl sbin/*.pl libexec/*.pl contrib/*/*.pl"
+	RS="kern/*.pl proc/*.pl bin/*.pl sbin/*.pl libexec/*.pl contrib/*/*.pl sys/*/[a-z]*"
 
 	if [ $package = 1 ]
 	then
@@ -67,7 +67,7 @@ INIT_VERSION () {
 		echo " "; 
 		for file in $RS
 		do
-			perl .release/bin/show-rcsid.pl $file |\
+			perl $FML/distrib/bin/show-rcsid.pl $file |\
 			tee -a $RELEASE_MANIFEST
 		done
 

@@ -8,7 +8,7 @@ branch=0
 
 # prog
 MAKE=make
-INCLUDE_PROG="perl .release/bin/_include.pl "
+INCLUDE_PROG="perl distrib/bin/_include.pl "
 
 FWIX_OPTS=-F
 
@@ -24,18 +24,17 @@ DATE_LOG=/var/tmp/_datelog_
 
 # config file
 
-PATCHLEVEL_DIR=.release/patch
+PATCHLEVEL_DIR=distrib/patch
 PATCHLEVEL_FILE=$PATCHLEVEL_DIR/version
 
-
+# distribution list
 RELEASE_MANIFEST=etc/RELEASE_FILES
 
+# distribution directory of snapshot
+DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST
 
-# distribution directory
-DIRECTORY_LIST=.release/directory_list
 
-
-perl .release/bin/gen_variable_from_release_files.pl .release/RELEASE_FILES > $TMP
+perl distrib/bin/gen_variable_from_release_files.pl distrib/etc/RELEASE_FILES > $TMP
 . $TMP
 
 

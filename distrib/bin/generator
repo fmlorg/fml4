@@ -2,8 +2,8 @@
 
 umask 022
 
-. .release/config
-. .release/getopt
+. distrib/etc/config
+. distrib/lib/getopt
 
 trap 'rm -f $TMP' 0 1 3 6 9 15
 
@@ -11,9 +11,9 @@ trap 'rm -f $TMP' 0 1 3 6 9 15
 chdir $FML || exit 1
 test -d $UPDIR/FML || mkdir $UPDIR/FML # backup directory
 
-. .release/fyi
-. .release/libinit
-. .release/libgen
+. distrib/lib/fyi
+. distrib/lib/libinit
+. distrib/lib/libgen
 
 INIT 
 

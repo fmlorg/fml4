@@ -25,7 +25,7 @@ GEN_LIBRARY () {
 
 	echo  " ";
 	echo  "Generating libkern.pl  ";
-	sed '/^$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
+	sed '/^$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
 
 }
 
@@ -83,7 +83,8 @@ COPY_DOCS () {
 	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
 	(chdir $UPDIR/distrib/doc; tar xvf - )
 
-	perl .release/bin/fix-wix.pl doc/smm/op.wix > $UPDIR/distrib/doc/smm/op.wix
+	perl distrib/bin/fix-wix.pl -R doc/smm/op.wix \
+	> $UPDIR/distrib/doc/smm/op.wix
 
 	echo " "; echo "Copying Documents (doc/ri/)...";
 	(chdir doc; tar cf - ri/*.wix) |\
@@ -92,15 +93,18 @@ COPY_DOCS () {
 
    # http
    echo " ";
-   echo "Copying html/index.html < doc/html/release-index.html";
-   echo "doc/html/release-index.html => \$UPDIR/distrib/doc/html/index.html";
-	cp -p doc/html/release-index.html $UPDIR/distrib/doc/html/index.html
+
+   CPP="cpp -P -DDIST "
+   HTML_DIR=$UPDIR/distrib/doc/html
+   $CPP -DJAPANESE doc/html/index.html > $HTML_DIR/index-j.html
+   $CPP -UJAPANESE doc/html/index.html > $HTML_DIR/index-e.html
+   cp doc/html/release-index.html $HTML_DIR/index.html
+   cp doc/html/fml.css $HTML_DIR/
 
    (
 	chdir var/html;
-	echo "tar cf - INFO.html RE* INSTALL ...";
-	tar cf - INFO.html RE* INSTALL* INSTALL_on_NT4* |\
-	(chdir $UPDIR/distrib/doc/html; tar xvf -)
+	echo "rsync -av [A-Z]* $UPDIR/distrib/doc/html/"
+	rsync -av [A-Z]* $UPDIR/distrib/doc/html/
    )	
 
 }
@@ -116,11 +120,14 @@ COPY_SOURCES () {
 	cp -p $C_SOURCES	$UPDIR/distrib/C
 	cp -p $PERL_SOURCES	$UPDIR/distrib/src
 
-	find proc/arch -type f -print|\
+	find sys -type f -print|\
 	egrep -v '*~|/RCS' |sed 's#proc/##' > $archsrc
-	(chdir proc; tar cf - `cat $archsrc`)|\
-	(chdir $UPDIR/distrib/src; tar xvf -)
 
+	# removed proc/arch (98/08/01)
+	# (chdir proc; tar cf - `cat $archsrc`)|\
+	# (chdir $UPDIR/distrib/src; tar xvf -)
+
+	echo "   copying $ARCH_SOURCE -> $UPDIR/distrib/"
 	find $ARCH_SOURCES -type f -print|\
 	egrep -v '*~|/RCS|/FVS|/CVS|WINDOWS_NT4/docs|WINDOWS_NT4/lib|WINDOWS_NT4.old|Makefile' > $archsrc
 
@@ -167,16 +174,20 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	echo " ";
 	echo "Fixing Rcsid ..."
 
+   (cd kern	
+
 	for file in fml.pl msend.pl 
 	do
 		echo "   Fixing Rcsid in $file ... ( > src/$file )"
-		perl .release/bin/fml_version.pl $file > $UPDIR/distrib/src/$file
+		perl $FML/distrib/bin/fml_version.pl $file > $UPDIR/distrib/src/$file
 	done
+
+   )
 
 	for file in $LIBEXEC_SOURCES 
 	do
 		echo "   Fixing Rcsid in $file ... "
-		perl .release/bin/fml_version.pl $file > $UPDIR/distrib/$file
+		perl $FML/distrib/bin/fml_version.pl $file > $UPDIR/distrib/$file
 	done
 }
 
@@ -184,10 +195,10 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 FIX_DISTRIBUTION_FILE_MAKEFILE () { 
 	echo " "; echo "Fixing Makefile"
 
-	sed '/^DISTRIB/,$d' Makefile |\
-	sed '/^include/d'|\
-	sed 's/gar/rm \-f/' |\
-	sed 's/delete/rm \-f/' > $UPDIR/distrib/Makefile
+	# sed '/^DISTRIB/,$d' Makefile |\
+	# sed '/^include/d'|\
+	# sed 's/gar/rm \-f/' |\
+	# sed 's/delete/rm \-f/' > $UPDIR/distrib/Makefile
 }
 
 
@@ -234,7 +245,7 @@ FIX_DISTRIBUTION_LINKS () {
 
 GEN_CONTRIB () {
 
-	for dir in `cat .release/contrib_list`
+	for dir in `cat distrib/contrib_list`
 	do
 		echo " "; 
 		echo "---installing contrib/$dir"
@@ -266,7 +277,7 @@ FIX_DISTRIBUTION_PERMISSION () {
 PATCHLEVEL_INCREMENT () {
    ( 
 	chdir $FML
-	perl .release/bin/fml_version.pl -p $PATCHLEVEL $file |\
+	perl $FML/distrib/bin/fml_version.pl -p $PATCHLEVEL kern/$file |\
 	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
 	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
 	> $UPDIR/distrib/$target
@@ -417,4 +428,11 @@ GEN_ARCHIVE () {
 	#		chdir $FTP
 	#		ls -lR . | gzip -9 > ls-lR.gz
 	#	)
+
+	(
+		echo "Creating MD5"
+		chdir $FTP
+
+		md5 *gz *zip |sort |tee MD5SUM
+	)
 }

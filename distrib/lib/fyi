@@ -1,3 +1,4 @@
 echo  "" 
 echo  "'$MAKE ci' DONE? O.K.?" 
+echo  "ssh-add? ssh configuration O.K.?"
 echo  "" 

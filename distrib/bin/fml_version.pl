@@ -40,7 +40,7 @@ if ($SHOW_ID) {
 while (<>) {
     if (/^\$Rcsid.*=\s+[\'\"](\S+)/) {
 	$prog = $1;	# reset;
-
+	
 	if ($query) {
 	    #print "fml $ID$PL \#: ${MailDate}JST $Year\n";
 	    print "fml $ID$PL \#:\n";
@@ -69,11 +69,13 @@ sub GetID
     chop($ID = <F>);
     $ID =~ s/\s*//g;
 
+    print STDERR "GetID: $ID =>\t";
+
     if ($ID =~ /([\d\._]+[A-Z]\#)(\d+)$/) {
 	$ID = $1;
 	$PL = $2;
     }
-    elsif ($ID =~ /([\d\._]+[\#\w\.]+)(\d+)$/) {
+    elsif ($ID =~ /([\d\._]+[\#\w\.]+\#)(\d+)$/) {
 	$ID = $1;
 	$PL = $2;
     }
@@ -82,7 +84,7 @@ sub GetID
 	$PL = "";
     }
 
-    print STDERR "GetID: $ID $PL\n";
+    print STDERR "<$ID $PL>\n";
     ($ID, $PL);
 }
 
