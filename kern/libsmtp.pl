@@ -59,9 +59,12 @@ sub SmtpInit
     }
 
     # ANYTIME, Try fixing since plural mails are delivered
-    $e{'Body'} =~ s/\n\./\n../g;           # enough for body ^. syntax
-    $e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
-    $e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
+    if (index($e{'Body'}, "\n\.") > 0) {
+	$e{'Body'} =~ s/\n\./\n../g;           # enough for body ^. syntax
+	$e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
+    }
+    local($buf) = substr($e{'Body'}, -2);
+    $e{'Body'} .= "\n" unless $buf =~ /\n$/o;	# without the last "\n"
 
     return 1 if $SocketOK;
     return ($SocketOK = &SocketInit);
