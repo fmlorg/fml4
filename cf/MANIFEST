@@ -62,6 +62,12 @@ debug:		 1
 
 
 INFO:
+### DEFINITIONS FOR "makefml"
+#
+NON_PORTABILITY:	0
+
+
+INFO:
 # CF Version 
 # Declare "V2"
 CFVersion:	2
@@ -452,11 +458,14 @@ HELP_FILE:	 $DIR/help
 DENY_FILE:	 $DIR/deny
 			# attention to illegal access
 
-WELCOME_FILE:	 $DIR/guide
+WELCOME_FILE:	 $DIR/welcome
 			# could be $DIR/welcome
 
 WELCOME_STATEMENT:Welcome to our $ML_FN\n         You are added automatically
 			# Subject of the reply mail for welcome
+
+CONFIRMATION_FILE:	 $DIR/confirm
+			# explanation of confirmation mode;
 
 LOGFILE:	 $DIR/log
 			# activity log file
