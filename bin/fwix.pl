@@ -873,6 +873,11 @@ sub OutputFile
     elsif ($mode eq 'text') {
 	$input = $Lang eq 'ENGLISH' ? 'ENG' : 'TMPF';
 
+	if ($Index{$Lang}) {
+	    local($sep) = ("-" x 60);
+	    $Index{$Lang} = $sep. $Index{$Lang}. $sep."\n";
+	}
+
 	while (<$input>) {
 	    undef $Error;
 
