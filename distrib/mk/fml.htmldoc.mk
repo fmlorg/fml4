@@ -134,6 +134,7 @@ var/html/fml.css: doc/html/fml.css
 
 ### main ###
 .include "distrib/mk/fml.cf.mk"
+.include "distrib/mk/fml.ref.mk"
 __htmlbuild__ += __inithtml__
 __htmlbuild__ += var/html/fml.css
 __htmlbuild__ += ${HTML_MISC} 
