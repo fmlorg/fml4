@@ -16,7 +16,7 @@
 
 .HTML_PRE
 .if LANG == ENGLISH
-.include error mail-handling.en.wix
+.include errormail-handling.en.wix
 .return
 .fi
 ○ ＭＬの規模が小さい場合はエラーメールも個別に処理できるが
@@ -41,40 +41,40 @@ fml 附属の libexec/mead.pl というプログラムはこのエラーメールを解析し
 
 でＭＬを作成した際には include-mead という設定ファイルが作成される。
 中身は次のようなものである
-.q
+
 # MEAD: Mail Error Analyze Daemon ("-m auto" to remove addrs automatically)
 # a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
 "|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
-.~q
+
 
 また作成される aliases 中にもコメントアウトされているがmeadの見本が入っ
 ている。
-.q
+
 # Mail Error Analyzer Daemon
 # If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
 #elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
-.~q
+
 
 mead での処理を有効にするためには /etc/aliases に
-.q
+
 # Mail Error Analyzer Daemon
 # If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
 elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
-.~q
+
 を書いて newaliases を走らせるだけで良い。
 
 
 ○ 自動で削除をする
 
 /var/spool/ml/elena/include-mead で -m report を -m auto にする
-.q
+
 "|/usr/local/fml/libexec/mead.pl -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
-.~q
+
 
 /etc/aliases の設定は特に変更する必要はない。同様に
-.q
+
 elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
-.~q
+
 を書いて newaliases を走らせるだけで良い。
 
            Copyright (C) 1999 Ken'ichi Fukamachi
