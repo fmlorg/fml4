@@ -1,0 +1,136 @@
+.HTML_PRE
+	FML Security Advisory 2000-003: Love Letter Worm
+	========================================
+
+Topic:	Love Letter Worm
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 2000 Ken'ichi Fukamachi
+		All rights reserved.
+
+[Abstract] 
+   * add the rule to config.ph
+
+   &DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+
+   $DISTRIBUTE_FILTER_HOOK = q#
+      if ($e{'Body'} =~ /Content.*\.vbs/) {
+           return 'VB script attatchment';
+      }
+   #;
+
+
+[References]
+   "CERT Advisory CA-2000-04 Love Letter Worm"
+   http://www.cert.org/advisories/CA-2000-04.html
+
+  http://www.sophos.com/virusinfo/analyses/vbsloveleta.html
+  http://www.sophos.com/virusinfo/analyses/trojloveleta.html
+
+
+.~HTML_PRE
+-------------------------
+.toc
+-------------------------
+
+手順の意味についてはINSTALLマニュアルを参照して下さい
+=E
+See INSTALL manual for more details on how to configure fml.
+
+.url	http://www.fml.org/fml/INSTALL/
+
+"CERT Advisory CA-2000-04 Love Letter Worm"
+
+.P	フィルタリング
+=E.P	Filtering
+
+.include enable_filter.wix
+
+
+.C	フィルタリングに新ルールを加える
+=E.C	Add a new filtering rule
+
+どちらでも作業の結果は同じですが、使いなれている方法でどうぞ。
+=E
+The following ruels are the same. Please use one you are familliar with.
+
+.S	cfを使う人
+=E.S	cf
+
+=E
+To add
+
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+
+亜種がでるだろうとおもわれるので、汎用的にはVBスクリプト全部を弾く
+
+$DISTRIBUTE_FILTER_HOOK = q#
+      if ($e{'Body'} =~ /Content.*\.vbs/) {
+           return 'VB script attatchment';
+      }
+#;
+
+
+をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
+に 
+=E
+to the last of "cf" (after "LOCAL_CONFIG" line) and run
+
+	% make config.ph
+
+.S	config.phを使う人
+=E.S	config.ph
+
+config.ph生書きの人は
+=E
+To write 
+
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+
+亜種がでるだろうとおもわれるので、汎用的にはVBスクリプト全部を弾く
+
+$DISTRIBUTE_FILTER_HOOK = q#
+      if ($e{'Body'} =~ /Content.*\.vbs/) {
+           return 'VB script attatchment';
+      }
+#;
+
+を追加。
+=E
+to the last of config.ph (but before the last "1;").
+
+.appendix
+.C	Information
+
+.S	Bugtraq
+
+Bugtraq
+Message-ID:  <20000504095618.N24513@securityfocus.com>
+Message-ID:  <NDBBLPMNJHCONOFDHGCNIENLABAC.j.kase@privador.com>
+Message-ID:  <20000504173015.2246.qmail@web612.mail.yahoo.com>
+Message-ID:  <001901bfb5f1$e6baf0a0$85755ad1@iboats.com>
+Message-ID:  <20000504110932.N15104@securityfocus.com>
+Message-ID:  <88B83692B566C74F82EBDA8D36983E64B922@exchange2000.WAGWEB.COM>
+Message-ID:  <20000504121550.B20905@securityfocus.com>
+Message-ID:  <20000504163541.D14933@securityfocus.com>
+
+.S	postfix filtering
+
+.q
+/Content.*LOVE-LETTER-FOR-YOU.TXT.vbs/  REJECT
+.~q
+
+.S	sendmail
+
+.url http://www.sendmail.com/loveletter/
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
