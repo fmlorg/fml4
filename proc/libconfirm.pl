@@ -356,6 +356,7 @@ sub ManualRegistConfirm
     }
     # $MANUAL_REGISTRATION_TYPE eq confirmation
     elsif ($mode eq 'subscribe') {
+	&Mesg(*e, $NULL, 'confirm.manual_regist.preamble');
 	&Confirm(*e, $From_address, $buf);
 	&Log("send back confirmation");
     }
