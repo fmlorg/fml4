@@ -445,33 +445,43 @@ GEN_ARCHIVE () {
 
 	if [ X$IN_RELEASE_BRANCH = X ]
 	then
+		echo ""
+		echo XXX experimental/ branch
+		echo ""
+
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 
+		echo update www.fml.org/fml/
 		echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
 		cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
 
 	   (
-		echo 	chdir $FTP
-		echo    rm -f fml-current.*.tar.gz
-		echo 	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
-		echo 	ln $FMLID.tar.gz fml-current.tar.gz
-		echo 	ln $FMLID.tar.gz old/$FMLID.tar.gz
+		set -vx
 
 		chdir $FTP
-		rm -f fml-current.*.tar.gz fml-current.tar.gz
+		rm -f fml-current.*.tar.gz fml-current.tar.gz 
+
+		ln $FMLID.tar.gz experimental/$FMLID.tar.gz
+		ln $FMLID.tar.gz old/$FMLID.tar.gz
+		ln $FMLID.tar.gz fml-current.tar.gz
+
+		chdir experimental/
+		rm -f fml-current.*.tar.gz fml-current.tar.gz 
+
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
-		ln $FMLID.tar.gz old/$FMLID.tar.gz
-		# (uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
-		# cat > $FTP/fml-current.uu
 	   )
 	else
+		echo ""
+		echo XXX release/ branch
+		echo ""
+
 	   (
-		echo 	chdir $FTP
-		echo 	ln $FMLID.tar.gz old/$FMLID.tar.gz
+		set -vx
 
 		chdir $FTP
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
+		mv $FMLID.tar.gz official
 	   )
 	fi
 
@@ -488,28 +498,21 @@ GEN_ARCHIVE () {
 		fi
 	)
 
-	cp -p $FMLID.zip $FTP
+	cp -p $FMLID.zip $FTP/experimental
 
 	(
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
-			echo 	chdir $FTP
+			echo 	chdir $FTP/experimental
 			echo 	ln $FMLID.zip fml-current.zip
-			chdir $FTP
+			chdir $FTP/experimental
 			ln $FMLID.zip fml-current.zip
 		fi
 	)
 
-	#	echo "Generating ls-lR.gz";
-	#	(
-	#		chdir $FTP
-	#		ls -lR . | gzip -9 > ls-lR.gz
-	#	)
+	echo "Creating MD5"
 
-	(
-		echo "Creating MD5"
-		chdir $FTP
-
-		md5 *gz *zip |sort |tee MD5SUM
-	)
+	( chdir $FTP;              md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP/experimental; md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP/official;     md5 *gz *zip |sort |tee MD5SUM )
 }
