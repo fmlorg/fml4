@@ -85,6 +85,21 @@ Appendix C: CVSROOT/commitlog
 
 Appendix D: CVS TAGS, BRANCH
 
+
+[4.0 series]
+
+      fml-4-0-maint
+     -------------------
+    |
+------------
+  A A
+  | |- fml-4-0-1-pre-alpha
+  |
+ fml-4-0
+
+
+[3.0 series]
+
                                  --- 4.0 release branch
                                  |
 -- 3.0 --- 3.0A -- 3.0B -- 3.0H --- 4.0A -->	(main trunk)
