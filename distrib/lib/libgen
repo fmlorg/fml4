@@ -284,6 +284,7 @@ OLD_GEN_CONTRIB () {
 FIX_DISTRIBUTION_PERMISSION () {
 	echo " "
 	echo "Fixing Permissions ..."
+	echo "   disable all"
 
 	find $DESTDIR/distrib |\
 	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
@@ -294,9 +295,11 @@ FIX_DISTRIBUTION_PERMISSION () {
 		perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 	fi
 
+	echo "   enable some executables"
 	(
 		cd $DESTDIR/distrib
 		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
+		chmod -R ugo+x www/cgi-bin/
 	)
 }
 
