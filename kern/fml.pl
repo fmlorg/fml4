@@ -1899,10 +1899,19 @@ sub ListIncludePatP
     0;
 }
 
+sub DebugLog
+{
+    local($s) = @_;
+    local($f) = $DEBUG_LOGFILE || $LOGFILE.".debug";
+    &GetTime;
+    &Append2("$Now $s", $f);
+}
+
 sub Debug 
 { 
     print STDERR "$_[0]\n";
     &Mesg(*Envelope, "\nDEBUG $_[0]") if $debug_message;
+    &DebugLog($_[0]) if $debug > 1;
 }
 
 sub ABS { $_[0] < 0 ? - $_[0] : $_[0];}
@@ -2007,6 +2016,7 @@ sub SetOpts
 	/^\-(\S)/      && ($_cf{"opt:$1"} = 1);
 	/^\-(\S)(\S+)/ && ($_cf{"opt:$1"} = $2);
 
+	/^\-d(\d+)/    && ($debug = $1)        && next;
 	/^\-d|^\-bt/   && ($debug = 1)         && next;
 	/^\-s(\S+)/    && &eval("\$$1 = 1;")   && next;
 	/^\-u(\S+)/    && &eval("undef \$$1;") && next;
