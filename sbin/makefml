@@ -3085,11 +3085,16 @@ sub do_newml
     # &SetWritableUmask; &SetPublicUmask;
     &SetPersonalUmask;	# umask 077;
 
-    &Conv($ml, "$EXEC_DIR/etc/makefml/cf", "$ML_DIR/$ml/cf");
+    if (-f "$ML_DIR/etc/makefml/cf") {
+       &Conv($ml, "$ML_DIR/etc/makefml/cf", "$ML_DIR/$ml/cf");
+    }
+    else {
+       &Conv($ml, "$EXEC_DIR/etc/makefml/cf", "$ML_DIR/$ml/cf");
+    }
 
     if (($OS_TYPE || $CPU_TYPE_MANUFACTURER_OS)
 	 && open(CF, ">> $ML_DIR/$ml/cf")) {
-	# CFVersio 2;
+	# CFVersion 2;
 	# $MAKE_FML{'NON_PORTABILITY'} = 1;
 	# $MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 
@@ -3131,19 +3136,35 @@ sub do_newml
     # why for () fails?;
     &ResetAlignedBuffer;
     print "\n   Generate template files in $ML_DIR/$ml/\n";
-    &Conv($ml, "$EXEC_DIR/etc/makefml/include", "$ML_DIR/$ml/include");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/include-mead", 
-	  "$ML_DIR/$ml/include-mead");
 
+    {
+	my ($f, $orgf, $newf);
+	for $f ("include", "include-ctl", "include-mead",
+		"aliases", "Makefile") {
+	    if (-f "$ML_ETC_DIR/makefml/$f") {
+		$orgf = "$ML_ETC_DIR/makefml/$f";
+	    }
+	    else {
+		$orgf = "$EXEC_DIR/etc/makefml/$f";
+	    }
+	    $newf = "$ML_DIR/$ml/$f";
+	    &Conv($ml, $orgf, $newf);
+	}
 
-    &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
+	&SetPersonalUmask;	# umask 077;
 
-    &SetPersonalUmask;	# umask 077;
+	for $f ("crontab", "fmlwrapper.c") {
+	    if (-f "$ML_ETC_DIR/makefml/$f") {
+		$orgf = "$ML_ETC_DIR/makefml/$f";
+	    }
+	    else {
+		$orgf = "$EXEC_DIR/etc/makefml/$f";
+	    }
+	    $newf = "$ML_DIR/$ml/$f";
+	    &Conv($ml, $orgf, $newf);
+	}
+    }
 
-    &Conv($ml, "$EXEC_DIR/etc/makefml/crontab", "$ML_DIR/$ml/crontab");
-    &Conv($ml, "$EXEC_DIR/etc/makefml/fmlwrapper.c",   "$ML_DIR/$ml/fmlwrapper.c");
 
     &FixIncludeHeader;
 
@@ -3293,20 +3314,15 @@ sub CreateDocTemplate
 	    &Copy("$ML_DIR/$ml/$x", "$ML_DIR/$ml/$x.bak");
 	}
 
-	&Conv($ml, "$EXEC_DIR/drafts/$x", "$ML_DIR/$ml/$x");
+	if (-f 	"$ML_ETC_DIR/fml/drafts/$LANGUAGE/$x") {
+	    &Conv($ml, "$ML_ETC_DIR/fml/drafts/$x", "$ML_DIR/$ml/$x");
+	}
+	else {
+	    &Conv($ml, "$EXEC_DIR/drafts/$x", "$ML_DIR/$ml/$x");
+	}
     }
-
+    
     &PrintAlignedBuffer;
-    return;
-
-    # not reach here
-    &Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
-    &Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
-    &Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
-    &Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
-    &Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
-    &Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
-    &Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");
 }
 
 
@@ -3812,6 +3828,8 @@ sub do_config_template
     local($dir)    = "$ML_DIR/$ml";
     local($org_cf) = "$EXEC_DIR/etc/makefml/cf";
     local($tmp_cf) = "$dir/cf";
+    local($newdir) = "$ML_DIR/etc/makefml";
+    local($new_cf) = "$ML_DIR/etc/makefml/cf";
 
     if (-d $dir) {
 	print STDERR "Oops, $dir EXISTS ALREADY!!!\n";
@@ -3822,13 +3840,20 @@ sub do_config_template
     else {
 	# make $ML_DIR/@ (this name MUST NOT EXIST)
 	&Mkdir($dir);
+	&Mkdir($newdir);
     }
 
     $UnderConfigTemplate = 1;
 
     # reset the current $EXEC_DIR/etc/makefml/cf to $ML_DIR/@/cf
     unlink $tmp_cf;
-    &Copy($org_cf,  $tmp_cf);
+    if (-f $new_cf) {	
+       print STDERR "   copy $new_cf to $tmp_cf\n";
+       &Copy($new_cf,  $tmp_cf);
+    }
+    else {
+       &Copy($org_cf,  $tmp_cf);
+    }
 
     &do_config($ml);
 
@@ -3836,8 +3861,8 @@ sub do_config_template
 	$| = 1;
 	eval &__system("diff", "-u", $org_cf, $tmp_cf);
     }
-    print STDERR "   Copy($tmp_cf, $org_cf);\n";
-    &Copy($tmp_cf, $org_cf);
+    print STDERR "   copy $tmp_cf to $new_cf\n";
+    &Copy($tmp_cf, $new_cf);
     $UnderConfigTemplate = 0;
 
     # clean up
@@ -4112,12 +4137,58 @@ sub do_edit
 sub do_edit_template
 {
     local($f) = @_;
-    local($editor, $file, @dir, @file);
+    local($editor, $file, @master_dir, @dir, @file);
 
-    @dir = ("$EXEC_DIR/drafts", "$EXEC_DIR/etc/makefml");
+    @master_dir = ("$EXEC_DIR/drafts", 
+		   "$EXEC_DIR/etc/makefml");
 
-    undef $file; for (@dir) { if (-f "$_/$f") { $file = "$_/$f";}}
-    if (! $file) {
+    @dir = ("$ML_ETC_DIR/fml/drafts/",
+	    "$ML_ETC_DIR/makefml"
+	    );
+
+    if ($f) {
+	my ($orgf, $lang, $newf);
+
+	# makefml
+	$orgf = "$EXEC_DIR/etc/makefml/$f";
+	$newf = "$ML_ETC_DIR/makefml/$f";
+	&Mkdir("$ML_ETC_DIR/makefml");
+
+	if (-f $newf) {
+	    $file = $newf;
+	}
+	elsif (-f $orgf) {
+	    print STDERR "   create $newf\n";
+	    &Copy($orgf, $newf); $file = $newf;
+	}
+
+	# drafts
+	$lang = $LANGUAGE;
+	$orgf = "$EXEC_DIR/drafts/$lang/$f";
+	$newf = "$ML_ETC_DIR/fml/drafts/$lang/$f";
+	&Mkdir("$ML_ETC_DIR/fml/drafts/$lang");
+
+	if ($file) {
+	    ;
+	}
+	elsif (-f $newf) {
+	    $file = $newf;
+	}
+	elsif ((-f $orgf) && (! -f $newf)) {
+	    print STDERR "   create $newf\n";
+	    &Copy($orgf, $newf); $file = $newf;
+	}
+
+	# check validity of the file
+	if (-f $file) {
+	    print STDERR "  template file is \"$file\"\n\n";
+	}
+	else {
+	    &Error("cannot find $f template");
+	    return;
+	}
+    }
+    else {
 	&Log("makefml::edit_template cannot find $f");
 
 	print "\nUsage: makefml edit-template TEMPLATE\n";
@@ -4137,7 +4208,6 @@ sub do_edit_template
 	return $NULL;
     }
 
-
     if ($ENV{'EDITOR'}) {
 	$editor = $ENV{'EDITOR'} || "vi";
     }
@@ -4149,12 +4219,13 @@ sub do_edit_template
 
     $editor = $editor || $ENV{'EDITOR'} || "vi";
 
-    print STDERR "\n\t$editor $file\n\n";
+    print STDERR "\n   $editor $file\n\n"; 
+    sleep 1;
     &Log("makefml::edit $editor $file");
 
     &__system($editor, $file);
-    print STDERR "\n\t$editor $file\n\n";
 
+    print STDERR "\n   \"$editor $file\" ends\n\n";
     &Log("makefml::edit_template operation ends");
 }
 
