@@ -21,6 +21,12 @@ Please see INSTALL for the install flow.
 	うまく動いたぽい version がみつかれば吉ということくらいしかないです
 	5.6.0 では今一つうまくいかなかったという報告ありました
 
+	最近の中では 522 なら動いたという例があるので、5.6.0 がだめなら
+	522を使ってみて下さい。
+
+.url	http://www.activestate.com/download/ActivePerl/APi522e.exe
+.url	http://www.activestate.com/Products/ActivePerl/Download.html
+
    fml	NT用というのが特別にあるわけではなく、標準ディストリビューション
 	の中にNT用のが入っています。
 
@@ -543,6 +549,16 @@ Create directories before installation.
 修正ずみ (98/07/15)
 =E
 fixed (98/07/15)
+
+.appendix
+.C	useful links
+
+統合アーカイバプロジェクト
+.url http://www.csdinc.co.jp/archiver/
+
+DOSからアーカイブファイル等を利用するために必要なツール及びドキュメント
+.url ftp://ring.etl.go.jp/pub/pack/00tools/
+
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
