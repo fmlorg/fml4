@@ -5,3 +5,6 @@
 .~HTML_PRE
 
 .include indexes.wix
+
+.appendix
+.include links.wix
