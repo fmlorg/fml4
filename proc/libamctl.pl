@@ -275,37 +275,46 @@ sub AutoRegist
     ### Ends.
 
     ### distribute when auto_regist?
+    # XXX not distribute by default
     if ($AUTO_REGISTERED_UNDELIVER_P) {
 	; # not delivery
     }
     else {
-	local($p);
+	# fml 3.0
+	if ($SUBSCRIBE_ANNOUNCE_FORWARD_TYPE eq 'raw') {
+	    # already member :-)
+	    &Distribute(*Envelope, 'permit from members_only');
+	}
+	# fml 4.0
+	elsif ($SUBSCRIBE_ANNOUNCE_FORWARD_TYPE eq 'prepend_info') {
+	    my $p = '';
 
-	# save-excursion
-	%OriginalEnvelope = %Envelope;
+	    # save-excursion
+	    %OriginalEnvelope = %Envelope;
 
-	# rewrite Body
-	$p = &Translate(*Envelope, 
-			"$from is newly added to $MAIL_LIST",
-			'amctl.added.notify2ml', 
-			$from, 
-			$MAIL_LIST) || $Envelope{'Body'};
+	    # rewrite Body
+	    $p = &Translate(*Envelope, 
+			    "$from is newly added to $MAIL_LIST",
+			    'amctl.added.notify2ml', 
+			    $from, 
+			    $MAIL_LIST) || $Envelope{'Body'};
 
-	$Envelope{'Body'} = $p || $Envelope{'Body'};
+	    $Envelope{'Body'} = $p ."\n". $Envelope{'Body'};
 
-	# rewrite subject
-	$p = &Translate(*Envelope,
-			"$from is added",
-			'amctl.added.notify2ml.subject',
-			$from, 
-			$MAIL_LIST);
-	&DEFINE_FIELD_FORCED('subject', $p);
+	    # rewrite subject
+	    $p = &Translate(*Envelope,
+			    "$from is added",
+			    'amctl.added.notify2ml.subject',
+			    $from, 
+			    $MAIL_LIST);
+	    &DEFINE_FIELD_FORCED('subject', $p);
 
-	# already member :-)
-	&Distribute(*Envelope, 'permit from members_only');
+	    # already member :-)
+	    &Distribute(*Envelope, 'permit from members_only');
 
-	# reset %Envelope
-	%Envelope = %OriginalEnvelope;
+	    # reset %Envelope
+	    %Envelope = %OriginalEnvelope;
+	}
     }
 
     if ($USE_DATABASE) {

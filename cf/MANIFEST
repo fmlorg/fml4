@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.76.2.8 2002/01/09 15:27:47 fukachan Exp $
+# $FML: MANIFEST,v 1.76.2.9 2002/02/21 13:59:05 fukachan Exp $
 #
 
 
@@ -521,6 +521,11 @@ MTI_COST_EVAL_FUNCTION: MTISimpleBomberP
 # cache of spammer candidates
 # value: filename string
 MTI_MAIL_FROM_HINT_LIST: $DIR/mti_mailfrom.hints
+
+
+# how to announce the new comer if $AUTO_REGISTERED_UNDELIVER_P is 0.
+# value: raw / prepend_info
+SUBSCRIBE_ANNOUNCE_FORWARD_TYPE: prepend_info
 
 
 # Optional. If UNSUBSCRIBE_AUTH_TYPE is 'confirmation', fml sends back
