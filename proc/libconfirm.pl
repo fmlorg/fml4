@@ -297,7 +297,7 @@ sub GenConfirmReplyText
 	$s .= "Please try again. The new confirm key is as follows\n\n";
     }
     elsif ($mode eq 'BufferSyntax::Error') {
-	&Mesg(*e, $NULL, 'confirm.auto_regist.syntax_error',
+	&Mesg(*e, $NULL, 'confirm.auto_regist.buffer_syntax_error',
 	      $MAIL_LIST, 
 	      $CONFIRMATION_SUBSCRIBE,
 	      $MAINTAINER,

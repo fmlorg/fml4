@@ -38,7 +38,7 @@ confirm.auto_regist.expired:
 	(数行下の _ARG1_ 行)を送りかえしてください。
 
 # @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
-confirm.auto_regist.syntax_error:
+confirm.auto_regist.buffer_syntax_error:
 	こちらは<_ARG0_>メーリングリスト(ＭＬ)のfmlです。
 
 	・あなたのメールはＭＬに登録されていないアドレスから出していませんか？
