@@ -1,4 +1,7 @@
 #!/usr/local/bin/perl
+#
+# $FML$
+#
 
 require 'getopts.pl';
 &Getopts("iqtsp:L:X:Tm:b:Nr");
@@ -6,6 +9,7 @@ require 'getopts.pl';
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
 $RELEASE_ID    = "$FML/conf/release_version";
+$STATUS        = "$FML/conf/status";
 $RELEASE_DATE  = "$FML/var/tmp/release_date";
 $SHOW_ID       = $opt_s;
 $RCSID_FNAME   = $opt_r;
@@ -221,9 +225,14 @@ sub YYYYMMDD
 sub __YYYYMMDD
 {
     local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
-    sprintf("%4d%02d%02d",
-		$year + 1900, $mon + 1, $mday,
-		$hour, 0);
+
+    my $status = '';
+    if (-f $STATUS) {
+	chop($status = `cat $STATUS`);
+	$status = "/$status";
+    }
+    sprintf("%4d%02d%02d%s",
+		$year + 1900, $mon + 1, $mday, $status);
 }
 
 
