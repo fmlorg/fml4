@@ -362,7 +362,7 @@ fml 自体がつける場合、キャッシュテーブルの有効な大きさが半分になってし
 
 これは
 
-	&DEFINE_FIELD_FOECED('Message-Id', "適当なID");
+	&DEFINE_FIELD_FORCED('Message-Id', "適当なID");
 
 で解決ですが。HOOKを使うやり方も書いておきます。
 
@@ -381,7 +381,7 @@ Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
 
 $HEADER_ADD_HOOK = q#
    $body .= "Message-ID: ".
-	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	sprintf("<%4d%02d%02d.%05d.%s>\n", 1900 + $year, $mon + 1, $mday, $ID, 
 	"Elena.Lolobrigita@Baycity.jp");
 #;
 
@@ -573,10 +573,10 @@ config.ph あたりで
        "\nTo need help, please send '# help' to elena-ctl\@fml.org."; %;
 
 .# $Id$
-.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

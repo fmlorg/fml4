@@ -123,10 +123,10 @@ A program to make aliases database from /etc/aliases.
 You should run newaliases if you edit /etc/aliases.
 
 .# $Id$
-.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
