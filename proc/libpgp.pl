@@ -48,6 +48,8 @@ sub PGPGoodSignatureP
     # PGP authenticated
     &Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
 
+    &Log("Error: PGP no good signature.") unless $auth;
+
     $auth;
 }
 
