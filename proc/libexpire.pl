@@ -43,8 +43,9 @@ sub Expire
 	    &Debug("?:expire $f(NOT -f)")         if $debug && (! -f $f);  
 
 	    if ((!$debug) && (-f $f) && ($d > $expire)) {
-		# Init(NOT SET last_seq)
-		$first_seq || ($last_seq = $first_seq = $f); 
+		# Init(NOT SET last_seq);
+		# fixed by OGAWA Kunihiko <kuni@edit.ne.jp> ;fml-support:6260 
+                $first_seq || ($last_seq = $first_seq = $unlink_seq);
 
 		# unlink($f)? &Debug("unlink $f"): &Debug("CANNOT unlink $f");
 		unlink($f) || &Log("fail to unlink $f");
