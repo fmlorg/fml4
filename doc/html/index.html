@@ -28,6 +28,9 @@
 </CENTER>
 </H1>
 
+<P><A HREF="index-e.html">[English]</A> is here. <A HREF="menu.html">FRAME version</A> is here.
+<HR>
+
 #ifdef JAPANESE
 <P>
 <A HREF="Japanese/basic_setup/index.html">
@@ -39,6 +42,7 @@ Tutorials and Guides for fml beginners
 </A>
 #endif
 
+#ifdef JAPANESE
 <P>最近のトピックス
 <UL>
    <LI>
@@ -49,6 +53,10 @@ Tutorials and Guides for fml beginners
    <LI>
    <A HREF="good_bye_perl4.html">
    fml-current は perl 5 でしか動かなくなるでしょう
+   </A>
+   <BR>
+   <A HREF="devel/OS_and_Perl.txt">
+   [各OSのデフォールトで入っている perl version のリスト]
    </A>
 
    <LI>
@@ -71,6 +79,32 @@ Tutorials and Guides for fml beginners
    [CGIインターフェイスの現状]
    </A>
 </UL>
+#else
+   <LI>
+   <A HREF="advisories/FA2000_003-e/index.html">
+   Love Letter Worm
+   </A>
+
+   <LI>
+   <A HREF="good_bye_perl4.en.html">
+   fml-current works with only perl 5 now.
+   </A>
+   <BR>
+   <A HREF="devel/OS_and_Perl.txt">
+   perl version list installed on OS default 
+   </A>
+
+   <LI>
+   <A HREF="anoncvs.en.html">
+   annymous CVS
+   </A>
+
+   <LI>
+   <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/">
+   3.0.1 release
+   </A>
+#endif
+
 
 #ifdef JAPANESE
 <P>
@@ -105,7 +139,6 @@ Please check out ftp and get latest one.
 <HR>
 #ifdef JAPANESE
 <PRE>
-        <A HREF="index-e.html">[English]</A> is here. <A HREF="menu.html">FRAME version</A> is here.
 #ifndef DIST
         <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">[検索]</A>   <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>   <A HREF="download.html">[download]</A>
 #endif

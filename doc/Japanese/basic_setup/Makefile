@@ -23,3 +23,7 @@ TUTORIAL_BASIC_SAMPLES += sample.ls_fml
 
 # install index.html
 TUTORIAL_BASIC_SAMPLES += index.html
+TUTORIAL_BASIC_SAMPLES += MTAspecific.html
+TUTORIAL_BASIC_SAMPLES += newml.html
+TUTORIAL_BASIC_SAMPLES += add.html
+

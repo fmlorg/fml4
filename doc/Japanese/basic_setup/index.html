@@ -17,90 +17,80 @@
 </CENTER>
 </H1>
 
-<!- <A HREF="index-e.html">[English] is here</A> ->
-
 <P>
 <A HREF=../tutorial.html>"fml" チュートリアル</A>
 
 <P>
 <!- menu ->
-	<A HREF="#overview">概要</A>
-	<A HREF="#fundamental-config">基本設定</A>
-	<A HREF="#advanced-config">やや進んだ設定</A>
+	　<A HREF="#overview">概要</A>
+	　<A HREF="#newml">basicな操作</A>
+	　<A HREF="#fundamental-config">やさしいカスタマイズ</A>
+	　<A HREF="#advanced-config">やや進んだカスタマイズ</A>
 <BR>
-        <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
-	[ www.fml.org内ドキュメント検索 ]
-	</A>
+	　<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
+	  [ www.fml.org内ドキュメント検索 ]
+	  </A>
 <!- menu ->
 
 <!--------------------------------------------------------------------->
-<HR>
-
 <UL>
 	<LI>
 	<A NAME="overview">
 	概要:
 	インストール手順の簡単なまとめ
-	<BR>
 	(以下pathは適当に読みかえてください)
+
 	<UL>
 	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
-		にインストールする/されている
+		にインストールする。もしくはすでにされている
+
 	<LI> elena MLを作ったら
 		(ディレクトリは 
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
+
 	<LI> <A HREF="howto-customize.html">
 		/var/spool/ml/elena/config.ph の設定をする
 		</A>	
+
 	<LI> <A HREF="sample.aliases">/etc/aliases</A>
 		に設定/設定したことを確認する(MTA依存)
 		
 	</UL>
-	で手順のすべてです。
+	でインストールは終りです。
 	カスタマイズは
 	<A HREF="files.html">設定ファイル</A>
 	config.phで行ないます。
 
+	<HR>
 	<UL>
 		<LI>
 		<A HREF="fml-install.html">
 		fmlのインストールの概観
 		</A>
+		　
 		<A HREF="../../INSTALL/index.html">
-		　(詳細)	
+		(詳細)	
 		</A>
+
+		　
 		<A HREF="installer-QandA.html">
-		　[Q and A]
+		[Q and A]
 		</A>
+
+		<LI>
 		<A HREF="../../INSTALL_CGI/index.html">
-		　[CGIのインストール (fml-current only)]
+		[CGIのインストール (fml-current only)]
 		</A>
-		<BR>
+
+		<LI>
 		<A HREF="../../UPGRADE-3.0/index.html">
 		注: fml 2.x から 3.0 へのアップグレード
 		</A>
 
 		<LI>
-		<A HREF="postfix-install.html">
-		Postfix のインストールの例 (NetBSD-currentのpackage system)
-		</A>
-		<BR>
-		最近のpostfixはmake installするとインストーラが
-		対話的に聞いてくれる。それに答えていけば
-		基本設定はそれだけで十分だ。
-
-		<LI>
-		MTA (Mail Transport Agent)別の注意
-		<BR>
-		<A HREF="../../INSTALL_with_SENDMAIL/index.html">sendmail</A>
-		<A HREF="../../INSTALL_with_POSTFIX/index.html">postfix</A>
-		<A HREF="../../INSTALL_with_QMAIL/index.html">qmail</A>
-		<A HREF="../../INSTALL_with_EXIM/index.html">exim</A>
-		<A HREF="../../INSTALL_with_ZMAILER/index.html">zmailer</A>
-		<BR>
-		<A HREF="http://www.y-min.or.jp/~nob/qmail/qmail+fml.html">
-		[link]qmailの基本的なインストール・メモ
+		<A HREF=MTAspecific.html>
+		MTA 別の注意 
 		</A>
 
 		<LI>
@@ -110,14 +100,30 @@
 	</UL>
 
 
+	<HR>
+	<LI>
+	<A NAME="newml">ＭＬを作る。メンバーの登録/削除
+	<UL>
+		<LI><A HREF="newml.html">ＭＬを新しく作る</A>
+		<LI><A HREF="add.html">メンバーを登録する</A>
+		<LI><A HREF="bye.html">メンバーを削除する</A>
+	</UL>
+
+	<HR>
 	<LI>
 	<A NAME="fundamental-config">
-	<P> 基本的な設定
+	<P> ＭＬのカスタマイズ(基本編)
 	<UL>
 		<LI>
 		<A HREF="howto-customize.html">
 		fmlの設定変更の仕方について
 		</A>
+		
+		<UL>
+			<LI> メニュー選択: GUI か CUI (makefml) を使う
+			<LI> cf を編集。そして config.ph を生成
+			<LI> config.ph (perl script)を生書き (上級編)
+		</UL>
 
 		<LI>
 		<A HREF="../../INSTALL/index.html#makefml-config">
@@ -182,6 +188,7 @@
 	</UL>
 
 
+	<HR>
 	<LI>
 	<A NAME="advanced-config">
 	<P> 少し進んだ設定
