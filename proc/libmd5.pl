@@ -1,25 +1,26 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
+#
 
-
+use vars qw($debug);
 use MD5;
 
 sub main::Md5
 {
-    local($data) = @_;
-    local($buf, $p, $pe);
+    my ($data) = @_;
+    my ($p, $pe);
 
     $pe = length($data);
 
-    $md5 = new MD5;
+    my $md5 = new MD5;
     $md5->reset();
 
     $p = 0;
@@ -37,12 +38,13 @@ sub main::Md5
 # XXX: called under perl 5
 sub main::MailBodyMD5Cksum
 {
+    use vars qw(%e);
     local(*e) = @_;
-    local($buf, $p, $pe);
+    my ($p, $pe);
 
     $pe = length($e{'Body'});
 
-    $md5 = new MD5;
+    my $md5 = new MD5;
     $md5->reset();
 
     $p = 0;
