@@ -1528,7 +1528,10 @@ sub ExecCmd
 	local($mode, $uid, $gid) = (stat("$ML_DIR/$ml/config.ph"))[2,4,5];
 
 	# Case: root but ML's owner IS NOT ROOT
-	if ($< == 0 && $uid != $<) { 
+	if ($UNISTD && $< == 0 && $uid != $<) { 
+	    &WarnYourAreRoot;
+	}
+	elsif ((! $UNISTD) && $ENV{'USERNAME'} eq 'Administrator') {
 	    &WarnYourAreRoot;
 	}
     }
