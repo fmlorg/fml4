@@ -137,13 +137,15 @@ init_dir:
 
 plaindoc: init_dir INFO doc/smm/op.wix
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
-	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild TUTORIAL_LANGUAGE=Japanese
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk plaindocbuild TUTORIAL_LANGUAGE=English
 
 htmldoc: init_dir INFO doc/smm/op.wix
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |${PERL} -nle unlink
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
-	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk htmlbuild
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk htmlbuild TUTORIAL_LANGUAGE=Japanese
+	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.doc.mk htmlbuild TUTORIAL_LANGUAGE=English
 
 syncwww: doc
 	$(RSYNC) -av $(WORK_HTML_DIR)/ ${WWW_DIR}/

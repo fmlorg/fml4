@@ -2,7 +2,8 @@
 # $Id$
 #
 
-TUTORIAL_LANGUAGE    = Japanese
+# disable this since $TOP_DIR/Makefile defines this
+# TUTORIAL_LANGUAGE    = Japanese
 
 DOC_TUTORIAL_RAW_SUBDIR += examples
 

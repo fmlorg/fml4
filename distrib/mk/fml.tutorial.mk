@@ -1,13 +1,15 @@
-HTML_CONV   = ${_FWIX} -m htmlconv
-HTML_FILTER = ${_FWIX} -m html -f ${TMP_DIR}/html_index.ph
-TEXT_FILTER = ${_FWIX} -m text -f ${TMP_DIR}/text_index.ph
+_TL_        = ${TUTORIAL_LANGUAGE}
+__FWIX      = ${_FWIX}  -L ${TUTORIAL_LANGUAGE}
+HTML_CONV   = ${__FWIX} -m htmlconv
+HTML_FILTER = ${__FWIX} -m html -f ${TMP_DIR}/html_index.ph.${_TL_}
+TEXT_FILTER = ${__FWIX} -m text -f ${TMP_DIR}/text_index.ph.${_TL_}
 
 WORK_TUTORIAL_DIR = ${WORK_HTML_DIR}/${TUTORIAL_LANGUAGE}
 
 
 # index list dependence
-__TUTORIAL_DOC_TARGETS__ += ${TMP_DIR}/text_index.ph
-__HTML_TUTORIAL__        += ${TMP_DIR}/html_index.ph
+__TUTORIAL_DOC_TARGETS__ += ${TMP_DIR}/text_index.ph.${_TL_}
+__HTML_TUTORIAL__        += ${TMP_DIR}/html_index.ph.${_TL_}
 
 
 .for dir in ${DOC_TUTORIAL_SUBDIR}
@@ -81,13 +83,13 @@ ${WORK_TUTORIAL_DIR}/basic_setup/${file}.html: doc/${TUTORIAL_LANGUAGE}/basic_se
 __HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/tutorial.html
 ${WORK_TUTORIAL_DIR}/tutorial.html: doc/${TUTORIAL_LANGUAGE}/INDEX
 	${PERL} distrib/bin/mkindex.pl \
-		-f doc/${TUTORIAL_LANGUAGE}/INDEX \
-		> ${WORK_TUTORIAL_DIR}/tutorial.html
+		-f doc/${TUTORIAL_LANGUAGE}/INDEX |\
+		${JCONV} > ${WORK_TUTORIAL_DIR}/tutorial.html
 
 
 # %index list
-${TMP_DIR}/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
-	@ echo creating text_index.ph
+${TMP_DIR}/text_index.ph.${_TL_}: ${__HTML_TUTORIAL_SOURCES__}
+	@ echo creating text_index.ph.${_TL_}
 	@ for dir in ${__HTML_TUTORIAL_SUBDIRS__} ;\
 	do \
 	   echo -n '.';\
@@ -95,35 +97,34 @@ ${TMP_DIR}/text_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 		exit 1 ; \
 	   fi ; \
 	   ${FWIX} -m text -i $$dir doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix \
-		>> ${TMP_DIR}/text_index.ph.new 2>/dev/null; \
+		>> ${TMP_DIR}/text_index.ph.${_TL_}.new 2>/dev/null; \
 	done
 	@ echo ""
-	@ mv ${TMP_DIR}/text_index.ph.new ${TMP_DIR}/text_index.ph
-	@ ${PERL} -cw ${TMP_DIR}/text_index.ph
+	@ mv ${TMP_DIR}/text_index.ph.${_TL_}.new ${TMP_DIR}/text_index.ph.${_TL_}
+	@ ${PERL} -cw ${TMP_DIR}/text_index.ph.${_TL_}
 	@ echo done.
 
-${TMP_DIR}/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
-	@ echo creating html_index.ph
+${TMP_DIR}/html_index.ph.${_TL_}: ${__HTML_TUTORIAL_SOURCES__}
+	@ echo creating html_index.ph.${_TL_}
 	@ for dir in ${__HTML_TUTORIAL_SUBDIRS__} ;\
 	do \
 	   echo -n '.';\
 	   ${FWIX} -D /tmp -m html -i $$dir \
 		doc/${TUTORIAL_LANGUAGE}/$$dir/index.wix \
-		>> ${TMP_DIR}/html_index.ph.new 2>/dev/null; \
+		>> ${TMP_DIR}/html_index.ph.${_TL_}.new 2>/dev/null; \
 	done
 	@ echo ""
-	@ mv ${TMP_DIR}/html_index.ph.new ${TMP_DIR}/html_index.ph
-	@ ${PERL} -cw ${TMP_DIR}/html_index.ph
+	@ mv ${TMP_DIR}/html_index.ph.${_TL_}.new ${TMP_DIR}/html_index.ph.${_TL_}
+	@ ${PERL} -cw ${TMP_DIR}/html_index.ph.${_TL_}
 	@ echo done.
 
 
 # special import
 __TUTORIAL_DOC_TARGETS__ += ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
-${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt: databases/TOY_MODEL.Japanese
+${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt: databases/TOY_MODEL.${TUTORIAL_LANGUAGE}
 	test -d ${WORK_TUTORIAL_DIR}/examples || ${MKDIR} ${WORK_TUTORIAL_DIR}/examples
-	${JCONV} databases/TOY_MODEL.Japanese \
+	${JCONV} databases/TOY_MODEL.${TUTORIAL_LANGUAGE} \
 	   > ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
 
 
 __plainbuild_new: ${__TUTORIAL_DOC_TARGETS__}
-

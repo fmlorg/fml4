@@ -38,7 +38,7 @@ HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 .include "doc/devel/Makefile"
 
 # doc/Japanese
-.include "doc/Japanese/Makefile"
+.include "doc/${TUTORIAL_LANGUAGE}/Makefile"
 
 ### RULES ###
 .include "distrib/mk/fml.sys.mk"
