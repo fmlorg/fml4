@@ -1,0 +1,124 @@
+/* 
+	TAMURA Kent <kent@hauN.org>
+	fml-support: 04153
+	$Id$
+*/
+
+BODY {
+	color: #000000;
+	background-color: #f0f0f0;
+	line-height: 150%;
+}
+P {
+	text-indent: 1.5em;
+}
+H2 {
+	display: block;
+	background-color: #404080;
+	color: #ffffff;
+	padding: 4px 4px 4px 4px;
+}
+H3 {
+	display: block;
+	background-color: #b0b0e0;
+}
+
+PRE {
+	line-height: 1.2;
+}
+
+.topnav {
+}
+.topcount {
+}
+.topthread {
+}
+.localnav {
+}
+.localcount {
+}
+.localthread {
+}
+
+A:visited, A:visited .Date-value, A:visited .From, A:visited .From-value, A:visited .Subject, A:visited .Subject-value {
+	color: #551a8b;
+}
+
+.mailheaders {
+	color: #7f7f7f;
+}
+.Date {
+	color: #008b00;
+}
+.Date-value {
+	color: #1e90ff;
+}
+.From {
+	color: #008b00;
+}
+.From-value {
+	color: blue;
+}
+.Subject {
+	color: #008b00;
+}
+.Subject-value {
+	color: #ff6347;
+}
+.Sender {
+	color: #008b00;
+}
+.Sender-value {
+}
+.To {
+	color: #008b00;
+}
+.To-value {
+	color: black;
+}
+.Cc {
+	color: #008b00;
+}
+.Cc-value {
+	color: black;
+}
+.Message-ID {
+	color: #008b00;
+}
+.Message-ID-value {
+}
+.In-Reply-To {
+	color: #008b00;
+}
+.In-Reply-T-value {
+}
+.References {
+	color: #008b00;
+}
+.References-value {
+}
+.Keywords {
+	color: #008b00;
+}
+.Keywords-value {
+}
+.Comments {
+	color: #008b00;
+}
+.Comments-value {
+}
+.Encrypted {
+	color: #008b00;
+}
+.Encrypted-value {
+}
+.Posted {
+	color: #008b00;
+}
+.Posted-value {
+}
+.xmlcount {
+	color: #008b00;
+}
+.xmlcount-value {
+}
