@@ -10,11 +10,9 @@ $rcsid .= ($id =~ /Id: (\S+),v\s+(\S+)\s+/ && "$1 $2");
 
 &Init;
 
-print "Daily Report ($rcsid)\n";
+print "Daily Report ($rcsid):\n";
 
-for (@ARGV) {
-    &SearchInterests($_);
-}
+for (@ARGV) { &SearchInterests($_);}
 
 if ($Report) {
     print "\n".("=" x 60)."\n";
@@ -67,7 +65,8 @@ sub SearchInterests
     eval $eval;
 
     if (! $Count) {
-	$Report .= "$file\thas No Possible Item of Interest\n\n";
+	$Report .= 
+	    sprintf("%-20s\thas No Possible Item of Interest\n\n", $file);
     }
 }
 
