@@ -19,15 +19,18 @@ sub MesgLE
 
     # 1. check whether the message template with the key exists?
     # 1.1. search messages.conf if exists
-    my ($file) = $MESSAGES_CONF || "$DIR/messages.conf";
-    if (-f $file) {
-	&Log("MesgLE: search key='$key' in messages.conf") if $debug_mesgle;
-	$msg = &MesgLE::Lookup($key, $file);
-	&Log("MesgLE: key='$key' FOUND") if $msg && $debug_mesgle;
-	&Log("MesgLE: key='$key' NOT FOUND") if (!$msg) && $debug_mesgle;
-    }
-    else {
-	&Log("MesgLE: messages.conf not exists, ignore it") if $debug_mesgle;
+    my ($file_ld) = "$DIR/messages.${MESSAGE_LANGUAGE}.conf";
+    my ($file_li) = "$DIR/messages.conf";
+    for my $file ($file_ld, $file_li) {
+	if (-f $file) {
+	    &Log("MesgLE: search key='$key' in $file") if $debug_mesgle;
+	    $msg = &MesgLE::Lookup($key, $file);
+	    &Log("MesgLE: key='$key' FOUND") if $msg && $debug_mesgle;
+	    &Log("MesgLE: key='$key' NOT FOUND") if (!$msg) && $debug_mesgle;
+	}
+	else {
+	    &Log("MesgLE: $file not exists, ignored") if $debug_mesgle;
+	}
     }
 
     # 1.2. search under $mesg_dir
