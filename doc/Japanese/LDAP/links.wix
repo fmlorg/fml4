@@ -10,6 +10,11 @@
 .url http://people.netscape.com/bjm/whyLDAP.html
 .url http://developer.netscape.com/docs/manuals/ldap/
 
+.url http://developer.iplanet.com/docs/technote/ldap/
+.url http://www.umich.edu/~dirsvcs/ldap/doc/guides/
+.url ftp://ftp.debian.org/debian/dists/frozen/main/source/doc/openldap-guide_19991007.orig.tar.gz
+
+
 NOTE:
 
 Netscape ldap is downloadable and extremely easy to setup and configure.
