@@ -1409,6 +1409,7 @@ is converted like this in config.ph
 .appendix
 .C	:include: ではうまく動かない場合 (/etc/aliases)
 =E.C	You fails to use :include: form in /etc/aliases
+.l	unsafe
 
 可能性としては
 =E
