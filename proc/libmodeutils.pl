@@ -25,7 +25,7 @@ sub SpeculateContorolOrDistriuteMode
         $COMMAND_ONLY_SERVER = 1; 
     }
     else {
-        &DEFINE_MODE('distribute');
+        &DEFINE_MODE('post=anyone');
     }
     #;
 }
