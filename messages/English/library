@@ -1,0 +1,8 @@
+library.not_permit:
+	library command: cannot execute _ARG0_ command
+
+library.not_unlink:
+	library command: cannot remove _ARG0_
+
+library.article.save:
+	library command: save _ARG0_

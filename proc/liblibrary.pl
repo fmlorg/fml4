@@ -54,8 +54,8 @@ sub ProcLibrary4PlainArticle
 	for $p (@DenyLibraryProcedure) {
 	    if ($p && ($_ =~ /^$p$/i)) {
 		&Log("Library: cannot permit $_ command");
-		&Mesg(*e, "Library: cannot permit $_ command");
-		&Mesg(*e, $NULL, 'library.not_permit', $_);
+		&Mesg(*e, "Library: cannot permit $_ command", 
+		      'library.not_permit', $_);
 		return;
 	    }
 	}
@@ -112,7 +112,7 @@ sub ProcLibrary4PlainArticle
 	}
 
 	if (! &LibraryUnlinkP($From_address, $target)) {
-	    &Mesg(*e, $NULL, 'library.not_unlink', $n);
+	    &Mesg(*e, 'cannot unlink', 'library.not_unlink', $n);
 	    &Mesg(*e, "ERROR: library unlink: you cannot unlink $n");
 	    &Log("ERROR: library unlink: not author try to unlink $n");
 	    &Warn("Warning: illegal request of library unlink $ML_FN",
@@ -159,7 +159,7 @@ sub ProcLibrary4PlainArticle
 	### Write
 	&Write3(*le, "$arc_dir/$id");
 	&Log("Library: ARTICLE $id [saved in $arc_dir/$id]");
-	&Mesg(*e, $NULL, 'library.article.save', $id);
+	&Mesg(*e, 'article saved', 'library.article.save', $id);
 	&Mesg(*e, "The article is saved as $id in the archive");
 
 	return 'LAST'; # 95/12/25 tanigawa@tribo.mech.nitech.ac.jp;
