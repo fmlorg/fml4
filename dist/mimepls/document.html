@@ -1,0 +1,300 @@
+<HTML>
+<HEAD>
+<TITLE>mime_pls ver.2.02 document</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<CENTER>
+<H1>mime_pls Ver.2.02について</H1>
+<H2>1997年12月30日</H2>
+</CENTER>
+<HR>
+<A HREF="index.html">[Top]</A>
+Document
+<A HREF="history.html">[History]</A>
+<P>
+<UL TYPE=SQUARE>
+<LI><A HREF="#description">mime_plsとは</A>
+<LI><A HREF="#www-page">WWW上のmime_plsのページについて</A>
+<LI><A HREF="#version-check">バージョン番号の調べ方</A>
+<LI><A HREF="#distribute">再配布について</A>
+<LI><A HREF="#no-guarantee">無保証</A>
+<LI><A HREF="#files">配布ファイルについて</A>
+  <UL>
+  <LI><A HREF="#documents">ドキュメントファイル</A>
+    <UL>
+    <LI><A HREF="#mime_pls.doc">mime_pls.doc</A>
+    <LI><A HREF="#history">history</A>
+    <LI><A HREF="#html">HTML形式ドキュメントファイル</A>
+    </UL>
+  <LI><A HREF="#mimer.pl">mimer.pl</A>
+    <UL>
+    <LI><A HREF="#mimedecode">&AMP;mimedecode</A>
+    <LI><A HREF="#bodydecode">&AMP;bodydecode</A>
+    <LI><A HREF="#bdeflush">&AMP;bdeflush</A>
+    </UL>
+  <LI><A HREF="#mimew.pl">mimew.pl</A>
+    <UL>
+    <LI><A HREF="#mimeencode">&AMP;mimeencode</A>
+    <LI><A HREF="#bodyencode">&AMP;bodyencode</A>
+    <LI><A HREF="#benflush">&AMP;benflush</A>
+    </UL>
+  <LI><A HREF="#examples">ライブラリを使用したスクリプト</A>
+    <UL>
+    <LI><A HREF="#rmime">rmime</A>
+    <LI><A HREF="#wmime">wmime</A>
+    <LI><A HREF="#rbody">rbody</A>
+    <LI><A HREF="#wbody">wbody</A>
+    </UL>
+  <LI><A HREF="#Makefile">Makefile</A>
+  </UL>
+</UL>
+<HR>
+<H2><A NAME="description">mime_plsとは</A></H2>
+
+mime_plsは、MIME encode/decodeのためのperl libraryです。メッセージ
+ヘッダフィールド中の日本語文字列のMIME encode/decode(RFC2047参照)
+と、メッセージボディのBase64形式およびQuoted-Printable形式の
+encode/decode(RFC2045参照)の機能をPerlの関数として提供します。
+<P>
+メッセージヘッダフィールド中の日本語文字列のMIME化はISO-2022-JPの
+B-encodingのみをサポートします。EUCまたはShiftJISの日本語文字列は
+ISO-2022-JPに自動変換され、B-encodingによりMIME encoded-wordに変換
+されます。また、MIME encoded-wordをデコードする際に出力漢字コード
+を指定すると、ISO-2022-JPコードをEUCコードやShiftJISコードに変換
+して出力することができます。
+<P>
+DOSマシン等の小メモリマシンで使用できるように、mimer.plとmimew.pl
+の2つのライブラリファイルに分割しました。総称名としてはmime_pls
+(まいむ・ぷるす)と名付けます。
+<P>
+このドキュメント以外に各ファイルの先頭にもドキュメントを付けたので
+参照してください。
+<P>
+<HR>
+<H2><A NAME="www-page">WWW上のmime_plsのページについて</A></H2>
+
+mime_plsのページ
+<A HREF="http://www.cc.rim.or.jp/~ikuta/mime_pls/index.html">
+&LT;http://www.cc.rim.or.jp/~ikuta/mime_pls/&GT;</A>
+を公開しました。
+このページでは、mime_plsについての情報提供とmime_plsの配布を
+行ないます。
+<P>
+<HR>
+<H2><A NAME="version-check">バージョン番号の調べ方</A></H2>
+
+Ver.2.02からは、mime_plsライブラリを使用するスクリプトがmimer.plと
+mimew.plのバージョンをそれぞれ調べることができるように$mimer_version
+と$mimew_versionの2つの変数を定義しています。
+<P>
+これらの変数は、値として浮動小数点数を持ちバージョンが上がるにした
+がって単純増加することが、今後のバージョンにおいても保証されます。
+<P>
+<HR>
+<H2><A NAME="distribute">再配布について</A></H2>
+
+このライブラリを利用したアプリケーションを書かれた場合には、この
+ライブラリそのものを添付していただいて構いません。ただし、必ず本
+ドキュメントを含む配布ファイルを全て添付してください。
+<P>
+改変して再配布する場合はライブラリファイル中の「配布条件」に従って
+ください。
+<P>
+<HR>
+<H2><A NAME="no-guarantee">無保証</A></H2>
+
+このプログラムを使用することにより生じた損害については、作者は
+いかなる理由においても責任を負いません。使用される方の責任に
+おいてお使いください。
+<P>
+<HR>
+<CENTER>
+<H2><A NAME="files">配布ファイルについて</A></H2>
+</CENTER>
+<HR>
+<DL>
+<DT><H3><A NAME="documents">ドキュメントファイル</A></H3>
+<DD><DL>
+    <DT><B><A NAME="mime_pls.doc">mime_pls.doc</A></B>
+    <DD>このファイル(のプレインテキスト版)です。
+    <P>
+    <DT><B><A NAME="history">history</A>
+        (<A HREF="history.html">HTML版を見る</A>)</B>
+    <DD>これまでの変更履歴を記述したドキュメントです。
+    <P>
+    <DT><B><A NAME="html">HTML形式ドキュメントファイル</A></B>
+    <DD><A HREF="#www-page">WWW上のページ</A>で公開しているHTML
+        文書です。
+    </DL>
+<P>
+<DT><H3><A NAME="mimer.pl">mimer.pl</A>
+        (<A HREF="mimer.pl">ライブラリファイルを見る</A>)
+    </H3>
+<DD>requireすることにより、&AMP;mimedecode,&AMP;bodydecode,
+    &AMP;bdeflushの3つの関数が使用できます。Ver.2.02から、
+    $mimer_versionを参照することによりバージョン番号を調べること
+    ができるようになりました。
+    <P>
+    <DL>
+    <DT><B><A NAME="mimedecode">&AMP;mimedecode($string,$kout)</A></B>
+    <DD>$string中のencoded-wordのうち、charset=ISO-2022-JP,encoding=B
+        のものを選択的にデコードし、$koutの指定にしたがって漢字コード
+        変換を行なった結果を返します。
+        <P>
+        $koutは&QUOT;SJIS&QUOT;または&QUOT;EUC&QUOT;が有効です。
+        $koutを省略した場合、または有効な指定がされなかった場合は
+        ISO-2022-JP(いわゆる7bit JIS)を返します。
+        <P>
+        RFC2047に基づき、encoded-wordにはさまれたLWS(空白、タブ文字、
+        改行＋タブまたは空白)は削除します。デコードのあと、ISO-2022-JP
+        (RFC1468)で定義されたエスケープシーケンスのうち不要なものが
+        あれば削除します。
+    <P>
+    <DT><B><A NAME="bodydecode">&AMP;bodydecode($encoded,$coding)</A></B>
+    <DD>$coding が&QUOT;b64&QUOT;に等しいか指定しない場合は、$encoded
+        に入れられた文字列をMIME Base64形式のデータとみなしてデコード
+        し、その結果を返します。
+        Base64 alphabet(A-Za-z0-9+/=)以外の文字が存在しても単に無視
+        して処理します。
+        <P>
+        Base64のデコードは4バイト単位に行われるので、半端な部分(最後
+        の1〜3バイト)はバッファに保存され、次にこの関数が呼び出された
+        時にいっしょにデコードされます。
+        バッファをクリアするには &AMP;bdeflush関数を使用します。
+        <P>
+        $codingが&QUOT;qp&QUOT;に等しい場合は、$encodedに入れられた
+        文字列をMIME quoted-printable形式のデータとみなしてデコード
+        し、その結果を返します。
+    <P>
+    <DT><B><A NAME="bdeflush">&AMP;bdeflush($coding)</A></B>
+    <DD>$codingに&QUOT;b64&QUOT;または&QUOT;qp&QUOT;を指定すること
+        により、エンコード形式としてBase64またはQuoted-Printableを
+        選択することができます。
+        $codingを指定しなかった場合はBase64を選択したとみなされます。
+        <P>
+        &AMP;bodydecode関数によりバッファに保存されたデータを(Base64
+        の場合は最後に適当なpad文字'='を仮定して)デコードしその結果
+        を返します。
+        <P>
+        この関数が呼ばれると&AMP;bodydecodeのバッファがクリアされます。
+    </DL>
+<P>
+<DT><H3><A NAME="mimew.pl">mimew.pl</A>
+        (<A HREF="mimew.pl">ライブラリファイルを見る</A>)
+    </H3>
+<DD>requireすることにより、&AMP;mimeencode,&AMP;bodyencode,
+    &AMP;benflushの３つの関数が使用できます。
+    Ver.2.02から、$mimew_versionを参照することによりバージョン
+    番号を調べることができるようになりました。
+    <P>
+    <DL>
+    <DT><B><A NAME="mimeencode">&AMP;mimeencode($string)</A></B>
+    <DD>$string中の日本語コードの部分をISO-2022-JP(いわゆる7bit JIS)
+        に変換したあとMIME encoded-word(RFC2047参照)に変換し、
+        その結果を返します。
+        <P>
+        ShiftJISコードとEUCコードが同じ行にある場合を除き、文字
+        コードは自動的に判別します。エンコードされるISO-2022-JP
+        のエスケープシーケンスはライブラリファイル(mimew.pl)の
+        最初の方で設定できます。
+        <P>
+        $string中のShiftJISまたはEUCの文字列を正常にISO-2022-JP
+        に変換しエンコードするためには、英語版のPerlを使用する
+        必要があります。
+        <P>
+        encoded-wordがASCII文字や特殊文字と直接接することを避け
+        るために、必要に応じて空白を挿入します。encoded-word が
+        コメントの内側にある場合は例外扱いとして括弧との間に空白
+        を挿入しません。
+        <P>
+        長い日本語文字列は必要に応じて分割してエンコードし、また
+        必要に応じてencoded-wordの前後で折り返し(行分割)処理を
+        します。
+        <P>
+    <DT><B><A NAME="bodyencode">&AMP;bodyencode($data,$coding)</A></B>
+    <DD>$codingが&QUOT;b64&QUOT;に等しいか指定しない場合は、$data
+        中のデータをBase64エンコードしその結果を返します。
+        <P>
+        Base64エンコードの場合は出力1行(デフォルトでは72バイト)に
+        相当する単位(デフォルトでは54バイト)毎、Quoted-Printable
+        エンコードの場合は元データの論理行(改行コードによる行)毎に
+        処理します。
+        $dataのうち半端な部分はバッファ中に保存され、次の呼び出し
+        時にいっしょにエンコードされます。バッファをクリアするには
+        &AMP;benflush関数を使用します。
+    <P>
+    <DT><B><A NAME="benflush">&AMP;benflush($coding)</A></B>
+    <DD>$codingに&QUOT;b64&QUOT;または&QUOT;qp&QUOT;を指定すること
+        により、エンコード形式としてBase64またはQuoted-Printable
+        を選択することができます。$codingを指定しない場合はBase64
+        を選択したとみなされます。
+        <P>
+        &AMP;bodyencode関数によりバッファに保存したデータを選択した
+        形式でエンコードしその結果を返します。Base64の場合は、エン
+        コード結果が4の倍数長にならなければ必要に応じてpad文字'='を
+        追加します。
+        <P>
+        この関数が呼ばれると&AMP;bodyencodeのバッファがクリアされます。
+    </DL>
+<P>
+<DT><H3><A NAME="examples">ライブラリを使用したスクリプト</A></H3>
+<DD><DL>
+    <DT><B><A NAME="rmime">rmime</A>
+           (<A HREF="rmime">スクリプトを見る</A>)
+        </B>
+    <DD><A HREF="#mimer.pl">mimer.pl</A>を使用してMIME headerを
+        デコードするフィルターです。
+        <P>
+        使い方：<KBD>[[j]perl] rmime [-s|-e|-j] [ファイル ...]</KBD>
+    <P>
+    <DT><B><A NAME="wmime">wmime</A>
+           (<A HREF="wmime">スクリプトを見る</A>)
+        </B>
+    <DD><A HREF="#mimew.pl">mimew.pl</A>を使用してヘッダフィールド
+        中の日本語文字列をエンコードするフィルターです。
+        <P>
+        使い方：<KBD>[[j]perl [-Llatin]] wmime [ファイル ...]</KBD>
+    <P>
+    <DT><B><A NAME="rbody">rbody</A>
+           (<A HREF="rbody">スクリプトを見る</A>)
+        </B>
+    <DD><A HREF="#mimer.pl">mimer.pl</A>を使用してMIME
+        Base64/Quoted-Printable形式のデータをデコードするフィルター
+        です。DOSマシンのような小メモリの環境でも動作するように
+        メモリ使用を抑えて作ってあります。
+        <P>
+        使い方：<KBD>[[j]perl] {-q|-b} rbody [ファイル ...]</KBD>
+    <P>
+    <DT><B><A NAME="wbody">wbody</A>
+           (<A HREF="wbody">スクリプトを見る</A>)
+        </B>
+    <DD><A HREF="#mimew.pl">mimew.pl</A>を使用してデータをMIME
+        Base64/Quoted-Printable形式でエンコードするフィルターです。
+        DOSマシンのように使用できるメモリが少ない環境でも動作する
+        ようにメモリ使用を抑えて作ってあります。
+        <P>
+        使い方：<KBD>[[j]perl] {-q|-b} wbody [ファイル ...]</KBD>
+    </DL>
+<P>
+<DT><H3><A NAME="Makefile">Makefile</A></H3>
+<DD>mimer.pl,mimew.pl,rmime,wmime,rbody,wbodyをインストールする
+    際に使用します。他には、ratやtar+gzip(or compress)+uuencode
+    で配布用のアーカイブを作成する機能があります。
+    <P>
+    作者の環境(SunOS4.1.3)で使うためのMakefileなので、他の環境
+    (特にUNIX系以外の環境)ではうまく動かないかもしれません。
+</DL>
+<P>
+<A HREF="index.html">[Top]</A>
+Document
+<A HREF="history.html">[History]</A>
+
+<HR>
+<ADDRESS>
+Copyright (C) 1997 生田　昇
+<A HREF="mailto:noboru@ikuta.ichihara.chiba.jp">
+&LT;noboru@ikuta.ichihara.chiba.jp&GT;
+</A>
+</ADDRESS>
+</BODY>
+</HTML>
