@@ -11,14 +11,38 @@
 
 require 'mimer.pl';
 require 'mimew.pl';
-sub DecodeMimeStrings { &mimedecode(@_);}
+
+### debug ###
+if ($0 eq __FILE__) { 
+    while (<>) { 
+	print &MIME'MimeBDecode($_); #';
+    }
+}
+
+
+sub DecodeMimeStrings 
+{ 
+    if ($MIME_EXT_TEST) {
+	&MIME'MimeBDecode(@_); #';
+    }
+    else {
+	&mimedecode(@_);
+    }
+}
+
 
 sub EnvelopeMimeDecode
 { 
     local(*e) = @_;
 
-    $e{'Hdr'}  = &mimedecode($e{'Hdr'});
-    $e{'Body'} = &mimedecode($e{'Body'});
+    if ($MIME_EXT_TEST) {
+	$e{'Hdr'}  = &DecodeMimeStrings($e{'Hdr'});
+	$e{'Body'} = &DecodeMimeStrings($e{'Body'});
+    }
+    else {
+	$e{'Hdr'}  = &mimedecode($e{'Hdr'});
+	$e{'Body'} = &mimedecode($e{'Body'});
+    }
 }
 
 
@@ -40,6 +64,47 @@ sub StripMIMESubject
 
     &Debug("MIME OUTPUT:[$_]") if $debug;
     &Debug("MIME OUTPUT:[". $e{'h:Subject:'}."]") if $debug;
+}
+
+
+###
+### import fml-support: 02651 (hirono@torii.nuie.nagoya-u.ac.jp)
+### 
+package MIME;
+
+sub MimeQDecode
+{
+    local($_) = @_;
+    s/=*$//;
+    s/=(..)/pack("H2", $1)/ge;
+    $_;
+}
+
+
+sub MimeBDecode 
+{
+    local($_, $out) = @_;
+
+    $MimeBEncPat = 
+	'=\?[Ii][Ss][Oo]-2022-[Jj][Pp]\?[Bb]\?([A-Za-z0-9\+\/]+)=*\?=';
+
+    $MimeQEncPat = 
+	'=\?[Ii][Ss][Oo]-2022-[Jj][Pp]\?[Qq]\?([\011\040-\176]+)=*\?=';
+
+
+    while (s/($MimeBEncPat)[ \t]*\n?[ \t]+($MimeBEncPat)/$1$3/o) {;}
+
+    s/$MimeBEncPat/&kconv(&MimeBDecode($1))/geo;
+    s/$MimeQEncPat/&kconv(&MimeQDecode($1))/geo;
+
+    s/(\x1b[\$\(][BHJ@])+/$1/g;
+
+    while (s/(\x1b\$[B@][\x21-\x7e]+)\x1b\$[B@]/$1/) { ;}
+    while (s/(\x1b\([BHJ][\t\x20-\x7e]+)\x1b\([BHJ]/$1/) { ;}
+
+    s/^([\t\x20-\x7e]*)\x1b\([BHJ]/$1/;
+
+    $_;
 }
 
 
