@@ -145,6 +145,10 @@ while (<>) {
     }
 
     # exim || qmail
+    if ($MTA eq 'qmail' && /This is a permanent error/) {
+	$RABuf .= $_;
+    }
+
     if ($MTA eq 'exim' || $MTA eq 'qmail') {
 	/^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
 	$CurAddr =~ s/[\<\>]//g;
@@ -230,6 +234,11 @@ while (<>) {
 	$found++;
     }
 
+    if ($MTA eq 'qmail' && $CurAddr && $RABuf) {
+	&AnalyzeErrorWord($RABuf, $CurAddr);
+	$found++;
+    }
+
     ###
     ### sendmail
     ###
@@ -306,6 +315,10 @@ sub AnalWord
     # qmail
     if (/couldn\'t find any host/) { $reason = 'uh';}
     if (/can\'t accept addresses/) { $reason = 'ua';}
+    if (/no mailbox here/)         { $reason = 'uu';}
+    # qmail loop
+    if (/This message is looping/) { $reason = 'us';}
+    if (/This is a permanent error/) { $reason = 'us';}
 
     # exim ?
     if (/unknown local-part/i)  { $reason = 'uu';}
@@ -377,16 +390,27 @@ sub CacheOn
     &Debug("--CacheOn ($addr, $reason);") if $debug;
 
     # cache check
+    if ($debug && $Cached{"$addr:$reason"}) {
+	print STDERR "CacheOn already cached\n";
+    }
+
     return if $Cached{"$addr:$reason"};
     $Cached{"$addr:$reason"} = 1;
 
+    if ($debug) {
+	unless (%return_addr)   { print STDERR "no return_addr\n";}
+	for (keys %return_addr) { print STDERR "return_addr = $_\n";}
+    }
+
     for (keys %return_addr) {
+	if ($debug) {
+	    if (/^\s*$/ || ($_ eq $addr)) {
+		print STDERR "ignore $_\n";
+	    }
+	}
+
 	next if /^\s*$/;
 	next if $_ eq $addr;
-
-print STDERR " 
-	&AddrCache(time, $addr, $_, $reason);
-";
 
 	# %AddrCache
 	&AddrCache(time, $addr, $_, $reason);
