@@ -427,6 +427,9 @@ sub SetDefaults
     
     # Content Filtering Handler for MIME
     @MailContentHandler = ();	# Default: No filter
+
+    # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
+    &DEFINE_FIELD_LOOP_CHECKED('from');
 }
 
 sub GetTime
@@ -1097,13 +1100,28 @@ sub CheckCurrentProc
 	return 0;
     }
 
-    # reject all "From: MAIL_LIST" mails
-    if (&LoopBackWarn($From_address)) {
-	&Log("reject mail from $From_address");
-	&WarnE("reject mail from $From_address",
-	       "reject mail from $From_address\n");
-	$DO_NOTHING = 1;
-	return 0;
+    # XXX reject all "From: MAIL_LIST" mails (3.0)
+    # XXX fix for 3.0.1
+    # XXX controllable by %LOOP_CHECKED_HDR_FIELD.
+    {
+	local($f, $v);
+	for $f (keys %LOOP_CHECKED_HDR_FIELD) {
+	    next unless $LOOP_CHECKED_HDR_FIELD{$f};
+	    if ($v = $e{"h:${f}:"}) {
+		$v = &Conv2mailbox($v);
+		if (&LoopBackWarn($v)) {
+		    &Log("$f: <$v> may cause loop. rejected");
+		    &WarnE("reject mail $f:<$v>",
+			   "rejected since '$f' header\n".
+			   "may cause mail loop.\n".
+			   "${f}: ".
+			   $e{"h:${f}:"}.
+			   "\n");
+		    $DO_NOTHING = 1;
+		    return 0;
+		}
+	    }
+	}
     }
 
     ### security level
@@ -2561,6 +2579,7 @@ sub LoopBackWarn
 {
     local($to) = @_;
     local($a);
+    local(@c) = caller;
 
     for $a ($MAIL_LIST, $CONTROL_ADDRESS, @MAIL_LIST_ALIASES, 
 	    "fmlserv\@$DOMAINNAME", "majordomo\@$DOMAINNAME", 
@@ -2570,6 +2589,7 @@ sub LoopBackWarn
 	if (&AddressMatch($to, $a)) {
 	    &Debug("AddressMatch($to, $a)") if $debug;
 	    &Log("Loop Back Warning: ", "$to eq $a");
+	    &Log("called from @c");
 	    &WarnE("Loop Back Warning: [$to eq $a] $ML_FN", 
 		   "Loop Back Warning: [$to eq $a]");
 	    return 1;
@@ -2675,6 +2695,18 @@ sub DEFINE_FIELD_PAT_TO_REJECT
 { 
     $REJECT_HDR_FIELD_REGEXP{$_[0]} = $_[1];
     $REJECT_HDR_FIELD_REGEXP_REASON{$_[0]} = $_[2] if $_[2];
+}
+
+sub DEFINE_FIELD_LOOP_CHECKED
+{ 
+    local($_) = $_[0]; tr/A-Z/a-z/;
+    $LOOP_CHECKED_HDR_FIELD{$_} = 1;
+}
+
+sub UNDEF_FIELD_LOOP_CHECKED
+{ 
+    local($_) = $_[0]; tr/A-Z/a-z/;
+    $LOOP_CHECKED_HDR_FIELD{$_} = 0;
 }
 
 sub ADD_FIELD
