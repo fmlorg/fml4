@@ -2,11 +2,46 @@
 
 .S	エラーメール
 
+エラーメールは通常 $MAINTAINER に返ってきます。
+elena MLなら elena-admin@あなたのドメイン です。
+
 MTAから返ってくるメールはエラーの分析とデバッグの大事な情報です。
 ほとんどは典型的なフレーズでしかないので英語だからと嫌わず
 エラーをしらせるキーワードを探してみてください。
 
 典型的な例 => .ptr{errorlist}
+
+
+.S	エラーメールの送られる先は？
+
+"makefml newml"の時に作る見本では
+
+	elena-admin: そのmakefmlを走らせたユーザ
+
+になっています。例:
+
+	elena-admin: fml
+
+fml@あなたのドメイン のメールを読む人にいきます。設定によっては単にメー
+ルスプール /var/mail/fml にたまっているだけかもしれません
+
+この送り先を変えるには
+
+1. 単に /etc/aliases をいじる
+
+	elena-admin: ユーザ１@どっかのドメイン, ユーザ2@どっかのドメイン2
+
+2. いちいち root になりたくない
+
+	elena-admin: :include:/var/spool/ml/elena/include-admin
+
+/var/spool/ml/elena/include-admin は一行一アドレス
+
+	ユーザ１@どっかのドメイン
+	ユーザ2@どっかのドメイン2
+
+[注意]
+	/var/spool/ml/elena/include-admin は chmod 644 してください
 
 
 .S	ＭＬ側から定期的に『入り続けるか？』を確認する
