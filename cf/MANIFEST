@@ -627,6 +627,10 @@ PRECEDENCE:	bulk
 # value: 1/0
 APPEND_STARDATE:
 
+# RFC2369 e.g. list-post: ..
+# value: 1/0
+USE_RFC2369:
+
 # obsolete in fml 3.0
 # We should force "To: $MAIL_LIST" form "For Eye" or NOT?
 # default is "NO".
