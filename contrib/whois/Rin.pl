@@ -1,8 +1,12 @@
 #!/usr/local/bin/perl
+#
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+#
+# $Id$
 
-$rcsid = q$Id$;
-($rcsid) = ($rcsid =~ /Id:.*.pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/); 
-$rcsid = " Rin Russel". $rcsid;
 
 $FILE      = "/home/axion/fukachan/work/spool/EXP/contrib/whois/whoisdb";
 $LOGFILE   = "/home/axion/fukachan/work/spool/EXP/contrib/whois/log";
