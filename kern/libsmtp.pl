@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.58 2001/09/29 10:35:43 fukachan Exp $
+# $FML: libsmtp.pl,v 2.59 2002/02/16 10:31:42 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -539,6 +539,7 @@ sub __SmtpIO
 	    # postfix xverp
 	    if ($e{'mci:xverp'}) {
 		$xverp = ' XVERP=-=';
+		$mail_from = $SMTP_SENDER || $MAINTAINER;
 	    }
 	    # qmail
 	    else {
