@@ -14,7 +14,7 @@ INFO:
 #####################################################################
 # ### Section: DNS and Other Fundamental (CF Version, debug, Language) ### 
 # config.ph configuration version
-CFVersion:	3.1
+CFVersion:	3.2
 
 # global debug option. if non-nil, debug mode.
 # In debug mode, NOT do distribution
@@ -146,6 +146,13 @@ AUTO_REGISTERED_UNDELIVER_P:  1
 AUTO_REGISTRATION_LINES_LIMIT:  0
 
 
+#####################################################################
+# ### Section: Confirmd ###
+# confirmd
+CONFIRMD_ACK_REQ_FILE:	$DIR/confirmd.ackreq
+CONFIRMD_ACK_LOGFILE:	$VARLOG_DIR/confirmd.ack
+CONFIRMD_ACK_EXPIRE_UNIT:	1month
+CONFIRMD_ACK_WAIT_UNIT:		2weeks
 
 #####################################################################
 # ### Section: Remote Administration ###
@@ -176,6 +183,11 @@ ADMIN_HELP_FILE:	$DIR/help-admin
 # password file to authenticate members
 PASSWD_FILE: 		$DIR/etc/passwd
 
+# "admin add" to add an address to a member list. If succeeds, FML 
+# sends back WELCOME_FILE if this variable is defined. Default is 0,
+# so the maintainer which adds it notifies 'work is done' to the subscriber.
+ADMIN_ADD_SEND_WELCOME_FILE:	0
+
 # "admin log" is "tail -100 log" in default
 ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 
@@ -203,7 +215,8 @@ MODERATOR_MEMBER_LIST:	$DIR/moderators
 
 # We reject $REJECT_ADDR@ARBITRARY.DOMAINS, 
 # since these are clearly NOT individuals.
-REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc
+REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc|\S+\-help|\S+\-subscribe|\S+\-unsubscribe
+
 
 # list of spammers to be rejected, which corresponds /etc/sendmail.spamlist
 REJECT_ADDR_LIST:	$DIR/spamlist
@@ -223,7 +236,12 @@ ADDR_CHECK_MAX:		3
 # In-coming mail size > $INCOMING_MAIL_SIZE_LIMIT, fml discards it
 # and send a warning only to the maintainer.
 # 0 (default) implies infinite (no limit)
+# If $NOTIFY_MAIL_SIZE_OVERFLOW is set, notify the rejection to the sender.
+# If $ANNOUNCE_MAIL_SIZE_OVERFLOW is set, announce received the over
+# size mail to the ML (SARASHIMONO:-).
 INCOMING_MAIL_SIZE_LIMIT:
+NOTIFY_MAIL_SIZE_OVERFLOW:	1
+ANNOUNCE_MAIL_SIZE_OVERFLOW:	0
 
 # Resource Limit (for ISP ?): (default 0 == not check this limit)
 # the maximum of ML delivery members when auto registration routine works.
@@ -232,15 +250,41 @@ INCOMING_MAIL_SIZE_LIMIT:
 # We check @ACTIVE_LIST effective members, not @MEMBER_LIST.
 MAX_MEMBER_LIMIT:
 
-
 # Envelope Filtering for distribution mails
 # &EnvelopeFilter is called in the top of &Distribute if you set
 # $USE_DISTRIBUTE_FILTER = 1;
-# You can use $REJECT_DISTRIBUTE_FILTER_HOOK for advanced customizes.
-# $FILTER_NOTIFY_REJECTION enables fml.pl notifies the rejection to the sender.
+# You can use $DISTRIBUTE_FILTER_HOOK for advanced customizes.
 USE_DISTRIBUTE_FILTER:
-REJECT_DISTRIBUTE_FILTER_HOOK:
+DISTRIBUTE_FILTER_HOOK:
+
+# $FILTER_NOTIFY_REJECTION enables fml.pl notifies the rejection to
+# the sender.
 FILTER_NOTIFY_REJECTION:
+
+# Attributes
+# When $FILTER_ATTR_REJECT_COMMAND is 1 under distribution mode, 
+# rejects "# command" syntax just before distribution (&Distribute;)
+FILTER_ATTR_REJECT_COMMAND:
+
+# Mail Traffic Information: internal traffic monitor
+USE_MTI:
+
+# Optional. If UNSUBSCRIBE_AUTH_TYPE is 'confirmation', FML sends back
+# confirmation against a fake. In default, FML does not do confirmation.
+# available type is "confirmation" only.
+UNSUBSCRIBE_AUTH_TYPE:
+
+
+# LOGGING THE LATEST IN-COMING MAILS
+# Logs an in-coming mail to $LOG_MAIL_DIR/$id 
+# where ($id = `cat $LOG_MAIL_SEQ`; $id = $id % $NUM_LOG_MAIL; $id++).
+# Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and each file size
+# is limited up to $LOG_MAIL_FILE_SIZE_MAX bytes to save disk.
+USE_LOG_MAIL:	0
+LOG_MAIL_DIR:	$VAR_DIR/Mail
+LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
+NUM_LOG_MAIL:	100
+LOG_MAIL_FILE_SIZE_MAX:	2048
 
 
 #####################################################################
@@ -253,6 +297,18 @@ FILTER_NOTIFY_REJECTION:
 #   &DEFINE_FIELD_FORCED('field', "contents");   Overwrite
 #
 # In default, we discard fields not shown in @HdrFieldsOrder.
+
+# Date: definition ("makefml config" can control this)
+# 1 original-date			Date:
+# * Date: == when distribute() works
+# 2 distribute-date+posted		Date: + Posted:
+# 3 distribute-date+x-posted		Date: + X-Posted:
+# 4 distribute-date+x-original-date	Date: + X-Original-Date:
+# * Date: == when fml.pl receives or is kicked off.
+# 5 received-date+posted		Date: + Posted:
+# 6 received-date+x-posted		Date: + X-Posted:
+# 7 received-date+x-original-date	Date: + X-Original-Date:
+DATE_TYPE:	received-date+posted
 
 # In Header, we expand these values to
 #
@@ -326,9 +382,10 @@ TZone:		 +0900
 # ## Sub Section: Pass All Header ? ##
 # In default we pass only defined fields of the header
 # which is defined in @HdrFieldsOrder (see "sub SetDefaults" in fml.pl).
-# All files except $SKIP_FIELDS is passed through if $SUPERFLUOUS_HEADERS = 1.
-# 
-SUPERFLUOUS_HEADERS:  0
+# All files except $SKIP_FIELDS is passed through 
+# when $PASS_ALL_FIELDS_IN_HEADER is set. 
+# The old variable name is $SUPERFLUOUS_HEADERS.
+PASS_ALL_FIELDS_IN_HEADER: 0
 
 SKIP_FIELDS:	Received|Return-Receipt-To
 
@@ -361,6 +418,13 @@ COMMAND_ONLY_SERVER:	0
 COMMAND_CHECK_LIMIT:  	3
 GUIDE_CHECK_LIMIT:	3
 GUIDE_KEYWORD:	guide
+
+# The maximum number of commands in one command mail.
+# The variable \$MAXNUM_COMMAND_INPUT controls this.
+# If the value is 3, fml permits 3 commands in one command mail.
+# 0 or NULL implies infinite (default). 
+MAXNUM_COMMAND_INPUT:
+
 
 # "# chaddr" commands is required for special exception
 CHADDR_KEYWORD:	 chaddr|change\-address|change
@@ -430,7 +494,7 @@ MGET_SUBJECT_TEMPLATE:	result for mget _DOC_MODE_ _PART_ _ML_FN_
 #
 # $NOT_SHOW_DOCMODE is obsolete, it equals you discard _PART_.
 #
-MSEND_SUBJECT_TEMPLATE:	Digest -Matome Okuri- _ARTICLE_RANGE_ _DOC_MODE_ _PART_ _ML_FN_
+MSEND_SUBJECT_TEMPLATE:	Digest _ARTICLE_RANGE_ _PART_ _ML_FN_
 
 
 # Digest/Matome Okuri rc file
@@ -538,7 +602,8 @@ CF_DEF:
 # ## Sub Section: MIME ##
 # Mime Decode On if $USE_MIME; 
 # e.g. Decode $SUMMARY_FILE subject and so on.
-USE_MIME:
+# default 1 from 2.1C#13
+USE_MIME:		1
 
 # NOT RECOMMENDED OPTION: 
 # articles in the spool are MIME-DECODED for poor environment users.
@@ -648,6 +713,14 @@ INDEX_SHOW_DIRNAME:		0
 LIBRARY_DIR:			var/library
 LIBRARY_ARCHIVE_DIR:		archive
 
+# ## Sub Section: newsyslog(8) ##
+# to turn over \$DIR/log
+LOGFILE_NEWSYSLOG_LIMIT:
+
+# to turn over \$DIR/actives.bak and \$DIR/members.bak, 
+# 150K = 30*5000
+AMLIST_NEWSYSLOG_LIMIT:	150K
+
 
 # ### Section: Html Configurations ###
 # HTML Mode Configurations (libsynchtml.pl)
@@ -663,10 +736,13 @@ HTML_INDEX_TITLE:
 HTML_DATA_CACHE:
 HTML_OUTPUT_FILTER:
 HTML_THREAD:			1
+HTML_THREAD_REF_TYPE:		default
 HTML_DATA_THREAD:
 HTML_INDEX_REVERSE_ORDER:	1
 HTML_INDEX_UNIT:		day
-BASE64_DECODE:
+
+# HTML 4.0; example: "fml.css"
+HTML_STYLESHEET_BASENAME:	
 
 
 # ### Section: Interface to other Services (http,ftp,gopher,www) ###
@@ -730,7 +806,12 @@ COMPRESS:	&path(gzip) -c
 ZCAT:		&path(gzcat:zcat:gzip\s-cd)
 LHA:		&path(lha)
 ISH:		&path(ish)
+ZIP:		&path(zip)
 PGP:		&path(pgp)
+
+# base64
+BASE64_DECODE:
+BASE64_ENCODE:
 
 
 LOCAL_CONFIG:
