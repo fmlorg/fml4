@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+CGI interface Status
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+<CENTER>
+CGIの現状いろいろ (2000/03/22 記)
+</CENTER>
+</H1>
+
+<PRE>
+Posted: Wed, 22 Mar 2000 12:47:12 +0900
+fml-support: 07689
+
+fml/www/ にあるから、なおして〜なおして〜なおして〜 :-)
+
+○ MLつくる／けす、メンバーをいれる／けす／かんりしゃをいれる／けす。
+makefml config (日本語メニューだ)をWWWでするとかは一通りできるはずです。
+＃個人的には YYYY/MM/DD の特定の日のログをみる がおきにいりです:-)
+
+○ CGIのINSTALL ガイドはapache-ssl の設定ガイドとかまでセットにしよう
+とおもってたけど全然かいてません。（ひたすらコマンドラインでなにをうつ
+か？みたいな簡単なのはあるんだけどね）。＃ fml/doc/devel/ 以下参照
+
+○ 各組合せごとに script 一発で full automatic でセットアップして一発
+で出荷OK(?謎)な script があるといいなーとかおもってます。思ってるだけ
+でつくってないですけど;)
+
+組合せとは
+
+	postfix + apache
+	sendmail + apache
+	qmail + apache
+	postfix + thttpd
+	…
+
+とかそういう組合せのことです＃全部つくっちゃいられないとおもうけど
+
+各 program 用の patch は fml/www/examples/ に用意しつつあるので、ftp 
+して、make して, patch あててという一連の動作をする script があればい
+いんだとおもうけど
+
+○ ちなみにCGIをうごかしている実績があるのは
+
+	postfix  + apache
+	sendmail + apache
+
+です。postfix の方がちょっと楽でした、はい。 
+＃alias_maps と alias_database の２つ変数のある意義がいまわかるというか
+＃深いなあ
+
+◯ メモ
+
+fml/www/INSTALL.jp
+fml/www/QandA.jp
+fml/www/IMPLEMENTATION.jp
+
+やりのこし
+
+fml/www/TODO.jp
+
+とかをみてみてください。
+
+known bugs として makefml config そのものが画面では動いてる(動いてるん
+ですけどね)のに、入力がセキュリティチェックではねられる項目がたまにあります
+例: SUBJECT_TAG_TYPE (入力に [:] とかあるから)
+
+これをどうするかは考え中です。
+
+P.S. 
+
+ちなみに副産物としてコマンドラインの makefml config も日本語表示できま
+す。jmakefml とかいう wrapper とかもあるといいのかなとかおもったのです
+が、どうでしょうね
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

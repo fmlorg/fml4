@@ -13,7 +13,7 @@ HTML_MISC_SOURCES += roadmap.html nt.html search-j.html search-e.html
 HTML_MISC_SOURCES += releng.ja.html
 HTML_MISC_SOURCES += ftphier.ja.html ftphier.html
 HTML_MISC_SOURCES += anoncvs.ja.html anoncvs.html
-HTML_MISC_SOURCES += good_bye_perl4.html
+HTML_MISC_SOURCES += good_bye_perl4.html CGIstatus.ja.html
 
 ### targets ###
 HTML_REQ_CPP_SOURCES  = index history download links mailinglist people
