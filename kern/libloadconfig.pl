@@ -156,6 +156,9 @@ sub LoadDummyMacros
     eval "sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL { 1;}";
     eval "sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL { 1;}";
 
+    # misc
+    eval "sub SIZE { ;}";
+
     # for convenience
     eval "sub DUMMY { ;}";
     eval "sub TRUE  { 1;}";
@@ -489,6 +492,12 @@ sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL
 }
 
 sub Debug { print STDERR "@_\n";}
+
+# return total size reading from STDIN
+sub SIZE
+{
+    return $Envelope{ _pcb }->{ incoming_message }->{ total_read_size };
+}
 
 # for conveinience
 sub DUMMY { ;}
