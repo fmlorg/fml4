@@ -1,13 +1,18 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
+
+use vars qw($debug);
+use vars qw($debug %LockStatus $LockFile $LockTmp);
+
 
 ### Lock library functions, 
 ### This lock functions uses proceses ID
@@ -19,9 +24,9 @@ sub V7Lock
     $0 = "${FML}: link(2) style Locked and waiting <$MyProcessInfo>";
 
     # set variables
-    $LockFile = $LOCK_FILE || "$FP_VARRUN_DIR/lockfile.v7";
-    $LockTmp  = "$FP_VARRUN_DIR/lockfile.$$";
-    local($timeout) = 0;
+    $LockFile   = $LOCK_FILE || "$FP_VARRUN_DIR/lockfile.v7";
+    $LockTmp    = "$FP_VARRUN_DIR/lockfile.$$";
+    my $timeout = 0;
 
     # create tmpfile
     open(APP, ">> $LockTmp") || die "Can't make LOCK $LockTmp\n";
@@ -50,10 +55,11 @@ sub V7Lock
     unlink $LockTmp;
 
     if ($timeout >= $MAX_TIMEOUT) {
-	$Timeout = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) = localtime(time);
+	my $f = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
 			   1900 + $year, $mon+1, $mday, $hour, $min, $sec);
 
-	open(TIMEOUT, "> $FP_VARLOG_DIR/$Timeout");
+	open(TIMEOUT, "> $FP_VARLOG_DIR/$f");
 	select(TIMEOUT); $| = 1; select(STDOUT);
 	print TIMEOUT $Envelope{'Header'};
 	print TIMEOUT "\n";
@@ -61,7 +67,7 @@ sub V7Lock
 	close(TIMEOUT);
 
 	&WarnE("link(2) style LOCK TIMEOUT", 
-	       "saved in $FP_VARLOG_DIR/$Timeout\n\n");
+	       "saved in $FP_VARLOG_DIR/$f\n\n");
 
 	sleep(3);
 	&TimeOut; # called when flock(2) and alarm(3) works and lock timeouts.
