@@ -45,15 +45,18 @@ exit 0;
 sub Init
 {
     %SECURE = (
+	       # internal use
 	       '$NULL' => 1,
 	       '$SIG'  => 1,
 
+	       # /usr/local/fml/.fml/system
 	       '$DOMAIN' => 1,
 	       '$FQDN' => 1,
 	       '$LANGUAGE' => 1,
 	       '$ML_DIR' => 1,
 	       '$EXEC_DIR' => 1,
 
+	       # /usr/local/fml/.fml/cgi.conf
 	       '$CGI_AUTHDB_DIR' => 1,
 	       '$HOW_TO_UPDATE_ALIAS' => 1,
 	       '$MTA' => 1,
@@ -63,9 +66,11 @@ sub Init
 	       # config.ph
 	       '$ADMIN_MEMBER_LIST' => 1,
 	       '$MEMBER_LIST' => 1,
-
-	       # 
 	       '$CFVersion'      => 1,
+
+
+	       # XXX PAY ATTENTOINS
+	       # other variables
 	       '$ControlThrough' => 1,
 	       '$ErrorString'    => 1,
 	       '$HTDOCS_TEMPLATE_DIR' => 1,
@@ -78,15 +83,19 @@ sub Init
 	       '$MAKE_FML' => 1, 
 	       '$GETBUFLEN' => 1, 
 
-	       # 
 	       '$CGI_CF' => 1, 
 	       '$CGI_PATH' => 1, 
 	       '$CGI_CONF' => 1, 
-
 	       '$WWW_CONF_DIR' => 1, 
 	       '$WWW_DIR' => 1, 
+
 	       '$ACTION' => 1, 
 	       '$OPTION' => 1, 
+
+	       '$SavedENV'          => 1, 
+	       '$UseLogMessage'     => 1, 
+	       '$LogMessage'        => 1, 
+	       '$WithinPre'         => 1, 
 	       );
 }
 
