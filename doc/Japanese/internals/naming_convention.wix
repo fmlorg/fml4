@@ -1,12 +1,16 @@
 .C	変数名や関数名の名付け方の慣習について
+=E.C	Naming Convention
 
 .S	関数名
+=E.S	Function Name
 
-Capital
+Capital by default. There are exceptional cases.
 
 □ 例外
 
 ◯ 関数オーバーロードをちょっと意図している風
+=E
+* function overload
 
 use()
 eval()
@@ -14,6 +18,8 @@ system()
 daemon()
 
 ◯ mget3_*() 関数群
+=E
+* mget3_*(): file operations
 
 proc/libsendfile.pl:108:sub mget3 
 proc/libsendfile.pl:334:sub mget3_SendingEntry
@@ -29,6 +35,8 @@ proc/libsendfile.pl:738:sub mget3_V1search
 
 ◯ fml_local ユーザ定義関数の例題 
    これはユーザ定義関数なので、普通の意味での慣習には従っていない
+=E
+fml_local, independent from fml itself.
 
 libexec/fml_local.pl:689:sub sendback
 libexec/fml_local.pl:725:sub getmyspool_nopasswd

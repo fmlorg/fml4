@@ -1,11 +1,18 @@
 .C	事例集
+=E.C	Examples
 
 .S	Reply-To: が携帯電話のあどれすで困る
+=E.S	Reply-To: in a message from portable phone is invalid?
 
 Q: 携帯電話から送られるメールで Reply-To: が携帯電話のアドレスのために
 配送されたメールが Reply-To: ＭＬになりません。
+=E
+Q: Reply-To: in a message from portable phone is invalid?
 
 A: 『常に強制的に Reply-To: ＭＬにしてしまう』ことで解決になるのなら
+=E
+A: "Reply-To: is enforced to ML" is a solution. It may resolve your
+   annoyance. 
    
 /var/spool/ml/elena/cf (PATHは適当によみかえてください) の 
 LOCAL_CONFIG という行の後に
@@ -13,12 +20,15 @@ LOCAL_CONFIG という行の後に
    &DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
 
 と書いて config.ph を作り直して下さい。作り直すのは例えば
-
    % cd /var/spool/ml/elena/cf
    % makefml update-config.ph elena
 
 
 .S	fmlでのwelcomeメールのsubjectを日本語にする
+=E.S	hack subject of welcome message to be in Japanese
+
+=E
+omitted since this is Japanese specific topic.
 
 fml-support: 07219
 
@@ -41,12 +51,15 @@ make config.ph
 
 
 .S	登録のconfirmationメールのsubjectをいじる
+=E.S	hack subject of confirmation message
 
    "Subscribe confirmation request $ML_FN";
 
 のような subject を自由にカスタマイズするのはちょっと面倒です。という
 のは状態によってさまざまなsubjectに変わるので、それは今関数のなかに埋
 め込まれてしまっています。
+=E
+Hmm, in the present fml you need to customize internal function.
 
 XXX 本来は messages/$LANGUAGE/ に押し出して外のファイルから定義を
 XXX 変更できるようににするべきでしょうね。外側からそのてのフレーズをい

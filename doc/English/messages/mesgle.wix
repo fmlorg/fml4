@@ -1,4 +1,5 @@
 .C	エラーメッセージなどのカスタマイズ
+=E.C	Customize error messages
 
 エラーメッセージなどの返事には元になるテンプレートがあります。
 fml のソースにはメッセージを返す必要がある場所に no_such_file や 
@@ -20,8 +21,13 @@ auth.fail といったキーワードが埋め込まれています。
 
 
 .S	キーワードのサーチ
+=E.S	Search order for keywords for fml messages
 
 キーワードは	ファイル名.いろ.いろ のような形式です。
+=E
+A lot of keywords for error messages are built-in.  The keyword format
+is "filename.key.word". For example, fml searchs "auth.ok" in the
+following order.
 
 例: auth.ok というキーワードのサーチは次の順です。
     最初にそのキーワードが見つかったファイルの文章を使います。
@@ -35,6 +41,9 @@ auth.fail といったキーワードが埋め込まれています。
 一方 no_such_file といった . を含まないキーワードは kern というファイ
 ルに含まれるお約束です。
 最初にそのキーワードが見つかったファイルの文章を使います。
+=E
+If fml searches the keyword without . (e.g. no_such_file), the order
+follows:
 
 	/var/spool/ml/elena/messages.Japanese.conf
 	/var/spool/ml/elena/messages.conf
@@ -44,13 +53,17 @@ auth.fail といったキーワードが埋め込まれています。
 
 
 .S	messages.conf の例
+=E.S	Example: messages.conf
 
 いじりたいキーワードを
+=E
+cut and paste the keyword from
 
 	/usr/local/fml/messages/Japanese/
 
-ディレクトリのしたから探して cut & paste してください。
+ディレクトリの下から探して cut & paste してください。
 
+.if LANG == JAPANESE
 .q
 messages.conf の例
 
@@ -63,11 +76,27 @@ auth.ok:
 auth.fail:
 	認証に失敗しました。
 ~.q
+.fi
+.if LANG == ENGLISH
+unlink:
+	remove _ARG0_
+
+auth.ok:
+	authenticated
+
+auth.fail:
+	failed to authenticate
+.fi
 
 
 .S	サーチ順の例
+=E.S	Example: Search
 
-ケース1: /var/spool/ml/elena/messages.conf に auth.ok だけ書いた
-
-auth.ok をサーチする時は messages.conf を使う。
-auth.fail は /usr/local/fml/messages/Japanese/auth を使います。
+ケース1: /var/spool/ml/elena/messages.conf に auth.ok だけ書いたとしま
+す。この時は次のようになります。auth.ok をサーチする時は messages.conf 
+を使う。auth.fail は /usr/local/fml/messages/Japanese/auth を使います。
+=E
+You add "auth.ok" to /var/spool/ml/elena/messages.conf.  The search
+order of keywors is the following way: If you search "auth.ok",
+messages.conf is used.  If you search "auth.fail",
+/usr/local/fml/messages/English/auth is used.

@@ -2,10 +2,16 @@
 =E.C	Overview
 
 .S	fml の返すメッセージ
+=E.S	message fml sends back
 
 fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
 大雑把にいって長いものと短いものがあります。長いものは各ＭＬのホームに
 ファイルとして容易されています。例えば
+=E
+The messages fml sends back (for example, error messages) is
+controlled by files themself and messages temlates. For examle,
+welcome message is a set of /var/spool/ml/elena/welcome and keyword in
+/usr/local/fml/messages/ templates.
 
 	登録された時に返すメッセージ (/var/spool/ml/elena/welcome)
 
@@ -22,8 +28,10 @@ fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
 
 という作業です。どのようなものがあるのかについては完全なリストはありま
 せんが、Japanese/ 以下のファイルがそれぞれ何に対応しているのかは
-
 	/usr/local/fml/messages/Japanese/MANIFEST.Japanese
+=E
+See the following file what purpose for each file
+	/usr/local/fml/messages/English/MANIFEST
 
 を見て下さい。また最新版は以下のURLをみてください。
 
@@ -31,9 +39,14 @@ fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
 
 
 .S	長めの返事のテンプレート
+=E.S	prepared message files
 
 makefml newml を実行した際に各ＭＬのHOMEに用意されるテンプレートのファ
 イルは
+=E
+fml sends back the following file itself in some cases, for example,
+retriving help file.
+
 
      confirm             confirm モードの登録用
      confirmd.ackreq     confirm モードの登録継続確認用
@@ -43,6 +56,15 @@ makefml newml を実行した際に各ＭＬのHOMEに用意されるテンプレートのファ
      help-admin          admin メンバ用 help
      objective           ML の objective (目的)
      welcome             入会メッセージ
+=E
+     confirm             used in confirmation
+     confirmd.ackreq     confirmd uses
+     deny                deny message
+     guide               ML  guide
+     help                ML  help
+     help-admin          admin commands help
+     objective           ML objective
+     welcome             welcome
 
 です。これらはメッセージとしてはかなり長いものです。短いものは全部
 
