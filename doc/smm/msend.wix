@@ -214,6 +214,19 @@ fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
 cron.plを起動しなおします。
 
 インストール：
+○システムが定期的に何かをしてくれないので、
+cron.pl をなんとかして（疑似定期的に）起動すればいいわけです。
+
+% cron.pl ML's-Directory(config.phの場所) Library's(libsmtp.plとかの場所) 
+
+で起動します。＃ Argument がないと、その環境の $HOME にいってしまう
+
+１． たとえば ~/.login で cron.pl を起動するとか（すでに走っていれば走
+     らないから大丈夫）…
+
+２．loginしたとき、まめにたちあげるとか…
+
+３．ＭＬサーバにメールが来たときに起動させる↓とか…
 
 config.ph に
 .key	$CRON_PIDFILE
