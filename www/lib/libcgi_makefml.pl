@@ -135,11 +135,13 @@ sub Control
 
 sub MailServerConfig
 {
-    local($proc, $mta) = @_;
+    local($proc, *config) = @_;
+    local($s);
 
     if ($proc eq 'mail_server_config') {
-	if ($mta =~ /^(sendmail|postfix|qmail)$/) {
-	    $CGI_CF{'MTA'} = $mta;
+	$s = $config{'MTA'};
+	if ($s =~ /^(sendmail|postfix|qmail)$/) {
+	    $CGI_CF{'MTA'} = $s;
 	    &SaveCGICF;
 	}
 	else {
@@ -147,18 +149,16 @@ sub MailServerConfig
 	    &ERROR("I have preparations for sendmail, postfix, qmail.");
 	}
     }
-    elsif ($proc eq 'newaliases') {
-	if ($CGI_CF{'MTA'} eq 'sendmail') {
-	    &SpawnProcess('newaliases');
-	}
-	elsif ($CGI_CF{'MTA'} eq 'postfix') {
-	    ;
-	}
-	elsif ($CGI_CF{'MTA'} eq 'qmail') {
-	    ;
+    elsif ($proc eq 'newaliases_config') {
+	$CGI_CF{'HOW_TO_UPDATE_ALIAS'} = $config{'HOW_TO_UPDATE_ALIAS'};
+	&SaveCGICF;
+    }
+    elsif ($proc eq 'run_newaliases') {
+	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
+	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
 	}
 	else {
-	    ;
+	    &ERROR("I don't know how to update aliases map");
 	}
     }
     else {
@@ -374,9 +374,13 @@ sub Command
     }
     # not "makefml" calls
     elsif ($PROC eq 'mail_server_config') {
-	&MailServerConfig($PROC, $MTA);
+	&MailServerConfig($PROC, *Config);
+    }
+    elsif ($PROC eq 'newaliases_config') {
+	&MailServerConfig($PROC, *Config);
     }
     elsif ($PROC eq 'newaliases') {
+	&P("-- run newaliases");
 	&MailServerConfig($PROC, $CGI_CF{'MTA'});
     }
     else {

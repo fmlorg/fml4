@@ -5,17 +5,30 @@
 ○ apache-ssl (1.3.9 base)の解説の用意をする
 
 ○ ＭＬを作るには newaliases と連動させる必要があるが、
-   MTAの設定はいつどこでする？
 
-	1. makefml admin.cgi
+Q: MTAの設定はいつどこでする？
+A: メインメニュー
 
-	2. admin/menu.cgi の中でする
-		(こっちのほうが素直な気がする)
-		(途中でMTAが変わるかも知れない)
-		(sendmailはいいとして)
-		(/etc/aliases.db は postfix だとpermission deniedかも)
-		(qmail はどうすればいいんだろぉ…)
+	(こっちのほうが素直な気がする)
+	(途中でMTAが変わるかも知れない)
 
-○ makefml config メニューを日本語にする？
+Q:	WWW下のCGIが利用可能なPATHは？
+
+どこかで設定する？ makefml / メインメニュー？
+
+	(sendmailはいいとして)
+
+Q:	postfix
+
+postfix がつかう /var/spool/ml/etc/aliases のパスを指定できないといけ
+ない。/etc/aliases.db は postfix だとpermission deniedかも
+	
+Q:	qmail
+
+「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要らな
+いのか？
+
+
+○ makefml config メニューを日本語にできるか？
 
 	Message Language Extension をつかう

@@ -1,1 +1,2 @@
-MTA	sendmail
+MTA			sendmail
+HOW_TO_UPDATE_ALIAS	newaliases

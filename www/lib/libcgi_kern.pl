@@ -88,6 +88,7 @@ sub Convert
 
 	    s/_CGI_PATH_/$CGI_PATH/g;
 	    s/_FML_VERSION_/$VERSION/g;
+	    s/_HOW_TO_UPDATE_ALIAS_/$CGI_CF{'HOW_TO_UPDATE_ALIAS'}/g;
 
 	    print;
 	}

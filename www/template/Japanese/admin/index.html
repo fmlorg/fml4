@@ -214,12 +214,23 @@ _____________________________
 <P>
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=newaliases>
+<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
+<INPUT TYPE=hidden NAME=ML VALUE=etc>
+aliasesの更新方法: 
+<INPUT NAME=HOW_TO_UPDATE_ALIAS VALUE=_HOW_TO_UPDATE_ALIAS_ SIZE=80>
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+<P>
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
 <INPUT TYPE=hidden NAME=ML VALUE=etc>
 aliasesを更新する: 
 <INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
 </FORM>
-
 
 <HR>
 
