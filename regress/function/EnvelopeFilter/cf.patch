@@ -1,0 +1,19 @@
+$START_HOOK = q#
+print STDERR "\n--- EnvelopeFilter regression test (2.2E) ---\n\n";
+
+$debug = 1;
+
+&EnvelopeFilter(*Envelope, 'distribute');
+
+print STDERR "\n--- old EnvelopeFilter (regress/libkern.pl) ---\n\n";
+
+sleep 1;
+
+undef %INC;
+require 'regress/libkern.pl';
+&EnvelopeFilter(*Envelope, 'distribute');
+
+$debug = 0;
+$DO_NOTHING=1;
+
+#;
