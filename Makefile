@@ -43,7 +43,7 @@ MODE=`cat conf/mode`
 ### include site specific configuration files: fmlmk.conf
 ### For example, ./fmlmk.conf,  ~/.fmlmk.conf, ..
 .if exists(fmlmk.conf)
-FMLMK_CONF=mk.conf
+FMLMK_CONF=fmlmk.conf
 .elif exists(.fmlmk.conf)
 FMLMK_CONF=.fmlmk.conf
 .else
