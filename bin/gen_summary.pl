@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: gen_summary.pl,v 2.6 2001/05/09 15:22:50 fukachan Exp $
+# $FML: gen_summary.pl,v 2.7 2001/11/28 14:13:42 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -236,6 +236,7 @@ sub Usage
     -f    config.ph;
     -m    use mime conversion;
     -L    the number of Last sequence to process (hence MIN = MAX - $opt_L);
+    -B    strip bracket
     ;
     SPOOL $SPOOL_DIR;
     ;#;
