@@ -6,6 +6,10 @@
 
 2001/02/18
 
+   fix NT 4.0
+	link($SMTP_LOG, $org_smtp_log) only on unix
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09271)
+
    fix NT installer bugs
 	install also ("databases", "messages", "drafts", "module")
 	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09235)

@@ -52,7 +52,7 @@ sub SmtpInit
 		unlink $SMTP_LOG if -f $SMTP_LOG;
 		open($SMTP_LOG, ">$SMTP_LOG"); # XXX: prefer basic functions
 		unlink $org_smtp_log if -f $org_smtp_log;
-		link($SMTP_LOG, $org_smtp_log);
+		link($SMTP_LOG, $org_smtp_log) if $UNISTD;
 	    }
 	}
 	else {
