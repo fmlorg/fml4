@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsynchtml.pl,v 2.45 2001/09/13 03:38:43 fukachan Exp $
+# $FML: libsynchtml.pl,v 2.46 2001/10/14 04:57:12 fukachan Exp $
 #
 
 
@@ -30,6 +30,7 @@ sub SyncHtml
     local($remake_index, $subdir_first_time);
 
     # work in distribution mode only
+    # XXX-Envelope-Data-Input ( mode:dist is 1 or undef)
     if (! $e{'mode:dist'}) { # flag on when through Distribute()
 	&Log("SyncHtml does not run under non distribute mode") if $debug;
 	return ;
@@ -52,6 +53,8 @@ sub SyncHtml
     # Original SyncHtml is the Converter to Html in the memory image.
     # so $mtime (by stat()) NOT REQUIRED
     # IF YOU CONVERT THE ARTICLE on the disk, stat() info REQUIRED
+    # XXX-Envelope-Data-Input ( stat:mtime is unixtime )
+    # XXX-Envelope-Data-Input ( html:probe is 1 or 0 )
     $mtime = $e{'stat:mtime'} if $e{'stat:mtime'};
     $probe = $e{'html:probe'};
 
@@ -119,6 +122,7 @@ sub SyncHtml
 	# first time
 	else {
 	    $subdir_first_time = 1;
+	    # XXX-Envelope-Data-Input (no tmp:subdir_first_time'} is 1/undef)
 	    $e{'tmp:subdir_first_time'} = 1;
 	}
 
@@ -161,6 +165,7 @@ sub SyncHtml
 
     ### PROBE ONLY (PROBE ONLY ENDS HERE) ###
     if ($probe) {
+	# XXX-Envelope-Data-Input ( html:probe is 1 or 0 )
 	undef $e{'html:probe'}; 
 	return (-f "$dir/$file.html" ? 1 : 0);
     }
@@ -192,6 +197,7 @@ sub SyncHtml
     &SyncHtml'Write($dir, $file, *li, *e) || return; #';
 
     # reconfig "htdocs/19990913/index.html"
+    # $li is "<LI> <A HREF=...ID.html ..." 
     &SyncHtml'Configure($dir, $file, $title, $li, *e); #';
 
     # [Expiration Call]
@@ -467,6 +473,7 @@ package SyncHtml;
            INDEX_HTML_FORMAT_PREAMBLE,
            INDEX_HTML_FORMAT_TRAILER,
            INDEX_HTML_DOCUMENT_SEPARATOR,
+	   HTML_PERMIT_HTML_ATTACHMENT,
            HTML_STYLESHEET_BASENAME, HTML_INDENT_STYLE,
            HTML_DATA_CACHE, HTML_TITLE_HOOK, BASE64_DECODE);
 
@@ -558,7 +565,21 @@ sub Write
     binmode(OUT);
     
     # TITLE
+    # XXX-Envelope-Data-Input ( vulnerable )
+    # PR fml-help: 01093 by <kjm@rins.ryukoku.ac.jp>
     $htmlsubject = $e{"h:http-subject:"} || $e{"h:Subject:"} || "Article $ID";
+    if ($USE_MIME && ($htmlsubject =~ /ISO/i)) {
+	$htmlsubject = &DecodeMimeStrings($htmlsubject);
+    }
+    &ConvSpecialChars(*htmlsubject);
+
+    # XXX-Envelope-Data-Input ( $From_address is parsed by Mail::Address )
+    # XXX-Envelope-Data-Input ( ensure: force conversion even if valid )
+    if ($USE_MIME && ($From_address =~ /ISO/i)) {
+	$From_address = &DecodeMimeStrings($From_address);
+    }
+    &ConvSpecialChars(*From_address);
+
     $HtmlTitle = 
 	"Article $ID at $Now From: $From_address Subject: $htmlsubject";
     $HtmlTitleForIndex = 
@@ -583,8 +604,9 @@ sub Write
 	local($css) = &StyleSheeRelativePath($dir, $HTML_STYLESHEET_BASENAME);
 	print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
     }
+
     print OUT "    <TITLE>$HtmlTitle</TITLE>\n";
-    print OUT $HTML_DOCUMENT_SEPARATOR, "\n";
+    print OUT $HTML_DOCUMENT_SEPARATOR, "\n"; # </HEAD><BODY>
     print OUT &ShowPointer;
     print OUT "    <PRE>\n";
 
@@ -602,6 +624,8 @@ sub Write
 	for (@HtmlHdrFieldsOrder) {
 	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
 	    # if ($s = $e{"h:$_:"}) {
+	    # XXX-Envelope-Data-Input ( via &GetHdrField(*e) )
+	    # XXX-Envelope-Data-Input ( converted by &ConvSpecialChars() )
 	    if ($s = $FieldHash{$_}) {
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 		&ConvSpecialChars(*s);
@@ -614,17 +638,23 @@ sub Write
 
     # append time() for convenience 
     # print OUT "X-Unixtime: ".(time)."\n";
-
-    printf OUT ("<SPAN CLASS=xmlcount>$XMLCOUNT</SPAN>: <SPAN CLASS=xmlcount-value>%05d</SPAN>\n", $e{'rewrite:ID'} || $ID)
-	if $e{'rewrite:ID'} || $ID;
-
-    print OUT "</SPAN>";
+    # XXX-Envelope-Data-Input ( pick up from %Envelope but converted by %05d)
+    # XXX-Envelope-Data-Input ( vulnerablility depends on your libc ?)
+    # XXX-Envelope-Data-Input ( ensure ID is a "number")
+    {
+	my $id = $e{'rewrite:ID'} || $ID;
+	if ($id =~ /^\d+$/) {
+	    printf OUT ("<SPAN CLASS=xmlcount>$XMLCOUNT</SPAN>: <SPAN CLASS=xmlcount-value>%05d</SPAN>\n", $id);
+	    print OUT "</SPAN>";
+	}
+    }
 
     ### Body ###
     # 96/05/17 If mutipart, goto exceptional routine (for NCF)
     print OUT "\n";
 
     if ($USE_MIME && $e{"h:Content-Type:"} =~ /Multipart/i) {
+	# XXX-Envelope-Data-Input ( See &ParseMultipart())
 	&ParseMultipart($dir, $file, *e);
     }
     else {
@@ -632,9 +662,9 @@ sub Write
 	local($pp, $p, $x);
 	$pp = 0;
 	while (1) {
+	    # XXX-Envelope-Data-Input ( converted by &ConvSpecialChars() )
 	    $p = &main'GetLinePtrFromHash(*e, "Body", $pp); #';
 	    $x = substr($e{'Body'}, $pp, $p-$pp+1);
-
 	    &ConvSpecialChars(*x);
 	    $x =~ s#(http://\S+)#&Conv2HRef($1)#ge;
 	    print OUT $x;
@@ -673,6 +703,8 @@ sub GetHdrField
     local(*e) = @_;
     local($cf);
 
+    # XXX-Envelope-Data-Input ( caution: raw here but checked in Write())
+    # XXX-Envelope-Data-Input ( converted by &ConvSpecialChars() in Write())
     for (split(/\n/, $e{'Hdr'})) {
 	if (/^(\S+):(.*)/) {
 	    $cf = $1;
@@ -778,6 +810,7 @@ sub ParseMultipart
     require 'libhtmlsubr.pl';
 
     # boundary
+    # XXX-Envelope-Data-Input ( $b is search target. not shown in html )
     $ct  = $e{"content-type:"};
     if ($ct =~ /boundary=\s*\"(.*)\"/i || $ct =~ /boundary=\s*(\S+)/i) {
 	$b = "--".$1; print STDERR "boundary='$b'\n" if $debug;
@@ -808,32 +841,35 @@ sub ParseMultipart
 	last mpb1 if $p < 0;     # end of body
 
 	# extract multipart header info in the block
+	# XXX-Envelope-Data-Input ( $bh is search target. not shown in html )
+	# XXX-Envelope-Data-Input ( %mpbcb is dirty but restricted to [.\d\w]+)
 	$bh = substr($e{'Body'}, $p, $pb - $p -2);
 	&MPBProbe(*mpbcb, $bh); # => %mpbcb
 	
-	# encoded ?
-	if ($mpbcb{'enc'} eq 'base64') {
+	# e.g. text/html, text/plain, 
+	if ($mpbcb{'type'} eq 'text') {
+	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
+	}
+	# e.g. message/rfc822
+	elsif ($mpbcb{'type'} eq 'message') {
+	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
+	}
+	# e.g. encoded images
+	elsif ($mpbcb{'enc'} eq 'base64') {
 	    # the file location
+	    # XXX-Envelope-Data-Input ( %mpbcb is restricted to [.\d\w]+)
 	    $xf = "$dir/${file}_$mp_count.$mpbcb{'suffix'}";
 	    &DecodeAndWriteFile(*e, $pb, $pe, $xf);
 
-	    # file name without directory
+	    # show file name inline (file  name without directory)
+	    # XXX-Envelope-Data-Input ( %mpbcb is restricted to [.\d\w]+)
 	    $xf = "${file}_$mp_count.$mpbcb{'suffix'}";
 	    &TagOfDecodedFile(*mpbcb, $xf);
 	}
-	# plain ?
-	elsif ($mpbcb{'type'} eq 'text' && $mpbcb{'subtype'} eq 'html') {
-	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
-	}
-	elsif ($mpbcb{'type'} eq 'text' && $mpbcb{'subtype'} eq 'plain') {
-	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
-	}
-	elsif ($mpbcb{'type'} eq 'message' && $mpbcb{'subtype'} eq 'rfc822') {
-	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
-	}
 	else {
-	    print OUT "<PRE>\n";
-	    print OUT "attatchment ($mpbcb{'type'}/$mpbcb{'subtype'}) ignored\n";
+	    print OUT "<PRE>";
+	    print OUT "attatchment ($mpbcb{'type'}/$mpbcb{'subtype'}) ignored";
+	    print OUT "(encoded)" if $mpbcb{'enc'};
 	    print OUT "</PRE>\n";
 	}
 
@@ -931,7 +967,7 @@ sub ReWrite
 sub Configure 
 { 
     local($dir, $file, $title, $li, *e) = @_;
-    
+
     # caching ... (with threading)
     &Append2Cache(@_);
 
@@ -999,6 +1035,7 @@ sub MakeThreadData
     local($new) = "${HtmlThreadCache}.new";
 
     # original Message-ID:
+    # XXX-Envelope-Data-Input ( written to cache, not shown in html )
     $id = $e{'h:Message-Id:'};
     $id =~ s/\s*//g;
     
@@ -1049,6 +1086,7 @@ sub MakeThreadData
     }
 
     # my message-id cache on 
+    # XXX-Envelope-Data-Input ( written to cache, not shown in html )
     $mid = $e{'h:Message-Id:'};
     $mid =~ s/\s*//g;
     print OUT "$mid\t$file \n";
@@ -1208,6 +1246,7 @@ sub ReConfigureIndex
 	    $uniq{$index_file} = 1;
 
 	    # first time
+	    # XXX-Envelope-Data-Input ( tmp:subdir_first_time is 1/0)
 	    if ($e{'tmp:subdir_first_time'}) {
 		;
 	    }
