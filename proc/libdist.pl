@@ -46,7 +46,8 @@ sub DoDistribute
     # c.f. RFC1522	2. Syntax of encoded-words
     if ($e{'MIME'}) { &use('MIME'); $s = &DecodeMimeStrings($s);}
 
-    &Append2(sprintf("%s [%d:%s] %s", 
+    # fml-support: 02007
+    &Append2(sprintf("%s [%d:%s]%s", 
 		     $Now, $ID, substr($From_address, 0, 15), $s),
 	     $SUMMARY_FILE) || return;
 
@@ -221,6 +222,9 @@ sub DoDistribute
     # spooling, check dupulication of ID against e.g. file system full
     # not check the return value, ANYWAY DELIVER IT!
     # IF THE SPOOL IS MIME-DECODED, NOT REWRITE %e, so reset %me <- %e;
+    # 
+    local($umask) = umask(027) if $USE_FML_WITH_FMLSERV;
+
     if (! -f "$FP_SPOOL_DIR/$ID") {	# not exist
 	&Log("ARTICLE $ID");
 	&Write3(*e, "$FP_SPOOL_DIR/$ID");
@@ -231,6 +235,8 @@ sub DoDistribute
 	&Warn("ERROR:ARTICLE ID dupulication $ML_FN", 
 	      "Try save > $FP_VARLOG_DIR/DUP$CurrentTime\n$e{'Hdr'}\n$e{'Body'}");
     }
+
+    umask($umask)       if $USE_FML_WITH_FMLSERV;
 
     ##### ML Distribute Phase 04: SMTP
     # IPC. when debug mode or no recipient, no distributing 
