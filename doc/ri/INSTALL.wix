@@ -189,6 +189,17 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 以下の例では /usr/local/fml に実行ファイル /var/spool/ml の下に各ＭＬ
 の directory (例: elena MLは/var/spool/ml/elena)などを作ることにします。
 
+注意:	以下の例では /usr/local/fml と /var/spool/ml のオーナーは
+	仮想ユーザ fml (後述)になります。意味がわからないならとりあえ
+	ず、以下のような呪文を実行してから make install してください
+   例:
+	% su
+	ユーザ fml とグループ fml を作る (作り方はOSによって違う)
+	# mkdir /usr/local/fml /var/spool/ml
+	# chown fml /usr/local/fml /var/spool/ml
+	# chgrp fml /usr/local/fml /var/spool/ml
+
+
 .S	どのユーザで走らせるか？
 =E.S	Introduction
 
