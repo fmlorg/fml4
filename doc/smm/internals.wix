@@ -215,6 +215,33 @@ sitedef.ph は各MLの config.ph の評価後に適用され、各ＭＬの設定を強制的
 に書き換えることもできます。それぞれ使いわけると良いでしょう。いずれに
 しろ config.ph にない変数であればどちらを使っても同じことです。
 
+sitedef.ph site_init.ph のサーチは
+=E
+fml (after 2.2.1) searchs sitedef.ph and site_init.ph in the following
+order:
+
+				Example
+	-----------------------------------------------
+	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
+	$DIR			/var/spool/ml/elena/
+	$EXEC_DIR		/usr/local/fml/
+	perl standard path	@INC
+
+の順にサーチされます。共通の場所なので
+=E
+It shoule exist in common directory.
+
+	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
+	$EXEC_DIR		/usr/local/fml/
+
+のいづれかでしょう。fml 2.2.1 で $ML_DIR/etc/fml/ が先頭になりました。
+これはversion up時に/usr/local/fmlの下をいじらなくてもよいようにという
+配慮からです。
+=E
+So it will be either of them. To avoid recnstructuing under
+/usr/local/fml in version up, the first location in fml 2.2.1 search
+path is $ML_DIR/etc/fml/.
+
 .S	fmlのプロセス(STDINからの読み込みの第一段階)
 =E.S	fml.pl process (first stage) 
 .l	STDIN->fml
