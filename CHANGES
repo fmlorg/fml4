@@ -35,6 +35,13 @@
 	反映されないものがあります。  
 
 
+2001/07/03
+
+   proc/libdist.pl 
+
+	apply fml-help:00418 (by OGAWA Kunihiko <kuni@edit.ne.jp>) to
+	fix MIME encoding.
+
 2001/07/02
 
    bin/spool2html
