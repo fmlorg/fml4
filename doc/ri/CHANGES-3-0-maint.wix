@@ -6,6 +6,15 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl8 ] 
+
+   fix "admin remove-article" command bug with html creation mode
+
+	XXX should not run &SyncHtml() under command mode
+
+	HTMLスプールを生成することになっている場合に"admin remove-article"
+	command を使うとその命令を送ったメールもついでに再生成されてしまうbug
+
 [ 3.0pl7 ] 
 
    etc/makefml/dot-qmail-default 
