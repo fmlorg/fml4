@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.134 2001/06/30 08:30:15 fukachan Exp $
+# $FML$
 
 $Rcsid   = 'fml 4.0';
 
@@ -333,6 +333,9 @@ sub LoadConfig
     require 'libloadconfig.pl'; &__LoadConfiguration('__KERN__');
 
     require 'libsmtp.pl';		# a library using smtp
+
+    # load MIME handling functions for convenience
+    if ($LANGUAGE eq 'Japanese') { require 'libMIME.pl';}
 
     # if mode:some is set, load the default configuration of the mode
     for (keys %Envelope) { 
