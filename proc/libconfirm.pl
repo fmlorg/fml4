@@ -346,9 +346,9 @@ sub ManualRegistConfirm
     if ($mode eq 'subscribe' && 
 	$MANUAL_REGISTRATION_TYPE eq 'forward_to_admin') {
 	# To Sender
-	&LogWEnv("$proc request is forwarded to maintainer", *e);
-	&Mesg(*e, "Please wait a little");
-	&Mesg(*e, $NULL, 'confirm.manual_regist.forward_to_admin');
+	&Mesg(*e, "your request is forwarded to maintainer", 
+	      'confirm.manual_regist.forward_to_admin');
+	&Mesg(*e, "Please wait a little", 'wait_a_little');
 
 	# To $MAINTAINER
 	&WarnE("$proc request from $From_address", 

@@ -34,8 +34,7 @@ sub Ftp
     }
     else {
 	&Mesg(*e, $NULL, 'ftp.not_configure');
-	&LogWEnv("The spool of Ftp is NOT SET, STOP!", *e);
-	&Log("If you use local ftp, please set \$FTP_DIR");
+	&Log("ERROR: \$FTP_DIR not defined, STOP!");
 	return;
     }    
 
@@ -90,7 +89,7 @@ sub Ftp
 	  
 	  if (! $ok) {
 	      &Mesg(*e, $NULL, 'no_such_file', "ls-lR(|.gz|.Z)");
-	      &LogWEnv("Cannot find ls-lR(|.gz|.Z)", *e);
+	      &Log("ERROR: cannot find ls-lR(|.gz|.Z)");
 	      &Log("Ftp(local): please create ls-lR.gz when use ls-lR");
 	      next;
 	  }

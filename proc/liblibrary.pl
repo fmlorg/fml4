@@ -83,7 +83,9 @@ sub ProcLibrary4PlainArticle
 
 	&ProcMgetMakeList($proc, *fld, *e, *misc);
 
-	&LogWEnv("Library: submitted entry [mget @p]", *e);
+	&Log("library: submitted entry [mget @p]");
+	&Mesg(*e, "library: submitted entry [mget @p]", 
+	      'fop.receive.submit', join(" ", @p));
 
 	if ($FmlExitHook{'lib_mget3'} !~ /LibrarySendingEntry/) {
 	    $FmlExitHook{'lib_mget3'} .= '&LibrarySendingEntry(*Envelope);';
@@ -106,8 +108,9 @@ sub ProcLibrary4PlainArticle
 	    $target = "$arc_dir/$target";
 	}
 	else {
-	    &Mesg(*e, $NULL, 'fop.no_numeric_filename');
-	    &LogWEnv("filename($n) is not numeric, STOP!", *e);
+	    &Mesg(*e, "filename($n) is not numeric", 'fop.no_numeric_filename', $n);
+	    &Log("filename($n) is not numeric");
+	    &Log("ERROR: library command stops");
 	    return;
 	}
 
@@ -122,13 +125,13 @@ sub ProcLibrary4PlainArticle
 	}
 
 	if (unlink($target)) {
-	    &Mesg(*e, $NULL, 'fop.unlink', $target);
-	    &LogWEnv("Unlink $target", *e);
+	    &Mesg(*e, "unlink $target", 'fop.unlink', $target);
+	    &Log("unlink $target");
 	    &LibraryExpireSummary($summary, $n);
 	}
 	else {
-	    &Mesg(*e, $NULL, 'fop.unlink.fail', $target);
-	    &LogWEnv("Fail to unlink $target", *e);
+	    &Mesg(*e, "failed to unlink $target", 'fop.unlink.fail', $target);
+	    &Log("failed to unlink $target");
 	}
     }
     elsif (/^put$/i) {
