@@ -275,5 +275,8 @@ asuka:
 scan:
 	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix |\
 	tee /tmp/_scan_
-	grep Modified /tmp/_scan_
-	rm /tmp/_scan_
+	@ grep Modified /tmp/_scan_
+	@ rm /tmp/_scan_
+
+loop:
+	perl usr/sbin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
