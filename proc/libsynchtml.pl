@@ -87,7 +87,7 @@ sub SyncHtml
 	    # index.html must exist. If not, it must be an error.
 	    if (-f "$html_dir/index.html" &&
 		(! &Grep($id, "$html_dir/index.html"))) { 
-		&Log("Warning: $id is not in $html_dir/index.html");
+		&Log("Warning: $id is not in $html_dir/index.html") if $debug_html;
 		$remake_index = 1; # expire flag (irrespective of first time)
 	    }
 	    elsif (!-f "$html_dir/index.html") {
@@ -380,11 +380,12 @@ sub SyncHtmlUnlinkArticle
 ##### DEFINITION OF NAME SPACE #####
 
 ### import main functions
-sub SyncHtml'DecodeMimeStrings { &main'DecodeMimeStrings(@_);}
-sub SyncHtml'Log               { &main'Log(@_);}
-sub SyncHtml'Debug             { &main'Debug(@_);}
-sub SyncHtml'Append2           { &main'Append2(@_);}
-sub SyncHtml'ProgExecuteP      { &main'ProgExecuteP(@_);}
+sub SyncHtml'DecodeMimeStrings  { &main'DecodeMimeStrings(@_);}
+sub SyncHtml'SearchFileInLIBDIR { &main'SearchFileInLIBDIR(@_);}
+sub SyncHtml'Log                { &main'Log(@_);}
+sub SyncHtml'Debug              { &main'Debug(@_);}
+sub SyncHtml'Append2            { &main'Append2(@_);}
+sub SyncHtml'ProgExecuteP       { &main'ProgExecuteP(@_);}
 
 ### DECLARE DIFFERENT NAME SPACE ###
 package SyncHtml;
@@ -663,7 +664,7 @@ sub ShowPointer
 sub ParseMultipart
 {
     local($dir, $file, *e) = @_;
-    local($image, $image_in, $mp_count, $s, @s, $ct, $cte);
+    local($suffix, $mp_count, $ct, $cte);
     local($boundary);
     
     # Header Info
@@ -675,86 +676,111 @@ sub ParseMultipart
 	print STDERR "boundary='$boundary'\n" if $debug;
     }
  
-    &Log("--ParseMultipart");
-
     # Split Body
-    @s = split(/\n\n|$boundary/, $e{'Body'});
-    local($decode);
+    local($decode, $sep, $base64, $quoted_printable, $pb);
+    local($buf) = $e{'Body'};
+
+    # remove the preamble before the boundary.
+    $pb  = index($buf, $boundary);
+    $buf = substr($buf, $pb);
+    local(@s) = split(/\n\n|$boundary/, $buf);
+
+    # input each paragraph as one buffer.
+    # 1. --boundary\nContent-* ...
+    # 2. base64/quoted-printable/... encoded part
+    # 3. --boundary--
+    #
     foreach (@s) {
 	/ISO\-/i && ($_ = &DecodeMimeStrings($_)); 
 
-	if (/^[\s\n]*$/) { print; next;} # ignore null line
+	if (/^[\s\n]*$/) { next;} # ignore null line
 
-	undef $next; 
+	undef $sep; 
 	undef $match;
 
-	/^\-\-/ && $next++;	# must be a boundary;
-
-	if (/^$boundary/) { 
+	if (/$boundary/) { 
+	    &Log("found boudary ");
 	    &Debug("Found boundary=[$boundary]") if $debug;
 	    s/$boundary\-\-//g;	# the last part
 	    s/$boundary//g;
-	    $next++;
+	    $sep++;
 	}
-	if (/Content-Type|Content-ID|Content-Description/i)  { $next++;}
-	if (/content-transfer-encoding:\s*base64/i) { $base64 = 1; $next++;} 
+	if (/\nContent-/i)  { $sep++;}
+
+	# encoding type
+	if (/content-transfer-encoding:\s*base64/i) { 
+	    $base64 = 1;
+	} 
+	if (/content-transfer-encoding:\s*quoted-printable/i) { 
+	    $quoted_printable = 1;
+	} 
 
 	# get file type
-	if (/Content-Type:\s+image\/([a-z]+)/i) { 
-	    $image = $1; 
-	    $next++;
+	if (/Content-Type:\s+([\-a-z]+)\/([\-0-9a-z\.]+)/i) { 
+	    $suffix = &SearchMimeTypes("$1/$2") || $2;
+	    $suffix =~ s/^x-//i; # remove x- in x-hoehoe type.
+	    $sep++;
 	}
 
-	next if $next;
+	next if $sep; # avoid the separators.
 
-	if ($base64) {		# now BASE64 strings here
-	    $mp_count++; # global in one mail
-
-	    &Log("mp_count ++") if $debug_html;
-
+	# 
+	# DECODE BASE64 encoded parts
+	# 
+	if ($base64) { # now BASE64 strings here
 	    # if not defined, try search bin/base64decede.pl
 	    if ($BASE64_DECODE && &ProgExecuteP($BASE64_DECODE)) {
 		$decode = $BASE64_DECODE;
 	    }
 	    elsif (! $BASE64_DECODE) {
-		$decode = &main'SearchFileInLIBDIR("bin/base64decode.pl");#';
+		$decode = &SearchFileInLIBDIR("bin/base64decode.pl");
 		$decode = $^X . " " . $decode; # perl base64decode.pl
 
 		if (! $decode) {
 		    &Log("SyncHtml::\$BASE64_DECODE is not defined");
-		    $mp_count = 0;
 		    next;
 		}
 	    }
 	    # when $BASE64_DECODE is defined, but not found
 	    elsif (! &ProgExecuteP($BASE64_DECODE)) {
 		&Log("SyncHtml::\$BASE64_DECODE is not found");
-		$mp_count = 0;
 		next;
 	    }
 
-	    &Log("write image > $dir/${file}_$mp_count.$image") ;
-	    &Debug("|$decode > $dir/${file}_$mp_count.$image") 
+	    $mp_count++; # global in one mail
+	    &Log("\$mp_count++ => $mp_count") if $debug_html;
+
+	    # write a splitted part of the multipart mail.
+	    &Log("multipart::split to $dir/${file}_$mp_count.$suffix");
+	    &Debug("|$decode > $dir/${file}_$mp_count.$suffix") 
 		if $debug; 
-	    open(IMAGE, "|$decode > $dir/${file}_$mp_count.$image") 
+	    open(IMAGE, "|$decode > $dir/${file}_$mp_count.$suffix") 
 		|| &Log($!);
 	    select(IMAGE); $| = 1; select(STDOUT);
-
-	    print OUT "</PRE>\n";
-	    print OUT "<IMAGE SRC= ${file}_$mp_count.$image>\n";
-	    print OUT "<PRE>\n";
-
 	    print IMAGE $_;
-
 	    close(IMAGE);
 
+	    # reflect reference to the part in the \d+.html file.
+	    if ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'A') {
+		print OUT "<A HREF=\"${file}_$mp_count.$suffix\">";
+		print OUT "${file}_$mp_count.$suffix</A>\n";
+	    }
+	    elsif ($HTML_MULTIPART_IMAGE_REF_TYPE eq 'IMAGE' ||
+		   !$HTML_MULTIPART_IMAGE_REF_TYPE) {
+		print OUT "</PRE>\n";
+		print OUT "<IMAGE SRC=\"${file}_$mp_count.$suffix\">\n";
+		print OUT "<PRE>\n";
+	    }
+
+
+	    # reset
 	    undef $base64;
-	    undef $image; 
+	    undef $suffix; 
 	    next;
 	}
 
 	&ConvSpecialChars(*_);
-	# s#(http://\S+)#<A HREF="$1">$1</A>#g;
+
 	s#(http://\S+)#&Conv2HRef($1)#eg;
 	print OUT "$_\n";
     }
@@ -1669,5 +1695,30 @@ sub Remove
     }
 }
 
+
+### Section: Utilities
+sub SearchMimeTypes
+{
+    local($type) = @_;
+    local($def, $suffix); 
+
+    $def = &SearchFileInLIBDIR("etc/mime.types");
+
+    $def || return $NULL;
+
+    if (-f $def) {
+	open(DEF, $def) || &Log("SearchMimeTypes: cannot open $def");
+	while (<DEF>) {
+	    if (/^$type\s+(\S+)/) {
+		$suffix = $1;
+	    }
+	}
+	close(DEF);
+    }
+
+    &Log("SearchMimeTypes: found $type => suffix=$suffix") if $debug_html;
+
+    $suffix;
+}
 
 1;
