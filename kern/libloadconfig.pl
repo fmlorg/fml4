@@ -153,6 +153,8 @@ sub LoadDummyMacros
     eval "sub PERMIT_ADMIN_PROCEDURE { 1;}";
     eval "sub DENY_ADMIN_PROCEDURE { 1;}";
     eval "sub DEFINE_ADMIN_PROCEDURE { 1;}";
+    eval "sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL { 1;}";
+    eval "sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL { 1;}";
 
     # for convenience
     eval "sub DUMMY { ;}";
@@ -426,10 +428,18 @@ sub DEFINE_PROCEDURE
     $LocalProcedure{$proc} = $fp;
 }
 
+sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL
+{
+    local($proc, $n) = @_;
+    $LocalProcedure{"l#${proc}"} = $n;
+}
+
+
 # XXX overwritten by %LocaAdminProcedure and @DenyAdminProcedure
 sub PERMIT_ADMIN_PROCEDURE
 {
     local($proc) = @_;
+    if ($proc !~ /^admin/) { $proc = "admin:proc";}
 
     push(@PermitAdminProcedure, $proc);
 
@@ -452,6 +462,7 @@ sub PERMIT_ADMIN_PROCEDURE
 sub DENY_ADMIN_PROCEDURE
 {
     local($proc) = @_;
+    if ($proc !~ /^admin/) { $proc = "admin:proc";}
     $LocalAdminProcedure{$proc} = 'ProcDeny';
 }
 
@@ -459,7 +470,15 @@ sub DENY_ADMIN_PROCEDURE
 sub DEFINE_ADMIN_PROCEDURE
 {
     local($proc, $fp) = @_;
+    if ($proc !~ /^admin/) { $proc = "admin:proc";}
     $LocalAdminProcedure{$proc} = $fp;
+}
+
+sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL
+{
+    local($proc, $n) = @_;
+    if ($proc !~ /^admin/) { $proc = "admin:proc";}
+    $LocalAdminProcedure{"l#${proc}"} = $n;
 }
 
 sub Debug { print STDERR "@_\n";}
