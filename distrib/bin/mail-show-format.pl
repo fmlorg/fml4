@@ -5,19 +5,23 @@
 
 
 while(<>) {
-	/^>>> fml/ && ( print ('-' x 30)."\n") && next;
+    if (/^\>\>> fml/) {
+	print '-' x 30;
+	print "\n";
+	next;
+    }
 
-	# mh
-	next if /mhl.format|\(Message\s+inbox:\d+\)/;
+    # mh
+    next if /mhl.format|\(Message\s+inbox:\d+\)/;
 
-	print "\n" if /Return-Path/i;
+    print "\n" if /Return-Path/i;
 
-	# headers to skip
-	next if /^(Lines|Posted|Precedence|Reply-To|Return-Path|Subject):/i;
-	next if /^(errors-to|message-id|mime-version|content-type):/i;
-	next if /X-.*:/i && !/Count/i;
+    # headers to skip
+    next if /^(Lines|Posted|Precedence|Reply-To|Return-Path|Subject):/i;
+    next if /^(errors-to|message-id|mime-version|content-type):/i;
+    next if /X-.*:/i && !/Count/i;
 
-	print " $_";
+    print " $_";
 }
 
 1;
