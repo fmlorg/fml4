@@ -17,12 +17,10 @@
 .include ptr.wix
 
 .HTML_PRE
-
 .if LANG == ENGLISH
 .include setup-more-secure.en.wix
 .return
 .fi
-
 ○ 目的
 
 メールサイズの上限を設定する。
