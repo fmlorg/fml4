@@ -1,0 +1,206 @@
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
+
+# Called under $USE_DISTRIBUTE_FILTER is not null.
+# IF *HOOK is not defined, we apply default checkes.
+# The function name looks strange but this is derived from
+# that "filtering for %Envelope hash, not only mail message/body".
+sub __EnvelopeFilter
+{
+    local(*e, $mode) = @_;
+    local($c, $p, $r, $org_mlp);
+
+    # force plural line match
+    $org_mlp = $*;
+    $* = 0;
+
+    # compatible 
+    # appending twice must be no problem since statments is "return".
+    $DISTRIBUTE_FILTER_HOOK .= $REJECT_DISTRIBUTE_FILTER_HOOK;
+    $COMMAND_FILTER_HOOK    .= $REJECT_COMMAND_FILTER_HOOK;
+
+    if ($mode eq 'distribute' && $DISTRIBUTE_FILTER_HOOK) {
+	$r = &EvalRejectFilterHook(*e, *DISTRIBUTE_FILTER_HOOK);
+    }
+    elsif ($mode eq 'command' && $COMMAND_FILTER_HOOK) {
+	$r = &EvalRejectFilterHook(*e, *COMMAND_FILTER_HOOK);
+    }
+
+    ### Part I. Check Invalid Header ###
+    if ($r) {
+	; # O.K.
+    }
+    # reject for some header field patterns.
+    elsif (%REJECT_HDR_FIELD_REGEXP) {
+	local($hf, $pat, $match);
+
+	for $hf (keys %REJECT_HDR_FIELD_REGEXP) {
+	    next unless ($hf && $REJECT_HDR_FIELD_REGEXP{$hf});
+
+	    $pat = $REJECT_HDR_FIELD_REGEXP{$hf};
+
+	    if ($pat =~ m@/i$@) { # case insensitive
+		$pat =~ s@(/i|/)$@@g; 
+		$pat =~ s@^/@@g;
+		$e{"h:$hf:"} =~ /$pat/i && $match++;
+	    }
+	    else {		# case sensitive
+		$pat =~ s@(/i|/)$@@g; 
+		$pat =~ s@^/@@g;
+		$e{"h:$hf:"} =~ /$pat/ && $match++;
+	    }
+
+	    if ($match) {
+		&Log("EnvelopeFilter: \$REJECT_HDR_FIELD_REGEXP{\"$hf\"} HIT");
+		$r = "reject for invalid $hf field.";
+		last;
+	    }
+	}
+    }
+
+
+    ### Part II. Check Body Content ####
+    # XXX malloc() too much?
+    # If multipart, check the first block only.
+    # If plaintext, check the first two paragraph or 1024 bytes.
+    local($xbuf);
+
+    if ($e{'MIME:boundary'}) {
+	$xbuf = &GetFirstMultipartBlock(*e);
+    }
+    else {
+	# skip the first three paragraph
+	$p = index($e{'Body'}, "\n\n");
+	$p = index($e{'Body'}, "\n\n", $p + 1);
+	$p = index($e{'Body'}, "\n\n", $p + 1);
+	if ($p > 0) {
+	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
+	}
+	else { # may be null or continuous character buffer?
+	    $xbuf = substr($e{'Body'}, 0, 1024);
+	}
+    }
+
+    # remove the last block which must be a signature.
+    $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
+    $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
+
+    # XXX: remove the signature (we suppose) part
+    $p = index($xbuf, "\n\n"); # forward ...
+    if ($p > 0) { 
+	$p = rindex($xbuf, "\n\n"); # backward ...
+	$xbuf = substr($xbuf, 0, $p) if $p > 0;
+    }
+
+    # count up "\n\n" lines;
+    # If one paraghaph (+ signature), must be $c == 0. 
+    $c = $p = 0;
+    while (($p = index($xbuf, "\n\n", $p + 1)) > 0) { $c++;}
+
+    # cut off Email addresses (exceptional).
+    $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
+
+    &Debug("--EnvelopeFilter::Buffer($xbuf\n);\ncount=$c\n") if $debug;
+
+    if ($r) { # must be matched in a hook.
+	;
+    }
+    elsif ($xbuf =~ /^[\s\n]*$/ && $FILTER_ATTR_REJECT_NULL_BODY) {
+	$r = "null body";
+    }
+    # e.g. "unsubscribe", "help", ("subscribe" in some case)
+    # DO NOT INCLUDE ".", "?" (I think so ...)! 
+    # If we include them, we cannot identify a command or an English phrase ;D
+    # If $c == 0, the mail must be one paragraph (+ signature).
+    elsif (!$c && $xbuf =~ /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
+	   $FILTER_ATTR_REJECT_ONE_LINE_BODY) {
+	$r = "one line body";
+    }
+    # elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
+    elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*/i && 
+	   $FILTER_ATTR_REJECT_INVALID_COMMAND) {
+	$r = "invalid command line body";
+    }
+
+    # JIS: 2 byte A-Z => \043[\101-\132]
+    # JIS: 2 byte a-z => \043[\141-\172]
+    # EUC 2-bytes "A-Z" (243[301-332])+
+    # EUC 2-bytes "a-z" (243[341-372])+
+    # e.g. reject "SUBSCRIBE" : octal code follows:
+    # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
+    # 243 305
+    if ($FILTER_ATTR_REJECT_2BYTES_COMMAND && 
+	$xbuf =~ /\033\044\102(\043[\101-\132\141-\172])/) {
+	# /JIS"2byte"[A-Za-z]+/
+	
+	$s = &STR2EUC($xbuf);
+
+	local($n_pat, $sp_pat);
+	$n_pat  = '\243[\301-\332\341-\372]';
+	$sp_pat = '\241\241'; # 2-byte space
+
+	$s = (split(/\n/, $s))[0]; # check the first line only
+	if ($s =~ /^\s*(($n_pat){2,})\s+.*$|^\s*(($n_pat){2,})($sp_pat)+.*$|^\s*(($n_pat){2,})$/) {
+	    &Log("2 byte <". &STR2JIS($s) . ">");
+	    $r = '2 byte command';
+	}
+    }
+
+    # some attributes
+    # XXX: "# command" is internal represention
+    # XXX: but to reject the old compatible syntaxes.
+    if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
+	$xbuf =~ /^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
+	$r = $1; $r =~ s/\n//g;
+	$r = "avoid to distribute commands [$r]";
+    }
+
+    # Spammer?  Message-Id should be <addr-spec>
+    if ($e{'h:message-id:'} !~ /\@/) { $r = "invalid Message-Id";}
+
+    # [VIRUS CHECK against a class of M$ products]
+    # Even if Multipart, evaluate all blocks agasint virus checks.
+    if ($FILTER_ATTR_REJECT_MS_GUID && $e{'MIME:boundary'}) {
+	&use('viruschk');
+	local($xr);
+	$xr = &VirusCheck(*e);
+	$r = $xr if $xr;
+    }
+
+    if ($r) { 
+	$DO_NOTHING = 1;
+	&Log("EnvelopeFilter::reject for '$r'");
+	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", 
+	       "Mail from $From_address\nis rejected for '$r'.\n\n");
+	if ($FILTER_NOTIFY_REJECTION) {
+	    &Mesg(*e, $NULL, 'filter.rejected', $r);
+	    &Mesg(*e, "Your mail is rejected for '$r'.\n");
+	    &MesgMailBodyCopyOn;
+	}
+    }
+
+    $* = $org_mlp;
+}
+
+# return 0 if reject;
+sub EvalRejectFilterHook
+{
+    local(*e, *filter) = @_;
+    return $NULL unless $filter;
+    local($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
+    eval($r); &Log($@) if $@;
+    $r = &DoEvalRejectFilterHook;
+    $r || $NULL;
+}
+
+
+1;

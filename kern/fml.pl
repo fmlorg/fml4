@@ -876,7 +876,7 @@ sub CheckCurrentProc
     local(*e, $ccp_mode) = @_;
 
     # connection info
-    &eval('&GetPeerInfo;') if $LOG_CONNECTION;
+    &eval("&use('kernsubr2'); &GetPeerInfo;") if $LOG_CONNECTION;
 
     ##### SubSection: Check Body Contents (For Command Mode)
     local($limit, $p, $buf, $boundary, $nclines, $cc);
@@ -1327,37 +1327,12 @@ sub RunHooks
 
 sub ExecNewProcess
 {
-    local($s);
-    $0 = "$FML: Run New Process <$LOCKFILE>";
-
-    $FML_EXIT_PROG .= $_cf{'hook', 'prog'};
-
-    if ($s = $FML_EXIT_PROG) {
-	print STDERR "\nmain::exec $s\n\n" if $debug;
-	$0 = "$FML: Run Hooks(prog) <$LOCKFILE>";
-	exec $s || do { &Log("cannot exec $s");}
-    }
+    local(@xargv) = @_; &use('kernsubr2'); &__ExecNewProcess(@xargv);
 }
 
 sub SpawnProcess
 {
-    local($p) = @_;
-    $0 = "$FML: Spawn Process <$LOCKFILE>";
-
-    $p =~ s/^\s*\|\s*//;
-
-    if (open(PROC, "| $p")) {
-	select(PROC); $| = 1; select(STDOUT);
-
-	print PROC $Envelope{'Hdr'};
-	print PROC "\n";
-	print PROC $Envelope{'Body'};
-
-	close(PROC);
-    }
-    else {
-	&Log("cannot execute $p");
-    }
+    local(@xargv) = @_; &use('kernsubr2'); &__SpawnProcess(@xargv);
 }
 
 ####### Section: Member Check
@@ -1779,63 +1754,9 @@ sub WarnE
     undef $Envelope{'preamble'};
 }
 
-# Notification of the mail on warnigs, errors ... 
 sub Notify
 {
-    local($buf) = @_;
-    local($not_send, $addr);
-    local($to, @to, $s, $proc, $m);
-
-    # special flag
-    return $NULL if $Envelope{'mode:disablenotify'};
-
-    # refer to the original(NOT h:Reply-To:);
-    $to   = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
-
-    # once only (e.g. used in chaddr)
-    @to   = split(/\s+/, $Envelope{'message:h:@to'}); 
-    undef $Envelope{'message:h:@to'};
-
-    $s    = $Envelope{'message:h:subject'} || "Fml status report $ML_FN";
-    $proc = $PROC_GEN_INFO || 'GenInfo';
-    $GOOD_BYE_PHRASE = $GOOD_BYE_PHRASE || "--${MAIL_LIST}, Be Seeing You!   ";
-
-    # send the return mail to the address (From: or Reply-To:)
-    # (before it, checks whether the return address is not ML nor ML-Ctl)
-    # Error Message is set to $Envelope{'error'} if loop is detected;
-    if (($buf || $Envelope{'message'}) && 
-	&CheckAddr2Reply(*Envelope, $to, @to)) {
-	$REPORT_HEADER_CONFIG_HOOK .= 
-	    q# $le{'Body:append:files'} = $Envelope{'message:append:files'}; #;
-	
-	$Envelope{'trailer'} .= "\n$GOOD_BYE_PHRASE $FACE_MARK\n";
-	$Envelope{'trailer'} .= &$proc;
-
-	if ($Envelope{'message:ebuf2socket'}) {
-	    $Envelope{'ctl:smtp:ebuf2socket'} = 1;
-	}
-	&Sendmail($to, 
-		  $s, 
-		  ($buf || $Envelope{'message'}),
-		  @to);
-	if ($Envelope{'message:ebuf2socket'}) {
-	    $Envelope{'ctl:smtp:ebuf2socket'} = 0;
-	}
-    }
-
-    # if $buf is given, ignore after here.
-    # admin error report is done in the last of fml.pl, &Notify(); 
-    return if $buf;
-
-    # send the report mail ot the maintainer;
-    $Envelope{'error'} .= $m;
-    if ($Envelope{'error'}) {
-	&WarnE("fml system error message $ML_FN", $Envelope{'error'});
-    }
-
-    if ($Envelope{'message:to:admin'}) {
-	&Warn("fml system message $ML_FN", $Envelope{'message:to:admin'});
-    }
+    local(@xargv) = @_; &use('kernsubr'); &__Notify(@xargv);
 }
 
 sub EnableReportForw2Admin
@@ -1906,18 +1827,7 @@ sub GenInfo
 	}
     }
     # RFC2369; Proposed Standard (so fml optional)
-    if ($USE_RFC2369) {
-	if ($Envelope{'mode:stranger'}) {
-	    &DefineDefaultField("List-Subscribe", 
-				"<mailto:$addr?body=${trap}subscribe>");
-	}
-	else {
-	    &DefineDefaultField("List-Help", 
-				"<mailto:$addr?body=${trap}help>");
-	    &DefineDefaultField("List-Unsubscribe", 
-				"<mailto:$addr?body=${trap}unsubscribe>");
-	}
-    }
+    if ($USE_RFC2369) { &use('kernsubr2'); &EmulRFC2369;}
 
     $s .= "If you have any questions or problems,\n";
     $s .= "   please contact $MAINTAINER\n";
@@ -1935,6 +1845,7 @@ sub GenInfo
 
     $s;
 }
+
 
 sub GenXMLInfo
 {
@@ -2071,33 +1982,9 @@ sub Write2
 
 sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
 
-sub Write3			# call by reference for effeciency
-{ 
-    local(*e, $f) = @_; 
-
-    open(APP, "> $f") || (&Log("cannot open $f"), return '');
-    select(APP); $| = 1; select(STDOUT);
-
-    if ($MIME_DECODED_ARTICLE) { 
-	&use('MIME');
-	local(%me) = %e;
-	&EnvelopeMimeDecode(*me);
-
-	# XXX 2.2E split code to 3 phases
-	# we should not make string to avoid malloc()
-	print APP $me{'Hdr'};
-	print APP "\n";
-	print APP $me{'Body'};
-    }
-    else {
-	# XXX 2.2E split code to 3 phases
-	# we should not make string to avoid malloc()
-	print APP $e{'Hdr'};
-	print APP "\n";
-	print APP $e{'Body'};
-    }
-
-    close(APP);
+sub Write3
+{
+    local(@xargv) = @_; &use('kernsubr'); &__Write3(@xargv);    
 }
 
 sub GetFirstLineFromFile 
@@ -2576,85 +2463,14 @@ sub GetGID { (getgrnam($_[0]))[2];}
 
 sub InSecureP { (! &SecureP(@_));}
 
-sub SecureP 
-{ 
-    local($s, $command_mode) = @_;
-
-    $s =~ s#(\w)/(\w)#$1$2#g; # permit "a/b" form
-
-    # permit m=12u; e.g. admin subscribe addr m=1;
-    # permit m=12 for digest format(subscribe)
-    $s =~ s/\s+m=\d+/ /g; $s =~ s/\s+[rs]=\w+/ /g;
-    $s =~ s/\s+[rms]=\d+\w+/ /g;
-
-    # ignore <addr+ext@domain>; but this is ugly hack ;-)
-    if ($command_mode eq 'admin') { 
-	$s =~ s/\+[-\w\.]+\@[-\w\.]+//g;
-    }
-
-    # special hooks (for your own risk extension)
-    if (%SecureRegExp || %SECURE_REGEXP) { 
-	for (values %SecureRegExp, values %SECURE_REGEXP) {
-	    next if !$_;
-	    return 1 if $s =~ /^($_)$/;
-	}
-    }
-
-    # special hooks to reject some patterns
-    if (%INSECURE_REGEXP) {
-	for (values %INSECURE_REGEXP) {
-	    next if !$_; 
-	    return 0 if $s =~ /^($_)$/;
-	}
-    }
-
-    # XXX: "# command" is internal represention
-    # XXX: and for permitting a special backward compatibility.
-    # permit Email Address, 100.tar.gz, # command, # mget 100,last:10 mp ...
-    # if ($s =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
-    if ($s =~ /^[\#\s\w\-\.\,\@\:]+$/) {
-	1;
-    }
-    # since, this ; | is not checked when interact with shell in command.
-    elsif ($command_mode && $s =~ /[\;\|]/) {
-	&Log("SecureP: [$s] includes ; or |"); 
-	$s = "Security alert:\n\n\t$s\n\t[$'$`] HAS AN INSECURE CHAR\n";
-	&WarnE("Security Alert $ML_FN", "$s\n".('-' x 30)."\n");
-	0;
-    }
-    else {
-	&Log("SecureP: Security Alert for [$s]", "[$s] ->[($`)<$&>($')]");
-	$s = "Security alert:\n\n\t$s\n\t[$'$`] HAS AN INSECURE CHAR\n";
-	&WarnE("Security Alert $ML_FN", "$s\n".('-' x 30)."\n");
-	0;
-    }
+sub SecureP {
+    local(@xargv) = @_; &use('kernsubr'); &__SecureP(@xargv);
 }
 
 sub ValidAddrSpecP
 {
     ($_[0] !~ /\s|\033\$[\@B]|\033\([BJ]/ && 
      $_[0] =~ /^[\0-\177]+\@[\0-\177]+$/) ? 1 : 0;
-}
-
-sub GetPeerInfo
-{
-    local($family, $port, $addr);
-    local($clientaddr);
-
-    $addr = getpeername(STDIN);
-
-    if (! $addr) {
-	&Log("cannot getpeername()");
-	return;
-    }
-
-    ($family, $port, $addr) = unpack($STRUCT_SOCKADDR, $addr);
-    ($clientaddr) = gethostbyaddr($addr, 2);
-
-    if (! defined($clientaddr)) {
-	$clientaddr = sprintf("%d.%d.%d.%d", unpack('C4', $addr));
-    }
-    $PeerAddr = $clientaddr;
 }
 
 # Check Looping 
@@ -2681,226 +2497,12 @@ sub LoopBackWarn
     0;
 }
 
-sub RejectAddrP
-{
-    local($from) = @_;
-    local($pat);
+sub RejectAddrP { 
+    local(@xargv) = @_; &use('kernsubr'); &__RejectAddrP(@xargv);
+}    
 
-    if (! -f $REJECT_ADDR_LIST) {
-	&Log("RejectAddrP: \$REJECT_ADDR_LIST NOT EXISTS");
-	return $NULL;
-    }
-
-    &Open(RAL, $REJECT_ADDR_LIST) || return $NULL;
-    while (<RAL>) {
-	chop;
-	next if /^\s*$/;
-
-	# adjust syntax
-	s#\@#\\\@#g;
-	s#\\\\#\\#g;
-
-	if ($from =~ /^($_)$/i) { 
-	    &Log("RejectAddrP: we reject [$from] which matches [$_]");
-	    close(RAL);
-	    return 1;
-	}
-    }
-    close(RAL);
-
-    0;
-}
-
-# Called under $USE_DISTRIBUTE_FILTER is not null.
-# IF *HOOK is not defined, we apply default checkes.
-# The function name looks strange but this is derived from
-# that "filtering for %Envelope hash, not only mail message/body".
-sub EnvelopeFilter
-{
-    local(*e, $mode) = @_;
-    local($c, $p, $r, $org_mlp);
-
-    # force plural line match
-    $org_mlp = $*;
-    $* = 0;
-
-    # compatible 
-    # appending twice must be no problem since statments is "return".
-    $DISTRIBUTE_FILTER_HOOK .= $REJECT_DISTRIBUTE_FILTER_HOOK;
-    $COMMAND_FILTER_HOOK    .= $REJECT_COMMAND_FILTER_HOOK;
-
-    if ($mode eq 'distribute' && $DISTRIBUTE_FILTER_HOOK) {
-	$r = &EvalRejectFilterHook(*e, *DISTRIBUTE_FILTER_HOOK);
-    }
-    elsif ($mode eq 'command' && $COMMAND_FILTER_HOOK) {
-	$r = &EvalRejectFilterHook(*e, *COMMAND_FILTER_HOOK);
-    }
-
-    ### Part I. Check Invalid Header ###
-    if ($r) {
-	; # O.K.
-    }
-    # reject for some header field patterns.
-    elsif (%REJECT_HDR_FIELD_REGEXP) {
-	local($hf, $pat, $match);
-
-	for $hf (keys %REJECT_HDR_FIELD_REGEXP) {
-	    next unless ($hf && $REJECT_HDR_FIELD_REGEXP{$hf});
-
-	    $pat = $REJECT_HDR_FIELD_REGEXP{$hf};
-
-	    if ($pat =~ m@/i$@) { # case insensitive
-		$pat =~ s@(/i|/)$@@g; 
-		$pat =~ s@^/@@g;
-		$e{"h:$hf:"} =~ /$pat/i && $match++;
-	    }
-	    else {		# case sensitive
-		$pat =~ s@(/i|/)$@@g; 
-		$pat =~ s@^/@@g;
-		$e{"h:$hf:"} =~ /$pat/ && $match++;
-	    }
-
-	    if ($match) {
-		&Log("EnvelopeFilter: \$REJECT_HDR_FIELD_REGEXP{\"$hf\"} HIT");
-		$r = "reject for invalid $hf field.";
-		last;
-	    }
-	}
-    }
-
-
-    ### Part II. Check Body Content ####
-    # XXX malloc() too much?
-    # If multipart, check the first block only.
-    # If plaintext, check the first two paragraph or 1024 bytes.
-    local($xbuf);
-
-    if ($e{'MIME:boundary'}) {
-	$xbuf = &GetFirstMultipartBlock(*e);
-    }
-    else {
-	# skip the first three paragraph
-	$p = index($e{'Body'}, "\n\n");
-	$p = index($e{'Body'}, "\n\n", $p + 1);
-	$p = index($e{'Body'}, "\n\n", $p + 1);
-	if ($p > 0) {
-	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
-	}
-	else { # may be null or continuous character buffer?
-	    $xbuf = substr($e{'Body'}, 0, 1024);
-	}
-    }
-
-    # remove the last block which must be a signature.
-    $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
-    $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
-
-    # XXX: remove the signature (we suppose) part
-    $p = index($xbuf, "\n\n"); # forward ...
-    if ($p > 0) { 
-	$p = rindex($xbuf, "\n\n"); # backward ...
-	$xbuf = substr($xbuf, 0, $p) if $p > 0;
-    }
-
-    # count up "\n\n" lines;
-    # If one paraghaph (+ signature), must be $c == 0. 
-    $c = $p = 0;
-    while (($p = index($xbuf, "\n\n", $p + 1)) > 0) { $c++;}
-
-    # cut off Email addresses (exceptional).
-    $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
-
-    &Debug("--EnvelopeFilter::Buffer($xbuf\n);\ncount=$c\n") if $debug;
-
-    if ($r) { # must be matched in a hook.
-	;
-    }
-    elsif ($xbuf =~ /^[\s\n]*$/ && $FILTER_ATTR_REJECT_NULL_BODY) {
-	$r = "null body";
-    }
-    # e.g. "unsubscribe", "help", ("subscribe" in some case)
-    # DO NOT INCLUDE ".", "?" (I think so ...)! 
-    # If we include them, we cannot identify a command or an English phrase ;D
-    # If $c == 0, the mail must be one paragraph (+ signature).
-    elsif (!$c && $xbuf =~ /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
-	   $FILTER_ATTR_REJECT_ONE_LINE_BODY) {
-	$r = "one line body";
-    }
-    # elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
-    elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*/i && 
-	   $FILTER_ATTR_REJECT_INVALID_COMMAND) {
-	$r = "invalid command line body";
-    }
-
-    # JIS: 2 byte A-Z => \043[\101-\132]
-    # JIS: 2 byte a-z => \043[\141-\172]
-    # EUC 2-bytes "A-Z" (243[301-332])+
-    # EUC 2-bytes "a-z" (243[341-372])+
-    # e.g. reject "SUBSCRIBE" : octal code follows:
-    # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
-    # 243 305
-    if ($FILTER_ATTR_REJECT_2BYTES_COMMAND && 
-	$xbuf =~ /\033\044\102(\043[\101-\132\141-\172])/) {
-	# /JIS"2byte"[A-Za-z]+/
-	
-	$s = &STR2EUC($xbuf);
-
-	local($n_pat, $sp_pat);
-	$n_pat  = '\243[\301-\332\341-\372]';
-	$sp_pat = '\241\241'; # 2-byte space
-
-	$s = (split(/\n/, $s))[0]; # check the first line only
-	if ($s =~ /^\s*(($n_pat){2,})\s+.*$|^\s*(($n_pat){2,})($sp_pat)+.*$|^\s*(($n_pat){2,})$/) {
-	    &Log("2 byte <". &STR2JIS($s) . ">");
-	    $r = '2 byte command';
-	}
-    }
-
-    # some attributes
-    # XXX: "# command" is internal represention
-    # XXX: but to reject the old compatible syntaxes.
-    if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
-	$xbuf =~ /^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
-	$r = $1; $r =~ s/\n//g;
-	$r = "avoid to distribute commands [$r]";
-    }
-
-    # Spammer?  Message-Id should be <addr-spec>
-    if ($e{'h:message-id:'} !~ /\@/) { $r = "invalid Message-Id";}
-
-    # [VIRUS CHECK against a class of M$ products]
-    # Even if Multipart, evaluate all blocks agasint virus checks.
-    if ($FILTER_ATTR_REJECT_MS_GUID && $e{'MIME:boundary'}) {
-	&use('viruschk');
-	local($xr);
-	$xr = &VirusCheck(*e);
-	$r = $xr if $xr;
-    }
-
-    if ($r) { 
-	$DO_NOTHING = 1;
-	&Log("EnvelopeFilter::reject for '$r'");
-	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", 
-	       "Mail from $From_address\nis rejected for '$r'.\n\n");
-	if ($FILTER_NOTIFY_REJECTION) {
-	    &Mesg(*e, $NULL, 'filter.rejected', $r);
-	    &Mesg(*e, "Your mail is rejected for '$r'.\n");
-	    &MesgMailBodyCopyOn;
-	}
-    }
-
-    $* = $org_mlp;
-}
-
-# return 0 if reject;
-sub EvalRejectFilterHook
-{
-    local(*e, *filter) = @_;
-    return $NULL unless $filter;
-    local($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
-    eval($r); &Log($@) if $@;
-    $r = &DoEvalRejectFilterHook;
-    $r || $NULL;
+sub EnvelopeFilter {
+    local(@xargv) = @_; &use('envf'); &__EnvelopeFilter(@xargv);
 }
 
 # QUOTA
@@ -2921,20 +2523,13 @@ sub CheckResourceLimit
 
 ####### Section: Macros for the use of user-side-definition (config.ph) 
 
-sub STR2JIS { &JSTR(@_);}
+sub STR2JIS { &JSTR($_[0], 'jis');}
+sub STR2EUC { &JSTR($_[0], 'euc');}
 sub JSTR
 {
-    local($s) = @_;
+    local($s, $code) = @_;
     require 'jcode.pl';
-    &jcode'convert(*s, 'jis'); #';
-    $s;
-} 
-
-sub STR2EUC
-{
-    local($s) = @_;
-    require 'jcode.pl';
-    &jcode'convert(*s, 'euc'); #';
+    &jcode'convert(*s, $code || 'jis'); #';
     $s;
 } 
 
@@ -2951,7 +2546,7 @@ sub DEFINE_MAILER
     }
 }
 
-sub DEFINE_MODE 
+sub DEFINE_MODE
 { 
     local($m) = @_;
     print STDERR "--DEFINE_MODE($m)\n" if $debug;
@@ -2973,21 +2568,6 @@ sub DEFINE_MODE
 	&Log("call ModeDef($m)") if $debug;
 	&use("modedef"); 
 	&ModeDef($m);
-    }
-}
-
-sub DefineDefaultField
-{
-    local($f) = $_[0];
-    $f =~ tr/A-Z/a-z/;
-
-    # not overwrite
-    if ($Envelope{"h:$f"}) {
-	;
-    }
-    else {
-	&DEFINE_FIELD_FORCED(@_);
-	&DEFINE_FIELD_OF_REPORT_MAIL(@_);
     }
 }
 
