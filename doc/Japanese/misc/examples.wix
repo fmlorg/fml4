@@ -1,0 +1,172 @@
+.C	いろいろ
+
+.S	off と skip
+
+fml-support: 07144
+
+off はメンバ用
+skip は管理者だけが使えるように
+
+Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
+んですが) として on off matome のメンバには定期的に個別にメイルを送って
+ます。(skip の場合には送らないようにしている)
+
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
+
+
+.S	command status report をしなくさせる
+
+command status をおくりかえしている部分を disable するには
+＃コマンドの普通の受け答え（？）の類をやみにほうむるには
+
+    &DEFINE_MODE('disablenotify'); 
+
+と config.ph に書くとこの関数がダミーの状態で呼ばれるけど何もしないよ
+うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
+れじゃだめなんですけどね
+
+
+.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+fml-support: 07521 より
+
+Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
+      へ投稿した場合は、
+   [1] members ファイルに自動登録する。
+   [2] 投稿されたメールをmembersに配送する。
+
+これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
+いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+
+B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   へメールを送信した場合は、
+
+   [1] membersに自動登録する。
+
+A: config.ph でちょっと tricky だが 
+   
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+
+のような設定をする。
+
+
+.S	意見受付用アドレス？
+
+意見受付用アドレスをMLでうけて、送ってきた人に「ご意見ありがとうござい
+ました。返事はしばらく待ってね。」と自動で応答させる。
+
+改造:
+そのために投稿は誰でもOK。ただし、メンバー以外からの投稿はMLに流し、か
+つ投稿者にguideファイルを返す（自動登録はしない）。
+
+config.phの設定例 1:
+.fi
+.if LANG == ENGLISH
+We accept opinions by mail from anyone and send back the reply "thank
+you for your opinion" to the sender.
+
+object:
+return guide if fml receives post from the member.
+
+config.ph configuration Example 1:
+
+1. permit post from anyone
+2. add $START_HOOK to send back "guide"
+.fi
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$START_HOOK = q# 
+   if (! &MailListMemberP($From_address)) { &GuideRequest(*Envelope);} 
+#;
+.~q
+
+.if LANG == JAPANESE
+config.ph 設定例 2:
+guide ではなくguideとは別に用意したファイルを返す。
+ヘッダもカスタマイズ
+.fi
+.if LANG == ENGLISH
+config.ph configuration Example 2:
+return another file not guilde with the header:
+.fi
+
+From: $MAIL_LIST
+Subject: Thanks you for your mail
+
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$RECRUIT_ACK_STATEMENT = "Thanks you for your mail";
+$RECRUIT_ACK_FILE      = "$DIR/recruit_reply";
+
+$START_HOOK = q#
+    if (! &MailListMemberP($From_address)) {
+	&DEFINE_FIELD_OF_REPORT_MAIL('From', $MAIL_LIST);
+        &SendFile($From_address, $RECRUIT_ACK_STATEMENT, $RECRUIT_ACK_FILE);
+    }
+#;
+.~q
+
+
+
+Q: 一日のMail数が 一目でも分かるように…
+
+例えば0:00を境に
+   Subject: [elena 00100] の番号を自動的に 
+   Subject: [elena 00000] にしたい
+
+/var/spool/ml/elena 以下の seq, summary, log, spool などを全部初期かし
+てしまうしかないです。
+
+解答例: このプログラム(shell script)を毎日夜12時にまわす
+
+   #!/bin/sh
+
+   ml=elena
+   date=`date -u +%C%y%m%d`
+
+   /usr/local/fml/makefml lock $ml 60 &
+
+   cd /var/spool/ml/$ml || exit 1
+
+   for file in seq spool summary log
+   do
+       if [ -f $file ];then
+          # mv $file $file.$date
+          cp  $file $file.$data
+         cp /dev/null $file
+       fi
+   done

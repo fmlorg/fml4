@@ -1,0 +1,11 @@
+.HTML_PRE
+	その他(うまく分類できなかった)いくつかのこと
+
+.toc
+.~HTML_PRE
+
+.p	いろいろ
+.include examples.wix
+
+.p	MTA 関係
+.include postfix-pop-before-smtp.wix
