@@ -237,7 +237,7 @@ sub FmlLocalInitialize
     @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, TMP,
 	    TMP_DIR, PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
 	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
-	    LOG_MESSAGE_ID,
+	    LOG_MESSAGE_ID, SECURE_FML_LOCAL,
 	    MY_FUNCTIONS, CASE_INSENSITIVE, MAIL_LENGTH_LIMIT);
 
     # getopts
@@ -507,10 +507,10 @@ sub FmlLocalAdjustVariable
 {
     # Headers
     $Reply_to              = $Envelope{'h:Reply-To:'};
-    $Original_To_address   = $Envelope{'to:'};
-    $To_address            = $Envelope{'to:'};
-    $Original_From_address = $Envelope{'from:'};
-    $Subject               = $Envelope{'subject:'};
+    $Original_To_address   = $Envelope{'h:to:'};
+    $To_address            = $Envelope{'h:to:'};
+    $Original_From_address = $Envelope{'h:from:'};
+    $Subject               = $Envelope{'h:subject:'};
     
     # variable expand
     $EXEC = &FmlLocalReplace($EXEC);
@@ -527,7 +527,7 @@ sub FmlLocalMainProc
     # SECURITY CHECK
     for $x ($F1, $F2, $F3) {
 	next if $x =~ /^\s*$/;
-	if (! &SecureP($x)) {
+	if ($SECURE_FML_LOCAL &&  (! &SecureP($x))) {
 	    &Log("INSECURE($x), hence STOP!");
 	    return;
 	}
@@ -634,34 +634,13 @@ sub FmlLocalReadFile
 #:include: fml.pl
 #:sub GetTime Parse Parsing Expand_mailbox WholeMail eval Logging Log Append2
 #:sub GetFieldsFromHeader Conv2mailbox Debug SecureP
-#:sub FixHeaders CheckEnv CtlAddr
+#:sub FixHeaders CheckEnv CtlAddr Addr2FQDN CutFQDN
 #:sub Debug CheckMember AddressMatch Warn FieldsDebug use
 #:sub Touch Write2
 #:~sub
 ##################################################################
 #:replace
-sub GetTime
-{
-    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
-			$WDay[$wday], $mday, $Month[$mon], 
-			$year, $hour, $min, $sec, $TZone);
-
-    # /usr/src/sendmail/src/envelop.c
-    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
-    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-    # 
-    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
-			   1900 + $year, $mon + 1, $mday, $hour, $min);
-}
-
-
+sub Write2 { &Append2(@_, 1);}
 
 
 # one pass to cut out the header and the body
@@ -697,6 +676,66 @@ sub Parse
 
     $Envelope{'nlines'}  = $nlines;
     $Envelope{'nclines'} = $nclines;
+}
+
+
+
+
+# Recreation of the whole mail for error infomation
+sub WholeMail   
+{ 
+    $_ = ">".$Envelope{'Header'}."\n".$Envelope{'Body'};
+    s/\n/\n\>/g; 
+    "Original Mail:\n$_\n";
+}
+
+
+# Log: Logging function
+# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
+# delete \015 and \012 for seedmail return values
+# $s for ERROR which shows trace infomation
+sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
+sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
+sub Log { 
+    local($str, $s) = @_;
+    local($package,$filename,$line) = caller; # called from where?
+    local($status);
+
+    &GetTime;
+    $str =~ s/\015\012$//;	# FIX for SMTP
+    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
+	$Envelope{'error'} .= "Sendmail Error:\n";
+	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
+    }
+    
+    $str = "$filename:$line% $str" if $debug_caller;
+
+    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
+    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
+}
+
+
+# append $s >> $file
+# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
+# $nor "set $nor"(NOReturn)
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2
+{
+    local($s, $f, $w, $nor) = @_;
+    local(@info) = caller;
+    print STDERR "Append2: @info \n" if $debug_caller && (!-f $f);
+
+    if (! open(APP, $w ? "> $f": ">> $f")) {
+	local($r) = -f $f ? "cannot open $f" : "$f not exists";
+	$nor ? (print STDERR "$r\n") : &Log($r);
+	return $NULL;
+    }
+    select(APP); $| = 1; select(STDOUT);
+    print APP "$s\n" if $s;
+    close(APP);
+
+    1;
 }
 
 
@@ -754,6 +793,33 @@ sub GetFieldsFromHeader
 }
 
 
+# Expand mailbox in RFC822
+# From_address is user@domain syntax for e.g. member check, logging, commands
+# return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
+# 
+sub Conv2mailbox
+{
+    local($mb) = @_;		# original string
+
+    # $mb = &Strip822Comments($mb);
+
+    # NULL is given, return NULL
+    ($mb =~ /^\s*$/) && (return $NULL);
+
+    # RFC822 unfolding
+    $mb =~ s/\n(\s+)/$1/g;
+
+    # Hayakawa Aoi <Aoi@aoi.chan.panic>
+    ($mb =~ /^\s*.*\s*<(\S+)>.*$/io) && (return $1);
+
+    # Aoi@aoi.chan.panic (Chacha Mocha no cha nu-to no 1)
+    ($mb =~ /^\s*(\S+)\s*.*$/io)     && (return $1);
+
+    # Aoi@aoi.chan.panic
+    return $mb;
+}	
+
+
 # LATTER PART is to fix extracts
 sub FixHeaders
 {
@@ -770,12 +836,14 @@ sub FixHeaders
     $e{'h:Posted:'}      = $e{'h:date:'} || $MailDate;
     $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
     $e{'h:Lines:'}       = $e{'nlines'};
+    $e{'h:References:'}  = $e{'h:references:'};       
+    $e{'h:In-Reply-To:'} = $e{'h:in-reply-to:'};     
     $e{'h:Subject:'}     = $e{'h:subject:'};       # anyway save
 
     # Some Fields need to "Extract the user@domain part"
     # $e{'h:Reply-To:'} is "reply-to-user"@domain FORM
     $From_address        = &Conv2mailbox($e{'h:from:'});
-    $e{'h:Reply-To:'}    = &Conv2mailbox($e{'h:reply-to:'});
+    $e{'h:Reply-To:'}    = $e{'h:reply-to:'}; # &Conv2mailbox($e{'h:reply-to:'});
     $e{'Addr2Reply:'}    = $e{'h:Reply-To:'} || $From_address;
 
     # Subject:
@@ -783,7 +851,8 @@ sub FixHeaders
     # 2. while ( Re: Re: -> Re: ) 
     # Default: not remove multiple Re:'s),
     # which actions may be out of my business
-    if (($_ = $e{'h:Subject:'}) && $STRIP_BRACKETS) {
+    if (($_ = $e{'h:Subject:'}) && 
+	($STRIP_BRACKETS || $SUBJECT_HML_FORM || $SUBJECT_FREE_FORM_REGEXP)) {
 	if ($e{'MIME'}) { # against cc:mail ;_;
 	    &use('MIME'); 
 	    &StripMIMESubject(*e);
@@ -792,7 +861,8 @@ sub FixHeaders
 	    local($r)  = 10;	# recursive limit against infinite loop
 
 	    # e.g. Subject: [Elena:003] E.. U so ...
-	    s/\[$BRACKET:\d+\]\s*//g;
+	    $pat = $SUBJECT_HML_FORM ? "\\[$BRACKET:\\d+\\]" : $SUBJECT_FREE_FORM_REGEXP;
+	    s/$pat\s*//g;
 
 	    #'/gi' is required for RE: Re: re: format are available
 	    while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
@@ -859,39 +929,6 @@ sub CheckEnv
     }
 }
 
-
-
-# Expand mailbox in RFC822
-# From_address is user@domain syntax for e.g. member check, logging, commands
-# return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
-sub Conv2mailbox
-{
-    local($mb) = @_;
-
-    # NULL is given, return NULL
-    ($mb =~ /^\s*$/) && (return $NULL);
-
-    # RFC822 unfolding
-    $mb =~ s/\n(\s+)/$1/g;
-
-    # Hayakawa Aoi <Aoi@aoi.chan.panic>
-    ($mb =~ /^\s*.*\s*<(\S+)>.*$/io) && (return $1);
-
-    # Aoi@aoi.chan.panic (Chacha Mocha no cha nu-to no 1)
-    ($mb =~ /^\s*(\S+)\s*.*$/io)     && (return $1);
-
-    # Aoi@aoi.chan.panic
-    return $mb;
-}	
-
-
-# Recreation of the whole mail for error infomation
-sub WholeMail   
-{ 
-    $_ = ">".$Envelope{'Header'}."\n".$Envelope{'Body'};
-    s/\n/\n\>/g; 
-    "Original Mail:\n$_";
-}
 
 
 # CheckMember(address, file)
@@ -989,80 +1026,30 @@ sub AddressMatch
 }
 
 
-
-# Log: Logging function
-# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
-# delete \015 and \012 for seedmail return values
-# $s for ERROR which shows trace infomation
-sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
-sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
-sub Log { 
-    local($str, $s) = @_;
-    local($package,$filename,$line) = caller; # called from where?
-    local($status);
-
-    &GetTime;
-    $str =~ s/\015\012$//;	# FIX for SMTP
-    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
-	$Envelope{'error'} .= "Sendmail Error:\n";
-	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
-    }
-    
-    $str = "$filename:$line% $str" if $debug_caller;
-
-    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
-    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
-}
-
-
-# append $s >> $file
-# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
-# $nor "set $nor"(NOReturn)
-# if called from &Log and fails, must be occur an infinite loop. set $nor
-# return NONE
-sub Append2
-{
-    local($s, $f, $w, $nor) = @_;
-    local(@info) = caller;
-    print STDERR "Append2: @info \n" if $debug_caller && (!-f $f);
-
-    if (! open(APP, $w ? "> $f": ">> $f")) {
-	local($r) = -f $f ? "cannot open $f" : "$f not exists";
-	$nor ? (print STDERR "$r\n") : &Log($r);
-	return $NULL;
-    }
-    select(APP); $| = 1; select(STDOUT);
-    print APP "$s\n" if $s;
-    close(APP);
-
-    1;
-}
-
-
 sub Touch  { &Append2("", $_[0]);}
 
 
-sub Write2 { &Append2(@_, 1);}
-
-
-# Warning to Maintainer
-sub Warn { &Sendmail($MAINTAINER, $_[0], $_[1]);}
-
-
-# eval and print error if error occurs.
-# which is best? but SHOULD STOP when require fails.
-sub use { require "lib$_[0].pl";}
-
-
-# eval and print error if error occurs.
-sub eval
+sub GetTime
 {
-    &CompatFML15_Pre  if $COMPAT_FML15;
-    eval $_[0]; 
-    &CompatFML15_Post if $COMPAT_FML15;
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
 
-    $@ ? (&Log("$_[1]:$@"), 0) : 1;
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
 }
+
 
 
 # Debug Pattern Custom for &GetFieldsFromHeader
@@ -1095,6 +1082,26 @@ LOAD_LIBRARY:        $LOAD_LIBRARY
 }
 
 
+# eval and print error if error occurs.
+sub eval
+{
+    &CompatFML15_Pre  if $COMPAT_FML15;
+    eval $_[0]; 
+    &CompatFML15_Post if $COMPAT_FML15;
+
+    $@ ? (&Log("$_[1]:$@"), 0) : 1;
+}
+
+
+# eval and print error if error occurs.
+# which is best? but SHOULD STOP when require fails.
+sub use { require "lib$_[0].pl";}
+
+
+# Warning to Maintainer
+sub Warn { &Sendmail($MAINTAINER, $_[0], $_[1]);}
+
+
 sub Debug 
 { 
     print STDERR "$_[0]\n";
@@ -1110,7 +1117,13 @@ sub Debug
 
 
 # which address to use a COMMAND control.
-sub CtlAddr { $CONTROL_ADDRESS =~ /\@/ ? $CONTROL_ADDRESS : "$CONTROL_ADDRESS\@$FQDN";}
+sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
+
+
+
+# Do FQDN of the given Address 1. $addr is set and has @, 2. MALI_LIST
+sub Addr2FQDN { $_[0] ? ($_[0] =~ /\@/ ? $_[0] : $_[0]."\@$FQDN") : $MAIL_LIST;}
+sub CutFQDN   { $_[0] =~ /(\S+)\@(\S+)/ ? $1 : $_[0];}
 
 
 # Security 
@@ -1140,15 +1153,16 @@ sub SecureP
 #:replace
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
 # Please obey GNU Public License(see ./COPYING)
 
 
-$rcsid .= " :smtp[1.9]";
+$rcsid .= " :smtp[1.12]";
 
 
 ##### local scope in Calss:Smtp #####
-local($SmtpTime, $FixTransparency); 
+local($SmtpTime, $FixTransparency, $LastSmtpIOString); 
 
 
 # sys/socket.ph is O.K.?
@@ -1158,6 +1172,7 @@ sub SmtpInit
 
     # IF NOT SPECIFIED, [IPC]
     $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
+    $e{'macro:s'}    = $e{'macro:s'}    || $FQDN;
 
     @smtp = ("HELO $e{'macro:s'}", "MAIL FROM: $MAINTAINER");
 
@@ -1184,11 +1199,12 @@ sub SmtpInit
 
 	if ($e{'preamble'}) { $e{'preamble'} =~ s/\n\./\n../g; $e{'preamble'} =~ s/\.\.$/./g;}
 	if ($e{'trailer'})  { $e{'trailer'} =~ s/\n\./\n../g;  $e{'trailer'} =~ s/\.\.$/./g;}
-
-	$e{'Body'} =~ s/\n\./\n../g;               # enough for body ^. syntax
-	$e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
-	$e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
     }
+
+    # ANYTIME, Try fixing since plural mails are delivered
+    $e{'Body'} =~ s/\n\./\n../g;               # enough for body ^. syntax
+    $e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
+    $e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
 
     return 1 if $SocketOK;
     return ($SocketOK = &SocketInit);
@@ -1198,15 +1214,15 @@ sub SmtpInit
 sub SocketInit
 {
     ##### PERL 5  
-    local($eval, $ok);
+    local($eval, $ok, $ExistSocket_ph);
 
-    eval "use Socket;", ($ok = $@ eq "");
-    &Log($ok ? "Socket O.K.": "Socket fails. Try socket.ph") if $debug;
+    $ok = eval "use Socket;", ($@ eq "");
+    &Log($ok ? "Socket(XS) O.K.": "Socket(Perl 5 XS) fails. Try socket.ph") if $debug;
     return 1 if $ok;
 
     ##### PERL 4
-    local($ExistSocket_ph) = eval("require 'sys/socket.ph';"), ($@ eq "");
-    &Log("sys/socket.ph is O.K.") if $ExistSocket_ph && $debug;
+    $ExistSocket_ph = eval("require 'sys/socket.ph';"), ($@ eq "");
+    &Log("\"eval sys/socket.ph\" O.K.") if $ExistSocket_ph && $debug;
     return 1 if $ExistSocket_ph; 
 
     if ((! $ExistSocket_ph) && $COMPAT_SOLARIS2) {
@@ -1328,6 +1344,8 @@ sub SmtpIO
 	    last         if $error eq ""; # O.K.
 	    &Log($error) if $error;       # error log %BAD FREE()%;
 	    sleep(1);		          # sleep and try the secondaries
+
+	    last         unless @HOSTS;	  # trial ends if no candidate
 	}
     }
     ### not IPC, try popen(sendmail) ...
@@ -1348,12 +1366,13 @@ sub SmtpIO
 
     foreach $s (@smtp, 'm_RCPT', @rcpt, 'm_RCPT', 'DATA') {
 	next if $s =~ /^\s*$/o;
-	$0 = "-- $s <$FML $LOCKFILE>";
 
 	# RCPT TO:; trick for the less memory use;
 	if ($s eq 'm_RCPT') { $in_rcpt = $in_rcpt ? 0 : 1; next;}
 	$s = "RCPT TO: $s" if $in_rcpt;
 	
+	$0 = "-- $s <$FML $LOCKFILE>"; 
+
 	print SMTPLOG ($s . "<INPUT\n");
 	print S ($s . "\n");
 
@@ -1390,12 +1409,18 @@ sub SmtpIO
     # BODY ON MEMORY
     else { 
 	print SMTPLOG $e{'Body'}; print S $e{'Body'};
+	$LastSmtpIOString = $e{'Body'}; 
     }
 
     # Trailer
-    if ($e{'trailer'}) { print SMTPLOG $e{'trailer'}; print S $e{'trailer'};}
+    if ($e{'trailer'}) { 
+	$LastSmtpIOString =  $e{'trailer'}; 
+	print SMTPLOG $e{'trailer'}; 
+	print S $e{'trailer'};
+    }
 
     ### close smtp with '.'
+    print S "\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
     print SMTPLOG ('-' x 30)."\n";
     print S ".\n";
 
@@ -1456,6 +1481,7 @@ sub SmtpFiles2Socket
 	    &jcode'convert(*_, 'jis') if $autoconv;#';
 	    print S $_;
 	    print SMTPLOG $_;
+	    $LastSmtpIOString = $_;
 	};
 
 	close(FILE);
@@ -1781,7 +1807,7 @@ sub getmyspool2
 sub forward
 {
     local($host) = 'localhost';
-    local($body, @Rcpt, $status);
+    local($body, @rcpt, $status);
     &Log("Forward");
 
     # :include: form
@@ -1800,6 +1826,10 @@ sub forward
 
     &GetTime;
 
+    # fix to:
+    $Envelope{'h:To:'} .= 
+	($Envelope{'h:To:'} !~ /\s*/) ? $Envelope{'h:To:'} : $Envelope{"h:to:"};
+
     for ('Return-Path', 'Date', 'From', 'Subject', 'Sender', 'To', 
 	 'Errors-To', 'Cc', 'Reply-To', 'Posted') {
 	$Envelope{'Hdr'} .= "$_: $Envelope{\"h:$_:\"}\n" if $Envelope{"h:$_:"};
@@ -1809,9 +1839,9 @@ sub forward
     $Envelope{'Hdr'} .= "X-MLServer: $rcsid\n" if $rcsid;
     $Envelope{'Hdr'} .= "Precedence: ".($PRECEDENCE || 'list')."\n"; 
 
-    foreach $rcpt (@OPT) { push(@Rcpt, $rcpt);}
+    foreach $rcpt (@OPT) { push(@rcpt, $rcpt);}
 
-    $status = &Smtp(*Envelope, *Rcpt);
+    $status = &Smtp(*Envelope, *rcpt);
     &Log("Sendmail:$status") if $status;
 }
 
