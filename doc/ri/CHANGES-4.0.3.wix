@@ -8,6 +8,14 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
 
+2001/08/20
+
+   www/lib/libcgi_kern.pl (1.54-1.55): 
+	bug fix cgi list check in initial state without members/actives
+
+	初期状態で members  や actives がない場合に
+	エラーが表示されることがあるが、このエラーは不必要なので削除
+
 2001/08/19
 
    module/Japanese/IM/Iso2022jp.pm (1.1-1.2):
@@ -48,7 +56,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.5 2001/08/17 14:45:55 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.6 2001/08/19 12:08:21 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
