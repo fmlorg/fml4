@@ -36,6 +36,11 @@ chdir $DIR || die $!;
 &CWhoisInit;
 &CWhoisSearch(*e, $WHOIS_SERVER, $Key);
 
+if ($Key =~ /^help$/i) { 
+    print ("\#" x 60); print "\n";
+    print &CWhoisUsage;
+}
+
 exit 0;
 
 ##### libexec/whois.pl Libraries
@@ -233,6 +238,8 @@ sub CWhoisUsage
     local(@db) = keys %WhoisCacheDB;
 
     $s = qq!;
+    Caching Whois Server HELP (FOR YOUR HELP);
+    ;
     % whois -h WHOIS-SERVER key;
     ;
     e.g.;
@@ -291,3 +298,4 @@ sub Cat
 }
 
 1;
+
