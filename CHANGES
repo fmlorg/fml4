@@ -3,6 +3,26 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/15
+
+  doc/Japanese/
+
+	とりあえずひととおり submit した
+
+2000/04/12
+
+  bin/fwix.pl
+	automatically expand ".toc" command to
+		"-" x 60
+		table of contents
+		"-" x 60
+
+	TEXTモードでは .toc を枠つきの自動展開に変更
+
+  doc/Japanese/
+
+	大改造キャンペーン;)
+
 2000/04/11
 
   bin/fwix.pl
