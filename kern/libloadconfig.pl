@@ -347,7 +347,7 @@ sub COPY_FIELD
     else { # in *.ph files
 	# XXX pass real operation to the later function
 	# XXX while (($old,$new) = each %HdrFieldCopy) { ... } later
-	$HdrFieldCopy{ $src } = $new;
+	$HdrFieldCopy{ $old } = $new;
     }
 
     &ADD_FIELD(&FieldCapitalize($new));
