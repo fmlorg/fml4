@@ -41,4 +41,6 @@ else {
     }
 }
 
+if ($ErrorString) { &Exit($ErrorString);}
+
 exit 0;

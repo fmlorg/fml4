@@ -19,6 +19,11 @@ sub Init
     # fml system configuration
     require "$CONFIG_DIR/system";
 
+    if (-f "$CONFIG_DIR/cgiconfig") {
+        eval("require \"$CONFIG_DIR/cgiconfig\"");
+	&Err($@) if $@;
+    }
+
     # makefml location
     $MAKE_FML = "$EXEC_DIR/makefml";
 
@@ -95,7 +100,7 @@ sub GetBuffer
 	$v =~ s/%(..)/pack("C", hex($1))/eg;
 	$s{$k} = $v;
 
-	&P("GetBuffer: $k\t$v<br>\n") if $debug;
+	&P("GetBuffer: $k\t$v\n<br>") if $debug;
     }
 
     # pass the called parent url to the current program;
