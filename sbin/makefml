@@ -2656,9 +2656,13 @@ sub do_create_doc_template
 sub CreateDocTemplate
 {
     local(*config, $ml) = @_;
-    local($x);
+
+    # require overwrite %*config (?)
+    local($x, $cf, %config, %cur_config);
 
     &ResetVariables;
+
+    &GetCF($cf, $ml, *config, *cur_config); 
 
     # <Command Trap Keyword>
     # In 'newml', we have no knowledge so that 
@@ -2666,8 +2670,8 @@ sub CreateDocTemplate
     if ($config{'MAIL_LIST'}) {
 	if ($config{'MAIL_LIST'} eq $config{'CONTROL_ADDRESS'} ||
 	    $config{'MAIL_LIST_ACCEPT_COMMAND'}) {
-	    &Log("\$CTK = '# ';"); 
-	    $CTK = '# '; 
+	    &Log("\$CTK = '#';"); 
+	    $CTK = '#'; 
 	}
     }
 
