@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2002 Ken'ichi Fukamachi
+# Copyright (C) 1993-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2002 fukachan@sapporo.iij.ad.jp
+#               1996-2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.124.2.12 2002/08/10 09:25:59 fukachan Exp $
+# $FML: fml.pl,v 2.124.2.13 2002/08/10 09:30:57 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -938,6 +938,20 @@ sub CutOffRe
     $_;
 }
 
+sub _get_boundary
+{
+    my ($content_type) = @_;
+
+    for my $param (split(/[;\s]+/, $content_type)) {
+	if ($param =~ /boundary=\"(.*)\"/i ||
+	    $param =~ /boundary=\s*(\S+)/i) {
+	    return $1;
+	}
+    }
+
+    return undef;
+}
+
 sub CheckCurrentProc
 {
     local(*e, $ccp_mode) = @_;
@@ -954,9 +968,7 @@ sub CheckCurrentProc
 
     ### SubSection: MIME info
     # MIME skip mode; against automatic-MIME-encapsulated fool MUA
-    if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
-	$e{'h:content-type:'} =~ /boundary=\s*(\S+)/i) {
-	$boundary = $1;
+    if ($boundary = _get_boundary($e{'h:content-type:'})) {
 	$boundary = "--$boundary";
 	$e{'MIME:boundary'} = $boundary;
     }
