@@ -96,8 +96,7 @@ sub ModeBifurcate
 	&DataBaseMIBPrepare(\%mib, 'member_p', {'address' => $From_address});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
 	if ($mib{'error'}) {
-	    &Log("ERROR: database server is down ?");
-	    &Mesg(*Envelope, 'configuration_error');
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
 	    return 0; # return ASAP
 	}
 
