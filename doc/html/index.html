@@ -28,15 +28,20 @@
 </CENTER>
 </H1>
 
-<P><A HREF="index-e.html">[English]</A> is here. <A HREF="menu.html">FRAME version</A> is here.
+#ifdef JAPANESE
+<P><A HREF="index-e.html">[English]</A> is here. 
+<A HREF="menu.html" TARGET="_top">Japenese FRAME version</A> is here.
 <HR>
 
-#ifdef JAPANESE
 <P>
 <A HREF="Japanese/basic_setup/index.html">
 チュートリアルの basic コース: まず最初に見てみてほしい場所
 </A>
 #else
+<P><A HREF="index.html">[Japanese]</A> is here. 
+<A HREF="menu-e.html" TARGET="_top">English FRAME version</A> is here.
+<HR>
+
 <A HREF="examples/index-e.html">
 Tutorials and Guides for fml beginners
 </A>
