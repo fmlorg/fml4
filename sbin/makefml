@@ -10,7 +10,7 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
 ### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
-$FML_RCDIR = ""; # __MAKEFML_AUTO_REPLACED_HERE__
+$CONFIG_DIR = ""; # __MAKEFML_AUTO_REPLACED_HERE__
 
 
 
@@ -75,8 +75,8 @@ sub InitMakeFml
     # config amd temporary files
     $CONFIG_TMP  = "/tmp/.fmlconfig.$user";
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$user";
-    $FML_RCDIR   = $FML_RCDIR || "$HOME/.fml";
-    $FML_CONFIG  = "$FML_RCDIR/config";
+    $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
+    $FML_CONFIG  = "$CONFIG_DIR/config";
 
     # initialize files
     if (-f $FML_CONFIG) {
@@ -121,9 +121,9 @@ sub InitMakeFml
     @Config = ('DOMAIN', 'FQDN', 'EXEC_DIR', 'ML_DIR');
 
     %Config = ('EXEC_DIR', 'EXEC FILES DIRECTORY',
-	       'ML_DIR',   'ML DIR ', 
+	       'ML_DIR',   'TOP LEVEL ML DIRECTORY', 
 	       'DOMAIN',   'DOMAIN NAME', 
-	       'FQDN',     'MACHINE FULL NAME', 
+	       'FQDN',     'FQDN', 
 	       ); 
 
     %Default = ('EXEC_DIR', '/usr/local/fml',
@@ -163,7 +163,7 @@ sub InitFmlConfig
 	$p = $Config{$_};
 	$v = $CurConfig{$_} ? $CurConfig{$_} : $Default{$_};
 
-	printf "%-20s %s ", $p, "[$v]";
+	printf "%-25s %s ", $p, "[$v]";
 
 	$cmd = &GetString;
 	
@@ -176,17 +176,17 @@ sub InitFmlConfig
 
     &GetCurConfig;
 
-    print "FML_RCDIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
+    print "CONFIG_DIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
     print "Config Saved in [$CurConfig{'EXEC_DIR'}/.fml] ";
 
     $cmd = &GetString;
     $cmd = ($cmd !~ /^\s*$/) ? $cmd : "$CurConfig{'EXEC_DIR'}/.fml";
-    $FML_RCDIR = $cmd;
+    $CONFIG_DIR = $cmd;
 
-    # mkdir FML_RCDIR;
+    # mkdir CONFIG_DIR;
     {
 	local($dir);
-	for (split(/\//, $FML_RCDIR)) {
+	for (split(/\//, $CONFIG_DIR)) {
 	    $dir .= "/$_";
 	    $dir =~ s#//#/#g;
 
@@ -197,7 +197,7 @@ sub InitFmlConfig
 	}
     }
 
-    $FML_CONFIG  = "$FML_RCDIR/config";
+    $FML_CONFIG  = "$CONFIG_DIR/config";
 
     $buf = &Dumpvar('Config');
     &SaveConfig($buf);
@@ -368,71 +368,6 @@ sub InitTTY
 }
 
 
-sub InitMenu
-{
-    local($menu);
-
-    open(MENU, "etc/menu") || return;
-
-    while (<MENU>) {
-
-	if (/^\-\-(\S+)/) {
-	    $menu = $1;
-	    next;
-	}
-
-	if (/^\.fp\s+(\S+)/) {
-	    chop;
-	    $FP{$menu} = $1;
-	    next;
-	}
-
-	if (/^\.next\s+(\S+)/) {
-	    chop;
-	    $Next{$menu} = $1;
-	    next;
-	}
-
-	if (/^\.var\s+(\S+)/) {
-	    chop;
-	    $Var{$menu} = $1;
-	    next;
-	}
-
-	if (/^\.prompt\s+(\S+)/) {
-	    chop;
-	    $Prompt{$menu} = $1;
-	    next;
-	}
-
-
-	$Menu{$menu} .= $_;
-
-    }
-    close(MENU);
-}
-
-
-sub Menu
-{
-    local($_) = @_;
-
-    &InitMenu;
-
-    if ($opt_h) {
-	$CurMenuP = "HELP";
-	&ShowMenu;
-    }
-    elsif (@ARGV) {
-	&ExecCmd(join(" ",@ARGV));
-    }
-    else {
-	&Interactive;
-
-	print "\n";
-    }
-}
-
 sub ExecCmd
 {
     local($_) = @_;
@@ -456,83 +391,6 @@ sub ExecCmd
 	return;
     }
 
-}
-
-
-sub DoMenu
-{
-    local($menu) = @_;
-    local($cmd, $prompt, $status);
-
-    $Level++;
-
-    print "DoMenu<$Level> $menu\n" if $debug;
-
-    print "=" x 30;
-    print "\n";
-    print $Menu{$menu};
-
-    # call next menu when not get variables;
-    if ($Next{$menu} && (! $Var{$menu})) {
-	$status = &DoMenu($Next{$menu});
-	return $status;
-    }
-
-    # get variables
-    if ($Var{$menu}) {
-	$prompt = $Prompt{$menu} || 'INPUT';
-	print " $prompt> ";
-
-	$cmd = &GetString;
-	$cmd = "setq $Var{$menu} $cmd";
-
-	push(@History, $cmd) if $cmd;
-
-	return ""     if $cmd =~ /^\S$/;
-	return ""     if $cmd =~ /^\s*$/;
-	return 'LAST' if $cmd eq "q";
-    }
-
-    if ($cmd) {
-	$status = &ExecCmd($cmd);
-    }
-
-    if ($FP{$menu}) { 
-	$cmd = $FP{$menu};
-	$status = &ExecCmd($cmd);
-    }
-
-
-    # next menu;
-    if ($Next{$menu}) { 
-	$status = &DoMenu($Next{$menu});
-    }
-
-    $Level--;
-    $status;
-}
-
-
-sub Interactive 
-{
-    select(OUT);
-
-    local($menu);
-
-    while (1) {
-	# top menu;
-	if ($TheFirstTime) {
-	    $menu = $TheFirstTime++ == 1 ? "INIT": "INIT";
-	}
-	else {
-	    $menu = 'TOP';
-	}
-
-	if ($status eq 'LAST') { last;}
-	$status = &DoMenu($menu);
-
-	sleep 3;
-    }
 }
 
 
@@ -561,9 +419,6 @@ sub GetString
 ##########################################################
 sub do_init
 {
-    print "do_init: @_\n" if $debug;
-
-    # do_init;
     print "\n";
     
     for ($Config'EXEC_DIR, $Config'ML_DIR) {
@@ -599,7 +454,8 @@ sub do_install
 
     # $exec_dir/sbin/install.sh is NOT yet installed 
     if (-f "sbin/install.sh") {
-	system "/bin/sh ./sbin/install.sh $Config'EXEC_DIR"; #';
+	$SH = $ENV{'SH'} || "/bin/sh";
+	system "$SH ./sbin/install.sh $Config'EXEC_DIR"; #';
     }
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
@@ -626,9 +482,9 @@ sub FixPath
 
 	# recreate my own;
 	if ($prog =~ /makefml/ && 
-	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$FML_RCDIR/) {
+	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$CONFIG_DIR/) {
 	    print NEW "### AUTOMATICALLY REPLACED by makefml ($MailDate)\n";
-	    print NEW "\$FML_RCDIR = \"$FML_RCDIR\"; ";
+	    print NEW "\$CONFIG_DIR = \"$CONFIG_DIR\"; ";
 	    print NEW "\# __MAKEFML_AUTO_REPLACED_HERE__\n";
 	    next;
 	}
@@ -649,26 +505,19 @@ sub search_path
     local($path) = $ENV{'PATH'};
     local(@path) = split(/:/, $path);
 
-    for ("/usr/local/bin", "/usr/share/bin", "/usr/contrib/bin") {
+    for ("/usr/local/bin", "/usr/share/bin", 
+	 "/usr/contrib/bin", "/usr/gnu/bin") {
 	push(@path, $_);
     }
 
-    foreach $dir (@path) { 
-	if (-f "$dir/$f") { return "$dir/$f";}
-    }
-
-    "";
+    foreach $dir (@path) { if (-f "$dir/$f") { return "$dir/$f";}}
 }
 
 
 sub do_setq
 {
-    local($k, $v) = @_;
-
-    print "do_setq: @_\n" if $debug;
-
-    eval("\$Config'$k = '$v';");
-    print $@ if $@;
+    eval("\$Config'$_[0] = '$_[1]';");
+    print "$@\n--@_\n" if $@;
 }
 
 
@@ -684,9 +533,9 @@ sub do_newml
 
     # mkdir ML Directory
     mkdir("$ml_dir/$ml", 0700);
-    &Conv($ml, "$exec_dir/cf/__makefml", "$FML_RCDIR/$ml.cf");
+    &Conv($ml, "$exec_dir/cf/__makefml", "$CONFIG_DIR/$ml.cf");
 
-    if ($OS_TYPE && open(CF, ">> $FML_RCDIR/$ml.cf")) {
+    if ($OS_TYPE && open(CF, ">> $CONFIG_DIR/$ml.cf")) {
 	print CF "\n\# makefml defines the following.\n";
 	print CF "\$COMPAT_${OS_TYPE} = 1;\n";
 	close(CF);
@@ -694,7 +543,7 @@ sub do_newml
 
     # 
     # make ml/config.ph
-    system "perl $exec_dir/cf/config $FML_RCDIR/$ml.cf > $ml_dir/$ml/config.ph";
+    system "perl $exec_dir/cf/config $CONFIG_DIR/$ml.cf > $ml_dir/$ml/config.ph";
 
     ### generate samples, includes and aliases in $exec_dir/include ###
     umask(022);
@@ -707,20 +556,20 @@ sub do_newml
     umask(077);
 
     # directory to store the config for each ML
-    mkdir("$FML_RCDIR/$ml", 0700);
+    mkdir("$CONFIG_DIR/$ml", 0700);
 
     # generating samples ...;
-    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$FML_RCDIR/$ml/aliases");
-    &Conv($ml, "$exec_dir/etc/samples/__include", "$FML_RCDIR/$ml/include");
-    &Conv($ml, "$exec_dir/etc/samples/__crontab", "$FML_RCDIR/$ml/crontab");
-    &Conv($ml, "$exec_dir/etc/samples/__fml.c",   "$FML_RCDIR/$ml/fml.c");
+    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$CONFIG_DIR/$ml/aliases");
+    &Conv($ml, "$exec_dir/etc/samples/__include", "$CONFIG_DIR/$ml/include");
+    &Conv($ml, "$exec_dir/etc/samples/__crontab", "$CONFIG_DIR/$ml/crontab");
+    &Conv($ml, "$exec_dir/etc/samples/__fml.c",   "$CONFIG_DIR/$ml/fml.c");
 
     &GenCrontab;
 
     # the last info
-    print "Please see several examples in $FML_RCDIR/$ml\n";
-    print "\n# Example of Aliases ($FML_RCDIR/$ml/aliases)\n";
-    &Cat("$FML_RCDIR/$ml/aliases");
+    print "Please see several examples in $CONFIG_DIR/$ml\n";
+    print "\n# Example of Aliases ($CONFIG_DIR/$ml/aliases)\n";
+    &Cat("$CONFIG_DIR/$ml/aliases");
     print "\n";
 }
 
@@ -740,16 +589,16 @@ sub InitLocalVariables
 
 sub GenCrontab
 {
-    open(TAB, "> $FML_RCDIR/crontab") || 
-	(&Warn("cannot open $FML_RCDIR/crontab"), return);
+    open(TAB, "> $CONFIG_DIR/crontab") || 
+	(&Warn("cannot open $CONFIG_DIR/crontab"), return);
     select(TAB); $| = 1; select(STDOUT);
 
-    opendir(DIRD, $FML_RCDIR) || (&Warn("cannot open $FML_RCDIR"), return);
+    opendir(DIRD, $CONFIG_DIR) || (&Warn("cannot open $CONFIG_DIR"), return);
     for (readdir(DIRD)) {
 	next if /^\./;
 
-	if (-f "$FML_RCDIR/$_/crontab") {
-	    if (open(IN, "$FML_RCDIR/$_/crontab") ) {
+	if (-f "$CONFIG_DIR/$_/crontab") {
+	    if (open(IN, "$CONFIG_DIR/$_/crontab") ) {
 		while (<IN>) {  print TAB $_;}
 		close(IN);
 	    }
