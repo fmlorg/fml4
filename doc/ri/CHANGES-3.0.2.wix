@@ -1,6 +1,10 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/12/04
+	proc/libsynchtml.pl (2.40-2.41):
+	PR fml-support:8935 ( Tomoki Ichinoseki <ichinskt@synap.co.jp> )
+
 2000/10/27
 
    sbin/makefml
