@@ -123,6 +123,17 @@ Password:
 =E
 send test mail to "elena" ML 
 
+○ 設定を変更してみる
+=E
+** configure fml
+
+.if LANG == JAPANESE
+.url howto-customize.html
+.fi
+.if LANG == ENGLISH
+.url howto-customize-e.html
+.fi
+
 ○ 必要なら本運用の前にカウンターやログをリセットする。
 =E
 To remove log of test mails, please remove the following files.
