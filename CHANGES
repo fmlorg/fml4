@@ -3,6 +3,16 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/05/10
+
+   messages/Japanese/amctl (1.5-1.6):
+	fix Japanese to be more friendly for newbies
+
+2001/05/03
+
+   sbin/makefml (2.210-2.211):
+	fix mladmin.cgi help typo
+
 2001/04/27
 
    module/Japanese/liblangdep.pl (1.7-1.8): 
