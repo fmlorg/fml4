@@ -6,11 +6,19 @@
 #
 # $Id$
 
+CC     = cc
+CFLAGS = -DPOSIX
+
+
 all:
 	@ echo ""
 	@ echo \"make config.ph\"	to make config.ph from ./cf
+	@ echo \"make fml\"		to make fml from fml.c
 	@ echo ""
 
 config.ph: cf
 	@ eval 'mv -f config.ph config.ph.old >/dev/null 2>&1'
 	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph
+
+fml: fml.c config.h
+	$(CC) $(CFLAGS) -o fml fml.c
