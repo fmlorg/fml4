@@ -162,6 +162,34 @@ sub SmtpConnect
 {
     local(*host, *error) = @_;
 
+    if (1 || $USE_INET6) {
+	my $mta = 'localhost:25' || '[::1]:25';
+	my $obj;
+	my $pkg = "Mail::Delivery";
+
+	eval "require $pkg; $pkg->import();";
+	unless (@$) {
+	    $obj = new Mail::Delivery { 
+		protocol     => 'SMTP', 
+		log_function => \&Log,
+	    };
+
+	    if (defined $obj) {
+		$obj->connect6( { _mta => $mta } );
+		&Log($@) if $@;
+
+		if (defined $obj->{ _socket }) {
+		    *S = $obj->{ _socket };
+		    return "";
+		}
+		else {
+		    &Log( $obj->error() ) if $obj->error();
+		    &Log("cannot connect $mta by IPv6");
+		}
+	    }
+	}
+    }
+
     local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
