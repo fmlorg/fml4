@@ -278,10 +278,4 @@ sub GenerateMailMajority
     return ($host, $body, @headers);
 }
 
-# FOR DEBUG
-if($0 =~ __FILE__) {
-    @test = ("./spool/1", "./spool/2");
-    $MAINTAINER = "Elena@phys.titech.ac.jp";
-}
-
 1;

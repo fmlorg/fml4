@@ -41,30 +41,35 @@ sub Smtp # ($host, $headers, $body)
     if (connect(S, $target)) { 
 	print SMTPLOG  "connect ok\n"; 
     } else { return "Smtp:connect:$!";}
-    select(S); $| = 1; select(stdout); # need flush of sockect <S>;
+
+    # need flush of sockect <S>;
+    select(S); $| = 1; select(stdout);
+    select(SMTPLOG); $| = 1; select(stdout);
 
     # interacts smtp port, see the detail in $SMTPLOG
-    do { print SMTPLOG $_ = <S>;} while(/^\d\d\d\-/o);
-    while(@headers) {
-	$_ = $headers[0], shift @headers;
-	print SMTPLOG "$_<INPUT\n";
-	print S "$_\n";
-	do { print SMTPLOG $_ = <S>;} while(/^\d\d\d\-/o);
+    do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
+    foreach $line (@headers) {
+	print SMTPLOG "$line<INPUT\n";
+	print S "$line\n";
+    do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
     }
+
     print SMTPLOG "-------------\n";
     if($SEND_FILE_TRICK) {
-	chop $body; chop $body; chop $body; # trick
+	print SMTPLOG $body;
 	print S $body;
 	while(<file>) { print S $_; print SMTPLOG $_;};
+	print SMTPLOG "-------------\n";
 	print S ".\n";
     }else {
 	print SMTPLOG "$body-------------\n";
 	print S $body;
     }
-    do { print SMTPLOG $_ = <S>;} while(/^\d\d\d\-/o);
+    do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
     print S "QUIT\n";
-    do { print SMTPLOG $_ = <S>;} while(/^\d\d\d\-/o);
+    do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
     close S, SMTPLOG;
+
     return 0;
 }
 
@@ -84,9 +89,11 @@ sub SendFile
 
     # trick for using smaller memory!
     $SEND_FILE_TRICK = 1;
-    &Sendmail($to, $subject, ""); 
+    ($host, $body, @headers) = &GenerateMail($to, $subject);
 
-    # while(<file>) { print S $_;}     -> in sub Smtp
+    $Status = &Smtp($host, $body, @headers);
+    &Logging("SendFile:$Status") if $Status;
+
     close(file);
 }
 
@@ -95,6 +102,18 @@ sub SendFile
 sub Sendmail
 {
     local($to, $subject, $MailBody) = @_;
+    local($host, $body, @headers) = &GenerateMail($to, $subject);
+
+    $body .= "$MailBody";
+    $body .= "\n" if(! ($MailBody =~ /\n$/o));
+
+    $Status = &Smtp($host, "$body.\n", @headers);
+    &Logging("Sendmail:$Status") if $Status;
+}
+
+sub GenerateMail
+{
+    local($to, $subject) = @_;
     local($body) = '';
     local($whom, @tmp) = split(/:/, getpwuid($<), 999);
     local($from) = $MAINTAINER ? $MAINTAINER: $whom;
@@ -102,7 +121,7 @@ sub Sendmail
     local($Status) = 0;
 
     if($debug) {
-	print STDERR "from = ", $from, "\nto = ", $to, "\n";
+	print STDERR "from = ", $from, "\nto   = ", $to, "\n";
 	print STDERR "sendmail: missing address" if( !$from || !$to ); 
     }
     return if(!$from || !$to);
@@ -118,10 +137,8 @@ sub Sendmail
     $body .= "Reply-to: $Reply_to\n" if $Reply_to;
     $body .= "X-MLServer: $rcsid\n" if $rcsid;
     $body .= "\n";
-    $body .= "$MailBody" unless($SEND_FILE_TRICK); # trick for SendFile
-    $body .= "\n" if(! ($MailBody =~ /\n$/o));
-    $Status = &Smtp($host, "$body.\n", @headers);
-    &Logging("Sendmail:$Status") if $Status;
+
+    return ($host, $body, @headers);
 }
 
 1;

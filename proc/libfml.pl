@@ -4,19 +4,19 @@
 # Please obey GNU Public Licence(see ./COPYING)
 
 $libid   = q$Id$;
-($libid) = ($libid =~ /Id: *(.*) *\d\d\d\d\/\d+\/\d+.*/); 
+($libid) = ($libid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid  .= "/$libid";
 
 &Command;
 
 sub Command
 {
-    # From_address and Original_From_address are arbitrary.
-    local($to) = $Reply_to ? $Reply_to : $From_address;
-    local(@MAILBODY) = split(/\n/, $MailBody, 999) ;
     $0 = "--Command Mode in <$FML $LOCKFILE>";
 
-  GivenCommands: foreach (@MAILBODY) {
+    # From_address and Original_From_address are arbitrary.
+    local($to) = $Reply_to ? $Reply_to : $From_address;
+
+  GivenCommands: foreach (split(/\n/, $MailBody, 999)) {
       next GivenCommands if(/^$/o); # skip null line
       if(! /^#/o) {
 	  &Logging("HELP sent to $From_address");
@@ -25,7 +25,7 @@ sub Command
       }
 
       s/^#(\S+)(.*)/# $1 $2/ if $RPG_ML_FORM_FLAG;
-      @Fld = split(/[ \t\n]+/, $_, 999);
+      @Fld = split(/\s+/, $_, 999);
       $_ = $Fld[1];
       $0 = "--Command Mode processing $_: $FML $LOCKFILE>";
       print STDERR "Now command is >$_<\n" if($debug);
@@ -87,16 +87,19 @@ sub Command
 
       # get one article from the spool, then return it
       if(/^get$/io) {
-	  $ID = $Fld[2];
-	  local($mail_file) = "$SPOOL_DIR/$ID";
-	  if(-f $mail_file) {
-	      &SendFile($to, "Get $ID $ML_FN", $mail_file);
-	      $status = "Success";
+	  $ID = $Fld[2]; local($mail_file);
+	  if(&InSecureP($ID)){ 
+	      &Sendmail($to, "get $Fld[2] failed. $ML_FN");
+	      last GivenCommands;
+	  }
+
+	  if($mail_file = &ExistP($ID)) { # return is "spool/ID" form.
+	      &SendFile($to, "Get $ID $ML_FN", "$DIR/$mail_file", $BINARY_P);
+	      &Logging("Get $ID, Success ($From_address)");
 	  } else {				# or null $ID
 	      &Sendmail($to, "Article $ID is not found. $ML_FN");
-	      $status = "Fail";
+	      &Logging("Get $ID, Fail ($From_address)");
 	  }
-	  &Logging("Get $ID, ($From_address), status is $status");
 	  next GivenCommands;
       }
 
@@ -105,68 +108,75 @@ sub Command
       # new version should be used as mget ver.2(mget[ver.2])
       # matomete get articles from the spool, then return them
       if(/^mget$/io || /^mget2$/io) {
-	  if(&mget2(@Fld)) {
-	      &Logging("mget[ver.2] $Fld[2] $Fld[3] from <$to> request, called");
-	      next GivenCommands;
-	  }
-	  &Logging("mget[ver.2] $Fld[2] $Fld[3] from <$to> request, failed");
-	  &Sendmail($to, "mget request $Fld[2], $Fld[3] failed. $ML_FN");
+	  $Status = ( &mget2(@Fld) ? "Success" : "Fail");
+	  &Logging("mget[ver.2] $Fld[2] $Fld[3] from <$to>, $Status");
+	  &Sendmail($to, "mget $Fld[2] $Fld[3] failed. $ML_FN")
+	      if($Status eq 'Fail');
 	  next GivenCommands;
       }
-      
-      # Off temporarily.
-      if(/^off$/io) {
-	  if(&ChangeMemberList('off', $From_address, $ACTIVE_LIST)) {
-	      &Logging("Off ($From_address)");
-	      &Sendmail($to, "Off accepted. I'm waiting your On cmd. $ML_FN");
-	      next GivenCommands;
-	  }else {
-	      &Logging("Off failed ($From_address)");
-	      &Sendmail($to, "Off failed. check and try again! $ML_FN");
-	      next GivenCommands;
+
+      # Off: temporarily.
+      # On : Return to Mailng List
+      # Matome Okuri ver.2 Control Interface
+      if(/^off$/io || /^on$/io || /^matome$/io) {
+	  y/a-z/A-Z/; 
+	  $cmd = $_;
+
+	  # Matome Okuri preroutine
+	  if(($Fld[2] =~ /^(\d+)$/)||($Fld[2] =~ /^(\d+u)$/oi)||
+	     ($Fld[2] =~ /^(\d+)h$/oi)) { 
+	      $MATOME = $1;
 	  }
+	  &Logging("Try matome $MATOME") if $MATOME;
+
+	  # Go!
+	  if(&ChangeMemberList($cmd, $From_address, $ACTIVE_LIST)) {
+	      &Logging("$cmd ($From_address)");
+	      &Sendmail($to, "$cmd accepted. $ML_FN");
+	  }else {
+	      &Logging("$cmd failed ($From_address)");
+	      &Sendmail($to, "$cmd failed. check and try again! $ML_FN");
+	  }
+	  next GivenCommands;
       }
 
-      # Return to Mailng List
-      if(/^on$/io) {
-	  if(&ChangeMemberList('on', $From_address, $ACTIVE_LIST)) {
-	      &Logging("On ($From_address)");
-	      &Sendmail($to, "On accepted $ML_FN");
-	      next GivenCommands;
-	  }else {
-	      &Logging("On failed ($From_address)");
-	      &Sendmail($to, "On failed. check and try again! $ML_FN");
-	      next GivenCommands;
-	  }
-      }
-
-      # Bye - off permanently 
+      # Bye - Good Bye Eternally
       if(/^bye$/io) {
-	  if(! &ChangeMemberList('bye', $From_address, $ACTIVE_LIST)) {
-	      &Logging("bye failed[$ACTIVE_LIST] ($From_address)");
-	      &Sendmail($to, "Bye failed. check and try again! $ML_FN");
+	  if(! &ChangeMemberList('BYE', $From_address, $ACTIVE_LIST)) {
+	      &Logging("BYE failed[$ACTIVE_LIST] ($From_address)");
+	      &Sendmail($to, "BYE failed. check and try again! $ML_FN");
 	      last GivenCommands;
 	  }
+
 	  if($ML_MEMBER_CHECK && 
-	     (! &ChangeMemberList('bye', $From_address, $MEMBER_LIST))) {
-	      &Logging("bye failed[$MEMBER_LIST] ($From_address)");
-	      &Sendmail($to, "Bye failed. check and try again! $ML_FN");
+	     (! &ChangeMemberList('BYE', $From_address, $MEMBER_LIST))) {
+	      &Logging("BYE failed[$MEMBER_LIST] ($From_address)");
+	      &Sendmail($to, "BYE failed. check and try again! $ML_FN");
 	      last GivenCommands;
 	  }
-	  &Logging("Bye ($From_address)");
+
+	  &Logging("BYE ($From_address)");
 	  &Sendmail($to, "Bye accepted. So Long! $ML_FN");
 	  last GivenCommands;
       }
 
+      # Special hook e.g. "# list"
+      # should be used as a ML's specific hooks
+      if(defined($COMMAND_HOOK)) {
+	  eval $COMMAND_HOOK;
+	  &Logging("COMMAND HOOK:$@") if $@;
+      }
+      
       # these below are not implemented, but implemented in hml 1.6
       # codes only for notifying the alart to the user
-      local($implementedflag) = '';
-      if(/^iam$/io)  { $implementedflag = 'off';}
-      if(/^whois$/io){ $implementedflag = 'off';}
-      if(/^who$/io)  { $implementedflag = 'off';}
-      if($implementedflag) {
+      if(/^iam$/io || /^whois$/io || /^who$/io) {
 	  &Logging("$_, ($From_address)");
-	  &SendFile($to, "Command $_ is not implemented $ML_FN", "$HELP_FILE");
+	  if(defined($USE_WHOIS)) {
+	      require 'libutils.pl';
+	      &Whois(@Fld);
+	  } else {
+	      &SendFile($to, "Command $_ is not implemented $ML_FN", "$HELP_FILE");
+	  }
 	  next GivenCommands;
       }
 
@@ -190,16 +200,11 @@ sub ChangeMemberList
     local($Status) = '';
     print STDERR "Now is $file\n" if($debug);
 
-    if($MEMBER_LIST eq $file) {
-	open(BAK, ">> $MEMBER_LIST.bak") || (&Logging("$!"), return $NULL);
+    if($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file) {
+	open(BAK, ">> $file.bak") || (&Logging("$!"), return $NULL);
 	print BAK "-----Backup on $Now-----\n";
-	open(NEW, ">  $MEMBER_LIST.tmp") || (&Logging("$!"), return $NULL);
-	open(FILE,"<  $MEMBER_LIST") || (&Logging("$!"), return $NULL);
-    }elsif($ACTIVE_LIST eq $file) {
-	open(BAK, ">> $ACTIVE_LIST.bak") || (&Logging("$!"), return $NULL);
-	print BAK "-----Backup on $Now-----\n";
-	open(NEW, ">  $ACTIVE_LIST.tmp") || (&Logging("$!"), return $NULL);
-	open(FILE,"<  $ACTIVE_LIST") || (&Logging("$!"), return $NULL);
+	open(NEW, ">  $file.tmp") || (&Logging("$!"), return $NULL);
+	open(FILE,"<  $file") || (&Logging("$!"), return $NULL);
     }else {
 	&Logging("Cannot match $file in ChangeMemberList");
 	return $NULL;
@@ -209,16 +214,16 @@ sub ChangeMemberList
 	print BAK $_;
 	chop;
 	next if (/^$/o);
-	next if (/^[ \t]+$/o);
+	next if (/^\s+$/o);
 
-	# get $addr for ^#[ \t]+$addr$. if ^#, skip process except for 'off' 
+	# get $addr for ^#\s+$addr$. if ^#, skip process except for 'off' 
 	local($addr) = '';
 	if(/^\s*(\S+)\s*.*/o)   { $addr = $1;}
-	print STDERR "address = $addr\n" if($debug);
 	if(/^\#\s*(\S+)\s*.*/o) { $addr = $1;}
-	print STDERR "address = $addr\n" if($debug);
+
 	if(! &StripFieldAndMatchCheck($addr, $Address)) {
-	    print NEW "$_\n"; next;
+	    print NEW "$_\n"; 
+	    next;
 	} 
 
 	# if matched, get $addr including mx or comments
@@ -227,16 +232,45 @@ sub ChangeMemberList
 
 	# not use "last" for the possibility the address is written double. 
 	# may not be effecient.
-	if($cmd eq 'on')  { print NEW "$addr\n"; $Status = 'done'; next;}
-	if($cmd eq 'bye') { print NEW "\#\#BYE $addr\n"; $Status = 'done'; next;}
-	if($cmd eq 'off') { print NEW "\#\t$addr\n"; $Status = 'done'; next;}
-    } # end of while loop
+	# Return to the ML
+	if($cmd eq 'ON')  { 
+	    print NEW "$addr\n"; 
+	    $Status = 'done'; 
+	    next;
+	}
 
+	# Good Bye to the ML eternally
+	if($cmd eq 'BYE') { 
+	    print NEW "\#\#BYE $addr\n"; 
+	    $Status = 'done'; 
+	    next;
+	}
+
+	# Good Bye to the ML temporarily
+	if($cmd eq 'OFF') { 
+	    print NEW "\#\t$addr\n"; 
+	    $Status = 'done'; 
+	    next;
+	}
+
+	# Matome Okuri Control
+	if($cmd eq 'MATOME') {
+	    if($addr =~ /^(.*)matome/oi) {
+		print STDERR "$1\tmatome\t$MATOME\n";
+		print NEW "$1\tmatome\t$MATOME\n" if $MATOME;  
+		print NEW "$1\n" if(0 == $MATOME);
+	    } else {
+		print NEW "$1\tmatome\t", $MATOME ? $MATOME : 3, "\n";
+		&ConfigMSendRC($Address);
+	    }
+	    $Status = 'done';	next;	    
+	}
+    } # end of while loop
+    
     close BAK, NEW, FILE;
-    if($file eq $MEMBER_LIST) {
-	rename("$MEMBER_LIST.tmp", "$MEMBER_LIST");
-    }elsif($file eq $ACTIVE_LIST) {
-	rename("$ACTIVE_LIST.tmp", "$ACTIVE_LIST");
+
+    if(($file eq $MEMBER_LIST) || ($file eq $ACTIVE_LIST)) {
+	rename("$file.tmp", $file);
     }else {
 	&Logging("Cannot rename for $file in ChangeMemberList");
 	return $NULL '';
@@ -248,7 +282,12 @@ sub ChangeMemberList
 sub StripFieldAndMatchCheck
 {
     local($_, $From_address) = @_;
-    /^[ \t]*(\S+)[ \t]*.*/o && ($_ = $1);
+    /^\s*(\S+)\s*.*/o && ($_ = $1);
+
+    # at least to lower characters. 94/07/29
+    tr/A-Z/a-z/;
+    $From_address =~ tr/A-Z/a-z/;
+
     return 'ok' if("$_" eq "$From_address");
     return $NULL;
 }
@@ -258,86 +297,43 @@ sub StripFieldAndMatchCheck
 # mget2 1-100,101,110-1000
 sub mget2 
 {
-    local($sharp, $_, $which, $SLEEPING) = @_;
-    $SLEEPING = 300 if(! $SLEEPING);
-    local($matched)  = local($USE_MGET2) = 0;
-    $filelist = "";
-    @filelist = ();
+    local($matched, $PACK_P, $FileCandidate, @FileCandidate);
+    local($sharp, $_, $which, $SLEEPING, $UNPACK) = @_;
+    $PACK_P   = 1   unless($SLEEPING =~ /^unpack$/io);
+    $PACK_P   = 0   if($UNPACK);
+    $SLEEPING = 300 unless($SLEEPING =~ /^\d+$/o);
+    $MAXFILE_ON_SHELL = 1000;      # global 
 
-    # global 
-    $MAXFILE_ON_SHELL = 1000;
+    # for security
+    &InSecureP($which) && return 0;
 
-    # check of regular expressions type, where mget or mget2? 
-    if($which =~ /\.\.\//o){ &Logging("Insecure matching:$which"); return 0;}
+    # check of regular expressions type, which of mget or mget2? 
+    # USE_MGET2 is a global for convenience(1.2.1++)
     if($which =~ /^[\d\-\,]+$/){ $USE_MGET2 = 1;}
-    local(@which)    = split(/\,/, $which, 9999);
 
     if($USE_MGET2) {		# if type mget2
-	foreach $which (@which) {
-	    print STDERR  "MGET2 >$which\n" if($debug);
-	    if($which =~ /(\d+)\-(\d+)/io) {
-		print STDERR  "MGET2>>$which\n" if($debug);
-		if(! &ExistCheck($1, $2, *filelist)) { 
+	foreach (split(/\,/, $which, 9999)) {
+	    if(/(\d+)\-(\d+)/io) {
+		&ExistCheck($1, $2, *FileCandidate) || 
 		    &Logging("mget[ver.2] scan $1 ->$2 fails");
+	    }else { push(@FileCandidate, 
+			 ($_ > $STORED_BOUNDARY) ? "spool/$_" : &ExistP($_));
 		}
-	    }else {
-		push(@filelist, $which);
-	    }
-	}
-    }else {			# old type mget
-	push(@filelist, <./spool/$which>);	
+	}# foreach ends;
+    }else {			# old type mget. Not use StoredSpool
+	push(@FileCandidate, <./spool/$which>);	
     }
 
     # if not matched, process stops.
-    if(scalar(@filelist) > $MAXFILE_ON_SHELL) {
+    if(scalar(@FileCandidate) > $MAXFILE_ON_SHELL) {
 	&Logging("mget[ver.2]: Requested number of files are exceeded!");
-	&Sendmail($to, "Sorry. the number of files given in your request\n\t\nexceed $MAXFILE_ON_SHELL\n");
+	&Sendmail($to, "Sorry. your request exceeds $MAXFILE_ON_SHELL\n");
 	return 0;
     }
 
-    # whether the requested files exist or not?
-    # a filename "spool" is different in each case.
-    if($USE_MGET2) {
-	foreach $file (@filelist) {
-	    if(-r "./spool/$file" && -w "./spool/$file")
-	    { $filelist .= " ./spool/$file"; $matched++;}
-	}# end of foreach loop
-    } else {
-	foreach $file (@filelist) {
-	    if(-r "./spool/$file" && -w "./spool/$file")
-		{ $filelist .= " $file"; $matched++;}
-	}# end of foreach loop
-    }
-
-    # debug info
-    print STDERR "MATCHED FILES>$filelist\n" if($debug);
-
-    # not matched!
-    if(0 == $matched) {	&Logging("mget[ver.2] no matched."); return 0;}
-
-    # evaluation on the shell 
-    open(BUFFER,"cd $DIR ;$TAR $filelist|$COMPRESS|$UUENCODE spool.tar.Z|");
-    open(TMPFILE, "> $DIR/mget$$") || (&Logging("$!"), return);
-    while(<BUFFER>) {
-	print TMPFILE $_;
-	$totallines++;# counting the total lines of the uuencoded;
-    }
-    close TMPFILE, BUFFER;
-
-    local($MGET_COMMAND) = "$LIBDIR/split_and_sendmail.pl";
-    $MGET_COMMAND .= " -I " . join(":",@INC);
-    $MGET_COMMAND .= " -f $DIR/mget$$ -s \'mget[$which] $ML_FN\'";
-    $MGET_COMMAND .= " -d $DIR -l $MGET_LOGFILE -t $SLEEPING -m $MAINTAINER $to";
-
-    # Pay attention! COMMAND uses Insecure mode
-    system "/bin/sh", '-c', "$MGET_COMMAND &";
-
-    return 'ok';
+    return 'ok' if 
+	&GenerateConfigAndExec($which, $SLEEPING, $PACK_P, @FileCandidate);
 }
-
-#	&Logging($errorlog);
-#	&Sendmail($to, "mget: $errorlog $ML_FN", $MailBody);
-
 
 # if ok, return 1;
 sub ExistCheck
@@ -355,7 +351,7 @@ sub ExistCheck
 
     # meaningless?
     if($left == $right) {
-	push(@filelist, $left);
+	push(@filelist, "spool/$left");
 	return 1;
     }
 
@@ -363,13 +359,12 @@ sub ExistCheck
     if($left < $right) {
 	# for too large request e.g. 1-100000
 	# This code may be not good but useful enough.
-	if(($right - $left) > $CHECK_MAXFILE && 
-	   (! -r "$SPOOL_DIR/$right")) {
+	if(($right - $left) > $CHECK_MAXFILE && (! &ExistP($right)) ) {
 	    do {
 		$right  = int($right / 2);
 		$med = int($right / 2);
 		print STDERR "$left $right\n" if($debug);
-	    }while(! -r "$SPOOL_DIR/$med");
+	    }while(! &ExistP($med));
 
 	    if($left > $right) { return 0;}	# meaningless
 	    $file = $right;
@@ -378,18 +373,143 @@ sub ExistCheck
 		$right = $file;
 		$file  = int(($right + $med) / 2);
 		print STDERR "$left $right\n" if($debug);
-	    }while(! -r "$SPOOL_DIR/$file");
+	    }while(! &ExistP($file));
 	}
 
 	if($left > $right) { return 0;}	# meaningless
 	print STDERR  "scan: $left -> $right\n" if($debug);
 
-	# store the existing files
-	for($i = $left; $i < $right + 1; $i++) { push(@filelist, $i);}
+	# store the candidates
+	for($i = $left; $i < $right + 1; $i++) { push(@filelist, "spool/$i");}
+	if(defined(@StoredSpool_DIR) && $left < ($STORED_BOUNDARY + 1)) { 
+	    push(@filelist, &Storedfilelist($left, $right));	    
+	}
 	return 1;
     }
 
     return 0;
+}
+
+sub Storedfilelist
+{
+    local($left, $right) = @_;
+    local($i) = 0;
+    local(@tmp);
+
+    while($i < ($right + 1)) {
+	local($space_op) = (int($i/100) + 1) * 100;
+	foreach $dir ("spool", @StoredSpool_DIR) {
+	    $filename = "$dir/$space_op.gz";
+	    if(-B $filename && -r _ && -o _ ) { push(@tmp, $filename);}
+	}
+	$i += 100;
+    }
+    return @tmp;
+}
+
+# Exist a file or not, a binary or not, your file? read permitted?
+sub ExistP
+{
+    local($file) = @_;		# must be a number
+    local($filename) = "spool/$file";
+
+    $BINARY_P = 0; # global binary or not variable on _(previous attached)
+
+    # plain and 400 and your file;
+    # usually return here
+    if(-T $filename && -r _ && -o _ ) {	return $filename;}
+
+    if(-B "$filename.gz" && -r _ && -o _ ) {# may be .gz?(binary);
+	$BINARY_P = 1;		# 1 is gunziped and send back
+	return "$filename.gz";
+    } 
+
+    if(defined(@StoredSpool_DIR)) {
+	local($space_op) = (int($file/100) + 1) * 100;
+	$BINARY_P = 2;		# 2 is uuencode operation
+	foreach $dir ("spool", @StoredSpool_DIR) {
+	    $filename = "$dir/$space_op.gz";
+	    if(-B $filename && -r _ && -o _ ) { return $filename;}
+	}
+    }
+
+    return 0;
+}
+
+sub InSecureP
+{
+    local($ID) = @_;
+    if($ID =~ /..\//o || $ID =~ /\`/o){ 
+	&Logging("Insecure matching: $ID  -> $`($&)$'");
+	&Sendmail($MAINTAINER, "Insecure $ID from $From_address. $ML_FN");
+	return 1;
+    }
+}
+
+sub ConfigMSendRC
+{
+    local($Address) = @_;
+    local($ID);
+
+    if(open(IDINC, "< $SEQUENCE_FILE")){
+	$ID = <IDINC>; $ID++; close(IDINC);
+    } else { &Logging("Cannot open $SEQUENCE_FILE");}
+
+    if(open(TMP, ">> $MSEND_RC") ) {
+	print TMP "$Address\t$ID\n";
+	close TMP;
+    } else { &Logging("Cannot open $MSEND_RC");}
+}
+
+# Generate Msend controling file and exec the SendFile with the config file.
+sub GenerateConfigAndExec
+{
+    local($which, $SLEEPING, $PACK_P, @FileCandidate) = @_;
+    local(@filelist, $PREV);
+
+    # whether the requested files exist or not?
+    # if with unpack option, select only plain text files. 
+    foreach (sort @FileCandidate) { # require 400, your own
+	next if($PREV eq $_);	# uniq emulation
+	($PACK_P && -r $_ && -o _ ) && push(@filelist, $_) && $matched++;
+	((! $PACK_P) && -r $_ && -o _ && -T _) 
+	    && push(@filelist, $_) && $matched++;
+	((! $PACK_P) && -r $_ && -o _ && -B _) 
+	    && push(@filelistB, $_) && $matched++;
+	$PREV = $_;
+    }
+    
+    # Check and Log: not matched!
+    print STDERR "MATCHED FILES>",join(" ",@filelist),"\n" if($debug);
+    if(0 == $matched) {	&Logging("mget[ver.2] no matched files."); return 0;}
+
+    # The Called Command
+    local($MGET_CONFIG)  = "$DIR/mget$$.config ";
+    local($MGET_COMMAND) = "$LIBDIR/SendFile.pl $MGET_CONFIG $DIR/config.ph";
+
+    # Make a Config file
+    open(CONFIG, "> $MGET_CONFIG") || (&Logging("$!"), return 0);
+    print CONFIG 
+	"CONFIG:$MGET_CONFIG\n", 
+	"PACK:$PACK_P\n",
+	"INCLUDE:". join("\nINCLUDE:", @INC).   "\n",
+	"FILE:".    join("\nFILE:", @filelist). "\n",
+	"FILEB:".   join("\nFILEB:", @filelistB). "\n",
+	"DIR:$DIR\n",  
+	"PID:$$\n",  
+	"SUBJECT:mget v2 [$which]\n",
+	"LOGFILE:$MGET_LOGFILE\n",  
+	"SLEEP:$SLEEPING\n",
+	"MAINTAINER:$MAINTAINER\n", 
+	"TO:$to\n";
+    print CONFIG "DEBUG:\n" if $debug;
+    close(CONFIG);
+
+    # Pay attention! COMMAND uses Insecure mode
+    system "sh", '-c', "$MGET_COMMAND &" || do {
+	&Logging("System:$?:$!"); return 0;};
+
+    return 'ok';
 }
 
 1;
