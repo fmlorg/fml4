@@ -370,6 +370,7 @@ sub SetDefaults
 	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
 	 'XRef', 'X-Stardate', 'X-ML-Info', 
 	 'X-Mailer',
+	 'Mail-Followup-To',	# I-D now?
 	 ':body:', ':any:', 
 	 'X-Authentication-Warning',
 	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
@@ -1074,6 +1075,9 @@ sub RuleSetTo
 sub Conv2mailbox
 {
     local($mb, *e) = @_;	# original string
+
+    # return NULL if addr does not contain @. ?
+    # return $NULL unless $mb =~ /\@/;
 
     # $mb = &Strip822Comments($mb);
 
@@ -2021,7 +2025,24 @@ sub LogFileNewSyslog
 
 ####### Section: Security 
 # anyway alias now (1998/05/03)
-sub MailLoopP { &DupMessageIdP;}
+# If sent back directly, X-ML-Info: exists and must contains e.g. $MAIL_LIST .
+sub MailLoopP
+{
+    if ($Envelope{'h:x-ml-info:'}) {
+	if ($Envelope{'h:x-ml-info:'} =~ /$MAINTAINER/i ||
+	    $Envelope{'h:x-ml-info:'} =~ /$MAIL_LIST/i ||
+	    $Envelope{'h:x-ml-info:'} =~ /$CONTROL_ADDRESS/i) {
+	    &Log("Loop Alert: dup X-ML-Info:");
+	    &Warn("Loop Alert: dup X-ML-Info: $ML_FN", 
+		  "fml <$MAIL_LIST> has detected a loop condition so that\n"
+		  ."input mail has already our ML X-ML-Info: field.\n\n"
+		  .&WholeMail);
+	    return 1;
+	}
+    }
+    
+    &DupMessageIdP;
+}
 
 # If O.K., record the Message-Id to the file $LOG_MESSAGE_ID);
 # message-id cache should be done for mails in action
