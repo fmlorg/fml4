@@ -14,6 +14,12 @@ Exim is almost compatible with sendmail, so see INSTALL for installation.
 You can use the same samples as sendmail with exim.  
 However don't forget the following configuratino change.
 
+0. exim.confで受けとるべきドメインを記述するのを忘れずに
+   local_domain
+=E
+0. accept your domain (including virtual domain) :) in exim.conf
+
+
 1. fmlはSMTPでMTAと通信するのでリレーの許可を出して下さい。
    つまりlocalhostからのリレーを許可するように変更を加えて下さい。 
 =#
@@ -27,6 +33,29 @@ However don't forget the following configuratino change.
 
    sender_host_accept_relay = localhost
    # sender_host_reject_relay = *
+
+
+.appendix
+.C	Virtual domain
+
+.S	設定例
+=E.S	Example
+
+fml-support: 06305
+
+Exim 3.02
+
+virtual:
+  driver = aliasfile
+  domains = "dbm;/etc/exim/domains"
+  no_more
+  file = /etc/exim/$domain
+  search_type = lsearch
+  file_transport = address_file
+  pipe_transport = address_pipe
+  user = fml
+
+end
 
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
