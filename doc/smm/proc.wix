@@ -6,6 +6,158 @@
 help ファイルを見て下さい:-)
 
 
+
+
+.S	ＭＬで使えるコマンドを増やすor減らす
+.l	add-procedures
+.xref	add-admin-procedures
+
+config.ph でコントロールできます。
+いくつかの変数がありますが、次のように作動します
+
+   1	@PermitProcedure が定義してあるなら
+	@PermitProcedure で許しているコマンドだけを設定します。
+	もし、定義されていなければデフォールトのすべてのコマンドが
+	利用可能になります。
+	これらの設定はグローバル変数の %Procedure に定義されます。
+
+   2	%LocalProcedure が定義されているなら
+	1 で定義された %Procedure を %LocalProcedure で上書きします。
+
+   3	@DenyProcedure が定義されているなら
+	@DenyProcedure のコマンドだけを使えなくする
+
+例：
+	○ guide と summary のみを使用可能、それ以外はすべて使用不可
+
+	@PermitProcedure = ('guide', 'summary');
+
+	○デフォールトに加え自分で定義した hack コマンドも使える
+
+	%LocalProcedure = ('hack', 'ProcHack');
+
+	もちろんこの場合はどこかで sub ProcHack { ...; } があって
+	この関数を用意しておく必要がある。
+
+	○デフォールトの中で get 関係は使えなくする
+	@DenyProcedure = ('get', 'send', 'mget', 'msend');
+
+
+.S	コマンドの # syntax は必要か？ 
+.k	# コマンド シンタックス
+
+配送とコマンドが同じアドレスなら動作を切替えるためのキーワードが必要で
+す。それが # syntax です。
+
+makefml が作る listname-ctl アドレスはコマンド専用なので要りません。
+もちろんあっても # 部分は勝手に解釈するのでどっちでも構いません。
+
+“コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
+もし、コマンド専用のアドレスで
+
+	# get 1
+		も
+	get 1
+
+同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
+
+	config.ph に $COMMAND_ONLY_SERVER = 1;
+
+
+.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
+.k	# help ではなく #help 形式
+
+以下は コマンドの書き方についてのオプションです。
+
+	# get 1
+	# help
+
+のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
+たので、今度は
+
+	# get 1 と #get 1は同じものとみなす（両方使える）
+	すべてのコマンドで同じように "# " -> "#" 解釈する。
+	さらに#getfile ...も# get ...と理解する。
+
+としました。つまり、
+
+	# get 1
+	#get 1
+	# getfile 1
+	#getfile 1
+
+は同じもの。同様に
+
+	# help
+	#help
+
+を同じものにみなします。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+
+両方解釈するなら１、"# summary" みたいな形式だけなら０
+
+
+.S	コマンドは一辺に実行できるか？
+
+例えば
+
+	# get 1
+	# get 2
+	# get 3
+	# help
+	# summary
+
+という内容のメールをＭＬサーバへ入れると
+
+1、 2、 3 の記事を取り寄せ、ヘルプとさらにサマリファイルも取り寄せると
+いう働きをします。bye を除き 一行一コマンドずつ順番にすべて実行します。
+
+それは各行ごとにどんどん処理をするようになっているからです。
+＃ ただし # exit はコマンドの終りです。ここで exit == end == quit
+
+
+しかしながら
+
+	uja
+	# get 1
+	# get 2
+
+というメールの内容とエラーです。というのは、最初の３行のどこかで#では
+じまる行があればコマンドモードとみなして処理を行なうためです。
+
+最初の行は空行で２行目に#があるメールが、間違えて流れたりしないための
+防止機構です。この“３”行の“３”を変えたいときは config.ph の中の
+
+	$COMMAND_CHECK_LIMIT = 3;
+
+を変えます（最初の３行をチェックする）。
+
+
+.S	間違ったコマンドを送ってきた人への警告
+.k	USE_WARNING 
+
+デフォールトでは警告しません。
+
+	$USE_WARNING = 1; 
+
+でない限り、間違ったコマンドへの警告メールをだすことはありません。
+これは signature を自動的に付ける設定をしている場合への対処です。
+# exit 等で明示的にコマンド指定を終わらせるのが良いでしょう。
+
+
+.S	コマンドの終り(シグニチャア対策)
+.key	signature 対策
+
+	# exit 
+	# end
+	# quit
+
+というコマンドを追加しました。このコマンドのところでアクションは終了し
+ます。signature があってもいいように、こうしました。
+
+
 .S	library コマンド
 .l	library
 .k	library コマンド
@@ -52,7 +204,9 @@ $DIR の代わりに対応するものとして
 .k	$INDEX_SHOW_DIRNAME
 .k	$INDEX_FILE 
 
-取り寄せられるファイルの一覧を返します。
+取り寄せられるファイルの一覧を返します。もし $DIR/index ($INDEX_FILE) 
+が存在する場合はそれを使います。そうでない場合は$SPOOL_DIR
+@ARCHIVE_DIR の内容を調べて返します。
 
 $INDEX_SHOW_DIRNAME がセットされている時は ($DIR からの相対的な)
 directory 階層も表示します。デフォールトではファイル名とそのサイズだけ
@@ -61,7 +215,11 @@ directory 階層も表示します。デフォールトではファイル名とそのサイズだけ
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
