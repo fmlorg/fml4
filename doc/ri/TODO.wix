@@ -1,6 +1,4 @@
-		TODO forward 2.3 (after fml 2.2.1 release)
-=E
-		TODO リスト (after fml 2.2.1 release)
+		TODO List torward 3.0 (after fml 2.2.1 release)
 
 				Ken'ichi Fukamachi
 
@@ -376,7 +374,7 @@ MANY MANY "; post only (only members can post)"  ...
 	Sendmail()
 	WholeMail()
 	Forw()
-	&Warn() 
+	Warn() 
 
 
 .C	日本特有の問題
@@ -387,6 +385,8 @@ MANY MANY "; post only (only members can post)"  ...
 
 fml-support: 06265
 半角カナは勝手に全角カナに、機種依存文字は似た文字に
+
+言語依存 repository は必要か？
 
 
 
