@@ -10,11 +10,6 @@ sub myGenConfirmReplySubject
 	&Log("GenConfirmReplySubject<$c[2]>: $mode") if $mode ne 'Default';
     }
 
-    # extensions for confirmd
-    if ($CONFIRM_REPLAY_SUBJECT_FUNCTION) {
-	return &$CONFIRM_REPLAY_SUBJECT_FUNCTION(@_);
-    }
-
     if ($mode eq 'Default') {
 	$s = "Subscribe request result $ML_FN";
     }
