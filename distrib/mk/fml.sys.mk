@@ -14,19 +14,21 @@ DIST_DIR     = $(FML)/distrib
 DIST_BIN     = $(DIST_DIR)/bin
 DIST_DOC_BIN = $(DIST_DIR)/doc/bin
 
+COMPILE_DIR  = $(DIST_DIR)/compile
+
 
 ### exports  ###
 FTP_DIR      = $(DESTDIR)/exports/ftp
 SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 
-WWW          = $(DESTDIR)/exports/www
-WWW_DIR      = $(WWW)
+WWW          = ${DESTDIR}/exports/www
+WWW_DIR      = ${WWW}
 
-TMP_DIR         = $(FML)/tmp
-VAR_DIR         = $(FML)/var
-WORK_DOC_DIR    = $(VAR_DIR)/doc
-WORK_HTML_DIR   = $(VAR_DIR)/html
-WORK_DRAFTS_DIR = $(WORK_DOC_DIR)/drafts
+TMP_DIR         = ${FML}/tmp
+VAR_DIR         = ${FML}/var
+WORK_DOC_DIR    = ${VAR_DIR}/doc
+WORK_HTML_DIR   = ${VAR_DIR}/html
+WORK_DRAFTS_DIR = ${WORK_DOC_DIR}/drafts
 
 
 ######################################################################
@@ -35,7 +37,7 @@ WORK_DRAFTS_DIR = $(WORK_DOC_DIR)/drafts
 ###
 __ALL__  = $(DESTDIR) $(FTP_DIR) $(SNAPSHOT_DIR) $(WWW_DIR)
 __ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_HTML_DIR) $(WORK_DRAFTS_DIR)
-__ALL__ += $(TMP_DIR)
+__ALL__ += $(TMP_DIR) $(COMPILE_DIR)
 
 .for dir in ${__ALL__}
 .PHONY: ${dir}
