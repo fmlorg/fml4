@@ -1,0 +1,24 @@
+directory which has original distributions.
+
+------------------------------------------------------
+* fml imports as standard distribution 
+
+multipart-filter	bin/multipart.pl
+			1.3.1.2
+
+libtraffic		proc/libtraffic.pl
+			1.2
+
+jcode			proc/jcode.pl
+			- famous jcode.pl by Utashiro Kazumasa
+			2.11
+
+------------------------------------------------------
+* import distribution for developpers
+
+devel/			development tools
+
+devel/p5-MD5		md5.pm perl module
+			1.7
+
+$Id: README,v 1.2 2000/01/05 04:57:44 fukachan Exp $

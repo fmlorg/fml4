@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+# Copyright (C) 1993-94 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
+#
+# rmime: MIME-header decoder Ver.1.11a
+#   メッセージヘッダ中（先頭から最初の空行まで）に含まれる encoded-word
+#   （"=?ISO2022-JP?B?" と "?=" に囲まれた文字列）をサーチしてデコード
+#   する。encoded-word にはさまれた空白は全て除去する。オプションスイッ
+#   チを指定することにより MIME 梱包を解いた部分の漢字コードを 7bit JIS
+#   から Shift-JIS または EUC に変換することができる。
+#
+# 入力漢字コードは固定(7bit JIS)ですが、出力漢字コードは指定できます。
+# なお、出力漢字コードのデフォルトは 7bit JIS（透過）です。
+#
+# 使い方 : [ [j]perl ] rmime [ -s|-e|-j ] [ ファイル名 ...]
+#
+#         mimer.pl は、環境変数 HOME→rmimeと同じ→通常の@INC の順にサ
+#         ーチされます。
+#
+# 注意 : rmimeをjperl（の2バイト文字対応モード）で使用するときは、tr///
+#        の書き方が異なりますので、必要に応じて mimer.pl 中の 'sub j2e'
+#        のコメント(#)を付け替えてください。jperl1.4以上を -Llatin オプ
+#        ション付きで使用する場合およびEUC変換機能を使わない場合はその必
+#        要はありません。
+#
+# 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。
+
+$home = $ENV{'HOME'};
+$perl_dir = $0;
+$perl_dir =~ s/\\/\//g;
+substr($perl_dir, rindex($perl_dir, "/")) = '';
+unshift(@INC, $home, $perl_dir);
+require 'mimer.pl';
+
+## オプションスイッチ判断のためのテーブル
+%kanjicode = ( "-e", "EUC", "-s", "SJIS", "-E", "EUC", "-S", "SJIS" );
+
+## 出力漢字コードの設定 (UNDEF は 7bit JIS)
+shift if ( $ARGV[0] =~ /^-[esj]$/i );
+$kout = $kanjicode{$&};
+
+## メッセージヘッダの処理
+$/ = "\n\n";
+$* = 1;
+$_ = <>;
+print &mimedecode($_,$kout);
+
+## メッセージボディの処理
+$/ = "\n";
+while (<>){
+    print;
+}

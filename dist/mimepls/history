@@ -1,0 +1,69 @@
+<<history>>                                                1997.12.30
+
+Ver.2.01 → Ver.2.02 :
+
+(1) mimer.plとmimew.plにバージョンを表わす変数 $main'mimer_version
+    と$main'mimew_versionをそれぞれ追加した。
+(2) ドキュメント(mime_pls.doc)を大幅に見直した。
+(3) HTML形式のドキュメントをパッケージに添付した。
+
+Ver.2.00alpha → Ver.2.01 :
+
+(1) MIME Quoted-Printableのbody encode/decode機能を追加した。
+    具体的には、mimer.plに&qpdecode関数を追加して&bodydecode関数
+    から呼ばれるようにした。また、mimew.plに&qpencode関数と&qphex
+    関数を追加し、&bodyencode関数および&benflush関数から呼ばれる
+    ようにした。
+    これに伴い、&bodydecode関数、&bdeflush関数、&bodyencode関数、
+    &benflush関数がBase64とQuoted-Printableの両方に対応したので、
+    それぞれエンコード形式を表わす引数を追加した。
+(2) rbody,wbodyプログラム(Ver.0.02)をQuoted-Printable対応にした。
+
+
+Ver.1.11a → Ver.2.00alpha :
+
+(1) MIME Base64のbody encode/decode機能を追加した。具体的には、
+    mimer.plに&bodydecode関数と&bdeflush 関数を、mimew.plに
+    &bodyencode関数と&benflush関数を追加した。
+(2) ライブラリの使用例として、rbody,wbodyプログラム(Ver.0.01)を
+    添付した。
+
+
+Ver.1.11 → Ver.1.11a :
+
+(1) wmimeで、Mime-Version:ヘッダとContent-Type:ヘッダを付加する
+    機能をオプションとした。(デフォルトでは付加しない。)
+(2) インストールとアーカイブ作成用のMakefileを添付した。
+
+
+Ver.1.10 → Ver.1.11 :
+
+(1) 行の先頭に長い日本語文字列があるときに分割エンコードされないバグ
+    を修正した。(mimew.pl)
+(2) ISO-2022-JPのエスケープシーケンスの扱いを変更した。
+    ・デコードしたあと、不必要なエスケープシーケンスを削除するように
+    　した。(mimer.pl)
+    ・エンコードする前に、不必要なエスケープシーケンスを除去するよう
+    　にした。Ver.1.10では(不要な)エスケープシーケンスのところで分割
+      エンコードしていたが、Ver.1.11では行の長さだけを考慮して分割する
+      ようになった。(mimew.pl)
+(3) rmime,wmimeで、メッセージ本文が大きいと大量のメモリが必要になる
+    (と思った)ので小メモリマシンでも実行できるように修正した。
+
+
+Ver.1.00 → Ver.1.10 :
+
+(1) ISO-2022-JPのエスケープシーケンスの扱いを変更した。
+   ・無駄なエスケープシーケンスが入っていても正常に扱えるようにした。
+   　(２バイトモード中でのESC-$-Bなど)
+   ・エスケープシーケンスが連続している場合は最後のものだけを残して
+   　残りを削除するようにした。
+(2) RFC1522の仕様に完全対応した。(…と思う)
+   ・エンコード時に、長い日本語文字列は分割してエンコードするように
+   　した。また、長い行はencoded-wordの前後で折り返し(行分割)処理を
+     するようにした。
+   ・デコード時には、encoded-wordにはさまれたLWS(ここでは、スペース、
+   　タブ、折り返し[改行+(スペースまたはタブ)]を指す)を除去するよう
+     にした。
+(3) ライブラリの使用例として、rmimeとwmimeの新版を添付した。
+(4) JISコードからSJISコードに変換する部分のバグを修正した。

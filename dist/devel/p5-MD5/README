@@ -1,0 +1,42 @@
+MD5 Extension Version 1.7
+
+This is a Perl5 extension interface to the RSA Data Security Inc. MD5
+Message Digest algorithm. Documentation is in MD5.pod.
+
+To build the extension, unpack this distribution under the ext/
+directory of your Perl source distribution, create the Makefile using
+'perl Makefile.PL' and do a 'make'.
+
+Note that the MD5.xs file uses the "PROTOTYPES: DISABLE" facility
+which only became available in late betas pf perl 5.002. If you are
+using a version which does not support this then merely remove
+this line.
+
+The mddriver.pl script gives a simple example of how to use the
+routines. In particular 'perl mddriver.pl -x' will perform a quick
+test of the routines to see if they produce the expected output. The
+use of "make test" will perform a more comprehensive test. (WARNING:
+You should not run mddriver.pl directly in the MD5 directory when using
+dynamic linking as on some systems it will dynamically link to object
+files in the current directory which may not give the correct
+behaviour. This is believed to affect at least AIX and IRIX. A similar
+caveat applies to the direct use of the test.pl script).
+
+The module is known to work (using static or dynamic linking) on at
+least AIX, Solaris, HP-UX and IRIX. It should work on other
+"reasonable" UNIX-like platforms (for an unspecified definition of the
+word "reasonable" :-)
+
+Support is also provided for 64-bit platforms. This should be detected
+and handled automatically. See the entry for version 1.7 in the
+Changes file for further details.
+
+Bugs, queries, plaudits to
+
+	Neil Winton
+
+*   Neil Winton			Post Point P5		*
+*   N.Winton@axion.bt.co.uk	BT Laboratories		*
+*   Tel +44 1473 646079		Martlesham Heath	*
+*   Fax +44 1473 643306		IPSWICH IP5 7RE, UK	*
+

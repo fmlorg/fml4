@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+##!/usr/bin/jperl -Llatin
+
+# Copyright (C) 1993-94 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
+#
+# wmime: MIME-header encoder Ver.1.11a
+#   メッセージヘッダ中（先頭から最初の空行まで）に含まれる漢字の部分を
+#   ISO-2022-JP(7bit JIS)に変換し MIME エンコードする。
+#   また、Mime-Version: とContent-Type: の２つのフィールドがヘッダ部に
+#   含まれなければメッセージヘッダの最後に以下の対応するフィールドを追
+#   加する。（$add_headers が 1 のとき）
+
+$mime_ver = "Mime-Version: 1.0\n";
+$con_type = "Content-Type: text/plain; charset=iso-2022-jp\n";
+$add_headers = 0;
+
+# 使い方 : [ perl ] wmime [ ファイル名 ...]
+#
+#         mimew.pl は、環境変数 HOME→wmimeと同じ→通常の@INC の順にサ
+#         ーチされます。
+#
+# 注意 : wmimeをjperl（の2バイト文字対応モード）で使用すると、SJISとEUC
+#        をうまく7bit JIS(ISO-2022-JP)に変換できません。
+#        入力に含まれる文字が7bit JIS(ISO-2022-JP)とASCIIのみであること
+#        が保証されている場合を除き、必ずoriginalの英語版のperl（または
+#        jperl1.4以上を -Llatin オプション付き）で動かしてください。
+#
+# 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。
+
+$home = $ENV{'HOME'};
+$perl_dir = $0;
+$perl_dir =~ s/\\/\//g;
+substr($perl_dir, rindex($perl_dir, "/")) = '';
+unshift(@INC, $home, $perl_dir);
+require 'mimew.pl';
+
+## `MIME-Version:'と`Content-Type:' にマッチするパターン
+$match_mime_ver = '^mime-version:';
+$match_con_type = '^content-type:';
+
+## メッセージヘッダの処理
+$/ = "\n\n";
+$* = 1;
+$_ = <>;
+$_ = &mimeencode($_);
+
+if (/\n\n$/){
+    chop; print;
+    if ($add_headers){
+        if (!/$match_mime_ver/io){
+            print $mime_ver;
+        }
+        if (!/$match_con_type/io){
+            print $con_type;
+        }
+    }
+    print "\n";
+
+## メッセージボディの処理
+    $/ = "\n";
+    while (<>){
+        print;
+    }
+}else{
+    print if ($_);
+}
