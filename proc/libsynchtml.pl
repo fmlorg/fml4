@@ -847,11 +847,12 @@ sub Append2Cache
 
     $title =~ s/\n/ /g;
 
-    # XXX
-    &Append2("      <LI><A HREF=\"$file.html\">$title</A></LI>", $HtmlDataCache);
+    # XXX (old in 2.x)
+    # &Append2("      <LI><A HREF=\"$file.html\">$title</A></LI>", $HtmlDataCache);
     
-    # XXX (how to rewrite): is this correct???
-    # &Append2("      <LI><A HREF=\"$file.html\">$file.html</A> $title</LI>", $HtmlDataCache);
+    # XXX (how to rewrite): is this correct??? (new in 3.0)
+    # fml-support: 6462 6464 6465
+    &Append2("      <LI><A HREF=\"$file.html\">Article $file</A> $title</LI>", $HtmlDataCache);
 
     if ($HTML_THREAD) { &MakeThreadData($dir, $file, *e);}
 }
