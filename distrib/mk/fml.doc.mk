@@ -26,13 +26,15 @@ HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 .include "doc/advisories/Makefile"
 
 # doc/examples
-.include "doc/examples/Makefile"
-.include "doc/examples/filter/Makefile"
-.include "doc/examples/tips/Makefile"
-.include "doc/examples/header/Makefile"
-.include "doc/examples/body/Makefile"
-.include "doc/examples/manual/Makefile"
-.include "doc/examples/virtual/Makefile"
+# .include "doc/examples/Makefile"
+# .include "doc/examples/filter/Makefile"
+# .include "doc/examples/tips/Makefile"
+# .include "doc/examples/header/Makefile"
+# .include "doc/examples/body/Makefile"
+# .include "doc/examples/manual/Makefile"
+# .include "doc/examples/virtual/Makefile"
+
+# doc/devel/
 .include "doc/devel/Makefile"
 
 # doc/Japanese
