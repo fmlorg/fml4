@@ -74,7 +74,7 @@ sub Crypt
 
     # if DES function is not given
     # fml-support: 03447 oota@pes.com1.fc.nec.co.jp
-    &SRand();
+    &__SRand() unless defined &SRand;
     if ($CPU_TYPE_MANUFACTURER_OS =~ /freebsd/i &&
 	!&TraditionalCryptP) {
         if (! $salt) {
@@ -87,6 +87,15 @@ sub Crypt
     # crypt
     crypt($passwd, $salt);
 }
+
+
+sub __SRand
+{
+    local($i) = time;
+    $i = (($i & 0xff) << 8) | (($i >> 8) & 0xff) | 1;
+    srand($i + $$); 
+}
+
 
 sub TraditionalCryptP
 {
