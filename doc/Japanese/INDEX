@@ -1,7 +1,15 @@
 # .part はパートのはじまり宣言
 # # はコメント
 #
-
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+	<HTML>
+	<HEAD>
+	<TITLE>
+	"fml" tutorial (Japanese)
+	</TITLE>
+	<META http-equiv="Content-Type"
+		content="text/html; charset=ISO-2022-JP">
+	</HEAD>
 	<BODY BGCOLOR="#E6E6FA">
 	<CENTER><B>
 	fml チュートリアル
@@ -41,6 +49,8 @@ references		文献など
 .part 開発者向け(旧 doc/smm/ 相当か?)
 internals		内部構造や実装の理屈についてなど
 
+	</HTML>
+	</BODY>
 #
 # $Id$
 #
