@@ -1,24 +1,42 @@
 package MIME;
 # Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
 #
-# mimew.pl: MIME-header encoder library Ver.1.11a ('94/07/24)
+# mimew.pl: MIME base64 encoder library Ver.2.00alpha ('94/08/27)
 #
-# インストール : @INC のディレクトリ（通常は /usr/local/lib/perl）に
-#                コピーして下さい。
+# インストール : @INC のディレクトリ（通常は /usr/local/lib/perl）にコピー
+#                して下さい。
 #
-# 使用例 : require 'mimew.pl';
-#          $from = 'From: Noboru Ikuta / 生田 昇 <ikuta@crc.co.jp>';
-#          print &mimeencode($from);
+# 使用例1 : require 'mimew.pl';
+#           $from = 'From: Noboru Ikuta / 生田 昇 <ikuta@crc.co.jp>';
+#           print &mimeencode($from);
 #
-# mimeencode:
+# 使用例2 : # UNIX の場合
+#           require 'mimew.pl';
+#           undef $/;
+#           $body = <>;
+#           print &bodyencode($body);
+#           print &benflush;
+#
+# &bodyencode:
+#   任意のデータ列を MIME base64 エンコードする。$foldcol*3/4 バイト単位で
+#   変換するので、渡されたデータのうち半端な部分はバッファに保存され次に呼
+#   ばれたときに処理される。最後にバッファに残ったデータは &benflush を呼ぶ
+#   ことにより処理されバッファからクリアされる。
+#
+# &benflush:
+#   &bodyencode が処理し残したデータを処理し pad文字を出力する。一つのデー
+#   タを（１回または何回かに分けて）&bodyencode した後に必ず１回呼ぶ必要が
+#   ある。
+#
+# &mimeencode:
 #   漢字の部分を7bit JIS(ISO-2022-JP)に変換しMIME(Part2)エンコードする。
 #   必要に応じてencoded-wordの分割とencoded-wordの前後での行分割を行う。
 #
-#   漢字コードの自動判断は、1行にSJISとEUCが混在している場合を除いて漢
-#   字コードの混在にも対応しています。SJISかEUCかどうしても判断できな
-#   いときは $often_use_kanji に設定されている漢字コードとみなします。
-#   ISO-2022-JP(JIS漢字)のエスケープシーケンスは $jis_in と $jis_out に
-#   設定することにより変更可能です。
+#   漢字コードの自動判断は、1行にSJISとEUCが混在している場合を除いて漢字コ
+#   ードの混在にも対応しています。SJISかEUCかどうしても判断できないときは 
+#   $often_use_kanji に設定されている漢字コードとみなします。
+#   ISO-2022-JP(JIS漢字)のエスケープシーケンスは $jis_in と $jis_out に設
+#   定することにより変更可能です。
 
 $often_use_kanji = 'EUC'; # or 'SJIS'
 
@@ -28,10 +46,10 @@ $jis_out = "\x1b\(B"; # ESC-(-B ( or ESC-(-J )
 # 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。改変して
 #            配布する場合は、オリジナルと異なることを明記し、オリジナル
 #            のバージョンナンバーに改変版バージョンナンバーを付加した形
-#            例えば Ver.1.11a-XXXX のようなバージョンナンバーを付けて下
+#            例えば Ver.2.00-XXXXX のようなバージョンナンバーを付けて下
 #            さい。なお、Copyright 表示は変更しないでください。
 #
-# 注意 : mimeencodeをjperl（の2バイト文字対応モード）で使用すると、SJIS
+# 注意 : &mimeencodeをjperl（の2バイト文字対応モード）で使用すると、SJIS
 #        とEUCをうまく7bit JIS(ISO-2022-JP)に変換できません。
 #        入力に含まれる文字が7bit JIS(ISO-2022-JP)とASCIIのみであること
 #        が保証されている場合を除き、必ずoriginalの英語版のperl（または
@@ -66,7 +84,12 @@ $jis_out = "\x1b\(B"; # ESC-(-B ( or ESC-(-J )
 28,58, 30,58, 32,62, 34,66, 36,66,
 38,70, 40,74, 42,74,
 );
-$limit=74; ## ＊注意＊ $limit を 75 より大きい数字に設定してはいけない。
+
+## ヘッダエンコード時の行の長さの制限
+$limit=74; ## ＊注意＊ $limitを75より大きい数字に設定してはいけない。
+
+## ボディエンコード時の行の長さの制限
+$foldcol=72; ## ＊注意＊ $foldcolは76以下の4の倍数に設定すること。
 
 ## null bitの挿入と pad文字の挿入のためのテーブル
 @zero = ( "", "00000", "0000", "000", "00", "0" );
@@ -82,7 +105,13 @@ $match_euc  = '([\xa1-\xfe]{2})+';
 $mime_head = '=?ISO-2022-JP?B?';
 $mime_tail = '?=';
 
-## mimeencode interface ##
+## &bodyencode が使う処理残しデータ用バッファ
+$benbuf = "";
+
+## &bodyencode の処理単位（バイト）
+$bensize = int($foldcol/4)*3;
+
+## &mimeencode interface ##
 sub main'mimeencode {
     local($_) = @_;
     s/$match_jis/$jis_in$1/go;
@@ -97,7 +126,29 @@ sub main'mimeencode {
     $_;
 }
 
-## MIME エンコーディング
+## &bodyencode interface ##
+sub main'bodyencode {
+    local($_) = @_;
+    $_ = $benbuf . $_;
+    local($cut) = int((length)/$bensize)*$bensize;
+    $benbuf = substr($_, $cut+$[);
+    $_ = substr($_, $[, $cut);
+    $_ = &base64encode($_);
+    s/.{$foldcol}/$&\n/g;
+    $_;
+}
+
+## &benflush interface ##
+sub main'benflush {
+    local($ret) = "";
+    if ($benbuf ne ""){
+        $ret = &base64encode($benbuf) . "\n";
+        $benbuf = "";
+    }
+    $ret;
+}
+
+## MIME ヘッダエンコーディング
 sub mimeencode {
     local($_, $befor, $after) = @_;
     local($back, $forw, $blen, $len, $flen, $str);
@@ -119,10 +170,7 @@ sub mimeencode {
         }
         if ($len >= 5){
             $str = substr($_, 0, $len).$jis_out;
-            $str = unpack("B".((length($str))<<3), $str);
-            $str .= $zero[(length($str))%6];
-            $str =~ s/.{6}/$mime{$&}/go;
-            $str .= $pad[(length($str))%4];
+            $str = &base64encode($str);
             $str = $mime_head.$str.$mime_tail;
             $back.$str."\n ".$jis_in.substr($_, $len);
         }else{
@@ -130,10 +178,7 @@ sub mimeencode {
         }
     }else{
         $_ .= $jis_out;
-        $_ = unpack("B".((length)<<3), $_);
-        $_ .= $zero[(length)%6];
-        s/.{6}/$mime{$&}/go;
-        $_ .= $pad[(length)%4];
+        $_ = &base64encode($_);
         $_ = $back.$mime_head.$_.$mime_tail;
         if ($blen + (length) + $flen > $limit){
             $_."\n ";
@@ -141,6 +186,15 @@ sub mimeencode {
             $_.$forw;
         }
     }
+}
+
+## MIME base64 エンコーディング
+sub base64encode {
+    local($_) = @_;
+    $_ = unpack("B".((length)<<3), $_);
+    $_ .= $zero[(length)%6];
+    s/.{6}/$mime{$&}/go;
+    $_.$pad[(length)%4];
 }
 
 ## Shift-JIS と EUC のどちらの漢字コードが含まれるかをチェック

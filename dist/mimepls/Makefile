@@ -3,10 +3,10 @@ INSTALL_DIR = /usr/local
 LIB_DIR = $(INSTALL_DIR)/lib/perl
 BIN_DIR = $(INSTALL_DIR)/bin
 
-APPLICATION = rmime wmime
+APPLICATION = rmime wmime rbody wbody
 LIBRARY = mimer.pl mimew.pl
 DOCUMENT = mime_pls.doc history Makefile
-ARCHIVE = mime_pls
+ARCHIVE = mime_pls-2.00alpha
 SUF = gz
 TAR = tar
 COMPRESS = gzip

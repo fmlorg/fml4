@@ -1,4 +1,13 @@
-<<history>>                                                1994.7.24
+<<history>>                                                1994.8.28
+
+Ver.1.11a → Ver.2.00alpha :
+
+(1) MIME base64 の body encode/decode 機能を追加した。具体的には、
+    mimer.pl に &bodydecode 関数と &bdeflush 関数を、mimew.pl に
+    &bodyencode 関数と &benflush 関数を追加した。
+(2) ライブラリの使用例として、rbody, wbody プログラム(Ver.0.01)を
+    添付した。
+
 
 Ver.1.11 → Ver.1.11a :
 

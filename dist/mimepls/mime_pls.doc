@@ -1,12 +1,21 @@
-<mime_pls.doc>                                               94/07/24
-      《perl library 版 MIME-header encoder/decoder について》
+<mime_pls.doc>                                               94/08/30
+       《perl library 版 MIME base64 encoder/decoder について》
 
-  メッセージヘッダフィールド中の日本語文字列を MIME encode/decodeする
-ための perl library です。perl のスクリプト中で、require することによ
-り、&mimeencode と &mimedecode の２つの関数が使えるようになります。
+  MIME base64 encode/decode するための perl library です。メッセージヘ
+ッダフィールド中の MIME(part 2) は ISO-2022-JP の base64 encode/decode
+のみをサポートします。EUC/SJIS の日本語文字列は ISO-2022-JP への自動変
+換を行うことにより MIME(part 2) encode/decode の対象として扱うことがで
+きます。body 部の MIME base64 encode/decode は本バージョンからの追加機
+能です。
+  将来構想としては、Quoted-Printable encoding 機能を追加することと ISO
+-2022-JP 以外の文字コードセットを扱えるようにすること、Content-Type ヘ
+ッダ等の処理を行うことにより MIME メッセージを完全に扱えるようにするこ
+との３つを考えています。
   DOSマシン等の小メモリマシンで使用できるように、mimer.pl と mimew.pl
 の２つのライブラリファイルに分割しました。総称名としては mime_pls と名
 付けます。（最後の s は複数の意味です。）
+  このドキュメント以外に各ファイルの先頭にもドキュメントを付けましたの
+で参照してください。
 
 ◎再配布について
   このライブラリを利用したアプリケーションを書かれた場合には、このライ
@@ -20,7 +29,8 @@
     このファイルです。
 
   ■mimer.pl
-    require することにより、&mimedecode 関数が使用できます。
+    require することにより、&mimedecode, &bodydecode, &bdeflush の３つ
+  の関数が使用できます。
 
     ◆&mimedecode($string,$kout)
       $string 中の encoded-word のうち、charset=ISO-2022-JP,encoding=B
@@ -33,8 +43,22 @@
       デコードしたあと、ISO-2022-JP(RFC1468)で定義されたエスケープシー
     ケンスのうち不必要なものがあれば削除します。
 
+    ◆&bodydecode($encoded)
+      $encoded に入れられた文字列を MIME base64 エンコードされたデータ
+    とみなしてデコードしその結果を返します。base64 alphabet(A-Za-z0-9+/=)
+    以外の文字が存在しても単に無視して処理します。
+      デコードは４バイト単位に行われるので、半端な部分（最後の１〜３バ
+    イト）はバッファ中に保存され次の呼び出し時にいっしょにデコードされ
+    ます。バッファをクリアするには &bdeflush 関数を使用します。
+
+    ◆&bdeflush
+      &bodydecode 関数によりバッファに保存されたデータを（最後に適当な
+    pad文字'=' を仮定して）デコードしその結果を返します。
+      この関数が呼ばれると &bodydecode のバッファがクリアされます。
+
   ■mimew.pl
-    require することにより、&mimeencode 関数が使用できます。
+    require することにより、&mimeencode, &bodyencode, &benflush の３つ
+  の関数が使用できます。
 
     ◆&mimeencode($string)
       $string 中の漢字の部分を ISO-2022-JP（いわゆる7bit JIS）に変換し
@@ -53,19 +77,45 @@
       長い日本語文字列は必要に応じて分割してエンコードし、また必要に応
     じて encoded-word の前後で折り返し（行分割）処理をします。
 
+    ◆&bodyencode($data)
+      $data 中のデータを base64 エンコードしその結果を返します。
+      エンコードは出力１行（デフォルトでは72バイト）に相当する単位（デ
+    フォルトでは54バイト）毎に処理します。$data のうち半端な部分はバッ
+    ファ中に保存され、次の呼び出し時にいっしょにエンコードされます。バ
+    ッファをクリアするには &benflush 関数を使用します。
+      なお、出力１行の長さはライブラリの最初の方で設定できます。
+
+    ◆&benflush
+      &bodyencode 関数によりバッファに保存されたデータをエンコードしそ
+    の結果を返します。エンコード結果が４の倍数長にならなければ必要に応
+    じて pad文字'=' を追加します。
+      この関数が呼ばれると &bodyencode のバッファがクリアされます。
+
   ■rmime
     mimer.pl を使用して MIME header をデコードするフィルターです。
-    使い方：rmime [ -s | -e | -j ] [ファイル ...]
+    使い方：[[j]perl] rmime [ -s | -e | -j ] [ファイル ...]
 
   ■wmime
-    mimew.pl を使用して ヘッダフィールド中の日本語文字列を MIME にエン
+    mimew.pl を使用してヘッダフィールド中の日本語文字列を MIME にエン
   コードするフィルターです。
-    使い方：wmime [ファイル ...]
+    使い方：[[j]perl [-Llatin]] wmime [ファイル ...]
+
+  ■rbody
+    mimer.pl を使用して MIME base64 エンコードされたデータをデコードす
+  るフィルターです。MS-DOSマシンでも動作するように作成したので UNIX 等
+  では効率が悪いかもしれません。
+    使い方：[[j]perl] rbody [ファイル ...]
+
+  ■wbody
+    mimew.pl を使用してデータを MIME base64 エンコードするフィルターで
+  す。MS-DOSマシンでも動作するように作成したので UNIX 等では効率が悪い
+  かもしれません。
+    使い方：[[j]perl] wbody [ファイル ...]
 
   ■Makefile
-    mimer.pl mimew.pl rmime wmime をシステムにインストールする際に使用
-  します。他には、ppack や tar+gzip(or compress)+uuencode でアーカイブ
-  を作成することができます。（２つめはほとんど作者専用ですが）
+    mimer.pl mimew.pl rmime wmime rbody wbody をシステムにインストール
+  する際に使用します。他には、ppack や tar+gzip(or compress)+uuencode で
+  アーカイブを作成することができます。（２つめはほとんど作者専用ですが）
 
 ◎無保証
   このプログラムを使用することにより生じた損害については、作者はいかな
@@ -75,3 +125,4 @@
                                               生田　昇＠市原.千葉.日本
                                               ikuta@crc.co.jp
 					      QGB01240@niftyserve.or.jp
+                                              net43236@asciinet.or.jp
