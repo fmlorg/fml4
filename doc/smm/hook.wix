@@ -4,9 +4,14 @@
 .S	インタプリタとconfig.ph
 .seealso	command-hook
 
-インタプリタなんですから、コマンドでそのＭＬ独自の機能をもたせたかった
-らconfig.ph にフックをセットして下さい（そうすれば、ＭＬが複数あっても
-ＭＬごとに変更できるわけです）。以下、例題です。
+インタプリタなので(例えば config.ph に)HOOK を定義すれば
+適当な場所でそのHOOKは評価され実行されます。
+
+その HOOK でちょっと複雑な設定やダイナミックなサーバの挙動の変更をした
+りできます。config.ph で定義するのでMLが複数あってもMLごとに変更できる
+わけです。
+
+以下、HOOKおよび、それを使ういくつかの例です。
 
 
 .S	$START_HOOK
@@ -36,7 +41,7 @@ $START_HOOK =q%
 
 例：
     $HEADER_ADD_HOOK = q#
-	$body .= "X-Baycity-Weather: Mizumaki";
+	$body .= "X-Baycity-Weather: Mizumaki\n";
     #;
 
 ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる（意味不明（笑））
