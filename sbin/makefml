@@ -1386,6 +1386,7 @@ sub FixPath
 {
     local($prog) = @_;
     local($perl);
+    local($mode) = (stat($prog))[2]; # preserve mode! 
 
     if ($perl = $ENV{'_PATH_PERL'}) {
 	print STDERR "\n   replace perl with $perl\n" if $FixPathCount++ < 1;
@@ -1424,6 +1425,8 @@ sub FixPath
     close(NEW);
     close(PROG);
     # sleep 1;
+
+    chmod $mode, "${prog}.new";
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
@@ -1954,6 +1957,8 @@ sub Conv
 	##
 	s/_CRON_TIME_/$crontime/g;
 
+	# www/cgi interface
+	s/_SSL_REQUIRE_SSL_/$SSL_REQUIRE_SSL/g;
 
 	if (/dev\.null.*\@domain\.uja/) {
 	    s/domain\.uja/$DOMAIN/g;
@@ -2340,39 +2345,6 @@ sub do_install
 
     # cgi mode
     &SetUpCGIadmin;
-}
-
-# set up cgi for admin (full access for fml system)
-#    $EXEC_DIR/www/cgi-bin/admin/.htaccess
-#    $EXEC_DIR/www/dn/admin/htpasswd
-sub SetUpCGIadmin
-{
-    print STDERR "---Setup CGI interfaces\n";
-
-    &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
-    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
-	  "$EXEC_DIR/www/cgi-bin/admin/.htaccess");
-
-    # first time!
-    if (-f "$EXEC_DIR/www/authdb/admin/htpasswd") {
-	print STDERR "$EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
-    } 
-    else {
-	&MkDirHier("$EXEC_DIR/www/authdb/admin");
-	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
-	      "$EXEC_DIR/www/authdb/admin/htpasswd");
-
-	local($htp) = &search_path('htpasswd');
-	if (-x $htp) {
-	    print STDERR "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
-	    system "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin";
-	}
-	else {
-	    print STDERR "cannot find \"htpasswd\" program\n";
-	}
-    }
-
-    print STDERR "\n";
 }
 
 
@@ -5552,7 +5524,7 @@ sub Bind
 }
 
 
-####### NT 
+###### NT specific #####
 package main;
 
 sub MenuInputLoop
@@ -5581,6 +5553,106 @@ sub MenuInputLoop
 	$cmd = &Query("Do you continue?", "y/n", "y|n", "y");
 	if ($cmd eq 'n') { last;}
     }
+}
+
+
+##### WWW/CGI Interfaces #####
+package main;
+
+# set up cgi for admin (full access for fml system)
+#    $EXEC_DIR/www/cgi-bin/admin/.htaccess
+#    $EXEC_DIR/www/dn/admin/htpasswd
+sub SetUpCGIadmin
+{
+    local($cmd);
+    print STDERR "\n---Setup CGI interfaces\n";
+
+    $cmd = &Query("Use SSL? ", "y/n", "y|n", "n");
+
+    if ($cmd eq 'y') { 
+	$SSL_REQUIRE_SSL = 'SSLRequireSSL';
+    }
+    else {
+	$SSL_REQUIRE_SSL = '';
+    }
+
+    &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
+    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
+	  "$EXEC_DIR/www/cgi-bin/admin/.htaccess");
+
+    # first time!
+    if (-f "$EXEC_DIR/www/authdb/admin/htpasswd") {
+	print STDERR "\t$EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
+	print STDERR "\tnot edit $EXEC_DIR/www/authdb/admin/htpasswd\n";
+    } 
+    else {
+	&MkDirHier("$EXEC_DIR/www/authdb/admin");
+	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
+	      "$EXEC_DIR/www/authdb/admin/htpasswd");
+
+	local($htp) = &search_path('htpasswd');
+	if (-x $htp) {
+	    print STDERR "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
+	    system "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin";
+	}
+	else {
+	    print STDERR "cannot find \"htpasswd\" program\n";
+	}
+    }
+
+    &SaveCGIConf;
+
+    print STDERR "\n";
+}
+
+
+sub LoadCGIConf
+{
+    if (-f "$CONFIG_DIR/cgi.conf") {
+        eval("require \"$CONFIG_DIR/cgi.conf\";");
+	&Log($@) if $@;
+    }
+}
+
+
+sub SaveCGIConf
+{
+    local($cf) = "$CONFIG_DIR/cgi.conf";
+    local($new) = $cf.".new$$";
+
+    if (open(CF, "> $new")) {
+	select(CF); $| = 1; select(STDOUT);
+
+	# log date 
+	print CF "\# $MailDate(configured by $0)\n\n";
+	print CF "\$SSL_REQUIRE_SSL = \"$SSL_REQUIRE_SSL\";\n";
+	print CF "1;";
+	close(CF);
+    }
+    else {
+	&Log("cannot open $new");
+    }
+
+    # if valid perl script, rename($new, $cf);
+    if (&ValidatePerlScriptP($new)) {
+	if (rename($new, $cf)) {
+	    print STDERR "\tcgi configuration is saved in $cf.\n";
+	}
+	else {
+	    &Log("Error: cannot rename($new, $cf)");
+	}
+    }
+}
+
+
+sub ValidatePerlScriptP
+{
+    local($cf) = @_;
+
+    system "perl -c $cf >/dev/null 2>&1";
+    &Log("$cf is broken as perl script.") if $?;
+
+    $? ? 0 : 1; # $? is 0 if normal. 
 }
 
 
