@@ -224,17 +224,19 @@ sub SmtpIO
     local($sendmail);
     local($host, $error, $in_rcpt, $ipc, $try_prog, $retry, $backoff);
 
+    ### SMTP Section: initialize and set up
+
     if ($USE_SMTP_PROFILE) { $SmtpIOStart = time;}
 
-    ### set global variable
+    # set global variable
     $SmtpFeedMode  = 0; # reset;
     $SocketTimeOut = 0; # against the call of &SocketTimeOut;
     # &SetEvent($TimeOut{'socket'} || 1800, 'SocketTimeOut') if $HAS_ALARM;
 
     # delay of retry 
     $backoff = 2;
-
-    ### IPC 
+    
+    # IPC 
     if ($e{'mci:mailer'} eq 'smtpfeed' || $HOSTS[0] =~ /(\S+):\#smtpfeed/) {
 	# calling smtpfeed in the last
 	require 'liblmtp.pl';
@@ -288,8 +290,8 @@ sub SmtpIO
 	}
     }
 
-    ### not IPC, try popen(sendmail) ... OR WHEN ALL CONNEVTION FAIL;
-    ### Only on UNIX
+    # not IPC, try popen(sendmail) ... OR WHEN ALL CONNEVTION FAIL;
+    # Only on UNIX
     if ($e{'mci:mailer'} eq 'prog' || $error) {
 	$host = '';
 	&Log("Try mci:prog since smtp connections cannot be opened") if $error;
@@ -331,9 +333,10 @@ sub SmtpIO
 	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
     }
 
-    ##### SMTP CONNECTION
-    ##### THE MOST HEAVY LOOP IS HERE;
-    #####
+
+    ### SMTP Section: HELO/EHLO
+    # SMTP connection starts
+
     $Current_Rcpt_Count = 0;
     $e{'mci:pipelining'} = 0; # reset EHLO information
 
@@ -355,7 +358,11 @@ sub SmtpIO
     }
 
     $e{'mci:pipelining'} = 0 if $NOT_USE_ESMTP_PIPELINING;
-    
+
+
+    ### SMTP Section: MAIL FROM:
+
+    ## [VERPs]
     # XXX MAIL FROM:<mailing-list-maintainer@domain>
     # XXX If USE_VERP (e.g. under qmail), you can use VERPs
     # XXX "VERPs == Variable Envelope Return-Path's".
@@ -376,6 +383,9 @@ sub SmtpIO
 	&Log("reason: $SoErrBuf");
 	return $NULL;
     }
+
+
+    ### SMTP Section: RCPT TO:
 
     # DLA is effective in processing deliver();
     local(%a, $a);
@@ -405,7 +415,7 @@ sub SmtpIO
     elsif ($e{'mode:delivery:list'}) { 
 	&SmtpPutActiveList2Socket($ipc, $e{'mode:delivery:list'});
     }
-    else { # not-DLA is possible;
+    else { # [COMPATIBILITY] not-DLA is possible;
 	for (@rcpt) { 
 	    $Current_Rcpt_Count++ if $_;
 	    if ($e{'mci:pipelining'}){
@@ -446,12 +456,16 @@ sub SmtpIO
 
     print SMTPLOG ('-' x 30), "\n";
 
-    ### (HELO .. DATA) sequence ends
+    ## (HELO .. DATA) sequence ends
 
-    ##### "DATA" Session BEGIN; no reply via socket ######
-    ###
-    ### BODY INPUT
-    ### putheader()
+
+    ### SMTP Section: DATA
+    # 
+    # "DATA" Session BEGIN; no reply via socket
+    #
+    # BODY INPUT ; putheader()
+    # 
+
     $0 = "$FML:  BODY <$LOCKFILE>";
     $e{'Hdr'} =~ s/\n/\r\n/g; 
     $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
@@ -571,22 +585,24 @@ sub SmtpIO
 	print S $e{'trailer'};
     }
 
-    ### close smtp with '.'
+    ## close smtp with '.'
     print S "\r\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
     print SMTPLOG ('-' x 30), "\n";
 
-    ##### "DATA" Session ENDS; ######
-    ### Closing Phase;
+    ## "DATA" Session ENDS; ##
+
+    ### SMTP Section: QUIT
+    # Closing Phase;
     &SmtpPut2Socket('.', $ipc);
     &SmtpPut2Socket('QUIT', $ipc);
 
     close(S);
 
+    ### SMTP Section: save-excursion(?)
     # reverse \r\n -> \n
-    $e{'Hdr'}  =~ s/\r\n/\n/g;
+    $e{'Hdr'} =~ s/\r\n/\n/g;
     # $e{'Body'} =~ s/\r\n/\n/g; # XXX 2.2D no more reference of $e{'Body'}
 
-    # 
     if ($USE_SMTP_PROFILE) { 
 	&Log("SMTP::Prof::IO: ". (time - $SmtpIOStart)." secs.");
     }
