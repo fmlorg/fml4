@@ -30,41 +30,74 @@ else {
 
     &SendFax(*Envelope, $subject, $address);
 
-    if ($debug) {
-	&Mesg(*Envelope, "\n---------- sending contents ----------");
-	&Mesg(*Envelope, $Envelope{'Body'});
-	&Mesg(*Envelope, "---------- sending contents ends ----------");
-    }
+    &Mesg(*Envelope, "---------- sending contents ----------");
+    &Mesg(*Envelope, $Envelope{'Body'});
+    &Mesg(*Envelope, "---------- end of sending contents ---");
 }
 
 
 
 sub InitSendFax
 {
+    local($a2ps_opt) = "-a4 -ns -nb -no -nt -j1.2 -p";
+
     # directory
     $TMP_DIR   = $FP_TMP_DIR || $TMP_DIR || "/tmp";
 
     # prog
-    $FORMATTER = $FORMATTER || "/usr/local/bin/a2ps -nt -ns -nh -p ";
-    $SENDFAX   = $SENDFAX   || "/usr/local/bin/sendfax -n -D -R ";
+    $FORMATTER = $FORMATTER || "/usr/local/mail2fax/a2ps $a2ps_opt";
+    $SENDFAX   = $SENDFAX   || "/usr/local/bin/sendfax -m -n -D -R ";
+
+
+    ##### ML Preliminary Session Phase 01: set and save ID
+    # Get the present ID
+    &Open(IDINC, $SEQUENCE_FILE) || return; # test
+    $ID = &GetFirstLineFromFile($SEQUENCE_FILE);
+    $ID++;			# increment, GLOBAL!
+
+    # ID = ID + 1 (ID is a Count of ML article)
+    &Write2($ID, $SEQUENCE_FILE) || return;
+
+    # wait for sync against duplicated ID for slow IO or broken calls
+    {
+	local($newid, $waitc);
+	while (1) {
+	    $newid = &GetFirstLineFromFile($SEQUENCE_FILE);
+	    last if $newid == $ID;
+	    last if $waitc++ > 10;
+	    sleep 1;
+	}
+	&Log("FYI: $waitc secs for SEQUENCE_FILE SYNC") if $waitc > 1;
+    }
 }
 
 
 sub SendFax
 {
     local(*e, $faxnumber, $notify_address) = @_;
-    local($tmp) = "$TMP_DIR/faxserv$$";
+    local($tmp) = "$TMP_DIR/outgoing-$ID.ps";
+    local($s);
+
+    $s .= "$faxnumber";
+    $s .= " from $notify_address" if $From_address ne $notify_address;
+
+    &Log($s);
 
     if ($faxnumber !~ /^[\+0-9][\-\.\(\)0-9]+$/) {
+	&Log("Syntax Error: faxnumber $faxnumber");
 	$e{'message'} .= "Error: FAX NUMBER SYNTAX ERROR\n";
     }
 
     if ($notify_address !~ /^([\w\d\-\.]+\@[\w\d\-\.]+)$/) {
+	&Log("Syntax Error: return address $notify_address");
 	$e{'message'} .= "Error: Email Address SYNTAX ERROR\n";
     }
 
-    $e{'message'} .= 
-	"Expanded form:\n$SENDFAX -d $faxnumber -f $notify_address\n";
+    if ($From_address =~ /fukachan/i) {
+	$e{'message'} .= "\nExpanded form:\n\n";
+	$e{'message'} .= "   $FORMATTER > $tmp\n\n";
+	$e{'message'} .= "   $SENDFAX -d $faxnumber -f $notify_address\n\n";
+    }
 
     # generate postscript tmporary files
     open(TMP, "|$FORMATTER > $tmp") || die($!);
@@ -78,6 +111,9 @@ sub SendFax
     }
 
     close(TMP);
+
+    system "sync;sync;sync";
+    sleep 3;
 
     # sending fax
     open(SENDFAX, "|$SENDFAX -d $faxnumber -f $notify_address") || die($!);
