@@ -8,6 +8,225 @@ CHANGES (0.x -> current (2.1 gamma test) 97/01)
 
 ■ fml 2.1 gamma test (for the preparation of the 2.1 release)
 
+
+97/03/31
+	fmlserv を複数配送ファイル等に適応させる。
+	$REJECT_ADDR に majordomo, listserv, listproc を入れる
+	(against いたずら)
+
+97/03/30
+	libexec/fmlserv.pl fixed 
+	 ＃(quick hack, 複数ファイルへの対応はまだ完全ではない)
+
+	FIX TYPO $AUTO_REGISTRATION_DEFAULT_MODE
+
+	add a lot of .. in doc/smm 
+	   UPDATED: すべての user defined variable の記述
+
+97/03/28
+	Clean uping ... 		 
+	複数のモード混在の mget での Constructor Destructor FIX
+	e.g. Mime-* bug, uuencode and tar.gz ...
+
+
+97/03/27
+	bug fix: help が使えない _o_
+	複数リスト対応のための initializeをしそこねているものの fix
+
+97/03/26
+	ＭＬのアドレスを変更して axion -> fml.org 以下に収容。
+
+	@ACTIVE_LIST に設定された
+	複数の配送リストファイルを配送に用いる。
+	＃まとめ送りの場合も当然複数ファイル対応と
+	＃ crosspost 以外は対応が終了しているはず
+
+97/03/23
+	自動登録ルーチン(appended)
+	   $AUTO_REGISTRATION_HOOK
+	   $AUTO_REGISTRATION_DEFAULT_MODE
+	
+	15.8	$AUTO_REGISTRATION_DEFAULT_MODE
+	
+	登録を
+	
+		アドレス $AUTO_REGISTRATION_DEFAULT_MODE
+	
+	の形で行なう。fml の内部表現↑で設定する必要があるので注意して下さい。
+	
+	例: デフォールトを skip にする
+	
+		$AUTO_REGISTRATION_DEFAULT_MODE	= "s=1"; 
+	
+	    まとめおくりで３時間に一回 Multipart に設定。
+	
+		$AUTO_REGISTRATION_DEFAULT_MODE	= "m=3mp"; 
+	
+	
+	15.9	$AUTO_REGISTRATION_HOOK
+	
+	$AUTO_REGISTRATION_HOOK = q#
+	    $e{'GH:Reply-To:'} = $MAINTAINER;
+	#;
+	
+	WELCOMEのメールの Reply-To: を管理者宛にする
+
+97/03/22
+	doc/smm/pager.wix
+	uuencode filename fixed	
+	clean up; self-defense the strange behaviour of local scope
+	fmlserv "単体"の機能は which だけを使えるだけに機能を落す。
+		注:メタレベルで help とかは仮想的に fmlserv ＭＬの help
+		そうではなく 全ＭＬにまたがるコマンドは which だけということ
+
+97/03/21
+	sbin/makefml install: fixed search .fml/system
+	geturl.pl probe-failed-action fixed
+
+97/03/20 (from 97/03/10)
+	directory 構造 clean up
+		lib/localhack -> lib/fml_R1_localhack 
+		とし、fml 1.x 用の hack の例をこの階層下に集める
+
+	fix subject of mget, ...
+	mget の compilation mode の表示のON,OFF (msend.pl, mget) 
+	複数配送リストα版（まだ半分だから使わないようにね）
+	bin/geturl.pl bug fix
+	cf/MANIFEST fix (DLA)
+	makefml により confirmation モードの設定を可能にする
+		confirmation は推奨です。
+
+	geturl.pl cleaned up (+ update mode)
+
+		他………
+
+
+97/03/10
+	$NOT_SHOW_DOCMODE mget とか msend のドキュメントの形式の説明を省く
+
+97/03/08
+	libexec/fmlserv でデフォールトでは lists コマンドを unable する。
+	$FMLSERV_PERMIT_LISTS_COMMAND  = 1 で使えるようにする(default は０)
+	Listserv 的なインターフェイスのデフォールトは lists コマンドをさせない
+	というのはこれがいたずらに多用されるため。
+
+	doc: info changes 調整 (info には 97/02 以降を収録)
+
+97/03/07
+	zcat code bug fix
+	makefml: add the search path entry "/perl5/bin" for NT4
+		 Summary Information bugs fixed e.g. MIME
+		 clean up codes and bug-fix of output not-uniqueness 
+	bin/Archive.pl bug fix and adjusted for the current config.ph
+
+97/03/06
+	Pararell Delivery using plufal HOSTS ($MCI_SMTP_HOSTS > 1)
+	BUG FIX --distribute in $ML_MEMBER_CHECK=0;(with fmlserv)
+
+97/03/03
+	[confirmしながらの自動登録の場合]
+	   confirm passwd が必要な場合でも
+	   subscribe phase が来たら常にリセットしまた最初から初められる。
+	それに伴い confirm ファイルを修正
+
+97/03/02
+	help ファイル renewal
+	--moderated forwarded 形式へ
+
+97/03/01
+	libexec/fml_local.pl の中身の関数は 
+		libkern.pl libsmtp.pl libsmtutils.pl libdebug.pl
+	そのものにいれかえ。
+	＃引数を必要にするようにしてしまいましたが、元に戻した_o_
+
+	confirmしながらの自動登録の場合
+		confirm reset 
+	で総やりなおしできるようにした。それに伴い confirm ファイルを修正
+
+
+97/02/28
+	
+
+97/02/27
+	msend Reply-To evaluation order fixed 
+		(config.ph shoule be able to overwrite)
+	whois backup fixed
+	modereated mode fixed
+	confirm ファイルを修正
+
+97/02/25
+	msend Reply-To
+	fixed around perl version
+	
+
+97/02/18
+	NT 向けドキュメントを少し書く
+	tar zxvf fixed
+	perl path fixing
+	makefml lock problem(first time) fixed
+
+97/02/16
+	makefml setgid code added (for OS's NOT 4.4BSD)
+	confirmation mode fixed 運用テスト(axion.phys.titech.ac.jp ML群)
+
+97/02/15
+	makefml config の配送モード設定, bug-fix, 
+		flock, not-flock code fixed
+		etc/makefml/cf fixed
+	include-ctl fixed
+	--ctladdr を追加。--distribute --ctladdr の時は ctladdr 優先にする
+	よって、ML を config.ph で distributeモードにして
+	アドレス ML-ctl を --ctladdr (include-ctl に書いてある)で呼べば
+	コマンドを実行する。
+
+97/02/14
+	dup fix and check codes
+	
+97/02/11
+	まとめおくりの時の Subject, X-ML-Name 修正
+	Makefile のデフォールトを makefml を使うように修正(documentもともに)
+	Debug 用 Emulation コマンド (bin/emumail.pl)
+
+	モード：
+	--stdinlog
+	   その日のすべてのメールを var/log/STDIN_LOG_19970212 にログをとる
+	   ＃ var/log/STDIN_LOG_日付 ごと (PIRC のようですな(謎))
+
+	--distorctl
+	   100%の保証はないが、control-address 宛を推測して、
+	   ＭＬ	    宛は配送だけ
+	   ＭＬ-Ctl 宛はコマンド
+	を実行するようにする
+	（そのために include include-ctl がデフォールトで生成されるの
+	で普通はそれを使うってください）
+
+	--mimedecodedsubject
+	   SubjectがMIME -> append "X-Subject: MIME-Decoded Subject"
+
+97/02/10
+	まとめおくり解除時の溜っている分の配送 bug FIXED
+	関連場所への event scheduler code の配置(第２段階)
+	HTMLに変換された場合 duplicated することがある bug FIXED
+
+97/02/02
+	CFによるリレー GW NGW DOM 対応
+	bin/weekend-msend.sh (週一まとめ送り用)
+
+97/02/01
+	自動登録の confirmation モード ベータテスト
+	   ＊説明：subscribe リクエストに対し一度確認を促す。
+
+      ・RFC821 syntax relay (% relay hack is obsolete)
+      ・get コマンドの拡張
+	"get 数字" は今までどおりの Resend スタイル
+	"get それ以外" は MIME/Multipart で送り返す。
+		例えば "get last:3" は "mget last:3 mp " と同じ。 
+	”mget …” コマンドは今までどおりに tar.gz がデフォールトの形式
+	まとめてごそっというときには固まっている方が良い場合は mget 
+	単に最近の数通をまとめてぱっと読みたい時などには get を使うと良い。 
+
+	cf/MANIFEST	$CONFIRMATION_FILE (confirmation mode の説明)
+
 97/01/31
 	fixed to adjust qmail 0.96
 	まとめおくりのSubject:のデフォールト Matome Okuri (Digest Delivery)
