@@ -900,7 +900,7 @@ sub OutPutLocalConfig
 	}
 	elsif ($k eq "AUTO_REGIST_WITH_CONFIRM" && $v == 1) {
 	    print CF "\$MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'} = 1;\n";
-	    print CF "\&DEFINE_MODE('confirm');\n";
+	    print CF "\&DEFINE_MODE('artype=confirm');\n";
 	}
 	elsif ($k eq "DELIVERY_MODE") {
 	    print CF "\# --- MAKEFML_DELIVERY_MODE SETUP ---\n";
