@@ -79,6 +79,10 @@ sub Expire
 		$d--;
 		&Debug("unlink\t$_\t[more $d files]") if $debug;
 
+		# patch by (fml-help: 00039)
+		# Tatsuya Shimizu <shimizu@np.bs1.fc.nec.co.jp>
+                $first_seq || ($last_seq = $first_seq = $unlink_seq);
+
 		# store the largest sequence
 		$last_seq = $last_seq > $unlink_seq ? $last_seq : $unlink_seq;
 		$first_seq = $first_seq < $unlink_seq ? $first_seq : $unlink_seq;
