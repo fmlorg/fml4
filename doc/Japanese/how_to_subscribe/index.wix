@@ -4,18 +4,15 @@
 .toc
 .~HTML_PRE
 
-.p	登録について
+.P	登録について
 .include overview.wix
 .include registration.wix
 .include autoregist.wix
 .include moderator.wix
 .include acl.wix
 
-.p	アドレスについて
+.P	アドレスについて
 .include address.wix
 
-.p	事例集
+.P	事例集
 .include examples.wix
-
-.appendix
-.include 00terms.wix

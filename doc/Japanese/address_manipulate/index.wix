@@ -1,11 +1,25 @@
 .HTML_PRE
-		アドレス操作
+		アドレス関係の操作
 
 .toc
+
+ここではアドレスについての
+
+登録の仕方について詳しくは .ptr{how_to_subscribe} をみてね
+.url ../how_to_subscribe/
+
+特定のアドレスを弾きたいとかはフィルタリング .ptr{filter} を参照して下
+さい。
+
+リモート管理の時の認証については .ptr{remote_control}
+
 .~HTML_PRE
 
 .include overview.wix
 .include howto.wix
+
+.appendix
+.include crosspost.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

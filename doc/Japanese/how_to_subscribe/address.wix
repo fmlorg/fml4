@@ -203,3 +203,5 @@ members in $MEMBER_LIST not $ACTIVE_LIST. This is historical (but I
 cannot change it for backward compatibility;-). It does not annoy you
 if you do not edit member lists by hand. Please see .ptr{auto-regist}
 for several subscription styles ($AUTO_REGISTRATION_TYPE).
+
+

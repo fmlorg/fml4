@@ -13,13 +13,10 @@
 .include isp_specific.wix
 
 
-.P	MTA ดุทธ
-.include postfix-pop-before-smtp.wix
-
-
 .P	examples
 .C	examples
 
 .include sample-sitedef-mnews
+
 
 .# $Id$

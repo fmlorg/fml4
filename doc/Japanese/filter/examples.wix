@@ -194,6 +194,39 @@ Q: Notesのメールでテンプレートか何かを使うと同じMessage-IDになるのため
 これは直しようがないです;-) NOTES担当に文句をいいましょう 
 
 
+.S	特定のアドレスを拒否する(e.g. spam mails)
+=E.S	Reject Mails From Specific Domains
+.k	spam mails
+.l	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR
+.l	$DIR/spamlist
+
+.if LANG == JAPANESE
+メインのルーチンに飛ぶ前に reject するコードなら入っています(2.1 gamma
+206以降)。$REJECT_ADDR_LIST (デフォールトは $DIR/spamlist) に perl の
+正規表現で書いたアドレスから来たメールには何もしないで reject するよう
+になります。この場合配送、コマンド、自動登録すべての場合にそこへいく前
+に reject します。
+
+   \S+@spam.org (spam.org のアドレスは全部許否)
+   manager@\S+  (あらゆるサイトの個人を代表しないアドレスは拒否)
+
+みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
+れます。
+.fi
+.if LANG == ENGLISH
+Before the main routine works, fml.pl can check and reject mails from
+specific domains in $REJECT_ADDR_LIST ($DIR/spamlist in default).
+Please write e.g.
+
+   \S+@spam.org (reject spammers?, mails from spam.org)
+   manager@\S+  (reject not personal addresses)
+
+fml adjusts $REJECT_ADDR for rejection irrespective of this file.
+.fi
+
+
 .#
 .# $Id$
 .#

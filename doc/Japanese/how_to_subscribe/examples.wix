@@ -276,5 +276,131 @@ A: config.ph に
 			"$DIR/c.list",
 			);
 
+.S	意見受付用アドレス？
+
+意見受付用アドレスをMLでうけて、送ってきた人に「ご意見ありがとうござい
+ました。返事はしばらく待ってね。」と自動で応答させる。
+
+改造:
+そのために投稿は誰でもOK。ただし、メンバー以外からの投稿はMLに流し、か
+つ投稿者にguideファイルを返す（自動登録はしない）。
+
+config.phの設定例 1:
+.fi
+.if LANG == ENGLISH
+We accept opinions by mail from anyone and send back the reply "thank
+you for your opinion" to the sender.
+
+object:
+return guide if fml receives post from the member.
+
+config.ph configuration Example 1:
+
+1. permit post from anyone
+2. add $START_HOOK to send back "guide"
+.fi
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$START_HOOK = q# 
+   if (! &MailListMemberP($From_address)) { &GuideRequest(*Envelope);} 
+#;
+.~q
+
+.if LANG == JAPANESE
+config.ph 設定例 2:
+guide ではなくguideとは別に用意したファイルを返す。
+ヘッダもカスタマイズ
+.fi
+.if LANG == ENGLISH
+config.ph configuration Example 2:
+return another file not guilde with the header:
+.fi
+
+From: $MAIL_LIST
+Subject: Thanks you for your mail
+
+
+.q
+### sample configuration ###
+$PERMIT_POST_FROM              = "anyone";
+
+
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+$RECRUIT_ACK_STATEMENT = "Thanks you for your mail";
+$RECRUIT_ACK_FILE      = "$DIR/recruit_reply";
+
+$START_HOOK = q#
+    if (! &MailListMemberP($From_address)) {
+	&DEFINE_FIELD_OF_REPORT_MAIL('From', $MAIL_LIST);
+        &SendFile($From_address, $RECRUIT_ACK_STATEMENT, $RECRUIT_ACK_FILE);
+    }
+#;
+.~q
+
+
+.S	複数アドレスから投稿したいがうけとりは一つ( "skip" コマンド)
+=E.S	One recipient for plural addresses to post mails from
+.key	skip
+.key	noskip
+.label	skip
+
+.if LANG == JAPANESE
+複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい、「こ
+の１週間だけこのアドレスも使いたい」などの場合にも効果的です。これらの
+場合を想定して actives(自動登録では members = actives) で
+
+fukachan@phys.titech.ac.jp	skip
+
+と書いておけば認証(新人さんチェック)には使うけど配送はしないという動作
+をします。つまり
+
+	fukachan@phys.titech.ac.jp	skip
+	Elena@phys.titech.ac.jp	
+	Pollyanna@phys.titech.ac.jp	skip
+
+になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
+が、配送はelenaにしか行なわれないということです。
+
+ユーザーがこれを自分でコントロールしたいなら、コマンドは
+＃ Admin command でのみ引数が有効です。
+ 
+skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
+			そこから投稿はできるが、配送はされないものと設定する
+noskip [引数]		上の逆。配送するようにする。
+
+です。例：
+skip 
+	From: のアドレスを skip に
+
+skip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp を skip に
+
+noskip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp へも配送を
+.fi
+.if LANG == ENGLISH
+When one recipient for plural addresses to post mails from, you can
+write 
+
+	# address
+
+format in member or delivery lists. In this comment out style fml.pl
+uses it as an authentication candidate but not delivers articles to
+it. If the list follows
+
+	# addr1
+	# addr2
+	# addr3
+	addr4
+
+Fml delivers mail to addr4 not addr1,addr2,addr3 but accepts post
+from addr1,addr2,addr3,addr4.
+.fi
+
 
 $Id$

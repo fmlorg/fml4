@@ -5,13 +5,9 @@
 .toc
 .~HTML_PRE
 
-.include crosspost.wix
 .include fml_local.wix
 .include fmlserv.wix
 .include forward.wix
-.include mail2irc.wix
-.include mail2news.wix
-.include pager.wix
 .include popfml.wix
 .include uip.wix
 
