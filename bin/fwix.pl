@@ -314,12 +314,12 @@ sub Open4Write
     select(ENG); $| = 1; select(STDOUT);
 
     if ($opt_m eq 'htmlconv') {
-	print TMPF "\#.CUT:$OUTPUT_FILE\n";
-	print ENG  "\#.CUT:$OUTPUT_FILE\n";
+	print TMPF "\n\#.CUT:$OUTPUT_FILE\n";
+	print ENG  "\n\#.CUT:$OUTPUT_FILE\n";
     }
     elsif ($mode eq 'html') {
-	print TMPF "\#.CUT:${HtmlDir}/index.html\n";
-	print ENG  "\#.CUT:${HtmlDir}/index.html\n";
+	print TMPF "\n\#.CUT:${HtmlDir}/index.html\n";
+	print ENG  "\n\#.CUT:${HtmlDir}/index.html\n";
     }
 
     print STDERR "---Open::($TmpFile $TmpFile_Eng)\n" if $verbose || $debug;
@@ -404,7 +404,7 @@ sub ReadFile
     
     ### split after the tmpfile is generated;
     if ($mode eq 'html') {
-	;#; print TMPF "#.CUT:$HtmlDir/$fname\n";
+	;#; print TMPF "\n#.CUT:$HtmlDir/$fname\n";
     }
     elsif ($mode eq 'roff') {
 	$fname =~ s/\.wix/.1/;
@@ -429,13 +429,13 @@ sub ReadFile
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
 
 	# IF, ENDIF
-	if (/^\.if\s+LANG\s*==\s*(\S+)/i) { 
+	if (/^\.if\s+LANG\s*==\s*(\S+)|^<Lang\s+(\S+)/i) {
 	    $InIf = 1;
 	    # print STDERR " \$TrueInIf = $Lang eq $1 ? 1 : 0;  \n";
 	    $TrueInIf = $Lang eq $1 ? 1 : 0; 
 	    next;
 	}
-	if (/^\.endif/i || /^\.~if/ || /^\.fi/) { 
+	if (/^\.endif/i || /^\.~if/ || /^\.fi/ || /^<\//) { 
 	    undef $InIf; 
 	    next;
 	}
@@ -649,6 +649,22 @@ sub OutputHtml
 
     while (<$input>) {
 	undef $Error;
+
+	# if ($prev_line eq $_) {
+	#    $prev_line = $_;
+	#    next;
+	# }
+	{
+	    $prev_line = $_;
+
+	    if (m@\<\/PRE\>\<A.*\<PRE\>\s*$@) {
+		s@^\<\/PRE\>@@;
+		s@\<PRE\>\s*$@\n\n@ if $__withinPRE;
+	    }
+	    
+	    $__withinPRE = 0 if m@\</PRE\>@;
+	    $__withinPRE = 1 if m@\<PRE\>@;
+	}
 
 	if (/^\#\.CUT_SKIP:(\S+)/) {
 	    $name = $outfile = $1;
@@ -988,7 +1004,7 @@ sub Format
 		$QuoteInPRE = 1;
 	    }
 	    else {
-		$r = "<PRE>";
+		# $r = "<PRE>";
 		$In_PRE = 1;
 	    }
 	}
@@ -1000,7 +1016,7 @@ sub Format
 		$QuoteInPRE = 0;
 	    }
 	    elsif ($In_PRE) {
-		$r = "</PRE>";
+		# $r = "</PRE>";
 	    }
 	    else {
 		;
@@ -1024,8 +1040,8 @@ sub FormatReset
     undef $Tag;
 
     if ($InPre) {
-	print TMPF "</PRE>\n";
-	print ENG  "</PRE>\n";
+	print TMPF "</PRE>";
+	print ENG  "</PRE>";
     }
     undef $InPre;
 }
@@ -1147,7 +1163,7 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<HR>\n<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>";  	$In_PRE = 1;
+	    $s     .= "<PRE>";	    $In_PRE = 1;
 
 	    $s = &HtmlSplitHere($s, 0);
 
@@ -1181,7 +1197,7 @@ sub Expand
 	}
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
-	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
+	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>";
 	    $s     .= "<PRE>";  	$In_PRE = 1;
 	    $InPre++ unless $LANG;
 	}
@@ -1358,12 +1374,12 @@ sub HtmlSplitHere
     local($s, $not_cut) = @_;
 
     if ($not_cut) {
-	"\#.CUT_SKIP:${HtmlDir}/$Chapter.html\n\n$s"; 
+	"\n\#.CUT_SKIP:${HtmlDir}/$Chapter.html\n\n$s"; 
     } 
     else {
 	# split after the tmpfile is generated;
 	# $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s";
-	"\#.CUT:${HtmlDir}/$Chapter.html\n\n$s"; 
+	"\n\#.CUT:${HtmlDir}/$Chapter.html\n\n$s"; 
     }
 }
 
