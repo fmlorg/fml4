@@ -41,6 +41,10 @@ documentation		ドキュメントについて
 RDBMS			データベースへのアクセス(リレーショナル: PostgreSQL, MySQL)
 LDAP			データベースへのアクセス(LDAP)
 
+.part OS 依存の話題
+NT_specific		Windows 2000/NT4 依存の話題
+
+
 .part エラー
 errormails		エラーメールをどうするか？
 debug			デバッグについて

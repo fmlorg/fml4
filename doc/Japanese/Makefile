@@ -41,5 +41,6 @@ DOC_TUTORIAL_SUBDIR += smtp
 DOC_TUTORIAL_SUBDIR += troubleshoot
 DOC_TUTORIAL_SUBDIR += utility_programs
 DOC_TUTORIAL_SUBDIR += virtual_domain
+DOC_TUTORIAL_SUBDIR += NT_specific
 
 .include "basic_setup/Makefile"
