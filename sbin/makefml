@@ -2649,9 +2649,6 @@ sub do_html_htpasswd
 
     -f $passwd_file || &Touch($passwd_file);
 
-    # perserve the current inode $mode
-    my ($saved_permission) = (stat($passwd_file))[2];
-
     # make directory
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin/$ml");
@@ -2660,6 +2657,9 @@ sub do_html_htpasswd
     local($f, $x, $fnew);
     $f    = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
     $fnew = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd.new.$$";
+
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($f))[2];
 
     print STDERR "\n   change htpasswd ($f)\n";
 
@@ -2676,7 +2676,7 @@ sub do_html_htpasswd
     }
 
     # reset inode $mode
-    chmod $saved_permission, $passwd_file;
+    chmod $saved_permission, $f;
 }
 
 
@@ -2733,6 +2733,9 @@ sub __html_htpasswd_repl
     $x =~ s/\n$//;
     print STDERR "($f, $fnew, $member, $x)\n" if $debug;
 
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($f))[2];
+
     if (! open($fnew, "> $fnew")) {
 	&Error("cannot open $fnew");
 	return 0;
@@ -2760,6 +2763,10 @@ sub __html_htpasswd_repl
     }
 
     close($fnew);
+
+    # reset inode $mode
+    chmod $saved_permission, $f;
+
     1;
 }
 
@@ -2793,6 +2800,9 @@ sub do_htpasswd
 	&Touch($pwd);
     }
 
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($pwf))[2];
+
     print STDERR "\% $prog $flag $pwf $user\n";
     if ($flag) {
 	&__system($prog, $flag, $pwf, $user);
@@ -2800,6 +2810,9 @@ sub do_htpasswd
     else {
 	&__system($prog, $pwf, $user);
     }
+
+    # reset inode $mode
+    chmod $saved_permission, $pwf;
 }
 
 
