@@ -22,11 +22,11 @@
 
 
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
-.key	bin/Archive.pl
+.k	bin/Archive.pl
 .key	bin/Archive.sh
 .key	Archive.pl
 .key	Archive.sh
-.xref	archive
+.xref	archive Archive.pl
 
 アーカイブの節を参照
 
