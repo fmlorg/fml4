@@ -4791,7 +4791,7 @@ sub do_setup_admin_cgi
     &MkDir("$REAL_CGI_PATH/admin", 0755);
 
     for $f ("menu.cgi", "makefml.cgi", "mlmenu.cgi",
-	    "menubar.cgi", "index.cgi") {
+	    "menubar.cgi", "index.cgi", "newml.cgi", "rmml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/admin/$f";
 	$outfile  = "$REAL_CGI_PATH/admin/$f";
 	print "\tcreate $outfile\n";
