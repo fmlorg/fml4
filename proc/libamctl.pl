@@ -669,8 +669,8 @@ sub DoChangeMemberList
     # here should be "Only once called"
     if ($cmd eq 'MATOME' && $status eq 'done') {
 	&Log("ReConfiguring $curaddr in \$MSendRC");
-	&ConfigMSendRC($curaddr);
 	&Rehash($org_addr) if $org_addr;# info of original mode is required
+	&ConfigMSendRC($curaddr);
     }
     elsif ($cmd eq 'MATOME' && $status ne 'done') {
 	&Log("Matome[Digest]: something Error");
