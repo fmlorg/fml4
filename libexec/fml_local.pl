@@ -706,7 +706,7 @@ sub sendback
     else {
 	$s  = "I cannot find $file\n\n";
 	$s .= "If you have a problem\n";
-	$s .= "please make a contact with $MAINTAINER\n";
+	$s .= "please contact $MAINTAINER\n";
 	&Sendmail($to, "Cannot find $file", $s);
 	&Log("cannot find $dir/$file");
     }
