@@ -660,6 +660,19 @@ Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 .~q
 
 
+.S	X-Stardate: をつける（mh-e）
+
+lib/Utilities/stardate.el を load してください
+＃ emacs 19 でなきゃかきかえないとだめ
+
+たとえば、.emacs に
+(load-libaray "stardate")
+(setq startrek-stardate-process "/some-directory-path/libStardate.pl")
+
+とすると mh-comp の draft buffer をつくるときに 
+X-Stardate: をつけてくれます。
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
