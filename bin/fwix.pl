@@ -98,7 +98,7 @@ All rights of this page is reserved.
 
 # This Document(html format) is automatically geneareted by fwix.pl. 
 # fwix (Formatter of WIX Language) is fml document formatter system
-# intended to generate plaintext, html, texinfo and nroff from one file.
+# designed to generate plaintext, html, texinfo and nroff from one file.
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
