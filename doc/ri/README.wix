@@ -323,6 +323,12 @@ INSTALL_on_NT4 というドキュメントを参照して下さい。
 Fml on Windows NT4.0 (beta test phase) can work also. Please read
 INSTALL and INSTALL_on_NT4.
 
+○ 開発環境
+=E
+* Development Environment:
+
+	postfix 19990325 on NetBSD 1.4_ALPHA 
+
 ○ テスト環境: fml 2.2 のターゲットマシン/テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
