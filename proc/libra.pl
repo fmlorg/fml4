@@ -9,24 +9,28 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 sub AdminCommand
 {
     local($sharp, $admin, $_, @parameter) = @_;
-    local($to) = $Reply_to ? $Reply_to : $From_address;
+    local($to) = $_cf{'reply-to'}; # reply-to is reset in libfml.pl
     local($parameter) = $parameter[0];
+
+    &Log("ADMIN:($sharp, $admin, $_, \@parameter)") if $debug;
+
+    &AdminModeInit;		# initialize
 
     # DEFINE for libfml.pl
     # for multiple-matching
-    $_cf{'mode', 'com-admin'} = 1;
+    $_cf{'mode:addr:multiple'} = 1;
     
     if(/^help$/io) {
-	&Logging("ADMIN: HELP REQUEST from $to");
+	&Log("ADMIN: HELP REQUEST from $to");
 	&SendFile($to, "ADMIN: HELP", $ADMIN_HELP_FILE);
-	$_cf{'return'} .= "ADMIN: send $ADMIN_HELP_FILE to $to\n";
+	$Envelope{'message'} .= "ADMIN: send $ADMIN_HELP_FILE\n\tto $to\n";
 	return 'ok';
     }
     
     if(/^log$/io) {
-	&Logging("ADMIN: LOG REQUEST from $to");
+	&Log("ADMIN: LOG REQUEST from $to");
 	&SendFile($to, "ADMIN: LOG", $LOGFILE);
-	$_cf{'return'} .= "ADMIN: send $LOGFILE to $to\n";
+	$Envelope{'message'} .= "ADMIN: send $LOGFILE\n\tto $to\n";
 	return 'ok';
     }
 
@@ -43,26 +47,26 @@ sub AdminCommand
 	    # 95/09/07 libcrypt.pl
 	    if(&CmpPasswdInFile($PASSWD_FILE, $to, $parameter)) {
 		$_cf{'remote', 'auth'} = 1;
-		$_cf{'return'} .= "250 PASSWD AUTHENTIFIED... O.K.\n";
+		$Envelope{'message'} .= "250 PASSWD AUTHENTIFIED... O.K.\n";
 		return 'ok';
 	    }else {
-		$_cf{'return'} .= "554 Illegal Passwd\n";
+		$Envelope{'message'} .= "554 Illegal Passwd\n";
 		return 0;
 	    }
 	}
 
 	# PREDICATE AUTHENTIFIED!
 	if(1 != $_cf{'remote', 'auth'}) {
-	    $_cf{'return'} .= "Cannot AUTHENTIFY YOU\n";
+	    $Envelope{'message'} .= "Cannot AUTHENTIFY YOU\n";
 	    return 0;
 	}
 
 	if(/^PASSWD$/oi && $parameter) {
 	    if(&ChangePasswd($PASSWD_FILE, $to, $parameter)) {
-		$_cf{'return'} .= "250 PASSWD CHANGED... O.K.\n";
+		$Envelope{'message'} .= "250 PASSWD CHANGED... O.K.\n";
 		return 'ok';
 	    }else {
-		$_cf{'return'} .= "554 PASSWD UNCHANGED\n";
+		$Envelope{'message'} .= "554 PASSWD UNCHANGED\n";
 		return 0;
 	    }
 	}
@@ -74,19 +78,19 @@ sub AdminCommand
     # e.g. 
     # # admin add fukachan@phys.titech.ac.jp axion.phys.titech.ac.jp
     if(/^add$/io) {
-	local($ADDRESSS) = join("\t", @parameter);
-	open(TMP, ">> $MEMBER_LIST")  || (&Logging("$!"), return 0);
-	print TMP "$ADDRESSS\n";
+	local($ADDRESS) = join("\t", @parameter);
+	open(TMP, ">> $MEMBER_LIST")  || (&Log($!), return 0);
+	print TMP "$ADDRESS\n";
 	close(TMP);
-	&Logging("ADMIN: ADDS ($ADDRESSS) to $MEMBER_LIST");
+	&Log("ADMIN: ADDS ($ADDRESS) to $MEMBER_LIST");
 	
 	if($ML_MEMBER_CHECK) {
-	    open(TMP, ">> $ACTIVE_LIST")  || (&Logging("$!"), return 0);
-	    print TMP "$ADDRESSS\n";
+	    open(TMP, ">> $ACTIVE_LIST")  || (&Log($!), return 0);
+	    print TMP "$ADDRESS\n";
 	    close(TMP);
-	    &Logging("ADMIN: ADDS ($ADDRESSS) to $ACTIVE_LIST");
+	    &Log("ADMIN: ADDS ($ADDRESS) to $ACTIVE_LIST");
 	}	
-	$_cf{'return'} .= "ADMIN: ADDS ($ADDRESSS)\n\tto members and actives files\n";
+	$Envelope{'message'} .= "ADMIN: ADDS ($ADDRESS)\n\tto members and actives files\n";
 	return 'ok';
     }
     
@@ -110,7 +114,7 @@ sub AdminCommand
 	   ($parameter =~ /^(\d+)h$/oi)) { 
 	    $c = $MATOME = $1;
 	    $c = " -> Synchronous Delivery" if(0 == $MATOME);
-	    &Logging("Try matome $MATOME") if $MATOME;
+	    &Log("Try matome $MATOME") if $MATOME;
 	}elsif($c = $parameter) {
 	    # Set or unset Address to SKIP, OFF, ON ...
 	    $addr = $c;
@@ -124,11 +128,11 @@ sub AdminCommand
 	
 	# Go!
 	if(&ChangeMemberList($cmd, $addr, $ACTIVE_LIST)) {
-	    &Logging("$cmd [$addr] $c");
-	    $_cf{'return'} .= "$cmd [$addr] $c accepted.\n";
+	    &Log("$cmd [$addr] $c");
+	    $Envelope{'message'} .= "$cmd [$addr] $c accepted.\n";
 	}else {
-	    &Logging("$cmd [$addr] $c failed");
-	    $_cf{'return'} .= "$cmd [$addr] $c failed. check and try again!\n";
+	    &Log("$cmd [$addr] $c failed");
+	    $Envelope{'message'} .= "$cmd [$addr] $c failed. check and try again!\n";
 	}
 	return 'ok';
     }
@@ -147,20 +151,20 @@ sub AdminCommand
 	}
 	
 	if(! &ChangeMemberList('BYE', $old, $ACTIVE_LIST)) {
-	    &Logging("BYE [$old] failed[$ACTIVE_LIST]");
-	    $_cf{'return'} .= "BYE [$old] failed. check and try again!\n";
+	    &Log("BYE [$old] failed[$ACTIVE_LIST]");
+	    $Envelope{'message'} .= "BYE [$old] failed. check and try again!\n";
 	    $err           .= "BYE [$old] failed. check and try again!\n";
 	}
 	
 	if($ML_MEMBER_CHECK && 
 	   (! &ChangeMemberList('BYE', $old, $MEMBER_LIST))) {
-	    &Logging("BYE [$old] failed[$MEMBER_LIST]");
-	    $_cf{'return'} .= "BYE [$old] failed. check and try again!\n";
+	    &Log("BYE [$old] failed[$MEMBER_LIST]");
+	    $Envelope{'message'} .= "BYE [$old] failed. check and try again!\n";
 	    $err           .= "BYE [$old] failed. check and try again!\n";
 	}
 
 	# log
-	$_cf{'return'} .= "ADMIN: Remove [$old]\n"
+	$Envelope{'message'} .= "ADMIN: Remove [$old]\n"
 	    unless $err;
 	
 	# add
@@ -176,7 +180,7 @@ sub AdminCommand
 	if($ML_MEMBER_CHECK && open(TMP, ">> $ACTIVE_LIST")) {
 	    print TMP "$new\n";
 	    close(TMP);
-	    &Logging("ADMIN: ADDS ($new) to $ACTIVE_LIST");
+	    &Log("ADMIN: ADDS ($new) to $ACTIVE_LIST");
 	}else {
 	    &Log("ADMIN:$!");
 	    $err .= "ADMIN:$!";
@@ -184,8 +188,8 @@ sub AdminCommand
 
 	if(! $err) {
 	    &Log("CHANGE [$old -> $new]");
-	    $_cf{'return'} .= "ADMIN: ADDS [$new]\n";
-	    $_cf{'return'} .= "Change [$old -> $new] accepted\n";
+	    $Envelope{'message'} .= "ADMIN: ADDS [$new]\n";
+	    $Envelope{'message'} .= "Change [$old -> $new] accepted\n";
 	    return 'ok';
 	}else {
 	    return 0;
@@ -208,43 +212,43 @@ sub AdminCommand
 	}
 	
 	if(! &ChangeMemberList('BYE', $addr, $ACTIVE_LIST)) {
-	    &Logging("BYE [$addr] failed[$ACTIVE_LIST]");
-	    $_cf{'return'} .= "BYE [$addr] failed. check and try again!\n";
+	    &Log("BYE [$addr] failed[$ACTIVE_LIST]");
+	    $Envelope{'message'} .= "BYE [$addr] failed. check and try again!\n";
 	    return 'ok';
 	}
 	
 	if($ML_MEMBER_CHECK && 
 	   (! &ChangeMemberList('BYE', $addr, $MEMBER_LIST))) {
-	    &Logging("BYE [$addr] failed[$MEMBER_LIST]");
-	    $_cf{'return'} .= "BYE [$addr] failed. check and try again!\n";
+	    &Log("BYE [$addr] failed[$MEMBER_LIST]");
+	    $Envelope{'message'} .= "BYE [$addr] failed. check and try again!\n";
 	    return 'ok';
 	}
 	
-	&Logging("BYE [$addr]");
-	$_cf{'return'} .= "Bye [$addr] accepted. So Long!\n";
+	&Log("BYE [$addr]");
+	$Envelope{'message'} .= "Bye [$addr] accepted. So Long!\n";
 	return 'ok';
     }
 
 ######### END OF THE SAME PART AS libfml.pl #########
     
     if(/^addadmin$/io || /^addpriv$/io) {
-	open(TMP, ">> $ADMIN_MEMBER_LIST")  || (&Logging("$!"), return 0);
+	open(TMP, ">> $ADMIN_MEMBER_LIST")  || (&Log($!), return 0);
 	print TMP $parameter, "\n";
 	close(TMP);
-	&Logging("ADMIN: ADDS $parameter to $ADMIN_MEMBER_LIST");
-	$_cf{'return'} .= "ADMIN: ADDS $parameter to Admins\n";
+	&Log("ADMIN: ADDS $parameter to $ADMIN_MEMBER_LIST");
+	$Envelope{'message'} .= "ADMIN: ADDS $parameter to Admins\n";
 	return 'ok';
     }
     
     if(/^byeadmin$/io || /^byepriv$/io) {
 	$MEMBER_LIST = $ADMIN_MEMBER_LIST; # special effects
 	if(! &ChangeMemberList('BYE', $parameter, $ADMIN_MEMBER_LIST)) {
-	    &Logging("ADMIN: BYE FAILED[$ADMIN_MEMBER_LIST] for $parameter");
-	    $_cf{'return'} .= "ADMIN: BYE FAILED[$ADMIN_MEMBER_LIST] for $parameter\n";
+	    &Log("ADMIN: BYE FAILED[$ADMIN_MEMBER_LIST] for $parameter");
+	    $Envelope{'message'} .= "ADMIN: BYE FAILED[$ADMIN_MEMBER_LIST] for $parameter\n";
 	    return 0;
 	}
-	&Logging("ADMIN: BYE to Admins ($parameter)");
-	$_cf{'return'} .= "ADMIN: BYE to Admins ($parameter)\n";
+	&Log("ADMIN: BYE to Admins ($parameter)");
+	$Envelope{'message'} .= "ADMIN: BYE to Admins ($parameter)\n";
 	return 'ok';
     }
     
@@ -253,11 +257,11 @@ sub AdminCommand
 	local($RESULT);
 	$RESULT=`chdir $DIR; ls -lR`;
 	if($@) {
-	    &Logging("ERROR: when ls -lR: $@");
+	    &Log("ERROR: when ls -lR: $@");
 	}else {
-	    &Logging("ADMIN: ls -lR $DIR");
+	    &Log("ADMIN: ls -lR $DIR");
 	}
-	$_cf{'return'} .= "ADMIN: ls -lR $DIR\n\n$RESULT\n";
+	$Envelope{'message'} .= "ADMIN: ls -lR $DIR\n\n$RESULT\n";
 	return 'ok';
     }
     
@@ -267,11 +271,11 @@ sub AdminCommand
 	local($COM) = join("\t",@parameter);
 	$RESULT=`chdir $DIR; ls $COM`;
 	if($@) {
-	    &Logging("ERROR: when ls $COM: $@");
+	    &Log("ERROR: ls $COM: $@");
 	}else {
-	    &Logging("ADMIN: ls $COM in $DIR");
+	    &Log("ADMIN: ls $COM $DIR");
 	}
-	$_cf{'return'} .= "ADMIN: ls $COM in $DIR\n\n$RESULT\n";
+	$Envelope{'message'} .= "ADMIN: ls $COM $DIR\n\n$RESULT\n";
 	return 'ok';
     }
     
@@ -279,12 +283,12 @@ sub AdminCommand
 	local($targetfile) = "$DIR/$parameter";
 	if(-r $targetfile) { 
 	    unlink $targetfile;
-	    &Logging("ADMIN: remove $targetfile");
-	    $_cf{'return'} .= "ADMIN: remove $targetfile\n";
+	    &Log("ADMIN: remove $targetfile");
+	    $Envelope{'message'} .= "ADMIN: remove $targetfile\n";
 	    return 'ok';
 	}else {
-	    &Logging("ADMIN: remove: cannot find $targetfile");
-	    $_cf{'return'} .= "ADMIN: remove: cannot find $targetfile\n";
+	    &Log("ADMIN: remove: cannot find $targetfile");
+	    $Envelope{'message'} .= "ADMIN: remove: cannot find $targetfile\n";
 	    return 0;
 	}
     }
@@ -292,13 +296,13 @@ sub AdminCommand
     if(/^get$/io) {
 	local($targetfile) = "$DIR/$parameter";
 	if(-r $targetfile) { 
-	    &Logging("ADMIN: get $targetfile");
+	    &Log("ADMIN: get $targetfile");
 	    &SendFile($to, "ADMIN: get $targetfile", $targetfile);
-	    $_cf{'return'} .= "ADMIN: send $targetfile to $to\n";
+	    $Envelope{'message'} .= "ADMIN: send $targetfile\n\tto $to\n";
 	    return 'ok';
 	}else {
-	    &Logging("ADMIN: get: cannot get $targetfile");
-	    $_cf{'return'} .= "ADMIN: cannot find $targetfile\n";
+	    &Log("ADMIN: get: cannot get $targetfile");
+	    $Envelope{'message'} .= "ADMIN: cannot find $targetfile\n";
 	    return 0;
 	}
     }
@@ -340,8 +344,8 @@ sub AdminCommand
 	    $r = "ADMIN: Cannot Create $t in $DIR";
 	}
 
-	&Logging($r);
-	$_cf{'return'} .= "$r\n";
+	&Log($r);
+	$Envelope{'message'} .= "$r\n";
 	return 0; # must be done as "last NextCommand";
     }
     
@@ -350,17 +354,17 @@ sub AdminCommand
 	local($newname)    = "$DIR/$Fld[4]";
 	if(-r $targetfile) { 
 	    if(rename($targetfile, $newname)) {
-		&Logging("ADMIN: rename $targetfile to $newname");
-		$_cf{'return'} .= "ADMIN: rename $targetfile to $newname\n";
+		&Log("ADMIN: rename $targetfile to $newname");
+		$Envelope{'message'} .= "ADMIN: rename $targetfile to $newname\n";
 		return 'ok';
 	    }else {
-		&Logging("ADMIN: cannot rename $targetfile to $newname");
-		$_cf{'return'} .= "ADMIN: cannot find $targetfile\n";
+		&Log("ADMIN: cannot rename $targetfile to $newname");
+		$Envelope{'message'} .= "ADMIN: cannot find $targetfile\n";
 		return 0;
 	    }
 	}else {
-	    &Logging("ADMIN: cannot find $targetfile");
-	    $_cf{'return'} .= "ADMIN: cannot find $targetfile\n";
+	    &Log("ADMIN: cannot find $targetfile");
+	    $Envelope{'message'} .= "ADMIN: cannot find $targetfile\n";
 	    return 0;
 	}
     }
@@ -368,13 +372,29 @@ sub AdminCommand
     # LOG
     local($s) = $_ . join(" ", @parameter);
     &Log("ADMIN: UNKNOWN COMMAND [$s]");
-    $_cf{'return'} .= "ADMIN: UNKNOWN COMMAND [$s]\n";
+    $Envelope{'message'} .= "ADMIN: UNKNOWN COMMAND [$s]\n";
 
     # End Hook
-    undef $_cf{'mode', 'com-admin'}; # for later use of not admin commands
+    undef $_cf{'mode:addr:multiple'}; # for later use of not admin commands
 
     # O.K. comes back to the main
     return 0;
+}
+
+
+sub AdminModeInit
+{
+    # Touch
+    for ($ADMIN_MEMBER_LIST, $ADMIN_HELP_FILE, $PASSWD_FILE) {
+	if (!-f $_) { 
+	    open(TOUCH,">> $_"); close(TOUCH);
+	}
+	else {
+	    &Log("WARNING: no exist in $_!");
+	}
+
+	(-z $_) && &Log("WARNING: no content in $_!");
+    }
 }
 
 
