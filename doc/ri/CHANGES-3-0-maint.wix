@@ -1,0 +1,44 @@
+	LIST OF BUG FIXES between 3.0 release and 3.0 patch
+
+				¿¼Ä® ¸­°ì
+=E
+				Ken'ichi Fukamachi
+
+------------------------------
+.toc
+------------------------------
+
+
+.C	BUG FIXES
+
+.S	3.0 Release patchlevel 1
+
+cf/config
+
+	TZone cannot accpet -0800 style.
+
+doc/examples/index*html
+
+	remove fml.css stylesheet definition since fml.css does not exist
+
+doc/ri/INSTALL.wix
+
+	add how to pass perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+sbin/makefml
+
+	fix perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+	add COPY_FIELD() to avoid evaluation of config.ph loading
+
+$Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
