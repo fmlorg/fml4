@@ -585,16 +585,20 @@ sub SetHashDefaults
 		    # upgrade from 2.x to 3.0
 		    'upgrade', 'do_upgrade',
 
-		    # WWW/CGI interface
+		    # WWW/CGI interface for cgi interface
 		    'html_config',     'do_html_config',
 		    'html_config_set', 'do_html_config',
 		    'html_passwd',     'do_html_passwd',
 
-		    # 
-		    'admin.cgi',    'do_setup_admin_cgi',
-		    'mladmin.cgi',  'do_setup_mladmin_cgi',
-		    'ml-admin.cgi', 'do_setup_mladmin_cgi',
-		    '500#mladmin.cgi', 'set up ml-admin/$ml/*.cgi',
+		    # cgi utilities
+		    'admin.cgi',          'do_setup_admin_cgi',
+		    'mladmin.cgi',        'do_setup_mladmin_cgi',
+		    'ml-admin.cgi',       'do_setup_mladmin_cgi',
+		    '500#mladmin.cgi ML', 'set up ml-admin/$ml/*.cgi',
+
+		    # cui htpasswd wrapper
+		    'htpasswd',           'do_htpasswd',
+		    '500#htpasswd ML',    'htpasswd wrapper for ml',
 
 		    # utilities
 		    'resend',       'do_resend',
@@ -2263,6 +2267,35 @@ sub do_html_passwd
 	&Log("makefml::passwd changing $passwd_file fails");
     }
 
+}
+
+
+sub do_htpasswd
+{
+    local($ml, $user) = @_;
+    local($prog, $flag);
+    local($dir, $pwf);
+
+    if (! $user) {
+	print STDERR "   Error!\n";
+	print STDERR "   Usage: htpasswd $ml user\n\n";
+	return;
+    }
+
+    &ResetVariables;
+    $prog = search_path('htpasswd');
+
+    $dir = "$CGI_AUTHDB_DIR/ml-admin/$ml";
+    $pwf = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
+
+    if (! -f $pwf) {
+	$flag = '-c';
+	&MkDirHier($dir);
+	&Touch($pwd);
+    }
+
+    print STDERR "\% $prog $flag $pwf $user\n";
+    system "$prog $flag $pwf $user";
 }
 
 
