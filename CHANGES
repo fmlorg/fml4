@@ -5,6 +5,16 @@
 
 2000/04/27
 
+   bump up to 3.0D (_cf changes for command line options)
+
+   clean up campaign (modify global variable name)
+   s/_cf/Opt/g over sentences for command line options
+	bin/cron.pl
+	kern/fml.pl
+	kern/msend.pl
+	proc/libfml.pl
+	bin/split_and_msend.pl
+
    fix version numbering in sources and packages (fml-stable) 
 
    new functions used in config.ph (kern/libloadconfig.pl)
