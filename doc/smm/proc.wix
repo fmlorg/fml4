@@ -156,6 +156,10 @@ Example: "bye" and "unsubscribe" to notify the log to maintainers.
 		    'r#unsubscribe',   1,
 		    'r2a#unsubscribe', 1,
 
+Ex 2: "chaddr" case.
+		    'chaddr',         'ProcSetMemberList',
+		    'r#chaddr', 1,
+
 Îã: "get" ¤Ï£±¥á¡¼¥ë¤Ç£±£°¸Ä¤Þ¤Ç
 =E
 Example: "get" command requets is up to 10 in one mail.
