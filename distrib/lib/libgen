@@ -19,6 +19,8 @@ GEN_WWW () {
    if [ X$MODE = X ]; then
 	echo "ReGenerating WWW Search Environment";
 	(cd $FML; make syncwww search)
+   else
+	echo ignore www updates
    fi
 }
 
@@ -391,6 +393,7 @@ GEN_ARCHIVE () {
 	test -d $WWW     || mkdir $WWW
 	test -d $FTP/src || mkdir $FTP/src
 
+
 	### Section: export to ftp
 	echo " "
 	echo "-- sync w/ ftp server"
@@ -456,5 +459,21 @@ GEN_ARCHIVE () {
 		rm -f $FTP/00LATEST_CURRENT_IS*
 		eval " touch '$FTP/00LATEST_${BRANCH}_SNAPSHOT_IS__$FMLID__' ";
 		echo ""
+	else
+		echo ""
+		echo "-- make current htdocs tarballs"
+		echo ""
+		test -d $FTP/htdocs || mkdir $FTP/htdocs
+		rsync --delete -C -av $FML/var/html/ $FTP/htdocs/
+		(
+			TB=htmldocs-${BRANCH}-${DATE}
+
+			chdir $FTP
+
+			mv htdocs ${TB}
+			tar cvf ${TB}.tar ${TB}
+			gzip -9 -f -v ${TB}.tar
+			mv ${TB} htdocs
+		)
 	fi
 }
