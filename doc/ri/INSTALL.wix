@@ -46,15 +46,7 @@
 
    For easy guideline of installation and fundamental configuration,
    See
-.url http://www.fml.org/fml/examples/index-e.html
-
-   For more details of internals, advanced configurations, see
-   doc/op.en		(plain text)
-.url	http://www.fml.org/fml/op-e/index.html
-
-   For more details on advanced settings, please see the part III of
-   doc/op.en		(plain text)
-.url	http://www.fml.org/fml/op-e/index.html#Configurations
+.url http://www.fml.org/fml/English/tutorial.html
 
    For installation on Windows NT4, please also see INSTALL_on_NT4.
 .url http://www.fml.org/fml/
@@ -705,7 +697,7 @@ doc/Japanese/
 .url http://www.fml.org/fml/English/tutorial.html
 
 To find information, 
-1.	search keyword or variable name in the doc/op.en
+1.	search keyword or variable name in the doc/English/
 2.	use http://www.fml.org/fml/search-e.html 
 Check your system following doc/CHECK_LIST.en.
 .fi
@@ -913,7 +905,7 @@ Vixie Cron でない OS についてはマニュアルで cron を調べるとか
 doc/Japanese/ を見て下さい。
 =E 
 If your OS has not Vixie cron, please see the manual of "crontab" or
-the chapter on "cron" of doc/op.en in the fml source.
+the chapter on "cron" of doc/English/ in the fml source.
 
 ＊＊＊ MLが多くなってきたら? (ISPのシェルアカウントなどでは初めからこ
 ＊＊＊ のケースでしょう)
@@ -2675,7 +2667,7 @@ sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
 そういうtrickyな話題については doc/Japanese/ を見て下さい(^^;)
 =E
 If sendmail do not run on your machine, you can set ML via POP3.
-Please see doc/op.en for more details. 
+Please see doc/English/ for more details. 
 =S
 FYI. NT Version uses this trick:)
 

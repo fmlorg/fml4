@@ -24,8 +24,7 @@ automatically.
 
 [ /var/spool/ml/elena/include-mead ] has
 
-# MEAD: Mail Error Analyze Daemon ("-m auto" to remove addrs automatically)
-# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
+# comments ...
 "|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
 
 [ /var/spool/ml/elena/aliases has the (commented) entry to call ]
