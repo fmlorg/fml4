@@ -1,7 +1,7 @@
 .for file in ${HTML_MISC_SOURCES}
 HTML_MISC += var/html/${file}
 var/html/${file}: doc/html/${file}
-	$(CP) doc/html/${file} $(FML)/var/html/ 
+	$(CP) doc/html/${file} ${FML}/var/html/ 
 .endfor
 
 # mascot
@@ -31,23 +31,23 @@ var/html/advisories/${file}/index.html: doc/advisories/${file}.wix
 __HTML_RI__ += var/html/${file}.html
 __HTML_RI__ += var/html/${file}-e.html
 
-var/html/${file}.html: doc/ri/${file}.wix $(FML)/var/doc/${file}.jp
-	rm -f $(FML)/var/html/${file}.html
-	if [ -f $(FML)/doc/html/include.jp/${file}.hdr ] ;\
+var/html/${file}.html: doc/ri/${file}.wix var/doc/${file}.jp
+	rm -f ${FML}/var/html/${file}.html
+	if [ -f ${FML}/doc/html/include.jp/${file}.hdr ] ;\
 	then \
-	cat $(FML)/doc/html/include.jp/${file}.hdr >\
-	$(FML)/var/html/${file}.html ;\
+	cat ${FML}/doc/html/include.jp/${file}.hdr >\
+	${FML}/var/html/${file}.html ;\
 	fi
-	cat $(FML)/var/doc/${file}.jp >> $(FML)/var/html/${file}.html
+	cat ${FML}/var/doc/${file}.jp >> ${FML}/var/html/${file}.html
 
-var/html/${file}-e.html: doc/ri/${file}.wix $(FML)/var/doc/${file}.en
-	rm -f $(FML)/var/html/${file}-e.html
-	if [ -f $(FML)/doc/html/include.en/${file}.hdr ] ;\
+var/html/${file}-e.html: doc/ri/${file}.wix var/doc/${file}.en
+	rm -f ${FML}/var/html/${file}-e.html
+	if [ -f ${FML}/doc/html/include.en/${file}.hdr ] ;\
 	then \
-	cat $(FML)/doc/html/include.en/${file}.hdr >\
-	$(FML)/var/html/${file}-e.html ;\
+	cat ${FML}/doc/html/include.en/${file}.hdr >\
+	${FML}/var/html/${file}-e.html ;\
 	fi
-	cat $(FML)/var/doc/${file}.en >> $(FML)/var/html/${file}-e.html
+	cat ${FML}/var/doc/${file}.en >> ${FML}/var/html/${file}-e.html
 
 .endfor
 
@@ -62,21 +62,21 @@ __HTML_CPP__ += var/html/${file}-e.html
 
 var/html/${file}.html: doc/html/${file}.html
 	$(CPP) -P -DJAPANESE doc/html/${file}.html |\
-	$(JCONV) > $(FML)/var/html/${file}.html
+	$(JCONV) > ${FML}/var/html/${file}.html
 
 var/html/${file}-e.html: doc/html/${file}.html
 	$(CPP) -P -UJAPANESE doc/html/${file}.html |\
-	$(JCONV) > $(FML)/var/html/${file}-e.html
+	$(JCONV) > ${FML}/var/html/${file}-e.html
 
 .endfor
 
 var/html/advisories/index.html: doc/advisories/index.html
 	$(CPP) -P -DJAPANESE doc/advisories/index.html |\
-	$(JCONV) > $(FML)/var/html/advisories/index.html
+	$(JCONV) > ${FML}/var/html/advisories/index.html
 
 var/html/advisories/index-e.html: doc/advisories/index-e.html
 	$(CPP) -P -UJAPANESE doc/advisories/index-e.html \
-	> $(FML)/var/html/advisories/index-e.html
+	> ${FML}/var/html/advisories/index-e.html
 
 var/html/op/index.html: doc/smm/*wix
 	test -d var/html/op || mkdir var/html/op
