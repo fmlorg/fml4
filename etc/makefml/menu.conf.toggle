@@ -79,6 +79,7 @@
 	_i_  PASS_ALL_FIELDS_IN_HEADER                  $SUMMARY{'PASS_ALL_FIELDS_IN_HEADER'}
 	_i_  RELAY_HACK                                 $SUMMARY{'RELAY_HACK'}
 	_i_  REMOTE_ADMINISTRATION                      $SUMMARY{'REMOTE_ADMINISTRATION'}
+	_i_  TRY_VERP_PER_DAY                           $SUMMARY{'TRY_VERP_PER_DAY'}
 	_i_  UNISTD                                     $SUMMARY{'UNISTD'}
 	_i_  USE_ARCHIVE                                $SUMMARY{'USE_ARCHIVE'}
 	_i_  USE_CROSSPOST                              $SUMMARY{'USE_CROSSPOST'}
@@ -740,6 +741,20 @@
 
 =menu
 	REMOTE_ADMINISTRATION	$SUMMARY{'REMOTE_ADMINISTRATION'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/TRY_VERP_PER_DAY
+
+=name
+	TRY_VERP_PER_DAY
+
+=config
+	TRY_VERP_PER_DAY
+
+=menu
+	TRY_VERP_PER_DAY	$SUMMARY{'TRY_VERP_PER_DAY'}
 
 =query
 	type:	y-or-n
