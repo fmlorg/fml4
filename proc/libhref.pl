@@ -139,6 +139,10 @@ sub TalkWithHttpServer
 	close(HOUT);
 	close(S);
 
+
+	### SPECIAL for bin/geturl.pl
+	$e{'special:geturl'} && (return $e{'special:geturl'} = $tmpf);
+
 	
 	### PLAIN TEXT FILE
 	if (-T $tmpf) {
@@ -170,7 +174,7 @@ sub TalkWithHttpServer
 	### BINARY FILE 
 	else {
 	    local($name) = reverse split(/\//, $body);
-	    if (! open(HIN, "$UUENCODE $tmpf $name|")) {
+	    if (! (open(HIN,"-|") || exec $UUENCODE, $tmpf, $name)) {
 		$re{'message'} .= "canont open tmpf"; 
 		return;
 	    }
