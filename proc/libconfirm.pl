@@ -43,6 +43,14 @@ sub ConfirmationModeInit
 }
 
 
+sub FixFmlservConfirmationMode
+{
+    local(*e) = @_;
+    $CONFIRMATION_KEYWORD   = "$CONFIRMATION_KEYWORD $e{'tmp:ml'}";
+    $CONFIRMATION_SUBSCRIBE = "$CONFIRMATION_SUBSCRIBE $e{'tmp:ml'}";
+}
+
+
 # return 1 if we can regist $addr (replied and confirmed);
 # return 0 if first-time, expired, confirmation yntax error;
 sub Confirm
@@ -92,10 +100,11 @@ sub Confirm
 	 &Append2("$time\t$addr\t$id\t$name", $CONFIRMATION_LIST);
 
 	 # Header
+	 &FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	 $e{"GH:Subject:"} = "Subscribe confirmation request $ML_FN";
 	 $m .= "To confirm your subscribe request for $MAIL_LIST,\n";
 	 $m .= "please send the following phrase to $CONFIRMATION_ADDRESS\n\n";
-	 $m .= "$CONFIRMATION_KEYWORD $id $name\n";
+	 $m .= "$CONFIRMATION_KEYWORD $id $name\n";	     
 	 &Mesg(*e, $m);
 
 	 $e{'message:append:files'} = $CONFIRMATION_FILE;
@@ -148,11 +157,13 @@ sub IdCheck
 	return 1;
     }
     else {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+
 	&Log("confirm[confirm] syntax error");
 	&Log("confirm request[$buffer]");
 	$m .= "Confirmation Syntax or Password Error:\n";
 	$m .= "Syntax is following style, check again syntax and password\n\n";
-	$m .= "$CONFIRMATION_KEYWORD password $name\n";
+	$m .= "$CONFIRMATION_KEYWORD password $name\n";	    
 	$m .= "\nwhere this \"password\" can be seen\n";
 	$m .= "in the confirmation request mail from $main'MAIL_LIST.\n";
 	&Mesg(*e, $m);
@@ -185,6 +196,8 @@ sub BufferSyntax
 	$name = $1;
     }
     else {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+
 	&Log("confirm[firstime] syntax error");
 	&Log("confirm request[$buffer]");
 	$_ .= "Syntax Error! Please use the following syntax\n";
@@ -199,6 +212,8 @@ sub BufferSyntax
     }
 
     if ($buffer =~ /\@/) {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+
 	&Mesg(*e, "Please use your name NOT E-Mail Address!");
 	&Mesg(*e, "For Example:");
 	&Mesg(*e, "\t\"$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\"");
