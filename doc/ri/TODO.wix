@@ -522,8 +522,8 @@ A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
 利点として makefml config の日本語変換
 Message Language Extensionの関数ライブラリをよぶ
 
-.S	prepare documents to make apache-ssl (1.3.9 base)
-=E.S	apache-ssl (1.3.9 base)の解説の用意をする
+.S	prepare documents to make apache-ssl (1.3.12 base)
+=E.S	apache-ssl (1.3.12 base)の解説の用意をする
 
 .S	acl model
 
@@ -561,11 +561,11 @@ Message Language Extensionの関数ライブラリをよぶ
 .C	UNIX 以外のOS固有の問題
 =E.C	NOT UNIX system specific problems
 
-.S	NT: tail command emulation
+.S	NT emulation
 
-.S	NT: fork
-
-.S	NT: alarm
+	tail command emulation
+	fork
+	alarm
 
 
 .C	日本特有の問題
@@ -577,7 +577,8 @@ Message Language Extensionの関数ライブラリをよぶ
 fml-support: 06265
 半角カナは勝手に全角カナに、機種依存文字は似た文字に
 
-言語依存 repository は必要か？
+Q: 言語依存 repository は必要か？
+A: module/$LANGUAGE/
 
 
 .appendix
