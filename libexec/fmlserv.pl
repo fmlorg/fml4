@@ -108,6 +108,15 @@ sub InitFmlServ
 	    last;
 	}
     }
+
+    # ml cache
+    $MAP_DB = "$FMLSERV_DIR/mlmap";
+
+    # if Berkeley DB is not used, reset always ;-)
+    if ((stat($MAIL_LIST_DIR))[9] >  (stat("$MAP_DB.db"))[9]) {
+	print STDERR "RESET $MAP_DB\n";
+	&CreateML_MAP($FMLSERV_DIR, $MAP_DB);
+    }
 }
 
 
@@ -769,6 +778,30 @@ sub InitFmlServProcedure
 		  );
 }
 
+
+sub CreateML_MAP 
+{
+    opendir(DIRD, $MAIL_LIST_DIR) || do {
+	&Mesg(*Envelope, "\tError: cannot opendir ML MAP"); 
+	&Log("cannot open $dir");
+	return;
+    };
+
+    &ML_MAPopen;
+
+    for (readdir(DIRD)) {
+	print STDERR "MAP SCAN $_\n" if $debug;
+	next if /^\./;
+	next if /^(fmlserv|etc)/;
+	$ML_MAP{$_} = $_;
+    }
+
+    &ML_MAPclose;
+    closedir(DIRD);
+}
+
+sub ML_MAPopen  { dbmopen(%ML_MAP, $MAP_DB, 0644);}
+sub ML_MAPclose { dbmclose(%ML_MAP);}
 
 sub ProcLists
 {
