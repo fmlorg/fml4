@@ -411,7 +411,10 @@ sub AdminCommand
 
 	# PROCEDURE
 	# RETURN is 0 == LAST(libfml.pl);
+	eval $ADMIN_COMMAND_START_HOOK{$cmd} if $ADMIN_COMMAND_START_HOOK{$cmd};
 	$status = &$proc($cmd, *Fld, *e, *opt);
+	eval $ADMIN_COMMAND_END_HOOK{$cmd }  if $ADMIN_COMMAND_END_HOOK{$cmd};
+
 	&Log("admin status=$status") if $debug_proc;
 
 	# chaddr and bye
