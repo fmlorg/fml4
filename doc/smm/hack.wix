@@ -208,7 +208,7 @@ if ($Envelope{'h:X-Original-Subject:'} eq $Envelope{'h:Subject:'}) {
  'References', 'In-Reply-To', 'Precedence', 'Lines');
 
 # 念のため最後に記事を 644 にして誰でも読めるようにする
-=#
+=E
 # chmod 644 articles in the spool
 
 $DISTRIBUTE_CLOSE_HOOK = q#
@@ -233,7 +233,7 @@ $DISTRIBUTE_CLOSE_HOOK = q#
 $FACE_MARK = '(o)^^)';
 
 # ish の時は SJIS自動変換
-=#
+=E
 # SJIS auto conversion when ish
 
 $USE_SJIS_IN_ISH = 1;
@@ -389,7 +389,7 @@ $TRF_NAME_HOOK = q#
 
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
 =E.S	Example: set up Reply-To if required when Reply-To == $MAIL_LIST
-.key	# replyto コマンド
+.key	replyto コマンド
 
 .if LANG == ENGLISH
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
@@ -532,9 +532,9 @@ the future. This code enforces FML to ignore $MEMBER_LIST check in
 .l	my-file-sendback-command
 .xref	%Procedure-special-key
 
-例: コマンド # news でニュースというファイルを送り返す。
+例: コマンド news でニュースというファイルを送り返す。
 =E
-E.g. "# news" command is to send back $DIR/news file.
+E.g. "news" command is to send back $DIR/news file.
 
 config.ph に
 =E
@@ -557,7 +557,7 @@ In config.ph
 ２	本文にキーワード uja とかくこと
 =E
 1	requests from anyone are O.K.
-2	keyword "# uja" in the mail body to send back "uja"
+2	keyword "uja" in the mail body to send back the file "uja".
 
 $START_HOOK = q#
     $UJA_FILE = "$DIR/uja";

@@ -224,15 +224,15 @@ to &Smtp; This routine is used in a reply mail of command results.
 
 インタプリタですから、コマンドでそのML独自の機能をもたせたかったら
 config.ph にセットして下さい(そうすれば、MLが複数あってもそれぞれ別様
-にカスタマイズできる)。以下の例はリストを返すようにするコマンド "#
-list" を新たに付け加える例です。
+にカスタマイズできる)。以下の例はリストを返すようにするコマンド "list" 
+を新たに付け加える例です。
 =E
 This hook is evaluated in the command execution loop. Historically
 this hook is to add a new command you customize. Today this is
 obsolete, to add a new command is that you write a new routine and
 inject "command name" and the function name (reference to the
 function) to %LocalProcedure.  Using this hook is obsolete. This
-example is to add a new command "# list" which send back $DIR/list
+example is to add a new command "list" which send back $DIR/list
 file.
 .xref add-procedures my-file-sendback-command
 
@@ -261,7 +261,7 @@ quoteする関数（本当の意味での関数ではないそうだ）
 方が優先という観察と経験に基づいてます。ただ前述のようにこのやり方はす
 でに obsolete です。
 
-.S	$COMMAND_HOOK Example: add "# list" and "# rsummary"
+.S	$COMMAND_HOOK Example: add "list" and "rsummary"
 .k	"list" command (example)
 .k	"rsummary" command (example)
 
@@ -271,7 +271,7 @@ FYI: "rsummay" command below is available in the context of "summary"
 command.
 
 例:
-	# list		list リストファイルを取り寄せる
+	list		list リストファイルを取り寄せる
 .xref	my-file-sendback-command
 
 sub Command では $to にコマンドの結果の返し先が設定されています。
@@ -287,7 +287,7 @@ $COMMAND_HOOK =q#
 #;
 
 例:
-# rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
+rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
 =E
 Example: to show summary of article number from 100 to 200 articles.
 
@@ -316,11 +316,11 @@ $COMMAND_HOOK = q#
     }
 #;
 
-.S	HOOKによるコマンド実装例: "# sget"
-=E.S	Example: "# sget"
+.S	HOOKによるコマンド実装例: "sget"
+=E.S	Example: "sget"
 .key	$COMMAND_HOOK
 
-# sget uja		subjectに uja というキーワードが入っているファ
+sget uja		subjectに uja というキーワードが入っているファ
 			イルを取り寄せる
 
 $COMMAND_HOOK =q#
@@ -344,12 +344,12 @@ $COMMAND_HOOK =q#
     }
 #;
 
-.S	HOOKによるコマンド実装例: "# admin" アドミンコマンド
-=E.S	"# admin" command by $COMMAND_HOOK
+.S	HOOKによるコマンド実装例: "admin" アドミンコマンド
+=E.S	"admin" command by $COMMAND_HOOK
 .k	admin コマンド
 .xref	REMOTE-ADMINISTRATION 
 
-"# admin" アドミンコマンド って昔HOOKで実装していましたが、今は変数が
+"admin" アドミンコマンド って昔HOOKで実装していましたが、今は変数が
 あります。
 =E
 Obsolete. Long time ago, FML provides "admin" commands by

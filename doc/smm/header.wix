@@ -901,7 +901,7 @@ Example: Append "how to get help" to the last of a distributed article.
    $SMTP_OPEN_HOOK = q% 
 
 	$e{'Body'} .= 
-       "\nTo need help, please send '# help' to elena-ctl\@fml.org."; 
+       "\nTo need help, please send 'help' to elena-ctl\@fml.org."; 
 
    %;
 
