@@ -480,3 +480,49 @@ $Id$
 .# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+
+.#
+.#################################################################
+.#
+.# この作業の前にインストールするホストに
+.#    ユーザ fml というアカウント
+.# があり、
+.#    perl 5
+.#    メール配送プログラム
+.# がインストールされていることを確認して下さい。
+.# 
+.# 
+.# プロバイダのサービスを利用している場合どうすればよいかは一概にはいえま
+.# せん。詳しくは自分の使っているプロバイダに聞いて下さい。一般にはいわゆ
+.# る「シェルアカウント/シェルサービス」などと呼ばれる UNIX マシンを使え
+.# るサービスを利用している必要があるはずです。ホームページレンタルサービ
+.# スなどでFTP等でファイルを送り込むタイプのものなどの"シェルサービスのつ
+.# いていない"サービスだけではおそらく無理でしょう。
+.# =E
+.# If you use an ISP service, you must require e.g. a shell account. You
+.# should consult with ISP you use for details of computer environments.
+.# 
+.# .if LANG == JAPANESE
+.# MLは本質的にフィルタリングなので、MLのプロセスの流れは(間にfmlを夾んで)
+.# 	"メールを受けてfmlをkickするプロセス"
+.# 	"SMTPを理解する配送プロセス"
+.# の２つの動作からなります。メールを受けることと配送することは概念的に別
+.# のものです。原則的に fml はメールを受けるホスト上で動きます。配送系は
+.# SMTPを理解してくれればなんでも構いません postfix,sendmail, qmail, exim, ...
+.# そのため配送を担当するホストはメールを受けるホストと同じでなくても構い
+.# ません。配送専用マシンなどあるととてもよいでしょう。
+.# .fi
+.# .if LANG == ENGLISH
+.# ML is a filtering process, so it consists of
+.#                                1             2
+.#    sender(post an article) -> MTA -> fml -> MTA (to deliver the article)
+.# 
+.#    1. process receives an incoming mail and kicks a fml process off
+.#    2. delivery process which process understands SMTP
+.# 
+.# The delivery (MTA 2) and kick-off (MTA 1) processes can be essentially
+.# different ones. fml runs on the host which receives mail submitted
+.# to ML. MTA 2 (delivery system) can run on another hosts other than MTA
+.# 1. Plural MTA's for delivery are available to accelerate it.
+.# .fi
+.# 
