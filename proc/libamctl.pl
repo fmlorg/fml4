@@ -214,7 +214,7 @@ sub DoSetDeliveryMode
     local($proc, *Fld, *e, *misc) = @_;
     local($c, $_, $cmd, $opt, $curaddr);
 
-    &Debug("\$curaddr = $misc || $Addr || $From_address");
+    &Debug("\$curaddr = $misc || $Addr || $From_address") if $debug;
 
     $curaddr = $misc || $Addr || $From_address; # address to operate;
     $cmd     = $proc; $cmd =~ tr/a-z/A-Z/; $_ = $cmd;
