@@ -25,6 +25,19 @@ fml-current をインストールする。
 /usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに付け
 足す。
 
+例: apache と sendmail を使っている場合
+
+   /usr/local/apache/conf/httpd.conf に
+	/usr/local/fml/www/examples/apache/httpd.conf.patch
+	をつけたす。そしてリスタート
+
+   /etc/sendmail.cf を編集する。編集する内容は
+
+	/usr/local/fml/www/examples/sendmail/senmail.cf	
+
+   にある alias ファイルの定義をつけたしてほしい。
+		
+
 このあとはWWW画面で一通りできるようになる。"一通り"できることの範囲は
 
 	ＭＬの新規作成/削除
