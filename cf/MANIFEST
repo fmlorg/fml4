@@ -1004,6 +1004,15 @@ HTML_INDEX_UNIT:		day
 # value: "" / UL
 HTML_INDENT_STYLE:		UL
 
+# image file embedding style
+# value: A / IMAGE 
+HTML_MULTIPART_IMAGE_REF_TYPE:
+
+# html file umask
+# value: "" / umask
+HTML_DEFAULT_UMASK:
+HTML_WRITE_UMASK:
+
 
 # ### Section: Interface to other Services (http,ftp,gopher,www) ###
 # Please see doc/op for the details.
