@@ -1244,7 +1244,7 @@ sub Distribute
     if ($CHECK_MAILBODY_CKSUM) {
 	&use('cksum');
 
-	if (&CheckMailBodyCKSUM(*Envelope)) {
+	if (&CheckMailBodyCKSUM(*e)) {
 	    # looped !
 	    $DO_NOTHING = 1;
 	    return $NULL;
