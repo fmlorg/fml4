@@ -337,8 +337,16 @@ Please use crontab(1) in the following way:
 The Matome Okuri Server wakes up periodically, checks articles in the
 ML spool and deliver articles in one mail.
 
-Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron 
-の章を見る等して下さい。
+＊玄人向け解説: 本来まとめ送りサーバはログレポートを一時間に一度送りま
+す。この makefml で newml する時はメールが送られないように -q がデフォー
+ルトでついています。もしログレポートが欲しいなら 
+	/var/spool/ml/etc/crontab/ユーザの名前 
+から-q を外して下さい。
+=E
+
+
+Vixie Cron でない OS については man crontab で調べるとか doc/op の 
+cron の章を見る等して下さい。
 =E 
 If your OS has not Vixie Cron, please see the manual of "crontab" or
 the chapter on "cron" of doc/op in the fml source.
