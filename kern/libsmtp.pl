@@ -14,6 +14,7 @@
 
 ##### local scope in Calss:Smtp #####
 local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus, $Port);
+local($SoErrBuf, $RetVal);
 
 # sys/socket.ph is O.K.?
 sub SmtpInit
@@ -323,12 +324,23 @@ sub SmtpIO
     ##### THE MOST HEAVY LOOP IS HERE;
     #####
     $Current_Rcpt_Count = 0;
+    $e{'mci:pipelining'} = 0; # reset EHLO information
 
     if ($e{'mci:mailer'} eq 'smtpfeed' || $SmtpFeedMode) {
 	&SmtpPut2Socket("LHLO $e{'macro:s'}", $ipc);
     }
     else {
-	&SmtpPut2Socket("HELO $e{'macro:s'}", $ipc);
+	&SmtpPut2Socket("EHLO $e{'macro:s'}", $ipc, 1, 1); # error ignore mode 
+
+	# EHLO fails (smap returns 500 ;_;, may not 554)
+	if ($SoErrBuf =~ /^5/) {
+	    &SmtpPut2Socket("HELO $e{'macro:s'}", $ipc);
+	}
+	elsif ($RetVal =~ /250.PIPELINING/) {
+	    $e{'mci:pipelining'} = 1;
+	}
+
+	undef $SoErrBuf;
     }
 
     &SmtpPut2Socket("MAIL FROM:<$MAINTAINER>", $ipc);
@@ -340,7 +352,20 @@ sub SmtpIO
 
     # DLA is effective in processing deliver();
     local(%a, $a);
-    if ($e{'mode:_Deliver'}) { 
+
+    if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT  IN>$MailDate\n";}
+
+    if ($e{'mode:_Deliver'} && $SMTP_DIST_HACK) { 
+	if ($e{'mci:pipelining'}){
+	    &SmtpPut2Socket_NoWait("RCPT TO:<$SMTP_DIST_HACK_RCPT>", $ipc);
+	}
+	else {
+	    &SmtpPut2Socket("RCPT TO:<$SMTP_DIST_HACK_RCPT>", $ipc);
+	}
+	    
+	$Current_Rcpt_Count = 1;
+    }
+    elsif ($e{'mode:_Deliver'}) { 
 	push(@ACTIVE_LIST, $ACTIVE_LIST) 
 	    unless grep(/$ACTIVE_LIST/, @ACTIVE_LIST);
 
@@ -359,12 +384,19 @@ sub SmtpIO
     else { # not-DLA is possible;
 	for (@rcpt) { 
 	    $Current_Rcpt_Count++ if $_;
-	    &SmtpPut2Socket("RCPT TO:<$_>", $ipc) if $_;
+	    if ($e{'mci:pipelining'}){
+		&SmtpPut2Socket_NoWait("RCPT TO:<$_>", $ipc) if $_;
+	    }
+	    else {
+		&SmtpPut2Socket("RCPT TO:<$_>", $ipc) if $_;
+	    }
 	}
     }
 
+    if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT OUT>$MailDate\n";}
+
     # if no rcpt (e.g. MCI_SMTP_HOSTS > 1,  crosspost and compination of them)
-    # "DATR" without "RCPT" must be error;
+    # "DATA" without "RCPT" must be error;
     if ($Current_Rcpt_Count == 0) {
 	&Log("SmtpIO: no recipients but O.K.?");
 	&SmtpPut2Socket('QUIT', $ipc);
@@ -378,7 +410,14 @@ sub SmtpIO
 	return $NULL;
     }
 
-    &SmtpPut2Socket('DATA', $ipc);
+    if ($e{'mci:pipelining'}) {
+	&SmtpPut2Socket_NoWait('DATA', $ipc);
+	&WaitFor354($ipc);
+    }
+    else {
+	&SmtpPut2Socket('DATA', $ipc, 1);
+    }
+
     print SMTPLOG ('-' x 30)."\n";
 
     ### (HELO .. DATA) sequence ends
@@ -458,6 +497,7 @@ sub SmtpIO
     close(S);
 
     # reverse \r\n -> \n
+    $e{'Hdr'}  =~ s/\r\n/\n/g;
     $e{'Body'} =~ s/\r\n/\n/g;
 
     # 
@@ -475,9 +515,52 @@ sub SocketTimeOut
     close(S);
 }
 
+
+sub SmtpPut2Socket_NoWait
+{
+    &SmtpPut2Socket(@_, 0, 0, 1);
+}
+
+
+sub WaitFor354
+{
+    local($ipc) = @_;
+    local($wc) = $Current_Rcpt_Count + 1;
+
+    while ($wc-- > 0) {
+	undef $RetVal;
+	&WaitForSmtpReply($ipc, 1, 0);
+	last if $RetVal =~ /^354/;
+    }
+}
+
+
+sub WaitForSmtpReply
+{
+    local($ipc, $getretval, $ignore_error) = @_;
+
+    if ($ipc) {
+	do { 
+	    print SMTPLOG $_ = <S>; 
+	    $RetVal .= $_ if $getretval;
+	    $SoErrBuf = $_  if /^[45]/o;
+	    &Log($_) if /^[45]/o && (!$ignore_error);
+	} while(/^\d+\-/o);
+    }
+    else {
+	do { 
+	    print SMTPLOG $_ = <RS>; 
+	    $RetVal .= $_ if $getretval;
+	    $SoErrBuf = $_  if /^[45]/o;
+	    &Log($_) if /^[45]/o && (!$ignore_error);
+	} while(/^\d+\-/o);
+    }
+}
+
+
 sub SmtpPut2Socket
 {
-    local($s, $ipc) = @_;
+    local($s, $ipc, $getretval, $ignore_error, $no_wait) = @_;
 
     # return if $s =~ /^\s*$/; # return if null;
 
@@ -485,26 +568,20 @@ sub SmtpPut2Socket
     print SMTPLOG "$s<INPUT\n";
     print S "$s\r\n";
 
-    if ($ipc) {
-	do { 
-	    print SMTPLOG $_ = <S>; 
-	    &Log($SoErrBuf = $_) if /^[45]/o;
-	} while(/^\d+\-/o);
-    }
-    else {
-	do { 
-	    print SMTPLOG $_ = <RS>; 
-	    &Log($SoErrBuf = $_) if /^[45]/o;
-	} while(/^\d+\-/o);
-    }
+    # no wait
+    return $NULL if $no_wait;
+
+    # wait for SMTP Reply
+    &WaitForSmtpReply($ipc, $getretval, $ignore_error);
 
     # Approximately correct :-)
     if ($TRACE_SMTP_DELAY) {
 	$time = time() - $SmtpTime;
 	$SmtpTime = time();
 	&Log("SMTP DELAY[$time sec.]:$s") if $time > $TRACE_SMTP_DELAY;
-	$TRACE_SMTP_DELAY if $Hack{'dnscache'};
     }
+
+    $RetVal;
 }
 
 
@@ -616,7 +693,14 @@ sub SmtpPutActiveList2Socket
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
-	&SmtpPut2Socket("RCPT TO:<$rcpt>", $ipc);
+
+	if ($e{'mci:pipelining'}){
+	    &SmtpPut2Socket_NoWait("RCPT TO:<$rcpt>", $ipc);
+	}
+	else {
+	    &SmtpPut2Socket("RCPT TO:<$rcpt>", $ipc);
+	}
+
 	if ($USE_SMTP_PROFILE && (time - $xtime > 1)) { 
 	    &Log("SMTP::Prof $rcpt slow");
 	}
