@@ -489,8 +489,16 @@ sub __SmtpIO
 	&SmtpPutActiveList2Socket(*smtp_pcb, $ipc, $e{'mode:delivery:list'});
     }
     else { # [COMPATIBILITY] not-DLA is possible;
+	local($lc_rcpt);
 	for (@rcpt) { 
 	    $Current_Rcpt_Count++ if $_;
+
+	    $lc_rcpt = $_;
+	    $lc_rcpt =~ tr/A-Z/a-z/;
+
+	    # Relay Hack; always enable %RelayRcpt
+	    $_ = $RelayRcpt{$lc_rcpt} if $RelayRcpt{$lc_rcpt};
+
 	    if ($e{'mci:pipelining'}){
 		&SmtpPut2Socket_NoWait("RCPT TO:<$_>", $ipc) if $_;
 	    }
