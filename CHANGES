@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/05
+
+  clean up internal for database access
+	nuke CheckMember() to replace it with Lookup() or MailList*P()
+
 2000/07/04
 
   more HOOK's
