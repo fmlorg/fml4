@@ -369,6 +369,7 @@ libStardate.pl はその perl 版です。
 
 .S	1つのMLに複数の投稿用アドレス
 .key	1つのMLに複数の投稿用アドレス
+.k	@MAIL_LIST_ALIASES
 
 何の意味があるのかは聞かないでください（笑）
 
@@ -379,11 +380,14 @@ Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
 
 config.ph に次の設定をする。その複数のアドレスを(ループチェックに使うために)
 
-@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
-		'Anna@phys.titech.ac.jp');
+@MAIL_LIST_ALIASES = (	'Elena@phys.titech.ac.jp', 
+			'Anna@phys.titech.ac.jp');
 
 のように、かいてください。配列の先頭がオリジナルのアドレス(==
 $MAIL_LIST)です。
+
+注意： @PLAY_TO は昔の変数名です。この変数は compatibility のため自動
+的に @MAIL_LIST_ALIASES に代入されます。
 
 こうすると Elena になげても Anna に投げても どっちでもＯＫで、
 to: と reply-to:を変更します。
@@ -392,26 +396,8 @@ to: と reply-to:を変更します。
 ＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
 libcompat.pl にBackward compatibility のためのコードがあります。
 
-
-あと、↓このように書いてみてください。
-
-例（全体）： 
-----------------------------------------------------------------
-# Here is a playing of "To addresses change"; string to eval
-$SMTP_OPEN_HOOK .= q#
-    local($a);
-    foreach (@PLAY_TO) {
-        $a = (split(/\@/, $_))[0];
-        if ($Envelope{"to:"} =~ /$a/) {
-            $MAIL_LIST = $_;
-        }
-    }
-#;
-
-----------------------------------------------------------------
-
-
-
+また、もうフック設定は必要ありません。&FixHeaders の中で書き換えは行な
+われます。
 
 
 .# ##########################################################

@@ -537,8 +537,8 @@ RFC1522	2. Syntax of encoded-words
 これは Subject: [Elena:ID] の形で配送するための前処理です。
 
 
-.S	1つのMLに複数の投稿用アドレスとヘッダ
-.key	1つのMLに複数の投稿用アドレスとヘッダ
+.S	メーリングリストに複数の投稿用アドレスがある場合
+.key	メーリングリストに複数の投稿用アドレスがある場合
 
 何の意味があるのかは聞かないでください(笑)
 
@@ -550,28 +550,22 @@ Elena@phys.titech.ac.jp というＭＬで
 の両方を投稿可能にする(いくつあっても全部配列にして ずらずらかけば同じ)
 
 config.ph に次のような設定をしてください
+.k	@MAIL_LIST_ALIASES
 .k	@PLAY_TO
-.l	@PLAY_TO
+.l	@MAIL_LIST_ALIASES
 
-	@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
+  @MAIL_LIST_ALIASES = ('Elena@phys.titech.ac.jp', 
 			'Anna@phys.titech.ac.jp'
 		    );
 
-そして、次のフックを仕掛けます。
+注意： @PLAY_TO は昔の変数名です。この変数は compatibility のため自動
+的に @MAIL_LIST_ALIASES に代入されます。
 
-# Here is a playing of "To addresses change"; string to eval
-$SMTP_OPEN_HOOK .= q#
-    local($a);
-    foreach (@PLAY_TO) {
-        $a = (split(/\@/, $_))[0];
-        if ($Envelope{"to:"} =~ /$a/) {
-            $MAIL_LIST = $_;
-        }
-    }
-#;
+なお、フック設定はもう必要ありません。&FixHeaders の中で書き換えは行な
+われます。
 
-その複数のアドレスを(ループチェックに使うために) @PLAY_TO が必要です。
-配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
+その複数のアドレスを(ループチェックに使うために) @MAIL_LIST_ALIASES が
+必要です。配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
 
 こうすると Elena になげても Anna に投げても どっちでもＯＫで、
 To: と Reply-To:を変更します。
@@ -611,13 +605,13 @@ Backward compatibility で残っている変数が
 
 
 
-.S	To: と Cc: の Rewriting 処理
+.S	To: の Rewriting 処理
+.l	$NOT_REWRITE_TO
 .l	$NOT_REWRITE_CC
-
 
 可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
 スが出るようになっています。
-original header を通すという設定の場合はそうはならずオリジナルのままです。
+original header を通すという設定の場合はそうはならずにオリジナルのままです。
 
 ですが、apparent-to: になっていて、見辛いとか一体どうしてこのＭＬに来
 たメールなの？とかよくわからないメールも多いので、それよりは可読性を重
@@ -627,8 +621,10 @@ original header を通すという設定の場合はそうはならずオリジナルのままです。
 	1 To: に   $MAIL_LIST が含まれているなら、そのまま
 	2 To: には $MAIL_LIST が含まれていない場合は
 
-	  To: $MAIL_LIST
-          Cc: に元の To: を付け加えて、情報を保存しておく
+	  To: $MAIL_LIST,
+		元の To: 
+
+となるように付け加えて、情報を保存しておく
 
 To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 の SMTP としてはなんら区別はしていません。ですから、情報を落さず、To: 
@@ -636,6 +632,8 @@ To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 
 [蛇足] なお、To: Cc: の中に重複して現れるアドレスには普通それらを一つ
 にまとめて一通分のみが配送されます。だから複数あっても気にしないでね
+
+＃注意：なお、$NOT_REWRITE_CC は obsolete にしました
 
 
 .S	NIFTY対策をするか?(参加者にNIFの人もいる, OBSOLETE?)
