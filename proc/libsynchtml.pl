@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -47,13 +47,13 @@ sub SyncHtml
     umask($HTML_DEFAULT_UMASK ? $HTML_DEFAULT_UMASK : 002);
 
     ### Init ###
-    # Original SyncHtml is the Converter2Html of the memory image.
+    # Original SyncHtml is the Converter to Html in the memory image.
     # so $mtime (by stat()) NOT REQUIRED
-    # IF YOU CONVERT THE ARTICLE, stat() info REQUIRED
+    # IF YOU CONVERT THE ARTICLE on the disk, stat() info REQUIRED
     $mtime = $e{'stat:mtime'} if $e{'stat:mtime'};
     $probe = $e{'html:probe'};
 
-    # INIT THE UNIT;
+    # initialize the unit to determine sub-directories.
     $HTML_INDEX_UNIT = $HTML_INDEX_UNIT || 'day';
 
     # MIME Decoding, suggested by domeki@trd.tmg.nec.co.jp, thanks
