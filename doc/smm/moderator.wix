@@ -1,0 +1,114 @@
+.C	モデレーター
+.l	moderators
+
+.S	Overview
+
+モデレーターは
+
+	1 ＭＬ宛に来たメールは配送されず
+	2 一旦モデレーターへフォワードされます
+	3 モデレーターは内容を査読後承認するなら
+	  あるキーワードをＭＬサーバへ送ることで
+	  ＭＬ全体へ配送されます。	
+
+変数は config.ph で
+
+$PERMIT_POST_FROM              = "moderator";
+
+となっている状態です。makefml config の設定画面では
+
+   [POST]
+
+   1    PERMIT_POST_FROM                   moderators
+
+のようになります。コマンドについても
+
+   [COMMAND]
+
+   3    PERMIT_COMMAND_FROM                moderators
+
+設定はできますが、いちいち承認を出すコマンドというのは意味がないでしょ
+う。この設定でコマンドを送るとモデレーターにフォワードされて終るだけです。
+
+.S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 2 デフォールト)
+
+$MODERATOR_FORWARD_TYPE という変数があります。デフォールトは２です。
+デフォールトについて説明します。２以外は doc/op (WWW なら 
+http://www.fml.org/fml/op/) を見て下さい。
+
+次のようなメールがモデレーターに来ます。
+   
+   Moderated $MAIL_LIST (elena@fml.org) receives a submit from
+   
+      fukachan@fml.org.
+   
+   Please check it. If you certify the following article, 
+   please send to elena-ctl@fml.org
+   the following line (only this line!)
+   
+   # moderator certified 199711032027.709982
+   
+   ------- Forwarded Message
+   
+   メール本文
+   
+   ------- End of Forwarded Message
+
+メールはＭＬサーバも保存しています。メール本文の内容を承認したなら、
+
+# moderator certified 199711032027.709982
+
+の行だけをコマンド用のアドレスに送って下さい。そうするとＭＬサーバは自
+分が保存しておいたそのメールを配送します。
+
+モデレーターか否かはこの特別な文字列(# moderator certified 数字)を知っ
+ているか否かです。この数字は毎回違うもるので、ある意味で暗合レベルの非
+常に低い one time password だとみなすこともできます。
+
+このメールが送られてくる人はは誰でもモデレーターになれます。デフォール
+トは $MAINTAINER ですが、複数の人をモデレーターにするなら moderators 
+というファイルを作り、actives や members のように一行一アドレス書いて
+いって下さい。
+
+
+.S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 1 もしくは 未定義)
+
+承認を求めるメールがフォワードされるのは $MAINTAINER です。承認したか
+否かはパスワード認証になります。パスワードを知っている人がモデレータと
+いえます。ＭＬサーバへ送るメールのヘッダに Approval: line をつけて
+
+	1 メールは一回管理者へフォワードされる。
+        2 管理者が査読してOKとみなしたらＭＬへ投げる。
+          Approval: password フィールドをヘッダにつけてＭＬに
+          投げればメールは配送される。
+
+パスワードはリモート管理のし方と同様に保守して下さい。
+問題としては
+
+	Header をつかうのはいやだ
+	＃こういう実装はいやなんだけど、してるだけ
+
+	ださいMUA(メールインターフェイス)がある
+
+などがあるので回避策の一つとして
+
+	# admin forward
+	フォワードする本文
+
+というコマンドもあります。
+
+	# admin pass あなたのパスワード
+	# admin forward
+
+	本文(この下は全部フォワードされる)
+
+
+.# $Id$
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
