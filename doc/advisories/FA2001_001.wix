@@ -47,7 +47,7 @@ fml 内蔵の HTML 化機構において、Subject: に含まれる <> がインデックス
 
 	libsynchtml.pl libhtmlsubr.pl を最新のものにする
 
-.url ftp://ftp.fml.org/pub/fml/workaround-fix/
+.url ftp://ftp.fml.org/pub/fml/workaround-fix2/
 	
 	
 .S	入れ替える(2)
@@ -78,4 +78,4 @@ fml-help: 01093 (From: KOJIMA Hajime / 小島肇 <kjm@rins.ryukoku.ac.jp>)
 を参照してください。problem report およびパッチ案を頂いた小島さんに感
 謝致します。
 
-$FML: FA2001_001.wix,v 1.1 2001/10/26 17:17:07 fukachan Exp $
+$FML: FA2001_001.wix,v 1.2 2001/10/27 10:38:21 fukachan Exp $
