@@ -1,0 +1,198 @@
+.C	local spoolへのftp-likeなアクセス (ftpmail)
+
+.S	libftp.pl イントロダクション
+.k	libftp.pl
+.k	ftpmail
+
+libftp.pl はローカルスプール、例えば /usr/local/ftp へのアクセスを可能
+にします。つまりメールで ftp のように
+
+	cd pub/net/fml-current
+	get fml-current.tar.gz
+
+を可能にするライブラリです。
+
+libftp.pl にはおまけ機能として ftpmail (という名前のサーバプログラムが
+ある)へのリレー中継機能も内蔵しています。
+
+libhref.pl も使えば
+
+	ftp://ftp.phys.titech.ac.jp/ls-lR.gz 
+
+形式での要求も理解できます。
+
+
+.S	libftp.pl と libhref.pl はどう使う？
+.k	libftp.pl
+.k	libhref.pl
+.k	URL
+.k	ftpmail
+.k	$FTPMAIL_SERVER
+
+○libref.pl
+
+URL を理解するための ライブラリ
+
+	http://host/something 
+や 
+	gopher://host/something 
+
+を自力で取りにいって、必要なら、binaryをuuencode や、ファイル分割をし
+て送り返す。
+	ftp://host/something 
+は libftp.pl へ引き渡します。
+
+○libftp.pl
+
+	local spool への ftp interface 
+と
+	ftpmail server ($FTPMAIL_SERVER を設定していないとエラー) 
+	へリレーするインターフェイス
+
+
+.S	ローカルアクセスのための config.ph の設定
+
+	$FTP_DIR        = '/var/spool/ftp/ftpmail';
+
+ローカルにあるftp用のスプール。
+
+	$FTP_HELP_FILE  = '/var/local/ftpmail/help';
+
+ftpmail のヘルプファイル。help でユーザに返されるファイル。
+
+デフォールトでは、メール全文をftpmailへのコマンドだと解釈します。
+特定の文字列だけを ftpmail へのコマンドにするには、
+
+    &Ftp(*Envelope, $_);
+
+のようにして $_ に実行させたい文字列を入れます。
+この場合は $_ で入力された文字列だけをコマンドとみなします。
+
+代表的な使い方は
+
+	$START_HOOK  = q#
+	    require 'libftp.pl';
+	    &Ftp(*Envelope, $_);
+	    $DO_NOTHING = 1;
+	#;
+
+を config.ph にしかける。といった感じになります。
+
+
+.S	FTPMAIL専用サーバ
+.k	libftpmail.pl
+
+	$LOAD_LIBRARY	= "libftpmail.pl";
+
+をセットすると ftpmail 専用のサーバになる
+
+
+.S	ローカルアクセスの挙動の説明
+.k	@FtpDirStack
+
+Security 対策のため cd ./ みたいなコマンドは実行させません。
+また、今どこにいるかはシェル等を使わず自力でそのデータを把握しています
+(@FtpDirStack)。そういう形で chroot($FTP_DIR) を疑似的に実装しています。
+
+もし、spool/uja/Aoichan_panic が欲しい時は
+
+	# get spool/uja/Aoichan_panic
+
+とか
+	# cd spool/uja
+	# get Aoichan_panic
+
+とか
+
+	# cd spool
+	# cd uja
+	# get Aoichan_panic
+
+です。ftp と同じですね。
+
+	# cd ..
+
+や
+	# cd ../X11
+
+もできます。今どこにいるか把握しているので疑似的に chroot() した先より
+上にいこうとしたらエラーになります。
+
+またコマンド ftp と connect は実装していません。つまり、あるマシンのアー
+カイブを対象にした簡易版で、他のマシンへコネクトしてとってきたりはでき
+ません。
+＃そこまでやるなら ほんものの ftpmail を使うべきでしょう(^^;)
+
+ftpmail だと
+
+	quit 
+
+書くところを fml 流の書き方になれている人のために
+
+# quit 
+
+と書いても理解します。後は help 参照 
+
+
+.S	本物の ftpmail server へのリレー
+.S	ftp://www.iij.ad.jp/ls-lR.gz をとりにいく
+
+ftpmail serverへ経由する設定になっていれば、そのサーバーへ
+メールをリレーする。
+たとえばうちでは、
+
+	$FTPMAIL_SERVER = 'ftpmail@beth.phys.titech.ac.jp';
+
+のように設定しているので、bethへリレーする。あとはftpmailへまかせる
+当然ながら、任意のサイトへ ftp かけられます。
+
+
+
+.S	ftpmail server へのリレーの設定
+
+どこのサーバーを使うのか?
+
+	$FTPMAIL_SERVER = 'ftpmail@beth.phys.titech.ac.jp';
+
+後は、libhref.pl がやります。
+
+もっとも libhref.pl を読んでちゃんと &Ftpmail(..); へ命令を伝えていれ
+ば…ですね
+
+
+
+.S	URL ftp://host/directory/file へのアクセス 
+.k	&HRef
+.k	libhref.pl
+
+たとえば、なんらかの処理をして、$request の内容が
+
+$request = 'ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/README.fml';
+
+という内容になっているとすれば
+
+	require 'libhref.pl';
+	&HRef($request, *Envelope);
+
+で、そのURLの内容を返させることが出来ます。
+
+
+.S	URL http,gopher://host/directory/ へのアクセス
+.k	&HRef
+.k	libhref.pl
+
+も上記と同じです。あとは libhref.pl がかってにやります V(^^)
+
+
+.S	local directoryをアクセスするためのライブラリ
+.k	libftpmail.pl
+
+昔なんとなく作った FTPMAIL 互換ライブラリα版(libftpmail.pl) は
+OBSOLETEです。いま libftpmail.pl は libftp.pl を使うための互換インター
+フェイスです。
+
+libftp.pl はローカルディスクへアクセスおよびftpmailへのリレー両方を担
+当します。
+
+
+.# $Id$
