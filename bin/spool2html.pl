@@ -87,6 +87,10 @@ sub InitS2P
     $inc =~ s#^(\S+)/bin.*$#$1#;
     push(@INC, $inc);
 
+    # @LIBDIR
+    push(@LIBDIR, $opt_I);
+    push(@LIBDIR, $inc);
+
     # set opt
     for (split(/:/, $opt_o)) { 
 	print STDERR "\$${_} = 1;\n" if $verbose;
