@@ -54,23 +54,16 @@ Tutorials and Guides for fml beginners
    <A HREF="advisories/FA2000_003/index.html">
    Love Letter Worm
    </A>
-   <BR>
    <A HREF="Japanese/examples/virus_check.ph">
-   virus check 関係設定をまとめた例 (はじめたばかりですが役に立つかも?)
+   virus check 関係設定例
    </A>
 
    <LI>
    <A HREF="good_bye_perl4.html">
-   fml-current は perl 5 でしか動かなくなるでしょう
+   fml-current は perl 5 only
    </A>
-   <BR>
    <A HREF="devel/OS_and_Perl.txt">
-   [各OSのデフォールトで入っている perl version のリスト]
-   </A>
-
-   <LI>
-   <A HREF="anoncvs.ja.html">
-   annymous CVS について
+   [各 OS default perl version リスト]
    </A>
 
    <LI>
@@ -80,13 +73,10 @@ Tutorials and Guides for fml beginners
 
    <LI>
    <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/">
-   fml-current
+   current
    </A>
-   のWWW/CGI設定インターフェイス"のβテストをしてくれると嬉しいです。
-   <BR>
-   <A HREF="CGIstatus.ja.html">
-   [CGIインターフェイスの現状]
-   </A>
+   のCGIインターフェイスを試してくれると嬉しいっす
+   <A HREF="CGIstatus.ja.html">[現状]</A>
 </UL>
 #else
    <LI>
@@ -148,9 +138,8 @@ Please check out ftp and get latest one.
 <HR>
 #ifdef JAPANESE
 <PRE>
-#ifndef DIST
-        <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">[検索]</A>   <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>   <A HREF="download.html">[download]</A>
-#endif
+        <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">[検索]</A>   <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>   <A HREF="download.html">[download]</A>   <A HREF="anoncvs.ja.html">[annymous CVS]</A>
+
         <A HREF="WHATS_NEW/index.html">What's new</A>     <A HREF="download.html">ダウンロード</A>
 	<A HREF="Japanese/tutorial.html">チュートリアル/設定ガイド</A>
         <A HREF="advisories/index.html">FML アドバイザリィ</A>
@@ -166,6 +155,8 @@ Please check out ftp and get latest one.
         <A HREF="mailinglist.html">Mailing List</A>   <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>
 
         <A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/src/doc/html/index-j.html">fml-stableのドキュメント</A>
+
+        config.ph で設定可能な変数名<A HREF="variable-list.ja.html">[一覧</A><A HREF="sorted-variable-list.ja.html">|アルファベット順 ]</A>
 </PRE>
 #else
 <PRE>
@@ -194,6 +185,14 @@ Please check out ftp and get latest one.
 <PRE>
         <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">[Search]</A>   <A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>      <A HREF="download-e.html">[download]</A>
 </PRE>
+
+	<P>
+	<A HREF="variable-list.html">
+	config.ph variable list
+	</A>
+	<A HREF="sorted-variable-list.html">
+	config.ph variable list (alphabetical order)
+</A>
 #endif
 #endif
 #ifdef DIST
@@ -279,23 +278,6 @@ Information and HTML version documents in the fml source distribution
 	<BR>
 	<A HREF="INSTALL_CGI-e/index.html">
 	CGI INSTALLATION GUIDE 
-	</A>
-#endif
-
-	<LI>
-#ifdef JAPANESE
-	<A HREF="variable-list.ja.html">
-	設定可能な変数のリスト
-	</A>
-	<A HREF="sorted-variable-list.ja.html">
-	アルファベット順の変数リスト
-	</A>
-#else
-	<A HREF="variable-list.html">
-	config.ph variable list
-	</A>
-	<A HREF="sorted-variable-list.html">
-	config.ph variable list (alphabetical order)
 	</A>
 #endif
 
