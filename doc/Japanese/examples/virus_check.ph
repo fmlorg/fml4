@@ -1,4 +1,4 @@
-# $Id$
+# $FML: virus_check.ph,v 1.13 2002/02/01 00:08:18 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -11,6 +11,9 @@
 #
 # チュートリアル
 #    http://www.fml.org/fml/Japanese/tutorial.html
+#
+# CERT ADVISORY など
+#   CERT Summary CS-2001-04 nimda など最近のウィルスについてのサマリ？  
 #
 
 # フィルタリング ON
@@ -41,19 +44,19 @@ $FILTER_ATTR_REJECT_MS_GUID = 1;
 
 # ちょっと複雑な HOOK
 $DISTRIBUTE_FILTER_HOOK .= q#
-    if ($e{'Body'} =~ /Content.*\.vbs|filename=.*\.vbs/i) {
+    if ($e{'Body'} =~ /Content.*\.vbs|(filename|name)=.*\.vbs/i) {
 	return 'VB script attatchment';
     }
 
-    if ($e{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty Park\.exe/i ) {
 	return 'original Pretty Park virus';
     }
 
-    if ($e{'Body'} =~ /filename=.*\.Pretty.*Park.*\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty.*Park.*\.exe/i ) {
 	return 'original Pretty Park familly ?';
     }
 
-    if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*search.*URL.*\.exe/i ) {
 	return 'P2000 virus familly?';
     }
 #;
@@ -73,10 +76,22 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 $DISTRIBUTE_FILTER_HOOK .= q#
     my($extension) = 'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
 
-    if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';
     }
 #;
+
+
+#
+# uuencode されてるものはすべからく怪しい？
+# (このチェックを有効にするには以下の行頭の # をはずしてください)
+# Against MyParty et.al.
+#
+$DISTRIBUTE_FILTER_HOOK .= q{
+    if ($e{'Body'} =~ /^begin\s+\d{3}\s+\S+|\nbegin\s+\d{3}\s+\S+/m) {
+	return 'uuencoded attachment';
+    }
+};
 
 
 # XXX TODO 
