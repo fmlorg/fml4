@@ -694,7 +694,7 @@ sub Rehash
     local($l, $r, $s, $d, $mode);
     ($adr, $mode) = split(/\s+/, $adr, 2);
 
-    print STDERR "\n---Rehash local($adr, $mode)\n\n";
+    print STDERR "\n---Rehash local($adr, $mode)\n\n" if $debug;
 
     &use('utils');
 
