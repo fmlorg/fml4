@@ -12,6 +12,9 @@
 # チュートリアル
 #    http://www.fml.org/fml/Japanese/tutorial.html
 #
+# CERT ADVISORY など
+#   CERT Summary CS-2001-04 nimda など最近のウィルスについてのサマリ？  
+#
 
 # フィルタリング ON
 $USE_DISTRIBUTE_FILTER   = 1;
