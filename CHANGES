@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/06/17
+
+  content filter
+	呼ぶ順番を変更する。
+
 2002/06/16
 
   etc/makefml/
@@ -315,7 +320,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.252 2002/06/12 14:17:08 fukachan Exp $
+	add $FML: CHANGES,v 1.253 2002/06/16 12:47:10 fukachan Exp $
 
 2001/10/03
 
