@@ -1,5 +1,10 @@
 package sd;
 
+sub Log 
+{
+    main'Log(@_); #';
+}
+
 sub main'SDInit #';
 {
     local(*list) = @_;
