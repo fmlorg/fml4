@@ -1446,6 +1446,11 @@ sub UnLock
     local($ml) = @_;
     local($flockp) = $ml'FLockP{$ml};#'
 
+    if ($debug) {
+	my (@c) = caller;
+	&Log("UnLock: $c[1] $c[2]");
+    }
+
     return if $NotRequireLock;
 
     if ($flockp) {
@@ -2511,6 +2516,9 @@ sub do_passwd
 
     -f $passwd_file || &Touch($passwd_file);
 
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($passwd_file))[2];
+
     while (!$member || !$passwd) {
 	if (! $member) {
 	    print "Address: ";
@@ -2565,6 +2573,8 @@ sub do_passwd
 	&Log("makefml::passwd changing $passwd_file fails");
     }
 
+    # reset inode $mode
+    chmod $saved_permission, $passwd_file;
 }
 
 
@@ -2593,6 +2603,9 @@ sub do_html_passwd
 
     -f $passwd_file || &Touch($passwd_file);
 
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($passwd_file))[2];
+
     require 'libcrypt.pl';
     $init = 1;	# if new-comer, initialize the passwd;
 
@@ -2610,6 +2623,9 @@ sub do_html_passwd
 
     # sync w/ $CGI_AUTHDB_DIR/*/htpasswd
     &do_html_htpasswd($ml, $member, $passwd);
+
+    # reset inode $mode
+    chmod $saved_permission, $passwd_file;
 }
 
 
@@ -2633,6 +2649,9 @@ sub do_html_htpasswd
 
     -f $passwd_file || &Touch($passwd_file);
 
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($passwd_file))[2];
+
     # make directory
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin/$ml");
@@ -2655,6 +2674,9 @@ sub do_html_htpasswd
     else {
 	&Error("cannot find $member in $passwd_file");
     }
+
+    # reset inode $mode
+    chmod $saved_permission, $passwd_file;
 }
 
 
@@ -2671,6 +2693,9 @@ sub do_html_cgiadmin_htpasswd
     # here we go to convert etc/passwd to some/whare/m-admin/$ml/htpasswd
     $f    = "$CGI_AUTHDB_DIR/admin/htpasswd";
     $fnew = "$CGI_AUTHDB_DIR/admin/htpasswd.new.$$";
+
+    # perserve the current inode $mode
+    my ($saved_permission) = (stat($f))[2];
 
     print STDERR "\n   change htpasswd ($f)\n\n";
     $x = $member .":". crypt($passwd, $member);
@@ -2695,6 +2720,9 @@ sub do_html_cgiadmin_htpasswd
 	    &Error("something wrong! since file size 0. no operation.");
 	}
     }
+
+    # reset inode $mode
+    chmod $saved_permission, $f;
 }
 
 
@@ -6101,8 +6129,9 @@ sub FLock
     $FH = $FH || "FLOCKDIR000";
     $unistd = $main'UNISTD; #';
 
+    # /var/spool/ml/etc/ is an exception.
     $lockdir  = "$mldir/$ml/";
-    $lockdir .= $SPOOL_DIR{$ml} || "spool";
+    $lockdir .= $SPOOL_DIR{$ml} || ($ml eq 'etc' ? '.' : 'spool');
     $DIR      = $DIR || "$main::ML_DIR/$ml";
 
     # why $ml/$ml -> $ml conversion? (may be historical reason)
@@ -6148,6 +6177,7 @@ sub FUnLock
 
 package v7;
 
+sub Log        { print STDERR join("\t", @_), "\n";}
 sub WarnE      { print STDERR join("\t", @_), "\n";}
 sub WholeMail  { print STDERR join("\t", @_), "\n";}
 sub SetEvent   { print STDERR join("\t", @_), "\n";}
@@ -6233,6 +6263,8 @@ sub CleanUpLockFiles
 	$max = 10;		# for each lockfile
 	$_ = $LockFile{$_};
 
+	next unless $_;
+
 	while (-f $_ && $max-- > 0) {
 	    unlink $_;
 	    sleep 1;
@@ -6256,10 +6288,20 @@ sub main'V7UnLock #';
 {
     local($ml) = @_;
 
+    if ($main::debug) {
+	my (@c) = caller;
+	&Log("V7UnLock: $c[1] $c[2]");
+    }
+
     $LockFile = $LockFile{$ml};
 
-    require 'liblock.pl';
-    &V7Unlock;
+    if ($LockFile) {
+	require 'liblock.pl';
+	&V7Unlock;
+    }
+    else {
+	print STDERR "ERROR: undefined LockFile (unlink style lock, OK?)\n";
+    }
 }
 
 
