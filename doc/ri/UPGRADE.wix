@@ -110,14 +110,14 @@ irrespective of "auto_regist". When you use "auto_subscribe", you
 should copy members to actives before you change "auto_regist" to
 "auto_subscribe".
 
-auto_regist から auto_subscribe へ切替える前に 各MLのHOME directoryで 
+auto_regist から auto_subscribe へ切り替える前に 各MLのHOME directoryで 
 members を actives にコピーすることが必要です。
 =E
 Firstly copy members to actives. You have only to do this.
 
 	% cp members actives
 
-この後 auto_subscribe へ切替えて下さい。
+この後 auto_subscribe へ切り替えて下さい。
 
 
 * 2. auto_regist を使い続ける。
@@ -146,12 +146,12 @@ Caution: but I do not recommend case 2 since your policy will change.
   It is correct design but not compatible with past fml release.
 
 $REJECT_POST_HANDLER, $REJECT_COMMAND_HANDLERには新しいハンドラー名を
-使うことでそう振舞うように設定する。
+使うことでそう振る舞うように設定する。
 
 ドキュメントでは「自動登録には新ハンドラーを使う」ように書いてあるが、
 3.0でもわざわざ古い auto_regist というハンドラーを選ぶことで古い挙動を
 させることができる。よって、3.0をインストールしても以前の config.ph を
-そのまま使えばmembers だけを使う振舞いになる点に注意されたい。
+そのまま使えばmembers だけを使う振る舞いになる点に注意されたい。
 
 .# endif-3.0
 
@@ -160,7 +160,7 @@ $REJECT_POST_HANDLER, $REJECT_COMMAND_HANDLERには新しいハンドラー名を
 * make messages returned from fml be Japanese.
 
 $MESSAGE_LANGUAGE で指定された言語でメッセージを返す$MESSAGE_LANGUAGE 
-はデフォールトではインストール時に指定する$LANGUAGEと同じ値に設定され
+はデフォルトではインストール時に指定する$LANGUAGEと同じ値に設定され
 る。$MESSAGE_LANGUAGE を English にすれば昔の挙動になる。
 =E
 return message in language defined as $MESSAGE_LANGUAGE.
@@ -170,7 +170,7 @@ $LANGUAGE is defined in installation.
 .S	その他の(目に見える)変更
 =E.S	Other Changes
 
-SKIP_FIELDS のデフォールトを変更して Received: を通すのがデフォールト
+SKIP_FIELDS のデフォルトを変更して Received: を通すのがデフォルト
 =E
 change $SKIP_FIELDS default to pass through Received:. 
 It causes too many hops but need to check spam or back trace.
@@ -180,7 +180,7 @@ It causes too many hops but need to check spam or back trace.
 =E.C	The difference between 2.2.1 and 2.2
 
 ○ ドキュメント(例えば help ファイル)には # command シンタックスの見本
-が書かれなくなった。デフォールトでは無意味なので。
+が書かれなくなった。デフォルトでは無意味なので。
 =E
 * remove hml command emulation in documents
 
@@ -206,7 +206,7 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
 =E
 * enable PIPELINING
 
-○ %SECURE_REGEXP のbug fix。op.jp の記述が正しくなるように直した。
+○ %SECURE_REGEXP のbug fix。op.jp の記述が正しくなるようになおした。
 =E
 * fix %SECURE_REGEXP design so that documents become correct.
 
@@ -222,9 +222,9 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
 
 .C	2.2 RELEASE と 2.1 RELEASE の間の差について
 
-新機能は README や op.jp を読んで下さい。ここではデフォールト値の違い
+新機能は README や op.jp を読んで下さい。ここではデフォルト値の違い
 について説明します。古い config.ph を使う場合には関係ありません。
-ＭＬを新たに壱から作ると2.1の時と何が違うか？について記述します。
+ ML を新たに壱から作ると2.1の時と何が違うか？について記述します。
 
 ○ 一般ユーザの使う members, actives コマンドの返答からは
    # で始まる行は削除されています。管理者モードではファイルそのものが
@@ -235,16 +235,16 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
    移行する前に古いアドレスから新しいアドレスへ変更しておかなければ
    いけません。   
 
-○ モデレータは3種類あります。デフォールトは Approval: password という
+○ モデレータは3種類あります。デフォルトは Approval: password という
 ヘッダの一部を使う方法ではなく、各モデレータ依頼のメールの承認KEYを与
 えます。confirmation と似ています。
 
-○ デフォールトではサイズチェックなどは特にかけていません。
+○ デフォルトではサイズチェックなどは特にかけていません。
    members.bak actives.bak は１５０ｋをめやすに members.0 などへ
    移動して古いものから順にログは消されていきます。
 
 
-○ デフォールトで Date: は original をとおします。Posted: はなくなりま
+○ デフォルトで Date: は original をとおします。Posted: はなくなりま
 した。前と同じにするには $DATE_TYPE で設定します。
 
 ○ To: は元の値のままとおします。2.1 のようにするには $REWRITE_TO で制
@@ -252,7 +252,7 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
  
 ○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER
  
-○ USE_MIME はデフォールトで on です。
+○ USE_MIME はデフォルトで on です。
 
 ○ HTML記事を作ると HTML 4.0 です。スタイルシートがないと自動的に見本が
    インストールされます。
@@ -273,7 +273,7 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
 HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
 して下さい。
 
-○ upgrade で『config.ph から何から作り直す』人には注意が必要です。古
+○ upgrade で『config.ph から何から作りなおす』人には注意が必要です。古
 い config.ph のまま使うのなら backward compatible になるように動作する
 ので関係ありません。
 
@@ -285,7 +285,7 @@ HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
 
 だけです。
 
-2.1 RELEASE のデフォールトは
+2.1 RELEASE のデフォルトは
 
    『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
 
@@ -303,7 +303,7 @@ HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
 
 	makefml newml elena
 
-で elena MLを作ったとします。デフォールト構成は
+で elena MLを作ったとします。デフォルト構成は
 
 	elena@fml.org		MLへの投稿用のアドレス
 	elena-ctl@fml.org	MLのコマンドを送るアドレス
@@ -328,7 +328,7 @@ config.ph で
 となっていれば elena@fml.org でコマンドを受け付けます。この場合は配送
 メールの X-ML-Info: というフィールドやコマンドのREPLYもすべて 
 elena@fml.org 宛になるように設定されます。(helpファイルは手動で書き直
-してください)
+して下さい)
 
 # command というシンタックスのコマンドをelena@fml.org も 
 elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
@@ -350,8 +350,8 @@ elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
 .S	fml 1.6 より前からの移行について (2.1 READMEより)
 
 HOOKについて注意が必要です。FML 1.6 で基本的なデータ構造を call by
-reference に書き直しました。それ以前の HOOK はまずそのままでは反映され
-ないでしょう。libcompat.pl などを参考に書き直すなどが必要でしょう。
+reference に書きなおしました。それ以前の HOOK はまずそのままでは反映され
+ないでしょう。libcompat.pl などを参考に書きなおすなどが必要でしょう。
 
 
 .S	hml 1.6 的インターフェイスとの互換性 (2.1 READMEより)
@@ -384,7 +384,7 @@ config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
 .#  いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
 .#  使ってない場合はそのままでＯＫです。
 .#  
-.#  ただたまに変数名のスペリングの間違いを直すとか〜で かわっちゃうことが
+.#  ただたまに変数名のスペリングの間違いをなおすとか〜で かわっちゃうことが
 .#  ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
 .#  書いておきますので、見てもらえばOKのはずです。
 

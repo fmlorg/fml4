@@ -17,7 +17,7 @@ copyright からみで、postfix に改名されました。IBM Secure Mailer とも呼
 ばれます。作者は tcp_wraper で有名な Wietse Venema です。
 
 
-ソースの入手、インストール方法や詳細は以下のURLを参照してください。
+ソースの入手、インストール方法や詳細は以下のURLを参照して下さい。
 =E
 Please see the following URL for more information:
 
@@ -55,7 +55,7 @@ manual and configure before running fml.
 Consider /etc/postfix/main.cf. Postfix does not permit :include: form
 in /etc/aliaes. You need the following line e.g. 
 
-デフォールトでは :include: が使えないので
+デフォルトでは :include: が使えないので
 
 allow_mail_to_commands = alias,forward,include
 
@@ -63,7 +63,7 @@ allow_mail_to_commands = alias,forward,include
 =E
 in main.cf
 
-(必須ではないが)また fml プロセスを動かすＭＬ用の特別なユーザを定義す
+(必須ではないが)また fml プロセスを動かす ML 用の特別なユーザを定義す
 る。
 =E
 Also you need set up account for your ML. For exmaple

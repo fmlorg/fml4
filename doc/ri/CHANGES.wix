@@ -121,7 +121,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	$NUM_SMTP_LOG_ROTATE modulo, the number of files (default 8)
 
 	つねに _smtplog.数字 のログを残すようにしました。
-	でもディスクをくうのでデフォールトは 8 です。
+	でもディスクをくうのでデフォルトは 8 です。
 
 2000/10/01
 
@@ -174,7 +174,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
    fix NT installer
 
-	Windows 2000/NT でのインストーラの不具合を直す
+	Windows 2000/NT でのインストーラの不具合をなおす
 		エラーをつぶす
 		perl path がうまくかわらないのをなおす
 
@@ -191,7 +191,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
    $USE_SMTPFEED_F_OPTION
 
 	100 回に一回 smtpfeed -F -1 を使う。
-	(smtpfeed の設定は各自がんばてください:)
+	(smtpfeed の設定は各自がんばて下さい:)
 
 	mead はこのヘッダを見ているが…
 
@@ -323,7 +323,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	/usr/local/fml/messages/Japanese/MANIFEST.Japanese
 	http://www.fml.org/fml/messages-list.ja.txt
 
-	を見て下さい。デフォールトでは
+	を見て下さい。デフォルトでは
 
 	/usr/local/fml/messages/Japanese/$file
 
@@ -531,7 +531,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
   sbin/makefml (on Windows NT4)
 	fix behaviour around rename()
 
-	config.ph を作り損ねた時のエラーハンドリングの間違いを直す
+	config.ph を作り損ねた時のエラーハンドリングの間違いをなおす
 	＃いわゆる NT の rename(2) まわり問題
 
   kern/fml.pl
@@ -540,9 +540,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	3.0-stable と同期してない部分を current へ逆輸入;)
 
-        デフォールトでは From: $MAIL_LIST を弾かないように変更
+        デフォルトでは From: $MAIL_LIST を弾かないように変更
         3.0ではループチェックの一部としてこれをしているが
-        企業のサポートＭＬなどではまるのでとりあえず戻す
+        企業のサポート ML などではまるのでとりあえず戻す
 
 	pointed out by MURASHITA Takuya (fml-support: 08220)
 
@@ -917,7 +917,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	by wrap "system stty " with "if $UNISTD"
 
 	NT4 上で『そんなコマンドはない』というエラーメッセージが出る
-	のを直す。
+	のをなおす。
 	ただし以前からメッセージがでるけどパスワードの変更はできてい
 	るという状態のはずなので、無視して使う分には別に問題はない;)
 
@@ -951,7 +951,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
    EnvelopFilter
 	skip plural null lines between paragraphs
 
-	最初のＮ行のパラグラフをえぐりだす部分を直す
+	最初のＮ行のパラグラフをえぐりだす部分をなおす
 	FIX: 複数の空行を一行とみなさないとおかしい
 
 2000/03/26
@@ -1146,7 +1146,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	makefml -a install tries to load /usr/local/fml/.fml/system if exists
 
 	makefml install で /usr/local/fml/.fml/system などをさがして
-	デフォールト値を探そうとするのをやめてみる。-a オプションをつけると
+	デフォルト値を探そうとするのをやめてみる。-a オプションをつけると
 	以前の挙動(.fml/system を探そうとしてみる)にもどる。
 	＃ virtual domain のときなどは不便なために不人気？
 	＃ virtualでない人は default 値を推測してくれた方が便利だと思うんだが
@@ -1157,12 +1157,12 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	create ml-admin/$ml/htpasswd from /var/spool/$ml/etc/passwd
 	if exists
 
-	あるＭＬのCGI操作を有効にする際に htpasswd はもし $DIR/etc/passwd
+	ある ML のCGI操作を有効にする際に htpasswd はもし $DIR/etc/passwd
 	があればそれからCGI管理者初期ユーザリストを生成する。
 	つまりコマンドを送り込める権限のユーザとCGI管理者は初期設定では
 	同じ人々になる。
 
-	XXX 特定の (e.g. elena)ＭＬをCGI操作可能にした場合も
+	XXX 特定の (e.g. elena) ML をCGI操作可能にした場合も
 	XXX フレームバージョンにはやくしたいものだ
 
    doc/examples/
@@ -1198,7 +1198,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	cut off Re(2): and Re*2: in Subject:
 
 	レレレ問題。切り落とすフォーマットを拡張
-	今デフォールトで叩き落すのは
+	今デフォルトで叩き落とすのは
 
 	Re: Re2: Re[2]: Re(2): Re*2: Re^2: 
 
@@ -1221,7 +1221,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
   $HTML_THREAD_SORT_TYPE
 	value: "" / reverse-number
 
-	スレッドの順番。デフォールトは記事の順番通り(上の方が過去)
+	スレッドの順番。デフォルトは記事の順番通り(上の方が過去)
 	reverse-number にすると上の方が一番最近のもの
 
   bin/pmail.pl
@@ -1312,7 +1312,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
   CGI installation: fix cgi installation to make examples for MTA and httpd.
 
-	CGIを使う場合のMTAとかhttpdの設定例で install にあわせたPATHへ直す
+	CGIを使う場合のMTAとかhttpdの設定例で install にあわせたPATHへなおす
 
   makefml htpasswd ML username
 	htpasswd wrapper for the ML
@@ -1367,7 +1367,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
   cgi menu for each ml for administrator
 
-	それぞれのＭＬごとの階層
+	それぞれの ML ごとの階層
 	(サーバ管理者用、つまり通常makefmlが使用可能な人の権限)
 
 2000/01/24
@@ -1386,7 +1386,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
   makefml
 	resolv conflicts around doc-template
 
-	先日直したdoc-templateまわりの２つの修正がそれぞれは正しいが
+	先日なおしたdoc-templateまわりの２つの修正がそれぞれは正しいが
  	２つあわさると互いに妨害してしまうbugの修正
 
   bug fix "admin matome addr 0"
@@ -1472,7 +1472,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
   sbin/makefml
 	use current cf value in y/n query menu
 
-	y/nでメニューに答える時はcfにある値をデフォールト値として
+	y/nでメニューに答える時はcfにある値をデフォルト値として
 	メニューにだす
 	
 2000/01/20
@@ -1544,7 +1544,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	リリースエンジニアリングがちょっと戻ってます。
 	fml 3.0pl#18 は fml 3.0.1_BETA #7 の扱いです。
 	ファイル名だけは3.0.1_BETAですがひろげても 3.0.1_BETA と表示さ
-	れません。が、そういうもんだとおもってください :)
+	れません。が、そういうもんだとおもって下さい :)
 
 2000/01/06
 
@@ -1591,7 +1591,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	reject not ascii nor ISO-2022-JP
 	(variable name is appropriate ???)
 
-	フィルタ: 変な日本語ぽいメールを拒否。デフォールトではつかってない
+	フィルタ: 変な日本語ぽいメールを拒否。デフォルトではつかってない
 	XXX こんな変数名でいいのか？？？
 
   html generator
@@ -1632,7 +1632,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	makefml bye ML 正規表現のようなアドレス 
 
-	問題のtrickyな回避。もっとちゃんと書き直すべき。TODOをみよう
+	問題のtrickyな回避。もっとちゃんと書きなおすべき。TODOをみよう
 
 
   update TODO, html/nt.html
@@ -2016,7 +2016,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	change $SKIP_FIELDS default to pass through Received:. 
 	It causes too many hops but need to check spam or back trace.
 
-	SKIP_FIELDS のデフォールトを変更して Received: を通すのがデフォールト
+	SKIP_FIELDS のデフォルトを変更して Received: を通すのがデフォルト
 
 1999/07/11
    SMTP new library: if $MCI_SMTP_HOSTS > 1 case
@@ -2116,7 +2116,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	ループ対策その３
 	md5 チェックサムのキャッシュを持ち記事の重複をチェックする
-	(一応デフォールトではこの機能は有効にはしていない)
+	(一応デフォルトではこの機能は有効にはしていない)
 
 	[config.ph]
 		$CHECK_MAILBODY_CKSUM = 1;
@@ -2246,7 +2246,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	ループ対策その３
 	md5 チェックサムのキャッシュを持ち記事の重複をチェックする
-	(一応デフォールトではこの機能は有効にはしていない)
+	(一応デフォルトではこの機能は有効にはしていない)
 
 	[config.ph]
 		$CHECK_MAILBODY_CKSUM = 1;
@@ -2339,8 +2339,8 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	&Mesg()関係はとりあえず日本語(２か国語で表示)になった
 
-	インストール時のデフォールトを $LANGUAGE と同じにしておく
-	(つまりデフォールトでONにする)
+	インストール時のデフォルトを $LANGUAGE と同じにしておく
+	(つまりデフォルトでONにする)
 
 1999/04/27
    $HTML_MAIL_DEFAULT_HANDLER	(obsolete $AGAINST_HTML_MAIL_HANDLER)
@@ -2451,7 +2451,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
    or.jp -> ne.jp translator: Japanese specific
 
 	or.jp -> ne.jp へメンバーファイルなどを変換するツールを
-	加える。ＭＬのディレクトリで
+	加える。 ML のディレクトリで
 
 		make translate-domain
 
@@ -2658,9 +2658,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	非常〜〜に後ろ向きなオプション
 	Eudora 等の In-Reply-To: References: をつけてくれないMUA対策
 	0. Subject: にTAGをつけることは前提(not default)
-	1. Message-ID: はＭＬ独自のものをつける
+	1. Message-ID: は ML 独自のものをつける
 	2. Subject: Re: [elena 00100] のようなTAGを解析する
-	ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
+	ことで ML 全体のスレッドの一貫性を疑似的に強制する。
 	元のMessage-ID:はX-Original-Message-ID:に移動される
 	(#28はbugでつけてない, fixed in #29)
 
@@ -2677,7 +2677,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	みんみん様にささぐ :) perl の滞在時間をできるだけ少なくする工夫
 	1. fml はある一つのアドレス ML-dist に投げるだけで終了
-	2. ML-dist は :include:$DIR/var/db/rcptlist を行なう。
+	2. ML-dist は :include:$DIR/var/db/rcptlist を行う。
 	   つまり配送の実態が ML-dist である。
 
 	3. このためのaliasesの見本として$DIR/.include-disthackが作成される
@@ -2793,7 +2793,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 1998/11/22
    help file: add 'tgz' mode in digest mode (missed in the past???)
 
-	まとめおくりの tgz モードがなぜかマニュアルからぬけてる;)
+	まとめ送りの tgz モードがなぜかマニュアルからぬけてる;)
 
    MTI: negative cache to warn the burst traffic to maintainers
 
@@ -2812,7 +2812,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
    $MTI_TIE_TYPE: use "tie" function in MTI sub system.
 
 	$MTI_TIE_TYPE に DB_File などを定義すると perl 5 の tie 
-	を使った hash へのバインディングを行なう。
+	を使った hash へのバインディングを行う。
 	perl 4 では使えない(当り前:-) 
 	使える引数はOSに依存する。各自マニュアルを参考に
 	e.g. DB_File, NDBM_File, ...
@@ -2865,7 +2865,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	Fml uses bin/base64decode.pl as a default when $BASE64_DECODE
 	is not defined.
 
-	html 化をする際のBASE64デコーダのデフォールト
+	html 化をする際のBASE64デコーダのデフォルト
 	明示的に $BASE64_DECODE を定義した場合はそちらが優先
 
 1998/10/30
@@ -2882,7 +2882,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
    mead.pl: modified to work with perl 4
 
-	perl 5 だと、ん〜ちょい変。直す
+	perl 5 だと、ん〜ちょい変。なおす
 
    spool2html.pl: update documents and information (help message)	
 
@@ -2899,8 +2899,8 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	define PGP Encrypted ML and prepare makefml menu entry
 
-	makefml のメニューでPGP暗合化ＭＬモードへ移行できるように
-	便宜上定義した。もちろんＭＬの鍵を作る、メンバーに配るなどの
+	makefml のメニューでPGP暗合化 ML モードへ移行できるように
+	便宜上定義した。もちろん ML の鍵を作る、メンバーに配るなどの
 	作業は別途必要なのは変わらない。
 	理屈について詳しくは doc/op* を見てね
 
@@ -3006,9 +3006,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	How to handle 'subscribe' request to ML modified by
 	maintainers' hand. In default fml confirms the will to From: address.
 
-	手動で登録作業をするＭＬで、subscribe request をうけたら
+	手動で登録作業をする ML で、subscribe request をうけたら
 	confirm を返し、confirm が帰ってきたら管理者は手で登録する。
-	デフォールトは confirmation にしてある。＃ 2.2A
+	デフォルトは confirmation にしてある。＃ 2.2A
 
    %Procedure: 'l#command' syntax
 	
@@ -3032,7 +3032,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	If you 'off' the users who causes "unknown user" error "not reachable",
 	you can  use '-k off' option.
 
-	-k off とすると(デフォールトではユーザを自動的に抜いてしまいますが)
+	-k off とすると(デフォルトではユーザを自動的に抜いてしまいますが)
 	それを OFF の状態にします。
 
 98/09/27
@@ -3056,7 +3056,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	[2.2BETA#23]
 	add ANNOUNCE_MAIL_SIZE_OVERFLOW
-	でっかいめーるをなげるとＭＬでさらしものにされてしまう:)
+	でっかいめーるをなげると ML でさらしものにされてしまう:)
 	＃でふぉーるとは使わない
 
 	etc/makefml/Makefile; remove $(PWD) (of no mean)
@@ -3089,7 +3089,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 98/08/29
 	msend.pl -s (slow start) オプションをつけると
 	スタートをゆっくりにする。
-	複数のＭＬがある場合には msend_master.sh を使うと良い
+	複数の ML がある場合には msend_master.sh を使うと良い
 
 	crontab の見本生成で起動する時間を乱数で少しふる
 	(msend の slow start の補助)
@@ -3117,7 +3117,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	2.2 BETA#14
 
 	liblop.pl: pull down to 2.2BETA#12
-	summary 分割送り直し問題の修正
+	summary 分割送りなおし問題の修正
 
 
 	2.2 BETA#13
@@ -3211,7 +3211,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	
 98/08/07
 	○ [デバッグ用途]
-	最近fmlが受けたメールを保存する(デフォールトは NO, 使わない)
+	最近fmlが受けたメールを保存する(デフォルトは NO, 使わない)
 	投稿、コマンドは問わずに保存。
 
 	(stdinlog のかわりに使えるよね？)
@@ -3220,7 +3220,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	$LOG_MAIL_FILE_SIZE_MAX bytes。このくらいあればヘッダとメール
 	の最初の方は十分収まるのでデバッグには十分だろう。
 	101通めは1を上書きするなどのようにファイルは円環上に使用される
-	(このために各ＭＬ、平均１Ｍ程度のディレクトリが必要になる)
+	(このために各 ML 、平均１Ｍ程度のディレクトリが必要になる)
 
 		LOG_MAIL_DIR:	$VAR_DIR/Mail
 		LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
@@ -3266,7 +3266,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	○ Solaris と NT4 の人だけ
 	   sys/arch/ を廃止して sys/ の下に統一しました
-	   インストールして何かあったらいってください。
+	   インストールして何かあったらいって下さい。
 
 	* HTML 生成コードを少し改良   
 
@@ -3381,7 +3381,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	sys/arch/WINDOWS_NT4
 		IDLE_PRIORITY で呼び出す
-		POP verison: デフォールトのループの時間を180秒に
+		POP verison: デフォルトのループの時間を180秒に
 
 	fix synchtml warning condition (case of no html directory)
 
@@ -3457,7 +3457,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	change *_TEMPLATE default
 
 	&DEFINE_FIELD_PAT_TO_REJECT(ヘッダフィールド, 正規表現)
-	例: Subject: に ADULT XXX のいづれかの文字列が入っていたら
+	例: Subject: に ADULT XXX のいずれかの文字列が入っていたら
 	SPAMとみなして捨てる
 
      	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'ADULT|XXX');
@@ -3643,9 +3643,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	2.1B #2
 
 	* confirmd "confirm daemon" ALPHA TEST
-	  定期的に「これからもＭＬに入り続けるか？」を尋ね
+	  定期的に「これからも ML に入り続けるか？」を尋ね
 	  返事がないならそのメンバーを削除する。
-	  まとめおくりと同様に cron から起動する。
+	  まとめ送りと同様に cron から起動する。
 
 	* makefml ML::command syntax
 	* fix moderated type II and html geneartor
@@ -3655,7 +3655,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	2.1A final is 2.1A#45 and define 2.1B 
 
       * 2.1B
-	デフォールトでこれらの変数(2.1Aではテスト)を
+	デフォルトでこれらの変数(2.1Aではテスト)を
 	    $MIME_EXT_TEST = 1;
 	    $FOP_HACK = 1;
 	    $USE_MTI_TEST = 1;
@@ -3826,10 +3826,10 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	in the following order: site_init.ph config.ph sitedef.ph
 
 97/11/23
-	2.1A #19	ntfml での まとめおくりの bug fix
+	2.1A #19	ntfml での まとめ送りの bug fix
 
 97/11/22
-	2.1A #18	ntfml での まとめおくりの bug fix
+	2.1A #18	ntfml での まとめ送りの bug fix
 
 97/11/21
 	2.1A #17	remove popfml queue_dir debug code
@@ -3846,12 +3846,12 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 97/11/03
 	新しい moderator モード ($MODERATOR_FORWARD_TYPE == 2)
-	$MODERATOR_FORWARD_TYPE = 2 をデフォールトにする
+	$MODERATOR_FORWARD_TYPE = 2 をデフォルトにする
 
 97/11/02
 	msend.pl timeout bug fix
 	define $MODERATOR_FORWARD_TYPE, $MODERATOR_MEMBER_LIST
-	$SLEEPTIME のデフォールトを 60 へ (いままでは 300)
+	$SLEEPTIME のデフォルトを 60 へ (いままでは 300)
 
 97/10/30
 	smtpfeed direct 呼びだし support α版
@@ -3869,7 +3869,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	1	To: $MAIL_LIST, $MAIL_LIST以外のアドレス(2.1 Release)
 	2	常に To: $MAIL_LIST (大昔）
 
-	1と2はメールを読む時にどこのＭＬのメールか見易いように
+	1と2はメールを読む時にどこの ML のメールか見易いように
 	To: $MAIL_LIST が常に同じ位置に来るようにするためのもの。
 
 97/10/23
@@ -3885,13 +3885,13 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 97/10/11
 	もし help ファイルなどがない場合は 
 	install先/drafts/help (install 用の original テンプレート)
-	をその都度各ＭＬにあわせて convert して送り出す。
-	１ テンプレートをいじれば全ＭＬに反映される
+	をその都度各 ML にあわせて convert して送り出す。
+	１ テンプレートをいじれば全 ML に反映される
 	という半面
-	２ 各ＭＬごとに helpやguide に懲ることが難しい。
-	懲りたければ書く。そうでないならデフォールトを使うなどができる
+	２ 各 ML ごとに helpやguide に懲ることが難しい。
+	懲りたければ書く。そうでないならデフォルトを使うなどができる
 	だろう(ISP向けともいえる）
-	なお makefml newml 時デフォールトではhelp, guide などは作成される
+	なお makefml newml 時デフォルトではhelp, guide などは作成される
 
 97/10/10
 	fml.pl:
@@ -4173,7 +4173,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 97/06/02
 	$REJECT_ADDR_LIST ("$DIR/spammers")
 	reject するアドレス From: と UNIX FROM に対して適用される。
-	デフォールトの $REJECT_ADDR はこれとは別に適用される。
+	デフォルトの $REJECT_ADDR はこれとは別に適用される。
 
 	%ProcedureException
 
@@ -4233,7 +4233,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	mode 内部表現
 
 97/04/19
-	sbin/makefml ＭＬのドキュメントの Language の選択
+	sbin/makefml  ML のドキュメントの Language の選択
 	help 等を distribution package 中では doc/ doc/drafts へ移動
 	clean up
 
@@ -4288,7 +4288,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	複数リスト対応のための initializeをしそこねているものの fix
 
 97/03/26
-	ＭＬのアドレスを変更して axion -> fml.org 以下に収容。
+	 ML のアドレスを変更して axion -> fml.org 以下に収容。
 
 	@ACTIVE_LIST に設定された
 	複数の配送リストファイルを配送に用いる。
@@ -4306,13 +4306,13 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	
 		アドレス $AUTO_REGISTRATION_DEFAULT_MODE
 	
-	の形で行なう。fml の内部表現↑で設定する必要があるので注意して下さい。
+	の形で行う。fml の内部表現↑で設定する必要があるので注意して下さい。
 	
-	例: デフォールトを skip にする
+	例: デフォルトを skip にする
 	
 		$AUTO_REGISTRATION_DEFAULT_MODE	= "s=1"; 
 	
-	    まとめおくりで３時間に一回 Multipart に設定。
+	    まとめ送りで３時間に一回 Multipart に設定。
 	
 		$AUTO_REGISTRATION_DEFAULT_MODE	= "m=3mp"; 
 	
@@ -4329,9 +4329,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	doc/smm/pager.wix
 	uuencode filename fixed	
 	clean up; self-defense the strange behaviour of local scope
-	fmlserv "単体"の機能は which だけを使えるだけに機能を落す。
-		注:メタレベルで help とかは仮想的に fmlserv ＭＬの help
-		そうではなく 全ＭＬにまたがるコマンドは which だけということ
+	fmlserv "単体"の機能は which だけを使えるだけに機能を落とす。
+		注:メタレベルで help とかは仮想的に fmlserv  ML の help
+		そうではなく 全 ML にまたがるコマンドは which だけということ
 
 97/03/21
 	sbin/makefml install: fixed search .fml/system
@@ -4359,9 +4359,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	$NOT_SHOW_DOCMODE mget とか msend のドキュメントの形式の説明を省く
 
 97/03/08
-	libexec/fmlserv でデフォールトでは lists コマンドを unable する。
+	libexec/fmlserv でデフォルトでは lists コマンドを unable する。
 	$FMLSERV_PERMIT_LISTS_COMMAND  = 1 で使えるようにする(default は０)
-	Listserv 的なインターフェイスのデフォールトは lists コマンドをさせない
+	Listserv 的なインターフェイスのデフォルトは lists コマンドをさせない
 	というのはこれがいたずらに多用されるため。
 
 	doc: info changes 調整 (info には 97/02 以降を収録)
@@ -4437,8 +4437,8 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	dup fix and check codes
 	
 97/02/11
-	まとめおくりの時の Subject, X-ML-Name 修正
-	Makefile のデフォールトを makefml を使うように修正(documentもともに)
+	まとめ送りの時の Subject, X-ML-Name 修正
+	Makefile のデフォルトを makefml を使うように修正(documentもともに)
 	Debug 用 Emulation コマンド (bin/emumail.pl)
 
 	モード：
@@ -4448,17 +4448,17 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	--distorctl
 	   100%の保証はないが、control-address 宛を推測して、
-	   ＭＬ	    宛は配送だけ
-	   ＭＬ-Ctl 宛はコマンド
+	    ML 	    宛は配送だけ
+	    ML -Ctl 宛はコマンド
 	を実行するようにする
-	（そのために include include-ctl がデフォールトで生成されるの
-	で普通はそれを使うってください）
+	（そのために include include-ctl がデフォルトで生成されるの
+	で普通はそれを使うって下さい）
 
 	--mimedecodedsubject
 	   SubjectがMIME -> append "X-Subject: MIME-Decoded Subject"
 
 97/02/10
-	まとめおくり解除時の溜っている分の配送 bug FIXED
+	まとめ送り解除時の溜っている分の配送 bug FIXED
 	関連場所への event scheduler code の配置(第２段階)
 	HTMLに変換された場合 duplicated することがある bug FIXED
 
@@ -4475,7 +4475,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	"get 数字" は今までどおりの Resend スタイル
 	"get それ以外" は MIME/Multipart で送り返す。
 		例えば "get last:3" は "mget last:3 mp " と同じ。 
-	”mget …” コマンドは今までどおりに tar.gz がデフォールトの形式
+	”mget …” コマンドは今までどおりに tar.gz がデフォルトの形式
 	まとめてごそっというときには固まっている方が良い場合は mget 
 	単に最近の数通をまとめてぱっと読みたい時などには get を使うと良い。 
 
@@ -4483,7 +4483,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 97/01/31
 	fixed to adjust qmail 0.96
-	まとめおくりのSubject:のデフォールト Matome Okuri (Digest Delivery)
+	まとめ送りのSubject:のデフォルト Matome Okuri (Digest Delivery)
 	doc/ に見本 welcome confirm (自動登録のConfirmation mode 用)
 	makekfml:	include-ctl を追加, 
 			libmakefml.pl を使わずに済むように変更。 
@@ -4498,7 +4498,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	makefml and $BRACKET problem (fix the source "cf" file) 
 
 97/01/28
-	まとめおくり（digest） の To: を (delivery list is suppressed)にする
+	まとめ送り（digest） の To: を (delivery list is suppressed)にする
 	Confirm Mode 実装（アルファテスト）
 
 97/01/27
@@ -4514,23 +4514,23 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	コードの整理 (Append2, Write2)
 
 97/01/18
-	fml.pl のデフォールトに $USE_FLOCK = 1; を加える(config.ph評価前)。
+	fml.pl のデフォルトに $USE_FLOCK = 1; を加える(config.ph評価前)。
 	compat code に頼りきりの場合に flock() を使わないケースがあり得る。
 
 	makefml の permission 制御のため、personal/group/fmlserv に拡張
-		perlsonal そのマシンでＭＬを運用するのは一人だけ
-		group 	  そのマシンでＭＬを運用する人が複数いる場合
-		fmlserv	  そのマシンでＭＬを運用する人が複数いて
+		perlsonal そのマシンで ML を運用するのは一人だけ
+		group 	  そのマシンで ML を運用する人が複数いる場合
+		fmlserv	  そのマシンで ML を運用する人が複数いて
 			  なおかつfmlservを使う場合
 
 	$USE_FML_WITH_FMLSERV  
 	複数のML運用者がいて fmlserv を使う場合は group permission で
 	アクセス制限する必要があるので、そのためのオプション
-	fmlserv を使う場合でも、そのマシンには自分の管理するＭＬのみ！
+	fmlserv を使う場合でも、そのマシンには自分の管理する ML のみ！
 	ならこのオプションは使うべきではない。
 	＃なお、fmlserv directory が同じ階層にある場合は自動的に設定される。
 
-	HTML 化された記事の置き場所のデフォールトを var/htdocs から htdocs へ
+	HTML 化された記事の置き場所のデフォルトを var/htdocs から htdocs へ
 	＃ permission の問題からそうでないとまずい 
 
 	fmlserv (listserv-like interface) unsubscribe code 
@@ -4542,7 +4542,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 97/01/14
 	libexec/popfml.pl (libpop.pl)
-	   popを使ってＭＬをするための正式実装版ベータテスト２
+	   popを使って ML をするための正式実装版ベータテスト２
 	bin/pop2recv.pl を obsolete にして popfml.pl をその後継とする。
 
 97/01/13,14
@@ -4551,7 +4551,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 97/01/12
 	libexec/popfml.pl (libpop.pl)
-	   popを使ってＭＬをするための正式実装版ベータテスト
+	   popを使って ML をするための正式実装版ベータテスト
 
 97/01/11
 	chdir -> cd (shell もの)
@@ -4632,7 +4632,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	perl makefml addadmin
 	perl makefml byeadmin
 
-	get コマンドのデフォールトを Resent-つきのフォワードに変更
+	get コマンドのデフォルトを Resent-つきのフォワードに変更
 	コマンドの結果だと分かるように
 	Subject: に Get Number $ML_FN が付け加えられる他はスプールの
 	元記事が送り返される。
@@ -4646,7 +4646,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 		Subject のタイプ
 		オプションの設定
 
-	自動登録時にＭＬに流れるメールのReply-TOが CtlAddrになっている
+	自動登録時に ML に流れるメールのReply-TOが CtlAddrになっている
 	のを MAIL_LIST にFIXED
 
 96/12/14
@@ -4678,9 +4678,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 96/12/9
 	perl makefml によるインストール方式
-	まとめおくり や fml.c のサンプルも作成する
+	まとめ送り や fml.c のサンプルも作成する
 
-	各ＭＬのサンプルは ~/.fml/ML名/ の下に保存される
+	各 ML のサンプルは ~/.fml/ML名/ の下に保存される
 
 
 96/12/8
@@ -4689,9 +4689,9 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 		perl makefml でインストール
 		perl makefml newml 
 
-	でＭＬの作成等の初心者向けインターフェイスの実装
+	で ML の作成等の初心者向けインターフェイスの実装
 
-	bin/spool2html.pl もスレッド処理をデフォールトに加える。
+	bin/spool2html.pl もスレッド処理をデフォルトに加える。
 
 
 96/12/6
@@ -4721,7 +4721,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 
 96/11/26
-	--html (&DEFINE_MODE('html'))では スレッドも作るのがデフォールト
+	--html (&DEFINE_MODE('html'))では スレッドも作るのがデフォルト
 	libsynchtml.pl の bug fix 
 		e.g. 1 - 99, SUN-SAT
 
@@ -4749,7 +4749,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 96/11/12
 	libsmtp.pl modified for qmail
-	＃sendmail は柔軟なので昔から大丈夫だけどRFCにばか正直すぎるの
+	＃sendmail は柔軟なので昔から大丈夫だけどRFCにばか正なおすぎるの
 	＃も困ったちゃんね
 
 	libsynchtml.pl: representation of the boundary is fixed 
@@ -4775,14 +4775,14 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	bin/daily.pl -f etc/daily.ignore
 		エラーやwarningの類と思われるもののみを表示する
-		毎朝走らせてメールで受けとると良いだろう
+		毎朝走らせてメールで受け取ると良いだろう
 
 96/11/1
 	DLA_HACK (Direct List Access) to use smaller stack
 
 96/10/31
 	cf/config modified 
-		デフォールトの値がないように設定する変数は
+		デフォルトの値がないように設定する変数は
 		コメントアウトの形でOUTPUTするようにする。
 
 	Subject: FORMAT modified when SUBJECT_*_FORM set;
@@ -4862,23 +4862,23 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 96/07/13
 
 libutils.pl
-	defauilt subscribe の直しそこないをFIX
+	defauilt subscribe のなおしそこないをFIX
 	自動 html 化ライブラリが一月;-)ずれてるのをFIX
 
 96/07/12
 
 お手軽インストールのバグをなおす;_;
 
-	・こないだ直し過ぎて勢い余ってしまっているところ;_;
+	・こないだなおし過ぎて勢い余ってしまっているところ;_;
 
 	% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
 
 	MAINTAINER=ML管理者のアドレス	がちゃんと反映されてない
-	＃ cf/config を使ってFIX処理を行なうように変更
+	＃ cf/config を使ってFIX処理を行うように変更
 
 
 html mode definition
-	default を 日毎に別の directory に保存するのを デフォールトへ
+	default を 日毎に別の directory に保存するのを デフォルトへ
 	＃前にしたつもりだったんだが…なおしそこねてた
 
 
@@ -4965,7 +4965,7 @@ libutils.pl
 librfc1153.pl
 	カスタマイズ用の変数を外へ出す（config.phで設定できるように）
 
-	変数				デフォールト
+	変数				デフォルト
 	$RFC1153_ISSUE    		1
 	$RFC1153_LISTNAME 		UJA
 	$RFC1153_VOL      		$year
@@ -4974,11 +4974,11 @@ librfc1153.pl
 libsendfile.pl
      $MGET_TEXT_MODE_DEFAULT 
      $MGET_BIN_MODE_DEFAULT 
-	mget のデフォールトの変更
+	mget のデフォルトの変更
 
 msend.pl
      $MSEND_MODE_DEFAULT 
-	まとめおくりのデフォールトの変更
+	まとめ送りのデフォルトの変更
 
 
 ＊＊＊＊＊
@@ -5004,8 +5004,8 @@ bin/fwix.pl
 
 
 bin/split_and_msend.pl 
-	unix from のかたちの file の まとめおくり 
-	ようするに obsolute の まとめおくりＲ１ の現代版（苦笑）
+	unix from のかたちの file の まとめ送り 
+	ようするに obsolute の まとめ送りＲ１ の現代版（苦笑）
 	PLAIN TEXT ONLY っすけど。
 
 
@@ -5044,7 +5044,7 @@ $FML_EXIT_HOOK = q#
 # whois [-h host] key	whois で key を探す。
 			host が与えられた場合はそのhostへIPCで、
 			もしそうでない場合は
-			ＭＬローカルな whois database を探します
+			 ML ローカルな whois database を探します
 
 # iam			自己紹介を登録する
 # who			自己紹介の一覧を得る
@@ -5125,14 +5125,14 @@ local spool への ftp interface
 
 ＊＊＊ヴァージョンアップの場合の注意＊＊＊
 
-基本的なデータ構造を call by reference 用に書き直したので、
+基本的なデータ構造を call by reference 用に書きなおしたので、
 
 libcompat.pl にBackward compatibility のためのコードがあります。
 昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
 る程度まで compatible にできます。
 ＃コードの都合上実現できないカスタマイズもありえます_o_
 
-FAQ は新しい形で書き直されています。
+FAQ は新しい形で書きなおされています。
 
 e.g.	Playing_to
 	STAR_TREK_FORM
@@ -5143,7 +5143,7 @@ e.g.	Playing_to
 ========== CHANGES  1.5 -> 1.6 ==========
 
 ・ bin/inc_via_pop.pl を経由して、fml.pl を動かすことで、
-   SMTPをうけつけないマシンで ＭＬ をつくるとか
+   SMTPをうけつけないマシンで  ML  をつくるとか
    SMTPをうけつけないマシンで .forward に相当することをやるとか
    つまり、bin/inc_via_pop.pl から fml_local.pl をよべばＯＫ
 
@@ -5179,11 +5179,11 @@ e.g.	Playing_to
 	username@.*.iijnet.or.jp にマッチしたら
 	$ADDR_MAX_CHECK を１あげる。
 
-これの応用として、デフォールトを厳しくして、特定のドメインでは -1 する。
+これの応用として、デフォルトを厳しくして、特定のドメインでは -1 する。
 ってのもありですね。
 
 
-・コマンドでは $TRAILER_MAILBODY 等へのインフォがデフォールトでつきます。
+・コマンドでは $TRAILER_MAILBODY 等へのインフォがデフォルトでつきます。
 
 
 ・コマンドを実行したメールを送り返すとき
@@ -5285,7 +5285,7 @@ libsmtp.pl にその補正機構はbuilt-inされました。
 （configure で 自動的に config.ph に $COMPAT_SOLARIS2 という変数がセッ
 トされるはずですが）
 	$COMPAT_SOLARIS2 = 1;
-とセットしてください。
+とセットして下さい。
 うまくシステムのsys/socket.phが呼べないときに必要な定義をします。
 
 ・bin/vipw.pl	
@@ -5298,7 +5298,7 @@ libfml.pl のstatus report は↑をつかう。
 ~/.forward extension fixes
 
 コマンドは user define ができるように、
-まとめおくりと同様に 連想配列で設定できるようにした。
+まとめ送りと同様に 連想配列で設定できるようにした。
 これにより、簡単にコマンドの名前等の変更もできる。
 
 
@@ -5350,7 +5350,7 @@ ftpmailでuuencodeがうごかない（1.5直前から〜）
 
 1.4.1 RELEASE 1995/5/7
 
-・mget とまとめおくりでの User interface 
+・mget とまとめ送りでの User interface 
 	PLAINTEST 
 		UNIX FROM
 		RFC934	
@@ -5395,18 +5395,18 @@ _smtplog -> var/log/_smtplog（本体）
   ただし、リモートでの アドミンコマンドでは 複数マッチを許す。
   OFF 引数 等の 引数も許す。
 
-・まとめおくりのヴァリエーション拡張その１
+・まとめ送りのヴァリエーション拡張その１
 
 ・コマンドの拡張
-まとめおくりで、Ｎ時間おき（デフォールト）と Ｎ時に一日一回指定
+まとめ送りで、Ｎ時間おき（デフォルト）と Ｎ時に一日一回指定
 
 # status [引数]
-# stat   [引数]		現在の設定について知らせる（まとめおくりとかOFFとか）
-			デフォールト（# stat(us)）は自分自身の状態
+# stat   [引数]		現在の設定について知らせる（まとめ送りとかOFFとか）
+			デフォルト（# stat(us)）は自分自身の状態
 # mget last:10 		(mhだね) シンタックス
-# exit 			コマンドの終り
-# end			コマンドの終り
-# quit			コマンドの終り
+# exit 			コマンドの終わり
+# end			コマンドの終わり
+# quit			コマンドの終わり
 
 ・libfml.pl はエラー処理を一括しておこなう。そうしないと複数のコマンド
 ミスそれぞれについて警告メールが返ってしまうから
@@ -5445,7 +5445,7 @@ subscribe ml-address のようなキーワードを必要とするように
 マンドメールでの単なるシンタックスエラーの警告をしない
 ＃ヘルプを返さない。signuatureとかでひっかかるから
 
-・ Proceess Table にＭＬ名をつける（８文字もありゃ十分だろう）
+・ Proceess Table に ML 名をつける（８文字もありゃ十分だろう）
 
 ・古いライブラリ は lib/Compatibility に移動
 
@@ -5458,7 +5458,7 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 
 ■変更点(diff between fml 1.3 and fml 1.2)
 
-・まとめおくり ver.1-4
+・まとめ送り ver.1-4
   ver. 3,4 ではUNIX FROM <-> RFC934 きりかえ等もオプショナルサポート
 
 ・より secure に
@@ -5470,7 +5470,7 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 
 ・ドキュメント Generator(lib/AIKO) texinfo and html自動 Generator
 
-・自動的にＭＬのspoolをhtml化する
+・自動的に ML のspoolをhtml化する
 
 ・httpdへの（ＩＰＣ） smtp インターフェイス（というのか？）
 
@@ -5482,7 +5482,7 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 	例：	Subject: subscribe
 	本文に subscribe pollyanna@phys.titech.ac.jp 等
 
-・自動登録で登録要請をしているメールはＭＬへ流さないモード（オプショナル）
+・自動登録で登録要請をしているメールは ML へ流さないモード（オプショナル）
 
 ・ユーザからのリモート制御 
 	# matome 数字(0-23)	コマンド
@@ -5495,13 +5495,13 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 
 ・gzip, zcat を使う
 
-・hml 1.6にあったアドミンコマンド（remote で ＭＬサーバを操作する）
+・hml 1.6にあったアドミンコマンド（remote で  ML サーバを操作する）
 （オプショナル）
 
 ・new options of configuration files
 	・ + in members
 	・ skip in actives
-	・ matome in actives（まとめおくり ver.2-4）
+	・ matome in actives（まとめ送り ver.2-4）
 
 ・RecreateConfig.pl	config.ph の自動更新
 
@@ -5516,7 +5516,7 @@ lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
 
 ・Documentsの改良。
 
-・ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+・ひとつのfmlで複数の ML を扱う（２方式）（実は1.1.2.17からある）
 
 ■主な変更点(diff between fml 1.2 and hml 1.6)
 

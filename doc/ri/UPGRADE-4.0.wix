@@ -40,7 +40,7 @@
 
 	makefml	モード.pgpコマンド名
 
-になります。またモードのデフォールト値は環境変数 
+になります。またモードのデフォルト値は環境変数 
 MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 例:	真面目に書くとこのように書きます。
@@ -95,9 +95,9 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 	makefml aa.gpg
 
 
-.S	省略しない makefml の使い方 （ＭＬの暗号化の鍵の操作）
+.S	省略しない makefml の使い方 （ ML の暗号化の鍵の操作）
 
-  fml 3.0 では makefml pgp によりＭＬの暗号化のため鍵を操作しました。
+  fml 3.0 では makefml pgp により ML の暗号化のため鍵を操作しました。
   fml 4.0 では
 
 	makefml	モード.pgpコマンド
@@ -123,15 +123,15 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 .S	解説: 3.0 と 4.0 とのちがいについて
 
-  3.0 までは例えば elena ＭＬの PGP 認証( admin コマンド)および
-  ＭＬの暗号化のキーがともに
+  3.0 までは例えば elena  ML の PGP 認証( admin コマンド)および
+   ML の暗号化のキーがともに
 
 		/var/spool/ml/elena/etc/pgp/
 
   におかれていました。これでは
 	
 		admin コマンドの PGP 認証
-		ＭＬの暗号化のキー
+		 ML の暗号化のキー
 
   を同時には使えないことになります。同様で makefml pgp もこのディレク
   トリにあるファイルを操作することを意図しています。4.0 ではこれをきち

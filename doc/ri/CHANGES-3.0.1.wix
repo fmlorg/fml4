@@ -7,7 +7,7 @@
 
 .if LANG == JAPANESE
 3.0 stable branch の CHANGES についてのみ記しています。
-3.0 の CHANGES は http://www.fml.org/fml/ からたどってください。
+3.0 の CHANGES は http://www.fml.org/fml/ からたどって下さい。
 .fi
 .if LANG == ENGLISH
 This document logs CHANGES in fml stable branch.
@@ -80,9 +80,9 @@ See http://www.fml.org/ for CHANGES in fml-current.
 
    disable to reject "From: $MAIL_LIST" mail in default 
 
-	デフォールトでは From: $MAIL_LIST を弾かないように変更
+	デフォルトでは From: $MAIL_LIST を弾かないように変更
 	3.0ではループチェックの一部としてこれをしているが
-	企業のサポートＭＬなどではまるのでとりあえず戻す
+	企業のサポート ML などではまるのでとりあえず戻す
 
 	明示的にループチェックする場所を指定する関数を用意したので
 	したい人はチェックするとよいとおもう。
@@ -103,14 +103,14 @@ See http://www.fml.org/ for CHANGES in fml-current.
 	changed to accpet From: $MAIL_LIST
 
 	3.0 のループチェックではじいている From: $MAIL_LIST のケース
-	をデフォールトでは適用しない
+	をデフォルトでは適用しない
 
 [ 3.0pl#27 == 3.0.1_BETA #16 ]
 
   sbin/makefml (2.65-2.66): 
 	resolve conflicts around doc-template
 
-	先日直したdoc-templateまわりの２つの修正がそれぞれは正しいが
+	先日なおしたdoc-templateまわりの２つの修正がそれぞれは正しいが
  	２つあわさると互いに妨害してしまうbugの修正
 
 [ 3.0pl#26 == 3.0.1_BETA #15 ]
@@ -154,7 +154,7 @@ See http://www.fml.org/ for CHANGES in fml-current.
    sbin/makefml
 	use $DIR/cf value in 'y/n' case
 
-	y/nでメニューに答える時はcfにある値をデフォールト値として
+	y/nでメニューに答える時はcfにある値をデフォルト値として
 	メニューにだす
 
    MesgLE
@@ -215,7 +215,7 @@ See http://www.fml.org/ for CHANGES in fml-current.
 
 [ 3.0pl#16 == 3.0.1_BETA #5 ]
 
-   一回リリースエンジニアリングの体制を仕切り直す。
+   一回リリースエンジニアリングの体制を仕切りなおす。
    いまは 3.0pl#16 は 3.0.1_BETA #5 と同じ意味
    ＃以下 3.0.1 リリースまでしばらくこのconventionを使う
 
@@ -294,7 +294,7 @@ See http://www.fml.org/ for CHANGES in fml-current.
 	3.0's "From: $MAIL_LIST" rejection.
 
 	3.0 では From: $MAIL_LIST はループの可能性を避けるために
-	拒否するようになっているが、サポートＭＬなどでは必要かも知れないので
+	拒否するようになっているが、サポート ML などでは必要かも知れないので
 	管理者がその設定を解除できるようにする
 
 	update dummy {DEFINE,UNDEF}_FIELD_LOOP_CHECKED()

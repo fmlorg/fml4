@@ -27,7 +27,7 @@
 
 
 [用語]
-   以下のドキュメント中ではメーリングリストをＭＬと略しています。
+   以下のドキュメント中ではメーリングリストを ML と略しています。
    % はシェルのプロンプトです。
    # は root のシェルのプロンプトです。
 .fi
@@ -94,7 +94,7 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 …メッセージ省略…
 
 ○ fml自体のインストール自体は終了。
-   この後ＭＬの作成/設定/メンバー登録等を行なう。
+   この後 ML の作成/設定/メンバー登録等を行う。
 
 例: elena MLを作る。
 % /usr/local/fml/makefml newml elena
@@ -102,14 +102,14 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 .~q
 
 
-.C	ＭＬサーバとは?
+.C	 ML サーバとは?
 =E.C	What is ML?
 .n	concept
 
-ＭＬサーバは本質的にフィルタリングをするものです。ＭＬ宛のメールが来た
+ ML サーバは本質的にフィルタリングをするものです。 ML 宛のメールが来た
 ら配送プログラムから起動されいろいろな処理をした後、配送するべき(MLの)
 メンバーリストを配送プログラムへ渡します。後は配送プログラムが配送を行
-ないます。配送自体はＭＬサーバの役目ではありません。
+ないます。配送自体は ML サーバの役目ではありません。
 =E
 Fml, a ML server (manager) is a filtering process. It does not need to
 handle delivery process. MTA receives mail, kicks off fml and
@@ -120,9 +120,9 @@ delivery.
 .if LANG == JAPANESE
 [図]
 
-あるホスト                                    ＭＬサーバのマシン
+あるホスト                                     ML サーバのマシン
 
-ＭＬのメンバーからのメール
+ ML のメンバーからのメール
    |
    V                    fml を起動する
  MTA (e.g. sendmail)   ------------------>     
@@ -131,7 +131,7 @@ delivery.
  (配送プロセス)
    | | | 
    V V V
- ＭＬのメンバ
+  ML のメンバ
 .fi
 .if LANG == ENGLISH
 [Figure]
@@ -149,17 +149,17 @@ mail from a member
  members of the Mailing List 
 .fi
 
-配送プロセスは上図のように動きます。ＭＬサーバが普通のメールではなくあ
-る命令(ＭＬを辞める、過去の記事を読むなど)を含んだメールをうけた場合は、
+配送プロセスは上図のように動きます。 ML サーバが普通のメールではなくあ
+る命令( ML を辞める、過去の記事を読むなど)を含んだメールをうけた場合は、
 それを実行して答えをリクエストした人へ配送します(コマンド)。
 =E
 Described above, the mailing list and delivery process works.
 A mailing list driver can accept commands, too. 
 
-また上図からわかるとおりＭＬ宛のメールが来た時だけＭＬサーバは起動され
-ます。つまり"不定期"にです。ＭＬが盛り上がって一気に来る瞬間もあれば、
+また上図からわかるとおり ML 宛のメールが来た時だけ ML サーバは起動され
+ます。つまり"不定期"にです。 ML が盛り上がって一気に来る瞬間もあれば、
 メールが流れない暇な時もあります。そのためメールの流量を気にする人はリ
-アルタイムにＭＬの記事(メール)を読むより、例えば3時間に一度過去3時間の
+アルタイムに ML の記事(メール)を読むより、例えば3時間に一度過去3時間の
 メールをまとめて読む「まとめ送り」を好む人もいます。
 =E
 Only when mail comes in, fml is kicked off. That is event driven.
@@ -181,12 +181,12 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 =E.C	Installation
 .n	installation
 
-以下の例では /usr/local/fml に実行ファイル /var/spool/ml の下に各ＭＬ
+以下の例では /usr/local/fml に実行ファイル /var/spool/ml の下に各 ML 
 の directory (例: elena MLは/var/spool/ml/elena)などを作ることにします。
 
 注意:	以下の例では /usr/local/fml と /var/spool/ml のオーナーは
 	仮想ユーザ fml (後述)になります。意味がわからないならとりあえ
-	ず、以下のような呪文を実行してから make install してください
+	ず、以下のような呪文を実行してから make install して下さい
    例:
 	% su
 	ユーザ fml とグループ fml を作る (作り方はOSによって違う)
@@ -205,7 +205,7 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 ML の運用を特権ユーザでやるべきではありません。一般ユーザ(例えばML専用
 のアカウントやあなたのアカウント等)でインストールおよび運用をして下さ
 い。ML 用の特別な一般アカウント (e.g. fml 等) を作りその架空ユーザになっ
-てインストール・設定を行なうとよいでしょう。
+てインストール・設定を行うとよいでしょう。
 =E
 In general you should not run mailing lists as a privileged user.
 Please run mailing lists as a non-privileged user.
@@ -283,23 +283,23 @@ fml asks you on it in the first stage of installation.
 それぞれの項目の意味は次の通りです。いずれかを選択して下さい。
 権限が適当に設定されます。
 
-personal 	自分一人しか使わない(ＭＬ群のオーナーは自分だけ)場合。
-		自分のアカウントないしＭＬ専用のアカウント fml などを使います。
+personal 	自分一人しか使わない( ML 群のオーナーは自分だけ)場合。
+		自分のアカウントないし ML 専用のアカウント fml などを使います。
 		すべてのファイルやディレクトリはそのアカウントだけで読
 		み書き可能です。fmlserv を使うならそのアカウントで走らせます。
 
 group		 "特定多数"のオーナー達がいる場合でfmlservは"使わない"場合。
-		ある group に属する人達は自由にＭＬを作成できます。
-		各ＭＬはそのＭＬの所有者だけが読み書きできます。
+		ある group に属する人達は自由に ML を作成できます。
+		各 ML はその ML の所有者だけが読み書きできます。
 		/var/spool/ml が group writable 以外は personal と変わ
 		りません。
 
 fmlserv  	"特定多数"のオーナー達がいる場合でfmlservも"使う"場合。
-		ある group に属する人達は自由にＭＬを作成できます。
+		ある group に属する人達は自由に ML を作成できます。
 		/var/spool/ml だけでなく一部のファイルは group の
 		人なら誰でも読み書きできるようになります。
 		これは fmlserv のために必要な設定です。
-		ただ、設定ファイルは各ＭＬのオーナーだけが変更できます。
+		ただ、設定ファイルは各 ML のオーナーだけが変更できます。
 .fi
 .if LANG == ENGLISH
 personal	only you use the fml system. In this case you 
@@ -321,11 +321,11 @@ The write permission of the fml system changes in each type.
 
 ○ ２、３の事例
 
-自分一人しかＭＬをいじらないのであれば単に自分が読み書きできれば十分
-(personal タイプ)ですが、逆に複数の人が複数のＭＬを作る場合
+自分一人しか ML をいじらないのであれば単に自分が読み書きできれば十分
+(personal タイプ)ですが、逆に複数の人が複数の ML を作る場合
 
 	1. それぞれのアカウントで自由に作成することができる
-	2. 常に fml というアカウントで必要な操作を行なう
+	2. 常に fml というアカウントで必要な操作を行う
 
 という２つの運用ポリシーが考えられます。
 =E
@@ -340,14 +340,14 @@ should prepare ML account e.g. "fml".
 (select "personal"). If you use "fmlserv" under "fml" account, please
 select "personal".
 
-2. ＭＬをリモートで管理する人などが複数いたりしても newml をしたり直接
+2.  ML をリモートで管理する人などが複数いたりしても newml をしたり直接
 ファイルをいじるなどの面倒を見るのがあなた一人ならやはり"personal"を選
-択してください。
+択して下さい。
 =E
 2. There exist several mailing lists, but only you can do "newml" and
 edit files directly.  In this case please select "personal", too.
 
-3. 複数の人がいてそれぞれのアカウントで自由にＭＬを作りたいという場合
+3. 複数の人がいてそれぞれのアカウントで自由に ML を作りたいという場合
 は group です。その場合にさらに fmlserv も使うというのであれば fmlserv 
 を選択して下さい。
 =E
@@ -418,7 +418,7 @@ to install the fml to your system.
 
 	env MKDOC=no perl makefml install
 
-としてください。
+として下さい。
 最近の UNIX なら env コマンドは普通あるはずです(POSIX にあるから)。
 
 
@@ -522,19 +522,19 @@ Please see the previous section!
 
 	ML(複数)はこの階層の"下"に作られる。例えば
 
-	   Elena ＭＬを作る場合は /var/spool/ml/elena 
-	   Mirei ＭＬを作る場合は /var/spool/ml/mirei
+	   Elena  ML を作る場合は /var/spool/ml/elena 
+	   Mirei  ML を作る場合は /var/spool/ml/mirei
 
-	といった具合に複数のＭＬがこの場所の下に作られていく。
-	ここは各ＭＬごとの設定ファイルや記事を保存する場所です。
+	といった具合に複数の ML がこの場所の下に作られていく。
+	ここは各 ML ごとの設定ファイルや記事を保存する場所です。
 
    LANGUAGE                  [Japanese] 
 .if LANG == JAPANESE
-	"makefml newml" (後述)の際にＭＬ用に作られるドキュメントの言語
+	"makefml newml" (後述)の際に ML 用に作られるドキュメントの言語
 	設定。インストールするマシンが .jp の場合[]の中つまりデフォー
 	ルトは日本語になります。"Japanese" か "English" が選べます。
 
-	「マシンは jp ドメインではないが日本人向けＭＬなので
+	「マシンは jp ドメインではないが日本人向け ML なので
 	  help を日本語にするために Japanese としておく場合」
 	などの使いわけを想定しています。
 .fi
@@ -567,7 +567,7 @@ Please see the previous section!
 というケースがありえます。その場合は
 
 	/home/fukachan/fml に実行ファイル
-	/home/fukachan/ml  にＭＬ群の階層
+	/home/fukachan/ml  に ML 群の階層
 
 を作るといった形になるでしょう。
 .fi
@@ -609,7 +609,7 @@ currentにしかありません。
 .url http://www.fml.org/fml/examples/cgi-INSTALL.txt
 
 CGI関係のメモは以下のURLの最後の方にCGIの節があるのでそこからたどって
-みてください。
+みて下さい。
 
 .url http://www.fml.org/fml/examples/
 
@@ -631,7 +631,7 @@ It is better for the ML maintainer to log in the fml running host to
 customize ML configurations and change ML member lists on the fml
 running host. "makefml" command helps you to do them.
 
-「メールでfmlにコマンドを送り込み、ユーザの登録/削除などを行なう」こと
+「メールでfmlにコマンドを送り込み、ユーザの登録/削除などを行う」こと
 もできます。ドキュメント中では『リモート管理』と呼ばれています。リモー
 ト管理はデフォルトの動作ではありません。明示的にこの動作を許すように
 設定を変更しなければいけません。 => .ptr{REMOTE_ADMINISTRATION}
@@ -640,8 +640,8 @@ The term "remote administration" implies "to control fml by sending
 administrative commands to fml". It is not default. You need to set it
 explicitly. => .ptr{REMOTE_ADMINISTRATION}
 
-コマンドを送り込むことのできる人は(各ＭＬごとに設定できる)パスワードを
-知っている必要があります。認証をPGPで行なうオプションもあります。 => .ptr{configure-remote-administrators}
+コマンドを送り込むことのできる人は(各 ML ごとに設定できる)パスワードを
+知っている必要があります。認証をPGPで行うオプションもあります。 => .ptr{configure-remote-administrators}
 =E
 The ML maintainer can send the commands to fml if he/she knows the
 password. The authentication is based by password or PGP, you can
@@ -679,8 +679,8 @@ variables you can customize. See "doc/op.en" for details of each
 variable.
 
 カスタマイズ変数一覧は インストール先(/usr/local/fml)/cf/MANIFEST を見
-てください。各変数の意味、実装上の理念、パラメータについての詳細は 
-doc/Japanese/internal の中をサーチしてください。
+て下さい。各変数の意味、実装上の理念、パラメータについての詳細は 
+doc/Japanese/internal の中をサーチして下さい。
 
 いずれの場合でも分からない時はまず最初に doc/Japanese/ のファイル群を
 適当なキーワードや変数名でサーチして見て下さい。最新版のドキュメント全
@@ -694,7 +694,7 @@ Check your system following doc/CHECK_LIST.en.
 
 
 
-.C	ＭＬを作る
+.C	 ML を作る
 =E.C	Creating A New Mailing List
 
 基本的な設定の変更やメンバー登録/削除などはコマンドで実行できます。
@@ -710,7 +710,7 @@ fundamental parameters for a ML.
 "makefml" command syntax is as follows:
 	makefml command [parameters or options]
 
-.S	ＭＬを作る時
+.S	 ML を作る時
 =E.S	Creating A New Mailing List
 
 例: Elena ML を作る時は
@@ -719,7 +719,7 @@ When you create a new "elena" Mailing List, you do just
 
 	/usr/local/fml/makefml newml elena
 
-を実行します。ＭＬのHOMEディレクトリ
+を実行します。 ML のHOMEディレクトリ
 =E
 You can find the samples for each ML under /var/spool/ml/"listname"/
 e.g. the include sample for elena ML is
@@ -728,7 +728,7 @@ e.g. the include sample for elena ML is
 
 の下に include や aliases をはじめ、必要なサンプルが作成されます。
 (sendmailの場合)見本の aliases ファイルを /etc/aliases に追加して 
-newaliases したら終りです。まとめ送りについては後述(.ptr{msend})。
+newaliases したら終わりです。まとめ送りについては後述(.ptr{msend})。
 ＃その時 unsafe などのエラーがでたら？ → .ptr{unsafe}
 =E
 You can see a sample to add to /etc/aliases is shown in the last
@@ -776,7 +776,7 @@ Please see manuals and faq's of MTA's.
 If you create another "mirei" ML, you do the same way again for mirei
 in replacing "elena" with "mirei".
 
-作成される設定の見本は以下のようなものです。既にそれぞれのＭＬ用にカス
+作成される設定の見本は以下のようなものです。既にそれぞれの ML 用にカス
 タマイズされています。
 =E
 Created samples are the following files:
@@ -794,9 +794,9 @@ Created samples are the following files:
 			(config.ph については .ptr{config-file})
 
 	guide		ガイド
-	help		ＭＬやコマンドの使い方
+	help		 ML やコマンドの使い方
 	help-admin	リモート管理のためのコマンドの一覧
-	objective	ＭＬの目的について
+	objective	 ML の目的について
 	welcome		自動登録時に返す「ようこそ…」の文面
 	confirm		自動登録(confirmationモード)で使う文面
 	crontab		vixie cron 用の定義ファイルの見本
@@ -829,23 +829,23 @@ Created samples are the following files:
 	config.h	fml.c header file
 .fi
 
-.S	ＭＬを削除する時
+.S	 ML を削除する時
 =E.S	Remove a Mailing List
 
 	rm -fr /var/spool/ml/MLの名前
 =E
 	rm -fr /var/spool/ml/listname
 
-でファイル群を消し、そして /etc/aliases から該当するＭＬの部分を削って 
+でファイル群を消し、そして /etc/aliases から該当する ML の部分を削って 
 newaliases をかけます。
 =E
 and delete the entries in /etc/aliases.
 
-.S	まとめおくり
+.S	まとめ送り
 =E.S	Digest Delivery
 .label	msend
 
-まとめおくりはcronを利用します。NetBSD のような Vixie Cron がOS附属の
+まとめ送りはcronを利用します。NetBSD のような Vixie Cron がOS附属の
 場合、elena ML の /var/spool/ml/elena/crontab が見本なので
 =E
 Digest delivery is to send articles in one mail periodically not real
@@ -853,7 +853,7 @@ time delivery of mail when the server receives mail.
 
 	% crontab /var/spool/ml/elena/crontab 
 
-とすればまとめおくりを設定できます。
+とすればまとめ送りを設定できます。
 =E
 For each user who used "makefml newml listname", the user can find
 =S
@@ -866,8 +866,8 @@ This file has all crontab entries the user administrates.
 =E
 	/var/spool/ml/etc/crontab/USERNAME
 
-というファイルには各ＭＬオーナーが管理しているＭＬ全部のまとめおくり項
-目が入った見本です。これはＭＬを増やすたびに新しいまとめおくりの設定が
+というファイルには各 ML オーナーが管理している ML 全部のまとめ送り項
+目が入った見本です。これは ML を増やすたびに新しいまとめ送りの設定が
 自動的に付け加えられます。cron の設定をいっきに更新するには makefml
 newml で作成後、
 =E
@@ -876,7 +876,7 @@ Please use crontab(1) in the following way:
 .if LANG == JAPANESE
 	% crontab /var/spool/ml/etc/crontab/ユーザの名前
 
-としてください。USERNAME.master については後述。MLの数が増えてきたら
+として下さい。USERNAME.master については後述。MLの数が増えてきたら
 
 	% crontab /var/spool/ml/etc/crontab/ユーザの名前.master
 
@@ -903,8 +903,8 @@ the chapter on "cron" of doc/op.en in the fml source.
 ***** When a lot of ML run in ONE MACHINE? (must be always yes on ISP
 ***** accounts)?
 
-(どんなプログラムにも当てはまる)当然のことですが、複数の人が複数のＭＬ
-でまとめおくりをしている場合、全員が cron で毎時0分に msend を走らせる
+(どんなプログラムにも当てはまる)当然のことですが、複数の人が複数の ML 
+でまとめ送りをしている場合、全員が cron で毎時0分に msend を走らせる
 とシステムの負荷が瞬間最大風速的に上がります。cron はいわれた通り走る
 だけでチューニングはしてくれません。システム管理者が2、3分ずつずらして
 走らせるなどの運用的なシステムチューニングに気を配ることが重要です。
@@ -924,8 +924,8 @@ concurrent plural msend running. This crontab example follows:
    0 * * * * /usr/local/fml/bin/msend_master.sh -E /usr/local/fml -M /var/spool/ml
 
 のような見本を作ります。msend_master.sh は /var/spool/ml (-M オプショ
-ンで変更できる)の下にあるML全部に対してまとめおくり作業を順番に実行す
-るためのスクリプトです。複数のＭＬのまとめおくりが一斉に走らないように
+ンで変更できる)の下にあるML全部に対してまとめ送り作業を順番に実行す
+るためのスクリプトです。複数の ML のまとめ送りが一斉に走らないように
 するために有効です。
 
 =E
@@ -962,7 +962,7 @@ You can see the example setting in
 
 	/var/spool/ml/fmlserv
 
-に作られます。ＭＬを作る時と同様に aliases を設定して下さい。
+に作られます。 ML を作る時と同様に aliases を設定して下さい。
 =E
 Please cut and paste the example of "aliases" which is seen in the
 last of "makefml" for /etc/aliases and do "newaliases".
@@ -970,13 +970,13 @@ To check the action of "fmlserv", please send "help" to the
 fmlserv@your-domain.
 
 .if LANG == JAPANESE
-コマンドは単にコマンドの書き方にＭＬ名が加わっているだけです。
+コマンドは単にコマンドの書き方に ML 名が加わっているだけです。
 
 	コマンド   ML  [fml標準のコマンドのオプションと引数]
 
 というコマンド形式になります。単に一枚皮が被さっているだけなのでコマン
-ドの動作はシンタックスを除いて、全く同じです。また各ＭＬの config.ph 
-に従って実行されるので、各ＭＬのコマンド用のアドレスに送った時と同じ動
+ドの動作はシンタックスを除いて、全く同じです。また各 ML の config.ph 
+に従って実行されるので、各 ML のコマンド用のアドレスに送った時と同じ動
 きをします。(config.ph のかきかたについては => .ptr{config-file})
 .fi
 .if LANG == ENGLISH
@@ -995,28 +995,28 @@ fmlserv just offers in another "fmlserv" (listserv) syntax.
 See .ptr{config-file} on config.ph syntaxes.
 .fi
 
-○ 複数のＭＬオーナーがいる場合の注意
+○ 複数の ML オーナーがいる場合の注意
 
-fmlserv は各ＭＬの記事が読めたりログファイルの読み書きができる必要があ
+fmlserv は各 ML の記事が読めたりログファイルの読み書きができる必要があ
 ります。複数人で fmlserv を使う場合に推奨できる方法はそのマシンに特別
 のアカウント(たとえば fml という特別なアカウント)を作成し、fmlserv も
-各ＭＬもそのユーザ(fml)の所有にして personal 扱いで作成する方法だとお
-もいます。ＭＬの設定をいじる時はいちいち su fml (switch user) するわけ
-です。もし複数の人が自分のアカウントでＭＬをいじりたいなら group
+各 ML もそのユーザ(fml)の所有にして personal 扱いで作成する方法だとお
+もいます。 ML の設定をいじる時はいちいち su fml (switch user) するわけ
+です。もし複数の人が自分のアカウントで ML をいじりたいなら group
 writable であるような設定が必要なことに注意して下さい。最初に fmlserv 
 タイプを選択したらそのような設定で作成されます。
 
 
 
-.C	ＭＬへのユーザの登録・削除
+.C	 ML へのユーザの登録・削除
 =E.C	To Add And Delete A User In The Mailing List
 .l	add-user
 
-.S	ＭＬへのユーザの登録・削除の場合の注意
+.S	 ML へのユーザの登録・削除の場合の注意
 =E.S	Attention When To Add And Delete A User
 
-以下ＭＬへのユーザの登録・削除等について述べますが、もしＭＬサーバを作
-るマシンと同じマシンからＭＬへメールを出すとすると、設定によっては
+以下 ML へのユーザの登録・削除等について述べますが、もし ML サーバを作
+るマシンと同じマシンから ML へメールを出すとすると、設定によっては
 =E
 When you send e-mail to a mailing list server on the same machine as
 one running mailing list servers, your mail header may have NOT
@@ -1029,7 +1029,7 @@ BUT
 
 	From: username 
 
-のようなメールがＭＬサーバへ送られます。そのためにメンバーではないと判
+のようなメールが ML サーバへ送られます。そのためにメンバーではないと判
 定されたり「自動登録できない」などのエラーが発生します。それを避けるた
 めにはとりあえず username とusername@domain の両方を登録して下さい。
 常に @domain がつくべきですが、それはMTA/MUAの設定の問題です。
@@ -1038,7 +1038,7 @@ In this case the server recognizes YOU ARE NOT A MEMBER!. To avoid
 this error, you can register both addresses "username" and
 "username@domain" by "makefml add listname address"
 
-.S	ユーザをＭＬに加える場合
+.S	ユーザを ML に加える場合
 =E.S	To Add A New User To The ML
 
 Elena MLに fukachan@baycity.asia を加える。
@@ -1060,7 +1060,7 @@ Remove "fukachan@baycity.asia" in "Elena" ML.
 
 
 
-.C	makefml のメニューで ＭＬの基本的な設定変更をする
+.C	makefml のメニューで  ML の基本的な設定変更をする
 =E.C	To change the configuration of a mailing list
 .n	makefml-config
 .l	makefml-config
@@ -1083,7 +1083,7 @@ You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
 See .ptr{config-file} for more "config.ph".
 
-ちなみに3.0B#3以降では日本語表示が可能になりました。デフォールトでは英
+ちなみに3.0B#3以降では日本語表示が可能になりました。デフォルトでは英
 語です。これはCGI化の副産物です:)
 
 とりあえず環境変数MAKEFML_LANGで指定するとその文字コードで表示をします。
@@ -1165,7 +1165,7 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 ○ サマリー
 
    Mailing List Addresses 
-        FOR POST          ＭＬへの投稿用のアドレス
+        FOR POST           ML への投稿用のアドレス
         FOR COMMAND       コマンド用のアドレス	
 
 ○ アクセス制御	(=> Section .ptr{ACCESS_POLICY})
@@ -1285,7 +1285,7 @@ You can select e.g.
                      PERMIT ?              NO
                      AUTH_TYPE             crypt
 
-リモートでＭＬの設定を変更を可能にするか？(デフォルトは"できない")
+リモートで ML の設定を変更を可能にするか？(デフォルトは"できない")
 =E
 You maintain the ML in remote? or not. And the default type is
 "crypt". This is "password authentication" and the password is saved
@@ -1569,7 +1569,7 @@ enable confirmation in "chaddr" command?(default "NO")
 
 	アドレスを配送専用とコマンド専用とはっきりわける主義 (default)
 
-	与えられるアドレスが少ないのでＭＬ本体で配送もコマンド実行も可
+	与えられるアドレスが少ないので ML 本体で配送もコマンド実行も可
 	能だと便利だという場合
 
 	配送専用のアドレスと、コマンドは一つのアドレスですべて受け付け
@@ -1630,14 +1630,14 @@ We suppose several environments,
 
       which type (0-4) [0] 
 
-   のような画面です。この設定はＭＬの記事のメールヘッダやＭＬサーバへ
+   のような画面です。この設定は ML の記事のメールヘッダや ML サーバへ
    送ったコマンドへのREPLYに付加される情報に利用されます。
 
    注意: つまり sendmail 等のMTAへの設定は別途必要です。
 
    ・ elena-ctl@$DOMAINNAME タイプ
 
-	デフォルトではエレナさんＭＬ(elena@baycity.asia)に対し、
+	デフォルトではエレナさん ML (elena@baycity.asia)に対し、
 	elena-ctl@baycity.asia がコマンド専用に設定されています。
 
    ・ elena@$DOMAINNAME タイプ (backward compatible)
@@ -1652,7 +1652,7 @@ We suppose several environments,
 	fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を
 	使う用意がある場合に設定します。＃ fmlserv の設定は別途必要です(前述)
 
-   ・ 4番目の NOT USE は「ＭＬでコマンドを使わない」つまり「配送専用」
+   ・ 4番目の NOT USE は「 ML でコマンドを使わない」つまり「配送専用」
 	の場合に指定して下さい。使わない(unavailable)時はコマンドのア
 	ドレスを表示する部分が全部
 
@@ -1671,7 +1671,7 @@ elena と elena-ctl と両方のアドレスがあって、なおかつ elena でもコマン
 
 なお、デフォルトでは # は不必要なのでドキュメント(helpなど)は # 抜き
 のものが生成されます。この変更や、MAIL_LIST == CONTROL_ADDRESS への設
-定の変更を行なうとドキュメントを再生成するか？と尋ねられます。
+定の変更を行うとドキュメントを再生成するか？と尋ねられます。
 make doc-template でもドキュメント再生成はできます。
 =E
 This menu enables both elena and elena-ctl accepts "# command" trap
@@ -1778,7 +1778,7 @@ to notify the registration.
 .l	HEADER_CONFIG
 
 例えば「To: をどうするか？」「Subject: につけるタグ e.g. [Elena:00100] 
-は？」「ヘッダに出てくる全てのフィールドを素通しにするのか？」などの設
+は？」「ヘッダに出てくるすべてのフィールドを素通しにするのか？」などの設
 定メニューです。
 
    ************************************************************
@@ -1805,7 +1805,7 @@ to notify the registration.
 *  SUBJECT TAG TYPE (default: nothing)
 
 .q
-SubjectでのＭＬ名前と記事番号の設定について例えば、Subject:
+Subjectでの ML 名前と記事番号の設定について例えば、Subject:
 [Elena:00010] のようにするのか？何もつけないのか? (推奨は何もつけない。
 読むインターフェイスの自由度を制限するし、元々サーバではなくクライアン
 トの仕事です)
@@ -1900,7 +1900,7 @@ and hop count expiration errors. see the next menu.
 
 [参考] これ以上細かいヘッダフィールドのカスタマイズのためには次のよう
 な関数が用意されています。使い方は doc/Japanese/header_write 
-doc/html/Japanese/header_rewrite/ の中をサーチしてください。
+doc/html/Japanese/header_rewrite/ の中をサーチして下さい。
 =E
 FYI: The following functions are prepared to customize the mail header
 more precisely.
@@ -2047,7 +2047,7 @@ off / on する ( 1 or 0 を定義する) だけの変数(toggle な変数)なら全部メ
 =E
 *  FILTERING FOR MAIL BODY
 .q
-"本文がないメール"や"unsubscribe だけ"のメールをＭＬに流さない。
+"本文がないメール"や"unsubscribe だけ"のメールを ML に流さない。
 MIME/Multipart の場合は最初のブロックの中身を評価の対象にします。
 =E
 Reject empty mails or only "unsubscribe" mails.
@@ -2065,7 +2065,7 @@ If MIME/Multipart mail is input, fml checks only the first block.
 *  FILTER_ATTRIBUTE
 
  * FILTER_ATTR_REJECT_COMMAND (default: no)
-   投稿用のＭＬに #help などが来たら拒否 (yes (拒否)を推奨)
+   投稿用の ML に #help などが来たら拒否 (yes (拒否)を推奨)
 =E
  * FILTER_ATTR_REJECT_COMMAND (default: no)
    reject "#help" posted to a ML. ("yes" is recommended)
@@ -2099,8 +2099,8 @@ If MIME/Multipart mail is input, fml checks only the first block.
 *  USE_MTI (Traffic Monitor; default NO)
 
 .q
-使うなら yes 。ＭＬのトラフィックを監視し一気にメールが来たらメール爆
-弾とみなすなどを行なう。ものすごーく手の込んだものは reject できないか
+使うなら yes 。 ML のトラフィックを監視し一気にメールが来たらメール爆
+弾とみなすなどを行う。ものすごーく手の込んだものは reject できないか
 もしれない;_;。yes を一応推奨
 =E
 Inspect the ML traffic. If the traffic is over some threshold, fml
@@ -2194,22 +2194,22 @@ PGP encrypted ML. Need pgp configuration.
 .l	configure
 .n	remote-admin
 
-.S	リモート管理の権限をもつユーザをＭＬに加える場合
+.S	リモート管理の権限をもつユーザを ML に加える場合
 =E.S	To add the user who can manage the ML server in remote. 
 
    /usr/local/fml/makefml addadmin elena fukachan@baycity.asia
 
-Elena ＭＬのリモート管理者に fukachan@baycity.asia を加える。
+Elena  ML のリモート管理者に fukachan@baycity.asia を加える。
 =E
 Add "fukachan@baycity.asia" in "Elena" mailing list. He can
 manage the mailing list server in remote.
 
-.S	リモート管理の権限をもつユーザをＭＬから削除する場合
+.S	リモート管理の権限をもつユーザを ML から削除する場合
 =E.S	To remove the user who can manage the ML server in remote. 
 
    /usr/local/fml/makefml byeadmin elena fukachan@baycity.asia
 
-Elena ＭＬのリモート管理者から fukachan@baycity.asia を外す。
+Elena  ML のリモート管理者から fukachan@baycity.asia を外す。
 =E
 Remove the user "fukachan@baycity.asia" who can manage the
 "Elena" ML in remote.
@@ -2234,8 +2234,8 @@ Please input the "password" of "who" (Email address).
 .l	config-file
 .n	configuration-file
 
-各ＭＬのHOMEディレクトリには cf と config.ph という２つのファイルがあ
-ります。config.ph がそのＭＬの動作を制御するもっとも大事なファイルです。 
+各 ML のHOMEディレクトリには cf と config.ph という２つのファイルがあ
+ります。config.ph がその ML の動作を制御するもっとも大事なファイルです。 
 cf というファイルは主にメニュープログラムが処理しやすくするために存在
 します。
 
@@ -2248,7 +2248,7 @@ cf というファイルは主にメニュープログラムが処理しやすくするために存在
 .n	cf-and-config.ph
 
 fml.pl がメーリングリスト本体です。このプログラムにメールを入れるとメー
-リングリストとして作動します。fml のほとんど全てのプログラムの動作は 
+リングリストとして作動します。fml のほとんどすべてのプログラムの動作は 
 config.ph という設定ファイルの内容で挙動が変わります。
 =E
 fml.pl is the main execution file. The configuration file "config.ph"
@@ -2362,7 +2362,7 @@ is for localhack.
 =E.S	makefml config-template
 
 newml 時に $DIR/cf は $EXEC_DIR/etc/makefml/cf というファイルから生成
-されています。同じような設定のＭＬを複数作るのであればあらかじめ
+されています。同じような設定の ML を複数作るのであればあらかじめ
 $EXEC_DIR/etc/makefml/cf というファイルを編集しておいた方が後々楽がで
 きます。もちろん手動で設定変更しても構いません(ロックも不必要)。
 =E
@@ -2373,7 +2373,7 @@ yourself. e.g. the default is "automatic registration".
 
 	makefml config-template 
 
-は特定のＭＬではなくこのファイル($EXEC_DIR/etc/makefml/cf) に対して
+は特定の ML ではなくこのファイル($EXEC_DIR/etc/makefml/cf) に対して
 "makefml config" 同様のメニュー編集機能を提供します。_ML_ などのテンプ
 レートで使われている生の記号が出てきますが、その辺は触らないようにして
 下さい。例えば自動登録をデフォルトにしてしまうなどに用いることができ
@@ -2391,7 +2391,7 @@ keyword e.g. _ML_ used in template file.
 
 cf はメニューでのテンプレート変更ができますが、もっと複雑な変更がした
 い場合は直接編集する必要があります。テンプレートにあらかじめ必要な設定
-を仕込んでおけばＭＬ作成時に必要な作業を減らすことができます。このファ
+を仕込んでおけば ML 作成時に必要な作業を減らすことができます。このファ
 イルを直接いじってもよいし、
 =E
 When "makefml newml" creates a new mailing list with examples e.g. cf,
@@ -2458,7 +2458,7 @@ works. When the following prompt appears, select "y" (command test) or
 	n	配送のテスト (デフォルト)
 
 どちらかを選んで下さい。この後メール本文の入力を求められるので入れて下
-さい。本文入力の終りは . (ピリオド)だけの行の入力です。
+さい。本文入力の終わりは . (ピリオド)だけの行の入力です。
 =E
 The last of input is just a period "." line.
 
@@ -2512,7 +2512,7 @@ http://www.fml.org/fml/op-e/index.html#trouble
 .~q
 
 perlが正しくインストールされていません。perlをインストールしなおして
-ください。
+下さい。
 =E
 The installation of perl fails. Please install perl again!
 
@@ -2581,7 +2581,7 @@ The following reasons are possible:
 	  You may require C-Wrapper (see below). 
 
 などが考えられます。include ファイルの置き場所は可能な限り permission 
-を落したローカル(NFSではない)場所(そこまでの階層すべての permission に
+を落としたローカル(NFSではない)場所(そこまでの階層すべての permission に
 配慮する)に include ファイルを置いてみて下さい。例えば /usr/local が 
 local disk の上にあるとして /usr/local/include/ の下に置いておくなどです。
 ＃注意: そもそも NFS ごしに setuid しようというのが間違い
@@ -2600,7 +2600,7 @@ machine since it requires a lot of attention.
 
 	/var/spool/ml/ML名/fml.c 
 
-というのが各ＭＬ用に作られているので compile して設定する必要がありま
+というのが各 ML 用に作られているので compile して設定する必要がありま
 す。compile そのものはその場所で make fml で実行されますが、setuid は
 よ〜く注意して設定しないといけないので doc/Japanese/* の "fml.c の呼び方"
 あたりを参考に root の人とよく相談しながら設定して下さい。
@@ -2628,7 +2628,7 @@ When
 とすれば elena@baycity.asia でコマンドを受け付けます。この場合は配送メー
 ルの X-ML-Info: というフィールドやコマンドのREPLYもすべて 
 elena@baycity.asia 宛になるように設定されます。場合によっては helpファ
-イルは手動で書き直してください。
+イルは手動で書きなおして下さい。
 =E
 elena@baycity.asia accepts the command such as "# help" ("# command" form). 
 Both X-ML-Info: and command server replies shows the pointer to
@@ -2655,7 +2655,7 @@ accept commands, you should set
 =E.C	ML via pop3
 
 sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
-そういうtrickyな話題については doc/Japanese/ を見てください(^^;)
+そういうtrickyな話題については doc/Japanese/ を見て下さい(^^;)
 =E
 If sendmail do not run on your machine, you can set ML via POP3.
 Please see doc/op.en for more details. 
@@ -2669,7 +2669,7 @@ FYI. NT Version uses this trick:)
 .C	HELPなどの取り寄せについてユーザに知らせる方法について
 =E.C	Header information to notify information
 
-ヘッダにはデフォルトで X-ML-Info に書いてあります。当然ＭＬに入った
+ヘッダにはデフォルトで X-ML-Info に書いてあります。当然 ML に入った
 時にはそういったことについてメールを書く or 自動的に送られるでしょう。
 
 それでもどうしてもだめだとあきらめて、最後の手段「本文に情報をつけてし
@@ -2683,11 +2683,11 @@ FYI. NT Version uses this trick:)
 
 モデレータモードの時は
 
-	1 ＭＬ宛に来たメールは配送されず
+	1  ML 宛に来たメールは配送されず
 	2 一旦モデレータへフォワードされます
 	3 モデレータは内容を査読後承認するなら
-	  あるキーワードをＭＬサーバへ送ることで
-	  ＭＬ全体へ配送されます。	
+	  あるキーワードを ML サーバへ送ることで
+	   ML 全体へ配送されます。	
 
 このモードにするには config.ph で
 
@@ -2732,11 +2732,11 @@ $MODERATOR_FORWARD_TYPE という変数があります。デフォルトは２です。デフォー
    
    ------- End of Forwarded Message
 
-メールはＭＬサーバも保存しています。メール本文の内容を承認したなら、
+メールは ML サーバも保存しています。メール本文の内容を承認したなら、
 
 moderator certified 199711032027.709982
 
-の行だけをコマンド用のアドレスに送って下さい。そうするとＭＬサーバは自
+の行だけをコマンド用のアドレスに送って下さい。そうすると ML サーバは自
 分が保存しておいたそのメールを配送します。
 
 モデレータか否かはこの特別な文字列(# moderator certified 数字)を知って
@@ -2759,13 +2759,13 @@ moderator certified 199711032027.709982
 
 で elena MLを作ったとします。デフォルト構成は
 
-	elena@baycity.asia	ＭＬへの投稿用のアドレス
-	elena-ctl@baycity.asia	ＭＬのコマンドを送るアドレス
+	elena@baycity.asia	 ML への投稿用のアドレス
+	elena-ctl@baycity.asia	 ML のコマンドを送るアドレス
 
 を使うように setup されます。ヘルプファイル等の見本もこの選定の元に生
 成されます。ちなみに管理者のアドレスは
 
-	elena-admin@baycity.asia	ＭＬの管理者宛のアドレス
+	elena-admin@baycity.asia	 ML の管理者宛のアドレス
 					(エラーメールなどが送られてくる)
 
 です。
@@ -2831,7 +2831,7 @@ Append in config.ph (before the last "1;")
 	$USE_LOG_MAIL             logging all mails fml received
 .fi
 
-* PGP による暗合化ＭＬ: 配送を暗合化する
+* PGP による暗合化 ML : 配送を暗合化する
 =E
 * PGP Encrypted ML: encrypted article is distributed. 
 

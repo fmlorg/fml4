@@ -60,7 +60,7 @@
  新しく ML を作ると、以下のファイル群が TOP LEVEL ML の下の各 ML のホー
  ムディレクトリに作られます。
  
- 【各ＭＬの HOME 】
+ 【各 ML の HOME 】
  Makefile                  Makefile
  aliases                   aliases 設定見本
  cf                        ML の設定

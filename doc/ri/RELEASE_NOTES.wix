@@ -711,7 +711,7 @@ Date:    Sat, 14 Feb 1998 23:25:03 +0900
 In fml-support ML's Count: 03886
 
 >      * 2.1B
->	デフォールトでこれらの変数(2.1Aではテスト)を
+>	デフォルトでこれらの変数(2.1Aではテスト)を
 >	    $MIME_EXT_TEST = 1;
 >	    $FOP_HACK = 1;
 >	    $USE_MTI_TEST = 1;
@@ -1342,7 +1342,7 @@ FML 2.1 GAMMA -> DELTA の変数間の変換テーブル
 
 ■ makefml 
 
-これに従い makefml config のテーブル等が書き直されています。
+これに従い makefml config のテーブル等が書きなおされています。
 なので INSTALL ファイルもかなり違います(やることは同じ)。 
 
 
@@ -1371,7 +1371,7 @@ FML 2.1 (config.ph の CFVersion が 3)では
    [だれから？]
 
 	anyone			だれでもOK
-	members_only		ＭＬのメンバーのみ
+	members_only		 ML のメンバーのみ
 	moderator		モデレーターのみ
 
    [HANDLERの種類]
@@ -1381,14 +1381,14 @@ FML 2.1 (config.ph の CFVersion が 3)では
 
 ＊ HANDLER はいずれの場合も管理者へメールでの報告はいきます。
 
-デフォールトのＭＬサーバの挙動は
+デフォルトの ML サーバの挙動は
 
 	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
 	もしメンバー以外から来たら許否(reject)
 
 です。つまり config.ph で
 
-（デフォールト）
+（デフォルト）
 
 	$MAIL_LIST                     = "elena\@$DOMAINNAME";
 	$PERMIT_POST_FROM              = "members_only";
@@ -1462,7 +1462,7 @@ See also: 19
 
 		$AUTO_REGISTRATION_TYPE = "body";
 
-○ デフォールトは
+○ デフォルトは
 
 	$AUTO_REGISTRATION_TYPE = "no-keyword";
 
@@ -1484,7 +1484,7 @@ See also: 19
 
 	    $REMOTE_ADMINISTRATION_AUTH_TYPE = "md5";
 
-■ まとめおくり
+■ まとめ送り
 
 $MGET_SUBJECT_TEMPLATE の導入
 $MSEND_MODE_DEFAULT への一元化
@@ -1544,7 +1544,7 @@ In fml-support ML's Count: 02941
 
 3.3	互換性について
 
-FML では config.ph という設定ファイルが振舞いを決めます。
+FML では config.ph という設定ファイルが振る舞いを決めます。
 config.ph にも version という概念があります。
 
 	$CFVersion
@@ -1589,7 +1589,7 @@ ______________________________________________________
 	elena		配送もコマンドも処理する
 	elena-ctl	コマンドだけ
 
-のように振舞いました。elena でのコマンドの「配送とコマンドの切り分け」
+のように振る舞いました。elena でのコマンドの「配送とコマンドの切り分け」
 はメール本文が"# command"であるか？否か？で決めています。
 
 2.1 でも配送用とコマンド用のアドレスが同じ場合は
@@ -1785,7 +1785,7 @@ config.ph 問題:
 
 	もしくはすべて makefml に押付ける(現状方針)
 
-５	もしくは CFVersion 3 をする。削りたい config を落す。
+５	もしくは CFVersion 3 をする。削りたい config を落とす。
 	排他制御なものは うじゃうじゃTYPE とかに統合とか
 	e.g. $REMOTE_ADMIN_AUTH_TYPE とか〜
 	HMLうじゃうじゃ とか…ですな(meta に SUBJECT_TAG_TYPE でOKじゃん)
@@ -1904,7 +1904,7 @@ In fml-support ML's Count: 02766
 97/06/02
 	$REJECT_ADDR_LIST ("$DIR/spammers")
 	reject するアドレス From: と UNIX FROM に対して適用される。
-	デフォールトの $REJECT_ADDR はこれとは別に適用される。
+	デフォルトの $REJECT_ADDR はこれとは別に適用される。
 
 	%ProcedureException
 
@@ -2276,7 +2276,7 @@ Date:    Mon, 17 Feb 97 01:10:03 JST
 Thanks to: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
 In fml-support ML's Count: 02164
 
-axion.phys.titech.ac.jp のＭＬ群の自動登録 -> confirmation mode
+axion.phys.titech.ac.jp の ML 群の自動登録 -> confirmation mode
 
 ------------------------------------------
 Date:    Wed, 12 Feb 97 23:35:01 JST
@@ -2534,7 +2534,7 @@ In fml-support ML's Count: 01797
 Date:    Sat, 23 Nov 96 14:05:02 JST
 In fml-support ML's Count: 01760
 
-samples のまとめおくりの crontab 
+samples のまとめ送りの crontab 
 
 	commond line options の解説つきに
 
@@ -2548,7 +2548,7 @@ yuba@kitai.densi.kansai-u.ac.jp (YUBA Akinori) さん  wrote:
 >そうですね。 INSTALL に書いておいて頂いた方が親切だと思います。
 
 INSTALL
-	変えてください…	に変更
+	変えて下さい…	に変更
 
 directory名と tar.gz でかためる時のファイル名を 
 
@@ -2772,16 +2772,16 @@ snapshot release memo
 
 お手軽インストールのバグをなおす;_;
 
-	・こないだ直し過ぎて勢い余ってしまっているところ;_;
+	・こないだなおし過ぎて勢い余ってしまっているところ;_;
 
 	% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
 
 	MAINTAINER=ML管理者のアドレス	が config.ph にちゃんと反映されてない
-	＃ cf/config を使ってFIX処理を行なうように変更
+	＃ cf/config を使ってFIX処理を行うように変更
 
 
 html mode definition
-	default を 日毎に別の directory に保存するのを デフォールトへ
+	default を 日毎に別の directory に保存するのを デフォルトへ
 	＃前にしたつもりだったんだが…なおしそこねてた
 
 
@@ -2874,7 +2874,7 @@ FIX:
    $WHOIS_JCODE_P	libwhois.pl
 
    ipc と jcode は相性が悪い？とにかく 自動 jcode 変換するか否かは
-   ケースbyケース ＃一応 Backward compat で デフォールトはする
+   ケースbyケース ＃一応 Backward compat で デフォルトはする
 
 
 簡易モード設定 EXTENSION:
@@ -2977,7 +2977,7 @@ Compiler options：
 	-i				--force:reply-to=なにか
 					$Envelope{'fh:reply-to'}=なにか
 
-	-R				デフォールト
+	-R				デフォルト
 
 	-h host				？
 
@@ -2996,7 +2996,7 @@ Compiler options：
 	-P precedence			$PRECEDENCE
 
 	-m sendmailopt			$SEDNMAIL
-					デフォールトではプロセス間通信
+					デフォルトではプロセス間通信
 					なので意味なし
 
     パス/ファイル名指定オプション
@@ -3674,8 +3674,8 @@ bin/fwix.pl
 
 
 bin/split_and_msend.pl 
-	unix from のかたちの file の まとめおくり 
-	ようするに obsolute の まとめおくりＲ１ の現代版（苦笑）
+	unix from のかたちの file の まとめ送り 
+	ようするに obsolute の まとめ送りＲ１ の現代版（苦笑）
 	PLAIN TEXT ONLY っすけど。
 
 
@@ -4901,7 +4901,7 @@ At  Tue, 26 Jul 94 01:57:30  JST
 
 ● http://www.phys.titech.ac.jp/uja
 
-●まとめおくり ver.1 形でなおかつ 本体のＭＬサーバでユーザーがまとめお
+●まとめ送り ver.1 形でなおかつ 本体の ML サーバでユーザーがまとめお
 くり制御できるようにしました。＃まとめ送り ver.2 
 
 ●httpd アクセス ＆＆ 自動シンクロナイズ
@@ -5105,7 +5105,7 @@ SubjectはMIME decodeをしてsummaryファイルに記録しておく
 
 ●Documentsの改良。特にFAQは前より充実（したはず）
 
-●ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+●ひとつのfmlで複数の ML を扱う（２方式）（実は1.1.2.17からある）
 ・でも 1.2 ではドキュメントでふれてなくてごめんなさい（上と関連）
 ・前よりもうすこし改良されてます
 
@@ -5221,7 +5221,7 @@ At  Wed, 23 Mar 94 18:41:52  JST
 Following the opinion by Toshio Sengoku
 <sengoku@panda.intelligent-systems.co.jp>
 
-$SUBJECT_HML_FORM = 1;（デフォールトは０。hml 1.6形ではない）
+$SUBJECT_HML_FORM = 1;（デフォルトは０。hml 1.6形ではない）
 
 ---
 At  Wed, 23 Mar 94 12:30:58  JST
@@ -5377,7 +5377,7 @@ sendmailコマンドを呼ぶのではなく、プロセス間通信でsendmailへ渡す。
 ・コマンドの書き方について。# get 1 と #get 1は同じもの等。
 
 ●アドミンコマンド群の削除（libfml.pl）
-＃使わないし、remoteでＭＬサーバはやるべきではない（何かあった時のため
+＃使わないし、remoteで ML サーバはやるべきではない（何かあった時のため
 にも）
 
 ●ｗｈｏｉｓ等実績のないコマンドの削除（libfml.pl）
@@ -5429,7 +5429,7 @@ SubjectはMIME decodeをしてsummaryファイルに記録しておく
 
 ●Documentsの改良。特にFAQは前より充実（したはず）
 
-●ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+●ひとつのfmlで複数の ML を扱う（２方式）（実は1.1.2.17からある）
 ・でも 1.2 ではドキュメントでふれてなくてごめんなさい（上と関連）
 ・前よりもうすこし改良されてます
 

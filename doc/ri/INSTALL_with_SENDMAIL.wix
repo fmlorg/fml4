@@ -6,7 +6,7 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 .q
-fml は歴史的に sendmail を使う環境をデフォールトにしています。よって 
+fml は歴史的に sendmail を使う環境をデフォルトにしています。よって 
 INSTALL ファイルは sendmail を使うことを前提に書かれています。
 よってsendmailの場合の詳細は INSTALL ファイルを見て下さい。
 =E

@@ -18,7 +18,7 @@ Server. Please see INSTALL for the install flow.
 .S	Overview
 
 OSの見かけはともかくとして:-)、fml のインストールの際にはMach 2.5起源
-の 4.4BSD に似ているOSとして考えてください。現状若干の違いを除き普通の 
+の 4.4BSD に似ているOSとして考えて下さい。現状若干の違いを除き普通の 
 4.4BSD として扱えばうまくいくらしいということがわかっています。
 =E
 Mac OS X Server is 4.4BSD like system. In this document we describe
@@ -32,7 +32,7 @@ difference with INSTALL between Mac OS and usual UNIX-like system.
 .S	推奨されるシステム構成について
 =E.C	Recommendation
 
-デフォールトのものを使っても動かすことはできます。しかしデフォールトで
+デフォルトのものを使っても動かすことはできます。しかしデフォルトで
 インストールされているソフトウエアは古いので新しいものにすることが推奨
 されます。
 =E
@@ -49,12 +49,12 @@ sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fmlのドキュ
 Default sendmail des not see /etc/aliases. You need to modify
 /etc/sendmail.cf.
 
-1. 最低限直してそのまま使う
-2. この際なので一から作り直す。例えばCFなどを使って作る。
+1. 最低限なおしてそのまま使う
+2. この際なので一から作りなおす。例えばCFなどを使って作る。
 
-のいづれかでしょう。
+のいずれかでしょう。
 
-1. 最低限直してそのまま使う。
+1. 最低限なおしてそのまま使う。
 =E
 1. modify /etc/sendmail.cf
 
@@ -76,9 +76,9 @@ O AliasFile=/etc/aliases
 
 .url ftp://ftp.kyoto.wide.ad.jp/pub/mail/CF/
 
-CFで作り直せば sendmail は /etc/aliases を見るようになるので、あとは 
+CFで作りなおせば sendmail は /etc/aliases を見るようになるので、あとは 
 INSTALL マニュアルの通りです。CFの使い方は附属のマニュアル
-(doc/MANUAL.jpn)などをみてください。
+(doc/MANUAL.jpn)などをみて下さい。
 
 
 .C	fmlのインストール時の注意点
@@ -86,7 +86,7 @@ INSTALL マニュアルの通りです。CFの使い方は附属のマニュアル
 
 インストール作業(make installを走らせる)の前に作成する項目、確認する項
 目が2、3あります。確認後、INSTALL ファイルにしたがってインストールをし
-てください。
+て下さい。
 =E
 Installation of Mac OS X server differs little from usual UNIX like
 system. Please see INSTALL file without the following some

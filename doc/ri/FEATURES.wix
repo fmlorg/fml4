@@ -1,7 +1,7 @@
 .HTML_PRE
 .if LANG == JAPANESE
 基本的な設計方針は
-   『可能な限りユーザおよび ＭＬ管理者 にとっての自由度をあげる』
+   『可能な限りユーザおよび  ML 管理者 にとっての自由度をあげる』
    『「明示的な指定があって初めて機能は増やすべきである」
 	と
    「管理者のルーチンワークを少しでも減らす」間の妥協』
@@ -86,7 +86,7 @@ you should enable functions explicitly.
 	アクセス制御(anyone/members_only/moderator)
 
    [moderator タイプ(I, II, III; II is the default)について]
-   デフォールトのモデレータはfmlがスプールして配送していいかどうかを
+   デフォルトのモデレータはfmlがスプールして配送していいかどうかを
    one time password と共にモデレータに判断をゆだねる。
 .fi
 .if LANG == ENGLISH
@@ -106,7 +106,7 @@ you should enable functions explicitly.
         MIME/Multipart to another user. 
         Also a digest is sent to each user at each time.
 
-○ PGP暗号化ＭＬ
+○ PGP暗号化 ML 
 =E
 *  PGP encrypted ML
 
@@ -116,7 +116,7 @@ you should enable functions explicitly.
 
 .if LANG == JAPANESE
 ○ スプールする/しない
-   標準のＭＬの記事スプール以外にもアーカイブは設定できます。
+   標準の ML の記事スプール以外にもアーカイブは設定できます。
 ○ 自動圧縮(spool -> tar.gz style)
 ○ 記事の自動 expiration (DISKがない場合)
 ○ HTML記事作成 (HTML 4.0 FORMAT) 
@@ -132,7 +132,7 @@ you should enable functions explicitly.
 .fi
 
 .if LANG == JAPANESE
-○ メール配送は直接SMTPを張る(デフォールト)/sendmailを起動する
+○ メール配送は直接SMTPを張る(デフォルト)/sendmailを起動する
    応用として配送専用マシンを別にするなどができる。
 
    SMTPを直接張るため自分のマシンで sendmail が走っている必要はありません。
@@ -199,11 +199,11 @@ you should enable functions explicitly.
 	password (password file is saved by crypt or MD5)
 	PGP(Pretty Good Privacy) signature based authentication
 
-○ 豊富なファイル操作 (まとめおくりや mget, get コマンド等で使われる)
+○ 豊富なファイル操作 (まとめ送りや mget, get コマンド等で使われる)
 =E
 *  Multiple functions to handle a bundle of articles
 
-	mget と まとめおくりでの User interface は次のようなものが取り
+	mget と まとめ送りでの User interface は次のようなものが取り
 	揃えられています。ユーザーごとに設定できます
 	＃ lha 系のものはSJISに変換するオプションもあります
 
@@ -248,14 +248,14 @@ you should enable functions explicitly.
    which confirms the "subscribe" will in default.
    type: confirmation, keyword in body or subject, no-keyword
 
-○ 自動でない場合のsubscribeリクエストに対し confirmation を行なう (2.2.1 new)
+○ 自動でない場合のsubscribeリクエストに対し confirmation を行う (2.2.1 new)
 =E
 *  fml tries to confirm "subscribe" request in the case of manual
    registration.
 
    $MANUAL_REGISTRATION_TYPE = 'confirmation' or 'forward_to_admin'
 
-○ ＭＬを抜ける時の confirmation (2.2 new function); optional
+○  ML を抜ける時の confirmation (2.2 new function); optional
 =E
 *  confirmation in "unsubscribe". (2.2 new function). This is optional.
 
@@ -287,7 +287,7 @@ you should enable functions explicitly.
 Fml provides fundamentals for a lot of mailing list functions. You can
 use fml as it is and the first step to hack a ML of your own.
 
-また、この類いの「外部のサイトとの通信を行なうプログラム」は全てそうで
+また、この類いの「外部のサイトとの通信を行うプログラム」はすべてそうで
 すが最新版のソースコードを手に入れて使うべきです。また改造も最新版につ
 いてした方がよいとおもいます。
 =E

@@ -51,7 +51,7 @@ fml はメーリングリスト(以下 ML)を作るためのパッケージです。perl を使っ
 心に、多くのプログラムから構成されます。
 
 fml のセットアップやカスタマイズは makefml というプログラムにより、メ
-ニューで対話的に行なうこともできます。fml 4.0 からは CGI から makefml 
+ニューで対話的に行うこともできます。fml 4.0 からは CGI から makefml 
 の代表的な機能(登録、削除、メニューによる ML のカスタマイズ)を使う仕組
 みが導入されています。
 .fi
@@ -77,11 +77,11 @@ fml のデザインの根幹をなす思想は
 fml design policy is based on the degree of freedom, so that I respect
 "each environment for each man/women".
 
-デフォールトの ML の運用スタイルは ML サーバのホスト上で、fml の管理者
+デフォルトの ML の運用スタイルは ML サーバのホスト上で、fml の管理者
 が makefml コマンドを使うことです。makefml を使いメンバーの登録や削除、
-そして細かなカスタマイズを行なうことが期待されています。
+そして細かなカスタマイズを行うことが期待されています。
 別の運用スタイル(自動登録、モデレータ、メールマガジン型)への
-変更も makefml のメニューで行なうことができます。
+変更も makefml のメニューで行うことができます。
 =E
 I assume that ML is a private communication so that the default fml
 policy is manual edit: "you add a new member in hand, only members can
@@ -107,7 +107,7 @@ INSTALL というファイルを読んで下さい。
    メール配送プログラム
 がインストールされていることを確認して下さい。
 
-Windows NT4 上での fmlについては INSTALL_on_NT4 を参照してください。
+Windows NT4 上での fmlについては INSTALL_on_NT4 を参照して下さい。
 いくつかのMTA(現在は sendmail, postfix, qmail and exim)についての注意
 点が INSTALL_with_MTA名 というファイルにあります。
 .fi
@@ -245,7 +245,7 @@ fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ
 をメールの本文に書いて送って下さい。登録意志確認のメールが届くのでその
 メールに返事をして下さい。
 
-BUGレポートはどのOS,MTA, fml version を使っていてデフォールトから何を
+BUGレポートはどのOS,MTA, fml version を使っていてデフォルトから何を
 変えて何をどうしてどうなったのか? を書いて下さい。そういう場合にチェッ
 クして欲しい項目は doc/CHECK_LIST.jp (日本語)にあります。
 
@@ -284,15 +284,15 @@ lists.
 .if LANG == JAPANESE
 作者個人宛のメールは <fml-bugs@ffs.fml.org> に送って下さい。しかし個人
 宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れないので捨て置
-かれる場合がよくあります。ＭＬならわかる人がすぐに答えてくれる可能性も
+かれる場合がよくあります。 ML ならわかる人がすぐに答えてくれる可能性も
 ありますから、できるだけ fml-support ML宛へ投げてもらえると助かります。
 "どうしても"内密な相談とか、DMで聞きたいことは投げてもらっても構いませ
 んが、返事はものすごく遅いでしょう _o_
 
 fml-bugs はあくまでもＤＭのアドレスです。情報は埋もれ共有されません。
 fml-query@ffs.fml.org へ送るとそのメールは fml-support MLへフォワード
-されＭＬの記事として扱われます。fml-supportに登録して欲しくない人用で
-す。fml-bugs と違い質疑応答は全て fml-support 内に流れ、情報は共有され
+され ML の記事として扱われます。fml-supportに登録して欲しくない人用で
+す。fml-bugs と違い質疑応答はすべて fml-support 内に流れ、情報は共有され
 ます。MLに参加しない場合でも fml-bugs より fml-query を使って欲しいと
 思います。
 .fi
@@ -332,7 +332,7 @@ address <fml-bugs@ffs.fml.org>.
 
 を走らせて下さい。ML の作成は(例えば elena MLを作るなら)
 
-	/usr/local/fml/makefml newml ＭＬの名前 (例: makefml newml elena)
+	/usr/local/fml/makefml newml  ML の名前 (例: makefml newml elena)
 
 のようにします。何個作る場合でも以下同様です。詳細については INSTALL 
 というファイルを見て下さい。
@@ -444,7 +444,7 @@ INSTALL for more details.
 =E
 *** translation is abbreviated ***
 
-fml では config.ph という設定ファイルが振舞いを決めます。config.ph に
+fml では config.ph という設定ファイルが振る舞いを決めます。config.ph に
 も version ($CFVersion)という概念があります。この $CFVersion を利用し設
 定ファイルの昔の変数名などは変わっていても、基本的に自動補正/変換が加
 えられ昔作った config.ph をそのまま使っても大丈夫なようになっています。

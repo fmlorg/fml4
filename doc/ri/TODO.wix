@@ -2,7 +2,7 @@
 	TODO of fml Mailing List Server Package
 .if LANG == JAPANESE
 	やり残し、やろうかなとおもってること
-	(誰かすでにやってたらパッチください)
+	(誰かすでにやってたらパッチ下さい)
 
 ＃ WISH_LIST は WISH_LIST のほうを…
 
@@ -61,7 +61,7 @@ XRef: fml-support:05930
 
 * new 3.0B __LoadConfiguration()
 
-う〜ん、ＭＬをまたぐものたちはむつかしいなぁ/うまくはまらないかも…?
+う〜ん、 ML をまたぐものたちはむつかしいなぁ/うまくはまらないかも…?
 
 not_needed:
    libexec/mead.pl
@@ -88,7 +88,7 @@ obsolete ?
 mget の uu って何か空行が足りなくないかい？
 
 
-.S	MIMEライブラリーの書き直し
+.S	MIMEライブラリーの書きなおし
 =E.S	rewrite MIME library
 
 特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
@@ -195,7 +195,7 @@ fml-support: 06899
    spool  だけはつくられていますねぇ…(lockのため)。
    ＃ &mkdir(ディレクトリ) でよびだすところはほとんどないんですが、
    ＃ ここで stat(2)して mode が $DEFAULT_DIR_MODE か否か見て
-   ＃ もし違ってたら$DEFAULT_DIR_MODEに直すといいかな…と一瞬おもったけど
+   ＃ もし違ってたら$DEFAULT_DIR_MODEになおすといいかな…と一瞬おもったけど
    ＃ 意図的にchmodしててもこれに戻されちゃうとかあって問題だろうなぁ
 .fi
 
@@ -303,7 +303,7 @@ but it is o.k. now? (on some OS?)
 * RFC1153 library
 
 
-.S	かるいまとめおくり？
+.S	かるいまとめ送り？
 =E.S	lightweight digest
 
 
@@ -414,7 +414,7 @@ Reference: fml-support: 08449
 
 
 
-.S	ＭＬを消したら対応する authdb/ml-admin/$ml/ 以下も消す
+.S	 ML を消したら対応する authdb/ml-admin/$ml/ 以下も消す
 
 
 .S	apache with SSL の解説の用意をする
@@ -436,8 +436,8 @@ Reference: fml-support: 08449
 A: Ｎ通りについて考えるのが面倒なので
    
    	/cgi-bin/fml/admin/menu.cgi	   (何でもできる権限人用)
-   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定のＭＬ $ml の管理者だけ用)
-   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
+   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定の ML  $ml の管理者だけ用)
+   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定の ML  $ml の一般ユーザ用)
    
 みたいに決めうちしておく。
 
@@ -464,7 +464,7 @@ Message Language Extensionの関数ライブラリをよぶ
 
 .S	acl model
 
-○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといけない
+○ ML名つきで、その下のアクセス権限は各 ML ごとに自由に変更できないといけない
 
 ○ 一般ユーザ用のWWWアクセスモデルの構築
 

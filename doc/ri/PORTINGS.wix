@@ -17,13 +17,13 @@
 MTA からプログラムを起動する機能は sendmail には昔からありますが、
 一般にはありません。NT版の最大の問題点はここにあります。
 MetaInfo Sendmail以外のMTAを使用している場合は、POPを使ってメール配送
-全般に渡って一種のエミュレーションを行なうしかありません。
+全般に渡って一種のエミュレーションを行うしかありません。
 
 そこで次のようなことをしています。
 
-○POP経由の自動RefileやＭＬの実行 (libexec/popfml.pl)
+○POP経由の自動Refileや ML の実行 (libexec/popfml.pl)
 
-POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl が
+POP経由でスプールへ、POP3 を使って ML を実行するlibexec/popfml.pl が
 それの専用プログラムとして実装されています。対象としているケースは
 
 	メールはPOP3で読めるだけ

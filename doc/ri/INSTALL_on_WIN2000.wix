@@ -1,6 +1,6 @@
 .HTML_PRE
-	INSTALL guide (on WIN2000)
-	--- fml Mailing List Server Package ---
+	INSTALL guide ( on Windows 2000 )
+	--- fml mailing list server package ---
 
 
 				Ken'ichi Fukamachi
@@ -34,11 +34,7 @@ fml-current (3.0G 20000716) pop version
 インストールは NT4 用のドキュメントを見て下さい。基本的に一緒です。
 .url ../INSTALL_on_NT4/index.html
 
-
-MS-DOS prompt じゃなくて command prompt とか細かい違いはありますが
-その辺はよきにはからってください:)
-
-
+今のところ 2000 特有の問題点は見つかっていないと思います。
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

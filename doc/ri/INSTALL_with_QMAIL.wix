@@ -40,7 +40,7 @@ Please see manuals and http://www.qmail.org/ and so on.
 
 qmail-smtpd は /var/qmail/control/rcpthosts に書かれているホストあての
 メイルしか受け取りません。fml はSMTPでMTAと通信するのでMLの配送をその
-ホストで行なうならqmail の設定を変更する必要があります。やり方は qmail 
+ホストで行うならqmail の設定を変更する必要があります。やり方は qmail 
 の FAQ などを見ると出ています(適当にWWWからたどるか tcp-env でサーチな
 どしてみると見つかるだろう)。要点は
 .if LANG == ENGLISH
@@ -56,7 +56,7 @@ the first. The point is
 .fi
 
    localhost の通信なら RELAYCLIENT を空文字にして rcpthosts を無効にする
-   外からのSMTPでは rcpthosts だけを受けとる
+   外からのSMTPでは rcpthosts だけを受け取る
 
 ということです。
 
@@ -129,7 +129,7 @@ used, you have not only to su).
 
 注意: 自分宛のメール用に more specific な設定をしておかないとメールは
 すべてユーザfmlの人に全部飛んでいってしまう。
-例: mikoto宛のメールはmikotoが受け取る。それ以外の宛先は全部ＭＬ用。
+例: mikoto宛のメールはmikotoが受け取る。それ以外の宛先は全部 ML 用。
 マニュアルqmail-users(5)を参照のこと
 =E
 ATTETION: All mails are forwarded to ML in this "assign" config.
@@ -250,7 +250,7 @@ It has the same format as sendmail's include files but without '"'.
 =E
 If you use "makefml", you should switch user (su) to "alias".
 
-.S	elena というユーザをつくってＭＬを運用する
+.S	elena というユーザをつくって ML を運用する
 =E.S	Create "elena" user virtually.
 
 elena というユーザを作ります。/var/spool/ml/elena は elena の持ち主に

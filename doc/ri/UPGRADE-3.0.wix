@@ -95,14 +95,14 @@ irrespective of "auto_regist". When you use "auto_subscribe", you
 should copy members to actives before you change "auto_regist" to
 "auto_subscribe".
 
-auto_regist から auto_subscribe へ切替える前に 各MLのHOME directoryで 
+auto_regist から auto_subscribe へ切り替える前に 各MLのHOME directoryで 
 members を actives にコピーすることが必要です。
 =E
 Firstly copy members to actives. You have only to do this.
 
 	% cp members actives
 
-この後 auto_subscribe へ切替えて下さい。
+この後 auto_subscribe へ切り替えて下さい。
 
 
 * 2. auto_regist を使い続ける。
@@ -131,12 +131,12 @@ Caution: but I do not recommend case 2 since your policy will change.
   It is correct design but not compatible with past fml release.
 
 $REJECT_POST_HANDLER, $REJECT_COMMAND_HANDLERには新しいハンドラー名を
-使うことでそう振舞うように設定する。
+使うことでそう振る舞うように設定する。
 
 ドキュメントでは「自動登録には新ハンドラーを使う」ように書いてあるが、
 3.0でもわざわざ古い auto_regist というハンドラーを選ぶことで古い挙動を
 させることができる。よって、3.0をインストールしても以前の config.ph を
-そのまま使えばmembers だけを使う振舞いになる点に注意されたい。
+そのまま使えばmembers だけを使う振る舞いになる点に注意されたい。
 
 .# endif-3.0
 .~HTML_PRE

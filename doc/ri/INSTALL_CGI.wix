@@ -126,7 +126,7 @@ which ? (0-7) [0]
 $REAL_CGI_PATH 以下のスクリプトを再生成します。
 
 6, 7 はメールサーバと newaliases をどのように実行するかを指定する項目
-です。デフォールトは 共に sendmail 用になっています。
+です。デフォルトは 共に sendmail 用になっています。
 6と7は本来一組かもしれませんが、便宜上２つにわけてあります。
 
 postfix にするには 6, 7 をそれぞれ変更して下さい。
@@ -150,7 +150,7 @@ a) ユーザの設定
 
 	User fml
 
-   つまり /usr/local/fml /var/spool/ml のオーナーと同じにしてください。
+   つまり /usr/local/fml /var/spool/ml のオーナーと同じにして下さい。
 
 b) ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行をコメントアウト
 
@@ -163,7 +163,7 @@ httpd.conf ファイルの最後に
 を付け足して下さい。
 付け足しただけでうまくいくかもしれないしすでにCGIの設定があるならそれ
 とうまくマージしないといけないです。分からなかったら apache デフォール
-トに戻して上述の作業をして下さい。そしてリスタートしてみてください
+トに戻して上述の作業をして下さい。そしてリスタートしてみて下さい
 
 c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
@@ -196,7 +196,7 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
   
    # touch /var/spool/ml/etc/aliases.db
 
-   などとしておいてください。.db なのか .pag .dir なのかはOSによります。
+   などとしておいて下さい。.db なのか .pag .dir なのかはOSによります。
    4.4BSD では .db です。
 
    sendmail を restart
@@ -246,17 +246,17 @@ c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
 この後ひととおりのことはWWWでできるはず。できること
 
-	ＭＬをつくる, 消す
-	ＭＬのユーザ登録,削除
-	ＭＬの管理者の登録,削除
-	ＭＬの設定(makefml config メニューでできることと同じ)
+	 ML をつくる, 消す
+	 ML のユーザ登録,削除
+	 ML の管理者の登録,削除
+	 ML の設定(makefml config メニューでできることと同じ)
 	ログをみる
 	MTAの設定(特に newaliases のかけ方)
 
 などです。
 
 
-.C	特定のＭＬだけはCGIでいじれるようにしてあげる
+.C	特定の ML だけはCGIでいじれるようにしてあげる
 =E.C	enable a mailing list to be configured on cgi menu
 
 	% makefml ml-admin.cgi elena config
@@ -335,7 +335,7 @@ cgi.conf に
 	$CGI_PATH        = '/~fml/cgi-bin/fml'; 
 
 を付け足します。また $REAL_CGI_PATH を ~/public_html に
-書き直しておくとよいでしょう。
+書きなおしておくとよいでしょう。
 
 例:
 .q
