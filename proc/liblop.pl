@@ -174,7 +174,7 @@ sub DoStatusInFile
 sub ResentForwFileInSpool
 {
     local($proc, *Fld, *e, *misc, *cat, $ar, $mail_file) = @_;
-    local($buffer, $header, $body, $subject, %org_e);
+    local($buffer, $header, $body, %org_e);
 
     # backup and reset;
     undef @ResentHdrFieldsOrder;

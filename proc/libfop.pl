@@ -841,7 +841,6 @@ sub Convert2Sjis
 sub file2sjis 
 {
     local($in, $out) = @_;
-    local($line);
 
     open(IN, $in)       || (&Log("file2sjis < $in: $!"),  return $NULL);
     open(OUT, "> $out") || (&Log("file2sjis > $out: $!"), return $NULL);
@@ -875,7 +874,7 @@ sub SendingBackOrderly { &SendBackInOrder(@_);}
 sub SendBackInOrder
 {
     local($returnfile, $total, $subj, $sleeptime, @to) = @_;
-    local($file, @files, $timeout, $evid, $evidk, $evidk0, %mib);
+    local($file, @files, $evid, $evidk, $evidk0, %mib);
 
     # reset timeout flag;
     undef $SendingBackInOrderTimeOut;
