@@ -15,6 +15,14 @@ Please see INSTALL for the install flow.
 
 .toc
 
+.C	必要なソフトウエア
+
+   perl 5 の NT version
+	うまく動いたぽい version がみつかれば吉ということくらいしかないです
+	5.6.0 では今一つうまくいかなかったという報告ありました
+
+   fml	NT用というのが特別にあるわけではなく、標準ディストリビューション
+	の中にNT用のが入っています。
 
 .C	FML NT Version について
 =E.C	on FML NT Version
