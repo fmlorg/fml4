@@ -1886,6 +1886,14 @@ sub AddressMatch
     ($i >= $m) ? 1 : 0;
 }
 
+sub LowerDomain
+{
+    my ($addr) = @_;
+    my (@addr) = split(/\@/, $addr);
+    $addr[1] =~ tr/A-Z/a-z/;
+    return $addr[0].'@'.$addr[1];
+}
+
 ####### Section: Info
 # Recreation of the whole mail for error infomation
 sub WholeMail { 
