@@ -1,42 +1,50 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
 <TITLE>
-The Design and Implementation of the fml Mailing List Server
+The Design and Implementation of "fml" Mailing List Server
 </TITLE>
-<LINK REV=MADE HREF="mailto:fukachan@sapporo.iij.ad.jp">
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="master.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 
 <!-- =================================================================== -->
 <H1>
-fml Mailing List Server ¤ÎÀß·×¤È¼ÂÁõ
+"fml" Mailing List Server $B$N@_7W$H<BAu(B
 <BR>
-The Design and Implementation of the fml current 
-2.x Mailing List Server
+The Design and Implementation of "fml" Mailing List Server
 </H1>
-<IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP¼õ¾ÞºîÉÊ">
 
 <A HREF="index-e.html">[English] is here.</A>
 
 <!-- =================================================================== -->
 <HR>
-<H2>
-fml 2.1 is released
-</H2>
-
+<P>
+	<A HREF=search-j.html>
+	FML$BG[I[%I%-%e%a%s%H72$X$N%5!<%A(B
+	</A>
+<HR>
 <H3>
-Information ¤È¥É¥­¥å¥á¥ó¥È¤ÎHTMLÈÇ
+Information $B$H%I%-%e%a%s%H$N(BHTML$BHG(B
 </H3>
-
 <UL>
-
 	<LI>
 	<A HREF="INFO.html">
-	ºÇ¿·¤Î¾ðÊó(INFO)
+	What's New; $B:G?7$N>pJs(B(INFO)
 	</A>
 	[<A HREF="mailto:fml@ffs.fml.org">fml@ffs.fml.org</A>
-	¤Ë¥á¡¼¥ë¤ò½Ð¤¹¤ÈÊÖÁ÷¤µ¤ì¤ë¤â¤Î]
+	$B$K%a!<%k$r=P$9$HJVAw$5$l$k$b$N(B]
+
+	<LI>
+	<A HREF="roadmap.html">
+	ROADMAP TO 2.2 RELAESE
+	</A>
 
 	<LI>
 	<A HREF="README/">
@@ -45,20 +53,30 @@ Information ¤È¥É¥­¥å¥á¥ó¥È¤ÎHTMLÈÇ
 
 	<LI>
 	<A HREF="INSTALL/">
-	INSTALL ¥¬¥¤¥É
+	INSTALL $B%,%$%I(B
 	</A>
 	<BR>
 	<A HREF="INSTALL_on_NT4/">
-	INSTALL ¥¬¥¤¥É (for NT4)
+	INSTALL $B%,%$%I(B (for NT4)
+	<BR>
+	* MetaInfo Sendmail $B$G$O$[$H$s$I(BUNIX Version $B$HF1$8$G$9!#(B
+	<BR>
+	* MetaInfo version $B$J$iIaDL(B(?)$B$KF0$$$F$k$H;W$&$s$G$9$,(B
+	<BR>
+	* POP version $B$,?7$7$/$J$j$^$7$?(B (2.1A#14)
 	</A>
 	<BR>
 	<A HREF=UPGRADE/>
 	FOR UPGRADE
 	</A>
+	<BR>
+	<A HREF=INSTALL_with_QMAIL/>
+	qmail $B$N>l9g$N%$%s%9%H!<%k%a%b(B($B$[$s$H$K(BOK$B$+$J$!!)(B) 
+	</A>
 
 	<LI>
 	<A HREF="op/index.html">
-	Fml 2.1 ¤ÎÀß·×¤È¼ÂÁõ (Deamon Book for fml)
+	Fml 2.2 $B$N@_7W$H<BAu(B (Deamon Book for fml)
 	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
 	<BR>
@@ -78,40 +96,40 @@ Information ¤È¥É¥­¥å¥á¥ó¥È¤ÎHTMLÈÇ
 </UL>
 
 <H3>
-¥½¡¼¥¹¥³¡¼¥É
+$B%=!<%9%3!<%I(B
 </H3>
 <UL>
 	<LI>
 	<A HREF="fml-current.tar.gz">
-	fml ºÇ¿·ÈÇ¥½¡¼¥¹¥³¡¼¥É°ì¼° (fml-current.tar.gz)
+	fml $B:G?7HG%=!<%9%3!<%I0l<0(B (fml-current.tar.gz)
 	</A>
 
 	<LI>
 	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
-	fml ¥½¡¼¥¹°ì¼° archive
+	fml $B%=!<%90l<0$N%"!<%+%$%V(B
 	<BR>
 	(the same as on ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/)
 	</A>
 
 	<LI>
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-	fml ¥½¡¼¥¹°ì¼° on
+	fml $B%=!<%90l<0(B on
 	<BR>
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 	</A>
-
 	<BR>
 	lha, ish and mime_pls.* sendmail, bind, ntperl
-	Åù¤â°ì½ï¤ËÃÖ¤¤¤Æ¤¢¤ê¤Þ¤¹¡£¸æÍøÍÑ²¼¤µ¤¤
+	$BEy$b0l=o$KCV$$$F$"$j$^$9!#8fMxMQ2<$5$$(B
 	<BR>
-	¤¢¤È¡¢
+	$B$"$H!"(B
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
 	snapshot
 	</A>
-	¤Î²¼¤Ë¤Ï current ¤Î¥½¡¼¥¹¤¬¹­¤¬¤Ã¤¿·Á¤Ç¤ª¤¤¤Æ¤¢¤ê¤Þ¤¹¡£
+	$B$N2<$K$O(B current $B$N%=!<%9$,9-$,$C$?7A$G$*$$$F$"$j$^$9(B
+	($B;~$H$7$F(B tar.gz $B$K$^$H$a$i$l$kA0$N$b$N$b$"$jF@$k(B)$B!#(B
 
 	<LI>
-	¤½¤ÎÂ¾¤Î¥½¥Õ¥È¥¦¥¨¥¢
+	$B$=$NB>$N%=%U%H%&%(%"(B
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/">
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/
 	</A>	
@@ -122,11 +140,41 @@ Information ¤È¥É¥­¥å¥á¥ó¥È¤ÎHTMLÈÇ
 links around mail systems
 </H3>
 <UL>
+	<P> MTA
 	<LI>
 	<A HREF="http://www.sendmail.org/">
 	http://www.sendmail.org/
 	</A>
+	<BR>
+	<A HREF=http://www.jpcert.or.jp/tech/98-0001/>
+	$B5;=Q%a%b(B - sendmail $B%P!<%8%g%s%"%C%W%^%K%e%"%k(B -
+	</A>
+	<A HREF="http://www.sendmail.com/">
+	http://www.sendmail.com/
+	</A>
 
+	<LI>
+	<A HREF="http://www.vmailer.org/">
+	http://www.vmailer.org/ ($B:n<T$O$"$N(B tcp_wrapper $B$N(B Wietse Venema)
+	</A>
+	<BR>
+
+	<LI>
+	<A HREF="http://www.qmail.org/">
+	http://www.qmail.org/
+	</A>
+	<BR>
+	<A HREF="http://tehanu.hpcl.titech.ac.jp/">
+	qmail $B%I%-%e%a%s%H$NF|K\8lLu(B (http://tehanu.hpcl.titech.ac.jp/)
+	</A>
+
+	<LI>
+	<A HREF="http://www.exim.org/">
+	http://www.exim.org/
+	</A>
+	
+
+	<P> DNS
 	<LI>
 	<A HREF="http://www.isc.org/bind.html">
 	http://www.isc.org/bind.html
@@ -136,34 +184,48 @@ links around mail systems
 	ftp://ftp.isc.org/
 	</A>
 
+
+	<P> Security
 	<LI>
 	<A HREF="http://www.cert.org/">
 	http://www.cert.org/
 	</A>
-	<BR>
+
+	<LI>
 	<A HREF="http://www.jpcert.or.jp/">
 	http://www.jpcert.or.jp/
 	</A>
+	
+	<LI>
+	<A HREF="http://www.nsi.org">
+	http://www.nsi.org/
+	</A>
 
+
+	<P> Perl
 	<LI>
 	<A HREF="http://www.perl.org/">
 	http://www.perl.org/
 	</A>
-
-	<LI>
+	<BR>
 	<A HREF="http://www.perl.com/CPAN/ports/">
 	http://www.perl.com/CPAN/ports/
 	</A>
-
-	<LI>
-	<A HREF="http://www.qmail.org/">
-	http://www.qmail.org/
+	<BR>
+	<A HREF=http://www.ActiveState.com>
+	http://www.ActiveState.com (NTPERL)
 	</A>
 	<BR>
-	<A HREF="http://tehanu.hpcl.titech.ac.jp/">
-	qmail ¥É¥­¥å¥á¥ó¥È¤ÎÆüËÜ¸ìÌõ (http://tehanu.hpcl.titech.ac.jp/)
+	<A HREF=ftp://err.ethz.ch/pub/neeri/MacPerl/>
+	ftp://err.ethz.ch/pub/neeri/MacPerl/
+	</A>
+	<BR>
+	<A HREF=ftp://sunsite.cnlab-switch.ch//software/platform/macos/perl/>
+	ftp://sunsite.cnlab-switch.ch//software/platform/macos/perl/
 	</A>
 
+
+	<P> Operating Systems and Architectures
 	<LI>
 	<A HREF="nt.html">
 	links around Windows NT
@@ -173,6 +235,30 @@ links around mail systems
 
 <!-- =================================================================== -->
 
+<HR>
+<P> Historical perspective
+
+<P>
+<PRE>
+*fj.sources official release
+
+1997/08                2.1
+1995/01                1.5
+1994/09                1.3
+1994/05                1.2.1
+1994/03                1.2
+</PRE>
+
+<P>
+<PRE>
+* other topics
+
+1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP$B<u>^:nIJ(B"></A>
+
+</PRE>
+
+
+<!-- =================================================================== -->
 <HR>
 <ADDRESS>
 
@@ -184,5 +270,12 @@ links around mail systems
 (http://www.sapporo.iij.ad.jp/staff/fukachan/)
 </A>
 </ADDRESS>
+
+<PRE>
+Copyright (C) 1993-1998 Ken'ichi Fukamachi
+         All rights reserved. 
+              1993-1996 fukachan@phys.titech.ac.jp
+              1996-1998 fukachan@sapporo.iij.ad.jp
+</PRE>
 </BODY>
 </HTML>
