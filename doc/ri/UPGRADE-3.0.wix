@@ -1,7 +1,8 @@
 .HTML_PRE
 .# ifdef-3.0
 ○3.0 RELEASE と 2.2.1 RELEASE の間の違いについて
-=E.C	The difference between 2.2.1 and 3.0
+=E
+<>The difference between 2.2.1 and 3.0
 
 自動登録が新しくなります。
 =E
