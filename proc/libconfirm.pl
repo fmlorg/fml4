@@ -298,7 +298,9 @@ sub GenKey
     local($seed) = @_;
     local($key)  = time|$$;
 
-    &GetTime;
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
 
     srand($key);
     $CurrentTime.int(rand($seed + $key));
