@@ -26,4 +26,65 @@ sub ProcRetrieveFileInSpool_FML_20
     &Log("Get $ID, Success");
 }
 
+
+# check a mail from members or not? return 1 go on to Distribute or Command!
+sub MLMemberNoCheckAndAdd { &DoMLMemberCheck;}; # backward compatibility
+sub DoMLMemberCheck
+{
+    local($k, $v, $file);
+
+    $0 = "--Checking Members or not <$FML $LOCKFILE>";
+
+    &AdjustActiveAndMemberLists; # tricky
+
+    while (($k, $v) = each %SEVERE_ADDR_CHECK_DOMAINS) {
+	print STDERR "/$k/ && ADDR_CHECK_MAX += $v\n" if $debug; 
+	($From_address =~ /$k/) && ($ADDR_CHECK_MAX += $v);
+    }
+
+    return 1 if $Envelope{'mode:anyoneok'}; # --anyoneok == '+';
+
+    print STDERR "ChAddrModeP $Envelope{'mode:uip:chaddr'} ? " if $debug;
+
+    ### if "chaddr old-addr new-addr " is a special case of
+    # $Envelope{'mode:uip:chaddr'} is the line "# chaddr old-addr new-addr"
+    if ($Envelope{'mode:uip:chaddr'}) {
+	&use('utils');
+	&ChAddrModeOK($Envelope{'mode:uip:chaddr'}) && 
+	    (return $Envelope{'mode:uip'} = 'on');
+    }
+
+    &Debug("NOT") if $debug;
+
+    ### WHETHER a member or not?, Go ahead! if a member
+    # AUTHENTIFIED Even if the admin member is not a member of MEMBER_LIST
+    &MailListMemberP($From_address) && (return 1);
+
+    # here not authentified;
+    $Envelope{'mode:stranger'} = 1;
+
+    # Hereafter must be a mail from not member
+    # Crosspost extension.
+    if ($USE_CROSSPOST && $Envelope{'crosspost'}) {
+	&Log("Crosspost from not member");	    
+	&Warn("Crosspost from not member: $From_address $ML_FN", &WholeMail);
+	return 0;
+    }
+
+    if ($ML_MEMBER_CHECK) {
+	# When not member, return the deny file.
+	&Reject;
+	return 0;
+    } 
+    else {
+	# original designing is for luna ML (Manami ML)
+	# If failed, add the user as a new member of the ML	
+	$0 = "--Checking Members and add if new <$FML $LOCKFILE>";
+
+	&use('amctl');
+	return &AutoRegist(*Envelope);
+    }
+}    
+
+
 1;
