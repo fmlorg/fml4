@@ -375,7 +375,6 @@ sub __SmtpIOClose
 
     ### SMTP Section: QUIT
     # Closing Phase;
-    &SmtpPut2Socket('.', $ipc);
     &SmtpPut2Socket('QUIT', $ipc);
 
     close(S);
@@ -648,6 +647,7 @@ sub __SmtpIO
     print SMTPLOG ('-' x 30), "\n";
 
     ## "DATA" Session ENDS; ##
+    &SmtpPut2Socket('.', $ipc);
 
     $NULL;
 }
