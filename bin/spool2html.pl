@@ -233,7 +233,7 @@ sub SetTime
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($mtime))[0..6];
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   $year, $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
