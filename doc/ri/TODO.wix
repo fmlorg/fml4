@@ -533,6 +533,10 @@ Message Language Extensionの関数ライブラリをよぶ
 	fork
 	alarm
 
+.S	Exchange でうごくのかなぁ？
+
+.url http://www.microsoft.com/japan/backoffice/exchange/DeployAdmin/eventscr.htm
+
 
 .appendix
 .C	遠い目標
