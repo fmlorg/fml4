@@ -369,16 +369,112 @@ sub ManualRegistConfirm
 
 
 ##### Section: CHADDR confirmation
-sub FML_SYS_ChaddrConfirm
+sub ValidChaddrRequest
 {
-    local(*e, $buf) = @_; # $e{'buf:req:chaddr-confirm'});
+    local($addr0, $addr1) = @_;
 
+    # loop check
+    &LoopBackWarn($addr0) && (return 0);
+    &LoopBackWarn($addr1) && (return 0);
+
+    # addr0 should be a member.
+    &MailListMemberP($addr0) || do {
+	&Log("$addr0 is NOT a member");
+	return 0;
+    };
+
+    # one of addr0 and addr1 should be == From: .
+    if (&AddressMatch($From_address, $addr0) || 
+	&AddressMatch($From_address, $addr1)) {
+	1;
+    }
+    else {
+	0;
+    }
 }
-
 
 sub FML_SYS_ChaddrRequest
 {
     local(*e, $buf) = @_; # $e{'buf:req:chaddr'});
+    local(@x, $xbuf, $v);
+
+    $buf =~ s/[\s\n]*$//;
+
+    if ($buf =~ /($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/) {
+	&ValidChaddrRequest($2, $3) || do {
+	    &Log("invalid chaddr request: $2 => $3");
+	    &Mesg(*e, ">>> $buf");
+	    &Mesg(*e, "Error: invalid chaddr request");
+	    return $NULL;
+	};
+    }
+
+    &ConfirmationModeInit(*e, 'chaddr');
+
+    local(@addr) = split(/\@/, $From_address);
+    $s = join(" ", "chaddr", @addr);
+
+    if (! &Confirm(*e, $From_address, $s)) {
+	if ($buf =~ /($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/) {
+	    $xbuf = join(" ", 
+			 ($e{'buf:confirmation:id'}, $From_address, $2, $3));
+	    &DBCtl('text', $CONFIRMATION_ENV_SAVED_FILE, 'add', $xbuf);
+	}
+	else {
+	    &Log("ChaddrRequest: invalid buffer syntax");
+	}
+    }
+    else {
+	&Mesg(*e, "$proc had something error.");
+    }
+}
+
+
+sub FML_SYS_ChaddrConfirm
+{
+    local(*e, $buf) = @_; # $e{'buf:req:chaddr-confirm'});
+    local($id);
+
+    &ConfirmationModeInit(*e, 'chaddr');
+
+    if ($buf =~ /$CONFIRMATION_KEYWORD\s+(\S+)/) {
+	$id = $1;
+    }
+    else {
+	&Log("invalid chaddr-confirm request");
+	&Mesg(*e, "invalid chaddr-confirm request");
+	return $NULL;
+    }
+
+    $xbuf = &DBCtl('text', $CONFIRMATION_ENV_SAVED_FILE, 'get', $id);
+
+    if ($xbuf) {
+	(@xbuf) = split(/\s+/, $xbuf);
+    }
+    else {
+	&Log("no such chaddr request");
+	&Mesg(*e, "Error: no such chaddr request");
+	return $NULL;	
+    }
+
+    if ($status = &Confirm(*e, $xbuf[0], $buf)) {
+	undef $LOAD_LIBRARY;
+	&use('fml');
+	@Fld = ('#', 'chaddr', $xbuf[1], $xbuf[2]);
+	$sfa = $From_address;
+
+	# XXX "emulate $From_address" is a ugly hack ;-)
+	# XXX we should fix this in fml 2.3 release but
+	# XXX anyway do this in fml 2.2.1 release.
+	$From_address = $xbuf[1];
+	$status = &FML_SYS_SetMemberList('chaddr', *Fld, *e, *misc);
+
+	$From_address = $sfa;
+	$status;
+    }
+    else {
+	0;
+    }
 }
 
 
