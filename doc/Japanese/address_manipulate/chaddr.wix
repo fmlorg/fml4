@@ -1,0 +1,39 @@
+.#
+.# $FML$ 
+.#
+
+.C	chaddr
+
+.S	Q: chaddr の結果を返す人を変更する
+
+A: けっこう面倒。4.0.3 でなんかしたいとはおもう…
+
+	$FML_EXIT_HOOK = q#
+	   if ($Envelope{'mode:ctladdr'} && $Envelope{'Body'} =~ /chaddr/) {
+		処理を書く(下の例を参照)
+	   }
+	#;
+
+
+ケース1: だれにも返事そのものを返さない
+
+	$Envelope{'mode:disablenotify'} = 1;
+
+
+ケース2: 操作対象のユーザに返事を送る、管理者へはレポートを送らない
+	注: コマンドメールを送った人に"も"返事は返します
+
+	undef $Envelope{'message:to:admin'}
+
+
+ケース3: ユーザへは返事を返さない、管理者へは送る
+	注: コマンドメールを送った人に"も"返事は返します
+
+	undef $Envelope{'message:h:@to'};
+
+
+ケース4: chaddr コマンドを送った人にだけは返事を返す
+	注: コマンドメールを送った人に"だけ"返事は返す
+
+	undef $Envelope{'message:h:@to'};
+	undef $Envelope{'message:to:admin'};

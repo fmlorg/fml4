@@ -19,6 +19,7 @@
 .~HTML_PRE
 
 .include overview.wix
+.include chaddr.wix
 .include howto.wix
 
 .appendix
