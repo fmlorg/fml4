@@ -1,0 +1,65 @@
+.C	mail2news (メーリングリストからニュースへ)
+=E	mail2news (ML -> News)
+.l	mail2news
+
+おまけ機能のメーリングリストからニュースへ垂れ流す例です。
+注意: ベータテストですぅ
+
+NNTPClient.pm の使い方の例とでもいう方がいいでしょう。
+
+perl 5 でのみ使える機能です。また NNTPClient.pm がインストールされてい
+ることが必要です。
+
+libnnt.pl は contrib/mail2news に入っています。
+
+
+.S	mail2news の組み込み方
+
+contrib/mail2news/libnntp.pl を perl の include の search path のどこ
+かへ入れます。例えば makefml でインストールした場所 ( fml.pl や 
+libsmtp.pl の入ってる場所)へ入れます。
+
+
+.S	mail2news の設定
+
+まずこのライブラリを fml.pl の最後に実行するように組み込みます。
+
+例:
+	$FML_EXIT_HOOK .= q#;
+		&use('nntp');
+		&NntpPost(*Envelope);
+	#;
+
+また、必要な変数を設定します。
+
+    $NEWS_SERVER
+
+	投稿する先のニュースサーバ。設定しないと自分自身のホスト
+
+    @NEWS_HDR_FIELDS_ORDER
+
+	ニュースに投稿する時に元のメールから内容を採り入れる
+	ヘッダ。デフォールトは
+
+	("from", "newsgroups", "subject", "supersedes", "references")
+
+	小文字なのはオリジナルを使うためです。Capital にすれば
+	メーリングリストにながれる内容と同じものがながれます。例えば
+	subject ではなく Subject にすると(そういう設定をしていれば)
+	Counter つきのが流れるといった具合です。
+
+   %NEWS_FIELD_DEFAULT
+
+	メールにない場合必要な内容をハッシュに入れる。
+	Organization とかか？
+
+   %NEWS_FIELD_TO_OVERWRITE
+
+	強制的に書き換える内容をハッシュに入れる。
+	Organization とかか？
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
