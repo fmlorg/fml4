@@ -14,21 +14,6 @@
 	XXX 終ったもの/終ったつもりのものはここに一回書いておく
 	XXX 一月くらいで消すこと
 
-*	にほんごでふぃるた
-=E
-*	Filter by Japanese
-
-*	configure mead
-	mead_init.ph
-	mead_force.ph
-
-	項目が少しだけなので
-	とりあえずメニュー画面などなくてもOKだろう
-
-*	PostgreSQL は DBD 化へ
-=E
-*	PostgreSQL DBI version
-
 
 
 .# ############################################################
@@ -104,10 +89,6 @@ meadと各種MTA対応
 =E
 mead for each MTA
 
-   postfix 対応
-=E
-   postfix
-
    qmail =>  http://www.jp.qmail.org/qmaildoc/RFC/RFCQSBMF.html
 
 
@@ -163,7 +144,7 @@ fml-support: 07262
 fml-support: 07101
 fml-support: 07104
 
-Incomplate but effective fix is done.  We should rewrite address match
+Incomplete but effective fix is done.  We should rewrite address match
 routine.
 
 
