@@ -2513,6 +2513,7 @@ in error mails returned from MTA's.
 
 	sh: fml.pl not available
 			smrsh を使ってたりしますか？
+			(最近のRedhatでこのsmrshからみのトラブルが多いです)
 			sendmail.cfをどうやって作ったかを確認
 .fi
 .if LANG == ENGLISH
