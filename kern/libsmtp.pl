@@ -42,7 +42,7 @@ sub SmtpInit
 	if ($USE_SMTP_LOG_ROTATE) {
 	    my ($id) = &IncrementCounter("$VARLOG_DIR/.seq", 
 					 $NUM_SMTP_LOG_ROTATE || 50);
-	    $SMPT_LOG .= ".$id";
+	    $SMTP_LOG .= ".$id";
 	}
     }
 
