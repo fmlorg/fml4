@@ -45,6 +45,14 @@ sub Init
     local(@trap, @scan_list, $scan_start);
     local($trap) = $e{'trap:rcpt_fields'};
 
+    # DataBase Access
+    # XXX If you uses database access, you cannot use crosspost.
+    # XXX This logic requires database access for all mailing lists, isnt it? 
+    if ($USE_DATABASE) {
+	&Log("WARN: you cannot use USE_CROSSPOST with USE_DATABASE");
+	return;
+    }
+
     # Error Handling
     if (! @CROSSPOST_CF) {
 	&Log("ERROR: please define \@CROSSPOST_CF to use \$USE_CROSSPOST");

@@ -97,6 +97,16 @@ sub MemberStatus
 
     &Log("Status [$who]");
 
+    if ($USE_DATABASE) {
+	&use('databases');
+
+	my (%mib, %result, %misc);
+	# members
+	&DataBaseMIBPrapare('get_status', \%mib);
+	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
+	return;
+    }
+
     &use('utils');
 
     &Uniq(*file);

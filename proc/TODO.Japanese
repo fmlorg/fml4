@@ -1,6 +1,20 @@
-DiagPrograms() をうけて、エラー制御をちゃんとしたい
+◯ Database access
+
+* append address to $ACTIVE_LIST
+
+	proc/libamctl.pl:160
+	proc/libra.pl:587
+	proc/libra.pl:588
+	proc/libra.pl:590
+
+
+
+------------------------------------------------------------
+
+◯ DiagPrograms() をうけて、エラー制御をちゃんとしたい
 
 1.  return でOKのところもあるが
 
 2.  for () { &$_fp();} ループでなんらかのエラー判定？
 
+$Id$
