@@ -98,7 +98,7 @@ sub ContentHandler
     
     # Check REJECT, MULTIPART, CUTOFF
     $reject = grep(/^.*\treject$/, @actions);
-    $multipart = grep(/^.*\tallow+multipart$/, @actions);
+    $multipart = grep(/^.*\tallow\+multipart$/, @actions);
     $cutoff = grep(/^.*\tstrip$/, @actions);
     
     # Rebuild message body
