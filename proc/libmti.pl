@@ -9,7 +9,7 @@
 #
 # $Id$
 #
-local($MTI_DB, $MTIErrorString, %MTI, %HI);
+local($MTI_DB, $MTI_HI_DB, $MTIErrorString, %MTI, %HI);
 
 
 # MTI: Mail Traffic Information
@@ -19,10 +19,6 @@ sub MTICache
     local($time, $from, $rp, $sender, $xsender);
     local($host, $date, $rdate, $buf, $status);
     local(%hostinfo, %addrinfo);
-
-    ### 2.1B test ###
-    $USE_MTI_TEST = 1;
-    ### 2.1B test end ###
 
     ### Extract Header Fields
     $time    = time;
@@ -309,135 +305,9 @@ sub MTIWarn
 
 sub Date2UnixTime
 {
-    local($in) = @_;
-    local($input) = $in;
-    local($c, $day, $month, $year, $hour, $min, $sec, $pm, $shift_t, $shift_m);
-    local(%zone);
-
-    require 'timelocal.pl';
-
-    # Hints
-    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    $c = 0; for (@Month) { $c++; $Month{$_} = $c;}
-    
-    # TIME ZONES: RFC822 except for "JST"
-    %zone = ("JST", "+0900",
-	     "UT",  "+0000",
-	     "GMT", "+0000",
-	     "EST", "-0500",
-	     "EDT", "-0400",
-	     "CST", "-0600",
-	     "CDT", "-0500",
-	     "MST", "-0700",
-	     "MDT", "-0600",	     
-	     "PST", "-0800",
-	     "PDT", "-0700",	     
-	     "Z",   "+0000",	     
-	     );
-
-    if ($in =~ /([A-Z]+)\s*$/) {
-	$zone = $1;
-	if ($zone{$zone} ne "") { 
-	    $in =~ s/$zone/$zone{$zone}/;
-	}
-    }
-
-    # RFC822
-    # date        =  1*2DIGIT month 2DIGIT        ; day month year
-    #                                             ;  e.g. 20 Jun 82
-    # date-time   =  [ day "," ] date time        ; dd mm yy
-    #                                             ;  hh:mm:ss zzz
-    # hour        =  2DIGIT ":" 2DIGIT [":" 2DIGIT]
-    # time        =  hour zone                    ; ANSI and Military
-    # 
-    # RFC1123
-    # date = 1*2DIGIT month 2*4DIGIT
-    # 
-    # 
-    # 
-    if ($in =~ 
-	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
-	if ($debug_mti) { print STDERR "Date2UnixTime: Standard\n";}
-	$day   = $1;
-	$month = ($Month{$2} || $month) - 1;
-	$year  = $3 > 1900 ? $3 - 1900 : $3;
-	$hour  = $4;
-	$min   = $5;
-	$sec   = $6;	    
-
-	# time zone
-	$pm    = $7;
-	$shift_t = $8;
-	$shift_m = $9;
-    }
-    elsif ($in =~ 
-	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
-	if ($debug_mti) { print STDERR "Date2UnixTime: Standard without \$sec\n";}
-	$day   = $1;
-	$month = ($Month{$2} || $month) - 1;
-	$year  = $3 > 1900 ? $3 - 1900 : $3;
-	$hour  = $4;
-	$min   = $5;
-	$sec   = 0;
-
-	# time zone
-	$pm    = $6;
-	$shift_t = $7;
-	$shift_m = $8;
-    }
-    # INVALID BUT MANY Only in Japan ??? e.g. "Apr 1 04:01:00 1999"
-    # no timezone case ... WHAT SHOULD WE DO ? ;_;
-    elsif ($in =~ /([A-Za-z]+)\s+(\d{1,2})\s+(\d+):(\d+):(\d+)\s+(\d{4})\s*/) {
-	if ($debug_mti) { print STDERR "Date2UnixTime: Japan specific?\n";}
-	$month = ($Month{$1} || $month) - 1;
-	$day   = $2;
-	$hour  = $3;
-	$min   = $4;
-	$sec   = $5;
-	$year  = $6 > 1900 ? $6 - 1900 : $6;
-
-	# time zone
-	$pm    = '+';
-	$shift_t = '09';
-	$shift_m = '00';	   
-    }
-    elsif ($in =~ /\;\s*(\d{9,})\s*$/) {
-	if ($debug_mti) { print STDERR "Date2UnixTime: unixtime case\n";}
-	if (&ABS($1 - time) < 7*24*3600) { 
-	    return $1;
-	}
-	elsif ($debug_mti) {
-	    local(@caller) = caller;
-	    &Log("MTI[$$]::Date2UnixTime: invalid [$input]");
-	    &Log("MIT[$$]: callded from @caller");
-	}
-    }
-    else {
-	if ($debug_mti) {
-	    local(@caller) = caller;
-	    &Log("MTI[$$]::Date2UnixTime: invalid [$input]");
-	    &Log("MIT[$$]: callded from @caller");
-	}
-	return 0;
-    }
-
-    # get gmtime
-    $shift_t =~ s/^0*//; 
-    $shift_m =~ s/^0*//;
-
-    $shift = $shift_t + ($shift_m/60);
-    $shift = ($pm eq '+' ? -1 : +1) * $shift;
-
-    if ($debug_mti) {
-	print STDERR 
-	    "timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600')\n";
-    }
-
-    local($t);
-    eval('$t = &timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600');
-    &Log($@) if $@;
-    $t;
+    my ($date) = @_;
+    use Mail::Message::Date;
+    return Mail::Message::Date::date_to_unixtime( $date );
 }
 
 
@@ -454,10 +324,7 @@ sub MTILog
 	$buf .= sprintf("%15s %s\n", "$h:", $e{"h:$_:"}) if $e{"h:$_:"};
     }
     $buf .= "\nsince\n$s\n";
-
-    # IN TEST PHASE, please set $USE_MTI_TEST to reject mails automatically.
-    # removed $USE_MTI_TEST in the future;
-    $MTIErrorString .= $buf if $USE_MTI_TEST && $s;
+    $MTIErrorString .= $buf if $s;
 }
 
 
