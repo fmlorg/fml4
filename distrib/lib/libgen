@@ -373,6 +373,14 @@ GEN_ARCHIVE () {
 
 
 	### Section: export to ftp,www
+	if [ -d $FTP_DIR ]; then
+		mkdir $FTP_DIR
+	fi
+
+	if [ -d $WWW_DIR ]; then
+		mkdir $WWW_DIR
+	fi
+
 	echo " "
 	echo "-- sync w/ ftp server"
 	echo " "
