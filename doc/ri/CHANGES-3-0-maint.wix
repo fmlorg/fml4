@@ -5,15 +5,13 @@
 =E
 				Ken'ichi Fukamachi
 
-[ 3.0pl#30 == 3.0.1_BETA #19 ]
+[ 3.0pl#29 == 3.0.1_BETA #18 ]
 
    makefml (2.68-2.69):
 	FixDefault: reflect real variable name not hier name
 
    libexec/mead.pl
 	fix qmail VERPs analyze code
-
-[ 3.0pl#29 == 3.0.1_BETA #18 ]
 
    disable to reject "From: $MAIL_LIST" mail in default 
 
