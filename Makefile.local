@@ -93,7 +93,7 @@ testsetup:
 	@ test -d $(TRASH)/FML_TEST || mkdir $(TRASH)/FML_TEST
 	@ test -d $(TRASH)/FML_TEST/e || mkdir $(TRASH)/FML_TEST/e
 	@ test -d $(TRASH)/FML_TEST/s || mkdir $(TRASH)/FML_TEST/s
-	@ test -h /tmp/e || ln -s /usr/local/ml /tmp/e
+	@ test -h /tmp/e || ln -s /usr/local/fml /tmp/e
 	@ test -h /tmp/s || ln -s /var/spool/ml /tmp/s
 
 search:
