@@ -1,0 +1,94 @@
+.C	用語
+
+以下で使う用語について2、3説明しておきます。
+
+.S	MLのHOME
+.k	MLのHOME
+
+ML(fml) の HOME は config.ph のある場所です。例えば config.ph が 
+/var/spool/ml/elena/config.ph にあるとすると、directory
+/var/spool/ml/elena をMLのHOMEと呼んでいます。
+
+
+.S	SMTP
+.k	SMTP
+.k	Simple Mail Transfer Protocol
+
+SMTP == Simple Mail Transfer Protocol。 sendmail 間の通信方式のこと。
+
+
+.S	メールサーバ/SMTPサーバ, MTA
+
+sendmail というプログラムが元祖であり、もっとも代表的なプログラムです
+が、SMTPを理解すればうけるのは何でも構いません。より正確には $HOST で
+指定する(デフォールトは自分自身 "localhost")で smtp/tcp ポートがメール
+を受けとってくれれば何が走っていて構わないという意味です。
+
+MTAなら qmail (http://www.qmail.org/) のような他のMTAもあるし、MTAでは
+なく例えば TIS (Trusted Information System) の Gauntlet という 
+Firewall では smap というプログラムが受けて queue だけをします。
+
+世の中にはそれ以外にも sendmail もどきのプログラムはありますから、
+sendmail に拘る必要はありません。
+
+この文書ではターゲットマシンが 4.4BSD なので、sendmail と perl を使う
+場合について解説しています。
+
+
+.S	sendmail
+.k	/usr/sbin/sendmail
+.k	sendmail
+
+現在も Eric Allman がメンテしている メール配送エージェントのこと。
+sendmail は BSD の標準装備です。
+
+どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
+もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
+を使うようにして下さい。
+例えば
+
+	ftp://ftp.cert.org/pub/tools/sendmail/
+	ftp://ftp.sendmail.org/
+
+国内のミラーは例えば
+
+	ftp://ftp.iij.ad.jp/pub/network/sendmail/
+
+です。
+
+
+.S	sendmail.cf 
+.k	/etc/sendmail.cf 
+.k	sendmail.cf 
+
+sendmail をコントロールする configration file。これの読み書きができな
+いとネットワーク管理者にはなれません(なりたくないって?(泣))。
+
+大抵の場合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッ
+ケージで sendmail.cf を簡単に作ることができるが、この見本で十分実用で
+す。
+
+詳しくは、このCFパッケージの日本語マニュアルも参照して下さい。
+
+国内のミラーは例えば
+
+	ftp://ftp.iij.ad.jp/pub/network/sendmail/
+
+
+.S	newaliases
+.k	/usr/sbin/newaliases
+.k	newaliases
+
+/etc/aliases から aliases データベースを作るための操作のこと。
+/etc/aliases をいじったら必ず newaliases というコマンドを実行しなけれ
+ばなりません。
+
+.# $Id$
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
