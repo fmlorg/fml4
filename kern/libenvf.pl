@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libenvf.pl,v 2.18 2001/09/29 10:35:42 fukachan Exp $
+# $FML: libenvf.pl,v 2.19 2001/10/14 04:23:22 fukachan Exp $
 #
 
 use vars qw($debug $debug_filter $debug_envf_rule);
@@ -110,7 +110,12 @@ sub __EnvelopeFilter
     }
 
     # extract the buffer to check
-    if ($p >= 0 && $p < 1024) {
+    if ($e{'MIME:boundary'}) {
+	$xbuf    = substr($xbuf, $pmap[0], $pmap[$#pmap]);
+	$fparbuf = substr($xbuf, $pmap[0], $pmap[1]); # first par(agraph)
+	$lparbuf = substr($xbuf, $pmap[ $#pmap - 1 ], $pmap[$#pmap]); # last
+    }
+    elsif ($p >= 0 && $p < 1024) {
 	$xbuf    = substr($e{'Body'}, $pmap[0], $pmap[$#pmap]);
 	$fparbuf = substr($e{'Body'}, $pmap[0], $pmap[1]); # first par(agraph)
 	$lparbuf = substr($e{'Body'}, $pmap[ $#pmap - 1 ], $pmap[$#pmap]); # last
