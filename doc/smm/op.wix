@@ -2867,8 +2867,8 @@ Current(1.6以降) では、すべての変数は
 .include smtp.wix
 .include uip.wix
 .include lib.wix
-.include log.wix
 .include perl.wix
+.include log.wix
 
 
 .C	あしたリリースオフ
