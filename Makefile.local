@@ -102,11 +102,8 @@ m:	testsetup /usr/local/fml/makefml
 	if [ -d /usr/local/fml ]; then \
 	 perl w/repl.pl sbin/makefml > /usr/local/fml/makefml ; fi
 
-
-
-testsetup:
-	@ test -d $(TRASH)/FML_TEST || mkdir $(TRASH)/FML_TEST
-	@ test -d $(TRASH)/FML_TEST/e || mkdir $(TRASH)/FML_TEST/e
-	@ test -d $(TRASH)/FML_TEST/s || mkdir $(TRASH)/FML_TEST/s
-	@ test -h /tmp/e || ln -s /usr/local/fml /tmp/e
-	@ test -h /tmp/s || ln -s /var/spool/ml /tmp/s
+testsetup: libkern
+	rsync -C -a kern/ /usr/local/fml/
+	rsync -C -a proc/ /usr/local/fml/
+	rsync -C -a libexec/ /usr/local/fml/libexec/
+	rsync -C -a bin/ /usr/local/fml/bin/
