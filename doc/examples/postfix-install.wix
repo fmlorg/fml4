@@ -1,6 +1,8 @@
 .HTML_PRE
 
 	NetBSD-current での postfix のインストール
+=E
+	postfix install on NetBSD-current
 
  [用語]
    # は root の prompt
@@ -12,10 +14,14 @@
 
 	postfix というユーザをつくる
 	fml  というユーザをつくる
+=E
+	create user "postfix" and "fml"
 
 # $EDITOR /etc/group
 
 	maildrop というグループをつくっておく
+=E
+	create "maildrop"
 
 # cd /usr/pkgsrc/mail/postfix
 # make install
@@ -27,10 +33,16 @@
 
      myhostname = このホストのFQDN
      mydomain   = 自分のドメイン
+=E
+     myhostname = your host FQDN
+     mydomain   = your domain
 
      mynetworks = 自分のネットワーク 例: 10.0.0.0/28, 127.0.0.1/32
+=E
+     mynetworks = your network IP addresses
+		e.g. 10.0.0.0/28, 127.0.0.1/32
 
-     # command
+     # enable command like "fml"
      allow_mail_to_commands = alias,forward,include
 
      # これはなくてもよい
@@ -39,7 +51,12 @@
 ---------
 
 このあと fml のインストールを sendmail の時と同様に行なう
+=E
+After postfix, install fml in the same way as "sendmail" case.
 
+.url http://www.fml.org/fml/INSTALL/
+=E
+.url http://www.fml.org/fml/INSTALL-e/
 
            Copyright (C) 1999 Ken'ichi Fukamachi
                    All rights reserved. 
