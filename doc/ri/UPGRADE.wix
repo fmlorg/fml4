@@ -190,7 +190,7 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
 元のhelpはhelp.bak等になるので必要なら戻すなりmergeなりをして欲しい。
 
 ○ HTMLのスレッドの仕方が異なる。
-<UL><LI>を利用したあまりお行儀のようい作法ではない
+<UL><LI>を利用したあまりお行儀のよい作法ではない
 =E
 * change HTML thread default
 
