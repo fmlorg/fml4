@@ -6,6 +6,8 @@
 
 .p	いろいろ
 .include examples.wix
+.include lock.wix
+
 
 .p	MTA 関係
 .include postfix-pop-before-smtp.wix

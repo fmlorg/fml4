@@ -1,0 +1,24 @@
+.C	ロックについて
+
+.S	ロックアルゴリズムの選択
+=E.S	Lock Algorithm
+.xref	how-to-lock
+
+FML uses flock(2) in default. If you use flock(2), set
+
+	$USE_FLOCK    = 1; (default 1)
+.k	$USE_FLOCK
+
+を設定すると flock system call をロックに使います。
+=E
+If flock(2) does not work on your OS, set
+
+	$USE_FLOCK    = 0;
+
+とすると link(2) を使うやり方にセットできます。デフォールトはflockです。
+=E
+to use a lock based on link(2). This algorithm uses lockfiles whereas
+flock(2) is only in kernel.  If the machine shutdowns or reboots
+suddenly, temporary lock files may be left in the lock spool. If
+exists, please remove them. 
+
