@@ -67,10 +67,11 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .exe: executable
 #   .doc: word
 #   .rtf: RTF (embedded object in RTF is possible?) ?
-#   .pif: win32/MTX
+#   .pif: win32/MTX sircam?
 #   .scr: win32/MTX
+#   .lnk: sircam ?  
 $DISTRIBUTE_FILTER_HOOK .= q#
-    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf|pif|scr';
+    my($extension) = 'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
 
     if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';
