@@ -89,6 +89,44 @@ sub PGPDecode
     }
 }
 
+# using the temporary file.
+# so this should be only applied to clear-singed text.
+sub PGPDecode2
+{
+    local($buf) = @_;
+    local($auth, $dcbuf);
+    local($tmpf) = "$FP_TMP_DIR/pgp$$";
+
+    # load open2
+    require 'open2.pl';
+
+    # PGP Signature Check
+    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode2: $!");
+    print WPGP $buf;
+    close(WPGP);
+
+    while (<RPGP>) {
+	$auth = 1 if /Good\s+signature/i;
+    }
+    close(RPGP);
+
+    # 2>&1 is required to detect "Good signature"
+    open(WPGP, "|$PGP $PgpOpts -o $tmpf")||&Log("PGPDecode2: $!");
+    select(WPGP); $| = 1; select(STDOUT);
+    print WPGP $buf;
+    close(WPGP);
+
+    open(RPGP, $tmpf) || &Log("PGPDecodeAndSave: cannot open $tmpf");
+    while (<RPGP>) {
+	$dcbuf .= $_;
+	print STDERR "PGP (decode and save) OUT:$_" if $debug;
+    }
+    close(RPGP);
+
+    &Log("Error: PGP no good signature.") unless $auth;
+
+    $dcbuf;
+}
 
 sub DoPGPDecode
 {
