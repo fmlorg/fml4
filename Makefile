@@ -102,13 +102,6 @@ snapshot:
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
 
 	
-exp: experimental-snapshot
-experimental-snapshot:
-	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
-	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -b 2>&1|\
-		tee $(DESTDIR)/_release.log)
-	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
-
 release:
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -rp 2>&1|\
