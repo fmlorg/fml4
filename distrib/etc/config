@@ -33,8 +33,7 @@ RELEASE_MANIFEST=etc/RELEASE_FILES
 # distribution directory of snapshot
 DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST
 
-echo \$WORK_HTML_DIR $WORK_HTML_DIR
-exit 0
+
 
 ### MAIN ###
 
