@@ -18,9 +18,24 @@ FAILしてどこかのポストマスタにうっかり見えてしまう可能性もあります(普
 通はヘッダだけですが)。でもヘッダの Approval: password フィールドは見
 えちゃいますよね、その場合は。
 
-そういう意味で決して「推奨していません」が、実用上しかたなく使うことに
-なるケースも一杯あるらしいので実装しています。そういうものだ心に止めて
-おいて下さい。
+そういう意味で決して”推奨していません”が、実用上しかたなく使うことに
+なるケースも一杯あるらしいので実装しています。そういうものだと心に止め
+ておいて下さい。
+
+SMTP でやるより、Secure Shell で RSA 認証して、
+.k SSH 
+.k Secure Shell
+
+	ssh remote-host $FML/makefml add address
+
+や
+	scp remote-host:$FML/ml/elena/guide newguide 
+	newguide を編集
+	scp newguide remote-host:$FML/ml/elena/guide
+
+のような操作をする方がはるかに優れていると思います。
+これならコネクションがRSA認証されていてなおかつIDEA(default)暗号化され
+ているという優れ物です。
 
 なおマシンの上で他の人に除かれた場合は少しだけましで、etc/passwd とい
 うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
@@ -162,6 +177,42 @@ $REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
 のがデフォールトのfmlの挙動ですが、リモート管理のコマンドの時だけは 
 multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 たりできるわけです。
+
+
+.S	リモートで入れ替えが可能なファイルについて、
+
+具体的には remove unlink put rename の場合に、任意のファイルが操作でき
+るのはまずいです。本来これらのコマンドはリモートで guide ファイルを入
+れ換える等の目的のためにあります。現在では
+
+	  @REMOTE_RECONFIGURABLE_FILES
+.k	  @REMOTE_RECONFIGURABLE_FILES
+
+という配列で定義されたファイルにのみこれらのコマンドは作用します。デフォー
+ルトは、次の変数で設定されているものを操作可能にしてあります。
+
+	$INDEX_FILE		$WHOIS_DB
+	$ADMIN_MEMBER_LIST	$ADMIN_HELP_FILE
+	$PASSWD_FILE		$LOG_MESSAGE_ID
+	$MEMBER_LIST		$ACTIVE_LIST
+	$OBJECTIVE_FILE		$GUIDE_FILE
+	$HELP_FILE		$DENY_FILE
+	$WELCOME_FILE		$CONFIRMATION_FILE
+	$LOGFILE		$MGET_LOGFILE
+	$SMTPLOG		$SUMMARY_FILE
+	$SEQUENCE_FILE		$MSEND_RC
+	$LOCK_FILE
+
+	$FILE_TO_REGIST
+	$FTP_HELP_FILE		$WHOIS_HELP_FILE
+
+	@ACTIVE_LIST		@MEMBER_LIST
+
+増やす場合は config.ph で
+
+	push(@REMOTE_RECONFIGURABLE_FILES, "$DIR/独自のファイル");
+
+のように配列の中身を追加してください。
 
 
 .S	アドミンのコマンド一覧 (help-admin より)
