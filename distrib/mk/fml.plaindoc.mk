@@ -4,13 +4,13 @@ var/doc/op.jp: doc/smm/*wix
 	env FML=${FML} $(SH) distrib/bin/DocReconfigure.op
 
 .for file in ${DOC_DRAFT_SOURCES}
-__DOC_TARGETS__ += var/doc/drafts/${file}.jp
-__DOC_TARGETS__ += var/doc/drafts/${file}.en
-var/doc/drafts/${file}.jp: drafts/${file}.wix
-	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/${file}.jp
+__DOC_TARGETS__ += var/doc/drafts/Japanese/${file}
+__DOC_TARGETS__ += var/doc/drafts/English/${file}
+var/doc/drafts/Japanese/${file}: drafts/${file}.wix
+	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/Japanese/${file}
 
-var/doc/drafts/${file}.en: drafts/${file}.wix
-	${FWIX} -L ENGLISH -n i drafts/${file}.wix > var/doc/drafts/${file}.en
+var/doc/drafts/English/${file}: drafts/${file}.wix
+	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/English/${file}
 .endfor
 
 .for file in ${DOC_ADVISORY_SOURCES}
@@ -45,6 +45,8 @@ __initplaindocbuild__:
 	@ echo --plaindoc
 	@ test -d var/doc || mkdir var/doc
 	@ test -d var/doc/drafts     || mkdir var/doc/drafts
+	@ test -d var/doc/drafts/Japanese || mkdir var/doc/drafts/Japanese
+	@ test -d var/doc/drafts/English  || mkdir var/doc/drafts/English
 	@ test -d var/doc/advisories || mkdir var/doc/advisories
 	@ test -d var/doc/Japanese   || mkdir var/doc/Japanese
 	@ test -d var/doc/English    || mkdir var/doc/English

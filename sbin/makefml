@@ -2120,12 +2120,11 @@ sub Conv
     # Case: under fml-source/drafts/
     if ($example =~ /\/drafts\//) {
 	# English
-	if ($LANGUAGE eq 'English') {
-	    $example = "$example.en";
-	}
-	# Japanese
-	elsif ($LANGUAGE eq 'Japanese') {
-	    $example = "$example.jp";
+	if ($LANGUAGE eq 'English' || $LANGUAGE eq 'Japanese') {
+	    if ( $example =~ /^(.*drafts\/)([-\w]+)$/) {
+		my ($dir, $fn) = ($1, $2);
+		$example = "$dir/$LANGUAGE/$fn";
+	    }
 	}
 	else {
 	    &Log("unknown language [$Language]");
@@ -4998,21 +4997,16 @@ sub do_update
     if (-f "$EXEC_DIR/etc/makefml/$x") {
 	$t = "$EXEC_DIR/etc/makefml/$x";
     }
-    elsif ($LANGUAGE eq 'Japanese') {
-	if (-f "$EXEC_DIR/drafts/$x.jp") {
-	    $t = "$EXEC_DIR/drafts/$x";
-	}
-    }
-    elsif ($LANGUAGE eq 'English') {
-	if (-f "$EXEC_DIR/drafts/$x.en") {
-	    $t = "$EXEC_DIR/drafts/$x";
+    elsif ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {
+	if (-f "$EXEC_DIR/drafts/$LANGUAGE/$x") {
+	    $t = "$EXEC_DIR/drafts/$LANGUAGE/$x";
 	}
     }
 
-    print "\n   Updating $ML_DIR/$ml/$file ...\n\n";
+    print "\n\ttry to update $ML_DIR/$ml/$file\n";
 
     if ($t) {
-	print "   Converting $t to \n";
+	print "\tconverted from $t\n";
 	&Conv($ml, $t, "$ML_DIR/$ml/$x.new");
 	if (rename($target, "$target.bak")) {
 	    ;
@@ -5023,7 +5017,7 @@ sub do_update
 	}
 
 	if (rename("$target.new", $target)) {
-	    print "\trename $target.new $target\n";
+	    print "\trename $target.new $target\n" if $debug0;
 	}
 	else {
 	    &Log("fail to rename $target.new $target");
@@ -5031,10 +5025,10 @@ sub do_update
 	}
 
 	if ($fail) {
-	    print "   $target is NOT updated\n";
+	    print "\n   $target is NOT updated\n";
 	}
 	else {
-	    print "   $target is updated\n";
+	    print "\n   $target is updated\n";
 	}
     }
     else {

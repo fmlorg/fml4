@@ -142,6 +142,21 @@ chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 
 	rm -f bin/inc_via_pop.pl
 	ln bin/pop2recv.pl bin/inc_via_pop.pl
+
+	# 2000/06/29
+	# /usr/local/fml/drafts/*.{jp,en} are obsolete.
+	if [ -f drafts/help.jp ];then
+	   (cd drafts;
+		for f in *.jp *.jp.bak; do
+			mv $f Japanese/$f.bak
+		done
+		if [ -f help.en ];then
+			for f in *.en *.en.bak; do
+				mv $f English/$f.bak
+			done
+		fi
+	   )
+	fi
 )
 
 

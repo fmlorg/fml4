@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/29
+
+  change the locatoin for message template files
+	/usr/local/fml/drafts/Japanese/{help,guide,...}
+	/usr/local/fml/drafts/English/{help,guide,...}
+
+	テンプレートファイルの置き場所変えました。
+	これで doc/ 以外に .jp シンタックスは消えた	
+
 2000/06/25
 
   sbin/makefml

@@ -130,9 +130,13 @@ COPY_SOURCES () {
 
 	echo ""; echo "Copying Main Sources ... ";
 	cp -p  $SOURCES 	$DESTDIR/distrib/
-	cp -p  $DRAFTS_SOURCES  $DESTDIR/distrib/drafts
 	cp -p  $C_SOURCES	$DESTDIR/distrib/C
 	cp -p  $PERL_SOURCES	$DESTDIR/distrib/src
+
+	echo ""
+	echo Copying drafts/
+	echo "rsync -av $DRAFTS_SOURCES $DESTDIR/distrib/drafts/"
+	rsync -av $DRAFTS_SOURCES  $DESTDIR/distrib/drafts/
 
 	echo ""
 	echo Copying messages/
@@ -335,11 +339,15 @@ FIX_LANGUATE () {
    (
 	cd $DESTDIR/distrib/drafts
 	echo "Fixing Japanese code: "
-	for file in *
+	for file in */*
 	do
+	   if [ -f $file ];then
 		echo -n "$file "
 		nkf -j $file > $file.j
 		mv $file.j $file
+	   else
+		echo ERROR: $file is not a text.
+	   fi
 	done
 
 	echo " ... Done."
