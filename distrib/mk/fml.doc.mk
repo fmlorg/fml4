@@ -46,7 +46,7 @@ DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year200
 .include "doc/examples/filter/Makefile"
 .include "doc/examples/tips/Makefile"
 .include "doc/examples/header/Makefile"
-
+.include "doc/devel/Makefile"
 
 ### RULES ###
 .include "distrib/mk/fml.sys.mk"
@@ -56,6 +56,9 @@ DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year200
 
 # examples; I provides this in html format only.
 .include "distrib/mk/fml.examples.mk"
+
+# doc/devel/
+.include "distrib/mk/fml.devel.mk"
 
 # special HTML rurles (depends on *SOURCES*)
 .include "distrib/mk/fml.htmldoc.mk"
