@@ -22,7 +22,7 @@ FAQ、Setting、改造の仕方等に関する読みものになっています。
 
 
 .S	サーバの中身は？
-.label	fml-mechanism
+.label	{fml-mechanism}
 
 ようは Sendmail からパイプで渡されたメールをヘッダと本文にわけて（ヘッ
 ダの解析もして）、メンバーへ配送かコマンドを実行するってだけです
@@ -197,7 +197,7 @@ sub Distribute でＭＸ引く時とかサーバプロセスの後のSendmailの配送が遅
 .key	uid
 .key	setuid
 .key	ユーザー権限ということ
-.label	fml-uid
+.label	{fml-uid}
 
 ・ローカルに自分が実験したら
 
@@ -260,11 +260,11 @@ From: を見てメンバーチェックをし、知らない人かどうかを決めています。
 
 	３．	そのメールにSubject: subscribe のようなキーワードが必要
 		（キーワード必須）
-	.seealso auto-regist-6
+.#	.seealso auto-regist-6
 
 	４．	そのメール本文に subscribe のようなキーワードが必要
 		（キーワード必須）
-	.seealso auto-regist-7
+.#	.seealso auto-regist-7
 
 のVariationがあります。くわしい設定はそれぞれのセクションを見て下さい。
 
@@ -342,7 +342,7 @@ $COMMAND_ONLY_SERVER = 1;
 
 
 .S	コマンドは一辺に実行できるか？２
-.label	command-plural2
+.label	{command-plural2}
 
 でも、
 	% cat foo
@@ -416,6 +416,33 @@ Distribution 担当のサーバ
 登録します
 
 
+.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する 	
+
+	$PREAMBLE_MAILBODY	（前）
+	$TRAILER_MAILBODY	（後）
+	を本文の前後に必ず付けます。
+
+つまり、
+	e.g. HELP コマンドにたいして、
+
+	$PREAMBLE_MAILBODY	（前）
+	HELPファイル本文
+	$TRAILER_MAILBODY	（後）
+
+のようにです。
+
+もし、なんらかの理由で普通のメールの場合にも付けたいなら
+＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
+＃倫理的に許されないと思うが…世の中いろいろあるだろう〜？？？
+
+config.ph に $_cf{'ADD2BODY'} = 1; と書いておいてください。
+普通のＭＬのメールですら、INFO?がつくようになります。
+
+これを利用して、本文に メールカウントを埋め込むことも可能になります。
+＃実際、コマンドモードに入るときに $_cf{'ADD2BODY'} = 1;をしています。
+
+
+
 .S	リモートで管理する設定
 .seealso	REMOTE-ADMINISTRATION
 
@@ -446,7 +473,7 @@ SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 
 .# ##########################################################
 .C	Install && Configurations
-.label	configuration
+.label	{configuration}
 
 ここはおおむね概論です。細かい詳細（フラッグ等のsetting）は後の章を御
 覧下さい（その名前の章があれば…ですが）。
@@ -472,7 +499,7 @@ RecreateConfig.pl を使うべきです。
 .key	$LIBDIR
 .key	fml.c
 .key	fml.plの引数
-.label	c-wrapper
+.label	{c-wrapper}
 
 fml.cの中に
 
@@ -502,7 +529,7 @@ execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
 .key	fml.plの引数
 .key	:include:
 .key	onwer-list
-.label	calling-fml.pl
+.label	{calling-fml.pl}
 .seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
 
 fml.pl の中に変数は今はもうありません（fml 1.2）。
@@ -527,7 +554,7 @@ version依存だろう）でもできる
 
 
 .S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
-.label  calling-fml.pl-POSIX
+.label	{calling-fml.pl-POSIX}
 .key	POSIXなsetuid
 .key	POSIX
 .key	fml.plの起動のしかた
@@ -571,7 +598,7 @@ fml ができたら スーパーユーザー権限で
 
 
 .S	fml.plの呼び方 と OS一覧
-.label  calling-fml.pl-and-OS
+.label	{calling-fml.pl-and-OS}
 .key	OS_dependence
 
 INSTALLにOSのまとめ一覧があります。ご覧ください
@@ -608,7 +635,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 
 .S	コマンド専用のサーバ
-.label	control-addr
+.label	{control-addr}
 
 $CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
 別の汎用の仕方として、
@@ -627,7 +654,7 @@ $CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
 
 
 .S	まとめおくり
-.label	msend-0
+.label	{msend-0}
 .key	UNIX FROM
 .key	RFC934
 .key	RFC1153
@@ -671,7 +698,7 @@ Contrib/Matomeokuri-NOCRONの下に
 
 
 .S	コントロール専用アドレス
-.label	control-addr
+.label	{control-addr}
 .seealso calling-fml.pl
 .key	$CONTROL_ADDRESS
 .key	コマンド専用アドレス
@@ -753,7 +780,7 @@ lib Elena は 700、driver は755としておけば、
 .# ##########################################################
 .C	config.phの項目一覧
 .key	config.ph
-.label	config
+.label	{config}
 
 あくまで Advanced なので慣れてない人はデフォールトでもいっこう
 に構いませんし、この章は読み飛ばしていっこうに差し支えありません。
@@ -860,7 +887,7 @@ $USE_RFC934 = 0;		# まとめおくりで９３４フォーマット
 
 
 .S	デバッグモード
-.label	debug-mode
+.label	{debug-mode}
 
 デバッグモードのフラッグ。１がデバッグモード。配送以外のことは全部でき
 るので、テストに使って下さいませ。０にすると配送もするようになります。
@@ -924,7 +951,8 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 
 
 .S	自動登録した時にそのメールをフォワードするか否か？
-.label	auto-regist, auto-regist-3
+.seealso	{auto-regist}
+.seealso	{auto-regist-3}
 .key	$AUTO_REGISTERD_UNDELIVER_P
 
 	$AUTO_REGISTERD_UNDELIVER_P = 1;
@@ -960,7 +988,7 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 
 .# ##########################################################
 .C	自動登録
-.label	auto-regist
+.label	{auto-regist}
 
 
 .S	基本挙動
@@ -1017,7 +1045,7 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 
 
 .S	メンバーチェックはしないけど自動登録はしたくない(+ trick)
-.label	auto-regist-1
+.label	{auto-regist-1}
 .key	+
 .key	/etc/aliases＋アーカイブ
 
@@ -1038,7 +1066,7 @@ membersに
 .key	skip
 .key	s=skip
 .key	複数アドレスからの投稿だが受けは一つ
-.label	auto-regist-2
+.label	{auto-regist-2}
 
 自動登録では見知らぬアドレスは全部新しい人とおもってしまうのですが、少
 数の人だけが
@@ -1088,14 +1116,14 @@ $START_HOOK = q#
 
 
 .S	自動的に登録してそのままＭＬにフォワードする
-.label	auto-regist-4
+.label	{auto-regist-4}
 
 これが一番シンプルなやつですね。もともとＯＦＦ会用ＭＬなんです。
 ＃「いきます」メールがＭＬにながれると便利だから
 
 
 .S	自動登録モードだと最初のメールから全部流れてしまうのはちょっと…？
-.label	auto-regist-3
+.label	{auto-regist-3}
 .key	$AUTO_REGISTERD_UNDELIVER_P
 
 config.ph の中で 
@@ -1132,7 +1160,7 @@ config.ph では一応
 
 .# ##########################################################
 .C	ヘッダのカスタマイズ
-.label	header-custom
+.label	{header-custom}
 
 
 .S	ヘッダの形とadditionalなものをそのまま保存すること
@@ -1175,7 +1203,7 @@ $HEADER_ADD_HOOK = q#
 
 .S	MIME decodingを行なう
 .key	MIME
-.label	MIME-1
+.label	{MIME-1}
 
 summaryに書くsubjectをMIME decodeをしてから書き込むようにするなら１です。
 
@@ -1223,7 +1251,7 @@ RFC1522	2. Syntax of encoded-words
 
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
-.label	MIME-2
+.label	{MIME-2}
 .seealso MIME-1
 
 では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
@@ -1246,7 +1274,7 @@ RFC1522	2. Syntax of encoded-words
 
 
 .S	MIME decodeをするためのライブラリ libMIME.pl はどこにあるか？
-.label	MIME-3
+.label	{MIME-3}
 	$LIBMIMEDIR	= "$LIBDIR/contrib/MIME";
 					# location in libMIME.pl
 
@@ -1268,7 +1296,7 @@ mime_pls.doc   mimer.pl       mimew.pl
 
 
 .S	MIMEのカスタマイズ変数
-.label	MIME-customizing
+.label	{MIME-customizing}
 .key	$MIME_VERSION
 .key	$MIME_CONTENT_TYPE
 .key	$MIME_MULTIPART_BOUNDARY
@@ -1393,9 +1421,9 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 
 
 .S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
-.label	NIFTY
-.label	$AGAINST_NIFTY
-.label	against-nifty
+.label	{NIFTY}
+.label	{$AGAINST_NIFTY}
+.label	{against-nifty}
 
 注意：もう必要ないらしい
 
@@ -1538,7 +1566,7 @@ $SMTP_OPEN_HOOK .= q#
 
 .# ##########################################################
 .C	config.phのその他の設定
-.label	config-misc
+.label	{config-misc}
 .S	どのマシンのSendmailを使う？
 
 ・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
@@ -1687,7 +1715,7 @@ Subject: daa
 
 
 .S	まとめ送りのデフォールトを RFC1153 digest へ
-.label	RFC1153
+.label	{RFC1153}
 .key	RFC1153
 
 これは それぞれに通し番号をつけなければなりませんので、まとめおくりの
@@ -1711,7 +1739,8 @@ config.ph で $USE_RFC1153_DIGEST = 1; としてください。
 
 
 .S	コマンドのフック
-.label	command-hook, customize
+.label	{command-hook}
+.label	{customize}
 .key	$COMMAND_HOOK
 
 インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
@@ -1770,7 +1799,7 @@ config.ph で $USE_SJIS_in_ISH = 1; をセットしてください。
 
 
 .S	コマンドで単なるシンタックスエラーの警告をしない
-.label	USE_WARNING
+.label	{USE_WARNING}
 .key	$USE_WARNING
 
 明示的に $USE_WARNING をセット
@@ -1829,13 +1858,14 @@ $SECURITY_LEBEL < 2 では
 の両方を理解します。サーバが自動的に切替えます。
 
 
+
 .# ##########################################################
 .C	ファイルをまとめて操作する関数群(mget と まとめおくり)
 
 mget と まとめおくり はユーザーごとに これらの送り方が指定できます。
 
 .S	MIME/MultipartのBNF表現（RFC1521より）
-.label	MIME-Multipart
+.label	{MIME-Multipart}
 
    boundary := 0*69<bchars> bcharsnospace
 
@@ -1977,10 +2007,40 @@ End of GODAI BBS Digest V95 Issue #120
 ********************************
 
 
+.S	mget3 インターフェイス：パターンマッチ戦略
+.key	mget3
+.label	mget3
+
+	この時点で flock もはずれて、最後の最後
+	あとは、&Notify だけが残っている
+
+	MH風展開を実行
+		e.g. 1,last:30 -> 1,70-100
+
+	if V2 フォーマットでTRY
+		e.g.
+		spool/PLAIN-ARTITLE
+		archive/100.tar.gz 
+		等を探索
+		return
+
+	elsif ではそのパターンはアーカイブ？
+		ほとんど Exact にアーカイブ内を探索
+		return
+
+	elsif V1 format 探索もＯＫ？
+		なら、実行
+		return
+
+	else
+		NO MATCH or V1 FORMAT ERROR
+
+
+
 
 .# ##########################################################
 .C	フック、カスタマイズ（例を見る方がはやいかも）
-.label	customize
+.label	{customize}
 
 .S	インタプリタとconfig.ph
 .seealso	command-hook
@@ -2173,7 +2233,7 @@ $REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
 (.seealso REMOTE-ADMINISTRATION )をみてね
 
 
-.S	"# admin" アドミンの昔の呼出方。
+.S	"# admin" アドミンの昔の呼出し方
 
 lib/remote/REAMDE をみてもらうとわかりますね。 
 
@@ -2406,7 +2466,7 @@ fileはちゃんとインストールするべきだと思いますよ
 .key	seq
 .key	flock
 .key	lseek
-.label	seq-file
+.label	{seq-file}
 
 seq fileがこんなかんじに
 
@@ -2608,7 +2668,7 @@ private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
 
 .# ##########################################################
 .C	アーカイブ, Archive & Expire
-.label	archive
+.label	{archive}
 
 場所をとるから古い記事にはgzipかけたい。でも一つ一つやるより１００個ず
 つとかならさらに効率が上がります。以下を参照
@@ -2734,7 +2794,7 @@ Archive.pl が gzip化 のメインなのでこれのおき場所をちゃんとセットして
 
 
 .S	expire
-.label	expire
+.label	{expire}
 .key	$FML_EXIT_HOOK
 
 $FML_EXIT_HOOK = q#
@@ -2753,7 +2813,7 @@ cron で
 
 
 .S	expireを残すファイルの数で指定して行なう
-.label	expire_with_number
+.label	{expire_with_number}
 .key	$FML_EXIT_HOOK
 
 $FML_EXIT_HOOK = q#
@@ -2773,8 +2833,8 @@ cron で
 
 
 .S	expire.pl コマンドラインオプション
-.label	expire_getopt
-.label	expire.pl
+.label	{expire_getopt}
+.label	{expire.pl}
 .key	$FML_EXIT_HOOK
 
 expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
@@ -2790,7 +2850,7 @@ expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
 
 
 .S	newsyslogをする（デフォールト）
-.label	newsyslog
+.label	{newsyslog}
 .key	$NOT_USE_NEWSYSLOG
 .key	@NEWSYSLOG_FILES
 
@@ -2829,7 +2889,7 @@ ln -s members.bak 	var/log/members.0
 
 
 .S	newsyslogをしない
-.label	newsyslog-2
+.label	{newsyslog-2}
 .seealso	newsyslog
 .key	$NOT_USE_NEWSYSLOG
 
@@ -2840,7 +2900,7 @@ $NOT_USE_NEWSYSLOG = 1; なら実行しません
 .# ##########################################################
 .C	fml 本体一つで複数のメーリングリストを運用する
 .key	複数のメーリングリストの運用
-.label	plural-handling-1
+.label	{plural-handling-1}
 .seealso c-wrapper, calling-fml.pl
 
 
@@ -2855,7 +2915,7 @@ fml 本体は一つに済ませて、メーリングリスト毎に必要なファイルだけを分割
 
 
 .S	ひとつのfmlで複数のＭＬを扱う方法(fml.plの引数について)
-.label	plural-handling-2
+.label	{plural-handling-2}
 .seealso c-wrapper, calling-fml.pl
 
 まずconfigurationはfml.plの引数(/etc/aliases or fml(C wrapper))と
@@ -2914,7 +2974,7 @@ include する時は
 .S	ひとつのfmlで複数のＭＬを扱う方法(setuid programをばらばらに作る)
 .key	setuid-program
 .key	setuid-source-exapmles
-.label	plural-handling-3
+.label	{plural-handling-3}
 
 setuid program をばらばらに作ればいいわけです。
 ＃可変引数をとる setuid program は security hole になり得るからいちい
@@ -3067,7 +3127,7 @@ which とか
 
 .# ##########################################################
 .C	まとめおくり
-.label	msend-c
+.label	{msend-c}
 
 さらに詳しくは、lib/MatomeOkuri の下等も御覧下さい。
 
@@ -3075,7 +3135,7 @@ which とか
 .S	まとめおくり概論
 
 .S	まとめおくり	Release 1
-.label	matome-1
+.label	{matome-1}
 .http lib/MatomeOkuri/README
 .key	msend.pl
 
@@ -3103,7 +3163,7 @@ Contrib/Matomeokuri、Contrib/Matomeokuri2、の下に一式コードが入ってい
 
 
 .S	まとめおくり	Release 4
-.label	matome-3
+.label	{matome-3}
 .key	MSendv4.pl
 .key	crontab	
 .key	MatomeOkuri-ctl.sh
@@ -3225,7 +3285,7 @@ gzipかけずに送ることもできます。(u option)
 			
 
 .S	CRON(Systemのcron)を使わないまとめおくり その1
-.label	Matomeokuri-not-cron_1
+.label	{Matomeokuri-not-cron_1}
 .key	Matomeokuri-not-cron_1
 .key	store-and-deliver.ph
 .key	store-and-deliver.pl
@@ -3267,7 +3327,7 @@ store-and-deliver.pl がINCLUDE PATH のどこかにいれて、
 
 
 .S	CRON(Systemのcron)を使わないまとめおくり その２
-.label	Matomeokuri-not-cron_2
+.label	{Matomeokuri-not-cron_2}
 .key	Matomeokuri-not-cron_2
 .key	cron.pl
 
@@ -3312,7 +3372,7 @@ cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
 
 
 .S	cron.plを使う際の注意
-.label	Matomeokuri-not-cron_2fix
+.label	{Matomeokuri-not-cron_2fix}
 .key	Matomeokuri-not-cron_2fix
 .key	cron.pl
 
@@ -3334,7 +3394,7 @@ crontab をユーザー毎に設定できないＯＳへの対応です。
 
 
 .S	まとめおくりだと３００行越えちゃいますけど？（まとめおくり Rel.1）
-.label	msend-1
+.label	{msend-1}
 
 ＃いまどき３００行は関係ないと思うぞ＞おれ。ＮＩＦだって３０００かな？
 
@@ -3357,7 +3417,7 @@ MSendv4.pl は config.ph の$MAIL_LENGTH_LIMIT = 1000; を見ています。こ
 
 
 .S	まとめおくりで３時間おきとかはどうしましょう？（まとめおくり Rel.1）
-.label	msend-2
+.label	{msend-2}
 
 Ｒ４を使うというのが前向きですが。１、２でやりたいなら
 
@@ -3378,7 +3438,7 @@ fi
 
 
 .S	まとめおくりで１、３、６時間おきとか任意時間選択したい（まとめおくり Rel.4）
-.label	msend-3
+.label	{msend-3}
 
 version 3 ならユーザーに自分がＮ時間おきに配送してほしかったら
 コマンド "# matome N（数字）" を使ってもらえばいいだけです。
@@ -3428,7 +3488,7 @@ MSendv4.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
 
 
 .S	概論
-.label	forward-intro
+.label	{forward-intro}
 
 理屈は簡単です。~/.forward もsendmailは/etc/aliasesと同様に
 実行されます。だから
@@ -3455,7 +3515,7 @@ fml.plの設定を /etc/aliases への設定(上述)と同様にすればＯＫです。
 .S	MH インターフェイス
 .key	slocal
 .key	.maildelivery
-.label	slocal-1
+.label	{slocal-1}
 
 ここでは slocal を用いたやりかたを述べます。
 
@@ -3490,7 +3550,7 @@ default  -       >       ?      /var/mail/fukachan
 .S	ローカル配送のためのインターフェイス(libexec/fml_local.pl)
 
 .S	libexec/fml_local.pl
-.label	libexec/fml_local.pl
+.label	{libexec/fml_local.pl}
 .key	libexec
 .key	libexec/fml_local.pl
 .key	fml_local.pl
@@ -3512,7 +3572,7 @@ slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 .C	libexec/fml_local.pl マニュアル
 .key	libexec/fml_local.pl manual
 .key	manual of libexec/fml_local.pl
-.label	manual of libexec/fml_local.pl
+.label	{manual of libexec/fml_local.pl}
 
 .S	~/.forward
 
@@ -3521,29 +3581,90 @@ slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 
 とか書いて使います。usename はあなたの account名です。
 
-.S	~/.fmllocalrc
+
+.S	~/.fmllocalrc 1
 
 fml_local.pl は ~/.fmllocalrc で制御します。
-最後にマッチするエントリを実行します。
 
-# ではじまる行はコメントです。
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+	“最後にマッチするエントリを実行します”
+
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+また # ではじまる行はコメントです。空行は無視して次へいきます
+
+
+.S	~/.fmllocalrc 2
 
 デフォールトは自分のスプールへ、そしてローカルなＭＬの配送はスプールへ
 落すようにセットしてループしないようにするべきです。
+
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+だから、最後に必ず
+
+From		自分	&	MailLocal
+X-MLserver 	\S+	& 	MailLocal
+
+のエントリをかくことがループを防ぐためにもっとも大事になります
+さらに、ＭＬをやるときは
+From		自分	&	MailLocal
+
+ＭＬの設定
+
+X-MLserver 	\S+	& 	MailLocal
+
+のように 挟んでください。そうしないと自分ではＭＬへ投稿できません（笑）
+＃後にあると From がマッチしてしまう
+	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+
+
+.S	~/.fmllocalrc 3
 
 ４つの変数が スペース で区切ってやってほしいことをかきます。
 「フィールド パターン 実行のタイプ 実行すること」
 
 それ以外に変数を定義できます。それらの変数は 実行内容の中で展開して使
-われます。セットされる変数は、一覧（@VAR の中身）：
-    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
-	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
-	    MAINTAINER);
-
-です。
+われます。
+セットされる変数一覧（@VAR の中身）は後述します(.seealso fml_local-var )
 
 
-.S	~/.fmllocalrc の例
+.S	正規表現
+
+以下で実際に出てくる基本的な表現だけをすこし説明します。
+
+○ . なんでもいいから一文字
+○ \s 空白文字 e.g. space TAB 
+○ \S は空白でない文字
+○ + は１個以上、* は０個以上です。
+
+○ ()でくくったものがマッチしたもので fml_local.pl では
+左から順番に グローバル変数 $F1 $F2 $F3 にセットされます
+
+	to	(uja)		|	$DIR/fml.pl $DIR $DIR
+
+To: フィールドのどっかに uja という文字列があれば、それにマッチする
+
+	to	\(uja\)		|	$DIR/fml.pl $DIR $DIR
+
+uja ではなく (uja)  にまっちします。
+
+○“１個以上の空白でない文字”
+	Subject	get\s+(\S+)	&	sendback
+
+	Subject: get GUIDE FILE の GUIDE だけにまっち 
+
+○“０個以上のなんでも”
+
+	body	get my spool (.*)	& 	getmyspool
+
+メール本文に 
+	get my spool uja uja
+とあれば、"uja uja" の部分を $F1 にセットします。.* だからスペースにも
+マッチしてます。これでパスワードに空白も使えると
+
+
+S	~/.fmllocalrc の例
 
 ＭＬをセットする ~/.fmllocalrc の例：
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
@@ -3551,14 +3672,11 @@ DIR	/usr/local/fml
 
 From		fukachan	&	MailLocal
 
-to		(uja)		|	$DIR/fml.pl $DIR $DIR
+to		\(uja\)		|	$DIR/fml.pl $DIR $DIR
 
-to		(sayori)	|	$DIR/fml.pl $HOME/var/sayori $DIR
+to		\(sayori\)	|	$DIR/fml.pl $HOME/var/sayori $DIR
 
-X-MLserver	.*		&	MailLocal
-
-# default	anything 
-default		.*		&	MailLocal
+X-MLserver	\S		&	MailLocal
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
 で、To: username@somewhere.jp (uja) というメールがきたら
@@ -3603,17 +3721,24 @@ default		.*		&	MailLocal
 これはパスワードを必要とするようなものは、本体でパスワードを書くべきで
 す。エラーメールではヘッダはまるみえですから
 
-body	getmyspool\s+PASSWD	&	getmyspool
+body	getmyspool\s+(\S+)	&	getmyspool_pw
 
-とか設定すれば、NIFTY から会社の自分のスプールの内容を夜中に読むとかが
+とか設定すれば、Providerから会社の自分のスプールの内容を夜中に読むとかが
 できるようになります。
 例：
 % echo "getmyspool password-is-required" |Mail 自分のアドレス
 
 
 .S	変数’ｓ
+.label	fml_local-var
 
 もし変数を明示的にセットしないときは適当な値がデフォールト設定されます。
+
+    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
+	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
+	    MY_FUNCTIONS);
+
 
 # USER	-user fukachan で設定する変数と同じ意味
 USER	fukachan
@@ -3636,6 +3761,40 @@ MAIL_SPOOL	/var/mail/fukachan
 
 # デバッグモード
 DEBUG
+
+# From: であり、エラーメールが返る場所。もっともふつう〜は
+# 自分自身以外に設定仕様がないですね
+MAINTAINER 	fukachan@phys.titech.ac.jp
+
+# From: in MAINTAINER's SIGNATURE
+# From: $MAINTAINER ($MAINTAINER_SIGNATURE) になる
+# e.g. 返るメールのFrom:が、
+# From: fukachan@phys.titech.ac.jp (Prisoner No.6 Fukachan)
+# になる
+MAINTAINER_SIGNATURE	Prisoner No.6 Fukachan
+
+# ログファイル デフォールトは ~/log
+LOG		$HOME/work/fml/log
+
+# パスワード
+PASSWORD	uja uja 
+
+# get とかで使う アーカイブの置き場所。もし設定してないと HOME
+ARCHIVE_DIR	/home/uja/uja/work/archive
+
+# Vacation program compatible で vacation の働きもする。
+VACATION	/home/uja/uja/.vacationrc
+
+# フィールドセパレータを変更する
+FS	\s+
+
+FS	:
+とすれば、.fmllocalrcの設定は From:fukachan:&:MailLocal とかくことになる
+
+# ユーザーが自分用に設定した関数を 別のファイルにしまいたいなら
+# そのファイル名を設定する。デフォールトは ~/.myfunctions.pl
+MY_FUNCTIONS	/home/your-function-file
+
 
 
 .S	フィールド パターン 実行のタイプ 実行すること
@@ -3690,6 +3849,7 @@ Subject		get\s+(\S+)	|	/usr/bin/Mail -s $F1 $From_address
 
 to		(uja)		|	$DIR/fml.pl $DIR $DIR
 
+
 # これは最後にマッチするべき、これで絶対にループしないはず
 # MailLocal は
 # (/usr/libexec/mail.local にならう)
@@ -3697,12 +3857,523 @@ to		(uja)		|	$DIR/fml.pl $DIR $DIR
 # From:fukachan の場合、From:fukachan@phys.titech...もマッチする
 # From		fukachan	&	MailLocal
 # もし ML からきたら、ローカルにおとす
-X-MLserver	.*		&	MailLocal
+X-MLserver	\S		&	MailLocal
 
-
-# default	anything 
-default		.*		&	MailLocal
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	ファイルを送り返す用にする設定の例
+
+~/.fmllocalrc
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+# Subject: get ファイル名
+# アーカイブの“ファイル名”のファイルを
+# Reply-to: へ もしなければ From: へ送り返す
+
+Subject         get\s+(\S+)     	&	sendback
+
+# Subject: GUIDE
+# アーカイブの ファイル GUIDE を
+# Reply-to: へ もしなければ From: へ送り返す
+
+Subject         (GUIDE)  	   	&	sendback
+
+# メール本文に "getmyspool パスワード" とかいて
+# 家から (大学|会社)のメールスプールを 家に送ってもらう
+# 一応スプールのメールは消さない
+# Reply-to: へ もしなければ From: へ送り返す
+
+body            getmyspool\s+(\S+)	&	getmyspool_pw
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	BUILD-IN Functions
+
+ sendback
+     内部定義関数としては &sendback(ファイル) は
+     ファイル を送り返します
+     引数なしに sendback を使うと
+        e.g. .fmllocalrc で from uja & sendback
+     正規表現でマッチした第一フィールドのファイルを送り返す
+     .fmllocalrcの例:
+     subject get (\S+) & sendback
+ 
+ getmyspool_nopasswd
+     メールスプールを送り返します
+     パスワードは必要ありません。
+     内部定義関数として使うべきです
+ 
+ getmyspool 
+     メールスプールを送り返します
+     正規表現でマッチした第一フィールドをパスワードとして認証します
+     認証した場合 送り返します。
+    .fmllocalrcの例:
+    body get my spool (\.*) & getmyspool
+ 
+ forward
+     メールを特定のアドレスへフォワードする
+     アドレスは forward の後に空白で続けて 
+     \@OPT の中に入ってます。
+     簡単なメーリングリストですね
+    .fmllocalrcの例:
+    To (uja) & forward address-1 address-2 ..
+ 
+ 
+ ALIASES:
+ getback       は sendback と同じ
+ 
+ getmyspool_pw は getmyspool と同じ
+ 
+
+
+.# ##########################################################
+.# Mariel
+.C	SID ( Listserv もどき コマンド インターフェイス )
+.ST	- Subscription and Information request Detector(or Daemon) -
+.label	{SID}
+
+
+以下、SID インターフェイスは SID, 
+SID がmanageすべき おのおののＭＬは単にＭＬとかＭＬサーバとかの単語を
+使います。
+
+なお以下 setuid wrapper じゃなくて :include:形式で説明します。
+.seealso c-wrapper,:include:
+
+fmlのソース/lib/perl には fml共通で使うperl scriptsが入っていますが、
+/usr/local/fml におくことにします。
+
+
+.S	SIDのインストール
+.key	SID:install
+.label	SID:install
+
+例：
+SID@phys.titech.ac.jp を設定するために
+
+		/usr/local/SID
+
+にfmlのソースを広げることにします。
+
+/usr/local/SID/libexec/sid.pl が本体です。
+/usr/local/SID/etc/sid.ph     がsid.phの見本で
+/usr/local/SID/etc/sidrc      がＭＬの設定ファイルの見本です。
+
+/usr/local/SID/lib/perl にはよく使いそうな perl scripts のリンクがはっ
+てあります。このdirectory を /usr/local/fml とか スクリプトだけの専用
+のdirectory へまとめておくと、 version up の時も便利です。
+もちろん sid.pl もそのなかに混ざっています。
+
+/etc/aliases に
+
+	SID::include:/usr/local/SID/driver
+
+/usr/local/SID/driver の中身は
+
+	"|/usr/local/fml/sid.pl /usr/local/SID /usr/local/fml"
+
+つまり、 fml の普通のインストールのやりかたと同じです。
+
+○ sid.ph の help ファイルの位置とかヘッダの変数設定をいじります。
+
+重要なのは、この２つです。
+＃あとはデフォールトでほっときゃいいです
+
+SID がリクエストメールをうけるアドレス
+	$MAIL_LIST	= 'sid@beth.phys.titech.ac.jp';
+
+SID サーバの管理者。エラーメールが返る場所
+	$MAINTAINER	= 'Elena@phys.titech.ac.jp';
+
+
+○ sidrc には、
+ＭＬのdirectryとspoolなど  MLのaddress  "lists"コマンドでの一行紹介文
+
+sidrc の例：
+# directory		   ML name	description of ML(one line)
+/usr/local/ml/enterprise   enterprise	Discussion on Startrek
+/usr/local/ml/freekick	   freekick	Discussion on Ashita he Freekick
+		………
+
+SID の基本設定はここまでです。以下は、
+普通に fml が動くための設定をしてください。つまり
+/usr/local/ml/enterprise の下の
+
+	/usr/local/ml/enterprise/config.ph 
+
+の設定をして、/etc/alaisesに
+
+	enterprise::include:/usr/local/ml/enterprise/driver
+
+	/usr/local/ml/enterprise/driver は
+	"|/usr/local/fml/fml.pl /usr/local/ml/enterprise /usr/local/fml"
+
+みたいに設定してください。
+
+
+.S	SID ：イントロダクション
+.key	SID:intro0
+.label	SID:intro0
+
+SID インターフェイス は あるマシンにさわらずに、
+
+	完全にリモートで管理する人
+	そのマシンにアカウントはあるが、サーバの設定はいじらない
+	そのマシンにアカウントもあるし、サーバもいじる
+
+これらの ＭＬ管理者のための、Listserv-Likeなインターフェイスです。
+インストールは上のセクションを見てください。Directory構成等は上に習い
+ます。
+
+
+.S	SID の動きの基本原理：イントロダクション
+.key	SID:intro
+.label	SID:intro
+
+例：	例として SIDは
+
+	enterprise@phys.titech.ac.jp
+	freekick@phys.titech.ac.jp
+
+の２つのＭＬの面倒を見るインターフェイスとします。
+
+	enterprise@phys.titech.ac.jp
+		は
+	/usr/local/ml/enterprise というdirectory 
+
+	freekick@phys.titech.ac.jp
+		は
+	/usr/local/ml/freekick という directory 
+
+にそれぞれのＭＬのconfig.phとかhelpとかスプールがあるとします。 
+この場合、SID は次のように動きます。
+
+単なる help リクエストに対しては、   SID は 
+	/usr/local/SID/help 
+を送り返します。
+
+	subscribe enterprise 
+
+というリクエスト(enterprise というＭＬへのリクエスト)に対しては、   
+	
+	/usr/local/ml/enterprise/actives(もしメンバーチェックするなら)
+と
+	/usr/local/ml/enterprise/members（自動登録だとこっちだけ）
+
+にリクエストをうけたアドレスを付け加えます
+
+	info freekick
+
+というリクエスト(guide freekick も同じ)に対しては、 
+
+	/usr/local/ml/freekick/guide
+
+を送り返します。
+ＭＬごとに管理者の人が guide を書きたいでしょうから、
+その辺は、各ＭＬの管理者の人が工夫を懲らしてください(^^)
+注意：guide とか members は rw-rw--- で設定されている必要があります
+
+なお、使えるコマンドは fml で使えるすべてのコマンドおよび、
+SIDで付け加えられているコマンド群（以下で説明します）です。
+
+
+.S	SID の動きの基本原理：ＭＬごとへの制御切替え…
+.key	SID:intro2
+.label	SID:intro2
+
+
+ログファイルについて、説明を。
+SID がだすログは 
+
+	/usr/local/SID/log 
+
+にでますが、
+＃sid.ph の $LOGFILE で変更できます。
+
+	guide list
+	mget  list last:10 mp 
+
+みたいな 各ＭＬごとに実行されるコマンドの場合
+その各ＭＬごとのconfig.ph で決められたログファイルにもログは残ります。
+
+実は、各ＭＬごとのコマンドを実行するときは、それぞれのＭＬが独立に動く
+のと同じなので、ログファイルをはじめ、細かい設定はすべて 各ＭＬの管理
+者の胸算用に任されることになります。
+＃だから、各ＭＬごとのログは 各ＭＬのconfig.ph で決められます。
+
+
+.S	SID で新しいＭＬを作る例
+.key	SID:new-ml
+.label	SID:new-ml
+
+ＭＬのDirectoryは sidrcに書くので どこでもいいんですが、ここでは 
+/usr/local/SID の近くにしておきます。
+/home/axion/fukachan/work/spool/ml/uja/ みたいに遠くとかでも
+/usr/local/SID/ML/uja とかでももちろん構いません。
+
+	/usr/local/ml/uja
+
+に作るとしましょう。この場合
+/usr/local/ml/uja/config.ph がＭＬのconfiguration file
+/usr/local/ml/uja/help,	/usr/local/ml/uja/guide等…
+そして /usr/local/ml/uja/spoolが記事の置き場所になります
+
+	SID/sidrc に
+
+	/usr/local/ml/uja	uja	info-of-uja(一行説明)
+
+/usr/local/ml/uja/ の下のファイル、config.ph や members が
+/usr/local/ml/uja の管理者のuid と SIDを管理する人のuid 
+両方で読み書きできるようになっていることを確認してください。
+
+で、おしまいです。
+
+SIDのコマンドにパスワードを要求するなら
+
+	/usr/local/ml/uja/etc/passwd の中身が
+	「ujaの管理者のEmailアドレス	パスワード」
+
+というのを設定してください(.seealso set-passwd)。
+
+ここからは、通常の fml のインストールとおなじになります。
+/usr/local/ml/uja/config.ph 	を設定してください。
+＃ /usr/local/ml/uja/ で、EacyConfigure.euc とかを走らせて対話的に設定
+＃というのもあります
+
+最初の３つの変数の設定して、 ＯＫなら、$debug=0; にして運用へ入ってく
+ださい。
+
+
+.S	SID での permission 問題
+.key	SID:permission
+.label	SID:permission
+
+
+上で述べたようなアクションを実行するためには、
+次の permission 問題をクリアする必要があります。
+
+すべて、SID をインストールする人がすべてのＭＬの面倒を見るのなら、
+
+つまり、 /usr/local/SID /usr/local/ml 以下すべてその人の持ちもので600
+or 700 にしてあるなら、
+
+その人の uid で、600, や 700 でファイルのモード設定をしておけばいいの
+ですが、
+
+他にＭＬごとに、それぞれの管理者がいじりたいことがあれば、ＭＬは本来、
+そのＭＬの管理者のユーザーの uid にセットしてその人しか読めないように
+してあるべきですよね。
+
+でも、 SID が enterprise/members に書き込めたりする permission がどう
+しても必要になります。
+＃で、どうしてもこうするしかなくなります;_;
+
+	uid は sid.pl,sid.ph,sidrc 等を設定する人のもの。
+	彼以外の人のために SID とかの group を /etc/group に作って、 
+	gid を設定する。
+
+% chown uid.gid /usr/local/SID/driver
+% chmod 700 /usr/local/SID/*
+% chmod 660 /usr/local/ml/enterprise/actives
+% chmod 660 /usr/local/ml/enterprise/members
+% chmod 640 /usr/local/ml/enterprise/guide
+
+みたいに、uid, gid で読み書きが出来るようにする必要があります。
+
+
+.S	ヘルプ for [ SID fml Listserv-like インターフェイス ]
+.label	SID:help
+.key	SID:help
+
+コマンド専用のサーバなので、
+
+	# help
+	#help
+	help 
+
+は同じです（つまり、#のあるなし、その位置はどうでもいい）。
+なお以下で[] はオプショナルを意味しています
+
+“list” は Mailing list 名のことです。
+この list は Mailing list のドメイン名を抜いた名前で指定してください
+
+つまり、ＭＬが enterprise@phys.titech.ac.jp なら
+
+	info enterprise
+
+のようにコマンドを使ってください。
+
+======================================================================
+SID インターフェイス固有のコマンド
+
+help	
+	このヘルプ
+
+guide	
+info
+	このSID インターフェイスの ガイド or インフォメーション
+
+end	
+exit
+quit
+	コマンドの終り（Signature あっても大丈夫）
+
+
+which [address]
+	あなた（または明示的に addressの人）は どこのＭＬに登録されているか？
+
+lists
+	SID インターフェイスからアクセスできるＭＬ群のリスト
+	とおのおのの一行インフォメーション
+	その場で /usr/local/SID/sidrc から生成しています。
+	第２フィールド以降がlistsに使われます。
+
+subscribe list [address]
+	Subscribe 命令
+	もし、自動登録に設定してある list なら自動的に登録を
+	もし、自動登録でないなら そのＭＬの管理者へメールをリクエスト
+	のメールをフォワードして終わり（それ以上なにもしない）
+
+unsubscribe list [address]
+	Unsubscribe 命令
+	自動的に実行する。これは fml での通常の bye に相当します。
+ 
+	“コマンド list …”シンタックス はすべて普通のfmlのコマンドを
+	実行しているだけです。次のセクションを参照してください
+
+
+.S	SID インターフェイスから呼ぶ各ＭＬのコマンド
+
+これらは、すべて、
+
+	コマンド  ＭＬアドレス（ドメイン名はなし） コマンドのオプション引数
+
+の形です。もしその形式のコマンドが与えられた場合
+
+	そのＭＬ（ＭＬアドレスで指定）で
+	“コマンド  コマンドのオプション引数”
+	の実行
+
+に解釈しなおして、各ＭＬのコマンドを実行します。
+よって、fml のすべてのコマンドが使えます。
+
+例えば、
+	get enterprise 100
+は
+	% echo "# get 100" | Mail enterprise@phys.titech.ac.jp
+と同じに解釈しています。
+
+
+.S	lists コマンド
+.key	lists
+.key	SID:lists
+.label	SID:lists
+
+/SID's_Directoy/sidrc から生成しています。
+第１フィールドが、Directry名 第２フィールド以降がlistsと同じ
+
+sidrc の例：
+# directory		ML name		descriptio of ML(one line)
+/usr/local/ML/Freekick	Freekick	Discussion on Ashita he Freekick
+
+返ってくるメールの例：
+>>> sid:lists
+
+List           	Info
+--------------------------------------------------
+Freekick	Discussion on Ashita he Freekick
+
+
+.S	which コマンド
+.key	which
+.key	SID:which
+.label	SID:which
+
+各ＭＬの members に総辺り戦をして、メンバーかどうかを判定します。
+だから、read permission が必要です。
+
+返ってくるメールの例：
+>>> sid:which
+
+List           	Address
+--------------------------------------------------
+freekick       	fukachan@phys.titech.ac.jp
+enterprise     	fukachan@phys.titech.ac.jp
+uja     	fukachan@phys.titech.ac.jp
+
+
+
+.S	Approve と Admin 
+.label	SID:approve
+.key	SID:approve
+.key	Approve_and_Admin
+.seealso	admin:approve
+
+	approve list password ls 
+
+みたになシンタックスは、各ＭＬへ制御が渡った後実行されるのと同じなので、
+実は、普通の fml のリモート管理の 
+
+	approve password ls 
+
+とおなじです。
+
+
+.S	おまけ：SID メカニズム詳解
+.key	SID:mechanism
+.label	SID:mechanism
+
+基本概念は、受けたコマンドを、
+
+	・SIDが処理するのか？ 
+	・ある list へのコマンドリクエストなのか？
+		リクエストできる list は 
+		/SID-directory/sidrc にあらかじめ設定されている
+		listに対してのみOK
+
+を判別しておく。で、そのあとおもむろに処理を実行する。
+
+
+メール	→	SID@axion.phys.titech.ac.jp 
+		list@axion.phys.titech.ac.jp 形の
+		fml ML群へのコマンドを全部
+		コントロールするインターフェイス
+
+			SIDで処理するコマンドを処理
+			e.g. help, lists, which, ...
+
+			一方 list毎に何をすべきかチェック
+			e.g. index list, get list 100, ...
+
+		→	
+			for each list in コマンド
+			do
+			   listでのコマンド実行
+			   e.g. index, get 100, ...
+			done
+
+
+.S	SID の語源
+
+いわずとしれた（笑）、あれです。
+トップをねらえ とか トップをねらえの元ネタではありません。
+じゃなくて、あれです（わかる人はわかる、ははは うじゃ）
+
+はっきりいって、“むりやりなね〜みんぐ” です:-)
+＃ほら、来る何かを待ち構えてるところが同じでしょ(^^)
+
+
+.S	このSIDの章へのつけたし
+
+たぶんＭＬ群のスプールを置くのに妥当なのは 
+	/usr/local/ml
+じゃなくて、
+	/var/local/ml
+でしょうね〜。	＃ 4.4BSD
+
+でも、上ではわかり安くするために、usr にしてあります
+
 
 
 
@@ -3759,7 +4430,7 @@ Decodeしてしまうなら、
 
 .# ##########################################################
 .C	リモート管理
-.label	REMOTE-ADMINISTRATION
+.label	{REMOTE-ADMINISTRATION}
 .key	$REMOTE_ADMINISTRATION
 
 
@@ -3773,20 +4444,24 @@ Decodeしてしまうなら、
 いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
 (libfml.pl 1.5.2 から)
 
+以下に出てくる $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は、
+REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
+＃Backward compatible にしてあるので、どっちの変数でもOKですが
+
 
 .S	カスタマイズできる変数
 
-管理者のリスト
+リモートで管理者になれる人のリスト
 
 	$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
 
-管理者のコマンドのヘルプ
+このリモート管理サーバのコマンドのヘルプ
 
 	$ADMIN_HELP_FILE	= "$DIR/help-admin";
 
 もし、リモートの管理者にパスワードを要求するなら、
 
-	$REMORE_AUTH = 1; 
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; 
 
 ０にすれば パスワードチェック をおこなわない設定です
 
@@ -3794,6 +4469,39 @@ Decodeしてしまうなら、
 
 	$PASSWD_FILE = "$DIR/etc/passwd";
 
+注意：
+$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は
+REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
+＃Backward compatible にしてあるので、どっちの変数でもいいんですけど
+
+
+.S	ログファイルがＭＬ本体と管理者コマンドで同じなんだけど…
+
+ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってるん
+ですよね。分けた方がいいのかなぁ？？？
+
+もし変えたいなら
+libhml.pl で こうなってますんでいじってください
+      if(/^admin$/io) {
+	  # if you would like to change logfile for admin commands.
+	  # $LOGFILE	= "$DIR/log-admin"; 
+
+
+.S	approve password command SYNTAX
+.key	{approve}
+.key	{for SID approve}
+.label	admin:approve
+
+どっちもどっちですが、
+・password認証して、その後は全部認証したものとみなす
+
+・毎回 password を書く 
+
+＃どっちもそれなりに面倒くさいが…
+
+ようは 毎回 password を書く っとことです。
+で、これは Listserv もどきインターフェイス拡張のために付け加えられました
+(.seealso SID, SID:approve)
 
 
 .S	アドミンモードでのアドレスの複数マッチ問題について 
@@ -3813,14 +4521,128 @@ fukachan@uja.aoi.chan.panic
 つまり、上の両方のアドレスを一気に消して、新しく add したりできるわけです。
 
 
+.S	アドミンのコマンド一覧
+
+# admin pass パスワード（もしパスワードを必要とする設定なら）
+# admin passwd 新しいパスワード（もしパスワードを必要とする設定なら）
+# admin help		管理者コマンドヘルプを取り寄せる（このファイル）
+# admin log		ログを取り寄せる
+# admin add address	address の人をＭＬに登録する
+# admin off address	address の人をＭＬ一時おやすみにする
+# admin on address	address の人のＭＬ一時おやすみを解除
+# admin bye address	address の人をＭＬメンバーから削除
+# admin addadmin address
+# admin addpriv  address	address の人を管理者メンバーとして登録
+# admin byeadmin address
+# admin byepriv  address	address の人を管理者メンバーから削除
+# admin dir		ＭＬのある場所の階層全部のリスト（ls -lR）
+# admin ls options	ＭＬのある場所のリスト（ls）
+# admin ls -l
+# admin ls -l spool	のようにオプションも可
+# admin remove filename	ＭＬのある場所の filename というファイルを削除
+# admin get filename	ＭＬのある場所の filename というファイルをとってくる
+# admin put filename	ＭＬのある場所の filename というファイルを置く。
+# admin rename filename1 filename2 
+		filename1 というファイルをfilename2 という名前にする
+
+
+.S	アドミンのコマンド一覧(approve) 2
+.label	admin:approve-2
+
+# approve password commands 
+
+は ２行分
+
+# pass  password
+# admin commands
+
+と同じです。全部上のコマンドで # admin を # approve password に置き換
+えれば同じです。
+
+
+.S	パスワードファイルの設定
+.label	set-passwd
+
+fmlのソース/bin/passwd.pl 
+
+っていうのがあります。使い方は、
+
+passwd.pl [-p password-file] username new-password
+
+例：
+% passwd.pl fukachan@phys.titech.ac.jp uja
+で、
+
+fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
+
+こういう fukachan@phys.titech.ac.jp 用のエントリを 
+
+	fmlのソース/etc/passwd
+
+につくります（デフォールト）。もし、他の場所なら 
+
+% bin/passwd.pl -p /some/directory/passwd fukachan	uja
+
+のように -p オプションで指定してください。
+
+
+.S	パスワード設定：昔のドキュメント採録：
+
+＃lib/remote/README に １例が詳しく書いてありますんで、そちらも参照く
+＃ださい。(Written by oota@pes.com1.fc.nec.co.jp)
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+passwdの作り方書いてなくて、、もうしわけないです。
+
+＜初期パスワードのつくりかた＞
+passwdの文字列を uja とすると（１１という数字に意味はない、なん
+か適当は数字です、ＤＥＳのアルゴリズムの番号です）
+% perl -e 'print crypt("uja", 11)' 
+のOUTPUT をencrypted passwdとして使って下さい
+
+etc/passwd の中身のシンタックス（デフォールト）は
+mail-address	encrypted-passwd 
+です。
+ 
+初期パスワードをなんらかの形で相手に与えてすぐに変えてもらうこ
+とが重要でしょう
+＃できればメールでなく電話とかがいいんだろうなぁ
+ 
+mailの エラー時 ヘッダしか普通はpostmasterにはいきません。
+本文にパスワードを書くようにしたのはそのためですが、
+運悪くいってしまうかもしれません。気をつけて下さい。
+＃securityはｓｍｔｐもｔｅｌｎｅｔもどっこいどっこいってか;-)
+
+% chmod 600    etc/passwd
+% chown 管理者 etc/passwd
+もわすれずに
+
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+.S	Ｃｌｉｅｎｔ インターフェイス
+
+FmlRemoreControl はリモートでＭＬをコントロールするためのインターフェ
+イスです。
+Bourne Shell script です。
+先頭の ML というとこをろＭＬのアドレスにして使って下さい。
+INPUT したコマンドをＭＬに投げます。
+
+INPUT> ls
+
+    は
+
+% echo "# admin ls" | mail -v $ML
+
+と同じです
+
+
 
 
 .# ##########################################################
 .C	misc
-.label	misc
+.label	{misc}
 
 .S	はやりのＭＩＭＥ対応については？
-.label	MIME-extension
+.label	{MIME-extension}
 .seealso	MIME-1, MIME-2, MIME-3
 
 MIMEまわりは↑を御覧下さい。すべてperlだけで処理しています
@@ -3967,7 +4789,7 @@ lib/Utilitites/packmbox.pl を使って、
 .S	複数アドレスから投稿したいがうけとりは一つ( "# skip" )
 .key	skip
 .key	noskip
-.label	skip
+.label	{skip}
 
 複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい。
 ＃この１週間だけこのアドレスも使いたいしぃ〜とかの場合にも効果的です
@@ -4015,7 +4837,7 @@ fukachan@phys.titech.ac.jp	skip
 
 
 .S	.forwardでのＭＬ	その２
-.label	dot-forard
+.label	{dot-forard}
 .key	.forwardでのＭＬ
 
 どういうケースが考えられるかよくわからないので、こんなのを考えてみました
@@ -4103,8 +4925,35 @@ rosy:uja
 
 
 
-.S	自動送り返しサーバってどう実装してるんですか？
-.key	自動送り返しサーバっ実装例
+.S	自動送り返しサーバってどう実装してるんですか？ その１
+.key	自動送り返しサーバっ実装例１
+
+なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
+で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
+＃いままで、きづかなかった…
+
+ポイントは、“$START_HOOK にしかける”ってところですね。
+
+例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+$MAIL_LIST	= 'fml@phys.titech.ac.jp';
+$ML_FN		= '(fml recent infomation)';
+$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
+
+$FML            = '/home/axion/fukachan/work/spool/EXP';
+$GUIDE_FILE	= "$FML/doc/INFO";
+$LOGFILE	= "$FML/doc/fmlinfo-log"; # activity log file
+
+$START_HOOK =q#
+	$GUIDE_REQUEST = 1;
+#;
+
+1;
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+.S	自動送り返しサーバってどう実装してるんですか？ その２
+.key	自動送り返しサーバっ実装例２
 
 設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
 てくるのですが、こういったものを作るには、どのような設定をすればいい？
@@ -4251,6 +5100,31 @@ sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
 一通にまとめられます。
 
 
+.# ##########################################################
+.C	ユーザーインターフェイス
+
+.S	MH scan.format (lib/Utilities/scan.format)
+.label	scan.format 
+.key	scan.format 
+.key	lib/Utilities/scan.format
+
+暗号のようですが、ポイントは今レジスターに何が入っているかと、
+if	%<
+elif	%?
+else	%|
+fi	%>
+です。
+
+X-ML-Name: とかと名前が違うフィールドは ↓この辺を
+
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+
+X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
+適当に増やして、適当に増やしてください。
+
+%?(match NetBSD.ORG)NetBSD\
+
+
 
 .# ##########################################################
 .C	Library 一覧
@@ -4258,7 +5132,7 @@ sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
 
 
 .S 	MatomeOkuri まとめ送り Ｒｅｌｅａｓｅ　１
-.label	msend-dir
+.label	{msend-dir}
 .seealso	matome-1
 
 まとめ送り Ｒｅｌｅａｓｅ　１
@@ -4285,8 +5159,8 @@ sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
 
 
 .S 	まとめ送り Ｒｅｌｅａｓｅ　１ 改良
-.label	msend-dir2
-.seealso	matome-2
+.label	{msend-dir2}
+.# .seealso	matome-2
 
 	まとめ送り ver.2
 
@@ -4320,7 +5194,7 @@ matome という行の人にたいしてまとめ送りをします。
 
 
 .S 	MatomeOkuri-NOCRON
-.label	MatomeOkuri-NOCRON
+.label	{MatomeOkuri-NOCRON}
 .key	store-and-deliver.ph
 .key	store-and-deliver.pl
 
@@ -4476,7 +5350,7 @@ Subject: [rec]	恐竜惑星はおもしろい
 
 
 .S 	Whois
-.label	whois
+.label	{whois}
 .key	whois
 .key	Rin.pl
 
