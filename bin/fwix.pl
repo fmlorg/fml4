@@ -20,7 +20,19 @@ $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
 $FORMAT  = 'q|~q';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
-$BGColor   = "E6E6FA";# lavender ("E0FFFF" == lightcyan)
+$BGColor   = "E6E6FA";# lavender ("E0FFFF" == lightcyan);
+
+%Part = (1, 'I',
+	 2, 'II',
+	 3, 'III',
+	 4, 'IV',
+	 5, 'V',
+	 6, 'VI',
+	 7, 'VII',
+	 8, 'X',
+	 9, 'XI',
+	 10, 'XII',
+	 );
 
 
 # Alphabetical Order Table
@@ -206,7 +218,7 @@ sub Open4Write
     print TMPF "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
     print ENG  "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
 
-    print STDERR "--Open::($TmpFile $TmpFile_Eng)\n";
+    print STDERR "---Open::($TmpFile $TmpFile_Eng)\n" if $verbose || $debug;
 }
 
 
@@ -264,7 +276,7 @@ sub ReadFile
     # info
     {	
 	local($c) = $Chapter + 1;
-	printf STDERR "---Including %-40s  %s\n", $file,
+	printf STDERR " --Including %-40s  %s\n", $file,
 	"(".($Appendix ? "App.$Appendix " : ""). "Chap.$c)";
     }
     
@@ -326,7 +338,7 @@ sub ReadFile
 	# PATTERN
 	
 	if (/^\.($HTML_KEYWORD)/) {
-	    print STDERR "\tCATCH HTML($&)\n";
+	    print STDERR "\tCATCH HTML($&)\n" if $verbose;
 	    if ($mode eq 'html')  {
 		s/^\.($HTML_KEYWORD)/($_  = &HtmlExpand($1, $2, $file, $mode)) || next/e;
 	    }
@@ -407,25 +419,30 @@ sub OutputHtml
     while (<$input>) {
 	undef $Error;
 
+	if (/^\#\.CUT_SKIP:(\S+)/) {
+	    $name = $outfile = $1;
+	    $name =~ s#.*/##;
+	    if ($name =~ /^(\d+)\.html/) {
+		$PREV_URL_NUMBER = $1 - 1;
+		$PREV_URL_NUMBER = $PREV_URL_NUMBER > 0 ? $PREV_URL_NUMBER : 1;
+	    }
+
+	    print STDERR "---Skipping\t$outfile";
+	    print STDERR "(prev->$PREV_URL_NUMBER)\n" if $verbose;
+
+	    next;
+	}
+
 	if (/^\#\.CUT:(\S+)/) {
 	    $name = $outfile = $1;
 	    $name =~ s#.*/##;
-	    print STDERR "---Generating\t$outfile\n";
+
+	    $prev_url_pointer =  $CUR_URL_POINTER;
 
 	    # here the cur_n is the next number (attention) 
 	    # since here is close() phase for the next chapter;
 	    if ($name =~ /^(\d+)\.html/) {
-		$cur_n = $1 - 1;
-
-		print OUTHTML "\n<HR>\n";
-
-		if ($cur_n != 1) {
-		    $n = $cur_n - 1;
-		    print OUTHTML "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
-		}
-
-		$n = $cur_n + 1;
-		print OUTHTML "<A HREF=${n}.html> [NEXT CHAPTER]</A>\n";
+		print OUTHTML ($CUR_URL_POINTER = &ShowPointer($1));
 		print OUTHTML &CopyRight;
 	    }
 
@@ -435,6 +452,7 @@ sub OutputHtml
 
 	    print OUTHTML "<TITLE>$Title $name</TITLE>";
 	    print OUTHTML "\n<BODY BGCOLOR=$BGColor>\n" if $BGColor;
+	    # print OUTHTML $prev_url_pointer if $prev_url_pointer;
 
 	    next;		# cut the line "^#.CUT";
 	}
@@ -451,6 +469,33 @@ sub OutputHtml
     }
 
     close(OUTHTML);
+}
+
+
+sub ShowPointer
+{
+    local($cur_n) = @_;
+    local($s);
+
+    $s .= "</PRE><HR>\n";
+
+
+    if ($cur_n != 2) {
+	$n = $cur_n - 2;
+	$n = $PREV_URL_NUMBER < $n ? $PREV_URL_NUMBER : $n;
+	$s .= "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+    }
+
+    print STDERR " --Generating\t$outfile (prev-> $n, ";
+    
+    $n = $cur_n;
+    $s .= "<A HREF=${n}.html> [NEXT CHAPTER]</A>\n";
+
+    print STDERR "next -> $n)\n";
+
+    $PREV_URL_NUMBER = 10000;
+
+    $s;
 }
 
 
@@ -598,18 +643,6 @@ sub Expand
 	&FormatReset;
 	$CurrentSubject = $s;
 
-	%Part = (1, 'I',
-		 2, 'II',
-		 3, 'III',
-		 4, 'IV',
-		 5, 'V',
-		 6, 'VI',
-		 7, 'VII',
-		 8, 'X',
-		 9, 'XI',
-		 10, 'XII',
-		 );
-
 	$Part++ unless $LANG;
 	$s = "$Part{$Part}\t$s";
 
@@ -617,14 +650,16 @@ sub Expand
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
-	    $Index{$CurLang} .= "<HR><LI><H3><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A></H3>\n";
-	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>\n";
-
-	    # split after the tmpfile is generated;
-	    # $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s"; 
+	    local($ch) = $Chapter + 1;
+	    local($se) = 0;
+	    $Index{$CurLang} .= 
+		"<HR><LI><H3><A HREF=\"$ch.html#C${ch}S${se}\">$s</A></H3>\n";
+	    $s      = "<HR>\n<A NAME=\"C${ch}S${se}\">$s</A>\n";
+	    $s     .= "<PRE>";
 
 	    $InPre++ unless $LANG;
+
+	    &HtmlSplitHere(1);
 	}
 	elsif ($mr) {
 	    $s = ".SH\n$s\n";
@@ -649,11 +684,9 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>\n";
+	    $s     .= "<PRE>";
 
-	    # split after the tmpfile is generated;
-	    # $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s";
-	    $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n\n$s"; 
+	    &HtmlSplitHere();
 
 	    $InPre++ unless $LANG;
 	}
@@ -676,7 +709,7 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>\n";
+	    $s     .= "<PRE>";
 	    $InPre++ unless $LANG;
 	}
 	elsif ($mr) {
@@ -694,17 +727,23 @@ sub Expand
     elsif ($c eq 'A') {
 	&FormatReset;
 	$CurrentSubject = $s;
+
+	$Chapter++ unless $LANG;
 	$InAppendix = 1;
+	$Section = 0;
 
 	$Appendix = shift @AlpTable;
-	$Section = 0;
 	$s = "Appendix $Appendix\t$s";
 
 	if ($mt) {
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
-	    ;
+	    $Index{$CurLang} .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
+	    $s     .= "<PRE>";
+
+	    &HtmlSplitHere();
 	}
 	elsif ($mr) {
 	    ;
@@ -754,6 +793,21 @@ sub Expand
 }
 
 
+sub HtmlSplitHere
+{
+    local($not_cut) = @_;
+
+    if ($not_cut) {
+	$s = "\#.CUT_SKIP:${HtmlDir}/$Chapter.html\n\n$s"; 
+    } 
+    else {
+	# split after the tmpfile is generated;
+	# $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s";
+	$s = "\#.CUT:${HtmlDir}/$Chapter.html\n\n$s"; 
+    }
+}
+
+
 sub PtrExpand
 {
     local($k) = @_;
@@ -784,7 +838,14 @@ sub IndexExpand
 
     print STDERR "]\n" if $debug;
 
-    "See also: $result";  # "Xref: $result";
+    if ($mode eq 'html') {
+	$result =~ s#</PRE>#</PRE>See also: #;
+	$result;
+    }
+    else {
+	"See also: $result";  # "Xref: $result";
+    }
+
 }
 
 
@@ -794,7 +855,7 @@ sub HtmlExpand
 
     print STDERR "HtmlExpand::($_, $s, $file, $mode);\n" if $debug;
 
-    /~HTML_PRE/ && ($s = "</PRE>");
+    /~HTML_PRE/ && ($s = "</PRE>\n");
     /HTML_PRE/  && ($s = "<PRE>");
 
     $s;
