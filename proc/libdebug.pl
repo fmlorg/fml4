@@ -26,7 +26,7 @@ FQDN                 $FQDN
 DOMAIN               $DOMAINNAME
 
 Mailing List         $MAIL_LIST
-UNIX FROM            $Envelope{'UnixFrom'}
+Return Path          $UnixFrom
 From(Original):      $Envelope{'from:'}
 From_address:        $From_address
 Original Subject:    $Envelope{'subject:'}
