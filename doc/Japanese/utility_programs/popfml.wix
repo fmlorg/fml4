@@ -10,26 +10,6 @@
 これを使うことはまずありません。NTの上ではこれを利用しています。
 
 
-.S	Introduction
-
-POP3 を使う場合は設定手順は3段階から成ります。
-
-	1 ~/.netrc にPOPサーバとそのパスワード(いや〜ん)
-	2 ~/.popfmlrc に popfml の設定を書く
-	3 cron で定期的に popfml を呼ぶ
-=E
-	1 set POP server host, account(ML address), password to ~/.netrc
-	2 configure ~/.popfmlrc
-	3 set up cron which runs popfml periodically
-
-これで、MLが作れました。なお、まとめおくりはまた別です。以下でPOPとFML
-の設定について各ステップを説明します。
-=E
-This configuration is a minimum explanation:) We explain details below.
-
-.S	POP経由の自動RefileやＭＬの実行 (bin/popfml.pl)
-=E.S	Automatic Re-Filing And Execution Ml By Pop (Bin/Popfml.Pl)
-
 POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
 れの専用プログラムとして実装されています。想定されているケースは
 =E
@@ -72,7 +52,51 @@ machine. In default popfml.pl read it from ~/.netrc.
 注意: inc_via_pop.pl は昔の名前(今はリンク)で、pop2recv.pl は backward
 compatible の目的で popfml.pl にリンクされています。
 
-.S	Popfml.pl 
+
+.S	elena ML を POP3 ＭＬエミュレーションする
+=E.S	how to emulate elena ML based on POP3
+
+1. 仮想的に popfml ＭＬをつくる。このＭＬのHOMEに queue ディレクトリを
+つくるためです。
+
+% makefml newml popfml
+
+2. POPサーバに
+
+	elena
+	elena-ctl
+
+のアカウントとパスワードを設定して下さい。
+
+
+3. こういう呪文をためしてください。( \ は次の行につづきます。)
+
+% /usr/local/fml/libexec/popfml.pl /var/spool/ml/popfml /usr/local/fml \
+	-host POPサーバ名 \
+	-user elena -pwfile /var/spool/ml/etc/netrc \
+	-include_file /var/spool/ml/elena/include
+
+% /usr/local/fml/libexec/popfml.pl /var/spool/ml/popfml /usr/local/fml \
+	-host POPサーバ名 \
+	-user elena-ctl -pwfile /var/spool/ml/etc/netrc \
+	-include_file /var/spool/ml/elena/include-ctl
+
+なお、/var/spool/ml/etc/netrc の中は
+.q
+machine POPサーバ名
+login    elena
+password パスワード
+
+machine POPサーバ名
+login    elena-ctl
+password パスワード
+.~q
+
+という感じのファイルです。~/.netrc 形式です。意味は ftp のマニュアルな
+どをみて(.netrcという項目をサーチして)ください。
+
+
+.S	Popfml.pl Reference 
 .l	popfml.pl 
 .k	popfml.pl 
 
@@ -95,12 +119,6 @@ injects them to programs defined in ~/.popfmlrc.
 
 	popfml.pl -user fukachan -host hikari
 
-.S	Popfml.pl の設定
-=E.S	Popfml.pl's Configuration
-.k	popfml.pl
-.l	libexec/popfml.pl
-.xref	cron
-.xref	fml_local
 
 .if LANG == JAPANESE
 popfml で実行するコマンドを定義する設定ファイルは
@@ -187,8 +205,9 @@ perl がちゃんと(?)動くOSなら WINDOWS だろうが Macintosh だろうが動くは
 FML via POP3 technique may enable FML to run on several plat homes out
 of UNIX and administration policy.
 
-.S	変数
-=E.S	Variables
+◯	変数
+=E
+	Variables
 
 	$POPFML_PROG
 .l	$POPFML_PROG
