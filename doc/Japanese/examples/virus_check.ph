@@ -56,6 +56,10 @@ $DISTRIBUTE_FILTER_HOOK .= q#
     if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
 	return 'P2000 virus familly?';
     }
+
+    if ($e{'Body'} =~ /filename=.*NEW.*NAPSTER.*site.*TXT\.pif/i ) {
+	return 'Win32/MTX familly?';
+    }
 #;
 
 # さらに HOOK へつけたす
