@@ -6,6 +6,26 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl5 ]
+
+  sbin/makefml
+	PR: fml-support:06764
+	fix "auto_asymmetic_regist" behaviour
+	which affects libexec/mead.pl remove user process ;-)
+
+  doc/ri/INSTALL.wix
+	 add note on "makefml -U install" (unlock mode)
+
+  examples/fml-install.wix
+	unify makefml syntax example to be easy for beginners
+
+  proc/libra.pl
+	fix file validation check" in the case regexp-like directory name
+
+  update (sync with HEAD (cvs main trunk))
+	INSTALL_on_MacOS_X_Server
+
+
 [ 3.0pl4 ]
 
   etc/makefml/include-mead
