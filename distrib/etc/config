@@ -5,10 +5,13 @@ release=0
 branch=0
 
 
+
 ### user defined variables ###
 # prog
 MAKE=/usr/bin/make
 FWIX_OPTS=-F
+setenv BLOCKSIZE	1024; export BLOCKSIZE
+
 
 
 ### imports distrib/mk/fml.sys.mk ###
