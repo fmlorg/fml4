@@ -227,6 +227,7 @@ sub DoGenerateHeader
     $le{'GH:To:'}          = $tmpto;
     $le{'GH:Date:'}        = $MailDate;
     $le{'GH:References:'}  = $Envelope{'h:message-id:'};
+    $le{'GH:References:'}  =~ s/^\s+//;
     $le{'GH:X-MLServer:'}  = $Rcsid;
     $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $le{'GH:X-ML-Info:'}   = $URLComInfo if $URLComInfo;
