@@ -4,6 +4,12 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+   [4.0.2_ALPHA と 4.0-current が分離した後の主な変更点]
+
+	* spool2html
+		--overwrite
+		記事→HTML 化する際に記事内の Date: ヘッダフィールドを使う
+		
    [4.0.1 リリース以降の主な変更点]
 
 	* 新機能は fml 5.0 のモジュールベースに変更 
@@ -23,6 +29,23 @@
 		FreeBSD での CGI 
 		spool2html で module が @INC にない
 		_smtplog の expire が変なのを修正
+
+   [注意]
+	07/02 以降の 4.0-current の変更は 4.0.2 に反映されるものと
+	反映されないものがあります。  
+
+
+2001/07/02
+
+   bin/spool2html
+
+	--overwrite 
+
+		このオプションをつけると、HTML を再生成をする
+		(デフォルトではすでにHTML化された分については無視する)。
+
+	記事→HTML 化する際に記事内の Date: ヘッダフィールドを使う
+
 
 2001/07/01
 
