@@ -70,10 +70,13 @@ sub NeonSendFile
     local(@info) = caller;
     local($le, %le, @rcpt, $error, $f, @f, %f);
 
-    ### INFO
-    &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES\t@files\n") if $debug;
-	
+    # backward compat;
+    $SENDFILE_NO_FILECHECK = 1 if $SUN_OS_413;
 
+    ### DEBUG INFO;
+    &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES:\t") if $debug;
+    &Debug(join(" ", @files)) if $debug;
+	
     ### check again $file existence
     foreach $f (@files) {
 	next if $f =~ /^\s*$/;
@@ -145,7 +148,7 @@ sub DoSendFile
 
 # Sendmail is an interface of Smtp, and accept strings as a mailbody.
 # Sendmail($to, $subject, $MailBody) paramters are only three.
-sub Sendmail
+sub DoSendmail
 {
     local(@to, %le, @rcpt);
     local($to, $subject, $body, @to) = @_;
@@ -166,7 +169,7 @@ sub Sendmail
 # Generating Headers, and SMTP array
 sub GenerateMail    { &GenerateHeaders(@_);}
 sub GenerateHeaders { &GenerateHeader(@_);}
-sub GenerateHeader
+sub DoGenerateHeader
 {
     # old format == local(*to, $subject) 
     # @Rcpt is passed as "@to" even if @to has one addr;
