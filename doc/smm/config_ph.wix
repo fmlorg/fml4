@@ -1,24 +1,51 @@
-.S	配送するメールのMIME部分はDecodeしてしまいたい
-.label	{MIME-2}
-.seealso MIME-1
+.C	config.phのその他の設定について
+.label	{config-misc}
 
-では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
-例えば、fml.pl の sub GetFieldsFromHeaderで
+.S	実際の配送を担当するマシンを別にする場合
+.xref	smtp
 
-    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
-        require 'libMIME.pl';
-	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
-    }
+・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
 
-を
+.key	$HOST
+	$HOST         = 'localhost';
 
-    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
-        require 'libMIME.pl';
-	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
-	$MailBody = &DecodeMimeStrings($MailBody);
-    }
+デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
+貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
+そういう場合上の変数を書き換えて、別のマシンに配送を任すこともできます。
+その時は
 
-で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+	$HOST         = 'beth.foo.bar.ac.jp';
+
+のようにそのマシン名を書いて下さい。DNS に登録されていないマシンの場合
+はIPアドレスでも構いません。
+
+この手のアクセスを認めていないマシンも駄目です。当然勝手にそのマシンの
+パワーを使うことにもなるのでそのマシン(リレーサーバ)を使う許可を得て使っ
+て下さい。
+
+
+.S	ロックアルゴリズムの選択
+.xref	how-to-lock
+
+.key	$USE_FLOCK
+	$USE_FLOCK    = 1;
+
+で flock system call で、
+
+	$USE_FLOCK    = 0;
+
+でＩＤを使うやり方にセットできます。デフォールトはflockです。
+
+
+.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
+
+コマンドはデフォールトで "# get 1" と "#get 1" は同じものとみなしてい
+ます。# で始まるか否かだけで判定しています。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+
+なんですが、これがデフォールトです。
 
 
 .S	MIMEのカスタマイズ変数
@@ -56,345 +83,6 @@ $MIME_MULTIPART_PREAMBLE = なし
 
 $MIME_MULTIPART_TRAILER = なし
 
-
-.S	Subject: [Elena:ID] サブジェクト の [Elena:ID] を抜く
-.key	Subjectから[Elena:ID]を抜く
-.key	$STRIP_BRACKETS
-
-これは Subject: [Elena:ID] の形で配送するための前処理です。今は、
-
-	    # e.g. Subject: [Elena:001] Uso...
-	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
-	    $Subject = $contents;
-
-にしちゃいました:-)。つまり multiple Re: 問題はサーバがメール本文をい
-じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
-変更は個人がやってくれると期待して）いじらないことにしました。
-
-変数は
-	$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
-
-１ならSubjectから [ML:fukachan] みたいな部分をカットする。
-
-解説：昔は、
-
-	Subject: Re: [*] Re: サブジェクト
-				→	Subject: Re: サブジェクト
-	Subject: Re: [*] サブジェクト
-				→	Subject: Re: サブジェクト
-	Subject: [*] サブジェクト
-				→	Subject: サブジェクト
-
-ということをするために
-
-	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*Re:[\s\n]*([\s\S\n]*)/o) {
-		$Subject = "Re: $1"; next;
-	}
-	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*([\s\S\n]*)/o) {
-		$Subject = "Re: $1"; next;
-	}
-	if(/^[\s\n]*\[[\s\S\n]*\][\s\n]*(.*)/o) {
-		$Subject = $1; next;
-	}
-	$Subject = $contents; next;
-
-こんなけったいな処理をしていましたが、やめました:-)
-＃このコードにもどせばmultiple Re:を削ることができます。
-
-何のために必要な前処理かというと、次を見てみよう(^^;;
-
-
-
-.# ##########################################################
-.C	config.phのその他の設定
-.label	{config-misc}
-.S	どのマシンのSendmailを使う？
-
-・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
-
-.key	$HOST
-	$HOST         = 'localhost';
-
-デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
-貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
-そういう場合上の変数を書き換えて、別のマシンに配送を任すこともできます。
-その時は
-
-	$HOST         = 'beth.foo.bar.ac.jp';
-
-のようにそのマシン名を書いて下さい。
-＃ただしgethostbynameできないようなマシンじゃだめですが。
-＃もちろんアクセスできないマシンとかではできません（あったりする）
-
-勝手にそのマシンのパワーを使うことになるのでそのマシンを使う許可を得る
-べきでしょう。
-
-
-.S	ロックアルゴリズムの選択と変数の設定
-.seealso fml-mechanism, seq-file
-
-＃fml 1.2.2 からあとでは flockでどのＯＳでも大丈夫だとおもいます。
-
-ロックアルゴリズムは二通り用意されてます。
-一つはプロセスＩＤで区別するやりかた。もう一つがflock system callを使
-うもの。flockがお奨めです
-
-.key	$USE_FLOCK
-	$USE_FLOCK    = 1;
-
-でflock system call
-
-	$USE_FLOCK    = 0;
-
-でＩＤを使うやり方にセットできます（デフォールトはflock）。
-
-・プロセスＩＤで区別するやりかたでそのＩＤをもったロック用ファイル
-をつくるdirectoryの指定
-
-.key	$LOCKDIR
-	$LOCKDIR      = "$DIR/LOCK";
-
-・その場合のデフォールトのＩＤのとり方。
-
-.key	$LOCKFILE
-	$LOCKFILE     = "$$";
-＃$$はプロセスのＩＤ（% man sh）
-
-
-.S	# helpとかの形式がいや。#helpとか#getfileがいいの
-次節
-
-.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
-
-コマンドの書き方についてのオプションです。
-
-hml 1.6 では
-	# get 1
-	# help
-のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
-たので、今度は
-
-	# get 1 と #get 1は同じものとみなす（両方使える）
-	すべてのコマンドで同じように "# " -> "#" 解釈する。
-	さらに#getfile ...も# get ...と理解する。
-
-としました。つまり、
-
-	# get 1
-	#get 1
-	# getfile 1
-	#getfile 1
-
-は同じもの。同様に
-
-	# help
-	#help
-
-も同じものです。
-
-.key	$COMMAND_SYNTAX_EXTENSION
-	$COMMAND_SYNTAX_EXTENSION = 1;
-	両方解釈するなら１、"# summary"みたいなhml 1.6形だけなら０。
-
-
-.S	WHOISを使うか？
-.key	whois
-.seealso whois
-.key	$USE_WHOIS
-
-	$USE_WHOIS = 0;			# Use Whois library
-
-０ならｆｍｌデフォールト（whoisは使わない）。１なら使う。ただし、これ
-はｈｍｌとは違い、本物の任意のwhois serverとソケット間通信をするための
-ものです。
-＃ｈｍｌは独自に自分だけのｗｈｏｉｓを抱えていた（無意味＆＆security
-hole）
-
-例：
-
-% echo  "# whois fukachan" | Mail -v Elena@phys.titech.ac.jp
-
-% echo "# whois -h どっかのwhois fukachan" | Mail Elena@phys.titech.ac.jp
-
-は ”どっかのwhois” に聞きにいきます。
-
-	$DEFAULT_WHOIS_SERVER = "localhost";
-
-で デフォールトの whois サーバを変更できます。コマンドの -h オプション
-で変更できるわけですが、コマンドの-hオプションが優先します。
-
-例：
-	"# whois -h どっかのwhois fukachan"
-
-
-.S	まとめおくり(Rel. 4)のデフォールトで RFC934 形をつかうか？
-.key	$USE_RFC934
-
-	$USE_RFC934 = 0;
-
-まとめおくり(Rel. 4)で、０はデフォールトのUNIX FROMで区切られたメールを
-送り出すが、１なら次のような形のものを送るようになる。これは mh の
-burstで複数の展開に展開できます。
-＃あと、どういうソフトがあるのか知らない…:-)
-
-９３４形式の例：
-------- Forwarded Message
-From: uja
-Subject: daa 
-
-うじゃ
-------- Forwarded Message
-From: uja
-Subject: daa
-
-あおいちゃんパニック もいいけど せいふくもの もよくてよ
-------- Forwarded Message
-
-
-.S	まとめ送りのデフォールトを RFC1153 digest へ
-.label	{RFC1153}
-.key	RFC1153
-
-これは それぞれに通し番号をつけなければなりませんので、まとめおくりの
-デフォールトを1153にすることになります。
-
-つまりコマンド # matome 3 はgzip ではなく 1153 形を意味します。
-
-config.ph で $USE_RFC1153_DIGEST = 1; としてください。
-
-デフォールト以上の細かい部分は librfc1153.pl でフォーマットを決めてく
-ださい
-
-注意：
-一時期 デフォールトで 3時間に 強制的に設定しておいてある version があ
-りますが、ようは番号の整合性をとるためです。
-１時間おきの１１５３送りの人と、３時間おきの１１５３送りの人、があると
-番号が食い違ってしまいますから
-
-番号の整合性を無視すれば、どうでもいいことなんですが…
-とりあえず、この部分はコメントアウトしてあります（95/6/27)
-
-
-.S	コマンドのフック
-.label	{command-hook}
-.key	customize-of-commands
-.key	コマンドのカスタマイズ
-.key	$COMMAND_HOOK
-
-インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
-config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
-様にカスタマイズできる）。
-
-これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
-
---------- in config.ph ---------
-$COMMAND_HOOK =q#
-      if(/list/io) {
-	  &Logging("List ($From_address)");
-	  &SendFile($to, "List $ML_FN", "$DIR/list");
-	  next GivenCommands;
-      }
-#;
---------- in config.ph ---------
-
-この例だとは # 〜 # の間をquoteしています。#...コメントをとかははさめ
-ません。
-＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
-quoteする関数（本当の意味での関数ではないそうだ）
-
-fml 1.3 ではライブラリの多くの機能はこれを使うことを前提にＲＥＡＤＭＥ
-等が書かれています。
-
-応用は フックの章 に例題がのっています。
-
-
-
-.S	lzh + ish option
-.key	lzh
-.key	ish
-.key	$LHA
-.key	$ISH
-
-	# mget 200-210 ish
-
-の用に指定するとlzh して ish(s7 mode)したものを送り返します。
-
-$LHA = "/usr/share/bin/lha";
-$ISH = "/home/axion/fukachan/bin/ish";
-
-等をどこかで（config.phとか）で設定して下さい。
-しないと上の↑Built-inデフォールト値になります。
-
-
-.S	SJIS にファイルを変換して送る （lzh + ish option）
-.key	lzh
-.key	ish
-
-config.ph で $USE_SJIS_IN_ISH = 1; をセットしてください。
-
-使う時は jcode.pl を INCLUDE PATH へいれておいてください。
-^M ^Z もつけます。すべて、外部コマンドを使わずに自力でやります。
-
-
-.S	コマンドで単なるシンタックスエラーの警告をしない
-.label	{USE_WARNING}
-.key	$USE_WARNING
-
-明示的に $USE_WARNING をセット
-e.g. in config.ph
-
-	$USE_WARNING = 1;
-
-するとコマンドメールでの単なるシンタックスエラーの警告をしない
-
-e.g. 
-# helps 			←コマンドのエラーは警告
-＃うじゃ			←シンタックスエラー警告なし
-＃しぐにちゃ〜	uja@uja.ac.jp	←シンタックスエラー警告なし
-
-
-.S	mgetのファイルサイズ（送り返し）
-.key	$MAIL_LENGTH_LIMIT
-
-in libsendfile.pl
-
-	$MAIL_LENGTH_LIMIT = 1000;
-
-を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
-いますよね。
-＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
-＃pc-van は何の問題もなかったと思いました（たしか）
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
-
-
-１０００行でだいたい５０ｋくらいになります。
-
-
-
-.S	mgetのシンタックスの Shell Match Pattern(e.g. * 1? )
-.key	$SECURITY_LEVEL
-
-$SECURITY_LEVEL < 2 では 
-
-	# mget * 
-とか
-	# mget 10? 
-
-が使えます。パッケージは １ （Backward Compatibility）にして配布してま
-す。＃前のヴァージョンとおなじになるように
-
-
-.S	mgetのシンタックス
-
-何もしなくても、
-
-# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
-
-	と
-
-# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔（ｓｅｃ）
-
-の両方を理解します。サーバが自動的に切替えます。
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
