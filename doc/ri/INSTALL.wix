@@ -16,8 +16,8 @@
    NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
    ＃まだ途中っす;-)
 =E
-   INSTALL_on_NT4.English is the install guide for Windows NT4.0.
-   NT3.5 may be also O.K(not tested since I do not have the OS).
+   INSTALL_on_NT4. English is the install guide for Windows NT4.0.
+   NT3.5 may be also O.K (not tested since I do not have the OS).
 
    昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
    INSTALL.advanced はより細やかな設定をしつつインストールをするための
