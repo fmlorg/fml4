@@ -188,7 +188,9 @@ sub Ctl
 
 	$0 = "spool2html: $label $id/($_[0] -> $_[1])";
 
+	# declare distribute mode
 	$ID = $id;
+	$Envelope{'mode:dist'} = 1;
 
 	# since undef %e above;
 	$Envelope{'stat:mtime'} = (stat("$SPOOL_DIR/$id"))[9]; 
