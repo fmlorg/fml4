@@ -1,36 +1,45 @@
 .C	一般的な質問 (Windows NT4 および Windows 2000)
+=E.C	general questions on Windows 2000/NT4
 
 .S	Windows で動きますか？
+=E.S	fml works on Windows ?
 
 NT4 でも WIN2000 でも動きます。
+=E
+fml works on Windows 2000/NT4.
 
-.S	perl のバージョンは？
+.S	必要な perl のバージョンは？
+=E.S	
 
 少なくとも ActivePerl の build 522 は結構実績ありです。
 5.6.0 ベースの build 600 以降が問題で、うまくいくという意見と
 今一つうまくいかなかったというのと事例があってよくわかりません。
 とにかく、うまく動いたら勝ちです ;-)
+=E
+It seems build 552 works well. It may seem build 6XX works well ?
 
 build 522
 .url http://www.activestate.com/download/ActivePerl/APi522e.exe
 
 
 .S	実績のあるメールサーバは？
+=E.S	mail servers  where fml works on.
 
 作者が試したことのあるものは Metainfo sendmail (現在は Sendmail Inc. )
 です。
 
 fml-support ＭＬでこの話題が出た時には以下の MTA の名前が挙げられてい
 ます。
+=E
+The following mail servers are introduced in fml-support ML.
 
 	Sendmail
 	IMail
 	emwac 
 	emwac ims + SPA SMTP
-	IIS のおまけ(?) + Aki POP
+	IIS + Aki POP
 
 Exchange はよくわかりませんが、IMail と同様の技が使えるのではないだろ
 うか？という意見もありますが、試した人がいないという status のようです。
-
 
 .# $Id$

@@ -1,8 +1,12 @@
 .C	一般的な質問 (UNIX)
+=E.C	General question on UNIX
 
 .S	UNIX で実績のあるメールサーバは？
+=E.S	mail servers where fml works on
 
 作者が試したことのあるメールサーバは次の通りです。
+=E
+The author makes fml work on the following mail servers:
 
 	sendmail
 	postfix
@@ -12,20 +16,26 @@
 
 これらについては doc/ の下にそれぞれの MTA ごとの注意点をメモったファ
 イルがあります。
-
+=E
+Please see fml documents for each servers.
 
 .S	ユーザ fml を作らないといけない？
+=E.S	Should I make a user "fml" ?
 
 いいえ、そういうことはありません。自分のアカウントでやっても構いません。
 ですがＭＬ専用のアカウント fml を作る方が望ましいでしょう。
+=E
+No, but it is recommended. 
 
 
 .S	fml をインストールしたホストからＭＬへは投稿できないもの？
+=E.S	Cannot I post article on the mail server host itself ?
 
 いいえ。メールサーバの設定を直して下さい。
+=E
+Yes, you can. Please check your MTA configuration.
 
 sendmail で CF パッケージを使って sendmail.cf を作る場合は
 ALWAYS_APPEND_DOMAIN という項目を読んで下さい。
-
 
 .# $Id$

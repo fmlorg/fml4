@@ -18,6 +18,7 @@ The search path for archive directories is @ARCHIVE_DIR.
 $ARCHIVE_DIR is set to $ARCHIVE_DIR[0].
 
 .S	アーカイブの単位
+=E.S	Archive Unit
 
 何個ずつ単位でまとめるかは
 =E

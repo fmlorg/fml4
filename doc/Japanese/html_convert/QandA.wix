@@ -1,13 +1,17 @@
 .C	Q&A
 
 .S	spool2html で HTML 化された記事を作ると、記事の Date: が狂う
-
+=E.S	Date: is broken when spool2html makes HTML articles.
 
 これはメールヘッダではなくファイルの修正日時を見ているためです。
 サーバの引越し時( \ref{bahen} 章参照)に
 単にコピーをすると日付がコピーした日になってしまっています。
 きちんと保存しつつコピーをしてください。
 例えば rsync などを使いましょう。
+=E
+Hmm, may you copy articles from somewhere? You should preserve the
+inode data of articles. For example, you should use "rsync" not "cp"
+(or "cp -p").
 
 これは、ファイルの修正日時を使って
 htdocs/ 以下のサブディレクトリ分けをしています。
