@@ -1,3 +1,26 @@
+----------
+[ rerere ]
+
+fml-support: 07507
+
+sub CutOffRe
+{
+   いままでどおりの Re: とかとっぱらう 
+
+   if ($LANGUAGE eq 'Japanese') {
+	日本語処理依存ライブラリへ飛ぶ
+	この中で $CUT_OFF_PATTERN (config.ph)などにしたがって
+	切り落とすのも良し（きっと日本語を書くだろうとおもうわけで
+	で、このライブラリの先で実行する）
+   }
+
+   run-hooks $CUT_OFF_HOOK(ユーザ定義HOOK)
+}
+
+
+----------
+[ new config ]
+
 See also fml-support: 06987 and around it
 
 * load order
@@ -43,4 +66,5 @@ config.ph を require などして設定を読み込んでいるプログラムは、
 の順番で読み込むように、４つの処理をとじこめた関数をつくるべき。fml.pl 
 内にその関数を作って makefml とかは libkern.pl を require して呼び出す
 
-
+-----
+$Id$
