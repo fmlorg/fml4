@@ -1135,6 +1135,10 @@ sub Expand
 	$InAppendix = 0;
 	$Figure     = 0;
 
+	if ($ENV{'debug_fwix'}) {
+	    print STDERR "C($Chapter): <$c><$s> LANG=$LANG/$CurLang\n";
+	}
+
 	$s = "$Chapter\t$s";
 
 	# FORCE PRINT
@@ -1152,6 +1156,11 @@ sub Expand
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= 
+		    "<HR>\n<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    }
+
 	    $Index{$CurLang} .= "<HR>\n<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
 	    $s     .= "<PRE>";	    $In_PRE = 1;
@@ -1187,6 +1196,10 @@ sub Expand
 	    $Index{$CurLang}  .= "$s\n";
 	}
 	elsif ($mh) {
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    }
+
 	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>";
 	    $s     .= "<PRE>";  	$In_PRE = 1;
