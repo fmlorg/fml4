@@ -15,7 +15,7 @@
 
 .HTML_PRE
 
-% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-3.0.tar.gz
 Connected to ftp.iij.ad.jp.
 
 	.... だ〜 ...
@@ -24,11 +24,13 @@ Connected to ftp.iij.ad.jp.
 
 	.... だ〜 ...
 
-% tar zxf fml-current.tar.gz
-% cd fml-2.2F-snapshot3
+% tar zxf fml-3.0.tar.gz
+% cd fml-3.0
 
   (できるディレクトリ名はその時時で変わる。
    名前は『fml-バージョン番号-スナップショット番号』のようになっている)
+=E
+where fml-3.0 but please use the latest fml-3.0pl\d+.tar.gz.
 
 % make install
 
