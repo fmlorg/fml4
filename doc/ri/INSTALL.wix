@@ -408,7 +408,7 @@ fmlserv を setup すること自体はオーナーの数に関わらず
 
 	/usr/local/fml/makefml fmlserv
 
-でできます。permission は適宜変更されます。しして設定見本が
+でできます。permission は適宜変更されます。そして設定見本が
 =E
 You can see the example setting in 
 

@@ -330,12 +330,15 @@ fml にはありえます _o_
 .key	+ トリック
 .key	/etc/aliases ＋ アーカイブ
 
-現在では配送するだけのモード設定というのがあるのでこれを使う必要はない
-でしょう。これも backward compatibility という趣があります。
-モード設定：--distribute もしくは config.ph で &DEFINE_MODE('distribute') 
+現在では配送するだけのモード設定というのがあるので、listname と 
+listname-ctl と２つのアドレス(デフォールト)を使えるなら、
+これを使うより配送用とコマンド用をわけた方が良いと思います。
+例: --distribute もしくは config.ph で &DEFINE_MODE('distribute') 
 .xref --distribute
 
-members ($MEMBER_LIST) に
+そういう観点では backward compatibility という趣はあります。
+
+使い方: members ($MEMBER_LIST) に
 
 	+
 
