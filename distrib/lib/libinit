@@ -93,7 +93,7 @@ INIT_VERSION () {
 		# not use $RELEASE_MANIFEST
 		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
 
-		RID=`perl distrib/bin/fml_version.pl -s|awk {print $2}`
+		RID=`perl distrib/bin/fml_version.pl -s|awk '{print $2}' `
 
 		# log cvs status
 		perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
