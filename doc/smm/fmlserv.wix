@@ -21,7 +21,7 @@ elena-ctl@baycity.asia へコントロールコマンドを送り込む形でコマンドを
 Consider Elena ML (elena@baycity.asia) and Freekick ML
 (freekick@baycity.asia).
 
-   "# get 1-10 mp"		というメールを
+   "get 1-10 mp"		というメールを
    Elena-ctl@baycity.asia	へ送る
 =E
 To get articles from 1 to 10 in MIME/Multipart mode, you send "get
@@ -44,8 +44,8 @@ inject commands such as
 違う点は単にコマンドのシンタックスが拡張されて『コマンド ＭＬ オプショ
 ン』の形になることです。コマンドそれぞれについてＭＬを指定するので
 
-   "# get Freekick 1-10 mp" 	
-   "# get elena 1-10 mp" 	というメールを
+   "get Freekick 1-10 mp" 	
+   "get elena 1-10 mp" 	というメールを
    fmlserv@baycity.asia		へ送る
 
 と、一通のメールで Freekick と Elena それぞれのＭＬの最初の10通の記事

@@ -1677,15 +1677,15 @@ conditions". It restricts the fml command syntax. The rule is
 
 例：	許される例
 
-   # summary
-   # mget 1-20,30,last:20 mp 1
-   # mget 10? mp 1			(default では許さない)
-   # mget 1[012]? mp 1			(default では許さない)
-   # chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp 
+   summary
+   mget 1-20,30,last:20 mp 1
+   mget 10? mp 1			(default では許さない)
+   mget 1[012]? mp 1			(default では許さない)
+   chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp 
 
 
 例：	許されない例
-   # mget `domainname`
+   mget `domainname`
 .fi
 .if LANG == ENGLISH
     1 	ignore \w/\w , deny both ../ and .[a.]/
@@ -1711,16 +1711,16 @@ conditions". It restricts the fml command syntax. The rule is
 
 Example: 
 
-   # summary				(permit)
-   # mget 1-20,30,last:20 mp 1		(permit)
-   # mget 10? mp 1			(denied in default)
-   # mget 1[012]? mp 1			(denied in default)
-   # chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp (permit)
+   summary				(permit)
+   mget 1-20,30,last:20 mp 1		(permit)
+   mget 10? mp 1			(denied in default)
+   mget 1[012]? mp 1			(denied in default)
+   chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp (permit)
 .fi
 
 例外処理として:
 
-   # whois 日本語
+   whois 日本語
 
 をどうしよう？という問題があります。今のところ”通さない”設定のままで
 すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
@@ -2353,7 +2353,7 @@ is the same but
 =E
 differs from others.
 
-.S	複数アドレスから投稿したいがうけとりは一つ( "# skip" コマンド)
+.S	複数アドレスから投稿したいがうけとりは一つ( "skip" コマンド)
 =E.S	One recipient for plural addresses to post mails from
 .key	skip
 .key	noskip
@@ -2379,18 +2379,18 @@ fukachan@phys.titech.ac.jp	skip
 ユーザーがこれを自分でコントロールしたいなら、コマンドは
 ＃ Admin command でのみ引数が有効です。
  
-# skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
+skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
 			そこから投稿はできるが、配送はされないものと設定する
-# noskip [引数]		上の逆。配送するようにする。
+noskip [引数]		上の逆。配送するようにする。
 
 です。例：
-# skip 
+skip 
 	From: のアドレスを skip に
 
-# skip pollyanna@phys.titech.ac.jp
+skip pollyanna@phys.titech.ac.jp
 	pollyanna@phys.titech.ac.jp を skip に
 
-# noskip pollyanna@phys.titech.ac.jp
+noskip pollyanna@phys.titech.ac.jp
 	pollyanna@phys.titech.ac.jp へも配送を
 .fi
 .if LANG == ENGLISH

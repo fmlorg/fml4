@@ -206,18 +206,18 @@ fml-1.4.1 以降、各ユーザーごとにまとめ送りの様式を決めることができま
 =E
 Each user can control each digest delivery configuration by a command.
 e.g.
-	# digest 3u
-	# matome 3u
+	digest 3u
+	matome 3u
 which sets up digest delivery is sent once 3 hours with UNIX FROM
 format(PLAIN-TEXT). Please see help file for available options.
 
 例: 3時間おきにUNIX FROMの形で送って欲しい場合
 
-	# matome 3u
+	matome 3u
 
 をコマンドとして送ります。UNIXのSHELL上なら
 
-   (shell prompt)% echo "# matome 3u" | Mail コマンド用のアドレス
+   (shell prompt)% echo "matome 3u" | Mail コマンド用のアドレス
 
 ですね。
 
@@ -389,7 +389,7 @@ To change the default to RFC1153 style.
 
 これには、それぞれまとめた束に、通し番号をつけなければなりません。よっ
 てまとめおくりのデフォールトを1153に統一することになります。ユーザがコ
-マンド # matome 3 としても、 gzip ではなく 1153 形を意味するようになり
+マンド matome 3 としても、 gzip ではなく 1153 形を意味するようになり
 ます。この形式では通し番号はばらばらで各ユーザ毎に適当についてます。
 =E
 FML does not check the sequence number since each user is each user
@@ -421,14 +421,14 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 .k	まとめ送りコマンド一覧
 
 ○まとめ送り希望の方へ:(基本的に N時間“おき")
-なお # digest と # matome は同じコマンド(引数も当然同じ)です。
+なお digest と matome は同じコマンド(引数も当然同じ)です。
 .if LANG == JAPANESE
-# matome 数字(0-23)	配送時間は実はmodulusで決めています
+matome 数字(0-23)	配送時間は実はmodulusで決めています
 			if (0 == (24 % time)) { 配送();} 
 			だから 17 なんてやっても一日一回と同じです(_o_)
 			様式 default は gzip した Unix From つきのファイ
 			ルの固まり
-# matome 数字(13-36)	上の特別の場合で、一日一回N時にまとめおくり
+matome 数字(13-36)	上の特別の場合で、一日一回N時にまとめおくり
 			13〜36の数字がこのケースに当てはまります
 			午前5時に一回だけまとめおくり慕いときは、
 			24+5=29 をおくりこんでください。午後5
@@ -439,7 +439,7 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 FML checks modulus between the time and parameters.  "digest" command
 fundamental syntax is
 
-# digest N 		If N is 0-23, a digest is delivered once N hours.
+digest N 		If N is 0-23, a digest is delivered once N hours.
 			If N is 13-36, a digest is delivered once a day
 			at N hour. 
 
@@ -447,8 +447,8 @@ After N, file option may be added. If without a file format option,
 the file format is "gzip", which is gzip-ped file containing articles.
 .fi
    例:
-	# matome 数字u	plain(unpack)、つまりplain textを
-	# matome 数字i 	lha + ish でまとめて送ります
+	matome 数字u	plain(unpack)、つまりplain textを
+	matome 数字i 	lha + ish でまとめて送ります
    オプション：
 		オプションなしはGZIP(UNIX FROM)
 
@@ -469,29 +469,29 @@ the file format is "gzip", which is gzip-ped file containing articles.
 	unpack	PLAIN-TEXT(UNIX FROM)
 
 
-# matome 0		普通の配送へ戻す
+matome 0		普通の配送へ戻す
 =E
-# digest 0		real time delivery (stop digest)
+digest 0		real time delivery (stop digest)
 
 .if LANG == JAPANESE
    例:
-   # matome 1		まとめ送り １時間に一回(gzipd)
-   # matome 2		まとめ送り ２時間に一回(gzipd)
-   # matome 2u		まとめ送り ２時間に一回(plain text)
-   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
-   # matome 17		まとめ送り 一日一回と同じ(gzipd)
+   matome 1		まとめ送り １時間に一回(gzipd)
+   matome 2		まとめ送り ２時間に一回(gzipd)
+   matome 2u		まとめ送り ２時間に一回(plain text)
+   matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+   matome 17		まとめ送り 一日一回と同じ(gzipd)
 			#この場合は１７時に来る
-   # matome 29		まとめ送り 一日一回と同じ(gzipd)
+   matome 29		まとめ送り 一日一回と同じ(gzipd)
 			#この場合は午前５時に来る
 			＃matome 5 は５時間“おき” という意味
 .fi
 .if LANG == ENGLISH
-   # matome 1		once in an hour  (file format is gzipd)
-   # matome 2		once in two hours (file format is gzipd)
-   # matome 2u		once in two hours (file format is unix from)
-   # matome 2mp		once in two hours (file format is MIME/Multipart)
-   # matome 17		once in a day (send at 17:00)
-   # matome 29		once in a day (send at 05:00; 29 = 24 + 5 )
+   matome 1		once in an hour  (file format is gzipd)
+   matome 2		once in two hours (file format is gzipd)
+   matome 2u		once in two hours (file format is unix from)
+   matome 2mp		once in two hours (file format is MIME/Multipart)
+   matome 17		once in a day (send at 17:00)
+   matome 29		once in a day (send at 05:00; 29 = 24 + 5 )
 .fi
 
 .S	まとめ送りがなかった msend がメールを出す設定

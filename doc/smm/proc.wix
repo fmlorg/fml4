@@ -167,12 +167,12 @@ Example: "get" command requets is up to 10 in one mail.
 .k	# コマンド シンタックス
 
 .if LANG == ENGLISH
-Usually, '# ' part is not needed. In default FML sets up
+Usually, '# ' part is NOT needed. In default FML sets up
 "listname@FQDN" for post and "listname-ctl@FQDN" for command.
 
-If both posting and command addresses are the same, the switching
-between post function and command function is required. '# syntax' is
-the key of switching.
+If both posting and command addresses are the same, a keyword for the
+switching between post function and command function is required. '#
+syntax' is the key of switching.
 
 .fi
 .if LANG == JAPANESE
@@ -216,6 +216,19 @@ Listserv 形式のシンタックスをうけつけるように拡張されたインターフェイ
 
 両方解釈するなら１、"# summary" みたいな形式だけなら０
 .fi
+
+コマンドはデフォールトで "# get 1" と "#get 1" は同じものとみなしてい
+ます。# で始まるか否かだけで判定しています。--ctladdr で fml.pl を呼び
+出している場合(例えば include-ctl を使っている場合)は # も必要ありませ
+ん。
+=E
+To configure that "# command" is the same as "#command", set 
+
+	$COMMAND_SYNTAX_EXTENSION = 1; (default 1)
+.k	$COMMAND_SYNTAX_EXTENSION
+
+がデフォールトです。
+
 
 .S	Subject: にコマンドを書く場合
 =E.S	Commands are Available In Subject:?
@@ -273,9 +286,9 @@ them. If you want to warn it, set
 .k	USE_WARNING 
 
 を設定すると間違ったコマンドへの警告メールをだします。これは signature 
-を自動的に付ける設定をしている場合への対処です。一般には # exit 等で明
-示的にコマンド指定を終わらせるのを推奨するかMUAでシグニチャーを自動的
-につけないようにするのを推奨するのがよいでしょう。
+を自動的に付ける設定をしている場合への対処です。一般には exit 等で明示
+的にコマンド指定を終わらせるのを推奨するかMUAでシグニチャーを自動的に
+つけないようにするのを推奨するのがよいでしょう。
 
 .S	コマンドの終り(シグニチャア対策)
 =E.S	End of Command Sets Against Signature
@@ -284,9 +297,9 @@ them. If you want to warn it, set
 =E
 Please use one of them to show the end of commands sequence. 
 
-	# exit 
-	# end
-	# quit
+	exit 
+	end
+	quit
 
 というコマンドを追加しました。このコマンドのところでアクションは終了し
 ます。signature があってもいいように、こうしました。
@@ -417,7 +430,7 @@ makefml craetes a sample .listname-default. If you copy it to
 in config.ph, you can use listname-command-argument for "command
 argument" to listname-ctl. For example, 
 
-	send "# get 100 " to elena-ctl@baycity.asia
+	send "get 100 " to elena-ctl@baycity.asia
 
 は次のアドレスと同じにできます。
 =E

@@ -180,20 +180,6 @@ flock(2) is only in kernel.  If the machine shutdowns or reboots
 suddenly, temporary lock files may be left in the lock spool. If
 exists, please remove them. 
 
-.S	コマンドのフォーマット
-=E.S	Command Syntax
-
-コマンドはデフォールトで "# get 1" と "#get 1" は同じものとみなしてい
-ます。# で始まるか否かだけで判定しています。--ctladdr で fml.pl を呼び
-出している場合(例えば include-ctl を使っている場合)は # も必要ありませ
-ん。
-=E
-To configure that "# command" is the same as "#command", set 
-
-	$COMMAND_SYNTAX_EXTENSION = 1; (default 1)
-.k	$COMMAND_SYNTAX_EXTENSION
-
-がデフォールトです。
 
 .S	MLを止めて(ロックして) config.phの edit をしたい
 =E.S	Lock ML and edit its config.ph

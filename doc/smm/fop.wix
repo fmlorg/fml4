@@ -12,7 +12,7 @@ mgetは『そのコマンドごとに』『まとめおくりはユーザーごとに』送り方が指
 "mget" command has several options. See help file also.
 
 .if LANG == JAPANESE
-# mget range 	[モード]	[時間間隔]
+mget range 	[モード]	[時間間隔]
 			ファイルをまとめて送り返す
 			スプールの記事や、
 			(もしあれば)アーカイブにあるファイル
@@ -49,7 +49,7 @@ mgetは『そのコマンドごとに』『まとめおくりはユーザーごとに』送り方が指
 に関して記述します。
 .fi
 .if LANG == ENGLISH
-usage:	# mget range [mode] [time_unit]
+usage:	mget range [mode] [time_unit]
 
    range		1-10,12,15-100
 			1,2,10
@@ -715,7 +715,7 @@ FYI: 一部のOS(Sun OS 4.x ?)で 2.2 でうまく動かない時に
 $INSECURE_SYSTEM = 1; を設定すると動くことがあります。
 .xref $INSECURE_SYSTEM
 
-	# mget 200-210 ish
+	mget 200-210 ish
 
 の用に指定するとlzh して ish(s7 mode)したものを送り返します。
 =E

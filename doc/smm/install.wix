@@ -478,7 +478,7 @@ For advanced settings, please see chapters .ptr{msend} and .ptr{cron}.
 	tar + gzip でまとめる
 	lzh + ish でまとめる
 
-を定義できます。# matome (# digestでもよい) コマンドで各ユーザが定義し
+を定義できます。matome (digestでもよい) コマンドで各ユーザが定義し
 て下さい。
 .fi
 .if LANG == ENGLISH

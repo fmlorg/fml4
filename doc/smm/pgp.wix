@@ -223,7 +223,7 @@ Please read PGP books if you cannot understand them.
 =E
 Example:
 
-	# admin pgp -kvv
+	admin pgp -kvv
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -127,34 +127,34 @@ We always checks where we locates under the top directory.
 =E
 To get spool/uja/Aoichan_panic, the commands are like a ftp:
 
-	# get spool/uja/Aoichan_panic
+	get spool/uja/Aoichan_panic
 
 とか
 =E
 or
 
-	# cd spool/uja
-	# get Aoichan_panic
+	cd spool/uja
+	get Aoichan_panic
 
 とか
 =E
 or
 
-	# cd spool
-	# cd uja
-	# get Aoichan_panic
+	cd spool
+	cd uja
+	get Aoichan_panic
 
 です。ftp と同じですね。
 =E
 You can use commands
 
-	# cd ..
+	cd ..
 
 や
 =E
 or
 
-	# cd ../X11
+	cd ../X11
 
 もできます。今どこにいるかチェックしていてTOP directoryより上にいこう
 としたらエラーになります。
@@ -178,7 +178,7 @@ quit
 =E 
 and
 
-# quit 
+quit 
 
 と書いても理解します。後は help 参照 
 

@@ -79,7 +79,7 @@ from FML when an article is submitted.
    please send to elena-ctl@fml.org
    the following line (only this line!)
    
-   # moderator certified 199711032027.709982
+   moderator certified 199711032027.709982
    
    ------- Forwarded Message
 
@@ -94,12 +94,12 @@ from FML when an article is submitted.
 If the moderator certifies the content, he/she sends the "moderator"
 keyword line to elena-ctl@fml.org.
 
-# moderator certified 199711032027.709982
+moderator certified 199711032027.709982
 
 の行だけをコマンド用のアドレスに送って下さい。そうするとＭＬサーバは自
 分が保存しておいたそのメールを配送します。
 
-モデレーターか否かはこの特別な文字列(# moderator certified 数字)を知っ
+モデレーターか否かはこの特別な文字列(moderator certified 数字)を知っ
 ているか否かです。この数字は毎回違うもるので、ある意味で暗合レベルの非
 常に低い one time password だとみなすこともできます。
 =E
@@ -151,22 +151,22 @@ postmaster can read a password in a header.
 Not to use Approval: field, FML provides "admin forward" command such
 as:
 
-	# admin forward
+	admin forward
 	フォワードする本文
 =E
-	# admin forward
+	admin forward
 	certified article sent to ML
 
 というコマンドもあります。
 =E
 Example:
 
-	# admin pass あなたのパスワード
-	# admin forward
+	admin pass あなたのパスワード
+	admin forward
 	本文(この下は全部フォワードされる)
 =E
-	# admin pass approval-password
-	# admin forward
+	admin pass approval-password
+	admin forward
 	mail body (certified article sent to ML)
 
 .S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 3 もしくは 未定義)

@@ -31,7 +31,7 @@ this.
 =E
 DESCRIPTION:
 
-  これまでの fml では、メンバー一覧を '# members' コマンドで取り寄せると
+  これまでの fml では、メンバー一覧を 'members' コマンドで取り寄せると
 メンバー全員のアドレスが返送されてきますが、アドレスだけでは誰が誰なのか
 わかりにくい場合がありました。
   このモジュール libmember_name.pl は、その問題を解決するために、各メンバー
@@ -40,9 +40,9 @@ DESCRIPTION:
   このモジュールを有効にすることにより、機能が追加・変更される項目を以下
 に記述します。
 =E
-Fml command "# members" sends a list back but the list contains only
+Fml command "members" sends a list back but the list contains only
 E-mail addresses. So you cannot identify who is an address? 
-libmember_name.pl module provides a function that "# members" command
+libmember_name.pl module provides a function that "members" command
 sends back a list with full names where the name is extracted from
 "From:" field e.g. in automatic registration.
 
@@ -53,7 +53,7 @@ When you enable this function, fml changes like this.
 =E
 * When automatic registration works
 
-    自動登録時 ('# confirm','# subscribe' コマンドによる登録も含む) に、
+    自動登録時 ('confirm','subscribe' コマンドによる登録も含む) に、
   mail の From: 行に書かれているアドレスが $MEMBER_LIST に追加されますが、
   その際に From: 行に書かれている名前 (gecos) も保存するようになります。
 =E
@@ -61,11 +61,11 @@ When fml registered a user in automatic registration mode, fml
 extracts GECOS field in From: and caches it to a file
 $MEMBER_NAME_FILE.
 
-● '# members', '# member' コマンド
+● 'members', 'member' コマンド
 =E
 members / member command
 
-    '# members', '# member' コマンドによるメンバー一覧の取り寄せで、メン
+    'members', 'member' コマンドによるメンバー一覧の取り寄せで、メン
   バーのアドレスに対応する名前が登録されている場合には、その名前が付加さ
   れて返送されます。
 =E
@@ -96,13 +96,13 @@ members / member command sends back a list with full names.
 	tomoyo@fml.org     (Tomoyo Daidouji)
 .fi
 
-● '# name' コマンド (新規)
+● 'name' コマンド (新規)
 =E
 "name" command
 
-  コマンド文法 : # name [新しい名前]
+  コマンド文法 : name [新しい名前]
 =E
-SYNOPSIS: # name new-name
+SYNOPSIS: name new-name
 
     コマンドを送ってきた者の登録されている名前を [新しい名前] に変更します。
   古い名前が登録されていない場合は、新規に登録されます。
@@ -112,17 +112,17 @@ Replace the full name in the cache file for "From:" address with
 "new-name". If no argument is given, fml removes the full name entry
 in the cache file.
 
-● '# admin name' コマンド (新規)
+● 'admin name' コマンド (新規)
 =E
 "admin name" command
 
-  コマンド文法 : # admin name アドレス [新しい名前]
+  コマンド文法 : admin name アドレス [新しい名前]
 =E
-SYNOPSIS: # admin name address new-name
+SYNOPSIS: admin name address new-name
  
     リモート管理機能を使用している場合に有効になる、管理者用の名前変更コマ
   ンドです。アドレスを指定することにより、各メンバーの名前を変更することが
-  できます。([新しい名前] の取り扱いについては、'# name' コマンドと同様)
+  できます。([新しい名前] の取り扱いについては、'name' コマンドと同様)
 =E
 In administration mode, overwrite the name for the address. The usage
 is the same way as "name" command. Administrators can use this
@@ -131,7 +131,7 @@ only in automatic registration but also in manual registration. Also
 this command overwrite the name to arbitrary ones e.g. nick names,
 handles ...
 
-    この '# name' と '# admin name' コマンドを使用することにより、自動登録
+    この 'name' と 'admin name' コマンドを使用することにより、自動登録
   でない ML や、既に運用されている ML でも、名前の新規登録や変更ができるよ
   うになります。さらに、自動登録時には無条件に gecos が登録されるのとは違
   い、コマンドのオペランドにより自由な名前を登録することができますので、
@@ -148,7 +148,7 @@ handles ...
     表面上は、members ファイル中に書かれている各行のメンバーのアドレスに
   名前が付加されるように見えますが、実際には members-name という別ファイル
   にて、'アドレス 名前' というエントリを記述して、アドレスと名前の対応付け
-  をしています。('# members' コマンドは members ファイルを返送するのではな
+  をしています。('members' コマンドは members ファイルを返送するのではな
   く、members と members-name をマージしてテンポラリファイルを作成し、それ
   を返送しています)
 
@@ -191,24 +191,24 @@ handles ...
     libmember_name.pl 内で追加処理が実行されるコマンド・処理の一覧を以下に
   記述します。
 
-	- 自動登録処理 ('# confirm','# subscribe' コマンド含む)
-	- '# members','# member' コマンド
-	- '# bye','# unsubscribe' コマンド
-	- '# chaddr','# change-address','# change' コマンド
-	- '# admin bye','# admin unsubscribe' コマンド
-	- '# admin chaddr','# admin change-address','# admin change' コマンド
-	- '# name' コマンド (新規)
-	- '# admin name' コマンド (新規)
+	- 自動登録処理 ('confirm','subscribe' コマンド含む)
+	- 'members','member' コマンド
+	- 'bye','unsubscribe' コマンド
+	- 'chaddr','change-address','change' コマンド
+	- 'admin bye','admin unsubscribe' コマンド
+	- 'admin chaddr','admin change-address','admin change' コマンド
+	- 'name' コマンド (新規)
+	- 'admin name' コマンド (新規)
 
-● '# name', '# admin name' コマンドの &SecureP() 処理のバイパスについて
+● 'name', 'admin name' コマンドの &SecureP() 処理のバイパスについて
 
   fml では、コマンドを処理する際にコマンドラインに不当な文字がないかどうかを
   &SecureP() という関数内でチェックして、不当な文字が含まれていればコマンド
   の実行を却下するようになっています。
 
-  '# name','# admin name' コマンドで、オペランドに日本語(2バイト文字) を指定
+  'name','admin name' コマンドで、オペランドに日本語(2バイト文字) を指定
   すると、そのままではこの 2バイト文字が「不当な文字」と認識されてコマンドが
-  実行できません。そこで、'# name','# admin name' コマンドで &SecureP() 処理
+  実行できません。そこで、'name','admin name' コマンドで &SecureP() 処理
   をバイパスするために、libmember_name.pl では %SECURE_REGEXP を定義していま
   す。
 

@@ -201,9 +201,9 @@ $REMOTE_ADMINISTRATION_AUTH_TYPE is one of them
 .if LANG == JAPANESE
 リモートで管理を許される人は
 
-	# admin コマンド オプション
+	admin コマンド オプション
 もしくは
-	# approve パスワード コマンド オプション
+	approve パスワード コマンド オプション
 
 というシンタックスのコマンドをＭＬサーバに送ることで様々な操作をするこ
 とができます。
@@ -217,14 +217,14 @@ crypt と md5 の時だけです。またPGPではコマンド列を書いた後メール本文全
 .if LANG == ENGLISH
 To do remote maintenance, commands for it has the following syntax
 
-	# admin command command-options
+	admin command command-options
 or
-	# approve password command command-options
+	approve password command command-options
 
 If $REMOTE_ADMINISTRATION_AUTH_TYPE is "crypt" or "md5", commands
 begin with the authentication line.
 
-	# admin pass password
+	admin pass password
 
 If $REMOTE_ADMINISTRATION_AUTH_TYPE is "pgp", the command mailbody is
 clear-signed.
@@ -233,12 +233,12 @@ clear-signed.
 .fi
 
 Example:
-	# admin pass password
-	# admin addadmin fukachan@sapporo.iij.ad.jp
-	# admin add      fukachan@sapporo.iij.ad.jp
-.k	# admin pass
-.k	# admin addadmin
-.k	# admin add
+	admin pass password
+	admin addadmin fukachan@sapporo.iij.ad.jp
+	admin add      fukachan@sapporo.iij.ad.jp
+.k	admin pass
+.k	admin addadmin
+.k	admin add
 
 .S	Approve Password Command Syntax
 .k	approve コマンド
@@ -247,10 +247,10 @@ Example:
 .l	admin:approve
 
 .if LANG == JAPANESE
-# admin 形式は
+admin 形式は
    password認証して、その後は全部認証したものとみなす
 
-# approve 形式は
+approve 形式は
    毎回 password を書く 
 
 どっちもそれなりに面倒くさいですが…ようはapproveは毎回 password を書
@@ -258,34 +258,34 @@ Example:
 性のために付け加えられました
 
 例:	(上と同じコマンド)
-	# approve パスワード addadmin fukachan@sapporo.iij.ad.jp
-	# approve パスワード add      fukachan@sapporo.iij.ad.jp
+	approve パスワード addadmin fukachan@sapporo.iij.ad.jp
+	approve パスワード add      fukachan@sapporo.iij.ad.jp
 
 つまり
 
-	# approve password commands 
-.k	# approve password commands 
+	approve password commands 
+.k	approve password commands 
 
 は ２行分
 
-	# admin pass password
-	# admin commands
+	admin pass password
+	admin commands
 
-と同じになります。つまり『# admin コマンド』は『# approve password コ
+と同じになります。つまり『admin コマンド』は『approve password コ
 マンド』と等価です。apporove スタイルはPGPでは意味がありません(パスワー
 ドを使わないし、パスワードを平文で書きたくないから)。
 .fi
 .if LANG == ENGLISH
-"# admin" format is once authenticated, FML requests no more password.
+"admin" format is once authenticated, FML requests no more password.
 e.g.
 
-	# admin pass password
-	# admin addadmin fukachan@sapporo.iij.ad.jp	
+	admin pass password
+	admin addadmin fukachan@sapporo.iij.ad.jp	
 
-The following "# approve password" format corresponds to the line
+The following "approve password" format corresponds to the line
 above
 
-	# apporove password addadmin fukachan@sapporo.iij.ad.jp	
+	approve password addadmin fukachan@sapporo.iij.ad.jp	
 
 This is added for listserv style compatibility.
 .fi
@@ -353,15 +353,15 @@ fukachan@sapporo.iij.ad.jp as a remote maintainer
 =E
 In the case of "only address authentication", (not need password)
 
-   # admin addadmin fukachan@sapporo.iij.ad.jp
+   admin addadmin fukachan@sapporo.iij.ad.jp
 
 * パスワード認証(crypt or md5)もしている時は
 =E
 If both address and password authentication, an administrator needs to
 initialize password for fukachan@sapporo.iij.ad.jp.
 
-   # admin addadmin fukachan@sapporo.iij.ad.jp
-   # admin initpass fukachan@sapporo.iij.ad.jp password
+   admin addadmin fukachan@sapporo.iij.ad.jp
+   admin initpass fukachan@sapporo.iij.ad.jp password
 
 コマンドで初期化するより、より良いのは makefml を使うことです。
 ＃ ISP にコネクトする場合はSSHなんて使わせてくれない気がするが…
@@ -393,7 +393,7 @@ Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet
 
 コマンドは
 
-	# admin byeadmin fukachan@sapporo.iij.ad.jp
+	admin byeadmin fukachan@sapporo.iij.ad.jp
 
 です。
 
@@ -404,71 +404,71 @@ Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet
 .k	admin コマンド一覧
 
 .if LANG == JAPANESE
-   # admin pass パスワード
-   # admin password パスワード
-   # admin passwd 新しいパスワード
-   # admin initpass アドレス パスワード
-   # admin help
-   # admin log
-   # admin add address
-   # admin off address
-   # admin on address
-   # admin bye address
-   # admin chaddr old-addr new-addr
-   # admin change old-addr new-addr
-   # admin change-address old-addr new-addr
-   # admin matome address 引数 
-   # admin skip address
-   # admin addadmin address
-   # admin addpriv  address
-   # admin byeadmin address
-   # admin byepriv  address
-   # admin dir
-   # admin ls options
-   # admin remove filename
-   # admin get filename
-   # admin resend filename address
-   # admin put filename
-   # admin rename filename1 filename2
-   # admin newinfo
-   # admin newguide
-   # admin unlink-article ID
-   # admin remove-article ID
-   # admin pgp options
+   admin pass パスワード
+   admin password パスワード
+   admin passwd 新しいパスワード
+   admin initpass アドレス パスワード
+   admin help
+   admin log
+   admin add address
+   admin off address
+   admin on address
+   admin bye address
+   admin chaddr old-addr new-addr
+   admin change old-addr new-addr
+   admin change-address old-addr new-addr
+   admin matome address 引数 
+   admin skip address
+   admin addadmin address
+   admin addpriv  address
+   admin byeadmin address
+   admin byepriv  address
+   admin dir
+   admin ls options
+   admin remove filename
+   admin get filename
+   admin resend filename address
+   admin put filename
+   admin rename filename1 filename2
+   admin newinfo
+   admin newguide
+   admin unlink-article ID
+   admin remove-article ID
+   admin pgp options
 .fi
 .if LANG == ENGLISH
 Please see help-admin.
-   # admin pass password
-   # admin password password
-   # admin passwd new-password
-   # admin initpass address password
-   # admin help
-   # admin log
-   # admin add address
-   # admin off address
-   # admin on address
-   # admin bye address
-   # admin chaddr old-addr new-addr
-   # admin change old-addr new-addr
-   # admin change-address old-addr new-addr
-   # admin matome address 引数 
-   # admin skip address
-   # admin addadmin address
-   # admin addpriv  address
-   # admin byeadmin address
-   # admin byepriv  address
-   # admin dir
-   # admin ls options
-   # admin remove filename
-   # admin get filename
-   # admin resend filename address
-   # admin put filename
-   # admin rename filename1 filename2
-   # admin newinfo
-   # admin newguide
-   # admin unlink-article ID
-   # admin remove-article ID
-   # admin pgp options
+   admin pass password
+   admin password password
+   admin passwd new-password
+   admin initpass address password
+   admin help
+   admin log
+   admin add address
+   admin off address
+   admin on address
+   admin bye address
+   admin chaddr old-addr new-addr
+   admin change old-addr new-addr
+   admin change-address old-addr new-addr
+   admin matome address 引数 
+   admin skip address
+   admin addadmin address
+   admin addpriv  address
+   admin byeadmin address
+   admin byepriv  address
+   admin dir
+   admin ls options
+   admin remove filename
+   admin get filename
+   admin resend filename address
+   admin put filename
+   admin rename filename1 filename2
+   admin newinfo
+   admin newguide
+   admin unlink-article ID
+   admin remove-article ID
+   admin pgp options
 .fi
 
 .S	リモート管理で使えるコマンドを増やすor減らす
@@ -557,19 +557,19 @@ Of course this method requires you can log in the ML server host.
 
 コマンドで
 
-	# admin pass	パスワード
-	# admin passwd	新しいパスワード
+	admin pass	パスワード
+	admin passwd	新しいパスワード
 =E
-	# admin pass	password
-	# admin passwd	new-password
+	admin pass	password
+	admin passwd	new-password
 
 をサーバへ送り込むことで変更 (etc/passwdの設定変更) をすることができま
 す。approve コマンドなら
 
-	# approve パスワード passwd 新しいパスワード
+	approve パスワード passwd 新しいパスワード
 =E
 If "approve" command style, 
-	# approve password present-password new-password
+	approve password present-password new-password
 
 ですね。
 
@@ -659,7 +659,7 @@ command fails. So removing it by (maintainer's) hand is required.
 
 In remote administration mode, it is not useful. So one command 
 
-	# admin bye fukachan@aoi.chan.panic
+	admin bye fukachan@aoi.chan.panic
 
 can remove both addresses since FML permits multiple matchings in this
 case.
