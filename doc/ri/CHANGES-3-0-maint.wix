@@ -5,6 +5,11 @@
 =E
 				Ken'ichi Fukamachi
 
+   doc/
+	TODO: remove all but add ptr to http://www.fml.org/
+
+	TODOリストはURLだけに変更
+
    proc/libmesgle.pl (1.8-1.9)
 	disable directory search
 	bug fix search key without .
