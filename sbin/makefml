@@ -6622,8 +6622,7 @@ sub ValidatePerlScriptP
 	system "perl -c $cf >/dev/null 2>&1";
     }
     else {
-	print "\n"; # easy for eyss
-	system "perl -c $cf ";
+	system "perl -c $cf > nul 2>&1";
     }
     &Error("$cf is broken as perl script.") if $?;
     &Log("$cf is broken as perl script.") if $?;
