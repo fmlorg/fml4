@@ -181,7 +181,7 @@ sub DoSendFile
     (1 == $zcat) && ($files{$f, 'zcat'} = 1);
     (2 == $zcat) && ($files{$f, 'uuencode'} = 1);
 
-    &NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
+    &DoNeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
 }
 
 
@@ -244,7 +244,7 @@ sub DoGenerateHeader
     $le{'GH:From:'}        = $MAINTAINER ||((getpwuid($<))[0])."\@$DOMAINNAME";
     $le{'GH:Date:'}        = $MailDate;
     $le{'GH:X-MLServer:'}  =  $Rcsid;
-    $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug;
+    $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $le{'GH:From:'}      .= " ($MAINTAINER_SIGNATURE)" if $MAINTAINER_SIGNATURE;
 
     # Run-Hooks. when you require to change header fields...
