@@ -55,8 +55,14 @@ IRIX 6.5 6.5.7m			5.005_04 (/usr/bin/perl) (may not exist)
 AIX V4.3.2			none
 AIX V4.3.3			5.005_03
 
-# Mach-like ...
-Mac OS X			?
+# Apple : Mac OS X Server, Rhapsody
+Mac OS X Server (1.0)	5.3		5.005_02 built for rhapsody
+Mac OS X Server (1.01)	5.4		5.005_02 built for rhapsody
+Mac OS X Server (1.02)	5.5		5.005_02 built for rhapsody
+Mac OS X Server (1.2)	5.6		5.005_02 built for rhapsody
+
+# Apple : Mac OS X, Darwin
+Mac OS X (Public Beta)	1.2		5.6.0 built for darwin
 
 # not UNIX-like
 Windows NT4			none
