@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:X:T");
+&Getopts("iqtsp:L:X:Tm:b:");
 
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
@@ -11,6 +11,8 @@ $SHOW_ID       = $opt_s;
 $query         = $opt_q;
 $patchlevel    = $opt_p;
 $Label         = $opt_L;
+$MODE          = $opt_m;
+$BRANCH        = $opt_b;
 
 if (! -f $RELEASE_DATE) {
 	system "date > $RELEASE_DATE";
@@ -49,6 +51,7 @@ if ($SHOW_ID) {
     exit 0;
 }
 
+local($dailyid) = $BRANCH. " ". &YYYYMMDD;
 while (<>) {
     if (/^\$Rcsid.*=\s+[\'\"](\S+)/) {
 	$prog = $1;	# reset;
@@ -57,13 +60,16 @@ while (<>) {
 	    #print "fml $ID$PL \#: ${MailDate}JST $Year\n";
 	    print "fml $ID$PL \#:\n";
 	    last;
-	} 
+	}
 
-	#print "\$Rcsid   = '$prog [fml $ID$PL: ${MailDate}JST $Year]';\n";
-	print "\$Rcsid   = '$prog [fml $ID$PL]';\n";
-
-	#print STDERR "Replaced -> '$prog [fml $ID$PL: ${MailDate}JST $Year]';\n";
-	print STDERR "Replaced -> '$prog [fml $ID$PL]';\n";
+	if ($MODE eq 'daily') {
+		print STDERR "Replaced -> '$prog [fml $dailyid]';\n";
+		print "\$Rcsid   = '$prog [fml $dailyid]';\n";
+	}
+	else {
+		print STDERR "Replaced -> '$prog [fml $ID$PL]';\n";
+		print "\$Rcsid   = '$prog [fml $ID$PL]';\n";
+	}
 
 	next;
     }
@@ -168,6 +174,13 @@ sub GetTime
     # 
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
+}
+
+
+sub YYYYMMDD
+{
+    local($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime(time);
+    sprintf("%4d%02d%02d", $year + 1900, $mon + 1, $mday);
 }
 
 
