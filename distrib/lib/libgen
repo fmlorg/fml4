@@ -82,6 +82,12 @@ COPY_DOCS () {
 	then
 	   rsync -av advisories $DESTDIR/distrib/doc;
 	fi
+
+	if [ -d Japanese ]
+	then
+	   mkdir $DESTDIR/distrib/doc/tutorial.Japanese;
+	   rsync -av Japanese/ $DESTDIR/distrib/doc/tutorial.Japanese/;
+	fi
    )
    (
 	echo " "; echo "Copying 'contrib' Documents (doc/master)...";
