@@ -6,6 +6,8 @@
    [4.0.3 の主な変更点]
 
 	* 4.0.3 は基本的に細かいバグとりが中心です。
+	* perl 5.6.x および 5.7.x でもインストールが失敗しないように修正
+	* IM  への修正 ( local patch )
 	* 拡張: データベース周り
 	    makefml が DBMS と直接通信できるようになりました。
 		コマンドラインからのデータベースへの登録/削除
@@ -19,6 +21,9 @@
    proc/libhtmlsubr.pl (1.8-1.9)
    proc/libsynchtml.pl (2.44-2.45)   
 	fix multipart counter
+
+	記事の HTML 化の際の添付ファイルの detect の仕方の微妙な差
+	注意: この bug は spool2html を使った場合にしか発現しない
 
 2001/09/11
 
@@ -128,7 +133,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.15 2001/09/11 13:51:56 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.16 2001/09/13 10:21:38 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
