@@ -72,7 +72,7 @@ pkgsrc:
 ##################################################
 World: world
 world: build
-build: touch_info plaindoc htmldoc dist
+build: touch_info plaindoc htmldoc pkgsrc dist
 
 .PHONY: touch_info
 touch_info:
