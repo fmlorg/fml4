@@ -785,24 +785,41 @@ sub SearchPath
 }
 
 
+sub ValidAddressP($addr)
+{
+    local ($a) = @_;
+    $a =~ /^[-a-z0-9\._]+\@[a-z0-9\.-]+$/i ? 1 : 0;
+}
+
 sub Action
 {
     local($addr, $ml) = @_;
+    local ($mode) = $MODE;
 
     ### makefml -> $LogBuf{$ml}
     ### report     $Template{$ml} (command template)
     ###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
 
-    if ($MODE eq 'auto') {
-	&MakeFml("$KILL $ml $addr", $addr, $ml);
-    }
-    elsif ($MODE eq 'report') {
-	$Template{$ml}            .= $CTK{$ml}."admin $KILL $addr\n";
-	$MakeFmlTemplate{$ml}     .= "$MAKEFML $KILL $ml $addr\n";
-	$MakeFmlTemplateAddr{$ml} .= $addr. "\t";
+    if (&ValidAddressP($addr)) {
+	if ($mode eq 'auto') {
+	    &MakeFml("$ACTION $ml $addr", $addr, $ml);
+	}
+	elsif ($mode eq 'report') {
+	    $Template{$ml}            .= $CTK{$ml}."admin $ACTION $addr\n";
+	    $MakeFmlTemplate{$ml}     .= "$MAKEFML $ACTION $ml $addr\n";
+	    $MakeFmlTemplateAddr{$ml} .= $addr. "\t";
+	}
+	else {
+	    &Debug("mode $mode is unknown");
+	}
     }
     else {
-	&Debug("mode $MODE is unknown");
+	&Debug("ignore invalid address $addr");
+
+	$MFSummary{$ml} .= "\tignore invalid address <$addr>.\n";
+	$MFSummary{$ml} .= "\tPlease remove <$addr> by hand.\n";
+	$LogBuf{$ml} .= "\tignore invalid address <$addr>.\n";
+	$LogBuf{$ml} .= "\tPlease remove <$addr> by hand.\n";
     }
 
     # record the addr irrespective of succeess or fail
