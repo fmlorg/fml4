@@ -102,8 +102,10 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 
 
 .S	簡易モード設定 （ロングラインオプション）--\S+
+.l	--mode
 .k	--mode
 .k	&DEFINE_MODE('mode')
+.k	&DEFINE_SUBJECT_TAG
 
 ＃さぁこれで N 秒はやく設定できるぜ（苦笑）
 
@@ -156,6 +158,46 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 
 	等アドレス設定をよきにはからう:-)
 	＃とりあえず -request なのは USENET 依頼の伝統芸なだけ
+
+.k	--tag=subject-tag-definition
+.k	--subjecttag=subject-tag-definition
+  --subjecttag=subject-tag-definition
+  --tag=subject-tag-definition
+
+Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
+タグはつけない。
+
+	--tag='(:)'
+
+		Subject: (Elena:100)
+
+	--tag='[:]'
+
+		Subject: [Elena:100]	(HMLタイプ)
+
+	--tag='( )'
+
+		Subject: (Elena:100)
+
+	--tag='[ ]'
+
+		Subject: [Elena:100]
+
+
+なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
+れるので注意。例： HML Emulation mode  (--hml)
+
+これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
+できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
+フェイスになるようにしたものです。
+
+config.ph では
+
+	&DEFINE_SUBJECT_TAG("(:)");
+
+のように呼び出してあげて下さい。
+.xref &DEFINE_SUBJECT_TAG
+
 
 .k	--auto
  --auto

@@ -2236,6 +2236,7 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 
 
 .S	Subject: を (Elena 100) とかの任意の形に成形する
+.l	$SUBJECT_FREE_FORM
 
 	fml 	Subject: はいじらない
 	hml	Subject: [Elena:100]
@@ -2262,6 +2263,49 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 	$END_BRACKET       = ']';
 	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
 
+
+.S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
+.l	&DEFINE_SUBJECT_TAG
+.k	&DEFINE_SUBJECT_TAG
+.xref	--mode
+
+Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
+タグはつけない。
+
+	(:)
+
+		Subject: (Elena:100)
+
+	[:]
+
+		Subject: [Elena:100]	(HMLタイプ)
+
+	( )
+
+		Subject: (Elena:100)
+
+	[ ]
+
+		Subject: [Elena:100]
+
+
+なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
+れるので注意。例： HML Emulation mode  (--hml)
+
+これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
+できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
+フェイスになるようにしたものです。
+
+config.ph では
+
+	&DEFINE_SUBJECT_TAG("(:)");
+
+コマンドラインでは 
+
+	--tag="(:)"
+	--subjecttag="(:)"
+
+のように呼び出してあげて下さい。
 	
 
 .S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
