@@ -107,9 +107,9 @@ done
 chmod -R +w $EXEC_DIR/*
 
 cp C/fml.c $EXEC_DIR
-cp -p sbin/makefml*  $EXEC_DIR
+cp -p sbin/makefml $EXEC_DIR
 
-chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml*
+chmod 755 $EXEC_DIR/fml.pl $EXEC_DIR/msend.pl $EXEC_DIR/makefml
 chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 
 
