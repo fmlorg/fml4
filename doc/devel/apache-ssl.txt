@@ -1,0 +1,83 @@
+		make apache-ssl on NetBSD
+
+1) get sources 
+
+	apache_1.3.9.tar.gz
+	mod_ssl-2.4.8-1.3.9.tar.gz 
+	openssl-0.9.4.tar.gz
+
+2)  extract them
+
+% tar zxvf apache_1.3.9.tar.gz
+% tar zxvf mod_ssl-2.4.8-1.3.9.tar.gz 
+% tar zxvf openssl-0.9.4.tar.gz
+
+3 ) make openssl
+
+% cd openssl-0.9.4 
+% ./config
+% make
+% su
+# make install
+
+4 ) apply openssl patch to apache
+
+% cd mod_ssl-2.4.8-1.3.9
+% sh configure --with-apache=../apache_1.3.9
+% cd ../apache_1.3.9
+
+5 ) make apache-ssl
+
+% pwd
+/some/where/apache_1.3.9
+% env BASE_SSL=/usr/local/ssl ./configure --enable-module=ssl 
+% make
+
+6) create my CA (Certificate Agent) and install
+
+% make certificate TYPE=custom
+% make install
+
+7) remove pass phrase to start apache-ssl without query of pass phrase
+
+# cd /usr/local/apache/conf/ssl.key
+# mv server.key server.key.orig 
+# openssl -in server.key.orig -out server.key
+# chmod 400 server.key
+
+8) start apache-ssl
+
+# /usr/local/apache/bin/apachectl startssl
+
+--------->8--------->8--------->8--------->8--------->8--------->8
+RESULT: CA and Server Certification Files
+
+o  conf/ssl.key/ca.key
+   The PEM-encoded RSA private key file of the CA which you can
+   use to sign other servers or clients. KEEP THIS FILE PRIVATE!
+
+o  conf/ssl.crt/ca.crt
+   The PEM-encoded X.509 certificate file of the CA which you use to
+   sign other servers or clients. When you sign clients with it (for
+   SSL client authentication) you can configure this file with the
+   'SSLCACertificateFile' directive.
+
+o  conf/ssl.key/server.key
+   The PEM-encoded RSA private key file of the server which you configure
+   with the 'SSLCertificateKeyFile' directive (automatically done
+   when you install via APACI). KEEP THIS FILE PRIVATE!
+
+o  conf/ssl.crt/server.crt
+   The PEM-encoded X.509 certificate file of the server which you configure
+   with the 'SSLCertificateFile' directive (automatically done
+   when you install via APACI).
+
+o  conf/ssl.csr/server.csr
+   The PEM-encoded X.509 certificate signing request of the server file which
+   you can send to an official Certificate Authority (CA) in order
+   to request a real server certificate (signed by this CA instead
+   of our own CA) which later can replace the conf/ssl.crt/server.crt
+   file.
+
+Congratulations that you establish your server with real certificates.
+--------->8--------->8--------->8--------->8--------->8--------->8
