@@ -43,6 +43,7 @@ sub Init
 	eval("\$POP_${_} = \$PopConf{\"${_}\"};");
     }
 
+    # pop queue should be "only you can read and write".
     -d $POP_QUEUE_DIR || mkdir($POP_QUEUE_DIR, 0700);
     $POP_LOGFILE = $POP_LOGFILE || '/dev/null';
 
@@ -137,6 +138,7 @@ sub Gabble
     local(*conf) = @_;
     local($i, $tmpf, $queue);
 
+    # only you can read since the mail is your mail;
     umask(077);
 
     &MakeConnection(*conf);
