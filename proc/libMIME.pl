@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998,2000,2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2000,2001,2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998,2000,2001 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2000,2001,2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -67,6 +67,11 @@ sub mimeencode
 {
     my ($s) = @_;
 
+    use Mail::Message::Encode;
+    my $encode = new Mail::Message::Encode;
+    return $encode->encode_mime_string($s, 'base64', 'jis');
+
+    # obsolete
     my $pkg = 'IM::Iso2022jp';
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {
@@ -97,8 +102,14 @@ sub DecodeMimeStrings { &DecodeMimeString(@_); }
 
 sub DecodeMimeString
 { 
+    my ($buf) = @_;
+
     # 2.1A4 test phase (2.1REL - 2.1A3 requires explicit $MIME_EXT_TEST=1)
-    &MIME::MimeDecode(@_);
+    # &MIME::MimeDecode(@_);
+
+    use Mail::Message::Encode;
+    my $encode = new Mail::Message::Encode;
+    return $encode->decode_mime_string($buf);
 }
 
 
