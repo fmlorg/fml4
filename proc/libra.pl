@@ -587,7 +587,19 @@ sub ProcAdminSubscribe
 	return 1;# not fatal;
     }
     
-    if (&UseSeparateListP && ($ACTIVE_LIST ne $file_to_regist)) {
+    if ($USE_DATABASE) {
+	&use('databases');
+	my ($addr, @opts) = split(/\s+/, $s);
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'subscribe', {'address' => $addr});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Log("ERROR: database server is down ?");
+	    &Mesg(*Envelope, 'configuration_error');
+	    return 0; # return ASAP
+	}
+    }
+    elsif (&UseSeparateListP && ($ACTIVE_LIST ne $file_to_regist)) {
 	$status = &Append2($s, $ACTIVE_LIST);
 	if ($status) {
 	    &LogWEnv("admin $proc $s >> \$ACTIVE_LIST", *e);

@@ -158,7 +158,18 @@ sub AutoRegist
     }
 
     # WHEN CHECKING MEMBER MODE
-    if (&UseSeparateListP) {
+    if ($USE_DATABASE) {
+	&use('databases');
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'subscribe', {'address' => $entry});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Log("ERROR: database server is down ?");
+	    &Mesg(*Envelope, 'configuration_error');
+	    return 0; # return ASAP
+	}
+    }
+    elsif (&UseSeparateListP) {
 	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	&Append2($entry, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
 	($ok == 2) ? &Log("Added: $entry") : do {
@@ -772,6 +783,7 @@ sub DoChangeMemberList
     &Debug("DoChangeMemberList($cmd, $curaddr, $file, $misc)") if $debug;
 
     if ($USE_DATABASE) {
+	&use('databases');
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, $cmd, {'address' => $curaddr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
