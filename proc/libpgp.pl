@@ -24,7 +24,7 @@ sub PGPGoodSignatureP
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGP: $!");
-    print WPGP "\n$e{'Body'}\n";
+    print WPGP $e{'Body'};
     close(WPGP);
 
     while (<RPGP>) {
@@ -42,59 +42,97 @@ sub PGPGoodSignatureP
 }
 
 
-sub PGPDecode
+sub PGPDecodeAndEncode
 {
     local(*e) = @_;
-    local($auth)   = 0;
-    local($tmpbuf) = "$FP_TMP_DIR/pgp:tmpbuf";
+    &PGPDecode(*e, 1);
+
+    # buffer replacement
+    $e{'OriginalBody'} = $e{'Body'};
+    $e{'Body'}         = $e{'pgp:encbuf'};
+}
+
+
+# PGP Decoding
+# We set a decrypted mail body in $Envelope{'pgp:buf'}.
+sub PGPDecode
+{
+    local(*e, $encode) = @_;
+    local($buf, $pgp_buf);
+
+    # separator
+    local($bs, $es);
+    $bs = '-----BEGIN PGP MESSAGE-----';
+    $es = '-----END PGP MESSAGE-----';
 
     &Log("PGPDecode") if $debug;
 
     &PgpInit(*e) || return 0;
+
+    # check each line and PGP Blocks
+    for (split(/\n/, $e{'Body'})) {
+	if (/^$bs/ .. /^$es/) {
+	    $pgp_buf .= "$_\n";
+	}
+	else {
+	    $e{'pgp:buf'}    .= "$_\n";
+	    $e{'pgp:encbuf'} .= "$_\n";
+	}
+
+	# pgp decode
+	if (/^$es/) {
+	    $_ = &DoPGPDecode($pgp_buf);
+	    undef $pgp_buf;
+	    $e{'pgp:buf'}    .= $_;
+	    $e{'pgp:encbuf'} .= &DoPGPEncode($_) if $encode;
+	}
+    }
+}
+
+
+sub DoPGPDecode
+{
+    local($buf) = @_;
+    local($auth, $dcbuf);
 
     # load open2
     require 'open2.pl';
 
     # PGP Signature Check
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>&1") || &Log("PGPDecode: $!");
-    print WPGP "\n$e{'Body'}\n";
+    print WPGP $buf;
     close(WPGP);
+
     while (<RPGP>) {
 	$auth = 1 if /Good\s+signature/i;
     }
     close(RPGP);
 
     # 2>&1 is required to detect "Good signature"
-    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>/dev/null") || 
-	&Log("PGPDecode: $!");
-    print WPGP "\n$e{'Body'}\n";
+    &open2(RPGP, WPGP, "$PGP $PgpOpts -f 2>/dev/null")||&Log("PGPDecode: $!");
+    print WPGP $buf;
     close(WPGP);
 
-    undef $e{'pgp:buf'};
-    undef $e{'pgp:errbuf'};
-
     while (<RPGP>) {
-	$e{'pgp:buf'} .= $_;
+	$dcbuf .= $_;
 	print STDERR "PGP OUT:$_" if $debug;
     }
     close(RPGP);
 
-    # PGP authenticated
-    # &Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
-
     &Log("Error: PGP no good signature.") unless $auth;
 
-    $auth;
+    $dcbuf;
 }
 
 
-sub PGPEncode
+# real PGP encoding engine
+sub DoPGPEncode
 {
-    local(*e) = @_;
-    local($whom);
+    local($buf) = @_;
+    local($whom, $encbuf);
     local($tmpbuf) = "$FP_TMP_DIR/pgp:tmpbuf";
 
-    &Log("PGPEncode") if $debug;
+    &Log("DoPGPEncode") if $debug;
 
     &PgpInit(*e) || return 0;
 
@@ -108,27 +146,34 @@ sub PGPEncode
     require 'open2.pl';
     &open2(RPGP, WPGP, "$PGP $PgpOpts -f -sea $whom 2>$tmpbuf") || 
 	&Log("PGPEncode: $!");
-    print WPGP $e{'pgp:buf'};
+    print WPGP $buf;
     close(WPGP);
 
-    undef $e{'pgp:buf'};
-    undef $e{'pgp:errbuf'};
-
-    while (<RPGP>) { $e{'pgp:buf'} .= $_;}
+    while (<RPGP>) { $encbuf .= $_;}
     close(RPGP);
 
+    open(EPGP, $tmpbuf) || &Log("PGPEncode: $!");
     while (<EPGP>) { $e{'pgp:errbuf'} .= $_;}
     close(EPGP);
+    unlink $tmpbuf;
+
+    $encbuf;
+}
+
+
+# PGPEncode: PGP encoding engine
+# PGPDecode set $Envelope{'pgp:buf'} as a decrypted mail body.
+# PGPEncode assumes it, encode it and rewrite $Envelope{'Body'};
+sub PGPEncode
+{
+    local(*e) = @_;
+
+    &Log("PGPEncode") if $debug;
 
     ### replacement
     # buffer replacement
     $e{'OriginalBody'} = $e{'Body'};
-    $e{'Body'}         = $e{'pgp:buf'};
-
-    # PGP authenticated
-    # &Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
-
-    $auth;
+    $e{'Body'}         = &DoPGPEncode($e{'pgp:buf'});
 }
 
 
@@ -176,7 +221,6 @@ sub PgpUserExistP
 sub PgpEncryptedMailBodyP
 {
     local(*e) = @_;
-
     $e{'Body'} =~ /\-\-\-\-\-BEGIN PGP MESSAGE\-\-\-\-\-/ ? 1 : 0;
 }
 
