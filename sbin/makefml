@@ -2227,8 +2227,11 @@ sub do_adduser
     }
 
     # add 
+    local($file);
     for (@files) {
-	&Log("makefml::$proc append $member to $_");
+	$file = $_;
+	$file =~ s#.*/(\S+)#$1#;
+	&Log("makefml::$proc append $member to $file");
 	print "Append $member to $_\n" if $debug;
 	&AppendString2File($member, $_);
     }
@@ -2271,10 +2274,12 @@ sub do_byeuser
     }
 
     # delete 
-    for (@files) {
-	if (&Repl($member, $_)) {
-	    &Log("makefml::$proc delete $member of $_");
-	    print "Delete $member in $_\n" if $debug;
+    local($file);
+    for $file (@files) {
+	if (&Repl($member, $file)) {
+	    $file =~ s#.*/(\S+)#$1#;
+	    &Log("makefml::$proc delete $member in $file");
+	    print "Delete $member in $file\n" if $debug;
 	}
     }
 }
