@@ -17,6 +17,11 @@ sub RCSBackUp
 
     &RCSInit;
 
+    if (! $CI) {
+	&Log("RCSBackUp: cannot find 'ci'");
+	return $NULL;
+    }
+
     &Log("RCSBackUp: $CI -l -q $f 2>&1|") if $debug;
 
     if (!-f $f) {
