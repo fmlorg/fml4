@@ -64,7 +64,7 @@ sub SocketInit
     ##### PERL 5  
     local($eval, $ok, $ExistSocket_ph);
 
-    $ok = eval "use Socket;", ($@ eq "");
+    eval "use Socket;"; $ok = $@ eq "";
     &Log($ok ? "Socket(XS) O.K.": "Socket(Perl 5 XS) fails. Try socket.ph") if $debug;
     return 1 if $ok;
 
@@ -158,14 +158,14 @@ sub Smtp
 	    for ($j = 0; $cache{$i, $j} ne ''; $j++) { push(@rcpt, $cache{$i, $j});}
 
 	    if (@rcpt) {
-		$error = &SmtpIO(*e, *rcpt, *smtp);
+		$error = &SmtpIO(*e, *rcpt, *smtp, *files);
 		push(@HOSTS, $HOST); # If all hosts are down, anyway try $HOST;
 		return $error if $error;
 	    }
 	}
     }
     else {
-	($error = &SmtpIO(*e, *rcpt, *smtp)) && (return $error);
+	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
     }
 
     ### SMTP CLOSE
@@ -176,7 +176,7 @@ sub Smtp
 
 sub SmtpIO
 {
-    local(*e, *rcpt, *smtp) = @_;
+    local(*e, *rcpt, *smtp, *files) = @_;
     local($sendmail) = $SENDMAIL || "/usr/sbin/sendmail -bs ";
     local($host, $error, $in_rcpt, $ipc);
 
@@ -252,7 +252,7 @@ sub SmtpIO
 
     # Put files as a body
     if (@files) { 
-	&SmtpFiles2Socket(@files);
+	&SmtpFiles2Socket(*files);
     }
     # BODY ON MEMORY
     else { 
@@ -298,12 +298,14 @@ sub SmtpIO
 
 sub SmtpFiles2Socket
 {
-    local(@f) = @_;
-    local($f, $autoconv, $count, $boundary);
+    local(*f) = @_;
+    local($autoconv, $count, $boundary);
 
     $count = scalar(@f) > 1 ? 1 : 0;
 
     foreach $f (@f) {
+	&Debug("SmtpFiles2Socket::($f)") if $debug;
+
 	if ($f{$f, 'zcat'}) {
 	    open(FILE,"-|") || exec($ZCAT, $f) || 
 		(&Log("SmtpFiles2Socket: cannot zcat $f"), close(FILE), next);
@@ -445,8 +447,9 @@ sub GenerateHeader
 {
     # old format == local(*to, $subject) 
     local(*to, *e, *rcpt) = @_;
-    local($from) = $MAINTAINER || (getpwuid($<))[0];
+    local($from) = $e{'F:From'} || $MAINTAINER || (getpwuid($<))[0]; # F=Force
 
+    $to_org = $to; # required 
     undef $to; # required 
 
     if ($debug) {
@@ -482,7 +485,11 @@ sub GenerateHeader
     $e{'Hdr'} .= $Envelope{'r:MIME'} if $Envelope{'r:MIME'};
 
     # ML info
-    $e{'Hdr'} .= "X-MLServer: $rcsid\n" if $rcsid;
+    $e{'Hdr'} .= "X-Debug: $rcsid\n"    if $debug && $rcsid;
+    $e{'Hdr'} .= "X-MLServer: $Rcsid\n" if $Rcsid;
+
+    $to = $to_org; # required 
+
 }
 
 1;
