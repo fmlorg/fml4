@@ -7,3 +7,8 @@ ${WORK_EXAMPLES_DIR}/${file}.html: doc/examples/${file}.wix
 	${HTML_FILTER} -L JAPANESE -n i \
 		-o ${WORK_EXAMPLES_DIR}/${file}.html doc/examples/${file}.wix
 .endfor
+
+# doc/examples/index.html
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index.html
+${WORK_EXAMPLES_DIR}/index.html: doc/examples/index.wix
+	cp -p doc/examples/index.wix ${WORK_EXAMPLES_DIR}/index.html
