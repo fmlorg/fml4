@@ -1,3 +1,30 @@
+.if LANG == JAPANESE
+トラブルの元は複数考えられます。
+	FML自体の設定のミス
+	perlの変なバージョンを使っているために挙動が不審
+	OS依存性
+	などなど…
+
+OSのログファイルとFMLのログ($DIR/log)のチェックは当然として、トラブル・
+シューティングには debug モード(config.ph で $debug = 1,2)でのprintfデ
+バッグなどが役に立ちます。
+
+なお質問の前に
+   CHECK_LIST.jp というファイルに従って一通りチェックしてみること
+   ドキュメント群に対して適当なキーワードでサーチをしてみること	
+をお願いしています。
+.url http://www.fml.org/fml/CHECK_LIST/
+
+c.f. OS依存性: .ptr{os-dependence}
+.fi
+.if LANG == ENGLISH
+All software must have bugs and also several OS dependent
+inconveniences. Before query, please check in the following check list
+.xref	os-dependence
+.url http://www.fml.org/fml/CHECK_LIST-e/
+and search appropriate keyword over the documents.
+.fi
+
 .#######################################################################
 .C	トラブル・シューティング (主に permission 問題まわり)
 =E.C	Trouble Shooting (around permission)

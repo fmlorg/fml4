@@ -556,6 +556,50 @@ ftp:// automatically changes to local or to be related to ftpmail.
 An example of functions is bin/geturl.pl
 .xref bin/geturl.pl
 
+.S	NOTE: Special Character (libsynchtml.pl)
+
+特殊文字
+
+ASCII(or ISO 8859)コードの中の4つのキャラクタは HTMLでは特別な意味を持つため、
+そのままでは使用できない。 4つのキャラクタとは、<, >, & と " である。
+
+< と > はタグを示すために使用され、 & は、以下のキャラクタやその他のキャラクタ
+のための エスケープシーケンスとなっている。
+
+    &lt;
+      <
+
+    &gt;
+      > のエスケープシーケンス
+
+    &amp;
+      & のエスケープシーケンス
+
+    &quot;
+      " のエスケープシーケンス
+
+エスケープシーケンスとは、各キャラクタを表示するために必要な文字列であり、 そ
+れぞれ ; が必ず必要。
+
+その他にも、8bitキャラクタをサポートするために以下のような エスケープシーケン
+スが用意されている。
+
+注意: この文書は日本語で書かれているため、以下の例では正しく表示されない可能性
+がある。
+
+    &ouml;
+      小文字の o にウムラルトのエスケープシーケンス
+
+    &ntilde;
+      小文字の n にチルダのエスケープシーケンス
+
+    &Egrave;
+      大文字の E にグレーブ・アクセントのエスケープシーケンス
+
+このようなエスケープシーケンスに関してはCERN からリストが提供されてい
+るのでそちらを参照していただきたい。
+
+
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 

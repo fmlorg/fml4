@@ -2,7 +2,6 @@
 =E.C	Japanese and MIME
 .l	MIME
 .l	MIME-1
-.l	MIME-2
 
 .if LANG == ENGLISH
 CAUTION: This chapter explains Japanese and MIME. Hence I do not

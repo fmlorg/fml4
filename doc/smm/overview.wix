@@ -1235,6 +1235,7 @@ $REJECT_ADDR_LIST is also a list to reject.
 .S	ML無限ループのチェックメカニズム
 =E.S	Loop checks against mail loops
 .k	$CHECK_MESSAGE_ID
+.l	$CHECK_MESSAGE_ID
 .xref	$LOG_MESSAGE_ID
 
 デフォールトは $CHECK_MESSAGE_ID がセットされています。この時は

@@ -1,8 +1,24 @@
 .C	MEAD (Mail Error Analyze Daemon)
 
-まだ βテスト なので時時間違うかもしれませんのでよろしく〜
+[概要]
+この章は「エラーメールを解析して、メールが届かないメンバーのアドレスを
+自動的にＭＬから削除する」方法についてです。
+ＭＬ作成時に見本は作られているので/etc/aliasesに一行足せば動きます。カ
+スタマイズはコマンドラインオプションで行ないます。perlで書いたHOOKなど
+は設定ファイルを使って読み込ませることができます。
+設定 		=> .ptr{mead-setup}
+設定ファイル	=> .ptr{mead-config-file}
+オプション	=> .ptr{mead-clo}
+=E
+[abstract]
+set up 			=> .ptr{mead-setup}
+configuration file 	=> .ptr{mead-config-file}
+command line option	=> .ptr{mead-clo}
+
+まだβテストなので時時間違うかもしれませんのでよろしく〜
 =E
 Beta test phase now.
+
 
 .S	Introduction
 
@@ -23,10 +39,16 @@ Example:
  550 xyz@ar.domain.or.jp... User unknown
 ~.q
 
+特に年度末などの切替わり時期には連絡もなく勝手にいなくなるユーザが多数
+いるので、このようなメールを無数にうけとります。そして管理者が削除しな
+ければなりません。そのためＭＬ管理者は自動的に削除したいとおもうもので
+す。
+
 帰ってくるメールはデフォールトではMLを作成したユーザへフォワードされる
 ように設定されています(aliasesファイルを参照)。この user unknown など
-の情報を自動的に拾い上げ、Ｎ回(デフォールトは5回)エラーが帰ってきたら
-そのユーザを削除するためのプログラムが mead.pl (libexec/mead.pl) です。
+の情報を集めて『Ｎ回(デフォールトは5回)エラーが帰ってきたらそのユーザ
+を削除する』ようにすれば自動的に存在しないユーザをＭＬから削除すること
+ができます。そのためのプログラムが mead.pl (libexec/mead.pl) です。
 =E
 In default returned error mails are set up to be forwarded to
 $MAINTAINER. See the file $DIR/aliases example file. If you can
@@ -34,25 +56,50 @@ collect error information automatically, you may remove "user unknown"
 user addresses. For example mead.pl collects the information and remove
 an address if the address causes errors over some limit.
 
-設定の手違などあるととても困るのであまりお勧めしません。そのため fml 
-デフォールトでは設定されません。が年度末などに連絡もなく勝手にいなくな
-るユーザ多数なのでこういうった処理が必要だという人もいるでしょう。
+便利ですが、設定の手違などあると困るので設定はくれぐれも慎重に。
 =E
 This may be dangerous especially when you do mis-configuration. So
 this is not fml default.  But this mechanism is helpful for you in the
 last of year.
 
-.S	設定
-=E.S	Configurations
 
-makefml newml を実行すると
+.S	理論
+=E.S	Theory
+
+帰ってきたエラーメールが mead.pl に入力として渡される。5XX のような行
+からエラーになるアドレスをわりだし、キャッシュします。5(がデフォールト)
+回エラーが来たら
+	『そのアドレスを削除すべきことをしらせる』(デフォールト)
+か
+	『makefmlを呼び出して自動的に削除する』
+ことをします。
+=E
+mead.pl caches returned error mails as an input if the error content
+has 5XX code which must be critical. If the error limits some
+threshold, mead.pl does "notify removing address to $MAINTAINER" or
+"call makefml and remove error mail addresses automatically". In
+default "notify removing address to $MAINTAINER".
+
+
+2.2A以降(2.2.1, 2.2A)では、各MTA依存のフレーズの解析やDSN(Delivery
+Status Notification)も見ています。
+
+
+.S	セットアップ
+=E.S	How to set up mead
+.l	mead-setup
+
+パラメータをいじらないなら/etc/aliasesの変更だけです。
+
+ＭＬ作成時(makefml newml を実行した時)に
 =E
 "makefml newml" creates a sample
 
 	include-mead
 
-が作られます。また生成される見本の aliases ファイルには mead を使う設
-定がコメントアウトされた状態で入っています。meadを設定するためには
+が作られています。また生成される見本の aliases ファイルには mead を使
+う設定がコメントアウトされた状態で入っています。meadを設定するためには
+/etc/aliasesにその該当する行のコメントをはずしたものをつけ足します。
 =E
 and $DIR/aliases has a sample entry for mead (comment out).
 ":include:/var/spool/ml/elena/include-mead" is a sample to kick off mead
@@ -74,29 +121,13 @@ Example: elena ML. To set up mead
 	# MEAD; If you use mead.pl, 
 	elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
 
-のように入れ換えます。:include:/var/spool/ml/elena/include-mead は 
-mead.pl を起動するように設定されています。
-
-.S	理論
-=E.S	Theory
-
-帰ってきたエラーメールが mead.pl に入力として渡される。5XX のような行
-からエラーになるアドレスをわりだし、キャッシュします。5(がデフォールト)
-回エラーが来たら
-	『そのアドレスを削除すべきことをしらせる』(デフォールト)
-か
-	『makefmlを呼び出して自動的に削除する』
-ことをします。
-=E
-mead.pl caches returned error mails as an input if the error content
-has 5XX code which must be critical. If the error limits some
-threshold, mead.pl does "notify removing address to $MAINTAINER" or
-"call makefml and remove error mail addresses automatically". In
-default "notify removing address to $MAINTAINER".
+のように入れ換えます。/var/spool/ml/elena/include-mead は mead.pl を起
+動するように最初から設定されています。
 
 
 .S	設定ファイル
 =E.S	Configuration file
+.l	mead-config-file
 
 コマンドラインの -f config-file オプションで設定ファイル(perl script)
 を指定できます。コマンドラインオプションはこのファイルの後に評価される
@@ -114,6 +145,7 @@ e.g.
 
 .S	mead.pl コマンドラインオプション
 =E.S	mead.pl Command Line Option
+.l	mead-clo
 
 Usage: mead.pl [options]
 
@@ -167,10 +199,10 @@ The error mail says for the delivered address <a@b.org>
 which is not on $ACTIVE_LIST nor $MEMBER_LIST.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

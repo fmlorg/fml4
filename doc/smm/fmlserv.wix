@@ -3,6 +3,10 @@
 .l	fmlserv
 .l	fmlserv.pl
 
+listservのように使いたいとか、サーバの中身を入れ換えるけどなんとなく
+見た目は何が変わったんだろう？？？というフェイクのため:-)
+
+
 .S	Listserv (Or Majordomo) Style Interface (libexec/fmlserv.pl)
 .k	listserv compatibility
 .k	majordomo compatibility
@@ -208,10 +212,10 @@ To make "which" available, please set
 is a cache for 'lists' command.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
