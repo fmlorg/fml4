@@ -10,6 +10,13 @@
 		%ADMIN_COMMAND_START_HOOK
 		%ADMIN_COMMAND_END_HOOK
 
+
+2002/01/24
+
+   kern/fml.pl (2.141-2.142):
+	fix wrong function call when $NOTIFY_MAIL_SIZE_OVERFLOW.
+	applied patch by anthrax@unixuser.org, thanks.
+
 2002/01/09
 
    kern/libloadconfig.pl (2.21-2.22):
