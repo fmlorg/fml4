@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PATH=${PATH}:/usr/local/bin:/usr/pkg/bin; export PATH
+
 umask 022
 
 if [ X$FML != X ]; then
