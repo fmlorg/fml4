@@ -29,7 +29,7 @@ exit 0;
 
 sub Init
 {
-    local($prev);
+    local($prev, $dir);
 
     $| = 1;
 
@@ -39,11 +39,12 @@ sub Init
     # help
     if ($opt_h) { &Usage; exit 0;}
 
+    $dir = $0; $dir =~ s@daily.pl$@@; $dir .= "../";
     $debug = $opt_d;
     $prev  = $opt_p || 1;
     $TrapPatFile = $opt_t;
-    ($PatFile = $opt_f) ||
-	die("no -f file:\nPlease define the pattern table to ignore\n");
+    $PatFile     = $opt_f || "$dir/etc/daily.ignore";
+    print STDERR "use pattern file: ", $PatFile, "\n" if $debug;
 
     local($mday,$mon,$year,$wday) = (localtime(time - 3600*24*$prev))[3..6];
     $Date = sprintf("%02d/%02d/%02d", $year % 100, $mon + 1, $mday);
