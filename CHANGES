@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/21
+
+  cut off Re: Re: Re:
+	modify regexp to avoid compilation error (related to perl version) 
+
 2000/04/15
 
   sbin/makefml
