@@ -158,12 +158,12 @@ sub InitMakeFml
     }
 
     &ProbePerlVersion;
-    if ($UNDER_JPERL) {
+    if ($UnderJPerl) {
 	local($sep) = "*" x 60;
 	local($tab) = "\t\t";
 	print STDERR "\n$sep\n";
 	print STDERR "\n${tab}***** WARNING *****\n";
-	print STDERR "${tab}YOUR PERL LOOKS jperl! (looks $JPERL_MODE mode)\n";
+	print STDERR "${tab}YOUR PERL LOOKS jperl! (looks $JPerlMode mode)\n";
 	print STDERR "${tab}YOU SHOULD USE\n";
 	print STDERR "${tab}perl 4.036 or perl 5\n${tab}NOT jperl!\n";
 
@@ -4755,28 +4755,28 @@ sub ProbePerlVersion
     print STDERR "ProbePerlVersion: $^X -v \n" if $debug;
     open(PERL, "$^X -v |");
     while (<PERL>) {
-	$UNDER_JPERL = 1 if /jperl/;
+	$UnderJPerl = 1 if /jperl/;
     }
     close(PERL);
 
     # if jperl 4, always bad.
-    if ($UNDER_JPERL && ($] =~ /Revision.*4\.0/)) { $jperl4 = 1;}
+    if ($UnderJPerl && ($] =~ /Revision.*4\.0/)) { $jperl4 = 1;}
 
     # if jperl 5, check jperl or perl ?
     # try to check regexp working
     if ("\xa4\xa2" =~ m/^.$/) {
-	$JPERL_MODE = "euc";
+	$JPerlMode = "euc";
     }
     elsif ("\x80\xa0" =~ m/^.$/) {
-	$JPERL_MODE = "sjis";
+	$JPerlMode = "sjis";
     }
     else { # must be usual perl
-	$JPERL_MODE = "unknown"; # jperl4 matches here?
-	$UNDER_JPERL = 0;
+	$JPerlMode = "unknown"; # jperl4 matches here?
+	$UnderJPerl = 0;
     }
 
     # if jperl 4, always jperl is jperl.
-    $UNDER_JPERL = 1 if $jperl4;
+    $UnderJPerl = 1 if $jperl4;
 }
 
 
