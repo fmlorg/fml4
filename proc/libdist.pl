@@ -110,9 +110,6 @@ sub DoDistribute
 	}
     }
 
-    # Crosspost info
-    if ($USE_CROSSPOST) { local($r) = &GetXRef; $body .= $r ? $r : '';}
-
     # Run-Hooks
     $HEADER_ADD_HOOK && &eval($HEADER_ADD_HOOK, 'Header Add Hook');
 
@@ -256,18 +253,6 @@ sub ReadActiveRecipients
 	  $lc_rcpt =~ tr/A-Z/a-z/; # lower case;
 
 	  printf STDERR "%-30s %s\n", $rcpt, $opt if $debug;
-
-	  # Crosspost Extension. if matched to other ML's, no deliber
-	  if ($USE_CROSSPOST && $e{'crosspost'}) {
-	      $w = $lc_rcpt;
-	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
-	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
-	      # address ($w) is delivered in other ml's (ml == $NoRcpt{$w})
-	      if ($NoRcpt{$w}) { # no add to @Rcpt
-		  $SKIP{$w} = 1;
-		  next line;
-	      } 
-	  }
 
 	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
 	  next line if $SKIP{$lc_rcpt}; # SKIP FIELD;
