@@ -325,15 +325,18 @@ sub ADD_FIELD
 
 sub DELETE_FIELD 
 {
-    local(@h); 
+    my ($f) = @_;
+    my (@h); 
+
+    $f = &FieldCapitalize($f);
 
     # If $SKIP_FIELDS has no this entry.
-    # print STDERR "    if ($SKIP_FIELDS !~ /\"\\|$_[0]\\|\"/) { \n";
-    if ($SKIP_FIELDS !~ /\|$_[0]$|\|$_[0]\|/) {
-	$SKIP_FIELDS .= $SKIP_FIELDS ? "|$_[0]" : $_[0];
+    # print STDERR "    if ($SKIP_FIELDS !~ /\"\\|$f\\|\"/) { \n";
+    if ($SKIP_FIELDS !~ /\|$f$|\|$f\|/) {
+	$SKIP_FIELDS .= $SKIP_FIELDS ? "|$f" : $f;
     }
 
-    for (@HdrFieldsOrder) { push(@h, $_) if $_ ne $_[0];}
+    for (@HdrFieldsOrder) { push(@h, $_) if $_ ne $f;}
     @HdrFieldsOrder = @h;
 }
 
