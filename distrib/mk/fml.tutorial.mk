@@ -117,5 +117,12 @@ ${TMP_DIR}/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 	@ echo done.
 
 
+# special import
+__TUTORIAL_DOC_TARGETS__ += ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
+${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt: databases/TOY_MODEL.Japanese
+	${JCONV} databases/TOY_MODEL.Japanese \
+	   > ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
+
+
 __plainbuild_new: ${__TUTORIAL_DOC_TARGETS__}
 
