@@ -276,7 +276,7 @@ sub GetAddr2Regist
 sub GetSubscribeString
 {
     local($_, $key) = @_;
-    local($buf, $pb, $pe);
+    local($buf);
 
     # evalute the first multipart block
     if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e);}
