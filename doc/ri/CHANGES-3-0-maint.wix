@@ -5,95 +5,116 @@
 =E
 				Ken'ichi Fukamachi
 
-	makefml
-		use $DIR/cf value in 'y/n' case
+   doc/
+	TODO: remove all but add ptr to http://www.fml.org/
 
-		y/nでメニューに答える時はcfにある値をデフォールト値として
-		メニューにだす
+	TODOリストはURLだけに変更
 
-	MesgLE
-		add some debug code
+   proc/libmesgle.pl (1.8-1.9)
+	disable directory search
+	bug fix search key without .
+
+	$FML/messages/$LANGUAGE/ 内ディレクトリサーチをやめる
+	. のないキーワード(例: no_such_command)の時のバグを修正
+
+   proc/libsynchtml.pl:	(2.34-2.36)
+	automatci conversion of index.html in the case week or month
+
+   doc/messages/Japanese/kern:(1.5-1.6)
+	define no_such_admin_command to remove dup no_such_command
+
+[ 3.0pl#24 == 3.0.1_BETA #13 ]
+
+   sbin/makefml
+	use $DIR/cf value in 'y/n' case
+
+	y/nでメニューに答える時はcfにある値をデフォールト値として
+	メニューにだす
+
+   MesgLE
+	add some debug code
 
 [ 3.0pl#23 == 3.0.1_BETA #12 ]
 
+   doc/
 	clean up documents
 
-	etc/makefml/menu.conf: (1.18-1.19)
-		fix typo. PR 7165 from OGAWA Kunihiko
+   etc/makefml/menu.conf: (1.18-1.19)
+	fix typo. PR 7165 from OGAWA Kunihiko
 
 [ 3.0pl#22 == 3.0.1_BETA #11 ]
 
-	bin/spool2html
-		sync w/ HEAD (2.11-2.12): fix GetMax()
-		patch from MURASHITA Takuya (fml-support: 7215)
+   bin/spool2html
+	sync w/ HEAD (2.11-2.12): fix GetMax()
+	patch from MURASHITA Takuya (fml-support: 7215)
 
 [ 3.0pl#21 == 3.0.1_BETA #10 ]
 
-	doc/html/
-		update url
+   doc/html/
+	update url
 
-	sbin/makefml 
-		doc-template:
-		repl $ctladdr with %config value' sbin/makefml
-		PR from Teruyuki Morimura  fml-support:7244
+   sbin/makefml 
+	doc-template:
+	repl $ctladdr with %config value' sbin/makefml
+	PR from Teruyuki Morimura  fml-support:7244
 
 [ 3.0pl#20 == 3.0.1_BETA #9 ]
 
-	download.html
-		updated (sync with current)
+   download.html
+	updated (sync with current)
 
-	sbin/makefml 
-		doc-template: fix import variable bug 2/2
+   sbin/makefml 
+	doc-template: fix import variable bug 2/2
 
 [ 3.0pl#19 == 3.0.1_BETA #8 ]
 
-	sbin/makefml 
-		doc-template: fix import variable bug 1/2
+   sbin/makefml 
+	doc-template: fix import variable bug 1/2
 
-	doc/advisories/year2000
-		fix url	
+   doc/advisories/year2000
+	fix url	
 
 [ 3.0pl#18 == 3.0.1_BETA #7 ]
 
-	url updates
+  url updates
 	clean up
 
 [ 3.0pl#17 == 3.0.1_BETA #6 ]
 
-	spool2html
-		fix bug no variable import from config.ph
+   spool2html
+	fix bug no variable import from config.ph
 
-		config.ph の内容を反映しないのを修正
+	config.ph の内容を反映しないのを修正
 
 
 [ 3.0pl#16 == 3.0.1_BETA #5 ]
 
-	一回リリースエンジニアリングの体制を仕切り直す。
-	いまは 3.0pl#16 は 3.0.1_BETA #5 と同じ意味
-	＃以下 3.0.1 リリースまでしばらくこのconventionを使う
+   一回リリースエンジニアリングの体制を仕切り直す。
+   いまは 3.0pl#16 は 3.0.1_BETA #5 と同じ意味
+   ＃以下 3.0.1 リリースまでしばらくこのconventionを使う
 
-	merge 3.0.1
+   merge 3.0.1
 
-	  fix miscellaneous y2k
-		PR by fml-support: 07189 OGAWA Kunihiko
+  fix miscellaneous y2k
+	PR by fml-support: 07189 OGAWA Kunihiko
 
-		bin/daily.pl
-		bin/gen_summary.pl
-		bin/spool2html.pl
-		contrib/utilities/packmbox.pl
-		contrib/localhack/release-1/vote/vote.pl
+	bin/daily.pl
+	bin/gen_summary.pl
+	bin/spool2html.pl
+	contrib/utilities/packmbox.pl
+	contrib/localhack/release-1/vote/vote.pl
 
-		y2k?
-		  src/libcompat.pl
-		  src/libcompat_fml15.pl
+	y2k?
+	  src/libcompat.pl
+	  src/libcompat_fml15.pl
 
-	  bin/passwd.pl
-		PR fml-support: 07190 Masaaki Hirono
-		fix undefined function bug
-		see also libcrypt.pl change below
+  bin/passwd.pl
+	PR fml-support: 07190 Masaaki Hirono
+	fix undefined function bug
+	see also libcrypt.pl change below
 
-	  libcrypt.pl
-	 	fix SRand() call bug
+  libcrypt.pl
+ 	fix SRand() call bug
 
 [ 3.0pl#15 ]
 
