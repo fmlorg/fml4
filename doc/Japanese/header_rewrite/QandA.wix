@@ -1,0 +1,49 @@
+.HTML_PRE
+
+	Q and A: ヘッダ書き換え関係のノウハウ
+=E
+	TIPS on header rewriting
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+
+Q: 携帯電話から送られるメールで Reply-To: が携帯電話のアドレスのために
+   配送されたメールが Reply-To: ＭＬになりません。
+
+A: 『常に強制的に Reply-To: ＭＬにしてしまう』ことで解決になるのなら
+   
+/var/spool/ml/elena/cf (PATHは適当によみかえてください) の 
+LOCAL_CONFIG という行の後に
+
+   &DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
+
+と書いて config.ph を作り直して下さい。作り直すのは例えば
+
+   % cd /var/spool/ml/elena/cf
+   % make config.ph
+
+◯ ヘッダ関係のTIPSは
+
+   http://www.fml.org/fml/examples/ptr-customize-header.html
+
+を参照。
+
+◯ cf と config.ph の依存関係の説明はこの辺をみてみてください
+
+   http://www.fml.org/fml/examples/examples/howto-customize.html
+
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

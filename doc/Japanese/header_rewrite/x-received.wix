@@ -1,0 +1,51 @@
+.HTML_PRE
+	Received: -> X-Received:
+
+.if LANG == JAPANESE
+投稿された記事のヘッダの Received: を X-Received: にコピーしてその元の 
+Received: は消す。
+.fi
+.if LANG == ENGLISH
+Copy Received: of the input article to X-Received: and remove the
+field.
+.fi
+
+[Configuration]
+
+&COPY_FIELD('Received', 'X-Received');
+$SKIP_FIELDS = 'Received|Return-Receipt-To';
+
+
+[結果]
+=E
+[Result]
+
+ Received: by hikari.fml.org (8.9.3/3.4W6+Hikari-2.1) with ESMTP id XAA17996 for <fukachan@sapporo.iij.ad.jp>; Wed, 6 Oct 1999 23:29:52 +0900 (JST)
+ Received: from beth.fml.org (localhost.sapporo.iij.ad.jp [127.0.0.1])
+ 	by beth.fml.org (Postfix) with ESMTP id 1CE0EA6837
+ 	for <fukachan@fml.org>; Wed,  6 Oct 1999 23:29:52 +0900 (JST)
+ X-Received: by hikari.fml.org (8.9.3/3.4W6+Hikari-2.1) with ESMTP id XAA17981 for <fukachan@sapporo.iij.ad.jp>; Wed, 6 Oct 1999 23:29:30 +0900 (JST)
+ X-Received: by beth.fml.org (Postfix)
+ 	id 465B4A6838; Wed,  6 Oct 1999 23:29:30 +0900 (JST)
+ X-Received: by beth.fml.org (Postfix, from userid 1106)
+ 	id 0DB1EA6837; Wed,  6 Oct 1999 23:29:29 +0900 (JST)
+ Date: Wed,  6 Oct 1999 23:29:29 +0900 (JST)
+ From: fukachan@fml.org (Ken'ichi Fukamachi)
+ Reply-To: elena@fml.org
+ To: fukachan@fml.org
+ Message-Id: <19991006142929.0DB1EA6837@beth.fml.org>
+ X-ML-Name: elena
+ X-Mail-Count: 00207
+ X-MLServer: fml 2.2; post only (only members can post)
+ X-ML-Info: If you have a question, send e-mail with the body
+ 	"help" (without quotes) to the address elena-ctl@fml.org;
+ 	help=<mailto:elena-ctl@fml.org?body=help>
+ Precedence: bulk
+ Lines: 2
+ 
+ test
+    
+ -- fukachan
+
+
+.~HTML_PRE
