@@ -596,6 +596,7 @@ sub Die
 sub DeadOrAlive
 {
     local($buf, $now, $last, $prev);
+    local(%addr);
 
     $now = time;
 
@@ -671,10 +672,23 @@ sub DeadOrAlive
 	    $pri = $NULL;
 	    for (@opts) { /r=(\S+)/ && ($pri = $1);}
 
-	    $debugbuf = "$addr : $addr{\"$addr $ml\"}\t" if $debug;
-	    $addr{"$addr $ml"} += $PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
-	    $debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
-	    &Debug($debugbuf) if $debug;
+	    # algorithm
+	    my (%info);
+	    $info{'key'}  = "$addr $ml";
+	    $info{'time'} = $time;
+	    $info{'addr'} = $addr;
+	    $info{'ml'}   = $ml;
+
+	    if (1) {
+		&MeadSimpleEvaluator(*addr, \%info);
+	    }
+	    else {
+		$debugbuf = "$addr : $addr{\"$addr $ml\"}\t" if $debug;
+		$addr{"$addr $ml"} += 
+		    $PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
+		$debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
+		&Debug($debugbuf) if $debug;
+	    }
 	}
     }
 
@@ -694,6 +708,9 @@ sub DeadOrAlive
 
     rename($new, $CACHE_FILE) || 
 	&Die("CacheOn: cannot rename $new $CACHE_FILE");
+
+    # show profile
+    &ShowProfile(*addr);
 
     ### remove address 
     local($addr, $admin);
@@ -737,7 +754,57 @@ sub DeadOrAlive
 }
 
 # dummary
-sub MeadSimpleEvaluator { 1;};
+sub MeadSimpleEvaluator 
+{ 
+    local(*addr, $info) = @_;
+    my ($time, $addr, $ml, $pri) = (
+				    $info->{'time'},
+				    $info->{'addr'},
+				    $info->{'ml'},
+				    $info->{'pri'},
+				    );
+
+
+    my $debugbuf = "EVAL> $addr : $addr{\"$addr $ml\"}\t" if $debug;
+
+    $addr{"$addr $ml"} += 
+	$PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
+
+    $debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
+    &Debug($debugbuf) if $debug;
+
+    # for better profile
+    {
+	# cache oldest log for better evaluation
+	if (! $OldestLog{$addr}) { $OldestLog{$addr} = $time;}
+
+	# total errors
+	$SumUp{$addr}++;
+
+	# profile
+	my ($when) = int((time - $time)/(24*3600));
+	$Profile{$addr}{$when}++;
+    }
+}
+
+
+sub ShowProfile
+{
+    local(*addr) = @_;
+    my ($key);
+
+    for $key (keys %addr) {
+	my ($a, $ml) = split(/\s+/, $key);
+
+	my ($profile);
+	for $when (0 .. 7) {
+	    $profile .= $Profile{$a}{$when} || '0';
+	    $profile .= " ";
+	}
+
+	&Log("prof: <$a> sum=$SumUp{$a} [$profile]");
+    }
+}
 
 
 
