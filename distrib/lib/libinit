@@ -55,7 +55,7 @@ INIT_VERSION () {
 
 	elif [ $init = 1 ]
 	then
-		echo "fml release          Increment() ... "
+ 		echo "fml release          Increment() ... "
 		perl $FML_VERSION -i kern/fml.pl > /dev/null
 	else
 		echo ""
@@ -96,14 +96,20 @@ INIT_VERSION () {
 
 		RID=`perl distrib/bin/fml_version.pl -s|awk '{print $2}' `
 
-		# log cvs status
-		perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
-		tee -a distrib/history/$TID/$RID
-		(
-		 echo "--------------------------";
-		 echo "";
-		) >> distrib/history/$TID/$RID
-		echo " "; 
+		# log cvs status unless $MODE
+		if [ X$MODE = X ]; then
+		   perl distrib/bin/cvsscan.pl -f distrib/etc/cvsscan.conf |\
+		   tee -a distrib/history/$TID/$RID
+			(
+			 echo "--------------------------";
+			 echo "";
+			) >> distrib/history/$TID/$RID
+			echo " "; 
+		else
+			echo "";
+			echo -- ignore cvs status log
+			echo "";
+		fi
 	fi
 
    )
