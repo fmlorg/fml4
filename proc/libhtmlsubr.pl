@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libhtmlsubr.pl,v 1.10 2001/09/18 12:19:13 fukachan Exp $
+# $FML: libhtmlsubr.pl,v 1.11 2001/09/21 04:36:49 fukachan Exp $
 #
 
 
@@ -93,29 +93,45 @@ sub MPBProbe
 #   (*envelope, *mpbcb, line pointer, max pointer, sub directory,
 #                article id, number of called)
 #
+# NOTES: target is plaintext only.
+#
 # Returns: none
 #
 sub WriteHtmlFile
 {
     local(*e, *mpbcb, $lpp, $pe, $dir, $file, $mp_count) = @_;
-    local($lp, $xbuf, $fn, $fp, $noconv);
+    local($lp, $xbuf, $fn, $fp);
+    my $metacharconv = 1;
+    my $print_pre    = 1;
 
     &Log("WriteHtmlFile: $mpbcb{'type'}/$mpbcb{'subtype'}") if $debug;
 
     # mp_count N is the N-th multipart block.
-    # after 2nd multipart block
-    if ($mp_count > 1) {
-	$noconv = 1; # always really?
+    # after 2nd multipart block or when 1st block is text/html
+    my $is_attachment = 1 if $mp_count > 1;
+    my $is_attachment = 1 if $mpbcb{'subtype'} eq 'html';
 
+    if ($is_attachment) {
 	if ($mpbcb{'subtype'} eq 'html') {
+	    if ( $HTML_PERMIT_HTML_ATTACHMENT ) {
+		$metacharconv = 0;
+		$print_pre    = 0;
+	    }
+	    else {
+		$metacharconv = 1;
+		$print_pre    = 1;
+	    }
+
 	    $fn = "${file}_${mp_count}.html";
 	    $fp = "$dir/$fn";
 	}
 	elsif ($mpbcb{'subtype'} eq 'plain') {
+	    $metacharconv = 0;
 	    $fn = "${file}_${mp_count}.txt";
 	    $fp = "$dir/$fn";
 	}
 	else {
+	    $metacharconv = 1;
 	    $fn = "${file}_${mp_count}.". $mpbcb{'subtype'};
 	    $fp = "$dir/$fn";
 	}
@@ -129,6 +145,7 @@ sub WriteHtmlFile
 	}
     }
 
+    print OUT "<PRE>" if $print_pre;
     while(1) {
 	$lp   = &main'GetLinePtrFromHash(*e, "Body", $lpp);#';
 	$xbuf = substr($e{'Body'}, $lpp, $lp-$lpp+1);
@@ -137,12 +154,31 @@ sub WriteHtmlFile
 
 	if ($xbuf =~ /ISO\-/i) { $xbuf = &DecodeMimeStrings($xbuf);}
 
-	&ConvSpecialChars(*xbuf) unless $noconv;
+	# decode all buffer in a mime multipart block
+	if ($xbuf && $mpbcb{'enc'}) {
+	    local($/); undef $/;
+	    my $code = $mpbcb{'enc'} eq 'quoted-printable' ? 'qp' : 'b64';
+	    require 'mimer.pl';
+	    &main::bdeflush($code); # flush to discard old cache
+	    $xbuf =~ s/[\s\n]*$//;
+	    $xbuf = &main::bodydecode($xbuf, $code). &main::bdeflush($code);
+	    $xbuf = &main::STR2EUC($xbuf);
+	}
+
+	# XXX-Envelope-Data-Input
+	# 1. &ConvSpecialChars(*xbuf) for the first multipart block
+	# 2. not converson for the second after blocks
+	#    (may be a bug since the second block may be also html)
+	# 3. may be hole ? 
+	#    out target is plaintext only, so always do ConvSpecialChars().
+	&ConvSpecialChars(*xbuf) if $metacharconv;
 
 	$xbuf =~ s#([a-z]+://\S+)#&Conv2HRef($1)#eg;
 
 	if ($fp) {
+	    print $fp "<PRE>" if $print_pre;
 	    print $fp $xbuf;
+	    print $fp "</PRE>" if $print_pre;
 	}
 	else {
 	    print OUT $xbuf;
@@ -152,9 +188,12 @@ sub WriteHtmlFile
 
 	$lpp = $lp + 1;
     }
+    print OUT "</PRE>" if $print_pre;
 
     if ($fp) { 
-	print OUT "\t<P><A HREF=\"$fn\">$fn (attatchment)</A>\n";
+	print OUT "\t<P><A HREF=\"$fn\">$fn (attatchment)</A>";
+	print OUT "(tag is disabled)\n" if $print_pre;
+	print OUT "\n";
 	close($fp);
     }
 }
@@ -210,6 +249,7 @@ sub DecodeAndWriteFile
     binmode(IMAGE);
 
     while(1) {
+	# XXX-Envelope-Data-Input (raw input into base64 decoder)
 	$lp   = &main'GetLinePtrFromHash(*e, "Body", $lpp);#';
 	$xbuf = substr($e{'Body'}, $lpp, $lp-$lpp+1);
 
