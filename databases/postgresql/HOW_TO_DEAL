@@ -1,0 +1,73 @@
+1. add user
+
+SQL# createuser fml
+Shall the new user be allowed to create databases? (y/n) y
+Shall the new user be allowed to create more new users? (y/n) y
+CREATE USER
+
+1.1 edit acess control if needed
+
+	/usr/local/pgsql/data/pg_hba.conf
+
+	local        all                                         trust
+	host         all         127.0.0.1     255.255.255.255   trust
+	host         all         192.168.1.3   255.255.255.255   trust
+
+
+2. create database
+
+SQL# createdb fml
+CREATE DATABASE
+
+	[verify]
+	shell# ls /usr/local/pgsql/data/base/fml
+	PG_VERSION                      pg_listener
+	pg_aggregate                    pg_listener_relname_pid_index
+		... snip ...
+	pg_language_name_index          pg_views
+	pg_language_oid_index
+
+
+3. run psql
+
+# su postgres
+# id -un
+postgres
+# psql fml
+Welcome to psql, the PostgreSQL interactive terminal.
+
+Type:  \copyright for distribution terms
+       \h for help with SQL commands
+       \? for help on internal slash commands
+       \g or terminate with semicolon to execute query
+       \q to quit
+
+4. create table
+
+fml=# create table ml (ml text, addr text);
+CREATE
+fml=# \d ml
+         Table "ml"
+ Attribute | Type | Modifier 
+-----------+------+----------
+ ml        | text | 
+ addr      | text | 
+
+fml=# 
+
+
+5. insert data
+
+fml=# insert into ml (ml, addr)
+fml-# values ('elena', 'rudo@nuinui.fml.org');
+INSERT 18932 1
+
+
+6. show table
+
+fml=# select * from ml ;
+  ml   |        addr         
+-------+---------------------
+ elena | rudo@nuinui.fml.org
+(1 row)
+
