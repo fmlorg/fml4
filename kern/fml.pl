@@ -456,15 +456,21 @@ sub InitConfig
     if ($0 =~ m%^(.*)/(.*)%) { $FML = $2;}
 
     # a little configuration before the action
-    if ($FML_UMASK || $UMASK) {
-	$FML_UMASK ? umask($FML_UMASK) : umask($UMASK);
+    if (defined $FML_UMASK) {
+	$UMASK = $FML_UMASK;
+    }
+    elsif (defined $UMASK) {
+	;
     }
     elsif ($USE_FML_WITH_FMLSERV) {
-	umask(007); # rw-rw----
+	$UMASK = 007; # rw-rw----
     }
     else {
-	umask(077); # rw-------
+	$UMASK = 077; # rw-------
     }
+
+    umask($UMASK);
+    defined $DEFAULT_DIR_MODE || ($DEFAULT_DIR_MODE = ($UMASK & 0777) ^ 0777);
 
     ### Against the future loop possibility
     if (&AddressMatch($MAIL_LIST, $MAINTAINER)) {
@@ -2202,7 +2208,7 @@ sub MkDir { &Mkdir(@_);}
 sub Mkdir
 {
     if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
-    &MkDirHier($_[0], $USE_FML_WITH_FMLSERV ? 0770 : 0700);
+    &MkDirHier($_[0], $DEFAULT_DIR_MODE || 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
 }
