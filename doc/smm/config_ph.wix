@@ -53,7 +53,10 @@
 .k	$MIME_DECODED_ARTICLE
 
 と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
-時に日本語へ逆変換した内容を書き込みます。
+時に日本語へ逆変換した内容を書き込みます。ただしこれをすると 
+MIME/Multipart とかでエラーになるのでやってはいけません。
+
+これも にふてぃ〜 とかのださださ対策の一貫の名残です。
 
 
 .S	ISO-2022-JP trap
@@ -81,11 +84,9 @@ RFC1522	2. Syntax of encoded-words
 .k	$MIME_MULTIPART_PREAMBLE
 .k	$MIME_MULTIPART_TRAILER
 
-以下はＭＬ本来の配送には普通関係ないです。
-
-右辺はデフォールトの値（Built-in）です。
-ファイルの取り寄せ等のモードにMIME関係もありますが、その時に使われてい
-ます。
+以下はＭＬ本来の配送には関係ないです。mget やまとめおくりの際の処理に
+関係します。右辺はデフォールトの値（Built-in）です。ファイルの取り寄せ
+等のモードにMIME関係もありますが、その時に使われています。
 
    Mime-Version:
    Content-Type:
@@ -166,8 +167,35 @@ RFC1522	2. Syntax of encoded-words
 なんですが、これがデフォールトです。
 
 
+.S	MLを止めて(ロックして) config.phの edit をしたい
+.k	vipw.pl
+.l	bin/vipw.pl
+.k	maintenance.pl
+
+ＭＬを動かしたまま config.ph を edit するのちょっと恐いです。夜中とか
+メールがまず来ないと思っている時間ではなく、普通にメールが来得る時間帯
+にメインテナンスをしたい時には
+
+	% makefml edit ML 
+
+昔あった maintenace.pl や vipw.pl は削除されましたが、それと同じことを
+する機能です。しかしこれを使う場合は makefml config は基本的に使えない
+ということを意味するので注意して下さい。makefml config は毎回
+
+	 cf -> config.ph 
+
+の生成手順を行なうため、cf ファイルがマスターになります。cf ファイルの
+内容は makefml config でも保存されるので、makefml config を使う場合は 
+cf を設定のマスターファイルにする必要があります。
+ちょうど sendmail.cf と CFの設定ファイルの関係のように
+
+
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
