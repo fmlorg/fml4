@@ -905,13 +905,13 @@ sub OutPutLocalConfig
 
 	    if ($v eq "distribute") {
 		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
-		print CF "\&DEFINE_MODE('distribute') ";
+		print CF "\&DEFINE_MODE('post=anyone') ";
 		print CF "unless \$Envelope{'mode:ctladdr'};\n";
 		print CF "\# mode != ctladdr may be always true\n";
 	    }
 	    if ($v eq "distribute_with_member_check") {
 		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
-		print CF "\&DEFINE_MODE('distribute_with_member_check') ";
+		print CF "\&DEFINE_MODE('post=members_only') ";
 		print CF "unless \$Envelope{'mode:ctladdr'};\n";
 		print CF "\# mode != ctladdr may be always true\n";
 	    }
@@ -1220,7 +1220,7 @@ sub ModeString
 	"distribute-only (anyone can post)";
     }
     elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
-	"distribute-only (only member can post)";
+	"distribute-only (only members can post)";
     }
     else {
 	"distribute + commands available";
@@ -1267,8 +1267,8 @@ sub ShowDeliveryModeMenu
     $_ .= "  ENTRY                           Current Configuration\n";
     $_ .= "-------------------------------------------------------\n";
     $_ .= "0 END\n";
-    $_ .= "1 Distribute Only (only member can post)  $mode1\n";
-    $_ .= "2 Distribute Only (anyone can post)       $mode2\n";
+    $_ .= "1 Distribute only (only members can post) $mode1\n";
+    $_ .= "2 Distribute only (anyone can post)       $mode2\n";
     $_ .= "3 Distribute + Commands (default)         $mode3\n";
 
     $_  =~ s/\n/\n$CurTag/g;
@@ -2106,7 +2106,7 @@ sub ApplyPolicy
 	$MAIL_LIST_MODE = "distribute";
 	$Marker{'policy:dm:d-c:any'}    = "<===";
     }
-    elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (only member can post)") {
+    elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (only members can post)") {
 	$MAIL_LIST_MODE = "distribute_with_member_check";
 	$Marker{'policy:dm:d-c:member'} = "<===";
     }
@@ -2148,7 +2148,7 @@ sub PolicyListMode
 	$Policy{'MAIL_LIST_MODE'} = "distribute + commands";
     }
     elsif ($r == 2) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute (only member can post)";
+	$Policy{'MAIL_LIST_MODE'} = "distribute (only members can post)";
     }
     elsif ($r == 3) {
 	$Policy{'MAIL_LIST_MODE'} = "distribute (anyone can post)";
