@@ -677,7 +677,7 @@ sub FixPath
     }
     close(NEW);
     close(PROG);
-    sleep 1;
+    # sleep 1;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	unlink "${prog}.bak" if -f "${prog}.bak";
@@ -1447,14 +1447,32 @@ sub do_install
 	return;
     }
     else {
-	print "Installing ... to $Config'EXEC_DIR\n"; #';
+	print "Installing fml system to $Config'EXEC_DIR\n"; #';
     }
 
-    &FixPath("src/fml.pl");
-    &FixPath("src/msend.pl");
-    &FixPath("libexec/fmlserv.pl");
-    &FixPath("sbin/makefml");
-    &FixPath("cf/config");
+    ### Fixing perl path ###
+    {
+	print STDERR "   Fixing Path:";
+
+	print STDERR " src";
+	&FixPath("src/fml.pl");
+	&FixPath("src/msend.pl");
+
+	print STDERR " libexec";
+	for (<libexec/*.pl>){ &FixPath($_);}
+
+	print STDERR " sbin";
+	&FixPath("sbin/makefml");
+
+	print STDERR " cf";
+	&FixPath("cf/config");
+
+	# bin/*.pl
+	print STDERR " bin";
+	for (<bin/*.pl>){ &FixPath($_);}
+
+	print STDERR " Done.\n";
+    }
 
     &ResetVariables;
 
