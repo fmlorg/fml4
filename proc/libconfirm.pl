@@ -292,11 +292,6 @@ sub GenConfirmReplyText
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
-
-	$s .= "Hi, I am fml ML manager for the ML $ML_FN.\n";
-	$s .= "Please reply this mail to confirm your subscribe request\n";
-	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
-	$s .= "So, you can be added to MAILING LIST $ML_FN.";
     }
     elsif ($mode eq 'IdCheck::syntax_error') {
 	&Mesg(*e, $NULL, 'confirm.auto_regist.syntax_error',
@@ -306,21 +301,11 @@ sub GenConfirmReplyText
 	      $CONFIRMATION_ADDRESS);
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Confirmation Syntax or Password Error:\n";
-	$s .= "Syntax is following style, check again syntax and password\n\n";
-	$s .= "$CONFIRMATION_KEYWORD password $cf{'name'}\n";
-	$s .= "\nwhere this \"password\" can be seen in the\n";
-	$s .= "confirmation request mail from MAILING LIST <$MAIL_LIST>.\n";
     }
     elsif ($mode eq 'Confirm::expired') {
 	&Mesg(*e, $NULL, 'confirm.auto_regist.expired',
 	      $MAIL_LIST, 
 	      $CONFIRMATION_KEYWORD);
-
-	$s .= "Your confirmation for \"subscribe request for $MAIL_LIST\"\n";
-	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
-	$s .= "So we treat you request is the first time request.\n";
-	$s .= "Please try again. The new confirm key is as follows\n\n";
     }
     elsif ($mode eq 'BufferSyntax::Error') {
 	&Mesg(*e, $NULL, 'confirm.auto_regist.buffer_syntax_error',
@@ -330,16 +315,6 @@ sub GenConfirmReplyText
 	      $key);
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "SYNTAX ERROR! Please check your mail\n\n";
-	$s .= "   - The address you used IS NOT A ML MEMBER?\n";
-	$s .= "     (TRUE if you try to subscribe)\n";
-	$s .= "   - You sent a bad subscribe syntax?\n\n";
-	$s .= "If you try to subscribe,  please use the following syntax\n\n";
-	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
-	$s .= "(Name NOT E-Mail Address)\n";
-	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
-	$s .= "For example,\n\n";
-	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
     }
     elsif ($mode eq 'BufferSyntax::InvalidAddr') {
 	&Mesg(*e, $NULL, 'confirm.auto_regist.invalid_addr',
@@ -349,8 +324,6 @@ sub GenConfirmReplyText
 	      $key);
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Please use your name NOT E-Mail Address! like \n\n";
-	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
     }
 
     $s;
@@ -576,7 +549,6 @@ sub MesgChaddrConfirm
     else {
 	&Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
 	&Mesg(*e, "\tsyntax: chaddr old-address new-address");
-	&Mesg(*e, "\told-address should be a member");
     }
 }
 
