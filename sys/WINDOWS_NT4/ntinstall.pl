@@ -134,10 +134,15 @@ sub RecursiveCopy
 
 	my (@f) = <$dir\\*>;
 	if (@f) {
-	    print STDERR ".";
-	    print STDERR "copy $dir\\* $EXEC_DIR\\$target\n" if $debug_nt;
-	    system "copy $dir\\* $EXEC_DIR\\$target >nul";
-	    print STDERR "\nfail to copy $dir\\* $EXEC_DIR\\$target\n" if $?;
+	    my ($found) = 0;
+	    for (@f) { -f $_ && $found++;}
+	    if ($found) {
+		print STDERR ".";
+		print STDERR "copy $dir\\* $EXEC_DIR\\$target\n" if $debug_nt;
+		system "copy $dir\\* $EXEC_DIR\\$target >nul";
+		print STDERR "\nfail to copy $dir\\* $EXEC_DIR\\$target\n"
+		    if $?;
+	    }
 	}
     }
 }
