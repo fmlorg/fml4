@@ -33,11 +33,15 @@ sub MailLocal
     $LOCK_UN = 8;
 
     # Do FLOCK
-    if ( open(MBOX, ">> $MAIL_SPOOL") ) {
+    if (open(MBOX, ">> $MAIL_SPOOL")) {
  	flock(MBOX, $LOCK_EX);
 	seek(MBOX, 0, 2);
     }
-    elsif ( open(MBOX, ">> $HOME/dead.letter") ) {
+    elsif (open(MBOX, ">> $HOME/mbox")) {
+	flock(MBOX, $LOCK_EX);
+	seek(MBOX, 0, 2);
+    }
+    elsif (open(MBOX, ">> $HOME/dead.letter")) {
 	flock(MBOX, $LOCK_EX);
 	seek(MBOX, 0, 2);
     }
@@ -47,22 +51,8 @@ sub MailLocal
     }
 
     # APPEND!
-    select(MBOX); $| = 1;
-    &Log("> $MAIL_SPOOL") if $debug;
-
-    print MBOX $MailHeaders;
-    local(@s) = split(/\n/, $MailBody);
-    while(@s) {
-	$_ = shift @s;
-	print MBOX ">" if /^From /i; # '>From'
-	print MBOX $_;
-    }
-
-    # not newline terminated
-    print MBOX "\n" unless $_ =~ /\n$/;
-
-    # "\n"; allow empty message
-    print MBOX "\n";
+    &Log(">> $MAIL_SPOOL") if $debug;
+    &Append2MBOX(0);
 
     # Unlock
     flock(MBOX, $LOCK_UN);
@@ -70,65 +60,112 @@ sub MailLocal
 }
 
 
+sub Append2MBOX
+{
+    local($cut_unix_from) = 0;
+    local($cut_unix_from) = @_;
+    local(@s);
+
+    # APPEND!
+    select(MBOX); $| = 1;
+
+    # Header
+    if ($cut_unix_from) {
+	@s = split(/\n/, $MailHeaders);
+	while(@s) {
+	    $_ = shift @s;
+	    next if /^From /i;
+	    print MBOX $_,"\n";
+	}
+
+	# separator between Header and Body
+	print MBOX "\n";
+    }
+    else {  
+	print MBOX $MailHeaders;
+    }
+
+    # Body
+    @s = split(/\n/, $MailBody);
+    while(@s) {
+	$_ = shift @s;
+	print MBOX ">" if /^From /i; # '>From'
+	print MBOX $_,"\n";
+    }
+
+    # not newline terminated
+    print MBOX "\n" unless $_ =~ /\n$/;
+
+    # "\n"; allow empty message
+    print MBOX "\n";
+}
+
+
 sub MailProc
 {
     local($type, $exec) = @_;
 
+    &Log("[$type]$exec") if $debug;
+
+    # defaults
     if ($exec =~ /^mail\.local$/i) {
-	&Log("mail.local") if $debug;
-	&MailLocal;
+	&MailLocal || &Log($!);
     }
 
-    if ($type =~ /^\|$/o) {
-	&Log("|$exec") if $debug;
-	open(EXEC,"|$exec");
-	select(EXEC); $| = 1; 
-	print EXEC &WholeMail;
-	close(EXEC);
+    # call "PERL" procedure
+    elsif ($type =~ /^&$/o) { 
+	(eval "&$exec;", $@ eq "") || &Log($@);
     }
 
-    if ($type =~ /^>$/o) {
-	&Log(">>$exec") if $debug;
-	open(EXEC,">> $exec");	# APPEND!
-	select(EXEC); $| = 1; 
-	print EXEC &WholeMail;
-	close(EXEC);
+    # cut unix from and PIPE OPEN
+    elsif ($type =~ /^mh$/io) { 
+	open(MBOX, "|$exec")  || &Log($!);
     }
 
-    if ($type =~ /^&$/o) {
-	&Log("&$exec") if $debug;
-	if ($exec =~ /(\S+)\((.*)\)/) {
-	    $exec  = $1;
-	    $param = $2;
-	    &$exec($param);
-	}
-	else {
-	    &$exec;
-	}
+    # PIPE OPEN
+    elsif ($type =~ /^\|$/o) { 
+	open(MBOX, "|$exec")  || &Log($!);
     }
 
+    # APPEND!
+    elsif ($type =~ /^>$/o) { 
+	open(MBOX, ">>$exec") || &Log($!);
+    }
+
+    # GO! fflush() is done in sub Append2MBOX. 
+    if ($type =~ /^mh$/i) {
+	&Append2MBOX(1);
+    }
+    else {
+	&Append2MBOX(0);
+    }
+
+    # CLOSE
+    close(MBOX);
 }
 
 
 sub FmlLocalInitilize
 {
+    # DEFAULTS
     $UNMATCH_P = 1;
     $AUTH      = 0;
     $NOT_TRACE_SMTP = 1;
+    $FS = '\s+';			# DEFAULT field separator
     
     @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
-	    PASSWORD, DEBUG, AND, ARCHIVE_DIR);
+	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION);
 
+    # getopts
     local($ARGV_STR) = join(" ", @ARGV);
     undef @ARGV;
     if ($ARGV_STR =~ /\-user\s+(\S+)/) {
 	$USER = $1;
     }
 
+    # a few variables
     $USER = $USER || (getpwuid($<))[0];
-
     $HOME = (getpwnam($USER))[7] || $ENV{'HOME'};
-
     $FML_LOCAL_RC = "$HOME/.fmllocalrc";
 }
 
@@ -158,7 +195,9 @@ sub FmlLocalReadCF
 
 	# Set environment variables
 	foreach $VAR (@VAR) { 
-	    /^$VAR\s+(\S+)/ && ($VAR{$VAR} = $1) && (next CF);
+	    if (/^$VAR\s+(\S+)/) {
+		eval "\$$VAR = '$1';";
+	    }
 	}
 
 	# store configurations
@@ -176,42 +215,33 @@ sub FmlLocalConfigure
     $EVAL = &FmlLocalReadCF;
     print STDERR $EVAL if $debug;
 
-    $HOME = $VAR{'HOME'} || (getpwnam($USER))[7] || 
+    $HOME = $HOME || (getpwnam($USER))[7] || 
 	    $ENV{'HOME'} || $ENV{'LOGDIR'} || (getpwuid($<))[7] ||
 		die("You are homeless!\n");
 
-    $DIR    = $VAR{'DIR'}    || $HOME;
-
-    $LIBDIR = $VAR{'LIBDIR'} || $DIR;
-
-    $LOGFILE = $VAR{'LOG'} || "$DIR/log";
-    $ARCHIVE_DIR = $VAR{'ARCHIVE_DIR'} || $DIR;
+    $DIR     = $DIR    || $HOME;
+    $LIBDIR  = $LIBDIR || $DIR;
+    $LOGFILE = $LOG    || "$DIR/log";
+    $ARCHIVE_DIR = $ARCHIVE_DIR || $DIR;
     
-    $FML_PL = $VAR{'FML_PL'} || 
+    $FML_PL = $FML_PL || 
 	(-f "$LIBDIR/fml.pl" && "$LIBDIR/fml.pl") ||
 	    (-f "$DIR/fml.pl" && "$DIR/fml.pl") ||
 		(-f "$ENV{'FML'}/fml.pl" && "$ENV{'FML'}/fml.pl") ||
 		    ($NOT_EXIST_FML_PL = 1);
-#die "Please set where is fml.pl!\n";
 
-    $USER   = $USER || $VAR{'USER'} || getlogin || 
-	(getpwuid($<))[0] || "Somebody";
+    $USER   = $USER || getlogin || (getpwuid($<))[0] || 
+	die "USER not defined\n";
 
-    $MAIL_SPOOL 
-	= $VAR{'MAIL_SPOOL'} || 
-	    (-r "/var/mail/$USER"       && "/var/mail/$USER") ||
-		(-r "/var/spool/mail/$USER" && "/var/spool/mail/$USER") ||
-		    (-r "/usr/spool/mail/$USER" && "/usr/spool/mail/$USER");
+    $MAIL_SPOOL = $MAIL_SPOOL || 
+	(-r "/var/mail/$USER"       && "/var/mail/$USER") ||
+	    (-r "/var/spool/mail/$USER" && "/var/spool/mail/$USER") ||
+		(-r "/usr/spool/mail/$USER" && "/usr/spool/mail/$USER");
 
-    $PASSWORD = $VAR{'PASSWORD'};
-
-    # field separator
-    $FS = $VAR{'FS'} || '\s+';
-
+    $VACATION_RC = $VACATION || "$HOME/.vacationrc";
+    
     # include ~/.vacationrc
-    if (-f "$HOME/.vacationrc") {
-	&FmlLocalReadCF("$HOME/.vacationrc");
-    }
+    &FmlLocalReadCF($VACATION_RC) if -f $VACATION_RC;
 
     1;
 }
@@ -251,7 +281,8 @@ sub FmlLocalPatternMatch
 	printf STDERR "=> %-10s %-60s\n", $_, $contents if $debug;
 
 	CF: foreach $pat (@CF) {
-	    ($field, $pattern, $type, $exec) = split(/$FS/, $pat);
+	    ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
+	    $exec = join(" ", @exec);
 	    next CF unless /$field/i;
 
 	    if ($field =~ /^AND$/i || (!$exec)) {
@@ -360,6 +391,26 @@ sub FmlLocalPatternMatch
     1;
 }
 
+
+# Expand mailbox in RFC822
+# From_address is modified for e.g. member check, logging, commands
+# Original_From_address is preserved.
+# return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
+sub Expand_mailbox
+{
+    local($mb) = @_;
+
+    $mb =~ s/\n(\s+)/$1/g;
+
+    # Hayakawa Aoi <Aoi@aoi.chan.panic>
+    ($mb =~ /^\s*.*\s*<(\S+)>.*$/io) && (return $1);
+
+    # Aoi@aoi.chan.panic (Chacha Mocha no cha nu-to no 1)
+    ($mb =~ /^\s*(\S+)\s*.*$/io)     && (return $1);
+
+    # Aoi@aoi.chan.panic
+    return $mb;
+}	
 
 sub FmlLocalSet
 {
@@ -498,6 +549,8 @@ sub FmlLocalReadFile
 
 
 ########## ########## ########## ########## ########## ########## 
+########## ########## ########## ########## ########## ########## 
+########## ########## ########## ########## ########## ########## 
 ########## Built-In Functions
 
 sub getback
@@ -506,6 +559,7 @@ sub getback
 
     chdir $ARCHIVE_DIR || do {
 	&Log("cannot chdir $DIR");
+	&Warn("cannot chdir $DIR");
 	return 0;
     };
 
@@ -527,8 +581,28 @@ sub getback
 }
 
 
-########## ########## ########## ########## ########## ########## 
+sub getmyspool
+{
+    undef $F1,$F2,$F2;
+    $F1 = $MAIL_SPOOL;
 
+    if (-f $F1 && (! &MetaCharP($F1))) {
+	&Log("getmyspool $F1");
+	&SendFile($Reply_to ? $Reply_to : $From_address,
+		  "Send $F1",
+		  $F1);
+    }
+    else {
+	&Log("fail to getmyspool $F1");
+    }
+
+    1;
+}
+
+
+########## ########## ########## ########## ########## ########## 
+########## ########## ########## ########## ########## ########## 
+########## ########## ########## ########## ########## ########## 
 
 ########## fml.pl
 sub GetTime
@@ -542,6 +616,42 @@ sub GetTime
 		   $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
 			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+}
+
+# one pass to cut out the header and the body
+sub Parsing
+{
+    $0 = "--Parsing header and body <$FML $LOCKFILE>";
+
+    # Guide Request Check within in the first 3 lines
+    $GUIDE_CHECK_LIMIT || ($GUIDE_CHECK_LIMIT = 3);
+    
+    while (<STDIN>) { 
+	if (1 .. /^$/o) {	# Header
+	    if (/^$/o) { #required for split(tricky)
+		$MailHeaders .= "\n";
+		next;
+	    } 
+
+	    $MailHeaders .= $_;
+
+	} 
+	else {
+	    # Guide Request from the unknown
+	    if ($GUIDE_CHECK_LIMIT-- > 0) { 
+		$GUIDE_REQUEST = 1 if /\#\s*guide\s*$/io;
+	    }
+
+	    # Command or not is checked within the first 3 lines.
+	    if ($COMMAND_CHECK_LIMIT-- > 0) { 
+		$CommandMode = 'on' if /^\#/o;
+	    }
+
+	    $MailBody .= $_;
+	    $BodyLines++;
+	    $_cf{'cl'}++ if /^\#/o; # the number of command lines 
+	}
+    }# END OF WHILE LOOP;
 }
 
 # Recreation of the whole mail for error infomation
