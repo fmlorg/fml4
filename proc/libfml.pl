@@ -252,7 +252,8 @@ sub DoProcedure
 
 	  # LIMIT
 	  if ($limit = $Procedure{"l#$xbuf"}) {
-	      if ($ProcedureLimitCount{$xbuf}++ > $limit) {
+	      $ProcedureLimitCount{$xbuf}++;
+	      if ($ProcedureLimitCount{$xbuf} > $limit) {
 		  &Log("$xbuf command exceeds the limit $limit, STOP");
 		  local($s);
 		  $s .= "*** ";
