@@ -917,6 +917,61 @@ actives には”MLからの受信がOKなアドレス”だけ
 をかけているアドレスつぅかサイトつぅかソフトつぅかが一目でわかるかなと
 
 
+.S	ＭＬとWWWのマシンが別々の場合
+
+とあるケースは、メールを受けるマシンと WWW のマシンは別々(にある日強制
+的にさせられてしまったケース)で、WWWマシンの上でMLをやりたい場合。
+
+ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
+れず、そのマシンの上でないとDISKも十分でない場合。
+
+次のような pop を使う技が使えます。
+.xref	pop2recv.pl
+
+	cron で pop2recv.pl を１分に一回とか呼ぶ。
+	pop2recv.pl が pop server からメールを持ってきて
+	fml.pl を起動する。
+
+これで pop でメールを読む環境ならＯＫっす。
+
+詳しくは pop2recv.pl の部分を読んで下さい↓
+.xref	pop2recv.pl
+
+
+.S	勝手についてしまう signature を取る
+
+そもそもメールの本文をいじるなんてとんでもない話ですが…
+そういうことをする provider なり会社を許してはいけませんね。
+
+そもそも、これ通信の秘密に関わる問題なので、許してはいけません。
+それができるということは内容の改竄もできるし、機密保持も存在していない
+わけです。
+
+
+切り出して追加の例：＃別に split じゃなくてもいいんだけど
+
+$SMTP_OPEN_HOOK = q#
+	local($uja);
+	for (split(/\n/, $e{'Body'})) {
+	   $uja .= "$_\n" if /=+/ .. /\-+/;
+	}
+
+	$e{'Body'} .= $uja;
+#;
+
+切り捨て:
+
+$SMTP_OPEN_HOOK = q#
+	local($uja);
+	for (split(/\n/, $e{'Body'})) {
+	   next if /=+/ .. /\-+/;
+	   $uja .= "$_\n";
+	}
+
+	$e{'Body'} = $uja;
+#;
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp

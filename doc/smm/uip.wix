@@ -375,10 +375,44 @@ SYNOPSIS:
 
 
 .S	POP経由の自動RefileやＭＬの実行 (bin/pop2recv.pl)
+.l	pop2recv.pl
 .k	POP経由の自動RefileやＭＬの実行
 .k	bin/pop2recv.pl
 .xref	cron
 .xref	fml_local
+
+設定ファイル：
+
+   ~/.popexecrc 設定ファイル pop2recv で実行するコマンドを定義する
+
+設定の仕方：
+	設定ファイルを書いて、Cron を設定する。
+	
+設定例：
+	全部のメールを fml.pl へ渡していいなら、
+
+~/.popexecrc の中は
+
+	$POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
+	1;
+
+でいいわけですが、普通はＭＬと自分宛をわけたりするためにフィルタ
+(e.g. fml_local)が必要な場合もあるでしょうが、基本的には同じです。
+
+	$POP_EXEC の中身はフィルタのプログラムになります。
+
+注意： いつもと違って "| で始らないことに注意してください。
+
+この後、pop-server が hikari、 user が fukachan なら
+
+* * * * * pop2recv.pl -user fukachan -host hikari
+
+のような内容の crontab を書いて、crontab crontab とかします。
+この辺はＯＳによって異なります。
+.xref cron
+
+
+解説：
 
    ~/.popexecrc という設定ファイルを使って、POP経由でfml_localへ渡す。
    またcronで pop2recv.pl を動かし、ＭＬと同様のことをすることにする。
@@ -393,9 +427,9 @@ SYNOPSIS:
 	pop2recv.pl -user fukachan -host hikari
 
 を一分おきに起こす。
-＃4.4 だと 
+＃NetBSD の cron だと 
 ＃	* * * * * pop2recv.pl -user fukachan -host hikari
-＃ですよね。
+＃です。
 
 これで
 	一分に一回 POPサーバへメールが来ているかどうかを見にいって
@@ -450,6 +484,8 @@ SYNOPSIS:
     
 
 ターゲット SPOOL 中のメールを HTML化し $HTTP_DIR 中に変換します。
+注意： 2.1GAMMA#103 以降はデフォールトでスレッド処理も実行します。 
+
 変換の仕方については SyncHtml (.ptr{SyncHtml}) を参照してください。
 
 ＭＬなら config.ph を評価して実行するので -f config.ph で呼び出しても
