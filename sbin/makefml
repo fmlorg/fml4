@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -668,12 +668,24 @@ sub Write2
 
 sub Touch  
 { 
+    local($umask);
+
+    $umask = umask;
+    if ($GroupWritable eq 'fmlserv') {
+	umask(007);
+    }
+    else {
+	umask(077);
+    }
+
     open(APP, ">>$_[0]"); 
     close(APP); 
     chown $<, $GID, $_[0] if $GID;
 
     $now = time;
     utime $now, $now, @_;
+
+    umask($umask);
 }
 
 
@@ -1051,7 +1063,7 @@ sub search_path
 }
 
 
-############ CFVersion 2 -> 3 
+############ CFVersion 2 -> 3
 
 ### convert CF2 -> CF3
 sub ConvertCF2to3
@@ -1483,14 +1495,15 @@ sub do_passwd
 
     &ResetVariables;
     $cf = "$ML_DIR/$ml/cf";
-    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+    # set %config, eval %MAKE_FML in it;
+    &GetCF($cf, $ml, *config, *cur_config);
 
     # $ml/etc
     &MakeSubDir("$ML_DIR/$ml/etc");
 
     # here we go! 
     &SetWritableUmask;
-    $passwd_file= "$ML_DIR/$ml/etc/passwd";
+    $passwd_file= $cur_config{"PASSWD_FILE"} || "$ML_DIR/$ml/etc/passwd";
 
     -f $passwd_file || &Touch($passwd_file);
 
@@ -1727,7 +1740,10 @@ sub GenerateDirectory
     # owner only read-write
     # umask(077);
     &MakeDir("$ML_DIR/$ml");
-    &MakeDir("$ML_DIR/$ml/spool"); # required for further flock
+
+    # required for further flock but need and can not reflect 
+    # config.ph you change in this stage.
+    &MakeSubDir("$ML_DIR/$ml/spool"); 
 }
 
 
@@ -1795,7 +1811,8 @@ sub do_newml
     ### cf fixed
     if ($MAIL_LIST_MODE) {
 	$cf = "$ML_DIR/$ml/cf";
-	&GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+	# set %config, eval %MAKE_FML in it;
+	&GetCF($cf, $ml, *config, *cur_config); 
 	$MAKE_FML{"DELIVERY_MODE"} = $MAIL_LIST_MODE;
 	print STDERR "MODE $MAKE_FML{'DELIVERY_MODE'}\n";
 	&SaveCF($cf, *config);
@@ -1902,13 +1919,16 @@ sub do_test
 # here eval $local_config since here is the phase evaluating CF;
 sub GetCF
 {
-    local($cf, *config) = @_;
+    local($cf, $ml, *config, *cur_config) = @_;
     local($local_config, %uniq, $cf_template);
+
+    # against errors
+    $cf = $cf || "$ML_DIR/$ml/cf";
 
     # template -> @ConfigOrder (with comments)
     $cf_template = "$EXEC_DIR/etc/makefml/cf";
-    open(CF, $cf_template) || die ("cannot open cf template[$cf_template]");
-    while (<CF>) {
+    open(CFTMP, $cf_template) || die ("cannot open cf template[$cf_template]");
+    while (<CFTMP>) {
 	chop;
 
 	if (/^\#/ || /^\s*$/) {
@@ -1919,8 +1939,11 @@ sub GetCF
 	    push(@ConfigOrder, $key);
 	}
     }
-    close(CF);
+    close(CFTMP);
 
+    # set up a buffer in which we eval the current cf
+    undef $evalbuf;
+    $evalbuf .= qq# \$DIR = \"$ML_DIR/$ml\"; \n#;
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
@@ -1941,6 +1964,9 @@ sub GetCF
 	    $uniq{$key}   = 1;	# unique
 
 	    print STDERR "\$config{$key} = [$value]\n" if $debug;
+
+	    # set up evalbuf to get the current values
+	    $evalbuf .= qq# \$cur_config{'${key}'} = \"$value\"; \n#;
 	}
 	else {
 	    next if /^LOCAL_CONFIG/;
@@ -1956,6 +1982,10 @@ sub GetCF
 	    }
 	}
     }
+
+    # set up $evalbuf
+    eval($evalbuf);
+    print $@ if $@;
 
     # set local_config -> %MAKE_FML;
     # print $local_config if $debug;
@@ -1986,11 +2016,12 @@ sub do_pgp
 {
     local($ml, @argv) = @_; 
 
-    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+    $cf = "$ML_DIR/$ml/cf";
+    # set %config, eval %MAKE_FML in it;
+    &GetCF($cf, $ml, *config, *cur_config); 
 
-    &MkDirHier($config{'PGP_PATH'});
-
-    $ENV{'PGPPATH'} = $config{'PGP_PATH'};
+    $ENV{'PGPPATH'} = $cur_config{'PGP_PATH'};
+    &MkDirHier($cur_config{'PGP_PATH'});
 
     $| = 1;
     print "\n--- PGP BEGIN ---\n";
@@ -2084,7 +2115,8 @@ sub do_config
     }
 
     # evaluate "$ML_DIR/$ml/cf";
-    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+    # set %config, eval %MAKE_FML in it;
+    &GetCF($cf, $ml, *config, *cur_config); 
 
     # internal use
     $config{'_ML_'} = $ml;
@@ -2139,8 +2171,9 @@ sub EachLevelQuery
 {
     local(*config, $top_level) = @_;
     local($r, $clear_prog);
-    
-    $clear_prog = &search_path('clear');
+
+    # "clear" not exist on NT4
+    $clear_prog = $UNISTD ? &search_path('clear') : "cls";
 
     while ($top_level =~ s|^//|/|) { ;}
 
@@ -2376,15 +2409,19 @@ sub do_adduser
 	return;
     }
 
+    &GetCF($cf, $ml, *config, *cur_config); 
+
     &SetWritableUmask;
 
     print "---Adding $member to $ml mailing list\n";
 
     if ($AdminMode) {
-	@files = ("$ML_DIR/$ml/members-admin");
+	@files = ($cur_config{'ADMIN_MEMBER_LIST'} ||
+		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = ("$ML_DIR/$ml/members", "$ML_DIR/$ml/actives");
+	@files = ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members", 
+		  $cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives");
     }
 
     &ResetVariables;
@@ -2425,13 +2462,18 @@ sub do_byeuser
 
     print "---Delete $member in $ml mailing list\n";
 
+    &GetCF($cf, $ml, *config, *cur_config); 
+
     &SetWritableUmask;
 
+    # beth: require fix
     if ($AdminMode) {
-	@files = ("$ML_DIR/$ml/members-admin");
+	@files = ($cur_config{'ADMIN_MEMBER_LIST'} ||
+		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = ("$ML_DIR/$ml/members", "$ML_DIR/$ml/actives");
+	@files = ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members", 
+		  $cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives");
     }
 
     &ResetVariables;
@@ -2715,12 +2757,15 @@ sub main'FUnLock { &ml'FUnLock(@_);}
 sub FLock
 {
     local($ml, $mldir) = @_;
-    local($lockdir) = "$mldir/$ml/";
-    $lockdir =~ s#$ml/$ml#$ml#;
+    local($lockf, $lockdir);
+
+    $lockdir  = "$mldir/$ml/";
+    $lockdir  =~ s#$ml/$ml#$ml#;
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
-   
-    open($lockdir, $lockdir) || do {
-	&Log("Error: Flock cannot open $lockdir");
+    $lockf    = $UNISTD ? $lockdir : "$mldir/$ml/config.ph";
+
+    open($lockdir, $lockf) || do {
+	&Log("Error: Flock cannot open $lockf");
 	return 0;
     };
 
