@@ -399,7 +399,7 @@ SYNOPSIS:
 	&LogWEnv($s, *e);
 
 ¤Ï
-=#
+=E
 &LogWEnv($s, *e); is the same as
 
 	&Log($s)
