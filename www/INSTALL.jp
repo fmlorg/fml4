@@ -1,7 +1,9 @@
 		CGIのインストールについて (fml-current)
 		〜かぎりなくβバージョン〜
 
-fml-stable でもCGIが使えないことはない:)
+fml-stable でもCGIが使えないことはない:)んだけど、ちょっと嘘だ。
+default_config.ph を呼ばないと…
+＃デフォールト値が違う場合があるような
 
 .url http://www.fml.org/fml/examples/tips/fml-stable-with-cgi.html
 
