@@ -761,6 +761,7 @@ sub SetHashDefaults
 		 'log',    1,
 		 'showconfig', 1,
 		 'showconf', 1,
+		 'show', 1,
 		 'send-pr', 1,
 		 'bug-report-template', 1,
 		 );
@@ -776,7 +777,7 @@ sub SetHashDefaults
 	 "admin.cgi", "html_cgiadmin_passwd",
 
 	 # utility
-	 "showconfig", "showconf", 'send-pr', 'bug-report-template'
+	 "show", "showconfig", "showconf", 'send-pr', 'bug-report-template'
 	 );
 }
 
@@ -1657,7 +1658,8 @@ sub ExecCmd
 
 	my($curproc) = join(" ", $SavedFP, @opts);
 	$curproc =~ s/\s*$//;
-	print "DO \"$curproc\" for $ml mailing list.\n" if $show;
+	print "DO \"$curproc\" for $ml mailing list.\n" 
+	    if $show && ($fp !~ /^do\_show/);
 
 	&$fp(@argv);
 	if ($Env eq 'HTTPD') { &FixErrorBuffer($fp);}
@@ -5437,6 +5439,32 @@ sub do_setup_mladmin_cgi
     }
 
     print "\n   done.\n";
+}
+
+
+# CISCO IOS like commands for convenience :-)
+sub do_show
+{
+    my ($proc, @argv) = @_;
+    my (@p) = ('/sbin', '/usr/sbin', '/usr/bin', '/usr/etc');
+
+    if ($proc eq 'version') {
+	&do_showconfig();
+    }
+    elsif ($proc =~ /^int.*/) {
+	if (&__SearchPath('ifconfig', @p)) { &__system('ifconfig -a');}
+    }
+    elsif ($proc eq 'ip') {
+	if ($argv[0] eq 'route') {
+	    if (&__SearchPath('netstat', @p)) { &__system('netstat -rn');}
+	}
+	elsif ($argv[0] =~ /^int.*/) {
+	    if (&__SearchPath('ifconfig', @p)) { &__system('ifconfig -a');}
+	}
+    }
+    elsif ($proc eq 'diag') {
+	if (&__SearchPath('dmesg', @p)) { &__system('dmesg');}
+    }
 }
 
 
