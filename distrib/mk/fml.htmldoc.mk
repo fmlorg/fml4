@@ -68,8 +68,8 @@ var/html/advisories/index.html: doc/advisories/index.html
 	$(CPP) -P -DJAPANESE doc/advisories/index.html |\
 	$(JCONV) > $(FML)/var/html/advisories/index.html
 
-var/html/advisories/index-e.html: doc/advisories/index.html
-	$(CPP) -P -UJAPANESE doc/advisories/index.html \
+var/html/advisories/index-e.html: doc/advisories/index-e.html
+	$(CPP) -P -UJAPANESE doc/advisories/index-e.html \
 	> $(FML)/var/html/advisories/index-e.html
 
 var/html/op/index.html: doc/smm/*wix
@@ -87,7 +87,7 @@ var/html/op-e/index.html: doc/smm/*wix
 distrib/compile/WHATS_NEW.wix: .info
 	rm -f distrib/compile/WHATS_NEW.wix
 	echo '.HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
-	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix
+	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix || echo ""
 	echo '.~HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
 
 var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix

@@ -108,7 +108,7 @@ the fml distribution with www and ftp/snapshot/ directory.
 fml-2-1		2.1 Release
 fml-2-2		2.2 Release
 fml-2-2A-end	the end point of 2.2A
-fml-2-2-bb0	2.2 Release Branch BreakPoint 0 and working branch line
+fml-2-2-bb0	2.2 release working branch line
 		which is the road to 2.2.1.
 fml-2-2-1-prep	== fml-2-2-bb0's alias
 		the road to 2.2.1
@@ -116,3 +116,6 @@ fml-2-2-1-prep	== fml-2-2-bb0's alias
 fml-2-2A-end	2.2A end
 fml-2-2D	2.2D start
 fml-2-2D-start	2.2D start
+
+fml-3-0-maint	3.0 release branch
+fml-3-0-bb0	3.0_BETA start point

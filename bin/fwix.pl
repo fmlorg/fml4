@@ -373,6 +373,9 @@ sub ReadFile
 	undef $NotIncrement;
 	undef $TrapEC;
 
+	# if find space only line, cut off spaces
+	s/^\s+$//;
+
 	# debug, comment
 	/$COMMENT/i && next;                    # Comments
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
@@ -715,8 +718,23 @@ sub POH
 {
     local($s) = @_;
     local($lc, $buf);
+    local($re_jin)    = '\033\$[\@B]';
+    local($re_euc_c)  = '[\241-\376][\241-\376]';
 
     $lc = ($s =~ tr/\n/\n/);
+
+    if ($Lang eq 'ENGLISH' && $s =~ /$re_euc_c|$re_jin/) {
+	print STDERR "ignore <$s>\n";
+	return;
+    }
+
+    if ($s =~ /^\s*$/) {
+	$AlignCount++ if $s =~ /^\s*$/;
+	if ($AlignCount > 2) { return;}
+    }
+    else {
+	$AlignCount = 0;
+    }
 
     if ($lc > 1) {
 	&Debug("POH: input $lc lines") if $debug;
@@ -1236,7 +1254,8 @@ sub Expand
     elsif ($c eq 'n') {
 	if ($mode eq 'html') {
 	    $s =~ s/\s//g;
-	    $Index{$CurLang} .= "<A NAME=\"$s\">\n";
+	    $Index{'JAPANESE'} .= "<A NAME=\"$s\">\n";
+	    $Index{'ENGLISH'}  .= "<A NAME=\"$s\">\n";
 	}
 	return; # ignore
     }

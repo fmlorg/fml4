@@ -698,14 +698,15 @@ sub WaitFor354
 sub WaitForSmtpReply
 {
     local($ipc, $getretval, $ignore_error) = @_;
+    local($buf);
 
     if ($ipc) {
 	do { 
-	    print SMTPLOG $_ = <S>; 
-	    $RetVal .= $_ if $getretval;
-	    $SoErrBuf = $_  if /^[45]/o;
-	    &Log($_) if /^[45]/o && (!$ignore_error);
-	} while(/^\d+\-/o);
+	    print SMTPLOG ($buf = <S>); 
+	    $RetVal .= $buf if $getretval;
+	    $SoErrBuf = $buf if $buf =~ /^[45]/o;
+	    &Log($buf) if $buf =~ /^[45]/o && (!$ignore_error);
+	} while ($buf =~ /^\d+\-/o);
     }
     else {
 	do { 
@@ -713,7 +714,7 @@ sub WaitForSmtpReply
 	    $RetVal .= $_ if $getretval;
 	    $SoErrBuf = $_  if /^[45]/o;
 	    &Log($_) if /^[45]/o && (!$ignore_error);
-	} while(/^\d+\-/o);
+	} while (/^\d+\-/o);
     }
 }
 
@@ -888,7 +889,7 @@ sub SmtpPutActiveList2Socket
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
-	if ($debug_mci || 1) {
+	if ($debug_mci) {
 	    print STDERR 
 		$mci_count, 
 		":$file:($mci_window_start, $mci_window_end)> $rcpt\n";

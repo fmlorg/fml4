@@ -1065,9 +1065,18 @@ sub CheckCurrentProc
     ###      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
     if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@(\S+)/i) {
 	local($addr, $domain) = ($1, $2);
-	&Log("reject address $addr\@$domain");
+	&Log("reject mail from $addr\@$domain");
 	&WarnE("reject mail from $addr\@$domain", 
 	       "reject mail from $addr\@$domain\n");
+	$DO_NOTHING = 1;
+	return 0;
+    }
+
+    # reject all "From: MAIL_LIST" mails
+    if (&LoopBackWarn($From_address)) {
+	&Log("reject mail from $From_address");
+	&WarnE("reject mail from $From_address",
+	       "reject mail from $From_address\n");
 	$DO_NOTHING = 1;
 	return 0;
     }
@@ -2483,17 +2492,18 @@ sub LoopBackWarning { &LoopBackWarn(@_);}
 sub LoopBackWarn
 {
     local($to) = @_;
+    local($a);
 
-    for ($MAIL_LIST, $CONTROL_ADDRESS, @MAIL_LIST_ALIASES, 
-	 "fmlserv\@$DOMAINNAME", "majordomo\@$DOMAINNAME", 
-	 "listserv\@$DOMAINNAME") {
+    for $a ($MAIL_LIST, $CONTROL_ADDRESS, @MAIL_LIST_ALIASES, 
+	    "fmlserv\@$DOMAINNAME", "majordomo\@$DOMAINNAME", 
+	    "listserv\@$DOMAINNAME") {
 
-	next if /^\s*$/oi;	# for null control addresses
-	if (&AddressMatch($to, $_)) {
-	    &Debug("AddressMatch($to, $_)") if $debug;
-	    &Log("Loop Back Warning: ", "$to eq $_");
-	    &WarnE("Loop Back Warning: [$to eq $_] $ML_FN", 
-		   "Loop Back Warning: [$to eq $_]");
+	next if $a =~ /^\s*$/oi;	# for null control addresses
+	if (&AddressMatch($to, $a)) {
+	    &Debug("AddressMatch($to, $a)") if $debug;
+	    &Log("Loop Back Warning: ", "$to eq $a");
+	    &WarnE("Loop Back Warning: [$to eq $a] $ML_FN", 
+		   "Loop Back Warning: [$to eq $a]");
 	    return 1;
 	}
     }
