@@ -1,0 +1,29 @@
+.if LANG == JAPANESE
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+   /usr/local/fml/	実行ファイルやライブラリの置き場所
+			例: fml.plやlibsmtp.plなど
+   /var/spool/ml/	MLのディレクトリが生成される場所
+   /var/spool/ml/elena/	elena MLのHOMEディレクトリ
+.fi
+.if LANG == ENGLISH
+ [Terminology]
+   %        prompt of user shell
+   #        prompt of root shell
+   $EDITOR  editor you use
+
+   Direcoty path and mailing list name is default value.
+   Please rewrite it to fit your environment.
+
+   /usr/local/fml/	executables and libraries
+			Examples: fml.pl, libsmtp.pl, ...
+   /var/spool/ml/	directory which contains ML's
+   /var/spool/ml/elena/	elena ML HOME directory
+.fi
+.# $Id$
