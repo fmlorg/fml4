@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "config.h"
 
 static char rcsid[] = "$Id$";
 
@@ -17,10 +18,22 @@ main()
 
 #endif
 
-  execl("/home/axion/fukachan/work/spool/EXP/fml.pl", /* where is fml.pl */
+  if (getuid() != geteuid()) 
+    fprintf(stderr, "Warning: uid != euid\n");
+
+  if (getgid() != getegid()) 
+    fprintf(stderr, "Warning: gid != egid\n");
+
+#ifdef DEBUG
+  if (getuid() == geteuid() && (getuid() < (Uid_t) 10))
+    fprintf(stderr, "Warning: Hmm... uid seems set to %d < 10. O.K.? \n", 
+	    (int) getuid());
+#endif
+
+  execl(FMLPROG, /* where is fml.pl */
 	"(fml)", 
-	"/home/axion/fukachan/work/spool/EXP", /* where is config.ph */
-	"/home/axion/fukachan/work/spool/EXP", /* library of fml package */
+	FMLDIR, /* where is config.ph */
+	FMLLIBDIR, /* library of fml package */
 	NULL);
 
   exit(0);
