@@ -14,6 +14,9 @@ $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 umask(077);
 
 &FmlLocalInitilize;		# preliminary
+
+chdir $HOME || die("Cannot chdir \$HOME=$OME\n"); # meaningless but for secure
+
 &FmlLocalReadCF($CONFIG_FILE);	# set %VAR, %CF, %_cf
 &FmlLocalGetEnv;		# set ENV vars, $DIR, ...
 
@@ -32,11 +35,18 @@ exit 0;
 
 sub USAGE
 {
+    # Built in functions
     if (open(F, __FILE__)) {
 	while(<F>) { 
-	    /^\#\.USAGE:(.*)/ && ($USAGE_OF_BUILD_IN_FUNCTIONS .= "$1\n");
+	    /^\#\.USAGE:(.*)/ && ($USAGE_OF_BUILT_IN_FUNCTIONS .= "$1\n");
 	}
 	close(F);
+    }
+
+    # Variables
+    foreach (@VAR) { 
+	$VARIABLES .= " $_ ";
+	$VARIABLES .= "\n" if (length($VARIABLES) % 65) < 3;
     }
 
     print STDERR <<"EOF";
@@ -54,8 +64,11 @@ FILE:  \$HOME/.fmllocalrc
 
                   Please read FAQ for the details.
 
-BUILD-IN FUNCTIONS:
-$USAGE_OF_BUILD_IN_FUNCTIONS
+VARIABLES (set in \$HOME/.fmllocalrc):
+$VARIABLES
+
+BUILT-IN FUNCTIONS:
+$USAGE_OF_BUILT_IN_FUNCTIONS
 
 EXAMPLES for \~/.fmllocalrc
 #field		pattern		type	exec
@@ -119,7 +132,8 @@ sub MailLocal
 
 sub Append2MBOX
 {
-    local($cut_unix_from) = (@_ ? 1 : 0);
+    local($cut_unix_from) = 0;
+    ($cut_unix_from) = @_;	# against "eval scalar of @_" context
     local(@s);
 
     # fflush()
@@ -129,7 +143,8 @@ sub Append2MBOX
     @s = split(/\n/, $MailHeaders);
     while(@s) {
 	$_ = shift @s;
-	next if /^From /i && $cut_unix_from;
+	next if (/^From /i && $cut_unix_from);
+
 	print MBOX $_,"\n";
     }
 
@@ -167,17 +182,19 @@ sub MailProc
 
     # call "PERL" procedure
     elsif ($type =~ /^&$/o) { 
-	($exec, @Fld) = split(/\s+/, $exec);
-	(eval "&$exec;", $@ eq "") || &Log($@);
+	# ($exec, @Fld) = split(/\s+/, $exec);
+	(eval "&$exec();", $@ eq "") || &Log($@);
     }
 
     # cut unix from and PIPE OPEN
     elsif ($type =~ /^mh$/io) { 
+	$exec .= " ". join(" ",@OPT);
 	open(MBOX, "|-") || exec $exec || &Log($!);
     }
 
     # PIPE OPEN
     elsif ($type =~ /^\|$/o) { 
+	$exec .= " ". join(" ",@OPT);
 	open(MBOX, "|-") || exec $exec || &Log($!);
     }
 
@@ -212,7 +229,7 @@ sub FmlLocalInitilize
     @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
 	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
 	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
-	    MY_FUNCTIONS);
+	    MY_FUNCTIONS, CASE_INSENSITIVE);
 
     # getopts
     while(@ARGV) {
@@ -286,10 +303,10 @@ sub FmlLocalReadCF
 	/^body/i && ($_cf{'has-body-pat'} = 1);
     }
 
-    # record the number of matched entry
-    $_cf{'entry'} = $entry;
-
     close(CF);
+
+    # record the number of matched entry
+    $_cf{'entry'} = $entry + 1;	# +1 is required for anti-symmetry
 }
 
 
@@ -305,7 +322,7 @@ sub FmlLocalGetEnv
     $DIR     = $DIR    || $HOME;
     $LIBDIR  = $LIBDIR || $DIR;
     $LOGFILE = $LOG    || "$DIR/log";
-    $ARCHIVE_DIR = $ARCHIVE_DIR || $DIR;
+    $ARCHIVE_DIR = $ARCHIVE_DIR || "$DIR/.archive";
     
     $FML_PL = $FML_PL || 
 	(-f "$LIBDIR/fml.pl" && "$LIBDIR/fml.pl") ||
@@ -392,7 +409,7 @@ sub FmlLocalGetFields
 #
 sub FmlLocalMatch_and_Set
 {
-    local($s)   = @_;
+    local($s, $entry)   = @_;
     local($f, $p, $type, $exec, @opt);
     local($ok, $cnt);
     local(@pat) = split(/\n/, $s);
@@ -406,18 +423,20 @@ sub FmlLocalMatch_and_Set
 	# field pattern type exec
 	# ATTENTION! @OPT is GLOBAL
 	($f, $p, $type, $exec, @opt) = split(/$FS/, $pat);
-	print STDERR "PAT: ($f, $p, $type, $exec)\n";
+	print STDERR "  pat[$entry]:\t($f, $p, $type, $exec)\n";
 
 	$f =~ tr/A-Z/a-z/;	# lower
 
-	if ($FIELD{"$f:"} =~ /$p/) {
-	    print STDERR "Match: [$f:$`($&)$']\n" if $debug;
+	if ($FIELD{"$f:"} =~ /$p/ || 
+	    ($CASE_INSENSITIVE && $FIELD{"$f:"} =~ /$p/)) {
+	    print STDERR "MatchPat:\t[$f:$`($&)$']\n" if $debug;
 	    &Log("Match [$f:$`($&)$']") if $debug;
 	    $ok++;
 
 	    # MULTIPLE MATCH
-	    $type && ($ok == $cnt) && (@OPT = @opt) &&
+	    $type && ($ok == $cnt) && 
 		&FmlLocalSetVar($type, $exec, $1, $2, $3);
+	    $type && ($ok == $cnt) && (@OPT = @opt); # @opt eval may fail
 	}
 
 	($f =~ /^default/i) && ($_cf{'default'} = $pat);
@@ -434,7 +453,7 @@ sub FmlLocalSearch
 	next if /^\s*$/o;
 	next if /^\#/o;
 
-	&FmlLocalMatch_and_Set($_);
+	&FmlLocalMatch_and_Set($_, $i);
     }
 }
 
@@ -472,26 +491,39 @@ sub FmlLocalSetVar
 }
 
 
+sub FmlLocalReplace
+{
+    local($_) = @_;
+
+    s/\$F1/$F1/g;
+    s/\$F2/$F2/g;
+    s/\$F3/$F3/g;
+    s/\$From_address/$From_address/g;
+    s/\$To_address/$To_address/g;
+    s/\$Subject/$Subject/g;
+    s/\$Reply_to/$Reply_to/g;
+    s/\$HOME/$HOME/g;
+    s/\$DIR/$DIR/g;
+    s/\$LIBDIR/$LIBDIR/g;
+    s/\$ARCHIVE_DIR/$ARCHIVE_DIR/g;
+
+    $_;
+}
+
 sub FmlLocalAdjustVariable
 {
-    # adjustment
-    $EXEC =~ s/\$F1/$F1/g;
-    $EXEC =~ s/\$F2/$F2/g;
-    $EXEC =~ s/\$F3/$F3/g;
-    $EXEC =~ s/\$From_address/$From_address/g;
-    $EXEC =~ s/\$To_address/$To_address/g;
-    $EXEC =~ s/\$Subject/$Subject/g;
-    $EXEC =~ s/\$Reply_to/$Reply_to/g;
-    $EXEC =~ s/\$HOME/$HOME/g;
-    $EXEC =~ s/\$DIR/$DIR/g;
-    $EXEC =~ s/\$LIBDIR/$LIBDIR/g;
-
     # Headers
     $Reply_to              = &Expand_mailbox($FIELD{'reply-to:'});
     $Original_To_address   = $To_address 
 	                   = $FIELD{'to:'};
     $Original_From_address = $FIELD{'from:'};
     $From_address          = &Expand_mailbox($FIELD{'from:'});
+
+    # variable expand
+    $EXEC = &FmlLocalReplace($EXEC);
+    for ($i = 0; $i < scalar(@OPT); $i++) {
+	$OPT[$i] = &FmlLocalReplace($OPT[$i]);
+    }
 
     1;
 }
@@ -532,7 +564,12 @@ sub FmlLocalMainProc
 	&MailLocal;
     }
     else {
-	print STDERR "\n&MailProc($TYPE, $EXEC);\n\n" if $debug;
+	if ($debug) {
+	    $s  = "\n&MailProc($TYPE, $EXEC);\n";
+	    $s .= "\twith F1=$F1 F2=$F2 F3=$F3\n"; 
+	    $s .= "\twith \@OPT=(". join(" ", @OPT) .")\n";
+	    print STDERR $s;
+	}
 	&Log("MailProc($TYPE, $EXEC)") if $debug;
 	&MailProc($TYPE, $EXEC);
     }
@@ -542,6 +579,7 @@ sub FmlLocalMainProc
     undef @OPT;
     ($a, $b, $type, $exec, @OPT) = split(/\s+/, $_cf{'default'});
     if ($type) {
+	print STDERR "\n *** ALWAYS GO! *** \n" if $debug;
 	&FmlLocalSetVar($type, $exec);
 	&MailProc($TYPE, $EXEC);
     }
@@ -1061,18 +1099,29 @@ sub MetaCharP
 #.USAGE: 
 sub sendback
 {
-    local($file) = @_ || $F1;
+    local($file, $fullpath) = @_;
+    $file = $file || $F1;
     local($to)   = $Reply_to ? $Reply_to : $From_address;
-    local($dir)  = $ARCHIVE_DIR || $DIR;
+    local($ok)   = 1;
+    local($dir)  = $ARCHIVE_DIR;
 
-    chdir $dir || &Log("cannot chdir $dir") && return 0;
+    if (! $fullpath) {
+	chdir $dir || (&Log("cannot chdir $dir, STOP!"), undef $ok);
+    }
+    elsif ($fullpath) {
+	undef $dir;
+    }
 
-    if (-f $file) {
-	&Log("getback $F1");
+    if ($ok && -f $file) {
+	&Log("sendback $dir/$file");
 	&SendFile($to, "Send $file", $file);
     }
     else {
-	&Log("cannot find $file");
+	$s  = "I cannot find $file\n\n";
+	$s .= "If you have a problem\n";
+	$s .= "please make a contact with $MAINTAINER\n";
+	&Sendmail($to, "Cannot find $file", $s);
+	&Log("cannot find $dir/$file");
     }
 
     1;
@@ -1088,7 +1137,7 @@ sub getmyspool_nopasswd
 {
     undef $F1,$F2,$F2;
     &Log("getmyspool");
-    &sendback($MAIL_SPOOL);
+    &sendback($MAIL_SPOOL, 1);
 }
 
 
@@ -1116,12 +1165,29 @@ sub getmyspool
 #.USAGE:     簡単なメーリングリストですね
 #.USAGE:    .fmllocalrcの例:
 #.USAGE:    To (uja) & forward address-1 address-2 ..
+#.USAGE:        or
+#.USAGE:    file の中にアドレスが書いてある（一行一アドレス）場合
+#.USAGE:    To (uja) & forward :include:file
 #.USAGE: 
 sub forward
 {
     local($host) = 'localhost';
     local($body);
     &Log("Forward");
+
+    # :include: form
+    if ($OPT[0] =~ /^:include:(\S+)/) {
+	$file = $1;
+	undef @OPT;
+	open(F, $file) || (&Log("cannot open $file"), return);
+	while (<F>) {
+	    chop;
+	    next line if /^\#/o;	# skip comment and off member
+	    next line if /^\s*$/o;	# skip null line
+	    push(@OPT, $_);	    
+	}
+	close(F);
+    }
 
     &GetTime;
 
@@ -1145,6 +1211,16 @@ sub forward
     $Status = &Smtp($host, "$body.\n", @headers);
     &Log("Sendmail:$Status") if $Status;
 }
+
+#.USAGE: discard
+#.USAGE:   何もしない。ダミー関数 ＝＝ 入力を捨てる関数ともいう
+#.USAGE:    .fmllocalrcの例:
+#.USAGE:    From    (uja)      & discard
+#.USAGE:    要するに
+#.USAGE:    From    (uja)      > /dev/null
+#.USAGE:    と同じですね〜
+#.USAGE: 
+sub discard{ 1;}
 
 #.USAGE: 
 #.USAGE: ALIASES:
