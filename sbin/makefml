@@ -35,6 +35,7 @@ if ($GroupWritable) {
 
 &System if $SYSTEM_ARGV;
 
+&FlushLog;
 exit 0;
 
 
@@ -46,6 +47,9 @@ sub InitMakeFml
     ### signal handling
     $SIG{'ALRM'} = 'TimeOut';
     $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
+
+    # for log
+    $USER  = $ENV{'USER'} || (getpwuid($<))[0];
 
     # flush;
     select(STDOUT); $| = 1;
@@ -127,7 +131,7 @@ sub InitMakeFml
     }
 
     # config amd temporary files
-    $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
+    $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER.$$";
 
     # Anyway try once ... (may be re-installation ?)
     # Dame moto sune:-)
@@ -569,8 +573,56 @@ sub Debug { print STDERR "@_\n";}
 
 sub Log 
 { 
-    &AppendString2File($_[0], $CONFIG_LOG);
+    local($str, $s) = @_;
+    local($from) = $USER;
+    local(@c) = caller;
+
+    &GetTime;
+
+    # existence and append(open system call check)
+    if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
+	&Append2("$Now $str ($from)", $LOGFILE);
+	&Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
+    }
+    elsif (-f $CONFIG_LOG && open(APP, ">> $CONFIG_LOG")) {
+	&Append2("$Now $str ($from)", $CONFIG_LOG);
+	&Append2("$Now    $filename:$line% $s", $CONFIG_LOG) if $s;
+    }
+    else {
+	print STDERR "$Now ($package, $filename, $line) $LOGFILE\n";
+	print STDERR "$Now $str ($from)\n\t$s\n";
+    }
 }
+
+
+# append $s >> $file
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2 { &Write2(@_, 1);}
+sub Write2
+{
+    local($s, $f, $o_append) = @_;
+
+    if ($o_append && $s && open(APP, ">> $f")) { 
+	select(APP); $| = 1; select(STDOUT);
+	print APP "$s\n";
+	close(APP);
+    }
+    elsif ($s && open(APP, "> $f")) { 
+	select(APP); $| = 1; select(STDOUT);
+	print APP "$s\n";
+	close(APP);
+    }
+    else {
+	local(@caller) = caller;
+	print STDERR "Append2(@_)::Error [@caller] \n";
+    }
+
+    1;
+}
+
+
+sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
 
 
 sub SignalLog 
@@ -579,7 +631,7 @@ sub SignalLog
 
     print STDERR "Caught Signal[$sig], shutting down ... \n\n";
     # &MakeFmlUnLock; infinite loop?     sleep(1);
-    #&FlushLog;
+    &FlushLog;
     exit(1);
 }
 
@@ -742,7 +794,7 @@ sub InitTTY
 sub ExecCmd
 {
     local($_) = @_;
-    local(@argv, $fp);
+    local(@argv, $fp, $ml);
 
     @argv = split(/\s+/, $_);
 
@@ -778,7 +830,7 @@ sub ExecCmd
 
     # check arguments
     {
-	local($not_require_ml, $ml);
+	local($not_require_ml);
 	$ml = $argv[0];
 	for ("newml", "info", "help", "install", 
 	     "fmlserv", "majordomo", "listserv") {
@@ -799,6 +851,10 @@ sub ExecCmd
 	}
     }
 
+    # O.K. $ml is defined if $ml is required.
+    if ($ml) {
+	$LOGFILE = "$ML_DIR/$ml/log";
+    }
 
     # Lock all when "install"
     if ($TheFirstTime || $NOT_LOCK{$fp}) {
@@ -810,6 +866,8 @@ sub ExecCmd
 
     if ($MakeFmlProc{$fp}) {
 	local($fp) = $MakeFmlProc{$fp};	# not overwrite $fp for later use;
+	local($fn) = $fp; $fn =~ s/do_//;
+	&Log("makefml::${fn} @argv ");
 	&$fp(@argv);
     }
     else {
@@ -1363,6 +1421,8 @@ sub do_passwd
 
 	if (!$member || !$passwd) {
 	    &Warn("Error: Please input NOT NULL Address and Password.");
+	    &Log("makefml::passwd address is not defined")  if !$member;
+	    &Log("makefml::passwd password is not defined") if !$passwd;
 	}
     }
 
@@ -1373,9 +1433,11 @@ sub do_passwd
 
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
+	&Log("makefml::passwd changing $passwd_file succeed");
     }
     else {
 	print "   Passwd Change Fails ($passwd_file).\n";
+	&Log("makefml::passwd changing $passwd_file fails");
     }
 
 }
@@ -1447,7 +1509,7 @@ sub do_install
 	print STDERR "Fixing Path:";
 
 	print STDERR " src ";
-	&FixPath("src/fml.pl"); print STDERR ".";
+	&FixPath("src/fml.pl");   print STDERR ".";
 	&FixPath("src/msend.pl"); print STDERR ".";
 	
 	print STDERR " libexec ";
@@ -1483,6 +1545,7 @@ sub do_install
 
     # $EXEC_DIR/sbin/install.sh is NOT yet installed 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	&Log("makefml windows NT4 mode");
 	print "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR\n";
 	system "perl sys/arch/WINDOWS_NT4/ntinstall.pl $EXEC_DIR";
     }
@@ -1553,6 +1616,8 @@ sub do_newml
     local($cf, $local_config, $config, @config, %config);
 
     if (! $ml) {
+	&Log("Error: makefml::newml ML is not defined");
+
 	&Debug("*** Error: no arguments ***");
 	&Debug("Please define ML(mailing-list) arguments");
 	&Debug("\n\tmakefml newml ML\n");
@@ -1560,6 +1625,8 @@ sub do_newml
     }
 
     if ($< == 0) {
+	&Log("Error: makefml::newml you should not run newml as root.");
+
 	print "************************* WARNING *************************\n";
 	print "\n";
 	print "    YOU WILL OPERATE A MAILING LIST as ROOT?\n";
@@ -1612,10 +1679,9 @@ sub do_newml
 	&SaveCF($cf, *config);
     }
 
-
-
     &ResetVariables;
     &SetPublicUmask;
+
 
     # include file is public readable;
     # why for () fails?;
@@ -1634,6 +1700,7 @@ sub do_newml
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
     # drafts -> help,deny,guide,objective
+    # Japanese;
     if ($LANGUAGE eq 'Japanese') {
 	&Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
 	&Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
@@ -1641,15 +1708,19 @@ sub do_newml
 	&Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
 	&Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
 	&Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    }
+	&Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    
+    }
+    # English;
     else {
 	&Conv($ml, "$EXEC_DIR/drafts/help.English", "$ML_DIR/$ml/help");
-	&Conv($ml, "$EXEC_DIR/drafts/help-admin.English", "$ML_DIR/$ml/help-admin");
+	&Conv($ml, "$EXEC_DIR/drafts/help-admin.English", 
+	      "$ML_DIR/$ml/help-admin");
 	&Conv($ml, "$EXEC_DIR/drafts/deny.English", "$ML_DIR/$ml/deny");
 	&Conv($ml, "$EXEC_DIR/drafts/guide.English", "$ML_DIR/$ml/guide");
 	&Conv($ml, "$EXEC_DIR/drafts/welcome.English", "$ML_DIR/$ml/welcome");
 	&Conv($ml, "$EXEC_DIR/drafts/confirm.English", "$ML_DIR/$ml/confirm");
-	&Conv($ml, "$EXEC_DIR/drafts/objective.English", "$ML_DIR/$ml/objective");
+	&Conv($ml, "$EXEC_DIR/drafts/objective.English", 
+	      "$ML_DIR/$ml/objective");
     }
 
     # here backed to the writable bit == 077 or 007
@@ -1759,225 +1830,12 @@ sub GetCF
     if (!$config{"CFVersion"} || 
 	$config{"CFVersion"} < 3 ||
 	$COMPAT_CF2) {
-	print STDERR "   (Backward Compatible: Convert CFVersion 2 -> 3)\n";
+	print STDERR "   (config.ph; connvert \$CFVersion 2 -> 3)\n\n";	
+	&Log("makefml::config convert config.ph::\$CFVersion 2 -> 3");
 	&ConvertCF2to3(*config, *MAKE_FML);
     }
     else {
-	print STDERR "   CFVersion 3\n";
-    }
-}
-
-
-sub do_policy
-{
-    local($buf, $error, $default);
-
-    # Variable Settings;
-    &ResetVariables;
-
-    &GetCurPolicy;
-
-    while (1) {
-	undef $error;
-	$default = 0;
-	$CurTag = "    ";
-
-	&PolicyMenu;
-
-	print "--- Set Up the Policy of How to use ML Addresses\n";
-	print $POLICY_MENU;
-
-	if ($Policy{'CONTROL_ADDRESS_FORMAT'} eq '_ML_' &&
-	    $MAIL_LIST_MODE ne "") {
-	    $error = "*" x 20;
-	    print "\n\t$error Error $error\n";
-
-	    print "\tWhen \$CONTROL_ADDRESS == \$MAIL_LIST,\n";
-	    print "\tyou need to set \"distribute + commands\".\n";
-
-	    $error = "*" x 47;
-	    print "\t$error\n";
-
-	    $default = 1;
-	}
-
-	### 
-	$r = &Query("Menu ", "0,1,2", "\\d+", $default);
-
-	if ($r == 0 && !$error) {
-	    last;
-	}
-	elsif ($r == 1) {
-	    &PolicyListMode;
-	}
-	elsif ($r == 2) {
-	    &PolicyCtlAddr;
-	}
-    }    
-
-    while (($k, $v) =  each %Policy) {
-	$buf .= "\$$k = '$v';\n";
-    }
-
-    &SavePolicy($buf);
-}
-
-
-sub FYIPolicy
-{
-    &PolicyMenu; 
-
-    print "\n---For Your Information:\n";
-    print "The Current Policy to use ML addresses are as follows\n";
-    print "    (DEFAULT POLICY IS BACKWARD COMPATIBLE AS BELOW):\n";
-    print $SHOW_ONLY_POLICY_MENU;
-    print "\nYou can change this policy settings by \"makefml policy\".\n\n";
-}
-
-
-sub PolicyMenu
-{
-    for (keys %Marker) {
-	next unless /^policy:/;
-	undef $Marker{$_};
-    }
-
-    &ApplyPolicy;
-
-    if ($Marker{'policy:ca:other'}) {
-	$Marker{'policy:ca:other'} .= " $Policy{'CONTROL_ADDRESS_FORMAT'}";
-    }
-
-
-    $MenuPolicy{'MAIL_LIST_MODE'} = qq#; 
-    \t[available modes]                  [current setting]
-    \tdistribute + commands              $Marker{'policy:dm:d+c'};
-    \tdistribute (only member can post)  $Marker{'policy:dm:d-c:member'};
-    \tdistribute (anyone can post)       $Marker{'policy:dm:d-c:any'};
-    ;#;
-   
-
-    $MenuPolicy{'CONTROL_ADDRESS_FORMAT'} = qq#;
-    \t[available format]                [current setting]
-    \t_ML_-ctl (default)                 $Marker{'policy:ca:ctl'};
-    \t_ML_ (require distribute+commands) $Marker{'policy:ca:ml'};
-    \tfmlserv                            $Marker{'policy:ca:fmlserv'};
-    \tother                              $Marker{'policy:ca:other'};
-    ;#;
-
-    $POLICY_MENU = qq#;
-    0 END;
-    1 \$MAIL_LIST Delivery mode (mode of delivery);
-    $MenuPolicy{'MAIL_LIST_MODE'};
-    2 $CONTROL_ADDRESS FORMAT\n;$MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
-    ;
-    ;#;
-
-    $POLICY_MENU =~ s/;//g;
-
-    $SHOW_ONLY_POLICY_MENU = qq#;
-    DELIVERY MODE OF \$MAIL_LIST;
-    $MenuPolicy{'MAIL_LIST_MODE'};
-    FORMAT OF \$CONTROL_ADDRESS (for commands);
-    $MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
-    ;
-    ;#;
-
-    $SHOW_ONLY_POLICY_MENU =~ s/;//g;
-    $SHOW_ONLY_POLICY_MENU =~ s/_ML_/listname/g;
-    $SHOW_ONLY_POLICY_MENU =~ s/\(require\s+distribute\+commands\)//;
-}
-
-
-sub ApplyPolicy
-{
-    if ($Policy{'MAIL_LIST_MODE'} eq "distribute + commands" ||
-	$Policy{'MAIL_LIST_MODE'} eq ""	) {
-	$MAIL_LIST_MODE = "";
-	$Marker{'policy:dm:d+c'}        = "<===";
-    }
-    elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (anyone can post)") {
-	$MAIL_LIST_MODE = "distribute";
-	$Marker{'policy:dm:d-c:any'}    = "<===";
-    }
-    elsif ($Policy{'MAIL_LIST_MODE'} eq "distribute (only members can post)") {
-	$MAIL_LIST_MODE = "distribute_with_member_check";
-	$Marker{'policy:dm:d-c:member'} = "<===";
-    }
-
-    local($_) = $Policy{'CONTROL_ADDRESS_FORMAT'};
-    if ($_ eq '_ML_-ctl' || $_ eq '') {
-	$Marker{'policy:ca:ctl'} = "<===";
-    }
-    elsif ($_ eq '_ML_') {
-	$Marker{'policy:ca:ml'} = "<===";
-    }
-    elsif ($_ eq 'fmlserv') {
-	$Marker{'policy:ca:fmlserv'} = "<===";
-    }
-    else { # if ($_ eq 'other') {
-	$Marker{'policy:ca:other'} = "<===";
-    }
-}
-
-
-sub PolicyListMode
-{
-    local($m) = q#;
-    0 ENDS;
-    1 distribute and commands available (DEFAULT FOR BACKWARD COMPATIBLE);
-    2 distribute only (ONLY MEMBER CAN POST);
-    3 distribute only (ANYBODY CAN POST);
-    ;#;
-
-    $m =~ s/;//g;
-    print $m;
-
-    $r = &Query("Menu ", "number", "\\d+", "0");
-
-    if ($r == 0) {
-	;
-    }
-    elsif ($r == 1) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute + commands";
-    }
-    elsif ($r == 2) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute (only members can post)";
-    }
-    elsif ($r == 3) {
-	$Policy{'MAIL_LIST_MODE'} = "distribute (anyone can post)";
-    }
-}
-
-sub PolicyCtlAddr
-{
-    local($m) = q#;
-    $CONTROL_ADDRESS (ADDRESS FOR COMMANDS) FORMAT:;
-    default is _ML_-ctl where _ML_ is substituted when "makefml newml";
-    ;
-    for example;
-    0 END;
-    1 _ML-ctl    ($CONTROL_ADDRESS == _ML_-ctl@your-domain);
-    2 _ML_       ($CONTROL_ADDRESS == $MAIL_LIST);
-    3 fmlserv    ($CONTROL_ADDRESS == fmlserv@your-domain);
-    4 other      (PLEASE INPUT FORMAT);
-    ;#;
-    $m =~ s/;//g;
-    print $m;
-
-    %Menu = (0, $Policy{'CONTROL_ADDRESS_FORMAT'},
-	     1, "_ML_-ctl",
-	     2, "_ML_",
-	     3, "fmlserv",
-	     4, $r);
-
-    $r = &Query("\$CONTRO_LADDRESS", "0-4", "[\\-\\_\\w\\d]+", "0");
-
-    $Policy{'CONTROL_ADDRESS_FORMAT'} = $Menu{$r};
-
-    if ($r == 4) {
-	$r = &Query("Format", "_ML_-ctl", "[\\-\\_\\w\\d]+", "_ML_-ctl");
-	$Policy{'CONTROL_ADDRESS_FORMAT'} = $r;
+	print STDERR "   (config.ph; \$CFVersion 3)\n\n";
     }
 }
 
@@ -1995,6 +1853,7 @@ sub do_pgp
 
     $| = 1;
     print "\n--- PGP BEGIN ---\n\n";
+    &Log("makefml::pgp pgp @argv");
     system("pgp @argv");
     print STDERR "Error: $@" if $@;
 
@@ -2008,6 +1867,8 @@ sub do_pgp
 
 sub Mkdir
 {
+    &Log("makefml::mkdir $_[0]");
+
     $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
@@ -2018,6 +1879,9 @@ sub MkDirHier
 {
     local($dir) = @_;
     local($d);
+
+    &Log("makefml::mkdirhier $_[0]");
+
     for (split(/\//, $dir)) {
 	$d .= "/$_";
 	$d =~ s#//#/#g;
@@ -2035,9 +1899,13 @@ sub do_edit
     local($cf, $local_config, $config, @config, %config);
 
     $editor = $ENV{'EDITOR'} || "vi";
+
     print STDERR "\n\t$editor $ML_DIR/$ml/config.ph\n\n";
+    &Log("makefml::edit $editor $ML_DIR/$ml/config.ph");
 
     system "$editor $ML_DIR/$ml/config.ph";
+
+    &Log("makefml::edit operation ends");
 }
 
 
@@ -2045,6 +1913,7 @@ sub do_config
 {
     local($ml) = @_;
     local($cf, $local_config, $config, @config, %config);
+    local(%saved_config);
 
     # start;
     print "---Configure $ml mailing list ... \n";
@@ -2061,12 +1930,23 @@ sub do_config
     ($config{'_CA_DOMAIN_'}) = (split(/\@/, $config{'CONTROL_ADDRESS'}))[1];
     
 
+    ### MENU BEGIN
+    # for log
+    %saved_config = %config;
+
     # menu.conf version
     $MENU = "$EXEC_DIR/etc/makefml/menu.conf";
     &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG);#';
 
     ### MAIN LOOP 
     &EachLevelQuery(*config, "/");
+
+    for (keys %config) {
+	if ($config{$_} ne $saved_config{$_}) {
+	    &Log("makefml::config \$${_} [$saved_config{$_} -> $config{$_}]");
+	}
+    }
+    ### MENU END 
 
     # set local_config -> %MAKE_FML;
     # print $local_config;
@@ -2078,6 +1958,7 @@ sub do_config
 	&SaveCF($cf, *config);
     }
     else {
+	&Log("Error makefml::config cannot save to cf file");
 	&Warn("Cannot open cf[$cf]");
 	return;
     }
@@ -2085,6 +1966,8 @@ sub do_config
     # make ml/config.ph
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
 		  $cf, "$ML_DIR/$ml/config.ph");
+
+    &Log("makefml::config operation ends");
 }
 
 
@@ -2093,12 +1976,15 @@ sub EachLevelQuery
     local(*config, $top_level) = @_;
     local($r);
 
-    while ($top_level =~ s#^//#/#) { ;}
+    while ($top_level =~ s|^//|/|) { ;}
 
     $Depth++;
 
     while (1) {
 	$CurTag = "   " x $Depth;
+
+	# required?
+	# &Log("makefml::config menu $top_level");
 
 	&EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP);
 
@@ -2110,7 +1996,6 @@ sub EachLevelQuery
 	&Menu'GenQuery(*query, $QUERY{$top_level}, $top_level); #';
 	$r = &Query($query{'menu'}, $query{'query'}, 
 		    $query{'pat'}, $query{'default'});
-
 
 	if ($query{"type"} eq "y-or-n") {
 	    print "--query y/n\n";
@@ -2246,12 +2131,14 @@ sub MakeConfigPH
     $perl = &search_path('perl');
 
     if (! $perl) { 
+	&Log("Error: makefml cannot find perl");
 	print STDERR "I cannot find perl!! Dead Ends!\n";
 	print STDERR "Hence I cannot make config.ph.\n";
 	return "";
     }
 
     print STDERR "Generating $config_ph from $cf ...\n";
+
     for ($config, $manifest, $cf) { # config.ph may not exist; 
 	if (! -e $_) {
 	    print STDERR "***Error: I Cannot find $_, Stop.\n";
@@ -2259,9 +2146,13 @@ sub MakeConfigPH
 	}
     }
 
-    open(EXEC_CF, "$perl $config -m $manifest $cf|") || 
-	(&Warn("cannot exec $config -m $manifest $cf"), return 0);
-    open(SAVE, "> $config_ph") || (&Warn("cannot open $config_ph"), return 0);
+    if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
+	&Log("Error: cannot exec $config -m $manifest $cf");
+	&Warn("cannot exec $config -m $manifest $cf");
+	return 0;
+    }
+
+    open(SAVE, "> $config_ph") || (&Log("cannot write $config_ph"), return 0);
     select(SAVE); $| = 1; select(STDOUT);
 
     while (<EXEC_CF>) { print SAVE $_;}
@@ -2291,10 +2182,11 @@ sub do_adduser
 {
     local($ml, $member) = @_;
     local(@files);
+    local($proc) = $fp;
+    $proc =~ s/do_//;
 
     if (! $ml || !$member) {
-	local($proc) = $fp;
-	$proc =~ s/do_//;
+	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	return;
@@ -2315,6 +2207,7 @@ sub do_adduser
 
     # mkdir ML Directory
     if (! -d "$ML_DIR/$ml") {
+	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
 	print "\n*****Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	return;
@@ -2322,6 +2215,7 @@ sub do_adduser
 
     # add 
     for (@files) {
+	&Log("makefml::$proc append $member to $_");
 	print "Append $member to $_\n" if $debug;
 	&AppendString2File($member, $_);
     }
@@ -2332,10 +2226,11 @@ sub do_byeuser
 {
     local($ml, $member) = @_;
     local(@files);
+    local($proc) = $fp;
+    $proc =~ s/do_//;
 
     if (! $ml || !$member) {
-	local($proc) = $fp;
-	$proc =~ s/do_//;
+	&Log("Error: makefml::$proc invalid arguments");
 	&Debug("*** Syntax Error: the number of arguments ***");
 	&Debug("\n\tmakefml $proc ML address\n");
 	return;
@@ -2356,6 +2251,7 @@ sub do_byeuser
 
     # mkdir ML Directory
     if (! -d "$ML_DIR/$ml") {
+	&Log("Error: makefml::$proc cannot find $ML_DIR/$ml");
 	print "***Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	return;
@@ -2364,6 +2260,7 @@ sub do_byeuser
     # delete 
     for (@files) {
 	if (&Repl($member, $_)) {
+	    &Log("makefml::$proc delete $member of $_");
 	    print "Delete $member in $_\n" if $debug;
 	}
     }
@@ -2388,6 +2285,7 @@ sub do_fmlserv
     # include file is public readable;
     # why for () fails?;
     local($exec_dir) = "$EXEC_DIR/etc/makefml";
+    &Conv($ml, "$exec_dir/fmlserv-config.ph", "$ML_DIR/$ml/config.ph");
     &Conv($ml, "$exec_dir/fmlserv-include", "$ML_DIR/$ml/include");
     &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_DIR/$ml/aliases");
 
@@ -2561,6 +2459,7 @@ sub main'Dumpvar
 
 package ml;
 
+sub ml'Log       { &main'Log(@_);}
 sub main'FLock   { &ml'FLock(@_);}
 sub main'FUnLock { &ml'FUnLock(@_);}
 
@@ -2579,12 +2478,17 @@ sub FLock
 
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
    
-    open($lockdir, $lockdir);
+    open($lockdir, $lockdir) || do {
+	&Log("Error: cannot open $lockdir");
+	return 0;
+    };
+
     flock($lockdir, $LOCK_EX);
 
     $FLockP{$ml}   = 1;
     $LockFile{$ml} = $lockdir;
 }
+
 
 sub FUnLock 
 {
@@ -2598,9 +2502,11 @@ sub FUnLock
 
 package v7;
 
+
 sub main'V7Lock   { &v7'MakeFml_V7Lock(@_);}
 sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
 
+sub v7'Log        { &main'Log(@_);}
 sub v7'Warn       { &main'Warn(@_);}
 sub v7'WholeMail  { &main'WholeMail(@_);}
 sub v7'SetEvent   { &main'SetEvent(@_);}
@@ -2608,6 +2514,8 @@ sub v7'SetEvent   { &main'SetEvent(@_);}
 
 sub Mkdir
 {
+    &Log("makefml::v7::mkdir $_[0]");
+
     $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
@@ -2842,6 +2750,8 @@ sub ProbePerlVersion
 ########################################################################
 package Menu;
 
+sub Menu'Log        { &main'Log(@_);}
+
 
 sub InitMenu
 {
@@ -2973,7 +2883,7 @@ sub GenQuery
     local($type, $pat);
 
     undef %query;
-    # print STDERR "GenQuery:\n$s\n";
+    print STDERR "GenQuery:\n$s\n" if $debug;
 
     for (split(/\n/, $s)) {
 	if (/(\S+):\s+(.*)\s*$/) {
