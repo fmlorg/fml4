@@ -1734,6 +1734,17 @@ sub MesgGetABP { $MesgBuf;}	# After Break Point
 # Forwarded and Warned to Maintainer;
 sub Warn { &Forw(@_);}
 sub Forw { &Sendmail($MAINTAINER, $_[0], $_[1]);}
+sub WarnFile
+{ 
+    local($subject, $file, $preamble, $trailor) = @_;
+    local($to, @file);
+
+    @file = $file; undef $file;
+    @to   = ($MAINTAINER);
+    $Envelope{'preamble'} = $preamble;
+    &NeonSendFile(*to, *subject,*file);
+    undef $Envelope{'preamble'};
+}
 
 # Notification of the mail on warnigs, errors ... 
 sub Notify
@@ -1946,12 +1957,55 @@ sub Log
     print STDERR "*** $str; $s;\n" if $debug;
 }
 
+# $mode: see open(2) 
+sub fml30__Write
+{
+    local(*e, *s, *f, $mode, $envelope_hash_key) = @_;
+    
+    if ($mode eq "O_APPEND") {
+	$status = open(WRITE2_OUT, ">> $f");
+    }
+    else {
+	$status = open(WRITE2_OUT, "> $f");
+    }
+
+    if ($status) {
+	select(WRITE2_OUT); $| = 1; select(STDOUT);
+
+	# XXX Caution: "\n" handling differs.
+	if ($envelope_hash_key) {
+	    print WRITE2_OUT $e{$envelope_hash_key};
+	}
+	else {
+	    print WRITE2_OUT $s, "\n";
+	}
+	close(WRITE2_OUT);
+
+	1;
+    }
+    else {
+	0;
+    }
+}
+
+sub HashValueAppend
+{
+    local(*e, $key, $f) = @_;
+
+    &fml30__Write(*e, *NULL, *f, "O_APPEND", $key) || do {
+	local(@caller) = caller;
+	print STDERR "HashValueAppend(@_)::Error caller=<@caller>\n";
+    };
+}
+
 # append $s >> $file
 # if called from &Log and fails, must be occur an infinite loop. set $nor
 # return NONE
 sub Append2 
 { 
-    &Write2(@_, 1) || do {
+    local($s, $f, $o_append) = @_;
+
+    ($s && &fml30__Write(*NULL, *s, *f, "O_APPEND")) || do {
 	local(@caller) = caller;
 	print STDERR "Append2(@_)::Error caller=<@caller>\n";
     };
@@ -1961,21 +2015,17 @@ sub Write2
 {
     local($s, $f, $o_append) = @_;
 
-    if ($o_append && $s && open(WRITE2_OUT, ">> $f")) { 
-	select(WRITE2_OUT); $| = 1; select(STDOUT);
-	print WRITE2_OUT $s, "\n";
-	close(WRITE2_OUT);
+    if ($o_append) {
+	return &Append2(@_);
     }
-    elsif ($s && open(WRITE2_OUT, "> $f")) { 
-	select(WRITE2_OUT); $| = 1; select(STDOUT);
-	print WRITE2_OUT $s, "\n";
-	close(WRITE2_OUT);
+    elsif ($s && &fml30__Write(*NULL, *s, *f, "O_RWONLY")) {
+	;
     }
     else {
 	local(@caller) = caller;
 	print STDERR "Write2(@_)::Error caller=<@caller>\n";
 	return 0;
-    }
+    };
 
     1;
 }

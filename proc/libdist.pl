@@ -288,9 +288,14 @@ sub DoDistribute
     } 
     else { # if exist, warning and forward againt DISK-FULL;
 	&Log("ARTICLE $ID", "ID[$ID] dupulication");
-	&Append2("$e{'Hdr'}\n$e{'Body'}", "$FP_VARLOG_DIR/DUP$CurrentTime");
-	&Warn("ERROR:ARTICLE ID dupulication $ML_FN", 
-	      "Try save > $FP_VARLOG_DIR/DUP$CurrentTime\n$e{'Hdr'}\n$e{'Body'}");
+
+	local($f) = "$FP_VARLOG_DIR/DUP$CurrentTime";
+	&HashValueAppend(*Envelope, "Hdr", $f);
+	&Append2("\n", $f);
+	&HashValueAppend(*Envelope, "Body", $f);
+
+	&WarnFile("ERROR:ARTICLE ID dupulication $ML_FN", $f,
+		  "FYI: saved in $FP_VARLOG_DIR/DUP$CurrentTime\n\n");
     }
 
     umask($umask) if $USE_FML_WITH_FMLSERV;

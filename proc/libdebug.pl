@@ -65,8 +65,11 @@ sub OutputEventQueue
 sub StdinLog
 {
     local($date) = sprintf("%04d%02d%02d", 1900 + $year, $mon + 1, $mday);
-    &Append2($Envelope{'Header'}."\n".$Envelope{'Body'}, 
-	     "$VARLOG_DIR/STDIN_LOG_$date");
+    local($f)    = "$VARLOG_DIR/STDIN_LOG_$date";
+
+    &HashValueAppend(*Envelope, "Header", $f);
+    &Append2("\n", $f);
+    &HashValueAppend(*Envelope, "Body", $f);
 }
 
 

@@ -444,7 +444,7 @@ sub SmtpIO
 	&SmtpPut2Socket('DATA', $ipc, 1);
     }
 
-    print SMTPLOG ('-' x 30)."\n";
+    print SMTPLOG ('-' x 30), "\n";
 
     ### (HELO .. DATA) sequence ends
 
@@ -550,7 +550,7 @@ sub SmtpIO
 
     ### close smtp with '.'
     print S "\r\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
-    print SMTPLOG ('-' x 30)."\n";
+    print SMTPLOG ('-' x 30), "\n";
 
     ##### "DATA" Session ENDS; ######
     ### Closing Phase;
