@@ -1,11 +1,11 @@
-.A	Caching Whois (libexec/cwhois.pl)
+.C	Caching Whois (libexec/cwhois.pl)
+.k	Caching Whois (libexec/cwhois.pl)
 .l	cwhois
-.k	libexec/cwhois.pl
+.l	libexec/cwhois.pl
 .k	cwhois.pl
-.k	Caching-Whois
-.k	Whois-with-Cache
 
 .S	Whois Server with Cache
+.k	Whois Server with Cache
 
 whois server でデータベースを引く時、
 
@@ -358,10 +358,10 @@ sub CacheOn
 
 
 .S	scandb.pl (lib/cwhois/scandb.pl)
-.k	lib/cwhois/scandb.pl
+.l	lib/cwhois/scandb.pl
 .k	scandb.pl
 .k	$CWHOIS_SEARCH_PROG
-.k	ScanDB
+.k	&ScanDB
 
 	require $CWHOIS_SEARCH_PROG;
 	&ScanDB(*key, *set, *db, *spool, *misc);

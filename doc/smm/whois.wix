@@ -1,4 +1,5 @@
 .C	WHOIS データベースとサーバ
+.k	whois 
 .l	whois
 .xref	whois-security
 
@@ -12,9 +13,7 @@ fml の whois コマンドは
 
 
 .S	WHOIS コマンド
-.key	whois
-.seealso whois
-.key	$USE_WHOIS
+.k	$USE_WHOIS
 
 	$USE_WHOIS = 0;			# Use Whois library
 
@@ -53,7 +52,7 @@ fml の whois コマンドは
 
 	$WHOIS_HELP_FILE
 .k	$WHOIS_HELP_FILE
-.k	"# whois help"コマンド
+.k	# whois help
 
 	"# whois help" 
 

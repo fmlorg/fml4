@@ -1,5 +1,6 @@
 .S	Traffic を調べる (libtraffic.pl)
 .l	libtraffic.pl
+.k	traffic コマンド
 
 AUTHOR: yuao@infonia.or.jp (Yuao Tanigawa)
 

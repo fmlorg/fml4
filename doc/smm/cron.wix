@@ -1,9 +1,9 @@
 .S	cron (fml original bin/cron.pl)
 .l	cron
-.key	cron.pl
+.k	cron.pl
 .k	bin/cron.pl
-.key	etc/crontab
-.key	$DIR/crontab
+.k	etc/crontab
+.k	$DIR/crontab
 
 システムにユーザごとに定義できる cron がない場合に使います。
 まずはユーザごとに定義できる cron がないかどうかを調べて下さい。
@@ -108,9 +108,9 @@ cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
 
 config.ph に
 
-.key	$CRON_PIDFILE
-.key	$CRONTAB
-.key	$DISTRIBUTE_CLOSE_HOOK
+.k	$CRON_PIDFILE
+.k	$CRONTAB
+.k	$DISTRIBUTE_CLOSE_HOOK
 
 	$CRON_PIDFILE = "$DIR/var/run/cron.pid";
 	$CRONTAB      = "$DIR/etc/crontab";
@@ -133,9 +133,7 @@ crontab は システムの /etc/crontab に相当するものです。makefml newml
 cron.pl は 4.4 BSD FORMAT を理解します。4.3BSDの形式ではありません
 
 
-
 .S	cron.pl を使う際の注意
-
 
 上述のように cron.pl を sendmail が exec して実行するというのはcrontab 
 をユーザー毎に設定できない OS への対応です。できるなら user ごとに 

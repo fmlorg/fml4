@@ -3,7 +3,7 @@
 
 .S	リレー(RFC821)
 =E.S	Relaying based on RFC821
-.key	%リレー (obsolete)
+.k	%リレー (obsolete)
 
 「厳密にはRFCには従ってない?から%なんざぁ理解しなくていいんだぜっ!」っ
 てサイトも世の中にはあることに注意しましょう。
@@ -55,13 +55,12 @@ NEW FORMATでは
 
 .S	全てのメールをリレーサーバに投げる
 .=E.S	Using relay servers
-.l	DEFAULT_RELAY_SERVER
-.k	$DEFAULT_RELAY_SERVER
 
 $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 
 	$DEFAULT_RELAY_SERVER
 .k	$DEFAULT_RELAY_SERVER
+.l	$DEFAULT_RELAY_SERVER
 
 で定義されたリレーサーバへ投げそのサーバに配送します。
 
@@ -89,7 +88,7 @@ $RELAY_HACK = 1; がセットされ、$CF_DEF で定義された CF 形式の static
 配送ルールが設定された場合、それにしたがったリレーサーバの設定がされま
 す。
 
-CF 形式の例：
+CF 形式の例:
 
 	GW smtp-ignmx:  mlrelay0.domain0
 	DOM or.jp
@@ -135,6 +134,7 @@ qmail 1.0 はそうことをせず相手の負荷も回線の太さも考えず、ひたすら一通
 
 .S	MCI Cache
 =E.S	MCI Cache
+.k	MCI
 
 TCP Connection Cache の基本的なアイデアは TCP Connection 自体のコスト
 の高さです。
@@ -189,9 +189,9 @@ CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
 
 
 .S	配送プログラム(e.g. sendmail)との通信のログ
-.key	var/log/_smtplog
-.key	_smtplog
-.key	$NOT_TRACE_SMTP
+.k	var/log/_smtplog
+.k	_smtplog
+.k	$NOT_TRACE_SMTP
 
 sendmailとのやりとりの記録(もっとも最近のものだけ)デバッグに便利です。
 (デバッグとか終わっちゃって)必要ないなら

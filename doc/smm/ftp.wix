@@ -26,8 +26,6 @@ libhref.pl も使えば
 .S	libftp.pl と libhref.pl はどう使う？
 .k	libftp.pl
 .k	libhref.pl
-.k	URL
-.k	ftpmail
 .k	$FTPMAIL_SERVER
 
 ○libref.pl

@@ -1,10 +1,10 @@
 .C	contrib 以下について
-.k	lib
 .l	contrib
 
 lib/ == contrib/ の階層のリストと簡単な説明です。
 
 .S	contrib 一覧
+.k	contrib 一覧
 
 .q
 MIME				

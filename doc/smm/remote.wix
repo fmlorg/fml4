@@ -1,7 +1,8 @@
 .C	リモート管理
 .l	remote
-.label	REMOTE-ADMINISTRATION
-.key	$REMOTE_ADMINISTRATION
+.l	$REMOTE-ADMINISTRATION
+.l	REMOTE-ADMINISTRATION
+.k	$REMOTE_ADMINISTRATION
 
 
 .S	リモート管理 イントロダクション
@@ -35,8 +36,8 @@ password フィールドは見えちゃいますよね、その場合は。
 .S	より安全を考えると
 
 SMTP でやるより、Secure Shell で RSA 認証して、
-.k SSH 
-.k Secure Shell
+.k	SSH 
+.k	Secure Shell
 
 	ssh remote-host $FML/makefml add address
 
@@ -52,7 +53,7 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 なおマシンの上で他の人に覗かれた場合は少しだけましで、etc/passwd とい
 うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
 います。$USE_MD5 をセットすれば、MD5 で保存します。
-.xref	MD5
+.xref	$USE_MD5
 
 そのためパスワードファイルの編集には makefml もしくは bin/passwd.pl を
 使うと良いでしょう(自分で crypt してもいいですけどね、普通手動ではしな
@@ -67,6 +68,8 @@ config.ph に
 
 	$REMOTE_ADMINISTRATION = 1;
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
+.k	$REMOTE_ADMINISTRATION
+.k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 
 をするとリモート管理を可能にします。これは
 
@@ -85,7 +88,7 @@ config.ph に
 
 
 .S	コマンド
-.k	admin
+.k	admin コマンド
 
 リモートで管理を許される人は
 
@@ -101,12 +104,15 @@ config.ph に
 	# admin pass パスワード
 	# admin addadmin fukachan@sapporo.iij.ad.jp
 	# admin add      fukachan@sapporo.iij.ad.jp
+.k	# admin pass
+.k	# admin addadmin
+.k	# admin add
 
 
 .S	approve password command SYNTAX
-.key	approve
+.k	approve コマンド
 .xref	fmlserv.pl
-.label	admin:approve
+.l	admin:approve
 
 # admin 形式は
    password認証して、その後は全部認証したものとみなす
@@ -126,6 +132,7 @@ config.ph に
 つまり
 
 	# approve password commands 
+.k	# approve password commands 
 
 は ２行分
 
@@ -141,6 +148,7 @@ config.ph に
 
 .S	リモート管理の設定
 .l	$ADMIN_MEMBER_LIST
+.k	$ADMIN_MEMBER_LIST
 .k	$ADMIN_HELP_FILE
 .k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 .k	$PASSWD_FILE
@@ -231,8 +239,9 @@ multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 
 
 .S	アドミンのコマンド一覧 (help-admin より)
+.l	help-admin
 .k	help-admin
-.k	help-admin
+.k	admin コマンド一覧
 
    # admin pass パスワード
    # admin password パスワード
@@ -267,7 +276,7 @@ multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 .S	リモート管理で使えるコマンドを増やすor減らす
 .l	add-admin-procedures
 .xref	add-procedures
-.k	リモート管理で使えるコマンドを増やすor減らす
+.k	リモート管理コマンドを増やす/減らす
 
 普通のコマンドを増やす要領で同じようにやれば良いです。
 config.ph でコントロールできます。
@@ -357,10 +366,11 @@ Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet
 
 
 .S	パスワードファイルの初期化と設定
-.label	init-passwd
+.l	init-passwd
 .k	etc/passwd
 .k	bin/passwd.pl
 .xref	bin/passwd.pl
+.xref	makefml
 
 例：
 	makefml passwd ML名 ...
@@ -391,7 +401,6 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 
 
 .S	リモート管理の古い設定への注意
-.key	リモート管理の古い設定への注意
 
 古い設定のままでは動きません(libfml.pl 1.5.2より前)。ごめんなさい
 

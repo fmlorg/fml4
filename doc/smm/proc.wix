@@ -1,12 +1,13 @@
 .C	コマンドについて
 
 .S	コマンドの一覧
+.k	コマンドの一覧->helpファイル
 
 help ファイルを見て下さい:-)
 
 
 .S	library コマンド
-.l	#library
+.l	library
 .k	library コマンド
 
 library コマンドはＭＬの中に配送されないsubのＭＬを含んでいるような状
@@ -46,7 +47,8 @@ $DIR の代わりに対応するものとして
 
 
 .S	index コマンド
-.l	#index
+.l	index
+.k	index コマンド
 .k	$INDEX_SHOW_DIRNAME
 .k	$INDEX_FILE 
 

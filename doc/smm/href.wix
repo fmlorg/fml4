@@ -1,11 +1,7 @@
 .C	WWW 関係 (HyperReference ...)
 .l	href
-.key	WWW
+.k	WWW
 .k	ローカルスプールへのftp操作
-.key	localftp
-.key	http://
-.key	gopher://
-.key	ftp://
 
 
 .S	自動的に スプールを html 化する(Expireはしない)
@@ -20,6 +16,7 @@ fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
 
 SYNOPSIS:
 	&SyncHtml(生成されたHTMLを置く場所, $ID, *Envelope);
+.k	&SyncHtml
 
 	$ID		記事番号は &Distribute; で
 			グローバル変数 $ID はセットされる。
@@ -172,7 +169,7 @@ HTMLに変換された記事をファイルに保存する直前に実行されるフック。
 .l	TalkWithHttpServer
 .k	TalkWithHttpServer
 .k	&TalkWithHttpServer
-.xref	geturl.pl
+.xref	bin/geturl.pl
 
 SYNOPSIS:
 	&TalkWithHttpServer($host, $port, $request, $tp, *e); 
@@ -215,7 +212,7 @@ http:// で始まらない時には、デフォールトで聞きにいくサーバを
 	
 
 .S	URLの中身を返すサーバ
-.k	&HRef(...)
+.k	&HRef
 .k	libhref.pl
 
 一番単純なやり方は

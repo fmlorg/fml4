@@ -25,6 +25,7 @@ config.ph の中にすべての設定を書くようにして下さい。コマンドラインはデ
 
 
 .S	コマンドラインのシンタックス
+.k	コマンドラインのシンタックス
 
 SYNOPSIS:
    fml.pl   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
@@ -76,7 +77,6 @@ directory が存在すれば引数の順に $DIR、$LIBDIR にセットされます。
 
 
 .S	ロングラインオプション --\S+=\S+
-.k	--MAIL_LIST=mailing-list-name@domain 
 
 例:
 	--MAINTAINER=fukachan@sapporo.iij.ad.jp
@@ -129,7 +129,8 @@ $Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外は
 ひとつだけ例外があります。コマンド用のアドレス listname-ctl は 
 include-ctl を呼びますが、この include-ctl の中には
 
-		--ctladdr 
+		--ctladdr
+.k		--ctladdr
 
 という
 
@@ -151,6 +152,7 @@ makefml を使っている限りでは気にする必要はありません。場合によってはコ
 この場合 どっか/listname/config.ph で
 
 	&DEFINE_MODE('post=anyone');
+.k	&DEFINE_MODE('post=anyone');
 
 のように書きます。makefml を使えば対話的にこのように↑この部分を書き加
 えてくれます。この時 makefml が準備するのは
@@ -162,9 +164,7 @@ makefml を使っている限りでは気にする必要はありません。場合によってはコ
 listname というアドレスでの再配送だけに専念するのが良いでしょう。例え
 ば ip-connection とかです。
 
-
-
-さてさて --ctladdr ですが、次のような理由で使われています。
+さて --ctladdr ですが、次のような理由で使われています。
 
    config.ph はすべての場合に常に読み込まれるファイルです。そのため 
    makefml が作るコマンドサーバ用の include-ctl というファイルには 

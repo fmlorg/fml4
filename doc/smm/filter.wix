@@ -1,4 +1,5 @@
 .C	Filtering
+.k	Filtering
 .l	filter
 
 ちなみに Filtering FAQ のURLは
@@ -11,7 +12,7 @@
 .S	MH slcoal interface
 .key	slocal
 .key	.maildelivery
-.label	{slocal-1}
+.l	slocal-1
 
 ここでは slocal を用いたやりかたを述べます。
 
@@ -37,9 +38,7 @@ default  -       >       ?      /var/mail/fukachan
 
 
 .S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
-.label	{libexec/fml_local.pl}
-.key	libexec
-.key	libexec/fml_local.pl
+.l	libexec/fml_local.pl
 .key	fml_local.pl
 
 ようはループを止めようと思ったものの、作り終わってみたら な〜んか 

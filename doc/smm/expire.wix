@@ -1,5 +1,7 @@
 .C	Expire (一定日数より古いファイルは消す)とNewSyslog
 .l	expire
+.k	expire
+
 
 .S	Introduction
 
@@ -12,6 +14,9 @@ $USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。必ず
 $EXPIRE_LIMIT が記事の数で指定されていて、
 
 	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+.k	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+.k	$EXPIRE_LIMIT
+.k	$ARCHIVE_UNIT 
 
 でなくてはいけません。念のため
 
@@ -23,6 +28,8 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 .S	一定日数以上古いファイルを消去
 .l	$USE_EXPIRE
 .l	$EXPIRE_LIMIT
+.k	$USE_EXPIRE
+.k	$EXPIRE_LIMIT
 
 	$USE_EXPIRE = 1; (デフォールトは0、expireはしない) 
 
@@ -45,10 +52,11 @@ $EXPIRE_LIMIT で調整します。$EXPIRE_LIMIT のシンタックスは
 [参考]
 
 参考までにHOOKを使う従来のやり方を書いておくと
-.key	$FML_EXIT_HOOK
+.k	$FML_EXIT_HOOK
 
    SYNOPSIS:
 	&Expire(場所, 日数(以上古いファイルを消す));
+.k	&Expire(場所, 日数(以上古いファイルを消す))
 
 例：
 	$FML_EXIT_HOOK .= q#
@@ -84,10 +92,11 @@ $EXPIRE_LIMIT で調整します。$EXPIRE_LIMIT のシンタックスは
 
 
 .S	expire.pl コマンドラインオプション (bin/expire.pl)
-.k	bin/expire.pl
-.label	expire_getopt
-.label	expire.pl
-.key	$FML_EXIT_HOOK
+.l	bin/expire.pl
+.k	expire.pl
+.l	expire_getopt
+.l	expire.pl
+.k	$FML_EXIT_HOOK
 
 expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
     -h                 : HELP
@@ -101,9 +110,9 @@ expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
 
 
 .S	newsyslogをする(デフォールト)
-.label	newsyslog
-.key	$NOT_USE_NEWSYSLOG
-.key	@NEWSYSLOG_FILES
+.l	newsyslog
+.k	$NOT_USE_NEWSYSLOG
+.k	@NEWSYSLOG_FILES
 .k	libnewsyslog.pl
 
 まとめおくりの msend.pl は日曜朝6時に(デフォールト)
@@ -141,8 +150,8 @@ ln -s members.bak 	var/log/members.0
 
 
 .S	newsyslogをしない
-.label	{newsyslog-2}
-.seealso	newsyslog
+.l	newsyslog-2
+.xref	newsyslog
 .key	$NOT_USE_NEWSYSLOG
 
 $NOT_USE_NEWSYSLOG = 1; なら実行しません

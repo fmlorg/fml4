@@ -110,6 +110,7 @@ $addr1 と $addr2 が同じものかどうか調べる。
 
 
 .S	MailListMemberP        (fml.pl)
+.k	MailListMemberP
 
 SYNOPSIS:
 	&MailListMemberP(アドレス)
@@ -119,6 +120,7 @@ SYNOPSIS:
 
 
 .S	MailListActiveP        (fml.pl)
+.k	MailListActiveP
 
 SYNOPSIS:
 	&MailListActiveP(アドレス)

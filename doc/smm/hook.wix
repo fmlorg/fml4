@@ -16,7 +16,8 @@
 
 
 .S	$START_HOOK
-.key	$START_HOOK
+.l	$START_HOOK
+.k	$START_HOOK
 
 この時点では、ヘッダの各フィールドの切り出しは終っている。が、配送orコ
 マンド本体を行なう前である。
@@ -32,7 +33,8 @@ $START_HOOK =q%
 
 
 .S	$HEADER_ADD_HOOK
-.key	$HEADER_ADD_HOOK
+.l	$HEADER_ADD_HOOK
+.k	$HEADER_ADD_HOOK
 
 ヘッダに”新たに”つけくわえる フィールドをかいて、カスタマイズするた
 めのフック。
@@ -58,13 +60,15 @@ $HEADER_ADD_HOOK = q#
 
 
 .S	$DISTRIBUTE_START_HOOK
+.l	$DISTRIBUTE_START_HOOK
 .k	$DISTRIBUTE_START_HOOK
 
 配送を始める関数に入った時に最初に評価されるHOOK
 
 
 .S	$SMTP_OPEN_HOOK
-.key	$SMTP_OPEN_HOOK
+.l	$SMTP_OPEN_HOOK
+.k	$SMTP_OPEN_HOOK
 
 このフックの後 Sendmail へ渡すヘッダの処理が始まります。ここで強制的か
 つダイナミックにヘッダの内容を変えたりすると効果的です。
@@ -90,14 +94,16 @@ $SMTP_OPEN_HOOK = q#
 
 
 .S	$SMTP_CLOSE_HOOK
+.l	$SMTP_CLOSE_HOOK
+.k	$SMTP_CLOSE_HOOK
 
 $SMTP_CLOSE_HOOK は配送が終った後でかつまだロックされている状態で実行
 されます。具体的には &Distribute; を離れる直前に実行されます。
 
 
 .S	$FML_EXIT_HOOK
-.key	$FML_EXIT_HOOK
-.seealso expire
+.l	$FML_EXIT_HOOK
+.k	$FML_EXIT_HOOK
 
 fml.pl が最後に実行する フック。このときすでに 
 
@@ -107,7 +113,8 @@ fml.pl が最後に実行する フック。このときすでに
 
 
 .S	$MSEND_OPT_HOOK
-.key	$MSEND_OPT_HOOK
+.l	$MSEND_OPT_HOOK
+.k	$MSEND_OPT_HOOK
 
 デフォールトでは、まとめおくり や mget の時の Subject は
 
@@ -131,15 +138,16 @@ sub MSendModeSet  という関数を見るとわかるとおもいます。
 
 .S	$REPORT_HEADER_CONFIG_HOOK
 .l	$REPORT_HEADER_CONFIG_HOOK
+.k	$REPORT_HEADER_CONFIG_HOOK
 
 SMTP 配送ライブラリへ渡す直前に評価されるフック。
 
 
 .S	COMMAND_HOOK（コマンドへの追加）
-.label	command-hook
-.key	customize-of-commands
-.key	コマンドのカスタマイズ
-.key	$COMMAND_HOOK
+.l	$COMMAND_HOOK
+.l	command-hook
+.k	コマンドのカスタマイズ
+.k	$COMMAND_HOOK
 
 インタプリタですから、コマンドでそのML独自の機能をもたせたかったら
 config.ph にセットして下さい(そうすれば、MLが複数あってもそれぞれ別様
@@ -253,13 +261,13 @@ $COMMAND_HOOK =q#
 
 
 .S	HOOKによるコマンド実装例： "# admin" アドミンコマンド
-.key	$COMMAND_HOOK
-.key	$ADMIN_MEMBER_LIST
-.key	$ADMIN_HELP_FILE
-.key	$REMORE_AUTH
-.key	admin-command
-.key	アドミンコマンド
-.seealso	REMOTE-ADMINISTRATION 
+.l	admin-command
+.k	$COMMAND_HOOK
+.k	$ADMIN_MEMBER_LIST
+.k	$ADMIN_HELP_FILE
+.k	$REMORE_AUTH
+.k	admin コマンド
+.xref	REMOTE-ADMINISTRATION 
 
 "# admin" アドミンコマンド って昔あったんですが、今は config.ph で
 
@@ -273,7 +281,7 @@ lib/remote/REAMDE をみてもらうとわかりますね。
 
 
 .S	HOOKの例：ある行数を越えるメールは廃棄する設定
-
+.k	$START_HOOK
 	
 $START_HOOK = q#
     if ($Envelope{'nlines'} > 1000) {
@@ -284,6 +292,7 @@ $START_HOOK = q#
 
 
 .S	$START_HOOK でＭＬメンバーの人数制限をする
+.k	$START_HOOK
 
 $START_HOOK = q%;
 

@@ -1,8 +1,9 @@
 .A	References (参考文献)
 
 
-.S	Books (参考文献：本)
+.S	Books (参考文献:本)
 .l	books
+.k	参考文献:本
 
 S. J. Leffler, K. Bostic, M. J. Karels and J. S. Quarterman, 
 "The design and implementation of the 4.4BSD UNIX Operating System"
@@ -26,8 +27,9 @@ perl texinfo in japanese --- version 4.0.19.2
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
 
 
-.S	RFC  (参考文献：RFC)
+.S	RFC  (参考文献:RFC)
 =E.S	RFC
+.k	参考文献:RFC
 
 rfc822				headers of mail
 rfc821				smtp
@@ -121,6 +123,7 @@ rfc1428				ESMTP
 
 
 .S	Important RFCs for electronic mail
+.k	Important RFCs for electronic mail
 
 	RFC821	SMTP protocol
 	RFC822	Mail header format
@@ -149,7 +152,7 @@ rfc1428				ESMTP
 
 
 .S	fj.sourcesに過去リリースした記事のMessage-IDリスト
-
+.k	fj.sources
 
 Release Version 1.5
 Message-ID: <FUKACHAN.95Jun13000736@beth.phys.titech.ac.jp>
@@ -182,9 +185,9 @@ Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 
 
 .A	メーリングリストの挙動と1/fゆらぎ とDoctor論文と fml
-.key	1/f fluctuations
-.key	1/f ゆらぎ
-.key	学位論文(理学博士)
+.k	1/f fluctuations
+.k	1/f ゆらぎ
+.k	学位論文(理学博士)
 
 僕の書いた論文のリストは
 

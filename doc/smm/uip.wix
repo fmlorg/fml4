@@ -6,6 +6,8 @@
 
 
 .S 	analize_mail_error.pl, analize_mail_error.sh 
+.k 	analize_mail_error.pl
+.k	analize_mail_error.sh 
 .l 	analize_mail_error.pl
 .l	analize_mail_error.sh 
 
@@ -22,25 +24,25 @@
 
 
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
-.k	bin/Archive.pl
-.key	bin/Archive.sh
-.key	Archive.pl
-.key	Archive.sh
+.l	bin/Archive.pl
+.l	bin/Archive.sh
+.k	Archive.pl
+.k	Archive.sh
 .xref	archive Archive.pl
 
 アーカイブの節を参照
 
 
 .S	cron (bin/cron.pl)
-.key	bin/cron.pl
-.key	cron.pl
+.l	bin/cron.pl
+.k	cron.pl
 .xref	cron
 
 4.4BSD の cron と compatible な cron
  
 
 .S	プログラムをデーモン化して実行 (bin/daemon.pl)
-.k	bin/daemon.pl
+.l	bin/daemon.pl
 .k	daemon.pl
 .xref	cron
 
@@ -85,8 +87,10 @@ main(argc, argv)
 
 
 .S	daily （日々のログ解析）
-.k	bin/daily.pl
-.k	etc/daily.ignore
+.l	bin/daily.pl
+.l	etc/daily.ignore
+.k	daily.pl
+.k	daily.ignore
 
 	% bin/daily.pl -f etc/daily.ignore log
 
@@ -101,8 +105,8 @@ main(argc, argv)
 
 
 .S	DNS のチェック (bin/dns_check.pl)
-.key	bin/dns_check.pl
-.key	dns_check.pl
+.l	bin/dns_check.pl
+.k	dns_check.pl
 
 DNS のテストをする、ちょっとしたプログラム。
 
@@ -112,7 +116,7 @@ DNS のテストをする、ちょっとしたプログラム。
 
 
 .S	emumail.pl
-.l	emumail.pl
+.k	emumail.pl
 .l	bin/emumail.pl
 
 sendmail -> fml.pl の 「sendmail -> 」の部分を emulation します。
@@ -124,9 +128,9 @@ debug に便利かなと
 
 
 .S	FMLのコマンドへのユーザインターフェイス (bin/fmlctl.pl)
-.key	bin/fmlctl.pl
-.key	fmlctl.pl
-.key	.fmlctlrc
+.l	bin/fmlctl.pl
+.k	fmlctl.pl
+.k	.fmlctlrc
 
 通常 fml のコマンドをテストする場合メール経由で実行しますが、ＭＬのホー
 ムで fmlctl を使うと、fml のコマンドをメール経由でなくても実行します。
@@ -229,7 +233,7 @@ SYNOPSIS
 
 
 .S	WIX言語フォーマッタ (bin/fwix.pl)
-.l	fwix.pl
+.k	fwix.pl
 .l	bin/fwix.pl
 .xref	WIX
 
@@ -262,7 +266,7 @@ WIX言語のフォーマッタ
 
 
 .S	gen_summary.pl (summary ファイルを再生成する)
-.l	gen_summary.pl
+.k	gen_summary.pl
 .l	bin/gen_summary.pl
 
 MLの spool から summary を再生成する。
@@ -276,7 +280,7 @@ in fml-support ML's Count: 02393
 
 
 .S	URL の中身を取り出す (bin/geturl.pl)
-.l	geturl.pl
+.k	geturl.pl
 .l	bin/geturl.pl
 .k	$WWW_HOME
 .k	$WITH_WWW_WATCH
@@ -307,7 +311,7 @@ saveします。画像データや音声データでも同様にファイルに落せます。
 
 .S	ローカルテスト (bin/localtest.pl)
 .l	bin/localtest.pl
-.l	localtest.pl
+.k	localtest.pl
 
 gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
 これを使わずにローカルテストをするとメールがループしているとみなしてし
@@ -324,14 +328,14 @@ gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
 
 
 .S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
-.k	bin/newsyslog.sh
+.l	bin/newsyslog.sh
 .k	newsyslog.sh
 
 libnewsyslog.pl がなかった時代の産物。
 
 
 .S	Multipart Canceler フィルタ (bin/multipart.pl)
-.k	bin/multipart.pl
+.l	bin/multipart.pl
 .k	multipart.pl
 
 なお makefml で作るとサンプルに見本がついています。
@@ -356,13 +360,13 @@ Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 
 
 .S	SMTPライブラリを使った /usr/bin/Mail のemulation (bin/pmail.pl)
-.k	bin/pmail.pl
+.l	bin/pmail.pl
 .k	pmail.pl
 
 
 .S	パスワードの初期化と変更 (bin/passwd.pl)
 .l	bin/passwd.pl
-.key	passwd.pl
+.k	passwd.pl
 
 fml でのパスワードは crypt された形で保存されます。つまり UNIX の 
 /etc/passwd と同じようにです。
@@ -394,7 +398,7 @@ bin/passwd.pl を使って下さい。使い方は、
 	moderated モード
 
 等で使われます。
-.xref REMOTE-ADMINISTRATION mode:moderated
+.xref REMOTE-ADMINISTRATION &DEFINE_MODE
 
 
 .S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/pop2recv.pl)
@@ -416,7 +420,7 @@ libexec/popfml.pl がこの目的の専用プログラムです。
 
 
 .S	与えられたファイルを分割して送り出すプログラム (bin/split_and_msend.pl)
-.k	bin/split_and_msend.pl
+.l	bin/split_and_msend.pl
 .k	split_and_msend.pl
 
 与えられたファイルを分割して送り出すプログラムを太古の昔使ってた名残。
@@ -457,9 +461,9 @@ config.ph を評価する場合には気をつけて下さい。
 
 
 .S	MLを止めて(ロックして)config.phの edit をしたい (bin/vipw.pl)
-.key	vipw.pl
-.key	bin/vipw.pl
-.key	maintenance.pl
+.k	vipw.pl
+.l	bin/vipw.pl
+.k	maintenance.pl
 
 flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
 スをしたい時は？
@@ -487,9 +491,9 @@ vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)]
 
 
 .S	MH scan.format (lib/Utilities/scan.format)
-.label	scan.format 
-.key	scan.format 
-.key	lib/Utilities/scan.format
+.l	scan.format 
+.k	scan.format 
+.k	lib/Utilities/scan.format
 
 lib/Utilities/scan.format を あなたの ~/Mail にいれると
 
@@ -517,8 +521,8 @@ X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 
 
 .S	mgetで得たファイルをmh以外で読む時 (lib/Utilities/packmbox.pl)
-.key	lib/Utilitites/packmbox.pl
-.key	packmbox.pl
+.l	packmbox.pl
+.k	packmbox.pl
 
 packmbox.pl	(by ukai@hplj.hpl.hp.com)
 		1,2,3,...のように並んでいるファイルをmbox形式のファイ
@@ -540,17 +544,17 @@ lib/Utilitites/packmbox.pl を使って、
 
 
 .S	RMAILファイルからfmlへのメッセージの取込み (lib/Utilities/Rmail2fml.pl)
-.key	lib/Utilities/Rmail2fml.pl
-.key	Rmail2fml.pl
+.l	Rmail2fml.pl
+.k	Rmail2fml.pl
 
 Rmail2fml.pl	(yamane@ngi.co.jp)
 		RMAILファイルから fmlへのメッセージの取込みプログラム
 
 
 .S	宇宙歴関係
-.k	lib/Utilities/my-mh-post
-.k	lib/Utilities/my-mh-post.pl
-.k	lib/Utilities/stardate.el
+.l	my-mh-post
+.l	my-mh-post.pl
+.l	stardate.el
 .k	my-mh-post
 .k	my-mh-post.pl
 .k	stardate.el
@@ -572,13 +576,15 @@ stardate.el です。
 
 
 .S	bin/RecreateConfig.pl
-.k	bin/RecreateConfig.pl
+.l	bin/RecreateConfig.pl
 .k	RecreateConfig.pl
 
 fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
 
 
 .S	weekend-msend.sh
+.l	bin/weekend-msend.sh
+.k	weekend-msend.sh
 
 設定ファイルを別に持ち msend.pl を一週間に一度起動するようにすれば一週
 間に一度まとめ送りするようになります。
@@ -606,6 +612,9 @@ m=1u みたいに常に送りつけるように設定しておいて送り時間は cron でコン
 
 
 .S	X-Stardate: をつける（mh-e）
+.k	STAR TREK
+.k	stardate.el
+.xref	stardate.el
 
 lib/Utilities/stardate.el を load してください
 ＃ emacs 19 でなきゃかきかえないとだめ

@@ -98,6 +98,7 @@ require 'sys/socket.ph';
 
 
 .S	\w
+.k	\w
 
 \w ¤Ï [0-9A-Za-z_]  ¤Ç¤¹
 

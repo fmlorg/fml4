@@ -1,4 +1,5 @@
-.C	fml の基本動作と起動オプション…
+.C	fml のプロセス
+.k	fml process
 .l	fml-process
 
 ＭＬサーバの基本動作を知っておくとカスタマイズの時役にたちます。
@@ -84,8 +85,8 @@ sendmail から fml.pl へメールが渡される時は次のように動作します。
 
 .S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
 .k	fml.plと引数
-.k	DIR
-.k	LIBDIR
+.k	$DIR
+.k	$LIBDIR
 
 	/usr/libexec/fml/fml.pl /var/spool/ml/elena
 
@@ -148,8 +149,8 @@ STDIN からの読み込みは第壱段階でハッシュテーブル %Envelope
 .xref	%Envelope
 .k	$Envelope{'Header'}
 .k	$Envelope{'Body'}
-.k	ヘッダ	$Envelope{'Header'}
-.k	ボディ	$Envelope{'Body'}
+.k	メールのヘッダ
+.k	メールのボディ
 
 	ヘッダ	$Envelope{'Header'}
 	ボディ	$Envelope{'Body'}
@@ -185,8 +186,6 @@ LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
 
 
 .S	fmlのプロセス(第２段階, %Envelopeの処理)
-.xref	%Envelope
-.xref	header-custom
 
 %Envelope にヘッダとボディを読み込んだ後はヘッダの解析プロセスが続きま
 す。詳細については次の章を見て下さい。
@@ -241,8 +240,7 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 
 .S	ロックの仕方(flock でない場合)
 .l	how-to-lock
-.k	ロックの仕方について
-.k	ロックアルゴリズムの選択と変数の設定
+.k	ロックアルゴリズム
 .xref	fml-mechanism, seq-file
 
 ロックアルゴリズムは二通り用意されてます。flockがお奨めです。flock(2) 
@@ -274,6 +272,7 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 
 	"$FP_VARRUN_DIR/lockfile.v7"
 	"$FP_VARRUN_DIR/lockfile.数字"
+.k	$FP_VARRUN_DIR/lockfile.v7
 
 すべてを消して下さい。数字はプロセス番号ですから、プロセステーブルを見
 て(ps(1))、該当する数字(fml の process)がなければ、そのファイルは消し
@@ -309,10 +308,8 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 
 .S	SMTPライブラリについて
 .l	smtp
-.k	SMTP
-.k	Simple Mail Transfer Protocol
-.k	MTA
-.k	Mail Transport Agent
+.k	SMTP (Simple Mail Transfer Protocol)
+.k	MTA (Mail Transport Agent)
 
 SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
 Transport Agent)と通信するライブラリです。
@@ -378,9 +375,7 @@ sendmail の走っているマシンを定義することが出来ます。
 
 
 .S	変数名の Naming Convention
-.key	変数の名前つけ
 .key	変数の Naming Convention
-.key	Naming Convention
 
 
 ○ 大文字（[A-Z0-9_]+）だけの塊はユーザーのカスタマイズで使う目的の
@@ -433,8 +428,8 @@ sendmail の走っているマシンを定義することが出来ます。
 .k    	$FP_SPOOL_DIR
 
 
-.S	subroutine 名の Naming Convention
-.k	subroutine 名の Naming Convention
+.S	関数名の Naming Convention
+.k	関数名の Naming Convention
 
 例外を除いて
     ”１単語の先頭一文字が大文字、残りは小文字”の塊からなる単語
@@ -668,17 +663,21 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 	$MEMBER_LIST 	 	$DIR/members
 .l	$MEMBER_LIST
+.k	$MEMBER_LIST
 		メンバーリスト(認証のみに使う)
 .xref	fml-file-structure
 
 	$ACTIVE_LIST 		$DIR/actives
 .l	$ACTIVE_LIST
+.k	$ACTIVE_LIST
 		ＭＬの配送リスト
 .xref	fml-file-structure
 
 
 	$REJECT_ADDR_LIST	$DIR/spammers
 .l	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR_LIST
+.xref	$REJECT_ADDR_LIST
 
 投稿・コマンド・自動登録を始め弾きたいアドレスのリストを入れる。
 
@@ -687,29 +686,35 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 	$OBJECTIVE_FILE	 	$DIR/objective
 .l	$OBJECTIVE_FILE
+.k	$OBJECTIVE_FILE
 		ＭＬの目的を書いたファイル
 
 	$GUIDE_FILE		$DIR/guide
 .l	$GUIDE_FILE
+.k	$GUIDE_FILE
 		ＭＬの一般向けご案内（ガイド）
 
 	$HELP_FILE	 	$DIR/help
 .l	$HELP_FILE
+.k	$HELP_FILE
 		ＭＬのHELP、コマンドの解説等
 
 	$DENY_FILE	 	$DIR/deny
 .l	$DENY_FILE
+.k	$DENY_FILE
 		ＭＬがメンバーチェックをしている時
 		メンバー以外からメールが来た時に返す断りの文章
 		
 	$WELCOME_FILE	 	$DIR/guide
 .l	$WELCOME_FILE
+.k	$WELCOME_FILE
 .xref	auto-regist
 		ＭＬが自動登録の時、登録時に送ってあげる文章
 		デフォールトではとりあえずガイドと同じになっている。
 
 	$CONFIRMATION_FILE       $DIR/confirm
 .l	$CONFIRMATION_FILE
+.k	$CONFIRMATION_FILE
 .xref	confirmation
 		自動登録で confirmation モードの際
 		reply を返す confirmation の説明のファイル
@@ -719,42 +724,52 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 	$LOGFILE	 	$DIR/log
 .l	$LOGFILE
+.k	$LOGFILE
 		ログ
 
 	$MGET_LOGFILE    	$DIR/log
 .l	$MGET_LOGFILE
+.k	$MGET_LOGFILE
 		mgetのログ。デフォールトでは↑ログファイルと同じ
 .xref	mget
 	
 	$SMTPLOG		$VARLOG_DIR/_smtplog
 .l	$SMTPLOG
+.k	$SMTPLOG
 .l	$VARLOG_DIR/_smtplog
+.k	$VARLOG_DIR/_smtplog
 		プロセス間通信(SMTP)のログ(デバッグの役に立つ)
 
 	$SUMMARY_FILE 	 	$DIR/summary	
 .l	$SUMMARY_FILE
+.k	$SUMMARY_FILE
 		MLの記事のサマリ
 
 	$SEQUENCE_FILE 	 	$DIR/seq
 .l	$SEQUENCE_FILE
+.k	$SEQUENCE_FILE
 		MLの記事番号
 
 	$MSEND_RC		$VARLOG_DIR/msendrc
 .l	$MSEND_RC
+.k	$MSEND_RC
 		まとめおくりの制御ファイル
 .xref	msend
 
 	$LOCK_FILE	 	$VARRUN_DIR/lockfile.v7
 .l	$LOCK_FILE
+.k	$LOCK_FILE
 		flock() を使わない時のロックで使うファイル
 
 	$LOG_MESSAGE_ID		$VARRUN_DIR/msgidcache
 .l	$LOG_MESSAGE_ID
+.k	$LOG_MESSAGE_ID
 		message-id cache ファイル
 		(ML自身での無限ループを防ぐためのキャッシュ)
 
 	$INDEX_FILE		$DIR/index (なくてもいっこうに構わない)
 .l	$INDEX_FILE
+.k	$INDEX_FILE
 		indexコマンドで表示したい内容を書く
 		このファイルがない場合はその場でMLのHOME内容を調べて
 		返す
@@ -764,21 +779,25 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 	$DO_NITHING
 .l	$DO_NITHING
+.k	$DO_NITHING
 
 	何もしないという分岐をするための変数。特殊なサーバを作る時や
 	特別なHOOKをかけたりする場合に有用である。
 
 	$NULL
 .l	$NULL
+.k	$NULL
 		ダミー:-) ＃ 別にこんな変数いらない 
 		#define null (char *)0 みたいなものだと思ってもらえば良い
 
 	$FML	
 .l	$FML	
+.k	$FML	
 		カーネル内のプロセステーブルを書き変える際に使う変数
 
 	$FACE_MARK	（単なる愛敬:-）
 .l	$FACE_MARK
+.k	$FACE_MARK
 		各種リクエストの結果を返す時にお別れの文章の腋につける
 		e.g. P(^^)
 			Be seeing you P(^^)
@@ -787,6 +806,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 	$INCLUDE_SIM_PATH
 .l	$INCLUDE_SIM_PATH
+.k	$INCLUDE_SIM_PATH
 
 	Simulation で使う。気にしないで下さい:)
 
@@ -926,6 +946,8 @@ members はメンバーであるか否か？の認証、 actives は配送リストです。
 .S	複数のメンバーリスト、複数の配送リスト
 .l	@ACTIVE_LIST
 .l	@MEMBER_LIST
+.k	@ACTIVE_LIST
+.k	@MEMBER_LIST
 
 	@ACTIVE_LIST	複数の配送リスト
 
@@ -943,7 +965,6 @@ members と members-admin です。
 
 .S	msendrc ファイルのフォーマットと構造
 .k	msednrc ファイルのフォーマットと構造
-
 
 msendrc は $MSEND_RC で定められる場所におかれます。そのフォーマットは
 
@@ -1006,8 +1027,8 @@ MD5-1.7.tar.gz のインストールが必要です。MD5-1.7 は fml の directory
 .l	fml-maintenance
 .k	How to maintan the installed fml source
 .k	インストール後のメインテナンスとversion up
-.k	version up of fml
-.k	maintenance of fml
+.k	version up
+.k	maintenance
 
 上述のデータ構造とファイルの扱いを考慮した場合、インストール後の
 version up や maintenance に便利な形は次のようなものだと思っています。
@@ -1195,6 +1216,7 @@ $SECURITY_LEVEL < 2 では
 
 .S	DNS Spoofing
 .l	DNS Spoofing
+.k	DNS Spoofing
 .k	$LOG_CONNECTION
 .l	$PeerAddr
 .k	$PeerAddr
@@ -1211,8 +1233,7 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 
 .S	Address Spoofing
 .l	Address Spoofing
-.k	Gauntlet
-.k	Firewall
+.k	Address Spoofing
 
 これは無理っす。もっと下のlayerで何とかしてね。
 
@@ -1224,8 +1245,8 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 これもカーネルレベルの話。根本的な対策は難しい。
 
 
-.S	アドレス表現とRFC822
-.k	アドレス表現
+.S	Email アドレスの表現とRFC822
+.k	Email アドレスの表現
 .k	RFC822
 
 	From: なんか / なんか (なんか)
@@ -1254,6 +1275,7 @@ RFC822 はBNF表現でできる理論限界を表現している文書です。確かに使っても
 
 
 .S	smrsh.c
+.k	smrsh.c
 
 smrsh.c は、
 	"|program ..."
@@ -1265,6 +1287,7 @@ smrsh.c は、
 
 
 .S	access(2) 
+.k	access(2) 
 
 smrsh.c は acceess(2) を使っています。
 
@@ -1291,6 +1314,7 @@ CAVEAT
 
 
 .S	Precedence Priority
+.k	Precedence
 
 sendmail 8.8.5 operations manual tells:
 
@@ -1327,6 +1351,7 @@ sendmail 8.8.5 operations manual tells:
 
 
 .S	4.4BSD vacation
+.k	vacation
 
      No message will be sent unless login (or an alias supplied using the -a
      option) is part of either the ``To:'' or ``Cc:'' headers of the mail.  No
@@ -1347,6 +1372,7 @@ sendmail 8.8.5 operations manual tells:
 
 	$USE_FML_WITH_FMLSERV
 .l	$USE_FML_WITH_FMLSERV
+.k	$USE_FML_WITH_FMLSERV
 
 変数はそれを意味するための内部変数ですが、普通は fml.pl が $DIR の隣に 
 fmlserv という directory があるなら自動的に設定します。うまくいかない
@@ -1354,6 +1380,7 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 
 	$GID
 .l	$GID
+.k	$GID
 
 も fmlserv のために導入された変数ですね。
 
@@ -1389,7 +1416,7 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 .S	複数アドレスから投稿したいがうけとりは一つ( "# skip" )
 .key	skip
 .key	noskip
-.label	{skip}
+.label	skip
 
 複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい。
 ＃この１週間だけこのアドレスも使いたいしぃ〜とかの場合にも効果的です
@@ -1429,6 +1456,7 @@ fukachan@phys.titech.ac.jp	skip
 .S	特定のアドレスを拒否する (spam mails)
 .k	spam mails
 .l	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR_LIST
 .k	$REJECT_ADDR
 .l	$DIR/spammers
 
@@ -1449,6 +1477,7 @@ fukachan@phys.titech.ac.jp	skip
 .C	Portings
 
 .S	Micro$oft NT 4.0
+.k	Micro$oft NT 4.0
 .k	$HAS_GETPWUID
 .k	$HAS_GETPWGID
 .k	$HAS_ALARM
@@ -1472,6 +1501,7 @@ Architecture 依存コードをロードするためのものです。
 .C	配送について
 
 .S	配送プロセスの律速段階とは
+.k	配送プロセスの律速段階
 
 律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
 この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
@@ -1514,7 +1544,7 @@ Architecture 依存コードをロードするためのものです。
 
 で定義されたリレーサーバへ投げそのサーバに配送してもらうということもで
 きます。
-.xref	DEFAULT_RELAY_SERVER
+.xref	$DEFAULT_RELAY_SERVER
 
 
 qmail というひたすら配送プロセスを fork() しまくって、何も考えずにばん

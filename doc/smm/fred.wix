@@ -1,4 +1,4 @@
-.A	FRED （汎関数-正規表現-微分）ライブラリ 
+.C	FRED （汎関数-正規表現-微分）ライブラリ 
 .l	fred
 
 sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
@@ -7,6 +7,7 @@ sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
 .xref	aucea
 
 .S	Funtional Regular Expressional Derivative
+.k	Funtional Regular Expressional Derivative
 
 正規表現にマッチするか否かを調べパターンにマッチした時およびしない時に
 それぞれ定義された関数を実行します。fred は
@@ -30,7 +31,6 @@ sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
 
 
 .S	$FRED_CF
-.k	$FRED_CF
 
 FRED ライブラリは $FRED_CF 変数で定義された設定ファイルを読み、これに
 従い作動します。

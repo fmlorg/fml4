@@ -1,13 +1,14 @@
 .C	~/.forward でＭＬ
 .l	.forward
-.key	~/.forward
-.key	$HOME/.forward
+.k	.forward
+.k	~/.forward
+.k	$HOME/.forward
 
 /etc/aliases をいじれないユーザや密かにＭＬを実行する:-)ユーザ向けの話
 です。
 
 .S	.forward での方法の概論
-.label	{forward-intro}
+.l	forward-intro
 
 ~/.forward もsendmailは/etc/aliasesと同様に実行されます。
 ~/.forward に
@@ -18,9 +19,7 @@
 fml.pl の STDIN にSMTPでもらったメールの内容を送りこみます。
 
 この場合の問題は、自分自身へも配送するのでループ(bounce)問題をどう避け
-るか? が問題になります。
-
-.forward 方式では2通りの考え方ができます。
+るか? が問題になります。.forward 方式では2通りの考え方ができます。
 
 ○	架空のユーザを作りその .forward を使う
 	この場合ＭＬの名前は架空のユーザになります

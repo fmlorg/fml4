@@ -1,10 +1,10 @@
 .C	config.phのその他の設定について
-.label	{config-misc}
+.l	config-misc
 
 
 .S	ヘッダを MIME Decoding してログをとること
-.key	MIME
-.label	MIME-header
+.k	MIME
+.l	MIME-header
 .l	MIME-1
 .l	$USE_MIME
 .xref	MIME-hack
@@ -16,16 +16,18 @@
 まず各種の MIME Decoding を行うためには、
 
 	$USE_MIME	= 1;
+.k	$USE_MIME
 
 を定義します。これがないと必要なライブラリをロードしません。
 
 
-.S	summary に書くsubjectをMIME decodeをしてから書き込む
-.k	summary に書くsubjectをMIME decodeをしてから書き込む
+.S	subjectをMIME decodeして summary に記録
+.k	subjectをMIME decodeして summary に記録
 
 これは
 
 	$USE_MIME	= 1;  
+.k	$USE_MIME
 
 が設定されていれば実行されます。
 
@@ -45,10 +47,10 @@
 部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
 
 
-.S	記事をMIME Decoding してから保存する場合
-.k	$MIME_DECODED_ARTICLE
+.S	記事を MIME Decode して保存
 
 	$MIME_DECODED_ARTICLE          = 1;
+.k	$MIME_DECODED_ARTICLE
 
 と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
 時に日本語へ逆変換した内容を書き込みます。
@@ -60,7 +62,7 @@
 ISO-2022-JP の文字がない限りは require しません(たいして軽くはならない
 でしょうが…)。
 
-.key RFC1522
+.k	RFC1522
 RFC1522	2. Syntax of encoded-words
 
    encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
@@ -71,13 +73,13 @@ RFC1522	2. Syntax of encoded-words
 
 .S	MIME処理に関するカスタマイズ変数
 .k	MIME処理に関するカスタマイズ変数
-.label	MIME-customizing
-.label	MIME-2
-.key	$MIME_VERSION
-.key	$MIME_CONTENT_TYPE
-.key	$MIME_MULTIPART_BOUNDARY
-.key	$MIME_MULTIPART_PREAMBLE
-.key	$MIME_MULTIPART_TRAILER
+.l	MIME-customizing
+.l	MIME-2
+.k	$MIME_VERSION
+.k	$MIME_CONTENT_TYPE
+.k	$MIME_MULTIPART_BOUNDARY
+.k	$MIME_MULTIPART_PREAMBLE
+.k	$MIME_MULTIPART_TRAILER
 
 以下はＭＬ本来の配送には普通関係ないです。
 
@@ -121,8 +123,8 @@ RFC1522	2. Syntax of encoded-words
 
 ・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
 
-.key	$HOST
 	$HOST         = 'localhost';
+.k	$HOST
 
 デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
 貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
@@ -142,8 +144,8 @@ RFC1522	2. Syntax of encoded-words
 .S	ロックアルゴリズムの選択
 .xref	how-to-lock
 
-.key	$USE_FLOCK
 	$USE_FLOCK    = 1;
+.k	$USE_FLOCK
 
 で flock system call で、
 
@@ -157,46 +159,11 @@ RFC1522	2. Syntax of encoded-words
 コマンドはデフォールトで "# get 1" と "#get 1" は同じものとみなしてい
 ます。# で始まるか否かだけで判定しています。
 
-.key	$COMMAND_SYNTAX_EXTENSION
+
 	$COMMAND_SYNTAX_EXTENSION = 1;
+.k	$COMMAND_SYNTAX_EXTENSION
 
 なんですが、これがデフォールトです。
-
-
-.S	MIMEのカスタマイズ変数
-.label	{MIME-customizing}
-.key	$MIME_VERSION
-.key	$MIME_CONTENT_TYPE
-.key	$MIME_MULTIPART_BOUNDARY
-.key	$MIME_MULTIPART_PREAMBLE
-.key	$MIME_MULTIPART_TRAILER
-
-右辺はデフォールトの値（Built-in）です。
-
-$MIME_VERSION = '1.0';
-
-$MIME_CONTENT_TYPE = 'multipart/mixed;';
-
-以下は MIME/Multipart で使う変数です。
-
-$MIME_MULTIPART_BOUNDARY   = "--Thu_18_May_95_02:36:26--"な形で日付を設定します。
-
-そのあと、これら↓の変数を設定してます。
-	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
-	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
-	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
-
-くぎり
-
-$MIME_MULTIPART_BOUNDARY = 
-
-本文の前口上
-
-$MIME_MULTIPART_PREAMBLE = なし
-
-本文の後につく部分
-
-$MIME_MULTIPART_TRAILER = なし
 
 
 .# $Id$

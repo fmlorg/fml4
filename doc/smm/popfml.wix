@@ -1,4 +1,5 @@
 .C	POP による FML の起動
+.k	POP3 を使った FML
 .l	popfml
 
 .S	Introduction
@@ -23,7 +24,7 @@ POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
 		OS附属のメールシステム or ポリシー
 
 等のために存在します。このやり方は汎用なのでPOP3でメールが読める場合な
-らどんなＯＳでも原理的にはＭＬが実行できるということになります。
+らどんなOSでも原理的にはMLが実行できるということになります。
 ＃でもまああくまで裏技というカテゴリでしょう。
 
 理屈としては
@@ -45,6 +46,7 @@ compatible の目的で popfml.pl にリンクされています。
 
 .S	popfml.pl 
 .l	popfml.pl 
+.k	popfml.pl 
 
 SYNOPSIS:
 
@@ -63,8 +65,8 @@ SYNOPSIS:
 
 
 .S	bin/popfml.pl の設定
-.l	popfml.pl
-.k	libexec/popfml.pl
+.k	popfml.pl
+.l	libexec/popfml.pl
 .xref	cron
 .xref	fml_local
 
@@ -72,6 +74,8 @@ popfml で実行するコマンドを定義する設定ファイルは
 
 	~/.popexecrc
 	~/.popfmlrc 
+.k	.popexecrc
+.k	.popfmlrc 
 
 のいづれかです。どちらでも構いません(backward compatible)。
 もし ~/.popexecrc と ~/.popfmlrc 両方あると .popexecrc が優先されます。
@@ -86,6 +90,7 @@ popfml で実行するコマンドを定義する設定ファイルは
 
 でいいわけですが、普通はＭＬと自分宛をわけたりするためにフィルタ
 (e.g. fml_local)が必要な場合もあるでしょうが、基本的には同じです。
+.k	$POP_EXEC
 .xref	filter
 
 	$POP_EXEC の中身はフィルタのプログラムになります。
@@ -191,12 +196,13 @@ POP のサーバとの通信のログ。デフォールトは
 .k	$DIR/var/log/_poplog
 .k	var/log/_poplog
 
-
 	$POPFML_MAX_CHILDREN
+.k	$POPFML_MAX_CHILDREN
 
 一回(通常1分)にする処理数。あんまりやると OS がひさん
 
 	$POP_PORT
+.k	$POP_PORT
 
 110/tcp と違う場合に設定する(普通は設定しなくても大丈夫だろう)。
 

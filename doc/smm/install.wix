@@ -1,17 +1,16 @@
 .C	インストールについて
 .l	install
 
-
 .S	makefml: 初心者向けインストール・インターフェイス
-.k	makefml: 初心者向けインストール・インターフェイス
-.k	makefml
-.k	sbin/makefml
+.k	makefml: fmlのインストーラ
+.l	sbin/makefml
+.l	makefml
 
 fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
 では makefml という対話的にインストールや簡単なＭＬの設定を行なうイン
 ターフェイスが附属しています。それの使い方が INSTALL というファイルです。
 
-INSTALL + α でこの doc/op というファイルと INSTALL の中間に当たるユー
+INSTALL +α でこの doc/op というファイルと INSTALL の中間に当たるユー
 ザーズガイドが整備される予定ですが、2.1-RELEASE に間に合うように統合さ
 れるかどうかはわかりません。FAQ も分離するべきなのでしょうが、この辺す
 べてそこまで手が回る暇がないので整備される日は来ないかも知れません。
@@ -23,6 +22,7 @@ makefml 以外では使われません。
 
 
 .S	Version up について
+.k	version up
 
 ソースを広げてインストールと同様に makefml install をして下さい。
 手動でも十分できますが、makefml の方がよいでしょう。実作業としては
@@ -51,12 +51,6 @@ makefml でインストールすると document 群も入れます。documents は大きい
 
 .S	インストール後にサーバの設定(パラメータ)をいじる
 .l	how-to-customize-parameter
-.key	fml.plの起動のしかた
-.key	exec fml.pl
-.key	$DIR
-.key	$LIBDIR
-.key	fml.c
-.key	fml.plの引数
 .xref	fml-maintenance
 .xref	order-of-option-effeciency
 .xref	init-data-structure
@@ -68,6 +62,7 @@ makefml でインストールすると document 群も入れます。documents は大きい
 
 
 1	makefml
+.k	makefml
 
 初心者で内部構造がよくわからない場合はインストール時に使った makefml 
 というコマンドを使って、ＭＬの設定ができます。makefml config ML で 
@@ -86,6 +81,7 @@ ML-directory/config.ph が変更できます。よく使いそうだと思われる基本的
 下さい。
 
 3	sitedef.ph
+.k	sitedef.ph
 
 複数のメーリングリストに共通の設定であれば makefml が fml.pl や 
 libsmtp.pl を入れた場所に sitedef.ph というファイルを作ってこの中に書
@@ -105,12 +101,9 @@ mlrela.dokka.org(注意:これは架空のホストです)というマシンに変更。
 
 
 .S	include ファイル (fml.plの呼び方、引数の渡し方)
-.key	fml.plの起動のしかた
-.key	fml.plの引数
-.key	:include:
-.key	onwer-list
-.label	calling-fml.pl
-.seealso fml-uid, plural-handling-1, plural-handling-2
+.k	include ファイル
+.l	calling-fml.pl
+.xref	fml-uid, plural-handling-1, plural-handling-2
 
 fml の起動の仕方は
 
@@ -263,7 +256,6 @@ INSTALL ファイルの説明で設定だけはできるはずです。
 .xref	calling-fml.pl
 .key	$CONTROL_ADDRESS
 .key	コマンドの専用アドレス
-.key	コントロール専用アドレス
 
 makefml が作るデフォールトの config.ph では
 
@@ -380,6 +372,7 @@ provider 等ではそれぞれの設定があったりするので注意して下さい。
 
 
 .S	スプールに記事をためない
+.k	スプールに記事をためない
 .l	$NOT_USE_SPOOL
 
 DISKが足りない等で記事をためずに配送するだけにしたいなら
@@ -473,6 +466,7 @@ backward compatible のため 2.1 release でも設定は有効ですができるだけ
 
 
 .S	&DEFINE_MODE の定義について
+.l	&DEFINE_MODE
 
 以下 ＭＬ = 
 
@@ -808,6 +802,7 @@ config.ph でコントロールできます。
 
 
 .S	コマンドの # syntax は必要か？ 
+.k	# コマンド シンタックス
 
 配送とコマンドが同じアドレスなら動作を切替えるためのキーワードが必要で
 す。それが # syntax です。
@@ -911,7 +906,7 @@ makefml が作る listname-ctl アドレスはコマンド専用なので要りません。
 
 
 .S	コマンドの終り(シグニチャア対策)
-.key	シグニチャア対策
+.key	signature 対策
 
 	# exit 
 	# end
@@ -935,7 +930,7 @@ private communication のファイルを public な場所にファイルを残すことは
 存されます。
 
 
-.S	コマンドの結果を送り返すときにヘルプやなにかの情報も付加する設定
+.S	メールの最後に付加情報をつける設定
 
 	$PREAMBLE_MAILBODY	（前）
 	$TRAILER_MAILBODY	（後）
@@ -970,8 +965,8 @@ private communication のファイルを public な場所にファイルを残すことは
 
 .# ##########################################################
 .C	複数のメーリングリストの運用
-.key	複数のメーリングリストの運用
-.label	{plural-handling-1}
+.k	複数のメーリングリストの運用
+.l	plural-handling-1
 .xref	fml-process
 
 
@@ -989,7 +984,7 @@ INSTALL を見て下さい。メーリングリストを作るには
 
 
 .S	複数のメーリングリストの運用時の設定の理論
-.label	plural-handling-2
+.l	plural-handling-2
 .xref	fml-process
 
 .ptr{fml-process} (詳細はそちらを見て下さい)で説明されている通り
@@ -1009,8 +1004,7 @@ fml は
 
 
 .S	２つのメーリングリストの運用の設定例
-.k	２つのメーリングリストの運用の設定例
-.k	複数のメーリングリストの運用の設定例
+.k	複数のメーリングリストの運用例
 
 以下では Elena というＭＬともう一つ別の freekick というＭＬを設定
 する時の例です。複数あっても以下同様です。
@@ -1063,14 +1057,12 @@ setuid program を各ＭＬ用に作ればいいわけです。
 fml.c を参考にして下さい。fml.c を
 
   Elena ML が
-
-  execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/Elena", NULL);
+    execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/Elena", NULL);
 
   freekick ML が
-  execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/freekick", NULL);
+    execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/freekick", NULL);
 
 のように変更し、compileすればいいわけです。
-
 
 
 .S	複数のＭＬがあるがコマンドの処理は一つのアドレスで一括処理

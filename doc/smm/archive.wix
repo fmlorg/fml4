@@ -1,5 +1,6 @@
 .C	アーカイブ, Archive
 .l	archive
+.k	archive
 
 .S	Introduction
 .l	archive-and-expire-conflicts
@@ -13,6 +14,9 @@
 $EXPIRE_LIMIT が記事の数で指定されていて、
 
 	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+.k	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+.k	$EXPIRE_LIMIT
+.k	$ARCHIVE_UNIT 
 
 でなくてはいけません。念のため
 
@@ -53,7 +57,7 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 ＃ @StoredSpool_DIR = ('var/archive'); は Obsolete な書き方です。
 ＃ Backward Compatibility として
 ＃ 内部で @ARCHIVE_DIR に代入してるので、どちらでも動きます
-.key	@StoredSpool_DIR
+.k	@StoredSpool_DIR
 
 
 .S	"# get 1 " と archive
@@ -103,8 +107,7 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 
 .S	gzip file にする(アーカイブへの変換)
 .l	Archive.pl
-.k	bin/Archive.pl
-.key	Archive.pl
+.k	Archive.pl
 
 $USE_ARCHIVE の自動操作にまかせずに時々手で or cron でこのプログラムを
 動かしても良いです。cron で自動処理するなら次の節を御覧下さい
@@ -168,9 +171,7 @@ spoolの 3800 までの 100 個ずつのパッケージを作りました。spoolの方の元
 
 
 .S	アーカイブ作成を cron で自動処理
-.key	Archive.sh
-.key	Archive.pl
-.key	crontab
+.k	archive by cron
 
 cronで自動的（例えば週一日曜の朝とか）に次の形で
 
@@ -188,14 +189,12 @@ crontab が
 
 	0 * * * * /bin/sh /usr/libexec/fml/archive.sh
 
-
 /usr/libexec/fml/archive.sh は
 例：
 	#!/bin/sh
 
 	(chdir /var/spool/ml/Elena;    /usr/local/bin/perl bin/Archive.pl)
 	(chdir /var/spool/ml/Freekick; /usr/local/bin/perl bin/Archive.pl)
-
 
 
 .S	何故、まとめてgzip化したいのか？

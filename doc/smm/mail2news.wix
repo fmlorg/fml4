@@ -1,5 +1,7 @@
 .C	mail2news (メーリングリストからニュースへ)
-=E	mail2news (ML -> News)
+=E.C	mail2news (ML -> News)
+.k	mail2news (メーリングリストからニュースへ)
+=E.k	mail2news (ML -> News)
 .l	mail2news
 
 おまけ機能のメーリングリストからニュースへ垂れ流す例です。

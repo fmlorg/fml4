@@ -1,11 +1,11 @@
 .C	改造について
 .l	hack
-.xref	data-structure
 
 改造の話は fml のデータ構造の章は読んでおくとよりわかり易くなります。
 .xref	data-structure
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
+.k	debug
 
    fml-support: 01411 より
 
@@ -60,7 +60,7 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
 
 .S	MIME文字列を日本語へ変換すること
-.seealso	MIME-1, MIME-2
+.xref	MIME-1, MIME-2
 
 $MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
 Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
@@ -74,6 +74,7 @@ Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
 
 
 .S	改造事例:  sitedef.ph
+.k	sitedef.ph
 
 # Subject の [ML 数字] や (ML 数字) は切り落とし
 # Subject のオリジナルは X-Original-Subject に保存して
@@ -268,7 +269,6 @@ $TRF_NAME_HOOK = q#
 .~q
 
 
-
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
 .key	# replyto コマンド
 
@@ -318,10 +318,9 @@ MLのアドレスを書くようにしました。
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
 .k	%SKIP
-.key	$SKIP{'mail-address'}
-.key	skip
-.key	skip-but-determined-dynamically
-.key	$START_HOOK
+.k	$SKIP{アドレス}
+.k	skip
+.k	$START_HOOK
 
 こういう処理を config.ph にかいてください。
 
@@ -337,7 +336,8 @@ $START_HOOK = q#
 
 
 .S	古典の printf debug の例
-
+.k	debug: printf
+ 
 .q
 From: fukachan@phys.titech.ac.jp
 X-Mail-Count: 00702 
@@ -371,7 +371,8 @@ X-Mail-Count: 00702
 .~q
 
 
-.S	fmlのコマンドが送れるページの例 [http://www.j-is.or.jp/fml/]
+.S	fmlのコマンドが送れるページの例
+.url	http://www.j-is.or.jp/fml/
 
 .q
 in fml-support: Count: 01585
@@ -503,7 +504,8 @@ received になってしまってちょっと情けないかも知れませんが…
 ＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
 
 
-.S	今すでにスプールにあるファイルをMIME逆変換する
+.S	スプールにあるファイルをMIME逆変換する
+.k	スプールにあるファイルをMIME逆変換
 
 lib/MIME/rmime を使って、/bin/sh なら
 
@@ -518,8 +520,8 @@ lib/MIME/rmime を使って、/bin/sh なら
 
 
 .S	mget でえた spool の下のファイルを mh 以外で読む時
-.key	lib/Utilitites/packmbox.pl
-.key	packmbox.pl
+.l	lib/Utilitites/packmbox.pl
+.k	packmbox.pl
 
 lib/Utilitites/packmbox.pl を使って、
 
@@ -530,8 +532,7 @@ lib/Utilitites/packmbox.pl を使って、
 
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
-.label	{MIME-2}
-.seealso MIME-1
+.xref	MIME-1
 
 では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
 例えば、fml.pl の sub GetFieldsFromHeaderで

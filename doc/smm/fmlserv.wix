@@ -1,4 +1,5 @@
 .C	fmlserv
+.k	fmlserv
 .l	fmlserv
 .l	fmlserv.pl
 
@@ -14,6 +15,8 @@
 
 
 .S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)
+.k	listserv compatibility
+.k	marjodomo compatibility
 
 ここでは LISTSERV (or MAJORDOMO) COMPATIBLE MODE について述べます。
 つまり、fml コマンドを Listserv のようなインターフェイスで呼ぶための仕
