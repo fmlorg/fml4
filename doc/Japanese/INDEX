@@ -22,7 +22,6 @@ errormails		エラーメールをどうするか？
 documentation		ドキュメントについて
 
 .part 拡張
-QandA			いろいろな改造事例集
 command			コマンドについて
 extension		拡張
 
@@ -31,9 +30,10 @@ debug			デバッグについて
 troubleshoot		トラブルシューティング
 
 .part misc
-misc			その他
+misc			その他(分類に苦しんだ)改造事例集
 smtp			配送関係
 Japanese		日本語処理について
+utility_programs	その他便利かもしれないプログラム
 references		文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
