@@ -10,7 +10,7 @@
 #		Input and Output => JIS
 
 #
-# $Id: libhankaku2zenkaku.pl,v 1.5 2000/07/17 14:23:44 fukachan Exp $
+# $Id: libhankaku2zenkaku.pl,v 1.6 2000/07/17 15:55:11 fukachan Exp $
 #
 
 sub FixJapaneseMDChars
@@ -456,24 +456,28 @@ if ($0 eq __FILE__) {
     require 'jcode.pl';
   
     eval "sub Log { print STDERR \@_, \"\\n\";}";
+    my ($count) = 0;
     while (<>) { 
 	chop;
 	$han2zen::debug_hankaku = 1;
 
 	# input
-	$z = &jcode::euc($_);
+	$orgstr = $z = &jcode::euc($_);
 	&jcode::h2z_euc(\$z);
 	&han2zen::OctalDump("<< ", $z);
 
 	# conversion
 	$x  = &ConvertHankakuToZenkaku( &jcode::jis($_) );
 	$x  = &jcode::euc($x);
+	$count++ if $orgstr ne $x;
 	&han2zen::OctalDump(" >", $x);
 
 	$z = &jcode::euc($x);
 	&jcode::h2z_euc(\$z);
 	&han2zen::OctalDump(">>", $z);
     }
+
+    print STDERR "$count time converted\n";
 }
 
 
