@@ -16,7 +16,7 @@
 [ガイド]
 
     *** 重要 *** 
-    3.0へのアップグレードの注意(特に自動登録を使っている人へ)
+    2.xから3.0以降へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
    簡単なインストールの流れや設定例などについては以下のURLにあります。
@@ -1321,14 +1321,14 @@ If mail comes from not a ML member, what action should be done?
 	もしメンバー以外から来たら自動登録 → auto_subscribe へ変更
 
 することで行ないます。
-注意: auto_regist は fml 3.0 でも使えますが、公式にはobsoleteです。
+注意: auto_regist は fml 3.0 以降でも使えますが、公式にはobsoleteです。
       fml 2.xの時代の互換性のために残っています。
 .if LANG == JAPANESE
 .url http://www.fml.org/fml/UPGRADE-3.0/index.html
 .fi
 =E
-Caution: you can use "auto_regist" but it is obsolete in fml 3.0.
-         It works even in fml 3.0 for compatibility.
+Caution: you can use "auto_regist" but it is obsolete in fml 3.0 and after.
+         It works even in fml 3.0 after for compatibility.
 .if LANG == ENGLISH
 .url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
 .fi
