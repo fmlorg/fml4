@@ -1,12 +1,15 @@
 #!/bin/sh
 
-DIR='/home/axion/fukachan/work/spool'
+DIR='/var/spool/ml'
 
-chdir /home/axion/fukachan/work/spool/Cache
+chdir /var/spool/ml/etc
 
-rm -f Cache
+rm -f crosspost.cache
 
-# mladdr directory -ext
+#
+# XXX: Config.fml format
+#      mladdr directory -ext
+#
 cat Config.fml | while read a b c
 do
 	F="$DIR/$b/members"
@@ -22,7 +25,7 @@ do
 	then
 		echo $a
 		cp $F $file
-		echo "$a $file" >> Cache
+		echo "$a $file" >> crosspost.cache
 
 	else
 		echo " "
