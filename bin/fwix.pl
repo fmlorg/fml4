@@ -434,7 +434,7 @@ sub OutputHtml
 	    select(OUTHTML); $| = 1;
 
 	    print OUTHTML "<TITLE>$Title $name</TITLE>";
-	    print OUTHTML "<\n><BODY BGCOLOR=$BGColor>\n" if $BGColor;
+	    print OUTHTML "\n<BODY BGCOLOR=$BGColor>\n" if $BGColor;
 
 	    next;		# cut the line "^#.CUT";
 	}
