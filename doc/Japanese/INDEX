@@ -20,7 +20,7 @@ command			コマンド、そして拡張について
 resource_control	リソースの制御	
 makefml			makefml (CUI) interface for fml
 GUI			GUI インタフェイス
-messages		コマンドの結果や警告メールのメッセージ文について
+messages		fml の返すメッセージをいじる
 virtual_domain		virtual domain
 digest			まとめおくり
 errormails		エラーメールをどうするか？
