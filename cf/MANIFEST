@@ -223,7 +223,24 @@ ADDR_CHECK_MAX:		3
 # In-coming mail size > $INCOMING_MAIL_SIZE_LIMIT, fml discards it
 # and send a warning only to the maintainer.
 # 0 (default) implies infinite (no limit)
-INCOMING_MAIL_SIZE_LIMIT:	
+INCOMING_MAIL_SIZE_LIMIT:
+
+# Resource Limit (for ISP ?): (default 0 == not check this limit)
+# the maximum of ML delivery members when auto registration routine works.
+# If member > $MAX_MEMBER_LIMIT, auto registration rejects the request. 
+# We check actives to permit aliases of post-able addresses. 
+# We check @ACTIVE_LIST effective members, not @MEMBER_LIST.
+MAX_MEMBER_LIMIT:
+
+
+# Envelope Filtering for distribution mails
+# &EnvelopeFilter is called in the top of &Distribute if you set
+# $USE_DISTRIBUTE_FILTER = 1;
+# You can use $REJECT_DISTRIBUTE_FILTER_HOOK for advanced customizes.
+# $FILTER_NOTIFY_REJECTION enables fml.pl notifies the rejection to the sender.
+USE_DISTRIBUTE_FILTER:
+REJECT_DISTRIBUTE_FILTER_HOOK:
+FILTER_NOTIFY_REJECTION:
 
 
 #####################################################################
