@@ -85,7 +85,7 @@ INIT_VERSION () {
 
 INIT_CLEAN_UP () {
    (
-	chdir $UPDIR
+	chdir $DESTDIR
 
 	echo mv fml-* FML/
 	mv fml-* FML/

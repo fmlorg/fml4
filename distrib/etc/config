@@ -1,10 +1,11 @@
-### internal variables
+### internal variables ###
 init=0
 package=0
 release=0
 branch=0
 
-### user defined variables
+
+### user defined variables ###
 
 # prog
 MAKE=make
@@ -13,18 +14,17 @@ INCLUDE_PROG="perl distrib/bin/_include.pl "
 FWIX_OPTS=-F
 
 # working directory
-UPDIR=/var/tmp
+DESTDIR=/var/tmp
 
-TMP=/var/tmp/release.info.$$ 
+TMP=$DESTDIR/release.info.$$ 
 
 BAKID=`date +%y%m%d.%H%M%S`
 
 # log file
-DATE_LOG=/var/tmp/_datelog_
+DATE_LOG=$DESTDIR/_datelog_
 
-# config file
-
-PATCHLEVEL_DIR=distrib/patch
+# patch level (only for internal use snapshot)
+PATCHLEVEL_DIR=distrib/compile
 PATCHLEVEL_FILE=$PATCHLEVEL_DIR/version
 
 # distribution list
@@ -33,17 +33,21 @@ RELEASE_MANIFEST=etc/RELEASE_FILES
 # distribution directory of snapshot
 DIRECTORY_LIST=distrib/etc/DIRECTORY_LIST
 
+echo \$WORK_HTML_DIR $WORK_HTML_DIR
+exit 0
 
-perl distrib/bin/gen_variable_from_release_files.pl distrib/etc/RELEASE_FILES > $TMP
+### MAIN ###
+
+# generating list to export from "distrib/etc/RELEASE_FILES"
+perl distrib/bin/gen_variable_from_release_files.pl \
+	distrib/etc/RELEASE_FILES > $TMP
 . $TMP
 
-
-###### check 
-if [ "X" = "X$UPDIR" ]
+# self check 
+if [ "X" = "X$DESTDIR" ]
 then
-	echo " "; echo "No set UPDIR, exit"
+	echo " "; echo "No set DESTDIR, exit"
 	exit 1
 else
-	echo $UPDIR	
+	echo $DESTDIR	
 fi
-

@@ -37,33 +37,33 @@ INCREMENT_VERSION () {
 
 
 CLEAN_UP_SNAPSHOT () {
-	echo " "; echo "rm -f $UPDIR/fml-*.gz"
-	rm -f $UPDIR/fml-*.gz
+	echo " "; echo "rm -f $DESTDIR/fml-*.gz"
+	rm -f $DESTDIR/fml-*.gz
 	echo " ";
 }
 
 
 MKDIR_DISTRIBUTION () {
 
-	if [ -d $UPDIR/distrib ]
+	if [ -d $DESTDIR/distrib ]
 	then 
 		echo ""
-		echo "      mv $UPDIR/distrib $UPDIR/FML/distrib.$BAKID" 
-		mv $UPDIR/distrib $UPDIR/FML/distrib.$BAKID
+		echo "      mv $DESTDIR/distrib $DESTDIR/FML/distrib.$BAKID" 
+		mv $DESTDIR/distrib $DESTDIR/FML/distrib.$BAKID
 		echo ""
 	fi
 
-	echo make a directory $UPDIR/distrib; 
-	mkdir $UPDIR/distrib;
+	echo make a directory $DESTDIR/distrib; 
+	mkdir $DESTDIR/distrib;
 
 	for dir in `cat $DIRECTORY_LIST`
 	do
-		echo "mkdir $UPDIR/distrib/$dir"
-		mkdir $UPDIR/distrib/$dir
+		echo "mkdir $DESTDIR/distrib/$dir"
+		mkdir $DESTDIR/distrib/$dir
 	done
 
-	(chdir $UPDIR/distrib; ln -s contrib lib )
-	(chdir $UPDIR/distrib/doc; ln -s ../drafts drafts )
+	(chdir $DESTDIR/distrib; ln -s contrib lib )
+	(chdir $DESTDIR/distrib/doc; ln -s ../drafts drafts )
 }
 
 
@@ -71,31 +71,31 @@ COPY_DOCS () {
    (
 	echo " "; echo "Copying Documents (doc/ri)...";
 	cd var/doc;
-	cp -p $DOC $UPDIR/distrib/doc;
+	cp -p $DOC $DESTDIR/distrib/doc;
    )
    (
 	echo " "; echo "Copying 'contrib' Documents (doc/master)...";
-	cp -p $DOC_CONTRIB $UPDIR/distrib/doc;
+	cp -p $DOC_CONTRIB $DESTDIR/distrib/doc;
    )
 
    (
 	echo " "; echo "Copying Documents (doc/smm/)...";
 	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
-	(chdir $UPDIR/distrib/doc; tar xvf - )
+	(chdir $DESTDIR/distrib/doc; tar xvf - )
 
 	perl distrib/bin/fix-wix.pl -R doc/smm/op.wix \
-	> $UPDIR/distrib/doc/smm/op.wix
+	> $DESTDIR/distrib/doc/smm/op.wix
 
 	echo " "; echo "Copying Documents (doc/ri/)...";
 	(chdir doc; tar cf - ri/*.wix) |\
-	(chdir $UPDIR/distrib/doc; tar xvf - ) 
+	(chdir $DESTDIR/distrib/doc; tar xvf - ) 
    )
 
    # http
    echo " ";
 
    CPP="cpp -P -DDIST "
-   HTML_DIR=$UPDIR/distrib/doc/html
+   HTML_DIR=$DESTDIR/distrib/doc/html
    $CPP -DJAPANESE doc/html/index.html > $HTML_DIR/index-j.html
    $CPP -UJAPANESE doc/html/index.html > $HTML_DIR/index-e.html
    cp doc/html/release-index.html $HTML_DIR/index.html
@@ -103,8 +103,8 @@ COPY_DOCS () {
 
    (
 	chdir var/html;
-	echo "rsync -av [A-Z]* $UPDIR/distrib/doc/html/"
-	rsync -av [A-Z]* $UPDIR/distrib/doc/html/
+	echo "rsync -av [A-Z]* $DESTDIR/distrib/doc/html/"
+	rsync -av [A-Z]* $DESTDIR/distrib/doc/html/
    )	
 
 }
@@ -115,55 +115,55 @@ COPY_SOURCES () {
 
 
 	echo ""; echo "Copying Main Sources ... ";
-	cp -p $SOURCES 		$UPDIR/distrib/
-	cp -p $DRAFTS_SOURCES   $UPDIR/distrib/drafts
-	cp -p $C_SOURCES	$UPDIR/distrib/C
-	cp -p $PERL_SOURCES	$UPDIR/distrib/src
+	cp -p $SOURCES 		$DESTDIR/distrib/
+	cp -p $DRAFTS_SOURCES   $DESTDIR/distrib/drafts
+	cp -p $C_SOURCES	$DESTDIR/distrib/C
+	cp -p $PERL_SOURCES	$DESTDIR/distrib/src
 
 	find sys -type f -print|\
 	egrep -v '*~|/RCS' |sed 's#proc/##' > $archsrc
 
 	# removed proc/arch (98/08/01)
 	# (chdir proc; tar cf - `cat $archsrc`)|\
-	# (chdir $UPDIR/distrib/src; tar xvf -)
+	# (chdir $DESTDIR/distrib/src; tar xvf -)
 
-	echo "   copying $ARCH_SOURCE -> $UPDIR/distrib/"
+	echo "   copying $ARCH_SOURCE -> $DESTDIR/distrib/"
 	find $ARCH_SOURCES -type f -print|\
 	egrep -v '*~|/RCS|/FVS|/CVS|WINDOWS_NT4/docs|WINDOWS_NT4/lib|WINDOWS_NT4.old|Makefile' > $archsrc
 
-	tar cf - `cat $archsrc`|(chdir $UPDIR/distrib; tar xvf -)
+	tar cf - `cat $archsrc`|(chdir $DESTDIR/distrib; tar xvf -)
 
 	# cf
 	echo " "; echo "cf/ ...";
 	(cd cf;
 	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS|FVS'|grep -v '~'` \
-	$UPDIR/distrib/cf;
+	$DESTDIR/distrib/cf;
 	)
 
 	# bin
 	echo " "; echo "Copying bin/ ";
-	cp -p $BIN_SOURCES $UPDIR/distrib/bin
+	cp -p $BIN_SOURCES $DESTDIR/distrib/bin
 	echo "chmod 755 bin/\*";
-	chmod 755 $UPDIR/distrib/bin/*
+	chmod 755 $DESTDIR/distrib/bin/*
 
 	# sbin
 	echo " "; echo "Copying sbin/ ";
-	cp -p $SBIN_SOURCES $UPDIR/distrib/sbin
+	cp -p $SBIN_SOURCES $DESTDIR/distrib/sbin
 	echo "chmod 755 sbin/\*";
-	chmod 755 $UPDIR/distrib/sbin/*
+	chmod 755 $DESTDIR/distrib/sbin/*
 
 	# libexec
 	echo " "; echo "Copying libexec/ ";
-	cp .fmllocalrc 	$UPDIR/distrib/etc/dot_fmllocalrc
-	cp -p $LIBEXEC_SOURCES $UPDIR/distrib/libexec
+	cp .fmllocalrc 	$DESTDIR/distrib/etc/dot_fmllocalrc
+	cp -p $LIBEXEC_SOURCES $DESTDIR/distrib/libexec
 
 	# etc
 	echo " "; echo "Copying etc/ ";
-	cp -p $ETC_SOURCES $UPDIR/distrib/etc;
+	cp -p $ETC_SOURCES $DESTDIR/distrib/etc;
 	tar cf - etc/makefml/Makefile etc/makefml/[0-9a-z]* |\
-	(chdir $UPDIR/distrib; tar xvf - )
+	(chdir $DESTDIR/distrib; tar xvf - )
 
-	# tar cf - etc/samples/[a-z]* | (chdir $UPDIR/distrib; tar xvf - )
+	# tar cf - etc/samples/[a-z]* | (chdir $DESTDIR/distrib; tar xvf - )
 
 	rm -f $archsrc
 }
@@ -179,7 +179,7 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in fml.pl msend.pl 
 	do
 		echo "   Fixing Rcsid in $file ... ( > src/$file )"
-		perl $FML/distrib/bin/fml_version.pl $file > $UPDIR/distrib/src/$file
+		perl $FML/distrib/bin/fml_version.pl $file > $DESTDIR/distrib/src/$file
 	done
 
    )
@@ -187,7 +187,7 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in $LIBEXEC_SOURCES 
 	do
 		echo "   Fixing Rcsid in $file ... "
-		perl $FML/distrib/bin/fml_version.pl $file > $UPDIR/distrib/$file
+		perl $FML/distrib/bin/fml_version.pl $file > $DESTDIR/distrib/$file
 	done
 }
 
@@ -198,21 +198,21 @@ FIX_DISTRIBUTION_FILE_MAKEFILE () {
 	# sed '/^DISTRIB/,$d' Makefile |\
 	# sed '/^include/d'|\
 	# sed 's/gar/rm \-f/' |\
-	# sed 's/delete/rm \-f/' > $UPDIR/distrib/Makefile
+	# sed 's/delete/rm \-f/' > $DESTDIR/distrib/Makefile
 }
 
 
 MAKE_CONFIG_PH_EXAMPLE () {
 	(echo "";echo -n " cf/release -> config.ph  "; date)
-	cf/config cf/release > $UPDIR/distrib/config.ph
+	cf/config cf/release > $DESTDIR/distrib/config.ph
 }
 
 
 FIX_DISTIRUBTION_FILE_INCLUDE () {
 	echo "---Including relations";
 	echo "   libexec/fml_local.pl"
-	$INCLUDE_PROG $UPDIR/distrib/libexec/fml_local.pl > /tmp/_fml$$_
-	cp /tmp/_fml$$_ $UPDIR/distrib/libexec/fml_local.pl
+	$INCLUDE_PROG $DESTDIR/distrib/libexec/fml_local.pl > /tmp/_fml$$_
+	cp /tmp/_fml$$_ $DESTDIR/distrib/libexec/fml_local.pl
 	rm -f /tmp/_fml$$_
 }
 
@@ -221,13 +221,13 @@ FIX_DISTIRUBTION_FILE_INCLUDE () {
 FIX_DISTRIBUTION_LINKS () {
    (
 	echo "Arrangement of Links ... "
-	cd $UPDIR/distrib;
+	cd $DESTDIR/distrib;
 	ln -s sbin/makefml makefml
    )
 
 
    (
-	cd $UPDIR/distrib
+	cd $DESTDIR/distrib
 
 	for file in README.jp README.en INSTALL.jp INSTALL.en
 	do 
@@ -235,7 +235,7 @@ FIX_DISTRIBUTION_LINKS () {
 	done
    )
 
-	#cd $UPDIR/distrib/doc/drafts
+	#cd $DESTDIR/distrib/doc/drafts
 	#for file in help guide deny objective confirm welcome 
 	#do
 	#	test -f $file && (chdir ../..; ln -s doc/drafts/$file $file)
@@ -251,7 +251,7 @@ GEN_CONTRIB () {
 		echo "---installing contrib/$dir"
 
 		(cd contrib/$dir;\
-		 make -f $FML/contrib/Makefile.template UPDIR=$UPDIR DISTRIB)
+		 make -f $FML/contrib/Makefile.template DESTDIR=$DESTDIR DISTRIB)
 
 	done
 }
@@ -261,14 +261,14 @@ FIX_DISTRIBUTION_PERMISSION () {
 	echo " "
 	echo "Fixing Permissions ..."
 
-	find $UPDIR/distrib |\
+	find $DESTDIR/distrib |\
 	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 
 	find $HOME/.ftp/ |\
 	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 
 	(
-		cd $UPDIR/distrib
+		cd $DESTDIR/distrib
 		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
 	)
 }
@@ -280,7 +280,7 @@ PATCHLEVEL_INCREMENT () {
 	perl $FML/distrib/bin/fml_version.pl -p $PATCHLEVEL kern/$file |\
 	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
 	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
-	> $UPDIR/distrib/$target
+	> $DESTDIR/distrib/$target
    )
 }
 
@@ -303,7 +303,7 @@ DISTRIBUTION_PATCHLEVEL_INCREMENT () {
 
 FIX_LANGUATE () {
    (
-	cd $UPDIR/distrib/drafts
+	cd $DESTDIR/distrib/drafts
 	echo "Fixing Japanese code: "
 	for file in *
 	do
@@ -318,7 +318,7 @@ FIX_LANGUATE () {
 
 
 GEN_BRANCH_ARCHIVE () {
-	chdir $UPDIR
+	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
 	DATE=`date +"%y%m%d"`
@@ -348,7 +348,7 @@ GEN_ARCHIVE () {
 
 	echo ""
 
-	chdir $UPDIR
+	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
 	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
@@ -361,8 +361,8 @@ GEN_ARCHIVE () {
 
 	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
 	echo " "
-	echo "nkf -j $UPDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
-	nkf -j $UPDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
+	echo "nkf -j $DESTDIR/distrib/doc/INFO.jp => $FTP/snapshot/info"
+	nkf -j $DESTDIR/distrib/doc/INFO.jp > $FTP/snapshot/info
 
 	echo "Synchronizing $WWW ..."
 	echo " "
