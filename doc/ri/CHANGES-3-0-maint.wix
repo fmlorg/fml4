@@ -5,6 +5,14 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#27 == 3.0.1_BETA #16 ]
+
+  sbin/makefml (2.65-2.66): 
+	resolve conflicts around doc-template
+
+	先日直したdoc-templateまわりの２つの修正がそれぞれは正しいが
+ 	２つあわさると互いに妨害してしまうbugの修正
+
 [ 3.0pl#26 == 3.0.1_BETA #15 ]
 
   sbin/makefml: 2.64-2.65
