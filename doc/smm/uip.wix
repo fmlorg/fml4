@@ -426,7 +426,7 @@ SYNOPSIS:
     -h    this message
     -d    $HTTP_DIR
     -f    cf (例えばMLの設定ファイルconfig.phを評価する）
-    -t    number of day ($HTTP_INDEX_UNIT)
+    -t    number of day ($HTML_INDEX_UNIT)
     -D    $DIR (fml の $DIR)
     -I    @INC に INCLUDE PATH を付け加える
     
