@@ -1,7 +1,7 @@
 .S	Traffic を調べる (libtraffic.pl)
 .k	libtraffic.pl
- 
-AUTHOR: tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
+
+AUTHOR: yuao@infonia.or.jp (Yuao Tanigawa)
 
 .q
 [libtraffic.pl の説明]
@@ -43,9 +43,9 @@ AUTHOR: tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
 
 .S	#traffic で 複数のアドレスを持つ人物を同一視してカウントする 技
 
+	Author: Yuao Tanigawa <yuao@infonia.or.jp>
 	fml-support: 00736
-	From: tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
-	より
+	fml-support: 02578
 .q
 > $TRF_NAME_HOOK = q#
 >     $name =~ s/umura@solan\.chu/umura@nn.solan./oi;
