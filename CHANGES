@@ -38,6 +38,9 @@
 
 2001/07/16
 
+  libexec/fml_local.pl
+	We need to include kern/libloadconfig.pl to avoid errors.
+
   proc/libmesgle.pl
 
 	$LANGUAGE に English を指定した時にエラーメッセージが出るのを修正
