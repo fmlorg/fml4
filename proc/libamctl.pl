@@ -80,11 +80,14 @@ sub AutoRegist
 
 	$s    = &GetSubscribeString($set_buf || $e{'Body'});
 	$from = &GetAddr2Regist($DEFAULT_SUBSCRIBE || "subscribe", $s);
-	$from = $from ? $from : $From_address;
     }
     else {
-	&Log("\$AUTO_REGISTRATION_TYPE is unknown type.");
+	&Log("\$AUTO_REGISTRATION_TYPE is unknown type. stop.");
+	return 0;
     }
+
+    # default is From: field.
+    $from = $from ? $from : $From_address;
 
     # Check $from appliced already in regist_to_file (GetAddr2Regist())
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
