@@ -6,15 +6,14 @@
 
 
    昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
-   INSTALL.advanced はより高度なインストールのためのドキュメント
-   です。以下がわかりにくい場合は INSTALL.advanced を参照して下さ
-   い _o_ このインストール方式はまだα版なので…
+   INSTALL.advanced はより濃やかな設定をしつつインストールをするための
+   ドキュメントです。
 
 
 
 .C	とりあえずＭＬを動かすためのインストールの仕方
 
-まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
+まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.y.. という名前
 の directory ができてその下にひとセット入ってます。
 
 この directory に移動して、
@@ -32,7 +31,7 @@
    ML DIR               [/var/spool/ml] 
 
 それぞれ、次のような意味ですので、適当に入れて下さい。単に
-Enter?(CR) を押すと [] の中の値が設定されます。
+Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
    ・DOMAIN NAME          [sapporo.iij.ad.jp] 
 
@@ -51,7 +50,7 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 		/usr/local/fml/fml.pl 
 		/usr/local/fml/doc/ 
 
-	等の場所にインストールされる。
+	等がインストールされる。
 
    ・ML DIR               [/var/spool/ml] 
 
@@ -64,11 +63,26 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 	ここは各ＭＬごとの設定ファイルや記事を保存する場所である。
 
 
+.S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
+
+
+	例えば provider や大学の一般ユーザで /home の下だけならいじっ
+	てよい。aliases は root の人に書いてもらう
+
+というケースもありうるでしょう。その場合は
+
+	/home/fukachan/fml に実行ファイル
+	/home/fukachan/ml  にＭＬ群の階層を作る
+
+とか /home の下の適当な場所に作ればよいでしょう。
+
+
+
 .C	ＭＬを作る。
 
 いくつかの簡単なものはコマンドで実行できます。
 
-   sbin/fmladmin コマンド [引数]
+   makefml コマンド [引数]
 
 
 .S	新しくＭＬを作る場合
@@ -77,38 +91,96 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 
 例： Elena ＭＬを作ろうと思ったら
 
-	/usr/local/fml/sbin/fmladmin newml elena
+	/usr/local/fml/sbin/makefml newml elena
 
 を実行すれば終りです。ＭＬ用の include ファイルの
 
 	/usr/local/fml/include/elena
 
-がそれぞれできます。それを呼ぶように設定された aliases の見本が
+がそれぞれできます。それを呼ぶように設定された aliases の見本がコマン
+ドの最後に表示されるのでそれを cut & paste して/etc/aliases に加えて 
+newalises して下さい。
 
-	~/.fml/aliases.elena 
-
-にできているので、それを /etc/aliases に加えて newalises して下さい。
+なおコマンドの最後の表示の内容は ~/.fml/elena/aliases に念のため保存さ
+れています。
 
 別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を mirei に
 変えて実行すればよいです。
 
+なお、各ＭＬごとに 
+
+	~/.fml/MLの名前/サンプルのファイル
+
+という形で作った時の設定を参考までに保存します。
+注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
+小文字の ML 名で作成されます。
 
 
-.S	ユーザをＭＬに加える場合
+.S	まとめおくり
 
-   /usr/local/fml/sbin/fmladmin adduser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/sbin/fmladmin add elena fukachan@sapporo.iij.ad.jp
+NetBSD のような Vixie Cron がＯＳ附属の場合については
+
+	~/.fml/crontab 
+
+というファイルができているので、
+
+	crontab ~/.fml/crontab 
+
+というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
+起動されて配送するようになります。
+
+Vixie Cron でないOSについては man crontab で調べる or doc/op の cron 
+の章を見る等して下さい。
+
+
+.S		＊＊＊ＭＬを作る際の注意＊＊＊
+
+この簡易インストールでは作られるＭＬの設定で debug モードは切ってある
+のでいきなりメールは配送可能です。またいくつかの点で portability を無
+視してあります。
+
+
+
+.C	設定ファイルの保存
+
+	~/.fml/ＭＬの名前/
+
+という場所に makefml で作った見本が入っています。
+がそれぞれのＭＬ用にカスタマイズされた内容の
+
+	aliases          crontab         fml.c           include 
+
+が保存されています。
+
+
+
+.C	ユーザをＭＬに加える場合
+
+   /usr/local/fml/sbin/makefml adduser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/sbin/makefml add elena fukachan@sapporo.iij.ad.jp
 
 	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
 
 
-.S	ユーザをＭＬから削除される場合
 
-   /usr/local/fml/sbin/fmladmin byeuser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/sbin/fmladmin bye elena fukachan@sapporo.iij.ad.jp
+.C	ユーザをＭＬから削除される場合
+
+   /usr/local/fml/sbin/makefml byeuser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/sbin/makefml bye elena fukachan@sapporo.iij.ad.jp
 
 	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
 
+
+
+.C	include ではうまく動かない場合
+
+大抵は include でうまくいくはずですが、どうしてもだめな場合は 
+
+	~/.fml/ML名/fml.c 
+
+というのが各ＭＬ用に作られているので compile して設定する必要がありま
+す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
+にしつつ、root の人とよく相談しながら設定して下さい。
 
 
 $Id$
