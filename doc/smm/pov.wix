@@ -17,11 +17,11 @@
              ↓
 
    /etc/aliases から何をすれば良いのかを理解して、
-   setuid 操作等を行なった後 fml の STDIN にメールが送り込まれる。
+   setuid 操作等を行なった後 fml.pl の STDIN にメールが送り込まれる。
 
              ↓
 
-   (sendmail -> fml へ引き渡される。ここからが fml の担当)
+   (sendmail -> fml.pl へ引き渡される。ここからが FML の担当)
    config.ph による設定に従い、ヘッダの解析、ＭＬメンバーのリストに従い
    配送 or コマンド要求を処理した結果のメールを配送リストと共に
    sendmail 等のSMTPサーバへ引き渡す
@@ -32,26 +32,25 @@
    sendmail 等のSMTPサーバがメールの配送を行なう。
 
 
-フィルタだけなら sed でも十分だし、“配るだけ"なら Sendmail 8.x でも十
-分でしょう。しかし、+αでログをとり、スプールし、必要なら取り寄せられ
-るようにちょこっとだけ複雑なことをしようとするならこの サーバ まで必要
-となるというわけです。
+フィルタだけなら sed でも十分だし"配るだけ"なら Sendmail 8.x でも十分
+でしょう。しかし、+αでログをとり、スプールし、必要なら取り寄せられる
+ようにちょこっとだけ複雑なことをしようとするならこのサーバ まで必要と
+なるというわけです。
 
-なお、この図でわかるとおり、まとめおくりはこれとは”全く別の”プロセス
-です。まとめおくりは自動的に作動するわけではありません。
+なおこの図でわかるとおり、まとめおくりはこれとは"全く別の"プロセスです。
+まとめおくりは自動的に作動するわけではありません。
 .xref msend
 
-まとめおくりとは、一定時間ごとにスプールされたＭＬの記事を送ってあげる”
-別のプロセス”のことです。このプロセスは別の仕方で定期的に実行されなけ
-ればなりません。
-
+まとめおくりとは、一定時間ごとにスプールされたＭＬの記事を送ってあげる
+"別のプロセス"です。このプロセスは別の仕掛けで定期的に実行されなければ
+なりません。
 
 
 .S	sendmail -> fml 時の動作
 .k	sendmail -> fml 時の動作
 .l	sendmail2fml
 
-sendmail から fml へメールが渡される時は次のように動作します。
+sendmail から fml.pl へメールが渡される時は次のように動作します。
 
 ○ まず /etc/aliases にある
 
@@ -59,10 +58,10 @@ sendmail から fml へメールが渡される時は次のように動作します。
 	owner-Elena:fukachan
 
 のような部分から /usr/local/list/Elena を実行すればよいことがわかるの
-で、sendmail はこのファイルを実行します。
+で sendmail はこのファイルを実行します。
 
-	/usr/local/list/Elenaの中身は
-
+	/usr/local/list/Elena
+の中身は
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
 
 のようになっています。
@@ -72,13 +71,13 @@ sendmail から fml へメールが渡される時は次のように動作します。
 /var/spool/ml/elena/config.ph に従い fml の設定を行います。
 
 そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
-するときは 	/usr/local/list/Elena の中で
+するときは /usr/local/list/Elena の中で
 
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --ctladdr "
 
 のように書きます(コマンドラインオプションをつける場合)。
 
-引数の書き方の順番は任意です。引数の最初の directry を MLのホーム
+引数の書き方の順番は任意です。引数の最初の directry を ML の HOME
 (config.phのある場所 もしくは spool やメンバーファイルのある場所) と見
 なします。
 
@@ -88,7 +87,7 @@ sendmail から fml へメールが渡される時は次のように動作します。
 .k	DIR
 .k	LIBDIR
 
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+	/usr/libexec/fml/fml.pl /var/spool/ml/elena
 
 のように起動されるわけですが、この場合
 
@@ -103,7 +102,7 @@ sendmail から fml へメールが渡される時は次のように動作します。
 
 この順番で dynamic loading するファイルを探します。例えば config.ph や 
 libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
-け加えられていた（複数可能）場合、例えば
+け加えられていた(複数可能)場合、例えば
 
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
 
@@ -128,9 +127,8 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 	3   各MLごとの config.ph による設定
 	4   fml デフォールト設定
 
-大抵の program と同様ですね。
-
-ＭＬごとではなくそのマシン共通の設定になるもの
+普通の program と同様ですね。ＭＬごとではなくそのマシン共通の設定にな
+るもの
 
 	tar や gzip はどこにある？
 
@@ -156,8 +154,8 @@ STDIN からの読み込みは第壱段階でハッシュテーブル %Envelope
 	ヘッダ	$Envelope{'Header'}
 	ボディ	$Envelope{'Body'}
 
-に保存されます。この時ボディ（メールの本文）に対しては次のようなチェッ
-クがなされます。
+に保存されます。この時ボディ(メールの本文)に対しては次のようなチェック
+がなされます。
 
 ○ 最初の $GUIDE_CHECK_LIMIT 行に対して $GUIDE_KEYWORD のキーワードが
 現れるか否か？
@@ -205,29 +203,29 @@ LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
 .k	$MAX_TIMEOUT
 
 現在の flock を使うロックアルゴリズムは次のように設定されています。
-alarm(3) を使う普通のやり方です。 
+flock(2) と alarm(3) によるTIMEOUT処理による一般的な方法です。 
 
 sub Flock {
 
     &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
 	...
 
-TIMEOUTを待つ時間は $TimeOut{'flock'} で決まります。
-(flock でない場合は 三秒＋α 程度の sleep を $MAX_TIMEOUT 回して待ってみる）
+TIMEOUTを待つ時間は $TimeOut{'flock'} で決まります。(flock でない場合
+は 3秒+α 程度の sleep を $MAX_TIMEOUT 回して待ってみる)
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
     $SIG{'INT'}  = $SIG{'QUIT'} = 'SignalLog';
 
-$TimeOut{'flock'} (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された
-関数(TimeOut)を実行します。
+$TimeOut{'flock'} (デフォールトは3600秒)後 $SIG{'ALRM'} で定義された関
+数(TimeOut)を実行します。
 
-関数 TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
+関数 TimeOut は管理者へ TIMEOUT を知らせ、ログを残しfmlを終了します。
 これがないとずっとロック(flock)がかかったままになるからです。
 
-なお、flock を使わない時はTIMEOUTしたメールを保存し、管理者へTIMEOUTを
+なお flock を使わない時はTIMEOUTしたメールを保存し管理者へ TIMEOUT を
 知らせます。詳細は liblock.pl を見るとわかるでしょう。
-.#	UNIX Nework Programming
+.xref	books
 
 
 .S	イベント・スケジューラ
@@ -235,12 +233,10 @@ $TimeOut{'flock'} (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された
 .k	ClearEvent
 .k	Tick
 
-TIMEOUT等は、現在実行している処理内容によらず特定の時間が来たら(割り込
-んで)実行する必要がありますが、それは伝統の味 alarm(3) を使って実装し
-ます。
-
-なお、Windows NT 4.0 Version では alarm(3) が使えないのこの処理は実行
-されません。
+TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
+んで) 実行する必要がありますがそれは伝統の味 alarm(3) を使って実装しま
+す。なお Windows NT 4.0 Version では alarm(3) が使えないのこの処理は実
+行されません。
 
 
 .S	ロックの仕方(flock でない場合)
@@ -259,10 +255,9 @@ TIMEOUT等は、現在実行している処理内容によらず特定の時間が来たら(割り込
 
 	$USE_FLOCK    = 0;
 
-で Unix V7 時代からある link() を使う方式を使います。
-
-この方式はロックするファイルへの link() ができるか否か？を排他制御に使
-います。このロックするファイルは $LockFile で、
+で Unix V7 時代からある link(2) を使う方式を使います。この方式はロック
+するファイルへの link() ができるか否か?を排他制御に使います。このロッ
+クするファイルは $LockFile で、
 
 	$LOCK_FILE
 
@@ -270,10 +265,10 @@ TIMEOUT等は、現在実行している処理内容によらず特定の時間が来たら(割り込
 
 	"$FP_VARRUN_DIR/lockfile.v7"
 
-つまり、ML の home の下の var/run/lockfile.v7 です。この方式の問題は 
-OS がいきなり落ちた時にこのファイルが残ってしまうので手動でこのファイ
-ル群を消さなければならないという点が最大の問題点です。そのため flock() 
-が望ましいということになります。
+つまり ML の home の下の var/run/lockfile.v7 です。この方式の問題は OS 
+がいきなり落ちた時にこのファイルが残ってしまうので手動でこのファイル群
+を消さなければならないという点が最大の問題点です。そのため flock() が
+望ましいということになります。
 
 そういう場合は reboot 直後に
 
@@ -309,10 +304,11 @@ OS がいきなり落ちた時にこのファイルが残ってしまうので手動でこのファイ
      flock(int fd, int operation)
 .~q
 
-排他制御については例えば、A. S. Tanenbaum, "Modern Operating Systems"
+排他制御については例えば A. S. Tanenbaum, "Modern Operating Systems"
 
 
 .S	SMTPライブラリについて
+.l	smtp
 .k	SMTP
 .k	Simple Mail Transfer Protocol
 .k	MTA
@@ -324,11 +320,12 @@ Transport Agent)と通信するライブラリです。
 $PORT = 25 (25/tcp) で通信しますが、
 
 	$PORT 
+.k	$PORT 
 
 を変えることで別のポートで通信することもできます。また、標準で
 
-
 	$SMTP_LOG (default は "var/log/_smtplog")
+.k	$SMTP_LOG
 
 というファイルに通信のログを残します。このログはデバッグに非常に役立ち
 ます。
@@ -336,39 +333,37 @@ $PORT = 25 (25/tcp) で通信しますが、
 	$NOT_TRACE_SMTP 
 .k	$NOT_TRACE_SMTP 
 
-をセットすると、このログは残りません。
+をセットすると、このログは残りません。また、どのマシンの sendmail を使
+うかも自由に設定できます。デフォールトはそのマシンです。もしMLサーバの
+マシン(受けるマシン)が貧弱ならそのマシンが何十通もメールを送り出すのは
+酷です。
 
-また、どのマシンの sendmail を使うかも自由に設定できます。
-デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
-貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
-
-.key	$HOST
 	$HOST         = 'localhost';
+.key	$HOST
 
-そういう場合変数 $HOST を書き換えて、別のマシンに配送を任すこともでき
-ます。その時は
+そういう場合変数 $HOST を書き換えて別のマシンに配送を任すこともできま
+す。その時は
 
 	$HOST         = 'beth.foo.bar.ac.jp';
 
-のようにそのマシン名を書いて下さい。
-
-もちろんアクセスできないマシンとかではできません(あったりする)し勝手に
-そのマシンのパワーを使うことになるのでそのマシンを使う許可を得るべきで
-す。
+のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
+ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
+のでそのマシンを使う許可を得るべきです。
 
 
 .S	予備のSMTPサーバ
 .k	予備のSMTPサーバ
 .k	@HOSTS
 
-もしSMTPサーバに何かあった時のために @HOSTS に複数台の予備の sendmail 
-の走っているマシンを定義することが出来ます。
+もし SMTP サーバに何かあった時のために @HOSTS に複数台の予備の 
+sendmail の走っているマシンを定義することが出来ます。
 
    @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
 
 この場合、もし $HOST に connect() できない時は、machine-1 に、
 もし machine-1 に connect() できない時は machine-2 へ…とい
 う風に予備のサーバを使い何とか配送をしようと試みます。
+全部だめだった場合は sendmail コマンドを使って配送します。
 
 
 
@@ -393,7 +388,7 @@ $PORT = 25 (25/tcp) で通信しますが、
 
 	例：	$ML_MEMBER_CHECK
 
-○ ”１単語の先頭一文字が大文字、残りは小文字”の塊からなる単語はメー
+○ "1単語の先頭一文字が大文字、残りは小文字"の塊からなる単語はメー
    ル本体やヘッダをSubroutine間で渡しあうための Global 変数です。
 
 	$MailBody	$Reply_to
@@ -473,9 +468,8 @@ $PORT = 25 (25/tcp) で通信しますが、
 %Envelope には今 fml を起動したメールの内容(ヘッダ、ヘッダの各フィール
 ド、本文等)が格納されます。また、そのメールに対しどういうMETHODでREPLY
 を返すべきか？や、sendmail との通信等の設定に関しての付加情報も 
-%Envelope を通じて渡されます。
-それはこのメールに対する METHOD の定義とみなしているからです。
-
+%Envelope を通じて渡されます。それはこのメールに対する METHOD の定義と
+みなしているからです。
 
 sendmail の struct envelople e; に対応するものです。
 しかし、perl 4 を本来ターゲットにしているため
@@ -490,8 +484,8 @@ sendmail の struct envelople e; に対応するものです。
 で表現されています。 h = header で From: はわざと Field だとわかりやす
 いように : まで含めています。
 
-   以下、%EnvelopeのKEYについて説明します。
-   ＃ハッシュなので、KEY => VALUE が $Envelope{KEY} の値が VALUE ですね
+以下 %EnvelopeのKEYについて説明します。
+＃ハッシュなので、KEY => VALUE が $Envelope{KEY} の値が VALUE です
 
 	h: ではじまるものKEYは「ヘッダの各フィールドのデータ」です。
 
@@ -501,17 +495,16 @@ sendmail の struct envelople e; に対応するものです。
 	それ以外に その Envelope のメールをどういうモードで処理するか？
 	や、そのメールへのREPLY、エラーレポート処理をどうするか？
 	というMETHODの指定等の付加情報も付け加えることもあります。
-.#	hack:
 
 	[ヘッダ関係]
 
 	h:field:	上述のヘッダ：フィールド：設定値
 
-	fh:field:	field(小文字) はfmlがある値を強制する
+	fh:field:	field(小文字) は fml.pl がある値を強制する
 
 			例： fh:to: は To: を $Envelope{'fh:to:'} の値にする
 
-	oh:field:	field はOriginalのヘッダフィールドを使う
+	oh:field:	field は original のヘッダフィールドを使う
 
 	GH:field:	コマンドの結果を返すメールは GenerateHeader() という
 			ルーチンでメールヘッダを生成する。
@@ -548,7 +541,7 @@ sendmail の struct envelople e; に対応するものです。
 	trailer		メール本文の後につける文章
 
 
-   例： Subject:
+   例: Subject:
 
     $Envelope{'h:subject:'}	
 	は来たメールそのもの
@@ -565,7 +558,6 @@ sendmail の struct envelople e; に対応するものです。
 	From:		h:From:
 	To: 		h:To:
 	Sujbect: 	h:Subject:
-
 
 
 .S	データ構造の初期化
@@ -598,10 +590,10 @@ sendmail の struct envelople e; に対応するものです。
 	&GetFieldsFromHeader
 		%Envelope へ h:field: および h:Field: をセット
 
-	&FixHeaders
+	&FixHeaderFields
 		h:Field: への各種補正を行なう
 
-	&CheckEnv
+	&CheckCurrentProc
 		%Envelope による設定、動作モードチェック
 
 	この後各種フックがそれぞれの場所で評価される。
@@ -611,7 +603,8 @@ sendmail の struct envelople e; に対応するものです。
 		$FML_EXIT_HOOK
 
 
-.S	DIRECTORY変数
+.S	ディレクトリ変数
+=E.S	Directory variables
 .xref	fml-process
 
 起動時の一番最初の段階では $DIR $LIBDIR @INC という変数の設定を筆頭に
@@ -623,7 +616,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 以下では DIRECTORY 一覧を示します。
 		
-	@INC	（参考）
+	@INC	(参考)
 		これは Perl の include file の search path
 		$DIR @INC(original) $LIBDIR ...
 		の順番に探される。
@@ -637,8 +630,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 		fml.pl や libsmtp.pl 等の置き場所。
 		$DIR と同じでも良いし、別の場所で保守されていてもよい。
 		もともと複数のＭＬを扱うためにスプールと *.pl ファイル
-		群の置き場所をわけるために導入された
-		@INC の最後に入る。
+		群の置き場所をわけるために導入された。@INC の最後に入る。
 
 		なおコマンドラインに出てくるdirectoryはすべて @INC に
 		設定されるが、$DIR の直後の directory が $LIBDIR に設
@@ -685,6 +677,12 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 .xref	fml-file-structure
 
 
+	$REJECT_ADDR_LIST	$DIR/spammers
+.l	$REJECT_ADDR_LIST
+
+投稿・コマンド・自動登録を始め弾きたいアドレスのリストを入れる。
+
+
 [各種の説明、ご案内関係のファイル]
 
 	$OBJECTIVE_FILE	 	$DIR/objective
@@ -710,6 +708,11 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 		ＭＬが自動登録の時、登録時に送ってあげる文章
 		デフォールトではとりあえずガイドと同じになっている。
 
+	$CONFIRMATION_FILE       $DIR/confirm
+.l	$CONFIRMATION_FILE
+.xref	confirmation
+		自動登録で confirmation モードの際
+		reply を返す confirmation の説明のファイル
 
 
 [ログファイル関係]
@@ -831,7 +834,7 @@ $MEMBER_LIST (default members) で定義されるファイルは
    ## ではじまるところはコメント
 
 となっています。よって上の例では ##BYE の行は無視されますが、それ以外
-のアドレス１〜アドレス５（４を除いて）すべてがメンバーチェックの際には
+の アドレス1 〜 アドレス5 (4を除いて) すべてがメンバーチェックの際には
 対象となります。
 
 この動作は 1.2 release version の直後、自動登録を拡張する際に導入され
@@ -966,10 +969,10 @@ msend.pl は $ACTIVE_LIST を見て、
 
 		$USE_MD5 = 1;
 
-を設定すると crypt() は crypt(3) ではなく MD5 の値を返すようになります。
-これは MD5.pm を用いた実装なので perl 5 であることと MD5-1.7.tar.gz の
-インストールが必要です。MD5-1.7 は fml の directory に一緒に置いてあり
-ます。
+を設定すると fml.pl の crypt 関数は crypt(3) ではなく MD5 の値を返すよ
+うになります。これは MD5.pm を用いた実装なので perl 5 であることと 
+MD5-1.7.tar.gz のインストールが必要です。MD5-1.7 は fml の directory 
+に一緒に置いてあります。
 
 これらの cryptography はＭＬサーバのリモート管理で使われます。
 .xref	remote
@@ -1026,7 +1029,7 @@ maintenance は コマンドのパスやＭＬ全体共通の設定は
 	$HOME/libexec/fml/sitedef.ph 
 .k	sitedef.ph 
 
-で行ない、各ＭＬごとの設定は
+で行ない各ＭＬごとの設定は
 
 	$HOME/w/spool/fml-support/config.ph 
 .k	config.ph 
@@ -1068,7 +1071,6 @@ fml-support: 00950 でも述べていますが
 
 といってます(^^)。1.x と 2.y の関係はそのまま 上の 1 と 2 の違いといっ
 て間違いありません。
-
 
 SecureP は以下のように
 
@@ -1162,11 +1164,11 @@ $SECURITY_LEVEL < 2 では
 
 また、何もしなくても、
 
-# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
+# mget 正規表現 送り返されるメールの時間間隔(sec)
 
 	と
 
-# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔（ｓｅｃ）
+# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔(sec)
 
 の両方を理解します。サーバが自動的に切替えます。
 
@@ -1215,14 +1217,12 @@ $PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 それは(設計思想として)「疑わしきものははじく」ということから来ています。
 sendmail のソースを読めばなぜ弾くのか理解できます。
 
-
-RFC822 は BNF表現でできる理論限界を表現している文書です。確かに使って
-も構わないのですが、表現のクラスをかなり制限したアドレスを使っていない
-と通信できない可能性はあります。
+RFC822 はBNF表現でできる理論限界を表現している文書です。確かに使っても
+構わないのですが、表現のクラスをかなり制限したアドレスを使っていないと
+通信できない可能性はあります。
 
 では、どういうものならよいのか？というとすべてを網羅した表現はうまくで
 きませんが…
-
 
 
 .S	Gauntlet Firewall
@@ -1354,12 +1354,13 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 	fukachan@exelion.phys.titech.ac.jp
 
 はすべて同じにみなしてます。つまり phys.titech.ac.jp のjp側から数えて
-３つの部分の判定チェックですね。（木構造のルートから数える）
+３つの部分の判定チェックですね。(木構造のルートから数える)
 ＃経験的にここまでやれば十分でしょう
 
-４つ（jp ac phys titech の４つ）までチェックしたいなら、
+4つ(jp ac phys titech の4つ)までチェックしたいなら、
 
-$ADDR_CHECK_MAX = 4;
+	$ADDR_CHECK_MAX = 4;
+.k	$ADDR_CHECK_MAX
 
 と config.ph のどっかに書いておいて下さい。$ADDR_CHECK_MAX という変数
 が設定されてない場合は３として動きます。
@@ -1377,10 +1378,8 @@ $ADDR_CHECK_MAX = 4;
 
 fukachan@phys.titech.ac.jp	skip
 
-と書いておけば認証（新人さんチェック）には使うけど配送はしないという動
-作をします
-
-つまり
+と書いておけば認証(新人さんチェック)には使うけど配送はしないという動作
+をします。つまり
 
 	fukachan@phys.titech.ac.jp	skip
 	Elena@phys.titech.ac.jp	
