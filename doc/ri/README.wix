@@ -93,7 +93,7 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 最新版の fml-current のソースコードを手に入れてから改造等はしていただ
 けるとよろしいかと存じます(_o_)。
 
-○ fml のWWWのページは http://www.phys.titech.ac.jp/uja/fml/ です。
+○ fml のWWWのページは http://axion.phys.titech.ac.jp/uja/fml/ です。
    最新のドキュメント、ソースともにここに揃っています。 
 
 ○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
@@ -186,7 +186,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 	shell% make doc でつくってください
 	最新版は
-		http://www.phys.titech.ac.jp/uja/fml/ 
+		http://axion.phys.titech.ac.jp/uja/fml/ 
 	をのぞいてみてください
 
 ○user 権限で実行します＃ daemon とかではなく

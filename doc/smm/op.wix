@@ -2983,7 +2983,33 @@ which とか
 .include localhack.wix
 .include href.wix
 
+
 .# ##########################################################
+.C	WIX Language
+
+言語自体はおおむね nroff like + texinfo like 折衷版くらいです
+
+専用のフォーマッタ bin/fwix.pl を使って４種類のフォーマットで 
+マニュアルを生成します。
+
+plain text は
+	doc/op そのもの 
+
+html 版は
+	make doc でつくってください
+
+nroff と texinfo 版は対応しかけてるところ です。
+
+WIX Language は 
+１	nroff 覚え直すのも面倒臭い
+２	texinfo, html, nroff, plain text 
+	４種類を同時に生成する
+
+ために作られたものです。単に僕が書きやすいか否か？で言語仕様が決まって
+ます:-)。ついでに 二か国語対応しかけ code まで入ってたりします;-)
+
+
+
 .C	misc
 .label	{misc}
 
