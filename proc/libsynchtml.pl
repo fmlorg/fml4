@@ -1417,7 +1417,7 @@ sub GenThread
 	$last  = $x;
 
 	$next{$x} = " @x ";
-	$next{$x} =~ s/$x//g;
+	#$next{$x} =~ s/$x//g;
 	$next{$x} =~ s/^\s*$//g;
     }
     close(CACHE);

@@ -9,8 +9,8 @@ sub AggregateLinks
 	&DoAggregateLinks(*links, *cache);
 
 	# enough aggregated ?
-	$p = join(" ", values %prev);
-	$q = join(" ", values %links);
+	$p = join(",", sort {$a <=> $b} values %prev);
+	$q = join(",", sort {$a <=> $b} values %links);
 	$p =~ s/\s+/ /g;
 	$q =~ s/\s+/ /g;
 	if ($p eq $q) { last;}
@@ -69,8 +69,8 @@ sub OutPutAggrThread
 
 	if ($debug_thread) { print "==$p\n";}
 
-	print OUT "\n<UL><!-$p->\n";
-	print OUT "\n<!- UL $p ->\n";
+	print OUT "\n<UL><!--$p-->\n";
+	print OUT "\n<!-- UL $p -->\n";
 	print OUT $list{$p};
 	&ThreadPrint(*list, *links, *already, $p, 0);
 
@@ -84,7 +84,7 @@ sub ThreadPrint
     local(*list, *links, *already, $np, $offset) = @_;
     local($i, $p, $level, %np);
 
-    print OUT "\n", ("   " x ($offset+1)),"<!-    sets in   UL ->\n";
+    print OUT "\n", ("   " x ($offset+1)),"<!--    sets in   UL -->\n";
 
     # nesting check
     return 1 if $ThreadPrintNest++ > 10;
@@ -111,7 +111,7 @@ sub ThreadPrint
 		print OUT "\n", ("   " x ($level+$offset)), "<UL>\n";
 	    }
 	    
-	    print OUT ("   " x ($level+$offset)), "<!- UL $i->\n";
+	    print OUT ("   " x ($level+$offset)), "<!-- UL $i-->\n";
 	    print OUT $list{$i};
 
 	    # links pointer;
@@ -133,7 +133,7 @@ sub ThreadPrint
 	}
     }
 
-    print OUT "\n", ("   " x ($offset+1)),"<!-    sets out   UL ->\n";
+    print OUT "\n", ("   " x ($offset+1)),"<!--    sets out   UL -->\n";
 
     # nesting check
     $ThreadPrintNest--;
