@@ -250,7 +250,33 @@ sub AutoRegist
 	; # not delivery
     }
     else {
+	local($p);
+
+	# save-excursion
+	%OriginalEnvelope = %Envelope;
+
+	# rewrite Body
+	$p = &Translate(*Envelope, 
+			"$from is newly added to $MAIL_LIST",
+			'amctl.added.notify2ml', 
+			$from, 
+			$MAIL_LIST) || $Envelope{'Body'};
+
+	$Envelope{'Body'} = $p || $Envelope{'Body'};
+
+	# rewrite subject
+	$p = &Translate(*Envelope,
+			"$from is added",
+			'amctl.added.notify2ml.subject',
+			$from, 
+			$MAIL_LIST);
+	&DEFINE_FIELD_FORCED('subject', $p);
+
+	# already member :-)
 	&Distribute(*Envelope, 'permit from members_only');
+
+	# reset %Envelope
+	%Envelope = %OriginalEnvelope;
     }
 }
 
