@@ -4,6 +4,16 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/08/04
+
+   proc/libmoderated.pl
+	bug fix mime boundary handling
+
+2002/07/09
+
+  ドキュメント修正
+	X-Stardate: がみえてないよ(???)
+
 2002/07/03
 
   間違ったヘッダ入力を修正する
@@ -346,7 +356,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.258 2002/06/29 15:21:36 fukachan Exp $
+	add $FML: CHANGES,v 1.259 2002/07/03 16:14:25 fukachan Exp $
 
 2001/10/03
 
