@@ -118,6 +118,7 @@ sub ModeBifurcate
 		      "autoregist",  "AutoRegistHandler",
 		      "ignore",      "IgnoreHandler",
 
+		      "auto_symmetric_regist", "AutoRegistHandler",
 		      "auto_asymmetric_regist", "AutoRegistHandler",
 		      );
     if ($debug) {
@@ -505,13 +506,19 @@ sub InitConfig
     ### CFVersion 3
     ### DEFINE INTERNAL FLAG FOR THE USE $DIR/members or $DIR/actives ?
     ### $ML_MEMBER_CHECK is internal variable to indicate file relation
+    local($touch) = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
     if (&AutoRegistrableP) {
 	$ML_MEMBER_CHECK = 0;	# backward
-	$touch = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
-	&Touch($touch) if ! -f $touch;
+	if (&NotUseSeparateListP) {
+	    &Touch($touch) if ! -f $touch;
+	}
+	else {
+	    unlink $touch if -f $touch;
+	}
     }
     else {
-	-f $ACTIVE_LIST || &Touch($ACTIVE_LIST);	
+	-f $ACTIVE_LIST || &Touch($ACTIVE_LIST);
+	unlink $touch if -f $touch;
     }
 
     if ($SUBJECT_TAG_TYPE) { 
@@ -1354,14 +1361,19 @@ sub AdjustActiveAndMemberLists
 
     if ($status = &AutoRegistrableP) {
 	# automatic asymmetric registration
+	# XXX: fml 2.x auto_asymmetric_regist fakes "only member list".
 	if ($status eq "auto_asymmetric_regist") {
 	    $FILE_TO_REGIST = $FILE_TO_REGIST || $ACTIVE_LIST;
 	    &Touch($FILE_TO_REGIST) unless -f $FILE_TO_REGIST;
 	}
-
-	$ACTIVE_LIST = $MEMBER_LIST;
-	for (@MEMBER_LIST) {
-	    grep(/$_/, @ACTIVE_LIST) || push(@ACTIVE_LIST, $_);
+	# XXX: fml 2.x auto_regist uses only member file.
+	# XXX: fml 3.x auto_symmetric_regist uses actives and members.
+	elsif (&NotUseSeparateListP) {
+	    # XXX: this block is always true in 2.x but false in 3.x.
+	    $ACTIVE_LIST = $MEMBER_LIST;
+	    for (@MEMBER_LIST) {
+		grep(/$_/, @ACTIVE_LIST) || push(@ACTIVE_LIST, $_);
+	    }
 	}
     }
 
@@ -1438,15 +1450,42 @@ sub MailListAdminMemberP { &Lookup($_[0], $ADMIN_MEMBER_LIST);}
 sub NonAutoRegistrableP { ! &AutoRegistrableP;}
 sub AutoRegistrableP
 {
+    if ($REJECT_POST_HANDLER =~ /auto\S+regist/ &&
+	 $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist') {
+	&Log("These HANDLER configuration may not work well");
+    }
+
     if ($Envelope{'mode:ctladdr'} && 
 	($REJECT_POST_HANDLER    eq 'auto_asymmetric_regist' ||
 	 $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist')) {
 	"auto_asymmetric_regist";
     }
-    elsif ($REJECT_POST_HANDLER =~ /auto_regist/i ||
-	   $REJECT_POST_HANDLER =~ /autoregist/i ||
-	   $REJECT_COMMAND_HANDLER =~ /auto_regist/i ||
+    elsif ($Envelope{'mode:ctladdr'} && 
+	($REJECT_POST_HANDLER    eq 'auto_symmetric_regist' ||
+	 $REJECT_COMMAND_HANDLER eq 'auto_symmetric_regist')) {
+	"auto_symmetric_regist";
+    }
+    elsif ($REJECT_COMMAND_HANDLER =~ /auto_regist/i ||
+	   $REJECT_COMMAND_HANDLER =~ /auto_symmetric_regist/i ||
 	   $REJECT_COMMAND_HANDLER =~ /autoregist/i) {
+	$REJECT_COMMAND_HANDLER;
+    }
+    elsif ($REJECT_POST_HANDLER =~ /auto_regist/i ||
+	   $REJECT_POST_HANDLER =~ /auto_symmetric_regist/i ||
+	   $REJECT_POST_HANDLER =~ /autoregist/i) {
+	   $REJECT_POST_HANDLER;
+    }
+    else {
+	0;
+    }
+}
+
+sub NotUseSeparateListP { ! &UseSeparateListP;}
+sub UseSeparateListP
+{
+    local($x) = &AutoRegistrableP;
+
+    if ($x eq 'auto_symmetric_regist' || (! $x)) {
 	1;
     }
     else {

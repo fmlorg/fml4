@@ -583,7 +583,7 @@ sub ProcAdminSubscribe
 	return 1;# not fatal;
     }
     
-    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
+    if (&UseSeparateListP && ($ACTIVE_LIST ne $file_to_regist)) {
 	$status = &Append2($s, $ACTIVE_LIST);
 	if ($status) {
 	    &LogWEnv("admin $proc $s >> \$ACTIVE_LIST", *e);

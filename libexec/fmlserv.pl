@@ -556,7 +556,12 @@ sub MLContextSwitch
     if (&AutoRegistrableP) {
 	$ML_MEMBER_CHECK = 0;
 	$touch = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
-	&Touch($touch) if ! -f $touch;
+	if (&NotUseSeparateListP) {
+	    &Touch($touch) if ! -f $touch;
+	}
+	else {
+	    unlink $touch if -f $touch;
+	}
     }
 
     ### Here, all variables must be set already. 

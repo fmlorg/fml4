@@ -155,7 +155,7 @@ sub AutoRegist
     }
 
     # WHEN CHECKING MEMBER MODE
-    if (&NonAutoRegistrableP) {
+    if (&UseSeparateListP) {
 	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	&Append2($entry, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
 	($ok == 2) ? &Log("Added: $entry") : do {
@@ -606,7 +606,7 @@ sub DoSetMemberList
 	&Log("ProcedureException: bye ignore $list");
 	$rm++;
     }
-    elsif (&NonAutoRegistrableP) {
+    elsif (&UseSeparateListP) {
 	$list = &MailListMemberP($curaddr);
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
 	if ($rm == 1) {
