@@ -72,7 +72,7 @@ fml のセットアップやカスタマイズは makefml というプログラムにより、メ
 .if LANG == ENGLISH
 fml 4.0 is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
-in Japan from 1993 to 2000. fml contains
+in Japan from 1993 to 2001. fml contains
 
    distributer (filter program which passes articles to MTA to deliver)
    command server for users
@@ -146,7 +146,7 @@ INSTALL_on_NT4.
 =E
 *  Test Environment: I've tested fml on the following system:
 
-   postfix release-20010228 + perl 5.004_04 on NetBSD/sparc (1.4-stable)
+   postfix release-20010228 (+IPv6) + perl 5.00503 on NetBSD/sparc 1.5.1
 
 さらに配送系は複数のMTAを使った並列配送実験をしています(通称 MTA みく
 じです ^^;)。(最近は一旦２つに減っていますが、そのうち増えるかも:)
@@ -499,7 +499,7 @@ GNU General Public License です。詳しくは COPYING というファイルを読ん
 
 
 
-$Id$
+$FML$
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp

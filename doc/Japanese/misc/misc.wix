@@ -16,7 +16,7 @@ back numbers, so you may lose the version specific descriptions.
 
 makefml でインストールすると document 群も入れます。documents は大きい
 です。インストール先の doc の下にまとまってるので、ここは消して構いま
-せん。ドキュメントは「www.sapporo.iij.ad.jp を見るから doc/html は要ら
+せん。ドキュメントは「www.fml.org を見るから doc/html は要ら
 ないから消す」という選択はありうるでしょう。ただ www では常に最新版の
 内容だけが見られるという点に注意してください。ISPのシェルを使ってる場
 合などならISP側ではなく自分の端末のローカルディスクに移しておくとゆう
@@ -97,3 +97,6 @@ do
    fi
 done
 .~q
+
+
+.# $FML: misc.wix,v 1.6 2001/07/20 05:49:02 fukachan Exp $

@@ -86,7 +86,7 @@ Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 =E
 You can see my papers at
 
-.url http://www.sapporo.iij.ad.jp/staff/fukachan/PAPERS/
+.url http://www.fml.org/home/fukachan/PAPERS/
 
 にあります。メーリングリストの挙動と 1/fゆらぎ に関しての論文は
 =E
@@ -114,11 +114,11 @@ Ken'ichi Fukamachi,
 though it lacks figures.
 
 
-.# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# $FML: ref.wix,v 2.8 2001/07/20 05:49:08 fukachan Exp $
+.# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -519,7 +519,6 @@ this document, please run
 =E
 Latest version of documents are available in
 
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 .url	http://www.fml.org/fml/
 
 にあります。
@@ -1357,11 +1356,11 @@ To avoid replies from all ML members.
 もちろん本来はヘッダの意味を考えてメールを書かない”そのメールを出した
 人”が悪いのはいうまでもありまん。
 
-.# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# $FML: overview.wix,v 2.6 2001/07/20 05:49:07 fukachan Exp $
+.# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
