@@ -1,4 +1,8 @@
-sbin/makefml
+*** popfml
+
+	+fml-todo をみよ
+
+*** sbin/makefml
 
     # Lock all when "install"
     if ($TheFirstTime || $NOT_LOCK{$fp}) {
@@ -7,3 +11,10 @@ sbin/makefml
 	# XXX reload $LANGUAGE to translate messages on Web CGI
 	# XXX &GetConfigPH($ml) if (!$TheFirstTime);
     }
+
+
+*** chaddr
+
+	dupilication してるとき chaddr がうまくおごかない
+
+	エラーメッセージが正しくないバグ _o_
