@@ -1,396 +1,364 @@
 #!/usr/local/bin/perl
+#
+# Copyright (C) 1993 fukachan@phys.titech.ac.jp
+# Copyright (C) 1994 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
 
-# $Author$
-# $State$
-;$rcsid = "$Id$";
+$rcsid   = q$Id$;
+($rcsid) = ($rcsid =~ /Id: *(.*) *\d\d\d\d\/\d+\/\d+.*/); 
 
-# Mailing List home directory
-$DIR		= '/home/axion/fukachan/work/spool/EXP';
+# For the insecure command actions
+$ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
+$ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
+$ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 
-$incc = @INC;
-$INC[$incc] = "$DIR";
+# Directory of Mailing List Server Libraries
+$DIR	      = $ARGV[0] ? $ARGV[0] : '/home/axion/fukachan/work/spool/EXP';
+while(@ARGV) { shift @ARGV;}
 
-require 'configure.pl';
-require 'smtp.pl';
+#################### MAIN ####################
+# including libraries
+push(@INC,"$DIR");		# add the path for include files
+require 'config.ph';		# a config header file
+require 'libsmtp.pl';		# a library using smtp
+require 'liblock.pl' unless $USE_FLOCK;
 
+# a little configuration before the action
 umask (022);			# rw-r--r--
-$[ = 1;				# set array base to 1
+$CommandMode  = '';		# default CommandMode is nil.
+$GUIDE_REQUEST_FROM_UNKNOWN = 0;# not member && guide request only
+
 chdir $DIR || die "Can't chdir to $DIR\n";
-($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);$wday++;
-$Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", $year, $mon+1, $mday, $hour, $min, $sec);
-$MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-		    $mday, $Month[$mon+1], $year, $hour, $min, $sec, $TZone);
 
-&lock;
-#&makeActives();
-&parseHeader;
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+				# e.g. MIME
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
 
-if ($CommandLine =~ /^#/) {
-    require './libcommand.pl';
-    &COMMAND;
-} else {
-#    &MAILBACK; this routine is for YP_ML backup server
-#    because the design of no distribution of mails need 
-#    implementation of no distribution 
-#    require './sendmail.pl';
-    &DISTRIBUTE;
-}
+$CommandMode = 1 if($CONTROL_ADDRESS &&
+		    index($To_address, $CONTROL_ADDRESS) >= 0);
+				# when the address is for command.
 
-&cleanup;
+(!$USE_FLOCK) ? &Lock : &Flock;	# Locking 
 
-exit 0;
-
-################### Libraries ###################
-
-# lock
-sub lock
-{
-    open(LOCK_TMP, ">$LOCK_TMP") || die "Can't make LOCK\n";
-    close(LOCK_TMP);
-    
-### lock temporary file; just existance of lockfile
-    
-    for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
-	if (link($LOCK_TMP, $LOCK_FILE) == 0) {
-	    sleep (rand(3)+5);
-	} else {
-	    last;
-	}
+if($ML_MEMBER_CHECK) { 
+    if(! &MLMemberCheck) {	# if failed
+	(!$USE_FLOCK) ? &Unlock : &Funlock;
+	exit 0;
     }
-    
-    unlink $LOCK_TMP;
-    
-# save incoming mail, send warning to maintainer, put log, die
-    if ($timeout >= $MAX_TIMEOUT) {
-	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
-			   $year, $mon+1, $mday, $hour, $min, $sec);
-	open(TIMEOUT, ">" . $TIMEOUT);
-	while (<>) {
-	    print TIMEOUT $_;
-	}
-	close(TIMEOUT);
-	&sendmail($MAINTAINER, "LOCK " . $TIMEOUT, "zonky");
-	&fatal("LOCK " . $TIMEOUT);
+} else { 
+    if(! &MLMemberNoCheckAndAdd) { # if failed
+	(!$USE_FLOCK) ? &Unlock : &Funlock;
+	exit 0;
     }
 }
 
-
-# sub parseHeader()
-# parse header and save body into a file
-# $_ is mail text from the mail daemon
-
-sub parseHeader
-{
-    local($body) = 0;
-    local($tag, $text);
-
-    open(MAIL_BODY, ">$MAIL_BODY");
-    while (<stdin>) {
-	if (($body == 0) && /^$/) { # 1st null line separates header and body 
-	    $body = 1;
-	} else {
-	    if ($body) {	# save mail body
-		print MAIL_BODY $_;
-		if (++$BodyLines == 1) {
-		    $CommandLine = $_; # save 1st line of body for command check
-		}
-	    } else {
-		chop;		# strip record separator
-		($tag, $text) = /^([^: ]*): *(.*)/;
-
-		$tag =~ /^Date$/i && ($Date = $text);
-		$tag =~ /^Reply-to$/i && ($Reply_to = $text);
-		$tag =~ /^Errors-to$/i && ($Errors_to = $text);
-		$tag =~ /^X-Distribution$/i && ($Distribution = $text);		
-		# get From: field, address and username
-		if ($tag =~ /^From$/i) {
-		    $From = $text;
-		    if ($From =~ /<(.*)>/) { # <add@ress>
-			$From_address = $1;
-			$From_1 = $1;					     
-		    } else {
-			$From =~ /^([^ ]*) */; # add@ress (NAME)
-			$From_address = $1;
-			$From_2 = $1;					     
-		    }
-		    $User = substr($From_address, 1, 15);
-		    # printf "From_address: %s\n", $From_address;
-		    # printf "user: %s\n", $User;
-		}
-
-		# get subject (strip [id:user], move multiple Re:)
-		if ($tag =~ /^Subject$/i) {
-		    $Subject = $text; 			# default
-		    if ($Subject =~ /Re: *\[.*\] *Re: *(.*)/) {
-			$Subject = "Re: " . $1; 	# strip [id] and Re:
-		    } elsif ($Subject =~ /^Re: *\[.*\] *(.*)/) { 
-			$Subject = "Re: " . $1;		# strip [id] and Re:
-		    } elsif ($Subject =~ /^.*\[.*\] *(.*)/) {
-			$Subject = $1; 			# strip [id]
-		    }
-		    # printf "Subject: %s\n", $Subject;
-
-		    }
-	    }
-	}
-    }
-    close(MAIL_BODY);
+if ($CommandMode) {		# If "# (.*)" form is given, Command mode
+    require 'libfml.pl'; 
+} else {			# distribution mode(Mailing List)
+    &Distribute;
 }
 
-# distribute mail to member
+(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
+exit 0;				# the main ends.
+#################### MAIN ENDS ####################
 
-sub DISTRIBUTE
+##### SubRoutines #####
+
+sub InitConfig
 {
-    local($ID) = 0;
+    # moved from Distribute and codes are added to check log files
+    # Initialize the ML server, spool and log files.  
+    if(!-d $SPOOL_DIR)     { mkdir($SPOOL_DIR,0755);}
+    if(!-f $ACTIVE_LIST)   { open(TOUCH,"> $ACTIVE_LIST");   close(TOUCH);}
+    if(!-f $MEMBER_LIST)   { open(TOUCH,"> $MEMBER_LIST");   close(TOUCH);}
+    if(!-f $SUMMARY_FILE)  { open(TOUCH,"> $SUMMARY_FILE");  close(TOUCH);}
+    if(!-f $LOGFILE)       { open(TOUCH,"> $LOGFILE");       close(TOUCH);}
+    if(!-f $MGET_LOGFILE)  { open(TOUCH,"> $MGET_LOGFILE");  close(TOUCH);}
+    if(!-f $SEQUENCE_FILE) { open(TOUCH,"> $SEQUENCE_FILE"); close(TOUCH);}
+
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+	      'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
+			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+}
+
+# one pass to modify the mail header, ex. MIME...
+sub Parsing
+{
+    $0 = "--Parsing header and body <$FML $LOCKFILE>";
+    local($WHOLE_MAIL) = '';
+    # whether a command mode or not is checked within the first 3 lines.
+    
+    while(<>) { $WHOLE_MAIL .= $_;}
+    local($MailBodyIndex) = index($WHOLE_MAIL, "\n\n");
+    $MailHeaders = substr($WHOLE_MAIL, 0, $MailBodyIndex);
+    $MailBody    = substr($WHOLE_MAIL, $MailBodyIndex + 2, 
+			  length($WHOLE_MAIL));
+    $MailHeaders =~ s/\s\n\s+//go; # not special, for e.g. MIME headers
+    
+    local(@body) = split(/\n/, $MailBody, 9999);
+    local($i);
+    for($i = 0; $i < $COMMAND_CHECK_LIMIT; $i++) {
+	print STDERR $body[$i], "\n" if $debug;
+	$CommandMode = 'on' if($body[$i] =~ /^\#/o);
+    }
+    $BodyLines = scalar(@body) - 1;
+    $GUIDE_REQUEST_FROM_UNKNOWN = 1 if($MailBody =~ /\#\s*guide/io);
+}
+
+# Phase 2(2nd pass), extract several fields 
+sub GetFieldsFromHeader
+{
+    # tuned below? 
+    local(@MailHeaders) = split(/\n/, $MailHeaders, 999);
+    
+    # matching $MailHeaders =~ /\nDate: *(.*)\n/io is faster, is'nt it?
+    while($_ = $MailHeaders[0], shift @MailHeaders) {
+	/^Date: *(.*)$/io           && ($Date = $1, next);
+	/^Reply-to: *(.*)$/io       && ($Reply_to = $1, next);
+	/^Errors-to: *(.*)$/io      && ($Errors_to = $1, next);
+	/^Sender: *(.*)$/io         && ($Sender = $1, next);
+	/^X-Distribution: *(.*)$/io && ($Distribution = $1, next);
+	/^From: *(.*)$/io           && ($From_full_address = $1);
+
+	if(/^From: *.* *<(\S+)> *.*$/io) { $From_address = $1; next;}
+	if(/^From: *(\S+) *.*$/io)       { $From_address = $1; next;}
+
+	# To control each action corresponding to each address(1.1.2.15-)
+	if(/^To: *.* *<(\S+)> *.*$/io) { $To_address = $1; next;}
+	if(/^To: *(\S+) *.*$/io)       { $To_address = $1; next;}
+	
+	# get subject (strip [id:user], move multiple Re:)
+	if(/^Subject: *(.*)$/io) { 
+	    $_ = $1; print STDERR "subject: $_\n" if($debug);
+	    if(/^Re: *\[.*\] *Re: *(.*)/o) { $Subject = "Re: " . $1; next;}
+	    if(/^Re: *\[.*\] *(.*)/o)      { $Subject = "Re: " . $1; next;}
+	    if(/^.*\[.*\] *(.*)/o)         { $Subject = $1; next;}
+	    $Subject = $1;
+	}
+    }
+    print STDERR  $From_address, "<---From_adress\n" if($debug);
+    print STDERR  $Subject,      "<---Subject\n"     if($debug);
+    print STDERR  $To_address,   "<---To_adress\n"   if($debug);
+    $User = substr($From_address, 0, 15);
+}
+
+# check a mail from members or not? return 0 is end of whole fml process
+sub MLMemberCheck
+{
+    $0 = "--Checking Members or not <$FML $LOCKFILE>";
+    if(0 == &CheckMember($From_address, $MEMBER_LIST)) {
+	# When just guide request from unknown person, return the guide only
+	if($GUIDE_REQUEST_FROM_UNKNOWN) {
+	    &Logging("Guide ($From_address) who is unknown");
+	    &SendFile($From_address, "Guide $ML_FN", $GUIDE_FILE);
+	}else{
+	    # When not member, return the deny file.
+	    &Logging("From not member: $From_address");
+	    &Sendmail($MAINTAINER, "NOT MEMBER article from $From_address $ML_FN", $MailBody);
+	    &SendFile($From_address, "You $From_address are not member $ML_FN",$DENY_FILE);
+	}
+	return 0;
+    }
+    return 1;
+}    
+
+# original designing is for luna ML 
+# return 0 is end of whole fml process
+# Member or not is checked, if failed, add the user as a new member of the ML
+sub MLMemberNoCheckAndAdd
+{
+    $0 = "--Checking Members and add if new <$FML $LOCKFILE>";
+    $ACTIVE_LIST 	= "$DIR/members"; # actives and members are the same 
+    
+    if (0 == &CheckMember($From_address, $MEMBER_LIST)) { # if not member
+	# if not member but guide request, not add him and return the guide
+	if($GUIDE_REQUEST_FROM_UNKNOWN) {
+	    &Logging("Guide ($From_address) who is unknown");
+	    &SendFile($From_address, "Guide $ML_FN", $GUIDE_FILE);
+	    return 0;# fml ends if guide. if not, &Command also send the guide.
+	}
+
+	# if not guide, add him to the member list and do the next step.
+	open(TMP, ">> $MEMBER_LIST")  || (&Logging("$!"), return 0);
+	print TMP $From_address, "\n";
+	close(TMP);
+	&Logging(sprintf("Added: %s", $From_address));
+	&Sendmail($MAINTAINER, sprintf("New added member: %s $ML_FN", 
+				       $From_address), $MailBody);
+	return 1;
+    }
+    return 1;
+}
+
+# Distribute mail to member
+sub Distribute
+{
+    $0 = "--Distributing <$FML $LOCKFILE>";
     local($mail_file, $to);
-    
-    # check mail from members
-    if (&checkmember($From_address, $MEMBER_LIST) == 0) {
-	&putlog(sprintf("Added: (%s)", $From_address));
-	&sendmail($MAINTAINER, sprintf("NOT MEMBER article from %s", 
-				       $From_address), $MAIL_BODY);
-    }
-    
-    # make ID
-    open(SEQUENCE_FILE);
-    while (<SEQUENCE_FILE>) {
-	$ID = $_;
-    }
-    $ID = $ID + 1;
-    open(SEQUENCE_FILE, ">$SEQUENCE_FILE"); # close then open
-    printf SEQUENCE_FILE "%d\n", $ID; # update sequence number
-    close(SEQUENCE_FILE);
+    local($Status) = 0;
 
+    # ID = ID + 1( ID is a Count of ML article)
+    # require another file descripter for flock system call
+    open(IDINC, "< $SEQUENCE_FILE") || (&Logging("$!"), return);
+    $ID = <IDINC>; $ID++;
+    close(IDINC);
+
+    # for when not using flock system call, but no symmetry ;_;
+    if(! $USE_FLOCK) { 
+	open(LOCK, "> $SEQUENCE_FILE") || (&Logging("$!"), return);
+    }
+
+    # save the ID for the next process
+    printf LOCK "%d\n", $ID; 
+    close(LOCK);
+    
     # save summary and put log
-    open(SUMMARY, ">>$SUMMARY_FILE");
+    open(SUMMARY, ">> $SUMMARY_FILE") || (&Logging("$!"), return);
     printf SUMMARY "%s [%d:%s] %s\n", $Now, $ID, $User, $Subject;
     close(SUMMARY);
-    &putlog(sprintf("ARTICLE %d (%s)", $ID, $From_address));
+    &Logging(sprintf("ARTICLE %d (%s)", $ID, $From_address));
     
-    # save message
-    if (! -d $SPOOL_DIR) {
-	system "mkdir $SPOOL_DIR";
-    }
+    # Distribution mode
+    @headers = ("HELO", "MAIL FROM: $MAINTAINER");
+    open(ACTIVE_LIST) || 
+	(&Logging("cannot open $ACTIVE_LIST when $ID:$!"), return);
+    
+    $rcsid  .= "/MX-0.0 "; $MX_PATCH_DATE = "";
+  line: while (<ACTIVE_LIST>) {	# MX version(for 5.67+1.6w)
+      chop;
+      /^[ \t]*(.*)[ \t]*\#.*/o && ($_ = $1);# strip comment, not \S+ for mx
+      next line if(/^\#/o);	# skip comment and off member
+      next line if(/^\s*$/o);	# skip null line
+      local($rcpt, $mx) = split(/[ \t\n]+/, $_, 999);
+      if($mx) {			# if MX is explicitly given,
+	  print STDERR "MX = $mx, the given fields is $_\n" if($debug);
+	  local($who, $mxhost) = split(/@/, $rcpt, 2);
+	  $rcpt = "$who%$mxhost@$mx";
+      }
+      print STDERR "RCPT TO: $rcpt \n" if($debug);
+      push(@headers, "RCPT TO: $rcpt");
+  }
+    close(ACTIVE_LIST);
+    push(@headers, "DATA");
+    
+# This is the order recommended in RFC822, p.20. But not clear about X-*
+    $body = 
+	"Return-Path: <$MAINTAINER>\n" .
+	"Date: $MailDate\n" .
+	"From: $From_full_address\n";
+    $body .= "Subject: $Subject\n" if $Subject; # When Subject is nil, no field
+    $body .= "Sender: $Sender\n" if($Sender); # Sender is just additional. 
+    $body .= "To: $MAIL_LIST $ML_FN\n";
+    $body .= "Reply-To: ";
+    $body .= $Reply_to ? "$Reply_to\n" : "$MAIL_LIST\n";
+# Errors-to is not refered in RFC822. 
+# Sendmail 8.x do not see this field in default. 
+# However in error may be effective for e.g. Pasokon Tuusin, BITNET..
+# I don't know details about them.
+#      $body .= "Errors-To: ";
+#      $body .= $Errors_to ? "$Errors_to\n" : "$MAINTAINER\n";
+    $body .= 
+	"Posted: $Date\n" .
+	"$XMLNAME\n" .
+	"$XMLCOUNT: " . sprintf("%05d", $ID) . "\n"; # 00010 
+    $body .= "X-MLServer: $rcsid\n" if $rcsid;
+    $body .= "Precedence: list\n"; # for Sendmail 8.x, for delay mail
+    $body .= "Lines: $BodyLines\n\n";
+    $body .=  $MailBody;
+
+    # spooling
     $mail_file = sprintf("%s/%d", $SPOOL_DIR, $ID);
-    open(mail_file, ">$mail_file");
+    open(mail_file, "> $mail_file") || (&Logging("$!"), return);
+    print mail_file "$body";
     close(mail_file);
 
-    # Distribution mode
-    open(ACTIVE_LIST) || &fatal("can't open $ACTIVE_LIST.\n");
+    # IPC. when debug mode, no distributing 
+    $Status = &Smtp($host, "$body.\n", @headers) if(! $debug);
+    &Logging("Sendmail:$Status") if $Status;
 
-    $_ = "";
-    $to = "";
-    $count = 0;
-    @tothem = ();
-
-  line: while (<ACTIVE_LIST>) {
-      chop;			# strip newline
-      next line if (/(.*)#/);	# strip comment
-		    next line if /^[ \t]*$/; # skip null line
-		    push(tothem,$_);    
-		    $count++;
-		}
-
-      $headers = "HELO \nRSET\nMAIL FROM: $From\n";
-      for(; $count > 0; $count--) {
-#	  $to = $to . pop(tothem); for usual sendmail
-	  $headers .= "RCPT TO: ". pop(tothem) . "\n";	  
-      }
-      close(ACTIVE_LIST);
-      $headers .= "DATA\n";	  
-
-      $IDTMP = substr("00000", 1, 5 - length($ID)) . "$ID";
-
-      $body = 
-	  "Date: $MailDate\n" . 
-	  "To: $MAIL_LIST $ML_FN\n" . 
-	  "From: $From\n" .
-          "Return-Path: <$MAINTAINER>\n" .
-	  "Subject: $Subject\n". 
-          "Posted: $Date\n" .
-          "Sender: $From\n" .
-          "$XMLNAME: $XML\n" .
-          "$MLCOUNT: $IDTMP\n" .
-	      "Reply-To: ";
-      $body .= 
-	  $Reply_to ? $Reply_to : $MAIL_LIST;
-      $body .= "\nErrors-To: ";
-      $body .= 
-	  $Errors_to ? $Errors_to : $MAINTAINER; 
-      $body .= "\nLines: $BodyLines\n";
-
-      open(MAIL_BODY);
-      while (<MAIL_BODY>) {
-	  $body .=  $_;
-      }
-      close(MAIL_BODY);
-      $body .= ".\n";
-      print "HEADERS:\n\n\n$headers";
-      print "BODY   :\n\n$body";      
-      &smtp($machine, $headers, $body);
-      &cleanup;		# remove lock
+    return ;
 }
 
-# 
-# addtional for YP_ML backup server 
-# 
-sub MAILBACK
-{
-    local($to) = $Reply_to ? $Reply_to : $From;
-    local($line, $cmd, $subcmd, $ok, $subject);
-
-    &sendmail($to, "HELP for phys ML:backup server", $YPHELP_FILE);
-    &putlog(sprintf("HELP for Yuong Phys ML sent to <%s>", $From_address));
-}
-
-# checkmember(address, file)
-# return 1 if given address belongs to member's else return 0
-
-sub checkmember
+# CheckMember(address, file)
+# return 1 if a given address is authentified as member's
+sub CheckMember
 {
     local($address, $file) = @_;
-
+    
     open(FILE, $file) || return 0;
-    line: while (<FILE>) {
-	chop;
-	if (/(.*)#/) {		# strip comment
-	    $_ = $1;
-	}
-	if (/([^ \t]*)/) {	# strip space
-	    $_ = $1;
-	}
-	next line if /^[ \t]*$/; # skip null line
-	if (&fuzzyAddressMatch($_, $address) == 1) {
-	    close(FILE);
-	    return 1;
-	}
-    }
+  getline: while (<FILE>) {
+      chop; # strip comment and space below
+      next getline if(/^\#/o);
+      next getline if(/^\s*$/o); # skip null line
+      /^[ \t]*(\S+)[ \t]*.*$/o && ($_ = $1); # including .*#.*
+
+      # This searching algorithm must require about N/2, not tuned,
+      # but for checking addresses registerd doubly
+      if (1 == &AddressMatching($_, $address)) {
+	  close(FILE);
+	  return 1;
+      }
+  }# while loop;
     close(FILE);
     return 0;
 }
 
-# makeActives()
-# create actives file if not exist
-
-sub makeActives
+# sub AddressMatching($addr1, $addr2)
+# return 1 given addresses are matched at the accuracy of 4 fields
+sub AddressMatching
 {
-    if (! -f $ACTIVE_LIST) {
-	open(MEMBER_LIST) || &fatal("NO MEMBER LIST!");
-	open(ACTIVE_LIST, ">$ACTIVE_LIST");
-	while (<MEMBER_LIST>) {
-	    print ACTIVE_LIST $_;
-	}
-	close(ACTIVE_LIST);
-	close(MEMBER_LIST);
-    }
-
-}
-
-# changeMemberList(cmd, address, file)
-# delete or add address from/to file
-
-sub changeMemberList
-{
-    local($cmd, $address, $file) = @_;
-    local($line);
-
-    open(LIST, $file);
-    open(NEW, ">hml.tmp");
-  line:
-    while (<LIST>) {
-	$line = $_;		# save line
-	chop;
-	if (/(.*)#/) {
-	    $_ = $1;		# strip comment
-	}
-	if (/([^ \t]*)/) {
-	    $_ = $1;		# strip space
-	}
-	if (&fuzzyAddressMatch($_, $address) == 0) {	# copy if not match
-	    print NEW $line;
-	}
-    }
-    if ($cmd eq 'add') {	# add new entry
-	print NEW $address, "\n";
-    }
-    close(NEW);
-    close(LIST);
-    rename('hml.tmp', $file);
-}
-
-# sub fuzzyAddressMatch($address1, $address2)
-# return 1 given addresses are almost match else return 0
-
-sub fuzzyAddressMatch
-{
-    local($address1, $address2) = @_;
+    local($addr1, $addr2) = @_;
+    $addr1 =~ y/A-Z/a-z/;	# canonicalize to lower case
+    $addr2 =~ y/A-Z/a-z/;
     
-    $address1 =~ y/A-Z/a-z/;	# canonicalize to lower case
-    $address2 =~ y/A-Z/a-z/;
-    # try exact match
-    if ($address1 eq $address2) {
+    if ($addr1 eq $addr2) { return 1;} # try exact match
+    
+    local($acct1, $addr1) = split(/@/, $addr1); # parse account and host
+    local($acct2, $addr2) = split(/@/, $addr2);
+    
+    if($acct1 ne $acct2) {return 0;}# account is the same or not?;
+    
+    # get an array "jp.ac.titech.phys" for "fukachan@phys.titech.ac.jp"
+    local(@domain1) = reverse split(/\./, $addr1);
+    local(@domain2) = reverse split(/\./, $addr2);
+    
+    # if you like to strict the address check, 
+    # add fields like a ...$domain[3].$domain[4]...;
+    if("$domain1[0].$domain1[1].$domain1[2].$domain1[3]" eq 
+       "$domain2[0].$domain2[1].$domain2[2].$domain2[3]") { 
 	return 1;
     }
-    # try fuzzy match
-    local($name1, $addr1) = split(/@/, $address1);
-    local($name2, $addr2) = split(/@/, $address2);
-    if ($name1 ne $name2) {
-	return 0;			# name not match
-    }
-    local(@domain1) = split(/\./, $addr1);
-    local($num1) = $#domain1;
-    local(@domain2) = split(/\./, $addr2);
-    local($num2) = $#domain2;
-    local($match) = 0;
-    while ($num1 > 0 && $num2 > 0) {
-	if ($domain1[$num1] eq $domain2[$num2]) {
-	    $match++;
-	}
-	$num1--;
-	$num2--;
-    }
-    return ($match >= 3 ? 1 : 0);
+    return 0;			# not matched
 }
 
-# checkFileName(filename)
-# return 1 if filename does not start with '/' and not include '.'.
-# else return 0
-
-sub checkFileName
+# Logging(String as message)
+sub Logging
 {
-    local($name) = @_;
-
-    return 0 if ($name =~ /^\// || $name =~ /\./ || $name =~ /$HML/);
-    return 1;
+    local($message) = @_;
+    open(LOGFILE, ">> $LOGFILE");
+    printf LOGFILE "%s %s\n", $Now, $message;
+    close(LOGFILE);
 }
-	
 
-# fatal(msg)
-sub fatal
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub Flock
 {
-    &putlog(@_);
-    &cleanup;
-    exit 0;
+    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
+    open(LOCK, ">> $SEQUENCE_FILE"); # if using ">", remove the content
+    flock(LOCK, $LOCK_EX);
+    seek(LOCK, 0, 0);	# move to the top of file(above, open as append mode)
 }
 
-# putlog(msg)
-
-sub putlog
-{
-    local($msg) = @_;
-
-    # open then close; since this log will be called once in usual.
-    open(LOG_FILE, ">>$LOG_FILE") || (&cleanup && die "Can't open $LOG_FILE\n");
-    printf LOG_FILE "%s %s\n", $Now, $msg;
-    close(LOG_FILE);
+sub Funlock {
+    $0 = "--Unlock <$FML $LOCKFILE>";
+    flock(LOCK, $LOCK_UN);
 }
 
-sub cleanup
-{
-    if (-f $MAIL_BODY) {
-	unlink $MAIL_BODY;
-    }
-    if (-f $LOCK_FILE) {
-	unlink $LOCK_FILE;
-    } 
-}
+1;
