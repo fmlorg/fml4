@@ -1,3 +1,221 @@
+.C	ファイルをまとめて操作する関数群 (mget と まとめおくり)
+
+	mgetはそのコマンドごとに
+	まとめおくりはユーザーごとに
+
+送り方が指定できます。
+
+help ファイルより抜粋
+
+# mget 1-10,5みたいなsyntax 	[モード]	[時間間隔]
+# mget 正規表現 		[モード]	[時間間隔]
+			ファイルをまとめて送り返す
+			スプールの記事や、
+			(もしあれば)アーカイブにあるファイル
+   引数：
+	範囲を指定	1-10,12,15-100 1,2,10
+			first first:10 last:30 100-last(mh的 Syntax)
+	正規表現	e.g. * ? 1? 1?? 
+	モード		gz tgz ish rfc934 b rfc1153 d unpack uf(default=tgz)
+	時間間隔	送り返すメールが複数の時の間隔(default=300)	
+   モード：
+		オプションなしは tar+gzip で spool.tar.gz
+	tgz	同上
+	uf	PLAINTEXT(UNIX FROM)
+	gz	GZIP(UNIX FROM)
+	b	RFC934 format 	PLAINTEXT(mh-burst)
+	rfc934	
+	ish	lha + ish 
+	lhaish
+	i
+	li
+	lu	lha + uuencode
+	lhauu
+	unpack	PLAINTEXT(UNIX FROM)
+	uu	UUENCODE
+	d	RFC1153 format 	PLAINTEXT
+	rfc1153	RFC1153 format 	PLAINTEXT
+
+
+ここでは、これら
+	複数のファイルを一辺に取り扱う方法
+	そのフォーマットについての少し細かい点
+
+に関して記述します。
+
+
+.S	mget3 インターフェイス：パターンマッチ戦略
+.key	mget3
+.label	mget3
+
+	この時点で flock もはずれて、最後の最後
+	あとは、&Notify だけが残っている
+
+	MH風展開を実行
+		e.g. 1,last:30 -> 1,70-100
+
+	if V2 フォーマットでTRY
+		e.g.
+		spool/PLAIN-ARTITLE
+		archive/100.tar.gz 
+		等を探索
+		return
+
+	elsif ではそのパターンはアーカイブ？
+		ほとんど Exact にアーカイブ内を探索
+		return
+
+	elsif V1 format 探索もＯＫ？
+		なら、実行
+		return
+
+	else
+		NO MATCH or V1 FORMAT ERROR
+
+
+.S	MIME/MultipartのBNF表現（RFC1521より）
+.label	{MIME-Multipart}
+
+   boundary := 0*69<bchars> bcharsnospace
+
+   bchars := bcharsnospace / " "
+
+   bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
+                 / "," / "-" / "." / "/" / ":" / "=" / "?"
+
+   Overall, the body of a multipart entity may be specified  as
+   follows:
+
+   multipart-body := preamble 1*encapsulation
+                  close-delimiter epilogue
+
+   encapsulation := delimiter body-part CRLF
+
+   delimiter := "--" boundary CRLF ; taken from Content-Type field.
+                                   ; There must be no space
+                                   ; between "--" and boundary.
+
+   close-delimiter := "--" boundary "--" CRLF ; Again, no space
+   by "--",
+
+   preamble := discard-text   ;  to  be  ignored upon receipt.
+
+   epilogue := discard-text   ;  to  be  ignored upon receipt.
+
+   discard-text := *(*text CRLF)
+
+   body-part := <"message" as defined in RFC 822,
+             with all header fields optional, and with the
+             specified delimiter not occurring anywhere in
+             the message body, either on a line by itself
+             or as a substring anywhere.  Note that the
+             semantics of a part differ from the semantics
+             of a message, as described in the text.>
+
+
+.S	MIME/Multipartの見本
+
+
+Date: Thu, 18 May 95 22:33:00 JST
+From: Elena@phys.titech.ac.jp (Elena Lologrigita)
+Subject: P R E S E N T
+To: fukachan@phys.titech.ac.jp
+MIME-Version: 1.0
+Content-type: multipart/mixed;
+	boundary="--Thu_18_May_95_22:32:56--"
+
+
+----Thu_18_May_95_22:32:56--
+Content-Type: message/rfc822
+
+Date: Thu, 18 May 95 21:45:17 JST
+From: fukachan@phys.titech.ac.jp
+Subject: あほうどり
+To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+「なんとなく いいかんじだな〜 そのほうがおもしろいし 」
+につきますね、この番組
+「明日に」でも「明日へ」でも「明日」でもない「あしたキックオフ」なんで
+すよ（う〜ん、なんとなくわかるが（笑））
+
+（ふ）：やっぱり、＃３、＃７、＃２３、＃２７、＃３２ ですか
+
+----Thu_18_May_95_22:32:56--
+Content-Type: message/rfc822
+
+Date: Thu, 18 May 95 22:00:29 JST
+From: Elena@phys.titech.ac.jp
+Subject: あしたキックオフ
+To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
+Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.jp>
+
+はまるとあの変な雰囲気から抜けられなくなります（笑）やっぱり 
+アミノテツロー の謎のマニアックな味？とでもいうのがこの番組が
+一番全壊^H開してますね。
+もちろん 脚本・シリーズ構成：山本優 あっての「フリーキック」です
+
+----Thu_18_May_95_22:32:56----
+
+
+.S	RFC934
+
+rfc934	"Proposed Standard for Message Encapsulation"
+
+mh の burstで複数の展開に展開できます。
+
+例：
+------- Forwarded Message
+
+From: Anna
+Subject: Mama told me
+
+やっぱり「あほうどり」ですね。シリーズの核心です。
+脚本：山本優	絵コンテ：アミノテツロー	演出：鈴木敏明
+
+------- Forwarded Message
+
+From: Elena
+Subject: Albatoros
+
+イングリッドは隼の妹という根も葉もあるような話が…（笑）
+
+------- Forwarded Message
+
+
+.S	RFC1153 digest 
+
+comp.sys.ibm.pc.digest とかでみるでしょ？あれです
+ＲＦＣは読んでもよくわかりません;_;
+
+例：
+Date: Sat, 20 May 95 01:33:50 JST
+From: Elena@phys.titech.ac.jp
+Subject: Freekick
+To: fukachan@phys.titech.ac.jp
+
+GODAI BBS DIGEST	Sat, 20 May 95	Volume 95: Issue 120
+
+Today's Topics:
+	エレナさんの特技は？ 
+
+------------------------------
+
+Date: Sat, 20 May 95 00:00:31 JST
+From: "Ken'ichi Fukamachi" <fukachan>
+Subject: 	エレナさんの特技は？ 
+X-Mail-Count: 01932
+
+エレナさんの特技は水撒きだってば(^^) 水撒き
+
+（ふ）「とんでもだめだよ、おにいちゃん。アルバトロスは風にのるんだ」
+
+------------------------------
+
+End of GODAI BBS Digest V95 Issue #120
+********************************
+
+
 .S	1153 のカスタマイズ
 
 
@@ -12,3 +230,5 @@
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
     $issue = &Rfc1153GetSeq($IssueSeq);
 
+
+.# $Id$
