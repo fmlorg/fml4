@@ -256,9 +256,7 @@ sub MTIError
     local(*e) = @_;
 
     if ($MTIErrorString) {
-	&Warn("FML Mail Traffic Monitor System Report $ML_FN", 
-	      "FML Mail Traffic Monitor System:\n\n$MTIErrorString\n".
-	      &WholeMail);
+	&MTIWarn(*e, $MTIErrorString);
 	1;
     }
     else {
@@ -266,6 +264,49 @@ sub MTIError
     }
 }
 
+sub MTIWarn
+{
+    local(*e, $s) = @_;
+    local($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+	  $atime,$mtime,$ctime,$blksize,$blocks);
+    local($cont, $s);
+
+    $MTI_WARN_LOG_FILE = $MTI_WARN_LOG_FILE || "$FP_VARLOG_DIR/mti.lastwarn";
+    $MTI_WARN_INTERVAL = $MTI_WARN_INTERVAL || 3600;
+
+    # already exists (some errors occured in the past)
+    if (-f $MTI_WARN_LOG_FILE) {
+	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+	 $atime,$mtime,$ctime,$blksize,$blocks)
+	    = stat($MTI_WARN_LOG_FILE);
+
+	# ignore until the next waning time.
+	if ((time - $mtime) < $MTI_WARN_INTERVAL) { 
+	    return 0;
+	}
+	elsif ((time - $mtime) < 2*$MTI_WARN_INTERVAL) { 
+	    $cont = 1;
+	    &Append2(time, $MTI_WARN_LOG_FILE);
+	}
+    }
+    # the first time
+    else {
+	&Append2(time, $MTI_WARN_LOG_FILE);
+    }
+
+    $s = "FML Mail Traffic Monitor System:\n\n".
+	"I detect a burst traffic (mail bomb?) occurs now.\n";
+    if ($cont) {
+	$s .= "Fml MTI rejects submission of articles continuously.\n";
+    }
+    else {
+	$s .= "Fml MTI rejects submission of articles hereafter.\n";
+    }
+    $s .= "The current rejected article:\n\n$MTIErrorString\n".
+	&WholeMail;
+
+    &Warn("FML Mail Traffic Monitor System Report $ML_FN", $s);
+}
 
 sub Date2UnixTime
 {
@@ -512,8 +553,8 @@ sub main'MTISimpleBomberP #';
 	    &Log("MTI[$$]: <$addr> must be a bomber;");
 	    &Log("MTI[$$]:".
 		 sprintf("src_cr=%2.4f >= dst_cr=%2.4f", $scr, $cr));
-	    $es .= "MTI[$$]: <$addr> must be a bomber,\n";
-	    $es .= "since the evaled costs are ".
+	    $es .= "   MTI[$$]: <$addr> must be a bomber,\n";
+	    $es .= "   since the evaled costs are ".
 		sprintf("src_cr=%2.4f >= dst_cr=%2.4f\n", $scr, $cr);
 	    &main'MTIHintOut(*e); #';
 	}
