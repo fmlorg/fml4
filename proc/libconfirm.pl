@@ -7,6 +7,8 @@
 
 sub ConfirmationModeInit
 {
+    &Log("Mode Confirmation") if $debug;
+
     # save the request and given identifier;
     # The concept of KEYWORD and ADDRESS suggeted (irc:-) by ando@iij-mc.co.jp
     $CONFIRMATION_KEYWORD = $CONFIRMATION_KEYWORD || "confirm";
@@ -22,7 +24,8 @@ sub ConfirmationModeInit
 
     # transfer main to Confirm NameSpace;
     for (CONFIRMATION_KEYWORD,
-	 CONFIRMATION_LIST,   
+	 CONFIRMATION_FILE,
+	 CONFIRMATION_LIST,
 	 CONFIRMATION_ADDRESS,
 	 CONFIRMATION_SUBSCRIBE, 
 	 CONFIRMATION_EXPIRE) {
@@ -36,8 +39,8 @@ sub ConfirmationModeInit
 sub Confirm
 {
     local(*e, $addr, $buffer) = @_;
-    local($id, $r, @r, %r, $time, $m);
-
+    local($id, $r, @r, %r, $time, $m, $gh_subject);
+    
     $e{"GH:Subject:"} = "Subscribe confirmation result $ML_FN";
 
     # current time
@@ -77,6 +80,7 @@ sub Confirm
     }
     elsif ($r eq 'confirmed') { # @r == identifier;
 	$r = &Confirm'IdCheck(*e, *r, $buffer);#';
+	undef $e{"GH:Subject:"};# subject: welcome file;
 	return $r;
     }
     else {
@@ -119,20 +123,20 @@ sub IdCheck
 sub BufferSyntax
 {
     local(*e, $buffer) = @_;
-    local($name);
+    local($name, $_);
 
     if ($buffer =~ /$CONFIRMATION_SUBSCRIBE\s+(\S+.*)/) { # require anything;
 	$name = $1;
     }
     else {
-	&Mesg(*e, "Syntax Error! Please use the following syntax");
-	&Mesg(*e, "   $CONFIRMATION_SUBSCRIBE Your-Name");
-	&Mesg(*e, "Please use not only E-Mail Address but Your Name");
-	&Mesg(*e, "for clearer identification in subscription.");
-	&Mesg(*e, "\n Example:");
-	&Mesg(*e, "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita");
-	&Mesg(*e, "\n PLEASE DO NOT USE E-Mail Address like a");
-	&Mesg(*e, "   $CONFIRMATION_SUBSCRIBE Elena\@baycity.pacific");
+	$_ .= "Syntax Error! Please use the following syntax\n";
+	$_ .= "\n   $CONFIRMATION_SUBSCRIBE Your-Name ";
+	$_ .= "(Name NOT E-Mail Address)\n";
+	$_ .= "\nwhere \"Your Name\" for clearer identification. ";
+	$_ .= "For example,\n\n";
+	$_ .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita";
+	&Mesg(*e, $_);
+	$e{'message:append:files'} = $CONFIRMATION_FILE;
 	return 0;
     }
 
@@ -140,6 +144,8 @@ sub BufferSyntax
 	&Mesg(*e, "Please use your name NOT E-Mail Address!");
 	&Mesg(*e, "For Example:");
 	&Mesg(*e, "\t\"$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\"");
+
+	$e{'message:append:files'} = $CONFIRMATION_FILE;
 	return 0;
     }
     else {
@@ -151,7 +157,8 @@ sub FirstTimeP
 {
     local(*r, $addr, $cur_time) = @_;
     local($time, $key_addr, $a, $id, $match, $addr_found);
-    
+    local($status);
+
     # init variables;
     $cur_time   = time;
     ($key_addr) = split(/\@/, $addr);
@@ -171,17 +178,17 @@ sub FirstTimeP
 	# already address is OK;
 	if ($time + ($CONFIRMATION_EXPIRE*3600) < $cur_time) {
 	    &Log("Confirmation [id=$id] is already Expired");
-	    return 'expired';
+	    $status = 'expired';
 	}
 	else {
 	    @r = ($time, $a, $id, $name);
-	    return 'confirmed';
+	    $status = 'confirmed';
 	}
     }
     close(FILE);
 
     @r = ($time, $a, $id, $name);
-    return 'first-time';
+    return ($status ? $status : 'first-time');
 }
 
 
