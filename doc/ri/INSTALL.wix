@@ -22,7 +22,7 @@
    細かい設定などはここを参照して下さい。
 .url http://www.fml.org/fml/Japanese/tutorial.html
 
-   HOME PAGE
+   ホームページ
 .url http://www.fml.org/fml/
 
 
@@ -69,7 +69,7 @@ versionの数字や作られるディレクトリについては適当に読み変えて下さい。
 
 .q
 ○ ソースを以下のURLからダウンロードする。
-% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
+% ftp ftp://ftp.fml.org/pub/fml/current/
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
 …略…
@@ -90,7 +90,7 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 % cd fml-3.0B-current-20000227
 
 ○ インストール開始。インストールする場所等の質問に答える。
-% make install RECOMMEND=yes
+% env RECOMMEND=yes perl makefml install
 …メッセージ省略…
 
 ○ fml自体のインストール自体は終了。
@@ -182,16 +182,16 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 .n	installation
 
 以下の例では /usr/local/fml に実行ファイル /var/spool/ml の下に各 ML 
-の directory (例: elena MLは/var/spool/ml/elena)などを作ることにします。
+のディレクトリ(例: elena MLは/var/spool/ml/elena)などを作ることにします。
 
 注意:	以下の例では /usr/local/fml と /var/spool/ml のオーナーは
-	仮想ユーザ fml (後述)になります。意味がわからないならとりあえ
-	ず、以下のような呪文を実行してから make install して下さい
+	仮想ユーザ fml (後述)になります。意味がわからないなら、
+	とりあえず以下のような呪文を実行してから make install して下さい
    例:
 	% su
-	ユーザ fml とグループ fml を作る (作り方はOSによって違う)
+	ユーザ fml とグループ fml を作る (作り方はOSによって異なります)
 	# groupadd fml
-	# useradd fml
+	# useradd -g fml fml
 
 	ディレクトリを作っておきます。
 	# mkdir /usr/local/fml /var/spool/ml
@@ -199,7 +199,7 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 	# chgrp fml /usr/local/fml /var/spool/ml
 
 
-.S	どのユーザで走らせるか？
+.S	どのユーザで fml を走らせるのか？
 =E.S	Introduction
 
 ML の運用を特権ユーザでやるべきではありません。一般ユーザ(例えばML専用
@@ -234,9 +234,8 @@ the os type. For example
 
 	% makefml -O i386-unknown-OSTYPE install
 
-OSによってはインストール情報が提供されていることもあります。チェッ
-クしてみて下さい。
-例:	Debian Linux	/usr/doc/fml/ の下
+OSによってはインストール情報が提供されていることもあります。チェックし
+てみて下さい。例えば Debian Linux なら /usr/doc/fml/ の下というように
 =E
 Some OS's provides a memo on installation. Please check your OS.
 e.g.	Debian Linux	/usr/doc/fml/
@@ -281,7 +280,7 @@ fml asks you on it in the first stage of installation.
 
 .if LANG == JAPANESE
 それぞれの項目の意味は次の通りです。いずれかを選択して下さい。
-権限が適当に設定されます。
+権限が適当に設定されます。現代では通常 personal です。
 
 personal 	自分一人しか使わない( ML 群のオーナーは自分だけ)場合。
 		自分のアカウントないし ML 専用のアカウント fml などを使います。
@@ -381,10 +380,10 @@ If you use "group" or "fmlserv" type, you may need MTA configuration
 change. For example, see 
 
 .if LANG == JAPANESE
-JPCERT の技術メモの中に中村素典先生による非常に良い sendmail 解説があ
+JPCERT/CC の技術メモの中に中村素典先生による非常に良い sendmail 解説があ
 るので困ったらここを読みましょう。
 
-.url http://www.jpcert.or.jp/tech/
+.url http://www.jpcert.or.jp/ed/
 
    O DontBlameSendmail=GroupWritableDirPathSafe
    O DontBlameSendmail=GroupWritableIncludeFileSafe
@@ -400,8 +399,9 @@ For example, see "O DontBlameSendmail=GroupWritableIncludeFileSafe" option.
 .S	インストーラ(makefml)を走らせる
 =E.S	Installing by makefml
 
-パッケージ(fml.*.tar.gzとか…)をひろげると fml-x.y.. という名前のディ
-レクトリができてfmlが壱セット入ってます。このディレクトリに移動して、
+配布されているパッケージ(fml.*.tar.gz など)を展開すると、tar.gz を除い
+た名前のディレクトリが作成されます。そこに、fml が壱セット入っています。
+このディレクトリに移動して、
 =E
 Unpack fml-something(usually revision).tar.gz, you can find
 fml-x.y-something directory. Change to the directory, you find a set
@@ -409,8 +409,8 @@ of the fml system. In this directory, please run
 
 	perl makefml install
 
-というコマンドを実行して下さい。そのマシンの上に FML システムをインス
-トールします。
+というコマンドを実行して下さい。
+そのマシンの上に fml システム一式をインストールします。
 =E
 to install the fml to your system.
 
@@ -418,13 +418,13 @@ to install the fml to your system.
 
 	env MKDOC=no perl makefml install
 
-として下さい。
-最近の UNIX なら env コマンドは普通あるはずです(POSIX にあるから)。
-
-
-補足1: perlのpathの書換えをします。これは通常自動探索ですが、もし特定
-のもの(例 /usr/local/bin/perl5)にしたいなら次のように環境変数を指定し
-て下さい。
+として下さい。最近の UNIX なら env コマンドは普通あるはずです(POSIX に
+あるから)。
+.q
+補足1: perl のパス名は通常自動探索です。
+もし、perl のパス名の書換えをしたい場合は、
+環境変数を指定して下さい。
+例えば、/usr/local/bin/perl5 にしたい場合は、
 =E
 Note 1: To replace perl path with some special path
 (e.g. /usr/local/bin/perl5), run
@@ -437,9 +437,13 @@ Note 2: fml locks ML's in installing. If you install under unlocking,
 run 
 
 	perl makefml -U install
+.~q
 
 
-この時に以下のような項目を聞いて来ます。
+.S	インストーラからの質問
+=E.S	query from installer
+
+makefml はインストール時に、以下のような項目を聞いて来ます。
 =E
 Here you see the following questions. Please answer them!
 
@@ -590,7 +594,7 @@ In this case, you change the input for "makefml" to the following
 
     Config Saved in [/usr/local/fml/.fml] 
 
-設定した directory 等の情報はこの場所に格納されます。次回以降 newml
+設定したディレクトリ等の情報はこの場所に格納されます。次回以降 newml
 (後述)する時などはいつもこの値が使われます。
 ＃つまり上で選んだ EXEC FILES DIRECTORYで指定した場所の下の .fml です。
 =E
@@ -601,17 +605,9 @@ configurations (e.g. config.ph, include).
 .S	CGIからmakefmlを呼び出す (4.0 new)
 =E.S	call makefml via CGI
 
-CGIでmakefmlを呼び出す設定の開発は現在進行形です。いまプレβくらい。
-currentにしかありません。
+インストールについてのメモはこちらを参照して下さい。
 
-インストールについてのメモはここにあります。
-
-.url http://www.fml.org/fml/examples/cgi-INSTALL.txt
-
-CGI関係のメモは以下のURLの最後の方にCGIの節があるのでそこからたどって
-みて下さい。
-
-.url http://www.fml.org/fml/examples/
+.url http://www.fml.org/fml/INSTALL_CGI/
 
 
 
@@ -625,7 +621,7 @@ CGI関係のメモは以下のURLの最後の方にCGIの節があるのでそこからたどって
 ことで行ないます。これがもっとも安全な方法でしょう。
 
 設定ファイルの変更は直接手で編集するか makefml (使い方は後述)というCUI
-で行なえます。
+で行なえます。fml 4.0 では CGI 経由でも行なえます。
 =E
 It is better for the ML maintainer to log in the fml running host to
 customize ML configurations and change ML member lists on the fml
@@ -670,27 +666,29 @@ so, you should edit cf or config.ph file directly => .ptr{config-file}
 Please see "help" file for commands usual users who can use.
 Please see "help-admin" file for ML maintainers commands.
 
-doc/Japanese/internal が内部構造、大まかな機能ごとに章だてされた『設計
-と実装』について書いてあるドキュメントです。
-=E
-Please see "doc/op.en" for fml internals, whole functions. This file
-is for "design and implementation".  This file contains whole
-variables you can customize. See "doc/op.en" for details of each
-variable.
-
+.if LANG == JAPANESE
 カスタマイズ変数一覧は インストール先(/usr/local/fml)/cf/MANIFEST を見
-て下さい。各変数の意味、実装上の理念、パラメータについての詳細は 
-doc/Japanese/internal の中をサーチして下さい。
+て下さい。各変数の意味、実装上の理念、パラメータについての詳細等は
+doc/Japanese/ のファイル群を適当なキーワードや変数名でサーチして見て下
+さい。最新版の HTML 版ドキュメント全体へのサーチは 以下のURLで可能です。
 
-いずれの場合でも分からない時はまず最初に doc/Japanese/ のファイル群を
-適当なキーワードや変数名でサーチして見て下さい。最新版のドキュメント全
-体へのサーチは http://www.fml.org/fml/search-j.html でできます。
+.url http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi
 
-=E
+doc/Japanese/
+.url http://www.fml.org/fml/Japanese/tutorial.html
+.fi
+.if LANG == ENGLISH
+Search
+.url	http://www.fml.org/fml/search-e.html 
+
+doc/Japanese/
+.url http://www.fml.org/fml/English/tutorial.html
+
 To find information, 
 1.	search keyword or variable name in the doc/op.en
 2.	use http://www.fml.org/fml/search-e.html 
 Check your system following doc/CHECK_LIST.en.
+.fi
 
 
 
@@ -802,8 +800,8 @@ Created samples are the following files:
 	crontab		vixie cron 用の定義ファイルの見本
 	deny		メンバー以外からの投稿に拒否の旨を伝える
 
-	fml.c		C Wrapper
-	config.h	fml.c のヘッダファイル
+	fmlwrapper.c	C Wrapper
+	fmlwrapper.h	fmlwrapper.c のヘッダファイル
 .fi
 .if LANG == ENGLISH
 [Files]
@@ -825,8 +823,8 @@ Created samples are the following files:
 	crontab		vixie cron 's sample
 	deny		deny post from not member
 
-	fml.c		C Wrapper
-	config.h	fml.c header file
+	fmlwrapper.c	C Wrapper
+	fmlwrapper.h	fmlwrapper.c header file
 .fi
 
 .S	 ML を削除する時
@@ -2592,18 +2590,18 @@ If you fails to use :include: in /etc/aliases, please use the
 C-wrapper program which may be required to be root-setuid.
 The example of the C-wrapper is 
 =S
-	/var/spool/ml/listname/fml.c 
+	/var/spool/ml/listname/fmlwrapper.c 
 =S
 Please compile and set it properly. I recommend you council the
 setting of the C-wrapper with the administrator of the
 machine since it requires a lot of attention.
 
-	/var/spool/ml/ML名/fml.c 
+	/var/spool/ml/ML名/fmlwrapper.c 
 
 というのが各 ML 用に作られているので compile して設定する必要がありま
 す。compile そのものはその場所で make fml で実行されますが、setuid は
-よ〜く注意して設定しないといけないので doc/Japanese/* の "fml.c の呼び方"
-あたりを参考に root の人とよく相談しながら設定して下さい。
+よ〜く注意して設定しないといけないので doc/Japanese/* の "fmlwrapper.c 
+の呼び方"あたりを参考に root の人とよく相談しながら設定して下さい。
 ＃注: 2.2 では cc のオプションに -DPOSIX がデフォルトでついています。
 
 FYI: OSによってはインストール情報が提供されていることもあります。チェッ
@@ -2617,7 +2615,6 @@ e.g.	Debian Linux	/usr/doc/fml/
 .C	コマンド用のアドレスについての捕捉 
 =E.C	Attention to the command address
 .l	post-ac
-.xref	post-or-command-addr
 
 .ptr{post-or-command-addr} で述べられている通りに
 =E
@@ -2782,6 +2779,14 @@ elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac} 参照。
 .C	セキュリティを強化する設定について
 =E.C	Security Consideration
 .l	secure-configure
+
+◯ デフォールトの cf を以下で説明する設定にすることもできます。
+   インストール時に、次の用にインストーラを実行して下さい。
+=E
+* run in the installation if you use recommended secure cf template.
+
+   % env RECOMMEND=yes perl makefml install
+
 
 ○ MLのHOMEで make secure とすると代表的な設定は有効になるように
    cf を書きかえます。現在付け加えられる設定は以下のようなものです。
