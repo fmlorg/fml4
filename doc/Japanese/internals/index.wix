@@ -13,3 +13,9 @@
 .include security.wix
 .include functions.wix
 .include porting.wix
+
+.appendix
+.include naming_convention.wix
+
+.C	some debug information
+.include loading.wix
