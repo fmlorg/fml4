@@ -502,7 +502,7 @@ sub DoSetMemberList
     if ((! $e{'mode:admin'}) &&
 	(! ($list = &MailListMemberP($curaddr)))) {
 	&Log("$cmd: Error: address '$curaddr' is not a member. STOP");
-	&Mesg(*e, $NULL, 'auth.should_be_from_member');
+	&Mesg(*e, $NULL, 'auth.should_be_from_member', $curaddr);
 	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
 	&Mesg(*e, "$cmd requires command from a member address.");
 	&Mesg(*e, "Please check your From: field.");
