@@ -15,6 +15,287 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 *** Please see RELEASE_NOTES for contributors and the contribution.
 .fi
 
+
+1999/07/09
+	s/auto_symmeric_regist/auto_subscribe/
+
+  2.2F	merge mci-window2 branch
+	more elabarate recipient list division
+
+	より賢いSMTP配送リスト分割
+	modulus 法はobsolete
+
+1999/07/05
+   2.2E#5
+   EnvelopeFilter: fix 'one line body' check bug
+
+	fix couting number of paragraph
+
+1999/07/02
+   handling attachemnt in multipart mail
+	split each multipart block to each file
+	We can handle text/plain, text/html, base64 encoded file ;-) only
+
+	HTMLジェネレータがMultipartの時は貼付ファイルをばらばらのURLに
+	分離してみようと試みるだよ
+
+1999/07/01
+   2.2E#1	[less momory hack] part I
+
+		fix a lot of main code (fml.pl)
+		completely rewrite multipart to html generator (libsynchtml.pl)
+		rewrite virus check code (libvirus.pl)
+
+	&ADD_CONTENTS_HANDER
+		apply patch of fml-support:6396 to fix  regexp
+
+1999/06/29
+   2.2E		less momory smtp IO library
+
+	2.2E: SMTPライブラリの改良
+
+1999/06/27
+	new handler: "auto_symmetric_regist" to resolve 
+	asymmetric treating of "members" and "actives" files.
+	It will be fml 3.0 future.
+
+1999/06/26
+   2.2D
+	2.2C: smtp hack (1/2) for pipelining
+	2.2D: auto_symmetric_regist
+
+1999/06/25
+   HTML generation: $AUTO_HTML_GEN
+
+	(a little) more smart memory use of base64decoding
+
+1999/06/23
+   EnvelopeFilter: modify 2-byte-codes filtering code (Japanese sepcific)
+
+	２バイトコード排除の仕方をちょっと変更する。
+	排除するパターン
+
+	   ^２バイト[A-Za-z]２文字以上連続$
+	   ^２バイト[A-Za-z]２文字以上連続 + スペース  + なんでも
+	   ^２バイト[A-Za-z]２文字以上連続 + ２バイトスペース + なんでも
+
+	mead: pick up Received: for <address> line for mail forwarding case
+
+1999/06/22
+	fix PIPELINING. 
+
+	add flow control of RCPT TO: rate.
+
+	PIPELINGの時突っ込んではちょっと受け取ってを
+	くりかえしていくように flow control のようなことをする。
+
+1999/06/18
+	VERPs: Variable Envelope Return Paths
+	See http://www.jp.qmail.org/qmaildoc/RFC/RFCVERP.html
+	If you enable $USE_VERP variable, fml uses VERPs.
+
+		$USE_VERP = 1; (default 0)
+
+1999/06/16
+	loop detection based on MD5 check sum of article
+
+	ループ対策その３
+	md5 チェックサムのキャッシュを持ち記事の重複をチェックする
+	(一応デフォールトではこの機能は有効にはしていない)
+
+	[config.ph]
+		$CHECK_MAILBODY_CKSUM = 1;
+
+	[makefml config]
+	   top menu => SECURITY_AND_FILTER => CHECK_MAILBODY_CKSUM => "y"
+	
+1999/06/14
+	make FEATURES document/web page from README
+
+	WWW.FML.ORGに FEATURES (特徴)だけのページを作る
+
+1999/06/08
+	fix command mode moderation
+
+	modify messages/Japanese/amctl (amctl.added)
+	to be more readable at a glance
+
+
+1999/06/07
+	bug fix html mail filtering code
+	新しいHTMLメール(なんていうんだ?)フィルタリングコード bug fix 版
+
+1999/06/04
+	fml-support:6245
+	contributed by <t-nakano@ccs.mt.nec.co.jp>.
+	import new html_mail(?) filtering code (beta test?).
+	Now we can set each policy e.g. permit/deny for each multipart block.
+
+	新しいHTMLメール(なんていうんだ?)フィルタリングコード
+	multipartの各ブロックごとに制御できる。
+	(Author: <t-nakano@ccs.mt.nec.co.jp>)
+
+	Example:
+
+ 	&ADD_CONTENT_HANDLER('multipart/*', 'text/plain', 'allow');
+ 	&ADD_CONTENT_HANDLER('multipart/*', '*/*',        'reject');
+ 	&ADD_CONTENT_HANDLER('text/plain',  '*/*',        'allow');
+ 	&ADD_CONTENT_HANDLER('!MIME',       '*/*',        'allow');
+
+1999/06/03
+	bug fix confirmation message
+	(resolve duplicated entry in doc/message/Japanese/)
+
+1999/05/31
+	chaddr: bug fix address similarity check
+
+	chaddr 時に chaddr A B で AとBが似ている場合にはアドレスの
+	チェックを厳しくしているがその厳しさ判定のバグFIX
+
+1999/05/30
+	bug fix Copy() permission preservation
+
+1999/05/19
+	start 2.2C
+
+	when $SMTP_SORT_DOMAIN is set.
+	split recipients list to some windows not divided by modulus 
+
+	$SMTP_SORT_DOMAIN の時は配送リストをmodulusで分割ではなく
+	連続したいくつかの領域にわける。
+
+1999/05/11
+	2.2.1 release
+
+1999/05/10
+	bug fix makefml:
+	   die() does not unlink lockfile NOT IN flock(2) case.
+
+	   link(2)を使うロックの異常終了の処理時のbug fix
+
+1999/05/08
+	bug fix html generator
+
+	HTML のbase64デコーダーの呼び出し方のバグFIX
+
+1999/05/06
+	fmlserv MesgLE
+
+1999/05/03
+	2.2B#6
+	Message Language Extension phase 3
+
+	&LogWEnv()まわりも日本語化。日本語化ひととおり終了！
+
+1999/05/02
+	2.2B#5
+
+	Message Language Extension phase 2
+
+	&Mesg()関係はとりあえず日本語(２か国語で表示)になった
+
+	インストール時のデフォールトを $LANGUAGE と同じにしておく
+	(つまりデフォールトでONにする)
+
+1999/04/27
+   $HTML_MAIL_DEFAULT_HANDLER	(obsolete $AGAINST_HTML_MAIL_HANDLER)
+
+	No, nameing is incorrect! Following fml-support: 05979
+	rename $AGAINST_HTML_MAIL_HANDLER $HTML_MAIL_DEFAULT_HANDLER
+	since $AGAINST_HTML_MAIL_HANDLER looks strange convention.
+
+1999/04/24
+   $AGAINST_HTML_MAIL_HANDLER
+
+1999/04/23
+   fix typo etc/makefml/menu.conf
+
+1999/04/21
+	fixes 'matome' command bugs (fixed but not in essential ;_;)
+
+1999/04/19
+	fml 2.2.1_BETA phase 
+
+	code freeze しました。fml 2.2.1_BETAは main trunk から分離し
+	２週間テストの予定です。その後リリースになります。
+
+	   2.2 -----> 2.2 A -----> 2.2B ----->	(main trunk)
+	                      |
+	                  2.2.1 BETA		(branch)
+	                      |
+	                  2.2.1 Release
+
+1999/04/18
+	add new search path for sitedef.ph site_init.ph
+
+		$ML_DIR/etc/fml/ (e.g. /var/spool/ml/etc/fml/sitedef.ph)
+
+	so the current search order is 
+
+		$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
+		$DIR			/var/spool/ml/elena/
+		$EXEC_DIR		/usr/local/fml/
+		PERL standard path	@INC
+
+1999/04/17
+	makefml update file:
+
+	update README for 2.2.1
+
+
+1999/04/15
+	etc/makefml/menu.conf: 	add option->USE_MEMBER_NAME
+
+1999/04/14
+	expire old articles: bug fix critical bug
+
+	chaddr: check oldaddr != newaddr
+
+1999/04/11
+	2.2A#49 chaddr confirmation
+
+	chaddr confirmation をmergeしました。
+
+	$CHADDR_AUTH_TYPE = 'confirmation'; 
+
+	を設定するとchaddrコマンドにconfirmation(確認)が要求されます
+	confirmationの場合は新旧アドレスどちらからでもchaddr可能です。
+
+	confirmation なしのchaddrは旧アドレスからのみchaddr可能です。
+	
+
+1999/04/10
+	bug fix FmlExitHook for library 
+
+1999/04/08
+	bug fix chaddr:
+		reject curaddr==newaddr case firstly
+
+1999/04/07
+	domain-translate: update list
+		fix file permission preservation
+
+1999/04/03
+	domain-translate: bug fix rules
+
+	doc/man/:  add nroff manuals
+
+1999/04/02
+	bug fix bin/more_secure_cf.pl variable substibution
+
+	bin/more_secure_cf.pl の変数置換のbug fix 
+
+	adjust doc/advisories/
+
+1999/04/01
+	(2.2A#42)
+
+	FML Advisory 1999-04: Melissa Familly Macro Virus
+
+	Melissaと同じ祖先を持つウィルス一族への対策について
+
+	libviruschk.pl: added
+
 1999/03/29
 	FML Advisory 1999-03: Melissa Macro Virus
 
