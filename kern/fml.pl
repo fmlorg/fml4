@@ -55,6 +55,7 @@ if ($USE_LOG_MAIL) { &use('logmail'); &MailCacheDir;}
 
 if (! &MailLoopP) {
     &CacheMessageId(*Envelope);
+    &CacheMailBodyCksum(*Envelope) if $CHECK_MAILBODY_CKSUM;
     &RunStartHooks;		# run hooks
     &ModeBifurcate(*Envelope);	# Main Procedure
 }
@@ -522,6 +523,7 @@ sub InitConfig
 
     ### misc 
     $LOG_MESSAGE_ID = $LOG_MESSAGE_ID || "$VARRUN_DIR/msgidcache";#important;
+    $LOG_MAILBODY_CKSUM = $LOG_MAILBODY_CKSUM || "$VARRUN_DIR/bodycksumcache";
     $REJECT_ADDR_LIST = $REJECT_ADDR_LIST || "$DIR/spamlist";
     $FML .= "[".(split(/\@/, $MAIL_LIST))[0]."]"; # For tracing Process Table
 
@@ -2199,6 +2201,17 @@ sub LogFileNewSyslog
     }
 }
 
+sub CacheTurnOver
+{
+    local($file, $size_limit) = @_;
+
+    if ((stat($file))[7] > $size_limit) {
+	&use('newsyslog');
+	&NewSyslog'TurnOverW0($file);#';
+	&Touch($file);
+    }
+}
+
 sub DBCtl
 {
     &use('db');
@@ -2222,10 +2235,39 @@ sub MailLoopP
 	    return 1;
 	}
     }
-    
-    &DupMessageIdP;
 
-    &DupMailBodyCKSUM;
+    if (&DupMessageIdP) { 
+	return 1;
+    }
+    # optional MD5 cksum
+    elsif ($CHECK_MAILBODY_CKSUM) { 
+	&use('cksum');
+	&CheckMailBodyCKSUM(*Envelope);
+    }
+}
+
+sub SearchDupKey
+{
+    local($key, $file) = @_;
+    local($i);
+
+    # 1. scan current and 
+    if (-f $file) { 
+	$status = &Lookup($key, $file);
+    }
+    return $status if $status;
+
+    # 2. scan all available caches
+    for $i (0 .. $NEWSYSLOG_MAX) {
+	if ($status) {
+	    last; # end if non null $status is returned.
+	}
+	elsif (-f "$file.$i") {
+	    $status = &Lookup($key, "$file.$i");
+	}
+    }
+
+    $status;
 }
 
 # If O.K., record the Message-Id to the file $LOG_MESSAGE_ID);
@@ -2235,7 +2277,7 @@ sub CacheMessageId
     local(*e, $msgid) = @_;
     local($id);
 
-    # checks
+    # canonicalize
     $id = $msgid || $e{'h:Message-Id:'};
     $id || (&Log("Invalid Message-Id:<$id>"), return $NULL);
     $id =~ s/[\<\>]//g;
@@ -2248,12 +2290,8 @@ sub CacheMessageId
 
     # Turn Over log file (against too big);
     # The default value is evaluated as "once per about 100 mails".
-    $MESSAGE_ID_CACHE_BUFSIZE = $MESSAGE_ID_CACHE_BUFSIZE || 60*100;
-    if ((stat($LOG_MESSAGE_ID))[7] > $MESSAGE_ID_CACHE_BUFSIZE) {
-	&use('newsyslog');
-	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
-	&Touch($LOG_MESSAGE_ID);
-    }
+    &CacheTurnOver($LOG_MESSAGE_ID, 
+		   $MESSAGE_ID_CACHE_BUFSIZE || 60*100);
 
     $CachedMessageID{$id} = 1;
     &Append2($id." \# pid=$$", $LOG_MESSAGE_ID);
@@ -2272,24 +2310,11 @@ sub DupMessageIdP
 
     &Debug("DupMessageIdP::($mid, $LOG_MESSAGE_ID)") if $debug;
 
-    # 1. scan current and 
-    if (-f $LOG_MESSAGE_ID) {
-	$status = &Lookup($mid, $LOG_MESSAGE_ID);
-    }
-
-    # 2. scan all available caches
-    for $i (0 .. $NEWSYSLOG_MAX) {
-	if ($status) {
-	    last; # end if non null $status is returned.
-	}
-	elsif (-f "$LOG_MESSAGE_ID.$i") {
-	    $status = &Lookup($mid, "$LOG_MESSAGE_ID.$i");
-	}
-    }
+    $status = &SearchDupKey($mid, $LOG_MESSAGE_ID);
 
     if ($status) {
 	&Debug("\tDupMessageIdP::(DUPLICATED == LOOPED)") if $debug;
-	local($s) = "Duplicated Message-ID is detected";
+	local($s) = "Duplicated Message-ID";
 	&Log("Loop Alert: $s");
 	&Warn("Loop Alert: $s $ML_FN", 
 	      "$s in <$MAIL_LIST>.\n\n".&WholeMail);
@@ -2299,11 +2324,6 @@ sub DupMessageIdP
 	&Debug("\tDupMessageIdP::(OK NOT LOOPED)") if $debug;
 	0;
     }
-}
-
-sub DupMailBodyCKSUM
-{
-    ;
 }
 
 # if the addr to reply is O.K., return value is 1;
