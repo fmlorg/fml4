@@ -1,15 +1,21 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
+#
+
+use vars qw($debug); 
+use vars qw($LastSmtpIOString);
+use vars qw($MIME_CONVERT_WHOLEMAIL);
+
 
 ### Mail Forwarding
 sub ForwardSeparatorBegin { "\n------- Forwarded Message\n\n";}
@@ -18,8 +24,7 @@ sub ForwardSeparatorEnd { "\n\n------- End of Forwarded Message\n";}
 sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
-    local($autoconv, $count, $boundary, $ml);
-    local($hdr_found) = 0;
+    my ($autoconv, $count, $ml, $hdr_found);
 
     $ml    = (split(/\@/, $MAIL_LIST))[0];
     $count = scalar(@f) > 1 ? 1 : 0;
@@ -55,7 +60,7 @@ sub DoSmtpFiles2Socket
 	$autoconv = $f{$f, 'autoconv'};
 
 	if ($count) { # append the separator if more than two files;
-	    $boundary = ('-' x 60)."\r\n";
+	    my $boundary = ('-' x 60)."\r\n";
 	    print S $boundary;
 	    print SMTPLOG $boundary;
 	}
@@ -115,8 +120,8 @@ sub DoSmtpFiles2Socket
 
 sub Copy2SocketFromHash
 {
-    local($key) = @_;
-    local($pp, $p, $maxlen, $len, $buf);
+    my ($key) = @_;
+    my ($pp, $p, $maxlen, $len, $buf);
 
     $pp     = 0;
     $maxlen = length($Envelope{$key});
