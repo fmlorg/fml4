@@ -359,6 +359,7 @@ sub Date2UnixTime
     # 
     if ($in =~ 
 	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
+	if ($debug_mti) { print STDERR "Date2UnixTime: Standard\n";}
 	$day   = $1;
 	$month = ($Month{$2} || $month) - 1;
 	$year  = $3 > 1900 ? $3 - 1900 : $3;
@@ -373,6 +374,7 @@ sub Date2UnixTime
     }
     elsif ($in =~ 
 	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
+	if ($debug_mti) { print STDERR "Date2UnixTime: Standard without \$sec\n";}
 	$day   = $1;
 	$month = ($Month{$2} || $month) - 1;
 	$year  = $3 > 1900 ? $3 - 1900 : $3;
@@ -385,8 +387,10 @@ sub Date2UnixTime
 	$shift_t = $7;
 	$shift_m = $8;
     }
-    # INVALID BUT MANY Only in Japan ???
-    elsif ($in =~ /(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\d{4})\s*/) {
+    # INVALID BUT MANY Only in Japan ??? e.g. "Apr 1 04:01:00 1999"
+    # no timezone case ... WHAT SHOULD WE DO ? ;_;
+    elsif ($in =~ /([A-Za-z]+)\s+(\d{1,2})\s+(\d+):(\d+):(\d+)\s+(\d{4})\s*/) {
+	if ($debug_mti) { print STDERR "Date2UnixTime: Japan specific?\n";}
 	$month = ($Month{$1} || $month) - 1;
 	$day   = $2;
 	$hour  = $3;
@@ -400,6 +404,7 @@ sub Date2UnixTime
 	$shift_m = '00';	   
     }
     elsif ($in =~ /\;\s*(\d{9,})\s*$/) {
+	if ($debug_mti) { print STDERR "Date2UnixTime: unixtime case\n";}
 	if (&ABS($1 - time) < 7*24*3600) { 
 	    return $1;
 	}
@@ -424,6 +429,11 @@ sub Date2UnixTime
 
     $shift = $shift_t + ($shift_m/60);
     $shift = ($pm eq '+' ? -1 : +1) * $shift;
+
+    if ($debug_mti) {
+	print STDERR 
+	    "timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600')\n";
+    }
 
     local($t);
     eval('$t = &timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600');
