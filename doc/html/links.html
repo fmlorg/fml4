@@ -37,18 +37,34 @@ The Design and Implementation of "fml" Mailing List Server
 links around mail systems
 </H3>
 <UL>
+	<P>
+	USENET FAQ collection
+	<A HREF=http://www.faqs.org/>
+	http://www.faqs.org/
+	</A>
+
 	<P> MTA
+	<LI>
+	<A HREF="http://www.postfix.org/">
+	http://www.postfix.org/ (it was called as "vmailer" in alpha phase)
+	</A>
+#ifdef JAPANESE
+	<BR>
+	(作者はあの tcp_wrapper の Wietse Venema;
+	以前はvmailerと呼ばれていたMTA)
+#else
+#endif
+
 	<LI>
 	<A HREF="http://www.sendmail.org/">
 	http://www.sendmail.org/
 	</A>
 	<BR>
-
 #ifdef JAPANESE
 	<A HREF=http://www.jpcert.or.jp/tech/98-0001/>
 	技術メモ - sendmail バージョンアップマニュアル -
 	</A>
-#else
+	<BR>
 #endif
 	<A HREF="http://www.sendmail.com/">
 	Sendmail Inc. (http://www.sendmail.com/)
@@ -66,17 +82,6 @@ links around mail systems
 	</A>
 
 	<LI>
-	<A HREF="http://www.postfix.org/">
-	http://www.postfix.org/ (vmailer)
-#ifdef JAPANESE
-	(作者はあの tcp_wrapper の Wietse Venema;
-	以前はvmailerと呼ばれていたMTA)
-#else
-#endif
-	</A>
-	<BR>
-
-	<LI>
 	<A HREF="http://www.qmail.org/">
 	http://www.qmail.org/
 	</A>
@@ -89,12 +94,12 @@ links around mail systems
 
 	<LI>
 	<A HREF="http://www.exim.org/">
-	http://www.exim.org/
+	exim (http://www.exim.org/)
 	</A>
 
 	<LI>
 	<A HREF="http://www.zmailer.org/">
-	http://www.zmailer.org/
+	zmailer (http://www.zmailer.org/)
 	</A>
 
 	<LI>
@@ -113,7 +118,7 @@ links around mail systems
 	</A>
 
 
-	<P> Arond Security
+	<P> Around Security
 	<LI>
 	<A HREF="http://www.cert.org/">
 	CERT 
