@@ -38,23 +38,23 @@ sub EmuHeader
 {
 $_ = qq#From $USER\@$DOMAINNAME $MailDate
 Date: $MailDate
-From: $FROM
+From: $From
 Message-Id: $MessageId
 To: (list suppressed)
-Subject: test mail
+Subject: $Subject
 #;
 
-$_ .= $ADD_STR if $ADD_STR;
+$_ .= $AddString if $AddString;
 "$_\n\n";
 }
 
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:");
+    &Getopts("dhg:f:s:");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
-    $GECOS = (getpwuid($<))[6] || $USER;
+    $Gecos = (getpwuid($<))[6] || $USER;
 
     # DNS AutoConfigure to set FQDN and DOMAINNAME; 
     local(@n, $hostname, $list);
@@ -69,14 +69,18 @@ sub Init
     $DOMAINNAME = $FQDN;
     $DOMAINNAME =~ s/^$hostname\.//;
 
+    # From: Field 
+    $From    = $opt_f || "$USER\@$DOMAINNAME";
+    $Subject = $opt_s || "test mail";
+
     if ($opt_g) {
-	$FROM = "$USER\@$DOMAINNAME (\"$GECOS\")";
+	$From = "$From (\"$Gecos\")";
     }
     else {
-	$FROM = "\"$GECOS\" <$USER\@$DOMAINNAME>";	
+	$From = "\"$Gecos\" <$From>";	
     }
 
-    $ADD_STR = shift @ARGV;
+    $AddString = shift @ARGV;
 }
 
 1;
