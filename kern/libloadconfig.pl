@@ -7,8 +7,12 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libloadconfig.pl,v 2.20 2001/08/21 09:10:18 fukachan Exp $
 #
+
+use vars qw($debug);
+use vars qw($SiteInitPath $SiteforcePath $LoadConfigurationDone);
+
 
 ##
 ## Example:
@@ -25,7 +29,7 @@
 #
 sub __LoadConfiguration
 {
-    local($space) = @_;
+    my ($space) = @_;
 
     if (! $DIR) {
 	print STDERR "ERROR: __LoadConfiguration: \$DIR is not defined\n";
@@ -130,8 +134,6 @@ sub SearchFileInLIBDIR
 # tricky
 sub LoadDummyMacros
 {
-    print STDERR "-- LoadDummyMacros\n" if $debug_30B;
-
     eval "sub GET_HEADER_FIELD_VALUE { 1;}";
     eval "sub GET_ORIGINAL_HEADER_FIELD_VALUE { 1;}";
     eval "sub SET_HEADER_FIELD_VALUE { 1;}";
@@ -258,9 +260,9 @@ sub STR2JIS { &JSTR($_[0], 'jis');}
 sub STR2EUC { &JSTR($_[0], 'euc');}
 sub JSTR
 {
-    local($s, $code) = @_;
+    my ($s, $code) = @_;
     require 'jcode.pl';
-    &jcode'convert(*s, $code || 'jis'); #';
+    &jcode'convert(\$s, $code || 'jis'); #';
     $s;
 } 
 
@@ -268,7 +270,7 @@ sub DEFINE_SUBJECT_TAG { &use('tagdef'); &SubjectTagDef($_[0]);}
 
 sub DEFINE_MAILER
 {
-    local($t) = @_;
+    my ($t) = @_;
     if ($t eq 'ipc' || $t eq 'prog') { 
 	$Envelope{'mci:mailer'} = $t;
     }
@@ -279,7 +281,7 @@ sub DEFINE_MAILER
 
 sub DEFINE_MODE
 { 
-    local($m) = @_;
+    my ($m) = @_;
     print STDERR "--DEFINE_MODE($m)\n" if $debug;
 
     $m =~ tr/A-Z/a-z/;
@@ -397,8 +399,8 @@ sub MOVE_FIELD
 # add Content Handler
 sub ADD_CONTENT_HANDLER
 {
-    local($bodytype, $parttype, $action) = @_;
-    local($type, $subtype, $xtype, $xsubtype);
+    my ($bodytype, $parttype, $action) = @_;
+    my ($type, $subtype, $xtype, $xsubtype);
    
     if ($bodytype eq '!MIME') {
 	$type = '!MIME';
@@ -414,7 +416,7 @@ sub ADD_CONTENT_HANDLER
 # XXX overwritten by %LocaProcedure and @DenyProcedure
 sub PERMIT_PROCEDURE
 {
-    local($proc) = @_;
+    my ($proc) = @_;
 
     push(@PermitProcedure, $proc);
 
@@ -436,20 +438,20 @@ sub PERMIT_PROCEDURE
 # XXX overwrite @PermitProcedure
 sub DENY_PROCEDURE
 {
-    local($proc) = @_;
+    my ($proc) = @_;
     $LocalProcedure{$proc} = 'ProcDeny';
 }
 
 # set up Hash %LocalProcedure
 sub DEFINE_PROCEDURE
 {
-    local($proc, $fp) = @_;
+    my ($proc, $fp) = @_;
     $LocalProcedure{$proc} = $fp;
 }
 
 sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL
 {
-    local($proc, $n) = @_;
+    my ($proc, $n) = @_;
     $LocalProcedure{"l#${proc}"} = $n;
 }
 
@@ -457,7 +459,7 @@ sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL
 # XXX overwritten by %LocaAdminProcedure and @DenyAdminProcedure
 sub PERMIT_ADMIN_PROCEDURE
 {
-    local($proc) = @_;
+    my ($proc) = @_;
     if ($proc !~ /^admin/) { $proc = "admin:proc";}
 
     push(@PermitAdminProcedure, $proc);
@@ -480,7 +482,7 @@ sub PERMIT_ADMIN_PROCEDURE
 # XXX overwrite @PermitAdminProcedure
 sub DENY_ADMIN_PROCEDURE
 {
-    local($proc) = @_;
+    my ($proc) = @_;
     if ($proc !~ /^admin/) { $proc = "admin:proc";}
     $LocalAdminProcedure{$proc} = 'ProcDeny';
 }
@@ -488,14 +490,14 @@ sub DENY_ADMIN_PROCEDURE
 # set up Hash %LocalAdminProcedure
 sub DEFINE_ADMIN_PROCEDURE
 {
-    local($proc, $fp) = @_;
+    my ($proc, $fp) = @_;
     if ($proc !~ /^admin/) { $proc = "admin:proc";}
     $LocalAdminProcedure{$proc} = $fp;
 }
 
 sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL
 {
-    local($proc, $n) = @_;
+    my ($proc, $n) = @_;
     if ($proc !~ /^admin/) { $proc = "admin:proc";}
     $LocalAdminProcedure{"l#${proc}"} = $n;
 }
