@@ -1,0 +1,574 @@
+.HTML_PRE
+	CHANGES from 3.0 to 3.0.1
+
+				深町 賢一
+=E
+				Ken'ichi Fukamachi
+
+.if LANG == JAPANESE
+3.0 stable branch の CHANGES についてのみ記しています。
+3.0 の CHANGES は http://www.fml.org/fml/ からたどってください。
+.fi
+.if LANG == ENGLISH
+This document logs CHANGES in fml stable branch.
+See http://www.fml.org/ for CHANGES in fml-current. 
+.fi
+
+2000/03/26
+
+	3.0.1 release
+
+2000/03/18
+
+  proc/librelayhack.pl (2.2-2.3):
+	fix relay.cf load bug
+
+2000/03/10
+
+ libtraffic.pl
+	apply fml-support:7627 (patch by Yuao Tanigawa)
+	import fix month update bug (libtraffic 1.3)
+
+2000/03/09
+
+   proc/libfml.pl
+	check mode:uip to validate input procedure 
+
+   kern/fml.pl:
+	CheckCurrentProc: fix to trap #\s+[\w\-]+ command string
+
+2000/03/08
+
+   kern/fml.pl (2.79-2.80): 
+	fix $REWRITE_TO == 1 behaviour to follow doc/op
+
+   envelope filter
+	check the first paragraphs or first 1024 bytes to count up the
+	number of paragraphs.
+
+[ 3.0.1_RC (release candidate)]
+
+   sbin/makefml (2.108-2.109): 
+	use _MAINTAINER_ in Conv()
+
+[ 3.0pl#32 == 3.0.1_BETA #21 ]
+
+   sbin/makefml (2.107-2.108): 
+	fix to reflect makefml install $CONFIG_DIR
+
+[ 3.0pl#31 == 3.0.1_BETA #20 ]
+
+   update/clean up documents	
+
+[ 3.0pl#30 == 3.0.1_BETA #19 ]
+
+   sbin/makefml
+	sync w/ HEAD (2.100-2.101): 
+	FixDefault: no operation.. if debug
+
+   doc/smm/header.wix
+	sync w/ HEAD (2.10-2.11): 
+	clean up $USE_ORIGINAL_MESSAGE_ID around
+
+[ 3.0pl#29 == 3.0.1_BETA #18 ]
+
+   makefml (2.68-2.69):
+	FixDefault: reflect real variable name not hier name
+
+   libexec/mead.pl
+	fix qmail VERPs analyze code
+
+   disable to reject "From: $MAIL_LIST" mail in default 
+
+	デフォールトでは From: $MAIL_LIST を弾かないように変更
+	3.0ではループチェックの一部としてこれをしているが
+	企業のサポートＭＬなどではまるのでとりあえず戻す
+
+	明示的にループチェックする場所を指定する関数を用意したので
+	したい人はチェックするとよいとおもう。
+
+   fix to enable $DEFAULT_RELAY_SERVER even if command reply 
+
+	libsmtp.pl      (2.30-2.31)
+	libsmtputils.pl (2.7-2.8)
+
+   dirty hack to resolve 'admin matome 0' sends articles out asap.
+   XXX we should resolve it to modify fml internals but anyway fix
+   XXX it by dirty hack.
+
+	libamctl.pl (2.24-2.25)
+
+[ 3.0pl#28 == 3.0.1_BETA #17 ]
+
+	changed to accpet From: $MAIL_LIST
+
+	3.0 のループチェックではじいている From: $MAIL_LIST のケース
+	をデフォールトでは適用しない
+
+[ 3.0pl#27 == 3.0.1_BETA #16 ]
+
+  sbin/makefml (2.65-2.66): 
+	resolve conflicts around doc-template
+
+	先日直したdoc-templateまわりの２つの修正がそれぞれは正しいが
+ 	２つあわさると互いに妨害してしまうbugの修正
+
+[ 3.0pl#26 == 3.0.1_BETA #15 ]
+
+  sbin/makefml: 2.64-2.65
+
+	PR in fml-support: 07167
+	CreateDocTemplate: bug fix %config by GetCF() again here since
+	SaveCF() resets this hash (why?).
+
+  sbin/makefml: 2.63-2.64
+	makefml config
+
+	suspect default value of y/n only when y-or-n/r everse-y-or-n
+	type
+
+	makefml config メニューのenbug fix (0 のところが n になる)
+	
+[ 3.0pl#25 == 3.0.1_BETA #14 ]
+
+   doc/
+	TODO: remove all but add ptr to http://www.fml.org/
+
+	TODOリストはURLだけに変更
+
+   proc/libmesgle.pl (1.8-1.9)
+	disable directory search
+	bug fix search key without .
+
+	$FML/messages/$LANGUAGE/ 内ディレクトリサーチをやめる
+	. のないキーワード(例: no_such_command)の時のバグを修正
+
+   proc/libsynchtml.pl:	(2.34-2.36)
+	automatci conversion of index.html in the case week or month
+
+   doc/messages/Japanese/kern:(1.5-1.6)
+	define no_such_admin_command to remove dup no_such_command
+
+[ 3.0pl#24 == 3.0.1_BETA #13 ]
+
+   sbin/makefml
+	use $DIR/cf value in 'y/n' case
+
+	y/nでメニューに答える時はcfにある値をデフォールト値として
+	メニューにだす
+
+   MesgLE
+	add some debug code
+
+[ 3.0pl#23 == 3.0.1_BETA #12 ]
+
+   doc/
+	clean up documents
+
+   etc/makefml/menu.conf: (1.18-1.19)
+	fix typo. PR 7165 from OGAWA Kunihiko
+
+[ 3.0pl#22 == 3.0.1_BETA #11 ]
+
+   bin/spool2html
+	sync w/ HEAD (2.11-2.12): fix GetMax()
+	patch from MURASHITA Takuya (fml-support: 7215)
+
+[ 3.0pl#21 == 3.0.1_BETA #10 ]
+
+   doc/html/
+	update url
+
+   sbin/makefml 
+	doc-template:
+	repl $ctladdr with %config value' sbin/makefml
+	PR from Teruyuki Morimura  fml-support:7244
+
+[ 3.0pl#20 == 3.0.1_BETA #9 ]
+
+   download.html
+	updated (sync with current)
+
+   sbin/makefml 
+	doc-template: fix import variable bug 2/2
+
+[ 3.0pl#19 == 3.0.1_BETA #8 ]
+
+   sbin/makefml 
+	doc-template: fix import variable bug 1/2
+
+   doc/advisories/year2000
+	fix url	
+
+[ 3.0pl#18 == 3.0.1_BETA #7 ]
+
+  url updates
+	clean up
+
+[ 3.0pl#17 == 3.0.1_BETA #6 ]
+
+   spool2html
+	fix bug no variable import from config.ph
+
+	config.ph の内容を反映しないのを修正
+
+
+[ 3.0pl#16 == 3.0.1_BETA #5 ]
+
+   一回リリースエンジニアリングの体制を仕切り直す。
+   いまは 3.0pl#16 は 3.0.1_BETA #5 と同じ意味
+   ＃以下 3.0.1 リリースまでしばらくこのconventionを使う
+
+   merge 3.0.1
+
+  fix miscellaneous y2k
+	PR by fml-support: 07189 OGAWA Kunihiko
+
+	bin/daily.pl
+	bin/gen_summary.pl
+	bin/spool2html.pl
+	contrib/utilities/packmbox.pl
+	contrib/localhack/release-1/vote/vote.pl
+
+	y2k?
+	  src/libcompat.pl
+	  src/libcompat_fml15.pl
+
+  bin/passwd.pl
+	PR fml-support: 07190 Masaaki Hirono
+	fix undefined function bug
+	see also libcrypt.pl change below
+
+  libcrypt.pl
+ 	fix SRand() call bug
+
+[ 3.0pl#15 ]
+
+  html generator
+	fix title to YYYY/MM/DD
+
+  update fwix.pl 
+	fix cross reference, so I've recreate ducuments.
+
+	ドキュメントのcross referenceのバグ修正
+
+  fix "traffic" command (traffic command module)
+	update "libtraffic.pl" to 1.2
+	fix y2k related (looks of report) bugs.
+	PR from Yuao Tanigawa (author).
+
+	trafficコマンドの見栄えが悪い(y2k;)のを修正
+	作者の谷川さんに最新版をもらったので入れ換え
+
+  update multipart.pl (multipart mail prefilter) to 1.3.1.2
+	PR from Yuao Tanigawa (author).
+
+	multipart フィルタを最新版にアップデート
+
+  smm/hack.wix (2.17-2.18)
+	update url. PR from Yuao Tanigawa
+
+  update to use jcode.pl-2.11
+	PR from Fumitoshi UKAI
+
+	jcode.pl を最新版に
+
+  synchtml.pl
+	sync w/ head 2.31-2.32
+	import critical bug fix: $ID here should be local
+
+  fml.pl
+	sync w/ head (2.73-2.74)
+	apply patch to fix scope bug from Teruyuki Morimura
+	<lisa@sandalwood.net>. fml-support: 07135
+
+[ 3.0pl#14 ]
+
+   DEFINE_FIELD_LOOP_CHECKED()
+   UNDEF_FIELD_LOOP_CHECKED()
+
+	Define DEFINE_FIELD_LOOP_CHECKED() and UNDEF_FIELD_LOOP_CHECKED() to
+	be controllable by maintainer since customer support mailing
+	list may need this function. Define default
+	DEFINE_FIELD_LOOP_CHECKED('from') to be 3.0.1 compatible with
+	3.0's "From: $MAIL_LIST" rejection.
+
+	3.0 では From: $MAIL_LIST はループの可能性を避けるために
+	拒否するようになっているが、サポートＭＬなどでは必要かも知れないので
+	管理者がその設定を解除できるようにする
+
+	update dummy {DEFINE,UNDEF}_FIELD_LOOP_CHECKED()
+		bin/Archive.pl
+		bin/spool2html.pl
+		libexec/fmlserv.pl
+		sbin/makefml
+
+[ 3.0pl#13 ]
+
+  member_name extension
+	cutoff approve password in logfile
+	(not appear in mail but logfile)
+
+	ログファイルに approve パスワードが残らないように
+
+  messages language extension (MesgLE)
+	fix amctl.added.caution controll
+
+	自動登録の時の welcome というファイルを返すが
+	その前につく警告文が MesgLE だけで制御できないのを修正
+	今は messages/Japanese/amctl だけでコントロールできる
+
+  moderator mode
+	try to check default $MODERATOR_MEMBER_LIST if not defined
+
+[ 3.0pl#12 ]
+
+   sbin/makefml
+	import a subset of 2.49-2.50: Conv() preserves file mode
+
+   sbin/install.sh
+	you can use both MKDOC=no and MKDOC=NO to disable doc installation.
+
+   proc/libmoderated.pl (2.10-2.11)
+
+	missing Japanese message
+	apply patch by Satoshi Tatsuoka <satoshi@softagency.co.jp>
+
+   sbin/makefml	(2.44-2.45)
+	validate config.guess existence
+
+[ 3.0pl#11 ]
+
+   proc/libra.pl
+	fix typo
+	by <yuao@infonia.ne.jp> fml-support:06999 
+
+   kenn/fml.pl
+	if handler == ignore in command mode, ignore all requests
+
+   bin/spool2html.pl
+	define $Envelope{'mode:dist'} to avoid libsynchtml check
+
+	SyncHtml()の新しいチェックにひっかかる
+
+   etc/makefml/Makefile (1.16-1.17)
+	validate config.ph.new before mv .ph.new to .ph
+
+[ 3.0pl#10 ]
+
+   bin/fwix.pl
+	fix IndexExpand() avoid to match unexpected '+' string
+
+   doc/
+	add simple installa memo on qmail
+	http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+
+   sbin/makefml (2.43-2.44)
+	define dummy DEFINE_FIELD_PAT_TO_REJECT()
+
+[ 3.0pl#9 ] 
+
+  fix qmail examples (qmail/users/assign)
+
+[ 3.0pl#8 ] 
+
+   fix "admin remove-article" command bug with html creation mode
+
+	XXX should not run &SyncHtml() under command mode
+
+	HTMLスプールを生成することになっている場合に"admin remove-article"
+	command を使うとその命令を送ったメールもついでに再生成されてしまうbug
+
+[ 3.0pl#7 ] 
+
+   etc/makefml/dot-qmail-default 
+
+	s/USE_QMAIL_EXTENSION/USE_DOT_QMAIL_EXT/
+	$USE_QMAIL_EXTENSION is renamed to $USE_DOT_QMAIL_EXT.
+
+	$USE_QMAIL_EXTENSION は $USE_DOT_QMAIL_EXT に改名されている。
+
+   proc/libexpire.pl 
+	expire spooled articles based on mtime not ctime
+	fml-support: 6867
+
+	なぜかexpireのコードのところ一箇所でだけ判定の基準が異なることを修正
+
+  libexec/mead.pl
+	trap postfix error messages (true?)
+	trap more qmail error messages (sync w/ HEAD 1.8-1.9)
+
+  libexec/mead.pl, doc/smm/mead.wix
+	add missing options mead.pl help shows
+
+[ 3.0pl#6 ] 
+
+  clean up/changes documents mainly
+
+  doc/examples/
+	Please refer www.fml.org for current tutorial
+
+  doc/
+	regenerate HTML documents since fwix.pl converter changed.
+
+  bin/fwix.pl
+	not expand .ptr with <PRE>
+
+
+[ 3.0pl#5 ]
+
+  sbin/makefml
+	PR: fml-support:06764
+	fix "auto_asymmetic_regist" behaviour
+	which affects libexec/mead.pl remove user process ;-)
+
+  doc/ri/INSTALL.wix
+	 add note on "makefml -U install" (unlock mode)
+
+  examples/fml-install.wix
+	unify makefml syntax example to be easy for beginners
+
+  proc/libra.pl
+	fix file validation check" in the case regexp-like directory name
+
+  update (sync with HEAD (cvs main trunk))
+	INSTALL_on_MacOS_X_Server
+
+
+[ 3.0pl#4 ]
+
+  etc/makefml/include-mead
+	fix spelling 
+
+  doc/html/index.html
+	add ptr to Mac OS X Server
+
+  cf/MANIFEST
+	clean up English ;-)
+	sync with fml 3.0 etc/makefml/cf
+
+  cf/MANIFEST.Japanese
+	added. Japanese description for variables
+
+
+[ 3.0pl#3 ]
+
+   add INSTALLATION NOTES on MacOS X Server
+
+   proc/libsynchtml.pl 
+	fix dup check of htdocs/index.html
+
+   proc/libmesgle.pl 
+	&Mesg() repl may has invalid input
+	check the input and wrap repl in euc and back to jis
+
+   sbin/makefml
+	modify jperl check code
+
+   fix distribution package lacks some plaintext
+	distribute all INSTALL* (plaintext) 
+
+   proc/libra.pl
+	remove-article always checks spool and archive (tar.gz)
+
+   doc/ri/README.wix
+   doc/ri/INSTALL.wix
+	fix 2 bytes "-" statements (Japanese specific)
+
+[ 3.0pl#2 ]
+
+   doc/ri/
+   doc/examples/
+
+	sync with cvs main-trunk
+
+   libmember_name.pl
+
+	correct handling of "apporove PASSWORD name ..." case
+
+[ 3.0pl#1 ]
+
+   cf/config
+
+	TZone cannot accpet -0800 style.
+
+   doc/examples/index*html
+
+	remove fml.css stylesheet definition since fml.css does not exist
+
+   doc/ri/INSTALL.wix
+
+	add how to pass perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+   sbin/makefml
+
+	fix perl path in "make install"
+	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+	add COPY_FIELD() to avoid evaluation of config.ph loading
+
+
+======================================================================
+
+*** 3.0.1 preparation notes ***
+
+[3.0.1_BETA#4]
+
+  html generator
+	fix title to YYYY/MM/DD
+
+[3.0.1_BETA#3]
+
+  update fwix.pl 
+	fix cross reference, so I've recreate ducuments.
+
+	ドキュメントのcross referenceのバグ修正
+
+[3.0.1_BETA#2]
+
+  fix "traffic" command (traffic command module)
+	update "libtraffic.pl" to 1.2
+	fix y2k related (looks of report) bugs.
+	PR from Yuao Tanigawa (author).
+
+	trafficコマンドの見栄えが悪い(y2k;)のを修正
+	作者の谷川さんに最新版をもらったので入れ換え
+
+  update multipart.pl (multipart mail prefilter) to 1.3.1.2
+	PR from Yuao Tanigawa (author).
+
+	multipart フィルタを最新版にアップデート
+
+  smm/hack.wix (2.17-2.18)
+	update url. PR from Yuao Tanigawa
+
+  update to use jcode.pl-2.11
+	PR from Fumitoshi UKAI
+
+	jcode.pl を最新版に
+
+[3.0.1_BETA#1]
+
+   libsynchtml.pl
+	sync w/ head 2.31-2.32
+	import critical bug fix: $ID here should be local
+
+   fml.pl
+	sync w/ head (2.73-2.74)
+	apply patch to fix scope bug from Teruyuki Morimura
+	<lisa@sandalwood.net>. fml-support: 07135
+
+
+
+$Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+
+.~HTML_PRE
