@@ -1,3 +1,12 @@
+*** CAUTION ***
+
+  This master site is moved to
+
+     http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/perl.html
+
+***
+
+
 NetBSD				none
 
 OpenBSD				?
