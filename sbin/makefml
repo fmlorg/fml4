@@ -2527,7 +2527,9 @@ sub QmailSetUp
 
     # /var/qmail/users/assign
     ($GroupWritable eq 'fmlserv') ? umask(002) : umask(022);
-    if (! &Grep("\\+:$USER", "$qmail_users_dir/assign")) {
+
+    # if (! &Grep("\\+:$USER", "$qmail_users_dir/assign")) {
+    {
 	print STDERR "\t$qmail_users_dir/assign\n";
 
 	local($uid, $gid);
@@ -2544,11 +2546,17 @@ sub QmailSetUp
 	    next if /^\.$/;
 	    print OUT $_;
 	}
+	close(IN);
 
-	print OUT "+:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	if (! &Grep('\+:', "$qmail_users_dir/assign")) {
+	    print OUT "+:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	}
+
+	if (! &Grep("\\+$ml\\-:", "$qmail_users_dir/assign")) {
+	    print OUT "+$ml-:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	}
 	print OUT ".\n";
 	close(OUT);
-	close(IN);
 
 	rename("$qmail_users_dir/assign.new", "$qmail_users_dir/assign")
 	    || &Log("cannot rename assign.new assign");
