@@ -120,6 +120,7 @@ ${TMP_DIR}/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 # special import
 __TUTORIAL_DOC_TARGETS__ += ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
 ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt: databases/TOY_MODEL.Japanese
+	test -d ${WORK_TUTORIAL_DIR}/examples || ${MKDIR} ${WORK_TUTORIAL_DIR}/examples
 	${JCONV} databases/TOY_MODEL.Japanese \
 	   > ${WORK_TUTORIAL_DIR}/examples/DATABASE_TOY_MODEL.txt
 
