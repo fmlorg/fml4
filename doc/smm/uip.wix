@@ -562,7 +562,9 @@ stardate.el です。
 .k	bin/RecreateConfig.pl)
 .k	RecreateConfig.pl
 
-fml 1.x 用なので OBSOLETE です。
+fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
+
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp

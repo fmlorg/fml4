@@ -19,26 +19,23 @@ config.ph の例：
 ＃ Backward Compatibility として
 ＃ 内部で @ARCHIVE_DIR に代入してるので、どちらでも動きます
 
-以下
+以下 記事１００個ずつ、つまり
+
 	spool/1〜100
 
-をtar して gzip かけて
+を tar して gzip かけて
 
 	var/archive/100.tar.gz 
 
 と作っているとしましょう
 
 これを 次のように fml.pl は解釈します。
-
-
-.S	$DEFAULT_ARCHIVE_UNIT
-.k	$DEFAULT_ARCHIVE_UNIT
-
 上に出てくる 100 個という数字は
 
 	$DEFAULT_ARCHIVE_UNIT
+.k	$DEFAULT_ARCHIVE_UNIT
 
-でコントロールできます。デフォールトが 100 です。
+でコントロールできます。デフォールトは 100 です。
 
 
 .S	"# get 1 " と archive
