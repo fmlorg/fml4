@@ -212,6 +212,8 @@ sub InitMakeFml
 	if ($ARGV[0] eq 'install' && $ARGV[1]) {
 	    $CONFIG_DIR = "$ARGV[1]/.fml" if -d "$ARGV[1]/.fml";
 	}
+
+	if ($CONFIG_DIR) { $AutoLoad = 1;}
     }
 
 
