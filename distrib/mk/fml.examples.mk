@@ -3,8 +3,17 @@ HTML_FILTER = $(FML)/bin/fwix.pl -m htmlconv
 
 
 ### fundamental rules
+.for dir in ${DOC_EXAMPLES_SUBDIR}
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${dir}
 
-.for file in ${DOC_EXAMPLE_SOURCES}
+${WORK_EXAMPLES_DIR}/${dir}:
+	test -d ${WORK_EXAMPLES_DIR}/${dir} ||\
+	   ${MKDIR} ${WORK_EXAMPLES_DIR}/${dir}
+
+.endfor
+
+
+.for file in ${DOC_EXAMPLES_SOURCES}
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}-e.html
 
@@ -31,6 +40,7 @@ ${WORK_EXAMPLES_DIR}/${file}.txt: doc/examples/${file}.txt
 
 ### doc/examples/index{,-e}.html and doc/examples/*html
 __HTML_EXAMPLES_HTML__ += index index-e
+__HTML_EXAMPLES_HTML__ += examples examples-e
 __HTML_EXAMPLES_HTML__ += ptr-customize-header
 
 .for file in ${__HTML_EXAMPLES_HTML__}
