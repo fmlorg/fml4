@@ -620,6 +620,7 @@ sub SetHashDefaults
 		    # admin command (sub)
 		    'on',     'do_on',
 		    'off',    'do_off',
+		    'skip',   'do_off',
 		    'chaddr', 'do_chaddr',
 		    'matome', 'do_matome',
 		    'digest', 'do_digest',
@@ -2180,7 +2181,7 @@ sub CtlAddrList
 	    elsif ($proc eq 'on') {
 		s/^\#\s*($addr)/$1/;
 	    }
-	    elsif ($proc eq 'off') {
+	    elsif ($proc eq 'off' || $proc eq 'skip') {
 		s/^($addr)/\# $1/i;
 	    }
 	    elsif ($proc eq 'chaddr') {
