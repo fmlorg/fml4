@@ -3,6 +3,36 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/04
+
+   proc/libfml.pl
+	define MAXLEN_COMMAND_INPUT
+	The maximum length for each command. 128 bytes by default.
+
+   kern/fml
+	add mead as a loop check target.
+	LoopBackWarn(): check mead@$DOMAINNAME against mail loop
+
+   makefml mead
+	set up /var/spool/ml/mead for mead working directory
+	
+   add "makefml recollect-aliases"
+	% cat /var/spool/ml/*/aliases > /var/spool/ml/etc/aliases
+	based on "UENO Kazuaki" <kazu@a-u.net> (fml-support: 08834)
+
+	/var/spool/ml/etc/aliases を再生成するコマンド
+
+   var/log/_smtplog.$i
+	always log SMTP between fml and MTA to var/log/_smtplog.$i
+	where $i is 0 .. 7 (modulo 8).
+	This is default configuration now for 4.0 release.
+	Configuration:
+	$USE_SMTP_LOG_ROTATE toggle flag (defualt 1)
+	$NUM_SMTP_LOG_ROTATE modulo, the number of files (default 8)
+
+	つねに _smtplog.数字 のログを残すようにしました。
+	でもディスクをくうのでデフォールトは 8 です。
+
 2000/10/01
 
   mead.pl
