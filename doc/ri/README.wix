@@ -1,4 +1,7 @@
 .HTML_PRE
+
+	fml 4.0 メーリングリスト サーバ/マネージャ
+=E
 	fml 4.0 mailing list server/manager package
 
 .if LANG == JAPANESE
@@ -69,6 +72,14 @@ in Japan from 1993 to 2000. fml contains
    CUI installer and configuration program
    other utility programs
 .fi
+
+.#
+.# ----------- 新バージョンのまとめについて --------------
+.#
+fml 4.0 の(目に見える)主な新機能は CGI インターフェイス、データベース
+アクセス(リレーショナルデータベース、LDAP)などです。
+見えない変化としては初期化コードなどです。
+
 
 fml のデザインの根幹をなす思想は
 『趣味やコンピュータ環境は人それぞれであり、それを尊重すること』です。
@@ -352,13 +363,13 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-   postfix 19991231-pl04 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
+   postfix 19991231-pl11 + perl 5.00503 on NetBSD 1.4Y
 
 ○ テスト環境: fml.org の実運用テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
-   postfix + perl 5.004_04 on NetBSD/sparc (netbsd-1-4 branch)
+   postfix 19991231-pl11 + perl 5.004_04 on NetBSD/sparc (netbsd-1-4 branch)
 
 さらに配送系は複数のMTAを使った並列配送実験をしています(通称MTAみくじ
 です ^^;)。最近は一旦２つに減っています。その内増えるでしょう:)
@@ -377,11 +388,11 @@ delivery (as both an experiment and a demonstration :-).
 
 
 
-.C	Version Up と互換性(Compatibility)
+.C	バージョンアップと互換性について
 =E.C	Version Up and Compatibility
 .l	compatibility
 
-.S	Version Up について
+.S	バージョンアップについて
 =E.S	On Version Up
 
 ソースを広げてインストールと同様に makefml install (INSTALL というファ
@@ -420,7 +431,9 @@ config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 らです。ただ、昔できたことは必ず今の実装でもできるので doc/Japanese/ 
 を参照してみて下さい。
 
-.S	Changes
+
+.S	変更点について
+=E.S	Changes
 
 CHANGES と RELEASE_NOTES を参照のこと。
 =E
@@ -454,21 +467,6 @@ Initiative Japan Inc.). "ftp.iij.ad.jp" is just a ftp server as the
 fml master distribution server.
 
 よろしくお願いします。
-
-
-
-.C	Acknowledgments 
-
-I thank a lot of people for valuable comments, suggestions, bug
-reports, contributions, fixes and patches both on fml-support ML and
-in private communication. I distribute some contributed codes as a
-part of fml distribution. I refer each contribution in RELEASE_NOTES.
-
-I greatly appreciate softwares developed and distributed under freedom
-of programming. For convenience I bundle to my package, config.guess
-(GNU autoconf), a few useful codes jcode.pl and mime_pls, which you
-can obtain on anonymous ftp's. 4.4BSD has been a start point to study
-several aspects of OS details. 
 
 
 $Id$
@@ -526,3 +524,17 @@ $Id$
 .# 1. Plural MTA's for delivery are available to accelerate it.
 .# .fi
 .# 
+.# 
+.# 
+.# .C	Acknowledgments 
+.# 
+.# I thank a lot of people for valuable comments, suggestions, bug
+.# reports, contributions, fixes and patches both on fml-support ML and
+.# in private communication. I distribute some contributed codes as a
+.# part of fml distribution. I refer each contribution in RELEASE_NOTES.
+.# 
+.# I greatly appreciate softwares developed and distributed under freedom
+.# of programming. For convenience I bundle to my package, config.guess
+.# (GNU autoconf), a few useful codes jcode.pl and mime_pls, which you
+.# can obtain on anonymous ftp's. 4.4BSD has been a start point to study
+.# several aspects of OS details. 

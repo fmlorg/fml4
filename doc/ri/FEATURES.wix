@@ -1,19 +1,23 @@
 .HTML_PRE
+
+   ---------------------------------------------------------------
 .if LANG == JAPANESE
-基本的な設計方針は以下のように表現できるでしょう。
-   1. 可能な限りユーザおよび  ML 管理者 にとっての自由度をあげる
-   2. 「明示的な指定があって初めて機能は増やすべきである」
-	および
-      「管理者のルーチンワークを少しでも減らす」間の妥協をさがす
+   基本的な設計方針は以下のように表現できるでしょう。
+      1. 可能な限りユーザおよび  ML 管理者 にとっての自由度をあげる
+      2. 「明示的な指定があって初めて機能は増やすべきである」
+          および
+         「管理者のルーチンワークを少しでも減らす」間の妥協をさがす
 .fi
 .if LANG == ENGLISH
-I think that FML should provide "the degrees of freedom for users and
-maintainers as could as possible" and decreases the routine work of
-administrators. Fml configuration in default assumes manual
-operations, so e.g. manually add a member to the ML.  If you use
-extensions e.g. automatic registration/subscribe remote administration, 
-you should enable functions explicitly.
+   I think that FML should provide "the degrees of freedom for users
+   and maintainers as could as possible" and decreases the routine
+   work of administrators. Fml configuration in default assumes manual
+   operations, so e.g. manually add a member to the ML.  If you use
+   extensions e.g. automatic registration/subscribe remote
+   administration, you should enable functions explicitly.
 .fi
+   ---------------------------------------------------------------
+
 
 [インストール]
 =E
@@ -320,8 +324,8 @@ Please use the latest version since programs which contact external
 worlds should be always latest e.g. for security, evolution
 environments, ... Hence it is better to do hacks for latest version.
 
-.~HTML_PRE
 
+.~HTML_PRE
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

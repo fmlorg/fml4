@@ -17,80 +17,90 @@ Please see INSTALL for the install flow.
 
 
 .C	必要なソフトウエア
+=E.C	Required Softwares
 
 
 .S	必要なソフトウエア
+=E.S	Required Softwares
 
-   perl 5 の NT version
+   perl 5 (の NT version)
 	うまく動くバージョンを見つけられれば吉です。
-	5.6.0 では今一つうまくいかなかったという報告もあります。
-
-	最近の中では 522 なら動いたという例があるので、5.6.0 がだめなら
-	build 522 を使ってみて下さい。
+	5.6.0 では今一つうまくいかなかったという報告もあり、また
+	5.6.0 ではなく 522 なら動いたという事例もあります。
+	5.6.0 がうまく動かない場合は build 522 を試してみて下さい。
 
 .url	http://www.activestate.com/download/ActivePerl/APi522e.exe
 .url	http://www.activestate.com/Products/ActivePerl/Download.html
 
    メールサーバ
+	２つのタイプがあります(後述)。
+	プログラムが使えるか否かを確認して下さい。
+	それによってタイプが異なります。
 
-.S	NT 用の fml 
 
-fml に NT 用のものが特にあるわけではなく、標準ディストリビューションの
+.S	NT 用の fml ?
+=E.S	fml for NT ?
+
+ fml に NT 用のものが特にあるわけではなく、標準ディストリビューションの
 中に NT 用は含まれています。
 
 
-.S	MTAごとのメモ
+.S	メールサーバごとのメモ
+=E.S	memo for each MTA
 
-pop version はあまり関係ないので省略します。↓確かこれ以外にもあったよ
-うな気もしなくもないんですが、「これで動いてるぞ」というのがあったら教
-えて下さい。
+NT 用のメールサーバは大抵配送システム兼POPサーバです。そのため、POP バー
+ジョンはどんなメールサーバでもうごくでしょう。そのため省略します。
 
-◯ 	MetaInfo Sendmail 2.5 (?)
+プログラムを動かすことができた( つまりプログラム fml を動かすことがで
+きた )と確認できたものは以下の通りです。確かこれ以外にもあったような気
+もしなくもないんですが、「これで動いてるぞ」というのがあったら教えて下
+さい。
 
-ターゲットだったもの。
+* 	MetaInfo Sendmail 2.5 (?)
+
 
 3.0 ? (Sendmail - Products - NT Routing)
 .url http://www2.sendmail.com/products/routing/nt/
 
 
-◯ IMail Server GOld
-References: fml-support: 7947 7954 7967 
+* IMail Server GOld
+References: fml -support: 7947 7954 7967 
 
 	OS          Windows NT4.0
 	Mail Server IMail Server Gold 4.1J
 	Perl        ActivePerl 522
-	FML         FML 3.0.1
+	fml         fml 3.0.1
 
 	開発元: IPSWITCH
 		日本語版はクボタグラフィックス<http://wwwcsoft.kgt.co.jp/>
 
-[解説]
+   [解説]
 
-プログラムエイリアスという機能は「そのアドレスにメールが届いたらプログ
-ラムを起動する」そうでこれを使うと fml を起動できます。aliases ファイ
-ルの編集は必要なくなります。
+   プログラムエイリアスという機能は「そのアドレスにメールが届いたらプ
+   ログラムを起動する」そうでこれを使うと fml を起動できます。aliases 
+   ファイルの編集は必要なくなります。
 
-elena  ML ならプログラムエイリアスに(GUIで選んで)
+   elena  ML ならプログラムエイリアスに(GUIで選んで)
 
-  C:\\fml\ml\elena\include.cmd <
+     C:\\ fml \ml\elena\include.cmd <
 
-と書けばいいそうです。こうすると
+   と書けばいいそうです。こうすると
 
-  C:\\fml\ml\elena\include.cmd < 一時ファイル(STDIN相当)
+     C:\\ fml \ml\elena\include.cmd < 一時ファイル(STDIN相当)
 
-という形で fml (include.cmd が呼びます)を起動するらしいです。
-＃ 4.0J ユーザーズガイドの P.64 にちょっとだけかいてありますね
+   という形で fml (include.cmd が呼びます)を起動するらしいです。
+   ＃ 4.0J ユーザーズガイドの P.64 にちょっとだけかいてありますね
 
 
-
-.S	テスト環境
+.S	ケーススタディ: テスト環境
+=E.S	Case Study: test environment
 
 参考: 	テスト環境
 =E
 NOTE:	Required and Test Environment 
 
-テストには activestate の ntperl を使っています。それ以外の perl ports
-for NT で動くのかどうかは未確認です。動いたら教えて下さい:)
+テストには activestate.com の ntperl を使っています。それ以外の NT 用 
+で動くのかどうかは未確認です。動いたらぜひ教えて下さい
 =E
 You need MTA and ntperl. I tested fml master source using ntperl by
 activestate.com. Other perl ports to NT4 exist but I've not tested
@@ -110,25 +120,14 @@ My test environment is
 
 
 
-.C	FML NT Version について
-=E.C	on FML NT Version
+.C	fml NT バージョンのしくみ
+=E.C	how fml NT Version work 
 
-.S	Introduction
 
-マルチプラットホーム環境を前提としているFMLシステムにとってNT ports は
-一つのヴァリエーションにしか過ぎません。
-注意: なお最初に言っておきたいと思いますが、NT自体そしてNT上での
-sendmail, bind, perl自体についてはよく知らないので聞かれても困ります。
-各売り物/share wareなどについては直接販売元に聞いて下さい。
-=E
-fml runs on a lot of operating systems, so fml on NT4 is just one of
-them. But NT4 differs a lot from UNIX, so we cannot use usual
-technique on UNIX. Some functions do not work but almost all
-functions work well I believe.
-# Attention: please do not consult me with NT4 and commercial products
-# itself.
 
-Unix 版とほとんど同じコードが NT 上でも動きます。
+マルチプラットホーム環境を前提としている fml システムにとって NT ports 
+は一つのバリエーションにしか過ぎません。
+そのため、Unix 版とほとんど同じコードが NT 上でも動きます。
 =E
 The almost same code as UNIX works on NT4. The difference is around
 fork(), exec() and alarm(). We emulate timeout using Win32 perl module
@@ -147,7 +146,18 @@ The default in retrieving file is tar.gz on UNIX but MIME/Multipart on
 NT4 since tar, gzip does not exist on standard NT4. The default for
 some functions are changed for this type reasons.
 
-.S	2種類の fml for NT4
+注意: なお最初に言っておきたいと思いますが、NT自体そしてNT上での
+sendmail, bind, perl自体についてはよく知らないので聞かれても困ります。
+各売り物/share wareなどについては直接販売元に聞いて下さい。
+=E
+ fml runs on a lot of operating systems, so fml on NT4 is just one of
+them. But NT4 differs a lot from UNIX, so we cannot use usual
+technique on UNIX. Some functions do not work but almost all
+functions work well I believe.
+# Attention: please do not consult me with NT4 and commercial products
+# itself.
+
+.S	2 種類の NT 用 fml
 =E.S	Two Kinds of fml for NT4
 
 NT4 の上での MTA の多くはSMTPとPOPしかできません。売り物には MTA から 
@@ -157,7 +167,7 @@ MetaInfo で成功したことがあるという事例があるだけです。
 =E
 A lot of MTA's on NT4 runs with limited functions. MTA provides SMTP
 and POP servers but not others. We need "prog mailer" function which
-runs fml.pl and puts mail into fml.pl. I have experimented and found
+runs fml .pl and puts mail into fml .pl. I have experimented and found
 a prog mailer in MetaInfo Sendmail (2.x) works well.
 
 そのため fml for NT4 にはMTA と ntperl の２つの種類があります。それは
@@ -171,14 +181,15 @@ For this lack of functions, two variations of fml for NT4 exist.
 		Configuration is the same as on UNIX.	
 	2.	POP3 type
 		fml gets mail from POP server and 
-		injects it to fml.pl to run a mailing list.
+		injects it to fml .pl to run a mailing list.
 
 の2種類です。タイプ1は現在のところ事実上 MetaInfo Sendmail 用でUNIX と
-同様の設定になります。一方タイプ2は(後述しますが)、fml がPOPでメールを
-POPサーバーから持ってきてそれを自分で処理しています。
+同様の設定になります。一方タイプ2は(後述しますが)、 fml がPOPでメールを
+POPサーバから持ってきてそれを自分で処理しています。
+
 
 .S	MetaInfo Sendmail の場合 (prog mailer タイプ)
-=E.S	A Case of MetaInfo Sendmail (prog mailer type)
+=E.S	Case Study: MetaInfo Sendmail (prog mailer type)
 
 MetaInfo Sendmail では prog mailer で動くので UNIX Version と基本的に
 同じになります。POP版のように ntfml.cmd をずっと走らせるなどは必要あり
@@ -199,21 +210,21 @@ MetaInfo or not. If it is MetaInfo Sendmail, you follows INSTALL, cut
 and paste examples e.g. aliases and runs "newaliases". Please see
 the file INSTALL.
 
-makefml が最初に prog mailer か POP mailer かを聞くので、作られる見本
+make fml が最初に prog mailer か POP mailer かを聞くので、作られる見本
 ファイルも異なります。例えば aliases や include.cmd は MetaInfo 用の見
 本です。インストール後にMTAを変更する場合などは気を付けて下さい。
 =E
-makefml creates examples for each type (prog mailer or POP). If you
+make fml creates examples for each type (prog mailer or POP). If you
 change MTA after running a ML, you may not use examples in $DIR
 directly.
 
 aliasesは include.cmd include-ctl.cmd をプログラムとして呼び出すように
 設定されています。include.cmd の中では wrapper.pl が起動されそれが 
-fml.pl を呼び出します。wrapper.pl は一時間たっても fml.pl が動いている
+ fml .pl を呼び出します。wrapper.pl は一時間たっても fml .pl が動いている
 なら強制的に終了させます。これだけで配送とコマンドシステムは動きます。
 =E
 In aliases MTA runs include.cmd and injects an input mail to
-include.cmd. include.cmd runs fml.pl wrapped by wrapper.pl. When you
+include.cmd. include.cmd runs fml .pl wrapped by wrapper.pl. When you
 set up aliases, fml delivery and command functions work.
 
 まとめ送りは 各 ML にできる msend.cmd というプログラムを定期的に動か
@@ -229,11 +240,12 @@ NT 版では MTA に配送をまかせようとしてMTAに拒否されたらそこで配送は失
 の際 UNIX 版では sendmail を起動して送り込みますが NT 版ではうまくいか
 ないようです(過去にやった限りでは)。
 
-.S	基本的な動作原理(POP version)
-=E.S	Mechanism (POP version)
+
+.S	fml POP バージョンの場合
+=E.S	Case Study: fml POP version
 
 NT の多くのMTAでは sendmail が受けとってもその後にプログラムを起動して
-くれません。そのため ML の名前の POP アカウントを作ります。fml はPOP 
+くれません。そのため ML の名前の POP アカウントを作ります。 fml はPOP 
 でPOPサーバから ML 宛のメールを引きだし fml へ渡すという裏技(苦肉の技)
 でメーリングリストを動かすことになります。これは元々は UNIX でPOPしか
 させてくれないような場合になんとか ML を実行するために考出された方法が
@@ -242,7 +254,7 @@ NT の多くのMTAでは sendmail が受けとってもその後にプログラムを起動して
 =E
 A lot of MTA on NT4 has only SMTP and POP servers and cannot run the
 program. In POP version you need to set up ML name account in POP
-server. fml extracts mail for ML by POP3 and injects it to fml.pl
+server. fml extracts mail for ML by POP3 and injects it to fml .pl
 (mailing list emulation). # This function is implemented on UNIX in
 1995, and the same technique # is used on NT4.
 
@@ -250,9 +262,9 @@ server. fml extracts mail for ML by POP3 and injects it to fml.pl
 * prog mailer 版
 * prog mailer version
 
-	メール → sendmail → fml.pl を起動
+	メール → sendmail → fml .pl を起動
 =E
-	mail -> sendmail -> fml.pl
+	mail -> sendmail -> fml .pl
 
 ＊ POP 版
 =E
@@ -263,15 +275,15 @@ server. fml extracts mail for ML by POP3 and injects it to fml.pl
 
 				↑↓ POP3
 
-				popfml.pl 
-				   とってきたメール → fml.pl を起動
+				pop fml .pl 
+				  とってきたメール → fml .pl を起動
 .fi
 .if LANG == ENGLISH
 	mail	-> sendmail -> mail spool
 				|
 				V POP3
-				popfml.pl	->	fml.pl
-		    sendmail <-	<-	<-	<-	
+				pop fml .pl	->	fml .pl
+		   sendmail <-	<-	<-	<-	
 .fi
 
 * マスタープログラムである ntfml.pl の動作
@@ -281,60 +293,60 @@ server. fml extracts mail for ML by POP3 and injects it to fml.pl
 .if LANG == JAPANESE
 ntfml.pl (ずっとはしっている)の無限ループ {
 
-	popfml.pl を3分に1回起動
+	pop fml .pl を3分に1回起動
 
 		elena ML の場合
 		(ユーザ名 elena のメールボックスを除く)
 
-			→	POPサーバー 
+			→	POPサーバ 
 			←
 
 	○もしメールがあれば		○なければそのまま終わり
-	popfml.pl
+	pop fml .pl
 		↓
-		fml.pl を起動
+		fml .pl を起動
 
     }
 .fi
 .if LANG == ENGLISH
     infinite loop {
 
-	popfml.pl runs one three minutes.
+	pop fml .pl runs one three minutes.
 
 		----> POP SERVER account = elena
 		<----
 
 	If mail for elena ML exist
-		runs fml.pl
+		runs fml .pl
 
 	elsif not, sleep again
     }
 .fi
 .~q
 
-のようになります。つまりMLの実体はメールサーバーのユーザ名そのものにな
+のようになります。つまりMLの実体はメールサーバのユーザ名そのものにな
 ります。それをメールソフトのようにPOPで読んできて無理やりMLを実行して
 しまうという仕組みです。
 
 
 
-.C	インストール
+.C	インストール手順
 =E.C	Installation
 
-.S	インストーラー (ntinstall.cmd)
+.S	インストーラ (ntinstall.cmd)
 =E.S	Installer (ntinstall.cmd)
 
 パッケージを広げると ntinstall.cmd というのがあります。それを起動して
-下さい。ソースの修正と、perl makefml install が自動的にすすんでいきま
+下さい。ソースの修正と、perl make fml install が自動的にすすんでいきま
 す。いくつかの項目について尋ねられるので答えて下さい。とりあえずデフォー
 ルトでも構いません。
 =E
 Extract the fml package archive and run ntinstall.cmd. It adjusts
-sources a little to fit NT4 and runs "makefml install". The
+sources a little to fit NT4 and runs "make fml install". The
 installation proceeds automatically with asking you a few
 items. Please see INSTALL for what is asked to you. 
 
-インストールの大筋や尋ねられる項目、makefml の使い方については INSTALL 
+インストールの大筋や尋ねられる項目、make fml の使い方については INSTALL 
 というマニュアルを読んで下さい。インストールの最後が少し違います(次節)
 が、基本的にはUNIX 版と同じに進めて下さい。
 
@@ -346,27 +358,27 @@ items. Please see INSTALL for what is asked to you.
 時で挙動が違います。2 の時にはいきなりウィンドウが消えるかも知れません
 が、エラーとか画面でいっていないならそれは正常な終了です。
 
-よくわからないM$ テクノロジーとか見栄えをどうにかするソフトウエアなど
-は何も使ってないのでちょっとその辺変ですが、お金かけてないので
-その辺は適当に処理して下さい(== 気にしないで下さい;-)。
+よくわからない M$ テクノロジーとか見栄えをどうにかするソフトウエアなど
+は何も使ってないのでちょっとその辺変ですが、お金かけてないのでその辺は
+適当に処理して下さい(== 気にしないで下さい;-)。
 
 
-.S	POPサーバー と SMTPサーバーの設定。 UNIX 版との違い
+.S	POPサーバ と SMTPサーバの設定。 UNIX 版との違い
 =E.S	POP and SMTP Server configurations
 
 POP3 タイプのインストールの際には Unix Version の /etc/aliases の設定
 の代わりに POPの設定を尋ねられます。ここでいっている
 =E
-In POP3 type, makefml asks you which is POP and SMTP server. Please
+In POP3 type, make fml asks you which is POP and SMTP server. Please
 input them. This query does not exist on UNIX version.
 
-	POPサーバー
-	SMTPサーバー
+	POPサーバ
+	SMTPサーバ
 	
 はメールソフトなんかの設定にでてくる用語と同じです。
 
-	POPサーバー		POPで取りにいく先
-	SMTPサーバー		配送に使うマシン(SMTPで投げる)
+	POPサーバ		POPで取りにいく先
+	SMTPサーバ		配送に使うマシン(SMTPで投げる)
 
 デフォルトは自分自身ですが、適当に変えて構いません。
 
@@ -393,16 +405,17 @@ up it.
 You need to set up msend.cmd runs periodically.
 
 
-.C	UNIX 版との相違点について
-=E.C	The difference of makefml between on UNIX and on NT4
 
-.S	POP版での makefml newml (MLの作成)
-=E.S	makefml newml (create a new mailing list)
+.C	UNIX 版との相違点について
+=E.C	The difference of make fml between on UNIX and on NT4
+
+.S	POP版での make fml newml (MLの作成)
+=E.S	make fml newml (create a new mailing list)
 
  ML 作成時にPOPパスワードを入力が要求されます。例えば elena ML を作る
 と
 =E
-In creating a new ML, makefml asks you the POP password. Consider the
+In creating a new ML, make fml asks you the POP password. Consider the
 case that you create elena ML. The default configuration needs
 accounts on POP server
 
@@ -412,11 +425,11 @@ accounts on POP server
 =E
 	elena-admin	(MAINTAINER)
 
-が必要です。これらのアカウントをPOPサーバーにつくっておいて下さい。
+が必要です。これらのアカウントをPOPサーバにつくっておいて下さい。
 そしてそれと同じPOPパスワードを newml の際に入力して下さい。
 =E
 Please create these account on POP server and input the same password
-in "makefml newml elena".
+in "make fml newml elena".
 
 elena-ctl のように9文字のものは作れないかも知れません。そうなると 
 elenactl にするとか、elena で配送もコマンドも受け付けるように設定する
@@ -432,15 +445,15 @@ control address name.
       この仮想ユーザたちはメールが読めればいいだけです。
 
 
-.S	POP版での makefml pop_passwd ML名  (POPパスワードの変更)
-=E.S	makefml pop_passwd <ML> (change POP password)
+.S	POP版での make fml pop_passwd ML名  (POPパスワードの変更)
+=E.S	make fml pop_passwd <ML> (change POP password)
 
-	makefml pop_passwd ML名
+	make fml pop_passwd ML名
 =E	
-	makefml pop_passwd ML
+	make fml pop_passwd ML
 
 e.g.
-	makefml pop_passwd elena
+	make fml pop_passwd elena
 
 のように起動するとPOPパスワードが設定できます。
 =E
@@ -458,10 +471,10 @@ NT4 since tar, gzip does not exist on standard NT4. The default for
 some functions are changed for this type reasons.
 
 
-.C	 ML の運用
+.C	ML の運用
 =E.C	ML Operations
 
-.S	 ML の運用
+.S	ML の運用
 =E.S	ML Operation and Maintenance
 
 * prog mailer 版
@@ -470,7 +483,7 @@ some functions are changed for this type reasons.
 
 メールが来た時だけ起動して働きます。ほおって置いて構いません。
 =E
-fml runs when mail comes. Please let it be.
+ fml runs when mail comes. Please let it be.
 
 * POP 版
 =E
@@ -530,19 +543,19 @@ runs "ntfml.cmd -d" to show a lot of debug information.
 
 * POP version
 
-ntfml は毎回 directory を scan しています。そのためMLのホームごと全体
+ntfmlは毎回 directory を scan しています。そのためMLのホームごと全体
 を消してしまえば直に存在する ML として認識されなくなります。またMLに対
 応するPOPアカウントを消去しておいて下さい。MLがなくなれば自動的にまと
 めおくりについてもされなくなります。
 =E
-remove ML's HOME e.g. C:\fml\ml\elena. ntfml.pl scans C:\fml\ml always
+remove ML's HOME e.g. C:\ fml \ml\elena. ntfml.pl scans C:\ fml \ml always
 in the loop. Hence the directory disappears, ntfml.pl ignores the ML
 automatically.
 
 * MetaInfo version
 
-これは普通のFMLと同様です。aliases から該当するエントリを削除して
-newaliasesをかけて下さい。MLのホームは消さなくても構いません(fml.plな
+これは普通の fml と同様です。aliases から該当するエントリを削除して
+newaliasesをかけて下さい。MLのホームは消さなくても構いません( fml .plな
 どが起動されることはないので)。まとめ送りについて別途設定があればそ
 れも落とします。
 =E
@@ -584,6 +597,6 @@ $Id$
 .#               1993-1996 fukachan@phys.titech.ac.jp
 .#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
-.# FML is free software; you can redistribute it and/or modify
+.# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
