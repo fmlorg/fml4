@@ -7,7 +7,7 @@
 
 ### configuration ###
 POP_SERVER=`hostname`
-PORT=20110
+PORT=110
 SLEEPTIME=3
 OPT=
 
