@@ -3,6 +3,17 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/12
+
+  FNF rewriting project starts ...
+	See fml/FNF (in cvs repository)
+
+  more checks on file operations
+	define DiagPrograms( @ARRAY ) to check existence of programs and
+	validate how command works.
+	XXX TODO: file operations
+	XXX   need further checks but logs errors in $DIR/log now anyway.
+
 2000/05/11
 
   sbin/makefml
