@@ -276,7 +276,7 @@ sub GetAddr2Regist
 sub GetSubscribeString
 {
     local($_, $key) = @_;
-    local($buf, $pb, $pe);
+    local($buf);
 
     # evalute the first multipart block
     if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e);}
@@ -603,11 +603,7 @@ sub DoSetMemberList
     local($rm, $ra) = (0, 0);
 
     # obsolete code but left for compatibility.
-    if (&ListIncludePatP($list, $ProcedureException{"bye", "ignore_list"})) {
-	&Log("ProcedureException: bye ignore $list");
-	$rm++;
-    }
-    elsif (&UseSeparateListP) {
+    if (&UseSeparateListP) {
 	$list = &MailListMemberP($curaddr);
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
 	if ($rm == 1) {
@@ -1100,9 +1096,7 @@ sub main'MemberLimitP #';
     @a = @main'ACTIVE_LIST; #';
 
     for (@a) {
-	 print STDERR "ACTIVE_LIST: $_\n";
 	 next unless -f $_;
-
 	 $total += &CountEffectiveMember($_);
     }
 
