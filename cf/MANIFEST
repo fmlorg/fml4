@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.88 2001/09/29 15:00:35 fukachan Exp $
+# $FML: MANIFEST,v 1.89 2001/10/07 11:42:52 fukachan Exp $
 #
 
 
@@ -904,7 +904,7 @@ LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
 
 # cache size of Message-ID: negative cache
 # value: number
-MESSAGE_ID_CACHE_BUFSIZE:	60*100
+MESSAGE_ID_CACHE_BUFSIZE:	6000
 
 # cache file of mailbody cksum mail loop check
 # value: filename string
