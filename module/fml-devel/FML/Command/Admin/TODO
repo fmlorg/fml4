@@ -1,0 +1,97 @@
+		admin 用のコマンド一覧
+
+
+注意: remove のように単語がぶつかっているものがある。
+      そのため、アドレス関連の機能は互換性を優先するが
+      それ以外のものは、admin command subcommand args 形が
+      可能であるかを模索するべき。
+
+
+  not yet	何らかの意味で決定済み	status or コメント
+------------------------------------------------------
+
+ [アドレス関連の操作]
+
+actives
+		add			done
+add2actives
+add2members
+addactives
+		addadmin		done
+addmembers
+		addpriv			done
+		bye			done
+		byeadmin		done
+		byepriv			done
+		chaddr			done
+		change			removed
+		change-address		removed
+matome
+members
+off
+on
+		noskip			removed
+		skip			removed
+		subscribe		done
+		unsubscribe		done
+
+
+  [ディレクトリ操作]
+   *** 新スタイルへ移行するべき ? ***
+
+		dir			done
+		ls			done
+
+  [ログファイルを見る]
+
+		log			半分
+
+
+  [ファイルに対する一般的な操作]
+   *** 新スタイルへ移行するべき ? ***
+
+		forward			removed *新スタイルへ
+		get			done
+		newguide		removed *新スタイルへ ?
+		newinfo			removed *新スタイルへ ?
+		put			removed *新スタイルへ
+		remove			注意: 別の意味になる
+		remove-article		removed *新スタイルへ
+		rename			removed *新スタイルへ
+		resend			removed *新スタイルへ ?
+		send			removed *新スタイルへ ?
+		unlink			removed *新スタイルへ
+		unlink-article		removed *新スタイルへ
+
+		file remove		done
+		file unlink		done
+		file delete		done
+file    rename
+file    put
+file    get				(例外: get と同じ機能)
+file    send
+
+article forward
+article remove
+article unlink
+
+
+   [認証]
+   *** 新スタイルへ移行するべき ? ***
+
+		initpass		removed *新スタイルへ
+		initpasswd		removed *新スタイルへ
+		pass			done
+		passwd			removed *新スタイルへ
+		password		done
+pgp
+
+
+   [その他]
+
+help
+		iam			removed
+
+
+----------
+$FML: TODO,v 1.8 2002/04/01 23:41:11 fukachan Exp $
