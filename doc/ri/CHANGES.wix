@@ -4913,7 +4913,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 	Subject: FORMAT modified when SUBJECT_*_FORM set;
 
 96/10/30
-	fix @HdrFieldOrder to avoid duplicated Subject:
+	fix @HdrFieldsOrder to avoid duplicated Subject:
 
 96/10/29
 	FIX EacyConfigure's advanced setting
