@@ -642,7 +642,7 @@ $ISH = "/home/axion/fukachan/bin/ish";
 .key	lzh
 .key	ish
 
-config.ph で $USE_SJIS_in_ISH = 1; をセットしてください。
+config.ph で $USE_SJIS_IN_ISH = 1; をセットしてください。
 
 使う時は jcode.pl を INCLUDE PATH へいれておいてください。
 ^M ^Z もつけます。すべて、外部コマンドを使わずに自力でやります。

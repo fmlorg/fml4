@@ -199,7 +199,7 @@ $DISTRIBUTE_CLOSE_HOOK = q#
 $FACE_MARK = '(o)^^)';
 
 # ish の時は SJIS自動変換
-$USE_SJIS_in_ISH = 1;
+$USE_SJIS_IN_ISH = 1;
 
 # host_map_lookup での DNS 遅延情報を トレースする、
 # １０秒かかるホストはログに残す

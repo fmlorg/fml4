@@ -23,6 +23,13 @@
 これをさらに汎用的に拡張しなおしたものと考えてよいでしょう。
 
 
+.S	$FRED_CF
+.k	$FRED_CF
+
+FRED ライブラリは $FRED_CF 変数で定義された設定ファイルを読み、これに
+従い作動します。
+
+
 .S	FRED Configuration file の例：
 
    #CONFIG:

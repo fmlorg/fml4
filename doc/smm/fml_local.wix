@@ -262,13 +262,50 @@ body	getmyspool\s+(\S+)	&	getmyspool_pw
 
 .S	変数一覧
 .label	fml_local-var
+.k	@VAR(fml_local)
+.k	$HOME(fml_local)
+.k	$DIR(fml_local)
+.k	$LIBDIR(fml_local)
+.k	$FML_PL(fml_local)
+.k	$USER(fml_local)
+.k	$MAIL_SPOOL(fml_local)
+.k	$LOG(fml_local)
+.k	$TMP(fml_local)
+.k	$TMP_DIR(fml_local)
+.k	$PASSWORD(fml_local)
+.k	$DEBUG(fml_local)
+.k	$AND(fml_local)
+.k	$ARCHIVE_DIR(fml_local)
+.k	$VACATION(fml_local)
+.k	$MAINTAINER(fml_local)
+.k	$MAINTAINER_SIGNATURE(fml_local)
+.k	$FS(fml_local)
+.k	$LOG_MESSAGE_ID(fml_local)
+.k	$SECURE_FML_LOCAL(fml_local)
+.k	$FIRST_MATCH(fml_local)
+.k	$SLOCAL(fml_local)
+.k	$MY_FUNCTIONS(fml_local)
+.k	$CASE_INSENSITIVE(fml_local)
+.k	$MAIL_LENGTH_LIMIT(fml_local)
 
 もし変数を明示的にセットしないときは適当な値がデフォールト設定されます。
 
-    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
-	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, TMP,
+	    TMP_DIR, PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
 	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
-	    MY_FUNCTIONS);
+	    LOG_MESSAGE_ID, SECURE_FML_LOCAL,
+	    FIRST_MATCH, SLOCAL,
+	    MY_FUNCTIONS, CASE_INSENSITIVE, MAIL_LENGTH_LIMIT);
+
+これらの USER DEFINED 変数は fml_local 中ではそれぞれ
+
+	@VAR $HOME $DIR $LIBDIR $FML_PL $USER $MAIL_SPOOL $LOG $TMP
+	$TMP_DIR $PASSWORD $DEBUG $AND $ARCHIVE_DIR $VACATION
+	$MAINTAINER $MAINTAINER_SIGNATURE $FS $LOG_MESSAGE_ID
+	$SECURE_FML_LOCAL $FIRST_MATCH $SLOCAL $MY_FUNCTIONS
+	$CASE_INSENSITIVE $MAIL_LENGTH_LIMIT
+
+のような USER DEFINED 変数中に格納され Refer することができます。
 
 
 # USER	-user fukachan で設定する変数と同じ意味

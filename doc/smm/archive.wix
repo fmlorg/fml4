@@ -31,6 +31,16 @@ config.ph の例：
 これを 次のように fml.pl は解釈します。
 
 
+.S	$DEFAULT_ARCHIVE_UNIT
+.k	$DEFAULT_ARCHIVE_UNIT
+
+上に出てくる 100 個という数字は
+
+	$DEFAULT_ARCHIVE_UNIT
+
+でコントロールできます。デフォールトが 100 です。
+
+
 .S	"# get 1 " と archive
 
 例えば、"# get 1 " というコマンドを送り込んだ時

@@ -186,6 +186,24 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 .k	$CWHOIS_HELP_FILE
 
 
+○	#keyword でデータベースの指定がない時使うデフォールトのデータベース
+
+	$CWHOIS_DEFAULT_SET
+.k	$CWHOIS_DEFAULT_SET
+
+
+○ 	一次キャッシュ探索アルゴリズムを使う
+
+	$USE_CWHOIS_FIRST_CACHE
+.k	$USE_CWHOIS_FIRST_CACHE
+
+
+○ 	一次キャッシュのTIMEOUT
+
+	$FIRST_CACHE_TIMEOUT
+.k	$FIRST_CACHE_TIMEOUT
+
+
 
 .S	Cwhois の Search Algorithm
 
