@@ -291,3 +291,6 @@ scan:
 
 loop:
 	perl usr/sbin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
+
+e:
+	@ (cd /var/tmp/fml-current; pwd ; make install)
