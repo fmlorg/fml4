@@ -213,6 +213,10 @@ sub ModeBifurcate
 		    &Command() if $ForceKickOffCommand;
 		}
 	    }
+	    # not member and ignore the mail
+	    elsif ((! $member_p) && ($REJECT_COMMAND_HANDLER eq "ignore")) {
+		&Log("ignore request from not member");
+	    }
 	    # chaddr-confirm
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr-confirm'}) {
 		&use('trap');
