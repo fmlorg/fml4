@@ -1,0 +1,42 @@
+.C	Aucea (AUtomatic Certification and Alert system)
+
+.S	Introduction to Aucea
+
+	特定のフォーマットで与えられるフィールドが正規表現にマッチする
+	か否かを調べパターンにマッチした時およびしない時にそれぞれ定義
+	された関数を実行する。
+
+例えば
+	項目	値
+
+のようなものは多くあります。特定の書類、投票やアンケートのフォーマット
+等の一般的に良くありうる形式について当てはまるすべてのものに適用可能で
+す。
+
+投票システム lib/Elena (VotingSystem) や FRED ライブラリの可読性をあげ、
+汎用的に拡張しなおしたものと考えてよいでしょう。
+
+
+.S	config の例
+
+例：人気投票…
+
+datatype ACTRESS
+	data-begin	\[ACTORESS\]
+
+	field-if  "best" match &BestP required
+		&AddEntry
+
+	field-if  "best2" match /.*/ 
+		&AddEntry
+
+	field-if  "best" match /.*/ required
+		and
+	field-if  "how" match /(\d+)/ required
+		&Err("エラー: best と how は両方の項目が同時に必要です")
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
