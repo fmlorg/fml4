@@ -40,6 +40,9 @@ sub Parse
     # misc
     $OPTION = $Config{'OPTION'};
 
+    # CGI
+    $CGI_ADMIN_USER = $Config{'CGI_ADMIN_USER'};
+
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
     $PROC      =~ tr/A-Z/a-z/;
@@ -102,6 +105,7 @@ sub MakefmlInputTranslate
     local($buf, %xe);
 
     return unless $MESSAGE_LANGUAGE;
+    return if $ml eq 'etc';
 
     # print "(debug) &MesgLE(*xe, makefml.$command, $ml, @argv);\n";
     $buf = &MesgLE(*xe, "makefml.$command", $ml, @argv);
@@ -120,6 +124,9 @@ sub Control
 	select(CTL); $| = 1; select(STDOUT);
 
 	&MakefmlInputTranslate($command, $ml, @argv);
+
+	# debug message
+	print join("\t", $command, $ml, @argv),"\n" if $debug;
 
 	print CTL join("\t", $command, $ml, @argv);
 	print CTL "\n";
@@ -300,6 +307,7 @@ sub SecureP
 {
     local($secure_pat) = '[A-Za-z0-9\-_]+';
     local($mail_addr)  = '[A-Za-z0-9\.\-_]+\@[A-Za-z0-9\.\-]+';
+    local($account)    = '[A-Za-z0-9\-_]+';
 
     if ($ML !~ /^($secure_pat)$/i) {
 	&P("ERROR: ML is insecure.");
@@ -315,6 +323,10 @@ sub SecureP
     }
     elsif ($MAIL_ADDR && ($MAIL_ADDR !~ /^($mail_addr)$/)) {
 	&P("ERROR: MAIL_ADDR is insecure.");
+	0;
+    }
+    elsif ($CGI_ADMIN_USER && ($CGI_ADMIN_USER !~ /^($mail_addr|$account)$/)) {
+	&P("ERROR: CGI_ADMIN_USER is insecure.");
 	0;
     }
     elsif ($VARIABLE && ($VARIABLE !~ /^($secure_pat)$/i)) {
@@ -361,6 +373,10 @@ sub Command
 	$PROC =~ s/_admin/admin/;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
+    elsif ($PROC eq 'add_cgi_admin' || $PROC eq 'bye_cgi_admin') {
+	$PROC =~ s/_//g;
+	&Control($ML, $PROC, $MAIL_ADDR);
+    }
     elsif ($PROC eq 'newml') {
 	&Control($ML, $PROC);
     }
@@ -386,6 +402,23 @@ sub Command
 	if ($PASSWORD && $PASSWORD_VRFY) {
 	    if ($PASSWORD eq $PASSWORD_VRFY) {
 		&Control($ML, "html_passwd", $MAIL_ADDR, $PASSWORD);
+	    }
+	    else {
+		&ERROR("input passwords are different each other.");
+		&ERROR(&Mesg2Japanese("cgi.password.different"));
+	    }
+	}
+	else {
+	    &ERROR("empty password");
+	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
+	}
+    }
+    elsif ($PROC eq 'cgiadmin_passwd') {
+	$PROC = 'html_cgiadmin_passwd';
+
+	if ($PASSWORD && $PASSWORD_VRFY) {
+	    if ($PASSWORD eq $PASSWORD_VRFY) {
+		&Control($ML, $PROC, $CGI_ADMIN_USER, $PASSWORD);
 	    }
 	    else {
 		&ERROR("input passwords are different each other.");

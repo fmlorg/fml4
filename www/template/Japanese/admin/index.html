@@ -31,6 +31,7 @@
 <LI><A HREF="#config">特定のメーリングリストの設定/登録/削除 関係</A>
 <LI><A HREF="#newml">メーリングリストの作成</A>
 <LI><A HREF="#destructml">メーリングリストの削除</A>
+<LI><A HREF="#cgiadmin">CGI操作可能な管理者の設定</A>
 <LI><A HREF="#server_config">サーバの設定関係(初回の確認必須)</A>
 </UL>
 
@@ -135,6 +136,43 @@ _____________________________
 <INPUT NAME=submit-p TYPE=submit VALUE=Remove>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
+
+
+<HR>
+<A NAME=cgiadmin>
+この画面を操作可能な(CGI)管理者アカウントのパスワード設定
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
+<INPUT TYPE=hidden NAME=ML   VALUE=etc>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Email アドレス:
+		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=right>
+			<SELECT NAME=CGI_ADMIN_USER>
+			__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
+			</SELECT>
+		</TABLE>
+
+	<TR>
+		<TD ALIGN=right> パスワード:
+		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
+
+	<TR>
+		<TD ALIGN=right> 確認のため同じパスワード:
+		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
+</TABLE>
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
 
 
 <HR>

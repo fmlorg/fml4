@@ -25,6 +25,11 @@ sub Init
     # fml system configuration
     require "$CONFIG_DIR/system";
 
+    # cgi.conf
+    $CGI_CONF = $CGI_CONF || "$EXEC_DIR/.fml/cgi.conf";
+    if (-f $CGI_CONF) {	require $CGI_CONF;}
+
+    # www menu specific configuration
     $WWW_DIR      = "$EXEC_DIR/www";
     $WWW_CONF_DIR = "$WWW_DIR/conf";
     $CGI_CF       = "$WWW_CONF_DIR/cgi.cf";
@@ -150,6 +155,33 @@ sub ExpandHowToUpdateAliases
 }
 
 
+sub ExpandCGIAdminMemberList
+{
+    local($mode) = @_;
+    local($list);
+
+    $list = "$CGI_AUTHDB_DIR/admin/htpasswd";
+
+    if (open(LIST, $list)) {
+	while (<LIST>) {
+	    next if /^\#/;
+
+	    ($addr) = split(/:/,$_);
+	    $addr{$addr} = $addr;
+	}
+	close(LIST);
+    }
+    else {
+	&ERROR("cannot open '$list'");
+    }
+
+    # XXX oops, I wanna less malloc() version ;-)
+    for $addr (sort {$a cmp $b} keys %addr) {
+	print "\t\t\t<OPTION VALUE=$addr>$addr\n";
+    }
+}
+
+
 sub Convert
 {
     local($file) = @_;
@@ -173,6 +205,11 @@ sub Convert
 
 	    if (/__EXPAND_HOW_TO_UPDATE_ALIASES__/) {
 		&ExpandHowToUpdateAliases;
+		next;
+	    }
+
+	    if (/__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__/) {
+		&ExpandCGIAdminMemberList;
 		next;
 	    }
 

@@ -587,9 +587,10 @@ sub SetHashDefaults
 
 		    # WWW/CGI interface for cgi interface
 		    # (hidden function only CGI uses)
-		    'html_config',     'do_html_config',
-		    'html_config_set', 'do_html_config',
-		    'html_passwd',     'do_html_passwd',
+		    'html_config',          'do_html_config',
+		    'html_config_set',      'do_html_config',
+		    'html_passwd',          'do_html_passwd',
+		    'html_cgiadmin_passwd', 'do_html_cgiadmin_htpasswd',
 
 		    # cgi utilities
 		    'admin.cgi',          'do_setup_admin_cgi',
@@ -636,7 +637,7 @@ sub SetHashDefaults
 	 "edit-template", "config-template",
 
 	 # CGI/
-	 "admin.cgi"
+	 "admin.cgi", "html_cgiadmin_passwd"
 	 );
 }
 
@@ -2326,9 +2327,42 @@ sub do_html_htpasswd
 }
 
 
+# hidden function only CGI calls
+# change htpassword for  /cgi-bin/fml/admin/ layer.
+sub do_html_cgiadmin_htpasswd
+{
+    local($ml, $member, $passwd) = @_;
+    local($f, $x, $fnew);
+
+    &ResetVariables;
+    &SetWritableUmask;
+
+    # here we go to convert etc/passwd to some/whare/m-admin/$ml/htpasswd
+    $f    = "$CGI_AUTHDB_DIR/admin/htpasswd";
+    $fnew = "$CGI_AUTHDB_DIR/admin/htpasswd.new.$$";
+
+    print STDERR "\n   change htpasswd ($f)\n";
+    $x = $member .":". crypt($passwd, $passwd);
+
+    if (&__html_htpasswd_repl($f, $fnew, $member, $x)) {
+	if (-s $fnew) { 
+	    if (! rename($fnew, $f)) {
+		&Error("cannot rename $fnew $f");
+	    }
+	}
+	else {
+	    &Error("something wrong! since file size 0. no operation.");
+	}
+    }
+}
+
+
 sub __html_htpasswd_repl
 {
     local($f, $fnew, $member, $x) = @_;
+
+    $x =~ s/\n$//;
+    print STDERR "($f, $fnew, $member, $x)\n" if $debug;
 
     if (! open($fnew, "> $fnew")) {
 	&Error("cannot open $fnew");
@@ -2343,7 +2377,7 @@ sub __html_htpasswd_repl
 	    }
 	    close($f);
 
-	    print $fnew $x;
+	    print $fnew $x, "\n";
 	    close($fnew);
 	}
 	else {
