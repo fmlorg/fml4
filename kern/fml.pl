@@ -1385,6 +1385,12 @@ sub Distribute
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
 	&Log("fail to dump active list") if $mib{'error'};
 	return $NULL if  $mib{'error'};
+
+	# tricky but effective 
+	# we push cache file to recipient lists, so that
+	# @ACTIVE_LIST = ($ACTIVE_LIST, $mib{'_cache_file'});
+	push(@ACTIVE_LIST, $mib{'_cache_file'}) if -f $mib{'_cache_file'};
+	&Log("ACTIVE = ( @ACTIVE_LIST )") if $debug;
     }
 
     require 'libdist.pl';
