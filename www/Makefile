@@ -1,0 +1,2 @@
+scan:
+	cvs -n update

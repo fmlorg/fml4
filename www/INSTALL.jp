@@ -1,0 +1,66 @@
+		CGIのインストールについて
+
+1.	fml-snap-日付(YYYYMMDD).tar.gz を入手する
+	(fml-3.0とはちょっと違います) 
+
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/
+
+2.	普通のfmlと同様にインストール
+
+3.	cgi の生成
+
+3.1	管理者用
+
+   % makefml admin.cgi 
+
+	/usr/local/fml/share/cgi-bin/fml/admin/ 以下にCGIが生成される
+			menu.cgi
+			makefml.cgi
+
+
+3.2	各ＭＬの管理者用
+
+   % makefml mladmin.cgi $ml
+
+	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ 以下にCGIが生成される
+			menu.cgi
+			makefml.cgi
+
+3.3	一般ユーザ用のは未実装
+
+4	パスワードを設定する
+
+httpd の設定によるので適宜マニュアルを参照 
+
+例: thttpd (NetBSD上での例)
+
+	/usr/local/fml/share/cgi-bin/fml/admin/.htpasswd
+
+.htpasswd は
+
+   % cd /usr/local/fml/share/cgi-bin/fml/admin/
+   % touch .htpasswd	
+   % /usr/pkg/sbin/htpasswd -c .htpasswd fukachan@fml.org
+   Adding password for fukachan@fml.org
+   New password:
+   Re-type new password:
+
+などのようにつくればよい
+
+
+5.	httpd でcgiをつかえるようにする
+
+以下ではCGIを走らせるときのユーザ権限はfmlと仮定する。
+
+5.1	thttpd (target)
+
+     /usr/pkg/sbin/thttpd -nor -u fml \
+	-d /usr/local/fml/share -c 'cgi-bin/fml/admin/*cgi'
+
+ここでは /usr/local/fml/share をそのまま使うと仮定している
+
+5.2	apache
+
+     % rsync -av /usr/local/fml/share/cgi-bin/ /usr/pkg/libexec/cgi-bin/
+
+$Id$

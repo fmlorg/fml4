@@ -7,21 +7,25 @@
 # $Id$
 #
 
-
 sub Parse
 {
-    &GetBuffer(*config);
+    &GetBuffer(*Config);
 
-    $ML        = $config{'ML_DEF'} || $config{'ML'};
-    $MAIL_ADDR = $config{'MAIL_ADDR'};
-    $PROC      = $config{'PROC'};
-    $LANGUAGE  = $config{'LANGUAGE'};
-    @PROC_ARGV = split(/\s+/, $config{'ARGV'});
+    $ML        = $Config{'ML_DEF'} || $Config{'ML'};
+    $MAIL_ADDR = $Config{'MAIL_ADDR'};
+    $PROC      = $Config{'PROC'};
+    $LANGUAGE  = $Config{'LANGUAGE'};
+
+    @PROC_ARGV = split(/\s+/, $Config{'ARGV'});
 
     # menu
-    $VARIABLE  = $config{'VARIABLE'};
-    $VALUE     = $config{'VALUE'};
-    $PTR       = $config{'PTR'};
+    $VARIABLE  = $Config{'VARIABLE'};
+    $VALUE     = $Config{'VALUE'};
+    $PTR       = $Config{'PTR'};
+
+    # password
+    $PASSWORD      = $Config{'PASSWORD'};
+    $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
 
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
@@ -54,7 +58,7 @@ sub UpperHalf
 
     if ($debug) {
 	while (($k, $v) = each %ENV)    { &P("ENV: $k => $v");}
-	while (($k, $v) = each %config) { &P("config: $k => $v");}
+	while (($k, $v) = each %Config) { &P("Config: $k => $v");}
     }
 }
 
@@ -69,8 +73,7 @@ sub Control
     if (open(CTL, "|$MAKE_FML -E HTTPD -i stdin > $tmpbuf 2>&1")) {
 	select(CTL); $| = 1; select(STDOUT);
 
-	print CTL $command, "\t", $ml, "\t";
-	print CTL join("\t", @argv);
+	print CTL join("\t", $command, $ml, @argv);
 	print CTL "\n";
 
 	close(CTL);
@@ -109,10 +112,14 @@ sub Mesg2Japanese
     local($key) = @_;
     local($x);
 
-    $x = &MesgLE'Lookup($key, $MESG_FILE); #';
-    &jcode'convert(*x, 'jis'); #';
-
-    $x;
+    if ($LANGUAGE eq 'Japanese') {
+	$x = &MesgLE'Lookup($key, $MESG_FILE); #';
+	&jcode'convert(*x, 'jis'); #';
+	$x;
+    }
+    else {
+	$key;
+    }
 }
 
 sub Log
@@ -226,6 +233,23 @@ sub Command
 	    &Control($ML, $PROC, $PTR);
 	}
     }
+    elsif ($PROC eq 'passwd') {
+	$PROC = 'html_passwd';
+
+	if ($PASSWORD && $PASSWORD_VRFY) {
+	    if ($PASSWORD eq $PASSWORD_VRFY) {
+		&Control($ML, "html_passwd", $MAIL_ADDR, $PASSWORD);
+	    }
+	    else {
+		&ERROR("input passwords are different each other.");
+		&ERROR(&Mesg2Japanese("cgi.password.different"));
+	    }
+	}
+	else {
+	    &ERROR("empty password");
+	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
+	}
+    }
     else {
 	&ERROR("unknown PROC");
     }
@@ -234,6 +258,8 @@ sub Command
 
 sub Finish
 {
+    if ($ErrorString) { &Exit($ErrorString);}
+
     &P("</PRE>");
     &P("</BODY>");
     &P("</HTML>");
