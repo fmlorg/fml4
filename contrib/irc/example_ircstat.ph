@@ -33,6 +33,21 @@ $IRC_SIGNOFF_MSG = 'Seeing you';
 # 関数定義(高度なカスタマイズ用)
 # $FP_GET_NEXT_BUFFER = $FP_GET_NEXT_BUFFER || 'GetNextBuffer';
 
+
+### SYSLOG ###
+
+# syslog を使う
+# $USE_SYSLOG
+
+# SYSLOG を飛ばす HOST; 定義しないと localhost
+# $IRC_SYSLOG_HOST
+
+# see syslog(3)
+# $IRC_SYSLOG_FACILITY ; default "user"
+# $IRC_SYSLOG_LEVEL    ; default "info"
+
+
+
 ##### IRCSTAT 固有の設定 #####
 # 見張るホストのリスト(配列)
 # -H host1:host2 で上書きできる

@@ -81,6 +81,23 @@ IRCに入ってLUSERSコマンドでユーザ数のログをとる。
 		など
 
 
+   SYSLOG
+
+	$USE_SYSLOG
+		syslog を使う
+
+	$IRC_SYSLOG_HOST
+		SYSLOG を飛ばす HOST; 定義しないと localhost
+
+	$IRC_SYSLOG_FACILITY 
+		default "user"
+
+	$IRC_SYSLOG_LEVEL
+		default "info"
+
+	see syslog(3) for more details.
+
+
   コマンドラインオプション
 
 	ircstat [-dh] [-I INC] [-t title] [-L file] -f file
