@@ -1,574 +1,636 @@
 INFO:
-# fml-Relese.2-source/cf/MANIFEST
-# $Id$
+# FML Release 2.1: Configurable Variable Definitions
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 # 
-# *** Required Definition of your Mailing List ***
-# The mail header has 
-#       To: $MAIL_LIST $ML_FN 
-#         ... (and additional fields for convenience)
-#       $XMLNAME 
-#       $XMLCOUNT: ID
-# e.g. 
-#      To: Elena@axion.phys.titech.ac.jp
-#         ...
-#      X-ML-Name: Elena
-#      X-Mail-Count: Count of ML article
-# 
+# $Id$
+#
+#
 
+
+#####################################################################
+# ### Section: DNS and Other Fundamental (CF Version, debug, Language) ### 
+# config.ph configuration version
+CFVersion:	3
+
+# global debug option. if non-nil, debug mode.
+# In debug mode, NOT do distribution
+debug:		 0
+
+# for further extension: FML 2.1 DOES NOT use this 
+# except for files (e.g. help, welcome, ...) created in "makefml newml"
+LANGUAGE:		Japanese
+
+# ## Sub Section: DNS ##
+# DNS setting s automatically checked by makefml but check them, please
+#
+#    DOMAINNAME the domain name              e.g. fml.org
+#    FQDN       Fully Qualified Domain Name  e.g. beth.fml.org
+#
 DOMAINNAME:	&fix:dn   phys.titech.ac.jp
 FQDN:		&fix:fqdn axion.phys.titech.ac.jp
 
-MAIL_LIST:	Elena@$FQDN
-ML_FN:		(Elena Lolabrigita ML)
 
-XMLNAME:	 X-ML-Name: Elena
-XMLCOUNT:	 X-Mail-Count
+#####################################################################
+# ### Section: Mailing List Policy (for Post, Commands), Maintainer ###
+#
+# $MAIL_LIST is THE ADDRESS FOR POST.
+# $PERMIT_POST_FROM is "anyone", "members_only" or "moderator", 
+# which permit post from who? If not-member posts is rejected,
+# THE FUNCTION $REJECT_POST_HANDLER is applied.
+# $REJECT_POST_HANDLER is "reject", "auto_regist" or "ignore"
+#
+# **ATTENTION**: "reject" implies just "NOT REGISTERED IN $MEMBER_LIST".
+#    See "Section: Security" for positive reject against e.g. spammers.
+#
+MAIL_LIST:		Elena@$FQDN
+PERMIT_POST_FROM:	members_only
+REJECT_POST_HANDLER:	reject
 
 
+# $CONTROL_ADDRESS is THE ADDRESS FOR COMMANDS.
+# $PERMIT_COMMAND_FROM is "anyone", "members_only" or "moderator", 
+# which permit command from who? If not-member commands is rejected,
+# THE FUNCTION $REJECT_COMMAND_HANDLER is applied.
+# $REJECT_COMMAND_HANDLER is "reject", "auto_regist" or "ignore"
+#
+CONTROL_ADDRESS:  	Elena-ctl@$FQDN
+PERMIT_COMMAND_FROM:	members_only
+REJECT_COMMAND_HANDLER:	reject
 
-INFO:
-
-MAINTAINER:	 Elena.Lolobrigita@$FQDN
-	# Maintainer's Email Address
-	# In order to avoid mail bauncing, this should be different from MAIL_LIST.
-	# I recommend to define ADMIN address rather than your address so that
-	# someone can become a maintainer for you easily in future.
-
+# ## Sub Section: Maintainer ##
+# $MAINTAINER != $MAIL_LIST IS REQUIRED AGAINST MAIL LOOP
+MAINTAINER:		Elena-admin@$FQDN
 MAINTAINER_SIGNATURE:	
 
 
-INFO:
+#####################################################################
+# ### Section: Automatic Registration ###
+# If at least either REJECT_{POST,COMMAND}_HANDLER is "auto_regist", 
+# PLEASE SELECT THE TYPE OF AUTOMATIC REGISTRATION
+# choice is "confirm", "subject", "body", "nokeyword"
+AUTO_REGISTRATION_TYPE:	confirm
 
-CONTROL_ADDRESS:  
-	# This address is used only for only-command-oriented Server.
-	# e.g. Elena-ctl may not require @phys.titech.ac.jp for usefulness
+# $REQUIRE_SUBSCRIBE (CFVersion 2) => $AUTO_REGISTRATION_KEYWORD
+AUTO_REGISTRATION_KEYWORD:	subscribe
 
+# when auto-registered, 
+# we apply $AUTO_REGISTRATION_DEFAULT_MODE e.g. "m=3mp s=1" to the address.
+AUTO_REGISTRATION_DEFAULT_MODE:
 
+# "confirmation" (default) mode configurations
+# please see doc/op for the detail of "confirmation"
+CONFIRMATION_ADDRESS:
+CONFIRMATION_SUBSCRIBE:		subscribe
+CONFIRMATION_KEYWORD:		confirm
 
-INFO:
-### DEBUG MODE
-# FLAGS(Toggle) and Variables to be checked
-# choice of member check, lock algorithm and debug option
+# explanation of confirmation
+CONFIRMATION_FILE:	 $DIR/confirm
 
-debug:		 1
-			# global debug option. if non-nil, debug mode.
-			# In debug mode, NOT sendmail in distributing
-		
+# Expire of request queue. The unit is "hour". (default, 168 == 7*24)
+CONFIRMATION_EXPIRE:		168
 
+# confirmation request queue (you should not manually edit it)
+CONFIRMATION_LIST:		
 
-INFO:
-### DEFINITIONS FOR "makefml"
-
-# GNU config.guess
-CPU_TYPE_MANUFACTURER_OS:
-
-# struct sockaddr
-STRUCT_SOCKADDR:	S n a4 x8
-
-# for further extention: fml 2.1 not use this except for "makefml newml"
-LANGUAGE:		Japanese
-
-
-INFO:
-# CF Version 
-# Declare "V2"
-CFVersion:	2
-
-
-
-INFO:
-### AUTO REGISTRAION
-#
-# MEMBER CHECK (DEFUALT) IS "$ML_MEMBER_CHECK = 1;"
-# AUTOMATIC REGISTRATION IS "$ML_MEMBER_CHECK = 0;"
-#
-# IN DEFAULT, no special syntax (subscribe keyword in body) is required
-# for automatic registration. BUT IF YOU LIKE, YOU CAN HAVE CHOICES.
-# TODAY I RECOMMENDS YOU "Confirmation Mode". For it you can set in the last
-#     &DEFINE_MODE('confirm'); (in the last of config.ph but before "1;") 
-#
-
-ML_MEMBER_CHECK:  1
-			# if non-nill, do a member check
-
-
+# default keyword for trap
 DEFAULT_SUBSCRIBE:  subscribe
-			# default, change registered address
 
+# WHEN either $REJECT_{POST,COMMAND}_HANDLER has "auto_regist", 
+# we do automatic registration. After we register an address to 
+# $MEMBER_LIST ($FILE_TO_REGIST if $FILE_TO_REGIST is set),
+# we send $WELCOME_FILE to him/her with the subject $WELCOME_STATEMENT
+WELCOME_FILE:	 $DIR/welcome
+WELCOME_STATEMENT:Welcome to our $ML_FN\n         You are added automatically
 
-AUTO_REGISTERED_UNDELIVER_P:  1
-
-			### Forwading when auto-registration
-			# when auto-registered, the mail own is
-			# delivered or not? if 1, not delivered
-
-
-AUTO_REGISTRATION_LINES_LIMIT:  0
-			# When Auto-registration
-			# not distribute if lines < this value
-			# built-in default is 8
-			# (suppose body is 3, signature is 4)
-
-
-REQUIRE_SUBSCRIBE:
-			# e.g.  subscribe
-
-
-REQUIRE_SUBSCRIBE_IN_BODY:  0
-			# body is subscribe when 1
-
-
+# e.g. $DIR/members (default)
 FILE_TO_REGIST:	
 
+# In default if body lines > $AUTO_REGISTRATION_LINES_LIMIT, 
+# we forward this mail to $MAIL_LIST. If $AUTO_REGISTERED_UNDELIVER_P is set, 
+# we ALWAYS DO NOT Forward it to $MAIL_LIST.
+AUTO_REGISTERED_UNDELIVER_P:  1
+AUTO_REGISTRATION_LINES_LIMIT:  0
 
 
-INFO:
-# MIME Definition
 
-USE_MIME:	 0
-			# MIME support
-			# when use MIME Extension in libMIME.pl
+#####################################################################
+# ### Section: Remote Administration ###
+# For security, YOU CANNOT CONTROL FML IN REMOTE (DEFAULT).
+# IF $REMOTE_ADMINISTRATION is set, You can control FML in remote.
+# The remote control require some kind of authentication.
+# The choice of authentication is $REMOTE_ADMINISTRATION_AUTH_TYPE,
+# which is one of 
+#    address		From: field
+#    crypt		From: field + password (e.g. "#admin pass PASSWORD")
+#    md5		From: field + password (e.g. "#admin pass PASSWORD")
+#    pgp                PGP(Pretty Good Privacy) signature 
+#
+# The difference of "crypt" and "md5" is $PASSWD_FILE format.
+#
+REMOTE_ADMINISTRATION:  0
 
-MIME_DECODED_ARTICLE:	0
+# TYPE is address, crypt, md5 or pgp.
+# FYI: $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD <=> "crypt"
+REMOTE_ADMINISTRATION_AUTH_TYPE:	crypt
 
+# members who can use admin commands for the type "address"
+ADMIN_MEMBER_LIST:	$DIR/members-admin
+
+# help file of admin commands
+ADMIN_HELP_FILE:	$DIR/help-admin
+
+# password file to authenticate members
+PASSWD_FILE: 		$DIR/etc/passwd
+
+# "admin log" is "tail -100 log"
+ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
+
+
+#####################################################################
+# ### Section: Security ###
+
+# We reject $REJECT_ADDR@ARBITRARY.DOMAINS, 
+# since these are clearly NOT individuals.
+REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc
+
+# list of spammers to be rejected, which corresponds /etc/sendmail.spammers
+REJECT_ADDR_LIST:	$DIR/spammers
+
+# DO CHECK UNIX From Loop or not
+NOT_USE_UNIX_FROM_LOOP_CHECK:  0
+
+# DO Message-Id: cache and check loops
+CHECK_MESSAGE_ID:	1
+
+# Logs the getpeername()
+LOG_CONNECTION:	1
+
+# address check levels, which level is the tree depth from the root.
+ADDR_CHECK_MAX:		3
+
+
+#####################################################################
+# ### Section: Header Customization ###
+# In general, you can control fields in header in the following:
+#
+#   @HdrFieldsOrder 				 Fields Order In Header
+#					 	 
+#   &DEFINE_FIELD_ORIGINAL('field');             Conserve Original
+#   &DEFINE_FIELD_FORCED('field', "contents");   Overwrite
+#
+# In default, we discard fields not shown in @HdrFieldsOrder.
+
+# In Header, we expand these values to
+#
+#   To: $MAIL_LIST $ML_FN
+#   $XMLNAME
+#   $XMLCOUNT: sequence-number
+#
+#   e.g.
+#   To: Elena@fml.org (Elena Lolabrigita ML)
+#   X-ML-Name: Elena
+#   X-Mail-Count: 00007
+#
+ML_FN:		(Elena Lolabrigita ML)
+XMLNAME:	 X-ML-Name: Elena
+XMLCOUNT:	 X-Mail-Count
+
+# In default subject tag does not exist to show more and more effective
+# subject and body. Client Interface SHOULD CONTROL subject descriptions.
+# The available type is [:] [,] [ ] (:) (,) ( ).
+# e.g. [:]  => [Elena:00100] format (here $BRACKET is "Elena").
+# But you can customize SUBJECT_FREE_* series variables.
+# Please see doc/op for the detail
+SUBJECT_TAG_TYPE:	
+
+# BRACKET of "Subject: [BRACKET:ID] ..." form
+BRACKET:	 Elena
+
+# Obsoletes? We strip off e.g. [ML:fukachan] form in Subject
+# but this operations depends on special forms, so not functional.
+# You do not expect a lot on this option.
+STRIP_BRACKETS:  0
+
+# "Free Subject Tag" settings (see doc/op and libtagdef.pl on examples)
+BRACKET_SEPARATOR:
+SUBJECT_FREE_FORM:
+SUBJECT_FREE_FORM_REGEXP:
+SUBJECT_FORM_LONG_ID:
+
+# Errors-To: field
+# Errors-To is not referred in RFC822. Sendmail 8.x do not see this 
+# field in default. However in error may be effective for e.g. Pasokon
+# Tuusin, BITNET..
+USE_ERRORS_TO:	
+ERRORS_TO:
+
+# Message-Id: use original Message-Id or Server Defined Message-Id ?
+USE_ORIGINAL_MESSAGE_ID:	1
+
+# Precedence: field; 
+# why "list" is not used ;_; but netbsd.org is "list" 
+PRECEDENCE:	bulk
+
+# X-Stardate: field
+APPEND_STARDATE:
+
+# We should force "To: $MAIL_LIST" form "For Eye" or NOT?
+# In default, we rewrite "To: $MAIL_LIST, original-to-fields".
+NOT_REWRITE_TO:
+
+# Default values if no value (no field) is given.
+Subject:
+From_address:	 not.found
+User:		 not.found
+Date:		 not.found
+
+# TIME ZONE;  +0900 is RFC822 syntax (I like JST but ... ;-)
+TZone:		 +0900
+		
+# ## Sub Section: Pass All Header ? ##
+# In default we pass only defined fields of the header
+# which is defined in @HdrFieldsOrder (see "sub SetDefaults" in fml.pl).
+# All files except $SKIP_FIELDS is passed through if $SUPERFLUOUS_HEADERS = 1.
+# 
+SUPERFLUOUS_HEADERS:  0
+
+SKIP_FIELDS:	Received|Return-Receipt-To
+
+
+#####################################################################
+# ### Section: Commands, Command Traps, File Operations (e.g. mget) ###
+
+# COMMAND format is "#help" == "# help" if $COMMAND_SYNTAX_EXTENSION is set.
+COMMAND_SYNTAX_EXTENSION:  1
+
+# "Subject: # commands" is available?
+USE_SUBJECT_AS_COMMANDS:	0
+
+# If NOT "# command" syntax commands is given, ignore or warn to the user?
+# Our default is not, since most such cases are "signature".
+USE_WARNING:			0
+
+# obsolete: since this is the same as --ctladdr.
+COMMAND_ONLY_SERVER:	0
+
+# **ATTENTION**
+# $PROHIBIT_COMMAND_FOR_STRANGER is obsoletes since 
+# $PROHIBIT_COMMAND_FOR_STRANGER equals $PERMIT_COMMAND_FROM = "anyone";
+
+# ## Sub Section: traps ##
+# when $MAIL_LIST == $CONTROL_ADDRESS, 
+# the first $COMMAND_CHECK_LIMIT lines is checked for commands mail or not?
+# $GUIDE_CHECK_LIMIT is the same kind of variable but for "# guide" trap.
+# $GUIDE_KEYWORD determines "guide" of "$ guide" trap.
+COMMAND_CHECK_LIMIT:  	3
+GUIDE_CHECK_LIMIT:	3
+GUIDE_KEYWORD:	guide
+
+# "# chaddr" commands is required for special exception
+CHADDR_KEYWORD:	 chaddr|change\-address|change
+
+# ## Sub Section: mget ##
+# The default mode of "mget" without mode (default is "tar.gz" form).
+# $MGET_TEXT_MODE_DEFAULT is used by &SendFileBySplit
+MGET_MODE_DEFAULT:
+MGET_TEXT_MODE_DEFAULT:
+
+# The reply for "mget" commands sends long reply mails as splitten mails
+# by the unit $MAIL_LENGTH_LIMIT lines once at $SLEEPTIME secs..
+MAIL_LENGTH_LIMIT:	1000
+SLEEPTIME:		300
+
+# See doc/op and libfop.pl for the detail. You change MIME/Multipart default.
 MIME_VERSION:
 MIME_CONTENT_TYPE:
-
 MIME_MULTIPART_BOUNDARY:
 MIME_MULTIPART_CLOSE_DELIMITER:
 MIME_MULTIPART_DELIMITER:
 MIME_MULTIPART_PREAMBLE:
 MIME_MULTIPART_TRAILER:
 
+# sjis conversion in "mget ish" mode.
+USE_SJIS_IN_ISH:
 
-USE_LIBMIME:	 0
-			# Backward compatible, DUMMY VARIABLE for USE_MIME;
-			# R1 MIME support when use MIME Extension in libMIME.pl			
+# RFC1153 configurations; see doc/op for the detail
+RFC1153_ISSUE:
+RFC1153_SEQUENCE_FILE:
+RFC1153_VOL:
 
+#C beth
+# ## Sub Section: Headers of reply from FML ##
+# For the reply for commands from FML,
+# we force Reply-To: $FORCE_COMMAND_REPLY_TO ?(default is $CONTROL_ADDRESS)
+FORCE_COMMAND_REPLY_TO:
 
-INFO:
-### HEADER CUSTOMIZATION
+# In "mget" reply, not show the present format of the bundle.
+NOT_SHOW_DOCMODE:
 
-SUBJECT_HML_FORM:  0
-			### SUBJECT FORM
-			# if non-nil , Subject: [X-ML-Name:ID] Subject
-			# like the form of Subject in hml 1.6.
-
-BRACKET:	 Elena
-			# Subject: [BRACKET:ID] ...
-
-
-SUPERFLUOUS_HEADERS:  0
-			# preserve more header fields
-
-
-STRIP_BRACKETS:  0
-			# multiple Re:, Strip e.g. [ML:fukachan] in Subject
+# In "mget" reply, the former part of Subject:
+DEFAULT_MGET_SUBJECT:
 
 
-AGAINST_NIFTY:  0
-			### OBSOLETE ERRORS-TO against NIFTY
-			# Against illegal implementation, use Erros-To
+#####################################################################
+# ### Section: Digest/Matome Okuri Configurations ###
+#
+# $MSEND_MODE_DEFAULT is the default of msend (when e.g. m=3)
+# and the format is the same as $MGET_MODE_DEFAULT.
+# which is "tar.gz" format.
 
-USE_ERRORS_TO:			0
+# Digest/Matome Okuri rc file
+MSEND_RC:	 $VARLOG_DIR/msendrc
 
-ERRORS_TO:	$MAINTAINER
-    # Errors-to is not refered in RFC822. 
-    # Sendmail 8.x do not see this field in default. 
-    # However in error may be effective for e.g. Pasokon Tuusin, BITNET..
-    # I don't know details about them.
+# rfc1153 or rfc934
+# obsoletes $USE_RFC1153, $USE_RFC1153_DIGEST, $USE_RFC934
+MSEND_MODE_DEFAULT:
 
-USE_ORIGINAL_MESSAGE_ID:	1
+# Subject:
+MSEND_DEFAULT_SUBJECT:
 
-PRECEDENCE:	bulk
+# If no articles to send, we send "no traffic" to the member of $MAIL_LIST
+# with the subject $MSEND_NOTIFICATION_SUBJECT if $MSEND_NOTIFICATION is set.
+MSEND_NOTIFICATION:
+MSEND_NOTIFICATION_SUBJECT:
 
-REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc
+# not require X-ML-Info: in the "mget";
+MSEND_NOT_USE_X_ML_INFO:
 
-SKIP_FIELDS:	Received|Return-Receipt-To
-
-PREAMBLE_MAILBODY:
-
-TRAILER_MAILBODY:
-
-APPEND_STARDATE:	0
-
-
-
-
-
-INFO:
-### IPC to speak to Sendmail via SMTP PORT
-# Configuration for Smtp library
-# host is an arbitrary host(if you can access it)
-# If the Mailing List Server has only weak power,
-# you can use the sendmail of another powerful host(host).
-
-HOST:		 localhost
-			# e.g. write beth.foo.bar.ac.jp here.
-
-NOT_TRACE_SMTP:  	0
-			# If non-nil, not log smtp to sendmail.
-			# trace of smtp is effective when DEBUG!
-			# 0 is backward-compatible
+# not do newsyslog in the sunday morning. $NOT_USE_NEWSYSLOG (CFVersion 2)
+MSEND_NOT_USE_NEWSYSLOG:
 
 
-TRACE_SMTP_DELAY:	0
+#####################################################################
+# ### Section: Directory  ###
+# We use fully pathed directory name => $FP_SPOOL_DIR(= $DIR/$SPOOL_DIR)
+# and relative path $SPOOL_DIR (e.g. spool) 
 
-SENDMAIL:	&path(sendmail)
-
-MCI_SMTP_HOSTS:		0
-
-
-
-INFO:
-### OS, MISC: OTHER CUSTOM OPTIONS
-
-USE_FLOCK:	 1
-			# use flock for lock algorithm if non-nil
-
-NOT_USE_SPOOL:	0
-			# not spooling (default is "spooling")
-
-COMMAND_SYNTAX_EXTENSION:  1
-			## COMMAND syntax ...
-			# if non-nil, convert #member -> # member
-			# in libfml.pl
-
-
-COMMAND_CHECK_LIMIT:  3
-			# the first 3 lines is checked for
-			# mistakes whether the command mode or not?
-			# at &Parsing in fml.pl,
-
-GUIDE_CHECK_LIMIT:	3
-
-
-MAX_TIMEOUT:	 200
-			# TIMEOUT OF LOCKING, flock(2), alarm(3)
-
-
-TZone:		 +0900
-		 	#Timezone: TZone	 JST
-		 	#Timezone: TZone	 +0900
-		
-
-NOT_USE_UNIX_FROM_LOOP_CHECK:  0
-			# CHECK UNIX-From Loop if 0
-
-
-NOT_USE_TIOCNOTTY:	0
-
-COMPAT_SOLARIS2:	0
-
-SLEEPTIME:		300
-
-FACE_MARK:
-
-PROC_GEN_INFO:		GenInfo
-
-MAIL_LENGTH_LIMIT:	1000
-
-ADDR_CHECK_MAX:		3
-
-COMMAND_ONLY_SERVER:	0
-
-COMPAT_FML15:		0
-
-PROHIBIT_COMMAND_FOR_STRANGER:	1
-
-USE_SUBJECT_AS_COMMANDS:	0
-
-USE_WARNING:			0
-
-
-
-INFO:
-
-
+# article spool directory
 SPOOL_DIR:	 spool
-			# article spool directory
-			# ATTENTION! $DIR/SPOOL_DIR form
 
+# tmp, after chdir, under DIR
 TMP_DIR:	tmp
-			# tmp, after chdir, under DIR
 
+# LOG is /var/log (4.4BSD style)
 VAR_DIR:	var
-			# LOG is /var/log (4.4BSD)
-
 VARLOG_DIR:	var/log
-
 VARRUN_DIR:	var/run
-
 VARDB_DIR:	var/db
 
-INFO:
-# Crosspost 
-CACHE_DIR:
+
+#####################################################################
+# ### Section: Other Files for Configurations and Logs ###
+
+# cache of loop check
+LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
+
+# $MEMBER_LIST 	sent by "# member" command
+# $ACTIVE_LIST 	sent by "# active" command
+#               == delivery list (active member list)
+
+MEMBER_LIST: 	 $DIR/members
+ACTIVE_LIST: 	 $DIR/actives
+
+
+# ATTENTION: only "guide" is also send to strangers
+#
+# $GUIDE_FILE 		sent by "# guide" command, 
+# $OBJECTIVE_FILE 	sent by "# objective" command
+# $HELP_FILE 		sent by "# help" command
+GUIDE_FILE:	 $DIR/guide
+OBJECTIVE_FILE:	 $DIR/objective
+HELP_FILE:	 $DIR/help
+
+# WHEN REJECT_*_HANDLER is "reject", we return this file to the poster
+DENY_FILE:	 $DIR/deny
+
+# $LOGFILE		log file
+# $MGET_LOGFILE		log file for mget routine, the same file in default.
+LOGFILE:	 $DIR/log
+MGET_LOGFILE:    $DIR/log
+
+
+# article summary file
+SUMMARY_FILE: 	 $DIR/summary
+
+# sequence number file
+SEQUENCE_FILE: 	 $DIR/seq
+
+# rename(2) lock (liblock.pl)
+LOCK_FILE:	 $VARRUN_DIR/lockfile.v7
+
+
+#####################################################################
+# ### Section: SMTP and Delivery ###
+#
+# [IPC] to speak to Sendmail via Simple Mail Transfer Protocol($PORT/tcp).
+# $HOST is an arbitrary host(if you can access it) which runs MTA
+# (e.g. sendmail).  If the Mailing List Server machine is week, 
+# you can use the sendmail of another powerful host(host).
+#
+HOST:		localhost
+PORT:		25
+
+# IF $NOT_TRACE_SMTP IS 1 (default 0), we log the SMTP session to $SMTP_LOG
+# IF $TRACE_SMTP_DELAY IS 1, we logs the delay of response between SMTP server.
+SMTP_LOG:		$VARLOG_DIR/_smtplog
+NOT_TRACE_SMTP:  	0
+TRACE_SMTP_DELAY:	
+
+# IF YOU USE PLURAL SMTP SERVER FOR DELIVERY, Please set the number to
+# $MCI_SMTP_HOSTS and define them to @HOSTS as the array components.
+MCI_SMTP_HOSTS:		
+
+# ## Relay server ##
+# each user relay is defined in delivery list as "m=relay-host".
+# If $DEFAULT_RELAY_SERVER is set, we apply it for all members.
+DEFAULT_RELAY_SERVER:
+
+# CF (by motonori@wide.ad.jp) base relay control if $RELEY_HACK is on. 
+# with %RELAY_GW, %RELAY_NGW, %RELAY_NGW_DOM (set in librelayhack.pl)
+# $CF_DEF is CF's configuration files; 
+# **ATTENTION**; we do not use sendmail.cf but CF's configuration.
+RELAY_HACK:
+CF_DEF:
 
 
 
-INFO:
-# newsyslog
+#####################################################################
+# ### Section: MISC ###
 
-NEWSYSLOG_MAX:			4
+# ## Sub Section: MIME ##
+# Mime Decode On if $USE_MIME; 
+# e.g. Decode $SUMMARY_FILE subject and so on.
+USE_MIME:
 
-
-
-INFO:
-### Expiration Function
-
-USE_EXPIRE:			0
-				# expiration function built-in (2.1 release) 
-
-EXPIRE_LIMIT:			7days
-				# expiration limit, syntax is e.g. 
-				# 7days(days) or 100 (articles left in spool)
+# NOT RECOMMENDED OPTION: 
+# articles in the spool are MIME-DECODED for poor environment users.
+# These articles may be insane in strict MIME oriented mail interfaces.
+MIME_DECODED_ARTICLE:
 
 
-INFO:
-# Archive
-
-USE_ARCHIVE:			0
-
-ARCHIVE_UNIT:			100
-
-DEFAULT_ARCHIVE_UNIT:		100
-
-
-
-INFO:
-# index
-
-INDEX_FILE:			$DIR/index
-INDEX_SHOW_DIRNAME:		0
+# ## Sub Section: Preamble and Trailer for Mail Body ##
+# If you always append some message in the mail body, you can use these.
+# e.g. mail body becomes
+#
+#    $PREAMBLE_MAILBODY
+#    original body
+#    $TRAILER_MAILBODY
+#
+PREAMBLE_MAILBODY:
+TRAILER_MAILBODY:
 
 
-
-INFO:
-# Library
-# DEFAULT: @DenyProcedure = ('library');
-# So you cannot use the 'library' command;
-# Please set @DenyProcedure = ('');
-LIBRARY_DIR:			var/library
-LIBRARY_ARCHIVE_DIR:		archive
-
-
-
-
-INFO:
-# Interface to other Information Services
-# Ftpmail, gopher, WWW
-
-HTML_EXPIRE:
-HTML_INDEX_TITLE:
+# ## Sub Section: Reply Configurations ##
+# In the last of e.g. "command status report", we add 
+# "$GOOD_BYE_PHRASE $FACE_MARK" :-) in the last of the reply. 
+# So the standard form is
+#
+#    message
+#    FYI message generated by the function $PROC_GEN_INFO.
+#    $GOOD_BYE_PHRASE $FACE_MARK
+#
+GOOD_BYE_PHRASE:	--$MAIL_LIST, Be Seeing You!
+FACE_MARK:
+PROC_GEN_INFO:		GenInfo
 
 
-FTPMAIL_SERVER:
-FTP_DIR:
-FTP_HELP_FILE:
-
-DEFAULT_GOPHER_PORT:	70
-DEFAULT_GOPHER_SERVER:
-
-DEFAULT_HTML_FIELD:
-DEFAULT_HTTP_PORT:	80
-DEFAULT_HTTP_SERVER:
-
-USE_WHOIS:  0
-			# Use Whois library
-
-DEFAULT_WHOIS_SERVER:  localhost
-			# where is the default whois server?
-
-WHOIS_DB:		$VARDB_DIR/whoisdb
-
-WHOIS_HELP_FILE:
-
-WHOIS_JCODE_P:		1
-			# do japanese coversion? or not ?
+# ## Sub Section: Lock Algorithm ##
+# use flock for lock algorithm if $USE_FLOCK is on.
+# see flock(2), alarm(3). If not, we rename(2) base lock.
+# The timeout of rename(2) lock is rand(3) *  $MAX_TIMEOUT secs.
+USE_FLOCK:	 1
+MAX_TIMEOUT:	 200
 
 
-INFO:
-# Cron
+# ## Sub Section: misc ##
+# Not spooling (default is "spooling")
+NOT_USE_SPOOL:	
 
+# "$CFVersion < 2" equals "$COMPAT_FML15 = 1;"
+COMPAT_FML15:		0
+
+# newsyslog library maximum number. default is 4. So
+# log.3 -> log.4, log.2 -> log.3, log.1 -> log.2, log.0 -> log.1, log -> log.0
+NEWSYSLOG_MAX:		4
+
+# cron configurations for bin/cron.pl NOT system Vixie cron(8)
 CRONTAB:			etc/crontab
 CRON_NOTIFY:			1
 CRON_PIDFILE:			var/run/cron.pid
 
-
-INFO:
-### SECURITY: Level for Commands.
-### REMOTE ADMINISTRATION CONFIGURATIONS:
-
-REJECT_ADDR_LIST:	$DIR/spammers
-			# list of spammers to be rejected
-
-REMOTE_ADMINISTRATION:  0
-			# admin and approve command if non-nil
-
-REMOTE_ADMINISTRATION_REQUIRE_PASSWORD:  1
-			# require password when use commands above
-
-ADMIN_MEMBER_LIST:	$DIR/members-admin
-			# members who can use admin commands
-
-ADMIN_HELP_FILE:	$DIR/help-admin
-			# help file of admin commands
-
-PASSWD_FILE: 		$DIR/etc/passwd
-			# password file to authentify members
+USE_CROSSPOST:
 
 
-INFO:
-GUIDE_KEYWORD:	guide
-    # Exceptional procedure KEYWORD to detect before &CheckMember
-    # CHECK KEYWORDS. Default is 'guide'
+#####################################################################
+# ### Section: Expire and Archive  ###
+
+# If $USE_EXPIRE is set, we do expiration function built-in (2.1 release) 
+# default is "NOT Expiration" or "Manual Expiration".
+# Expiration limit is $EXPIRE_LIMIT, which syntax is
+#   e.g. 7days(days) or 100 (articles left in spool)
+# If you re-generate $SUMMARY_FILE, set $EXPIRE_SUMMARY
+#
+USE_EXPIRE:			0
+EXPIRE_LIMIT:			7days
+EXPIRE_SUMMARY:
+
+# If $USE_ARCHIVE is on, we do automatically archive, which is 
+# spool/articles is aggregated to e.g. "$ARCHIVE_DIR/100.tar.gz"
+# by the unit $ARCHIVE_UNIT.
+# @ARCHIVE_DIR ($ARCHIVE_DIR == $ARCHIVE_DIR[0] now, $ARCHIVE_DIR is obsolete)
+#
+USE_ARCHIVE:			0
+ARCHIVE_UNIT:			100
+DEFAULT_ARCHIVE_UNIT:		100
+
+# "index" command; in default we scan spool and archives and reports. But
+# "# index" send $INDEX_FILE if $INDEX_FILE exists;
+INDEX_FILE:			$DIR/index
+INDEX_SHOW_DIRNAME:		0
 
 
-CHADDR_KEYWORD:	 chaddr|change\-address|change
-    # CHECK CHADDR_KEYWORDS. Default ...
+# ### Section: Library Commands  ###
+# You can put and get files by "library" commands.
+# In default, @DenyProcedure = ('library'); So 'library' command is disabled;
+# Set @DenyProcedure = ('') in LOCAL CONFIG part (the last of config.ph).
+#
+LIBRARY_DIR:			var/library
+LIBRARY_ARCHIVE_DIR:		archive
 
 
-CHECK_MESSAGE_ID:	1
-    # message-id: loop check
+# ### Section: Html Configurations ###
+# HTML Mode Configurations (libsynchtml.pl)
+# Please see doc/op for the details.
+HTML_EXPIRE:
+HTML_INDEX_TITLE:
+HTML_DATA_CACHE:
+HTML_OUTPUT_FILTER:
+HTML_THREAD:
+HTML_DATA_THREAD:
+HTML_INDEX_REVERSE_ORDER:
+HTML_INDEX_UNIT:
+BASE64_DECODE:
 
 
+# ### Section: Interface to other Services (http,ftp,gopher,www) ###
+# Please see doc/op for the details.
+FTPMAIL_SERVER:
+FTP_DIR:
+FTP_HELP_FILE:
+DEFAULT_GOPHER_PORT:	
+DEFAULT_GOPHER_SERVER:
+DEFAULT_HTML_FIELD:
+DEFAULT_HTTP_PORT:	
+DEFAULT_HTTP_SERVER:
 
-INFO:
-### HOOKS: ML-specific hooks e.g. # list
+# "whois": default is search of local database file 
+# If "whois -h host" syntax is given, we connects "host" whois server.
+# If $USE_WHOIS set, you can use local database $WHOIS_DB.
+# If you have local whois server (inetd), you can also use it.
+# If "whois help" is given, send back $WHOIS_HELP_FILE if it exists.
+#
+USE_WHOIS:
+DEFAULT_WHOIS_SERVER:
+WHOIS_DB:		$VARDB_DIR/whoisdb
+WHOIS_HELP_FILE:
 
-
-START_HOOK:
-DISTRIBUTE_START_HOOK:
-SMTP_OPEN_HOOK:
-HEADER_ADD_HOOK:
-DISTRIBUTE_CLOSE_HOOK:
-COMMAND_HOOK:
-ADMIN_COMMAND_HOOK:
-RFC1153_CUSTOM_HOOK:
-MSEND_OPT_HOOK:
-FML_EXIT_HOOK:
-FML_EXIT_PROG:
-MSEND_START_HOOK:
-
-
-INFO:
-##### THESE FILES SHOULD BE CHECKED.
-
-FML:		 fml.pl
-			# driver name (dont add /)
-
-LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
+# do Japanese conversion or not? for the result from whois server
+WHOIS_JCODE_P:		1
 
 
+#####################################################################
+# ### Section: Architecture Dependence ###
 
-MEMBER_LIST: 	 $DIR/members
-			# member list
+# cpu-type manufacturer operating-system by GNU config.guess ("makefml")
+CPU_TYPE_MANUFACTURER_OS:
 
-ACTIVE_LIST: 	 $DIR/actives
-			# active member list
+# struct sockaddr
+STRUCT_SOCKADDR:	S n a4 x8
 
-OBJECTIVE_FILE:	 $DIR/objective
-			# objective file
-
-GUIDE_FILE:	 $DIR/guide
-			# the guide file of our Mailing List
-
-HELP_FILE:	 $DIR/help
-			# the help file for useful commands
-
-DENY_FILE:	 $DIR/deny
-			# attention to illegal access
-
-WELCOME_FILE:	 $DIR/welcome
-			# could be $DIR/welcome
-
-WELCOME_STATEMENT:Welcome to our $ML_FN\n         You are added automatically
-			# Subject of the reply mail for welcome
-
-CONFIRMATION_FILE:	 $DIR/confirm
-			# explanation of confirmation mode;
-
-LOGFILE:	 $DIR/log
-			# activity log file
-
-MGET_LOGFILE:    $DIR/log
-			# log file for mget routine
-
-SMTPLOG:		$VARLOG_DIR/_smtplog
-
-
-SUMMARY_FILE: 	 $DIR/summary
-			# article summary file
-
-SEQUENCE_FILE: 	 $DIR/seq
-			# sequence number file
-
-MSEND_RC:	 $VARLOG_DIR/msendrc
-			# Matome Okuri Rel.4 rc file
-
-
-LOCK_FILE:	 $VARRUN_DIR/lockfile.v7
-			# liblock.pl
-
-
-Subject:
-			# Subject field
-
-From_address:	 not.found
-			# Address of From field
-
-User:		 not.found
-			# username, the first 15 characters
-
-Date:		 not.found
-			# when posted to ML
-
-BodyLines:	 0
-			# number of lines of a mailbody
-
-
-NULL:
-			# Useful Constants
-
-
-INFO:
-### System parameters: flock system call
-
+# flock system call; please see "/usr/include/sys/file.h"
 LOCK_SH: 	 1
 LOCK_EX: 	 2
 LOCK_NB:	 4
 LOCK_UN: 	 8
 
+# solaris 2 compatible (for not-automatic-checked OS's ;-)
+COMPAT_SOLARIS2:	
 
+# we can emulate daemon(3) ?
+NOT_USE_TIOCNOTTY:	
 
+# In Unix, always yes set 1 in &SetDefaults;
+HAS_GETPWUID:	
+HAS_GETPWGID:	
+HAS_ALARM:	
 
-LOCAL_CONFIG:
-############################################################################
-# FML R2 CONFIGURATIONS
-# libcompat_cf1.pl is generated from cf/MANIFEST
-#    $Id$
-# @ARCHIVE_DIR  = ('var/archive', 'old');
-
-
-############################################################################
-
-
-INFO:
-# Configure automatically generated is below
-# System commands following 4.4 BSD. Please check when it does not work.
-#
-# ********* ATTENTION! **********
-# IF "sitedef.ph" EXISTS in the same directory as in config.ph or in lib*.pl
-# "sitedef.ph" OVERWRITE the following command settings.
-# PLEASE CHECK THE EXISTENCE 
-# (see ./samples/sitedef.ph which is automatically generated in installing)
-
+# programs which may be used in the fml library
+# these are automatically set by "makefml"
+SENDMAIL:	&path(sendmail)
 TAR:		&path(tar) cf -
 UUENCODE:	&path(uuencode)
 COMPRESS:	&path(gzip) -c
@@ -576,3 +638,24 @@ ZCAT:		&path(gzcat:zcat:gzip\s-cd)
 LHA:		&path(lha)
 ISH:		&path(ish)
 PGP:		&path(pgp)
+
+
+LOCAL_CONFIG:
+
+# ## Sub Section: Available Hooks ##
+# You can set customized hooks here. See doc/op's chapter "HOOKS".
+# For example available hooks are 
+# $START_HOOK, $DISTRIBUTE_START_HOOK, $SMTP_OPEN_HOOK
+# $HEADER_ADD_HOOK, $DISTRIBUTE_CLOSE_HOOK, $COMMAND_HOOK
+# $ADMIN_COMMAND_HOOK, $RFC1153_CUSTOM_HOOK, $MSEND_OPT_HOOK
+# $FML_EXIT_HOOK, $FML_EXIT_PROG, $MSEND_START_HOOK
+# $REPORT_HEADER_CONFIG_HOOK, $AUTO_REGISTRATION_HOOK, $MSEND_HEADER_HOOK
+# $SMTP_CLOSE_HOOK, $MODE_BIFURCATE_HOOK. $HTML_TITLE_HOOK
+#
+# ## Sub Section: Available Arrays and Assoc-Arrays ##
+# Also you can set here arrays and association arrays:
+#
+# @MEMBER_LIST, @ACTIVE_LIST, @CROSSPOST_CF
+# @HOST, @HOSTS, @MAIL_LIST_ALIASES, @HdrFieldsOrder
+#
+
