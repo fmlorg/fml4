@@ -47,7 +47,7 @@ simulation:
 	@ env ${EXPORT_ENV} sh $(FML)/.simulation/bootstrap
 
 update:
-	cvs update -dAP
+	cvs update -dAP || echo 'nothing changed'
 
 __scan: update_configuration
 	@ mv -f /tmp/__scan__ /tmp/__scan__.bak || echo ""
