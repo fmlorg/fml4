@@ -17,6 +17,24 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	CGI
+
+X-Mail-Count: 07111
+
+片方だけのファイルを操作するための
+
+   makefml {add,bye}ファイル名
+   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
+
+(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
+がします。
+
+e.g. makefml addactives ML addr
+     makefml addmembers ML addr
+
+なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
+思うので実装しなくてはいけないとおもいました。
+
 .S	msend.pl should not tr/A-Z/a-z/
 
 fml-support: 07262
