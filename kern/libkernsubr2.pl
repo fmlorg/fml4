@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libkernsubr2.pl,v 2.9 2001/08/25 12:17:41 fukachan Exp $
+# $FML: libkernsubr2.pl,v 2.10 2001/09/24 12:44:41 fukachan Exp $
 #
 
 use vars qw($debug $PeerAddr);
@@ -74,8 +74,9 @@ sub EmulRFC2369
     my $rcsid = $args->{ 'rcsid' };
 
     if ($Envelope{'mode:stranger'} && $PERMIT_POST_FROM ne 'anyone') {
-	&DefineDefaultField("List-Subscribe", 
-			    "<mailto:$addr?body=${trap}subscribe>");
+	my $subscribe = $LIST_SUBSCRIBE ||
+		"<mailto:$addr?body=${trap}subscribe>";
+	&DefineDefaultField("List-Subscribe", $subscribe);
     }
     else {
 	my ($software, $post, $owner, $help, $unsubscribe);
