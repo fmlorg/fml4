@@ -12,20 +12,46 @@
 # $Id$
 #
 
+######### CONFIGURATION ##########
 # fml system (executables) directory
 EXEC_DIR=/usr/local/fml
 
 # ML's parent directory
 ML_DIR=/var/spool/ml
+######### CONFIGURATION ENDS ##########
 
-#####
+##### LIBRARIES
 ERROR () {
 	echo "cannot chdir $ML_DIR";
 	exit 1;
 }
 
-#####
 
+##### MAIN PRE; GETOPT
+
+while [ $# -gt 0 ]
+do
+    case $1 in
+    -E )
+	shift
+	EXEC_DIR=$1
+	;;
+    -M )
+	shift
+	ML_DIR=$1
+	;;
+    -v )
+	set -vx
+	;;
+     * )
+	echo $1 "is not matched option"
+	exit 2
+    esac
+    shift
+done
+
+
+##### MAIN
 chdir $ML_DIR || ERROR
 
 for ml in *
