@@ -40,3 +40,8 @@ subdir_index:
 	     mv	$$d/index.wix.new $$d/index.wix;\
 	  fi ;\
 	done
+
+entry:
+	apply 'echo DOC_TUTORIAL_SUBDIR += %1' `find [A-Za-z]* -type d -print|grep -v CVS`|\
+	egrep -v 'CVS|/obsolete|template|[a-z]/[a-z]' |\
+	sed 's@\./@@'
