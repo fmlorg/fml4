@@ -9,6 +9,8 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 sub ConfigByMakeFml
 {
+    $UnderMakeFml = 1; # Set Global Identifier;
+
     local($os);
 
     for (keys %MAKE_FML) {
