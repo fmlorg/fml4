@@ -208,7 +208,7 @@ a problem to define templates.
 
 .fi
 
-.S	本文へ注意をつけたす (2000/06/05 以降の fml-current)
+.S	本文へ注意をつけたす (2000/06/05 以降の fml-current の場合)
 
 $START_HOOK = q#
 	my ($s) = &GET_BUFFER_FROM_FILE("$DIR/info");
@@ -239,5 +239,41 @@ CAUTION: メール本文をいじることと慣習法と倫理(私見)
 行為を許すでしょうか?
 .~q
 
+その他の問題: 
+
+1. degital signature 
+
+	メールの degital signature があったら、勝手に文章を付け足すこ
+	とはそれを無意味にしてしまいます。いったいどこにつけるのが正し
+	いのか？
+
+2. MIME
+
+	MIME blocks の終った後につけても、多くのメールソフトでは
+	それは見えないでしょう。
+	もっともＭＬのメールが全部 MIME multipart ということは
+	ないでしょうから、それなりに付け足すヘルプは見てもらえるだろう
+	ということでOKなのかもしれません。
+
+
+.S	本文へ注意をつけたす (2000/06/05 以前の場合)
+
+これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
+注意： 配送されるメール本体につける方法。これは倫理的な問題があるので
+変数などで容易にできるように実装されていません。
+=E
+If you rewrite the distribution mail, please use a hook BY YOUR OWN
+RESPONSIBILITY AND RISK.
+
+注意: このHOOKが走る関数中では %e == %Envelope 
+
+例： メール本文にヘルプを常につけたす
+
+.q
+$SMTP_OPEN_HOOK = q% 
+   my($help_message) = "\n---\nHELP: please send 'help' to $CONTROL_ADDRESS";
+   $e{'Body'} .= $help_message;
+%;
+.~q
 
 .# $Id$
