@@ -232,6 +232,9 @@ sub EvalConfigPH
     local($f, $dir, $ml)   = @_;
     local($buf);
 
+    # but site_{init,force,def} ?
+    require 'default_config.ph';
+
     if (-f $f && open(FILE, $f)) {
 	;
     }
