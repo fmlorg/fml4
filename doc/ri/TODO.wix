@@ -14,39 +14,14 @@
 .toc
 -------------------------------
 
-.C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
-=E.C	TODO, WISH LIST
+.C	current
 
-.S	automatic-unsubscribe when "Subject: unsubscribe" mail comes
-=E.S	Subject: unsubscribe で自動削除?
+.S	3.0B (fukui newconfig)
 
-もともとの設問の意図が「そういう一行メールが多いので、こういうときは自
-動的にTRAPして削除処理をしよう」っていう変数があるとしあわせ？
-そんな気がするよね〜 :-)
+要いろいろチェック
 
-これがデフォルトはまずいとおもうんだが、optional ならOK？
-
-
-.S	Welcome ... and MesgLE()
-
-いまでは MesgLE() をつかって再実装するべきだ
-
-.S	cvs add default_config.ph ?
-=E.S	default_config.ph をcvs treeに?
-
-for fml-stable
-
-.S	chkerror
-
-Author: i16@forest.ne.jp
-
-package としてくみこむ作業がのこってる
-
-.S	fukui newconfig
-
-やっぱりいろいろ不都合あり。要いろいろチェック
-
-fml-stable に default_config.ph をつっこむべき。
+package にダミーの default_config.ph をいれよう 
+A: エラーにならないだけなら "1;" だけのものでもいい気はする。
 
 fml-support: 06987
 
@@ -71,8 +46,33 @@ fml-support: 06987
        (実際には、site_force.ph がなければ、
         sitedef.ph を require するようになっている)
 
-.S	CGI
+
+.S	3.0A (CGI)
 .xref	CGI
+
+
+.C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
+=E.C	TODO, WISH LIST
+
+.S	automatic-unsubscribe when "Subject: unsubscribe" mail comes
+=E.S	Subject: unsubscribe で自動削除?
+
+もともとの設問の意図が「そういう一行メールが多いので、こういうときは自
+動的にTRAPして削除処理をしよう」っていう変数があるとしあわせ？
+そんな気がするよね〜 :-)
+
+これがデフォルトはまずいとおもうんだが、optional ならOK？
+
+
+.S	Welcome ... and MesgLE()
+
+いまでは MesgLE() をつかって再実装するべきだ
+
+.S	chkerror
+
+Author: i16@forest.ne.jp
+
+package としてくみこむ作業がのこってる
 
 .S	msend.pl should not tr/A-Z/a-z/
 
@@ -251,12 +251,7 @@ fml-support: 7155
 XRef: fml-support:05930
 
 
-
 .S	Naming Convention
-
-import fukui-newconfig branch/patch
-
-* sitedef.ph , site_init の naming convention
 
 * personal, group の naming convention
    share ?
@@ -591,6 +586,13 @@ A: module/$LANGUAGE/
 * all ranges
 
 * clean up mget3 internals
+
+XXX まぁそれ以前に「美しい」 って何だ？っていう哲学的問題があるわけだ
+XXX が…
+XXX 時代によって「美しい」という意味は変わるだろうし
+XXX 難しくて保守できないようなコードじゃ意味がないわけで
+XXX 「美しいコード」という命題自体がかなり無意味な気がする
+XXX わかりやすいコードというべきなんだろうな
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
