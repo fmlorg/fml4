@@ -142,6 +142,7 @@ INFO:	$(FML)/.info
 	rm -f /var/tmp/.fml/INFO
 	(nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
 		nkf -e |tee var/doc/INFO > /var/tmp/.fml/INFO
+	sh usr/sbin/DocReconfigure -o var/doc /var/tmp/.fml/INFO 
 
 plaindoc: doc/smm/op.wix
 	@ $(MKDIR) /var/tmp/.fml
@@ -150,7 +151,7 @@ plaindoc: doc/smm/op.wix
 		nkf -e > /var/tmp/.fml/INFO
 	@ sh usr/sbin/DocReconfigure
 
-htmldoc:	doc/smm/op.wix
+htmldoc: doc/smm/op.wix
 	@ (chdir doc/html; make)
 	@ $(MKDIR) var/html/op
 	@ (chdir doc/html; make op)
@@ -286,7 +287,7 @@ docdiff:
 scan:
 	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix |\
 	tee /tmp/_scan_
-	@ grep Modified /tmp/_scan_
+	@ grep Modified /tmp/_scan_ || echo OK
 	@ rm /tmp/_scan_
 
 loop:
