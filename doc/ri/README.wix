@@ -1,5 +1,5 @@
 .HTML_PRE
-	fml 4.0 mailing list manager package
+	fml 4.0 mailing list server/manager package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -11,11 +11,11 @@
 .if LANG == JAPANESE
 [ガイド]
 
-   大まかな流れを掴むためには、まずここを最初に参照して下さい。
+   大まかな流れを掴むには、以下の URL を参照して下さい。
 .url http://www.fml.org/fml/Japanese/basic_setup/
 
-   チュートリアルは様々なテーマごとにまとめられたページです。
-   細かい設定はこちらを参照して下さい。
+   fml チュートリアルはテーマごとに事例を取り上げたページです。
+   細かい設定等はこちらを参照して下さい。fml 内部等も適宜解説しています。
 .url http://www.fml.org/fml/Japanese/tutorial.html
 
    fml のホームページ
@@ -39,21 +39,21 @@
 .toc
 
 
-.C	概要
-=E.C	Overview
+.C	イントロダクション
+=E.C	Introduction
 
 .S	はじめに
 =E.S	Introduction
 
 .if LANG == JAPANESE
 fml はメーリングリスト(以下 ML)を作るためのパッケージです。perl を使っ
-て書かれています。fml は、配送とコマンドメールに対応するプログラムを中
-心に、多くのプログラムから構成されます。
+て書かれています。fml は、配送とコマンドメールを処理するプログラムを中
+核に、多くのプログラムから構成されます。
 
 fml のセットアップやカスタマイズは makefml というプログラムにより、メ
 ニューで対話的に行うこともできます。fml 4.0 からは CGI から makefml 
 の代表的な機能(登録、削除、メニューによる ML のカスタマイズ)を使う仕組
-みが導入されています。
+みもあります。
 .fi
 .if LANG == ENGLISH
 fml 4.0 is a package of mailing list server and utility programs. It
@@ -77,11 +77,13 @@ fml のデザインの根幹をなす思想は
 fml design policy is based on the degree of freedom, so that I respect
 "each environment for each man/women".
 
-デフォルトの ML の運用スタイルは ML サーバのホスト上で、fml の管理者
-が makefml コマンドを使うことです。makefml を使いメンバーの登録や削除、
-そして細かなカスタマイズを行うことが期待されています。
-別の運用スタイル(自動登録、モデレータ、メールマガジン型)への
-変更も makefml のメニューで行うことができます。
+デフォルトの ML の場合、運用の仕方は 
+
+	ML サーバのホスト上で、fml の管理者が makefml コマンドを使い
+	登録や削除、そして細かなカスタマイズ等を行う
+
+ことが期待されています。別の運用スタイル(自動登録、モデレータ、メール
+マガジン型)もいろいろと用意されています。
 =E
 I assume that ML is a private communication so that the default fml
 policy is manual edit: "you add a new member in hand, only members can
@@ -93,23 +95,26 @@ to customize basic functions. Advanced configuration needs the manual
 edit of config.ph.
 
 
-.S	インストールの前に
+.S	インストールについて
 =E.S	Environment you need in installation of fml
 
 .if LANG == JAPANESE
-fml のインストールとメールサーバの設定作業については 
-INSTALL というファイルを読んで下さい。
+fml のインストールとメールサーバの設定作業について詳しくは 
+INSTALL という名のファイルを読んで下さい。
 
-この作業の前にインストールするホストに
-   ユーザ fml というアカウント
-があり、
-   perl 5
-   メール配送プログラム
-がインストールされていることを確認して下さい。
+INSTALL はインストールの手続き全般について述べています。
+そこでは UNIX 上で sendmail を使っているケースを前提としています。
 
-Windows NT4 上での fmlについては INSTALL_on_NT4 を参照して下さい。
-いくつかのMTA(現在は sendmail, postfix, qmail and exim)についての注意
-点が INSTALL_with_MTA名 というファイルにあります。
+各オペレーティングシステムごとの注意は
+
+	INSTALL_on_オペレーティングシステム
+
+という名のファイルに、UNIX 上のメールサーバごとの注意は
+
+	INSTALL_with_メールサーバ
+
+という名のファイルにまとめられています。
+UNIX 系の OS 上では手順等に特別な違いはありません。
 .fi
 .if LANG == ENGLISH
 fml fundamentally needs
@@ -123,41 +128,7 @@ See INSTALL_on_NT4 for fml on Windows NT4.
 See INSTALL_with_QMAIL when you use fml with qmail.
 .fi
 
-プロバイダのサービスを利用している場合どうすればよいかは一概にはいえま
-せん。詳しくは自分の使っているプロバイダに聞いて下さい。一般にはいわゆ
-る「シェルアカウント/シェルサービス」などと呼ばれる UNIX マシンを使え
-るサービスを利用している必要があるはずです。ホームページレンタルサービ
-スなどでFTP等でファイルを送り込むタイプのものなどの"シェルサービスのつ
-いていない"サービスだけではおそらく無理でしょう。
-=E
-If you use an ISP service, you must require e.g. a shell account. You
-should consult with ISP you use for details of computer environments.
-
-.if LANG == JAPANESE
-MLは本質的にフィルタリングなので、MLのプロセスの流れは(間にfmlを夾んで)
-	"メールを受けてfmlをkickするプロセス"
-	"SMTPを理解する配送プロセス"
-の２つの動作からなります。メールを受けることと配送することは概念的に別
-のものです。原則的に fml はメールを受けるホスト上で動きます。配送系は
-SMTPを理解してくれればなんでも構いません postfix,sendmail, qmail, exim, ...
-そのため配送を担当するホストはメールを受けるホストと同じでなくても構い
-ません。配送専用マシンなどあるととてもよいでしょう。
-.fi
-.if LANG == ENGLISH
-ML is a filtering process, so it consists of
-                               1             2
-   sender(post an article) -> MTA -> fml -> MTA (to deliver the article)
-
-   1. process receives an incoming mail and kicks a fml process off
-   2. delivery process which process understands SMTP
-
-The delivery (MTA 2) and kick-off (MTA 1) processes can be essentially
-different ones. fml runs on the host which receives mail submitted
-to ML. MTA 2 (delivery system) can run on another hosts other than MTA
-1. Plural MTA's for delivery are available to accelerate it.
-.fi
-
-.S	ソースコードと情報へのポインタ
+.S	ソースコード
 =E.S	Source codes and the latest information
 
 [Sources]
@@ -168,45 +139,54 @@ You can obtain fml sources at the URL
 
 .url	ftp://ftp.fml.org/pub/fml/
 
-です。この下には
+です。このディレクトリ以下には
 
 	release/	正式リリース
 	stable/		正式リリースにバグ修正のみをしたシリーズ
 	current/	開発版
 
-などがあります。説明は例えば
+などのサブディレクトリがあります。それぞれの違いについては例えば
+以下の URL を参照して下さい。
 =E
 See this url for explanation of ftp hierarchy:
 
 .url http://www.fml.org/fml/download.html
 
-リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼ばれファ
-イル名には日付(YYYYMMDD, e.g. 200002029)がついています。日付の新しい
-(生きのいい:-)のをどうぞ。ここの階層以下にはメールに関連するプログラム
-群も置いてあります。
+それぞれのディレクトリにあるファイル名は少しずつ異なります。しかし、基
+本的に
+
+	fml-バージョン番号-日付情報を含むスナップショット番号
+
+のようになっています。バージョン番号(4.0、4.0.1 とか 4.0B、4.0C など)
+は何かの区切りがついたと思われる時だけ変化します。
+
+お勧めは stable/ にある日付の一番新しいファイルです。
 =E
 Please get the latest one, which is called fml-current. You'll find
 fml-current, official released and other mail related sources at the
 URL. 
 
 
-[Documents] 
+.S	ドキュメント
+=E.S	ドキュメント
 
-ドキュメントは fml のソースをひろげると doc/ の下に plain test
-doc/html/ の下にその HTML版があります。
+ドキュメントは fml のソースを展開すると doc/ の下にあります。プレイン
+テキストがそこに展開されます。また、doc/html/ の下にはその HTML 版が用
+意されています。
 =E
 When you expand the fml source, you will find several documents under
 doc/ and html documents under doc/html/.
 
-最新版のドキュメント/ソースなどは
+最新版のドキュメントは
 =E
 The HOME PAGE of the fml is 
 
 .url	http://www.fml.org/
 
 .if LANG == JAPANESE
-からたどれます。最新のネタはML(後述)かここを見てみて下さい。
-配布ドキュメント群へのサーチエンジンもあります。
+からたどれます。最新のネタは ML (後述)かこの URL を見てみて下さい。こ
+こにはドキュメント群へのサーチエンジンもあります。知りたい情報がある時
+は、まず、このサーチエンジンを使ってみて下さい。
 .fi
 .if LANG == ENGLISH
 You can obtain the latest (fml-)current documents and sources here.
@@ -214,18 +194,6 @@ You could see the latest topics on fml-users mailing lists or fml home
 pages. This site provides the search engine over fml distribution
 documents. 
 .fi
-
-.S	fml Advisories
-
-現在のfml-currentにはfml Advisoriesというドキュメント群があります。旬
-の特定のテーマについてまとめたものです。セキュリティ関係が主なテーマで
-すが、それ以外のテーマもあります。
-例: happy99, Melissa
-=E
-fml Advisories are a series of documents to advice some kinds of
-current topics, for example, happy99, Melissa ...
-
-.url	http://www.fml.org/fml/advisories/
 
 
 .S	メーリングリストについて
@@ -310,8 +278,6 @@ address <fml-bugs@ffs.fml.org>.
 .# <fml-users@ffs.fml.org> but the sender is not registered
 .# automatically.
 .fi
-
-
 
 
 
