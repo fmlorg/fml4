@@ -230,13 +230,13 @@ sub AutoRegist
     if ($e{'GH:Reply-To:'} eq $MAIL_LIST) {
 	local($p);
 	$p = "<$from> is added to <$MAIL_LIST>.\n\n";
-	$p = &Translate(*e, $p, 'amctl.added', $from, $MAIL_LIST);
-	$p = &Translate(*e, $p, 'amctl.added.caution', 
-			$MAINTAINER, $MAIL_LIST, $CONTROL_ADDRESS);
 	$p .= "ATTENTION!: IF YOU REPLY THIS MAIL SIMPLY\n";
 	$p .= "YOUR REPLY IS DIRECTLY SENT TO THE MAILING LIST $MAIL_LIST\n";
 	$p .= "-" x 60; $p .= "\n\n";
-	$e{'preamble'} .= $p;
+	$p = &Translate(*e, $p, 'amctl.added', $from, $MAIL_LIST);
+	$p = &Translate(*e, $p, 'amctl.added.caution', 
+			$MAINTAINER, $MAIL_LIST, $CONTROL_ADDRESS);
+	$e{'preamble'} .= $p if $p;
     }
     &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
 
