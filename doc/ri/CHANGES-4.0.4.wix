@@ -7,6 +7,10 @@
 
 	* 4.0.4 は基本的に細かいバグとりが中心です(詳細は以下参照)。
 
+2001/12/27
+
+   proc/libra.pl 2.37-2.39):
+	ADMIN_COMMAND_{START,END}_HOOK
 
 2001/12/19
 
@@ -16,7 +20,7 @@
 	perl module の include path を修正
 	fml 附属モジュールが最優先です。
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.36 2001/12/02 03:52:40 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.1 2001/12/19 13:17:25 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
