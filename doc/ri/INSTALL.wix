@@ -6,7 +6,7 @@
 
 
    昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
-   INSTALL.advanced はより濃やかな設定をしつつインストールをするための
+   INSTALL.advanced はより細やかな設定をしつつインストールをするための
    ドキュメントです。
 
 
@@ -25,24 +25,24 @@
 
 この時に次のような項目を聞いて来ます。
 
-   DOMAIN NAME          [sapporo.iij.ad.jp] 
-   MACHINE FULL NAME    [beth.sapporo.iij.ad.jp] 
-   EXEC FILES DIRECTORY [/usr/local/fml] 
-   ML DIR               [/var/spool/ml] 
+   DOMAIN NAME               [sapporo.iij.ad.jp] 
+   FQDN                      [beth.sapporo.iij.ad.jp] 
+   EXEC FILES DIRECTORY      [/usr/local/fml] 
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
 
 それぞれ、次のような意味ですので、適当に入れて下さい。単に
 Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
-   ・DOMAIN NAME          [sapporo.iij.ad.jp] 
+   DOMAIN NAME               [sapporo.iij.ad.jp] 
 
 	ドメイン名。
 	メーリングリストのアドレスの @ から後ろで使う部分
 
-   ・MACHINE FULL NAME    [beth.sapporo.iij.ad.jp] 
+   FQDN                      [beth.sapporo.iij.ad.jp] 
 
 	マシンのインターネット上での完全表記。
 
-   ・EXEC FILES DIRECTORY [/usr/local/fml] 
+   EXEC FILES DIRECTORY      [/usr/local/fml] 
 
 	実行ファイル等の fml system をインストールする場所。
 	例えば、この値の場合 
@@ -52,9 +52,9 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 	等がインストールされる。
 
-   ・ML DIR               [/var/spool/ml] 
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
 
-	ML(複数)はこの階層の下に作られる。例えば
+	ML(複数)はこの階層の"下"に作られる。例えば
 
 	   Elena ＭＬを作る場合は /var/spool/ml/Elena 
 	   Mirei ＭＬを作る場合は /var/spool/ml/Mirei
@@ -65,7 +65,6 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
 
-
 	例えば provider や大学の一般ユーザで /home の下だけならいじっ
 	てよい。aliases は root の人に書いてもらう
 
@@ -75,6 +74,23 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 	/home/fukachan/ml  にＭＬ群の階層を作る
 
 とか /home の下の適当な場所に作ればよいでしょう。
+
+
+.S	設定の保存
+
+なお、これらの↑設定はある場所に格納されるので次回以降 newml （後述）
+する時などはいつもこの値が使われます。
+
+これらの↑設定の後これらの設定を保存する directory をどこに置くか？尋
+ねられます。
+
+    CONFIG_DIR (e.g. /home/beth/fukachan/.fml, /usr/local/fml/.fml ...)
+    Config Saved in [/usr/local/fml/.fml] 
+
+デフォールトは、上で選んだ実行ファイルをインストールする場所の下の .
+fml 階層になっています。個人的にインストールする場合には $HOME の下 
+(例えば ~/.fml ) がよかったりするでしょうから、適当な directory 名を入
+れて下さい。
 
 
 
@@ -101,15 +117,15 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 ドの最後に表示されるのでそれを cut & paste して/etc/aliases に加えて 
 newalises して下さい。
 
-なおコマンドの最後の表示の内容は ~/.fml/elena/aliases に念のため保存さ
-れています。
+なおコマンドの最後の表示の内容は /usr/local/fml/.fml/elena/aliases に
+念のため保存されています。
 
 別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を mirei に
 変えて実行すればよいです。
 
 なお、各ＭＬごとに 
 
-	~/.fml/MLの名前/サンプルのファイル
+	/usr/local/fml/.fml/MLの名前/サンプルのファイル
 
 という形で作った時の設定を参考までに保存します。
 注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
@@ -120,11 +136,11 @@ newalises して下さい。
 
 NetBSD のような Vixie Cron がＯＳ附属の場合については
 
-	~/.fml/crontab 
+	/usr/local/fml/.fml/crontab 
 
 というファイルができているので、
 
-	crontab ~/.fml/crontab 
+	crontab /usr/local/fml/.fml/crontab 
 
 というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
 起動されて配送するようになります。
@@ -143,7 +159,7 @@ Vixie Cron でないOSについては man crontab で調べる or doc/op の cron
 
 .C	設定ファイルの保存
 
-	~/.fml/ＭＬの名前/
+	/usr/local/fml/.fml/ＭＬの名前/
 
 という場所に makefml で作った見本が入っています。
 がそれぞれのＭＬ用にカスタマイズされた内容の
@@ -163,7 +179,7 @@ Vixie Cron でないOSについては man crontab で調べる or doc/op の cron
 
 
 
-.C	ユーザをＭＬから削除される場合
+.C	ユーザをＭＬから削除する場合
 
    /usr/local/fml/sbin/makefml byeuser elena fukachan@sapporo.iij.ad.jp
    /usr/local/fml/sbin/makefml bye elena fukachan@sapporo.iij.ad.jp
@@ -176,7 +192,7 @@ Vixie Cron でないOSについては man crontab で調べる or doc/op の cron
 
 大抵は include でうまくいくはずですが、どうしてもだめな場合は 
 
-	~/.fml/ML名/fml.c 
+	/usr/local/fml/.fml/ML名/fml.c 
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
