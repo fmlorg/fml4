@@ -1,0 +1,2 @@
+&COPY_FIELD('Received', 'X-Received');
+$SKIP_FIELDS = 'Received|Return-Receipt-To';
