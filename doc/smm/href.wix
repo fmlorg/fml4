@@ -130,11 +130,38 @@ expireしない場合一つの htdocs/ に数千のファイルができることになり
 
 
 .S	HTMLファイルのExpire
+.k	$HTML_EXPIRE_LIMIT
 .k	$HTML_EXPIRE
 
-$HTML_EXPIRE	(default 0)
+$HTML_EXPIRE_LIMIT	(default 0)
 	expire の“日”数。もし０以下ならおこなわない。
 	これが指定されていないときは index.html は増える一方:-)
+
+＃注意: $HTML_EXPIRE はわかりにくいので $HTML_EXPIRE_LIMIT へ名前を変えた。
+＃      なお内部では自動変換しているのでどっちでも動く
+
+なお今のアルゴリズムは以下のようなものです。htdocs の下は
+
+	thread.html
+	index.html
+		SUB-DIRECTORY/thread.html
+		SUB-DIRECTORY/index.html
+		SUB-DIRECTORY/100.html
+		…
+
+のような階層を成しています。今はファイル単位ではなく sub-directory ご
+とに expire するか否かを決定しています。
+そうしないと中途半端に記事が欠落するとか、中途半端にファイルがなくなっ
+た状態で thread を再生成しなければならないので、ものすごく複雑な処理が
+必要になるからです。
+
+directory ごと expire する根拠はdirectory 中に含まれる全てのファイルが 
+expire だと判定された場合です。よって、ある directory 中の一部のファイ
+ルが expire の日付を過ぎていてもそれらは全てのファイルが expire される
+まで残り続けることに注意して下さい。
+
+なお directory ごと消す時に一番上の index.html thread.html は再構成さ
+れます。
 
 
 .S	BASE64の展開
