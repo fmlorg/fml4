@@ -1,0 +1,46 @@
+See also fml-support: 06987 and around it
+
+* load order
+
+  (1) $LIBDIR/default_config.ph
+  (2) site_init.ph
+  (3) $DIR/config.ph
+  (4) sitedef.ph
+
+
+* changed by fukui-newconfig
+
+  cf/config
+    → fml のインストール時に default_config.ph を作成するための
+       オプションとして '-i' オプションを追加。
+       '-i' オプション指定時は cf ファイル名の指定は不要で、
+       cf/MANIFEST に記述されている全変数を有効にした config.ph を出力する
+    → $DIR/cf ファイル指定時 (各ML での make config.ph 実行時) は、
+       $DIR/cf ファイルで有効になっていない変数をコメントアウトした
+       config.ph を出力するように変更
+
+  sbin/makefml
+    → fml のインストール時に cf/config を呼び出し、
+       $EXEC_DIR/default_config.ph を作成する処理を追加
+    → 上記に伴い sub MakeConfigPH 内を修正
+
+  src/fml.pl
+    → site_init.ph を require する前に、
+       default_config.ph の require を追加
+    → sitedef.ph を obsolete し、site_force.ph に変更
+       (実際には、site_force.ph がなければ、
+        sitedef.ph を require するようになっている)
+
+* TODO
+
+config.ph を require などして設定を読み込んでいるプログラムは、
+
+  (1) $LIBDIR/default_config.ph
+  (2) site_init.ph
+  (3) $DIR/config.ph
+  (4) site_force.ph
+
+の順番で読み込むように、４つの処理をとじこめた関数をつくるべき。fml.pl 
+内にその関数を作って makefml とかは libkern.pl を require して呼び出す
+
+
