@@ -4,6 +4,16 @@
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
 
+2001/03/07
+
+  define $SMTP_LOG_ROTATE_EXPIRE_LIMIT 
+	90 days by default
+
+	$SMTP_LOG_ROTATE_TYPE が day の時に、この
+	$SMTP_LOG_ROTATE_EXPIRE_LIMIT を指定すると
+	古い _smtplog.日付 ファイルを消す。
+	デフォルトは 90 日以上古いファイル。
+
 2001/03/04
 
   lowerize the domain part of mail addresses in database access methods 

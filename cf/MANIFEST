@@ -944,6 +944,10 @@ SMTP_LOG:		$VARLOG_DIR/_smtplog
 # value: 1/0
 USE_SMTP_LOG_ROTATE:	1
 
+# expire how old _smtplog.$date
+# value: number
+SMTP_LOG_ROTATE_EXPIRE_LIMIT:	90
+
 # the number of var/log/_smtplog.$i files. This is the value of modulus.
 # value: number
 NUM_SMTP_LOG_ROTATE:	8

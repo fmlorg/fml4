@@ -42,6 +42,8 @@ sub SmtpInit
 	my ($org_smtp_log) = $SMTP_LOG;
 
 	if ($USE_SMTP_LOG_ROTATE) {
+	    eval { &use('modedef'); &RegistSmtpLogExpire; };
+
 	    if ($USE_SMTP_LOG_ROTATE_TYPE eq 'day') {
 		my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime;
 		$SMTP_LOG .= sprintf(".%04d%02d%02d", 

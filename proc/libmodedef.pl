@@ -232,4 +232,37 @@ sub ArchiveAndExpireConflictP
 }
 
 
+sub RegistSmtpLogExpire
+{
+    $FmlExitHook{'archive'} = q#
+	&SmtpLogExpire(); 1 if $ID % 10 == 0;
+    #;
+}
+
+
+sub SmtpLogExpire
+{
+    use File::Basename;
+
+    my $f;
+    my $limit  = $SMTP_LOG_ROTATE_EXPIRE_LIMIT || 90;
+    my $target = basename($SMTP_LOG);
+
+    $limit = $limit * 24 * 3600;
+    $target =~ s/\.\d+$//;
+
+    opendir(VARLOG_DIR, $VARLOG_DIR);
+    while ($f = readdir(VARLOG_DIR)) {
+	next if $f =~ /^\./o;
+	if ($f =~ /$target/) {
+	    my @stat = stat( $VARLOG_DIR .'/'. $f);
+	    if ( (time - $stat[ 9 ]) >  $limit ) {
+		unlink $f && &Log("remove $f");
+	    }
+	}
+    }
+    closedir(VARLOG_DIR);
+}
+
+
 1;
