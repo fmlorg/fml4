@@ -1,8 +1,9 @@
-var
-tmp
 .copyright
-branch
 00_CURRENT_BRANCH_
 00_HERE_IS_MAIN_TRUNK
-fmlmk.conf
+00_HERE_IS_fml-3.0-maint_BRANCH
+00_STABLE_BRANCH_
 __scan__
+branch
+fmlmk.conf
+var
