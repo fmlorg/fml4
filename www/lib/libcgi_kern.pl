@@ -66,29 +66,32 @@ sub Init
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 
     # signal handling
-    $SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
+    $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
 }
 
 
 sub SetUpTmpDir
 {
     # safe tmp buffer
-    my ($xdir);
+    my ($xdir, $tmpdir);
     for $xdir ("$ML_DIR/etc/tmp", "$ML_DIR/tmp", 
 	       "$EXEC_DIR/www/tmp") {
 	-d $xdir || mkdir($xdir, 0700);
 	if (-d $xdir) {
-	    $TmpDir = $xdir;
+	    $tmpdir = $xdir;
 	    last;
 	}
     }
+
+    $tmpdir;
 }
 
 
+
+# try to remove them if defined
 sub CleanUp
 {
-    # try to remove them if defined
-    if ($TmpDir) { -d $TmpDir && rmdir($TmpDir);}
+    # XXX When we consider race condition, do not remove tmpdir.
 }
 
 
@@ -103,16 +106,15 @@ sub ShowHeader
 sub YYYYMMDD
 {
     sprintf("%4d%02d%02d.%02d%02d",
-            $year + 1900, $mon + 1, $mday,
-          $hour, 0);
+            $year + 1900, $mon + 1, $mday, $hour, 0);
 }
 
 
 sub ExpandDate
 {
-    local($pat) = @_;
-    local($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
-    local($x, $a, $b);
+    my ($pat) = @_;
+    my ($sec,$min,$hour,$mday,$mon,$year) = localtime(time);
+    my ($x, $a, $b);
 
     if ($pat eq 'YYYY') {
 	for $a (0 .. 10) {
@@ -138,7 +140,7 @@ sub ExpandDate
 
 sub ExpandOption
 {
-    local($dir, %ml);
+    my ($dir, %ml, $addr);
 
     if (opendir(DIRD, $ML_DIR)) {
 	while ($dir = readdir(DIRD)) {
@@ -171,7 +173,6 @@ sub ExpandMemberList
 {
     local($mode) = @_;
     local($config_ph, @list, $list, $addr);
-    local(%uniq, %addr);
 
     # XXX 3.0B
     # $DIR, @LIBDIR
@@ -195,8 +196,7 @@ sub ExpandMemberList
 	@list = ($config_ph'MEMBER_LIST, @config_ph'MEMBER_LIST);
     }
 
-    undef %uniq;
-    undef %addr;
+    my (%uniq, %addr);
 
     for $list (@list) {
 	next unless $list;
@@ -229,7 +229,7 @@ sub ExpandMemberList
 
 sub ExpandHowToUpdateAliases
 {
-    local($s);
+    my ($s);
 
     for $s (
 	    "[postfix]  postalias $ML_DIR/etc/aliases",
@@ -243,9 +243,8 @@ sub ExpandHowToUpdateAliases
 sub ExpandCGIAdminMemberList
 {
     local($mode) = @_;
-    local($list);
 
-    $list = "$CGI_AUTHDB_DIR/admin/htpasswd";
+    my $list = "$CGI_AUTHDB_DIR/admin/htpasswd";
 
     if (open(LIST, $list)) {
 	while (<LIST>) {
@@ -257,7 +256,8 @@ sub ExpandCGIAdminMemberList
 	close(LIST);
     }
     else {
-	&ERROR("cannot open '$list'");
+	&ERROR("cannot open admin/htpasswd");
+	# &ERROR("cannot open '$list'");
     }
 
     # XXX oops, I wanna less malloc() version ;-)
@@ -284,7 +284,8 @@ sub ExpandCGIAdminMemberListForEachML
 	close(LIST);
     }
     else {
-	&ERROR("cannot open '$list'");
+	&ERROR("cannot open htpasswd for $ml ML");
+	# &ERROR("cannot open '$list'");
     }
 
     # XXX oops, I wanna less malloc() version ;-)
@@ -298,7 +299,7 @@ sub Convert
 {
     local($file, $inline) = @_;
 
-    $TODAY = &YYYYMMDD;
+    my $today = &YYYYMMDD;
 
     if (open($file, $file)) {
 	while (<$file>) {
@@ -355,7 +356,7 @@ sub Convert
 	    s/_ML_/$ML/g;
 
 	    # 
-	    s/__TODAY__/$TODAY/g;
+	    s/__TODAY__/$today/g;
 
 	    print;
 	}
@@ -378,7 +379,9 @@ sub GetBuffer
     $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
 
     if ($ENV{'REQUEST_METHOD'} eq "POST") {
-	read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+	my $len = $ENV{'CONTENT_LENGTH'};
+	$len    = $len < $GETBUFLEN ? $len : $GETBUFLEN;
+	read(STDIN, $buffer, $len);
     }
     else {
 	$buffer = $ENV{'QUERY_STRING'};
@@ -396,9 +399,6 @@ sub GetBuffer
 
 	&P("GetBuffer: $k\t$v\n<br>") if $debug;
     }
-
-    # pass the called parent url to the current program;
-    # $PREV_URL = $s{'PREV_URL'};
 
     $buffer;
 }

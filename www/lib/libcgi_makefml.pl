@@ -22,7 +22,7 @@ sub Parse
     $PROC      = $Config{'PROC'};
     $LANGUAGE  = $Config{'LANGUAGE'};
 
-    @PROC_ARGV = split(/\s+/, $Config{'ARGV'});
+    # @PROC_ARGV = split(/\s+/, $Config{'ARGV'});
 
     # menu
     $VARIABLE  = $Config{'VARIABLE'};
@@ -56,9 +56,10 @@ sub Parse
     ## REQUEST_URI     => /cgi-bin/fml/../fml/admin/makefml.cgi
 
     # extract $ML name for later use
-    my $REQUEST_URI = $ENV{'REQUEST_URI'};
-    $REQUEST_URI =~ qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
-    my ($cgimode , $cgiml) = ($1,$2);
+    my $req_uri = $ENV{'REQUEST_URI'};
+    $req_uri =~	
+	qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
+    my ($cgimode , $cgiml) = ($1, $2);
     $ML = $cgiml if ($cgimode ne "admin");
 
     # We should not use raw $LANGUAGE (which is raw input from browser side).
@@ -119,10 +120,10 @@ sub MakefmlInputTranslate
 sub Control
 {
     local($ml, $command, @argv) = @_;
-    my ($tmpbuf);
+    my ($tmpbuf, $tmpdir);
 
-    &SetUpTmpDir;
-    $tmpbuf = $TmpDir ? "$TmpDir/makefml.ctlbuf.$$" : '/dev/stdout';
+    $tmpdir = &SetUpTmpDir;
+    $tmpbuf = $tmpdir ? "$tmpdir/makefml.ctlbuf.$$" : '/dev/stdout';
 
     &P("---Control($ml, $command, @argv)") if $debug;
 
@@ -155,28 +156,8 @@ sub MailServerConfig
     local($proc, *config) = @_;
     local($s);
 
-    &P("");
-    &P("*** setup aliases ***");
-    &P("");
-
-    if ($proc eq 'mail_server_config') {
-	$s = $config{'MTA'};
-	if ($s =~ /^(sendmail|postfix|qmail)$/) {
-	    $CGI_CF{'MTA'} = $s;
-	    &SaveCGICF;
-	}
-	else {
-	    &ERROR("unknown MTA (Mail Trasnport Agent)");
-	    &ERROR("I have preparations for sendmail, postfix, qmail.");
-	}
-    }
-    elsif ($proc eq 'newaliases_config') {
-	$CGI_CF{'HOW_TO_UPDATE_ALIAS'} = $config{'HOW_TO_UPDATE_ALIAS'};
-	$CGI_CF{'HOW_TO_UPDATE_ALIAS'} =~
-	    s/^\s*\[\S+\]\s*//g;
-	&SaveCGICF;
-    }
-    elsif ($proc eq 'run_newaliases') {
+    if ($proc eq 'run_newaliases') {
+	&P(""); &P("*** setup aliases ***"); &P("");
 	&P("-- run newaliases");
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
@@ -223,10 +204,10 @@ sub MesgConv
     local($x);
 
     if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {
-	$x = &MesgLE'Lookup($key, $MESG_FILE); #';
+	$x = &MesgLE::Lookup($key, $MESG_FILE);
 	return $NULL unless $x;
 
-	&jcode'convert(*x, 'jis'); #';
+	&jcode::convert(*x, 'jis');
 	$x;
     }
     else {
@@ -237,7 +218,7 @@ sub MesgConv
 
 sub Log
 {
-    print "LOG: @_\n";
+    print "LOG: ", @_, "\n";
 }
 
 
@@ -356,8 +337,7 @@ sub SecureP
 	0;	
     }
     else {
-	# check 'ARGV'
-        if (@PROC_ARGV) { 1;}
+        # if (@PROC_ARGV) { 1;} # check 'ARGV'
 
 	1;
     }
@@ -367,7 +347,6 @@ sub SecureP
 sub Translate2LogOption
 {
     local($x) = @_;
-    local($s);
 
     if ($x eq 'tail') {
 	if ($Config{'TAIL_SIZE'} =~ /^\d+$/) {
@@ -378,8 +357,8 @@ sub Translate2LogOption
 	if (($Config{'YYYY'} =~ /^\d+$/) &&
 	    ($Config{'MM'}   =~ /^\d+$/) &&
 	    ($Config{'DD'}   =~ /^\d+$/)) {
-	    $s = sprintf("%04d%02d%02d", 
-			 $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
+	    my $s = sprintf("%04d%02d%02d", 
+			    $Config{'YYYY'}, $Config{'MM'}, $Config{'DD'});
 	    if ($s =~ /^\d+$/) { return "-D$s";}
 	}
 	else {
@@ -524,8 +503,8 @@ sub Finish
 
     &P("</PRE>");
 
-    if ($ControlThrough) {	# 
-	#;&P("<META HTTP-EQUIV=refresh CONTENT=\"2; URL=menubar.cgi\">");
+    if ($ControlThrough) {
+	;# &P("<META HTTP-EQUIV=refresh CONTENT=\"2; URL=menubar.cgi\">");
     }
 
     &P("</BODY>");
