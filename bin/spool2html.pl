@@ -22,7 +22,7 @@ $HTTP_DIR        = $opt_d;
 $SPOOL_DIR       = shift;
 $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
-$HTML_THREAD     = $opt_T;
+$HTML_THREAD     = 1; # $opt_T;
 $MIN             = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
 push(@INC, $opt_I);
@@ -107,14 +107,14 @@ sub Ctl
 
 	open(STDIN, "$SPOOL_DIR/$id") || return;
 
-	$0 = "spool2html: $label $_[0] -> $_[1]";
+	$0 = "spool2html: $label $id/($_[0] -> $_[1])";
 
 	&SetTime($mtime);
 	&Parse;
 	&GetFieldsFromHeader;	# -> %Envelope
 	&Fix(*Envelope);
 
-	$0 = "spool2html: $label $_[0] -> $_[1]";
+	$0 = "spool2html: $label $id/($_[0] -> $_[1])";
 
 	$ID = $id;
 
@@ -215,7 +215,7 @@ eval($evalstr);
 sub GetMax
 {				
     local($dir) = @_;
-    local($i, $try, $right, $seq, $p);
+    local($i, $try, $right, $seq, $p, $sep2);
 
     # anyway try prescan;
     for ($p = 1; $p < (1 << 16); $p *= 2) { $seq = $p if -f "$dir/$p";}
@@ -225,6 +225,16 @@ sub GetMax
 
     # e.g. right for expired directry;
     if ($i < $seq) { $i = $seq + 1;}
+
+    # checks sequence file
+    if (-f "$dir/../seq") {
+	open(SEQ, "$dir/../seq");
+	chop($seq2 = <SEQ>);
+
+	print STDERR "if ($seq2 > $seq) { \$seq = $seq2;}\n";
+
+	if ($seq2 > $seq) { $seq = $seq2;}
+    }
 
     $try  = $i;
     $left = int($i/2); 
