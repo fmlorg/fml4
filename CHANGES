@@ -4,6 +4,26 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/29
+
+   cf/MANIFEST: define varialbes
+	USE_SMTP_PROFILE
+
+   proc/libmti.pl
+	remove $USE_MTI_TEST (variable for debug)
+
+   back again "use vars" declaration for local() scoped variables anyway
+	 proc/libcksum.pl
+	 proc/libmd5.pl
+	 proc/libqmail.pl
+	 kern/libenvf.pl
+	 kern/libenvfsubr.pl
+	 kern/libkernsubr.pl
+	 kern/libsmtp.pl
+	 kern/libsmtpmci.pl
+	 kern/libsmtpsubr.pl
+	 kern/libsmtputils.pl
+
 2001/09/28
 
    cf/MANIFEST
