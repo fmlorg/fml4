@@ -12,7 +12,7 @@ FIX_WIX         = $(PERL) ${FML}/distrib/bin/fix-wix.pl -X ${FML}
 HTML_MISC_SOURCES = roadmap.html nt.html search-j.html search-e.html
 
 ### targets ###
-HTML_REQ_CPP_SOURCES = index history download links
+HTML_REQ_CPP_SOURCES = index history download links mailinglist
 
 HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
 HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
