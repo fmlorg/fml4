@@ -2384,6 +2384,10 @@ sub ATOI
 # eval and print error if error occurs.
 # which is best? but SHOULD STOP when require fails.
 sub use { require "lib$_[0].pl";}
+sub Use { require "lib$_[0].pl";}
+
+# &UseModule("Japanese", "langdep");
+sub UseModule { require "module/$_[0]/lib$_[1].pl";}
 
 sub MkDir { &Mkdir(@_);}
 sub Mkdir
