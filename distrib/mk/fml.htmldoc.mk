@@ -116,6 +116,11 @@ var/html/WHATS_NEW-e/index.html: ${TMP_DIR}/WHATS_NEW.wix
 	${PERL} distrib/bin/remove_japanese_line.pl ${TMP_DIR}/WHATS_NEW.wix |\
 	${FWIX} -L ENGLISH -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
 
+__htmlbuild__ += var/html/messages-list.ja.txt
+var/html/messages-list.ja.txt: messages/Japanese/MANIFEST.Japanese
+	${JCONV} messages/Japanese/MANIFEST.Japanese \
+		> var/html/messages-list.ja.txt
+
 
 .for file in ${DOC_RI_RAW}
 __HTML_RI__ += var/html/${file}

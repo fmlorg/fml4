@@ -1,0 +1,25 @@
+ファイル名	ファイルに含まれるメッセージが関係する機能
+
+admin		リモート管理
+amctl		登録削除: subscribe, bye, off, on, matome, skip
+auth		パスワード認証: admin コマンドなど
+cgi		CGI 
+chaddr		chaddr コマンド
+confirm		登録時の confirmation 
+errno		エラー (一般的なエラーコード)
+filter		フィルタ (EnvelopeFilter)
+fmlserv		fmlserv
+fop		ファイル操作関数: mget コマンドやまとめおくり
+ftp		ftp  (obsolete)
+ftpmail		ftpmail (obsolete)
+info		一般的なガイドの類: ＭＬの案内、◯◯コマンドとは？など
+kern		代表的なエラー: 例: そんなコマンドはない
+library		library コマンド
+makefml		makefml の表示メッセージ
+menu_conf	makefml の日本語メニュー
+misc		分類不能なもの。今は未定義
+moderator	モデレータ
+pgp		PGP: 暗号化ＭＬや公開鍵暗号によるリモート管理の認証
+req		subscribe (manual registration)などの特殊なもの
+resource	◯◯制限: 登録メンバー数の上限、コマンド数の制限など…
+whois		whois コマンド
