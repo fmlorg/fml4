@@ -31,7 +31,7 @@ DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 
 
 ## doc/advisory
-DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa
+DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
 
 
 ### special PLAINDOC rurles (depends on *SOURCES*) ###
