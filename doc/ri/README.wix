@@ -146,7 +146,7 @@ Please see the file INSTALL for the detail.
 =E
 The HOME PAGE of the Fml is 
 
-	http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 
 =E
 You can obtaion the latest (fml-current) documents and sources.
@@ -231,7 +231,7 @@ members や log file等をそのままに、*pl 群と config.phを差し替えればい
 
 詳細についてはパッケージの中の doc/op ("The Design and Implementation
 of the fml Mailing List Server") を読んで下さいね(^^;)
-＃ http://www.iij.ad.jp/sapporo/staff/fukachan/fml/op/
+＃ http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
 
 fml 2.1 が hml 1.6 と同様に目指したものは
 	(以下 hml 1.6 README.jpn より)
@@ -252,11 +252,11 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 
 	PLAINTEXT版はあらかじめ用意されています。
 
-	HTML 版は var/html/ の下に用意されいますが、
+	HTML 版は doc/html の下に用意されいますが、
 	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 	shell% make doc でつくってください
 	最新版は
-	http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 	をのぞいてみてください
 
 ○ user 権限で実行します＃ daemon とかではなく
@@ -357,6 +357,15 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 
 
 .C	インストールに必要な環境（条件）
+
+.S	Supporeted Architectures
+
+基本的にメインターゲットは 4.4BSD です。ですが最近の Unix であれば動く
+はずです。ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
+
+WINDOWS NT 4.0 へ porting された ntfml (苦笑)はすでに稼働しています。
+現在はアルファテスト段階です。
+
 
 .S	インストールと環境
 

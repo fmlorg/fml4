@@ -1,9 +1,11 @@
-		fml INSTALL guide (New Version Draft)
+		fml INSTALL guide (for Unix)
 
 
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
+   NT4.0 については別のドキュメントが用意されています。
+   ＃まだ書いてない;-)
 
    昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
    INSTALL.advanced はより細やかな設定をしつつインストールをするための
