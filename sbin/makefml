@@ -2364,9 +2364,11 @@ sub do_newml
     # the last info
     print "\n";
     print "-" x 60;
-    print "\n*** Please see several examples in $ML_DIR/$ml\n";
-    print "*** Here is an example of aliases to set.\n\n";
+    print "\n*** Please see several examples in directory '$ML_DIR/$ml'\n";
+    print "# from '#' to the end of this line is a comment.\n";
+    print "# ---------- /etc/aliases example      ----------\n";
     &Cat("$ML_DIR/$ml/aliases"); 
+    print "# ---------- /etc/aliases example ends ----------\n";
     print "\n";
 
     # always cf is newer than config.ph (against manual edit check)
