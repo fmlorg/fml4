@@ -6,8 +6,12 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.include overview.wix
+.include permission.wix
+.include fml.wix
+.include mua.wix
+.include misc.wix
 .include os.wix
-.include trouble.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
