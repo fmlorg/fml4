@@ -5,6 +5,17 @@
 	$Date$
 
 
+2001/08/19
+
+  module/Japanese/IM
+	im140 + local fix
+
+	patch by OGAWA Kunihiko <kuni@edit.ne.jp> (PR:
+	fml-help@ffs.fml.org: 00607). patch it to fml 5.0 branch and
+	import it to fml 4.0-current back again.
+
+	IM へのローカルパッチ
+
 2001/08/17
 
    modify default_config.ph creation code
