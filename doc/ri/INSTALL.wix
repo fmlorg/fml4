@@ -19,9 +19,10 @@
     3.0へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単な install と設定例などについては以下のURLにあります。
-   もう少し詳細なものがこのドキュメントです。
+   簡単なインストールの流れや設定例などについては以下のURLにあります。
+   感じを掴むために先にこっちを読むといいかもしれません。
 .url http://www.fml.org/fml/examples/
+   もう少し詳細なものがこのドキュメント(INSTALL)です。
 
    デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
    doc/op.jp というファイルをみてください
@@ -41,19 +42,26 @@
 .if LANG == ENGLISH
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 
-   ************** IMPORTANT!!! *******************
+   ***** IMPORTANT!!! *****
    If you use automatic registration and upgrade fml 2.x to fml 3.0, 
    please read UPGRADE file firstly. Especially the first part
 
 .url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
 
-   ***********************************************
+   For easy guideline of installation and fundamental configuration,
+   See
+.url http://www.fml.org/fml/examples/
+
+   For more details of internals, advanced configurations, see
+   doc/op.en		(plain text)
+.url	http://www.fml.org/fml/op-e/index.html
 
    For more details on advanced settings, please see the part III of
    doc/op.en		(plain text)
 .url	http://www.fml.org/fml/op-e/index.html#Configurations
 
    For installation on Windows NT4, please also see INSTALL_on_NT4.
+.url http://www.fml.org/fml/
 
 [Terminology]
    The word "ML" is the abbreviation of "Mailing List" in this document.
@@ -1849,6 +1857,37 @@ for articles.
 =E
    flock or not for lock algorithm. If no, rename() based lock is done.
 
+○ SMTP
+=E
+*  SMTP
+
+   USE_OUTGOING_ADDRESS (default: NO)
+	fml.pl => list-outgoing => expand
+
+   USE_VERP (default: NO)
+	Variable Envelope Return-Paths
+
+詳しくは doc/op.jp などをみてください
+=E
+Please see doc/op.en for more details.
+
+○ USE_MEMBER_NAME
+=E
+*  USE_MEMBER_NAME
+   relate "address" with "real name"
+
+○ LANGUAGE
+=E
+*  LANGUAGE
+
+   MESSAGE_LANGUAGE (default: Japanese or English determined in installation)
+	Message Language Extension
+
+エラーなどを何語で返すか？デフォールトはインストール時の言語選択と一緒
+=E
+Which language you use in error reply? Default language is the same as
+$LANGUAGE asked and determined in installation.
+
 
 .########### Menu Section ##########
 .S	セキュリティ関係
@@ -1859,6 +1898,15 @@ for articles.
 詳細については doc/op.jp を読んで下さい。
 =E
 Please see doc/op.jp for more details.
+
+○ 様々なセキュリティオプションを一気に設定する
+   make secure とやることは同じ => .ptr{secure-configure}
+=E
+*  set up several parameters related with security.
+   If you run "make secure", you can get the same effect.
+   See .ptr{secure-configure} for "more secure".
+
+   MENU => SECURITY => MORE_SECURE => "y"
 
 ○ メールの中身のフィルタリングについて
 =E
@@ -1877,17 +1925,37 @@ If MIME/Multipart mail is input, fml checks only the first block.
 *  USE_DISTRIBUTE_FILTER (default: NO)
    Do you use filter? answer "yes" if you use this (recommended).
 
-○ FILTER_ATTR_REJECT_COMMAND (default: no)
+○ FILTER_ATTRIBUTE => 
+
+ * FILTER_ATTRIBUTE => FILTER_ATTR_REJECT_COMMAND (default: no)
    投稿用のＭＬに #help などが来たら拒否 (yes 推奨)
 =E
-*  FILTER_ATTR_REJECT_COMMAND (default: no)
+ * FILTER_ATTR_REJECT_COMMAND (default: no)
    reject "#help" posted to a ML. ("yes" is recommended)
 
-○ FILTER_NOTIFY_REJECTION (default: no)
+ * FILTER_ATTR_REJECT_2BYTES_COMMAND (default: no)
+
+  ＵＮＳＵＢＳＣＲＩＢＥ とかだけのメールを弾く。
+  しかし弾き過ぎることがある(例: 最初の段落が『ＵＪＡ です。』というメー
+  ルはコマンドと引数なのか区別できない)
+=E
+   Japanese specific
+
+ * FILTER_ATTRIBUTE => FILTER_NOTIFY_REJECTION (default: no)
    拒否した旨をその送り主に伝える
 =E
-*  FILTER_NOTIFY_REJECTION (default: no)
+ * FILTER_ATTRIBUTE => FILTER_NOTIFY_REJECTION (default: no)
    report the rejection to the sender?
+
+ * FILTER_ATTRIBUTE => FILTER_ATTR_REJECT_MS_GUID (default: no)
+
+   M$関係のマクロ入りに見えるファイルを弾く(e.g Melissa virus)
+   一般には弾き過ぎることになる
+   (が普通のファイルにはマクロなんて使わないだろうに)
+=E
+   reject files with M$ GUID, which may be a file with macro definition,
+   e.g. Melissa virus.    
+
 
 ○ USE_MTI (トラフィックモニタ; default No)
 =E
@@ -1928,6 +1996,13 @@ message/partial, fml guesses the total mail size and compare it with
 $MAX_MAIL_SIZE.
 .~q
 
+○ ANNOUNCE_MAIL_SIZE_OVERFLOW (default: no) 
+
+拒否した旨をメーリングリストに流す。恥曝し？
+=E
+send "it is rejected" to ML as a distribution.
+
+
 ○ ADDR_CHECK_MAX (default: 3)
 =E
 *  ADDR_CHECK_MAX (default: 3)
@@ -1967,6 +2042,14 @@ var/Mail/ の下に最近Ｎ通のメールの先頭2Kバイト程度を保存するヘッダ情報
 For debug (and against tricks), it may be useful to save the latest
 $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 .~q
+
+○ USE_ENCRYPTED_DISTRIBUTION (default: no)
+=E
+*  USE_ENCRYPTED_DISTRIBUTION (default: no)
+
+PGP encrypted ML. Need pgp configuration. Please see doc/op.{jp,en}
+for more details.
+
 
 
 .C	リモート管理するユーザの登録について
@@ -2439,6 +2522,7 @@ FYI. NT Version uses this trick:)
 なお MetaInfo Sendmail 2.x 以外のMTAを使う場合の NT 上ではこの裏技を使
 います:)
 
+
 .C	HELPなどの取り寄せについてユーザに知らせる方法について
 =E.C	Header information to notify information
 
@@ -2521,6 +2605,7 @@ http://www.fml.org/fml/op/) を見て下さい。
 というファイルを作り、actives や members のように一行一アドレス書いて
 いって下さい。
 
+
 .C	アップグレード時の注意 (fml 2.1 以前からの時)
 =E.C	Upgrade (from before fml 2.1)
 .l	upgrade
@@ -2549,6 +2634,7 @@ elena@baycity.asia でコマンド "# command" を受け付けるようにはなってい
 elena@baycity.asia がコマンド "# command" をコマンドとして理解するよう
 になります。設定は makefml config でもできます。詳細は .ptr{post-or-command-addr} を参照。
 elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac} 参照。
+
 
 .C	セキュリティを強化する設定について
 =E.C	Security Consideration

@@ -14,14 +14,29 @@
    3.0へのアップグレードの注意
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単な install と設定例などについて
+   簡単なインストールのアウトラインと基本的な設定例などについて
 .url http://www.fml.org/fml/examples/
+
+   あとはここからたどってください。
+.url http://www.fml.org/fml/
+
+   ソース
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 .if LANG == ENGLISH
 [Guide]
 
    Please read when you upgrade from 2.x to 3.0.
 .url http://www.fml.org/fml/UPGRADE-3.0-e/
+
+   outline of installation and fundamental configurations
+.url http://www.fml.org/fml/examples/index-e.html
+
+   home page of fml
+.url http://www.fml.org/fml/
+
+   download from here
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 
 .~HTML_PRE
@@ -289,7 +304,7 @@ address <fml-bugs@ffs.fml.org>.
 .# automatically.
 .fi
 
-.S	fml-FAQのネタ募集について
+.S	fml-FAQ project
 =E.S	fml FAQ
 
 fmlのFAQを作成中するプロジェクトが現在進行形です。プロジェクトからのお
@@ -398,7 +413,7 @@ delivery (as both an experiment and a demonstration :-).
    sendmail 8.9.3
    qmail 1.03
    exim 2.04
-   postfix snap-19990322
+   postfix snap-19990601
 
 
 
@@ -453,14 +468,6 @@ config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 いうのはHOOKで使う関数や変数等が今でもサポートされているとは限らないか
 らです。ただ、昔できたことは必ず今の実装でもできるので doc/op.jp を参
 照してみて下さい。
-
-できるだけ互換性を保つように作られていますが、2.1 RELEASE 以降では
-   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
-が昔と異なり『配送専用』です。
-   『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
-	昔と同じで配送用のアドレス $MAIL_LIST で
-	コマンド(# command の形)を受け付けます。
-   』(HML 1.6 互換モード)
 
 .S	Changes
 
