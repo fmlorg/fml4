@@ -720,3 +720,30 @@ forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
 の時に fpathconf() が bugってるか、それともpath
 のどこかにファイルの所有者以外への write permission が与えられていると
 か、NFSごし だとか… 
+
+
+
+.S	Return-Receipt-To:事件と CC:Mail等ＭＵＡ
+Thanks tanigawa@tribo.mech.nitech.ac.jp 
+
+.q
+１．MLにReturn-Receipt-To:（発信者のアドレス）をつけて投稿する。配送さ
+れたメールに対して cc:Mailが Return-Receipt-To:に書いてあるアドレスで
+はなくて、( Reply-To: || From: ) のアドレスに開封確認のメイルを送って
+しまう。ループする
+
+MLサーバーで切りとっても、MLサーバーに到着した時点で、まず
+Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
+と思います。おそらく、発信者もそれを意図していると思うのです。
+
+.~q
+
+結論として、『ＭＬサーバは親切に Return-Receipt-To: を取ってあげる』;_; 
+を実行するように デフォールトを変更しました。
+
+
+.S	Return-Path:のアドレスに送る他のメイルリーダーも存在する
+
+気をつけようね;-)
+
+
