@@ -419,9 +419,12 @@ sub FML_SYS_ChaddrRequest
 
     if (! &Confirm(*e, $From_address, $s)) {
 	if ($buf =~ /($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/) {
+	    local($oa, $na) = ($2, $3);
 	    $xbuf = join(" ", 
-			 ($e{'buf:confirmation:id'}, $From_address, $2, $3));
+			 ($e{'buf:confirmation:id'}, $From_address, $oa, $na));
 	    &DBCtl('text', $CONFIRMATION_ENV_SAVED_FILE, 'add', $xbuf);
+
+	    $Envelope{'message:h:@to'} = "$oa $na";
 	}
 	else {
 	    &Log("ChaddrRequest: invalid buffer syntax");
