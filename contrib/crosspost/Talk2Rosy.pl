@@ -70,12 +70,23 @@ sub GetTime
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", $year, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			1900 + $year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime  = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+    $PCurrentTime = sprintf("%04d%02d%02d%02d%02d%02d", 
+			    1900 + $year, $mon + 1, $mday, $hour, $min, $sec);
 }
+
 
 sub InitConfig
 {

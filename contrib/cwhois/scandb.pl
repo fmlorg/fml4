@@ -149,7 +149,7 @@ sub GetTime
 	
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			$year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, $TZone);
 }
 
 

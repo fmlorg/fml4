@@ -29,7 +29,8 @@ sub GetTime
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", $year % 100, $mon + 1, 
 		   $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", $WDay[$wday],
-			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
+			$mday, $Month[$mon], 
+			1900 + $year, $hour, $min, $sec, $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
