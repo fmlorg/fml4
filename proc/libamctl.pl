@@ -19,9 +19,9 @@ sub AutoRegist
     local(*e, $set_addr) = @_;
     local($from, $s, $b, $r, @s);
     local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
-
+    
     # &AutoRegist("address");
-    if ($set_addr) { undef $REQUIRE_SUBSCRIBE; $from = $set_addr;}
+    if ($set_addr) { undef $AUTO_REGISTRATION_KEYWORD; $from = $set_addr;}
 
     # for &Notify,  reply-to ? reply-to : control-address
     $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $MAIL_LIST;#|| $e{'CtlAddr:'};
@@ -30,7 +30,7 @@ sub AutoRegist
     ##### listserv emulation code;
     # Confirmation Mode; 
     # check the MailBody to search $CONFIRMATION_KEYWORD
-    if ($e{'mode:artype=confirm'}) {
+    if ($AUTO_REGISTRATION_TYPE eq "confirmation") {
 	&use('confirm');
 	&ConfirmationModeInit;
 
@@ -42,29 +42,29 @@ sub AutoRegist
 	    return 0;
 	}
     }
-    elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
+    elsif ($AUTO_REGISTRATION_TYPE eq "body") {
 	# Syntax e.g. "subscribe" in the body
 
 	$s    = &GetSubscribeString($e{'Body'});
-	$from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s);
+	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
 	    &AutoRegistError(*e, 'Body', $s);
 	    return 0;
 	}
     }
-    elsif ($REQUIRE_SUBSCRIBE) {
+    elsif ($AUTO_REGISTRATION_TYPE eq "subject") {
 	# Syntax e.g. "Subject: subscribe"...
 
 	$s    = &GetSubscribeString($e{'h:Subject:'});
-	$from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s);
+	$from = &GetAddr2Regist($AUTO_REGISTRATION_KEYWORD, $s);
 
 	if (! $from) {
 	    &AutoRegistError(*e, 'Subject', $s);
 	    return 0;
 	}
     }
-    else {
+    elsif ($AUTO_REGISTRATION_TYPE eq "no-keyword") {
 	# In default, when changing your registered address
 	# use "subscribe your-address" in body.
 	# if not found, use $From-address;
@@ -72,6 +72,9 @@ sub AutoRegist
 	$s    = &GetSubscribeString($set_addr || $e{'Body'});
 	$from = &GetAddr2Regist($DEFAULT_SUBSCRIBE || "subscribe", $s);
 	$from = $from ? $from : $From_address;
+    }
+    else {
+	&Log("\$AUTO_REGISTRATION_TYPE is unknown type.");
     }
 
     # Check $from appliced already in regist_to_file (GetAddr2Regist())
@@ -192,7 +195,7 @@ sub GetAddr2Regist
 sub GetSubscribeString
 {
     local($_) = @_;
-
+    @c=caller; &Log("GetSubscribeString is called @c[1,2]");
     &Debug("--GetSubscribeString(\n$_\n);\n") if $debug;
 
     s/(^\#[\s\n]*|^[\s\n]*)//;
@@ -210,7 +213,7 @@ sub AutoRegistError
     &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
 
     $sj = "Bad Syntax $key in AutoRegistration";
-    $b  = "${key}: $REQUIRE_SUBSCRIBE [your-email-address]\n";
+    $b  = "${key}: $AUTO_REGISTRATION_KEYWORD [your-email-address]\n";
     $b .= "\t[] is optional\n";
     $b .= "\tfor changing your address to regist explicitly.\n";
 
