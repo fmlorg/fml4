@@ -4,7 +4,6 @@
 .toc
 .~HTML_PRE
 
-.__repl_include__
 .include overview.wix
 .include list.wix
 .include mead.wix
