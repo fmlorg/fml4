@@ -5,5 +5,5 @@
 alias_maps = hash:/etc/aliases, 
 	hash:/var/spool/ml/etc/aliases
 
-# gateway, you should also include $mydomain. Do not specify the
+# permit :include: operation in aliases
 allow_mail_to_commands = alias,forward,include
