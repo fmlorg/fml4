@@ -138,6 +138,7 @@ sub LoadDummyMacros
     # procedure manipulation
     eval "sub PERMIT_PROCEDURE { 1;}";
     eval "sub DENY_PROCEDURE { 1;}";
+    eval "sub DEFINE_PROCEDURE { 1;}";
 }
 
 
