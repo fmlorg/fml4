@@ -90,7 +90,7 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 % cd fml-3.0B-current-20000227
 
 ○ インストール開始。インストールする場所等の質問に答える。
-% make install
+% make install RECOMMEND=yes
 …メッセージ省略…
 
 ○ fml自体のインストール自体は終了。

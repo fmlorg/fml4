@@ -15,6 +15,22 @@
 .~HTML_PRE
 
 .HTML_PRE
+Q: おすすめの設定は？
+A: 
+
+fml 4.0 では最初から厳し目の推奨設定をセットアップできます。
+
+	     % make install RECOMMEND=yes
+
+のように指定してインストールして下さい。
+makefml を実行する場合は 
+
+	     % env RECOMMEND=yes perl makefml install
+
+としてください。
+なおこれは make secure を実行すると行なわれる状態です。
+
+
 Q: virtual domain をしたいとき (1)
 A. fml を２つインストールする (1)
   

@@ -44,10 +44,17 @@ Connected to ftp.iij.ad.jp.
   (できるディレクトリ名はその時時で変わる。
    名前は『fml-バージョン番号-スナップショット番号』のようになっている)
 
-% make install
+% make install 
 
    (インストール場所などを聞かれるので[]内の値でいいなら Enter 
     ちがうなら別の値を入力する)
+
+  [推奨] fml 4.0 では最初から厳し目の推奨設定をセットアップできます。
+	     % make install RECOMMEND=yes
+	のように指定してインストールして下さい。
+        makefml を実行する場合は 
+	     % env RECOMMEND=yes perl makefml install
+	としてください。
 
 perl ./makefml install
 ---NOT USING configuration file (for the first time)
