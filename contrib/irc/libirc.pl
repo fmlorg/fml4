@@ -18,9 +18,17 @@ if ($0 eq __FILE__) {
 
     &IrcParseArgv;
     &IrcInit;
-    &IrcConnect;
-    &IrcMainLoop;
 
+    if (($pid = fork) < 0) {
+	&Log("cannot fork");
+    }
+    elsif (0 == $pid) {
+	&IrcConnect;
+	&IrcMainLoop;
+	# infinite loop
+    }
+
+    # parent
     exit 0;
 }
 else {
@@ -34,16 +42,19 @@ else {
 
 package irc;
 
+sub Log { main'Log(@_);}
+
+
 sub main'IrcParseArgv #'
 {
     eval "sub Log { print STDERR \"LOG: \@_\\n\";}";
 
-
     ### getopts
     require 'getopts.pl';
-    &Getopts("df:I:");
+    &Getopts("df:I:t:");
 
     $debug = $opt_d;
+    $SetProcTitle = $opt_t;
 
     # load config.ph
     if (!-f $opt_f) { die("cannot load config file, stop.\n");}
@@ -65,6 +76,12 @@ sub main'IrcInit  #'
     # default
     $IRC_TIMEOUT = $IRC_TIMEOUT || 2;
     $IRC_SIGNOFF_MSG = $IRC_SIGNOFF_MSG || "Seeing you";
+    
+    ($my_user, $my_name, $HOME) = (getpwuid($<))[0,6,7];
+    $my_name =~ s/,.*$//;
+    $IRC_USER = $my_user;
+    $IRC_NAME = $IRC_NAME || $my_user;
+    $IRC_NICK = $IRC_NICK || $my_user;
 
     ### fix Japanese code of configurable variables
     require 'jcode.pl';
@@ -218,6 +235,8 @@ sub main'IrcMainLoop  #'
     $ein = $rin | $win;
 
     for (;;) {
+	$0 = "--stdin2irc $SetProcTitle";
+    
 	($nfound, $timeleft) =
 	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
 
@@ -240,6 +259,56 @@ sub main'IrcMainLoop  #'
 	sleep 1;
 	$wbuf = shift @Queue;
 	&SendS($wbuf) if $wbuf;
+    }
+}
+
+
+
+########## Library
+sub main'IrcImport #'
+{
+    $irc'debug = $main'debug;
+
+    for (IRC_SERVER, IRC_PORT, IRC_CHANNEL, IRC_USER, IRC_NAME, IRC_NICK, 
+	 IRC_SIGNOFF_MSG) {
+	eval "\$irc'$_ = \$main'$_;";
+    }
+}
+
+
+sub main'Write2Irc #'
+{
+    local($buf) = @_;
+    local($rin, $win, $ein);
+    local($rout, $wout, $eout);
+    local($wbuf);
+
+    ### Set up buffer
+    for (split(/\n/, $buf)) {
+	print STDERR ">>> $_\n" if $debug;
+	$_ = /^\s*$/ ? " " : $_; # effective null line for irc.
+	push(@Queue, "PRIVMSG $IRC_CHANNEL :$_") if $_;
+    }
+    push(@Queue, "QUIT :$IRC_SIGNOFF_MSG");
+
+    $BITS{'S'} = fileno(S);
+
+    $rin = $win = $ein = "";
+    vec($rin,fileno(S),1) = 1;
+    $ein = $rin | $win;
+
+    for (@Queue) {
+	&SendS($_) if $_;
+
+	($nfound, $timeleft) =
+	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
+
+	if (vec($rout, $BITS{'S'}, 1)) {
+	    sysread(S, $buf, 4096) || &Log("Error:$!");
+	    if ($debug) {
+		for (split(/\n/, $buf)) { print STDERR "--- $_\n";}
+	    }
+	}
     }
 }
 
