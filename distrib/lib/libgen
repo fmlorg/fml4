@@ -397,12 +397,6 @@ GEN_ARCHIVE () {
 	echo " "
 	rsync --delete -C -av distrib/ $FTP/src/
 
-	echo " "
-	echo "-- sync w/ www server (not required since www have ftp mirror)"
-	echo " "
-	# echo rsync --delete -C -av distrib/doc/html/ $WWW/
-	# rsync --delete -C -av distrib/doc/html/	$WWW/
-
 
 	### Section: cleanup
 	echo " "
@@ -434,8 +428,8 @@ GEN_ARCHIVE () {
 	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
 	   (
 	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
-	      rm fml-current.tar.gz
-	      ln -s current/$FMLID.tar.gz # backward compatibility
+	      rm -f fml-current.tar.gz
+	      ln -s current/$FMLID.tar.gz fml-current.tar.gz # backward compatibility
 	   )
 	fi
 
