@@ -75,18 +75,18 @@ $mib->{'_action'} には次のようなものがあります。
 	get_active_list
 	dump_active_list
 
-		$mib->{'_cache_file'} というファイルに
-		配送するべきのメールアドレスの一覧を
-		書いて下さい。
+		SQL/LDAP から配送リストのメールアドレス一覧を取りだし、	
+		$mib->{'_cache_file'} で指定されたファイルに
+		書きこんでください。
 
 		* つまり actives ファイルを疑似的につくって下さい。
 
 	get_member_list
 	dump_member_list
 
-		$mib->{'_cache_file'} というファイルに
-		投稿可能なメールアドレスの一覧を
-		書いて下さい。
+		SQL/LDAP からメンバーリストのメールアドレス一覧を取りだし、
+		$mib->{'_cache_file'} で指定されたファイルに
+		書きこんでください。
 
 		* つまり members ファイルを疑似的につくって下さい。
 
@@ -105,7 +105,7 @@ $mib->{'_action'} には次のようなものがあります。
 
 		＊ members ファイルにメールアドレスがありますか？
 
-	active_p
+	admin_member_p
 
 		$mib->{'_address'} アドレスはリモート管理者として
 		登録されているか？
@@ -181,4 +181,4 @@ $mib->{'_action'} には次のようなものがあります。
 
 
 ----------
-$Id$
+$FML: TOY_MODEL.Japanese,v 1.8 2003/01/14 23:01:55 fukachan Exp $
