@@ -5,7 +5,7 @@ var/doc/drafts/Japanese/${file}: drafts/${file}.wix
 	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/Japanese/${file}
 
 var/doc/drafts/English/${file}: drafts/${file}.wix
-	${FWIX} -n i drafts/${file}.wix > var/doc/drafts/English/${file}
+	${FWIX} -L ENGLISH -n i drafts/${file}.wix > var/doc/drafts/English/${file}
 .endfor
 
 .for file in ${DOC_ADVISORY_SOURCES}
