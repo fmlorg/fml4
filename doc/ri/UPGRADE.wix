@@ -19,6 +19,77 @@
 .return
 .fi
 
+.C	2.2.1 RELEASE と 2.2 RELEASE の間の差について
+=E.C	The difference between 2.2.1 and 2.2
+
+○ ドキュメント(例えば help ファイル)には # command シンタックスの見本
+が書かれなくなった。デフォールトでは無意味なので。
+
+makefml config で $MAIL_LIST == $CONTROL_ADDRESS に変更した場合にhelp 
+ファイルなどの再生成が行なわれる。また逆の場合($MAIL_LIST ==
+$CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
+元のhelpはhelp.bak等になるので必要なら戻すなりmergeなりをして欲しい。
+
+○ HTMLのスレッドの仕方が異なる。
+<UL><LI>を利用したあまりお行儀のようい作法ではない
+
+○ 2.2までは『自動登録ではない場合にsubscribeコマンドをもらった』時は
+管理者へフォワードするだけだった。2.2.1, 2.2A (fml-current) ではそのメー
+ルに対し自動登録時のようなconfirmation を行ない、confirmされた後管理者
+に「登録希望者がいる」旨を伝える。
+
+○ SMTPはPIPELININGをする。まんがいちPIPELININGでMTAとの合性などがあっ
+たら教えて欲しい。
+
+○ %SECURE_REGEXP のbug fix。op.jp の記述が正しくなるように直した。
+
+
+.C	2.2 RELEASE と 2.1 RELEASE の間の差について
+
+新機能は README や op.jp を読んで下さい。ここではデフォールト値の違い
+について説明します。古い config.ph を使う場合には関係ありません。
+ＭＬを新たに壱から作ると2.1の時と何が違うか？について記述します。
+
+○ 一般ユーザの使う members, actives コマンドの返答からは
+   # で始まる行は削除されています。管理者モードではファイルそのものが
+   返されます。セキュリティの上からもやめてしまったユーザの情報を
+   流すべきではないでしょう。
+
+○ chaddr old-address new-address しかできません。つまり移行する場合は
+   移行する前に古いアドレスから新しいアドレスへ変更しておかなければ
+   いけません。   
+
+○ モデレータは3種類あります。デフォールトは Approval: password という
+ヘッダの一部を使う方法ではなく、各モデレータ依頼のメールの承認KEYを与
+えます。confirmation と似ています。
+
+○ デフォールトではサイズチェックなどは特にかけていません。
+   members.bak actives.bak は１５０ｋをめやすに members.0 などへ
+   移動して古いものから順にログは消されていきます。
+
+
+○ デフォールトで Date: は original をとおします。Posted: はなくなりま
+した。前と同じにするには $DATE_TYPE で設定します。
+
+○ To: はオリジナルをとおします。2.1 のようにするには $REWRITE_TO で制
+御します。
+ 
+○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER
+ 
+○ USE_MIME はデフォールトで on です。
+
+○ HTML記事を作ると HTML 4.0 です。スタイルシートがないと自動的に見本が
+   インストールされます。
+
+○ mgetの一部 ish などがうまく動かなくなったら？
+
+一部のOSでは mgetの一部 ish などがうまく動かない場合もあるようです。そ
+の時は
+
+	$INSECURE_SYSTEM = 1;
+
+を設定すると直ることもあります。
+
 
 .C	2.1 とそれ以前との互換性について
 
@@ -97,54 +168,6 @@ elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
 # いわば option TCP_COMPAT_42 みないなもんですかね
 
 
-.C	2.2 RELEASE と 2.1 RELEASE の間の差について
-
-新機能は README や op.jp を読んで下さい。ここではデフォールト値の違い
-について説明します。古い config.ph を使う場合には関係ありません。
-ＭＬを新たに壱から作ると2.1の時と何が違うか？について記述します。
-
-○ 一般ユーザの使う members, actives コマンドの返答からは
-   # で始まる行は削除されています。管理者モードではファイルそのものが
-   返されます。セキュリティの上からもやめてしまったユーザの情報を
-   流すべきではないでしょう。
-
-○ chaddr old-address new-address しかできません。つまり移行する場合は
-   移行する前に古いアドレスから新しいアドレスへ変更しておかなければ
-   いけません。   
-
-○ モデレータは3種類あります。デフォールトは Approval: password という
-ヘッダの一部を使う方法ではなく、各モデレータ依頼のメールの承認KEYを与
-えます。confirmation と似ています。
-
-○ デフォールトではサイズチェックなどは特にかけていません。
-   members.bak actives.bak は１５０ｋをめやすに members.0 などへ
-   移動して古いものから順にログは消されていきます。
-
-
-○ デフォールトで Date: は original をとおします。Posted: はなくなりま
-した。前と同じにするには $DATE_TYPE で設定します。
-
-○ To: はオリジナルをとおします。2.1 のようにするには $REWRITE_TO で制
-御します。
- 
-○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER
- 
-○ USE_MIME はデフォールトで on です。
-
-○ HTML記事を作ると HTML 4.0 です。スタイルシートがないと自動的に見本が
-   インストールされます。
-
-○ mgetの一部 ish などがうまく動かなくなったら？
-
-一部のOSでは mgetの一部 ish などがうまく動かない場合もあるようです。そ
-の時は
-
-	$INSECURE_SYSTEM = 1;
-
-を設定すると直ることもあります。
-
-
-
 .C	その他互換性について
 
 .S	fml 1.6 より前からの移行について (2.1 READMEより)
@@ -164,4 +187,13 @@ config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
 (INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
 設定が必要です。
 
+
 $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
