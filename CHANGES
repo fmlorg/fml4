@@ -5,6 +5,8 @@
 
 2000/05/31
 
+  pgp2 code: more debug 
+
   doc/
 	clean up to clarify apache-ssl and apache+mod_ssl
 
