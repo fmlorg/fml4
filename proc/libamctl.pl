@@ -100,7 +100,7 @@ sub AutoRegist
     ### HERE WE GO REGISTRATION PROCESS;
     local($entry); # locally modified { addr -> addr mode syntax;}
     if ($AUTO_REGISTRATION_DEFAULT_MODE) {
-	$entry = "$from $REGISTRATION_DEFAULT_MODE";
+	$entry = "$from $AUTO_REGISTRATION_DEFAULT_MODE";
     }
     else {
 	$entry = $from;
