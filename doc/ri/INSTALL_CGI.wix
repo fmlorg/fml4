@@ -214,6 +214,89 @@ httpd の設定をいじること
 	一般ユーザが入る階層
 	パスワード認証をともなうべき
 
+.appendix
+
+.C	suexec を使う場合
+
+   http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
+
+	でアクセスできるようにすることを考えます。
+
+.S	前提
+
+ユーザ fml は
+
+    user fml
+   group fml
+
+としましょう。この fml の uid gid は suexec の制限に引っかから
+ないようにして下さい。例えば uid は 1000、gid 1000 とします。
+
+
+.S	apache で suexec を可能にする。
+
+suexec のログや /usr/local/apache/logs/error_log を見ながら
+suexec がうごくことを確認して下さい。
+
+典型的なインストール例は以下の通りです。
+.q
+# tar zxvf ~ftp/pub/net/www/apache/apache_1.3.12.tar.gz
+# cd apache_1.3.12/
+# ./configure --enable-suexec --suexec-caller=www
+# make
+# make install 
+.~q
+
+/usr/local/apache/conf/httpd.conf の変更が必要かも知れません。
+例えば、この2箇所辺りです。
+.q
+<Directory /home/*/*/public_html>
+    AllowOverride FileInfo AuthConfig Limit
+    Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI
+</Directory>
+
+AddHandler cgi-script .cgi
+.~q
+
+
+.S	~/public_html/ の準備
+
+% su fml
+% mkdir ~/public_html
+% chmod 755 ~/public_html
+% rsync -a /usr/local/fml/share/ ~/public_html/
+% chown -R fml ~/public_html
+% chgrp -R fml ~/public_html
+% chmod -R go-w ~/public_html
+
+.S	/usr/local/fml/.fml/cgi.conf の編集
+
+cgi.conf に
+
+	$CGI_PATH        = '/~fml/cgi-bin/fml'; 
+
+を付け足します。また $REAL_CGI_PATH を ~/public_html に
+書き直しておくとよいでしょう。
+
+例:
+.q
+$REAL_CGI_PATH   = "/usr/local/fml/share/cgi-bin/fml";
+$CGI_AUTHDB_DIR  = "/usr/local/fml/www/authdb";
+$SSL_REQUIRE_SSL = "";
+
+$REAL_CGI_PATH   = "/home/fml/public_html/cgi-bin/fml";
+$CGI_PATH        = '/~fml/cgi-bin/fml';
+
+1;
+.~q
+
+この編集後に
+
+	% makefml admin.cgi
+	% makefml mladmin.cgi elena
+
+を実行すると ~/public_html/ 以下に作られます。
+
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
