@@ -4,6 +4,21 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/21
+
+   modify HTML-ify for win32 system
+
+	最近 windows で redirection するとうまく動かないらしい
+	しょうがないので redirection しないようなコードに修正
+
+	Affected:
+		proc/libhtmlsubr.pl
+		bin/base64decode.pl
+
+   bin/base64decode.pl
+	-o option (new)
+	Example: bin/base64decode.pl -o OUTPUT_FILE
+		
 2001/09/19
 
    www/lib/libcgi_cleanup.pl
