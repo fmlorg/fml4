@@ -4384,7 +4384,8 @@ sub MakeConfigPH
     local($back_up) = 0;
     if (-f $config_ph) {
 	if (&Copy($config_ph, "$config_ph.bak")) { $back_up = 1;}
-	if ($COMPAT_ARCH eq "WINDOWS_NT4") { unlink $config_ph;}
+	# disabled by fukachan (2000/06/19)
+	# if ($COMPAT_ARCH eq "WINDOWS_NT4") { unlink $config_ph;}
     }
 
     # write
@@ -4410,6 +4411,10 @@ sub MakeConfigPH
     my($status);
     if (&ValidatePerlScriptP($new_ph)) {
 	print STDERR "\t(rename($new_ph, $config_ph)\n\t" if $debug;
+
+	# moved here by fukachan (2000/06/19)
+	if ($COMPAT_ARCH eq "WINDOWS_NT4") { unlink $config_ph;}
+
 	if (rename($new_ph, $config_ph)) {
 	    print STDERR "Done.\n";
 	    print STDERR "\t(back-up is saved in $config_ph.bak)\n"

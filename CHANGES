@@ -5,6 +5,12 @@
 
 2000/06/19
 
+  sbin/makefml (on Windows NT4)
+	fix behaviour around rename()
+
+	config.ph を作り損ねた時のエラーハンドリングの間違いを直す
+	＃いわゆる NT の rename(2) まわり問題
+
   kern/fml.pl
 	(back import a fix from 3.0.1_BETA #18)
 	disable to reject "From: $MAIL_LIST" mail in default
