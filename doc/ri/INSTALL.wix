@@ -423,7 +423,7 @@ last of "makefml" for /etc/aliases and do "newaliases".
 To check the action of "fmlserv", please send "help" to the
 fmlserv@your-domain.
 
-コマンドは、各ＭＬごとでもうけつけるますが、加えて fmlserv 宛の
+コマンドは、各ＭＬごとでも受け付けますが、加えて fmlserv 宛の
 
 	コマンド   ML  [fml標準のコマンドのオプションと引数]
 
