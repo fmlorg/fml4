@@ -40,8 +40,8 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 &Parse;				# Phase 1(1st pass), pre-parsing here
 &GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
-&FixHeaders(*Envelope);		# Phase 3, fixing fields information
-&CheckEnv(*Envelope);		# Phase 4, fixing environment and check loops
+&FixHeaderFields(*Envelope);	# Phase 3, fixing fields information
+&CheckCurrentProc(*Envelope);	# Phase 4, fixing environment and check loops
 				# If an error is found, exit here.
 
 &FmlServ(*Envelope);
@@ -199,38 +199,6 @@ sub FmlServ
 
 
 ######### Standard Utilities ##########
-# Log is special for fmlserv.
-sub Log 
-{ 
-    local($str, $s) = @_;
-    local($package, $filename, $line) = caller; # called from where?
-    local($status);
-
-    &GetTime;
-    $str =~ s/\015\012$//;	# FIX for SMTP
-    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
-	$Envelope{'error'} .= "Sendmail Error:\n";
-	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
-    }
-    
-    $str = "$filename:$line% $str" if $debug_caller;
-
-    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
-    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
-
-    local($ml);
-    if ($ml = $PresentML) {
-	&Append2("$Now $ml\# $str ($From_address)", $FMLSERV_LOGFILE, 0, 1);
-	&Append2("$Now $ml\# $filename:$line% $s", $FMLSERV_LOGFILE, 0, 1) 
-	    if $s;
-    }
-
-    if ($Envelope{'mode:caller'}) {
-	&Append2("$Now ($package, $filename, $line)", $LOGFILE, 0, 1);
-	&Debug("$Now ($package, $filename, $line) $LOGFILE, 0, 1");
-    }
-}
-
 ### :include: -> libkern.pl
 # Getopt
 sub Opt { push(@SetOpts, @_);}
