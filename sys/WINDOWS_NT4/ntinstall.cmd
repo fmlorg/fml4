@@ -5,4 +5,5 @@ del libexec\*.b0
 del bin\*.b0 
 del sbin\*.b0
 
-perl makefml install
+perl sbin\makefml install
+
