@@ -23,15 +23,6 @@ sub DoDistribute
     $DISTRIBUTE_START_HOOK && 
 	&eval($DISTRIBUTE_START_HOOK, 'DISTRIBUTE_START_HOOK');
 
-    # Cut off multipart or reject by mail's Content-Type handler
-    # The existence of $AGAINST_HTML_MAIL and $HTML_MAIL_DEFUALT_HANDLER
-    # are backward compatible.
-    if (@MailContentHandler > 0) {
-	&use('disthack'); 
-    	my ($status) = &ContentHandler(*e);
-	if ($status eq 'reject') { return $NULL;}
-    }
-
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {
 	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp'  ||

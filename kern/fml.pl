@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.124.2.9 2002/02/21 13:58:58 fukachan Exp $
+# $FML: fml.pl,v 2.124.2.10 2002/03/09 05:40:02 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -1419,6 +1419,15 @@ sub Distribute
 	    # not looped ! O.K. now cache on for the future
 	    &CacheMailBodyCksum(*e);
 	}
+    }
+
+    # Cut off multipart or reject by mail's Content-Type handler
+    # The existence of $AGAINST_HTML_MAIL and $HTML_MAIL_DEFUALT_HANDLER
+    # are backward compatible.
+    if (@MailContentHandler > 0) {
+	&use('disthack'); 
+    	my ($status) = &ContentHandler(*e);
+	if ($status eq 'reject') { return $NULL;}
     }
 
     # Security: Mail Traffic Information
