@@ -26,15 +26,15 @@ XXX 一月くらいで消すこと
 
 .S	3.0? (to be 3.0? in the new future)
 
-*** list to hack for DB Interface ?
+[TODO] とはいうものの、どうしたもんかな
 
-   bin/split_and_msend.pl
-   contrib/localhack/release-2/member_name/src/libmember_name.pl
-   kern/msend.pl
+	bin/split_and_msend.pl
+	contrib/localhack/release-2/member_name/src/libmember_name.pl
    
-[difficult]
-   libexec/fmlserv.pl
-   proc/libcrosspost.pl
+[difficult] not support anyway in this stage
+
+	libexec/fmlserv.pl
+	proc/libcrosspost.pl
 
 
 .S	3.0B (fukui newconfig)
@@ -51,7 +51,7 @@ done (?): require more check ?
 	   libexec/fmlserv.pl
 
 obsolete ?
-   contrib/whois/submit.pl 
+	contrib/whois/submit.pl 
 
 
 .S	3.0A (CGI)
