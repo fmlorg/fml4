@@ -1,0 +1,13 @@
+---
+born shell, bash ..
+
+~/.profile ~/.bash_profile (?)
+
+  MAKEFML_LANG=euc; export MAKEFML_LANG
+
+--- 
+csh, tcsh, ... 
+
+~/.cshrc ~/.tcshrc
+  setenv MAKEFML_LANG euc
+
