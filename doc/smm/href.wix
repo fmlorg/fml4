@@ -164,6 +164,12 @@ expire だと判定された場合です。よって、ある directory 中の一部のファイ
 なお directory ごと消す時に一番上の index.html thread.html は再構成さ
 れます。
 
+また expire 処理の overhead がかなりかかります。また directry 単位なの
+に毎回 expire するべきか？の判定処理をしてもしょうがありません。デフォー
+ルトは投稿数に対し $HTML_EXPIRE_LIMIT * 5 回に一回 expire code は走り
+ます。
+
+
 
 .S	BASE64の展開
 .k	$BASE64_DECODE
