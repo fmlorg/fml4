@@ -7,8 +7,14 @@ var/html/${file}: doc/html/${file}
 # mascot
 HTML_MISC += var/html/pictures/index.html
 var/html/pictures/index.html: doc/html/pictures/index.html
-	test -d var/html/pictures || mkdir var/html/pictures
+	@ test -d var/html/pictures || mkdir var/html/pictures
 	${CPP} -P -UDIST doc/html/pictures/index.html > var/html/pictures/index.html
+
+# history
+HTML_MISC += var/html/p_list.gif
+var/html/p_list.gif: doc/html/pictures/p_list.gif
+	@ test -d var/html/pictures || mkdir var/html/pictures
+	cp -p doc/html/pictures/p_list.gif var/html/p_list.gif
 
 .for file in ${DOC_RI_SOURCES}
 __HTML_RI__ += var/html/${file}/index.html
