@@ -2959,7 +2959,7 @@ sub Bind
 
     $Count++;
 
-    return "${index}${label}";
+    return "$index$label";
 }
 
 
