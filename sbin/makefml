@@ -5867,7 +5867,7 @@ sub FixDefault
 	}
     }
     else {
-	print STDERR "   no operation (no conversion)\n";
+	print STDERR "   no operation (no conversion)\n" if $debug;
     }
 }
 
