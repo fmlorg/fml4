@@ -4,12 +4,23 @@
 .k	ローカルスプールへのftp操作
 
 
+注意: HTML を作る場所ですが、デフォールトでは var/htdocs -> htdocs/ に
+変わっています。var は nobody 等へpermission を出していないからです。
+
+
 .S	自動的に スプールを html 化する(Expireはしない)
 .l	SyncHtml
 .key	自動 html 化
 .key	libsynchtml.pl
 .xref	spool2html.pl
+.k	$AUTO_HTML_GEN
 
+$AUTO_HTML_GEN = 1; をセットすると、自動的にHTML化された記事も作ります。
+この時普通のPLAINTEXTスプールも同時に作っています。EXPIREもしていません。
+EXPIRE等は別途明示的に設定する必要があります。
+.xref	expire
+
+実体としては HOOK で実装されています。
 fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
 ので;-)、HOOK でやれるように書き直しました。
 注意: libsynchtml.pl により SyncHtml.pl は obsolete になりました
@@ -25,12 +36,12 @@ SYNOPSIS:
 例：
 	$FML_EXIT_HOOK .= q#;
 		&use('synchtml');
-		$HTTP_DIR = 'var/htdocs';
+		$HTTP_DIR = 'htdocs';
 		&SyncHtml($HTTP_DIR, $ID, *Envelope);
 	#;
 
-	var/htdocs/index.html 
-	var/htdocs/記事番号.html 
+	htdocs/index.html 
+	htdocs/記事番号.html 
 
 を生成します。index.html の中身は
 
@@ -72,17 +83,17 @@ $HTML_DATA_THREAD です。
 
 	$HTML_INDEX_UNIT (default 'day') 
 
-expireしない場合一つの var/htdocs/ に数千のファイルができることになり
+expireしない場合一つの htdocs/ に数千のファイルができることになり
 かねません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをま
 とめておく方が見やすいでしょう。
 
 現在の標準実装のデフォールトは $HTML_INDEX_UNIT = 'day'; で
 
-	var/htdocs/19960916/index.html
-	var/htdocs/19960916/記事番号.html
+	htdocs/19960916/index.html
+	htdocs/19960916/記事番号.html
 	…
 
-のように 1996/09/16 日のMLの記事を var/htdocs/19960916/ 以下にHTML化
+のように 1996/09/16 日のMLの記事を htdocs/19960916/ 以下にHTML化
 します。
 
 また、
@@ -90,8 +101,8 @@ expireしない場合一つの var/htdocs/ に数千のファイルができることになり
 
 とした場合記事100個ごとに別のdirectoryを作ります。
   
-	var/htdocs/100/
-	var/htdocs/200/
+	htdocs/100/
+	htdocs/200/
 	…
 
 .S	スレッド化した index.html を作成する
