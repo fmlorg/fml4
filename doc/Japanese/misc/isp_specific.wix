@@ -1,19 +1,19 @@
-.C	$B%l%s%?%k%5!<%P%M%?(B?
+.C	¥ì¥ó¥¿¥ë¥µ¡¼¥Ð¥Í¥¿?
 
-.S	$B%l%s%?%k%5!<%P!<$r<Z$j$FJ#?t$N#M#L$rF0$+$7$?$$(B
+.S	¥ì¥ó¥¿¥ë¥µ¡¼¥Ð¡¼¤ò¼Ú¤ê¤ÆÊ£¿ô¤Î£Í£Ì¤òÆ°¤«¤·¤¿¤¤
 
-$B7kO@$H$7$F$O!"7@Ls7ABV$K$h$k$H$$$&Ez$(J}$7$+$J$$$G$7$g$&!#(B
+·ëÏÀ¤È¤·¤Æ¤Ï¡¢·ÀÌó·ÁÂÖ¤Ë¤è¤ë¤È¤¤¤¦Åú¤¨Êý¤·¤«¤Ê¤¤¤Ç¤·¤ç¤¦¡£
 
-(1) $B$$$/$i$G$b(B aliases $B$K=q$$$F$/$l$k$N$J$i(B $BIaDL$N%$%s%9%H!<%k<j=g$G$9!#(B
-   INSTALL $B%U%!%$%k$d(B fml $B%A%e!<%H%j%"%k$N(B basic_setup $B$rFI$s$G2<$5$$!#(B
+(1) ¤¤¤¯¤é¤Ç¤â aliases ¤Ë½ñ¤¤¤Æ¤¯¤ì¤ë¤Î¤Ê¤é ÉáÄÌ¤Î¥¤¥ó¥¹¥È¡¼¥ë¼ê½ç¤Ç¤¹¡£
+   INSTALL ¥Õ¥¡¥¤¥ë¤ä fml ¥Á¥å¡¼¥È¥ê¥¢¥ë¤Î basic_setup ¤òÆÉ¤ó¤Ç²¼¤µ¤¤¡£
 
 .q
-$B$b$70l$D$N%"%+%&%s%H$G$$$/$D#M#L$r<B9T$7$F$b$$$$$N$J$i(B 
-$B!t$3$3$,4V0c$C$F$$$k$HOC$7$,$+$o$C$F$7$^$$$^$9!#(B
+¤â¤·°ì¤Ä¤Î¥¢¥«¥¦¥ó¥È¤Ç¤¤¤¯¤Ä£Í£Ì¤ò¼Â¹Ô¤·¤Æ¤â¤¤¤¤¤Î¤Ê¤é 
+¡ô¤³¤³¤¬´Ö°ã¤Ã¤Æ¤¤¤ë¤ÈÏÃ¤·¤¬¤«¤ï¤Ã¤Æ¤·¤Þ¤¤¤Þ¤¹¡£
 
-1. $B%f!<%6(B aaa $B$K$J$C$F(B
+1. ¥æ¡¼¥¶ aaa ¤Ë¤Ê¤Ã¤Æ
 
-2.  ml-a $B!A(B ml-e $B$r:n@.$9$k(B
+2.  ml-a ¡Á ml-e ¤òºîÀ®¤¹¤ë
 
 	makefml  newml ml-a
 	makefml  newml ml-b
@@ -21,9 +21,9 @@
 	makefml  newml ml-d
 	makefml  newml ml-e
 
-$B$rA4It%f!<%6(B aaa $B$G<B9T$9$k!#(B
+¤òÁ´Éô¥æ¡¼¥¶ aaa ¤Ç¼Â¹Ô¤¹¤ë¡£
 
-3.  ml-a $B!A(B ml-e $B$N(B aliaes ($B8+K\(B) $B$r(B /etc/aliases $B$K=q$$$F$/$l$H0MMj$9$k(B
+3.  ml-a ¡Á ml-e ¤Î aliaes (¸«ËÜ) ¤ò /etc/aliases ¤Ë½ñ¤¤¤Æ¤¯¤ì¤È°ÍÍê¤¹¤ë
 
 	/var/spool/ml/ml-a/aliases
 	/var/spool/ml/ml-b/aliases
@@ -32,27 +32,27 @@
 	/var/spool/ml/ml-e/aliases
 .~q
 
-2. $B!X(B aliases $B$O=q$$$F$/$l$k$,%"%+%&%s%H0l$D$G%"%I%l%9$O#N8DJ,!Y(B
-   $B$J$I$N@)8B$,$"$k>l9g(B
+2. ¡Ø aliases ¤Ï½ñ¤¤¤Æ¤¯¤ì¤ë¤¬¥¢¥«¥¦¥ó¥È°ì¤Ä¤Ç¥¢¥É¥ì¥¹¤Ï£Î¸ÄÊ¬¡Ù
+   ¤Ê¤É¤ÎÀ©¸Â¤¬¤¢¤ë¾ì¹ç
 
 .q
-$B$b$70l$D$N%"%+%&%s%H$G$O0l$D$N#M#LJ,$7$+G'$a$J$$$N$J$i(B
+¤â¤·°ì¤Ä¤Î¥¢¥«¥¦¥ó¥È¤Ç¤Ï°ì¤Ä¤Î£Í£ÌÊ¬¤·¤«Ç§¤á¤Ê¤¤¤Î¤Ê¤é
 
-1. $B%f!<%6(B aaa-a $B$K$J$C$F(B
+1. ¥æ¡¼¥¶ aaa-a ¤Ë¤Ê¤Ã¤Æ
 
-2.  ml-a $B$r:n@.$9$k(B
+2.  ml-a ¤òºîÀ®¤¹¤ë
 
 	makefml  newml ml-a
 
-1. $B%f!<%6(B aaa-b $B$K$J$C$F(B
+1. ¥æ¡¼¥¶ aaa-b ¤Ë¤Ê¤Ã¤Æ
 
-2.  ml-b $B$r:n@.$9$k(B
+2.  ml-b ¤òºîÀ®¤¹¤ë
 
 	makefml  newml ml-b
 
-$B$H$$$&<j=g$r7+$jJV$9$^$9!#(B
+¤È¤¤¤¦¼ê½ç¤ò·«¤êÊÖ¤¹¤Þ¤¹¡£
 
-3. $B0MMj$O$^$H$a$F(B
+3. °ÍÍê¤Ï¤Þ¤È¤á¤Æ
 
 	/var/spool/ml/ml-a/aliases
 	/var/spool/ml/ml-b/aliases
@@ -60,12 +60,12 @@
 	/var/spool/ml/ml-d/aliases
 	/var/spool/ml/ml-e/aliases
 
-$B$rA4It$+$$$F$/$l$H$?$N$_$^$9(B($BI,MW$G$J$$9T$,$"$l$P:o$C$F(B)$B!#3F%W%m%;%9$O(B
+¤òÁ´Éô¤«¤¤¤Æ¤¯¤ì¤È¤¿¤Î¤ß¤Þ¤¹(É¬Í×¤Ç¤Ê¤¤¹Ô¤¬¤¢¤ì¤Ðºï¤Ã¤Æ)¡£³Æ¥×¥í¥»¥¹¤Ï
 
-	/var/spool/ml/ml-a/include $B$N%f!<%6(B aaa-a  
-	/var/spool/ml/ml-b/include $B$N%f!<%6(B aaa-b  
-		$B!D0J2<F1MM!D(B
+	/var/spool/ml/ml-a/include ¤Î¥æ¡¼¥¶ aaa-a  
+	/var/spool/ml/ml-b/include ¤Î¥æ¡¼¥¶ aaa-b  
+		¡Ä°Ê²¼Æ±ÍÍ¡Ä
 
-$B$GAv$j$^$9!#(B
+¤ÇÁö¤ê¤Þ¤¹¡£
 .~q
 

@@ -1,35 +1,35 @@
-.C	$B%I%-%e%a%s%HN`(B
+.C	¥É¥­¥å¥á¥ó¥ÈÎà
 
-.S	$B%I%-%e%a%s%H$O$I$3$K$"$j$^$9$+!)(B
+.S	¥É¥­¥å¥á¥ó¥È¤Ï¤É¤³¤Ë¤¢¤ê¤Þ¤¹¤«¡©
 
-$B%$%s%9%H!<%k$7$?%I%-%e%a%s%H$r$_$^$7$g$&!#(B
+¥¤¥ó¥¹¥È¡¼¥ë¤·¤¿¥É¥­¥å¥á¥ó¥È¤ò¤ß¤Þ¤·¤ç¤¦¡£
 
 /usr/local/fml/doc/
 
-$B$J$I$G$9!#(B
+¤Ê¤É¤Ç¤¹¡£
 
-$B$J$*(B http://www.fml.org/fml/ $B$O>o$K:G?7HG$N(B current $B$N%I%-%e%a%s%H$G$9!#(B
-$B$=$N$?$a$"$J$?$N<j85$N(B fml $B$H0[$J$C$F$$$k$+$bCN$l$^$;$s!#(B
+¤Ê¤ª http://www.fml.org/fml/ ¤Ï¾ï¤ËºÇ¿·ÈÇ¤Î current ¤Î¥É¥­¥å¥á¥ó¥È¤Ç¤¹¡£
+¤½¤Î¤¿¤á¤¢¤Ê¤¿¤Î¼ê¸µ¤Î fml ¤È°Û¤Ê¤Ã¤Æ¤¤¤ë¤«¤âÃÎ¤ì¤Þ¤»¤ó¡£
 
 
-.S	fml-current $B$N:G?7HG$N%I%-%e%a%s%H$O$I$3$K$"$j$^$9$+!)(B
+.S	fml-current ¤ÎºÇ¿·ÈÇ¤Î¥É¥­¥å¥á¥ó¥È¤Ï¤É¤³¤Ë¤¢¤ê¤Þ¤¹¤«¡©
 
 .url http://www.fml.org/fml/
 
-$B$O>o$K:G?7HG$N(B current $B$G$9!#(B
-$BCm(B: $B%j%"%k%?%$%`$K:G?7HG$H$$$&$3$H$G$O$"$j$^$;$s(B
+¤Ï¾ï¤ËºÇ¿·ÈÇ¤Î current ¤Ç¤¹¡£
+Ãí: ¥ê¥¢¥ë¥¿¥¤¥à¤ËºÇ¿·ÈÇ¤È¤¤¤¦¤³¤È¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó
 
 
-.S	fml-stable $B$N0lHV?7$7$$%I%-%e%a%s%H$O$I$3$K$"$j$^$9$+!)(B
+.S	fml-stable ¤Î°ìÈÖ¿·¤·¤¤¥É¥­¥å¥á¥ó¥È¤Ï¤É¤³¤Ë¤¢¤ê¤Þ¤¹¤«¡©
 
 .url http://www.fml.org/fml/sources/stable/src/doc/html/index-j.html
 
-.S	http://www.fml.org/fml/ $B$r%@%&%s%m!<%I$7$?$$(B
+.S	http://www.fml.org/fml/ ¤ò¥À¥¦¥ó¥í¡¼¥É¤·¤¿¤¤
 
 .url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/
 
-$B$3$3$K(B htmldocs-current-$BF|IU(B.tar.gz $B$H$$$&%U%!%$%k$,$"$j$^$9!#(B
-html $B7A<0$N%I%-%e%a%s%H$r(B
+¤³¤³¤Ë htmldocs-current-ÆüÉÕ.tar.gz ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤¬¤¢¤ê¤Þ¤¹¡£
+html ·Á¼°¤Î¥É¥­¥å¥á¥ó¥È¤ò
 
 .q
 total 6989
@@ -37,11 +37,11 @@ drwxr-xr-x  59 fukachan  wheel     2560 Aug 25 02:01 htdocs/
 -rw-r--r--   1 fukachan  wheel   829631 Aug 25 01:38 htmldocs-current-20000824.tar.gz
 .~q
 
-.S	$B%I%-%e%a%s%H$N:G?7HG$@$1$rDI$C$+$1$?$$(B
+.S	¥É¥­¥å¥á¥ó¥È¤ÎºÇ¿·ÈÇ¤À¤±¤òÄÉ¤Ã¤«¤±¤¿¤¤
 
-$BA0@a;2>H(B
+Á°Àá»²¾È
 
-.S	$B%I%-%e%a%s%H$N%5!<%A$O!)(B
+.S	¥É¥­¥å¥á¥ó¥È¤Î¥µ¡¼¥Á¤Ï¡©
 
 .url http://www.fml.org/fml/search-j.html
 
