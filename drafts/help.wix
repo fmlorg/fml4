@@ -767,10 +767,33 @@ _CTK_traffic [-n <best?>] [-m <mails>] [-d]
 　　フォーマットを指定しなかった場合、ファイルは tar でまとめられ gzip
 　され uuencode されて送り返されます。
 
-　　1000 行を越える場合は複数のメールに分けますので、自分でつなげて(^^;
-　例えば bar というファイルにしたとします。
-＃uuencode されている場合は uudecode を使えば順番さえ合わせれば自動展開
-＃されます。
+◯ MH 形式の場合
+
+1000 行を越える場合は複数のメールに分かれます。
+MH形式のメールの場合は以下のようなシェルスクリプトを使用すると
+手間を省くことが出来ます。
+
+#!/bin/bash
+# MH形式のメールを
+# maildecoder 3001 3002 3003
+# という風に順番に指定しすると、spoolディレクトリに解凍されたファイル
+が出来ます。
+while [ $# -gt 0 ]
+	do perl -e 'while(<>){last if /^$/}
+		while(<>){print unless /^$/}' $1 >>
+mail_dearchiver_spool_file.uu.$$;
+	shift
+done && 
+uudecode mail_dearchiver_spool_file.uu.$$ &&
+rm -f mail_dearchiver_spool_file.uu.$$ &&
+tar xzf msend.tar.gz &&
+rm -f msend.tar.gz
+
+MH以外の形式のメールボックスを使用している場合は、自分でつなげてくださ
+い(^^; 
+
+uuencode されている場合は uudecode を使えば順番さえ合わせれば自動展開
+されます。例えば bar というファイルにしたとします。
 
      % uudecode bar
      % ls 
@@ -782,8 +805,8 @@ _CTK_traffic [-n <best?>] [-m <mails>] [-d]
      -rw-r--r-- .......................... spool.tar.gz
      drwxr-xr-x .......................... spool
 
-　という具合に spool ディレクトリというのが出来ます。この中に取り寄せた
-　メールがしまわれています。
+という具合に spool ディレクトリというのが出来ます。この中に取り寄せた
+メールがしまわれています。
 .fi
 .if LANG == ENGLISH
 In the following, 'mail' refers to /usr/ucb/mail, Mail(SUN),
@@ -883,6 +906,7 @@ malix(SYSR3/4) /usr/bin/Mail(4.4BSD), /usr/bin/mail(4.4BSD)
 
 History:
 
+2000/12/03 merge patch by <kazuto@Kz-soft.com>
 1998/08/17 translated by fukachan@sapporo.iij.ad.jp
 1998/08/16 merge Jason.Chen@efi.com's Translation (95/11)
 		by fukachan@sapporo.iij.ad.jp
