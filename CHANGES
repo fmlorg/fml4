@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/06/17
+
+   bin/spool2html.pl
+	add ${EXEC_DIR,opt_I}/module to @INC by default
+
+	@INC に module/* を入れるように修正
+	これをしないと Mail::Address が見つからないなどという
+	エラーが出る（が、spool2html は動くけど）
+
 2001/06/10
 
    List-* ヘッダをカスタマイズできるようにする。変数は
