@@ -14,7 +14,7 @@
 <H1>
 
 <CENTER>
-add a member to elena ＭＬ
+add a member to elena ML
 </CENTER>
 
 <PRE>
@@ -23,7 +23,7 @@ command.
 
 % /usr/local/fml/makefml add elena nospam@fml.org
 
-Contrarly, remove nospam@fml.org, run this way.
+Contrarily, remove nospam@fml.org, run this way.
 
 % /usr/local/fml/makefml bye elena nospam@fml.org
 

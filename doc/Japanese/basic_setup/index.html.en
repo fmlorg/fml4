@@ -9,29 +9,29 @@
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <META name="keywords"   lang="ja"
-   content="fml, 基本, チュートリアル">
+   content="fml, basic tutorial">
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" チュートリアル: basic コース
+"fml" tutorial: basic course
 </CENTER>
 </H1>
 
 <P>
-<A HREF=../tutorial.html> "fml" チュートリアル </A>
+<A HREF=../tutorial.html> "fml" tutorial </A>
 <A HREF=../FAQ/index.html> FAQ </A>
 
 <P>
 <!- menu ->
-	　<A HREF="#overview">概要</A>
-	　<A HREF="#newml">basicな操作</A>
-	　<A HREF="#fundamental-config">やさしいカスタマイズ</A>
-	　<A HREF="#advanced-config">やや進んだカスタマイズ</A>
+	　<A HREF="#overview"> overview </A>
+	　<A HREF="#newml">basic manipulation </A>
+	　<A HREF="#fundamental-config">basic customize</A>
+	　<A HREF="#advanced-config">little advacned customize</A>
 <BR>
-	　<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
-	  [ www.fml.org 内ドキュメント検索 ]
+	　<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
+	  [ search www.fml.org ]
 	  </A>
 <!- menu ->
 
@@ -39,205 +39,205 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	ＭＬの作り方の概要: 例は elena ＭＬです。pathは適当に読みかえてください。
+	ＭＬの作り方の概要: 例は elena ＭＬです。pathは適当に読みかえてください。
 	<P>
-	注意: このページは fml をインストールしたマシンの上で行なう操作方法です。
+	注意: このページは fml をインストールしたマシンの上で行なう操作方法です。
 	<BR>
-	(GUIについては<A HREF="../GUI/">../GUI</A>をみてね)
+	(GUIについては<A HREF="../GUI/">../GUI</A>をみてね)
 	<BR>
 
 	<UL>
-	<LI> (前提条件: MTA (sendmail,postfix,qmail,...) の設定はすでに終っているはず)
+	<LI> (前提条件: MTA (sendmail,postfix,qmail,...) の設定はすでに終っているはず)
 
 	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
-		に fml をインストールする
+		に fml をインストールする
 
-	<LI> elena MLを作る
-		(作られるディレクトリ:
+	<LI> elena MLを作る
+		(作られるディレクトリ:
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
 
 	<LI> <A HREF="sample.aliases">/var/spool/ml/elena/aliases</A>
-		を /etc/aliases に付け加える(ファイルの編集)。
-		編集したら newaliases などを忘れずに
-		(update の手順は使っているMTAに依存します)。
+		を /etc/aliases に付け加える(ファイルの編集)。
+		編集したら newaliases などを忘れずに
+		(update の手順は使っているMTAに依存します)。
 		
-	<LI> <A HREF="add.html">メンバーを登録</A>する。
+	<LI> <A HREF="add.html">メンバーを登録</A>する。
 
 	</UL>
-	<A HREF="howto-customize.html">カスタマイズ</A>
-	は設定ファイル(/var/spool/ml/elena/config.ph)で行ないます。
-	ＭＬごとに異なる設定です。	
+	<A HREF="howto-customize.html">カスタマイズ</A>
+	は設定ファイル(/var/spool/ml/elena/config.ph)で行ないます。
+	ＭＬごとに異なる設定です。	
 	<BR>
-	設定ファイルのメインテナンス方法については松竹梅(?)あります。
+	設定ファイルのメインテナンス方法については松竹梅(?)あります。
 	<BR>
 	<A HREF="site_xxx.html">
-	全ＭＬ共通の設定を強制することもできます
-	(/var/spool/ml/elena/site_force.ph)。
+	全ＭＬ共通の設定を強制することもできます
+	(/var/spool/ml/elena/site_force.ph)。
 	</A>
 
 	<HR>
 	<UL>
 		<LI>
 		<A HREF="fml-install.html">
-		fmlのインストールの概観
+		fmlのインストールの概観
 		</A>
-		　
+		　
 		<A HREF="../../INSTALL/index.html">
-		(詳細)	
+		(詳細)	
 		</A>
-		　
+		　
 		<A HREF="installer-QandA.html">
 		[Q and A]
 		</A>
 
 		<LI>
 		<A HREF="../../INSTALL_CGI/index.html">
-		[CGIのインストール (fml-current only)]
+		[CGIのインストール (fml-current only)]
 		</A>
 
 		<LI>
 		<A HREF=MTAspecific.html>
-		MTA 別の注意 
+		MTA 別の注意 
 		</A>
 
 		<LI>
 		<A HREF=server_movement.html>
-		fmlを別の(新)サーバへ移動させる方法
+		fmlを別の(新)サーバへ移動させる方法
 		</A>
 
 		<LI>
 		<A HREF="../../UPGRADE-3.0/index.html">
-		注: fml 2.x から 3.0 へのアップグレード
+		注: fml 2.x から 3.0 へのアップグレード
 		</A>
 	</UL>
 
 
 	<HR>
 	<LI>
-	<A NAME="newml">ＭＬを作る。メンバーの登録/削除
+	<A NAME="newml">ＭＬを作る。メンバーの登録/削除
 	<UL>
-		<LI><A HREF="newml.html">ＭＬを新しく作る</A>
-		<LI><A HREF="add.html">メンバーを登録する</A>
-		<LI><A HREF="bye.html">メンバーを削除する</A>
+		<LI><A HREF="newml.html">ＭＬを新しく作る</A>
+		<LI><A HREF="add.html">メンバーを登録する</A>
+		<LI><A HREF="bye.html">メンバーを削除する</A>
 	</UL>
 	<BR>
-	<A HREF="acl.html"> [まとめ] メンバーにできること/できないこと</A>
+	<A HREF="acl.html"> [まとめ] メンバーにできること/できないこと</A>
 
 	<HR>
 	<LI>
 	<A NAME="fundamental-config">
-	<P> ＭＬのカスタマイズ(基本編)
+	<P> ＭＬのカスタマイズ(基本編)
 	<UL>
 		<LI>
 		<A HREF="howto-customize.html">
-		fmlの設定変更の仕方について
+		fmlの設定変更の仕方について
 		</A>
 		
 		<UL>
-			<LI> メニュー選択: GUI か CUI (makefml) を使う
-			<LI> cf を編集。そして config.ph を生成
-			<LI> config.ph (perl script)を生書き (上級編)
+			<LI> メニュー選択: GUI か CUI (makefml) を使う
+			<LI> cf を編集。そして config.ph を生成
+			<LI> config.ph (perl script)を生書き (上級編)
 		</UL>
 
 		<LI>
-		<A HREF="files.html">設定ファイル</A>の読み込む順と
-		ＭＬ共通の設定ファイルについて		
+		<A HREF="files.html">設定ファイル</A>の読み込む順と
+		ＭＬ共通の設定ファイルについて		
 
 		<LI>
 		<A HREF="../../INSTALL/index.html#makefml-config">
-		設定メニュー(makefml config)の使い方
+		設定メニュー(makefml config)の使い方
 		</A>
 		<BR>
-		注: CGIでは日本語のメニューです。
+		注: CGIでは日本語のメニューです。
 		<BR>
-		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義すると
-		その文字コードで表示されます。
-		<A HREF=../makefml/index.html>例:</A>
+		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義すると
+		その文字コードで表示されます。
+		<A HREF=../makefml/index.html>例:</A>
 		<BR>
 		<A HREF="../../INSTALL/index.html#cf-and-config.ph">
-		設定ファイルについて(cfとconfig.phの違いは?)
+		設定ファイルについて(cfとconfig.phの違いは?)
 		</A>
 		<BR>
 		<A HREF="../../variable-list.ja.html">
-		変数リスト
+		変数リスト
 		</A>
 		<A HREF="../../sorted-variable-list.ja.html">
-		アルファベット順の変数リスト
+		アルファベット順の変数リスト
 		</A>
 
 		<LI>
 		<A HREF="config-default.html">
-		fmlの設定(生の状態)
+		fmlの設定(生の状態)
 		</A>
 
 		<LI>
 		<A HREF="config-auto-subscribe.html">
-		fmlの設定(自動登録)
-		<A HREF="../how_to_subscribe/index.html">[詳細]</A>
+		fmlの設定(自動登録)
+		<A HREF="../how_to_subscribe/index.html">[詳細]</A>
 		</A>
 
 		<LI>
 		<A HREF="config-remote.html">
-		リモートからメールでメーリングリストの設定をいじる
+		リモートからメールでメーリングリストの設定をいじる
 		</A>
 		<BR>
-		"リモート管理"	
-		<A HREF="../remote_control/index.html">[詳細]</A>
+		"リモート管理"	
+		<A HREF="../remote_control/index.html">[詳細]</A>
 
 
 		<LI>
 		<A HREF="../header_rewrite/index.html">
-		ヘッダの書き換え
+		ヘッダの書き換え
 		</A>
 
 		<LI>
 		<A HREF="setup-more-secure.html">
-		よりセキュアに
+		よりセキュアに
 		</A>
 		<BR>
-		詳細:
-		<A HREF="../filter/index.html">フィルタ</A>
-		<A HREF="../resource_control/index.html">トラフィクモニタ</A>
+		詳細:
+		<A HREF="../filter/index.html">フィルタ</A>
+		<A HREF="../resource_control/index.html">トラフィクモニタ</A>
 		<A HREF="../../advisories/index.html">
-		FMLセキュリティアドバイザリィ
+		FMLセキュリティアドバイザリィ
 		</A> 
 
 		<LI>
-		<A HREF="../errormails/index.html">エラーメールの自動処理</A>
+		<A HREF="../errormails/index.html">エラーメールの自動処理</A>
 	</UL>
 
 
 	<HR>
 	<LI>
 	<A NAME="advanced-config">
-	<P> 少し進んだ設定
+	<P> 少し進んだ設定
 	<UL>
 		<LI>
-		企業のサポート用ＭＬなど
+		企業のサポート用ＭＬなど
 		<A HREF="config-post-from-anyone.html">
-		だれでも投稿可能なＭＬ
+		だれでも投稿可能なＭＬ
 		</A>
 
 		<LI>
-		例えばメールマガジン?
+		例えばメールマガジン?
 		<BR>
 		<A HREF="config-asymmetric-regist.html">
-		メールを一方的に送るような場合にユーザに自分で登録させたい
+		メールを一方的に送るような場合にユーザに自分で登録させたい
 		</A>
-		<A HREF="../how_to_subscribe/index.html#auto_asymmetric_regist">[詳細]</A>
+		<A HREF="../how_to_subscribe/index.html#auto_asymmetric_regist">[詳細]</A>
 
 		<LI>
-		"モデレータ" 
+		"モデレータ" 
 		<BR>
 		<A HREF="config-moderated.html">
-		メーリングリストの記事はながれる前に査読をうける場合
+		メーリングリストの記事はながれる前に査読をうける場合
 		</A>
 	</UL>
 </UL>
 
 <PRE>
-Copyright (C) 1999-2000 Ken'ichi Fukamachi
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
 
 $Id$
