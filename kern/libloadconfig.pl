@@ -134,6 +134,10 @@ sub LoadDummyMacros
 
     eval "sub ADD_CONTENT_HANDLER { 1;}";
     eval "sub DEFINE_MAILER       { 1;}";
+
+    # procedure manipulation
+    eval "sub PERMIT_PROCEDURE { 1;}";
+    eval "sub DENY_PROCEDURE { 1;}";
 }
 
 
@@ -271,6 +275,35 @@ sub ADD_CONTENT_HANDLER
     ($xtype, $xsubtype) = split(/\//, $parttype, 2);
     push (@MailContentHandler,
 	  join("\t", $type, $subtype, $xtype, $xsubtype, $action));
+}
+
+# XXX overwritten by %LocaProcedure and @DenyProcedure
+sub PERMIT_PROCEDURE
+{
+    local($proc) = @_;
+
+    push(@PermitProcedure, $proc);
+
+    # may be defined by DENY_PROCEDURE() ?
+    if ($LocalProcedure{$proc} eq 'ProcDeny') {
+	delete $LocalProcedure{$proc};
+    }
+
+    # remove entry in @DenyProcedure
+    if (@DenyProcedure) {
+	my(@x, $x);
+	for $x (@DenyProcedure) {
+	    push(@x, $x) if $x ne $proc;
+	}
+	@DenyProcedure = @x;
+    }
+}
+
+# XXX overwrite @PermitProcedure
+sub DENY_PROCEDURE
+{
+    local($proc) = @_;
+    $LocalProcedure{$proc} = 'ProcDeny';
 }
 
 1;
