@@ -1,62 +1,70 @@
 		How to edit fml CVS repository
 
-CAUTION:
-   you need "BSD make" not gmake.
+CAUTION: you need "BSD make" not gmake.
 
-* For developpers: 
-
-check out cvs tree
+1. how to hack 
 
    % cvs -d cvs.fml.org:/cvsroot co fml
 
-edit it and commit it! Please add your changes to "CHANGES".
+	check out cvs tree, edit it and commit it! 
+	Please add your changes to "CHANGES". 
 
-* snapshot maker
+2. If you make "snapshot" without .tar.gz
 
-If you are the maintainer to make 'snapshot', 
+   % cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
+
+	Please edit ~/.fmkmk.conf to modify several PATH's
+	to fit your environemnt.
+
+
+3. how to make snapshot with tar.gz
 
    % cvs -d cvs.fml.org:/cvsroot co fml
-   % touch CHANGES	(or get the latest CHANGES)
-   % make build
+   % cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
+	... edit ~/.fmlmk.conf ...
+   % cd fml
+   % make snapshot
 
-* release maker
+
+4. how to make release tarball
 
    % cvs -d cvs.fml.org:/cvsroot co fml
-   % make build
+   % cd fml
+   % cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
+	... edit ~/.fmlmk.conf ...
    % echo 3.0.x > conf/release
    % echo 3.0.x > conf/release_version
    % make release
 
 
------------------------------------------------------------------
-* The fml master maintainer who is responsible for 
-  e.g. snapshot generation
-  should check the version number
+Appendix A:  install "bsd make" on Debian GNU/linux
 
-0.	check conf/.
+  I verified you can make bsd make by GNU make on linux famillies.
 
-	conf/release			2.2A      ;;; main trunk version
-	conf/release_version		2.2A#100  ;;; snapshot (not in cvs)
-	conf/branch			current, stable, etc...
-					which reflects ftp servre hier(7).
-	conf/mode			$NULL or "daily" which indicates mode
-					expecially for daily snapshot system
+   % cvs -d cvs.fml.org:/cvsroot co fml
+   % cd fml
+   % make bsdmake
+   % su
+   # cp dist/NetBSD/src/usr.bin/make/bmake /usr/local/bin
+   # cp dist/NetBSD/src/share/mk /usr/share
+
+
+Appendix B: conf/ (maintainer is responsible for these files)
+
+conf/
+
+	release			4.0 4.0A 4.0.1
+	release_version		(automatically updated)
+	branch			current / stable
+	mode			'' / "daily"
 
 "conf/release" is the main trunk revision, which should be set up by hand.
-distrib/bin/fml_version.pl controls "conf/release_version".
+"branch" indicates current or stable, which should be set up by hand.
+"mode" is for daily snapshot system.
+distrib/bin/fml_version.pl updates "conf/release_version" automatically.
 
-1.	define the current snapshot number "conf/release_version".
 
-You need to set "conf/release" based on information not in cvs.
-
-2. 	cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
-	
-edit .fmlmk.conf to fit your directory hier(7), for example, WWW_DIR,
-FTP_DIR for exports...
-	
-
------------------------------------------------------------------
-* CVS on cvs.fml.org  NetBSD-current/newsmips (1.3I)
+Appendix C: CVSROOT/commitlog
 
 ^fml
 		-> source-changes@fml.org 
@@ -70,34 +78,29 @@ FTP_DIR for exports...
 ^fml/distrib/history
 		-> /cvsroot/log/fml/commitlog
 
------------------------------------------------------------------
-* TAG, BRANCH
 
-When you make "fml x.y.z release", you will work on the branch split
-off from the main trunk. For example
+Appendix D: CVS TAGS, BRANCH
 
-	   2.2 -----> 2.2 A --*--> 2.2B ----->	(main trunk)
-	                      |
-	                  2.2.1 BETA		(branch)
-	                      |			(* == fml-2-2-bb0)
-	                  2.2.1 Release
+                                 --- 4.0 release branch
+                                 |
+-- 3.0 --- 3.0A -- 3.0B -- 3.0H --- 4.0A -->	(main trunk)
+ |              |
+ |              v (import diffs for bug-fix only)
+ |
+  -- 3.0 -- 3.0.1 -- 3.0.2 --> (stable branch)
 
-[ALREADY ASSIGNED TAGS]
+stable branch:
+  3.0_BETA 3.0 3.0-stable 3.0.1 3.0.1-stable 3.0.2 3.0.2-stable ...
+           
 
-fml-2-1		2.1 Release
-fml-2-2		2.2 Release
-fml-2-2A-end	the end point of 2.2A
-fml-2-2-bb0	2.2 release working branch line
-		which is the road to 2.2.1.
-fml-2-2-1-prep	== fml-2-2-bb0's alias
-		the road to 2.2.1
+*** ASSIGNED TAGS ***
 
-fml-2-2A-end	2.2A end
-fml-2-2D	2.2D start
-fml-2-2D-start	2.2D start
+fml-2-1		2.1   release
+fml-2-2		2.2   release
+fml-2-2-1	2.2.1 release
+fml-3-0-maint	3.0 stable branch
+fml-3-0		3.0   release
+fml-3-0-1	3.0.1 release
 
-fml-3-0-maint	3.0 release branch
-fml-3-0-bb0	3.0_BETA start point
-fml-3-0		3.0 release
-		XXX: update -j fml-3-0-maint:"1999-8-16 00:39" -j fml-3-0-maint
-fml-3-0-1	3.0.1 release tag
+
+XXX: update -j fml-3-0-maint:"1999-8-16 00:39" -j fml-3-0-maint
