@@ -231,6 +231,9 @@ INFO:
 USE_FLOCK:	 1
 			# use flock for lock algorithm if non-nil
 
+NOT_USE_SPOOL:	0
+			# not spooling (default is "spooling")
+
 COMMAND_SYNTAX_EXTENSION:  1
 			## COMMAND syntax ...
 			# if non-nil, convert #member -> # member
