@@ -80,6 +80,8 @@ sub MakefmlInputTranslate
     local($command, $ml, @argv) = @_;
     local($buf, %xe);
 
+    return unless $MESSAGE_LANGUAGE;
+
     # print "(debug) &MesgLE(*xe, makefml.$command, $ml, @argv);\n";
     $buf = &MesgLE(*xe, "makefml.$command", $ml, @argv);
     print $buf, "\n";
