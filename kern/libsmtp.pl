@@ -530,7 +530,11 @@ sub __SmtpIO
 	if ($USE_VERP) {
 	    # postfix xverp
 	    if ($e{'mci:xverp'}) {
-		$xverp = ' XVERP=-=';
+		# Example: elena-admin+rudo=nuiniu.net@fml.org
+		# you need set up alias
+		#    elena-admin: :include:/var/spool/ml/include-mead
+		my $vd = $POSTFIX_VERP_DELIMITERS || '+=';
+		$xverp = " XVERP=$vd";
 		$mail_from = $SMTP_SENDER || $MAINTAINER;
 	    }
 	    # qmail

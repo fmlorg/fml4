@@ -1,0 +1,14 @@
+.C	postfix の VERPs での自動エラー処理のしかた
+=E.C	postfix VERPs
+
+	$USE_VERP = 1;
+
+あとは SMTP で MTA と通信を始める際に XVERP をサポートしていることがわ
+かったら、自動的に XVERP を使います。
+
+その際、VERP の区切り記号として $POSTFIX_VERP_DELIMITERS が使われます。
+デフォルトは次のとおり += です。
+
+	$POSTFIX_VERP_DELIMITERS = '+=';
+
+他の記号を使いたい場合は、この変数を設定して下さい。
