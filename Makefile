@@ -262,3 +262,5 @@ libkern:
 asuka:
 	(chdir sbin; ( echo put makefml; echo quit;) | ftp -ivd asuka)
 
+scan:
+	fvs scan doc/ri/*wix doc/smm/*wix
