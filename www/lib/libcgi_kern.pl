@@ -29,6 +29,7 @@ sub Init
     $WWW_CONF_DIR = "$WWW_DIR/conf";
     $CGI_CF       = "$WWW_CONF_DIR/cgi.cf";
 
+    # if exists, import cgi.cf to %CGI_CF hash.
     if (-f $CGI_CF) {
         eval("&LoadCGICF;");
 	&Err($@) if $@;
@@ -216,6 +217,18 @@ sub ShowCGICF
 	    syswrite(STDOUT, $_, $p);
 	}
 	print "</PRE>";
+    }
+}
+
+
+### Section: utils
+sub SpawnProcess
+{
+    local($prog) = @_;
+
+    if (open(PROG, "$prog 2>&1 |")) {
+	while (<PROG>) { &P($_);}
+	close(PROG);
     }
 }
 
