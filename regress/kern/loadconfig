@@ -1,0 +1,14 @@
+#!/usr/local/bin/perl
+
+push(@INC, "/usr/local/fml");
+$DIR = "/var/spool/ml/elena";
+
+require 'kern/libloadconfig.pl';
+
+print "\n1. __KERN__\n";
+&LoadConfiguration('__KERN__');
+print &JSTR('uja'), "\n";
+
+print "\n2. !__KERN__\n";
+&LoadConfiguration;
+print &JSTR('uja'), "\n";
