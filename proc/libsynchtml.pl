@@ -410,7 +410,7 @@ package SyncHtml;
            INDEX_HTML_FORMAT_PREAMBLE,
            INDEX_HTML_FORMAT_TRAILER,
            INDEX_HTML_DOCUMENT_SEPARATOR,
-           HTML_STYLESHEET_BASENAME, HTML_INDENT_TYPE,
+           HTML_STYLESHEET_BASENAME, HTML_INDENT_STYLE,
            HTML_DATA_CACHE, HTML_TITLE_HOOK, BASE64_DECODE);
 
 sub Init
@@ -1351,7 +1351,7 @@ sub OutQueueOn
     # "$i" refers itself only;
     return unless $next{$i}; 
 
-    $queue .= " ( " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_TYPE eq 'UL';
+    $queue .= " ( " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_STYLE eq 'UL';
     $queue .= " ( " if $next{$i} =~ /\d+\s+\d+/;
 
     # $i -> somewhere;
@@ -1359,7 +1359,7 @@ sub OutQueueOn
 	&OutQueueOn($_, *next, *queue);
     }
 
-    $queue .= " ) " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_TYPE eq 'UL';
+    $queue .= " ) " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_STYLE eq 'UL';
     $queue .= " ) " if $next{$i} =~ /\d+\s+\d+/;
 }
 
