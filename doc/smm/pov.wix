@@ -141,7 +141,60 @@ samples/sitedef.ph が作られますので参考にしてみて下さい。
 .include clo.wix
 
 
-.S	fmlのプロセス
+.S	fmlのプロセス(STDINからの読み込みの第一段階)
+.l	STDIN->fml
+
+STDIN からの読み込みは第壱段階でハッシュテーブル %Envelope
+.xref	%Envelope
+.k	$Envelope{'Header'}
+.k	$Envelope{'Body'}
+.k	ヘッダ	$Envelope{'Header'}
+.k	ボディ	$Envelope{'Body'}
+
+	ヘッダ	$Envelope{'Header'}
+	ボディ	$Envelope{'Body'}
+
+に保存されます。この時ボディ（メールの本文）に対しては次のようなチェッ
+クがなされます。
+
+○ 最初の $GUIDE_CHECK_LIMIT 行に対して $GUIDE_KEYWORD のキーワードが
+現れるか否か？
+メンバー以外からのメールでこのキーワードをキャッチした場合は、ガイドを
+送り返してそれ以外のことはしない。
+.k	$GUIDE_CHECK_LIMIT
+.k	$GUIDE_KEYWORD
+
+○ 最初の $COMMAND_CHECK_LIMIT 行に対して
+.k	$COMMAND_CHECK_LIMIT
+.k	$CHADDR_KEYWORD
+
+	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
+	# で始まり、$CHADDR_KEYWORD のキーワード
+
+が現れる行があるか否か？あった場合はコマンドモードへ移行。
+
+の２つのチェックをしています。それぞれの LIMIT を調節すると、つまり 
+LIMITを０にすればチェックをしないということになるし、全文すべてをコマ
+ンドの対象にすることもできます。デフォールトではそれぞれ最初の３行のみ
+を対象にしています。
+
+なお、それぞれのキーワードデフォールトは次のように設定されています。
+
+	$GUIDE_KEYWORD  = "guide";
+	$CHADDR_KEYWORD = "chaddr|change-address|change";
+
+
+.S	fmlのプロセス(第２段階, %Envelopeの処理)
+.xref	%Envelope
+.xref	header-custom
+
+%Envelope にヘッダとボディを読み込んだ後はヘッダの解析プロセスが続きま
+す。詳細については次の章を見て下さい。
+.xref	%Envelope
+.xref	header-custom
+
+この後ロックして、メインのプロセスが続くことになります。
+
 
 .S	fml process の signal handling
 .k	$Sigarlm
@@ -149,7 +202,7 @@ samples/sitedef.ph が作られますので参考にしてみて下さい。
 .k	$MAX_TIMEOUT
 
 現在は次のように設定されています。
-これは alarm(3) を使ういつものやり方です。
+これは alarm(3) を使う普通のやり方です。
 TIMEOUTを待つ時間は $FLOCK_TIMEOUT で決まります。
 (flock でない場合は 三秒＋α 程度のSLEEPを MAX_TIMEOUT 回待ってみる）
 
@@ -212,6 +265,28 @@ TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
 なお通常は $MAX_TIMEOUT 秒後、var/log/ の下にTIMEOUTしたメールは保存さ
 れ、管理者へTIMEOUTが通知されます。
 
+[捕捉]	flock(2) を見れば分かりますが 
+.k	flock(2)
+.k	$LOCK_SH
+.k	$LOCK_EX
+.k	$LOCK_NB
+.k	$LOCK_UN
+
+	$LOCK_SH                       = 1;
+	$LOCK_EX                       = 2;
+	$LOCK_NB                       = 4;
+	$LOCK_UN                       = 8;
+.q
+     #include <sys/file.h>
+     #define   LOCK_SH   1    /* shared lock */
+     #define   LOCK_EX   2    /* exclusive lock */
+     #define   LOCK_NB   4    /* don't block when locking */
+     #define   LOCK_UN   8    /* unlock */
+
+     int
+     flock(int fd, int operation)
+.~q
+＃1.2Beta のマニュアルは間違っている。今は /usr/include/sys/fctnl.h
 
 
 .S	SMTPライブラリについて
@@ -371,6 +446,7 @@ $PORT = 25 (25/tcp) で通信しますが、
 
 
 .S	%Envelope (ハッシュテーブル)
+.l	%Envelope
 .k	%Envelope
 .k	struct envelope e;
 
@@ -580,10 +656,12 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 [メンバーのリスト関係]
 
 	$MEMBER_LIST 	 	$DIR/members
+.l	$MEMBER_LIST
 		メンバーリスト(認証のみに使う)
 .xref	fml-file-structure
 
 	$ACTIVE_LIST 		$DIR/actives
+.l	$ACTIVE_LIST
 		ＭＬの配送リスト
 .xref	fml-file-structure
 
@@ -591,64 +669,86 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 [各種の説明、ご案内関係のファイル]
 
 	$OBJECTIVE_FILE	 	$DIR/objective
+.l	$OBJECTIVE_FILE
 		ＭＬの目的を書いたファイル
 
 	$GUIDE_FILE		$DIR/guide
+.l	$GUIDE_FILE
 		ＭＬの一般向けご案内（ガイド）
 
 	$HELP_FILE	 	$DIR/help
+.l	$HELP_FILE
 		ＭＬのHELP、コマンドの解説等
 
 	$DENY_FILE	 	$DIR/deny
+.l	$DENY_FILE
 		ＭＬがメンバーチェックをしている時
 		メンバー以外からメールが来た時に返す断りの文章
 		
 	$WELCOME_FILE	 	$DIR/guide
+.l	$WELCOME_FILE
+.xref	auto-regist
 		ＭＬが自動登録の時、登録時に送ってあげる文章
 		デフォールトではとりあえずガイドと同じになっている。
-.xref	auto-regist
+
 
 
 [ログファイル関係]
 
 	$LOGFILE	 	$DIR/log
+.l	$LOGFILE
 		ログ
 
 	$MGET_LOGFILE    	$DIR/log
+.l	$MGET_LOGFILE
 		mgetのログ。デフォールトでは↑ログファイルと同じ
 .xref	mget
 	
 	$SMTPLOG		$VARLOG_DIR/_smtplog
+.l	$SMTPLOG
 		プロセス間通信(SMTP)のログ(デバッグの役に立つ)
 
 	$SUMMARY_FILE 	 	$DIR/summary	
+.l	$SUMMARY_FILE
 		MLの記事のサマリ
 
 	$SEQUENCE_FILE 	 	$DIR/seq
+.l	$SEQUENCE_FILE
 		MLの記事番号
 
 	$MSEND_RC		$VARLOG_DIR/msendrc
+.l	$MSEND_RC
 		まとめおくりの制御ファイル
 .xref	msend
 
 	$LOCK_FILE	 	$VARRUN_DIR/lockfile.v7
+.l	$LOCK_FILE
 		flock() を使わない時のロックで使うファイル
 
 	$LOG_MESSAGE_ID		$VARRUN_DIR/msgidcache
+.l	$LOG_MESSAGE_ID
 		message-id cache ファイル
 		(ML自身での無限ループを防ぐためのキャッシュ)
 
+	$INDEX_FILE		$DIR/index (なくてもいっこうに構わない)
+.l	$INDEX_FILE
+		indexコマンドで表示したい内容を書く
+		このファイルがない場合はその場でMLのHOME内容を調べて
+		返す
 
 .S	単に便利なためにある変数
 
 	$NULL
+.l	$NULL
 		ダミー:-) ＃ 別にこんな変数いらない 
 		#define null (char *)0 みたいなものだと思ってもらえば良い
 
 	$FML	
+.l	$FML	
 		カーネル内のプロセステーブルを書き変える際に使う変数
 
 	$FACE_MARK	（単なる愛敬:-）
+.l	$FACE_MARK
 		各種リクエストの結果を返す時にお別れの文章の腋につける
 		e.g. P(^^)
 			Be seeing you P(^^)

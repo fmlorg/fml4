@@ -156,6 +156,14 @@ fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
 
 ですね
 
+
+.S	$MSEND_START_HOOK
+.k	$MSEND_START_HOOK
+
+実際の配送作業の始まる直前に評価されます。
+
+
+
 .S	まとめ送りのデフォールト
 .k	$MSEND_MODE_DEFAULT
 .xref	$MGET_MODE_DEFAULT

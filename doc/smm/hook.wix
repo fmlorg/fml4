@@ -57,6 +57,12 @@ $HEADER_ADD_HOOK = q#
 #;
 
 
+.S	$DISTRIBUTE_START_HOOK
+.k	$DISTRIBUTE_START_HOOK
+
+配送を始める関数に入った時に最初に評価されるHOOK
+
+
 .S	$SMTP_OPEN_HOOK
 .key	$SMTP_OPEN_HOOK
 

@@ -572,6 +572,8 @@ fmlのデフォールトの挙動は
 いはずでず…	
 
 	$COMMAND_ONLY_SERVER           = 1;
+.l	$COMMAND_ONLY_SERVER
+.k	$COMMAND_ONLY_SERVER
 
 とすると 
 
@@ -606,6 +608,25 @@ $CONTROL_ADDRESS にアドレスを登録するとコマンド専用野ＭＬサーバが作れ
 
 それは $LOAD_LIBRARY が設定されていると、そのライブラリを評価して実行
 するように作動します。この場合配送は行ないません。
+
+
+.S	Subject: にコマンドを書く場合
+.k	$USE_SUBJECT_AS_COMMANDS
+.xref	STDIN->fml
+
+	$USE_SUBJECT_AS_COMMANDS = 1;
+
+の場合は、Subject: の部分をコマンドとみなします。
+.xref	STDIN->fml
+
+	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
+	# で始まり、$CHADDR_KEYWORD のキーワード
+
+$COMMAND_ONLY_SERVER がセットされている場合は、キーワード # の有無に関
+わらず、上記のキーワードを探索します。
+.xref	$COMMAND_ONLY_SERVER
+
+キーワードを見つけた場合は、コマンドモードへ移行します。
 
 
 .S	リモートで管理する設定

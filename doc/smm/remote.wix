@@ -218,6 +218,10 @@ config.ph でコントロールできます。
    3	@DenyAdminProcedure が定義されているなら
 	@DenyAdminProcedure のコマンドだけを使えなくする
 
+   4	$ADMIN_COMMAND_HOOK を評価する。
+.k	$ADMIN_COMMAND_HOOK
+
+
 例：
 	○ 管理者用の helpとaddadminのみを使用可能、それ以外はすべて使用不可
 

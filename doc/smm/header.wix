@@ -51,6 +51,7 @@ config.ph で
 	:body:
 	:any:
 	:XMLNAME:
+	:XMLCOUNT:
 
 の特殊な変数が使われています。それぞれ
 
@@ -62,6 +63,10 @@ config.ph で
 			に明示的に現れないフィールドを展開する場所
 
 	:XMLNAME:	$XMLNAME を展開する (X-ML-Name: フィールド)
+.k	$XMLNAME
+
+	:XMLCOUNT:	$XMLCOUNT を展開する (X-Mail-Count: フィールド)
+.k	XMLCOUNT
 
 のような特殊な目的に使われます。
 これらは Backward Compatibility という趣が強い例外処理です。
@@ -630,14 +635,21 @@ To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 にまとめて一通分のみが配送されます。だから複数あっても気にしないでね
 
 
-.S	NIFTY対策をするか?(参加者にNIFの人もいる)
+.S	NIFTY対策をするか?(参加者にNIFの人もいる, OBSOLETE?)
 .label	NIFTY
 .label	$AGAINST_NIFTY
 .label	against-nifty
+.k	$USE_ERRORS_TO
 
 注意：もう必要ないらしい
 
+	$USE_ERRORS_TO = 1;
+
+とすると Errors-To: をつけます。もしくは
+
 	$AGAINST_NIFTY = 1;（対策をする）
+
+でも同じこと意味です。
 
 NIFTY は非常識にも、Errors-to という時代おくれの部分しかみてないので;_;、
 config.ph あたりで
@@ -654,6 +666,9 @@ config.ph あたりで
 前向きなのは、みんなで文句をいって直させることです。
 ＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
 らいいいつづけないとだめなんだろうなぁ（はぁ）
+
+なお、$ERRORS_TO で Errors-To: の部分は $MAINTAINER から変更できます。
+.k	$ERRORS_TO
 
 
 .# $Id$

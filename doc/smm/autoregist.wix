@@ -6,13 +6,17 @@
 .k	$ML_MEMBER_CHECK
 
 ○ fml で "自動登録" といっているのは
+.k	$FILE_TO_REGIST
+.k	$MEMBER_LIST
 
 
    1 あるアドレスについて、
    2 すでにＭＬのメンバーであるかどうかをチェックして
-	($MEMBER_LIST の中のアドレスについてチェックします)
+	$FILE_TO_REGIST (デフォールトは $MEMBER_LIST)
+	の中のアドレスについてチェックします
    3 もしメンバーでないならそのアドレスをＭＬに登録する
-	($MEMBER_LISTに登録します)
+	$FILE_TO_REGIST (デフォールトは $MEMBER_LIST)
+	に登録します。
    4 登録した場合にはガイド等を送ってあげる
 
    また、管理者へ登録した旨をメールで知らせます。
@@ -189,7 +193,7 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
 自動登録の場合はactivesを使わずmembersファイルがmemberとactivesの両方
 を兼任する形になっています。
 
-	$MEMBER_LIST
+	$FILE_TO_REGIST($MEMBER_LIST)
 
 に対して登録を行ないますが、メンバーチェックは
 

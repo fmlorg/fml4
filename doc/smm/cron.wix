@@ -34,6 +34,31 @@ fml.pl が cron.pl を走らせ、そのまま system の cron と同じ働きをします。
 り続けます。
 
 
+.S	オプションの捕捉
+
+-b43 オプションは 
+.k	-b43
+
+	$CRON_NOTIFY    = 0; (デフォールトは 1)
+.k	$CRON_NOTIFY
+
+ということをします。デフォールトでは cron が何らかの処理をした場合はそ
+のログをそのユーザに知らせます。
+
+また、デフォールトでは cron.pl はデーモン化しません。
+
+	-onotty
+.k	-onotty
+
+オプションをつけると自分でデーモン化します。
+うまくいかないＯＳがありうることを考慮してデフォールトでは
+
+	$NOT_USE_TIOCNOTTY = 1;		# no ioctl
+.k	$NOT_USE_TIOCNOTTY
+
+つまりデーモンにならないようになっています。
+
+
 .S	Vixie Cron
 .k	P.Vixie
 .k	bind
