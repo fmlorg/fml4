@@ -57,9 +57,9 @@ sub Parse
 
 
     while (<STDIN>) {
-	chop;
-
 	$SavedBuffer .= $_ if $. < 1024;
+
+	chop;
 
 	# ignore the first header
 	# we should ignore header for <maintainer>
@@ -879,7 +879,7 @@ sub SaveMail
 	# make working directory
 	-d $VAR_DIR    || mkdir($VAR_DIR, 0755);
 	-d $VARLOG_DIR || mkdir($VARLOG_DIR, 0755);
-	my $f = $VARLOG_DIR."/mead.".$PCurrentTime;
+	my $f = $VARLOG_DIR."/mead.$$.".$PCurrentTime;
 	&Append($SavedBuffer, $f);
 	$f =~ s@$DIR/@@;
 	&Log("warn: saved in $f");
