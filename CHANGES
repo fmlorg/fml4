@@ -3,7 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/08/12
+
+   $PGP_VERSION is removed
+
 2000/08/11
+
+   update doc/Japanese/examples/virus_check.sh
+	reject Pretty*Park*exe pattern
+	for example "Pretty Park 1.exe" 
 
    change PGP related codes 
 	XXX THIS CHANGE IS INCOMPATIBLE WITH fml 3.0 !!!
