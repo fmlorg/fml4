@@ -160,6 +160,34 @@ _____________________________
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
+<BR>
+・メーリングリストをWWWでいじれるように設定する
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> メーリングリスト名:
+		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=right>
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+		</TABLE>
+	<TR>
+</TABLE>
+
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
 
 <HR>
 <A NAME=destructml><P>メーリングリストの消去

@@ -347,6 +347,9 @@ sub Command
     elsif ($PROC eq 'newml') {
 	&Control($ML, $PROC);
     }
+    elsif ($PROC eq 'mladmincgi') {
+	&Control($ML, 'mladmin.cgi');
+    }
     elsif ($PROC eq 'destructml') {
 	&Control($ML, $PROC);
     }
