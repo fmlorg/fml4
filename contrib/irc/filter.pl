@@ -40,12 +40,15 @@ for (;;) {
 		$Filter;
 	    }
 	    select(undef, undef, undef, 1);
+	    \$i = 0 if \$RestartNextLoop;
 	}
     #;
 
     print STDERR $EVAL if $debug;
     eval($EVAL); 
     &Log($@) if $@;
+
+    undef $RestartNextLoop;
 }
 
 exit 0;
@@ -110,6 +113,8 @@ sub ReadFilterConf
     open(CONF, $FILTER_CONF) || &die("cannot open $FILTER_CONF");
     while (<CONF>) { $Filter .= "\t$_";}
     close(CONF);
+
+    $RestartNextLoop = 1;
 }
 
 

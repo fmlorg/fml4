@@ -52,6 +52,31 @@ package irc;
 
 sub Log { main'Log(@_);}
 
+sub GetTime
+{
+    local($time) = @_;
+
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time||time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+
+    $MailDate;
+}
+
 
 sub main'IrcParseArgv #'
 {
@@ -132,7 +157,8 @@ sub SendS
 {
     local($s) = @_;
     print S "$s\r\n";
-    print STDERR "SendS:[$s]\n" if $debug;
+    &GetTime(time);
+    print STDERR "SendS $Now> $s\n" if $debug;
 }
 
 
@@ -263,7 +289,8 @@ sub main'IrcMainLoop  #'
 	if (vec($rout, $BITS{'S'}, 1)) {
 	    sysread(S, $buf, 4096) || &Log("Error:$!");
 	    if ($debug) {
-		for (split(/\n/, $buf)) { print STDERR "--- $_\n";}
+	        &GetTime(time);
+		for (split(/\n/, $buf)) { print STDERR "----- $Now> $_\n";}
 	    }
 	}
 
@@ -285,7 +312,9 @@ sub main'IrcMainLoop  #'
 	$count = @Queue ? 0 : ($count+1);
 
 	# ping, pong
-	if ($count % 10 == 0) { &SendS("PING $IRC_SERVER");}
+	if ($count % 10 == 0) { 
+	    &SendS("PING $IRC_SERVER");
+	}
     }
 }
 
