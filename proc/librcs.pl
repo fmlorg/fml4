@@ -33,7 +33,7 @@ sub RCSBackUp
     $mode = (stat($f))[2];
 
     open(CI, "$CI -l -q $f 2>&1|") || 
-	&Log("RCSBackUp Error: cannot exec $CI -q $file");
+	&Log("RCSBackUp Error: cannot exec $CI -q $f");
     while (<CI>) {
 	chop;
 	&Debug("RCSBackUp> $_") if $debug;
