@@ -100,8 +100,8 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 .S	Update や bug fix 等の情報について
 
-最新版の fml-current のソースコードを手に入れてから改造等はしていただ
-けるとよろしいかと存じます(_o_)。
+できるだけ最新版の fml-current のソースコードを手に入れてから改造等は
+していただけるとよろしいかと存じます (_o_)
 
 ○ fml のWWWのページは 
 
@@ -109,33 +109,29 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 最新のドキュメント、ソースともにここに揃っています。 
 
-○ fml@axion.phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
-うにしてあります。
+○ fml@axion.phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を
+返すようにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
 
 ○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
-可能です。
-ftp が使えない場合メールでは、なんでもいいからメールを
+可能です。ftp が使えない場合メールでは、なんでもいいからメールを
 fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。
 
 
-.S	anonymous ftp でのソースの入手方法 
+.S	Anonymous ftp でのソースの入手方法 
 
-	国内、国外共にマスターサーバは
+国内、国外共にマスターサーバは
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-	国内のミラーが
-	ftp://ftp.phys.titech.acjp/pub/net/fml-current/
-
-＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
+です。名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
 
 
 .S	fml の ML と bug-report のアドレス
 
 ○ バグ、質問、要望、新しい発見(謎)があったら 
-	fml-support ML(例によって自動登録です)
+	fml-support ML (例によって自動登録です)
 	fml-support@axion.phys.titech.ac.jp
 
 か 
@@ -144,10 +140,10 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 
 に御一報くださいませ。
 
-ただ、個人宛にメールがくるとどこかへまぎれたり、
-忙しくて時間が取れない場合も多々あります。
-できるだけ fml-support Mailing List 宛へ投げてください _o_
-ＭＬならわかる人がすぐに答えてくれる可能性があります。
+ただ、個人宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れない
+場合も多々あります。できるだけ fml-support Mailing List 宛へ投げてもら
+えると助かります _o_
+＃ＭＬならわかる人がすぐに答えてくれる可能性がありますから
 
 2.1 からはＭＬへ登録して欲しくない方のために
 
@@ -175,7 +171,7 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ○ hml 1.6 との compatibility
 
 members や log file等をそのままに、*pl 群と config.phを差し替えればい
-きなり動きます
+きなり動くはずです。
 
 
 .S	使用上の注意
@@ -189,8 +185,9 @@ members や log file等をそのままに、*pl 群と config.phを差し替えればい
 
 .C	fml でやれること
 
-詳細については doc/op ("The Design and Implementation of the fml
-Mailing List Server") を読んで下さいね(^^;)
+詳細についてはパッケージの中の doc/op ("The Design and Implementation
+of the fml Mailing List Server") を読んで下さいね(^^;)
+＃ http://www.iij.ad.jp/sapporo/staff/fukachan/fml/op/
 
 fml 2.1 が hml 1.6 と同様に目指したものは
 	(以下 hml 1.6 README.jpn より)
@@ -302,7 +299,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 ○ スタートレック宇宙歴サポート(笑)
 	宇宙歴をつけるmh, mh-e user interface つき:-)
 
-○ Sendmail 8.x を意識してつくる…＃(もちろん 5.x でも動きます)
+○ Sendmail 8.x を意識してつくる(もちろん 5.x でも動きますが…)
 
 
 .S	Brief History
@@ -311,7 +308,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 	1.3 -> 1.4 よく使うコード、普段使わないものを再構成する
 	1.4 -> 1.5 まとめおくりおよびmgetのUser Interface拡張
 	1.5 -> 1.6 call by reference, fml_local.pl, sid.pl
-	1.6 -> 2.0 cf/ doc/ まわりの再構成、
+	1.6 -> 2.0 cf/ doc/ libexec/ まわりの再構成、libexec/fmlserv.pl
 
 
 
@@ -322,13 +319,14 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 インストール自体はおおむね make 一発です:-)。
 ＃実際のインストールはINSTALLというファイルを見て下さい。
 
-今時最初からOSに入ってるとおもいますが perl は必須です、
-自分のマシンで sendmail が走っている必要は必ずしもありませんし、
-SMTPを喋れるなら sendmail である必要もありません。
+今時最初からOSに入ってるとおもいますが perl は必須です。
+また、sendmail のようなSMTPを理解してくれるサーバが必要です。
 
-pop を使ってＭＬを動かすこともできますし、sendmail以外のMTAもあります
-から拘る必要はありませんが、4.4BSD がターゲットマシンなので sendmail +
-perl を想定してドキュメントの大部分は書いてあります。
+自分のマシンで sendmail が走っている必要は必ずしもありませんし、SMTPを
+喋れるなら sendmail である必要もありません。pop を使ってＭＬを動かすこ
+ともできますし、sendmail以外のMTAもありますから拘る必要はありませんが、
+4.4BSD がターゲットマシンなので sendmail + perl を想定してドキュメント
+の大部分は書いてあります。
 
 実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
 ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
@@ -358,15 +356,15 @@ INSTALL で説明の足りない部分は doc/op を見てください。
 
 .S	対話式設定プログラム
 
-基本設定を（日本語で）対話的に行なうために、 EasyConfigure.euc (名前の
-とおり EUC の形で配布しています)スクリプトを走らせても良いです。（端末
-に合わせてファイルコードをかえてからどうぞ）。
+基本設定を(日本語で)対話的に行なうために、 EasyConfigure.euc (名前のと
+おり EUC の形で配布しています)スクリプトを走らせても良いです。(端末に
+合わせてファイルコードをかえてからどうぞ)。
 
 1.5 以降のスクリプトは flock や自動登録等の設定も対話的に行えます。
 ＃将来、全ての変数を対話的に設定できるように拡張する予定です。
 
 
-.S	自分のマシンで sendmail が走っていない場合(例:POP3 経由…)
+.S	自分のマシンで sendmail が走っていない場合 (例:POP3 経由…)
 
 sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
 もできますが、そういうtrickyな話題については doc/op を見てください(^^;)
@@ -388,8 +386,8 @@ sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
 
 .S	Backward Compatibility 
 
-Backward Compatibility は保証していますが 万が一 consistencyのないもの
-があったら上述のＭＬ等へ御一報ください。
+Backward Compatibility は保証していますが 万が一 consistency のないも
+のがあったら上述のＭＬ等へ御一報ください。
 変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
 なくて普通は大丈夫です。
 ＃注意：複雑なフックの場合は注意がいるとは思いますが…
@@ -398,20 +396,23 @@ Backward Compatibility は保証していますが 万が一 consistencyのないもの
 .S	1.6 より前からの移行について
 
 	＊＊＊注意＊＊＊
-1.6では、基本的なデータ構造を call by reference 用に書き直したので、
-いままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
-libcompat.pl にBackward compatibility のためのコードがあります。
-昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
-る程度まで compatible にできます。
 
-コードの都合上どうしても実現できないカスタマイズもありえます_o_
-昔できたことは必ず今の実装でもできるので doc/op を参照してみて下さい。
+1.6では、基本的なデータ構造を call by reference 用に書き直したので、い
+ままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
+libcompat.pl にBackward compatibility のためのコードがあります。昔の設
+定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとある程度
+まで compatible にできます。コードの都合上どうしても実現できないカスタ
+マイズもありえます _o_
+
+ただ、昔できたことは必ず今の実装でもできるので doc/op を参照してみて下
+さい。
 
 
 .S	document ...
 
-current でドキュメントがおいつかない部分は INFO（fml@axion.phys.titech
-で返すファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
+fml current snapshot でドキュメントがおいつかない部分は INFO
+（fml@axion.phys.titech.ac.jpで返すファイル）に ちょっと書いてあります 
+＃注意：パッケージ中では doc/INFO です。
 
 最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
 
@@ -454,4 +455,7 @@ Please see CHANGES and RELEASE_NOTES
 
 Last Modified
 $Id$
-
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
