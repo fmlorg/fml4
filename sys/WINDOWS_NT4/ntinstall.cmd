@@ -5,5 +5,4 @@ del libexec\*.b0
 del bin\*.b0 
 del sbin\*.b0
 
-perl sbin\makefml install
-
+perl sys\arch\WINDOWS_NT4\bootstrap.pl
