@@ -6,6 +6,15 @@
 
 2001/09/11
 
+   libsynchtml.pl
+	bug fix initialization
+
+		$WriteHtmlFileCount is local scope in html routines (
+		libsynchtml libhtmlsubr ).
+
+		reset $WriteHtmlFileCount to count up number of
+		attachments
+
    4.0C
 	SMTP: fix @RcptLists update
 
