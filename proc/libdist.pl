@@ -106,7 +106,7 @@ sub DoDistribute
 	      $relay = $1 || $DEFAULT_RELAY_SERVER;
 	      ($who, $mxhost) = split(/@/, $rcpt, 2);
 
-	      if ($LESS_STACK_HACK) {
+	      if ($DLA_HACK) {
 		  $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
 	      }
 
@@ -114,7 +114,7 @@ sub DoDistribute
 	  }
 
 	  print STDERR "RCPT:<$rcpt>\n\n" if $debug;
-	  push(@Rcpt, $rcpt) unless $LESS_STACK_HACK;
+	  push(@Rcpt, $rcpt) unless $DLA_HACK;
 	  $Rcpt++; # count the number of recipients;
       }
 
