@@ -27,6 +27,16 @@ MOVE () {
 	# echo "mv -f $dst.$suffix $dst"
 	mv -f $dst.$suffix $dst
 }
+
+ECHO () {
+  if [ "X$ONCE" = Xxxxxxxxxxx ];then
+	echo -n '.'
+	ONCE=
+  else
+	ONCE=x$ONCE
+  fi
+}
+
 #########################
 
 ##### variables
@@ -100,11 +110,11 @@ do
 	   	test -d $EXEC_DIR/$dir || mkdir $EXEC_DIR/$dir
 	   fi
 
-	   echo -n '.'
+	   ECHO # echo -n '.'
 	   MOVE
 	done
 
-	echo ''
+	echo '.'
 done
 
 chmod -R +w $EXEC_DIR/*

@@ -912,7 +912,7 @@ sub InitFmlConfig
 	    if (! -d $dir) {
 		# print "   mkdir $dir\n";
 		# here /usr/local/fml;only installer can read-write this;
-		print STDERR "mkdir($dir, 0755);\n";
+		# print STDERR "mkdir($dir, 0755);\n";
 		&Mkdir($dir, 0755); 
 	    }
 	}
@@ -2815,6 +2815,11 @@ sub do_install
 {
     local($cmd);
 
+    # dummy for silent screen
+    $UnderInstall = 1;
+    $MAKEFML_LOGFILE = "./install.log";
+    &Touch($MAKEFML_LOGFILE);
+
     if ($Env ne 'CUI') {
 	&Error("installation runs only on shell");
     }
@@ -2915,7 +2920,7 @@ sub do_install
 	$d = "$EXEC_DIR/drafts";
 	opendir(DIRD, $d) || &Warn("cannot opendir $d");
 
-	print STDERR "Back-up\'ing templates in $d ...\n";
+	print STDERR "backup templates in $d ...\n";
 
 	for $f (readdir(DIRD)) {
 	    next if $f =~ /^\./;
@@ -4636,8 +4641,8 @@ sub MakeConfigPH
 
 	if (rename($new_ph, $config_ph)) {
 	    print STDERR "Done.\n";
-	    print STDERR "\t(back-up is saved in $config_ph.bak)\n"
-		if $back_up;
+	    print STDERR "\t(configuration is backuped in $config_ph.bak)\n"
+		if $back_up && (! $UnderInstall);
 	}
 	else {
 	    &Log("cannot make $config_ph");
