@@ -31,6 +31,10 @@ fml 3.0 に移行する場合の支援ツールを用意してあります(次節)
 .S	アップグレードの支援ツールについて
 =E.S	Helper tool to upgrade fml 2.x to fml 3.0
 
+注意: 以下のmakefmlは fml 3.0 のmakefmlをさしています。
+      以前のversionのmakefmlに upgrade などのコマンドが密かに
+      組み込まれていたという意味ではありません
+
 ケース1:  makefml config ML
 
 makefml config で
@@ -51,8 +55,8 @@ makefml config で
    cf と config.ph の auto_regist を auto_subscribe にさし換える
    members を actives にコピーする
 
-の操作をします。こっちは対話プログラムではありません。
-
+の操作をします。こっちは対話プログラムではなく上記のアクションが確認を
+求められることもなく一気に行なわれます。
 
 .S	『自動登録』を使っている場合の注意
 =E.S	Caution to automatic registration
