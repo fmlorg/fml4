@@ -895,6 +895,7 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
    1    elena-ctl@$DOMAINAME
    2    elena@$DOMAINAME
    3    fmlserv@$DOMAINAME
+   4    NOT USE
 
    In default, we use "listname-ctl" format address for command only.
    If you choice "listname" for commands, 
@@ -902,7 +903,7 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
    "fmlserv" is the listserv/majordomo style interface of fml.
    ************************************************************
 
-      which type (0-3) [0] 
+      which type (0-4) [0] 
 
 のような画面です。この設定はＭＬの記事のメールヘッダやＭＬサーバへ送っ
 たコマンドへのREPLYに付加される情報に利用されます。
@@ -925,6 +926,14 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
 fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 がある場合に設定します。
 ＃ fmlserv の設定は別途必要です(前述)
+
+・ 4番目の NOT USE は「ＭＬでコマンドを使わない」つまり「配送専用」の
+場合に指定して下さい。使わない(unavailable)時はコマンドのアドレスを表
+示する部分が全部
+
+   COMMAND ADDRESS                      *** Command Unavailable ***
+
+のようになります。
 
 
 .S	リモート管理
@@ -1036,11 +1045,12 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
    Other Optional Settings
 
    0    END             
-   1    MIME    
-   2    HTML    
+   1    MIME            
+   2    HTML            
+   3    SPOOLING        spooling
    ************************************************************
 
-      Which section? (0-2) [0] 
+      Which section? (0-3) [0] 
 
 
      ○   1 MIME
@@ -1052,6 +1062,10 @@ MIME を使うことにすると、ＭＬの記事のサマリ等がMIME decode されたもの
 =E 
 Using MIME. Summary file of the ML and articles saved in the ML spool
 are MIME-Decoded.
+
+     ○	  2 HTML
+=E
+     <>   2 HTML
 
 	HTML自動変換は 
 
@@ -1072,6 +1086,11 @@ which contains the html'ed articles here. In default articles are
 collected in each day directory below here.  Each directory has
 index.html and thread.html. index.html is the menu for the ML sequence
 order, thread.html is threaded menu for articles.
+
+      ○    3    SPOOLING        spooling
+
+はＭＬのスプールに記事を貯めるか否か？の設定です。デフォールトは「貯め
+る」です。
 
 
 
