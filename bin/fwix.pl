@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -108,17 +108,17 @@ sub CopyRight
 {
 q%
 <PRE>
-Copyright (C) 1993-1998 Ken'ichi Fukamachi
+Copyright (C) 1993-1999 Ken'ichi Fukamachi
 All rights of this page is reserved.
 
 # This Document(html format) is automatically geneareted by fwix.pl. 
 # fwix (Formatter of WIX Language) is fml document formatter system
 # designed to generate plaintext, html, texinfo and nroff from one file.
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
