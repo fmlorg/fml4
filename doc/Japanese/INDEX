@@ -9,8 +9,10 @@ daily			日々の運用についてのTIPS
 encryption		暗号化関係
 header_rewrite		ヘッダの書き換え
 filter			フィルタリング
-remote_control		遠隔からメールでの操作 (REMOTE_ADMINISTRATION)
+remote_control		メールでの設定変更など(REMOTE_ADMINISTRATION): adminコマンド
 resource_control	リソースの制御	
+makefml			makefml (CUI) interface for fml
+GUI			GUI interface
 
 .part 拡張
 command			コマンドについて
