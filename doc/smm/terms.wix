@@ -21,45 +21,89 @@ The HOME of each ML is the location of config.ph. If
 
 
 .S	管理者
+=E.S	Maintainer
 
 (fmlの動作モードにより実作業の幅は異なるがざっくりいって)メーリングリ
 ストの面倒を見る人。配送できなかったとかのエラーメールを受ける人。良く
 分からない人がいたら面倒を見るとか、入りたいけどコマンドが分からないと
 いわれたら、手でファイルをいじるなどもありうる。
+=E
+A person to maintain fml configurations, member lists, remove
+non-deliverable addresses and so on. 
 
 
 .S	手動登録
+=E.S	Manual Registration
 .l	term-registration
 
 『手動』と「自動』登録はこの単語を使っている意図がまぎらわしいかもしれ
 ません。削除やアドレス変更などについても以下同様のロジックです。
+=E
+In FML context, I use "manual" and "automatic" terms in the following
+way. This usage is applied to "subscribe", change-address (chaddr
+command) and "unsubscribe" cases. Here we describe the "subscribe"
+case.
 
-まずメーリングリストのメンバーリストはあるファイルに書かれています。時
-間順に書くと
+簡単にいうと『あるリクエストが管理者の手をわずらわさないで処理可能』な
+ら"自動"で、そうでない場合にはみな『手動』という接頭辞を使っています。
+=E
+We call a process "automatic" when a request proceeds without
+maintainers.  If not, we call it "manual ...".
+
+例えば登録について考えます。登録とはメンバーリストなどにアドレスを登録
+することです。まずメーリングリストのメンバーリストはあるファイルに書か
+れています。時間順に書くと
 
 0.	管理者は「入れて欲しい」というリクエストを
 	何らかの手段で受けとります。
+=E
+0.	the maintainer recieves "subscribe" request from a person.
 
 	登録意志の確認をfmlがしてくれることもあります。
+=E
+	If configured, fml tries to confirm the subscriber's will.
 
 1.	入りたい人のEmailアドレスをファイルに書きます。
+=E
+1.	add the email address to the FML files
 
 の２段階です。しかし１は
+=E
+There will be two patterns of "How to edit the files".
 
 1.1	そのマシンに入ってファイルに書く
    a.	makefml add
    b.	ファイルの直接編集
+=E
+1.1	log in the machine where fml runs and edit it
+   a.	makefml add ...
+   b.   directly edit files by hand
 
 1.2	そのマシンに入らずにファイルに書く
    a.	admin ないし apporove コマンドをfmlのサーバに送り込む
+=E
+1.2	not log in the machine
+   a.	send a mail with several commands to fml server
+	e.g. "admin add <address>" or "apporove PASSWORD add <address>" ..
 
 という複数の方法があります。これら全部を手動登録という単語でくくってい
 る場合もあります。狭義には『1.1』が手動登録で、『1.2』はリモート管理と
 いう文脈で語られています。
+=E
+We call these "manual ..." in general. In almost all cases, we call
+1.1 "manual ..." but 1.2 "remote ...." or "remote administration".
 
 
 .S	自動登録
+=E.S	Automatic Registration
 
+簡単にいうと『あるリクエストが管理者の手をわずらわさないで処理可能』な
+ら"自動"で、そうでない場合にはみな『手動』という接頭辞を使っています。
+=E
+We call a process "automatic" when a request proceeds without
+maintainers.  If not, we call it "manual ...".
+
+詳しくは前節参照。
 
 『手動』と「自動』登録はこの単語を使っている意図がまぎらわしいかもしれ
 ません。削除やアドレス変更などについても以下同様のロジックです。

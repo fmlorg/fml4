@@ -44,8 +44,11 @@ struct sockaddrがBSD traditionalとは違い拡張されている。インストーラが
 
 
 .S	BSD/OS 3.0 以前
+=E.S	Before BSD/OS 3.0
 
 何もしなくても動くような気がします。
+=E
+I believe nothing to do.
 
 
 .S	4.3BSD

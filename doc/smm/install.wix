@@ -1,4 +1,5 @@
 .C	デバッグについて
+=E.C	How to debug
 .l	debug
 
 コマンドラインオプションについては => .ptr{-d}
@@ -19,8 +20,11 @@ SMTPのログとり => .ptr{$SMTP_LOG}
 In debug mode, fml.pl does not distribute (for test).
 
 .S	デバッグモード レベル２
+=E.S	Debug mode level 2 
 
 $debug を2以上にすると、にデバッグ出力を
+=E
+If $debug >= 2, fml writes debug info the file
 
 	$DEBUG_LOGFILE (default "$DIR/log.debug")
 

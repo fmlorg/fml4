@@ -2498,16 +2498,20 @@ $DIR/var/run/ の下にキャッシュファイルが作られています。デフォールトで
 ほどに対して二重でないかどうかのチェックがされます。
 
 .S	一意なX-ML-Info: 
+=E.S	Unique X-ML-Info: header field
 
 X-ML-Info: フィールドにはＭＬのアドレス(MLのアドレス、コマンドのアドレ
 ス、管理者のアドレスのいづれか)が出てきます。例え多段のＭＬ(例えば 
 ML-A -> ML-B -> ML-C -> ... のML-B)であってもX-ML-Info: に自分のＭＬア
 ドレス(X-ML-Info: ML-B)はでないはずという仮定です。
+=E
+X-ML-Info: field has the ML address. It must be unique. A mail with
+"X-ML-Info: ML" must not be injected to the fml.  Under this
+conjecture, we check and reject mails with "X-ML-INfo: our ML".
 
 メールループはMessage-ID: Cacheをすり抜けても、このルールがループと見
 なすことになります。ただし「ヘッダが削除されない」という前提条件は必要
 です。
-
 
 
 .include mti.wix
