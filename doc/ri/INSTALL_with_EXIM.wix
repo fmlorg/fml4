@@ -4,15 +4,14 @@
 		fml and exim as a MTA
 
 				Ken'ichi Fukamachi
-.~HTML_PRE
-.q
+
 
 exim は sendmail と同様にすればできます。(sendmailを前提に書かれている)
-INSTALL ファイルに従ってやってみて下さい。exim の設定での注意点は以
-下の通りです。
+INSTALL ファイルに従ってやってみて下さい。exim の設定での注意点は以下
+の通りです。
 =E
-Exim is almost compatible with sendmail, so see INSTALL for installation.
-You can use the same samples as sendmail with exim.  
+Exim is almost compatible with sendmail, so see INSTALL for
+installation.  You can use the same samples as sendmail with exim.
 However don't forget the following configuratino change.
 
 0. exim.confで受け取るべきドメインを記述するのを忘れずに
@@ -58,8 +57,8 @@ virtual:
 
 end
 
-.~q
 
+.~HTML_PRE
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp

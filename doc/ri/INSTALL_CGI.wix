@@ -9,9 +9,12 @@
 
 				Ken'ichi Fukamachi
 .fi
+.toc
+
 .~HTML_PRE
 
-.toc
+注: 以下の $EXEC_DIR は /usr/local/fml です。
+
 
 .C	Overview
 
@@ -45,8 +48,8 @@ sendmail か postfix です。
 2. もし、稼働中の WWW サーバを大きく改造することができない場合
    例: いまさら User nobody は変更できない
 
-たぶん suexec を使ってユーザ fml のページで fml CGI を動かすとなるので
-しょう。これは簡単に付録で解説してあります。
+たぶん suexec (=> .ptr{suexec}) を使ってユーザ fml のページで fml CGI 
+を動かすとなるのでしょう。これは簡単に付録で解説してあります。
 
 
 .S	トラブルシュート
@@ -57,29 +60,33 @@ sendmail か postfix です。
 また各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマ
 ニュアルや文献を確認して下さい。
 
-.S	CGI 階層のモデル
 
-.C	各ディレクトリの権限について
+.C	CGI 階層のモデル
 
-以下たとえば $EXEC_DIR は /usr/local/fml です。
+URL の階層がどういう前提で分けられているか、各ディレクトリの権限につい
+てまとめます。
 
    $EXEC_DIR/www/share/cgi-bin/fml/admin/
 
-	fml 管理者用画面といえる
+	fml 管理者用画面といえる階層
 	そのホスト上で makefml を使える人
 	つまり何でもできる権限がある人と等価
 
 	各MLの管理者とは別の集合である可能性がある
 	よってパスワードは別途設定するべき(特にインストール時)
 
+
    $EXEC_DIR/www/share/cgi-bin/fml/ml-admin/$ml/
 
-	各MLの管理者の権限
-	メーリングリストサーバのホストに入れるとは限らない
+	各 ML の MAINTAINER 用の階層
+
+	この人はメーリングリストサーバのホストに入れるとは限らない
+	イメージとしてはリモート管理者に近いといえるかも。
 
 	パスワード認証をともなうべきで
 	adminコマンドと同じパスワード?
  
+
    $EXEC_DIR/www/share/cgi-bin/fml/ml/$ml/ (仮) 未実装
 
 	一般ユーザが入る階層

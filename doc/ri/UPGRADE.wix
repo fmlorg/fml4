@@ -14,9 +14,168 @@
 
 .toc
 
-.C	4.0 へのアップグレードについて
+.P	4.0 へのアップグレードについて
+
+.C	PGP まわり ( fml-current (3.0I) 2000/08/12 以降 )
+
+.S	ディレクトリについて
+
+   fml 3.0 までは $DIR/etc/pgp だけでした。
+   例: /var/spool/ml/elena/etc/pgp/
+
+   fml 4.0 では PGP の鍵の置き場所が意味的に４つに分かれました。
+
+	$DIST_AUTH_KEYRING_DIR     = "$DIR/etc/dist-auth";
+	$DIST_ENCRYPT_KEYRING_DIR  = "$DIR/etc/dist-encrypt";
+	$ADMIN_AUTH_KEYRING_DIR    = "$DIR/etc/admin-auth";
+	$ADMIN_ENCRYPT_KEYRING_DIR = "$DIR/etc/admin-encrypt";
+
+   実際に意味があるのは次の2つだけです。
+
+     * 投稿記事の暗号化の際に用いる PGP の鍵の置き場所
+	$DIST_ENCRYPT_KEYRING_DIR	
+	例: /var/spool/ml/elena/etc/dist-encrypt/
+
+     * admin コマンドメールの PGP 認証の際に用いる PGP の鍵の置き場所
+	$ADMIN_AUTH_KEYRING_DIR
+	例: /var/spool/ml/elena/etc/admin-auth/
+
+   NOTE: 他の2つの変数は使ってないけど将来のために予約します。
 
 
+.S	makefml の使い方 （互換性について)
+
+ fml 4.0 では
+
+	makefml	モード.pgpコマンド名
+
+になります。またモードのデフォルト値は環境変数 
+MAKEFML_PGP_DEFAULT_MODEで指定できます。
+
+例:	真面目に書くとこのように書きます。
+
+	% makefml admin-auth.pgp2 elena [pgpのオプションがつづく…]
+
+  しかし認証にしか使わないのであれば
+  環境変数で admin-auth と指定しておくと便利です。
+
+	% setenv MAKEFML_PGP_DEFAULT_MODE admin-auth
+	% makefml pgp elena
+
+  上の例と同じ動きをします。
+  この場合 makefml pgp elena は	makefml admin-auth.pgp2 elena と
+  再解釈されています。
+
+注意: MAKEFML_PGP_DEFAULT_MODE を明示的に指定しない場合のデフォー
+ルトモードはadmin-auth になっています。そのため
+
+	% makefml pgp elena
+
+  は
+	% makefml admin-auth.pgp elena
+
+  と同じです。
+
+
+.S	省略しない makefml の使い方 （admin コマンドの認証鍵の操作）
+
+  fml 3.0 では makefml pgp により admin コマンドの認証鍵を操作しました。
+  fml 4.0 では
+
+	makefml	モード.pgpコマンド
+
+  形になります。つまり次のような組合せがあります。
+  歴史的に pgp は pgp2 を意味します。
+
+	makefml admin-auth.pgp
+	makefml admin-auth.pgp2
+	makefml admin-auth.pgp5
+	makefml admin-auth.pgpk
+	makefml admin-auth.pgps
+	makefml admin-auth.pgpe
+	makefml admin-auth.pgpv
+	makefml admin-auth.gpg
+
+   あまりに長いので admin-auth を aa で代用できます :-) 
+   例:
+
+	makefml aa.pgp2
+	makefml aa.pgp5
+	makefml aa.gpg
+
+
+.S	省略しない makefml の使い方 （ ML の暗号化の鍵の操作）
+
+  fml 3.0 では makefml pgp により ML の暗号化のため鍵を操作しました。
+  fml 4.0 では
+
+	makefml	モード.pgpコマンド
+
+  形になります。つまり次のような組合せがあります。
+  歴史的に pgp は pgp2 を意味します。
+
+	makefml dist-encrypt.pgp
+	makefml dist-encrypt.pgp2
+	makefml dist-encrypt.pgp5
+	makefml dist-encrypt.pgpk
+	makefml dist-encrypt.pgps
+	makefml dist-encrypt.pgpe
+	makefml dist-encrypt.pgpv
+	makefml dist-encrypt.gpg
+
+   de で代用できます。例:
+
+	makefml de.pgp2
+	makefml de.pgp5
+	makefml de.gpg
+
+
+.C	解説: 3.0 と 4.0 とのちがいについて
+
+  3.0 までは例えば elena  ML の PGP 認証( admin コマンド)および
+   ML の暗号化のキーがともに
+
+		/var/spool/ml/elena/etc/pgp/
+
+  におかれていました。これでは
+	
+		admin コマンドの PGP 認証
+		 ML の暗号化のキー
+
+  を同時には使えないことになります。同様で makefml pgp もこのディレク
+  トリにあるファイルを操作することを意図しています。4.0 ではこれをきち
+  んと整理したということです。
+
+
+  ◯ fml を今迄通り使いたい場合
+
+	1. /var/spool/ml/etc/fml/site_force.ph に
+
+		$DIST_ENCRYPT_KEYRING_DIR = $PGP_PATH;
+		$ADMIN_AUTH_KEYRING_DIR   = $PGP_PATH;
+
+	   と書くと、3.0H までと同じ(つまり混ざった状態)になります。
+	   片方しか使わないなら別に問題はないのですが…
+
+	2. もっと後向きな or 危ない解決方法として
+
+		% cd /var/spool/ml/elena/etc
+		% ln -s pgp dist-encrypt
+		% ln -s pgp admin-auth
+
+	    でも 3.0H までと同じことになります。
+
+  ◯ makefml を今迄通り使いたい場合
+
+	makefml pgp elena
+
+		は
+
+	makefml admin-auth.pgp2 elena
+
+	と同じ意味になっています。つまり 
+	PGP version 2 で admin コマンドメールの PGP 認証
+	のために PGP2 の鍵を操作することになります。
 
 
 .appendix
