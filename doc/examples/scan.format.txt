@@ -1,0 +1,46 @@
+%; NOTE: This file is supplied for reference only; it shows the default
+%;	format string (for non-UK sites) which was compiled into "scan".
+%;	See the source file "h/scansbr.h" for details.
+%4(msg)%<(cur)+%| %>%<{replied}-%?{encrypted}E%| %>\
+%02(mon{date})/%02(mday{date})%<{date} %|*%>\
+%<(mymbox{from})%<{to}To:%12(friendly{to})%>%>%<(zero)%15(friendly{from})%> \
+%; begining of extention
+%<{X-Ml-Name}%6{X-Ml-Name}\
+%?{X-Ml-Nickname}%6{X-Ml-Nickname}\
+%?{Newsgroups}%6{Newsgroups}\
+%?{X-Mail-Name}%6{X-Mail-Name}\
+%?{X-Mailing-List-Name}%6{X-Mailing-List-Name}\
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+%?{X-Distribute}386bsd\
+%?{X-Phys-Mail-Count}cpcmp \
+%?{To}\
+%<(match usagi@)USAGI \
+%?(match NetBSD.ORG)NetBSD\
+%?(match admin)#A %3{To}\
+%?{Cc}\
+%<(match usagi@)USAGI \
+%?(match @NetBSD.ORG)NetBSD\
+%?(match admin)#A %3{Cc}\
+%|%6{}\
+%>\
+%>\
+%<(null)%6{}%>\
+%|%6{}\
+%>\
+ \
+%; ends of extention
+%{subject}%<{body}<<%{body}>>%>
+%; if X-mail-count ...
+%;           X-mail-count
+%; elsif to
+%;       if to is matched
+%;          to-field
+%;       else cc
+%;          cc-field
+%;       fi
+%; else
+%;       "     "
+%; fi
+%;
+%; <%<{Cc}%<(putstr {Cc})%>%>>\
+
