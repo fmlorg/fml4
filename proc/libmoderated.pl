@@ -119,6 +119,7 @@ sub ModeratedDeliveryTypeII
     local($passwd, $id, $f, $h);
 
     # if --ctladdr, eval a queued commands mail.
+    # XXX: "# command" is internal represention
     if (($PERMIT_COMMAND_FROM eq "moderator")
 	&& $e{'Body'} =~ /^[\s\n]*\# moderator/) {
 	&Log("moderator: eval queue as a command") if $debug;
@@ -145,7 +146,7 @@ sub ModeratedDeliveryTypeII
     $info .= "Please check it. If you certify the following article, \n";
     $info .= "please send to $e{'CtlAddr:'}\n";
     $info .= "the following line (only this line!)\n";
-    $info .= "\n\# moderator certified $id\n\n";
+    $info .= "\n$e{'trap:ctk'}moderator certified $id\n\n";
 
     $h = $e{'Header'};
     $h =~ s/^From .*\n//;
@@ -366,6 +367,7 @@ sub GetPasswd
 	undef $e{'h:Approval:'};
 	$e{'Hdr2add'} =~ s/Approval:.*\n//ig;
     }
+    # XXX: "# command" is internal represention
     elsif ($e{'Body'} =~ /^[\s\n\#]*approval\s+(\S+)\s+forward\n/) {
 	$e{'Body'} =~ s/^[\s\n\#]*approval\s+(\S+)\s+forward\n//;
 	$p = $1;

@@ -54,6 +54,7 @@ sub Ftp
 
       &Mesg(*e, "\n>>> $_");
 
+      # XXX: "# command" is internal represention
       /^\#/o || ($_ = "# $_");
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
       @Fld = split(/\s+/, $_, 999);

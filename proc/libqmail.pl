@@ -36,6 +36,8 @@ sub DotQmailExt
     $ext =~ s/\-/ /g;
     $ext =~ s/\@/-/g;
     &Log("\$ext -> $ext");
+
+    # XXX: "# command" is internal represention
     $e{'Body'} = sprintf("# %s", $ext);
 }
 

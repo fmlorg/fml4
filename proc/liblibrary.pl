@@ -27,7 +27,7 @@ sub ProcLibrary4PlainArticle
     ### convert library -> mget call;
     @p   = @Fld[3 .. $#Fld]; 
     @fld = @Fld[2 .. $#Fld]; 
-    unshift(@fld, '#');
+    unshift(@fld, '#'); # XXX: "# command" is internal represention
 
     &Debug("\nProcLibrary4PlainArticle::\n\tp @p\n\tfld @fld\n") if $debug;
 
@@ -149,7 +149,7 @@ sub ProcLibrary4PlainArticle
 	### Fix Body
 	$le{'Body'} =  $e{'Body'};
 	$le{'Body'} =~ s/^[\n\s]*//;
-	$le{'Body'} =~ s/^[\s\#]*$proc\s+$_\s*\n//;
+	$le{'Body'} =~ s/^[\s\#]*$proc\s+$_\s*\n//; # remove # in '# command'
 
 	### Write
 	&Write3(*le, "$arc_dir/$id");

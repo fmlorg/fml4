@@ -62,6 +62,9 @@ sub MgetCompileEntry
 	    $status = "Fail";
 	    # &Mesg(*e, "\n>>> $proc $value $fld\n\tfailed.");
 	    local($fld) = $Fld;
+
+	    # XXX: "# command" is internal represention
+	    # XXX: remove '# command' part if exist since not essential
 	    $fld =~ s/^\#\s*//;
 	    &Mesg(*e, "\n>>> $fld\n\tfailed.");
 	};

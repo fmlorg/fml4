@@ -115,6 +115,7 @@ sub DoProcedure
       # history buffer
       $history .= "\t". $_. "\n"; 
 
+      # XXX: CTK
       # e.g. *-ctl server, not require '# command' syntax
       # bug default has been false(not rewrite), true 198/01/19	
       if ($COMMAND_ONLY_SERVER && (!/^\#/o)) {
@@ -123,8 +124,8 @@ sub DoProcedure
       elsif ($e{'mode:ctladdr'} && (!/^\#/o)) {
 	  for $p (keys %Procedure) {
 	      if ($p && /^$p/) {
-		  &Log("recognize $p => '# $p'");
-		  $_ = "\# $_";
+		  # &Log("recognize $p => '# $p'"); # XXX: not log
+		  $_ = "\# $_";	# XXX: internal representation
 	      }
 	  }
       }
@@ -135,14 +136,15 @@ sub DoProcedure
       # e.g. even when permit from "anyone" mode, auto_regist works
       if ($REJECT_COMMAND_HANDLER eq "auto_regist" && 
 	  /^($subscribe_key|$confirm_key)/i)  {
-	  $_ = "\# $_";	  
+	  $_ = "\# $_"; # XXX: CTK interal representation
 
 	  # fml-support: 03100 <kishiba@ipc.hiroshima-u.ac.jp>
 	  # we should consider this special case without "^#"
 	  $trap_counter++; 
       }
 
-      # check '# in-secre-matching-pattern ...' 
+      # check '# in-secre-matching-pattern ...'
+      # XXX: CTK internal representation
       # against the signature (NOT COMMAND_ONLY)
       # \w == [0-9A-Za-z_]
       if (/^\#\s*(\w+)/) {
@@ -156,6 +158,7 @@ sub DoProcedure
 	  next GivenCommands unless $USE_INVALID_COMMAND_WARNING; 
 	  next GivenCommands unless $USE_WARNING; # backward
 
+	  # XXX: (internally converted, so) already "# command" in usual
 	  &Log("Command: Syntax Error /\# \\w+/ !~ [$_]");
 	  &Mesg(*e, "Command Syntax Error: without ^#") if !/^\#/;
 	  &Mesg(*e, "Command Syntax Error: expect \"# English-word\"") 
@@ -172,9 +175,12 @@ sub DoProcedure
       print STDERR "SECURE CHECK OK>$_\n" if $debug;
 
       ### syntax check, and set the array of cmd..
+      # XXX: (internally converted, so) already "# command" in usual
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
       $Fld = $_;		# preserve the original string;
       @Fld = split(/\s+/, $_);
+
+      # XXX: internal representation; "# command" => "command" for convenience
       s/^#\s*//;
       $org_str = $_;
       $_ = $Fld[1];
@@ -781,7 +787,7 @@ sub ProcSetDeliveryMode2
 
     if ($proc =~ /matome/i) {
 	$proc = 'matome';
-	@Fld = ('#', 'matome', 0);
+	@Fld = ('#', 'matome', 0); # XXX: "# command" is internal represention
     }
     elsif ($proc =~ /digest/i) {
 	$proc = 'digest';
@@ -897,7 +903,10 @@ sub ProcSubscribe
     }
     else {
 	&use('amctl');
-	$buf =~ s/^\#\s*//; # cut the mode switch keyword
+
+	# XXX: "# command" is internal represention
+	# cut the mode switch keyword
+	$buf =~ s/^\#\s*//;
 	&AutoRegist(*e, $buf);
     }
 }

@@ -379,6 +379,8 @@ sub DoFmlServItselfFunctions
 	    # in sub SortRequest
 	    $org_str = $_;
 	    ($_, @Fld) = split;
+
+	    # XXX: "# command" is internal represention
 	    @Fld = ('#', $_, @Fld);
 
 	    # REPORT IF REPLY IS DEFINED?

@@ -640,7 +640,7 @@ sub Action
 	&MakeFml("$KILL $ml $addr", $addr, $ml);
     }
     elsif ($MODE eq 'report') {
-	$Template{$ml} .= "\# admin $KILL $addr\n";
+	$Template{$ml} .= $CTK{$ml}."admin $KILL $addr\n";
 	$MakeFmlTemplate{$ml} .= "$MAKEFML $KILL $ml $addr\n";
     }
     else {
@@ -867,6 +867,7 @@ sub main'MLEntryOn #';
 	    $ML{$MAINTAINER} = $ml;
 	    $MAA{$ml} = $MAINTAINER; # ML Admin Address
 	    $CA{$ml}  = $CONTROL_ADDRESS || $MAINTAINER;
+	    $CTK{$ml} = ($CONTROL_ADDRESS eq $MAIL_LIST) ? '# ' : '';
 	}
 
     }

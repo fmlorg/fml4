@@ -898,7 +898,12 @@ sub Append2Cache
     local($title) = $HtmlTitleForIndex;
 
     $title =~ s/\n/ /g;
+
+    # XXX
     &Append2("      <LI><A HREF=\"$file.html\">$title</A></LI>", $HtmlDataCache);
+    
+    # XXX (how to rewrite): is this correct???
+    # &Append2("      <LI><A HREF=\"$file.html\">$file.html</A> $title</LI>", $HtmlDataCache);
 
     if ($HTML_THREAD) { &MakeThreadData($dir, $file, *e);}
 }

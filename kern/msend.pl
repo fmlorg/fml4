@@ -615,7 +615,7 @@ sub MSendNotify
     # Added INFOMATION
     if (! $MSEND_NOT_USE_X_ML_INFO) {
 	$e{'h:X-ML-INFO:'} = 
-	    "If you have a question, send \# help|Mail ".&CtlAddr;
+	    "If you have a question, send $e{'trap:ctk'} help|Mail ".&CtlAddr;
     }
 
     # set Reply-To:, use "ORIGINAL Reply-To:" if exists ??? (96/2/18, -> Reply)

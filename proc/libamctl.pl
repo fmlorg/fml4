@@ -278,9 +278,11 @@ sub GetSubscribeString
     }
     &Debug("--GetSubscribeString(\n$_\n,\n$key\n);\n") if $debug;
 
+    # XXX: "# command" is internal represention
+    # XXX: remove the first '#\s+' and '\s+' part 
     if ($key) {	# return lines with $key
 	s/(^\#[\s\n]*|^[\s\n]*)//;
-	s/^\033\050\112\s*//;
+	s/^\033\050\112\s*//; # against bugs of Japanese Softwares
 
 	for (split(/\n/, $_)) {
 	    $buf .= "$_\n" if /$key/;
@@ -289,7 +291,7 @@ sub GetSubscribeString
     }
     else {
 	s/(^\#[\s\n]*|^[\s\n]*)//;
-	s/^\033\050\112\s*//;
+	s/^\033\050\112\s*//; # against bugs of Japanese Softwares
 	(split(/\n/, $_))[0]; # GET THE FIRST LINE ONLY
     }
 }
@@ -968,7 +970,7 @@ sub Rehash
 	return;
     }
 
-    # make an entry 
+    # make an entry ; XXX: "# command" is internal represention
     local(@fld) = ('#', 'mget', "$l-$r", 10, $mode);
 
     ($l <= $r) && &ProcMgetMakeList('Rehash:EntryIn', *fld);

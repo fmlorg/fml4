@@ -448,6 +448,8 @@ sub ChAddrModeOK
     local($C) = 'ChAddrModeOK';
 
     # GET PARAM
+    # XXX: "# command" is internal represention
+    # XXX: remove '# command' part if exist (since not use it here directly)
     $a =~ /^\#\s*($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/i;
     ($old, $new) = ($2, $3);
 
