@@ -13,92 +13,38 @@
 $WWW_HOME = $ENV{'WWW_HOME'};
 $DIR      = $FP_TMP_DIR = $TMP_DIR = ($ENV{'TMPDIR'} || '.');
 
-$debug          = 1;
-$debug_caller   = 1;
-
-$LOGFILE = "$DIR/geturllog";
+$LOGFILE  = "$DIR/geturllog";
 
 $LIBRARY_TO_OVERWRITE = q#;
-sub Log     { print STDERR "LOG>@_\n";};
-sub Mesg    { local(*e, $s) = @_; print STDERR "LOG>$s\n";};
+sub Log     { print STDERR "@_\n";};
+sub Mesg    { local(*e, $s) = @_; print STDERR "LOG>$s\n" if $debug;};
 sub Debug   { &Log(@_);};
 sub LogWEnv { &Log(@_);};
 #;
 
 #########################################################################
 
-
+### MAIN ###
 &Init;
+&GetUrl;
 
-$req      = shift @ARGV || $WWW_HOME;
-$outfile  = shift @ARGV;
-
-$tmpf = &GetUrl;
-
-if ($opt_p) {
-    &ProbeUrl;
-}
-else {
-    &OutPutFile($tmpf);
-}
-
-unlink $tmpf;
 exit 0;
+
+### MAIN ENDS ###
 
 
 
 #########################################################################
-
-
-sub Init
-{
-    require 'getopts.pl';
-    &Getopts("C:H:cdp");
-
-    $debug = 1 if $opt_d;
-    $cache = 1 if $opt_c;
-
-    # overwrite
-    $Contents = $opt_C if $opt_C;
-    $HeadFile = $opt_H if $opt_H;
-
-    if ($Contents) {
-	$Compare = 1;
-	$HeadFile = ".${Contents}.head" unless $HeadFile;
-    }
-
-    ### Target machine hack;
-    push(@INC, $ENV{'FML'});
-    push(@INC, $ENV{'FMLLIB'});
-
-    require 'libkern.pl';
-    require 'libsmtp.pl';
-    require 'libhref.pl';
-
-
-    eval $LIBRARY_TO_OVERWRITE;
-    print STDERR $@ if $@;
-}
-
-
-sub ProbeUrl
-{
-    $e{"special:probehttp"} = 1;
-    $e{'special:geturl'} = 1; # Retrieve
-
-    &HRef($req, *e);
-
-    $tmpf = $e{'special:geturl'};
-    undef $e{'special:geturl'};
-
-    system "cat $tmpf";
-    unlink $tmpf;
-}
-
 sub GetUrl
-{
+{ 
+    local($req, $outfile, $head, $tmpf);
+
+    $req      = shift @ARGV || $WWW_HOME;
+    $outfile  = shift @ARGV;
+
     if ($outfile) {
-	if (-f $outfile) { die("$outfile already exists, exit!\n");}
+	# if exists already, we update it;
+	# if (-f $outfile) { die("$outfile already exists, exit!\n");}
 	if ($outfile eq '-') { $UseStdout = 1;}
     } 
     else {
@@ -110,6 +56,111 @@ sub GetUrl
 	}
     }
 
+    $head     = ".head-${outfile}";
+    $headnew  = ".head-${outfile}-new";
+
+    $oldcache = "${outfile}.old";
+
+    # clean up
+    for ($oldcache, $headnew) { unlink $_ if -f $_;}
+
+    # probe by HEAD
+    &ProbeUrl($headnew);
+
+    # retrieved O.K.?
+    if (-z $headnew) {
+	&Log("Cannot connect $req, exit");
+	return;
+    }
+
+    # for the first time;
+    if (!-f $outfile || !-f $head) {
+	&Log(sprintf("%-15s %s", "created:", $req));
+	$tmpf     = &DoGetUrl($req, $outfile);
+	&OutPutFile($tmpf, $outfile);
+	&OutPutFile($headnew, $head);
+    }
+    # IF updated
+    elsif (&UpDatedP($head, $headnew)) {
+	&Log(sprintf("%-15s %s", "updated:", $req));
+	rename($outfile, $oldcache);
+	$tmpf     = &DoGetUrl($req, $outfile);
+	&OutPutFile($tmpf, $outfile);
+	&OutPutFile($headnew, $head);
+    }
+    else {
+	&Log(sprintf("%-15s %s", "not updated:", $req));
+    }
+}
+
+
+sub UpDatedP
+{
+    local($head, $headnew) = @_;
+    local($last, $lastnew);
+
+    # first time
+    return 0 unless (-f $head && -f $headnew);
+
+    $last    = &Grep('^Last-Modified:', $head);
+    $lastnew = &Grep('^Last-Modified:', $headnew);
+
+    ($last ne $lastnew) ? 1 : 0;
+}
+
+
+sub Grep
+{
+    local($key, $file) = @_;
+
+    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<IN>) { return $_ if /$key/;}
+    close(IN);
+    $NULL;
+}
+
+
+sub Init
+{
+    require 'getopts.pl';
+    &Getopts("C:H:cdpI:");
+
+    $debug = 1 if $opt_d;
+
+    ### Target machine hack;
+    push(@INC, $ENV{'FML'});
+    push(@INC, $ENV{'FMLLIB'});
+    push(@INC, $opt_I) if $opt_I;
+
+    require 'libkern.pl';
+    require 'libsmtp.pl';
+    require 'libhref.pl';
+
+    eval($LIBRARY_TO_OVERWRITE); print STDERR $@ if $@;
+}
+
+
+sub ProbeUrl
+{
+    local($out) = @_;
+
+    $e{"special:probehttp"} = 1;
+    $e{'special:geturl'} = 1; # Retrieve
+
+    &HRef($req, *e);
+
+    $tmpf = $e{'special:geturl'};
+    undef $e{'special:geturl'};
+    undef $e{"special:probehttp"};
+
+    &OutPutFile($tmpf, $out);
+}
+
+
+sub DoGetUrl
+{
+    local($req, $outfile) = @_;
+    local($tmpf);
 
     $e{'special:geturl'} = 1; # Retrieve
 
@@ -124,16 +175,16 @@ sub GetUrl
 
 sub OutPutFile
 {
-    local($tmpf) = @_;
+    local($in, $out) = @_;
 
-    ### $tmpf -> $outfile
-    open(IN, $tmpf) || die("< $tmpf: $!\n");
+    ### $tmpf -> $out
+    open(IN, $in) || die("< $in: $!\n");
 
     if (! $UseStdout) {
-	open(STDOUT, "> $outfile") || die("> $outfile: $!\n");
+	open(STDOUT, "> $out") || die("> $out: $!\n");
     }
     else {
-	&Log("> STDOUT");
+	&Debug("> STDOUT") if $debug;
     }
 
     select(STDOUT); $| = 1;
@@ -143,7 +194,9 @@ sub OutPutFile
     close(STDOUT);
     close(IN);
 
-    &Log("$tmpf -> ".($outfile || 'STDOUT'));
+    &Debug("$in -> ".($out || 'STDOUT')) if $debug;
+
+    unlink $tmpf;
 }
 
 
