@@ -15,6 +15,11 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2003/12/06:
+
+   messages/Japanese/confirm(1.2-1.3):
+	add Japanese confirm messages
+
 2003/12/05
   fix search algorithm bug to find target in removing user address.
 	o fml.pl (2.152-2.153)
@@ -301,7 +306,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.45 2003/08/21 13:55:56 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.46 2003/12/05 15:01:08 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
