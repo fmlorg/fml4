@@ -70,7 +70,7 @@
 設定変更すらできない場合もあります。その場合これらの有益な情報は見えま
 せん。
 
-例 1：
+例 1:
    意訳:↓ このアドレスでは配送とコマンドともにうけつけます。
 
    X-MLServer: fml [fml 2.1_RELEASE](distribute + commands available mode)
@@ -79,11 +79,10 @@
 
    意訳:↑わからんかったら fml-support-ctl@fml.org へ "# help" を送ってね
 
-例 2：
+例 2:
    X-MLServer: fml [fml 2.1_RELEASE](distribute only mode)
 
    意訳:↑ このアドレスは配送専用です。
-
 
 どうしてもわからないとか、エラーメール等が返ってきたりした場合は、メー
 リングリストの管理者
@@ -122,7 +121,7 @@
 			者にそのまま転送されます。
 			なお、「# msg」コマンドの後のコマンドはすべて
 			無視されます。
-			例：
+			例:
 				# guide
 				# msg
 				こんにちは。ここがメッセージです。
@@ -182,13 +181,13 @@
 	複数のアドレスが登録してある場合の ON, OFF, MATOME 等の操作は、
 	操作するべきアドレスが一つに特定できるまでアドレスを一意に特定
 	できるまでアドレスのチェックを厳しくしてチャレンジします。
-	＃どうしてもだめな場合だけは管理者へコンタクトをして下さい。
+	＃どうしてもだめな場合だけは管理者へコンタクトして下さい。
 
 # skip	 		複数箇所のアドレスからＭＬへ投稿する場合
 			投稿はできるが、配送はされないアドレスと設定する
 # noskip 		上の設定をやめる。
-# off	 		ＭＬを一時的に離脱する
-# on	 		一時的離脱をやめてＭＬに再参加する
+# off	 		ＭＬの配送を一時的に止める(e.g. 長期休暇等)
+# on	 		off を解除し、配送を再開させる
 # bye	 		ＭＬをやめる
 # unsubscribe 		ＭＬをやめる
 
@@ -212,8 +211,8 @@ SYNOPSIS:
 # chaddr 古いメールアドレス 新しいメールアドレス
 
 という内容のメールを送るとメールアドレスを変更することができます。
-必ず『古いアドレスか新しいアドレスのどちらかから』このコマンドを送って
-ください。
+必ず『古いアドレスか新しいアドレスの"どちらか"から』このコマンドを送っ
+てください。
 
 このコマンドは、オプションが以下の条件を満たしたときに実行されます。
 
@@ -233,7 +232,7 @@ SYNOPSIS:
 
 注意:以下の説明では「# matome」は「# digest」としても同様の動作になります。
 
-例：
+例:
 	# matome 3mp
 	3時間おきに MIME/Multipart 形式でおくる。
 
@@ -254,10 +253,24 @@ SYNOPSIS:
 			を指定してください。
 			午後5時は17時なので 17 で指定して下さい。
 
-   例：
+# digest 0		
+# matome 0		普通の配送へ戻す
+
+   例:
+   # matome 1		まとめ送り １時間に一回(gzipd)
+   # matome 2		まとめ送り ２時間に一回(gzipd)
+   # matome 2u		まとめ送り ２時間に一回(plain text)
+   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+   # matome 17		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は１７時に来る
+   # matome 29		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は午前５時に来る
+			＃matome 5 は５時間“おき” という意味
+
+   例:
 	# matome 数字u	plain(unpack)、つまりplain textを
 	# matome 数字i 	lha + ish でまとめて送ります
-   オプション：
+   オプション:
 		オプションなしはGZIP(UNIX FROM)
 	u	PLAINTEXT(UNIX FROM)
 	uf	PLAINTEXT(UNIX FROM)
@@ -276,42 +289,39 @@ SYNOPSIS:
 	unpack	PLAINTEXT(UNIX FROM)
 
 
-# digest 0		
-# matome 0		普通の配送へ戻す
-
-   例：
-   # matome 1		まとめ送り １時間に一回(gzipd)
-   # matome 2		まとめ送り ２時間に一回(gzipd)
-   # matome 2u		まとめ送り ２時間に一回(plain text)
-   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
-   # matome 17		まとめ送り 一日一回と同じ(gzipd)
-			#この場合は１７時に来る
-   # matome 29		まとめ送り 一日一回と同じ(gzipd)
-			#この場合は午前５時に来る
-			＃matome 5 は５時間“おき” という意味
-
-
-.S	過去の記事の取り寄せ 
+.S	過去の記事の取り寄せ方
 
 # index			"# get", "# mget" で取り寄せ可能なファイルのリストを
 			かえす。
 			index ファイルがあるのなら、それを返します
 
-# get  ID		過去の記事を得る(ひとつずつ plain text で送り返す)
-# send ID		同上
+# get  数字		過去の記事を得る(ひとつずつ plain text で送り返す)
+# send 数字		同上
 
+# get  1-10,5みたいなsyntax 	[モード]	[時間間隔]
 # mget 1-10,5みたいなsyntax 	[モード]	[時間間隔]
-# mget 正規表現 		[モード]	[時間間隔]
-			ファイルをまとめて送り返す
-			スプールの記事や、
-			(もしあれば)アーカイブにあるファイル
-   引数：
+
+			スプールの記事や(もしあれば)アーカイブにあるファイル
+			を一つのメールにまとめて送り返す
+
+注意: "get" コマンドの引数が『数字』ならば、その数字のCountを持つ記事
+が resend されます。"get" コマンドがそれ以外の形式 (e.g. get 1-10) で
+あれば mget と同じ動作をします。その場合 "get" と "mget" の違いはファ
+イルの形式で
+
+	get  	のデフォールトは MIME/Multipart 
+	mget	のデフォールトは tar.gz 形式
+
+のように設定されています。
+
+			
+   get,mgetの引数:
 	範囲を指定	1-10,12,15-100 1,2,10
 			first first:10 last:30 100-last(mh的 Syntax)
 	正規表現	e.g. * ? 1? 1?? 
 	モード		gz tgz ish rfc934 b rfc1153 d unpack uf(default=tgz)
 	時間間隔	送り返すメールが複数の時の間隔(default=300)	
-   モード：
+   モード:
 		オプションなしは tar+gzip で spool.tar.gz
 	tgz	同上
 	uf	PLAINTEXT(UNIX FROM)
@@ -355,8 +365,7 @@ SYNOPSIS:
 # whois [-h host] key	whois で key を探す。
 			host が与えられた場合はそのhostへIPCで、
 			もしそうでない場合は
-			メーリングリストサーバ local な 
-			whois database を探します
+			ＭＬサーバ local な whois database 中を探します
 
 # whois -a		特殊オプションで、すべての登録エントリを表示する
 # iam			自己紹介を登録する
@@ -485,11 +494,19 @@ SYNOPSIS:
 　メールがしまわれています。
 
 
-付記： このヘルプファイルは fml 2.1 RELEASE のために 
-fukachan@sapporo.iij.ad.jp がそれ以前の help (original) help.example2
-(mnews ML, contributed by umura@nn.solan.chubu.ac.jp, thanks!) を参考に
-して再編集したものです。
+History:
 
+97/04/05 imported and merged by fukachan@sapporo.iij.ad.jp
+97/04/04 improved by metalman@kt.rim.or.jp
+97/04/01 improved by metalman@kt.rim.or.jp
+
+	 help and help.example2 are merged by fukachan@sapporo.iij.ad.jp
+				(preparation for 2.1 RELEASE)
+
+         help.example2         contributed by umura@nn.solan.chubu.ac.jp
+	 			(mnews ML's help is contributed) 
+
+         original              by fukachan@phys.titech.ac.jp
 
 $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
