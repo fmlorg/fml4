@@ -177,6 +177,7 @@ Can you understand sources of quotations?:-)
 
 .include pager.wix
 .include mail2news.wix
+.include mail2irc.wix
 
 .include aucea.wix
 .include fred.wix
