@@ -510,8 +510,13 @@ sub NewML
     $e{'GH:Reply-To:'}            = "fmlserv\@$DOMAINNAME";
 
     # Directory *_DIR -> FP_*_DIR (fully pathed)
+    local($s);
     for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
-	eval "-d \$$_||&Mkdir(\$$_); s#$DIR/##g; \$FP_$_ = \"$DIR/\$$_\";";
+	eval "\$s = \$$_; \$s =~ s#\$DIR/##g; \$s =~ s#$DIR/##g;";
+	&Log($@) if $@;
+	eval "\$FP_$_ = \"$DIR/\$s\";";
+	&Log($@) if $@;
+	eval "-d \$$_||&Mkdir(\$$_);";
 	&Log($@) if $@;
     }
 
