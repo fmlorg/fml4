@@ -4,7 +4,17 @@
 				¿¼Ä® ¸­°ì
 =E
 				Ken'ichi Fukamachi
-.~HTML_PRE
+
+   sbin/install.sh
+	you can use both MKDOC=no and MKDOC=NO to disable doc installation.
+
+   proc/libmoderated.pl (2.10-2.11)
+
+	missing Japanese message
+	apply patch by Satoshi Tatsuoka <satoshi@softagency.co.jp>
+
+   sbin/makefml	(2.44-2.45)
+	validate config.guess existence
 
 [ 3.0pl11 ]
 
@@ -186,3 +196,5 @@ $Id$
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+
+.~HTML_PRE
