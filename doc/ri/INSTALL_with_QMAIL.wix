@@ -1,0 +1,111 @@
+.if LANG == ENGLISH
+*** NOT TRANSLATE FOR LACK OF TIME ****
+.return
+.fi
+
+qmail から fml を起動する場合のインストールについて
+
+				Ken'ichi Fukamachi
+				fukachan@sapporo.iij.ad.jp
+
+
+qmail は別に詳しくないですがあってなかったら誰か直して下さい _o_
+
+.C	Qmail Overview
+
+qmail ではそのマシンにアカウントがあればそのユーザへ送られます(rootは
+例外です)。sendmail の ~/.forward に相当する ~/.qmail などが使えます。
+
+sendmail の /etc/aliases では postmaster や www-admin のようなアカウン
+トのないユーザへのフォワーディングが行なえます。qmail ではアカウントの
+存在しないユーザについては /var/qmail/alias/.qmail-$USER を使います。
+postmaster は/var/qmail/alias/.qmail-postmaster にフォワード先を書き込
+みます。
+
+
+.C	Set up mailing lists
+
+elena メーリングリストを作ることを考えます。~alias/.qmail-$USER と ~
+elena/.qmail-* のどっちのスタイルがいいのかはよくわかりません。手間は
+どっちもどっちだと思うので楽だと思った方がいいんでないかなぁ
+
+
+.S	:include:
+
+:include: スタイルは qmail では使えません。qmsmac というソフトをつかう
+と :include: スタイルを使えるようになるそうです(not tested)。でも
+program は動かないのでだめです。qmsmac は何にもマッチしなかった時 
+~alias/.qmail-default からよばれます。なので一種の ~alias (次の節)です。
+.q
+/var/qmscma/man/cat5/aliases.0
+
+MAJOR COMPATIBILITY ISSUES
+       sendmail's handling of quotes and backslashes violates RFC
+       821  and  RFC  822,  and  is not supported by qmsmac.  The
+       qmail-alias delivery mechanism lets each user manage  sev-
+       eral  addresses,  so there is no need for a special syntax
+       to get around forwarding.
+
+       sendmail and smail support file and program deliveries out
+       of  /etc/aliases  and  :include:  files.  qmsmac does not.
+       You can use the delivery  mechanism  described  in  qmail-
+       alias(8) to set up secure file and program deliveries.
+.~q
+
+.S	~alias/.qmail-list スタイル
+
+makefml newml で作った後は chmod -R alias MLのdirectory などとして所有
+者を alias にします。次に
+
+	~alias/.qmail-elena
+	~alias/.qmail-elena-ctl
+	~alias/.qmail-elena-admin
+	~alias/.qmail-elena-request
+
+を作ります。それぞれの中身は
+
+~alias/.qmail-elena
+|/usr/local/fml/fml.pl /var/spool/ml/elena
+
+~alias/.qmail-elena-ctl
+|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr
+
+~alias/.qmail-elena-admin:
+あなたのメールアドレス
+
+~alias/.qmail-elena-request:
+あなたのメールアドレス
+
+つまり include や include-ctl の中身と同じです。ただし " は要らない。
+
+問題はリモート管理でなく makefml や手動での管理を前提にするなら常に 
+alias に switch user (su) しないといけません。
+つまりML用の特別なアカウントが alias になるというだけです。
+
+
+.S	elena というユーザをつくってＭＬを運用する場合
+
+elena というユーザを作ります。/var/spool/ml/elena は elena の持ち主に
+します。
+
+~elena/.qmail
+|/usr/local/fml/fml.pl /var/spool/ml/elena
+
+~elena/.qmail-ctl
+|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr
+
+~elena/.qmail-admin:
+あなたのメールアドレス
+
+~elena/.qmail-request:
+あなたのメールアドレス
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
