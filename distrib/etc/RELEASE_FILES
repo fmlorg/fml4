@@ -91,6 +91,7 @@ bin/dns_check.pl
 bin/spool2html.pl
 bin/gen_summary.pl
 bin/daily.pl
+bin/daily_master.sh
 bin/multipart.pl
 bin/weekend-msend.sh
 bin/emumail.pl
