@@ -1,9 +1,9 @@
+.HTML_PRE
 	CHANGES from 0.x(1993) to fml-current
 
 				深町 賢一
 =E
 				Ken'ichi Fukamachi
-			
 
 最新の動向については INFO というファイルを見て下さい。
 このファイルは作者による変更点のメモです。
@@ -14,6 +14,7 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 *** This file is the author's memo on changes.
 *** Please see RELEASE_NOTES for contributors and the contribution.
 .fi
+.~HTML_PRE			
 
 
 1999/07/09
