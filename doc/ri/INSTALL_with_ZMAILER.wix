@@ -1,0 +1,35 @@
+		fml を zmailer と一緒に使う場合
+=E
+		fml and zmailer as a MTA
+
+				Ken'ichi Fukamachi <fukachan@fml.org> 
+
+当然ですが、まずML以外の機能がちゃんと動くようにzmailerを設定してくだ
+さい。INSTALLを丹念に読みながらやればできます。
+=E
+Please set up zmailer itself works well! 
+After you check zmailer works well, please set up mailing lists.
+
+/usr/local/zmailer/db/aliases
+
+elena: ":include:/tmp/s/elena/include"
+elena-ctl: ":include:/tmp/s/elena/include-ctl"
+elena-request: elena-admin
+elena-admin: fukachan
+owner-elena: fukachan
+
+" は必要らしい。逆にいえばそれだけで後はsendmailと同様に動いてくれるよ
+うです。
+=E
+`"' seems required in zmailer but it looks you need only this `"'. 
+
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.#
+.# $Id$
