@@ -44,12 +44,17 @@ A: makefml mladmin.cgi ML を走らせる。
 
 どちらでも効果は同じ
 
-
 2. 各ＭＬの管理者に渡す
 
 各ＭＬの管理者用ページ
 
 	http://the.fml.host/cgi-bin/fml/ml-admin/$ml/menu.cgi
+
+3. パスワードの設定
+
+CUI: makefml htpasswd ML ユーザ名
+
+GUI: not yet
 
 
 III. 各ＭＬのユーザ用のページ
