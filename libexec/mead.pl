@@ -726,33 +726,43 @@ sub Init
     $| = 1;
 
     require 'getopts.pl';
-    &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:k:");
+    &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:k:f:");
     $opt_h && die(&Usage);
     $debug  = $opt_d;
-    $EXPIRE = $opt_e || 14; # days
-    $KILL   = $opt_k || 'bye';
+
+
+    ### at the first stage, evaluate the configuration file ###
+    if ($opt_f && -f $opt_f) {
+	&EvalCF($opt_f);
+    }
+
+    $EXPIRE = $opt_e || $EXPIRE || 14; # days
+    $KILL   = $opt_k || $KILL || 'bye';
 
     # expire check interval
-    $CHECK_INTERVAL = $opt_i || 3*3600;
+    $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
 
-    $LIMIT  = $opt_l || 5;
+    $LIMIT  = $opt_l || $LIMIT || 5;
 
-    $DIR    = $opt_D || 
+    $DIR    = $opt_D || $DIR ||
 	die("Please define -D \$DIR, mead.pl working directory\n");
-    $ML_DIR = $opt_S || die("Please define -S ML_DIR e.g. -S /var/spool/ml\n");
-    $CACHE  = $opt_C || "$DIR/errormaillog";
+    $ML_DIR = $opt_S || $ML_DIR ||
+	die("Please define -S ML_DIR e.g. -S /var/spool/ml\n");
+    $CACHE  = $opt_C || $CACHE || "$DIR/errormaillog";
 
     # program
-    $EXEC_DIR = $0;
-    $EXEC_DIR =~ s#/libexec/mead.pl##;
+    if (! $EXEC_DIR) {
+	$EXEC_DIR = $0;
+	$EXEC_DIR =~ s#/libexec/mead.pl##;
+    }
     $EXEC_DIR = $opt_E || $EXEC_DIR;
-    $MAKEFML  = $opt_M || "$EXEC_DIR/makefml";
+    $MAKEFML  = $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
 
     # mode
-    $MODE = $opt_m || 'report';
+    $MODE = $opt_m || $MODE || 'report';
 
     # MTA
-    $SENDMAIL = $opt_z;
+    $SENDMAIL = $opt_z || $SENDMAIL;
 
     # touch
     &Touch($CACHE);
@@ -760,7 +770,7 @@ sub Init
     # priority; $opt_p
     $PRI{'uu'} = 1;
     $PRI{'default'} = 0.25;
-    for (split(/,/, $opt_p)) {
+    for (split(/,/, $opt_p . $PRIORITY)) {
 	if (/(\S+)=(\S+)/) {
 	    $PRI{$1} = $2;
 	    &Debug("--- \$PRI{$1} = $2") if $debug;
@@ -774,6 +784,25 @@ sub Init
     $RE_EUC_S  = "($RE_EUC_C)+";
     $RE_JIN    = '\033\$[\@B]';
     $RE_JOUT   = '\033\([BJ]';
+}
+
+
+sub EvalCF
+{
+    package mead;
+    require $main'opt_f; #';
+    package main;
+
+    for (debug, 
+	 EXPIRE, KILL, CHECK_INTERVAL, LIMIT, 
+	 DIR, ML_DIR, CACHE, EXEC_DIR, MAKEFML, 
+	 MODE, SENDMAIL, PRIORITY) {
+	eval("\$main'${_} = \$mead'${_};"); 
+    }
+
+    require 'dumpvar.pl';
+    &dumpvar('main');
+    exit 0;
 }
 
 
