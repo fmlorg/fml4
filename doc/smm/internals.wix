@@ -1300,9 +1300,11 @@ Lists used in FML assumes shell like structures:
 =E.S	members file formats
 .k	members ファイルのフォーマットと構造
 
-2.2 では以前と異なり一般ユーザには下のようなフォーマットは見えません。
-すでにいなくなったメンバーの情報をだすべきではないからです。管理者には
-後述する生のフォーマットが見えてしまいます。一応知っておいて下さい。
+生のファイルのフォーマットは後述のようなものです。コマンドの挙動は 2.2 
+以前と以後でちょっと違います。2.2 以降のmembersコマンドでは一般ユーザ
+には下のようなフォーマットは見えません。すでにいなくなったメンバーの情
+報をだすべきではないからです。admin members では後述する生のフォーマッ
+トが見えてしまいます。一応知っておいて下さい。
 =E
 Fml 2.2 REL provides the raw format to administrators but not raw
 format to general users since general users should not know members
