@@ -546,8 +546,9 @@ sub do_install
 	print "\nsbin/install.sh $Config'EXEC_DIR\n"; #';
     }
 
+    # $exec_dir/sbin/install.sh is NOT yet installed 
     if (-f "sbin/install.sh") {
-	system "/bin/sh sbin/install.sh $Config'EXEC_DIR"; #';
+	system "/bin/sh ./sbin/install.sh $Config'EXEC_DIR"; #';
     }
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
@@ -597,14 +598,54 @@ sub do_newml
     # make ml/config.ph
     system "$exec_dir/cf/config $FML_RCDIR/$ml.cf > $ml_dir/$ml/config.ph";
 
-    # generate samples, includes and aliases in $exec_dir/include
-    mkdir("$exec_dir/include", 0755);
+    ### generate samples, includes and aliases in $exec_dir/include ###
+    umask(022);
 
-    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$FML_RCDIR/aliases.$ml");
+    mkdir("$exec_dir/include", 0755);
+    # include file is public readable;
     &Conv($ml, "$exec_dir/etc/samples/__include", "$exec_dir/include/$ml");
 
-    print "Please see $FML_RCDIR/aliases.$ml (example of the aliases)\n\n";
-    &Cat("$FML_RCDIR/aliases.$ml");
+    # 
+    umask(077);
+
+    # directory to store the config for each ML
+    mkdir("$FML_RCDIR/$ml", 0700);
+
+    # generating samples ...;
+    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$FML_RCDIR/$ml/aliases");
+    &Conv($ml, "$exec_dir/etc/samples/__include", "$FML_RCDIR/$ml/include");
+    &Conv($ml, "$exec_dir/etc/samples/__crontab", "$FML_RCDIR/$ml/crontab");
+    &Conv($ml, "$exec_dir/etc/samples/__fml.c",   "$FML_RCDIR/$ml/fml.c");
+
+    &GenCrontab;
+
+    # the last info
+    print "Please see several examples in $FML_RCDIR/$ml\n";
+    print "   Example of Aliases ($FML_RCDIR/$ml/aliases)\n\n";
+    &Cat("$FML_RCDIR/$ml/aliases");
+}
+
+
+sub GenCrontab
+{
+    open(TAB, "> $FML_RCDIR/crontab") || 
+	(&Warn("cannot open $FML_RCDIR/crontab"), return);
+    select(TAB); $| = 1; select(STDOUT);
+
+    opendir(DIRD, $FML_RCDIR) || (&Warn("cannot open $FML_RCDIR"), return);
+    for (readdir(DIRD)) {
+	next if /^\./;
+
+	if (-f "$FML_RCDIR/$_/crontab") {
+	    if (open(IN, "$FML_RCDIR/$_/crontab") ) {
+		while (<IN>) {  print TAB $_;}
+		close(IN);
+	    }
+	}
+
+    }
+    closedir(DIRD);
+
 }
 
 
