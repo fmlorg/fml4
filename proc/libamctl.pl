@@ -370,7 +370,10 @@ sub DoSetMemberList
     if (/^($CHADDR_KEYWORD)$/i) {
 	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
 	$cmd = 'CHADDR';
-	
+
+	# return addrs
+	$e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
+
 	if ($curaddr eq '' || $newaddr eq '') {
 	    &Log("CHADDR Error: empty address is given");
 	    &Mesg(*e, "Error: CHADDR requires two non-empty addresses.");
