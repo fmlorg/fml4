@@ -83,7 +83,7 @@
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
 …略…
-ftp> get fml-3.0B-current-20000227.tar.gz
+ftp> get fml-4.0.3.tar.gz
 …略…
 50% |*************************                         | 818 KB 00:40 ETA
 …略…
@@ -93,11 +93,11 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 %
 
 ○ ソースを展開する。directoryができる。
-% gunzip fml-3.0B-current-20000227.tar.gz
-% tar xf fml-3.0B-current-20000227.tar
+% gunzip fml-4.0.3.tar.gz
+% tar xf fml-4.0.3.tar
 
 ○ 作られたdirectoryに移る(名前はfml-バージョン-日付のようになる)。
-% cd fml-3.0B-current-20000227
+% cd fml-4.0.3
 
 ○ インストール開始。インストールする場所等の質問に答える。
 % env RECOMMEND=yes perl makefml install

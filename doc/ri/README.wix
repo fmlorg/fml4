@@ -1,12 +1,12 @@
 .HTML_PRE
 
 .if LANG == JAPANESE
-	fml 4.0.3_ALPHA メーリングリスト サーバ/マネージャ
+	fml 4.0.3 メーリングリスト サーバ/マネージャ
 
 				深町 賢一
 .fi
 .if LANG == ENGLISH
-	fml 4.0.3_ALPHA mailing list server/manager package
+	fml 4.0.3 mailing list server/manager package
 
 				Ken'ichi Fukamachi
 .fi
@@ -499,7 +499,7 @@ GNU General Public License です。詳しくは COPYING というファイルを読ん
 
 
 
-$FML: README.wix,v 2.46.2.9 2001/07/23 12:08:52 fukachan Exp $
+$FML: README.wix,v 2.46.2.10 2001/07/29 05:00:17 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
