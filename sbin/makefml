@@ -455,11 +455,6 @@ sub FlockP
     $ml'FLockP{$ml}    = $flockp'USE_FLOCK;
     $ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
 
-    print STDERR "
-    \$ml'FLockP{$ml}    = $flockp'USE_FLOCK;
-    \$ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
-";
-
     return $flockp'USE_FLOCK; #';
 }
 
