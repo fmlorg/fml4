@@ -1,0 +1,2 @@
+# FOR SECURITY, Disable user to retrieve member list
+@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');

@@ -12,41 +12,43 @@
 # $Id$
 #
 
-%config = (
-	   'INCOMING_MAIL_SIZE_LIMIT',   512000,
-	   'USE_DISTRIBUTE_FILTER',      1,
-	   'FILTER_ATTR_REJECT_COMMAND', 1,
-	   'FILTER_ATTR_REJECT_MS_GUID', 1,
-	   'USE_MTI',                    1,
-	   'USE_LOG_MAIL',               1,
-	   );
+require 'getopts.pl';
+&Getopts("df:c:");
 
+$DIR  = $0;
+$DIR  =~ s#(.*/).*$#$1#;
+$DIR .= "../etc/makefml";
+
+$PARAM_CONFIG = $opt_c || "$DIR/secure_config.ph";
+$LOCAL_CONFIG = $opt_f || "$DIR/secure_local_config";
+
+require $PARAM_CONFIG;
 
 while (<>) {
     chop;
 
     if (/^LOCAL_CONFIG/) {
-	for $key (keys %config) {
-	    next unless $config{$key};
-	    &Write($key, $config{$key});
-	    &P($key, $config{$key});
+	for $key (keys %SecureConfig) {
+	    next unless $SecureConfig{$key};
+	    &Write($key, $SecureConfig{$key});
+	    &P($key, $SecureConfig{$key});
 	}
 
 	print "\n\n";
     };
 
-    for $key (keys %config) {
+    for $key (keys %SecureConfig) {
 	# remove entry
 	if (/^$key\s+(\S+)/) { 
 	    $x = $1;
 
 	    if (! $x) {
-		&P($key, $config{$key});
-		&Write($key, $config{$key});
+		&P($key, $SecureConfig{$key});
+		&Write($key, $SecureConfig{$key});
 	    }
 
 	    # remove entry which appended in the last
-	    delete $config{$key};
+	    delete $SecureConfig{$key};
 
 	    next;
 	}
@@ -61,9 +63,7 @@ while (<>) {
 	print STDERR "\t\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');\n";
 	print STDERR "\n";
 
-	print "# FOR SECURITY, Disable user to retrieve member list\n";
-	print 
-	    "\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');\n";
+	&Output($LOCAL_CONFIG);
     }
 }
 
@@ -77,4 +77,19 @@ sub P
 sub Write
 {
     printf "%-30s  %s\n", @_;
+}
+
+sub Output
+{
+    local($f) = @_;
+
+    if (open($f, $f)) {
+	while (<$f>) {
+	    print $_;
+	}
+	close($f);
+    }
+    else {
+	print STDERR "   cannot open $f\n";
+    }
 }
