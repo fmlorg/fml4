@@ -1,6 +1,6 @@
 #-*- perl -*-
 #
-# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+# Copyright (C) 1999-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
 #               1996-2000 fukachan@sapporo.iij.ad.jp
@@ -217,7 +217,9 @@ sub ExpandMemberList
     my (%uniq, %addr);
 
     for $list (@list) {
+	next unless -f $list;
 	next unless $list;
+
 	# uniq
 	next if $uniq{$list}; $uniq{$list} = 1;
 
