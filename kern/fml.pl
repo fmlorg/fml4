@@ -362,6 +362,7 @@ sub SetDefaults
     @DenyProcedure = ('library');
     @HdrFieldsOrder =	# rfc822; fields = ...; Resent-* are ignored;
 	('Return-Path', 'Received',
+	 'Delivered-To',  # for postfix, qmail
 	 'Date', 'Posted', 'X-Posted', 'X-Original-Date',
 	 'From', 'Reply-To', 'Subject', 'Sender', 
 	 'To', 'Cc', 'Errors-To', 'Message-Id', 'In-Reply-To', 
