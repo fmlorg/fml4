@@ -2654,6 +2654,7 @@ sub do_html_htpasswd
     -f $passwd_file || &Touch($passwd_file);
 
     # make directory
+    &SetPublicUmask;
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
     &MkDirHier("$CGI_AUTHDB_DIR/ml-admin/$ml");
 
@@ -5649,6 +5650,7 @@ sub do_setup_mladmin_cgi_scripts
 
     &ResetVariables;
 
+    &SetPublicUmask;
     &MkDir("$REAL_CGI_PATH/ml-admin/$ml", 0755);
     &Mkdir("$CGI_AUTHDB_DIR/ml-admin/$ml", 0755);
 
@@ -7044,7 +7046,8 @@ sub SetUpCGIadmin
     # first time!
     if (! -f "$CGI_AUTHDB_DIR/admin/htpasswd") {
 	# we enforce valid-user in .htaccess, so empty htpasswd is invalid :)
-	&MkDir("$CGI_AUTHDB_DIR/admin");
+        &SetPublicUmask;
+	&MkDirHier("$CGI_AUTHDB_DIR/admin");
 	&Touch("$CGI_AUTHDB_DIR/admin/htpasswd");
     }
 
@@ -7341,6 +7344,7 @@ sub cgi_menu_mainloop
 	}
 
 	if (! -f $pwf) {
+	    &SetPublicUmask;
 	    $flag = '-c';
 	    &MkDirHier($dir);
 	    &Touch($pwd);
