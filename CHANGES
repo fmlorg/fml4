@@ -10,12 +10,7 @@
 	bump up to 4.0E (digest delivery fix)
 
    bug fix RDBMS dump_xxx_list() to enable digest delivery
-	kern/msend.pl
-	databases/mysql/toymodel.pl
-	databases/postgresql/DBI_toymodel.pl
-	databases/postgresql/DBI_toymodel2.pl
-	databases/postgresql/Pg_toymodel.pl
-	databases/postgresql/toymodel.pl kern/msend.pl
+	RDBMS を使うとまとめ送りがうまくいかないのを修正
 
 2002/02/16
 
@@ -235,7 +230,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.237 2002/02/18 10:37:30 fukachan Exp $
+	add $FML: CHANGES,v 1.238 2002/02/24 14:47:02 fukachan Exp $
 
 2001/10/03
 
