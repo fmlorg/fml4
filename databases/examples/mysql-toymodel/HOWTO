@@ -1,0 +1,39 @@
+XXX CAUTION!
+XXX DONT FORGET 
+XXX	# mysqladmin reload  
+XXX when you change access databases.
+
+
+1.	check access control 
+
+	% su
+	# mysqlaccess host user dbname
+
+   Access-rights
+   for USER 'fukachan', from HOST 'beth.fml.org', to DB 'fml'
+        +-----------------+---+ +-----------------+---+
+        | Select_priv     | Y | | Shutdown_priv   | N |
+        | Insert_priv     | Y | | Process_priv    | N |
+        | Update_priv     | Y | | File_priv       | N |
+        | Delete_priv     | Y | | Grant_priv      | N |
+        | Create_priv     | Y | | References_priv | N |
+        | Drop_priv       | N | | Index_priv      | N |
+        | Reload_priv     | N | | Alter_priv      | N |
+        +-----------------+---+ +-----------------+---+
+   NOTE:    A password is required for user `fukachan' :-(
+
+ 
+   * mysql internal
+	check mysql.user	if not match => reject
+	check mysql.user	match => ok
+	check mysql.db		match => ok
+	check mysql.host
+	check mysql.tables_priv
+	check mysql.columns_priv
+
+
+2. 	
+
+
+
+$Id$
