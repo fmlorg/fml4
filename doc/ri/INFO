@@ -32,7 +32,11 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 
-========== WHAT'S NEW  fml current (1.6.2) ==========
+========== WHAT'S NEW  fml current (1.7 pre release version) ==========
+bin/fwix.pl
+	html 形式をサポート
+	今度は var/html/op/ の下に index.html と Chapeter ごとのhtml をつくる
+
 
 bin/split_and_msend.pl 
 	unix from のかたちの file の まとめおくり 
