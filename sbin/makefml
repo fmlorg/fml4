@@ -2395,7 +2395,7 @@ sub do_passwd
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
 	&Log("makefml::passwd changing $passwd_file succeed");
-	print "xstatus ok\n"; # XXX ???? this is for debug ??  (can I remove?)
+	print "status ok\n"; # XXX ???? this is for debug ??  (can I remove?)
 	# $XStatus = 'OK:';
     }
     else {
