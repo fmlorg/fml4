@@ -17,3 +17,9 @@ RCS
 :Crosspost
 :\(FML=/home/beth/fukachan/w/fml
 doc/examples/errormail-handling.*.wix   [0-9].[0-9]+
+[A-Za-z]+/[A-Za-z]+/ErrorStatus.pm$
+[A-Za-z]+/[A-Za-z]+/ErrorStatus.pm *[0-9.]+$
+messages/[A-Za-z]+/errno$
+messages/[A-Za-z]+/errno *[0-9.]+$
+distrib/[A-Za-z]+/error_report.sh *[0-9.]+$
+dist/NetBSD/src/usr.bin/make/lst.lib/lstOpen.c *[0-9.]+$
