@@ -5,6 +5,9 @@
 
 2000/03/08
 
+   fix $REWRITE_TO == 1 behaviour
+	fml-support: 07595
+
    fix envelope fileter
 
 	unsubscribe XXXX YYYY だけのメールは弾くけど
