@@ -438,7 +438,7 @@ GEN_ARCHIVE () {
 	if [ X$IN_RELEASE_BRANCH = X ]
 	then
 		echo ""
-		echo XXX experimental/ branch
+		echo XXX current/ branch
 		echo ""
 
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -453,11 +453,11 @@ GEN_ARCHIVE () {
 		chdir $FTP
 		rm -f fml-current.*.tar.gz fml-current.tar.gz 
 
-		ln $FMLID.tar.gz experimental/$FMLID.tar.gz
+		ln $FMLID.tar.gz current/$FMLID.tar.gz
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
 
-		chdir experimental/
+		chdir current/
 		rm -f fml-current.*.tar.gz fml-current.tar.gz 
 
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
@@ -486,11 +486,11 @@ GEN_ARCHIVE () {
 
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
+			echo 	rm -f *.zip current/fml*zip
+			rm -f *.zip current/fml*zip
+		else
 			echo 	rm -f *.zip official/fml*zip
 			rm -f *.zip official/fml*zip
-		else
-			echo 	rm -f *.zip experimental/fml*zip
-			rm -f *.zip experimental/fml*zip
 		fi
 	)
 
@@ -499,23 +499,23 @@ GEN_ARCHIVE () {
 	then
 		cp -p $FMLID.zip $FTP/official/
 	else
-		cp -p $FMLID.zip $FTP/experimental/
+		cp -p $FMLID.zip $FTP/current/
 	fi
 
 	echo "   relink *zip"
 	(
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
-			echo 	chdir $FTP/experimental
+			echo 	chdir $FTP/current
 			echo 	ln $FMLID.zip fml-current.zip
-			chdir $FTP/experimental
+			chdir $FTP/current
 			ln $FMLID.zip fml-current.zip
 		fi
 	)
 
 	echo "Creating MD5"
 
-	( chdir $FTP;              md5 *gz *zip |sort |tee MD5SUM )
-	( chdir $FTP/experimental; md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP;         md5 *gz *zip |sort |tee MD5SUM )
+	( chdir $FTP/current; md5 *gz *zip |sort |tee MD5SUM )
 	( chdir $FTP/official;     md5 *gz *zip |sort |tee MD5SUM )
 }
