@@ -415,8 +415,7 @@ sub system
 	    close(STDOUT);
 	}
 
-	exec $s;
-	&Log("Cannot exec $s:".$@);
+	exec $s || &Log("Cannot exec $s:".$@);
     }
 
     close($c_w) if $c_w;# close child's handles.
