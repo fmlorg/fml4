@@ -1,17 +1,13 @@
 check:
 	env FML=${FML} sh distrib/bin/check.sh
 
-capital:
-	cat `echo *pl proc/*pl |\
-	 sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
-	perl $(DIST_BIN)/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
 #
 # Section: Variable checks
 #
 varcheck:
 	@ env ${EXPORT_ENV} perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
-	tee tmp/VARLIST
-	@ wc tmp/VARLIST
+	tee /tmp/VARLIST
+	@ wc /tmp/VARLIST
 
 v2: varcheck2
 varcheck2:
@@ -23,8 +19,8 @@ varcheck2:
 v3:
 	@ env ${EXPORT_ENV} perl distrib/bin/search-config-variables.pl \
 	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
-	tee tmp/VARLIST
-	@ wc tmp/VARLIST
+	tee /tmp/VARLIST
+	@ wc /tmp/VARLIST
 
 curtest:
 	( echo -n "[`date`]"; \
@@ -35,16 +31,6 @@ test:
 	( echo -n "[`date`]"; \
 	  echo " test of new FML snapshot."; echo ""; echo "--fukachan")|\
 	  Mail test@fml.org
-
-makefml:
-	@ env ${EXPORT_ENV} sh distrib/bin/reset-makefml
-
-init-makefml:
-	cp sbin/makefml /tmp/distrib
-	(chdir /tmp/distrib ; perl makefml )
-
-simulation:
-	@ env ${EXPORT_ENV} sh $(FML)/.simulation/bootstrap
 
 update:
 	cvs update -dAP || echo 'nothing changed'
@@ -72,8 +58,8 @@ kscan:
 __clean:
 	find . |grep '/\.#' |${PERL} -nple unlink
 
-loop:
-	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
+
+
 
 e:	testsetup
 	@ echo 'make m is to re-generate /usr/local/fml/makefml'
@@ -117,5 +103,3 @@ install_current:
 	rsync -C -a libexec/ /usr/local/fml-current/libexec/
 	rsync -C -a bin/ /usr/local/fml-current/bin/
 	rsync -C -a module /usr/local/fml-current/
-
-
