@@ -15,6 +15,33 @@
 	DOMAIN                 fml.org
 	FQDN                   beth.fml.org
 
+	makefml showconfig は自分の使っている環境の情報を表示する
+
+	makefml bug-report-template はバグレポートを書く時のテンプレートを
+	作成してくれる。
+	わからないところは「わからない」でいいですが、
+	この空白をできるだけ埋めてくれると嬉しい
+
+		---------- fml bug report template ----------
+		Template-Version:      0.8
+		fml version:           3.0C (20000319)
+		installation mode:     personal
+
+		OS type:               NETBSD1.4T
+		CPU-MANUFACTURER-OS:   i386-unknown-netbsd1.4T
+		Perl version:          5.00503
+
+		MTA:                   
+		DOMAIN:                fml.org
+		FQDN:                  beth.fml.org
+		Email-Address:         fukachan@fml.org
+
+		Description:           
+
+		How-To-Repeat:         
+
+		Fix:                   
+
    Clean up campaign: remove Open()
 
 2000/03/21
