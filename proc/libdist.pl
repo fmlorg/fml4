@@ -113,7 +113,7 @@ sub DoDistribute
 	      $rcpt = "${who}\%${mxhost}\@${relay}";
 	  }
 
-	  print STDERR "RCPT:<$rcpt>\n\n" if $debug;
+	  print STDERR "DdDistribute::RCPT:<$rcpt>\n\n" if $debug;
 	  push(@Rcpt, $rcpt) unless $DLA_HACK;
 	  $Rcpt++; # count the number of recipients;
       }
