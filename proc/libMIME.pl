@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libMIME.pl,v 2.19 2001/09/14 04:11:14 fukachan Exp $
+# $FML$
 #
 
 use vars qw($debug 
@@ -136,7 +136,7 @@ sub MimeDecode
     s/$MimeQEncPat/&kconv(&MimeQDecode($1))/geo;
 
     if ($main::MIME_BROKEN_ENCODING_FIXUP) {
-	s/\0//g;
+	s/\0+/\x1B(B/g;
 	s/$/\x1b(B/;
     }
 
