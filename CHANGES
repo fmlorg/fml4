@@ -4,6 +4,12 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/10/22
+
+   proc/libamctl.pl
+	bug fix chaddr multiple matching error handling
+	(fix enbug)
+
 2001/10/21
 
    proc/libmodedef.pl
@@ -40,7 +46,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.218 2001/10/15 12:11:10 fukachan Exp $
+	add $FML: CHANGES,v 1.219 2001/10/21 15:13:57 fukachan Exp $
 
 2001/10/03
 

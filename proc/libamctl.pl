@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libamctl.pl,v 2.49 2001/10/13 14:22:16 fukachan Exp $
 #
 
 
@@ -797,9 +797,6 @@ sub ChangeMemberList
 
     $ADDR_CHECK_MAX = $org_addr; # reset;
 
-    # special handling for recursive errors
-    if ($status ne 'RECURSIVE') { undef $status;}
-
     $status;
 }
 
@@ -1009,7 +1006,7 @@ sub DoChangeMemberList
     ## IF TOO RECURSIVE
     # elsif ($ADDR_CHECK_MAX >= 10) {
     elsif ($ChMemCount >= 10) {
-
+	return $NULL;
 	&Log("MAXIMUM of ADDR_CHECK_MAX, STOP");
     }
     ## DEFAULT 
