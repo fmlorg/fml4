@@ -1661,6 +1661,11 @@ sub ResetVariables
     $LANGUAGE = $CurConfig{'LANGUAGE'};
     $TZ       = $CurConfig{'TZ'} || '+0900'; # COMPAT UNTIL FML 2.2;
     $VENDOR   = $CurConfig{'VENDOR'};
+    $CGI_PATH = $CurConfig{'CGI_PATH'} || '/cgi-bin/fml';
+
+    # fix path
+    $RP_CGI_PATH = $CGI_PATH;
+    $RP_CGI_PATH =~ s#^/+##;
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -4159,11 +4164,11 @@ sub do_setup_admin_cgi
 
     &ResetVariables;
 
-    &MkDir("$EXEC_DIR/share/cgi-bin/admin", 0755);
+    &MkDir("$EXEC_DIR/share/$RP_CGI_PATH/admin", 0755);
 
     for $f ("menu.cgi", "makefml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/admin/$f";
-	$outfile  = "$EXEC_DIR/share/cgi-bin/admin/$f";
+	$outfile  = "$EXEC_DIR/share/$RP_CGI_PATH/admin/$f";
 	print "\tcreate $outfile\n";
 	&Copy($template, $outfile);
 	chmod 0755, $outfile;
@@ -4179,11 +4184,11 @@ sub do_setup_mladmin_cgi
 
     &ResetVariables;
 
-    &MkDir("$EXEC_DIR/share/cgi-bin/ml-admin/$ml", 0755);
+    &MkDir("$EXEC_DIR/share/$RP_CGI_PATH/ml-admin/$ml", 0755);
 
     for $f ("menu.cgi", "makefml.cgi") {
 	$template = "$EXEC_DIR/www/cgi-bin/ml-admin/$f";
-	$outfile  = "$EXEC_DIR/share/cgi-bin/ml-admin/$ml/$f";
+	$outfile  = "$EXEC_DIR/share/$RP_CGI_PATH/ml-admin/$ml/$f";
 	&Conv($ml, $template, $outfile);
 	chmod 0755, $outfile;
     }
