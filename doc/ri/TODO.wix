@@ -1,3 +1,5 @@
+		TODO forward 2.3 (after fml 2.2.1 release)
+=E
 		TODO リスト (after fml 2.2.1 release)
 
 				Ken'ichi Fukamachi
@@ -6,52 +8,72 @@
 .toc
 -------------------------------
 
-.C	終ったものリスト ;-)
+.C	終ったものリスト
+=E.C	DONE
 
 .S	日本語のエラーがかえる
+=E.S	Japanese Error String
 
 .S	HTML_DEFAULT_HANDLERの拡張
+=E.S	Enhance $HTML_DEFAULT_HANDLER
+
+
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
-
+=E.C	TODO, WISH LIST
 
 .S	ドキュメント: FAQ をつくる
+=E.S	Document: make FAQ
 
 .url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
 
-.S	ドキュメント: op
+.S	ドキュメント: doc/op
+=E.S	Document: doc/op
 
 ２つにわけるべきか？
+=E
+Should we split it to two parts?
+
 	1. fml operations guide
 	2. The design and implementation of ml
 
-
 .S	MIMEライブラリーの書き直し
+=E.S	rewrite MIME library
 
 特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
 る。それを考慮すること
-
+=E
+Especially basse64 encoder. RFC2047 is incomplete for Japanese.
 
 .S	日本語化問題
+=E.s	Japanese configuration files
 
 cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
 ＃時間次第か？(難易度は低くても辛さ度は最大)
 
 *	cf/MANIFEST 日本語化計画
+=E
+*	Japanese cf/MANIFEST
 
 *	merge mnews help merge
 
 *	cf/MANIFEST 未定義変数探し
+=E
+*	search undefined variables on cf/MANIFEST
 
 
 .S	[認証] $SENDER_AUTH_TYPE
+=E.S	Authentication: $SENDER_AUTH_TYPE
 
 $SENDER_AUTH_TYPE = address / pgp
 
 makefml でのPGP操作をどうするべきなのか？
 ＃makefml pgp は管理者用に使ってしまったから
 ＃一般メンバー操作には適用できない
+=E
+makefml pgp ??? This command is for administrators.
+Which command could we use for usual member PGP authentication?
 
 
 .S	makefml config full menu
@@ -61,10 +83,13 @@ I may not do it since it only confuses the customize.
 
 
 .S	間違いメールのフィルタリング
+=E.S	more smart filtering algorithm for e.g. signature
 
 * ２バイトはじきすぎ問題
 
 * シグニチャー判定問題
+=E
+* Signature
 
   今は @ をふくんでいる最後のパラグラフはsignatureのパラグラムだと判定
   してむしするようになっているが、ひっかかないものもある。
@@ -79,6 +104,7 @@ I may not do it since it only confuses the customize.
 
 
 .S	アップグレードについて
+=E.S	upgrade
 
 * fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
 
@@ -88,8 +114,11 @@ I may not do it since it only confuses the customize.
 
 
 .S	リモート管理のノウハウについて
+=E.S	remote administration
 
 ドキュメント
+=E
+document
 
 >ごめんなさい、その通りです。
 >書いたつもりでしたが、読み返すと確かに書かれていませんでした。
@@ -105,44 +134,62 @@ A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 
 
 .S	CGI ユーザ・インターフェイス
+=E.S	CGI 
 
 makefml -i stdin を kick すりゃいいだけ
 
 
 .S	マクロ
+=E.S	Macro
 
 &DEFINE_MAILER(); は必要か？
+=E
+&DEFINE_MAILER(); is required ? 
 
    to define "ipc" or "prog" mailer
 
 
 .S	配送関係
+=E.S	Delivery
 
 * $OUTGOING_ADDRESSの設定をもっと簡単に？
+=E
+* $OUTGOING_ADDRESS easy configuration
 
 * smtpfeedを直接叩く
   kick off smtpfeed, 
   errorはSMTPでどっかにまるなげ
+=E
+* kick off smtpfeed directly
 
 * VERPs
 
-* $smtpd_recipient_restriction 問題
+* $smtpd_recipient_restriction
 see /etc/postfix/sample*cf
 
 
 .S	エラーアドレスの自動削除
+=E.S	automatic unsubscribe error addresses
 
 meadと各種MTA対応
+=E
+mead for each MTR
+
    postfix 対応
+=E
+   postfix
+
    qmail =>  http://www.jp.qmail.org/qmaildoc/RFC/RFCQSBMF.html
 
 
 .S	モデレータモードとexpire
+=E.S	moderator and expire
 
 fml-support ML's Count: 05639
 
 
 .S	ファイル操作
+=E.S	file operation
 
 tar.gz の中に spool/file tmp/spool/file が混在する問題
 
@@ -155,10 +202,15 @@ NT4 はだめだが NT5 fs には link(2)はある。
 
 
 .S	HTML関係
+=E.S	HTML
 
 * <DIV>の定義に反する使い方？
+=E
+* <DIV> 
 
 * BASE_URL な変数
+=E
+* BASE_URL 
 
 * fml-support: 05984
 
@@ -166,6 +218,7 @@ NT4 はだめだが NT5 fs には link(2)はある。
 
 
 .S	ポーティング 
+=E.S	Porting
 
 * NT と makefml ?
 
@@ -183,30 +236,50 @@ NT4 はだめだが NT5 fs には link(2)はある。
 .S	Y2K advisory
 
 * GetTimeを入れ換えるキット
+=E
+* &GetTime 
 
 * アドヴァイザリィ
+=E
+* y2k advisory
 
 * RFC1153のライブラリはどうする？
-
+=E
+* RFC1153 library
 
 .S	ログファイル
+=E.S	log file
 
 log file に年号をつけるモード。backup が楽
-例: $DIR/log.1999
+=E
+log filename with year
+
+For example: $DIR/log.1999
 
 
 .S	かるいまとめおくり？
+=E.S	lightweight digest
 
 
 .S	より統合されたパッケージ
+=E.S	fully integrated package
 
 	サーチエンジンとの連携
 	スケジュールソフト
 	IRC
+	...
+=E
+	search engine
+	scheduler
+	IRC
+	...
 
 .S	PGP version
 
 	現状 PGP 2 
+=E	
+	now PGP2
+
 	PGP 5
 	PGP 6
 	OpenPGP ...
@@ -216,8 +289,10 @@ log file に年号をつけるモード。backup が楽
 
 .appendix
 .C	遠い目標
+=E.C	far far away goal
 
 .S	美しいコード
+=E.S	more beautiful codes
 
 * all ranges
 
