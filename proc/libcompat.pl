@@ -1,54 +1,64 @@
 ###############################################
 ### ### BACKWARD COMPATIBILITY LIBRARIES ###### 
 ###############################################
+local($id);
+$id = q$Id$;
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
-##### GLOCAL VARIABLES ##### 
-##### PHASE 01 -> continues to PHASE02
-$Reply_to            = $Reply_to || $Envelope{'h:Reply-To:'};
+sub CompatFML15_Post
+{
+    $Envelope{'macro:s'}        = $_Ds;
 
-# TO:
-$Original_To_address = $Envelope{'to:'};
-$To_address          = $Envelope{'mode:chk'};
+    # TO:
+    $Envelope{'to:'}	        = $Original_To_address;
+    $Envelope{'mode:chk'}	= $To_address;
 
-# FROM:
-$From_address        = $Envelope{'h:From:'};
+    # FROM:
+    $Envelope{'h:From:'}        = $Original_From_address;
+    $Envelope{'h:Reply-To:'}    = $Reply_to;
 
-# OTHER
-$Date                = $Envelope{'h:Date:'};
-$Errors_to           = $Envelope{'h:Errors-To:'};
-$Sender              = $Envelope{'h:Sender:'};
-$Message_Id          = $Envelope{'h:Message-Id:'};
-$Cc                  = $Envelope{'h:Cc:'};
-$Subject             = $Envelope{'h:Subject:'};
+    # OTHER
+    $Envelope{'h:Date:'}	= $Date;
+    $Envelope{'h:Errors-To:'}	= $Errors_to;
+    $Envelope{'h:Sender:'}	= $Sender;
+    $Envelope{'h:Message-Id:'}	= $Message_Id;
+    $Envelope{'h:Cc:'}	        = $Cc;
+    $Envelope{'h:Subject:'}	= $Subject;
 
-### MIME
-for ('mime-version', 'content-type', 'content-transfer-encoding') {
-    next unless $Envelope{"$_:"};
-    $_cf{'MimeHeaders'} .= "$_: ".$Envelope{"h:$_:"}."\n";
-}
-
-### SUPERFLUOUS
-if ($SUPERFLUOUS_HEADERS) {
-    $SuperfluousHeaders = $Envelope{'Hdr2add'};
-}
-
-### SUMMARY
-$Summary_Subject = $Subject;
-$Summary_Subject =~ s/\n(\s+)/$1/g;
-$User = substr($From_address, 0, 15);
-
-
-##### MIME decoding. #####
-# If other fields are required to decode, add them here.
-# c.f. RFC1522	2. Syntax of encoded-words
-if ($USE_LIBMIME && $Envelope{'MIME'}) {
-    &use('MIME');
-    $Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+    # SUPERFLUOUS
+    if ($SUPERFLUOUS_HEADERS) {
+	$Envelope{'Hdr2add'}    = $SuperfluousHeaders;
+    }
 }
 
 
+sub CompatFML15_Pre
+{
+    $_Ds                 = $Envelope{'macro:s'};
 
+    # TO:
+    $Original_To_address = $Envelope{'to:'};
+    $To_address          = $Envelope{'mode:chk'};
 
+    # FROM:
+    $From_address        = $Envelope{'h:From:'};
+    $Reply_to            = $Envelope{'h:Reply-To:'};
+
+    # OTHER
+    $Date                = $Envelope{'h:Date:'};
+    $Errors_to           = $Envelope{'h:Errors-To:'};
+    $Sender              = $Envelope{'h:Sender:'};
+    $Message_Id          = $Envelope{'h:Message-Id:'};
+    $Cc                  = $Envelope{'h:Cc:'};
+    $Subject             = $Envelope{'h:Subject:'};
+
+    # SUPERFLUOUS
+    if ($SUPERFLUOUS_HEADERS) {
+	$SuperfluousHeaders = $Envelope{'Hdr2add'};
+    }
+}
+
+##############################################################################
 
 ##### STARTREK FORM ##### 
 $SMTP_OPEN_HOOK .= q#
@@ -60,6 +70,8 @@ $SMTP_OPEN_HOOK .= q#
 #;
 
 
+##############################################################################
+
 ##### PLAY of TO: (95/10/3) ##### 
 # $To_address is obsolete
 $SMTP_OPEN_HOOK .= q#
@@ -68,6 +80,8 @@ $SMTP_OPEN_HOOK .= q#
 $SMTP_OPEN_HOOK .= $Playing_to;
 push(@PLAY_TO, @Playing_to);
 
+
+##############################################################################
 
 ###### ($host, $headers, $body) #####
 sub OldSmtp
@@ -83,5 +97,6 @@ sub OldSmtp
     &Smtp(*e, *rcpt);
 }
 
+##############################################################################
 
 1;
