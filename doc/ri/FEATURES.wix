@@ -16,18 +16,25 @@ extensions e.g. automatic registration/subscribe remote administration,
 you should enable functions explicitly.
 .fi
 
+[インストール]
+=E
 [installation]
 
 ○ makefml 対話設定プログラム (CUI)
 =E
 *  makefml (CUI; interactive install and customize interface)
 
-
-[message/response]
+[一般]
+=E
+[General]
 
 ○ メッセージの多国語化 (3.0 new)
 =E
 * Message Language Extension (3.0 new)
+
+○ メモリ仕様効率の改善 (3.0 new)
+=E
+*  fix memory usage (3.0 new)
 
 
 [セキュリティ]
@@ -56,6 +63,10 @@ you should enable functions explicitly.
    which monitors the ML traffic. Fml rejects more articles from a
    sender from which fml observes the high traffic mail, which must a
    mail bomber.
+
+○ MD5 checksum によるループ検出 (3.0 new, optional)
+=E
+*  MD5 check sum loop detecton (3.0 new, optional)
 
 ○ FML Advisory
    最近の諸問題とそれに関するfmlの設定などについてのアドバイザリィ
