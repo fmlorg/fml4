@@ -25,7 +25,7 @@ require 'libcgi_kern.pl';
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-&ShowAminMenu('rmml');
+&ShowAdminMenu('rmml');
 
 if ($ErrorString) { &Exit($ErrorString);}
 

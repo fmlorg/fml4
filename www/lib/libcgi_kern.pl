@@ -480,7 +480,7 @@ sub SpawnProcess
 
 
 ### Real Function of *.cgi
-sub ShowAminMenu
+sub ShowAdminMenu
 {
     local($mode) = @_;
 

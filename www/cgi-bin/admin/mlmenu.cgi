@@ -26,7 +26,7 @@ $ML = $Config{'ML'};
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-&ShowAminMenu($Config{'PROC'});
+&ShowAdminMenu($Config{'PROC'});
 
 if ($ErrorString) { &Exit($ErrorString);}
 

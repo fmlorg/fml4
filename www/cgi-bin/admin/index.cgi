@@ -25,7 +25,7 @@ require 'libcgi_kern.pl';
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-&ShowAminMenu('index');
+&ShowAdminMenu('index');
 
 if ($ErrorString) { &Exit($ErrorString);}
 
