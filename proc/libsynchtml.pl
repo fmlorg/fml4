@@ -355,6 +355,7 @@ sub SyncHtmlUnlinkArticle
 {
     local(*e, $article) = @_;
     local($dir, $id, $li, %le, $atime, $mtime);
+    local($ID); # XXX required for temporary emulation
 
     local($atime, $mtime) = (stat($article))[8,9];
 
@@ -382,6 +383,7 @@ sub SyncHtmlUnlinkArticle
     &use('synchtml');
     &SyncHtml'Init; #';
     &SyncHtml'Write($dir, $id, *li, *le); #';
+    undef $ID; # reset emulated variable (not needed but reset reset ;-)
 
     # reset the original time for expire
     utime $atime, $mtime, $article;
