@@ -8,6 +8,9 @@ RSYNC     = rsync --rsh ssh
 JCONV     = nkf -j
 ECONV     = nkf -e
 
+# version up 
+VERSION   = $(FML)/distrib/bin/version.pl
+
 # fml specific
 #
 # [fwix]
