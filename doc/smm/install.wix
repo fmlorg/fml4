@@ -30,9 +30,46 @@ If $debug >= 2, fml writes debug info the file
 
 ファイルに吐きます。
 
+.S	How to debug (1)
 
-.S	HOW TO DEBUG ... ［デバッグのポイント］
-=E.S	How to debug
+in fml-support: 5282
+.if LANG == JAPANESE
+.q
+1. OSのメールのログを調べる。
+   see INSTALL file Appendix A.
+
+2. fml のログを調べる。$DIR/log (ML's HOME ログファイル)
+
+3. fml からMTAへちゃんと渡せているかのログを調べる。
+   ($DIR/var/log/_smtplog)
+
+4. "makefml test ML" で fml 自体が動いているかを調べる。
+   このテストはMTAとは完全に無関係に動くのでこれが動くならMTAの問題
+
+	makefml test ML
+
+と打つとデバッグモードでの動作テストができます。画面に debug 情報が一
+杯出るので emacs の shell mode なり /usr/bin/script などでログをとるな
+りして見て下さい。makefml test ML を起動すると配送のテストかコマンドの
+テストか？選択をしろといわれます。
+.~q
+.fi
+.if LANG == ENGLISH
+.q
+1. check OS's maillog.
+   following the check list in INSTALL file Appendix A.
+
+2. check fml log, $DIR/log.
+
+3. check the connection between fml and MTA, $DIR/var/log/_smtplog.
+
+4. "makefml test ML" helps you to test fml.
+
+.~q
+.fi
+
+.S	How to debug (2)［デバッグのポイント］
+=E.S	How to debug (2)
 .k	debug
 
 From: fml-support: 01411
