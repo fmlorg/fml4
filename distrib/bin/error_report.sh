@@ -3,7 +3,7 @@
 echo "Possible Error Report ($1):"; 
 echo "";
 
-egrep -ni 'no |not | no| not|error' $1 |\
+egrep -ni 'stop|no |not | no| not|error' $1 |\
 egrep -v "analyze_mail_error|liberror.pl| Nov |:\+|RCS|:var/html/RELEASE_NOTES.html|:doc/ri/RELEASE_NOTES|:Crosspost|:\(FML=/home/beth/fukachan/w/fml" |\
 perl -nle ' s/:/  /; print "   $_\n"'
 
