@@ -15,6 +15,351 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 *** Please see RELEASE_NOTES for contributors and the contribution.
 .fi
 
+1999/11/29
+
+   remove obsolete files from standard distribution
+	bin/geturl.pl
+	etc/crontab-4.3
+	etc/crontab-4.4
+	etc/passwd
+
+1999/11/27
+
+   installer
+	"makefml -W cgi install" which setups cgi
+
+	CGIのインストール
+
+   installer
+	you can use both MKDOC=no and MKDOC=NO
+
+	MKDOC=no =NO どっちでも使えるように修正
+	＃ MKDOC=no を環境変数に設定するとドキュメントをインストールしない 
+
+	例:	env MKDOC=no make install
+
+
+1999/11/26
+
+   doc/{html,ri}/
+	fix some ptr and lexical (for html generation) bugs
+
+   bug fix Japanese reply message in moderator mode
+	# Thank Satoshi Tatsuoka for the patch
+
+	モデレーターモードで投稿確認の日本語のメッセージが表示されない
+
+1999/11/23
+
+   sbin/makefml	(2.44-2.45)
+	validate config.guess existence
+
+1999/11/19
+
+   [ 3.0pl11 ]
+
+   proc/libra.pl
+	fix typo
+	by <yuao@infonia.ne.jp> fml-support:06999 
+
+   kenn/fml.pl
+	if handler == ignore in command mode, ignore all requests
+
+   bin/spool2html.pl
+	define $Envelope{'mode:dist'} to avoid libsynchtml check
+
+	SyncHtml()の新しいチェックにひっかかる
+
+   etc/makefml/Makefile (1.16-1.17)
+	validate config.ph.new before mv .ph.new to .ph
+
+
+1999/11/18
+
+   proc/libra.pl
+	fix typo of "admin add" command reply
+	by <yuao@infonia.ne.jp> fml-support:06999 
+
+	admin add の返事の日本語のメッセージがおかしい;0
+
+1999/11/17
+
+   kenn/fml.pl
+	if handler == ignore in command mode, ignore all requests
+
+	コマンドで ignore を指定するとすべてのリクエストを無視する
+	ように変更(guideやsubscribe,chaddrだけは受け付けてしまっていた)
+
+1999/11/15
+
+   bin/spool2html.pl
+	define $Envelope{'mode:dist'} to avoid libsynchtml check
+
+	SyncHtml()の新しいチェックにひっかかる
+
+   etc/makefml/Makefile (1.16-1.17)
+	validate config.ph.new before mv .ph.new to .ph
+
+1999/11/14
+   -------------------------------------------------------------------
+   [ 3.0pl10 ]
+   bin/fwix.pl
+	fix IndexExpand() avoid to match unexpected '+' string
+   doc/
+	add simple installa memo on qmail
+	http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+   sbin/makefml (2.43-2.44)
+	define dummy DEFINE_FIELD_PAT_TO_REJECT()
+   -------------------------------------------------------------------
+
+   bug fix (current only): actives/members not cut off comment lines with /^#/
+
+	actives members で # ではじまるコメント行がのぞかれない
+	(currentだけのbug)
+
+1999/11/09
+
+   bin/fwix.pl
+
+	fix IndexExpand() avoid to match unexpected '+' string
+
+	+ をふくむURLをちゃんとparseできなさげ?なbug fix
+
+   doc/
+
+	add simple installa memo on qmail
+	http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+
+	qmail の簡単なインストールメモを付け加えさせてもらう
+
+1999/11/08
+
+   sbin/makefml: bug fix (missing definition)
+
+	Undefined subroutine &config_ph::DEFINE_FIELD_PAT_TO_REJECT called at 
+	/var/spool/ml/elena/config.ph line 1293.
+
+	「DEFINE_FIELD_PAT_TO_REJECTがないのでエラー」となるbug fix
+
+   add new CVS repository: fml/doc/devel/
+
+	a small memo's for developements
+
+	doc/devel/ は開発(者)用のメモとして整理する予定
+	(devel == developement)
+
+
+   [ 3.0pl9 ]
+   fix qmail examples (qmail/users/assign)
+
+   fix qmail examples (qmail/users/assign)
+
+	change
+		   +elena-:fukachan:1000:1000:/a:-::
+	   to
+		   +elena:fukachan:1000:1000:/a:-:elena:
+	style
+
+	makefml newml時に生成されるqmailの見本のbug fix
+
+1999/10/29
+
+   [ 3.0pl8 ] 
+
+   fix "admin remove-article" command bug with html creation mode
+
+	XXX should not run &SyncHtml() under command mode
+
+	HTMLスプールを生成することになっている場合に"admin remove-article"
+	command を使うとその命令を送ったメールもついでに再生成されてしまうbug
+
+   [ 3.0pl7 ] 
+
+   etc/makefml/dot-qmail-default 
+
+	s/USE_QMAIL_EXTENSION/USE_DOT_QMAIL_EXT/
+	$USE_QMAIL_EXTENSION is renamed to $USE_DOT_QMAIL_EXT.
+
+	$USE_QMAIL_EXTENSION は $USE_DOT_QMAIL_EXT に改名されている。
+
+   proc/libexpire.pl 
+	expire spooled articles based on mtime not ctime
+	fml-support: 6867
+
+	なぜかexpireのコードのところ一箇所でだけ判定の基準が異なることを修正
+
+  libexec/mead.pl
+	trap postfix error messages (true?)
+	trap more qmail error messages (sync w/ HEAD 1.8-1.9)
+
+  libexec/mead.pl, doc/smm/mead.wix
+	add missing options mead.pl help shows
+
+1999/10/28
+
+   cf/MANIFEST cf/MANIFEST.Japanese
+
+	add missing USE_DOT_QMAIL_EXT definition
+
+   etc/makefml/dot-qmail-default 
+
+	s/USE_QMAIL_EXTENSION/USE_DOT_QMAIL_EXT/
+	$USE_QMAIL_EXTENSION is renamed to $USE_DOT_QMAIL_EXT.
+
+	$USE_QMAIL_EXTENSION は $USE_DOT_QMAIL_EXT に改名されている。
+
+   proc/libexpire.pl 
+	expire spooled articles based on mtime not ctime
+	fml-support: 6867
+
+	なぜかexpireのコードのところ一箇所でだけ判定の基準が異なることを修正
+
+   sbin/makefml
+	fix $ML_DIR/etc/aliases generation
+	fml-support: 6903
+
+	fml-currentのmakefmlがエラーをはくことを修正(CGI 開発branchの余波)
+
+1999/10/26
+
+   aliases example
+
+	add owner-ml-ctl: $user
+
+	newl 時に作成されるaliasesファイルに owner-ml-ctl を加える
+
+
+1999/10/18
+   admin iam
+
+	add administrative "iam" command to overwrite entry for the addr
+
+	管理者用のiam: 既存ユーザのエントリの強制上書き/削除用
+
+  libexec/mead.pl
+	trap more qmail error messages
+
+	qmail のエラーの解析をもうちょっと頑張る
+
+1999/10/05
+  3.0A (fml-current)
+
+	3.0A (fml-current) スタート
+		設定のための WWW/CGI Interface (αテスト)
+		clean up 他
+
+  libexec/mead.pl
+
+	trap postfix error messages (true?)
+
+	postfix のエラーの解析をもうちょっと頑張る
+
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/htmldocs-current.tar.gz
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/htmldocs-YYYYMMDD.tar.gz
+
+	package of html documents under http://www.fml.org/fml/
+
+	http://www.fml.org/fml/ の下のドキュメントをまとめたもの
+
+1999/10/04
+  3.0pl6
+
+  clean up/changes documents mainly
+
+  bin/fwix.pl
+	not expand .ptr with <PRE>
+
+1999/09/26
+  3.0pl5
+
+  sbin/makefml
+	PR: fml-support:06764
+	fix "auto_asymmetic_regist" behaviour
+	which affects libexec/mead.pl remove user process ;-)
+
+  doc/ri/INSTALL.wix
+	 add note on "makefml -U install" (unlock mode)
+
+  examples/fml-install.wix
+	unify makefml syntax example to be easy for beginners
+
+  proc/libra.pl
+	fix file validation check" in the case regexp-like directory name
+
+  update (sync with HEAD (cvs main trunk))
+	INSTALL_on_MacOS_X_Server
+
+1999/09/20
+  3.0pl4
+
+  etc/makefml/include-mead
+	fix spelling 
+
+  doc/html/index.html
+	add ptr to Mac OS X Server
+
+  cf/MANIFEST
+	clean up English ;-)
+	sync with fml 3.0 etc/makefml/cf
+
+  cf/MANIFEST.Japanese
+	added. Japanese description for variables
+
+1999/09/18
+   3.0pl3 
+
+   add INSTALLATION NOTES on MacOS X Server
+
+   proc/libsynchtml.pl 
+	fix dup check of htdocs/index.html
+
+   proc/libmesgle.pl 
+	&Mesg() repl may has invalid input
+	check the input and wrap repl in euc and back to jis
+
+   sbin/makefml
+	modify jperl check code
+
+   fix distribution package lacks some plaintext
+	distribute all INSTALL* (plaintext) 
+
+   proc/libra.pl
+	remove-article always checks spool and archive (tar.gz)
+
+   doc/ri/README.wix
+   doc/ri/INSTALL.wix
+	fix 2 bytes "-" statements (Japanese specific)
+
+1999/09/02
+   3.0pl2 (fml-3.0pl2.tar.gz, patchlevel 2)
+
+   doc/ri/
+   doc/examples/
+	sync with cvs main-trunk
+
+   libmember_name.pl
+	correct handling of "apporove PASSWORD name ..." case
+
+1999/08/28
+   3.0pl1 (fml-3.0pl1.tar.gz, patchlevel 1)
+
+	cf/config
+		TZone cannot accpet -0800 style.
+
+	doc/examples/index*html
+		remove fml.css stylesheet definition since fml.css does not exist
+
+	doc/ri/INSTALL.wix
+		add how to pass perl path in "make install"
+		   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+	sbin/makefml
+		fix perl path in "make install"
+		   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+		add COPY_FIELD() to avoid evaluation of config.ph loading
+
+1999/08/15
+   3.0 Release
 
 1999/08/11
 	fix sbin/makefml bug (loading config.ph)
