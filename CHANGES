@@ -4,6 +4,17 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/12/27
+
+   proc/libra.pl
+	admin コマンド用の %ADMIN_COMMAND_START_HOOK を創設する
+
+		eval $ADMIN_COMMAND_START_HOOK{$cmd}
+		run admin command $cmd
+		eval $ADMIN_COMMAND_END_HOOK{$cmd}
+
+	みたいに実行してます。
+
 2001/12/19
 
    kern/fml.pl (2.140-2.141):
@@ -117,7 +128,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.227 2001/12/14 14:59:43 fukachan Exp $
+	add $FML: CHANGES,v 1.228 2001/12/19 14:30:08 fukachan Exp $
 
 2001/10/03
 
