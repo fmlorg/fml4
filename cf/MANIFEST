@@ -14,7 +14,7 @@ INFO:
 #####################################################################
 # ### Section: DNS and Other Fundamental (CF Version, debug, Language) ### 
 # config.ph configuration version
-CFVersion:	3
+CFVersion:	3.1
 
 # global debug option. if non-nil, debug mode.
 # In debug mode, NOT do distribution
@@ -70,6 +70,13 @@ MAIL_LIST_ACCEPT_COMMAND:
 # $MAINTAINER != $MAIL_LIST IS REQUIRED AGAINST MAIL LOOP
 MAINTAINER:		Elena-admin@$FQDN
 MAINTAINER_SIGNATURE:	
+
+# ## Sub Section: ML_FN ##
+# We expand
+#   To: $MAIL_LIST $ML_FN
+#  =>
+#   To: Elena@fml.org (Elena Lolabrigita ML)
+ML_FN:		(Elena Lolabrigita ML)
 
 
 #####################################################################
@@ -217,16 +224,13 @@ INCOMING_MAIL_SIZE_LIMIT:
 
 # In Header, we expand these values to
 #
-#   To: $MAIL_LIST $ML_FN
 #   $XMLNAME
 #   $XMLCOUNT: sequence-number
 #
 #   e.g.
-#   To: Elena@fml.org (Elena Lolabrigita ML)
 #   X-ML-Name: Elena
 #   X-Mail-Count: 00007
 #
-ML_FN:		(Elena Lolabrigita ML)
 XMLNAME:	 X-ML-Name: Elena
 XMLCOUNT:	 X-Mail-Count
 
@@ -270,8 +274,13 @@ PRECEDENCE:	bulk
 APPEND_STARDATE:
 
 # We should force "To: $MAIL_LIST" form "For Eye" or NOT?
-# In default, we rewrite "To: $MAIL_LIST, original-to-fields".
-NOT_REWRITE_TO:
+#
+# 0 Pass the original field To: 
+# 1 We rewrite "To: $MAIL_LIST, original-to-fields".
+# 2 Force "To: $MAIL_LIST".
+# 
+# REWRITE_TO = 1 if NOT_REWRITE_TO == 0 (2.1 Release)
+REWRITE_TO:
 
 # Default values if no value (no field) is given.
 Subject:
