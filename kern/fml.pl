@@ -383,9 +383,8 @@ sub GetTime
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
@@ -1307,7 +1306,16 @@ sub DoMailListMemberP
 	}
     }
     $SubstiteForMemberListP = 0;
-    $NULL;
+
+    if ($IDENTIFY_MIGRATING_DOMAIN) {
+	# avoid recursive call under libmgrdom.pl
+	return $NULL if $Envelope{'mode:in_mgrdom'};
+	&use('mgrdom');
+	&MgrdomConsider($addr, $type);
+    }
+    else {
+	$NULL;
+    }
 }
 
 sub MailListMemberP { return &DoMailListMemberP(@_, 'm');}
