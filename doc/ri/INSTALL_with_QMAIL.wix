@@ -14,6 +14,12 @@
 
 .C	fml with Qmail
 
+.if LANG == JAPANESE
+参考: 簡単なqmail上でのfmlの設定の仕方のメモがあります。大雑把な流れが
+掴めます。
+.url http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
+.fi
+
 .S	Overview
 
 .if LANG == JAPANESE
