@@ -129,6 +129,12 @@ $MSEND_OPT_HOOK = q%
 sub MSendModeSet  という関数を見るとわかるとおもいます。
 
 
+.S	$REPORT_HEADER_CONFIG_HOOK
+.l	$REPORT_HEADER_CONFIG_HOOK
+
+SMTP 配送ライブラリへ渡す直前に評価されるフック。
+
+
 .S	COMMAND_HOOK（コマンドへの追加）
 .label	command-hook
 .key	customize-of-commands
