@@ -1,8 +1,3 @@
-op: var/doc/op.jp
-
-var/doc/op.jp: doc/smm/*wix
-	env FML=${FML} $(SH) distrib/bin/DocReconfigure.op
-
 .for file in ${DOC_DRAFT_SOURCES}
 __DOC_TARGETS__ += var/doc/drafts/Japanese/${file}
 __DOC_TARGETS__ += var/doc/drafts/English/${file}
@@ -53,4 +48,4 @@ __initplaindocbuild__:
 
 plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} __plainbuild_new
 	@ echo --plaindoc done.
-#	@ echo ${__DOC_TARGETS__} |tr ' ' '\012'
+
