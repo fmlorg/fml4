@@ -935,6 +935,9 @@ Options:
     -k action        'bye' is default,  off or bye.
                      change the action when mead detects a bad address.
 
+    -l limit         limit whether we should do action defined by '-k action'
+
+    -z sendmail      alternative sendmail path
 "
 }
 

@@ -157,7 +157,6 @@ Options:
 
     -f configfile   load configuration from this file at the first
                     Other command line options can overwrite it.
-
     -e number       expire of error data cache (unit is 'day')
     -i number       check interval (unit is 'second')
 
@@ -173,11 +172,15 @@ Options:
                             uu: unknown user
                             uh: unknown host
                             ua: unknown address
-                            us: service unavaiable
-                       default: default value for phrases not above 
+                            us: service unavaiable 
+                            default: default value for phrases not above
 
     -k action        'bye' is default,  off or bye.
                      change the action when mead detects a bad address.
+
+    -l limit         limit whether we should do action defined by '-k action'
+
+    -z sendmail      alternative sendmail path
 
 ○ -k オプション
 
