@@ -923,11 +923,12 @@ sub CheckCurrentProc
 	$cc++;
 	print STDERR " SCAN BUF> $_ ($cc line)\n\n" if $debug;
 
-	# skip useless checks
-	if (! $e{'trap:ctk'}) {
-	    print STDERR "  -skip fml rel. 1 compatible scan\n" if $debug;
-	    next;
-	}
+	# DO NOT "skip useless checks (2.23?)"
+	# which we uses in the "guide" request check from a stranger.
+	# if (! $e{'trap:ctk'}) {
+	#    print STDERR "  -skip fml rel. 1 compatible scan\n" if $debug;
+	#    next;
+	# }
 
 	# Guide Request from the unknown
 	if ($GUIDE_CHECK_LIMIT-- > 0) { 
