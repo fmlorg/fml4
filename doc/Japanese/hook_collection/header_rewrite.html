@@ -18,6 +18,7 @@
 <A Href="#Anchor6">Cc: を元メールの Cc:,From にしたい</A> 
 <A Href="#Anchor7">オリジナルのFrom:を本文に付け加える</A>
 <A Href="#Anchor8">Subject: に [ML-NAME:数字] が書いてあったら、タグをつけない</A>
+<A Href="#Anchor9">Reply-To: を消してしまうには</A>
 
 </pre><Br><Br>
 <Font Size=4><B><A Name="Anchor1">●ある特定のユーザだけヘッダを書き換えて配信する</A>
@@ -152,9 +153,8 @@ $START_HOOK = q%
 %;
 #携帯電話などへの配送の際に From を書き換えて固定して、
 #実際の From は本文中に埋め込む用途に使用
-
-
 </pre>
+<Br><Br>
 <Font Size=4><B><A Name="Anchor8">●Subject: に [ML-NAME:数字] が書いてあったら、タグをつけない</A>
 </B></Font>
 <pre>
@@ -168,6 +168,17 @@ $HEADER_ADD_HOOK .= q{
     $Envelope{'h:Subject:'} = $subject ;
   }
 };
+</pre>
+<Br><Br>
+<Font Size=4><B><A Name="Anchor9">●Reply-To: を消してしまうには</A>
+</B></Font>
+<pre>
+【fml-support:09408】
+
+$START_HOOK = q{
+	&DELETE_FIELD('Reply-To');
+};
+</pre>
 </Div>
 </Body>
 </Html>
