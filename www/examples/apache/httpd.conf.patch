@@ -17,14 +17,14 @@ AccessFileName .htaccess
     Deny from all
 </Files>
 
-ScriptAlias /cgi-bin/fml/ "_EXEC_DIR_/share/cgi-bin/fml/"
+ScriptAlias /cgi-bin/fml/ "_EXEC_DIR_/www/share/cgi-bin/fml/"
 
 # ACL example
 #     allow from .ncsa.uiuc.edu
 #     allow from 10.1.0.0/255.255.0.0
 #     allow from 10.1.0
 #     allow from 10.1.0.1
-<Directory "_EXEC_DIR_/share/cgi-bin/fml">
+<Directory "_EXEC_DIR_/www/share/cgi-bin/fml">
     Options None
     AllowOverride AuthConfig
     Order allow,deny
