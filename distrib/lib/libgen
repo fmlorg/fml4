@@ -383,12 +383,14 @@ GEN_ARCHIVE () {
 	fi
 
 
-	echo ""
-	echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
-	rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
+	if [ X$BRANCH_SNAPSHOT = X ]
+	then
+		echo ""
+		echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
+		rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
+	fi
 
 	echo ""
-
 	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
@@ -427,13 +429,14 @@ GEN_ARCHIVE () {
 	mv distrib $FMLID
 	tar cvf $FMLID.tar $FMLID
 	gzip -9 $FMLID.tar
-	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
 
 	if [ X$BRANCH_SNAPSHOT = X ]
 	then
+		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
+
 		echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
 		cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
 
