@@ -10,9 +10,36 @@
 # $Id$
 #
 
+#    argv: __KERN__ or $NULL
+# require: $DIR, @LIBDIR
+#
 sub __LoadConfiguration
 {
     local($space) = @_;
+
+    if (! $DIR) {
+	print STDERR "Error: __LoadConfiguration: \$DIR is not defined\n";
+	&Log("Error: __LoadConfiguration: \$DIR is not defined");
+	exit(1);
+    }
+    elsif (! -d $DIR) {
+	print STDERR "Error: __LoadConfiguration: \$DIR not exsts\n";
+	&Log("Error: __LoadConfiguration: \$DIR not exists");
+	exit(1);
+    }
+
+    # fix @INC to suppose
+    # 1. $DIR
+    # 2. $DIR/../etc/fml/ (e.g. /var/spool/ml/etc/fml/ )
+    # 3. $EXEC_DIR (e.g. /usr/local/fml/)
+    if (-d "$DIR/../etc/fml/") {
+	unshift(@LIBDIR, "$DIR/../etc/fml/"); # ../etc for not UNIX OS
+	unshift(@INC, "$DIR/../etc/fml/"); # ../etc for not UNIX OS
+    }
+    if (-d $DIR) {
+	unshift(@LIBDIR, $DIR);
+	unshift(@INC, $DIR);
+    }
 
     require 'default_config.ph';
 
