@@ -344,6 +344,11 @@ bin/passwd.pl を使って下さい。使い方は、
 .k	pop2recv.pl
 .k	inc_via_pop.pl
 
+*** OBSOLETE ***
+
+libexec/popfml.pl がそれの専用プログラムとして実装される予定です（まだ
+３／４くらい）
+
 理屈としては
 
 	pop を使って取り寄せつつ MH の rcvstore へPIPEで投げる(inc)
