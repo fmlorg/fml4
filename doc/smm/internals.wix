@@ -179,6 +179,7 @@ fml.pl searches OS for executable and libraries like this:
 .l	設定ファイルのサーチ順番
 .l	site_init.ph
 .l	sitedef.ph
+.n	sitedef.ph
 .k	site_init.ph
 .k	sitedef.ph
 
