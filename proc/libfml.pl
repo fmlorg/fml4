@@ -30,11 +30,21 @@ sub Command
 }
 
 
+sub __GetProcedureName
+{
+    my ($xbuf) = @_;
+    $xbuf =~ s/^\#\s*//;
+    if ($xbuf =~ /^(\S+)/) { $xbuf = $1;}
+    $xbuf =~ tr/A-Z/a-z/;
+    return $xbuf;
+}
+
+
 # fml command routine
 # return NONE but ,if exist, mail back $e{'message'} to the user
 sub DoProcedure
 {
-    $0 = "${FML}: Command Mode in <$LOCKFILE>";
+    $0 = "${FML}: Command Mode in <$MyProcessInfo>";
 
     # Rcsid offers usefu Information for you;
     # !~ fix (pointed out by ando@iij-mc.co.jp (by irc :))
@@ -219,7 +229,7 @@ sub DoProcedure
       }
 
       ### info
-      $0 = "${FML}: Command Mode processing $xbuf: $LOCKFILE>";
+      $0 = "${FML}: Command Mode processing $xbuf: $MyProcessInfo>";
       &Log("proc debug: eval [$xbuf]") if $debug;
       &Debug("Present command    $xbuf") if $debug;
 
@@ -239,6 +249,9 @@ sub DoProcedure
       &MesgSetBreakPoint;
 
       if ($proc = $Procedure{$xbuf}) {
+	  # procedure name for hook
+	  my $pn = &__GetProcedureName($xbuf);
+
 	  $trap_counter++; # found in %Procedure;
 
 	  # REPORT TO ADMINS ALSO 
@@ -281,10 +294,12 @@ sub DoProcedure
 
 	  # INFO
 	  &Debug("Call               &$Procedure{$xbuf}") if $debug;
-	  $0 = "${FML}: Command calling $proc: $LOCKFILE>";
+	  $0 = "${FML}: Command calling $proc: $MyProcessInfo>";
 
 	  # PROCEDURE
+	  eval $COMMAND_START_HOOK{$pn} if $COMMAND_START_HOOK{$pn};
 	  $status = &$proc($xbuf, *Fld, *e, *misc);
+	  eval $COMMAND_END_HOOK{$pn}   if $COMMAND_END_HOOK{$n};
 
 	  &Debug("Addr=$Addr") if $Addr;
 	  
