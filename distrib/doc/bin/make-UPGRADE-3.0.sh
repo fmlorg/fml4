@@ -6,5 +6,9 @@
    echo '.~HTML_PRE'
 ) |\
 perl -nple 's/^\.C\s*/¡û/; s/^\=E.C\s*/=E\n<>/;' | nkf -e
+echo '$Id$'
+echo '.#'
+echo ".# Copyright (C) Ken'ichi Fukamachi"
+echo '.#     all rights reserved'
 
 exit 0
