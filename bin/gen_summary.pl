@@ -22,7 +22,7 @@ $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
 $debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
-$MIN             = $opt_M > 0 ? $opt_M : 1;
+$Minimum         = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
 push(@INC, $opt_I);
 
@@ -54,10 +54,10 @@ $max = &GetMax($SPOOL_DIR);
 &InitGenSummary;
 
 if ($LastRange) {
-    $MIN = $max - $LastRange > 0 ? $max - $LastRange : 1;
+    $Minimum = $max - $LastRange > 0 ? $max - $LastRange : 1;
 }
 
-for ($i = $MIN; $i <  ($max + 100); $i += 100) {
+for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
     print STDERR "fork() [$$] ($i -> ".($i+100).")\n" if $verbose;
     $0 = "gen_summary(Parent): $label::Ctl $i -> ". ($i + 100);
 
