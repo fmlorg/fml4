@@ -1,6 +1,26 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/04/15
+
+  sbin/makefml (2.122-2.123):
+	apply patch fml-support: 07762 From: Akira Ohashi
+	make template of owner-* for qmail case.
+
+	qmailの時に owner-* のためのtemplateファイルを作る
+	(単なる便宜上)
+
+2000/04/11
+
+  sbin/makefml (2.121-2.122): (only on NT4)
+	fix 'no such file' in "makefml passwd ..."
+	by wrap "system stty " with "if $UNISTD"
+
+	NT4 上で『そんなコマンドはない』というエラーメッセージが出る
+	のを直す。
+	ただし以前からメッセージがでるけどパスワードの変更はできてい
+	るという状態のはずなので、無視して使う分には別に問題はない;)
+
 2000/03/31
 
    EnvelopFilter
