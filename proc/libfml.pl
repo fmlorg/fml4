@@ -653,7 +653,7 @@ sub ProcFileSendBack
 	$f = $mib{'_cache_file'};
 
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
-	&Log("fail to do $mydirective") if $mib{'error'};
+	&Log("fail to do $dbdirective") if $mib{'error'};
 	return $NULL if $mib{'error'};
     }
     # file to send back
