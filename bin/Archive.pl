@@ -1,4 +1,9 @@
 #!/usr/local/bin/perl
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
 
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
@@ -28,11 +33,11 @@ unshift(@ARCHIVE_DIR, $opt_A) if $opt_A;
 
 # Preliminary
 $i = 1;
-$LIMIT = $ARGV[0] || ($UNIT * int ($MAX_SEQ / $UNIT )) || 1000;
+$limit = $ARGV[0] || ($UNIT * int ($MAX_SEQ / $UNIT )) || 1000;
 
 
 # MESSAGE
-&Mesg( "Try archive 1 .. $LIMIT by the unit 100");
+&Mesg( "Try archive 1 .. $limit by the unit 100");
 &Mesg( "DEBUG MODE, DO NOTHING ACTUALLY\nHere is $PWD") if $debug;
 
 # ARCHIVE DIR CHECK
@@ -52,15 +57,15 @@ foreach (split(/\//, $ARCHIVE_DIR)) {
 }
 
 
-while ($i * $UNIT  <= $LIMIT) {
+while ($i * $UNIT <= $limit) {
     $counter = 0;
     undef $files;
-    $LOWER = $UNIT * ($i - 1) + 1;
-    $UPPER = $UNIT * ($i);
+    $lower = $UNIT * ($i - 1) + 1;
+    $upper = $UNIT * ($i);
     $TAR  =  $UNIT * ($i);
     $i++;
     
-    foreach ($LOWER .. $UPPER) {
+    foreach ($lower .. $upper) {
 	if( -f "$SPOOL_DIR/$_") {
 	    $files .= "$SPOOL_DIR/$_ "; 
 	    $counter++;
