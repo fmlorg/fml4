@@ -3,7 +3,7 @@
 =E
 		fml and sendmail as a MTA
 
-				Ken'ichi Fukamachi <fukachan@fml.org> 
+				Ken'ichi Fukamachi
 .~HTML_PRE
 
 fml は歴史的に sendmail を使う環境をデフォールトにしています。よって 

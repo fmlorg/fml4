@@ -3,8 +3,7 @@
 =E
 		fml and exim as a MTA
 
-				Ken'ichi Fukamachi <fukachan@fml.org> 
-
+				Ken'ichi Fukamachi
 .~HTML_PRE
 
 exim は sendmail と同様にすればできます。(sendmailを前提に書かれている)

@@ -3,9 +3,6 @@
 				深町 賢一
 =E
 				Ken'ichi Fukamachi
-==
-				fukachan@sapporo.iij.ad.jp
-				fukachan@fml.org
 			
 
 refer しそこなかったらごめんなさい _o_
@@ -5349,10 +5346,10 @@ hml 1.6 (1991/05/01)	hirano@tkl.iis.u-tokyo.ac.jp
        and a little modification for another ML server
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
