@@ -58,9 +58,17 @@ sub GetUrl
 
     $head     = ".headinfo_${outfile}";
     $headnew  = ".cur_headinfo_${outfile}";
+    $urlcache = ".url_${outfile}";
 
     $oldcache = "${outfile}.old";
     $newcache = "${outfile}.new";
+
+    if ($WITH_WWW_WATCH) {
+	open(URL, "> $urlcache");
+	select(URL); $| = 1; select(STDOUT);
+	print URL $url;
+	close(URL);
+    }
 
     # clean up
     for ($oldcache, $newcache, $headnew) { 
@@ -93,7 +101,7 @@ sub GetUrl
 	&OutPutFile($tmpf, $outfile);
 	&OutPutFile($headnew, $head);
 
-	link($outfile, $newcache);
+	link($outfile, $newcache) if $WITH_WWW_WATCH;
     }
     # IF updated
     elsif ($force_updated || &UpDatedP($head, $headnew)) {
@@ -143,14 +151,16 @@ sub Grep
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("C:H:cdpI:");
+    &Getopts("C:H:cdpI:w");
 
     $debug = 1 if $opt_d;
 
     ### Target machine hack;
     push(@INC, $ENV{'FML'});
-    push(@INC, $ENV{'FMLLIB'});
+    push(@INC, $ENV{'LIBFML'});
     push(@INC, $opt_I) if $opt_I;
+
+    $WITH_WWW_WATCH = 1 if $opt_w;
 
     require 'libkern.pl';
     require 'libsmtp.pl';
