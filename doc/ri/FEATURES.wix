@@ -1,3 +1,4 @@
+.HTML_PRE
 .if LANG == JAPANESE
 基本的な設計方針は
    『可能な限りユーザおよび ＭＬ管理者 にとっての自由度をあげる』
@@ -282,6 +283,8 @@ use fml as it is and the first step to hack a ML of your own.
 Please use the latest version since programs which contact external
 worlds should be always latest e.g. for security, evolution
 environments, ... Hence it is better to do hacks for latest version.
+
+.~HTML_PRE
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
