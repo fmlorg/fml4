@@ -12,6 +12,9 @@ sub DataBaseMIBPrapare
 {
     my ($action, $mib) = @_;
 
+    # manipulate which address ?
+    $mib->{'_address'}        = $From_address;
+
     # fundamental information
     $mib->{'MAIL_LIST'}       = $MAIL_LIST;
     $mib->{'CONTROL_ADDRESS'} = $CONTROL_ADDRESS;
@@ -87,14 +90,14 @@ package DataBases;
 sub Log { &main::Log(@_);}
 
 
-#  DataBaseCtl(*Envelope, *MIB, *result, *misc)
+#  DataBaseCtl(\%Envelope, \%MIB, \%result, \%misc)
 #     Envelope: Envelope Hash
 #          MIB: Management Information Base
 #       result: returned value or not used (*** reserved **)
 #         misc: *** reserved **
 sub main::DataBaseCtl
 {
-    local(*Envelope, $mib, $result, $misc) = @_;
+    local($e, $mib, $result, $misc) = @_;
 
     # Leightweight Directory Access Protocol
     if ($mib->{'METHOD'} =~ /^LDAP$/i) {
@@ -103,7 +106,7 @@ sub main::DataBaseCtl
 	}
 	else {
 	    require 'databases/ldap/examples/libldap.pl'; # temporary
-	    eval(' &Execute(*Envelope, $mib, $result, $misc); ');
+	    eval(' &Execute($e, $mib, $result, $misc); ');
 	    &Log($@) if $@;
 	}
     }

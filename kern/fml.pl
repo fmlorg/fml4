@@ -90,14 +90,20 @@ sub ModeBifurcate
     if ($USE_DATABASE) {
 	&use('databases');
 
-	my (%mib, %result, %misc);
+	my (%mib, %result, %misc, $error);
+
+	# try to access database to verify the server is alive
+	# and try to verify the address is member or not.
+	&DataBaseMIBPrapare('member_p', \%mib);
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+
 	# members
 	&DataBaseMIBPrapare('get_member_list', \%mib);
-	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
 
 	# recipients
 	&DataBaseMIBPrapare('get_active_list', \%mib);
-	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
     }
 
     # member ot not?
