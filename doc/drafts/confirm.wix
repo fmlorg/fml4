@@ -1,38 +1,61 @@
-*** Confirmation (登録の確認)  ***
+*** Confirmation (登録の確認) ***
+=E
+*** Confirmation of your will ***
 
-このメールはメーリングリスト(_ML_@_DOMAIN_) へ本当に登録してよいかの確
+このメールはメーリングリスト(_MAIL_LIST_) へ本当に登録してよいかの確
 認です。本当に登録して良いのならこのメールにREPLYしてそのまま送って下
 さい。
+=E
+This mail is to confirm your will that you will join <_MAIL_LIST_>.
+If you join this list, please just reply this mail and send it back.
 
 
 *** Confirmation (登録の確認) について ***
+=E
+*** What is Confirmation? ****
 
+.if LANG == JAPANESE
 自動登録の場合、まず最初に
 
 	subscribe あなたの名前 (注意: Email Address ではなくあなたの名前)
 例：
-	subscribe Ken'ichi Fukamachi
+	subscribe Sakura Kinomoto
 
-のようなリクエストを送ってもらっています。その一度めの登録リクエストに
-対し次のようなフレーズ(この数字↓はあくまでも例です)
+のようなリクエストを送ってもらっています。名前は英語(というかローマ字)
+が期待されています。また全角スペースなどのコードがあるとエラーになりま
+す。いわゆるASCII文字の範囲で書いて下さい。
 
+その一度めの登録リクエストに対し次のようなフレーズ(この数字↓はあくま
+でも例です)
+.fi
+.if LANG == ENGLISH
+When automatic registration fucntion works, fml checks your will
+against tricks from others. The first phase in registration is to send
 
-	confirm 84682771 Ken'ichi Fukamachi
+	subscribe your-name (not Email Address)
+e.g.
+	subscribe Sakura Kinomoto
+
+If fml receives this content mail, fml sends back a query
+(confirmation request) with the following phase:
+.fi
+
+	confirm 84682771 Sakura Kinomoto
 
 を含む『このメーリングリストに登録をしてもよいか？』という確認を求める
 メールを一度返します。これは「勝手にメーリングリストへ登録されてしまう」
 等のいたずらへの予防策です。
 
 あなたがこのメーリングリストへの参加確認のメールを受けとったなら、
+=E
+If you receive this mail and confirms it, please reply and sends back
+this mail to the address <_CTLADDR_>.
 
 	confirm パスワード(数字) あなたの名前
 
-このフレーズを含むメールをもう一度登録用のアドレス
-
-	_ML_-ctl@_DOMAIN_
-
-へメールして下さい。そうするとあなたの確認が得られたとみなし、サーバは
-あなたを登録します。
+このフレーズを含むメールをもう一度登録用のアドレス <_CTLADDR_> へメー
+ルして下さい。そうするとあなたの確認が得られたとみなし、サーバはあなた
+を登録します。
 
 ＊＊＊注意＊＊＊
 もし、
@@ -41,8 +64,11 @@
 
 のメールをなくしてしまったとか、分からなくなってきたので最初からやりな
 おしたいという場合は、”最初から”つまり
+=E
+If you fails in the registration phase, start again in the first
+phase, that is, to send
 
-	subscribe Ken'ichi Fukamachi
+	subscribe Sakura Kinomoto
 
 を送ることからやり直して下さい。
 

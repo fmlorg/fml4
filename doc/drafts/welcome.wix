@@ -1,40 +1,65 @@
-$B$3$N%a!<%j%s%0%j%9%H(B(_ML_@_DOMAIN_)$B$X$h$&$3$=(B
+<_MAIL_LIST_> ¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Ø¤è¤¦¤³¤½!
+=E
+Welcome to our mailing list <_MAIL_LIST_> !
 
-$B$3$N%a!<%k$O%5!<%P$N;H$$J}$K$D$$$F$N>pJs$r4^$s$G$$$^$9!#Bg;v$K$H$C$F$*(B
-$B$$$F2<$5$$!#(B
+¤³¤Î¥á¡¼¥ë¤Ï¥µ¡¼¥Ð¤Î»È¤¤Êý¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤ò´Þ¤ó¤Ç¤¤¤Þ¤¹¡£Âç»ö¤Ë¤È¤Ã¤Æ¤ª
+¤¤¤Æ²¼¤µ¤¤¡£
+=E
+This mail contains the fundamental usage of the mailing list server.
 
-$B#1(B	$B%a!<%j%s%0%j%9%H%5!<%P$N;H$$J}(B
+£±	¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¥µ¡¼¥Ð¤Î»È¤¤Êý
+=E
+1	How to use this server
 
-$B$3$N%a!<%j%s%0%j%9%H%5!<%P$X$N%3%^%s%I$O(B
+¤³¤Î¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¥µ¡¼¥Ð¤Ø¤Î¥³¥Þ¥ó¥É¤Ï¥á¡¼¥ëËÜÊ¸¤Ë¥³¥Þ¥ó¥É¤ò½ñ¤¤¤Æ
+¥¢¥É¥ì¥¹ <_CTLADDR_> ¤ØÁ÷¤Ã¤Æ²¼¤µ¤¤¡£
+=E
+Plaese send commands in the mail body not subject to the address
+<_CTLADDR_>.
 
-	_ML_-ctl@_DOMAIN_
-
-$B$XAw$C$F2<$5$$!#%3%^%s%I$N%7%s%?%C%/%9$O(B
+¥³¥Þ¥ó¥É¤Î¥·¥ó¥¿¥Ã¥¯¥¹¤Ï
+=E
+The command syntax is as follows:
 
 	# help
-$B$^$?$O(B
+¤Þ¤¿¤Ï
+	help 
+=E
+	# help
+or	
 	help 
 
-$B$N$h$&$J%7%s%?%C%/%9$G$9!#$I$A$i$G$b7k9=$G$9!#%3%^%s%I$N0lMw$O(B
+¤Î¤è¤¦¤Ê¥·¥ó¥¿¥Ã¥¯¥¹¤Ç¤¹¡£¤É¤Á¤é¤Ç¤â·ë¹½¤Ç¤¹¡£¥³¥Þ¥ó¥É¤Î°ìÍ÷¤È¥µ¡¼¥Ð¤Î
+»È¤¤Êý¤Î²òÀâ¤Ï¥¢¥É¥ì¥¹ <_CTLADDR_> ¤Ë
+=E
+Plaese send the "# help" to the address <_CTLADDR_> for help and
+server functions overview
 
 	# help
 
-$B$r(B
-	_ML_-ctl@_DOMAIN_
-
-$B$KAw$k$3$H$GF@$i$l$^$9!#$^$?%a!<%j%s%0%j%9%H$K4X$9$k0lHLE*$J>pJs$O(B
+¤òÁ÷¤ë¤³¤È¤ÇÆÀ¤é¤ì¤Þ¤¹¡£¤Þ¤¿¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Ë´Ø¤¹¤ë°ìÈÌÅª¤Ê¾ðÊó¤Ï
+=E
+to get general information on this list
 
 	# guide
 
-$B$r(B
-	_ML_-ctl@_DOMAIN_
+¥³¥Þ¥ó¥É¤òÁ÷¤Ã¤Æ²¼¤µ¤¤¡£
 
-$B$KAw$l$P$b$i$($^$9!#(B
-
-$B:G8e$K!"$b$7%a!<%j%s%0%j%9%H$N4IM}<T$XD>@\J9$-$?$$$3$H$,$"$l$P(B
+¤â¤·¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Î´ÉÍý¼Ô¤ØÄ¾ÀÜÊ¹¤­¤¿¤¤¤³¤È¤¬¤¢¤ì¤Ð
+=E
+If you want to make a contact with the mailing list maintainer, please
+e-mail to
 
 	_ML_-admin@_DOMAIN_
 
-$B$X%a!<%k$r=P$7$F2<$5$$!#(B
-$B$G$9$,4IM}<T$N<j4V$r>J$/$?$a$K%a!<%j%s%0%j%9%H%5!<%P$O$"$k$N$G!"$G$-$k(B
-$B$@$1%5!<%P$r;H$C$F$_$F2<$5$$!#(B
+¤Ø¥á¡¼¥ë¤ò½Ð¤·¤Æ²¼¤µ¤¤¡£¤·¤«¤·¤Ê¤¬¤é´ÉÍý¼Ô¤Î¼ê´Ö¤ò¾Ê¤¯¤¿¤á¤Ë¥á¡¼¥ê¥ó¥°
+¥ê¥¹¥È¥µ¡¼¥Ð¤Ï¤¢¤ë¤â¤Î¤Ç¤¹¡£¤Ç¤­¤ë¤À¤±¥µ¡¼¥Ð¤ò»È¤Ã¤Æ¤ß¤Æ²¼¤µ¤¤¡£
+=E
+ML server exists to descrease routine works by maintainers. Please try
+to use server functions as could as possible.
+
+				_MAIL_LIST_ ´ÉÍý¿Í
+				_ML_-admin@_DOMAIN_			
+=E
+				_MAIL_LIST_ Maintainer
+				_ML_-admin@_DOMAIN_			
