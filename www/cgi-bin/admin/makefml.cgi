@@ -46,7 +46,6 @@ sub Parse
 {
     &GetBuffer(*config);
 
-    $debug     = $config{'debug'};
     $ML        = $config{'ML_DEF'} || $config{'ML'};
     $MAIL_ADDR = $config{'MAIL_ADDR'};
     $PROC      = $config{'PROC'};
@@ -61,7 +60,7 @@ sub Parse
 	require 'jcode.pl';
 	eval "&jcode'init;";
 	require 'libmesgle.pl';
-	$MESG_FILE = "$EXEC_DIR/messages/$LANGUAGE/makefml";
+	$MESG_FILE = "$EXEC_DIR/messages/Japanese/makefml";
     }
 }
 
@@ -185,15 +184,27 @@ sub OUTPUT_FILE
 sub SecureP
 {
     local($secure_pat) = '[A-Za-z0-9\-_]+';
+    local($mail_addr)  = '[A-Za-z0-9\.\-_]+\@[A-Za-z0-9\.\-]+';
 
     if ($ML !~ /^($secure_pat)$/i) {
-	&P("ERROR: ML=$ML is invalid.");
+	&P("ERROR: ML is insecure.");
 	0;
     }
     elsif ($PROC !~ /^($secure_pat)$/i) {
-	&P("ERROR: PROC=$PROC is invalid.");
+	&P("ERROR: PROC is insecure.");
 	0;
     }
+    elsif ($LANGUAGE !~ /^[A-Za-z]+$/) {
+	&P("ERROR: LANGUAGE is insecure.");
+	0;
+    }
+    elsif ($MAIL_ADDR !~ /^($mail_addr)$/) {
+	&P("ERROR: \$MAIL_ADDR is insecure.");
+	0;
+    }
+    # 
+    # check @PROC_ARGV
+    # 
     else {
 	1;
     }
