@@ -433,14 +433,14 @@ GEN_ARCHIVE () {
 	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
 	   (
 	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
-	      chdir archive/these_days || exit 1
+	      chdir archives/these_days || exit 1
 	      rm -f fml-current.tar.gz
 	      ln -s ../../current/$FMLID.tar.gz fml-current.tar.gz
 	   )
 	elif [ X$MODE = X -a X$BRANCH = Xstable ]; then
 	   (
 	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
-	      chdir archive/these_days || exit 1
+	      chdir archives/these_days || exit 1
 	      rm -f fml-stable-latest.tar.gz
 	      ln -s ../../stable/$FMLID.tar.gz fml-stable-latest.tar.gz
 	   )
