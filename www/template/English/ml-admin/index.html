@@ -21,7 +21,7 @@
 
 <P>
 <UL>
-<LI><A HREF="_CGI_PATH_/ml-admin/_ML_/menu.cgi?LANGUAGE=Japanese">[Japanese]</A>
+<LI><A HREF="menu.cgi?LANGUAGE=Japanese">[Japanese]</A>
 <LI><A HREF="#add.bye"> add/remove a ML member </A>
 <LI><A HREF="#adminadd.bye"> add/remove a remote administrator </A>
 <LI><A HREF="#config">_ML_  ML's setup in detail </A>
@@ -35,8 +35,8 @@
 
    <LI> add/remove a ML member 
 
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
 	<TABLE>
 	<TR>
 		<TD ALIGN=right>  Email address:
@@ -67,8 +67,8 @@
    
    <A NAME=adminadd.bye>
    <LI> add/remove a remote administrator 
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 
 	<TABLE>
@@ -101,8 +101,8 @@
    <A NAME=config>
    <LI> setup in detail  (makefml config)
 	<BR>
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR VALUE=/>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
@@ -119,8 +119,8 @@
 
 	<!- apply patch by ikeda@meple.or.jp ->
 	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
 	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 	<TABLE>
@@ -146,11 +146,11 @@
    <A NAME=log>
    <LI> see ML's log 
 
-	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<FORM ACTION="makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=English>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
-
+++ fml/makefml	Thu Jul  5 19:27:50 2001
 	<BR>
 	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked> the last N lines 
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
