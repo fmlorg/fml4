@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.82 2001/05/11 16:26:48 fukachan Exp $
+# $FML: MANIFEST,v 1.83 2001/06/10 14:33:05 fukachan Exp $
 #
 
 
@@ -632,12 +632,12 @@ APPEND_STARDATE:
 USE_RFC2369:	1
 
 # List-*
-LIST_SOFTWARE:		$Rcsid
-LIST_POST:		<mailto:$MAIL_LIST>
-LIST_OWNER:		<mailto:$MAINTAINER>
-LIST_HELP:		<mailto:$CONTROL_ADDRESS?body=help>
-LIST_UNSUBSCRIBE:	<mailto:$CONTROL_ADDRESS?body=unsubscribe>
-LIST_ID:		<$BRACKET.$DOMAINNAME>
+LIST_SOFTWARE:		
+LIST_POST:		
+LIST_OWNER:		
+LIST_HELP:		
+LIST_UNSUBSCRIBE:	
+LIST_ID:		
 
 
 # obsolete in fml 3.0

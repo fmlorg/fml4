@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/06/18
+
+   List-*
+	null string by default
+
+	List- ヘッダに変な値が設定されないように、
+	デフォルト値を修正する。
+
 2001/06/17
 
    bin/spool2html.pl
