@@ -56,10 +56,6 @@ $DISTRIBUTE_FILTER_HOOK .= q#
     if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
 	return 'P2000 virus familly?';
     }
-
-    if ($e{'Body'} =~ /filename=.*NEW.*NAPSTER.*site.*TXT\.pif/i ) {
-	return 'Win32/MTX familly?';
-    }
 #;
 
 # さらに HOOK へつけたす
@@ -71,8 +67,10 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .exe: executable
 #   .doc: word
 #   .rtf: RTF (embedded object in RTF is possible?) ?
+#   .pif: win32/MTX
+#   .scr: win32/MTX
 $DISTRIBUTE_FILTER_HOOK .= q#
-    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf';
+    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf|pif|scr';
 
     if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';

@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/01/10
+
+   doc/Japanese/examples/virus_check.ph
+	add rules against win32/mtx
+
+
 2000/12/29
 
    makefml html_config
