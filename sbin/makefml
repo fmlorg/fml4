@@ -2293,7 +2293,7 @@ sub TrySmtpConnect
 	eval $eval;
     }
 
-    local($pat)    = 'S n a4 x8'; # 'S n C4 x8'? which is correct? 
+    local($pat)    = 'n n a4 x8'; 
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = $PORT || (getservbyname('smtp', 'tcp'))[2];
