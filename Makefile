@@ -28,6 +28,9 @@ usage:
 	@ echo ""
 	@ echo "\"make all\"       not works!!!"
 	@ echo ""
+	@ echo "\"make build\"     to set up fundamentals and run \"make dist\""
+	@ echo "                   It is suitable for the first time."	
+	@ echo ""
 	@ echo "\"make release\"   to make the release"
 	@ echo "\"make snapshot\"  to make a snapshot to export"
 	@ echo "\"make dist \"     to make a snapshot to use internally" 
@@ -68,34 +71,9 @@ release:
 pkgsrc:
 	(cd pkgsrc; make MASTER_SITE=${MASTER_SITE} )
 
-
-##### "make build" to initialize documents and all
-.if ! exists(.info)
-__BUILD_INIT__ += touch_info
-.endif
-
-.if ! exists(conf/release_version)
-__BUILD_INIT__ += init_conf
-__BUILD_END__  += note_conf
-.endif
-
-World: world
-world: build
+##### "make build"
+.include "distrib/mk/fml.build.mk"
 build: init_build plaindoc htmldoc pkgsrc dist ${__BUILD_END__}
-
-touch_info:
-	echo ${FML}
-	touch .info
-
-init_conf:
-	echo `cat conf/release`"#0" > conf/release_version
-	echo please set up ${FML}/conf/release_version >> /tmp/fml.note
-
-note_conf:
-	cat /tmp/fml.note
-
-init_build: ${__BUILD_INIT__}
-##### end of "make build"
 
 
 doc: INFO syncinfo newdoc search
