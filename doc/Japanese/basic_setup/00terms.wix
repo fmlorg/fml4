@@ -170,6 +170,7 @@ this document.
 	INSTALL_with_POSTFIX
 	INSTALL_with_QMAIL
 	INSTALL_with_ZMAILER
+	INSTALL_with_EXIM
 
 
 .S	sendmail
