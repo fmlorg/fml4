@@ -7,7 +7,7 @@
 # $Id$;
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
-$CONFIG_DIR = '/tmp/-e/.fml'; # __MAKEFML_AUTO_REPLACED_HERE__
+$CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 &InitMakeFml;
 &InitTTY;
@@ -91,7 +91,16 @@ sub InitMakeFml
 
     # config amd temporary files
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
-    $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
+
+    # Anyway try once ... (may be re-installation ?)
+    # Dame moto sune:-)
+    if (! $CONFIG_DIR) {
+	for ("$HOME/.fml", "/usr/local/fml/.fml") {
+	    $CONFIG_DIR = $_ if -d $_;
+	}
+    }
+    # must be no meaning ...
+    $CONFIG_DIR = $CONFIG_DIR || "$HOME/.fml"; 
 
     if ($opt_f) {
 	$FML_CONFIG  = $opt_f;	
