@@ -102,7 +102,7 @@ sub MemberStatus
 
 	my (%mib, %result, %misc);
 	# members
-	&DataBaseMIBPrapare('get_status', \%mib);
+	&DataBaseMIBPrepare(\%mib, 'get_status');
 	&DataBaseCtl(*Envelope, \%mib, \%result, \%misc);
 	return;
     }
