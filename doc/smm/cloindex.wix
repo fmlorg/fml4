@@ -96,10 +96,10 @@ Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
 
 config.ph では
 
-	&DEFINE_SUBJECT_TAG("(:)");
+	$SUBJECT_TAG_TYPE	= "(:)";
 
-のように呼び出してあげて下さい。
-.xref &DEFINE_SUBJECT_TAG
+のようになります。
+.xref $SUBJECT_TAG_TYPE
 
 
 .k	--auto
@@ -264,7 +264,11 @@ config.ph では $Envelope{"oh:to:"} = 1; とおなじ。便利なように、
 .k	--debug
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
