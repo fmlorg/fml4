@@ -3,7 +3,7 @@
 # Copyright (C) 2000-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML: toymodel.pl,v 1.11 2001/08/25 14:26:52 fukachan Exp $
+# $FML: toymodel.pl,v 1.12 2001/09/18 14:41:47 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -236,7 +236,7 @@ sub __DumpList
     my ($query);
 
     $ml     = $mib->{'_ml_acct'};
-    $query  = " select address from ml ";
+    $query  = " select address,options from ml ";
     $query .= " where ml = '$ml' ";
     $query .= " and file = '$file' ";
     if ($ignore_off) {
@@ -256,7 +256,7 @@ sub __DumpList
 	};
 
 	while (@row = $res->fetchrow_array) { 
-	    print OUT $row[0], "\n";
+	    print OUT $row[0], "\t", $row[1], "\n";
 	}
 	close(OUT);
 

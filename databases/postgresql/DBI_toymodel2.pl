@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML: DBI_toymodel.pl,v 1.8 2001/09/18 14:41:47 fukachan Exp $
+# $FML: DBI_toymodel2.pl,v 1.1 2001/11/21 14:29:46 fukachan Exp $
 #
 
 #
@@ -243,7 +243,7 @@ sub __DumpList
     my ($query);
 
     $mlname     = $mib->{'_ml_acct'};
-    $query  = " select address from ml ";
+    $query  = " select address,options from ml ";
     $query .= " where mlname = '$mlname' ";
     $query .= " and mlfile = '$mlfile' ";
     if ($ignore_off) {
@@ -263,7 +263,7 @@ sub __DumpList
 	};
 
 	while (@row = $res->fetchrow_array) { 
-	    print OUT $row[0], "\n";
+	    print OUT $row[0], "\t", $row[1], "\n";
 	}
 	close(OUT);
 
