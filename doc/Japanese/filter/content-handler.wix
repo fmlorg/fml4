@@ -1,6 +1,33 @@
 .C	ContentHandler
 .l	ContentHandler
 
+.S	フィルタルールの事例
+
+multipart の各ブロックに対し処理を行なうので、良く考えないと
+期待と違う動作をします。
+
+◯ text/plain と text/html からなるメールの html 部分を落す
+
+  &ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip+notice');
+
+.# ?
+.#  &ADD_CONTENT_HANDLER('multipart/.*', 'text/plain', 'allow');
+.#  &ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip+notice');
+.#  &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*', 'reject');
+
+◯ 普通のテキストメール はOK
+	text/plain + text/html は html 部分を叩き落す
+	text/plain + text/html + それ以外(謎の添付ファイル) は
+	最初の text/plain 以外は落す。
+
+  &ADD_CONTENT_HANDLER('multipart/.*', 'text/plain', 'allow');
+  &ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip+notice');
+  &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*', 'strip');
+
+
+
+.S	解説 by original author 
+
 Author: t-nakano@marimo.org
 
 # [Example]
