@@ -142,7 +142,36 @@ sub InitS2P
     # loading MIME libraries (prefetch)
     if ($USE_MIME) { require 'libMIME.pl';}
 
+    if ($verbose) { 
+	print STDERR "\n";
+	for (@INC) { print STDERR "INCLUDE: $_\n";}
+    }
+
+    if ($verbose) { 
+	print STDERR "\n";
+	local($x);
+	for $x ('DEFAULT_HTML_FIELD', 'HTML_DATA_CACHE', 'HTML_DATA_THREAD', 
+		'HTML_DEFAULT_UMASK', 'HTML_DIR', 'HTML_EXPIRE_LIMIT', 
+		'HTML_INDENT_STYLE', 'HTML_INDEX_REVERSE_ORDER', 
+		'HTML_INDEX_TITLE', 'HTML_INDEX_UNIT', 
+		'HTML_MULTIPART_IMAGE_REF_TYPE', 'HTML_OUTPUT_FILTER', 
+		'HTML_STYLESHEET_BASENAME', 'HTML_THREAD', 
+		'HTML_THREAD_REF_TYPE', 'HTML_THREAD_SORT_TYPE', 
+		'HTML_WRITE_UMASK') {
+	    eval "printf STDERR \"%-30s  => \", $x";
+	    eval "print STDERR \$${x}";
+	    eval "print STDERR \"\\n\"";
+	}
+    }
+
     require 'libsynchtml.pl';
+
+    if ($verbose) { 
+	print STDERR "\n";
+	for (keys %INC) { print STDERR "INCLUDE_LIBRARY: $INC{$_}\n";}
+    }
+
+    print STDERR "\n";
 }
 
 
@@ -294,8 +323,8 @@ sub Usage
 sub FixProc
 {
 local($evalstr) = q#;
-sub Log  { print STDERR "@_\n";};
-sub Mesg { print STDERR "@_\n";};
+sub Log  { print STDERR "LOG> ", @_, "\n";};
+sub Mesg { print STDERR "   > ", @_, "\n";};
 ;#;
 
 eval($evalstr);
