@@ -1,6 +1,18 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/08/21
+   sbin/makefml (2.173-2.174): 
+	fix to load solaris2/depend.pl if on solaris
+
+   proc/libfml.pl (2.32-2.33):
+   proc/libra.pl (2.30-2.31):
+	fix "admin put" bug to ignore ^admin line in file
+
+2000/08/20
+   doc/ri/INSTALL.wix (1.114-1.115): 
+	env MKDOC=no make install to disable document install
+
 2000/08/07
 
    proc/libamctl.pl (2.40-2.41):
@@ -119,3 +131,4 @@ $Id$
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .~HTML_PRE
+
