@@ -8,6 +8,21 @@
 				Ken'ichi Fukamachi
 .fi
 
+.if LANG == JAPANESE
+[ガイド]
+
+   3.0へのアップグレードの注意
+.url http://www.fml.org/fml/UPGRADE-3.0/
+
+   簡単な install と設定例などについて
+.url http://www.fml.org/fml/examples/
+.fi
+.if LANG == ENGLISH
+[Guide]
+
+   Please read when you upgrade from 2.x to 3.0.
+.url http://www.fml.org/fml/UPGRADE-3.0-e/
+.fi
 
 .~HTML_PRE
 _____________________________________
