@@ -119,21 +119,29 @@ sub DoDistribute
     # set Reply-To:, use "ORIGINAL Reply-To:" if exists ??? (96/2/18, -> Reply)
     $e{'h:Reply-To:'} = 
 	$e{'fh:reply-to:'} || $e{'h:Reply-To:'} || $MAIL_LIST;
-    
+
+    # get ID (the current sequence of the Mailing List)
     $id = sprintf("%05d", $ID);		# 96/05/07 set $id here for each mode 
 
-    if ($SUBJECT_HML_FORM) {# FIX (95/07/03) kise@ocean.ie.u-ryukyu.ac.jp
-	if ($HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID) {
-	    $id = &LongId($ID, $HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID);
+    # Subject ReConfigure;
+    { 
+	local($pat);
+	local($subject) = $e{'h:Subject:'} || $Subject; # original
+	$subject =~ s/^\s*//;
+
+	if ($SUBJECT_HML_FORM) {# FIX (95/07/03) kise@ocean.ie.u-ryukyu.ac.jp;
+	    if ($HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID) {
+		$id = &LongId($ID, $HML_FORM_LONG_ID || $SUBJECT_FORM_LONG_ID);
+	    }
+	    $e{'h:Subject:'} = "[$BRACKET:$id] $subject";
 	}
-	$e{'h:Subject:'} = "[$BRACKET:$id] ".($e{'h:Subject:'} || $Subject); 
-    }
-    elsif ($SUBJECT_FREE_FORM) {
-	if ($SUBJECT_FORM_LONG_ID) {
-	    $id = &LongId($ID, $SUBJECT_FORM_LONG_ID);
+	elsif ($SUBJECT_FREE_FORM) {
+	    if ($SUBJECT_FORM_LONG_ID) {
+		$id = &LongId($ID, $SUBJECT_FORM_LONG_ID);
+	    }
+	    $pat = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
+	    $e{'h:Subject:'} = "$pat $subject";
 	}
-	local($pat) = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
-	$e{'h:Subject:'} = "$pat ".($e{'h:Subject:'} || $Subject); 
     }
 
     # Crosspost info
