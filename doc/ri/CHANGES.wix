@@ -1,4 +1,4 @@
-CHANGES (0.x -> current (2.1 gamma test) 97/01)
+CHANGES 0.x(1993) => 97/06
 
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
@@ -6,8 +6,117 @@ CHANGES (0.x -> current (2.1 gamma test) 97/01)
 
 詳細は RELESE_NOTES も御覧下さい (_o_)
 
-■ fml 2.1 gamma test (for the preparation of the 2.1 release)
+97/06/27
+	admin forward
 
+97/06/21
+	admin log を tail -100 log のようにする。
+
+	... documents いろいろ ...
+
+97/06/08
+	Expire 機能の built-in 化
+	USE_EXPIRE	1 (0 がdefault)
+	EXPIRE_LIMIT	数字days(日数)か数字(記事の数) default は 7days
+	cf/MANIFESTも変更
+
+97/06/07
+	%FmlExitHook (internal use)
+	expire mode (defult is '7days')
+		$EXPIRE_LIMIT = e.g. "7days"(day), "100"(count) ...
+
+97/06/02
+	$REJECT_ADDR_LIST ("$DIR/spammers")
+	reject するアドレス From: と UNIX FROM に対して適用される。
+	デフォールトの $REJECT_ADDR はこれとは別に適用される。
+
+	%ProcedureException
+
+	doc/smm, doc/ri a little improved
+
+
+97/05/18
+	$NOT_USE_SPOOL = 1; ＃DISKが足りない等で記事をためずに配送するだけ
+	すべてのメンバーリスト等の操作で $FILE_TO_REGIST の値を考慮する
+	
+97/05/17
+	snapshot package 再編成
+	bin/fwix ".url" 命令
+
+97/05/16
+	preparation for fml-2.1-release
+	snapshot , snapshot generator の再編成
+	makefml 以外の installer を削除
+	directory の整理、contrib の再編成
+
+	makefml install とかちゃんとできるのは確認してるけどなんか勘違
+	してたらめんご
+
+
+97/05/12
+	cf/config search_prog enhancemnet to handle options
+
+97/05/11
+	&DEFINE_MODE("mode_definition=type")
+	oboslete; --[a-z] mode definition
+	cf/config search_prog fixed to search plural candidates (anyway fixed)
+	doc/smm	
+
+97/05/07
+	Gecos field (macro:x); overwritten is fixed
+	etc/makefml/Makefile (config.ph -> config.ph.old)
+
+97/05/06
+	delete $NON_PORTABILITY (smtp, makefml)
+	makefml FYI
+
+97/05/01
+	makefml: auto configure $STRUCT_SOCKADDR (cf も対応してmodify)
+	import bin/multipart.pl v1.01 
+	(thanks to Yuao Tanigawa <yuao@infonia.or.jp>)
+	
+97/04/30
+	GenInfo fix
+	on mail2fax
+
+97/04/29
+	INSTALL update
+	library unlink
+	makefml jperl check
+	bin/analize_mail_error.sh bin/analize_mail_error.pl
+	imported contrib/localhack/kizu
+	mode 内部表現
+
+97/04/19
+	sbin/makefml ＭＬのドキュメントの Language の選択
+	help 等を distribution package 中では doc/ doc/drafts へ移動
+	clean up
+
+97/04/18
+	fwix html mode mkdir(directyr, 755);
+
+97/04/17
+	$CPU_TYPE_MANUFACTURER_OS の導入 (set by config.guess)
+	＃特にソラリス２の人ちゃんと動くか試してみてね♪
+	RFC2045
+
+97/04/16
+	admin resend file address
+
+97/04/14
+	mode change bug fix
+
+97/04/07
+	upgrade help INSTALL 
+
+97/04/04
+
+
+97/04/03
+	sbin/makefml: 	 permission conserved
+	sbin/install.sh: chmod 755 libexec/* bin/* sbin/*
+
+■ fml 2.1 gamma test (for the preparation of the 2.1 release)
 
 97/03/31
 	fmlserv を複数配送ファイル等に適応させる。
