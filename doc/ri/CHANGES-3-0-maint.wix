@@ -5,6 +5,22 @@
 =E
 				Ken'ichi Fukamachi
 
+  sbin/makefml: 2.64-2.65
+
+	PR in fml-support: 07167
+	CreateDocTemplate: bug fix %config by GetCF() again here since
+	SaveCF() resets this hash (why?).
+
+  sbin/makefml: 2.63-2.64
+	makefml config
+
+	suspect default value of y/n only when y-or-n/r everse-y-or-n
+	type
+
+	makefml config メニューのenbug fix (0 のところが n になる)
+	
+[ 3.0pl#25 == 3.0.1_BETA #14 ]
+
    doc/
 	TODO: remove all but add ptr to http://www.fml.org/
 
