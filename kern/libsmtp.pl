@@ -726,7 +726,7 @@ sub __SmtpIO
     print SMTPLOG ('-' x 30), "\n";
 
     ## "DATA" Session ENDS; ##
-    &SmtpPut2Socket('.', $ipc);
+    &SmtpPut2Socket("\r\n.", $ipc);
 
     $NULL;
 }
