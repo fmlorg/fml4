@@ -1870,10 +1870,10 @@ $SECURITY_LEBEL < 2 では
 
 
 .# ##########################################################
-.include smm/smm/mget.wix
-.include smm/smm/hook.wix
-.include smm/smm/os.wix
-.include smm/smm/trouble-shooting.wix
+.include mget.wix
+.include hook.wix
+.include os.wix
+.include trouble-shooting.wix
 
 
 .# ##########################################################
@@ -2692,10 +2692,10 @@ MSendv4.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
 
 
 .# ##########################################################
-.include smm/smm/forward.wix
-.include smm/smm/fml_local.wix
-.include smm/smm/sid.wix
-.include smm/smm/localhack.wix
+.include forward.wix
+.include fml_local.wix
+.include sid.wix
+.include localhack.wix
 
 .# ##########################################################
 .C	リモート管理
@@ -3308,10 +3308,10 @@ $POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
 
 
 .# ##########################################################
-.include smm/smm/smtp.wix
-.include smm/smm/uip.wix
-.include smm/smm/lib.wix
-.include smm/smm/perl.wix
-.include smm/smm/ref.wix
+.include smtp.wix
+.include uip.wix
+.include lib.wix
+.include perl.wix
+.include ref.wix
 
 .# FAQ ENDS
