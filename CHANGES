@@ -5,6 +5,10 @@
 
 2000/05/09
 
+  kern/fml.pl 
+	fml-support: 07764 by OGAWA Kunihiko <kuni@edit.ne.jp>
+	fix RuleSetTo() rewriting
+
   messages/Japanese/confirm (1.1-1.2):
   proc/libconfirm.pl (2.18-2.19):
 	add message in manual_subscribe mode which message describes
