@@ -31,12 +31,13 @@ all:
 	@ echo "\"make doc-template\"	create documents e.g. help,welcome,..."
 	@ echo ""
 
+# 'touch cf' to avoid "makefml checks cf should be newer than config.ph"
+# since "config.ph is newer than cf" implies you must edit config.ph not cf. 
 config.ph: cf
 	@ eval 'cp -p config.ph config.ph.old >/dev/null 2>&1'
 	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph.new
-	mv config.ph.new config.ph
+	perl -c config.ph.new && mv config.ph.new config.ph
 	@ touch cf
-	@ perl -c config.ph
 
 fml: fml.c config.h
 	$(CC) $(CFLAGS) -o fml fml.c
