@@ -125,6 +125,7 @@ sub __EnvelopeFilter
     }
     # e.g. "unsubscribe", "help", ("subscribe" in some case)
     # DO NOT INCLUDE ".", "?" (I think so ...)! 
+    # XXX but we need "." for mail address syntax e.g. "chaddr a@d1 b@d2".
     # If we include them, we cannot identify a command or an English phrase ;D
     # If $c == 0, the mail must be one paragraph (+ signature).
     elsif (!$c && $xbuf =~ /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
