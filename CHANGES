@@ -4,6 +4,20 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/11
+
+   makefml can use RDBMS 
+
+	fml-support: 09357 のパッチをマージして少し整理しました。
+	＃ patch by shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
+
+	makefml からデータベースアクセスができます。これにより
+
+		コマンドラインからのデータベースへの登録/削除
+		CGI からのデータベースへの登録/削除
+
+	が可能になりました。
+
 
 2001/09/10
 
