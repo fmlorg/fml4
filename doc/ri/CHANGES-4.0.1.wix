@@ -27,6 +27,16 @@
 
 			--------------------------
 
+2001/06/04
+
+   4.0.1 release
+
+2001/06/02
+
+   doc/html/booknotes.ja.html (2.4-2.5):
+   doc/Japanese/RDBMS/postgresql.wix (1.4-1.5): 
+	caution: seems not work with postgresql 7.1.x ;)
+
 2001/05/20
 
    sbin/makefml (2.212-2.214):
@@ -215,7 +225,7 @@
    4.0 release
 
 
-$FML: CHANGES-4.0.1.wix,v 1.1.2.18 2001/05/24 04:46:36 fukachan Exp $
+$FML: CHANGES-4.0.1.wix,v 1.1.2.20 2001/06/03 14:47:34 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
