@@ -1304,6 +1304,24 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 も fmlserv のために導入された変数ですね。
 
 
+.S	特定のアドレスを拒否する (spam mails)
+.k	spam mails
+.l	$REJECT_ADDR_LIST
+.k	$REJECT_ADDR
+.l	$DIR/spammers
+
+メインのルーチンに飛ぶ前に reject するコードなら入っています(2.1 gamma
+206)。$REJECT_ADDR_LIST (デフォールトは $DIR/spammers) に正規表現で書
+いたアドレスから来たメールには何もしないで reject するようになります。
+この場合配送、コマンド、自動登録すべての場合にそこへいく前に reject します。
+
+   \S+@spam.org (*@spam.org でも補正するので大丈夫)
+   manager@\S+  (あらゆるサイトの個人を代表しないアドレスは許否)
+
+
+みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
+れます。
+
 
 .C	Portings
 
