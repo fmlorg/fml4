@@ -78,6 +78,53 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
 のょうになります (since $ML_FN = "(Elena ML)")
 
 
+.S	自動登録を有効にする
+
+デフォールトのＭＬサーバの挙動は
+
+   メンバーのみ(members_only) 投稿/コマンドの使用 が可能
+   もしメンバー以外から来たら許否(reject)
+
+です。自動登録は"投稿がメンバーだけ"(members_only)の場合に
+
+   もしメンバー以外から来たら自動登録 → auto_regist へ変更
+
+することで行ないます(makefmlで制御できます)。config.ph 中では
+
+（デフォールト）
+
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
+
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+	$REJECT_COMMAND_HANDLER        = "reject";
+
+の部分が
+
+	$MAIL_LIST                     = "elena\@$DOMAINNAME";
+	$PERMIT_POST_FROM              = "members_only";
+	$REJECT_POST_HANDLER           = "reject";
+
+	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
+	$PERMIT_COMMAND_FROM           = "members_only";
+注意→	$REJECT_COMMAND_HANDLER        = "auto_regist";
+
+のようになることです。この場合はメンバー以外の人が
+
+	投稿した場合		→	許否(メンバーでないというメールが返る)
+
+	コマンド用のアドレスへメール
+				→	自動登録
+
+のような動きをします。
+
+	$REJECT_POST_HANDLER           = "auto_regist";
+
+にすれば「投稿用のアドレスで自動登録」もできます。
+
+
 .S	自動登録の仕方のvariation(登録するアドレスとキーワードについて)
 .k	自動登録: 手順
 .k	自動登録: 方法のvariation
@@ -87,49 +134,58 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
 
 
 variation は
-
+    
 	登録すべきアドレスをどこから選ぶか？
 	登録アクションの起動にキーワード等を必要とするか？
 
-により何種類も存在します。
+により何種類も存在します。これは
 
-   0 自動登録の宣言
+	$AUTO_REGISTRATION_TYPE 
+.k	$AUTO_REGISTRATION_TYPE 
 
-	$ML_MEMBER_CHECK = 0; 
+という変数で振舞いが変わります。この変数は
 
-	これは config.ph で
+	confirmation
+	body
+	subject
+	no-keyword
+.k	confirmation
+.k	body
+.k	subject
+.k	no-keyword
 
-		$ML_MEMBER_CHECK = 0; 
-
-	と宣言することと同じです。
-	なぜこの分かりにくい変数名の宣言(メンバーチェックをするの否定)
-	かというと、もともと
-
-	「ＭＬとは private communication なのだから管理者がリクエスト
-	を吟味して手動で操作するのが筋だろう」
-
-	という思想からメンバーチェックをするのがデフォールトだからです。
+のうちの一つです。それぞれについて解説します。confirmation は次説参照。
 
 
    1 自動登録を設定してそれ以外特に設定をしない時
+
+	$AUTO_REGISTRATION_TYPE = "no-keyword";
+.k	$AUTO_REGISTRATION_TYPE
 .k	$DEFAULT_SUBSCRIBE
 
 	From: からアドレスを割り出してそれを比較・登録に使います。
-	$DEFAULT_SUBSCRIBE (デフォールトは "subscribe") で指定されるキー
+	(デフォールトは "subscribe") で指定されるキー
 	ワードでメール本文に
 
 		subscribe your-mail-address 
 
-	の形で登録したいメールアドレスを変更できます。
+	の形で登録したいメールアドレスを変更できます。キーワードは
+
+		$AUTO_REGISTRATION_KEYWORD
+.k		$AUTO_REGISTRATION_KEYWORD
+		(注:config.ph CFVersion 3 以前の $DEFAULT_SUBSCRIBE)
+
+	で変更できます。
+
+	From: をみてメンバーでない人からのメールだった場合は自動的に
+	メンバーに加えます。
+
 	From: と違うアドレスで登録したい時にこの方法で明示的に行なえます
 	これから述べるキーワードを必要とする場合と違うのは 
 
 		subscribe your-mail-address 
 
 	のようなキーワードを含む書き方が"必須ではない"という点です。
-
-	From: をみてメンバーでない人からのメールだった場合は自動的に
-	メンバーに加えます。
 
 	[歴史] この形式はもともとOFF会用MLなんかに便利です。
 		例：「出席します」メールがそのまま流れる。
@@ -138,8 +194,11 @@ variation は
 
    2 自動登録のためには Subject: にキーワードを必要とする場合
 
-		$ML_MEMBER_CHECK = 0;
-		$REQUIRE_SUBSCRIBE = "subscribe";
+	$AUTO_REGISTRATION_TYPE = "subject";
+
+	(config.ph CFVersion 3 以前では
+		$REQUIRE_SUBSCRIBE = "subscribe"; 
+	に相当します)
 .k	$REQUIRE_SUBSCRIBE
 
 	この場合メールヘッダの
@@ -155,10 +214,12 @@ variation は
 
    3 自動登録のためにはメール本文にキーワードを必要とする場合
 
-		$ML_MEMBER_CHECK = 0;
-		$REQUIRE_SUBSCRIBE = "subscribe";
-		$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+	$AUTO_REGISTRATION_TYPE = "body";
 
+	(config.ph CFVersion 3 以前では
+		$REQUIRE_SUBSCRIBE = "subscribe"; 
+		$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+	に相当します)
 .k	$REQUIRE_SUBSCRIBE
 .k	$REQUIRE_SUBSCRIBE_IN_BODY
 
@@ -173,7 +234,7 @@ variation は
 	登録の仕方が間違っているとユーザにメールが送られます。
 
 
-.S	Confirmation モード (お勧め)
+.S	Confirmation モード (推奨)
 .l	confirmation
 .l	confirmation-mode
 .k	自動登録: 確認(confirmation)を求める(推奨)
@@ -185,6 +246,8 @@ variation は
 .k	$CONFIRMATION_KEYWORD
 .k	$CONFIRMATION_SUBSCRIBE
 .k	$CONFIRMATION_FILE
+
+	$AUTO_REGISTRATION_TYPE = "confirmation";
 
 Confirmation (登録の確認) は自動登録をいきなりは行なわず、リクエストへ
 対し一旦「パスワードつきの確認メール」をリクエストしてきたメールの 
