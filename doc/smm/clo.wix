@@ -1,0 +1,171 @@
+.C	コマンドライン オプション
+
+コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
+"|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
+
+	fml.pl 	   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
+
+	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
+	注意：fml_local.pl は MH を意識してるので異なります。
+
+オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
+れ以外は Directoryの変数 だと仮定します。順番は関係ありません
+Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
+$LIBDIR にセットされます。
+
+
+	-d		デバッグモード
+			（ＭＬへの配送以外すべてを実行可能）
+	-bt   		アドレステストモード	(Become Test)
+			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
+			いまのところ debug mode とかわらへんねん:-)
+	-bd		デーモンモード	(Become Daemon)
+	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
+	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
+	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
+
+
+注意：sendmail のように『空白なし』です。(だってその方がコードが簡単なんだもん:-)
+
+例：
+	-llibfml.pl とすると、コマンド専用アドレスのできあがりです
+	＃ CONTROL_ADDRESS とおなじ意味ですね
+
+	-llibftpmail.pl ftpmail 専用アドレス
+	-sdebug		debug mode
+	-sFIX_SLOCAL_PIPE	$FIX_SLOCAL_PIPE = 1;と同じ
+
+とかできるわけです
+
+例：
+"|/Baycity/fml.pl /Baycity /Baycity/lib -d -sFIX_SLOCAL_PIPE -sDUMPVAR"
+
+デバッグモード かつ $FIX_SLOCAL_PIPE =1; で 変数のダンプを行なう。
+
+
+.S	簡易モード設定 （ロングラインオプション）
+＃さぁこれで N 秒はやく設定できる？（苦笑）
+
+注意： 	コマンドラインの  --mode は config.ph で指定する 
+	$Envelope{mode:$mode} と同じです。
+
+例：	"| fml.pl  --distribute $DIR " は 
+	$DIR/config.ph での $Envelope{'mode:distribute'} = 1; 
+	と同じ
+
+ --distribute	
+
+	distribgute only 
+	スプールして再配送しているだけ
+
+	再配送してスプールするために使うアドレスに使う場合は
+	このモードを使うようにするべきである。
+	
+	例： /etc/aliases
+	ip-connection: "|$FML/fml.pl $DIR --distribute"
+
+	#ip-connections ML のようなものの受け口に使う場合には
+	#このモードを使うようにするべきである。
+
+
+ --mladdr=uja@domain	
+
+	config.ph がなくても
+
+	MAIL_LIST  = uja@domain
+	MAINTAINER = uja-request@domain
+
+	等よきにはからう:-)	
+	request なのは USENET 依頼の伝統
+
+ --auto
+	投稿者がメンバーでない場合自動的にMLに登録する
+
+ --check 
+	投稿者がMLのメンバーか否かチェックを行う(default)
+	
+ --fml
+	MAINTAINER = uja-admin@domain 
+	admin syntax を使う
+
+ --fmlserv		
+
+	CONTROL_ADDRESS = fmlserv@domain
+
+	コマンドインターフェイスとして 
+	fmlserv@domain があることが必要
+
+ --listserv
+ --majordomo
+
+	は  --fmlserv と同一である。
+
+ --remote
+	リモート管理モード（パスワードを要求する）
+	具体的には
+		$REMOTE_ADMINISTRATION = 1;
+		$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+	をセットしている
+
+ --html
+
+	最後に SyncHtml を呼出し Html 化する
+
+	var/htdocs/Ｎ通ごとにdirectoryを作り階層化して保存
+
+	例：
+	var/htdocs/100/index.html 
+	
+	この index.html の中では 逆順 つまり １００、９９、…
+	のように URLが並ぶ
+
+ --force:field=value
+
+	MLの配送時 field の値を強制的に value に設定する
+	＃注意： field name は小文字である
+
+	例： 
+
+	reply-to: を常にMLにしてしまう
+	--force:reply-to=uja@domain
+
+	＃ $Envelop{"fh:reply-to:"} = 'uja@domain'; と同じ
+
+
+ --permit:variable
+	$Permit{"variable"} = 1;
+
+
+例：
+	From: を強制的に fml-maintainer@phys.titech.ac.jp に設定して
+	フォワードをする。
+	＃この場合配送先は $MAIL_LIST_DIR/fml-query/actives で決まる。
+
+	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query \
+	--distribute \
+	--mladdr=fml-query@phys.titech.ac.jp \
+	--force:from=fml-maintainer@phys.titech.ac.jp
+
+
+ロングラインオプションによる変数の設定：
+
+ --variable
+	$variable = 1;
+
+ --variable=value
+	$variable = $value;
+
+例：
+	$MAINTAINER を fml-admin@uja にする
+	＃ config.ph での $MAINTAINER = 'fml-admin@uja'; と同じ
+
+	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query \
+	--distribute \
+	--mladdr=fml-query@phys.titech.ac.jp \
+	--force:from=fml-maintainer@phys.titech.ac.jp
+	--MAINTAINER=fml-admin@uja
+
+例：
+	デバッグモードオン
+	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query --debug
+
