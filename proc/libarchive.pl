@@ -15,7 +15,7 @@ sub Archive
 {
     local($archive_dir, $max_seq, $unit, $limit);
 
-    $archive_dir = $ARCHIVE_DIR[0] || $ARCHIVE_DIR || "var/archive";
+    $archive_dir = $ARCHIVE_DIR || $ARCHIVE_DIR[0] || "var/archive";
     $max_seq     = &GetFirstLineFromFile($SEQUENCE_FILE);
     $unit        = $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;
 
@@ -47,10 +47,6 @@ sub Archive
     local($archive_dir, $max_seq, $unit, $limit) = @_;
     local($i) = 1;
     local($dir) = ".";
-
-print STDERR "
-    local($archive_dir, $max_seq, $unit, $limit);
-";
 
     # Adjust following config.ph; moved here;
     # fml-support: 02590 <fujita@soum.co.jp>
