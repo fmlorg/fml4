@@ -238,6 +238,16 @@ sub __ListCtl
 	$entry->addValue("active", $addr) ||
 	    &__Error("fail to add $addr to active");
     }
+    elsif ($mib->{'_action'} eq 'add2actives' ||
+	   $mib->{'_action'} eq 'addactives') {
+	$entry->addValue("active", $addr) ||
+	    &__Error("fail to add $addr to active");
+    }
+    elsif ($mib->{'_action'} eq 'add2members' ||
+	   $mib->{'_action'} eq 'addmembers') {
+	$entry->addValue("member", $addr) ||
+	    &__Error("fail to add $addr to active");
+    }
     elsif ($mib->{'_action'} eq 'unsubscribe' ||
 	   $mib->{'_action'} eq 'bye') {
 	$entry->removeValue("member", $addr) ||

@@ -281,6 +281,22 @@ sub __ListCtl
 	&__Execute($mib, $query) || return $NULL;
 
     }
+    elsif ($mib->{'_action'} eq 'add2actives' ||
+	   $mib->{'_action'} eq 'addactives') {
+
+	$query  = " insert into ml ";
+	$query .= " values ('$ml', 'actives', '$addr', 0, '$NULL') ";
+	&__Execute($mib, $query) || return $NULL;
+
+    }
+    elsif ($mib->{'_action'} eq 'add2members' ||
+	   $mib->{'_action'} eq 'addmembers') {
+
+	$query  = " insert into ml ";
+	$query .= " values ('$ml', 'members', '$addr', 0, '$NULL') ";
+	&__Execute($mib, $query) || return $NULL;
+
+    }
     elsif ($mib->{'_action'} eq 'unsubscribe' ||
 	   $mib->{'_action'} eq 'bye') {
 

@@ -175,6 +175,12 @@ sub AdminModeInit
 		  'admin:add',            'ProcAdminSubscribe',
 		  'admin:subscribe',      'ProcAdminSubscribe',
 
+		  # asymmetric manipulation
+		  'admin:add2actives',     'ProcAdminAddToActives',
+		  'admin:addactives',      'ProcAdminAddToActives',
+		  'admin:add2members',     'ProcAdminAddToMembers',
+		  'admin:addmembers',      'ProcAdminAddToMembers',
+
 		  'admin:chaddr',         'ProcAdminSetDeliverMode',
 		  'admin:change',         'ProcAdminSetDeliverMode',
 		  'admin:change-address', 'ProcAdminSetDeliverMode',
@@ -570,7 +576,7 @@ sub ProcAdminSubscribe
 
     if ($REGISTRATION_ACCEPT_ADDR) {
 	if ($addr !~ /$REGISTRATION_ACCEPT_ADDR/i) {
-	    &Log("ERROR: AutoRegist: address [$addr] is not acceptable");
+	    &Log("ERROR: address [$addr] is not acceptable");
 	    return 0;
 	}
     }
@@ -621,6 +627,77 @@ sub ProcAdminSubscribe
     }
     else {
 	local($r) = $!;
+	&LogWEnv("ERROR: admin $proc [$r]",*e);
+	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
+	$swf = 0;
+    }
+
+    if ($ADMIN_ADD_SEND_WELCOME_FILE) {
+	if ($swf && $addr) {
+	    &SendFile($addr, $WELCOME_STATEMENT, $WELCOME_FILE);
+	}
+	else {
+	    &Log("ProcAdminSubscribe: fails to add") unless $swf;
+	    &Log("ProcAdminSubscribe: no address to send") unless $addr;
+	}
+    }
+
+    1;
+}
+
+
+# admin add2{actives,members} fukachan@phys.titech.ac.jp
+sub ProcAdminAddToActives { &__ListCtl('actives', $ACTIVE_LIST, @_);}
+sub ProcAdminAddToMembers { &__ListCtl('members', $MEMBER_LIST, @_);}
+sub __ListCtl
+{
+    local($op, $file_to_regist, $proc, *Fld, *e, *opt) = @_;
+    local($status, $swf, $addr);
+    local($s) = join("\t", @opt);
+
+    $addr = $opt;
+    &Log("admin $proc $s");
+
+    if ($REGISTRATION_ACCEPT_ADDR) {
+	if ($addr !~ /$REGISTRATION_ACCEPT_ADDR/i) {
+	    &Log("ERROR: address [$addr] is not acceptable");
+	    return 0;
+	}
+    }
+    
+    ## duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
+    if ($USE_DATABASE) { # XXX disabled anyway
+	;
+    }
+    elsif (&CheckMember($addr, $file_to_regist)) {	
+	&LogWEnv("admin $proc [$addr] is duplicated in the file to regist", *e);
+	&Mesg(*e, $NULL, 'already_subscribed', $addr);
+	&Mesg(*e, "   different sub-domain address already exists?");
+	&Mesg(*e, "   \"set exact\" command enforces exact address matching");
+	&Mesg(*e, "   to ignore the difference of sub-domain parts.");
+	return 1;# not fatal;
+    }
+    
+    if ($USE_DATABASE) {
+	&use('databases');
+	my ($addr, @opts) = split(/\s+/, $s);
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, "add2$op", {'address' => $addr});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
+	    return 0; # return ASAP
+	}
+    }
+
+    $status = &Append2($s, $file_to_regist);
+
+    if ($status) {
+	&LogWEnv("admin ${proc}: $s is added to $op", *e);
+	$swf += 1;
+    }
+    else {
+	my ($r) = $!;
 	&LogWEnv("ERROR: admin $proc [$r]",*e);
 	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	$swf = 0;
