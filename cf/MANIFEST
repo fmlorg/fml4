@@ -1,16 +1,16 @@
 INFO:
 # FML Configurable Variable Definitions
 #
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1996-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: MANIFEST,v 1.104 2003/12/06 04:06:29 fukachan Exp $
 #
 
 
@@ -194,6 +194,10 @@ CONFIRMATION_ADDRESS:
 CONFIRMATION_SUBSCRIBE:		subscribe
 CONFIRMATION_KEYWORD:		confirm
 CONFIRMATION_WELCOME_STATEMENT:
+
+# "subscribe" needs no YOUR NAME. 
+# value: 1/0
+CONFIRMATION_SUBSCRIBE_NEED_YOUR_NAME: 1
 
 # file to send back "what is confirmation?" with "confirmation request"
 # reply mail in "confirmation" mode.
@@ -477,6 +481,14 @@ FILTER_ATTR_REJECT_MS_GUID: 1
 # value: 1/0
 FILTER_ATTR_REJECT_INVALID_JAPANESE: 0
 
+# cutoff empty message. 
+# value: 1/0
+CONTENT_HANDLER_CUTOFF_EMPTY_MESSAGE:	0
+
+# reject empty message after cut off process.
+# value: 1/0
+CONTENT_HANDLER_REJECT_EMPTY_MESSAGE:	0
+
 # try to convert Japanese HANKAKU chars in the mail body to ZENAKKU
 # value: 1/0
 USE_HANKAKU_CONVERTER:	0
@@ -534,14 +546,15 @@ SUBSCRIBE_ANNOUNCE_FORWARD_TYPE: prepend_info
 # value: confirmation
 UNSUBSCRIBE_AUTH_TYPE:
 
-# chaddr checks confirmation (not implemented)
+# chaddr checks confirmation
 # value: confirmation / ""
 CHADDR_AUTH_TYPE:
 
 # LOGGING THE LATEST IN-COMING MAILS
 # Logs an in-coming mail to $LOG_MAIL_DIR/$id 
 # where ($id = `cat $LOG_MAIL_SEQ`; $id = $id % $NUM_LOG_MAIL; $id++).
-# Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and each file size
+# Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and 
+# the message size of each file except for the header
 # is limited up to $LOG_MAIL_FILE_SIZE_MAX bytes to save disk.
 # value: 1/0
 USE_LOG_MAIL:	0
@@ -1089,6 +1102,10 @@ USE_VERP:
 # value: string
 POSTFIX_VERP_DELIMITERS: +=
 
+# try VERPs once a day for efficient delivery.
+# value: 1/0
+TRY_VERP_PER_DAY:
+
 # we use ESMTP pipelining mechanism by default.
 # value: 1/0
 NOT_USE_ESMTP_PIPELINING: 0
@@ -1298,6 +1315,10 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 # value: 1/0
 AUTO_HTML_GEN:
 
+# use Mail::HTML::Lite in fml-devel (fml next generation).
+# value: 1/0
+USE_NEW_HTML_GEN:
+
 # value: 1/0
 HTML_THREAD:			1
 
@@ -1496,6 +1517,7 @@ PGPE:		&path(pgpe)
 PGPK:		&path(pgpk)
 PGPS:		&path(pgps)
 PGPV:		&path(pgpv)
+GPG:		&path(gpg)
 RCS:		&path(rcs)
 CI:		&path(ci)
 BASE64_DECODE:
