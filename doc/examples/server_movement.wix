@@ -1,6 +1,6 @@
 .HTML_PRE
 
-	fmlを新しいサーバへ移転する
+	fmlを新しいサーバへ移転する/OSを新しくした時
 =E
 	move fml to another new server
 
@@ -54,6 +54,35 @@
 などの全ＭＬ共通の設定ファイルをおくことが推奨されています。インストー
 ルの時に左右されないためです。是非この方法へ移行して(copyすればおわり)
 作業をしてみてください。
+
+◯ その他の注意
+
+新しいサーバに移動した時やOSを新しくした時に勢いでUIDやGIDが異なったも
+のになってしまっていることもありえます。permission denied などのエラー
+が出たらその辺もチェックしてみましょう。aliases ファイルの場所や valid
+shell などの設定も忘れているかも知れません。
+
+OSによって使っているファイルなどは異なりますが
+
+	/etc/passwd
+	/etc/master.passwd
+	/etc/shadow
+	/etc/shells
+
+[postfix]	
+	/etc/postfix/main.cf
+	/etc/aliases
+
+[sendmail]	
+	/etc/sendmail.cf
+	/etc/aliases
+
+[qmail]
+	/var/qmail/users/assign
+
+qmail-newu をしわすれてないか確認を
+
+などなど…
 
 .fi
 .if LANG == ENGLISH
