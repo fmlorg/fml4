@@ -14,26 +14,7 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
-◯	CGI security check ;-)
 
-SUBJECT_TAG_TYPE が設定できない。回避した
-
-◯
-
-  messages/English/ created
-
-	勢いで全部英訳しました(へろへろ〜）
-
-
-* Filter module ?
-* Filter の動的 update はできないか？ 
-=E
-* Filter module ?
-* update filter dynamically 
-
-とりあえず virus_check.ph に終結して www.fml.org にあるので
-それを定期的にもっていってくれればいいんですかね…
-＃ちょっと全自動はこわいだろうねぇ…
 
 
 .# ############################################################
@@ -83,6 +64,11 @@ obsolete ?
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO
+
+.S	mget "uu" mode
+
+mget の uu って空行が足りなくないかい？
+
 
 .S	MIMEライブラリーの書き直し
 =E.S	rewrite MIME library
