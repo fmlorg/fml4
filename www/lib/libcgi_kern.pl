@@ -81,7 +81,7 @@ sub ExpandOption
 sub ExpandMemberList
 {
     local($config_ph, @list, $list, $addr);
-    local(%uniq);
+    local(%uniq, %addr);
 
     $config_ph = "$ML_DIR/$ML/config.ph";
     $DIR       = "$ML_DIR/$ML";
@@ -100,6 +100,8 @@ sub ExpandMemberList
     @list = ($config_ph'MEMBER_LIST, @config_ph'MEMBER_LIST);
 
     undef %uniq;
+    undef %addr;
+
     for $list (@list) {
 	next unless $list;
 	# uniq
@@ -110,13 +112,18 @@ sub ExpandMemberList
 		next if /^\#/;
 
 		($addr) = split;
-		print "\t\t\t<OPTION VALUE=$addr>$addr\n";
+		$addr{$addr} = $addr;
 	    }
 	    close(LIST);
 	}
 	else {
 	    &ERROR("cannot open '$list'");
 	}
+    }
+
+    # XXX oops, I wanna less malloc() version ;-)
+    for $addr (sort keys %addr) {
+	print "\t\t\t<OPTION VALUE=$addr>$addr\n";
     }
 }
 
