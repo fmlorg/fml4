@@ -37,9 +37,9 @@
 .url	ftp://ftp.fml.org/pub/fml/
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
-.~HTML_PRE
 
 .toc
+.~HTML_PRE
 
 
 .C	イントロダクション
@@ -106,6 +106,47 @@ to customize basic functions. Advanced configuration needs the manual
 edit of config.ph.
 
 
+.S	fml を動かすことのできる環境
+=E.S	Supported Systems
+
+UNIX の場合は、最近の UNIX 系 OS であれば動くでしょう。できるだけイン
+ストーラが自動判定してなんとかするようになっています。ちなみに、ターゲッ
+トの OS は NetBSD (4.4BSD)です。
+=E
+fml can run on almost UNIX like operating systems. The installer
+(makefml) tries to adjust fml to your OS in installing as could as
+possible. fml master source has been tested on NetBSD (4.4BSD derived
+system).
+
+WINDOWS 2000/NT4 上でも動きます。注意点については INSTALL_on_NT4 を参
+照して下さい。操作方法の大筋は UNIX 版と同様です。詳しくは INSTALL を
+参照して下さい。
+=E
+fml on Windows 2000/NT4.0 can work also. Please read INSTALL and
+INSTALL_on_NT4.
+
+* 開発環境
+=E
+* Development Environment:
+
+   postfix 19991231-pl11 + perl 5.00503 on NetBSD/i386 1.4Y
+
+* テスト環境: fml.org の実運用テスト環境は
+=E
+*  Test Environment: I've tested fml on the following system:
+
+   postfix 19991231-pl11 + perl 5.004_04 on NetBSD/sparc (1.4-stable)
+
+さらに配送系は複数のMTAを使った並列配送実験をしています(通称 MTA みく
+じです ^^;)。(最近は一旦２つに減っています。またその内増えるかも:)
+=E
+The delivery system on fml.ORG consists of 2 MTA's to accelerate the
+delivery (as both an experiment and a demonstration :-).
+
+   qmail 1.03
+   postfix 19991231-pl11
+
+
 .S	インストールについて
 =E.S	Environment you need in installation of fml
 
@@ -139,7 +180,7 @@ See INSTALL_on_NT4 for fml on Windows NT4.
 See INSTALL_with_QMAIL when you use fml with qmail.
 .fi
 
-.S	ソースコード
+.S	ソースのダウンロード
 =E.S	Source codes and the latest information
 
 [Sources]
@@ -224,13 +265,16 @@ fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ
 をメールの本文に書いて送って下さい。登録意志確認のメールが届くのでその
 メールに返事をして下さい。
 
-BUGレポートはどのOS,MTA, fml version を使っていてデフォルトから何を
-変えて何をどうしてどうなったのか? を書いて下さい。そういう場合にチェッ
-クして欲しい項目は doc/CHECK_LIST.jp (日本語)にあります。
+バグレポート等では、使用している OS、メールサーバ、fml などの各バージョ
+ンについての情報を付記して下さい。チェックして欲しい項目はたとえ
+ば doc/CHECK_LIST.jp (日本語)を参照して下さい。
 
-疑問点について尋ねる前にドキュメントのサーチをすると解決することもよく
-あります。それっぽいキーワードや言葉でドキュメントの中を検索する、
-www.fml.orgのサーチエンジンを使うのが解決への第一歩です。
+その際に、fml のデフォルトからどのような変更をしたら、どう期待と異なっ
+ていたかなどを書いてもらうと解答の参考になります。
+
+また、疑問な点について尋ねる前に fml のドキュメントを検索して下さい。
+そこに答がある場合もよくあります。http://www.fml.org/fml/ にあるサーチ
+エンジンを使い、それらしいキーワードで検索してみて下さい。
 .fi
 .if LANG == ENGLISH
 Despite of my efforts, errors are inevitable. (Especially documents
@@ -262,32 +306,20 @@ lists.
 
 .if LANG == JAPANESE
 作者個人宛のメールは <fml-bugs@ffs.fml.org> に送って下さい。しかし個人
-宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れないので捨て置
-かれる場合がよくあります。 ML ならわかる人がすぐに答えてくれる可能性も
-ありますから、できるだけ fml-support ML宛へ投げてもらえると助かります。
-"どうしても"内密な相談とか、DMで聞きたいことは投げてもらっても構いませ
-んが、返事はものすごく遅いでしょう _o_
+宛にメールがくるとどこかへまぎれたり、忙しくて時間が取れないことがよく
+あります。 ML ならわかる人がすぐに答えてくれる可能性もありますから、で
+きるだけ fml-support ML宛へ投げてもらえると助かります。"どうしても"内
+密な相談とか、DMで聞きたいことは投げてもらっても構いませんが、返事はも
+のすごく遅いかもしれません _o_
 
 fml-bugs はあくまでもＤＭのアドレスです。情報は埋もれ共有されません。
-fml-query@ffs.fml.org へ送るとそのメールは fml-support MLへフォワード
-され ML の記事として扱われます。fml-supportに登録して欲しくない人用で
-す。fml-bugs と違い質疑応答はすべて fml-support 内に流れ、情報は共有され
-ます。MLに参加しない場合でも fml-bugs より fml-query を使って欲しいと
-思います。
+一方 fml-query@ffs.fml.org へ送ると、そのメールは fml-support MLへフォ
+ワードされ ML の記事として扱われます。fml-support に参加したくないが、
+ML に公開してもよい情報なら是非 fml-query を使って下さい。
 .fi
 .if LANG == ENGLISH
 If you want to contact only the author, please send e-mail to the
 address <fml-bugs@ffs.fml.org>. 
-.#
-.# I recommended you've better to send your questions to fml-users or
-.# fml-query than fml-bugs since I am so busy, so the reply may be
-.# delayed a lot usually. When you send e-mail to ML, some experts of ML
-.# may help your questions. If I am not busy, you may receive my reply
-.# soon but in a lot of cases very slowly.
-.#
-.# The address <fml-query@ffs.fml.org> is forwarded to
-.# <fml-users@ffs.fml.org> but the sender is not registered
-.# automatically.
 .fi
 
 
@@ -298,21 +330,23 @@ address <fml-bugs@ffs.fml.org>.
 
 設定項目は多岐に渡りますが、基本的なセットアップ(MLをつくる/登録する)
 や簡単な設定の変更は makefml という対話設定プログラムで行なえます。
+詳細については INSTALL というファイルを見て下さい。
 
-.S	makefml (インストーラー及び設定インターフェイス)
+.S	makefml (インストーラ及び設定インターフェイス)
 =E.S	makefml (installer and CUI interface for configurations)
 
 .if LANG == JAPANESE
-インストールは
+例えば、インストールは
 
 	(shell prompt)% perl makefml install 
 
-を走らせて下さい。ML の作成は(例えば elena MLを作るなら)
+を実行して下さい。また、ML (例えば elena ML)の作成は
 
-	/usr/local/fml/makefml newml  ML の名前 (例: makefml newml elena)
+	/usr/local/fml/makefml newml ML名
+   例:
+	/usr/local/fml/makefml newml elena
 
-のようにします。何個作る場合でも以下同様です。詳細については INSTALL 
-というファイルを見て下さい。
+のようにします。何個作る場合でも以下同様です。
 .fi
 .if LANG == ENGLISH
 To install fml, you can only run
@@ -328,57 +362,19 @@ ML), run
 Please see the file INSTALL for the detail.
 .fi
 
-○ アップグレード・インストールをしようとしている人へ
 
-3.0 へのアップグレードの際には必ず UPGRADE ファイルの最初の章を読んで
-おいて下さい。自動登録をしていない人は考えなくてもいいとは思いますが
+.S	アップグレード・インストールをしようとしている人へ
+=E.S	Upgrade Installation
+
+3.0 以前からのアップグレード(例: 2.2.1 -> 4.0)の際には必ず UPGRADE を
+参照して下さい。自動登録を使っている場合に、重要な注意点があります。
 
 .url	http://www.fml.org/fml/UPGRADE/
 
-UPGRADE というファイルを見て下さい。古い config.ph をそのまま使おうと
-思っている人は(HOOKについてはちょっと気を付けないといけませんが)そのま
-ま使って下さい。凝ったHOOKをしていない人はそのまま使って大丈夫です。
-.xref compatibility
+古い config.ph をそのまま使おうと思っている人は(HOOKについてはちょっと
+気を付けないといけませんが)そのまま使って下さい。凝った HOOK をしてい
+ない人はそのまま使って大丈夫でしょう。.ptr{compatibility} 章参照
 
-.S	fmlが動く環境
-=E.S	Supported Systems
-
-ターゲットは NetBSD (4.4BSD)ですが最近のUNIX系OSであれば動くでしょう。
-できるだけインストーラが自動判定してなんとかするようになっています。
-＃ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
-＃判定できないようなどマイナ〜なOSだったらどうなるかわかりませんが
-=E
-fml can run on almost UNIX like operating systems. The installer
-(makefml) tries to adjust fml to your OS in installing as could as
-possible. fml master source has been tested on NetBSD (4.4BSD derived
-system).
-
-WINDOWS NT 4.0 上でも動きます。INSTALL と INSTALL_on_NT4 というドキュ
-メントを参照して下さい。
-=E
-fml on Windows NT4.0 can work also. Please read INSTALL and
-INSTALL_on_NT4.
-
-○ 開発環境
-=E
-* Development Environment:
-
-   postfix 19991231-pl11 + perl 5.00503 on NetBSD 1.4Y
-
-○ テスト環境: fml.org の実運用テスト環境は
-=E
-*  Test Environment: I've tested fml on the following system:
-
-   postfix 19991231-pl11 + perl 5.004_04 on NetBSD/sparc (netbsd-1-4 branch)
-
-さらに配送系は複数のMTAを使った並列配送実験をしています(通称MTAみくじ
-です ^^;)。最近は一旦２つに減っています。その内増えるでしょう:)
-=E
-The delivery system on fml.ORG consists of 2 MTA's to accelerate the
-delivery (as both an experiment and a demonstration :-).
-
-   qmail 1.03
-   postfix 19991231-pl04
 
 
 .C	fml 4.0 の機能の概要
@@ -469,6 +465,7 @@ fml master distribution server.
 よろしくお願いします。
 
 
+
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
@@ -478,7 +475,7 @@ $Id$
 .# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
-
+.#
 .#
 .#################################################################
 .#
