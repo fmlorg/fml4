@@ -11,6 +11,16 @@ var/html/${file}/index.html: doc/ri/${file}.wix
 	env FML=${FML} $(DOC_GENERATOR) ${file} ri
 .endfor
 
+
+.for file in ${DOC_ADVISORY_SOURCES}
+__HTML_RI__ += var/html/advisories/${file}/index.html
+var/html/advisories/${file}/index.html: doc/advisories/${file}.wix
+	test -d var/html/advisories/${file} || \
+		${MKDIR} var/html/advisories/${file}
+	env FML=${FML} $(DOC_GENERATOR) ${file} advisories advisories
+.endfor
+
+
 .for file in ${DOC_RI_EXCEPTIONAL_SOURCES}
 __HTML_RI__ += var/html/${file}.html
 __HTML_RI__ += var/html/${file}-e.html

@@ -31,16 +31,21 @@ do
 done
 
 
-
+# e.g. "README.wix" for doc/ri/README.wix
 FILE=$1
+
+# e.g. "ri" for doc/ri
 SOURCE_DIR=$2
+
+# html subdir "advisory" for doc/advisory/y2k.html
+SUBDIR=$3
 
 GEN_HTML () {
 	chdir $FML
 
 	if [ doc/$SOURCE_DIR/$FILE.wix -nt var/html/$TARGET/index.html -o $always ]
 	then
-		test -d var/html/$TARGET || mkdir var/html/$TARGET
+		test -d var/html/$TARGET || mkdirhier var/html/$TARGET
 
 		perl distrib/bin/fix-wix.pl doc/$SOURCE_DIR/$FILE.wix |\
 		$FWIX -L $LANG -T $FILE -m html -D var/html/$TARGET -d doc/smm
@@ -57,11 +62,11 @@ GEN_HTML () {
 }
 
 LANG=JAPANESE
-TARGET=${FILE}
+TARGET=${SUBDIR}/${FILE}
 LINK=${FILE}-jp
 GEN_HTML;
 
 LANG=ENGLISH
-TARGET=${FILE}-e
+TARGET=${SUBDIR}/${FILE}-e
 LINK=${FILE}-en
 GEN_HTML;

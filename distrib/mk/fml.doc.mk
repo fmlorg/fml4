@@ -30,6 +30,10 @@ DOC_DRAFT_SOURCES  = confirm confirmd.ackreq deny guide
 DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 
 
+## doc/advisory
+DOC_ADVISORY_SOURCES  = happy99
+
+
 ### special PLAINDOC rurles (depends on *SOURCES*) ###
 .include "distrib/mk/fml.plaindoc.mk"
 
