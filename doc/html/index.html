@@ -1,0 +1,228 @@
+<TITLE>
+Mailing List Server の設計と実装(The Design and Implementation of the fml current Mailing List Server)
+</TITLE>
+
+<! ###################################################################
+
+	<H1>
+	Mailing List Server の設計と実装
+
+	</H1>
+
+	<H2>
+	The Design and Implementation of the fml current 
+	1.x Mailing List Server
+	</H2>
+
+<! ###################################################################
+
+<HR>
+	ｆｍｌ 
+<UL>
+
+	<LI>
+	<A HREF=INFO.html>
+	最新の情報(INFO)
+	[fml@phys.titech.ac.jpにメールを出すと返送されるもの]
+	</A>
+
+	<LI>
+	<A HREF=README/>
+	README
+	</A>
+
+	<LI>
+	<A HREF=INSTALL/>
+	INSTALL ガイド
+	</A>
+
+	<LI>
+	<A HREF=op/index.html>
+	Fml オペレイションマニュアル (旧 FAQ)
+	<br>
+	Fml System Management Manual (doc/smm/)
+	</A>
+
+	<LI>
+	<A HREF=RELEASE_NOTES.html>
+	RELEASE_NOTES
+	</A>
+
+	<LI>
+	<A HREF=GPL.html>
+	GNU PUBLIC LICENSE
+	</A>
+</UL>
+
+<! ###################################################################
+<PRE>
+FIGURE:
+   sendmail 
+	fml (fml.pl original form)
+	→ :include: "|fml.pl $FML'DIR  $FML'LIBDIR "
+
+	sid (ListServ Like Interface for libfml.pl)
+	→ sid@DOMAIN 
+	   subscription, index, "command list" syntax for multiple ML's
+
+	fml_local (.forward interface with simple user functions for fml.pl)
+	→ ~/.forward → libexec/fml_local.pl 	→ fml.pl
+						→ mail.local to /var/mail/user
+						→ USER's custamized functions
+</PRE>
+
+<! ###################################################################
+
+<HR>
+ソースへのリンク
+<UL>
+	<LI>
+	<A HREF=ftp://ftp.phys.titech.ac.jp/pub/net/fml-current>
+	fml のcurrentソースコード (fml-current)
+	</A>
+	<br>
+	lha, ish and mime_pls.* も一緒に置いてあります。御利用下さい
+	<br>
+	libexec の fml_local と SID の部分を取り出したセットもあります。
+	<br>
+	あと、
+	<A HREF=ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/snapshot>
+	snapshot
+	</A>
+	の下にはcurrentのソースが広がった形でおいてあります。
+
+
+	その他
+	</H1>
+	<LI>
+	<A HREF=http://www.wide.ad.jp/sendmail.html>
+	Sendmail
+	</A>
+</UL>
+
+<! ###################################################################
+<HR>
+<UL>
+	<LI>
+	mh interface で 
+	<PRE>
+	24 -09/01 "No.6 Fukachan" fml-su Re: compatibility of listserv? 
+	31  09/04 "No.6 Fukachan" fml-su Re: compatibility of listserv? 
+	</PRE>
+	みたいにするための scan.format の
+	<A HREF= mh.html>
+	設定例
+	</A>
+
+	<LI>
+	sed等で最低限の機能だけの簡単な実例集
+	<A HREF=filter.html>
+	最低限だと、こうかな?
+	</A>
+
+	<LI>
+	CF-3.?W に収録されているフィルタの例
+	<UL>
+		<LI>
+		<A HREF=sendmail-src-1.html>
+		その1
+		</A>
+
+		<LI>
+		<A HREF=sendmail-src-1.html>
+		その2
+		</A>
+	</UL>
+
+	<LI>
+	fj.mail より
+	<UL>
+		<LI>
+		<A HREF=fj.mail-38.html>
+		例1
+		</A>
+
+		<LI>
+		<A HREF=fj.mail-45.html>
+		例2
+		</A>
+
+		<LI>
+		NIFTYについて二、三
+		<A HREF=fj.mail-nifty.html>
+		Erros-to問題(解決したみたい？）
+		</A>
+
+		<LI>
+		<A HREF=nifty-info.html>
+		行数制限は?
+		</A>
+</UL>
+
+<! ###################################################################
+
+<HR>
+他へのリンク
+
+<P>WINDOWS 
+<A HREF=nt.html>
+NT
+</A>
+<br>
+
+
+<br>
+<A HREF=http://wildside.kwnet.on.ca/WinSmtp.html/>
+http://wildside.kwnet.on.ca/WinSmtp.html/
+</A>
+<br>
+
+<A HREF=http://metrics.com/>
+http://metrics.com/
+</A>
+<br>
+
+<P>NTPERL 4.036
+
+
+<P>NTPERL 5.001
+<br>
+Binary
+<br>
+<A HREF=ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.i86.zip>
+        ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.i86.zip 
+</A>
+<br>
+    Source Version 
+<br>
+<A HREF=ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.src.zip>
+        ftp://ntperl.hip.com/ntperl/ntperl5.001.beta.2.src.zip 
+</A> 
+
+
+<A HREF=ftp://ftp.hipecs.hokudai.ac.jp/pub/MSDOS/network/winsock/apps/Winbiff>
+Winbiff
+</A>
+
+<br>
+<PRE> ########## </PRE>
+<br>
+
+<A HREF=ftp://ftp.ipc.chiba-u.ac.jp/ftp.kyoto-u.ac.jp/.u3/doc/MscSummary-190-240.txt.Z>
+MscSummary-190-240.txt.Z
+</A>
+<br>
+
+<PRE> ########## </PRE>
+<A HREF=ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz>
+ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz
+</A>
+<br>
+
+<H2>HOME PAGE:   
+<A HREF=http://www.phys.titech.ac.jp/uja/index.html>
+fukachan@phys.titech.ac.jp
+</A>
+
+<! ###################################################################
+
