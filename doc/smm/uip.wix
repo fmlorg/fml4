@@ -282,14 +282,18 @@ since FML checks Message-Id duplication. Hence you should do
 =E
 "makefml test <ML>" is the same function and more useful I believe.
 
-.S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
-.xref	newsyslog
-.l	bin/newsyslog.sh
-.k	newsyslog.sh
 
-libnewsyslog.pl がなかった時代の産物。
-=E
-Inheritance in the age without libnewsyslog.pl
+.S	bin/msend_master.sh
+
+example of control over multiple msending processes.
+See also INSTALL file.
+
+
+.S	bin/more_secure_cf.pl
+
+a real program of "make secure" operation.
+
+
 
 .S	Multipart Canceler Filter (bin/multipart.pl)
 .l	bin/multipart.pl
@@ -320,6 +324,17 @@ Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 ているところを "|/scriptpath/multipart.pl|/fmlpath/fml.pl ..."
 などと記述すれば機能します。
 .~q
+
+
+.S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
+.xref	newsyslog
+.l	bin/newsyslog.sh
+.k	newsyslog.sh
+
+libnewsyslog.pl がなかった時代の産物。
+=E
+Inheritance in the age without libnewsyslog.pl
+
 
 .S	SMTPライブラリを使った /usr/bin/Mail の emulation (bin/pmail.pl)
 =E.S	A demo of SMTP library
