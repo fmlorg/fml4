@@ -244,6 +244,12 @@ and the password file is $PASSWD_FILE.  $new is a plain password.
 .S	CheckMember            (fml.pl)
 .k	CheckMember
 
+Go to .ptr{Lookup}
+
+関数名を変更した。互換性のため残っている。
+=E
+obsolete. left for compatibility.
+
 SYNOPSIS:
 	 &CheckMember($addr, $list);
 
@@ -409,6 +415,47 @@ SYNOPSIS:
 内容に $s を付け加える。
 =E
 Both Logs $LOGFILE and the messages &Notify uses.
+
+
+.S	Lookup (fml.pl)
+.l	Lookup
+
+SYNOPSIS:
+	 &Lookup($addr, $list);
+
+$list の中に $addr が現れるかどうかしらべる。
+=E
+Check whether $addr appears in $list or not. 1 if found, 0 if fails.	
+
+
+.S	MailListActiveP	(fml.pl)
+.l	MailListActiveP
+
+SYNOPSIS:
+	&MailListActiveP($address);
+
+$address はメーリングリストのメンバーか否か？つまり認証のリストの中に
+含まれているか？配送先とは限らないことに注意。返り値はそのアドレスを含
+むファイル名かNULL
+=E
+ML member list contains $address? It return the file which contains it
+or NULL if fails. 
+Caution: $address is a member, so it is used in authenticaion. Whereas
+this does not imply $address is a recipient in fml.
+
+
+.S	MailListMemberP	(fml.pl)
+.l	MailListMemberP
+
+SYNOPSIS:
+	&MailListMemberP($address);
+
+$address はメーリングリストの配送リストに含まれているか？否か？
+返り値はそのアドレスを含むファイル名かNULL
+=E
+$address is a recipient? This returns the file which contains it or
+NULL if fails.
+
 
 .S	Mesg                   (fml.pl)
 .k	Mesg
