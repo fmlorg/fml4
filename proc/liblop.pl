@@ -149,4 +149,68 @@ sub MemberStatus
 }
 
 
+sub ResentForwFileInSpool
+{
+    local($proc, *Fld, *e, *misc, *cat, $ar, $mail_file) = @_;
+    local($buffer, $header, $body, $subject, %org_e);
+
+    # backup
+    for (keys %e) { next unless /^GH:/;	$org_e{$_} = $e{$_};}
+
+    $Envelope{"mode:resent"} = 1;
+
+    $cat{"$SPOOL_DIR/$ID"} = 1;
+
+    if ($ar eq 'TarZXF') {  
+	&use('utils');
+	$buffer = &TarZXF("$DIR/$mail_file", 1, *cat);
+	($header, $body) = split(/\n\n/, $buffer, 2);
+    }
+    else {
+	if (open(ARTICLE, "$DIR/$mail_file")) {
+	    while (<ARTICLE>) {
+		if (1 .. /^$/) { 
+		    $header .= $_ unless /^$/o;
+		}
+		else {
+		    $body .= $_;
+		}
+	    }
+	    close(ARTICLE);
+	}
+	else {
+	    &Log("Cannot open Article $ID");
+	    &Log("Get $ID, Fail");
+	}
+    }
+
+    # Get Header;
+    $header = "From $MAINTAINER $MailDate\n$header";
+    $header =~ s/\n(\S+):/\n\n$1:\n\n/g;
+    for (@Hdr = split(/\n\n/, "$header#dummy\n"), 
+	 $_ = $field = shift @Hdr; #"From "
+	 @Hdr; 
+	 $_ = $field = shift @Hdr, $contents = shift @Hdr) {
+	next if /^From\s+(\S+)/i;
+	next if /^\s*$/o;
+	$e{"GH:$field"} = $contents;
+    }
+
+    # Resent;
+    $e{"GH:Resent-From:"} = $MAINTAINER;
+    $e{"GH:Resent-To:"}   = $e{'Addr2Reply:'};
+    $e{"GH:Resent-Date:"} = $MailDate;
+    $e{"GH:Resent-Message-Id:"} = "<$CurrentTime.FML$$\@$FQDN>";
+
+    # rewritten;
+    $e{'GH:Subject:'} = "Get $ID $ML_FN\n\t".$e{'GH:Subject:'};
+
+    &Sendmail($e{'Addr2Reply:'}, "", $body);
+
+    # restore backup
+    for (keys %org_e) { $e{$_} = $org_e{$_};}
+
+    &Log("Get $ID, Success");
+}
+
 1;
