@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: liblangdep.pl,v 1.4 2000/03/18 16:24:48 fukachan Exp $
+# $Id: liblangdep.pl,v 1.5 2000/03/18 16:27:01 fukachan Exp $
 
 # patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 # fml-support: 07599, 07600
@@ -48,10 +48,11 @@ sub CutOffReReRe
 	&jcode'convert(*CUT_OFF_RERERE_PATTERN, 'euc'); #';
     }
 
-    # apply patch from OGAWA Kunihiko <kuni@edit.ne.jp> fml-support:7626,7653
+    # apply patch from OGAWA Kunihiko <kuni@edit.ne.jp> 
+    #            fml-support:7626 7653 07666
     #            Re: Re2:   Re[2]:     Re(2):     Re^2:    Re*2:
     $pattern  = 'Re:|Re\d+:|Re\[\d+\]:|Re\(\d+\):|Re\^\d+:|Re\*\d+:';
-    $pattern .= '|手慨\s*:|手慨¨|手\s*:|手¨|ＲＥ\s*:|ＲＥ¨|Ｒｅ\s*:|Ｒｅ¨';
+    $pattern .= '|(手慨|手|ＲＥ|Ｒｅ)(\s*:|¨)';
     $pattern .= '|' . $CUT_OFF_RERERE_PATTERN if ($CUT_OFF_RERERE_PATTERN);
 
     $x =~ s/^((\s*|(　)*)*($pattern)\s*)+/Re: /oi;
