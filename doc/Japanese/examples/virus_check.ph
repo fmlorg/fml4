@@ -1,4 +1,4 @@
-# $FML: virus_check.ph,v 1.13 2002/02/01 00:08:18 fukachan Exp $
+# $FML: virus_check.ph,v 1.14 2002/05/01 03:06:09 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -97,6 +97,24 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 $DISTRIBUTE_FILTER_HOOK .= q{
     if ($e{'Body'} =~ /^begin\s+\d{3}\s+\S+|\nbegin\s+\d{3}\s+\S+/m) {
 	return 'uuencoded attachment';
+    }
+};
+
+
+# 参照: fml-help:01853
+# Norton Antivirus for Gateways を使っている場合、
+# ウィルスと判定されたメールのウィルス部分が
+#    除去されてテキスト（text/plain; name="DELETED[番号].TXT"）
+# という案内にさしかわるケースがあるそうです。
+# 例: http://www.firstserver.ne.jp/function/l_virus.html
+#
+# でも、これだとウィルス駆除されたどうでもいいメールも流れてしまうです。
+# このメールを弾きたい場合 (0) を (1) にしてください。 
+if (0) {
+    my $re = ';\s*(file)?name='
+	.'("(DELETED\d+\.TXT|.*\.($extension))"|.*\.($extension))';
+    if ($e{'Body'} =~ /$re/i){
+	return 'disabled virus attachment';
     }
 };
 
