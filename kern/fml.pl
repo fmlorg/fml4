@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -1594,6 +1594,16 @@ sub Notify
     }
 }
 
+sub EnableReportForw2Admin
+{ 
+    local(*e) = @_; $e{'mode:notify_to_admin_also'} = 1;
+}
+
+sub DisableReportForw2Admin
+{ 
+    local(*e) = @_; $e{'mode:notify_to_admin_also'} = 0;
+}
+
 # Generate additional information for command mail reply.
 # return the STRING
 sub GenInfo
@@ -2456,8 +2466,14 @@ sub EnvelopeFilter
     # 243 305
     if (/\033\044\102(\043[\101-\132])+/) { # JIS "2 byte"[A-Z]+
 	$s = &STR2EUC($_);
+
+	local($n_pat, $sp_pat);
+	$n_pat  = '\243[\301-\332]';
+	$sp_pat = '\241\241'; # 2-byte space
+
 	$s = (split(/\n/, $s))[0]; # check the first line only
-	if ($s =~ /^\s*(\243[\301-\332]).*$/) {
+	if ($s =~ /^\s*(($n_pat){1,})[\s$sp_pat]+.*$|^\s*(($n_pat){1,})$/) {
+	    &Log("2 byte <". &STR2JIS($s) . ">");
 	    $r = '2 byte command';
 	}
     }
