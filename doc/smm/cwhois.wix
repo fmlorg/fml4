@@ -1,0 +1,85 @@
+.C	Caching Whois (libexec/cwhois.pl)
+
+.S	Whois Server with cache
+
+lib/whois では本物の whois server を提供してますが、
+libexec/cwhois.pl は本物の whois とローカルサーチを実行する extended
+whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
+自動的に ローカルサーチ に切替えることができます。
+
+
+.S	configuration file
+
+変数は次の通りです。
+
+ローカルサーチに使うプログラムの定義
+
+	$CACHE_SEARCH_PROG  = "/usr/local/fml/bin/scandb.pl";
+
+
+連想配列
+    KEYWORD => スプール（directory）
+    KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
+
+	%WhoisCacheSpool    = ('apply', '/var/spool/apply');
+	%WhoisCacheDB       = ('apply', '/var/db/applydb');
+
+	必要なら（対応する） key1:key2, spool1:spool2 という形で
+
+	   一つのキーワード => 複数の database と spool
+
+	が定義できます。
+
+コマンドモードの定義
+	デフォールトでは proc#keyword 形	
+
+	$CHMODE             = '#';
+	$LOCAL_HELP_KEYWORD = "help$CHMODE";
+	$LOCAL_CACHE_SEARCH = "$CHMODE(\\S+)";
+	$LOCAL_COMMAND_MODE = "(\\S+)$CHMODE(\\S+)";
+
+デフォールト whois server
+
+	$WHOIS_SERVER       = 'whois.nic.ad.jp';
+
+WHOIS の TCP CONNECTION をあきらめるまでの時間
+
+	$TIMEOUT            = 5;#20;
+
+
+.S	Search Algorithm
+
+    if  "#key" SYNTAX
+
+	key の ローカルサーチ
+
+    elsif "option#key" SYNTAX
+
+	key の ローカルサーチ
+	ローカルサーチする対象は option の部分で変更可能
+
+    else 
+
+	Signal handling を設定した後
+	＃ SIGALRM
+
+	Whois ライブラリを呼び初期化する
+
+	TCP/43 で通信
+	&Ipc2Whois(*e, *Fld, *host, *pat)
+
+	返り値は %e 内部変数へ返す。
+	＃sendmail の struct ENVELOPE e; に対応するもの
+	＃だが perl 4 用に reference は使わない実装である
+
+	fml 標準実装では $e{'message'}; にセット
+	
+	キャッシュ オン（後で利用するため）
+
+
+.S	複数のサーチ
+
+
+
+
+.# $Id$
