@@ -63,7 +63,7 @@ $SIG{'HUP'}  = 'CleanUp';
 
     if ($mode eq 'html') {
 	$HtmlDir    || die "Required! \$HtmlDir Direcotry for the output of html files\n";	
-	-d $HtmlDir || mkdir($HtmlDir, 0700);
+	-d $HtmlDir || mkdir($HtmlDir, 0755);
     }
 
     print STDERR "MODE:\t$mode\n";
