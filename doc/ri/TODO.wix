@@ -91,6 +91,19 @@ obsolete ?
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	check $ENV{'PWD'}
+
+$ENV{'PWD'} を使っているところをチェックすること
+
+ref: fml-support:7745
+
+直し方の例:
+
+.q
+    eval(' chop ($pwd = `pwd`); ');
+    $PWD = $ENV{'PWD'} || $pwd || '.'; # '.' is the last resort;)
+.~q
+
 .S	spool2html
 
 fml-suppport: 07638
