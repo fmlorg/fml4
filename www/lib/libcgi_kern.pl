@@ -122,6 +122,9 @@ sub ExpandMemberList
 	    }
 	    close(LIST);
 	}
+	elsif ($mode eq 'admin_member_list') {
+	    ; # ignore since $ADMIN_MEMBER_LIST is not required.
+	}
 	else {
 	    &ERROR("cannot open '$list'");
 	}
