@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/19
+
+   define IncrementCounter()
+   define $USE_SMTP_LOG_ROTATE $NUM_SMTP_LOG_ROTATE
+
+
 2000/09/12
 
    fix cf/config which should be read .fml/system if exists

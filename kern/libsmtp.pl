@@ -39,6 +39,11 @@ sub SmtpInit
 	(-d $VAR_DIR)    || &Mkdir($VAR_DIR);
 	(-d $VARLOG_DIR) || &Mkdir($VARLOG_DIR);
 	$SMTP_LOG = $SMTP_LOG || "$VARLOG_DIR/_smtplog";
+	if ($USE_SMTP_LOG_ROTATE) {
+	    my ($id) = &IncrementCounter("$VARLOG_DIR/.seq", 
+					 $NUM_SMTP_LOG_ROTATE || 50);
+	    $SMPT_LOG .= ".$id";
+	}
     }
 
     ### FIX: . -> .. 

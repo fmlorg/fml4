@@ -2226,6 +2226,25 @@ sub GetFirstLineFromFile
     }
 }
 
+# $id = IncrementCounter(file, modulus)
+sub IncrementCounter
+{
+    my ($f, $modulus) = @_;
+    my ($id) = 0;
+    if (-f $f) {
+	$id = &GetFirstLineFromFile($f);
+	$id++;
+	if ($modulus > 0) { $id = $id % $modulus;}
+	if (open($f, "> ${f}.$$.new")) { 
+	    select($f); $| = 1; select(STDOUT);
+	    print $f $id, "\n"; 
+	    close($f);
+	    rename("${f}.$$.new", $f);
+	}
+    }
+    $id;
+}
+
 # For Example, 
 # $pp = $p = 0;
 # while (1) { 
