@@ -214,6 +214,19 @@ sub FmlServ
 
 	    undef $eval;
 
+	    # "-" of Name Space Name is forbidden.
+	    # so save $ml and modify it only in this hook.
+	    # (mainly for perl 4 since hash table cannot have arrays;-)
+	    # 
+	    # e.g. 90210 -> _90210
+	    #      a-b   -> _a_b
+	    #      a_b   -> _a__b
+	    # 
+	    $save_ml = $ml;
+	    $ml =~ s/_/__/g;	# _   => --
+	    $ml =~ s/\-/_/g;	# -   => _
+	    $ml =~ s/^/fml_/g;	# ^   => fml_ (fml_ by ando@iij-mc.c.jp)
+
 	    for $n ('SendingEntry', 'SendingArchiveEntry') {
 		$eval .= sprintf("\@%s'$n = \@main'$n;\n", $ml);
 		$eval .= sprintf("%%%s'$n = %%main'$n;\n", $ml);
@@ -221,7 +234,9 @@ sub FmlServ
 		$hook .= sprintf("%%main'$n = %%%s'$n;\n", $ml);
 	    }
 
-	    # hook
+	    # hook is the real action
+	    # passed to "$FML_EXIT_HOOK = $hook;" after here.
+	    # and runs it at the last.
 	    $hook .= qq#&mget3_SendingEntry;\n#;
 
 	    # eval
@@ -229,6 +244,9 @@ sub FmlServ
 
 	    $FmlExitHook{'mget3'} =~ s/&mget3_SendingEntry;//g;
 	    &mget3_Reset;	# only mget3 routine called..
+
+	    # restore;
+	    $ml = $save_ml;
 	}	
 
 	&Unlock;		# UNLOCK
