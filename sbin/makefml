@@ -1325,17 +1325,17 @@ sub LangExtConv
     $key = 'menu_conf' .$key;
 
     if ($LANGUAGE eq 'Japanese') {
+	# XXX %LangExtCache has no such key!
+	# XXX so if %LangExtCache != NULL, return the value of the key
+	if (%LangExtCache) {
+	    return $LangExtCache{$key};
+	}
+	print STDERR "mis hit $key\n";
+	
 	require 'libmesgle.pl';
-	require 'jcode.pl';
 
-        $x = &MesgLE'Lookup($key, $msgfile); #';
-	$x =~ s/^[\s\n]+$//;
-        return $NULL unless $x;
-
-        &jcode'convert(*x, 'euc'); #';
-	$x =~ s/^[\s\n]*//;
-	$x =~ s/[\s\n]*$//;
-        $x;
+        &MesgLE::CacheOn(*LangExtCache, $msgfile, 'euc');
+	return $LangExtCache{$key};
     }
     else {
         $key;

@@ -169,4 +169,45 @@ sub Lookup
 }
 
 
+sub CacheOn
+{
+    local(*table, $file, $jcode) = @_;
+    my ($key, $mesg);
+    local($x);
+
+    require 'jcode.pl';
+
+    if (open(LE_TMPL, $file)) {
+	while (<LE_TMPL>) {
+	    next if /^\#/;
+
+	    # see [FILE FORMAT] above
+	    if (/^(\S+):/) {
+		my ($xkey) = $1;
+
+		if ($key) {
+		    $table{$key} = $mesg;
+		    undef $mesg;
+		}
+
+		$key = $xkey; 
+	    }
+	    else {
+		chop;
+
+		$x = $_;
+		$x =~ s/^\s//;
+		&jcode::convert(*x, $jcode);
+		$mesg .= $x . "\n";
+	    }
+	}
+	close(LE_TMPL);
+    }
+    else {
+	&Log("ERROR: MesgLE::CacheOn cannot open file $file");
+	undef $mesg;
+    }
+}
+
+
 1;
