@@ -38,7 +38,8 @@ sub SyncHtml
     # WE REQUIRE DEFINED $ID -> $file;
     return unless $file;
 
-    umask (002);# since nobody reads files in the HTML Directories;
+    # since nobody reads files in the HTML Directories;
+    umask($HTML_DEFAULT_UMASK ? $HTML_DEFAULT_UMASK : 002);
 
     ### Init ###
     # Original SyncHtml is the Converter2Html of the memory image.
@@ -410,6 +411,7 @@ package SyncHtml;
            HTML_FORMAT_PREAMBLE,
            HTML_FORMAT_TRAILER,
            HTML_DOCUMENT_SEPARATOR,
+           HTML_WRITE_UMASK,
            INDEX_HTML_FORMAT_PREAMBLE,
            INDEX_HTML_FORMAT_TRAILER,
            INDEX_HTML_DOCUMENT_SEPARATOR,
@@ -473,7 +475,7 @@ sub Write
     local($htmlsubject);
 
     # write permission is required for only you and nobody read these files;
-    umask(022);	
+    umask($HTML_WRITE_UMASK ? $HTML_WRITE_UMASK : 022);
 
     # file existence check
     -f "$f.html" && (&Log("Already $f.html exists"), return $NULL);
