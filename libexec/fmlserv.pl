@@ -311,6 +311,8 @@ sub FmlServ
 	&AppendFmlServInfo(*e);
     }
 
+    &Mesg(*e, "Processing Done.");
+
     # preparation for &Notify;
     &MakePreambleOfReply(*e); # The first reply message;
 }
@@ -425,13 +427,15 @@ sub DoFmlServProc
 	&Command($proc);
     }
     else {
-	local($mesg);
+	local($mesg, $buf);
 	$mesg  = "\n   Your subscribe request is forwarded to the maintainer.";
 	$mesg .= "\n   Please wait a little.";
 
 	&Debug("Error: MailListMemberP($From_address) fails") if $debug;
 
 	for (split(/\n/, $proc)) {
+	    $buf = $_; # preserve;
+
 	    &Debug("DoFmlServProc($_)") if $debug;
 	    s/\s+$//;		# cut the \s+
 
@@ -445,20 +449,17 @@ sub DoFmlServProc
 	    }
 
 	    if (/^(subscribe|confirm)\s*(.*)/i){ 
-		$addr = $1; 
-
 		if ($ML_MEMBER_CHECK) {
 		    &Mesg(*e, $mesg);
 		    &Warn("Subscribe Request $ML_FN", &WholeMail);
 		}
 		else {
 		    &use('amctl');
-		    $addr = $addr || $From_address;
-		    &Mesg(*e, "\n");
 
-		    $_ =~ s/$ml//;
-		    $e{'tmp:ml'} = $ml;	# for confirmation mode;
-		    &AutoRegist(*e, $_);
+		    $buf =~ s/$ml//;
+		    &Mesg(*e, "");
+		    $e{'tmp:ml'} = $ml;	 # for confirmation mode;
+		    &AutoRegist(*e, $buf); # using set_buf of AutoRegist
 		    undef $e{'tmp:ml'};
 		}
 
@@ -592,7 +593,7 @@ sub NewMLAA
 	next if $_ eq "etc";
 
 	# A Candidate
-	$entry{$_} = $_;
+	$entry{$_} = $_ if -d "$dir/$_";
     }
     closedir(DIRD);
 
@@ -620,7 +621,7 @@ sub SortRequest
 
 	# EXPILICIT ML DETECTED. 
 	# $ml is non-nil and the ML exists
-	if ($ml && -d "$MAIL_LIST_DIR/$ml") {
+	if ($ml && $MailList{$ml}) {
 	    $ML_cmds{$ml}         .= "$cmd @p\n";
 	    $ML_cmds_log{$ml}     .= "${ml}> $cmd $ml @p\n";	    
 	}
@@ -968,9 +969,11 @@ sub main'LoadMLNS
     # so, it always cost a lot of stacks.
     # we cannot permit it!. so here I use dirty(;_;) trick
     # based on "require checkes the full-pathed file name". ;D
-    $SiteDefPH = "/../$SiteDefPH";
-    eval("require '$SiteDefPH';");
-    &Log($@) if $@;
+    if ($SiteDefPH && -f $SiteDefPH) {
+	$SiteDefPH = "/../$SiteDefPH";
+	eval("require '$SiteDefPH';");
+	&Log($@) if $@;
+    }
 
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
@@ -1010,4 +1013,5 @@ sub DEFINE_FIELD_ORIGINAL { 1;}
 sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
 sub ADD_FIELD     { 1;}
 sub DELETE_FIELD  { 1;}
+
 1;
