@@ -36,20 +36,25 @@ sub main'SDInit #';
     }
 
     # file list
+    local($buf);
     for (@list) {
+	next unless $_;
 	open(LIST, $_) || do { &Log("SDInit: cannot open $_"); next;};
 	while (<LIST>) {
 	    chop;
 	    next if /^\#/;
 	    next if /s=|m=/;
 
+	    s/^\s+//;
+	    s/\s+$//;
+	    $buf = $_;
 	    ($addr, $domain) = split(/\@/, $_);
 	    $domain =~ tr/A-Z/a-z/;
 	    @rev = split(//, $domain);
 	    @rev = reverse @rev;
 	    $rev = join("", @rev);
 
-	    print OUTLIST "$rev\t$_\n";
+	    print OUTLIST "$rev\t$buf\n";
 	}
 	close(LIST);
     } 
@@ -63,13 +68,16 @@ sub main'SDInit #';
 	&Log("SDInit: $!");
 	return 0;
     }
-
+    
+    $NumSortedRecipient = 0;
+    local($x);
     open(LIST, $TmpFile) || do { &Log("SDInit: cannot open $TmpFile"); next;};
     while (<LIST>) {
 	chop;
-	($domain, $_) = split(/\s+/, $_);
+	($domain, $x) = split(/\s+/, $_, 2);
 
-	print OUTLIST "$_\n";
+	print OUTLIST "$x\n";
+	$NumSortedRecipient++;
     }
 
     close(OUTLIST);

@@ -611,6 +611,12 @@ sub SmtpPutActiveList2Socket
     $time  = time;
     $mci_count = $count = 0;
 
+    if ($SMTP_SORT_DOMAIN && $MCI_SMTP_HOSTS) {
+	$MCIType = 'window';
+	&GetMCIWindow;
+	print STDERR "new:($MCIWindowStart, $MCIWindowEnd)\n" if $debug_mci;
+    }
+
     # when crosspost, delivery info is saved in crosspost.db;
     if ($USE_CROSSPOST) { 
 	dbmopen(%WMD, "$FP_VARDB_DIR/crosspost", 0400);
@@ -694,12 +700,22 @@ sub SmtpPutActiveList2Socket
 	&Debug("  [$mci_count]  \t$rcpt") if $debug_mci;
 	&Debug("  $mci_count % $MCI_SMTP_HOSTS != $CurModulus") if $debug_mci;
 
-	next if $MCI_SMTP_HOSTS && 
-	    ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
+	if ($MCIType eq 'window' && $MCI_SMTP_HOSTS) {
+	    # $mci_count++ before but $count++ after here.
+	    # Suppose (first, last) = (0, 100), (100, 200), ...
+	    # we pass throught 0-99, 100-199, ...
+	    next if $mci_count <= $MCIWindowStart; #   0 100 200
+	    last if $mci_count >  $MCIWindowEnd;   # 100 200 300
+	}
+	elsif (($MCIType eq 'modulus') || $MCI_SMTP_HOSTS) {
+	    next if ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
+	}
 
-	$count++; # delivery count;
+	$count++; # real delivery count;
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
+
+	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n";
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 
