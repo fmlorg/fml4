@@ -15,7 +15,9 @@ HTML_REQ_CPP_SOURCES  = history download links mailinglist people
 HTML_REQ_CPP_SOURCES += 3.0-new-features
 
 HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
-HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
+
+# disabled in 4.0
+# HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 
 # doc/ri
 .include "doc/ri/Makefile"
