@@ -2438,6 +2438,19 @@ sub EnvelopeFilter
     elsif (/^[\s\n]*\%\s*echo.*/i) {
 	$r = "invalid command line body";
     }
+    
+    # JIS: 2 byte A-Z => \043[\101-\132]
+    # EUC 2-bytes "A-Z" (243[301-332])+
+    # e.g. reject "SUBSCRIBE" : octal code follows:
+    # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
+    # 243 305
+    if (/\033\044\102(\043[\101-\132])+/) { # JIS "2 byte"[A-Z]+
+	$s = &STR2EUC($_);
+	$s = (split(/\n/, $s))[0]; # check the first line only
+	if ($s =~ /^\s*(\243[\301-\332]).*$/) {
+	    $r = '2 byte command';
+	}
+    }
 
     # some attributes
     # XXX: "# command" is internal represention
@@ -2494,11 +2507,20 @@ sub CheckResourceLimit
 
 ####### Section: Macros for the use of user-side-definition (config.ph) 
 
-sub JSTR 
+sub STR2JIS { &JSTR(@_);}
+sub JSTR
 {
     local($s) = @_;
     require 'jcode.pl';
     &jcode'convert(*s, 'jis'); #';
+    $s;
+} 
+
+sub STR2EUC
+{
+    local($s) = @_;
+    require 'jcode.pl';
+    &jcode'convert(*s, 'euc'); #';
     $s;
 } 
 
