@@ -1,22 +1,36 @@
 #!/bin/sh
 
-GEN="perl .release/html_split.pl"
+GEN="perl distrib/bin/html_split.pl"
 
-for dir in README INSTALL op README-e INSTALL-e op-e
+tmp=/tmp/splitdoc$$
+
+trap "rm -f $tmp" 0 1 3 15
+
+(cd var/html/; echo * | tr ' ' '\012' |perl -nle 'print unless -l $_'> $tmp )
+
+for dir in `cat $tmp`
 do
-   if [ ! -d var/db/$dir -o \
-	var/html/$dir/index.html -nt var/db/$dir/.touch ]
+   if [ -d var/html/$dir ]	
    then
-	$GEN -R ../../$dir/ -U http://www.fml.org/fml/$dir \
-		-D var/db/$dir var/html/$dir/[0-9]*html
-   fi
+	if [ ! -d var/db/$dir -o \
+	var/html/$dir/index.html -nt var/db/$dir/.touch ]
+	then
+	   $GEN -R ../../$dir/ -U http://www.fml.org/fml/$dir \
+		-D var/db/$dir var/html/$dir/[i0-9]*html
+	fi
 
-   touch var/db/$dir/.touch
+	touch var/db/$dir/.touch
+
+   elif [ -f var/html/$dir ]
+   then
+	rm -f var/db/$dir
+	cp -p var/html/$dir var/db/$dir
+   fi
 done
 
 echo ""
-echo "perl .release/find_older.pl |perl -nple unlink"
+echo "perl distrib/bin/find_older.pl |perl -nple unlink"
 echo ""
-perl .release/find_older.pl |perl -nple unlink
+perl distrib/bin/find_older.pl |perl -nple unlink
 
 exit 0;
