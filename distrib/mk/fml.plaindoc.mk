@@ -33,6 +33,12 @@ var/doc/${file}.en: doc/ri/${file}.wix
 	${FWIX} -L ENGLISH -n i doc/ri/${file}.wix > var/doc/${file}.en
 .endfor
 
+.for file in ${DOC_RI_RAW}
+__DOC_TARGETS__ += var/doc/${file}
+var/doc/${file}: doc/ri/${file}
+	cp -p doc/ri/${file} var/doc/${file}
+.endfor
+
 
 ### MAIN ###
 __initplaindocbuild__:

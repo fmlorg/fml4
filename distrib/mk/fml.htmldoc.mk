@@ -105,6 +105,13 @@ var/html/WHATS_NEW-e/index.html: distrib/compile/WHATS_NEW.wix
 	${FWIX} -L ENGLISH -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
 
 
+.for file in ${DOC_RI_RAW}
+__HTML_RI__ += var/html/${file}
+var/html/${file}: doc/ri/${file}
+	cp -p doc/ri/${file} var/html/${file}
+.endfor
+
+
 ### main ###
 __htmlbuild__ += __inithtml__ 
 __htmlbuild__ += ${HTML_MISC} 
