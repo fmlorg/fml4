@@ -41,6 +41,7 @@ troubleshoot		トラブルシューティング
 
 .part misc
 misc			その他(分類に苦しんだ)改造事例集
+MTA			MTA 依存のTIPS
 smtp			配送関係
 Japanese		日本語処理について
 utility_programs	その他便利かもしれないプログラム
