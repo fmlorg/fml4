@@ -118,7 +118,7 @@ sub ModeBifurcate
 		      "autoregist",  "AutoRegistHandler",
 		      "ignore",      "IgnoreHandler",
 
-		      "auto_symmetric_regist", "AutoRegistHandler",
+		      "auto_subscribe", "AutoRegistHandler",
 		      "auto_asymmetric_regist", "AutoRegistHandler",
 		      );
     if ($debug) {
@@ -1356,7 +1356,7 @@ sub AdjustActiveAndMemberLists
 	    &Touch($FILE_TO_REGIST) unless -f $FILE_TO_REGIST;
 	}
 	# XXX: fml 2.x auto_regist uses only member file.
-	# XXX: fml 3.x auto_symmetric_regist uses actives and members.
+	# XXX: fml 3.x auto_subscribe uses actives and members.
 	elsif (&NotUseSeparateListP) {
 	    # XXX: this block is always true in 2.x but false in 3.x.
 	    $ACTIVE_LIST = $MEMBER_LIST;
@@ -1450,17 +1450,17 @@ sub AutoRegistrableP
 	"auto_asymmetric_regist";
     }
     elsif ($Envelope{'mode:ctladdr'} && 
-	($REJECT_POST_HANDLER    eq 'auto_symmetric_regist' ||
-	 $REJECT_COMMAND_HANDLER eq 'auto_symmetric_regist')) {
-	"auto_symmetric_regist";
+	($REJECT_POST_HANDLER    eq 'auto_subscribe' ||
+	 $REJECT_COMMAND_HANDLER eq 'auto_subscribe')) {
+	"auto_subscribe";
     }
     elsif ($REJECT_COMMAND_HANDLER =~ /auto_regist/i ||
-	   $REJECT_COMMAND_HANDLER =~ /auto_symmetric_regist/i ||
+	   $REJECT_COMMAND_HANDLER =~ /auto_subscribe/i ||
 	   $REJECT_COMMAND_HANDLER =~ /autoregist/i) {
 	$REJECT_COMMAND_HANDLER;
     }
     elsif ($REJECT_POST_HANDLER =~ /auto_regist/i ||
-	   $REJECT_POST_HANDLER =~ /auto_symmetric_regist/i ||
+	   $REJECT_POST_HANDLER =~ /auto_subscribe/i ||
 	   $REJECT_POST_HANDLER =~ /autoregist/i) {
 	   $REJECT_POST_HANDLER;
     }
@@ -1474,7 +1474,7 @@ sub UseSeparateListP
 {
     local($x) = &AutoRegistrableP;
 
-    if ($x eq 'auto_symmetric_regist' || (! $x)) {
+    if ($x eq 'auto_subscribe' || (! $x)) {
 	1;
     }
     else {

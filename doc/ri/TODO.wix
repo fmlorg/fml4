@@ -34,7 +34,7 @@ check
 
 	Received: for <ADDRESS>
 
-.S	auto_symmetric_regist
+.S	auto_subscribe
 
 members actives をちゃんと２つ使う自動登録。
 auto_regist は互換性のため有効だが、 fml 3.0 ではこれを使うこと。
