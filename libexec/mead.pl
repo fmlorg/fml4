@@ -40,6 +40,8 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 &Report;
 
+if ($ParseFail) { &SaveMail;}
+
 exit 0;
 
 
@@ -56,6 +58,8 @@ sub Parse
 
     while (<STDIN>) {
 	chop;
+
+	$SavedBuffer .= $_ if $. < 1024;
 
 	# ignore the first header
 	# we should ignore header for <maintainer>
@@ -516,12 +520,18 @@ sub CacheOut
     my ($a, $s);
     &Debug("--- CacheOut") if $debug;
 
-    for $a (keys %AddrCache) {
-	$s = $a.$AddrCache{$a};
-	&Append($s, $CACHE_FILE);
-	&Debug($s) if $debug;
-	# &Log("cache.out: <$a>");
+    if (%AddrCache) {
+	for $a (keys %AddrCache) {
+	    $s = $a.$AddrCache{$a};
+	    &Append($s, $CACHE_FILE);
+	    &Debug($s) if $debug;
+	    # &Log("cache.out: <$a>");
+	}
     }
+    else {
+	$ParseFail = 1;
+    }
+
     &Debug("--- CacheOut End.") if $debug;
 } 	
 
@@ -699,6 +709,10 @@ sub DeadOrAlive
     }
 }
 
+# dummary
+sub MeadSimpleEvaluator { 1;};
+
+
 
 ### makefml -> $LogBuf{$ml}
 ### report     $Template{$ml} (command template)
@@ -853,6 +867,26 @@ sub Mail
 }
 
 
+sub SaveMail
+{
+    &Log("warn: unanalyzable error mail");
+
+    if ($SAVE_UNANALYZABLE_ERROR_MAIL ||
+	$Forced::SAVE_UNANALYZABLE_ERROR_MAIL) {
+
+	&GetTime;
+	
+	# make working directory
+	-d $VAR_DIR    || mkdir($VAR_DIR, 0755);
+	-d $VARLOG_DIR || mkdir($VARLOG_DIR, 0755);
+	my $f = $VARLOG_DIR."/mead.".$PCurrentTime;
+	&Append($SavedBuffer, $f);
+	$f =~ s@$DIR/@@;
+	&Log("warn: saved in $f");
+    }
+}
+
+
 # mainly search e.g. "sendmail"
 sub SearchPath
 {
@@ -987,7 +1021,7 @@ sub Init
 
     # program directory
     $EXEC_DIR = $opt_E;
-    $ML_DIR = $opt_S;
+    $ML_DIR   = $opt_S;
     if (! $EXEC_DIR) {
 	$EXEC_DIR = $0;
 	$EXEC_DIR =~ s#/libexec/mead.pl##;
@@ -1006,6 +1040,7 @@ sub Init
     # fml 4.0
     if ($opt_D) {
 	if (-d $opt_D && -f "$opt_D/mead_init.ph") {
+	    push(@INC, $opt_D);
 	    eval require "$opt_D/mead_init.ph";
 	}
     }
@@ -1015,8 +1050,9 @@ sub Init
     # fml 4.0
     if ($opt_D) {
 	if (-d $opt_D && -f "$opt_D/mead_force.ph") {
+	    push(@INC, $opt_D);
 	    package Forced;
-	    eval require "$opt_D/mead_force.ph";
+	    eval require "$main::opt_D/mead_force.ph";
 	    package main;
 	}
     }
@@ -1030,16 +1066,20 @@ sub Init
     $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
 
     # directories
-    $DIR      = $Forced::DIR      || $opt_D || $DIR; # working directory.
-    $ML_DIR   = $FORECE_ML_DIR    || $opt_S || $ML_DIR;
-    $EXEC_DIR = $Forced::EXEC_DIR || $opt_E || $EXEC_DIR;
+    $ML_DIR     = $FORECE_ML_DIR    || $opt_S || $ML_DIR;
+    $EXEC_DIR   = $Forced::EXEC_DIR || $opt_E || $EXEC_DIR;
+    $DIR        = $Forced::DIR      || $opt_D || $DIR; # working directory.
+    $VAR_DIR    = "$DIR/var" if $DIR;
+    $VARLOG_DIR = "$VAR_DIR/log" if $VAR_DIR;
 
     # log file
     $LOGFILE = "$DIR/log.mead";
 
     # cache
-    $CACHE_FILE    = $Forced::CACHE_FILE || $opt_C || $CACHE_FILE || "$DIR/errormaillog";
-    $ERROR_ADDR_HINT_FILE     = $Forced::ERROR_ADDR_HINT_FILE  || $ERROR_ADDR_HINT_FILE  || "$DIR/error_addr.hints";
+    $CACHE_FILE = $Forced::CACHE_FILE || $opt_C || $CACHE_FILE || 
+	"$DIR/errormaillog";
+    $ERROR_ADDR_HINT_FILE = $Forced::ERROR_ADDR_HINT_FILE || 
+	$ERROR_ADDR_HINT_FILE  || "$DIR/error_addr.hints";
 
     # programs
     $MAKEFML  = $Forced::MAKEFML  || $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
