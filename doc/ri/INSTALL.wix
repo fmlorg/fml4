@@ -1,5 +1,5 @@
 .HTML_PRE
-	INSTALL guide (for Unix Version)
+	INSTALL guide (FML Unix Version)
 	--- fml Mailing List Server Package ---
 
 				深町 賢一
@@ -22,8 +22,10 @@
    The word "ML" is the abbreviation of "Mailing List" in this document.
 
 
-.#   NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
-.#   ＃まだとってもとっても途中なので信用しないように;-)
+   NT4.0 でも Path 名表記は当然異なりますが、基本的に同じです。
+   ntinstall.cmd というのがあるのでそれを使って下さい。Unix 版との相違点
+   については INSTALL_on_NT4 を見て下さい。このドキュメントはあくまでも
+   Unix版の makefml の使い方について述べたものです。
 =E
    INSTALL_on_NT4.English is the install guide for Windows NT4.0.
    NT3.5 may be also O.K (not tested since I do not have the OS).
