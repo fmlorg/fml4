@@ -1,3 +1,7 @@
 Use of \$\* is deprecated at line
 5 bin/fwix.pl *Use of \"do\" to call subroutines is deprecated
 5 sbin/makefml *Ambiguous use of \$\{package\} resolved to 
+IO/Adapter/ErrorStatus.pm$
+Mail/Bounce/ErrorStatus.pm$
+Mail/Delivery/ErrorStatus.pm$
+Mail/Message/ErrorStatus.pm$
