@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML: fml_version.pl,v 1.20 2001/07/23 13:49:49 fukachan Exp $
+# $FML: fml_version.pl,v 1.21 2001/08/02 13:52:29 fukachan Exp $
 #
 
 require 'getopts.pl';
@@ -21,6 +21,10 @@ $BRANCH        = $opt_b;
 
 if (! -f $RELEASE_DATE) {
    system "date > $RELEASE_DATE";
+}
+
+if (! -f $RELEASE_ID) {
+    system "cat $STATUS > $RELEASE_ID";
 }
 
 &StoreTime if $opt_t;
@@ -169,7 +173,15 @@ sub StoreID
 {
     open(F, "> $RELEASE_ID") || die("cannot open $RELEASE_ID :$!");
     select(F); $| = 1; select(STDOUT);
-    print F "$ID$PL", "\n";
+
+    if ($ENV{'RELEASE'}) {
+	print STDERR "release mode: $ID$PL\n";
+	print F $ID, $PL, "\n";
+    }
+    else {
+	print F $ID, $PL, "\n";
+    }
+
     close(F);
     print STDERR "ID incremented -> $ID$PL\n";
 }
