@@ -27,7 +27,7 @@ sub SmtpDLAMCIDeliver
 sub SmtpMCIDeliver
 {
     local(*e, *rcpt, *smtp, *files) = @_;
-    local($nh, $nm, $i);
+    my ($nh, $nm, $i);
 
     if ($e{'mode:__deliver'}) {
 	return &SmtpDLAMCIDeliver(*e, *rcpt, *smtp, *files);
