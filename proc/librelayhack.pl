@@ -21,7 +21,7 @@ sub RelayHack
 {
     local($gw, $domain, $negative_gw);
 
-    &Open(CF_DEF, $CF_DEF) || return 0;
+    if (! open(CF_DEF, $CF_DEF)) { return 0;}
     while (<CF_DEF>) {
 	next if /^\#/o;	  # skip comments
 	next if /^\s*$/o; # skip null line

@@ -2096,9 +2096,14 @@ sub Write3
 
 sub GetFirstLineFromFile 
 { 
-    &Open(GFLFF, $_[0]) || return $NULL; 
-    chop($_ = <GFLFF>);
-    $_;
+    if (open(GFLFF, $_[0])) {
+	chop($_ = <GFLFF>);
+	close(GFLFF);
+	$_;
+    }
+    else {
+	return $NULL; 
+    }
 }
 
 # For Example, 

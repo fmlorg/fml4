@@ -80,7 +80,7 @@ sub DoDistribute
     }
 
     # Get the present ID
-    &Open(IDINC, $SEQUENCE_FILE) || return; # test
+    if (! open(IDINC, $SEQUENCE_FILE)) { return;} # test
     $ID = &GetFirstLineFromFile($SEQUENCE_FILE);
     $ID++;			# increment, GLOBAL!
 
@@ -316,7 +316,7 @@ sub ReadActiveRecipients
     &Log("ReadActiveRecipients:$active") if $debug_active;
 
     ##### ML Preliminary Session Phase 03: get @Rcpt
-    &Open(ACTIVE_LIST, $active) || return 0;
+    if (! open(ACTIVE_LIST, $active)) { return 0;}
 
     # Under DLA_HACK PreProcessing Section;
     # Get a member list to deliver

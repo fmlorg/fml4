@@ -39,8 +39,11 @@ sub DoSmtpFiles2Socket
 	    &Log("SmtpFiles2Socket: cannot uuencode $f"); close(FILE); next;
 	}
 	else {
-	    &Open(FILE, $f) || 
-		(&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
+	    if (! open(FILE, $f)) {
+		&Log("SmtpFiles2Socket: cannot open $f");
+		close(FILE);
+		next;
+	    }
 	}
 
 	$autoconv = $f{$f, 'autoconv'};

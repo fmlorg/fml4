@@ -195,12 +195,15 @@ sub MSendP
 # Get ID 
 sub GetID
 {
-    &Open(IDINC, $SEQUENCE_FILE) || return 0;
-    $ID = <IDINC>; 
-    chop $ID;
-    close(IDINC);
-
-    $ID;
+    if (open(IDINC, $SEQUENCE_FILE)) {
+	$ID = <IDINC>; 
+	chop $ID;
+	close(IDINC);
+	$ID;
+    }
+    else {
+	0;
+    }
 }
 
 
@@ -221,8 +224,9 @@ sub GetDistributeList
 	print STDERR "WARNING: $MSEND_RC filesize=0 O.K.?\n" unless $Quiet;
     }
 
-    if (! &Open(MSEND_RC, $MSEND_RC)) {
+    if (! open(MSEND_RC, $MSEND_RC)) {
 	print STDERR "not found $MSEND_RC\n" unless -f $MSEND_RC;
+	&Log("$MSEND_RC not found") unless -f $MSEND_RC;
 	print STDERR "cannot open $MSEND_RC:$!\n";
 	&Log("cannot open $MSEND_RC:$!");
 	return;
@@ -297,7 +301,7 @@ sub MSendReadActiveList
     
     &Log("ReadActiveRecipients:$active") if $debug_active;
 
-    &Open(ACTIVE_LIST, $active) || do {
+    if (! open(ACTIVE_LIST, $active)) {
 	print STDERR "cannot open $ACTIVE_LIST:$!\n";
 	return;
     };
@@ -681,7 +685,7 @@ sub MSendNotifyReadActiveList
 {
     local($active) = @_;
 
-    &Open(ACTIVE_LIST, $active) || return 0;
+    if (! open(ACTIVE_LIST, $active)) { return 0;}
 
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
