@@ -645,7 +645,15 @@ sub Write2
 }
 
 
-sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
+sub Touch  
+{ 
+    open(APP, ">>$_[0]"); 
+    close(APP); 
+    chown $<, $GID, $_[0] if $GID;
+
+    $now = time;
+    utime $now, $now, @_;
+}
 
 
 sub SignalLog 
@@ -1529,6 +1537,7 @@ sub do_install
 	print "Installing fml system to $Config'EXEC_DIR\n"; #';
     }
 
+
     ### Fixing perl path ###
     {
 	print STDERR "Fixing Path:";
@@ -1785,6 +1794,9 @@ sub do_newml
 	require "$EXEC_DIR/arch/$COMPAT_ARCH/makefml.pl";
 	&PopFmlInputPasswd($ml);
     }
+
+    # always cf is newer than config.ph (against manual edit check)
+    &Touch("$ML_DIR/$ml/cf");
 }
 
 
@@ -1969,6 +1981,24 @@ sub do_config
     &ResetVariables;
     $cf = "$ML_DIR/$ml/cf";
 
+    # if config.ph is newer than cf?
+    if (-f $cf && -f "$ML_DIR/$ml/config.ph") {
+	if ((stat($cf))[9] < (stat("$ML_DIR/$ml/config.ph"))[9]) {
+	    print "\n   *** Warning ***\n";
+	    print "   Hmm... \"config.ph\" is newer than \"cf\" file\n";
+	    print "   You had manually edited it, is\'nt it?\n\n";
+	    print "   \"makefml config\" overwrites config.ph.\n";
+
+	    local($cmd);
+	    $cmd = &Query("   Can I overwrite config.ph?", "y/n", "y|n", "n");
+
+	    if ($cmd eq "n") { 
+		print "   O.K. makefml stops now. Happy hacking!\n\n";
+		return;
+	    }
+	}
+    }
+
     # evaluate "$ML_DIR/$ml/cf";
     &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
 
@@ -2015,6 +2045,9 @@ sub do_config
 		  $cf, "$ML_DIR/$ml/config.ph");
 
     &Log("makefml::config operation ends");
+
+    # touch for (cf is newer than config.ph always when makefml works)
+    &Touch($cf);
 }
 
 
@@ -2489,6 +2522,20 @@ sub SetGidBit
 }
 
 
+
+
+# remove $to if -f $to on UNIX
+# but error if -f $to on MS-DOS
+sub Rename
+{
+    local($from, $to) = @_;
+
+    unlink $to if -f $to;
+
+    #     |  this space is important for 
+    #     V  fix_syscall.pl of NT version
+    rename ($from, $to);
+}
 
 
 #################################################################
@@ -3040,9 +3087,6 @@ sub Bind
 
     return "$index$label";
 }
-
-
-exit 0;
 
 
 1;
