@@ -12,7 +12,7 @@
 
              ↓
 
-   SMTP で待ち構えているプログラムがうけとる (例： sendmail)
+   SMTP で待ち構えているプログラムがうけとる (例: sendmail)
 
              ↓
 
@@ -40,6 +40,11 @@
 なお、この図でわかるとおり、まとめおくりはこれとは”全く別の”プロセス
 です。まとめおくりは自動的に作動するわけではありません。
 .xref msend
+
+まとめおくりとは、一定時間ごとにスプールされたＭＬの記事を送ってあげる”
+別のプロセス”のことです。このプロセスは別の仕方で定期的に実行されなけ
+ればなりません。
+
 
 
 .S	sendmail -> fml 時の動作
@@ -170,11 +175,11 @@ STDIN からの読み込みは第壱段階でハッシュテーブル %Envelope
 .k	$CHADDR_KEYWORD
 
 	# で始まり、英文字が続く行 (\s*\w+\s|^\#\s*\w+)
+
 	# で始まり、$CHADDR_KEYWORD のキーワード
+	が現れる行があるか否か？あった場合はコマンドモードへ移行。
 
-が現れる行があるか否か？あった場合はコマンドモードへ移行。
-
-の 2つのチェックをしています。それぞれの LIMIT を調節すると、つまり 
+の2つのチェックをしています。それぞれの LIMIT を調節すると、つまり 
 LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
 ンドの対象にすることもできます。デフォールトではそれぞれ最初の3行のみ
 を対象にしています。
@@ -197,15 +202,20 @@ LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
 この後ロックして、メインのプロセスが続くことになります。
 
 
-.S	fml process の signal handling
+.S	fml process の lock と signal handling 
 .k	$Sigarlm
 .k	$FLOCK_TIMEOUT
 .k	$MAX_TIMEOUT
 
-現在は次のように設定されています。
-これは alarm(3) を使う普通のやり方です。
+現在の flock を使うロックアルゴリズムは次のように設定されています。
+alarm(3) を使う普通のやり方です。
+
+sub Flock {
+    eval alarm($FLOCK_TIMEOUT || 3600);
+	...
+
 TIMEOUTを待つ時間は $FLOCK_TIMEOUT で決まります。
-(flock でない場合は 三秒＋α 程度のSLEEPを MAX_TIMEOUT 回待ってみる）
+(flock でない場合は 三秒＋α 程度の sleep を $MAX_TIMEOUT 回して待ってみる）
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -214,14 +224,15 @@ TIMEOUTを待つ時間は $FLOCK_TIMEOUT で決まります。
 $FLOCK_TIMEOUT (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された関数
 (TimeOut)を実行します。
 
-TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
+関数 TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
 これがないとずっとロック(flock)がかかったままになるからです。
 
 なお、flock を使わない時はTIMEOUTしたメールを保存し、管理者へTIMEOUTを
 知らせます。詳細は liblock.pl を見るとわかるでしょう。
+.#	UNIX Nework Programming
 
 
-.S	ロックの仕方について
+.S	ロックの仕方(flock でない場合)
 .l	how-to-lock
 .k	ロックの仕方について
 .k	ロックアルゴリズムの選択と変数の設定
@@ -305,6 +316,7 @@ $PORT = 25 (25/tcp) で通信しますが、
 
 を変えることで別のポートで通信することもできます。また、標準で
 
+
 	$SMTP_LOG (default は "var/log/_smtplog")
 
 というファイルに通信のログを残します。このログはデバッグに非常に役立ち
@@ -338,12 +350,13 @@ $PORT = 25 (25/tcp) で通信しますが、
 .k	予備のSMTPサーバ
 .k	@HOSTS
 
-もしSMTPサーバに何かあった時のために @HOSTS に複数台の sendmail の走っ
-ているマシンを定義することが出来ます。
+もしSMTPサーバに何かあった時のために @HOSTS に複数台の予備の sendmail 
+の走っているマシンを定義することが出来ます。
 
    @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
 
-この場合、もし machine-1 に connect() できない時は machine-2 へ…とい
+この場合、もし $HOST に connect() できない時は、machine-1 に、
+もし machine-1 に connect() できない時は machine-2 へ…とい
 う風に予備のサーバを使い何とか配送をしようと試みます。
 
 
@@ -387,9 +400,8 @@ $PORT = 25 (25/tcp) で通信しますが、
 	$debug と $rcsid です。歴史的にそうなっているというだけなので
 	今後そういう変数名は作られることはありません。
 
-○ 小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言
+○ 小文字は基本的にlocal variableで、大抵はsubroutineの先頭でlocal宣言
    されています。
-
 
 ○ 補足
 なお、Directory を定義する $*_DIR タイプの変数には
@@ -398,7 +410,8 @@ $PORT = 25 (25/tcp) で通信しますが、
 	$FP_*_DIR 	絶対パス
 
 の２種類があります。 $FP_*_DIR タイプの変数は自動的に変換され定義され
-ます。基本的には絶対パスが使われます。
+ます。基本的には絶対パスが使われます。$FP_ の変数は fml.pl の初期化で
+自動的に補正されつつ設定されます。
 
 	$FP_TMP_DIR
 	$FP_VARDB_DIR
