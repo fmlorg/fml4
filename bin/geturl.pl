@@ -128,11 +128,15 @@ sub UpDatedP
     local($last, $lastnew);
 
     # first time
+    &Log("not found $head")    unless -f $head;
+    &Log("not found $headnew") unless -f $headnew;
+
     return 0 unless (-f $head && -f $headnew);
 
     $last    = &Grep('^Last-Modified:', $head);
     $lastnew = &Grep('^Last-Modified:', $headnew);
 
+    &Log("?: last=$last != lastnew=$lastnew") if $debug;
     ($last ne $lastnew) ? 1 : 0;
 }
 
@@ -142,8 +146,9 @@ sub Grep
     local($key, $file) = @_;
 
     open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
-    while (<IN>) { return $_ if /$key/;}
+    while (<IN>) { return $_ if /$key/i;}
     close(IN);
+
     $NULL;
 }
 
