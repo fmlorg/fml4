@@ -1384,6 +1384,8 @@ sub GenThread
     # $queue =~ s/^\s*\(//;
     # $queue =~ s/\)\s*$//;
 
+    local($indent) = 0;
+
     for (split(/\n/, "$queue\n")) {
 	next if /^\s*$/;
 	print STDERR "QUEUE $_\n" if $debug;
@@ -1394,8 +1396,23 @@ sub GenThread
 	&Log("QUEUE $_") if $debug_html;
 
 	for $i (split(/\s+/, $_)) {
-	    if ($i eq '(') { print OUT "<UL>\n"; next;}
-	    if ($i eq ')') { print OUT "</UL>\n\n"; next;} 
+	    if ($i eq '(') {
+		$indent++;
+		print OUT "\n";
+		print OUT "<!- $_ ->\n" if $debug;
+		print OUT "<!- $indent ->\n" if $debug;
+		print OUT " " x $indent;
+		print OUT "<UL>\n"; next;
+	    }
+	    if ($i eq ')') { 
+		print OUT "\n";
+		print OUT "<!- $_ ->\n" if $debug;
+		print OUT "<!- $indent ->\n" if $debug;
+		print OUT " " x $indent;
+		print OUT "</UL>\n\n";
+		$indent--;
+		next;
+	    }
 
 	    if ($list{$i}) {
 		print OUT $list{$i};
@@ -1438,7 +1455,26 @@ sub ConsiderQueueExpiration
     # remove non-contents threads
     $buf =~ s/\(\s*\)//g;
 
-    # clean-up'ed link relation
+    # check the close of parentheses
+    # ( a b (c d) )
+    local($r, $l);
+    $buffer = $buf;
+    undef $buf;
+    for $x (split(/\s+/, $buffer)) {
+	$r++ if $x eq '(';
+	$l++ if $x eq ')';
+	$buf .= " $x ";
+    }
+
+    $r = $r - $l;
+    if ($r > 0) {
+	while ($r-- > 0) { $buf .= " ) ";}
+    }
+    else {
+	while ($r++ < 0) { $buf = " ( " . $buf;}
+    }
+
+    ### return clean-up'ed link relation ###
     $buf;
 }
 
