@@ -40,20 +40,30 @@ sub MD5_cksum
 }
 
 
-sub MailBocyCksum
+sub MailBodyCksum
 {
     local(*e) = @_;
+    local(@path, $prog);
+
+    if ($MD5 && -x $MD5) {
+	$prog = $MD5;
+    }
+    else {
+	@path = ('/usr/bin', '/sbin', '/usr/local/bin', '/usr/gnu/bin', 
+		 '/usr/pkg/bin');
+	$prog = &SearchPath('md5', @path) || &SearchPath('md5sum', @path);
+    }
 
     # perl 5
     if ($] =~ /^5/ && &PerlModuleExistP('MD5')) {
-	&Log("MD5.pm");
+	&Log("MD5.pm") if $debug_cksum;
 	&use('md5');
 	$mid = &MailBodyMD5Cksum(*e);
     }
-    elsif ($MD5 && -x $MD5) {
-	&Log("md5");
+    elsif ($prog && -x $prog) {
+	&Log("run prog=$prog") if $debug_cksum;
 	&use('cksum');
-	$mid = &MD5_cksum(*e);
+	$mid = &MD5_cksum(*e, $prog);
     }
     else {
 	&Log("Error: neither MD5.pm nor program 'md5' found");
@@ -69,7 +79,7 @@ sub CheckMailBodyCKSUM
 
     $CHECK_MAILBODY_CKSUM || return 0;
 
-    $mid = &MailBocyCksum(*e);
+    $mid = &MailBodyCksum(*e);
 
     if ($mid) {
 	$status = &SearchDupKey($mid, $LOG_MAILBODY_CKSUM);
@@ -100,7 +110,7 @@ sub CacheMailBodyCksum
     
     $CHECK_MAILBODY_CKSUM || return 0;
 
-    $id = $msgid || &MailBocyCksum(*e);
+    $id = $msgid || &MailBodyCksum(*e);
 
     if ($CachedMailBodyCksum{$id}) {
 	&Log("CacheMailBodyCksum: warning: duplicated input") if $debug_loop;
