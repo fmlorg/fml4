@@ -38,6 +38,15 @@ fml-current (3.0G 20000716) pop version
     ・lhmelt                      ※ファイル解凍用
 
 
+.S	case 3
+
+    OS:     Windows 2000 Server SP2
+    MTA:    X-Mail Server Ver 1.1
+    FML:    fml 4.0.3_ALPHA
+    Perl:   Active Perl Ver 5.6.1 Build 629
+
+   参照: fml-help: 01136
+
 
 .C	installation
 
@@ -76,7 +85,7 @@ appreciate the environment information to be installed on windows
 
 	Masaya Mase
 
-$FML: INSTALL_on_WIN2000.wix,v 1.7 2001/07/07 08:22:00 fukachan Exp $
+$FML: INSTALL_on_WIN2000.wix,v 1.8 2001/07/16 14:15:11 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp

@@ -102,6 +102,14 @@ References: fml -support: 7947 7954 7967
    という形で fml (include.cmd が呼びます)を起動するらしいです。
    ＃ 4.0J ユーザーズガイドの P.64 にちょっとだけかいてありますね
 
+*  X-Mail Server Ver 1.1
+
+X-Mail でも IMail のような感じの script を記述することで
+プログラムを起動することができるらしいです。
+が、どう書くのが正しいのか？はいまひとつ不明です。
+
+   参照: fml-help: 01136
+
 
 .S	ケーススタディ: テスト環境
 =E.S	Case Study: test environment
