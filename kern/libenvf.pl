@@ -40,6 +40,7 @@ sub __EnvelopeFilter
     $DISTRIBUTE_FILTER_HOOK .= $REJECT_DISTRIBUTE_FILTER_HOOK;
     $COMMAND_FILTER_HOOK    .= $REJECT_COMMAND_FILTER_HOOK;
 
+    &Log("ENVF: run-hooks \$DISTRIBUTE_FILTER_HOOK") if $debug_envf_rule;
     if ($mode eq 'distribute' && $DISTRIBUTE_FILTER_HOOK) {
 	$r = &EvalRejectFilterHook(*e, *DISTRIBUTE_FILTER_HOOK);
     }
@@ -49,6 +50,7 @@ sub __EnvelopeFilter
 
 
     ### 2. evaluate %REJECT_HDR_FIELD_REGEXP
+    &Log("ENVF: eval \%REJECT_HDR_FIELD_REGEXP") if $debug_envf_rule;
     if ($r) {
 	; # O.K.
     }
@@ -97,6 +99,7 @@ sub __EnvelopeFilter
     # If multipart, check the first block only.
     # If plaintext, check the first two paragraph or 1024 bytes.
 
+    &Log("ENVF: create target buffer (pmap,multipart)") if $debug_envf_rule;
     &use('envfsubr');
     if ($e{'MIME:boundary'}) {
 	$xbuf = &GetFirstMultipartBlock(*e);
@@ -128,19 +131,26 @@ sub __EnvelopeFilter
     $one_line_check_p = &EnvelopeFilter::OneLineCheckP(*e, *pmap, $lparbuf);
     &Debug("--EnvelopeFilter::BufferToCheck($xbuf)\n") if $debug;
     &Log("EnvelopeFilter: one line check? $one_line_check_p") if $debug;
-
+    &Log("ENVF: one-line-check-p") if $debug_envf_rule;
 
     ### 5. arrange
     $xbuf = &EnvelopeFilter::CleanUpBuffer($xbuf);
-
-
+    &Log("ENVF: clean up buffer") if $debug_envf_rule;
+    
     ### 6. reject if the mail body has non ISO-2022-JP Japanese strings.
+    &Log("ENVF: jis-p (default = $FILTER_ATTR_REJECT_INVALID_JAPANESE)")
+	if $debug_envf_rule;
     if ($FILTER_ATTR_REJECT_INVALID_JAPANESE && &NonJISP($xbuf)) {
 	$r = 'neigher ASCII nor ISO-2022-JP';
     }
 
 
     ### 7. body check whether invalid or not
+    if ($debug_envf_rule) {
+	&Log("ENVF: null-body-p (default = $FILTER_ATTR_REJECT_NULL_BODY)");
+	&Log("ENVF: one-line-p (default = $FILTER_ATTR_REJECT_ONE_LINE_BODY)");
+    }
+
     if ($r) { # must be matched in a hook already.
 	;
     }
@@ -160,6 +170,12 @@ sub __EnvelopeFilter
 	    ($fparbuf =~ /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/)) {
 	    $r = "one line mail body";
 	}
+    }
+
+    ## 7.1
+    if ($debug_envf_rule) {
+	&Log("ENVF: invalid-command-p (default = $FILTER_ATTR_REJECT_INVALID_COMMAND)");
+	&Log("ENVF: check-2-bytes (default = $FILTER_ATTR_REJECT_2BYTES_COMMAND)");
     }
 
     if ($r) {
@@ -195,8 +211,13 @@ sub __EnvelopeFilter
 	}
     }
 
+
+    # 7.2
     # XXX: "# command" is internal represention
     # XXX: but to reject the old compatible syntaxes.
+    if ($debug_envf_rule) {
+	&Log("ENVF: reject-#proc-p (default = $FILTER_ATTR_REJECT_COMMAND)");
+    }
     if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
 	$fparbuf =~ /^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
 	$r = $1; $r =~ s/\n//g;
@@ -207,11 +228,14 @@ sub __EnvelopeFilter
     ### 8. simple SPAM check
     # Spammer?  Message-Id should be <addr-spec>
     if ($e{'h:message-id:'} !~ /\@/) { $r = "invalid Message-Id";}
+    &Log("ENVF: message-id check") if $debug_envf_rule;
 
 
     ### 9. virus checker
     # [VIRUS CHECK against a class of M$ products]
     # Even if Multipart, evaluate all blocks agasint virus checks.
+    &Log("ENVF: MS-GUID (default = $FILTER_ATTR_REJECT_MS_GUID)")
+	if $debug_envf_rule;
     if ($FILTER_ATTR_REJECT_MS_GUID && $e{'MIME:boundary'}) {
 	&use('viruschk');
 	my ($xr);
