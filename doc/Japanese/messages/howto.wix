@@ -1,24 +1,5 @@
 .C	事例集
 
-.S	本文へ注意をつけたす (2000/06/05 以降の fml-current)
-
-$START_HOOK = q#
-	my ($s) = &GET_BUFFER_FROM_FILE("$DIR/info");
-	&ENVELOPE_APPEND('Body', &STR2JIS($s));
-#;
-
-ここで $DIR/info は /var/spool/ml/elena/info に展開される。
-/var/spool/ml/elena/info というファイルを作りこの中に
-.q
-◯◯◯ ＭＬの抜け方は ……… です。
-.~q
-
-などと書いておきます。
-
-過去のリリース、fml-stable および 2000/06 以前の current では
-%Envelope を直接いじってください。
-
-
 .S	例: fmlでの confirm のメールの本文をハックする (ひとつのＭＬだけ)
 .l	messages.customize
 
@@ -227,18 +208,36 @@ a problem to define templates.
 
 .fi
 
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
-#          All rights reserved. 
-#               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
-# 
-# FML is free software; you can redistribute it and/or modify
-# it under the terms of GNU General Public License.
-# See the file COPYING for more details.
-#
-# $Id$
-.~HTML_PRE
+.S	本文へ注意をつけたす (2000/06/05 以降の fml-current)
 
+$START_HOOK = q#
+	my ($s) = &GET_BUFFER_FROM_FILE("$DIR/info");
+	&ENVELOPE_APPEND('Body', &STR2JIS($s));
+#;
+
+ここで $DIR/info は /var/spool/ml/elena/info に展開される。
+
+/var/spool/ml/elena/info というファイルを作りこの中に
+.q
+◯◯◯ ＭＬの抜け方は ……… です。
+.~q
+などと書いておきます。
+
+過去のリリース、fml-stable および 2000/06 以前の current では
+%Envelope を直接いじってください。
+
+CAUTION: メール本文をいじることと慣習法と倫理(私見)
+.q
+常識的にはメールも郵政省の郵便も本質的に同じはずです、輸送形態が非常に
+異なるのは事実ですが。なんらかの理由で普通の配送時のメール本文になにか
+付けて配送したい時、つまりールの中を勝手にいじって配送するとする場合、
+それは「人の郵便を勝手に開けて、人の手紙に手を加えるようなもので、倫理
+的に許されるのか？」疑問です。いってみればヘッダ情報は封筒の表のような
+ものです。付加情報をつけたり、転送先を書いたり情報の削除・追加をします。
+でも封筒の中身を開けて「この封筒の中身は13000番めの文通封書です」と本
+文に付けたしてからまた封を閉じることを郵便局の人間がやったら人々はその
+行為を許すでしょうか?
+.~q
 
 
 .# $Id$

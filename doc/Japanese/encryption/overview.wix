@@ -80,6 +80,10 @@ Example:
 
 .C	PGP5
 
+$PGP_VERSION = 5; 
+
+を定義して下さい。
+
 .S	makefml
 
 	makefml のコマンドは

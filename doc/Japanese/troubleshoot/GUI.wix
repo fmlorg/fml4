@@ -1,5 +1,36 @@
 .C	GUI 関係
 
+.S	管理者パスワードを忘れました。
+
+default なら /usr/local/fml/www/authdb/admin/htpasswd というのが
+パスワードファイルです。fml のサーバに入って
+.q
+% htpasswd  /usr/local/fml/www/authdb/admin/htpasswd admin
+New password: 
+~.q
+で、パスワードを再設定してください。ちなみに
+.q
+% htpasswd パスワードファイル ユーザ名
+.~q
+です。どのファイルかは 
+/usr/local/fml/share/cgi-bin/fml/admin/.htaccess を見ると分かります。
+例: .htaccess
+.q
+AuthName ByPassword
+AuthType Basic
+AuthUserFile /usr/local/fml/www/authdb/admin/htpasswd  ←これ
+<Limit GET POST>
+require valid-user
+</Limit>
+.~q
+
+各ＭＬ、例えば elena ML の設定は
+
+   /usr/local/fml/share/cgi-bin/fml/ml-admin/elena/.htaccess
+
+を見ると分かります(以下同様)。
+
+
 .S	newaliases を実行すると permission denied という
 
 root が
@@ -71,6 +102,13 @@ apache の /usr/local/apache/logs/errors_log ですでにエラーメッセージが
 専用サーバでない場合は、apache をもう一つつくって別のポートであげて実
 験するなりしてうまくいくとを確認した後に suexec なりを検討するべきでしょ
 う。
+
+
+.S	symlink ?
+
+/usr/local/www/cgi-bin/fml は /usr/local/fml/share/cgi-bin/fml への 
+symlink ですか？ apache のCGI関係の設定例で symlink はデフォールトでは
+ないです。Options FollowSymLinks 
 
 
 .S	WWWでＭＬを作成したが、aliases のエントリがちゃんとUPDATEされてない？
