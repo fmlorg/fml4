@@ -1,0 +1,37 @@
+.HTML_PRE
+
+	CHANGES-4.0.3 (from 4.0.2 to 4.0.3)
+	$Date$
+
+   [4.0.3 の主な変更点]
+
+	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
+
+2001/08/07
+
+   proc/libfml.pl (2.39-2.40):
+	bug fix filter code to accept capital e.g. "Bye".
+
+	大文字ではじまるコマンド(例: Bye)を弾いてしまうのは
+	コマンドの正当性チェックが厳し過ぎるから。
+	これは feature ではなく bug 
+
+2001/07/29
+
+   4.0.3_ALPHA start
+
+2001/07/23
+
+   4.0.2 release
+
+---------------------------------------------------------------------------
+
+$FML: CHANGES-4.0.3.wix,v 1.1.2.2 2001/08/07 14:51:08 fukachan Exp $
+.# Copyright (C) 2001 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               2001 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+.~HTML_PRE
