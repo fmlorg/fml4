@@ -19,19 +19,10 @@
     3.0へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単なインストールの流れや設定例などについては以下のURLにあります。
-   感じを掴むために先にこっちを読むといいかもしれません。
-.url http://www.fml.org/fml/examples/
-   もう少し詳細なものがこのドキュメント(INSTALL)です。
+   感じを掴むためにはまずここ
+.url http://www.fml.org/fml/Japanese/basic_setup/
 
-   デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
-   doc/op.jp というファイルをみてください。
-.url http://www.fml.org/fml/op/
-
-   細かいカスタマイズは part III「インストールとカスタマイズ」を
-.url http://www.fml.org/fml/op/index.html#Configurations
-
-   MTAごとの設定やNTではどうするか？などはファイルが別にあります。
+   HOME PAGE
 .url http://www.fml.org/fml/
 
 
