@@ -85,10 +85,17 @@ e:	testsetup
 	@ echo 'make m is to re-generate /tmp/e/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /tmp/e/.fml/system install)
 
-cgi:	testsetup
+cgi:	testsetup cgisetup cgisync
+
+cgisetup:
 	@ echo 'make m is to re-generate /tmp/e/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; \
 		perl makefml -W cgi -f /tmp/e/.fml/system install)
+
+cgisync:
+	@ echo sync cgi with fml-current
+	rsync -C --exclude=cgi -av www/lib/ /usr/local/fml/www/lib/
+	rsync -C -av doc/messages/Japanese/ /usr/local/fml/messages/Japanese/
 
 m:	testsetup
 	if [ -d /tmp/e ]; then \
