@@ -26,26 +26,27 @@
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#config">_ML_$B$N%a!<%j%s%0%j%9%H$N>\:Y@_Dj(B</A>
-<LI><A HREF="#add.bye">$BEPO?(B/$B:o=|(B</A>
+<LI><A HREF="#add.bye">$B%f!<%6EPO?(B/$B:o=|(B</A>
 <LI><A HREF="#adminadd.bye">$B4IM}<TEPO?(B/$B:o=|(B</A>
+<LI><A HREF="#config">_ML_ $B#M#L$N>\:Y@_Dj(B</A>
 <LI><A HREF="#password">$B4IM}<T%Q%9%o!<%I$N@_Dj(B</A>
 <LI><A HREF="#log">$B%m%0$r$_$k(B</A>
 </UL>
 
+
 <HR>
-<P>$B%f!<%6$NEPO?(B/$B:o=|(B
+<UL>
 
-<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+   <LI>$B%f!<%6$NEPO?(B/$B:o=|(B
 
-<P>
-<TABLE>
+	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<TABLE>
 	<TR>
 		<TD ALIGN=right> Email $B%"%I%l%9(B:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>$B4{B8%j%9%H$+$i$NA*Br(B:
+			<TD ALIGN=left>$B%j%9%H$+$i$NA*Br(B:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR>
 			__EXPAND_OPTION_MEMBER_LIST__
@@ -59,36 +60,22 @@
 		<OPTION VALUE=ADD>$BEPO?(B
 		<OPTION VALUE=BYE>$B:o=|(B
 		</SELECT>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
 
 
-<HR>
-<A NAME=config>$B>\:Y@_Dj(B(makefml config)
-<BR>
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=config>
-<INPUT TYPE=hidden NAME=PTR  VALUE=/>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-<INPUT NAME=submit-p TYPE=submit VALUE=GO>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+   
+   <A NAME=adminadd.bye>
+   <LI>$B4IM}<T$NEPO?(B/$B:o=|(B $B4X78(B
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
-
-<HR>
-<A NAME=adminadd.bye><P>$B4IM}<T$NEPO?(B/$B:o=|(B $B4X78(B
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-
-<P>
-<TABLE>
+	<TABLE>
 	<TR>
 		<TD ALIGN=right> Email $B%"%I%l%9(B:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
@@ -107,33 +94,46 @@ _____________________________
 		<OPTION VALUE=ADD_ADMIN>ADD ADMIN $B4IM}<T$H$7$FEPO?(B
 		<OPTION VALUE=BYE_ADMIN>BYE ADMIN $B4IM}<T$H$7$F:o=|(B
 		</SELECT>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+
+<HR>
+   <A NAME=config>
+   <LI>$B>\:Y@_Dj(B(makefml config)
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=config>
+	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
+	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
 
 
 <HR>
-<A NAME=password><P>$B4IM}<T%Q%9%o!<%I$N@_Dj(B
-<BR>
-admin $B$J$$$7(B approve $B%3%^%s%I$N%Q%9%o!<%I$H(BGUI$B$N%a%K%e!<$K$O$$$k$?$a$N(B
-$B%Q%9%o!<%I$rF1;~$K99?7$7$^$9!#(B
-<BR>
-GUI$B$G$O$H$j$"$($:$3$l$i$K$D$$$F$OF1$8%Q%9%o!<%I$G$9!#(B
-<BR>
-CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(B
-$B2DG=$G$9!#(B
+	<A NAME=password>
+	<LI>$B4IM}<T%Q%9%o!<%I$N@_Dj(B
+	<BR>
+	admin $B$J$$$7(B approve $B%3%^%s%I$N%Q%9%o!<%I$H(BGUI$B$N%a%K%e!<$K$O$$$k$?$a$N(B
+	$B%Q%9%o!<%I$rF1;~$K99?7$7$^$9!#(B
+	<BR>
+	GUI$B$G$O$H$j$"$($:$3$l$i$K$D$$$F$OF1$8%Q%9%o!<%I$G$9!#(B
+	<BR>
+	CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(B
+	$B2DG=$G$9!#(B
 
-
-<!- apply patch by ikeda@meple.or.jp ->
-<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
-<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
-<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
-<TABLE>
+	<!- apply patch by ikeda@meple.or.jp ->
+	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
+	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
+	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
+	<TABLE>
 	<TR>
 		<TD ALIGN=right> $B4IM}<T(B Email $B%"%I%l%9(B:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
@@ -145,31 +145,46 @@ CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(
 	<TR>
 		<TD ALIGN=right> $B3NG'$N$?$aF1$8%Q%9%o!<%I(B:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Go>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
 
-<HR>
-<A NAME=log><P>$B%a!<%j%s%0%j%9%H$N%m%0$r$_$k(B
+   <HR>
+   <A NAME=log>
+   <LI>$B%a!<%j%s%0%j%9%H$N%m%0$r$_$k(B
 
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=log>
-<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=log>
+	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
-<BR>
-<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>$B:G8e$N#N9T(B
-<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=10>
-<BR>
-<INPUT NAME="OPTION" TYPE="radio" VALUE="all">$BA4It(B
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Go>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
+	<BR>
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>$B:G8e$N#N9T(B
+	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
+	<BR>
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">$B$"$kF|(B
+	<SELECT NAME="YYYY" SIZE=4>
+	__EXPAND_YYYY__
+	</SELECT>
+	<SELECT NAME="MM" SIZE=2>
+	__EXPAND_MM__
+	</SELECT>
+	<SELECT NAME="DD" SIZE=2>
+	__EXPAND_DD__
+	</SELECT>
+	<BR>
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">$BA4It(B
 
+	<BR>
+	$BA*Br(B: <SELECT NAME=ML>
+	__EXPAND_OPTION_ML__
+	</SELECT>
+
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
 
 <PRE>
 Copyright (C) 1993-2000 Ken'ichi Fukamachi
