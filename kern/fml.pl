@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.137 2001/08/25 12:18:35 fukachan Exp $
+# $FML: fml.pl,v 2.138 2001/09/18 14:41:48 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -1588,7 +1588,26 @@ sub DoMailListMemberP
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, $action, {'address' => $addr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
-	if ($mib->{'error'}) { return 0;}
+
+	# if search fails for $MEMBER_LIST, 
+	if ($mib{'error'} && ($type eq 'm')) {
+	    # retry search in $ADMIN_MEMBER_LIST 
+	    my (%xmib, %result, %misc, $error);
+	    &DataBaseMIBPrepare(\%xmib,'admin_member_p',{'address' => $addr});
+	    &DataBaseCtl(\%Envelope, \%xmib, \%result, \%misc);
+
+	    # search fails for both $MEMBER_LIST and $ADMIN_MEMBER_LIST
+	    if ($xmib{'error'}) {
+		return 0;
+	    }
+	    else {
+		$mib{ _result } = $xmib{ _result };
+	    }
+	}
+	# if search fails for $ACTIVE_LIST, return here ASAP.
+	elsif ($mib{'error'}) {
+	    return 0;
+	}
 
 	$Envelope{'database:cache:$action'} = 1 if $mib{'_result'};
 
@@ -1652,7 +1671,7 @@ sub MailListAdminMemberP
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, 'admin_member_p', {'address' => $addr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
-	if ($mib->{'error'}) { return 0;}
+	if ($mib{'error'}) { return 0;}
 
 	$Envelope{'database:cache:admin_member_p'} = 1 if $mib{'_result'};
 

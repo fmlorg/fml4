@@ -352,9 +352,9 @@ sub DoDistribute
 
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, 'store_article');
-	$mib->{'_article_id'} = $ID;
+	$mib{'_article_id'} = $ID;
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
-	if ($mib->{'error'}) { return 0;}
+	if ($mib{'error'}) { return 0;}
     }
 }
 
