@@ -6,7 +6,10 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.include overview.wix
+.include howto.wix
 .include remote.wix
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
