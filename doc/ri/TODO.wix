@@ -166,6 +166,18 @@ I may not do it since it only confuses the customize.
   してむしするようになっているが、ひっかかないものもある。
 
 
+*  Filter の動的 update はできないか？ 
+=E
+*  update filter dynamically 
+
+
+* Filter module ?
+
+* MTIの理論の解説書(本の厚さとはいわないが…)
+=E
+* MTI documente
+
+
 .S	Naming Convention
 
 * sitedef.ph , site_init の naming convention
@@ -381,6 +393,8 @@ $LOG_FILE_SUFFIX = ".%C%y";
 
  *  Recieved: handling rule for each distributing article and Saved file
 
+ *  $REWRITE_TO not number value
+
 
 .S	Memory Usage
 
@@ -402,6 +416,22 @@ $LOG_FILE_SUFFIX = ".%C%y";
 .S	&Open()
 
 remove &Open()
+
+
+.S	アドレス一括書き換え
+=E.S	rewrite address in one action
+
+アドレス一括書き換えするコマンド？
+=E
+command to rewrite addresses in one action ?
+
+	admin rewrite s/domain-A/domain-B/ 
+
+
+.C	Windows NT 固有の問題
+=E.C	Windows NT specific problems
+
+.S	tail command emulation
 
 
 .C	日本特有の問題
