@@ -2854,6 +2854,7 @@ sub ADD_CONTENT_HANDLER { 1;}
 sub Load 
 {
     local($f) = @_;
+    undef %INC;
     eval require($f);
     $@;
 }

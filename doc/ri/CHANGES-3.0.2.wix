@@ -1,6 +1,11 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/10/27
+
+   sbin/makefml
+	nuke cache of %INC before load config.ph in Load() 
+
 2000/08/21
    sbin/makefml (2.173-2.174): 
 	fix to load solaris2/depend.pl if on solaris
