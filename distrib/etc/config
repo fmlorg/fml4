@@ -10,7 +10,7 @@ branch=0
 # prog
 MAKE=/usr/bin/make
 FWIX_OPTS=-F
-setenv BLOCKSIZE	1024; export BLOCKSIZE
+BLOCKSIZE=1024; export BLOCKSIZE
 
 
 
