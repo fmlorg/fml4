@@ -1,35 +1,15 @@
-The set of "cf/" is a utility to help you to maintenance your customization of "fml".
-This directory is not necessary to install "fml".
-It must be useful in the same sense of customizing /etc/sendmail.cf.
+The scripts and configurations under cf/ is the base of fml configurations.
 
+* fml (after fml 2.2.1) defines available values for each variable.
+  We use "# value: xxx" format in cf/MANIFEST, and the available values
+  follows:
 
-If you would like to convert your fml-Release-1-format "config.ph" to the new style,
-
-	% sbin/config -r config.ph > my-setting
-
-The file "my-setting" is a summary under the new style format.  
-It consists of entries different from the default settings (cf/MANIFEST). 
-
-Please check and edit "my-setting" for your preference. 
-To generate the config.ph 
-
-	% sbin/config my-setting > config.ph
-
-This config.ph includes all the entries of fml customizing variables
-irrespective of the demand.
-
----------------------------------------------------
-FML 2.2.1 add a comment of available values for each variable.
-
-"# value: xxx" style in cf/MANIFEST. The values follows:
-
-# value: directory string
-# value: filename string
-# value: 1/0
-# value: number
-# value: string
-# value: regexp string
-# value: perl statement
-
+	# value: directory string
+	# value: filename string
+	# value: 1/0
+	# value: number
+	# value: string
+	# value: regexp string
+	# value: perl statement
 
 $Id$
