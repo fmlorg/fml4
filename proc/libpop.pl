@@ -39,6 +39,10 @@ sub Log { &main'Log(@_);} #';
 
 sub Init
 {
+    for (HAS_ALARM, HAS_GETPWUID, HAS_GETPWGID) {
+	eval("\$POP'$_ = \$main'$_;");	
+    }
+
     for (SERVER, PORT, USER, PASSWORD, TIMEOUT, 
 	 PROG, MAIL_SPOOL, QUEUE_DIR, RECVSTORE, LOGFILE) {
 	eval("\$POP_${_} = \$PopConf{\"${_}\"};");
@@ -48,7 +52,8 @@ sub Init
     -d $POP_QUEUE_DIR || mkdir($POP_QUEUE_DIR, 0700);
     $POP_LOGFILE = $POP_LOGFILE || '/dev/null';
 
-    open(POPLOG, "> $POP_LOGFILE") || &Log("cannot set output of error log");
+    open(POPLOG, "> $POP_LOGFILE") || 
+	&Log("cannot open poplog[$POP_LOGFILE]");
     select(POPLOG); $| = 1; select(STDOUT);
 
     &main'SocketInit;#'; # smtp;
@@ -168,7 +173,7 @@ sub Gabble
 	# We expect the future try. 
 	$SIG{'ALRM'} = 'Shutdown';
 	$SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'Shutdown';
-	alarm($POP_TIMEOUT || 30);
+	alarm($POP_TIMEOUT || 30) if $HAS_ALARM;
 
 	### FILE RETRIEVE
 	open(FILE, "> $tmpf") || next;
