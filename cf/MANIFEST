@@ -1179,22 +1179,6 @@ HTML_WRITE_UMASK:
 
 
 # ### Section: Interface to other Services (http,ftp,gopher,www) ###
-#
-# obsolete
-#
-# Please see doc/op for the details.
-# *_DIR    value: directory string
-# *_FILE   value: filename string
-# *_SERVER value: string
-# *_PORT   value: number
-FTPMAIL_SERVER:
-FTP_DIR:
-FTP_HELP_FILE:
-DEFAULT_GOPHER_PORT:	
-DEFAULT_GOPHER_SERVER:
-DEFAULT_HTML_FIELD:
-DEFAULT_HTTP_PORT:	
-DEFAULT_HTTP_SERVER:
 
 # "whois": default is search of local database file 
 # If "whois -h host" syntax is given, we connects "host" whois server.
