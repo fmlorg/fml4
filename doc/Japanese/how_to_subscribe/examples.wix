@@ -255,4 +255,26 @@ However some ISP services cannot provide listname-request or
 listname-admin. Please consult with your ISP around on this point.
 
 
+.S	アドレスを組織ごとに管理したい
+
+	A社	a.list
+	B社	b.list
+	C社	c.list
+
+各社では自社のメンバーリストを管理する
+
+A: config.ph に
+
+	@MEMBER_LIST = (
+			"$DIR/a.list",
+			"$DIR/b.list",
+			"$DIR/c.list",
+			);
+	@ACTIVE_LIST = (
+			"$DIR/a.list",
+			"$DIR/b.list",
+			"$DIR/c.list",
+			);
+
+
 $Id$
