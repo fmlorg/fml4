@@ -21,9 +21,14 @@ $TrapWord       = 'unknown \S+|\S+ unknown|\S+ not known';
 $new_block = 1;
 $gabble = 0;
 $curf = $NULL;
+$first_header_part = 1;
 
 while (<>) {
     chop;
+
+    # ignore the first header
+    # we should ignore header for <maintainer>
+    $first_header_part = 0 if /^$/;
 
     # save excursion
     $PrevLine = $CurLine;
@@ -36,14 +41,16 @@ while (<>) {
     }
 
     # Store Received: field 
-    if (/^([-A-Za-z]+):(.*)/) {
-	$curf  = $1;
-	$value = $2;
-	$Received .= "\n".$value if $curf =~ /Received/i;
-    }
-    elsif (/^\s+(.*)/) {
-	$value = $1;
-	$Received .= $value if $curf =~ /Received/i;
+    if (! $first_header_part) {
+	if (/^([-A-Za-z]+):(.*)/) {
+	    $curf  = $1;
+	    $value = $2;
+	    $Received .= "\n".$value if $curf =~ /Received/i;
+	}
+	elsif (/^\s+(.*)/) {
+	    $value = $1;
+	    $Received .= $value if $curf =~ /Received/i;
+	}
     }
 
     if ($original_mail && $found && $debug) {
@@ -74,24 +81,25 @@ while (<>) {
     }
 
     # get returned addresses
-    if (/^(To|Cc):.*/i) {
-	if ($new_block && $gabbble == 0) {
-	    &Debug("$new_block, $gabble> rset \%return_addr\n") if $debug;
-	    undef %return_addr;
+    if ($first_header_part) {
+	if (/^(To|Cc):.*/i) {
+	    if ($new_block && $gabbble == 0) {
+		&Debug("$new_block, $gabble> rset \%return_addr\n") if $debug;
+		undef %return_addr;
+	    }
+
+	    $new_block = 0;
+	    $gabbble = 1;
+
+	    &ExtractAddr($_);
+	    next;
 	}
-
-	$new_block = 0;
-	$gabbble = 1;
-
-	&ExtractAddr($_);
-	next;
+	# 822 folding
+	elsif (/^\s+/ && $gabble) {
+	    &ExtractAddr($_);
+	    next;	
+	}
     }
-    # 822 folding
-    elsif (/^\s+/ && $gabble) {
-	&ExtractAddr($_);
-	next;	
-    }
-
 
 
     ###
@@ -226,8 +234,8 @@ while (<>) {
     }
 }
 
-&CacheOut;
 &CacheHints;
+&CacheOut;
 
 &DeadOrAlive;
 
@@ -288,7 +296,7 @@ sub AnalWord
 
 sub AnalyzeErrorCode
 {
-    local($addr, $reason);
+    local($addr, $reason, $r);
 
     $AnalyzeErrorCode++;
 
@@ -301,21 +309,23 @@ sub AnalyzeErrorCode
 	$addr = $1;
 
 	if (/^($error_code_pat)|\D($error_code_pat)\D/) {
-	    &CacheOn($addr, &AnalWord($_));
+	    &CacheOn($addr, $r = &AnalWord($_));
 	}
     }
     elsif ($addr = $_[1]) {
-	    &CacheOn($addr, &AnalWord($_));
+	    &CacheOn($addr, $r = &AnalWord($_));
     }
     else {
 	&Debug("AnalyzeErrorCode: invalid input <$_>") if $debug;
     }
+
+    $CurReason = $r;
 }
 
 
 sub AnalyzeErrorWord
 {
-    local($addr);
+    local($addr, $r);
 
     $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
     $addr = $_[1];
@@ -323,14 +333,16 @@ sub AnalyzeErrorWord
     &Debug("AnalyzeErrorWord(@_)") if $debug;
 
     if (/user unknown|unknown user/i && /(\S+\@[\.A-Za-z0-9\-]+)/) {
-	&CacheOn($addr = $1, &AnalWord($_));
+	&CacheOn($addr = $1, $r = &AnalWord($_));
     }
     elsif ($addr) {
-	&CacheOn($addr, &AnalWord($_));
+	&CacheOn($addr, $r = &AnalWord($_));
     }
     elsif ($debug) {
 	&Debug("AnalyzeErrorWord: invalid input");	
     }
+
+    $CurReason = $r;
 }
 
 
@@ -348,6 +360,10 @@ sub CacheOn
     for (keys %return_addr) {
 	next if /^\s*$/;
 	next if $_ eq $addr;
+
+print STDERR " 
+	&AddrCache(time, $addr, $_, $reason);
+";
 
 	# %AddrCache
 	&AddrCache(time, $addr, $_, $reason);
@@ -649,12 +665,19 @@ sub Mesg
 
 sub CacheHints
 {
-    for (reverse split(/\n/,$Received)) {
+    for (reverse split(/\n/, $Received)) {
+	print STDERR "RECV>: <$_>\n";
+
 	if (/from\s+([-A-Za-z0-9]+\.[-A-Za-z0-9\.]+)/i) {
 	    $Hint{$1} = $1;
 	}
 	if (/by\s+([-A-Za-z0-9]+\.[-A-Za-z0-9\.]+)/i) {
 	    $Hint{$1} = $1;
+	}
+
+	if (/for\s+<(\S+\@[A-Za-z0-9\.]+)>/) {
+	    print STDERR "--&CacheOn($1, $CurReason);\n";
+	    &CacheOn($1, $CurReason);
 	}
     }
 }
