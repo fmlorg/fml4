@@ -4,7 +4,7 @@
 HTML_MISC_SOURCES += roadmap.html nt.html
 HTML_MISC_SOURCES += releng.ja.html
 HTML_MISC_SOURCES += ftphier.ja.html ftphier.html
-HTML_MISC_SOURCES += good_bye_perl4.html CGIstatus.ja.html
+HTML_MISC_SOURCES += CGIstatus.ja.html
 
 ### targets ###
 HTML_REQ_CPP_SOURCES  = history links mailinglist people
