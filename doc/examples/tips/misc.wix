@@ -1,6 +1,6 @@
 .HTML_PRE
 
-	いろいろ
+	いろいろ (fml-support より)
 =E
 	miscellaneous tips
 
@@ -14,11 +14,9 @@
 
 .~HTML_PRE
 
-.HTML_PRE
-
-いろいろ (fml-support より)
-
 .toc
+
+.HTML_PRE
 
 .S	off と skip
 
@@ -30,6 +28,22 @@ skip は管理者だけが使えるように
 Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
 んですが) として on off matome のメンバには定期的に個別にメイルを送って
 ます。(skip の場合には送らないようにしている)
+
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
 
 .S	fmlでのwelcomeメールのsubjectを日本語にする
 
@@ -96,24 +110,21 @@ command status をおくりかえしている部分を disable するには
 うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
 れじゃだめなんですけどね
 
+.S	登録のconfirmationメールのsubjectをいじる
 
-.S	登録/削除以外は限りなく不必要
+   "Subscribe confirmation request $ML_FN";
 
-fml-support: 07271
+のような subject を自由にカスタマイズするのはちょっと面倒です。という
+のは状態によってさまざまなsubjectに変わるので、それは今関数のなかに埋
+め込まれてしまっています。
 
-条件1. 登録者に一切報告メール(welcome も)は送らない
-条件2. 登録した、退会した、旨のメールのみ送る
-条件3. よってコマンドは subscribe と bye 以外不要だろう
+XXX 本来は doc/messages/$LANGUAGE/ に押し出して外のファイルから定義を
+XXX 変更できるようににするべきでしょうね。外側からそのてのフレーズをい
+XXX じれるようにする作業はエラーとかは一通り終ってるけどそれ以外は...
 
-@PermitProcedure = ('subscribe', 'confirm', 'bye');
+例: 現状ではたぶんこんなんをかかないといけないす( not tested )
 
-で、この３つ以外のコマンドをdisableして、さらに
-
-     &DEFINE_MODE('disablenotify');
-
-とかするとほとんどなくなるでしょうかね…
-
-
+.include myGenConfirmReplySubject.pl
 
            Copyright (C) 2000 Ken'ichi Fukamachi
                    All rights reserved. 

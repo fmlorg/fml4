@@ -13,3 +13,6 @@ DOC_EXAMPLES_SOURCES += tips/postfix-pop-before-smtp
 DOC_EXAMPLES_SOURCES += tips/smrsh
 
 DOC_EXAMPLES_RAW_SOURCES += tips/qpopper-patch-by-drac.txt
+DOC_EXAMPLES_RAW_SOURCES += tips/myGenConfirmReplySubject.pl
+
+
