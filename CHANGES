@@ -3,6 +3,16 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/30
+
+  fix pgp around
+	fml/proc: libdist.pl libpgp.pl libra.pl 
+	fix to follow $ENCRYPTED_DISTRIBUTION_TYPE and
+	$REMOTE_ADMINISTRATION_AUTH_TYPE
+
+  fix messages for moderators in each mode (article/command)
+	PR fml-support:8849   
+
 2000/10/29
 
   4.0_ALPHA starts
