@@ -1728,13 +1728,15 @@ sub ResetVariables
     $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
     $TZ       = $CurConfig{'TZ'} || '+0900'; # COMPAT UNTIL FML 2.2;
     $VENDOR   = $CurConfig{'VENDOR'};
-    $CGI_PATH = $CurConfig{'CGI_PATH'} || '/cgi-bin/fml';
+    $CGI_PATH = $CurConfig{'CGI_PATH'} || $ENV{'CGI_PATH'} || '/cgi-bin/fml';
 
     # overwritten for each ml
     $LANGUAGE = &Value('LANGUAGE') || $CurConfig{'LANGUAGE'};
 
     # set up /cgi-bin/ directory directive for www server
     # this directory should be special
+    # import environment REAL_CGI_PATH
+    $REAL_CGI_PATH = $REAL_CGI_PATH || $ENV{'REAL_CGI_PATH'};
     if (! $REAL_CGI_PATH) {
 	$REAL_CGI_PATH = $CGI_PATH;
 	$REAL_CGI_PATH =~ s#^/+##;
