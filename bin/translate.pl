@@ -59,6 +59,8 @@ sub Translate
     local($f) = @_;
     local($buf, $backup, $x, $max_lines, $unit);
 
+    local($mode) = (stat($f))[2];
+
     open(IN, $f) || die("cannot open $f");
     while (<IN>) { $max_lines++;}
     close(IN);
@@ -107,6 +109,7 @@ sub Translate
 	print STDERR "\tdone.\n";
 	print STDERR "backup is $f.trbak\n";
 	unlink $backup;
+	chmod $mode, $f;
     }
     else {
 	print STDERR "something error occurs\n";
