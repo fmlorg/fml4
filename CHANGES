@@ -4,6 +4,14 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/11/21
+
+   database/postgresql/DBI_toymodel2.pl を作りました。
+	toymodel + fml-help:01135 の patch というものです。
+
+	PostgreSQL 7.1 以降ではこのモデルを使うと
+	動くはずです。
+
 2001/11/17
 
    www.fml.org
@@ -77,7 +85,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.221 2001/10/28 15:21:55 fukachan Exp $
+	add $FML: CHANGES,v 1.222 2001/11/18 13:55:55 fukachan Exp $
 
 2001/10/03
 
