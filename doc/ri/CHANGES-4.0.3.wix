@@ -5,10 +5,15 @@
 
    [4.0.3 の主な変更点]
 
-	* 4.0.3 は基本的に細かいバグとりが中心です。
+	* 4.0.3 は基本的に細かいバグとりが中心です(詳細は以下参照)。
+        * FA2001_001 に対する修正
+		記事の HTML 化の際のメタキャラクタの取り扱いにバグ
+		があります。詳しくは 
+		http://www.fml.org/fml/advisories/FA2001_001/
+		を参照して下さい。
 	* perl 5.6.x および 5.7.x でもインストールが失敗しないように修正
-	* IM  への修正 ( local patch )
-	* 拡張: データベース周り
+	* IM  への修正 (local patch)
+	* データベース周りの拡張
 	    makefml が DBMS と直接通信できるようになりました。
 		コマンドラインからのデータベースへの登録/削除
 		CGI からのデータベースへの登録/削除
@@ -28,13 +33,21 @@
 	+UNISTD:                	&is_unix
 
    proc/libdisthack.pl (1.15-1.16):
-	PR by fml-help/1208
-	fix mime boundary handling
+	fix mime boundary handling PR by fml-help/1208
+	
+	Content Filter で MIME ブロックの区切りがおかしい点を
+	修正
 
 2001/11/03
 
    update htmlifier
 	sync w/ current
+
+	HTML 化する際に subject のコンバータがメタキャラクタの
+	処理をしていないことを修正。
+	詳しくは FML アドヴァイザリ FA2001_001 を参照して下さい。
+
+	   http://www.fml.org/fml/advisories/FA2001_001/
 
 2001/10/22
 
@@ -43,6 +56,8 @@
 
    proc/libmodedef.pl (2.6-2.7):
 	check more by defined($ID)
+
+	アーカイブモードなどで無駄働きを抑制する
 
 2001/10/15
 
@@ -60,6 +75,9 @@
 	+ unsafe   = CTL | SP | <"> | "#" | "%" | "<" | ">"
 	incomplete but may be effective ?
 
+	HTML 化する際に URL を取り出す範囲を"より"正しく
+	＃厳密ではない workaround 
+
    kern/libenvf.pl (2.18-2.19):
 	nuke debug 
 
@@ -71,7 +89,8 @@
 2001/10/10
 
    cf/MANIFEST (1.88-1.89):
-	define MIME_BROKEN_ENCODING_FIXUP
+	MIME_BROKEN_ENCODING_FIXUP を定義すると
+	変な MIME エンコーディングをなんとかする
 
 2001/10/03
 
@@ -91,6 +110,7 @@
 
   bin/base64decode.pl (1.6-1.7)
   proc/libhtmlsubr.pl (1.10-1.11) 
+	Microsoft 系でうまく添付ファイルを処理できないことへの対処
 	use "base64decode.pl -o OUTFILE" style to avoid error
 	on win32 system
 
@@ -115,7 +135,7 @@
         PR by shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
         (fml-help: 00872)
 
-        bug fix chaddr et. al. in database access
+	DBMS でも chaddr が使えるようにする、など
 
    databases/TOY_MODEL.English (1.1-1.2):
 	nuke Japanese.
@@ -123,6 +143,8 @@
    proc/libhtmlsubr.pl (1.9-1.10): 
 	implement _get_suffix() by Kasui Nayumi (fml-help: 00721) to
 	extract suffix
+
+	添付ファイルの suffix の選択をより正しく処理する
 
 2001/09/17
 
@@ -187,7 +209,8 @@
 	remove ^H
 
    sbin/makefml (2.220-2.221): 
-	workaround fix: avoid installation error on perl 5.6.x/5.7.x?
+	workaround ながら perl 5.6.x および 5.7.x で
+	インストーラがうまく動かない問題を直す
 
 2001/08/23
 
@@ -203,13 +226,15 @@
    www/lib/libcgi_kern.pl (1.54-1.55): 
 	bug fix cgi list check in initial state without members/actives
 
-	初期状態で members  や actives がない場合に
+	CGI の初期状態で members  や actives がない場合に
 	エラーが表示されることがあるが、このエラーは不必要なので削除
 
 2001/08/19
 
    module/Japanese/IM/Iso2022jp.pm (1.1-1.2):
 	im140 + local fix (fml-help:00607)
+
+	注意: IM のバグを直すが、FML ローカルの修正となっている
 
 2001/08/17
 
@@ -246,7 +271,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.34 2001/11/24 08:12:20 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.35 2001/11/24 16:46:27 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
