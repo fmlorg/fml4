@@ -1,3 +1,5 @@
+.C	いろいろなサイズの制限
+
 .S	投稿メールのサイズの制限
 =E.S	Limit of size for a posted article
 .n	mail_size_limit

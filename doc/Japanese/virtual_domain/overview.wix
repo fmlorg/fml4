@@ -1,0 +1,54 @@
+.C	Overview
+
+virtual domain については fml がどうこうというよりMTAの設定のはなしな
+ので特別何かあるわけじゃありませんが、インストールや upgrade を簡単化
+する工夫の余地はあります。
+
+一般には一台のマシンで複数の(それぞれのドメイン用の)fmlがインストール
+されていることとになります。
+例:
+
+virtual-1 用
+	/usr/local/fml-virtual-1/	1用の実行ファイル群
+	/var/spool/ml-virtual-1/	1用のスプール
+
+virtual-2 用
+	/usr/local/fml-virtual-2/
+	/var/spool/ml-virtual-2/
+
+virtual-3 用
+	/usr/local/fml-virtual-3/
+	/var/spool/ml-virtual-3/
+
+
+makefml を使って設定することを考えるとこれする方が簡単です。
+
+もちろん /usr/local/fml と /var/spool/ml-virutla-1,2,3 だけでももちろ
+ん動きますが、その場合 makefml を使おうとするとちょっと工夫が必要にな
+ります。
+
+
+.S	makefml に設定を読み込ませるやりかた
+
+makefml install を実行すると対話モードになるので、各
+
+  makefml -f /some/where/virtual-domain-1 install
+  makefml -f /some/where/virtual-domain-2 install
+
+-f の引数は /usr/local/fml/.fml/system というファイルです。
+
+例:
+
+  makefml -f /usr/local/fml-virtual-1/.fml/system install
+  makefml -f /usr/local/fml-virtual-2/.fml/system install
+  makefml -f /usr/local/fml-virtual-3/.fml/system install
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

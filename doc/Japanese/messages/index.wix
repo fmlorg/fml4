@@ -5,4 +5,4 @@
 .~HTML_PRE
 
 .include overview.wix
-.include welcome.wix
+.include howto.wix

@@ -45,59 +45,6 @@ fml-support: 07271
 
 とかするとほとんどなくなるでしょうかね…
 
-.S	fmlでのwelcomeメールのsubjectを日本語にする
-
-fml-support: 07219
-
-ＭＬのHOMEにあるcfというファイルの最後(LOCAL_CONFIGという行より後)に
-
-$START_HOOK = q#
-
-	&use('MIME');
-	$WELCOME_STATEMENT  = "ようこそここへ、うふふ";
-	$WELCOME_STATEMENT  = &STR2EUC($WELCOME_STATEMENT);
-	$WELCOME_STATEMENT  = &mimeencode($WELCOME_STATEMENT);
-
-#;
-
-と呪文を書いておいて、その場所で
-
-make config.ph
-
-で config.ph をつくりなおす
-
-.S	fmlでのwelcomeメールの本文をハックする
-
-◯ $DIR/welcome ファイルをいじる
-
-◯ 一番先頭の
-
-   メーリングリストへの投稿は	<foo@bar.jp>
-   コマンドは			<foo-ctl@bar.jp>
-   管理者宛のメールは		<foo-admin@bar.jp>
-
-のような部分をいじりたい場合は
-
-/usr/local/fml/messages/Japanese/amctl というファイルの
-
-amctl.added.caution:
-	注意: このメールにリプライするとメーリングリスト宛になります。
-	メーリングリストへの投稿は	<_ARG1_>
-	コマンドは			<_ARG2_>
-	管理者宛のメールは		<_ARG0_>
-	へ送って下さい。
-
-という部分をいじってください。
-
-[KNOWN_BUGS]
-
-XXX ただこのファイルはインストール時に上書きされてしまうので
-XXX /var/spool/ml/etc/fml/messages/Japanese/amctl などという場所へコピー
-XXX してそのファイルを好きなようにいじるべきです。しかし今度は fml を
-XXX updateしたときに新しい /usr/local/fml/messages/Japanese/amctl の内
-XXX 容が最新版を反映してくれません。現在のコードを修正してだめなら 
-XXX /usr/local/fml のほうもさがすように修正するべきでしょう。
-
 
 .S	command status report をしなくさせる
 
@@ -109,22 +56,6 @@ command status をおくりかえしている部分を disable するには
 と config.ph に書くとこの関数がダミーの状態で呼ばれるけど何もしないよ
 うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
 れじゃだめなんですけどね
-
-.S	登録のconfirmationメールのsubjectをいじる
-
-   "Subscribe confirmation request $ML_FN";
-
-のような subject を自由にカスタマイズするのはちょっと面倒です。という
-のは状態によってさまざまなsubjectに変わるので、それは今関数のなかに埋
-め込まれてしまっています。
-
-XXX 本来は messages/$LANGUAGE/ に押し出して外のファイルから定義を
-XXX 変更できるようににするべきでしょうね。外側からそのてのフレーズをい
-XXX じれるようにする作業はエラーとかは一通り終ってるけどそれ以外は...
-
-例: 現状ではたぶんこんなんをかかないといけないす( not tested )
-
-.include myGenConfirmReplySubject.pl
 
 
 .S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい

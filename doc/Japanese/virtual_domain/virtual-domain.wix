@@ -1,8 +1,4 @@
-.HTML_PRE
-
-	２つの virtual domain で同じＭＬを作る
-=E
-	create two same account name ML's: account@virtual.domain
+.S	２つの virtual domain で同じＭＬを作る
 
 例:
 =E
@@ -10,13 +6,6 @@ Example:
 
    info@domain1.org
    info@domain2.org 
-
-.~HTML_PRE
-.if LANG == ENGLISH
-.include virtual-domain.en.wix
-.return
-.fi
-.HTML_PRE
 
 1. fml を２つインストールする。
 
@@ -85,9 +74,3 @@ info@domain2.orgをつくる
 [sendmail]
 
 例えば CF の usertable
-
-           Copyright (C) 1999 Ken'ichi Fukamachi
-                   All rights reserved. 
-
-$Id$
-.~HTML_PRE

@@ -1,5 +1,44 @@
 .C	事例集
 
+.S	fmlでのwelcomeメールのsubjectを日本語にする
+
+fml-support: 07219
+
+ＭＬのHOMEにあるcfというファイルの最後(LOCAL_CONFIGという行より後)に
+
+$START_HOOK = q#
+
+	&use('MIME');
+	$WELCOME_STATEMENT  = "ようこそここへ、うふふ";
+	$WELCOME_STATEMENT  = &STR2EUC($WELCOME_STATEMENT);
+	$WELCOME_STATEMENT  = &mimeencode($WELCOME_STATEMENT);
+
+#;
+
+と呪文を書いておいて、その場所で
+
+make config.ph
+
+で config.ph をつくりなおす
+
+
+.S	登録のconfirmationメールのsubjectをいじる
+
+   "Subscribe confirmation request $ML_FN";
+
+のような subject を自由にカスタマイズするのはちょっと面倒です。という
+のは状態によってさまざまなsubjectに変わるので、それは今関数のなかに埋
+め込まれてしまっています。
+
+XXX 本来は messages/$LANGUAGE/ に押し出して外のファイルから定義を
+XXX 変更できるようににするべきでしょうね。外側からそのてのフレーズをい
+XXX じれるようにする作業はエラーとかは一通り終ってるけどそれ以外は...
+
+例: 現状ではたぶんこんなんをかかないといけないす( not tested )
+
+.include myGenConfirmReplySubject.pl
+
+
 .S	Received: を残す
 =E.S	Preserve Received: field in distribution articles
 .k	Received: を残す

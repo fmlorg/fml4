@@ -1,3 +1,11 @@
-.include fml-install-for-virtual-domain.wix
-.include virtual-domain.en.wix
+.HTML_PRE
+		virtual domain ¤ÎÀßÄê
+
+.toc
+.~HTML_PRE
+.include overview.wix
 .include virtual-domain.wix
+.include fml-install-for-virtual-domain.wix
+
+.appendix
+.include postfix-example.txt

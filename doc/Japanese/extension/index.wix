@@ -6,7 +6,10 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.p	»öÎã½¸
 .include hack.wix
+
+.p	internals
 .include hook.wix
 
 .# $Id$

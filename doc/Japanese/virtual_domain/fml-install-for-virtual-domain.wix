@@ -1,20 +1,6 @@
-.HTML_PRE
+.S	makefml -f 
 
-	makefml -f configfile
-
- [用語]
-   % はユーザの prompt
-   # は root の prompt
-   $EDITOR は自分の好きなエディタ
-
-   メーリングリスト名やディレクトリは適当に読みかえてください
-   ここではデフォールトの値を使って説明しています。
-
-.~HTML_PRE
-
-.HTML_PRE
-
-makefml -f 
+virtual domain の設定の時には makefml -f の活用を考えると便利です。
 
 ちなみに
 
@@ -35,9 +21,3 @@ makefml -f
 
 ここの /some/where/virtual-domain-1,2 は /usr/local/fml/.fml/system
 で、ドメイン部分が変更されているものです。
-
-           Copyright (C) 2000 Ken'ichi Fukamachi
-                   All rights reserved. 
-
-$Id$
-.~HTML_PRE

@@ -1,0 +1,77 @@
+.S	例: fmlでのwelcomeメールの本文をハックする
+
+◯ $DIR/welcome ファイルをいじる
+
+◯ 一番先頭の
+
+   メーリングリストへの投稿は	<foo@bar.jp>
+   コマンドは			<foo-ctl@bar.jp>
+   管理者宛のメールは		<foo-admin@bar.jp>
+
+のような部分をいじりたい場合は
+
+/usr/local/fml/messages/Japanese/amctl というファイルの
+
+amctl.added.caution:
+	注意: このメールにリプライするとメーリングリスト宛になります。
+	メーリングリストへの投稿は	<_ARG1_>
+	コマンドは			<_ARG2_>
+	管理者宛のメールは		<_ARG0_>
+	へ送って下さい。
+
+という部分をいじってください。
+
+[KNOWN_BUGS]
+
+XXX ただこのファイルはインストール時に上書きされてしまうので
+XXX /var/spool/ml/etc/fml/messages/Japanese/amctl などという場所へコピー
+XXX してそのファイルを好きなようにいじるべきです。しかし今度は fml を
+XXX updateしたときに新しい /usr/local/fml/messages/Japanese/amctl の内
+XXX 容が最新版を反映してくれません。現在のコードを修正してだめなら 
+XXX /usr/local/fml のほうもさがすように修正するべきでしょう。
+
+
+.S	welcomeというファイルの内容の前についてしまう部分を削除/編集
+
+[3.0pl113 以降]
+
+この部分はあるテンプレートファイルを変換して生成しています。
+
+/usr/local/fml/messages/Japanese/amctl というファイルに
+
+amctl.added.caution:
+        注意: このメールにリプライするとメーリングリスト宛になります。
+        メーリングリストへの投稿は      <_ARG1_>
+        コマンドは                      <_ARG2_>
+        管理者宛のメールは              <_ARG0_>
+        へ送って下さい。
+
+という定義があります。この文章の部分を編集/消してみることでカスタマイ
+ズできます。
+
+[3.0pl112 まで]
+
+それでも英語のwarningがでてしまいます。
+
+A2: 注意書きを後ろに持っていくのはwelcome というファイルを編集しましょう
+
+.if LANG == ENGLISH
+Q: customize welcome message in registration
+
+A: sorry it is hard coded but you can customize only in Japanese mode. 
+In the near future, we should expand it by using &MesgLE(). It is just
+a problem to define templates.
+
+.fi
+
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+.~HTML_PRE
