@@ -77,7 +77,7 @@ sub MesgLETranslate
 	local($t, $i); $i = 0;
 	for (@argv) {
 	    $t   = "_ARG${i}_";
-	    $msg =~ s/$t/$argv[$i]/;
+	    $msg =~ s/$t/$argv[$i]/g;
 	    $i++;
 	}
 
@@ -114,7 +114,7 @@ sub Lookup
 
     if (open(LE_TMPL, $file)) {
 	while (<LE_TMPL>) {
-	    next if /^\s*$/;
+	    # next if /^\s*$/;
 	    next if /^\#/;
 
 	    # see [FILE FORMAT] above
@@ -122,8 +122,9 @@ sub Lookup
 	    if (/^\S+/)     { $found = 0; next;}
 
 	    if ($found) {
-		s/^\s+//;
-		$mesg .= $_;
+		chop;
+		s/^\s//;
+		$mesg .= $_."\n";
 	    }
 	}
 	close(LE_TMPL);
