@@ -1504,7 +1504,12 @@ sub Lookup
 
     # more severe check;
     $address =~ s/^\s*//;
-    ($addr) = split(/\@/, $address);
+    if ($address =~ /\@/) { # RFC822 addrspec
+	($addr) = split(/\@/, $address);
+    }
+    else { # not addrspec, arbitrary string
+	$addr = substr($address, 0, 8);
+    }
     
     # MUST BE ONLY * ? () [] but we enhance the category -> shell sc
     # add + (+ed user) 1998/11/08
@@ -2015,6 +2020,12 @@ sub SearchFileInLIBDIR
 	&Debug("SearchFileInLIBDIR: <$_>/$_[0]") if $debug;
 	if (-f "$_/$_[0]") { return "$_/$_[0]";}
     }
+    $NULL;
+}
+
+sub SearchFileInINC
+{
+    for (@INC) { if (-f "$_/$_[0]") { return "$_/$_[0]";}}
     $NULL;
 }
 

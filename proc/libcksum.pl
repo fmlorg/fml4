@@ -55,7 +55,7 @@ sub MailBodyCksum
     }
 
     # perl 5
-    if ($] =~ /^5/ && &PerlModuleExistP('MD5')) {
+    if ($] =~ /^5/ && &SearchFileInINC('MD5.pm')) {
 	&Log("MD5.pm") if $debug_cksum;
 	&use('md5');
 	$mid = &MailBodyMD5Cksum(*e);
