@@ -2,12 +2,16 @@ fml Mailing List Packeges release revison 2.1   Bulletin
 
 
 				深町 賢一
+				fukachan@fml.org
 				fukachan@sapporo.iij.ad.jp
+
+○ メーリングリストなど
 
 ＃バグ、質問等は fml-query@ffs.fml.org までおねがいします。
 
-ちなみに関連アドレスは
-	fml: これ
+ちなみに FML.ORG での関連アドレスは
+
+	fml: このファイルが返される
 	fml-support = fml に関するＭＬ(自動登録)
 	fml-query     fml-support へフォワードする(＊＊登録はしない＊＊)
 		      DM は見落とす恐れもあるし、情報が二元化されてしまうので
@@ -16,18 +20,18 @@ fml Mailing List Packeges release revison 2.1   Bulletin
 	fml-request, fml-bugs: 管理者いき
 	fml-current, fml-src: currentのソースの送り返し
 
-です。
-	使用・改造をなさる場合は
-	それ以降の直し(e.g. Bug fix, Extension)もあるので
+です。使用・改造をする場合は常に update, bugfixes, extensions が行なわ
+れているので最新版のfml-current を手に入れてからしてもらえると幸いです。
 
-	fml-current	を手に入れていただくとよろしいと思います。
+○ FMLの入手方法
 
-なんでもいいからメールを
+最新版のソースは
 
 	fml-current@ffs.fml.org
 
 に送ると自動的に送り返されます。
-ＩＰならanonymous ftpが御利用いただけます。
+
+IP reachable なら anonymous ftpが御利用いただけます。
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
@@ -35,11 +39,9 @@ fml Mailing List Packeges release revison 2.1   Bulletin
 
 WWW が使えるなら
 
+	http://www.fml.org/
 	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 
-という「ＭＬサーバの設計と実装」というところを御覧下さいませ。
-そこで最新版のドキュメントやらソースやらが見られます_o_
+という「ＭＬサーバの設計と実装」というところからたどって下さい。そこで
+最新版のドキュメントやらソースやらが見られます。
 
-
-				fukachan@sapporo.iij.ad.jp
-				fml-admin@ffs.fml.org
