@@ -103,28 +103,25 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 
 最新のドキュメント、ソースともにここに揃っています。 
 
-○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
+○ fml@axion.phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
 うにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
 
 ○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
 可能です。
 ftp が使えない場合メールでは、なんでもいいからメールを
-fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
+fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。
 
 
 .S	anonymous ftp でのソースの入手方法 
 
-	国内のマスター
-	ftp.phys.titech.ac.jp:/pub/net/fml-current/
+	国内、国外共にマスターサーバは
 
-	国内のミラー
-	ftp://ftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-	国外用のミラー
-	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
-
+	国内のミラーが
+	ftp://ftp.phys.titech.acjp/pub/net/fml-current/
 
 ＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
 
@@ -141,14 +138,14 @@ fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
 
 2.1 からはＭＬへ登録して欲しくない方のために
 
-	fml-query@phys.titech.ac.jp 	
+	fml-query@axion.phys.titech.ac.jp 	
 
 を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
 ことなく fml-support へフォワードを行います。
 
 どうしても 内密な相談とか、DMで聞きたいことは 
 
-	fml-bugs@phys.titech.ac.jp
+	fml-bugs@axion.phys.titech.ac.jp
 
 へ投げておいてください。ただ返事は遅れぎみです _o_ 
 ＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
@@ -400,8 +397,8 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 
 .S	document ...
 
-current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
-ファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
+current でドキュメントがおいつかない部分は INFO（fml@axion.phys.titech
+で返すファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
 
 最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
 

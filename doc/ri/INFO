@@ -4,7 +4,7 @@ fml Mailing List Packeges release rivison 2.1   Bulletin
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
-＃バグ、質問等は fml-query@phys.titech.ac.jp までおねがいします。
+＃バグ、質問等は fml-query@axion.phys.titech.ac.jp までおねがいします。
 
 ちなみに関連アドレスは
 	fml: これ
@@ -24,12 +24,12 @@ fml Mailing List Packeges release rivison 2.1   Bulletin
 
 なんでもいいからメールを
 
-	fml-current@phys.titech.ac.jp
+	fml-current@axion.phys.titech.ac.jp
 
 に送ると自動的に送り返されます。
 ＩＰならanonymous ftpが御利用いただけます。
 
-	ftp.phys.titech.ac.jp:/pub/net/fml-current
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
 の下です。（名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ）
 
@@ -509,5 +509,5 @@ $MAINTAINER が ML-admin とか ML-request とかになっていないと
 bug fix 
 ftpmailでuuencodeがうごかない（1.5直前から〜）
 
-				fukachan@phys.titech.ac.jp
-				fml-request@phys.titech.ac.jp
+				fukachan@sapporo.iij.ad.jp
+				fml-request@axion.phys.titech.ac.jp
