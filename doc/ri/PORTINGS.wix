@@ -14,46 +14,32 @@
 =E.S	Mechanisms on NT4
 
 .if LANG == JAPANESE
-MTA からプログラムを起動する機能は sendmail には昔からありますが、
-一般にはありません。NT版の最大の問題点はここにあります。
-MetaInfo Sendmail以外のMTAを使用している場合は、POPを使ってメール配送
-全般に渡って一種のエミュレーションを行うしかありません。
+MTA からプログラムを起動する機能は sendmail には昔からありますが、一般
+にはありません。NT版 fml の最大の問題点はここにあります。
 
-そこで次のようなことをしています。
+MetaInfo Sendmail以外のMTAを使用する場合、POPを使い、メール配送全般に
+渡って一種のエミュレーションを行うしかありません。
+
+そこで、次のような処理をしています。
 
 ○POP経由の自動Refileや ML の実行 (libexec/popfml.pl)
 
-POP経由でスプールへ、POP3 を使って ML を実行するlibexec/popfml.pl が
-それの専用プログラムとして実装されています。対象としているケースは
+libexec/popfml.pl が「POP 経由でメールを取り寄せ、ML を実行する」専用
+プログラムとして実装されています。対象としているケースは
 
-	メールはPOP3で読めるだけ
-	メールを受けとめてプログラムを呼べないという
-		OS附属のメールシステム or ポリシー
+	メールは POP3 で読めるだけの環境でも ML を実行したい
 
-等です。裏技というカテゴリでしょうが、このやり方は汎用なのでPOP3でメー
-ルが読める場合ならどんなOSでも原理的にはMLが実行できるということになり
-ます。OS/2とかBeOSでもできるのかもしれませんが…
+	メールは受けられるが、
+	プログラムを呼べないメールサーバを使っている場合
 
-ちなみに現在までのところBeOSはperlのsocketがちゃんと動かないようなので
-だめでした。
+等です。裏技というカテゴリでしょうが、このやり方は汎用です。
+POP3 でメールが読める場合ならどんなOSでも原理的にはMLが実行できるでしょう。
 
-○POPでのエミュレーション
+OS/2 とか BeOS でもできるのかもしれませんが試したことはありません。
+ちなみに現在までのところ BeOS は perl の socket がちゃんと動かないよう
+なのでだめでした。
+＃やってみた人がいたら教えて下さい
 
-理屈としては
-
-	pop を使って取り寄せつつパイプで MH の rcvstore へ入力(inc)
-	pop を使って取り寄せつつパイプで fml へ投げる (ML)
-
-は同じです。実行する下請けプログラムが違うだけです。後はこれを cron で
-実行すれば、サイトに一台 UNIX マシンがあれば自分のマシンがメールを受け
-られなくてもPOP3経由で自動的にメールをスプールできます。
-
-ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
-できるでしょう。なおMHと同様パスワードは $HOME/.netrc からとられます。
-どこかにパスワードを書いておかないといけないことは最大の弱点です。
-
-inc_via_pop.pl は昔の名前(今はリンク)で、pop2recv.pl は backward
-compatible の目的で popfml.pl にリンクされています。
 
 .fi
 .if LANG == ENGLISH
@@ -73,69 +59,11 @@ how I deal perl pgorams on NT4. If you know it, please let me them.
 
 .fi
 
-.S	歴史: 実験その１
-=E.S	Historical revies: experiment 1
-
-上の内容を実行して動かした。動いた。特に問題なく動いた。
-＃ コマンドは試してないのでしらない す
-＃ Multipart とかならいいけど gnu binutils がなきゃ動かないのもおおい
-=E
-It looks I and a lot of people succeeded to run fml.pl on NT4 using
-POP3. This hack has problems
-==
-	error hadnlings
-	event handlings (now we  CAN ONLY KILL FML if e.g. time out occurs)
-
-問題は popper が腐った時にエラーハンドリング。
-エラーハンドリングに目をつぶってしまえば、うごく（うれしくないぞ…）
-
-perl 4 はたぶん問題外。perl 5 はPlISi303.EXE PlSEi303.EXE Pw32i303.EXE 
-あたり(でとまってる？）。インストール自体は問題ない。perl 5 がイヴェン
-ト・コントロールをサポートする見込みはなさそう。
-
-
-.C	Toward Windows NT 4.0 Porting Experiment; phase II
-
-.S	現在の sys/WINDOWS_NT4
-=E.S	sys/WINDOWS_NT4
-
-libexec/popfml.pl 以前のライブラリコールを使っているので
-libexec/popfml.pl ベースの内容を perl の Win32 Module の process コン
-トロールで駆動させてみればいいんだとおもう。で、すでにそうなってると。
-=E
-NT version fml is based on Win32::Process modules. but I give up error
-handlings.
-
-エラーでこけてるプロセスは強制的に殺す以外はどうにもならないみたいなん
-だけど…エラーハンドリングはこのへんで妥協するしかない。
-
-.S	Installer
-
-makefml の依存性を ifdef で制御すればできる。以前の version では
-makefml は使えたがその後の改造でどのくらいうまく動くのかはチェックされ
-ていない。
-=E
-ntinstall.cmd is an installer. It modifies sources if needed and runs
-makefml -w (-w is for WINDOWS options).
-
-makefml が下でよぶものは専用に install.cmd 等が用意される
-
-GUI 化する予定はない(作り方知らないし)。 makefml を drive できればいい
-んだけど… ＃密かに活動中らしい？
-=E
-Now I have no plan to change it to GUI since I want to use makefml. 
-I hope browsers can handle makefml directly but ....
-
-
 .C	Windows 2000
 
 ドメインが絡まない限り NT 4.0 との互換性は高く
 現状 NT と同じに扱って問題はない模様
 
-
-.C	OS/2 
-
-OS/2 でも動くかな？というはなしがいっかいあったけど。どうなったかな…
 
 .HTML_PRE
 .# $Id$

@@ -1,5 +1,5 @@
 .HTML_PRE
-	質問をする際に調べておいてほしいリスト
+	質問やバグレポートの際に調べてほしいリスト
 =E
 	CHECK LIST BEFORE ASKING
 
@@ -8,47 +8,43 @@
 				Ken'ichi Fukamachi
 
 
-「どうしても分からないならしょうがないですが、質問の前に事前に調べられ
-ることは調べておいてもらえると助かる」というリストです。
+以下は質問やバグレポートの際に、(できるだけ)事前に調べておいて欲しい項
+目です。ただ分からないなら、仕方ないので、間接的な情報でもいいので付加
+しておいて下さい。
 
-なお以下で % は shell の prompt です。
-=S
-In these documents, % means a shell prompt, # means a "root" shell
-prompt . 
+.include _prompt.wix
 
 .toc
+.~HTML_PRE
 
-.C	質問の種類にかかわらず共通なチェック項目
+
+.C	基本的なチェック項目
 =E.C	Common things over problems
 
-.S	FML の吐くログは調べたか？
+.S	fml の吐くログ
 =E.S	Check FML's log file? 
 
-$DIR/log (config.phのある場所の log ファイル)に何が書いてあるか？
-(例えば /var/spool/ml/elena/log のようなファイル名)
+fml のログファイル(例えば /var/spool/ml/elena/log )に何か書いてないか？
+たとえば error などのキーワードがある行を探してください
 =E
 Please see $DIR/log (e.g. /var/spool/ml/elena) to check fml log ?
 Can you find some error messages?
 
-.S	FML の version は？
-=E.S	FML version ?
+.S	ソフトウエアのバージョン
+=E.S	fml version ?
 
-取ってきて広げたファイル名か展開したdirectoryで % cat etc/release_version
+以下のコマンドを実行して下さい。fml perl OSの情報が表示されます。
 =E
-archive file name or `cat fml-source/etc/release_version`
+run
 
-.S	OS は何か? その Version は?
-=E.S	What is your operating system and the version?
+	% /usr/local/fml/makefml showconf
 
-run "uname -a"
 
-Example: (uname があるかどうかもOS依存だが）
-	% uname -a
-	NetBSD beth 1.3B NetBSD 1.3B (BETH) #4: Fri Jan 23 14:22:17 JST 1998
-        fukachan@beth:/sys/arch/i386/compile/BETH i386
+[参考]
 
-.S	メール配送システムは何か?その version は?
-=E.S	What is MTA(Mail Transport Agent) and the version?
+◯ メールサーバのバージョン
+=E
+*  What is MTA(Mail Transport Agent) and the version?
 
 For example, 
 
@@ -61,6 +57,8 @@ For example,
 	MMDF:)
 	..........
 
+試して下さい
+=E
 Please TRY like this!
 
 	% telnet localhost 25
@@ -69,75 +67,58 @@ Please TRY like this!
 	Escape character is '^]'.
 	220 beth.fml.org ESMTP Sendmail 8.9.1/3.6W; Mon, 10 Aug 1998 23:39:14 +0900 (JST)
 
-.S	perl の version は？
-=E.S	What is Perl version ?
 
-run "perl -v"
+◯	perl のバージョン
+=E
+*	What is Perl version ?
 
-Example:
-% perl4.036 -v
-This is perl, version 4.0
-$RCSfile$$Revision$$Date$
-Patch level: 36
+	% perl -v
+	This is perl, version 5.005_03 built for i386-netbsd
 
-Copyright (c) 1989, 1990, 1991, Larry Wall
+	Copyright 1987-1999, Larry Wall
 
-Perl may be copied only under the terms of either the Artistic License or the
-GNU General Public License, which may be found in the Perl 4.0 source kit.
+		... 以下省略 ...
 
-.S	メールシステムのログはどうなっているか？
+
+.S	メールシステムのログを調べる
 =E.S	Check MTA's log?
 
-OSによりファイル名は異なります。
-例:
+OS によりファイル名は異なります。例えば BSD 系では
+/var/log/maillog です。
+ERROR などのキーワードが内科道かを探して下さい。
 
-/var/log/maillog (4.4BSD; NetBSD, OpenBSD, FreeBSD, BSD/OS)
+
+.C	基本的なエラーの確認
 
 .S	エラーや疑問点についてドキュメントを検索したか？
-=E.S	Search keywords on problems over FML documents?
+=E.S	Search keywords on problems over fml documents?
 
-配布しているパッケージの中の doc/ の下のドキュメントを開いて検索
 
-	doc/Japanese/  (Japanese)
-
-FML ドキュメント群へのサーチ
+以下の URL に fml ドキュメント群へのサーチエンジンがあります。
+ここで
 =E
-Search keywords on your problem over FML documents ?
+Search keywords on your problem over fml documents ?
 
 	http://www.fml.org/fml/search-j.html (Japanese)
 	http://www.fml.org/fml/search-e.html (English)
 
 
-.C	質問時に最低限用意して欲しい情報は？
-=E.C	Least Required Information in questions
+.S	以下のような典型的なエラーではありませんか？
 
-	FML version
-	perl version
-	MTA version
-	OS version
-
-	現象が起きたあたりのFMLのログ($DIR/log)
+*	/etc/aliases に設定はちゃんとあるか？ newaliases はしたか？
 =E
-	$DIR/log around the time an error occurs.
+*	Check entries in /etc/aliases? You did newaliases?
 
-
-.C	MTA: Sendmail 
-
-.S	/etc/aliases に設定はちゃんとあるか？ newaliases はしたか？
-=E.S	Check entries in /etc/aliases? You did newaliases?
-
-e.g.
-	/etc/aliases (4.4BSD derived)
-	/etc/mail/aliases 
-
-.S	FMLに対しメールを送ったら、エラーメールが返ってきたか？ 
-=E.S	Check error mails if exists?
-
-エラーメールを見てチェックをしたか？
+*	/etc/aliases ではなくて /etc/mail/aliases だったりしませんか？
 =E
-Error mails can tell you the reason of errors. Please check it before
-asking.
+	Sendmail uses /etc/mail/aliases not /etc/aliases ?
 
+* 	エラーメールに以下のようなキーワードがありませんか？
+=E
+* Error mails can tell you the reason of errors. Please check it
+before asking.
+
+.HTML_PRE
 .if LANG == JAPANESE
 	エラー		原因
 	--------------------------------------------------------
@@ -168,7 +149,7 @@ $Id$
 .#               1993-1996 fukachan@phys.titech.ac.jp
 .#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
-.# FML is free software; you can redistribute it and/or modify
+.# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .~HTML_PRE
