@@ -592,7 +592,7 @@ fmlのデフォールトの挙動は
 .key	特殊目的専用のサーバへの変更
 .label	server-for-command-only
 
-$CONTROL_ADDRESS にアドレスを登録するとコマンド専用野ＭＬサーバが作れ
+$CONTROL_ADDRESS にアドレスを登録するとコマンド専用のＭＬサーバが作れ
 ます。その場合 $CONTROL_ADDRESS に来た場合有無を言わさずすべてコマンド
 と解釈します。
 

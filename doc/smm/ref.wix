@@ -40,6 +40,7 @@ rfc1594				用語集
 perl texinfo in japanese --- version 4.0.19.2
 (ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz)
 
+
 以下RFCのインターネットスタンダード集より関係ありそうな部分のみの抜粋
 ＃ 96/9/14記
 
@@ -64,6 +65,33 @@ perl texinfo in japanese --- version 4.0.19.2
 0053 Post Office Protocol - Version 3. J. Myers & M. Rose. May 1996.
      (Format: TXT=47018 bytes) (Obsoletes RFC1725) (Also RFC1939)
 
+
+.S	Important RFCs for electronic mail
+
+	RFC821	SMTP protocol
+	RFC822	Mail header format
+	RFC974	MX routing
+	RFC976	UUCP mail format
+	RFC1123	Host requirements (modifies 821, 822, and 974)
+	RFC1413	Identification server
+	RFC1869	SMTP Service Extensions (ESMTP spec)
+	RFC1652	SMTP Service Extension for 8bit-MIMEtransport
+	RFC1870	SMTP Service Extension for Message Size Declaration
+	RFC1521	MIME: Multipurpose Internet Mail Extensions
+	RFC1344	Implications of MIME for Internet Mail Gateways
+	RFC1428	Transition of Internet Mail from Just-Send-8 to
+		8-bit SMTP/MIME
+	RFC1891	SMTP Service Extension for Delivery Status Notifications
+	RFC1892	Multipart/Report Content Type for the Reporting of
+		Mail System Administrative Messages
+	RFC1893	Enhanced Mail System Status Codes
+	RFC1894	An Extensible Message Format for Delivery Status
+		Notifications
+	RFC1985	SMTP Service Extension for Remote Message Queue Starting
+
+その他の関連もの：
+	RFC987	Mapping between RFC822 and X.400
+	RFC1049	Content-Type header field (extension to RFC822)
 
 
 .S	fj.sourcesに過去リリースした記事のMessage-IDリスト
