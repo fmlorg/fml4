@@ -22,7 +22,9 @@ sub DoDistribute
 
     # cut off the html mail's second (and after ) multipart parts
     # e.g. mails from outlook
-    if ($AGAINST_HTML_MAIL) { 
+    # The existence of $AGAINST_HTML_MAIL is backward compatible.
+    if ($AGAINST_HTML_MAIL ||
+	$HTML_MAIL_DEFAULT_HANDLER) { 
 	&use('disthack'); 
 	local($status) = &AgainstHtmlMail(*e);
 	if ($status eq 'reject') { return $NULL;}
@@ -42,6 +44,7 @@ sub DoDistribute
 	    else {
 		&Log("NOT ALLOW delivery");
 		&Mesg(*e, "Your PGP signature seems incorrect, ML delivery is not allowed.");
+		&Mesg(*e, $NULL, 'EAUTH');
 		return 0;
 	    }
 	}

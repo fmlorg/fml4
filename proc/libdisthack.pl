@@ -17,8 +17,8 @@ sub AgainstHtmlMail
     local($buf, $p, $sp);
 
     if ($e{'h:content-type:'} =~ /multipart/i) {
-	if ($AGAINST_HTML_MAIL_HANDLER eq '' ||
-	    $AGAINST_HTML_MAIL_HANDLER eq 'strip') {
+	if ((! $HTML_MAIL_DEFAULT_HANDLER) || # not defined case (compatible)
+	    $HTML_MAIL_DEFAULT_HANDLER eq 'strip') {
 
 	    $p  = index($e{'Body'}, $boundary, 0);
 	    $p  = index($e{'Body'}, $boundary, $p + 1);
@@ -37,7 +37,7 @@ sub AgainstHtmlMail
 	    &Log("cut off HTML part");
 	    return "strip";
 	}
-	elsif ($AGAINST_HTML_MAIL_HANDLER eq 'reject') {
+	elsif ($HTML_MAIL_DEFAULT_HANDLER eq 'reject') {
 	    &Mesg(*e, "This mailing list <$MAIL_LIST> denies HTML mail.");
 	    &Mesg(*e, "Please send your mail by PLAIN TEXT!");
 	    &Mesg(*e, &WholeMail);
