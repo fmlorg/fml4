@@ -1,6 +1,17 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/04/11
+
+  sbin/makefml (2.121-2.122): (only on NT4)
+	fix 'no such file' in "makefml passwd ..."
+	by wrap "system stty " with "if $UNISTD"
+
+	NT4 上で『そんなコマンドはない』というエラーメッセージが出る
+	のを直す。
+	ただし以前からメッセージがでるけどパスワードの変更はできてい
+	るという状態のはずなので、無視して使う分には別に問題はない;)
+
 2000/03/31
 
    EnvelopFilter
