@@ -536,6 +536,18 @@ sub Distribute で
 とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
 実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
 
+ 
+.S	fmlのコマンドが送れるページの例 [http://www.j-is.or.jp/fml/]
+
+.q
+in fml-support: Count: 01585
+From: Yuao Tanigawa <yuao@infonia.or.jp>
+>   fmlのコマンドが送れるページを作ってみました。URLは
+> http://www.j-is.or.jp/fml/ です。
+
+…
+.~q
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
