@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/31
+
+  messages/English/ created
+
+	英語部分を messages/English/ へ括り出す作業をしないと…
+
 2000/05/29
 
   www/examples/postfix/main.cf
