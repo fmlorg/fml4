@@ -22,6 +22,11 @@ var/html/releng.gif: doc/html/pictures/releng.gif
 	@ test -d var/html/pictures || mkdir var/html/pictures
 	cp -p doc/html/pictures/releng.gif var/html/releng.gif
 
+HTML_MISC += var/html/logo.jpg
+var/html/logo.jpg: doc/html/pictures/logo.jpg
+	@ test -d var/html/pictures || mkdir var/html/pictures
+	cp -p doc/html/pictures/logo.jpg var/html/logo.jpg
+
 .for file in ${DOC_RI_SOURCES}
 __HTML_RI__ += var/html/${file}/index.html
 var/html/${file}/index.html: doc/ri/${file}.wix
