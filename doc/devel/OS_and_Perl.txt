@@ -26,6 +26,9 @@ BSD/OS 4.0.1			4.036 (/usr/bin/perl)
 BSD/OS 4.1			4.036    (/usr/bin/perl4)
 				5.005_03 (/usr/bin/perl)
 				5.005_03 (/usr/bin/perl5)
+BSD/OS 4.2			4.036    (/usr/bin/perl4)
+				5.005_03 (/usr/bin/perl)
+				5.005_03 (/usr/bin/perl5)
 
 Debian Gnu/Linux 1.1(buzz)	5.002
 Debian Gnu/Linux 1.2(rex)	5.003_07
@@ -70,6 +73,11 @@ Windows 2000			none
 Windows Services for UNIX 2.0 (JP) 5.6.0 
 				(ActivePerl 5.6.0 build 613 
 				MSWin32-x86-multi-thread)
+
+
+SEE ALSO:
+   http://www.cyber-magic.org/~taka/perl-versions.html
+   http://www.uinet.or.jp/~taka/perl-versions.html
 
 ---
 checked by
