@@ -11,6 +11,26 @@ makefml は fml を設定するための CUI (Chacacter User Interface) インター
 
 コマンドラインから実行します。
 
+.S	makefml config のメニューを日本語にする？
+
+GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
+ドを使うことが可能です。
+
+環境変数を設定して下さい。
+
+.q
+◯ born shell, bash などの場合
+
+~/.profile ~/.bash_profile (?)
+
+  MAKEFML_LANG=euc; export MAKEFML_LANG
+
+◯ csh, tcsh  などの場合
+
+~/.cshrc ~/.tcshrc
+  setenv MAKEFML_LANG euc
+.~q
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

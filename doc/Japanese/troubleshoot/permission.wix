@@ -9,6 +9,76 @@
 .xref	c-wrapper, calling-fml.pl, plural-handling-1, plural-handling-2
 .xref	non_privileged_user
 
+
+.S	   sh: fml.pl not available for sendmail programs
+
+最近では Red Hat Linux ではまるひとが多い(?)のが
+sendmail の smrsh ではまるケースです。
+
+      ----- The following addresses had permanent fatal errors -----
+   "|/usr/local/fml/fml.pl /var/spool/ml/elena "
+       (expanded from: :include:/var/spool/ml/elena/include)
+   
+      ----- Transcript of session follows -----
+   sh: fml.pl not available for sendmail programs
+   554 "|/usr/local/fml/fml.pl /var/spool/ml/elena "... Service unavailable
+
+これは fml じゃなくて sendmail のエラーです。fmlはそもそもよばれてもい
+ません。
+
+1. /usr/local/bin/perlなどが存在しない。
+   fml.pl の先頭の #!/usr/local/bin/perl の部分のこのパスにperlがない
+
+2. sendmail restricted shell のせい。最近の linux の distribution のな
+かにはそれがデフォールトのものがあったとおもいます。で、Redhatがまさに
+それだったようなきがします
+
+sendmail.cf に
+
+Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
+
+のような行が P=/bin/smrsh になってたりしませんか？
+
+(securityを緩める方向のうしろむきな解決ですが) そこを/bin/shにするとと
+りあえず動くようになるとおもいます。もしこれが正解だったら、Sendmail
+Restricted Shell というものについて調べて下さい。
+そして smrsh について正しい設定をしなおしてみてください。
+
+◯ 
+
+fml-support:  07458
+
+smrshを使っていると @LIBDIR に/usr/local/fmlが入らない。
+このために 
+
+	require default_config.ph 
+
+の場所でエラーになる。
+
+回避例:
+
+site_init.phに
+
+	push(@LIBDIR,"/usr/local/fml");
+
+書いておいて、これとfml.plのsymbolic linkをsmrshのディレクトリにはる
+
+fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl を smrshのディ
+レクトリにリンクしておくことも必要です。例:
+
+	% ln -s /usr/local/fml/libloadconfig.pl smrshのディレクトリ
+
+
+Refercnes:
+
+See fml-support ML:
+
+01877,01879,01881
+03942,03944,03965
+05706,05708,05712,05715,05721,05722,05723,05724,05725,05726,05727,05728
+07458,07733
+
+
 .if LANG == JAPANESE
 permission が正しくない場合に出ます。おそらく C Wrapper の設定(特に 
 permission )が間違っている可能性が大です。fml.pl プロセスのユーザに 
