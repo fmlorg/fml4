@@ -15,8 +15,6 @@ $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 # info
 if (! @ARGV) { &ExecCmd("info"); exit 0;}
 
-&MakeFmlLock;
-
 if (@ARGV) {
     &ExecCmd(join(" ",@ARGV));
 }
@@ -24,22 +22,25 @@ else {
     &ExecCmd("info");
 }
 
-# RESERVED FOR FURTHER EXTENTION;
-# Interactive Mode;
-# &Menu;
-
-&MakeFmlUnLock;
 
 if ($GroupWritable) {
     print STDERR "\n   Please check the group permission in $ML_DIR\n";
     print STDERR "   Enjoy Internetworking!\n";
 }
 
+&System;
+
 exit 0;
 
 
 
 #################### LIBLARIES ####################
+sub System
+{
+    system $SYSTEM_ARGV;
+}
+
+
 sub InitMakeFml
 {
     # flush;
@@ -174,8 +175,7 @@ sub InitMakeFml
 	$Default{'ML_DIR'}   = "$dir\\fml\\ml";
     }
 
-    %MakeFmlProc = ('init',     'do_init',
-		    'install',  'do_install',
+    %MakeFmlProc = ('install',  'do_install',
 		    '0#install', 'Install the fml system',
 		    'info',     'do_info',
 		    '0#info',    'show this message',
@@ -223,7 +223,7 @@ sub InitMakeFml
     &GetCurConfig;
     &ResetVariables;
 
-    # fix include path for *.pl
+    # fix include path for *.pl 
     push(@INC, $EXEC_DIR);
 
     if ($CurConfig{'PERSONAL_OR_GROUP'} =~ /^(group|fmlserv)$/) {
@@ -243,7 +243,9 @@ sub InitFmlConfig
     print "---Please Define Your Fml System Configurations\n\n";
 
     # personal or group-shared?
-    printf "%-25s ", 'Personal Use or ML-Admin-Group-Shared or fmlserv you use?';
+    printf "%-25s ", 
+    "Personal Use or ML-Admin-Group-Shared or fmlserv you use?";
+
     $cmd = &Query("Personal, Group, Fmlserv", "personal/group/fmlserv", 
 		  "personal|group|fmlserv", "personal");    
     $cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
@@ -411,74 +413,125 @@ sub Log
 sub SignalLog 
 { 
     local($sig) = @_; 
+
     print STDERR "Caught Signal[$sig], shutting down ... \n\n";
+    &MakeFmlUnLock;
+    sleep(1);
+
     #&FlushLog;
     exit(1);
 }
 
 
-sub MakeFmlLock
+sub FlockP
 {
-    local($dir) = $CurConfig{'ML_DIR'};
+    local($config_ph) = @_;
+    local($eval);
 
-    print "---Locking\n\t";
-
-    opendir(DIRD, $dir);
-    for (readdir(DIRD)) {
-	next if /^\./;
-	next unless -f "$dir/$_/config.ph";
-	$count++;
-	print " $_";
-
-	$FP_SPOOL_DIR = "$dir/$_/spool";
-	open($FP_SPOOL_DIR, $FP_SPOOL_DIR);
-	flock($FP_SPOOL_DIR, $LOCK_EX);
-
+    open(PH, $config_ph) || 
+	(&Warn("cannot open config.ph[$config_ph]:$!"), return);
+    while (<PH>) {
+	/\$USE_FLOCK/ && ($eval .= $_);
     }
-    closedir(DIRD);
+    close(PH);
 
-    print "\n";
+    eval("package flockp; $main'eval; package main; #';");
+    &Warn($@) if $@;
 
-    if ($count) {
-	print "   Locked. Go ahead!\n\n";
+    return $flockp'USE_FLOCK; #';
+}
+
+sub Lock
+{
+    local($ml, $dir) = @_;
+
+    if (&FlockP("$dir/$ml/config.ph")) {
+	&FLock($ml, "$dir/$ml");
     }
     else {
-	print "   Nothing exists. Go ahead anyway!\n\n";
+	&V7Lock($ml, "$dir/$ml");
+    }
+}
+
+sub UnLock
+{
+    local($ml) = @_;
+    local($flockp) = $ml'FlockP{$ml};#'
+
+    if ($flockp) {
+	&FUnLock($ml);
+    }
+    else {
+	&V7UnLock($ml);
+    }
+}
+
+sub MakeFmlLock
+{
+    local($ml) = @_;
+    local($dir) = $CurConfig{'ML_DIR'};
+    local($count);
+
+    # Lock Algorithm deepnds on each ML's config.ph,
+    # so very complicated (which requires fmlserv's tricks)
+    # lock struct
+    #    ( flock_p  => lock_file (directory or lockfile) );
+
+    ### Lock Type Probe 
+    # only one
+    if ($ml) {
+	print "---Locking $ml ML"; $count++;
+	&Lock($ml, $dir);
+    }
+    else {
+	print "---Locking\n\t";
+
+	opendir(DIRD, $dir);
+	for (readdir(DIRD)) {
+	    next if /^\./;
+	    next unless -f "$dir/$_/config.ph";
+
+	    print " $_"; $count++;
+	    
+	    &Lock($_, "$dir/$_");
+	}
+	closedir(DIRD);
+    }
+
+    if ($count) {
+	print "\n   Locked. Go ahead!\n\n";
+    }
+    else {
+	print "\n   Nothing exists. Go ahead anyway!\n\n";
     }
 }
 
 
 sub MakeFmlUnLock
 {
+    local($ml) = @_;
     local($dir) = $CurConfig{'ML_DIR'};
 
-    opendir(DIRD, $dir);
-    for (readdir(DIRD)) {
-	next if /^\./;
-
-	$FP_SPOOL_DIR = "$dir/$_";
-	open($FP_SPOOL_DIR, $FP_SPOOL_DIR);
-	flock($FP_SPOOL_DIR, $LOCK_UN);
-
+    if ($ml) {
+	print "---UnLocking $ml ML\n";
+	print $ml;
+	&UnLock($ml);
     }
-    closedir(DIRD);
+    else {
+	opendir(DIRD, $dir);
+	for (readdir(DIRD)) {
+	    next if /^\./;
+	    next unless -f "$dir/$_/config.ph";
+
+	    &UnLock($_);
+	}
+	closedir(DIRD);
+    }
+
+    print "Done.\n";
 }
 
 
-# lock algorithm using flock system call
-# if lock does not succeed,  fml process should exit.
-sub Flock
-{
-    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
-    flock(LOCK, $LOCK_EX);
-}
-
-
-sub Funlock 
-{
-    close(LOCK);
-    flock(LOCK, $LOCK_UN);
-}
 
 
 sub InitTTY
@@ -515,11 +568,12 @@ sub ExecCmd
 	}
     }
 
-
-
     # function pointer;
     $fp = shift @argv;
     $fp = $FP{$fp} ? $FP{$fp} : $fp;
+
+    # Lock all when "install"
+    &MakeFmlLock($fp eq 'install' ? "" : $argv[0]);
 
     if ($MakeFmlProc{$fp}) {
 	$fp = $MakeFmlProc{$fp};
@@ -531,6 +585,8 @@ sub ExecCmd
 	return;
     }
 
+    # Unlock;
+    &MakeFmlUnLock($fp eq 'install' ? "" : $ml);
 }
 
 
@@ -1307,22 +1363,6 @@ sub do_passwd
 }
 
 
-sub do_init
-{
-    &ResetVariables;
-
-    if (! -d $EXEC_DIR) {
-	print "   mkdir $EXEC_DIR\n";
-	mkdir($EXEC_DIR, 0755);		
-    }
-
-    if (! -d $ML_DIR) {
-	print "   mkdir $ML_DIR\n";
-	&MakeWritableDir($ML_DIR);
-    }
-}
-
-
 sub do_info
 {
     print STDERR "*" x 60; print STDERR "\n";
@@ -1355,7 +1395,21 @@ sub do_install
 
     # main proc -> here;
     &InitFmlConfig;
-    &ExecCmd("init");
+
+    # do_init
+    {
+	&ResetVariables;
+
+	if (! -d $EXEC_DIR) {
+	    print "   mkdir $EXEC_DIR\n";
+	    mkdir($EXEC_DIR, 0755);		
+	}
+
+	if (! -d $ML_DIR) {
+	    print "   mkdir $ML_DIR\n";
+	    &MakeWritableDir($ML_DIR);
+	}
+    }
 
     $cmd = &Query("---Install the Fml system to $CurConfig{'EXEC_DIR'}.", 
 		  "y/n", "y|n", "n");
@@ -1528,38 +1582,13 @@ sub do_test
     &ResetVariables;
     &GetTime;
 
-    chdir "$ML_DIR/$ml" || die("$!\n");
+    local($input, $exec, $dir);
+    $input = "$EXEC_DIR/bin/emumail.pl";
+    $exec  = "$EXEC_DIR/fml.pl";
+    $dir   = "$ML_DIR/$ml";
 
-    &TestInit;
-
-    do "$ML_DIR/$ml/config.ph";
-
-    $e{'h:Return-Path:'} = "<$MAINTAINER>";        # needed?
-    $e{'h:Date:'}        = $MailDate;
-    $e{'h:To:'}          = "$MAIL_LIST $ML_FN";    # rewrite To:
-    $e{'h:Posted:'}      = $e{'h:date:'} || $e{'h:Date:'};
-    $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
-    $e{'h:Lines:'}       = $e{'nlines'};
-
-    $e{"h:Message-ID:"}  = "$CurrentTime/$$\@$FQDN";
-    
-    print "From $USER\@$FQDN $MailDate\n";
-    for (@HdrFieldsOrder) {
-	print "$_: $e{'h:$_'}\n";
-    }
-}
-
-sub TestInit
-{
-    @HdrFieldsOrder =	# rfc822; fields = ...; Resent-* are ignored;
-	('Return-Path', 'Date', 'Posted', 
-	 'From', 'Reply-To', 'Subject', 'Sender', 
-	 'To', 'Cc', 'Errors-To', 'Message-Id', 'In-Reply-To', 
-	 'References', 'Keywords', 'Comments', 'Encrypted',
-	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
-	 'XRef', 'X-Stardate', 'X-ML-Info', ':body:', ':any:', 
-	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
-	 'Precedence', 'Lines');
+    chdir $dir || die("cannot chdir ML directory[$dir]\n");
+    $SYSTEM_ARGV = "$input|$exec $dir -d";
 }
 
 sub GetCF
@@ -1896,6 +1925,7 @@ sub MakeSubDir
     }
 }
 
+
 #################################################################
 package dumpvar;
 
@@ -1953,5 +1983,40 @@ sub main'Dumpvar
 }
 
 # here is in "package dumpvar";
+
+
+package ml;
+
+sub main'FLock   { &ml'FLock(@_);}
+sub main'FUnLock { &ml'FUnLock(@_);}
+
+###
+### from libkern.pl
+###
+
+### %FLockP and %FLockFile; 
+
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub FLock
+{
+    local($ml, $mldir) = @_;
+    local($lockdir)    = "$mldir/spool";
+   
+    open($lockdir, $lockdir);
+    flock($lockdir, $LOCK_EX);
+
+    $FLockP{$ml}    = 1;
+    $FLockFile{$ml} = $lockdir;
+}
+
+sub FUnLock 
+{
+    local($ml) = @_;
+
+    $lockdir = $FLockFile{$ml};
+    close($lockdir);
+    flock($lockdir, $LOCK_UN);
+}
 
 1;
