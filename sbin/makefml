@@ -568,9 +568,10 @@ sub SetHashDefaults
 		    # upgrade from 2.x to 3.0
 		    'upgrade', 'do_upgrade',
 
-		    # 
+		    # WWW/CGI interface
 		    'html_config',     'do_html_config',
 		    'html_config_set', 'do_html_config',
+		    'newmlcgi', 'do_new_ml_cgi',
 		    );
 
     # functions not to lock
@@ -4138,6 +4139,25 @@ sub do_update
     }
 
     print "\n";
+}
+
+
+sub do_new_ml_cgi
+{
+    local($ml) = @_;
+
+    &ResetVariables;
+
+    &MkDir("$EXEC_DIR/share/cgi-bin/ml-admin/$ml");
+
+    for $f ("menu.cgi", "makefml.cgi") {
+	$template = "$EXEC_DIR/www/cgi-bin/ml-admin/$f";
+	$outfile  = "$EXEC_DIR/share/cgi-bin/ml-admin/$ml/$f";
+	&Conv($ml, $template, $outfile);
+	chmod 0555, $outfile;
+    }
+
+    print "done.\n";
 }
 
 
