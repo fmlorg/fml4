@@ -30,7 +30,7 @@ pkgsrc/mimepls2/mimer.pl
 pkgsrc/mimepls2/mimew.pl
 pkgsrc/mimepls2/mimer202.pl
 pkgsrc/mimepls2/mimew202.pl
-pkgsrc/traffic/libtraffic.pl 
+dist/libtraffic/libtraffic.pl 
 contrib/localhack/release-2/member_name/src/libmember_name.pl
 
 
