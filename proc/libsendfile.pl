@@ -177,6 +177,9 @@ sub mget3
 	$m += &ExtractFiles(*sp, *r);
 	push(@filelist, @r) if @r;
     }
+    else {
+	&Debug("--mget3 extract session: no %sp") if $debug;
+    }
 
 
     ##### ADJUST: counting matched archives
@@ -536,7 +539,10 @@ sub mget3_Search
       print STDERR "MGET V2 Request [$r]\n" if $debug;
       &mget3_V2search($r, *sp) && ($m .= "\tFOUND.\n") && (next TARGET);
 
-      return 'STOP' if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
+      if ($_cf{'INSECURE'}) { # EMERGENCY STOP FOR SECURITY
+	  &Log('mget3_Search: insecure, stop');
+	  return 'STOP';
+      }
 
       ### search in archive
       # set the result to @ar
@@ -822,7 +828,7 @@ sub ExistCheck
 	    push(@flist, "$SPOOL_DIR/$left");
 	}
 	else {			       # if stored as an archive 
-	    print STDERR "$ep:\$left <= AB:$ArchiveBoundary\n" if $debug;
+	    &Debug("$ep:\$left <= ArchiveBoundary=$ArchiveBoundary") if $debug;
 	    &ArchiveFileList($left, $right, *flist);
 	}
 	return 1;

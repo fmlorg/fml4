@@ -60,7 +60,7 @@ sub DoSetAdminMode
 	return $NULL;
     }
     else {
-	&Mesg(*e, $NULL, 'auth.not_admin', $proc);
+	&Mesg(*e, "not a remote maintainer", 'auth.not_admin', $proc);
 	&LogWEnv("$proc request from not administrator, ends", *e);
 	$e{'mode:admin'} = 0;	# UNSET for hereafter
 	return 'LAST';
@@ -99,7 +99,7 @@ sub DoApprove
 	;
     }
     else {
-	&Mesg(*e, $NULL, 'auth.not_admin', $proc);
+	&Mesg(*e, "not a remote maintainer", 'auth.not_admin', $proc);
 	&LogWEnv("$proc request from not administrator, ends", *e);
 	return 'LAST';
     }
@@ -124,14 +124,12 @@ sub DoApprove
 	return '';
     }
     else {
-	&Mesg(*e, $NULL, 'auth.invalid_password', $proc);
-	&Mesg(*e, "$proc: password unmatched.");
+	&Mesg(*e, "wrong password", 'auth.invalid_password', $proc);
 	&Log("ERROR: admin ${proc} password unmatches.");
 
 	if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
-	    &Mesg(*e, $NULL, 'auth.please_use_pgp', $proc);
-	    &Mesg(*e, " BTW why you use password authentication in pgp mode?");
-	    &Mesg(*e, " passwd auth is not needed under pgp mode.");
+	    &Mesg(*e, 'why you use password with PGP?', 
+		  'auth.please_use_pgp', $proc);
 	}
     }
 }
@@ -317,8 +315,7 @@ sub ApproveCommand
     if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
 	&use('pgp');
 	$UnderAuth = &PGPGoodSignatureP(*e);
-	&Mesg(*e, "554 YOU CANNOT BE AUTHENTICATED\n\tSTOP!");
-	&Mesg(*e, $NULL, 'auth.fail');
+	&Mesg(*e, "554 YOU CANNOT BE AUTHENTICATED", 'auth.fail');
     }
     else {
 	$UnderAuth = 1;
@@ -460,13 +457,11 @@ sub AdminAuthP
 	    # 95/09/07 libcrypt.pl
 	    if (&CmpPasswdInFile($PASSWD_FILE, $to, $opt)) {
 		$UnderAuth = 1;
-		&Mesg(*e, "250 PASSWD AUTHENTICATED... O.K.");
-		&Mesg(*e, $NULL, 'auth.ok');
+		&Mesg(*e, "250 PASSWD AUTHENTICATED... O.K.", 'auth.ok');
 		return 1;
 	    }
 	    else {
-		&Mesg(*e, "554 Illegal Passwd\n\tSTOP!");
-		&Mesg(*e, $NULL, 'auth.invalid_password');
+		&Mesg(*e, "554 Illegal Passwd", 'auth.invalid_password');
 		return $NULL;
 	    }
 	}
@@ -483,8 +478,7 @@ sub AdminAuthP
 
     ### SHOULD BE AFTER AUTH. IF NOT, STOPS(FATAL ERROR)
     if (! $UnderAuth) {
-	&Mesg(*e, "554 YOU CANNOT AUTHENTICATED\n\tSTOP!");
-	&Mesg(*e, $NULL, 'auth.fail');
+	&Mesg(*e, "554 YOU CANNOT AUTHENTICATED", 'auth.fail');
 	return $NULL;
     }
 
@@ -493,13 +487,12 @@ sub AdminAuthP
 	&Mesg(*e, "210 TRY CHANGING PASSWORD ...");
 
 	if (&ChangePasswd($PASSWD_FILE, $to, $opt)) {
-	    &Mesg(*e, "250 PASSWD CHANGED... O.K.");
-	    &Mesg(*e, $NULL, 'auth.change_password.ok');
+	    &Mesg(*e, "250 PASSWD CHANGED... O.K.", 'auth.change_password.ok');
 	    return 'ok';
 	}
 	else {
-	    &Mesg(*e, "554 PASSWD REMAINS UNCHANGED");
-	    &Mesg(*e, $NULL, 'auth.password_unchanged');
+	    &Mesg(*e, "554 PASSWD REMAINS UNCHANGED", 
+		  'auth.password_unchanged');
 	    return $NULL;
 	}
     }
@@ -538,9 +531,7 @@ sub ProcAdminInitPasswd
     &Log("admin $proc ${who}\'s password.");
 
     if (! &CheckMember($who, $ADMIN_MEMBER_LIST)) {
-	&Mesg(*e, "  $who is not a member!!!");
-	&Mesg(*e, "  Firstly 'admin addadmin $who'!!!");
-	&Mesg(*e, $NULL, 'auth.admin_not_member');
+	&Mesg(*e, 'not a remote maintainer', 'auth.admin_not_member');
 	return 0;
     }
 
@@ -644,11 +635,12 @@ sub ProcAdminSetDeliverMode
     # $opt must be an address NOT OPTION;
     # Warn: the compat of a bug of help-admin
     if ($proc =~ /MATOME/i && $opt =~ /^(\d+|\d+[A-Za-z]+)$/) {
-	&Mesg(*e, "   Sorry for a bug in help for admins.");
-	&Mesg(*e, "   Please use 'admin command \"address\" options' SYNTAX.");
+	my ($s);
+	$s .= "   Sorry for a bug in help for admins.\n";
+	$s .= "   Please use 'admin command \"address\" options' SYNTAX.\n";
 	@opt = reverse @opt;
-	&Mesg(*e, "   Anyway try \"admin $proc @opt \" now!");
-	&Mesg(*e, $NULL, 'admin.mandatry_addr_args');
+	$s .= "   Anyway try \"admin $proc @opt \" now!";
+	&Mesg(*e, $s, 'admin.mandatry_addr_args');
     }
 
     # Variable Fixing...; @opt = (address, options(e.g."3u"), ...); 
@@ -747,11 +739,14 @@ sub ProcAdminLog
 	/^all$/i    && ($all_p = 1)
     }
 
-    &Mesg(*e, $NULL, 'admin.log', $proc);
-    &Mesg(*e, "   \"$proc\" show the last $lines lines of log file.");
-    &Mesg(*e, "     \"$proc all\" send back the whole log file.");
-    &Mesg(*e, "     \"$proc -number\" show the last \"number\" lines.");
-    &Mesg(*e, "     e.g. \"$proc -200\" show the last 200 lines.\n");
+    {
+	my($s);
+	$s .= "   \"$proc\" show the last $lines lines of log file.\n";
+	$s .= "   \"$proc all\" send back the whole log file.\n";
+	$s .= "   \"$proc -number\" show the last \"number\" lines.\n";
+	$s .= "    e.g. \"$proc -200\" show the last 200 lines.\n";
+	&Mesg(*e, $s, 'admin.log', $proc);
+    }
 
     if ($all_p) {
 	&Log("admin $proc all");
@@ -1125,8 +1120,7 @@ sub ReconfigurableFileP
     $s .= "Please set \@REMOTE_RECONFIGURABLE_FILES to permit other files\n";
     $s .= "See doc/op for more details\n";
 
-    &Mesg(*e, $NULL, 'admin.reconfigurable_error');
-    &Mesg(*e ,$s);
+    &Mesg(*e, $s, 'admin.reconfigurable_error');
 
     0;
 }

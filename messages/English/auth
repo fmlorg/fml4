@@ -1,0 +1,49 @@
+auth.ok:
+	authenticated
+
+auth.fail:
+	authentication failed
+
+auth.not_admin:
+	you are not permitted to do remote administaration
+	request (_ARG0_) is denied.
+
+auth.change_password.ok:
+	password changes
+
+auth.change_password.fail:
+	password failes to change
+
+auth.invalid_password:
+	wrong password
+
+auth.password_unchanged:
+	password failes to change, so unchanged
+
+auth.password.cannot_open:
+	cannot open password file
+
+auth.password.cannot_mk_pwdb:
+	cannot create password file
+
+auth.password.cannot_mk_pwdb.bak:
+	fails to back up password file
+
+auth.password.rename.fail:
+	fails to rename (back up) password file
+
+auth.please_use_pgp:
+	WARNING _ARG0_: 
+	Why you try to authenticate by passwrod in PGP mode?
+	It is useless.
+
+auth.admin_not_member:
+	<_ARG0_> is not a member who is permitted to do remote 
+	administration.
+	Please ask the (primary) maintainer to add yourself by
+	   by mail:  admin addadmin _ARG0_
+	   on shell: % makefml addadmin _ARG0_
+
+auth.should_be_from_member:
+	Error: <_ARG0_> is not a member
+	Please check From: in your mail.

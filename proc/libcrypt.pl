@@ -21,24 +21,22 @@ sub DoPasswd
 
     # if you know the old password, you are authenticated.
     if (&CmpPasswdInFile($PASSWD_FILE, $curaddr, $old)) {
-	&Mesg(*e, $NULL, 'auth.ok');
-	&Mesg(*e, "$proc: Authenticated");
+	&Mesg(*e, "$proc: Authenticated", 'auth.ok');
 	&Log("$proc; Authenticated");
 	if (&ChangePasswd($PASSWD_FILE, $curaddr, $new)) {
-	    &Mesg(*e, $NULL, 'auth.change_password.ok', $proc);
-	    &Mesg(*e, "$proc; change passwd succeed");
+	    &Mesg(*e, "$proc; change passwd succeed", 
+		  'auth.change_password.ok', $proc);
 	    &Log("$proc; change passwd succeed");
 	}
 	else {
-	    &Mesg(*e, $NULL, 'auth.change_password.fail', $proc);
-	    &Mesg(*e, "$proc; change passwd fail");
+	    &Mesg(*e, "$proc; change passwd fail", 
+		  'auth.change_password.fail', $proc);
 	    &Log("$proc; change passwd fail");
 	}
     }
     else {
-	&Mesg(*e, $NULL, 'auth.invalid_password');
-	&Mesg(*e, "$proc: Illegal password");
-	&Log("$proc: Illegal password");
+	&Mesg(*e, "$proc: invalid password", 'auth.invalid_password');
+	&Log("$proc: invalid password");
     }
 }
 
@@ -174,24 +172,24 @@ sub ChangePasswd
     open(FILE, "< $file")      || do {
 	select(FILE); $| = 1;
 	&Log("Cannot open $file");
-	&Mesg(*Envelope, "Cannot open passwd file");
-	&Mesg(*Envelope, $NULL, 'auth.password.cannot_open');
+	&Mesg(*Envelope, "cannot open password file", 
+	      'auth.password.cannot_open');
 	return 0;
     };
 
     open(OUT,  "> $file.new")  || do {
 	select(OUT); $| = 1;
 	&Log("Cannot open $file.new");
-	&Mesg(*Envelope, "Cannot make new passwd file");
-	&Mesg(*Envelope, $NULL, 'auth.password.cannot_mk_pwdb');
+	&Mesg(*Envelope, "cannot make new passwd file", 
+	      'auth.password.cannot_mk_pwdb');
 	return 0;
     };
 
     open(BAK,  ">> $file.bak") || do {
 	select(BAK); $| = 1;
 	&Log("Cannot open $file.bak");
-	&Mesg(*Envelope, "Cannot make passwd backup");
-	&Mesg(*Envelope, $NULL, 'auth.password.cannot_mk_pwdb.bak');
+	&Mesg(*Envelope, "cannot make passwd backup", 
+	      'auth.password.cannot_mk_pwdb.bak');
 	return 0;
     };
 
@@ -230,8 +228,8 @@ sub ChangePasswd
 	return 1;
     }else {
 	&Log("Cannot rename $file.new");
-	&Mesg(*Envelope, "Cannot rename passwd backup");
-	&Mesg(*Envelope, $NULL, 'auth.password.rename.fail');
+	&Mesg(*Envelope, "cannot rename passwd backup", 
+	      'auth.password.rename.fail');
 	return 0;
     }
 }
