@@ -82,6 +82,7 @@ URL で fml CGI を使うことになります(後述)。
 
 
 .S	CGI スクリプトの準備
+=E.S	prepare CGI scripts
 
 特に fml を再インストールする必要などはありません。
 
@@ -114,6 +115,7 @@ URL で fml CGI を使うことになります(後述)。
 	0 を入力し、メニューを終了します。
 
 .S	メールサーバの設定 ( sendmail の場合 )
+=E.S	mail servers setup
 
 root になり 
 
@@ -123,6 +125,7 @@ root になり
 
 
 .S	apache の設定
+=E.S	apache configurations
 
 apache をインストールするところから解説します。suEXEC を有効にするため
 に configure を次のように実行します。
@@ -168,6 +171,7 @@ httpd.conf の編集後、
 
 
 .S	確認: パスワード
+=E.S	check: passwords
 
 /usr/local/fml/www/authdb ディレクトリ以下をユーザ nobody が読めること
 を確認して下さい。例えば、次の用にします。
@@ -182,6 +186,7 @@ httpd.conf の編集後、
 
 
 .S	確認: ~fml/public_html/
+=E.S	check: ~fml/public_html/
 
 ~/public_html/ 以下のパーミッションの確認をして下さい。
 
@@ -193,6 +198,7 @@ httpd.conf の編集後、
 
 
 .S	テストをする
+=E.S	test
 
 	http://そのホスト/~fml/cgi-bin/fml/admin/menu.cgi
 
@@ -541,7 +547,7 @@ AddHandler cgi-script .cgi
 
 使い方は admin.cgi と同様です。1 は SSL を使うか否か？です。2 でユーザ
 とパスワードを設定して下さい。3 で ml-admin/ 以下の CGI スクリプトと 
-.htaccess が再生成されます。
+ .htaccess が再生成されます。
 
 
 階層が異なるだけで、基本的なノウハウは admin.cgi の場合と同様です。
@@ -564,8 +570,8 @@ Q: SSL
 /usr/local/fml/www/share/cgi-bin/fml/admin/.htaccess: 
 	Invalid command 'SSLRequireSSL', 〜略〜
 
-.htaccess で SSL を使うように設定されています。しかし apache が SSL 対
-応出ない場合にこのエラーメッセージが出ます。
+ .htaccess で SSL を使うように設定されています。しかし apache が SSL 
+対応出ない場合にこのエラーメッセージが出ます。
 
 	% makefml admin.cgi config 
 
@@ -675,7 +681,7 @@ UID が 1000、GID が 1000 であることを suEXEC は期待していますが、ディ
 リのオーナ（UID）とグループID（GID）を確認してください。
 
 
-$FML$
+$FML: INSTALL_CGI.wix,v 1.24 2001/05/27 01:39:00 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
