@@ -58,7 +58,7 @@ sub Parse
     $SCRIPT_NAME  = $ENV{'SCRIPT_NAME'};
     $HTTP_REFERER = $ENV{'HTTP_REFERER'};
     my $REQUEST_URI  = $ENV{'REQUEST_URI'};
-    $REQUEST_URI  =~ qq{/cgi-bin/fml/([A-Za-z\-\.]+)/(|[A-Za-z\-\.]+)(|/)makefml.cgi};
+    $REQUEST_URI  =~ qq{$CGI_PATH/([A-Za-z0-9\-\._]+)/(|[A-Za-z0-9\-\._]+)(|/)makefml.cgi};
     my ($cgimode , $cgiml) = ($1,$2);
     $ML = $cgiml if($cgimode ne "admin");
 
@@ -93,7 +93,7 @@ sub UpperHalf
     &P("</TITLE>");
     &P("</HEAD>");
     &P("<BODY BGCOLOR=\"E6E6FA\">");
-    &P("<A HREF=\"menu.cgi\">return to menu</A>");
+    &P("<A HREF=\"menu.cgi\" target=\"_parent\">return to menu</A>");
 
     if ($ErrorString) { &Exit($ErrorString);}
 
