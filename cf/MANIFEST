@@ -692,6 +692,10 @@ MSEND_NOT_USE_NEWSYSLOG:
 # value: filename string
 LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
 
+# cache of mailbody cksum
+# value: filename string
+LOG_MAILBODY_CKSUM:	$VARRUN_DIR/bodycksumcache
+
 # $MEMBER_LIST 	sent by "# member" command
 # $ACTIVE_LIST 	sent by "# active" command
 #               == delivery list (active member list)
