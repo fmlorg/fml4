@@ -621,11 +621,29 @@ application of this function.
 
 .xref	unsubscribe-confirmation
 
-.S	登録とメンバーチェックに使うファイルについて
-=E.S	File To Regist In
+.S	[fml 1.x, fml 2.x] 登録とメンバーチェックに使うファイルについて
+=E.S	[fml 1.x, fml 2.x] File to use in automatic registration
 .k	$MEMBER_LIST
 .k	@MEMBER_LIST
 .xref	@MEMBER_LIST
+
+[fml 3.0]
+.if LANG == JAPANESE
+fml 3.0 以降では自動登録か否かを問わず
+
+		actives		配送リスト
+		members		認証リスト
+
+です。
+.fi
+.if LANG == ENGLISH
+fml 3.0 always uses member lists as follows:
+
+		actives		recipient list
+		members		authentication list
+.fi
+
+[fml 1.x, 2.x]
 
 自動登録の場合はactivesを使わずmembersファイルがmemberとactivesの両方
 を兼任する形になっています。

@@ -49,8 +49,10 @@ are access control variables.
 
    [HANDLERの種類]
 	reject			拒否 (deny というファイルが送り返される)
-	auto_regist		自動登録
+	auto_subscribe		自動登録 (fml Release 3)
 	ignore			無視 
+
+	(auto_regist		fml Release 2時代の自動登録)
 
 例え anyone でも $REJECT_ADDR がその前に適用されることに注意して下さい。
 
@@ -67,8 +69,10 @@ HANDLER はいずれの場合も管理者へメールでの報告はいきます。
 
 [handler]
 	reject			reject (sends the file "deny" to From:)
-	auto_regist		calls automatic registration 
+	auto_subscribe		calls automatic registration (fml Release 3)
 	ignore			ignore
+
+	(auto_regist		fml Release 2 automatic registration)
 
 When non usual event occurs in any case, fml.pl sends a report to
 $MAINTAINER.
@@ -111,7 +115,7 @@ defined as follows:
 自動登録は
 
 	"投稿がメンバーだけ"(members_only)の場合に
-	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+	もしメンバー以外から来たら自動登録 → auto_subscribe へ変更
 
 という設定をすることで行ないます(makefmlで制御できます)。config.ph 中
 では
@@ -125,7 +129,7 @@ For example, configure
 
 	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
 	$PERMIT_COMMAND_FROM           = "members_only";
-注意→	$REJECT_COMMAND_HANDLER        = "auto_regist";
+注意→	$REJECT_COMMAND_HANDLER        = "auto_subscribe";
 .fi
 .if LANG == ENGLISH
 	$MAIL_LIST                     = "elena\@$DOMAINNAME";
@@ -134,7 +138,7 @@ For example, configure
 
 	$CONTROL_ADDRESS               = "elena-ctl\@$DOMAINNAME";
 	$PERMIT_COMMAND_FROM           = "members_only";
-==>	$REJECT_COMMAND_HANDLER        = "auto_regist";
+==>	$REJECT_COMMAND_HANDLER        = "auto_subscribe";
 .fi
 
 のようになることです。この場合はメンバー以外の人が
@@ -150,7 +154,7 @@ to automatic registration routine.
 
 のような動きをします。
 
-	$REJECT_POST_HANDLER           = "auto_regist";
+	$REJECT_POST_HANDLER           = "auto_subscribe";
 
 にすれば「投稿用のアドレスにメンバー以外からメールが来たら自動登録」に
 することもできます。
