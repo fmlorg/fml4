@@ -1030,7 +1030,7 @@ new options of configuration files
 Sendmail と直接話すので fml の場合ああいうのは関係なし。
 ただ、似たような形が split_and_sendmail.pl を呼ぶ時にあった(最終fix 06/16)。
 
-.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
+
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 
