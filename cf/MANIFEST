@@ -114,7 +114,7 @@ MAINTAINER_SIGNATURE:
 #   To: $MAIL_LIST $ML_FN => To: Elena@fml.org (Elena Lolabrigita ML)
 #
 # value: string
-ML_FN:		(Elena Lolabrigita ML)
+ML_FN:
 
 
 #####################################################################
