@@ -75,6 +75,19 @@ sub ExpandOption
 }
 
 
+sub ExpandHowToUpdateAliases
+{
+    local($s);
+
+    for $s (
+	    "[postfix]  postalias $ML_DIR/etc/aliases",
+	    "[sendmail] newaliases",
+	    ) {
+	print "\t\t\t<OPTION VALUE=\"$s\">$s\n";
+    }
+}
+
+
 sub Convert
 {
     local($file) = @_;
@@ -86,9 +99,17 @@ sub Convert
 		next;
 	    }
 
+	    if (/__EXPAND_HOW_TO_UPDATE_ALIASES__/) {
+		&ExpandHowToUpdateAliases;
+		next;
+	    }
+
 	    s/_CGI_PATH_/$CGI_PATH/g;
 	    s/_FML_VERSION_/$VERSION/g;
 	    s/_HOW_TO_UPDATE_ALIAS_/$CGI_CF{'HOW_TO_UPDATE_ALIAS'}/g;
+
+	    s/_EXEC_DIR_/$EXEC_DIR/g;
+	    s/_ML_DIR_/$ML_DIR/g;
 
 	    print;
 	}
@@ -230,6 +251,9 @@ sub SpawnProcess
     if (open(PROG, "$prog 2>&1 |")) {
 	while (<PROG>) { &P($_);}
 	close(PROG);
+
+	&ERROR("exit (" .($? & 255). ")") if $? & 255;
+	&ERROR($!) if $!;
     }
 }
 

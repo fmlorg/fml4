@@ -151,10 +151,15 @@ sub MailServerConfig
     }
     elsif ($proc eq 'newaliases_config') {
 	$CGI_CF{'HOW_TO_UPDATE_ALIAS'} = $config{'HOW_TO_UPDATE_ALIAS'};
+	$CGI_CF{'HOW_TO_UPDATE_ALIAS'} =~
+	    s/^\s*\[\S+\]\s*//g;
 	&SaveCGICF;
     }
     elsif ($proc eq 'run_newaliases') {
+	&P("-- run newaliases");
+
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
+	    &P("run \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\"");
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
 	}
 	else {
@@ -379,8 +384,7 @@ sub Command
     elsif ($PROC eq 'newaliases_config') {
 	&MailServerConfig($PROC, *Config);
     }
-    elsif ($PROC eq 'newaliases') {
-	&P("-- run newaliases");
+    elsif ($PROC eq 'run_newaliases') {
 	&MailServerConfig($PROC, $CGI_CF{'MTA'});
     }
     else {
