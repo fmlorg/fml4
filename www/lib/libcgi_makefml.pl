@@ -43,7 +43,7 @@ sub Parse
 	require 'jcode.pl';
 	eval "&jcode'init;";
 	require 'libmesgle.pl';
-	$MESG_FILE = "$EXEC_DIR/messages/Japanese/makefml";
+	$MESG_FILE = "$EXEC_DIR/messages/Japanese/cgi";
     }
 }
 
@@ -99,14 +99,17 @@ sub Control
 sub XSTranslate
 {
     local($mesg) = @_;
+    local($r);
 
     $mesg =~ s/^\s*//;
 
     if ($mesg =~ /OK:/) {
 	&Mesg2Japanese('OK') || $mesg;
     }
-    elsif ($mesg =~ /(ERROR:|WARN:)\s*(\S+)/) {
-	$1 ." ". &Mesg2Japanese($2);
+    elsif ($mesg =~ /(ERROR:|WARN:)\s*(\S+)(.*)/) {
+	local($tag, $key, $tbuf) = ($1, $2, $3);
+	$r = &Mesg2Japanese($key);
+	$tag ." ". ($r ? $r : $key.$tbuf);
     }
     else {
 	$mesg;
@@ -121,6 +124,8 @@ sub Mesg2Japanese
 
     if ($LANGUAGE eq 'Japanese') {
 	$x = &MesgLE'Lookup($key, $MESG_FILE); #';
+	return $NULL unless $x;
+
 	&jcode'convert(*x, 'jis'); #';
 	$x;
     }
@@ -139,15 +144,23 @@ sub Log
 sub OUTPUT_FILE
 {
     local($file) = @_;
-    local(%ncache);
+    local(%ncache, $xbuf, $inbuf);
 
     if (open($file, $file)) {
 	# firstly check "ExitStatus:" 
 	while (<$file>) {
-	    if (/^ExitStatus:(.*)/) {
-		next if $ncache{$_};
-		$ncache{$_} = 1;
-		print &XSTranslate($1), "\n";
+	    chop($inbuf = $_);
+
+	    if ($inbuf =~ /^ExitStatus:(.*)/) {
+		$xbuf = $1;
+
+		# uniq
+		next if $ncache{$inbuf};
+		$ncache{$inbuf} = 1;
+
+		# output with language conversion
+		print &XSTranslate($xbuf), "\n" if $xbuf;
+
 		next;
 	    }
 	}
