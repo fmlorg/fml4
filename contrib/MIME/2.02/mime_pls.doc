@@ -1,0 +1,184 @@
+<mime_pls.doc>                                             1997/12/30
+                    《mime_pls Ver.2.02について》
+
+◎mime_plsとは
+
+  mime_plsは、MIME encode/decodeのためのperl libraryです。メッセージ
+ヘッダフィールド中の日本語文字列のMIME encode/decode(RFC2047参照)と、
+メッセージボディのBase64形式およびQuoted-Printable形式のencode/decode
+(RFC2045参照)の機能をPerlの関数として提供します。
+
+  メッセージヘッダフィールド中の日本語文字列のMIME化はISO-2022-JPの
+B-encodingのみをサポートします。EUCまたはShiftJISの日本語文字列は
+ISO-2022-JPに自動変換され、B-encodingによりMIME encoded-wordに変換
+されます。また、MIME encoded-wordをデコードする際に出力漢字コードを
+指定すると、ISO-2022-JPコードをEUCコードやShiftJISコードに変換して
+出力することができます。
+
+  DOSマシン等の小メモリマシンで使用できるように、mimer.plとmimew.plの
+2つのライブラリファイルに分割しました。総称名としてはmime_pls(まいむ・
+ぷるす)と名付けます。
+
+  このドキュメント以外に各ファイルの先頭にもドキュメントを付けたので
+参照してください。
+
+
+◎WWW上のmime_plsのページについて
+
+  mime_plsのページ <http://www.cc.rim.or.jp/~ikuta/mime_pls/> を公開
+しました。このページでは、mime_plsについての情報提供とmime_plsの配布
+を行ないます。
+
+
+◎バージョン番号の調べ方
+
+  Ver.2.02からは、mime_plsライブラリを使用するスクリプトがmimer.plと
+mimew.plのバージョンをそれぞれ調べることができるように$mimer_version
+と$mimew_versionの2つの変数を定義しています。
+  これらの変数は、値として浮動小数点数を持ちバージョンが上がるにした
+がって単純増加することが、今後のバージョンにおいても保証されます。
+
+
+◎再配布について
+
+  このライブラリを利用したアプリケーションを書かれた場合には、このライ
+ブラリそのものを添付していただいて構いません。ただし、必ず本ドキュメン
+トを含む配布ファイルを全て添付してください。
+  改変して再配布する場合はライブラリファイル中の「配布条件」に従ってく
+ださい。
+
+
+◎無保証
+
+  このプログラムを使用することにより生じた損害については、作者はいかな
+る理由においても責任を負いません。使用される方の責任においてお使いくだ
+さい。
+
+
+◎配布ファイルについて
+
+  ■ドキュメントファイル
+
+    ◆mime_pls.doc
+      このファイルです。
+
+    ◆history
+      これまでの変更履歴を記述したドキュメントです。
+
+    ◆HTML形式ドキュメントファイル
+      WWW上のページで公開しているHTML文書です。
+
+  ■mimer.pl
+    require することにより、&mimedecode, &bodydecode, &bdeflush の3つ
+  の関数が使用できます。Ver.2.02から、$mimer_versionを参照することに
+  よりバージョン番号を調べることができるようになりました。
+
+    ◆&mimedecode($string,$kout)
+      $string中のencoded-wordのうち、charset=ISO-2022-JP,encoding=Bの
+    ものを選択的にデコードし、$koutの指定にしたがって漢字コード変換を
+    行なった結果を返します。
+      $koutは"SJIS"または"EUC"が有効です。$koutを省略した場合、または
+    有効な指定がされなかった場合はISO-2022-JP(いわゆる7bit JIS)を返し
+    ます。
+      RFC2047に基づき、encoded-wordにはさまれたLWS(空白、タブ文字、
+    改行＋タブまたは空白)は削除します。デコードのあと、ISO-2022-JP
+    (RFC1468)で定義されたエスケープシーケンスのうち不要なものがあれば
+    削除します。
+
+    ◆&bodydecode($encoded,$coding)
+      $codingが"b64"に等しいか指定しない場合は、$encodedに入れられた
+    文字列をMIME Base64形式のデータとみなしてデコードし、その結果を
+    返します。Base64 alphabet(A-Za-z0-9+/=)以外の文字が存在しても単に
+    無視して処理します。
+      Base64のデコードは4バイト単位に行われるので、半端な部分(最後の
+    1〜3バイト)はバッファに保存され、次にこの関数が呼び出された時に
+    いっしょにデコードされます。バッファをクリアするには&bdeflush関数
+    を使用します。
+
+      $codingが"qp"に等しい場合は、$encodedに入れられた文字列をMIME
+    Quoted-Printable形式のデータとみなしてデコードし、その結果を返し
+    ます。
+
+    ◆&bdeflush($coding)
+      $codingに"b64"または"qp"を指定することにより、エンコード形式と
+    してBase64またはQuoted-Printableを選択することができます。$coding
+    を指定しなかった場合はBase64を選択したとみなされます。
+      &bodydecode関数によりバッファに保存されたデータを(Base64の場合は
+    最後に適当なpad文字'='を仮定して)デコードしその結果を返します。
+      この関数が呼ばれると&bodydecodeのバッファがクリアされます。
+
+  ■mimew.pl
+    requireすることにより、&mimeencode,&bodyencode,&benflushの３つの
+  関数が使用できます。Ver.2.02から、$mimew_versionを参照することにより
+  バージョン番号を調べることができるようになりました。
+
+    ◆&mimeencode($string)
+      $string中の日本語コードの部分をISO-2022-JP(いわゆる7bit JIS)に
+    変換したあとMIME ecoded-word(RFC2047参照)に変換し、その結果を返し
+    ます。
+      ShiftJISコードとEUCコードが同じ行にある場合を除き、文字コードは
+    自動的に判別します。エンコードされるISO-2022-JPのエスケープシーケ
+    ンスはライブラリファイル(mimew.pl)の最初の方で設定できます。
+      $string中のShiftJISまたはEUCの文字列を正常にISO-2022-JPに変換し
+    エンコードするためには、英語版のPerlを使用する必要があります。
+      encoded-wordがASCII文字や特殊文字と直接接することを避けるために、
+    必要に応じて空白を挿入します。encoded-wordがコメントの内側にある場
+    合は例外扱いとして括弧との間に空白を挿入しません。
+      長い日本語文字列は必要に応じて分割してエンコードし、また必要に応
+    じてencoded-wordの前後で折り返し(行分割)処理をします。
+
+    ◆&bodyencode($data,$coding)
+      $codingが"b64"に等しいか指定しない場合は、$data中のデータをBase64
+    エンコードしその結果を返します。$codingが"qp"に等しい場合は、$data
+    中のデータを Quoted-Printableエンコードしその結果を返します。
+      Base64エンコードの場合は出力1行(デフォルトでは72バイト)に相当する
+    単位(デフォルトでは54バイト)毎、Quoted-Printableエンコードの場合は
+    元データの論理行(改行コードによる行)毎に処理します。$dataのうち半端
+    な部分はバッファ中に保存され、次の呼び出し時にいっしょにエンコード
+    されます。バッファをクリアするには&benflush関数を使用します。
+
+    ◆&benflush($coding)
+      $codingに"b64"または"qp"を指定することにより、エンコード形式として
+    Base64またはQuoted-Printableを選択することができます。$codingを指定
+    しない場合はBase64を選択したとみなされます。
+      &bodyencode関数がバッファに保存したデータを選択した形式でエンコード
+    しその結果を返します。Base64の場合は、エンコード結果が4の倍数長になら
+    なければ必要に応じてpad文字'='を追加します。
+      この関数が呼ばれると&bodyencodeのバッファがクリアされます。
+
+  ■ライブラリを使用したスクリプト
+
+    ◆rmime
+      mimer.plを使用してMIME headerをデコードするフィルターです。
+
+      使い方：[[j]perl] rmime [ -s | -e | -j ] [ファイル ...]
+
+    ◆wmime
+      mimew.plを使用してヘッダフィールド中の日本語文字列をエンコード
+    するフィルターです。
+
+      使い方：[[j]perl [-Llatin]] wmime [ファイル ...]
+
+    ◆rbody
+      mimer.plを使用してMIME Base64/Quoted-Printable形式のデータを
+    デコードするフィルターです。DOSマシンのように使用できるメモリ
+    が少ない環境でも動作するようにメモリ使用を抑えて作ってあります。
+
+      使い方：[[j]perl] rbody {-q|-b} [ファイル ...]
+
+    ◆wbody
+      mimew.plを使用してデータをMIME Base64/Quoted-Printable形式で
+    エンコードするフィルターです。DOSマシンのように使用できるメモリ
+    が少ない環境でも動作するようにメモリ使用を抑えて作ってあります。
+
+      使い方：[[j]perl] wbody {-q|-b} [ファイル ...]
+
+  ■Makefile
+    mimer.pl,mimew.pl,rmime,wmime,rbody,wbodyをインストールする際に
+  使用します。他には、ratやtar+gzip(or compress)+uuencodeで配布用の
+  アーカイブを作成する機能があります。
+    作者の環境(SunOS4.1.3)で使うためのMakefileなので、他の環境(特に
+  UNIX系以外の環境)ではうまく動かないかもしれません。
+
+---
+生田　昇 <noboru@ikuta.ichihara.chiba.jp>

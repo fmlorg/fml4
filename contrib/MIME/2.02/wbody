@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+# Copyright (C) 1994,1997 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
+#
+# wbody: MIME encoder Ver.0.02
+#        データを MIME base64 または Quoted-Printable でエンコードする。
+#
+# 使い方 : [ [j]perl ] wbody {-q|-b} [ ファイル名 ...]
+#
+#         mimew.pl は、環境変数 HOME→wbodyと同じ→通常の@INC の順にサ
+#         ーチされます。
+#
+# 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。
+
+## データ処理のブロック長（バイト）
+$len = 1026; ## 実行時のメモリが厳しい場合は 54 まで減らしてみてください。
+             ## (mimew.pl中の$foldcol)/4*3 (デフォルトで54)の倍数にすると
+             ## 効率がよくなります。54の倍数でなくても問題なく動きます。
+
+$home = $ENV{'HOME'};
+$perl_dir = $0;
+$perl_dir =~ s/\\/\//g;
+substr($perl_dir, rindex($perl_dir, "/")) = '';
+unshift(@INC, $home, $perl_dir);
+require 'mimew.pl';
+
+if ($#ARGV >= $[){
+    if ($ARGV[$[] =~ /^-q$/i){
+	shift;
+	$coding = "qp";
+    }elsif ($ARGV[$[] =~ /^-b$/i){
+	shift;
+	$coding = "b64";
+    }else{
+	$coding = "b64";
+    }
+}else{
+    $coding = "b64";
+}
+
+unshift(@ARGV, '-') if $#ARGV < $[;
+while ($ARGV = shift) {
+    open(ARGV, $ARGV) || die "Can't open $ARGV.\n";
+    binmode ARGV;
+    while(read(ARGV, $_, $len)){
+        print &bodyencode($_,$coding);
+    }
+    print &benflush($coding);
+}

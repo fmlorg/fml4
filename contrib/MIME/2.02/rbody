@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+
+# Copyright (C) 1994,1997 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
+#
+# rbody: MIME decoder Ver.0.02
+#        MIME base64 encoding または Quoted-Printable encoding された
+#        データをデコードする。
+#
+# 使い方 : [ [j]perl ] rbody {-q|-b} [ ファイル名 ...]
+#
+#         mimer.pl は、環境変数 HOME→rbodyと同じ→通常の@INC の順にサ
+#         ーチされます。
+#
+# 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。
+
+$home = $ENV{'HOME'};
+$perl_dir = $0;
+$perl_dir =~ s/\\/\//g;
+substr($perl_dir, rindex($perl_dir, "/")) = '';
+unshift(@INC, $home, $perl_dir);
+require 'mimer.pl';
+
+if ($#ARGV >= $[){
+    if ($ARGV[$[] =~ /^-q$/i){
+	shift;
+	$coding = "qp";
+	print STDERR "Quoted-Printable decoding\n";
+    }elsif ($ARGV[$[] =~ /^-b$/i){
+	shift;
+	$coding = "b64";
+	print STDERR "Base64 decoding\n";
+    }else{
+	$coding = "b64";
+	print STDERR "Base64 decoding\n";
+    }
+}
+
+binmode STDOUT;
+while(<>){
+    print &bodydecode($_,$coding);
+}
+print &bdeflush($coding);
