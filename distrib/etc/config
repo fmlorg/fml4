@@ -86,11 +86,12 @@ do
 	if [ "X$xvar" = X ];then
 		echo "variable $x is not defined";
 		xstatus=1;
+		continue;
 	fi
 
 	path=` echo $xvar | awk '{print $1}' `
 	realpath=`which $path`
-	if [ -x $path -o -x $realpath ];then
+	if [ -x "$path" -o -x "$realpath" ];then
 		echo "       ${x}: $path found"
 	else
 		echo "$path not exists";
