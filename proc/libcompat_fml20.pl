@@ -17,6 +17,7 @@ sub ProcRetrieveFileInSpool_FML_20
     $cat{"$SPOOL_DIR/$ID"} = 1;
     if ($ar eq 'TarZXF') {  
 	&use('utils');
+	# XXX malloc() ...
 	&Sendmail($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
 		  &TarZXF("$DIR/$mail_file", 1, *cat));
     }

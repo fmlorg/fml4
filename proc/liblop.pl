@@ -253,6 +253,7 @@ sub ResentForwFileInSpool
     # rewritten ?;
     # $e{'GH:Subject:'} = "Get $ID $ML_FN\n\t".$e{'GH:Subject:'};
 
+    # XXX malloc()
     &Sendmail($e{'Addr2Reply:'}, "", $body);
 
     # reset for the sequel actions and restore backup

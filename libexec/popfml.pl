@@ -461,6 +461,7 @@ sub CheckQueueIsExpireP
 	    close(F);
 	    $buf .= "\n\n------- End of Forwarded Message\n";
 
+	    # XXX malloc()
 	    &Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
 
 	    $status = unlink $queue;
