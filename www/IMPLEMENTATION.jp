@@ -4,7 +4,7 @@
 ○ ターゲットの httpd を apache 1.3.9 (apache-ssl) へ
 
     templateは
-	$EXEC_DIR/www/conf/apache-httpd.conf.diff (apache, apache-ssl)
+	$EXEC_DIR/www/examplesapache-httpd.conf.diff (apache, apache-ssl)
 
 
 ○ 基本的なディレクトリ構成
@@ -18,7 +18,7 @@
 
 	   $EXEC_DIR/www/cgi-bin/
 	   $EXEC_DIR/www/htdocs/
-	   $EXEC_DIR/www/conf/		(apache/conf/httpd.conf example)
+	   $EXEC_DIR/www/examples		(apache/conf/httpd.conf example)
 	   $EXEC_DIR/www/etc/		(.ht{access,passwd} example)
 	   $EXEC_DIR/www/authdb/		パスワードの実体置き場
 
