@@ -156,6 +156,10 @@ fml_local.pl は ~/.fmllocalrc で制御します。見本が etc/dot_fmllocalrc
 実行するもの	実行するもの。関数 or ファイル
 
 
+パターンマッチルーチンの後 $TYPE と $EXEC というグローバル変数に実行す
+るべきタイプと実行するべきプログラムが設定されます。
+.k	$TYPE (fml_local)
+.k	$EXEC (fml_local)
 
 
 .S	パターンの記述に用いることのできる正規表現

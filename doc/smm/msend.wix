@@ -159,10 +159,22 @@ fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
 .S	まとめ送りのデフォールト
 .k	$MSEND_MODE_DEFAULT
 .xref	$MGET_MODE_DEFAULT
+.k	$USE_RFC1153_DIGEST
+.k	$USE_RFC1153
+.k	$USE_RFC934
+
 
 gzip で複数のファイルを一つにして送るのがデフォールトですが、 
 $MSEND_MODE_DEFAULT の値で変更することが出来ます。
 使えるパラメータは $MGET_MODE_DEFAULT と同様です。
+
+なお便利なように、これらの簡易設定があります。
+
+	$USE_RFC1153_DIGEST	デフォールトをRFC1153
+	$USE_RFC1153		デフォールトをRFC1153
+	$USE_RFC934		デフォールトをRFC934
+
+に設定する。
 
 
 .S	msend.pl のコマンド一覧 (help fileより)

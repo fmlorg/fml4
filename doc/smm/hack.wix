@@ -500,6 +500,8 @@ X-Mail-Count: 00702
 
 .S	複数のマシンの sendmail を使ってパラレルに送信
 .k	$HOSTS
+.k	@HOSTS
+.k	@HOST(@HOSTSの旧変数名)
 
 複数の(sendmailの走っている)マシン（非常時のセカンダリも含む）
 

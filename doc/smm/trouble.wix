@@ -307,6 +307,7 @@ HReceived: by $j ($v/$Z); $b
 
 
 .S	WARNING: UNIX FROM Loop
+.k	WARNING: UNIX FROM Loop
 
 自動登録の時に 
 ＭＬ本体とかを間違って登録すると 無限にループしますよね？
@@ -336,6 +337,7 @@ UNIX FROM loop の方のチェックは それとはちがって
 
 
 .S	Solaris 2.4 でプロセス間通信がうまくいかない時
+.k	Solaris 2.4でプロセス間通信がうまくいかない
 
 とりあえず、 config.ph で
 
@@ -380,6 +382,7 @@ config.ph で
 
 
 .S	Solaris 2.3 (SUN OS 5) で flock がうごかない？？？
+.k	Solaris 2.3 (SUN OS 5) で flock がうごかない
 
 flock がだめというエラーメッセージがでたら
 
@@ -388,9 +391,9 @@ flock がだめというエラーメッセージがでたら
 にしてみてください
 
 
-.S	cc:Mail でのトラブル その１
+.S	CC:Mail でのトラブル その１
 .key	nkf
-.key	cc:Mail
+.key	CC:Mail
 .key	パソコンメールソフト
 
 cc:Mail は[\033\050\112]を日本語が絡みそうな部分には強制的に入れている
@@ -408,6 +411,7 @@ private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
 
 
 .S	PC-VANがちゃんとうけとってくれない 事件
+.k	PC-VAN
 
 message-id で < > がちゃんとついてないと だーめ。
 
@@ -416,6 +420,7 @@ PC-VAN は、<uja@aja.or.jp> という Message-Id: を@の前で切り取って、
 
 
 .S	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
+.k	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
 
 Perl 5 が正しくインストールされてないと起きるみたいですね。
 ＃それも 5.000 のようだが… 
@@ -509,6 +514,8 @@ sub fp_sort
 
 
 .S	503 Need RCPT (recipient) 
+.k	503 Need RCPT (recipient) 
+
 
 そのひとから DM をもらってみると、なんかわかるんじゃないかな〜と
 
@@ -577,6 +584,7 @@ Smtp:connect:なんとか とかエラーがでるんじゃないかとおもいます。
 
 
 .S	553 machine-name host name configuration error
+.k	553 machine-name host name configuration error
 
 sendmail R8 では相当するコードが存在しないので…なにがおこっているのか
 わかりません;-)
@@ -626,6 +634,7 @@ Elena@Baycity.jp  m=1u
 
 
 .S	:include:うじゃ is unsafe for mailing to program
+.k	:include:うじゃ is unsafe for mailing to program
 
 check：		includeするファイルおよびそこまでのパスの	
 		どこかで危ないことがないか？
@@ -682,6 +691,9 @@ forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
 
 
 .S	Return-Receipt-To:事件と CC:Mail等ＭＵＡ
+.k	Return-Receipt-To:とCC:Mail等ＭＵＡ
+.k	CC:Mail
+
 Thanks tanigawa@tribo.mech.nitech.ac.jp 
 
 .q
@@ -721,6 +733,7 @@ binary と判定するからです
 .S	[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID] 
 .key	$SUBJECT_HML_FORM
 .key	CyberDog-1.1J-beta
+
 .q
 From:    easy@pfu.co.jp
 
@@ -734,10 +747,20 @@ CyberDog正式版に期待しましょう。
 .~q
 
 
-.S	 DEC alpha(OSF1 V3.0)上の perl4 で config 等が動かない
+.S	DEC alpha(OSF1 V3.0)上の perl4 で config 等が動かない
+.k	DEC alpha(OSF1 V3.0)
 
 perl4 だと多分動かないとおもう。perl5 を install して試してみてくださ
 い。
+
+
+.S	Microsoft Exchange で [Elena:数字] が消える
+.k	Microsoft Exchange
+
+fml-support: 01508
+
+Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
+[Elena:数字]がなくなる。
 
 
 .# $Id$

@@ -436,3 +436,15 @@ to: と reply-to:を変更します。
 ＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
 libcompat.pl にBackward compatibility のためのコードがあります。
 
+
+.S	コマンドメールの結果のメールのReply-To:を変更する
+.k	$FORCE_COMMAND_REPLY_TO
+
+	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.

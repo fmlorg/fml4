@@ -49,6 +49,13 @@ SYNOPSIS:
 
 構造を自動的に作ります。
 
+$HTML_INDEX_REVERSE_ORDER がセットされていると逆方向に <LI> エントリを
+作ります。つまり新しい記事が最初に来るわけです。
+.k	$HTML_INDEX_REVERSE_ORDER
+
+この時各 directory の .indexcache にキャッシュされているデータから生成
+しています。ファイル .indexcache は $HTML_DATA_CACHE で変更できます。
+.k	$HTML_DATA_CACHE
 
 
 .S	HTML化するUNIT (数 or 日)
@@ -98,6 +105,33 @@ base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 
 例：
 	BASE64_DECODE = "/usr/local/bin/mewdecode";
+
+
+.S	$HTML_OUTPUT_FILTER
+.k	$HTML_OUTPUT_FILTER
+
+index.html を作る時 $HTML_OUTPUT_FILTER というプログラムを通してから作
+る。具体的には 日本語漢字変換やMIME,BASE64 decoder 等が該当するだろう。
+
+
+.S	$HTML_TITLE_HOOK
+.k	$HTML_TITLE_HOOK
+
+HTMLに変換された記事をファイルに保存する直前に実行されるフック。
+
+例：
+	q#$HtmlTitle = sprintf("%s %s", $Now, $HtmlTitle);#;
+
+で、タイトルのシンタックスを日付を付け加える等…変えられる。
+
+
+.S	キーワードによるHTML化の自動分類 （今の実装でOKか未確認？）
+.k	@HTML_FIELD
+.k	Keyword:
+
+ヘッダの Keyword: エントリが含んでいるキーワードが @HTML_FIELD のどれ
+かにマッチした場合に、キーワード別に別のHTML階層を作ります。
+
 
 
 .S	TalkWithHttpServer

@@ -8,6 +8,15 @@ LISTSERV (or MAJORDOMO) COMPATIBLE MODE について
 
 書きかけ _o_ 
 
+
+.S	$FMLSERV_DIR
+.k	$FMLSERV_DIR
+
+
+.S	$FMLSERV_LOGFILE
+.k	$FMLSERV_LOGFILE
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp

@@ -201,6 +201,14 @@ $PORT = 25 (25/tcp) で通信しますが、
 う風に予備のサーバを使い何とか配送をしようと試みます。
 
 
+.S	その他の変数（未解説）
+
+	$COMPAT_CF1
+	$UMASK
+	$GOOD_BYE_PHRASE
+	@MEMBER_LIST
+
+
 
 .C	Security 
 
@@ -263,6 +271,21 @@ SecureP は以下のように
 をどうしよう？という問題があります。今のところ”通さない”設定のままで
 すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
 .k	whoisと日本語の問題
+
+
+.S	DNS Spoofing
+.l	DNS Spoofing
+.k	$LOG_CONNECTION
+.k	$PeerAddr
+
+デフォールトでは何もしていませんが、
+
+	$LOG_CONNECTION = 1;
+
+コネクションを張ってきた相手先のIPアドレスを $PeerAddr に設定します。
+Gauntlet(firewall) 越しだったりすると無意味ですが…
+
+$PeerAddr を使って DNS Spoofing Check コードをHOOK掛ければよいでしょう。
 
 
 .# $Id$
