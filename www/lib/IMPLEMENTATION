@@ -1,0 +1,8 @@
+makefml.cgi calls 
+
+	Command() (libcgi_makefml.pl)
+
+as an entry point to www/ world.
+
+
+$Id$
