@@ -616,19 +616,24 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
 	注意：fml_local.pl は MH を意識してるので異なります。
 
+オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
+れ以外は Directoryの変数 だと仮定します。順番は関係ありません
+Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
+$LIBDIR にセットされます。
 
-順番は関係ありません。引数が -ではじまらなくて、そのDirectoryが存在す
-れば、その順に $DIR、 $LIBDIR にセットされます。
 
 	-d		デバッグモード
-	-bt   		デバッグモード	(Become Test)
+			（ＭＬへの配送以外すべてを実行可能）
+	-bt   		アドレステストモード	(Become Test)
+			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
+			いまのところ debug mode とかわらへんねん:-)
 	-bd		デーモンモード	(Become Daemon)
-	-sOPT $OPT 	をセットする。
-	-uOPT $OPT 	をオフする。
-	-lfile	file を $LOAD_LIBRARY 変数に代入する
+	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
+	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
+	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
 
-注意：sendmail のように『空白なし』です。
 
+注意：sendmail のように『空白なし』です。(だってその方がコードが簡単なんだもん:-)
 
 例：
 	-llibfml.pl とすると、コマンド専用アドレスのできあがりです
