@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: liblangdep.pl,v 1.5 2000/03/18 16:27:01 fukachan Exp $
+# $Id: liblangdep.pl,v 1.6 2000/03/21 03:10:05 fukachan Exp $
 
 # patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 # fml-support: 07599, 07600
@@ -55,7 +55,9 @@ sub CutOffReReRe
     $pattern .= '|( ÷øÆ| ÷|£“£≈|£“£Â)(\s*:|°ß)';
     $pattern .= '|' . $CUT_OFF_RERERE_PATTERN if ($CUT_OFF_RERERE_PATTERN);
 
-    $x =~ s/^((\s*|(°°)*)*($pattern)\s*)+/Re: /oi;
+    # fixed by OGAWA Kunihiko <kuni@edit.ne.jp> (fml-support: 07815)
+    # $x =~ s/^((\s*|(°°)*)*($pattern)\s*)+/Re: /oi;
+    $x =~ s/^((\s|(°°))*($pattern)\s*)+/Re: /oi;
 
     if ($CUT_OFF_RERERE_HOOK) {
 	eval($CUT_OFF_RERERE_HOOK);
