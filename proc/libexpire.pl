@@ -46,7 +46,8 @@ sub Expire
 		# Init(NOT SET last_seq)
 		$first_seq || ($last_seq = $first_seq = $f); 
 
-		unlink($f) ? &Debug("unlink $f") : &Debug("CANNOT unlink $f");
+		# unlink($f)? &Debug("unlink $f"): &Debug("CANNOT unlink $f");
+		unlink($f) || &Log("fail to unlink $f");
 
 		# store the largest sequence
 		$last_seq  = $last_seq > $unlink_seq ? $last_seq : $unlink_seq;
