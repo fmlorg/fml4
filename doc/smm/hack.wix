@@ -395,6 +395,8 @@ $TRF_NAME_HOOK = q#
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
 .fi
 .if LANG == JAPANESE
+fml 2.x ではこのままではうごきません。参考までに収録しています。
+
 .q
 From:    Yuao Tanigawa <yuao@infonia.or.jp>
 X-ML-Name: fml-support
@@ -438,6 +440,17 @@ MLのアドレスを書くようにしました。
 
 .~q
 .fi
+
+でもコマンドで実装しなくてもええやんか？メール本文の先頭に
+Reply-To: address があったらそれを設定する。
+
+$START_HOOK = q!
+    local($pat) = '.*\s*reply-to:\s*';
+    if ($Envelope{'Body'} =~ /^$pat(\S+)/i) {
+	&DEFINE_FIELD_FORCED('reply-to', $1);
+	$Envelope{'Body'} =~ s/^$pat\S+\n//io;
+    }
+!;
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
 =E.S	Not Deliver From: Field Address Of In-Coming Mail. 
