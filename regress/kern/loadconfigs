@@ -1,0 +1,43 @@
+#!/usr/local/bin/perl
+#-*- perl -*-
+#
+# Copyright (C) 2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#
+# $Id$
+#
+
+# getopt()
+require 'getopts.pl';
+&Getopts("dhI:");
+
+$ML_DIR = shift || '/var/spool/ml';
+push(@INC, $opt_I);
+
+if (opendir(DIRD, $ML_DIR)) {
+    for $xdir (readdir(DIRD)) {
+	next if /^\./;
+	eval &LoadConfigPH($xdir);
+    }
+    closedir(DIRD);
+}
+else {
+    ;
+}
+
+exit 0;
+
+sub LoadConfigPH
+{
+    local($ml) = @_;
+
+    $DIR = "$ML_DIR/$ml";
+
+    return unless -f "$DIR/config.ph";
+    require 'libloadconfig.pl'; &__LoadConfiguration;
+
+    # verify each differenct value for each ml
+    print STDERR "ACTIVE_LIST\t$ACTIVE_LIST\n";
+}
+
+1;
