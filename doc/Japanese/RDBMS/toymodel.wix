@@ -1,0 +1,26 @@
+.C	おもちゃのモデル
+
+
+おもちゃなので、実用的なモデルかどうかは不明、というより多分教育的効果
+以上のものは期待されないモデル。
+
+
+テーブルの定義は
+
+[PostgreSQL]
+
+  create table ml (ml text,
+		file text, 
+		address text,
+		off int,
+		options text);
+
+[MySQL]
+
+  create table ml (
+	ml char(64),
+	file char(64),
+	address char(64),
+	off int,
+	options char(64)
+  );
