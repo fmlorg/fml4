@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
@@ -10,7 +10,7 @@
 
 # CONFIGURATION
 $SPOOL_DIR = $SPOOL_DIR || "spool";	# expire spool articles
-$EXPIRE	   = $EXPIRE    || 7;		# days (7 == one week)
+$Expire	   = $Expire    || 7;		# days (7 == one week)
 
 if ($0 eq __FILE__) {
 	require 'getopts.pl';
@@ -18,16 +18,16 @@ if ($0 eq __FILE__) {
 
 	die(&USAGE) if $opt_h;
 	$SPOOL_DIR = $opt_s || $SPOOL_DIR;
-	$EXPIRE	   = $opt_e || $EXPIRE;
+	$Expire	   = $opt_e || $Expire;
 	$with_number = $opt_n;	# number
 	$debug     = $opt_d;
 	
-	print STDERR "&Expire($SPOOL_DIR, $EXPIRE);\n" if $debug;
+	print STDERR "&Expire($SPOOL_DIR, $Expire);\n" if $debug;
 	if ($with_number) {
-	    &Expire($SPOOL_DIR, $EXPIRE, $with_number);
+	    &Expire($SPOOL_DIR, $Expire, $with_number);
 	}
 	else {
-	    &Expire($SPOOL_DIR, $EXPIRE);
+	    &Expire($SPOOL_DIR, $Expire);
 	}
 
 	exit 0;
@@ -40,7 +40,7 @@ else {
 sub Expire_with_date { &Expire(@_);}
 sub Expire
 {
-	local($SPOOL_DIR, $EXPIRE, $with_number) = @_;
+	local($SPOOL_DIR, $Expire, $with_number) = @_;
 	local($d, $f, @f, %f);
 	local($oneday) = 24*3600; # seconds for one day
 
@@ -57,9 +57,9 @@ sub Expire
 		    $d = time - (stat($f))[10];
 		    $d /= $oneday;
 		    
-		    print STDERR "?:expire $f if $d > $EXPIRE\n" if $debug; 
+		    print STDERR "?:expire $f if $d > $Expire\n" if $debug; 
 
-		    if ( !$debug && -f $f && $d > $EXPIRE && unlink $f ) {
+		    if ( !$debug && -f $f && $d > $Expire && unlink $f ) {
 			print STDERR "unlink $f\n";
 		    }
 		}
@@ -70,7 +70,7 @@ sub Expire
 	if ($with_number)  {
 	    # sort ->  1 , 2, 3, ... incresing order.
 	    @f = sort { $a <=> $b;} @f;
-	    $d = scalar(@f) - $EXPIRE;
+	    $d = scalar(@f) - $Expire;
 
 	    foreach (@f) {
 		$_ = "$SPOOL_DIR/$_";
