@@ -37,7 +37,7 @@ DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
 
 
 ### doc/examples
-DOC_EXAMPLE_SOURCES = setup-postfix fml-install
+DOC_EXAMPLE_SOURCES = postfix-install fml-install
 
 
 ### RULES ###
