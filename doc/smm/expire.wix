@@ -1,4 +1,5 @@
 .C	Expire (一定日数より古いファイルは消す)とNewSyslog
+.l	expire
 
 
 Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
