@@ -169,6 +169,7 @@ Can you understand sources of quotations?:-)
 .include fred.wix
 .include pager.wix
 
+.include obsoletes.wix
 .include app/fmlR1.wix
 .include app/vars.wix
 .include app/misc.wix
