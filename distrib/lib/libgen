@@ -378,6 +378,7 @@ GEN_ARCHIVE () {
 	else
 		FMLID=fml-${BRANCH}-${DATE}
 	fi
+	export FMLID
 
 	# directory
 	FTP=$FTP_DIR/${BRANCH}
@@ -429,6 +430,14 @@ GEN_ARCHIVE () {
 
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
+
+	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
+	   (
+	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      rm fml-current.tar.gz
+	      ln -s current/$FMLID.tar.gz # backward compatibility
+	   )
+	fi
 
 	echo ""
 	echo "-- make $FMLID.zip";
