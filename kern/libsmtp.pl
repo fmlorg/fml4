@@ -212,6 +212,8 @@ sub SmtpIO
     local($sendmail);
     local($host, $error, $in_rcpt, $ipc, $try_prog, $retry, $backoff);
 
+    if ($USE_SMTP_PROFILE) { $SmtpIOStart = time;}
+
     ### set global variable
     $SmtpFeedMode  = 0; # reset;
     $SocketTimeOut = 0; # against the call of &SocketTimeOut;
@@ -364,6 +366,13 @@ sub SmtpIO
 	return;
     }
 
+    # check critical error
+    if ($SoErrBuf =~ /^[45]/) {
+	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
+	&Log("reason: $SoErrBuf");
+	return $NULL;
+    }
+
     &SmtpPut2Socket('DATA', $ipc);
     print SMTPLOG ('-' x 30)."\n";
 
@@ -445,6 +454,9 @@ sub SmtpIO
 
     # reverse \r\n -> \n
     $e{'Body'} =~ s/\r\n/\n/g;
+
+    # 
+    if ($USE_SMTP_PROFILE) { &Log("SmtpIO: ", (time - $SmtpIOStart));}
 
     0;
 }
@@ -604,11 +616,14 @@ sub SmtpPutActiveList2Socket
     dbmclose(%WMD);
 
     &Log("Smtp: ".(time - $time)." sec. for $count rcpts.") if $debug_smtp;
+    if ($USE_SMTP_PROFILE) {
+	&Log("Smtp::Active->Smtp: ".(time - $time)." sec. for $count rcpts.");
+    }
 }
 
 ###FI: NOT EXPORTS IN FIX-INCLUDE
 # SMTP UTILS;
-sub SmtpFiles2Socket { require 'libsmtputils.pl'; &DoSmtpFiles2Socket(@_);}
+sub SmtpFiles2Socket { require 'libsmtpsubr.pl'; &DoSmtpFiles2Socket(@_);}
 sub NeonSendFile     { require 'libsmtputils.pl'; &DoNeonSendFile(@_);}
 sub SendFile         { require 'libsmtputils.pl'; &DoSendFile(@_);}
 sub SendFile2        { require 'libsmtputils.pl'; &DoSendFile2(@_);}
