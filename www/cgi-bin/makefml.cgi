@@ -109,11 +109,13 @@ sub OUTPUT_FILE
 
 sub SecureP
 {
-    if ($ML !~ /^[A-Za-z0-9\-]$/i) {
+    local($secure_pat) = '[A-Za-z0-9\-_]+';
+
+    if ($ML !~ /^($secure_pat)$/i) {
 	&P("ERROR: ML=$ML is invalid.");
 	0;
     }
-    elsif ($PROC !~ /^[A-Za-z0-9\-]$/i) {
+    elsif ($PROC !~ /^($secure_pat)$/i) {
 	&P("ERROR: PROC=$PROC is invalid.");
 	0;
     }
@@ -125,7 +127,7 @@ sub SecureP
 
 sub Command
 {
-    if ($PROC eq 'add' || $PROC eq 'BYE') {
+    if ($PROC eq 'add' || $PROC eq 'bye') {
 	&P("&Control($ML, $PROC, $MAIL_ADDR);") if $debug;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
