@@ -24,7 +24,11 @@ do
 	#   sed -f $sed $buf |\
 	#   awk -v x=$x '{printf("4 %-20s %s\n", x, $0)}'
 
-	   perl5.00503 -Imodule/ -Imodule/CPAN -Imodule/Jcode -cw $x 2>$buf
+	   perl5.00503 -Imodule/ \
+		-Imodule/CPAN \
+		-Imodule/Jcode \
+		-Imodule/fml-devel \
+		-cw $x 2>$buf
 	   sed -f $sed $buf |\
 	   awk -v x=$x '{printf("5 %-20s %s\n", x, $0)}'
 	)|\
