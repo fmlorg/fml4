@@ -1,7 +1,7 @@
 INFO:
 # FML Configurable Variable Definitions
 #
-# Copyright (C) 1993-2002 Ken'ichi Fukamachi
+# Copyright (C) 1996-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
 #               1996-2002 fukachan@sapporo.iij.ad.jp
@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.91 2002/01/09 15:08:58 fukachan Exp $
+# $FML: MANIFEST,v 1.92 2002/01/09 15:39:20 fukachan Exp $
 #
 
 
@@ -1275,6 +1275,10 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 # if $AUTO_HTML_GEN, we generate html'ed articles in $DIR/$HTML_DIR
 # value: 1/0
 AUTO_HTML_GEN:
+
+# use Mail::HTML::Lite in fml-devel (fml next generation).
+# value: 1/0
+USE_NEW_HTML_GEN:
 
 # value: 1/0
 HTML_THREAD:			1

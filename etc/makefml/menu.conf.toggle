@@ -95,6 +95,7 @@
 	_i_  USE_MEMBER_NAME                            $SUMMARY{'USE_MEMBER_NAME'}
 	_i_  USE_MIME                                   $SUMMARY{'USE_MIME'}
 	_i_  USE_MTI                                    $SUMMARY{'USE_MTI'}
+	_i_  USE_NEW_HTML_GEN                           $SUMMARY{'USE_NEW_HTML_GEN'}
 	_i_  USE_ORIGINAL_MESSAGE_ID                    $SUMMARY{'USE_ORIGINAL_MESSAGE_ID'}
 	_i_  USE_OUTGOING_ADDRESS                       $SUMMARY{'USE_OUTGOING_ADDRESS'}
 	_i_  USE_RFC2369                                $SUMMARY{'USE_RFC2369'}
@@ -962,6 +963,20 @@
 
 =menu
 	USE_MTI	$SUMMARY{'USE_MTI'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/USE_NEW_HTML_GEN
+
+=name
+	USE_NEW_HTML_GEN
+
+=config
+	USE_NEW_HTML_GEN
+
+=menu
+	USE_NEW_HTML_GEN	$SUMMARY{'USE_NEW_HTML_GEN'}
 
 =query
 	type:	y-or-n
