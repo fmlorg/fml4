@@ -12,9 +12,15 @@ sub AutoRegist
 
     if($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
 	# Syntax e.g. "Subject: subscribe"...
+	# 
+	# [\033\050\112] is against a bug in cc:Mail
+	# patch by yasushi@pier.fuji-ric.co.jp
+	$s = $Subject;
+	$s =~ s/^\#\s*//;
 
-	if($Subject =~ /^\s*$REQUIRE_SUBSCRIBE\s+(.*)\s*$/i ||
-	   $Subject =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i ) {
+	if($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*$/i ||
+	   $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i||
+	   $s =~ /^[\033\050\112]\s*$REQUIRE_SUBSCRIBE\s*$/i) {
 	    $from = $1;
 	}else {
 	    $s = "Bad Syntax on subject in autoregistration";
@@ -28,9 +34,11 @@ sub AutoRegist
 
     }elsif($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
 	# Syntax e.g. "subscribe" in body
+	$s = $MailBody;
+	$s =~ s/^\#\s*//;
 
-	if($MailBody =~ /^\s*$REQUIRE_SUBSCRIBE\s+(.*)\s*$/i ||
-	   $MailBody =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i) {
+	if($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*\n/i ||
+	   $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*\n/i) {
 	    $from = $1;
 	}else {
 	    $s = "Bad Syntax in mailbody in autoregistration";
@@ -55,7 +63,7 @@ sub AutoRegist
     print STDERR "AUTO REGIST CANDIDATE>$from<\n" if $debug;
     $from = ($from || $From_address);
     print STDERR "AUTO REGIST FROM     >$from<\n" if $debug;
-    return 0 if(1 == &LoopBackWarning2($from)); # loop back check
+    return 0 if(1 == &LoopBackWarning($from)); # loop back check
 
     # ADD the unknown to the member list
     open(TMP, ">> $MEMBER_LIST") || do {
@@ -126,6 +134,8 @@ sub MemberStatus
     return $s ? $s : "$who is NOT matched\n";
 }
 
+# PACK_P is backward compatibility since 
+# PACK_P is always 0!
 sub OpenStream_OUT
 {
     local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
@@ -133,6 +143,7 @@ sub OpenStream_OUT
     print STDERR "OpenStream_OUT($WHERE, 0, $FILE, $TOTAL)\n" if $debug;
 
     if($PACK_P) {
+	# MEANINGLESS since always called as 0 .
 	open(OUT, "|$COMPRESS|$UUENCODE $FILE > $WHERE.$TOTAL") || return 0;
     }else {
 	open(OUT, "> $WHERE.$TOTAL") || return 0;
@@ -225,8 +236,13 @@ sub MakeFileWithUnixFrom
 	$PUNC_FLAG++;
 	$linecounter++;
 	if($_cf{'readfile', 'hook'}) {
-	    $s = "while(<FILE>) { $_cf{'readfile', 'hook'}; print OUT \$_; \$linecounter++;}";
-	    print STDERR ">>$s<<\n";
+	    $s = qq#
+		while(<FILE>) { 
+		    $_cf{'readfile', 'hook'}; 
+		    print OUT \$_; \$linecounter++;
+		}
+            #;
+	    print STDERR ">>$s<<\n" if $debug;
 	    &eval($s, 'Readfile hook');
 	}else {
 	    while(<FILE>) { print OUT $_; $linecounter++;}
@@ -254,16 +270,21 @@ sub MakeFileWithUnixFrom
 	$TOTAL = int($linecounter/$MAIL_LENGTH_LIMIT + 1);
 
 	if($_cf{'ish'}) {
+	    local($COMPRESS, $UUENCODE); # locally define!
+
 	    $FILE =~ s/\.gz$/.lzh/;
 	    $LHA = $LHA ? $LHA : "$LIBDIR/bin/lha";
 	    $ISH = $ISH ? $ISH : "$LIBDIR/bin/aish";
 	    $COMPRESS = "$LHA a $TMP_DIR/$FILE ". join(" ", @filelist);
 	    $UUENCODE = "$ISH -s7 -o $WHERE $TMP_DIR/$FILE";
-	    system "$COMPRESS; $UUENCODE";
+	    &system($COMPRESS);
+	    &system($UUENCODE);
 	    unlink "$TMP_DIR/$FILE";
 	}else {
-	    system "$COMPRESS $WHERE.0|$UUENCODE $FILE > $WHERE";
+	    # In fact , we do not use this code.;-)
+	    &system("$COMPRESS $WHERE.0|$UUENCODE $FILE", $WHERE);
 	}
+
 	$totallines = &WC($WHERE);
 	$TOTAL = int($totallines/$MAIL_LENGTH_LIMIT + 1);
 
@@ -279,6 +300,7 @@ sub MakeFileWithUnixFrom
 }
 
 # Sending files back, Orderly is [a], not [ad] _o_
+# $returnfile not include $DIR PATH
 sub SendingBackOrderly { &SendingBackInOrder(@_);}
 sub SendingBackInOrder
 {
@@ -286,7 +308,7 @@ sub SendingBackInOrder
 
     foreach $now (1..$TOTAL) {
 	local($file) = "$DIR/$returnfile.$now";
-	$0 = ($PS_TABLE ? $PS_TABLE : "SendingBackOrderly"). " Sending Back $now/$TOTAL";
+	$0 = ($PS_TABLE ? $PS_TABLE : "--SendingBackOrderly"). " Sending Back $now/$TOTAL";
 	&Logging("SBO:[$$] Send $now/$TOTAL ($to)", 1);
 	&SendFileMajority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0, @to);
 
@@ -442,9 +464,41 @@ sub TarZXF
     return $outfile ? $TOTAL: $BUF;
 }
 
+sub system
+{
+    local($s, $out, $in) = @_;
+
+    if(($pid = fork) < 0) {
+	&Log("Cannot fork");
+    }elsif(0 == $pid) {
+	if($in){
+	    open(STDIN, $in) || die "in";
+	}else {
+	    close(STDIN);
+	}
+
+	if($out){
+	    open(STDOUT, '>'. $out)|| die "out";
+	    $| = 1;
+	}else {
+	    close(STDOUT);
+	}
+
+	exec $s;
+	&Log("Cannot exec $s:$@");
+    }
+
+    # Wait for the child to terminate.
+    while(($dying = wait()) != -1 && ($dying != $pid) ){
+	;
+    }
+}
+
+### may be a DUPLICATED SUBROLUTINE ###
 
 # Return 1 if Loopback
-sub LoopBackWarning2
+if(! defined(&LoopBackWarning)) {
+sub LoopBackWarning
 {
     local($to) = @_;
 
@@ -458,6 +512,7 @@ sub LoopBackWarning2
     }
 
     return 0;
+}
 }
 
 1;
