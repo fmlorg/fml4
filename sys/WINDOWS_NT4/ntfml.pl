@@ -10,118 +10,59 @@
 # See the file COPYING for more details.
 #
 # $Id$
+#
 
-
+### MAIN
 &Init;
 
-while (1) {
-    $init_time = time;
+# main loop
+for (;;) { 
+    # A new ml may has been created a little ago, 
+    # We scan $MAIL_LIST_DIR to check it.
+    &GetConf; 
 
-    &GetConf;
+    &Log("===== start new session =====") if $debug;
 
-    # determine slot
-    $Counter++;
-    $Counter = $Counter % $SlotSize;
-
-    # kill the 3600 sec. after
-    $next = ($Counter + 1) % $SlotSize;
-
-
-    &Info("start new session") if $debug;
-
-    foreach $ml (keys %IncludeFile) {
+    # POP
+    for $ml (keys %IncludeFile) {
+	next unless -f $IncludeFile{$ml};
 	next unless $ml;
 
-	&Info("call $ml session") if $debug;
+	&Log("start $ml pop session") if $debug;
 
-	$Process  = "perl $PopFmlProg ";
-	$Process .= "-d " if $debug;
-	$Process .= "$ML_DIR/popfml $EXEC_DIR ";
-	$Process .= "-user $ml -host $POP_SERVER ";
-	$Process .= "-include_file $IncludeFile{$ml} ";
-	$Process .= "-pop_passwd $ML_DIR/etc/pop_passwd ";
-	$Process .= "-perl_prog $PerlProgram ";
-	$Process .= "-arch $COMPAT_ARCH";
-
-	if ($debug) {
-	    print STDERR "Perl   \t$PerlProgram\n";
-	    print STDERR "Process\t$Process\n";
-	}
-
-	### 
-	### *** ATTENTION! ***
-	### Create() CANNOT READ "/" path syntax;
-	### Only in this call, we need to user 'c:\perl' .. syntax ;_;
-	### 
-	# create processes
-	&Win32::Process::Create($ProcessObj, 
-				$PerlProgram, 
-				$Process, 
-				0,
-				NORMAL_PRIORITY_CLASS, ".") || 
-				    die ErrorReport();
-
-	$ProcessObj{$ml, $Counter} = $ProcessObj;
-
-	if ($ProcessObj{$ml, $next}) {
-	    print STDERR "kill \$ProcessObj{$ml, $next}\n" if $debug;
-	    $ProcessObj = $ProcessObj{$ml, $next};
-	    $ProcessObj->Kill(1);
-	}
+	$p = &ArrangeProc($ml, " -mode POP_ONLY");
+	system $p;
     }
 
+    # EXEC
+    for $ml (keys %IncludeFile) {
+	next unless -f $IncludeFile{$ml};
+	next unless $ml;
+
+	&Log("start $ml exec session") if $debug;
+
+	$p = &ArrangeProc($ml, " -mode EXEC_ONLY_ONCE");
+	system $p;
+    }
 
     &GetTime;
 
+    # Matome Okuri
     # e.g. 18:00 
     if ($min == 0 || $debug_msend) {
-	# Matome Okuri
-	foreach $ml (keys %IncludeFile) {
+	for $ml (keys %IncludeFile) {
 	    next unless $ml;
 
-	    &Info("call $ml msend session") if $debug;
+	    &Log("start $ml msend session") if $debug;
 
-	    $Process  = "perl $EXEC_DIR/msend.pl ";
-	    $Process .= "$ML_DIR/$ml $EXEC_DIR ";
-	    $Process .= "-d " if $debug;
-	    $Process .= "--COMPAT_ARCH=$COMPAT_ARCH " if $COMPAT_ARCH;
-
-	    &Win32::Process::Create($ProcessObj, 
-				    $PerlProgram, 
-				    $Process, 
-				    0,
-				    NORMAL_PRIORITY_CLASS, ".") || 
-					die ErrorReport();
-
-	    $MSendProcessObj{$ml, $Counter} = $ProcessObj;
-
-	    if ($MSendProcessObj{$ml, $next}) {
-		print STDERR "kill \$MSendProcessObj{$ml, $next}\n" if $debug;
-		$ProcessObj = $MSendProcessObj{$ml, $next};
-		$ProcessObj->Kill(1);
-	    }
+	    $p = &ArrangeMSendProc;
+	    system $p;
 	}
     } # $min == 0
-
-    # sleep time
-    &GetTime;
-    $sleep = (60 - $sec) - (time - $init_time) + 1;
-    &Info("sleep for $sleep sec.") if $debug;
-
-    if ($time <= 60) {
-	sleep($sleep);
-    }
-    elsif ($debug) {
-	print STDERR "Oops, the execution costs > 60 secs.\n";
-	print STDERR "Do the next scan as soon as possible.\n";
-    }
-
-    &Info('go to next loop') if $debug;
 }
 
 
 exit 0;
-
 
 
 sub GetConf
@@ -164,27 +105,6 @@ sub GetConf
 }
 
 
-sub ReadNTConfig
-{
-    local($arg, $exec);
-
-    ### read configuration file
-    open(CONFIG, "_fml\\nt") || die("Error: cannot open _fml\\nt [$!]\n");
-    while (<CONFIG>) {
-	chop;
-	next if /^\s*$/;
-	next if /^\#/;
-
-	(@buf) = split;
-	$arg   = shift @buf;
-	$exec  = join(" ", @buf);
-
-	$Config{$arg} = $exec;
-    }
-    close(CONFIG);
-}
-
-
 sub Init
 {
     require 'getopts.pl';
@@ -200,11 +120,6 @@ sub Init
     }
     
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	# $ProcessObj
-	# $ProcessObj->Suspend();
-	# $ProcessObj->Resume();
-	# $ProcessObj->Wait(10);
-	# $ProcessObj->Kill(1);
 	use Win32::Process;
 	use Win32;
 
@@ -218,6 +133,9 @@ sub Init
 	# perl perl\popfml.pl h:\w h:\fml 
 	# -pwfile h:\perl\pw -user elena -host iris.sapporo.iij.ad.jp -f h:\cf
 	$PopFmlProg = $EXEC_DIR.'\libexec\popfml.pl';
+
+	# wrapper for timeout
+	$Wrapper = $EXEC_DIR.'\wrapper.pl';
     }
     else {
 	$PerlProgram = &search_path('perl');
@@ -225,11 +143,9 @@ sub Init
     }
 
 
-    ### default values;
-    $|        = 1;
-    $WaitUnit = 60;
-    $TimeOut  = 3600;
-    $SlotSize = int($TimeOut/$WaitUnit);
+    ### default values ###
+    $|          = 1;
+    $TIME_SLICE = 5; # 5 sec.
 }
 
 
@@ -261,20 +177,20 @@ sub GetTime
 }
 
 
-
-sub Info
-{
-    $count++;
-    &GetTime;
-    print STDERR "\#\#\#[$count]\#\#\# $MailDate: @_\n";
-}
-
-
 sub search_path
 {
     local($f) = @_;
-    local($path) = $ENV{'PATH'};
-    local(@path) = split(/:/, $path);
+    local($p, @path);
+
+    # cache on
+    if ($PathCache{$f}) { return $PathCache{$f};}
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	@path = split(/;/, $ENV{'PATH'});
+    }
+    else {
+	@path = split(/:/, $ENV{'PATH'});
+    }
 
     # too pesimistic?
     for ("/usr/local/bin", "/usr/share/bin", 
@@ -282,12 +198,67 @@ sub search_path
 	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
 	 # NT Extention
 	 "/perl5/bin", 
-	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin"
+	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
 	 ) {
 	push(@path, $_);
     }
 
-    for (@path) { if (-f "$_/$f") { return "$_/$f";}}
+    for (@path) { 
+	$p = $_ ; $p =~ s#\\#/#g;
+	if (-f "$p/$f") { 
+	    $PathCache{$f} = "$_/$f";
+	    return "$_/$f";
+	}
+    }
+
+    print STDERR "$f is not found\n";
+    $f; # try anyway 
+}
+
+
+sub ArrangeProc
+{
+    local($ml, $ap) = @_;
+    local($p);
+
+    $p  = "perl $Wrapper -p $PerlProgram ";
+    $p .= "$PopFmlProg ";
+    $p .= "-d " if $debug;
+    $p .= "$ML_DIR/popfml $EXEC_DIR ";
+    $p .= "-user $ml -host $POP_SERVER ";
+    $p .= "-include_file $IncludeFile{$ml} ";
+    $p .= "-pop_passwd $ML_DIR/etc/pop_passwd ";
+    $p .= "-perl_prog $PerlProgram ";
+    $p .= "-arch $COMPAT_ARCH";
+    $p .= "$ap";
+
+    if ($debug) {
+	print STDERR "\n\nArrangeProc:\n";
+	print STDERR "Perl   \t$PerlProgram\n";
+	print STDERR "Process\t$p\n";
+    }
+
+    $p;
+}
+
+
+sub ArrangeMSendProc
+{
+    local($ml) = @_;
+    local($p);
+    $p  = "perl $Wrapper -p $PerlProgram ";
+    $p . "$EXEC_DIR/msend.pl ";
+    $p .= "$ML_DIR/$ml $EXEC_DIR ";
+    $p .= "-d " if $debug;
+    $p .= "--COMPAT_ARCH=$COMPAT_ARCH " if $COMPAT_ARCH;
+
+    if ($debug) {
+	print STDERR "\nArrangeProc:\n";
+	print STDERR "Perl   \t$PerlProgram\n";
+	print STDERR "Process\t$p\n\n";
+    }
+
+    $p;
 }
 
 
@@ -295,7 +266,7 @@ sub Grep
 {
     local($key, $file) = @_;
 
-    print STDERR "Grep $key $file\n" if $debug;
+    &Log("Grep $key $file") if $debug;
 
     open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
     while (<IN>) { return $_ if /$key/i;}
@@ -318,7 +289,8 @@ sub GetPopPasswd
 
 sub Log
 {
-    print STDERR "Log: @_\n";
+    &GetTime;
+    print STDERR ">>> $Now @_\n";
 }
 
 
