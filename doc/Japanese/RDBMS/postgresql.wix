@@ -1,6 +1,20 @@
 .C	PostgreSQL へのアクセス
 .l	PostgreSQL
 
+注意: 現在の toymodel は postgresql 7.1 以降では
+      うまく動かないようです。理由は off というエントリが
+      SQL '99 の規格にある予約語とぶつかっているからです。
+
+      とりあえずの回避策は
+
+	1. postgresql 7.0.x を使う
+	2. toymodel の off のエントリを他の名前に変える
+
+  TODO:
+	互換性のために現在の toymodel はそのままにし、別途 SQL'99 でも
+	使えるドライバを用意しようと思います。
+
+
 .S	必要なもの
 =E.S	what you need
 
@@ -69,4 +83,4 @@ $DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
 .url ftp://ring.asahi-net.or.jp/
 .url http://member.nifty.ne.jp/hippo2000/
 
-.# $Id$ 
+.# $FML$
