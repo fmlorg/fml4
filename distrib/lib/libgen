@@ -245,7 +245,7 @@ FIX_DISTRIBUTION_LINKS () {
 
 GEN_CONTRIB () {
 
-	for dir in `cat distrib/contrib_list`
+	for dir in `cat distrib/etc/contrib_list`
 	do
 		echo " "; 
 		echo "---installing contrib/$dir"
@@ -393,11 +393,13 @@ GEN_ARCHIVE () {
 		echo    rm -f fml-current.*.tar.gz
 		echo 	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 		echo 	ln $FMLID.tar.gz fml-current.tar.gz
+		echo 	ln $FMLID.tar.gz old/$FMLID.tar.gz
 
 		chdir $FTP
 		rm -f fml-current.*.tar.gz fml-current.tar.gz
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
+		ln $FMLID.tar.gz old/$FMLID.tar.gz
 		(uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
 		cat > $FTP/fml-current.uu
 	)
