@@ -300,18 +300,28 @@ sub Usage
                   [-E limit] [-t type]
                   [-t TYPE] SPOOL;
     ;
-    -D    $DIR (ML HOME DIRECTORY)
+    -h              this message;
     ;
-    -h    this message;
-    -v    verbose;
-    -V    debug mode on;
-    -d    $HTML_DIR;
-    -f    config.ph;
-    -t    number of day ($HTML_INDEX_UNIT);
-    -M    Minimum (MIN, default 1);
-    -L    the number of Last sequence to process (hence MIN = MAX - $opt_L);
+    -v              verbose;
+    -V              debug mode on;
     ;
-    SPOOL $SPOOL_DIR;
+    -f config.ph    configuration file;
+    ;
+    -D $DIR         ML HOME directory);
+    -d $HTML_DIR    html created directory);
+    -I path         include path;
+    ;
+    -t type         number of day ($HTML_INDEX_UNIT);
+    -M number       Minimum (MIN, default 1);
+    -L number       process the latest $opt_L files.
+                    (hence MIN = MAX - $opt_L);
+    ;
+    SPOOL           $SPOOL_DIR;
+    ;
+    For example;
+    % chdir /var/spool/ml/elena;
+    % /usr/local/fml/bin/spool2html.pl -t month -L 100 -v \\;
+       -I /my/hacked/library -d htdocs -f config.ph spool;
     ;#;
 
     $s =~ s/;//g;
