@@ -69,6 +69,9 @@ sub SocketInit
 {
     local($eval, $exist_socket_ph);
 
+    # SMTP HACK
+    if ($DISTRIBUTE_DUMMY_RECIPIENT) { require 'libsmtphack.pl'; &SmtpHackInit;}
+
     for (@INC) { if (-r "$_/sys/socket.ph") { $ExistSocketPH = 1;}}
 
     $STRUCT_SOCKADDR = $STRUCT_SOCKADDR || 'n n a4 x8';
@@ -355,12 +358,12 @@ sub SmtpIO
 
     if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT  IN>$MailDate\n";}
 
-    if ($e{'mode:_Deliver'} && $SMTP_DIST_HACK) { 
+    if ($e{'mode:_Deliver'} && $DISTRIBUTE_DUMMY_RECIPIENT) { 
 	if ($e{'mci:pipelining'}){
-	    &SmtpPut2Socket_NoWait("RCPT TO:<$SMTP_DIST_HACK_RCPT>", $ipc);
+	    &SmtpPut2Socket_NoWait("RCPT TO:<$DISTRIBUTE_DUMMY_RECIPIENT>", $ipc);
 	}
 	else {
-	    &SmtpPut2Socket("RCPT TO:<$SMTP_DIST_HACK_RCPT>", $ipc);
+	    &SmtpPut2Socket("RCPT TO:<$DISTRIBUTE_DUMMY_RECIPIENT>", $ipc);
 	}
 	    
 	$Current_Rcpt_Count = 1;
