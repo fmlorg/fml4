@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: UnixGroup.pm,v 1.1.1.2 2001/06/04 04:47:01 fukachan Exp $
+# $FML: UnixGroup.pm,v 1.18 2002/12/22 02:54:38 fukachan Exp $
 #
 
 package IO::Adapter::UnixGroup;
@@ -38,6 +38,7 @@ IO::Adapter::UnixGroup - IO wrapper to read /etc/group
 =head1 DESCRIPTION
 
 See L<IO::Adapter::Array> for more details.
+It inherits C<IO::Adapter::Array> class.
 
 C<CAUTION: this map is read only>.
 
@@ -50,6 +51,10 @@ Configure object for array IO operation.
 =cut
 
 
+# Descriptions: initialize /etc/group specific configuration
+#    Arguments: OBJ($self) HASH_REF($me)
+# Side Effects: none
+# Return Value: ARRAY_REF
 sub configure
 {
     my ($self, $me) = @_;
@@ -66,20 +71,24 @@ sub configure
 
 L<IO::Adapter::Array>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-IO::Adapter::UnixGroup appeared in fml5 mailing list driver package.
+IO::Adapter::UnixGroup first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2002 Ken'ichi Fukamachi
 #
-# $FML: Spool.pm,v 1.10 2002/09/22 14:57:04 fukachan Exp $
+# $FML: Spool.pm,v 1.5 2002/04/06 01:30:37 fukachan Exp $
 #
 
 package Mail::Message::Spool;
@@ -53,10 +53,9 @@ return article file path.  If you use hierarchical subdirectories,
 this filepath() conversion is useful.
 
    $args = {
-	base_dir    => $base_dir,
-	id          => $id,
-	use_subdir  => 0,    # 1 or 0
-	subdir_unit => 1000,
+	base_dir   => $base_dir,
+	id         => $id,
+	use_subdir => 0,    # 1 or 0
    };
 
 where C<base_dir> and C<id> are mandatory.
@@ -77,11 +76,10 @@ sub filepath
 	my $id       = $args->{ id };
 	my $is_hash  = 0;
 	my $file     = '';
-	my $unit     =
-	    defined($args->{ subdir_unit }) ?  $args->{ subdir_unit } : 1000;
+	my $unit     = 1000;
 	my $subdir   = int($id/$unit);
 
-	if (defined $args->{ use_subdir } && $args->{ use_subdir }) {
+	if (defined $args->{ use_subdir }) {
 	    $is_hash = 1;
 	    use File::Spec;
 	    $file = File::Spec->catfile($base_dir, $subdir, $id);
@@ -156,10 +154,6 @@ if ($0 eq __FILE__) {
 }
 
 
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
@@ -173,7 +167,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::Spool first appeared in fml8 mailing list driver package.
+Mail::Message::Spool appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

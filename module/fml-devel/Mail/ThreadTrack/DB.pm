@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself.
+#   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: DB.pm,v 1.32 2002/12/24 10:19:49 fukachan Exp $
+# $FML: DB.pm,v 1.15 2001/11/20 09:43:21 fukachan Exp $
 #
 
 package Mail::ThreadTrack::DB;
@@ -12,11 +12,11 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-my $debug = 0;
+my $debug = defined $ENV{'debug'} ? 1 : 0;
 
 =head1 NAME
 
-Mail::ThreadTrack::DB - database access.
+Mail::ThreadTrack::DB - what is this
 
 =head1 SYNOPSIS
 
@@ -28,9 +28,9 @@ Mail::ThreadTrack::DB - database access.
 
 =head2 C<db_open()>
 
-open database.
+open DB.
 It uses tie() to bind a hash to a DB file.
-Our thread model uses several DB files such as
+Our minimal_states uses several DB files for
 C<%thread_id>,
 C<%date>,
 C<%status>,
@@ -42,7 +42,7 @@ C<%index>.
 
 =head2 C<db_close()>
 
-untie() the corresponding hashes opened by C<db_open()>.
+untie() corresponding hashes opened by C<db_open()>.
 
 =cut
 
@@ -50,25 +50,23 @@ my @kind_of_databases = qw(thread_id date status sender articles
                            message_id);
 
 
-# Descriptions: open database by tie()
-#    Arguments: OBJ($self)
-# Side Effects: $self->{ _hash_table } initialized.
+# Descriptions: 
+#    Arguments: $self
+# Side Effects: 
 # Return Value: none
 sub db_open
 {
     my ($self) = @_;
-    my $db_type   = $self->{ config }->{ db_type } || 'AnyDBM_File';
-    my $db_dir    = $self->{ _db_dir };
-    my $file_mode = $self->{ _file_mode } || 0644;
+    my $db_type = $self->{ config }->{ db_type } || 'AnyDBM_File';
+    my $db_dir  = $self->{ _db_dir };
 
-    use File::Spec;
     eval qq{ use $db_type; use Fcntl;};
     unless ($@) {
         for my $db (@kind_of_databases) {
-	    my $file = File::Spec->catfile($db_dir, $db);
+            my $file = "$db_dir/${db}";
             my $str  = qq{
                 my \%$db = ();
-                tie \%$db, \$db_type, \$file, O_RDWR|O_CREAT, $file_mode;
+                tie \%$db, \$db_type, \$file, O_RDWR|O_CREAT, 0644;
                 \$self->{ _hash_table }->{ _$db } = \\\%$db;
             };
             eval $str;
@@ -78,22 +76,22 @@ sub db_open
 	my %index      = ();
 	my $index_file = $self->{ _index_db };
 	eval q{
-	    tie %index, $db_type, $index_file, O_RDWR|O_CREAT, $file_mode;
+	    tie %index, $db_type, $index_file, O_RDWR|O_CREAT, 0644;
 	    $self->{ _hash_table }->{ _index } = \%index;
 	};
 	croak($@) if $@;
     }
     else {
-        croak("failed to \"use $db_type\"");
+        croak("cannot use $db_type");
     }
 
     1;
 }
 
 
-# Descriptions: clear database
-#    Arguments: OBJ($self)
-# Side Effects: update database
+# Descriptions: 
+#    Arguments: $self
+# Side Effects: 
 # Return Value: none
 sub db_clear
 {
@@ -108,15 +106,15 @@ sub db_clear
 }
 
 
-# Descriptions: clear database
-#    Arguments: STR($db_dir)
-# Side Effects: clear database, remove file if needed
+# Descriptions: 
+#    Arguments: $directory
+# Side Effects: 
 # Return Value: none
 sub _db_clear
 {
     my ($db_dir) = @_;
 
-    eval q{
+    eval q{ 
 	use DirHandle;
 	use File::Spec;
 	my $dh = new DirHandle $db_dir;
@@ -138,16 +136,16 @@ sub _db_clear
 }
 
 
-# Descriptions: close database by untie()
-#    Arguments: OBJ($self)
-# Side Effects: none
+# Descriptions: 
+#    Arguments: $self
+# Side Effects: 
 # Return Value: none
 sub db_close
 {
     my ($self) = @_;
 
     for my $db (@kind_of_databases) {
-        my $str = qq{
+        my $str = qq{ 
             my \$${db} = \$self->{ _hash_table }->{ _$db };
 	    untie \%\$${db};
         };
@@ -162,21 +160,15 @@ sub db_close
 
 =head2 db_mkdb($min, $max)
 
-remake database.
-
 =cut
 
 
-# Descriptions: remake database for messages from $min_id to $max_id
-#    Arguments: OBJ($self) NUM($min_id) NUM($max_id)
-# Side Effects: remake database
-# Return Value: none
 sub db_mkdb
 {
     my ($self, $min_id, $max_id) = @_;
     my $config     = $self->{ _config };
     my $spool_dir  = $config->{ spool_dir };
-    my $saved_args = $self->{ _saved_args }; # original $args
+    my $saved_args = $self->{ _saved_args }; # original $args 
 
     return undef unless (defined $min_id && defined $max_id);
 
@@ -184,33 +176,24 @@ sub db_mkdb
     use File::Spec;
 
     my $count = 0;
-    my ($fh, $file, $msg);
     print STDERR "db_mkdb: $min_id -> $max_id\n" if $debug;
-
-  ID:
     for my $id ( $min_id .. $max_id ) {
 	print STDERR "." if $count++ % 10 == 0;
 	print STDERR "process $id\n" if $debug;
 
-	# XXX-TODO: this code is workaround, we should create more clever way.
-	# XXX-TODO: overwrite (tricky)
+	# XXX this code is workaround, we should create more clever way.
+	# XXX overwrite (tricky)
 	$self->{ _config }->{ article_id } = $id;
 
-	# parse article and analyze it.
-	$file = $self->filepath({
-	    base_dir => $spool_dir,
-	    id       => $id,
-	});
+	# analyze
+	my $file = File::Spec->catfile($spool_dir, $id);
+	my $fh   = new FileHandle $file;
+	my $msg  = Mail::Message->parse({ fd => $fh });
+	$self->analyze($msg);
 
-	$fh = new FileHandle $file;
-	if (defined $fh) {
-	    my $msg  = Mail::Message->parse({ fd => $fh });
-	    $self->analyze($msg);
-
-	    # XXX-TODO: workaround, we should create more clever way.
-	    # XXX-TODO: remove current status (tricky ;)
-	    delete $self->{ _status };
-	}
+	# XXX this code is workaround, we should create more clever way.
+	# XXX remove current status (tricky ;)
+	delete $self->{ _status };
     }
     print STDERR "\n" if $count > 0;
 }
@@ -218,16 +201,12 @@ sub db_mkdb
 
 =head2 db_dump([$type])
 
-dump hash as text.
+dump hash as text. 
 dump status database if $type is not specified.
 
 =cut
 
 
-# Descriptions: dump data for database $type
-#    Arguments: OBJ($self) STR($type)
-# Side Effects: none
-# Return Value: none
 sub db_dump
 {
     my ($self, $type) = @_;
@@ -243,15 +222,11 @@ sub db_dump
 
 =head2 db_hash( $type )
 
-return HASH REFERENCE for specified database $type.
+return HASH REFERENCE for specified $type.
 
 =cut
 
 
-# Descriptions: get HASH REFERENCE for specified $type.
-#    Arguments: OBJ($self) STR($db_type)
-# Side Effects: none
-# Return Value: HASH_REF or UNDEF
 sub db_hash
 {
     my ($self, $db_type) = @_;
@@ -266,53 +241,20 @@ sub db_hash
 }
 
 
-=head2 db_last_modified()
-
-return the last modified time of our dateabase as unix time.
-This time is the latest modified time among all database files.
-
-=cut
-
-
-# Descriptions: return the last modified time (unix time) of database
-#    Arguments: OBJ($self) STR($db_type)
-# Side Effects: none
-# Return Value: STR or UNDEF
-sub db_last_modified
-{
-    my ($self, $db_type) = @_;
-    my $db_dir        = $self->{ _db_dir };
-    my $last_modified = 0;
-
-    # XXX-TODO: we supporse Berkeley DB. fix it.
-    use File::Spec;
-    my $file = File::Spec->catfile($db_dir, "date.db");
-    if (-f $file) {
-	$last_modified = (stat($file))[8];
-    }
-
-    return $last_modified;
-}
-
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+redistribute it and/or modify it under the same terms as Perl itself. 
 
 =head1 HISTORY
 
-Mail::ThreadTrack::DB first appeared in fml8 mailing list driver package.
+Mail::ThreadTrack::DB appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: File.pm,v 1.1.1.2 2001/06/04 04:47:01 fukachan Exp $
+# $FML: File.pm,v 1.44 2003/01/11 15:22:26 fukachan Exp $
 #
 
 package IO::Adapter::File;
@@ -13,6 +13,10 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use IO::Adapter::ErrorStatus qw(error_set error error_clear);
+
+
+my $debug = 0;
+
 
 =head1 NAME
 
@@ -43,9 +47,9 @@ To delete it
 =head1 DESCRIPTION
 
 This module provides real IO functions for a file used in
-C<IO::Adapter>. 
+C<IO::Adapter>.
 The map is the fully path-ed file name or a file name with 'file:/'
-prefix. 
+prefix.
 
 =head1 METHODS
 
@@ -56,6 +60,10 @@ standard constructor.
 =cut
 
 
+# Descriptions: standard constructor.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: OBJ
 sub new
 {
     my ($self) = @_;
@@ -67,13 +75,17 @@ sub new
 
 =head2 C<open($args)>
 
-$args HASH REFERENCE must have two parameters. 
+$args HASH REFERENCE must have two parameters.
 C<file> is the target file to open.
 C<flag> is the mode of open().
 
 =cut
 
 
+# Descriptions: open map
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: file opened
+# Return Value: HANDLE
 sub open
 {
     my ($self, $args) = @_;
@@ -90,9 +102,9 @@ sub open
 
 
 # Descriptions: open file in "read only" mode
-#    Arguments: $self $args
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: file is opened for read
-# Return Value: file descriptor
+# Return Value: HANDLE
 sub _read_open
 {
     my ($self, $args) = @_;
@@ -112,24 +124,64 @@ sub _read_open
 }
 
 
+# Descriptions: open file in "read/write" mode
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: file is opened for read
+# Return Value: HANDLE
 sub _rw_open
 {
     my ($self, $args) = @_;
     my $file = $args->{ file };
     my $flag = $args->{ flag };
 
-    require IO::File::Atomic;
-    my ($rh, $wh)  = IO::File::Atomic->rw_open($file);
+    use IO::Adapter::AtomicFile;
+    my ($rh, $wh)  = IO::Adapter::AtomicFile->rw_open($file);
     $self->{ _fh } = $rh;
     $self->{ _wh } = $wh;
     $rh;
 }
 
 
+=head2 C<touch()>
+
+create a file if not exists.
+
+=cut
+
+
+# Descriptions: touch (create a file if needed)
+#    Arguments: OBJ($self)
+# Side Effects: create a file
+# Return Value: same as close()
+sub touch
+{
+    my ($self) = @_;
+    my $file = $self->{_file};
+
+    use IO::File;
+    my $fh = new IO::File;
+    if (defined $fh) {
+	$fh->open($file, "a");
+	$fh->close;
+    }
+}
+
+
 # debug tools
-my $c = 0;
+my $c  = 0;
 my $ec = 0;
-sub line_count { my ($self) = @_; return "${ec}/${c}";}
+
+
+# Descriptions: line couter (for debug).
+#               XXX remove this in the future
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub line_count
+{
+    my ($self) = @_;
+    return "${ec}/${c}";
+}
 
 
 =head2 C<getline()>
@@ -137,29 +189,48 @@ sub line_count { my ($self) = @_; return "${ec}/${c}";}
 return one line.
 It is the same as usual getline() call for a file.
 
-=head2 C<get_next_value()>
-
-return one line suitable with C<fml> IO design.
-This is used in C<fml5>.
-
 =cut
 
 
+# Descriptions: get string for new line
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub getline
 {
     my ($self) = @_;
     my $fh = $self->{_fh};
-    $fh->getline;
+
+    if (defined $fh) {
+	$fh->getline;
+    }
+    else {
+	return undef;
+    }
 }
 
 
-sub get_next_value
+# Descriptions: return the next key
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub get_next_key
 {
     my ($self) = @_;
+    $self->_get_next_xxx('key');
+}
 
+
+# Descriptions: get data and return key or value by $mode.
+#    Arguments: OBJ($self) STR($mode)
+# Side Effects: none
+# Return Value: STR
+sub _get_next_xxx
+{
+    my ($self, $mode) = @_;
     my ($buf) = '';
-    my $fh = $self->{_fh};
 
+    my $fh = $self->{_fh};
     if (defined $fh) {
       INPUT:
 	while ($buf = <$fh>) {
@@ -167,21 +238,112 @@ sub get_next_value
 	    next INPUT if not defined $buf;
 	    next INPUT if $buf =~ /^\s*$/o;
 	    next INPUT if $buf =~ /^\#/o;
-	    next INPUT if $buf =~ /\sm=/o;
-	    next INPUT if $buf =~ /\sr=/o;
-	    next INPUT if $buf =~ /\ss=/o;
 	    last INPUT;
 	}
 
 	if (defined $buf) {
-	    my @buf = split(/\s+/, $buf);
-	    $buf    = $buf[0];
-	    $buf    =~ s/[\r\n]*$//o;
+	    $buf =~ s/[\r\n]*$//o;
+	    my ($key, $value) = split(/\s+/, $buf, 2);
+	    if ($mode eq 'key') {
+		$buf = $key;
+	    }
+	    elsif ($mode eq 'value_as_str') {
+		$buf = $value;
+	    }
+	    elsif ($mode eq 'value_as_array_ref') {
+		$value =~ s/^\s*//;
+		$value =~ s/\s*$//;
+		my (@buf) = split(/\s+/, $value);
+		print STDERR "[ @buf ]\n";
+		$buf = \@buf;
+	    }
 	    $ec++;
 	}
 	return $buf;
     }
+
     return undef;
+}
+
+
+=head2 get_value_as_str($key)
+
+return value(s) for the next key as STR.
+
+=head2 get_value_as_array_ref($key)
+
+return value(s) for the next key as ARRAY_REF.
+
+=cut
+
+
+# Descriptions: return value(s) for the next key
+#    Arguments: OBJ($self) STR($key)
+# Side Effects: none
+# Return Value: STR
+sub get_value_as_str
+{
+    my ($self, $key) = @_;
+    $self->_get_value($key, 'value_as_array_str');
+}
+
+
+# Descriptions: return value(s) for the next key
+#    Arguments: OBJ($self) STR($key)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub get_value_as_array_ref
+{
+    my ($self, $key) = @_;
+    $self->_get_value($key, 'value_as_array_ref');
+}
+
+
+# Descriptions: return value(s) for the next key.
+#               XXX "key" should be uniq since "key" is used as a primary key.
+#    Arguments: OBJ($self) STR($key) STR($style)
+# Side Effects: none
+# Return Value: STR or ARRAY_REF
+sub _get_value
+{
+    my ($self, $key, $style) = @_;
+    my $xkey   = '';
+    my $buf    = '';
+    my $curpos = $self->getpos();
+
+    my $fh = $self->{_fh};
+    if (defined $fh) {
+	$self->setpos(0);
+
+      LOOP:
+	while (<$fh>) {
+	    ($xkey, $buf) = split(/\s+/, $_, 2);
+	    if ($key eq $xkey) { last LOOP;}
+	}
+
+	$fh->close();
+
+	if ($style eq 'value_as_str') {
+	    return $buf
+	}
+
+	if ($style eq 'value_as_array_ref') {
+	    $buf =~ s/^\s*//;
+	    $buf =~ s/\s*$//;
+	    my @a = split(/\s+/, $buf);
+
+	    $self->setpos( $curpos );
+	    return \@a;
+	}
+
+    }
+    else {
+	carp("cannot defined \$fh");
+    }
+
+
+    $self->setpos( $curpos );
+    return $buf;
 }
 
 
@@ -196,14 +358,22 @@ set the position in the opened file.
 =cut
 
 
+# Descriptions: return current postion in file descriptor
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: NUM
 sub getpos
 {
     my ($self) = @_;
     my $fh = $self->{_fh};
-    defined $fh ? tell($fh) : undef;    
+    defined $fh ? tell($fh) : undef;
 }
 
 
+# Descriptions: reset postion in file descriptor
+#    Arguments: OBJ($self) NUM($pos)
+# Side Effects: none
+# Return Value: NUM
 sub setpos
 {
     my ($self, $pos) = @_;
@@ -223,6 +393,10 @@ close the opended file.
 =cut
 
 
+# Descriptions: EOF or not
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: same as eof()
 sub eof
 {
     my ($self) = @_;
@@ -231,6 +405,10 @@ sub eof
 }
 
 
+# Descriptions: close map
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: same as close()
 sub close
 {
     my ($self) = @_;
@@ -238,60 +416,52 @@ sub close
 }
 
 
-=head2 C<add($address)>
+=head2 C<add($address, ... )>
 
 add (append) $address to this map.
 
 =cut
 
+
+# Descriptions: add $addr into map
+#    Arguments: OBJ($self) STR($addr) VARARGS($argv)
+# Side Effects: update map
+# Return Value: same as close()
 sub add
 {
-    my ($self, $addr) = @_;
+    my ($self, $addr, $argv) = @_;
 
     $self->open("w");
 
     my $fh = $self->{ _fh };
     my $wh = $self->{ _wh };
 
-    if (defined $fh) {
+    if (defined $fh && defined $wh) {
       FILE_IO:
 	while (<$fh>) {
 	    print $wh $_;
 	}
 	$fh->close;
-    }
-    else {
-	$self->error_set("Error: cannot open file=$self->{ _file }");
-	return undef;
-    }
 
-    print $wh $addr, "\n";
-    $wh->close;
-}
+	print STDERR "add: argv=$argv\tref=<", ref($argv), ">\n" if $debug;
 
-
-=head2 C<delete($regexp)>
-
-delete lines which matches $regexp from this map.
-
-=cut
-
-sub delete
-{
-    my ($self, $regexp) = @_;
-
-    $self->open("w");
-
-    my $fh = $self->{ _fh };
-    my $wh = $self->{ _wh };
-
-    if (defined $fh) {
-      FILE_IO:
-	while (<$fh>) {
-	    next FILE_IO if /$regexp/;
-	    print $wh $_;
+	if (defined $argv) {
+	    if (ref($argv) eq 'ARRAY') {
+		print $wh $addr, "\t", join("\t", @$argv), "\n";
+	    }
+	    elsif (not ref($argv)) {
+		print $wh $addr, "\t", $argv, "\n";
+	    }
+	    else {
+		$self->error_set("Error: add: invalid args");
+		$wh->close;
+		return undef;
+	    }
 	}
-	$fh->close;
+	else {
+	    print $wh $addr, "\n";
+	}
+
 	$wh->close;
     }
     else {
@@ -301,15 +471,20 @@ sub delete
 }
 
 
-=head2 C<replace($regexp, $value)>
+=head2 C<delete($key)>
 
-replace lines which matches $regexp with $value.
+delete lines with key $key from this map.
 
 =cut
 
-sub replace
+
+# Descriptions: delete address(es) matching $reexp from map
+#    Arguments: OBJ($self) STR($key)
+# Side Effects: update map
+# Return Value: same as close()
+sub delete
 {
-    my ($self, $regexp, $value) = @_;
+    my ($self, $key) = @_;
 
     $self->open("w");
 
@@ -319,12 +494,8 @@ sub replace
     if (defined $fh) {
       FILE_IO:
 	while (<$fh>) {
-	    if (/$regexp/) {
-		print $wh $value, "\n";
-	    }
-	    else {
-		print $wh $_;
-	    }
+	    next FILE_IO if /^$key\s+\S+|^$key\s*$/;
+	    print $wh $_;
 	}
 	$fh->close;
 	$wh->close;
@@ -340,20 +511,24 @@ sub replace
 
 L<IO::Adapter>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-IO::Adapter::File appeared in fml5 mailing list driver package.
+IO::Adapter::File first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

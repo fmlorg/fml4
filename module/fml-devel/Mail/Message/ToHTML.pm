@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ToHTML.pm,v 1.33 2003/01/11 15:16:35 fukachan Exp $
+# $FML: ToHTML.pm,v 1.10 2002/04/14 08:10:11 fukachan Exp $
 #
 
 package Mail::Message::ToHTML;
@@ -12,12 +12,14 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
+# BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File); }
+
 my $is_strict_warn = 0;
 my $debug = 0;
 my $URL   =
     "<A HREF=\"http://www.fml.org/software/\">Mail::Message::ToHTML</A>";
 
-my $version = q$FML: ToHTML.pm,v 1.33 2003/01/11 15:16:35 fukachan Exp $;
+my $version = q$FML: ToHTML.pm,v 1.10 2002/04/14 08:10:11 fukachan Exp $;
 if ($version =~ /,v\s+([\d\.]+)\s+/) {
     $version = "$URL $1";
 }
@@ -96,14 +98,13 @@ sub new
     my $me     = {};
 
     $me->{ _html_base_directory } = $args->{ directory };
-    $me->{ _charset }             = $args->{ charset } || 'us-ascii';
-    $me->{ _is_attachment }       = defined($args->{ attachment }) ? 1 : 0;
-    $me->{ _db_type }             = $args->{ db_type };
-    $me->{ _args }                = $args;
-    $me->{ _num_attachment }      = 0; # for child process
-    $me->{ _use_subdir }          = 'yes';
-    $me->{ _subdir_style }        = 'yyyymm';
-    $me->{ _html_id_order }       = $args->{ index_order } || 'normal';
+    $me->{ _charset }        = $args->{ charset } || 'us-ascii';
+    $me->{ _is_attachment }  = defined($args->{ attachment }) ? 1 : 0;
+    $me->{ _db_type }        = $args->{ db_type };
+    $me->{ _args }           = $args;
+    $me->{ _num_attachment } = 0; # for child process
+    $me->{ _use_subdir }     = 'yes';
+    $me->{ _subdir_style }   = 'yyyymm';
 
     return bless $me, $type;
 }
@@ -306,9 +307,6 @@ sub htmlfy_rfc822_message
 sub _disable_html_tag_in_file
 {
     my ($inf, $outf) = @_;
-    my $mask = umask();
-
-    umask(022);
 
     use FileHandle;
     my $rh = new FileHandle $inf;
@@ -320,8 +318,6 @@ sub _disable_html_tag_in_file
 	$wh->close;
 	$rh->close;
     }
-
-    umask($mask);
 }
 
 
@@ -337,7 +333,7 @@ sub html_filename
     if (defined($id) && ($id > 0)) {
 	if ($use_subdir eq 'yes') {
 	    my $r = $self->_html_file_subdir_name($id);
-	    # print STDERR "xdebug: $id => $r\n";
+	    # print STDERR "xdebug: $id => $r\n"; 
 	    return $r;
 	}
 	else {
@@ -363,7 +359,6 @@ sub _html_file_subdir_name
     my $month_db      = $self->{ _db }->{ _month };
     my $subdir_db     = $self->{ _db }->{ _subdir };
     my $curid         = $self->{ _current_id };
-    my $dir_mode      = $self->{ _dir_mode } || 0755;
 
     if ($subdir_style eq 'yyyymm') {
 	if (defined $subdir_db->{ $id } && $subdir_db->{ $id }) {
@@ -377,14 +372,11 @@ sub _html_file_subdir_name
 		$subdir_db->{ $id } = $subdir; # cache subdir info into DB.
 		# print STDERR "xdebug: \$subdir_db->{ $id } = $subdir\n";
 	    }
-
+	    
 	    use File::Spec;
 	    my $xsubdir = File::Spec->catfile($html_base_dir, $subdir);
 	    unless (-d $xsubdir) {
-		my $mask = umask();
-		umask(022);
-		mkdir($xsubdir, $dir_mode);
-		umask($mask);
+		mkdir($xsubdir, 0755);
 	    }
 	}
     }
@@ -580,9 +572,6 @@ sub _set_output_channel
     my $dst = $args->{ dst };
     my $wh;
 
-    my $mask = umask();
-    umask(022);
-
     if (defined $dst) {
 	$wh = new FileHandle "> $dst";
     }
@@ -590,36 +579,32 @@ sub _set_output_channel
 	$wh = \*STDOUT;
     }
 
-    umask($mask);
-
     return $wh;
 }
 
 
 # Descriptions: return temporary file path.
 #               XXX temporary file is created under $db_dir not public space
-#    Arguments: OBJ($self)
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: STR
 sub _create_temporary_filename
 {
-    my ($self) = @_;
-    my $db_dir = $self->{ _html_base_directory };
+    my ($self, $msg) = @_;
+    my $db_dir  = $self->{ _html_base_directory };
 
     return "$db_dir/tmp$$";
 }
 
 
 # Descriptions: create a temporary file with the content $msg
-#    Arguments: OBJ($self) OBJ($msg)
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: create $tmpf file
 # Return Value: STR
 sub _create_temporary_file_in_raw_mode
 {
     my ($self, $msg) = @_;
     my $tmpf = $self->_create_temporary_filename();
-    my $mask = umask();
-    umask(022);
 
     use FileHandle;
     my $wh = new FileHandle "> $tmpf";
@@ -630,11 +615,9 @@ sub _create_temporary_file_in_raw_mode
 	$wh->print($buf);
 	$wh->close;
 
-	umask($mask);
 	return ($tmpf);
     }
 
-    umask($mask);
     return undef;
 }
 
@@ -686,7 +669,7 @@ sub _print_inline_object_link
 
 
 # Descriptions: return attachment filename
-#    Arguments: STR($dst) STR($attach) STR($suffix)
+#    Arguments: OBJ($self) STR($attach) STR($suffix)
 # Side Effects: none
 #         Todo: UNIX specific
 # Return Value: STR
@@ -744,7 +727,7 @@ sub _format_safe_header
 
 
 # Descriptions: show link to indexes as navigation
-#    Arguments: HASH_REF($args)
+#    Arguments: none
 # Side Effects: none
 # Return Value: none
 sub _format_index_navigator
@@ -754,10 +737,9 @@ sub _format_index_navigator
     my $prefix = $use_subdir ? '../' : '';
 
     my $str = qq{
-<A HREF=\"${prefix}index_all.html\">[ID Index]</A>
+<A HREF=\"${prefix}index.html\">[ID Index]</A>
 <A HREF=\"${prefix}thread.html\">[Thread Index]</A>
 <A HREF=\"${prefix}monthly_index.html\">[Monthly ID Index]</A>
-<A HREF=\"${prefix}index.html\">[Top Index]</A>
 };
 
 return $str;
@@ -796,9 +778,6 @@ sub _text_raw_print
     my $buf  = $msg->message_text();
 
     if (defined( $args->{ file } )) {
-	my $mask = umask();
-	umask(022);
-
 	my $outf = $args->{ file };
 	use FileHandle;
 	my $fh = new FileHandle "> $outf";
@@ -809,8 +788,6 @@ sub _text_raw_print
 	}
 	print $fh $buf, "\n";
 	$fh->close();
-
-	umask($mask);
     }
 }
 
@@ -826,9 +803,6 @@ sub _binary_print
     my $msg  = $args->{ message }; # Mail::Message object
     my $type = $msg->data_type;
     my $enc  = $msg->encoding_mechanism;
-    my $mask = umask();
-
-    umask(022);
 
     if (defined( $args->{ file } )) {
 	my $outf = $args->{ file };
@@ -861,8 +835,6 @@ sub _binary_print
 	    $fh->close();
 	}
     }
-
-    umask($mask);
 }
 
 
@@ -1055,24 +1027,17 @@ sub cache_message_info
 sub _msg_time
 {
     my ($self, $type) = @_;
-    my $hdr  = $self->{ _current_hdr  };
+    my $hdr = $self->{ _current_hdr  };
 
-    if (defined($hdr) && $hdr->get('date')) {
-	use Time::ParseDate;
-	my $unixtime = parsedate( $hdr->get('date') );
-	my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime( $unixtime );
+    use Time::ParseDate;
+    my $unixtime = parsedate( $hdr->get('date') );
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime( $unixtime );
 
-	if ($type eq 'yyyymm') {
-	    return sprintf("%04d%02d", 1900 + $year, $mon + 1);
-	}
-	elsif ($type eq 'yyyy/mm') {
-	    return sprintf("%04d/%02d", 1900 + $year, $mon + 1);
-	}
+    if ($type eq 'yyyymm') {
+	return sprintf("%04d%02d", 1900 + $year, $mon + 1);
     }
-    else {
-	my $id = $self->{ _current_id };
-	warn("cannot pick up Date: field id=$id");
-	return '';
+    elsif ($type eq 'yyyy/mm') {
+	return sprintf("%04d/%02d", 1900 + $year, $mon + 1);
     }
 }
 
@@ -1275,15 +1240,11 @@ sub _update_relation
     my $pat_footer_begin   = quotemeta($footer_begin);
     my $pat_footer_end     = quotemeta($footer_end);
 
-    my $mask = umask();
-
-    umask(022);
-
     _PRINT_DEBUG("_update_relation $id");
 
     use FileHandle;
-    my $file = $args->{ file };
-    if (defined $file && $file && -f $file) {
+    my $file        = $args->{ file };
+    if (defined $file) {
 	my ($old, $new) = ($file, "$file.new.$$");
 	my $rh = new FileHandle $old;
 	my $wh = new FileHandle "> $new";
@@ -1320,13 +1281,11 @@ sub _update_relation
     else {
 	warn("undefined file for $id\n") if $is_strict_warn;
     }
-
-    umask($mask);
 }
 
 
 # Descriptions: return thread link relation info et.al. for $id
-#    Arguments: OBJ($self) NUM($id)
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: HASH_REF
 sub evaluate_relation
@@ -1414,10 +1373,6 @@ sub evaluate_safe_preamble
     my $prefix     = $use_subdir ? '../' : '';
     my $preamble   = $preamble_begin. "\n";
 
-    my $mask = umask();
-
-    umask(022);
-
     if (defined($link_prev_id)) {
 	$preamble .= "<A HREF=\"${prefix}$link_prev_id\">[Prev by ID]</A>\n";
     }
@@ -1462,8 +1417,6 @@ sub evaluate_safe_preamble
 
     $preamble .= _format_index_navigator( { use_subdir => $use_subdir } );
     $preamble .= $preamble_end. "\n";;
-
-    umask($mask);
 
     return $preamble;
 }
@@ -1615,9 +1568,8 @@ my @kind_of_databases = qw(from date subject message_id references
 sub _db_open
 {
     my ($self, $args) = @_;
-    my $db_type   = $args->{ db_type } || $self->{ _db_type } || 'AnyDBM_File';
-    my $db_dir    = $self->{ _html_base_directory };
-    my $file_mode = $self->{ _file_mode } || 0644;
+    my $db_type = $args->{ db_type } || $self->{ _db_type } || 'AnyDBM_File';
+    my $db_dir  = $self->{ _html_base_directory };
 
     _PRINT_DEBUG("_db_open( type = $db_type )");
 
@@ -1627,7 +1579,7 @@ sub _db_open
 	    my $file = "$db_dir/.htdb_${db}";
 	    my $str = qq{
 		my \%$db = ();
-		tie \%$db, \$db_type, \$file, O_RDWR|O_CREAT, $file_mode;
+		tie \%$db, \$db_type, \$file, O_RDWR|O_CREAT, 0644;
 		\$self->{ _db }->{ _$db } = \\\%$db;
 	    };
 	    eval $str;
@@ -1683,10 +1635,6 @@ sub _print_index_begin
     my $title = $args->{ title };
     my $code  = _charset_to_code($self->{ _charset });
 
-    my $mask = umask();
-
-    umask(022);
-
     use FileHandle;
     my $wh = new FileHandle "> $new";
     $args->{ wh } = $wh;
@@ -1695,8 +1643,6 @@ sub _print_index_begin
 
     _print_raw_str($wh, _format_index_navigator(), $code);
     $self->mhl_separator($wh);
-
-    umask($mask);
 }
 
 
@@ -1726,51 +1672,25 @@ sub _print_index_end
     }
 }
 
-# Descriptions: create Top index.html if no index.html
+
+# Descriptions: update index.html
 #    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: create Top index.html
-# Return Value: none
-sub create_top_index
-{
-    my ($self, $args) = @_;
-    my $html_base_dir = $self->{ _html_base_directory };
-    my $code          = _charset_to_code($self->{ _charset });
-    my $order         = $self->{ _html_id_order } || 'normal';
-    my $htmlinfo = {
-	title => defined($args->{ title }) ? $args->{ title } : "Top Index",
-	old   => "$html_base_dir/index.html",
-	new   => "$html_base_dir/index.html.new.$$",
-	code  => $code,
-    };
-
-    return if ( -f $htmlinfo-> { old } );
-
-    $self->_print_index_begin( $htmlinfo );
-    my $wh = $htmlinfo->{ wh };
-
-    $self->_print_index_end( $htmlinfo );
-}
-
-
-# Descriptions: update index_all.html
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: rewrite index_all.html
+# Side Effects: rewrite index.html
 # Return Value: none
 sub update_id_index
 {
     my ($self, $args) = @_;
     my $html_base_dir = $self->{ _html_base_directory };
     my $code          = _charset_to_code($self->{ _charset });
-    my $order         = $self->{ _html_id_order } || 'normal';
     my $htmlinfo = {
 	title => defined($args->{ title }) ? $args->{ title } : "ID Index",
-	old   => "$html_base_dir/index_all.html",
-	new   => "$html_base_dir/index_all.html.new.$$",
+	old   => "$html_base_dir/index.html",
+	new   => "$html_base_dir/index.html.new.$$",
 	code  => $code,
     };
 
     if ($self->is_ignore($args->{id})) {
-	warn("not update index_all.html around $args->{id}") if $debug;
+	warn("not update index.html around $args->{id}") if $debug;
 	return undef;
     }
 
@@ -1782,14 +1702,8 @@ sub update_id_index
     my $id_max = $db->{ _info }->{ id_max };
 
     $self->_print_ul($wh, $db, $code);
-    if($order eq 'reverse') {
-	for my $id ( reverse (1 .. $id_max )) {
-	    $self->_print_li_filename($wh, $db, $id, $code);
-	}
-    } else {
-	for my $id ( 1 .. $id_max ) {
-	    $self->_print_li_filename($wh, $db, $id, $code);
-	}
+    for my $id ( 1 .. $id_max ) {
+	$self->_print_li_filename($wh, $db, $id, $code);
     }
     $self->_print_end_of_ul($wh, $db, $code);
 
@@ -1875,7 +1789,7 @@ sub _update_id_montly_index_master
 
     _print_raw_str($wh, "<TABLE>", $code);
 
-    for my $year (sort {$b <=> $a} @$years) {
+    for my $year (@$years) {
 	_print_raw_str($wh, "<TR>", $code);
 
 	for my $month (1 .. 12) {
@@ -1949,7 +1863,6 @@ sub _update_id_monthly_index
     my $code          = _charset_to_code($self->{ _charset });
     my $this_month    = $monthlyinfo->{ this_month }; # yyyy/mm
     my $suffix        = $monthlyinfo->{ suffix };     # yyyymm
-    my $order         = $self->{ _html_id_order } || 'normal';
     my $htmlinfo = {
 	title => "ID Monthly Index $this_month",
 	old   => "$html_base_dir/month.${suffix}.html",
@@ -1970,16 +1883,9 @@ sub _update_id_monthly_index
     my (@list) = split(/\s+/, $db->{ _monthly_idlist }->{ $this_month });
 
     $self->_print_ul($wh, $db, $code);
-    if($order eq 'reverse') {
-	for my $id (reverse sort {$a <=> $b} @list) {
-	    next unless $id =~ /^\d+$/;
-	    $self->_print_li_filename($wh, $db, $id, $code);
-	}
-    } else {
-	for my $id (sort {$a <=> $b} @list) {
-	    next unless $id =~ /^\d+$/;
-	    $self->_print_li_filename($wh, $db, $id, $code);
-	}
+    for my $id (sort {$a <=> $b} @list) {
+	next unless $id =~ /^\d+$/;
+	$self->_print_li_filename($wh, $db, $id, $code);
     }
     $self->_print_end_of_ul($wh, $db, $code);
 
@@ -2003,7 +1909,6 @@ sub update_thread_index
 {
     my ($self, $args) = @_;
     my $html_base_dir = $self->{ _html_base_directory };
-    my $order         = $self->{ _html_id_order } || 'normal';
     my $code          = _charset_to_code($self->{ _charset });
     my $htmlinfo = {
 	title => defined($args->{ title }) ? $args->{ title } : "Thread Index",
@@ -2343,7 +2248,7 @@ sub _print_end_of_ul
 
 
 # Descriptions: print <LI> filename ... with proper indentation
-#    Arguments: OBJ($self) HANDLE($wh) HASH_REF($db) NUM($id) STR($code)
+#    Arguments: OBJ($self) HANDLE($wh) HASH_REF($db) STR($code)
 # Side Effects: none
 # Return Value: none
 sub _print_li_filename
@@ -2496,27 +2401,20 @@ try to convert all rfc822 messages to HTML in C<$dir> directory.
 
 
 # Descriptions: convert $file to HTML
-#    Arguments: OBJ($self) STR($file) HASH_REF($args)
+#    Arguments: STR($file) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub htmlify_file
 {
-    my ($self, $file, $args) = @_;
+    my ($file, $args) = @_;
     my $dst_dir = $args->{ directory };
 
-    unless (-f $file) {
-	print STDERR "no such file: $file\n" if $debug;
-	return;
-    }
-
-    unless (-s $file) {
-	print STDERR "empty file: $file\n" if $debug;
-	return;
-    }
-
     use File::Basename;
-    my $id   = basename($file);
-    my $html = new Mail::Message::ToHTML $args;
+    my $id = basename($file);
+    my $html = new Mail::Message::ToHTML {
+	charset   => "euc-jp",
+	directory => $dst_dir,
+    };
 
     if ($debug) {
 	printf STDERR "htmlify_file( id=%-6s src=%s )\n", $id, $file;
@@ -2527,40 +2425,30 @@ sub htmlify_file
 	src => $file,
     });
 
-    if ($debug) {
-	printf STDERR "htmlify_file( id=%-6s ) update relation\n", $id;
-    }
     $html->update_relation( $id );
     $html->update_id_monthly_index({ id => $id });
     $html->update_id_index({ id => $id });
     $html->update_thread_index({ id => $id });
-    $html->create_top_index();
 
     # no more action for old files
     if ($html->is_ignore($id)) {
 	warn("not process $id (already exists)") if $debug;
     }
     else {
-	if ($debug) {
-	    printf STDERR "   converted( id=%-6s src=%s )\n", $id, $file;
-	}
+	printf STDERR "   converted( id=%-6s src=%s )\n", $id, $file;
     }
 }
 
 
 # Descriptions: convert all articles in specified directory
-#    Arguments: OBJ($self) STR($src_dir) HASH_REF($args)
+#    Arguments: STR($src_dir) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub htmlify_dir
 {
-    my ($self, $src_dir, $args) = @_;
-    my $dst_dir  = $args->{ directory };
-    my $min      = 0;
-    my $max      = 0;
-    my $has_fork = 1; # ok on unix and perl>5.6 on wine32.
-
-    print STDERR "src = $src_dir\ndst = $dst_dir\n" if $debug;
+    my ($src_dir, $args) = @_;
+    my $dst_dir = $args->{ directory };
+    my $max     = 0;
 
     use DirHandle;
     my $dh = new DirHandle $src_dir;
@@ -2568,43 +2456,14 @@ sub htmlify_dir
       FILE:
 	for my $file ( $dh->read() ) {
 	    next FILE unless $file =~ /^\d+$/;
-
-	    # initialize $min
-	    unless ($min) { $min = $file;}
-
 	    $max = $max < $file ? $file : $max;
-	    $min = $min > $file ? $file : $min;
 	}
     }
 
-    # overwride
-    $has_fork = $args->{ has_fork } if defined $args->{ has_fork };
-    $max      = $args->{ max }      if defined $args->{ max };
-
-    print STDERR "   scan ( $min .. $max ) for $src_dir\n";
-    for my $id ( $min .. $max ) {
+    for my $id ( 1 .. $max ) {
 	use File::Spec;
 	my $file = File::Spec->catfile($src_dir, $id);
-
-	unless ( $has_fork ) {
-	    $self->htmlify_file($file, $args);
-	}
-	else {
-	    my $pid = fork();
-	    if ($pid < 0) {
-		croak("cannot fork");
-	    }
-	    elsif ($pid == 0) {
-		$self->htmlify_file($file, $args);
-		exit 0;
-	    }
-
-	    # parent
-	    my $dying;
-	    while (($dying = wait()) != -1 && ($dying != $pid) ){
-		;
-	    }
-	}
+	htmlify_file($file, { directory => $dst_dir });
     }
 }
 
@@ -2613,28 +2472,15 @@ sub htmlify_dir
 # debug
 #
 if ($0 eq __FILE__) {
-    my $dir      = "/tmp/htdocs";
-    my $has_fork = defined $ENV{'HAS_FORK'} ? 1 : 0;
-    my $max      = defined $ENV{'MAX'} ? $ENV{'MAX'} : 1000;
-    my $charset  = 'euc-jp';
+    my $dir = "/tmp/htdocs";
 
     eval q{
-	my $obj = new Mail::Message::ToHTML:
-
 	for my $x (@ARGV) {
 	    if (-f $x) {
-		$obj->htmlify_file($x, {
-		    directory => $dir
-		    charset   => $charset,
-		    });
+		htmlify_file($x, { directory => $dir });
 	    }
 	    elsif (-d $x) {
-		$obj->htmlify_dir($x, {
-		    directory => $dir,
-		    has_fork  => $has_fork,
-		    max       => $max,
-		    charset   => $charset,
-		});
+		htmlify_dir($x, { directory => $dir });
 	    }
 	}
     };
@@ -2648,24 +2494,20 @@ if ($0 eq __FILE__) {
 
    sub directory?
 
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::ToHTML first appeared in fml8 mailing list driver package.
+Mail::Message::ToHTML appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 This class is renamed from C<Mail::HTML::Lite> 1.40 (2001-2002).

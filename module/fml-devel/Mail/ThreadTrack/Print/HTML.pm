@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself.
+#   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: HTML.pm,v 1.16 2003/01/11 15:16:37 fukachan Exp $
+# $FML: HTML.pm,v 1.7 2001/11/17 04:03:38 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print::HTML;
@@ -12,35 +12,13 @@ package Mail::ThreadTrack::Print::HTML;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-
-
-=head1 NAME
-
-Mail::ThreadTrack::Print::HTML - print thread summary as HTML
-
-=head1 SYNOPSIS
-
-See C<Mail::ThreadTrack::Print> for usage of this subclass.
-
-=head1 DESCRIPTION
-
-See C<Mail::ThreadTrack::Print> for usage of this subclass.
-
-=head1 METHODS
-
-=head2 show_articles_in_thread(thread_id)
-
-show articles as HTML in this thread.
-
-=cut
-
-
 use CGI qw/:standard/;
+
 use Mail::ThreadTrack::Print::Utils qw(decode_mime_string STR2EUC);
 
 
 # Descriptions: show articles as HTML in this thread
-#    Arguments: OBJ($self) STR($thread_id)
+#    Arguments: $self $str
 # Side Effects: none
 # Return Value: none
 sub show_articles_in_thread
@@ -52,7 +30,6 @@ sub show_articles_in_thread
 
     my $articles = $self->{ _hash_table }->{ _articles }->{ $thread_id };
 
-    # XXX-TODO: who validates $thread_id ?
     print "<B>";
     print "show contents related with thread_id=$thread_id\n";
     print "</B>";
@@ -64,18 +41,11 @@ sub show_articles_in_thread
 
 	my $s = '';
 	for (split(/\s+/, $articles)) {
-	    my $file = $self->filepath({
-		base_dir => $spool_dir,
-		id       => $_,
-	    });
+	    my $file = File::Spec->catfile($spool_dir, $_);
 	    my $fh   = new FileHandle $file;
 	    while (defined($_ = $fh->getline())) {
-		# ignore header part.
 		next if 1 .. /^$/;
 
-		# XXX-TODO: care for non Japanese char(s).
-		# XXX-TODO: to avoid CSS bug, convert all special char(s).
-		# XXX-TODO: create method safe_html_string() in Mail::Message ?
 		$s = STR2EUC($_);
 		$s =~ s/&/&amp;/g;
 		$s =~ s/</&lt;/g;
@@ -92,7 +62,7 @@ sub show_articles_in_thread
 
 
 # Descriptions: show guide
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __start_thread_summary
@@ -115,13 +85,11 @@ sub __start_thread_summary
 	print $fd br, "\n";
     }
 
-    # XXX-TODO: validate $action ?
     print $fd start_form(-action=>$action, -target=>$target);
     print $fd submit(-name => 'submit');
-    print $fd reset(-name  => 'reset');
+    print $fd reset(-name => 'reset');
     print $fd "\n";
 
-    # XXX-TODO: validate $ml_name ?
     print $fd hidden(-name    => 'ml_name',
 		     -default => [ $ml_name ],
 		     ), "\n";
@@ -140,9 +108,9 @@ sub __start_thread_summary
 }
 
 
-# Descriptions: finalize thread list.
-#               close TABLE tag.
-#    Arguments: OBJ($self) HASH_REF($args)
+# Descriptions: finalize thread list
+#               close TABLE tag
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __end_thread_summary
@@ -153,14 +121,14 @@ sub __end_thread_summary
     print $fd "</TABLE>\n";
 
     print submit(-name => 'submit');
-    print reset(-name  => 'reset');
+    print reset(-name => 'reset');
     print $fd end_form;
 }
 
 
 # Descriptions: This shows summary on C<$thread_id> in HTML language.
 #               It is used in C<FML::CGI::ThreadSystem>.
-#    Arguments: OBJ($self) HASH_REF($optargs)
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __print_thread_summary
@@ -172,17 +140,16 @@ sub __print_thread_summary
     my $action    = $config->{ myname };
     my $target    = $config->{ thread_cgi_target_window } || '_top';
 
-    my $date      = $optargs->{ date };
-    my $age       = $optargs->{ age };
-    my $status    = $optargs->{ status };
-    my $tid       = $optargs->{ thread_id };
-    my $articles  = $optargs->{ articles };
-    my $aid       = (split(/\s+/, $articles))[0];
+    my $date     = $optargs->{ date };
+    my $age      = $optargs->{ age };
+    my $status   = $optargs->{ status };
+    my $tid      = $optargs->{ thread_id };
+    my $articles = $optargs->{ articles };
+    my $aid      = (split(/\s+/, $articles))[0];
 
     # do nothing if the $thread_id is unknown.
     return unless $tid;
 
-    # XXX-TODO: validate $action, $ml_name, $aid ...
     # <FORM ACTION=> ..>
     my $xtid = CGI::escape($tid);
     $action  = "${action}?ml_name=${ml_name}&article_id=$aid";
@@ -190,13 +157,11 @@ sub __print_thread_summary
     $self->{ _table_count } = 1 unless defined $self->{ _table_count };
     if (($self->{ _table_count }++ % 5) == 0) {
 	print "<TR>\n<TD>\n";
-	print submit(-name => 'submit');
-	print reset(-name  => 'reset');
+	print submit(-name => 'submit'), reset(-name => 'reset');
     }
 
     print "<TR>\n";
 
-    # XXX-TODO: validate $msg_base_url ?
     # show articles in this thread id
     print "<TD>";
     if (defined $config->{ msg_base_url }) {
@@ -207,7 +172,6 @@ sub __print_thread_summary
 	print "\n</A>\n";
     }
     else {
-	# XXX-TODO: validate $action ?
 	print "<A HREF=\"$action&action=show\" TARGET=\"article\">\n";
 	print $tid;
 	print "\n</A>\n";
@@ -218,8 +182,8 @@ sub __print_thread_summary
     my $name    = "change_status.$tid";
     my $values  = ["open", "analyzed", "closed"];
     my $default = $status;
-    print radio_group(-name      => $name,
-		      -values    => $values,
+    print radio_group(-name      => $name, 
+		      -values    => $values, 
 		      -default   => $default,
 		      -linebreak => 'true',
 		      );
@@ -228,12 +192,8 @@ sub __print_thread_summary
     print "<TD>";
     if (defined $articles) {
 	$aid = (split(/\s+/, $articles))[0];
-	my $f = $self->filepath({
-	    base_dir => $spool_dir,
-	    id       => $aid,
-	});
+	my $f = File::Spec->catfile($spool_dir, $aid);
 	if (-f $f) {
-	    # XXX-TODO: care for non Japanese.
 	    my $buf = $self->message_summary($f);
 	    $self->print( STR2EUC($buf) );
 	}
@@ -247,7 +207,7 @@ sub __print_thread_summary
 }
 
 
-# Descriptions: dummy, defined for symmetry
+# Descriptions: dummy
 #    Arguments: none
 # Side Effects: none
 # Return Value: none
@@ -255,29 +215,6 @@ sub __print_message_summary
 {
     ;
 }
-
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
-=head1 AUTHOR
-
-Ken'ichi Fukamachi
-
-=head1 COPYRIGHT
-
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
-
-All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
-
-=head1 HISTORY
-
-Mail::ThreadTrack::Print::HTML first appeared in fml8 mailing list driver package.
-See C<http://www.fml.org/> for more details.
-
-=cut
 
 
 1;

@@ -4,8 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: unixgroup_map.pl,v 1.1.1.1 2001/05/10 04:55:22 fukachan Exp $
-# $FML: unixgroup_map.pl,v 1.1.1.1 2001/05/10 04:55:22 fukachan Exp $
+# $FML: unixgroup_map.pl,v 1.5 2001/08/19 16:12:25 fukachan Exp $
 #
 
 use Carp;

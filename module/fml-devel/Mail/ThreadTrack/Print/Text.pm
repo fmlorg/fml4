@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself.
+#   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Text.pm,v 1.14 2003/01/11 15:16:37 fukachan Exp $
+# $FML: Text.pm,v 1.4 2001/11/19 08:47:01 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print::Text;
@@ -13,39 +13,13 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use Mail::ThreadTrack::Print::Utils qw(decode_mime_string STR2EUC);
 
-#
-# XXX-TODO: insert more examples on format in each function.
-#
-
-=head1 NAME
-
-Mail::ThreadTrack::Print::Text - printing suitable for text
-
-=head1 SYNOPSIS
-
-See C<Mail::ThreadTrack::Print> for usage of this subclass.
-
-=head1 DESCRIPTION
-
-See C<Mail::ThreadTrack::Print> for usage of this subclass.
-
-=head1 METHODS
-
-=head2 show_articles_in_thread(thread_id)
-
-show articles as text in this thread.
-
-=cut
-
-# XXX-TODO: $is_show_cost_indicate hard-coded.
 my $is_show_cost_indicate = 0;
 
-# XXX-TODO: $format hard-coded.
 my $format = "%-20s %10s %5s %8s %s\n";
 
 
-# Descriptions: show articles as text in this thread
-#    Arguments: OBJ($self) STR($thread_id)
+# Descriptions: show articles as HTML in this thread
+#    Arguments: $self $str
 # Side Effects: none
 # Return Value: none
 sub show_articles_in_thread
@@ -60,32 +34,22 @@ sub show_articles_in_thread
     use FileHandle;
     if (defined($articles) && defined($spool_dir) && -d $spool_dir) {
 	my $s = '';
-	# $articles = "1 2 3 4 5";
-	for my $id (split(/\s+/, $articles)) {
-	    my $file = $self->filepath({
-		base_dir => $spool_dir,
-		id       => $id,
-	    });
-
-	    my $fh = new FileHandle $file;
-	    if (defined $fh) {
-	      LINE:
-		while (defined($_ = $fh->getline())) {
-		    next LINE if 1 .. /^$/;
-
-		    # XXX-TODO: we suppose Japanese only here.
-		    $s = STR2EUC($_);
-		    print $wh $s;
-		}
-		$fh->close;
+	for (split(/\s+/, $articles)) {
+	    my $file = File::Spec->catfile($spool_dir, $_);
+	    my $fh   = new FileHandle $file;
+	    while (defined($_ = $fh->getline())) {
+		next if 1 .. /^$/;
+		$s = STR2EUC($_);
+		print $wh $s;
 	    }
+	    $fh->close;
 	}
     }
 }
 
 
 # Descriptions: show guide line
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __start_thread_summary
@@ -93,15 +57,14 @@ sub __start_thread_summary
     my ($self, $args) = @_;
     my $fd = $self->{ _fd } || \*STDOUT;
 
-    # XXX-TODO: guide line is hard-coded. o.k.?
     printf($fd $format, 'id', 'date', 'age', 'status', 'articles');
     print $fd "-" x60;
     print $fd "\n";
 }
 
 
-# Descriptions: print formatted brief summary
-#    Arguments: OBJ($self) HASH_REF($optargs)
+# Descriptions: print formated brief summary
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __print_thread_summary
@@ -113,16 +76,16 @@ sub __print_thread_summary
     my $status    = $optargs->{ status };
     my $thread_id = $optargs->{ thread_id };
     my $articles  = $optargs->{ articles };
-    my $aid       = (split(/\s+/, $articles))[0]; # the head of this thread
+    my $aid       = (split(/\s+/, $articles))[0];
 
-    printf($fd $format, $thread_id, $date, $age, $status,
+    printf($fd $format, $thread_id, $date, $age, $status, 
 	   _format_list(25, $articles));
 }
 
 
-# Descriptions: print closing string, empty now (dummy).
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
+# Descriptions: 
+#    Arguments: $self $args
+# Side Effects: 
 # Return Value: none
 sub __end_thread_summary
 {
@@ -132,21 +95,20 @@ sub __end_thread_summary
 
 
 # Descriptions: create a string of "a b c .." style up to $num bytes
-#    Arguments: NUM($max) STR($str)
+#    Arguments: $num $str
 # Side Effects: none
-# Return Value: STR
+# Return Value: string
 sub _format_list
 {
     my ($max, $str) = @_;
     my (@idlist) = split(/\s+/, $str);
     my $r = '';
 
-  ID:
     for (@idlist) {
 	$r .= $_ . " ";
 	if (length($r) > $max) {
 	    $r .= "...";
-	    last ID;
+	    last;
 	}
     }
 
@@ -155,7 +117,7 @@ sub _format_list
 
 
 # Descriptions: print message summary
-#    Arguments: OBJ($self) STR($thread_id)
+#    Arguments: $self $args
 # Side Effects: none
 # Return Value: none
 sub __print_message_summary
@@ -169,7 +131,7 @@ sub __print_message_summary
 
     if (defined $config->{ spool_dir }) {
 	my ($aid, @aid, $file);
-	my $spool_dir = $config->{ spool_dir };
+	my $spool_dir  = $config->{ spool_dir };
 
       THREAD_ID_LIST:
 	for my $thread_id (@$thread_id) {
@@ -185,10 +147,7 @@ sub __print_message_summary
 	    if (defined $rh->{ _articles }->{ $thread_id }) {
 		(@aid) = split(/\s+/, $rh->{ _articles }->{ $thread_id });
 		$aid  = $aid[0];
-		$file = $self->filepath({
-		    base_dir => $spool_dir,
-		    id       => $aid,
-		});
+		$file = File::Spec->catfile($spool_dir, $aid);
 		if (-f $file) {
 		    $self->print(  $self->message_summary($file) );
 		}
@@ -198,18 +157,16 @@ sub __print_message_summary
 }
 
 
-# Descriptions: for example, cost -> '!!!'
-#               broken now ;-)
-#    Arguments: STR($cost)
+# Descriptions: ( broken now ;-)
+#    Arguments: $string
 # Side Effects: none
-# Return Value: STR
+# Return Value: string
 sub _cost_to_indicator
 {
     my ($cost) = @_;
     my $how_bad = 0;
 
-    # XXX-TODO: cost indicator is broken ?
-    if ($cost =~ /(\w+)\-(\d+)/) {
+    if ($cost =~ /(\w+)\-(\d+)/) { 
 	$how_bad += $2;
 	$how_bad += 2 if $1 =~ /open/;
 	$how_bad  = "!" x ($how_bad > 6 ? 6 : $how_bad);
@@ -217,29 +174,6 @@ sub _cost_to_indicator
 
     $how_bad;
 }
-
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
-=head1 AUTHOR
-
-Ken'ichi Fukamachi
-
-=head1 COPYRIGHT
-
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
-
-All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
-
-=head1 HISTORY
-
-Mail::ThreadTrack::Print::Text first appeared in fml8 mailing list driver package.
-See C<http://www.fml.org/> for more details.
-
-=cut
 
 
 1;

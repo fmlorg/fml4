@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself.
+#   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: ThreadTrack.pm,v 1.34 2003/01/11 15:16:34 fukachan Exp $
+# $FML: ThreadTrack.pm,v 1.22 2001/11/26 09:12:38 fukachan Exp $
 #
 
 package Mail::ThreadTrack;
@@ -24,7 +24,7 @@ use Mail::ThreadTrack::Print;
 
 =head1 NAME
 
-Mail::ThreadTrack - analyze message thread
+Mail::ThreadTrack - analyze mail threading
 
 =head1 SYNOPSIS
 
@@ -45,7 +45,7 @@ Mail::ThreadTrack - analyze message thread
 
     ... unlock mailing list ...
 
-where C<$msg> is Mail::Message object for the article 100.
+where C<$msg> is Mail::Message object for article 100.
 
 =head1 DESCRIPTION
 
@@ -58,41 +58,19 @@ where C<$msg> is Mail::Message object for the article 100.
 	db_base_dir => "/var/spool/ml/\@db\@/thread",
 	ml_name     => 'elena',
 	spool_dir   => "/var/spool/ml/elena/spool",
-	article_id  => $id,
+	article_id  => 100,
     };
 
-C<db_base_dir>, C<spool_dir> and C<ml_name> in C<config> are mandatory.
-C<$id> is the sequential number for input data (article).
-
-Available variables in $args follows:
-
-    variables               type       example
-    ------------------------------------------------------------
-    myname                  STR        ?
-    ml_name                 STR        elena
-    spool_dir               STR        /var/spool/ml/elena
-    article_id              STR        100
-    db_base_dir             STR        /var/spool/ml/@db@/thread
-    reverse_order           STR        1 or 0
-    rewrite_header          STR        1 or 0
-    base_url                STR        "" or URL
-    msg_base_url            STR        "" or URL
-    dir_mode                NUM        0755
-    thread_id_syntax        STR        elena/%d
-    thread_subject_tag      STR        [elena/%d]
-    fd                      HANDLE     \*STDOUT
-    logfp                   CODE       \&Log()
+C<db_base_dir> and C<ml_name> in C<config> are mandatory.
+C<$id> is sequential number for input data (article).
 
 =cut
 
 
-my $dir_mode = 0755;
-
-
 # Descriptions: constructor
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: $self
 # Side Effects: none
-# Return Value: OBJ
+# Return Value: object
 sub new
 {
     my ($self, $args) = @_;
@@ -101,10 +79,6 @@ sub new
     my $config = $me->{ _config } = {
 	db_type => 'AnyDBM_File',
     };
-
-    if (defined $args->{ dir_mode }) {
-	$dir_mode = $args->{ dir_mode };
-    }
 
     my @keys = qw(myname ml_name spool_dir article_id db_base_dir
 		  reverse_order
@@ -150,7 +124,6 @@ sub new
 	push(@ISA, 'Mail::ThreadTrack::HeaderRewrite');
     }
 
-    # XXX-TODO: $article_summary_lines hard-coded.
     # ::Print parameters
     $me->{ _article_summary_lines } = 5;
 
@@ -166,33 +139,31 @@ sub new
 }
 
 
-# Descriptions: dummy
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
-# Return Value: none
 sub DESTROY {}
 
 
 # Descriptions: "mkdir -p" or "mkdirhier"
-#    Arguments: STR($dir) STR($mode)
+#    Arguments: directory [file_mode]
 # Side Effects: set $ErrorString
-# Return Value: 1 or UNDEF
+# Return Value: succeeded to create directory or not
 sub _mkdirhier
 {
     my ($dir, $mode) = @_;
+    $mode = defined $mode ? $mode : 0700;
 
     # XXX $mode (e.g. 0755) should be a numeric not a string
-    eval q{
+    eval q{ 
         use File::Path;
-        mkpath($dir, 0, $dir_mode);
+        mkpath($dir, 0, $mode);
     };
 
     return ($@ ? undef : 1);
 }
 
 
-# Descriptions: create the directory taken from $self->{ _db_dir }.
-#    Arguments: OBJ($self) HASH_REF($args)
+# Descriptions: set up directory which is taken from 
+#               $self->{ _db_dir }
+#    Arguments: $self $curproc $args
 # Side Effects: create a "_db_dir" directory if needed
 # Return Value: 1 (success) or undef (fail)
 sub _init_dir
@@ -217,27 +188,24 @@ sub _init_dir
 
 =head2 C<increment_id(file)>
 
-increment thread number which is taken up from C<file>
-and save the new number to C<file>.
+increment thread number which is taken up from C<file> 
+and save its new number to C<file>.
 
 =cut
 
 
-# Descriptions: increment thread number $id holded in DB.
-#    Arguments: OBJ($self) STR($seq_file)
-# Side Effects: increment id holded in $seq_file
-# Return Value: NUM
+# Descriptions: increment thread number $id holded in $seq_file
+#    Arguments: $self $seq_file
+# Side Effects: increment id holded in $seq_file 
+# Return Value: number
 sub increment_id
 {
     my ($self, $seq_file) = @_;
     my $seq = 0;
 
-    # XXX-TODO: $seq_file is not used. fix this method.
-
     $self->db_open();
 
     # prepare hash table tied to db_dir/*db's
-    # XXX-TODO: we prepare $self->db_base(); ?
     my $rh = $self->{ _hash_table };
 
     if (defined $rh->{ _info }->{ sequence }) {
@@ -245,7 +213,7 @@ sub increment_id
 	return $rh->{ _info }->{ sequence };
     }
     else {
-	$seq = $rh->{ _info }->{ sequence } = 1;
+	$seq = $rh->{ _info }->{ sequence } = 1; 
     }
 
     $self->db_close();
@@ -256,23 +224,22 @@ sub increment_id
 
 =head2 list_up_thread_id()
 
-return not closed ticket id(s) as ARRRAY_REF.
+return @thread_id ARRAY 
 
 =cut
 
 
-# Descriptions: return not closed ticket id(s) as ARRRAY_REF.
-#    Arguments: OBJ($self)
-# Side Effects: none
-# Return Value: ARRAY_HASH
+# Descriptions: return @thread_id ARRAY
+#    Arguments: $self $args
+# Side Effects: 
+# Return Value: none
 sub list_up_thread_id
 {
     my ($self) = @_;
-    my ($tid, $status);
+    my ($tid, $status, @thread_id);
     my $rh_status = $self->{ _hash_table }->{ _status };
     my $mode      = 'default';
     my $stat      = {};
-    my @thread_id = ();
 
   TICEKT_LIST:
     while (($tid, $status) = each %$rh_status) {
@@ -300,20 +267,20 @@ sub list_up_thread_id
 =head2 set_mode($mode)
 
 specify output format by $mode string.
-"text" and "html" are available.
+"text" and "html" are available. 
 "text" by default.
 
 =head2 get_mode()
 
-get output format.
+get output format. 
 
 =cut
 
 
 # Descriptions: set output format
-#    Arguments: OBJ($self) STR($mode)
-# Side Effects: update info in object
-# Return Value: STR
+#    Arguments: $self $string
+# Side Effects: none
+# Return Value: string
 sub set_mode
 {
     my ($self, $mode) = @_;
@@ -322,9 +289,9 @@ sub set_mode
 
 
 # Descriptions: set output format
-#    Arguments: OBJ($self)
-# Side Effects: update info in object
-# Return Value: STR
+#    Arguments: $self
+# Side Effects: none
+# Return Value: string
 sub get_mode
 {
     my ($self) = @_;
@@ -334,15 +301,11 @@ sub get_mode
 
 =head2 set_fd( $fd )
 
-=head2 get_fd()
+=head2 get_fd( $fd )
 
 =cut
 
 
-# Descriptions: set output channel handle.
-#    Arguments: OBJ($self) HADNLE($fd)
-# Side Effects: update info in object.
-# Return Value: HANDLE
 sub set_fd
 {
     my ($self, $fd) = @_;
@@ -350,10 +313,10 @@ sub set_fd
 }
 
 
-# Descriptions: get output channel handle.
-#    Arguments: OBJ($self)
-# Side Effects: update info in object.
-# Return Value: HANDLE
+# Descriptions: set output format
+#    Arguments: $self $string
+# Side Effects: none
+# Return Value: string
 sub get_fd
 {
     my ($self) = @_;
@@ -368,10 +331,6 @@ set thread listing order where $order is 'normal' or 'reverse'.
 =cut
 
 
-# Descriptions: set thread listing order
-#    Arguments: OBJ($self) STR($order)
-# Side Effects: update info in object.
-# Return Value: none
 sub set_order
 {
     my ($self, $order) = @_;
@@ -383,23 +342,20 @@ sub set_order
 	$self->{ _config }->{ reverse_order } = 1;
     }
     else {
-	warn("set_order: unknown order $order");
+	warn("set_order eats unknown order $order");
     }
 }
 
 
 =head2 exist($thread_id)
 
-$thread_id exists or not in database?
-return 1 (exist) or 0.
-
 =cut
 
 
-# Descriptions: $thread_id exists or not in database?
-#    Arguments: OBJ($self) STR($id)
-# Side Effects: none
-# Return Value: 1 or 0
+# Descriptions: 
+#    Arguments: $self $string
+# Side Effects: 
+# Return Value: none
 sub exist
 {
     my ($self, $id) = @_;
@@ -411,7 +367,7 @@ sub exist
 
     if (defined $rh->{ _articles }) {
 	my $a = $rh->{ _articles };
-	$r = (defined $a->{ $id } ? 1 : 0);
+	$r = (defined $a->{ $id } ? 1 : 0);	
     }
 
     $self->db_close();
@@ -427,10 +383,6 @@ close specified $thread_id.
 =cut
 
 
-# Descriptions: close specified $thread_id.
-#    Arguments: OBJ($self) STR($thread_id)
-# Side Effects: update status
-# Return Value: none
 sub close
 {
     my ($self, $thread_id) = @_;
@@ -456,9 +408,9 @@ C<set_status()> calls db_open() an db_close() automatically within it.
 =cut
 
 
-# Descriptions: set status.
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: update status in db.
+# Descriptions: 
+#    Arguments: $self $curproc $args
+# Side Effects: 
 # Return Value: none
 sub set_status
 {
@@ -466,16 +418,15 @@ sub set_status
     my $thread_id = $args->{ thread_id };
     my $status    = $args->{ status };
 
-    # XXX-TODO: validate input.
     $self->db_open();
     $self->_set_status($thread_id, $status);
     $self->db_close();
 }
 
 
-# Descriptions: set status.
-#    Arguments: OBJ($self) STR($thread_id) STR($value)
-# Side Effects: update status in db.
+# Descriptions: 
+#    Arguments: $self $args
+# Side Effects: 
 # Return Value: none
 sub _set_status
 {
@@ -494,17 +445,13 @@ add filter rule to ignore in thread database.
 =cut
 
 
-# Descriptions: add filter rule(s) to ignore in thread database.
-#    Arguments: OBJ($self) HASH_REF($hash)
-# Side Effects: none
-# Return Value: none
 sub add_filter
 {
     my ($self, $hash) = @_;
 
     # update filter list
     my ($k, $v);
-    while (($k, $v) = each %$hash) {
+    while (($k, $v) = each %$hash) { 
 	$self->{ _filterlist }->{ $k } = $v;
     }
 }
@@ -512,15 +459,11 @@ sub add_filter
 
 =head2 log( $str )
 
-log $str using the specified log function or into STDERR if logfp
-unspecified.
-
 =cut
 
-
-# Descriptions: log
-#    Arguments: OBJ($self) STR($str)
-# Side Effects: none
+# Descriptions: 
+#    Arguments: $self $args
+# Side Effects: 
 # Return Value: none
 sub log
 {
@@ -536,53 +479,20 @@ sub log
 }
 
 
-=head2 filepath($args)
-
-return the article file path.
-
-   $args = {
-	base_dir   => DIR,
-	id         => NUM,
-	use_subdir => 1 or 0,
-   };
-
-=cut
-
-
-# Descriptions: return the article file path.
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
-# Return Value: STR(file path)
-sub filepath
-{
-    my ($self, $args) = @_;
-
-    use Mail::Message::Spool;
-    my $spool = new Mail::Message::Spool;
-    my $file  = $spool->filepath($args);
-
-    return $file;
-}
-
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+redistribute it and/or modify it under the same terms as Perl itself. 
 
 =head1 HISTORY
 
-Mail::ThreadTrack first appeared in fml8 mailing list driver package.
+Mail::ThreadTrack appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

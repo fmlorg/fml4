@@ -1,16 +1,15 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2000 Ken'ichi Fukamachi
 #
-# $FML: MH.pm,v 1.12 2003/01/11 15:16:35 fukachan Exp $
+# $FML: MH.pm,v 1.1 2001/11/04 13:46:34 fukachan Exp $
 #
 
 package Mail::Message::MH;
-use strict;
 
 =head1 NAME
 
-Mail::Message::MH - utilities to handle MH style format
+Mail::Message::MH - utilities for MH style format
 
 =head1 SYNOPSIS
 
@@ -23,7 +22,7 @@ Mail::Message::MH - utilities to handle MH style format
 
 =head2 expand($str, [$min, $max])
 
-return ARRAY_REF of numbers specified by the following format:
+return HASH ARRAY of numbers specified by the following format:
 
     100
     100-110
@@ -37,37 +36,12 @@ return ARRAY_REF of numbers specified by the following format:
 =cut
 
 
-# Descriptions: usual constructor
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
-# Return Value: OBJ
-sub new
-{
-    my ($self, $args) = @_;
-    my ($type) = ref($self) || $self;
-    my $me     = {};
-    return bless $me, $type;
-}
-
-
-# Descriptions: expand MH style expression to list of numbers
-#    Arguments: OBJ($self) STR($str) NUM($min) NUM($max)
-# Side Effects: none
-# Return Value: ARRAY_REF
 sub expand
 {
     my ($self, $str, $min, $max) = @_;
     my $ra = [];
 
     unless (defined $min) { $min = 1;}
-
-    if ($str =~ /,/o) {
-	for my $s (split(/,/, $str)) {
-	    my $ra0 = $self->expand($s, $min, $max);
-	    for my $element (@$ra0) { push(@$ra, $element);}
-	}
-	return $ra;
-    }
 
     if ($str eq 'all') {
 	unless (defined $max) { return undef;}
@@ -97,48 +71,30 @@ sub expand
         return [ $max ];
     }
     elsif ($str =~ /^first:(\d+)$/) {
-	return _expand_range($min, $min + $1 - 1);
+	return _expand_range($min, $min + $1);
     }
     elsif ($str =~ /^last:(\d+)$/) {
 	unless (defined $max) { return undef;}
-	return _expand_range($max - $1 + 1, $max);
+	return _expand_range($max - $1, $max);
     }
 
-    return [];
+    undef;
 }
 
 
 # Descriptions: make an array from $fist to $last number
-#    Arguments: NUM($first) NUM($last)
+#    Arguments: $first_number $last_number
 # Side Effects: none
-# Return Value: ARRAY_REF (as [ $first .. $last ])
+# Return Value: HASH ARRAY as [ $first .. $last ]
 sub _expand_range
 {
     my ($first, $last) = @_;
-    my (@fn) = ();
 
+    my (@fn);
     for ($first .. $last) { push(@fn, $_);}
-
     return \@fn;
 }
 
-
-if ($0 eq __FILE__) {
-    eval q{
-	my $mh = new Mail::Message::MH;
-	for (qw(1,2,3 1,10,last:20 100 100-110 first-110 190-last first
-	      first:10 last last:10)) {
-	    print "\n[$_] => ";
-	    my $a = $mh->expand($_, 1, 200);
-	    print "@$a\n";
-	}
-    };
-}
-
-
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -146,14 +102,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+redistribute it and/or modify it under the same terms as Perl itself. 
 
 =head1 HISTORY
 
-Mail::Message::MH first appeared in fml8 mailing list driver package.
+Mail::Message::MH appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

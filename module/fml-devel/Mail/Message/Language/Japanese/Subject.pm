@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself.
+#   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Subject.pm,v 1.13 2003/01/11 15:16:36 fukachan Exp $
+# $FML: Subject.pm,v 1.2 2001/11/09 10:39:05 fukachan Exp $
 #
 
 
@@ -21,12 +21,12 @@ use Jcode;
 
 =head1 NAME
 
-Mail::Message::Language::Japanese::Subject - functions for Japanese subject
+Mail::Message::Language::Japanese::Subject - Japanese specific handling of a subject
 
 =head1 SYNOPSIS
 
- use Mail::Message::Language::Japanese::Subject;
- $is_reply = Mail::Message::Language::Japanese::Subject::is_reply($subject);
+    use Mail::Message::Language::Japanese::Subject;
+    $is_reply = Mail::Message::Language::Japanese::Subject::is_reply($subject);
 
 =head1 DESCRIPTION
 
@@ -36,14 +36,17 @@ in the subject.
 =cut
 
 
-# XXX-TODO: we should it in proper way in the future.
-# XXX-TODO: but we import it anyway for further rewriting.
+require Exporter;
+@ISA = qw(Exporter);
+
+# XXX we should it in proper way in the future.
+# XXX but we import it anyway for further rewriting.
 my $CUT_OFF_RERERE_PATTERN = '';
 my $CUT_OFF_RERERE_HOOK    = '';
 
 
 # subjec reply pattern
-# apply patch from OGAWA Kunihiko <kuni@edit.ne.jp>
+# apply patch from OGAWA Kunihiko <kuni@edit.ne.jp> 
 #            fml-support:7626 7653 07666
 #            Re: Re2:   Re[2]:     Re(2):     Re^2:    Re*2:
 # i-mode ? (PR fml-help: 00157 by OGAWA Kunihiko)
@@ -64,16 +67,10 @@ For example, it is like this:
 =cut
 
 
-# Descriptions: looks reply message ?
-#    Arguments: OBJ($self) STR($x)
-# Side Effects: none
-# Return Value: 1 or 0
 sub is_reply
 {
     my ($self, $x) = @_;
-
     return 0 unless $x;
-
     &Jcode::convert(\$x, 'euc');
     return ($x =~ /^((\s|(　))*($pattern)\s*)+/ ? 1 : 0);
 }
@@ -90,7 +87,7 @@ within C<Subject:>.
 # fml-support: 07507
 # sub CutOffRe
 # {
-#    いままでどおりの Re: とかとっぱらう
+#    いままでどおりの Re: とかとっぱらう 
 #
 #   if ($LANGUAGE eq 'Japanese') {
 #	日本語処理依存ライブラリへ飛ぶ
@@ -102,18 +99,10 @@ within C<Subject:>.
 #   run-hooks $CUT_OFF_HOOK(ユーザ定義HOOK)
 #}
 # レレレ対策
-
-
-# Descriptions: remove Re:
-#    Arguments: STR($subject)
-# Side Effects: none
-# Return Value: STR
 sub cut_off_reply_tag
 {
     my ($subject) = @_;
     my ($y, $limit);
-
-    # XXX-TODO: method-ify ?
 
     Jcode::convert(\$subject, 'euc');
 
@@ -127,7 +116,7 @@ sub cut_off_reply_tag
     # $subject =~ s/^((\s*|(　)*)*($pattern)\s*)+/Re: /oi;
     $subject =~ s/^((\s|(　))*($pattern)\s*)+/Re: /oi;
 
-    if ($CUT_OFF_RERERE_HOOK) {
+    if ($CUT_OFF_RERERE_HOOK) { 
 	eval($CUT_OFF_RERERE_HOOK);
 	&Log($@) if $@;
     }
@@ -137,25 +126,20 @@ sub cut_off_reply_tag
 }
 
 
-=head1 CODING STYLE
-
-See C<http://www.fml.org/software/FNF/> on fml coding style guide.
-
 =head1 AUTHOR
 
  Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+redistribute it and/or modify it under the same terms as Perl itself. 
 
 =head1 HISTORY
 
-Mail::Message::Language::Japanese::Subject
-first appeared in fml8 mailing list driver package.
+Mail::Message::Language::Japanese::Subject appeared in fml5 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

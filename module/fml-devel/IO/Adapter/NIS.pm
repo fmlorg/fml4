@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: NIS.pm,v 1.1.1.2 2001/06/04 04:47:01 fukachan Exp $
+# $FML: NIS.pm,v 1.20 2002/12/22 02:54:38 fukachan Exp $
 #
 
 package IO::Adapter::NIS;
@@ -41,6 +41,7 @@ C<CAUTION: this map is read only>.
 
 =head1 METHODS
 
+This class inherits C<IO::Adapter::Array>.
 See L<IO::Adapter::Array>.
 
 =head2 C<configure($obj)>
@@ -49,11 +50,17 @@ Configure $obj for array IO emulation.
 
 =cut
 
+
+# Descriptions: initialize NIS specific configuration
+#    Arguments: OBJ($self) HASH_REF($me)
+# Side Effects: none
+# Return Value: ARRAY_REF
 sub configure
 {
     my ($self, $me) = @_;
     my ($type) = ref($self) || $self;
 
+    # XXX-TODO: we call "ypmatch" but should use full-path if could.
     # emulate an array on memory
     my $key        = $me->{_name};
     my (@x)        = split(/:/, `ypmatch $key group.byname`);
@@ -66,20 +73,24 @@ sub configure
 
 L<IO::Adapter::Array>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-IO::Adapter::NIS appeared in fml5 mailing list driver package.
+IO::Adapter::NIS first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

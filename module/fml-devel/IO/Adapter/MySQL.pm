@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001 Ken'ichi Fukamachi
-#          All rights reserved. 
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+#          All rights reserved.
 #
-# $FML: MySQL.pm,v 1.13 2001/06/17 08:57:10 fukachan Exp $
+# $FML: MySQL.pm,v 1.24 2003/01/11 15:22:26 fukachan Exp $
 #
 
 
@@ -13,8 +13,11 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
+my $debug = 0;
+
 use IO::Adapter::DBI;
-@ISA = qw(IO::Adapter::DBI);
+push(@ISA, 'IO::Adapter::DBI');
+
 
 =head1 NAME
 
@@ -23,7 +26,7 @@ IO::Adapter::MySQL - interface to talk with a MySQL server
 =head1 SYNOPSIS
 
    use IO::Adapter;
-   
+
    my $map        = 'mysql:toymodel';
    my $map_params = {
        $map => {
@@ -38,7 +41,7 @@ IO::Adapter::MySQL - interface to talk with a MySQL server
    	},
        },
    };
-   
+
    my $obj = new IO::Adapter ($map, $map_params);
    $obj->open();
    $obj->add( 'rudo@nuinui.net' );
@@ -48,159 +51,125 @@ IO::Adapter::MySQL - interface to talk with a MySQL server
 
 This module is a top level driver to talk with a MySQL server in SQL
 (Structured Query Language).
+This module inherits C<IO::Adapter::DBI> class.
 
 The model dependent SQL statement is expected to be holded in
-C<SQL::Schema::> modules. 
+C<IO::Adapter::SQL::> modules.
 
 You can specify your own module name at $args->{ driver } in
-new($args). 
+new($args).
 It is expected to provdie C<add()>, C<delete()> and
-C<get_next_value()> method. 
-
+C<get_next_value()> method.
 
 =head1 METHODS
 
 =head2 C<configure($me, $args)>
 
 IO::Adapter::MySQL specific configuration loader.
-It also calles SQL::Schema::$model module for model specific
+It also calles IO::Adapter::SQL::$model module for model specific
 customizatoins and functions.
 
 =cut
 
+
+# Descriptions: initialize MySQL specific configuration
+#    Arguments: OBJ($self) HASH_REF($me) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
 sub configure
 {
     my ($self, $me, $args) = @_;
     my $map    = $me->{ _map };       # e.g. "mysql:toymodel"
-    my $config = $args->{ $map };     # { add => 'insert into ..', }
-    my $params = $config->{ params }; #
+    my $config = $args->{ "[$map]" };
 
-    # import basic DBMS parameters
-    $me->{ _config }        = $config;
-    $me->{ _params }        = $params;
-    $me->{ _sql_server }    = $config->{ sql_server }    || 'localhost';
-    $me->{ _database }      = $config->{ database }      || 'fml';
-    $me->{ _table }         = $config->{ table }         || 'ml';
-    $me->{ _user }          = $config->{ user }          || 'fml';
-    $me->{ _user_password } = $config->{ user_password } || '';
-    $me->{_dsn}             = $self->SUPER::make_dsn( {
-	driver     =>  'mysql',
-	database   =>  $me->{ _database },
-	host       =>  $me->{ _sql_server },
+    # import variables
+    for my $key (qw(sql_server
+		    sql_database
+		    sql_table
+		    sql_user
+		    sql_password)) {
+	$me->{ "_$key" } = $config->{ $key };
+    }
+
+    use IO::Adapter::DBI;
+    my $dsn = IO::Adapter::DBI->make_dsn( {
+	driver   => 'mysql',
+	database => $config->{ sql_database },
+	host     => $config->{ sql_server },
     });
-    
-    # load model specific library
-    my $pkg = $config->{ driver } || 'SQL::Schema::toymodel';
-    eval qq{ require $pkg; $pkg->import();};
 
-    # $self->{ _driver } is the $config->{ driver } object.
-    unless ($@) {
-	print STDERR "load $pkg\n" if $ENV{ 'debug ' };
-	@ISA = ($pkg, @ISA);
-	$me->{ _driver } = $pkg;
-    }
-    else {
-	error_set($self, $@);
-	return undef;
-    }
+    # save the current DSN
+    $me->{ _dsn } = $dsn;
+
+    # save map specific configuration
+    $me->{ _config } = $config;
 }
 
 
-=head2 C<getline()>
+=head2 C<setpos($pos)>
 
-return the next address.
-
-=head2 C<get_next_value()>
-
-same as C<getline()> now.
+MySQL does not support rollack, so we close and open this transcation.
+After re-opening, we moved to the specified $pos.
 
 =cut
 
 
-sub getline
+# Descriptions: set position in database handle
+#    Arguments: OBJ($self) NUM($pos)
+# Side Effects: none
+# Return Value: none
+sub setpos
 {
-    my ($self, $args) = @_;
-    $self->get_next_value($args);
-}
+    my ($self, $pos) = @_;
+    my $i = 0;
 
-
-sub get_next_value
-{
-    my ($self, $args) = @_;
-
-    # for the first time
-    unless ($self->{ _res }) {
-	# $self->{ _driver } is the $config->{ driver } object.
-	if ( $self->{ _driver }->can('get_next_value') ) {
-	    $self->{ _driver }->get_next_value($args);
-	}
-	else {
-	    my $query = $self->build_sql_query({ 
-		query   => 'get_next_value',
-	    });
-	    $self->execute({ query => $query });
-	}
-    }
-
-    if ($self->{ _res }) {
-	my @row = $self->{ _res }->fetchrow_array;
-	join(" ", @row);
+    # requested position $pos is later here
+    if ($pos > $self->{ _row_pos }) {
+	$i = $pos - $self->{ _row_pos } - 1;
     }
     else {
-	$self->error_set( $DBI::errstr );
-	undef;
+	# hmm, rollback() is not supported on mysql.
+	# we need to restart this session.
+	my $args = $self->{ _args };
+	$self->close($args);
+	$self->open($args);
+	$i = $pos - 1;
     }
+
+    # discard
+    while ($i-- > 0) { $self->get_next_key();}
 }
 
 
-=head2 C<add($addr)>
-
-add C<$addr> to the sql server specified at new().
-SQL::Schema::$model provides model specific SQL query statement.
-If SQL::Schema::add() exists, SQL::Schema::add() is called.
-
-=head2 C<delete($addr)>
-
-delete C<$addr> from the sql server specified at new().
-SQL::Schema::$model provides model specific SQL query statement.
-If SQL::Schema::delete() exists, SQL::Schema::delete() is called.
+=head2 C<getpos()>
 
 =cut
 
 
-sub add
+# Descriptions: get position in database handle
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: NUM
+sub getpos
 {
-    my ($self, $addr) = @_;
-
-    # $self->{ _driver } is the $config->{ driver } object.
-    if ( $self->{ _driver }->can('add') ) {
-	$self->{ _driver }->add($addr);
-    }
-    else {
-	my $query = $self->build_sql_query({ 
-	    query   => 'add',
-	    address => $addr,
-	});
-	$self->execute({ query => $query });
-    }
+    my ($self) = @_;
+    return $self->{ _row_pos };
 }
 
 
-sub delete
-{
-    my ($self, $addr) = @_;
+=head2 C<eof()>
 
-    # $self->{ _driver } is the $config->{ driver } object.
-    if ( $self->{ _driver }->can('delete') ) {
-	$self->{ _driver }->delete($addr);
-    }
-    else {
-	my $query = $self->build_sql_query({ 
-	    query   => 'delete',
-	    address => $addr,
-	});
-	$self->execute({ query => $query });
-    }
+=cut
+
+
+# Descriptions: EOF or not?
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: 1 or 0
+sub eof
+{
+    my ($self) = @_;
+    $self->{ _row_pos } < $self->{ _row_max } ? 0 : 1;
 }
 
 
@@ -210,20 +179,24 @@ L<DBI>,
 L<DBD::MySQL>,
 L<IO::Adapter::DBI>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-IO::Adapter::File appeared in fml5 mailing list driver package.
+IO::Adapter::File first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Decode.pm,v 1.3 2002/07/02 12:53:44 fukachan Exp $
+# $FML: Decode.pm,v 1.1 2001/12/23 02:59:48 fukachan Exp $
 #
 
 package Mail::Message::Decode;
@@ -15,17 +15,18 @@ use Carp;
 
 =head1 NAME
 
-Mail::Message::Decode - decode a MIME encoded string
+Mail::Message::Decode - handle a MIME encoded string
 
 =head1 SYNOPSIS
 
-    use Mail::Message::Decode qw(decode_mime_string);
+    use Mail::Message::Decode qw(decode_mime_string encode_mime_string);
     $decoded = decode_mime_string( $message );
 
 =head1 DESCRIPTION
 
-MIME utilities to decode the string.  It uses C<MIME::Base64> and
-C<MIME::QuotedPrint> as decoding engines.
+MIME utilities to encode and decode string.
+It uses C<MIME::Base64> and C<MIME::QuotedPrint> as encoding/decoding
+engines.
 
 =head1 METHODS
 
@@ -34,7 +35,7 @@ C<MIME::QuotedPrint> as decoding engines.
 
 require Exporter;
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(decode_mime_string);
+@EXPORT_OK = qw(decode_mime_string encode_mime_string);
 
 
 =head2 C<decode_mime_string(string, [$options])>
@@ -48,17 +49,10 @@ by $options->{ charset }.
 
 =cut
 
-
-# Descriptions: decode MIME string
-#    Arguments: STR($str) HASH_REF)$option)
-# Side Effects: none
-# Return Value: STR
 sub decode_mime_string
 {
     my ($str, $options) = @_;
-    my $charset = (defined $options->{ 'charset' } ?
-		   $options->{ 'charset' } :
-		   'euc-japan');
+    my $charset = $options->{ 'charset' } || 'euc-japan';
 
     if ($charset eq 'euc-japan') {
 	use MIME::Base64;
@@ -90,7 +84,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
