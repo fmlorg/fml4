@@ -1807,6 +1807,49 @@ sub DisableReportForw2Admin
     local(*e) = @_; $e{'mode:notify_to_admin_also'} = 0;
 }
 
+##
+## Negative Cache Wrapper()'s
+##
+# wrap &Mesg() with negative cache
+sub CMesg
+{
+    local($msgkey, $howold, *e, $s, $mesgle_key, @mesgle_argv) = @_;
+    if (&OutOfNegativeCacheP($msgkey, $howold)) {
+	&Mesg(*e, $s, $mesgle_key, @mesgle_argv);
+    }
+}
+
+# wrap &Warn() with negative cache
+sub CWarn
+{
+    local($msgkey, $howold, $subject, $body) = @_;
+    if (&OutOfNegativeCacheP($msgkey, $howold)) {
+	&Warn($subject, $body);
+    }
+}
+
+sub OutOfNegativeCacheP
+{
+    local($msgkey, $howold) = @_;
+    local($dir) = "$VAR_DIR/mesgcache";
+    local($cf)  = "$dir/$msgkey";
+    local($x);
+
+    -d $dir || &Mkdir($dir);
+
+    if (-f $cf) {
+	$x = time - (stat($cf))[9]; # how lod  
+	if ($x < $howold) { 
+	    print STDERR "ignore now ($count, $x $howold)\n" if $debug;
+	    return 0; # in negative cache
+	}
+    }
+
+    &Touch($cf);
+
+    1;
+}
+
 # Generate additional information for command mail reply.
 # return the STRING
 sub GenInfo
