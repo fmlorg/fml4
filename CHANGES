@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/08
+
+  3.0G  add database access hook
+	define initial database access method
+	enabel access via LDAP (Leightweight Directory Access Protocol)
+
+  fix cgi-bin/ml-admin/menu.cgi
+
 2000/07/05
 
   clean up internal for database access
