@@ -115,6 +115,7 @@ sub main'MStat #";
 	$q = $x[5] - $px[5];
 	$px[4] = $x[4];
 	$px[5] = $x[5];
+	print STDERR "--- xpkg=$xpkg pkg=$pkg\n" if $debug; 
 	printf STDERR "%1s %4d\t%4d  sum=<%4d %4d> (%s:%d %s:%d)\n", 
 	($touch ? "+" : ""), $p, $q, $x[4], $x[5], 
 	$xfile, $xln, $file, $ln;
