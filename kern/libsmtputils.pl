@@ -10,6 +10,41 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
+### 
+sub SmtpMCIDeliver
+{
+    local(*e, *rcpt, *smtp, *files) = @_;
+    local($nh, $nm, $i);
+
+    $nh = $MCI_SMTP_HOSTS;
+    $nm = 0;
+
+    # save @rcpt to the local cache entry
+    while (@rcpt) { 
+	foreach $i (1 .. $nh) { $cache{$i, $nm} = shift @rcpt;}; 
+	$nm++;
+    }
+
+    foreach $i (1 .. $nh) { 
+	undef @rcpt; # reset @rcpt
+	for ($j = 0; $cache{$i, $j} ne ''; $j++) { 
+	    push(@rcpt, $cache{$i, $j});
+	    undef $cache{$i, $j}; # not retry, OK?;
+	}
+
+	if (@rcpt) {
+	    $error = &SmtpIO(*e, *rcpt, *smtp, *files);
+	    # If all hosts are down, anyway try $HOST;
+	    if ($error) {
+		push(@HOSTS, $HOST);
+		return $error;
+	    }
+	}
+    }
+
+    0; # O.K.;
+}
+
 
 sub DoSmtpFiles2Socket
 {
