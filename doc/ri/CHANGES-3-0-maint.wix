@@ -5,6 +5,15 @@
 =E
 				Ken'ichi Fukamachi
 
+.if LANG == JAPANESE
+3.0 stable branch の CHANGES についてのみ記しています。
+3.0 の CHANGES は http://www.fml.org/fml/ からたどってください。
+.fi
+.if LANG == ENGLISH
+This document logs CHANGES in fml stable branch.
+See http://www.fml.org/ for CHANGES in fml-current. 
+.fi
+
 [ 3.0pl#30 == 3.0.1_BETA #19 ]
 
    sbin/makefml
