@@ -3,6 +3,20 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/08/25
+
+   sbin/makefml
+	fix not to make /var/spool/ml/.crc
+	fix flock on solaris2 
+
+2000/08/24
+
+   EnvelopeFilter
+	enable EnvelopeFilter to filter Japenese strings.
+	define EUCCompare(buf, pat) to check buf with the 2 bytes alignment.
+
+	フィルタルールに日本語をかけるようにする。
+
 2000/08/22
 
    fix "admin put" removes (^admin|^# admin) lines
