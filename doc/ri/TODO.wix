@@ -42,6 +42,8 @@ aggregate addresses to reply
 
 .S	mead
 
+fml-support: 6897
+
 mead が判定不能だったメールを知らせる
 =E
 if mead finds unknown error format, notify it to administrator.
@@ -136,6 +138,8 @@ I may not do it since it only confuses the customize.
 
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
+
+* 1バイト2バイトいりみだれ文字列ははじけない "chａddr"
 
 * ２バイトはじきすぎ問題
 
