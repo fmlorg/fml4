@@ -34,28 +34,27 @@ unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 require 'proc/libkern.pl';
 require 'proc/libpop.pl';
 
-
 &CheckUGID;
 
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-&InitConfig;			# Load config.ph, initialize conf, date,...
-
 &PopFmlInit;
+$! = "";
 &PopFmlGabble;
+&Log("Gabble Error: $!") if $!;
 &PopFmlProg;
 
 exit 0;
 
 
 ############################################################
-sub PopFmlReadCF
+sub PopFmlGetPasswd
 {
-    local($h) = @_;
+    local($h, $config_file) = @_;
     local($org_sep)  = $/;
     $/ = "\n\n";
 
-    open(NETRC, "$ENV{'HOME'}/.netrc") || die $!;
+    open(NETRC, $config_file) || die $!;
     while(<NETRC>) {
 	s/\n/ /;
 	s/machine\s+(\S+)/$Host = $1/ei;
@@ -69,13 +68,11 @@ sub PopFmlReadCF
 }
 
 
-sub PopFmlGetopt 
+# getopts
+sub PopFmlGetOpts
 {
-    local(@ARGV) = @_;
-
-    # getopts
-    while(@ARGV) {
-	$_ =  shift @ARGV;
+    while (@ARGV) {
+	$_ = shift @ARGV;
 	/^\-user/ && ($USER = $PopConf{'USER'} = shift @ARGV) && next; 
 	/^\-host/ && ($PopConf{'SERVER'} = shift @ARGV) && next; 
 	/^\-f/    && ($ConfigFile = shift @ARGV) && next; 
@@ -88,11 +85,39 @@ sub PopFmlGetopt
 
 sub PopFmlInit
 {
+    &InitConfig;	# Load config.ph, initialize conf, date,...
+
     # for logging 
     $From_address = "popfml";
 
-    &PopFmlGetopt(@ARGV); 
-    &PopFmlReadCF($PopConf{'SERVER'});
+    # flock parameters (/usr/include/sys/file.h)
+    $LOCK_SH                       = 1;
+    $LOCK_EX                       = 2;
+    $LOCK_NB                       = 4;
+    $LOCK_UN                       = 8;
+
+    # Defualt Value
+    $POPFML_MAX_CHILDREN  = 3;
+
+    $PopConf{'TIMEOUT'}   = 30;
+    $PopConf{'QUEUE_DIR'} = "$DIR/var/pop.queue";
+    $PopConf{'LOGFILE'}   = "$DIR/var/log/_poplog";
+    $PopConf{"PROG"}      = "/usr/local/mh/lib/rcvstore";
+
+    # search config file
+    for ("$ENV{'HOME'}/.popfmlrc", "$ENV{'HOME'}/.popexecrc") { 
+	if (-f $_) { $ConfigFile = $_;}
+    }
+
+    &PopFmlGetOpts;
+
+    # debug 
+    # for (keys %PopConf) { print STDERR "$_\t$PopConf{$_}\n" if $debug;}
+
+    # get password for the host;
+    &PopFmlGetPasswd($PopConf{'SERVER'}, "$ENV{'HOME'}/.netrc");
+    $PopConf{"PASSWORD"}  = $Password;
+
 
     if (! $PopConf{'USER'}) {
 	$PopConf{'USER'} = getlogin || (getpwuid($<))[0];
@@ -105,13 +130,14 @@ sub PopFmlInit
 	}
     }
 
-    $PopConf{'TIMEOUT'}   = 30;
-    $PopConf{'QUEUE_DIR'} = 'var/pop.queue';
-    $PopConf{'LOGFILE'}   = 'var/log/_poplog';
-    $PopConf{"PASSWORD"}  = $Password;
-    $PopConf{"PROG"}      = "/usr/local/mh/lib/rcvstore";
+    if (-f $ConfigFile) { 
+	package popcf;
+	require $main'ConfigFile; #';
+	$POPFML_PROG = $POP_EXEC if $POP_EXEC;
+	package main;
 
-    if (-f $ConfigFile) { require ($ConfigFile);}
+	$PopConf{"PROG"} = $popcf'POPFML_PROG; #';
+    }
 }
 
 
@@ -134,41 +160,135 @@ sub PopFmlGabble
 }
 
 
+sub PopFmlProgShutdown
+{
+    local($sig) = @_;
+
+    print STDERR "--caught signal $sig ($$)\n";
+    print STDERR "--alarm PopFmlProgShutdown ($$)\n";
+    exit(0);
+}
+
+sub PopLock
+{
+    local($queue_dir) = @_;
+
+    print STDERR "--try lock ... ($$)\n" if $debug;
+
+    open(LOCK, $queue_dir);
+    flock(LOCK, $LOCK_EX);
+
+    print STDERR "--locked ... ($$)\n" if $debug;
+}
+
+sub PopUnLock
+{
+    close(LOCK);
+    flock(LOCK, $LOCK_UN);
+
+    print STDERR "--unlocked ($$)\n" if $debug;
+}
+
+sub PopFmlProgFreeLock
+{
+    $PopFmlProgExitP = 1;
+    &PopUnLock;
+}
+
 sub PopFmlProg
 {
-    local($queue, $prog, $qf);
+    local($queue, $queue_dir, $prog, $qf);
 
-    $queue = $PopConf{'QUEUE_DIR'};
+    $queue_dir = $PopConf{'QUEUE_DIR'};
     $prog  = $PopConf{'PROG'};
     $prog =~ s/^\|+//;
 
-    print STDERR "--PopFmlProg (queue=$queue prog=$prog)\n" if $debug;
+    print STDERR "--PopFmlProg (queue_dir=$queue_dir prog=$prog)\n" if $debug;
 
-    opendir(DIRD, $queue) || &Log("Cannot opendir $queue");
-    for $qf (readdir(DIRD)) {
+    # anyway shutdown after 45 sec.
+    $SIG{'ALRM'} = "PopFmlProgShutdown";
+    alarm($ALARM || 300);
+    &PopLock($queue_dir);
+
+    opendir(DIRD, $queue_dir) || &Log("Cannot opendir $queue_dir");
+    for $qf (sort {$a <=> $b} readdir(DIRD)) {
 	next if $qf =~ /^\./;
+	next if $qf =~ /\.prog$/;
 
-	print STDERR "--PopFmlProg [$qf] ...\n" if $debug;
+	last if $ForkCount >= $POPFML_MAX_CHILDREN;
+	last if $PopFmlProgExitP;
 
-	if (! open(QUEUE_IN, "$queue/$qf")) {
-	    &Log("Cannot open $queue/$qf");
-	    next;
+	$queue = "$queue_dir/$qf";
+
+	print STDERR "===queue $queue\n" if $debug;
+
+	# checks the current progs (if exists, fatal error since unlocked);
+	# againt another context doing the processing...;
+	next if -f "${queue}.prog";
+
+	if (-f "${queue}.prog") {
+	    # NOT MATCH THIE CONDISION, but should do the error handling;
+	    &Log("PopFmlProg Fatal Error ${queue}.prog exists!");
+	}
+	# anyway touch; (here flocked state);
+	elsif (-f $queue) {
+	    open(TOUCH, ">> ${queue}.prog"); close(TOUCH);
+
+	    # setup the prog
+	    if (! rename($queue, "${queue}.prog")) {
+		unlink "${queue}.prog";
+		&Log("Cannot setup the prog for $queue, exit");
+		exit(1);
+	    }
+
+	    # change the queue file name after setup;
+	    $queue = "${queue}.prog";
 	}
 
-	if (! open(PROG_IN, "|$prog")) {
-	    &Log("Cannot exec [$prog]");
-	    next;
+	### FORKED, CHILDREN IS THE MAIN PROG ###
+	if (($pid = fork) < 0) {
+	    &Log("Cannot fork");
+	}
+	elsif (0 == $pid) {
+	    print STDERR "--PopFmlProg [$qf] ... ($$)\n" if $debug;
+
+	    if (! open(QUEUE_IN, $queue)) {
+		&Log("Cannot open $queue");
+		exit 0;
+	    }
+
+	    if (! open(PROG_IN, "|$prog")) {
+		&Log("Cannot exec [$prog] for $queue");
+		exit 0;
+	    }
+
+	    while (<QUEUE_IN>) { print PROG_IN $_;}
+
+	    close(PROG_IN);
+	    close(QUEUE_IN);
+
+	    unlink $queue || &Log("PopFmlProg: fails to remove the queue $qf");
+
+	    exit 0;
 	}
 
-	while (<QUEUE_IN>) { print PROG_IN $_;}
+	$ForkCount++; # parent;
 
-	close(PROG_IN);
-	close(QUEUE_IN);
-
-	unlink "$queue/$qf" || 
-	    &Log("PopFmlProg: fails to remove the queue $qf");
     }
+    
+    # O.K. Setup the prog of the queue; GO!
+    undef $SIG{'ALRM'};
+    alarm(0);
+
+    &PopUnLock;
     closedir(DIRD);
+
+    # &Log("fork $ForkCount childrens") if $ForkCount;
+
+    # Wait for the child to terminate.
+    while (($dying = wait()) != -1 && ($dying != $pid) ){
+	;
+    }
 }
 
 
