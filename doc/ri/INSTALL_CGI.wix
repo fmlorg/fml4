@@ -57,6 +57,131 @@ suexec (=> .ptr{suexec} 章) などを使い、~fml/cgi-bin/ などといった
 URL で fml CGI を使うことになります(後述)。
 
 
+.C	実例 ( apache 1.3.14 で suexec を使う場合)
+
+以下は sendmail と apache 1.3.14 で suexec を使う場合の操作例です。
+ここでは SSL は使わずに、Basic 認証のみです。
+
+
+.S	CGI スクリプトの準備
+
+	makefml admin.cgi config 
+
+を実行し、以下の順番に操作して下さい。
+
+	項目 1 で USE_MOD_SSL を NO に変更する
+
+	項目 2 の REAL_CGI_PATH を ~/public_html/cgi-bin/fml に変更する
+
+	項目 4 でユーザとパスワードを設定する
+
+ which ? (0-7) [0] 4
+     
+ user (fml) [fml] fml
+     
+ % /usr/local/apache/bin/htpasswd /usr/local/fml/www/authdb/admin/htpasswd fml
+ New password: 
+ Re-type new password: 
+
+	項目 5 で、CGI スクリプトを生成する
+
+ which ? (0-7) [0] 5
+
+  * create /home/fukachan/public_html/cgi-bin/fml/admin/.htaccess
+  * create CGI scripts in /home/fukachan/public_html/cgi-bin/fml/admin/
+    menu.cgi makefml.cgi mlmenu.cgi menubar.cgi index.cgi newml.cgi rmml.cgi 
+
+	0 を入力し、メニューを終了します。
+
+.S	メールサーバの設定 ( sendmail の場合 )
+
+root になり 
+
+   # touch /var/spool/ml/etc/aliases.db
+
+してください。
+
+
+.S	apache の設定
+
+apache をインストールするところから解説します。
+
+    # tar zxvf apache_1.3.14.tar.gz
+    # cd apache_1.3.14/
+    # ./configure --enable-suexec --suexec-caller=nobody
+    # make
+    # make install 
+
+nobody の部分は httpd.conf の User 行とあわせます。デフォルトは nobody 
+です。次に /usr/local/apache/conf/httpd.conf を編集します。
+
+ユーザ fml のホームディレクトリが /home/fml なら、次のような設定を 
+httpd.conf に追加します。
+
+    <Directory /home/*/public_html>
+        AllowOverride FileInfo AuthConfig Limit
+        Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI
+    </A>
+
+    AddHandler cgi-script .cgi
+
+そして
+	# apachectl configtest
+	OK
+	# apachectl restart
+
+をします。ここで /usr/local/apache/logs/error_log に
+
+   Apache/1.3.14 (Unix) configured -- resuming normal operations
+   suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)
+
+といったログが出ればとりあえずは成功です。しかし、このログが出ていても 
+suEXEC がうまくいかないことは多々あります。次の点を確認して下さい。
+
+Q: ~/public_html/ のパーミッションの確認
+
+	ファイルのモード  ( ユーザ fml 以外は書き込むことができません )
+	オーナ、グループ、( ディレクトリとファイルすべて
+				オーナが fml
+				グループが fml	
+				になっている必要があります。
+			  )
+	UID、GID が両方とも1000より大きいか？
+
+念のため次のコマンドを実行するとよいでしょう。
+
+	% chmod -R go-w ~/public_html/	
+	% chown -R fml:fml  ~/public_html/	
+
+ファイルを読むことは誰にでもできるようになっているかも確認して下さい。
+例:
+     
+     % ls -lR ~/public_html
+     total 1
+     drwxr-xr-x  4 fml  fml  512 Nov 28 09:07 cgi-bin/
+     
+     /home/fml/public_html/cgi-bin:
+     total 2
+     drwxr-xr-x  2 fml  fml  512 Nov 28 09:07 admin/
+     drwxr-xr-x  3 fml  fml  512 Nov 28 09:07 fml/
+     
+     /home/fml/public_html/cgi-bin/admin:
+     
+     /home/fml/public_html/cgi-bin/fml:
+     total 1
+     drwxr-xr-x  2 fml  fml  512 Dec 16 21:18 admin/
+     
+     /home/fml/public_html/cgi-bin/fml/admin:
+     total 7
+     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 index.cgi
+     -rwxr-xr-x  1 fml  fml  575 Dec 16 21:18 makefml.cgi
+     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 menu.cgi
+     -rwxr-xr-x  1 fml  fml  622 Dec 16 21:18 menubar.cgi
+     -rwxr-xr-x  1 fml  fml  648 Dec 16 21:18 mlmenu.cgi
+     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 newml.cgi
+     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 rmml.cgi
+
+	
 
 .C	CGI 階層のモデル
 =E.C	hierarychy of CGI model
@@ -314,6 +439,21 @@ AddHandler cgi-script .cgi
 
 ExecCGI と AddHandler cgi-script .cgi の部分が特に重要です。
 
+もし、ホームディレクトリが /home/マシン名/ユーザ名 (例:
+/home/ahodori/fukachan )のようになるなら
+
+.q
+<Directory /home/*/*/public_html>
+    AllowOverride FileInfo AuthConfig Limit
+    Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI
+</Directory>
+
+AddHandler cgi-script .cgi
+.~q
+
+としてください。
+
+
 
 .S	CGI スクリプトの生成
 =E.S	prepare ~/public_html/
@@ -388,6 +528,44 @@ ExecCGI と AddHandler cgi-script .cgi の部分が特に重要です。
 また各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマ
 ニュアルや文献を確認して下さい。
 
+Q: SSL 
+
+/usr/local/fml/www/share/cgi-bin/fml/admin/.htaccess: 
+	Invalid command 'SSLRequireSSL', 〜略〜
+
+.htaccess で SSL を使うように設定されています。しかし apache が SSL 対
+応出ない場合にこのエラーメッセージが出ます。
+
+	% makefml admin.cgi config 
+
+を実行し、メニュー１で SSL を使わないようにして下さい。 
+
+
+Q: パーミッションの間違い
+
+(13)Permission denied: Could not open password file: /usr/local/fml/www/authdb/admin/htpasswd
+
+authdb/ 以下はユーザ nobody などが読めるようになっていないといけません。
+そのため authdb/ ディレクトリ以下を誰にでも読めるように設定して下さい。
+たとえば
+
+	# chmod -R go+r /usr/local/fml/www/authdb
+
+もしくは
+	# chmod -R go+rx `find /usr/local/fml/www/authdb -type d -print`
+	# chmod -R go+r /usr/local/fml/www/authdb
+
+としてください。 
+
+Q: Options ExecCGI is off in this directory
+
+    <Directory /home/*/public_html>
+        AllowOverride FileInfo AuthConfig Limit
+        Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI
+    </A>
+
+Options に ExecCGI がぬけていませんか？もしくはホームディレクトリは 
+/home/* 形式でただしいですか？
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
