@@ -22,17 +22,19 @@ makefml 以外では使われません。
 
 
 .S	Version up について
+.l	version-up
 .k	version up
 
 ソースを広げてインストールと同様に makefml install をして下さい。
-手動でも十分できますが、makefml の方がよいでしょう。実作業としては
+手動でも十分できますが、makefml の方がよいでしょう。
+makefml install を使えば必要な作業を行なってくれます。
 
-	ソースの下の src 階層以下に perl scripts は集められています
-	よって version up はこの src/*.pl をコピー(cp - pr)する
-	必要に応じて bin/ sbin/ cf/ 等も copy する。
-	ドキュメントを copy する
+実作業としては
 
-ことを行ないます。makefml install を使えば必要な作業を行なってくれます。
+	(ソースの下の src 階層以下に perl scripts は集められています)
+	makefml この src/ bin/ sbin/ cf/ doc/ 群をコピーします。
+
+ことを makefml が行ないます。
 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
 
 
