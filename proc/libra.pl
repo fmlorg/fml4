@@ -942,7 +942,7 @@ sub ProcAdminPutFile
 
     ### skip until find "# admin put file" line.
     for (split(/\n/, $e{'Body'})) {
-	next while /^\#\s*(admin|approve)\s*\S+/i; # skip all admin lines
+	next while /^(\#\s*|\s*)(admin|approve)\s*\S+/i; # skip all admin lines
 	$s .= $_."\n";
     }
 
