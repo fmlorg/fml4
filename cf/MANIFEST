@@ -14,7 +14,7 @@ INFO:
 #####################################################################
 # ### Section: DNS and Other Fundamental (CF Version, debug, Language) ### 
 # config.ph configuration version
-CFVersion:	3.2
+CFVersion:	4.0
 
 # global debug option. if non-nil, debug mode.
 # In debug mode, NOT do distribution
@@ -96,6 +96,13 @@ VARLOG_DIR:	var/log
 VARRUN_DIR:	var/run
 VARDB_DIR:	var/db
 
+
+#####################################################################
+# ### Section: Manual Registration ###
+# only support 'confirmation' or 'forward_to_admin'
+# I call this "5 way hand shake".
+MANUAL_REGISTRATION_TYPE:	confirmation
+MANUAL_REGISTRATION_CONFIRMATION_FILE:	$DIR/confirm.msub
 
 #####################################################################
 # ### Section: Automatic Registration ###
