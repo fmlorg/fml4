@@ -58,11 +58,14 @@ e-mail to
 ML server exists to descrease routine works by maintainers. Please try
 to use server functions as could as possible.
 
+.if LANG == JAPANESE
 				_MAIL_LIST_ ´ÉÍý¿Í
 				_ML_-admin@_DOMAIN_			
-=E
+.fi
+.if LANG == ENGLISH
 				_MAIL_LIST_ Maintainer
 				_ML_-admin@_DOMAIN_			
+.fi
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
