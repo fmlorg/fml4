@@ -2310,6 +2310,9 @@ sub do_newml
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-ctl", "$ML_DIR/$ml/include-ctl");
     &Conv($ml, "$EXEC_DIR/etc/makefml/include-mead", 
 	  "$ML_DIR/$ml/include-mead");
+    &Conv($ml, "$EXEC_DIR/etc/makefml/include-disthack", 
+	  "$ML_DIR/$ml/.include-disthack");
+
 
     &Conv($ml, "$EXEC_DIR/etc/makefml/aliases", "$ML_DIR/$ml/aliases");
     &Conv($ml, "$EXEC_DIR/etc/makefml/Makefile","$ML_DIR/$ml/Makefile");
