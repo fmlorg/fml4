@@ -4388,6 +4388,7 @@ sub MakeConfigPH
     else {
 	&Log("cannot write $new_ph");
 	&Error("cannot write $new_ph");
+	unlink $new_ph;
 	return $NULL;
     }
 
@@ -4403,6 +4404,7 @@ sub MakeConfigPH
 	    &Log("cannot make $config_ph");
 	    &Error("cannot make $config_ph");
 	    &Error("config.ph IS NOT UPDATED.");
+	    unlink $new_ph;
 	    return $NULL;
 	}
     }
@@ -4410,6 +4412,7 @@ sub MakeConfigPH
 	&Log("$config_ph is broken perl script");
 	&Error("$config_ph is broken perl script");
 	&Error("config.ph IS NOT UPDATED.");
+	unlink $new_ph;
 	return $NULL;	
     }
 
