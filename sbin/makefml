@@ -2257,6 +2257,8 @@ sub do_html_passwd
 
     print "---Changing Passwd of Admin $member in $ml mailing list\n";
 
+    &Error("empty password") unless $passwd;
+
     &ResetVariables;
     $cf = "$ML_DIR/$ml/cf";
     # set %config, eval %MAKE_FML in it;
