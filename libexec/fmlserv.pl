@@ -4,7 +4,6 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
 $Rcsid   = 'fmlserv #: Wed, 29 May 96 19:32:37  JST 1996';
@@ -61,19 +60,31 @@ sub InitFmlServ
 {
     require 'libkern.pl';
 
-    $DIR           = $DIR;
+    # Check-routine before "chdir $DIR";
+    # $DIR is up-directory over "fmlserv, several Mailing List $DIR".
+    # e.g. $DIR = "/var/spool/ml"; Under it, you can find 
+    # /var/spol/ml/fmlserv, /var/spol/ml/elena, /var/spol/ml/mirei, ...
+
+    # Define the Up-Directory over ML's $DIR;
+    $DIR =~ s#[/]+$##;
+    $DIR =~ s#(/fmlserv)$##;
     $MAIL_LIST_DIR = $DIR;
     $FMLSERV_DIR   = $FMLSERV_DIR || "$DIR/fmlserv";
+
+    # redefine the current $DIR (fmlserv's directory)
     $DIR           = $FMLSERV_DIR;
     $LIBDIR	   = $LIBDIR || $DIR;
     unshift(@INC, $FMLSERV_DIR);
 
     # Directory check
     $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
+
+    # 0700 is enough for fmlserv, since fmlserv controls other ML's;
     if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
 
+    # log file of fmlserv
     $LOGFILE       = "$FMLSERV_DIR/log";
-    &Touch($LOGFILE);
+    &Touch($LOGFILE) unless -f $LOGFILE;
 }
 
 
@@ -81,6 +92,15 @@ sub FmlServ
 {
     local(*e) = @_;
     local($eval, $hook);
+
+    ### initialize fmlserv procedures;
+    $FmlServProcExitPat	= 'quit|end|exit';
+    $FmlServProcPat = 
+	'guide|info|help|lists|which|href|http|gopher|ftp|ftpmail';
+    &SetFmlServProcedure;
+
+    ### The first reply message;
+    &MakePreambleOfReply(*e);
 
     # Declare 
     $e{'mode:fmlserv'} = 1;
@@ -109,30 +129,43 @@ sub FmlServ
 
     $FMLSERV_DIR = $DIR;	# save $DIR
 
+    ###
+    ### Processing For Each ML's
+    ###
     foreach $ml (keys %ReqInfo) {
-	next if $ml eq 'fmlserv'; # fmlserv is the last;
-	next if $ml =~ /^majordomo:/; # fmlserv is the last;
+	next if $ml eq 'fmlserv'; # fmlserv is the last (internal functions);
+	next if $ml =~ /^majordomo:/; # exceptions
 
 	$DIR  = $MailList{$ml};	# reset $DIR for each ML's $DIR
 	$cf   = "$DIR/config.ph";
 	$proc = $ReqInfo{$ml};
 
-	$PresentML = $ml;	# for logfile
+	$CurrentProcML = $ml;	# for logfile
 
-	&Debug("ML\t$ml\nDIR\t$DIR\ncf\t$cf\nprocs\t$proc\n") if $debug;
-	
+	if ($debug) {
+	    &Debug("---Processing ML $ml");
+	    &Debug("DIR\t$DIR\ncf\t$cf\nprocs\t$proc\n");
+	}
+
 	# Load 'ml' NS from $list/config.ph
 	&NewML($DIR, $ml, *e, *MailList);
 
 	&Lock;			# LOCK
 
-	chdir $DIR || die $!;
+	chdir $DIR || do {
+	    &Log("cannot chdir $DIR, ignore given commands for $ml");
+	    &Mesg(*e, "Hmm, ... I cannot find $ml. really?");
+	    next;
+	};
 
-	&Mesg(*e, "\n\n--- Requests to \"$ml\" Mailing List");
+	# &Mesg(*e, "\n===Requested Commands for \"$ml\" Mailing List");
 	# $e{'message'} .= $ML_cmds_log{$ml};
 
+	### Processing $proc For $ml ###
+	&Debug("FmlServ::DoFmlServProc($ml, $proc, *e);") if $debug;
 	&DoFmlServProc($ml, $proc, *e);
 
+	### mget ... for $ml;
 	if ($FML_EXIT_HOOK =~ /mget3_SendingEntry/) {
 	    undef $eval;
 	    foreach $n ('SendingEntry', 'SendingArchiveEntry') {
@@ -162,39 +195,37 @@ sub FmlServ
 	&DestructCompatMajordomo if $e{'mode:majordomo'};
 	&ResetNS;
 
-	undef $PresentML;
+	undef $CurrentProcML;
     }# each MLs
 
     $FML_EXIT_HOOK = $hook;
     $DIR           = $FMLSERV_DIR; #reset global variable
 
+    ###
+    ### FMLSERV INTERNAL (ITSELF) FUNCTIONS; ###
+    ###
+    if ($debug) { &Debug("---Processing ML fmlserv");}
+
     chdir $DIR || die $!;
 
     &NewML($FMLSERV_DIR, 'fmlserv', *e, *MailList);
 
-    # WHEN no result code commands only e.g. help, 
-    # we do not append the simple help;
-    if ($ReqInfo{'fmlserv'} =~ /^[\s\n(help|guide|info|exit|end|quit)]*$/i) {
+    if ($ReqInfo{'fmlserv'}) {
+	&Debug("FmlServ::DoFmlServItselfFunctions") if $debug;
 	&DoFmlServItselfFunctions(*ReqInfo, *e);
+
+	# Report Mail is From and Reply-To MAIL_LIST;
+	$e{'GH:From:'}          = $MAIL_LIST;# special case when fmlserv
+	$e{'message:h:subject'} = "Fmlserv command status report";
+    }
+
+    ### We ALWAYS append the simple help ###
+    if (-f "$FMLSERV_DIR/help") {
+	$e{'message:append:files'} = "$FMLSERV_DIR/help";
     }
     else {
-	&Mesg(*e, "\n\n--- fmlserv ");
-	&DoFmlServItselfFunctions(*ReqInfo, *e) if ($ReqInfo{'fmlserv'});
-
-	$e{'h:From'} = $MAIL_LIST;	# special case when fmlserv
-	$e{'message:h:subject'} = "fmlserv command status report";
-
-	# append help;
-	if (-f "$FMLSERV_DIR/help") {
-	    $e{'message:append:files'} = "$FMLSERV_DIR/help";
-	}
-	else {
-	    &AppendFmlServInfo(*e);
-	}
+	&AppendFmlServInfo(*e);
     }
-
-    # Already '_main' ENVIRONMENT
-    # DONE;
 }
 
 
@@ -206,82 +237,46 @@ sub Opt { push(@SetOpts, @_);}
 
 #########################################################################
 ##### LIBRARY OF FMLSERV #####
-sub AppendFmlServInfo
+sub MakePreambleOfReply
 {
     local(*e) = @_;
-    local($m);
-
-    $m = qq#;
-    ;
-    ****************************************************************;
-    ----- Simple HELP of $MAIL_LIST -----;
-    ;
-    "Fmlserv" is the Fml Interface for Listserv or Majordomo Styles;
-       send "help" to $MAIL_LIST for the details;
-    ;
-    Fmlserv command syntax is a Fml command with a ML Name;
-    ;
-    ;   Command <listname> [the Command Options if available];
-    ;
-    Examples of Commands for <listname> mailing list(ML):;
-    ;
-    help    <listname>;
-    ;       get help file of <listname> ML;
-    ;
-    members <listname>;
-    ;       get the member list of <listname> ML;
-    ;
-    actives <listname>;
-    ;       get the list of members who read <listname> ML now;
-    ;
-    get     <listname> 1;
-    ;       get the article 1 of <listname> ML;
-    ;
-    mget    <listname> 1-10 mp;
-    ;       get the latest 10 articles of <listname> ML in a set;
-    ;       PAY ATTENTION! the options is after the ML's name;
-    ;
-    e.g. "members elena" is to get the member list for the "elena" ML;
-#;
-		    
-    $m =~ s/;//g;
-    $e{'message'} .= $m;
+    &Mesg(*e, "Fmlserv (Fml Listserv-Like Interface) Results:");
 }
-
 
 sub DoFmlServItselfFunctions
 {
     local(*proc, *e) = @_;
     local($procs2fml);
 
-    &SetFmlServProcedure;
-
     if ($proc{'fmlserv'}) {
-	local(@proc) = split(/\n/, $proc{'fmlserv'});
 	&use('fml');
 
-	foreach (@proc) {
+	foreach (split(/\n/, $proc{'fmlserv'})) {
+	    &Debug("DoFmlServItselfFunctions($_)") if $debug;
+
 	    # ATTENTION! already "cut the first #.. syntax"
 	    # in sub SortRequest
 	    $org_str = $_;
 	    ($_, @Fld) = split;
 	    @Fld = ('#', $_, @Fld);
 
-	    ### Procedures
+	    # REPORT IF REPLY IS DEFINED?
+	    #if($Procedure{"r#fmlserv:$_"}){&Mesg(*e,"\n${ml}> $org_str");}
+	    # Anyway We REPORT ALWAYS Anything!
+	    &Mesg(*e, "\nfmlserv> $org_str");
+
+	    ### Procedures is lower-case;
 	    tr/A-Z/a-z/;
 
 	    # FIRST fmlserv:command form here
 	    if ($proc = $Procedure{"fmlserv:$_"}) {
 		$0 = "--Command calling $proc: $FML $LOCKFILE>";
 		&Debug("Call $proc for [$org_str]") if $debug;
-
-		# REPORT
-		if ($Procedure{"r#fmlserv:$_"}) {
-		    &Mesg(*e, "\n>>> $org_str");
-		}
-
+		
 		# PROCEDURE
-		$status = &$proc("fmlserv:$_", *Fld, *e, *misc);
+		# $status = &$proc("fmlserv:$_", *Fld, *e, *misc);
+		$status = &$proc($_, *Fld, *e, *misc);
+		# &Mesg(*e, "*** $status") if $status;
 	    }
 	    # WHEN NOT FMLSERV:Commands, call usual command(libfml.pl)
 	    # not call multiple times, for only one calling
@@ -292,6 +287,7 @@ sub DoFmlServItselfFunctions
 	}# foreach;
 
 	### CALL when NOT MATCHED TO FMLSERV:Commnads
+	# foreach (split(/\n/, $proc2fml)) { &Mesg(*e, "fmlserv> $_");}
 	&Command($procs2fml) if $procs2fml;
     }
 }
@@ -313,6 +309,7 @@ sub DoFmlServProc
     }
 
     if ($auth) {
+	foreach (split(/\n/, $proc)) { &Mesg(*e, "${ml}> $_");}
 	&Command($proc);
     }
     else {
@@ -322,9 +319,10 @@ sub DoFmlServProc
 
 	&Debug("ERROR: CheckMember($From_address, @MEMBER_LIST)") if $debug;
 	foreach (split(/\n/, $proc)) {
+	    &Debug("DoFmlServProc($_)") if $debug;
 	    s/\s+$//;		# cut the \s+
 
-	    &Mesg(*e, "\n>>>> $_");
+	    &Mesg(*e, "\n${ml}> $_");
 	    &Debug("DoFmlServProc::$_()") if $debug;
 	    
 	    if (/^(guide|info)/i)    { 
@@ -394,7 +392,7 @@ sub NewML
 
     ### do actions for each $list ###
     # RESET IMPORTANT VARIABLES
-
+    # direct reply e.g. get, ... 
     $e{'h:Reply-To:'}             = $e{'Addr2Reply:'};
     $From_address = $e{'h:From:'} = &Conv2mailbox($e{'from:'});
 
@@ -409,10 +407,11 @@ sub NewML
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
 
-    eval($s); &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
+    eval($s); 
+    &Log("FAIL EVAL \$SPOOL_DIR ...") if $@;
 
-    # FORCE Reply-TO
-    $e{'h:Reply-To:'}  = "fmlserv\@$DOMAINNAME";
+    # Foce Reply-To: be fmlserv@fqdn in &Notify;
+    $e{'GH:Reply-To:'}  = "fmlserv\@$DOMAINNAME";
 }
 
 
@@ -421,11 +420,8 @@ sub FixMLMode
     local($dir, $ml) = @_;
     local($mdir) = "$MAIL_LIST_DIR/$ml";
 
-    &Debug("\n\tFound $mdir.closed;\n") if -f "$mdir.closed" && $debug;
-    &Debug("\n\tFound $mdir.auto;\n")   if -f "$mdir.auto"   && $debug;
-
-    $ML_MEMBER_CHECK = 1 if -f "$mdir.closed";
-    $ML_MEMBER_CHECK = 0 if -f "$mdir.auto";
+    $ML_MEMBER_CHECK = 1 if -f "${mdir}.closed";
+    $ML_MEMBER_CHECK = 0 if -f "${mdir}.auto";
 }
 
 
@@ -539,7 +535,7 @@ sub SortRequest
     local(*e, *MailList, *ML_cmds) = @_;
     local($cmd, $ml, @p, $s, $k, $v);
 
-    foreach ( split(/\n/, $e{'Body'}) ) {
+    foreach (split(/\n/, $e{'Body'})) {
 	next if /^\s*$/;	# skip null line
 	s/^\#\s*//;		# cut the first #.. syntax
 	next if /^\S+=\S+/;	# variable settings, skip
@@ -550,33 +546,25 @@ sub SortRequest
 	# EXPILICIT ML DETECTED. 
 	# $ml is non-nil and the ML exists
 	if ($ml && $MailList{$ml}) {	
-	    # &Log("Request::${ml}::$cmd", (@p ? "(@p)" : ""));
 	    $ML_cmds{$ml}         .= "$cmd @p\n";
-	    $ML_cmds_log{$ml}     .= ">>>> $cmd $ml @p\n";	    
-	    &Debug("\$ML_cmds{$ml} = $ML_cmds{$ml}") if $debug;
+	    $ML_cmds_log{$ml}     .= "${ml}> $cmd $ml @p\n";	    
 	}
 	# LISTSERV COMPATIBLE: COMMANDS SINCE NO EXPILICIT ML.
 	else {
-	    last if /^\s*(quit|end|exit)/i;
-
-	    local($pat);
-	    $pat = "guide|info|help|lists|which|href|http|gopher|ftp|ftpmail";
-
-	    if (/^\s*($pat)/i) {
-		# push(@ML_cmds, $_);
-		# default >> virtual fmlserv ML
-		$ML_cmds{'fmlserv'}         .= "$_\n";
-		&Debug("FMLSERV COMMAND [$_]") if $debug;
+	    last if /^\s*($FmlServProcExitPat)/i;
+	    
+	    if (/^\s*($FmlServProcPat)/i) { # default >> virtual fmlserv ML
+		$ML_cmds{'fmlserv'} .= "$_\n";
 		next;
 	    }
 
-	    &Mesg(*e, "\n>>>> $_");
+	    &Mesg(*e, "\nfmlserv> $_");
 
 	    if ($ml) {
 		&Mesg(*e, "   ML[$ml] NOT EXISTS; Your request is ignored\n");
 	    }
 	    else {
-		&Mesg(*e, "   Unknown commands");		
+		&Mesg(*e, "   Unknown fmlserv commands");
 	    }
 	}
     }    
@@ -676,8 +664,6 @@ sub ResetNS
 # $ProcFileSendBack($proc, *s);
 sub SetFmlServProcedure
 {
-    # (guide|info|help|lists|which|href|http|gopher|ftp|ftpmail)/) {
-
     %Procedure = (
 		  'fmlserv:lists',	'ProcLists',
 		  'fmlserv:which',	'ProcWhich',
@@ -723,8 +709,8 @@ sub ProcLists
 {
     local($proc, *Fld, *e, *misc) = @_;
 
-    &Mesg(*e, "\n>>> $proc\n");
-    &Mesg(*e, "  $MAIL_LIST serves the following lists\n");
+    #&Mesg(*e, "\nfmlserv> $proc");
+    &Mesg(*e, "  $MAIL_LIST serves the following lists:\n");
     #$e{'message'} .= sprintf("   %s\n", 'Lists:');
 
     while (($key, $value) = each %MailList) {
@@ -740,15 +726,12 @@ sub ProcLists
 sub ProcWhich
 {
     local($proc, *Fld, *e, *misc) = @_;
-    local($r, $s, $DIR, $hitc);
+    local($r, $s, $DIR, $hitc, $reply);
     local($addr) = $Fld[2] || $From_address;
 
     &Log($proc);
-
-    &Mesg(*e, "\n>>> $proc $addr\n");
-    &Mesg(*e, "   You are registered in the following lists:");
-    $e{'message'} .= sprintf("   %-15s\t%s\n", 'List', 'Address');
-    $e{'message'} .= "   ".('-' x 50)."\n";
+    #&Mesg(*e, "\nfmlserv> $proc");
+    &Mesg(*e, "\"$proc $addr\" yields that\n");
 
     foreach $ml (keys %MailList) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
@@ -772,17 +755,25 @@ sub ProcWhich
 	    $r = $MEMBER_LIST = "$DIR/members";
 	}
 	else {
-	    &Mesg(*e, "ML Configuration Error");
+	    &Mesg(*e, "*** $ml Mailing List has a Configuration Error");
 	}
 
 	# if eval is succeed, get entry for $addr
 	if ($r && ($s = &CheckMember($addr, $MEMBER_LIST))) {
-	    $e{'message'} .= sprintf("%-15s\t%s\n", $ml, $addr);
+	    $reply .= sprintf("   %-15s\t%s\n", $ml, $addr);
 	    $hitc++;
 	}
     }#FOREACH;
 
-    if (! $hitc) { &Mesg(*e, "\tnothing");}
+    if ($hitc) { 
+	&Mesg(*e, "   $addr is registered in the following lists:");
+	&Mesg(*e, sprintf("   %-15s\t%s", 'List', 'Address'));
+	&Mesg(*e, "   ".('-' x 50));
+	&Mesg(*e, $reply);
+    }
+    else {
+	&Mesg(*e, "*** $addr is not registered in any lists.");
+    }
 }
 
 
@@ -835,6 +826,76 @@ sub DestructCompatMajordomo
     undef @ARCHIVE_DIR;
 }
 
+
+##################################################################
+sub AppendFmlServInfo
+{
+    local(*e) = @_;
+    local($m);
+
+    $m = qq#;
+    ;
+    ****************************************************************;
+    ----- Simple HELP of $MAIL_LIST -----;
+    ;
+    "Fmlserv" is the Fml Interface for Listserv or Majordomo Styles;
+    ;
+    ;In the description below items contained in [] are optional.;
+    ;do not include the [] around it.;
+    ;
+    Fmlserv command syntax is a Fml command with a "Mailing-List" Name;
+    ;
+    ;   Command Mailing-List [Command Arguments or Options];
+    ;
+    Available typical commands for "Fmlserv":;
+    ;
+    subscribe Mailing-List [address];
+    ;       Subscribe yourself (or "address" if specified) to ;
+    ;       the named Mailing-List;
+    ;
+    unsubscribe Mailing-List [address];
+    ;       Unsubscribe yourself (or "address" if specified) ;
+    ;       from the named Mailing-List;
+    ;
+    help;
+    ;       Fmlserv help;
+    ;
+    lists;
+    ;       List of maling lists this fmlserv serves;
+    ;
+    which [address];
+    ;       Which lists you (or "address" if specified) are registerd.;
+    ;
+    exit;
+    end;
+    quit;
+    ;       End of processing (these three commands are the same).;
+    ;
+    index Mailing-List;
+    ;       Return an index of files you can "get" for Mailing-List.;
+    ;
+    guide Mailing-List;
+    info  Mailing-List;
+    ;       Retrieve the general "guide" for the Mailing-List.;
+    ;
+    members Mailing-List;
+    ;       get the member list of Mailing-List;
+    ;
+    actives Mailing-List;
+    ;       get the list of members who read Mailing-List now;
+    ;
+    get     Mailing-List article-number;
+    ;       get the "article-number" article count of Mailing-List;
+    ;
+    mget    Mailing-List 1-10 mp;
+    ;       get the latest 10 articles of Mailing-List in a set;
+    ;       PAY ATTENTION! the options is after the ML's name;
+    ;
+#;
+
+    $m =~ s/;//g;
+    $e{'message'} .= $m;
+}
 
 
 ##################################################################
