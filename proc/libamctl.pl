@@ -26,7 +26,7 @@ sub AutoRegist
     # ignore $AUTO_REGISTRATION_KEYWORD. fmlserv uses hard-coded "subscribe"
     # In addtion, $set_buf overwrites buffer to ignore the artype
     # except for confirmation.
-    if ($set_buf) { 
+    if ($e{'mode:fmlserv'} && $set_buf) { 
 	$AUTO_REGISTRATION_KEYWORD = "subscribe"; # fmlserv;
 	&Log("set_buf[$set_buf]") if $debug;
     }
