@@ -1,4 +1,4 @@
-	CHANGES from 0.x(1993) to FML 2.2
+	CHANGES from 0.x(1993) to fml-current
 
 				深町 賢一
 =E
@@ -9,10 +9,435 @@
 			
 
 最新の動向については INFO というファイルを見て下さい。
+このファイルは作者による変更点のメモです。
+contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 .if LANG == ENGLISH
+*** Excuse me, this document is not fully translated to English.
 *** Please see INFO for latest information
-*** (Excuse me, this document is not fully translated to English).
+*** This file is the author's memo on changes.
+*** Please see RELEASE_NOTES for contributors and the contribution.
 .fi
+
+1999/02/01
+	begin to prepare 2.2.1 release ...
+
+1999/01/31
+	Added: doc/ri/INSTALL_with_POSTFIX
+
+	For convenience, I split INSTALL*wix to INSTALL_with_"MTA".wix.
+	So now available documents specific for a MTA are:
+
+		INSTALL_with_SENDMAIL (almost dummy file :-)
+		INSTALL_with_POSTFIX
+		INSTALL_with_QMAIL
+		INSTALL_with_EXIM
+
+1999/01/25
+    SMTP bug fix: remove a too restrict error condition
+    # XXX this condition is too restrict since this traps
+    # XXX direct local delivery errors ;D
+
+1999/01/24
+    $MODERATOR_EXPIRE_LIMIT: (default 14 == 2 weeks)
+    bug fix: expire moderator mail queue
+
+	モデレータの時(TYPE II,III)の古いqueueの削除
+
+1999/01/21
+	add another loop detection: X-ML-Info: check
+
+1999/01/20
+	bug fix: re-configure we should import 1.11a mime library no 1.1
+		PR: fml-support: 05735
+
+1999/01/15
+	$AGAINST_MAIL_WITHOUT_REFERENCE;
+	0. you require to set up 'fml puts the subject tag'.
+	1. add ML specific Message-ID: 
+	2. analyze the subject tag e.g. Subject: Re: [elena 00100]
+	In this mode, fml emulates Message-ID: always based on rule 2. 
+	Hence fml can ensure the consistency of ML threads against
+	some MUA's e.g. old Eudora...
+
+	非常〜〜に後ろ向きなオプション
+	Eudora 等の In-Reply-To: References: をつけてくれないMUA対策
+	0. Subject: にTAGをつけることは前提(not default)
+	1. Message-ID: はＭＬ独自のものをつける
+	2. Subject: Re: [elena 00100] のようなTAGを解析する
+	ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
+	オリジナルのMessage-ID:はX-Original-Message-ID:に移動される
+	(#28はbugでつけてない, fixed in #29)
+
+	$AGAINST_HTML_MAIL: cut off except the first multipart block
+
+	OUTLOOKからHTML貼付メールを送りつけてきたら、最初のブロックだ
+	け残してぶった切るスーパー極悪オプション。
+	(企画名 $AGAINST_OUTLOOK :-)
+	
+1998/12/27
+   DISTRIBUTE_DUMMY_RECIPIENT: dedicated to minmin sama:-)
+	decrease perl resident time for on a weak machine e.g. 486DX.
+	add "include-disthack".
+
+	みんみん様にささぐ :) perl の滞在時間をできるだけ少なくする工夫
+	1. fml はある一つのアドレス ML-dist に投げるだけで終了
+	2. ML-dist は :include:$DIR/var/db/rcptlist を行なう。
+	   つまり配送の実態が ML-dist である。
+
+	3. このためのaliasesの見本として$DIR/.include-disthackが作成される
+	   のでこれを使うと良い。
+	   /etc/aliases を変更する
+	
+	4. cf に DISTRIBUTE_DUMMY_RECIPIENT にアドレスをかく
+	例:
+
+		DISTRIBUTE_DUMMY_RECIPIENT 	list-dist@$DOMAINNAME
+
+	5. MLのHOMEで、make config.ph で config.ph を再生成
+	6. MLのHOMEで、make disthack 
+	   /etc/aliases に書くための include-disthack という見本が
+	   生成される
+
+	たうぜんのことながら ML-dist の防衛はMTAの設定なので各自頑張るように
+
+   HTML: define default $HTML_INDENT_STYLE = 'UL';
+
+	HTMLのスレッド表示をかえたざんす
+
+1998/12/20
+   base64decode.pl: enable binary mode IO (for NT)
+
+   HTML 4.0: 822 unfolding in createing HTML articles.
+
+   $NOT_USE_ESMTP_PIPELINING:
+
+	PIPELINE が可能な場合でも使わない
+
+1998/12/15
+   makefml: fix sockaddr probe() code 
+
+	this code bug is not found on a lot of plathome (just a good luck)
+	but on redhat linux.
+
+	インストーラのバグ
+	redhat linux 以外ではたまたま顕在化しなかった(運)
+
+1998/12/12
+   $DISTRIBUTE_DUMMY_RECIPIENT: 
+
+	If $DISTRIBUTE_DUMMY_RECIPIENT is defined in config.ph such as
+		$DISTRIBUTE_DUMMY_RECIPIENT = "fml-dist\@$DOMAINNAME";
+	In distribution of articles, fml sends it to only one address e.g.
+	fml-dist. MTA (e.g. sendmail) sends the mail to members of the ML
+	which are listed in $DIR/var/db/rcptlist
+	 e.g. /var/spool/ml/elena/var/db/rcptlist.
+
+	fml -> fml-dist -> (/etc/aliases)
+
+	[Configuration Examples]
+
+	$DIR/config.ph
+	   $DISTRIBUTE_DUMMY_RECIPIENT = "fml-dist\@$DOMAINNAME";
+
+	/etc/aliases
+	fml-dist: :include:/var/spool/ml/elena/var/db/rcptlist
+
+	$DISTRIBUTE_DUMMY_RECIPIENT が設定されている場合
+	記事の配送時に fml は一つのアドレスにのみ送る。そのアドレスで
+	:include:list などでMTAが本当のメーリングリストメンバーへ配送する。
+
+	セキュリティ: そのアドレス自体を防衛するのはMTAの設定であり
+	別途考えるべき課題である。
+
+	また、この方法により複数のMTAによる並列配送などfmlの機能が使え
+	なくなることにも注意。システム設定を複雑にしてでも perl の生存
+	時間を短くしたいとという特殊な人向きの特殊機能。
+
+1998/12/11
+   admin command: fix 'put' command function to cut off 'admin' lines
+
+   HTML: fix threading
+
+	ちょっと微修正。またためしてみてね〜＞スレッド化
+
+1998/12/5
+   HTML: Try new threading algorithm ! (not default yet)
+
+	$HTML_THREAD_REF_TYPE  = "prefer-in-reply-to";
+	$HTML_INDENT_STYLE     = "UL";
+
+   という設定でできるHTMLファイルのスレッド化をためしてみてね〜:) 
+
+1998/12/3
+   PIPELINING(RFC2197)
+
+	最大の問題は sendmail が対応してないことだ…
+	＃PIPELININGしてくれるやつはすでに十分速くSMTPで
+	＃受けとってくれてるとおもうが、まぁさらにもう少し速くなると
+
+1998/12/1
+   HTML generator: cut off superflouous ^M
+
+1998/11/26
+   fix admin members/actives fails:
+	modify return value of ProcFileSendBack()
+
+1998/11/25
+   append FYI how to get help for administrators 
+	when admin command error occurs.
+
+1998/11/23
+   Documents: remove # (command trap keyword) in default.
+
+   You can re-create help, welcome, ... 
+	1. in "makefml config"
+	2. makefml create-doc-template
+	3. make doc-template in the ML HOME DIRECTORY
+
+1998/11/22
+   help file: add 'tgz' mode in digest mode (missed in the past???)
+
+	まとめおくりの tgz モードがなぜかマニュアルからぬけてる;)
+
+   MTI: negative cache to warn the burst traffic to maintainers
+
+1998/11/19
+   HTML article generator: fix thread 'UL' parenthesis
+
+1998/11/18
+   msend.pl: bug fix uuencoded name in the mode "tgz".
+
+   HTML article generator: fix spool2html emulation code
+
+	spool2html をつかうとヘッダに足らないものがあるのを修正
+	＃ spool2html のfmlエミュレーションの修正
+
+1998/11/17
+   $MTI_TIE_TYPE: use "tie" function in MTI sub system.
+
+	$MTI_TIE_TYPE に DB_File などを定義すると perl 5 の tie 
+	を使った hash へのバインディングを行なう。
+	perl 4 では使えない(当り前:-) 
+	使える引数はOSに依存する。各自マニュアルを参考に
+	e.g. DB_File, NDBM_File, ...
+
+1998/11/09
+   install.sh: modify for SunOS (?)
+
+1998/11/08
+  +'ed user <addr+ext@domain> (for sendmail users):
+	fix to permit this address syntax when automagic registration.
+	but not fix to permit command with this addr beautifully.
+	# so require more eloborate design
+
+  +'d ユーザのアドレス体系を扱えるように修正
+  e.g. MAR+KUN@DOMAIN :-)
+
+  'status' command: consider $MSEND_MODE_DEFAULT variable
+
+1998/11/07
+   HTML articles: modify calling base64decode.pl for on NT4
+
+   makefml menu: a comment on *HANDLER
+
+1998/11/06
+   %SECURE_REGEXP: oops, the code is inversed in the definition.
+	The document style hash is correct. Fix it.
+
+   admin.*pass.* command: back again to permit FML 2.1 level pass phrase 
+	degree of freedom.
+
+	リモート管理用のコマンドのパスワードに使える文字列をFML 2.1 の
+	レベルに戻す。それ以外のコマンドは元のまま
+
+1998/11/04
+   install.sh: internal code changes
+
+   irc: modify a lot
+
+1998/11/03
+   moderator: fix to remove Approval: field under $PASS_ALL_FIELDS is set.
+
+   bin/emumail.pl: fix help message
+
+   fix some documents
+
+1998/11/01
+   add bin/base64decode.pl
+
+   HTML 4.0 article generator
+	Fml uses bin/base64decode.pl as a default when $BASE64_DECODE
+	is not defined.
+
+	html 化をする際のBASE64デコーダのデフォールト
+	明示的に $BASE64_DECODE を定義した場合はそちらが優先
+
+1998/10/30
+   EnvelopeFilter: ignore Email address patterns before check routine sets in.
+
+1998/10/27
+   USE_ENCRYPTED_DISTRIBUTION: check PGP signature before decoding
+
+1998/10/26
+   make secure: disable 'status' command
+
+1998/10/24
+   @DenyLibraryProcedure: more friendly message :)
+
+   mead.pl: modified to work with perl 4
+
+	perl 5 だと、ん〜ちょい変。直す
+
+   spool2html.pl: update documents and information (help message)	
+
+	ちょっと表示やらドキュメントやらをなおす。-d -D のチェックを
+	ちょっと親切化した(とおもふ)
+
+1998/10/18
+   daily.pl: bug fix initialization
+
+1998/10/17
+   @DenyLibraryProcedure: bug fix
+
+   USE_ENCRYPTED_DISTRIBUTION: 
+
+	define PGP Encrypted ML and prepare makefml menu entry
+
+	makefml のメニューでPGP暗合化ＭＬモードへ移行できるように
+	便宜上定義した。もちろんＭＬの鍵を作る、メンバーに配るなどの
+	作業は別途必要なのは変わらない。
+	理屈について詳しくは doc/op* を見てね
+
+   fml.pl: $TZone = +0900 for old config.ph (compatibility)
+
+   $NOT_USE_SPOOL: logs ARTICLE number when $NOT_USE_SPOOL is set.
+
+   $SUBJECT_FORM_LONG_ID
+	check $SUBJECT_FORM_LONG_ID < 2 or not for compatibility
+
+	互換性のため「$SUBJECT_FORM_LONG_ID < 2 では動作が違う」を戻した
+	makefml の menu を変更
+
+1998/10/13
+   fml.pl: bug fix to ignore plural caching in $USE_LOG_MAIL case.
+
+	fml.pl で余計なキャッシュまで書いているのを修正
+	ロック直後に処理を移動
+
+1998/10/11
+   daily.pl: rewrite to implement '-t trap_patfile'
+
+	daily.pl [-hd] [-f patfile] [-t trap_patfile] [-p days]
+
+	-h        this message
+	-d        debug mode
+
+	-f file   pattern file to ignore
+	-t file   pattern file to trap (evaluated before ignore list)
+	-p days   scan at which day (default is 1, that is "yesterday")
+
+1998/10/10
+   mead.pl (Mail Error Analyze Daemon);
+	Ignore Japanese Strings (which may cause an error)
+
+	日本語を無視(誤動作する)。可能性のある文字列を全部見て
+	sort |uniq してキャッシュする(first match では user unknownが
+	上書きされたりするかもしれないのを回避)
+
+1998/10/8
+   makefml: Installer asks you TIME ZONE (CFVersion 4.1).
+	    We must require this for Internationalization.
+
+	インストーラは TIME ZONE を聞きます。多分自動判定できるので
+	一発余計にキーを叩いてちょ:) ちなみに日本は +0900 です
+	#でも summer time は…どしよもないきがする
+
+   documents: fix typo's
+
+1998/10/6
+   SUBJECT_TAG's 0 padding problem:
+	remove strange constraints
+	if $SUBJECT_FORM_LONG_ID < 2, redefine $SUBJECT_FORM_LONG_ID = 5;
+
+   SUBJECT_FORM_LONG_ID:
+	reflects the figure of sequence in X-Mail-Count: regardless of
+	Subject: line.
+
+   SUbject: にタグ (Elena:00100) などはつけなくても SUBJECT_FORM_LONG_ID
+   は X-Mail-Count の 0 padding を制御するようにした
+   ＃タグのあるときはそれも同時に変わっているはずですが、ないときも
+
+   HTML GENERATION: using the distributed article header
+
+   $MANUAL_REGISTRATION_TYPE: bug fix confiction with AUTO_REGISTRATION
+
+   2.2A#1 ; DO NOT USE 2.2A#1's AUTOMATIC REGISTRATION 
+
+1998/10/5
+  HTML Generation: adjust DEFINE_FIELD_FORCED fields for html output.
+
+	HTML生成で DEFINE_FIELD_FORCED を考慮する
+
+  $DISTRIBUTE_SUMMARY_HOOK: defined
+
+1998/10/4
+   chaddr: check the new address and the current address similarity
+	For example, unless this, sub-domain change must be an error.
+	e.g. chaddr foo@a.b.x.y.z foo@123.b.x.y.z
+	So, we gains the ADDR_CHECK_MAX if we encounters this case.
+	And we need SaveACL and RetACL to get back to the
+	original state after this function calling(like Context Switch).
+
+	chaddr でサブドメインだけを変更しようとすると通常はエラーになる
+	というのは変更先のアドレスがすでにメンバーリストにあるので。
+	そのため
+
+		chaddr foo@a.b.x.y.z foo@123.b.x.y.z
+
+	のような時は、アドレスの似ている度合いを見て一時的に
+	$ADDR_CHECK_MAX の値を上げることで正しく動作させる。
+	これに伴い &SaveACL, &RetACL でこの関数呼び出しを
+	保護する必要がある。HOOkなどで呼び出してる人は注意。
+
+   makefml: bug fix do_ctladdr: off/on/chaddr/matome/digest command
+	fix mis-configure which files to operate
+
+   makefml: qmail setup fix umask of examples in group case.
+
+1998/10/3
+   $MANUAL_REGISTRATION_TYPE = 'confirmation' or 'forward_to_admin'
+
+	How to handle 'subscribe' request to ML modified by
+	maintainers' hand. In default fml confirms the will to From: address.
+
+	手動で登録作業をするＭＬで、subscribe request をうけたら
+	confirm を返し、confirm が帰ってきたら管理者は手で登録する。
+	デフォールトは confirmation にしてある。＃ 2.2A
+
+   %Procedure: 'l#command' syntax
+	
+	Restrict 'command' requests in one mail up to $Procedure{"l#command"}
+	$MAXNUM_COMMAND_INPUT is another issue which restrict the
+	total number of commands in on email.
+
+	一通のメールの中のコマンド 'command' リクエストを最大でも
+	$Procedure{"l#command"} 個までに制限する。コマンドごとに制限は
+	変えられる。
+
+	$MAXNUM_COMMAND_INPUT は一つのメールの中のコマンドの合計への制限
+	になっている(種別を問わず足し合わせた値)。
+
+1998/10/2
+   bug fix: installer permission adjusting problems
+
+1998/10/1
+   mead.pl -k command option (default 'bye')
+
+	If you 'off' the users who causes "unknown user" error "not reachable",
+	you can  use '-k off' option.
+
+	-k off とすると(デフォールトではユーザを自動的に抜いてしまいますが)
+	それを OFF の状態にします。
 
 98/09/27
 	2.2 RELEASE
@@ -2574,11 +2999,11 @@ Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
 Subject: hml1.6: a powerful mailing list server
 Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 
-.# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+$Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
