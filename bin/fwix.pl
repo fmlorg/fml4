@@ -97,10 +97,10 @@ $SIG{'HUP'}  = 'CleanUp';
     my ($dirname) = $0;
     $dirname =~ s@bin/[^/]+$@@;
     $dirname =~ s@/*$@@;
-    $dirname =~ s@^/*@@;
     $dirname = '.' unless $dirname;
-    push(@INC, "./$dirname");
-    push(@INC, "./$dirname/module/Japanese");
+    push(@INC, $dirname);
+    push(@INC, "$dirname/module/Japanese");
+    print STDERR join("\n", @INC), "\n";
     require 'jcode.pl';
 
     local($mode) = $opt_b || $opt_m || 'text';
