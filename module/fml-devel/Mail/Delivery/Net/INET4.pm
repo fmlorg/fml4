@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET4.pm,v 1.2 2001/06/17 08:57:12 fukachan Exp $
+# $FML: INET4.pm,v 1.4 2002/01/13 07:09:05 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET4;
@@ -18,6 +18,11 @@ require Exporter;
 @ISA       = qw(Exporter);
 @EXPORT    = qw(connect4);
 
+
+# Descriptions: try connect(2) by IPv4
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: create ipv4 smtp connection
+# Return Value: HANDLE
 sub connect4
 {
     my ($self, $args) = @_;
@@ -70,17 +75,17 @@ IPv4. This is a typical socket program.
 
 =item C<connect4()>
 
-try L<connect(2)>. 
-If it succeeds, returned 
+try L<connect(2)>.
+If it succeeds, returned
 $self->{ _socket } has true value.
-If not, 
-$self->{ _socket } is undef. 
+If not,
+$self->{ _socket } is undef.
 
 Avaialble arguments follows:
 
     connect4( { _mta => $mta });
 
-$mta is a hostname or [raw_ipv4_addr]:port form, for example, 
+$mta is a hostname or [raw_ipv4_addr]:port form, for example,
 127.0.0.1:25.
 
 =head1 SEE ALSO
@@ -96,10 +101,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

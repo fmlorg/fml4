@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Exim.pm,v 1.3 2001/07/30 14:42:34 fukachan Exp $
+# $FML: Exim.pm,v 1.7 2002/01/16 13:43:21 fukachan Exp $
 #
 
 
@@ -37,19 +37,25 @@ See C<Mail::Bounce> for more details.
  Subject: Mail delivery failed: returning message to sender
  Message-Id: <E11fxjP-0005MW-00@eriko.fml.org>
 
+=head1 TODO
+
+need to guess MTA as "exim" ???
+
+	if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) {
+	    $MTA = "exim";
+	}
+
 =cut
 
 
-# need to guess MTA as "exim" ???
-#	if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) { 
-#	    $MTA = "exim";
-#	}
-
-
+# Descriptions: trap X-Failed-Recipients: exim returns.
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
-    my $m    = $msg->rfc822_message_header();
+    my $m    = $msg->whole_message_header();
     my $addr = $m->get('X-Failed-Recipients');
 
     # set up return buffer if $addr is found.
@@ -61,16 +67,17 @@ sub analyze
     }
 }
 
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SimpleMatch.pm,v 1.23 2001/09/18 03:31:33 fukachan Exp $
+# $FML: SimpleMatch.pm,v 1.28 2002/01/16 13:43:21 fukachan Exp $
 #
 
 
@@ -30,7 +30,7 @@ See C<Mail::Bounce> for more details.
 
 =head1 DESCRIPTION
 
-sub class used in C<Mail::Bounce>.
+subclass used in C<Mail::Bounce>.
 
 =head1 SIMPLE STATE MACHINE
 
@@ -156,6 +156,10 @@ my $reason_trap_regexp = {
 };
 
 
+# Descriptions: analyze irregular pattern
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
@@ -164,11 +168,11 @@ sub analyze
     # variables to hold current states
     my $args = {
 	state  => 0,
-	result => $result, 
+	result => $result,
     };
 
-    # skip the first header part and search "text/*" in the body part(s). 
-    $m = $msg->rfc822_message_body_head;
+    # skip the first header part and search "text/*" in the body part(s).
+    $m = $msg->whole_message_body_head;
     $m = $m->find( { data_type_regexp => 'text' } );
 
     if (defined $m) {
@@ -188,7 +192,7 @@ sub analyze
 		$self->_address_match($args);
 	    }
 
-	    # we found the mark of "end of error message part". 
+	    # we found the mark of "end of error message part".
 	    last if $self->_reach_end($args);
 	}
     }
@@ -198,6 +202,10 @@ sub analyze
 }
 
 
+# Descriptions: end of scan range ?
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update $result
+# Return Value: 1 or 0
 sub _reach_end
 {
     my ($self, $args) = @_;
@@ -217,9 +225,13 @@ sub _reach_end
     0;
 }
 
-# XXX
-# XXX our state check is applied to each paragraph not the whole body. 
-# XXX
+
+# Descriptions: trap address in error message
+#               our state check is applied to each paragraph
+#               not the whole body.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update $result
+# Return Value: none
 sub _address_match
 {
     my ($self, $args) = @_;
@@ -231,7 +243,7 @@ sub _address_match
 	    next unless $mta_type;
 
 	    my $start_regexp = $address_trap_regexp->{ $mta_type }->{'start'};
-	    if ($$rbuf =~ /$start_regexp/) { 
+	    if ($$rbuf =~ /$start_regexp/) {
 		$args->{ mta_type  } = $mta_type;
 		$args->{ state }     = 1;
 	    }
@@ -245,7 +257,7 @@ sub _address_match
     my $mta_type    = $args->{ mta_type };
     my $end_regexp  = $address_trap_regexp->{ $mta_type }->{ 'end' };
     my $addr_regexp = $address_trap_regexp->{ $mta_type }->{ 'regexp' };
-    
+
     # 1.1 o.k. we've found the start pattern !!
     if ($args->{ state } == 1) {
 	my @buf = split(/\n/, $$rbuf);
@@ -266,7 +278,7 @@ sub _address_match
 		}
 	    }
 
-	    if (/$addr_regexp/) { 
+	    if (/$addr_regexp/) {
 		my $addr = $self->address_clean_up($mta_type, $1);
 		if ($addr) {
 		    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
@@ -285,10 +297,10 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

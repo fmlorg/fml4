@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Parse.pm,v 1.2 2001/05/27 14:27:56 fukachan Exp $
+# $FML: Parse.pm,v 1.5 2002/01/13 13:35:29 fukachan Exp $
 #
 
 
@@ -17,6 +17,12 @@ use Carp;
 use Mail::Message;
 @ISA = qw(Mail::Message);
 
+
+# Descriptions: fake constructor.
+#               run Mail::Message->parse($args) in fact.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: OBJ
 sub new
 {
     my ($self, $args) = @_;
@@ -48,7 +54,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

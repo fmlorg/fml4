@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Smtpfeed.pm,v 1.2 2001/07/30 14:42:34 fukachan Exp $
+# $FML: Smtpfeed.pm,v 1.4 2001/12/23 14:26:45 fukachan Exp $
 #
 
 
@@ -38,12 +38,10 @@ at the header somewhere in the error message.
 =cut
 
 
-#	# smtpfeed -1 -F hack
-#	if (/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
-#	    &PickUpHint($1);
-#	}
-
-
+# Descriptions: trap error patterin in To: (smtpfeed -F mode).
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
@@ -51,11 +49,11 @@ sub analyze
     my $header = $m->nth_paragraph( 1 );
     my $addr;
 
-    # 
+    #
     # XXX code below is correct ?
-    # 
+    #
 
-    if ($header =~ 
+    if ($header =~
 	/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
 	$addr = $1;
     }
@@ -67,6 +65,7 @@ sub analyze
     $result->{ $addr }->{ 'hints' }           = 'smtpfeed';
 }
 
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
@@ -76,7 +75,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

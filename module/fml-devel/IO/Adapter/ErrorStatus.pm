@@ -2,9 +2,9 @@
 #
 #  Copyright (C) 2001 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ErrorStatus.pm,v 1.1 2001/04/08 13:25:40 fukachan Exp $
+# $FML: ErrorStatus.pm,v 1.2 2001/12/22 09:21:12 fukachan Exp $
 #
 
 package IO::Adapter::ErrorStatus;
@@ -98,7 +98,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 

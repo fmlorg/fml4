@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
-#          All rights reserved. 
+#          All rights reserved.
 #
-# $FML: DBI.pm,v 1.8 2001/09/17 11:35:21 fukachan Exp $
+# $FML: DBI.pm,v 1.10 2001/12/24 07:40:56 fukachan Exp $
 #
 
 package IO::Adapter::DBI;
@@ -37,6 +37,10 @@ prepare C<dsn>.
 =cut
 
 
+# Descriptions: prepare DSN for DBI
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
 sub make_dsn
 {
     my ($self, $args) = @_;
@@ -52,13 +56,17 @@ sub make_dsn
 
 execute sql query.
 
-    $args->{ 
+    $args->{
 	query => sql_query_statment,
     };
 
 =cut
 
 
+# Descriptions: execute query for DBI
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
 sub execute
 {
     my ($self, $args) = @_;
@@ -100,10 +108,10 @@ close connection to SQL server specified by C<dsn>.
 =cut
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
-# Return Value: none
+# Descriptions: open DBI map
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: create DB? handle
+# Return Value: HANDLE (DB? handle)
 sub open
 {
     my ($self, $args) = @_;
@@ -127,7 +135,7 @@ sub open
 
     # try to connect
     my $dbh = DBI->connect($dsn, $user, $password);
-    unless (defined $dbh) { 
+    unless (defined $dbh) {
 	$self->error_set( $DBI::errstr );
 	return undef;
     }
@@ -136,12 +144,12 @@ sub open
 }
 
 
-# Descriptions: 
-#    Arguments: $self $args
-# Side Effects: 
+# Descriptions: delete DBI map
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: delete DB? handle
 # Return Value: none
 sub close
-{ 
+{
     my ($self, $args) = @_;
     my $res = $self->{ _res };
     my $dbh = $self->{ _dbh };
@@ -164,6 +172,10 @@ same as C<getline()> now.
 =cut
 
 
+# Descriptions: get from DBI map
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
 sub getline
 {
     my ($self, $args) = @_;
@@ -171,6 +183,10 @@ sub getline
 }
 
 
+# Descriptions: get from DBI map
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
 sub get_next_value
 {
     my ($self, $args) = @_;
@@ -210,6 +226,11 @@ sub get_next_value
 
 =cut
 
+
+# Descriptions: replace value
+#    Arguments: OBJ($self) STR($regexp) STR($value)
+# Side Effects: update map
+# Return Value: none
 sub replace
 {
     my ($self, $regexp, $value) = @_;
@@ -232,9 +253,6 @@ sub replace
 }
 
 
-=cut
-
-
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
@@ -244,7 +262,7 @@ Ken'ichi Fukamachi
 Copyright (C) 2001 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
