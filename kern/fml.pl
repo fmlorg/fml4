@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.135 2001/08/13 13:46:18 fukachan Exp $
+# $FML: fml.pl,v 2.136 2001/08/20 11:12:02 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -2118,7 +2118,14 @@ sub GenInfo
     }
 
     # RFC2369; Proposed Standard (so fml optional)
-    if ($USE_RFC2369) { &use('kernsubr2'); &EmulRFC2369;}
+    if ($USE_RFC2369) {
+	&use('kernsubr2'); 
+	&EmulRFC2369( {
+	    'addr'  => $addr,
+	    'trap'  => $trap,
+	    'rcsid' => $Rcsid,
+	});
+    }
 
     $s .= "If you have any questions or problems,\n";
     $s .= "   please contact $MAINTAINER\n";
