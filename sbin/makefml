@@ -24,7 +24,7 @@ if ($IN_CHANNEL eq 'stdin') {
 }
 elsif (! @ARGV) { 
     # &ExecCmd("info");
-    &MenuInputLoop if $opt_w;
+    $opt_w ? &MenuInputLoop : &ExecCmd("info");
     exit 0;
 }
 
@@ -42,7 +42,7 @@ if ($GroupWritable) {
 
 # last message
 if ($SavedFP eq 'install') {
-    print STDERR "-- Enjoy Internetworking!\n";
+    print STDERR "\n -- Enjoy Internetworking!\n";
 }
 
 &System if $SYSTEM_ARGV || $SYSTEM_ARGV_IN || $SYSTEM_ARGV_OUT;
@@ -550,13 +550,13 @@ sub SetHashDefaults
 		    # asymmetric registration
 		    'addmember',      'do_addmembers',
 		    'addmembers',     'do_addmembers',
-		    'add2member',    'do_add2members',
-		    'add2members',   'do_add2members',
+		    'add2member',     'do_addmembers',
+		    'add2members',    'do_addmembers',
 		    '33#add2members ML addr', 'add <addr> to only members',
 		    'addactive',      'do_addactives',
 		    'addactives',     'do_addactives',
-		    'add2active',    'do_add2actives',
-		    'add2actives',   'do_add2actives',
+		    'add2active',     'do_addactives',
+		    'add2actives',    'do_addactives',
 		    '33#add2actives ML addr', 'add <addr> to only actives',
 
 		    # admin command (sub)
@@ -616,11 +616,11 @@ sub SetHashDefaults
 		    '200#config-template', 'configure template cf file',
 
 		    'command', 'do_command',
-		    '1000#command ML addr ...', 'e.g. "command ML addr mget last:3 mp"',
+		    '1000#command ML addr ...', 'e.g. "command ML <addr> mget last:3 mp"',
 
 		    # create document templates
 		    'create-doc-template',    'do_create_doc_template',
-		    '300#create-doc-template', 'create document templates e.g. help, guide, ...',
+		    '300#create-doc-template ML', 'create document templates e.g. help, guide, ...',
 
 		    # conversion
 		    'conv',             'do_conv',
@@ -1464,13 +1464,15 @@ sub ExecCmd
 	if ($Env eq 'HTTPD') { &InitErrorBuffer($fp);}
 
 	my ($ml, @opts) = @argv;
+	my ($show) = $ml;
+	undef $show if $fn eq 'log'; 
 
-	print "DO \"$SavedFP @opts\" for $ml mailing list.\n";
+	print "DO \"$SavedFP @opts\" for $ml mailing list.\n" if $show;
 
 	&$fp(@argv);
 	if ($Env eq 'HTTPD') { &FixErrorBuffer($fp);}
 
-	print "done.\n";
+	print "done.\n" if $show;
     }
     else {
 	print "   Command [$fp] NOT DEFINED\n";
@@ -1721,7 +1723,7 @@ sub OutPutLocalConfig
 	print STDERR "MAKE_FML\t$k\t=>$v\n" if $debug;
     }
 
-    print STDERR "--- OUTPUT CF LOCAL CONFIG\n";
+    print STDERR "--- OUTPUT CF LOCAL CONFIG\n" if $debug0;
 
     ### output of other configurations
     print CF "\n\n\n" unless $UnderConfigTemplate;
@@ -2006,7 +2008,7 @@ sub CtlAddrList
     chmod $mode, $file;
 
     if ($sumbuf) {
-	print "\t--- $file\n";
+	print "\n\t--- $file\n";
 	print $sumbuf;
     }
 
@@ -2310,7 +2312,7 @@ sub do_passwd
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
 	&Log("makefml::passwd changing $passwd_file succeed");
-	print "xstatus ok\n";
+	print "xstatus ok\n"; # XXX ???? this is for debug ??  (can I remove?)
 	# $XStatus = 'OK:';
     }
     else {
@@ -3155,7 +3157,7 @@ sub do_test
     local($ml) = @_;
     local($cf);
 
-    print "---Testing $ml mailing list ... \n";
+    print "---Testing $ml mailing list ... \n" if $debug0;
 
     &ResetVariables;
     &GetTime(time);
@@ -4099,7 +4101,7 @@ sub SaveCF
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
 
-	print "---Configuration is saved in $cf\n";
+	print "   Configuration is saved in ${cf}.\n";
     }
 }
 
@@ -4988,7 +4990,8 @@ sub do_setup_mladmin_cgi
 
     &ResetVariables;
 
-    print "\n-- create $ml CGI programs\n";
+    print "\n-- create $ml CGI programs\n" if $debug0;
+    print "\n   create $ml CGI programs\n";
 
     &MkDir("$REAL_CGI_PATH/ml-admin/$ml", 0755);
 

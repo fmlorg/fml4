@@ -5,6 +5,12 @@
 
 2000/05/12
 
+  sbin/makefml
+	clean up (nuke) a lot of debug messages
+
+	うざったいデバッグメッセージ類を一気に整理した
+	(すっきりしすぎでしょうか？)
+
   FNF rewriting project starts ...
 	See fml/FNF (in cvs repository)
 
