@@ -534,15 +534,20 @@ sub DoChangeMemberList
 	    next in;
 	}
 
+
 	######################################################
 	### HERE WE GO; $addr == $curaddr (target address)
-	# phase 01: extract $comment;
-	s/\s(\#.*)$/$comment = $1, $NULL/e; 
+	{
+	    # $_ is splitted to "$addr(include options)" +  "$comment"
 
-	# phase 02: if matched, get "$addr including mx or comments"
-	s/\s+/ /g; # "  " -> " ";
-	if (/^\s*(.*)/o)   { $addr = $1;}
-	if (/^\#\s*(.*)/o) { $addr = $1;}
+	    # phase 01: extract $comment;
+	    s/\s(\#.*)$/$comment = $1, $NULL/e; 
+
+	    # phase 02: if matched, get "$addr including mx or comments"
+	    s/\s+/ /g; # "  " -> " ";
+	    if (/^\s*(.*)/o)   { $addr = $1;}
+	    if (/^\#\s*(.*)/o) { $addr = $1;}
+	}
 
 	# fixing multiple s=skip possiblities;
 	if ($cmd =~ /^ON|SKIP|NOSKIP$/) { $addr =~ s/s=skip//g;}
@@ -553,7 +558,7 @@ sub DoChangeMemberList
 	# may not be effecient.
 	if ($cmd =~ /^ON|OFF|BYE|SKIP|NOSKIP|MATOME|CHADDR$/) {
 	    # Return to the ML
-	    print NEW "$addr $comment\n" 	if $cmd eq 'ON';
+	    print NEW "$addr $comment\n" 	 if $cmd eq 'ON';
 
 	    # Good Bye to the ML temporarily
 	    print NEW "\#\t$addr $comment\n"     if $cmd eq 'OFF';
@@ -588,7 +593,7 @@ sub DoChangeMemberList
 	    $log .= "$cmd $addr; "; $log_c++;
 	}# CASE of COMMANDS;
 	else {
-	    print NEW "$_ $comment\n"; 
+	    print NEW "$addr $comment\n"; 
 	    &Log("ChangeMemberList:Unknown cmd = $cmd");
 	}
     } # end of while loop;
