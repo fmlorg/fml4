@@ -1,0 +1,44 @@
+.C	ユーザがHOOKなどで安全に使える関数 
+.l	safe-functions
+
+.S	ヘッダ関係の操作
+
+GET_HEADER_FIELD_VALUE( header_field )
+
+	現在の値を取り出す。
+
+GET_ORIGINAL_HEADER_FIELD_VALUE( header_field )
+
+	fml が最初にメールを受けとった時の元々の値を取り出す。
+
+SET_HEADER_FIELD_VALUE( header_field , value )
+
+	前述の GET_HEADER_FILED_VALUE() の対称性のために作った関数。
+	ヘッダフィールドの値を特定にものにする。
+
+	ようは DEFINE_FIELD_FORCED() と一緒だけど
+	もうちょっと汎用的
+
+.S	%Envelope の操作
+
+GET_ENVELOPE_VALUE( hash_key )
+
+	%Envelope ハッシュのあるキーの値を取り出す
+
+SET_ENVELOPE_VALUE( hash_key, value )
+
+	%Envelope ハッシュのあるキーの値を設定する or 上書きする。
+
+ENVELOPE_APPEND( hash_key, value )
+
+	%Envelope ハッシュのあるキーに値をつけたす。
+	つまり現在の内容の後にいれる。
+
+ENVELOPE_PREPEND( hash_key, value )
+
+	%Envelope ハッシュのあるキーに値をつけたすが、現在の内容の
+	直前に挿入する。
+
+.S	
+
+GET_BUFFER_FROM_FILE( file )
