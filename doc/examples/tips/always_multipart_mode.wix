@@ -1,3 +1,5 @@
+.HTML_PRE
+
 Q: get 100 と コマンドを おくると マルチパート形式で 100 の記事がおくられる
 
 A: get の時も呼び出す関数を mget の関数にしてしまう。
@@ -23,3 +25,5 @@ append it to config.ph.
 # See the file COPYING for more details.
 #
 $Id$
+
+.~HTML_PRE

@@ -1,3 +1,5 @@
+.HTML_PRE
+
 Q: Replyのメールのサブジェクトを新しくする際にブラケットを外さない
    例: (Elena 100) Re:(Elena 99) xxxxxx のままにしてしまう
 
@@ -32,3 +34,4 @@ $Id$
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 
+.~HTML_PRE

@@ -1,3 +1,4 @@
+.HTML_PRE
 	return guide if fml receives post from the member
 
 .if LANG == JAPANESE
@@ -66,3 +67,4 @@ $START_HOOK = q#
 .~q
 
 $Id$
+.~HTML_PRE
