@@ -129,13 +129,13 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-   postfix 19991231-pl11 + perl 5.00503 on NetBSD/i386 1.4Y
+   postfix release-20010228 + perl 5.00503 on NetBSD/i386 1.4Y
 
 * テスト環境: fml.org の実運用テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
-   postfix 19991231-pl11 + perl 5.004_04 on NetBSD/sparc (1.4-stable)
+   postfix release-20010228 + perl 5.004_04 on NetBSD/sparc (1.4-stable)
 
 さらに配送系は複数のMTAを使った並列配送実験をしています(通称 MTA みく
 じです ^^;)。(最近は一旦２つに減っていますが、そのうち増えるかも:)
@@ -144,7 +144,7 @@ The delivery system on fml.ORG consists of 2 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
    qmail 1.03
-   postfix 19991231-pl11
+   postfix release-20010228
 
 
 .S	インストールについて
