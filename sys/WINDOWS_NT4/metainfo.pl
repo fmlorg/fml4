@@ -30,7 +30,7 @@ sub Conv4NT
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
 	$PERL_PATH = &__SearchPath('perl.exe');
-	print STDERR "set perl_path $PERL_PATH\n";
+	print STDERR "set perl_path $PERL_PATH\n" if $debug0;
 	$USER = $ENV{'USERNAME'};
     }
     else {
