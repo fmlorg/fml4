@@ -14,7 +14,7 @@ sub DoDistribute
 {
     local(*e) = @_;
 
-    $0 = "${FML}: Distributing <$LOCKFILE>";
+    $0 = "${FML}: Distributing <$MyProcessInfo>";
     local($status, $s, $id);
 
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
@@ -345,9 +345,9 @@ sub DoDistribute
 
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, 'store_article');
-	$mib->{'_article_id'} = $ID;
+	$mib{'_article_id'} = $ID;
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
-	if ($mib->{'error'}) { return 0;}
+	if ($mib{'error'}) { return 0;}
     }
 }
 
@@ -430,10 +430,15 @@ sub ReadActiveRecipients
 sub Deliver
 {
     local($status, $smtp_time);
-    
+
     if ($debug) {
-	&Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
-	return 1;
+	if ($debug & $DEBUG_OPT_DELIVERY_ENABLE) {
+	    &Log("info: debug mode but deliver article");
+	}
+	else {
+	    &Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
+	    return 1;
+	}
     }
     elsif ($Envelope{'mode:article_spooling_only'}) {
 	&Log("not deliver in article spooling only mode");
