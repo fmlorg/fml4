@@ -1221,6 +1221,8 @@ sub RewriteField
     $f ? &$f(*e) : &Log("RewriteField: unknown ruleset $ruleset");
 }
 
+# 2000/11/17 version is modified to use Mail::Address.pm 
+# based on the patch by OGAWA Kunihiko <kuni@edit.ne.jp>
 sub RuleSetTo
 {
     local(*e) = @_;
@@ -1269,6 +1271,8 @@ sub RuleSetTo
 #
 # macro:x is moved to FixHeaderFields (97/05/07 fukui@sonic.nm.fujitsu.co.jp)
 #
+# 2000/11/17 version is modified to use Mail::Address.pm 
+# based on the patch by OGAWA Kunihiko <kuni@edit.ne.jp>
 sub Conv2mailbox
 {
     local($mb, *e) = @_;	# original string
