@@ -10,6 +10,8 @@
    http://www.phys.titech.ac.jp/uja/fml/
    Last modified: 
 
+ごめん、いま大書き直し中…少し順番とか入り乱れてます _o_ 
+
    このファイルは昔FAQという名前でした。
    FAQ、Setting、改造の仕方等に関するガイドになっています。
    ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
@@ -538,13 +540,72 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 昔できたことは必ず今の実装でも必ずできるので以下を参照してみて下さい。
 
 
-.C	fml の基本動作、起動オプション…
+.C	用語
+
+以下で使う用語について2、3説明しておきます。
+
+.S	MLのHOME
+
+ML(fml) の HOME は config.ph のある場所です。例えば 
+config.ph が /var/spool/ml/elena/config.ph にあるとすると、
+directory /var/spool/ml/elena をＭＬのＨＯＭＥと呼んでいます。
+
+現在の実装は config.ph はなくてもかまいません。ですから spool
+(/var/spool/ml/elena/spool) や log (/var/spool/ml/elena/log)が作られる
+directory (/var/spool/ml/elena) のことだとおもってください。
+
+.S	SMTP
+
+SMTP == Simple Mail Transfer Protocol。 sendmail 間の通信方式のこと。
+
+.S	SMTPでうけるサーバ
+
+sendmail というプログラムが元祖であり、もっとも代表的なプログラムです
+が、SMTPを理解すればうけるのは何でも構いません。
+例えば、TIS (Trusted Information System) の Gauntlet という Firewall 
+では smap というプログラムが受けて queue だけをします。
+
+世の中にはそれ以外にも sendmail もどきのプログラムはありますから、
+sendmail に拘る必要はありません。
+
+この文書では Target machine が 4.4BSD なので、sendmail と perl を使う
+場合について解説しています。
+
+
+.S	sendmail
+
+現在も Eric Allman がメンテしている メール配信エージェントのこと。
+sendmail は BSDの標準装備です。
+
+どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
+もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
+を使うようにして下さい。
+
+.S	sendmail.cf 
+
+sendmail をコントロールする configration file。これの読み書きができな
+いとネットワーク管理者にはなれない（なりたくないって？（泣））。通常は 
+motonori さん（motonori@wide.ad.jp）のメンテしている CF パッケージで 
+sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
+
+詳しくは、このCFパッケージの日本語マニュアルも参照されたい。
+
+.S	newaliases
+
+/etc/aliases から aliases データベースを作るための操作のこと。
+/etc/aliases をいじったら newaliases というコマンドを実行することのこ
+と。
+
+
+
+.P	fml の起動、起動オプション、Configuration file による設定
+
+.C	fml の基本動作と起動オプション…
 
 .S	ＭＬサーバの動作
 .key	ＭＬサーバの動作
 
-
-メールが SMTP で送られてくる ＃注意：SMTPは通信方式のこと
+	メールが SMTP で送られてくる
 
              ↓
 
@@ -594,12 +655,17 @@ sendmail から fml へメールが渡されると 次のように動作します。
 そのあと設定に従いメールを処理します。 コマンドラインオプションを指定
 するときは 	/usr/local/list/Elena の中で
 
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
+
+や（デフォールト）
+
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --distribute "
 
-のように書きます。引数の書き方の順番は任意です。引数の最初の directry 
-をMLのホーム(config.phのある場所 もしくは spool やメンバーファイルのあ
-る場所)と見なします。
+のように書きます（コマンドラインオプションをつける場合）。
 
+引数の書き方の順番は任意です。引数の最初の directry をMLのホーム
+(config.phのある場所 もしくは spool やメンバーファイルのある場所)と見
+なします。
 
 
 .S	オプション設定の優先順位
@@ -611,8 +677,15 @@ sendmail から fml へメールが渡されると 次のように動作します。
 ３	各MLごとの config.ph による設定
 ４	fml デフォールト設定
 
-大抵の場合と同様ですね
+大抵の program と同様ですね。
 
+
+.# ##########################################################
+.#	command line options
+.include clo.wix
+
+
+.C	fml プロセス
 
 .S	律速段階
 .key	何がどこが遅くさせるか？
@@ -636,7 +709,7 @@ ML の配送プロセスには何のメリットも生じないということでもあります。
 .label	{fml-uid}
 
 「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
-走っているからで、fml 実行時は fml 管理者の プロセスとして走ります。
+走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
 システムに「 fml 管理者の プロセスとして走る」用に命令することが
 システムによって違うことがあるので少し厄介なことが発生します。
 
@@ -670,28 +743,29 @@ ML の配送プロセスには何のメリットも生じないということでもあります。
 .S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
 
 make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
-fml（fml.c から作る）自体は、make の時fml.c を自動的に補正してくれてい
-るはずです。
+fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
+れているはずです。
 
 /etc/aliases では
-	Elena: :include:/include-file 
+	Elena: :include:/some/directory/include-file 
 		もしくは
-	Elena: "|/directory/fml-1.4/fml"
+	Elena: "|/some/directory/fml-2.1/fml"
 の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
-ます。
-sendmail が setuid をちゃんと実行できないからで、けっこうターゲットマ
-シンのＢＳＤ以外では挙動がまちまちみたいです
+ます。現在では include-file 形式が普通のような気がします。
+
+sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
+BSD )以外では挙動がまちまちみたいです
 
 問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
 
-［４．３ＢＳＤ］
-	fml でも :include: でもＯＫでしょう
+ [4.3BSD]
+	fml でも :include: でもOKでしょう
 
-［４．４、ＰＯＳＩＸ準拠のＯＳ、その他］
+ [4.4、POSIX準拠のOS、その他]
 	:include: 式か 
 	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
 
-以下は実際にテストされたＯＳ一覧です
+以下は実際にテストされたOS一覧です
 
 	キーワード：
 	uid		ownerが自分自身で 4755 した fml
@@ -749,6 +823,9 @@ root のケースでは rootでしかかけない /usr/local/ml/driver
 ＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
 
 
+
+
+.C	配送モード
 
 .S	自動登録について
 .seealso fml-mechanism
@@ -1048,11 +1125,11 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
 
 カスタマイズするべきファイル等は
 
-    アドミンと認めるメンバーのリスト（Email-address）
-    $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+   アドミンと認めるメンバーのリスト（Email-address）
+   $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
 
-    アドミンのコマンドのHELPファイル
-    $ADMIN_HELP_FILE	= "$DIR/help-admin";
+   アドミンのコマンドのHELPファイル
+   $ADMIN_HELP_FILE	= "$DIR/help-admin";
 
    リモート管理にパスワードを要求する場合には１に
    $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
@@ -1064,7 +1141,6 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
 
 
 
-.# ##########################################################
 .C	Install && Configurations
 .label	{configuration}
 
@@ -1093,7 +1169,6 @@ Version up は *.pl をコピーすれば終りです。
 	
 	config.ph をいじるか コマンドラインオプションで変更します。
 	
-
 ○	複数のMLがある場合
 
 	ML固有の変更はそれぞれのMLの config.ph へ変更を加えるか
@@ -1410,11 +1485,6 @@ lib Elena は 700、driver は755としておけば、
 .seealso	customize
 
 フックの章をみてください
-
-
-.# ##########################################################
-.#	command line options
-.include clo.wix
 
 
 .# ##########################################################
