@@ -6,8 +6,9 @@
 
 .__repl_include__
 .include overview.wix
-.include confirmd.wix
+.include list.wix
 .include mead.wix
+.include confirmd.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -1,0 +1,113 @@
+.C	典型的なエラーリスト
+.l	errorlist
+
+.S	perlのだしているエラー
+
+これはおそらくMTAの問題ではなくfml自体( fml.pl )を実行し損なっていると
+いう意味です。
+
+.q
+  Can't locate getopts.pl in @INC at makefml line 104.
+.~q
+
+perlが正しくインストールされていません。perlをインストールしなおして
+ください。
+=E
+The installation of perl fails. Please install perl again!
+
+.S	MTAのエラー
+
+例えばMTAのエラーの場合の典型例は以下のようなものがあります。
+MTA(sendmail など)から返ってきたメールのエラーメッセージの代表例:
+=E
+Please see error mails from your MTA. These are typical errors shown
+in error mails returned from MTA's.
+
+.if LANG == JAPANESE
+	エラー		原因
+	--------------------------------------------------------
+	unsafe	 	ファイルやdirectoryのpermissionがおかしい
+			どこかが group writable
+	loop		/etc/aliases の設定がおかしい 
+			newaliases してない
+	user unknown	そんなユーザはいない
+			/etc/aliases に設定をしていない
+			newaliases してない
+
+	sh: fml.pl not available
+			smrsh を使ってたりしますか？
+			(最近のRedhatでこのsmrshからみのトラブルが多いです)
+			sendmail.cfをどうやって作ったかを確認
+.fi
+.if LANG == ENGLISH
+	error		origin
+	--------------------------------------------------------
+	unsafe		permission of files or directories
+	loop		/etc/aliases miss-configuration
+			did not newaliases
+	user unknown	no such user
+			/etc/aliases miss-configuration
+			did not newaliases
+	sh: fml.pl not available
+			you use smrsh? properly configured?
+			
+.fi
+
+○	:include: がうまく動かない場合 (/etc/aliases)
+=E
+*	You fails to use :include: form in /etc/aliases
+.l	unsafe
+
+可能性としては
+=E
+The following reasons are possible:
+
+	○ include ファイルの場所がセキュリティ的に問題があるためエラー
+	   例えば 
+		・ NFS ごし
+		・ include ファイルのある場所までのどこかの permission が危ない
+		   例えば /usr, /usr/local, /usr/local/fml のように順次下って
+		   group writable か否かを調べる。chmod 755 をしまくる
+=E	
+	* "include" file exists in an insecure directory.
+	  Please check the whole hierarchy permission from / to the "include".
+	  check	/usr, /usr/local, /usr/local/fml, ... and chmod 755 them!
+
+	○ include 形式をそもそもサポートしていない
+	   -> C Wrapper が必要かも知れない
+=E
+	* your mail system do not support include form.
+	  You may require C-Wrapper (see below). 
+
+などが考えられます。include ファイルの置き場所は可能な限り permission 
+を落したローカル(NFSではない)場所(そこまでの階層すべての permission に
+配慮する)に include ファイルを置いてみて下さい。例えば /usr/local が 
+local disk の上にあるとして /usr/local/include/ の下に置いておくなどです。
+＃注意: そもそも NFS ごしに setuid しようというのが間違い
+
+C Wrapper については
+=E
+If you fails to use :include: in /etc/aliases, please use the
+C-wrapper program which may be required to be root-setuid.
+The example of the C-wrapper is 
+=S
+	/var/spool/ml/listname/fml.c 
+=S
+Please compile and set it properly. I recommend you council the
+setting of the C-wrapper with the administrator of the
+machine since it requires a lot of attention.
+
+	/var/spool/ml/ML名/fml.c 
+
+というのが各ＭＬ用に作られているので compile して設定する必要がありま
+す。compile そのものはその場所で make fml で実行されますが、setuid は
+よ〜く注意して設定しないといけないので doc/op.jp の "fml.c の呼び方"
+あたりを参考に root の人とよく相談しながら設定して下さい。
+＃注: 2.2 では cc のオプションに -DPOSIX がデフォルトでついています。
+
+FYI: OSによってはインストール情報が提供されていることもあります。チェッ
+クしてみて下さい。
+例:	Debian Linux	/usr/doc/fml/ の下
+=E
+FYI: Some OS's provides a memo on installation. Please check your OS.
+e.g.	Debian Linux	/usr/doc/fml/

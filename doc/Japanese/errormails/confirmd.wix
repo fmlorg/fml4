@@ -1,10 +1,10 @@
 .C	Confirmation Daemon (libexec/confirmd.pl)
 .n	confirmd
+.l	confirmd
 
 注意: FML 2.1B#2 以降の機能です。
 =E
 This function is implemented after 2.1B#2.
-
 
 定期的(例: 2カ月の一度)にメンバーに「これからもＭＬに入り続けるか？」
 を尋ね、返事がなければ参加の意志がないものとして、そのメンバーを削除す
