@@ -1,8 +1,11 @@
 .C	TIPS
 
-.S	自動的に記事のスプールをまとめて小さくする
+.S	自動的に記事のスプールを圧縮する
 
-tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう
+spool を tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう。
+デフォールトでは100通の記事を一つの tar.gz 形式に圧縮する。
+注意: tar.gz を作るだけで、圧縮したものの記事は(危ないので)消さない。
+      自動的に消すには $USE_EXPIRE (次節)
 
 	$USE_ARCHIVE
 .xref	$USE_ARCHIVE
@@ -12,19 +15,30 @@ tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう
 	$USE_EXPIRE
 .xref	$USE_EXPIRE
 
+spool/ の古い記事を自動的に消す。これは「消すだけ」です。
+
+$USE_ARCHIVE と同時に使う時は注意が必要です。
+.xref relation_EXPIRE_LIMIT_and_ARCHIVE_UNIT 
+
 .S	ログをみる
 
+最後の10行をみる。ちなみに log と tail は一緒
 .q
 % makefml log elena
 .~q
 (2000/春以降の current only)
 
-.S	ログのチェック
+最後の100行
+.q
+% makefml elena::tail -100 
+.~q
 
-bin/daily.pl というのがある。あきらかに正常という以外の行(例: Article 
-数字)を全部表示する。出過ぎるとおもうときはパターンファイルを変更する。
-
+.S	fml のログのチェックをする
 .xref bin/daily.pl
+
+/usr/local/fml/bin/daily.pl というプログラムがある。あきらかに正常とい
+う以外の行(例: Article 数字)を全部表示する。
+出過ぎるとおもうときはパターンファイルを変更する。
 
 本質的には、前日のログに対して
 .q
