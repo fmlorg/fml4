@@ -415,6 +415,22 @@ Here is Beta test specification:)
 	%addrinfo	address
 	%hostinfo	host evaluated from Received: fields
 
+.S	perl 5 tie 
+.k	$MTI_TIE_TYPE
+.l	$MTI_TIE_TYPE
+
+	$MTI_TIE_TYPE
+
+$MTI_TIE_TYPE に DB_File などを定義すると perl 5 の tie 
+を使った hash へのバインディングを行なう。
+perl 4 では使えない(当り前:-) 
+使える引数はOSに依存する。各自マニュアルを参考にしてください
+e.g. DB_File, NDBM_File, ...
+=E
+If defined, fml uses "tie" function in MTI sub system irrespective of
+dbmopen(). This is used only on perl 5. What you use depends on
+your operating system. Please see your OS manuals and perl.
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
