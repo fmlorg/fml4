@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/31
+
+   EnvelopFilter
+	skip plural null lines between paragraphs
+
+	最初のＮ行のパラグラフをえぐりだす部分を直す
+	FIX: 複数の空行を一行とみなさないとおかしい
+
 2000/03/26
 
    3.0.1 release
