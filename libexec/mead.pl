@@ -703,7 +703,7 @@ sub Report
     ### send reports by mail.
 
     if ($MODE eq 'auto') {
-	$prepend = "Hi, I am fml Mail Error Analyzer Daemon (mead).\n";
+	$prepend = "Hi, I am the fml Mail Error Analyzer Daemon (mead).\n";
 	$prepend .= "I tried to remove the following mail unreachable addresses\n\n";
 
 	$sep  = "\n--mead, fml\'s Mail Error Analyze Daemon\n";
@@ -716,7 +716,7 @@ sub Report
     elsif ($MODE eq 'report') {    
 	if (%Template) {
 	    for $ml (keys %Template) {
-		$prepend = "Hi, I am fml Mail Error Analyzer Daemon (mead).\n";
+		$prepend = "Hi, I am the fml Mail Error Analyzer Daemon (mead).\n";
 		$prepend .= "I think you should remove the following mail unreachable addresses\n\n";
 
 		$prepend .= "1. If you use remote administration mode,\n";

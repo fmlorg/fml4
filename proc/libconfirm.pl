@@ -271,7 +271,7 @@ sub GenConfirmReplyText
 
     &Log("GenConfirmReplyText: $mode") if $debug_confirm;
 
-    $s .= "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
+    $s .= "Hi, I am the fml ML manager for the ML <$MAIL_LIST>.\n";
 
     # extensions for confirmd
     if ($CONFIRM_REPLAY_TEXT_FUNCTION) {
@@ -368,7 +368,7 @@ sub ManualRegistConfirm
 	    &Log("ManualRegistConfirm: confirm succeeds");
 
 	    &WarnE("subscribe request is confirmed $ML_FN",
-		   "Hi, I am fml ML manager for <$MAIL_LIST>.\n".
+		   "Hi, I am the fml ML manager for <$MAIL_LIST>.\n".
 		   "I confirmed subscribe request from <$From_address>.\n".
 		   "Please add <$From_address> to a ML member.\n\n".
 		   "FYI:Administrative Command Example:\n".

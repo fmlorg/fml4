@@ -63,7 +63,7 @@ sub AnnounceMailSizeOver
     local(*e) = @_;
     local($h, $body);
 
-    $body  = "Hello, I am fml ML manager.\n";
+    $body  = "Hello, I am the fml ML manager.\n";
     $body .= "This ML restricts the MAXIMUM MAIL SIZE.\n";
     $body .= "I\'ve received the following mail and reject it\n";
     $body .= "since it is ***** TOO BIG ***** !!!\n";

@@ -48,7 +48,7 @@ amctl.mail.undelivered:
 	not delivered
 
 amctl.info:
-	Hi, I am fml ML manager for the ML <_ARG0_>.
+	Hi, I am the fml ML manager for the ML <_ARG0_>.
 	I find some errors. Please check your mail!
 	For example,
 		- The address you used IS NOT A ML MEMBER?
