@@ -32,6 +32,7 @@ chop($Trunk = `cat $TRUNK_ID`);
 chop($Branch = `cat "$FML/conf/branch" `);
 
 if ($ENV{'RELEASE'}) {
+    chop($Trunk  = `cat $STATUS`);
     $Branch = "release";
 }
 elsif ($Branch eq 'stable') {
