@@ -63,12 +63,12 @@
 .n	overview
 
 インストールの大まかな流れは次のようになります。詳しくは後述します。
-versionの数字や作られるディレクトリについては適当に読み変えて下さい。
-コマンドの動きはOSによって若干異なります。OSのマニュアルを参照してくだ
-さい。
+バージョンの数字や作られるディレクトリについては適当に読み変えて下さい。
+コマンドの動きは OS によって若干異なります。 OS のマニュアルを参照して
+ください。
 
 .q
-○ ソースを以下のURLからダウンロードする。
+○ ソースを以下の URL からダウンロードする。
 % ftp ftp://ftp.fml.org/pub/fml/current/
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
@@ -102,7 +102,7 @@ ftp> get fml-3.0B-current-20000227.tar.gz
 .~q
 
 
-.C	 ML サーバとは?
+.C	ML サーバとは?
 =E.C	What is ML?
 .n	concept
 
