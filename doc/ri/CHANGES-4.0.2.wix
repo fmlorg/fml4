@@ -24,6 +24,19 @@
 		_smtplog の expire が変なのを修正
 
 
+2001/07/08
+
+   sbin/makefml (2.216-2.218):
+	use sysseek() to trap error
+
+   kern/libsmtp.pl (2.52-2.53):
+	fix CRLF at .
+
+2001/07/06
+
+   www/template/English/ml-admin/index.html (1.3-1.5):
+	 nuke prepending _CGI_PATH_
+
 2001/07/03
 
    proc/libdist.pl (2.27-2.28): fix MIME encoding bug
@@ -110,7 +123,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.2.wix,v 1.4.2.2 2001/07/01 13:31:47 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.3 2001/07/03 13:57:43 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
