@@ -17,6 +17,14 @@
 .S	HTML_DEFAULT_HANDLERの拡張
 =E.S	Enhance $HTML_DEFAULT_HANDLER
 
+.S	マクロ
+=E.S	Macro
+
+&DEFINE_MAILER(); は必要か？
+=E
+&DEFINE_MAILER(); is required ? 
+
+   to define "ipc" or "prog" mailer
 
 
 
@@ -118,7 +126,7 @@ I may not do it since it only confuses the customize.
 
 ドキュメント
 =E
-document
+more document
 
 >ごめんなさい、その通りです。
 >書いたつもりでしたが、読み返すと確かに書かれていませんでした。
@@ -137,16 +145,8 @@ A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 =E.S	CGI 
 
 makefml -i stdin を kick すりゃいいだけ
-
-
-.S	マクロ
-=E.S	Macro
-
-&DEFINE_MAILER(); は必要か？
 =E
-&DEFINE_MAILER(); is required ? 
-
-   to define "ipc" or "prog" mailer
+CGI => inject input to "makefml -i stdin".
 
 
 .S	配送関係
