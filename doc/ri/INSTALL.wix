@@ -136,7 +136,8 @@ FQDN(Fully Qualified Domain Name) には fml を設定するマシンのドメイン
 
 	To: Elena@axion.phys.titech.ac.jp (Elena Lolobrigita ML)
 
-に置き換えられます（置き換えには 上の MAIL_LIST と ML_FN が使われているわけです）
+に置き換えられます
+＃置き換えには 上の MAIL_LIST と ML_FN が使われています
 
 	XMLNAME	 	X-ML-Name: Elena
 	XMLCOUNT	X-Mail-Count
@@ -203,6 +204,7 @@ fml.pl が メーリングリスト（ＭＬ）ごとの設定をするために使う config.ph
 ("と"の間では @ には "\@" のように前に \ が必要です。)
 ＃以下の例では実際にはあるコメントが省いてあります。
 
+
 $FQDN                          = "axion.phys.titech.ac.jp";
 $MAIL_LIST                     = "Elena\@axion.phys.titech.ac.jp";
 $ML_FN                         = "(Elena Lolobrigita ML)";
@@ -250,27 +252,32 @@ Bourne Shell scriptを実行してください。
 
 
 .C	/etc/aliases への設定 ( :include:/some/path/include-file )
+.key	start-of-check
 
 .S	fml.c and include.example
 
 make すると fml という "C Wrapper"(setuidをするもの) の 実行ファイルが 
-fml.c から生成されます。さらに、
+fml.c から生成されます。さらに samples/ にサンプル一式が生成されます。
 
-include-file のサンプル 	etc/include.example 
-/etc/aliases のサンプル 	etc/aliases.example 
 
-というのも作られているはずです。
+   samples/aliases               /etc/aliases の見本
+
+   samples/include               基本的な include の見本（以下同様）
+   samples/include-auto          自動登録をするML
+   samples/include-distribute    フォワードするだけのML
+   samples/include-fmlserv       fmlserv の設定 (listservもどきinterface)
+   samples/include-remote        このマシン以外からメールでMLを管理する場合
+   samples/include-html		 var/htdocs/ の下にメールを html 形式でも保存
+				 spool にも保存（２重になる）
+
+   samples/crontab		まとめ送り用の crontab の見本 (4.4BSD Style)
+
+
 これらの内容を参考にしながらこの章は読んでみてください。
-
-/etc/aliases では
+/etc/aliases では次のような2通りの書き方ができます。
 
 	Elena: :include:/usr/local/fml/include-file 
-
-もしくは
-
 	Elena: "|/usr/local/fml/fml"
-
-のような書き方が両方できます。
 
 しかし、ＯＳによってうまくいったりいかなかったりします。ここでは、
 
@@ -285,19 +292,12 @@ C-wrapper を使うべきだという方は、 doc/op を見てください。
 
 .S	:include:するべきファイル
 
-具体的に、上述の include-file （see etc/include.example）は
-
-	/var/spool/ml/Elena/etc/include.example
-
-というファイルだとしましょう。
-/var/spool/ml/Elena/driver にコピーしたりするなり 
-/usr/local/ml-driver/Elena とかにするなりその辺は各自適当にどうぞ
-
-ファイルdriverの中身は
+:include:するべきファイルの中身は
 
 "|/var/spool/ml/Elena/fml.pl /var/spool/ml/Elena /var/spool/ml/Elena"
 
-みたいに書きます（これで一行です↑）
+みたいに書きます（これで一行です↑）。samples/ の下の各ファイルを見ると
+わかるとおもいます。
 
 
 .S	:include:するべきファイルの所有者
@@ -310,8 +310,9 @@ includeするファイル（ここでは include.example）の所有者の権限でサーバ
 
 .S	/etc/aliases 
 
-/etc/aliases にはこう書くことになります。
-＃ etc/aliases.example に一通り設定されています。それを見てみてください。
+/etc/aliases には次のような行を書くことになります。
+samples/aliases に一通り設定されています。
+それを見て cut & paste してみてください。
 
 	Elena::include:/var/spool/ml/Elena/driver
 
@@ -332,7 +333,7 @@ Elena-request: fukachan
 
 
 .C	Configurations for fml.pl and config.ph
-.key	start-of-check
+
 
 config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailのメン
 バーへの配送処理をしません。この場合、配送以外のすべての機能は動いてい
@@ -352,7 +353,6 @@ config.ph の設定や spool/の下のファイルでヘッダの確認をし、
 
 
 .C	メンバーの登録、ガイド等を書く
-
 
 .S	メンバーの登録
 
@@ -383,7 +383,7 @@ members		登録と配布に使う。勝手に登録するのでほっておいていいで
 ＃くわしくは doc/op を参照してください。
 
 
-.S	例：
+.S	配送するメールアドレス等の設定例：
 
 こんな感じのファイルになるはずです。
 	
@@ -453,15 +453,15 @@ var/log/	この下にログファイルがいろいろ
 		sendmailとのやりとりの記録（もっとも最近のものだけ）、
 		古い configuration 情報や loop check につかう情報等
 		例： var/log/_smtplog は デバッグに便利。
-
 var/run		（もし使うなら）ロックファイル等
+var/htdocs 	html モードを使うとデフォールトではここにＭＬの記事を
+		html化して保存する
 tmp		temporary に使う
 
 
+.C	ローカルなテスト
 
-.C	ローカルにテスト
-
-.S	 ローカルにテスト
+.S	 ローカルなテスト
 
 	% make localtest 
 
@@ -477,11 +477,25 @@ tmp		temporary に使う
 
 .C	まとめおくり
 
-doc/op に まとめおくり の章があります。そちらを見てください。
+samples/crontab に cron の設定のしかたの見本があります。
+4.4BSD では各個人ごとに cron の設定が可能です。
+
+% crontab samples/crontab 
+
+です。samples/crontab は例えば
+
+0 * * * *	/var/spool/ml/Elena/msend.pl /var/spool/ml/Elena
+
+とかきます。
+
+まとめおくりは msend.pl が行ないますが、自動では行ないません。
+1時間に一回 msend.pl を実行しなさいとマシンに教える設定が必要です。
+それがこの cron の設定です。
+
+doc/op に まとめおくり の章があります。詳しくはそちらを見てください。
 
 
 					Please enjoy!
 
 Last Modified
 $Id$
-
