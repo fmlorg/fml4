@@ -1886,9 +1886,9 @@ in libsendfile.pl
 
 
 .S	mgetのシンタックスの Shell Match Pattern(e.g. * 1? )
-.key	$SECURITY_LEBEL
+.key	$SECURITY_LEVEL
 
-$SECURITY_LEBEL < 2 では 
+$SECURITY_LEVEL < 2 では 
 
 	# mget * 
 とか
