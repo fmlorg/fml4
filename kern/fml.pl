@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: fml.pl,v 2.129 2001/05/05 04:36:47 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -421,12 +421,13 @@ sub GetTime
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, 
+			$isdst ? $TZONE_DST : $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,

@@ -653,6 +653,10 @@ Date:		 not.found
 # TIME ZONE;  +0900 is RFC822 syntax (I like JST but ... ;-)
 # value: +\d{4} / -\d{4} 
 TZone:		 +0900
+
+# time zone within summer time if you use summer time.
+# thank HIROSHIMA Naoki <naoki@bcrossing.com> on this idea
+TZONE_DST:
 		
 # ## Sub Section: Pass All Header ? ##
 # In some cases you need to pass only defined fields of the header

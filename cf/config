@@ -147,7 +147,7 @@ sub readfile
 		while ($str =~ s/\\\\@/\\@/g) { 1;}
 
 		# special handling of timezone 
-		if ($key eq 'TZone') {
+		if ($key eq 'TZone' || $key eq 'TZONE_DST') {
 		    $str = "\"$str\""; # enforce "string" sytanx.
 		}
 		else {
