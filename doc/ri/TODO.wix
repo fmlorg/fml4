@@ -52,6 +52,16 @@ if mead finds unknown error format, notify it to administrator.
 
 makefml 内での $DEFAULT_DIR_MODE の取り扱い
 
+fml-support: 06899
+   ># newml 実行時ってのとき、spool や tmp や var って
+   ># まとめて作ってしまうんでしたっけ? (覚えてない)
+   
+   spool  だけはつくられていますねぇ…(lockのため)。
+   ＃ &mkdir(ディレクトリ) でよびだすところはほとんどないんですが、
+   ＃ ここで stat(2)して mode が $DEFAULT_DIR_MODE か否か見て
+   ＃ もし違ってたら$DEFAULT_DIR_MODEに直すといいかな…と一瞬おもったけど
+   ＃ 意図的にchmodしててもこれに戻されちゃうとかあって問題だろうなぁ
+   
 .S	makefml mkdir()
 
 fml-support:6899
@@ -217,7 +227,79 @@ makefml -i stdin を kick すりゃいいだけ。11月はCGIの強化月間。
 =E
 CGI => inject input to "makefml -i stdin".
 
-
+.S	もろもろ
+=E.S	misc
+   
+   Q: CUIとGUIどっちが本体？
+   
+   A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
+   
+      利点として makefml config の日本語変換ができますね
+   	どうせMessage Language Extensionの関数ライブラリをよんでる
+   	だけですが
+   
+   in fml-support ML's Count:06557 
+   "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp> さん  wrote:
+   >○ TODO
+   >/cgi-bin/fml/admin/ の下とかがいいんではないのか？
+   
+   Q: CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
+   		or
+   	複数のサーバソフトのCGIがうごきうるだろうか？
+   
+   という仮定についてはどうか？
+   
+   A: Ｎ通りについて考えるのが面倒なので
+   
+   	/cgi-bin/fml/admin/menu.cgi	   (何でもできる権限人用)
+   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定のＭＬ $ml の管理者だけ用)
+   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
+   
+   みたいに決めうちしておく。
+   
+   Q:	/cgi-bin/fml/ml/$ml
+   
+   	/cgi-bin/fml/ml/$ml/
+   	/cgi-bin/fml/ml/$ml/*.cgi
+   
+   *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
+   
+   >インストーラ
+   
+   誰でもやるとはおもえないので
+   
+   	makefml install
+   	makefml cgi-setup 
+   
+   の2段構えくらいにしておく？
+   
+   Q:	makefml cgi-setup 
+   
+   A:	
+   	1. 前述の構造を掘る
+   
+   >	MTAごとの補正、補助
+   >	WWWの設定の補助
+   >	パスワード設定などについて
+   
+   	2. /cgi-bin/fml/admin/.htpasswd をつくるまではする
+   
+   	(for "thttpd" compiled with AUTH_FILE options)
+   
+   Q:	makefml newml ?
+   
+   >newaliases との連動
+   
+   	optional ?
+   
+   >入力のチェック機構
+   >他のエントリは？順番は？
+   >他にエミュレーションするべきもの？
+   
+   	makefml passwd
+   
+   
+   
 .S	配送関係
 =E.S	Delivery
 
