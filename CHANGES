@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/01
+
+  module/$LANGUAGE/: installation and enable them
+
+	module/Japanese/liblangdep.pl
+
+	日本語依存コード。レレレ問題コードをしこむ
+	例: Subject: "返信:" を切り落とすため
+
 2000/02/27
 
   new snapshot ID system
