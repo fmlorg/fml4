@@ -1,6 +1,14 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+2001/04/11
+
+   sys/SOLARIS2/depend.pl (1.2-1.3):
+	mkdir $DIR/var/run if not exists for lock
+
+   databases/postgresql/DBI_toymodel.pl (1.3-1.4):
+	nuke MySQL string
+
 2001/04/03
 
    doc/Japanese/how_to_subscribe/registration.wix (1.3-1.4)
