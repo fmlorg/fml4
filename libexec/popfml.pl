@@ -477,6 +477,7 @@ sub GetPopPasswd
     local($buf, @buf);
 
     $buf = &Grep("^$ml", $f);
+    $buf =~ s/^[\r\n]+$//g;
     (split(/\s+/, $buf, 2))[1];
 }
 
