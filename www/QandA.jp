@@ -16,10 +16,58 @@ A: makefml mladmin.cgi ML を走らせる。
 
 
 Q: パスワードの設定
-
 A: CUI: makefml htpasswd ML ユーザ名
 
 A: GUI: メニューの『管理者パスワードの設定』では
    'admin' コマンドでつかうものを自動的に htpasswd へ反映させる
+
+
+Q: ＭＬを作るには newaliases と連動させる必要があるが、
+A: aliases コレクタが必要そうだね 
+
+
+Q: MTAの設定はいつどこでする？
+A: メインメニュー
+
+	(こっちのほうが素直な気がする)
+	(途中でMTAが変わるかも知れない)
+
+
+Q: WWW下のCGIが利用可能なPATHは？
+A: makefml でインストールする時
+
+
+Q: postfix 特有の事情
+A: postfix がつかう /var/spool/ml/etc/aliases のパスを指定できないとい
+   けない。/etc/aliases.db は postfix だとpermission deniedかも
+
+
+Q:	qmail
+A: 「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要
+    らないのか？というきがする
+
+
+Q: makefml config メニューを日本語にできるか？
+A: Message Language Extension をつかう 。終了
+
+
+Q: 既存のシステムからの移行は？
+A: デフォールトではサーバ管理者がmakefmlをつかうようにWWWを使用可能
+   各々のＭＬ管理者はWWWはつかえない
+
+
+Q: 各々のＭＬも自動的にWWW上で操作可能にできないのか？
+A: サーバ管理者はなんでも可能だが、
+   あるＭＬの管理者にWWWアクセセウを許すかは明示的に設定が必要
+
+画面ないしmakefml mladmin.cgi ML で設定する
+
+つまり
+
+1. そのＭＬをWWWでいじれるようにするか否かはサーバ全体の管理者が決定する。
+   デフォールトはさせない
+
+2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
+   WWWでそのＭＬをいじらせることができる。
 
 $Id$

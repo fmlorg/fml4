@@ -4,55 +4,6 @@
 
 ○ apache-ssl (1.3.9 base)の解説の用意をする
 
-○ ＭＬを作るには newaliases と連動させる必要があるが、
+○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといかん
 
-Q: aliases コレクタが必要そうだね 
-
-Q: MTAの設定はいつどこでする？
-A: メインメニュー
-
-	(こっちのほうが素直な気がする)
-	(途中でMTAが変わるかも知れない)
-
-Q:	WWW下のCGIが利用可能なPATHは？
-
-どこかで設定する？ makefml / メインメニュー？
-
-	(sendmailはいいとして)
-
-Q:	postfix
-
-postfix がつかう /var/spool/ml/etc/aliases のパスを指定できないといけ
-ない。/etc/aliases.db は postfix だとpermission deniedかも
-	
-Q:	qmail
-
-「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要らな
-いのか？
-
-
-○ makefml config メニューを日本語にできるか？
-
-A: 	Message Language Extension をつかう 
-
-	DONE.
-
-Q: 既存のシステムからの移行は？
-
-A:
-	全体の管理者 cgi-bin/admin/menu.cgi
-
-permission さえあっていれば自由にいじれる	
-
-	各ＭＬの管理者 cgi-bin/ml-admin/$ml/menu.cgi
-
-1. そのＭＬをWWWでいじれるようにするか否かはサーバ全体の管理者が決定する。
-   デフォールトはさせない
-
-2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
-   WWWでそのＭＬをいじらせることができる。
-
-○ cgi-bin/admin/menu.cgi から htpasswd の変更をば
-
-○ もちろん ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更で
-   ないといかんです。
+$Id$
