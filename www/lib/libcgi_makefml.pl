@@ -447,12 +447,18 @@ sub Command
 	    &Control($ML, $PROC, $PTR);
 	}
     }
-    elsif ($PROC eq 'passwd') {
+    elsif ($PROC eq 'passwd' || $PROC eq 'mladminpasswd') {
+	local($saved_proc) = $PROC;
 	$PROC = 'html_passwd';
 
 	if ($PASSWORD && $PASSWORD_VRFY) {
 	    if ($PASSWORD eq $PASSWORD_VRFY) {
 		&Control($ML, "html_passwd", $MAIL_ADDR, $PASSWORD);
+
+		&P("</PRE>");
+		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${saved_proc}.html", 1);
+		&P("<HR>");
+		&P("<PRE>");
 	    }
 	    else {
 		&ERROR("input passwords are different each other.");

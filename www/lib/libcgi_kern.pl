@@ -112,7 +112,8 @@ sub ExpandDate
 
 sub ExpandOption
 {
-    local($dir);
+    local($dir, %ml);
+
     if (opendir(DIRD, $ML_DIR)) {
 	while ($dir = readdir(DIRD)) {
 	    next if $dir =~ /^\./;
@@ -121,10 +122,14 @@ sub ExpandOption
 
 	    # @listname@list.com must not exists!
 	    next if $dir =~ /^\@/;
-
-	    print "\t\t\t<OPTION VALUE=$dir>$dir\n";
+	    $ml{$dir} = $dir;
 	}
 	closedir(DIRD);
+
+	for $addr (sort {$a cmp $b} keys %ml) {
+	    print "\t\t\t<OPTION VALUE=$addr>$addr\n";
+	}
+
     }
     else {
 	&ERROR("cannot open \$ML_DIR");
@@ -231,6 +236,33 @@ sub ExpandCGIAdminMemberList
 }
 
 
+sub ExpandCGIAdminMemberListForEachML
+{
+    local($mode, $ml) = @_;
+    local($list);
+
+    $list = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
+
+    if (open(LIST, $list)) {
+	while (<LIST>) {
+	    next if /^\#/;
+
+	    ($addr) = split(/:/,$_);
+	    $addr{$addr} = $addr;
+	}
+	close(LIST);
+    }
+    else {
+	&ERROR("cannot open '$list'");
+    }
+
+    # XXX oops, I wanna less malloc() version ;-)
+    for $addr (sort {$a cmp $b} keys %addr) {
+	print "\t\t\t<OPTION VALUE=$addr>$addr\n";
+    }
+}
+
+
 sub Convert
 {
     local($file, $inline) = @_;
@@ -270,6 +302,11 @@ sub Convert
 
 	    if (/__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__/) {
 		&ExpandCGIAdminMemberList;
+		next;
+	    }
+
+	    if (/__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST_FOR_EACH_ML__/) {
+		&ExpandCGIAdminMemberListForEachML($NULL, $ML);
 		next;
 	    }
 
