@@ -170,10 +170,17 @@ caching whois server 用の付録として
 が提供されています。
 
 
-.S	scandb.pl (lib/cwhois/scandb.pl)
+.S	データベースの作成
 
-    require scandb.pl;
-    &ScanDB(*key, *proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
+cron を使って１時間に一度とかの割合で update をかけるのが良いでしょう。
+
+例：
+
+% cat crontab 
+0 * * * * /usr/local/libexec/gendb.pl /var/spool/whois/spool --DB=/var/db/cachedb
+
+データベースの内容は gendb.pl が呼ぶデータベース生成関数に依存していま
+す。
 
 
 .S	gendb.pl (lib/cwhois/gendb.pl)
@@ -187,6 +194,68 @@ sub CacheOn という example が gendb.pl の中にありますので、
 この関数をまねして gendb.ph 等に保存し、保守すると良いでしょう。
 
 この 関数の定義次第で データベースの出来が変わります。
+
+
+.S	データベース生成関数の例
+
+データベース生成関数（ここの例は CacheOn）というこの関数は 
+メールのヘッダと本文を渡され、
+
+	マッチした文字列を返す
+
+ことを期待されています。この仕様を満たせば書き方はどうでもいいです(笑)
+
+自分でカスタマイズした 例えば 'MyCacheOn' という関数 $CACHE_PROG とい
+う変数に入れて下さい。この関数を呼び出します(hard reference 呼びだし)。
+
+	$CACHE_PROG = 'MyCacheOn';
+
+関数の例、適用ルール：
+	・メールのヘッダに uja が含まれていたら捨てる。
+	・本文に [Project] という文字列があったら捨てる。
+	・メールが nic.netじゃないところから来ていたら捨てる。
+	 （From: に nic.net という文字列があるか否か？を見る）
+
+# return matched strings
+sub CacheOn
+{
+    local(*hdr, *body) = @_;
+    local($s, $nic);
+
+    $DISCARD_HDR_PAT  = 'Subject:.*uja';
+    $DISCARD_BODY_PAT = 'c.\s+\[Project\]\s+.*';
+
+    # 822 unfolding
+    $hdr  =~ s/\n\s+/\n/g;
+    $body =~ s/\n\s+/\n/g;
+
+    for (split(/\n/, $hdr)) {
+	return 0 if /^($DISCARD_HDR_PAT)/i;
+	$nic++ if /^From:.*nic.net/i;
+    }
+
+    return unless $nic;
+
+    for (split(/\n/, $body)) {
+	return 0 if /^($DISCARD_BODY_PAT)/i;
+
+	if (/ matched_pattern /) {
+	    $s .= "$1 ";
+	}
+
+	/\[wanted_pattern\]\s+(.*)/ && ($s .= "$1 ");
+    }
+
+    while ($s =~ s/\s+/ /g) { 1;}
+    $s;
+}
+
+
+.S	scandb.pl (lib/cwhois/scandb.pl)
+
+    require scandb.pl;
+    &ScanDB(*key, *proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
+
 
 
 .# $Id$
