@@ -1,0 +1,53 @@
+.C	一般的な質問 (UNIX)
+
+.S	UNIX で実績のあるメールサーバは？
+
+作者が試したことのあるメールサーバは次の通りです。
+
+	sendmail
+	postfix
+	qmail
+	exim
+	zmailer
+
+これらについては doc/ の下にそれぞれの MTA ごとの注意点をメモったファ
+イルがあります。
+
+
+.S	ユーザ fml を作らないといけない？
+
+いいえ、そういうことはありません。自分のアカウントでやっても構いません。
+ですがＭＬ専用のアカウント fml を作る方が望ましいでしょう。
+
+
+.S	fml をインストールしたホストからＭＬへは投稿できないもの？
+
+いいえ。メールサーバの設定を直して下さい。
+
+sendmail で CF パッケージを使って sendmail.cf を作る場合は
+ALWAYS_APPEND_DOMAIN という項目を読んで下さい。
+
+
+
+.C	一般的な質問 (Windows NT4 2000)
+
+.S	Windows で動きますか？
+
+NT4 でも WIN2000 でも動きます。
+
+.S	実績のあるメールサーバは？
+
+作者が試したことのあるものは Metainfo sendmail (現在は Sendmail Inc. )
+です。
+
+fml-support ＭＬでこの話題が出た時には以下の MTA の名前が挙げられてい
+ます。
+
+	Sendmail
+	IMail
+	emwac 
+	emwac ims + SPA SMTP
+	(IIS のおまけ ?)
+
+Exchange はよくわかりませんが、IMail と同様の技が使えるのではないだろ
+うか？という意見もありますが、試した人がいないという status のようです。
