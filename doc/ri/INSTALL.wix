@@ -414,6 +414,14 @@ of the fml system. In this directory, please run
 =E
 to install the fml to your system.
 
+ドキュメントをインストールしたくない場合は
+
+	env MKDOC=no perl makefml install
+
+としてください。
+最近の UNIX なら env コマンドは普通あるはずです(POSIX にあるから)。
+
+
 補足1: perlのpathの書換えをします。これは通常自動探索ですが、もし特定
 のもの(例 /usr/local/bin/perl5)にしたいなら次のように環境変数を指定し
 て下さい。
