@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SimpleMatch.pm,v 1.1.1.2 2001/06/04 04:44:33 fukachan Exp $
+# $FML: SimpleMatch.pm,v 1.33 2002/12/31 11:25:16 fukachan Exp $
 #
 
 
@@ -14,11 +14,15 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-@ISA = qw(Mail::Bounce);
+use Mail::Bounce::Language::Japanese;
+@ISA = qw(
+	Mail::Bounce
+	Mail::Bounce::Language::Japanese
+	  );
 
 =head1 NAME
 
-Mail::Bounce::SimpleMatch - SimpleState error message format parser
+Mail::Bounce::SimpleMatch - simple state machine to parse error messages
 
 =head1 SYNOPSIS
 
@@ -26,7 +30,7 @@ See C<Mail::Bounce> for more details.
 
 =head1 DESCRIPTION
 
-sub class used in C<Mail::Bounce>.
+subclass used in C<Mail::Bounce>.
 
 =head1 SIMPLE STATE MACHINE
 
@@ -42,7 +46,7 @@ When we trap C<end>,   the state changes from l to 0.
 
 =cut
 
-my $debug = $ENV{'debug'} ? 1 : 0;
+my $debug = 0;
 
 my $address_trap_regexp = {
 
@@ -152,6 +156,10 @@ my $reason_trap_regexp = {
 };
 
 
+# Descriptions: analyze irregular pattern
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
@@ -160,58 +168,72 @@ sub analyze
     # variables to hold current states
     my $args = {
 	state  => 0,
-	result => $result, 
+	result => $result,
     };
 
-    # skip the first header part and search "text/*" in the body part(s). 
-    $m = $msg->rfc822_message_body_head;
+    # skip the first header part and search "text/*" in the body part(s).
+    $m = $msg->whole_message_body_head;
     $m = $m->find( { data_type_regexp => 'text' } );
 
     if (defined $m) {
 	my $n = $m->num_paragraph;
-	if ($debug) { print "   num_paragraph: $n\n";}
+	if ($debug) { print STDERR "   num_paragraph: $n\n";}
 
+      PARAGRAPH:
 	for (my $i = 0; $i < $n; $i++) {
 	    my $buf = $m->nth_paragraph($i + 1); # 1 not 0 for 1st paragraph
 	    $args->{ buf } = \$buf;
 
-	    unless ( $self->look_japanese( $buf ) ) {
-		if ($debug) { print "{$buf}\n";}
+	    if ( $self->look_like_japanese( $buf ) ) {
+		if ($debug) { print STDERR "{$buf}\n";}
+		$self->_japanese_address_match($args);
+	    }
+	    else {
+		if ($debug) { print STDERR "{$buf}\n";}
 		$self->_address_match($args);
 	    }
 
-	    # we found the mark of "end of error message part". 
-	    last if $self->_reach_end($args);
+	    # we found the mark of "end of error message part".
+	    last PARAGRAPH if $self->_reach_end($args);
 	}
     }
     else {
-	print "body object not found\n" if $debug;
+	print STDERR "body object not found\n" if $debug;
     }
 }
 
 
+# Descriptions: end of scan range ?
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update $result
+# Return Value: 1 or 0
 sub _reach_end
 {
     my ($self, $args) = @_;
     my $result = $args->{ result };
     my $rbuf   = $args->{ buf };
 
+  REGEXP:
     for my $mta_type (keys %$address_trap_regexp) {
-	next unless $mta_type;
+	next REGEXP unless $mta_type;
 
 	my $end_regexp = $address_trap_regexp->{ $mta_type }->{ 'end' };
 	if ($end_regexp && ($$rbuf =~ /$end_regexp/)) {
-	    print "last match {$$rbuf} ~ /$end_regexp/\n" if $debug;
+	    print STDERR "last match {$$rbuf} ~ /$end_regexp/\n" if $debug;
 	    return 1;
 	}
     }
 
-    0;
+    return 0;
 }
 
-# XXX
-# XXX our state check is applied to each paragraph not the whole body. 
-# XXX
+
+# Descriptions: trap address in error message.
+#               our state check is applied to each paragraph
+#               not the whole body.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: update $result and state in $args if found.
+# Return Value: none
 sub _address_match
 {
     my ($self, $args) = @_;
@@ -219,11 +241,12 @@ sub _address_match
     my $rbuf   = $args->{ buf };
 
     unless ($args->{ state }) {
+      REGEXP:
 	for my $mta_type (keys %$address_trap_regexp) {
-	    next unless $mta_type;
+	    next REGEXP unless $mta_type;
 
 	    my $start_regexp = $address_trap_regexp->{ $mta_type }->{'start'};
-	    if ($$rbuf =~ /$start_regexp/) { 
+	    if ($$rbuf =~ /$start_regexp/) {
 		$args->{ mta_type  } = $mta_type;
 		$args->{ state }     = 1;
 	    }
@@ -237,31 +260,34 @@ sub _address_match
     my $mta_type    = $args->{ mta_type };
     my $end_regexp  = $address_trap_regexp->{ $mta_type }->{ 'end' };
     my $addr_regexp = $address_trap_regexp->{ $mta_type }->{ 'regexp' };
-    
+
     # 1.1 o.k. we've found the start pattern !!
     if ($args->{ state } == 1) {
 	my @buf = split(/\n/, $$rbuf);
 
       SCAN:
 	for (@buf) {
-	    print "scan($args->{ mta_type })|state=$args->{state}> $_\n"
+	    print STDERR "scan($args->{ mta_type })|state=$args->{state}> $_\n"
 		if $debug;
+	    # XXX in some cases, $end_regexp not defined.
 	    last SCAN if $end_regexp && /$end_regexp/;
 
-	    if (/(\S+\@\S+)/) {
-		if ($debug) { print "trap address ($1)\n";}
+	    if (/(\S+\@\S+\w+)/) {
+		if ($debug) { print STDERR "trap address ($1)\n";}
 		my $addr = $self->address_clean_up($mta_type, $1);
 		if ($addr) {
 		    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
 		    $result->{ $addr }->{ 'Status'}           = '5.x.y';
+		    $result->{ $addr }->{ 'hints' }           = $mta_type;
 		}
 	    }
 
-	    if (/$addr_regexp/) { 
+	    if ($addr_regexp && /$addr_regexp/) {
 		my $addr = $self->address_clean_up($mta_type, $1);
 		if ($addr) {
 		    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
 		    $result->{ $addr }->{ 'Status'}           = '5.x.y';
+		    $result->{ $addr }->{ 'hints' }           = $mta_type;
 		}
 	    }
 	}
@@ -269,20 +295,24 @@ sub _address_match
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Bounce::SimpleMatch appeared in fml5 mailing list driver package.
+Mail::Bounce::SimpleMatch first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

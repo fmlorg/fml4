@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET4.pm,v 1.2 2001/06/17 08:57:12 fukachan Exp $
+# $FML: INET4.pm,v 1.7 2002/12/20 03:50:27 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET4;
@@ -18,13 +18,19 @@ require Exporter;
 @ISA       = qw(Exporter);
 @EXPORT    = qw(connect4);
 
+
+# Descriptions: try connect(2) by IPv4
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: create ipv4 smtp connection
+# Return Value: HANDLE
 sub connect4
 {
     my ($self, $args) = @_;
-    my $mta = $args->{ _mta };
-    my $socket = '';
+    my $mta    = $args->{ _mta };
+    my $socket = undef;
 
     # avoid croak() in IO::Socket module;
+    # XXX-TODO: how long is timeout ??? (where we specified ?)
     eval {
 	local($SIG{ALRM}) = sub { Log("Error: timeout to connect $mta");};
 	use IO::Socket;
@@ -70,17 +76,17 @@ IPv4. This is a typical socket program.
 
 =item C<connect4()>
 
-try L<connect(2)>. 
-If it succeeds, returned 
+try L<connect(2)>.
+If it succeeds, returned
 $self->{ _socket } has true value.
-If not, 
-$self->{ _socket } is undef. 
+If not,
+$self->{ _socket } is undef.
 
 Avaialble arguments follows:
 
     connect4( { _mta => $mta });
 
-$mta is a hostname or [raw_ipv4_addr]:port form, for example, 
+$mta is a hostname or [raw_ipv4_addr]:port form, for example,
 127.0.0.1:25.
 
 =head1 SEE ALSO
@@ -90,20 +96,24 @@ L<Socket>,
 L<IO::Socket>,
 L<Mail::Delivery::Utils>
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Delivery::Net::INET4 appeared in fml5 mailing list driver package.
+Mail::Delivery::Net::INET4 first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

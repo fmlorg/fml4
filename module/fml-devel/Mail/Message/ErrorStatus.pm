@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: ErrorStatus.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
+# $FML: ErrorStatus.pm,v 1.1.1.1 2001/04/08 12:41:12 fukachan Exp $
 #
 
 package Mail::Message::ErrorStatus;

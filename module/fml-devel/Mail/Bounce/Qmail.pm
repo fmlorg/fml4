@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Qmail.pm,v 1.1.1.1 2001/05/05 04:34:15 fukachan Exp $
+# $FML: Qmail.pm,v 1.9 2003/01/07 08:38:35 fukachan Exp $
 #
 
 
@@ -29,17 +29,18 @@ format), as describbed in
 
     http://cr.yp.to/proto/qsbmf.txt
 
-=head1 METHODS
-
-=head2 C<new()>
-
 =cut
 
+
+# Descriptions: parse qmail error message
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
-    my $state   = 0;
-    my $pattern = 'Hi. This is the';
+    my $state       = 0;
+    my $pattern     = 'Hi. This is the';
     my $end_pattern = '--- Undelivered message follows ---';
 
     # search data
@@ -47,7 +48,7 @@ sub analyze
     my $m = $msg->{ next };
     do {
 	if (defined $m) {
-	    my $num  = $m->num_paragraph;
+	    my $num = $m->num_paragraph;
 	    for ( my $i = 0; $i < $num ; $i++ ) {
 		my $data = $m->nth_paragraph( $i + 1 );
 
@@ -59,6 +60,8 @@ sub analyze
 		    if ($data =~ /\<(\S+\@\S+)\>:\s*(.*)/) {
 			($addr, $reason) = ($1, $2);
 
+			# XXX-TODO: we should use $self->address_clean_up() ?
+
 			my $status = '5.x.y';
 			if ($data =~ /\#(\d+\.\d+\.\d+)/) {
 			    $status = $1;
@@ -69,11 +72,11 @@ sub analyze
 			    $status  = '4.x.y' if $code =~ /^4/;
 			}
 
-
 			$result->{ $addr }->{ 'Diagnostic-Code' } = $reason;
 			$result->{ $addr }->{ 'Status' }          = $status;
+			$result->{ $addr }->{ 'hints' }           = 'qmail';
 		    }
-		} 
+		}
 	    }
 	}
 
@@ -84,20 +87,24 @@ sub analyze
 }
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Bounce::Qmail appeared in fml5 mailing list driver package.
+Mail::Bounce::Qmail first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

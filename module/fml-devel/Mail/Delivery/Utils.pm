@@ -1,16 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000-2001 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.1.1.1 2001/05/05 04:34:11 fukachan Exp $
+# $FML: Utils.pm,v 1.10 2002/12/20 03:50:27 fukachan Exp $
 #
 
 package Mail::Delivery::Utils;
 
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK 
+use vars qw(@ISA @EXPORT @EXPORT_OK
 	    $LogFunctionPointer $SmtpLogFunctionPointer);
 use Carp;
 use Mail::Delivery::ErrorStatus qw(error_set error error_clear);
@@ -25,11 +25,11 @@ require Exporter;
 	     $LogFunctionPointer
 	     $SmtpLogFunctionPointer
 
-	     error_set 
-	     error 
-	     error_clear 
+	     error_set
+	     error
+	     error_clear
 
-	     _set_status_code 
+	     _set_status_code
 	     _get_status_code
 
 	     _set_target_map
@@ -45,7 +45,7 @@ require Exporter;
 
 =head1 NAME
 
-Mail::Delivery::utils - utiliti programs for mail delivery
+Mail::Delivery::utils - utility programs for mail delivery class
 
 =head1 SYNOPSIS
 
@@ -69,7 +69,7 @@ several utility functions for C<Mail::Delivery> sub classes.
 
 =head2 C<Log($buf)>
 
-Logging interface. 
+Logging interface.
 send C<$buf> (the log message) to the function specified as
 C<$LogFunctionPointer> (CODE REFERENCE).
 C<$LogFunctionPointer> is expected to set up at
@@ -80,6 +80,13 @@ the logging message is forwarded to STDERR channel.
 =cut
 
 
+# XXX-TODO: we should provide both Log() and $delivery->log() methods ?
+
+
+# Descriptions: log by specified function pointer or into STDERR
+#    Arguments: STR($buf)
+# Side Effects: none
+# Return Value: none
 sub Log
 {
     my ($buf) = @_;
@@ -107,17 +114,36 @@ sub Log
 smtp logging interface as the same as C<Log()> but for smtp
 transcation log.
 If the real log function pointer is not specified at
-C<Mail::Delivery::Delivery::new()>, 
+C<Mail::Delivery::Delivery::new()>,
 C<$buf> is sent to C<STDERR>.
 
 =cut
 
+
+# Descriptions: log by specified function pointer or into STDERR
+#    Arguments: OBJ($self) STR($buf)
+# Side Effects: none
+# Return Value: none
 sub smtplog
 {
     my ($self, $buf) = @_;
-    _smtplog($buf);
+
+    if (defined $buf) {
+	if (defined $self->{ _smtp_log_handle }) {
+	    my $wh = $self->{ _smtp_log_handle };
+	    print $wh $buf;
+	}
+	else {
+	    _smtplog($buf);
+	}
+    }
 }
 
+
+# Descriptions: log by specified function pointer or into STDERR
+#    Arguments: STR($buf)
+# Side Effects: none
+# Return Value: none
 sub _smtplog
 {
     my ($buf) = @_;
@@ -171,13 +197,24 @@ get the latest status code.
 =cut
 
 
+# Descriptions: get current status code
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub _get_status_code
 {
     my ($self) = @_;
+
+    # XXX-TODO: return what code if undefined ?
+    # XXX-TODO: consider Principle of Least Surprise!
     $self->{'_status_code'};
 }
 
 
+# Descriptions: set current status code
+#    Arguments: OBJ($self) STR($value)
+# Side Effects: update object
+# Return Value: STR
 sub _set_status_code
 {
     my ($self, $value) = @_;
@@ -206,6 +243,11 @@ where C<map> is a name usable at C<recipient_maps>
 
 =cut
 
+
+# Descriptions: set target map
+#    Arguments: OBJ($self) STR($map)
+# Side Effects: update object
+# Return Value: STR
 sub _set_target_map
 {
     my ($self, $map) = @_;
@@ -213,9 +255,16 @@ sub _set_target_map
 }
 
 
+# Descriptions: get current target map
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
 sub _get_target_map
 {
     my ($self) = @_;
+
+    # XXX-TODO: return what code if undefined ?
+    # XXX-TODO: consider Principle of Least Surprise!
     $self->{ _mapinfo }->{ _curmap };
 }
 
@@ -239,31 +288,57 @@ get the current C<$position> for C<$map> IO.
 
 =cut
 
+
+# Descriptions: set map status
+#    Arguments: OBJ($self) STR($map) STR($status)
+# Side Effects: update object
+# Return Value: STR
 sub _set_map_status
 {
     my ($self, $map, $status) = @_;
-    $self->{ _mapinfo }->{ $map }->{prev_status} = 
+    $self->{ _mapinfo }->{ $map }->{prev_status} =
 	$self->{ _mapinfo }->{ $map }->{status} || 'not done';
     $self->{ _mapinfo }->{ $map }->{status}      = $status;
 }
 
+
+# Descriptions: set map position
+#    Arguments: OBJ($self) STR($map) STR($position)
+# Side Effects: update object
+# Return Value: STR
 sub _set_map_position
 {
     my ($self, $map, $position) = @_;
-    $self->{ _mapinfo }->{ $map }->{prev_position} = 
+    $self->{ _mapinfo }->{ $map }->{prev_position} =
 	$self->{ _mapinfo }->{ $map }->{position} || 0;
     $self->{ _mapinfo }->{ $map }->{position}   = $position;
 }
 
+
+# Descriptions: get map status
+#    Arguments: OBJ($self) STR($map)
+# Side Effects: update object
+# Return Value: STR
 sub _get_map_status
 {
     my ($self, $map) = @_;
+
+    # XXX-TODO: return what code if undefined ?
+    # XXX-TODO: consider Principle of Least Surprise!
     $self->{ _mapinfo }->{ $map }->{status};
 }
 
+
+# Descriptions: get map position
+#    Arguments: OBJ($self) STR($map)
+# Side Effects: update object
+# Return Value: STR
 sub _get_map_position
 {
     my ($self, $map) = @_;
+
+    # XXX-TODO: return what code if undefined ?
+    # XXX-TODO: consider Principle of Least Surprise!
     $self->{ _mapinfo }->{ $map }->{position};
 }
 
@@ -280,10 +355,15 @@ clear information around the latest map operation.
 
 =cut
 
+
+# Descriptions: rollback IO for current map
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
 sub _rollback_map_position
 {
     my ($self) = @_;
-    my $map      = $self->_get_target_map;
+    my $map    = $self->_get_target_map;
 
     # count the number of rollback to avoid infinite loop
     if ( $self->{ _map_rollback_info }->{ $map }->{ count } > 2 ) {
@@ -306,6 +386,10 @@ sub _rollback_map_position
 }
 
 
+# Descriptions: reset info for the current map
+#    Arguments: OBJ($self)
+# Side Effects: clear info in object
+# Return Value: none
 sub _reset_mapinfo
 {
     my ($self) = @_;
@@ -316,20 +400,24 @@ sub _reset_mapinfo
 
 
 
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Delivery::Utils appeared in fml5 mailing list driver package.
+Mail::Delivery::Utils first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

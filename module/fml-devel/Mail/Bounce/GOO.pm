@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: GOO.pm,v 1.1.1.1 2001/05/05 04:34:15 fukachan Exp $
+# $FML: GOO.pm,v 1.9 2002/12/20 03:49:16 fukachan Exp $
 #
 
 
@@ -20,34 +20,54 @@ Mail::Bounce::GOO - GOO error message format parser
 
 =head1 SYNOPSIS
 
+See C<Mail::Bounce> for more details.
+
 =head1 DESCRIPTION
+
+See C<Mail::Bounce> for more details.
 
 =head1 GOO Error Formats
 
+   To: nospam-ml-admin@ffs.fml.org
+   Subject: [goo mail] Rejecting your mail to user@mail.goo.ne.jp
+   X-SMType: Notification
+   Message-Id: <E12pMyv-0003Q7-00@mail.goo.ne.jp>
+   Date: Wed, 10 May 2000 12:16:17 +0900
+   X-UIDL: 326069d2d4e53c677fa3443428c80788
 
-=head1 METHODS
-
-=head2 C<new()>
+     ... Japanese message ...
 
 =cut
 
+
+# Descriptions: trap error pattern in subject from goo.ne.jp.
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
-    my $hdr  = $msg->rfc822_message_header();
+    my $hdr  = $msg->whole_message_header();
     my $subj = $hdr->get('subject');
 
     if ($subj =~ /Rejecting your mail to (\S+)/) {
 	my $addr = $1;
 
 	# set up return buffer if $addr is found.
+	# XXX-TODO: we should use $self->address_clean_up() ?
 	if ($addr) {
 	    $addr =~ s/\s*$//;
 	    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
 	    $result->{ $addr }->{ 'Status' }          = '5.x.y';
+	    $result->{ $addr }->{ 'hints' }           = 'goo.ne.jp';
 	}
     }
 }
+
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -55,14 +75,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Bounce::DSN appeared in fml5 mailing list driver package.
+Mail::Bounce::DSN first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

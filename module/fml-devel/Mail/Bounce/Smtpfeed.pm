@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
-#   redistribute it and/or modify it under the same terms as Perl itself. 
+#   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Smtpfeed.pm,v 1.1.1.1 2001/05/05 04:34:15 fukachan Exp $
+# $FML: Smtpfeed.pm,v 1.7 2002/12/20 03:49:16 fukachan Exp $
 #
 
 
@@ -20,44 +20,57 @@ Mail::Bounce::Smtpfeed - Smtpfeed error message format parser
 
 =head1 SYNOPSIS
 
+See C<Mail::Bounce> for more details.
+
 =head1 DESCRIPTION
+
+See C<Mail::Bounce> for more details.
 
 =head1 Smtpfeed Error Formats
 
-=head1 METHODS
+"smtpfeed -1 -F" sends the mail with the header rewriting of To:
+header field. It will include
 
-=head2 C<new()>
+  To: (original recipient in envelope at ADDRESS) <ADDRESS>
+
+at the header somewhere in the error message.
 
 =cut
 
 
-#	# smtpfeed -1 -F hack
-#	if (/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
-#	    &PickUpHint($1);
-#	}
-
-
+# Descriptions: trap error patterin in To: (smtpfeed -F mode).
+#    Arguments: OBJ($self) OBJ($msg) HASH_REF($result)
+# Side Effects: update $result
+# Return Value: none
 sub analyze
 {
     my ($self, $msg, $result) = @_;
     my $m      = $msg->find( { data_type => 'message/rfc822' } );
     my $header = $m->nth_paragraph( 1 );
-    my $addr;
+    my $addr   = '';
 
-    # 
-    # XXX code below is correct ?
-    # 
+    #
+    # XXX-TODO: code below is correct ?
+    #
 
-    if ($header =~ 
+    if ($header =~
 	/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
 	$addr = $1;
-    }
-    $addr =~ s/\s*$//;
+	$addr =~ s/\s*$//;
 
-    # set up return buffer
-    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
-    $result->{ $addr }->{ 'Status' }          = '5.x.y';
+	if ($addr) {
+	    # set up return buffer
+	    $result->{ $addr }->{ 'Final-Recipient' } = $addr;
+	    $result->{ $addr }->{ 'Status' }          = '5.x.y';
+	    $result->{ $addr }->{ 'hints' }           = 'smtpfeed';
+	}
+    }
 }
+
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
@@ -65,14 +78,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself. 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Bounce::Smtpfeed appeared in fml5 mailing list driver package.
+Mail::Bounce::Smtpfeed first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut
