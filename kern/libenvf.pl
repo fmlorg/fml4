@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libenvf.pl,v 2.16 2001/08/25 12:42:30 fukachan Exp $
 #
 
 use vars qw($debug $debug_filter $debug_envf_rule);
@@ -69,7 +69,7 @@ sub __EnvelopeFilter
 	    $buf = $e{"h:$hf:"};
 	    if ($buf =~ /ISO-2022-JP/i) { 
 		&use('MIME');
-		$buf = &DecodeMimeString($buf);
+		$buf = &DecodeMimeStrings($buf);
 	    }
 	    $buf = &STR2EUC($buf);
 
