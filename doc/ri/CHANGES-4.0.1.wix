@@ -1,6 +1,22 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+2001/05/03
+
+   sbin/makefml (2.210-2.211):
+	fix mladmin.cgi help typo
+
+2001/04/27
+
+   module/Japanese/liblangdep.pl (1.7-1.8): 
+	remove Re> pattern in subject
+
+   proc/libamctl.pl (2.47-2.48):
+	correct subscribe keyword in warning
+
+   kern/libkernsubr2.pl (2.5-2.6):
+	add List-ID
+
 2001/04/17
 
    www/lib/libcgi_makefml.pl (1.59-1.60):
@@ -159,11 +175,11 @@
    4.0 release
 
 
-$Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+$FML$
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
