@@ -667,6 +667,18 @@ lib/MIME/rmime を使って、/bin/sh なら
 ＃とりあえず .org つきのをバックアップに残すコードつき:-)
 
 
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+.key	lib/Utilitites/packmbox.pl
+.key	packmbox.pl
+
+lib/Utilitites/packmbox.pl を使って、
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
