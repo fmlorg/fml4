@@ -294,7 +294,10 @@ sub EvalConfigPH
     }
 
     # export
-    @Crosspost'DELIVERY_LIST = @crosspost_ns'DELIVERY_LIST;
+    # XXX: rename DELIVERY_LIST to DeliveryList (since global but not
+    # user-defined) but not changed. fixed on 1999/06/24 by 
+    # fml-support: 6368, Atushi Sakauchi <sakauchi@micon.co.jp>
+    @Crosspost'DeliveryList = @crosspost_ns'DeliveryList;
     
     package Crosspost;
     %;
