@@ -90,18 +90,6 @@ var/html/advisories/index-e.html: doc/advisories/index-e.html
 	$(CPP) -P -UJAPANESE doc/advisories/index-e.html \
 	> ${FML}/var/html/advisories/index-e.html
 
-var/html/op/index.html: doc/html/obsolete-op-index.ja.html
-	test -d var/html/op || mkdir var/html/op
-	test -h var/html/op-jp || (cd var/html; ln -s op op-jp)
-	${JCONV} doc/html/obsolete-op-index.ja.html > \
-		var/html/op/index.html
-
-var/html/op-e/index.html: doc/smm/*wix
-	test -d var/html/op-e || mkdir var/html/op-e
-	test -h var/html/op-en || (cd var/html; ln -s op-e op-en)
-	${FIX_WIX} doc/smm/op.wix |\
-	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
-
 ${TMP_DIR}/WHATS_NEW.wix: CHANGES
 	rm -f ${TMP_DIR}/WHATS_NEW.wix
 	echo '.HTML_PRE'  >> ${TMP_DIR}/WHATS_NEW.wix
@@ -128,17 +116,34 @@ var/html/${file}: doc/ri/${file}
 	cp -p doc/ri/${file} var/html/${file}
 .endfor
 
+#
+.for file in ${DOC_MULTIVIEW_HTML}
+__HTML_MULTIVIEW__ += var/html/${file}.html
+__HTML_MULTIVIEW__ += var/html/${file}.ja.html
+__HTML_MULTIVIEW__ += var/html/${file}.en.html
+__HTML_MULTIVIEW__ += var/html/${file}-j.html
+__HTML_MULTIVIEW__ += var/html/${file}-e.html
+
+var/html/${file}.html: doc/html/${file}.ja.html
+	${JCONV} doc/html/${file}.ja.html > var/html/${file}.html
+
+var/html/${file}.ja.html: doc/html/${file}.ja.html
+	${JCONV} doc/html/${file}.ja.html > var/html/${file}.ja.html
+
+var/html/${file}-j.html: doc/html/${file}.ja.html
+	${JCONV} doc/html/${file}.ja.html > var/html/${file}-j.html
+
+var/html/${file}.en.html: doc/html/${file}.en.html
+	${JCONV} doc/html/${file}.en.html > var/html/${file}.en.html
+
+var/html/${file}-e.html: doc/html/${file}.en.html
+	${JCONV} doc/html/${file}.en.html > var/html/${file}-e.html
+
+.endfor
+
+
 var/html/fml.css: doc/html/fml.css
 	cp -p doc/html/fml.css var/html/fml.css
-
-var/html/index.html: doc/html/index.ja.html
-	${JCONV} doc/html/index.ja.html > var/html/index.html
-
-var/html/index-j.html: doc/html/index.ja.html
-	${JCONV} doc/html/index.ja.html > var/html/index-j.html
-
-var/html/index-e.html: doc/html/index.en.html
-	${JCONV} doc/html/index.en.html > var/html/index-e.html
 
 ### main ###
 .include "distrib/mk/fml.cf.mk"
@@ -152,8 +157,9 @@ __htmlbuild__ += ${__HTML_CPP__}
 __htmlbuild__ += ${__HTML_EXAMPLES__}
 __htmlbuild__ += ${__HTML_TUTORIAL__}
 __htmlbuild__ += ${__HTML_MANIFEST__}
-__htmlbuild__ += var/html/index.html var/html/index-j.html var/html/index-e.html
+__htmlbuild__ += ${__HTML_MULTIVIEW__}
 __htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
+
 htmlbuild: ${__htmlbuild__}
 	@ echo ""
 #	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}

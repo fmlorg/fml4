@@ -1,20 +1,17 @@
 .include "distrib/mk/fml.prog.mk"
 
 ### sources ###
-HTML_MISC_SOURCES += roadmap.html nt.html search-j.html search-e.html 
+HTML_MISC_SOURCES += roadmap.html nt.html
 HTML_MISC_SOURCES += releng.ja.html
 HTML_MISC_SOURCES += ftphier.ja.html ftphier.html
-HTML_MISC_SOURCES += anoncvs.ja.html anoncvs.html anoncvs.en.html
 HTML_MISC_SOURCES += good_bye_perl4.html CGIstatus.ja.html
-HTML_MISC_SOURCES += menu.html menubar.html
-HTML_MISC_SOURCES += menu-e.html menubar-e.html
-HTML_MISC_SOURCES += index.ja.html index.en.html
 
 ### targets ###
-HTML_REQ_CPP_SOURCES  = history download links mailinglist people
+HTML_REQ_CPP_SOURCES  = history links mailinglist people
 HTML_REQ_CPP_SOURCES += 3.0-new-features
 
-HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
+HTML_MISC        += var/html/advisories/index.html 
+HTML_MISC        += var/html/advisories/index-e.html
 
 # disabled in 4.0
 # HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
@@ -59,4 +56,5 @@ HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.h
 .include "distrib/mk/fml.devel.mk"
 
 # special HTML rurles (depends on *SOURCES*)
+.include "doc/html/Makefile"
 .include "distrib/mk/fml.htmldoc.mk"
