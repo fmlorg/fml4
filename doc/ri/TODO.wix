@@ -18,7 +18,17 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
-.S	リモート管理のドキュメント
+◯ good bye doc/smm/ 
+
+◯ にほんご
+
+『cf/MANIFEST での全変数定義 & コメント日本語化』は
+cf/MANIFEST.Japanese に定義されている。しかし定義されているだけで
+config.ph には反映されていない。
+
+CGIモードで使うだろう
+
+◯ リモート管理のドキュメント
 
 .if LANG == JAPANESE
 >ごめんなさい、その通りです。
@@ -28,8 +38,8 @@ XXX 一月くらいで消すこと
 >自動登録のケースは随所に記述がありますが、管理者登録のケースは
 >あまりまとまった情報がなく、試行錯誤が必要になります。
 
-.S	ログファイル
-=E.S	log file
+
+◯	ログファイル
 
 log file に年号をつけるモード。backup が楽
 =E
@@ -197,22 +207,6 @@ fml-support:6899
 4817:      $s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 
 
-.S	ドキュメント: doc/op
-=E.S	Document: doc/op
-
-２つにわけるべきか？
-=E
-Should we split doc/smm/ (doc/op) to two parts?
-
-	1. fml operations guide
-
-	2. The design and implementation of ml
-
-doc/examples/ がある。これは実例とチュートリアルとして位置付けている。
-=E
-now we have doc/examples/ as for examples and tutorials.
-
-
 .S	MIMEライブラリーの書き直し
 =E.S	rewrite MIME library
 
@@ -226,14 +220,6 @@ Xref: fml-support:05948
 
 .S	日本語化問題
 =E.S	Japanese configuration files
-
-.if LANG == JAPANESE
-『cf/MANIFEST での全変数定義 & コメント日本語化』は
-cf/MANIFEST.Japanese に定義されている。しかし定義されているだけで
-config.ph には反映されていない。
-
-CGIモードで使うだろう
-.fi
 
 *	cf/MANIFEST 未定義変数探し
 =E
@@ -334,28 +320,12 @@ XRef: fml-support:05930
 .S	リモート管理のノウハウについて
 =E.S	remote administration
 
-ドキュメント
-=E
-more document
-
-=> FAQ ?
-
 Q: pgp のときに address 登録なんていらないやんか
 A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
-.fi
+
 
 .S	配送関係
 =E.S	Delivery
-
-* $OUTGOING_ADDRESSの設定をもっと簡単に？
-=E
-* $OUTGOING_ADDRESS easy configuration
-
-* smtpfeedを直接叩く?
-  kick off smtpfeed, 
-  errorはSMTPでどっかにまるなげ
-=E
-* kick off smtpfeed directly
 
 * $smtpd_recipient_restriction
 see /etc/postfix/sample*cf
@@ -542,12 +512,6 @@ A: Ｎ通りについて考えるのが面倒なので
    
    *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
    
-XXX 実装済み
-XXX Q: インストーラ
-XXX make install-with-cgi
-XXX	htpasswd のための入力を促す
-XXX	SSLを使うかどうかをたずねる
-   
 .S   	makefml passwd のエミュレーション
 =E.S	emulate "makefml passwd"
    
@@ -638,6 +602,19 @@ XXX 時代によって「美しい」という意味は変わるだろうし
 XXX 難しくて保守できないようなコードじゃ意味がないわけで
 XXX 「美しいコード」という命題自体がかなり無意味な気がする
 XXX わかりやすいコードというべきなんだろうな
+
+.C	やめやめ
+
+* $OUTGOING_ADDRESSの設定をもっと簡単に？
+=E
+* $OUTGOING_ADDRESS easy configuration
+
+* smtpfeedを直接叩く?
+  kick off smtpfeed, 
+  errorはSMTPでどっかにまるなげ
+=E
+* kick off smtpfeed directly
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
