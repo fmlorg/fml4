@@ -12,6 +12,16 @@
 # $Id$
 #
 
+# /usr/bin/echo on SysV UNIX do not have '-n' option.
+# patch by Toshimi Aoki <toshi@kinotrope.co.jp> (fml-support: 09059)
+if echo "\c" | grep c >/dev/null 2>&1; then
+       n='-n'
+       c=''
+else
+       n=''
+       c='\c'
+fi
+
 #####   functions   #####
 MOVE () {
 	suffix=new$$	
@@ -30,7 +40,7 @@ MOVE () {
 
 ECHO () {
   if [ "X$ONCE" = Xxxxxxxxxxx ];then
-	echo -n '.'
+	echo $n ".$c"
 	ONCE=
   else
 	ONCE=x$ONCE
@@ -80,7 +90,7 @@ chmod 755 src/fml.pl src/msend.pl makefml
 ### here we go! ###
 for dir in $DIRS
 do
-	echo -n "Installing $dir "
+	echo -n "Installing $dir $c"
 
 	# making directories
 	find $dir -type d -print|while read x
