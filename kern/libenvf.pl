@@ -122,6 +122,11 @@ sub __EnvelopeFilter
     # XXX 3. Hmm,convert 2 byte Japanese charactor to 1 byte (required)?
     # XXX    How we deal buffer with both 1 and 2 bytes strings ??
 
+    # 4. reject not ISO-2022-JP
+    if ($FILTER_ATTR_REJECT_INVALID_JAPANESE && &NonJISP($xbuf)) {
+	$r = 'neigher ASCII nor ISO-2022-JP';
+    }
+
 
     &Debug("--EnvelopeFilter::Buffer($xbuf\n);\ncount=$c\n") if $debug;
 
@@ -218,6 +223,9 @@ sub EvalRejectFilterHook
 }
 
 
+# based on fml-support: 07020, 07029
+#   Koji Sudo <koji@cherry.or.jp>
+#   Takahiro Kambe <taca@sky.yamashina.kyoto.jp>
 # check the given buffer has unusual Japanese (not ISO-2022-JP)
 sub NonJISP
 {
