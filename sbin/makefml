@@ -2753,6 +2753,9 @@ sub TrySmtpConnect
 	$result = "socket ok";
     } 
     else { 
+	$VERBOSE_STR = 
+	    sprintf("socket(S, %s, %s, %s)", &PF_INET, &SOCK_STREAM, $proto);
+
 	return ($error = "Smtp::socket->Error[$!]");
     }
     
@@ -2760,6 +2763,8 @@ sub TrySmtpConnect
 	$result = "connect ok";
      } 
     else { 
+	$VERBOSE_STR = sprintf("connect(S, %s, %s, %s, %s)\n",
+			       $pat, &AF_INET, $port, $addrs);
 	return ($error = "Smtp::connect($host)->Error[$!]");
     }
 
@@ -2775,18 +2780,31 @@ sub FYI
     if ($r eq 'connect ok') {
 	# $m .= "OK...sendmail RUN on this machine.\n";
     }
-    else {
-	$m .= "Hmm...sendmail DOES NOT RUN on this machine.\n";
+    elsif ($r =~ /Smtp\:\:socket/) {
+	$m .= "Hmm... perl's socket() fails on this machine.\n";
+	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
+    }
+    elsif ($r =~ /Smtp\:\:connect.*connection refused/) {
+	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
+	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
 	$m .= 
 	    "(\$HOST in config.ph should be a machine where sendmail runs)\n";
 	$m .= &MX;
     }
-
-    if ($m) {
-	print STDERR "\nFYI: $m\n";
-	print STDERR "\nHence, fml must send mails by 'exec sendmail' NOT IPC.\n";	
+    else {
+	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
+	$m .= "So, fml would send mails by 'exec sendmail' NOT IPC.\n";
     }
- 
+
+    if ($m || $verbose) {
+	$r = "$r\n $VERBOSE_STR" if $verbose;
+	$m =~ s/\n/\n   /g;
+	$r =~ s/\n/\n   /g;
+
+	print STDERR "\n  For Your Information:\n   $m";
+	print STDERR "($r)\n" if $r;
+	print STDERR "\n";
+    }
 }
 
 
@@ -2823,18 +2841,22 @@ sub SetSockAddr
 sub ProbeSockAddr
 {
     local($r);
+    local($tab) = "\#probe sockaddr: ";
 
-    for ("n n a4 x8", "S n a4 x8", "S a4 x8", "S a4 x4", "n a4 x4") {
+    for ($STRUCT_SOCKADDR, "n n a4 x8", "S n a4 x8") {
+	next unless $_;
 	$STRUCT_SOCKADDR = $_;
 
 	$r = &TrySmtpConnect("localhost");
 
 	if ($r eq 'connect ok') { 
-	    print STDERR "OK  $_\n" if $verbose;
+	    print STDERR "${tab}OK  '$_'\n" if $verbose;
 	    return $r;
 	}
 	else {
-	    print STDERR "NOT $_\n" if $verbose;
+	    if ($verbose) {
+		print STDERR "${tab}NOT '$_' ($r $VERBOSE_STR)\n";
+	    }
 	}
     }
 }
