@@ -15,6 +15,13 @@
 		などが可能になりました。
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
+
+2001/10/03
+
+   proc/libMIME.pl (2.19-2.20):
+	fixing broken MIME encoding
+	apply patch by OGAWA Kunihiko (See fml-help:00907)        
+
 2001/09/28
 
    cf/MANIFEST (1.86-1.87):
@@ -179,7 +186,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.22 2001/09/24 13:27:46 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.23 2001/09/27 15:43:34 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
