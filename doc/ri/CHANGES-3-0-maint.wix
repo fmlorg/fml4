@@ -5,6 +5,15 @@
 =E
 				Ken'ichi Fukamachi
 
+   libsynchtml.pl
+	sync w/ head 2.31-2.32
+	import critical bug fix: $ID here should be local
+
+   fml.pl
+	sync w/ head (2.73-2.74)
+	apply patch to fix scope bug from Teruyuki Morimura
+	<lisa@sandalwood.net>. fml-support: 07135
+
 [ 3.0pl14 ]
 
    DEFINE_FIELD_LOOP_CHECKED()
