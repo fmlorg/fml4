@@ -47,7 +47,8 @@ sub MesgLE
 	    while ($x = readdir(DIRD)) {
 		next if $x =~ /^\./;
 		$msg = &MesgLE'Lookup($key, "$dir/$x"); #';
-		&Log("MesgLE: found in $dir/$x") if $msg && $debug;
+		&Log("FYI: MesgLE() use $dir/$x for $key") if $msg;
+		&Log("FYI: it is O.K. but ineffective") if $msg;
 		last if $msg;
 	    }
 	    closedir(DIRD);
