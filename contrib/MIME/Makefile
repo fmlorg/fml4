@@ -10,7 +10,7 @@
 # $Id$
 #
 
-SOURCES = README v1.1a/Makefile v1.1a/history v1.1a/mime_pls.doc v1.1a/mimer.pl v1.1a/mimew.pl v1.1a/rmime v1.1a/wmime
+SOURCES = README 2.02/*
 
 TARGET_DIR = ${CONTRIB_DIR}/MIME
 
