@@ -589,6 +589,9 @@ sub SetHashDefaults
 		    'admin.cgi',    'do_setup_admin_cgi',
 		    'mladmin.cgi',  'do_setup_mladmin_cgi',
 		    '500#mladmin.cgi', 'set up ml-admin/$ml/*.cgi',
+
+		    # utilities
+		    'resend',       'do_resend',
 		    );
 
     # functions not to lock
@@ -606,6 +609,9 @@ sub SetHashDefaults
 		 'html_config', 1,
 		 'admin.cgi',   1,
 		 'mladmin.cgi', 1,
+
+		 # utilities
+		 'resend', 1,
 		 );
 
     # <ML> argument is not required.
@@ -4427,6 +4433,15 @@ sub do_update
     }
 
     print "\n";
+}
+
+
+sub do_resend
+{
+    local($ml, @argv) = @_;
+
+    &ResetVariables;
+    system "$EXEC_DIR/bin/resend.pl", @argv;
 }
 
 
