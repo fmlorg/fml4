@@ -52,7 +52,7 @@ FQDN:		&fix:fqdn axion.phys.titech.ac.jp
 #####################################################################
 # ### Section: Mailing List Policy (for Post, Commands), Maintainer ###
 #
-# $MAIL_LIST is the address for post.
+# $MAIL_LIST is the address for post. For example 'elena@fml.org'.
 #
 # $PERMIT_POST_FROM is one of "anyone", "members_only" and "moderator".
 # It defines who can post to this ML. 
@@ -62,12 +62,13 @@ FQDN:		&fix:fqdn axion.phys.titech.ac.jp
 #    HISTORY: you can use "auto_regist" used in fml 2.x.
 #
 # value: string
-MAIL_LIST:		Elena@$FQDN
+MAIL_LIST:		
 PERMIT_POST_FROM:	members_only
 REJECT_POST_HANDLER:	reject
 
 
 # $CONTROL_ADDRESS is the address you send a command request to.
+#    For example 'elena-ctl@fml.org'.
 #
 # $PERMIT_COMMAND_FROM is one of "anyone", "members_only" and "moderator".
 # It defines who can post to this ML. 
@@ -88,7 +89,7 @@ REJECT_POST_HANDLER:	reject
 #    $REJECT_COMMAND_HANDLER = "auto_subscribe";
 #
 # value: string
-CONTROL_ADDRESS:  	Elena-ctl@$FQDN
+CONTROL_ADDRESS:  	
 PERMIT_COMMAND_FROM:	members_only
 REJECT_COMMAND_HANDLER:	reject
 
@@ -100,10 +101,10 @@ REJECT_COMMAND_HANDLER:	reject
 MAIL_LIST_ACCEPT_COMMAND:
 
 # ## Sub Section: Maintainer ##
-# mailing list maintainer/administrator address
+# mailing list maintainer/administrator address e.g. 'elena-admin@fml.org'.
 # $MAINTAINER != $MAIL_LIST IS REQUIRED AGAINST MAIL LOOP!
 # value: string
-MAINTAINER:		Elena-admin@$FQDN
+MAINTAINER:		
 MAINTAINER_SIGNATURE:	
 
 # ## Sub Section: ML_FN ##
