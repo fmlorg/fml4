@@ -118,18 +118,18 @@ sub InitS2P
     }
 
     require $ConfigFile if -f $ConfigFile;
-
+    
     # command line options overwrite variables
-    $HTML_INDEX_UNIT = $opt_t || 'day';
-    $HTML_DIR        = $opt_d;
+    $HTML_INDEX_UNIT = $opt_t || $HTML_INDEX_UNIT || 'day';
+    $HTML_DIR        = $opt_d || $HTML_DIR;
     $SPOOL_DIR       = shift @ARGV;
     $verbose         = $opt_v;
     $debug           = $opt_V ? 1 : 0;
-    $HTML_THREAD     = 1; # $opt_T;
+    $HTML_THREAD     = defined $HTML_THREAD ? $HTML_THREAD : 1; # $opt_T;
     $Minimum         = $opt_M > 0 ? $opt_M : 1;
     $LastRange       = $opt_L;
     $SleepTime       = $opt_S || 3;
-    $HTML_EXPIRE_LIMIT = $opt_E;
+    $HTML_EXPIRE_LIMIT = $opt_E || $HTML_EXPIRE_LIMIT;
 
     # WARNING;
     -d $SPOOL_DIR || 
