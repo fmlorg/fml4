@@ -8,11 +8,27 @@
 
 # $Id$;
 
-### 
+sub SmtpDLAMCIDeliver
+{
+    local(*e, *rcpt, *smtp, *files) = @_;
+    local($i, $error);
+
+    # set current modulus 0, 1, ... , ($MCI_SMTP_HOSTS - 1)
+    for ($i = 0; $i < $MCI_SMTP_HOSTS; $i++) {
+	$CurModulus = ($i + 1) % $MCI_SMTP_HOSTS; 
+	&Debug("\n---SmtpDLAMCIDeliver::CurModulus=$CurModulus") if $debug_mci;
+	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
+    }
+}
+
 sub SmtpMCIDeliver
 {
     local(*e, *rcpt, *smtp, *files) = @_;
     local($nh, $nm, $i);
+
+    if ($e{'mode:_Deliver'} && $e{'mode:DirectListAccess'}) { 
+	return &SmtpDLAMCIDeliver(*e, *rcpt, *smtp, *files);
+    }
 
     $nh = $MCI_SMTP_HOSTS; # may be != scalar(@HOSTS);
     $nm = 0;
