@@ -1,168 +1,23 @@
-# Library of fml.pl
-# Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
-# Auto registraion procedure
-# Subject: subscribe
-#        or 
-# subscribe ... in Body.
-# return 0 or 1 to use the return of &MLMemberCheck
-sub AutoRegist
+sub SubstituteTemplate
 {
-    local(*e) = @_;
-    local($from, $s, $b, $r);
-    local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
+    local($s, *template_cf) = @_;
 
-    # for &Notify,  reply-to ? reply-to : control-address
-    $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'Reply2:'};
-    &Log("\$AUTO_REGISTERD_UNDELIVER_P is $AUTO_REGISTERD_UNDELIVER_P");#UJA
-    if ($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
-	# Syntax e.g. "Subject: subscribe"...
-	# 
-	# [\033\050\112] is against a bug in cc:Mail
-	# patch by yasushi@pier.fuji-ric.co.jp
-	$s = $e{'h:Subject:'};
-	$s =~ s/(^\#\s*|^\s*)//;
-	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
-	$s =~ s/^\033\050\112\s*($REQUIRE_SUBSCRIBE.*)/$1/;
-	&Debug("AUTO REGIST SUBJECT ENTRY [$s]") if $debug;
-
-	if ($s =~ /^$REQUIRE_SUBSCRIBE\s*(.*)/) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	}
-	else {
-	    &Debug("AUTO REGIST SUBJECT[$s] SYNTAX ERROR") if $debug;
-	    $sj = "Bad syntax subject in autoregistration";
-	    $b  = "Subject: $REQUIRE_SUBSCRIBE [your-email-address]\n";
-	    $b .= "\t[] is optional\n";
-	    $b .= "\tfor changing your address to regist explicitly.\n";
-
-	    &Log($sj, "Subject => [$s]");
-	    &Warn("$sj $ML_FN", &WholeMail);
-
-	    # notify
-	    $e{'message:h:subject'} .= $sj;
-	    $e{'message'}           .= $b. &WholeMail;
-
-	    return 0;
-	}
-    }
-    elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
-	# Syntax e.g. "subscribe" in body
-	$s = $e{'Body'};
-	$s =~ s/(^\#\s*|^\s*)//;
-	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
-	&Debug("AUTO REGIST BODY ENTRY [$s]") if $debug;
-
-	if ($s =~ /^$REQUIRE_SUBSCRIBE\s*(.*)/) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
-	}
-	else {
-	    &Debug("AUTO REGIST BODY[$s] SYNTAX ERROR") if $debug;
-	    $sj = "Bad syntax body in autoregistration";
-	    $b  = "Body: $REQUIRE_SUBSCRIBE [your-email-address]\n";
-	    $b .= "\t[] is optional\n";
-	    $b .= "\tfor changing your address to regist explicitly.\n";
-
-	    &Log($sj, "Body => [$s]");
-	    &Warn("$sj $ML_FN", &WholeMail);
-
-	    # notify
-	    $e{'message:h:subject'} .= $sj;
-	    $e{'message'}           .= $b. &WholeMail;
-
-	    return 0;
-	}
-    }
-    else {
-	# DEFAULT
-	# Determine the address to check
-	# In default, when changing your registerd address
-	# use "subscribe your-address" in body.
-	$s = $e{'Body'};
-	$s =~ s/(^\#\s*|^\s*)//;
-	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
-
-	$DEFAULT_SUBSCRIBE || ($DEFAULT_SUBSCRIBE = "subscribe");
-
-	if ($s =~ /^$DEFAULT_SUBSCRIBE\s*(\S+)/i) { 
-	    $from = $1;
-	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
-	    $from =~ s/^(\S+).*/$1/;
-	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
-	}
-    }# end of REQUIRE_SUBSCRIBE;
-	
-    &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
-    $from = ($from || $From_address);
-    &Debug("AUTO REGIST FROM     >$from<") if $debug;
-
-    return 0 if     &LoopBackWarn($from); 	# loop back check	
-    return 0 unless &Chk822_addr_spec_P($from);	# permit only 822 addr-spec 
-
-    ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
-    if (&CheckMember($from, $MEMBER_LIST)) {	
-	&Log("Dup: $from");
-	$e{'message'} .= "Address [$from] already subscribed.\n";
-	$e{'message'} .= &WholeMail;
-	return 0;
-    }
-
-    ##### ADD the newcomer to the member list
-    local($ok, $er);		# ok and error-strings
-
-    # WHEN CHECKING MEMBER...
-    if ($ML_MEMBER_CHECK) {
-	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
-	&Append2($from, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
-	($ok == 2) ? &Log("Added: $from") : do {
-	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
-	    return 0; 
-	};
-    }
-    # AUTO REGISTRATION MODE
-    else {
-	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
-	$ok == 1 ? &Log("Added: $from") : do {
-	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
-	    return 0;
-	};
-    }
-
-    ### WHETHER DELIVER OR NOT?
-    # 7 is body 3 lines and signature 4 lines, appropriate?
-    local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
-    &Log("Deliver? $e{'nlines'} <=> $limit") if $debug;
-    &Log("\$AUTO_REGISTERD_UNDELIVER_P is $AUTO_REGISTERD_UNDELIVER_P");#UJA
-    if ($e{'nlines'} < $limit) { 
-	&Log("Not deliver: lines:$e{'nlines'} < $limit");
-	$AUTO_REGISTERD_UNDELIVER_P = 1;
-	$r  = "The number of mail body-line is too short(< $limit),\n";
-	$r .= "So NOT FORWARDED to ML($MAIL_LIST). O.K.?\n\n";
-	$r .= ('-' x 30) . "\n\n";
-    }
-    elsif ($AUTO_REGISTERD_UNDELIVER_P) {
-	$r  = "\$AUTO_REGISTERD_UNDELIVER_P is set, \n";
-	$r .= "So NOT FORWARDED to ML($MAIL_LIST).\n\n";
-	$r .= ('-' x 30) . "\n\n";
-    }
-    
-    &Warn("New added member: $from $ML_FN", $r . &WholeMail);
-    &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
-
-    ### Ends.
-    ($AUTO_REGISTERD_UNDELIVER_P ? 0 : 1);
+    print STDERR "subs tmpl: $s -> " if $debug;
+    for (keys %template_cf) { $s =~ s/$_/$template_cf{$_}/g;}
+    print STDERR "$s\n" if $debug;
+    $s;
 }
 
 
@@ -173,9 +28,10 @@ sub AutoRegist
 sub ParseMSendOpt
 {
     local($opt) = @_;
+    local($key);
 
-    foreach $OPT (keys %MSendOpt) {
-	return $MSendOpt{$OPT} if $opt eq $OPT;
+    foreach $key (keys %MSendOpt) {
+	return $MSendOpt{$key} if $opt eq $key;
     }
 
     return $NULL;
@@ -232,6 +88,7 @@ sub DocModeLookup
     &MSendModeSet;
 
     if ($opt =~ /^\#/ && ($opt = $MSendOpt{$opt})) {
+	return $NULL if $NotShowDocMode;
 	($opt =~ /^\#(.*)/) && (return $1);
     }
     else {
@@ -271,6 +128,9 @@ sub MSendModeSet
 		 'i',       'lhaish',
 		 'ish',     'lhaish',
 		 'wait#lhaish', 1,
+		 
+		 '#zip',    '#zip',
+		 'zip',     'zip',
 
 
 		 '#lhauu',   '#LHA+Uuencoded', 
@@ -313,18 +173,25 @@ sub TarZXF
     local($header_size)   = 512;
     local($header_format) = "a100 a8 a8 a8 a12 a12 a8 a a100 a*";
     local($nullblock)     = "\0" x $header_size;
-    local($buf, $totalsize);
+    local($buf, $buffer, $totalsize);
     local($tmptotal) = 1;
     
     &Debug("TarZXF local($tarfile, $total, ". 
 	join(" ", keys %cat) .", $outfile)\n") if $debug;
     
     # check the setting on ZCAT
-    if (! defined($ZCAT)) { return "ERROR of ZCAT";}
+    local($gzip);
+    if (! $ZCAT) { &Log("Error: \$ZCAT NOT DEFINED"); return "";}
+    ($gzip) = split(/\s+/, $ZCAT);
+    if (!-x $gzip) { &Log("Error: ZCAT[$gzip] NOT EXISTS"); return "";}
     
-    open(TAR, $tarfile) || &Log("TarZXF: Cannot open $tarfile: $!");
-    open(TAR, '-|') || exec($ZCAT, $tarfile) || die("zcat: $!\n")
-	if ($tarfile =~ /\.gz$/);
+    if ($tarfile =~ /\.(gz|z|Z)$/) {
+	open(TAR, "$ZCAT $tarfile|") || (&Log("$!:$ZCAT $tarfile"), return "");
+    }
+    else {
+	open(TAR, $tarfile) || &Log("TarZXF: Cannot open $tarfile: $!");
+    }
+
     select(TAR); $| = 1; select(STDOUT);
 
     if ($outfile) {
@@ -342,8 +209,9 @@ sub TarZXF
 	@header = unpack($header_format, $header);
 	
 	($name = $header[0]) =~ s/\0*$//;
-	&Debug("Extracting $name ...\n") if $debug;
+	&Debug("  Detected $name") if $debug;
 	local($catit) = $cat{$name};
+	&Debug("\nExtracting $name ...") if $debug && $catit;
 
 	local($bufsize) = 8192;
 	local($size)    = oct($header[4]);
@@ -368,11 +236,11 @@ sub TarZXF
 	    if ($catit) {	    
 		if ($outfile) {
 		    $B = substr($buf, 0, $size);
-		    $B =~ s/Return\-Path:.*\n/From $MAINTAINER\n/;
+		    $B =~ s/Return\-Path:.*\n/From $MAINTAINER $MailDate\n/;
 		    print OUT $B;
 		}
 		else {
-		    $buf .= substr($buf, 0, $size);
+		    $buffer .= substr($buf, 0, $size);
 		}
 	    }
 
@@ -384,14 +252,14 @@ sub TarZXF
 	if ($catit && ! --$total) {
 	    close TAR;
 	    close OUT;
-	    return $outfile ? $tmptotal : $buf;
+	    return $outfile ? $tmptotal : $buffer;
 	}
     }# end of Tar extract
     
     close TAR; 
     close OUT;
 
-    return $outfile ? $tmptotal : $buf;
+    return $outfile ? $tmptotal : $buffer;
 }
 
 # InterProcessCommunication
@@ -440,7 +308,11 @@ sub system
     local($s, $out, $in, $read, $write) = @_;
     local($c_w, $c_r) = ("cw$$", "cr$$"); # for child handles
 
-    &Debug("system ($s, $out, $in, $read, $write)") if $debug;
+    if ($debug) {
+	print STDERR "\nsystem ($s, $out, $in, $read, $write)\n".
+	    "exec:\t$s\nout:\t$out\nin:\t$in\n".
+		"read:\t$read\nwrite:\t$write\n\n";
+    }
 
     # Metacharacters check, but we permit only '|' and ';'.
     local($r) = $s;
@@ -450,6 +322,10 @@ sub system
 	&Log("System:[$s] matches the shell metacharacters, exit");
 	return 0;
     }
+
+    # Windows NT ;_; TOO BAD! ;_;;_;;_;
+    # Here is after fundamental check anyway (is a little hope;D
+    if (! $UNISTD) { system($s); return $@;}
 
     # File Handles "pipe(READHANDLE,WRITEHANDLE)"
     $read  && (pipe($read, $c_w)  || (&Log("ERROR pipe(pr, wr)"), return));
@@ -482,8 +358,7 @@ sub system
 	    close(STDOUT);
 	}
 
-	exec $s;
-	&Log("Cannot exec $s:".$@);
+	exec $s || &Log("Cannot exec $s:".$@);
     }
 
     close($c_w) if $c_w;# close child's handles.
@@ -493,18 +368,6 @@ sub system
     while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
-}
-
-
-sub Copy
-{
-    local($in, $out) = @_;
-    open(IN,  $in)      || (&Log("CopyIN: $!"), return);
-    open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
-    select(OUT); $| = 1; select(STDOUT); 
-    while (<IN>) { print OUT $_;}
-    close(OUT);
-    close(IN); 
 }
 
 
@@ -534,112 +397,53 @@ sub Link
 }
 
 
-sub SecWarn
-{
-    local($s);
-    if ($_[0] =~ /[\#\s\w_\-\[\]\?\*\.\\\:]+/) {
-	&Log("INSECURE [$_[0]] has illegal characters", "$`($&)$'");
-	$s = "INSECURE WARNING\nFrom: $From_address\n\n$_[0]\nIllegal chars \"$`$'\"\n";
-    }
-
-    &Warn("Insecure [$_[0]] $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
-}
-
-
-# check addr-spec in RFC822
-# patched by umura@nn.solan.chubu.ac.jp 95/6/8
-# return 1 if O.K. 
-sub Chk822_addr_spec_P
-{
-    local($from) = @_;
-
-    if ($from !~ /\@/) {
-	&Log("NO \@ mark: $from");
-        $Envelope{'message'} .= "WARNING From AUTO REGIST ROUTINE.\n";
-        $Envelope{'message'} .= "Address [$from] contains no \@.\n";
-        $Envelope{'message'} .= "\tHence, EXIT! Try Again!\n\n";
-        $Envelope{'message'} .= &WholeMail;
-	return 0;
-    }
-
-    1;
-}
-
-
 ##### sendmail.cf
 # $w hostname
 # $j fully quarified domain name 
 # $m domain mail(BSD)
 #
-
-
-sub DefineMacro 
-{
-    &Append2("\$Envelope{'macro:$_[0]'}\t= '$_[1]';", "config.ph");
-    $_[1] || &Append2("1;", "config.ph");
-    $Envelope{"macro:$_[0]"} = $_[1]; # return value;
-}
-
-
-sub Define_j { $Envelope{'macro:j'} || &DefineMacro('j', &GetFQDN);}
-
-sub Define_m { $Envelope{'macro:m'} || &DefineMacro('m', (split(/\@/, $MAIL_LIST))[1]);} 
-
-sub Define_s { $Envelope{'macro:s'} || &DefineMacro('s', &GetFQDN);}
-
-sub GetFQCtlAddr 
-{ 
-    if ($Envelope{'macro:fqca'}) { return $Envelope{'macro:fqca'};}
-
-    if ($CONTROL_ADDRESS && ($CONTROL_ADDRESS =~ /\@/)) {
-	&DefineMacro('ca',   (split(/\@/, $CONTROL_ADDRESS))[0]); 
-	&DefineMacro('fqca', $CONTROL_ADDRESS);
-    }
-    elsif ($CONTROL_ADDRESS) {
-	&DefineMacro('ca',   $CONTROL_ADDRESS);
-	&DefineMacro('fqca', "$CONTROL_ADDRESS\@".&Define_m);
-    }
-    else {
-	$MAIL_LIST;
-    }
-}
-
-
-# $j in /etc/sendmail.cf
-# seems $DOMAIN   = (gethostbyname('localhost'))[1]; do not work
-# So, we make domainname via $MAIL_LIST(must be user@domain form)
-sub GetFQDN 
-{
-    local($domain, $hostname);
-
-    # $m
-    $domain = $Envelope{'macro:m'} || &Define_m;
-
-    # Get HOSTNAME 
-    # WARN:4.4BSD getdomainname return 'domain', but 4.3 return NIS domain
-    chop($hostname = `hostname`); # must be /bin/hostname
-
-    ($domain =~ /^$hostname/i) ? $domain : "$hostname.$domain";
-}
+sub Define_j { $FQDN;}
+sub Define_m { $DOMAINNAME;}
+sub Define_s { $FQDN;}
 
 
 # Generate additional information for command mail reply.
 # return the STRING
 sub GenInfo
 {
-    local($addr)  = $MAIL_LIST;
-    local($s, $c, $d);
-    local($del) = ('*' x 60);
-    local($c)   = &GetFQCtlAddr if $CONTROL_ADDRESS;
+    local($s, $c, $d, $del);
+    local($message, $has_ctladdr_p, $addr);
+
+    # initialize variables
+    $del     = ('*' x 60);
+
+    # if has control-address
+    if ($CONTROL_ADDRESS) {
+	$addr = $Envelope{'CtlAddr:'};
+	$has_ctladdr_p = 1;
+    }
+    # if !control-address but MAIL_LIST==CONTROL_ADDRESS
+    elsif ((! $CONTROL_ADDRESS) && &CompatFMLv1P) { 
+	$addr = $MAIL_LIST;
+	$has_ctladdr_p = 1;
+    }
+
+    # help style;
+    $message = $Envelope{"mode:fmlserv"} ? "help": "\# help";
 
     $s .= "\n$del\n";
     $s .= "If you have any questions or problems,\n";
     $s .= "   please make a contact with $MAINTAINER\n";
-    $s .= "       or \n";
-    $s .= "   send a mail with the body '# help' to \n";
-    $s .= "   ".($c || $addr)."\n\n";
-    $s .= "e.g. \n";
-    $s .= "(shell prompt)\% echo \# help |Mail ".($c || $addr);
+
+    if (! $Envelope{'mode:stranger'} && $has_ctladdr_p) { # a member
+	$s .= "       or \n";
+	$s .= "   send a mail with the body \"$message\"(without quotes) to\n";
+	$s .= "      $addr\n";
+	$s .= "      (here is the automatic reply, so more preferable)\n\n";
+	$s .= "e.g. on a Unix Machine\n";
+	$s .= "(shell prompt)\% echo \"$message\" |Mail $addr";
+    }
+
     $s .= "\n\n$del\n";
 
     $s;
@@ -650,10 +454,8 @@ sub GenInfo
 sub ChAddrModeOK
 {
     local($a) = @_;
-    chop $a;
-    local($old, $new);
-    local($addr_chk, $mem_chk);
-    local($C) = 'ChAddr';
+    local($old, $new, $addr_chk, $mem_chk);
+    local($C) = 'ChAddrModeOK';
 
     # GET PARAM
     $a =~ /^\#\s*($CHADDR_KEYWORD)\s+(\S+)\s+(\S+)/i;
@@ -662,21 +464,22 @@ sub ChAddrModeOK
     # NOTIFY
     $Envelope{'message:h:@to'} = "$old $new $MAINTAINER";
 
+    $addr_chk = $mem_chk = 0;
     &AddressMatch($old, $From_address) && $addr_chk++;
     &AddressMatch($new, $From_address) && $addr_chk++;
-    &CheckMember($old, $MEMBER_LIST)   && $mem_chk++;
-    &CheckMember($new, $MEMBER_LIST)   && $mem_chk++;
+    &MailListMemberP($old) && $mem_chk++;
+    &MailListMemberP($new) && $mem_chk++;
 
     &Log("$C:addr   ".($addr_chk ? "ok": "fail")) if $debug;
     &Log("$C:member ".($mem_chk  ? "ok": "fail")) if $debug;
 
     if ($addr_chk && $mem_chk) {
-	&Log("ChAddr: Either $old and $new Authentified!");
+	&Log("$C: Either $old or $new Authenticated!");
 	return 1;
     } 
     else {
-	&Log("$C:addr   ".($addr_chk ? "ok\n": "fail\n"));
-	&Log("$C:member ".($mem_chk  ? "ok\n": "fail\n"));
+	&Log("$C:addr   ".($addr_chk ? "ok": "fail"));
+	&Log("$C:member ".($mem_chk  ? "ok": "fail"));
     }
 
     0;
@@ -732,29 +535,5 @@ sub daemon
     }
 }
 
-
-
-###### EMERGENCY STOP AND RESTART
-sub EmergencyNotify
-{
-    local($s, $b);
-    $s  = $b = "Found Emergency control file, Exit!";
-    $b .= "If using Remote Administration\n";
-    $b .= "\t'\# admin start' command.\n"; 
-    &Log($s);
-    &Warn($s, $b);
-}
-
-sub EmergencyRestart 
-{ 
-    unlink "$FP_VARRUN_DIR/emerg.stop";
-    &LogWEnv("ML Server Restart!", *Envelope);
-}
-
-sub EmergencyStop  
-{ 
-    &Touch("$FP_VARRUN_DIR/emerg.stop");
-    &LogWEnv("O.K. ML Server stop!", *Envelope);
-}
-
 1;
+

@@ -1,17 +1,20 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
-
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
 
 ##### local scope in Calss:Smtp #####
-local($SmtpTime, $FixTransparency, $LastSmtpIOString); 
-
+local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus);
+local($Port);
 
 # sys/socket.ph is O.K.?
 sub SmtpInit
@@ -22,8 +25,6 @@ sub SmtpInit
     $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
     $e{'macro:s'}    = $e{'macro:s'}    || $FQDN;
 
-    @smtp = ("HELO $e{'macro:s'}", "MAIL FROM: $MAINTAINER");
-
     # Set Defaults (must be "in $DIR" NOW)
     $SmtpTime  = time() if $TRACE_SMTP_DELAY;
 
@@ -32,8 +33,8 @@ sub SmtpInit
 	$SMTP_LOG = '/dev/null';
     }
     else {
-	(-d $VAR_DIR)    || mkdir($VAR_DIR, 0700);
-	(-d $VARLOG_DIR) || mkdir($VARLOG_DIR, 0700);
+	(-d $VAR_DIR)    || &Mkdir($VAR_DIR);
+	(-d $VARLOG_DIR) || &Mkdir($VARLOG_DIR);
 	$SMTP_LOG = $SMTP_LOG || "$VARLOG_DIR/_smtplog";
     }
 
@@ -45,12 +46,17 @@ sub SmtpInit
 	undef $e{'preamble'} if  $e{'mode:dist'};
 	undef $e{'trailer'}  if  $e{'mode:dist'};
 
-	if ($e{'preamble'}) { $e{'preamble'} =~ s/\n\./\n../g; $e{'preamble'} =~ s/\.\.$/./g;}
-	if ($e{'trailer'})  { $e{'trailer'} =~ s/\n\./\n../g;  $e{'trailer'} =~ s/\.\.$/./g;}
+	if ($e{'preamble'}) { 
+	    $e{'preamble'} =~ s/\n\./\n../g; $e{'preamble'} =~ s/\.\.$/./g;
+	}
+
+	if ($e{'trailer'})  { 
+	    $e{'trailer'} =~ s/\n\./\n../g;  $e{'trailer'} =~ s/\.\.$/./g;
+	}
     }
 
     # ANYTIME, Try fixing since plural mails are delivered
-    $e{'Body'} =~ s/\n\./\n../g;               # enough for body ^. syntax
+    $e{'Body'} =~ s/\n\./\n../g;           # enough for body ^. syntax
     $e{'Body'} =~ s/\.\.$/./g;	           # trick the last "."
     $e{'Body'} .= "\n" unless $e{'Body'} =~ /\n$/o;	# without the last "\n"
 
@@ -61,27 +67,40 @@ sub SmtpInit
 
 sub SocketInit
 {
-    ##### PERL 5  
-    local($eval, $ok, $ExistSocket_ph);
+    local($eval, $exist_socket_ph);
 
-    eval "use Socket;"; $ok = $@ eq "";
-    &Log($ok ? "Socket(XS) O.K.": "Socket(Perl 5 XS) fails. Try socket.ph") if $debug;
-    return 1 if $ok;
+    for (@INC) { if (-r "$_/sys/socket.ph") { $ExistSocketPH = 1;}}
 
-    ##### PERL 4
-    $ExistSocket_ph = eval("require 'sys/socket.ph';"), ($@ eq "");
-    &Log("\"eval sys/socket.ph\" O.K.") if $ExistSocket_ph && $debug;
-    return 1 if $ExistSocket_ph; 
+    $STRUCT_SOCKADDR = $STRUCT_SOCKADDR || 'n n a4 x8';
 
-    if ((! $ExistSocket_ph) && $COMPAT_SOLARIS2) {
-	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
-	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
-	&eval($eval) && $debug && &Log("Set socket [Solaris2]");
+    ### PERL 5  
+    if ($] =~ /^5\./) {
+	eval("use Socket;");
+	if ($@ eq '') {
+	    &Log("Set Perl 5::Socket O.K.") if $debug;
+	    return 1;
+	}
     }
-    elsif (! $ExistSocket_ph) {	# 4.4BSD
-	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
-	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
-	&eval($eval) && $debug && &Log("Set socket [4.4BSD]");
+
+    ### PERL 4
+    if ($ExistSocketPH) {
+	eval("require 'sys/socket.ph';");
+	$exist_socket_ph = $@ eq '' ? 1 : 0;
+	&Log("\"eval sys/socket.ph\" O.K.") if $exist_socket_ph && $debug;
+	return 1 if $exist_socket_ph; 
+    }
+
+    # COMPAT_SOLARIS2 is for backward compatibility.
+    if ((! $exist_socket_ph) && 
+	($COMPAT_SOLARIS2 || $CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i)) {
+	eval "sub AF_INET {2;}; sub PF_INET { 2;};";
+	eval "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
+	&Log("Set socket [Solaris2]") if $debug;
+    }
+    elsif (! $exist_socket_ph) { # 4.4BSD (and 4.x BSD's)
+	eval "sub AF_INET {2;}; sub PF_INET { 2;};";
+	eval "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
+	&Log("Set socket [4.4BSD]") if $debug;
     }
 
     1;
@@ -94,10 +113,10 @@ sub SmtpConnect
 {
     local(*host, *error) = @_;
 
-    local($pat)    = 'S n a4 x8'; # 'S n C4 x8'? which is correct? 
+    local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
-    local($port)   = (getservbyname('smtp', 'tcp'))[2];
+    local($port)   = $Port || $PORT || (getservbyname('smtp', 'tcp'))[2];
     $port          = 25 unless defined($port); # default port
 
     # Check the possibilities of Errors
@@ -112,18 +131,18 @@ sub SmtpConnect
 	print SMTPLOG "socket ok\n";
     } 
     else { 
-	return ($error = "Smtp:socket:$!");
+	return ($error = "Smtp::socket->Error[$!]");
     }
     
     if (connect(S, $target)) { 
 	print SMTPLOG "connect ok\n"; 
     } 
     else { 
-	return ($error = "Smtp:connect->$host[$!]");
+	return ($error = "Smtp::connect($host)->Error[$!]");
     }
 
     ### need flush of sockect <S>;
-    select(S);       $| = 1; select(STDOUT);
+    select(S); $| = 1; select(STDOUT);
 
     $error = "";
 }
@@ -146,61 +165,137 @@ sub Smtp
     push(@HOSTS, @HOST); # the name of the variable should be plural
     unshift(@HOSTS, $HOST);
 
-    if ($MCI_SMTP_HOSTS && (scalar(@rcpt) > 1)) {
-	$nh = $MCI_SMTP_HOSTS;
-	$nm = 0;
-
-	# save @rcpt to the local cache entry
-	while (@rcpt) { foreach $i (1 .. $nh) { $cache{$i, $nm} = shift @rcpt;}; $nm++;}
-
-	foreach $i (1 .. $nh) { 
-	    undef @rcpt;	# reset @rcpt
-	    for ($j = 0; $cache{$i, $j} ne ''; $j++) { push(@rcpt, $cache{$i, $j});}
-
-	    if (@rcpt) {
-		$error = &SmtpIO(*e, *rcpt, *smtp, *files);
-		push(@HOSTS, $HOST); # If all hosts are down, anyway try $HOST;
-		return $error if $error;
-	    }
+    # when @rcpt is non-zero, !mode:DirectListAcess
+    if ($MCI_SMTP_HOSTS > 1) {
+	require 'libsmtpmci.pl';
+	if ($error = &SmtpMCIDeliver(*e, *rcpt, *smtp, *files)) {
+	    return $error;
 	}
     }
-    else {
+    else { # not use pararell hosts to deliver;
 	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
     }
 
     ### SMTP CLOSE
     close(SMTPLOG);
-    0; # return status  %BAD FREE()%;
+    0; # return status BAD FREE();
 }
 
 
+# Deliver using one of $HOSTS or prog mailer
+# This routine ignore the contents of a set of recipients,
+# which is controlled by the parent routine calling this routine.
+# In default, no control. In MCI_SMTP_HOSTS > 1, $CurModulus controlls 
+# the set of recipients (SmtpIO not concern this set).
+#
+# FYI: programs which accpets SMTP from stdio.
+#   sendmail: /usr/sbin/sendmail -bs
+#   qmail: /var/qmail/bin/qmail-smtpd (-bs?)
+#   exim: /usr/local/exim/bin/exim -bs
+#
+# FYI2:
+#   Already given $CurModulus by SmtpDLAMCIDeliver
+#     SmtpDLAMCIDeliver 
+#        for (@HOSTS) { 
+#             set $CurModulus (global variable)
+#             => SmtpIO
+#             <=
+#        }
+#
 sub SmtpIO
 {
     local(*e, *rcpt, *smtp, *files) = @_;
-    local($sendmail) = $SENDMAIL || "/usr/sbin/sendmail -bs ";
-    local($host, $error, $in_rcpt, $ipc);
+    local($sendmail);
+    local($host, $error, $in_rcpt, $ipc, $try_prog, $retry, $backoff);
+
+    ### set global variable
+    $SmtpFeedMode  = 0; # reset;
+    $SocketTimeOut = 0; # against the call of &SocketTimeOut;
+    # &SetEvent($TimeOut{'socket'} || 1800, 'SocketTimeOut') if $HAS_ALARM;
+
+    # delay of retry 
+    $backoff = 2;
 
     ### IPC 
-    if ($e{'mci:mailer'} eq 'ipc') {
+    if ($e{'mci:mailer'} eq 'smtpfeed' || $HOSTS[0] =~ /(\S+):\#smtpfeed/) {
+	# calling smtpfeed in the last
+	require 'liblmtp.pl';
+	&SetupSmtpFeed;
+	$SmtpFeedMode = 1;
+	$ipc = 0;	
+    }
+    elsif ($e{'mci:mailer'} eq 'ipc' || $e{'mci:mailer'} eq 'smtp') {
 	$ipc = 1;		# define [ipc]
 
+	# (PROBE AND) MAKE A CONNECTTION;
 	# primary, secondary, ...;already unshift(@HOSTS, $HOST);
 	for ($host = shift @HOSTS; scalar(@HOSTS) >= 0; $host = shift @HOSTS) {
+
+	    if ($host =~ /(\S+):\#smtpfeed/) { # anyway skip here
+		next;
+	    }
+	    elsif ($host =~ /(\S+):(\d+)/) {
+		$host = $1;
+		$Port = $2 || $PORT || 25;
+	    }
+	    else {
+		$Port = $PORT || 25;
+	    }
+
+	    print STDERR "---SmtpIO::try smtp->host($host:$Port)\n"
+		if $debug_smtp;
+
 	    undef $error;
 	    &SmtpConnect(*host, *error);  # if host is null, localhost
 	    print STDERR "$error\n" if $error;
-	    last         if $error eq ""; # O.K.
-	    &Log($error) if $error;       # error log %BAD FREE()%;
-	    sleep(1);		          # sleep and try the secondaries
+
+	    if ($error) {
+		&Log($error); # error log BAD FREE();
+
+		# but maximum is 30 sec.
+		$backoff = 2 * $backoff;
+		$backoff = $backoff > 30 ? 30 : $backoff;
+		&Log("fml[$$] retry after $backoff sec.");
+		$retry = 1; 
+	    }
+	    else { # O.K.
+		&Log("fml[$$] send after $backoff sec.") if $retry;
+		last;
+	    }
+
+	    sleep($backoff);              # sleep and try the secondaries
 
 	    last         unless @HOSTS;	  # trial ends if no candidate
 	}
     }
-    ### not IPC, try popen(sendmail) ...
-    elsif ($e{'mci:mailer'} eq 'prog') {
-	&Log("open2") if $debug;
-	require 'open2.pl';
-	&open2(RS, S, $sendmail) || return "Cannot exec $sendmail";
+
+    ### not IPC, try popen(sendmail) ... OR WHEN ALL CONNEVTION FAIL;
+    ### Only on UNIX
+    if ($e{'mci:mailer'} eq 'prog' || $error) {
+	&Log("Try mci:prog since smtp connections cannot be opened") if $error;
+
+	if ($UNISTD) {
+	    $sendmail = $SENDMAIL || &SearchPath("sendmail") || 
+		&SearchPath("qmail-smtpd", "/var/qmail/bin") ||
+		    &SearchPath("exim", "/usr/local/exim/bin");
+	    # fix argv options
+	    if ($sendmail !~ /\-bs/) { $sendmail .= " -bs ";}
+
+	    require 'open2.pl';
+	    if (&open2(RS, S, $sendmail)) { 
+		&Log("open2(RS, S, $sendmail)") if $debug;
+	    }
+	    else {
+		&Log("SmtpIO: cannot exec $sendmail");
+		return "SmtpIO: cannot exec $sendmail";
+	    };
+
+	    $ipc = 0;
+	}
+	else {
+	    &Log("delivery fails since cannot open prog mailer");
+	    return 0;
+	}
     }
 
     ### Do talk with sendmail via smtp connection
@@ -212,284 +307,291 @@ sub SmtpIO
 	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
     }
 
-    foreach $s (@smtp, 'm_RCPT', @rcpt, 'm_RCPT', 'DATA') {
-	next if $s =~ /^\s*$/o;
+    ##### SMTP CONNECTION
+    ##### THE MOST HEAVY LOOP IS HERE;
+    #####
+    $Current_Rcpt_Count = 0;
 
-	# RCPT TO:; trick for the less memory use;
-	if ($s eq 'm_RCPT') { $in_rcpt = $in_rcpt ? 0 : 1; next;}
-	$s = "RCPT TO: $s" if $in_rcpt;
-	
-	$0 = "-- $s <$FML $LOCKFILE>"; 
+    if ($e{'mci:mailer'} eq 'smtpfeed' || $SmtpFeedMode) {
+	&SmtpPut2Socket("LHLO $e{'macro:s'}", $ipc);
+    }
+    else {
+	&SmtpPut2Socket("HELO $e{'macro:s'}", $ipc);
+    }
 
-	print SMTPLOG ($s . "<INPUT\n");
-	print S ($s . "\n");
+    &SmtpPut2Socket("MAIL FROM:<$MAINTAINER>", $ipc);
 
-	if ($ipc) {
-	    do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
+    # DLA is effective in processing deliver();
+    local(%a, $a);
+    if ($e{'mode:_Deliver'}) { 
+	push(@ACTIVE_LIST, $ACTIVE_LIST) 
+	    unless grep(/$ACTIVE_LIST/, @ACTIVE_LIST);
+
+	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*ACTIVE_LIST);}
+
+	for $a (@ACTIVE_LIST) { # plural active lists
+	    next if $a{$a}; $a{$a} = 1; # uniq;
+	    &SmtpPutActiveList2Socket($ipc, $a);
 	}
-	else {
-	    do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
-	}
 
-	# Approximately correct :-)
-	if ($TRACE_SMTP_DELAY) {
-	    $time = time() - $SmtpTime;
-	    $SmtpTime = time();
-	    &Log("SMTP DELAY[$time sec.]:$s") if $time > $TRACE_SMTP_DELAY;
+	if ($SMTP_SORT_DOMAIN) { &SDFin(*ACTIVE_LIST);}
+    }
+    elsif ($e{'mode:delivery:list'}) { 
+	&SmtpPutActiveList2Socket($ipc, $e{'mode:delivery:list'});
+    }
+    else { # not-DLA is possible;
+	for (@rcpt) { 
+	    $Current_Rcpt_Count++ if $_;
+	    &SmtpPut2Socket("RCPT TO:<$_>", $ipc) if $_;
 	}
     }
+
+    # if no rcpt (e.g. MCI_SMTP_HOSTS > 1,  crosspost and compination of them)
+    # "DATR" without "RCPT" must be error;
+    if ($Current_Rcpt_Count == 0) {
+	&Log("SmtpIO: no recipients but O.K.?");
+	&SmtpPut2Socket('QUIT', $ipc);
+	return;
+    }
+
+    &SmtpPut2Socket('DATA', $ipc);
+    print SMTPLOG ('-' x 30)."\n";
+
     ### (HELO .. DATA) sequence ends
 
+    ##### "DATA" Session BEGIN; no reply via socket ######
+    ###
     ### BODY INPUT
-    # putheader()
-    $0 = "-- BODY <$FML $LOCKFILE>";
-    print SMTPLOG ('-' x 30)."\n";
-    print SMTPLOG $e{'Hdr'}."\n";
-    print S $e{'Hdr'}."\n";	# "\n" == separator between body and header;
+    ### putheader()
+    $0 = "$FML:  BODY <$LOCKFILE>";
+    $e{'Hdr'} =~ s/\n/\r\n/g; 
+    $e{'Hdr'} =~ s/\r\r\n/\r\n/g; # twice reading;
+    print SMTPLOG $e{'Hdr'};
+    print S $e{'Hdr'};	# "\n" == separator between body and header;
+    print SMTPLOG "\r\n";
+    print S "\r\n";
 
     # Preamble
-    if ($e{'preamble'}) { print SMTPLOG $e{'preamble'}; print S $e{'preamble'};}
+    if ($e{'preamble'}) { 
+	$e{'preamble'} =~ s/\n/\r\n/g; 
+	$e{'preamble'} =~ s/\r\r\n/\r\n/g; # twice reading;
+	print SMTPLOG $e{'preamble'}; 
+	print S $e{'preamble'};
+    }
 
     # Put files as a body
     if (@files) { 
-	&SmtpFiles2Socket(*files);
+	&SmtpFiles2Socket(*files, *e);
     }
     # BODY ON MEMORY
     else { 
-	print SMTPLOG $e{'Body'}; print S $e{'Body'};
-	$LastSmtpIOString = $e{'Body'}; 
+	$e{'Body'} =~ s/\n/\r\n/g;
+	$e{'Body'} =~ s/\r\r\n/\r\n/g;  # twice reading;
+	print SMTPLOG $e{'Body'}; 
+	print S $e{'Body'};
+
+	# global interrupt;
+	if ($Envelope{'ctl:smtp:stdin2socket'}) {
+	    while (sysread(STDIN, $_, 1024)) {
+		s/\n/\r\n/g;
+		s/\r\r\n/\r\n/g; # twice reading;
+		print S $_;
+	    }
+
+	    print SMTPLOG "\n\n... truncated in log for file system ...\n";
+	    $LastSmtpIOString = $_;
+	}
+	else {
+	    $LastSmtpIOString = $e{'Body'};
+	}
+    }
+
+    # special exceptions;
+    if ($e{'Body:append:files'}) {
+	local(@append) = split($;, $e{'Body:append:files'});
+	&SmtpFiles2Socket(*append, *e);
+	undef $e{'Body:append:files'};
     }
 
     # Trailer
     if ($e{'trailer'}) { 
+	$e{'trailer'} =~ s/\n/\r\n/g; 
+	$e{'trailer'} =~ s/\r\r\n/\r\n/g; # twice reading;
 	$LastSmtpIOString =  $e{'trailer'}; 
 	print SMTPLOG $e{'trailer'}; 
 	print S $e{'trailer'};
     }
 
     ### close smtp with '.'
-    print S "\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
+    print S "\r\n" unless $LastSmtpIOString =~ /\n$/;	# fix the last 012
     print SMTPLOG ('-' x 30)."\n";
-    print S ".\n";
 
-    if ($ipc) {
-	do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
-    }
-    else {
-	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
-    }
+    ##### "DATA" Session ENDS; ######
+    ### Closing Phase;
+    &SmtpPut2Socket('.', $ipc);
+    &SmtpPut2Socket('QUIT', $ipc);
 
-    $0 = "-- QUIT <$FML $LOCKFILE>";
-    print S "QUIT\n";
-    print SMTPLOG "QUIT<INPUT\n";
+    close(S);
 
-    if ($ipc) {
-	do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
-    }
-    else {
-	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
-    }
-
-    close S;
+    # reverse \r\n -> \n
+    $e{'Body'} =~ s/\r\n/\n/g;
 
     0;
 }
 
 
-sub SmtpFiles2Socket
+sub SocketTimeOut
 {
-    local(*f) = @_;
-    local($autoconv, $count, $boundary);
+    $SocketTimeOut = 1;
+    close(S);
+}
 
-    $count = scalar(@f) > 1 ? 1 : 0;
+sub SmtpPut2Socket
+{
+    local($s, $ipc) = @_;
 
-    foreach $f (@f) {
-	&Debug("SmtpFiles2Socket::($f)") if $debug;
+    # return if $s =~ /^\s*$/; # return if null;
 
-	if ($f{$f, 'zcat'}) {
-	    open(FILE,"-|") || exec($ZCAT, $f) || 
-		(&Log("SmtpFiles2Socket: cannot zcat $f"), close(FILE), next);
-	}
-	elsif ($f{$f, 'uuencode'}) {
-	    open(FILE,"-|") || exec($UUENCODE, $f, $f) || 
-		(&Log("SmtpFiles2Socket: cannot uuencode $f"), close(FILE), next);
-	}
-	else {
-	    open(FILE, $f) || (&Log("SmtpFiles2Socket: cannot open $f"), close(FILE), next);
-	}
+    $0 = "$FML:  $s <$LOCKFILE>"; 
+    print SMTPLOG "$s<INPUT\n";
+    print S "$s\r\n";
 
-	$autoconv = $f{$f, 'autoconv'};
+    if ($ipc) {
+	do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
+    }
+    else {
+	do { print SMTPLOG $_ = <RS>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
+    }
 
-	if ($count) {		# if more than two files;
-	    $boundary = ('-' x 20).$f.('-' x 20)."\n";
-	    print S $boundary;
-	    print SMTPLOG $boundary;
-	}
-
-	while (<FILE>) { 
-	    s/^\./../; 
-	    &jcode'convert(*_, 'jis') if $autoconv;#';
-	    print S $_;
-	    print SMTPLOG $_;
-	    $LastSmtpIOString = $_;
-	};
-
-	close(FILE);
+    # Approximately correct :-)
+    if ($TRACE_SMTP_DELAY) {
+	$time = time() - $SmtpTime;
+	$SmtpTime = time();
+	&Log("SMTP DELAY[$time sec.]:$s") if $time > $TRACE_SMTP_DELAY;
+	$TRACE_SMTP_DELAY if $Hack{'dnscache'};
     }
 }
 
 
-# NEW VERSION FOR MULTIPLE @to and @files
-# return NONE
-sub NeonSendFile
+# %RELAY_SERVER = ('ac.jp', 'relay-server', 'ad.jp', 'relay-server');
+sub SmtpPutActiveList2Socket
 {
-    local(*to, *subject, *files) = @_;
-    local(@info) = caller;
-    local($e, %e, @rcpt, $error, $f, @f, %f);
+    local($ipc, $file) = @_;
+    local($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
+    local($mci_count, $count, $time);
 
-    ### INFO
-    &Debug("NeonSendFile[@info]:\n\nSUBJECT\t$subject\nFILES\t@files\n");# if $debug;
+    # Relay Hack
+    if ($CF_DEF && $RELAY_HACK) { require 'librelayhack.pl'; &RelayHack;}
+    if (%RELAY_GW)  { $gw_pat  = join("|", sort keys %RELAY_GW);}
+    if (%RELAY_NGW) { $ngw_pat = join("|", sort keys %RELAY_NGW);}
 
-    ### check again $file existence
-    foreach $f (@files) {
-	next if $f =~ /^\s*$/;
+    $time  = time;
+    $mci_count = $count = 0;
 
-	if (-f $f) {		# O.K. anyway exists!
-	    push(@f, $f);	# store it as a candidate;
+    # when crosspost, delivery info is saved in crosspost.db;
+    if ($USE_CROSSPOST) { 
+	dbmopen(%WMD, "$FP_VARDB_DIR/crosspost", 0400);
+	$myml = $MAIL_LIST;
+	$myml =~ tr/A-Z/a-z/;
+    }
 
-	    # Anyway copy each entry of each subject(%files) to %f
-	    $f{$f, 'subject'} = $files{$f, 'subject'} if $files{$f, 'subject'};
+    if ($debug_smtp) {
+	&Log("SmtpPutActiveList2Socket:open $file");
+	print STDERR "SmtpPutActiveList2Socket::open $file\n";
+    }
 
-	    next if $SENDFILE_NO_FILECHECK; # Anytime O.K. if no checked;
+    &Open(ACTIVE_LIST, $file) || return 0;
+    while (<ACTIVE_LIST>) {
+	chop;
 
-	    # Check whether JIS or not
-	    if (-B $f) {
-		&Log("ERROR: NeonSendFile: $f != JIS ?");
+	print STDERR "\nRCPT ENTRY\t$_\n" if ($debug_smtp || $debug_dla);
 
-		# AUTO CONVERSION 
-		$ExistJcode = eval "require 'jcode.pl';", $@ eq "";
+	next if /^\#/o;	 # skip comment and off member
+	next if /^\s*$/o; # skip null line
+	next if /\s[ms]=/o;
 
-		if ($ExistJcode) {
-		    &Log("NeonSendFile: $f != JIS ? Try Auto Code Conversion");
-		    $f{$f, 'autoconv'} = 1;
-		}
+	# O.K. Checking delivery and addrs to skip;
+	($rcpt) = split(/\s+/, $_);
+
+	$lc_rcpt = $rcpt;
+	$lc_rcpt =~ tr/A-Z/a-z/; # lower case;
+
+	# skip case, already loop-check-code-in %SKIP;
+	next if $SKIP{$lc_rcpt}; 
+
+	# skip if crosspost and the ml to deliver != $MAIL_LIST;
+	if ($USE_CROSSPOST) {
+	    if ($WMD{$lc_rcpt} && ($WMD{$lc_rcpt} ne $myml)) {
+		print STDERR "SKIP FOR CROSSPOST [$WMD{$lc_rcpt} ne $myml]\n"
+		    if $debug_smtp;
+		next;
 	    }
-
-	    # misc checks
-	    &Log("NeonSendFile: \$ZCAT not defined") unless $ZCAT;
-	    &Log("NeonSendFile: cannot read $file")  unless -r $f;
-	}
-	### NOT EXISTS 
-	else {
-	    &Log("NeonSendFile: $f is not found.", "[ @info ]");
-	    $f =~ s/$DIR/\$DIR/;
-	    $error .=  "$f is not found.\n[ @info ]\n\n";
-	    $Envelope{'message'} .= 
-		"Sorry.\nError NeonSendFile: $f is not found."; #HERE Envelope
 	}
 
-	$error && &Warn("ERROR NeonSendFile", $error);
-	return $NULL if $error;	# END if only one error is found. Valid?
+	# Relay Hack;
+	$rcpt = $RelayRcpt{$lc_rcpt} if $RelayRcpt{$lc_rcpt};
+
+	# %RELAY_GW 
+	# attention! $gw_pat is "largest match";
+	if ($gw_pat && $rcpt =~ /^\@/ && $rcpt =~ /($gw_pat)[,:]/i) {
+	    if ($relay = $RELAY_GW{$1}) { $rcpt = "\@${relay},${rcpt}";}
+	}
+	elsif ($gw_pat && $rcpt =~ /($gw_pat)$/i) {
+	    if ($relay = $RELAY_GW{$1}) { $rcpt = "\@${relay}:${rcpt}";}
+	}
+
+	if ($debug_smtp) {
+	    $ok = $rcpt !~ /($ngw_pat)/i ? 1 : 0;
+	    &Debug("$rcpt !~ /($ngw_pat)[,:]/i rewrite=$ok") if $debug_relay;
+	}
+
+	# %RELAY_NGW (negative relay gataway)
+	# attention! $ngw_pat is "largest match";
+	if ($ngw_pat) {
+	    if ($rcpt =~ /^\@/ && ($rcpt !~ /($ngw_pat)[,:]/i)) {
+		$relay = &SearchNegativeGw($rcpt, 1);
+		$rcpt = "\@${relay},${rcpt}" if $relay;
+	    }
+	    elsif ($rcpt !~ /($ngw_pat)$/i) {
+		$relay = &SearchNegativeGw($rcpt);
+		$rcpt = "\@${relay}:${rcpt}" if $relay;
+	    }
+	}
+
+	# count and do delivery for each modulus sets;
+	$mci_count++;
+
+	&Debug("  [$mci_count]  \t$rcpt") if $debug_mci;
+	&Debug("  $mci_count % $MCI_SMTP_HOSTS != $CurModulus") if $debug_mci;
+
+	next if $MCI_SMTP_HOSTS && 
+	    ($mci_count % $MCI_SMTP_HOSTS != $CurModulus);
+
+	$count++; # delivery count;
+	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
+	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
+
+	&SmtpPut2Socket("RCPT TO:<$rcpt>", $ipc);
+	$Current_Rcpt_Count++;
     }
 
-    ### DEFAULT SUBJECT. ABOVE, each subject for each file
-    $e{'subject:'} = $subject;
-    &GenerateHeader(*to, *e, *rcpt);
+    close(ACTIVE_LIST);
+    dbmclose(%WMD);
 
-    $e = &Smtp(*e, *rcpt, *f);
-    &Log("NeonSendFile:$e") if $e;
+    &Log("Smtp: ".(time - $time)." sec. for $count rcpts.") if $debug_smtp;
 }
 
-
-#
-# SendFile is just an interface of Sendmail to send a file.
-# Mainly send a "PLAINTEXT" back to @to, that is a small file.
-# require $zcat = non-nil and ZCAT is set.
-sub SendFile
-{
-    local(@to, %e, @rcpt, @files, %files);
-    local($to, $subject, $file, $zcat, @to) = @_;
-
-    @to || push(@to, $to); # extention for GenerateHeader
-
-    push(@files, $file);
-    (1 == $zcat) && ($files{$f, 'zcat'} = 1);
-    (2 == $zcat) && ($files{$f, 'uuencode'} = 1);
-
-    &NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
-}
-
-
-# Sendmail is an interface of Smtp, and accept strings as a mailbody.
-# Sendmail($to, $subject, $MailBody) paramters are only three.
-sub Sendmail
-{
-    local(@to, %e, @rcpt);
-    local($to, $subject, $body, @to) = @_;
-    push(@to, $to);		# extention for GenerateHeader
-
-    $e{'subject:'} = $subject;
-    &GenerateHeader(*to, *e, *rcpt);
-    
-    $e{'preamble'} .= $Envelope{'preamble'}.$PREAMBLE_MAILBODY;
-    $e{'Body'}     .= $body;
-    $e{'trailer'}  .= $Envelope{'trailer'}.$TRAILER_MAILBODY;
-
-    $e = &Smtp(*e, *rcpt);
-    &Log("Sendmail:$e") if $e;
-}
-
-
-# Generating Headers, and SMTP array
-sub GenerateMail    { &GenerateHeaders(@_);}
-sub GenerateHeaders { &GenerateHeader(@_);}
-sub GenerateHeader
-{
-    # old format == local(*to, $subject) 
-    local(*to, *e, *rcpt) = @_;
-    local($from) = $e{'F:From'} || $MAINTAINER || (getpwuid($<))[0]; # F=Force
-
-    $to_org = $to; # required 
-    undef $to; # required 
-
-    if ($debug) {
-	print STDERR "from = $from\nto   = @to\n";
-	print STDERR "GenerateHeader: missing from||to\n" unless ($from && @to);
-    }
-    return unless ($from && @to);
-
-    foreach (@to) {	
-	push(@rcpt, $_); 
-	$to .= $to ? (', '.$_) : $_; # a, b, c format
-    }
-
-    # fix by *Envelope
-    $e{'macro:s'}    = $Envelope{'macro:s'};
-    $e{'mci:mailer'} = $Envelope{'mci:mailer'};
-
-    # the order below is recommended in RFC822 
-    $e{'Hdr'} .= "Date: $MailDate\n";
-
-    # From
-    $e{'Hdr'} .= "From: $from";
-    $e{'Hdr'} .= " ($MAINTAINER_SIGNATURE)" if $MAINTAINER_SIGNATURE;
-    $e{'Hdr'} .= "\n";
-
-    $e{'Hdr'} .= "Subject: $e{'subject:'}\n" if $e{'subject:'};
-    $e{'Hdr'} .= "To: $to\n";
-    $e{'Hdr'} .= 
-	"Reply-to: $Envelope{'h:Reply-To:'}\n" if $Envelope{'h:Reply-To:'};
-
-    # MIME (see RFC1521)
-    # $_cf{'header', 'MIME'} => $Envelope{'r:MIME'}
-    $e{'Hdr'} .= $Envelope{'r:MIME'} if $Envelope{'r:MIME'};
-
-    # ML info
-    $e{'Hdr'} .= "X-Debug: $rcsid\n"    if $debug && $rcsid;
-    $e{'Hdr'} .= "X-MLServer: $Rcsid\n" if $Rcsid;
-
-    $to = $to_org; # required 
-
-}
+###FI: NOT EXPORTS IN FIX-INCLUDE
+# SMTP UTILS;
+sub SmtpFiles2Socket { require 'libsmtputils.pl'; &DoSmtpFiles2Socket(@_);}
+sub NeonSendFile     { require 'libsmtputils.pl'; &DoNeonSendFile(@_);}
+sub SendFile         { require 'libsmtputils.pl'; &DoSendFile(@_);}
+sub SendFile2        { require 'libsmtputils.pl'; &DoSendFile2(@_);}
+sub SendFile3        { require 'libsmtputils.pl'; &DoSendFile3(@_);}
+sub SendPluralFiles  { require 'libsmtputils.pl'; &DoSendPluralFiles(@_);}
+sub Sendmail         { require 'libsmtputils.pl'; &DoSendmail(@_);}
+sub GenerateMail     { &GenerateHeaders(@_);}
+sub GenerateHeaders  { &GenerateHeader(@_);}
+sub GenerateHeader   { require 'libsmtputils.pl'; &DoGenerateHeader(@_);}
 
 1;

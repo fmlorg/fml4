@@ -1,12 +1,18 @@
-# Copyright (C) 1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
-# $rcsid   = q$Id$;
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
-# local scope
-local($IssueSeq);
+# local scope -> Global for customize
+# local($IssueSeq);
 
-&use('MIME') if $USE_LIBMIME;
+&use('MIME') if $USE_MIME;
 
 # Skipped field for each mail header
 sub Rfc1153ReadFileHook
@@ -32,16 +38,17 @@ sub Rfc1153ReadFileHook
 # THIS ROUTINE CAN BE CALLED MULTIPLY.
 sub Rfc1153Custom
 {
-    local($mode, @filelist) = @_;
+    local($mode, *filelist) = @_;
     local($i, $f, $s);
-    local($issue, $listname, $vol, $IssueSeq);
+    local($issue, $listname, $vol);
     local($preamble, $trailer, $trick);
 
     ########## CUSTOMIZE BELOW ##########
-    $issue     = 1;
-    $listname  = "UJA";
-    $vol       = $year;
-    $IssueSeq = "$FP_VARLOG_DIR/IssueSeq"; # file to remember count;
+    $issue     = $RFC1153_ISSUE    || 1;
+    $listname  = $RFC1153_LISTNAME || "UJA";
+    $vol       = $RFC1153_VOL      || $year;
+    $IssueSeq  = $RFC1153_SEQUENCE_FILE  || 
+	"$FP_VARLOG_DIR/IssueSeq"; # file to remember count;
 
     &GetTime;
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
@@ -53,7 +60,8 @@ sub Rfc1153Custom
     # example "Subject: Info-IBMPC Digest V95 #22"
     $_cf{'subject', $mode} = "$listname Digest V$vol \#$issue";
 
-    print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n";
+    print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n"
+	if $debug;
 
     # FIRST LINE
     $preamble .= "$listname DIGEST\t";
@@ -84,7 +92,7 @@ sub Rfc1153Custom
 	    # PLEASE CUSTOMIZE!
 	    $s =~ s/\n(\s+)/$1/g;
 	    $s =~ s/\[$BRACKET:\d+\]\s*//g if $STRIP_BRACKETS; # Cut [Elena:..]
-	    $s = &DecodeMimeStrings($s) if $USE_LIBMIME;       # MIME DECODING 
+	    $s = &DecodeMimeStrings($s) if $USE_MIME;       # MIME DECODING 
 	    ($s =~ /\nSubject:(.*)\n/) && ($preamble .= "\t$1\n");
 	}
     }# end of foreach;
@@ -118,16 +126,17 @@ sub Rfc1153Custom
 
 sub Rfc1153GetSeq
 {
-    local($IssueSeq) = @_;
+    local($seqfile) = @_;
+    local($issue);
 
     ### ISSUE COUNT UPDATE ###
     # TOUCH
-    (-f $IssueSeq) || do {
-	open(F, ">> $IssueSeq");close(F);
+    (-f $seqfile) || do {
+	open(F, ">> $seqfile"); close(F);
     };
 
     # GET SEQ
-    open(F, "< $IssueSeq") || &Log("Cannot open $IssueSeq");
+    open(F, "< $seqfile") || &Log("Cannot open $seqfile");
     $issue = <F>;
     chop $issue;
     close(F);
@@ -135,9 +144,10 @@ sub Rfc1153GetSeq
     # COUNT CHECK OR RESET
     ($issue >= 1) || ($issue = 1);
 
-    # reset when happy new year!
-    $PrevYear = (localtime((stat($f))[9]))[5];# the last modify time
-    if($PrevYear != $year) {# not ">" when 2000 vs 1999 
+    # reset when happy new year;
+    # fml-support:01917 (soshi@maekawa.is.uec.ac.jp)
+    $PrevYear = (localtime((stat($seqfile))[9]))[5];# the last modify time
+    if ($PrevYear != $year) {# not ">" when 2000 vs 1999 
 	$issue = 1;		
     }
 

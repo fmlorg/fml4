@@ -1,11 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1995-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
 ##### LIBRARY #####
 sub Expire_with_date { &Expire(@_);}
@@ -24,11 +28,11 @@ sub Expire
     foreach $f (readdir(F)) {
 	next if $f =~ /^\./;
 	$unlink_seq = $f; 
-	$first_seq || ($first_seq = $f); # Init(NOT SET last_seq)
 
 	if ($ctl_by_number)  {
 	    push(@f, $f); # without 'spool' for numeric qsort
 	}
+	# DO UNLINK WHEN DATE EXPIRATION
 	else {
 	    # expire with date(default)
 	    $f  = "$spool_dir/$f";
@@ -36,18 +40,23 @@ sub Expire
 	    $d /= $OneDay;
 	    
 	    &Debug("?:expire $f if $d > $expire") if $debug; 
+	    &Debug("?:expire $f(NOT -f)")         if $debug && (! -f $f);  
 
 	    if ((!$debug) && (-f $f) && ($d > $expire)) {
-		unlink $f && &Debug("unlink $f");
+		# Init(NOT SET last_seq)
+		$first_seq || ($last_seq = $first_seq = $f); 
+
+		unlink($f) ? &Debug("unlink $f") : &Debug("CANNOT unlink $f");
 
 		# store the largest sequence
-		$last_seq = $last_seq > $unlink_seq ? $last_seq : $unlink_seq;
-		$first_seq = $first_seq < $unlink_seq ? $first_seq : $unlink_seq;
+		$last_seq  = $last_seq > $unlink_seq ? $last_seq : $unlink_seq;
+		$first_seq = $first_seq<$unlink_seq  ? $first_seq: $unlink_seq;
 	    }
 	}
     }
     closedir(F);
 
+    # DO UNLINK HERE WHEN LEFT ARTICLE COUNT EXPIRATION
     # not believing the counter by $DIR/seq 
     if ($ctl_by_number)  {
 	# sort ->  1, 2, 3, ... incresing order.
@@ -75,11 +84,29 @@ sub Expire
 	}#foreach;
     }
 
-    &Log("unlink $first_seq -> $last_seq");
+    &Log("unlink $first_seq -> $last_seq") if $first_seq && $last_seq;
 
-    &ExpireSummary($first_seq, $last_seq);
+    if ($EXPIRE_SUMMARY) {
+	&ExpireSummary($first_seq, $last_seq);
+    }
 
     1;
+}
+
+
+sub CtlExpire
+{
+    local($limit) = @_;
+
+    if ($limit =~ /^(\d+)(day|days)$/i) {
+	&Expire($SPOOL_DIR, $1, 0);
+    }
+    elsif ($limit =~ /^(\d+)$/i) {
+	&Expire($SPOOL_DIR, $1, 1);
+    }
+    else {
+	&Log("Unknown expire limit = [$limit]");
+    }
 }
 
 
@@ -99,14 +126,14 @@ sub ExpireSummary
     while (<IN>) {
 	print BAK $_;
 
-	if (/\d\d:\d\d:\d\d\s+\[(\d+):\S+\]/) {
+	if (/^\d\d\/\d\d\/\d\d\s+\d\d:\d\d:\d\d\s+\[(\d+):\S+\]/) {
 	    next if $1 <= $last;
 	}
 
 	print NEW $_;
     }
 
-    close(S);
+    close(IN);
     close(BAK);
     close(NEW);
 

@@ -1,11 +1,13 @@
-# Library of fml.pl 
-# Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public Licence(see ./COPYING)
-
-$libid   = q$Id$;
-($libid) = ($libid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
-$rcsid  .= "/$libid";
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# q$Id$;
 
 ##################################################################
 ##### Ftp for Local Directory #####
@@ -14,14 +16,14 @@ local($CurrentDir, $TopDir, $LocalDir, $Mode);
 
 sub Ftp
 {
-    local(*e, $body) = @_;	# the second for the further extension
+    local(*e, $body) = @_; # the second argv for the further extension
     local(@Fld);
     local(@FtpDirStack) = ('.');
 
     require 'libfop.pl';
     
     ### variables
-    $ps        = "--PSEUDO FML FTP FOR LOCALDIR";# Process Table
+    $ps        = "pseudo ftp (local)";# Process Table
     $sleeptime = $SLEEPTIME || 30;
     $body      = $body      || $e{'Body'};
 
@@ -32,12 +34,12 @@ sub Ftp
     }
     else {
 	&LogWEnv("The spool of Ftp is NOT SET, STOP!", *e);
-	&Log("If use ftp, please set \$FTP_DIR");
+	&Log("If you use local ftp, please set \$FTP_DIR");
 	return;
     }    
 
     # Set Process Table
-    $0 = "$ps in <$FML $LOCKFILE>";
+    $0 = "$FML: $ps <$LOCKFILE>";
 
     ### ATTACH TopDir 
     chdir $TopDir || do {
@@ -50,25 +52,25 @@ sub Ftp
     foreach (split(/\n/, $body)) {
       next if (/^\s*$/o); # skip null line
 
-      $e{'message'} .= "\n>>> $_\n";
+      &Mesg(*e, "\n>>> $_");
 
       /^\#/o || ($_ = "# $_");
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
       @Fld = split(/\s+/, $_, 999);
       $_   = $Fld[1];
-      $0   = "$ps :processing[$_] $FML $LOCKFILE>";
+      $0   = "$FML: $ps processing[$_] <$LOCKFILE>";
 
       print STDERR "Now local Ftp request >$_<\n" if $debug;
 
       # not implemented
       if (/^(ftp|connect)$/io) { 
-	  $e{'message'} .= "\tSorry. $1 is not implemented.\n";
+	  &Mesg(*e, "\tSorry. $1 is not implemented.");
 	  next;
       }
 
       # end of requests
       if (/^(quit|exit)$/io) { 
-	  $e{'message'} .= "\tExit of current process\n";
+	  &Mesg(*e, "\tExit the current process");
 	  last;
       }
 
@@ -79,7 +81,7 @@ sub Ftp
 	LS: for $f ("$TopDir/ls-lR.gz", "$TopDir/ls-lR.Z", "$TopDir/ls-lR") {
 	    next LS unless -f $f;
 	    $ok++;
-	    &Log("ls-lR");
+	    &Log("ls-lR [$f]");
 	}
 	  
 	  if (! $ok) {
@@ -89,7 +91,7 @@ sub Ftp
 	  }
 
 	  &FtpSetFtpEntry('.', $f, $Mode);
-	  $e{'message'} .= "\tTry Send Back ls-lR\n";
+	  &Mesg(*e, "\tTry Send Back ls-lR");
 	  next;
       }
 
@@ -107,17 +109,17 @@ sub Ftp
 	  }
 	  else {
 	      &Log("Cd: Insecure matching: $CurrentDir");
-	      $e{'message'} .= "\tCd: Insecure directory changes\n";
+	      &Mesg(*e, "\tCd: Insecure directory changes");
 	      last;
 	  }
 
 	  chdir $CurrentDir || do { 
 	      &Log("Can't chdir to $CurrentDir");
-	      $e{'message'} .= "\tCannot chdir /$LocalDir\n";
+	      &Mesg(*e, "\tCannot chdir /$LocalDir");
 	      last;
 	  };
 
-	  $e{'message'} .= "\tCurrent directory is /$LocalDir\n";
+	  &Mesg(*e, "\tCurrent directory is /$LocalDir");
 	  &Log("chdir $LocalDir");
 	  next;
       }
@@ -127,7 +129,7 @@ sub Ftp
 	  &SendFile($Envelope{'Addr2Reply:'}, "Ftp(Local) help $ML_FN", 
 		    $FTP_HELP_FILE || "$TopDir/help");
 	  &Log("Ftp Help");
-	  $e{'message'} .= "\tTry Sent back help file\n";
+	  &Mesg(*e, "\tTry Sent back help file");
 	  next;
       }
       
@@ -136,23 +138,23 @@ sub Ftp
 	  $Mode = $Fld[2];
 	  &Log("Ftp Mode -> $Mode");
 	  local($s) = &DocModeLookup("#3$Mode");
-	  $e{'message'} .= "\tFile Encoding Mode set to $Mode[$s]\n";
-	  $e{'message'} .= "\texcept for explicit command 'get file mode'\n";
+	  &Mesg(*e, "\tFile Encoding Mode set to $Mode[$s]");
+	  &Mesg(*e, "\texcept for explicit command 'get file mode'");
 	  next;
       }
       
       # return address change
       if (/^(mail|reply\-to)$/) {	# help or HELP
 	  local($to) = $Envelope{'Addr2Reply:'} = $Fld[2];
-	  $e{'message'} .= "\tReturn address change $From_address -> $to\n";
-	  &Log("RECIPIENT CHANGE: $From_address -> $to");
+	  &Mesg(*e, "\tReturn address change\n\t$From_address -> $to");
+	  &Log("Ftp: Recipient changed[$From_address -> $to]");
 	  next;
       }
       
       # get one article from the spool, then return it
       if (/^(get|send|getfile)$/io) {
 	  local($f) = $Fld[2];
-	  local($mode);
+	  local($mode); # the default is defined in &FtpSetFtpEntry;
 
 	  foreach (@Fld) {
 	      /^(\d+)$/o && ($SLEEPTIME = $1, next);
@@ -164,25 +166,25 @@ sub Ftp
 
 	  if (! &SecureP($f)) {
 	      &Log("Get: Insecure matching: $f");
-	      $e{'message'} .= "\tGet: Insecure Variable, STOP!\n";
+	      &Mesg(*e, "\tGet: Insecure Variable, STOP!");
 	      last;
 	  }
 
 	  &FtpSetFtpEntry($LocalDir, $f, $mode);
-	  $e{'message'} .= "\tTry Send back [$f] in [$LocalDir]\n";
-	  $e{'message'} .= "\tthe file is set-up with mode == [$s]\n";
+	  &Mesg(*e, "\tTry Send back [$f] in [$LocalDir]");
+	  &Mesg(*e, "\tthe file is set-up with mode == [$mode]");
 	  next;
       }
 
       # Unknown!
       &Log("Ftp: Unknown Commands [$_]");
-      $e{'message'} .= "\tFtp: Unknown Commands [$_]\n";
+      &Mesg(*e, "\tFtp: Unknown Commands [$_]");
   }# end of while loop;
 
     # Return Original $DIR
     chdir $DIR || &Log("Can't chdir to $DIR");
 
-    $e{'message'} .= "\n\t*** Pseudo Ftpmail Mode Ends. ***\n";
+    &Mesg(*e, "\n\t*** Pseudo Ftpmail Mode Ends. ***");
 
     if ($FML_EXIT_HOOK !~ /\&FtpSendingEntry/) {
 	$FML_EXIT_HOOK .= ' &FtpSendingEntry;';
@@ -193,10 +195,12 @@ sub Ftp
 sub FtpSetFtpEntry
 {
     local($dir, $file, $mode) = @_;
-    local($total);
+    local($total, $target, $name);
     local($ftpdir) = $FTP_DIR;
-    local($tmpf)   = "$TMP_DIR/Ftp$$:$FtpEntry"; # relative for all modes availability
-
+    
+    # relative for all modes availability
+    local($tmpf)   = "$TMP_DIR/Ftp$$:$FtpEntry"; 
+    
     printf STDERR "FtpEntry %-15s => %s\n", $dir, $file if $debug;
 
     # Global variables
@@ -208,7 +212,10 @@ sub FtpSetFtpEntry
     chdir $DIR || &Log("Can't chdir to $DIR");
 
     $ftpdir =~ s#$DIR/##g;
-    $total  = &DraftGenerate($tmpf, $mode, "$ftpdir/$dir/$file", "$ftpdir/$dir/$file");
+    $target = "$ftpdir/$dir/$file";
+    $name   = "$dir/$file";
+    $name   =~ s#^/##;
+    $total  = &DraftGenerate($tmpf, $mode, $name, $target);
 
     $FtpEntrySubject{"$FtpEntry:$total"} = "Ftp(local) $dir/$file";
     $FtpEntry{"$FtpEntry:$total"}        = $tmpf; 
@@ -305,18 +312,18 @@ sub Ftpmail
 
 	# Log
 	$body =~ s/\n/\n   /g;
-	$e{'message'} .= "Your requqst [ftp://$host/$file] is \n";
-	$e{'message'} .= "Submitted to Ftpmail Server [$FTPMAIL_SERVER]\n";
-	$e{'message'} .= "as\n\n$body\n\n";
-	$e{'message'} .= "Please wait a little for the reply\n";
-	$e{'message'} .= "*** ATTENTION! ***\n";
-	$e{'message'} .= "If you cancel your request\n";
-	$e{'message'} .= "send the email to $FTPMAIL_SERVER\n";
-	$e{'message'} .= "              NOT $MAIL_LIST\n";
+	&Mesg(*e, "Your requqst [ftp://$host/$file] is ");
+	&Mesg(*e, "Submitted to Ftpmail Server [$FTPMAIL_SERVER]");
+	&Mesg(*e, "as\n\n$body\n");
+	&Mesg(*e, "Please wait a little for the reply");
+	&Mesg(*e, "*** ATTENTION! ***");
+	&Mesg(*e, "If you cancel your request");
+	&Mesg(*e, "send the email to $FTPMAIL_SERVER");
+	&Mesg(*e, "              NOT $MAIL_LIST");
     }
     else {
-	$Envelope{'message'} .= 
-	    "*** Sorry, Relay to Ftpmail Server is NOT SUPPORTED ***\n";
+	&Mesg(*Envelope, 
+	      "*** Sorry, Relay to Ftpmail Server is NOT SUPPORTED ***");
 	&Log("Please set \$FTPMAIL_SERVER to relay when using ftpmail");
     }
 }

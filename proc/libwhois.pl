@@ -1,11 +1,13 @@
-# Library of fml.pl 
-# Copyright (C) 1995-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
-
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
 
 &use('utils');
@@ -15,13 +17,14 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 # return the answer
 sub WhoisSearch
 {
-    local($r, @r, %r, $pat, $host);
+    local($r, @r, %r, $pat, $host, $all);
     local(*e, *Fld) = @_;
 
     shift @Fld; shift @Fld;
     while (@Fld) {
 	$_ = shift @Fld;
-	/^-h/o && ($host = shift @Fld) && next;
+	/^\-h/o && ($host = shift @Fld) && next;
+	/^\-a/o && ($all = 1) && next;
 	$pat .= $pat ? "|$_" : $_;
     }
 
@@ -30,9 +33,12 @@ sub WhoisSearch
     if ($host) {
 	&Ipc2Whois(*e, *Fld, *host, *pat);#';
     }
+    elsif ($all) {
+	&Whois'ShowAllEntry(*e, *r); #';
+    }
     else {
 	&Whois'Search(*pat, *r); #';
-	$e{'message'} .= $r;
+	&Mesg(*e, $r);
     }
 }
 
@@ -44,13 +50,19 @@ sub WhoisWrite
     local(*e) = @_;
     local($encount);
 
-    &use('MIME') if $USE_LIBMIME;
+    &use('MIME') if $USE_MIME;
     &Whois'Import; #';
     
     foreach (split(/\n/, $e{'Body'})) {
 	/\#\s*iam/i && ($encount++, next);
 	$e{'Whois:Body'} .= "$_\n" if $encount;
-	print STDERR "W>$_\n" if $encount;
+	print STDERR "WHOIS>$_\n"  if $debug_whois && $encount;
+    }
+
+    if (! $encount) {	# encount == 1 if the body has "iam".
+	&Mesg(*e, "   Hmm.. your mail seems too short.");
+	&Mesg(*e, "   your self-introduction is not in it, isn't it?");
+	return;
     }
     
     &Whois'Write(*e); #';
@@ -61,7 +73,7 @@ sub WhoisList
 {
     local(*e) = @_;
 
-    &use('MIME') if $USE_LIBMIME;
+    &use('MIME') if $USE_MIME;
     &Whois'Import; #';    
     &Whois'List(*e); #';
 }
@@ -76,27 +88,34 @@ sub Ipc2Whois
 
     # IPC
     $ipc{'host'}   = $host || $DEFAULT_WHOIS_SERVER || 'localhost';
-    $ipc{'pat'}    = 'S n a4 x8';
+    $ipc{'pat'}    = $STRUCT_SOCKADDR;
     $ipc{'serve'}  = 'whois';
     $ipc{'proto'}  = 'tcp';
 
-    &Log("whois -h $host: $req");
+    &Log("whois -h $host [$req]");
 
     ### JCODE and Socket
     &SocketInit;
 
-    require 'jcode.pl';
-    eval "&jcode'init;";
-    &jcode'convert(*req, 'euc'); #'(trick) -> EUC
+    if ($WHOIS_JCODE_P) {
+	require 'jcode.pl';
+	eval "&jcode'init;";
+	&jcode'convert(*req, 'euc'); #'(trick) -> EUC
 
-    # After code-conversion!
-    # '#' is a trick for inetd
-    @ipc = ("$req#\n");
-    &ipc(*ipc, *r);
+	# After code-conversion!
+	# '#' is a trick for inetd
+	@ipc = ("$req\n\n");
+	&ipc(*ipc, *r);
 
-    &jcode'convert(*r, 'jis'); #'(trick) -> JIS
+	&jcode'convert(*r, 'jis'); #'(trick) -> JIS
+    }
+    else {
+	@ipc = ("$req\n\n");
+	&ipc(*ipc, *r);
+    }
 
-    $e{'message'} .= "Whois $host $req $ML_FN\n$r\n";
+    &Mesg(*e, "Whois -h $host $req $ML_FN");
+    &Mesg(*e, $r);
 }
 
 
@@ -104,15 +123,15 @@ sub Ipc2Whois
 
 package Whois;
 
-$Separator = "\.\n\n";
+$Separator = "\n\.\n\n";
 $Counter   = 0;
 
 @Import = (DEFAULT_WHOIS_SERVER, ML_FN, 
 	   WHOIS_DB, WHOIS_HELP_FILE, 
-	   DEBUG, debug, DIR, VARLOG_DIR
+	   DEBUG, 'debug', DIR, VARLOG_DIR
 	   );
 
-@ImportProc = ('Debug', 'Log', 'DecodeMimeStrings', LogWEnv);
+@ImportProc = ('Debug', 'Log', 'DecodeMimeStrings', LogWEnv, Touch, Mesg);
 
 
 sub Import
@@ -127,6 +146,9 @@ sub Import
     $DEFAULT_WHOIS_SERVER = $DEFAULT_WHOIS_SERVER || 'localhost';
     $WHOIS_DB             = $WHOIS_DB             || "$FP_VARLOG_DIR/whoisdb";
     $WHOIS_HELP_FILE      = $WHOIS_HELP_FILE      || "$DIR/etc/help.whois";
+
+    # if no var/log/whoisdb
+    &Touch($WHOIS_DB) if ! -f $WHOIS_DB;
 }
 
 
@@ -138,7 +160,7 @@ sub Append
 
     &BackupDB || do {
 	&Log("cannot backup \$WHOIS_DB, stop", return 0);
-	$e{'message'} .= "Cannot reset Whois Database of $ML_FN\n\n";
+	&Mesg(*e, "Cannot reset Whois Database of $ML_FN\n");
     };
 
     # open $WHOIS_DB
@@ -146,15 +168,22 @@ sub Append
     select(F); $| = 1; select(STDOUT);
 
     print F "$e{'h:From:'}\n\n";
+    &Mesg(*e, "Your data is registered");
+    &Mesg(*e, "in the ML($ML_FN) whois database as following:\n");
+    &Mesg(*e, "$e{'h:From:'}\n");
 
     # ^. -> ..
     foreach (split(/\n/, $s)) {
 	s/^\./\.\./;
 	print F "$_\n";
+	&Mesg(*e, "$_");
     }
 
     print F $Separator;     # ATTENTION! $/ = $Separator = ".\n\n";
     close(F);
+
+    &Mesg(*e, "\n");
+    &Mesg(*e, "--End of the submitted entry\n");
 
     1;
 }
@@ -248,9 +277,23 @@ sub AllocAllEntry
 	$r{$addr} = $_;
     }
     close(F);
-
+    
     # SEPARATOR RESET
     $/ = $sep_org;
+}
+
+
+sub ShowAllEntry
+{
+    local(*e, *r) = @_; #';
+
+    &AllocAllEntry(*e, *r);
+    while (($k, $v) = each %r) { 
+	$Counter++;
+	$r .= ('*' x 30)."\nMatched Entry[$Counter]> $k\n\n$v\n";
+    }
+
+    &Mesg(*e, $r);
 }
 
 
@@ -261,8 +304,8 @@ sub List
 
     &AllocAllEntry(*e, *r);
 
-    $e{'message'} .= "Entry List submitted to Whois Database of $ML_FN\n\n";
-    foreach (keys %r) { $e{'message'} .= "$_\n" if $_;}
+    &Mesg(*e, "Entry List submitted to Whois Database of $ML_FN\n");
+    foreach (keys %r) { &Mesg(*e, "$_") if $_;}
 }
 
 
@@ -274,22 +317,21 @@ sub BackupDB
     &AllocAllEntry(*e, *r);
 
     $Now = $main'Now;#';
-    
+
     # open $WHOIS_DB
     open(F, $WHOIS_DB) || (&Log("Cannot open $WHOIS_DB"), return 0);
     select(F); $| = 1; select(STDOUT);
 
     # backup
-    open(BAK, ">> $WHOIS_DB.bak") || (&Log("Cannot open $WHOIS_DB.bak"), return 0);
+    open(BAK, "> $WHOIS_DB.bak") || 
+	(&Log("Cannot open $WHOIS_DB.bak"), return 0);
     select(BAK); $| = 1; select(STDOUT);
     print BAK "----- Backup on $Now -----\n";
-    while (<F>) {
-	print BAK $_;
-    }
+    while (<F>) { print BAK $_;}
     close(BAK);
 
     # set the present entries
-    open(NEW, "> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB.bak"), return 0);
+    open(NEW, "> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB"), return 0);
     select(NEW); $| = 1; select(STDOUT);
 
     while (($k, $v) = each %r) { 
@@ -305,3 +347,5 @@ sub BackupDB
 
 
 1;
+
+

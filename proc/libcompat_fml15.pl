@@ -1,9 +1,19 @@
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+
+
 ###############################################
 ### ### BACKWARD COMPATIBILITY LIBRARIES ###### 
 ###############################################
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# $Id$;
 
 sub CompatFML15_Post
 {
@@ -11,7 +21,7 @@ sub CompatFML15_Post
 
     # TO:
     $Envelope{'to:'}	        = $Original_To_address;
-    $Envelope{'mode:chk'}	= $To_address;
+    $Envelope{'trap:rcpt_fields'}	= $To_address;
 
     # FROM:
     # $Envelope{'h:From:'}      = $Original_From_address;
@@ -47,7 +57,7 @@ sub CompatFML15_Pre
 
     # TO:
     $Original_To_address = $Envelope{'to:'};
-    $To_address          = $Envelope{'mode:chk'};
+    $To_address          = $Envelope{'trap:rcpt_fields'};
 
     # FROM:
     # $From_address      = $Envelope{'h:From:'};

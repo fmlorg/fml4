@@ -1,26 +1,39 @@
-# Library of fml.pl 
-# Copyright (C) 1996      kfuka@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$;
 
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+&use('modedef');
 
 sub MLAddr
 {
     local($addr) = @_;
 
+    # Loading the Default Entries
+    require 'libcompat_cf1.pl';
+
     local($name, $domain) = split(/\@/, $addr);
+    local($host);
+    chop($host = `hostname`);
 
-    $DOMAINNAME                    = $domain;
-    $MAIL_LIST                     = "${name}\@$domain";
-    $ML_FN                         = "($name ML)";
-    $XMLNAME                       = "X-ML-Name: $name";
-    $XMLCOUNT                      = "X-Mail-Count";
-    $MAINTAINER                    = "${name}-request\@$domain";
-    $CONTROL_ADDRESS               = "${name}-ctl\@$domain";
+    # if has . , already FQDN form.
+    $FQDN = ($host !~ /\./) ? "$host.$domain" : $host;
 
-    if ($debug) {
+    $DOMAINNAME      = $domain;
+    $MAIL_LIST       = "${name}\@$domain";
+    $ML_FN           = "($name ML)";
+    $XMLNAME         = "X-ML-Name: $name";
+    $XMLCOUNT        = "X-Mail-Count";
+    $MAINTAINER      = "${name}-request\@$domain";
+    $CONTROL_ADDRESS = "${name}-ctl\@$domain";
+
+    if ($debug) { # command line -d is not effective here
 	print STDERR "\nSeveral Variables are set as follows:\n\n";
 
 	for (DOMAINNAME, FQDN, MAIL_LIST, ML_FN, XMLNAME,
