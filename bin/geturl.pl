@@ -67,14 +67,14 @@ sub GetUrl
     # probe by HEAD
     &ProbeUrl($headnew);
 
-    # retrieved O.K.?
-    if (-z $headnew) {
-	&Log("Cannot connect $req, exit");
-	return;
+    # HEAD probe retrieved failed?
+    if (&Grep('404.*[nN]ot [fF]ound', $headnew)) {
+	&Log("Cannot connect (HEAD probe) $req, exit");
+	$force_created = 1;
     }
 
     # for the first time;
-    if (!-f $outfile || !-f $head) {
+    if ($force_created || !-f $outfile || !-f $head) {
 	&Log(sprintf("%-15s %s", "created:", $req));
 	$tmpf     = &DoGetUrl($req, $outfile);
 	&OutPutFile($tmpf, $outfile);
