@@ -30,7 +30,9 @@
 		(/etc/aliases.db は postfix だとpermission deniedかも)
 		(qmail はどうすればいいんだろぉ…)
 
+○ makefml config メニューを日本語にする？
 
+	Message Language Extension をつかう
 
 ------------------------------------------------------------------
 [DONE]
