@@ -1,9 +1,14 @@
 .S	CF's USERTABLE_MAPS の例
+=E.S	Example: CF's USERTABLE_MAPS
 
 CF については CF のマニュアル (doc/MANUAL.jpn)をよく読んで下さい。
 読むべきところは USERTABLE_MAPS です。
+=E
+See doc/MANUAL.jpn of CF package.
 
-◯ .def ファイルの変更点
+* .def ファイルの変更点
+=E
+* changes of .def file
 
 .q
 -##USERTABLE_MAPS='local=hash:/etc/ut.local \
@@ -14,15 +19,23 @@ CF については CF のマニュアル (doc/MANUAL.jpn)をよく読んで下さい。
 +
 ~.q
 
-◯ /root/test/fml
+* /root/test/fml
+
 .q
 fukachan:maildrop       fukachan@enkai.org
 .~q
 
-◯ db を作る
-# makemap hash /root/test/fml.db < /root/test/fml
+* db を作る
+=E
+* make db file
 
-◯ sendmail test mode
+.q
+# makemap hash /root/test/fml.db < /root/test/fml
+.~q
+
+* sendmail test mode
+
+.q
 % sendmail -bt -C virtual.cf
 > 3,0 fukachan@fml.org
 rewrite: ruleset   3   input: fukachan @ fml . org
@@ -43,3 +56,4 @@ rewrite: ruleset  88 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . o
 rewrite: ruleset   0 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
 rewrite: ruleset  97 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
 rewrite: ruleset   0 returns: $# smtp $@ enkai . org . $: fukachan < @ enkai . org >
+.~q

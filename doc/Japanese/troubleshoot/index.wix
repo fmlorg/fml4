@@ -1,6 +1,8 @@
 .HTML_PRE
 .# .__repl_title__
                 トラブルシューティング
+=E
+		Trouble Shooting
 
 .if LANG == JAPANESE
 とりあえずエラーメッセージにでてくる単語でサーチをしてみて、ドキュメン

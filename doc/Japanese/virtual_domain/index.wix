@@ -1,8 +1,11 @@
 .HTML_PRE
 		virtual domain ¤ÎÀßÄê
+=E
+		how to use fml under virtual domains
 
 .toc
 .~HTML_PRE
+
 .include overview.wix
 .include virtual-domain.wix
 
@@ -14,3 +17,5 @@
 .url http://www.sendmail.org/virtual-hosting.html
 
 .include sendmail.wix
+
+.# $Id$

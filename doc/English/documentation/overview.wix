@@ -1,4 +1,5 @@
-.C	Overview
+.C	概要
+=E.C	Overview
 
 ドキュメントの記述言語はWIXと呼ばれている NROFF もどきの言語です。
 一回書けば text, html, (nroff, texinfo は今だ未完) の複数のフォーマッ

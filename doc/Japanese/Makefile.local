@@ -38,3 +38,11 @@ test:
 fix_jcode:
 	@ echo run ../../distrib/bin/fix_doc_jcode.sh
 	@ ../../distrib/bin/fix_doc_jcode.sh
+
+sync:
+	rsync \
+		-C -av \
+		--exclude='INDEX*' \
+		--exclude=basic_setup \
+		./ ../English/
+	cp INDEX.English ../English/INDEX

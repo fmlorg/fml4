@@ -1,24 +1,30 @@
-.C	Overview
+.C	概要
+=E.C	Overview
 
 ここでは その他のユーティリティについてまとめてある。
 
 .S	fmlserv: listserve style interface
 
-listserv のようなインターフェイスが必要という場合のエミュレータ
+listserv のようなインターフェイスが必要な場合のエミュレータ
 .xref fmlserv
 
 .S	popfml: POP3 をつかってＭＬをエミュレーション
+=E.S	popfml: POP3 based ML emulator
 
-NT4 の POP version の実態。
+Windows 2000/NT4 で使われる fml POP version の実プログラム。
 .xref popfml
 
-UNIX 上でも使えるが嬉しいか？
+これは UNIX 上で使うこともできる。
 
 .S	~/.forward を利用したＭＬ
+=E.S	ML via .forward
 
 .xref .forward
 
 .S	その他の便利なプログラム
+=E.S	miscellaneous programs
 
-/usr/local/fml/bin/ などにこまごまとしたものがある。
+/usr/local/fml/bin/ にこまごまとユーティリティがあります。
 .xref uip
+
+.# $Id$

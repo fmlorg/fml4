@@ -1,49 +1,72 @@
-.C	Overview
+.C	概要
+=E.C	Overview
 .l	virtual-domains
 
-virtual domain については fml がどうこうというよりMTAの設定のはなしな
-ので特別何かあるわけじゃありませんが、インストールや upgrade を簡単化
-する工夫の余地はあります。
+バーチャルドメインにまつわる諸問題は、fml の設定というより、メールサー
+バの問題です。しかし、fml のインストールやアップグレードの際に、手間を
+はぶく工夫の余地はあります。
+=E
+If you want to run ML under virtual domain, you can use fml, off
+course. 
 
-一般には一台のマシンで複数の(それぞれのドメイン用の)fmlがインストール
-されていることとになります。
-例:
+バーチャルドメインの場合、一般に一台のホストに複数の(それぞれのドメイ
+ン用の) fml がインストールされています。例:
+=E
+Firstly you can install plural fml systems. For example,
 
-virtual-1 用
-	/usr/local/fml-virtual-1/	1用の実行ファイル群
-	/var/spool/ml-virtual-1/	1用のスプール
+.q
+virtual-1
+	/usr/local/fml-virtual-1/
+	/var/spool/ml-virtual-1/
 
-virtual-2 用
+virtual-2
 	/usr/local/fml-virtual-2/
 	/var/spool/ml-virtual-2/
 
-virtual-3 用
+virtual-3
 	/usr/local/fml-virtual-3/
 	/var/spool/ml-virtual-3/
+.~q
 
+例えば /usr/local/fml-virtual-1/ が、virtual-1 用の実行ファイル群
+/var/spool/ml-virtual-1/ は virtual-1 用のＭＬのスプールになります。こ
+れは、ディスクの無駄のようにみえますが、わかりやすいものです。
+=E
+/usr/local/fml-virtual-1/ directory has execlutables.
+/var/spool/ml-virtual-1/ directory has ML's home directories
 
-makefml を使って設定することを考えるとこれする方が簡単です。
-
-もちろん /usr/local/fml と /var/spool/ml-virutla-1,2,3 だけでももちろ
-ん動きますが、その場合 makefml を使おうとするとちょっと工夫が必要にな
-ります。
+一方 /usr/local/fml は共用し、/var/spool/ml-virutla-1,2,3 を使う方がディ
+スク消費は少ないです。しかし makefml を使う際には少し工夫が必要になり
+ます。
+=E
+If you can share /usr/local/fml over several virtual domains, 
+the disk requires smaller areas.
 
 
 .S	makefml に設定を読み込ませるやりかた
+=E.S	makefml can read configuration via -f option
 .xref	makefml-opt-f
 
 makefml install を実行すると対話モードになるので、各
+=E
+You can use configuration file in this way. 
 
+.q
   makefml -f /some/where/virtual-domain-1 install
   makefml -f /some/where/virtual-domain-2 install
+.~q
 
--f の引数は /usr/local/fml/.fml/system というファイルです。
+-f の引数は /usr/local/fml/.fml/system というファイルです。例:
+=E
+/some/where/virtual-domain-1, the option of -f, is the configuration
+file. The format is the same as /usr/local/fml/.fml/system.
+For example:
 
-例:
-
+.q
   makefml -f /usr/local/fml-virtual-1/.fml/system install
   makefml -f /usr/local/fml-virtual-2/.fml/system install
   makefml -f /usr/local/fml-virtual-3/.fml/system install
+.~q
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

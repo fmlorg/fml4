@@ -1,6 +1,8 @@
 .C	postfix での virtual domain 設定
+=E.C	Example: postfix and virtual domains
 .l	virtual-domain-postfix-example
 
+.q
 /etc/postfix/virtual:
 
 	elena@domain-1.org	elena-1
@@ -10,5 +12,6 @@
 
 	elena-1: :include:/var/spool/ml-virtual-domain-1/elena/include
 	elena-2: :include:/var/spool/ml-virtual-domain-2/elena/include
+.~q
 
 .# $Id$

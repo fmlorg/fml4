@@ -6,8 +6,10 @@
 =E
 Example:
 
+.q
    info@domain1.org
    info@domain2.org 
+.~q
 
 1. fml を２つインストールする。
 
@@ -15,17 +17,21 @@ make install する時に
 
 一つは
 
+.q
    DOMAIN NAME               [domain1.org] 
    FQDN                      [domain1.org] 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
    TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
- 
+.~q 
+
 もう一つを
 
+.q
    DOMAIN NAME               [domain2.org] 
    FQDN                      [domain2.org] 
    EXEC FILES DIRECTORY      [/usr/local/fml2] 
    TOP LEVEL ML DIRECTORY    [/var/spool/ml2] 
+.~q
  
 にしてインストールする。２つめを作る時にロックが気になるかも知れないが、
 インストール時にロックをしないで進めるには
@@ -48,21 +54,23 @@ info@domain2.orgをつくる
 
 3. /etc/aliases にそれぞれの設定を書く
 
-
+.q
 	info: :include:/var/spool/ml/info/include
 	... 略  ...
 
 	info-domain2: :include:/var/spool/ml2/info/include
 	... 略  ...
-
+.~q
 
 どっちのドメインの設定かわかりやすいように
 
+.q
 	info-domain1: :include:/var/spool/ml/info/include
 	... 略  ...
 
 	info-domain2: :include:/var/spool/ml2/info/include
 	... 略  ...
+~.q
 
 などもいいかもしれない。
 

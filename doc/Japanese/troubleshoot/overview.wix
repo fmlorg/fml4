@@ -1,34 +1,40 @@
 .C	トラブル事例の概要
+=E.C	Overview of trouble samples
 .l	trouble
 
 トラブルといっても内容は多岐に渡ります。
+=E
+The kinds of trouble exmaples covers a lot of areas.
 
 .S	OSの問題
+=E.S	Operating System
 
-典型例
-	permission がない
-	OS のディレクトリ permission の設定がおかしい
-	附属のパッケージがおかしい、ソースから作り直すべき
+典型的な例は
+	「permission がない」
+	「OS のディレクトリ permission の設定がおかしい」
+	「附属のパッケージがおかしい、ソースから作り直すべき」
+などです。OS 特有の設定や、おまじないが必要な場合もあります。
 
-などです。OS 特有の設定とかおまじないが必要な場合もあります。
-
-詳細: .ptr{troubles.os}
+詳細: .ptr{troubles.os} 参照
 
 
 .S	メールサーバの問題
+=E.S	mail server
 
-メールサーバの設定がおかしくてエラーになることがあります。単にOSの出荷
-時の初期設定がおかしいためにメールサーバがちゃんと動作してくれないこと
-も多いです。
+メールサーバの設定がおかしいため、エラーになることがあります。単に OS 
+の出荷(初期)設定がおかしいために、メールサーバが正しく動作しないことも
+よくあります。
 
 典型例は(OSとだぶりますが)
-	OS のバージョンアップをしたら smrsh になっていた (redhat > 5.2 ?)
-	ディレクトリの permission がおかしい
+	「OS のバージョンアップをしたら smrsh になっていた (redhat > 5.2 ?)」
+	「ディレクトリの permission がおかしい」
+などです。
 
-詳細: .ptr{troubles.mailserv}
+詳細: .ptr{troubles.mailserv} 参照
 
 
 .S	FML自体の問題
+=E.S	fml itself
 
 特定のバージョンでだけ失敗する。
 	もっと新しいものを使ってみてください
@@ -36,6 +42,7 @@
 
 
 .S	質問やバグレポートの際のお願い
+=E.S	on bug reports
 
 .if LANG == JAPANESE
 ログなりがないと答えようがありません。
