@@ -3,6 +3,29 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/10
+
+   ADD_FIELD() always convert the args to be capitalized
+
+	ADD_FIELD はどんな引数を与えても常に capital に変更する。
+	XXX 変更していいのか？	
+
+	例: ADD_FIELD('x-uja')  は ADD_FIELD('X-Uja') と解釈される。
+
+   libdist.pl
+   $USE_SMTPFEED_F_OPTION
+
+	100 回に一回 smtpfeed -F -1 を使う。
+	(smtpfeed の設定は各自がんばてください:)
+
+	mead はこのヘッダを見ているが…
+
+   makefml lock extension
+	you can use "makefml lock -e script" now.
+
+	makefml lock -e script を実行するとロックをかけつつ
+	script を実行する。
+
 2000/09/03
 
    sbin/makefml   
