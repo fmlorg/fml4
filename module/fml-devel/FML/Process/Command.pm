@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Command.pm,v 1.90 2003/10/17 14:00:51 fukachan Exp $
+# $FML: Command.pm,v 1.92 2003/11/30 09:59:19 fukachan Exp $
 #
 
 package FML::Process::Command;
@@ -84,6 +84,7 @@ sub prepare
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
     $curproc->scheduler_init();
+    $curproc->log_message_init();
 
     if ($config->yes('use_command_mail_program')) {
 	$curproc->parse_incoming_message($args);
@@ -200,13 +201,13 @@ sub run
 	# XXX reject command use irrespective of requests from admins/users.
 	# XXX rejection of admin use occurs in _evaluate_command_lines()
 	# XXX not here.
-	# XXX possible cases are from "system_accounts" or from a not member.
+	# XXX possible cases are from "system_special_accounts" or from a not member.
 	else {
 	    # check the error reason by permit_command().
 	    my $reason = $pcb->get("check_restrictions", "deny_reason");
-	    if (defined($reason) && ($reason eq 'reject_system_accounts')) {
+	    if (defined($reason) && ($reason eq 'reject_system_special_accounts')) {
 		my $s = "deny request from system accounts";
-		$curproc->reply_message_nl("error.system_accounts", $s);
+		$curproc->reply_message_nl("error.system_special_accounts", $s);
 	    }
 	    else {
 		$curproc->reply_message_nl("error.not_member",

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.1 2003/08/30 00:14:44 fukachan Exp $
+# $FML: Message.pm,v 1.2 2003/12/06 04:48:20 fukachan Exp $
 #
 
 package FML::IPC::Message;
@@ -34,7 +34,7 @@ operations.
 
 # Descriptions: constructor.
 #    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: create an object 
+# Side Effects: create an object
 # Return Value: OBJ
 sub new
 {

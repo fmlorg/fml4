@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: list.pm,v 1.17 2003/09/27 03:00:16 fukachan Exp $
+# $FML: list.pm,v 1.19 2003/11/26 09:19:10 fukachan Exp $
 #
 
 package FML::Command::Admin::list;
@@ -56,7 +56,7 @@ sub need_lock { 0;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $options = [ 'member' ];
+    my $options = [];
 
     # import makefml options
     if (defined $command_args->{ options } &&
@@ -79,20 +79,19 @@ sub _show_list
 {
     my ($self, $curproc, $command_args, $options) = @_;
     my $config  = $curproc->config();
-    my $maplist = undef;
+    my $maplist = $config->get_as_array_ref( 'list_command_default_maps');
 
+    # XXX first match is ok ?
+  ARGV:
     for my $option (@$options) {
-	if ($option =~ /^recipient|active/i) {
-	    $maplist = $config->get_as_array_ref( 'recipient_maps' );
-	}
-	elsif ($option =~ /^member/i) {
-	    $maplist = $config->get_as_array_ref( 'member_maps' );
-	}
-	elsif ($option =~ /^adminmember|^admin_member/i) {
-	    $maplist = $config->get_as_array_ref( 'admin_member_maps' );
-	}
-	else {
-	    $curproc->logwarn("list: unknown type $option");
+	my $list = $self->_gen_key_list($option);
+
+      KEY:
+	for my $key (@$list) {
+	    if (defined $config->{ $key } && $config->{ $key }) {
+		$maplist = $config->get_as_array_ref( $key );
+		last ARGV;
+	    }
 	}
     }
 
@@ -100,7 +99,7 @@ sub _show_list
     unless (defined $maplist) { croak("list: map undefined");}
     unless ($maplist)         { croak("list: map unspecified");}
 
-    # FML::Command::UserControl specific parameters
+    # FML::User::Control specific parameters
     my $uc_args = {
 	maplist => $maplist,
 	wh      => \*STDOUT,
@@ -109,13 +108,32 @@ sub _show_list
     my $r = '';
 
     eval q{
-	use FML::Command::UserControl;
-	my $obj = new FML::Command::UserControl;
-	$obj->userlist($curproc, $command_args, $uc_args);
+	use FML::User::Control;
+	my $obj = new FML::User::Control;
+	$obj->print_userlist($curproc, $command_args, $uc_args);
     };
     if ($r = $@) {
 	croak($r);
     }
+}
+
+
+# Descriptions: generate keyword list
+#    Arguments: OBJ($self) STR($key)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub _gen_key_list
+{
+    my ($self, $key) = @_;
+    my (@list) = (sprintf("%s_maps", $key),
+		  sprintf("primary_%s_map", $key),
+		  sprintf("fml_%s_maps", $key));
+
+    if ($key =~ /maps$/ || $key =~ /^primary_\S+_map$/) {
+	unshift(@list, $key);
+    }
+
+    return \@list;
 }
 
 

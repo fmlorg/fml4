@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Kernel.pm,v 1.192 2003/11/05 03:37:52 fukachan Exp $
+# $FML: Kernel.pm,v 1.197 2003/12/06 04:48:20 fukachan Exp $
 #
 
 package FML::Process::Kernel;
@@ -106,8 +106,8 @@ sub new
 			    primary_ml_home_prefix_map
 			    ml_home_prefix_maps
 			    default_config_cf
-			    site_default_config_cf 
-			    
+			    site_default_config_cf
+
 			)) {
 	if (defined $args->{ main_cf }->{ $main_cf_var }) {
 	    my $key = sprintf("fml_%s", $main_cf_var);
@@ -117,7 +117,7 @@ sub new
 
     # 1.3 import $fml_version
     if (defined $args->{ fml_version }) {
-	$cfargs->{ fml_version } = 
+	$cfargs->{ fml_version } =
 	    sprintf("fml-devel %s", $args->{ fml_version });
     }
 
@@ -154,8 +154,8 @@ sub new
     # 3.6 default printing style
     $curproc->_print_init;
 
-    # 3.7 set up message queue for logging.
-    $curproc->_log_message_init();
+    # 3.7 set up message queue for logging. (moved to each program)
+    # $curproc->_log_message_init();
 
     # 4.1 debug. XXX remove this in the future !
     $curproc->__debug_ml_xxx('loaded:');
@@ -1129,7 +1129,11 @@ sub is_refused
 }
 
 
-=head1 MESSAGE HANDLING
+=head1 LOG MESSAGE HANDLING
+
+=head2 log_message_init()
+
+initialize log message queue.
 
 =cut
 
@@ -1138,13 +1142,25 @@ sub is_refused
 #    Arguments: OBJ($curproc)
 # Side Effects: set up $curproc->{ log_message_queue }.
 # Return Value: none
-sub _log_message_init
+sub log_message_init
 {
     my ($curproc) = @_;
+    my $config    = $curproc->config();
+    my $module    = $config->{ log_computer_output_engine };
+    my $obj       = undef;
 
-    use FML::IPC::Queue;
-    my $queue = new FML::IPC::Queue;
-    $curproc->{ log_message_queue } = $queue;
+    eval qq{
+	use $module;
+	\$obj = new $module;
+    };
+    $curproc->logerror($@) if $@;
+
+    if (defined $obj) {
+	$curproc->{ log_message_queue } = $obj;
+    }
+    else {
+	$curproc->logerror("fail to create log_computer_output_engine object");
+    }
 }
 
 
@@ -1152,13 +1168,21 @@ sub _log_message_init
 #    Arguments: OBJ($curproc) HASH_REF($msg)
 # Side Effects: update message queue.
 # Return Value: none
-sub _msg_queue_append
+sub _log_message_queue_append
 {
     my ($curproc, $msg) = @_;
     my $msg_queue = $curproc->{ log_message_queue };
 
-    $msg->{ time } = time;
-    $msg_queue->append($msg);
+    if (defined $msg_queue) {
+	$msg->{ time } = time;
+	$msg_queue->add($msg);
+    }
+    else {
+	my $debug = $curproc->get_debug_level();
+	if ($debug > 1) {
+	    print STDERR "msg: ", $msg->{ buf }, "\n";
+	}
+    }
 }
 
 
@@ -1170,13 +1194,9 @@ sub _log_message_print
 {
     my ($curproc) = @_;
     my $msg_queue = $curproc->{ log_message_queue };
-    my $msg_list  = $msg_queue->list();
-    my ($buf);
 
-    for my $m (@$msg_list) {
-	$buf = $m->{ buf } || '';
-	$buf =~ s/\n/ /g;
-	printf "%10d %5s %s\n", $m->{ time }, $m->{ level }, $buf;
+    if (defined $msg_queue) {
+	$msg_queue->print();
     }
 }
 
@@ -1221,7 +1241,7 @@ sub log_message
     }
 
     # update message queue
-    $curproc->_msg_queue_append({
+    $curproc->_log_message_queue_append({
 	buf   => $msg,
 	level => $level,
 	hints => {
@@ -2356,7 +2376,8 @@ sub _reopen_stderr_channel
     if ($curproc->is_cgi_process()       ||
 	$curproc->is_under_mta_process() ||
 	defined $option->{ quiet }  || defined $option->{ q } ||
-	$config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	$config->yes('use_log_dup') || $option->{ 'log-dup' } ||
+	$config->yes('use_log_computer_output') || $option->{'log-computer-output'}) {
 	my $tmpfile = $curproc->temp_file_path();
 	my $pcb     = $curproc->pcb();
 	$pcb->set("stderr", "logfile", $tmpfile);
@@ -2389,7 +2410,9 @@ sub _finalize_stderr_channel
 	if ($curproc->is_cgi_process()       ||
 	    $curproc->is_under_mta_process() ||
 	    defined $option->{ quiet }  || defined $option->{ q } ||
-	    $config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	    $config->yes('use_log_dup') || $option->{ 'log-dup' } ||
+	    $config->yes('use_log_computer_output') ||
+	    $option->{'log-computer-output'}) {
 
 	    close(STDERR);
 	    open(STDERR, ">&STDOUT");
@@ -2464,7 +2487,8 @@ sub be_quiet
     if ($curproc->is_cgi_process()       ||
 	$curproc->is_under_mta_process() ||
 	defined $option->{ quiet }  || defined $option->{ q } ||
-	$config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	$config->yes('use_log_dup') || $option->{ 'log-dup' } ||
+	$config->yes('use_log_computer_output') || $option->{'log-computer-output'}) {
 	return 1;
     }
     else {
@@ -2484,7 +2508,8 @@ sub finalize
     my $config    = $curproc->config();
     my $option    = $curproc->command_line_options();
 
-    if ($config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+    if ($config->yes('use_log_dup') || $option->{ 'log-dup' } ||
+	$config->yes('use_log_computer_output') || $option->{'log-computer-output'}) {
 	$curproc->_finalize_stderr_channel();
 	$curproc->_log_message_print();
     }

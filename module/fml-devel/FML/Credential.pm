@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Credential.pm,v 1.48 2003/11/17 15:38:16 fukachan Exp $
+# $FML: Credential.pm,v 1.52 2003/11/30 09:59:18 fukachan Exp $
 #
 
 package FML::Credential;
@@ -61,13 +61,35 @@ sub new
 {
     my ($self, $curproc) = @_;
     my ($type) = ref($self) || $self;
+    my $config = $curproc->config();
+    my $actype = $config->{ address_compare_function_type };
     my $me     = \%Credential;
 
     # default comparison level
     set_compare_level( $me, 3 );
 
+    # user address check
+    if ($config->yes('use_address_compare_function')) {
+	$me->{ _use_address_compare_function } = 1;
+    }
+    else {
+	$me->{ _use_address_compare_function } = 0;
+    }
+
+    # case insensitive for backward compatibility. (default)
+    if ($actype eq 'user_part_case_insensitive' ||
+	$actype eq 'case_insensitive') {
+	$me->{ _user_part_case_sensitive } = 0;
+    }
     # case sensitive for user part comparison.
-    $me->{ _user_part_case_sensitive } = 1;
+    elsif ($actype eq 'user_part_case_sensitive' ||
+	   $actype eq 'case_sensitive') {
+	$me->{ _user_part_case_sensitive } = 1;
+    }
+    # case-insensitive by default for backward compatibility.
+    else {
+	$me->{ _user_part_case_sensitive } = 0;
+    }
 
     # hold pointer to $curproc
     $me->{ _curproc } = $curproc if defined $curproc;
@@ -170,6 +192,9 @@ are same since the last 3 top level domains are same.
 sub is_same_address
 {
     my ($self, $xaddr, $yaddr, $max_level) = @_;
+
+    # always same if address_check function disabled.
+    unless ($self->{ _use_address_compare_function }) { return 1; }
 
     # both should be defined !
     unless (defined($xaddr) && defined($yaddr)) {
@@ -430,12 +455,12 @@ sub _get_address
 }
 
 
-=head2 match_system_accounts($addr)
+=head2 match_system_special_accounts($addr)
 
 C<addr> matches a system account or not.
 The system accounts are given as
 
-     $curproc->config()->{ system_accounts }.
+     $curproc->config()->{ system_special_accounts }.
 
 =cut
 
@@ -445,7 +470,7 @@ The system accounts are given as
 #    Arguments: OBJ($self) STR($addr)
 # Side Effects: none
 # Return Value: STR
-sub match_system_accounts
+sub match_system_special_accounts
 {
     my ($self, $addr) = @_;
     my $curproc = $self->{ _curproc };
@@ -456,7 +481,7 @@ sub match_system_accounts
 
     # compare $user part with e.g. root, postmaster, ...
     # XXX always case INSENSITIVE
-    my $accounts = $config->get_as_array_ref('system_accounts');
+    my $accounts = $config->get_as_array_ref('system_special_accounts');
     for my $addr (@$accounts) {
 	if ($user =~ /^${addr}$/i) { return $addr;}
     }
