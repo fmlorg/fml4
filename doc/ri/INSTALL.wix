@@ -13,28 +13,29 @@
 .fi
 
 .if LANG == JAPANESE
-   ******************* 重要 ***********************
+[ガイド]
 
-   自動登録を使っていてなおかつ 2.x から 3.0 へ移行する人は
-   必ずUPGRADEを呼んで下さい。
-   2.x to 3.0 の部分だけ以下のURLに抜き出してあります。
-.url	http://www.fml.org/fml/UPGRADE-3.0/
+    *** 重要 *** 
+    3.0へのアップグレードの注意(特に自動登録を使っている人へ)
+.url http://www.fml.org/fml/UPGRADE-3.0/
 
-   ***********************************************
-   
-   このドキュメントで説明しているのは基本的なことに絞っています。
-   よりすすんだ設定については 
-	doc の下にある op.jp というファイル
-	http://www.fml.org/fml/op/ 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
-   の part III「インストールとカスタマイズ」を見て下さい。
-   Windows NT4 上でのインストールについては INSTALL_on_NT4 も
-   見て下さい。NT4 でのUNIXとの違いについての注意が書いてあります。
+   簡単な install と設定例などについては以下のURLに
+   より詳細なものがこのドキュメントです。
+.url http://www.fml.org/fml/examples/
 
-   バージョンアップに際して困ったらまずはUPGRADEという注意書きを
-   読んでみてください。
+   デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
+   doc/op.jp というファイルをみてください
+.url	http://www.fml.org/fml/op/ 
 
-   なお以下のドキュメント中ではメーリングリストをＭＬと略しています。
+   細かいカスタマイズは part III「インストールとカスタマイズ」を
+.url	http://www.fml.org/fml/op/index.html#Configurations
+
+   MTAごとの設定やNTではどうするか？などはファイルが別にあります。
+.url	http://www.fml.org/fml/
+
+
+[用語]
+   以下のドキュメント中ではメーリングリストをＭＬと略しています。
    % はシェルのプロンプトです。
 .fi
 .if LANG == ENGLISH
@@ -49,12 +50,12 @@
    ***********************************************
 
    For more details on advanced settings, please see the part III of
-	FML_SOURCE/doc/op.en		(plain text)
-	http://www.fml.org/fml/op-e/	(html)
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op-e/ (html)
+   doc/op.en		(plain text)
+.url	http://www.fml.org/fml/op/index.html#Configurations
 
    For installation on Windows NT4, please also see INSTALL_on_NT4.
 
+[Terminology]
    The word "ML" is the abbreviation of "Mailing List" in this document.
    % is the shell prompt.
 .fi
@@ -66,6 +67,7 @@ __________________________________________
 
 .C	簡単なインストールの流れ
 =E.C	Quick Ovewview
+.n	overview
 
 インストールの大まかな流れは次のようになります。詳しくは後述します。
 versionの数字や作られるDIRECTORYについては適当に読み変えて下さい。コマ
@@ -106,6 +108,7 @@ elena MLを作る。
 
 .C	ＭＬサーバとは?
 =E.C	What is ML?
+.n	concept
 
 ＭＬサーバは本質的にフィルタリングをするものです。ＭＬ宛のメールが来た
 ら配送プログラムから起動されいろいろな処理をした後、配送するべき(MLの)
@@ -179,6 +182,7 @@ emulator bin/cron.pl in fml-source (see => .ptr{msend}).
 
 .C	インストール
 =E.C	Installation
+.n	installation
 
 以下の例では /usr/local/fml に実行ファイル /var/spool/ml の下に各ＭＬ
 の directory (例: elena MLは/var/spool/ml/elena)などを作ることにします。
@@ -560,7 +564,7 @@ configurations (e.g. config.ph, include).
 
 .C	fml の扱い方の概要について
 =E.C	Overview on how to treat fml 
-
+.n	fml-overview
 
 (MLの管理者の作業として) MLの設定のカスタマイズやユーザの登録/削除など
 はfml の動いているホストに入り、設定ファイルやメンバーリストを変更する
@@ -1969,7 +1973,7 @@ $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 =E.C	How to add a user by remote administration
 .l	configure-remote-administrators
 .l	configure
-
+.n	remote-admin
 
 .S	リモート管理の権限をもつユーザをＭＬに加える場合
 =E.S	To add the user who can manage the ML server in remote. 
@@ -2009,6 +2013,7 @@ Please input the "password" of "who" (Email address).
 .C	設定ファイルの編集について
 =E.C	Configuration File
 .l	config-file
+.n	configuration-file
 
 各ＭＬのHOMEディレクトリには cf と config.ph という２つのファイルがあ
 ります。config.ph がそのＭＬの動作を制御するもっとも大事なファイルです。 
@@ -2198,6 +2203,7 @@ Also you can edit files e.g. help, guide in the same way.
 
 .C	動作のテスト, デバッグについて
 =E.C	How to test and debug
+.n	debug
 
 .if LANG == JAPANESE
 1. OSのメールのログを調べる。
@@ -2251,6 +2257,7 @@ Example:
 .C	典型的なエラー
 =E.C	Typical Error Cases
 .l	maillog-typical-errors
+.n	errors
 
 原因を探るためにはパッケージ附属の CHECK_LIST.jp や
 http://www.fml.org/fml/CHECK_LIST/ にリストアップされている項目をチェッ
