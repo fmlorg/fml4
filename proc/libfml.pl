@@ -92,8 +92,8 @@ sub DoProcedure
     local($limit, $history);
     $linenum = 0;
 
-    my ($max_len) = &ATOI($MAXLEN_COMMAND_INPUT) || 128; # each line <= 128 bytes 
-    $max_len = 5;
+    # each line <= 128 bytes 
+    my ($max_len) = &ATOI($MAXLEN_COMMAND_INPUT) || 128;
 
     # ATTENTION!
     # if $USE_SUBJECT_AS_COMMANDS != NULL,
