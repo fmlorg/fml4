@@ -133,5 +133,7 @@ __htmlbuild__ += ${__HTML_EXAMPLES__}
 __htmlbuild__ += ${__HTML_MANIFEST__}
 __htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
 htmlbuild: ${__htmlbuild__}
-	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
+	@ echo ""
+#	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
 	@ echo --htmlbuild done.
+	@ echo ""
