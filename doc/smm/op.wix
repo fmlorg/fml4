@@ -1,0 +1,4848 @@
+	-----	fml [Tuning and FAQ]	-----
+	http://www.phys.titech.ac.jp/uja/fml/
+	Last modified: 
+
+このファイルは歴史的な理由をひきずったままFAQという名前ですが、
+FAQ、Setting、改造の仕方等に関する読みものになっています。
+＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+	ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/
+	http://www.phys.titech.ac.jp/uja/fml/
+＃see README
+
+
+----------目次----------
+.index
+
+総索引
+------------------------
+
+
+.# ##########################################################
+.C	ＭＬサーバ概論
+
+
+.S	サーバの中身は？
+.label	fml-mechanism
+
+ようは Sendmail からパイプで渡されたメールをヘッダと本文にわけて（ヘッ
+ダの解析もして）、メンバーへ配送かコマンドを実行するってだけです
+
+さらっと、fml.plのmain partを説明しましょう。
+
+↓
+	引数からINCLUDE PATHを設定する(config.ph libaries...)
+	基本ライブラリのインクルード(e.g. SMTP)
+
+		&ChkREUid;
+	setuid のチェック、もしだめだと警告を出す
+	＃おそらく、その場合はその後のどこかで止まるでしょうが
+
+↓	ファイルや日付等のチェック
+
+		&InitConfig
+.key		&InitConfig
+
+	最初の空行を境にヘッダー、本体を分ける。
+	コマンドモードか否かを最初の3行が#ではじまっているかどうかで
+	判断（コマンド専用のアドレスも作る方が建設的かと…）。
+
+	見知らぬ人からのガイド要求チェック
+
+		&Parsing
+.key		&Parsing
+
+	From:とかSubject:の中身を切り出す。
+
+		&GetFieldsFromHeader
+.key		&GetFieldsFromHeader
+
+	ロックをして他のプロセスは待たせる（コマンド、配送問わず）。
+
+		(!$USE_FLOCK) ? &Lock : &Flock
+.key		$USE_FLOCK
+.key		Lock
+.key		FLock
+
+	もし、特別なことがしたければｈｏｏｋをしかけておく
+	＃ＭＬ依存のことです。デフォールトは何もしない
+
+		$START_HOOK && &eval($START_HOOK, 'Start hook'); 
+.key		$START_HOOK
+
+	＃＃＃ いよいよ、メインパート↓ ＃＃＃
+
+	もし見知らぬ人からのガイド要求だったら？
+	＃See INSTALL, README, config.ph
+
+		if($GUIDE_REQUEST) { 
+.key		$GUIDE_REQUEST
+
+	ガイドを送ってあげる
+
+		&GuideRequest
+.key		&GuideRequest
+
+	そうでないならＭＬサーバとして動くので、
+	メンバーチェックを実行
+
+		} elsif(&MLMemberCheck) { 
+.key	&MLMemberCheck
+
+	メンバーチェック もしくは チェックして自動登録なら登録
+	＃その区別は この sub MLMemberCheck 内で場合わけしている
+
+	メンバーチェックを通過したら、
+	普通にＭＬへ来たメールなのか？
+		or 
+	コマンド実行する要求なのか？の最終判断をする。
+
+		&AdditionalCommandModeCheck
+.key		&AdditionalCommandModeCheck
+
+	配送以外のなんらかのコマンド要求（LOAD_LIBRARYが空でない）だっ
+	たら
+
+		if($LOAD_LIBRARY) {
+.key		$LOAD_LIBRARY
+
+	$LOAD_LIBRARY(e.g. libfml.pl)を読み込んでコマンドを実行
+	＃デフォールトでは require 'libfml.pl'; と同じ
+
+			require $LOAD_LIBRARY;
+
+	もし、コマンドなら $LOAD_LIBRARY ＝ libfml.pl つまりコマンドを
+	実行する。config.ph等で $LOAD_LIBRARY を設定しておけば常にその
+	ライブラリ（$LOAD_LIBRARY）をよび、○○専用、例えばftpmail専用
+	サーバ等に設定できる（ために汎用化した（1.3.2））。
+
+	コマンドでもなければ配送（ＭＬ本来の挙動）を実行
+
+		} else {
+			&Distribute;
+.key			&Distribute
+
+	ロックを外しておしまい（通常はここで終り）
+
+		(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
+
+	■以下は必要に応じて■
+	なにかユーザーへ伝えることが起きていたらメールを送る
+	例：エラー等の通知。
+	&Notify if $_cf{'return'};	# Reply some report if-needed.
+.key	&Notify
+.key	$_cf{'return'}
+
+	この時点で本体とは直接関係ない残り仕事を”必要”なら実行
+	e.g. コマンドのmget とか まとめおくりver.5 をここで実行
+	
+		&RunHooks;	＃Ｌｉｓｐかいな:-)
+.key		&RunHooks
+
+		exit 0
+
+
+.S	ＭＬサーバの考え方？（私見）
+.key	ＭＬサーバの理屈
+
+Private Communication を便利にするだけのツール（Filter）
+＃Private→メンバーチェックという考え方になる。
+
+考え方：
+メール→Sendmailがうけとる
+             ↓
+	サーバへ渡す。
+             ↓
+	フィルター操作（しないなら/etc/aliasesいじるだけ）
+	さらにヘッダーをいじるとか…
+	＃これくらいならsed＋αでも十分
+             ↓
+	なんらかのリストにしたがって配送
+	＃“配るだけ”ならSendmail 8.xでも十分
+
+＋αでログをとり、スプールし、必要なら取り寄せられるようにちょこっとだ
+け複雑なことをしようとするならこのサーバまで必要です。
+
+
+.S	認証プロセス
+.key	認証プロセス
+
+せいぜい数百人（←数字100に根拠はありません。ふつうはそんなにいかないも
+の〜ってくらい）程度とおもって線形にファイルを探索します
+
+メンバー数万のオーダーとかいわない限り関係ないとおもうんですが…
+＃律速段階はやっぱりsendmailでしょう(sub Distribute)
+
+でも、普通 user@foo.bar.uja の user の exact match でreturn しちゃうか
+ら、その後の複雑なマッチング処理はあんまり気にしなくてもよいでしょう
+（期待値としての振舞いは）
+
+
+
+.S	律速段階
+.key	何がどこが遅くさせるか？
+
+律速段階はやっぱりsendmailでしょう。
+
+sub Distribute でＭＸ引く時とかサーバプロセスの後のSendmailの配送が遅
+いでしょうねぇ。
+＃アクティブな人たちをmember fileの最初にするとすると少しは早いかな:-)
+＃後、読み込む前に grep 一発かましてからとかね :-)
+
+ひっくりかえすと、sub Distribute のループとか認証プロセス以外は、少し
+くらい余計なプロセスがついても、ほとんど効かないということです。
+＃正確なProfileははかってないですけど
+
+
+.S	動く時のuid はどうなってるの？
+.key	uid
+.key	setuid
+.key	ユーザー権限ということ
+.label	fml-uid
+
+・ローカルに自分が実験したら
+
+	自分のuidで実行
+
+・外からメールがやってきたら？
+
+	外→	
+		sendmail は uid = 1で起動（daemon）
+		→ setuidしてユーザー権限(uid=your own)にして
+		   → fml.pl を起動する
+	＃これは fml.c で作った fml を使うか
+	＃:include list 形
+	.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
+
+	→ fml.plに渡す
+
+この辺でsetuidの話とかが関係するわけですね。
+
+各ＯＳでどう setuid をすればうまくいくか？については INSTALL にまとめ
+一覧があります。そちらをみてくださいませ
+
+
+.S	自動登録について
+.seealso fml-mechanism
+.key $ML_MEMBER_CHECK
+.key 自動登録
+.key 自動登録の仕方のヴァリエーション
+
+$ML_MEMBER_CHECK が 0 とか "" のようになっている時が
+”自動登録モード”
+	で、
+”それ以外はメンバーチェックをするモードです”。
+
+で、自動登録で使うアドレスと、メールでどういうふうに明示的な意志表示を
+してほしいか？のvariationが以下の話です。
+
+.key 登録に使うアドレスはどこから選ぶ？
+登録に使うアドレスはどこから選ぶ？：
+From: を見てメンバーチェックをし、知らない人かどうかを決めています。
+明示的に普段の From: と違うアドレスで登録したいなら
+＃例えば、ＭＬからのメールは マシン名つきのアドレスでうけるとか？
+
+本文の先頭に subscribe email-address（変更したいもの） を書いて下さい。
+＃Reply-to はLoopbackだけならともかく危険なので、自動登録の時は考慮す
+＃るのをやめました。
+
+	自動登録のパターンは
+	見知らぬ人からメールがきた	→
+
+	１．	自動的に登録してそのままＭＬにフォワードする。	
+	.seealso auto-regist-4
+
+		ＯＦＦ会用ＭＬなんかに便利です。
+		例：「出席します」メールがそのまま流れる
+
+
+	２．	自動的に登録してそのままＭＬにはフォワードしない
+	.seealso auto-regist-3
+
+	３．	そのメールにSubject: subscribe のようなキーワードが必要
+		（キーワード必須）
+	.seealso auto-regist-6
+
+	４．	そのメール本文に subscribe のようなキーワードが必要
+		（キーワード必須）
+	.seealso auto-regist-7
+
+のVariationがあります。くわしい設定はそれぞれのセクションを見て下さい。
+
+＃注意：２の”フォワードするか否か？”は１、３、４と独立事象です。つま
+り、２ｘ３＝６通り
+
+基本的な挙動は、
+
+	メンバーチェック（もしくはしない）、失敗したらロックを外して終り
+	見知らぬ人からのガイドの要求ならガイドを送る。
+	＃See INSTALL, README, config.ph
+
+	&MLMemberCheck; が呼ばれると
+
+	ここでは、
+	１．メンバーファイルと比較して
+	２．見知らぬ人なら	
+	３．メンバーファイルに登録して（ここからはlibutils.plを使う）
+	４．管理者へ知らせ
+	５．WELCOME（ぱふぱふぅ〜♪）というメールを返す
+
+というのをします。この５↑のために config.ph に
+	
+	$WELCOME_FILE	= "$DIR/guide";		# could be "$DIR/welcome"
+	$WELCOME_STATEMENT = 
+	"Welcome to our $ML_FN\n You are added automatically\n";
+
+というのがあって $WELCOME_FILE は歓迎の文章を書いたファイル（とりあえ
+ず、guideにしておいてあります）で、そのメールの Subject が
+
+	$WELCOME_STATEMENT = 
+	"Welcome to our $ML_FN\n\sYou are added automatically\n";
+
+になります。
+
+		
+.S	コマンド専用サーバなら "# command" syntax じゃなくてもいいわけで…
+
+	次説参照
+
+.S	コマンドの # syntax は必要か？ 
+
+“コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
+もし、コマンド専用のアドレスで
+
+	# get 1
+		も
+	get 1
+
+同じに動いて欲しいなら
+＃もちろん off bye 等も同じですが
+
+$COMMAND_ONLY_SERVER = 1;
+
+と config.ph に書いてみてください。
+＃もっとも、こうしておくと listserv とかわりませんな:-)
+
+
+.S	コマンドは一辺に実行できるか？
+
+	% cat foo
+	# get 1
+	# get 2
+	# get 3
+	# help
+	# summary
+	% cat foo | Mail ＭＬのアドレス
+
+とすると、1 2 3 の記事を取り寄せ、ヘルプとさらにサマリーファイルもとり
+よせるという働きをします。bye を除き 一行一コマンドなら順番にすべて実
+行します。
+
+それは各行ごとにどんどん処理をするようになっているからです。
+＃ ただし # exit はコマンドの終りです。ここで exit = end = quit
+
+
+.S	コマンドは一辺に実行できるか？２
+.label	command-plural2
+
+でも、
+	% cat foo
+	uja
+	# get 1
+	# get 2
+
+というファイルだとエラーです。最初の３行のどこかで#ではじまる行があれ
+ばコマンドモードとみなして処理を行なうためです。
+最初の行は空行で２行目に#があるメールが、間違えてながれたりしないため
+の防止機構です。この“３”行の“３”を変えたいときは
+
+config.ph の中の
+	$COMMAND_CHECK_LIMIT = 3;（最初の３行をチェックする）
+を変えます。
+
+
+.S	コマンドの終り（シグニチャア対策）
+.key シグニチャア対策
+
+# exit 
+# end
+# quit
+
+を追加しました。このコマンドのところでアクションは終了します。
+シグニチャアがあってもいいように、こうしました。
+
+
+.S	コマンドのエラー警告
+
+デフォールトではしません。$USE_WARNING =1; とすると変なコマンドがあっ
+たらメールでユーザーへ知らせます。
+.seealso USE_WARNING 
+
+
+.S	$TMP_DIR = './tmp'; を各種作業に使います。
+.key	$TMP_DIR
+
+1.3.1.3 からは $TMP_DIR をセットして下さい。
+セットしないと デフォールトでは $DIR/tmp(つまり $TMP_DIR = './tmp';) 
+です。
+
+/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
+＃だって private communication だもん
+
+
+.S	コマンド専用サーバ
+
+コマンド専用のサーバ（登録とか、get とか…）
+と
+Distribution 担当のサーバ
+の２つということですね
+
+コマンド専用のアドレスときには
+
+	$COMMAND_ONLY_SERVER = 1; 
+
+となるようにする（たとえば config.ph にかく）。この時
+	# command と command 
+は同じです。つまり 
+
+	# get 1 
+も
+	get 1 
+
+は同じです＃以下同様に各コマンド…
+
+ついでに subsribe コマンドも使えたりします。
+
+さらに $ML_MEMBER_CHECK = 1; だと members と actives 両方にアドレスを
+登録します
+
+
+.S	リモートで管理する設定
+.seealso	REMOTE-ADMINISTRATION
+
+SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
+にはなっていません。リモートで管理もできるようにモードを変えるには、
+
+	$REMOTE_ADMINISTRATION = 1;
+
+としてください。
+
+カスタマイズするべきファイル等は
+
+    アドミンと認めるメンバーのリスト（Email-address）
+    $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+
+    アドミンのコマンドのHELPファイル
+    $ADMIN_HELP_FILE	= "$DIR/help-admin";
+
+   リモート管理にパスワードを要求する場合には１に
+    $REMORE_AUTH        = 0;
+
+    その場合のパスワードを保存するファイル
+    $PASSWD_FILE        = "$DIR/etc/passwd";
+
+詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
+
+
+
+.# ##########################################################
+.C	Install && Configurations
+.label	configuration
+
+ここはおおむね概論です。細かい詳細（フラッグ等のsetting）は後の章を御
+覧下さい（その名前の章があれば…ですが）。
+
+
+.S	Version up
+
+Version up は *.pl をコピーすれば終りです。
+
+さらに RecreateConfig.pl を用いて昔の config.ph の設定を尊重しつつ新し
+い機能のためにconfig.ph を作ることができます(from 1.2.1.7)
+
+注意：（たぶん1.2.1.5 ->） 1.2.1.7以降へのヴァージョンアップでは、
+RecreateConfig.pl を使うべきです。
+（$AUTO_REGISTERD_UNDELIVER_P という変数の設定に関して問題が発生するの
+で）。それより昔のものへのヴァージョンアップなら関係ありません。
+
+
+.S	インストール後にサーバの設定（パラメータ）をいじるには？
+.key	fml.plの起動のしかた
+.key	exec fml.pl
+.key	$DIR
+.key	$LIBDIR
+.key	fml.c
+.key	fml.plの引数
+.label	c-wrapper
+
+fml.cの中に
+
+	fml.plの場所   config.phのある場所   ライブラリの場所
+
+の形でexecするように埋め込んで最初にcompileしました。
+directoryを変えるにはここを書き換えてrecompileです。
+＃since 1.1.2.17 1994.3.14 version
+
+例： fml.c
+
+execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+      "(fml)", 
+      "/usr/spool/EXP", /* config.ph は どこ？ */
+      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      NULL);
+
+これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
+イル等を見ながら直してみて下さい。
+
+よってversion upも*.plファイルをコピーすればいきなり使えるようになりま
+す。
+
+
+.S	fml.plの呼び方、引数の渡し方(4.3BSD)
+.key	fml.plの起動のしかた
+.key	fml.plの引数
+.key	:include:
+.key	onwer-list
+.label	calling-fml.pl
+.seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
+
+fml.pl の中に変数は今はもうありません（fml 1.2）。
+
+fml.cの中でfml.pl directoryという形で呼ぶようになってます。
+＃ fml.pl config.phのあるdirectry libaries の形で呼ぶ
+
+上と同じことを↓こういう書き方（ちゃんと動くか否かはsendmail の 
+version依存だろう）でもできる
+＃本当にこれが sendmail 8.x の最終仕様なんだろうか？（みたいだなぁ）
+
+	/etc/aliases では
+
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
+
+	/usr/local/list/Elenaの中身は
+
+	"|/home/axion/fukachan/work/spool/Elena/fml.pl directory"
+
+こうするとElena（ファイル）の所有者のＩＤで動くようになります。
+
+
+.S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
+.label  calling-fml.pl-POSIX
+.key	POSIXなsetuid
+.key	POSIX
+.key	fml.plの起動のしかた
+.key	fml.plの引数
+.key	:include:
+.key	onwer-list
+
+もし POSIX なら 
+
+% make OPT=-DPOSIX 
+
+とすると、 uid gid を今の環境からわりだして自動的にこういう風にcompile
+します。↓
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+perl sbin/ccfml cc -s -O -DPOSIX   fml.c -o fml
+O.K. I'll try to guess your OS...
+-f /usr/include/sys/types.h
+-f /usr/include/unistd.h
+#	... No OS= option specified; dynamically determining OS type
+#	... OS appears to be "nos4"
+
+cc -s -O fml.c -o fml  -DXXUID=65536 -DXXGID=999 -DPOSIX  -DOS=nos4 
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+fml ができたら スーパーユーザー権限で
+
+# chown root fml
+# chmod 4755 fml
+
+これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
+たのuidに設定して fml.pl を起動します。
+＃これ最後の手段だから…
+
+こういう時は /usr/local/ml/driver/fml とかにして そこは root 以外は絶
+対に書けないとかにしておくくらいの注意を払いたいものです。
+それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
+せん。管理者の方と相談して見てください。
+
+新しい発見 or bugがあったら fml-support ML か fml-bugs （fukachan@ に
+のみフォワード）に御一報くださいませ _o_
+
+
+.S	fml.plの呼び方 と OS一覧
+.label  calling-fml.pl-and-OS
+.key	OS_dependence
+
+INSTALLにOSのまとめ一覧があります。ご覧ください
+
+
+.S	コマンドライン オプション
+
+コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
+"|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
+
+		fml.pl $DIR $LIBDIR &optionals 
+
+で、オプション（最後につく）
+	-d	debug mode on
+	-lfile	file を $LOAD_LIBRARY 変数に代入する
+	-sopt	$opt 変数をセットする。つまり $opt = 1;
+
+注意：sendmail のように『空白なし』です。
+
+-llibfml.pl とすると、コマンド専用アドレスのできあがりです
+＃ CONTROL_ADDRESS とおなじ意味ですね
+
+例：
+	-llibftpmail.pl ftpmail 専用アドレス
+	-sdebug		debug mode
+	-sFIX_SLOCAL_PIPE	$FIX_SLOCAL_PIPE = 1;と同じ
+
+とかできるわけです
+
+例：
+"|/Baycity/fml.pl /Baycity /Baycity/lib -d -sFIX_SLOCAL_PIPE -sDUMPVAR"
+
+デバッグモード かつ $FIX_SLOCAL_PIPE =1; で 変数のダンプを行なう。
+
+
+.S	コマンド専用のサーバ
+.label	control-addr
+
+$CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
+別の汎用の仕方として、
+
+	$LOAD_LIBRARY = 'libfml.pl'; 
+
+のようにバインドしたら コマンド専用だし、
+
+	$LOAD_LIBRARY = 'libftpmail.pl'; 
+
+とすれば、ftpmail 専用のアドレスに早変わりです。
+
+それは $LOAD_LIBRARY が設定されていると、配送じゃなくて、そのライブラ
+リを実行するように動くからです
+
+
+
+.S	まとめおくり
+.label	msend-0
+.key	UNIX FROM
+.key	RFC934
+.key	RFC1153
+.key	MIME-Multipart
+.key	まとめおくり
+.key	Cron
+.key	Not using Cron
+.seealso msend-c, msend-1, msend-2, msend-3
+
+選択肢は
+	Release 4 で system にbundleされたCRON をつかう
+		か
+	fml の cron.pl (CRON clone)
+	を使う
+
+各ユーザーごとに
+
+	UNIX FROM形 でメールをひとセットにする
+	RFC934形    でメールをひとセットにする
+	RFC1153形   でメールをひとセットにする
+	MIME/Multipart
+	tar + gzip でまとめる
+	lzh + ish でまとめる
+
+を（ユーザーが）えらべます。
+
+ソースは MSendv4.pl があれば十分で、
+[Ｎ通たまったらメールを送る まとめおくり]だけは別で
+Contrib/Matomeokuri-NOCRONの下に
+	store-and-deliver.ph	(configuratio file)
+	store-and-deliver.pl
+があります。
+
+くわしくは、まとめおくりの章をご覧ください
+.seealso msend-c
+
+まとめおくり Release 4 は
+「特定時間になるとactivesの情報に基づき、その時間におくることになって
+いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
+ということをしています
+
+
+.S	コントロール専用アドレス
+.label	control-addr
+.seealso calling-fml.pl
+.key	$CONTROL_ADDRESS
+.key	コマンド専用アドレス
+
+config.phの中で
+
+$CONTROL_ADDRESS = 'Elena-ctl';
+
+をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
+けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
+ルがきても配送はしない
+
+この場合/etc/aliasesに
+
+	Elena-ctl:"|/home/axion/fukachan/work/spool/Elena/fml"
+
+とか書くことが必要です。
+＃あ、newaliasesも忘れずにね
+
+
+.S	メンバーチェックのはなし
+.seealso	auto-regist
+
+ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
+た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
+MLMemberCheck)。
+
+チェックするか否かはconfig.phの中で
+
+$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+
+で指定します。ここを（↓自動登録ということ）
+
+$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
+
+にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
+るようになる（subroutine MLMemberCheck）。
+注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
+の両方を兼任する形になっています。
+
+単にメンバーチェックをしない時はMLMemberCheck が常にreturn 1; としても
+いいでしょう
+
+
+.S	$MAINTAINERって何？
+.key	UNIX FROM
+.key	$MAINTAINER
+
+“大雑把に”いうとエラ−メ−ルの帰る場所です。
+＃エラーが変える時にこれがＭＬ宛になっていると無限ループするわけですね
+
+[歴史]	hml 1.6 はこのアドレスを
+
+	sendmail -f"$MAINTAINER"
+
+の形で使っていました。
+
+
+.S	他の人にＭＬのスプールを見せないような設定はどうするんですか？
+
+% ls .
+Elena	lib	driver
+
+という directory とする。
+＃以下省略して書くので適当にdirectory名は補ってください
+
+driver/driver には "|lib/fml.pl Elena lib"
+
+lib Elena は 700、driver は755としておけば、
+
+	sendmail(uid = 1)
+	→	
+	driver/driver を起動すると、uidが あなたのuidに変わる。
+	→	
+	ここから後は、lib, Elena は自分のuidになっているので、700でＯ
+	Ｋです。
+
+
+.# ##########################################################
+.C	config.phの項目一覧
+.key	config.ph
+.label	config
+
+あくまで Advanced なので慣れてない人はデフォールトでもいっこう
+に構いませんし、この章は読み飛ばしていっこうに差し支えありません。
+#Mariel
+1.3.1.10 前後からは config.ph は項目ごとに並びかえられています。
+
+Advanced の中で今の御時世で特別注意を払うべきなものはこの辺でしょうか
+＃次の一覧も御覧下さい
+
+デバッグモード			.seealso debug-mode
+$debug		= 1;            
+
+自動登録			.seealso auto-regist
+$ML_MEMBER_CHECK = 0;
+
+ＭＩＭＥ			.seealso MIME-1, MIME-2
+$USE_LIBMIME	= 1;
+$LIBMIMEDIR	= "$DIR/contrib/MIME";
+
+ＮＩＦＴＹ対策			.seealso against-nifty
+$AGAINST_NIFTY = 1;		もう必要ないらしい
+
+ロックのしかた
+$USE_FLOCK	= 1;		
+
+誤動作コマンドチェック		.seealso command-plural2
+$COMMAND_CHECK_LIMIT = 3;
+
+＃簡易config.ph として config.ph-fundamental というのにもっとも基本的
+＃なカスタムだけ抜き出したファイルがあります。
+＃ここにでてくる変数だけをみるほうがわかりやすいかもしれません
+＃つかうなら config.ph-fundamental -> config.ph にしてください
+
+
+.S	設定一覧（Advanced Setting）
+
+
+■デバッグモード
+$debug		= 1;            
+
+■メンバーチェックと自動登録
+$ML_MEMBER_CHECK = 1;		# メンバーチェックするか否か？
+
+・メールの中身を問わずに自動登録する時
+$DEFAULT_SUBSCRIBE = "subscribe";
+				# ただメールをだせば自動登録の時に
+				# 登録アドレスを最初から代えたいなら
+				# subscribe Email-address としてもらう。
+
+・共通
+$AUTO_REGISTERD_UNDELIVER_P = 1;# 自動登録の時、登録願いメールをＭＬへ
+				# フォワードするか否か？
+
+$AUTO_REGISTRATION_LINES_LIMIT = 0;# この行数以下のメール、例えば
+				# ただ”subscribe”一行のメールはＭＬ
+				# へは流さない
+				#（上のUNDELIVER_Pの設定に拘らず）
+				#今は 0 の場合デフォールト 7と設定される
+
+
+・自動登録する時にキーワードを必要とする時
+
+$REQUIRE_SUBSCRIBE = "subscribe";# 自動登録でsubjectに "subscribe" が必要
+$REQUIRE_SUBSCRIBE_IN_BODY = 1;	# 自動登録で本文に    "subscribe" が必要
+
+
+■ヘッダの形
+
+$SUPERFLUOUS_HEADERS = 1;	# ヘッダのadditionalなものをそのまま保存
+				# 例えば X-うじゃ の類。
+				# デフォールトは切捨て
+
+$USE_LIBMIME	= 1;		# MIME decodingを行なう
+$LIBMIMEDIR	= "$DIR/contrib/MIME";
+				# MIME decodeをするためのライブラリ
+
+$STRIP_BRACKETS = 0;		# サブジェクト の [Elena:ID] 形を抜く
+$SUBJECT_HML_FORM = 1;		# Subject: [Elena:ID] の形
+$BRACKET	= 'Elena';	# Subject: [$BRACKET:$ID] ...
+				#           ^^^^^^^^キーワード
+
+$AGAINST_NIFTY = 1;		# ＮＩＦＴＹ対策にobsoleteなErrors-to
+				# をつける;_;
+
+■ Ｓｅｎｄｍａｉｌとのおつきあい
+
+$HOST		= 'localhost';	# どのマシンのSendmailを使う？
+
+■ＯＳ、その他
+
+$USE_FLOCK	= 1;		# ロックアルゴリズムの選択
+
+$COMMAND_SYNTAX_EXTENSION = 1;	# "#member"形と"# member"形は同じ意味
+
+$COMMAND_CHECK_LIMIT = 3;	# 最初の３行は間違いコマンド探しの対象
+				# としてチェックされます。
+
+$USE_WHOIS = 0;			# Whois libraryを使うか？
+$DEFAULT_WHOIS_SERVER = "localhost";	# Default whois server
+
+$USE_RFC934 = 0;		# まとめおくりで９３４フォーマット
+
+@ARCHIVE_DIR = ('old');		# gzipした記事群のアーカイブのおき場所
+
+
+.S	デバッグモード
+.label	debug-mode
+
+デバッグモードのフラッグ。１がデバッグモード。配送以外のことは全部でき
+るので、テストに使って下さいませ。０にすると配送もするようになります。
+.key	$debug
+	$debug        = 1;
+
+
+.S	メンバーチェック or 自動登録
+.seealso auto-regist
+
+ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
+た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
+MLMemberCheck)。
+
+チェックするか否かはconfig.phの中で
+
+.key	$ML_MEMBER_CHECK
+$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+
+で指定します。ここを
+
+$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
+
+にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
+るようになる（subroutine MLMemberCheck）。
+注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
+の両方を兼任する形になっています。
+
+自動登録は３ｘ２種類もヴァリエーションがあるので、詳細については自動登
+録の章を御覧下さい。デフォールトはメンバーチェックをするのですが、上の
+フラッグを変えた時は、「自動登録して、かつそのメールをＭＬに流す」とい
+うＯＦＦ会用の設定になってます。
+.seealso auto-regist
+
+.key reply-to
+それから ＲＦＣ８２２を素直に解釈すれば登録の時に reply-to: をみて明示
+的に登録したいアドレスの変更ができるようにするべきな気がします。
+しかし、実際やってみると結構変なことが置きます。
+ヘッダをいじらない、つまり reply-to は前のメールから何も考えずにつけた
+ままにする人とかいろいろです。
+
+そこで明示的にアドレスを変えたい時は listserve のようにBody に
+
+subscribe Email-address
+
+とかいてあれば変更、ないときは From: からアドレスを決定します。
+このキーワードの変更は
+
+.key	$DEFAULT_SUBSCRIBE
+$DEFAULT_SUBSCRIBE = "subscribe";
+
+です。
+
+注意： 
+	$REQUIRE_SUBSCRIBE = "subscribe";
+
+は自動登録の時に”必ず subscribe syntaxが必須” です。
+
+デフォールトはガイド以外の見知らぬ人からのメールはメールの内容とはかか
+わらず登録です。
+
+
+.S	自動登録した時にそのメールをフォワードするか否か？
+.label	auto-regist, auto-regist-3
+.key	$AUTO_REGISTERD_UNDELIVER_P
+
+	$AUTO_REGISTERD_UNDELIVER_P = 1;
+
+自動登録はデフォールトでは登録要請をしているそのメールをＭＬへ流さない。
+つまり、「Subscribe」としか本文にないメールは流さない
+
+メール	→	登録	→ＭＬへ流す（デフォールト、
+					$AUTO_REGISTERD_UNDELIVER_P = 0;）
+
+				→ＭＬへは流さない
+					$AUTO_REGISTERD_UNDELIVER_P = 1;）
+
+注意： この変数をセットしても subscribe だけのメール（じつは８行）は 
+デフォールトでも流しません。管理者以外は見てもうれしくないでしょ？
+８ ＝ １ ＋ ３行本文 ＋４行シグニチャア ってことで
+
+デフォールトは $AUTO_REGISTRATION_LINES_LIMIT = 8; となってます
+これを０にしておけば、たとえ 中身なしメールでも流れます:-)
+
+
+.S	配送されるメールのヘッダのカスタマイズ
+.seealso header-custom
+
+.S 	OS, MISC: OTHER CUSTOM OPTIONS
+.seealso config-misc
+
+.S HOOKS: ML-specific hooks e.g. "# list"
+.seealso	customize
+
+フックの章をみてください
+
+
+.# ##########################################################
+.C	自動登録
+.label	auto-regist
+
+
+.S	基本挙動
+
+	１．メンバーファイルと比較して
+	２．見知らぬ人なら	
+	３．メンバーファイルに登録して
+	４．管理者へ知らせ
+	５．WELCOME（ひゅ〜ひゅ〜どんどんぱふぱふぅ）というメールを返す
+	６．	→ そのメールをＭＬにフォワードする（配送）
+	   or	→ そのメールをＭＬにフォワードしない（配送しない）
+	７．管理者にはいづれの場合でもメールをフォワードする
+
+
+.S	自動登録の時にSubject: subscribe と明示的に書いてもらうようにしたい
+.key	Subject: subscribe 
+
+明示的な自動登録をする時にセットして下さい。
+例えば Subject: subscribe とか書いてもらうようにしたい時です。
+
+	config.ph に使いたいキーワード（e.g. subscribe）を次のようにセッ
+	トすると、そのキーワードがある時に登録を行ないます。
+
+.key	$REQUIRE_SUBSCRIBE
+	$REQUIRE_SUBSCRIBE = "subscribe"; 
+
+デフォールトはセットされてません：
+	$REQUIRE_SUBSCRIBE = "";	# e.g.  "subscribe";
+
+例：
+	$REQUIRE_SUBSCRIBE = "subscribe";
+
+ちなみに、このメールを ＭＬ本体にフォワードさせるか否か？
+.key	$AUTO_REGISTERD_UNDELIVER_P
+	$AUTO_REGISTERD_UNDELIVER_P = 1;
+とは独立な事象です
+
+
+.S	同様だが自動登録の時にメール本文にsubscribeと明示的に書いてほしい
+.key	$REQUIRE_SUBSCRIBE_IN_BODY
+.key	$REQUIRE_SUBSCRIBE
+
+上と同様に	config.ph で
+	$REQUIRE_SUBSCRIBE = "subscribe"; 
+に加え
+	$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+
+のようにします。すると本文の先頭をみて判断します。（注意！最初の一行だ
+けです）
+
+ちなみに、これを ＭＬ本体にフォワードさせるか否か？
+	$AUTO_REGISTERD_UNDELIVER_P = 1;
+とは独立な事象です。
+
+
+.S	メンバーチェックはしないけど自動登録はしたくない(+ trick)
+.label	auto-regist-1
+.key	+
+.key	/etc/aliases＋アーカイブ
+
+membersに
+
+	+
+
+とだけ書いて
+
+	$ML_MEMBER_CHECK  = 1;
+
+
+とすると、メンバーチェックはしないけど登録もしないという動きをします。
+＃ＮＩＳにならう:-)
+
+
+.S	自動登録モードで、複数アドレスから投稿だがうけとりは一つ( skip )
+.key	skip
+.key	s=skip
+.key	複数アドレスからの投稿だが受けは一つ
+.label	auto-regist-2
+
+自動登録では見知らぬアドレスは全部新しい人とおもってしまうのですが、少
+数の人だけが
+
+	複数アドレスから投稿可能だが
+	うけとりはあるアドレスに送って欲しい
+
+という場合を考えて、members(自動登録では actives と兼任) で
+
+fukachan@phys.titech.ac.jp	skip
+
+と書いておけば認証（新人さんチェック）には使うけど配送はしないというア
+クションをします
+
+つまり
+
+	fukachan@phys.titech.ac.jp	skip
+	Elena@phys.titech.ac.jp	
+	Pollyanna@phys.titech.ac.jp	skip
+
+になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
+が、配送はelenaにしか行なわれないということです。
+
+今の話とは無関係ですが 
+fukachan@phys.titech.ac.jp	matome
+
+の行もスキップしています。まとめ送りの人だから
+
+
+.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+.key	$skip{'mail-address'}
+.key	skip
+.key	skip-but-determined-dynamically
+.key	$START_HOOK
+
+こういう処理を config.ph にかいてください。
+
+$START_HOOK = q#
+	$skip{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+
+こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
+↑ここは actives とかに現れるものと同じにして下さい。
+
+複数あるなら 全部を うえのフックに加えて下さい。
+
+
+.S	自動的に登録してそのままＭＬにフォワードする
+.label	auto-regist-4
+
+これが一番シンプルなやつですね。もともとＯＦＦ会用ＭＬなんです。
+＃「いきます」メールがＭＬにながれると便利だから
+
+
+.S	自動登録モードだと最初のメールから全部流れてしまうのはちょっと…？
+.label	auto-regist-3
+.key	$AUTO_REGISTERD_UNDELIVER_P
+
+config.ph の中で 
+	$AUTO_REGISTERD_UNDELIVER_P = 1;
+
+なら 登録要請をしている最初のメールはＭＬへ流さないようになります。
+デフォールトは０で 流してしまいます。
+
+ＯＦＦ会用ＭＬなんかだと流れててしまう（「わたしもいきま〜す！」メール）
+方がよいのですが…ケースバイケースですよね
+
+
+.S	ＯＦＦ会とかでも subscribe一行だけのメールはＭＬに流さなくても…？
+.key	$AUTO_REGISTRATION_LINES_LIMIT 
+
+登録要請をするメールで８行に達しない（つまり７行まで）のメールは、大抵
+『subscribe』とsignature４行くらいしか書いてなかったりするので、ＯＦＦ
+会用ならともかく自動登録で使う時は
+
+	$AUTO_REGISTRATION_LINES_LIMIT 
+
+の値以下の行数のメールはＭＬサーバから配送されません。
+＃もちろん管理者には知らせます
+
+$AUTO_REGISTRATION_LINES_LIMIT を明示的にセットしないと、８行にセット
+されます。
+
+config.ph では一応
+
+	$AUTO_REGISTRATION_LINES_LIMIT = 0;
+
+とセットしています。
+
+
+.# ##########################################################
+.C	ヘッダのカスタマイズ
+.label	header-custom
+
+
+.S	ヘッダの形とadditionalなものをそのまま保存すること
+.key	ヘッダの保存
+.key	$PREVENT_MIME
+
+デフォールトはMIME の３つのフィールドは↓通します。
+
+$PREVENT_MIME をセットしない限り常に 
+	MIME-Version:
+	Content-Type:
+	Content-Transfer-Encoding:
+をとおす。（１．４）
+
+＃つまり MIME反対派の方は $PREVENT_MIME をセットしてください
+
+それ以外のすべてのヘッダを通す（Received等はのぞく）時は
+
+.key	$SUPERFLUOUS_HEADERS
+	$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+とすると実行できます。0なら案１です。
+＃保存する時はsub GetFieldsFromHeaderでマッチしないフィールドは保存し
+ている
+
+
+.S	CC: フィールドだけをつける
+.key	$HEADER_ADD_HOOK
+
+config.ph で
+
+$SUPERFLUOUS_HEADERS = 0;	# preserve more header fields
+
+として、なおかつ
+
+$HEADER_ADD_HOOK = q#
+    $body .= "Cc: $Cc\n" if($Cc);
+#;
+
+
+.S	MIME decodingを行なう
+.key	MIME
+.label	MIME-1
+
+summaryに書くsubjectをMIME decodeをしてから書き込むようにするなら１です。
+
+.key	$USE_LIBMIME
+	$USE_LIBMIME	= 1;		# when use MIME Extension in libMIME.pl
+
+例：
+	……
+	Subject: Re: TELEPHONE 
+	=?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+
+	……
+というメールが来たとすると、summary ファイルには
+
+	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
+
+
+と記録されます
+
+注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
+部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
+もし、２行のsubjectは２行でというなら
+
+at sub GetFieldsFromHeader in fml.pl
+
+    # for summary file
+    $Summary_Subject = $Subject;
+#    $Summary_Subject =~ s/\n(\s+)/$1/g;	←この行を削る
+    $User = substr($From_address, 0, 15);
+
+とでもしておいて下さい。
+
+注意２ or メモ： ISO-2022-JP の文字がない限りは require しません（ま、
+たいしてかるくはならんが…）。fml.pl中の
+
+	local($INCLUDE_LIBMIME) = 1 if($MailHeaders =~ /ISO\-2022\-JP/o);
+
+.key RFC1522
+RFC1522	2. Syntax of encoded-words
+
+   encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+   charset = token    ; see section 3
+   encoding = token   ; see section 4
+   token = 1*<Any CHAR except SPACE, CTLs, and especials>
+
+
+.S	配送するメールのMIME部分はDecodeしてしまいたい
+.label	MIME-2
+.seealso MIME-1
+
+では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
+例えば、fml.pl の sub GetFieldsFromHeaderで
+
+    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+    }
+
+を
+
+    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+	$MailBody = &DecodeMimeStrings($MailBody);
+    }
+
+で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+
+
+.S	MIME decodeをするためのライブラリ libMIME.pl はどこにあるか？
+.label	MIME-3
+	$LIBMIMEDIR	= "$LIBDIR/contrib/MIME";
+					# location in libMIME.pl
+
+mimer.plというものを使うinterface部分です。適当に移してくださいませ。
+最初はもっと大層なことをしていたのですが、今はmimer.plの関数を一個呼ぶ
+くらいです。改造はlibMIME.plの中をいじる方がいいでしょう。
+
+MIME decodingの解説：
+最初は、fj.sources,fj.lang.perlにながれた
+Message-ID: <C1977.94Jan24130052@crcsn82.mdc.crc.co.jp>
+という	mime_pls 1.00a	というもので
+
+mime_pls.doc   mimer.pl       mimew.pl       
+
+の３つセットです。この記事の後のパッチもあててあります。
+#thanks to c1977@crcsn82.mdc.crc.co.jp (private communication)
+
+いまでは 1.11a です。2.00alpha  も ftp.physにおいてあります
+
+
+.S	MIMEのカスタマイズ変数
+.label	MIME-customizing
+.key	$MIME_VERSION
+.key	$MIME_CONTENT_TYPE
+.key	$MIME_MULTIPART_BOUNDARY
+.key	$MIME_MULTIPART_PREAMBLE
+.key	$MIME_MULTIPART_TRAILER
+
+右辺はデフォールトの値（Built-in）です。
+
+$MIME_VERSION = '1.0';
+
+$MIME_CONTENT_TYPE = 'multipart/mixed;';
+
+以下は MIME/Multipart で使う変数です。
+
+$MIME_MULTIPART_BOUNDARY   = "--Thu_18_May_95_02:36:26--"な形で日付を設定します。
+
+そのあと、これら↓の変数を設定してます。
+	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
+	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
+	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
+
+くぎり
+
+$MIME_MULTIPART_BOUNDARY = 
+
+本文の前口上
+
+$MIME_MULTIPART_PREAMBLE = なし
+
+本文の後につく部分
+
+$MIME_MULTIPART_TRAILER = なし
+
+
+.S	Subject: [Elena:ID] サブジェクト の [Elena:ID] を抜く
+.key	Subjectから[Elena:ID]を抜く
+.key	$STRIP_BRACKETS
+
+これは Subject: [Elena:ID] の形で配送するための前処理です。今は、
+
+	    # e.g. Subject: [Elena:001] Uso...
+	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
+	    $Subject = $contents;
+
+にしちゃいました:-)。つまり multiple Re: 問題はサーバがメール本文をい
+じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
+変更は個人がやってくれると期待して）いじらないことにしました。
+
+変数は
+	$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
+
+１ならSubjectから [ML:fukachan] みたいな部分をカットする。
+
+解説：昔は、
+
+	Subject: Re: [*] Re: サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: Re: [*] サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: [*] サブジェクト
+				→	Subject: サブジェクト
+
+ということをするために
+
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*Re:[\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^[\s\n]*\[[\s\S\n]*\][\s\n]*(.*)/o) {
+		$Subject = $1; next;
+	}
+	$Subject = $contents; next;
+
+こんなけったいな処理をしていましたが、やめました:-)
+＃このコードにもどせばmultiple Re:を削ることができます。
+
+何のために必要な前処理かというと、次を見てみよう(^^;;
+
+
+.S	hml 1.6 のSubjectの形がいいの
+
+次項参照↓
+
+
+.S	Subject: [Elena:ID] サブジェクトという形にする
+.key	$SUBJECT_HML_FORM
+.key	$BRACKET
+.key	hml形のSubject
+
+オリジナルの hml 1.6 は
+……
+From:	エレナさんＭＬ
+Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
+……
+
+こんな形のヘッダですね。で、私が嫌いなので:-)、
+＃無駄に多いヘッダは嫌いなんですよぉ。To: 見りゃわかるのにX-ML-Nameと
+＃か…X-ML-Count は違う種類の情報（Reference）だからいいんですが…
+
+デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
+ようにしました。
+
+	$SUBJECT_HML_FORM = 1;
+	$BRACKET	= 'Elena';
+
+で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
+＃今のFrom は ML名 じゃなくて ユーザー名
+
+最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
+つまり（今の場合だと）
+
+	Subject: [Elena:ID] サブジェクト
+#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
+
+の形になります。この場合
+
+	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
+
+にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+
+
+.S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
+.label	NIFTY
+.label	$AGAINST_NIFTY
+.label	against-nifty
+
+注意：もう必要ないらしい
+
+	$AGAINST_NIFTY = 1;（対策をする）
+
+NIFTY は非常識にも、Errors-to という時代おくれの部分しかみてないので;_;、
+config.ph あたりで
+
+	$AGAINST_NIFTY = 1
+
+とするとメール本文に
+
+.key	Errors-To: $MAINTAINER
+	Errors-To: $MAINTAINER
+
+がつきます。これで NIFTY からのエラーメールが $MAINTAINER に返るように
+なってくれます。後向きな解決法ですが;_;。
+＃前向きなのは、みんなで文句をいって直させること
+＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
+らいいいつづけないとだめなんだろうなぁ（はぁ）
+
+
+.S	Message-IDの保存
+.key	Message-ID
+.key	Uniq_Identifier_of_Message-ID
+.key	$USE_ORIGINAL_MESSAGE_ID
+
+$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
+てヘッダにつけます。
+
+
+.S	Message-IDを個人の趣味でカスタム化する
+.key	Message-IDのカスタム化
+.key	$HEADER_ADD_HOOK
+
+Message-ID: uja@aoi.chan.panic とするなら
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: uja@aoi.chan.panic\n";
+#;
+
+と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
+
+他の例：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	宇宙歴0403.3238…（おあそびその１）
+
+しゃれで作りました (_o_)
+
+	$STAR_TREK_FORM = 1;
+とか config.ph でしておくと
+
+Subject: [0403.00128] 外国ＴＶシリーズＭＬむけですね、これは
+＃もちろん外国ＴＶ ＭＬといえど実際には使ってないけど:-)
+
+みたいに、宇宙歴もどきとＩＤがセットの形をつけます（おあそび）。
+＃お遊びですが、One-actionだから許して(_o_)
+
+余談ですが、このStardateに意味はありません。翻訳の時に適当につけられた
+ものです。詳しくは、エンサイクロペディア等をごらんください。
+＃http://www.phys.titech.ac.jp/uja/Startrek/
+
+
+.S	宇宙歴その２
+
+外国ＴＶシリーズＭＬで使ってます:-)
+＃http://www.phys.titech.ac.jp/uja/Startrek/
+
+config.ph で	$APPEND_STARDATE = 1;
+
+Date: Fri, 19 May 95 22:31:09  JST
+From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
+Subject: Re: Nantonaku Leonard Nimoy 
+To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
+X-ML-Name: Prisoner
+X-Stardate: [-31]5697.816493
+
+…本文略…
+
+みたいになります。
+スタートレックＦＡＱにプログラムがのっています
+libStardate.pl はその perl 版です。
+
+
+.S	1つのMLに複数の投稿用アドレス
+.key	1つのMLに複数の投稿用アドレス
+
+何の意味があるのかは聞かないでください（笑）
+
+例：
+Elena@phys.titech.ac.jp というＭＬで
+Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
+の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
+
+config.ph に次の設定をする
+
+@Playing_to にフルアドレスを、			＃ループチェックに使う
+
+@Playing_to = (	'Elena@phys.titech.ac.jp', 
+		'Anna@phys.titech.ac.jp');
+
+のように、かいてください。配列の先頭がオリジナルのアドレスです。
+
+こうすると Elena になげても Anna に投げても どっちでもＯＫで、
+to: と reply-to:を変更します。
+＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
+＃もちろん昔の名前でもＯＫですが（sub InitConfigでコンヴァートしてます）
+
+例（全体）：
+----------------------------------------------------------------
+# Here is a playing of "To addresses change"; for &addressmatching
+@Playing_to = (	'Elena@phys.titech.ac.jp', 
+		'Anna@phys.titech.ac.jp');
+
+# Here is a playing of "To addresses change"; string to eval
+$SMTP_OPEN_HOOK .= q#
+        local($OrgAddr);	
+	foreach $Playing (@Playing_to) {
+	    ($Playing) = ($Playing =~ /(\S+)@/, $1);
+	    $OrgAddr = $Playing unless $OrgAddr;
+
+	    if($To_address =~ /$Playing/i) {
+		local($mail_list) = $MAIL_LIST;
+		if($mail_list =~ s/^$OrgAddr/$Playing/) {
+		    $MAIL_LIST = $mail_list;
+		}
+	    }
+	}
+#;
+----------------------------------------------------------------
+
+
+.# ##########################################################
+.C	config.phのその他の設定
+.label	config-misc
+.S	どのマシンのSendmailを使う？
+
+・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
+
+.key	$HOST
+	$HOST         = 'localhost';
+
+デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
+貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
+そういう場合上の変数を書き換えて、別のマシンに配送を任すこともできます。
+その時は
+
+	$HOST         = 'beth.foo.bar.ac.jp';
+
+のようにそのマシン名を書いて下さい。
+＃ただしgethostbynameできないようなマシンじゃだめですが。
+＃もちろんアクセスできないマシンとかではできません（あったりする）
+
+勝手にそのマシンのパワーを使うことになるのでそのマシンを使う許可を得る
+べきでしょう。
+
+
+.S	ロックアルゴリズムの選択と変数の設定
+.seealso fml-mechanism, seq-file
+
+＃fml 1.2.2 からあとでは flockでどのＯＳでも大丈夫だとおもいます。
+
+ロックアルゴリズムは二通り用意されてます。
+一つはプロセスＩＤで区別するやりかた。もう一つがflock system callを使
+うもの。flockがお奨めです
+
+.key	$USE_FLOCK
+	$USE_FLOCK    = 1;
+
+でflock system call
+
+	$USE_FLOCK    = 0;
+
+でＩＤを使うやり方にセットできます（デフォールトはflock）。
+
+・プロセスＩＤで区別するやりかたでそのＩＤをもったロック用ファイル
+をつくるdirectoryの指定
+
+.key	$LOCKDIR
+	$LOCKDIR      = "$DIR/LOCK";
+
+・その場合のデフォールトのＩＤのとり方。
+
+.key	$LOCKFILE
+	$LOCKFILE     = "$$";
+＃$$はプロセスのＩＤ（% man sh）
+
+
+.S	# helpとかの形式がいや。#helpとか#getfileがいいの
+次節
+
+.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
+
+コマンドの書き方についてのオプションです。
+
+hml 1.6 では
+	# get 1
+	# help
+のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
+たので、今度は
+
+	# get 1 と #get 1は同じものとみなす（両方使える）
+	すべてのコマンドで同じように "# " -> "#" 解釈する。
+	さらに#getfile ...も# get ...と理解する。
+
+としました。つまり、
+
+	# get 1
+	#get 1
+	# getfile 1
+	#getfile 1
+
+は同じもの。同様に
+
+	# help
+	#help
+
+も同じものです。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+	両方解釈するなら１、"# summary"みたいなhml 1.6形だけなら０。
+
+
+.S	コマンドは一辺に実行できるか？２
+.seealso	command-plural2
+
+
+.S	WHOISを使うか？
+.key	whois
+.seealso whois
+.key	$USE_WHOIS
+
+	$USE_WHOIS = 0;			# Use Whois library
+
+０ならｆｍｌデフォールト（whoisは使わない）。１なら使う。ただし、これ
+はｈｍｌとは違い、本物の任意のwhois serverとソケット間通信をするための
+ものです。
+＃ｈｍｌは独自に自分だけのｗｈｏｉｓを抱えていた（無意味＆＆security
+hole）
+
+例：
+
+% echo  "# whois fukachan" | Mail -v Elena@phys.titech.ac.jp
+
+% echo "# whois -h どっかのwhois fukachan" | Mail Elena@phys.titech.ac.jp
+
+は ”どっかのwhois” に聞きにいきます。
+
+	$DEFAULT_WHOIS_SERVER = "localhost";
+
+で デフォールトの whois サーバを変更できます。コマンドの -h オプション
+で変更できるわけですが、コマンドの-hオプションが優先します。
+
+例：
+	"# whois -h どっかのwhois fukachan"
+
+
+.S	まとめおくり(Rel. 4)のデフォールトで RFC934 形をつかうか？
+.key	$USE_RFC934
+
+	$USE_RFC934 = 0;
+
+まとめおくり(Rel. 4)で、０はデフォールトのUNIX FROMで区切られたメールを
+送り出すが、１なら次のような形のものを送るようになる。これは mh の
+burstで複数の展開に展開できます。
+＃あと、どういうソフトがあるのか知らない…:-)
+
+９３４形式の例：
+------- Forwarded Message
+From: uja
+Subject: daa 
+
+うじゃ
+------- Forwarded Message
+From: uja
+Subject: daa
+
+あおいちゃんパニック もいいけど せいふくもの もよくてよ
+------- Forwarded Message
+
+
+.S	まとめ送りのデフォールトを RFC1153 digest へ
+.label	RFC1153
+.key	RFC1153
+
+これは それぞれに通し番号をつけなければなりませんので、まとめおくりの
+デフォールトを1153にすることになります。
+
+つまりコマンド # matome 3 はgzip ではなく 1153 形を意味します。
+
+config.ph で $USE_RFC1153_DIGEST = 1; としてください。
+
+デフォールト以上の細かい部分は librfc1153.pl でフォーマットを決めてく
+ださい
+
+注意：
+一時期 デフォールトで 3時間に 強制的に設定しておいてある version があ
+りますが、ようは番号の整合性をとるためです。
+１時間おきの１１５３送りの人と、３時間おきの１１５３送りの人、があると
+番号が食い違ってしまいますから
+
+番号の整合性を無視すれば、どうでもいいことなんですが…
+とりあえず、この部分はコメントアウトしてあります（95/6/27)
+
+
+.S	コマンドのフック
+.label	command-hook, customize
+.key	$COMMAND_HOOK
+
+インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
+config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
+様にカスタマイズできる）。
+
+これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
+
+--------- in config.ph ---------
+$COMMAND_HOOK =q#
+      if(/list/io) {
+	  &Logging("List ($From_address)");
+	  &SendFile($to, "List $ML_FN", "$DIR/list");
+	  next GivenCommands;
+      }
+#;
+--------- in config.ph ---------
+
+この例だとは # 〜 # の間をquoteしています。#...コメントをとかははさめ
+ません。
+＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
+quoteする関数（本当の意味での関数ではないそうだ）
+
+fml 1.3 ではライブラリの多くの機能はこれを使うことを前提にＲＥＡＤＭＥ
+等が書かれています。
+
+応用は フックの章 に例題がのっています。
+
+
+
+.S	lzh + ish option
+.key	lzh
+.key	ish
+.key	$LHA
+.key	$ISH
+
+	# mget 200-210 ish
+
+の用に指定するとlzh して ish(s7 mode)したものを送り返します。
+
+$LHA = "/usr/share/bin/lha";
+$ISH = "/home/axion/fukachan/bin/ish";
+
+等をどこかで（config.phとか）で設定して下さい。
+しないと上の↑Built-inデフォールト値になります。
+
+
+.S	SJIS にファイルを変換して送る （lzh + ish option）
+.key	lzh
+.key	ish
+
+config.ph で $USE_SJIS_in_ISH = 1; をセットしてください。
+
+使う時は jcode.pl を INCLUDE PATH へいれておいてください。
+^M ^Z もつけます。すべて、外部コマンドを使わずに自力でやります。
+
+
+.S	コマンドで単なるシンタックスエラーの警告をしない
+.label	USE_WARNING
+.key	$USE_WARNING
+
+明示的に $USE_WARNING をセット
+e.g. in config.ph
+
+	$USE_WARNING = 1;
+
+するとコマンドメールでの単なるシンタックスエラーの警告をしない
+
+e.g. 
+# helps 			←コマンドのエラーは警告
+＃うじゃ			←シンタックスエラー警告なし
+＃しぐにちゃ〜	uja@uja.ac.jp	←シンタックスエラー警告なし
+
+
+.S	mgetのファイルサイズ（送り返し）
+.key	$MAIL_LENGTH_LIMIT
+
+in SendFile.pl
+
+	$MAIL_LENGTH_LIMIT = 1000;
+
+を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
+いますよね。
+＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
+＃参照 http://www.phys.titech.ac.jp/fml/ の下
+＃pc-van は何の問題もなかったと思いました（たしか）
+
+１０００行でだいたい５０ｋくらいになります。
+
+
+
+.S	mgetのシンタックスの Shell Match Pattern(e.g. * 1? )
+.key	$SECURITY_LEBEL
+
+$SECURITY_LEBEL < 2 では 
+
+	# mget * 
+とか
+	# mget 10? 
+
+が使えます。パッケージは １ （Backward Compatibility）にして配布してま
+す。＃前のヴァージョンとおなじになるように
+
+
+.S	mgetのシンタックス
+
+何もしなくても、
+
+# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
+
+	と
+
+# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔（ｓｅｃ）
+
+の両方を理解します。サーバが自動的に切替えます。
+
+
+.# ##########################################################
+.C	ファイルをまとめて操作する関数群(mget と まとめおくり)
+
+mget と まとめおくり はユーザーごとに これらの送り方が指定できます。
+
+.S	MIME/MultipartのBNF表現（RFC1521より）
+.label	MIME-Multipart
+
+   boundary := 0*69<bchars> bcharsnospace
+
+   bchars := bcharsnospace / " "
+
+   bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
+                 / "," / "-" / "." / "/" / ":" / "=" / "?"
+
+   Overall, the body of a multipart entity may be specified  as
+   follows:
+
+   multipart-body := preamble 1*encapsulation
+                  close-delimiter epilogue
+
+   encapsulation := delimiter body-part CRLF
+
+   delimiter := "--" boundary CRLF ; taken from Content-Type field.
+                                   ; There must be no space
+                                   ; between "--" and boundary.
+
+   close-delimiter := "--" boundary "--" CRLF ; Again, no space
+   by "--",
+
+   preamble := discard-text   ;  to  be  ignored upon receipt.
+
+   epilogue := discard-text   ;  to  be  ignored upon receipt.
+
+   discard-text := *(*text CRLF)
+
+   body-part := <"message" as defined in RFC 822,
+             with all header fields optional, and with the
+             specified delimiter not occurring anywhere in
+             the message body, either on a line by itself
+             or as a substring anywhere.  Note that the
+             semantics of a part differ from the semantics
+             of a message, as described in the text.>
+
+
+.S	MIME/Multipartの見本
+
+
+Date: Thu, 18 May 95 22:33:00 JST
+From: Elena@phys.titech.ac.jp (Elena Lologrigita)
+Subject: P R E S E N T
+To: fukachan@phys.titech.ac.jp
+MIME-Version: 1.0
+Content-type: multipart/mixed;
+	boundary="--Thu_18_May_95_22:32:56--"
+
+
+----Thu_18_May_95_22:32:56--
+Content-Type: message/rfc822
+
+Date: Thu, 18 May 95 21:45:17 JST
+From: fukachan@phys.titech.ac.jp
+Subject: あほうどり
+To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+「なんとなく いいかんじだな〜 そのほうがおもしろいし 」
+につきますね、この番組
+「明日に」でも「明日へ」でも「明日」でもない「あしたキックオフ」なんで
+すよ（う〜ん、なんとなくわかるが（笑））
+
+（ふ）：やっぱり、＃３、＃７、＃２３、＃２７、＃３２ ですか
+
+----Thu_18_May_95_22:32:56--
+Content-Type: message/rfc822
+
+Date: Thu, 18 May 95 22:00:29 JST
+From: Elena@phys.titech.ac.jp
+Subject: あしたキックオフ
+To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
+Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.jp>
+
+はまるとあの変な雰囲気から抜けられなくなります（笑）やっぱり 
+アミノテツロー の謎のマニアックな味？とでもいうのがこの番組が
+一番全壊^H開してますね。
+もちろん 脚本・シリーズ構成：山本優 あっての「フリーキック」です
+
+----Thu_18_May_95_22:32:56----
+
+
+.S	RFC934
+
+rfc934	"Proposed Standard for Message Encapsulation"
+
+mh の burstで複数の展開に展開できます。
+
+例：
+------- Forwarded Message
+
+From: Anna
+Subject: Mama told me
+
+やっぱり「あほうどり」ですね。シリーズの核心です。
+脚本：山本優	絵コンテ：アミノテツロー	演出：鈴木敏明
+
+------- Forwarded Message
+
+From: Elena
+Subject: Albatoros
+
+イングリッドは隼の妹という根も葉もあるような話が…（笑）
+
+------- Forwarded Message
+
+
+.S	RFC1153 digest 
+
+comp.sys.ibm.pc.digest とかでみるでしょ？あれです
+ＲＦＣは読んでもよくわかりません;_;
+
+例：
+Date: Sat, 20 May 95 01:33:50 JST
+From: Elena@phys.titech.ac.jp
+Subject: Freekick
+To: fukachan@phys.titech.ac.jp
+
+GODAI BBS DIGEST	Sat, 20 May 95	Volume 95: Issue 120
+
+Today's Topics:
+	エレナさんの特技は？ 
+
+------------------------------
+
+Date: Sat, 20 May 95 00:00:31 JST
+From: "Ken'ichi Fukamachi" <fukachan>
+Subject: 	エレナさんの特技は？ 
+X-Mail-Count: 01932
+
+エレナさんの特技は水撒きだってば(^^) 水撒き
+
+（ふ）「とんでもだめだよ、おにいちゃん。アルバトロスは風にのるんだ」
+
+------------------------------
+
+End of GODAI BBS Digest V95 Issue #120
+********************************
+
+
+
+.# ##########################################################
+.C	フック、カスタマイズ（例を見る方がはやいかも）
+.label	customize
+
+.S	インタプリタとconfig.ph
+.seealso	command-hook
+
+インタプリタなんですから、コマンドでそのＭＬ独自の機能をもたせたかった
+らconfig.ph にフックをセットして下さい（そうすれば、ＭＬが複数あっても
+ＭＬごとに変更できるわけです）。以下、例題です。
+
+
+.S	$START_HOOK
+.key	$START_HOOK
+
+この時点では、ヘッダの各フィールドの切り出しは終っている。が、配送orコ
+マンド本体を行なう前である。
+
+例： 配送前に、もし #ではじまらない行が８行以上あれば、たとえ#ではじま
+る行があっても普通のメールとおもうようにする。
+
+$START_HOOK =q%
+    if($CommandMode &&
+       (! ($MailBody =~ /\#\s*msg/)) &&
+       ($BodyLines - $_cf{'cl'} > 8)
+       ) {
+	$CommandMode = "";
+    };
+%;
+
+
+.S	$HEADER_ADD_HOOK
+.key	$HEADER_ADD_HOOK
+
+ヘッダにつけくわえる フィールドをかいて、カスタマイズするためのフック
+
+例：
+    $HEADER_ADD_HOOK = q#
+	$body .= "X-Baycity-weather: Mizumaki";
+    #;
+
+ヘッダに X-Baycity-weather: Mizumaki とつけくわえる（意味不明（笑））
+
+例２：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	$SMTP_OPEN_HOOK
+.key	$SMTP_OPEN_HOOK
+
+このフックの後、 Sendmail へ渡すヘッダの処理が始まります。
+ここで、強制的にヘッダの内容を変えたりすると効果的です。
+
+例：
+To: フィールドのオリジナルを保存
+Reply-To: フィールドをＭＬ自体へ強制書き換え
+Precedence: を bulk へ
+
+$SMTP_OPEN_HOOK = q#
+	$To         = $Original_To_address;
+	$Reply_to   = $MAIL_LIST;
+	$PRECEDENCE = 'bulk';
+#;
+
+
+
+.S	$FML_EXIT_HOOK
+.key	$FML_EXIT_HOOK
+.seealso expire
+
+fml.pl が最後に実行する フック。このときすでに 排他制御の lock も解除
+されていることに注意。expire とかがその例ですね。
+
+
+.S	$MSEND_OPT_HOOK
+.key	$MSEND_OPT_HOOK
+
+デフォールトでは、まとめおくり や mget の時の Subject は
+
+Subject: Matomete Send [PLAINTEXT(UNIX FROM)] (1/1) (Elena Lolobrigita ML)
+
+のようになります。が    ↑↑↑↑ここのところの文章がきにいらないので
+OVERWRITE したいときは、
+
+$MSEND_OPT_HOOK = q%
+    $MSendOpt{'#uf'} = "#Overwritten... $MSendOpt{'#uf'}";
+%;
+
+このように、
+		$MSEND_OPT_HOOK 
+に 連想配列の 
+	#モード の値が #説明の文章
+
+のようにかいてください。なにをやってるのかは、libutils.pl の中の
+sub MSendModeSet  という関数を見るとわかるとおもいます。
+
+
+.S	COMMAND_HOOK（コマンドへの追加）
+
+次を参照
+
+
+.S	コマンドをふやそう！♪でっきるかな〜♪でっきるかな
+
+config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
+します。こういうことをしてもいいというのは、大抵コマンドは一メールあた
+り１、２回しか呼ばれないので、eval は重たいけど、１、２度ならまぁ便利
+さの方が優先という経験と観察に基づいてます。
+
+
+.S	コマンドをふやそう！例： "# list" and "# rsummary"
+.key	$COMMAND_HOOK
+
+注意： rsummary は現在は summary 引数 の形で実行できます
+
+例：
+# list 			list リストファイルを取り寄せる
+# rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
+
+$COMMAND_HOOK =q#
+print STDERR $COMMAND_HOOK;
+      if(/list/io) {
+	  &Logging("List ($From_address)");
+	  &SendFile($to, "List $ML_FN", "$DIR/list");
+	  next GivenCommands;
+      }
+
+	if(/rsummary/io) {
+	    &Logging("R Summary ". $Fld[2]);
+	    if($Fld[2] =~ /^(\d+)\-(\d+)$/) {
+		local($a) = $1; local($b) = $2; local($RETURN);
+		open(TMP, "$DIR/summary") || do { &Logging("$!"); next GivenCommands;};
+		while(<TMP>) {
+		    if(/\[$a:/ .. /\[$b:/) {
+			$RETURN .= $_;						
+		    }
+		}
+		close(TMP);
+		&Sendmail($to, "Restricted  Summary $Fld[2]", $RETURN);
+	    }else {
+		&Logging("Summary ($From_address)");
+		&SendFile($to, "Summary $ML_FN", "$DIR/summary");
+	    }
+	    next GivenCommands;
+	}
+#;
+
+.S	コマンドをふやそう！例： "# sget"
+.key	$COMMAND_HOOK
+
+# sget uja		subjectに uja というキーワードが入っているファ
+			イルを取り寄せる
+
+$COMMAND_HOOK =q#
+      if(/^sget$/io) {
+	  local($s);
+	  if(open(F, $SUMMARY_FILE)) {
+	      while(<F>) {
+		  /$Fld[2]/ && do {/\s\[(\d+):/ && ($s .= $s ? ",$1" : $1);}
+	      }
+	      close(F);
+	  }else {
+	      $s = "Fail";
+	      &Logging("Search and Get $Fld[2] Fail");
+	      next GivenCommands;
+	  }
+
+	  &Logging("Search and Get $Fld[2]");
+	  &Sendmail($to, "Search and Get ". $Fld[2] . $ML_FN, $s);
+      }
+#;
+
+
+.S	コマンドをふやそう！例： "# admin" アドミンコマンド
+.key	$COMMAND_HOOK
+.key	$ADMIN_MEMBER_LIST
+.key	$ADMIN_HELP_FILE
+.key	$REMORE_AUTH
+.key	admin-command
+.key	アドミンコマンド
+.seealso	REMOTE-ADMINISTRATION 
+
+"# admin" アドミンコマンド って昔あったんですが、いまは、
+内蔵しちゃったので、わざわざ↓これしなくても、
+
+$REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
+(.seealso REMOTE-ADMINISTRATION )をみてね
+
+
+.S	"# admin" アドミンの昔の呼出方。
+
+lib/remote/REAMDE をみてもらうとわかりますね。 
+
+
+
+.# ##########################################################
+.C	trouble shooting
+
+
+.S	KNOWN BUGS
+
+１．
+ひとつのメールで
+# mget 1-10 ish
+# mget 1-10 unpack
+みたいに 種類を混ぜると 中で conflict して挙動がおかしくなるが…
+今の仕様ではとりあえず回避できない _o_ 
+＃って普通そういう変なことをするかね？？？
+
+
+.S	ありそうなこと
+
+う〜ん、動かなくてありそうなことといえば…（詳細はこの後の各sections）
+
+・setuid problem
+	でもケースバイケースなんですよねぇ
+
+・perlのインストール（socket.phがない）
+	（たぶん）4.019以上なら動くと思うんですが…
+
+・SYSVでflock, trancate等の実装がおかしい。（よってPerlでもおかしい）
+
+・OSのバグでlseek system callがおかしい。
+
+・Bourne Shellの実装が違う
+	＃そんな極端なのあるか？（ぼそっ）
+
+.S	Insecure dependency in chdir 
+
+	次です↓
+
+
+.S	動かない？（setuid or tperl ...）
+.seealso c-wrapper, calling-fml.pl, plural-handling-1, plural-handling-2, plural-handling-3
+
+ちゃんとfmlが4755になってますか？makeはしましたか？
+つまり
+
+	-rwsr-xr-x  1 fukachan guild 24576 Nov 26 04:43 fml
+
+のようにｓがありますか？
+
+解説：（versionによりこまごまと違うんですが…）
+setuidしないと sendmailは daemon（どらえもん:-)）のプロセスなので何箇
+所かdaemon に権限がなければならない変更が出てきます。しかし、それは気
+分が良くありません。それでsetuidということが話題になるわけです。
+
+sendmail が
+
+	in /etc/aliases
+	Elena:"|/home/axion/fukachan/work/spool/Elena/fml.pl"
+	owner-Elena:fukachan
+
+をちゃんとできれば問題はないんですが…結局、:include形でそれの中身が↑
+に落ち着いちゃったみたいですね。
+
+ちなみにfml.cはC wrapperでsetuidするため（だけ）のものです。中で
+
+  setuid(geteuid());
+  setgid(getgid());
+
+をしているだけです。問題は、これを ユーザー ができるのは ４．３ＢＳＤ
+までです。
+4.4BSD (POSIX準拠) では
+
+  The setuid() function sets the real and effective user IDs and the saved
+  set-user-ID of the current process to the specified value.  The setuid()
+  function is permitted if the specified ID is equal to the real user ID of
+  the process, or if the effective user ID is that of the super user.
+
+というわけで、もしも :include: でもだめなら
+
+一回 root に setuid する必要があります。つまり
+
+	-rwsr-xr-x  1 root guild 24576 Nov 26 04:43 fml
+
+みたいになります。この場合
+
+メール	→	sendmail(uid = 1)
+	-> 	fml
+	-> 	fml(uid = 0)	
+	-> 	setuid(uid → fukachan) して fml.pl を実行
+	->	fml.pl directory libdir
+
+この時は
+	getuid() == geteuid()
+かつ
+	getgid() == getegid()
+になっているはずです。そうでない時 Insecure といって perl は停止します。
+
+どのＯＳで、fml(user で setuid)、:include:、fml(root で setuid) すべき
+かは INSTALL を見て下さい。
+新しい発見があったら fml-bugs か fml-support Mailing list まで御一報を
+(^^)
+
+
+.S	:include:うじゃ is unsafe for mailing to program ...
+
+Posted:  Fri, 21 Jul 1995 03:10:25 JST
+X-Mail-Count: 00476
+
+check：		includeするファイルおよびそこまでのパスの	
+		どこかで危ないことがないか？
+		
+		でも、fpathconf とか  fchown ってよくわからない
+		意外なものも判定条件にしてるかも…（わからないけど）
+		＃sun os4.1.3JLEも変とかいってたし…
+
+ＯＳ：
+		fpathconf はPOSIXです。
+
+		EWS は…よくわかりません… がマニュアルにPOSIXとかかい
+		てあればきっと同じような現象でしょう。
+
+		HP では fchown() ではんていしてるらしいです。
+		あと、HP では setuid() じゃなくて まだ setreuid() を
+		使ってるとおもうので、
+		default の fml.c ではうまくいかないでしょう
+		setuid -> setreuid にしてでいいのかな…
+		% man setreuid ででてくる設定は多分setuid
+		なんかとおなじだとおもいますが…
+
+回避：
+		/usr/local/ml/include-file
+		とか local disk 上にうつして permission をきびしくする
+		＃111 とかまで？…:-)
+
+		限界までpermissionをおとして、
+		rootにsetuidした C-wrapper を同様な場所につくる
+		＃要注意な作業	
+
+		sendmail の chownsafe() が常に真を返すように改造する
+
+理由：
+
+QUNSAFEADDR フラッグがONになるのは、
+
+１	chown がちゃんとできないとき
+２	world writable であるとき
+
+です。で、１のほうは fpathconf() とか  fchown() だとすれば
+
+sendmail -> 
+forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
+			このとき
+			fpathconf()が安全性をチェックする
+
+の時に fpathconf() が bugってるか、それともpath
+	path = /home/local/lib/ML/fml/run_HOGEHOGE
+
+のどこかにファイルの所有者以外への write permission が与えられていると
+か、NFSごし だとか… 
+
+
+.S	ガイドとかが なぜか返送されない（no file in Sub SendFile[logfile]）
+.key	$SUN_OS_413
+
+妙に SUN OS 4.1.3 (+JLE)  の場合が多かったんですが
+perl の file test operator が（-T なんでもけっこう変みたい）おかしくて
+プレインテキストか否か？のチェックをしているところがちゃんと動作してい
+ません。
+
+とりあえず config.ph  の最初の方で
+
+	$SUN_OS_413 = 1;
+
+としておいてください。
+＃この変数の実体は $SENDFILE_NO_FILECHECK という変数を １ にすることで
+す。config.ph の後半で再代入しています。上の名前は単にわかりやすいよう
+にです。
+.key	$SENDFILE_NO_FILECHECK
+
+
+.S	log file の 550...は？
+
+Sendmail からのエラーメッセージの記録です。
+メッセージは [45]\d\d 形式です。
+ログの前後を調べて何が原因か調べてみて下さい。
+
+
+.S	 Can't locate sys/socket.ph in @INC
+.key	sys/socket.ph
+
+ Can't locate sys/socket.ph in @INC (did you run h2ph?) at ...
+ 554 "|/usr/spool/driver/fml"... unknown mailer error 2
+
+perlのインストールの時にh2phを走らせて
+
+	/usr/local/lib/perl/sys/socket.ph
+
+あたりにあるとおもうんですが、やってないとファイルがないので怒られるわ
+けです。
+
+% (cd /usr/include; h2ph * sys/*)
+
+で	/usr/local/lib/perl	に作ってくれると思います。
+＃% man h2ph
+
+一応、後向きな考えですが
+	contrib/sys/socket.ph
+
+というのを4.3BSDで作って、
+
+	distrib/sys	->	distrib/contrib/sys
+
+へリンクを飛ばしておいたので一応動くでしょうが、こういうsystemからみの
+fileはちゃんとインストールするべきだと思いますよ
+
+
+.S	"You should install sys/socket.ph using h2ph."
+.key	h2ph
+
+	"You should install sys/socket.ph using h2ph."
+
+というのがデバックモードで出てくるんのは何故？上を見ましょう！
+＃後向きな解決法なのでインストールを促しているんですね(^^)
+
+
+.S	seq fileの中身がおかしい？
+.key	seq
+.key	flock
+.key	lseek
+.label	seq-file
+
+seq fileがこんなかんじに
+
+1
+2
+2
+
+みたいになってる。
+
+「OSのバグ（kernel libraryだよね?）でlseek system callがおかしい。」
+が原因でこうなってしまいます;_;。
+
+	$USE_FLOCK    = 0;
+
+として flock を使わない方式にすればseekは使わないので大丈夫です。
+
+[備考]
+
+    seek(LOCK, 0, 0);
+
+は以下と同じだろうけど、きっとどっちも動かないと思うよぉ？
+
+    require 'sys/unistd.ph';
+    require 'sys/syscall.ph';
+    syscall &SYS_lseek, fileno(LOCK), 0, &SEEK_SET;
+
+[おかしい OS ]
+少なくとも以下の機種はおかしいようだ
+
+	Netbsd  0.9
+	NetBsd current(1/29)
+	Sun-OS 4.1.3C
+	Sun-OS 4.1.3 JLE1.1.3
+
+
+.S	ヘッダの時間がおかしい？
+.key	TZ
+.key	sendmail.cf
+
+システムで環境変数ＴＺがちゃんと定義されてない or ちゃんとSendmailに渡
+されない場合
+「変な TZ が設定されているため ＧＭＴ を使ってしまう」
+
+例えば sendmail.cf が古いとかで sendmailをいれかえたら顕在化したとか、
+
+fml.pl内で呼ばれるlocaltimeが正しい値を返さないため、
+変なＴＺの渡し方をして、結果としてＧＭＴをかえしてしまう
+
+例えば、JLEでないSUN-OS4.1.3でおこる。JLEの場合は正しい値を返す
+
+sendmail.cf に TZ=japan-time みたいに見知らぬものがついてたら削るかそ
+のＯＳの正しい書き方にする。
+
+もうひとつの後向きな考え方は fml.pl で 
+	$ENV{'TZ'} = 'JST';
+のようにセットしてしまうこと
+
+SunOS 4.1.3_U1(English)では、$ENV{'TZ'} = 'Japan';  だそうです。
+＃thanks to hogawa@mesh.ad.jp
+
+.S	Received: from  (localhost.変なドメイン) by ...
+.key	Received:
+.key	sendmail.cf
+
+少なくとも localhost ってところだけは関係ありますが後は sendmail と 
+sendmail.cf の問題であって fml の問題ではありません。
+
+謎の sendmail.cf だと変な展開をしてくっつけるのかも知れません。ネット
+の管理者の人に聞いてみて下さい。
+＃ DNS の設定が変とか resovler がおかしい OS とか 謎のsendmail とか 謎
+の sendmail.cf とか 謎のNIS もありうるか？………（おいおい）
+＃ 管理者に聞いてみませう。一応キーワードは逆引き
+
+解答０： localhost.変なドメイン → マシン名
+
+localhost.変なドメイン に関してだけは
+
+	in config.ph
+	$HOST		= 'そのマシン名';
+
+にしたらもしかしたらちゃんと展開したマシン名になったりしませんか？
+＃う〜ん、後向きな解決法だなぁ…
+
+
+解答１： Received: from  ... by ... を
+	 Received: by ... にする
+
+例：	sendmail.cf 	を
+
+HReceived: by $j ($v/$Z); $b
+
+にする。
+
+
+.S	WARNING: UNIX FROM Loop
+
+自動登録の時に 
+ＭＬ本体とかを間違って登録すると 無限にループしますよね？
+で、loopback はそのためのチェックなんですが、
+
+UNIX FROM loop の方のチェックは それとはちがって
+
+「/usr/sbin/sendmail -bd -t みたいな間違った設定をしたせいで 無限ルー
+プ事件というのが先日おきた」
+
+のを ふせぐための コードです
+
+ふつうは MAINTAINER に登録するものは ML-request とか ML-admin みたいな
+ものを別に作って登録するという暗黙の前提をしてますから…
+
+自分でＭＬにメールをだして 
+	自分＝＝$MAINTAINER 
+だと loop にひっかかるケースもありえます
+
+できたら MAITAINER は -request とかにするのがおすすめなんですが、
+いやなら 
+
+sub GetFieldsFromHeader の
+
+    # now before flock();
+    if (&AddressMatch($Unix_From, $MAINTAINER)) {
+	&Log("WARNING: UNIX FROM Loop");
+	exit 0;
+    }
+
+ってところを削ってみてください 
+
+
+
+.S	Solaris 2.4 でプロセス間通信がうまくいかない時
+
+SOCK_STREAM = 2;   らしいので、
+
+ちゃんと /usr/include/sys/socket.h から作った 
+sys/socket.ph （/usr/local/lib/perl(/ＯＳ名)/sys/socket.ph あたり）
+を 呼んでいないと動かないと思います。
+
+それともちがうなら 次の手段にでるっす↓
+
+
+.S	プロセス間通信がうまくいかない
+.key	ソケットがつくれまへん
+.key	プロセス間通信
+.key	IPC
+.key	libsmtp.pl
+.key	libo2smtp.pl
+.key	libR8.pl
+
+“ソケットがつくれまへん”とかいわれてしまったら、
+
+プロセス間通信をつかわないライブラリに変えてみてください。
+（もしかしたら、このライブラリではsyslogとかにうじゃうじゃでちゃうかも
+しれませんが…）
+
+変え方は、lib/Sendmail/libo2smtp.pl というのをINCLUDE PATHのどっかにおいて
+＃昔の名前は lib/Sendmail/libR8.pl
+
+fml.plの先頭のあたりの
+
+	require 'libsmtp.pl';
+を
+	require 'libo2smtp.pl';
+
+にしてみてください。
+あと libo2smtp.pl の先頭の /usr/lib/sendmail をＯＳにあわせて変えて下さい。
+libo2smtp.pl は open2.pl をつかっています。これでちゃんと受け答えする
+ようにするようになったはずです。
+＃ただ libsmtp.pl にくらべて ばんばんforkとかするので趣味としては嫌（苦笑）
+
+
+.S	Solaris 2.3(SUN OS 5) flock がうごかない？？？
+
+	flock がだめ ていうエラーメッセージがでたら
+	$USE_FLOCK = 0;にしてみてください
+
+
+.S	パソコンメールとの共存でのトラブル
+.S	cc:Mailでのトラブル
+.key	nkf
+.key	cc:Mail
+.key	パソコンメールソフト
+
+cc:Mail は[\033\050\112]を日本語が絡みそうな部分には強制的に入れている
+らしいです。
+
+他のツールとの兼ね合いや、bug fix、各ケース全部を叩き潰すよりも、
+/etc/aliasesなどでnkfをパイプするようにした方がはやいかもしれないそう
+です
+
+e.g. 
+本文に記述した"# help"などのMLのコントロールメールに関しても
+"[\033\050\112]# help"となってしまうそうです。
+
+private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
+
+
+.comment %%%%% The second %%%%%
+
+
+.# ##########################################################
+.C	アーカイブ, Archive & Expire
+.label	archive
+
+場所をとるから古い記事にはgzipかけたい。でも一つ一つやるより１００個ず
+つとかならさらに効率が上がります。以下を参照
+
+.comment beth
+.S	古い記事にはgzipかけたいなぁ、場所をとるから
+.key	@ARCHIVE_DIR
+
+config.ph の例：
+
+@ARCHIVE_DIR = ('old');
+＃ @StoredSpool_DIR = ('old');はObsolete
+
+spool/1-100	-> +tar+gzip	-> old/100.gz と作っているとする
+＃（趣味）僕は恐いので その gzip fileは自分で自動では作らないようにしてい
+ます。
+
+これは次のように fml.pl は解釈します。
+
+例えば、"# get 1 " というコマンドを送り込んだとする。その時は
+−−−−−−−−−−
+$STORED_BOUNDARY（今は100まで）以下の記事の請求（get等）がもしあったら、
+
+	ml-dir/spool/	を探索し、もし、ファイル spool/1 が見つからない時は
+
+	ml-dir/old/	という場所も探し、1-100 までがtar + gzipされて
+	いる old.100.gzを送り返す。
+
+
+.S	gzip fileにしよう！（アーカイブへの変換）
+.key	Archive.pl
+
+それには fml-1.3.x/bin/Archive.pl というのを使って下さい。
+さらに cron で自動処理するなら次の節を御覧下さい
+
+これは Archive.pl 2000とかすると、２０００までのファイルを１００個ずつ
+の塊にして、oldに作ります。変数はArchive.plの先頭でセットしてください。
+スプールのオリジナルは消さないので、注意を払って消して下さい（とりかえ
+しがききませんから、それは）
+＃自分じゃ、こわいのである程度まとまったところでこうやって手動でつくり
+ますね、アーカイブは
+
+例えば、
+
+spool/1-100	->  +tar+gzip	-> old/100.gz
+spool/101-200	->  +tar+gzip	-> old/200.gz
+
+のようなファイルをoldの下に作るプログラムがfml-1.3.x/bin/Archive.pl で
+す。
+
+目的のＭＬの場所にまでいって
+% ls 
+
+MSendrc		actives		config.ph	deny
+guide		help		list		log
+members		objective	seq		spool
+summary		welcome
+
+% mkdir old
+
+% perl Archive.pl 3800
+…たくさんメッセージが出るが省略…
+
+% ls old
+
+100.gz   1400.gz  1900.gz  2300.gz  2800.gz  3200.gz  3700.gz  700.gz   
+1000.gz  1500.gz  200.gz   2400.gz  2900.gz  3300.gz  3800.gz  800.gz   
+1100.gz  1600.gz  2000.gz  2500.gz  300.gz   3400.gz  400.gz   900.gz   
+1200.gz  1700.gz  2100.gz  2600.gz  3000.gz  3500.gz  500.gz   
+1300.gz  1800.gz  2200.gz  2700.gz  3100.gz  3600.gz  600.gz   
+
+spoolの３８００までの１００個ずつのパッケージを作りました。
+spoolの方の元メールを自動的に消しはしない（安全のため）ので、
+自分で消して下さい。
+
+
+.S	gzip fileにしよう！（cron で自動処理）
+.key	Archive.cron
+.key	crontab
+
+cronで自動的（例えば週一日曜の朝とか）に次の形で
+
+	fml-1.3/bin/Archive.cron "MLサーバのdirectory名
+
+をよんでください。 いくつかＭＬがあるなら、シェルスクリプトにまとめて
+呼ぶといいでしょう。
+＃まとめ送りと一緒とかでもよいですね
+
+Archive.cron の先頭に変数があります
+
+	DIR="$1"
+	ARCHIVE="$DIR/bin/Archive.pl"
+
+Archive.pl が gzip化 のメインなのでこれのおき場所をちゃんとセットして
+下さい。
+
+例：
+----- crontab -----
+0 * * * *	fukachan /bin/sh /適当な場所/ML-Archive 2>&1 | Mail あなたのアドレス
+-------------------
+----- ML-Archive -----
+#!/bin/sh
+
+	sh fml-1.3/bin/Archive.cron Elena
+	sh fml-1.3/bin/Archive.cron Uja
+	sh fml-1.3/bin/Archive.cron Sayori
+
+-------------------
+
+
+.S	gzip fileにしよう！（理論編）
+
+何故、まとめてgzip化したいのか？
+
+１．一個一個gzipかけると、約半分にしかなりませんが、１００個まとめて書
+けると、ヘッダとかの重なりがあるので約２５％にまで圧縮できるようになり
+ます。
+
+２．Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
+るのでファイル数を減らす or ほかの場所に移すことに意味があるようになり
+ます。そこでspoolの中身をうつし、１００分の一のファイル数にすると効果
+が非常にあります。
+
+
+.S	expire
+.label	expire
+.key	$FML_EXIT_HOOK
+
+$FML_EXIT_HOOK = q#
+	require 'expire.pl';
+	$EXPIRE = 7;
+	&Expire($SPOOL_DIR, $EXPIRE);
+#;
+
+と設定すれば、$SPOOL_DIR 以下のファイルにたいして $EXPIRE 以上古いファ
+イルを消します（いきなり消します。注意）
+＃ expire.pl を perl の inlcude pathのどこかにいれてください
+
+cron で 
+	expire.pl -s spool-directory -e expire-period 
+とかを設定して、週一くらいで動かせばいいのでは？
+
+
+.S	expireを残すファイルの数で指定して行なう
+.label	expire_with_number
+.key	$FML_EXIT_HOOK
+
+$FML_EXIT_HOOK = q#
+	require 'expire.pl';
+	$EXPIRE = 50;
+	&Expire($SPOOL_DIR, $EXPIRE, 1);
+#;
+
+と設定すれば、$SPOOL_DIR 以下のファイルにたいして 
+	”$EXPIRE 個残して”（注意）
+それ以外の古いファイルを消します（いきなり消します。注意）
+＃ expire.pl を perl の inlcude pathのどこかにいれてください
+
+cron で 
+	expire.pl -s spool-directory -e expire-period 
+とかを設定して、週一くらいで動かせばいいのでは？
+
+
+.S	expire.pl コマンドラインオプション
+.label	expire_getopt
+.label	expire.pl
+.key	$FML_EXIT_HOOK
+
+expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
+    -h                 : HELP
+    -e expireする日数
+    -s スプール
+    -n （残すファイル数を設定して、expireするモード）
+
+
+
+.S	logファイルの整理、消去をする
+.seealso	newsyslog
+
+
+.S	newsyslogをする（デフォールト）
+.label	newsyslog
+.key	$NOT_USE_NEWSYSLOG
+.key	@NEWSYSLOG_FILES
+
+まとめおくりの MSendv4.pl は日曜朝６時に（デフォールト）
+
+	libnewsyslog.pl を実行します
+
+この３つのファイル（デフォールト）に対し
+
+@NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak")
+
+rm -f var/log/members.4
+mv -f var/log/members.3 var/log/members.4
+mv -f var/log/members.2 var/log/members.3
+mv -f var/log/members.1 var/log/members.2
+mv -f var/log/members.0 var/log/members.1
+ln -s members.bak 	var/log/members.0
+
+を実行します。必要なら この @NEWSYSLOG_FILES に これ↑をやってほしいファ
+イル（log とか…）をつけくわえて 
+
+@NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak", "log")
+
+とか	config.ph に書いておいてください。
+
+
+.S	cronでnewsyslogをする
+
+たとえば、
+
+0	6	*	*	0	(chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
+
+とかかく
+
+
+.S	newsyslogをしない
+.label	newsyslog-2
+.seealso	newsyslog
+.key	$NOT_USE_NEWSYSLOG
+
+$NOT_USE_NEWSYSLOG = 1; なら実行しません
+
+
+
+.# ##########################################################
+.C	fml 本体一つで複数のメーリングリストを運用する
+.key	複数のメーリングリストの運用
+.label	plural-handling-1
+.seealso c-wrapper, calling-fml.pl
+
+
+「	in /etc/aliases
+
+	ML-1: "|fml ML-1"
+	ML-2: "|fml ML-2"
+
+はできるか？もしくはfml を用いて複数のメーリングリストを運用する時に、
+fml 本体は一つに済ませて、メーリングリスト毎に必要なファイルだけを分割
+できるか？」という命題ですが、次をどうぞ(^^;)
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(fml.plの引数について)
+.label	plural-handling-2
+.seealso c-wrapper, calling-fml.pl
+
+まずconfigurationはfml.plの引数(/etc/aliases or fml(C wrapper))と
+config.phの２箇所ですべてです。そして基本的に
+
+	fml.pl	config.phのdirectory libraryの場所
+
+の形で与えています（.seealso c-wrapper )。プロセスの最初で directory を評
+価するので、config.phはfml.plの引数のdirectoryのパラメータの下の
+config.ph（members, log等もここのを見ます）をみているわけです。
+
+例えば ＭＬのおき場所が
+＃以下すべて適当に directory 名は省略してます。
+
+	Elena/config.ph
+	manami/config.ph
+	lib/fml.pl
+	lib/libsmtp.pl
+
+なら、次のように起動すれば
+
+	lib/fml.pl Elena  lib 
+	lib/fml.pl manami lib 
+
+上は Elena/config.ph を評価して Elena ＭＬ、
+下は manami/config.ph を評価して manami ＭＬにかわります。
+ライブラリは lib の下の lib*.pl等をみているわけです。
+＃問題はfml.plが使うライブラリがどこにあるかで
+＃	“一番簡単な手は /usr/local/lib/perl にいれてしまう”
+＃というものです:-) ＃これはコンパイルの時 perl にはいっているはず。
+＃それがいやな場合のために
+＃
+＃	fml.pl	"directory(config.ph)"	"Perl libraries"
+＃
+＃と解釈するようにしました。（from 1.2.0.6）
+
+ただ、それぞれ非常に違うＭＬでlibfml.pl等もばらばらのものにしたいなら
+書き換えてそれぞれのdirectry(e.g. Elena)におけばいいでしょう。
+
+include する時は 
+
+	/usr/local/lib/perl   Elena   library
+
+の順で探しますから（先にマッチしたところで取り込むから）
+(see also Appendix about @INC)
+
+注意１：ＭＬ独自の fml.pl にしてしまったら上の論法は使えません（あたり
+まえ）。fml.c も書き換えておく必要があります。
+ただし、コマンドの改造はフックを用いれば簡単です
+.seealso	command-hook
+
+注意２：mget で使う SendFile.pl は LIBDIR という変数の場所を探すように
+してあるので mget まわりをいじる時は気をつけてください
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(setuid programをばらばらに作る)
+.key	setuid-program
+.key	setuid-source-exapmles
+.label	plural-handling-3
+
+setuid program をばらばらに作ればいいわけです。
+＃可変引数をとる setuid program は security hole になり得るからいちい
+ち作る
+
+で、中身は上と同じことをするように次のように作ります。後は同じです。
+
+例えば、 /usr/spool/driver の下に
+	manami
+	aiko
+というのを作るとしましょう。
+＃manami → ML-1、 aiko → ML-2 :-)
+
+	% cc -s -o manami manami.c
+	% chmod 4755 manami
+	% cc -s -o aiko aiko.c
+	% chmod 4755 aiko
+
+そして /etc/aliases に
+manami:"|/usr/spool/driver/manami"
+aiko:"|/usr/spool/driver/aiko"
+
+＃fml.c を参考にして下さい。これは↓4.3BSDです
+   ------------------- manami.c -------------------
+#include <stdio.h>
+main()
+{
+  setuid(geteuid());
+  setgid(getgid());
+  execl("/usr/spool/lib/fml.pl", 
+	"(fml)", 
+	"/usr/spool/manami", 
+	"/usr/spool/lib", 
+	NULL);
+  exit(1);
+}
+   ------------------- aiko.c -------------------
+#include <stdio.h>
+main()
+{
+  setuid(geteuid());
+  setgid(getgid());
+  execl("/usr/spool/lib/fml.pl", 
+	"(fml)", 
+	"/usr/spool/aiko", 
+	"/usr/spool/lib", 
+	NULL);
+  exit(1);
+}
+   -------------------------------------------------
+
+
+.S	ひとつのfmlで複数のＭＬを扱う方法(setuid をちゃんとするsendmail）
+	上のセクション及び .seealso calling-fml.pl
+
+上のセクションにならいます。
+
+/etc/aliasesでsetuidをちゃんとやってくれるという自信があれば、
+＃つぅか Sendmail の問題ですが…
+
+例えばこんなかんじでしょう
+＃ほんとに最終仕様かどうかは知りません。将来変わるのかも…
+
+	/usr/spool/driver の下に
+		manami
+		aiko
+
+	/usr/spool/driver/manamiの中身
+	"|fml.pl /usr/spool/manami /usr/spool/lib"
+
+	/usr/spool/driver/aikoの中身
+	"|fml.pl /usr/spool/aiko /usr/spool/lib"
+
+	in /etc/alises
+	
+	manami: :include:/usr/spool/driver/manami
+	owner-manami: fukachan
+
+	aiko: :include:/usr/spool/driver/aiko
+	owner-aiko: fukachan
+
+この場合/usr/spool/driver/manami の所有者権限で実行されるので適宜設定
+してください。あとは上のセクションと同じ。
+
+
+.S	複数のＭＬがあるけど、コマンドの処理は一つのアドレスで一括してやりたい
+.key	コマンド専用アドレスその２
+.comment beth2
+
+今 master.fml というそのためのアドレスを作ったとします。 
+
+解説０：
+ｆｍｌ は メンバーへの配送サーバ ＋ そのサーバの抱えているスプール等へ
+	のコマンドを制御する
+
+解説：で、今の場合（ｍａｓｔｅｒ．ｆｍｌ）は ｆｔｐ、 WWW 等へのアクセ
+スの中継と、（おまけで）ｆｍｌ（ＭＬサーバ）群への中継をおこなう
+
+例：	だから シンタックスは次のようになります。
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+普通のＭＬ宛のメール	→	sakisan@phys...(e.g. サキさん)
+
+サキさんの 記事１をとりよせる。
+
+"# get 1"		→	sakisan@phys...(e.g. サキさん)
+もしくは（推奨↓）
+"# get 1"		→	sakisan-ctl@phys...(e.g. サキさん)
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+一方、一箇所で集中管理したい場合（master.fml）のほうでは
+WWW.phys.titech.ac.jp へのアクセス
+
+"www http://www.phys.titech.ac.jp/"	→	master.fml@phys..
+
+サキさんの 記事１をとりよせる。
+
+"# get sakisan 1"	→	master.fml@phys..
+       ↑ここにはＭＬ名が入る（ここが要注意）
+
+となってます。実は中でＭＬサーバへただ中継してるだけです（笑）
+
+コマンド一覧：（<list>はＭＬ名（アドレスの＠前の部分））
+help		<list>
+objective	<list>
+guide		<list>
+msg		<list>
+member		<list>
+members		<list>
+active		<list>
+actives		<list>
+summary		<list>
+on		<list>
+off		<list>
+bye		<list>
+get		<list> <filename>
+mget		<list> <filename>
+
+end
+quit
+exit	
+
+本来の目的は	www, ftp, wais, gopher とのＩＰＣの中継をする
+おまけ機能で 
+subscribe ML-address とか
+member ML-address とか
+which とか
+できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ:-)
+
+
+.# ##########################################################
+.C	まとめおくり
+.label	msend-c
+
+さらに詳しくは、lib/MatomeOkuri の下等も御覧下さい。
+
+
+.S	まとめおくり概論
+
+.S	まとめおくり	Release 1
+.label	matome-1
+.http lib/MatomeOkuri/README
+.key	msend.pl
+
+「特定時間になるとそれまでためたメールを送る」というシンプルなコード。
+本質的に fml 本体とは独立した別のサーバというべきものです
+１時間おきと３時間おきのまとめ送りがしたいときは別の架空アドレス等が必要
+になります。
+
+fml の actives のエントリーをみながら走ります。その意味で fml とは一体
+型です。基本的に３時間に一度のような走らせ方しかできません。
+-------- actives --------
+katri
+pollyanna	matome 6u
+-------- actives --------
+
+のように matome のキーワードが書いてある人について配送をします。
+まとめおくりをする or 解除は普通のコマンドで行なえます
+＃helpファイルを御覧下さい
+
+e.g.
+% echo "# matome 6" |Mail -v Elena@phys.titech.ac.jp
+
+Contrib/Matomeokuri、Contrib/Matomeokuri2、の下に一式コードが入ってい
+ます。Ｒ１の詳細についてはContrib/Matomeokuri/READMEを読んで下さい。
+
+
+.S	まとめおくり	Release 4
+.label	matome-3
+.key	MSendv4.pl
+.key	crontab	
+.key	MatomeOkuri-ctl.sh
+.key	cron
+
+＃注意:今時の CRON ってユーザー権限ではしるよね(4.4みたいに)。最低でも 
+SONY News(BSDの方)みたいなユーザー権限だよね(crontabは勝手にいじれない
+だろうが)
+
+MSendv4.pl をつかうものの総称です。
+MatomeOkuri-ctl.sh を crontab に書いて使用します
+
+	fml-1.x.x/etc/crontab-4.3	
+	fml-1.x.x/MatomeOkuri-ctl.sh
+を参考にしてみて下さい。
+＃ crontab-4.3	は 4.3BSD の形
+＃ crontab-4.4	は 4.4BSD の形です。あなたのＯＳがどちらの形なのかは
+＃ man crontab とかで調べて下さいませ
+
+配送情報とかエラーメッセージとかを出力しながらMSendv4.plは走るので、
+cron のなかで、MatomeOkuri-ctl.sh の出力をたえずメールで管理者に送ると
+かしておくとよいとおもいます。
+＃一日２４通増えちゃいますけど、そのくらい誤差でしょ:-)
+
+仕組み：
+
+activesがこんなかんじだとしましょう。
+-------- actives --------
+katri
+pollyanna	matome 6u
+-------- actives --------
+
+	cron で一時間に一度 MatomeOkuri-ctl.sh を呼びます。
+			↓
+
+	activesをしらべて pollyanna はまとめおくりで６時間に一度で
+	gzipかけないで配送（uがついてる）希望だとわかる。
+	＃このとき各ユーザーにどういうふうに送るかも読み取る
+			↓
+
+	もし 今の時間 % 6 が０（ｍｏｄ　６） なら、つまり、６、１２、
+	１８、２４時なら、配送することにして
+	＃２９なら 一日一回午前５時です。
+			↓
+
+	MSendrcという、今までの配送記録を見て、スプールとくらべ
+	送ってない分を決定する
+			↓
+
+	そして、その送ってない分をスプールから掘り出して配送する。
+
+「特定時間になるとそれまでためたメールを送る」
+のではなく、
+「特定時間になるとactivesの情報に基づき、その時間におくることになって
+いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
+
+ただし、Ｒ１にくらべてかなり重いことになります、
+送る人一人一人について独立に走るので。
+その代わりに、１時間〜２３時間おき（＝一日一回とおなじ、無意味:-)）まで
+任意の時間指定が可能になります。
+
+	% echo "# matome 6"|Mail -v ml-address 
+
+のように、ユーザー個人がまとめおくりのコントロールをすることができます。
+
+gzipかけずに送ることもできます。(u option)
+
+	% echo "# matome 3u"|Mail -v ml-address 
+
+.S	各ユーザーごとにどういうふうに送るかを決める
+
+1.4.1 からは できるようになりました。
+デフォールトは UNIX FROM の gzip したやつです。
+
+ただし、RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に
+番号をつけるので、この機能と矛盾してしまいます。
+まぁ番号きにしないならいいんですが…
+
+
+.S	Rel.4 のコマンド一覧(help fileより)
+
+まとめ送り希望の方へ：（基本的に Ｎ時間“おき”）
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+			default は gzip した Unix From つきのファイルの固まり
+# matome 数字(13-29)	上の特別の場合で、一日一回Ｎ時にまとめおくり
+			１３〜３６の数字がこのケースに当てはまります
+			午前５時に一回だけまとめおくり慕いときは、
+			２４＋５＝２９ をおくりこんでください。午後５
+			時は１７でいいんですが、午前中はこうしないと判
+			別がつかないので…
+
+# matome 数字オプション
+# matome 数字u		とすれば plain(unpack)、つまりplain textををかえします
+# matome 数字i 		とすれば lha + ish で
+
+			オプションなしは GZIP(UNIX FROM) と同じ
+			u	PLAINTEXT(UNIX FROM)
+			uf	PLAINTEXT(UNIX FROM)
+			i	lha + ish 
+			ish	lha + ish 
+			b	RFC934 format 	PLAINTEXT
+			d	RFC1153 format 	PLAINTEXT
+			mp	MIME/Muptilpart	PLAINTEXT
+
+# matome 0		普通の配送へ戻す
+
+   例：
+   # matome 1		まとめ送り １時間に一回(gzipd)
+   # matome 2		まとめ送り ２時間に一回(gzipd)
+   # matome 2u		まとめ送り ２時間に一回(plain text)
+   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+   # matome 17		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は１７時に来る
+   # matome 29		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は午前５時に来る
+			＃matome 5 は５時間“おき” という意味
+
+			
+
+.S	CRON(Systemのcron)を使わないまとめおくり その1
+.label	Matomeokuri-not-cron_1
+.key	Matomeokuri-not-cron_1
+.key	store-and-deliver.ph
+.key	store-and-deliver.pl
+.key	$START_HOOK
+
+cronを使わずに、Ｎ通溜ったら まとめ送りの人に配送 という動作をする
+
+例： 10通たまったら配送としましょう
+＃もっとも10にみたない時は 日が開ける時に deliverします
+
+store-and-deliver.ph	(configuration file)
+store-and-deliver.pl
+が lib/MatomeOkuri-NOCRON に入っています。
+
+各ＭＬごとのまとめおくりのし方は store-and-deliver.ph というファイルで
+設定してください（ＭＬごとに設定は変えられる）
+＃ lib/Matomeokuri-NOCRON/store-and-deliver.ph に見本があります
+
+何通おきに配送するか？	
+.key	$MATOME_OKURI_VER5
+$MATOME_OKURI_VER5      = 10; 
+
+前回のまとめおくりのときどこまで送ったかのカウント
+.key	$MATOME_OKURI_SEQ
+$MATOME_OKURI_SEQ       = "$TMP_DIR/matome-seq";
+
+実行するコマンド	＃-a は anytime という意味だす。
+.key	$MATOME_OKURI_VER5_EXEC
+$MATOME_OKURI_VER5_EXEC = "$LIBDIR/MSendv4.pl $DIR $LIBDIR -a"; 
+
+store-and-deliver.pl がINCLUDE PATH のどこかにいれて、
+あとは config.ph で
+
+	$START_HOOK = q#
+		require 'store-and-deliver.pl';
+	#;
+
+と書いておけばＯＫです。
+
+
+.S	CRON(Systemのcron)を使わないまとめおくり その２
+.label	Matomeokuri-not-cron_2
+.key	Matomeokuri-not-cron_2
+.key	cron.pl
+
+fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
+そのまま system の cron と同じ働きをします。
+つまり１分に一回おきて crontab をみて、実行する。
+＃単にシステムのcronじゃないだけですね…うじゃ
+
+ちなみに、複数のcron.plは走りません、cron.pid をみて一つのＭＬにつき一
+つしか走らないようになってます。
+＃あと 長く走り過ぎておかしくなること防止で、２４時間くらいで 次の
+cron.plを起動しなおします。
+
+インストール：
+
+config.ph に
+.key	$CRON_PIDFILE
+.key	$CRONTAB
+.key	$DISTRIBUTE_CLOSE_HOOK
+
+$CRON_PIDFILE = "$DIR/var/run/cron.pid";
+$CRONTAB      = "$DIR/etc/crontab-4.4";
+＃ directory がなかったらつくってくださいませ
+
+$DISTRIBUTE_CLOSE_HOOK = q#
+	$_cf{'hook', 'prog'} = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
+#;
+
+をつけたす。＃いずれも適当にパスとかは変えてください
+
+cron.pid は cron.pl の pid を記録するファイル（/var/run/cron.pidに相当
+するもの）。
+
+crontab-4.4  は システムの/etc/crontab  に相当するものです。
+＃注意： cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
+
+適当な設定をして下さい。
+
+余談：	cron.pl は ほんもののcron のクローンですので、at とか 自分用の 
+cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
+あるようだ）
+
+
+.S	cron.plを使う際の注意
+.label	Matomeokuri-not-cron_2fix
+.key	Matomeokuri-not-cron_2fix
+.key	cron.pl
+
+
+cron.pl を sendmail が  exec して実行するというのは
+crontab をユーザー毎に設定できないＯＳへの対応です。
+できるなら、 user ごとに crontab を設定できるほうがいいとおもうんです
+が世の中そういうＯＳばっかりじゃないわけで
+
+例えば、２４時間でおきかえるっていうのも 安全策なだけで、別に１週間走
+らせてもＯＫです。
+
+だから、別に無理に sendmail にcron.pl を走らせさせなくても、ＭＬ管理者
+が login したときだけ cron.pl をいれかえる（実行すれば勝手に入れ替わる）
+のでもいいはずです。
+
+たまに、 sendmail とうまくおりあえないこともあるみたいなので、そういう
+時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね？
+
+
+.S	まとめおくりだと３００行越えちゃいますけど？（まとめおくり Rel.1）
+.label	msend-1
+
+＃いまどき３００行は関係ないと思うぞ＞おれ。ＮＩＦだって３０００かな？
+
+確かに「特定時間になるとそれまでためたメールを送る」というシンプルなコー
+ドだと、３００行って何にも考えてないんですよね。でも、うかつに切るのは
+メールのないように手を加えるみたいで気が引けますが…とりあえず
+
+	msend-300.pl	or msend2-300.pl
+
+ってのが強引に３００（ヘッダがあるので念のため２７５行）行で複数のメー
+ルに分ける処理をします。
+
+	$MATOMEOKURI_MAXLINE = 275;
+
+をかえると“何行か”の制御ができます。
+＃普通は１０００（だいたい５０ｋくらい）でいいんじゃないかな？
+
+MSendv4.pl は config.ph の$MAIL_LENGTH_LIMIT = 1000; を見ています。こ
+こを変更して下さい。
+
+
+.S	まとめおくりで３時間おきとかはどうしましょう？（まとめおくり Rel.1）
+.label	msend-2
+
+Ｒ４を使うというのが前向きですが。１、２でやりたいなら
+
+----- control -----
+#!/bin/sh
+
+HOUR=`date '+%h'`
+X=`expr  $HOUR / 3`
+P=`expr $HOUR - 3 \* $X`
+
+if [ 0 -eq  $P ] 
+then
+	perl msend.pl DIR LIBDIR
+fi
+---------------
+
+とかをcronに仕掛けて…でいいんじゃないでしょうか？
+
+
+.S	まとめおくりで１、３、６時間おきとか任意時間選択したい（まとめおくり Rel.4）
+.label	msend-3
+
+version 3 ならユーザーに自分がＮ時間おきに配送してほしかったら
+コマンド "# matome N（数字）" を使ってもらえばいいだけです。
+
+でも、１、２だとそれぞれに架空アドレスとコントロールアドレスが必要です
+ね（めんどうくさい）。
+
+
+.S	まとめおくりの いつ送るか？の判定を変える
+
+MSendv4.pl の sub MSendP を変える。
+例：今の設定
+
+if(($ID - $Request{$who}) >= 0) {
+送るべきメールがあるか？
+
+	return 1 if(0 == ($HOUR % $When{$who}));
+	$When{$who} おきに送るのだが、いまの時間は？
+		
+	return 1 if($When{$who} > 12 && ($HOUR + 24 == $When{$who}));
+	一日一回送る人には 今がその時か？
+…
+
+
+.S	まとめおくり一応旧名称との対応表
+
+version 1 一箇所にまとめておいて時間が来たら配送（ユーザーは時間は自由
+に選べない）
+version 2 １の改良型
+version 3 MSend-cron.pl
+version 4 とは MSendv4.pl 3の改良型
+version 5 は cronを使わずに 10通溜ったらまとめ送りの人へ配送する 
+というタイプで パッチが lib/Matomeokuri-NOCRON にあります。
+version 6 は 1153形の digest機能を提供します。
+
+Release 1 と呼んでいるのは、架空のアドレスを用いる旧バージョンです。
+version 1, 2 はこの文書には一応書いておきますが、obsolete です。
+Contrib/Matomeokuri、Contrib/Matomeokuri2、
+MSendv4.pl $DIR $LIBDIR -a として cron を動かせば同じなので。
+
+
+.# ##########################################################
+.C	~/.forward でＭＬを行なう
+.key	.forward
+.key	~/.forward
+.key	$HOME/.forward
+
+
+.S	概論
+.label	forward-intro
+
+理屈は簡単です。~/.forward もsendmailは/etc/aliasesと同様に
+実行されます。だから
+
+~/.forward に
+
+"|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml" 
+
+とかけば、 ＭＬを作ることができます。この場合 sendmail は fork()して 
+STDIN にSMTPでもらったメールの内容をfml.plへ送り込みます。
+
+この場合の問題は、自分自身へも配送するのでループ（bounce）問題をどう避
+けるか？ が問題になります。
+
+
+.S	架空のユーザーを作る
+.key	架空のユーザー
+
+たとえば provider でのはなしですね。/etc/aliases を変更してもらえない
+のなら、ようはアドレスがあればいいので、架空のユーザーの ~/.forward に 
+fml.plの設定を /etc/aliases への設定(上述)と同様にすればＯＫです。
+
+
+.S	MH インターフェイス
+.key	slocal
+.key	.maildelivery
+.label	slocal-1
+
+ここでは slocal を用いたやりかたを述べます。
+
+	~/.forward に
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+
+と書きます。よく名前を聞く slocal ってやつですね。
+slocal では、設定は  ~/.maildelivery で設定します。
+例：
+To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
+それ以外は全部スプールに落す（普通の挙動）
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field   pattern   action  result    string
+To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
+
+# drop to the personal mail-spool
+default  -       >       ?      /var/mail/fukachan
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+この場合 PIPE で fml.pl へ渡すとき UNIX FROM がおちてしまうのかもしれ
+ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
+す。
+
+
+.S	ほかのソフトを使ったインターフェイス(おしえて〜おねえさ〜ん)
+
+誰かやったひとおしえて_o_。
+基本原理は同じで どうやって pipe にわたせばいいのか？ だけ考えればいい
+だけです。
+
+
+.S	ローカル配送のためのインターフェイス(libexec/fml_local.pl)
+
+.S	libexec/fml_local.pl
+.label	libexec/fml_local.pl
+.key	libexec
+.key	libexec/fml_local.pl
+.key	fml_local.pl
+
+ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
+slocal と同じになっちゃいましたね(馬鹿)
+
+まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
+(開きなおり(苦笑))
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
+という upper compatibility です。
+最後にマッチするエントリを実行するというところが決定的に違いますね。
+でも、こうすることで、学習するvacationプログラムが簡単に書けます。
+
+
+.# ##########################################################
+.C	libexec/fml_local.pl マニュアル
+.key	libexec/fml_local.pl manual
+.key	manual of libexec/fml_local.pl
+.label	manual of libexec/fml_local.pl
+
+.S	~/.forward
+
+~/.forwardに
+"|/some/directory/libexec/fml_local.pl -user username || exit 75"
+
+とか書いて使います。usename はあなたの account名です。
+
+.S	~/.fmllocalrc
+
+fml_local.pl は ~/.fmllocalrc で制御します。
+最後にマッチするエントリを実行します。
+
+# ではじまる行はコメントです。
+
+デフォールトは自分のスプールへ、そしてローカルなＭＬの配送はスプールへ
+落すようにセットしてループしないようにするべきです。
+
+４つの変数が スペース で区切ってやってほしいことをかきます。
+「フィールド パターン 実行のタイプ 実行すること」
+
+それ以外に変数を定義できます。それらの変数は 実行内容の中で展開して使
+われます。セットされる変数は、一覧（@VAR の中身）：
+    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
+	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+	    MAINTAINER);
+
+です。
+
+
+.S	~/.fmllocalrc の例
+
+ＭＬをセットする ~/.fmllocalrc の例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+DIR	/usr/local/fml
+
+From		fukachan	&	MailLocal
+
+to		(uja)		|	$DIR/fml.pl $DIR $DIR
+
+to		(sayori)	|	$DIR/fml.pl $HOME/var/sayori $DIR
+
+X-MLserver	.*		&	MailLocal
+
+# default	anything 
+default		.*		&	MailLocal
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+で、To: username@somewhere.jp (uja) というメールがきたら
+"|$DIR/fml.pl $DIR $DIR" 
+という普通の形でＭＬを作動させるというものです。
+ここで $DIR は上の DIR の行の値で展開されます。
+
+このfml.pl は普通のfml.pl です。パッチとかをあてる必要はありません。
+つまり、fml_local.pl がヘッダをみて何を起動すればいいかを
+判断するので、起動するべきものは普通のＭＬサーバでいいわけです。
+
+また、 (uja)  は 
+	うじゃＭＬ（/usr/local/fmlの下にconfig.phでカスタマイズ）を、
+(sayori) はまた別の 
+	さよりちゃんＭＬ（/usr/local/fml/var/sayori/config.ph）
+を起動します。
+
+これ以外の、From: fukachan…（@phys とかついてても なくてもいい） 
+や、X-MLserver: フィールドのあるメール、いづれにもマッチしないメールは
+すべて /var/mail/fukachan のように sendmail が普通ためておく場所に
+おとします。
+
+
+.S	フィールドはヘッダの任意のフィールドです
+
+「フィールド パターン 実行のタイプ 実行すること」
+
+フィールド パターン はメールのヘッダのすべての行について、
+
+	if ( そのフィールドの値 =~ /パターン/ ) 
+
+が実行されます。というわけで、
+
+	subject: の特定のキーワードでＭＬを起動する
+	X-ML:	uja というフィールドがあったらＭＬを起動する
+
+等も自由に設定できます。
+
+
+.S	フィールドはヘッダ以外に body  があります
+
+これはパスワードを必要とするようなものは、本体でパスワードを書くべきで
+す。エラーメールではヘッダはまるみえですから
+
+body	getmyspool\s+PASSWD	&	getmyspool
+
+とか設定すれば、NIFTY から会社の自分のスプールの内容を夜中に読むとかが
+できるようになります。
+例：
+% echo "getmyspool password-is-required" |Mail 自分のアドレス
+
+
+.S	変数’ｓ
+
+もし変数を明示的にセットしないときは適当な値がデフォールト設定されます。
+
+# USER	-user fukachan で設定する変数と同じ意味
+USER	fukachan
+
+# HOME	$HOME変数。
+# Bourne Shell 風にしているので、~/ を展開するようにはなっていません
+HOME	/home/axion/fukachan
+
+# fml.pl のある場所。でも使ってない変数…:-)
+FML_PL	/home/vivian/fukachan/work/EXP/fml.pl
+
+# $DIR 変数の設定。下で使われると $DIR を次の値で展開するため
+DIR	/home/vivian/fukachan/work/EXP
+
+# $LIBDIR 変数の設定。下で使われると $LIBDIR を次の値で展開するため
+LIBDIR	/home/vivian/fukachan/work/EXP
+
+# メールスプールの場所
+MAIL_SPOOL	/var/mail/fukachan
+
+# デバッグモード
+DEBUG
+
+
+.S	フィールド パターン 実行のタイプ 実行すること
+
+各フィールドは スペースとタブ の塊で区切られます。
+# slocalと違って４つしかないから注意
+
+フィールド	To, subject, 等。なんでもいい
+
+パターン	perlの正規表現が使えます。
+		スペースとかは含めないので
+		get\s+(\S+) 
+		こんな形になります。
+		() でマッチした変数は順に
+		$F1 $F2 $F3 に設定されます
+実行のタイプ	& は perl の関数呼びだし
+		> は そのファイルにアペンドです
+		| は パイプで渡します。
+		UNIX FROMつきのまま渡します
+		UNIX FROMを抜いた形でプログラムへ渡すには
+		|の代わりにmhと書いてください
+		（mhへ渡すことを想定している）
+
+実行するもの	実行するもの。関数 or ファイル
+
+
+.S	フィールド設定の例
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field		pattern		type	exec
+
+# (/usr/libexec/mail.local にならう)
+# スプール （例 /var/mail/fukachan ）に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+From		fukachan	&	MailLocal
+
+# MH の folder へいれる。MH本来の slocal はこう使うんだろうなぁ
+From		fukachan@phys	mh	/usr/local/lib/mh/rcvstore +inbox
+
+# 外国ＴＶシリーズＭＬからのメールは
+# TO:enterprise@phys.titech.ac.jp になるから、それにマッチしたら
+# ~/Mail/enterprise というフォルダーにいれる
+To		Enterprise@phys mh	/usr/local/lib/mh/rcvstore +enterprise
+
+# File Retrieving 
+# perl の関数を呼ぶ。(\S+)でマッチしたものが ↓$F1 に置き換えられる。
+Subject		get\s+(\S+)	|	/usr/bin/Mail -s $F1 $From_address
+
+# Exec ML
+# ＭＬサーバ fml.pl を呼ぶ。
+# 今の場合管理者宛のメールは上のFrom や X-MLserverでスプールに落すので
+# ループはしない
+
+to		(uja)		|	$DIR/fml.pl $DIR $DIR
+
+# これは最後にマッチするべき、これで絶対にループしないはず
+# MailLocal は
+# (/usr/libexec/mail.local にならう)
+# スプール （例 /var/mail/fukachan ）に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+# From		fukachan	&	MailLocal
+# もし ML からきたら、ローカルにおとす
+X-MLserver	.*		&	MailLocal
+
+
+# default	anything 
+default		.*		&	MailLocal
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+
+.# ##########################################################
+.C	改造についていろいろ
+
+
+.S	変数の名前つけには組織的な何かがあるんですか？
+.key	変数の名前つけ
+.key	Naming-Convention
+
+あります。大雑把には config.ph の中のような
+
+	$ML_MEMBER_CHECK
+
+という大文字だけの塊は カスタマイズ用の Global Variables。
+
+	$MailBody	$Reply_to
+
+のように”大文字ではじまる”単語はメール本体やヘッダをSubroutine間で渡
+し会うためのGlobal Variables。
+
+小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言さ
+れているでしょう。
+
+ついでに subroutine の名前はX11風だったりします。最近のはlisp風味も混
+ざってます:-)
+#おおむねX11風ですね
+
+1.5〜	例外があります。 まとめ送り関係の関数で
+
+	変換インターフェイスとしての 	f_関数 名
+	＃いつか、なくなるのかも
+
+		と 
+
+	そのモードのコンストラクタ	Cnstr_関数 名
+	そのモードのディストラクタ	Destr_関数 名
+
+が例外です
+
+
+.S	MIME-decoding
+.seealso	MIME-1, MIME-2, MIME-3, MIME-extension
+
+$MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
+Decodeしてしまうなら、
+
+	$MailBody = &DecodeMimeStrings($MailBody);
+
+こんな感じのコードを適当な場所に書けばいいわけですね。
+
+
+
+.# ##########################################################
+.C	リモート管理
+.label	REMOTE-ADMINISTRATION
+.key	$REMOTE_ADMINISTRATION
+
+
+.S	リモート管理の古い設定への注意
+.key	リモート管理の古い設定への注意
+
+古い設定のままでは動きません。ごめんなさい
+
+昔は、リモートでの管理は eval へ渡すフックをしかけることで実装していま
+した。 
+いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
+(libfml.pl 1.5.2 から)
+
+
+.S	カスタマイズできる変数
+
+管理者のリスト
+
+	$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+
+管理者のコマンドのヘルプ
+
+	$ADMIN_HELP_FILE	= "$DIR/help-admin";
+
+もし、リモートの管理者にパスワードを要求するなら、
+
+	$REMORE_AUTH = 1; 
+
+０にすれば パスワードチェック をおこなわない設定です
+
+このチェックに使うパスワードファイルです。
+
+	$PASSWD_FILE = "$DIR/etc/passwd";
+
+
+
+.S	アドミンモードでのアドレスの複数マッチ問題について 
+.key	アドレスの複数マッチ
+.key	アドミンコマンド
+
+OFF コマンド等は multiple-matching を認めません。
+つまり、
+
+fukachan@aoi.chan.panic
+	と
+fukachan@uja.aoi.chan.panic
+は両方ともマッチしてしまう時、チェックをきびしくしてひとつのアドレスだ
+けを選ぶのがデフォールトの挙動ですが、
+
+アドミンコマンドの時だけは multiple です。
+つまり、上の両方のアドレスを一気に消して、新しく add したりできるわけです。
+
+
+
+
+.# ##########################################################
+.C	misc
+.label	misc
+
+.S	はやりのＭＩＭＥ対応については？
+.label	MIME-extension
+.seealso	MIME-1, MIME-2, MIME-3
+
+MIMEまわりは↑を御覧下さい。すべてperlだけで処理しています
+
+
+.S	ロックアルゴリズム
+.key	flock
+.key	liblock.pl
+.key	pid
+.key	rename()
+
+今のは
+	1.	flock system call（man flock）
+＃ＢＳＤね。fml 1.2はあまりすっきりしたコードになってないが、1.3はかな
+りすっきりしたとおもう
+
+	2.	pidにもとづくロック（liblock.pl）
+＃ちゃんと一周した後も補正している。
+
+1にくらべ数倍よけいなsystem callがかかる
+
+	3.	その他
+
+rename()をつかって排他制御とか…でもいいんだけどね
+
+ま、いろいろあるってことです。
+
+
+.S	ロックしてconfig.phのｅｄｉｔをしたい
+.key	vipw.pl
+.key	bin/vipw.pl
+.key	maintenance.pl
+
+flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
+スをしたい時は？
+
+% bin/vipw.pl 
+
+とすれば、MLの機能をflockでロックして、
+
+	shell% $EDITOR $PWD/config.ph
+
+を vipw.pl は実行します。maintenance.pl の発展版ですかね
+
+vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
+    -h help
+    -d ＭＬのconfig.phのあるdirectory
+    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
+    -f editしたいファイル
+    ＭＬのconfig.phのあるdirectory
+
+すべてを省略した場合 $PWD の config.ph 
+もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
+必要ですね
+
+
+.S	maintenance.pl
+.key	maintenance.pl
+
+flockを使っていて夜中とかじゃなくてメールが来得る時間帯にメインテナン
+スをしたい時は？
+
+maintenance.plはMaintenance用のflockするスクリプトで、fmlと同じロック
+ファイルにflockでアクセスしてサーバーを止めるためのものです。中身は
+	flock 
+	sleep 600 
+	flockをはずす
+だけです。使い方は
+
+	maintenance.pl -s sleeptime [directory]
+# [directory] のデフォールトは PWD です（いまいるところ）
+
+で -s でスリープする時間を変更できます。
+
+flock 使わずに pid 式の ロックを使っているなら
+% touch LOCK/1
+とでもして、作業の後それを消せばいいわけです。
+
+
+.S	sendmailとの通信の記録（デバッグ）
+.key	var/log/_smtplog
+.key	_smtplog
+.key	$NOT_TRACE_SMTP
+
+sendmailとのやりとりの記録（もっとも最近のものだけ）デバッグに便利。
+（デバッグとか終わっちゃって）もぉ必要なかったら
+
+	$NOT_TRACE_SMTP = 1; 
+
+とconfig.phにかいてください。ログをとらなくなります。
+
+
+
+.S	X-MLServer: field って何？
+.key	X-MLServer:
+
+起源はデバッグ用だったんだけど（笑）、今の意味は『明示的にＭＬサーバが
+ｈｍｌ系である』ことを宣言しているつもりです。無意味ではないと思うんで
+すが
+＃だってぇ〜hmlじゃないのにhmlのコマンドがＭＬにながれるのをよく見るか
+ら:-)
+
+＃けずるときはfml.plの中の sub Distribute のX-MLServerって行をコメント
+＃アウトなりなんなりしてください
+
+
+.S	違うアドレスから来たメールは？
+.S	アドレスチェックを緩めたい or 強くしたい
+.key	$ADDR_CHECK_MAX
+
+メンバーチェックは送られてきたメールの発信者のアドレスと members に書
+かれたアドレスとが一致するか否かで判断しています。今の設定は
+＃1.3.2からは…緩くした
+
+	fukachan@titech.ac.jp
+	fukachan@phys.titech.ac.jp
+	fukachan@beth.phys.titech.ac.jp
+	fukachan@exelion.phys.titech.ac.jp
+
+はすべて同じにみなしてます。つまり phys.titech.ac.jp のjp側から数えて
+３つの部分の判定チェックですね。（木構造のルートから数える）
+＃経験的にここまでやれば十分でしょう
+
+４つ（jp ac phys titech の４つ）までチェックしたいなら、
+
+$ADDR_CHECK_MAX = 4;
+
+と config.ph のどっかに書いておいて下さい。$ADDR_CHECK_MAX という変数
+が設定されてない場合は３として動きます。
+
+
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+.key	lib/Utilitites/packmbox.pl
+.key	packmbox.pl
+
+lib/Utilitites/packmbox.pl を使って、
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+
+.S	複数アドレスから投稿したいがうけとりは一つ( "# skip" )
+.key	skip
+.key	noskip
+.label	skip
+
+複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい。
+＃この１週間だけこのアドレスも使いたいしぃ〜とかの場合にも効果的です
+
+という場合を考えて、actives(自動登録では members = actives) で
+
+fukachan@phys.titech.ac.jp	skip
+
+と書いておけば認証（新人さんチェック）には使うけど配送はしないという動
+作をします
+
+つまり
+
+	fukachan@phys.titech.ac.jp	skip
+	Elena@phys.titech.ac.jp	
+	Pollyanna@phys.titech.ac.jp	skip
+
+になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
+が、配送はelenaにしか行なわれないということです。
+
+ユーザーがこれを自分でコントロールしたいなら、コマンドは
+＃ Admin command でのみ引数が有効です。
+ 
+# skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
+			そこから投稿はできるが、配送はされないものと設定する
+# noskip [引数]		上の逆。配送するようにする。
+
+です。例：
+# skip 
+	From: のアドレスを skip に
+
+# skip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp を skip に
+
+# noskip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp へも配送を
+
+
+.S	.forwardでのＭＬ	その１
+
+もちろん 特別なＭＬ用のUser をつくって ~/.forward を /etc/aliases と同
+じように設定すれば できます。
+＃なんらかの形で（お金で解決もあり） /etc/passwd をいじれることが条件
+ですね
+
+
+.S	.forwardでのＭＬ	その２
+.label	dot-forard
+.key	.forwardでのＭＬ
+
+どういうケースが考えられるかよくわからないので、こんなのを考えてみました
+＃他にどういうのがあるのかおしえてくださいね
+
+！！どういうふうにすると無限ループしちゃうかをよく考えた上で使って下さい！！
+
+rosy という人が、beth.phys.titech.ac.jp というマシンで 個人的にＭＬをつくるとします。
+で、
+To: rosy@beth.phys.titech.ac.jp (uja)
+                                ＾＾＾
+				ここの部分でＭＬなのかＤＭなのかを区別するとする
+もしくは
+X-ML: uja 
+というのも考えられますね（いまのところ、どっちかをつかう、どっちでもＯＫ）
+＃他のヴァリエーションとしてヘッダに何かつけて区別とかもありえますよね？
+＃どういうのがいいんでしょ？？？
+
+このときは （~ = $HOME です）
+
+~/.forward に
+rosy@beth.phys.titech.ac.jp
+"|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml -F||exit 75"
+
+としかけます。ここで -F は.forwardでの利用を fml.pl に教えています。
+＃これで loop しないはずですね。
+
+~/.forward はどのマシンからも呼ばれちゃうので、どのマシンで使うか？を
+定義しておきます。＃大文字子文字もあわせてね hostname と
+
+$DOT_FORWARD_EXEC_HOST = "beth";
+
+＃ beth はマシン名 (Elizabeth March:-))
+
+/home/beth/rosy/ml/config.ph に次のように書いておきます
+
+そのキーワードの時に実行するコマンド（↓注意：-Fはつかず、普通のｆｍｌ起動）
+$forward_key{'uja'} = 
+"/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml";
+
+つまり
+	sendmail	１-> localにユーザーへ
+
+			２-> fml.pl -F を起動
+			  -> (uja) を検出したら（キーワード）
+			  -> fml.pl を起動してＭＬとしてはたらく
+
+くれぐれも配送先に自分を指定しないようにしてください（無限ループ）
+あとは普通と同じです。
+
+あと この場合、***-requestとかじゃなくて$MAIL_LIST, $MAINTAINERとかも
+自分のアドレスですね。 この場合の追加ヘッダ処理は
+
+sub MultipleMLForwarding
+の中で
+
+    $Reply_to = "Reply-To: $MAIL_LIST ($KEY)\n";
+                            ↑
+			本人のアドレスのはず
+
+    $HEADER_ADD_HOOK = q#
+	$body .= "X-ML: $KEY";
+    #;
+
+			X-ML: uja とかつける
+
+をしてます。＃いじるならここです。
+
+fml.pl への patch が lib/Utilities にあります。あてて、つかってください
+
+
+.S	あんまり意味ないけど…
+
+上と同じことをして、
+$address_key{rosy} = "fml.pl rosy rosy";
+$address_key{rosy} = "/bin/cat > /home/beth/rosy/uja";
+
+/etc/aliases で
+uja:"|fml.pl $DIR $DIR"
+aja:uja
+aoi:uja
+rosy:uja
+
+とかける（あまり建設的とは思えないのだが…どうせ/etc/aliasesいじるのは一緒なんだから）
+
+
+
+.S	自動送り返しサーバってどう実装してるんですか？
+.key	自動送り返しサーバっ実装例
+
+設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
+てくるのですが、こういったものを作るには、どのような設定をすればいい？
+
+いまでは libSendBack.pl ってのにまとまってます。
+/usr/ucb/vacation ってのはこれとほぼ同じですね。
+＃もっともあれは unix from をみるんですが
+
+理屈は コードをけずっただけ（笑）というだけですが、
+
+０．いつもの通り仕掛ける
+１．ロック
+２．メンバーチェックをしないで
+３．送り返す
+	&SendFile($to, "", 目的のFILE);
+４．ロックをはずす
+
+in fml.pl MAIN PART
+
+(!$USE_FLOCK) ? &Lock : &Flock;	# Locking 
+
+#---------------- CHANGE -------------------------
+
+$MAIL_LIST	= 'fml@phys.titech.ac.jp';
+$ML_FN		= '(fml recent infomation)';
+$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
+
+$INFO_FILE	= "$DIR/INFO";
+
+$LOGFILE	= "$DIR/fmlinfo-log";		# activity log file
+
+$to             = $Reply_to ? $Reply_to : $From_address;
+
+&SendFile($to, "Info $ML_FN", $INFO_FILE);
+&Logging("Info request from $From_address");
+
+#---------------- CHANGE ENDS --------------------
+
+(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
+exit 0;				# the main ends.
+
+
+.S	X-Stardate: をつける（mh-e）
+
+lib/Utilities/stardate.el を load してください
+＃ emacs 19 でなきゃかきかえないとだめ
+
+たとえば、.emacs に
+(load-libaray "stardate")
+(setq startrek-stardate-process "/some-directory-path/libStardate.pl")
+
+とすると mh-comp の draft buffer をつくるときに 
+X-Stardate: をつけてくれます。
+
+
+
+.# ##########################################################
+.C	System Tuning
+
+.S	％リレー
+.key	%リレー
+
+sendmail.cfの問題です。それに厳密にはＲＦＣには従ってない？から％なん
+ざぁ理解しなくていいんだぜってサイトも世の中にはあることに注意
+
+
+.S	activesファイルによるリレー（sendmail 8.x）
+.key	%リレー
+
+actives には
+
+アドレス			リレーサーバー
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+
+のような書き方ができます。これをするとsendmailには
+
+fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
+
+のように渡されます。	
+だからactivesファイルに
+
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+…
+Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
+…
+cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+
+なものがあると
+
+fukachan%phys.titech.ac.jp@axion.phys.titech.ac.jp
+Elena%phys.titech.ac.jp@axion.phys.titech.ac.jp
+cocoa%phys.titech.ac.jp@axion.phys.titech.ac.jp
+
+のように渡されてaxion.phys.titech.ac.jpまで一通にまとめられて来て
+axion.phys.titech.ac.jpで３通にばらけます。
+パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可
+が得られればどこかでリレーサーバーを使えるといいですね。
+
+＃注意：ＲＦＣに従うなら、% ではなく : を使った形が正しい。
+%式制御は ＲＦＣにはないが、これで動くという類のものです。(see rfc821)
+
+
+.S	activesファイルによるリレー（sendmail 8.x）捕捉
+.key	リレー
+
+1.3.2 からは内部表現が拡張性のため違う形になっています。が、この章の内
+容は以前有効です。内部で古いフォーマットも自動的に変換して解釈していま
+す。気にしないで下さい:-)
+
+NEW FORMAT に自動変換します。＃気にしないでください。
+
+fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp m=1u 
+＃意味：axion をリレーサーバとし、まとめおくりは一時間おきにPLAINで
+
+
+.S	activesファイルによるリレー（sendmail 5.x）
+
+fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
+cocoa@phys.titech.ac.jp		axion.phys.titech.ac.jp
+
+↑このように順番に並んでいないと一通になってくれませんので注意。
+それ以外は8.xの時と一緒です。
+
+
+.S	同じｍｘについて
+.key	mx
+
+sendmail 8.xではCHANGES-R5-R8にあるとおり↓
+
+   For example, if two sites ``foo.com'' and ``bar.com'' are both
+   served by UUNET, they will have the same set of MX hosts and will
+   be sent in one transaction.  UUNET will then split the message
+
+一通で送られます。ばらばらの順番でも大丈夫。
+
+sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
+れば
+
+	fukachan@phys.titech.ac.jp	
+	Elena@phys.titech.ac.jp	
+	cocoa@phys.titech.ac.jp	
+
+一通にまとめられます。
+
+
+
+.# ##########################################################
+.C	Library 一覧
+詳しくは各 directory の README を御覧になって下さいませ(_o_)
+
+
+.S 	MatomeOkuri まとめ送り Ｒｅｌｅａｓｅ　１
+.label	msend-dir
+.seealso	matome-1
+
+まとめ送り Ｒｅｌｅａｓｅ　１
+ＭＬ本体はリアルタイムに配送し希望者のみまとめ送りを行なう場合。
+＃これは私の趣味でもある(^^;)
+＃まとめおくりに関してはオプションであることを希望（単なる趣味ですけど）
+
+	リアルタイム配送のＭＬ本体のサーバ
+	↑		→リアルタイム配送のメンバー
+	↑		→まとめ送りアドレス
+	↑			↓
+	↑		まとめ送りサーバが蓄えて、
+	↑		cronで一定時間毎に配送する→まとめ送りのメンバー
+	↑
+	↑
+	ＭＬへの投稿は全員が本体のＭＬへ
+
+仕様：
+まとめ送りするメールはスプールにあるのと同じ形式でgzipはかけない
+（送る方も解凍する方もめんどくさいし、生で読めるというのは利点である。）
+
+面倒な点：まとめおくりは本質的に別物なのでコントロールするのに別のサー
+バが必要
+
+
+.S 	まとめ送り Ｒｅｌｅａｓｅ　１ 改良
+.label	msend-dir2
+.seealso	matome-2
+
+	まとめ送り ver.2
+
+vｅｒ．１の面倒な点
+『まとめおくりは本質的に別物なのでコントロールするのに別のサーバが必要』
+
+を回避するために、まとめ送りサーバの“コントロール”は matome というキー
+ワードを使って本体のサーバのactivesファイルで行ないます。
+---------- actives ----------
+…
+fukachan	matome	1
+pollyanna
+fukachan@phys.titech.ac.jp	matome	10
+katori@phys.titech.ac.jp		matome 7u
+…
+-----------------------------
+
+のようになってます。こういう風になっている時、
+matome という行の人にたいしてまとめ送りをします。
+普通の配送時には matome という行はスキップされます。
+コントロールは # matome 7u のようなコマンドで制御します。
+
+コマンド一覧：
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+			default は gzip した Unix From つきのファイルの固まり
+
+# matome 数字u 		とすれば plain(unpack)、つまりplain textををかえします
+
+# matome 0		普通の配送へ戻す
+
+
+.S 	MatomeOkuri-NOCRON
+.label	MatomeOkuri-NOCRON
+.key	store-and-deliver.ph
+.key	store-and-deliver.pl
+
+ｃｒｏｎを使わずに、１０通溜ったら まとめ送りの人に配送 というまとめ送
+りサーバです。パッチだけが lib/MatomeOkuri-NOCRON に入っているので、こ
+の場所で make して パッチを当てて下さい。
+configuration につかう store-and-deliver.ph もあります。
+
+.S	Elena
+.key	Elena
+.key	投票サーバ
+.key	vote.pl
+.key	vote.ph
+.key	Elena.pl
+.key	Elena.ph
+
+	投票サーバ『エレナ』
+
+エレナ は vote.pl へのメールシステムインターフェイスのことです。
+直接いじる投票メールをいじるシステムは vote.pl です。
+
+vote.ph で投票フォーマットを制御します。日本語で項目を書いてもよいです。
+
+適当なフォーマットを決めてそのメール郡に対して自動統計処理を実行します
+
+設定例：
+	@keyword            = ('best', 'uja');
+	%Jname              = ('best', '好きな声優', 'uja', 'うじゃ');
+	%maxkeyword         = ('best', '3', 'uja', '1');
+
+投票のし方：
+	好きな声優:荘 真由美
+	好きな声優:	西原	久美子
+
+	のような書き方の時 行の終りまでを 対象にして統計をとる。
+	Space等は処理の段階（vote.pl）でとる
+
+	----------   投票オリジナルテキスト -------------------
+	好きな声優:荘真由美
+	好きな声優:西原久美子
+	好きな声優:こおろぎさとみ
+	uja: こおろぎさとみ
+	好きな監督：アミノテツロー
+	好きな監督：今川泰弘
+
+	(2)
+
+	「トト…サルバトーレ カンタビレ ペレケトランポ７世…」
+	「内緒にして下さいね。トトは照れ屋なんですぅ」
+
+	（３）
+	アルバトロスシュートは要素に過ぎない。
+	それより大事なものがあそこにある	
+	
+	----------  投票結果   -------------------
+	vote.pl [ vote 2.0.1.0 ]  Status Report
+	---
+	好きな声優
+	
+		1 荘真由美
+		1 西原久美子
+		1 こおろぎさとみ
+	
+	(2)
+	>>>From: 投票者のアドレス
+	
+	「トト…サルバトーレ カンタビレ ペレケトランポ７世…」
+	「内緒にして下さいね。トトは照れ屋なんですぅ」
+	
+	(3)
+	>>>From: 投票者のアドレス
+	
+	アルバトロスシュートは要素に過ぎない。
+	それより大事なものがあそこにある	
+	-----------------------------
+
+注：好きな監督 のような関係ない行は無視される…;-)
+
+
+ユーザーは次のようなコマンドを使うことができます。
+
+"# summary"
+
+	その時点までに投票されたものすべてのサマリを作ります
+	＃実はその場で作ってますけど:-)
+
+"# cancel ID"
+
+	メールのサブジェクトにある 番号があなたの 投票番号？です。
+	キャンセルしたくなったら、その番号を使ってこのように キャンセ
+	ルできます。
+
+
+.S	Osakana, VotingSystem
+
+投票サーバ『エレナ』の古い開発コード
+簡単なフォーマットの投票サーバの実現例
+
+
+.S	Utilities
+	ユーティリティ’ｓ(いろいろ)
+
+.key	Rmail2fml.pl
+Rmail2fml.pl	(yamane@ngi.co.jp)
+		RMAILファイルから fmlへのメッセージの取込みプログラム
+
+.key	packmbox.pl
+packmbox.pl	(ukai@hplj.hpl.hp.com)
+		1,2,3,...のように並んでいるファイルをmbox形式のファイ
+		ルにするスクリプト
+
+		つまり、mget してきたファイルたちをｍｈでない人はmbox
+		にした後で好きなインターフェイスをつかえばよいように
+
+
+.S	putfiles
+.key	putfiles
+
+"# put file"を実装する。vulnerable なところはつぶしたとおもいますが…
+注意して下さい
+
+(sha@harl.hitachi.co.jp)
+
+
+.S	Cpcmp
+.key	Category_in_Subject
+.key	cpcmp
+
+	例その１
+
+	@category = ('admin', 'phys', 'rec', 'inet');
+
+を登録すると、Subjectについている[category]にしたがって、配送されるメー
+ルにもそれがつく。書かれていない場合は misc になる
+
+例：
+Subject: [inet]	ＭＬ
+Subject: [rec]	恐竜惑星はおもしろい
+
+
+.S	Schwalben, 自動返送の改造例，複数ＭＬの取り扱いのインストール例
+.key	Schwalben
+
+        ・ファイル自動返送改造例
+            ファイルの取り寄せには，getコマンドを使えば良いが，
+          初心者ユーザー向けおよび頻繁に取り寄せられる可能性のあるファイル
+          に関しては，専用のaddressをつくって，そこになんらかのメールを送る
+          だけで，指定されたファイルを返送するように改造した例．
+            また，メンバーチェックをする場合としない場合の改造例がある．
+        ・複数ＭＬ取扱例
+          また，複数ＭＬ(14種)の取り扱いを1つのfmlで管理するように
+          インストールした例のdocumentがある．
+
+
+.S 	Whois
+.label	whois
+.key	whois
+.key	Rin.pl
+
+開発コード：リンちゃん	Rin.pl
+
+Rin.pl は whois と同じ挙動をするが日本語にもマッチするようにする。
+というextensionをもった本物の whois server です。
+Client の使い方は普通のＢＳＤのものと同じです。
+
+
+.S	 ftpmail
+.key	ftpmail
+.key	ローカルファイルのためのftpmail
+
+Security 対策のため賢くつくってありません(_o_)
+
+例えば、もし spool/uja/Aoichan_panic が欲しい時は
+
+	# get spool/uja/Aoichan_panic
+か
+	# cd spool/uja
+	# get Aoichan_panic
+
+とか
+
+	# cd spool
+	# cd uja
+	# get Aoichan_panic
+
+とかしないとだめです
+
+あるマシンのローカルなアーカイブを対象にした簡易版で、他のマシンへコネ
+クトしてとってきたりはできません。
+＃そこまでやるなら ほんものの ftpmail を使うべきでしょう(^^;)
+
+これのいいところは anoymous ftp をわざわざあげなくてもいいことです
+
+
+
+.S	 http
+.key	html
+.key	SyncHTMLfiles.pl
+.key	Keyword:
+.key	supersedes:
+.key	Expire:
+
+一つのスプールを自動的にｈｔｍｌにするライブラリ。
+
+例えば、ML-dir/spool/の下の 1,2,... というスプールのメールを
+1.html, 2.html にして index.html をキーワードで分類しながら生成する。
+ 
+SyncHTMLfiles.pl スプールの場所
+
+		その“場所”のファイルをPLAINTEXTとしてhtml化します。
+		そして、index.html を作ります。
+
+コマンドとして # cancel 15
+メールのヘッダとして
+	Keyword:  non-linear
+	supersedes: 15
+	Expire: 3
+等が使えます
+
+例：（Formatted Text）
+http://www.phys.titech.ac.jp/uja/Physics/seminar/
+
+   non-linear 
+   material 
+   misc 
+
+   non-linear 
+   Phase Model -- Basics and Recent Topics -- , 9/19, 京大 
+   量子カオスと正則ベクトル場の定性的研究,10/1-5,都立大学会津田島寮（福
+   島県南会津郡田島町） 
+   Campbell, 7/22, 日吉 
+   Buchalter 、駒場、７／２３（土） 
+   7/28 "Self-organized Criticality"、Per Bak、 矢上、 
+
+   material 
+
+   misc 
+   うじゃ 
+
+
+.S	 libhml
+
+次を見て下さい
+
+.S	 remote
+.key	libhml	
+.key	libremote.pl
+.key	remote-control
+.key	admin-commands
+.key	#admin
+.key	passwd
+.key	pass
+
+Backward Compatibility のため アドミンコマンド。
+FmlRemoreControl はリモートでＭＬをコントロールするためのインターフェ
+イスです（↑これ便利かなぁ〜よくわかんないっす）。
+
+つまり # admin シンタックスの admin コマンドです。現状で使えるコマンド
+は、
+
+# admin pass パスワード（もしパスワードを必要とする設定なら）
+# admin passwd 新しいパスワード（もしパスワードを必要とする設定なら）
+# admin help		管理者コマンドヘルプを取り寄せる（このファイル）
+# admin log		ログを取り寄せる
+# admin add address	address の人をＭＬに登録する
+# admin off address	address の人をＭＬ一時おやすみにする
+# admin on address	address の人のＭＬ一時おやすみを解除
+# admin bye address	address の人をＭＬメンバーから削除
+# admin addadmin address
+# admin addpriv  address	address の人を管理者メンバーとして登録
+# admin byeadmin address
+# admin byepriv  address	address の人を管理者メンバーから削除
+# admin dir		ＭＬのある場所の階層全部のリスト（ls -lR）
+# admin ls options	ＭＬのある場所のリスト（ls）
+# admin ls -l
+# admin ls -l spool	のようにオプションも可
+# admin remove filename	ＭＬのある場所の filename というファイルを削除
+# admin get filename	ＭＬのある場所の filename というファイルをとってくる
+# admin put filename	ＭＬのある場所の filename というファイルを置く。
+# admin rename filename1 filename2 
+		filename1 というファイルをfilename2 という名前にする
+
+
+.S	 sys
+.key	sys/socket.ph
+
+便利だろうからついているだけ。
+
+
+.S	 MIME
+.key	MIME
+.key	mime_pls
+.key	libMIME.pl
+
+MIME Package のおき場所です
+
+
+.S	 AIKO
+.key	AIKO
+.key	aiko2.pl
+.key	aiko2.ph
+
+fmlとは関係ありませんが、ドキュメント生成システムです。
+make doc で doc/*.texinfo と http/*.html 郡を生成します。
+ドキュメントは完成してません_o_
+ 
+
+.S	 www-mail
+.key	www-mail
+.key	libhttp.pl
+
+クライアントは開発中
+
+libhttp.pl	WWWでメールを操作するライブラリ
+----------------
+YOU -> SMTP  -> FIREWALLをこえ -> www-mail <-> HTTP →どっかのサーバ
+                                   ↓
+	SMTP		←おくりかえし
+----------------
+
+ファイル：
+libhttp.pl	fml.pl で呼ぶインターフェイス（単独でも動く）
+
+	% echo "http://www.phys.titech.ac.jp/uja" | perl libhttp.pl
+
+	これで
+	http://www.phys.titech.ac.jp/uja/index.html の中身が出力される。
+
+config.ph の中にセットして、ＭＬサーバの補助機能として使うなら、
+
+例：	"# www http://www.phys.titech.ac.jp/uja/" というコマンド シン
+	タックスを使えるようにする。
+
+--------- in config.ph ---------
+$COMMAND_HOOK =q#
+      if(/www/io) {
+	  &Logging("Http Request ($From_address)");
+	  &Http($request);
+	  next GivenCommands;
+      }
+#;
+--------- in config.ph ---------
+
+
+.# ##########################################################
+.C	perl 豆知識
+.S	exec LIST
+
+     `LIST' の中に 1 以上の引数がある場合、または `LIST' が 1 以上の値を
+     持つ配列の場合、`LIST' 中の引数で `execvp()' をコールする。
+
+     スカラー引数が 1 しかない場合、引数にシェルのメタキャラクターがある
+     かどうかチェックされる。もしあれば、parse するために全引数が 
+     `/bin/sh -c' に渡される。もしなければ、引数は単語毎に分けられ、
+     `execvp()' にそのまま渡される。この方が効率的だからである。
+
+
+.S	system LIST
+
+     `exec LIST' と全く同じことをするが、違いは最初に `fork' を行い、親
+     プロセスは子プロセスが完了するのを待つ点である。
+
+
+.S	open
+
+最終的に exec (do_exec in doio.c)を呼ぶので、この場合のメタキャラクタ
+の取り扱いも同じ
+
+
+.S	perl の習得はやさしいか？
+
+perlの書き方は見ての通り、
+
+	shell script, awk, C, sed
+
+の知識がちょっとあれば書けるものです。
+＃初心者でもわかるように 変な書き方をしないよう気をつけているつもりで
+すけど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+
+気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
+
+* Traps::			注意点
+
+あたりにあります。このperl.texinfoの日本語版は持っていて損はしないです。
+＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容である。
+＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
+
+perl texinfo in japanese --- version 4.0.19.2
+・perl.texinfo		perl.man を日本語に訳して texinfo 形式にしたもの
+
+というものがfj.sourcesに投稿されています。ちなみに
+
+ftp.phys.titech.ac.jp:pub/misc/perl
+-r--r--r--  1 fukachan   112208 Mar 12  1993 perl.texinfo-j4.0.19.2.tar.gz
+
+にもあります
+
+
+.S	perlはinterpreter
+
+必要のないコードは評価しない方が“少しは”はやいよね、きっと
+＃そうして、require ってのが増えていく（笑）
+
+
+.S	変数
+
+基本はグローバルで、localで明示的にlocal variableにする。
+そうでなければ前に評価した時の値のままなんです。
+＃でもって、interpreterなんですよね、perlは
+
+だから、“config.phを評価する時に$DIRに入っている値”が重要になるわけ
+ですね。
+
+
+.S	@INC	
+@INC : perl スクリプトを探す場所のリスト
+========================================
+
+`@INC': perl スクリプトを探す場所のリスト
+
+`do EXPR' コマンドまたは `require' コマンドで評価される。
+
+最初は コマンドスイッチ `-I' で指定した引数 + デフォルト perl ライブラリ 
+(多分 `/usr/local/lib/perl'、次に `.' すなわちカレントディレクトリ )が入っ
+ている。
+
+-----------------------------------------
+
+fml.plでは、
+
+$DIR	      = $ARGV[0] ? $ARGV[0] : '/home/axion/fukachan/work/spool/EXP';
+
+で、$DIRを引数からとった後
+
+push(@INC,"$DIR");		# add the path for include files
+
+で、探す場所を指定しています。
+% perl -e '$,="\n", print @INC'
+とかしてみればわかりますが、
+
+/usr/local/lib/perl
+$DIRの場所
+$LIBDIRの場所
+
+の順番で探していくはずです。つまり、
+
+require 'libsmtp.pl';	とか
+require 'sys/socket.ph';	
+
+がこの順で探されるはずなんですね。
+
+
+.S	require
+
+@INCの順でファイルを探してそれをperl scriptとして評価する。
+＃perlはinterpreterなので必要に応じて取り込んで評価した方がいいはず
+
+
+.S	主に言葉ではなくCodingする姿から伝わってくるもの
+
+ごみん、なんとなく… P^^;
+＃出典がわかる人（おぉ同志よ（笑））メールください(^^)
+
+
+.# ##########################################################
+.C	References
+
+rfc822				headers of mail
+rfc821				smtp
+rfc142[5678]			about esmtp
+
+rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
+
+rfc934				Proposed Standard for Message Encapsulation
+rfc1153				digest
+
+rfc1522				MIME part 2
+
+rfc1594				用語集
+
+perl texinfo in japanese --- version 4.0.19.2
+
+.# ##########################################################
+.# ##########################################################
+
+fj.sources:
+Release Version 1.5
+Message-ID: <FUKACHAN.95Jun13000736@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001452@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001132@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001217@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001255@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001321@beth.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.95Jun13001352@beth.phys.titech.ac.jp>
+
+Release Version 1.3
+Message-ID: <FUKACHAN.94Sep12063149@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063412@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063554@axion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Sep12063737@axion.phys.titech.ac.jp>
+
+Release Version 1.2.1
+Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+fml 1.2    Mailing List Server(upper compatible with hml 1.6).
+Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
+
+Subject: hml1.6: a powerful mailing list server
+Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
+
+.# ##########################################################
+.# ##########################################################
+
+
+Papers(http://www.phys.titech.ac.jp/uja/PAPERS/):
+Ken'ichi Fukamachi,
+"1/f Fluctuations in Internet Communication"
+to appaer in Interdisciplinary Information Sciences.
+
+.# ##########################################################
+.# ##########################################################
+
+.# FAQ ENDS
+
