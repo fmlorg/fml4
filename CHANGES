@@ -4,6 +4,34 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/08/31
+
+   drafts/help
+	remove ^H inserted by mistake
+	# It may be invisible on your terminal :-)
+
+2001/08/26
+
+   cf/MANIFEST 
+   etc/makefml/menu.conf.toggle 
+		add the following missing definitions:
+		FILTER_ATTR_REJECT_INVALID_JAPANESE	= 0
+		MESSAGE_ID_CACHE_BUFSIZE		= 60*100
+		NOT_USE_ESMTP_PIPELINING		= 0
+		UNISTD					= &is_unix
+
+2001/08/25
+
+   clean up
+	toymodel.pl of database drivers 
+
+   remove doc/smm/ (cvs repository)
+
+2001/08/23
+
+   doc/ri/INSTALL_CGI.wix
+	s/alias_database/alias_maps/
+	fix comment
 
 2001/08/21
 
