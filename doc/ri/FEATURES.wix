@@ -22,6 +22,13 @@ you should enable functions explicitly.
 *  makefml (CUI; interactive install and customize interface)
 
 
+[message/response]
+
+○ メッセージの多国語化 (3.0 new)
+=E
+* Message Language Extension (3.0 new)
+
+
 [セキュリティ]
 =E
 [security]
@@ -217,6 +224,10 @@ you should enable functions explicitly.
 [登録関係]
 =E
 [registration]
+
+○ 自動登録のメンバーリストの扱い方を変更 (3.0 new)
+=E
+* change actives/members treatment of automatic subscribe (3.0 new)
 
 ○ 自動的にメンバー登録をする機能 (default: confirmation)
    登録への確認/Subject: subscribe/本文に Subscribe/キーワードなし
