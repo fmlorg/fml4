@@ -1996,14 +1996,15 @@ sub do_passwd
     &ResetVariables;
     $cf = "$ML_DIR/$ml/cf";
     # set %config, eval %MAKE_FML in it;
-    &GetCF($cf, $ml, *config, *cur_config);
+    # &GetCF($cf, $ml, *config, *cur_config);
+    &GetConfigPH($ml); # store value in "config_ph" name space.
 
     # $ml/etc
     &MakeSubDir("$ML_DIR/$ml/etc");
 
     # here we go! 
     &SetWritableUmask;
-    $passwd_file= $cur_config{"PASSWD_FILE"} || "$ML_DIR/$ml/etc/passwd";
+    $passwd_file= &Value("PASSWD_FILE") || "$ML_DIR/$ml/etc/passwd";
 
     -f $passwd_file || &Touch($passwd_file);
 
@@ -2048,7 +2049,7 @@ sub do_passwd
     $init = 1;	# if new-comer, initialize the passwd;
 
     $REMOTE_ADMINISTRATION_AUTH_TYPE = 
-	    $config{'REMOTE_ADMINISTRATION_AUTH_TYPE'} || "crypt";
+	&Value('REMOTE_ADMINISTRATION_AUTH_TYPE') || "crypt";
 
     if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
 	print "   Passwd Changed ($passwd_file).\n";
@@ -2620,9 +2621,6 @@ sub do_test
 
 
 # here eval $local_config since here is the phase evaluating CF;
-#     %config: raw value in $DIR/cf.  $key => raw $value
-# %cur_config: evalued value of them; $key => evaluated $value
-#              since we need value with expanded $DOMAINNAME, for example. 
 sub GetCF
 {
     local($cf, $ml, *config, *cur_config) = @_;
@@ -2756,13 +2754,6 @@ sub GetCF
 	$config{'ADDR_CHECK_MAX'} = 3;
 	sleep 3;
     }
-
-    if ($debug) {
-	while (($k, $v) = each %cur_config) {
-	    print STDERR "    config{$k} => $config{$k}\n";
-	    print STDERR "cur_config{$k} => $v\n";
-	}
-    }
 }
 
 # dummy functions agasint the compile errors of config.ph
@@ -2800,7 +2791,9 @@ sub GetConfigPH
 
     &ResetVariables;
 
-    $cf = "$ML_DIR/$ml/config.ph";
+    $cf  = "$ML_DIR/$ml/config.ph";
+    $DIR = "$ML_DIR/$ml";
+    $config_ph'DIR = $main'DIR;
     $status = &config_ph'Load($cf); #';
     print STDERR $@ if $@;
 }
@@ -2820,15 +2813,18 @@ sub Value
 # makefml pgp elena PGP-OPTIONS
 sub do_pgp
 {
-    local($ml, @argv) = @_; 
+    local($ml, @argv) = @_;
+    local($xdir);
 
     $cf = "$ML_DIR/$ml/cf";
     # set %config, eval %MAKE_FML in it;
-    &GetCF($cf, $ml, *config, *cur_config); 
+    # &GetCF($cf, $ml, *config, *cur_config); 
+    &GetConfigPH($ml);
 
-    $ENV{'PGPPATH'} = $cur_config{'PGP_PATH'};
-    &MkDirHier($cur_config{'PGP_PATH'}, 0700);
-
+    $xdir = &Value('PGP_PATH');
+    $ENV{'PGPPATH'} = $xdir;
+    &MkDirHier($xdir, 0700);
+    
     $| = 1;
     print "\n--- PGP BEGIN ---\n";
     print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
@@ -2840,7 +2836,7 @@ sub do_pgp
     print "\n--- PGP END ---\n\n";
 
     if ($GroupWritable) {
-	chmod 0660, "$config{'PGP_PATH'}/pubring.pgp";	
+	chmod 0660, "$xdir/pubring.pgp";	
     }
 }
 
@@ -3561,19 +3557,20 @@ sub do_adduser
 	return;
     }
 
-    &GetCF($cf, $ml, *config, *cur_config); 
+    # &GetCF($cf, $ml, *config, *cur_config); 
+    &GetConfigPH($ml);
 
     &SetWritableUmask;
 
     print "---Adding $member to $ml mailing list\n";
 
     if ($AdminMode) {
-	@files = ($cur_config{'ADMIN_MEMBER_LIST'} ||
+	@files = (&Value('ADMIN_MEMBER_LIST') ||
 		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members", 
-		  $cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives");
+	@files = (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members", 
+		  &Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives");
     }
 
     &ResetVariables;
@@ -3628,18 +3625,19 @@ sub do_byeuser
 
     print "---Delete $member in $ml mailing list\n";
 
-    &GetCF($cf, $ml, *config, *cur_config); 
+    # &GetCF($cf, $ml, *config, *cur_config); 
+    &GetConfigPH($ml);
 
     &SetWritableUmask;
 
     # beth: require fix
     if ($AdminMode) {
-	@files = ($cur_config{'ADMIN_MEMBER_LIST'} ||
+	@files = (&Value('ADMIN_MEMBER_LIST') ||
 		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members", 
-		  $cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives");
+	@files = (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members", 
+		  &Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives");
     }
 
     &ResetVariables;
@@ -3697,7 +3695,7 @@ sub do_ctladdr
 	}
     }
 
-    if ($proc eq 'chaddr' && $config{'USE_MEMBER_NAME'}) {
+    if ($proc eq 'chaddr' && &Value('USE_MEMBER_NAME')) {
 	&Debug("*** Error ***");
 	&Debug("*** If you use \$USE_MEMBER_NAME, please use");
 	&Debug("*** \"makefml command $ml $proc addr new-addr\"");
@@ -3705,20 +3703,21 @@ sub do_ctladdr
 
     print "---$proc $addr in $ml mailing list\n";
 
-    &GetCF($cf, $ml, *config, *cur_config); 
+    # &GetCF($cf, $ml, *config, *cur_config);
+    &GetConfigPH($ml);
 
     &SetWritableUmask;
 
     # files to change
     if (&AutoRegistrableP) {
-	push(@files, ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members"));
+	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 
     }
     else {
-	push(@files, ($cur_config{'ACTIVE_LIST'} || "$ML_DIR/$ml/actives"));
+	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"));
 
 	if ($proc eq 'chaddr') {
-	    push(@files, ($cur_config{'MEMBER_LIST'} || "$ML_DIR/$ml/members"));
+	    push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 	}
     }
 
@@ -3752,11 +3751,16 @@ sub do_ctladdr
 
 sub AutoRegistrableP
 {
-    if ($cur_config{'REJECT_POST_HANDLER'} =~ /auto\S+regist/ ||
-	$cur_config{'REJECT_COMMAND_HANDLER'} =~ /auto\S+regist/) {
+    local($rph, $rch);
+    $rph = &Value('REJECT_POST_HANDLER');
+    $rch = &Value('REJECT_COMMAND_HANDLER');
+
+    if ($rph =~ /auto\S+regist/ || $rch =~ /auto\S+regist/) {
+	print STDERR "\tAutoRegistrableP\n" if $debug;
 	1;
     }
     else {
+	print STDERR "\tNot AutoRegistrableP\n" if $debug;
 	0;
     }
 }
