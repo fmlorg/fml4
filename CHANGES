@@ -5,6 +5,10 @@
 
 2000/03/08
 
+   Re: Re: Re: 
+	fix rurle to s/"Japanese Re:" Re:/ Re:/ to canonicalize subject to be
+	"Subject: Re: ..." form.
+
    fix $REWRITE_TO == 1 behaviour
 	fml-support: 07595
 

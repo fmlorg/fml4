@@ -900,13 +900,13 @@ sub CutOffRe
     s/^\s*Re\^\d+:\s+/Re: /gi;   # Re^2:
     s/^\s*Re\*\d+:\s+/Re: /gi;   # Re*2:
 
-    while (s/^\s*Re:\s*Re:\s*/Re: /gi) { ;} #'/gi' for RE: Re: re: ;
-    s/^\s*Re:\s+/Re: /; # canonicalize it to "Re: ";
-
     if ($LANGUAGE eq 'Japanese') { 
 	require("module/$LANGUAGE/liblangdep.pl");
 	$_ = &Japanese'CutOffReReRe($_);
     }
+
+    while (s/^\s*Re:\s*Re:\s*/Re: /gi) { ;} #'/gi' for RE: Re: re: ;
+    s/^\s*Re:\s+/Re: /; # canonicalize it to "Re: ";
 
     $_;
 }

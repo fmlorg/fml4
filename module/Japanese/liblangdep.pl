@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: liblangdep.pl,v 1.1 2000/03/01 04:25:09 fukachan Exp $
+# $Id: liblangdep.pl,v 1.2 2000/03/07 17:11:21 fukachan Exp $
 
 # patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 # fml-support: 07599, 07600
@@ -52,9 +52,12 @@ sub CutOffReReRe
 	$y = $x;
 	$x =~ s/^[\s]*//;
 	$x =~ s/^(　)*//;
-	$x =~ s/^(手慨:|手慨¨|手:|手¨|ＲＥ:|ＲＥ¨|Ｒｅ:|Ｒｅ¨)//;
+
+	# XXX s/Re: Re:/Re: / after this module. See CutOffRe() in fml.pl
+	$x =~ s/^(\s*|Re:\s*)(手慨:|手慨¨|手:|手¨|ＲＥ:|ＲＥ¨|Ｒｅ:|Ｒｅ¨)/Re:/;
 	if ($CUT_OFF_RERERE_PATTERN) { $x =~ s/^($CUT_OFF_RERERE_PATTERN)//;}
 	last if $y eq $x;
+	&Log("rewrite-subject: {$x}");
     }
 
     if ($CUT_OFF_RERERE_HOOK) {
