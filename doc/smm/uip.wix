@@ -622,11 +622,35 @@ stardate.el です。
 
 
 .S	bin/RecreateConfig.pl
-.k	bin/RecreateConfig.pl)
+.k	bin/RecreateConfig.pl
 .k	RecreateConfig.pl
 
 fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
 
+
+.S	Multipart Canceler フィルタ (bin/multipart.pl)
+.k	bin/multipart.pl
+.k	multipart.pl
+
+なお、makefml ではサンプルがついています。
+
+.q
+From:    Yuao TANIGAWA <yuao@infonia.or.jp>
+Subject: Multipart Canceler
+To:      fml-support@axion.phys.titech.ac.jp (fml supporting ML)
+Date:    Fri, 10 Jan 1997 21:09:03 +0200
+X-Mail-Count: 01937
+
+  最近、ML に Multipart/Mixed とか Multipart/Alternative とかの
+形式で、メールを送ってくる人がいるので（特にコマンドの処理がで
+きないので）、Multipart Canceler なるフィルタを作ってみました。
+  Multimart/Mixed の場合は、# End of Document No.??? でつなげる。
+Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
+いうことをしています。
+  使い方は、fml を起動するのに "|/fmlpath/fml.pl ..." と記述し
+ているところを "|/scriptpath/multipart.pl|/fmlpath/fml.pl ..."
+などと記述すれば機能します。
+.~q
 
 
 .# $Id$
