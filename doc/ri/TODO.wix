@@ -20,6 +20,15 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
+◯ makefml showconf
+
+	 makefml showconfig
+	 makefml showconf
+
+ついでに
+	 makefml bug-report-template
+はバグレポートテンプレートを作る。
+
 ◯ 3.0B
 
 (stable, current)
