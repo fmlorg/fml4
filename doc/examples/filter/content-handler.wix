@@ -1,0 +1,82 @@
+.HTML_PRE
+		ContentHandler
+
+.include config/ContentHander
+
+.if LANG == JAPANESE
+&ADD_CONTENT_HANDLER(type, subtype, action);
+	type		メール全体のMIMEタイプ
+	subtype		multipartの時のそれぞれのブロックのタイプ
+	action		マッチした時に起こすべきアクション
+
+例
+  &ADD_CONTENT_HANDLER('multipart/.*', 'text/plain',   'allow');
+  MIME multipartのメールがきたら text/plain の部分だけを通す
+
+  &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*',        'reject');
+  MIME multipartのメールがきたらすべて拒否
+
+
+'/' で区切って perl の正規表現で表記できます。
+!MIME は MIME 以外(その他)です。
+
+各パート毎にその動作を指定できます。動作は、
+
+allow			配信許可
+
+	allow はそのエンティティの multipart を分解してしまいます。
+	つまり allow にすると multipart でないメールになります。
+
+allow+multipart		許可し、multipart のエンティティは multipart
+			のまま残す
+
+	allowと異なりこの場合はmultipart はそのまま通します。
+
+strip			該当パートは削除
+
+	つまり一部分切り落として配送されます
+
+strip+notice		該当エンティティは切り落とし投稿者に返される
+
+	1. 一部分切り落として配送される (stripと同じ)
+	2. 投稿者に切り落としたと知らせる
+
+reject			このパートがあればメール配信拒否
+
+	つまり、一箇所でもマッチする場所があればメール全体を拒否
+
+が選択できます。
+.fi
+.if LANG == ENGLISH
+&ADD_CONTENT_HANDLER(type, subtype, action);
+	type		MIME type of whole mail
+	subtype		content type of each block
+	action		action if the type matches
+
+  &ADD_CONTENT_HANDLER('multipart/.*', 'text/plain',   'allow');
+  pass only text/plain block in MIME multipart mail
+
+  &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*',        'reject');
+  reject any mail with MIME multipart format
+
+Filtering based on each MIME entity block, Content-Type: field
+in the mail
+
+allow			permit distribution of this post
+allow+multipart		permit the mail and leave the entity as it is
+
+	allow+multipart pass through the block but allow disassembles
+	the multipart
+
+strip			strip this type entity block and distribute it
+strip+notice		strip this type entity block (same as "strip")
+			and also tell the sender "we strip the entity off".
+
+reject			reject this whole mail if only one block matches
+			the type
+
+.fi
+
+----------
+Author: t-nakano@marimo.org
+.~HTML_PRE
