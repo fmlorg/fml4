@@ -2346,6 +2346,9 @@ sub do_install
 	print "Please do \"makefml\" in the top directory of the source\n";
     }
 
+    &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
+		  "", "$EXEC_DIR/default_config.ph");
+
     if ($GroupWritable eq 'fmlserv') {
 	$cmd = &Query("Set up \"fmlserv\" system now? ", "y/n", "y|n", "n");
 	if ($cmd eq 'y') { &ExecCmd("fmlserv");}
@@ -3841,16 +3844,20 @@ sub MakeConfigPH
 	return "";
     }
 
-    print STDERR "\n";
-    print STDERR "   config.ph($config_ph):\n";
-    print STDERR "\t$cf  ->  config.ph ... ";
+    if ($cf) {
+	print STDERR "\n";
+	print STDERR "   config.ph($config_ph):\n";
+	print STDERR "\t$cf  ->  config.ph ... ";
+    }
 
     for ($config, $manifest, $cf) { # config.ph may not exist; 
-	if (! -e $_) {
+	if ($_ && ! -e $_) {
 	    print STDERR "***Error: I Cannot find $_, Stop.\n";
 	    return $NULL;
 	}
     }
+
+    $cf ||= "-i";
 
     if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
 	&Log("Error: cannot exec $config -m $manifest $cf");

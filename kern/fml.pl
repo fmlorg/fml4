@@ -319,6 +319,8 @@ sub LoadConfig
 	print STDERR "\nFYI: include's owner != config.ph's owner, O.K.?\n\n";
     }
 
+    require 'default_config.ph';
+
     # site_init
     if ($SiteInitPath = &SearchFileInLIBDIR("site_init.ph")) {
 	if (-r $SiteInitPath) { 
@@ -338,11 +340,14 @@ sub LoadConfig
 	exit 1;
     }
 
-    if ($SitedefPath = &SearchFileInLIBDIR("sitedef.ph")) {
-	if (-r $SitedefPath) { 
-	    &Log("require $SitedefPath") if $debug;
-	    require($SitedefPath);
-	}
+    # site_force
+    for ("site_force.ph", "sitedef.ph") {
+	($SiteforcePath = &SearchFileInLIBDIR($_)) || next;
+	-r $SiteforcePath || next;
+
+	&Log("require $SiteforcePath") if $debug;
+	require($SiteforcePath);
+	last;
     }
 
     require 'libsmtp.pl';		# a library using smtp

@@ -18,13 +18,14 @@ $ERROR_LOG = "etc/motd.error";
 unlink $ERROR_LOG if -f $ERROR_LOG;
 
 require 'getopts.pl';
-&Getopts("m:hdDr:csnfrFI:v");
+&Getopts("m:hdDr:csnfrFiI:v");
 
 $no_dns  = $opt_n;
 $debug   = $opt_d;
 $debug2  = $opt_D;
 $compat  = $opt_c;
 $reverse = $opt_r;
+$install = $opt_i;
 $verbose = $rv'verbose = 1 if $opt_v; #';
 $file_substitute = $opt_F;
 
@@ -65,7 +66,7 @@ elsif ($opt_f) {
     &FixEnv;
 }
 else {
-    &readfile(@ARGV);
+    &readfile(@ARGV) unless $install;
     &output;
 }
 
@@ -237,13 +238,8 @@ sub output
 
 	# here may be overwritten!
 	# patched by racsho@cpdc.canon.co.jp (96/11/14)
-	if (! $rewritten{$key}) {
-	    # if original is null field, comment out for less stacks;
-	    if ($value{$key} eq "\"\"" ||
-		$value{$key} eq "''"   ||
-		$value{$key} eq "0") {
-		$cf = '# ';
-	    }
+	if (!$install && !$rewritten{$key}) {
+	    $cf = '# ';
 	}
 
 	#print STDERR "[$cf]$key\t$value{$key}\n";
