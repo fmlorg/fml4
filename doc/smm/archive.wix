@@ -30,6 +30,7 @@ config.ph の例：
 
 これを 次のように fml.pl は解釈します。
 
+
 .S	"# get 1 " と archive
 
 例えば、"# get 1 " というコマンドを送り込んだ時
@@ -48,6 +49,7 @@ config.ph の例：
 	var/archive/100.tar.gz 
 
 があれば、ファイル １ を取り出して１だけを送り返す。
+
 
 .S	"# mget 1 " と archive
 
@@ -74,7 +76,8 @@ config.ph の例：
 上述のようになります。
 
 
-.S	Archive.pl(bin/Archive.pl)
+.S	Archive.pl (bin/Archive.pl)
+.k	bin/Archive.pl
 .key	Archive.pl
 
 	Archive.pl [-dh] [-A ARCHIVE_DIR][-u unit] MAX
@@ -143,7 +146,8 @@ spoolの 3800 までの 100 個ずつのパッケージを作りました。spoolの方の元
 
 
 .S	アーカイブ作成を cron で自動処理
-.key	Archive.cron
+.key	Archive.sh
+.key	Archive.pl
 .key	crontab
 
 cronで自動的（例えば週一日曜の朝とか）に次の形で
