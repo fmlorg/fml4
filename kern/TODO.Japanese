@@ -7,3 +7,14 @@
 Mellissa 検査ルーチンの buffer sliding window を cut & paste 
 のほうがいいか…
 
+------------------------------------
+add hook in msend.pl
+
+	exit if $MSEND_NOT_SUPPORT;
+
+any comments?
+
+
+
+-----
+$Id$
