@@ -352,6 +352,9 @@ FILTER_ATTR_REJECT_MS_GUID: 1
 # value: 1/0
 AGAINST_HTML_MAIL:
 
+# value: "strip" / "reject"
+AGAINST_HTML_MAIL_HANDLER:	strip
+
 # Mail Traffic Information: internal traffic monitor
 # value: 1/0
 USE_MTI:

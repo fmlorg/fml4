@@ -17,21 +17,38 @@ sub AgainstHtmlMail
     local($buf, $p, $sp);
 
     if ($e{'h:content-type:'} =~ /multipart/i) {
-	$p  = index($e{'Body'}, $boundary, 0);
-	$p  = index($e{'Body'}, $boundary, $p + 1);
-	$sp = $p;
+	if ($AGAINST_HTML_MAIL_HANDLER eq '' ||
+	    $AGAINST_HTML_MAIL_HANDLER eq 'strip') {
 
-	$buf .= substr($e{'Body'}, 0, $sp);
-	$p    = index($e{'Body'}, "$boundary--", 0);
-	$buf .= substr($e{'Body'}, $p);
+	    $p  = index($e{'Body'}, $boundary, 0);
+	    $p  = index($e{'Body'}, $boundary, $p + 1);
+	    $sp = $p;
 
-	if ($buf) {
-	    $e{'Body'} = 
-		"-- Fml automatically cuts off duplicated HTML parts.\n\n";
-	    $e{'Body'} .= $buf;
+	    $buf .= substr($e{'Body'}, 0, $sp);
+	    $p    = index($e{'Body'}, "$boundary--", 0);
+	    $buf .= substr($e{'Body'}, $p);
+
+	    if ($buf) {
+		$e{'Body'} = 
+		    "FYI: FML automatically cuts off HTML part(s).\n\n";
+		$e{'Body'} .= $buf;
+	    }
+
+	    &Log("cut off HTML part");
+	    return "strip";
+	}
+	elsif ($AGAINST_HTML_MAIL_HANDLER eq 'reject') {
+	    &Mesg(*e, "This mailing list <$MAIL_LIST> denies HTML mail.");
+	    &Mesg(*e, "Please send your mail by PLAIN TEXT!");
+	    &Mesg(*e, &WholeMail);
+	    &Log("reject HTML mail");
+	    return "reject";
 	}
     }
+
+    $NULL;
 }
+
 
 sub AgainstReplyWithNoRef
 {

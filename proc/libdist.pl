@@ -22,7 +22,11 @@ sub DoDistribute
 
     # cut off the html mail's second (and after ) multipart parts
     # e.g. mails from outlook
-    if ($AGAINST_HTML_MAIL) { &use('disthack'); &AgainstHtmlMail(*e);}
+    if ($AGAINST_HTML_MAIL) { 
+	&use('disthack'); 
+	local($status) = &AgainstHtmlMail(*e);
+	if ($status eq 'reject') { return $NULL;}
+    }
 
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {
