@@ -91,6 +91,9 @@ sub System
 
 sub InitMakeFml
 {
+    local($pwd);
+    eval(' chop ($pwd = `pwd`); ');
+
     # flush;
     select(STDOUT); $| = 1;
 
@@ -121,7 +124,7 @@ sub InitMakeFml
     # import variables
     $Env         = $opt_E || 'CUI';
     $HOME        = $ENV{'HOME'};
-    $PWD         = $ENV{'PWD'};
+    $PWD         = $ENV{'PWD'} || $pwd || '.'; # '.' is the last resort;)
     $COMPAT_ARCH = $opt_A;
     $VENDOR      = $opt_V;
     $IN_CHANNEL  = $opt_i;
@@ -228,8 +231,8 @@ sub InitMakeFml
 	if ($CONFIG_DIR) { $AutoLoad = 1;}
     }
 
-    if ($ARGV[0] eq 'install' && -d 'src') {
-	unshift(@INC, "$ENV{'PWD'}/src");
+    if (($ARGV[0] =~ /^install/i) && -d 'src') {
+	unshift(@INC, "$PWD/src");
 	print STDERR "unshift(\@INC, $ENV{'PWD'}/src)\n";
     }
 
