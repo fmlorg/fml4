@@ -1466,18 +1466,18 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 .S	自動登録した時にそのメールをフォワードするか否か？
 .seealso	{auto-regist}
 .seealso	{auto-regist-3}
-.key	$AUTO_REGISTERD_UNDELIVER_P
+.key	$AUTO_REGISTERED_UNDELIVER_P
 
-	$AUTO_REGISTERD_UNDELIVER_P = 1;
+	$AUTO_REGISTERED_UNDELIVER_P = 1;
 
 自動登録はデフォールトでは登録要請をしているそのメールをＭＬへ流さない。
 つまり、「Subscribe」としか本文にないメールは流さない
 
 メール	→	登録	→ＭＬへ流す（デフォールト、
-					$AUTO_REGISTERD_UNDELIVER_P = 0;）
+					$AUTO_REGISTERED_UNDELIVER_P = 0;）
 
 				→ＭＬへは流さない
-					$AUTO_REGISTERD_UNDELIVER_P = 1;）
+					$AUTO_REGISTERED_UNDELIVER_P = 1;）
 
 注意： この変数をセットしても subscribe だけのメール（じつは８行）は 
 デフォールトでも流しません。管理者以外は見てもうれしくないでしょ？
@@ -1507,8 +1507,8 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 	$REQUIRE_SUBSCRIBE = "subscribe";
 
 ちなみに、このメールを ＭＬ本体にフォワードさせるか否か？
-.key	$AUTO_REGISTERD_UNDELIVER_P
-	$AUTO_REGISTERD_UNDELIVER_P = 1;
+.key	$AUTO_REGISTERED_UNDELIVER_P
+	$AUTO_REGISTERED_UNDELIVER_P = 1;
 とは独立な事象です
 
 
@@ -1525,7 +1525,7 @@ $DEFAULT_SUBSCRIBE = "subscribe";
 けです）
 
 ちなみに、これを ＭＬ本体にフォワードさせるか否か？
-	$AUTO_REGISTERD_UNDELIVER_P = 1;
+	$AUTO_REGISTERED_UNDELIVER_P = 1;
 とは独立な事象です。
 
 
@@ -1609,10 +1609,10 @@ $START_HOOK = q#
 
 .S	自動登録モードだと最初のメールから全部流れてしまうのはちょっと…？
 .label	{auto-regist-3}
-.key	$AUTO_REGISTERD_UNDELIVER_P
+.key	$AUTO_REGISTERED_UNDELIVER_P
 
 config.ph の中で 
-	$AUTO_REGISTERD_UNDELIVER_P = 1;
+	$AUTO_REGISTERED_UNDELIVER_P = 1;
 
 なら 登録要請をしている最初のメールはＭＬへ流さないようになります。
 デフォールトは０で 流してしまいます。
