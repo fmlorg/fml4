@@ -102,7 +102,11 @@ sub InitFmlServ
 
     # sitedef.ph
     for (@INC) {
-	if (-f "$_/sitedef.ph") { $SiteDefPH = "$_/sitedef.ph"; last;}
+	if (-f "$_/sitedef.ph") { 
+	    $SiteDefPH = "$_/sitedef.ph"; 
+	    $ml'SiteDefPH = "$_/sitedef.ph";  #';
+	    last;
+	}
     }
 }
 
@@ -955,10 +959,19 @@ sub main'LoadMLNS
     # load the presnet directry information (tricky?)
     $ml'DIR = $main'DIR;
 
-    eval "require '$file';";
-    print STDERR $@ if $@;
-    # do $main'SiteDefPH if -f $main'SiteDefPH;
-    
+    eval("require '$file';");
+    &Log($@) if $@;
+
+    # daity trick ;-) 
+    # do "file" statement seems 
+    # gobble it to the buffer, and eval buffer
+    # so, it always cost a lot of stacks.
+    # we cannot permit it!. so here I use dirty(;_;) trick
+    # based on "require checkes the full-pathed file name". ;D
+    $SiteDefPH = "/../$SiteDefPH";
+    eval("require '$SiteDefPH';");
+    &Log($@) if $@;
+
     if ($] =~ /5.\d\d\d/) {
 	*stab = *{"ml::"};
     }
