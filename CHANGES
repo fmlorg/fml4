@@ -3,6 +3,23 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/19
+
+  CGI
+	create ml-admin/$ml/htpasswd from /var/spool/$ml/etc/passwd
+	if exists
+
+	あるＭＬのCGI操作を有効にする際に htpasswd はもし $DIR/etc/passwd
+	があればそれからCGI管理者初期ユーザリストを生成する。
+	つまりコマンドを送り込める権限のユーザとCGI管理者は初期設定では
+	同じ人々になる。
+
+	XXX 特定の (e.g. elena)ＭＬをCGI操作可能にした場合も
+	XXX フレームバージョンにはやくしたいものだ
+
+   doc/examples/
+	add daily-renewal,  manual/
+
 2000/02/18
 
   CGI
