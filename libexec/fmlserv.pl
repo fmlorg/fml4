@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1996 kfuka@sapporo.iij.ad.jp
+# Copyright (C) 1996 fukachan@sapporo.iij.ad.jp
 # Please obey GNU Public Licence(see ./COPYING)
 
 $rcsid   = q$Id$;
@@ -20,19 +20,32 @@ foreach (@ARGV) {
     $DIR    || (-d $_ && ($DIR = $_));
 }
 
+&InitFmlServ;
+
 # Fmlserv specific here
-$DIR           = $DIR    || '/home/axion/fukachan/work/spool/EXP';
-$MAIL_LIST_DIR = $DIR;
-$FMLSERV_DIR   = "$DIR/fmlserv";
-$LIBDIR	       = $LIBDIR || $DIR;
-unshift(@INC, $FMLSERV_DIR);
+sub InitFmlServ
+{
+    $DIR           = $DIR  || '/home/axion/fukachan/work/spool/EXP';
+    $MAIL_LIST_DIR = $DIR;
+    $FMLSERV_DIR   = "$DIR/fmlserv";
+    $DIR           = $FMLSERV_DIR;
+    $LIBDIR	   = $LIBDIR || $DIR;
+    unshift(@INC, $FMLSERV_DIR);
+
+    # Directory check
+    $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
+    if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
+
+    $LOGFILE       = "$FMLSERV_DIR/log";
+    &Touch($LOGFILE);
+}
 
 ### MAIN ###
 umask(077);			# ATTENTION!
 
 &CheckUGID;
 
-chdir $MAIL_LIST_DIR || die "Can't chdir to $DIR\n";
+chdir $DIR || die "Can't chdir to $DIR\n";
 
 &InitConfig;			# initialize date etc..
 
@@ -65,10 +78,6 @@ sub FmlServ
     # Declare 
     $e{'mode:fmlserv'} = 1;
 
-    # Directory check
-    $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
-    if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
-
     # ML::constructor() for fmlserv@$DOMAIN
     &NewML($FMLSERV_DIR, 'fmlserv', *e);
 
@@ -82,7 +91,7 @@ sub FmlServ
     # Summary of requested procedures for each ML
     # Envelope{Body} => %ReqInfo (Each ML)
     #                   @ReqInfo (fmlserv commands) 
-    &SortRequest(*Envelope, *ReqInfo);
+    &SortRequest(*Envelope, *ML, *ReqInfo);
 
     require 'libfml.pl';# if %ReqInfo;
     
@@ -93,6 +102,8 @@ sub FmlServ
     $FMLSERV_DIR = $DIR;	# save $DIR
 
     foreach $ml (keys %ReqInfo) {
+	next if $ml eq 'fmlserv'; # fmlserv is the last;
+
 	$DIR  = $ML{$ml};	# reset $DIR for each ML's $DIR
 	$cf   = "$DIR/config.ph";
 	$proc = $ReqInfo{$ml};
@@ -157,12 +168,65 @@ sub FmlServ
 
     &NewML($FMLSERV_DIR, 'fmlserv', *e);
 
+    &DoFmlServItselfFunctions(*ReqInfo, *e) if ($ReqInfo{'fmlserv'});
+
     $e{'h:From'} = $MAIL_LIST;	# special case when fmlserv
+    $e{'message:h:subject'} = "fmlserv command status report";
 
     &AppendFmlServInfo(*e);
 
     # Already '_main' ENVIRONMENT
     # DONE;
+}
+
+
+sub DoFmlServItselfFunctions
+{
+    local(*proc, *e) = @_;
+    local($procs2fml);
+
+    &SetFmlServProcedure;
+
+    if ($proc{'fmlserv'}) {
+	local(@proc) = split(/\n/, $proc{'fmlserv'});
+	&use('fml');
+
+	foreach (@proc) {
+	    print STDERR "proc $_\n";
+
+	    # ATTENTION! already "cut the first #.. syntax"
+	    # in sub SortRequest
+	    $org_str = $_;
+	    ($_, @Fld) = split;
+	    @Fld = ('#', $_, @Fld);
+
+	    ### Procedures
+	    tr/A-Z/a-z/;
+
+	    # FIRST fmlserv:command form here
+	    if ($proc = $Procedure{"fmlserv:$_"}) {
+		$0 = "--Command calling $proc: $FML $LOCKFILE>";
+		&Debug("Call $proc for [$org_str]") if $debug;
+
+		# REPORT
+		if ($Procedure{"r#fmlserv:$_"}) {
+		    $e{'message'} .= "\n>>> $org_str\n";
+		}
+
+		# PROCEDURE
+		$status = &$proc("fmlserv:$_", *Fld, *e, *misc);
+	    }
+	    # WHEN NOT FMLSERV:Commands, call usual command(libfml.pl)
+	    # not call multiple times, for only one calling
+	    else {
+		&Debug("Call \$proc for [$org_str]") if $debug;
+		$procs2fml .= "$org_str\n";
+	    }
+	}# foreach;
+
+	### CALL when NOT MATCHED TO FMLSERV:Commnads
+	&Command($procs2fml) if $procs2fml;
+    }
 }
 
 
@@ -190,7 +254,6 @@ sub DoFmlServProc
 	    }
 	    else {
 		&use('utils');
-		&Append2(join("\n", %e), "/tmp/ujauja");
 		&AutoRegist(*e, $addr);
 	    }
 	}
@@ -308,7 +371,7 @@ sub NewMLAA
 # ATTENTION! "cut the first #.. syntax"
 sub SortRequest
 {
-    local(*e, *ML_cmds) = @_;
+    local(*e, *ML, *ML_cmds) = @_;
     local($cmd, $ml, @p, $s, $k, $v);
 
     foreach ( split(/\n/, $e{'Body'}) ) {
@@ -316,29 +379,37 @@ sub SortRequest
 	s/^\#\s*//;		# cut the first #.. syntax
 	next if /^\S+=\S+/;	# variable settings, skip
 
-	($cmd, $ml, @p) = split(/\s+/,$_);
+	($cmd, $ml, @p) = split(/\s+/, $_);
 	$ml =~ tr/A-Z/a-z/;
 
 	# EXPILICIT ML DETECTED. 
 	# $ml is non-nil and the ML exists
 	if ($ml && $ML{$ml}) {	
 	    # &Log("Request::${ml}::$cmd", (@p ? "(@p)" : ""));
-	    $ML_cmds{$ml}     .= "$cmd @p\n";
-	    $ML_cmds_log{$ml} .= ">>>> $cmd $ml @p\n";	    
+	    $ML_cmds{$ml}         .= "$cmd @p\n";
+	    $ML_cmds_log{$ml}     .= ">>>> $cmd $ml @p\n";	    
 	    &Debug("\$ML_cmds{$ml} = $ML_cmds{$ml}") if $debug;
 	}
 	# LISTSERV COMPATIBLE: COMMANDS SINCE NO EXPILICIT ML.
 	else {
-	    last if $_ eq 'quit';
-	    last if $_ eq 'end';
-	    last if $_ eq 'exit';
-	    push(@ML_cmds, $_);
-	    &Debug("\@ML_cmds = push [$_]") if $debug;
+	    last if /^\s*(quit|end|exit)/i;
+
+	    if (/^\s*subscribe/i) {
+		$e{'message'} .= ">>>> $_\n\tnot effective, so ignored ...\n";
+		next;
+	    }
+
+	    if (/^\s*(guide|info|help|lists|which|href|http|gopher|ftp|ftpmail)/) {
+		# push(@ML_cmds, $_);
+		# default >> virtual fmlserv ML
+		$ML_cmds{'fmlserv'}         .= "$cmd @p\n";
+		&Debug("FMLSERV COMMAND [$_]") if $debug;
+	    }
+	    else {
+		$e{'message'} .= ">>>> $_\n\tunknown command!\n";
+	    }
 	}
     }    
-
-    # Match nothing "HELP of LISTSERV COMPATIBLE" not HELP of each ML
-    (! @ML_cmds) && (! %ML_cmds) && push(@ML_cmds, 'help');
 
     if ($debug) {
 	while (($k,$v) = each %ML_cmds) { &Debug("[$k]=>\n$v");}
@@ -419,6 +490,129 @@ sub ResetNS
 }
 
 
+# SYNTAX
+# $s = $_;(present line of the given mail body)
+# $ProcFileSendBack($proc, *s);
+sub SetFmlServProcedure
+{
+    # (guide|info|help|lists|which|href|http|gopher|ftp|ftpmail)/) {
+
+    %Procedure = (
+		  'fmlserv:lists',	'ProcLists',
+		  'fmlserv:which',	'ProcWhich',
+
+		  # WWW Interface
+		  # WWW Interface
+		  'fmlserv:href',	'ProcHRef',
+		  'r#fmlserv:href',	1,
+
+		  'fmlserv:http',	'ProcHRef',
+		  'r#fmlserv:http',	1,
+
+		  'fmlserv:gopher',	'ProcHRef',
+		  'r#fmlserv:gopher',	1,
+
+		  'fmlserv:ftp',	'ProcHRef',
+		  'r#fmlserv:ftp',	1,
+
+		  # ftpmail == ftp ( anyway.. 95/10)
+		  'fmlserv:ftpmail',	'ProcHRef',
+		  'r#fmlserv:ftpmail',	1,
+		  );
+}
+
+
+###### PROC PROCEDURES
+
+sub GetEntryByName
+{
+    local($file, $key) = @_;
+    local($s);
+
+    open(F, $file) || do { &Log("Cannot open $file"); return '';};
+    while(<F>) { $s .= $_ if /$key/;}
+    close(F);
+
+    $s;
+}
+
+
+sub ProcLists
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    $e{'message'} .= "\n>>> $proc\n\n";
+    $e{'message'} .= "  $MAIL_LIST serves the following lists\n\n";
+    $e{'message'} .= sprintf("   %s\n", 'Lists:');
+
+    while (($key, $value) = each %ML) {
+	next if $key eq 'fmlserv'; # fmlserv is an exception
+	$e{'message'} .= sprintf("\t%-15s\t%s\n", $key);
+    }
+
+    $e{'message'} .= "\n\n";
+}
+
+
+sub ProcWhich
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local($r, $s, $DIR, $hitc);
+    local($addr) = $Fld[2] || $From_address;
+
+    &Log($proc);
+
+    $e{'message'} .= "\n>>> $proc $addr\n\n";
+    $e{'message'} .= sprintf("%-15s\t%s\n", 'List', 'Address');
+    $e{'message'} .= ('-' x 50)."\n";
+
+    foreach $ml (keys %ML) {
+	next if $ml eq 'fmlserv'; # fmlserv is an exception
+	$DIR = $ML{$ml};
+
+	# get MEMBER_LIST
+	$s = "$DIR/config.ph";
+	$s = &GetEntryByName($s, '^\$MEMBER_LIST');
+	$s =~ s/\$DIR/$DIR/g;	# expand $DIR
+	$s .= ' 1;';
+
+	# and eval it
+	$r = eval $s, $@ eq "";	# $r is a result
+
+	# if eval is succeed, get entry for $addr
+	if ($r && ($s = &CheckMember($addr, $MEMBER_LIST))) {
+	    $e{'message'} .= sprintf("%-15s\t%s\n", $ml, $addr);
+	}
+
+	if (! $s) {
+	    ;# $e{'message'} .= "YOU ARE NOT A MEMBER of $ml\n";
+	}
+    }#FOREACH;
+
+}
+
+
+sub ProcHRef
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local(*r, $s, $DIR, $request);
+
+    ($request = $Fld[2]) || do {
+	$e{'message'} .= "\tERROR: NO GIVEN PARAMETER\n";
+	return;
+    };
+
+    &Log("$proc $request");
+
+    # Include required library
+    require 'libhref.pl';
+
+    &HRef($request, *e);
+
+    1;
+}
+
+
 ##################################################################
 package ml;
 
@@ -485,24 +679,33 @@ sub AppendFmlServInfo
     local($m);
 
     $m = qq#;
-    Fmlserv command syntax is a fml-command with ml-name.;
     ;
-    ;   COMMAND ML [OPTIONS];
+    ;************************************************************;
+    HELP of $MAIL_LIST;
+    ;
+    "Fmlserv" is an Listserv-Wise interface of "Fml"
+    Fmlserv command syntax is a kind of fml-command with ml-name;
+    ;
+    ;   COMMAND ML [COMMANDS' OPTIONS];
     ;
     e.g. the commands for 'elena' mailing list(ML);
     help    elena;
     ;       help file of 'elena' ML;
+    ;
     members elena;
     ;       members file of 'elena' ML;
+    ;
     actives elena;
     ;       actives file of 'elena' ML;
+    ;
     get     elena 1;
     ;       get the article 1 of 'elena' ML;
-    mget    elena last:10 mp;
-    ;       get the latest 10 articles of 'elena' ML;
     ;
-    #;
-
+    mget    elena 1-10 mp;
+    ;       get the latest 10 articles of 'elena' ML;
+    ;       PAY ATTENTION! the options is after the ML's name;
+#;
+		    
     $m =~ s/;//g;
     $e{'message'} .= $m;
 }
@@ -569,6 +772,7 @@ sub SetDefaults
     $SKIP_FIELDS = 'Received|Return-Receipt-To';
     $MAIL_LIST   = 'dev.null@domain.uja';
     $MAINTAINER  = 'dev.null-admin@domain.uja';
+    $ML_MEMBER_CHECK = 1;
 
     @HdrFieldsOrder = 
 	('Return-Path', 'Date', 'From', 'Subject', 'Sender',
@@ -638,6 +842,18 @@ sub InitConfig
 
     ### Options
     &SetOpts;
+
+    # Mode Definition
+    if ($Envelope{'mode:fmlserv'})     { &use("mladdr");  &FmlServMode;}
+    if ($Envelope{'mode:fml'})         { &use("mladdr");  &FmlMode;}
+    if ($Envelope{'mode:hml'})         { &use('modedef'); &HmlMode;}
+    if ($Envelope{'mode:auto'})        { $ML_MEMBER_CHECK = 0;}
+    if ($Envelope{'mode:check'})       { $ML_MEMBER_CHECK = 1;}
+    if ($Envelope{'mode:commandonly'}) { $COMMAND_ONLY_SERVER = 1;}
+    if ($Envelope{'mode:mime'})        { $USE_MIME = 1;}
+    if ($Envelope{'mode:through'})     { $SUPERFLUOUS_HEADERS = 1;}
+    if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
+
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
 
     &GetTime;			        # Time
@@ -688,7 +904,13 @@ sub SetOpts
     for (@SetOpts) { /^\-\-MLADDR=(\S+)/i && (&use("mladdr"), &MLAddr($1));}
 
     for (@SetOpts) {
-	if (/^\-\-(\S+)=(\S+)/) {
+	if (/^\-\-(force|fh):(\S+)=(\S+)/) { # "foreced header";
+	    $h = $2; $h =~ tr/A-Z/a-z/; $Envelope{"fh:$h:"} = $3;
+	}
+	elsif (/^\-\-(original|org|oh):(\S+)/) { # "foreced header";
+	    $h = $2; $h =~ tr/A-Z/a-z/; $Envelope{"oh:$h:"} = 1;
+	}
+	elsif (/^\-\-(\S+)=(\S+)/) {
 	    eval("\$$1 = '$2';"); next;
 	}
 	elsif (/^\-\-(\S+)/) {
@@ -706,9 +928,7 @@ sub SetOpts
 	/^\-u(\S+)/    && &eval("undef \$$1;") && next;
 	/^\-l(\S+)/    && ($LOAD_LIBRARY = $1) && next;
     }
-    
-    if ($Envelope{'mode:fmlserv'}) { &use("mladdr"); &FmlServMode;}
-    if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
+   
 }
 
 
@@ -798,6 +1018,9 @@ sub RunHooks
 {
     local($s);
     $0  = "--Run Hooks <$FML $LOCKFILE>";
+
+    # html mode
+    if ($Envelope{'mode:html'}) { &use('synchtml'); &HtmlMode;}
 
     # FIX COMPATIBILITY
     $FML_EXIT_HOOK .= $_cf{'hook', 'str'};
@@ -939,11 +1162,18 @@ sub Parse
 # Recreation of the whole mail for error infomation
 sub WholeMail   
 { 
-    local($b) = "--$MailDate--\n";
+    local($b) = "--$MailDate--";
     local($c) = "Content-Type: message/rfc822\n";
+    undef $Envelope{'r:MIME'};
     $Envelope{'r:MIME'} .= "MIME-Version: 1.0\n";
-    $Envelope{'r:MIME'} .= "Content-type: multipart/mixed; boundary=\"$d\"\n";
-    $_ = $Envelope{'Header'}."\n".$Envelope{'Body'};
+    $Envelope{'r:MIME'} .= 
+	"Content-type: multipart/mixed;\n\tboundary=\"$b\"\n";
+
+    if ($MIME_CONVERT_WHOLEMAIL) { 
+	&use('MIME'); 
+	$_ = &DecodeMimeStrings($Envelope{'Header'});
+    }
+    $_ .= $Envelope{'Header'}."\n".$Envelope{'Body'};
     "\n\nOriginal Mail as follows:\n\n$b$c\n$_\n$b\n";
 }
 
@@ -1151,7 +1381,7 @@ sub LoadConfig
 }
 
 
-sub Touch  { &Append2("", $_[0]);}
+sub Touch  { open(APPEND, ">> $_[0]"); close(APPEND);}
 
 
 sub Write2 { &Append2(@_, 1);}
@@ -1210,6 +1440,18 @@ sub InitConfig
 
     ### Options
     &SetOpts;
+
+    # Mode Definition
+    if ($Envelope{'mode:fmlserv'})     { &use("mladdr");  &FmlServMode;}
+    if ($Envelope{'mode:fml'})         { &use("mladdr");  &FmlMode;}
+    if ($Envelope{'mode:hml'})         { &use('modedef'); &HmlMode;}
+    if ($Envelope{'mode:auto'})        { $ML_MEMBER_CHECK = 0;}
+    if ($Envelope{'mode:check'})       { $ML_MEMBER_CHECK = 1;}
+    if ($Envelope{'mode:commandonly'}) { $COMMAND_ONLY_SERVER = 1;}
+    if ($Envelope{'mode:mime'})        { $USE_MIME = 1;}
+    if ($Envelope{'mode:through'})     { $SUPERFLUOUS_HEADERS = 1;}
+    if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
+
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
 
     &GetTime;			        # Time
@@ -1394,7 +1636,7 @@ sub Flock
 {
     $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
 
-    eval alarm(3600);
+    eval alarm($TIMEOUT || 3600);
     $SIGARLM = 1;
     open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
     flock(LOCK, $LOCK_EX);
