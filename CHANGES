@@ -7,8 +7,17 @@
 
 2001/08/02
 
+  sbin/makefml
+	apply patch by Tomoaki MITSUYOSHI
+		<Mitsuyoshi.Tomoaki@ss.anritsu.co.jp>
+	o fix authdb_dir handling
+	o fix search pattern bug for htpasswd
+
    databases
 	define addmember and addactives for further extension
+
+   配布パッケージ生成システムの修正
+	例: 4.0.2 のバージョン番号が変
 
 2001/07/28
 
