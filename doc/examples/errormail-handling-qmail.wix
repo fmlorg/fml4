@@ -1,46 +1,46 @@
 .HTML_PRE
 
-	$B!X(Bqmail $B$N(B VERPs $B$G$N<+F0%(%i!<=hM}$N$7$+$?!Y(B
+	°ÿqmail §Œ VERPs §«§Œº´∆∞•®•È°ºΩËÕ˝§Œ§∑§´§ø°Ÿ
 
-$B"~(B INSTALL_with_QMAIL $B$H$$$&%U%!%$%k$r8+$J$,$i%$%s%9%H!<%k(B&&qmail$B$N@_Dj$r$9$k(B
+¢˛ INSTALL_with_QMAIL §»§§§¶•’•°•§•Î§Ú∏´§ §¨§È•§•Û•π•»°º•Î&&qmail§Œ¿ﬂƒÍ§Ú§π§Î
 
-$B"~(B elena ML$B$rNc$K$H$k$H(B
+¢˛ elena ML§ÚŒ„§À§»§Î§»
 
 % makefml newml elena 
 
-$B$HAv$i$;$k$H(B
+§»¡ˆ§È§ª§Î§»
 
 /var/spool/ml/etc/qmail/alias/.qmail-elena
 /var/spool/ml/etc/qmail/alias/.qmail-elena-admin
 /var/spool/ml/etc/qmail/alias/.qmail-elena-ctl
 /var/spool/ml/etc/qmail/alias/.qmail-elena-default
 
-$B$H$$$&%U%!%$%k$,$G$-$k!#(B
+§»§§§¶•’•°•§•Î§¨§«§≠§Î°£
 /var/spool/ml/etc/qmail/alias/.qmail-elena-default 
-$B$G$O(B
+§«§œ
 
 |/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml
 
-$B$N$h$&$K(B mead $B$r$h$V$h$&$K$J$C$F$$$k!#<+F0:o=|$J$i(B $B$3$N%U%!%$%k$r$$$8$C$F(B
--m report $B$r(B -m auto $B$K$+$($k(B
+§Œ§Ë§¶§À mead §Ú§Ë§÷§Ë§¶§À§ §√§∆§§§Î°£º´∆∞∫ÔΩ¸§ §È §≥§Œ•’•°•§•Î§Ú§§§∏§√§∆
+-m report §Ú -m auto §À§´§®§Î
 
-$B"~(B qmail$B$N(BVERPs$B$r;H$&(B
+¢˛ qmail§ŒVERPs§Úª»§¶
 
-config.ph $B$G(B $USE_VERP = 1 (default$B$O#0$G!"(BVREPS$B$r;H$o$J$$(B)$B$r@_Dj$9$k(B
+config.ph §« $USE_VERP = 1 (default§œ£∞§«°¢VREPS§Úª»§Ô§ §§)§Ú¿ﬂƒÍ§π§Î
 
-$B!&(Bmakefml config elena $B$N%a%K%e!<(B / CGI$B$N%a%K%e!<(B($BF|K\8lI=<((B)$B$G$O(B 
-$B%H%C%W%a%K%e!<(B $B"*(B SMTP -> VERPs -> "y"
+°¶makefml config elena §Œ•·•À•Â°º / CGI§Œ•·•À•Â°º(∆¸À‹∏Ï…Ωº®)§«§œ 
+•»•√•◊•·•À•Â°º ¢™ SMTP -> VERPs -> "y"
 
-[$B2r@b(B]
+[≤Ú¿‚]
 
-$B$3$N@_Dj$,$5$l$F$$$k$J$i%(%i!<%a!<%k$,5"$C$F$-$?;~$O(B .
-qmail-elena-default $B$NCf?H$,$h$P$l$F!"<+F0E*$K%(%i!<$N=87W$r$*$3$J$&(B
+§≥§Œ¿ﬂƒÍ§¨§µ§Ï§∆§§§Î§ §È•®•È°º•·°º•Î§¨µ¢§√§∆§≠§øª˛§œ .
+qmail-elena-default §Œ√Êø»§¨§Ë§–§Ï§∆°¢º´∆∞≈™§À•®•È°º§ŒΩ∏∑◊§Ú§™§≥§ §¶
 
 
-$B"~(B KNOWN_BUGS / TODO($B$K$"$k$1$I(B)
+¢˛ KNOWN_BUGS / TODO(§À§¢§Î§±§…)
 
-mead $B$N@_Dj$O:#(B mead $B$N%3%^%s%I%i%$%s%*%W%7%g%s$@$1$K$J$C$F$$$^$9!#$3(B
-$B$l$r(B overwrite $B$G$-$k$h$&$J@_Dj%U%!%$%k$,JL$KI,MW$G$7$g$&(B
+mead §Œ¿ﬂƒÍ§œ∫£ mead §Œ•≥•ﬁ•Û•…•È•§•Û•™•◊•∑•Á•Û§¿§±§À§ §√§∆§§§ﬁ§π°£§≥
+§Ï§Ú overwrite §«§≠§Î§Ë§¶§ ¿ﬂƒÍ•’•°•§•Î§¨ Ã§À…¨Õ◊§«§∑§Á§¶
 
 $Id$
 .~HTML_PRE

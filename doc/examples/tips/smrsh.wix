@@ -1,11 +1,11 @@
 .HTML_PRE
 .if LANG == JAPANESE
-	sendmail $B$N(B smrsh $B$G$O$^$k(B
+	sendmail ¤Î smrsh ¤Ç¤Ï¤Þ¤ë
 .fi
 .if LANG == ENGLISH
 .fi
 
-$B:G6a$G$O(B Red Hat Linux $B$G$O$^$k$R$H$,B?$$(B(?)
+ºÇ¶á¤Ç¤Ï Red Hat Linux ¤Ç¤Ï¤Þ¤ë¤Ò¤È¤¬Â¿¤¤(?)
 
       ----- The following addresses had permanent fatal errors -----
    "|/usr/local/fml/fml.pl /var/spool/ml/elena "
@@ -15,50 +15,50 @@
    sh: fml.pl not available for sendmail programs
    554 "|/usr/local/fml/fml.pl /var/spool/ml/elena "... Service unavailable
 
-$B$3$l$O(B fml $B$8$c$J$/$F(B sendmail $B$N%(%i!<$G$9!#(Bfml$B$O$=$b$=$b$h$P$l$F$b$$(B
-$B$^$;$s!#(B
+¤³¤ì¤Ï fml ¤¸¤ã¤Ê¤¯¤Æ sendmail ¤Î¥¨¥é¡¼¤Ç¤¹¡£fml¤Ï¤½¤â¤½¤â¤è¤Ð¤ì¤Æ¤â¤¤
+¤Þ¤»¤ó¡£
 
-1. /usr/local/bin/perl$B$J$I$,B8:_$7$J$$!#(B
-   fml.pl $B$N@hF,$N(B #!/usr/local/bin/perl $B$NItJ,$N$3$N%Q%9$K(Bperl$B$,$J$$(B
+1. /usr/local/bin/perl¤Ê¤É¤¬Â¸ºß¤·¤Ê¤¤¡£
+   fml.pl ¤ÎÀèÆ¬¤Î #!/usr/local/bin/perl ¤ÎÉôÊ¬¤Î¤³¤Î¥Ñ¥¹¤Ëperl¤¬¤Ê¤¤
 
-2. sendmail restricted shell $B$N$;$$!#:G6a$N(B linux $B$N(B distribution $B$N$J(B
-$B$+$K$O$=$l$,%G%U%)!<%k%H$N$b$N$,$"$C$?$H$*$b$$$^$9!#$G!"(BRedhat$B$,$^$5$K(B
-$B$=$l$@$C$?$h$&$J$-$,$7$^$9(B
+2. sendmail restricted shell ¤Î¤»¤¤¡£ºÇ¶á¤Î linux ¤Î distribution ¤Î¤Ê
+¤«¤Ë¤Ï¤½¤ì¤¬¥Ç¥Õ¥©¡¼¥ë¥È¤Î¤â¤Î¤¬¤¢¤Ã¤¿¤È¤ª¤â¤¤¤Þ¤¹¡£¤Ç¡¢Redhat¤¬¤Þ¤µ¤Ë
+¤½¤ì¤À¤Ã¤¿¤è¤¦¤Ê¤­¤¬¤·¤Þ¤¹
 
-sendmail.cf $B$K(B
+sendmail.cf ¤Ë
 
 Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
 
-$B$N$h$&$J9T$,(B P=/bin/smrsh $B$K$J$C$F$?$j$7$^$;$s$+!)(B
+¤Î¤è¤¦¤Ê¹Ô¤¬ P=/bin/smrsh ¤Ë¤Ê¤Ã¤Æ¤¿¤ê¤·¤Þ¤»¤ó¤«¡©
 
-(security$B$r4K$a$kJ}8~$N$&$7$m$`$-$J2r7h$G$9$,(B) $B$=$3$r(B/bin/sh$B$K$9$k$H$H(B
-$B$j$"$($:F0$/$h$&$K$J$k$H$*$b$$$^$9!#$b$7$3$l$,@52r$@$C$?$i!"(BSendmail
-Restricted Shell $B$H$$$&$b$N$K$D$$$FD4$Y$F2<$5$$!#(B
-$B$=$7$F(B smrsh $B$K$D$$$F@5$7$$@_Dj$r$7$J$*$7$F$_$F$/$@$5$$!#(B
+(security¤ò´Ë¤á¤ëÊý¸þ¤Î¤¦¤·¤í¤à¤­¤Ê²ò·è¤Ç¤¹¤¬) ¤½¤³¤ò/bin/sh¤Ë¤¹¤ë¤È¤È
+¤ê¤¢¤¨¤ºÆ°¤¯¤è¤¦¤Ë¤Ê¤ë¤È¤ª¤â¤¤¤Þ¤¹¡£¤â¤·¤³¤ì¤¬Àµ²ò¤À¤Ã¤¿¤é¡¢Sendmail
+Restricted Shell ¤È¤¤¤¦¤â¤Î¤Ë¤Ä¤¤¤ÆÄ´¤Ù¤Æ²¼¤µ¤¤¡£
+¤½¤·¤Æ smrsh ¤Ë¤Ä¤¤¤ÆÀµ¤·¤¤ÀßÄê¤ò¤·¤Ê¤ª¤·¤Æ¤ß¤Æ¤¯¤À¤µ¤¤¡£
 
-$B"~(B 
+¢þ 
 
 fml-support:  07458
 
-smrsh$B$r;H$C$F$$$k$H(B @LIBDIR $B$K(B/usr/local/fml$B$,F~$i$J$$!#(B
-$B$3$N$?$a$K(B 
+smrsh¤ò»È¤Ã¤Æ¤¤¤ë¤È @LIBDIR ¤Ë/usr/local/fml¤¬Æþ¤é¤Ê¤¤¡£
+¤³¤Î¤¿¤á¤Ë 
 
 	require default_config.ph 
 
-$B$N>l=j$G%(%i!<$K$J$k!#(B
+¤Î¾ì½ê¤Ç¥¨¥é¡¼¤Ë¤Ê¤ë¡£
 
-$B2sHrNc(B:
+²óÈòÎã:
 
-site_init.ph$B$K(B
+site_init.ph¤Ë
 
 	push(@LIBDIR,"/usr/local/fml");
 
-$B=q$$$F$*$$$F!"$3$l$H(Bfml.pl$B$N(Bsymbolic link$B$r(Bsmrsh$B$N%G%#%l%/%H%j$K$O$k(B
+½ñ¤¤¤Æ¤ª¤¤¤Æ¡¢¤³¤ì¤Èfml.pl¤Îsymbolic link¤òsmrsh¤Î¥Ç¥£¥ì¥¯¥È¥ê¤Ë¤Ï¤ë
 
-fml-current 3.0B $B0J9_$O(B /usr/local/fml/libloadconfig.pl $B$r(B smrsh$B$N%G%#(B
-$B%l%/%H%j$K%j%s%/$7$F$*$/$3$H$bI,MW$G$9!#Nc(B:
+fml-current 3.0B °Ê¹ß¤Ï /usr/local/fml/libloadconfig.pl ¤ò smrsh¤Î¥Ç¥£
+¥ì¥¯¥È¥ê¤Ë¥ê¥ó¥¯¤·¤Æ¤ª¤¯¤³¤È¤âÉ¬Í×¤Ç¤¹¡£Îã:
 
-	% ln -s /usr/local/fml/libloadconfig.pl smrsh$B$N%G%#%l%/%H%j(B
+	% ln -s /usr/local/fml/libloadconfig.pl smrsh¤Î¥Ç¥£¥ì¥¯¥È¥ê
 
 
 Refercnes:

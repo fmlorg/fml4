@@ -1,111 +1,111 @@
 .HTML_PRE
 
-	$B%$%s%9%H!<%k$N:]$N(B Q & A
+	¥¤¥ó¥¹¥È¡¼¥ë¤ÎºÝ¤Î Q & A
 =E
 	installer Q and A
 
- [$BMQ8l(B]
-   % $B$O%f!<%6$N(B prompt
-   # $B$O(B root $B$N(B prompt
-   $EDITOR $B$O<+J,$N9%$-$J%(%G%#%?(B
+ [ÍÑ¸ì]
+   % ¤Ï¥æ¡¼¥¶¤Î prompt
+   # ¤Ï root ¤Î prompt
+   $EDITOR ¤Ï¼«Ê¬¤Î¹¥¤­¤Ê¥¨¥Ç¥£¥¿
 
-   $B%a!<%j%s%0%j%9%HL>$d%G%#%l%/%H%j$OE,Ev$KFI$_$+$($F$/$@$5$$(B
-   $B$3$3$G$O%G%U%)!<%k%H$NCM$r;H$C$F@bL@$7$F$$$^$9!#(B
+   ¥á¡¼¥ê¥ó¥°¥ê¥¹¥ÈÌ¾¤ä¥Ç¥£¥ì¥¯¥È¥ê¤ÏÅ¬Åö¤ËÆÉ¤ß¤«¤¨¤Æ¤¯¤À¤µ¤¤
+   ¤³¤³¤Ç¤Ï¥Ç¥Õ¥©¡¼¥ë¥È¤ÎÃÍ¤ò»È¤Ã¤ÆÀâÌÀ¤·¤Æ¤¤¤Þ¤¹¡£
 
 .~HTML_PRE
 
 .HTML_PRE
-Q: virtual domain $B$r$7$?$$$H$-(B (1)
-A. fml $B$r#2$D%$%s%9%H!<%k$9$k(B (1)
+Q: virtual domain ¤ò¤·¤¿¤¤¤È¤­ (1)
+A. fml ¤ò£²¤Ä¥¤¥ó¥¹¥È¡¼¥ë¤¹¤ë (1)
   
-  make install ($B$D$^$j(B perl makefml install $B0z?t$O$J$7(B)$B$9$k;~$K(B
+  make install (¤Ä¤Þ¤ê perl makefml install °ú¿ô¤Ï¤Ê¤·)¤¹¤ë»þ¤Ë
   
-  $B0l$D$O(B
+  °ì¤Ä¤Ï
   
      DOMAIN NAME               [domain1.org] 
      FQDN                      [domain1.org] 
      EXEC FILES DIRECTORY      [/usr/local/fml] 
      TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
    
-  $B$b$&0l$D$r(B
+  ¤â¤¦°ì¤Ä¤ò
   
      DOMAIN NAME               [domain2.org] 
      FQDN                      [domain2.org] 
      EXEC FILES DIRECTORY      [/usr/local/fml2] 
      TOP LEVEL ML DIRECTORY    [/var/spool/ml2] 
    
-  $B$=$7$F!"$=$l$>$l$N(Bfml$B$G#M#L$r$D$/$k(B
+  ¤½¤·¤Æ¡¢¤½¤ì¤¾¤ì¤Îfml¤Ç£Í£Ì¤ò¤Ä¤¯¤ë
   
-  info@domain1.org$B$r$D$/$k(B
+  info@domain1.org¤ò¤Ä¤¯¤ë
   
   	% /usr/local/fml/makefml newml info
   
-  info@domain2.org$B$r$D$/$k(B
+  info@domain2.org¤ò¤Ä¤¯¤ë
   
   	% /usr/local/fml2/makefml newml info
 
-Q: virtual domain $B$r$7$?$$$H$-(B (2)
-A. fml $B$r#2$D%$%s%9%H!<%k$9$k(B (2)
+Q: virtual domain ¤ò¤·¤¿¤¤¤È¤­ (2)
+A. fml ¤ò£²¤Ä¥¤¥ó¥¹¥È¡¼¥ë¤¹¤ë (2)
 
-  makefml $B$N(B -f $B@_Dj%U%!%$%k(B $B%*%W%7%g%s$r;H$&!#$D$^$j(B
+  makefml ¤Î -f ÀßÄê¥Õ¥¡¥¤¥ë ¥ª¥×¥·¥ç¥ó¤ò»È¤¦¡£¤Ä¤Þ¤ê
 
      % perl makefml -f /usr/local/fml/.fml/system install
      % perl makefml -f /usr/local/fml2/.fml/system install
 
-  $B$N$h$&$K%$%s%9%H!<%i$rAv$i$;$k!#$=$l$>$l$=$N(B .fml/system $B$rFI$s$G(B
-  "$BBPOCE*$KJ9$/$3$H$J$/(B"$BA4<+F0$G%$%s%9%H!<%k%W%m%;%9$,?J$`!#(B
+  ¤Î¤è¤¦¤Ë¥¤¥ó¥¹¥È¡¼¥é¤òÁö¤é¤»¤ë¡£¤½¤ì¤¾¤ì¤½¤Î .fml/system ¤òÆÉ¤ó¤Ç
+  "ÂÐÏÃÅª¤ËÊ¹¤¯¤³¤È¤Ê¤¯"Á´¼«Æ°¤Ç¥¤¥ó¥¹¥È¡¼¥ë¥×¥í¥»¥¹¤¬¿Ê¤à¡£
 
 
-Q: virtual domain $B$r$7$?$$$H$-(B (3)
-A. fml $B$r#2$D%$%s%9%H!<%k$9$k(B (3)
+Q: virtual domain ¤ò¤·¤¿¤¤¤È¤­ (3)
+A. fml ¤ò£²¤Ä¥¤¥ó¥¹¥È¡¼¥ë¤¹¤ë (3)
 
-  makefml install $B$N0z?t$H$7$F%$%s%9%H!<%k>l=j$r@_Dj$9$k!#(B
+  makefml install ¤Î°ú¿ô¤È¤·¤Æ¥¤¥ó¥¹¥È¡¼¥ë¾ì½ê¤òÀßÄê¤¹¤ë¡£
 
     % perl makefml install /usr/local/fml
     % perl makefml install /usr/local/fml2
 
-  $B$N$h$&$K%$%s%9%H!<%i$rAv$i$;$k!#$3$l$O(B (2) $B$HF1MM$K$=$l$>$l$N@_Dj%U%!%$%k(B
+  ¤Î¤è¤¦¤Ë¥¤¥ó¥¹¥È¡¼¥é¤òÁö¤é¤»¤ë¡£¤³¤ì¤Ï (2) ¤ÈÆ±ÍÍ¤Ë¤½¤ì¤¾¤ì¤ÎÀßÄê¥Õ¥¡¥¤¥ë
 
      /usr/local/fml/.fml/system
      usr/local/fml2/.fml/system
 
-  $B$r(B load $B$7$FBPOCE*$KJ9$/;~$N%G%U%)!<%k%HCM$rJQ99$9$k!#(B
-  -f $B$H0c$&$N$OA4<+F0$G$O$J$/BPOC%b!<%I$GAv$k$3$H(B
+  ¤ò load ¤·¤ÆÂÐÏÃÅª¤ËÊ¹¤¯»þ¤Î¥Ç¥Õ¥©¡¼¥ë¥ÈÃÍ¤òÊÑ¹¹¤¹¤ë¡£
+  -f ¤È°ã¤¦¤Î¤ÏÁ´¼«Æ°¤Ç¤Ï¤Ê¤¯ÂÐÏÃ¥â¡¼¥É¤ÇÁö¤ë¤³¤È
 
-  $B"~(B BUG
-	$B%=!<%9$r9-$2D>$9$3$H$J$/!"B3$1$FAv$i$;$?;~$K(B
-	$B$?$H$(0z?t$,$"$C$F$b(B /usr/local/fml/.fml/system $B$rFI$_9~$s$G$7(B
-	$B$^$&!#(B
+  ¢þ BUG
+	¥½¡¼¥¹¤ò¹­¤²Ä¾¤¹¤³¤È¤Ê¤¯¡¢Â³¤±¤ÆÁö¤é¤»¤¿»þ¤Ë
+	¤¿¤È¤¨°ú¿ô¤¬¤¢¤Ã¤Æ¤â /usr/local/fml/.fml/system ¤òÆÉ¤ß¹þ¤ó¤Ç¤·
+	¤Þ¤¦¡£
 
-Q: fml $B$O0l2s$@$1$$$l$k$,!"3F#M#L$=$l$>$l>!<j$K(B virtual domain (1)
-A: $B3F#M#L$N(B config.ph, help $B$J$I$r=q$1$P$I$&$H$G$b$J$j$^$9!#(B
+Q: fml ¤Ï°ì²ó¤À¤±¤¤¤ì¤ë¤¬¡¢³Æ£Í£Ì¤½¤ì¤¾¤ì¾¡¼ê¤Ë virtual domain (1)
+A: ³Æ£Í£Ì¤Î config.ph, help ¤Ê¤É¤ò½ñ¤±¤Ð¤É¤¦¤È¤Ç¤â¤Ê¤ê¤Þ¤¹¡£
 
-   XXX MTA$B$N@_Dj$K$D$$$F$O>JN,$7$^$9!#0J2<F1MM(B
+   XXX MTA¤ÎÀßÄê¤Ë¤Ä¤¤¤Æ¤Ï¾ÊÎ¬¤·¤Þ¤¹¡£°Ê²¼Æ±ÍÍ
 
-Q: fml $B$O0l2s$@$1$$$l$k$,!"3F#M#L$=$l$>$l>!<j$K(B virtual domain $B$N;~(B
-   help $B%U%!%$%k$O$I$&$9$l$P$$$$$+!)(B
+Q: fml ¤Ï°ì²ó¤À¤±¤¤¤ì¤ë¤¬¡¢³Æ£Í£Ì¤½¤ì¤¾¤ì¾¡¼ê¤Ë virtual domain ¤Î»þ
+   help ¥Õ¥¡¥¤¥ë¤Ï¤É¤¦¤¹¤ì¤Ð¤¤¤¤¤«¡©
 
-A: config.ph $B$rJQ99$7$?8e$G!"(B
+A: config.ph ¤òÊÑ¹¹¤·¤¿¸å¤Ç¡¢
 
 	% make doc-template
 
-   $B$r<B9T$9$k$H(B help $B$J$I$r(B config.ph $B$NCM$G:n$jD>$9!#(B
+   ¤ò¼Â¹Ô¤¹¤ë¤È help ¤Ê¤É¤ò config.ph ¤ÎÃÍ¤Çºî¤êÄ¾¤¹¡£
 
 
-Q: fml $B$O0l2s$@$1$$$l$k$,!"3F#M#L$=$l$>$l>!<j$K(B virtual domain $B$N;~(B
-   help $B%U%!%$%k$O$I$&$9$l$P$$$$$+!)(B
+Q: fml ¤Ï°ì²ó¤À¤±¤¤¤ì¤ë¤¬¡¢³Æ£Í£Ì¤½¤ì¤¾¤ì¾¡¼ê¤Ë virtual domain ¤Î»þ
+   help ¥Õ¥¡¥¤¥ë¤Ï¤É¤¦¤¹¤ì¤Ð¤¤¤¤¤«¡©
 
 A: rm -f help 
 
-   $B$3$N$H$-$O(B template $B%U%!%$%k$r8+$F(B help $B%U%!%$%k$r9g@.$9$k(B
+   ¤³¤Î¤È¤­¤Ï template ¥Õ¥¡¥¤¥ë¤ò¸«¤Æ help ¥Õ¥¡¥¤¥ë¤ò¹çÀ®¤¹¤ë
 
-  $B"~(B $B%P%0(B: $B$=$N$H$*$j$&$4$$$F$J$$(B;_;
+  ¢þ ¥Ð¥°: ¤½¤Î¤È¤ª¤ê¤¦¤´¤¤¤Æ¤Ê¤¤;_;
 
 
-Q: executable $B$OF~$l$k(B (/usr/local/fml1, /usr/local/fml2, ..)$B$,(B
-   /var/spool/ml $B$O6&M-$9$k$3$H$O$G$-$k$+!)(B
-A: $B$G$-$k$1$l$I!"$*$J$8#M#LL>$,:n$l$J$+$C$?$j$9$k$N$G$7$J$$J}$,L5Fq$@$m$&(B
-A: makefml $B$GA`:n$9$k$3$H$r9M$($J$1$l$P$b$A$m$s$J$s$G$b(BOK :-)
+Q: executable ¤ÏÆþ¤ì¤ë (/usr/local/fml1, /usr/local/fml2, ..)¤¬
+   /var/spool/ml ¤Ï¶¦Í­¤¹¤ë¤³¤È¤Ï¤Ç¤­¤ë¤«¡©
+A: ¤Ç¤­¤ë¤±¤ì¤É¡¢¤ª¤Ê¤¸£Í£ÌÌ¾¤¬ºî¤ì¤Ê¤«¤Ã¤¿¤ê¤¹¤ë¤Î¤Ç¤·¤Ê¤¤Êý¤¬ÌµÆñ¤À¤í¤¦
+A: makefml ¤ÇÁàºî¤¹¤ë¤³¤È¤ò¹Í¤¨¤Ê¤±¤ì¤Ð¤â¤Á¤í¤ó¤Ê¤ó¤Ç¤âOK :-)
 
 
            Copyright (C) 2000 Ken'ichi Fukamachi
