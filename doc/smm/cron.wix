@@ -63,12 +63,21 @@ fml.pl が cron.pl を走らせ、そのまま system の cron と同じ働きをします。
 .k	P.Vixie
 .k	bind
 
-4.4BSDにはPaul Vixie(現在、bindのMaintainerでもある)の書いた各ユーザご
-とにcronを定義できるcronが入っています。これがあるなら cron.pl は要ら
-ないでしょう。システムのマニュアルを見て下さい。
+4.4BSD には Paul Vixie の書いた各ユーザごとに cron を定義できる cron 
+が入っています。これがあるなら cron.pl は要らないです。詳しくはシステ
+ムのマニュアルを見て下さい。
 
-cron.pl はあくまでもそういうcronを提供してくれていないOSでなんとかまと
-め送りをしたい場合のためのものです。
+.q
+cron (8) - daemon to execute scheduled commands (Vixie Cron)
+crontab (1) - maintain crontab files for individual users (V3)
+crontab (5) - tables for driving cron
+.~q
+
+古いＯＳにはありません。しかし元々入っていなくても管理者の人がインストー
+ルしているかもしれません。探してみる価値はあります。
+
+cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
+をしたい場合のためのものです。
 
 
 .S	cron.plのインストール
@@ -88,7 +97,7 @@ cron.pl はあくまでもそういうcronを提供してくれていないOSでなんとかまと
    1. たとえば ~/.login で cron.pl を起動するとか(すでに走っていれば走
       らないから大丈夫)…
 
-   2. loginしたとき、まめにたちあげるとか…
+   2. loginしたとき、まめに(手動で)たちあげるとか…
 
    3. MLサーバにメールが来たときに起動させる↓とか…
 
@@ -96,6 +105,7 @@ cron.pl はあくまでもそういうcronを提供してくれていないOSでなんとかまと
 
 
 config.ph の
+
 .key	$CRON_PIDFILE
 .key	$CRONTAB
 .key	$DISTRIBUTE_CLOSE_HOOK
@@ -120,7 +130,6 @@ fml のインストール時に make しているなら、samples/crontab があるはずです。
 これを $DIR/etc/crontab にコピーするなり参考にすれば良いでしょう。
 
 
-
 .S	cron.pl を使う際の注意
 .label	{Matomeokuri-not-cron_2fix}
 .key	Matomeokuri-not-cron_2fix
@@ -139,8 +148,8 @@ crontab を設定できるほうがいいとおもうんですが世の中そういうOSばっかり
 が login したときだけ cron.pl をいれかえる(実行すれば勝手に入れ替わる)
 のでもいいはずです。
 
-たまに、 sendmail とうまくおりあえないこともあるみたいなので、そういう
-時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね?
+たまに sendmail とうまくおりあえないこともあるみたいなので、そういう時
+はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね?
 
 
 .S	cron.plのrestart

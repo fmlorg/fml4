@@ -3,13 +3,21 @@
 
 	表： fml ライブラリ 一覧 
 
-
+   libAucea.pl		Aucea
+   libAuceaCF.pl	Aucea	
+   libAuceaSyscall.pl	Aucea
    libMIME.pl		MIME 操作関数インターフェイス
+   libamctl.pl		actives members ファイルの制御ライブラリ
+   libaref.pl		AREF Library
    libcompat.pl		COMPAT コード
    libcompat_cf1.pl	COMPAT コード
    libcompat_fml15.pl	COMPAT FML 1.6 以前のもの
+   libcompat_fml20.pl	COMPAT FML between 2.0 and 2.1
+   libconfirm.pl	自動登録の confirmation mode 
    libcrosspost.pl	クロスポスト
    libcrypt.pl		暗号化ルーチン
+   libdebug.pl		not used (デバッグ用)
+   libdist.pl		配送ルーチン
    libexpire.pl		ＭＬの記事等の expiration を行なう
    libfml.pl		fml のコマンドインターフェイス および基本関数
    libfop.pl		ファイル操作関数
@@ -17,24 +25,33 @@
    libftp.pl		ftp の操作 ftp://, および、ローカルスプール用
    libftpmail.pl	ftpmail インターフェイス
    libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
+   libkern.pl		kernel library (== fml.pl)
    liblibrary.pl	ユーザからのファイルの put と getを可能にする
-   liblock.pl		UNIX V7 タイプの lock()
    liblm.pl		MEMBER_LIST ACTIVE_LIST 等の登録内容変更の関数群
+   liblock.pl		UNIX V7 タイプの lock()
    liblop.pl		summary ファイル等のログファイルへの operation
+   libmakefml.pl	not used (backward)
    libmladdr.pl		コマンドラインによる簡易設定ルーチン
    libmodedef.pl	簡易 MODE 設定ルーチン
+   libmoderated.pl	moderated mode
+   libmodeutils.pl	簡易 MODE 設定ルーチン backward
    libnewsyslog.pl	/usr/bin/newsyslog 
+   libpop.pl		popfml のライブラリ
    libra.pl		ＭＬをリモート管理するインターフェイス
-   libremote.pl		libra.pl の alias
+   librelayhack.pl	relay hack
+   libremote.pl		not used (backward, libra.pl の alias)
    librfc1153.pl	RFC1153 タイプのまとめおくりインターフェイス
    libsendfile.pl	mget 操作をした後メールを送り返すライブラリ
-   libsid.pl		古いタイプの インターフェイス
+   libsid.pl		not used (古いタイプの インターフェイス)
+   libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
+   libsmtputils.pl	SMTP utility functions
    libstardate.pl	スタートレック宇宙歴ルーチン
    libsubjectform.pl	Subject FORM 設定例
    libsynchtml.pl	HTML (e.g. var/htdocs ) 化インターフェイス
+   libtagdef.pl		Subjec Tag definition
+   libtraffic.pl	traffice コマンド by yuao@infonia.or.jp (Yuao Tanigawa)
    libutils.pl		各種 misc な関数
    libwhois.pl		WHOIS インターフェイス
-   libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
