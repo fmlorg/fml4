@@ -1,0 +1,1123 @@
+CHANGES (0.x -> current (2.1 gamma test) 97/01)
+
+				深町 賢一
+				fukachan@sapporo.iij.ad.jp
+
+
+詳細は RELESE_NOTES も御覧下さい (_o_)
+
+■ fml 2.1 gamma test (for the preparation of the 2.1 release)
+
+97/01/31
+	fixed to adjust qmail 0.96
+	まとめおくりのSubject:のデフォールト Matome Okuri (Digest Delivery)
+	doc/ に見本 welcome confirm (自動登録のConfirmation mode 用)
+	makekfml:	include-ctl を追加, 
+			libmakefml.pl を使わずに済むように変更。 
+			libmakefml.pl は使わないけど backward-compat のため残す
+
+97/01/30
+	Rcsid
+
+97/01/29
+	loop check bug fix
+	makefml fix (name space evaluation bug (perl -cw is a lie))
+	makefml and $BRACKET problem (fix the source "cf" file) 
+
+97/01/28
+	まとめおくり（digest） の To: を (delivery list is suppressed)にする
+	Confirm Mode 実装（アルファテスト）
+
+97/01/27
+	several bug fixes (fml-support:2056-2058あたり)
+
+97/01/20
+	Relay Hack Extension using CF style(by motonori@wide.ad.jp)
+	for なぞの "Project" :-)
+	Crosspost bug fix
+
+97/01/19
+	fmlserv のコードの整理
+	コードの整理 (Append2, Write2)
+
+97/01/18
+	fml.pl のデフォールトに $USE_FLOCK = 1; を加える(config.ph評価前)。
+	compat code に頼りきりの場合に flock() を使わないケースがあり得る。
+
+	makefml の permission 制御のため、personal/group/fmlserv に拡張
+		perlsonal そのマシンでＭＬを運用するのは一人だけ
+		group 	  そのマシンでＭＬを運用する人が複数いる場合
+		fmlserv	  そのマシンでＭＬを運用する人が複数いて
+			  なおかつfmlservを使う場合
+
+	$USE_FML_WITH_FMLSERV  
+	複数のML運用者がいて fmlserv を使う場合は group permission で
+	アクセス制限する必要があるので、そのためのオプション
+	fmlserv を使う場合でも、そのマシンには自分の管理するＭＬのみ！
+	ならこのオプションは使うべきではない。
+	＃なお、fmlserv directory が同じ階層にある場合は自動的に設定される。
+
+	HTML 化された記事の置き場所のデフォールトを var/htdocs から htdocs へ
+	＃ permission の問題からそうでないとまずい 
+
+	fmlserv (listserv-like interface) unsubscribe code 
+	is fixed (when no member check)
+
+97/01/15
+	makefml の extention and fixes (に応じてINSTALLドキュメントも改訂)
+	エラーの Warning 情報のメールの宛先のチェック Routine のbug fix _o_
+
+97/01/14
+	libexec/popfml.pl (libpop.pl)
+	   popを使ってＭＬをするための正式実装版ベータテスト２
+	bin/pop2recv.pl を obsolete にして popfml.pl をその後継とする。
+
+97/01/13,14
+	エラーの Warning 情報のメールの宛先のチェックをする
+	＃subscribe はもともとしてるんだが…
+
+97/01/12
+	libexec/popfml.pl (libpop.pl)
+	   popを使ってＭＬをするための正式実装版ベータテスト
+
+97/01/11
+	chdir -> cd (shell もの)
+	NetBSD /bin/sh defines "cd chdir" as "cdcmd"
+	しかし定義してないＯＳもある および bash は持ってない
+
+	0でパディングをしない Count (e.g. Subject につく部分)
+		$SUBJECT_FORM_LONG_ID = -1;
+		$HML_FORM_LONG_ID = -1;
+
+	doc/html の index.html を変更
+
+97/01/10
+	Copyright Updated
+	bin/fwix.pl ２か国語化
+	cf/config fixed for perl5
+	proc/librfc1153.pl 年末年始FIX
+	doc/smm 以外のドキュメントの２か国語化（ベータ版）
+	Event管理機構(scheduler) (fml.pl libkern.pl)
+	＃注意：↑ Windows NT 版では使えません。
+
+96/12/25
+	randomness fixed
+	doc/INSTALL_on_NT4
+
+96/12/24
+	GenerateHeader() Header Fields Format (liblop.pl)
+
+96/12/23
+	liblop libsmtuitl
+	conserve the header information in "get" command;
+
+96/12/22
+	fml_local.pl
+	依存関係が複雑なので fml_local の独立性を解除し、
+	通常の include 関係をたどることにする。そのため以前のように独
+	立しては動かない。
+	@INC のどこかに fml ライブラリが入っていることが必要
+
+	NT用のDirectory 
+		ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/ntfml/ 
+	を作る。
+
+	src/arch 	Architecture dependence "fml library" codes
+	sys/arch	Architecture dependence codes
+	をインストールするように変更。
+
+
+96/12/21
+	NT4.0への Porting 実験。アルファ運用テスト中
+	＃ようするにすでに動いてるわけだ:-)
+
+
+96/12/18
+	perl makefml passwd 
+	perl makefml fmlserv は listserv (or Majordomo)的インターフェ
+	イスをセットアップします。
+	機能はしますが、
+	別のソフトウエアのDirectoryをそのまま使ってCompatかどうかはテスト段階
+
+96/12/17
+	@HdrFieldsOrder = (..., Date, Posted, ...);
+	etc/makefml
+	sbin/install.sh installing libexec
+	
+
+96/12/16
+	permission 問題のため
+
+	perl makefml 
+		/usr/local/fml
+		/var/spool/ml
+		/var/spool/ml/etc/ML/samples
+		/var/spool/ml/etc/crontab/user
+
+	のような階層に変更
+	
+	perl makefml addadmin
+	perl makefml byeadmin
+
+	get コマンドのデフォールトを Resent-つきのフォワードに変更
+	コマンドの結果だと分かるように
+	Subject: に Get Number $ML_FN が付け加えられる他はスプールの
+	オリジナルが送り返される。
+
+
+96/12/15
+	SMTP もしSMTPを張れない時は、sendmail -bs モードをtryする。
+
+	perl makefml config ml
+		メンバーチェック or 自動登録
+		Subject のタイプ
+		オプションの設定
+
+	自動登録時にＭＬに流れるメールのReply-TOが CtlAddrになっている
+	のを MAIL_LIST にFIXED
+
+96/12/14
+	bin/fwix.pl	2か国語対応
+	ドキュメント英語翻訳プロジェクトスタート
+
+
+96/12/13
+	liblop.pl	summary option BUG FIXED
+		
+
+96/12/11
+	scope of libfml.pl
+	makefml:
+	   fix fethcing symbole table statement for perl 5;
+
+	makefml config ML
+		簡単にするためにエントリは増やすべきではないが
+		自動登録とSubject形式の設定項目だけは付け加える
+
+	libexec/fmlserv.pl:
+	   fix fethcing symbole table statement for perl 5;
+
+
+96/12/10
+	perl makefml の設定の保存場所の選択
+		ソースファイル上で実行しない場合等の bug fixes
+	
+
+96/12/9
+	perl makefml によるインストール方式
+	まとめおくり や fml.c のサンプルも作成する
+
+	各ＭＬのサンプルは ~/.fml/ML名/ の下に保存される
+
+
+96/12/8
+	perl makefml によるインストール方式
+
+		perl makefml でインストール
+		perl makefml newml 
+
+	でＭＬの作成等の初心者向けインターフェイスの実装
+
+	bin/spool2html.pl もスレッド処理をデフォールトに加える。
+
+
+96/12/6
+	$REPORT_HEADER_CONFIG_HOOK
+	レポート、警告等のメールのヘッダ生成の直前
+	このヘッダでは $le{'GH:From:'} の形なので、これをいじるとよい
+
+	例：
+	$REPORT_HEADER_CONFIG_HOOK = q#
+	    $le{'GH:Sender:'} = "elena\@axion.phys.titech.ac.jp";
+	#;
+
+
+	libra.pl ls-lR コマンド FIXED
+
+
+96/12/5
+	hml タイプ Subject での Re: 問題の bug fix (fml.pl)
+	$ACTIVE_LIST でのコメントの bug fix (libdist.pl)
+	RFC1153 ルーチン内の parameter 渡しの bug fix (librfc1153.pl)
+
+	自動登録ルーチン内部をより奇麗に(抽象化の度合いというべきか) 
+							(libamctl.pl)
+
+96/11/30
+	%RELAY_SERVER
+
+
+96/11/26
+	--html (&DEFINE_MODE('html'))では スレッドも作るのがデフォールト
+	libsynchtml.pl の bug fix 
+		e.g. 1 - 99, SUN-SAT
+
+96/11/23
+	スレッド化 HTML (libsynchtml.pl) (Beta Test)
+	
+
+96/11/23
+	スレッド化 HTML (libsynchtml.pl) (Alpha Test)
+	$HTML_THREAD = 1; にするとスレッド化したindex.html として
+	thread.html を作ります。
+	両方を作るので好きな階層を見ればいいでしょう。
+	スレッドには In-Reply-To: References: の依存関係を使っています。
+
+96/11/22
+	Snapshot source name is now 
+		"fml-x.y{ALPHA,BETA,GAMMA}-snapshot\d+.tar.gz" FORM anyway...
+
+	cf/config fixed to conserve the changes between users'cf and MANIFEST
+	cf/compat.ignore require *LIMIT variables, FIXED;
+
+96/11/17
+	Aucea (AUtomatic CErtification and Alert system)
+	to replace Elena and Fred (Aref v0)
+
+96/11/12
+	libsmtp.pl modified for qmail
+	＃sendmail は柔軟なので昔から大丈夫だけどRFCにばか正直すぎるの
+	＃も困ったちゃんね
+
+	libsynchtml.pl: representation of the boundary is fixed 
+
+96/11/4
+	libsmtp.pl style changed around SMTP CONNECTION
+
+96/11/3
+	Open() for "READ OPEN";
+	libsmtputils.pl BUG FIXED
+
+96/11/2
+	$NOT_USE_CC （削除）; &DELETE_FIELD('Cc') を使って下さい。
+
+	&DELETE_FIELD と &ADD_FIELD マクロ (for config.ph)
+	例：
+		&DELETE_FIELD('Errors-To');
+		&ADD_FIELD('Errors-To');
+
+	libsynchtml.pl
+		$HTML_INDEX_UNIT:  day 以外も week と month に対応
+		作るファイルの<TITLE>等の表示を少し変更
+
+	bin/daily.pl -f etc/daily.ignore
+		エラーやwarningの類と思われるもののみを表示する
+		毎朝走らせてメールで受けとると良いだろう
+
+96/11/1
+	DLA_HACK (Direct List Access) to use smaller stack
+
+96/10/31
+	cf/config modified 
+		デフォールトの値がないように設定する変数は
+		コメントアウトの形でOUTPUTするようにする。
+
+	Subject: FORMAT modified when SUBJECT_*_FORM set;
+
+96/10/30
+	fix @HdrFieldOrder to avoid duplicated Subject:
+
+96/10/29
+	FIX EacyConfigure's advanced setting
+	sbin/configure_ph -> sbin/configure_advanced
+
+
+96/10/28
+	bin/spool2html.pl: HTTP_INDEX_UNIT -> HTML_INDEX_UNIT
+	fml.pl:	Subject: and STRIP_BRACKETS and $SUBJECT*_FORM
+
+96/10/27
+	libdist.pl: distribution library extracted from fml.pl
+		the main part of &Distribute;
+
+96/10/26
+	Makefile modified for the bug of NEXT;_;
+	doc/smm/
+
+
+96/10/23
+	msend.pl: skip compatible mode compatible
+	liblml -> libamctl (Active_list and Member_list ConTroL)
+
+96/10/22
+	msend.pl: fix TYPO: the lack of skip field exception code _o_
+
+96/10/21
+	libfml.pl, libutils.pl から分離
+		liblop.pl	List and Log OPeraions
+		liblm.pl	List Modifier
+
+96/10/20
+	doc/smm
+
+	fml.pl
+		var/run/msgidcache (<- var/log/msgid.cache)
+		$TIMEOUT -> $FLOCK_TIMEOUT
+
+	liblibrary.pl
+	 FIXED: get の複数リクエストの制御
+		$USE_LIBMIME -> $USE_MIME;
+
+96/10/19
+	check ne.jp address too within the 4 level of the address severly
+
+96/10/14
+	change declarations around while loop for more effeciency
+	fml.pl msend.pl
+
+96/10/13
+	snapshot directory hierarchy: move *.pl src/*.pl
+	fix (doc/smm) documents to follow the movement
+	fix (SMTP's) local(%e) in the scope called from lib*pl
+	    since perl5 local(%e) hides %Envelope (libsmtp.pl)
+	SecureP() can permit [rms]=[\w\d]+ (fml.pl)
+	
+96/10/12
+	fix %AdminProcedure for "admin passwd"
+	Arrange a lot of Global Variables definitions of scripts 
+		and doc/smm references
+	fix hidden-password in a replied message
+	fix AutoRegist() since dup check $MEMBER_LIST not $file_to_regist
+
+96/10/11
+	fix libra.pl, libfml.pl ta lot o fix "admin matome addr option" syntax
+	fix help-admin
+
+
+■ fml 2.0 current (version 2 pre release version) 
+
+96/07/13
+
+libutils.pl
+	defauilt subscribe の直しそこないをFIX
+	自動 html 化ライブラリが一月;-)ずれてるのをFIX
+
+96/07/12
+
+お手軽インストールのバグをなおす;_;
+
+	・こないだ直し過ぎて勢い余ってしまっているところ;_;
+
+	% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
+
+	MAINTAINER=ML管理者のアドレス	がちゃんと反映されてない
+	＃ cf/config を使ってFIX処理を行なうように変更
+
+
+html mode definition
+	default を 日毎に別の directory に保存するのを デフォールトへ
+	＃前にしたつもりだったんだが…なおしそこねてた
+
+
+libsubjectdef.pl
+	subject フォームの見本
+	e.g. 
+		[Elena:100]
+		[Elena 100]
+		(Elena 100)
+	あとどういうのがあるかな…
+
+mode setting in &LoadConfig 
+	コマンドラインとconfig.ph の間の compatibility のために必要
+
+fix 
+	chaddr がモード保存してないけど…一応するように
+	＃環境ちがうんだから リセット するものだとはおもうのだが…
+
+	chaddr a b with conserving the a's option e.g. m=..  s=..
+
+
+perl5.002 の話
+
+    local($returnfile)	 = "${TMP_DIR}/m:${opt}:${$}return";
+    perl5 だとまずい部分のFIX
+
+	libsendfile, libsmtp 
+
+
+
+起動時に DNS ひいて $j $m $w あたりを推測する
+config.ph に書いてある内容は有効だが、cache はやめた↓。
+
+fml-support:00817
+>普段使う部分のprofile強化月間：で、 可能なマクロは config.ph 
+>に cache します。overwrite したいときは、しちゃって:-)
+>
+>例：	
+>$Envelope{'macro:m'}	= 'phys.titech.ac.jp';
+>$Envelope{'macro:s'}	= 'axion.phys.titech.ac.jp';
+>$Envelope{'macro:ca'}	= 'pollyanna';
+>$Envelope{'macro:fqca'}	= 'pollyanna@axion.phys.titech.ac.jp';
+
+
+ここまでは 96/07/05 以降の  update 情報です↑
+
+この↓期間の情報は fml-support ML にはあるのですが…
+こっちに書く暇がない そのうち書きます _o_
+
+----------------------
+
+この2カ月くらい このファイルに反映されてません _o_ #暇なし
+fml-support ML には情報を投げていますけど…
+
+===
+
+04/25
+
+libexec/fml_local.pl
+	SECURE_FML_LOCAL
+
+fml.pl
+	FIX the behaviour when $USE_SUBJECT_AS_COMMANDS is ON
+
+04/24
+
+	$EXPIRE_SUMMARY を non-nil にすると summary も Expire する
+
+04/23
+
+fml.pl
+	&CheckMember は 特殊文字を含む場合、正規表現エラーを避けるため 
+	high performance 用コードを用いない
+
+libexpire.pl
+	summary の expire も行う。
+
+04/22
+
+libfop.pl
+libutils.pl
+	FIX uuencode: bad file descriptor on NetBSD 1.1B
+
+librfc1153.pl
+	カスタマイズ用の変数を外へ出す（config.phで設定できるように）
+
+	変数				デフォールト
+	$RFC1153_ISSUE    		1
+	$RFC1153_LISTNAME 		UJA
+	$RFC1153_VOL      		$year
+	$RFC1153_SEQUENCE_FILE  	$FP_VARLOG_DIR/IssueSeq
+
+libsendfile.pl
+     $MGET_TEXT_MODE_DEFAULT 
+     $MGET_BIN_MODE_DEFAULT 
+	mget のデフォールトの変更
+
+msend.pl
+     $MSEND_MODE_DEFAULT 
+	まとめおくりのデフォールトの変更
+
+
+＊＊＊＊＊
+	SAPPORO.IIJ.AD.JP へ
+	ターゲットマシンは perl 4.036 on NetBSD 1.1B へ
+＊＊＊＊＊
+
+
+@HOSTS			複数のsendmailの走っているマシン（非常時のセカンダリも含む）
+$MCI_SMTP_HOSTS = N;	@HOSTS のうち Ｎ個 のマシンのsendmail をパラレルに使って
+			（理論上での限界は）Ｎ倍配送を高速化する。
+			Ｎは理論上 int と同じだろうが、普通は netmask できまるわな（笑）
+			でも、他のドメインでも使えるから、int までいく（理屈、理屈）
+			＃とくに actives の最後の方の人はうれしい
+
+		ばぐ： actives の中をちゃんと考えてならべないと sendmail R8 の 
+			HOST_CACHE がうまくいかせない可能性あり
+
+
+bin/fwix.pl
+	html 形式をサポート
+	今度は var/html/op/ の下に index.html と Chapeter ごとのhtml をつくる
+
+
+bin/split_and_msend.pl 
+	unix from のかたちの file の まとめおくり 
+	ようするに obsolute の まとめおくりＲ１ の現代版（苦笑）
+	PLAIN TEXT ONLY っすけど。
+
+
+・ lha して uuencode する モード
+
+
+・FIX libra.pl help, log
+・FIX libfml.pl approve 
+
+・ &daemon  (libutils.pl)
+   は、今のプロセスをデーモンにします。
+   ＃4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
+
+   cron.pl を動かすんなら、これをつかうべきでは？
+   ＃でも、４．３ＢＳＤでしか動作確認してないけど…
+
+例：
+$FML_EXIT_HOOK = q#
+	&use('utils');
+	&daemon;
+	exec("$LIBDIR/bin/cron.pl $DIR -a");
+#;
+
+
+・ file operations は libfop.pl へ
+
+・ # library  コマンド	（liblibrary.pl）
+   put も使える 別のちょっとちがう アーカイブ操作形式
+
+
+・ whois iam who コマンドを復活させました。
+   hmlと実装方式は全く別ですが:-)
+
+拡張として whois -h ほすと指定 ってのができます
+
+# whois [-h host] key	whois で key を探す。
+			host が与えられた場合はそのhostへIPCで、
+			もしそうでない場合は
+			ＭＬローカルな whois database を探します
+
+# iam			自己紹介を登録する
+# who			自己紹介の一覧を得る
+# whois-index			同上
+# whois-list			同上
+
+
+・ traffic コマンド  を標準化（？）へ
+作：谷川 百明生 さん  tanigawa@tribo.mech.nitech.ac.jp 
+   
+   [libtraffic.pl の説明]
+   
+     メイルの投稿量の統計をとるコマンドです。
+   
+   # traffic [-n <best?>] [-m <mails>] [-d]
+   
+   1. 月毎のメイル投稿量
+   2. メイル投稿量毎の日数
+   3. 時間帯別の投稿量
+   4. １日２５通以上投稿があった日
+   5. 投稿者ベストテン
+   6. １日当たりの平均投稿量と最大投稿量
+   
+   を出力します。
+   
+     オプションで、-d を指定すると、さらに、
+   
+   0. 日毎の投稿量
+   
+   も得られます。デフォルトでは表示しません。
+   
+     オプション -n は、5.の投稿量の多い人のベスト何人まで表示するかを
+   数字で指定します。デフォルトでは、-n 10 と同じです。
+   
+     オプション -m は、4.の何通以上あった日を表示するかを数字で指定し
+   ます。デフォルトでは、-m 25 と同じです。
+
+
+========== WHAT'S NEW  1.6 current ==========
+・  尋常でないアドレスからのメールははじく
+    From: が 'root|postmaster|MAILER-DAEMON|msgs|nobody|news'
+    のどれかの場合 管理者へメールをフォワードして サーバは何もしない
+    下手に相手に何かを返すとピンポンするかも知れないので管理者に判断は任す
+
+    上記以外のアドレスを追加したい場合、そのアドレスを 
+	$REJECT_ADDR = "|nobody|nazo-no-hito";
+   のように書くと追加できる。
+
+・ libsendfile.pl SendFile.plが旧名称
+
+・ bin/cron.pl は 実行したらcrontab の持ち主にメールをだす （４．４）
+   ４．３のようにするには $CRON_NOTIFY をオフにするか
+   cron.pl DIR -b43 のように起動する 
+
+・ libsmtp.pl  ファイルを JIS へ 自動変換（jcode.plがないときはエラーだが）
+
+・ libutils.pl ish+lzh mode bug fix
+
+・libref.pl  	（libexec/sid.pl の標準装備）
+
+URL を理解するための ライブラリ
+http://host/something や gopher://host/something は自力で取りにいって、
+必要なら、binaryをuuencode や、ファイル分割をして送り返す。
+ftp://host/something は libftp.pl へ引き渡します。 
+
+・libftp.pl   	（libexec/sid.pl の標準装備）
+ftpmail server ($FTPMAIL_SERVER を設定していないとエラー) へのリレー
+するインターフェイス（ＯＫ）
+	と
+local spool への ftp interface 
+
+
+・fml_local は分割してファイルを送り返す関数をBuilt-IN しました。
+＃ libutils.pl を使うので、INCLUDE-PATH を設定する必要があります
+
+○Backward Compatibility:
+	$COMPAT_FML15 = 1; 
+
+＊＊＊ヴァージョンアップの場合の注意＊＊＊
+
+基本的なデータ構造を call by reference 用に書き直したので、
+
+libcompat.pl にBackward compatibility のためのコードがあります。
+昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
+る程度まで compatible にできます。
+＃コードの都合上実現できないカスタマイズもありえます_o_
+
+FAQ は新しい形で書き直されています。
+
+e.g.	Playing_to
+	STAR_TREK_FORM
+  ＊Replyt_to とかへの特別の操作を フックでやってたりすると要注意です＊
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+
+========== CHANGES  1.5 -> 1.6 ==========
+
+・ bin/inc_via_pop.pl を経由して、fml.pl を動かすことで、
+   SMTPをうけつけないマシンで ＭＬ をつくるとか
+   SMTPをうけつけないマシンで .forward に相当することをやるとか
+   つまり、bin/inc_via_pop.pl から fml_local.pl をよべばＯＫ
+
+   たぶん WINDOWS NT でもうごくはずなんだけど… （実験中）
+
+
+・TYPO-FIX: $USE_SUBJECT_AS_COMMANDS が正しい、$USE_SUBECT_AS_COMMANDS 
+	じゃなくて
+
+・ bin/inc_via_pop.pl 
+	bin/inc_via_pop.pl -host $HOST
+		は	
+	/usr/local/mh/inc -noaudit -norpop -noapop -host $HOST
+	と同じ（はず）です。
+
+
+・ %SEVERE_ADDR_CHECK_DOMAINS
+
+%SEVERE_ADDR_CHECK_DOMAINS = (
+			      'iijnet.or.jp', 1,
+			      'bekkoame.or.jp', 1,
+			      'rim.or.jp', 1,
+			      'win.or.jp', 1,
+			      );
+
+インターネット・プロバイダーでは 
+	USERNAME@ppp.DOMAIN 
+	USERNAME@MACHINE.DOMAIN 
+で、jpから３階層だけチェックしたのでは充分ではない場合がある。
+例：
+			      'iijnet.or.jp', 1,
+この連想配列は
+	username@.*.iijnet.or.jp にマッチしたら
+	$ADDR_MAX_CHECK を１あげる。
+
+これの応用として、デフォールトを厳しくして、特定のドメインでは -1 する。
+ってのもありですね。
+
+
+・コマンドでは $TRAILER_MAILBODY 等へのインフォがデフォールトでつきます。
+
+
+・コマンドを実行したメールを送り返すとき
+	$PREAMBLE_MAILBODY	（前）
+	$TRAILER_MAILBODY	（後）
+  を本文の前後に必ず付けます。
+もし、なんらかの理由で普通のメールの場合にも付けたいなら
+＃それは、人の郵便をかってに開けて、人の手紙に手を加えるようなもので、
+＃倫理的に許されないと思うが…世の中いろいろあるだろう〜？？？
+
+
+
+・index コマンド
+# index			get できうるファイルのリストをかえす
+			index ファイルがあるのなら、それを返します
+
+＃SID で使うんです。これ
+
+・SID を正式に標準化する。以下の場所へファイルの移動をしました。
+	libexec/sid.pl
+	etc/sid.ph
+	etc/sidrc
+	etc/help.sid
+
+・admin と approve コマンドで password を要求するなら
+$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; 
+				# require password when use commands above
+
+REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
+バスワードコンパチにしてあるので、どっちの変数でもいいんですけど
+
+・ lib/SID/sid.pl
+
+Listserv-like INTERFACE for libfml.pl and libremote.pl
+
+＊＊＊＊＊＊要注意＊＊＊＊＊＊
+・$REMOTE_ADMINISTRATION 
+
+リモート管理する部分を 正式なコードの一部に変更して、この変数で切り替
+えるようにしたので いままで eval で使ってた人 この変数をセットしてくだ
+さい _o_
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+・$USE_SUBJECT_AS_COMMANDS = 1 ;
+
+Subject: 行も コマンドとして使う。
+例：
+Subject; # mget 1-100 
+
+
+・いかなる場合でも UNIX FROM なしのINPUTが来た時は、
+  UNIX FROM をつける（補正）
+
+・$PROHIBIT_COMMAND_FOR_STRANGER (<- $PROHIBIT_COMMAND_MODE)
+
+＋エントリを使って誰にでも投稿可能にするときに 
+	$PROHIBIT_COMMAND_FOR_STRANGER = 1; 
+とすると、
+「外部からは投稿可能＋自動登録なし＋メンバー以外はコマンドを使えない」
+が実現できる。
+
+
+□	libexec/fml_local.pl(独立して作動する)
+~/.forward から使うためのインターフェイス  VER.2 
+でも直接使うと、/usr/libexec/mail.local と同じに動く
+＃でも結果論としてなんか slocal そのものみたいだな…ははは、うじゃ
+
+slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
+か、（必要なら fml のlibrary を呼び込んで）perlの関数を直接呼べるとか…
+という upper compatibility です。
+
+例：
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+# /usr/libexec/mail.local
+From            fukachan        &       MailLocal
+X-MLserver      fml             &       MailLocal
+X-MLserver      SendFile        &       MailLocal
+X-MLserver      MSendv4         &       MailLocal
+
+# MH folders
+From            fukachan@phys   |       /usr/local/lib/mh/rcvstore +inbox
+To              Enterprise@phys |       /usr/local/lib/mh/rcvstore +enterprise
+
+# File Retrieving
+Subject         get\s+(\S+)     |       /usr/bin/Mail -s $F1 $From_address
+
+# Exec ML
+to              (uja)           |       $DIR/fml.pl $DIR $DIR
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+・ＯＳの違いによるソケットまわりのエラー
+libsmtp.pl にその補正機構はbuilt-inされました。
+→ 結果として sys/socket.ph へのリンクをはずす。
+
+・EasyConfigure bug fix（thanks to sengoku@intsys.co.jp）
+
+・ソラリス２．ｘでのソケット対策
+（configure で 自動的に config.ph に $COMPAT_SOLARIS2 という変数がセッ
+トされるはずですが）
+	$COMPAT_SOLARIS2 = 1;
+とセットしてください。
+うまくシステムのsys/socket.phが呼べないときに必要な定義をします。
+
+・bin/vipw.pl	
+	config.ph の edit 用
+	ヴァージョンアップの時のロックにも使えるね(^^)
+
+・UNDERWAY (for 1.5 -> 1.6)
+fml.pl へ Notification してメールをユーザーへ返す関数を移す。
+libfml.pl のstatus report は↑をつかう。
+~/.forward extension fixes
+
+コマンドは user define ができるように、
+まとめおくりと同様に 連想配列で設定できるようにした。
+これにより、簡単にコマンドの名前等の変更もできる。
+
+
+
+whois で sub ipc がうごかないのをＦＩＸ
+
+おまけ： bin/geturl.pl
+% bin/geturl.pl URL 
+で URL の中身をとってくる（TEXTいがいはしらないよん;-) ）
+
+RFC934 ^- -> '- -' syntax conversion
+
+
+1.5からの要注意： 
+
+$MAINTAINER が ML-admin とか ML-request とかになっていないと
+
+	WARNING: UNIX FROM Loop
+
+が log にでます。
+＃対策は -admin みたいにする、or そのチェック部分を削る
+＃ →ＦＡＱのトラブルシューティングをみてね
+
+bug fix 
+ftpmailでuuencodeがうごかない（1.5直前から〜）
+
+
+■変更点(diff between fml 1.5 and fml 1.4)
+
+・newsyslog e.g. var/log/*.0 -> .1..
+
+・UNIX FROM もループ CHECK
+
+・summary コマンドの引数
+
+・Makeのときに ＯＳの自動判別（して設定のアドヴァイスをする）
+
+・EasyConfigure で config.ph の flock の設定まわりまで 対話的に行うス
+クリプト
+
+・Configure 廃止。新しい sbin/ccfml が cc への前段階処理をする
+
+・スタートレックの 宇宙歴 がつく（笑）
+＃ $APPEND_STARDATE = 1; in config.ph 
+
+・EXPIRE 機能
+・libSendBack.pl （あるアドレスに送ると ドキュメントとかを送り返すように
+設定するための）
+
+1.4.1 RELEASE 1995/5/7
+
+・mget とまとめおくりでの User interface 
+	PLAINTEST 
+		UNIX FROM
+		RFC934	
+		RFC1153
+		MIME/Multipart
+	COMPRESSED FILE
+		GZIP of UNIX FROM
+		Lha + Ish 
+		tar + gzip
+
+を ユーザーごとに設定できる
+
+ファイル構成を一部再構成（ like a 4.4BSD like ）
+etc/crontab-4.3
+etc/crontab-4.4
+var/run
+var/log
+_smtplog -> var/log/_smtplog（本体）
+
+■変更点(diff between fml 1.4 and fml 1.3)
+1.4 RELEASE	1995/04/26 11:59:02 GMT
+
+・"# matome 0" の時に、いまたまっているメールを送り出します。
+
+・RFC1521 
+
+・From と 配送先が一致した時に、配送を止める フック
+
+・sjis conversion is ish+lzh mode
+^M ^Z もつける。
+
+・extract from archive to expand as tmp/spool/201 ...
+ for '# mget 201-210 ..' not using tmp/extract$$
+
+・fix libsmtp for rfc821 4.5.2
+
+・sub system
+
+・複数のアドレスが登録がされている時、
+  普通のユーザーにたいしては 一つにマッチするまで頑張る、
+  だめならだめ
+  ただし、リモートでの アドミンコマンドでは 複数マッチを許す。
+  OFF 引数 等の 引数も許す。
+
+・まとめおくりのヴァリエーション拡張その１
+
+・コマンドの拡張
+まとめおくりで、Ｎ時間おき（デフォールト）と Ｎ時に一日一回指定
+
+# status [引数]
+# stat   [引数]		現在の設定について知らせる（まとめおくりとかOFFとか）
+			デフォールト（# stat(us)）は自分自身の状態
+# mget last:10 		(mhだね) シンタックス
+# exit 			コマンドの終り
+# end			コマンドの終り
+# quit			コマンドの終り
+
+・libfml.pl はエラー処理を一括しておこなう。そうしないと複数のコマンド
+ミスそれぞれについて警告メールが返ってしまうから
+
+・fml の remote control（admin command）のパスワード機構
+
+・変数名等の変更：
+PRE_HOOK -> START_HOOK
+ExExec -> RunHooks
+"# guide" は本当に知らない人の時だけ特別扱い
+
+・ＦＡＱに索引がついたぞ！
+
+・~/.forward で 使う方法
+
+・ for $s in /etc/sendmail.cf
+
+・ マスターコントロールサーバ (./lib/Master)
+	www, ftp, wais, gopher とのＩＰＣの中継をする
+	おまけ機能で 
+	subscribe ML-address とか
+	member ML-address とか
+	which とか
+	できる（あくまでおまけ）＃実は単にＩＰＣの中継してるだけ
+
+・INSTALL MANUAL English 版:-)
+
+・クロスポスト機能
+
+・自動登録のときに reply-to を使わず。明示的に登録アドレスを変えるなら 
+subscribe ml-address のようなキーワードを必要とするように
+
+・$TMP_DIR
+
+・明示的に $USE_WARNING をセット（e.g. $USE_WARNING = 1;）しない限りコ
+マンドメールでの単なるシンタックスエラーの警告をしない
+＃ヘルプを返さない。signuatureとかでひっかかるから
+
+・ Proceess Table にＭＬ名をつける（８文字もありゃ十分だろう）
+
+・古いライブラリ は lib/Compatibility に移動
+
+・マシンによってはプロセス間通信がうまくいかない？
+lib/Sendmail/libo2smtp.pl(旧 libR8.pl)
+
+・MSendrc もしリアルタイム配送にきりかえたらちゃんとこっちのエントリも
+消す
+
+
+■変更点(diff between fml 1.3 and fml 1.2)
+
+・まとめおくり ver.1-4
+  ver. 3,4 ではUNIX FROM <-> RFC934 きりかえ等もオプショナルサポート
+
+・より secure に
+
+・標準の spool と Archive( tar + gzip ed files) spool
+	およびget等でのアーカイブへのアクセス
+
+・コマンドフック
+
+・ドキュメント Generator(lib/AIKO) texinfo and html自動 Generator
+
+・自動的にＭＬのspoolをhtml化する
+
+・httpdへの（ＩＰＣ） smtp インターフェイス（というのか？）
+
+・hml とはちがう任意の Whois サーバとのＩＰＣ
+
+・コマンド操作の誤チェック機能
+
+・明示的な自動登録をする（オプショナル）
+	例：	Subject: subscribe
+	本文に subscribe pollyanna@phys.titech.ac.jp 等
+
+・自動登録で登録要請をしているメールはＭＬへ流さないモード（オプショナル）
+
+・ユーザからのリモート制御 
+	# matome 数字(0-23)	コマンド
+
+・mget ver 2 
+	# mget 1-3,4-100,100-1000 time のようなシンタックスも自動判別
+	して動く
+
+・lock algorithm toggle switching の非対象性をなくした
+
+・gzip, zcat を使う
+
+・hml 1.6にあったアドミンコマンド（remote で ＭＬサーバを操作する）
+（オプショナル）
+
+・new options of configuration files
+	・ + in members
+	・ skip in actives
+	・ matome in actives（まとめおくり ver.2-4）
+
+・RecreateConfig.pl	config.ph の自動更新
+
+・ヘッダフィールドの形の保存
+
+・サーバで予定していないヘッダフィールドも保存して活用（オプショナル）
+
+・MIME decoding機能（オプショナル）
+
+・hml 1.6 形の Subject field（オプショナル）
+＃こんな形 → Subject: [Elena:ID] サブジェクト
+
+・Documentsの改良。
+
+・ひとつのfmlで複数のＭＬを扱う（２方式）（実は1.1.2.17からある）
+
+■主な変更点(diff between fml 1.2 and hml 1.6)
+
+・モジュール化
+・コマンド群の分離（libfml.pl等）
+＃必要な時だけrequire機能を使い組み込む。
+
+・Configurationsはconfig.phで設定
+
+・Contribでの補強。まとめ送り用コード等。詳しくは Contrib/README
+・まとめ送り
+・投票用サーバ
+・その他のいろいろなコードの見本
+
+・activesファイルで%式リレーを制御
+
+・Makefile, Install Program, 
+
+・対話式インストールプログラム EasyConfigure
+
+・現在はC wrapperを使いMaintainerの uid,gidで実行するように設定（デフォー
+ルトのインストールではそうなる）
+＃hmlではsendmail -fのためだけに必要なdaemonを使うことの解消。（５．ｘ
+の時代のはなし）
+
+・よく見られるコマンドモードと配布モードの間違いを防ぐため最初の３行以
+内に ^#.*$が現れたら自動的にコマンドモードとなり配布しない。
+＃日本を前提にしたこの仕様は失敗かもしれない（つまり日本語のメールなら
+最初の３行のどこかに＃があってもそれは＃であり#ではないだろうと仮定し
+ている）。
+＃”３行”は$COMMAND_CHECK_LIMIT = 3;で設定（see config.ph）
+
+・sendmailとはsmtpポートでＩＰＣ（libsmtp.pl）sendmailコマンドを呼ぶの
+ではなく、プロセス間通信でsendmailへ渡す。
+＃IPCはちゃんとesmtpの場合でもうけとるように気を配る(for sendmail 8.x)
+
+・ロック・アルゴリズムはflockとpidを使う２種類（fml.pl liblock.pl）
+
+・Toggle flag configurations
+
+・メンバーチェックをするか否か？（する＝１）
+	「メンバーチェックをするサーバ」と
+	「自動登録しながら走るサーバ」
+
+・ロックはflockを使うか、PID式を使うか？（flock＝１）
+
+・サーバーテスト用デバッグモード（debug mode = 1）
+
+・コマンドの書き方について。# get 1 と #get 1は同じもの等。
+
+・ｗｈｏｉｓ等実績のないコマンドの削除（libfml.pl）
+＃使わんって（やりたいなら専用のをつかえばいいでしょう）
+
+・ｍｇｅｔ（まとめてget :-)）…付け加えたコマンド（libfml.pl）
+“# mget 正規表現 送り返されるメールの送り間隔”による大規模な過去のメー
+ル取り寄せ機能送り返しはそれようのコマンドへ
+＃ftpmailのようなもの。ＩＰの人だけならpasswdつきのanonymous ftp？:-) 
+にする方がいいとおもう。
+
+・（余計かもしれなくても）loggingはできるだけする
+＃なんかあった時便利です。ごみごみするけどメリットはあるとおもう。
+
+・リレーやＭＸについては FAQ ファイルを参照して下さい
+
+
+# REFERENCES 
+
+Release Version 1.2.1
+
+Message-ID: <FUKACHAN.94Apr10222414@exelion.phys.titech.ac.jp>
+Message-ID: <FUKACHAN.94Apr10222520@exelion.phys.titech.ac.jp>
+
+Subject: fml 1.2 Mailing List Server(upper compatible with hml1.6).  
+Message-ID: <FUKACHAN.94Mar15165051@exelion.phys.titech.ac.jp>
+
+Subject: hml1.6: a powerful mailing list server Message-ID:
+<HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
