@@ -1178,9 +1178,13 @@ type in 2.
    6       Subject: [Elena,100]
    
    7       Subject: (Elena,100)
+
+   8       Subject: [Elena]
+
+   9       Subject: (Elena)
    ************************************************************
 
-      SUBJECT TAG TYPE (0-7) [0] 
+      SUBJECT TAG TYPE (0-9) [0] 
 
 
 .S	その他の設定
