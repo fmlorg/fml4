@@ -7,8 +7,14 @@ GEN_FMLID () {
    if [ X$MODE = X ]; then
 	# 3.0B new release engineering	
 	FML_REL=`cat $FML/conf/release`
+	FML_REL=`echo $FML_REL| sed s/_//`
 	FMLID=fml-${FML_REL}-${BRANCH}-${DATE}
+
+	# RC (release candidate) special handling
+	FMLID=` echo $FMLID | sed 's/RC-stable/RC/' `
    else
 	FMLID=fml-${BRANCH}-${DATE}
    fi
+
+   echo "FMLID=$FMLID" >&2
 }
