@@ -1,7 +1,10 @@
 #!/usr/local/bin/perl
-#
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
-# Please obey GNU Public License(see ./COPYING)
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
+
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
@@ -29,16 +32,15 @@ $0 =~ m#(\S+)/(\S+)# && (unshift(@INC, $1)); #for lower task;
 
 &SraqInit;
 &Log("$0 Started PORT=$PORT");
-&SraqDeliver(@ARGV);
 
 chdir $DIR || do {
-    &Log("Can't chdir to $SRAQ_DIR");
-    die "Can't chdir to $SRAQ_DIR\n";
+    &Log("Can't chdir to $DIR");
+    die "Can't chdir to $DIR\n";
 };
 
 
 eval alarm($TIMEOUT || 45); 
-open(LOCK, $SRAQ_DIR); # spool is also a file!
+open(LOCK, $DIR); # spool is also a file!
 flock(LOCK, $LOCK_EX);
 
 opendir(DIR, $DIR) || die $!;
