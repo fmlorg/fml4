@@ -1,10 +1,18 @@
 .HTML_PRE
-	やり残し、やろうかなとおもってること
+	TODO リスト / やり残し、やろうかなとおもってること
 	(誰かすでにやってたらパッチ下さい)
 =E
 	TODO of fml Mailing List Server Package
 
 ＃ WISH_LIST は WISH_LIST のほうをごらんください
+
+.if LANG == JAPANESE
+TODO リストは fml 5.0 プロジェクトへ引き継がれました。
+そちらを参照して下さい。
+
+.url http://www.fml.org/devel/fmlsrc/Documentation/ja/todo/
+.return
+.fi
 
 .toc
 
@@ -542,7 +550,7 @@ fml 5.0 へ持ち越し
 * easy configuration for $OUTGOING_ADDRESS 
 
 
-$FML$
+$FML: TODO.wix,v 1.104 2001/05/27 01:39:00 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
