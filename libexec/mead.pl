@@ -16,7 +16,8 @@
 
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-$error_code_pat = '55\d';
+$error_code_pat = '55\d|5\.5\.\d';
+$TrapWord       = 'unknown user|user unknown';
 $new_block = 1;
 $gabble = 0;
 
@@ -55,7 +56,8 @@ while (<>) {
     # error message line
     next if /<<<.*\@/;
     next if /^Diagnostic-Code:/i;
-    if (/\@/ && /(5\d\d)/) { &ErrorAnal($_);}
+    if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_);}
+    if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_);}
 }
 
 &DeadOrAlive;
@@ -79,36 +81,69 @@ sub ExtractAddr
 }
 
 
-sub ErrorAnal
+sub AnalWord
 {
-    $ErrorAnal++;
+    local($reason, $_);
+    $_ = $_[0];
 
-    local($addr);
+    if (/user unknown|unknown user/i) { $reason = 'uu';}
+    if (/host unknown|unknown host/i) { $reason = 'uh';}
+    if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
 
-    &Debug("$.:ErrorAnal(@_)") if $debug;
+    $reason;
+}
+
+
+sub AnalyzeErrorCode
+{
+    local($addr, $reason);
+
+    $AnalyzeErrorCode++;
+
+    &Debug("$.:AnalyzeErrorCode(@_)") if $debug;
 
     $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
+
 
     if (/(\S+\@[\.A-Za-z0-9\-]+)/) {
 	$addr = $1;
 
-	if (/^($error_code_pat)|\D$error_code_pat\D/) {
-	    for (keys %return_addr) {
-		next if /^\s*$/;
-		next if $_ eq $addr;
-		
-		&CacheOn(sprintf("%s %s\t%s", time, $addr, $_))
-		    if $addr && $_;
-	    }
+	if (/^($error_code_pat)|\D($error_code_pat)\D/) {
+	    &CacheOn($addr, &AnalWord($_));
 	}
     }
     else {
-	&Debug("ErrorAnal: invalid input <$_>") if $debug;
+	&Debug("AnalyzeErrorCode: invalid input <$_>") if $debug;
+    }
+}
+
+
+sub AnalyzeErrorWord
+{
+    $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
+
+    &Debug("AnalyzeErrorWord: <$_>");
+
+    if (/user unknown|unknown user/i && /(\S+\@[\.A-Za-z0-9\-]+)/) {
+	&CacheOn($addr = $1, "uu");
     }
 }
 
 
 sub CacheOn
+{
+    local($addr, $reason) = @_;
+
+    for (keys %return_addr) {
+	next if /^\s*$/;
+	next if $_ eq $addr;
+		
+	&DoCacheOn(sprintf("%s %s\t%s\tr=%s", time, $addr, $_, $reason))
+	    if $addr && $_;
+    }
+}
+
+sub DoCacheOn
 {
     local($s) = @_;
     &Append($s, $CACHE);
@@ -170,7 +205,7 @@ sub DeadOrAlive
 	next if $prev eq $_;
 	$prev = $_;
 
-	($time, $addr, $ml) = split;
+	($time, $addr, $ml, @opts) = split;
 
 	if (/^\#/) {
 	    # remove info is also expired
@@ -196,7 +231,12 @@ sub DeadOrAlive
 	    print NEW $_;
 
 	    # count; sum up for each address
-	    $addr{"$addr $ml"}++;
+	    $pri = $NULL;
+	    for (@opts) { /r=(\S+)/ && ($pri = $1);}
+
+	    print STDERR "$addr : $addr{\"$addr $ml\"}\t" if $debug;
+	    $addr{"$addr $ml"} += $PRI{$pri} != 0 ? $PRI{$pri} : 0.25;
+	    print STDERR "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
 	}
     }
 
@@ -227,7 +267,7 @@ sub DeadOrAlive
 	    &Debug("$admin => $ml map") if $debug;
 
 	    if ($ml) {
-		&Debug("dead:\t$_ <$ml>") if $debug;
+		&Debug("dead($addr{$_}/$LIMIT):\t$_ <$ml>") if $debug;
 		&Action($addr, $ml);
 	    }
 	    else {
@@ -236,7 +276,7 @@ sub DeadOrAlive
 	}
 	# alive
 	else {
-	    &Debug("alive:\t$_") if $debug;
+	    &Debug("alive($addr{$_}/$LIMIT):\t$_") if $debug;
 	}
     }
 }
@@ -271,22 +311,28 @@ sub Report
 	    }
 
 	    rename($tmp, $file) || &Debug("cannot rename $tmp $file");
-	    chmod 755, $file;
+	    chmod 0755, $file;
 	}
     }
 
     ### send reports by mail.
 
     if ($MODE eq 'auto') {
+	$prepend = "Hi, I am fml Mail Error Analyzer Daemon (mead).\n";
+	$prepend .= "I tried to remove the following mail unreachable addresses\n\n";
+
+	$sep  = "\n--mead, fml\'s Mail Error Analyze Daemon\n";
+	$sep .= "\n---------- makefml messages ---------\n";
+
 	for $ml (keys %LogBuf) {
-	    &Mail($ml, $LogBuf{$ml});
+	    &Mail($ml, $MFSummary{$ml} . "$sep\n" . $LogBuf{$ml});
 	}
     }
     elsif ($MODE eq 'report') {    
 	if (%Template) {
 	    for $ml (keys %Template) {
 		$prepend = "Hi, I am fml Mail Error Analyzer Daemon (mead).\n";
-		$prepend .= "I think you should remove mail unreachable addresses\n\n";
+		$prepend .= "I think you should remove the following mail unreachable addresses\n\n";
 
 		$prepend .= "1. If you use remote administration mode,\n";
 		$prepend .= "send the following command(s) to <";
@@ -330,7 +376,7 @@ sub Mail
 
     print MAIL "From: ". $ml'MAA{$ml} . "\n"; #';
     print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
-    print MAIL "Subject: mead report for ML <$ml>\n";
+    print MAIL "Subject: fml mail error analyzer (mead) report for ML <$ml>\n";
     print MAIL "To: ". $ml'MAA{$ml} . "\n"; #';
     print MAIL "\n";
     print MAIL $buf;
@@ -352,7 +398,7 @@ sub Action
     }
     elsif ($MODE eq 'report') {
 	$Template{$ml} .= "\# admin bye $addr\n";
-	$MakeFmlTemplate{$ml} .= "makefml bye $ml $addr\n";
+	$MakeFmlTemplate{$ml} .= "$MAKEFML bye $ml $addr\n";
     }
     else {
 	&Debug("mode $MODE is unknown");
@@ -372,24 +418,31 @@ sub MakeFml
     $ok = 0;
 
     $LogBuf{$ml} .= "mead> bye $ml $addr\n";
+    $MFSummary{$ml} .= "mead> bye $ml $addr\n";
 
-    if (&open2(RS, S, "$MAKEFML -i -u mead 2>&1")) { 
+    require 'open2.pl';
+
+    if (&open2(RS, S, "$MAKEFML -i stdin -u mead 2>&1")) { 
 	select(S); $| = 1; select(STDOUT);
 	print S $buf;
 	close(S);
 	while (<RS>) {
 	    $logbuf .= $_;
-
-	    if (/\#\#BYE\s+$addr/i) {
-		$ok = 1;
-		$LogBuf{$ml} .= "\tsucceeds.\n";
-	    }
-	    else {
-		$LogBuf{$ml} .= "\tfails.\n";
-		$LogBuf{$ml} .= "\tPlease remove $addr by hand.\n";
-	    }
+	    if (/\#\#BYE\s+$addr/i) { $ok = 1;}
 	}
 	close(RS);
+
+	if ($ok) {
+	    $LogBuf{$ml} .= "\tsucceeds.\n";
+	    $MFSummary{$ml} .= "\tsucceeds.\n";
+	}
+	else {
+	    $MFSummary{$ml} .= "\tfails.\n";
+	    $MFSummary{$ml} .= "\tPlease remove $addr by hand.\n";
+
+	    $LogBuf{$ml} .= "\tfails.\n";
+	    $LogBuf{$ml} .= "\tPlease remove $addr by hand.\n";
+	}
 
 	$LogBuf{$ml} .= $logbuf;
     }
@@ -429,7 +482,7 @@ sub Init
     $| = 1;
 
     require 'getopts.pl';
-    &Getopts("dD:e:S:hC:i:l:M:m:E:");
+    &Getopts("dD:e:S:hC:i:l:M:m:E:p:");
     $opt_h && die(&Usage);
     $debug  = $opt_d;
     $EXPIRE = $opt_e || 14; # days
@@ -455,6 +508,15 @@ sub Init
 
     # touch
     &Touch($CACHE);
+
+    # priority; $opt_p
+    $PRI{'uu'} = 1;
+    for (split(/,/, $opt_p)) {
+	if (/(\S+)=(\S+)/) {
+	    $PRI{$1} = $2;
+	    &Debug("--- \$PRI{$1} = $2") if $debug;
+	}
+    }
 }
 
 
@@ -475,6 +537,12 @@ Options:
     -E directory    \$EXEC_DIR (e.g. /usr/local/fml)
     -S directory    \$ML_DIR (e.g. /var/spool/ml)
     -M path         makefml path
+
+    -p priority     priority, e.g. -p uu=2,uh=0.5
+                    (user unkwown == 2, host unkown == 0.5)
+                    uu: unknown user
+                    uh: unknown host
+                    ua: unknown address
 "
 }
 
@@ -505,6 +573,7 @@ sub main'MLEntryOn #';
     local($spool) = @_;
 
     $ml_debug = $ml'debug = $main'debug;
+    $ml'debug_ml = $main'debug_ml;
 
     opendir(DIRD, $spool) || die("cannot opendir $spool");
     for (readdir(DIRD)) {
@@ -517,7 +586,7 @@ sub main'MLEntryOn #';
 	$config = "$spool/$_/config.ph";
 
 	if (-f $config) {
-	    &Debug("eval $config") if $debug;
+	    &Debug("eval $config") if $debug_ml;
 
 	    undef $buf;
 	    open(CF, $config);
@@ -533,7 +602,7 @@ sub main'MLEntryOn #';
 
 	    # reset required (config.ph overwrite it).
 	    $debug = $ml_debug;
-	    &Debug("\$ML{$MAINTAINER} = $ml;") if $debug;
+	    &Debug("\$ML{$MAINTAINER} = $ml;") if $debug_ml;
 
 	    $ML{$MAINTAINER} = $ml;
 	    $MAA{$ml} = $MAINTAINER; # ML Admin Address
@@ -543,7 +612,7 @@ sub main'MLEntryOn #';
     }
     closedir(DIRD);
 
-    if ($debug) {
+    if ($debug_ml) {
 	while (($k, $v) = each %ML) { print "$k -> $v\n";}
     }
 }
