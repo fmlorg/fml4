@@ -222,8 +222,8 @@ sub OutputHtml
 
 	s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
-
 	s/^(\#\.index)/$Index{$Lang}/; 
+	s/^=S//;
 
 	print STDERR "   $prev   $_\n" if $Error; $prev = $_;
 	print OUTHTML $_;
@@ -278,8 +278,11 @@ sub OutputFile
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	    s/^(\#\.index)/$Index{$Lang}/; 
+	    s/^=S//;
 
-	    print STDERR "   $prev   $_\n" if $Error; $prev = $_;
+	    print STDERR "==Error:\n- $prev\n+ $_\n" if $Error; 
+	    $prev = $_;
+
 	    print $_;
 	}
     }
@@ -570,14 +573,18 @@ sub ReadFile
 
 	# language declared
 	# reset Language if it encounters null line; 
-	if (/^\s*$/ || /\.($KEYWORD)/) {
+	if (/^\s*$/ || /^\.($KEYWORD)/) {
 	    undef $LANG;
 	}
 
+	# keywords
+	$DetectKeyword = $. if /\.($KEYWORD)/;# EUC or English;
+
 	if (/[\241-\376][\241-\376]/) {	# EUC(Japanese);
 	    undef $LANG;
+	    $DetectEUC = $.;	# save the current line;
 	}
-	elsif (! $LANG && !/\.($KEYWORD)/) {# to avoid duplicate title;
+	elsif (!$LANG && !/^\.($KEYWORD)/) {# to avoid duplicate title;
 	    $Both = 1;
 	}
 	
@@ -586,8 +593,14 @@ sub ReadFile
 	    $LANG = 'ENGLISH';
 	}
 
+	if (/^==/) { 
+	    undef $LANG;
+	    $CurLang = $LANG || "JAPANESE";
+	    next;
+	}
+
 	##########
-	if (/\.($KEYWORD)/) {
+	if (/^\.($KEYWORD)/) {
 	    $CurLang = $LANG || "JAPANESE";
 	}
 
@@ -608,7 +621,7 @@ sub ReadFile
 	}
 
 	# seealso{guide}
-	if (/\.($KEYWORD)\{(\S+)\}/) {
+	if (/^\.($KEYWORD)\{(\S+)\}/) {
 	    print STDERR "\tCATCH $1{$2}\n";
 	    s/\.($KEYWORD)\{(\S+)\}/&Expand($1, $2, $file, $mode)/e;
 	}
@@ -638,9 +651,24 @@ sub ReadFile
 	}
 
 	# OK. Print in both language
+	# BUT if a null line is output between Japanese sentences.
+	# a lot of null lines are printed.
+	# "(! $LANG && !/\.($KEYWORD)/)" ALREADY satisfied 
 	if ($Both) {
 	    select(ENG); $| = 1;
-	    &Print;
+
+	    next if $DetectKeyword == $.;
+
+	    # print "--Cur[$CurLang]   ";
+
+	    # the previous line is not Japanese, output a null line;
+	    if (/^\s*$/ && (($DetectEUC - 1) != $.)) {
+		&Print;
+	    }
+	    else {
+		# print "--Detect[$DetectKeyword != $.]\n";
+		&Print;
+	    }
 	}
 
 	# Try to detect ERROR
