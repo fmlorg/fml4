@@ -1,18 +1,36 @@
-# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-# fml is free software distributed under the terms of the GNU General
-# Public License. see the file COPYING for more details.
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
 
-# $Id$;
+SUBDIRS += MIME
+SUBDIRS += utilities
+SUBDIRS += ftpmail
+SUBDIRS += whois
+SUBDIRS += cwhois
+SUBDIRS += www
+SUBDIRS += traffic
+SUBDIRS += localhack/release-1/Elena
+SUBDIRS += localhack/release-1/mnews
+SUBDIRS += localhack/release-1/putfiles
+SUBDIRS += localhack/release-1/schwalben
+SUBDIRS += localhack/release-2/kizu
+SUBDIRS += localhack/release-2/doc-changes
+SUBDIRS += localhack/release-2/mnews
+SUBDIRS += localhack/release-2/member_name
+SUBDIRS += lexical
+SUBDIRS += pager
+SUBDIRS += mail2fax
+SUBDIRS += netutils
+SUBDIRS += mail2news
+SUBDIRS += msend-anytime
+SUBDIRS += irc
 
-all: distrib
-
-clean:
-	delete *~ _* mget* core
-
-DISTRIB: distrib
-
-distrib: README
-	@if [ ! -d $(UPDIR)/distrib/contrib ];\
-	then mkdir $(UPDIR)/distrib/contrib; fi;
-	cp -p README $(UPDIR)/distrib/contrib
+.include "../distrib/mk/fml.contrib.mk"
