@@ -322,8 +322,10 @@ sub UNDEF_FIELD_LOOP_CHECKED
 
 sub ADD_FIELD
 { 
-    grep(/^$_[0]$/i, @HdrFieldsOrder) || push(@HdrFieldsOrder, $_[0]);
-    &Debug("ADD_FIELD $_[0]") if $debug;
+    my ($f) = @_;
+    $f = &FieldCapitalize($f);
+    grep(/^${f}$/i, @HdrFieldsOrder) || push(@HdrFieldsOrder, $f);
+    &Debug("ADD_FIELD $f") if $debug;
 }
 
 sub DELETE_FIELD 
