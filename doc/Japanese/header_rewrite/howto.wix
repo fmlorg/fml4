@@ -786,6 +786,37 @@ $SMTP_OPEN_HOOK = q#
 注意: この場合のポイントは HOOK を使うことです。使わずに書くと 
       config.ph が評価される時に $From_address の値がまだ不定なのです。
 
+
+.S	毎日 TAG をリセットしたい(一日のMail数が 一目でも分かるように)
+
+例えば0:00を境に
+   Subject: [elena 00100] の番号を自動的に 
+   Subject: [elena 00000] にしたい
+
+/var/spool/ml/elena 以下の seq, summary, log, spool などを全部初期かし
+てしまうしかないです。
+
+解答例: このプログラム(shell script)を毎日夜12時にまわす
+
+   #!/bin/sh
+
+   ml=elena
+   date=`date -u +%C%y%m%d`
+
+   /usr/local/fml/makefml lock $ml 60 &
+
+   cd /var/spool/ml/$ml || exit 1
+
+   for file in seq spool summary log
+   do
+       if [ -f $file ];then
+          # mv $file $file.$date
+          cp  $file $file.$data
+         cp /dev/null $file
+       fi
+   done
+
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
