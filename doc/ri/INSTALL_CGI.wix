@@ -37,9 +37,16 @@ fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
 
 ◯ /usr/local/apache/conf/httpd.conf を編集
 
+   1. ユーザの設定
+
 	User fml
 
    つまり /usr/local/fml /var/spool/ml のオーナーと同じにしてください。
+
+   2. ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行をコメントアウト
+	# ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
+
+   して
 
 	/usr/local/fml/www/examples/apache/httpd.conf.patch
 
@@ -47,8 +54,9 @@ fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
 
 	付け足しただけでうまくいくかもしれないしすでにCGIの設定がある
 	ならそれとうまくマージしないといけないです。
-	分からなかったら apache デフォールトに戻して httpd.conf.patch
-	を付け足してみて下さい。そしてリスタートするのがいいのではないかと
+
+	分からなかったら apache デフォールトに戻して上述の作業をして下
+	さい。そしてリスタートしてみてください
 
 ◯ /etc/sendmail.cf を編集する。編集する内容は
 
@@ -64,7 +72,7 @@ fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
 	ユーザの登録/削除
 	管理者ユーザの登録/削除
 
-などです。
+などです。左のメニューバーあたりをみてください。
 
 
 .C	fml-current のインストール
