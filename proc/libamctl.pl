@@ -311,15 +311,22 @@ sub DoSetMemberList
     # LOOP CHECK
     if (&LoopBackWarn($curaddr)) {
 	&Log("$cmd: LOOPBACK ERROR, exit");
-	return '';
+	return $NULL;
     }
     
     ###### change address [chaddr old-addr new-addr]
     # Default: $CHADDR_KEYWORD = 'CHADDR|CHANGE\-ADDRESS|CHANGE';
     if (/^($CHADDR_KEYWORD)$/i) {
-	&Mesg(*e, "\t set $cmd => CHADDR");
+	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
 	$cmd = 'CHADDR';
 	
+	if ($curaddr eq '' || $newaddr eq '') {
+	    &Log("CHADDR Error: empty address is given");
+	    &Mesg(*e, "Error: CHADDR requires two non-empty addresses.");
+	    &Mesg(*e, "Please use the syntax \"CHADDR old-address new-address\"");
+	    return $NULL;
+	}
+
 	# LOOP CHECK
 	&LoopBackWarn($newaddr) && &Log("$cmd: LOOPBACK ERROR, exit") && 
 	    (return $NULL);
@@ -340,7 +347,7 @@ sub DoSetMemberList
     # NOT CHADDR;
     else {
 	$newaddr = $curaddr; # tricky;
-	&Mesg(*e, "\t set $cmd => BYE");
+	&Mesg(*e, "\t set $cmd => BYE") if $cmd ne "BYE";
 	$cmd = 'BYE';
     }
 
