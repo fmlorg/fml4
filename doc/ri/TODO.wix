@@ -4,6 +4,7 @@
 	やり残し、やろうかなとおもってること
 	(誰かすでにやってたらパッチください)
 
+＃ WISH_LIST は WISH_LIST のほうを…
 
 .toc
 
@@ -12,6 +13,18 @@
 
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
+
+◯
+
+* Filter module ?
+* Filter の動的 update はできないか？ 
+=E
+* Filter module ?
+* update filter dynamically 
+
+とりあえず virus_check.ph に終結して www.fml.org にあるので
+それを定期的にもっていってくれればいいんですかね…
+＃ちょっと全自動はこわいだろうねぇ…
 
 
 .# ############################################################
@@ -243,13 +256,6 @@ command" to handle pgp key for usual users.
   してむしするようになっているが、ひっかかないものもある。
 
 
-* Filter module ?
-* Filter の動的 update はできないか？ 
-=E
-* Filter module ?
-* update filter dynamically 
-
-   http://www.fml.org/some/where/filter-rule.html ? 
 
 * cannot reject ;)
 .q
@@ -435,7 +441,7 @@ TARGET 指定をして reload はできないのか？
 	http://www.apache.org/info/css-security/index.html
 
 
-.S	security check
+.S	security check ;-)
 
 e.g. SUBJECT_TAG_TYPE is rejected now;_;  for security reason.
 
