@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 <TITLE>
-"fml" Mailing List Server Package
+"fml 3.0.1" Mailing List Server Package
 </TITLE>
 <META http-equiv="Content-Type"
 #ifdef JAPANESE
@@ -24,11 +24,20 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" Mailing List Server Package
+"fml 3.0.1" Mailing List Server Package
 </CENTER>
 </H1>
 <P>
+<CENTER>
 The latest official release is fml-3.0.1 (1999/12/2x).
+</CENTER>
+#ifdef JAPANESE
+3.0.1は3.0リリースのバグ修正だけ(機能拡張なし)という安定したバージョン
+を提供するためのものです。3.0.1のあともバグ修正があれば3.0pl数字
+(patchlevel 数字)というシリーズが作られ、いつか3.0.2にまとまることにな
+るでしょう。新しい機能を試したい人はcurrentを試してみてください。今
+(3.0A)の旬の話題はCGIインターフェイスです。
+#else
 <BR>
 3.0.1 is 3.0 + bug fix patches.  We will provide fml-3.0pl\d+.tar.gz
 (3.0 release + bug fix patches) after 3.0.1. Pleaes check the file
@@ -37,7 +46,7 @@ date and use latest one.
 If you try to use current working snapshot, please use fml-current,
 which version is 3.0A now. I now develop GUI (WWW's CGI) interface.
 Please check out ftp and get latest one.
-
+#endif
 
 #ifdef JAPANESE
 <PRE>
