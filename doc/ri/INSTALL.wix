@@ -1071,8 +1071,33 @@ You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
 See .ptr{config-file} for more "config.ph".
 
+ちなみに3.0B#3以降では日本語表示が可能になりました。デフォールトでは英
+語です。これはCGI化の副産物です:)
+
+とりあえず環境変数MAKEFML_LANGで指定するとその文字コードで表示をします。
+日本語訳がまだない部分は英語のままです。"jis" or "sjis" or "euc" から
+選んで下さい。でもeucで表示させるのが一番無難です。
+
+使っているshellの設定にしこんでおくには例えばこんな感じの設定を付け加
+えておきます。
+
+設定例: bourne shell系(sh, bash, ..)
+
+~/.profile ~/.bash_profile (?)
+
+  MAKEFML_LANG=euc; export MAKEFML_LANG
+
+csh系(csh, tcsh, ... ): 
+
+~/.cshrc ~/.tcshrc
+  setenv MAKEFML_LANG euc
+
+
 .S	TOP メニュー
 =E.S	TOP MENU
+
+日本語表示は可能ですが、とりあえず英語版の説明ですすめます。
+日本語表示メニューの方はなんとなくいいたいことが分かるでしょう:)
 
    === TOP MENU ===
 
