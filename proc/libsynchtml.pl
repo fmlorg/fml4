@@ -517,12 +517,15 @@ sub Write
 
     ### Header ###
     print OUT "<SPAN CLASS=mailheaders>";
+
     if ($HTML_HEADER_TEMPLATE) {
 	print OUT $HTML_HEADER_TEMPLATE;
     }
     else {
 	local(%dup);
+	undef %FieldHash; # reset for spool2html
 	&GetHdrField(*e); # -> %FieldHash
+
 	for (@HtmlHdrFieldsOrder) {
 	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
 	    # if ($s = $e{"h:$_:"}) {
@@ -688,10 +691,14 @@ sub ParseMultipart
 	    s/$boundary//g;
 	    $next++;
 	}
-	if (/Content-Type:\s+image\/gif/i)  { $image = "gif";  $next++;}
-	if (/Content-Type:\s+image\/jpeg/i) { $image = "jpeg"; $next++;}
 	if (/Content-Type|Content-ID|Content-Description/i)  { $next++;}
 	if (/content-transfer-encoding:\s*base64/i) { $base64 = 1; $next++;} 
+
+	# get file type
+	if (/Content-Type:\s+image\/([a-z]+)/i) { 
+	    $image = $1; 
+	    $next++;
+	}
 
 	next if $next;
 
