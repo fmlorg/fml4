@@ -59,7 +59,7 @@ done
 # renice +18 $$ >/dev/null 2>&1
 #
 
-chdir $ML_DIR || cannot_chdir $ML_DIR
+cd $ML_DIR || cannot_chdir $ML_DIR
 
 for ml in *
 do
