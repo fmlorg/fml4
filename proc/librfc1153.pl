@@ -34,7 +34,7 @@ sub Rfc1153Custom
     require 'libMIME.pl' if $USE_LIBMIME;
 
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
-    $issue = &Rfc1153phGetSeq($ISSUE_SEQ);
+    $issue = &Rfc1153GetSeq($ISSUE_SEQ);
 
     ##### PREAMBLE #####
 
@@ -89,7 +89,7 @@ sub Rfc1153Custom
 }
 
 
-sub Rfc1153phGetSeq
+sub Rfc1153GetSeq
 {
     local($ISSUE_SEQ) = @_;
 
@@ -118,7 +118,7 @@ sub Rfc1153phGetSeq
 }
 
 
-sub Rfc1153phDestructer
+sub Rfc1153Destructer
 {
     local($listname)  = "UJA";
     local($vol)       = $year;
@@ -129,7 +129,7 @@ sub Rfc1153phDestructer
     $_cf{'rfc1153', 'in-destr'} = 1;
 
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
-    $issue = &Rfc1153phGetSeq($ISSUE_SEQ);
+    $issue = &Rfc1153GetSeq($ISSUE_SEQ);
 
     open(F, "> $ISSUE_SEQ") || &Log("Cannot open $ISSUE_SEQ");
     $issue++;
