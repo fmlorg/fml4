@@ -9,81 +9,165 @@
 #
 # $Id$
 #
-local($MTI_DB, $MTIErrorString);
+local($MTI_DB, $MTIErrorString, %MTI, %HI);
 
 
 # MTI: Mail Traffic Information
 sub MTICache
 {
     local(*e, $mode) = @_;
-    local($time, $from, $rp, $sender, $db, $host);
+    local($time, $from, $rp, $sender, $db, $xsender);
+    local($host, $date, $rdate, $buf);
+    local(%uniq);
 
-    $time   = time;
-    $from   = &Conv2mailbox($e{'h:from:'}, *e);
-    $rp     = &Conv2mailbox($e{'h:return-path:'}, *e);
-    $sender = &Conv2mailbox($e{'h:sender:'}, *e);
+    ### Extract Header Fields
+    $time    = time;
+    $date    = &Date2UnixTime($e{'h:date:'});
+    $from    = &Conv2mailbox($e{'h:from:'}, *e);
+    $rp      = &Conv2mailbox($e{'h:return-path:'}, *e);
+    $sender  = &Conv2mailbox($e{'h:sender:'}, *e);
+    $xsender = &Conv2mailbox($e{'h:x-sender:'}, *e);
 
-    $e{"sh:received:"} =~ s/\n\s/ /g;
-    if ($e{"sh:received:"} =~ /by\s+(\S+).*;(.*)/) { 
+    ## Received:
+    $buf = $e{"sh:received:"};
+    $buf =~ s/\n\s/ /g;
+    $buf =~ s/\(/ \(/g;
+
+    if ($buf =~ /\@localhost.*by\s+(\S+).*;(.*)/) { 
 	$host = $1;
-	$date = $2;
-	&Log("MTI: host=$host [$date]") if $debug_mti;
-	$date = &Date2UnixTime($date);
+	$rdate = $2;
+    }
+    elsif ($buf =~ /from\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$rdate = $2;
+    }
+    elsif ($buf =~ /^\s*by\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$rdate = $2;
+    }
+    else {
+	&Log("MTI: not match Received: [$buf]");
     }
 
+    # Received: date
+    &Log("MTI: Received info: host=$host [$rdate]") if $debug_mti;
+    $rdate = &Date2UnixTime($rdate) if $rdate;
+
+
+    ### OPEN HASH TABLES (SWITCH)
     if ($mode eq 'distribute') {
-	$MTI_DB = $db = $MTI_DIST_DB || "$FP_VARDB_DIR/mti.dist";
+	$MTI_DB    = $db = $MTI_DIST_DB || "$FP_VARDB_DIR/mti.dist";
+	$MTI_HI_DB = $MTI_HI_DIST_DB || "$FP_VARDB_DIR/mti.hi.dist";
     }
     elsif ($mode eq 'command') {
-	$MTI_DB = $db = $MTI_COMMAND_DB || "$FP_VARDB_DIR/mti.command";
+	$MTI_DB    = $db = $MTI_COMMAND_DB || "$FP_VARDB_DIR/mti.command";
+	$MTI_HI_DB = $MTI_HI_COMMAND_DB || "$FP_VARDB_DIR/mti.hi.command";
     }
     else {
 	&Log("Error: MTICache called under an unknown mode");
 	return $NULL;
     }
 
-    ### cache on addresses with the current time
-    ### also, expire the addresses
-    dbmopen(%MTI, $db, 0600);
+    &MTIDBMOpen;
 
-    for ($from, $rp, $sender, $host) {
+    ### CACHE ON
+    ### cache on addresses with the current time; also, expire the addresses
+
+    ## cache addresses info
+    for ($from, $rp, $sender, $xsender) {
 	next unless $_;
+	next if $uniq{$_};
 	next if $MTI{$_} =~ /$time/; # uniq
 
 	&MTICleanUp(*MTI, $_, $time);
 	$MTI{$_} .= " $time";
+	$uniq{$_} = $_;
     }
 
-    dbmclose(%MTI);
+    ## cache host info
+    # we check both $date and $rdate to check
+    # whether Date: may be a fake?, if a fake we use time shown in Received:
+    # since Received: field's "date" may be more reliable.
+    # (Received: time can be appended on the first relayed host
+    # Anyway I belive old time of either Date: or Received:
+    # which must be the real sent time.
+    # 
+    # Problems: Oops, in the case of UUCP?
+    # If a host over UUCP sent queued mails when UUCP ups, 
+    # "Date:" must be very older than the current time.
+    # We trap this fact.
+    # If a host sent mails with the current Date: when UUCP or DIP ups,
+    # he may be a bomber. We cannot determine whether he is a real bomber
+    # or to be a bomber by a mistake.
+    # 
+    # record speculated time when the mail left the host.
+    if ($host && ($date || $rdate)) {
+	&MTICleanUp(*HI, $host, $rdate);
+	$HI{$host} .= " ". &ValidateDate($date, $rdate);
+    }
 
+    ### CLOSE HASH (save once anyway), AND RE-OPEN
+    &MTIDBMClose;
+    &MTIDBMOpen;
+
+    ### GARBAGE COLLECTION FROM TIME TO TIME
     # Expire all caches (require to preserve the db size is small.)
     # default is one week
-    if ((time % 50) == 25) { # random, once perl 50;
-	dbmopen(%MTI, $db, 0600);
+    if ((time % 50) == 25) { # random, about once per 50;
 	&MTIGabageCollect(*MTI, $time);
-	dbmclose(%MTI);
+	&MTIGabageCollect(*HI, $time);
     }
 
-    ### BUILT_IN CHECK ROUTINES
+
+    #######################################################
+    ### CHECK ROUTINES
+    ## BUILT_IN 
     if (($mode eq 'distribute' && $MTI_DISTRIBUTE_TRAFFIC_MAX) || 
 	($mode eq 'command' && $MTI_COMMAND_TRAFFIC_MAX)) {
-	dbmopen(%MTI, $db, 0600);
-
 	for ($from, $rp, $sender) {
 	    next unless $_;
 	    &MTIProbe(*MTI, $_, "${mode}:max_traffic");
 	}
-
-	dbmclose(%MTI);
     }
 
-    ### CHECK FUNCTION HOOK
+    ## SPECULATE BOMBERS
+    for (keys %uniq) { &BomberP('addr', $_, $MTI{$_});}
+    &BomberP('host', $host, $HI{$host});
+
+    ## EVAL HOOKS
     if ($MTI_CHECK_FUNCTION_HOOK) {
-	dbmopen(%MTI, $db, 0600);
 	eval($MTI_CHECK_FUNCTION_HOOK);
 	&Log($@) if $@;
-	dbmclose(%MTI);
     }
+
+
+    ### CLOSE
+    &MTIDBMClose;
+}
+
+sub ValidateDate
+{
+    local($date, $rdate) = @_;
+
+    # both errors
+    if (!$date && !$rdate) {
+	$NULL;
+    }
+    else {
+	$rdate < $date ? $rdate : $date;
+    }
+}
+
+sub MTIDBMOpen
+{
+    dbmopen(%MTI, $db, 0600);
+    dbmopen(%HI, $MTI_HI_DB, 0600);
+}
+
+sub MTIDBMClose
+{
+    dbmclose(%MTI);
+    dbmclose(%HI);
 }
 
 sub MTIProbe
@@ -154,7 +238,6 @@ sub MTIError
 	&Warn("MTI Error $ML_FN",
 	      "FML Warning:\n$MTIErrorString\n".
 	      &WholeMail);
-	&Mesg(*e, "FML Warning:\n$MTIErrorString");
 	1;
     }
     else {
@@ -243,6 +326,52 @@ sub Date2UnixTime
 	&Log("Error Date2UnixTime: cannot resolve [$in]");
 	0;
     }
+}
+
+
+######################################################################
+sub BomberP
+{
+    local($tag, $addr, $buf) = @_;
+    local($fp) = $MTI_COST_FUNCTION || 'MTICost';
+    local($sum, $limit);
+
+    # BOMBER OR NOT: the limit is 
+    # "traffic over sequential 5 mails with 1 mail for each 10s".
+    $limit = $MTI_BURST_HARD_LIMIT || (5/10);
+    $sum   = &$fp($buf);
+
+    if ($sum > $limit) {
+	&Log("MTI::${tag}_cache: [$addr] must be a bomber; ".
+	     sprintf("sum=%1.2f > %1.2f", $sum, $limit));
+
+	$MTIErrorString .= "\nFML Mail Traffic Monitor System:\n";
+	$MTIErrorString .= "We detect address[$addr] must be a bomber, so\n";
+	$MTIErrorString .= "reject mails with address[$addr] in the header.\n";
+	$MTIErrorString .= "FYI: evaled as ".
+	    sprintf("sum=%1.2f > limit=%1.2f\n", $sum, $limit);
+    }
+
+    &Log("MTI::${tag}_cache: [$addr] ".sprintf("sum=%1.2f", $sum));
+}
+
+
+sub MTICost
+{
+    local($s) = @_;
+    local($prev, $sum, $epsilon);
+
+    # against divergence
+    $epsilon = $MTI_EPSILON || 0.1; 
+
+    for (split(/\s+/, $s)) {
+	next unless $_;
+
+	if ($prev) { $sum += 1 / &ABS($_ - $prev + $epsilon);}
+	$prev = $_;	
+    }
+
+    $sum;
 }
 
 
