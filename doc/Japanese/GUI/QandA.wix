@@ -6,7 +6,7 @@
 そのユーザでアクセスして下さい。
 
 もし debug のため認証をはずしたいなら /usr/local/fml/share 以下にある 
-.htaccess ファイルを消して下さい。例:
+ .htaccess ファイルを消して下さい。例:
 .q
 % find /usr/local/fml/share/ -name .htaccess -print |perl -nple unlink
 .~q
