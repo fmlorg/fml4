@@ -3,6 +3,18 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/10/15
+
+   make install RECOMMEND=yes
+	installs cf.recommneded
+
+	make install RECOMMEND=yes
+	もしくは
+	env RECOMMEND=yes perl makefml install
+
+	インストール時に推奨設定の cf を準備する。
+	＃つまり make secure した時にできる cf の原型
+
 2000/10/14
 
    fmlwrapper.c (nuke fml.c) and fmlwrapper is used now

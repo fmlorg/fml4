@@ -176,10 +176,11 @@ etc/makefml/cf.recommended: etc/makefml/cf etc/makefml/secure_config.ph etc/make
 	cp etc/makefml/cf etc/makefml/cf.recommended
 	echo >> etc/makefml/cf.recommended
 	echo LOCAL_CONFIG >> etc/makefml/cf.recommended
-	perl -i.bak bin/more_secure_cf.pl \
+	perl bin/more_secure_cf.pl \
 		-c etc/makefml/secure_config.ph \
 		-f etc/makefml/secure_local_config \
-		etc/makefml/cf.recommended
+		etc/makefml/cf.recommended > etc/makefml/cf.recommended.new
+	mv etc/makefml/cf.recommended.new etc/makefml/cf.recommended
 
 ### utils
 bsdmake:

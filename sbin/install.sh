@@ -128,6 +128,11 @@ chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 (
 	cd $EXEC_DIR;
 
+	cp -p etc/makefml/cf etc/makefml/cf.default
+	if [ "X$RECOMMEND" != X ]; then
+	    cp etc/makefml/cf.recommended etc/makefml/cf
+	fi
+
 	rm -f bin/Archive.pl
 	ln bin/archive.pl bin/Archive.pl
 
