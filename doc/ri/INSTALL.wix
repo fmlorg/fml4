@@ -167,6 +167,31 @@ Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron
 の章を見る等して下さい。
 
 
+.S	fmlserv (Listserv もしくは majordomo的インターフェイス)
+
+	/usr/local/fml/makefml fmlserv
+
+で、
+	/var/spool/ml/fmlserv
+
+設定見本が
+	/var/spool/ml/etc/fmlserv
+
+に作られ、aliases の見本が表示されるのでそれを /etc/aliases に張りつけ
+て newaliases してください。後は fmlserv というアドレスに help とか送っ
+てみると分かるでしょう。
+
+各ＭＬごとにうけつけるのに加えて、fmlserv 宛の
+
+	コマンド   ML  [コマンドのオプションと引数]
+
+というコマンドの形を理解するようになります。動作はこのコマンドの書き方
+を除いて、全く同じです。また、各ＭＬの configuration file に従って実行
+されるので、各ＭＬのコマンド用のアドレスに送った時と同じ同じ動きをしま
+す。あくまでコマンドの書き方にＭＬ名が加わっているだけです。
+
+
+
 .S		＊＊＊ＭＬを作る際の注意＊＊＊
 
 この簡易インストールでは作られるＭＬの設定で debug モードは切ってある
