@@ -1,103 +1,268 @@
-.C	各種 Utilities および User Interfaces
+.C	各種ユーザ用ユーティリティ等 (bin/, lib/Utilities/ ...)
 
-.S	MH scan.format (lib/Utilities/scan.format)
-.label	scan.format 
-.key	scan.format 
-.key	lib/Utilities/scan.format
+ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
+について解説します。
 
-lib/Utilities/scan.format を あなたの ~/Mail にいれると
-
-  65 -06/14 Horaki Hikari fml-su Subject uja  <<うじゃ…
-
-のような表示になります。    ↑ここが X-ML-Name: の部分の６文字
-
-暗号のようですが、ポイントは今レジスターに何が入っているかと、
-if	%<
-elif	%?
-else	%|
-fi	%>
-です。
-
-X-ML-Name: とかと名前が違うフィールドは ↓この辺を
-
-%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
-
-X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
-適当に増やして、適当に増やしてください。
-
-%?(match NetBSD.ORG)NetBSD\
+以下まだ未解説;-)
+	bin/inc_via_pop.pl
+	bin/split_and_msend.pl
 
 
+.S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
+.key	bin/Archive.pl
+.key	bin/Archive.sh
+.key	Archive.pl
+.key	Archive.sh
+.xref	archive
 
-.S	mget でえた spool の下のファイルを mh 以外で読む時
-.key	lib/Utilitites/packmbox.pl
-.key	packmbox.pl
-
-lib/Utilitites/packmbox.pl を使って、
-
-	(cd spool; packmbox.pl ) > ~/mbox
-
-として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
-うことができて便利でしょう。MH なら例えば mbox を作った後
-
-	inc -file ~/mbox -truncate 
-
-のようにすれば、mbox から inbox へ入ります。
+アーカイブの節を参照
 
 
-.S	メールが来る時間帯にＭＬを止めてメンテしたい時(maintenance.pl)
-.key	maintenance.pl
+.S	SPOOLをHTML化する (bin/Html.pl)
+.k	bin/Html.pl
+.k	Html.pl
 
-flockを使っていて夜中とかじゃなくてメールが来得る時間帯にメインテナン
-スをしたい時は？
-
-maintenance.plはMaintenance用のflockするスクリプトで、fmlと同じロック
-ファイルにflockでアクセスしてサーバーを止めるためのものです。中身は
-	flock 
-	sleep 600 
-	flockをはずす
-だけです。使い方は
-
-	maintenance.pl -s sleeptime [directory]
-# [directory] のデフォールトは PWD です（いまいるところ）
-
-で -s でスリープする時間を変更できます。
-
-flock 使わずに pid 式の ロックを使っているなら
-% touch LOCK/1
-とでもして、作業の後それを消せばいいわけです。
+current directory の config.ph をみてそこで指定されているデータに従い
+HTML化を実行します。
 
 
-.S	MLを止めて(ロックして)config.phの edit をしたい
-.key	vipw.pl
-.key	bin/vipw.pl
-.key	maintenance.pl
+.S	CRON (bin/cron.pl)
+.key	bin/cron.pl
+.key	cron.pl
+.xref	CRON
 
-flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
-スをしたい時は？
+4.4BSDのcronとCOMAPTIBLEなCRON 
+ 
 
-% bin/vipw.pl 
+.S	プログラムをデーモン化して実行 (bin/daemon.pl)
+.k	bin/daemon.pl
+.k	daemon.pl
+.xref	CRON
 
-とすれば、MLの機能をflockでロックして、
+例：
+	% bin/daemon.pl cron.pl $PWD
 
-	shell% $EDITOR $PWD/config.ph
+cron.pl をデーモン化して実行する。
+ようは次のプログラムの perl version です。
+.q
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sgtty.h>
+#include <sys/file.h>
 
-を vipw.pl は実行します。maintenance.pl の発展版ですかね
+void usage()
+{
+  char *string="USAGE: targetprogram";
+  fputs(string,stderr);
+  exit(0);
+}
 
-vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
-    -h help
-    -d ＭＬのconfig.phのあるdirectory
-    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
-    -f editしたいファイル
-    ＭＬのconfig.phのあるdirectory
+main(argc, argv)
+     int argc;
+     char **argv;
+{
+  int f;
 
-すべてを省略した場合 $PWD の config.ph 
-もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
-必要ですね
+  f = open( "/dev/tty", O_RDWR, 0);
+  if( -1 == ioctl(f ,TIOCNOTTY, NULL))
+    exit(1);
+  close(f);
+  
+  if( argc > 1 )
+    execvp(*(++argv), argv);
+  else
+    usage();
+
+  exit(0);
+}
+
+.~q
+
+
+.S	DNS のチェック (bin/dns_check.pl)
+.key	bin/dns_check.pl
+.key	dns_check.pl
+
+DNS のテストをする、ちょっとしたプログラム。
+
+% make dns_check
+
+とするとこのプログラムを実行する。
+
+
+.S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
+.xref	expire
+
+
+.S	FMLのコマンドへのユーザインターフェイス (bin/fmlctl.pl)
+.key	bin/fmlctl.pl
+.key	fmlctl.pl
+.key	.fmlctlrc
+
+通常 fml のコマンドをテストする場合メール経由で実行しますが、ＭＬのホー
+ムで fmlctl を使うと、fml のコマンドをメール経由でなくても実行します。
+
+例えば 
+	# mget last:10 mp
+
+をメールで送らずとも
+
+	% fmlctl.pl mget last:10 mp
+
+をすると、このコマンドを実行して、メールでの返答でなく画面に結果を出し
+ます。長い場合もあるので less 等で見ると良いでしょう。
+
+-i オプションの場合インタラクティブ・モードに入るので (perl debugger 
+もどきのインターフェイス)、これで複数のコマンドを実行したりもできます。
+
+SYNOPSIS
+	fmlctl.pl -i [-c configfile] [-d ML_directory] [-h] [DIR] [LIBDIR]
+
+	-a	ADMIN MODE (コマンド は # admin ... が前についてるものと仮定) 
+		つまり help をいれても # admin help のことだと思う。
+	-c	fmlctl の設定ファイル
+		デフォールトでは $HOME/.fmlctlrc を探して評価する
+	-d	ＭＬのホームの指定
+	-h	このメッセージ
+	DIR	ＭＬのホーム (config.ph のある場所)
+	LIBDIR	ＭＬのホームとは他の場所に libfml.pl 等があるならその場所
+
+
+例：	通常は subscribe address をメールで送る場合
+
+	% fmlctl subscribe ひとのあどれす
+
+インタラクティブモード (interactive mode)
+
+	% fmlctl -i 
+	fmlctl<1> subscribe address
+
+例：
+	fmlctl<1> subscribe 	address
+	fmlctl<1> addadmin	address
+
+管理者モードか否かは $ENABLE という変数で決まっているので、
+通常のコマンドを実行したい場合は
+
+	u $ENABLE
+
+管理者モードへ移行したい場合は
+
+	e $ENABLE = 1
+
+を実行すればできます。覚え方は「CISCOと同じenable」です（笑）
+この場合 # admin シンタックスは要らず、その後の部分だけでよいです。
+つまり help といれても admin help の意味になります。
+またパスワードは必要ありません(こちらの方が重要でしょう)。
+
+
+実行例：
+
+   % chdir /var/spool/ml/elena
+   % bin/fmlctl.pl -i $PWD /usr/libexec/fml
+   Fml Control (Interactive Administration Interface)
+   
+    chdir /var/spool/ml/elena
+   
+    Loading the configuration [/var/spool/ml/elena/config.ph]
+   
+   Setting the Mailing List [Elena@axion.phys.titech.ac.jp], O.K.?
+   
+ [[[ COMMAND MODE ]]]
+   
+     FmlCtl<0> h
+   
+           !number   do the previous action of the number
+           !string   do the string in the shell
+           e         eval string
+           e.g. e $debug = 1
+           h         help
+           H         history
+           p         print the value
+           e.g. p $debug
+           q         quit
+           u         undef the value
+           e.g. u $debug
+           
+     FmlCtl<1> e $debug = 1
+   eval "$debug = 1;";
+     FmlCtl<2> p $debug
+   1
+     FmlCtl<3> u $debug
+   eval "undef $debug;";
+     FmlCtl<4> H
+   1:h
+   2:e $debug = 1
+   3:p $debug
+   4:u $debug
+   5:H
 
 
 
-.S	bin/passwd.pl
+.S	WIX言語フォーマッタ (bin/fwix.pl)
+.key	bin/fwix.pl
+.key	fwix.pl
+.xref	WIX
+
+WIX言語のフォーマッタ 
+
+
+.S	URL の中身を取り出す (bin/geturl.pl)
+.key	bin/geturl.pl
+.key	geturl.pl
+
+
+	bin/geturl.pl URL
+
+でその中身を取り出して、URLのパス名の最後の文字列（index.html等）に
+saveします。画像データや音声データでも同様にファイルに落せます。
+
+   % $FML/bin/geturl.pl http://www.iij.ad.jp/index.html
+   LOG>"eval sys/socket.ph" O.K.
+   LOG>>>> HREF=http://www.iij.ad.jp/index.html
+   
+   LOG>TalkWithHttpServer(www.iij.ad.jp, 80, /index.html, http, *re)
+   LOG>open(HOUT, > /var/tmp/href:21452
+   LOG>>>> ENDS HREF=http://www.iij.ad.jp/index.html
+   
+   LOG>/var/tmp/href:21452 -> index.html
+   % ls -l index.html 
+   -rw-r--r--  1 fukachan  wheel  2046 Sep 15 18:41 index.html
+
+
+.S	ローカルテスト (bin/localtest.pl)
+.k	bin/localtest.pl
+.k	localtest.pl
+
+gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
+これを使わずにローカルテストをするとメールがループしているとみなしてし
+まうので、TEXT をメールの見本として使って fml のテスト
+
+	cat TEXT | perl fml.pl $PWD 
+
+のようにはできず
+
+	bin/localtest.pl -f < TEXT | perl fml.pl $PWD 
+
+のようにしないとテストできません。
+
+
+
+.S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
+.k	bin/newsyslog.sh
+.k	newsyslog.sh
+
+libnewsyslog.pl がなかった時代の産物。
+
+
+.S	SMTPライブラリを使った /usr/bin/mail のemulation (bin/pmail.pl)
+.k	bin/pmail.pl
+.k	pmail.pl
+
+
+
+
+.S	パスワードの初期化、変更 (bin/passwd.pl)
 .l	bin/passwd.pl
 .key	bin/passwd.pl
 .key	passwd.pl
@@ -127,5 +292,135 @@ fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
 
 のように -p オプションで指定してください。
 
+この etc/passwd は
+
+	ＭＬのリモート管理(admin approve コマンド)
+	moderated モード
+
+等で使われます。
+.xref moderated
+.xref REMOTE-ADMINISTRATION
+
+
+.S	MLを止めて(ロックして)config.phの edit をしたい (bin/vipw.pl)
+.key	vipw.pl
+.key	bin/vipw.pl
+.key	maintenance.pl
+
+flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
+スをしたい時は？
+
+% bin/vipw.pl 
+
+とすれば、MLの機能をflockでロックして、
+
+	shell% $EDITOR $PWD/config.ph
+
+を vipw.pl は実行します。
+＃ maintenance.pl の発展版ですね。よって maintenance.pl はもう配布され
+＃ ていません。
+
+vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
+    -h help
+    -d ＭＬのconfig.phのあるdirectory
+    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
+    -f editしたいファイル
+    ＭＬのconfig.phのあるdirectory
+
+すべてを省略した場合 $PWD の config.ph 
+もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
+必要ですね
+
+
+.S	MH scan.format (lib/Utilities/scan.format)
+.label	scan.format 
+.key	scan.format 
+.key	lib/Utilities/scan.format
+
+lib/Utilities/scan.format を あなたの ~/Mail にいれると
+
+  65 -06/14 Horaki Hikari fml-su Subject uja  <<うじゃ…
+
+のような表示になります。    ↑ここが X-ML-Name: の部分の６文字
+
+MHは暗号のようですが、ポイントは今レジスターに何が入っているかと、
+
+	if	%<
+	elif	%?
+	else	%|
+	fi	%>
+
+が理解できれば scan.format は書けます。
+
+X-ML-Name: とかと名前が違うフィールドは ↓この辺を
+
+%?{X-Mailinglist-Name}%6{X-Mailinglist-Name}\
+
+X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
+適当に増やして、適当に増やしてください。
+
+%?(match NetBSD.ORG)NetBSD\
+
+
+
+.S	mgetで得たファイルをmh以外で読む時 (lib/Utilities/packmbox.pl)
+.key	lib/Utilitites/packmbox.pl
+.key	packmbox.pl
+
+packmbox.pl	(by ukai@hplj.hpl.hp.com)
+		1,2,3,...のように並んでいるファイルをmbox形式のファイ
+		ルにするスクリプト
+
+		つまり、mget してきたファイルたちをｍｈでない人はmbox
+		にした後で好きなインターフェイスをつかえばよいように
+
+lib/Utilitites/packmbox.pl を使って、
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。MH なら例えば mbox を作った後
+
+	inc -file ~/mbox -truncate 
+
+のようにすれば、mbox から inbox へ入ります。
+
+
+.S	RMAILファイルからfmlへのメッセージの取込み (lib/Utilities/Rmail2fml.pl)
+.key	lib/Utilities/Rmail2fml.pl
+.key	Rmail2fml.pl
+
+Rmail2fml.pl	(yamane@ngi.co.jp)
+		RMAILファイルから fmlへのメッセージの取込みプログラム
+
+
+.S	宇宙歴関係
+.k	lib/Utilities/my-mh-post
+.k	lib/Utilities/my-mh-post.pl
+.k	lib/Utilities/stardate.el
+.k	my-mh-post
+.k	my-mh-post.pl
+.k	stardate.el
+
+MHのpost部分をいれかえて、  
+
+	X-Stardate: [-31]8122.12
+
+のような宇宙歴をヘッダにつける。
+
+post を入れ換えるべき 
+	SHELL VERSION が my-mh-post
+	PERL VERSION  が my-mh-post.pl
+
+libstardate.pl はコマンドラインで呼ぶと宇宙歴そのものをOUTPUTします。
+これを使って、mh-e レベルで宇宙歴をヘッダにつけるEmacs Lisp が 
+stardate.el です。
+
+
+.S	bin/RecreateConfig.pl
+.k	bin/RecreateConfig.pl)
+.k	RecreateConfig.pl
+
+fml 1.x 用なので OBSOLETE です。
 
 .# $Id$

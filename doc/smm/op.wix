@@ -21,7 +21,7 @@
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
    http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 
-.END_HTML_PRE
+.~HTML_PRE
 
 ----------目次----------
 #.index
@@ -3029,20 +3029,28 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
 
 .P	ライブラリ と hack
 
-.include mget.wix
+.include fop.wix
 .include function.wix
 .include cwhois.wix
 .include fred.wix
-
 .include hack.wix
-
 .include ftpmail.wix
-
-.# ##########################################################
 .include hook.wix
+
 
 .# ##########################################################
 .C	WIX Language
+.l	WIX
+.k	WIX Languate
+
+	"WIX" == "With Index and Xreference"
+
+.S	WIX Language Introduction
+
+WIX は４種類のフォーマットのドキュメントを同時生成するために考え出され
+た（妥協ともいう）言語です。名前の通り Index や Xref(Cross Rerefence)
+は重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言
+語です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
 
 言語自体はおおむね nroff like + texinfo like 折衷版くらいです
 
@@ -3058,336 +3066,90 @@ html 版は
 nroff と texinfo 版は対応しかけてるところ です。
 
 WIX Language は 
-１	nroff 覚え直すのも面倒臭い
-２	texinfo, html, nroff, plain text 
-	４種類を同時に生成する
+	１	nroff 覚え直すのも面倒臭い
+	２	texinfo, html, nroff, plain text 
+		４種類を同時に生成する
 
 ために作られたものです。単に僕が書きやすいか否か？で言語仕様が決まって
 ます:-)。ついでに 二か国語対応しかけ code まで入ってたりします;-)
 
 
+.S	WIX 言語仕様
 
-.C	misc
-.label	{misc}
+WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
+うなコマンドの後つづく部分は全部が新しい構造の一部とみなされます。
+つまり .S (Section宣言) は新しいsectionの始まりを意味しますが、
+それ以降のパラグラフはどれも新しいセクションの一部です。
+空行があったら次のセクションのようにはカウントしません。
 
-.S	はやりのＭＩＭＥ対応については？
-.label	{MIME-extension}
-.seealso	MIME-1, MIME-2, MIME-3
+	.P	Part
+	.C	Chapter
+	.S	Section
+	.SS	Sub Section 
 
-MIMEまわりは↑を御覧下さい。すべてperlだけで処理しています
+TeX も同様なデータ構造を持つので理解はしやすいと思います。
 
+	.key	KEYWORD
+	.k	KEYWORD
 
-.S	ロックアルゴリズム
-.key	flock
-.key	liblock.pl
-.key	pid
-.key	rename()
+KEYWORDと現在の Chapter.Section との対応づけ。
+索引に使われる
 
-今のは
-	1.	flock system call（man flock）
+	.label	KEYWORD
+	.l	KEYWORD
 
-	BSDね。fml 1.2はあまりすっきりしたコードになってないが、1.3は
-	かなりすっきりしたとおもう
+現在の Chapter.Section にラベルをつけ、xref でたどれるようにするための
+もの。KEYWORDと現在の Chapter.Section との対応づけ。
+xref が使うポインタだが、索引にも使われる
 
-	2.	pidにもとづくロック（liblock.pl）
+	.xref	KEYWORD
+	.seealso KEYWORD
 
-	1にくらべ数倍よけいなsystem callがかかる
-	＃ちゃんと一周した後も補正している。
+.label でラベルづけした Chapter.Section への Cross Reference。
+この Cross Reference は分中では
 
-	3.	rename() を使う
+	see also 10.3 
 
-	rename()をつかって排他制御とか… UNIX V7 の時代からあるやりか
-	たですね。結局 1.6 では、これにもどしちゃたんですが…
+のように変換される
 
 
-.S	ロックしてconfig.phのｅｄｉｔをしたい
-.key	vipw.pl
-.key	bin/vipw.pl
-.key	maintenance.pl
+	.A	Appendix
 
-flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
-スをしたい時は？
+	.ptr	KEYWORD
 
-% bin/vipw.pl 
+役目は xref と同じだが see also の部分は付け加えられない。
 
-とすれば、MLの機能をflockでロックして、
+	.q	引用開始
+	.~q	引用終り
 
-	shell% $EDITOR $PWD/config.ph
+これだけがセットで使われているが、.q からは行の最初に3文字スペースでイ
+ンデントし、 .~q のところまでそれが行なわれる。
+＃そのために 終りを示す必要がある。
 
-を vipw.pl は実行します。maintenance.pl の発展版ですかね
 
-vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
-    -h help
-    -d ＭＬのconfig.phのあるdirectory
-    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
-    -f editしたいファイル
-    ＭＬのconfig.phのあるdirectory
+特殊命令：
 
-すべてを省略した場合 $PWD の config.ph 
-もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
-必要ですね
+	.#		COMMENT
+	.comment	COMMENT
 
+この行はコメント
 
-.S	maintenance.pl
-.key	maintenance.pl
+	.include	FILE
 
-flockを使っていて夜中とかじゃなくてメールが来得る時間帯にメインテナン
-スをしたい時は？
+FILE をその部分に挿入する。
 
-maintenance.plはMaintenance用のflockするスクリプトで、fmlと同じロック
-ファイルにflockでアクセスしてサーバーを止めるためのものです。中身は
-	flock 
-	sleep 600 
-	flockをはずす
-だけです。使い方は
 
-	maintenance.pl -s sleeptime [directory]
-# [directory] のデフォールトは PWD です（いまいるところ）
+.S	WIX と HTML 例外処理
 
-で -s でスリープする時間を変更できます。
+	.HTML_PRE
+	.~HTML_PRE
 
-flock 使わずに pid 式の ロックを使っているなら
-% touch LOCK/1
-とでもして、作業の後それを消せばいいわけです。
+<PRE> 〜 </PRE> で展開したい部分。
 
-
-.S	sendmailとの通信の記録（デバッグ）
-.key	var/log/_smtplog
-.key	_smtplog
-.key	$NOT_TRACE_SMTP
-
-sendmailとのやりとりの記録（もっとも最近のものだけ）デバッグに便利。
-（デバッグとか終わっちゃって）もぉ必要なかったら
-
-	$NOT_TRACE_SMTP = 1; 
-
-とconfig.phにかいてください。ログをとらなくなります。
-
-
-
-.S	X-MLServer: field って何？
-.key	X-MLServer:
-
-起源はデバッグ用だったんだけど（笑）、今の意味は『明示的にＭＬサーバが
-ｈｍｌ系である』ことを宣言しているつもりです。無意味ではないと思うんで
-すが
-＃だってぇ〜hmlじゃないのにhmlのコマンドがＭＬにながれるのをよく見るか
-ら:-)
-
-＃けずるときはfml.plの中の sub Distribute のX-MLServerって行をコメント
-＃アウトなりなんなりしてください
-
-
-.S	違うアドレスから来たメールは？
-.S	アドレスチェックを緩めたい or 強くしたい
-.key	$ADDR_CHECK_MAX
-
-メンバーチェックは送られてきたメールの発信者のアドレスと members に書
-かれたアドレスとが一致するか否かで判断しています。今の設定は
-＃1.3.2からは…緩くした
-
-	fukachan@titech.ac.jp
-	fukachan@phys.titech.ac.jp
-	fukachan@beth.phys.titech.ac.jp
-	fukachan@exelion.phys.titech.ac.jp
-
-はすべて同じにみなしてます。つまり phys.titech.ac.jp のjp側から数えて
-３つの部分の判定チェックですね。（木構造のルートから数える）
-＃経験的にここまでやれば十分でしょう
-
-４つ（jp ac phys titech の４つ）までチェックしたいなら、
-
-$ADDR_CHECK_MAX = 4;
-
-と config.ph のどっかに書いておいて下さい。$ADDR_CHECK_MAX という変数
-が設定されてない場合は３として動きます。
-
-
-.S	mget でえた spool の下のファイルを mh 以外で読む時
-.key	lib/Utilitites/packmbox.pl
-.key	packmbox.pl
-
-lib/Utilitites/packmbox.pl を使って、
-
-	(cd spool; packmbox.pl ) > ~/mbox
-
-として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
-うことができて便利でしょう。
-
-
-.S	複数アドレスから投稿したいがうけとりは一つ( "# skip" )
-.key	skip
-.key	noskip
-.label	{skip}
-
-複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい。
-＃この１週間だけこのアドレスも使いたいしぃ〜とかの場合にも効果的です
-
-という場合を考えて、actives(自動登録では members = actives) で
-
-fukachan@phys.titech.ac.jp	skip
-
-と書いておけば認証（新人さんチェック）には使うけど配送はしないという動
-作をします
-
-つまり
-
-	fukachan@phys.titech.ac.jp	skip
-	Elena@phys.titech.ac.jp	
-	Pollyanna@phys.titech.ac.jp	skip
-
-になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
-が、配送はelenaにしか行なわれないということです。
-
-ユーザーがこれを自分でコントロールしたいなら、コマンドは
-＃ Admin command でのみ引数が有効です。
- 
-# skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
-			そこから投稿はできるが、配送はされないものと設定する
-# noskip [引数]		上の逆。配送するようにする。
-
-です。例：
-# skip 
-	From: のアドレスを skip に
-
-# skip pollyanna@phys.titech.ac.jp
-	pollyanna@phys.titech.ac.jp を skip に
-
-# noskip pollyanna@phys.titech.ac.jp
-	pollyanna@phys.titech.ac.jp へも配送を
-
-
-.S	.forwardでのＭＬ	その１
-
-もちろん 特別なＭＬ用のUser をつくって ~/.forward を /etc/aliases と同
-じように設定すれば できます。
-＃なんらかの形で（お金で解決もあり） /etc/passwd をいじれることが条件
-ですね
-
-
-.S	自動送り返しサーバってどう実装してるんですか？ その１
-.key	自動送り返しサーバっ実装例１
-
-なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
-で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
-＃いままで、きづかなかった…
-
-ポイントは、“$START_HOOK にしかける”ってところですね。
-
-例：
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-$MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent infomation)';
-$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
-
-$FML            = '/home/axion/fukachan/work/spool/EXP';
-$GUIDE_FILE	= "$FML/doc/INFO";
-$LOGFILE	= "$FML/var/log/fmlinfo-log"; # activity log file
-
-$START_HOOK     = q# $Envelope{'req:guide'} = 1;#;
-
-1;
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-
-.S	自動送り返しサーバってどう実装してるんですか？ その２
-.key	自動送り返しサーバっ実装例２
-
-設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
-てくるのですが、こういったものを作るには、どのような設定をすればいい？
-
-いまでは libSendBack.pl ってのにまとまってます。
-/usr/ucb/vacation ってのはこれとほぼ同じですね。
-＃もっともあれは unix from をみるんですが
-
-理屈は コードをけずっただけ（笑）というだけですが、
-
-０．いつもの通り仕掛ける
-１．ロック
-２．メンバーチェックをしないで
-３．送り返す
-	&SendFile($to, "", 目的のFILE);
-４．ロックをはずす
-
-in fml.pl MAIN PART
-
-(!$USE_FLOCK) ? &Lock : &Flock;	# Locking 
-
-#---------------- CHANGE -------------------------
-
-$MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent infomation)';
-$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
-
-$INFO_FILE	= "$DIR/INFO";
-
-$LOGFILE	= "$DIR/fmlinfo-log";		# activity log file
-
-$to             = $Reply_to ? $Reply_to : $From_address;
-
-&SendFile($to, "Info $ML_FN", $INFO_FILE);
-&Log("Info request from $From_address");
-
-#---------------- CHANGE ENDS --------------------
-
-(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
-exit 0;				# the main ends.
-
-
-.S	X-Stardate: をつける（mh-e）
-
-lib/Utilities/stardate.el を load してください
-＃ emacs 19 でなきゃかきかえないとだめ
-
-たとえば、.emacs に
-(load-libaray "stardate")
-(setq startrek-stardate-process "/some-directory-path/libStardate.pl")
-
-とすると mh-comp の draft buffer をつくるときに 
-X-Stardate: をつけてくれます。
-
-
-.S	POP3
-
-まだカスタマイズまで考えてないから、
-	bin/inc_via_pop.pl
-で、
-
-$POP_EXEC = "|/どっかにおいて/fml_local.pl -user yamazaki";
-
-を、ファイルの先頭辺りに書いて
-
-	bin/inc_via_pop.pl -host popする先のホスト名
-
-ってのを起動してみてください。
-
-pop のパスワードは ~/.netrc のエントリをみるようにしてあります。
-
-$POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
-ただコマンドラインで
-
-	bin/inc_via_pop.pl -host popする先のホスト名
-
-とすると、
-
-	/usr/local/mh/inc -noapop -norpop -host popする先のホスト名
-
-とおなじ（まず、これがうごかなきゃだめだね〜）
-＃もっともmhがいんすとーるしてなきゃ意味ないけど…
-
-
-.S	たとえば、Received: のようなヘッダを残すには？
-
-2.1 では
-
-    unshift(@HdrFieldsOrder, 'received');
-
-とすればいいでしょう。もっともこの場合一行だけ Received ではなく 
-received になってしまってちょっと情けないかも知れませんが…
-＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
 
 
 .# ##########################################################
+
 .include smtp.wix
 .include uip.wix
 .include lib.wix
@@ -3395,6 +3157,7 @@ received になってしまってちょっと情けないかも知れませんが…
 
 .P	misc ...
 
+.include misc.wix
 .include perl.wix
 .include misc.wix
 

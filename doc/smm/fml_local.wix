@@ -252,8 +252,8 @@ $HOME からの相対パスをかく。デフォールトは ./tmp（つまり $HOME/tmp ）
 SECURE_FML_LOCAL	0
 
 最終的に実行されるコマンドのsecurity予備チェック。自分で書いたコードで
-も Special character があれば、Insecure となってしまうので、
-.fmllocalrc には特殊も時は使わず、定数を埋め込んだ形で書くのが望ましい。
+も Special character があれば、Insecure となってしまうので、.fmllocalrc 
+には特殊も時は使わず、定数を埋め込んだ形で書くのが望ましい。
 その上で Secure にするべきであろう。
 
 
