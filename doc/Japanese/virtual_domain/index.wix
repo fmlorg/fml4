@@ -12,3 +12,5 @@
 .C	sendmail
 
 .url http://www.sendmail.org/virtual-hosting.html
+
+.include sendmail.wix
