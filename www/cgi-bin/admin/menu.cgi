@@ -56,6 +56,9 @@ sub Init
 
     # htdocs/
     $HTDOCS_DIR = "$EXEC_DIR/www/template";
+
+    # /cgi-bin/ in HTML
+    $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 }
 
 sub ExpandOption
@@ -84,6 +87,8 @@ sub Convert
 		&ExpandOption;
 		next;
 	    }
+
+	    s/_CGI_PATH_/$CGI_PATH/g;
 
 	    print;
 	}

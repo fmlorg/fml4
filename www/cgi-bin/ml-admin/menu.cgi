@@ -60,6 +60,9 @@ sub Init
 
     # htdocs/
     $HTDOCS_DIR = "$EXEC_DIR/www/template";
+
+    # /cgi-bin/ in HTML
+    $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
 }
 
 sub ExpandOption
@@ -91,6 +94,7 @@ sub Convert
 
 	    # tricy \_ML\_ syntax to avoid "makefml &Conv() replacement'
 	    s/\_ML\_/$ML/g;
+	    s/_CGI_PATH_/$CGI_PATH/g;
 
 	    print;
 	}
