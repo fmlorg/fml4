@@ -204,25 +204,27 @@ LIMIT を 0にすればチェックをしないということになるし、全文すべてをコマ
 
 .S	fml process の lock と signal handling 
 .k	$Sigarlm
-.k	$FLOCK_TIMEOUT
+.k	$TimeOut{'flock'}
+.k	$FLOCK_TIMEOUT(Obsolete)
 .k	$MAX_TIMEOUT
 
 現在の flock を使うロックアルゴリズムは次のように設定されています。
-alarm(3) を使う普通のやり方です。
+alarm(3) を使う普通のやり方です。 
 
 sub Flock {
-    eval alarm($FLOCK_TIMEOUT || 3600);
+
+    &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
 	...
 
-TIMEOUTを待つ時間は $FLOCK_TIMEOUT で決まります。
+TIMEOUTを待つ時間は $TimeOut{'flock'} で決まります。
 (flock でない場合は 三秒＋α 程度の sleep を $MAX_TIMEOUT 回して待ってみる）
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
     $SIG{'INT'}  = $SIG{'QUIT'} = 'SignalLog';
 
-$FLOCK_TIMEOUT (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された関数
-(TimeOut)を実行します。
+$TimeOut{'flock'} (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された
+関数(TimeOut)を実行します。
 
 関数 TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
 これがないとずっとロック(flock)がかかったままになるからです。
@@ -230,6 +232,19 @@ $FLOCK_TIMEOUT (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された関数
 なお、flock を使わない時はTIMEOUTしたメールを保存し、管理者へTIMEOUTを
 知らせます。詳細は liblock.pl を見るとわかるでしょう。
 .#	UNIX Nework Programming
+
+
+.S	イベント・スケジューラ
+.k	SetEvent
+.k	ClearEvent
+.k	Tick
+
+TIMEOUT等は、現在実行している処理内容によらず特定の時間が来たら(割り込
+んで)実行する必要がありますが、それは伝統の味 alarm(3) を使って実装し
+ます。
+
+なお、Windows NT 4.0 Version では alarm(3) が使えないのこの処理は実行
+されません。
 
 
 .S	ロックの仕方(flock でない場合)
@@ -1208,6 +1223,6 @@ CAVEAT
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
