@@ -14,4 +14,11 @@
 $FlockFile   = ">> $VARRUN_DIR/flock";
 $__FlockFile = "$VARRUN_DIR/flock";
 
+eval q{ 
+   if ($DIR) {
+	my $dir = "$DIR/$VARRUN_DIR";
+	-d $dir || &MkDir($dir); 
+   }
+};
+
 1;
