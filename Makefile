@@ -119,6 +119,12 @@ dist:	distrib
 distrib:
 	(/bin/sh .release/generator 2>&1| tee /var/tmp/_distrib.log)
 	@ usr/sbin/error_report.sh /var/tmp/_distrib.log
+	@ echo "";
+	@ echo "make distsnap  (make snapshot of dist) "
+	@ echo "make sync      (syncrhonize -> fml.org)"
+
+distsnap:
+	@ (cd /var/tmp/fml-current/; rsync -auv . $(HOME)/.ftp/snapshot)
 
 snapshot: 
 	(/bin/sh .release/generator -ip 2>&1| tee /var/tmp/_release.log)
