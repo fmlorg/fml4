@@ -16,6 +16,9 @@ See http://www.fml.org/ for CHANGES in fml-current.
 
  2000/03/09
 
+   proc/libfml.pl
+	check mode:uip to validate input procedure 
+
    kern/fml.pl:
 	CheckCurrentProc: fix to trap #\s+[\w\-]+ command string
 
