@@ -12,6 +12,9 @@ sub ConfirmationModeInit
     # save the request and given identifier;
     # The concept of KEYWORD and ADDRESS suggeted (irc:-) by ando@iij-mc.co.jp
     $CONFIRMATION_KEYWORD = $CONFIRMATION_KEYWORD || "confirm";
+    $CONFIRMATION_RESET_KEYWORD = 
+	$CONFIRMATION_RESET_KEYWORD || "confirm reset";
+
     $CONFIRMATION_FILE    = $CONFIRMATION_FILE || "$DIR/confirm";
     $CONFIRMATION_LIST    = $CONFIRMATION_LIST || "$FP_VARLOG_DIR/confirm";
     $CONFIRMATION_ADDRESS = $CONFIRMATION_ADDRESS || $e{'CtlAddr:'};
@@ -24,6 +27,7 @@ sub ConfirmationModeInit
 
     # transfer main to Confirm NameSpace;
     for (CONFIRMATION_KEYWORD,
+	 CONFIRMATION_RESET_KEYWORD,
 	 CONFIRMATION_FILE,
 	 CONFIRMATION_LIST,
 	 CONFIRMATION_ADDRESS,
@@ -52,7 +56,7 @@ sub Confirm
     &Log("Confirm::FirstTimeP r=$r");
 
     if ($debug_confirm) {
-	&Warn("Confirm::FirstTimeP r=$r $ML_FN", 
+	&Warn("Confirm Request[$r] $ML_FN", 
 	      "Confirm::FirstTimeP r=$r\n\n". &WholeMail);
     }
 
@@ -84,7 +88,7 @@ sub Confirm
 	 return 0;
     }
     elsif ($r eq 'confirmed') { # @r == identifier;
-	$r = &Confirm'IdCheck(*e, *r, $buffer);#';
+	$r = &Confirm'IdCheck(*e, *r, $addr, $buffer);#';
 	undef $e{"GH:Subject:"};# subject: welcome file;
 	return $r;
     }
@@ -100,20 +104,36 @@ package Confirm;
 
 sub AddressMatch { &main'AddressMatch(@_);} #';
 sub Log          { &main'Log(@_);} #';
-sub Mesg          { &main'Mesg(@_);} #';
+sub Mesg         { &main'Mesg(@_);} #';
 sub Open         { &main'Open(@_);} #';
 
 
 sub IdCheck
 {
-    local(*e, *r, $buffer) = @_;
+    local(*e, *r, $addr, $buffer) = @_;
     local($time, $a, $id, $name, $m);
     ($time, $a, $id, $name) = @r;
+
+    # reset anyway;
+    if ($buffer =~ /$CONFIRMATION_RESET_KEYWORD/) {
+	&Log("confirm[confirm] reset request");
+
+	if (&RemoveAddrInConfirmFile($addr)) {
+	    &Mesg(*e, "I throw away your subscription request from $addr.");
+	    &Mesg(*e, "Please do it again from the first step.");
+	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	}
+	
+	return 0;
+    }
+
 
     if ($buffer =~ /$CONFIRMATION_KEYWORD $id $name/) {
 	return 1;
     }
     else {
+	&Log("confirm[confirm] syntax error");
+	&Log("confirm request[$buffer]");
 	$m .= "Confirmation Syntax Error:\n";
 	$m .= "The Syntax is following style, check again\n\n";
 	$m .= "$CONFIRMATION_KEYWORD password $name\n";
@@ -134,6 +154,8 @@ sub BufferSyntax
 	$name = $1;
     }
     else {
+	&Log("confirm[firstime] syntax error");
+	&Log("confirm request[$buffer]");
 	$_ .= "Syntax Error! Please use the following syntax\n";
 	$_ .= "\n   $CONFIRMATION_SUBSCRIBE Your-Name ";
 	$_ .= "(Name NOT E-Mail Address)\n";
@@ -161,7 +183,7 @@ sub BufferSyntax
 sub FirstTimeP
 {
     local(*r, $addr, $cur_time) = @_;
-    local($time, $key_addr, $a, $id, $match, $addr_found);
+    local($time, $key_addr, $a, $id, $name, $match, $addr_found);
     local($status);
 
     # init variables;
@@ -197,11 +219,52 @@ sub FirstTimeP
 }
 
 
-sub Save
+sub RemoveAddrInConfirmFile
 {
-    local($addr, $id, $time, $file) = @_;
+    local($addr) = @_;
+    local($time, $key_addr, $a, $id, $name, $match, $addr_found);
+    local($status);
+
+    # init
+    ($key_addr) = split(/\@/, $addr);
+
+    open(FILE, $CONFIRMATION_LIST) || 
+	(&Log("cannot open $CONFIRMATION_LIST"), return $NULL);
+    open(BAK, "> $CONFIRMATION_LIST.bak") || 
+	(&Log("cannot open $CONFIRMATION_LIST.bak"), return $NULL);
+    select(OUT); $| = 1; select(STDOUT);
+    open(OUT, "> $CONFIRMATION_LIST.new") || 
+	(&Log("cannot open $CONFIRMATION_LIST.new"), return $NULL);
+    select(OUT); $| = 1; select(STDOUT);
+
+    while (<FILE>) {
+	print BAK $_;
+
+	chop;
+
+	($time, $a, $id, $name) = split(/\s+/, $_, 4);
+
+	# address match
+	&AddressMatch($addr, $a) && ($status++, next);
+
+	print OUT "$_\n";
+    }
+    close(BAK);
+    close(OUT);
+    close(FILE);
+
+    if ($status) {
+	&Log("remove $addr in confirmation queue");
+    }
+
+    if (! rename("$CONFIRMATION_LIST.new", $CONFIRMATION_LIST)) {
+	&Log("fail to rename $CONFIRMATION_LIST");
+	return $NULL;
+    }
+
+    1;
 }
- 
+
 
 sub GenKey
 {
