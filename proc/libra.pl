@@ -880,6 +880,7 @@ sub ProcAdminUnlinkArticle
 {
     local($proc, *Fld, *e, *opt) = @_;
     local($f) = "$FP_SPOOL_DIR/$opt";
+    local($ID); # XXX REQUIRED
 
     &Log("admin $proc $opt");
 
