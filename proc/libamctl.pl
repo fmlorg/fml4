@@ -350,7 +350,7 @@ sub Chk822_addr_spec_P
 {
     local(*e, $from) = @_;
 
-    if (&ValidAddrSpecP($from)) {
+    if (&SecureP($from) && &ValidAddrSpecP($from)) {
 	1;
     }
     else {
