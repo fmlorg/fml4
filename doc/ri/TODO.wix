@@ -26,6 +26,12 @@
 
    to define "ipc" or "prog" mailer
 
+.S	MEAD
+
+check
+
+	Received: for <ADDRESS>
+
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -173,7 +179,7 @@ see /etc/postfix/sample*cf
 
 meadと各種MTA対応
 =E
-mead for each MTR
+mead for each MTA
 
    postfix 対応
 =E
