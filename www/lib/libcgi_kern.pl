@@ -514,6 +514,9 @@ sub SpawnProcess
 {
     local($prog) = @_;
 
+    undef $?;
+    undef $!;
+
     # open(PROG, "$prog 2>&1 |")
     open(PROG, "-|") || exec $prog, "2>&1";
 
