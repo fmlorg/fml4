@@ -114,6 +114,7 @@ postfix では SMTP で通信する時（デフォルトです）に
 ＃なお、初期の postfix では以下の -o オプションが使えません。全部調べ
 ＃たわけではありませんが、19991231 ではできませんでした。少なくとも 
 ＃1.1.x では利用可能です。
+＃リリースノートによれば 2001/02/28 以降のリリースでは利用可能らしいです。
 
 .appendix
 
@@ -130,7 +131,7 @@ default_privs = fml
 
 などとして elena: "| fml.pl" などと直接 /etc/aliases に書くこともできます。
 
-$FML: INSTALL_with_POSTFIX.wix,v 1.16 2003/04/14 14:22:17 fukachan Exp $
+$FML: INSTALL_with_POSTFIX.wix,v 1.17 2003/04/14 15:18:26 fukachan Exp $
 
 .# Copyright (C) 1993-2001,2003 Ken'ichi Fukamachi
 .#          All rights reserved. 
@@ -141,4 +142,4 @@ $FML: INSTALL_with_POSTFIX.wix,v 1.16 2003/04/14 14:22:17 fukachan Exp $
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .#
-.# $FML: INSTALL_with_POSTFIX.wix,v 1.16 2003/04/14 14:22:17 fukachan Exp $
+.# $FML: INSTALL_with_POSTFIX.wix,v 1.17 2003/04/14 15:18:26 fukachan Exp $
