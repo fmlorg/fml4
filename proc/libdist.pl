@@ -184,7 +184,7 @@ sub DoDistribute
     if (! $USE_ORIGINAL_MESSAGE_ID) {
 	$e{'h:Message-Id:'}  = 
 	    ($e{'h:Message-Id:'} ne $e{'h:message-id:'}) ?
-		$e{'h:Message-Id:'} : "<$CurrentTime.FML$$\@$FQDN>";
+		$e{'h:Message-Id:'} : &GenMessageId;
  	&Append2($e{'h:Message-Id:'}, $LOG_MESSAGE_ID);
     }
 		      
