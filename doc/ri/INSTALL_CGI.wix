@@ -62,8 +62,18 @@ URL で fml CGI を使うことになります(後述)。
 以下は sendmail と apache 1.3.14 で suexec を使う場合の操作例です。
 ここでは SSL は使わずに、Basic 認証のみです。
 
+もし、うまくいかない場合は、まず
+
+	/usr/local/apache/logs/error_log
+	/usr/local/apache/logs/suexec_log
+
+を見て下さい。また、付録のトラブルシュート(=> .ptr{cgi-troubleshoot} )
+も参考にして下さい。
+
 
 .S	CGI スクリプトの準備
+
+特に fml を再インストールする必要などはありません。
 
 	makefml admin.cgi config 
 
@@ -125,63 +135,25 @@ httpd.conf に追加します。
 
     AddHandler cgi-script .cgi
 
-そして
+httpd.conf には最初から <Directory /home/*/public_html> の見本がコメン
+トとして入っていますが、それには ExecCGI が入っていません。コメントを
+はずしただけではだめで、追加する必要があることに注意して下さい。
+
+httpd.conf の編集後、
+
 	# apachectl configtest
 	OK
 	# apachectl restart
 
-をします。ここで /usr/local/apache/logs/error_log に
+/usr/local/apache/logs/error_log をみて
 
    Apache/1.3.14 (Unix) configured -- resuming normal operations
    suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)
 
-といったログが出ればとりあえずは成功です。しかし、このログが出ていても 
-suEXEC がうまくいかないことは多々あります。次の点を確認して下さい。
+といったログが出ていればとりあえずは成功です。しかし、このログが出てい
+ても suEXEC がうまくいかないことは多々あります。
+付録のトラブルシュート例を参考に、設定の確認をして下さい。
 
-Q: ~/public_html/ のパーミッションの確認
-
-	ファイルのモード  ( ユーザ fml 以外は書き込むことができません )
-	オーナ、グループ、( ディレクトリとファイルすべて
-				オーナが fml
-				グループが fml	
-				になっている必要があります。
-			  )
-	UID、GID が両方とも1000より大きいか？
-
-念のため次のコマンドを実行するとよいでしょう。
-
-	% chmod -R go-w ~/public_html/	
-	% chown -R fml:fml  ~/public_html/	
-
-ファイルを読むことは誰にでもできるようになっているかも確認して下さい。
-例:
-     
-     % ls -lR ~/public_html
-     total 1
-     drwxr-xr-x  4 fml  fml  512 Nov 28 09:07 cgi-bin/
-     
-     /home/fml/public_html/cgi-bin:
-     total 2
-     drwxr-xr-x  2 fml  fml  512 Nov 28 09:07 admin/
-     drwxr-xr-x  3 fml  fml  512 Nov 28 09:07 fml/
-     
-     /home/fml/public_html/cgi-bin/admin:
-     
-     /home/fml/public_html/cgi-bin/fml:
-     total 1
-     drwxr-xr-x  2 fml  fml  512 Dec 16 21:18 admin/
-     
-     /home/fml/public_html/cgi-bin/fml/admin:
-     total 7
-     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 index.cgi
-     -rwxr-xr-x  1 fml  fml  575 Dec 16 21:18 makefml.cgi
-     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 menu.cgi
-     -rwxr-xr-x  1 fml  fml  622 Dec 16 21:18 menubar.cgi
-     -rwxr-xr-x  1 fml  fml  648 Dec 16 21:18 mlmenu.cgi
-     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 newml.cgi
-     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 rmml.cgi
-
-	
 
 .C	CGI 階層のモデル
 =E.C	hierarychy of CGI model
@@ -521,6 +493,7 @@ AddHandler cgi-script .cgi
 .appendix
 .C	トラブルシュート
 =E.C	troubleshoot
+.l	cgi-troubleshoot
 
 うまくいかない時は fml 自体ではなく WWW サーバもしくはメールサーバの
 設定でつまづいていることが多いようです。
@@ -541,7 +514,51 @@ Q: SSL
 を実行し、メニュー１で SSL を使わないようにして下さい。 
 
 
-Q: パーミッションの間違い
+Q: ~/public_html/ のパーミッションの確認
+
+	ファイルのモード  ( ユーザ fml 以外は書き込むことができません )
+	オーナ、グループ、( ディレクトリとファイルすべて
+				オーナが fml
+				グループが fml	
+				になっている必要があります。
+			  )
+	UID、GID が両方とも1000より大きいか？
+
+念のため次のコマンドを実行するとよいでしょう。
+
+	% chmod -R go-w ~/public_html/	
+	% chown -R fml:fml  ~/public_html/	
+
+ファイルを読むことは誰にでもできるようになっているかも確認して下さい。
+例:
+     
+     % ls -lR ~/public_html
+     total 1
+     drwxr-xr-x  4 fml  fml  512 Nov 28 09:07 cgi-bin/
+     
+     /home/fml/public_html/cgi-bin:
+     total 2
+     drwxr-xr-x  2 fml  fml  512 Nov 28 09:07 admin/
+     drwxr-xr-x  3 fml  fml  512 Nov 28 09:07 fml/
+     
+     /home/fml/public_html/cgi-bin/admin:
+     
+     /home/fml/public_html/cgi-bin/fml:
+     total 1
+     drwxr-xr-x  2 fml  fml  512 Dec 16 21:18 admin/
+     
+     /home/fml/public_html/cgi-bin/fml/admin:
+     total 7
+     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 index.cgi
+     -rwxr-xr-x  1 fml  fml  575 Dec 16 21:18 makefml.cgi
+     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 menu.cgi
+     -rwxr-xr-x  1 fml  fml  622 Dec 16 21:18 menubar.cgi
+     -rwxr-xr-x  1 fml  fml  648 Dec 16 21:18 mlmenu.cgi
+     -rwxr-xr-x  1 fml  fml  618 Dec 16 21:18 newml.cgi
+     -rwxr-xr-x  1 fml  fml  616 Dec 16 21:18 rmml.cgi
+
+	
+Q: パスワードファイルのパーミッションの間違い
 
 (13)Permission denied: Could not open password file: /usr/local/fml/www/authdb/admin/htpasswd
 
@@ -566,6 +583,34 @@ Q: Options ExecCGI is off in this directory
 
 Options に ExecCGI がぬけていませんか？もしくはホームディレクトリは 
 /home/* 形式でただしいですか？
+
+
+Q: menu.cgi の中身が見えてしまう
+
+AddHandler cgi-script .cgi を追加するのを忘れていませんか？
+
+
+Q: suexec.log に crit: calling user mismatch (nobody instead of www)
+
+これは httpd.conf の User の名前との不整合のためです。例えば
+httpd.conf の User は nobody なのに、apache のインストールの際に
+
+   # ./configure --enable-suexec --suexec-caller=nobody
+
+ではなく、
+
+   # ./configure --enable-suexec --suexec-caller=www
+
+としてしまった場合です。この caller= と httpd.conf の User の名前は同
+じものにして下さい。
+
+
+Q: suexec.log に  target uid/gid (1000/1000) mismatch with directory ...
+
+UID が 1000、GID が 1000 であることを suEXEC は期待していますが、ディ
+レクトリの設定が実際には間違っています。~/public_html 以下のディレクト
+リのオーナ（UID）とグループID（GID）を確認してください。
+
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
