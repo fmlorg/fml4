@@ -147,7 +147,7 @@ The traffic is intermittent. If you are concerned with the traffic
 burst, you can receive a digest e.g. once per three hours.
 
 まとめ送りの場合は"定期的に"まとめ送り(.ptr{msend})を実行するプログラ
-ムが起動される必要があります。fmlLは定期的に起動しなければならないプロ
+ムが起動される必要があります。fmlは定期的に起動しなければならないプロ
 グラム群はcronというオペレーティングシステムが提供する機能を使うことを
 前提にしています。
 =E
