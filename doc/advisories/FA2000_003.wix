@@ -15,7 +15,7 @@ Topic:	Love Letter Worm
    &DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
 
    $DISTRIBUTE_FILTER_HOOK = q#
-      if ($e{'Body'} =~ /Content.*\.vbs/) {
+      if ($e{'Body'} =~ /Content.*\.vbs/i) {
            return 'VB script attatchment';
       }
    #;
@@ -91,7 +91,7 @@ To add
 亜種がでるだろうとおもわれるので、汎用的にはVBスクリプト全部を弾く
 
 $DISTRIBUTE_FILTER_HOOK = q#
-      if ($e{'Body'} =~ /Content.*\.vbs/) {
+      if ($e{'Body'} =~ /Content.*\.vbs/i) {
            return 'VB script attatchment';
       }
 #;
