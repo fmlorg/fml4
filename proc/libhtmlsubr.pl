@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libhtmlsubr.pl,v 1.8 2001/09/02 15:33:33 fukachan Exp $
 #
 
 # speculate multipart block
@@ -83,11 +83,11 @@ sub WriteHtmlFile
     local(*e, *mpbcb, $lpp, $pe, $dir, $file, $mp_count) = @_;
     local($lp, $xbuf, $fn, $fp, $noconv);
 
-    $WriteHtmlFileCount++;
-
     &Log("WriteHtmlFile: $mpbcb{'type'}/$mpbcb{'subtype'}") if $debug;
 
-    if ($WriteHtmlFileCount > 1) {
+    # mp_count N is the N-th multipart block.
+    # after 2nd multipart block
+    if ($mp_count > 1) {
 	$noconv = 1; # always really?
 
 	if ($mpbcb{'subtype'} eq 'html') {
