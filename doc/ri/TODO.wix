@@ -27,12 +27,6 @@
 これがデフォルトはまずいとおもうんだが、optional ならOK？
 
 
-.S	Re Re Re problem
-=E.S	れれれのおねえさん
-
-	Re:*2
-?
-
 .S	Welcome ... and MesgLE()
 
 いまでは MesgLE() をつかって再実装するべきだ
