@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.96 2002/03/31 23:34:18 fukachan Exp $
+# $FML: MANIFEST,v 1.97 2002/04/07 14:52:47 fukachan Exp $
 #
 
 
@@ -802,7 +802,8 @@ SLEEPTIME:		60
 # almost obsolete
 # special case of "mget" routine uses these variables. 
 # It is not user defined variable.
-# See doc/tutorial and libfop.pl for the detail. You change MIME/Multipart default.
+# See doc/tutorial and libfop.pl for the detail. 
+# You change MIME/Multipart default.
 # value: string
 MIME_VERSION:
 MIME_CONTENT_TYPE:
