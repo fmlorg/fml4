@@ -17,7 +17,10 @@
 sub __EnvelopeFilter
 {
     local(*e, $mode) = @_;
-    local($c, $p, $r, $org_mlp);
+    local($c, $p, $r, $org_mlp, $bodylen);
+
+    # basic parameter
+    $bodylen = length($e{'Body'});
 
     # force plural line match
     $org_mlp = $*;
@@ -81,12 +84,17 @@ sub __EnvelopeFilter
 	$p = 0;
 	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
 
-	# skip the first three paragraph
+	# 1. skip plural null lines like as one line
+	# 2. extract the first 3+1 paragraphs or the first 1024 bytes 
+	# 3. last 1 paragraph to be cut off (remove the last part as a signature)
 	$p = index($e{'Body'}, "\n\n", $p);
 	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
 	$p = index($e{'Body'}, "\n\n", $p + 1);
 	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
 	$p = index($e{'Body'}, "\n\n", $p + 1);
+	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
+	$p = index($e{'Body'}, "\n\n", $p + 1);
+
 	if ($p > 0) {
 	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
 	}
@@ -97,25 +105,25 @@ sub __EnvelopeFilter
 	&Debug("--EnvelopeFilter::InitialBuffer($xbuf\n)\n") if $debug;
     }
 
-
-    # remove the last block which must be a signature.
+    # remove superflous spaces
     $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
     $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
 
     # XXX: remove the signature (we suppose) part
-    $p = index($xbuf, "\n\n"); # forward ...
-    if ($p > 0) { 
-	$p = rindex($xbuf, "\n\n"); # backward ...
-	$xbuf = substr($xbuf, 0, $p) if $p > 0;
+    if (index($xbuf, "\n\n") > 0) {  # we must have at least one paragraph.
+	$p = rindex($xbuf, "\n\n", $bodylen); # backward from the buffer last point ...
+	&Debug("--EnvelopeFilter::bodylen=$bodylen substr(\$xbuf, 0, $p)\n") if $debug;
+	$xbuf = substr($xbuf, 0, $p + 1) if $p > 0;
     }
 
     ### count up the number of paragraphs
     # count up "\n\n" lines;
     # If one paraghaph (+ signature), must be $c == 0. 
+    &Debug("--EnvelopeFilter::CountUpBuffer($xbuf\n)\n") if $debug;
     $c = $p = 0;
     $pe = rindex($xbuf, "\n\n"); # ignore the last signature
     while (($p = index($xbuf, "\n\n", $p + 1)) > 0) {
-	last if $p >= $pe;
+	last if $p > $pe; # change '>=' to '>' at 2000/04/16 (fukachan)
 	$c++;
     }
     ### "count up the number of paragraphs" ends

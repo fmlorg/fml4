@@ -5,6 +5,12 @@
 
 2000/04/15
 
+  EnvelopeFilter
+	fix paragraph count up method
+	fix how to ignore the last paragraph as a signature
+
+	パラグラフ数の数え方、signature部分の無視の仕方を少し変更
+
   doc/Japanese/
 
 	とりあえずひととおり submit した
