@@ -4,11 +4,15 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-require 'getopts.pl';
-&Getopts("dh");
+local($id);
+$id = q$Id$;
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+
 
 &InitMakeFml;
 &InitTTY;
+
+&MakeFmlLock;
 
 if (@ARGV) {
     &ExecCmd(join(" ",@ARGV));
@@ -19,7 +23,10 @@ else {
     &ExecCmd("install");
 }
 
+# Interactive Mode;
 # &Menu;
+
+&MakeFmlUnLock;
 
 exit 0;
 
@@ -27,6 +34,14 @@ exit 0;
 #################### LIBLARIES ####################
 sub InitMakeFml
 {
+    require 'getopts.pl';
+    &Getopts("dh");
+
+    $LOCK_SH                       = 1;
+    $LOCK_EX                       = 2;
+    $LOCK_NB                       = 4;
+    $LOCK_UN                       = 8;
+
     umask(077);
 
     local($user) = (getpwuid($<))[0];
@@ -122,6 +137,10 @@ sub InitMakeFml
 		    'bye',     'do_byeuser',
 		    'byeuser', 'do_byeuser',
 		    );
+
+    # CurConfig
+    for (@Config) { $s .= "\$CurConfig{$_} = \$Config'$_;\n";}
+    eval($s);
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -231,6 +250,62 @@ sub SignalLog
     print STDERR "Caught Signal[$sig], shutting down ... \n\n";
     &FlushLog;
     exit(1);
+}
+
+
+sub MakeFmlLock
+{
+    local($dir) = $CurConfig{'ML_DIR'};
+
+    print "\n---Try to LOCK ML Actions...\n\t";
+
+    opendir(DIRD, $dir);
+    for (readdir(DIRD)) {
+	next if /^\./;
+
+	print " $_";
+
+	$FP_SPOOL_DIR = "$dir/$_/spool";
+	open($FP_SPOOL_DIR, $FP_SPOOL_DIR);
+	flock($FP_SPOOL_DIR, $LOCK_EX);
+
+    }
+    closedir(DIRD);
+
+    print "\n   ALL ML ACTIONS ARE LOCKED; GO AHEAD!\n\n";
+}
+
+
+sub MakeFmlUnLock
+{
+    local($dir) = $CurConfig{'ML_DIR'};
+
+    opendir(DIRD, $dir);
+    for (readdir(DIRD)) {
+	next if /^\./;
+
+	$FP_SPOOL_DIR = "$dir/$_";
+	open($FP_SPOOL_DIR, $FP_SPOOL_DIR);
+	flock($FP_SPOOL_DIR, $LOCK_UN);
+
+    }
+    closedir(DIRD);
+}
+
+
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub Flock
+{
+    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
+    flock(LOCK, $LOCK_EX);
+}
+
+
+sub Funlock 
+{
+    close(LOCK);
+    flock(LOCK, $LOCK_UN);
 }
 
 
@@ -551,7 +626,7 @@ sub do_adduser
 
     # mkdir ML Directory
     if (! -d "$ml_dir/$ml") {
-	print "$ml ML NOT CREATED\n";
+	print "***Error: $ml ML NOT CREATED\n";
 	return;
     }
 
@@ -568,7 +643,7 @@ sub do_byeuser
     local($ml, $member) = @_;
     local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
 
-    print "---Creating $ml mailing list\n";
+    print "---Delete $member in $ml mailing list\n";
 
     $user     = (getpwuid($<))[0];
     $exec_dir = $CurConfig{'EXEC_DIR'};
@@ -581,7 +656,7 @@ sub do_byeuser
 
     # mkdir ML Directory
     if (! -d "$ml_dir/$ml") {
-	print "$ml ML NOT CREATED\n";
+	print "***Error: $ml ML NOT CREATED\n";
 	return;
     }
 
