@@ -41,8 +41,7 @@
 7) remove pass phrase to start apache-ssl without query of pass phrase
 
 # cd /usr/local/apache/conf/ssl.key
-# mv server.key server.key.orig 
-# openssl -in server.key.orig -out server.key
+# openssl rsa -in server.key -out server.key
 # chmod 400 server.key
 
 8) start apache-ssl
