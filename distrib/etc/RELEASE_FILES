@@ -19,6 +19,8 @@ C/config.h
 DRAFTS_SOURCES:
 var/doc/drafts/*
 
+MESSAGES_SOURCES:
+doc/messages/
 
 PERL_SOURCES:
 kern/*pl

@@ -128,30 +128,25 @@ COPY_SOURCES () {
 
 
 	echo ""; echo "Copying Main Sources ... ";
-	cp -p $SOURCES 		$DESTDIR/distrib/
-	cp -p $DRAFTS_SOURCES   $DESTDIR/distrib/drafts
-	cp -p $C_SOURCES	$DESTDIR/distrib/C
-	cp -p $PERL_SOURCES	$DESTDIR/distrib/src
+	cp -p  $SOURCES 	$DESTDIR/distrib/
+	cp -p  $DRAFTS_SOURCES  $DESTDIR/distrib/drafts
+	cp -p  $C_SOURCES	$DESTDIR/distrib/C
+	cp -p  $PERL_SOURCES	$DESTDIR/distrib/src
 
-	find sys -type f -print|\
-	egrep -v '*~|/RCS' |sed 's#proc/##' > $archsrc
+	echo ""
+	echo Copying doc/messages/
+	rsync --exclude CVS -av doc/messages/ $DESTDIR/distrib/messages/
 
-	# removed proc/arch (98/08/01)
-	# (chdir proc; tar cf - `cat $archsrc`)|\
-	# (chdir $DESTDIR/distrib/src; tar xvf -)
+	echo ""
+	echo Copying sys/
+	rsync --exclude CVS --exclude Makefile --exclude old -av \
+		sys/ $DESTDIR/distrib/sys/
 
-	echo "   copying $ARCH_SOURCE -> $DESTDIR/distrib/"
-	find $ARCH_SOURCES -type f -print|\
-	egrep -v '*~|/RCS|/FVS|/CVS|WINDOWS_NT4/docs|WINDOWS_NT4/lib|WINDOWS_NT4.old|Makefile' > $archsrc
+	echo ""
+	echo Copying cf/
+	rsync --exclude CVS --exclude sapporo -av cf/ $DESTDIR/distrib/cf/
 
-	tar cf - `cat $archsrc`|(chdir $DESTDIR/distrib; tar xvf -)
-
-	# cf
-	echo " "; echo "cf/ ...";
-	(cd cf;
-	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS|CVS|FVS'|grep -v '~'` \
-	$DESTDIR/distrib/cf;
-	)
+	echo ""
 
 	# bin
 	echo " "; echo "Copying bin/ ";

@@ -1610,9 +1610,19 @@ sub ForwMail
 }
 
 # &Mesg(*e, );
+# $mesgle == Message Languae Extension
 sub Mesg 
 { 
-    local(*e, $s) = @_; 
+    local(*e, $s, $mesgle_key, @mesgle_argv) = @_;
+
+    if ($MESSAGE_LANGUAGE && $mesgle_key) {
+	&use('mesgle');
+	$s = &MesgLE(*e, $mesgle_key, @mesgle_argv) || $s;
+    }
+
+    # if $s is null, return just now! (DUMMY_OPS may be useful)
+    return unless $s;
+
     $e{'message'} .= "$s\n";
     $MesgBuf .= "$s\n";
 

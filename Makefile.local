@@ -44,6 +44,7 @@ sync:
 	$(RSYNC) -av $(DESTDIR)/fml-current/src/ eriko:~/.fml/
 	$(RSYNC) -av $(DESTDIR)/fml-current/bin/ eriko:~/.fml/bin/
 	$(RSYNC) -av $(DESTDIR)/fml-current/drafts/ eriko:~/.fml/drafts/
+	$(RSYNC) -av $(DESTDIR)/fml-current/messages/ eriko:~/.fml/messages/
 	$(RSYNC) -av $(DESTDIR)/fml-current/libexec/ eriko:~/.fml/libexec
 	(echo "test of new FML snapshot."; echo ""; echo "--fukachan")|\
 	Mail test@fml.org
