@@ -700,14 +700,18 @@ sub search_path
     # too pesimistic?
     for ("/usr/local/bin", "/usr/share/bin", 
 	 "/usr/contrib/bin", "/usr/gnu/bin", 
-	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb") {
+	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
+	 # NT Extention
+	 "/perl5/bin" ) {
 	push(@path, $_);
     }
 
     for (@path) { if (-f "$_/$f") { return "$_/$f";}}
 }
 
-
+# USE_MIME is an exception of treatment
+# USE_MIME 1 and $MAKE_FML{OPT_MIME} = 1
+# since we show the menu determined by %MAKE_FML values;
 sub OutPutLocalConfig
 {
     local(*MAKE_FML) = @_;
@@ -725,8 +729,8 @@ sub OutPutLocalConfig
 	next unless $v;
 
 	if ($k eq 'OPT_MIME') {
-	    print CF "USE_MIME\t1\n";
-	    undef $MAKE_FML{$k};
+	    print CF "USE_MIME\t$MAKE_FML{'OPT_MIME'}\n";
+	    # undef $MAKE_FML{$k}; # logs to %MAKE_FML for option_summary
 	}
 	elsif ($k eq "NON_PORTABILITY" || $k eq 'OS_TYPE') {
 	    undef $MAKE_FML{$k};
@@ -743,12 +747,17 @@ sub OutPutLocalConfig
     ### 
     while (($k, $v) = each %MAKE_FML) {
 	next unless $v;
+
+	# ATTENTION! RESET HERE;
 	undef $MAKE_FML{$k};
 
 	if ($k eq 'OPT_HTML') {
 	    print CF "\$MAKE_FML{'OPT_HTML'} = 1;\n";
 	    print CF "\$Envelope{'mode:html'} = 1;";
 	    print CF "\# MAKEFML_OPT_HTML\n";
+	}
+	elsif ($k eq 'OPT_MIME') {
+	    print CF "\$MAKE_FML{'OPT_MIME'} = 1;\n";
 	}
 	elsif ($k eq "DELIVERY_MODE") {
 	    if ($v eq "distribute") {
@@ -811,12 +820,16 @@ sub Query
 }
 
 
+# THIS OUTPUT MENU ROUTINE IS CONTROLLED ONLY BY %config and %MAKE_FML; 
+# OK?
+#
 sub ShowMainMenu
 {
     local(*config, *MAKE_FML) = @_;
     local($delivery_mode, $policy);
-    eval($local_config);
-    print $@ if $@;
+
+    # ??? why here?
+    # eval($local_config); print $@ if $@;
 
     if ($config{'ML_MEMBER_CHECK'}) {
 	$ShowMenu{'auto_regist'} = "member_check";
@@ -825,7 +838,12 @@ sub ShowMainMenu
 	$ShowMenu{'auto_regist'} = "auto_registation";
     }
 
+    # debug
+    while (($k, $v) = each %MAKE_FML) {print STDERR "SMM:MAKEFML $k -> $v\n";}
+
+    # change %ShowMenu;
     &MakeOptionShowMenu(*MAKE_FML);
+
     $delivery_mode = &ModeString(*MAKE_FML);
     $policy        = "";
 
@@ -948,12 +966,20 @@ sub MakeOptionShowMenu
     local(*MAKE_FML) = @_;
     local($r, $buf);
 
+    undef $r;
+
+    # debug
+    while (($k, $v) = each %MAKE_FML) {print STDERR "MOSM:MAKEFML $k -> $v\n";}
+
+
     for (keys %MAKE_FML) {
 	next unless /^OPT_/;
-	next if $MAKE_FML{$_} != 1;
 
-	$_ =~ s/OPT_//;
-	$r .= $r ? ",$_" : $_;
+	if ($MAKE_FML{$_}) {
+	    print STDERR "MakeOptionShowMenu: $_ -> $MAKE_FML{$_}\n";
+	    $_ =~ s/OPT_//;
+	    $r .= $r ? ",$_" : $_;
+	}
     }
 
     $ShowMenu{'OPT_MIME'} = $MAKE_FML{'OPT_MIME'} == 1 ? "USE": "";
@@ -1144,7 +1170,7 @@ sub ResetVariables
     $ML_DIR   = $CurConfig{'ML_DIR'};
     $DOMAIN   = $CurConfig{'DOMAIN'};
     $FQDN     = $CurConfig{'FQDN'};
-    $GID      = &GetGID($CurConfig{'GROUP'});
+    $GID      = &GetGID($CurConfig{'GROUP'}) if $CurConfig{'GROUP'};
 
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
@@ -1621,9 +1647,7 @@ sub do_newml
 sub do_test
 {
     local($ml) = @_;
-
-    local($cf, $local_config, $config);
-    local(@config, %config);
+    local($cf);
 
     print "---Testing $ml mailing list ... \n";
 
@@ -1639,9 +1663,12 @@ sub do_test
     $SYSTEM_ARGV = "$input|$exec $dir -d";
 }
 
+
+# here eval $local_config since here is the phase evaluating CF;
 sub GetCF
 {
     local($cf, *config) = @_;
+    local($local_config, %uniq);
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
@@ -1652,10 +1679,13 @@ sub GetCF
 
 	if (1 .. /LOCAL_CONFIG/) {
 	    next if /^\#/; # required here,not required in the next section;
-	    next if /^LOCAL_CONFIG/;
+
+	    next if /^LOCAL_CONFIG/; # just "cf"(for cf/config) statements;
+
 	    ($key, $value) = split(/\s+/, $_, 2);
-	    $config{$key} = $value;
-	    push(@config, $key);
+	    $config{$key} = $value; # entry can be overwritten;
+	    push(@config, $key) unless $uniq{$key}; # entry is unique;
+	    $uniq{$key}   = 1;	# unique
 	}
 	else {
 	    next if /^LOCAL_CONFIG/;
@@ -1691,6 +1721,9 @@ sub do_config
     ### MAIN LOOP ###
     while (1) {
 	$CurTag = "    ";
+
+	# debug
+	while (($k, $v) = each %MAKE_FML) {print STDERR "MAKEFML $k -> $v\n";}
 
 	&ShowMainMenu(*config, *MAKE_FML);
 
@@ -1735,7 +1768,13 @@ sub do_config
 	# undef $config{'NON_PORTABILITY'};
 	# undef $config{"COMPAT_$OS_TYPE"};
 
+	&Uniq(*config);
+
 	for (@config) {
+	    print STDERR "-config: $_\n";
+
+	    # skip MIME since thie value set by $MAKE_FML{OPT_MIME}
+	    next if $_ eq 'USE_MIME'; 
 	    next if $_ eq 'NON_PORTABILITY';
 	    next if $_ eq "COMPAT_$OS_TYPE";
 
@@ -1762,6 +1801,17 @@ sub do_config
 		  $cf, "$ML_DIR/$ml/config.ph");
 }
 
+sub Uniq
+{
+    local(*config) = @_;
+    local(@new, %uniq);
+
+    for (@config) {
+	push(@new, $_) unless $uniq{$_}; 
+	$uniq{$_} = 1;
+    }
+    @config = @new;
+}
 
 sub MakeConfigPH
 {
@@ -1942,7 +1992,7 @@ sub GetGID
     local($gid);
 
     $gid = (getgrnam($_[0]))[2];
-    print STDERR "Error: No such group $_[0]\n" if $gid eq '';
+    print STDERR "Error: No such group '$_[0]'\n" if $gid eq '';
     $gid;
 }
 
@@ -1950,7 +2000,7 @@ sub MakeWritableDir
 {
     if ($GroupWritable) {	# for backup files
 	-d $_[0] || mkdir($_[0], 0775);
-	chown $<, $GID, $_[0] if $GID;
+	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
@@ -1961,11 +2011,12 @@ sub MakeWritableDir
 
 sub MakeDir
 {
-    print "---Make Directory ($_[0])\t(UID=$< GID=$GID)\n";
+    local($info) = " GID=$GID" if $GID ne '';
+    print "---Make Directory ($_[0])\t(UID=$<$info)\n";
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || mkdir($_[0], 0775);
-	chown $<, $GID, $_[0] if $GID;
+	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
@@ -1976,11 +2027,12 @@ sub MakeDir
 
 sub MakeSubDir
 {
-    print "---Make Directory ($_[0])\t(UID=$< GID=$GID)\n";
+    local($info) = " GID=$GID" if $GID ne '';
+    print "---Make Directory ($_[0])\t(UID=$<$info)\n";
 
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || mkdir($_[0], 0770);
-	chown $<, $GID, $_[0] if $GID;
+	chown $<, $GID, $_[0] if $GID ne '';
 	&SetGidBit($_[0]);
     }
     else {
