@@ -21,10 +21,10 @@ CONFIG_PH = ./config.ph
 GENHOST   = _`hostname`_
 FWIX      = perl bin/fwix.pl
 
-include .release/mk/prog
+# include distrib/mk/prog
 
 all:
-	echo "NO!"
+	@ echo "NO! DO NOT RUN 'make' here"
 
 DISTRIB: distrib 
 ### ATTENTION! CUT OUT HEREAFTER WHEN RELEASE
@@ -54,14 +54,14 @@ cleanfr:
 # -S stylesheet
 FWIX    =  bin/fwix.pl -F -Z fml-bugs@fml.org 
 
-# .release dir
-REL     = .release
-RELBIN  = .release/bin
+# distrib dir
+REL     = distrib
+RELBIN  = distrib/bin
 
 local: distrib 
 
 ntdist: 
-	(/bin/sh .release/generator 2>&1| tee /var/tmp/_distrib.log)
+	(/bin/sh distrib/bin/generator 2>&1| tee /var/tmp/_distrib.log)
 	(/bin/sh $(RELBIN)/nt-release.sh /tmp/distrib 2>&1|\
 	 tee -a /var/tmp/_distrib.log)
 	@ $(RELBIN)/error_report.sh /var/tmp/_distrib.log
@@ -82,34 +82,35 @@ wintermute:
 #	@ (chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)
 #	@ chmod -R 777 /tmp/nt
 
-dist:	distrib 
-distrib:
-	(/bin/sh .release/generator 2>&1| tee /var/tmp/_distrib.log)
+dist:	
+	(/bin/sh distrib/bin/generator 2>&1| tee /var/tmp/_distrib.log)
 	@ $(RELBIN)/error_report.sh /var/tmp/_distrib.log
 	@ echo "";
 	@ echo "make distsnap  (make snapshot of dist) "
 	@ echo "make sync      (syncrhonize -> fml.org)"
 
+
 distsnap:
 	@ (cd /var/tmp/fml-current/; rsync -auv . $(HOME)/.ftp/snapshot)
 
-snapshot: 
-	(/bin/sh .release/generator -ip 2>&1| tee /var/tmp/_release.log)
+snapshot:
+	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
+	(/bin/sh distrib/generator -ip 2>&1| tee /var/tmp/_release.log)
 	@ $(RELBIN)/error_report.sh /var/tmp/_release.log
 
 branch:
-	(/bin/sh .release/generator -b 2>&1| tee /var/tmp/_release.log)
+	(/bin/sh distrib/generator -b 2>&1| tee /var/tmp/_release.log)
 	@ $(RELBIN)/error_report.sh /var/tmp/_release.log
 
 release:
-	(/bin/sh .release/generator -rp 2>&1| tee /var/tmp/_release.log)
+	(/bin/sh distrib/generator -rp 2>&1| tee /var/tmp/_release.log)
 	@ $(RELBIN)/error_report.sh /var/tmp/_release.log
 
 faq:	 plaindoc
 textdoc: plaindoc
 
 # release snapshot generator library
-GEN_RELEASE     = $(FML)/.release
+GEN_RELEASE     = $(FML)/distrib
 DOC_RECONFIGURE = $(GEN_RELEASE)/DocReconfigure
 
 INFO:	var/doc/INFO
@@ -122,7 +123,7 @@ var/doc/INFO: $(FML)/.info
 	sh $(DOC_RECONFIGURE) -o var/doc /var/tmp/.fml/INFO 
 
 INFO-e:
-	perl .release/remove_japanese_line.pl \
+	perl distrib/remove_japanese_line.pl \
 		< /var/tmp/.fml/INFO > /var/tmp/.fml/INFO-e
 
 plaindoc: doc/smm/op.wix
@@ -141,7 +142,7 @@ htmldoc: doc/smm/op.wix
 
 search:
 	@ echo ""
-	@ sh .release/search_doc_generator
+	@ sh distrib/search_doc_generator
 
 fix-rcsid:
 	@ echo " "; echo "Fixing rcsid ... " 
@@ -149,8 +150,8 @@ fix-rcsid:
 	@ chmod 755 *.pl bin/*.pl sbin/*.pl libexec/*.pl 
 	@ echo " Done. " 
 
-check:	fml.pl
-	sh .release/bin/check.sh
+check:
+	sh distrib/bin/check.sh
 
 size_check:
 	@ echo "";
@@ -160,16 +161,16 @@ size_check:
 
 c:	*.p?
 	(2>&1; for x in *.p? ; do perl -cw $$x ; done ) |\
-	perl .release/bin/fix-perl-c-output.pl
+	perl distrib/bin/fix-perl-c-output.pl
 
 fix-include: 
-	sh .release/bin/fix-include.sh
+	sh distrib/bin/fix-include.sh
 
 cmp:
 	$(RELBIN)/uncomments.pl fml.pl | wc
-	.release/bin/fpp.pl -mCROSSPOST fml.pl | $(RELBIN)/uncomments.pl | wc
+	distrib/bin/fpp.pl -mCROSSPOST fml.pl | $(RELBIN)/uncomments.pl | wc
 	$(RELBIN)/uncomments.pl libsmtp.pl | wc
-	(.release/bin/fpp.pl -mCROSSPOST fml.pl; cat libsmtp.pl)|\
+	(distrib/bin/fpp.pl -mCROSSPOST fml.pl; cat libsmtp.pl)|\
 	$(RELBIN)/uncomments.pl|wc
 #	$(RELBIN)/uncomments.pl $(HOME)/work/src/USEFUL/hml-1.6/hml.pl |wc
 
@@ -195,20 +196,20 @@ bethdoc: INFO INFO-e syncinfo newdoc search
 newdoc: htmldoc syncwww syncinfo 
 
 varcheck:
-	perl .release/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
+	perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
 
 v2: varcheck2
 
 varcheck2:
-	perl .release/bin/search-config-variables.pl -E -D -s -m \
+	perl distrib/bin/search-config-variables.pl -E -D -s -m \
 	*pl libexec/[a-lo-z]*pl proc/*pl bin/*pl |\
 	tee /tmp/VARLIST
 	@ wc /tmp/VARLIST
 
 v3:
-	perl .release/bin/search-config-variables.pl \
+	perl distrib/bin/search-config-variables.pl \
 	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
@@ -229,14 +230,14 @@ test:
 	(bin/emumail.pl; echo test )|perl fml.pl $(PWD) $(PWD)/proc
 
 makefml:
-	sh .release/bin/reset-makefml
+	sh distrib/bin/reset-makefml
 
 init-makefml:
 	cp sbin/makefml /tmp/distrib
 	(chdir /tmp/distrib ; perl makefml )
 
 admin-ci:
-	ci usr/bin/[^c^r]* .release/bin/*
+	ci usr/bin/[^c^r]* distrib/bin/*
 	chmod 755 usr/*bin/*
 
 rd:
@@ -253,7 +254,7 @@ libkern:
 	sed '/^$$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
 
 diff:
-	perl $(FML)/.release/rcsdiff.pl -p
+	perl $(FML)/distrib/rcsdiff.pl -p
 	# fvs diff * proc/* libexec/* sbin/makefml 
 
 ci:
@@ -263,7 +264,7 @@ docdiff:
 	fvs diff doc/ri/*wix doc/smm/*wix
 
 scan:
-	fvs scan * proc/* libexec/* \
+	fvs scan kern/* proc/* libexec/* \
 		sbin/makefml doc/ri/*wix doc/smm/*wix doc/master/*wix \
 		doc/html/* \
 		etc/makefml/* cf/* bin/* sys/*/*|\
@@ -281,7 +282,7 @@ scan:
 	@ echo ""; echo "file: /tmp/__scan__"; echo "";
 
 loop:
-	perl .release/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
+	perl distrib/bin/search_loop.pl *pl libexec/* proc/lib*pl|less -plocal
 
 e:	testsetup
 	@ echo 'make m is to re-generate /tmp/e/makefml'
