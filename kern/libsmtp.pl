@@ -410,12 +410,14 @@ sub SmtpIO
 	return;
     }
 
-    # check critical error
-    if ($SoErrBuf =~ /^[45]/) {
-	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
-	&Log("reason: $SoErrBuf");
-	return $NULL;
-    }
+    # check critical error: comment out (99/01/25)
+    # XXX this condition is too restrict since this traps
+    # XXX direct local delivery errors ;D
+    # if ($SoErrBuf =~ /^[45]/) {
+    # &Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
+    # &Log("reason: $SoErrBuf");
+    # return $NULL;
+    # }
 
     if ($e{'mci:pipelining'}) {
 	&SmtpPut2Socket_NoWait('DATA', $ipc);
