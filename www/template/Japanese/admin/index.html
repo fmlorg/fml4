@@ -102,8 +102,6 @@
 
     <A NAME=mlpassword>
 	<LI>管理者パスワードの設定
-	<BR>
-	ＭＬを選択して、管理者のパスワードを設定して下さい。
 	これは
 	<BR>
 	admin と approve コマンドのパスワード
@@ -120,31 +118,16 @@
 	注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
 	<BR>
 
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" 
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
+	<INPUT NAME=PROC TYPE="hidden" VALUE="mladminpasswd">
 	<BR>
 	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
-	<TABLE>
-	<TR>
-		<TD ALIGN=right> 管理者 アカウントもしくはEmail アドレス:
-		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
-	<TR>
-		<TD ALIGN=right> パスワード:
-		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
-
-	<TR>
-		<TD ALIGN=right> 確認のため同じパスワード:
-		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
-	</TABLE>
-	_____________________________
-	<BR>
-	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
 	</FORM>
 
 
