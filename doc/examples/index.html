@@ -13,19 +13,27 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml"(関係)設定ガイド
+"fml"(関係)設定ガイド
 </CENTER>
 </H1>
 
 <A HREF="index-e.html">[English] is here</A>
 
+<P>
+<A HREF="http://www.fml.org/fml/examples/index.html">
+www.fml.orgのexamples/
+</A>
+は逐次改良されています。fml3.0pl数字 に含まれているexamples/はbug fix
+はされますが、改良はされません。チュートリアルとしてはwww.fml.orgの方
+を参照してください。
+
 <BR>
 <!- menu ->
-	<A HREF="#overview">概要</A>
-	<A HREF="#fundamental-config">基本設定</A>
-	<A HREF="#advanced-config">やや進んだ設定</A>
-	<A HREF="#debug">デバッグ</A>
-	<A HREF="#more-advanced">より進んだ設定</A>
+	<A HREF="#overview">概要</A>
+	<A HREF="#fundamental-config">基本設定</A>
+	<A HREF="#advanced-config">やや進んだ設定</A>
+	<A HREF="#debug">デバッグ</A>
+	<A HREF="#more-advanced">より進んだ設定</A>
 <!- menu ->
 
 <HR>
@@ -33,27 +41,27 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	概要
+	概要
 	<UL>
 		<LI>
 		<A HREF="fml-install.html">
-		fmlのインストールの概観
+		fmlのインストールの概観
 		</A>
 		<A HREF="../INSTALL/index.html">
-		　(詳細)	
+		　(詳細)	
 		</A>
 		<BR>
 		<A HREF="../UPGRADE-3.0/index.html">
-		注: fml 2.x から 3.0 へのアップグレード
+		注: fml 2.x から 3.0 へのアップグレード
 		</A>
 
 		<LI>
 		<A HREF="postfix-install.html">
-		Postfix のインストールの例 (NetBSD-current)
+		Postfix のインストールの例 (NetBSD-current)
 		</A>
 
 		<LI>
-		MTA (Mail Transport Agent)別の注意
+		MTA (Mail Transport Agent)別の注意
 		<BR>
 		<A HREF="../INSTALL_with_SENDMAIL/index.html">sendmail</A>
 		<A HREF="../INSTALL_with_POSTFIX/index.html">postfix</A>
@@ -65,132 +73,132 @@
 
 	<LI>
 	<A NAME="fundamental-config">
-	<P> 基本的な設定
+	<P> 基本的な設定
 	<UL>
 		<LI>
 		<A HREF="../INSTALL/index.html#makefml-config">
-		設定メニュー(makefml config)の使い方
+		設定メニュー(makefml config)の使い方
 		</A>
 		<BR>
 		<A HREF="../INSTALL/index.html#cf-and-config.ph">
-		設定ファイルについて(cfとconfig.phの違いは?)
+		設定ファイルについて(cfとconfig.phの違いは?)
 		</A>
 
 		<LI>
 		<A HREF="config-default.html">
-		fmlの設定(生の状態)
+		fmlの設定(生の状態)
 		</A>
 
 		<LI>
 		<A HREF="config-auto-subscribe.html">
-		fmlの設定(自動登録)
-		<A HREF="../op/index.html#auto-subscribe">[詳細]</A>
+		fmlの設定(自動登録)
+		<A HREF="../op/index.html#auto-subscribe">[詳細]</A>
 		</A>
 
 		<LI>
 		<A HREF="config-remote.html">
-		リモートからメールでメーリングリストの設定をいじる
+		リモートからメールでメーリングリストの設定をいじる
 		</A>
 		<BR>
-		"リモート管理"	
-		<A HREF="../op/index.html#remote-admin">[詳細]</A>
+		"リモート管理"	
+		<A HREF="../op/index.html#remote-admin">[詳細]</A>
 
 		<LI>
 		<A HREF="setup-more-secure.html">
-		よりセキュアに
+		よりセキュアに
 		</A>
 		<BR>
-		詳細:
-		<A HREF="../op/index.html#envf">フィルタ</A>
-		<A HREF="../op/index.html#mti">トラフィクモニタ</A>
-		<A HREF="../op/index.html#mail_size_limit">メールサイズ</A>
+		詳細:
+		<A HREF="../op/index.html#envf">フィルタ</A>
+		<A HREF="../op/index.html#mti">トラフィクモニタ</A>
+		<A HREF="../op/index.html#mail_size_limit">メールサイズ</A>
 		<BR>
-		<A HREF="../advisories/index.html">FMLセキュリティアドバイザリィ</A> 
+		<A HREF="../advisories/index.html">FMLセキュリティアドバイザリィ</A> 
 	</UL>
 
 
 	<LI>
 	<A NAME="advanced-config">
-	<P> 少し進んだ設定
+	<P> 少し進んだ設定
 	<UL>
 		<LI>
-		企業のサポート用ＭＬなど
+		企業のサポート用ＭＬなど
 		<A HREF="config-post-from-anyone.html">
-		だれでも投稿可能なＭＬ
+		だれでも投稿可能なＭＬ
 		</A>
 
 		<LI>
-		例えばメールマガジン?
+		例えばメールマガジン?
 		<BR>
 		<A HREF="config-asymmetric-regist.html">
-		メールを一方的に送るような場合にユーザに自分で登録させたい
+		メールを一方的に送るような場合にユーザに自分で登録させたい
 		</A>
-		<A HREF="../op/index.html#auto_asymmetric_regist">[詳細]</A>
+		<A HREF="../op/index.html#auto_asymmetric_regist">[詳細]</A>
 
 		<LI>
-		"モデレータ" 
+		"モデレータ" 
 		<BR>
 		<A HREF="config-moderated.html">
-		メーリングリストの記事はながれる前に査読をうける場合
+		メーリングリストの記事はながれる前に査読をうける場合
 		</A>
 		<BR>
-		例えばアナウンス用やSPAMよけ?
+		例えばアナウンス用やSPAMよけ?
 		<A HREF="../op/index.html#moderator">
-		[詳細]
+		[詳細]
 		</A>
 	</UL>
 
 	<LI>
 	<A NAME="debug">
-	<P> エラーとデバッグ
+	<P> エラーとデバッグ
 	<UL>
 		<LI>
 		<A HREF="../INSTALL/index.html#errors">
-		典型的なエラー
+		典型的なエラー
 		</A>
 	</UL>
 
 	<LI>
 	<A NAME="more-advanced">
 	<P>
-	その他の細かいパラメータ設定をする人のために
+	その他の細かいパラメータ設定をする人のために
 	<BR>
-	詳しくは<A HREF="../op/index.html">doc/op.jp</A>を読んでください。
-	以下はそのうちのいくつかのものへのポインタです。
+	詳しくは<A HREF="../op/index.html">doc/op.jp</A>を読んでください。
+	以下はそのうちのいくつかのものへのポインタです。
 	<UL>
 		<LI>
-		<A HREF="../op/index.html#acl">アクセス制御</A>
+		<A HREF="../op/index.html#acl">アクセス制御</A>
 
 		<LI>
-		<A HREF="../op/index.html#headers">ヘッダ関係の設定</A>
+		<A HREF="../op/index.html#headers">ヘッダ関係の設定</A>
 
 		<LI>
-		<A HREF="../op/index.html#auto-archive">自動アーカイブ</A>
+		<A HREF="../op/index.html#auto-archive">自動アーカイブ</A>
 
 		<LI>
-		<A HREF="../op/index.html#auto-expire">自動-expire</A>
+		<A HREF="../op/index.html#auto-expire">自動-expire</A>
 
 		<LI>
-		<A HREF="../op/index.html#gen_html">HTMLファイルの生成</A>
+		<A HREF="../op/index.html#gen_html">HTMLファイルの生成</A>
 
 		<LI>
-		<A HREF="../op/index.html#mead">エラーになるユーザの自動削除</A>
+		<A HREF="../op/index.html#mead">エラーになるユーザの自動削除</A>
 
 		<LI>
 		<A HREF="../op/index.html#confirmd">confirmd</A>
 
 		<LI>
-		<A HREF="../op/index.html#delivery">配送関係について</A>
+		<A HREF="../op/index.html#delivery">配送関係について</A>
 
 		<LI>
 		<A HREF="../op/index.html#smtp">smtp</A>
 
 		<LI>
-		<A HREF="../op/index.html#digest">まとめおくり</A>
+		<A HREF="../op/index.html#digest">まとめおくり</A>
 
 		<LI>
 		<A HREF="../op/index.html#fmlserv">fmlserv 
-		(listserv, majordomoのようなユーザインターフェイスエミュレータ)
+		(listserv, majordomoのようなユーザインターフェイスエミュレータ)
 		</A>
 	</UL>
 </UL>
