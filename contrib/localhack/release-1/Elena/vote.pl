@@ -27,30 +27,35 @@ if( __FILE__ eq $0 && $0 =~ 'vote.pl') {
     # use STDIN
     @ARGV || (@BODY  = <STDIN>);
     if(@BODY) {
-	@votebody = split(/\n/, join(/\n/,@BODY));
-	print STDERR "BODY>\n@votebody<BODY ENDS\n" if($debug);
-	&Vote(@votebody);
+	print STDERR "BODY>\n@BODY<BODY ENDS\n" if($debug);
+	&Vote(@BODY);
     }
 
     # get vote from a file
-    while(@ARGV) {
-	&Vote(&VoteInitialize($ARGV[0]));
-        shift @ARGV;
+    foreach (@ARGV) { &Vote(&GetBufferFromFile($_));}
+
+    $return = "$DIR/return_body_$$";
+    unlink $return if -f $return;
+
+    foreach $key (@keywords) {
+	$GET_FIELD .= "open(POUT, \"|cat \");\n";
+	$GET_FIELD .= "print POUT \"$key\\n\";";
+	$GET_FIELD .= "close POUT;\n";
+	$GET_FIELD .= "open(OUT, \"|sort |uniq -c |sort -nr\");";
+	$GET_FIELD .= "print OUT join(\"\\n\", \@KEY$key), \"\\n\";\n";
+	$GET_FIELD .= "print STDOUT join(\"\\n\", \@KEY$key);\n" if $debug;
+	$GET_FIELD .= "close OUT;\n";
     }
 
-    # debug mode show infomataion
-    print STDERR "======== Debug Mode ========\n" if($debug);
-    for($i = 0; $i < $max_keywords; $i++ ) {
-	open(OUTBUF,"|cat");
-	print OUTBUF $keywords[$i], ":\n";
-	close(OUTBUF);	
-	open(OUTBUF,"|sort |uniq -c |sort -nr ");
-	print OUTBUF $votelog[$i] if($votelog[$i]);
-	close(OUTBUF);
-    }
+    print STDERR $GET_FIELD if $debug;
 
-    print "Comments:\n", $comment_strings, "\n";
-    &VoteStoreInfo  if($debug);
+    eval $GET_FIELD;
+    print STDERR $@ if $@;
+
+    unlink $return;
+
+    # Show Comments Summary's
+    print "\nComments Summary:\n$comment_strings\n";
     exit 0;
 }
 
@@ -60,7 +65,7 @@ sub Osakana
 {
     local($FD) = @_;
     &VoteInitConfig;
-    &Vote(&VoteInitialize($FD));
+    &Vote(&GetBufferFromFile($FD));
     &VoteStoreInfo;
 }
 
@@ -81,70 +86,57 @@ sub VoteStoreInfo
 
 
 # front end of Vote
-sub VoteInitialize
+sub GetBufferFromFile
 {
     local($FD) = @_;
-    local(@votebody) = '';
+    local($BUFFER) = "";
     open(FD) || (&VoteLog("cannot open $FD"), return);
-    while(<FD>) {
-	chop;
-	push(@votebody, $_);
-    }
+    $BUFFER = join("", <FD>);
     close(FD);
-    return @votebody;
+    return $BUFFER;
 }
 
 
 # get one file, collect @keywords up to @maxkeywords. 
 sub Vote {
     local(@votebody) = @_;
-    local($i, $j) = 0 x 2;
+    local($i) = local($j) = 0;
     local($in_comment) = '';
-    local(@counter_keywords) = 0 x $max_keywords;
+    local(@counter_keywords);
     local($COMMAND);
 
     # generate regexp for given fields
-    for( $i = 0; $i < $max_keywords; $i++ ) {
-	$GET_FIELD .= "if\(\/\^$keywords[$i]\:\(\.\*\)\/o\)\{\n";
-	$GET_FIELD .= "if\(\(\$counter_keywords\[$i]\)++  \< $maxkeywords[$i]\)\{\n";
-	$GET_FIELD .= "\$votelog\[$i\] .= \$1 . \"\\n\";\n";
-	$GET_FIELD .= "\}\}\n";
+    foreach $key (@keywords) {
+	$GET_FIELD .= "if(/^$key:(.*)/o) { push(\@KEY$key, \$1);}\n";
     }
 
-$EXEC_COMMAND =
-    "while\(\@votebody\) \{
-	\$\_ = \$votebody[0], shift \@votebody;
-	print STDERR \"IN\-\> \$\_\\n\" 
-              if\( \_\_FILE\_\_ eq \$0 \&\& \$debug\);
-
+    $EXEC_COMMAND = "foreach (\@votebody) {
 	# for comment
-	if\(\/\^$COMMENT_STRING\/o\)   \{ \$in_comment \= \'on\'; next;\}
-	if\(\/$END_COMMENT_STRING\/o\) \{ \$in_comment \=   \'\'; next;\}
+	if(/^$COMMENT_STRING/o)     { \$in_comment = 'on'; next;}
+	if(/^$END_COMMENT_STRING/o) { \$in_comment =   ''; next;}
 
-	if\(\$in_comment\) \{
-	    \$comment_strings \.\= \$\_ .\"\\n\"; 
+	if(\$in_comment) {
+	    \$comment_strings .= \$_ . \"\"; 
 	    next;
-	\}
+	}
 
  	# Email address for comment log
- 	if\(\/\^From\:\\s\*\(\\S\+\)\\s\*\.\*\$\/\)\{
+ 	if(/^From:\\s\*\(\\S\+\)\\s\*\.\*\$/) {
  	    \$From_address = \$1;
- 	    \$comment_strings \.\= \"\\nFrom\: \$From\_address\\n\\n\";
-         \}
+ 	    \$comment_strings .= \"\\nFrom\: \$From\_address\\n\\n\";
+         }
 
  	# get voting fields, initilize
- 	y\/A\-Z\/a\-z\/;
- 	s\/\[　 \\t\]\/\/g;
- 	print STDERR \"MODIFIED\-\> \$\_\\n\" 
-            if\( \_\_FILE\_\_ eq \$0 \&\& \$debug\);
+ 	y/A-Z/a-z/;
+ 	s/[　\\s]//g;
+        s/^最近/new/g;
  
         $GET_FIELD;
-\}\n";
+        }\n";
 
     eval $EXEC_COMMAND;
-
+    print STDERR $@ if $@;
 }
-
 
 sub VoteLog
 {
@@ -153,7 +145,6 @@ sub VoteLog
     print FILE $Date, ":", $strings, "\n";
     close(FILE);
 }
-
 
 sub VoteInitConfig
 {
@@ -167,7 +158,6 @@ sub VoteInitConfig
     if(!-d "$RESULTDIR"){ mkdir("$RESULTDIR", 0755);}
 }
 
-
 sub VoteCleanup
 {
     unlink @keywords;
@@ -176,7 +166,6 @@ sub VoteCleanup
     system "rm -fr $RESULTDIR";
     exit 0;
 }
-
 
 sub VoteSummary
 {
