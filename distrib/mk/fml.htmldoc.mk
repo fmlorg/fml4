@@ -49,14 +49,19 @@ var/html/${file}-e.html: doc/ri/${file}.wix $(FML)/var/doc/${file}.en
 __inithtml__: 
 	@ echo --htmlbuild
 
-var/html/index.html: doc/html/index.html
-	$(CPP) -P -DJAPANESE doc/html/index.html |\
-	$(JCONV) > $(FML)/var/html/index.html
+.for file in ${HTML_REQ_CPP_SOURCES}
 
-var/html/index-e.html: doc/html/index.html
-	$(CPP) -P -UJAPANESE doc/html/index.html \
-	> $(FML)/var/html/index-e.html
+__HTML_CPP__ += var/html/${file}.html
 
+var/html/${file}.html: doc/html/${file}.html
+	$(CPP) -P -DJAPANESE doc/html/${file}.html |\
+	$(JCONV) > $(FML)/var/html/${file}.html
+
+var/html/${file}-e.html: doc/html/${file}.html
+	$(CPP) -P -DJAPANESE doc/html/${file}.html |\
+	$(JCONV) > $(FML)/var/html/${file}.html
+
+.endfor
 
 var/html/advisories/index.html: doc/advisories/index.html
 	$(CPP) -P -DJAPANESE doc/advisories/index.html |\
@@ -79,6 +84,6 @@ var/html/op-e/index.html: doc/smm/*wix
 	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
 
 ### main ###
-htmlbuild: __inithtml__ ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
+htmlbuild: __inithtml__ ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM} ${__HTML_CPP__}
 	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
 	@ echo --htmlbuild done.

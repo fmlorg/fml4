@@ -29,11 +29,34 @@ The Design and Implementation of "fml" Mailing List Server
 #endif
 	The Design and Implementation of "fml" Mailing List Server
 </H1>
-
 #ifdef JAPANESE
 <A HREF="index-e.html">[English] is here.</A>
 #else
 <A HREF="index.html">[Japanese] is here.</A>
+#endif
+<!-- =================================================================== -->
+#ifdef JAPANESE
+<PRE>
+	<A HREF=#fml>fml  </A>    <A HREF=INFO.html>What's new</A>
+	<A HREF=links.html>links</A>    <A HREF=history.html>history</A>
+	<A HREF=download.html>download</A>
+</PRE>
+#ifndef DIST
+<PRE>
+	<A HREF=search-j.html>検索</A>
+</PRE>
+#endif
+#else
+<PRE>
+	<A HREF=#fml>fml  </A>    <A HREF=INFO-e.html>What's new</A>
+	<A HREF=links-e.html>links</A>    <A HREF=history-e.html>history</A>
+	<A HREF=download-e.html>download</A>
+</PRE>
+#ifndef DIST
+<PRE>
+	<A HREF=search-e.html>Search</A>
+</PRE>
+#endif
 #endif
 <!-- =================================================================== -->
 <HR>
@@ -63,17 +86,6 @@ The lastest official release is 2.2.1. The fml-current version is 2.2E.
 	[Search] over FML documents
 #endif
 	</A>
-#else
-<P>
-#ifdef JAPANESE 
-	<A HREF="search-j.html">
-	[検索] FMLドキュメントの検索ができます。
-#else
-	<A HREF="search-e.html">
-	[Search] over FML documents
-	Anyway try to search keywords around your question
-#endif
-	</A>
 #endif /* ! DIST */
 
 <P>
@@ -89,6 +101,7 @@ The lastest official release is 2.2.1. The fml-current version is 2.2E.
 
 <HR>
 <H3>
+<A NAME="fml">
 #ifdef JAPANESE
 Information とドキュメントのHTML版
 #else
@@ -96,16 +109,6 @@ Information and HTML version documents in the fml source distribution
 #endif
 </H3>
 <UL>
-	<LI>
-#ifdef JAPANESE
-	<A HREF="INFO.html">
-	What's New; 最新の情報(INFO)
-#else
-	<A HREF="INFO-e.html">
-	What's New; Latest Information(INFO)
-#endif
-	</A>
-
 	<LI>
 #ifdef JAPANESE
 	<A HREF="README/">
@@ -134,9 +137,6 @@ Information and HTML version documents in the fml source distribution
 	<A HREF="UPGRADE-e/">
 	ATTENTIONS and TIPS FOR UPGRADE
 #endif
-	<P>*** 
-	I think "principle of least surprise" is most important in upgrade.
-	</A>
 
 	<LI>
 #ifdef JAPANESE
@@ -239,66 +239,6 @@ Information and HTML version documents in the fml source distribution
 	</A>
 </UL>
 
-<H3>
-#ifdef JAPANESE
-	ソースコード
-#else
-	Source codes and so on ...
-#endif
-</H3>
-<UL>
-#if DIST
-#else /* DIST */
-	<LI>
-	<A HREF="fml-current.tar.gz">
-#ifdef JAPANESE
-	fml 最新版ソースコード一式 (fml-current.tar.gz)
-#else
-	fml latest source code package (fml-current.tar.gz)
-#endif
-#endif /* DIST */
-	</A>
-
-	<LI>
-	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
-#ifdef JAPANESE
-	fml のソースと関連するアーカイブ (WWW.SAPPORO.IIJ.AD.JP)
-#else
-	fml sources and related things (WWW.SAPPORO.IIJ.AD.JP)
-#endif
-	<BR>
-	(the same as on ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/)
-	</A>
-
-	<LI>
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-#ifdef JAPANESE
-	fml ソース (FTP)
-#else
-	fml sources (FTP)
-#endif
-	<BR>
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-	</A>
-	<BR>
-	lha, ish and mime_pls.* sendmail, smtpfeed, bind, ntperl
-#ifdef JAPANESE
-	等も参考までに一緒に置いてあります。
-	<BR>
-	あと、
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
-	snapshot
-	</A>
-	の下には current のソースが広がった形でおいてあります
-	(時として tar.gz にまとめられる前のものもあり得る)。
-#else
-	exist here for convenience. Also you find the fml latest source tree
-	on
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/
-	</A>
-#endif
-
 	<LI>
 #ifdef JAPANESE
 	その他のソフトウエア
@@ -310,184 +250,6 @@ Information and HTML version documents in the fml source distribution
 	</A>	
 
 </UL>
-
-<H3>
-links around mail systems
-</H3>
-<UL>
-	<P> MTA
-	<LI>
-	<A HREF="http://www.sendmail.org/">
-	http://www.sendmail.org/
-	</A>
-	<BR>
-
-#ifdef JAPANESE
-	<A HREF=http://www.jpcert.or.jp/tech/98-0001/>
-	技術メモ - sendmail バージョンアップマニュアル -
-	</A>
-#else
-#endif
-	<A HREF="http://www.sendmail.com/">
-	Sendmail Inc. (http://www.sendmail.com/)
-	</A>
-
-	<LI>
-	smtpfeed; 
-	Highly accelerated SMTP delivery system which is kicked off 
-	by sendmail via LMTP (Local Mail Transfer Protocol).
-	If slow MTA annoies you, try to use this!
-	I believe smtpfeed is better than a delivery system with many fork().
-
-	<A HREF="ftp://ftp.kyoto.wide.ad.jp/pub/mail/smtpfeed/">
-	ftp://ftp.kyoto.wide.ad.jp/pub/mail/smtpfeed/
-	</A>
-
-	<LI>
-	<A HREF="http://www.postfix.org/">
-	http://www.postfix.org/ (vmailer)
-#ifdef JAPANESE
-	(作者はあの tcp_wrapper の Wietse Venema;
-	以前はvmailerと呼ばれていたMTA)
-#else
-#endif
-	</A>
-	<BR>
-
-	<LI>
-	<A HREF="http://www.qmail.org/">
-	http://www.qmail.org/
-	</A>
-#ifdef JAPANESE
-	<BR>
-	<A HREF="http://www.jp.qmail.org/">
-	qmail ドキュメントの日本語訳 (http://www.jp.qmail.org/)
-	</A>
-#endif
-
-	<LI>
-	<A HREF="http://www.exim.org/">
-	http://www.exim.org/
-	</A>
-
-	<LI>
-	<A HREF="http://www.zmailer.org/">
-	http://www.zmailer.org/
-	</A>
-
-	<LI>
-	<A HREF="ftp://ftp.uu.net/networking/mail/smail/">
-	smail
-	</A>
-	
-
-	<P> DNS
-	<LI>
-	<A HREF="http://www.isc.org/bind.html">
-	http://www.isc.org/bind.html
-	</A>
-	<A HREF="ftp://ftp.isc.org/">
-	; ISC (ftp://ftp.isc.org/)
-	</A>
-
-
-	<P> Arond Security
-	<LI>
-	<A HREF="http://www.cert.org/">
-	CERT 
-	</A>
-
-	<LI>
-	<A HREF="http://www.jpcert.or.jp/">
-	JPCERT
-	</A>
-	
-	<LI>
-	<A HREF="http://www.nsi.org">
-	NSI
-	</A>
-
-
-	<P> Perl
-	<LI>
-	<A HREF="http://www.perl.org/">
-	http://www.perl.org/
-	</A>
-	<BR>
-	<A HREF="http://www.perl.com/CPAN/ports/">
-	http://www.perl.com/CPAN/ports/
-	</A>
-	<BR>
-	<A HREF=http://www.activestate.com/ActivePerl/>
-	ActivePerl
-	</A>
-	(
-	<A HREF=http://www.ActiveState.com/>
-	NTPERL
-	</A>
-	)
-#ifdef JAPANESE
-	＃5.005 はUNIX版と統合されている
-#endif
-	<BR>
-	<A HREF=ftp://err.ethz.ch/pub/neeri/MacPerl/>
-	ftp://err.ethz.ch/pub/neeri/MacPerl/
-	</A>
-	<BR>
-	<A HREF=ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
-	ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/
-	</A>
-
-	<P> Operating Systems and Architectures
-	<LI>
-#ifdef DIST
-	<A HREF="http://www.fml.org/fml/nt.html">
-#else
-	<A HREF="nt.html">
-#endif
-	links around Windows NT
-	</A>	
-</UL>
-
-<!-- =================================================================== -->
-
-<HR>
-<P> Historical perspective
-
-<P>
-<PRE>
-*fj.sources official release
-
-(1999 summer           2.3 ?)
-1999/05                2.2.1
-1998/09                2.2
-1997/08                2.1
-1995/01                1.5
-1994/09                1.3
-1994/05                1.2.1
-1994/03                1.2
-</PRE>
-
-<P>
-<PRE>
-* other topics
-
-#ifdef DIST
-#ifdef JAPANESE
-1996                   FSP(Free Software Prize)受賞作品
-#else
-1996                   FSP(Free Software Prize)
-#endif
-#else /* DIST */
-#ifdef JAPANESE
-1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP(Free Software Prize)受賞作品"></A>
-#else
-1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP(Free Software prize) 1996"></A>
-#endif
-#endif /* DIST */
-
-</PRE>
-
 
 <!-- =================================================================== -->
 <HR>

@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+The Design and Implementation of "fml" Mailing List Server
+</TITLE>
+<META http-equiv="Content-Type"
+#ifdef JAPANESE
+	content="text/html; charset=ISO-2022-JP">
+#else
+	content="text/html; charset=us-ascii">
+#endif
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+#ifdef JAPANESE
+<LINK rev="alternate" lang="en" href="links-e.html">
+#else
+<LINK rev="alternate" lang="ja" href="links.html">
+#endif
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+	Related Links around Mailing List Server
+</H1>
+
+#ifdef JAPANESE
+<A HREF="links-e.html">[English] is here.</A>
+#else
+<A HREF="links.html">[Japanese] is here.</A>
+#endif
+
+
+<H3>
+links around mail systems
+</H3>
+<UL>
+	<P> MTA
+	<LI>
+	<A HREF="http://www.sendmail.org/">
+	http://www.sendmail.org/
+	</A>
+	<BR>
+
+#ifdef JAPANESE
+	<A HREF=http://www.jpcert.or.jp/tech/98-0001/>
+	技術メモ - sendmail バージョンアップマニュアル -
+	</A>
+#else
+#endif
+	<A HREF="http://www.sendmail.com/">
+	Sendmail Inc. (http://www.sendmail.com/)
+	</A>
+
+	<LI>
+	smtpfeed; 
+	Highly accelerated SMTP delivery system which is kicked off 
+	by sendmail via LMTP (Local Mail Transfer Protocol).
+	If slow MTA annoies you, try to use this!
+	I believe smtpfeed is better than a delivery system with many fork().
+
+	<A HREF="ftp://ftp.kyoto.wide.ad.jp/pub/mail/smtpfeed/">
+	ftp://ftp.kyoto.wide.ad.jp/pub/mail/smtpfeed/
+	</A>
+
+	<LI>
+	<A HREF="http://www.postfix.org/">
+	http://www.postfix.org/ (vmailer)
+#ifdef JAPANESE
+	(作者はあの tcp_wrapper の Wietse Venema;
+	以前はvmailerと呼ばれていたMTA)
+#else
+#endif
+	</A>
+	<BR>
+
+	<LI>
+	<A HREF="http://www.qmail.org/">
+	http://www.qmail.org/
+	</A>
+#ifdef JAPANESE
+	<BR>
+	<A HREF="http://www.jp.qmail.org/">
+	qmail ドキュメントの日本語訳 (http://www.jp.qmail.org/)
+	</A>
+#endif
+
+	<LI>
+	<A HREF="http://www.exim.org/">
+	http://www.exim.org/
+	</A>
+
+	<LI>
+	<A HREF="http://www.zmailer.org/">
+	http://www.zmailer.org/
+	</A>
+
+	<LI>
+	<A HREF="ftp://ftp.uu.net/networking/mail/smail/">
+	smail
+	</A>
+	
+
+	<P> DNS
+	<LI>
+	<A HREF="http://www.isc.org/bind.html">
+	http://www.isc.org/bind.html
+	</A>
+	<A HREF="ftp://ftp.isc.org/">
+	; ISC (ftp://ftp.isc.org/)
+	</A>
+
+
+	<P> Arond Security
+	<LI>
+	<A HREF="http://www.cert.org/">
+	CERT 
+	</A>
+
+	<LI>
+	<A HREF="http://www.jpcert.or.jp/">
+	JPCERT
+	</A>
+	
+	<LI>
+	<A HREF="http://www.nsi.org">
+	NSI
+	</A>
+
+
+	<P> Perl
+	<LI>
+	<A HREF="http://www.perl.org/">
+	http://www.perl.org/
+	</A>
+	<BR>
+	<A HREF="http://www.perl.com/CPAN/ports/">
+	http://www.perl.com/CPAN/ports/
+	</A>
+	<BR>
+	<A HREF=http://www.activestate.com/ActivePerl/>
+	ActivePerl
+	</A>
+	(
+	<A HREF=http://www.ActiveState.com/>
+	NTPERL
+	</A>
+	)
+#ifdef JAPANESE
+	＃5.005 はUNIX版と統合されている
+#endif
+	<BR>
+	<A HREF=ftp://err.ethz.ch/pub/neeri/MacPerl/>
+	ftp://err.ethz.ch/pub/neeri/MacPerl/
+	</A>
+	<BR>
+	<A HREF=ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
+	ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/
+	</A>
+
+	<P> Operating Systems and Architectures
+	<LI>
+#ifdef DIST
+	<A HREF="http://www.fml.org/fml/nt.html">
+#else
+	<A HREF="nt.html">
+#endif
+	links around Windows NT
+	</A>	
+</UL>
+
+<PRE>
+Copyright (C) 1993-1999 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
