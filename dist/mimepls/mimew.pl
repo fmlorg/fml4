@@ -1,7 +1,7 @@
 package MIME;
 # Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
 #
-# mimew.pl: MIME-header encoder library Ver.1.10 ('94/06/12)
+# mimew.pl: MIME-header encoder library Ver.1.11a ('94/07/24)
 #
 # インストール : @INC のディレクトリ（通常は /usr/local/lib/perl）に
 #                コピーして下さい。
@@ -28,7 +28,7 @@ $jis_out = "\x1b\(B"; # ESC-(-B ( or ESC-(-J )
 # 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。改変して
 #            配布する場合は、オリジナルと異なることを明記し、オリジナル
 #            のバージョンナンバーに改変版バージョンナンバーを付加した形
-#            例えば Ver.1.10-XXXXX のようなバージョンナンバーを付けて下
+#            例えば Ver.1.11a-XXXX のようなバージョンナンバーを付けて下
 #            さい。なお、Copyright 表示は変更しないでください。
 #
 # 注意 : mimeencodeをjperl（の2バイト文字対応モード）で使用すると、SJIS
@@ -66,7 +66,7 @@ $jis_out = "\x1b\(B"; # ESC-(-B ( or ESC-(-J )
 28,58, 30,58, 32,62, 34,66, 36,66,
 38,70, 40,74, 42,74,
 );
-$limit=74;
+$limit=74; ## ＊注意＊ $limit を 75 より大きい数字に設定してはいけない。
 
 ## null bitの挿入と pad文字の挿入のためのテーブル
 @zero = ( "", "00000", "0000", "000", "00", "0" );
@@ -90,7 +90,8 @@ sub main'mimeencode {
     $kanji = &checkkanji;
     s/$match_sjis/&s2j($&)/geo if ($kanji eq 'SJIS');
     s/$match_euc/&e2j($&)/geo if ($kanji eq 'EUC');
-    s/(\x1b[\$\(][BHJ@])+/$1/go;
+    s/(\x1b[\$\(][BHJ@])+/$1/g;
+    1 while s/(\x1b\$[B@][\x21-\x7e]+)\x1b\$[B@]/$1/;
     1 while s/$match_jis/&mimeencode($&,$`,$')/eo;
     s/$match_ascii/$1/go;
     $_;
@@ -99,7 +100,7 @@ sub main'mimeencode {
 ## MIME エンコーディング
 sub mimeencode {
     local($_, $befor, $after) = @_;
-    local($back, $forw, $blen, $len, $flen, $str, @mline);
+    local($back, $forw, $blen, $len, $flen, $str);
     $befor = substr($befor, rindex($befor, "\n")+1);
     $after = substr($after, 0, index($after, "\n")-$[);
     $back = " " unless ($befor eq ""
@@ -110,7 +111,7 @@ sub mimeencode {
     $flen = length($forw)+length($&)-3 if ($after =~ /^$match_ascii/o);
     $len = length($_);
     return "" if ($len <= 3);
-    if ($blen + $mimelen{$len>39 ? 42 : $len+3} > $limit){
+    if ($len > 39 || $blen + $mimelen{$len+3} > $limit){
         if ($limit-$blen < 30){
             $len = 0;
         }else{

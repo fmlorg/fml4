@@ -2,7 +2,7 @@
 
 # Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
 #
-# rmime: MIME-header decoder Ver.1.10
+# rmime: MIME-header decoder Ver.1.11a
 #   メッセージヘッダ中（先頭から最初の空行まで）に含まれる encoded-word
 #   （"=?ISO2022-JP?B?" と "?=" に囲まれた文字列）をサーチしてデコード
 #   する。encoded-word にはさまれた空白は全て除去する。オプションスイッ
@@ -33,10 +33,10 @@ unshift(@INC, $home, $perl_dir);
 require 'mimer.pl';
 
 ## オプションスイッチ判断のためのテーブル
-%kanjicode = ( "-e", "EUC", "-s", "SJIS" );
+%kanjicode = ( "-e", "EUC", "-s", "SJIS", "-E", "EUC", "-S", "SJIS" );
 
 ## 出力漢字コードの設定 (UNDEF は 7bit JIS)
-shift if ( $ARGV[0] =~ /^-[esj]$/ );
+shift if ( $ARGV[0] =~ /^-[esj]$/i );
 $kout = $kanjicode{$&};
 
 ## メッセージヘッダの処理
@@ -46,6 +46,7 @@ $_ = <>;
 print &mimedecode($_,$kout);
 
 ## メッセージボディの処理
-undef $/;
-$_ = <>;
-print if ($_);
+$/ = "\n";
+while (<>){
+    print;
+}

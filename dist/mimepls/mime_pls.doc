@@ -1,4 +1,4 @@
-<mime_pls.doc>                                               94/06/12
+<mime_pls.doc>                                               94/07/24
       《perl library 版 MIME-header encoder/decoder について》
 
   メッセージヘッダフィールド中の日本語文字列を MIME encode/decodeする
@@ -30,9 +30,8 @@
     は ISO-2022-JP（いわゆる7bit JIS）を透過で返します。
       RFC1522に基づき、encoded-word にはさまれたLWS（空白、タブ文字、
     改行＋タブまたは空白）は削除されます。
-      デコードした結果、ISO-2022-JP(RFC1468)で定義されたエスケープシー
-    ケンスが連続していた場合、最後のエスケープシーケンス以外のエスケー
-    プシーケンスを削除します。
+      デコードしたあと、ISO-2022-JP(RFC1468)で定義されたエスケープシー
+    ケンスのうち不必要なものがあれば削除します。
 
   ■mimew.pl
     require することにより、&mimeencode 関数が使用できます。
@@ -56,10 +55,17 @@
 
   ■rmime
     mimer.pl を使用して MIME header をデコードするフィルターです。
+    使い方：rmime [ -s | -e | -j ] [ファイル ...]
 
   ■wmime
     mimew.pl を使用して ヘッダフィールド中の日本語文字列を MIME にエン
   コードするフィルターです。
+    使い方：wmime [ファイル ...]
+
+  ■Makefile
+    mimer.pl mimew.pl rmime wmime をシステムにインストールする際に使用
+  します。他には、ppack や tar+gzip(or compress)+uuencode でアーカイブ
+  を作成することができます。（２つめはほとんど作者専用ですが）
 
 ◎無保証
   このプログラムを使用することにより生じた損害については、作者はいかな

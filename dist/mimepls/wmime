@@ -3,15 +3,16 @@
 
 # Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
 #
-# wmime: MIME-header encoder Ver.1.10
+# wmime: MIME-header encoder Ver.1.11a
 #   メッセージヘッダ中（先頭から最初の空行まで）に含まれる漢字の部分を
 #   ISO-2022-JP(7bit JIS)に変換し MIME エンコードする。
 #   また、Mime-Version: とContent-Type: の２つのフィールドがヘッダ部に
 #   含まれなければメッセージヘッダの最後に以下の対応するフィールドを追
-#   加する。
+#   加する。（$add_headers が 1 のとき）
 
 $mime_ver = "Mime-Version: 1.0\n";
 $con_type = "Content-Type: text/plain; charset=iso-2022-jp\n";
+$add_headers = 0;
 
 # 使い方 : [ perl ] wmime [ ファイル名 ...]
 #
@@ -45,16 +46,21 @@ $_ = &mimeencode($_);
 
 if (/\n\n$/){
     chop; print;
-    if (!/$match_mime_ver/io){
-        print $mime_ver;
-    }
-    if (!/$match_con_type/io){
-        print $con_type;
+    if ($add_headers){
+        if (!/$match_mime_ver/io){
+            print $mime_ver;
+        }
+        if (!/$match_con_type/io){
+            print $con_type;
+        }
     }
     print "\n";
 
 ## メッセージボディの処理
-    undef $/;
-    $_ = <>;
+    $/ = "\n";
+    while (<>){
+        print;
+    }
+}else{
+    print if ($_);
 }
-print if ($_);

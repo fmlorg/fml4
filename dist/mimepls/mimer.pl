@@ -1,7 +1,7 @@
 package MIME;
 # Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
 #
-# mimer.pl: MIME-header decoder library Ver.1.10 ('94/06/12)
+# mimer.pl: MIME-header decoder library Ver.1.11a ('94/07/24)
 #
 # インストール : @INC のディレクトリ（通常は /usr/local/lib/perl）に
 #                コピーして下さい。
@@ -21,7 +21,7 @@ package MIME;
 # 配布条件 : 著作権は放棄しませんが、配布・改変は自由とします。改変して
 #            配布する場合は、オリジナルと異なることを明記し、オリジナル
 #            のバージョンナンバーに改変版バージョンナンバーを付加した形
-#            例えば Ver.1.10-XXXXX のようなバージョンナンバーを付けて下
+#            例えば Ver.1.11a-XXXX のようなバージョンナンバーを付けて下
 #            さい。なお、Copyright 表示は変更しないでください。
 #
 # 注意 : mimedecodeをjperl（の2バイト文字対応モード）で使用するときは、
@@ -64,7 +64,10 @@ sub main'mimedecode {
     local($_, $kout) = @_;
     1 while s/($match_mime)[ \t]*\n?[ \t]+($match_mime)/$1$3/o;
     s/$match_mime/&kconv(&mimedecode($1))/geo;
-    s/(\x1b[\$\(][BHJ@])+/$1/go;
+    s/(\x1b[\$\(][BHJ@])+/$1/g;
+    1 while s/(\x1b\$[B@][\x21-\x7e]+)\x1b\$[B@]/$1/;
+    1 while s/(\x1b\([BHJ][\t\x20-\x7e]+)\x1b\([BHJ]/$1/;
+    s/^([\t\x20-\x7e]*)\x1b\([BHJ]/$1/;
     $_;
 }
 
