@@ -746,12 +746,13 @@ sub ParseMultipart
 	    }
 	    elsif (! $BASE64_DECODE) {
 		$decode = &SearchFileInLIBDIR("bin/base64decode.pl");
-		$decode = $^X . " " . $decode; # perl base64decode.pl
 
 		if (! $decode) {
 		    &Log("SyncHtml::\$BASE64_DECODE is not defined");
 		    next;
 		}
+
+		$decode = $^X . " " . $decode; # perl base64decode.pl
 	    }
 	    # when $BASE64_DECODE is defined, but not found
 	    elsif (! &ProgExecuteP($BASE64_DECODE)) {
