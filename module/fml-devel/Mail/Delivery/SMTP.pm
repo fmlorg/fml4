@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SMTP.pm,v 1.13 2002/01/27 13:11:57 fukachan Exp $
+# $FML: SMTP.pm,v 1.17 2002/07/31 13:02:10 fukachan Exp $
 #
 
 
@@ -128,6 +128,7 @@ sub new
     $me->{_default_io_timeout} = $args->{default_io_timeout} || 10;
     $me->{_log_function}       = $args->{log_function};
     $me->{_smtp_log_function}  = $args->{smtp_log_function};
+    $me->{_smtp_log_handle}    = $args->{smtp_log_handle};
 
     _initialize_delivery_session($me, $args);
 
@@ -401,7 +402,7 @@ See L<Mail::Message> for more details.
 # Return Value: none
 sub deliver
 {
-    my ($self, $args) = @_;
+    my ($self, $args, $io_params) = @_;
 
     # recipient limit
     $self->{_recipient_limit} = $args->{recipient_limit} || 1000;
@@ -432,7 +433,7 @@ sub deliver
 	# try to open $map
 	eval q{
 	    use IO::Adapter;
-	    my $obj = new IO::Adapter ($map, $args->{ map_params });
+	    my $obj = new IO::Adapter $map, $args->{ map_params };
 	    if (defined $obj) {
 		$obj->open || croak("cannot open $map");
 	    }
@@ -505,7 +506,7 @@ sub deliver
     $self->_reset_mapinfo;
 
     if ( $self->{ _num_recipients } ) {
-	Log( "recipients: ". $self->{ _num_recipients } );
+	Log( "recipients: total=". $self->{ _num_recipients } );
     }
 }
 
@@ -652,7 +653,7 @@ sub _send_recipient_list_by_recipient_map
     # $map syntax is "type:parameter", e.g.,
     # file:$filename mysql:$schema_name
     use IO::Adapter;
-    my $obj = new IO::Adapter $map;
+    my $obj = new IO::Adapter  $map, $args->{ map_params };
 
     unless (defined $obj) {
 	Log("Error: cannot get object for $map by IO::Adapter");
@@ -759,6 +760,10 @@ sub _send_body_to_mta
     $msg->set_log_function( $SmtpLogFunctionPointer );
     $msg->set_print_mode('smtp');
     $msg->print($socket);
+
+    if (defined $self->{ _smtp_log_handle }) {
+	$msg->print( $self->{ _smtp_log_handle });
+    }
 }
 
 

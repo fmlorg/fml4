@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Postfix19991231.pm,v 1.16 2002/02/01 12:04:01 fukachan Exp $
+# $FML: Postfix19991231.pm,v 1.18 2002/06/30 14:27:49 fukachan Exp $
 #
 
 
@@ -62,7 +62,7 @@ sub analyze
     my ($self, $msg, $result) = @_;
     my $data_type = $msg->whole_message_header_data_type();
 
-    if ($data_type =~ /multipart/i) {
+    if (defined($data_type) && $data_type && $data_type =~ /multipart/i) {
 	$self->_analyze_broken_dsn($msg, $result);
     }
     else {
@@ -87,7 +87,7 @@ sub _analyze_plaintext
     my $m = $msg->{ next };
     do {
 	if (defined $m) {
-	    my $num  = $m->num_paragraph;
+	    my $num = $m->num_paragraph;
 	    for ( my $i = 0; $i < $num ; $i++ ) {
 		my $data = $m->nth_paragraph( $i + 1 );
 
