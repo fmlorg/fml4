@@ -145,12 +145,13 @@ sub ExpireModeratedQueueDir
 sub ModeratedDeliveryTypeII
 {
     local(*e) = @_;
-    local($passwd, $id, $f, $h);
+    local($passwd, $id, $f, $h, $fx);
 
+    # Call &Command() from here if keyword is found in mailbody;
     # if --ctladdr, eval a queued commands mail.
     # XXX: "# command" is internal represention
     if (($PERMIT_COMMAND_FROM eq "moderator")
-	&& $e{'Body'} =~ /^[\s\n]*\# moderator/) {
+	&& $e{'Body'} =~ /^[\s\n]*(\#\s*moderator|moderator)/) {
 	&Log("moderator: eval queue as a command") if $debug;
 	require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 	return;
@@ -164,7 +165,12 @@ sub ModeratedDeliveryTypeII
     $id = int(rand(1000000));
     $id = "$PCurrentTime$$.$id";
     $f      = "$ModeratedQueueDir/mq$id";
+    $fx     = "$ModeratedQueueDir/xq$id";
     $f_info = "$ModeratedQueueDir/mi$id";
+
+    # pcb: 
+    # log status information; "x" == "execution flag"
+    if ($e{'pcb:mode'} eq 'command') { &Touch($fx);}
 
     # log
     &Log("moderator: a submit is queued as id=$id");
@@ -288,7 +294,9 @@ sub ModeratorProcedure
 				 "$ModeratedQueueDir/mq$id",
 				 "moderator: resend id=$id to ML\n\n");
 		
-		&ModeratorResend(*e, "$ModeratedQueueDir/mq$id");
+		&ModeratorResend(*e, 
+				 "$ModeratedQueueDir/mq$id", 
+				 "$ModeratedQueueDir/xq$id");
 	    }
 	    else {
 		&Log("Error: moderator: no such id=$id");
@@ -316,7 +324,7 @@ sub ModeratorProcedure
 # Interface to &Distribute in Type II
 sub ModeratorResend
 {
-    local(*e, $f) = @_;
+    local(*e, $f, $fx) = @_;
     local($org_fa) = $From_address; # save global variable
 
     &GetTime;
@@ -353,21 +361,27 @@ sub ModeratorResend
     }
 
     #if  --ctladdr, eval commands
+    # Hmm, this mode may have two modes ;_;
+    # 1. distribute
+    # 2. command mode
     if ($PERMIT_COMMAND_FROM eq "moderator") {
 	# save and reset
 	$ppf = $PERMIT_POST_FROM;
 	$pcf = $PERMIT_COMMAND_FROM;
 	$mlac = $MAIL_LIST_ACCEPT_COMMAND;
+
+	# moderator certified, so not check authentication anymore.
         $PERMIT_POST_FROM = $PERMIT_COMMAND_FROM  = "anyone";
 
 	&FixHeaderFields(*Envelope);
 
 	$CheckCurrentProcUpperPartOnly = 1;
+	# XXX: oops against CTK ;D
 	$MAIL_LIST_ACCEPT_COMMAND = 1;
 	&CheckCurrentProc(*Envelope);
 	$CheckCurrentProcUpperPartOnly = 0;
 
-	$ForceKickOffCommand = 1;
+	$ForceKickOffCommand = 1; # enforce &Command() call.
 	&ModeBifurcate(*Envelope);      # Main Procedure
 	$ForceKickOffCommand = 0;
 
@@ -391,6 +405,7 @@ sub ModeratorResend
     $From_address = $org_fa;
 
     unlink $f;
+    unlink $fx if -f $fx;
 }
 
 
