@@ -159,16 +159,17 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 =E
 If the following arguments are given,  
 
-	"|/usr/local/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
+   "|/usr/local/fml/fml.pl /var/spool/ml/elena /usr/lib/uja /lib/aja"
 
 の時は
 =E
 fml.pl searches OS for executable and libraries like this:
 
 	1   /var/spool/ml/elena 
-	2   /usr/local/fml 
-	3   /usr/lib/uja
-	4   /lib/uja
+	2   /var/spool/ml/etc/fml/
+	3   /usr/local/fml 
+	4   /usr/lib/uja
+	5   /lib/uja
 
 のような順番でファイルを探します。
 
@@ -222,8 +223,8 @@ order:
 
 				Example
 	-----------------------------------------------
-	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
 	$DIR			/var/spool/ml/elena/
+	$ML_DIR/etc/fml/	/var/spool/ml/etc/fml/
 	$EXEC_DIR		/usr/local/fml/
 	perl standard path	@INC
 
