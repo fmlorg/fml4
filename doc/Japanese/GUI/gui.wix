@@ -1,8 +1,8 @@
-		CGIの実装
+.C		CGIの実装について
 
 たとえば $EXEC_DIR = '/usr/local/fml' 
 
-○ 基本的なディレクトリ構成
+.S	基本的なディレクトリ構成
 
    $EXEC_DIR/www/ は template やライブラリの場所
 
@@ -11,7 +11,7 @@
    $EXEC_DIR/www/authdb/ パスワードの実体置き場
 
 
-○ 基本設定ファイル
+.S	基本設定ファイル
 
    require $EXEC_DIR/.fml/system
 	このファイルはCGIからは変更不可
@@ -21,7 +21,7 @@
 	このファイルはCGIからも変更可能であるべき
 
 
-○ インストーラ
+.S	インストーラ
 
 1. インストール ("make install-withcgi") 時にひとおり全部設定。
 
@@ -29,7 +29,7 @@ admin でのアクセスを可能にする。つまりあとはWWWだけで閉じるようにする
 ということ
 
 
-○ パスワードファイル
+.S	パスワードファイル
 
 	$EXEC_DIR/www/cgi-bin/admin/.htaccess 
 

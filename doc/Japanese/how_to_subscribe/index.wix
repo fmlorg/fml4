@@ -1,11 +1,18 @@
 .HTML_PRE
-	メンバー登録や削除
+		メンバー登録や削除について
 
 .toc
 .~HTML_PRE
 
-.include acl.wix
-.include autoregist.wix
-.include examples.wix
-.include moderator.wix
+.p	登録について
+.include overview.wix
 .include registration.wix
+.include autoregist.wix
+.include moderator.wix
+.include acl.wix
+
+.p	アドレスについて
+.include address.wix
+
+.p	事例集
+.include examples.wix

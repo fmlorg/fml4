@@ -3,6 +3,7 @@
 .n	acl
 .l	delivery-mode
 
+
 .S	アクセス制御のポリシー
 =E.S	Access Control and policy
 .l	access_policy
@@ -108,6 +109,7 @@ defined as follows:
 
 のようになっています(elena MLの場合)。
 
+
 .S	自動登録とアクセス制御
 =E.S	Automatic registration and access control
 .l	access_policy_and_auto_regist
@@ -163,6 +165,7 @@ to automatic registration routine.
 enables to pass mail from a not member to the automatic registration
 routine.
 
+
 .S	配送用のアドレス ($MAIL_LIST)
 =E.S	$MAIL_LIST
 .k	配送用のアドレス ($MAIL_LIST)
@@ -201,6 +204,7 @@ This is not used in default and prepared for some backward
 compatibility.
 .fi
 
+
 .S	コマンド専用のアドレス ($CONTROL_ADDRESS)
 =E.S	Address for commands only
 .k	$COMMAND_CHECK_LIMIT
@@ -222,6 +226,7 @@ $PERMIT_COMMAND_FROM. You can change the variable by hand or makefml config.
 コマンドを実行できる人の範囲(だれでも/メンバーだけ)は 
 $PERMIT_COMMAND_FROM で変更します。特別な場合を除きこの変数を変えるこ
 とはないでしょう。デフォールトは members_only
+
 
 .S	配送とコマンドを同じアドレスで行なう場合
 =E.S	If $MAIL_LIST == $CONTROL_ADDRESS
@@ -287,6 +292,7 @@ This is not used in default and prepared for some backward
 compatibility.
 .fi
 
+
 .S	コマンド or 特殊目的専用のサーバへの変更
 =E.S	Set up a special server
 .k	コマンド専用のサーバへの変更
@@ -320,6 +326,7 @@ you can provide ftpmail server.
 するように作動します。この場合配送は行なわれません。絶対配送させないよ
 うにするために --ctladdr というコマンドラインオプションをつけておくと
 よいでしょう。
+
 
 .S	リモートで管理する際のアクセス制御
 =E.S	Access control in remote administration

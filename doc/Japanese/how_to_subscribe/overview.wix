@@ -1,0 +1,36 @@
+.C	Overview
+
+まず basic_setup を見て欲しい。
+.url ../basic_setup/index.html
+
+
+.S	基本は手動登録
+
+リクエストを受けたらメールサーバ上で
+
+% makefml add elena アドレス
+
+
+.S	でも自動登録に設定することが多い
+
+リクエストの数が多いと面倒ですからね:) 
+
+自動登録にするには
+
+makefml config elena 
+   MAIN MENU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_subscribe
+
+を選ぶ。ユーザはメール本文に「subscribe 自分の名前(ローマ字)」と書いて
+elena-ctl@ドメイン というアドレスへ出す。そうすると confirmation が返
+るのでそれに答える。
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
