@@ -27,7 +27,9 @@ clean:
 	gar *~ *.bak
 
 diag:
-	sh ../../distrib/doc/bin/diag_tutorial.sh
+	@ sh ../../distrib/doc/bin/diag_tutorial.sh
+	@ echo -------------
+	@ egrep '^\.p ' */*wix || echo ok
 
 test:
 	apply '$(FML)/bin/fwix.pl -f ../../tmp/text_index.ph -n i ' \
