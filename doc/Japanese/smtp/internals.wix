@@ -1,0 +1,273 @@
+.C	Internal
+
+.S	SMTPライブラリについて
+=E.S	SMTP library
+.l	smtp
+.k	SMTP (Simple Mail Transfer Protocol)
+.k	MTA (Mail Transport Agent)
+
+SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
+Transport Agent)と通信するライブラリです。
+=E
+FML can connect MTA (Mail Transport Agent) via SMTP (IPC).
+libsmtp*.pl are SMTP libraries. The default port is 25/tcp.
+You can control the port as $PORT. 
+
+$PORT = 25 (25/tcp) で通信しますが、
+
+	$PORT 
+.k	$PORT 
+
+を変えることで別のポートで通信することもできます。また通常
+=E
+FML logs a session details in $SMTP_LOG.
+
+	$SMTP_LOG (default "var/log/_smtplog")
+.k	$SMTP_LOG
+.l	$SMTP_LOG
+
+というファイルに通信のログを残します。このログはデバッグに非常に役立ち
+ます。
+=E
+If you do not need th session log, set 
+
+	$NOT_TRACE_SMTP 
+.k	$NOT_TRACE_SMTP 
+
+をセットすると、このログは残りません。
+
+また、どのマシンの sendmail を使うかも自由に設定できます。デフォールト
+はそのマシンです。もしMLサーバのマシン(受けるマシン)が貧弱ならそのマシ
+ンが何十通もメールを送り出すのは酷です。
+=E
+Which MTA in which hosts FML uses as a distributor? In default, $HOST
+is "localhost" (ML server itself). You can use another host by
+configuring $HOST.
+.l	$HOST
+
+	$HOST         = 'localhost'; (default)
+.key	$HOST
+
+そういう場合変数 $HOST を書き換えて別のマシンに配送を任すこともできま
+す。その時は
+
+	$HOST         = 'beth.foo.bar.ac.jp'; (another host)
+
+のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
+ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
+のでそのマシンを使う許可を得るべきです。
+=E
+You requires permission that you can use $HOST as a distributor since
+you use the machine resources. 
+
+HOSTではポート番号が25でないMTAへのアクセスも可能です。例えば port
+10025/tcp を使うこともできます。
+=E
+You can use MTA with another port (not 25/tcp). For example, 10025/tcp
+
+	$HOST         = 'beth.foo.bar.ac.jp:10025'; 
+
+.S	予備のSMTPサーバ
+=E.S	Secondary SMTP Servers
+.k	予備のSMTPサーバ
+.k	@HOSTS
+
+もし SMTP サーバに何かあった時のために @HOSTS に複数台の予備の 
+sendmail の走っているマシンを定義することが出来ます。
+=E
+If you can use several machines as delivery, you can set
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+この場合、もし $HOST に connect() できない時は、machine-1 に、
+もし machine-1 に connect() できない時は machine-2 へ…とい
+う風に予備のサーバを使い何とか配送をしようと試みます。
+全部だめだった場合は sendmail コマンドを使って配送を試みます。
+sendmail がないシステムでは qmail-smtpd, exim なdも試します。
+=E
+to use machine-* parallelly. FML breaks out recipients up to
+$MCI_SMTP_HOSTS groups. Mail to deliver is injected to each MTA on
+$HOST and @HOSTS. If all connections to hosts fail, FML tries to send
+mail with "sendmail" called as a command.
+
+.S	同じmxについて
+=E.S	On The Same Mx
+.key	mx
+
+sendmail 8.xではCHANGES-R5-R8にあるとおり↓
+=E
+In CHANGES-R5-R8 of Sendmail R8:
+
+   For example, if two sites ``foo.com'' and ``bar.com'' are both
+   served by UUNET, they will have the same set of MX hosts and will
+   be sent in one transaction.  UUNET will then split the message
+
+一通で送られます。ばらばらの順番でも大丈夫。
+
+sendmail 5.xでは@.*の部分が厳密に同じで、さらにちゃんと並んで書いてあ
+れば
+=E
+Sendmail 5.x requires ordering by domain:
+
+	fukachan@phys.titech.ac.jp	
+	Elena@phys.titech.ac.jp	
+	cocoa@phys.titech.ac.jp	
+
+一通にまとめられます。
+
+qmail 1.0 はそうことをせず相手の負荷も回線の太さも考えず、ひたすら一通
+ずつ投げつけます(だ〜っ)。
+
+
+.S	MCI Cache
+=E.S	MCI Cache
+.k	MCI
+
+.if LANG == ENGLISH
+Today sendmail 8.x has parallel connections and re-uses sockets. 
+Delivery acceleration codes is called MCI.
+Please see deliver() in /usr/src/usr.sbin/sendmail/src/deliver.c.
+
+WIDE-patched sendmail and smtpfeed has more and more elaborate
+parallelism of resolver and SMTP connections.
+.fi
+.if LANG == JAPANESE
+TCP Connection Cache の基本的なアイデアは TCP Connection 自体のコスト
+の高さです。
+
+もともとの sendmail は
+
+	for (…おくるべきホストのリスト…) {
+		ソケット、コネクト、通信、おしまひ
+	}
+
+を一つ一つおこないます。これだと 通信が遅いだろうが、なんだろうが、
+TIMEOUT か error が起こるまで長い間無駄な配送がありえます。
+
+sendmail 8.7 では標準装備ですが、いまは
+#旧もとのりさんのWIDEぱっち ってやつです
+
+	for (…おくるべきホストのリスト…) {
+		ソケット1
+		ソケット2
+		…
+
+		じゅんぐりにまわしていって、
+		通信がしやすい connection へ優先的に
+		通信、(…おしまひ)
+
+		………
+	}
+	#ちょっと、簡単化し過ぎかな↑
+
+のように、さっさと送ることが可能なホストへどんどん送って、駄目なところ
+は駄目なままです。どうしてもだめなら、最後は queue up されて、次回30分
+後とかに retry です。
+
+そういう意味で、MCI CACHE は多いと だめなホストが2、3個ならかなり理想
+的な速度で配送できるでしょう。もし、MCI_CACHE が2個で、2個だめなホスト
+があると、そこでしばらくつかえてしまうので、遅くなってしまい R5 のよ
+うになってしまうと。
+
+そういう意味で MCI CACHE は多ければ多いほどよさそうに見えますが、やり
+すぎると 今度はカーネルと折り合いがつかなくなるので、まぁ数個が妥当な
+数字なのでしょうね。
+
+○ 1つのメールは常に1か所づつ配送されるのでしょうか?
+
+これは (multi thread kernel でないのなら) kernel がある時点ではかならず 
+CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
+ても Connection 自体は OkN の N 個(MAX) ACTIVE なままです(netstat で
+みえるもの)。
+
+これにさらに MX Cache 等が組合わさって、R8はR5にくらべ非常に高速化さ
+れましたね。
+.fi
+
+.S	配送効率についての考察
+
+配送効率についての考察
+=E
+Discussion On Delivery Efficiency
+
+.S	配送プロセスの律速段階とは
+=E.S	Blocking Stage Of Delivery Process
+.k	配送プロセスの律速段階
+
+律速段階はやっぱり sendmailの配送プロセスそのものでしょう。この部分の 
+overhead は R5 にくらべ R8 では非常に改善されましたがそれでもかなりの 
+overhead があります。single thread であることが最大の要因の一つです。
+並列度をあげるためには、SMTP connection や DNS query を並列化しないと
+いけません。高速配送には例えば smtpfeed を利用して下さい:)
+qmail vs smtpfeed: 本当に複数のプロセスを立ち上げるという暴挙をやると 
+qmail になります;_;理論の上ではマシンの負荷は圧倒的に違うはずですが、
+配送するアドレス分布のスペクトルが白色雑音状態なら配送時間はあまり違わ
+ないように振舞うでしょうね。
+=E
+The cost of delivery depends on the cost of SMTP connections. To
+accelerate each action e.g. DNS, SMTP sessions need to run parallelly
+and simultaneously. For example it is good to use "smtpfeed" for
+acceleration of delivery. qmail forks plural processes and run
+simultaneously ;_;
+
+逆にいえば fml 自体を tuning して速度を例えば 0.1 sec 上げても ML の配
+送プロセスには何のメリットも生じないということでもあります。基本的には
+MTAのチューンや機能の並列化を先に考えるべきです。
+=E
+The tuning of fml.pl codes cannot contribute the delivery acceleration
+since delivery speeds are much slower than fml processing time scale.
+To accelerate delivery, we can consider a few conditions:
+
+１	十分なパワーのマシンで十分な file descriptor や 
+	多くの process が走っても大丈夫であれば、
+	複数の sendmail を起動して配送を試みる。
+	この場合ちゃんと Load Average と sendmail.cf を tune する
+	必要があります。人それを qmail と呼ぶという話もあります(苦笑)
+=E
+1	plural MTA running on one host. fml.pl uses them simultaneously.
+	If the host is enough tough, it is O.K. It is the logic of qmail:)
+	
+２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
+=E
+2	uses plural MTA on different hosts. 
+	This works even though hosts are delicate.
+
+３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
+	一回そのリレーサーバに投げて、そこから再配送をする。
+=E
+3	prepare relay servers, a variation of case 2. 
+	This case assumes one smtp session transports a pack of
+	plural recipients e.g. one smtp session for a region.
+
+ケース1、2は fml の $MCI_* 変数群がそれを可能にします。
+=E
+FML prepares variables $MCI_* to use plural MTA for one article.
+
+ケース3のリレーサーバは各ユーザごとに”管理者”が設定できます。ここで
+考えるべきこととしてリレーサーバは相手のマシンに負荷をかけることに注意
+しなくてはなりません。またネットワークトポロジーを考慮の上決めるべきで
+す。そして現在ではSPAM不正中継のため普通リレーはできないので特定のホス
+トからのリレーだけはあけてもらうなどの設定変更も必要なことにも注意して
+下さい。
+=E
+Today MTA rejects a relay against UCE(SPAM) illegal relay. If you use
+relay server, you need to reconfigure MTA's on relay machines.
+
+なお $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
+=E
+You can use $DEFAULT_RELAY_SERVER as a default relay server. fml.pl
+sends mail to deliver to the default relay server. The server
+delivers it.
+
+	$DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+
+で定義されたリレーサーバへ投げそのサーバに配送してもらうということもで
+きます。
+.xref	$DEFAULT_RELAY_SERVER
+
+qmail というひたすら配送プロセスを fork() しまくって、何も考えずにばん
+ばん投げるMTAがあります。そういう配送の仕方でバックボーンならいいと思
+いますが、細い線のサイトにばんばん投げ付けられてしまうようになったら最
+低ですよね？世の中どこも線が太いなんていう仮定は誤りですから。
+.url	http://www.qmail.org/

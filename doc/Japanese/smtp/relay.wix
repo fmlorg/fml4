@@ -1,0 +1,150 @@
+.C	リレーサーバを使う
+=E.C	Relaying based on RFC821
+.k	%リレー (obsolete)
+.l	relay
+
+リレーなんか禁止というサイトもあることにちゅういしましょう(昔のはなし)。
+最近では SPAM があるのでリレーは基本的に禁止ですからあまり意味がありま
+せん。もちろんお互いに合意の上でIPアドレスベースでチェックしてリレーを
+するなどは考えられます。
+=E
+Today we cannot permit relaying against spam mails. If sendmail is not
+found, FML tries to use qmail-smtpd, exim.
+
+
+.S	activesファイルによるリレー制御
+=E.S	Relay Configurations In Actives File
+
+actives には
+=E
+When you can use relay server (here axion.phys.titech.ac.jp), You can
+write how to relay in "actives" file, 
+
+	アドレス			リレーサーバー
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+=E
+	address				relay server
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+
+のような書き方ができます。これをすると sendmail には
+=E
+FML interprets, rewrite and injects this to sendmail as:
+
+	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
+
+のように渡されます。actives ファイルに
+=E
+If "actives" file has the following entries
+
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+	cocoa@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+
+なものがあると
+=E
+FML injects 
+
+	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:Elena@phys.titech.ac.jp
+	@axion.phys.titech.ac.jp:cocoa@phys.titech.ac.jp
+
+のように渡されます。sendmail 8.x での配送は axion.phys.titech.ac.jp ま
+で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
+=E
+sendmail 8.x delivery aggregates SMTP sessions to axion.
+On axion, MTA segregates it to three mails.
+
+パケットの数もサーバの負担も軽くなるのでもしリレーしていいという許可が
+得られればどこかでリレーサーバを使えるといいですね。
+
+.if	LANG == JAPANESE
+[捕捉]
+
+fml 1.3.2 からは actives 等の表現が拡張性のため違う形になっています。
+古いフォーマットで書いた場合は、自動的にNEW FORMAT に自動変換して解釈
+しています。
+.xref	fml-file-structure
+
+OLD FORMATでは
+
+	fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
+
+NEW FORMATでは
+
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+.fi
+
+.S	全てのメールをリレーサーバに投げる
+=E.S	Default relay server	
+
+$DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
+=E
+You can set up $DEFAULT_RELAY_SERVER. it is used as a default relay
+server. FML recognizes all recipients should be delivered via the
+relay server. FML interprets entries in "actives" has
+r=$DEFAULT_RELAY_SERVER.
+
+	$DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+.l	$DEFAULT_RELAY_SERVER
+
+で定義されたリレーサーバへ投げそのサーバに配送します。
+
+.S	activesファイルによるリレー (sendmail 5.x)
+=E.S	Relay Based On Actives File (Sendmail 5.X)
+
+	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
+	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+	cocoa@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
+
+↑このように順番に並んでいないと一通になってくれませんので注意。
+それ以外は8.xの時と一緒です。
+=E
+In Sendmail 5.x, you require additional orderings by relay server in
+"actives". 
+
+.S	CF (by motonori@wide.ad.jp) 形式による relay 
+=E.S	Cf (By motonori@wide.ad.jp) Style Relay Configurations
+.k	relay hack based on CF (by motonori@wide.ad.jp)
+.k	$CF_DEF
+.k	%RELAY_NGW
+.k	%RELAY_GW
+.k	%RELAY_NGW_DOM
+.k	$RELAY_HACK
+
+$RELAY_HACK = 1; がセットされ、$CF_DEF で STATIC_ROUTE_FILE で定義する
+static 配送ルールを記したファイルが設定された場合、それに従ってリレー
+サーバの設定がされます。
+=E
+When $RELAY_HACK = 1; is defined and $CF_DEF (CF style static delivery
+rule file) exists, FML controls relaying based on it.
+
+CF 形式の例1:
+or.jp ドメイン宛のメールは mlrelay0.domain0 へ全部送る。それ以外は 
+$HOST (通常自分のマシン) で定義されるマシンで配送を行なう。
+=E
+CF style example: 
+	send e-mail for or.jp domain to mlrelay0.domain0.
+
+	GW smtp-ignmx:  mlrelay0.domain0
+	DOM or.jp
+
+CF 形式の例2:
+co.jp にマッチしないドメイン宛のメールはすべて mlrelay.domain というマ
+シンへ送る。しかし or.jp ドメイン宛のものは mlrelay0.domain0 へ送る。
+=E
+CF style example2:
+	send mails not for co.jp to mlrelay.domain.
+	send e-mail for or.jp domain to mlrelay0.domain0.	 
+
+	NGW smtp-ignmx: mlrelay.domain
+	DOM co.jp
+	GW smtp-ignmx:  mlrelay0.domain0
+	DOM or.jp
+
+リレー情報はハッシュテーブル %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM に入
+れられ、smtp library で利用されます。
+=E
+SMTP library uses hashes %RELAY_NGW, %RELAY_GW, %RELAY_NGW_DOM for
+control of this relay routings.
+

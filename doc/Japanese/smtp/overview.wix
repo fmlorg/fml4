@@ -1,15 +1,8 @@
-.HTML_PRE
-.# .__repl_title__
-                配送関係
+.C	Overview
 
-.toc
-.~HTML_PRE
+フィルタリングについては => .ptr{filter}
 
-.# .__repl_include__
-.include overview.wix
-.include howto.wix
-.include internals.wix
-.include relay.wix
+リレーについて => .ptr{relay}
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

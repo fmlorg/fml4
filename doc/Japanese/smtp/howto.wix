@@ -1,0 +1,180 @@
+.C	事例
+
+.S	配送プログラム(e.g. sendmail)との通信のログを残す
+=E.S	SMTP logfile
+.k	var/log/_smtplog
+.k	_smtplog
+.k	$NOT_TRACE_SMTP
+.k	$SMTP_LOG
+
+ログをとるのがデフォールトです。
+
+sendmailとのやりとりの記録(もっとも最近のものだけ)デバッグに便利です。
+(デバッグとか終わっちゃって)必要ないなら
+=E
+For debug, FML logs SMTP session log in $SMTP_LOG. If you do not want
+the logging, please set
+
+	$NOT_TRACE_SMTP = 1; 
+
+と config.ph にかいてください。ログをとらなくなります。
+
+.S	ドメインをソートしてから配送
+=E.S	Delivery After Sorting
+
+bulkmailer の用にドメインをソートしてから配送プログラムに突っ込む。
+でも現代ではほとんど意味がないだろう。
+=E
+If
+
+	$SMTP_SORT_DOMAIN
+.k	$SMTP_SORT_DOMAIN
+
+を設定するとソートを行なう。
+=E
+is defined, delivery routine works after sorting recipients by domain.
+
+.# [MEMO] (against variable consistency check)
+.# %WMD is not a user defined variable.
+.#
+
+
+.S	$OUTGOING_ADDRESS: perl の生存時間を短くする 
+=E.S	$OUTGOING_ADDRESS: shorten perl life time
+
+.if LANG == JAPANESE
+貧弱なCPUのマシンに貧弱なメモリしかない場合(486で8M,16Mみたいな…)には、
+fmlが直接MTAへSMTP配送する時間すら惜しんで perl の生存時間を短くしたい
+という需要があります。そのための機能を提供します。
+$USE_OUTGOING_ADDRESS が non zero の時に次のように動きます。
+
+まず $OUTGOING_ADDRESS は:include:するだけの単純なMLです。例えば
+/etc/aliasesで
+
+	list-going: :include:/some/where/list
+
+のようにかきます。/some/where/list は actives などから生成されたＭＬの
+配送リストです。MTAはこのlistの人に配送を試みます。
+
+   if ($USE_OUTGOING_ADDRESS) {
+	1. fml は一つのアドレス $OUTGOING_ADDRESS だけに送り終了
+	   perl はこの時点で終了します。
+	2. MTAが前述の :include: 先の配送リストを展開しそのメンバーに配送
+   }
+
+XXX: minmin 様にささぐっす(謎)
+.fi
+.if LANG == ENGLISH
+$OUTGOING_ADDRESS is a simple :include: style ML. The member is
+recipients of this ML. Fml generates the file from recipient lists,
+@ACTIVE_LISTS files. 
+
+   if ($USE_OUTGOING_ADDRESS) {
+	1. fml sends article to $OUTGOING_ADDRESS.
+	   Hence perl dies here!
+	2. MTA expands the include and delivers the article to ML members.
+   }
+.fi
+
+[設定の手順]
+=E
+[How to configure]
+
+0.	elena MLを例にとります。
+=E
+0.	Consider elena ML
+
+1.	include の見本を作る(include-outgoing)
+=E
+1.	make include examles
+
+   % cd /var/spool/ml/elena
+   % make outgoing 
+
+include-outgoing という見本のファイルが生成されます。 
+=E
+You can see elena/include-outgoing file.
+
+2.	/etc/aliases に書いて newaliases
+=E
+2.	add elena-outgogin to /etc/aliases and run newaliases
+
+   elena-outgoing: :include:/var/spool/ml/elena/include-outgoing
+
+3. 	makefml config でこの機能を有効にする。
+=E
+3.	run 'makefml config' to enable this function
+
+	-> OPTIONS -> SMTP -> USE_OUTGOING_ADDREESS -> "y"
+
+$USE_OUTGOING_ADDDRESS を1にします。
+=E
+$USE_OUTGOING_ADDDRESS changes from zero/null to 1.
+
+
+.S	PIPELININGを使わなくする
+=E.S	Disable PIPELINING
+
+	$NOT_USE_ESMTP_PIPELINING = 1;
+
+PIPELINE が可能な場合でも使わない
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
+
+.S	複数のマシンの sendmail を使ってパラレルに送信
+=E.S	Use Plural Mta'S On Plural Hosts
+.k	$HOSTS
+.k	@HOSTS
+.k	@HOST(@HOSTSの旧変数名)
+
+複数の(sendmailの走っている)マシン(非常時のセカンダリも含む)
+=E
+To use plural MTA on plural hosts (N hosts), set the number of hosts
+in
+
+	$MCI_SMTP_HOSTS = N;
+
+で指定されたＮ台のマシンを配列 @HOSTS で指定する
+=E
+and configure an array @HOSTS filled with at least N hostnames.
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+$HOST と @HOSTS で与えられる N個 のマシンの sendmail をパラレルに使っ
+て(理論上での限界は)N倍配送を高速化する。
+＃ $HOST も使われてしまうのは、もともと @HOSTS はセカンダリだったから
+＃ です(歴史的に)。
+=E
+fml.pl uses MTA's on $HOST and @HOSTS in delivery.
+
+もし、指定したサーバ数が N 個に足りない場合は、$HOST が何度も使われま
+す。Nは理論上 int と同じだろうが、普通は netmask できまるわな(笑)でも、
+他のドメインでも使えるから、int までいく(理屈、理屈)
+＃とくに actives の最後の方の人はうれしい
+=E
+If the total number of $HOST and @HOSTS < N, fml.pl uses $HOST again
+and again. This technique is used as a secondary server in delivery.
+When you setup @HOSTS and unset $MCI_SMTP_HOSTS, fml.pl uses $HOST in
+usual, but @HOSTS if $HOST is down.
+
+.S	VERPs
+
+See .ptr{VERP}. 
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
