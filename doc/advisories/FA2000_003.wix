@@ -139,6 +139,18 @@ MIME Multipart のメールはすべからく危ない可能性があるので、拒否すると
    &ADD_CONTENT_HANDLER('multipart/.*', '.*/.*', 'reject');
 .~q
 
+.C	other solutions
+
+.S	vf.exe
+
+Message-ID:  <000d01bfb914$214863e0$2102020a@ELYSIUM>
+Date:         Mon, 8 May 2000 18:37:48 +0100
+From: Cerberus Security Team <CST@CERBERUS-INFOSEC.CO.UK>
+Subject:      Contemplations : Melissa, I love you - not!
+
+.url http://www.cerberus-infosec.co.uk/
+
+
 .appendix
 .C	Information
 
