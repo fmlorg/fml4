@@ -81,7 +81,7 @@ usage:
 	@ echo ""
 
 	
-_dist:
+__dist:
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator 2>&1| tee $(DESTDIR)/_distrib.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_distrib.log
@@ -111,11 +111,9 @@ release:
 
 ### "make build"
 .include "distrib/mk/fml.build.mk"
-build: init_build plaindoc htmldoc pkgsrc dist ${__BUILD_END__}
+build: init_build plaindoc htmldoc __dist ${__BUILD_END__}
 
-
-doc: INFO syncinfo newdoc search
-newdoc: htmldoc syncwww syncinfo 
+doc: init_build plaindoc htmldoc
 
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
@@ -160,3 +158,8 @@ proc/libkern.pl: kern/fml.pl
 
 clean:
 	find . |grep '/\.#' |${PERL} -nple unlink
+
+search:
+	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
+
+ 
