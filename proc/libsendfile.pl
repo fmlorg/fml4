@@ -60,7 +60,10 @@ sub MgetCompileEntry
 	}
 	else {
 	    $status = "Fail";
-	    &Mesg(*e, "\n>>>$proc $value $fld\n\tfailed.");
+	    # &Mesg(*e, "\n>>> $proc $value $fld\n\tfailed.");
+	    local($fld) = $Fld;
+	    $fld =~ s/^\#\s*//;
+	    &Mesg(*e, "\n>>> $fld\n\tfailed.");
 	};
 
 	&Log("$proc:[$$] $key $fld: $status");
@@ -244,6 +247,8 @@ sub mget3
 	local($xa, $xb);
 	@filelist = sort nsort @filelist;
 
+	# define %SE_MIB; # mget3; SendingEntry MIME Information Base;
+
 	$total  = &DraftGenerate($returnfile, $mode, $s, @filelist);
 	
 	# ENTRY IN
@@ -256,10 +261,13 @@ sub mget3
 	$SendingEntry{$opt, 'unlink'}  = " @r ";
 
 	# MIME Header Info;
-	$SendingEntry{$opt, 'h:mime-version:'} = $e{'GH:Mime-Version:'};;
-	$SendingEntry{$opt, 'h:content-type:'} = $e{'GH:Content-Type:'};
+	$SE_MIB{$opt, 'h:mime-version:'} = $e{'GH:Mime-Version:'};;
+	$SE_MIB{$opt, 'h:content-type:'} = $e{'GH:Content-Type:'};
+	$SE_MIB{$opt, 'h:content-transfer-encoding:'} = 
+	    $e{'GH:Content-Transfer-Encoding:'};
 	undef $e{'GH:Mime-Version:'};
 	undef $e{'GH:Content-Type:'};
+	undef $e{'GH:Content-Transfer-Encoding:'};
     }
     elsif (@ar) {
 	# ENTRY IN
@@ -340,8 +348,10 @@ sub mget3_SendingEntry
 	$r        = $SendingEntry{$opt, 'unlink'};
 
 	# MIME Info;
-	$Envelope{'GH:Mime-Version:'} = $SendingEntry{$opt, 'h:mime-version:'};
-	$Envelope{'GH:Content-Type:'} = $SendingEntry{$opt, 'h:content-type:'};
+	$Envelope{'GH:Mime-Version:'} = $SE_MIB{$opt, 'h:mime-version:'};
+	$Envelope{'GH:Content-Type:'} = $SE_MIB{$opt, 'h:content-type:'};
+	$Envelope{'GH:Content-Transfer-Encoding:'} = 
+	    $SE_MIB{$opt, 'h:content-transfer-encoding:'};
 
 	&Debug("&SendingBackInOrder($file, $t, $subject, $sleep, $to);") 
 	    if $debug;
@@ -353,6 +363,7 @@ sub mget3_SendingEntry
 	# MIME Info Desctructor;
 	undef $Envelope{'GH:Mime-Version:'};
 	undef $Envelope{'GH:Content-Type:'};
+	undef $Envelope{'GH:Content-Transfer-Encoding:'};
     }
 
     foreach $opt (@SendingArchiveEntry) {
@@ -433,7 +444,7 @@ sub mget3_Init
     # default
     $cf{'PACK'}     = 1;
     $cf{'SLEEP'}    = $MGET_SEND_BACK_SLEEPTIME || $SLEEPTIME || 300;
-    $cf{'MAXFILE'}  = $MGET_SEND_BACK_FILES_LIMIT || $MAIL_LENGTH_LIMIT || 1000;
+    $cf{'MAXFILE'}  = $MGET_SEND_BACK_FILES_LIMIT || 1000;
     $cf{'mode'}     = $mode;
     $cf{'mode-doc'} = &DocModeLookup("#3$mode");
     $cf{'reply-to'} = $e{'Addr2Reply:'};

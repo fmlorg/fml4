@@ -27,16 +27,18 @@ sub DoSummary
 	&Log(($s && "$s ")."Restricted Summary [$Fld[2]]");
     }
     else {
-	$s = ($s || "Summary");
-	&Log($s);
+	local($lc) = 0;
+	$s = ($s || "Summary _PART_ _ML_FN_");
 
-	local($lc);
 	if (open(F, $SUMMARY_FILE)) { while (<F>) { $lc++;}}
 	&Debug("$lc > $MAIL_LENGTH_LIMIT") if $debug;
 
 	if ($lc > $MAIL_LENGTH_LIMIT) {	# line count > MAIL_LENGTH_LIMIT;
 	    &use('sendfile');
-	    &SendFilebySplit($SUMMARY_FILE, 'uf', $s, $e{'Addr2Reply:'});
+
+	    # &SendFileDividedly($SUMMARY_FILE, 'uf', $s, $e{'Addr2Reply:'});
+	    &DelaySendFileDividedly($SUMMARY_FILE, 
+				    'uf', $s, $e{'Addr2Reply:'});
 	}
 	else {
 	    &SendFile($e{'Addr2Reply:'}, "$s $ML_FN", $SUMMARY_FILE);
@@ -133,7 +135,7 @@ sub DoStatusInFile
 	    # KEY MARIEL;
 	    if (/\sm=(\S+)\s/o) {
 		($d, $mode) = &ModeLookup($1);
-		$s   .= "\tMATOME OKURI mode = ";
+		$s   .= "\tDigest Delivery/MATOME OKURI mode = ";
 
 		if ($d) {
 		    $s .= &DocModeLookup("\#$d$mode");

@@ -210,14 +210,15 @@ sub ProbeUrl
     undef $e{'special:geturl'};
     undef $e{"special:probehttp"};
 
+    # non zero tmp file
     if (-f $tmpf && -s $tmpf) {
 	&OutPutFile($tmpf, $out);
-	unlink $tmpf;
     }
     else {
 	&Log("Not Found: $tmpf");
     }
 
+    unlink $tmpf;
     $tmpf;
 }
 

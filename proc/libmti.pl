@@ -20,6 +20,10 @@ sub MTICache
     local($host, $date, $rdate, $buf, $status);
     local(%hostinfo, %addrinfo);
 
+    ### 2.1B test ###
+    $USE_MTI_TEST = 1;
+    ### 2.1B test end ###
+
     ### Extract Header Fields
     $time    = time;
     $date    = &Date2UnixTime($e{'h:date:'});
@@ -82,7 +86,7 @@ sub MTICache
 
 
     ### CHECK ROUTINES
-    ## BUILT_IN 
+    ## average traffic
     if (($mode eq 'distribute' && $MTI_DISTRIBUTE_TRAFFIC_MAX) || 
 	($mode eq 'command' && $MTI_COMMAND_TRAFFIC_MAX)) {
 	for (keys %addrinfo) {
@@ -90,7 +94,7 @@ sub MTICache
 	}
     }
 
-    ## SPECULATE BOMBERS
+    ## speculate intermittent / burst traffic
     &MTIDBMOpen($mode) || return $NULL;
 
     local($fp) = $MTI_COST_EVAL_FUNCTION || 'MTISimpleBomberP';
@@ -98,7 +102,7 @@ sub MTICache
 
     ## EVAL HOOKS
     if ($MTI_COST_EVAL_HOOK) {
-	eval($MTI_CHECK_FUNCTION_HOOK);
+	eval($MTI_COST_EVAL_HOOK);
 	&Log($@) if $@;
     }
 
@@ -110,6 +114,7 @@ sub MTICache
 sub MTIDBMOpen
 {
     local($mode) = @_;
+    local($error);
 
     ### OPEN HASH TABLES (SWITCH)
     if ($mode eq 'distribute') {
@@ -127,15 +132,20 @@ sub MTIDBMOpen
 
     if ($USE_FML_WITH_FMLSERV) {
 	chmod 0660, $MTI_DB, $MTI_HI_DB;
-	dbmopen(%MTI, $MTI_DB, 0660);
-	dbmopen(%HI,  $MTI_HI_DB, 0660);
+	dbmopen(%MTI, $MTI_DB, 0660) || 
+	    ($error++, &Log("MTI[$$]: cannot bind \%MTI"));
+	dbmopen(%HI,  $MTI_HI_DB, 0660) || 
+	    ($error++, &Log("MTI[$$]: cannot bind \%HI"));
     }
     else {
 	chmod 0600, $MTI_DB, $MTI_HI_DB;
-	dbmopen(%MTI, $MTI_DB, 0600);
-	dbmopen(%HI,  $MTI_HI_DB, 0600);
+	dbmopen(%MTI, $MTI_DB, 0600) || 
+	    ($error++, &Log("MTI[$$]: cannot bind \%MTI"));
+	dbmopen(%HI,  $MTI_HI_DB, 0600) || 
+	    ($error++, &Log("MTI[$$]: cannot bind \%HI"));
     }
 
+    $error ? 0 : 1;
 }
 
 
@@ -149,12 +159,14 @@ sub MTIDBMClose
 sub MTIProbe
 {
     local(*MTI, $addr, $mode) = @_;
-    local($c, $s, $ss);
+    local(@c, $c, $s, $ss);
 
     &MTIDBMOpen($mode =~ /^(\w+):/ && $1) || return $NULL;
 
     if ($mode eq "distribute:max_traffic") {
-	$c = split(/\s+/, $MTI{$addr});	# count irrespective of contents
+	# count irrespective of contents
+	@c = split(/\s+/, $MTI{$addr});
+	$c = $#c + 1;
 
 	if ($c > $MTI_DISTRIBUTE_TRAFFIC_MAX) {
 	    $s  = "Distribute traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
@@ -162,11 +174,13 @@ sub MTIProbe
 	    $ss = "Reject post from $From_address for a while.";
 	    &Log("MTI[$$]: $s");
 	    &Log("MTI[$$]: $ss");
-	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_LIST;
+	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_ADDR_LIST;
 	}
     }
     elsif ($mode eq "command:max_traffic") {
-	$c = split(/\s+/, $MTI{$addr});	# count irrespective of contents
+	# count irrespective of contents
+	@c = split(/\s+/, $MTI{$addr});
+	$c = $#c + 1;
 
 	if ($c > $MTI_COMMAND_TRAFFIC_MAX) {
 	    $s  = "Command traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
@@ -174,7 +188,7 @@ sub MTIProbe
 	    $ss = "Reject command from $From_address for a while.";
 	    &Log("MTI[$$]: $s");
 	    &Log("MTI[$$]: $ss");
-	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_LIST;
+	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_ADDR_LIST;
 	}
     }
 
@@ -230,6 +244,7 @@ sub MTIError
 sub Date2UnixTime
 {
     local($in) = @_;
+    local($input) = $in;
     local($c, $day, $month, $year, $hour, $min, $sec, $pm, $shift_t, $shift_m);
     local(%zone);
 
@@ -304,7 +319,7 @@ sub Date2UnixTime
 	$shift_m = $8;
     }
     # INVALID BUT MANY Only in Japan ???
-    elsif ($in =~ /(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\d\d\d\d)\s*/) {
+    elsif ($in =~ /(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\d{4})\s*/) {
 	$month = ($Month{$1} || $month) - 1;
 	$day   = $2;
 	$hour  = $3;
@@ -317,11 +332,22 @@ sub Date2UnixTime
 	$shift_t = '09';
 	$shift_m = '00';	   
     }
-    elsif ($in =~ /\;\s*(\d\d\d\d\d\d\d\d\d+)\s*$/) {
-	if (&ABS($1 - time) < 7*24*3600) { return $1;}
+    elsif ($in =~ /\;\s*(\d{9,})\s*$/) {
+	if (&ABS($1 - time) < 7*24*3600) { 
+	    return $1;
+	}
+	elsif ($debug_mti) {
+	    local(@caller) = caller;
+	    &Log("MTI[$$]::Date2UnixTime: invalid [$input]");
+	    &Log("MIT[$$]: callded from @caller");
+	}
     }
     else {
-	&Log("Date2UnixTime: invalid date-time [$in]");
+	if ($debug_mti) {
+	    local(@caller) = caller;
+	    &Log("MTI[$$]::Date2UnixTime: invalid [$input]");
+	    &Log("MIT[$$]: callded from @caller");
+	}
 	return 0;
     }
 
@@ -362,7 +388,7 @@ sub MTIHintOut
     local($rp, $hint);
 
     $hint = $MTI_MAIL_FROM_HINT_LIST || "$DIR/mti_mailfrom.hints";
-    &Touch(hint) if ! -f $hint;
+    &Touch($hint) if ! -f $hint;
 
     # logs Erturn-Path: (hints for MTA e.g. sendmail)
     if ($e{'h:return-path:'}) {
@@ -374,8 +400,8 @@ sub MTIHintOut
     }
 
     # logs $addr to $DIR/spamlist (FML level)
-    if ($addr) {
-	&Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
+    if ($addr && $MTI_APPEND_TO_REJECT_ADDR_LIST) {
+	&Append2($addr, $REJECT_ADDR_LIST); 
     }
 }
 
@@ -399,12 +425,15 @@ sub GetHostInfo
 
     # We trace Received: chain to detect network error (may be UUCP?)
     # where the threshold is 15 min.
+    # NOT USED NOW
     $threshold = $main'MTI_CACHE_HI_THRESHOLD || 15*60; #'; 15 min.
 
     for (split(/\n\w+:/, $buf)) {
+	undef $host; undef $rdate;
+	
 	s/\n/ /g;
 	s/\(/ \(/g;
-	s/by\s+($host_pat).*;(.*)/$host = $1, $rdate = $2/e;
+	s/by\s+($host_pat).*(\;.*)/$host = $1, $rdate = $2/e;
 
 	if ($rdate) {
 	    $rdate = &main'Date2UnixTime($rdate); #';
@@ -451,8 +480,9 @@ sub main'MTISimpleBomberP #';
 
 	# soft limit: scr > cr : busrt in src host not dst host
 	# hard limit: cf > hard_limit or scr > hard_limit
-	if (($scr >= $cr && ($scr > $soft_limit)) ||
-	    (($scr > $hard_limit) || ($cr > $hard_limit))) {
+	if ((&MTI_GE($scr, $cr) && ($scr > $soft_limit)) ||
+	    ($scr > $hard_limit) || 
+	    ($cr  > $hard_limit)) {
 	    &Log("MTI[$$]: <$addr> must be a bomber;");
 	    &Log("MTI[$$]:".
 		 sprintf("src_cr=%2.4f >= dst_cr=%2.4f", $scr, $cr));
@@ -467,6 +497,19 @@ sub main'MTISimpleBomberP #';
 }
 
 
+sub MTI_GE
+{
+    if ($_[0] >= $_[1]) { 
+	return 1;
+    }
+    # within 3 %
+    elsif (&ABS($_[0] - $_[1]) < $MTI_BURST_SOFT_LIMIT * 0.03) {
+	return 1;
+    }
+
+    0;
+}
+
 sub COST 
 {
     &ABS($_[0]) < $Threshold ? $Threshold : &ABS($_[0]);
@@ -477,6 +520,9 @@ sub SumUp
 {
     local($buf) = @_;
     local($cr, $d_cr, $time, $date, $p_time, $p_date);
+
+    # reset
+    $cr = $d_cr = 0;
 
     for (split(/\s+/, $buf)) {
 	next unless $_;

@@ -111,7 +111,11 @@ sub ConvertArType2CFVersion3
 {
     $AUTO_REGISTRATION_KEYWORD = $REQUIRE_SUBSCRIBE;
 
-    if ($Envelope{'mode:artype=confirm'}) {
+    # already defined, ignore this
+    if ($AUTO_REGISTRATION_TYPE) {
+	;
+    }
+    elsif ($Envelope{'mode:artype=confirm'}) {
 	$AUTO_REGISTRATION_TYPE = "confirmation";
     }
     elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {

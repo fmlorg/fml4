@@ -23,7 +23,14 @@ sub NewSyslog
 
     foreach $f (@f) {
 	next if $f =~ /^\s*$/;
-	-f $f || ($f =~ s/$DIR/\$DIR/, &Log("newsyslog: no $f, skip"), next);
+
+	if (! -f $f) {
+	    if (! $Quiet) { # only for msend.pl
+		$f =~ s/$DIR/\$DIR/;
+		&Log("newsyslog: no $f, skip");
+	    }
+	    next;
+	}
 
 	&Debug("\nCall NewSyslog::Fml($f)") if $debug;
 	&NewSyslog'Fml($f);#';
@@ -42,6 +49,10 @@ $debug         = $main'debug;#';
 $DIR           = $main'DIR;#';
 $VARLOG_DIR    = $main'VARLOG_DIR;#';
 $FP_VARLOG_DIR = $main'FP_VARLOG_DIR;#';
+
+sub NewSyslog'Log   { &main'Log(@_);}
+sub NewSyslog'Debug { &main'Debug(@_);}
+sub NewSyslog'Touch { &main'Touch(@_);}
 
 sub Fml
 {
@@ -129,21 +140,27 @@ sub TurnOverW0
 
 
 # DEBUG in NewSyslog NAME SPACE;
-if ($0 eq __FILE__) {
-    $DIR        =  $ENV{'PWD'};
-    $TMP_DIR    = $TMP_DIR    || "tmp" ; # backward compatible
-    $VAR_DIR    = $VAR_DIR    || "var"; # LOG is /var/log (4.4BSD)
-    $VARLOG_DIR = $VARLOG_DIR || "var/log"; # absolute for ftpmail
-
-    $debug = 1;
-
-    @ARGV || die "No argv.\n";
-    foreach(@ARGV) { &Fml($_);}
-    exit 0;
-
-sub Log   { print STDERR "LOG: @_ \n";}
-sub Debug { &Log(@_);}
-sub Touch { open(F,">> $_[0]"); close(F);}
-}
+# if ($0 eq __FILE__) {
+#     $DIR        =  $ENV{'PWD'};
+#     $TMP_DIR    = $TMP_DIR    || "tmp" ; # backward compatible
+#     $VAR_DIR    = $VAR_DIR    || "var"; # LOG is /var/log (4.4BSD)
+#     $VARLOG_DIR = $VARLOG_DIR || "var/log"; # absolute for ftpmail
+# 
+#     $debug = 1;
+# 
+#     $subr = q#
+#     sub Log   { print STDERR "LOG: @_ \n";}
+#     sub Debug { &Log(@_);}
+#     sub Touch { open(F,">> $_[0]"); close(F);}
+#     #;
+# 
+#     eval $subr;
+# 
+#     @ARGV || die "No argv.\n";
+#     foreach(@ARGV) { &Fml($_);}
+# 
+#     exit 0;
+# }
+# 
 
 1;

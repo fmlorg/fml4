@@ -18,22 +18,22 @@ sub ModeDef
     ### MODE DEFINITIN ALIASES;
     # in fact, converts them to the current configuration in compat_cf2;    
     #    artype={subject,body} codes are called in ModeDef();
-    %MODE_ALIASES = ('distribute',                   'post=anyone',
-		     'distribute_with_member_check', 'post=members_only',
-		     'moderated',                    'post=moderated',
+    %ModeAliases = ('distribute',                   'post=anyone',
+		    'distribute_with_member_check', 'post=members_only',
+		    'moderated',                    'post=moderated',
 
-		     # auto registratin type declaration
-		     # require ML_MEMBER_CHECK = 0; particularly
-		     'confirm',        'artype=confirm',
+		    # auto registratin type declaration
+		    # require ML_MEMBER_CHECK = 0; particularly
+		    'confirm',        'artype=confirm',
 
-		     # aliases for convenience (against TYPO)
-		     'post=anyone_ok',    'post=anyone',
-		     'command=anyone_ok', 'command=anyone',
-		     'command=member_only', 'command=members_only', 
-		     );
+		    # aliases for convenience (against TYPO)
+		    'post=anyone_ok',    'post=anyone',
+		    'command=anyone_ok', 'command=anyone',
+		    'command=member_only', 'command=members_only', 
+		    );
 
     # rewrite (backword compat)
-    $mode = $MODE_ALIASES{$mode} ? $MODE_ALIASES{$mode} : $mode;
+    $mode = $ModeAliases{$mode} ? $ModeAliases{$mode} : $mode;
 
     &Debug("ModeDef: scan mode=$mode") if $debug;
 
@@ -66,11 +66,13 @@ sub ModeDef
     elsif ($mode eq 'artype=body') {
 	$AUTO_REGISTRATION_TYPE = "body";
     }
-    elsif ($mode eq 'check') { 
-	$ML_MEMBER_CHECK = 1;
+    elsif ($mode eq 'check') { # $ML_MEMBER_CHECK = 1;
+	$REJECT_POST_HANDLER = "reject";
+	$REJECT_COMMAND_HANDLER = "reject";
     }
-    elsif ($mode eq 'auto' || $mode eq 'autoregist') { 
-	$ML_MEMBER_CHECK = 0;
+    elsif ($mode eq 'auto' || $mode eq 'autoregist') { # $ML_MEMBER_CHECK = 0;
+	$REJECT_POST_HANDLER = "reject";
+	$REJECT_COMMAND_HANDLER = "auto_regist";
     }
     elsif ($mode eq 'autosubject') { 
 	$AUTO_REGISTRATION_KEYWORD = "subscribe";
@@ -121,10 +123,23 @@ sub HtmlMode
 	$HTML_INDEX_REVERSE_ORDER = $USE_MIME = $HTML_THREAD = 1;
     }
 
-    $FmlExitHook{'html'} = q# 
-	$USE_MIME = 1;
-	require 'libsynchtml.pl';
-	&SyncHtml($HTML_DIR || 'htdocs', $ID, *Envelope); 
+    # %SavedEnvelope is used only for moderator type II mode
+    # since %Envelope is swap in, out in moderator routine.
+    $FmlExitHook{'html'} = q#;
+    if (%SavedEnvelope) {
+	%OrgEnvelope = %Envelope;
+	%Envelope    = %SavedEnvelope;
+    }
+
+    $USE_MIME = 1;
+    require 'libsynchtml.pl';
+    &SyncHtml($HTML_DIR || 'htdocs', $ID, *Envelope);
+
+    if (%SavedEnvelope) {
+	$message .= $Envelope{'message'} if $Envelope{'message'};
+	%Envelope = %OrgEnvelope;
+	$Envelope{'message'} .= $message if $message;
+    }
     #;
 }
 

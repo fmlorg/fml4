@@ -294,7 +294,7 @@ sub PgpInit
 ##### Administrator Commands 
 sub PGP
 {
-    local($proc, *Fld, *opt, *e) = @_; 
+    local($proc, *Fld, *e, *opt) = @_; 
     local($cmd, @argv);
 
     if ($Fld =~ /pgp\s+(.*)/) {

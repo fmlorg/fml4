@@ -89,8 +89,16 @@ sub DoProcedure
     &ReConfigProcedure;
 
     # WE SHOULD NOT CHANGE THE KEYWORD "GivenCommands" for "backward compat";
-    local($status, $proc);
+    local($status, $proc, $fp, $input_command_count, $linenum);
+    $linenum = 0;
+
+    # ATTENTION!
+    # if $USE_SUBJECT_AS_COMMANDS != NULL,
+    # $mailbody != $Envelope{'Body'};
   GivenCommands: foreach (split(/\n/, $mailbody)) {
+      $linenum++; # line number (!= %Envelope under subject: command)
+      $e{'tmp:line_number'} = $linenum;
+
       &Log("proc debug: input [$_]") if $debug;
 
       # skip null line
@@ -104,8 +112,18 @@ sub DoProcedure
       undef $e{'mode:message:to:admin'}; 
 
       # e.g. *-ctl server, not require '# command' syntax
-      # bug default is false(not rewrite).
-      if ($COMMAND_ONLY_SERVER && (!/^\#/o)) { $_ = "\# $_";}
+      # bug default has been false(not rewrite), true 198/01/19	
+      if ($COMMAND_ONLY_SERVER && (!/^\#/o)) {
+	  $_ = "\# $_";
+      }
+      elsif ($e{'mode:ctladdr'} && (!/^\#/o)) {
+	  for $p (keys %Procedure) {
+	      if ($p && /^$p/) {
+		  &Log("recognize $p => '# $p'");
+		  $_ = "\# $_";
+	      }
+	  }
+      }
       
       (/^\#\s*(\w+)/ && &Log("proc debug: trap $`<$&>$'")) if $debug;
 
@@ -131,7 +149,8 @@ sub DoProcedure
       }
       else { # if (! /^\#\s*\w+/) 
 	  # USE_WARNING = 0 (default), so go to the next line in usual.
-	  next GivenCommands unless $USE_WARNING; 
+	  next GivenCommands unless $USE_INVALID_COMMAND_WARNING; 
+	  next GivenCommands unless $USE_WARNING; # backward
 
 	  &Log("Command: Syntax Error /\# \\w+/ !~ [$_]");
 	  &Mesg(*e, "Command Syntax Error: without ^#") if !/^\#/;
@@ -155,6 +174,15 @@ sub DoProcedure
       $org_str = $_;
       $_ = $Fld[1];
 
+      # counter
+      if ($MAXNUM_COMMAND_INPUT = &ATOI($MAXNUM_COMMAND_INPUT)) {
+	  &Log("$input_command_count++ >= $MAXNUM_COMMAND_INPUT");
+	  if ($input_command_count++ >= $MAXNUM_COMMAND_INPUT) {
+	      &Log("input commans >= $MAXNUM_COMMAND_INPUT, force to a stop");
+	      last GivenCommands;
+	  }
+      }
+
       ### info
       $0 = "$FML: Command Mode processing $_: $LOCKFILE>";
       &Log("proc debug: eval [$_]") if $debug;
@@ -169,10 +197,15 @@ sub DoProcedure
       }
 
       ### Procedures
-      undef $status; undef $proc;
+      undef $status; undef $proc; undef $fp;
       tr/A-Z/a-z/;
 
+      # extract each proc local message buffer (e.g. for plural "chaddr")
+      &MesgSetBreakPoint;	
+
       if ($proc = $Procedure{$_}) {
+	  $trap_counter++; # found in %Procedure;
+
 	  # REPORT TO ADMINS ALSO 
 	  if ($Procedure{"r2a#$_"}) { $e{'mode:notify_to_admin_also'} = 1;}
 
@@ -236,21 +269,24 @@ sub DoProcedure
     # help
     if ($Envelope{'mode:ctladdr'} && 
 	(!$trap_counter) && (!$COMMAND_ONLY_SERVER)) {
-	local($pre, $s);
+	local($s);
 
-	$s .= "For Your Information:\n";
-	$s .= "Address \"$CONTROL_ADDRESS\" is for fml commands.\n";
-	$s .= "Your mail do not include any command syntaxes.\n";
-	$s .= "Please read the following HELP for FML usage.\n";
-	$s .= "-" x 60;
+	$s .= "*" x 60;
+	$s .= "\nFor Your Information:\n";
+	if ($CONTROL_ADDRESS) {
+	    $s .= "Address \"$CONTROL_ADDRESS\" is for fml commands.\n";
+	    $s .= "Your mail DOES NOT include any effective command.\n";
+	    $s .= "Please read the following HELP for FML usage.\n";
+	}
+	else {
+	    $s .= "If you have a problem, ";
+	    $s .= "please make a contact with a ML maintainer.\n";
+	    $s .= "Address for a ML maintainer is <$MAINTAINER>.\n";
+	}
+	$s .= "*" x 60;
 
-	$pre = $PREAMBLE_MAILBODY;
-	$PREAMBLE_MAILBODY .= "$s\n\n";
-
-	$proc = $Procedure{"help"};
-	$status = &$proc("help", *Fld, *e, *misc);
-
-	$PREAMBLE_MAILBODY = $pre;
+	&Mesg(*e, $s);
+	$e{'message:append:files'} = $HELP_FILE;
     }
 }
 
@@ -361,10 +397,16 @@ sub InitProcedure
 		    'r#off', 1,
 		    'on',     'ProcSetDeliveryMode',
 		    'r#on', 1,
+
 		    'matome', 'ProcSetDeliveryMode',
 		    'r#matome', 1,
 		    'digest', 'ProcSetDeliveryMode',
 		    'r#digest', 1,
+		    'unmatome', 'ProcSetDeliveryMode2',
+		    'r#unmatome', 1,
+		    'undigest', 'ProcSetDeliveryMode2',
+		    'r#undigest', 1,
+
 		    'skip',   'ProcSetDeliveryMode',
 		    'r#skip', 1,
 		    'noskip', 'ProcSetDeliveryMode',
@@ -379,8 +421,14 @@ sub InitProcedure
 		    'r#change', 1,
 		    'bye',            'ProcSetMemberList',
 		    'r#bye',         1,
+		    'r2a#bye',         1,
 		    'unsubscribe',    'ProcSetMemberList',
 		    'r#unsubscribe', 1,
+		    'r2a#unsubscribe', 1,
+
+		    # confirmation mode unsubscribe
+		    'unsubscribe-confirm',  'ProcSetMemberList',
+		    'r#unsubscribe-confirm', 1,
 
 		    # Subscribe
 		    ($REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE || 'subscribe'), 'ProcSubscribe',
@@ -389,6 +437,9 @@ sub InitProcedure
 		    # confirmation (for when form anyone)
 		    ($CONFIRMATION_KEYWORD || 'confirm'), 'ProcSubscribe',
 		    'r#subscribe', 1,
+
+		    # confirmd
+		    'ack', 'ProcConfirmdAckReply',
 
 		    # Subscribe
 		    'admin', 'ProcSetAdminMode',
@@ -424,13 +475,15 @@ sub InitProcedure
 
     ### OVERWRITE by user-defined-set-up-data (%LocalProcedure)
     ### REDEFINE  by @PermitProcedure and @DenyProcedure
+    ### but --makefml mode permits all + local functions on shell
 
     # IF @PermitProcedure, PERMIT ONLY DEFINED FUNCTIONS;
-    if (@PermitProcedure) { 
+    if (@PermitProcedure && (! $e{'mode:makefml'}))  { 
 	for $k (@PermitProcedure) { 
 	    $Procedure{$k}     = $proc{$k};
 	    $Procedure{"#$k"}  = $proc{"#$k"}  if $proc{"#$k"};
 	    $Procedure{"r#$k"} = $proc{"r#$k"} if $proc{"r#$k"};
+	    $Procedure{"r2a#$k"} = $proc{"r2a#$k"} if $proc{"r2a#$k"};
 	}
     }
     # PERMIT ALL FUNCTIONS
@@ -442,7 +495,7 @@ sub InitProcedure
     while (($k, $v) = each %LocalProcedure) { $Procedure{$k} = $v;}
 
     # IF @DenyProcedure, Delete DEFIEND FUNCTIONS
-    if (@DenyProcedure) { 
+    if (@DenyProcedure && (! $e{'mode:makefml'})) {
 	foreach $k (@DenyProcedure) { undef $Procedure{$k};}
     }
 
@@ -469,17 +522,32 @@ sub ReConfigProcedure
 sub ProcFileSendBack
 {
     local($proc, *Fld, *e, *misc) = @_;
-    local(@to, $subject, $f, @files, $draft, $draft_dir);
+    local(@to, $subject, $f, @files, $draft, $draft_dir, @tmp);
+    local($ignore_mode);
 
     # file to send back
-    $f = $Procedure{"#$proc"};
+    # ADMIN MODE
+    if ( $e{'mode:admin'} ) {
+	$f = $AdminProcedure{"#$proc"};
+    }
+    # USER MODE
+    else {
+	# IN actives, ignore all ^#
+	# BUT IN members, ignore the first header and ^\#\# sequences
+	# $e{'mode:doc:ignore#'} = 'a';
+	$ignore_mode = 1;
+
+	$f = $Procedure{"#$proc"};
+    }
 
     # IF THE FILE TO SEND BACK DOES NOT EXIST, 
     # TRY TO AUTO CONVERT AND SEND BACK IT
     # e.g. s/_ML_/$ml/g; s/_DOMAIN_/$DOMAINNAME/g; s/_FQDN_/$FQDN/g;
     if (! -f $f) {
-	$draft = $f; $draft =~ s#(.*)/([^/]*)#$2#;
-	for (@LIBDIR) { $f = "$_/drafts/$draft" if -f "$_/drafts/$draft";}
+	$draft  = $f;
+	$draft  =~ s#(.*)/([^/]*)#$2#;
+	$draft .= $LANGUAGE eq 'Japanese' ? '.jp' : '.en';
+	$f = &SearchFileInLIBDIR("drafts/$draft") || $f;
 	$Envelope{'mode:doc:repl'} = 1;
     }
 
@@ -494,17 +562,31 @@ sub ProcFileSendBack
     # files to send
     if ($f eq $MEMBER_LIST) { 
 	push(@files, $MEMBER_LIST); push(@files, @MEMBER_LIST);
+	$e{'mode:doc:ignore#'} = 'm' if $ignore_mode;
     }
     elsif ($f eq $ACTIVE_LIST) { 
 	push(@files, $ACTIVE_LIST); push(@files, @ACTIVE_LIST);
+	$e{'mode:doc:ignore#'} = 'a' if $ignore_mode;
     }
     else {
 	push(@files, $f);
     }
 
     &Uniq(*files);
+
+    # ordinary people should not know $ADMIN_MEMBER_LIST content. 
+    if (! $e{'mode:admin'}) {
+	for (@files) {
+	    next if $_ eq $ADMIN_MEMBER_LIST;
+	    push(@tmp, $_);
+	}
+
+	@files = @tmp;
+    }
+
     &SendPluralFiles(*to, *subject, *files);
     undef $Envelope{'mode:doc:repl'};	# off
+    undef $e{'mode:doc:ignore#'};
 }
 
 
@@ -523,7 +605,7 @@ sub ProcModeSet
     elsif ($s eq 'exact') {
 	$ADDR_CHECK_MAX = 9;	# return if 10;
     }
-    elsif (! $_cf{'mode:admin'}) {
+    elsif (! $e{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTICATION";
 	&Mesg(*e, "$s");
 	&Log($s);
@@ -642,6 +724,34 @@ sub ProcSetDeliveryMode
     $status;
 }
 
+
+sub ProcSetDeliveryMode2
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local($save_f, @save_f); 
+
+    $save_f = $proc;
+    @save_f = @Fld;
+
+    if ($proc =~ /matome/i) {
+	$proc = 'matome';
+	@Fld = ('#', 'matome', 0);
+    }
+    elsif ($proc =~ /digest/i) {
+	$proc = 'digest';
+	@Fld = ('#', 'digest', 0);
+    }
+    else {
+	&Log("ProcSetDeliveryMode2: unknown proc=$proc");
+    }
+
+    &ProcSetDeliveryMode($proc, *Fld, *e, *misc);
+
+    $proc = $save_f;
+    @Fld  = @save_f;
+}
+
+
 # ($ProcName, *FieldName, *Envelope, *misc)
 # $misc      : E-Mail-Address to operate WHEN CHADDR (OBSOLETE 96/10/11)
 # $misc      : Digest Parameter          WHEN MATOME or DIGEST
@@ -651,11 +761,30 @@ sub ProcSetDeliveryMode
 sub ProcSetMemberList
 {
     local($proc, *Fld, *e, *misc) = @_;
-    local($status);
-    &use('amctl');
+    local($status, $s);
 
+    &Log("ProcSetMemberList: $proc") if $debug_confirm || $debug;
+
+    if ($proc eq 'unsubscribe' || $proc eq 'bye') {
+	if ($UNSUBSCRIBE_AUTH_TYPE eq 'confirmation') {
+	    &use('confirm');
+	    &ConfirmationModeInit(*e, 'unsubscribe');
+
+	    local(@addr) = split(/\@/, $From_address);
+	    $s = "unsubscribe @addr";
+
+	    &Confirm(*e, $From_address, $s) || return $NULL;
+	}
+    }
+    elsif ($proc eq 'unsubscribe-confirm') {
+	&use('confirm');
+	&ConfirmationModeInit(*e, 'unsubscribe');
+	&Confirm(*e, $From_address, "@Fld") || return $NULL;
+    }
+
+    &use('amctl');
     $e{'mode:in_amctl'} = 1;
-    $status = &DoSetMemberList(@_);
+    $status = &DoSetMemberList($proc, *Fld, *e, *misc);
     $e{'mode:in_amctl'} = 0;
 
     $status;
@@ -666,7 +795,7 @@ sub ProcSetAddr
 {
     local($proc, *Fld, *e, *misc) = @_;
 
-    if (! $_cf{'mode:admin'}) {
+    if (! $e{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTICATION";
 	&Mesg(*e, $s);
 	&Log($s);
@@ -694,7 +823,7 @@ sub ProcSubscribe
     local($buf) = $Fld;
 
     # if member-check mode, forward the request to the maintainer
-    if ($ML_MEMBER_CHECK) {
+    if (&NonAutoRegistrableP) {
 	&LogWEnv("$proc request is forwarded to Maintainer", *e);
 	&Mesg(*e, "Please wait a little");
 	&Warn("$proc request from $From_address", &WholeMail);
@@ -773,7 +902,7 @@ sub DoIndex
 
     require 'ctime.pl';
 
-    $lower = &DoIndexSearchMinCount;
+    $lower = &DoIndexSearchMinCount();
     $upper = &GetID - 1; # seq is already +1;
 
     if (-f $INDEX_FILE && open(F, $INDEX_FILE)) {
@@ -781,7 +910,7 @@ sub DoIndex
     }
     else {
 	local($ok, $dir, $f);
-	if (&DoIndexSearchMinCount < &GetID) {
+	if ($lower < &GetID) {
 	    $s .= "The spool of this ML have plain format articles\n";
 	    $s .= "\tthe number(count) exists\n\t$lower <-> $upper";
 	    &Mesg(*e, $s);
@@ -824,21 +953,45 @@ sub DoIndex
 }
 
 
+sub FindRange
+{
+    # $min == seconds.
+    local($minimum, $max) = @_;
+
+    print STDERR "$FindRangeLevel>FindRange($minimum, $max);\n" if $debug;
+
+    # last: too short range or too recursive
+    return ($minimum, $max) if ($max - $minimum) < 10;
+    return ($minimum, $max) if $FindRangeLevel++ > 16; # 2^16
+
+    # check the medium
+    $x = int ($max - (($max - $minimum) / 2));
+
+    if (-f "$FP_SPOOL_DIR/$x") {
+	# status: <-- $x --->|(seq)
+	print STDERR "<<< FindRange($minimum, $x)\n" if $debug_fr;
+	&FindRange($minimum, $x);
+    }
+    else {
+	# status: $x <----->|(seq)
+	print STDERR ">>> FindRange($x, $max)\n" if $debug_fr;
+	&FindRange($x, $max);
+    }
+}
+
+
 sub DoIndexSearchMinCount
 {
-    local($proc, *Fld, *e, *misc) = @_;
-    local($try)  = &GetID - 1;# seq is already +1;
-    local($last) = $try;
+    local($try, $last);
+    $try = $last = &GetID - 1; # seq is already +1;
 
-    while (-f "$FP_SPOOL_DIR/$try") {
-	last if $try <= 1;	# ERROR
-	$try  = int($try/2);
-	print STDERR "ExistCheck: min /2 $try\n" if $debug;
-    } 
-    
-    for ( ; (!-f "$FP_SPOOL_DIR/$try"); $try++) {
-	last if $try > $last; # ERROR
-	print STDERR "ExistCheck: min ++ $try\n" if $debug;
+    ($try, $last) = &FindRange(0, $last);
+
+    print STDERR "FindRange=>($try, $last);\n" if $debug;
+
+    for ($try = $try - 10; $try <= $last; $try++) {
+	print STDER "check: -f $FP_SPOOL_DIR/$try\n" if $debug;
+	last if -f "$FP_SPOOL_DIR/$try";
     }
 
     print STDERR "MINIMUM ($try < 1) \? 1 \: $try\n" if $debug;
@@ -886,7 +1039,10 @@ sub ProcWhoisWrite
 
     &Log("$proc @Fld[2..$#Fld]");
     &use('whois');
+
+    $e{'tmp:mailbody'} = $mailbody; # now under scope in &Procedure
     &WhoisWrite(*e);
+    undef $e{'tmp:mailbody'};
 
     'LAST';
 }
@@ -931,6 +1087,25 @@ sub ProcModerator
     &ModeratorProcedure(*Fld, *e, *misc);
 }
 
+
+sub ProcConfirmdAckReply
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local($time) = time;
+
+    &Log("$proc @Fld[2..$#Fld]");
+
+    if ($CONFIRMD_ACK_LOGFILE) {
+	&Touch($CONFIRMD_ACK_LOGFILE) if !-f $CONFIRMD_ACK_LOGFILE;
+	&Append2("$From_address\t$time", $CONFIRMD_ACK_LOGFILE);
+	1;
+    }
+    else {
+	&Log("$proc: ack reply logfile is not defined");
+	&Mesg(*e, "$proc: a configuration error");
+	0;
+    }
+}
 
 ##################################################################
 ### PROCEDURE SETTINGS ENDS 

@@ -14,44 +14,8 @@ $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
 $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 
-
-require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
-
-
-$opt_h && do { &Usage; exit 0;};
-$HTML_INDEX_UNIT = $opt_t || 'day';
-$DIR             = $opt_D || $ENV{'PWD'};
-$HTML_DIR        = $opt_d;
-$SPOOL_DIR       = shift;
-$ConfigFile      = $opt_f;
-$verbose         = $opt_v;
-$debug           = $opt_V;
-$HTML_THREAD     = 1; # $opt_T;
-$Minimum         = $opt_M > 0 ? $opt_M : 1;
-$LastRange       = $opt_L;
-$SleepTime       = $opt_S || 3;
-$HTML_EXPIRE_LIMIT = $opt_E;
-
-push(@INC, $opt_I);
-
-# set opt
-for (split(/:/, $opt_o)) { 
-    print STDERR "\$${_} = 1;\n" if $verbose;
-    eval "\$${_} = 1;";
-}
-
 ########## MAIN ##########
-### WARNING;
--d $SPOOL_DIR || die("At least one argument is required for \$SPOOL_DIR\n");
--d $HTML_DIR  || die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED\n");
-
-### Libraries
-require $ConfigFile if -f $ConfigFile;
-require 'libkern.pl';
-require 'libsynchtml.pl';
-
-sub PS { $FML = 'spool2html'; system "ps uw|grep spool2html";}
+&Init;
 
 ### redefine &Log ...
 &FixProc;
@@ -72,6 +36,13 @@ $label =~ s#.+/(\S+)#$1#;
 for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
     print STDERR "fork() [$$] ($i -> ".($i+100).")\n" if $verbose;
     $0 = "spool2html(Parent): $label::Ctl $i -> ". ($i + 100);
+
+    # NT4 perl has no fork() system call;
+    if ($CPU_TYPE_MANUFACTURER_OS =~ /windowsnt4/ ||
+	$ENV{'OS'} =~ /Windows_NT/) {
+	&Ctl($i, $i + 100 < $max ? $i + 100 : $max + 1);
+	next;
+    }
 
     if (($pid = fork) < 0) {
 	&Log("Cannot fork");
@@ -97,6 +68,58 @@ exit 0;
 
 
 ##### LIBRARY #####
+
+sub Init
+{
+    require 'getopts.pl';
+    &Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
+
+    $opt_h && do { &Usage; exit 0;};
+    $HTML_INDEX_UNIT = $opt_t || 'day';
+    $DIR             = $opt_D || $ENV{'PWD'};
+    $HTML_DIR        = $opt_d;
+    $SPOOL_DIR       = shift @ARGV;
+    $ConfigFile      = $opt_f;
+    $verbose         = $opt_v;
+    $debug           = $opt_V;
+    $HTML_THREAD     = 1; # $opt_T;
+    $Minimum         = $opt_M > 0 ? $opt_M : 1;
+    $LastRange       = $opt_L;
+    $SleepTime       = $opt_S || 3;
+    $HTML_EXPIRE_LIMIT = $opt_E;
+
+    push(@INC, $opt_I);
+
+    local($inc) = $0;
+    $inc =~ s#^(\S+)/bin.*$#$1#;
+    push(@INC, $inc);
+
+    # set opt
+    for (split(/:/, $opt_o)) { 
+	print STDERR "\$${_} = 1;\n" if $verbose;
+	if (/(\S+)=(\S+)/) {
+	    eval "\${$1} = \"$2\";";
+	}
+	else {
+	    eval "\$${_} = 1;";
+	}
+    }
+
+    # WARNING;
+    -d $SPOOL_DIR || 
+	die("At least one argument is required for \$SPOOL_DIR\n");
+    -d $HTML_DIR  || 
+	die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED\n");
+
+    # Libraries
+    require $ConfigFile if -f $ConfigFile;
+    require 'libkern.pl';
+    require 'libsynchtml.pl';
+
+    # loading MIME libraries (prefetch)
+    if ($USE_MIME) { require 'libMIME.pl';}
+}
+
 
 sub Ctl
 {
@@ -222,6 +245,7 @@ sub Usage
     print "$s\n\n";
 }
 
+
 sub FixProc
 {
 local($evalstr) = q#;
@@ -231,6 +255,7 @@ sub Mesg { print STDERR "@_\n";};
 
 eval($evalstr);
 }
+
 
 sub GetMax
 {				
@@ -275,5 +300,19 @@ sub GetMax
     ($try - 1);
 }
 
+
+# dummy functions agasint the compile errors of config.ph
+sub DEFINE_SUBJECT_TAG { 1;}
+sub DEFINE_MODE  { 1;}
+sub DEFINE_FIELD_FORCED  { 1;}
+sub DEFINE_FIELD_ORIGINAL { 1;}
+sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
+sub ADD_FIELD     { 1;}
+sub DELETE_FIELD  { 1;}
+sub COPY_FIELD  { 1;}
+sub MOVE_FIELD  { 1;}
+
+# debug
+sub PS { $FML = 'spool2html'; system "ps uw|grep spool2html";}
 
 1;

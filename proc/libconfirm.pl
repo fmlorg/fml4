@@ -12,20 +12,43 @@
 
 sub ConfirmationModeInit
 {
+    local(*e, $mode) = @_;
+
     &Log("Mode Confirmation") if $debug;
 
-    # save the request and given identifier;
-    # The concept of KEYWORD and ADDRESS suggeted (irc:-) by ando@iij-mc.co.jp
-    $CONFIRMATION_KEYWORD = $CONFIRMATION_KEYWORD || "confirm";
-    $CONFIRMATION_RESET_KEYWORD = 
-	$CONFIRMATION_RESET_KEYWORD || "confirm reset";
-
-    $CONFIRMATION_FILE    = $CONFIRMATION_FILE || "$DIR/confirm";
-    $CONFIRMATION_LIST    = $CONFIRMATION_LIST || "$FP_VARLOG_DIR/confirm";
+    # common
     $CONFIRMATION_ADDRESS = $CONFIRMATION_ADDRESS || $e{'CtlAddr:'};
     $CONFIRMATION_EXPIRE  = $CONFIRMATION_EXPIRE || 7*24; # unit is "hour"
-    $CONFIRMATION_SUBSCRIBE = $CONFIRMATION_SUBSCRIBE ||
-	$AUTO_REGISTRATION_KEYWORD || $DEFAULT_SUBSCRIBE || "subscribe";
+
+    # EXTENTION "unsubscribe" confirmation
+    if ($mode eq 'unsubscribe') {
+	&Log("ConfirmationModeInit: mode=$mode");
+	$CONFIRMATION_KEYWORD = "unsubscribe-confirm";
+
+	$CONFIRMATION_FILE = "$DIR/unsub.confirm";
+	$CONFIRMATION_LIST = "$FP_VARLOG_DIR/unsub.confirm";
+	$CONFIRMATION_SUBSCRIBE = "unsubscribe";
+
+	$CONFIRMATION_RESET_KEYWORD = 
+	    $CONFIRMATION_RESET_KEYWORD || "unsubscribe-confirm reset";
+
+	$CONFIRM_REPLAY_TEXT_FUNCTION    = 
+	    "Confirm'GenUnsubscribeConfirmReplyText";	    
+	$CONFIRM_REPLAY_SUBJECT_FUNCTION = 
+	    "Confirm'GenUnsubscribeConfirmReplySubject";
+    }
+    else {
+	# save the request and given identifier;
+	# The concept of KEYWORD and ADDRESS suggeted by ando@iij-mc.co.jp
+	$CONFIRMATION_KEYWORD = $CONFIRMATION_KEYWORD || "confirm";
+	$CONFIRMATION_RESET_KEYWORD = 
+	    $CONFIRMATION_RESET_KEYWORD || "confirm reset";
+
+	$CONFIRMATION_FILE    = $CONFIRMATION_FILE || "$DIR/confirm";
+	$CONFIRMATION_LIST    = $CONFIRMATION_LIST || "$FP_VARLOG_DIR/confirm";
+	$CONFIRMATION_SUBSCRIBE = $CONFIRMATION_SUBSCRIBE ||
+	    $AUTO_REGISTRATION_KEYWORD || $DEFAULT_SUBSCRIBE || "subscribe";
+    }
 
     # touch
     -f $CONFIRMATION_LIST || &Touch($CONFIRMATION_LIST);
@@ -37,9 +60,14 @@ sub ConfirmationModeInit
 	 CONFIRMATION_LIST,
 	 CONFIRMATION_ADDRESS,
 	 CONFIRMATION_SUBSCRIBE, 
-	 CONFIRMATION_EXPIRE) {
+	 CONFIRMATION_EXPIRE,
+	 MAIL_LIST) {
 	eval("\$Confirm'$_ = \$main'$_;");
     }
+
+    # debug
+    eval("\$Confirm'debug = \$main'debug;");
+    eval("\$Confirm'debug_confirm = \$main'debug_confirm;");
 }
 
 
@@ -59,13 +87,16 @@ sub Confirm
     local($id, $r, @r, %r, $time, $m, $gh_subject, $type);
 
     $e{'GH:Reply-To:'} = $e{'GH:Reply-To:'} || $e{'CtlAddr:'};
-    $e{"GH:Subject:"} = "Subscribe request result $ML_FN";
+    $e{"GH:Subject:"}  = &GenConfirmReplySubject(*e, *cf, 'Default');
+    $e{'message:h:to'} = $From_address;
 
     # current time
     $time = time;
 
     # result code; @r is the identifier;
     $r = &Confirm'FirstTimeP(*r, $addr, $time);#';
+
+    &Log("r => @r") if $debug_confirm;
 
     # Mail is "subscribe" ? or "confirm" ? else ? (error?)
     $type = &Confirm'BufferSyntaxType(*e, $buffer); #';
@@ -74,58 +105,180 @@ sub Confirm
 
     if ($debug_confirm) {
 	&Warn("Confirm Request[$r] $ML_FN", 
-	      "Confirm::FirstTimeP r=$r type=$type\n\n". &WholeMail);
+	      "debug_confirm = 1\nConfirm::FirstTimeP r=$r type=$type\n\n". 
+	      &WholeMail);
     }
-
+    
     if ($r eq 'first-time' || $r eq 'expired' || 
-	($r eq 'confirmed' && $type eq 'subscribe') 
-	) {
+	($r eq 'confirmed' && $type eq 'subscribe')) {
 
-	if ($r eq 'expired') {
-	    $m .= 
-		"Your confirmation for \"subscribe request for $MAIL_LIST\"\n";
-	    $m .= "is TOO LATE (ALREADY EXPIRED).\n";
-	    $m .= "So we treat you request is the first time request.\n";
-	    $m .= "Please try it from the first time as follows\n\n";
+	# need to check the validity of the buffer
+	# to reply "subscribe key" (reply new id again if expired).
+	# $name == "Elena Lolobrigita"
+	if ($r eq 'expired') { 
+	    &Log("request is expired");
+	    $e{"GH:Subject:"} = 
+		&GenConfirmReplySubject(*e, *cf, 'Confirm::expired');
+	    $m .= &GenConfirmReplyText(*e, *cf, 'Confirm::expired');
+	}
+	else {
+	    $name = &Confirm'BufferSyntax(*e, $buffer);#';
+	    &Log("name=[$name]") if $debug_confirm;
 	}
 
-	# $name == "Elena Lolabrigita";
-	($name = &Confirm'BufferSyntax(*e, $buffer)) || return 0; #';
+	# subscribe / expired state
+	if ($name || $r eq 'expired') {
+	    # create a format "addr id time(for expire) signature"
+	    $id   = &Confirm'GenKey(length($from)); #';
+	    $name = $name || $r[3];
 
-	 # required info format 
-	 # [addr id time(for expire) signature]
-	 $id = &Confirm'GenKey($from);#';
+	    # cache on var/log/confirm (always);
+	    &Append2("$time\t$addr\t$id\t$name", $CONFIRMATION_LIST);
 
-	 # var/log/confirm;
-	 &Append2("$time\t$addr\t$id\t$name", $CONFIRMATION_LIST);
+	    # Generating preamble of confirmation
+	    $cf{'id'}   = $id; 
+	    $cf{'name'} = $name;
 
-	 # Header
-	 &FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	 $e{"GH:Subject:"} = "Subscribe confirmation request $ML_FN";
-	 $m .= "$CONFIRMATION_KEYWORD $id $name\n\n";
-	 $m .= "Please reply this mail to confirm your subscribe request\n";
-	 $m .= "and send this to $CONFIRMATION_ADDRESS\n";
-	 $m .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";
-	 &Mesg(*e, $m);
+	    # create new "id"
+	    $e{"GH:Subject:"} = 
+		&GenConfirmReplySubject(*e, *cf, "Confirm::GenPreamble");
+	    $m .= &GenConfirmReplyText(*e, *cf, 'Confirm::GenPreamble');
+	}
+	else {
+	    &Log("Confirm: buffer with invalid key");
+	}
 
-	 $e{'message:append:files'} = $CONFIRMATION_FILE;
-	 return 0;
+	&Mesg(*e, $m);
+
+	if (-f $CONFIRMATION_FILE) {
+	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	}
+
+	# undef $e{"GH:Subject:"};
+	return 0;
     }
     elsif ($r eq 'confirmed') { # @r == identifier;
-	$e{"GH:Subject:"} = "Subscribe and confirmation result $ML_FN";
 	$r = &Confirm'IdCheck(*e, *r, $addr, $buffer);#';
-	undef $e{"GH:Subject:"};# subject: welcome file;
+	$e{"GH:Subject:"} = 
+	    &GenConfirmReplySubject(*e, *cf, 
+				    $r ? 
+				    'Confirm::Confirmed' : 
+				    'Confirm::Error');
+	# undef $e{"GH:Subject:"};# subject: welcome file;
 	return $r;
     }
     else {
-	$e{"GH:Subject:"} = "Subscribe with confirmation error $ML_FN";
+	$e{"GH:Subject:"} = 
+	    &GenConfirmReplySubject(*e, *cf, 'Confirm::Error');
 	&Log("Confirm: Error exception");
 	return 0;
     }
 }
 
 
+sub GenConfirmReplySubject
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    if ($debug_confirm) {
+	local(@c) = caller;
+	&Log("GenConfirmReplySubject<$c[2]>: $mode") if $mode ne 'Default';
+    }
+
+    # extensions for confirmd
+    if ($CONFIRM_REPLAY_SUBJECT_FUNCTION) {
+	return &$CONFIRM_REPLAY_SUBJECT_FUNCTION(@_);
+    }
+
+    if ($mode eq 'Default') {
+	$s = "Subscribe request result $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Confirmed') {
+	$s = $WELCOME_STATEMENT;
+	# $s = "Newly added $From_address $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Error') {
+	$s = "Subscribe with confirmation error $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::GenPreamble') {
+	$s = "Subscribe confirmation request $ML_FN";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	$s = "Subscribe confirmation errror $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	$s = "Subscribe confirmation expired $ML_FN";
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	$s = "Subscribe confirmation errror $ML_FN";
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	$s = "Subscribe confirmation errror $ML_FN";
+    }
+    else {
+	&Log("GenConfirmReplySubject: unknown mode [$mode]") if $debug_confirm;
+	"Subscribe request result $ML_FN";
+    }
+}
+
+
+sub GenConfirmReplyText
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    &Log("GenConfirmReplyText: $mode") if $debug_confirm;
+
+    # extensions for confirmd
+    if ($CONFIRM_REPLAY_TEXT_FUNCTION) {
+	return &$CONFIRM_REPLAY_TEXT_FUNCTION(@_);
+    }
+
+    if ($mode eq 'Confirm::GenPreamble') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	$s .= "Please reply this mail to confirm your subscribe request\n";
+	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
+	$s .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Confirmation Syntax or Password Error:\n";
+	$s .= "Syntax is following style, check again syntax and password\n\n";
+	$s .= "$CONFIRMATION_KEYWORD password $cf{'name'}\n";
+	$s .= "\nwhere this \"password\" can be seen in the\n";
+	$s .= "confirmation request mail from MAILING LIST <$MAIL_LIST>.\n";
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	$s .= "Your confirmation for \"subscribe request for $MAIL_LIST\"\n";
+	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
+	$s .= "So we treat you request is the first time request.\n";
+	$s .= "Please try again. The new confirm key is as follows\n\n";
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
+	$s .= "(Name NOT E-Mail Address)\n";
+	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
+	$s .= "For example,\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Please use your name NOT E-Mail Address! like \n\n";
+	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+
+    $s;
+}
+
+
 package Confirm;
+
+sub Confirm'GenConfirmReplySubject { &main'GenConfirmReplySubject(@_);}
+sub Confirm'GenConfirmReplyText    { &main'GenConfirmReplyText(@_);}
 
 sub Confirm'FixFmlservConfirmationMode { 
     &main'FixFmlservConfirmationMode(@_);
@@ -135,23 +288,26 @@ sub Log          { &main'Log(@_);} #';
 sub Mesg         { &main'Mesg(@_);} #';
 sub Open         { &main'Open(@_);} #';
 
-
 sub IdCheck
 {
     local(*e, *r, $addr, $buffer) = @_;
     local($time, $a, $id, $name)  = @r;
-    local($m);
+    local($m, %cf);
 
     &Debug("Confirm::IdCheck(addr=$addr) {\n$buffer\n}") if $debug;
 
-    # reset anyway;
-    if ($buffer =~ /$CONFIRMATION_RESET_KEYWORD/) {
+    # reset anyway; (if not defined, ignore "reset" routine)
+    if ($CONFIRMATION_RESET_KEYWORD && 
+	$buffer =~ /$CONFIRMATION_RESET_KEYWORD/) {
 	&Log("confirm[confirm] reset request");
 
 	if (&RemoveAddrInConfirmFile($addr)) {
 	    &Mesg(*e, "I throw away your subscription request from $addr.");
 	    &Mesg(*e, "Please do it again from the first step.");
-	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	    if (-f $CONFIRMATION_FILE) {
+		$e{'message:append:files'} = $CONFIRMATION_FILE;
+	    }
+
 	}
 	
 	return 0;
@@ -162,17 +318,14 @@ sub IdCheck
 	return 1;
     }
     else {
-	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-
 	&Log("confirm[confirm] syntax error");
 	&Log("confirm request[$buffer]");
-	$m .= "Confirmation Syntax or Password Error:\n";
-	$m .= "Syntax is following style, check again syntax and password\n\n";
-	$m .= "$CONFIRMATION_KEYWORD password $name\n";	    
-	$m .= "\nwhere this \"password\" can be seen\n";
-	$m .= "in the confirmation request mail from $main'MAIL_LIST.\n";
-	&Mesg(*e, $m);
-	$e{'message:append:files'} = $CONFIRMATION_FILE;
+	$cf{'name'} = $name;
+	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'IdCheck::syntax_error'));
+	if (-f $CONFIRMATION_FILE) {
+	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	}
+
 	return 0;
     }
 }
@@ -197,40 +350,50 @@ sub BufferSyntaxType
 sub BufferSyntax
 {
     local(*e, $buffer) = @_;
-    local($name, $_);
+    local($name, $_, $ml);
+
+    &Log("BufferSyntax::{$buffer}\n") if $debug_confirm;
+
+    $ml = $*;
+    $*  = 1;
 
     if ($buffer =~ /$CONFIRMATION_SUBSCRIBE\s+(\S+.*)/) { # require anything;
 	$name = $1;
     }
     else {
-	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	&Log("confirm buffer syntax error");
+	&Log("error buffer [$buffer]");
 
-	&Log("confirm[firstime] syntax error");
-	&Log("confirm request[$buffer]");
-	$_ .= "Syntax Error! Please use the following syntax\n";
-	$_ .= "\n   $CONFIRMATION_SUBSCRIBE Your-Name ";
-	$_ .= "(Name NOT E-Mail Address)\n";
-	$_ .= "\nwhere \"Your Name\" for clearer identification. ";
-	$_ .= "For example,\n\n";
-	$_ .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita";
-	&Mesg(*e, $_);
-	$e{'message:append:files'} = $CONFIRMATION_FILE;
-	return 0;
+	local($re_euc_c) = '[\241-\376][\241-\376]';
+	local($re_jin)   = '\033\$[\@B]';
+
+	if ($buffer =~ /($re_jin|$re_euc_c)/) {
+	    &Log("confirm: request includes Japanese character [$&]");
+	    &Mesg(*e, "Error! Your request seems to include Japanese.");
+	}
+
+	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'BufferSyntax::Error'));
+	if (-f $CONFIRMATION_FILE) {
+	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	}
+	$name = $NULL;
     }
+
+    if (! $name) { $* =$ml; return $NULL;}
 
     if ($buffer =~ /\@/) {
-	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-
-	&Mesg(*e, "Please use your name NOT E-Mail Address!");
-	&Mesg(*e, "For Example:");
-	&Mesg(*e, "\t\"$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\"");
-
-	$e{'message:append:files'} = $CONFIRMATION_FILE;
-	return 0;
+	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'BufferSyntax::InvalidAddr'));
+	if (-f $CONFIRMATION_FILE) {
+	    $e{'message:append:files'} = $CONFIRMATION_FILE;
+	}
+	$name = $NULL;
     }
     else {
-	return $name;
+	; # do nothing
     }
+
+    $* =$ml;
+    $name;
 }
 
 # IMPORTANT (Reset by plural "subscribe" is based below;)
@@ -262,6 +425,7 @@ sub FirstTimeP
 	# already address is OK;
 	if ($time + ($CONFIRMATION_EXPIRE*3600) < $cur_time) {
 	    &Log("Confirmation [id=$id] is already Expired");
+	    @r = ($time, $a, $id, $name);
 	    $status = 'expired';
 	}
 	else {
@@ -280,6 +444,8 @@ sub RemoveAddrInConfirmFile
     local($addr) = @_;
     local($time, $key_addr, $a, $id, $name, $match, $addr_found);
     local($status);
+
+    &Log("RemoveAddrInConfirmFile called") if $debug_confirm;
 
     # init
     ($key_addr) = split(/\@/, $addr);
@@ -331,9 +497,91 @@ sub GenKey
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
 
-    srand($key);
+    &main'SRand(); #';
     $CurrentTime.int(rand($seed + $key));
 }
 
+
+sub GenUnsubscribeConfirmReplySubject
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    &Log("GenUnsubscribeConfirmReplySubject: $mode") if $mode ne 'Default';
+
+    if ($mode eq 'Default') {
+	$s = "Unsubscribe request result $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Confirmed') {
+	$s = "Unsubscribe and confirmation result $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::Error') {
+	$s = "Unsubscribe with confirmation error $ML_FN";
+    }
+    elsif ($mode eq 'Confirm::GenPreamble') {
+	$s = "Unsubscribe confirmation request $ML_FN";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	;
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	;
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	;
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	;
+    }
+
+    $s || "Unsubscribe request result $ML_FN";
+}
+
+
+sub GenUnsubscribeConfirmReplyText
+{
+    local(*e, *cf, $mode) = @_;
+    local($s);
+
+    &Log("GenUnsubscribeConfirmReplyText: $mode");
+
+    if ($mode eq 'Confirm::GenPreamble') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	$s .= "Please reply this mail to confirm your unsubscribe request\n";
+	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
+	$s .= "If confirmed, you are removed from MAILING LIST <$MAIL_LIST>.";
+    }
+    elsif ($mode eq 'IdCheck::syntax_error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Confirmation Syntax or Password Error:\n";
+	$s .= "Syntax is following style, check again syntax and password\n\n";
+	$s .= "$CONFIRMATION_KEYWORD password $cf{'name'}\n";
+	$s .= "\nwhere this \"password\" can be seen\n";
+	$s .= "in the confirmation request mail from MAILING LIST <$MAIL_LIST>.\n";
+    }
+    elsif ($mode eq 'Confirm::expired') {
+	$s .= "Your confirmation for \"unsubscribe request for $MAIL_LIST\"\n";
+	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
+	$s .= "So we treat you request is the first time request.\n";
+	$s .= "Please try again. The new confirm key is as follows\n\n";
+    }
+    elsif ($mode eq 'BufferSyntax::Error') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
+	$s .= "(Name NOT E-Mail Address)\n";
+	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
+	$s .= "For example,\n\n";
+	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+    elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
+	$s .= "Please use your name NOT E-Mail Address! like \n\n";
+	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
+    }
+
+    $s;
+}
 
 1;

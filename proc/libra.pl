@@ -45,10 +45,14 @@ sub DoSetAdminMode
 	$status = &AdminCommand(*Fld, *e);
 
 	if ($status eq 'LAST') {
+	    # not required since return value ends command
+	    $e{'mode:admin'} = 0; 
 	    return 'LAST';
 	}
 	elsif (! $status)  {
 	    &Log("Error: admin command mode error, ends");
+	    # not required since return value ends command
+	    $e{'mode:admin'} = 0;
 	    return 'LAST';
 	};
 
@@ -210,6 +214,11 @@ sub AdminModeInit
 		  # PGP
 		  'admin:pgp',            'ProcPGP',
 
+		  # user commands
+		  'admin:members', 'ProcFileSendBack',
+		  '#members',     $MEMBER_LIST,
+		  'admin:actives',  'ProcFileSendBack',
+		  '#actives',    $ACTIVE_LIST,
 		  );
     
 
@@ -337,7 +346,7 @@ sub AdminCommand
     # since the authentication must be the first entry;
     # ALREADY whether member (in member-admin) or not is checked.
     # 
-    $UnderAuth || &AdminAuthP($cmd, *Fld, *opt, *e) || do {
+    $UnderAuth || &AdminAuthP($cmd, *Fld, *e, *opt) || do {
 	&Log("Error: admin mode authentication fails");
 	return $NULL;
     };
@@ -371,8 +380,24 @@ sub AdminCommand
 
 	# PROCEDURE
 	# RETURN is 0 == LAST(libfml.pl);
-	$status = &$proc($cmd, *Fld, *opt, *e);
+	$status = &$proc($cmd, *Fld, *e, *opt);
 	&Log("admin status=$status") if $debug_proc;
+
+	# chaddr and bye
+	if ($cmd =~ /^($CHADDR_KEYWORD)$/i ||
+	    $cmd =~ /^(bye|unsubscribe)$/i) {
+
+	    # if recipients exist,
+	    if ($e{'message:h:@to'}) {
+		&Log("flush message") if $debug;
+		&Log("rcpts: $e{'message:h:@to'}") if $debug;
+		&Notify(&MesgGetABP);
+	    }
+	    else {
+		&Log("not flush message for no recipients") if $debug;
+	    }
+	}
+
 	return $status;
     }
     else {
@@ -394,7 +419,7 @@ sub ProcAdminAuthP { &AdminAuthP(@_);}
 # 
 sub AdminAuthP
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($to) = $From_address;
 
     &Log("AdminAuthP type=$REMOTE_ADMINISTRATION_AUTH_TYPE") if $debug;
@@ -412,6 +437,7 @@ sub AdminAuthP
 	### TRY AUTH
 	if ($proc =~ /^(PASS|PASSWORD)$/i) {
 	    if (! $opt) {
+		&Log("AdminAuthP: no \$opt");
 		&Mesg(*e, "554 PASS NEEDS PASSWORD parameter\n\tSTOP!");
 		return $NULL;
 	    }
@@ -467,7 +493,7 @@ sub AdminAuthP
 ##### PROC DEFINITIONS #####
 sub ProcAdminDummy 
 { 
-    local($proc, *Fld, *opt, *e) = @_; 
+    local($proc, *Fld, *e, *opt) = @_; 
     &Mesg(*e, "O.K.!");
     return 1;
 }
@@ -475,16 +501,16 @@ sub ProcAdminDummy
 
 sub ProcPGP
 {
-    local($proc, *Fld, *opt, *e) = @_; 
+    local($proc, *Fld, *e, *opt) = @_; 
 
     require 'libpgp.pl';
-    &PGP($proc, *Fld, *opt, *e);
+    &PGP($proc, *Fld, *e, *opt);
 }
 
 
 sub ProcAdminInitPasswd
 {
-    local($proc, *Fld, *opt, *e) = @_; 
+    local($proc, *Fld, *e, *opt) = @_; 
     local($s) = " @Fld ";
 
     $s =~ s/$proc\s+(\S+)\s+(\S+).*/$who = $1, $pass = $2/e;
@@ -513,27 +539,63 @@ sub ProcAdminInitPasswd
 # # admin add fukachan@phys.titech.ac.jp axion.phys.titech.ac.jp
 sub ProcAdminSubscribe
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
+    local($status, $swf, $addr);
     local($s) = join("\t", @opt);
     local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
 
+    $addr = $opt;
+
     &Log("admin $proc $s");
+
+    if ($REGISTRATION_ACCEPT_ADDR) {
+	if ($addr !~ /$REGISTRATION_ACCEPT_ADDR/i) {
+	    &Log("Error: AutoRegist: address [$addr] is not acceptable");
+	    return 0;
+	}
+    }
     
     ## duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
-    if (&CheckMember($opt, $file_to_regist)) {	
-	&LogWEnv("admin $proc [$opt] is duplicated in the file to regist", *e);
+    if (&CheckMember($addr, $file_to_regist)) {	
+	&LogWEnv("admin $proc [$addr] is duplicated in the file to regist", *e);
+	&Mesg(*e, "   different sub-domain address already exists?");
+	&Mesg(*e, "   \"set exact\" command enforces exact address matching");
+	&Mesg(*e, "   to ignore the difference of sub-domain parts.");
 	return 1;# not fatal;
     }
-
-    if ($ML_MEMBER_CHECK && ($ACTIVE_LIST ne $file_to_regist)) {
-	&Append2($s, $ACTIVE_LIST) ? 
-	    &LogWEnv("admin $proc $s >> \$ACTIVE_LIST", *e) :
-		&LogWEnv("ERROR: admin $proc [$!]",*e);
+    
+    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
+	$status = &Append2($s, $ACTIVE_LIST);
+	if ($status) {
+	    &LogWEnv("admin $proc $s >> \$ACTIVE_LIST", *e);
+	    $swf = 1;
+	}
+	else {
+	    &LogWEnv("ERROR: admin $proc [$!]",*e);
+	    $swf = 0;
+	}
     }
 
-    &Append2($s, $file_to_regist) ? 
-	&LogWEnv("admin $proc $s is added to the member list", *e) :
-	    &LogWEnv("Error: admin $proc [$!]",*e);
+    $status = &Append2($s, $file_to_regist);
+
+    if ($status) {
+	&LogWEnv("admin $proc $s is added to the member list", *e);
+	$swf += 1;
+    }
+    else {
+	&LogWEnv("Error: admin $proc [$!]",*e);
+	$swf = 0;
+    }
+
+    if ($ADMIN_ADD_SEND_WELCOME_FILE) {
+	if ($swf && $addr) {
+	    &SendFile($addr, $WELCOME_STATEMENT, $WELCOME_FILE);
+	}
+	else {
+	    &Log("ProcAdminSubscribe: fails to add") unless $swf;
+	    &Log("ProcAdminSubscribe: no address to send") unless $addr;
+	}
+    }
 
     1;
 }
@@ -548,7 +610,7 @@ sub ProcAdminSubscribe
 #
 sub ProcAdminSetDeliverMode
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($misc, @misc, %misc, $address);
 
     &Log("admin $proc ".join(" ", @opt));
@@ -590,7 +652,7 @@ sub ProcAdminSetDeliverMode
 #
 sub ProcAdminAddAdmin
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($s) = join("\t", @opt);
 
     &Log("admin $proc $s");
@@ -614,7 +676,7 @@ sub ProcAdminAddAdmin
 # 
 sub ProcAdminByeAdmin
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($ok);
     $proc = 'BYE';
 
@@ -631,7 +693,7 @@ sub ProcAdminByeAdmin
 # Send a file back
 sub ProcAdminFileSendBack
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($to) = $e{'Addr2Reply:'};
 
     &LogWEnv("admin $proc send $proc to $to", *e);
@@ -643,7 +705,7 @@ sub ProcAdminFileSendBack
 # Send a file back
 sub ProcAdminLog
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($lines, $flag, $all_p);
     local($to) = $e{'Addr2Reply:'};
 
@@ -663,7 +725,7 @@ sub ProcAdminLog
     if ($all_p) {
 	&Log("admin $proc all");
 	# send back the whole file;
-	&ProcAdminFileSendBack($proc, *Fld, *opt, *e);
+	&ProcAdminFileSendBack($proc, *Fld, *e, *opt);
     }
     else {
 	$prog = &SearchUsualPath('tail');
@@ -684,7 +746,7 @@ sub ProcAdminLog
 # ReSend, a file forwarders
 sub ProcAdminReSend
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($file) = $Fld[3];
     local($addr) = $Fld[4];
 
@@ -708,7 +770,7 @@ sub ProcAdminReSend
 #  After admin authed, forward ...
 sub ProcAdminForward
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($s, $lines, $skip_p);
 
     &Log("admin $proc");
@@ -738,7 +800,7 @@ sub ProcAdminForward
 
 sub ProcAdminDir
 {    
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($flag, $prog);
 
     &Log("admin $proc $opt");
@@ -757,7 +819,7 @@ sub ProcAdminDir
 
 sub ProcAdminUnlink
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($file) = "$DIR/$opt";
 
     &Log("admin $proc $file");
@@ -778,13 +840,20 @@ sub ProcAdminUnlink
 
 sub ProcAdminUnlinkArticle
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($f) = "$FP_SPOOL_DIR/$opt";
 
     &Log("admin $proc $opt");
 
     if ($opt =~ /^\d+$/) {
-	if (-f $f && unlink $f) {
+	local($atime, $mtime) = (stat($f))[8,9];
+	if (open(OW, "> $FP_SPOOL_DIR/$opt")) {
+	    select(OW); $| = 1; select(STDOUT);
+	    print OW "This article $opt is removed by an administrator.\n\n";
+	    print OW "-- $MAINTAINER\n";
+	    close(OW);
+	    utime($atime, $mtime, $f);
+
 	    &LogWEnv("admin $proc $opt", *e);
 	}
 	else {
@@ -797,13 +866,34 @@ sub ProcAdminUnlinkArticle
 	return 0; 
     }
 
+    ### 
+    # O.K. here, searching plain article is done. 
+    # Now search html article.
+    $hook = qq#sub wanted { /^$opt\\.html\$/ && push(\@wanted,\$name);}#;
+    eval($hook);
+    &Log($@) if $@;
+
+    require 'find.pl';
+    &find($HTML_DIR);
+
+    # o$pt
+    if (@wanted) {
+	&use('synchtml');
+	for (@wanted) { &SyncHtmlUnlinkArticle(*e, $_);}
+    }
+    else {
+	&Log("$opt.html to remove is not found");
+    }
+
     1;
 }
 
 
+
+
 sub ProcAdminRetrieve
 {    
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($file) = "$DIR/$opt";
 
     &Log("admin $proc $file");
@@ -827,7 +917,7 @@ sub ProcAdminRetrieve
 # skip command sequence until "# admin put" lines.
 sub ProcAdminPutFile
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($file) = "$DIR/$opt";
     local($s);
 
@@ -884,7 +974,7 @@ sub ProcAdminPutFile
 
 sub ProcAdminRename
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($file) = $opt;
     local($new)  = $opt[1];
 
@@ -946,6 +1036,7 @@ sub ReconfigurableFileP
     &Log("FYI: reconfig only files in \@REMOTE_RECONFIGURABLE_FILES.");
 
     $s .= "Remote administraion mode error:\n";
+    $s .= "File to remove is not listed in \@REMOTE_RECONFIGURABLE_FILES.\n";
     $s .= "You can substitute a file of \@REMOTE_RECONFIGURABLE_FILES.\n";
     $s .= "Please set \@REMOTE_RECONFIGURABLE_FILES to permit other files\n";
     $s .= "See doc/op for more details\n";

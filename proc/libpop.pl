@@ -40,7 +40,7 @@ sub Log { &main'Log(@_);} #';
 sub Init
 {
     for (HAS_ALARM, HAS_GETPWUID, HAS_GETPWGID) {
-	eval("\$POP'$_ = \$main'$_;");	
+	eval("\$Pop'$_ = \$main'$_;");	
     }
 
     for (SERVER, PORT, USER, PASSWORD, TIMEOUT, 
@@ -49,7 +49,7 @@ sub Init
     }
 
     # pop queue should be "only you can read and write".
-    -d $POP_QUEUE_DIR || mkdir($POP_QUEUE_DIR, 0700);
+    -d $POP_QUEUE_DIR || &Mkdir($POP_QUEUE_DIR, 0700);
     $POP_LOGFILE = $POP_LOGFILE || '/dev/null';
 
     open(POPLOG, "> $POP_LOGFILE") || 

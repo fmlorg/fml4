@@ -70,7 +70,7 @@ sub Crypt
 
     # if DES function is not given
     # fml-support: 03447 oota@pes.com1.fc.nec.co.jp
-    srand(time|$$);
+    &SRand();
     if ($CPU_TYPE_MANUFACTURER_OS =~ /freebsd/i &&
 	!&TraditionalCryptP) {
         if (! $salt) {
@@ -88,7 +88,7 @@ sub TraditionalCryptP
 {
     local($c, $e);
     $c = "0./Qb5B6ICfvA";
-    $e = crypt("fukachan", 00);
+    $e = crypt("fukachan", "0.");
     $c eq $e ? 1 : 0;
 }
 
@@ -96,29 +96,24 @@ sub TraditionalCryptP
 # return 1 if matched
 sub CmpPasswd
 {
-    local($c, $p) = @_;
+    local($ep, $p) = @_;
     local($seed);
 
-    &Log("CmpPasswd: $c eq crypt($p)") if $debug;
+    &Log("CmpPasswd: $ep eq crypt($p)") if $debug;
 
-    # fml-support: 03441 oota@pes.com1.fc.nec.co.jp
+    # fml-support: 03441 oota@pes.com1.fc.nec.co.jp (obsolete)
     if ($CPU_TYPE_MANUFACTURER_OS =~ /freebsd/i) {
-       if ($c =~ /^\$1\$/) { # using MD5 crypt
-           $seed = substr($c, 3, index($c, "\$", 3) - 3);
-       } 
-       else { # using DES crypt
-           $seed = substr($c, 0, 2);
-       }
-
-       $p = &Crypt($p, $seed);
+	$p = &Crypt($p, $ep);
     }
     else {
-	($c =~ /^(\S\S)/) && ($p = &Crypt($p, $1));
+	($ep =~ /^(\S\S)/) && ($p = &Crypt($p, $1));
     }
 
-    &Log("CmpPasswd: $c eq $p") if $debug;
+    # now $p (given plain password) has been encrypted by crypt().
+    # compare $ep (given encrypted password) with $p
+    &Log("CmpPasswd: $ep eq $p") if $debug;
 
-    ($c eq $p) ? 1: 0;
+    ($ep eq $p) ? 1: 0;
 }
 
 
@@ -128,19 +123,25 @@ sub CmpPasswd
 sub CmpPasswdInFile
 {
     local($file, $from, $passwd) = @_;
-    local($ok) = 0;
+    local($found, $ok);
 
     open(FILE, $file) || return 0;
     while(<FILE>) {
 	chop;
 
 	if (/^$from\s+(\S+)/) {
-	    #CmpPasswd(encrypt, plain-passwd)
+	    $found++;
+
+	    # CmpPasswd(encrypt, plain-passwd)
 	    &CmpPasswd($1, $passwd) && $ok++; 
-	    &Log("O.K. CmpPasswdInFile: $passwd Authenticated") if $debug && $ok;
+
+	    &Log("O.K. CmpPasswdInFile: password [$passwd] is authenticated")
+		if $debug && $ok;
 	}
     }
     close(FILE);
+
+    if (! $found) { &Log("CmpPasswdInFile: address [$from] is not found");}
 
     $ok ? 1 : 0;
 }

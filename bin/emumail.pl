@@ -42,13 +42,23 @@ sub GetTime
 sub EmuHeader
 {
 $_ = qq#From $USER\@$DOMAINNAME $MailDate
+Return-Path: $From _RECEIVED_
 Date: $MailDate +0900 (JST)
 From: $From
 Message-Id: $MessageId
 To: $To
 Subject: $Subject
-
 #;
+
+$_ .= "\n" unless $opt_H; 
+
+if ($opt_r) {
+    s/_RECEIVED_/\nReceived: received at .../;
+}
+else {
+    s/_RECEIVED_//;
+}
+
 
 $_ .= $AddString if $AddString;
 $_;
@@ -57,10 +67,27 @@ $_;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:f:s:t:");
+    &Getopts("dhg:f:s:t:h:Hr");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
     $Gecos = (getpwuid($<))[6] || $USER;
+
+    # HELP Message
+    if ($opt_h) { 
+	print <<"EOF";
+	$0 [options]
+
+	    -f\tFrom:
+	    -s\tSubject:
+	    -t\tTo:
+	    -g\tGecos Field
+
+EOF
+
+	exit 0;
+    }
+
+
 
     # DNS AutoConfigure to set FQDN and DOMAINNAME; 
     local(@n, $hostname, $list);

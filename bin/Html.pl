@@ -32,7 +32,7 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 &use('synchtml');
 
-&SyncHtml($HTTP_DIR || $SPOOL_DIR, $ID, *Envelope);
+&SyncHtml($HTML_DIR || $HTTP_DIR || $SPOOL_DIR, $ID, *Envelope);
 
 exit 0;
 

@@ -43,7 +43,7 @@ sub AutoRegist
 	local($key);
 
 	&use('confirm');
-	&ConfirmationModeInit;
+	&ConfirmationModeInit(*e, 'subscribe');
 
 	# the first line
 	$key  = "^$CONFIRMATION_SUBSCRIBE|$CONFIRMATION_KEYWORD";
@@ -99,8 +99,22 @@ sub AutoRegist
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
 
     return 0 if     &LoopBackWarn($from); 	# loop back check	
-    return 0 unless &Chk822_addr_spec_P($from);	# permit only 822 addr-spec 
+    return 0 unless &Chk822_addr_spec_P(*e, $from);# permit only 822 addr-spec 
 
+    # acceptable address patterns
+    if ($AUTO_REGISTRATION_ACCEPT_ADDR) {
+	if ($from !~ /$AUTO_REGISTRATION_ACCEPT_ADDR/i) {
+	    &Log("Error: AutoRegist: address [$from] is not acceptable");
+	    return 0;
+	}
+    }
+    if ($REGISTRATION_ACCEPT_ADDR) {
+	if ($from !~ /$REGISTRATION_ACCEPT_ADDR/i) {
+	    &Log("Error: AutoRegist: address [$from] is not acceptable");
+	    return 0;
+	}
+    }
+	
     ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
     if (&CheckMember($from, $file_to_regist)) {	
 	&Log("AutoRegist: Dup $from");
@@ -139,7 +153,7 @@ sub AutoRegist
     }
 
     # WHEN CHECKING MEMBER MODE
-    if ($ML_MEMBER_CHECK) {
+    if (&NonAutoRegistrableP) {
 	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	&Append2($entry, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
 	($ok == 2) ? &Log("Added: $entry") : do {
@@ -172,16 +186,18 @@ sub AutoRegist
     local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
     &Log("AutoRegist: Deliver? $e{'nlines'} <=> $limit") if $debug;
 
+    $r = "<$from> is added to <$MAIL_LIST>\n\n";
+
     if ($AUTO_REGISTERED_UNDELIVER_P) {
 	&Log("AutoRegist: not deliver since \$AUTO_REGISTERED_UNDELIVER_P is on");
-	$r  = "\$AUTO_REGISTERED_UNDELIVER_P is set, \n";
+	$r .= "\$AUTO_REGISTERED_UNDELIVER_P is set, \n";
 	$r .= "So NOT FORWARDED to ML($MAIL_LIST).\n\n";
 	$r .= ('-' x 30) . "\n\n";
     }
     # IF $AUTO_REGISTERED_UNDELIVER_P NOT DEFINED, check Lines: 
     elsif ($e{'nlines'} < $limit) { 
 	&Log("AutoRegist: not deliver since lines:$e{'nlines'} < $limit");
-	$r  = "The number of lines in the mailbody is too short(< $limit),\n";
+	$r .= "The number of lines in the mailbody is too short(< $limit),\n";
 	$r .= "So NOT FORWARDED to ML ($MAIL_LIST). O.K.?\n";
 
 	if ($AUTO_REGISTRATION_LINES_LIMIT) {
@@ -196,13 +212,19 @@ sub AutoRegist
 	$AUTO_REGISTERED_UNDELIVER_P = 1;
     }
 
-
-    &Warn("New added member: $from $ML_FN", $r . &WholeMail);
+    # notified to $MAINTAINER
+    {
+	local($subject) = $e{"GH:Subject:"};
+	$e{"GH:Subject:"} = "New added member: $from $ML_FN";
+	&Warn("New added member: $from $ML_FN", $r . &WholeMail);
+	$e{"GH:Subject:"} = $subject;
+    }
 
     # HOOK's may modified this;
     local($cur_preamble) = $e{'preamble'};
     if ($e{'GH:Reply-To:'} eq $MAIL_LIST) {
 	local($p);
+	$p .= "<$from> is added to <$MAIL_LIST>.\n\n";
 	$p .= "ATTENTION!: IF YOU REPLY THIS MAIL SIMPLY\n";
 	$p .= "YOUR REPLY IS DIRECTLY SENT TO THE MAILING LIST $MAIL_LIST\n";
 	$p .= "-" x 60; $p .= "\n\n";
@@ -246,7 +268,10 @@ sub GetAddr2Regist
 sub GetSubscribeString
 {
     local($_, $key) = @_;
-    local($buf);
+    local($buf, $pb, $pe);
+
+    # evalute the first multipart block
+    if ($e{'MIME:boundary'}) { $_ = &GetFirstMultipartBlock(*e, $_);}
 
     if ($debug_confirm) {
 	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
@@ -301,21 +326,25 @@ sub AutoRegistError
 # return 1 if O.K. 
 sub Chk822_addr_spec_P
 {
-    local($from) = @_;
+    local(*e, $from) = @_;
 
-    if ($from !~ /\@/) {
-	&Log("NO \@ mark: $from");
-        &Mesg(*Envelope, "WARNING ON AUTO-REGISTRATION::Chk822_addr_spec_P:");
-        &Mesg(*Envelope, "Address [$from] contains NO '\@' STRING, SO EXIT!");
-        &Mesg(*Envelope, "[$from\@$FQDN] FORM IS REQUIRED for uniqueness\n");
-        &Mesg(*Envelope, "*** Please use e.g. [subscribe $from\@$FQDN] FORM");
-        &Mesg(*Envelope, "***        OR                                ");
-        &Mesg(*Envelope, "*** Manually Edit for $from on the localhost ");
-	&Mesg(*Envelope, &WholeMail);
-	return 0;
+    if (&ValidAddrSpecP($from)) {
+	1;
     }
+    else {
+	&Mesg(*e, "AUTO REGISTRATION ERROR:");
+	&Mesg(*e, "<$from> is invalid address form.");
+	&Log("<$from> is invalid address form");
 
-    1;
+	if ($from !~ /\@/) {
+	    &Mesg(*e, "address <$from> contains NO '\@' STRING.");
+	    &Mesg(*e, "It should be <$from\@$FQDN> form.");
+	}
+
+	&Mesg(*e, &WholeMail);
+
+	0;
+    }
 }
 
 
@@ -344,6 +373,13 @@ sub DoSetDeliveryMode
     if (/^(MATOME|DIGEST)$/ && ($opt =~ /^(\d+|\d+[A-Za-z]+)$/)) {
 	# set matome-okuri-parameter. *Fld -> &Change..( , , , *opt);
 	$c = $opt;
+
+	if ($NOT_USE_SPOOL) {
+	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
+	    &Mesg(*e, "Error: $proc is disabled");
+	    &Mesg(*e, "       since we do not spool articles");
+	    return $NULL;
+	}
 
 	# Exception is synchronous delivery
 	if (0 == $c) {
@@ -392,81 +428,117 @@ sub DoSetMemberList
     local($proc, *Fld, *e, *misc) = @_;
     local($curaddr, $newaddr);
 
-    $cmd = $proc; $cmd =~ tr/a-z/A-Z/; $_ = $cmd;
+    ### Modification routine is called recursively in ChangeMemberList;
+    local($r, $list, $mcs);
 
-    # {3u,oldaddr} newaddr 
-    $curaddr = $Fld[2] || $Addr || $From_address;#(From_address when bye)
+    $cmd = $proc; $cmd =~ tr/a-z/A-Z/;
+
+    # define current address (target address) & new address
+    # In administrator mode, accecpt any address but
+    # From: address only for an usual member. 
+    $curaddr = $e{'mode:admin'} ? $Fld[2] : ($Addr || $From_address);
     $newaddr = $Fld[3];
 
     &Debug("\n   SetMemberList::(\n\tcur  $curaddr\n\tnew  $newaddr\n\tmisc $misc\n") if $debug;
 
     # KEYWORD for 'chaddr'
+    # Default: $CHADDR_KEYWORD = 'CHADDR|CHANGE\-ADDRESS|CHANGE';
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
 
     # LOOP CHECK
     if (&LoopBackWarn($curaddr)) {
-	&Log("$cmd: LOOPBACK ERROR, exit");
+	&Mesg(*e, "$cmd: $curaddr may case a mail loop, reject");
+	&Log("$cmd: $curaddr may case a mail loop, reject");
 	return $NULL;
     }
-    
-    ###### change address [chaddr old-addr new-addr]
-    # Default: $CHADDR_KEYWORD = 'CHADDR|CHANGE\-ADDRESS|CHANGE';
+
+    # NOT REQUIRED, since 'r2a' is defind in %Procedure.
+    # $e{'message:h:@to'} = $MAINTAINER unless $e{'mode:admin'};
+
+    # ATTENTION! $curaddr should be a member.
+    if (! ($list = &MailListMemberP($curaddr))) {
+	&Log("$cmd: Error: address '$curaddr' is not a member. STOP");
+	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
+	&Mesg(*e, "$cmd requires command from a member address.");
+	&Mesg(*e, "Please check your From: field.");
+	return $NULL;
+    }
+
+    # redefine
+    $_ = $cmd;
+
+    # switch: chaddr case
     if (/^($CHADDR_KEYWORD)$/i) {
-	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
-	$cmd = 'CHADDR';
+	###### change address [chaddr old-addr new-addr]
 
-	# return addrs
-	$e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
-
+	# addresses
 	if ($curaddr eq '' || $newaddr eq '') {
-	    &Log("CHADDR Error: empty address is given");
-	    &Mesg(*e, "Error: CHADDR requires two non-empty addresses.");
-	    &Mesg(*e, "Please use the syntax \"CHADDR old-address new-address\"");
+	    &Log("$cmd: Error: empty address is given");
+	    &Mesg(*e, "$cmd: Error: $cmd requires two non-empty addresses.");
+	    &Mesg(*e, "Please use the syntax \"$cmd old-address new-address\"");
 	    return $NULL;
 	}
 
-	# LOOP CHECK
-	&LoopBackWarn($newaddr) && &Log("$cmd: LOOPBACK ERROR, exit") && 
-	    (return $NULL);
-
-	#ATTENTION! $curaddr or $newaddr should be a member.
-	if (&MailListMemberP($curaddr) || &MailListMemberP($newaddr)) {
-	    &Log("$cmd: OK! Either $curaddr and $newaddr is a member.");
-	    &Mesg(*e, "\tTry change\n\n\t$curaddr\n\t=>\n\t$newaddr\n");
-	}
-	else {
-	    &Log("$cmd: NEITHER $curaddr and $newaddr is a member. STOP");
-	    &Mesg(*e, "$cmd:\n\tNEITHER\n\t$curaddr nor $newaddr");
-	    &Mesg(*e, "\tis a member.\n\tDO NOTHING!");
-	    return 'LAST';
-	}
-    }
-    # NOT CHADDR;
-    else {
-	# when not administrator mode
-	if (! $e{'mode:admin'}) { 
-	    $curaddr = $Addr || $From_address;#(From_address when bye)
+	# loop check
+	if (&LoopBackWarn($newaddr)) {
+	    &Mesg(*e, "$cmd: $newaddr may cause a mail loop, reject");
+	    &Log("$cmd: $newaddr may cause a mail loop, reject");
+	    return $NULL;
 	}
 
+	# for usual user, From: == $curaddr is required
+	if (! $e{'mode:admin'} && 
+	    ! &AddressMatch($From_address, $curaddr)) {
+	    &Log("$cmd: Security Error: requests to change another member's address '$curaddr'");
+	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$curaddr'.");
+	    return $NULL;
+	}
+
+	#ATTENTION! $newaddr should not be a member.
+	local($new_list);
+
+	if ($new_list = &MailListMemberP($newaddr)) {
+	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");
+	    &Mesg(*e, "$cmd: Error: New address '$newaddr' is already registered as a member.");
+	    return $NULL;
+	}
+
+	# return addrs 
+	# valid for a general user but 
+	# invalid for plural "chaddr" command in admin mode 
+	$e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
+
+	&Log("$cmd: Try change address: $curaddr -> $newaddr");
+	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";
+	&Mesg(*e, "\tTry change\n\n\t$curaddr\n\t=>\n\t$newaddr\n");
+	$cmd = 'CHADDR';
+    } else {
+	# NOT CHADDR -> BYE or UNSUBSCRIBE
 	$newaddr = $curaddr; # tricky;
-	&Mesg(*e, "\t set $cmd => BYE") if $cmd ne "BYE";
+
+	# not required and wrong also.
+	# $e{'message:h:@to'} = "$curaddr $MAINTAINER";
+
+	&Mesg(*e, "set $cmd => BYE") if $cmd ne "BYE";
 	$cmd = 'BYE';
     }
 
-    ### Modification routine is called recursively in ChangeMemberList;
-    local($r, $list);
-
-    $list = &MailListMemberP($curaddr);
-
+    # obsolete code but left for compatibility.
     if (&ListIncludePatP($list, $ProcedureException{"bye", "ignore_list"})) {
 	&Log("ProcedureException: bye ignore $list");
 	$r++;
     }
-    elsif ($ML_MEMBER_CHECK) {
+    elsif (&NonAutoRegistrableP) {
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
-	&Log("$cmd MEMBER [$curaddr] $c O.K.")   if $r == 1 && $debug_amctl;
-	&Log("$cmd MEMBER [$curaddr] $c failed") if $r != 1;
-	&Mesg(*e, "Hmm,.., modifying member list fails.") if $r != 1;
+	&Log($mcs = "$cmd MEMBER [$curaddr] $c O.K.")
+	    if $r == 1 && $debug_amctl;
+	if ($r == 1) {
+	    &Mesg(*e, "changed a member list.");
+	}
+	else {
+	    &Log($mcs = "$cmd MEMBER [$curaddr] $c failed");
+	    &Mesg(*e, "Hmm,.., modifying member list fails.");
+	}
     }
     else {
 	$r++;
@@ -479,8 +551,14 @@ sub DoSetMemberList
     $list = &MailListActiveP($curaddr);
     &ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
     &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $r == 2 && $debug_amctl;
-    &Log("$cmd ACTIVE [$curaddr] $c failed") if $r != 2;
-    &Mesg(*e, "Hmm,.., modifying delivery list fails.") if $r != 2;
+
+    if ($r == 2) {
+	&Mesg(*e, "changed a delivery list.");
+    }
+    else {
+	&Log("$cmd ACTIVE [$curaddr] $c failed");
+	&Mesg(*e, "Hmm,.., modifying delivery list fails.");
+    }
 
     # Status
     if ($r == 2) {
@@ -488,6 +566,7 @@ sub DoSetMemberList
 	&Mesg(*e, "$cmd [$curaddr] $c accepted.");
     }
     else {
+	&Log($mcs);
 	&Log("$cmd [$curaddr] $c failed");
 	&Mesg(*e, "$cmd [$curaddr] $c failed.");
     }
@@ -500,7 +579,7 @@ sub DoSetMemberList
 sub GenFmlHeader
 {
 q$#.FML HEADER
-# NEW FORMAT FOR FURTHER EXTENTION
+# NEW FORMAT FOR FURTHER EXTENSION
 # e.g. fukachan@phys r=relayserver m=3u s=skip 
 # r= relayserver
 # m= matomeokuri parameter is time and option
@@ -516,14 +595,37 @@ $;
 sub ChangeMemberList
 {
     local($org_addr) = $ADDR_CHECK_MAX;	# save the present severity
-    local($status);
+    local($status, $dup);
 
-    while ($ADDR_CHECK_MAX < 10) { # 10 is built-in;
+    # already back up file exists 
+    $dup = 1 if -f "$file.bak";
+
+    $ChMemCount = 0;
+    while ($ChMemCount++ < 10) {
 	$status = &DoChangeMemberList(@_);
 	last if $status ne 'RECURSIVE';
 	$ADDR_CHECK_MAX++;
-	&Debug("Call Again ChangeMemberList(...)[$ADDR_CHECK_MAX]") if $debug;
-    } 
+	&Debug("Call Again ChangeMemberList(...)[$ADDR_CHECK_MAX + 1]") if $debug;
+    }
+
+    local($cmd, $curaddr, $file, *misc) = @_;
+    if ($AMLIST_BACKUP_TYPE eq 'rcs') {
+	&use('rcs');
+	&RCSBackUp($file);
+    }
+
+    # Threshold is 3000 addresses ?
+    $AMLIST_NEWSYSLOG_LIMIT = $AMLIST_NEWSYSLOG_LIMIT || 50*3000;
+    $AMLIST_NEWSYSLOG_LIMIT = &ATOI($AMLIST_NEWSYSLOG_LIMIT);
+
+    if ($dup && ((stat($file))[7] > $AMLIST_NEWSYSLOG_LIMIT)) {
+	&Log("ChangeMemberList->NewSyslog($file.bak)") if $debug;
+	require 'libnewsyslog.pl'; 
+	&NewSyslog("$file.bak");
+    }
+    else {
+	&Log("NO ChangeMemberList->NewSyslog($file.bak)") if $debug;
+    }
 
     $ADDR_CHECK_MAX = $org_addr; # reset;
     $status;
@@ -553,7 +655,13 @@ sub DoChangeMemberList
     ### File IO
     # NO CHECK 95/10/19 ($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file)
     # Backup
-    open(BAK, ">> $file.bak") || (&Log($!), return $NULL);
+    if ($AMLIST_BACKUP_TYPE eq 'rcs') {
+	open(BAK, "> $file.bak") || (&Log($!), return $NULL);
+    }
+    else {
+	open(BAK, ">> $file.bak") || (&Log($!), return $NULL);
+    }
+
     select(BAK); $| = 1; select(STDOUT);
     print BAK "----- Backup on $Now -----\n";
 
@@ -569,7 +677,7 @@ sub DoChangeMemberList
     print NEW &GenFmlHeader;
 
     # $c == conserve comment;
-    local($c, $rcpt, $o, $comment);
+    local($c, $rcpt, $o, $comment, $cbuf);
 
     in: while (<FILE>) {
 	chop;
@@ -606,7 +714,7 @@ sub DoChangeMemberList
 	next in if /^\s*$/o;
 
 	# get $addr for ^#\s+$addr$. if ^#, skip process except for 'off' 
-	$comment = $addr = '';
+	$cbuf = $comment = $addr = '';
 	if (/^\s*(\S+)\s*(.*)/o)   { $addr = $1;}
 	if (/^\#\s*(\S+)\s*(.*)/o) { $addr = $1;}
 
@@ -632,17 +740,17 @@ sub DoChangeMemberList
 	    # phase 02: if matched, get "$addr including mx or comments"
 	    s/\s+/ /g; # "  " -> " ";
 	    if (/^\s*(.*)/o)   { $addr = $1;}
-	    if (/^\#\s*(.*)/o) { $addr = $1;}
+	    if (/^(\#\s*)(.*)/o) { $addr = $2; $cbuf = $1;}
 	}
 
 	# fixing multiple s=skip possiblities;
-	if ($cmd =~ /^ON|SKIP|NOSKIP$/) { $addr =~ s/s=skip//g;}
+	if ($cmd =~ /^(ON|SKIP|NOSKIP)$/) { $addr =~ s/s=skip//g;}
 
 	print STDERR "ChangeAMList::{ CMD=$cmd \$addr=[$addr]}\n" if $debug;
 
 	# not use "last" for the possibility the address is written double. 
 	# may not be effecient.
-	if ($cmd =~ /^ON|OFF|BYE|SKIP|NOSKIP|MATOME|CHADDR$/) {
+	if ($cmd =~ /^(ON|OFF|BYE|SKIP|NOSKIP|MATOME|CHADDR)$/) {
 	    # Return to the ML
 	    print NEW "$addr $comment\n" 	 if $cmd eq 'ON';
 
@@ -665,14 +773,14 @@ sub DoChangeMemberList
 	    # $addr is reset each time, $org_addr is reused after if matome 0
 	    if ($cmd eq 'MATOME') {
 		($addr, $org_addr) = &CtlMatome($addr, *misc);
-		print NEW "$addr $comment\n"; 
+		print NEW "$cbuf$addr $comment\n";
 	    }
 
 	    # Matome Okuri Control
 	    if ($cmd eq 'CHADDR') {
 		&Log("ChangeMemberList:$addr -> $misc");
 		if ($addr =~ /^(\S+)\s*(.*)/o) { $addr = $1; $addr_opt = $2;}
-		print NEW "$misc $addr_opt $comment\n"; 
+		print NEW "$cbuf$misc $addr_opt $comment\n"; 
 	    }
 
 	    $status = 'done'; 
@@ -698,7 +806,7 @@ sub DoChangeMemberList
     # ADMIN MODE permit multiplly matching($_cf{'mode:addr:multiple'} = 1);
     ## IF MULTIPLY MATCHED
     if ($log_c > 1 && 
-	($ADDR_CHECK_MAX < 10) && 
+	($ChMemCount < 10) && # ($ADDR_CHECK_MAX < 10) && 
 	(! $_cf{'mode:addr:multiple'})) {
 	&Log("$cmd: Do NOTHING since Muliply MATCHed..");
 	$log =~ s/; /\n/g;
@@ -709,7 +817,9 @@ sub DoChangeMemberList
 	return 'RECURSIVE';
     }
     ## IF TOO RECURSIVE
-    elsif ($ADDR_CHECK_MAX >= 10) {
+    # elsif ($ADDR_CHECK_MAX >= 10) {
+    elsif ($ChMemCount >= 10) {
+
 	&Log("MAXIMUM of ADDR_CHECK_MAX, STOP");
     }
     ## DEFAULT 
@@ -729,7 +839,7 @@ sub DoChangeMemberList
     }
 
     if ($status eq 'done') {
-	&Mesg(*e, "O.K.");
+	;# &Mesg(*e, "O.K.");
     }
     else {
 	&Mesg(*e, "Hmm,.. something fails.");
@@ -753,6 +863,7 @@ sub CtlMatome
 	# modification
 	if ($addr =~ /\smatome/oi || $addr =~ /\sm=/) {
 	    $matome = 'RealTime';
+	    $NotAppendMsendRc = 1;
 	}
 	# new comer, set default
 	else {
@@ -765,6 +876,9 @@ sub CtlMatome
     }
     elsif ($matome == 0) {
 	$matome = 'RealTime';
+    }
+    else { # modify ?
+	# $NotAppendMsendRc = 1;
     }
 
     # Remove the present matomeokuri configuration
@@ -835,6 +949,11 @@ sub ConfigMSendRC
 {
     local($curaddr) = @_;
     local($ID)      = &GetID;
+
+    &Log("\$NotAppendMsendRc = $NotAppendMsendRc");
+
+    # append $ID >> $MSEND_RC (overwrite) if new comer comes in.
+    return $NULL if $NotAppendMsendRc;
 
     # may be duplicated 
     # but the latter config is overwritten when msend.pl works. 

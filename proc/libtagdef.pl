@@ -72,9 +72,9 @@ sub SubjectTagDef
 	$END_BRACKET       = ')';
 	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET,\\d+\\)";
     }
-    #######
-    ####### without numbers
-    #######
+    ###
+    ### without numbers
+    ###
     elsif ($mode eq '()') {
 	$SUBJECT_FREE_FORM = 1;
 	$BEGIN_BRACKET     = '(';
@@ -92,7 +92,25 @@ sub SubjectTagDef
 	$END_BRACKET       = ']';
 	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET\\]";
     }
-
+    ###
+    ### NUMBER AND BRACKET
+    ###
+    elsif ($mode eq '(ID)') {
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '(';
+	$BRACKET           = '';
+	$BRACKET_SEPARATOR = '';
+	$END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = "\\(\\d+\\)";
+    }
+    elsif ($mode eq '[ID]') {
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '[';
+	$BRACKET           = '';
+	$BRACKET_SEPARATOR = '';
+	$END_BRACKET       = ']';
+	$SUBJECT_FREE_FORM_REGEXP = "\\[\\d+\\]";
+    }
 
 }
 

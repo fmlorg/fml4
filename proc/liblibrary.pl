@@ -48,6 +48,17 @@ sub ProcLibrary4PlainArticle
     ### set the command of the library system;
     $_   = $Fld[2]; 
 
+    # permission
+    {
+	local($p);
+	for $p (@DenyLibraryProcedure) {
+	    if ($p && ($_ =~ /^$p$/i)) {
+		&Log("Library: cannot permit $_ command");
+		next;
+	    }
+	}
+    }
+
     ### "# library (get|put) @p"
     if (/^get$/i) {
 	&Log("$proc $_");
@@ -124,7 +135,9 @@ sub ProcLibrary4PlainArticle
 	&use('MIME') if $USE_MIME;
 	
 	### Header
+	local(%dup);
 	for (@HdrFieldsOrder) {
+	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
 	    if ($s = $e{"h:$_:"}) {
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 	    }
@@ -166,16 +179,20 @@ sub LibrarySendingEntry
     $FP_SPOOL_DIR = "$DIR/$LibraryArchiveDir";
     %mget_list    = %LibraryMGetList;
 
+    if ($debug) { &Debug("LibrarySendingEntry sets in");}
+
     if (%mget_list) {
 	&MgetCompileEntry(*e);
 	
 	if ($debug) {
-	    while (($k, $v) = each %mget_list)   { &Debug("LSE::ml:$k => $v");}
-	    while (($k, $v) = each %SendingEntry){ &Debug("LSE::SE:$k => $v");}
+	    while (($k,$v) = each %mget_list)   { &Debug("*LSE::ml:$k => $v");}
+	    while (($k,$v) = each %SendingEntry){ &Debug("*LSE::SE:$k => $v");}
 	}
 
 	&mget3_SendingEntry;
     }
+
+    if ($debug) { &Debug("LibrarySendingEntry get out");}
 }
 
 

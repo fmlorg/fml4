@@ -20,7 +20,7 @@ $DIR    = $opt_d || $ARGV[0] || $ENV{'PWD'} || '.';
 
 require "$DIR/config.ph" if -f "$DIR/config.ph";
 
-$EDITOR = $ENV{'EDITOR'} || 'vi';
+$Editor = $ENV{'EDITOR'} || 'vi';
 $PASSWD_FILE = "$DIR/etc/passwd";
 
 if ($opt_p) {
@@ -35,7 +35,7 @@ else {
 
 &Flock;
 
-system("$EDITOR $file");
+system("$Editor $file");
 
 # &EnCryption($PASSWD);
 
@@ -53,7 +53,7 @@ q#HELP: vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)]
 	    $DIR/etc/passwd
 	    ...
 
-    vipw.pl locked the ML and exec $EDITOR(vi if $EDITOR not defined).
+    vipw.pl locked the ML and exec $Editor(vi if $Editor not defined).
     for edit config.ph(default), passwd(-p) or the given file(-f file).
 	
 #;

@@ -57,13 +57,22 @@ sub SyncHtml
     # html root directory
     # here you can only operate html'nized directories
     # but nobody read these
-    -d $dir || mkdir($dir, 0755);
+    -d $dir || &Mkdir($dir, 0755);
+
+    # Stylesheet example
+    if (! -f "$html_dir/fml.css") {
+	local($f) = &SearchFileInLIBDIR("etc/makefml/fml.css");
+	if ($f) { 
+	    &Copy($f, "$html_dir/fml.css") && 
+		&Log("create sylesheet example in $html_dir");
+	}
+    }
 
     ### Init ENDS ###
 
     ### Recursive Html Structure ###
     if ($HTML_INDEX_UNIT) { # HTML_INDEX_UNIT;
-	($id, $li) = &SyncHhmlGenDirId($mtime);
+	($id, $li) = &SyncHtmlGenDirId($mtime);
 
 	# id generation (probe or not)
 	$title  = "ML SPOOL split by the unit '$HTML_INDEX_UNIT' $ML_FN";
@@ -76,9 +85,13 @@ sub SyncHtml
 	if (-d $subdir) {
 	    # $id (HREF of $subdir) is included in top_dir index.html ? 
 	    # index.html must exist. If not, it must be an error.
-	    if (! &Grep($id, "$html_dir/index.html")) { 
+	    if (-f "$html_dir/index.html" &&
+		(! &Grep($id, "$html_dir/index.html"))) { 
 		&Log("Warning: $id is not in $html_dir/index.html");
 		$remake_index = 1; # expire flag (irrespective of first time)
+	    }
+	    elsif (!-f "$html_dir/index.html") {
+		$remake_index = 1;
 	    }
 
 	    # Error? or First Time?
@@ -95,29 +108,25 @@ sub SyncHtml
 	}
 
 	########################
-	# reconfig htdocs/subdir/ 
-	#    index.html
-	#    thread.html
-	# 
 	# (not probe) Reconfigure TOP Directory index.html if not exits
 	if ((!$probe) || $remake_index) {
 	    # here you can only operate html'nized directories
 	    # but nobody read these
-	    -d $subdir || mkdir($subdir, 0755);
+	    -d $subdir || &Mkdir($subdir, 0755);
 
 	    # make the index.html in $dir (e.g. htdocs/index.html)
 	    # that is TOP_DIR Reconfiguration here.
+	    # * top directory recreatrion is done as follows:
+	    #   RemakeIndex -> ReConfigureIndex -> htdocs/{index,thread}.html
 	    # 
 	    # <TITLE>$title</TITLE> <UL> <LI><A HREF=..>$li</A>
 	    # 
 	    # "! -f" implies THE FIRST TIME or ERROR(index.html missing) 
 
-	    # THE FIRST TIME
 	    if ((! -f "$subdir/index.html") || $remake_index) {
 		&SyncHtml'RemakeIndex('index', $dir, "$id/index", $title, $li, *e); #';
 	    }
 
-	    # THE FIRST TIME
 	    if ($HTML_THREAD && 
 		((! -f "$subdir/thread.html") || $remake_index)) {
 		&SyncHtml'RemakeIndex('thread', $dir, "$id/thread", $title, $li, *e); #'
@@ -199,6 +208,17 @@ sub SyncHtml
 
     # O.K. remove *.expire in fact;
     &SyncHtml'Remove($html_dir, *e); #';
+
+    # For adjustment for the first time for $id or error, try to
+    # reconfig "htdocs/index.html". where $id is for "htdocs/$id/index.html".
+    # It is a trick to use probe mode, since probe mode is a probe but 
+    # is used to adjust the htdocs/ if required.
+    if (! &Grep($id, "$html_dir/index.html")) {
+	&Debug("no $id in index.html, reconfig") if $debug;
+	$e{'html:probe'} = 1;
+	&SyncHtml($html_dir, $file, *e);
+	$e{'html:probe'} = 0;
+    }
 }
 
 
@@ -255,7 +275,7 @@ sub SyncHtmlExpire
 }
 
 
-sub SyncHhmlGenDirId
+sub SyncHtmlGenDirId
 {
     local($mtime) = @_;
     local($id, $li, $mday, $mon, $year, $wday, $time);
@@ -297,6 +317,10 @@ sub SyncHhmlGenDirId
 	$id = sprintf("%04d%02d.month", 1900 + $year, $mon);
 	$li = "in the month $year/$mon";
     }
+    elsif ($HTML_INDEX_UNIT eq 'infinite') {
+	$id = ".";
+	$li = $NULL; # "."
+    }
     
     ($id, ($HTML_INDEX_TITLE || "ML Articles $li $ML_FN"));
 }
@@ -313,6 +337,43 @@ sub Grep
     close(IN);
 
     $NULL;
+}
+
+
+sub SyncHtmlUnlinkArticle
+{
+    local(*e, $article) = @_;
+    local($dir, $id, $li, %le, $atime, $mtime);
+
+    local($atime, $mtime) = (stat($article))[8,9];
+
+    &Log("remove $article");
+
+    rename($article, "$article.bak") || &Log("cannot rename $article");
+
+    # id -> dir/id
+    if ($article =~ m%(.*)/([^/]+)\.html$%) {
+	$dir = $1;
+	$id  = $2;
+    }
+
+    # %le
+    $le{'h:From:'} = $MAINTAINER;
+    $le{'Body'}    = "This article is removed by ML administrator.";
+
+    $ID = $id;
+    $li = "This article is removed by ML administrator.";
+
+    $HTML_TITLE_HOOK = q#
+	$HtmlTitle = "This article is removed by ML administrator.";
+    #;
+
+    &use('synchtml');
+    &SyncHtml'Init; #';
+    &SyncHtml'Write($dir, $id, *li, *le); #';
+
+    # reset the original time for expire
+    utime $atime, $mtime, $article;
 }
 
 
@@ -338,12 +399,27 @@ package SyncHtml;
            HTML_EXPIRE, HTML_EXPIRE_LIMIT, ID, ML_FN, USE_MIME, USE_LIBMIME, 
            XMLCOUNT,
 	   DEFAULT_HTML_FIELD, HTML_INDEX_TITLE, HTML_THREAD, 
+           HTML_THREAD_REF_TYPE,
            HTML_OUTPUT_JCODE, HTML_OUTPUT_FILTER, 
            HTML_INDEX_REVERSE_ORDER, HTML_INDEX_UNIT,
+           HTML_HEADER_TEMPLATE,
+           HTML_FORMAT_PREAMBLE,
+           HTML_FORMAT_TRAILER,
+           HTML_DOCUMENT_SEPARATOR,
+           INDEX_HTML_FORMAT_PREAMBLE,
+           INDEX_HTML_FORMAT_TRAILER,
+           INDEX_HTML_DOCUMENT_SEPARATOR,
+           HTML_STYLESHEET_BASENAME,
            HTML_DATA_CACHE, HTML_TITLE_HOOK, BASE64_DECODE);
 
 sub Init
 {
+    local($preamble, $trailor, $sep);
+
+    # MIME Decoding, suggested by domeki@trd.tmg.nec.co.jp, thanks
+    require 'libMIME.pl' if $USE_MIME;
+    require 'jcode.pl';
+
     @SyncHtml'HTML_FIELD = @main'HTML_FIELD;
     for (@Import) { eval("\$SyncHtml'$_ = \$main'$_;");}
 
@@ -354,9 +430,32 @@ sub Init
 
     # scope is this package
     $HtmlTitle = "Article $ID ($ML_FN)";
+    $HtmlTitleForIndex = $HtmlTitle;
 
     # e.g. for spool2html
     $XMLCOUNT = $XMLCOUNT || 'X-Mail-Count';
+
+    # default preamble, TRAILER, separator
+$preamble = 
+q#<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<HTML>
+  <HEAD>
+    <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-2022-JP">
+#;
+
+$trailor = 
+q#  </BODY>
+</HTML>
+#;
+
+    $sep = "  </HEAD>\n  <BODY>\n";
+
+    $HTML_FORMAT_PREAMBLE = $HTML_FORMAT_PREAMBLE || $preamble;
+    $HTML_FORMAT_TRAILER  = $HTML_FORMAT_TRAILER  || $trailor;
+    $HTML_DOCUMENT_SEPARATOR = $HTML_DOCUMENT_SEPARATOR || $sep;
+    $INDEX_HTML_FORMAT_PREAMBLE = $INDEX_HTML_FORMAT_PREAMBLE || $preamble;
+    $INDEX_HTML_FORMAT_TRAILER  = $INDEX_HTML_FORMAT_TRAILER  || $trailor;
+    $INDEX_HTML_DOCUMENT_SEPARATOR = $INDEX_HTML_DOCUMENT_SEPARATOR || $sep;
 }
 
 sub Write
@@ -364,6 +463,7 @@ sub Write
     local($dir, $file, *title, *e) = @_;
     local($s);
     local($f) = "$dir/$file";
+    local($htmlsubject);
 
     # write permission is required for only you and nobody read these files;
     umask(022);	
@@ -384,9 +484,11 @@ sub Write
     select(OUT); $| = 1; select(STDOUT);
     
     # TITLE
-    $HtmlTitle = $e{"h:http-subject:"} || $e{"h:Subject:"} || "Article $ID";
+    $htmlsubject = $e{"h:http-subject:"} || $e{"h:Subject:"} || "Article $ID";
     $HtmlTitle = 
-	"Article $ID at $Now <br>From: $From_address<br> Subject: $HtmlTitle";
+	"Article $ID at $Now From: $From_address Subject: $htmlsubject";
+    $HtmlTitleForIndex = 
+	"<DIV><SPAN CLASS=article>Article <SPAN CLASS=article-value>$ID</SPAN></SPAN> at <SPAN class=Date-value>$Now</SPAN> <SPAN class=Subject>Subject: <SPAN CLASS=Subject-value>$htmlsubject</SPAN></SPAN></DIV><DIV><SPAN CLASS=From>From: <SPAN CLASS=From-value>$From_address</SPAN></SPAN></DIV>";
 
     # Run Hooks
     # e.g.  $HTML_TITLE_HOOK = 
@@ -395,26 +497,44 @@ sub Write
 
     if ($USE_MIME && ($HtmlTitle =~ /ISO/i)) {
 	$HtmlTitle = &DecodeMimeStrings($HtmlTitle);
+	$HtmlTitleForIndex = &DecodeMimeStrings($HtmlTitleForIndex);
     } 
 
     ### HTML HEADER (REQUIRE SUPERFLUOUS \012 FOR RECONFIGURE OF index
-    print OUT "<TITLE>\n$HtmlTitle\n</TITLE>\n";
+    print OUT $HTML_FORMAT_PREAMBLE;
+    if ($HTML_STYLESHEET_BASENAME) {
+	local($css) = &StyleSheeRelativePath($dir, $HTML_STYLESHEET_BASENAME);
+	print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
+    }
+    print OUT "    <TITLE>$HtmlTitle</TITLE>\n";
+    print OUT "$HTML_DOCUMENT_SEPARATOR\n";
     print OUT &ShowPointer;
-    print OUT "<PRE>\n";
+    print OUT "    <PRE>\n";
 
     ### Header ###
-    for (@HtmlHdrFieldsOrder) {
-	if ($s = $e{"h:$_:"}) {
-	    $s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
-	    &ConvSpecialChars(*s);
-	    print OUT "$_: $s\n";
+    print OUT "<SPAN CLASS=mailheaders>";
+    if ($HTML_HEADER_TEMPLATE) {
+	print OUT $HTML_HEADER_TEMPLATE;
+    }
+    else {
+	local(%dup);
+	for (@HtmlHdrFieldsOrder) {
+	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
+	    if ($s = $e{"h:$_:"}) {
+		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
+		&ConvSpecialChars(*s);
+		print OUT "<SPAN CLASS=$_>$_</SPAN>: <SPAN CLASS=$_-value>$s</SPAN>\n";
+	    }
 	}
     }
 
     # append time() for convenience 
     # print OUT "X-Unixtime: ".(time)."\n";
-    printf OUT ("$XMLCOUNT: %05d\n", $e{'rewrite:ID'} || $ID)
+
+    printf OUT ("<SPAN CLASS=xmlcount>$XMLCOUNT</SPAN>: <SPAN CLASS=xmlcount-value>%05d</SPAN>\n", $e{'rewrite:ID'} || $ID)
 	if $e{'rewrite:ID'} || $ID;
+
+    print OUT "</SPAN>";
 
     ### Body ###
     # 96/05/17 If mutipart, goto exceptional routine (for NCF)
@@ -425,18 +545,29 @@ sub Write
     else {
 	$_ = $e{"Body"};
 	&ConvSpecialChars(*_);
-	s#(http://\S+)#<A HREF=$1>$1</A>#g;
+	# s#(http://\S+)#<A HREF="$1">$1</A>#g;
+	s#(http://\S+)#&Conv2HRef($1)#ge;
 	print OUT $_;
     }
-    
-    print OUT "</PRE>\n";
+
+    print OUT "    </PRE>\n";
+    print OUT $HTML_FORMAT_TRAILER;
 
     ### fclose
     close(OUT);
 
     &Log("Create $f.html");
 
-    ($title = $HtmlTitle); # return the created .html title;
+    # return the created .html title;
+    $title = $HtmlTitleForIndex;
+}
+
+
+sub StyleSheeRelativePath 
+{
+    local($dir, $f) = @_;
+    if (-f "$dir/../$f") { return "../$f";}
+    if (-f "$dir/./$f")  { return $f;}
 }
 
 
@@ -464,17 +595,26 @@ sub ShowPointer
 
     # based on fml-support: 03451 Manami TSUBOI <tsuboi@po.across.or.jp>
     if ($level eq "second") {
-	$ptr = "<A HREF=../index.html>[Top Index of this ML]</A>;\n";
-	$ptr .= "<A HREF=../thread.html>[Top Thread Index of this ML]</A>;\n"
+	$ptr = "<DIV CLASS=topnav>\n";
+
+	if (-e "../index.html") {
+	    $ptr .= "<A HREF=\"../index.html\" CLASS=topcount>[Top Index of this ML]</A>;\n";
+	}
+
+	if (-e "../thread.html") {
+	    $ptr .= "      <A HREF=\"../thread.html\" CLASS=topthread>[Top Thread Index of this ML]</A>;\n"
 	    if $main'HTML_THREAD; #';
+	}
+
+	$ptr .= "    </DIV>";
     }
 
     local($_) = qq#;
-    <P>;
-    Index ;
-    <A HREF=index.html>[Article Count Order]</A>, ;
-    <A HREF=thread.html>[Thread]</A>;
-    <BR>;
+    <DIV CLASS=localnav>;
+      Index: ;
+      <A HREF="index.html" CLASS=localcount>[Article Count Order]</A> ;
+      <A HREF="thread.html" CLASS=localthread>[Thread]</A>;
+    </DIV>;
     $ptr;
     <HR>;
     #;
@@ -554,11 +694,34 @@ sub ParseMultipart
 	}
 
 	&ConvSpecialChars(*_);
-	s#(http://\S+)#<A HREF=$1>$1</A>#g;
+	# s#(http://\S+)#<A HREF="$1">$1</A>#g;
+	s#(http://\S+)#&Conv2HRef($1)#eg;
 	print OUT "$_\n";
     }
 
     return $NULL;
+}
+
+
+# s#(http://\S+)#<A HREF="$1">$1</A>#g;
+sub Conv2HRef
+{
+    local($url) = @_;
+    local($x);
+    local($re_euc_c) = '[\241-\376][\241-\376]';
+    local($re_euc_s)  = "($re_euc_c)+";
+
+    &jcode'convert(*url, 'euc'); #';
+
+    if ($url =~ /($re_euc_s)+/) {
+	$x   = $1;
+	$url =~ s/$x//;
+    }
+
+    print STDERR "Conv2HRef(\$url = $url, \$x = $x)\n" if $debug || $debug_html;
+    &jcode'convert(*x, 'jis'); #';
+
+    "<A HREF=\"$url\">$url</A>$x";
 }
 
 
@@ -615,12 +778,13 @@ sub Configure
 
     # require reconfig of index.html for expiration
     if (@HTML_FIELD) {
-	print STDERR "do IndexReConfigure(@_);\n" if $debug;
-	&IndexReConfigure(@_);
+	print STDERR "do ReConfigureEachFieldIndex(@_);\n" if $debug;
+	&ReConfigureEachFieldIndex(@_);
     }
     #  append only, but may be 'of no use' ...???
     else {
 	&MakeIndex(@_);
+
 	# print STDERR "do RemakeIndex(@_);\n" if $debug;
 	# &RemakeIndex($dir, $file, $title, $li, *e)
 
@@ -633,13 +797,14 @@ sub Configure
 sub Append2Cache
 {
     local($dir, $file, $title, $li, *e) = @_;
-    local($title) = $HtmlTitle;
+    local($title) = $HtmlTitleForIndex;
 
     $title =~ s/\n/ /g;
-    &Append2("<LI><A HREF=$file.html>$title</A>", $HtmlDataCache);
+    &Append2("      <LI><A HREF=\"$file.html\">$title</A></LI>", $HtmlDataCache);
 
     if ($HTML_THREAD) { &MakeThreadData($dir, $file, *e);}
 }
+
 
 sub Uniq
 {
@@ -658,19 +823,38 @@ sub Uniq
 sub MakeThreadData
 {
     local($dir, $file, *e) = @_;
-    local($m, $mid, @mid, $prev_mid, $mid);
+    local($id, $m, $mid, @mid, $prev_mid, $tmp);
     local($org) = $HtmlThreadCache;
     local($new) = "${HtmlThreadCache}.new";
 
+    # original Message-ID:
+    $id = $e{'h:Message-Id:'};
+    $id =~ s/\s*//g;
+    
     # message id lists to refer
-    $mid = $e{"h:In-Reply-To:"}. $e{"h:References:"};
+    if ((! $HTML_THREAD_REF_TYPE) || 
+	($HTML_THREAD_REF_TYPE eq "default")) {
+	$mid = $e{"h:In-Reply-To:"}. $e{"h:References:"};
+    }
+    elsif ($HTML_THREAD_REF_TYPE eq "prefer-in-reply-to") {
+	$mid = $e{"h:References:"}.$e{"h:In-Reply-To:"};
+    }
+
     $mid =~ s/\n/\s/g;
-    for (split(/\s+/, $mid)) { /(<\S+\@\S+>)/ && push(@mid, $1);}
+    for (split(/\s+/, $mid)) { 
+	if (/(<\S+\@\S+>)/) {
+	    push(@mid, $1);
+	    $tmp = $1 if $1 ne $id; # ignore Message-ID myself
+	}
+    }
 
-    # uniq
-    @mid = &Uniq(@mid);
-
-    # print STDERR "\n- MID -------\n$mid\n===\n@mid\n\n";
+    if ($HTML_THREAD_REF_TYPE eq "prefer-in-reply-to") {
+	@mid = ($tmp);
+    }
+    else {
+	# uniq
+	@mid = &Uniq(@mid);
+    }
 
     # rewrite;
     open(THREAD, $org)  || &Log("cannot open $org");
@@ -734,9 +918,14 @@ sub AppendIndexInformation
     $title = $title || $HTML_INDEX_TITLE || $HtmlTitle || "Spool $ML_FN";
 
     if (! -f "$dir/$index.hdr") {
-        &Append2("<TITLE>$title</TITLE>", "$dir/$index.hdr");
+	&Append2($INDEX_HTML_FORMAT_PREAMBLE, "$dir/$index.hdr");
+	if ($HTML_STYLESHEET_BASENAME) {
+	    &Append2("    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$HTML_STYLESHEET_BASENAME\">", "$dir/$index.hdr");
+	}
+        &Append2("    <TITLE>$title</TITLE>", "$dir/$index.hdr");
+        &Append2($INDEX_HTML_DOCUMENT_SEPARATOR, "$dir/$index.hdr");
         &Append2(&ShowPointer, "$dir/$index.hdr");
-        &Append2("<UL>", "$dir/$index.hdr");
+        &Append2("    <UL>", "$dir/$index.hdr");
     }
 
     ### list: append to list ###
@@ -747,21 +936,21 @@ sub AppendIndexInformation
 	&Copy("$dir/$index.html", "$dir/$index.list");
 
 	# add current hierarchy
-	&Append2("<LI><A HREF=$file.html>$list</A>", "$dir/$index.list");
+	&Append2("      <LI><A HREF=\"$file.html\">$list</A></LI>", "$dir/$index.list");
 	&Log("Append Entry=$file.html >> $dir/$index.list") if $debug;
     }
     # initialize();
     else {
-	&Append2("<LI><A HREF=$file.html>$list</A>", "$dir/$index.list");
+	&Append2("      <LI><A HREF=\"$file.html\">$list</A></LI>", "$dir/$index.list");
 	&Log("Append Entry=$file.html >> $dir/$index.list") if $debug;
     }
-
 }
 
 
 # TOP_DIR/{index,thread}.html
 sub ReConfigureIndex
 {
+    # Hmm, $file is not used ...?
     local($index, $dir, $file, $title, $list, *e) = @_;
     local(%uniq, $index_file);
     local(@cache);
@@ -790,8 +979,26 @@ sub ReConfigureIndex
 	# This depends on our "one line" output.
 	next unless /A\s+HREF/i;
 
-	if (/A\s+HREF=(\S+\.html)/i) { 
+	# existence check
+	if (/HREF="(\S+\.html)"/) { # check {index,thread,\d+}.html
+	    &Debug("check0 -e $dir/$1") if $debug;
+	    &Debug("**ignore  $dir/$1") if $debug && ! -e "$dir/$1";
+	    next unless -e "$dir/$1";
+	}
+	elsif (/HREF="(\S+)"/) { 
+	    &Debug("check0 -e $dir/$1") if $debug;
+	    next unless -d "$dir/$1";
+	}
+
+	# e.g. HREF line in index.html, thread.html
+	if (/A\s+HREF="(\S+\.html)"/i) {
 	    $index_file = $1;
+
+	    if ($debug) {
+		&Debug("#b LIST $dir/$index_file");
+		&Debug("$dir/$index_file is removed") 
+		    unless (-e "$dir/$index_file" && -s "$dir/$index_file");
+	    }
 
 	    # unique (if dup, but where is not dup case?)
 	    next if $uniq{$index_file};
@@ -801,8 +1008,12 @@ sub ReConfigureIndex
 	    if ($e{'tmp:subdir_first_time'}) {
 		;
 	    }
-	    # expire
+	    # expire case
 	    else {
+		# expire case
+		# non-zero index.html exists or not
+		next unless (-e "$dir/$index_file" && -s "$dir/$index_file");
+
 		if ($debug) {
 		    print STDERR "  url list: $dir/$index_file\n";
 		    print STDERR "  skip      $dir/$index_file\n"
@@ -831,7 +1042,8 @@ sub ReConfigureIndex
     close(OUT);
     close(LIST);
 
-    &Append2("</UL>", "$dir/$index.new");
+    &Append2("    </UL>", "$dir/$index.new");
+    &Append2($INDEX_HTML_FORMAT_TRAILER, "$dir/$index.new");
 
     print STDERR "\n  rename $dir/{$index.new -> $index.html}\n" if $debug;
     rename("$dir/$index.new", "$dir/$index.html") || 
@@ -886,7 +1098,7 @@ sub GetEntry
 }
 
 
-sub IndexReConfigure
+sub ReConfigureEachFieldIndex
 {
     local($dir, $file, *e) = @_; # file is dummy:-);
     local($key, $subject, $url);
@@ -902,7 +1114,7 @@ sub IndexReConfigure
 	next unless $file =~ /^\d+\.html$/;
 
 	($key, $subject) = &GetEntry("$dir/$file");
-	$url = "\t<LI>\n\t<A HREF=$file>\n\t$subject\n\t</A>";
+	$url = "\t<LI><A HREF=\"$file\">$subject\n\t</A></LI>";
 	&Append2($url, "$dir/$key.html");
     }
     closedir(DIR);
@@ -919,11 +1131,17 @@ sub IndexReConfigure
     select(OUT); $| = 1; select(STDOUT);
 
     print STDERR "INDEX:<TITLE>Index $ML_FN</TITLE>\n" if $debug;
-    print OUT "<TITLE>Index $ML_FN</TITLE>\n";
-    print OUT "<UL>\n";
+    print OUT $INDEX_HTML_FORMAT_PREAMBLE;
+    if ($HTML_STYLESHEET_BASENAME) {
+	local($css) = &StyleSheeRelativePath($dir, $HTML_STYLESHEET_BASENAME);
+	print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
+    }
+    print OUT "    <TITLE>Index $ML_FN</TITLE>\n";
+    print OUT "$INDEX_HTML_DOCUMENT_SEPARATOR\n";
+    print OUT "    <UL>\n";
 
     foreach $key (@HTML_FIELD) { 
-	print OUT "<HR>\n\t<UL>\n\t<H2><P>$key</H2>\n";
+	print OUT "<HR>\n\t<UL>\n\t<H2>$key</H2>\n";
 	open(IN, "$dir/$key.html");
 	print OUT <IN>;
 	close(IN);
@@ -931,6 +1149,7 @@ sub IndexReConfigure
     }
 
     print OUT "</UL>\n";
+    print OUT $INDEX_HTML_FORMAT_TRAILER;
     close(OUT);
 
     &Log("reconfig $dir/index.html");
@@ -951,6 +1170,7 @@ sub MakeIndex
 }
 
 
+# main {index, thread}.html re-creation (mainly subdir)
 sub DoMakeIndex
 {
     local($index, $dir, $file, $title, $li, *e) = @_;
@@ -975,11 +1195,23 @@ sub DoMakeIndex
 
     # generating {index,thread}.html ...;
     if ($index eq 'thread') {
-	print OUT "<TITLE>Threaded Index $ML_FN</TITLE>\n";
+	print OUT $INDEX_HTML_FORMAT_PREAMBLE;
+	if ($HTML_STYLESHEET_BASENAME) {
+	    local($css) = &StyleSheeRelativePath($dir, $HTML_STYLESHEET_BASENAME);
+	    print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
+	}
+	print OUT "    <TITLE>Threaded Index $ML_FN</TITLE>\n";
+	print OUT "$INDEX_HTML_DOCUMENT_SEPARATOR\n";
 	print OUT &ShowPointer("second");
     }
     elsif ($index eq 'index') {
-	print OUT "<TITLE>Index $ML_FN</TITLE>\n";
+	print OUT $INDEX_HTML_FORMAT_PREAMBLE;
+	if ($HTML_STYLESHEET_BASENAME) {
+	    local($css) = &StyleSheeRelativePath($dir, $HTML_STYLESHEET_BASENAME);
+	    print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
+	}
+	print OUT "    <TITLE>Index $ML_FN</TITLE>\n";
+	print OUT "$INDEX_HTML_DOCUMENT_SEPARATOR\n";
 	print OUT &ShowPointer("second");
     }
 
@@ -992,7 +1224,15 @@ sub DoMakeIndex
 	# read .cache and output > dir/index.html
 	open(CACHE, $HtmlDataCache) || &Log("cannot open $HtmlDataCache");
 	while (<CACHE>) { 
-	    if (/HREF=(\d+\.html)/) { next if ! -f "$dir/$1";}
+	    if (/HREF="(\d+\.html)"/) { # check {index,thread,\d+}.html 
+		&Debug("check1 -e $dir/$1") if $debug;
+		&Debug("**ignore  $dir/$1") if $debug && ! -e "$dir/$1";
+		next unless -e "$dir/$1";
+	    }
+	    elsif (/HREF="(\S+)"/) { 
+		&Debug("check1 -e $dir/$1") if $debug;
+		next unless -d "$dir/$1";
+	    }
 
 	    if ($HTML_INDEX_REVERSE_ORDER) {
 		push(@cache, $_);
@@ -1011,6 +1251,7 @@ sub DoMakeIndex
 	print OUT "</UL>\n";
     }
 
+    print OUT $INDEX_HTML_FORMAT_TRAILER;
     close(OUT);
 
     &Log("reconfig $dir/$index.html [reverse order]");
@@ -1027,7 +1268,7 @@ sub GetCache
     open(CACHE, $HtmlDataCache) || &Log("cannot open $HtmlDataCache");
     while (<CACHE>) { 
 	chop;
-	if (/HREF=(\d+)\.html/) { $file = $1;}
+	if (/HREF="(\d+)\.html"/) { $file = $1;}
 	$list{$file} = $_;
     }
     close(CACHE);
@@ -1060,11 +1301,12 @@ sub GenThread
     local(*entry, $dir) = @_;
     local($m, $x, @x);
     local(%list, %next, $first, $last, $i, $queue, @queue);
+    local($seq, $prev_seq);
 
     &GetCache(*list);
 
     open(CACHE, $HtmlThreadCache) || &Log("cannot open $HtmlThreadCache");
-    while (<CACHE>) { 
+    while (<CACHE>) {
 	($m, $x, @x) = split(/\s+/, $_);
 	$first = $x unless $first;
 	$last  = $x;
@@ -1091,6 +1333,11 @@ sub GenThread
 	next if /^\s*$/;
 	print STDERR "QUEUE $_\n" if $debug;
 
+	$_ = &QueueUniq($_);
+	$_ = &ConsiderQueueExpiration($dir, $_);
+
+	&Log("QUEUE $_") if $debug_html;
+
 	for $i (split(/\s+/, $_)) {
 	    if ($i eq '(') { print OUT "<UL>\n"; next;}
 	    if ($i eq ')') { print OUT "</UL>\n\n"; next;} 
@@ -1106,6 +1353,41 @@ sub GenThread
 }
 
 
+sub QueueUniq
+{
+    local(@x, $x, $p, $buf);
+    
+    for $x (split(/\s+/, $_[0])) {
+	next if ($p eq $x || $p == $x);
+	$buf .= " $x ";
+	$p = $x;
+    }
+    $buf;
+}
+
+
+sub ConsiderQueueExpiration
+{
+    local($dir, $buffer) = @_;
+    local($x, $buf);
+
+    for $x (split(/\s+/, $buffer)) {
+	if ($x =~ /^\d+$/ && (! -e "$dir/$x.html")) {
+	    print STDERR "ignore $dir/$x.html\n" if $debug_html;
+	    next;
+	}
+
+	$buf .= " $x ";
+    }
+
+    # remove non-contents threads
+    $buf =~ s/\(\s*\)//g;
+
+    # clean-up'ed link relation
+    $buf;
+}
+
+
 # ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
 #       $atime,$mtime,$ctime,$blksize,$blocks)
 #         = stat($filename);
@@ -1113,7 +1395,7 @@ sub GenThread
 sub Expire
 {
     local($html_dir, $file, *e) = @_; # file is a dummy:-);
-    local($t, $expire, $time);
+    local($t, $expire, $time, $unlinked_p);
 
     &Log("Expire $html_dir") if $main'debug_expire;#';
 
@@ -1121,6 +1403,8 @@ sub Expire
     $expire = $HTML_EXPIRE_LIMIT || 14; # 2 weeks.
     $expire = $expire * 24 * 3600;
     $time   = time;
+
+    &Debug("SyncHtml::Expire->expire = $expire") if $debug;
 
     opendir(DIR, $html_dir) || (&Log("Cannot open $html_dir"), return);
     for (readdir(DIR)) {
@@ -1136,6 +1420,21 @@ sub Expire
 	if (-d "$html_dir/$_") {
 	    &ExpireByDirectoryUnit("$html_dir/$_", $expire);
 	    next;
+	}
+	elsif ($HTML_INDEX_UNIT eq 'infinite' && -f "$html_dir/$_") {
+	    next unless /^\d+\.html$/;
+
+	    $_ = "$html_dir/$_";
+
+	    # last modify time;
+	    $t = $time - (stat($_))[9]; 
+
+	    &Debug("unlink $_ if $t > $expire;") if $debug;
+	    next unless $t > $expire;
+
+	    print STDERR "unlink $_\n" if $debug;
+	    unlink($_) ? &Log("unlink $_") : &Log("fails to unlink $_");
+	    $unlinked_p = 1;
 	}
 	# file ?
 	elsif (-f "$html_dir/$_") {
@@ -1160,9 +1459,18 @@ sub Expire
 
     ### touch expire flag and regenerate htdocs/{index,thread}.html
     $title = $li = "dummy";
+
+    # Attention! directory based re-creation of htdocs/{index,thread}.html
     if (%ExpireDirList) {
+	&Log("if (%ExpireDirList) { &ReConfigureIndex;") if $debug_expire;
 	&ReConfigureIndex('index',  $html_dir, "$id/index",  $title, $li, *e);
 	&ReConfigureIndex('thread', $html_dir, "$id/thread", $title, $li, *e) 
+	    if $HTML_THREAD;
+    }
+    elsif ($HTML_INDEX_UNIT eq 'infinite' && $unlinked_p) {
+	&Log("if (unit is infinite) { &ReConfigureIndex;") if $debug_expire;
+	&MakeIndex($html_dir, "$id/index",  $title, $li, *e);
+	&MakeThread($html_dir, "$id/thread", $title, $li, *e) 
 	    if $HTML_THREAD;
     }
 }
@@ -1173,6 +1481,7 @@ sub ExpireByDirectoryUnit
     local($subdir, $expire) = @_;
     local($f, $t, $expire_count, $total_count, $time);
 
+    $expire_count = 0;
     $time = time;
 
     &Log("  expire $subdir ") if $main'debug_expire;#';

@@ -29,14 +29,17 @@ exit 0;
 
 sub Init
 {
+    local($prev);
+
     require 'getopts.pl';
-    &Getopts("f:dh");
+    &Getopts("f:dhp:");
 
     $debug = $opt_d;
+    $prev  = $opt_p || 1;
     ($Patfile = $opt_f) || die("Please define the pattern table to ignore\n");
 
 
-    local($mday,$mon,$year,$wday) = (localtime(time - 3600*24))[3..6];
+    local($mday,$mon,$year,$wday) = (localtime(time - 3600*24*$prev))[3..6];
     $Date = sprintf("%2d/%02d/%02d", $year, $mon + 1, $mday);
     print STDERR "Date: $Date\n" if $debug;
 

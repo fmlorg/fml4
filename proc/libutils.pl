@@ -21,6 +21,21 @@ sub SubstituteTemplate
 }
 
 
+sub MIMESubstitute
+{
+    local($type, *mib) = @_;
+
+    if ($type eq 'message/partial') {
+	$Envelope{'GH:Content-Type:'} =~ s/number=\d+/number=$mib{'number'}/;
+	$Envelope{'GH:Content-Type:'} =~ s/total=\d+/total=$mib{'total'}/;
+    }
+    else {
+	&Log("MIMESubstitute: unknown type");
+    }
+}
+
+
+
 # Get a option value for msend..
 # Parameter = opt to parse
 # If required e.g. 3mp, parse to '3' and 'mp', &ParseM..('mp')
@@ -127,6 +142,7 @@ sub MSendModeSet
 		 'li',      'lhaish',
 		 'i',       'lhaish',
 		 'ish',     'lhaish',
+		 'lhaish',  'lhaish',
 		 'wait#lhaish', 1,
 		 
 		 '#zip',    '#zip',
@@ -156,8 +172,10 @@ sub MSendModeSet
 		 '#rfc1153','#Digest (RFC1153)',
 		 '#rfc1153','#Digest (RFC1153)',
 		 'd',       'rfc1153',
-		 'rfc1153', 'rfc1153'
+		 'rfc1153', 'rfc1153',
 
+		 'base64',  'base64',
+		 '#base64',  '#base64',
 		 );
 
     $MSEND_OPT_HOOK && &eval($MSEND_OPT_HOOK, 'MSendModeSet:');
@@ -325,7 +343,11 @@ sub system
 
     # Windows NT ;_; TOO BAD! ;_;;_;;_;
     # Here is after fundamental check anyway (is a little hope;D
-    if (! $UNISTD) { system($s); return $@;}
+    if (! $UNISTD) { 
+	$s =~ s#/#\\#g;
+	system($s); 
+	return $@;
+    }
 
     # File Handles "pipe(READHANDLE,WRITEHANDLE)"
     $read  && (pipe($read, $c_w)  || (&Log("ERROR pipe(pr, wr)"), return));
@@ -405,49 +427,6 @@ sub Link
 sub Define_j { $FQDN;}
 sub Define_m { $DOMAINNAME;}
 sub Define_s { $FQDN;}
-
-
-# Generate additional information for command mail reply.
-# return the STRING
-sub GenInfo
-{
-    local($s, $c, $d, $del);
-    local($message, $has_ctladdr_p, $addr);
-
-    # initialize variables
-    $del     = ('*' x 60);
-
-    # if has control-address
-    if ($CONTROL_ADDRESS) {
-	$addr = $Envelope{'CtlAddr:'};
-	$has_ctladdr_p = 1;
-    }
-    # if !control-address but MAIL_LIST==CONTROL_ADDRESS
-    elsif ((! $CONTROL_ADDRESS) && &CompatFMLv1P) { 
-	$addr = $MAIL_LIST;
-	$has_ctladdr_p = 1;
-    }
-
-    # help style;
-    $message = $Envelope{"mode:fmlserv"} ? "help": "\# help";
-
-    $s .= "\n$del\n";
-    $s .= "If you have any questions or problems,\n";
-    $s .= "   please make a contact with $MAINTAINER\n";
-
-    if (! $Envelope{'mode:stranger'} && $has_ctladdr_p) { # a member
-	$s .= "       or \n";
-	$s .= "   send a mail with the body \"$message\"(without quotes) to\n";
-	$s .= "      $addr\n";
-	$s .= "      (here is the automatic reply, so more preferable)\n\n";
-	$s .= "e.g. on a Unix Machine\n";
-	$s .= "(shell prompt)\% echo \"$message\" |Mail $addr";
-    }
-
-    $s .= "\n\n$del\n";
-
-    $s;
-}
 
 
 # "# chaddr"  command

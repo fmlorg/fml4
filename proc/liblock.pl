@@ -30,11 +30,11 @@ sub V7Lock
 
     &Append2(&WholeMail."[$$]", $LockTmp) if $debug;
 
-    # Timeout by alarm(3);
-    &SetEvent($MAX_TIMEOUT * 10, 'TimeOut') if $HAS_ALARM;
+    # Timeout by alarm(3); adjust the value to 3600 sec. around.
+    &SetEvent(($MAX_TIMEOUT+10)*20 +60, 'TimeOut') if $HAS_ALARM;
 
     # try within about 10min.
-    srand(time|$$);
+    &SRand();
     for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
 	if (link($LockTmp, $LockFile) == 0) {	# if lock fails, wait&try
 	    sleep (rand(3)+5);

@@ -9,6 +9,9 @@
 #
 # $Id$;
 
+# local scope in this
+local($CurrentMode);
+
 # Aliases
 # sub SendFileMajority  { &SendFile('#dummy', @_);}
 # sub SendFile2Majority { &SendFile('#dummy', @_);}
@@ -53,12 +56,14 @@ sub DraftGenerate
     require $_fp{'inc', $mode} if $_fp{'inc', $mode};
 
     foreach $proc ( # order 
-		    'hdr',
-		    'cnstr', 
-		    'retrieve',
-		    'split',
-		    'destr'
-		    ) {
+		   'hdr',
+		   'cnstr', 
+		   'retrieve',
+		   'encode',
+		   'split',
+		   'encode_as',
+		   'destr'
+		   ) {
 
 	$prog = $_fp{$proc, $mode};
 	if ($debug) {
@@ -66,8 +71,11 @@ sub DraftGenerate
 	    print STDERR "$prog(*conf, *r, *misc);" if $prog;
 	    print STDERR "\n";
 	}
+	$CurrentMode = $mode;
 	&$prog(*conf, *r, *misc) if $prog;
     }
+
+    undef %conf;
 
     $r{'total'};
 }
@@ -77,6 +85,10 @@ sub DraftGenerate
 # return NONE
 sub InitDraftGenerate
 {
+    ### 2.1B test ###
+    $FOP_HACK = 1;
+    ### 2.1B test end ###
+
     &MSendModeSet;
 
     # PLAIN TEXT with UNIX FROM
@@ -98,39 +110,54 @@ sub InitDraftGenerate
     $_fp{'cnstr',    'mp'} = 'Cnstr_mp';
     $_fp{'retrieve', 'mp'} = 'f_RetrieveFile';
 
-    # Gzipped UNIX FROM
-    $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
-    $_fp{'retrieve', 'gz'} = 'f_gz';
-    $_fp{'split',    'gz'} = 'f_SplitFile';
-
-    # PACK: TAR + GZIP
-    $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
-    $_fp{'retrieve', 'tgz'} = 'f_tgz';
-    $_fp{'split',    'tgz'} = 'f_SplitFile';
-
-    # PACK: TAR + GZIP
-    $_fp{'cnstr',    'zip'} = 'Cnstr_tgz';
-    $_fp{'retrieve', 'zip'} = 'f_zip';
-    $_fp{'split',    'tgz'} = 'f_SplitFile';
-
-    # PACK: LHA + ISH
-    $_fp{'cnstr',    'lhaish'} = '';
-    $_fp{'retrieve', 'lhaish'} = 'f_LhaAndEncode2Ish';
-    $_fp{'split',    'lhaish'} = 'f_SplitFile';
-
-    # PACK: LHA + ISH
-    $_fp{'cnstr',    'lhauu'} = '';
-    $_fp{'retrieve', 'lhauu'} = 'f_LhaAndEncode2UU';
-    $_fp{'split',    'lhauu'} = 'f_SplitFile';
+    ### encoding ###
 
     # UUENCODE ONLY
     $_fp{'retrieve', 'uu'}     = 'f_uu';
     $_fp{'split',    'uu'}     = 'f_SplitFile';
 
+    # Base64 Encode Only
+    $_fp{'cnstr',    'base64'} = 'Cnstr_message_partial';
+    $_fp{'retrieve', 'base64'} = 'f_RetrieveFile';
+    $_fp{'encode',   'base64'} = 'f_base64';
+    $_fp{'split',    'base64'} = 'f_SplitFile';
+    $_fp{'encode_as','base64'} = 'Cnstr_message_partial';
+
+    ### compression + encoding ###
+
+    # Gzipped UNIX FROM
+    $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
+    $_fp{'retrieve', 'gz'} = 'f_gz';
+    $_fp{'encode',   'gz'} = 'f_gz_encode';
+    $_fp{'split',    'gz'} = 'f_SplitFile';
+
+    # PACK: TAR + GZIP
+    $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
+    $_fp{'retrieve', 'tgz'} = 'f_tgz';
+    $_fp{'encode',   'tgz'} = 'f_gz_encode';
+    $_fp{'split',    'tgz'} = 'f_SplitFile';
+
+    # PACK: TAR + GZIP
+    $_fp{'cnstr',    'zip'} = 'Cnstr_message_partial';
+    $_fp{'retrieve', 'zip'} = 'f_zip';
+    $_fp{'encode',   'zip'} = 'f_base64';
+    $_fp{'split',    'zip'} = 'f_SplitFile';
+
+    # PACK: LHA + ISH
+    $_fp{'cnstr',    'lhaish'} = '';
+    $_fp{'retrieve', 'lhaish'} = 'f_Lha';
+    $_fp{'encode',   'lhaish'} = 'f_lha_encode';
+    $_fp{'split',    'lhaish'} = 'f_SplitFile';
+
+    # PACK: LHA + UUENCODE
+    $_fp{'cnstr',    'lhauu'}  = '';
+    $_fp{'retrieve', 'lhauu'}  = 'f_Lha';
+    $_fp{'encode',   'lhauu'}  = 'f_lha_encode';
+    $_fp{'split',    'lhauu'}  = 'f_SplitFile';
 }
 
 
-############################## CONSTRUCTORS
+########### CONSTRUCTORS ##########
 
 
 sub Cnstr_uf
@@ -142,6 +169,8 @@ sub Cnstr_uf
     $conf{'delimiter'} = "From $MAINTAINER $MailDate\n";
     $conf{'preamble'} = '';
     $conf{'trailer'}  = '';
+
+    $conf{'MimeDecodable'} = 1;
 }
 
 
@@ -166,6 +195,8 @@ sub Cnstr_rfc1153
     # set Destructor used in MSendv4.pl 
     # to increment the issue count of the digest
     $_cf{'Destr'} .= "&Rfc1153Destructer;\n";
+
+    $conf{'MimeDecodable'} = 1;
 }
 
 
@@ -286,14 +317,37 @@ sub f_RetrieveFile
 	    $s = qq#
 		while (<FILE>) { 
 		    $conf{'rfhook'};
-		    print OUT \$_; \$linecounter++;
+
+		    if (1 .. /^\$/) {
+			if (\$FOP_HACK && \$USE_MIME &&
+			    \$conf{'MimeDecodable'} && 
+			    /=\\?ISO\\-2022\\-JP\\?/io) {
+			    &use('MIME');
+			    \$_ = &DecodeMimeStrings(\$_);
+			}
+		    }
+
+		    print OUT \$_; 
+		    \$linecounter++;
 		}
 	    #;
+
 	    &Debug(">>$s<<") if $debug;
-	    &eval($s, 'Retreive file hook');
+	    &eval($s, 'Retrieve file hook');
 	}
 	else {
-	    while (<FILE>) { print OUT $_; $linecounter++;}
+	    while (<FILE>) {
+		if (1 .. /^$/) {
+		    if ($FOP_HACK && $USE_MIME &&
+			$conf{'MimeDecodable'} && /=\?ISO\-2022\-JP\?/io) {
+			&use('MIME');
+			$_ = &DecodeMimeStrings($_);
+		    }
+		}
+		
+		print OUT $_; 
+		$linecounter++;
+	    }
 	}
 	&Debug("close(FILE) [total=$total];") if  $debug_rf; 
 	close(FILE);
@@ -343,17 +397,10 @@ sub f_RetrieveFile
 }
 
 
-sub f_LhaAndEncode2Ish 
+sub f_Lha
 {
     local(*conf, *r, *misc) = @_;
-    &LhaAndEncode2Ish($conf, $r, @conf); # input:$conf;
-}
-
-
-sub f_LhaAndEncode2UU
-{
-    local(*conf, *r, *misc) = @_;
-    &LhaAndEncode2UU($conf, $r, @conf); # input:$conf;
+    &Lha($conf, $r, @conf); # input:$conf;
 }
 
 
@@ -363,7 +410,8 @@ sub f_gz
     local($tmpf) = $conf;
 
     &f_RetrieveFile(*conf, *r, *misc);
-    &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
+    # &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
+    &system("$COMPRESS $tmpf.0", $tmpf);
 }
 
 
@@ -372,7 +420,20 @@ sub f_tgz
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
 
-    &system("$TAR ".join(" ", @conf)."|$COMPRESS|$UUENCODE $r", $tmpf);
+    # &system("$TAR ".join(" ", @conf)."|$COMPRESS|$UUENCODE $r", $tmpf);
+    &system("$TAR ".join(" ", @conf)."|$COMPRESS", $tmpf);
+}
+
+
+sub f_gz_encode
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+
+    # splitfile uses "$tmpf" as a mster.
+    rename($tmpf, "$tmpf.1");
+
+    &system("$UUENCODE $r", $tmpf, "$tmpf.1");
 }
 
 
@@ -380,8 +441,19 @@ sub f_zip
 {
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
+    local($t)    = "msend.zip";
 
-    &system("$ZIP -o $tmpf ".join(" ", @conf));
+    $ZIP = $ZIP || "/usr/local/bin/zip";
+
+    if (!-x $ZIP) {
+	&Log("f_zip: cannot find zip executable");
+	return;
+    }
+
+    &system("$ZIP $t @conf");
+    rename($t, "$tmpf.0") || &Log("cannot rename $t $tmpf.0");
+
+    $Envelope{"GH:Content-Type:"} .= "\n\tname=\"msend.zip\";";
 }
 
 
@@ -444,6 +516,44 @@ sub f_uu
     # system($s, $out, $in, $read, $write)
     &system("$UUENCODE $name", $output, $input); 
     unlink "$TMP_DIR/msend.uu" if -f "$TMP_DIR/msend.uu";
+}
+
+
+sub Cnstr_message_partial
+{
+    local($id) = &GenMessageId;
+
+    $MIME_VERSION              = $MIME_VERSION || '1.0';
+
+    $Envelope{'GH:Mime-Version:'} = $MIME_VERSION;
+    $Envelope{'GH:Content-Type:'} = 
+	"message/partial;\n\tnumber=1; total=1;\n\tid=\"$id\";";
+    $Envelope{'GH:Content-Transfer-Encoding:'} = "base64";
+}
+
+
+sub f_base64
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+    local($encode, $libdir);
+
+    $encode = &SearchFileInLIBDIR("bin/base64encode.pl");
+    $libdir = join(":", @LIBDIR);
+    $BASE64_ENCODE = $BASE64_ENCODE || "$encode -I $libdir";
+
+    open(IN, "$tmpf.0") || &Log("f_base64: cannot open $tmpf");
+    open(BASE64, "|$BASE64_ENCODE > $tmpf.1") ||
+	&Log("f_base64: cannot open $tmpf.1");
+    select(BASE64); $| = 1; select(STDOUT);
+    while (<IN>) {
+	print BASE64 $_;
+    }
+    close(IN);
+    close(BASE64);
+
+    &Debug("rename($tmpf.1, $tmpf);") if $debug;
+    rename("$tmpf.1", $tmpf) || &Log("f_base64: cannot rename $tmpf.1 $tmpf");
 }
 
 
@@ -581,13 +691,14 @@ sub MakeFileWithUnixFrom  { &DraftGenerate(@_);}
 # Lha + uuencode for $file
 # &Lha..( inputfile, encode-name, @list ) ;
 # return ENCODED_FILENAME
-sub LhaAndEncode2Ish
+# sub LhaAndEncode2Ish
+sub Lha
 {
     local($input, $name, @filelist) = @_;
     local($tmpout, @unlink);
     local($compress, $uuencode);
 
-    &Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
+    &Debug("Lha($input, $name, @filelist)") if $debug;
 
     # SJIS ENCODING
     if ($USE_SJIS_in_ISH || $USE_SJIS_IN_ISH) {
@@ -602,79 +713,74 @@ sub LhaAndEncode2Ish
     $name     =~ s/\.gz$//i;
     $name     =~ s/\.lzh$//i;
     $tmpout   = "$TMP_DIR/$name.lzh";
-    $tmpish   = "$TMP_DIR/$name.ish";
-    push(@unlink, $tmpuot);	# unlink
+    push(@unlink, $tmpout);	# unlink
 
     $LHA      = $LHA || "$LIBDIR/bin/lha";
-    $ISH      = $ISH || "$LIBDIR/bin/ish";
-
-    # FIX for 'aish' when NOT "aish -d"
-    ($ISH =~ /aish/) && ($ISH !~ /\s+\-d\s+/) && ($ISH .= " -d ");
 
     $compress = "$LHA a $tmpout @filelist ";
-    $uuencode = "$ISH -s7 $name.lzh"; # since in $TMP_DIR
-    #OLD: $uuencode = "$ISH -s7 -o $input $tmpout";
 
     # against unremoved left files;
-    unlink $tmpish if -f $tmpish; 
     unlink $tmpout if -f $tmpout; 
 
     &system($compress);
 
-    # ish cannot understand ">tmp/*.lzh.ish"
-    system("(cd $TMP_DIR; $uuencode)"); 
-
-    unlink $tmpout if -f $tmpout; # lha
-    rename($tmpish, $input) || &Log("canot rename $tmpish $input");
-
-    if ($debug) { print STDERR "   Unlink @unlink \n";} else { unlink @unlink;}
-
-    $input;
+    $misc{'name'}   = $name;
+    $misc{'input'}  = $input;
+    $misc{'tmpout'} = $tmpout;
+    $misc{'unlink'} = join(" ", @unlink);
 }
 
 
-# Lha + uuencode for $file
-# &Lha..( inputfile, encode-name, @list ) ;
-# return ENCODED_FILENAME
-sub LhaAndEncode2UU
+sub f_lha_encode
 {
-    local($input, $name, @filelist) = @_;
-    local($tmpout, @unlink);
-    local($compress, $uuencode);
+    local(*conf, *r, *misc) = @_;
+    local($name, $input, $tmpout, @unlink);
 
-    &Debug("LhaAndEncode2UU($input, $name, @filelist)") if $debug;
+    $name   = $misc{'name'};
+    $input  = $misc{'input'};
+    $tmpout = $misc{'tmpout'};
 
-    # SJIS ENCODING
-    if ($USE_SJIS_in_ISH || $USE_SJIS_IN_ISH) {
-	require 'jcode.pl';
-	@filelist = &Convert2Sjis(*filelist);
-	push(@unlink, @filelist); 
-	&Debug("LhaAndEncode2Ish($input, $name, @filelist)") if $debug;
+    if ($CurrentMode =~ /uu/) {
+	&system("$UUENCODE $name.lzh", $input, $tmpout);
+    }
+    elsif ($CurrentMode =~ /ish/) {
+	$ISH      = $ISH || "$LIBDIR/bin/ish";
+	$tmpish   = "$TMP_DIR/$name.ish";
+
+	# FIX for 'aish' when NOT "aish -d"
+	($ISH =~ /aish/) && ($ISH !~ /\s+\-d\s+/) && ($ISH .= " -d ");
+
+	$uuencode = "$ISH -s7 $name.lzh"; # since in $TMP_DIR
+	#OLD: $uuencode = "$ISH -s7 -o $input $tmpout";
+
+	# ish cannot understand ">tmp/*.lzh.ish"
+	if ($INSECURE_SYSTEM) {
+	    system("(cd $TMP_DIR; $uuencode)");
+	}
+	else {
+	    &use('utils');
+
+	    local($pwd);
+	    chop($pwd = `pwd`);
+	    (chdir $TMP_DIR) ? 
+		&system($uuencode) :
+		    &Log("f_lha_encode: cannot chdir $TMP_DIR");
+	    chdir $pwd || &Log("f_lha_encode: cannot chdir $pwd");
+	}
+
+	unlink $tmpout if -f $tmpout; # lha
+	rename($tmpish, $input) || &Log("canot rename $tmpish $input");
     }
 
-    &Debug("LhaAndEncode2UU($input, $name, @filelist)") if $debug;
+    # temporary files to remove
+    @unlink = split(/\s+/, $misc{'unlink'});
 
-    # Variable setting
-    $name     =~ s#(\S+)/(\S+)#$2.lzh#;
-    $name     =~ s/\.gz$//i;
-    $name     =~ s/\.lzh$//i;
-    $tmpout   = "$TMP_DIR/$name.lzh";
-    $tmpish   = "$TMP_DIR/$name.ish";
-    push(@unlink, $tmpuot);	# unlink
-
-    unlink $tmpout, $tmpish;
-
-    $LHA      = $LHA || "$LIBDIR/bin/lha";
-    ($ISH =~ /aish/) && ($ISH .= " -d "); # FIX for 'aish'
-
-    $compress = "$LHA a $tmpout ". join(" ", @filelist);
-
-    unlink $tmpout if -f $tmpout; # against strange behaviours by "lha";
-
-    &system($compress);
-    &system("$UUENCODE $name.lzh", $input, $tmpout);
-
-    if ($debug) { print STDERR "   Unlink @unlink \n";} else { unlink @unlink;}
+    if ($debug) { 
+	print STDERR "   Unlink @unlink \n";
+    }
+    else { 
+	unlink @unlink if @unlink;
+    }
 
     $input;
 }
@@ -759,17 +865,21 @@ sub SendingBackInOrderTimeOut
 # Sending files back, Orderly is [a], not [ad] _o_
 # $returnfile not include $DIR PATH
 # return NONE
-sub SendingBackOrderly { &SendingBackInOrder(@_);}
-sub SendingBackInOrder
+sub SendingBackInOrder { &SendBackInOrder(@_);}
+sub SendingBackOrderly { &SendBackInOrder(@_);}
+sub SendBackInOrder
 {
     local($returnfile, $total, $subj, $sleeptime, @to) = @_;
-    local($file, @files, $timeout, $evid);
+    local($file, @files, $timeout, $evid, $evidk, $evidk0, %mib);
 
     # reset timeout flag;
     undef $SendingBackInOrderTimeOut;
 
     # sleep time;
     $sleeptime = $sleeptime ? $sleeptime : 3;
+
+    # set the final remove event (the case "$total == 0" is possible???)
+    $evidk0 = &SetEvent((60 + $sleeptime)*($total+1), 'TimeOut') if $HAS_ALARM;
 
     for $now (1..$total) {
 	if ($SendingBackInOrderTimeOut) { # time out 
@@ -778,14 +888,15 @@ sub SendingBackInOrder
 	    last;
 	}
 
-	# timeout; (one more $sleeptime);
-	$evid = &SetEvent($sleeptime + 60, 'SendingBackInOrderTimeOut');
+	# timeout: dead timeout and socket timeout
+	$evidk = &SetEvent($sleeptime + 120, 'TimeOut') if $HAS_ALARM;
+	$evid  = &SetEvent($sleeptime + 60, 'SendingBackInOrderTimeOut');
 
 	if ($COMPAT_ARCH eq 'WINDOWS_NT4') {
 	    $file = "$returnfile.$now";
 	}
 	else {
-	    $file = ($returnfile =~ m#^/# ? "" : $DIR)."/$returnfile.$now";
+	    $file = ($returnfile =~ m%^/% ? "" : $DIR)."/$returnfile.$now";
 	}
 	
 	$0 = "$FML: SendingBackInOrder $now/$total";
@@ -796,6 +907,13 @@ sub SendingBackInOrder
 			"_ML_FN_", $ML_FN);
 	$subject = &SubstituteTemplate($subj, *template_cf);
 
+	# message/partial
+	if ($Envelope{'GH:Content-Type:'} =~ /partial/) {
+	    $mib{'number'} = $now;
+	    $mib{'total'}  = $total;
+	    &MIMESubstitute('message/partial', *mib);
+	}
+
 	@files = ($file);
 	&NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
 	#    &SendFile2Majority("$subj ($now/$total) $ML_FN", $file, @to);
@@ -804,7 +922,11 @@ sub SendingBackInOrder
 	unlink $file unless $debug;
 
 	$0 = "$FML: SendingBackInOrder sleep($sleeptime) cur=$now/$total";
-	&ClearEvent($evid) if $evid; # alarm(3) schduling reset;
+
+	# remove event handler
+	&ClearEvent($evid)  if $evid;  $evid  = 0;
+	&ClearEvent($evidk) if $evidk; $evidk = 0;
+
 	sleep(($total == $now) ? 1 : $sleeptime); # no wait when ends;
     }
 
@@ -812,9 +934,80 @@ sub SendingBackInOrder
     unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
     unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
 
+    # for example, msend.pl uses this routine several times.
+    # We should clean up all events.
+    &ClearEvent($evid)   if $evid;
+    &ClearEvent($evidk)  if $evidk;
+    &ClearEvent($evidk0) if $evidk0;
+
     # Destructor; 
-    undef $Envelope{'GH:Mime-Version:'};
-    undef $Envelope{'GH:Content-Type:'};
+    &ClearMimeHdr;
+}
+
+
+sub DelaySendFileDividedly
+{
+    # for unique tmp file
+    $DSFD_Counter++;
+
+    local($f, $mode, $enc, @to) = @_;
+    local($total, $s, $target);
+    local($sleep) = ($SLEEPTIME || 3);
+    local($tmp)   = "$TMP_DIR/sfbs:${DSFD_Counter}:$$";
+
+    $0 = "$FML: split and send back $f to $to <$LOCKFILE>";
+    $s = $enc || $DEFAULT_MGET_SUBJECT;
+
+    ### IF MIME mode, you are afraid of a lot ...
+    if ($mode ne 'uf') {
+	&Log("DelaySendFileDividedly: accept only 'uf' mode");
+	return $NULL;
+    }
+
+    ##### SAME AS "SendFileDividedly" #####
+    $total = &DraftGenerate($tmp, $mode, $f, $f);
+
+    # Hmm, O.K. In some case
+    # back to the first filename for the use of SplitFiles
+    local($lc) = &WC("$tmp.1");
+    if ($lc > $MAIL_LENGTH_LIMIT && $total == 1) {
+	rename("$tmp.1", $tmp) || &Log("cannot rename $tmp.1 $tmp");
+	$total = &SplitFiles($tmp, $lc, int($lc/$MAIL_LENGTH_LIMIT) + 1);
+    }
+
+    if ($total) {
+	$SFD_MIB{"$DSFD_Counter:tmp"}   = $tmp;
+	$SFD_MIB{"$DSFD_Counter:total"} = $total;
+	$SFD_MIB{"$DSFD_Counter:s"}     = $s;
+	$SFD_MIB{"$DSFD_Counter:sleep"} = $sleep;
+	$SFD_MIB{"$DSFD_Counter:\@to"}  = join(" ", @to);
+
+	$FmlExitHook{'DelaySendFileDividedly'} = q#;
+	&GoDelaySendFileDividedly;
+	#;
+    }
+    else {
+	&Log("DelaySendFileDividedly: error \$total=0");
+    }
+}
+
+
+sub GoDelaySendFileDividedly
+{
+    local($i) = 0;
+
+    for $i (1 .. $DSFD_Counter) {
+	next unless $SFD_MIB{"$i:total"};
+
+	# &SendingBackInOrder($tmp, $total, $s, $sleep, @to);
+	&SendingBackInOrder(
+			    $SFD_MIB{"$i:tmp"},
+			    $SFD_MIB{"$i:total"},
+			    $SFD_MIB{"$i:s"},
+			    $SFD_MIB{"$i:sleep"},
+			    $SFD_MIB{"$i:\@to"}
+			    );
+    }
 }
 
 
@@ -826,31 +1019,54 @@ sub SendingBackInOrder
 # $subject
 # @to 
 # return NONE
-sub SendFilebySplit
+sub SendFilebySplit { &SendFileDividedly(@_);}
+sub SendFileDividedly
 {
+    # for unique tmp file
+    $SFD_Counter++;
+    
     local($f, $mode, $enc, @to) = @_;
     local($total, $s, $target);
     local($sleep) = ($SLEEPTIME || 3);
-    local($tmp)   = "$TMP_DIR/sendfilesbysplit$$";
+    local($tmp)   = "$TMP_DIR/sfbs:${SFD_Counter}:$$";
 
     $0 = "$FML: split and send back $f to $to <$LOCKFILE>";
     $s = $enc || $DEFAULT_MGET_SUBJECT;
 
-    # local($tmpf, $mode, $file, @conf)
-    # $tmpf     : a temporary file 
-    # $mode     : mode 
-    # $file     : filename of encode e.g. uuencode , ish ...
-    &Debug("SendFilebySplit::DraftGenerate($tmp, $mode, $f, $f)") 
-	if $debug;
-    $total = &DraftGenerate($tmp, $mode, $f, $f);
-
-    # Hmm, O.K. In some case
-    # back to the first filename for the use of SplitFiles
-    local($lc) = &WC("$tmp.1");
-    if ($lc > $MAIL_LENGTH_LIMIT && $total == 1) {
-	rename("$tmp.1", $tmp) || &Log("cannot rename $tmp.1 $tmp");
-	$total = &SplitFiles($tmp, $lc, int($lc/$MAIL_LENGTH_LIMIT) + 1);
+    if ($mode eq 'mp') {
+	local($lc, @f, $tmpmp);
+	$tmpmp = "$TMP_DIR/sfbs:mp:$$";
+	$lc = &WC($f);
+	if ($lc > $MAIL_LENGTH_LIMIT) {
+	    &Copy($f, $tmpmp);
+	    $total = &SplitFiles($tmpmp, $lc, int($lc/$MAIL_LENGTH_LIMIT) + 1);
+	    # prepare an array of temporary files
+	    for (1 .. $total) { push(@f, "$tmpmp.$_");}
+	    $total = &DraftGenerate($tmp, $mode, $f, @f);
+	    for ($tmpmp, @f) { unlink $_;}
+	}
+	else {
+	    $total = &DraftGenerate($tmp, $mode, $f, $f);
+	}
     }
+    else {
+	# local($tmpf, $mode, $file, @conf)
+	# $tmpf     : a temporary file 
+	# $mode     : mode 
+	# $file     : filename of encode e.g. uuencode , ish ...
+	&Debug("SendFilebySplit::DraftGenerate($tmp, $mode, $f, $f)") 
+	    if $debug;
+	$total = &DraftGenerate($tmp, $mode, $f, $f);
+
+	# Hmm, O.K. In some case
+	# back to the first filename for the use of SplitFiles
+	local($lc) = &WC("$tmp.1");
+	if ($lc > $MAIL_LENGTH_LIMIT && $total == 1) {
+	    rename("$tmp.1", $tmp) || &Log("cannot rename $tmp.1 $tmp");
+	    $total = &SplitFiles($tmp, $lc, int($lc/$MAIL_LENGTH_LIMIT) + 1);
+	}
+    }
+
 
     if ($debug) {
 	&Debug("&SplitFiles($tmp, $lc, int($lc/$MAIL_LENGTH_LIMIT));");
@@ -862,8 +1078,15 @@ sub SendFilebySplit
     }
 
     # Destructor; 
+    &ClearMimeHdr;
+}
+
+
+sub ClearMimeHdr
+{
     undef $Envelope{'GH:Mime-Version:'};
     undef $Envelope{'GH:Content-Type:'};
+    undef $Envelope{'GH:Content-Transfer-Encoding:'};
 }
 
 1;

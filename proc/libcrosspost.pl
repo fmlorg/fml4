@@ -11,6 +11,7 @@
 # $Id$;
 
 ##### Class Crosspost: public fml #####
+local(@DeliveryList);
 
 #
 # Crosspost Protocol
@@ -133,10 +134,10 @@ sub Init
 
       # which active or members we should eval ?
       # eval ("do $dir/config.ph");
-      # set @DELIVERY_LIST to scan;
+      # set @DeliveryList to scan;
       &EvalConfigPH("$dir/config.ph", $dir, $ml);
 
-      for $list (@DELIVERY_LIST) {
+      for $list (@DeliveryList) {
 	  # set %WMD;
 	  &Scan($list, $ml, $first_time);
       }
@@ -235,12 +236,12 @@ sub EvalConfigPH
 	;
     }
     else {
-	undef @DELIVERY_LIST;
+	undef @DeliveryList;
 	if (-f "$dir/actives") {
-	    push(@DELIVERY_LIST, "$dir/actives");
+	    push(@DeliveryList, "$dir/actives");
 	}
 	elsif  (-f "$dir/members") {
-	    push(@DELIVERY_LIST, "$dir/members");
+	    push(@DeliveryList, "$dir/members");
 	}
 	else {
 	    &Log("Error: Crosspost::EvalConfigPH no list for $ml");
@@ -251,7 +252,7 @@ sub EvalConfigPH
 
     $buf .= q#;
     package crosspost_ns;
-    undef @DELIVERY_LIST;
+    undef @DeliveryList;
     #;
 
     $buf .= "\$DIR = \"$dir\";\n";
@@ -284,12 +285,12 @@ sub EvalConfigPH
     }
 
     if ($AutoRegistP) {
-	push(@DELIVERY_LIST, @MEMBER_LIST);
-	push(@DELIVERY_LIST, $MEMBER_LIST);
+	push(@DeliveryList, @MEMBER_LIST);
+	push(@DeliveryList, $MEMBER_LIST);
     }
     else {
-	push(@DELIVERY_LIST, @ACTIVE_LIST);
-	push(@DELIVERY_LIST, $ACTIVE_LIST);
+	push(@DeliveryList, @ACTIVE_LIST);
+	push(@DeliveryList, $ACTIVE_LIST);
     }
 
     # export

@@ -23,7 +23,7 @@ if ($0 eq __FILE__) {
 sub DecodeMimeStrings 
 { 
     # 2.1A4 test phase (2.1REL - 2.1A3 requires explicit $MIME_EXT_TEST=1)
-    if ($MIME_EXT_TEST) {
+    if (1) {
 	&MIME'MimeDecode(@_);
     }
     else {
@@ -36,7 +36,7 @@ sub EnvelopeMimeDecode
 { 
     local(*e) = @_;
 
-    if ($MIME_EXT_TEST) {
+    if (1) {
 	$e{'Hdr'}  = &DecodeMimeStrings($e{'Hdr'});
 	$e{'Body'} = &DecodeMimeStrings($e{'Body'});
     }

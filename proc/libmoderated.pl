@@ -23,6 +23,9 @@ sub ModeratedDelivery
     elsif ($MODERATOR_FORWARD_TYPE == 2) {
 	return &ModeratedDeliveryTypeII(@_);
     }
+    elsif ($MODERATOR_FORWARD_TYPE == 3) {
+	return &ModeratedDeliveryTypeI(@_);
+    }
 }
 
 
@@ -31,36 +34,52 @@ sub ModeratedDelivery
 sub ModeratedDeliveryTypeI
 {
     local(*e, $already_auth) = @_;
-    local($passwd); 
+    local($passwd, $auth); 
 
     if ($already_auth) {
-	;
+	$auth = 1; 
     }
-    elsif ($passwd = $e{'h:approval:'}) {
+    elsif ($passwd = &moderated'GetPasswd(*e)) { #';
 	$passwd =~ s/^\s*(\S+)\s*$/$1/;
 
 	&use('crypt');
 	if (&CmpPasswdInFile($PASSWD_FILE, $From_address, $passwd)) {
+	    $auth = 1; 
 	    &Log("Moderated: Approval Certified");
-	    undef $e{'h:approval:'}; # delete the passwd entry;
-	    undef $e{'h:Approval:'}; # delete the passwd entry;
 	}
 	else {
+	    $auth = 0; 
 	    &Log("Moderated: Approval FAILED");
 	    &Warn("Moderated: Approval FAILED $ML_FN", &ForwMail);
 
 	    $DO_NOTHING = 1;	# PASS TO THE USUAL ROUTINE;
 	}
     }
+    # no Apporoval: field
     else {
-	$e{'h:Reply-To:'} = $MAIL_LIST;
-	&Log("Moderated: Forwarded to maintainer");
-	&Warn("Forwarded Message: [MODERATED MODE] $ML_FN",
-	      "Please check the following mail\n".&ForwMail);
+	# TYPE I
+	if ($MODERATOR_FORWARD_TYPE == 1) {
+	    $e{'h:Reply-To:'} = $MAIL_LIST;
+	    &Log("Moderated: Forwarded to maintainer");
+	    &Warn("Forwarded Message: [MODERATED MODE] $ML_FN",
+		  &GenModeratorInfo .
+		  "Please check the following mail.\n".
+		  &ForwMail);
+	}
+	# TYPE III, do nothing
 
+	$auth = 0; 
 	$DO_NOTHING = 1;	# PASS TO THE USUAL ROUTINE;
     }
 
+    ### TYPE III
+    if ($MODERATOR_FORWARD_TYPE == 3) {
+	# If authenticated, passes it through.
+	# If not, passes argv to type II; 
+	if (!$auth) { return &ModeratedDeliveryTypeII(@_);}
+    }
+
+    ### TYPE I
     ### MAIN ###
     if ($DO_NOTHING) {		# Do nothing. Tricky. Please ignore 
 	;
@@ -92,16 +111,17 @@ sub InitModeratedQueueDir
 # saved in var/mqueue/YYYYMMDD.rand()
 #
 # moderator resend
+# resending is by &ModeratorResend;
 #
 sub ModeratedDeliveryTypeII
 {
     local(*e) = @_;
-    local($passwd, $id, $f, $h, $info);
+    local($passwd, $id, $f, $h);
 
     # if --ctladdr, eval a queued commands mail.
     if (($PERMIT_COMMAND_FROM eq "moderator")
 	&& $e{'Body'} =~ /^[\s\n]*\# moderator/) {
-	&Log("moderator: eval queue as a command");
+	&Log("moderator: eval queue as a command") if $debug;
 	require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 	return;
     }
@@ -110,9 +130,9 @@ sub ModeratedDeliveryTypeII
     &InitModeratedQueueDir;
 
     # file identifier
-    srand(time|$$);
+    &SRand();
     $id = int(rand(1000000));
-    $id = "$CurrentTime.$id";
+    $id = "$PCurrentTime$$.$id";
     $f      = "$ModeratedQueueDir/mq$id";
     $f_info = "$ModeratedQueueDir/mi$id";
 
@@ -121,9 +141,7 @@ sub ModeratedDeliveryTypeII
 
     $subject = "a submit to moderators";
 
-    $info  = "Dear moderators\n\n";
-    $info .= "Moderated \$MAIL_LIST ($MAIL_LIST) receives a submit from\n\n";
-    $info .= "   $From_address.\n\n";
+    $info  = &GenModeratorInfo;
     $info .= "Please check it. If you certify the following article, \n";
     $info .= "please send to $e{'CtlAddr:'}\n";
     $info .= "the following line (only this line!)\n";
@@ -151,6 +169,34 @@ sub ModeratedDeliveryTypeII
 }
 
 
+sub GenModeratorInfo
+{
+    local($info, $m_p, $a_p);
+
+    $a_p = &MailListActiveP($From_address);
+    $m_p = &MailListMemberP($From_address);
+
+    $info  = "Dear moderators\n\n";
+    $info .= "Moderated \$MAIL_LIST <$MAIL_LIST> receives a submit from\n\n";
+    $info .= "   $From_address\n";
+    $info .= "   (who is ";
+    if ($a_p && $m_p) {
+	$info .= "a receiver and a member";
+    }
+    elsif ($a_p && (!$m_p)) {
+	$info .= "a receiver but NOT A MEMBER";
+    }
+    elsif ((!$a_p) && $m_p) {
+	$info .= "NOT A RECEIVER but a member";
+    }
+    else {
+	$info .= "NOT A RECEIVER NOR A MEMBER";
+    }
+    $info .= ").\n\n";
+
+    $info;
+}
+
 sub ModeratorNotify
 {
     local(*distfile, $subject, $f_info, $preamble) = @_;
@@ -173,12 +219,25 @@ sub ModeratorNotify
     $Envelope{'preamble'} = $cp;
 }
 
+
+# '# moderator' command
 sub ModeratorProcedure
 {
     local(*Fld, *e, *misc) = @_;
     local($id) = $Fld[3];
 
     &InitModeratedQueueDir;
+
+    if ($moderated'Fld{$id}) { #';
+	&Log("moderator: duplicated input [@Fld]");
+	&Warn("fml Moderator routine error $ML_FN",
+	      "We trap the duplicated input. Please check \n".
+	      &ForwMail);
+	return $NULL;
+    }
+    else {
+	$moderated'Fld{$id} = 1;
+    }
 
     if ($Fld[2] eq 'certified') {
 	if ($id =~ /^[\d\.]+$/) {
@@ -212,16 +271,20 @@ sub ModeratorProcedure
 }
 
 
+# Interface to &Distribute in Type II
 sub ModeratorResend
 {
     local(*e, $f) = @_;
+    local($org_fa) = $From_address; # save global variable
 
     &GetTime;
 
     if (open(STDIN, $f)) {
 	# reset
 	%org_e = %Envelope;
-	undef %Envelope;
+
+	# remove except for header info but pass "[of]h:field:"
+	for (keys %Envelope) { /^\w+h:\S+:$/ || (undef $Envelope{$_});}
     
 	&Parse;                         # Phase 1, pre-parsing here
 	&GetFieldsFromHeader;           # Phase 2, extract fields
@@ -233,12 +296,17 @@ sub ModeratorResend
     }
 
     # append
-    $Envelope{"h:Resent-From:"} = $From_address;
-    $Envelope{"h:Resent-To:"}   = "$MAIL_LIST (moderated)";
-    $Envelope{"h:Resent-Date:"} = $MailDate;
-    $Envelope{"h:Resent-Message-Id:"} = &GenMessageId;
-    for ('Resent-From','Resent-To', 'Resent-Date', 'Resent-Message-Id') {
-	push(@HdrFieldsOrder, $_);
+    if (@ModeratedHdrFieldsOrder) {
+	@HdrFieldsOrder = @ModeratedHdrFieldsOrder;
+    }
+    else {
+	$Envelope{"h:Resent-From:"} = $org_fa;
+	$Envelope{"h:Resent-To:"}   = "$MAIL_LIST (moderated)";
+	$Envelope{"h:Resent-Date:"} = $MailDate;
+	$Envelope{"h:Resent-Message-Id:"} = &GenMessageId;
+	for ('Resent-From','Resent-To', 'Resent-Date', 'Resent-Message-Id') {
+	    push(@HdrFieldsOrder, $_);
+	}
     }
 
     #if  --ctladdr, eval commands
@@ -266,16 +334,44 @@ sub ModeratorResend
 	$MAIL_LIST_ACCEPT_COMMAND = $mlac;
     }
     else {
-	&FixHeaderFields(*Envelope); # e.g. checking MIME
+	&FixHeaderFields(*e); # e.g. checking MIME
 
 	# distribute
-	&Distribute(*Envelope, 'permit from members_only');
+	&Distribute(*e, 'permit from members_only');
     }
+
+    # exception for html generation 
+    if ($AUTO_HTML_GEN) { %SavedEnvelope = %Envelope;}
 
     undef %Envelope;
     %Envelope = %org_e;
+    $From_address = $org_fa;
 
     unlink $f;
 }
+
+
+package moderated;
+
+# COMMON ROUTINE
+# SIDE EFFECT; remove the passwd entry;
+sub GetPasswd
+{
+    local(*e) = @_;
+    local($p);
+
+    if ($e{'h:approval:'}) {
+	$p = $e{'h:approval:'};
+	undef $e{'h:approval:'};
+	undef $e{'h:Approval:'};
+    }
+    elsif ($e{'Body'} =~ /^[\s\n\#]*approval\s+(\S+)\s+forward\n/) {
+	$e{'Body'} =~ s/^[\s\n\#]*approval\s+(\S+)\s+forward\n//;
+	$p = $1;
+    }
+
+    $p;
+}
+
 
 1;

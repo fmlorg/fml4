@@ -27,6 +27,24 @@ sub DoDistribute
     $e{'mode:dist'} = 1;
 
     ##### ML Preliminary Session Phase 01: set and save ID
+    # Define the curren time 
+    &GetTime;
+
+    # Date: type
+    if ($DATE_TYPE eq 'distribute-date+x-posted') {
+	$e{'h:Date:'}     = $MailDate;
+	$e{'h:X-Posted:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
+    elsif ($DATE_TYPE eq 'distribute-date+x-original-date') {
+	$e{'h:Date:'}     = $MailDate;
+	$e{'h:X-Original-Date:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
+    elsif (($DATE_TYPE eq 'distribute-date') ||
+	   ($DATE_TYPE eq 'distribute-date+posted')) {
+	$e{'h:Date:'}   = $MailDate;
+	$e{'h:Posted:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
+
     # Get the present ID
     &Open(IDINC, $SEQUENCE_FILE) || return; # test
     $ID = &GetFirstLineFromFile($SEQUENCE_FILE);
@@ -54,7 +72,7 @@ sub DoDistribute
     ##### ML Preliminary Session Phase 02: $DIR/summary
     # save summary and put log
     $s = $e{'h:Subject:'};
-    $s =~ s/\n(\s+)/$1/g;
+    while ($s =~ s/\n(\s+)/$1/g) { 1;} # against multiple lines
 
     # MIME decoding. 
     # If other fields are required to decode, add them here.
@@ -114,7 +132,12 @@ sub DoDistribute
 		$pat = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$id.$END_BRACKET;
 	    }
 	    else {
-		$pat = $BEGIN_BRACKET.$BRACKET.$END_BRACKET;
+		if ($BRACKET) {
+		    $pat = $BEGIN_BRACKET.$BRACKET.$END_BRACKET;
+		}
+		else {
+		    $pat = $BEGIN_BRACKET.$id.$END_BRACKET;
+		}
 	    }
 
 
@@ -134,7 +157,7 @@ sub DoDistribute
 	$e{'h:Message-Id:'}  = 
 	    ($e{'h:Message-Id:'} ne $e{'h:message-id:'}) ?
 		$e{'h:Message-Id:'} : &GenMessageId;
- 	&Append2($e{'h:Message-Id:'}, $LOG_MESSAGE_ID);
+ 	&CacheMessageId(*e);
     }
 		      
     # STAR TREK SUPPORT:-);
@@ -158,6 +181,12 @@ sub DoDistribute
 
 	# print STDERR "\$e{'h:$_:'}\t". $e{"h:$_:"} ."\n";
 	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
+
+	if ($debug_dist && ($e{"fh:$lcf:"} || $e{"oh:$lcf:"})) {
+	    print STDERR "$_:\n   force:\t$e{\"fh:$lcf:\"}\n";
+	    print STDERR "   original:\t$e{\"oh:$lcf:\"}\n";
+	    print STDERR "   \t\t$e{\"h:$_:\"}\n";
+	}
 
 	if ($e{"fh:$lcf:"}) {	# force some value to a field
 	    $e{'Hdr'} .= "$_: ". $e{"fh:$lcf:"} ."\n";
@@ -301,6 +330,10 @@ sub Deliver
 	&Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
 	return 1;
     }
+    elsif ($Envelope{'mode:article_spooling_only'}) {
+	&Log("not deliver in article spooling only mode");
+	return 1;
+    }
 
     if ($Rcpt == 0) { return;} # NO RCPT
 
@@ -327,21 +360,6 @@ sub StatDelivery
     $smtp_time = time - $smtp_time;
     $pdt = $smtp_time/$nrcpt;
     &Log("Delivery Stat[$ID]: ${smtp_time}/${nrcpt} = ${pdt} sec./rcpts");
-}
-
-sub GenXMLInfo
-{
-    if ($X_ML_INFO_MESSAGE) { 
-	$X_ML_INFO_MESSAGE;
-    }
-    elsif (!$CONTROL_ADDRESS && 
-	   $PERMIT_POST_FROM =~ /^(anyone|members_only)$/) {
-	"If you have a question,\n\tplease make a contact with $MAINTAINER";
-    }
-    else {
-	"If you have a question, send a mail with the body\n".
-	    "\t\"\# help\" (without quotes) to the address ". &CtlAddr;
-    }
 }
 
 # return Long ID FORM

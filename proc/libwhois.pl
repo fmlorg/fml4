@@ -48,23 +48,31 @@ sub WhoisSearch
 sub WhoisWrite
 {
     local(*e) = @_;
-    local($encount);
+    local($encount, $i);
 
     &use('MIME') if $USE_MIME;
     &Whois'Import; #';
-    
-    foreach (split(/\n/, $e{'Body'})) {
-	/\#\s*iam/i && ($encount++, next);
-	$e{'Whois:Body'} .= "$_\n" if $encount;
+
+    $i = 0;
+    for (split(/\n/, $e{'tmp:mailbody'})) {
+	$i++;
+
+	# skip until "iam" command line number
+	next if $i <= $e{'tmp:line_number'};
+
+	$e{'whois:buf'} .= "$_\n";
+	$encount++;
+
 	print STDERR "WHOIS>$_\n"  if $debug_whois && $encount;
     }
 
     if (! $encount) {	# encount == 1 if the body has "iam".
-	&Mesg(*e, "   Hmm.. your mail seems too short.");
-	&Mesg(*e, "   your self-introduction is not in it, isn't it?");
-	return;
+	&Mesg(*e, "   Hmm.. your self-introduction is not in it, isn't it?");
+	&Mesg(*e, "   FML removes your entry.");
+	$e{'Whois:addr:remove'} = $From_address;
+	# return;
     }
-    
+
     &Whois'Write(*e); #';
 }
 
@@ -131,7 +139,7 @@ $Counter   = 0;
 	   DEBUG, 'debug', DIR, VARLOG_DIR
 	   );
 
-@ImportProc = ('Debug', 'Log', 'DecodeMimeStrings', LogWEnv, Touch, Mesg);
+@ImportProc = ('Debug', 'Log', 'DecodeMimeStrings', LogWEnv, Touch, Mesg, AddressMatch);
 
 
 sub Import
@@ -156,12 +164,18 @@ sub Write { &Append(@_);}
 sub Append
 {
     local(*e) = @_;
-    local($s) = $e{'Whois:Body'} || $e{'Body'};
+    local($s) = $e{'whois:buf'} || $e{'Body'};
 
-    &BackupDB || do {
+    &BackupDB(*e) || do {
 	&Log("cannot backup \$WHOIS_DB, stop", return 0);
 	&Mesg(*e, "Cannot reset Whois Database of $ML_FN\n");
     };
+
+    if ($addr = $e{'Whois:addr:remove'}) {
+	&Log("whois: addr=$addr append return");
+	return;
+    }
+
 
     # open $WHOIS_DB
     open(F, ">> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB"), return 0);
@@ -271,13 +285,14 @@ sub AllocAllEntry
 
 	($from) = split(/\n\n/, $_);
 	($from =~ /(\S+\@\S+)/) && ($addr = $1);
+	$addr = &main'Conv2mailbox($1, *e); #';
 
 	$addr        || /^(.*)\n/ && ($addr = $1);
 	s/$Separator$//g;
 	$r{$addr} = $_;
     }
     close(F);
-    
+
     # SEPARATOR RESET
     $/ = $sep_org;
 }
@@ -311,7 +326,7 @@ sub List
 
 sub BackupDB
 {
-    local($r, @r, %r);
+    local($r, @r, %r, $addr);
     local(*e) = @_;
 
     &AllocAllEntry(*e, *r);
@@ -334,7 +349,14 @@ sub BackupDB
     open(NEW, "> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB"), return 0);
     select(NEW); $| = 1; select(STDOUT);
 
-    while (($k, $v) = each %r) { 
+    $addr = $e{'Whois:addr:remove'};
+
+    while (($k, $v) = each %r) {
+	if (&AddressMatch($addr, $k)) {
+	    &Log("whois: remove $k entry");
+	    next;
+	}
+
 	print NEW $v;
 	print NEW $Separator;
     }
@@ -347,5 +369,3 @@ sub BackupDB
 
 
 1;
-
-

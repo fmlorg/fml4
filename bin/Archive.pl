@@ -49,8 +49,8 @@ if ($MaxSeq < $Unit) {
 }
 
 # MESSAGE
-&Mesg( "Try archive 1 .. $limit by the unit 100");
-&Mesg( "DEBUG MODE, DO NOTHING ACTUALLY\nHere is $PWD") if $debug;
+&Mesg("Try archive 1 .. $limit by the unit $Unit");
+&Mesg("DEBUG MODE, DO NOTHING ACTUALLY\nHere is $PWD") if $debug;
 
 # ARCHIVE DIR CHECK
 &Mesg( "\$ARCHIVE_DIR\t$ARCHIVE_DIR") if $debug;
@@ -84,7 +84,7 @@ while ($i * $Unit <= $limit) {
 	}
     }
 
-    &Mesg("Cheking\t$lower -> $upper ($counter hits)");
+    &Mesg("Checking\t$lower -> $upper ($counter hits)");
 
     if ($counter > 0) {
 	if (-f "$ARCHIVE_DIR/$tar.tar.gz") {

@@ -19,6 +19,8 @@ sub Archive
     $max_seq     = &GetFirstLineFromFile($SEQUENCE_FILE);
     $unit        = $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;
 
+    &use('utils');
+
     &Archive'Init; #';
     &Archive'Archive($archive_dir, $max_seq, $unit, $limit); #';
 }
@@ -30,6 +32,7 @@ package Archive;
 sub Archive'Log               { &main'Log(@_);}
 sub Archive'Debug             { &main'Debug(@_);}
 sub Archive'Append2           { &main'Append2(@_);}
+sub Archive'MkDir             { &main'MkDir(@_);}
 
 
 sub Init
@@ -60,15 +63,7 @@ sub Archive
     }
 
     # create archive dir when it does not exist
-    for (split(/\//, $archive_dir)) {
-	next if /^\s*$/;
-	$dir .= "/$_";
-	-d $dir || do { 
-	    &Debug("create $dir") if $debug;
-	    mkdir($dir, 0700);
-	}
-    }
-
+    &MkDir($archive_dir, 0700);
 
     ### HERE WE GO!
     while ($i * $unit <= $limit) {
@@ -98,7 +93,14 @@ sub Archive
 		&Debug("$TAR $files |$COMPRESS > $archive_dir/$tar.tar.gz")
 		    if $debug;
 
-		system("$TAR $files |$COMPRESS > $archive_dir/$tar.tar.gz");
+		if ($INSECURE_SYSTEM) {
+		    system("$TAR $files |$COMPRESS >$archive_dir/$tar.tar.gz");
+		}
+		else {
+		    &main'system("$TAR $files | $COMPRESS", 
+			    "$archive_dir/$tar.tar.gz");
+		}
+
 		&Log("Error: Archive::Archive [$@]") if $@;
 		&Log("$archive_dir/$tar.tar.gz is created") unless $@;
 	    }

@@ -101,8 +101,9 @@ sub AppendMimeDecodedSubject
     }
 
     if ($append) {
-	local(@h);
+	local(@h, %dup);
 	for (@HdrFieldsOrder) {
+	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
 	    push(@h, $_);
 	    if ('Subject' eq $_) { push(@h, 'X-Subject');}
 	}

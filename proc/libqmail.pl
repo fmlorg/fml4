@@ -32,7 +32,10 @@ sub DotQmailExt
 
     &Log("dot-qmail-ext: $ext") if $debug_qmail;
     $ext =~ s/^$key//i;
-    $ext =~ s/\-/ /g;    
+    $ext =~ s/\-\-/\@/i; # since @ cannot be used
+    $ext =~ s/\-/ /g;
+    $ext =~ s/\@/-/g;
+    &Log("\$ext -> $ext");
     $e{'Body'} = sprintf("# %s", $ext);
 }
 

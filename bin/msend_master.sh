@@ -52,6 +52,11 @@ done
 
 
 ##### MAIN
+
+# 
+# renice +18 $$ >/dev/null 2>&1
+#
+
 chdir $ML_DIR || ERROR
 
 for ml in *
@@ -60,6 +65,8 @@ do
 	then
 		$EXEC_DIR/msend.pl $ML_DIR/$ml
 	fi
+
+	sleep 3
 done
 
 exit 0;
