@@ -361,6 +361,18 @@ sub PickUpHint
 }
 
 
+sub DeadCache
+{
+   my ($addr) = @_;
+   my ($pickup_addr);
+   
+   $pickup_addr = &ExtractAddr($addr, 'pickup');
+   &Touch($DEAD_ADDR_HINT_FILE);
+   &Append($pickup_addr, $DEAD_ADDR_HINT_FILE) if -f $DEAD_ADDR_HINT_FILE;
+   &Log("deadaddr.hint: <$pickup_addr>");
+}
+
+
 sub AnalWord
 {
     local($reason);
@@ -709,6 +721,7 @@ sub DeadOrAlive
 	    if ($ml) {
 		&Debug("dead($addr{$_}/$LIMIT):\t$_ <$ml>") if $debug;
 		&Action($addr, $ml);
+		&DeadCache($addr);
 	    }
 	    else {
 		&Debug("$ml for <$admin> is not found, ignore <$_>") if $debug;
@@ -1114,7 +1127,10 @@ sub Init
     $CACHE_FILE = $Forced::CACHE_FILE || $opt_C || $CACHE_FILE || 
 	"$DIR/errormaillog";
     $ERROR_ADDR_HINT_FILE = $Forced::ERROR_ADDR_HINT_FILE || 
-	$ERROR_ADDR_HINT_FILE  || "$DIR/error_addr.hints";
+	$ERROR_ADDR_HINT_FILE || "$DIR/error_addr.hints";
+
+    $DEAD_ADDR_HINT_FILE = $Forced::DEAD_ADDR_HINT_FILE || 
+	$DEAD_ADDR_HINT_FILE || "$DIR/dead_addrs";
 
     # programs
     $MAKEFML  = $Forced::MAKEFML  || $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
