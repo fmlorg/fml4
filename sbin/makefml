@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.210.2.10 2002/03/23 14:52:58 fukachan Exp $
+# $FML: makefml,v 2.210.2.11 2002/08/10 14:01:39 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -6235,6 +6235,7 @@ sub main::Dumpvar
 	    # thanks: Tomohiro Yamauchi <handy@nid.co.jp>
 	    next if $key =~ /^EXPORT/;
 	    next if $key =~ /^Config/;
+	    next if $key =~ /^ISA/;
 
 	    next if @vars && !grep($key eq $_,@vars);
 	    local(*entry) = $val;
@@ -6246,7 +6247,7 @@ sub main::Dumpvar
 	    if (defined @entry) {
 		$buf .= "\@$key = (\n";
 		foreach $num ($[ .. $#entry) {
-		    $buf .= "  $num\t'$entry[$num]'\n";
+		    $buf .= "\t'$entry[$num]',\n";
 		}
 		$buf .= ");\n";
 	    }
