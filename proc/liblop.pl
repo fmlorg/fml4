@@ -233,7 +233,7 @@ sub ResentForwFileInSpool
     # Get Header;
     $header = "From $MAINTAINER $MailDate\n$header";
     $header =~ s/\n(\S+):/\n\n$1:\n\n/g;
-    for (@Hdr = split(/\n\n/, "$header#dummy\n"), 
+    for (@Hdr = split(/\n\n/, "$header\n#dummy\n"), 
 	 $_ = $field = shift @Hdr; #"From "
 	 @Hdr; 
 	 $_ = $field = shift @Hdr, $contents = shift @Hdr) {
