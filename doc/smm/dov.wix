@@ -62,7 +62,13 @@ listserv のようにユーザには見えるように動かすこともできます。
 各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
 カルな再配送』のような場合はコマンド機能を落して使うべきでしょう。
 例：
-   ip-connection を受けるアドレスに使う時は --distribute モードで使う
+
+ip-connection を受けるアドレス (include ファイルを呼び出すアドレス)に
+使う時は、
+
+   makefml config listname で 配送モード指定を「誰でもPOST可能」にする
+	OR (やることは同じことですが) 
+   手で config.ph の最後に &DEFIN_MODE('post=anyone'); と書く。
 
 
 .S	fml 2.1 Overview
@@ -429,11 +435,6 @@ fmlserv.pl を呼ぶようにした場合 コマンドは
 	fmlserv: :include:/var/spool/ml/include/fmlserv
 
 のようにしても大丈夫です。
-
-fmlserv.pl のコマンドラインでの --majordomo オプションは 今まで 
-majordomo 構造だった directory structure もうけつけるようにするための 
-emulation 命令です。
-
 
 
 .S	sendmail との通信

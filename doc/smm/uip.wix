@@ -341,7 +341,7 @@ bin/passwd.pl を使って下さい。使い方は、
 	moderated モード
 
 等で使われます。
-.xref --moderated
+.xref mode:moderated
 .xref REMOTE-ADMINISTRATION
 
 

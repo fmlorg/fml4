@@ -41,32 +41,22 @@ makefml install を使うのがいいでしょう。
 .key	fml.c
 .key	fml.plの引数
 .xref	fml-maintenance
-
+.xref	order-of-option-effeciency
+.xref	init-data-structure
 
 いつものように複数のやり方があります:-)
 
-○	初心者で内部構造がよくわからない場合はインストール時に使った
-	makefml というコマンドを使って、ＭＬの設定ができます。
-	makefml config ML で ML-directory/config.ph が変更できます。
-	よく使いそうだと思われる基本的な設定はこれで十分でしょう。
+○ 初心者で内部構造がよくわからない場合はインストール時に使った 
+makefml というコマンドを使って、ＭＬの設定ができます。makefml config
+ML で ML-directory/config.ph が変更できます。よく使いそうだと思われる
+基本的な設定はこれで十分でしょう。
 
-   それ以上のことがしたい場合は…
+○ それ以上のことがしたい場合は各MLの config.ph をいじって下さい。
 
-○	ひとつしかMLがない場合
-	
-	config.ph をいじるか コマンドラインオプションで変更します。
-	
-○	複数のMLがある場合
-
-	ML固有の変更はそれぞれのMLの config.ph へ変更を加える
-
-	include file 等で fml.pl --distribute のようにコマンドラインオ
-	プションで変更する
-
-といった方法がありますがが、複数の ML に共通の設定であれば libsmtp.pl 
-等がおいてある場所に
-sitedef.ph を作って、これの中にいれておくとよいでしょう。
-.xref	order-of-option-effeciency, init-data-structure
+○ 複数の ML に共通の設定であれば libsmtp.pl 等がおいてある場所に 
+sitedef.ph というファイルを作ってこの中に書いておくと config.ph の評価
+の後に sitedef.ph が評価されます。コマンドとかのマシンに共通の設定等は
+これを使うと良いかも知れません。
 
 例：
 	/usr/local/fml/sitedef.ph
@@ -324,11 +314,6 @@ $MEMBER_LIST に登録します。
 	autobody	メール本文にsubscribe のキーワードを必要とする
 
 等がカスタマイズできます。これらの詳細については「自動登録」の章を参照
-.xref	auto-regist
-
-例：
-	/usr/libexec/fml/fml.pl /var/ML-dir --auto 
-
 
 
 .S	$MAINTAINER というアドレス
@@ -449,130 +434,57 @@ config.ph spool	...(省略)
 .xref	auto-regist
 
 マクロというのは正確ではないですが config.ph で簡易モード設定ができま
-す。
+す。以下のような理由のために導入されました。
 
-特に歴史的な理由で自動登録とメンバーチェックをするモードの設定はわかり
-にくいので、このモード設定をつかうと楽かもしれません。
+○ 歴史的な理由で自動登録とメンバーチェックをするモードの設定はわかり
+にくいものについてはモード設定をつかうと楽かもしれない
 
-注意として、モード設定は config.ph を評価した後行なわれます。そのため、
-config.ph の中で
+○ 変数の設定の中には 1 or 0 だけでは不充分な場合がある
 
+&DEFIN_MODE(mode-name); は必ず config.ph の最後 (1; より前) に書いて下
+さい。というのはモード設定の中には config.ph の値を overwrite する必要
+のあるものがあるからです(もちろん必要のないものもあります)。
+
+例: 
 	$ML_MEMBER_CHECK = 1;
 	&DEFINE_MODE('autoregist'); 
 
-とか書くと、自動登録モードになり、メンバーチェック ($ML_MEMBER_CHECK =
-1)と宣言したことは overwrite されてしまいます。
+と書くと、$ML_MEMBER_CHECK は 0 に overwrite され自動登録モードになっ
+てしまいます。
 
-注意：コマンドラインオプションはこの定義よりも強いことに注意して下さい
+これはこの時はよいのですが、後で trouble が発生した時に見通しを悪くし
+ます。そのためこういう変数の conflict が発生しないようなものに限って使
+うべきです。
 
-config.ph の中で
-
-	$ML_MEMBER_CHECK = 1;
-	&DEFINE_MODE('autoregist'); # 自動登録
-
-でもコマンドラインで
-
-	fml.pl --distribute ...
-
-のようになっていた場合は、distribute モード（メンバーチェックも自動登
-録もせずに、配送しスプールするだけのモード）に設定されます。
-
-モード一覧は コマンドラインオプションを見て下さい。
-.xref	clo
-
-
-.S	簡易モード一覧
-.xref	clo
-
-詳細はコマンドラインオプションの項を見てね。ソースは libmodedef.pl です。
-
-	distribute	配送だけ
-	hack		ローカルハック用
-	fmlserv		listserv emulation
-	fml		デフォールト
-	hml		hml emulation
-	emudistribute	distribute を emulate(配送だけ＋ヘッダ変換等)
-			注意：↑ distribute というprogramもあるのである 
-	html		var/html に html 化した記事も作っていく
-	check		メンバーチェック
-	commandonly	コマンドだけを実行するサーバ
-	mime		MIME 変換した記事等を置くなど MIME オプション
-	through		すどおし
-	auto		自動登録（どういうメールが来ても登録）
-	autosubject	subject: subscribe のキーワードを必要とする
-	autobody	メール本文にsubscribe のキーワードを必要とする
-	cack		コマンドをだれでも実行できる（ + trick の時有用）
-	remote		ＭＬのリモート管理機能が使えるモードへ
-	ra		同上
-
-
-ソースより(以下 libmodedef.pl 2.0.4)：
-.q
-sub ModeDef
-{
-    local($mode) = @_;
-    $mode =~ tr/A-Z/a-z/;
-
-    &Debug("ModeDef::$mode()") if $debug;
-
-    require 'libhack.pl' if $mode eq 'hack';
-
-    &FmlServMode    if $mode eq 'fmlserv';
-    &FmlMode        if $mode eq 'fml';
-    &HmlMode        if $mode eq 'hml';
-    &EmulateDistributeMode if $mode eq 'emudistribute';
-    &HtmlMode       if $mode eq 'html';
-
-    if ($mode eq 'check')       { $ML_MEMBER_CHECK = 1;}
-    if ($mode eq 'commandonly') { $COMMAND_ONLY_SERVER = 1;}
-    if ($mode eq 'mime')        { $USE_MIME = 1;}
-    if ($mode eq 'through')     { $SUPERFLUOUS_HEADERS = 1;}
-    if ($mode eq 'auto')        { $ML_MEMBER_CHECK = 0;}
-
-    if ($mode eq 'autosubject') { 
-	$ML_MEMBER_CHECK = 0;
-	$REQUIRE_SUBSCRIBE = "subscribe";
-    }
-
-    if ($mode eq 'autobody')     { 
-	$ML_MEMBER_CHECK = 0;
-	$REQUIRE_SUBSCRIBE = "subscribe";
-	$REQUIRE_SUBSCRIBE_IN_BODY = 1;
-    }
-
-    if ($mode eq 'caok') {	# command anyone ok
-	$Envelope{'mode:anyoneok'} = 1;
-	$PROHIBIT_COMMAND_FOR_STRANGER = 0;
-    }
-
-    if ($mode eq 'remote' || $mode eq 'ra') {
-	$REMOTE_ADMINISTRATION = 1;
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
-    }
-
-    1;
-}
-.~q
+またこれらの理由により、2.1 gamma にあった、いくつかのものを除いて多く
+のモード設定は obsolete になりました。backward compatible のため 2.1
+release でも動くことは動きますができるだけ使うべきではありません。
 
 
 .S	再配送だけをするサーバ(コマンドを必要としないサーバ)
 .key	再配送だけをするサーバ
-.xref	--distribute
+.xref	re-distribute
 
 単に配送を待って、それをスプールすることだけを目的にするMLを作ることも
 あるでしょう。つまり ガイドを相手に返すこともなく、単に再配送するだけ
 です。
 
-	コマンドラインオプションの --distribute はそういう目的です。
+例: 	elena メーリングリストを再配送専用に設定する
 
-別の言い方をすれば、/etc/aliases でやってるただのフォワードにスプール
-機能がついてるようなものですね。
+	elena: :include:/var/spool/ml/elena/include
+
+のアドレスを再配送にするために /var/spool/ml/elena/config.ph に
+
+	&DEFINE_MODE("post=anyone");
+
+を書く。別の言い方をすれば、/etc/aliases でやってるただのフォワードに
+スプール機能がついてるような状態ですね。
 
 		
 .S	コマンド専用サーバ
 .k	$COMMAND_CHECK_LIMIT
 
-fmlのデフォールトの挙動は
+fml のデフォールトの挙動は
 
 	メールの最所の３行のどこかが 
 	# command（英文字だけの塊）
@@ -596,7 +508,6 @@ fmlのデフォールトの挙動は
 
 	$COMMAND_ONLY_SERVER           = 1;
 .l	$COMMAND_ONLY_SERVER
-.k	$COMMAND_ONLY_SERVER
 
 とすると 
 
@@ -659,37 +570,31 @@ $COMMAND_ONLY_SERVER がセットされている場合は、キーワード # の有無に関
 SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 にはなっていません。リモートで管理もできるようにモードを変えるには、
 
-	コマンドラインオプションで --remote (か --ra) か
-	config.ph で &DEFINE_MODE('remote') (か &DEFINE_MODE('ra'))  
-
-としてください。デフォールトではパスワードを要求する設定です。
-この状態は
-
 	$REMOTE_ADMINISTRATION = 1;
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
 
-を設定しているのと同じです。
+を設定して下さい。お勧めではありませんが &DEFINE_MODE("remote"); でも
+同じです。
 
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD 
 
 をセットしないならパスワード認証をせず管理者のメンバーリスト 
-($ADMIN_MEMBER_LIST) でアドレスの認証だけをします。 
+($ADMIN_MEMBER_LIST) でアドレスの認証だけをします。この設定はするべき
+ではありません。
 
-また、パスワードは $DIR/etc/passwd に crypt された形で保存されます。
+パスワードは $DIR/etc/passwd に crypt された形で保存されます。
+.xref bin/passwd
 
-新たにパスワードを初期化する場合は
-	bin/passwd -i mail-address new-passwod
-のようにしてください。アドミンコマンドには初期化用の initpass というコ
-マンドが用意されています。
+新たにパスワードを初期化する場合は 
+
+○ makefml を使う(INSTALL を見て下さい)
+
+○ コマンドでは fml-install-dir/bin/passwd -i mail-address 
+
+○ アドミンコマンドの初期化用の initpass というコマンド
 .xref	remote
 
-例：
-	% bin/passwd -i fukachan@sapporo.iij.ad.jp password
-
-fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
-設定する（実際にこんな間抜けなパスワードを付けてはいけません:-）
-
-カスタマイズするべきファイル等は
+リモート管理関係のカスタマイズするべき変数点ファイルは
 
    アドミンと認めるメンバーのリスト（Email-address）
    $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
@@ -761,10 +666,7 @@ config.ph でコントロールできます。
 
 同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
 
-	コマンドラインオプションで --commandonly か
-	$COMMAND_ONLY_SERVER = 1; と config.ph に書く
-
-かしてください。
+	config.ph に $COMMAND_ONLY_SERVER = 1;
 
 もっとも、こうしておくと listserv とかわりませんな:-) 
 .seealso fmlserv

@@ -5,6 +5,20 @@
 .k	自動登録のIntroduction
 .k	$ML_MEMBER_CHECK
 
+fml は作った最初の時(1993)から
+
+	デフォールトはメンバーのみがＭＬを使う
+	手動で登録する
+
+です。自動登録といった security を弱める方向へは明示的に設定をゆるめて
+いく必要があります。変数名等もそういう概念を元にしています。
+
+注意: 歴史的に『メンバーチェックをするという大前提』のため『メンバーチェッ
+クなしにだれでもPOSTできる とか メールフォワード』にはならず、メンバー
+チェックを切ったら メンバーでない人を自動的に登録するという動作になり
+ます。
+
+
 ○ fml で "自動登録" といっているのは
 .k	$FILE_TO_REGIST
 .k	$MEMBER_LIST
@@ -25,7 +39,8 @@
 
 なお、1997/02 以降の 2.1 GAMMA TEST (2.0 current) の自動登録には 
 confirmation モードが実装されています(詳細は後述)。現在のお勧めはこの
-モードを使うことです。このセクションでは通常の自動登録について述べます。
+モードを使うことです。このセクションでは”confirmatin 以外の自動登録”
+について記述します。
 
 
 ○ メンバーチェックおよび登録に使うアドレスは 
@@ -78,17 +93,8 @@ variation は
 により何種類も存在します。
 
    0 自動登録の宣言
-.k	&DEFINE_MODE('auto');
-.k	--auto
-.k	$ML_MEMBER_CHECK
 
-	config.ph で &DEFINE_MODE('auto');
-		か
 	$ML_MEMBER_CHECK = 0; 
-		か
-	コマンドラインで --auto 
-
-	と指定します。
 
 	これは config.ph で
 
@@ -130,18 +136,12 @@ variation は
 
 
    2 自動登録のためには Subject: にキーワードを必要とする場合
-.k	&DEFINE_MODE('autosubject');
-.k	--autosubject
-
-	config.ph で &DEFINE_MODE('autosubject');
-	コマンドラインオプションで --autosubject
-	この簡易モード宣言は
 
 		$ML_MEMBER_CHECK = 0;
 		$REQUIRE_SUBSCRIBE = "subscribe";
 .k	$REQUIRE_SUBSCRIBE
 
-	と同じです。この場合
+	この場合メールヘッダの
 
 	○ Subject: subscribe の時 From: のアドレス
 	○ Subject: subscribe address なら、この address 
@@ -153,20 +153,15 @@ variation は
 
 
    3 自動登録のためにはメール本文にキーワードを必要とする場合
-.k	&DEFINE_MODE('autobody');
-.k	--autobody
-
-	config.ph で &DEFINE_MODE('autobody');
-	コマンドラインオプションで --autobody
-	この簡易モード宣言は
 
 		$ML_MEMBER_CHECK = 0;
 		$REQUIRE_SUBSCRIBE = "subscribe";
 		$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+
 .k	$REQUIRE_SUBSCRIBE
 .k	$REQUIRE_SUBSCRIBE_IN_BODY
 
-	と同じです。この場合メールの本文に
+	この場合メールの本文に
 
 	○ subscribe の時は From: のアドレス
 	○ subscribe address なら、この address 
@@ -330,11 +325,17 @@ fml にはありえます _o_
 .key	+ トリック
 .key	/etc/aliases ＋ アーカイブ
 
-現在では配送するだけのモード設定というのがあるので、listname と 
-listname-ctl と２つのアドレス(デフォールト)を使えるなら、
-これを使うより配送用とコマンド用をわけた方が良いと思います。
-例: --distribute もしくは config.ph で &DEFINE_MODE('distribute') 
-.xref --distribute
+要約:
+この trick は From: のないようにかかわらず誰でもＯＫという風になります。
+この時デフォールトでは誰にでもコマンドが実行できるようにはしていません。
+
+解説:
+現在では配送するだけのモード設定というのがあるので (makefml ではデフォー
+ルトですが) listname と listname-ctl と２つのアドレス(デフォールト)を
+使えるなら、これを使うより配送用とコマンド用をわけた方が良いと思います。
+
+例: 
+	config.ph で &DEFINE_MODE('post=anyone') 
 
 そういう観点では backward compatibility という趣はあります。
 
@@ -342,31 +343,25 @@ listname-ctl と２つのアドレス(デフォールト)を使えるなら、
 
 	+
 
-と書いておくと、この行に出あった時点で認証ＯＫとなります。
-
-つまり + を書いておくと、
-
-	$ML_MEMBER_CHECK  = 1;
-
-メンバーチェックするモードでもメールを素通しします。
+と書いておくと、この行に出あった時点で認証されたとみなします。
 ＃シンタックスはNISにならっているです:-)
 
-この時デフォールトでは誰にでもコマンドが実行できるようにはしていません。
-ＭＬのメンバーでない人に解放しているからといってコマンドも実行させてよ
-いとは限らないからです。
+つまり + を書いてあると
 
-    	$PROHIBIT_COMMAND_FOR_STRANGER = 1;
+	メンバーチェックするか否か？
+	自動登録か？
+
+に関わらずメールは配送されます。
+
+この設定のデフォールトでは誰にでもコマンドが実行できるようにはしていま
+せん。ＭＬのメンバーでない人に解放しているからといってコマンドも実行さ
+せてよいとは限らないからです。
+
+    	$PROHIBIT_COMMAND_FOR_STRANGER = 1; (default)
 .k    	$PROHIBIT_COMMAND_FOR_STRANGER
 
 という変数が定義されています。これを 0 にすればコマンドが使えるように
-なります。コマンドラインでは、これを 0 にするための
-
-        --caok
-.k        --caok
-
-＃CAOK == Command Anyone OK
-
-が用意されています。
+なります。
 
 
 .S	複数アドレスから投稿だが配送先は一つ(自動登録モード)

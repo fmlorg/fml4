@@ -47,24 +47,18 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 
 .S	リモート管理モード ('remote')
 .k	リモート管理モード
-.k	--remote
 .k	&DEFINE_MODE('remote')
 
-ロングラインオプションで
-
-	fml.pl --remote
-	fml.pl --ra
-か
-	config.ph で &DEFINE_MODE('remote');
-	             &DEFINE_MODE('ra');
-
-で設定できます(ra == Remote Administration)。
-このモード設定は
+config.ph に
 
 	$REMOTE_ADMINISTRATION = 1;
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
 
-をしていることと同じです(後述)。つまり
+をするとリモート管理を可能にします。パスワード認証を必要としない場合
+
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
+
+ですが、これはするべきではないでしょう。
 
 	リモート管理を認め
 	管理者であることを証明するためにはパスワード認証が必要

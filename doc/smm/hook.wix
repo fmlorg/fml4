@@ -250,14 +250,10 @@ $COMMAND_HOOK =q#
 .key	アドミンコマンド
 .seealso	REMOTE-ADMINISTRATION 
 
-"# admin" アドミンコマンド って昔あったんですが、今は、
-内蔵しちゃったので、わざわざ（次節）しなくても、
+"# admin" アドミンコマンド って昔あったんですが、今は config.ph で
 
-   1	コマンドラインオプションで --remote
-   2	config.ph で &DEFINE_MODE('remote');
-   3	$REMOTE-ADMINISTRATION フラッグをON
-
-どれでも同じですが、設定だけでできるようにしました。
+	$REMOTE_ADMINISTRATION = 1;
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
 
 
 .S	"# admin" アドミンの昔の呼出し方

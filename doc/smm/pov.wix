@@ -76,10 +76,6 @@ sendmail から fml へメールが渡される時は次のように動作します。
 
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
 
-や(デフォールト↑)
-
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --distribute "
-
 のように書きます(コマンドラインオプションをつける場合)。
 
 引数の書き方の順番は任意です。引数の最初の directry を MLのホーム
@@ -127,7 +123,7 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 
 オプション設定の強い順番に並べると
 
-	1   コマンドラインオプション (fml.pl -d や --distribute 等)
+	1   コマンドラインオプション (fml.pl -d や fml.pl --ctladdr 等)
 	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
 	3   各MLごとの config.ph による設定
 	4   fml デフォールト設定

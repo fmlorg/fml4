@@ -70,11 +70,7 @@
 fml.pl と同様に make した時にできている samples/include-fmlserv を 
 include file として使うように設定します。この時 $DIR に相当する部分は
 /var/spool のようにします。そして /var/spool/Elena と 
-/var/spool/Freekick を作ります。config.ph を作らないなら
-
-   "|/usr/libexec/fml/fml.pl /var/spool/elena --mladdr=elena@baycity.asia"
-
-のように設定すればＯＫです。必要な基本設定はよきにはからいます。
+/var/spool/Freekick を作ります。
 
 
 .S	設定と基本動作

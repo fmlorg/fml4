@@ -6,7 +6,6 @@
 .S	ヘッダのフィールドの順番(フォーマット)
 .key	ヘッダのフィールドの順番(フォーマット)
 .key	@HdrFieldsOrder 
-.key	--through
 .xref	data-structure
 
 fml はヘッダのフィールドの成形を行います。これは変数配列
@@ -35,15 +34,12 @@ Received: と Return-Receipt-To: を除くすべてのフィールドを使うには
 config.ph で
 
 	$SUPERFLUOUS_HEADERS = 1;
-	&DEFINE_MODE('through');
+or
+	&DEFINE_MODE('through'); (config.ph の最後)
 
-とするかコマンドラインで --through と定義してください。
 .k	$SUPERFLUOUS_HEADERS
 .k	DEFINE_MODE('through')
 .k	&DEFINE_MODE('through')
-
-例：
-	fml.pl $DIR --through 
 
 
 また @HdrFieldsOrder 中では
@@ -261,7 +257,7 @@ Subject:の本体の情報を減らすタグはつけるべきではない」です。
 
 
 なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
-れるので注意。例： HML Emulation mode  (--hml)
+れるので注意して下さい。
 
 これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
 できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
