@@ -34,8 +34,9 @@ MAKE     = /usr/gnu/bin/gmake
 SHELL    = /bin/sh
 UPDIR    = /home/axion/fukachan/work/spool
 PWD      = /home/axion/fukachan/work/spool/EXP
-SOURCES  = Makefile FAQ COPYING PREHISTORY README FILES INSTALL Configure config.ph fml.c fml.pl guide help libfml.pl liblock.pl libsmtp.pl pmail.pl sendmail.pl split_and_sendmail.pl maintenance.pl
+SOURCES  = Makefile FAQ COPYING PREHISTORY README FILES INSTALL Configure config.ph fml.c fml.pl guide help libfml.pl liblock.pl libsmtp.pl pmail.pl sendmail.pl split_and_sendmail.pl maintenance.pl NetNews
 RCSID=`sed -n 's/\(.*\)Id\(.*\)fml\.pl,v \(.*\) [0-9][0-9][0-9][0-9]\/\(.*\)/\3/p' $(PWD)/fml.pl`
+DATE=`date +%y%h%d`
 #BETH
 
 all:	config fml.c fml.pl config.ph
@@ -60,6 +61,13 @@ clean:
 
 DISTRIB: distrib archive
 
+snap: DISTRIB SNAPSHOT
+snapshot: DISTRIB SNAPSHOT
+
+SNAPSHOT:
+	uuencode ../fml-$(RCSID).tar.gz fml-$(RCSID)_$(DATE).tar.gz > ../fml-current/fml-current
+	./UpDate_in_A_FTP
+
 distrib: $(SOURCES)
 	@ echo $(RCSID)
 	@ echo $(UPDIR)
@@ -70,6 +78,8 @@ distrib: $(SOURCES)
 	mkdir $(UPDIR)/distrib/LOCK
 	sed 's/\/home\/axion\/fukachan\/work\/spool\/EXP/XXFMLDIR/g' fml.c |\
 	cat > $(UPDIR)/distrib/fml.c
+#	sed 's/\/home\/axion\/fukachan\/work\/spool\/EXP/XXFMLDIR/g' master-fml.c |\
+#	cat > $(UPDIR)/distrib/master-fml.c
 	sed 's/\/home\/axion\/fukachan\/work\/spool\/EXP/XXFMLDIR/g' fml.pl > $(UPDIR)/distrib/fml.pl
 	sed '/MAINTAINER/s/erica@phys.titech.ac.jp/XXMAINTAINER/g' config.ph |\
 	sed 's/erica@phys.titech.ac.jp/XXML/g' > $(UPDIR)/distrib/config.ph
@@ -78,6 +88,7 @@ distrib: $(SOURCES)
 	sed '/^DISTRIB/,$$d' Makefile | sed 's/delete/rm \-f/' > $(UPDIR)/distrib/Makefile
 	cp -p     EasyConfigure $(UPDIR)/distrib/EasyConfigure.euc
 	chmod +x $(UPDIR)/distrib/EasyConfigure.euc
+	(cd $(UPDIR)/distrib; ln -s contrib/sys sys)
 #	jconv -es EasyConfigure > $(UPDIR)/distrib/EasyConfigure.sjis
 #	chmod +x $(UPDIR)/distrib/EasyConfigure.sjis
 #	jconv -ej EasyConfigure > $(UPDIR)/distrib/EasyConfigure.jis
@@ -88,15 +99,28 @@ distrib: $(SOURCES)
 	(cd $(PWD)/contrib/Schwalben; make DISTRIB)
 	(cd $(PWD)/contrib/Osakana; make DISTRIB)
 	(cd $(PWD)/contrib/Utilities; make DISTRIB)
+	(cd $(PWD)/contrib/MIME; make DISTRIB)
+	(cd $(PWD)/contrib/sys; make DISTRIB)
 
 archive:
 	sed '/^DISTRIB/,$$d' Makefile | sed 's/delete/rm \-f/' |\
 	sed '/XXMAINTAINER/s/erica/erica-request/g' |\
 	sed '/#BETH/,/#BETH/d' > $(UPDIR)/distrib/Makefile
-	(cd $(UPDIR); tar cvf distrib.tar distrib)
-	(cd $(UPDIR); mv distrib.tar fml$(RCSID).tar)
-	(cd $(UPDIR); gzip -f fml$(RCSID).tar)
-	(cd $(UPDIR); cp fml$(RCSID).tar.gz /home/axion/fukachan/work/gopher/software)
+	(cd $(UPDIR); ln -s distrib fml-$(RCSID))
+	(cd $(UPDIR); tar cvf distrib.tar distrib fml-$(RCSID))
+	(cd $(UPDIR); mv distrib.tar fml-$(RCSID).tar)
+	(cd $(UPDIR); gzip -9 -f fml-$(RCSID).tar)
+	(cd $(UPDIR); cp fml-$(RCSID).tar.gz fml-current.$(DATE).tar.gz)
+	(cd $(UPDIR); cp fml-$(RCSID).tar.gz /home/axion/fukachan/work/gopher/software)
 
 print:	fml.pl pmail.pl libsmtp.pl liblock.pl libfml.pl split_and_sendmail.pl setup.pl config.ph 
 	ra2ps fml.pl libfml.pl config.ph README INSTALL FILES FAQ | lpr -St
+
+doc:	fml.pl pmail.pl libsmtp.pl liblock.pl libfml.pl split_and_sendmail.pl setup.pl config.ph 
+	ra2ps README INSTALL FAQ config.ph| lpr -St
+
+contents: FAQ
+	egrep '^[0-9]\.' FAQ
+
+check:	*.p?
+	(for x in *.p? ; do perl -c $$x;done)
