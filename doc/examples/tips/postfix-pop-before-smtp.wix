@@ -27,7 +27,7 @@
    MANADM = 8
    
 [qpopperの改造]
-・INSTALLの中にある pop_user.c へのパッチをあてる。
+・INSTALLの中にある pop_pass.c へのパッチをあてる。
   必要なら手であてる
 
 ・qpopper をcompileするときに libdrac.a が必要なので適当な場所におく
