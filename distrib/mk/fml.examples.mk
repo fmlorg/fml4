@@ -1,5 +1,5 @@
 ### procs
-HTML_FILTER = $(FML)/bin/fwix.pl -m htmlconv
+HTML_CONV = $(FML)/bin/fwix.pl -m htmlconv
 
 ### fundamental rules
 .for dir in ${DOC_EXAMPLES_SUBDIR}
@@ -17,11 +17,11 @@ __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}-e.html
 
 ${WORK_EXAMPLES_DIR}/${file}.html: doc/examples/${file}.wix
-	${HTML_FILTER} -L JAPANESE -n i \
+	${HTML_CONV} -L JAPANESE -n i \
 		-o ${WORK_EXAMPLES_DIR}/${file}.html doc/examples/${file}.wix
 
 ${WORK_EXAMPLES_DIR}/${file}-e.html: doc/examples/${file}.wix
-	${HTML_FILTER} -L ENGLISH -n i \
+	${HTML_CONV} -L ENGLISH -n i \
 		-o ${WORK_EXAMPLES_DIR}/${file}-e.html doc/examples/${file}.wix
 .endfor
 
