@@ -15,11 +15,10 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
 ただOSによっては5でないとそもそもperlがちゃんと動かないことがあるので
 (5の方が新しいからOS適応性が上なのは当然ですが)
 
-例：６４ビットマシンやソラリス２なんかは５の方が無難だとおもう。
+例: 64ビットマシンやソラリス2なんかは5の方が無難だとおもう。
 
 
 .S	exec LIST
-
 
      `LIST' の中に 1 以上の引数がある場合、または `LIST' が 1 以上の値を
      持つ配列の場合、`LIST' 中の引数で `execvp()' をコールする。
@@ -138,7 +137,7 @@ perlの書き方は見ての通り、
 * Traps::			注意点
 
 あたりにあります。このperl.texinfoの日本語版は持っていて損はしないです。
-＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容である。
+＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容です。
 ＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
 
 perl texinfo in japanese --- version 4.0.19.2
@@ -146,9 +145,7 @@ perl texinfo in japanese --- version 4.0.19.2
 
 というものがfj.sourcesに投稿されています。ちなみに
 
-   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-
--r--r--r--  1 fukachan  wheel  112181 Mar 17  1992 perl.texinfo-j4.0.19.2.tar.gz
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
 
 にもおいてあります。
 

@@ -1,14 +1,16 @@
-.C	Mail Delivery System Tuning
+.C	めーる配送システムのチューニング
+=E.C	Mail Delivery System Tuning
 
 .S	リレー(RFC821)
+=E.S	Relaying based on RFC821
 .key	%リレー (obsolete)
 
 「厳密にはRFCには従ってない?から%なんざぁ理解しなくていいんだぜっ!」っ
 てサイトも世の中にはあることに注意しましょう。
 
 
-.S	activesファイルによるリレー 
-
+.S	activesファイルによるリレー制御
+.=E.S	Relay based on actives file
 
 actives には
 
@@ -35,7 +37,7 @@ actives には
 で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
 
 パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可
-が得られればどこかでリレーサーバーを使えるといいですね。
+が得られればどこかでリレーサーバを使えるといいですね。
 
 [捕捉]
 
@@ -52,6 +54,7 @@ NEW FORMATでは
 
 
 .S	全てのメールをリレーサーバに投げる
+.=E.S	Using relay servers
 .l	DEFAULT_RELAY_SERVER
 .k	$DEFAULT_RELAY_SERVER
 
@@ -64,6 +67,7 @@ $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 
 
 .S	activesファイルによるリレー (sendmail 5.x)
+=E.S	relay based on actives file (sendmail 5.x)
 
 	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
@@ -73,8 +77,8 @@ $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 それ以外は8.xの時と一緒です。
 
 
-.S	CF (by motonori@wde.ad.jp) 形式による relay 
-.k	CF
+.S	CF (by motonori@wide.ad.jp) 形式による relay 
+.k	relay hack based on CF (by motonori@wide.ad.jp)
 .k	$CF_DEF
 .k	%RELAY_NGW
 .k	%RELAY_GW
@@ -101,8 +105,8 @@ $HOST (通常自分のマシン) で定義されるマシンで配送を行なう。
 co.jp にマッチしないドメイン宛のメールはすべて mlrelay.domain というマ
 シンへ送る。しかし or.jp ドメイン宛のものは mlrelay0.domain0 へ送る。
 
-リレー情報はハッシュテーブルん %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM に
-入れられ、smtp library で利用されます。
+リレー情報はハッシュテーブル %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM に入
+れられ、smtp library で利用されます。
 
 
 .S	同じmxについて
@@ -130,6 +134,7 @@ qmail 1.0 はそうことをせず相手の負荷も回線の太さも考えず、ひたすら一通
 
 
 .S	MCI Cache
+=E.S	MCI Cache
 
 TCP Connection Cache の基本的なアイデアは TCP Connection 自体のコスト
 の高さです。
