@@ -334,7 +334,12 @@ sub DoProcedure
 	    &Mesg(*e, $s, 'info.procfail.noctladdr', $MAINTAINER);
 	}
 
-	$e{'message:append:files'} = $HELP_FILE;
+	if (-r $HELP_FILE) {
+	    $e{'message:append:files'} = $HELP_FILE;
+	}
+	else {
+	    ; # XXX we should emulate help file ???
+	}
     }
 }
 
