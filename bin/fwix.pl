@@ -1,4 +1,9 @@
 #!/usr/local/bin/perl
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
 
 local($id);
 $id = q$Id$;
@@ -11,10 +16,10 @@ require 'getopts.pl';
 ##### VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
-$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A';
+$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
 $FORMAT  = 'q|~q';
 
-$HTML_KEYWORD = 'HTML_PRE|HTML_ENDPRE';
+$HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
 # Alphabetical Order Table
 for('A'..'Z') { push(@AlpTable, $_);}
@@ -22,6 +27,7 @@ for('A'..'Z') { push(@AlpTable, $_);}
 
 $|        = 1;
 $no_index = 1 if $opt_n eq 'i';
+$not_include = 1 if $opt_n eq 'I';
 $debug    = $opt_v; 
 $Author   = $opt_I;
 $Copyright = $opt_C;
@@ -37,11 +43,10 @@ $TMPF          = $opt_t || "$TMPDIR/$$.fml";
 $TMP_ENG       = "$TMPDIR/$$.fml-e";
 $MANIFEST_FILE = $opt_M || "$TMPDIR/MANIFEST";
 
-
-$SIG{'HUP'}  = 'handler';
-$SIG{'INT'}  = 'handler';
-$SIG{'QUIT'} = 'handler';
-$SIG{'HUP'}  = 'handler';
+$SIG{'HUP'}  = 'CleanUp';
+$SIG{'INT'}  = 'CleanUp';
+$SIG{'QUIT'} = 'CleanUp';
+$SIG{'HUP'}  = 'CleanUp';
 ##### VARIABLES ENDS #####
 
 
@@ -59,6 +64,7 @@ $SIG{'HUP'}  = 'handler';
     &Formatter($mode);		# main;
 }
 
+&CleanUp;
 exit 0;
 ##### MAIN ENDS #####
 
@@ -118,7 +124,7 @@ sub ShowIndex
 {
     print "\n\t\tINDEX\n\n";
     foreach $x (sort keys %key) {
-	printf "%-50s   ...   %s\n", $x, $key{$x};
+	printf "%-40s   ...   %s\n", $x, $keylist{$x};
     }
 }
 
@@ -134,11 +140,11 @@ sub LogManifest
 
 # SIGNAL HANDER
 # 1st argument is signal name
-sub handler 
+sub CleanUp 
 {  
     local($sig) = @_;
 
-    print STDERR "Caught a SIG$sig--shutting down\n";
+    print STDERR "Caught a SIG$sig--shutting down\n" if $sig;
 
     unlink $TMPF;
     unlink $TMP_ENG;
@@ -177,6 +183,7 @@ sub Open4Write
 
 sub Open4Read
 {
+    print STDERR "Open4Read::($TMPF)\n" if $debug;
     open(TMPF, $TMPF)   || die $!;
     open(ENG, $TMP_ENG) || die $!;
 }
@@ -204,7 +211,9 @@ sub OutputFile
 		next;		# cut the line "^#.CUT";
 	    }
 
+	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+
 	    s/^(\#\.index)/$INDEX/; 
 
 	    print OUTHTML $_;
@@ -226,7 +235,7 @@ sub OutputFile
 
 		next;		# cut the line "^#.CUT";
 	    }
-
+	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	    s/^(\#\.index)/$INDEX/; 
 
@@ -237,6 +246,7 @@ sub OutputFile
     }
     elsif ($mode eq 'text') {
 	while (<TMPF>) {
+	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	    s/^(\#\.index)/$INDEX/; 
 	    print $_;
@@ -245,8 +255,7 @@ sub OutputFile
 }
 
 
-################################################################################
-### 
+############################################################################
 
 
 sub Format
@@ -344,12 +353,12 @@ sub Expand
 	    $INDEX .= "\n$s\n";
 	}
 	elsif ($mh) {
-	    $INDEX .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    $INDEX .= "<HR><LI><H3><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A></H3>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
 	    $s     .= "<PRE>\n";
 
 	    # split after the tmpfile is generated;
-	    $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
+	    # $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
 
 	    $InPre++;
 	}
@@ -441,6 +450,7 @@ sub Expand
     }
     elsif ($c eq 'key' || $c eq 'k') {
 	$key{$s} = $CurPosition;
+	$keylist{$s} .= "$CurPosition ";
 	$MANIFEST .= "key=$s\n$CurPosition";
 	$MANIFEST .= "   $CurrentSubject\n";
 	return '#.next';
@@ -448,10 +458,13 @@ sub Expand
     elsif ($c eq 'seealso' || $c eq 'xref') {
 	$s = "\#.xref $s";
     }
+    elsif ($c eq 'ptr') {
+	$s = "\#.ptr{$s}";
+    }
     elsif ($c eq 'label' || $c eq 'l') {
-	&Log("$s already exists\tin \%index[$.]\n  ALREADY $_index{$s}") 
+	&Log("$s already exists\tin \%index[$file::line=$.]\n  ALREADY $_index{$s}") 
 	    if $index{$s};
-	$_index{$s} = "$c $s($.)";
+	$_index{$s} = "$c $s($file::line=$.)";
 
 	if ($mode eq 'text') {
 	    $index{$s}  = $CurPosition;
@@ -520,12 +533,19 @@ sub ReadFile
 	# PATTERN
 	
 	if (/^\.($HTML_KEYWORD)/) {
+	    print STDERR "\tCATCH HTML($&)\n";
 	    if ($mode eq 'html')  {
 		s/^\.($HTML_KEYWORD)/($_  = &HtmlExpand($1, $2, $file, $mode)) || next/e;
 	    }
 	    else {
 		next;		# skip .HTML.*
 	    }
+	}
+
+	# seealso{guide}
+	if (/\.($KEYWORD)\{(\S+)\}/) {
+	    print STDERR "Catch $1{$2}\n";
+	    s/\.($KEYWORD)\{(\S+)\}/&Expand($1, $2, $file, $mode)/e;
 	}
 
 	s/^\.($KEYWORD)\s+(.*)/$_ = &Expand($1, $2, $file, $mode)/e;
@@ -537,7 +557,9 @@ sub ReadFile
 	next if /^\#.next/o;
 
 	# INCLUDE; anyway including. we add ".CUT" commands to Temporary Files
-	s/^\.include\s+(\S+)/&ReadFile($1, $dir || '.', $mode)/e;
+	if (! $not_include) {
+	    s/^\.include\s+(\S+)/&ReadFile($1, $dir || '.', $mode)/e;
+	}
 
 	select(TMPF);
 
@@ -565,6 +587,12 @@ sub ReadFile
     "";
 }
 
+sub PtrExpand
+{
+    local($k) = @_;
+    print STDERR "PtrExpand::($k)   $k -> $key{$k}\n" if $debug;
+    $key{$k};
+}
 
 sub IndexExpand
 {
@@ -581,7 +609,7 @@ sub IndexExpand
 	$result .= "$r ";
 
 	if (index($r, $org) == 0) {
-	    &Log("[$. lines] MISS HIT? when try s/$org/$r/\n");
+	    &Log("[$. lines] error or not defined? $org => $r\n");
 	}
     }
 
@@ -596,8 +624,10 @@ sub HtmlExpand
 {
     local($_, $s, $file, $mode) = @_;
 
-    /HTML_PRE/     && ($s = "<PRE>");
-    /HTML_ENDPRE/  && ($s = "</PRE>");
+    print STDERR "HtmlExpand::($_, $s, $file, $mode);\n";
+
+    /~HTML_PRE/ && ($s = "</PRE>");
+    /HTML_PRE/  && ($s = "<PRE>");
 
     $s;
 }
