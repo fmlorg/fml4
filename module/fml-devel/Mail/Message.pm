@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.66 2002/08/03 04:25:20 fukachan Exp $
+# $FML: Message.pm,v 1.67 2002/09/11 23:18:21 fukachan Exp $
 #
 
 package Mail::Message;
@@ -2233,7 +2233,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message appeared in fml5 mailing list driver package.
+Mail::Message first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Compose.pm,v 1.3 2001/12/22 09:21:19 fukachan Exp $
+# $FML: Compose.pm,v 1.4 2002/09/11 23:18:25 fukachan Exp $
 #
 
 
@@ -42,7 +42,7 @@ redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Mail::Message::Compose appeared in fml5 mailing list driver package.
+Mail::Message::Compose first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut
