@@ -4874,6 +4874,8 @@ sub do_log
     local($ml, @argv) = @_;
     local($lines, $flag, $all_p, $prog, $file, $pat, $dpat, $cis_p);
 
+    $lines = 10;
+
     &ResetVariables;
     &GetConfigPH($ml);
 
@@ -4901,8 +4903,6 @@ sub do_log
     }
 
     if ($pat) {
-	print "\% grep $pat $file\n";
-
 	if (open($file, $file)) {
 	    while (<$file>) {
 		if ($cis_p) {
@@ -4919,14 +4919,38 @@ sub do_log
 	}
     }
     elsif ($all_p) {
-	$prog = &search_path('cat');
-	print "\% $prog $flag $file\n";
-	system "$prog $file";
+	if (open($file, $file)) {
+	    while (<$file>) { print $_;}
+	    close($file);
+	}
+	else {
+	    &Error("cannot open $file");
+	}
     }
     else {
-	$prog = &search_path('tail');
-	print "\% $prog $flag $file\n";
-	system "$prog $flag $file";
+	if (! open($file, $file)) {
+	    &Error("cannot open $file");
+	}
+
+	my ($p, $c, $limit, $n);
+
+	$limit = 16;
+	$n     = 0;
+	LOOP: while ($n++ < $limit) {
+	    $p = - 128 * $lines * $n;
+
+	    # back again and count up the number of lines. 
+	    seek($file, $p, 2); # is it portable ??? 
+	    $c = 0;
+	    while (<$file>) { $c++;}
+	    last LOOP if $c > $lines;
+	}
+
+	# rewind and show 
+	seek($file, $p, 2); # is it portable ??? 
+	while (<$file>) { $c-- ; last if $c == $lines;}
+	while (<$file>) { print $_;}
+	close($file);
     }
 }
 

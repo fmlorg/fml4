@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/22
+
+  sbin/makefml
+	clean up 'makefml log' code not to use system commands
+
 2000/05/21
 
   cf/MANIFEST
