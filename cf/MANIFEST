@@ -1,16 +1,16 @@
 INFO:
 # FML Configurable Variable Definitions
 #
-# Copyright (C) 1996-2002 Ken'ichi Fukamachi
+# Copyright (C) 1996-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2002 fukachan@sapporo.iij.ad.jp
+#               1996-2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.99 2002/05/24 15:24:36 fukachan Exp $
+# $FML: MANIFEST,v 1.100 2002/07/03 16:12:51 fukachan Exp $
 #
 
 
@@ -480,6 +480,14 @@ FILTER_ATTR_REJECT_MS_GUID: 1
 # reject not ascii nor ISO-2022-JP
 # value: 1/0
 FILTER_ATTR_REJECT_INVALID_JAPANESE: 0
+
+# cutoff empty message. 
+# value: 1/0
+CONTENT_HANDLER_CUTOFF_EMPTY_MESSAGE:	0
+
+# reject empty message after cut off process.
+# value: 1/0
+CONTENT_HANDLER_REJECT_EMPTY_MESSAGE:	0
 
 # try to convert Japanese HANKAKU chars in the mail body to ZENAKKU
 # value: 1/0

@@ -4,6 +4,17 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2003/01/09
+
+   enhance content handler
+	multipart で空のメッセージ部分がある時、その部分も削除する。
+	もし結果として、全部のパートが削除されてしまったら、
+	フィルタはリジェクトする。
+
+	new variables
+		$CONTENT_HANDLER_CUTOFF_EMPTY_MESSAGE
+		$CONTENT_HANDLER_REJECT_EMPTY_MESSAGE
+
 2002/12/26
 
    sync w/ fml-devel 2002/12/26
@@ -394,7 +405,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.266 2002/12/22 14:31:06 fukachan Exp $
+	add $FML: CHANGES,v 1.267 2002/12/28 06:33:51 fukachan Exp $
 
 2001/10/03
 

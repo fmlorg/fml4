@@ -1,7 +1,7 @@
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001,2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2001,2003 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -9,6 +9,7 @@
 #
 # $FML$
 #
+
 
 # ContentHandler() by <t-nakano@imasy.or.jp>
 # see fml-support ML articles for more details. For example, 
@@ -30,7 +31,7 @@ sub ContentHandler
     
     # Split Bodie's Content-Type($paramaters is dummy) '
     ($type, $subtype, $paramaters) = split(/[\/;]/, $e{'h:content-type:'}, 3);
-    $type =~ s/\s//g;
+    $type    =~ s/\s//g;
     $subtype =~ s/\s//g;
     $nonMime = 1 if ($type eq '');
 
@@ -40,30 +41,37 @@ sub ContentHandler
 	print STDERR "{ $type, $subtype, $paramaters\t}\n";
     }
     
-    $ptr = 0;
+    $ptr       = 0;
     $multipart = 1;
+
+  MSG:
     while ($multipart) {
 	local($bodiesp, $action);
+	my $is_empty = 0;
 	
 	# Check Content-Type Header
+	# not MIME case (no content-type:)
 	if ($nonMime) {
 	    # Non MIME mail
-	    $type = '!MIME';
-	    $subtype = '';
-	    $xtype = '';
-	    $xsubtype = '';
+	    $type      = '!MIME';
+	    $subtype   = '';
+	    $xtype     = '';
+	    $xsubtype  = '';
 	    $multipart = 0;
-	    $header = $type;
-	    $bodiesp = -1;
+	    $header    = $type;
+	    $bodiesp   = -1;
 	}
+	# MIME case
 	else {
+	    # not MIME/multipart: text/* et.al.
 	    if ($type ne 'multipart') {
-		$xtype = '';
-		$xsubtype = '';
+		$xtype     = '';
+		$xsubtype  = '';
 		$multipart = 0;
-		$header = $type;
-		$bodiesp = -1;
+		$header    = $type;
+		$bodiesp   = -1;
 	    }
+	    # MIME/multipart 
 	    else {
 		local(@xheader, $str);
 		
@@ -71,13 +79,24 @@ sub ContentHandler
 		$prevp = $ptr;
 		($header, $body, $ptr) = &GetNextMultipartBlock(*e, $ptr);
 		print STDERR "($header, \$body, $ptr)\n" if $debug_ch;
+
+		if ($CONTENT_HANDLER_CUTOFF_EMPTY_MESSAGE) {
+		    if ($body =~ /^\s*$/) {
+			Log("ContentHandler: part($ptr -) looks empty");
+			$is_empty = 1;
+		    }
+		}
+
 		if ($header eq '' && $body eq '' && $ptr == 0) {
 		    # No more part/break do-while
-		    last;
+		    last MSG;
 		}
 		$bodiesp = $prevp;
+
 		# Get Content-Type
 		@xheader = split(/\n/, $header);
+
+	      HDRFIELD:
 		foreach (@xheader) {
 		    if (/^Content-Type:/io) {
 			$str = $_;
@@ -86,33 +105,50 @@ sub ContentHandler
 			    split(/[\/;]/, $str, 3);
 			$xtype =~ s/\s//g;
 			$xsubtype =~ s/\s//g;
-			last;
+			last HDRFIELD;
 		    }
 		}
-	    }
-	}
+	    } # multipart case in MIME 
+	} # MIME case
 
 	# Decide action to this part
-	$action = 'allow'; # enforce default to be "allow"
+	$action = 'allow'; # enforce default action to be "allow".
+
 	# XXX first match !!!
 	# We check @MailContentHandler (ADD_CONTENT_HANDLER() order)
 	# and apply the action by first match
+      RULE:
 	foreach (@MailContentHandler) {
 	    local($t, $st, $xt, $xst, $act) = split(/\t/);
 	    
-	    if ($type =~ /^$t$/i && $subtype =~ /^$st$/i &&
+	    if ($type  =~ /^$t$/i  && $subtype  =~ /^$st$/i &&
 		$xtype =~ /^$xt$/i && $xsubtype =~ /^$xst$/i) {
 		$action = $act;
-		last;
+		last RULE;
 	    }
 	}
-	push (@actions, join("\t", $bodiesp, $action));
+
+	if ($is_empty) {
+	    Log("ContentHandler: strip part($ptr -) due to empty");
+	    $action = 'strip';
+	    push (@actions, join("\t", $bodiesp, $action));
+	}
+	else {
+	    push (@actions, join("\t", $bodiesp, $action));
+	}
     }
+
+    #
+    # XXX end of use of $xtype and $xsubtype
+    # XXX pass off @actions into the latter part hereafter. 
+    # XXX @actions knows pointer of the part beginning and the action
+    # XXX for the part.
+    #
     
-    # Check REJECT, MULTIPART, CUTOFF
-    $reject = grep(/^.*\treject$/, @actions);
+    # Check the existence of rules for REJECT, MULTIPART, CUTOFF
+    $reject    = grep(/^.*\treject$/, @actions);
     $multipart = grep(/^.*\tallow\+multipart$/, @actions);
-    $cutoff = grep(/^.*\tstrip$/, @actions);
+    $cutoff    = grep(/^.*\tstrip$/, @actions);
 
     if ($debug_ch) {
 	print STDERR "\nMailContentHandler:\n   RULES\n";
@@ -130,14 +166,14 @@ sub ContentHandler
          cutoff: $cutoff\n\n";
     }
     
-    # Rebuild message body
+    # reject
     if ($reject) {
 	&Mesg(*e, "We deny non plaintext mails", 'filter.reject_non_text_mail');
 	&MesgMailBodyCopyOn;
 	&Log("reject multipart mail");
 	return "reject";
     } 
-    else {
+    else { # rebuild message body
 	local($outputbody) = '';
 	local($deletebody) = '';
 	
@@ -195,8 +231,8 @@ sub ContentHandler
 		local($bodiesp, $action) = split(/\t/);
 		
 		if ($bodiesp == -1) {
-		    $body = $e{'Body'};
-		    $header = '!MIME';
+		    $body       = $e{'Body'};
+		    $header     = '!MIME';
 		    $singlepart = 1;
 		} 
 		else {
@@ -223,7 +259,16 @@ sub ContentHandler
 		$e{'h:Content-Transfer-Encoding:'} = '7bit';
 	    }
 	}
+
 	$e{'Body'} = $outputbody;
+
+	if ($CONTENT_HANDLER_REJECT_EMPTY_MESSAGE) {
+	    if ($e{'Body'} =~ /^\s*$/o) {
+		Log("ContentHandler: reject has no effective mesage");
+		return "reject";
+	    }
+	}
+
 	if ($deletebody ne '') {
 	    # Notice
 	    &Mesg(*e, "strip attachments", 
@@ -232,13 +277,16 @@ sub ContentHandler
 	    &Log("Strip multipart mail and return notice");
 	    return ('strip+notice');
 	}
+
 	if ($cutoff) {
 	    &Log("Strip multipart mail");
 	    return ('strip');
 	}
+
 	return ($NULL);
-    }
-    $NULL;
+    } # rebuild message
+
+    return $NULL;
 }
 
 
