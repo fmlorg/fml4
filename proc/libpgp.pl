@@ -553,6 +553,21 @@ sub _PGPInit
 }
 
 
+sub EncryptedDistributionInit0
+{
+    if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp'  ||
+	$ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp2') {
+	$PGP_VERSION = 2;
+    }
+    elsif ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp5') {
+	$PGP_VERSION = 5;
+    }
+    elsif ($ENCRYPTED_DISTRIBUTION_TYPE eq 'gpg') {
+	;
+    }
+}
+
+
 ##### Administrator Commands 
 # default / backward compatible
 sub PGP { &PGP2(@_);}

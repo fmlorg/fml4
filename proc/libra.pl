@@ -31,9 +31,9 @@ sub DoSetAdminMode
 
     # touch
     -f $PASSWD_FILE || &Touch($PASSWD_FILE);
-    
+
     # pgp mode is not required of member check.
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp" ||
+    if (&RAAuthTypePGPModeP ||
 	&MailListAdminMemberP($curaddr)) {
 	$e{'mode:admin'} = 1;	# AUTHENTICATED, SET MODE ADMIN
 
@@ -90,7 +90,7 @@ sub DoApprove
     &Log("&CmpPasswdInFile($PASSWD_FILE, $curaddr, $p)") if $debug;
 
     # member check
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp" ||
+    if (&RAAuthTypePGPModeP ||
 	&MailListAdminMemberP($curaddr)) {
 	;
     }
@@ -123,7 +123,7 @@ sub DoApprove
 	&Mesg(*e, "wrong password", 'auth.invalid_password', $proc);
 	&Log("ERROR: admin ${proc} password unmatches.");
 
-	if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
+	if (&RAAuthTypePGPModeP) {
 	    &Mesg(*e, 'why you use password with PGP?', 
 		  'auth.please_use_pgp', $proc);
 	}
@@ -144,7 +144,7 @@ sub AdminModeInit
 	stat($_);
 	-f _ || &Touch($_);
 
-	if ($REMOTE_ADMINISTRATION_AUTH_TYPE ne "pgp" &&
+	if ((! &RAAuthTypePGPModeP) &&
 	    $REMOTE_ADMINISTRATION_AUTH_TYPE ne "address") {
 	    -z _ && &LogWEnv("AdminMode: WARNING $_ == filesize 0", *Envelope);
 	}
@@ -323,7 +323,7 @@ sub ApproveCommand
 {
     local(*Fld, *e) = @_;
 
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
+    if (&RAAuthTypePGPModeP) {
 	&use('pgp');
 	$UnderAuth = &PGPGoodSignatureP(*e);
 	&Mesg(*e, "554 YOU CANNOT BE AUTHENTICATED", 'auth.fail');
@@ -451,7 +451,7 @@ sub AdminAuthP
 
     ### IF NOT SET, ANYTIME O.K.!
     # already member or not is checked here.
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
+    if (&RAAuthTypePGPModeP) {
 	&use('pgp');
 	$UnderAuth = &PGPGoodSignatureP(*e);
     }
@@ -1115,7 +1115,7 @@ sub ProcAdminPutFile
     &ReconfigurableFileP(*e, $DIR, $file) || return 0;
 
     # buffer repalce
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
+    if (&RAAuthTypePGPModeP) {
 	&use('pgp');
 	$e{'Body'} = &PGPDecode2($e{'Body'});	# decode only
     }
@@ -1455,8 +1455,8 @@ sub __InitPGP
 
     # PGP_PATH: PGP Directory
     $PGP_PATH = $PGP_PATH || "$DIR/etc/pgp";
-
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE =~ /pgp|pgp2|pgp5|gpg/) {
+    
+    if (&RAAuthTypePGPModeP) {
 	$_PCB{'asymmetric_key'}{'keyring_dir'} = $ADMIN_AUTH_KEYRING_DIR;
 
 	if ($CFVersion >= 6.1) {
@@ -1468,6 +1468,27 @@ sub __InitPGP
 	}
     }
 } 
+
+
+sub RAAuthTypePGPModeP
+{
+    my $m = $REMOTE_ADMINISTRATION_AUTH_TYPE;
+    if ($m eq 'pgp' || $m eq 'pgp2') {
+	$PGP_VERSION = 2;
+	1;
+    }
+    elsif ($m eq 'pgp5') {
+	$PGP_VERSION = 5;
+	1;
+    }
+    elsif($m eq 'gpg') {    
+	$GPG_VERSION = 1;
+	1;
+    }
+    else {
+	0;
+    }
+}
 
 
 ##### DEBUG #####
