@@ -11,14 +11,28 @@
 # $Id$
 
 require 'getopts.pl';
-&Getopts("hHd");
+&Getopts("hHdr");
 
 $debug = $opt_d;
+$raw   = $opt_r ? 1 : 0;
 
-$/ = "\n\n";
-$\ = "\n";
+if ($raw) {
+    $\ = "\n";
+}
+else {
+    $/ = "\n\n";
+    $\ = "\n";
+}
 
 while (<>) {
+    if ($raw) {
+	if (m#(http://\S+)#) {
+	    print $1;
+	}
+	
+	next;
+    }
+
     next if /Return-Path:/ && /X-MLServer:/i; # header
 
     # cut the 'not \243'[\241-\376]
@@ -53,7 +67,7 @@ while (<>) {
 
 foreach (keys %e) {
     next if $e{$_} && $e{"$_/"};
-    print $e{$_};
+    print "http://".$e{$_};
 }
 
 exit 0;
