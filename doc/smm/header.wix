@@ -29,8 +29,9 @@ config.ph 等で定義しなおしてください。
 	 'Content-ID', 'Content-Description', # RFC2045
 	 'Precedence', 'Lines');
 
-のように定義されています。X-Authentification-Warning に 
-PICKY_HELO_CHECK (sendmail) 等の Warning がつくので通すようにしました。
+のように定義されています。X-Authentification-Warning は
+PICKY_HELO_CHECK (sendmail) 等で Security の Warning がつくので通すよ
+うにしました。
 
 @HdrFieldsOrder で定義された必要なフィールドのみをきりだしますが、
 Received: と Return-Receipt-To: を除くすべてのフィールドを使うには
@@ -43,7 +44,6 @@ or
 
 .k	$SUPERFLUOUS_HEADERS
 .k	&DEFINE_MODE('through')
-
 
 また @HdrFieldsOrder 中では
 
@@ -142,11 +142,11 @@ Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
 
 	&DEFINE_MODE("stdinlog");
 
-というモードがあります。これは入力を日毎にログファイル(var/logの下)に
-残しておきます。
+というモード指定があります。これは入力を日毎にログファイル(var/logの下)
+に残しておきます(溜る一方なので注意してね)。
 
 なお Posted: (user が出した時間)と Date: (サーバが配送した時間) の違い
-を見るとサーバにたどり着くまでの時間差(Network 的にどのくらい遠いか？)
+を見るとサーバにたどり着くまでの時間差(Network 的にどのくらい遠いか?)
 がわかります。
 .k Posted:(user が出した時間)とDate:(サーバが配送した時間)の差
 
@@ -210,12 +210,34 @@ Backward compatibility で残っている変数が
 
 
 .S	Subject: を (Elena 100) とかの任意の形に成形する
+.l	$SUBJECT_TAG_TYPE
+.k	$SUBJECT_TAG_TYPE
 .l	$SUBJECT_FREE_FORM
 .k	$SUBJECT_FREE_FORM
 
 fml デフォールトは「Subject: はいじらない。本来メールソフトが好きな形
-にフォーマットするものをサーバ側でフォーマットを押付けてはいけません」。
-例えば、
+にフォーマットするものをサーバ側でフォーマットを押付けるべきではない」
+「有効に使いもしないのに Subject:の本体の情報を減らすタグはつけるべき
+ではない」というものです。
+＃注意：この問題は本来はメールインターフェイスプログラムが賢いか？
+＃否か？という問題に還元されるべきものです。
+
+Subject: にタグをつける時は$SUBJECT_TAG_TYPE という変数にタイプを設定
+します。ちなみに makefml config で設定できます。
+
+  $SUBJECT_TAG_TYPE		Subject: での形
+  ____________________________________________________________
+
+	(:)			Subject: (Elena:100)
+	[:]			Subject: [Elena:100]
+	( )			Subject: (Elena 100)
+	[ ]			Subject: [Elena 100]
+	[,]			Subject: [Elena,100]
+	(,)			Subject: (Elena,100)
+
+
+[解説]
+設定すると config.ph の中では次のような形に設定されています
 
 	$SUBJECT_FREE_FORM = 1;
 	$BEGIN_BRACKET     = '(';
@@ -239,122 +261,27 @@ fml デフォールトは「Subject: はいじらない。本来メールソフトが好きな形
 なおこのやりかたは複雑なので次の節のような簡易インターフェイスが用意さ
 れています。
 
+[捕捉]
+$CFVersion 3 以前にあった $SUBJECT_HML_FORM は config.ph が CFVersion
+3 以前のものだと判定された場合は内部で$SUBJECT_TAG_TYPE = "[:]"; へ変
+換されます。現在の設定ではすでに無効な変数です。
 
-.S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
-.l	&DEFINE_SUBJECT_TAG
-.k	&DEFINE_SUBJECT_TAG
-.xref	--mode
-
-Subject のTAGを定義する。fml のデフォールトは「有効に使いもしないのに、
-Subject:の本体の情報を減らすタグはつけるべきではない」です。
-＃注意：この問題は本来はメールインターフェイスプログラムが賢いか？
-＃否か？という問題に還元されるべきものです。
-
-
-	(:)
-
-		Subject: (Elena:100)
-
-	[:]
-
-		Subject: [Elena:100]	(HMLタイプ)
-
-	( )
-
-		Subject: (Elena 100)
-
-	[ ]
-
-		Subject: [Elena 100]
-
-	[,]
-
-		Subject: [Elena,100]
-
-	(,)
-
-		Subject: (Elena,100)
-
-
-なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
-れるので注意して下さい。
-
-これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
-できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
-フェイスになるようにしたものです。
-
-config.ph では
-
-	&DEFINE_SUBJECT_TAG("(:)");
-
-コマンドラインでは 
-
-	--tag="(:)"
-	--subjecttag="(:)"
-
-のように呼び出してあげて下さい。
-	
 
 .S	Subject: の成形 ([Elena:ID] フォーマットを抜く)
 .key	Subjectから[Elena:ID]を抜く
 .k	[Elena:ID]を抜く
 .key	$STRIP_BRACKETS
 
+ほとんど歴史的意味しかないので使うことはないでしょう
+
 	$STRIP_BRACKETS = 1;
 
 とすると Subjectから [ML:fukachan] みたいな部分をカットする。これは 
-Subject: [Elena:ID] の形で配送するための前処理です。現在では汎用の
-
-	&DEFINE_SUBJECT_TAG("[:]"); (config.ph の最後)
-
-設定があるので、これは特別な場合の処理に過ぎないので Backward
-compatible 以上の意味はないといえます。
-
-
-.S	Subject: [Elena:ID] フォーマット
-.key	$SUBJECT_HML_FORM
-.key	$BRACKET
-.key	[Elena:ID] フォーマット
-
-オリジナルの hml 1.6 は
-……
-From:	エレナさんＭＬ
-Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
-……
-
-こんな形のヘッダですね。で、私が嫌いなので:-)、
-＃ 無駄に多いヘッダは嫌いなんです。
-＃ X-ML-Name とか…X-ML-Count は違う種類の情報
-
-デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
-ようにしました。
-
-	$SUBJECT_HML_FORM = 1;
-	$BRACKET	  = 'Elena';
-
-という設定でこれになります。これは汎用的な設定
-
-	$BRACKET	  = 'Elena';
-	&DEFINE_SUBJECT_TAG("[:]"); (config.ph の最後)
-
-の特別な場合に過ぎません。なお
-
-	$SUBJECT_HML_FORM = 1; 
-
-は自動的に
-
-	$STRIP_BRACKETS = 1;
-
-を意味してします。
+Subject: [Elena:ID] の形で配送するための前処理です。
 
 
 .S	TAGの [Elena:00001] の五桁の数字をＮ桁に変更
 .k	$HML_FORM_LONG_ID
-
-５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
-$SUBJECT_HML_FORM = 1; の時にのみ有効。
-
-一般には
 
 	$SUBJECT_FORM_LONG_ID
 .k	$SUBJECT_FORM_LONG_ID
@@ -362,17 +289,34 @@ $SUBJECT_HML_FORM = 1; の時にのみ有効。
 で、５桁がデフォールトだが $SUBJECT_FORM_LONG_ID 桁にする。
 $SUBJECT_FREE_FORM 使用時に有効な変数。
 
+注意:
+かつて
+
+	５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
+	$SUBJECT_HML_FORM = 1; の時にのみ有効。
+
+という設定もありました。現在では $SUBJECT_FORM_LONG_ID を使うべき。
+$CFVersion 3 以前にあった $HML_FORM_LONG_ID は config.ph が CFVersion
+3 以前のものだと判定された場合は内部で $SUBJECT_FREE_FORM_LONG_ID; へ
+代入変換されます。現在の設定ではすでに無効な変数です。
+
+
 
 .S	TAGの [Elena:00001] の 0 パディングをなくす
 .k	[Elena:ID]の0パディングをしない
 
 	$SUBJECT_FORM_LONG_ID = -1;
-	$HML_FORM_LONG_ID = -1;
 .k	$SUBJECT_FORM_LONG_ID
+
+[注意] 昔は
+
+	$HML_FORM_LONG_ID = -1;
 .k	$HML_FORM_LONG_ID
 
+も有効でしたが、今はありません。
 
-.S	オリジナルの Message-ID
+
+.S	オリジナルの Message-ID を配送に使う
 .key	Message-ID
 .l	Uniq_Identifier_of_Message-ID
 .key	$USE_ORIGINAL_MESSAGE_ID
@@ -415,6 +359,12 @@ fml 自体がつける場合、キャッシュテーブルの有効な大きさが半分になってし
 .S	ML 独自の Message-ID フォーマット
 .k	Message-ID の独自フォーマット
 .xref	$HEADER_ADD_HOOK
+
+これは
+
+	&DEFINE_FIELD_FOECED('Message-Id', "適当なID");
+
+で解決ですが。HOOKを使うやり方も書いておきます。
 
 Message-ID: uja@aoi.chan.panic とするなら
 
@@ -561,15 +511,12 @@ To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 .label	against-nifty
 .k	$USE_ERRORS_TO
 
-注意：もう必要ないらしい
+注意: もう必要ないらしい
 
 	$USE_ERRORS_TO = 1;
 
-とすると Errors-To: をつけます。もしくは
-
-	$AGAINST_NIFTY = 1;（対策をする）
-
-でも同じこと意味です。
+とすると Errors-To: をつけます。$AGAINST_NIFTY も同じ意味でしたが 
+$CFVersion 3 ではなくなりました。
 
 NIFTY は非常識にも、Errors-to という時代おくれの部分しかみてないので;_;、
 config.ph あたりで
@@ -590,8 +537,39 @@ config.ph あたりで
 なお、$ERRORS_TO で Errors-To: の部分は $MAINTAINER から変更できます。
 
 
+.S	メールの最後に付加情報をつける設定
+
+	$PREAMBLE_MAILBODY	（前）
+	$TRAILER_MAILBODY	（後）
+	を本文の前後に必ず付けます。
+
+つまり、
+	e.g. HELP コマンドにたいして、
+
+	$PREAMBLE_MAILBODY	（前）
+	HELPファイル本文
+	$TRAILER_MAILBODY	（後）
+
+のようになります。昔のやり方は
+
+   $SMTP_OPEN_HOOK = q# $e{'Body'} .= $PREAMBLE_BODY.$e{'Body'}; #;
+   ＃注：普通のＭＬのメールに $PREAMBLE_BODY がついて配送
+
+ですが今は汎用性のためSMTPライブラリ中で処理されます。
+
+これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
+
+   $SMTP_OPEN_HOOK = q# $e{'Body'} .= "Mail Count: $ID\n\n".$e{'Body'}; #;
+
+注意：このHOOKが走る関数中では %e == %Envelope 
+
+
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
