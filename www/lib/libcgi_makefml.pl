@@ -220,7 +220,7 @@ sub MesgConv
     local($key) = @_;
     local($x);
 
-    if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {) {
+    if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {
 	$x = &MesgLE'Lookup($key, $MESG_FILE); #';
 	return $NULL unless $x;
 
