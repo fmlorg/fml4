@@ -461,6 +461,14 @@ command to rewrite addresses in one action ?
 
 	admin rewrite s/domain-A/domain-B/ 
 
+.S	distrib/
+
+clean up distribution generator 
+
+.S	BSD make dependence
+
+I depends on NetBSD (bsd)make.
+
 
 .C	パッケージ
 =E.C	Packages
