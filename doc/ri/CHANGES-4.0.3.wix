@@ -15,6 +15,12 @@
 		などが可能になりました。
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
+2001/09/20
+
+   doc/Japanese/examples/virus_check.ph
+	filter all executables: the pattern is 
+	'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+
 2001/09/18
 
    databases/mysql/toymodel.pl (1.11-1.12)
@@ -158,7 +164,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.18 2001/09/17 15:18:20 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.19 2001/09/18 15:00:10 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
