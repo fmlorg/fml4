@@ -43,10 +43,10 @@ Appendix A:  install "bsd make" on Debian GNU/linux
 
    % cvs -d cvs.fml.org:/cvsroot co fml
    % cd fml
-   % make bsdmake
+   % (cd dist/NetBSD; make bsdmake)
    % su
    # cp dist/NetBSD/src/usr.bin/make/bmake /usr/local/bin
-   # cp dist/NetBSD/src/share/mk /usr/share
+   # cp -pr dist/NetBSD/src/share/mk /usr/share
 
 
 Appendix B: conf/ (maintainer is responsible for these files)

@@ -34,7 +34,7 @@ FYI: THIS FILE IS "EUC-JAPAN".
    % cvs -d cvs.fml.org:/cvsroot co fml
    % cd fml
 
-   % cp fml/distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
+   % cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
 
 	~/.fmlmk.conf のディレクトリやプログラムの PATH を編集してね
 
