@@ -11,7 +11,7 @@
 .url ../how_to_subscribe/
 
 特定のアドレスを弾きたいといった場合は、
-フィルタリング( .ptr{filter} 節)を参照して下さい。
+フィルタリング( .ptr{filtering} 節)を参照して下さい。
 
 また、リモート管理の時の認証については .ptr{remote_control} 節を参照し
 てください。
