@@ -67,22 +67,31 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 config.ph に
 
 	$REMOTE_ADMINISTRATION = 1;
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
+
 .k	$REMOTE_ADMINISTRATION
 .k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 
-をするとリモート管理を可能にします。これは
+をするとリモート管理を可能にします。さらにデフォールトでは
+
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "crypt";
+
+	(config.ph CFVersion 3 以前では
+		$REMOTE_ADMINISTRATION = 1;
+		$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+	に相当)
+
+と定義されています。これは
 
 	リモート管理を認め
-	管理者であることを証明するためにはパスワード認証が必要
+	管理者であることを証明するためには
+		メールヘッダの From: 行が管理者メンバーに登録されていて
+	   かつ
+		パスワード認証が必要
 
-という設定です。この２つの設定は
+という設定です。メールヘッダの From: 行が管理者メンバーに登録されてい
+るだけで十分でパスワード認証を必要としない場合は
 
-	&DEFINE_MODE('remote');
-
-を書くと ON になります。パスワード認証を必要としない場合は
-
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "address";
 
 とすればそうなりますが、これはするべきではありません。
 
@@ -99,6 +108,9 @@ config.ph に
 
 パスワード認証を必要とする場合、一般に次のような一連のコマンドをいれる
 ことになるでしょう。
+注意: パスワードが関係するのは $REMOTE_ADMINISTRATION_AUTH_TYPE が 
+crypt と md5 の時だけです。
+	
 
 例：
 	# admin pass パスワード
@@ -164,19 +176,21 @@ config.ph に
 
 もし、リモートの管理者にパスワードを要求するなら、
 
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; 
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "crypt";
+or
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "md5"; (perl 5 のみ)
 
-0にすればパスワードチェックをおこなわない設定です
 このチェックに使うパスワードファイルが
 
 	$PASSWD_FILE = "$DIR/etc/passwd";
 
 です。
 
-注意：
-$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は $REMOTE_AUTH (TYPO で 
-$REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
-の変数でもいいです。
+注意: config.ph CFVersion 3 では 
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
+	$REMOTE_AUTH 
+
+はobsolete です($REMOTE_AUTH (TYPO で $REMORE_AUTH) が古い変数名)。
 
 
 .S	リモート管理モードでのアドレスの複数マッチ問題について 
