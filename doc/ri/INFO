@@ -32,6 +32,10 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
+・ libsmtp.pl  ファイルを JIS へ 自動変換（jcode.plがないときはエラーだが）
+
+・ libutils.pl ish+lzh mode bug fix
+
 ・libref.pl  	（libexec/sid.pl の標準装備）
 
 URL を理解するための ライブラリ
