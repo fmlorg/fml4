@@ -61,7 +61,7 @@ $_ .= "\n" unless $opt_H;
 $_ .= "$opt_B\n" if $opt_B;
 
 if ($opt_r) {
-    s/_RECEIVED_/\nReceived: received at .../;
+    s/_RECEIVED_/\nReceived: received by $FQDN $MailDate/;
 }
 else {
     s/_RECEIVED_//;
