@@ -154,7 +154,8 @@ sub FmlLocalInitilize
     $FS = '\s+';			# DEFAULT field separator
     
     @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
-	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION);
+	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+	    MAINTAINER);
 
     # getopts
     local($ARGV_STR) = join(" ", @ARGV);
@@ -174,7 +175,6 @@ sub FmlLocalReadCF
 {
     local($INFILE) = @_;
     local($eval);
-    local($field, $pattern, $type, @exec);
 
     $INFILE = $INFILE || $FML_LOCAL_RC;
     
@@ -238,7 +238,10 @@ sub FmlLocalConfigure
 	    (-r "/var/spool/mail/$USER" && "/var/spool/mail/$USER") ||
 		(-r "/usr/spool/mail/$USER" && "/usr/spool/mail/$USER");
 
-    $VACATION_RC = $VACATION || "$HOME/.vacationrc";
+    $VACATION_RC = $VACATION   || "$HOME/.vacationrc";
+    $DOMAIN      = $DOMAIN     || (gethostbyname('localhost'))[1];
+    ($DOMAIN)    = ($DOMAIN =~ /localhost\.(\S+)\./i); 
+    $MAINTAINER  = $MAINTAINER || (getpwuid($<))[0] .'@'. $DOMAIN;
     
     # include ~/.vacationrc
     &FmlLocalReadCF($VACATION_RC) if -f $VACATION_RC;
@@ -256,7 +259,6 @@ sub FmlLocalPatternMatch
 	$MailHeaders = "From $USER $MailDate\n".$MailHeaders;
     }
 
-    local($field, $pattern, $type, $exec, $pat);
     local($MATCH_P, $AND, $PREV_MATCH);
     local($s) = $MailHeaders;
     
@@ -265,6 +267,7 @@ sub FmlLocalPatternMatch
 
     while (@MailHeaders) {
 	$_ = shift @MailHeaders;
+	next if /^\s*$/;
 
         # UNIX FROM is a special case.
 	# 1995/06/01 check UNIX FROM LoopBack
@@ -278,115 +281,18 @@ sub FmlLocalPatternMatch
 
 	next if /^\s*$/o;	# if null, skip. must be mistakes.
 
-	printf STDERR "=> %-10s %-60s\n", $_, $contents if $debug;
+	printf STDERR "=> %-10s %-40s\n", $_, $contents if $debug;
 
-	CF: foreach $pat (@CF) {
-	    ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
-	    $exec = join(" ", @exec);
-	    next CF unless /$field/i;
-
-	    if ($field =~ /^AND$/i || (!$exec)) {
-		$AND++;
-	    }
-	    else {
-		undef $AND;
-	    }
-
-	    # debug
-	    print STDERR "($field, $pattern, $type, $exec)\n" if $debug;
-
-	    # MATCHING PATTERN
-	    if (/^$field:$/i && ($contents =~ /$pattern/)) {
-		&FmlLocalSet($type, $exec, $1, $2, $3);
-		$MATCH_P++;
-
-		($MATCH_P == $AND) && &FmlLocalSet($type, $exec, $1, $2, $3);
-		($MATCH_P == $AND) && &Log("AND $type, $exec, $1, $2, $3");
-	    }
-
-	    if($field =~ /^body$/i) {
-		&FmlLocalMatchInBody($pattern, $type, $exec);
-		$MATCH_P++;
-
-		($MATCH_P == $AND) && &FmlLocalSet($type, $exec, $1, $2, $3);
-		($MATCH_P == $AND) && &Log("AND $type, $exec, $1, $2, $3");
-	    }
-
-	    if ($debug && $MATCH_P) {
-		&Log("MATCH $field =~ /$pattern/ && Do $TYPE$EXEC");
-		print STDERR "MATCH\t$field =~ /$pattern/\n";
-		print STDERR "DO\t$TYPE$EXEC\n";
-		print STDERR "F1\t$F1\n" if $F1;
-		print STDERR "F2\t$F2\n" if $F2;
-		print STDERR "F3\t$F3\n" if $F3;
-		undef $MATCH_P;
-	    }
-
-	}# FOREACH;
-
-
-	##### GET FIELD VALUE #####
-
-	# Fields to skip. Please custumize below.
-	next if /^Received:/io;
-	next if /^In-Reply-To:/io && (! $SUPERFLUOUS_HEADERS);
-	next if /^Return-Path:/io;
-	next if /^X-MLServer:/io;
-	next if /^X-ML-Name:/io;
-	next if /^X-Mail-Count:/io;
-	next if /^Precedence:/io;
-	next if /^Lines:/io;
-
-	# filelds to use later.
-	/^Date:$/io           && ($Date = $contents, next);
-	/^Reply-to:$/io       && do { 
-	    $Reply_to = &Expand_mailbox($contents);
-	    next;};
-	/^Errors-to:$/io      && ($Errors_to = $contents, next);
-	/^Sender:$/io         && ($Sender = $contents, next);
-	/^X-Distribution:$/io && ($Distribution = $contents, next);
-	/^Apparently-To:$/io  && ($Original_To_address = $To_address = $contents, 
-				  next);
-	/^To:$/io             && ($Original_To_address = $To_address = $contents, 
-				  next);
-	/^Cc:$/io             && ($Cc = $contents, next);
-	/^Message-Id:$/io     && ($Message_Id = $contents, next);
-
-	# get subject (remove [Elena:id]
-	# Now not remove multiple Re:'s),
-	# which actions may be out of my business though...
-	if (/^Subject:$/io && $STRIP_BRACKETS) {
-	    # e.g. Subject: [Elena:001] Uso...
-	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
-
-	    local($r)  = 10;	# recursive limit against infinite loop
-	    while (($contents =~ s/Re:\s*Re:\s*/Re: /g) && $r-- > 0) {;}
-
-	    $Subject = $contents;
-	    next;
-	}
-	/^Subject:$/io        && ($Subject = $contents, next); # default
-	
-	if (/^From:$/io) {
-	    # From_address is modified for e.g. member check, logging, commands
-	    # Original_From_address is preserved.
-	    $_ = $Original_From_address = $contents;
-	    $From_address = &Expand_mailbox($_);
-	    next;
-	}
-	
-	# Special effects for MIME, based upon rfc1521
-	if (/^MIME-Version:$/io || 
-	    /^Content-Type:$/io || 
-	    /^Content-Transfer-Encoding:$/io) {
-	    $_cf{'MIME', 'header'} .= "$field $contents\n";
-	    next;
-	}
-
-	# when encounters unknown headers, hold if $SUPERFLUOUS_HEADERS is 1.
-	$SuperfluousHeaders .= "$field $contents\n" if $SUPERFLUOUS_HEADERS;
-
+	##### Pattern match searching #####
+	tr/A-Z/a-z/;		# lower
+	$field{$_} = $contents;
     }# WHILE @MAILHAEDERS;
+
+    if ($debug) {
+	while (($key,$value) = each %field) {
+	    print STDERR "[$key]=[$value]\n";
+	}
+    }
 
     1;
 }
@@ -412,6 +318,53 @@ sub Expand_mailbox
     return $mb;
 }	
 
+
+sub FmlLocalEntryMatch
+{
+    local($field, $pattern, $type, $exec, @exec, $pat);
+    local($SUCSSESIVE_CONDITION, $AND_COUNTER);
+
+  CF: foreach $pat (@CF) {
+      ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
+      $field =~ tr/A-Z/a-z/;
+      $exec  = join(" ", @exec);
+
+      if ($pat =~ /^\s*$/o) {
+	  undef $SUCSSESIVE_CONDITION;
+	  undef $AND_COUNTER;      
+      }
+      elsif ($pat =~ /^\#/o) {
+	  ;			# do nothing
+      }
+      else {
+	  $SUCSSESIVE_CONDITION++;
+      }
+
+      # debug
+      print STDERR "($field, $pattern, $type, $exec)\n" if $debug;
+
+      # HEADER MATCHING PATTERN
+      if ($field{"$field:"} =~ /$pattern/) {
+	  $AND_COUNTER++;
+	  &FmlLocalSet($type, $exec, $1, $2, $3) if $exec;
+      }
+
+      # BODY MATCHING PATTERN
+      if ($field =~ /^body$/i && 
+	  &FmlLocalMatchInBody($pattern, $type, $exec)) {
+	  $AND_COUNTER++;
+	  &FmlLocalSet($type, $exec, $1, $2, $3) if $exec;
+      }
+
+      ################################################### 
+      if ($AND_COUNTER == $SUCSSESIVE_CONDITION) {
+	  &Log("\$AND_COUNTER == \$SUCSSESIVE_CONDITION") if $debug;
+      }
+      ################################################### 
+  }# FOREACH;
+}
+
+
 sub FmlLocalSet
 {
     local($type, $exec, $f1, $f2, $f3) = @_;
@@ -424,6 +377,14 @@ sub FmlLocalSet
     $F2  = $f2;
     $F3  = $f3;
 
+    if ($debug) {
+	print STDERR "MATCH\t$field =~ /$pattern/\n";
+	print STDERR "DO\t$TYPE$EXEC\n";
+	print STDERR "F1\t$F1\n" if $F1;
+	print STDERR "F2\t$F2\n" if $F2;
+	print STDERR "F3\t$F3\n" if $F3;
+    }
+
     undef $UNMATCH_P;
 }
 
@@ -435,24 +396,22 @@ sub FmlLocalMatchInBody
 
     while(@MailBody) {
 	  $_ = shift @MailBody;
+	  next if /^\s*$/;
 
-	  if (/$pat/) {
-	      &FmlLocalSet($type, $exec, $1, $2, $3);
-	  }
+	  return 1 if /$pat/i;	# match!
 
-	  if ($MailBody =~ /^#\s*PASS\s+(\S+)/ || 
-	      $MailBody =~ /^#\s*PASSWORD\s+(\S+)/) {
+	  if (/^#\s*PASS\s+(\S+)/ || /^#\s*PASSWORD\s+(\S+)/) {
 	      $AUTH++ if $password eq $PASSWORD;
 	      next;
 	  }
 
-	  if ($AUTH && /^#\s*PASSWD\s+(\S+)/) {
+	  if (/^#\s*PASSWD\s+(\S+)/) {
 	      &FmlLocalAppend2CF("PASSWORD $1");
 	      next;
 	  }
       }
 
-    1;
+    0;
 }
 
 
@@ -470,6 +429,14 @@ sub FmlLocalAdjust
     $EXEC =~ s/\$DIR/$DIR/g;
     $EXEC =~ s/\$LIBDIR/$LIBDIR/g;
 
+    # Headers
+    $Reply_to              = &Expand_mailbox($field{'reply-to:'});
+    $Original_To_address   = $To_address 
+	                   = $field{'to:'};
+    $Original_From_address = $field{'from:'};
+    $From_address          = &Expand_mailbox($field{'from:'});
+    $Subject               = &Expand_mailbox($field{'subject:'});
+
     1;
 }
 
@@ -481,8 +448,9 @@ sub FmlLocalMainProc
     eval $EVAL            || &Log("ReadCF::eval:$@");
 
     &Parsing;
-    &FmlLocalPatternMatch;
-    &FmlLocalAdjust;
+    &FmlLocalPatternMatch;	# headers
+    &FmlLocalEntryMatch;	# match
+    &FmlLocalAdjust;		# adjust variables
 
     # IF UNMATCHED ANYWHERE, 
     # Default action equals to /usr/libexec/mail.local(4.4BSD)
@@ -505,9 +473,11 @@ sub FmlLocalAppend2CF
     local($s) = @_;
 
     open(CF, ">> $FML_LOCAL_RC") || (return 'open fail ~/.fmllocalrc');
-    select(CF);
+    select(CF); $| = 1;
     print CF "$s\n";
     close(CF);
+
+    print CF "\n";
 
     return 'ok';
 }
