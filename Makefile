@@ -117,10 +117,5 @@ syncwww:
 syncinfo:
 	$(JCONV) $(WORK_DOC_DIR)/INFO > $(SNAPSHOT_DIR)/info
 
-
-search:
-	@ echo ""
-	@ sh $(DIST_DOC_BIN)/search_doc_generator
-
 libkern:
 	sed '/^$$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl

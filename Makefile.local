@@ -3,6 +3,7 @@ FTP_DIR      = $(HOME)/.ftp
 FTP_DIR      = /usr/local/ftp/pub/net/fml-current
 SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 WWW          = /home/hikari/sapporo/www/staff/fukachan/href/fml
+WWW_DB_DIR   = /home/Hikari/sapporo/www/staff/fukachan/href/fml/doc.db
 WWW_DIR      = $(WWW)
 DESTDIR      = /var/tmp
 MASTER_SITE  = ftp://ftp.sapporo.iij.ad.jp/pub/IIJ/dist/fukachan/fml/utils/pkgsrc/
@@ -81,3 +82,7 @@ testsetup:
 	@ test -d $(TRASH)/FML_TEST/s || mkdir $(TRASH)/FML_TEST/s
 	@ test -h /tmp/e || ln -s $(TRASH)/FML_TEST/e /tmp/e
 	@ test -h /tmp/s || ln -s $(TRASH)/FML_TEST/s /tmp/s
+
+search:
+	@ echo ""
+	@ sh $(DIST_DOC_BIN)/search_doc_generator ${WWW_DB_DIR}
