@@ -1,0 +1,81 @@
+.HTML_PRE
+	(非最終版)
+	FML Advisory 2001-001: $AUTO_HTML_GEN pass through invalid URL
+	========================================
+
+Topic:		HTML 化機構が悪意ある URL を通過させ得る
+=E
+Topic:		HTMLifier (SyncHtml()) can pass through invalid URL
+
+			Ken'ichi Fukamachi <fukachan@fml.org>
+
+	Copyright (C) 2001 Ken'ichi Fukamachi
+		All rights reserved.
+
+.~HTML_PRE
+
+[Abstract]
+
+$AUTO_HTML_GEN を利用して、HTML 化機構を利用している場合、不正な URL 
+が通過して HTML 化されたファイルに現れ得えます。
+対象範囲は $AUTO_HTML_GEN を ON にして運用しているＭＬです。
+
+
+.toc
+
+
+.C	Technical detail
+
+fml 内蔵の HTML 化機構において、Subject: に含まれる <> がインデックス
+ページではエスケープされない。
+
+
+.C	修正の仕方 (暫定案)
+=E.C	workaround fix
+
+.S	$AUTO_HTML_GEN = 0;
+
+まずは一旦 $AUTO_HTML_GEN = 0; にしてください。
+これで HTML 化機構が動作しなくなります。
+
+ですが、このままでは HTML 化が止まったままですから、将来、次の 2) 案を
+行ない、make spool2html を実行することで続きの記事の再生成をしてくださ
+い。
+
+.S	入れ替える(1)
+
+	libsynchtml.pl libhtmlsubr.pl を最新のものにする
+
+.url ftp://ftp.fml.org/pub/fml/workaround-fix/
+	
+	
+.S	入れ替える(2)
+
+	じきに出る 4.0.3 release (現在 4.0.3_BETA)
+
+
+
+.C	その他
+
+.S	現在進行中の計画
+
+今週末(2001/10/27)に言おうと思って bug 取りしていたのですが ;) 、
+SyncHtml を捨てて別のモジュールに移行する案を考えています。
+
+このモジュールは先週末(2001/10/20)から fml-devel (fml 5.0 branch) の中
+に存在しています。が、まだ開発中のステータスです。
+
+.url	http://www.fml.org/software/fml-devel/CHANGES.txt
+.url	http://www.fml.org/software/fml-devel/fml/lib/Mail/HTML/Lite.pm
+
+
+.C	Acknowledgement
+
+Problem Report は 
+
+fml-help: 01093 (From: KOJIMA Hajime / 小島肇 <kjm@rins.ryukoku.ac.jp>)
+
+を参照してください。problem report およびパッチ案を頂いた小島さんに感
+謝致します。
+
+$FML$
