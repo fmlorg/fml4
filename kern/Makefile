@@ -9,7 +9,10 @@
 
 CC 	  = cc
 CFLAGS	  = -s -O
+
 SH	  = /bin/sh
+MKDIR     = mkdirhier
+
 PWD       = `pwd`
 CONFIG_PH = ./config.ph
 GENHOST   = _`hostname`_
@@ -57,7 +60,7 @@ roff:	doc/smm/op.wix
 	@ echo "sorry, not yet implemetend but halfly completed?"
 	@ echo ""
 	@ echo "Making nroff of doc/smm/op => var/man"
-	@ test -d var/man || mkdir var/man
+	@ $(MKDIR) var/man
 	@ perl bin/fwix.pl -T smm/op -m roff -R var/man -I doc/smm doc/smm/op.wix
 
 texinfo:
@@ -115,17 +118,16 @@ faq:	 plaindoc
 textdoc: plaindoc
 
 plaindoc: doc/smm/op.wix
-	@ if [ ! -d /var/tmp/.fml ]; then mkdir /var/tmp/.fml; fi
+	@ $(MKDIR) /var/tmp/.fml
 	@ rm -f /var/tmp/.fml/INFO
 	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
 		nkf -e > /var/tmp/.fml/INFO
-	@ sh usr/sbin/sync-rcs-of-doc.sh
 	@ sh usr/sbin/DocReconfigure
 
 htmldoc:	doc/smm/op.wix
 	@ (chdir doc/html;make)
 	@ echo "Making WWW pages of doc/smm/op => var/html/op"
-	@ test -d var/html/op || mkdir var/html/op
+	@ $(MKDIR) var/html/op
 	@ perl doc/ri/conv-install.pl < doc/ri/INSTALL.wix > doc/smm/install-new.wix 
 	@ perl usr/sbin/fix-wix.pl doc/smm/op.wix |\
 	  perl bin/fwix.pl -T smm/op -m html -D var/html/op -I doc/smm
@@ -176,24 +178,10 @@ reset:
 diff:
 	usr/bin/rcsdiff++.sh *.pl
 
-test-sid:
-	(bin/h.pl ; echo help   fml-test)|(chdir ../SID/; perl $(FML)/libexec/sid.pl . $(FML) -d)
-
 capital:
 	cat `echo *pl proc/*pl | sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
 	perl usr/bin/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
-#	@ echo " "
-#	@ echo "libexec"
-#	@ echo " "
-#	cat `libexec/*pl | sed 's#proc/libcompat.pl##'` |\
-#	perl usr/bin/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
 
-
-
-test:
-	h.pl | $(HOME)/libexec/fml/fml.pl $(FML) -d --distribute
-	(h.pl; echo "# mget last:2 mp") |\
-	 $(HOME)/libexec/fml/fml.pl $(FML) -d --caok
 
 syncwww:
 	sh usr/sbin/syncwww
@@ -221,17 +209,13 @@ v3:
 	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
+
 sync:
 	scp -v -p /tmp/distrib/src/*.pl eriko:~/.fml
 	scp -v -p /tmp/distrib/src/*.pl iris:/usr/local/mail2fax/fml
 
-TEST:
-	tar cf - `find etc/ sbin |grep -v RCS` | ( chdir /tmp/distrib ; tar xvf - )
-
-ruby:
-	tar cf - bin cf *.p? etc libexec proc sbin |\
-	/usr/bin/rsh ruby 'chdir /usr/local/fml; tar xvf -'
-
+test:
+	(bin/emumail.pl; echo test )|perl fml.pl $(PWD) $(PWD)/proc
 
 makefml:
 	sh usr/sbin/reset-makefml
@@ -257,11 +241,10 @@ simulation:
 
 rel:
 	rm -f /tmp/relnotes
-	show -form $(PWD)/hack/release-notes.format  501-1000 +release-notes    >> /tmp/relnotes
-	show -form $(PWD)/hack/release-notes.format 1001-1500 +release-notes >> /tmp/relnotes
-	show -form $(PWD)/hack/release-notes.format 1501-2000 +release-notes >> /tmp/relnotes
-	show -form $(PWD)/hack/release-notes.format 2001-2500 +release-notes >> /tmp/relnotes
-	show -form $(PWD)/hack/release-notes.format 2501-3000 +release-notes >> /tmp/relnotes
 
 libkern:
 	sed '/^$$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
+
+asuka:
+	(chdir sbin; ( echo put makefml; echo quit;) | ftp -ivd asuka)
+
