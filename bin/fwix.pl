@@ -1283,6 +1283,7 @@ sub HtmlSplitHere
 sub PtrExpand
 {
     local($k) = @_;
+    local($x);
 
     &Log("PtrExpand::($k)   $k -> index[$index{$k}]") if $debug;
 
@@ -1291,7 +1292,10 @@ sub PtrExpand
     }
 
     # $key{$k};
-    $index{$k};    
+    $x = $index{$k};
+    $x =~ s/<PRE>//g;
+    $x =~ s/<\/PRE>//g;
+    $x;
 }
 
 
