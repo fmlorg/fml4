@@ -544,7 +544,7 @@ sub SetHashDefaults
 		    'listserv', 'do_fmlserv',
 		    'majordomo','do_fmlserv',
 
-		    # NT extensin
+		    # NT extension
 		    'popfml',     'do_popfml',
 		    'pop_passwd', 'do_pop_passwd',
 
