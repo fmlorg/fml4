@@ -223,6 +223,17 @@ Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron
 	Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
 
 
+.C	リモート管理の権限をもつユーザのパスワードの設定・変更
+
+   /usr/local/fml/makefml passwd elena 
+
+	---Changing Passwd of Admin  in uja mailing list
+	Who: 
+	Passwd: 
+
+  とかになるのでアドレスとパスワードを入れて下さい。
+
+
 
 .C	ＭＬの基本的ないくつかの設定
 
