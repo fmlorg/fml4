@@ -11,7 +11,7 @@
 # This library is based on the patch ( fml-support: 09069 ) by Toshimi Aoki
 #
 
-package MySQL;
+package PostgreSQL;
 
 
 sub Log { &main::Log(@_);}
@@ -22,21 +22,21 @@ sub DataBases::Execute
     my ($e, $mib, $result, $misc) = @_;
 
     if ($main::debug) {
-	while (($k, $v) = each %$mib) { print "MySQL: $k => $v\n";}
+	while (($k, $v) = each %$mib) { print "PostgreSQL: $k => $v\n";}
     }
 
     if ($mib->{'_action'}) {
 	# initialize
 	&Init($mib);
 	if ($mib->{'error'}) { 
-	    &Log("ERROR: MySQL::Init() fails"); 
-	    &Log("ERROR: MySQL: $mib->{'error'}"); 
+	    &Log("ERROR: PostgreSQL::Init() fails"); 
+	    &Log("ERROR: PostgreSQL: $mib->{'error'}"); 
 	    return 0;
 	}
 
-	&MySQL::Connect($mib);
+	&PostgreSQL::Connect($mib);
 	if ($mib->{'error'}) { 
-	    &Log("ERROR: MySQL: $mib->{'error'}"); 
+	    &Log("ERROR: PostgreSQL: $mib->{'error'}"); 
 	    return 0;
 	}
 
@@ -91,17 +91,17 @@ sub DataBases::Execute
 	    ;
 	}
 	else {
-	    &Log("ERROR: MySQL: unkown ACTION $mib->{'_action'}");
+	    &Log("ERROR: PostgreSQL: unkown ACTION $mib->{'_action'}");
 	}
 
 	if ($mib->{'error'}) { 
-	    &Log("ERROR: MySQL: $mib->{'error'}"); 
+	    &Log("ERROR: PostgreSQL: $mib->{'error'}"); 
 	    return 0;
 	}
 
 	&Close;
 	if ($mib->{'error'}) { 
-	    &Log("ERROR: MySQL: $mib->{'error'}"); 
+	    &Log("ERROR: PostgreSQL: $mib->{'error'}"); 
 	    return 0;
 	}
 
@@ -109,7 +109,7 @@ sub DataBases::Execute
 	return 1;
     }
     else {
-	&Log("ERROR: MySQL: no given action to do");
+	&Log("ERROR: PostgreSQL: no given action to do");
     }
 }
 
@@ -121,7 +121,7 @@ sub Init
 
     if ($debug) {
 	for ('host', 'port', 'user', 'password') {
-	    &Log("MySQL: \$mib->{$_} = $mib->{$_}");
+	    &Log("PostgreSQL: \$mib->{$_} = $mib->{$_}");
 	}
     }
 
@@ -253,13 +253,13 @@ sub __DumpList
 	close(OUT);
 
 	if (! rename($newf, $orgf)) {
-	    &Log("ERROR: MySQL: cannot rename $newf $orgf");
-	    $mib->{'error'} = "ERROR: MySQL: cannot rename $newf $orgf";
+	    &Log("ERROR: PostgreSQL: cannot rename $newf $orgf");
+	    $mib->{'error'} = "ERROR: PostgreSQL: cannot rename $newf $orgf";
 	}
     }
     else {
-	&Log("ERROR: MySQL: cannot open $newf");
-	$mib->{'error'} = "ERROR: MySQL: cannot open $orgf";
+	&Log("ERROR: PostgreSQL: cannot open $newf");
+	$mib->{'error'} = "ERROR: PostgreSQL: cannot open $orgf";
     }
 }
 
@@ -379,7 +379,7 @@ sub __ListCtl
 
     }
     else {
-	&Log("ERROR: MySQL: unknown ACTION $mib->{'_action'}");
+	&Log("ERROR: PostgreSQL: unknown ACTION $mib->{'_action'}");
     }
 
     if ($mib->{'error'}) { return $NULL;}
@@ -472,10 +472,10 @@ if ($0 eq __FILE__) {
     $mib{'user'}     = $opt_U || $ENV{'USER'};
     $mib{'_ml_acct'} = 'elena';
 
-    $MySQL::debug = 1;
-    &MySQL::Init(\%mib);
-    &MySQL::Dump(\%mib);
-    &MySQL::Count(\%mib, 'actives');
+    $PostgreSQL::debug = 1;
+    &PostgreSQL::Init(\%mib);
+    &PostgreSQL::Dump(\%mib);
+    &PostgreSQL::Count(\%mib, 'actives');
     print "number of actives: ", $mib{'_result'}, "\n";
 }
 
