@@ -449,7 +449,11 @@ sub InitConfig
     # &DEFINE_FIELD_LOOP_CHECKED('from');
 
     # $FML for process table readability
-    if ($0 =~ m%^(.*)/(.*)%) { $FML = $2;}
+    if ($0 =~ m%^(.*)/(.*)%) { $ExecDir = $1; $FML = $2;}
+
+    # fml 4.0 modules
+    push(@INC, "$ExecDir/module");
+    push(@INC, "$ExecDir/module/CPAN");
 
     # a little configuration before the action
     if (defined $FML_UMASK) {
@@ -1223,12 +1227,21 @@ sub RuleSetTo
     local($ok, $match, $addr, $x_addr, $ml, $buf, $to);
     local(@ml) = ($MAIL_LIST, @MAIL_LIST_ALIASES); # PLAY_TO Trick;
 
+    eval "use Mail::Address;";
+
+    # if fails, call fml 3.0 compatible routine.
+    if ($@ ne '') {
+	&Log("WARN: Mail::Address.pm not works well");
+	&Log("disable RuleSetTo function");
+	return $NULL;
+    }
+
     # search $MALI_LIST (+ aliases) contained in To: ?
     $to = $e{'h:to:'};
     $to =~ s/\s*To: /, /gi;
-    for $addr (split(/\s*,\s*/, $to)) {
-	$x_addr = $addr;
-	$addr   = &Conv2mailbox($addr, *e);
+    for $addr (Mail::Address->parse($to)) {
+	$x_addr = $addr->format;
+	$addr   = $addr->address;
 	$match  = 0;
 
 	# match one of $MALI_LIST ?
@@ -1257,6 +1270,31 @@ sub RuleSetTo
 # macro:x is moved to FixHeaderFields (97/05/07 fukui@sonic.nm.fujitsu.co.jp)
 #
 sub Conv2mailbox
+{
+    local($mb, *e) = @_;	# original string
+    local($addr);
+
+    &Log("try Mail::Address($mb)");
+    eval "use Mail::Address;";
+
+    # if fails, call fml 3.0 compatible routine.
+    if ($@ ne '') {
+	&Log($@);
+	&Log("WARN: Mail::Address.pm not works well");
+	return &__Conv2mailbox30($mb, *e);
+    }
+
+    # NULL is given, return NULL
+    ($mb =~ /^\s*$/) && (return $NULL);
+
+    ($addr) =  (Mail::Address->parse($mb))[0];
+    return $NULL unless $addr;
+
+    $e{'tmp:x'} = $addr->phrase . $addr->comment;
+    return $addr->address;
+}
+
+sub __Conv2mailbox30
 {
     local($mb, *e) = @_;	# original string
 

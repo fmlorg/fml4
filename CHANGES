@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/11/17
+
+  kern/fml.pl
+  module/CPAN/
+	modify conv2mailbox() to use Mail::Address module for more
+	correctness. apply patches in
+	fml-support: 09026, 09027 by OGAWA Kunihiko <kuni@edit.ne.jp>
+
 2000/11/07
 
   drafts/English/
