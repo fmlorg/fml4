@@ -15,16 +15,18 @@ capital:
 	cat `echo *pl proc/*pl |\
 	 sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
 	perl $(DIST_BIN)/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
+#
+# Section: Variable checks
+#
 varcheck:
 	perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
 
 v2: varcheck2
-
 varcheck2:
 	perl distrib/bin/search-config-variables.pl -E -D -s -m \
-	*pl libexec/[a-lo-z]*pl proc/*pl bin/*pl |\
+	kenn/*pl libexec/[a-lo-z]*pl proc/lib[a-z]*pl bin/*pl |\
 	tee /tmp/VARLIST
 	@ wc /tmp/VARLIST
 
