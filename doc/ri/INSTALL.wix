@@ -75,7 +75,7 @@ These questions are as follows:
    "group"    if several members in the group to set the ML use the fml.
 
 	・自分しか使わないなら personal
-	・特定他数の人達がＭＬをいじる権限を持つ場合(例： /etc/groupで管理)
+	・特定多数の人達がＭＬをいじる権限を持つ場合(例： /etc/groupで管理)
 	  group 
 
    を指定して下さい。作られるdirectoryの write permission が異なります。
