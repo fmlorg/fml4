@@ -1,0 +1,23 @@
+			メモ
+
+
+[TODO] MailListMemberP() をどうするか？
+
+	MailListMemberP() の返すファイル名を使うもの:
+
+		proc/libamctl.pl
+
+		MailListMemberP() => GetTargetMemberList() ?
+	
+	1 or 0 の値が知りたいだけ(おれらてきには OK):
+
+		kern/fml.pl
+		kern/module/compat/libcompat_fml20.pl
+		proc/libconfirm.pl
+		proc/libmoderated.pl
+		proc/libmgrdom.pl
+		proc/libutils.pl
+	
+
+----------------------------------------
+$FML$
