@@ -24,6 +24,14 @@
 		_smtplog の expire が変なのを修正
 
 
+2001/07/16
+
+   proc/libmesgle.pl (1.17-1.18):
+	modified MesgLEtranslate() accpet English
+
+   libexec/fml_local.pl (2.7-2.8):
+	permit English in MesgLETranslate()
+
 2001/07/12
 
    4.0.2_BETA
@@ -39,6 +47,13 @@
 
 	use FML::Date to speculate unix time from Date: in the article and
 	use it for the date of HTML'ed article not stat(2) information.
+
+	spool2html --overwrite 
+
+		このオプションをつけると、HTML を再生成をする
+		(デフォルトではすでにHTML化された分については無視する)。
+
+	記事→HTML 化する際に記事内の Date: ヘッダフィールドを使う
 
 2001/07/08
 
@@ -139,7 +154,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.2.wix,v 1.4.2.4 2001/07/08 14:18:42 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.5 2001/07/12 09:27:35 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
