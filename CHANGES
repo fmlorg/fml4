@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/03/15
+
+   proc/libexpire.pl
+	$*_seq initialization bug of expiration by number
+   	patch by Tatsuya Shimizu <shimizu@np.bs1.fc.nec.co.jp>
+	fml-help: 00039
+
 2001/03/09
 
     コマンドの返事をする時に、
