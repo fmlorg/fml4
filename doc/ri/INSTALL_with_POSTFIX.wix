@@ -101,7 +101,17 @@ postfix では SMTP で通信する時（デフォルトです）に
 ＃これを $inet_interfaces ごとに変更できるといいんですけどねぇ。
 ＃これは、ななめよみするかぎり release でもできないとおもいました。
 ＃ release はソース読んでないので嘘かもしれず
-
+＃
+＃(2003/04 記、thanks SEKINE Tatsuo)
+＃確かに、main.cf だけでは出来ませんが、master.cf も編集するなら
+＃インターフェイスごとに変更できますね、失礼 _o_
+＃この手でいいなら、実は結構初期からできたはずです。
+＃
+＃ 設定例:
+＃	-o key=value 形式で main.cf の値を上書きできます。
+＃      インターフェイスごとに smtpd を定義し、limit を変更してください。
+＃ インターフェイス:smtp ... smtpd -o smtpd_recipient_limit=10000
+＃ インターフェイス:smtp ... smtpd -o smtpd_recipient_limit=0 (無制限)
 
 .appendix
 
@@ -118,15 +128,15 @@ default_privs = fml
 
 などとして elena: "| fml.pl" などと直接 /etc/aliases に書くこともできます。
 
-$FML$
+$FML: INSTALL_with_POSTFIX.wix,v 1.14 2001/07/07 08:22:00 fukachan Exp $
 
-.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2001,2003 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2001 fukachan@sapporo.iij.ad.jp
+.#               1996-2001,2003 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .#
-.# $FML$
+.# $FML: INSTALL_with_POSTFIX.wix,v 1.14 2001/07/07 08:22:00 fukachan Exp $
