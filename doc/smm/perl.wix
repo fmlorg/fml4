@@ -1,6 +1,25 @@
-
 .C	perl 豆知識
+
+以下引用部分は 
+
+  日本語 perl texinfo バージョン 4.0.19.2
+  Copyright (C) 1990, 1991 高尾 直弥
+
+からです。
+
+
+.S	Perl 4 or 5 ?
+
+fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
+れています。5は upper compatibile のはずなので4でも5でもOKです。
+ただOSによっては5でないとそもそもperlがちゃんと動かないことがあるので
+(5の方が新しいからOS適応性が上なのは当然ですが)
+
+例：６４ビットマシンやソラリス２なんかは５の方が無難だとおもう。
+
+
 .S	exec LIST
+
 
      `LIST' の中に 1 以上の引数がある場合、または `LIST' が 1 以上の値を
      持つ配列の場合、`LIST' 中の引数で `execvp()' をコールする。
@@ -16,6 +35,8 @@
      `exec LIST' と全く同じことをするが、違いは最初に `fork' を行い、親
      プロセスは子プロセスが完了するのを待つ点である。
 
+注意：shell escape character check してからexec sh -c 等に入る
+
 
 .S	open
 
@@ -30,8 +51,14 @@ perlの書き方は見ての通り、
 	shell script, awk, C, sed
 
 の知識がちょっとあれば書けるものです。
-＃初心者でもわかるように 変な書き方をしないよう気をつけているつもりで
-すけど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+
+初心者でもわかるように 変な書き方をしないよう気をつけているつもりです
+けど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+
+ただ、変なOSやperlのために悲しいことにくどい書き方とかしなきゃいけない
+ところもあってちょっと…;_;;_;;_;
+
+
 
 気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
 
@@ -46,10 +73,9 @@ perl texinfo in japanese --- version 4.0.19.2
 
 というものがfj.sourcesに投稿されています。ちなみに
 
-ftp.phys.titech.ac.jp:pub/misc/perl
--r--r--r--  1 fukachan   112208 Mar 12  1993 perl.texinfo-j4.0.19.2.tar.gz
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-にもあります
+にもおいてあります。
 
 
 .S	perlはinterpreter
@@ -69,34 +95,28 @@ ftp.phys.titech.ac.jp:pub/misc/perl
 
 
 .S	@INC	
-@INC : perl スクリプトを探す場所のリスト
-========================================
 
-`@INC': perl スクリプトを探す場所のリスト
+   @INC : perl スクリプトを探す場所のリスト
+   ========================================
+   
+   `@INC': perl スクリプトを探す場所のリスト
+   
+   `do EXPR' コマンドまたは `require' コマンドで評価される。
+   
+   最初は コマンドスイッチ `-I' で指定した引数 + デフォルト perl ライブラリ 
+   (多分 `/usr/local/lib/perl'、次に `.' すなわちカレントディレクトリ )が入っ
+   ている。
+   
+   -----------------------------------------
 
-`do EXPR' コマンドまたは `require' コマンドで評価される。
 
-最初は コマンドスイッチ `-I' で指定した引数 + デフォルト perl ライブラリ 
-(多分 `/usr/local/lib/perl'、次に `.' すなわちカレントディレクトリ )が入っ
-ている。
+	% perl -e '$,="\n", print @INC' 
 
------------------------------------------
-
-fml.plでは、
-
-$DIR	      = $ARGV[0] ? $ARGV[0] : '/home/axion/fukachan/work/spool/EXP';
-
-で、$DIRを引数からとった後
-
-push(@INC,"$DIR");		# add the path for include files
-
-で、探す場所を指定しています。
-% perl -e '$,="\n", print @INC'
 とかしてみればわかりますが、
 
-/usr/local/lib/perl
-$DIRの場所
-$LIBDIRの場所
+	$DIRの場所
+	/usr/local/lib/perl
+	$LIBDIRの場所
 
 の順番で探していくはずです。つまり、
 
@@ -110,9 +130,6 @@ require 'sys/socket.ph';
 
 @INCの順でファイルを探してそれをperl scriptとして評価する。
 ＃perlはinterpreterなので必要に応じて取り込んで評価した方がいいはず
-
-.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
-.# $Id$
 
 
 .S	\w

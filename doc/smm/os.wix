@@ -2,23 +2,24 @@
 
 .S	4.4BSD
 
-NetBSD 1.1 はターゲットマシンなので、なにもなし
-他の 4.4 BSD based については不明。BSDI 2.1 では動いている。
+NetBSD 1.1 および 1.2 はターゲットマシンなので、なにもなし
+他の 4.4 BSD based については不明。BSDI 2.1 では動くのを確認ずみ
 
 .S	4.3BSD
 
-	旧ターゲットマシンなので、多分なにごともなくうまくいくでしょう
+旧ターゲットマシンなので、多分なにごともなくうまくいくでしょう
 
 .S	SUN OS 4.1.3
 
 fmlの昔のヴァージョンでは lseek system call をつかうところで、こけてま
 したが、その問題はもう発生しません。
 
-NFS ごしの fpathconf() はうまく作動しません。ローカルに include をもつ
-か、fmlを置く場所をローカルにするか等の技が必要になるでしょう
+sendmail: NFS ごしの fpathconf() はうまく作動しません。ローカルに 
+include をもつか、fmlを置く場所をローカルにするか等の技が必要になるか
+もしれません
 
 
-.S	HP-UX 
+.S	HP-UX 9?
 
 setuid まわりが 4.3と4.4の中間みたいな感じで止まってます。
 sendmail はいろいろとまわりみちをして、setuid を実行するようですが、
@@ -28,7 +29,7 @@ sendmail はいろいろとまわりみちをして、setuid を実行するようですが、
 もし、それでだめなら perl -U をつかってもらうということで
 
 
-.S	SGI Indy(IRIX5.3)
+.S	SGI Indy (IRIX5.3)
 .q
 From:    nino@windy.mech.utsunomiya-u.ac.jp
 

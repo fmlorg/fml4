@@ -39,13 +39,13 @@ $FML_EXIT_HOOK .= q#;
 で、自力で実行できるようにしてみました…
 
 
-.S	変数一覧
+.S	libsynchtml.pl用の変数一覧
 .key	libsynchtml.pl
 
-.key	$HTML_DIR
-$HTML_DIR
+.key	$HTTP_DIR
+$HTTP_DIR
 	httpd にアクセスさせる directory 
-	デフォールトは スプール （$SPOOL_DIR）
+	デフォールトは $DIR/var/htdocs 
 
 
 .key	$HTML_EXPIRE
