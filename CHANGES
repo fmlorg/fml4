@@ -3,6 +3,22 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/24
+
+   makefml
+	nuke obsolete ConcatenateAliases()
+
+   fix installer to disable installing C/*		
+
+   modify EnvelopeFilter
+	EnvelopeFilter should not count up the trailing "\n"
+	to determine the number of paragraphs (signature or not).
+
+2000/07/23
+
+  Content Filter bug fix (?)
+	appy patch by Naoki IDO (fml-support: 8504)
+
 2000/07/21
 
   clean up databases
