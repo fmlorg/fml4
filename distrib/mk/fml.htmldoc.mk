@@ -90,11 +90,11 @@ var/html/advisories/index-e.html: doc/advisories/index-e.html
 	$(CPP) -P -UJAPANESE doc/advisories/index-e.html \
 	> ${FML}/var/html/advisories/index-e.html
 
-var/html/op/index.html: doc/smm/*wix
+var/html/op/index.html: doc/html/obsolete-op-index.ja.html
 	test -d var/html/op || mkdir var/html/op
 	test -h var/html/op-jp || (cd var/html; ln -s op op-jp)
-	${FIX_WIX} doc/smm/op.wix |\
-	${FWIX} -L JAPANESE -T op -m html -D var/html/op -d doc/smm
+	${JCONV} doc/html/obsolete-op-index.ja.html > \
+		var/html/op/index.html
 
 var/html/op-e/index.html: doc/smm/*wix
 	test -d var/html/op-e || mkdir var/html/op-e
