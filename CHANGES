@@ -3,6 +3,23 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/03
+
+   help file
+	apply patch by <kazuto@Kz-soft.com> (fml-support: 09081)
+
+	help ファイルに MH フォルダの場合の復元のし方
+	についてのメモを付け加える
+
+   databases/postgresql/DBI_toymodel.pl
+	PostgreSQL DBI version
+
+	This library is based on the patch ( fml-support: 09069 ) by
+	Toshimi Aoki.
+
+   sbin/makefml
+	fix 12/02 bug fixes more.
+
 2000/12/02
 
    sbin/makefml
