@@ -125,7 +125,7 @@ FML fundamentally needs
 
 	a UNIX account
 	perl (4 or 5, at least after 4.019?)
-	MTA (e.g. sendmail,qmail,exim,...).
+	MTA (e.g. postfix,sendmail,qmail,exim,...).
 
 See INSTALL for more details on installation.
 See INSTALL_on_NT4 for fml on Windows NT4.
@@ -148,7 +148,7 @@ MLは本質的にフィルタリングなので、MLのプロセスの流れは(間にfmlを夾んで)
 	"SMTPを理解する配送プロセス"
 の２つの動作からなります。メールを受けることと配送することは概念的に別
 のものです。原則的に fml はメールを受けるホスト上で動きます。配送系は
-SMTPを理解してくれればなんでも構いません sendmail, qmail, exim, ...
+SMTPを理解してくれればなんでも構いません postfix,sendmail, qmail, exim, ...
 そのため配送を担当するホストはメールを受けるホストと同じでなくても構い
 ません。配送専用マシンなどあるととてもよいでしょう。
 .fi
@@ -397,27 +397,22 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-   postfix 19990601 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
+   postfix 19991231-pl04 + perl 5.00503 on NetBSD 1.4D (ELF, IPv4 only)
 
-○ テスト環境: fml 3.0 のターゲットマシン/テスト環境は
+○ テスト環境: fml.org の実運用テスト環境は
 =E
 *  Test Environment: I've tested fml on the following system:
 
-   sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.4_BETA
-   sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.4_BETA
+   postfix + perl 5.004_04 on NetBSD/sparc (netbsd-1-4 branch)
 
-なおFML.ORGの配送システムは5つのMTAを使った並列配送で高速化しています:)。
-(通称MTAみくじです ^^;)
+さらに配送系は複数のMTAを使った並列配送実験をしています(通称MTAみくじ
+です ^^;)。最近は一旦２つに減っています。その内増えるでしょう:)
 =E
-The delivery system on FML.ORG consists of 5 MTA's to accelerate the
+The delivery system on FML.ORG consists of 2 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
-   sendmail 8.8.8 + WIDE patch + smtpfeed
-   sendmail 8.9.3
    qmail 1.03
-   exim 2.04
-   postfix snap-19990601
-
+   postfix 19991231-pl04
 
 
 .C	FML 3.0 の機能の概要
