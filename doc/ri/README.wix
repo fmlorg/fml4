@@ -12,21 +12,45 @@ fml Mailing List Server Package
 
 
 .C	fml Introduction
+=E.C	fml Introduction
+
 .S	fml 2.1 Overview
+=E.S	fml 2.1 Overview
 
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
 ＃おまけCDROMつき雑誌等にある「hmlの改良」の記述はちょっと誤解を招く
 ＃言い回しですよね…
 
+=E 
+Fml 2.1 is the Mailing List Server package I've coded. It consists of
+perl scripts.
+
 ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 メールを使う各種インターフェイスの集合体です。
 
+=E
+Fml consits of several ML Servers 
+	distributer
+	serveral useful commands
+	Listserv(or majordomo) Interface for Fml system
+	ML using POP(and cron) or .forward
+	
 これは（歴史的理由により）デフォールトでは hml 1.6 のEmulationをします。
 ＃正確にはその元祖の shell script の program というべきであらう
 
 設定すればユーザにとってもＭＬ管理者にとっても使い勝手が同じになるよう
 に作動させることができます。
+
+=E
+Fml has been developed and begin developed as servers seen as the same
+for users who have used a lot of several tools.
+To integrate a lot of Fml functions, Fml has a lot of interfaces which 
+use the same fml library functions.
+Fml can emulate such as hml 1.6, listserv(or majordomo) ...
+
+=E 
+
 
 デフォールトの挙動はそうですが、それ以外にも様々な動作の実行および互換
 インターフェイスの提供ができます。例えば
@@ -65,6 +89,7 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 
 .S	目的
+=E.S	Objective
 
 これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
 いたいとおもっている方には改造の PLATFORM として利用していただけるかと
@@ -87,6 +112,18 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 
 .S	インストール
+=E.S	Install
+
+=E
+To install Fml system, 
+	perl makefml
+when you make a new ML 
+	perl makefml newml ML
+e.g. to make elena@your-domain mailng list
+	perl makefml newml elena
+
+=E
+Please see the file INSTALL for the detail.
 
 とりあえず細かいチューニングを行なわなくてよいなら
 
@@ -100,13 +137,19 @@ ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
 
 
 .S	Update や bug fix 等の情報について
+=E.S	Information on updates and bug-fixed
 
 できるだけ最新版の fml-current のソースコードを手に入れてから改造等は
 していただけるとよろしいかと存じます (_o_)
 
 ○ fml のWWWのページは 
+=E
+The HOME PAGE of the Fml is 
 
 	http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
+
+=E
+You can obtaion the latest (fml-current) documents and sources.
 
 最新のドキュメント、ソースともにここに揃っています。 
 
