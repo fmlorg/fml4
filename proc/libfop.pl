@@ -53,7 +53,7 @@ sub DraftGenerate
     &InitDraftGenerate;
 
     # INCLUDE
-    require $_fp{'inc', $mode} if $_fp{'inc', $mode};
+    require $_FOPH{'inc', $mode} if $_FOPH{'inc', $mode};
 
     foreach $proc ( # order 
 		   'hdr',
@@ -65,7 +65,7 @@ sub DraftGenerate
 		   'destr'
 		   ) {
 
-	$prog = $_fp{$proc, $mode};
+	$prog = $_FOPH{$proc, $mode};
 	if ($debug) {
 	    print STDERR "Call [$proc]\t";
 	    print STDERR "$prog(*conf, *r, *misc);" if $prog;
@@ -92,68 +92,68 @@ sub InitDraftGenerate
     &MSendModeSet;
 
     # PLAIN TEXT with UNIX FROM
-    $_fp{'cnstr',    'uf'} = 'Cnstr_uf';
-    $_fp{'retrieve', 'uf'} = 'f_RetrieveFile';
-    $_fp{'split',    'uf'} = '';
-    $_fp{'destr',    'uf'} = '';
+    $_FOPH{'cnstr',    'uf'} = 'Cnstr_uf';
+    $_FOPH{'retrieve', 'uf'} = 'f_RetrieveFile';
+    $_FOPH{'split',    'uf'} = '';
+    $_FOPH{'destr',    'uf'} = '';
 
     # PLAINTEXT by RFC934
-    $_fp{'cnstr',    'rfc934'}  = 'Cnstr_rfc934';
-    $_fp{'retrieve', 'rfc934'}  = 'f_RetrieveFile';
-    $_fp{'destr',    'rfc934'}  = 'Destr_rfc934';
+    $_FOPH{'cnstr',    'rfc934'}  = 'Cnstr_rfc934';
+    $_FOPH{'retrieve', 'rfc934'}  = 'f_RetrieveFile';
+    $_FOPH{'destr',    'rfc934'}  = 'Destr_rfc934';
 
     # PLAINTEXT by RFC1153
-    $_fp{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
-    $_fp{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
+    $_FOPH{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
+    $_FOPH{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
 
     # PLAINTEXT by MIME/Multipart
-    $_fp{'cnstr',    'mp'} = 'Cnstr_mp';
-    $_fp{'retrieve', 'mp'} = 'f_RetrieveFile';
+    $_FOPH{'cnstr',    'mp'} = 'Cnstr_mp';
+    $_FOPH{'retrieve', 'mp'} = 'f_RetrieveFile';
 
     ### encoding ###
 
     # UUENCODE ONLY
-    $_fp{'retrieve', 'uu'}     = 'f_uu';
-    $_fp{'split',    'uu'}     = 'f_SplitFile';
+    $_FOPH{'retrieve', 'uu'}     = 'f_uu';
+    $_FOPH{'split',    'uu'}     = 'f_SplitFile';
 
     # Base64 Encode Only
-    $_fp{'cnstr',    'base64'} = 'Cnstr_message_partial';
-    $_fp{'retrieve', 'base64'} = 'f_RetrieveFile';
-    $_fp{'encode',   'base64'} = 'f_base64';
-    $_fp{'split',    'base64'} = 'f_SplitFile';
-    $_fp{'encode_as','base64'} = 'Cnstr_message_partial';
+    $_FOPH{'cnstr',    'base64'} = 'Cnstr_message_partial';
+    $_FOPH{'retrieve', 'base64'} = 'f_RetrieveFile';
+    $_FOPH{'encode',   'base64'} = 'f_base64';
+    $_FOPH{'split',    'base64'} = 'f_SplitFile';
+    $_FOPH{'encode_as','base64'} = 'Cnstr_message_partial';
 
     ### compression + encoding ###
 
     # Gzipped UNIX FROM
-    $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
-    $_fp{'retrieve', 'gz'} = 'f_gz';
-    $_fp{'encode',   'gz'} = 'f_gz_encode';
-    $_fp{'split',    'gz'} = 'f_SplitFile';
+    $_FOPH{'cnstr',    'gz'} = 'Cnstr_gz';
+    $_FOPH{'retrieve', 'gz'} = 'f_gz';
+    $_FOPH{'encode',   'gz'} = 'f_gz_encode';
+    $_FOPH{'split',    'gz'} = 'f_SplitFile';
 
     # PACK: TAR + GZIP
-    $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
-    $_fp{'retrieve', 'tgz'} = 'f_tgz';
-    $_fp{'encode',   'tgz'} = 'f_gz_encode';
-    $_fp{'split',    'tgz'} = 'f_SplitFile';
+    $_FOPH{'cnstr',    'tgz'} = 'Cnstr_tgz';
+    $_FOPH{'retrieve', 'tgz'} = 'f_tgz';
+    $_FOPH{'encode',   'tgz'} = 'f_gz_encode';
+    $_FOPH{'split',    'tgz'} = 'f_SplitFile';
 
     # PACK: TAR + GZIP
-    $_fp{'cnstr',    'zip'} = 'Cnstr_message_partial';
-    $_fp{'retrieve', 'zip'} = 'f_zip';
-    $_fp{'encode',   'zip'} = 'f_base64';
-    $_fp{'split',    'zip'} = 'f_SplitFile';
+    $_FOPH{'cnstr',    'zip'} = 'Cnstr_message_partial';
+    $_FOPH{'retrieve', 'zip'} = 'f_zip';
+    $_FOPH{'encode',   'zip'} = 'f_base64';
+    $_FOPH{'split',    'zip'} = 'f_SplitFile';
 
     # PACK: LHA + ISH
-    $_fp{'cnstr',    'lhaish'} = '';
-    $_fp{'retrieve', 'lhaish'} = 'f_Lha';
-    $_fp{'encode',   'lhaish'} = 'f_lha_encode';
-    $_fp{'split',    'lhaish'} = 'f_SplitFile';
+    $_FOPH{'cnstr',    'lhaish'} = '';
+    $_FOPH{'retrieve', 'lhaish'} = 'f_Lha';
+    $_FOPH{'encode',   'lhaish'} = 'f_lha_encode';
+    $_FOPH{'split',    'lhaish'} = 'f_SplitFile';
 
     # PACK: LHA + UUENCODE
-    $_fp{'cnstr',    'lhauu'}  = '';
-    $_fp{'retrieve', 'lhauu'}  = 'f_Lha';
-    $_fp{'encode',   'lhauu'}  = 'f_lha_encode';
-    $_fp{'split',    'lhauu'}  = 'f_SplitFile';
+    $_FOPH{'cnstr',    'lhauu'}  = '';
+    $_FOPH{'retrieve', 'lhauu'}  = 'f_Lha';
+    $_FOPH{'encode',   'lhauu'}  = 'f_lha_encode';
+    $_FOPH{'split',    'lhauu'}  = 'f_SplitFile';
 }
 
 

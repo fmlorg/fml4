@@ -121,7 +121,7 @@ sub mget3
     &mget3_Init(*cf, *e);	# default values and ADDR_CHECK_MAX?(security)
 				# set -> %cf
     &InitDraftGenerate;		# set "function pointers"
-				# set -> %_fp
+				# set -> %_FOPH
     &mget3_Getopt(*cf,*opt,*e); # parsing options 
 				# set -> %cf
 
