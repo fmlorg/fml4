@@ -949,7 +949,7 @@ RELAY_HACK:
 # value: filename string
 CF_DEF:
 
-# list-going@domain is a real distribution address. Fml does not
+# list-outgoing@domain is a real distribution address. Fml does not
 # sends article to all recipient list to MTA but only this address.
 # MTA expands address list and distribute article.
 # In default fml does not use this but effective for poor machine like
@@ -962,7 +962,7 @@ CF_DEF:
 # value: 1/0
 USE_OUTGOING_ADDRESS:
 
-# list-going@domain is a real distribution address. Fml does not
+# list-outgoing@domain is a real distribution address. Fml does not
 # sends article to all recipient list to MTA but only this address.
 # MTA expands address list and distribute article.
 # In default fml does not use this but effective for poor machine like

@@ -6,6 +6,6 @@
 #
 # [/etc/aliases example]
 # XXX: PLEASE ADD THIS LINE to /etc/aliases and run newaliases!
-# _ML_: :include:_ML_DIR_/_ML_/include-outgoing
+# _ML_-outgoing: :include:_ML_DIR_/_ML_/include-outgoing
 
 :include:_ML_DIR_/_ML_/var/db/rcptlist
