@@ -125,22 +125,44 @@ sub HtmlMode
 
     # %SavedEnvelope is used only for moderator type II mode
     # since %Envelope is swap in, out in moderator routine.
-    $FmlExitHook{'html'} = q#;
-    if (%SavedEnvelope) {
-	%OrgEnvelope = %Envelope;
-	%Envelope    = %SavedEnvelope;
-    }
+    $FmlExitHook{'html'} = q{
+	if (%SavedEnvelope) {
+	    %OrgEnvelope = %Envelope;
+	    %Envelope    = %SavedEnvelope;
+	}
 
-    $USE_MIME = 1;
-    require 'libsynchtml.pl';
-    &SyncHtml($HTML_DIR || 'htdocs', $ID, *Envelope);
+	$USE_MIME = 1;
 
-    if (%SavedEnvelope) {
-	$message .= $Envelope{'message'} if $Envelope{'message'};
-	%Envelope = %OrgEnvelope;
-	$Envelope{'message'} .= $message if $message;
-    }
-    #;
+	# fml-devel new html generator
+	if ($USE_NEW_HTML_GEN) {
+	    my $file    = "$SPOOL_DIR/$ID";
+	    my $dst_dir = ( $HTML_DIR || "$DIR/htdocs" );
+
+	    -d $dst_dir || &MkDir($dst_dir);
+
+	    if (-f $file) {
+		eval q{
+		    use Mail::HTML::Lite;
+		    &Mail::HTML::Lite::htmlify_file($file, {
+			directory => $dst_dir,
+		    });
+		};
+		Log($@) if $@;
+	    }
+	}
+	# 4.0 default library 
+	else {
+	    require 'libsynchtml.pl';
+	    &SyncHtml($HTML_DIR || 'htdocs', $ID, *Envelope);
+	}
+
+	if (%SavedEnvelope) {
+	    $message .= $Envelope{'message'} if $Envelope{'message'};
+	    %Envelope = %OrgEnvelope;
+	    $Envelope{'message'} .= $message if $message;
+	}
+
+    };
 }
 
 
