@@ -1,4 +1,5 @@
 .C	Aucea (AUtomatic Certification and Alert system)
+.k	Aucea
 
 .S	Introduction to Aucea
 
@@ -18,6 +19,7 @@
 
 
 .S	config の例
+.k	Aucea config の例
 
 例：人気投票…
 
