@@ -16,7 +16,7 @@ sub Log { &main::Log(@_);}
 
 sub DataBases::Execute
 {
-    local(*Envelope, $mib, $result, $misc) = @_;
+    local($e, $mib, $result, $misc) = @_;
 
     if ($main::debug) {
 	while (($k, $v) = each %$mib) { print "LDAP: $k => $v\n";}
@@ -30,7 +30,23 @@ sub DataBases::Execute
 	&LDAP::Connect($mib);
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
-	&GetActiveList;
+	if ($mib->{'ACTION'} eq 'get_active_list') {
+	    &GetActiveList;
+	}
+	elsif ($mib->{'ACTION'} eq 'get_member_list') {
+	    &GetMemberList;
+	}
+	elsif ($mib->{'ACTION'} eq 'add' ||
+	       $mib->{'ACTION'} eq 'bye' ||
+	       $mib->{'ACTION'} eq 'subscribe'   ||
+	       $mib->{'ACTION'} eq 'unsubscribe' ||
+	       $mib->{'ACTION'} eq 'on'     ||
+	       $mib->{'ACTION'} eq 'off'    ||
+	       $mib->{'ACTION'} eq 'digest' ||
+	       $mib->{'ACTION'} eq 'matome') {
+	    &__ListCtl($mib);
+	}
+
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
 	&Close;
@@ -82,25 +98,57 @@ sub Connect
 }
 
 
-sub GetActiveList
+sub Close
 {
+    $conn->close();
+}
+
+
+### ***-predicate() ###
+
+
+sub MemberP
+{
+    my ($mib, $addr) = @_;
+
+    &Log("\$entry->hasValue(member, $addr)") if $main::debug_ldap;
+    &Log("\$entry->hasValue(member, $addr)");
+    $entry->hasValue("member", $addr);
+}
+
+
+sub ActiveP
+{
+    my ($mib, $addr) = @_;
+
+    &Log("\$entry->hasValue(member, $addr)") if $main::debug_ldap;
+    &Log("\$entry->hasValue(member, $addr)");
+    $entry->hasValue("member", $addr);
+}
+
+
+sub GetActiveList { &__DumpList('active');}
+sub GetMemberList { &__DumpList('member');}
+sub __DumpList
+{
+    my ($mode) = @_;
     my ($max, $orgf, $newf);
 
-    $max  = $entry->size("maildrop");
+    $max = $entry->size($mode);
     if ($main::debug_ldap) {
 	$orgf = $newf = '/dev/stdout';
     }
     else {
 	$orgf = $mib->{'CACHE_FILE'};
-	$newf = $mib->{'CACHE_FILE'}.".new";
+	$newf = $mib->{'CACHE_FILE'}.".new.$$";
     }
 
-    &main::Log("LDAP: maildrop max = $max") if $main::debug;
+    &main::Log("LDAP: member max = $max") if $main::debug;
 
     if (open(OUT, "> $newf")) {
 	for my $i (0 .. $max) {
-	    if ($entry->{maildrop}[$i]) {
-		print OUT $entry->{maildrop}[$i], "\n";
+	    if ($entry->{member}[$i]) {
+		print OUT $entry->{member}[$i], "\n";
 	    }
 	}
 	close(OUT);
@@ -117,21 +165,62 @@ sub GetActiveList
     }
 }
 
-sub Add
+
+### amctl ###
+# subscribe unsubscribe 
+sub __ListCtl
 {
     my ($mib, $addr) = @_;
 
-    &main::Log("add $addr");
+    $addr = $addr || $mib->{'_address'};
+
+    &main::Log("$mib->{'ACTION'} $addr");
 
     $conn->simpleAuth( $entry->getDN(), $mib->{'password'});
 
-    $entry->addValue("maildrop", $addr);
+    if ($mib->{'ACTION'} eq 'subscribe' ||
+	$mib->{'ACTION'} eq 'add') {
+	$entry->addValue("member", $addr);
+	$entry->addValue("active", $addr);
+    }
+    elsif ($mib->{'ACTION'} eq 'unsubscribe' ||
+	   $mib->{'ACTION'} eq 'bye') {
+	$entry->removeValue("member", $addr);
+	$entry->removeValue("active", $addr);
+    }
+    elsif ($mib->{'ACTION'} eq 'off') {
+	$entry->removeValue("active", $addr);
+    }
+    elsif ($mib->{'ACTION'} eq 'on') {
+	$entry->addValue("active", $addr);
+    }
+    elsif ($mib->{'ACTION'} eq 'chaddr') {
+	$entry->removeValue("member", $mib->{'_old_address'});
+	$entry->addValue("member",    $mib->{'_new_address'});
+	$entry->removeValue("active", $mib->{'_old_address'});
+	$entry->addValue("active",    $mib->{'_new_address'});
+    }
+    elsif ($mib->{'ACTION'} eq 'digest') {
+	&Log("not yet implemented");
+    }
 
     $conn->update($entry);
+
     my ($status) = $conn->getErrorString();
     if ($status ne 'Success') {
 	$mib->{'error'} = $conn->getErrorString();
     }
+}
+
+
+### for debug ###
+sub RemoveAll
+{
+    $max = $entry->remove("maildrop");
+    $max = $entry->remove("off");
+    $max = $entry->remove("member");
+    $max = $entry->remove("active");
+    $conn->update($entry);
 }
 
 
@@ -144,13 +233,6 @@ sub Dump
 }
 
 
-sub Close
-{
-    $conn->close();
-}
-
-
-
 package main;
 ### debug mode ###
 if ($0 eq __FILE__) {
@@ -159,7 +241,7 @@ if ($0 eq __FILE__) {
 
     # getopt()
     require 'getopts.pl';
-    &Getopts("dhm:r:b:D");
+    &Getopts("dhm:r:b:Dk:RA:");
 
     if ($opt_h) {
 	print "$0: [options] [query_filter]\n";
@@ -190,8 +272,12 @@ if ($0 eq __FILE__) {
     &LDAP::Connect(\%mib);
     if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
 
-    if ($r) {
-	&LDAP::Add(\%mib, $r);
+    if ($opt_R) {
+	&LDAP::RemoveAll();
+    }
+    elsif ($r) {
+	$mib{'ACTION'} = $opt_A || 'subscribe';
+	&LDAP::__ListCtl(\%mib, $r);
 	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
     }
     elsif ($opt_D) {
@@ -199,8 +285,15 @@ if ($0 eq __FILE__) {
 	&LDAP::Dump();
     }
     else {
-	&Log("-- get active list");
+	if ($opt_k) {
+	    my ($x) = $opt_k;
+	    my ($x) = &LDAP::MemberP(\%mib, $x);
+	    print "\t$opt_k is a member\n"   if $x; 
+	    print "\t$opt_k is not member\n" unless $x; 
+	    exit 1 unless $x;
+	}
 
+	&Log("-- get active list");
 	&LDAP::GetActiveList;
 	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
 
