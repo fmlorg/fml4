@@ -19,6 +19,9 @@ BSD/OS 2.1			4.036 (but broken)
 BSD/OS 3.1			4.036 (but broken)
 BSD/OS 4.0.1			4.036 (/usr/bin/perl)
 				5.004_02 (/usr/bin/perl5)
+BSD/OS 4.1			4.036    (/usr/bin/perl4)
+				5.005_03 (/usr/bin/perl)
+				5.005_03 (/usr/bin/perl5)
 
 Debian Gnu/Linux 1.1(buzz)	5.002
 Debian Gnu/Linux 1.2(rex)	5.003_07
@@ -36,6 +39,14 @@ Solaris 2.6			none
 Solaris 7			none
 Solaris 8			5.005_03
 
+# HP
+HP-UX 10.20			4.036 (/usr/contrib/bin/perl)
+
+# SGI
+IRIX 6.5 6.5.7m			5.005_04 (/usr/bin/perl) (may not exist)
+
+
+# Mach-like ...
 Mac OS X			?
 
 # not UNIX-like
