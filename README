@@ -2,16 +2,19 @@
 
 				Ken'ichi Fukamachi
 				<fukachan@fml.org>
+				1999 January
+
+XXX ATTENTION: you need "BSD make" not gmake.
 
 -----------------------------------------------------------------
-* Firstly cvs checkout
+* Firstly cvs checkout !
 
 0.	checkout fml repository
 
 	% cvs co fml
 	% cd fml
 
-1.	set up TCP/IP to the Internet if needed.
+1.	set up TCP/IP to the Internet if needed. You need it for 'make pkgsrc'.
 
 2.	generate pkgsrc/
 
@@ -23,15 +26,24 @@
 	% make plaindoc
 	% make htmldoc
 
-4.	O.K. start your hack!
+4.	O.K., now start your hack!
 
 
 -----------------------------------------------------------------
-* maintainer should check the version number
+* The fml master maintainer who is responsible for e.g. snapshot generation
+  should check the version number
 
-0.	check conf/release which is the main trunk version.
+0.	check conf/.
 
-1.	define the current snapshot number conf/release_version.
+	conf/release			2.2A      ;;; main trunk version
+	conf/release_version		2.2A#100  ;;; snapshot (not in cvs)
+
+"conf/release" is the main trunk revision, which should be set up by hand.
+distrib/bin/fml_version.pl controls "conf/release_version".
+
+1.	define the current snapshot number "conf/release_version".
+
+You need to set "conf/release" based on information not in cvs.
 
 
 -----------------------------------------------------------------
