@@ -1,9 +1,0 @@
-		REQUEST TO MERGE into fml-3-0-maint branch
-
-* fix to enable $DEFAULT_RELAY_SERVER even if command reply 
-
-   /cvsroot/fml/kern/libsmtp.pl,v  <--  libsmtp.pl
-   new revision: 2.31; previous revision: 2.30
-
-   /cvsroot/fml/kern/libsmtputils.pl,v  <--  libsmtputils.pl
-   new revision: 2.8; previous revision: 2.7
