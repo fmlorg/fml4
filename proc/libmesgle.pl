@@ -13,64 +13,45 @@
 sub MesgLE
 {
     local(*e, $key, @argv) = @_;
-    local($dir) = "messages/$MESSAGE_LANGUAGE";
-    local($found, $x, $msg);
+    my ($dir) = "messages/$MESSAGE_LANGUAGE";
+    my ($secondary_mesg_dir) = "$DIR/../etc/fml/$dir";
+    my ($mesg_dir, $x, $msg);
 
     &Log("MesgLE: key=$key (@argv)") if $debug_mesgle;
 
-    # 0. check whether the message template directory exists?
-    for (@LIBDIR) { 
-	if (-d "$_/$dir") { 
-	    $found = "$_/$dir";
-	    last;
-	}
-    }
+    # 0. search messages/Japanese/ directory to set up $mesg_dir as it.
+    for (@LIBDIR) { if (-d "$_/$dir") { $mesg_dir = "$_/$dir"; last;}}
+    &Log("MesgLE: mesg_dir=$mesg_dir ") if $debug_mesgle;
 
     # 1. check whether the message template with the key exists?
-    if ($dir = $found) {
-	local($file);
-	if ($key =~ /\./) {
-	    ($file) = split(/\./, $key);
-	}
-	else {
-	    $file = 'kern'; # if without '.', search file "kern".
-	}
-
-	if (-f "$dir/$file") {
-	    $msg = &MesgLE'Lookup($key, "$dir/$file"); #';
-	    &Log("MesgLE: found in $dir/$file") if $msg && $debug;
-	}
-
-	if ($msg) {
-	    &Log("MesgLE: found in file 'a' o keyword a.b.c.")
-		if $debug_mesgle;
-	}
-	# XXX temporary disable directory search since
-	# XXX we may use file.org ...
-	elsif (0 && opendir(DIRD, $dir)) {
-	    while ($x = readdir(DIRD)) {
-		next if $x =~ /^\./;
-		$msg = &MesgLE'Lookup($key, "$dir/$x"); #';
-		&Log("FYI: MesgLE() use $dir/$x for $key") if $msg;
-		&Log("FYI: it is O.K. but ineffective") if $msg;
-		last if $msg;
-	    }
-	    closedir(DIRD);
-	}
-	else {
-	    &Log("MesgLE: FYI: $dir has no entry") if 0;
-	    &Log("MesgLE: cannot opendir $dir") if 0;
-	    return $NULL;
-	}
+    # 1.1. search messages.conf if exists
+    my ($file) = $MESSAGES_CONF || "$DIR/messages.conf";
+    if (-f $file) {
+	&Log("MesgLE: search key='$key' in messages.conf") if $debug_mesgle;
+	$msg = &MesgLE::Lookup($key, $file);
+	&Log("MesgLE: key='$key' FOUND") if $msg && $debug_mesgle;
+	&Log("MesgLE: key='$key' NOT FOUND") if (!$msg) && $debug_mesgle;
     }
     else {
-	&Log("MesgLE: cannot find $dir in \@LIBDIR");
-	return $NULL;
+	&Log("MesgLE: messages.conf not exists, ignore it") if $debug_mesgle;
     }
 
-    # 2. now we have $msg template; translate it to $MESSAGE_LANGUAGE
+    # 1.2. search under $mesg_dir
+    if (! $msg) {
+	for my $dir ($secondary_mesg_dir, $mesg_dir) {
+	    &Log("MesgLE: $dir not exists") if $debug_mesgle && (! -d $dir);
+	    next unless -d $dir;
+	    &Log("MesgLE: search key='$key' under $dir") if $debug_mesgle;
+	    $msg = &MesgLESearchInMessagesDir($key, $dir);
+	    last if $msg;
+	}
+    }
+
+    # We got $msg, message template, now!
+    # finally we have $msg template, so translate it into $MESSAGE_LANGUAGE.
     if ($msg) {
-	if ($MESSAGE_LANGUAGE eq 'Japanese') {
+	if ($MESSAGE_LANGUAGE eq 'Japanese' || 
+	    $MESSAGE_LANGUAGE eq 'English') {
 	    return &MesgLETranslate(*e, $msg, $key, @argv);
 	}
 	else {
@@ -80,6 +61,38 @@ sub MesgLE
     }
     else {
 	&Log("MesgLE: no template for key='$key'");
+	return $NULL;
+    }
+}
+
+
+sub MesgLESearchInMessagesDir
+{
+    my ($key, $dir) = @_;
+    my ($file, $msg);
+
+    if ($key =~ /\./) {
+	($file) = split(/\./, $key);
+    }
+    else {
+	$file = 'kern'; # if without '.', search file "kern".
+    }
+
+    if (-f "$dir/$file") {
+	&Log("MesgLE: Lookup key='$key' in $dir/$file") if $debug_mesgle;
+	$msg = &MesgLE'Lookup($key, "$dir/$file"); #';
+	&Log("MesgLE: found in $dir/$file") if $msg && $debug;
+    }
+    else {
+	&Log("MesgLE: $dir/$file not found") if $debug_mesgle;
+    }
+
+    if ($msg) {
+	&Log("MesgLE: key='$key' FOUND") if $debug_mesgle;
+	return $msg;
+    }
+    else {
+	&Log("MesgLE: key='$key' NOT FOUND") if $debug_mesgle;
 	return $NULL;
     }
 }
@@ -203,6 +216,35 @@ sub CacheOn
     else {
 	&Log("ERROR: MesgLE::CacheOn cannot open file $file");
 	undef $mesg;
+    }
+}
+
+
+package main;
+
+if ($0 eq __FILE__) {
+    $| = 1;
+    $MESSAGE_LANGUAGE = 'Japanese';
+    $DIR = '/var/spool/ml/elena';
+    @LIBDIR = ('/usr/local/fml');
+    eval 'sub Log { print @_, "\n"; }';
+
+    $debug_mesgle = 1;
+
+    if (@ARGV) {
+	($key, @argv) = @ARGV;
+	my ($msg) = &MesgLE(*e, $key, @argv);
+	print "--- reply ---\n";
+	print $msg, "\n";
+    }
+    else {
+	for my $x ('unlink uja', 'fail', 'auth.ok', 'admin.log log 100') {
+	    print ">>> $x\n";
+	    my ($key, @argv) = split(/\s+/, $x);
+	    my ($msg) = &MesgLE(*e, $key, @argv);
+	    print "--- reply ---\n";
+	    print $msg, "\n";
+	}
     }
 }
 
