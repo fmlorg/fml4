@@ -33,7 +33,7 @@ if ($GroupWritable) {
     print STDERR "   Enjoy Internetworking!\n";
 }
 
-&System;
+&System if $SYSTEM_ARGV;
 
 exit 0;
 
@@ -153,7 +153,7 @@ sub InitMakeFml
 
     ### LOADING $FML_POLICY
     if (-f $FML_POLICY) {
-	print STDERR "---Load POLICY from $FML_POLICY\n";
+	# print STDERR "---Load POLICY from $FML_POLICY\n";
 	&GetCurPolicy;
     }
 
@@ -313,17 +313,17 @@ sub SetHashDefaults
 		    '4#addadmin ML address', 'add <address> as an admin to <ML>',
 		    'byeadmin', 'do_byeadmin',
 		    '4#byeadmin ML address', 'remove the administrator of the <ML>',
-		    'help',	'do_help',
+		    'help',	'do_info',
 		    '8#help',	'help message',
 		    'passwd',	'do_passwd',
 		    '8#passwd ML address',	'to change the administrator passwd',
 
 		    'test',	'do_test',
-		    '8#test',	'test ',
+		    '8#test ML',	'test ',
 
 		    'fmlserv',  'do_fmlserv',
 		    'listserv', 'do_fmlserv',
-		    'marjodomo','do_fmlserv',
+		    'majordomo','do_fmlserv',
 
 		    # PGP
 		    'pgp',	'do_pgp',
@@ -675,7 +675,7 @@ sub MakeFmlLock
 	$LockList{$ml} = $mldir;
     }
     else {
-	print "---Locking\n\t";
+	print "---Locking $mldir\n\t";
 
 	opendir(DIRD, $mldir);
 	for (readdir(DIRD)) {
@@ -765,7 +765,39 @@ sub ExecCmd
 
     # function pointer;
     $fp = shift @argv;
-    $fp = $FP{$fp} ? $FP{$fp} : $fp;
+    $fp = $FP{$fp} ? $FP{$fp} : $fp; # this line is not used ?
+
+    # valid command?
+    if (! $MakeFmlProc{$fp}) {
+	&Debug("\n*** Error: command [$fp] NOT DEFINED ***");
+	&Debug("   run \"makefml help\"");
+	&Debug("        or ");
+	&Debug("   see the document 'INSTALL' for more details\n");
+	return;
+    }
+
+    # check arguments
+    {
+	local($not_require_ml, $ml);
+	$ml = $argv[0];
+	for (newml, info, help, install, majordomo, fmlserv, listserv) {
+	    # print STDERR "check $fp eq $_\n";
+	    $fp eq $_ && $not_require_ml++;
+	}
+
+	if (! $not_require_ml) {
+	    if (-d "$ML_DIR/$ml" && -f "$ML_DIR/$ml/config.ph") {
+		; # O.K.;
+	    }
+	    else {
+		&Debug("\n*** Syntax Error ***");
+		&Debug("    makefml $fp mailing-list\n");
+		&Debug("arguments of mailing-list is required\n");
+		return;
+	    }
+	}
+    }
+
 
     # Lock all when "install"
     if ($TheFirstTime || $NOT_LOCK{$fp}) {
@@ -1519,6 +1551,13 @@ sub do_newml
     local($ml) = @_;
     local($cf, $local_config, $config, @config, %config);
 
+    if (! $ml) {
+	&Debug("*** Error: no arguments ***");
+	&Debug("Please define ML(mailing-list) arguments");
+	&Debug("\n\tmakefml newml ML\n");
+	return;
+    }
+
     if ($< == 0) {
 	print "************************* WARNING *************************\n";
 	print "\n";
@@ -1647,6 +1686,8 @@ sub do_test
 
     chdir $dir || die("cannot chdir ML directory[$dir]\n");
     $SYSTEM_ARGV = "$input|$exec $dir -d";
+
+    print STDERR "test() { $SYSTEM_ARGV }\n" if $debug;
 }
 
 
@@ -2235,6 +2276,14 @@ sub do_adduser
     local($ml, $member) = @_;
     local(@files);
 
+    if (! $ml || !$member) {
+	local($proc) = $fp;
+	$proc =~ s/do_//;
+	&Debug("*** Syntax Error: the number of arguments ***");
+	&Debug("\n\tmakefml $proc ML address\n");
+	return;
+    }
+
     &SetWritableUmask;
 
     print "---Adding $member to $ml mailing list\n";
@@ -2267,6 +2316,14 @@ sub do_byeuser
 {
     local($ml, $member) = @_;
     local(@files);
+
+    if (! $ml || !$member) {
+	local($proc) = $fp;
+	$proc =~ s/do_//;
+	&Debug("*** Syntax Error: the number of arguments ***");
+	&Debug("\n\tmakefml $proc ML address\n");
+	return;
+    }
 
     print "---Delete $member in $ml mailing list\n";
 
