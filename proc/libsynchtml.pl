@@ -410,7 +410,7 @@ package SyncHtml;
            INDEX_HTML_FORMAT_PREAMBLE,
            INDEX_HTML_FORMAT_TRAILER,
            INDEX_HTML_DOCUMENT_SEPARATOR,
-           HTML_STYLESHEET_BASENAME,
+           HTML_STYLESHEET_BASENAME, HTML_INDENT_TYPE,
            HTML_DATA_CACHE, HTML_TITLE_HOOK, BASE64_DECODE);
 
 sub Init
@@ -1027,7 +1027,18 @@ sub ReConfigureIndex
     }
 
     open(LIST, "$dir/$index.list")  || &Log("cannot open $dir/$index.list");
-    open(OUT,  ">>$dir/$index.new") || &Log("cannot open $dir/$index.new");
+    if ($HTML_OUTPUT_FILTER) {
+	open(OUT, "|$HTML_OUTPUT_FILTER > $dir/$index.new") || do {
+	    &Log("cannot open $dir/$index.new");
+	    return $NULL;
+	};
+    }
+    else {
+	open(OUT, ">> $dir/$index.new") || do {
+	    &Log("cannot open $dir/$index.new");
+	    return $NULL;
+	};
+    }
     select(OUT); $| = 1; select(STDOUT); 
     while (<LIST>) {
 	# we use an "A HREF" line only. 
@@ -1340,6 +1351,7 @@ sub OutQueueOn
     # "$i" refers itself only;
     return unless $next{$i}; 
 
+    $queue .= " ( " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_TYPE eq 'UL';
     $queue .= " ( " if $next{$i} =~ /\d+\s+\d+/;
 
     # $i -> somewhere;
@@ -1347,6 +1359,7 @@ sub OutQueueOn
 	&OutQueueOn($_, *next, *queue);
     }
 
+    $queue .= " ) " if $next{$i} =~ /\d+\s+/ if $HTML_INDENT_TYPE eq 'UL';
     $queue .= " ) " if $next{$i} =~ /\d+\s+\d+/;
 }
 
@@ -1417,11 +1430,11 @@ sub GenThread
 	    if ($list{$i}) {
 		print OUT $list{$i};
 	    }
-	}
+	} # split $_ (one on split $queue)
 	# print OUT "\t</UL>\n";
 
 	print OUT "\n\n<HR>\n";
-    }
+    } # split queue
 }
 
 
