@@ -5,10 +5,10 @@ I.	install
 普通のfmlと同様にインストール。ただし
 
 	make install-withcgi
-	(makefml -W cgi install を実行)
+	(makefml -W cgi install を実行する)
 
-	$EXEC_DIR/www/cgi-bin/admin/.htacces
-	$EXEC_DIR/www/cgi-bin/admin/*.cgi
+	$EXEC_DIR/share/cgi-bin/fml/admin/.htacces
+	$EXEC_DIR/share/cgi-bin/fml/admin/*.cgi
 
 	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
 		admin:$CRYPTED_PASSWORD
@@ -19,14 +19,31 @@ I.	install
 
 	http://the.fml.host/cgi-bin/fml/admin/menu.cgi
 
-からスタート
+からスタートする。
+
+Q: httpd.conf は fml/share/ の下について設定すれば十分か？
+A: たぶんそういう設定を書くことになるのだろう
+
+Q: fml/www/ と fml/share/ の違いは？
+
+www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを格納
+する場所が fml/www/ 
 
 
 II. 各ＭＬ
 
-1. adminが各ＭＬを作成する。
+1. adminの人が各ＭＬを作成する。
+
+WWWでもmakefmlでもやることは同じなので好きな方を選択
+
 
 Q: cgi以前に作られたものはどう処理する？自動的に有効か？
+
+A: admin がWWWの画面で有効にする
+A: makefml mladmin.cgi ML を走らせる。
+
+どちらでも効果は同じ
+
 
 2. 各ＭＬの管理者に渡す
 
@@ -35,7 +52,9 @@ Q: cgi以前に作られたものはどう処理する？自動的に有効か？
 	http://the.fml.host/cgi-bin/fml/ml-admin/$ml/menu.cgi
 
 
-III. 各ＭＬのユーザ用ページ
+III. 各ＭＬのユーザ用のページ
+
+たぶん登録/削除だけか？
 
 案???
 
