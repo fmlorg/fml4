@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.98 2002/04/20 05:52:06 fukachan Exp $
+# $FML: MANIFEST,v 1.99 2002/05/24 15:24:36 fukachan Exp $
 #
 
 
@@ -716,6 +716,10 @@ PASS_ALL_FIELDS_IN_HEADER: 1
 # $PASS_ALL_FIELDS_IN_HEADER setting
 # value: regexp string
 SKIP_FIELDS:	Return-Receipt-To
+
+# correct a wrong input
+# value: 1/0
+ALLOW_WRONG_LINES_IN_HEADER: 1
 
 
 #####################################################################

@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/07/03
+
+  間違ったヘッダ入力を修正する
+	patch by fml-help:01974
+
 2002/06/29
 
   kern/libloadconfig.pl 
@@ -341,7 +346,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.257 2002/06/26 15:16:50 fukachan Exp $
+	add $FML: CHANGES,v 1.258 2002/06/29 15:21:36 fukachan Exp $
 
 2001/10/03
 
