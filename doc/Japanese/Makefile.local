@@ -34,3 +34,7 @@ diag:
 test:
 	apply '$(FML)/bin/fwix.pl -f ../../tmp/text_index.ph -n i ' \
 		*/index.wix > /dev/null
+
+fix_jcode:
+	@ echo run ../../distrib/bin/fix_doc_jcode.sh
+	@ ../../distrib/bin/fix_doc_jcode.sh
