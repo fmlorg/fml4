@@ -9,9 +9,32 @@ sub SubMode
 {
     local($mode) = @_;
 
-    &StdinLogMode                     if $mode eq 'stdinlog';
-    &SpeculateContorolOrDistriuteMode if $mode eq 'distorctl';
-    &AppendMimeDecodedSubjectMode     if $mode eq 'mimedecodedsubject';
+    &Log("SubMode::mode=$mode") if $debug;
+
+    if ($mode eq 'fmlserv') {
+	&FmlServMode;
+    }
+    elsif ($mode eq 'fml') {
+	&FmlMode;
+    }
+    elsif ($mode eq 'hml') {
+	&HmlMode;
+    }
+    elsif ($mode eq 'emudistribute') {
+	&EmulateDistributeMode;
+    }
+    elsif ($mode eq 'stdinlog') {
+	&StdinLogMode;
+    }
+    elsif ($mode eq 'distorctl') {
+	&SpeculateContorolOrDistriuteMode;
+    }
+    elsif ($mode eq 'mimedecodedsubject') {
+	&AppendMimeDecodedSubjectMode;
+    }
+    else {
+	&Log("Error: $mode is unknown");
+    }
 }
 
 
@@ -30,6 +53,7 @@ sub SpeculateContorolOrDistriuteMode
     #;
 }
 
+
 sub StdinLogMode
 {
     $START_HOOK .= q#;
@@ -44,6 +68,7 @@ sub AppendMimeDecodedSubjectMode
     $START_HOOK .= q# &AppendMimeDecodedSubject(*Envelope);#;
 
 }
+
 
 sub AppendMimeDecodedSubject
 {
@@ -76,5 +101,46 @@ sub AppendMimeDecodedSubject
 	@HdrFieldsOrder = @h;
     }
 }
+
+
+sub EmulateDistributeMode
+{
+    local($name, $domain) = split(/\@/, $MAIL_LIST);
+
+    $SUBJECT_FREE_FORM = 1;
+    $BEGIN_BRACKET     = '[';
+    $BRACKET           = $name;
+    $BRACKET_SEPARATOR = ' ';
+    $END_BRACKET       = ']';
+    $SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+}
+
+
+sub FmlServMode
+{
+    $MAINTAINER      = "fmlserv-admin\@$DOMAINNAME";
+    $CONTROL_ADDRESS = "fmlserv\@$DOMAINNAME";
+}
+
+
+sub FmlMode
+{
+    local($name, $domain) = split(/\@/, $MAIL_LIST);
+    $MAINTAINER      = "${name}-admin\@$domain";
+    $CONTROL_ADDRESS = "${name}-ctl\@$domain";
+}
+
+
+sub HmlMode
+{
+    local($name, $domain) = split(/\@/, $MAIL_LIST);
+
+    $SUBJECT_HML_FORM              = 1;
+    $BRACKET                       = $name;
+    $SUPERFLUOUS_HEADERS           = 1;
+    $STRIP_BRACKETS                = 1;
+    $AGAINST_NIFTY                 = 1;
+}
+
 
 1;
