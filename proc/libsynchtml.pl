@@ -7,11 +7,8 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsynchtml.pl,v 2.43 2001/07/03 04:18:19 fukachan Exp $
+# $FML: libsynchtml.pl,v 2.44 2001/09/11 13:39:22 fukachan Exp $
 #
-
-# local scope in html routines ( libsynchtml libhtmlsubr )
-local($WriteHtmlFileCount) = 0;
 
 
 # Name: Syncronization of spool and html files directory
@@ -31,9 +28,6 @@ sub SyncHtml
     local($dir, $file, *e) = @_;
     local($id, $subdir, $title, $list, $mtime, $probe, $li, $html_dir);
     local($remake_index, $subdir_first_time);
-
-    # initialize counter to count up number of attachments
-    $WriteHtmlFileCount = 0;
 
     # work in distribution mode only
     if (! $e{'mode:dist'}) { # flag on when through Distribute()
