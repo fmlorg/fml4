@@ -1795,6 +1795,17 @@ sub Copy
     1;
 }
 
+# checks the executable "prog" in "prog option".
+sub ProgExecuteP
+{
+    local($prog) = @_;
+
+    $prog || return 0; # no input
+
+    ($prog) = (split(/\s+/, $prog))[0];
+    -x $prog ? 1 : 0;
+}
+
 # mainly search e.g. "sendmail"
 sub SearchPath
 {
