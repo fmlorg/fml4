@@ -1,0 +1,50 @@
+.HTML_PRE
+
+	NetBSD-current での postfix のインストール
+
+ [用語]
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+----------
+
+# vipw
+
+	postfix というユーザをつくる
+	fml  というユーザをつくる
+
+# $EDITOR /etc/group
+
+	maildrop というグループをつくっておく
+
+# cd /usr/pkgsrc/mail/postfix
+# make install
+# cp /usr/pkg/etc/mailer.conf.postfix /etc/mailer.conf
+# cp -pr /usr/pkg/share/postfix /etc/postfix
+# $EDITOR /etc/postfix/main.cf
+
+   (以下変更点のみ、あとはデフォールトでもとりあえずOK)
+
+     myhostname = このホストのFQDN
+     mydomain   = 自分のドメイン
+
+     mynetworks = 自分のネットワーク 例: 10.0.0.0/28, 127.0.0.1/32
+
+     # command
+     allow_mail_to_commands = alias,forward,include
+
+     # これはなくてもよい
+     default_privs = fml
+
+---------
+
+このあと fml のインストールを sendmail の時と同様に行なう
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
+
+
