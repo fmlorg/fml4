@@ -3,6 +3,24 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/08
+
+   makefml add2actives ML address
+   makefml add2members ML address
+
+	片方のファイルだけに(非対象に)登録するためのコマンド
+	一応 2 が打ちにくいのでなくてもOKにしてある。
+
+		makefml addactives
+		makefml add2actives
+
+	は一緒の意味
+
+		makefml addmembers
+		makefml add2members
+
+	は一緒の意味
+
 2000/05/05
 
    FA2000_003: advisory on Love Letter Worm

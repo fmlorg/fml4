@@ -544,6 +544,16 @@ sub SetHashDefaults
 		    'byeuser',  'do_byeuser',
 		    '30#byeuser ML address', 'remove <address> from <ML>',
 
+		    # asymmetric registration
+		    'addmember',      'do_addmembers',
+		    'addmembers',     'do_addmembers',
+		    'add2member',    'do_add2members',
+		    'add2members',   'do_add2members',
+		    'addactive',      'do_addactives',
+		    'addactives',     'do_addactives',
+		    'add2active',    'do_add2actives',
+		    'add2actives',   'do_add2actives',
+
 		    # admin command (sub)
 		    'on',     'do_on',
 		    'off',    'do_off',
@@ -4227,6 +4237,23 @@ sub do_byeadmin
     $AdminMode = 0;
 }
 
+
+sub do_addactives
+{
+    $AsymmetricMode = 'actives_only';
+    &do_adduser(@_);
+    $AsymmetricMode = $NULL;
+}
+
+
+sub do_addmembers
+{
+    $AsymmetricMode =  'members_only';
+    &do_adduser(@_);
+    $AsymmetricMode = $NULL;
+}
+
+
 sub do_adduser
 {
     local($ml, $member) = @_;
@@ -4252,6 +4279,19 @@ sub do_adduser
     if ($AdminMode) {
 	@files = (&Value('ADMIN_MEMBER_LIST') ||
 		  "$ML_DIR/$ml/members-admin");
+    }
+    elsif ($AsymmetricMode) {
+	if ($AsymmetricMode eq 'actives_only') {
+	    push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"));
+	    print "   * added to actives (recipients list) only!\n";
+	}
+	elsif ($AsymmetricMode eq 'members_only') {
+	    push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
+	    print "   * added to members (authentication list) only!\n";
+	}
+	else {
+	    &Error("unknown \$AsymmetricMode");
+	}
     }
     else {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
