@@ -3,13 +3,14 @@
 # Copyright (C) 2000-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML$
+# $FML: toymodel.pl,v 1.10 2001/08/25 14:15:02 fukachan Exp $
 #
 
+use vars qw($debug);
 
 package MySQL;
 
-use vars qw($debug);
+my $debug = $main::debug;
 
 sub Log { &main::Log(@_);}
 
@@ -23,7 +24,7 @@ sub DataBases::Execute
 {
     my ($e, $mib, $result, $misc) = @_;
 
-    if ($main::debug) {
+    if ($debug) {
 	my ($k, $v);
 	while (($k, $v) = each %$mib) { print "MySQL: $k => $v\n";}
     }
@@ -460,6 +461,7 @@ if ($0 eq __FILE__) {
     eval "sub Log { print \@_, \"\\n\";}";
 
     # getopt()
+    use vars qw($debug $opt_D $opt_H $opt_U);
     use Getopt::Std;
     Getopts("dh");
 
@@ -469,7 +471,7 @@ if ($0 eq __FILE__) {
     $mib{'user'}     = $opt_U || $ENV{'USER'};
     $mib{'_ml_acct'} = 'elena';
 
-    $MySQL::debug = 1;
+    $debug = 1;
     &MySQL::Init(\%mib);
     &MySQL::Dump(\%mib);
     &MySQL::Count(\%mib, 'actives');
