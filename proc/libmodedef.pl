@@ -181,7 +181,7 @@ sub ExpireMode
 # check_limit: each time calling is of no use.
 sub ArchiveMode
 {
-    $FmlExitHook{'archive'} = q#;
+    $FmlExitHook{'archive'} .= q#;
     local($check_limit, $unit, $conflict_p);
 
     if ($USE_EXPIRE) {
@@ -234,7 +234,7 @@ sub ArchiveAndExpireConflictP
 
 sub RegistSmtpLogExpire
 {
-    $FmlExitHook{'archive'} = q#
+    $FmlExitHook{'archive'} .= q#
 	&SmtpLogExpire(); 1 if $ID % 10 == 0;
     #;
 }
