@@ -42,6 +42,15 @@ obsolete ?
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	makefml showconf
+
+% makefml showconf
+	version:	fml 3.0B 19990320
+	     os:	i386-unknown-netbsd1.4T
+	............
+
+とかしてくれるような tool があると problem report に便利
+
 .S	spool2html
 
 fml-suppport: 07638
