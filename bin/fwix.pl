@@ -21,7 +21,7 @@ $debug=1;
 ##### Config VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
-$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr|url|filename';
+$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr|url|filename|n';
 $IGNKEY  = 'toc';
 $FORMAT  = 'q|~q|appendix';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
@@ -1233,6 +1233,14 @@ sub Expand
 
 	return '#.next';
     }
+    elsif ($c eq 'n') {
+	if ($mode eq 'html') {
+	    $s =~ s/\s//g;
+	    $Index{$CurLang} .= "<A NAME=\"$s\">\n";
+	}
+	return; # ignore
+    }
+
 
     $s;
 }
