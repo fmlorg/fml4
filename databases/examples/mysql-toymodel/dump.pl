@@ -42,9 +42,9 @@ for $table ( @tables ) {
 
     if ($p) {
 	my @f = @{ $p->{NAME} };
-	printf "%3d   %-10s %-30s %-10s %-10s\n", @f;
+	printf "%-10s %-10s %-30s %-10s %-10s\n", @f;
 	while ( my (@data) = $p->fetchrow_array ) {
-	printf "%3d   %-10s %-30s %-10s %-10s\n", @data;
+	printf "%-10s %-10s %-30s %-10s %-10s\n", @data;
 	}
     }
     else {
