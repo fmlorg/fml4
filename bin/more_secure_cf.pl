@@ -16,16 +16,10 @@
 	   'INCOMING_MAIL_SIZE_LIMIT',   512000,
 	   'USE_DISTRIBUTE_FILTER',      1,
 	   'FILTER_ATTR_REJECT_COMMAND', 1,
+	   'FILTER_ATTR_REJECT_MS_GUID', 1,
 	   'USE_MTI',                    1,
 	   'USE_LOG_MAIL',               1,
 	   );
-
-
-print STDERR "\n";
-for $key (keys %config) {
-    printf STDERR "\t\$%-30s  =>  %s\n", $key, $config{$key};
-}
-print STDERR "\n";
 
 
 while (<>) {
@@ -34,17 +28,34 @@ while (<>) {
     if (/^LOCAL_CONFIG/) {
 	for $key (keys %config) {
 	    next unless $config{$key};
-	    print "$key\t\t$config{$key}\n";
+	    &Write($key, $config{$key});
+	    &P($key, $config{$key});
 	}
+
+	print "\n\n";
     };
 
     for $key (keys %config) {
-	s/^$key\s*/$key\t\t$config{$key}/ && (delete $config{$key});
+	# remove entry
+	if (/^$key\s+(\S+)/) { 
+	    $x = $1;
+
+	    if (! $x) {
+		&P($key, $config{$key});
+		&Write($key, $config{$key});
+	    }
+
+	    # remove entry which appended in the last
+	    delete $config{$key};
+
+	    next;
+	}
     }
 
     print $_, "\n";
 
     if (eof) {
+	print STDERR "  --append the following perl statements\n";
 	print STDERR "\t# Append \@DenyProcedure PPEND FOR SECURITY\n";
 	print STDERR "\t# to disable user to retrieve member list\n";
 	print STDERR "\t\@DenyProcedure = ('member', 'active', 'members', 'actives', 'status');\n";
@@ -57,3 +68,13 @@ while (<>) {
 }
 
 exit 0;
+
+sub P
+{
+    printf STDERR "\t\$%-30s  =>  %s\n", @_;
+}
+
+sub Write
+{
+    printf "%-30s  %s\n", @_;
+}
