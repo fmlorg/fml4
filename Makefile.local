@@ -1,9 +1,11 @@
 ### local configuration 
 FTP_DIR      = $(HOME)/.ftp
+FTP_DIR      = /usr/local/ftp/pub/net/fml-current
 SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 WWW          = /home/hikari/sapporo/www/staff/fukachan/href/fml
 WWW_DIR      = $(WWW)
-
+DESTDIR      = /var/tmp
+MASTER_SITE  = ftp://ftp.sapporo.iij.ad.jp/pub/IIJ/dist/fukachan/fml/utils/pkgsrc/
 
 check:
 	sh distrib/bin/check.sh
