@@ -229,6 +229,10 @@ smrshを使っていると @LIBDIR に/usr/local/fmlが入らない。
 /var/spool/ml/etc/fml/site_init.ph というファイルに
 .q
 push(@INC,   "/usr/local/fml");
+push(@LIBDIR,"/usr/local/fml/module");
+push(@LIBDIR,"/usr/local/fml/module/CPAN");
+push(@LIBDIR,"/usr/local/fml/module/Japanese");
+push(@LIBDIR,"/usr/local/fml/module/fml-devel");
 1;
 .~q
 と書いて下さい。そして以下の symbolik link をはって下さい。
