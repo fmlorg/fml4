@@ -6999,7 +6999,7 @@ sub SetUpCGIadmin
     # print STDERR "     $EXEC_DIR/www/examples/ (examples for MTA and httpd)\n";
 
     $SilentMode = 1;
-    &do_setup_admin_cgi;
+    &do_setup_admin_cgi_scripts($NULL);
     print ".";
     $SilentMode = 0;
     for (<www/examples/*/*>) { print "."; &Conv($NULL, $_, "$EXEC_DIR/$_");}
