@@ -16,9 +16,15 @@ sub MakeParagraphMap
 
     # skip the first null lines. (not find any paragraph yet)
     if ($buf) {
+	# ignore the last trailing "\n"('s).
+	while (substr($buf, $bodylen -1, 1) eq "\n") { $bodylen--;} 
+
 	while (substr($buf, $p, 1) eq "\n") { $p++;}
     }
     else {
+	# ignore the last trailing "\n"('s).
+	while (substr($e{'Body'}, $bodylen -1, 1) eq "\n") { $bodylen--;} 
+
 	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;}
     }
     push(@pmap, $p);
@@ -99,6 +105,8 @@ sub OneLineCheckP
     my($one_line_check_p) = 0;
     my($n_paragraph) = $#pmap;
 
+    &Log("OneLineCheckP: n_paragraph=$n_paragraph") if $main::debug;
+
     if ($n_paragraph == 1) { $one_line_check_p = 1;}
     if ($n_paragraph == 2) { 
 	my($buf) = &main::STR2EUC($lparbuf);
@@ -107,20 +115,30 @@ sub OneLineCheckP
 
 	# basic citation ?
 	if ($buf =~ /\n>/) {
-	    &Log("must be citation") if $main::debug;
+	    &Log("/^>/ lines! must be citation") if $main::debug;
+	    &Log("2 paragraphs but accept mail as citation");
 	}
 	# more functional citation ?:)
+	# Oops ;-) This mail body is also a citation ;-) in this logic;)
+	#   Kenken
+	#   Kaisha
+	# 
 	elsif ($pat && ($buf =~ /$pat.*$pat/)) {
-	    &Log("must be citation") if $main::debug;
+	    my ($p) = $pat;
+	    $p =~ s/\n//;
+	    &Log("plural /^$p/ lines! must be citation") if $main::debug;
+	    &Log("2 paragraphs but accept mail as citation");
 	}
 	elsif ($lparbuf =~ /\@/ || 
 	    $lparbuf =~ /TEL:/i ||
 	    $lparbuf =~ /FAX:/i ||
 	    $lparbuf =~ /:\/\// ) {
+	    &Log("2 paragraphs and 2nd one may be the signature");
 	    $one_line_check_p = 1; 
 	}
 	# account"2-byte @"domain where "@" is a 2-byte "@" character.
 	elsif ($buf =~ /[-A-Za-z0-9]\241\367[-A-Za-z0-9]/) {
+	    &Log("2 paragraphs and 2nd one may be the signature (2-byte \@)");
 	    $one_line_check_p = 1;
 	}
     }
