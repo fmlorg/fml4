@@ -8,6 +8,7 @@ DOC_EXAMPLES_SOURCES += config-moderated
 DOC_EXAMPLES_SOURCES += setup-more-secure 
 DOC_EXAMPLES_SOURCES += config-post-from-anyone
 DOC_EXAMPLES_SOURCES += howto-customize
+DOC_EXAMPLES_SOURCES += errormail-handling
 
 # samples
 DOC_EXAMPLES_SAMPLES += sample.aliases
