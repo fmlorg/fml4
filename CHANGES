@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/24
+
+	CGI fix the behaviour in /ml-admin/$ml layer
+
+		/ml-admin/$ml/ 階層の修正
+
 2000/12/22
 
 	htpasswd 関連の表示を修正
