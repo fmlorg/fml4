@@ -109,7 +109,7 @@ Password:
 =E
 ** add myself to the mailing list
 
-% /usr/local/fml/makefml elena::add 自分のメールアドレス
+% /usr/local/fml/makefml add elena 自分のメールアドレス
 
 	... メッセージ(省略) ...
 =E
