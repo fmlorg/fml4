@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: Makefile,v 2.97 2001/07/13 09:51:27 fukachan Exp $
+# $FML: Makefile,v 2.98 2001/07/20 05:35:04 fukachan Exp $
 
 ### themost important variable ! ###
 FML  = ${.CURDIR}
@@ -111,23 +111,22 @@ build: init_build plaindoc htmldoc __dist ${__BUILD_END__}
 
 doc: plaindoc htmldoc
 
-INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
+INFO:	$(WORK_DOC_DIR)/INFO.jp $(WORK_DOC_DIR)/INFO.en
 
-INFO-common: $(FML)/CHANGES
+$(COMPILE_DIR)/INFO.src: $(FML)/CHANGES
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ $(MKDIR) $(COMPILE_DIR)
 	@ rm -f $(COMPILE_DIR)/INFO
 	($(ECONV) doc/ri/INFO; $(ECONV) CHANGES)|\
-		$(ECONV) |\
-		tee $(WORK_DOC_DIR)/INFO > $(COMPILE_DIR)/INFO.src
+		$(ECONV) > $(COMPILE_DIR)/INFO.src
 
-$(WORK_DOC_DIR)/INFO: INFO-common
-	${FWIX} -n i ${COMPILE_DIR}/INFO.src > ${COMPILE_DIR}/INFO
+$(WORK_DOC_DIR)/INFO.jp: $(COMPILE_DIR)/INFO.src
+	${FWIX} -n i ${COMPILE_DIR}/INFO.src > ${WORK_DOC_DIR}/INFO.jp
 
-$(WORK_DOC_DIR)/INFO-e: INFO-common
+$(WORK_DOC_DIR)/INFO.en: $(COMPILE_DIR)/INFO.src
 	${PERL} ${DIST_BIN}/remove_japanese_line.pl \
 		< $(COMPILE_DIR)/INFO.src |\
-		uniq > $(COMPILE_DIR)/INFO-e
+		uniq > $(WORK_DOC_DIR)/INFO.en
 
 init_dir:
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
