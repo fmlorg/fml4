@@ -32,6 +32,10 @@ sub SubMode
     elsif ($mode eq 'mimedecodedsubject') {
 	&AppendMimeDecodedSubjectMode;
     }
+    elsif ($mode eq "simulation") { 
+	push(@INC, $INCLUDE_SIM_PATH); 
+	require 'libsimulation.pl';
+    }
     else {
 	&Log("Error: $mode is unknown");
     }
