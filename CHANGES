@@ -4,6 +4,13 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/10/13
+
+   proc/libamctl.pl 
+	bug fix: chaddr error in encountering avoid duplication
+	fix spaces for parentheses
+	add $FML$
+
 2001/10/03
 
    proc/libMIME.pl (2.19 -> 2.20)
