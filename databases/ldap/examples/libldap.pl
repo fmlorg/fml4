@@ -68,9 +68,12 @@ sub Connect
 {
     my ($mib) = @_;
     
+    &Log(" search_base: $mib->{'base'}") if $main::debug_ldap;
+    &Log("query_filter: $mib->{'query_filter'}") if $main::debug_ldap;
+
     $entry = $conn->search($mib->{'base'}, 
 			   "subtree",
-			   $mib->{'query_filter'});
+			   $mib->{'query_filter'} || '(objectclass=*)');
 
     if (! $entry) {
 	$mib->{'error'} = "cannot find base $mib->{'base'}";
@@ -81,11 +84,18 @@ sub Connect
 
 sub GetActiveList
 {
-    $max = $entry->size("maildrop");
-    &main::Log("maildrop max = $max");
+    my ($max, $orgf, $newf);
 
-    my ($orgf) = $mib->{'CACHED_FILE'};
-    my ($newf) = $mib->{'CACHED_FILE'}.".new";
+    $max  = $entry->size("maildrop");
+    if ($main::debug_ldap) {
+	$orgf = $newf = '/dev/stdout';
+    }
+    else {
+	$orgf = $mib->{'CACHE_FILE'};
+	$newf = $mib->{'CACHE_FILE'}.".new";
+    }
+
+    &main::Log("LDAP: maildrop max = $max") if $main::debug;
 
     if (open(OUT, "> $newf")) {
 	for my $i (0 .. $max) {
@@ -95,7 +105,10 @@ sub GetActiveList
 	}
 	close(OUT);
 
-	if (! rename($newf, $orgf)) {
+	if ($main::debug_ldap) {
+	    ;
+	}
+	elsif (! rename($newf, $orgf)) {
 	    &Log("ERROR: LDAP: cannot rename $newf $orgf");
 	}
     }
@@ -122,6 +135,15 @@ sub Add
 }
 
 
+sub Dump
+{
+    while ($entry) {
+	$entry->printLDIF();
+	$entry = $conn->nextEntry();
+    }
+}
+
+
 sub Close
 {
     $conn->close();
@@ -137,32 +159,53 @@ if ($0 eq __FILE__) {
 
     # getopt()
     require 'getopts.pl';
-    &Getopts("dhm:r:");
+    &Getopts("dhm:r:b:D");
+
+    if ($opt_h) {
+	print "$0: [options] [query_filter]\n";
+	print "   -D       dump mode\n";
+	print "   -m \$ml   mailing list\n";
+	print "   -r \$addr recipient address\n";
+	print "   -b \$base base\n";
+	exit 0;
+    }
 
     $|  = 1;
     $ML = $opt_m || 'elena';
     $r  = $opt_r;
 
+    $debug_ldap = 1;
+
     my (%mib);
-    $mib{'base'} = "cn=$ML, dc=fml, dc=org";
+    $mib{'base'}         = $opt_b || "cn=$ML, dc=fml, dc=org";
+    $mib{'query_filter'} = $ARGV[0] || '(objectclass=*)';
+
     if ($r) {
 	# $mib{'password'} = 'secret';
     }
 
     &LDAP::Init(\%mib);
-    if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}");}
+    if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
 
     &LDAP::Connect(\%mib);
-    if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}");}
+    if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
 
     if ($r) {
 	&LDAP::Add(\%mib, $r);
-	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}");}
+	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
+    }
+    elsif ($opt_D) {
+	&Log("-- dump mode");	
+	&LDAP::Dump();
     }
     else {
-	&Log("get active list");
+	&Log("-- get active list");
+
 	&LDAP::GetActiveList;
+	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
+
 	&LDAP::Close;
+	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
     }
 }
 
