@@ -554,6 +554,7 @@ Backward compatibility で残っているともいえます。
 .S	To: と Cc: の Rewriting 処理
 .l	$NOT_REWRITE_CC
 
+
 可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
 スが出るようになっています。
 original header を通すという設定の場合はそうはならずオリジナルのままです。

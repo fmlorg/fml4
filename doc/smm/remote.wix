@@ -165,28 +165,36 @@ multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 
 
 .S	アドミンのコマンド一覧 (help-admin より)
+.k	help-admin
+.k	help-admin
 
-# admin pass パスワード（もしパスワードを必要とする設定なら）
-# admin passwd 新しいパスワード（もしパスワードを必要とする設定なら）
-# admin help		管理者コマンドヘルプを取り寄せる（このファイル）
-# admin log		ログを取り寄せる
-# admin add address	address の人をＭＬに登録する
-# admin off address	address の人をＭＬ一時おやすみにする
-# admin on address	address の人のＭＬ一時おやすみを解除
-# admin bye address	address の人をＭＬメンバーから削除
-# admin addadmin address
-# admin addpriv  address	address の人を管理者メンバーとして登録
-# admin byeadmin address
-# admin byepriv  address	address の人を管理者メンバーから削除
-# admin dir		ＭＬのある場所の階層全部のリスト（ls -lR）
-# admin ls options	ＭＬのある場所のリスト（ls）
-# admin ls -l
-# admin ls -l spool	のようにオプションも可
-# admin remove filename	ＭＬのある場所の filename というファイルを削除
-# admin get filename	ＭＬのある場所の filename というファイルをとってくる
-# admin put filename	ＭＬのある場所の filename というファイルを置く。
-# admin rename filename1 filename2 
-		filename1 というファイルをfilename2 という名前にする
+   # admin pass パスワード
+   # admin password パスワード
+   # admin passwd 新しいパスワード
+   # admin initpass アドレス パスワード
+   # admin help
+   # admin log
+   # admin add address
+   # admin off address
+   # admin on address
+   # admin bye address
+   # admin chaddr old-addr new-addr
+   # admin change old-addr new-addr
+   # admin change-address old-addr new-addr
+   # admin matome address 引数 
+   # admin skip address
+   # admin addadmin address
+   # admin addpriv  address
+   # admin byeadmin address
+   # admin byepriv  address
+   # admin dir
+   # admin ls options
+   # admin remove filename
+   # admin get filename
+   # admin put filename
+   # admin rename filename1 filename2
+   # admin newinfo
+   # admin newguide
 
 
 .S	リモート管理で使えるコマンドを増やすor減らす
@@ -226,6 +234,54 @@ config.ph でコントロールできます。
 	@DenyAdminProcedure = ('admin:addadmin');
 
 
+.S	リモートで管理する人を増やす時
+.k	admin addadmin
+.k	admin addpriv
+.k	admin initpass
+
+fukachan@sapporo.iij.ad.jp を管理者に加える時は
+
+パスワード認証をしていない時は
+
+   # admin addadmin fukachan@sapporo.iij.ad.jp
+
+だけを、パスワード認証もしている時は
+
+   # admin addadmin fukachan@sapporo.iij.ad.jp
+   # admin inipass  fukachan@sapporo.iij.ad.jp パスワード
+
+をコマンドで送りこみます。
+
+より良いのは、
+
+   # admin inipass  fukachan@sapporo.iij.ad.jp パスワード
+
+の代わりに、そのマシンで (ML の HOME で)
+
+   bin/passwd.pl -i fukachan@sapporo.iij.ad.jp パスワード
+
+をすることです。そのマシンがリモートにある場合さらに良い方法はあらかじ
+めそのパスワードを crypt した文字列を（ローカルマシン上で）用意して、
+そのマシンへ入って $DIR/etc/passwd (ML の HOME の下の etc/passwd) を
+手で編集することです。
+.xref	bin/passwd.pl etc/passwd 
+
+その場合途中の経路上が暗号化されているとより望ましいです(^^)。
+.xref	Gauntlet
+
+もっとも暗号化に関しては初期化プロセスだけ暗号化されていても admin コ
+マンドは SMTP 上で動いてるのでパスワード隠蔽に関しては、どのみちあまり
+意味はありませんが…
+
+
+.S	リモートで管理する人を削除する時
+.k	byeadmin
+.k	byepriv
+
+   # admin byeadmin fukachan@sapporo.iij.ad.jp
+
+です。
+
 
 .S	パスワードファイルの初期化と設定
 .label	init-passwd
@@ -246,13 +302,13 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 	# admin pas	パスワード
 	# admin passwd	新しいパスワード
 
-をサーバへ送り込むことで変更(etc/passwdの設定変更)をすることができます。
-approve コマンドなら
+をサーバへ送り込むことで変更 (etc/passwdの設定変更) をすることができま
+す。approve コマンドなら
 
 	# apporve パスワード passwd 新しいパスワード
 
 ですね。
-	
+
 
 .S	ログファイルがＭＬ本体と管理者コマンドで同じだが…
 

@@ -633,6 +633,7 @@ msend.pl は $ACTIVE_LIST を見て、
 
 .S	パスワードファイルのフォーマットと構造
 .k	パスワードファイルのフォーマットと構造
+.l	etc/passwd
 .xref	bin/passwd.pl remote
 
 パスワードを保存しているファイルは通常 etc/passwd に置かれています。
