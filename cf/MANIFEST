@@ -575,3 +575,4 @@ COMPRESS:	&path(gzip) -c
 ZCAT:		&path(gzcat:zcat:gzip\s-cd)
 LHA:		&path(lha)
 ISH:		&path(ish)
+PGP:		&path(pgp)
