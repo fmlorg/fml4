@@ -427,6 +427,7 @@ DISTRIBUTE_FILTER_HOOK:
 FILTER_NOTIFY_REJECTION:
 
 # Attribute of filter of posted article
+# value: 1/0
 FILTER_ATTR_REJECT_NULL_BODY:	1
 
 # Attribute of filter of posted article
@@ -442,6 +443,7 @@ FILTER_ATTR_REJECT_2BYTES_COMMAND:
 
 # Attribute of filter of posted article
 # reject command mail sent to the address for posting.
+# value: 1/0
 FILTER_ATTR_REJECT_INVALID_COMMAND:	1
 
 # Attribute of filter of posted article
@@ -450,6 +452,7 @@ FILTER_ATTR_REJECT_INVALID_COMMAND:	1
 # except for signature (last paragraph).
 # Even if it has one line, the paragraph ends with period '.'
 # it must be an effective paragraph. So we should not reject it.
+# value: 1/0
 FILTER_ATTR_REJECT_ONE_LINE_BODY:	1
 
 # Attribute of filter of posted article
@@ -899,13 +902,15 @@ PORT:		25
 SMTP_LOG:		$VARLOG_DIR/_smtplog
 
 # IF $NOT_TRACE_SMTP IS 1 (default 0), we log the SMTP session to $SMTP_LOG
-# IF $TRACE_SMTP_DELAY IS 1, we logs the delay of response between SMTP server.# value: 1/0
+# IF $TRACE_SMTP_DELAY IS 1, we log the delay of response between SMTP server.
+# value: 1/0
 NOT_TRACE_SMTP:  	0
 TRACE_SMTP_DELAY:	
 
 # You can use plural MTA for parallel delivery.
 # $MCI_SMTP_HOSTS is the number of hosts you use.
 # @HOSTS is the array of hosts you use.
+# value: number
 MCI_SMTP_HOSTS:		
 
 # obsolete today
@@ -1148,7 +1153,11 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 # if $AUTO_HTML_GEN, we generate html'ed articles in $DIR/$HTML_DIR
 # value: 1/0
 AUTO_HTML_GEN:
+
+# value: 1/0
 HTML_THREAD:			1
+
+# value: 1/0
 HTML_INDEX_REVERSE_ORDER:	1
 
 # generate html articles under htdocs/ 
@@ -1261,7 +1270,13 @@ NOT_USE_TIOCNOTTY:
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
 HAS_GETPWUID:	
+
+# On Unix, always yes set 1 in &SetDefaults;
+# value: 1/0
 HAS_GETPWGID:	
+
+# On Unix, always yes set 1 in &SetDefaults;
+# value: 1/0
 HAS_ALARM:	
 
 # program paths fml uses
