@@ -44,9 +44,6 @@ postfix での pop before smtp について
 see INSTALL of drac and make drac and qpopper
 .fi
 
-patch
-.url qpopper-patch-by-drac.txt
-
 3. modify postfix /etc/postfix/main.cf.
 
         smtpd_recipient_restrictions =
