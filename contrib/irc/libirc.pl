@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 # 
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -24,6 +24,11 @@ if ($0 eq __FILE__) {
 	$NetIRC'LOGFILE = "$ENV{'PWD'}/log"; #';
 	eval q#sub Log { &NetIRC'Log(@_);}#; #';
 
+	# program name
+	$Prog = $0;
+	$Prog =~ s#.*/##;
+	$Prog =~ s#\.pl$##;
+
 	for (;;) {
 	    ### configuration reset ###
 	    # signal handling
@@ -34,21 +39,16 @@ if ($0 eq __FILE__) {
 	    &IrcInit;
 	    &IrcConnect;
 
-	    if ($0 =~ /stdin2irc/) {
-		# infinite loop (but it ends up if anything error occurs).
-		# stdin -> buffer <-> irc server
-		&IrcMainLoop;
-	    }
-	    elsif ($0 =~ /q2irc/) {
-		&QueueToIrc;
-	    }
+	    # infinite loop (but it ends up if anything error occurs).
+	    # stdin -> buffer <-> irc server
+	    &IrcMainLoop($Prog);
 
 	    ### end ###
 	    close(S);
 	    shutdown(S, 2);
 
 	    sleep 3;
-	    &Log("stdin2irc restarting ...");
+	    &Log("$Prog restarting ...");
 	}
     }
 
@@ -104,7 +104,7 @@ sub main'IrcParseArgv #'
 {
     ### getopts
     require 'getopts.pl';
-    &Getopts("df:I:t:hL:");
+    &Getopts("df:I:t:hL:H:");
 
     if ($opt_h) {
 	$s = $0;
@@ -117,6 +117,7 @@ sub main'IrcParseArgv #'
 	-L file  log file;
 	-I INC   add include path to \@INC;
 	-t title setproctitle(title);
+	-H a:b:c HOSTS to monitor (ircstat option)
 	;
 	-d       debug mode;
 	-h       this message;
@@ -137,6 +138,12 @@ sub main'IrcParseArgv #'
 
     # include path
     push(@INC, $opt_I);
+
+    # import -> @irc::STAT_HOST
+    if ($opt_H) {
+	@STAT_HOST  = split(/:/, $opt_H);
+	$STAT_UNIT  = $#STAT_HOST + 1;
+    }
 }
 
 
@@ -190,7 +197,7 @@ sub Exit
     &Log("Caught SIG${sig}, shutting down");
     &Log("Send QUIT To Server");
     &SendS("QUIT :$IRC_SIGNOFF_MSG");
-    sleep 1;
+    sleep 2;
     exit(0);
 }
 
@@ -251,7 +258,7 @@ sub main'IrcConnect #'
     while ($status = &DoConnect(*IRC_SERVER, *error)) {
 	print STDERR "status=$status\n" if $debug;
 	&Log($status) if $status;
-	sleep 1;
+	sleep 2;
     }
 }
 
@@ -299,12 +306,26 @@ sub DoConnect
 
 sub main'IrcMainLoop  #'
 {
+    local($mode) = @_;
     local($rin, $win, $ein);
     local($rout, $wout, $eout);
     local($buf, $wbuf, $reset, $count);
 
     # server not recognize me!
     $TrapPattern = 'not registered';
+
+    ### ircstat
+    if ($mode eq 'ircstat') {
+	$RecvYes   = 1;
+	$StatQuery = 0;
+	$StatCount = 0;
+	$LastRecv  = time;
+
+	$STAT_UNIT || die("$mode: -H host is required\n");
+
+	# host to monitor
+	$NextStatHost = $STAT_HOST = $STAT_HOST[$StatCount++ % $STAT_UNIT];
+    }
 
     # server timeout
     $IRC_SERVER_TIMEOUT = $IRC_SERVER_TIMEOUT || 1800;
@@ -324,8 +345,8 @@ sub main'IrcMainLoop  #'
 	    last;
 	}
 
-	$0 = "--stdin2irc $SetProcTitle";
-    
+	$0 = "--$mode $SetProcTitle";
+
 	($nfound, $timeleft) =
 	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
 
@@ -341,10 +362,8 @@ sub main'IrcMainLoop  #'
 
 	# Server Socket
 	if (vec($rout, $BITS{'S'}, 1)) {
-	    print STDERR "S STAND-BY\n" if $debug;
-
 	    sysread(S, $buf, 4096) || do { 
-		if ($!) { &Log("sysread: $!");} 
+		if ($!) { &Log("S sysread: $!");} 
 		$reset = 1;
 	    };
 
@@ -358,11 +377,9 @@ sub main'IrcMainLoop  #'
 	}
 
 	# input channel
-	if (vec($rout, $BITS{'STDIN'}, 1)) {
-	    print STDERR "STDIN STAND-BY\n" if $debug;
-
+	if (($mode eq 'stdin2irc') && vec($rout, $BITS{'STDIN'}, 1)) {
 	    sysread(STDIN, $buf, 4096) || do { 
-		if ($!) { &Log("sysread: $!");}
+		if ($!) { &Log("STDIN sysread: $!");}
 		$reset = 1;
 	    };
 
@@ -372,11 +389,36 @@ sub main'IrcMainLoop  #'
 	    }
 	}
 
-	# debug
-	if ($debug) {
-	    $xxx = length(@Queue);
-	    &Log("wait queue $xxx");
+
+	### analyze buffer
+	# ircstat
+	if ($mode eq 'ircstat' && $StatQuery) {
+	    # wait for reply we expect
+	    if ($buf) {
+		$RecvYes = &NetIRC'StatLog(*buf); #';
+	    }
+
+	    if ((time - $LastRecv) > 60) {
+		&Log("ircstat: wait reply for ".(time - $LastRecv)." secs.");
+	    }
+	    
+	    if ($RecvYes) {
+		$StatQuery = 0;
+		$LastRecv  = time;
+
+		# host to monitor
+		$STAT_HOST = $STAT_HOST[$StatCount++ % $STAT_UNIT];
+		$StatCount = $StatCount % $STAT_UNIT;
+		undef $NextStatHost;
+
+		# debug :-)
+		push(@Queue, "PRIVMSG $IRC_CHANNEL :$RecvYes");
+	    }
+	    else {
+		# next;
+	    }
 	}
+
 
 	### reset flag, not continue ### 
 	next if $reset;
@@ -384,11 +426,13 @@ sub main'IrcMainLoop  #'
 	$GlobalErrorCount = 0 if $count > 5;
 
 	# wait
-	sleep 1;
-	sleep int(length(@Queue)/3);
+	sleep 2; # RFC1459 defines "1 message per 2 secs". (theory)
+	sleep int(log(length(@Queue) + 3)); # experimental (3 for 'e').
 
 	# write the buffer to server
-	$wbuf = shift @Queue;
+	$wbuf = &GetNextBuffer($mode);
+	&GetTime(time);
+	print STDERR "--wbuf <$wbuf> ($Now)\n" if $debug;
 	&SendS($wbuf) if $wbuf;
 
 	# counter
@@ -405,6 +449,41 @@ sub main'IrcMainLoop  #'
     sleep($GlobalErrorCount % 16); # max 15 sec.
 }
 
+
+########## SWITCH
+
+# stdin2irc
+sub GetNextBuffer
+{
+    local($m) = @_;
+
+    if ($m eq 'stdin2irc') {
+	shift @Queue;
+    }
+    elsif ($m eq 'ircstat') {
+	if (@Queue) {
+	    shift @Queue;
+	}
+	else {
+	    &GetTime(time);
+	    # 59,58,57
+	    if (((59 - $sec) % 30) < 3*$IRC_TIMEOUT) {
+		sleep(((59 - $sec) % 30) + 1); # align at 0 sec:-)
+		$StatQuery = 1;
+		"LUSERS $STAT_HOST";
+	    }
+	    else {
+		$NULL;
+	    }
+	}
+    }
+    elsif ($m eq 'q2irc') {
+	&QueueToIrc;
+    }
+    else {
+	shift @Queue;
+    }
+}
 
 
 ########## Library
@@ -498,12 +577,13 @@ sub Log
     if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
 	&Append2("$Now $str", $LOGFILE);
 	&Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
+	print STDERR "$Now $str\n" if $debug;
+	print STDERR "\t$s\n"  if $debug && $s;
     }
     else {
-	print STDERR "$Now $str\n\t$s\n";
+	print STDERR "$Now $str\n";
+	print STDERR "\t$s\n" if $s;
     }
-
-    print STDERR "$Now $str\n\t$s\n" if $debug;
 }
 
 
@@ -533,5 +613,21 @@ sub Write2
     1;
 }
 
+
+### ircstat
+sub StatLog
+{
+    local(*buf) = @_;
+    local(@x) = split(/\n/, $buf);
+
+    for (@x) {
+	if (/.*:.*\s+(\d+\s+user\w+)/) {
+	    &Log($_ = "$irc'STAT_HOST: $1"); #';
+	    return($_ ? $_ : 1);
+	}
+    }
+
+    0;
+}
 
 1;

@@ -1,4 +1,8 @@
-.C	Distribute との Compatibility 
+.C	Emulate "distribute"
+.if LANG == ENGLISH
+*** NOT TRANSLATE SINCE THIS CHAPTER IS ADDITIONAL AND OBSOLETE ***
+.return
+.fi
 
 以下ある時いきおいで作った対応表。さらに、ややこしいことに distribute 
 モードというのは distribute compatible のことではないのです

@@ -1,5 +1,10 @@
 .C	fml 1.x smm/op より再収録…
+=E.C	recordings from fml 1.x smm/op
 .l	appendix:fmlR1
+.if LANG == ENGLISH
+*** NOT TRANSLATE SINCE THIS CHAPTER IS ADDITIONAL AND OBSOLETE ***
+.return
+.fi
 
 .S	fml 1.x サーバの中身は？
 .label	{fml-mechanism}

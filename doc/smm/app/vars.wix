@@ -1,7 +1,13 @@
 .# ##########################################################
 .S	config.phの項目一覧 
+=E.S	config.ph entries
 .k	config.ph
 .l	{config}
+.if LANG == ENGLISH
+*** NOT TRANSLATE SINCE THIS CHAPTER IS ADDITIONAL AND OBSOLETE ***
+.return
+.fi
+
 
 .S	設定一覧（Advanced Setting）
 

@@ -1,4 +1,8 @@
-.A	Obsolete ?
+.C	Obsolete things
+.if LANG == ENGLISH
+*** NOT TRANSLATE SINCE THIS CHAPTER IS ADDITIONAL AND OBSOLETE ***
+.return
+.fi
 
 .S	複数のＭＬがあるけど、コマンドの処理は一つのアドレスで一括してやりたい
 .key	コマンド専用アドレスその２

@@ -1,0 +1,53 @@
+外部プログラムを起動する。これを通してプログラムを起動すると、実効UID は 起動
+されたプログラムの所有者になる。CGI などで使われるラッパー。
+
+大まかな euid の変更条件は、
+     1. URLのディレクトリ部が ~ で始まる、個人ユーザーのディレクトリであること。
+     2. ファイルの所有者がその public_html の所有者と等しいこと。
+     3. 普通の実行ファイルであること。
+
+らしい。
+
+各種呼び出し
+
+CGI の呼び出し方法は様々にある。それぞれについて試してみる。
+
+方法PUID URLuser SSIの #exec cgiuser SSIの #exec cmd実行不可 Apache/Perl &
+Apache-ePerlw3master
+
+コンパイル
+     1. Apache1.2 以降のディレクトリ下にある。
+
+        % cd  $APACHE/support
+     2. ここの suexec.h を設定する。
+
+        #define HTTPD_USER "w3master"
+          suEXEC を起動できるユーザー
+
+        #define LOG_EXEC "/usr/etc/apache_1.2.0/logs/cgi.log"
+
+        #define DOC_ROOT "/usr/etc/httpd/htdocs"
+     3. コンパイル
+
+        % gcc -O2 suexec.c -o suexec
+     4. Apacheの設定
+        * $apache/src/httpd.h
+
+          #define SUEXEC_BIN "/usr/etc/apache_1.2.0/sbin/suexec"
+        * コンパイル
+     5. インストール
+        % mkdir ../sbin
+        % cp suexec ../sbin
+        root に setuid しておく。
+        % cd ../sbin
+        % su
+        # chown root suexec
+        # chmod 4711 suexec
+     6. Apache の起動
+        suEXEC の許すユーザーで httpd が動くように起動する。
+        起動時に
+
+                Configuring Apache for use with suexec wrapper.
+と出れば成功。
+------------------------------------------------------------------------------
+Last modified: Wed Jun 11 20:50:16 JST 1997
