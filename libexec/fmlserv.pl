@@ -383,14 +383,7 @@ sub DoFmlServProc
 
     # already $DIR/$ml/file form; 
     # initialize some arrays; if auto-regist is clear here, we reset;
-    if (! $ML_MEMBER_CHECK) { $ACTIVE_LIST = $MEMBER_LIST;}
-    push(@MEMBER_LIST, $MEMBER_LIST);
-    push(@ACTIVE_LIST, $ACTIVE_LIST);
-
-    if (! $ML_MEMBER_CHECK) {
-	$ACTIVE_LIST = $MEMBER_LIST;
-	push(@ACTIVE_LIST, @MEMBER_LIST);
-    }
+    &AdjustActiveAndMemberLists;
 
     $auth = &MailListMemberP($From_address);
 
