@@ -104,7 +104,7 @@ COPY_DOCS () {
    # http
    echo " ";
 
-   htmlopt='--exclude=op --exclude=op-e'
+   htmlopt='--exclude=op --exclude=op-e --exclude=examples'
    echo "rsync $htmlopt -av var/html/ $DESTDIR/distrib/doc/html/"
    rsync $htmlopt -av var/html/ $DESTDIR/distrib/doc/html/
 
