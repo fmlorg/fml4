@@ -2424,6 +2424,11 @@ sub do_htpasswd
     &ResetVariables;
     $prog = &search_path('htpasswd');
 
+    if (! ($prog && -x $prog)) {
+	&Error("cannot find 'htpasswd'");
+	return;
+    }
+
     $dir = "$CGI_AUTHDB_DIR/ml-admin/$ml";
     $pwf = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
 
