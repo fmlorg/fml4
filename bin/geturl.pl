@@ -66,7 +66,7 @@ sub GetUrl
     if ($WITH_WWW_WATCH) {
 	open(URL, "> $urlcache");
 	select(URL); $| = 1; select(STDOUT);
-	print URL $url;
+	print URL "$req\n";
 	close(URL);
     }
 
