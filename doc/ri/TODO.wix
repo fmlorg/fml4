@@ -13,6 +13,25 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
+◯ makefml add$file
+   
+fml-support: 07111
+
+片方だけのファイルを操作するための
+
+   makefml {add,bye}ファイル名
+   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
+
+(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
+がします。
+
+e.g. makefml addactives ML addr
+     makefml addmembers ML addr
+
+なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
+思うので実装しなくてはいけないとおもいました。
+
+
 ◯ good bye doc/smm/ 
 
 ◯ にほんご
@@ -48,6 +67,11 @@ $LOG_FILE_SUFFIX = ".%C%y";
 
    use POSIX;
    $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
+
+◯ invalid form variables
+
+Example:
+	_cf (global)
 
 
 
@@ -98,11 +122,6 @@ obsolete ?
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO
-
-.S	invalid form variables
-
-Example:
-	_cf (global)
 
 .S	よくわからない --;;
 
@@ -244,7 +263,7 @@ makefml pgp ??? This command is for administrators.
 Which command could we use for usual member PGP authentication?
 
 
-.S	暗号化モード (USE_ENCRYPTION_DISTRIBUTION)
+.S	暗号化の問題 (USE_ENCRYPTION_DISTRIBUTION)
 =E.S	USE_ENCRYPTION_DISTRIBUTION
 
 この時に使う PGP は $DIR/etc/pgp/ ではよくない。別につくるべき。
@@ -252,15 +271,6 @@ Which command could we use for usual member PGP authentication?
 =E
 DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
 command" to handle pgp key for usual users.
-
-
-.S	makefml config full menu
-
-全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
-のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
-=E 
-All variables can be configurable in the menu? 
-I may not do it since it only confuses the customize.
 
 
 .S	間違いメールのフィルタリング
@@ -278,9 +288,11 @@ I may not do it since it only confuses the customize.
   してむしするようになっているが、ひっかかないものもある。
 
 
-*  Filter の動的 update はできないか？ 
+* Filter module ?
+* Filter の動的 update はできないか？ 
 =E
-*  update filter dynamically 
+* Filter module ?
+* update filter dynamically 
 
    http://www.fml.org/some/where/filter-rule.html ? 
 
@@ -292,12 +304,8 @@ fml-support: 7155
 # end
 .~q
 
-* Filter module ?
-
-
-* MTIの理論の解説書(本の厚さとはいわないが…)
-=E
-* MTI document
+.S	MTIの理論の解説書(本の厚さとはいわないが…)
+=E.S	MTI document
 
 XRef: fml-support:05930
 
@@ -428,17 +436,21 @@ command to rewrite addresses in one action ?
 
 I depends on NetBSD (bsd)make.
 
+
 .S	cf/MANIFEST.obsolete
 
 obsolete list of variables
+
 
 .S	re-create Makefile
 
 fml-support: 07525
 
+
 .S	makefml controls @*Procedure, %LocalProcedure ?
 
 fml-support: 07525
+
 
 .S	help depends commands 
 
@@ -510,25 +522,6 @@ A: Ｎ通りについて考えるのが面倒なので
    
    *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
    
-
-.S   	makefml add$file
-   
-fml-support: 07111
-
-片方だけのファイルを操作するための
-
-   makefml {add,bye}ファイル名
-   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
-
-(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
-がします。
-
-e.g. makefml addactives ML addr
-     makefml addmembers ML addr
-
-なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
-思うので実装しなくてはいけないとおもいました。
-
 
 .S 	CUIとGUIどっちが本体？
 =E.S	whether of CUI and GUI is fundamental 
@@ -622,6 +615,16 @@ XXX わかりやすいコードというべきなんだろうな
 * fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
   MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
   今は stat() して reload をするようになっている
+
+
+◯ 	makefml config full menu
+
+全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
+のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
+=E 
+All variables can be configurable in the menu? 
+I may not do it since it only confuses the customize.
+
 
 
 .# $Id$
