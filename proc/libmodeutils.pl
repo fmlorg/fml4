@@ -22,7 +22,7 @@ sub SpeculateContorolOrDistriuteMode
     local($ca) = &CutFQDN($CONTROL_ADDRESS);
     if (($ca && ($Envelope{'mode:chk'} =~ /$ca/i))) {
 	$LOAD_LIBRARY || ($LOAD_LIBRARY = 'libfml.pl'); 
-        $COMMAND_ONLY_MODE = 1; 
+        $COMMAND_ONLY_SERVER = 1; 
     }
     else {
         &DEFINE_MODE('distribute');
