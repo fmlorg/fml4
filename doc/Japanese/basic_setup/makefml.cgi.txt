@@ -1,0 +1,119 @@
+Date: Thu, 5 Aug 1999 10:04:35 +0900
+From: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+To: fml-support@ffs.fml.org (fml supporting ML)
+X-ML-Name: fml-support
+X-Mail-Count: 06557
+
+3.0 系とは全然別のbranchで、makefml を CGI にする実験してます。
+ソースはftpのいつもの場所の下に別途 experimental/ が掘ってあります。
+＃ fml-current とは別枠で experimental/ になっています  
+
+	experimental/fml-snap-19990805.tar.gz
+
+＃ このbranchではドキュメントのupdateをまだしない/してないので
+＃ 削ってしまった機能というのがありますが、ほとんどの人には
+＃ 無関係なはずです。
+
+最初の一発めで不完全ですが、試してみてもらえるとありがたいです_o_
+
+深町％さっぽろ＠IIJ
+
+
+		makefml CGI verion
+
+正確にはCGIが makefml の wrapper です。特に makefml config を呼び出し
+ている「設定」の部分はみかけは CUI の時と一緒で単に
+
+	数字で選択 	(CUI)
+	叩いて進む	(GUI)
+
+が違うだけです。このα板では
+
+	makefml config
+	makefml add
+	makefml bye
+	makefml addadmin
+	makefml byeadmin
+	makefml newml
+
+のエミュレーションをします。newml をすると /var/spool/ml/etc/aliases 
+につっこんでいくようにしてあるので(MTAの設定が必要ですが)、ボタン一発
+でつくれるはず（これもインストーラが補助をするべきなんでしょうが、でき
+てない）
+
+削除もまだできません。
+
+○インストール
+
+インストーラはまだないです。
+
+make install すると
+
+	/usr/local/fml/www/cgi-bin/
+
+ができます。cgi-bin/ 以下を WWWサーバの cgi-bin を実行できる場所へもっ
+ていってください。で、あとは
+
+	http://www-server/cgi-bin/admin/menu.cgi
+
+を呼べば以下のようなページになります(下はw3m -dump)。
+
+
+                      "fml" Configuration Interface                        
+
+
+---------------------------------------------------------------------------
+設定 
+
+  メーリングリスト: [____________________]                                        
+                    既存リストからの選択:                                         
+                               [*]aoi-chan
+                               [ ]elena
+                               [ ]mirei
+_____________________________ 
+[GO] [Reset] 
+
+---------------------------------------------------------------------------
+
+登録/削除関係 
+
+  メーリングリスト: [____________________]                                        
+                    既存リストからの選択:                                         
+                               [*]aoi-chan
+                               [ ]elena
+                               [ ]mirei
+     Emailアドレス: [____________________]                                        
+         登録/削除:                                 
+                    [*]登録                         
+                    [ ]削除                         
+                    [ ]管理者として登録                                           
+                    [ ]管理者として削除                                           
+_____________________________ 
+[Submit] [Reset] 
+
+---------------------------------------------------------------------------
+
+メーリングリストの作成 
+  メーリングリスト名: [____________________]  
+_____________________________ 
+[Create] [Reset] 
+
+
+○ TODO
+
+/cgi-bin/fml/admin/ の下とかがいいんではないのか？
+
+ドキュメント
+
+インストーラ
+	MTAごとの補正、補助
+	WWWの設定の補助
+	パスワード設定などについて
+
+newaliases との連動
+
+入力のチェック機構
+
+他のエントリは？順番は？
+
+他にエミュレーションするべきもの？

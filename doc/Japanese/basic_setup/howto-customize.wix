@@ -1,0 +1,84 @@
+.HTML_PRE
+
+	fml 3.0 の設定の変更の仕方について
+=E
+	fml 3.0: how to configure fml
+
+.include terms.wix
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include howto-customize.en.wix
+.return
+.fi
+
+○ 変数の設定を変更するやり方
+
+elena MLの設定は/var/spool/ml/elena/config.ph (以下config.ph)というファ
+イルの中身で決まります。全部のＭＬ共通の設定のしかたなどの発展版もあり
+ますが、基本は”/var/spool/ml/elena/config.ph をいじる”ということだけ
+です。
+
+このファイルの変更の仕方は大きく分けて3通りあります。
+機械的処理の度合が違うと思って下さい
+
+1.	makefml のメニューで変更する (機械的処理)
+2.	cf というというファイルをいじる (半機械的処理)
+3.	config.ph というファイルをエディターで直接いじる(人間がいじる。王道)
+
+
+
+1.	makefml のメニューで変更する (初級編)
+
+makefmlはメニューで変更された内容を/var/spool/ml/elena/cfにsaveし、自
+動的にconfig.phをcfから再生成する。
+
+設定メニュー(makefml config)の使い方の詳細は
+.url ../INSTALL/index.html#makefml-config
+
+  コマンドラインで makefml を起動するとメニューになる。
+  GUIではなくCUIです。＃GUIは開発中
+
+     % /usr/local/fml/makefml config ＭＬ名
+
+  例: elena ML 
+     % /usr/local/fml/makefml config elena
+
+  メニューの数字を適当に選択して進んで下さい。
+
+
+2.	cf というというファイルをいじる (別の意味で王道)
+
+/var/spool/ml/elena/cf を変更後 config.ph を再生成する。この生成は"自
+動ではない"ので注意。次のようなコマンドを叩く(呪文を唱える?:-)と cf か
+ら config.ph を生成します。
+
+   % cd /var/spool/ml/elena
+   % make config.ph	
+
+この2段階の処理は「機械処理するため」「デフォールトとの差分だけを書い
+ておきたい」という用途のために存在します。
+
+cfの構文はperlではありません。機械処理しやすいフォーマットになっていま
+す。構文とcfとconfig.phの違いについては
+.url ../INSTALL/index.html#cf-and-config.ph
+
+
+3.	config.ph というファイルをエディターで直接いじる(王道)
+	構文は perl の構文そのもの(何でも出来る)。
+	歴史的にはこの３が元々の形です。
+
+○ ＭＬ全部に共通の設定をする時は sitedef.ph, site_init.ph などを使い
+ます。詳細は
+
+.url ../op/index.html#sitedef.ph
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

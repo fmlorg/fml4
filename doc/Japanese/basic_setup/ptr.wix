@@ -1,0 +1,9 @@
+.if LANG == JAPANESE
+注意: 詳細については
+.url ../INSTALL/index.html
+を参照してください。
+.fi
+.if LANG == ENGLISH
+See the following url for more details of fml installation.
+.url ../INSTALL-e/index.html
+.fi

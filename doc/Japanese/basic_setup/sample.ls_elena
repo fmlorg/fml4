@@ -1,0 +1,19 @@
+total 87
+-rw-r--r--  1 fukachan  wheel   2024 Oct  3 14:32 Makefile
+-rw-r--r--  1 fukachan  wheel    361 Oct  3 14:32 aliases
+-rw-------  1 fukachan  wheel   2047 Oct  3 14:32 cf
+-rw-------  1 fukachan  wheel     43 Oct  3 14:32 config.h
+-rw-------  1 fukachan  wheel  43373 Oct  3 14:32 config.ph
+-rw-------  1 fukachan  wheel   1603 Oct  3 14:32 confirm
+-rw-------  1 fukachan  wheel    379 Oct  3 14:32 crontab
+-rw-------  1 fukachan  wheel    257 Oct  3 14:32 deny
+-rw-------  1 fukachan  wheel   1215 Oct  3 14:32 fml.c
+-rw-------  1 fukachan  wheel    608 Oct  3 14:32 guide
+-rw-------  1 fukachan  wheel  18251 Oct  3 14:32 help
+-rw-------  1 fukachan  wheel   5820 Oct  3 14:32 help-admin
+-rw-r--r--  1 fukachan  wheel    177 Oct  3 14:32 include
+-rw-r--r--  1 fukachan  wheel    389 Oct  3 14:32 include-ctl
+-rw-r--r--  1 fukachan  wheel    255 Oct  3 14:32 include-mead
+-rw-------  1 fukachan  wheel    176 Oct  3 14:32 objective
+drwx------  2 fukachan  wheel    512 Oct  3 14:32 spool/
+-rw-------  1 fukachan  wheel   1032 Oct  3 14:32 welcome

@@ -1,0 +1,120 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- よりセキュアに --
+=E
+	fml 3.0 -- more secure --
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include setup-more-secure.en.wix
+.return
+.fi
+○ 目的
+
+メールサイズの上限を設定する。
+
+投稿メールのフィルタリング
+   中身のないメールを弾く
+   unsubscribeのような無関係なメールを弾く
+
+トラフィックモニタをONにする
+   一気にメールが来たらメール爆弾と見なして受け取りを拒否する
+
+メンバーリストを取り寄せるコマンド members, actives などを使えなくする
+
+などを設定します。		
+		
+
+○ 設定
+
+% makefml config elena
+
+   メインメニュ -> セキュリティ -> MORE_SECURE -> "y"
+
+
+をすると、設定されます。メニューでやらずに /var/spool/ml/elena で
+
+   % make secure
+
+としても同じ効果があります。
+
+
+○ チューニング
+
+パラメータの代表的なものは
+
+   メインメニュ -> セキュリティ 
+
+で変更できます。
+
+詳細については doc/op.jp を読んで下さい。
+.url ../op/index.html
+
+○ メールの中身のフィルタリングについて
+.url ../op/index.html#envf
+
+    "本文がないメール"や"unsubscribe だけ"のメールをＭＬに流さない。
+    MIME/Multipart の場合は最初のブロックの中身を評価の対象にします。
+
+○ USE_DISTRIBUTE_FILTER (default: NO)
+   フィルタをするか？するなら yes (yes 推奨)
+
+○ FILTER_ATTR_REJECT_COMMAND (default: no)
+   投稿用のＭＬに #help などが来たら拒否 (yes 推奨)
+
+○ FILTER_NOTIFY_REJECTION (default: no)
+   拒否した旨をその送り主に伝える
+
+○ USE_MTI (トラフィックモニタ; default No)
+.url ../op/index.html#mti
+
+    使うなら yes 。ＭＬのトラフィックを監視し一気にメールが来たらメール爆
+    弾とみなすなどを行なう。ものすごーく手の込んだものは reject できないか
+    もしれない;_;。yes を一応推奨
+
+○ MAX_MAIL_SIZE (default: 未定義 == 無制限) 
+
+    メールサイズの最大値(デフォールトでは無制限)。貼付ファイルを許すか否か
+    でサイズ制限は決まるだろう。ちなみに fml.org では500K bytes にしている。
+
+○ NOTIFY_MAIL_SIZE_OVERFLOW (default: yes) 
+
+    MAX_MAIL_SIZE (最大値)を越えるメールが来たら拒否の旨を送り主に伝える。
+    伝えないとエラーだと思って再送する人が多く、システムに負荷がかかるため。
+    message/partial は合計のサイズを推定します。
+
+○ ADDR_CHECK_MAX (default: 3)
+
+    アドレスのチェックの厳しさ。3 はドメイン3レベル、つまり beth.fml.org 
+    という3階層までチェックするので beth.fml.org と jo.fml.org は別のアド
+    レスだが、beth.lw.fml.org と jo.lw.fml.org は同じドメインとみなす。
+      
+○ MAXNUM_COMMAND_INPUT (default: 無制限)
+
+   一つのメールに書けるコマンドの数の最大値
+
+○ REJECT_ADDR (無視するシステムアカウント名のリスト)
+   see => 7.2
+
+○ USE_LOG_MAIL (default: NO)
+
+    var/Mail/ の下に最近Ｎ通のメールの先頭2Kバイト程度を保存するヘッダ情報
+    を保存してデバッグなどに用いるとよい
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

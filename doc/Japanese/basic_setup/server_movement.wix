@@ -1,0 +1,121 @@
+.HTML_PRE
+
+	fmlを新しいサーバへ移転する/OSを新しくした時
+=E
+	move fml to another new server
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+.if LANG == JAPANESE
+◯ 新しいサーバへfmlを移転する手順について
+
+大雑把な手順は
+
+   1. 新サーバにfmlをインストール
+   2. 古いサーバの /var/spool/ml を新サーバへコピー
+
+だけである。以下もう少し細かく解説する。
+
+0. 新しいサーバのMTAのインストールおよび設定を終らせておく(大前提)
+
+1. 新サーバにfmlをインストールする。
+
+   /usr/local/fml	実行ファイル
+   /var/spool/ml	各MLのスプールや設定ファイルがある場所 
+
+である。
+
+インストール時には /usr/local/fml 以下に実行ファイルがインストールされ
+るが /var/spool/ml の下はいじらないことに注目して欲しい。通常ここには
+MLの設定ファイルは含まれない。よって /var/spool/ml 以下だけをコピー
+すれば十分である。
+
+2. 古いホストのMTAを止める。ML宛の溜っているメールがなくなるまで待つ。
+   例えば mailq コマンドなどでML宛のメールがないことを確認する
+
+3. 古いサーバの /var/spool/ml を新しいサーバの /var/spool/ml へコピーする
+
+例:
+
+   rsync --rsh ssh -av /var/spool/ml/ new-server:/var/spool/ml/
+
+4. 古いマシンのMTAは止めたままDNSを変更し、
+   新しいマシンに配送先を切替える。
+
+注意: 古いマシンのMTAをずっと止めていられないのならもうちょっと手順を
+考えなければいけないことがある。しかし fml 自体の移動とは直接関係ない
+のでここでは省略させてもらう。
+
+◯ /usr/local/fml/sitedef.ph ないし site_init.ph を使っているかたへ
+
+現在では /var/spool/ml/etc/fml/ の下に
+
+	sitedef.ph
+	site_init.ph
+	site_force.ph 
+
+などの全ML共通の設定ファイルをおくことが推奨されています。インストール
+の時に左右されないためです。是非この方法へ移行して(copyすればおわり)作
+業をしてみてください。
+
+◯ その他の注意
+
+新しいサーバに移動した時やOSを新しくした時に勢いでUIDやGIDが異なったも
+のになってしまっていることもありえます。permission denied などのエラー
+が出たらその辺もチェックしてみましょう。aliases ファイルの場所や valid
+shell などの設定も忘れているかも知れません。
+
+OSによって使っているファイルなどは異なりますが
+
+	/etc/passwd
+	/etc/master.passwd
+	/etc/shadow
+	/etc/shells
+
+[postfix]	
+	/etc/postfix/main.cf
+	/etc/aliases
+
+[sendmail]	
+	/etc/sendmail.cf
+	/etc/aliases
+
+[qmail]
+	/var/qmail/users/assign
+
+qmail-newu をしわすれてないか確認を
+
+などなど…
+
+その他:
+
+日付を保存するようにしてしてcopyなどはしないと何かとはまります。
+例えば
+
+1. scp -pr source/ host:/some/where/
+
+2. rsync --rsh ssh -av source/ host:/some/where/destination/
+
+3. tar -C source -cpf - . |ssh host tar -C /some/where/destination -xvpf - (gnu
+ tar)
+
+など…
+
+.fi
+.if LANG == ENGLISH
+.fi
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

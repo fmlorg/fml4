@@ -1,0 +1,74 @@
+*** overview
+
+In small mailing list, you may be able to handle error mails. 
+However you expect fml to handle error mails automatically.
+
+
+*** handle error mails
+
+Especially in the end of the year, users apart from university or
+company but forget to change the address registered in ML. In that
+case, many "user unknown" mail returns to $MAINTAINER.
+
+libexec/mead.pl in fml package analyses these error mails as input and
+removes such invalid users from the member list.
+
+In default mead.pl shows "user unknown" addresses to remove from the
+member list. You can configure mead.pl removes such addresses
+automatically.
+
+
+*** how to configure
+
+% makefml newml elena
+
+[ /var/spool/ml/elena/include-mead ] has
+
+# MEAD: Mail Error Analyze Daemon ("-m auto" to remove addrs automatically)
+# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
+"|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+
+[ /var/spool/ml/elena/aliases has the (commented) entry to call ]
+
+#elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+
+To enable "mead" to work, uncommnet it in /etc/aliases to enable mead
+
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+
+and run "newaliases".
+
+
+*** advanced configuration
+
+ * important command line option
+
+    -m mode
+    -k action
+
+These two options are orthogonal. "mode" is either of "auto" or
+"report" and "action" is "off" (stop delivery but not remove it) or
+"bye" (remove the user).
+
+ * Example: remove invalid user automatically
+
+change "-m report" to "-m auto" in /var/spool/ml/elena/include-mead.
+/etc/aliases is the same as described above. 
+
+"|/usr/local/fml/libexec/mead.pl -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+
+ * Example: stop delivery for invalid user automatically
+
+"|/usr/local/fml/libexec/mead.pl -k off -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+
+
+*** For more details
+
+.url ../op-e/index.html#mead
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
