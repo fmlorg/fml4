@@ -10,6 +10,16 @@
 # $Id$
 #
 
+##
+## Example:
+##	$EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+##	push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+##	push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+##	require 'libloadconfig.pl'; &__LoadConfiguration('__KERN__');
+##            # _OR_
+##	require 'libloadconfig.pl'; &__LoadConfiguration;
+##
+
 #    argv: __KERN__ or $NULL
 # require: $DIR, @LIBDIR
 #
@@ -102,7 +112,7 @@ sub SearchFileInLIBDIR
 # tricky
 sub LoadDummyMacros
 {
-    print STDERR "-- LoadDummyMacros\n";
+    print STDERR "-- LoadDummyMacros\n" if $debug_30B;
 
     eval "sub STR2JIS {1;}";
     eval "sub STR2EUC {1;}";
