@@ -7,9 +7,13 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id:$
+# $Id: liblangdep.pl,v 1.1 2000/03/01 04:25:09 fukachan Exp $
 
+# patch from OGAWA Kunihiko <kuni@edit.ne.jp>
+# fml-support: 07599, 07600
 package Japanese;
+
+sub Japanese'Log	{ &main'Log(@_) };
 
 # fml-support: 07507
 # sub CutOffRe
@@ -33,6 +37,10 @@ sub CutOffReReRe
 
     require 'jcode.pl'; # not needed but try again
 
+    # import
+    @Import = (CUT_OFF_RERERE_PATTERN, CUT_OFF_RERERE_HOOK);
+    for (@Import) { eval("\$Japanese'$_ = \$main'$_;");}
+
     &jcode'convert(*x, 'euc'); #';
 
     if ($CUT_OFF_RERERE_PATTERN) {
@@ -43,7 +51,7 @@ sub CutOffReReRe
     while ($limit-- > 0) {
 	$y = $x;
 	$x =~ s/^[\s]*//;
-	$x =~ s/^　*//;
+	$x =~ s/^(　)*//;
 	$x =~ s/^(手慨:|手慨¨|手:|手¨|ＲＥ:|ＲＥ¨|Ｒｅ:|Ｒｅ¨)//;
 	if ($CUT_OFF_RERERE_PATTERN) { $x =~ s/^($CUT_OFF_RERERE_PATTERN)//;}
 	last if $y eq $x;
