@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/12/14
+
+   update module/fml-devel
+	sync w/ fml-devel-20011213
+
 2001/11/28
 
     bin/gen_summary.pl
@@ -102,7 +107,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.225 2001/11/24 15:41:09 fukachan Exp $
+	add $FML: CHANGES,v 1.226 2001/11/28 14:16:58 fukachan Exp $
 
 2001/10/03
 
