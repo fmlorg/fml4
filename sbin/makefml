@@ -114,7 +114,7 @@ sub InitMakeFml
     local($pwd);
     if ($ENV{'OS'} =~ /Windows_NT/) {
 	eval(' chop ($pwd = `cd`); ');
-	print "pwd = $pwd\n";
+	print "pwd = $pwd\n" if $debug_nt;
     }
     else {
 	eval(' chop ($pwd = `pwd`); ');
@@ -5494,7 +5494,12 @@ sub MakeDir
 	&SetGidBit($_[0]);
     }
 
-    print "   directory $_[0] is created as UID=$<$info\n";
+    if ($UNISTD) {
+	print "   directory $_[0] is created as UID=$<$info\n";
+    }
+    else {
+	print "   directory $_[0] is created as USER=$ENV{'USERNAME'}\n";
+    }
 }
 
 sub MakeSubDir
@@ -5511,7 +5516,12 @@ sub MakeSubDir
 	-d $_[0] || &Mkdir($_[0], 0700);
     }
 
-    print "   directory $_[0] is created as UID=$<$info\n";
+    if ($UNISTD) {
+	print "   directory $_[0] is created as UID=$<$info\n";
+    }
+    else {
+	print "   directory $_[0] is created as USER=$ENV{'USERNAME'}\n";
+    }
 }
 
 
