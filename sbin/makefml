@@ -112,7 +112,13 @@ sub System
 sub InitMakeFml
 {
     local($pwd);
-    eval(' chop ($pwd = `pwd`); ');
+    if ($ENV{'OS'} =~ /Windows_NT/) {
+	eval(' chop ($pwd = `cd`); ');
+	print "pwd = $pwd\n";
+    }
+    else {
+	eval(' chop ($pwd = `pwd`); ');
+    }
 
     # flush;
     select(STDOUT); $| = 1;
@@ -5691,9 +5697,15 @@ sub Sendmail   { print STDERR join("\t", @_), "\n";}
 sub FixPath
 {
     local($ml, $mldir) = @_;
+    my ($cwd);
 
     # global $DIR ;
-    chop($CWD = `pwd`); # ATTENTION! ONLY ON UNIX
+    if ($UNISTD) {
+	chop($cwd = `pwd`); # ATTENTION! ONLY ON UNIX
+    }
+    else {
+	chop($cwd = `cd`);
+    }
     chdir $DIR;
 
     # variable fixes
@@ -5714,7 +5726,7 @@ sub FixPath
 	$LOCK_FILE =~ s#\\#/#g;
     }
 
-    chdir $CWD;
+    chdir $cwd;
 }
 
 sub main'V7Lock #';
