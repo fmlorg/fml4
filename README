@@ -32,3 +32,18 @@
 0.	check conf/release which is the main trunk version.
 
 1.	define the current snapshot number conf/release_version.
+
+
+-----------------------------------------------------------------
+* CVS on cvs.fml.org  NetBSD-current/newsmips (1.3I)
+
+^fml
+		-> source-changes@fml.org 
+		-> /cvsroot/log/fml/commitlog
+
+^fml/doc
+		-> doc-changes@fml.org 
+		-> /cvsroot/log/fml/commitlog
+
+^fml/distrib/history
+		-> /cvsroot/log/fml/commitlog
