@@ -24,3 +24,23 @@ amctl.msend_rehash.send:
 amctl.msend_rehash.send_nothing:
 	配送されていない記事はありません。
 
+### Section: subscribe
+amctl.added:
+	<_ARG1_> メーリングリストに新たに
+	<_ARG0_> を登録しました。
+
+amctl.added.caution:
+	注意: このメールにリプライするとメーリングリスト宛になります。
+	メーリングリストへの投稿は	<_ARG1_>
+	コマンドは			<_ARG2_>
+	管理者宛のメールは		<_ARG0_>
+	へ送って下さい。
+
+
+amctl.mail.undelivered:
+	注:内容が登録依頼だけのメールはメーリングリストに流していません。
+
+
+### Section: others
+# dummy to adjust '\n' above
+amctl.dummy:

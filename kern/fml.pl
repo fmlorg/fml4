@@ -1610,6 +1610,16 @@ sub ForwMail
     $_;
 }
 
+sub Translate
+{
+    local(*e, $s, $mesgle_key, @mesgle_argv) = @_;
+    if ($MESSAGE_LANGUAGE && $mesgle_key) {
+	&use('mesgle');
+	&MesgLE(*e, $mesgle_key, @mesgle_argv);
+    }
+    else { $NULL;}
+}
+
 # &Mesg(*e, );
 # $mesgle == Message Languae Extension
 sub Mesg 

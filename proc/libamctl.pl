@@ -189,9 +189,11 @@ sub AutoRegist
     &Log("AutoRegist: Deliver? $e{'nlines'} <=> $limit") if $debug;
 
     $r = "<$from> is added to <$MAIL_LIST>\n\n";
+    $r = &Translate(*e, $r, 'amctl.added', $from, $MAIL_LIST);
 
     if ($AUTO_REGISTERED_UNDELIVER_P) {
 	&Log("AutoRegist: not deliver since \$AUTO_REGISTERED_UNDELIVER_P is on");
+	$r .= &Translate(*e, $NULL, 'amctl.mail.undelivered');
 	$r .= "\$AUTO_REGISTERED_UNDELIVER_P is set, \n";
 	$r .= "So NOT FORWARDED to ML($MAIL_LIST).\n\n";
 	$r .= ('-' x 30) . "\n\n";
@@ -199,6 +201,7 @@ sub AutoRegist
     # IF $AUTO_REGISTERED_UNDELIVER_P NOT DEFINED, check Lines: 
     elsif ($e{'nlines'} < $limit) { 
 	&Log("AutoRegist: not deliver since lines:$e{'nlines'} < $limit");
+	$r .= &Translate(*e, $NULL, 'amctl.mail.undelivered');
 	$r .= "The number of lines in the mailbody is too short(< $limit),\n";
 	$r .= "So NOT FORWARDED to ML ($MAIL_LIST). O.K.?\n";
 
@@ -226,7 +229,10 @@ sub AutoRegist
     local($cur_preamble) = $e{'preamble'};
     if ($e{'GH:Reply-To:'} eq $MAIL_LIST) {
 	local($p);
-	$p .= "<$from> is added to <$MAIL_LIST>.\n\n";
+	$p = "<$from> is added to <$MAIL_LIST>.\n\n";
+	$p = &Translate(*e, $p, 'amctl.added', $from, $MAIL_LIST);
+	$p = &Translate(*e, $p, 'amctl.added.caution', 
+			$MAINTAINER, $MAIL_LIST, $CONTROL_ADDRESS);
 	$p .= "ATTENTION!: IF YOU REPLY THIS MAIL SIMPLY\n";
 	$p .= "YOUR REPLY IS DIRECTLY SENT TO THE MAILING LIST $MAIL_LIST\n";
 	$p .= "-" x 60; $p .= "\n\n";
