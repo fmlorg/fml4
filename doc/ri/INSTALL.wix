@@ -21,7 +21,7 @@ Mailing List 		Elena Lolobrigita ML
 address of it		Elena@axion.phys.titech.ac.jp
 Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
 ＭＬのdirectory		/var/spool/ml/Elena
-(fml.plやconfig.ph等がある場所）			
+			注意：fml.plやconfig.ph等が広がっている場所です
 
 なお便宜上以下 % を shell の prompt 、 # を root の時のshell promptと
 することにします。
@@ -31,7 +31,7 @@ Maintainer of ML	Elena-request@axion.phys.titech.ac.jp
 
 お手軽インストール教えます:-)。
 
-fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
+fml を広げた directory へいって、（今の例では /var/spool/ml/Elena です）
 
 % make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
 
@@ -43,9 +43,10 @@ fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
 
 自動的に /var/spool/ml/Elena/samples/ に aliases や include ファイルの
 見本ができます。あとは aliases を適当に切り剥ぎして、/etc/aliases に書
-いて、newaliases と。
-そして members actives にあなたのアドレス、メンバーのアドレス等を書い
-たら…
+いて、newaliases をします＃注意：% man newalises
+
+そして members と actives にあなたのアドレス、メンバーのアドレス等を書
+いたら…
 					はい、おしまひ(^^)
 
 
@@ -56,7 +57,7 @@ fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
    samples/include               基本的な include の見本（以下同様）
    samples/include-auto          自動登録をするML
    samples/include-distribute    フォワードするだけのML
-   samples/include-fmlserv       fmlserv の設定
+   samples/include-fmlserv       fmlserv の設定 (listservもどきinterface)
    samples/include-remote        このマシン以外からメールでMLを管理する場合
    samples/include-html		 var/htdocs/ の下にメールを html 形式でも保存
 				 spool にも保存（２重になる）
@@ -68,20 +69,25 @@ fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
 要らない部分は切り取ってからしかけるとよいでしょう。
 
 
-以下の数節はよりきめの細かい設定のための解説です。とりあえずMLを動かすのなら
-.ptr{start-of-check} 節（このファイルの最後の方）へ飛んで構いません。
+以下の数節はよりきめの細かい設定のための解説です。
+細かいチューニングは後回し、とりあえずMLを動かすというのなら
+.ptr{start-of-check} 節（このファイルの最後の方）へ飛んで下さい。
 
 
 
 .C	基本設定
 
-より自分好みのMLにしたい場合は、もちょっと手間をかけて config.ph を設
-定する必要があります。
-お手軽設定より少し複雑ですが、その分きめの細かい設定が出来ます。
-MLの運用に慣れたら
+.S	cf/Elena に変更したい設定だけをまとめてみる
 
-cf directory にいって、sample をコピーして、適当な名前にしておきます。
-＃ここでは、ファイル名を Elena とします
+より自分好みのMLにしたい場合は、もちょっと手間をかけて config.ph を設
+定して下さい。
+お手軽設定より少し複雑ですが、その分きめの細かい設定が出来ます。
+お手軽インストールをしておいて、ＭＬの運用に慣れたら config.ph を書く 
+でもいいとおもいます。
+
+Directory /var/spool/ml/Elena/cf 
+にいって、sample をコピーして、適当な名前にしておきます。
+＃ここでは、ファイル名をＭＬ名の Elena とすることにします(^^)
 
 % cd cf
 % cp sample Elena
@@ -89,10 +95,12 @@ cf directory にいって、sample をコピーして、適当な名前にしておきます。
 cf/Elena は デフォールトの設定とどこが異なるのか？”だけ” を記述する
 ためのファイルになります。
 後々のメンテ（複数のメーリングリストを管理する や version up等）を考え
-ると、大元の configuration files を一箇所で面倒見たほうがいいでしょ？
+ると、大元の configuration files を一箇所でメンテするのが良いだろう
+という発想からきています。
 
 Elena の中身は必須の変数の設定だけが書かれています。
 
+例：
 	FQDN		axion.phys.titech.ac.jp
 	MAIL_LIST	Elena@axion.phys.titech.ac.jp
 	ML_FN		(Elena Lolobrigita ML)
@@ -102,7 +110,9 @@ Elena の中身は必須の変数の設定だけが書かれています。
 
 perl と同様に行の # 以降の部分はコメントです。無視してください。
 シンタックスは
-	最初のキーワード 空白（SPACEとTAB) キーワードの内容
+
+	最初のキーワード 空白（SPACEかTAB) キーワードの内容
+
 です。空白はいくつあっても構いません。
 
 以下、変数の意味を順番に説明します。
@@ -171,22 +181,26 @@ fml.pl が メーリングリスト（ＭＬ）ごとの設定をするために使う config.ph
 
 	% cp config.ph ..
 
-＃ＭＬのホームにいるなら、% cf/config cf/Elena > config.ph ですね。
+ＭＬの home (/var/spool/ml/Elena)にいるなら、
 
+	% cf/config cf/Elena > config.ph 
+
+ですね。
 この config.ph には つかえるすべての変数が適当なデフォールト設定で入っ
 ています。とりあえずは、デフォールトのまま使えばいいでしょう。
 細かいカスタマイズは、doc/op に書いてあります。
 
+
 .S	config.ph の確認
 
 作ったら一応、以下の確認をしてください。
-それ以外の変数はすべてデフォールトのままにまだなってます。
+これら以外の変数はすべてデフォールトのままにまだなってます。
 
-上の Elena から作られた config.phの例：
+上の Elena から作られた config.ph の例：
 
 ファイル Elena での上述の設定は以下のようになっていますか？
 (perl で行の # 以降の部分はコメントです。無視してください)
-(@ には "\@" のように \ が必要です。)
+("と"の間では @ には "\@" のように前に \ が必要です。)
 ＃以下の例では実際にはあるコメントが省いてあります。
 
 $FQDN                          = "axion.phys.titech.ac.jp";
