@@ -4,12 +4,12 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.51 2002/04/13 14:43:09 fukachan Exp $
+# $FML: Message.pm,v 1.60 2002/04/28 13:34:16 fukachan Exp $
 #
 
 package Mail::Message;
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD $InComingMessage);
+use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
 my $debug = 0;
@@ -240,9 +240,10 @@ sub new
     my $me     = {};
     my $data   = '';
 
-    # alloc memory area to hold the whole message.
-    $InComingMessage = \$data;
-
+    # XXX alloc memory area to hold the whole message.
+    # XXX (NOT NEEDED ? but only parse() needs $InComingMessage ?)
+    # $InComingMessage = \$data;
+    $me->{ __data } = \$data;
     bless $me, $type;
 
     if ($args) { _build_message($me, $args);}
@@ -464,6 +465,8 @@ sub parse
 
     # parse the header and the body
     my $result = {};
+    my $data   = '';
+    $me->{ __data } = \$data;
     $me->_parse($fd, $result);
 
     # make a Mail::Messsage object for the (whole) mail header
@@ -479,7 +482,12 @@ sub parse
     $ref_body->_prev_message_is( $me );
 
     # return information
-    $result->{ body_size } = length($$InComingMessage);
+    if (defined($data) && $data) {
+	$result->{ body_size } = length($data);
+    }
+    else {
+	$result->{ body_size } = 0;
+    }
     $me->{ data_info }     = $result;
 
     # return the object
@@ -489,34 +497,41 @@ sub parse
 
 # Descriptions: cut off content into header and body
 #               and prepare buffer for further parsing
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) HANDLE($fd) HASH_REF($result)
 # Side Effects: fill in $inComingMessage on memory
 # Return Value: none
 sub _parse
 {
     my ($self, $fd, $result) = @_;
-    my ($header, $header_size, $p, $buf);
-    my $total_buffer_size;
+    my ($header, $header_size, $p, $buf, $data);
+    my $total_buffer_size = 0;
+    my $data_ptr          = $self->{ __data };
 
-    while ($p = sysread($fd, $_, 1024)) {
+  DATA:
+    while ($p = sysread($fd, $data, 1024)) {
 	$total_buffer_size += $p;
-	$buf .= $_;
+	$buf               .= $data;
+
 	if (($p = index($buf, "\n\n", 0)) > 0) {
 	    $header      = substr($buf, 0, $p + 1);
 	    $header_size = $p + 1;
-	    $$InComingMessage = substr($buf, $p + 2);
-	    last;
+	    $$data_ptr   = substr($buf, $p + 2);
+	    last DATA;
 	}
     }
 
-    # extract mail body and put it to $$InComingMessage
-    while ($p = sysread($fd, $_, 1024)) {
+    # extract mail body and put it to $$data_ptr
+  DATA:
+    while ($p = sysread($fd, $data, 1024)) {
 	$total_buffer_size += $p;
-	$$InComingMessage   .= $_;
+	$$data_ptr         .= $data;
     }
 
     # read the message (mail body) from the incoming mail
-    my $body_size = length($$InComingMessage);
+    my $body_size = 0;
+    if (defined($data_ptr)) {
+	$body_size = length($$data_ptr);
+    }
 
     if ($debug > 2) {
 	print STDERR "  (debug) header_size: $header_size\n";
@@ -527,6 +542,7 @@ sub _parse
     $result->{ header }      = $header;
     $result->{ header_size } = $header_size;
     $result->{ body_size }   = $body_size;
+    $result->{ total_read_size } = $total_buffer_size;
 }
 
 
@@ -540,16 +556,21 @@ sub _parse_header
     my ($self, $r) = @_;
 
     # parse the header
-    my (@h) = split(/\n/, $r->{ header });
-    for my $x (@h) { $x .= "\n";}
+    if (defined $r->{ header }) {
+	my (@h) = split(/\n/, $r->{ header });
+	for my $x (@h) { $x .= "\n";}
 
-    # save unix-from (mail-from) in PCB and remove it in the header
-    if ($h[0] =~ /^From\s/o) {
-	$r->{ envelope_sender } = (split(/\s+/, $h[0]))[1];
-	shift @h;
+	# save unix-from (mail-from) in PCB and remove it in the header
+	if ($h[0] =~ /^From\s/o) {
+	    $r->{ envelope_sender } = (split(/\s+/, $h[0]))[1];
+	    shift @h;
+	}
+
+	$r->{ header_array } = \@h;
     }
-
-    $r->{ header_array } = \@h;
+    else {
+	$r->{ header_array } = [];
+    }
 }
 
 
@@ -589,13 +610,14 @@ sub _build_header_object
 sub _build_body_object
 {
     my ($self, $args, $result) = @_;
+    my $data_ptr = $self->{ __data };
 
     # XXX we use data_type (type defined in Content-Type: field) here.
     # XXX "base_data_type" is used only internally.
     return new Mail::Message {
 	boundary  => $self->_header_mime_boundary($result->{ header }),
 	data_type => $self->_header_data_type($result->{ header }),
-	data      => $InComingMessage,
+	data      => $data_ptr,
     };
 }
 
@@ -663,9 +685,8 @@ sub whole_message_body
 # Return Value: STR_REF
 sub whole_message_as_string_ref
 {
-    my ($self) = @_;    
-
-    return $InComingMessage;
+    my ($self) = @_;
+    return $self->{ __data };
 }
 
 
@@ -715,10 +736,11 @@ sub _header_mime_boundary
 sub _header_data_type
 {
     my ($self, $header) = @_;
+    my $ctype = $header->get('content-type');
 
-    if (defined $header->get('content-type')) {
+    if (defined($ctype) && $ctype) {
 	my ($type) = split(/;/, $header->get('content-type'));
-	if (defined $type) {
+	if (defined($type) && $type) {
 	    $type =~ s/\s*//g;
 	    $type =~ tr/A-Z/a-z/;
 	    return $type;
@@ -758,7 +780,7 @@ sub find
 {
     my ($self, $args) = @_;
 
-    if (defined $args->{ data_type }) {
+    if (defined $args->{ data_type } && $args->{ data_type }) {
 	my $type = $args->{ data_type };
 	my $mp   = $self;
 	for ( ; $mp; $mp = $mp->{ next }) {
@@ -769,7 +791,8 @@ sub find
 	    }
 	}
     }
-    elsif (defined $args->{ data_type_regexp }) {
+    elsif (defined $args->{ data_type_regexp } && 
+	   $args->{ data_type_regexp }) {
 	my $regexp = $args->{ data_type_regexp };
 	my $mp     = $self;
 	for ( ; $mp; $mp = $mp->{ next }) {
@@ -782,7 +805,7 @@ sub find
 	}
     }
 
-    undef;
+    return undef;
 }
 
 
@@ -811,16 +834,17 @@ sub __head_message
     my ($self) = @_;
     my $m = $self;
 
+  LINK:
     while (1) {
 	if (defined $m->{ prev }) {
 	    $m = $m->{ prev };
 	}
 	else {
-	    last;
+	    last LINK;
 	}
     }
 
-    $m;
+    return $m;
 }
 
 
@@ -834,16 +858,17 @@ sub __last_message
     my ($self) = @_;
     my $m = $self;
 
+  LINK:
     while (1) {
 	if (defined $m->{ next }) {
 	    $m = $m->{ next };
 	}
 	else {
-	    last;
+	    last LINK;
 	}
     }
 
-    $m;
+    return $m;
 }
 
 
@@ -932,11 +957,13 @@ sub set_print_mode
 {
     my ($self, $mode) = @_;
 
+    if (defined($mode) && $mode) {
     if ($mode eq 'raw') {
 	$self->{ _print_mode } = 'raw';
     }
     elsif ($mode eq 'smtp') {
 	$self->{ _print_mode } = 'smtp';
+    }
     }
 }
 
@@ -1161,8 +1188,8 @@ sub build_mime_multipart_chain
     my $msglist        = $args->{ message_list };
     my $boundary       = $args->{ boundary } || "--". time ."-$$-";
     my $dash_boundary  = "--". $boundary;
-    my $delbuf         = "\n". $dash_boundary."\n";
-    my $delbuf_end     = "\n". $dash_boundary . "--\n";
+    my $delbuf         = "\n". $dash_boundary       ; # "\n";
+    my $delbuf_end     = "\n". $dash_boundary . "--"; # "\n";
 
     for my $m (@$msglist) {
 	# delimeter: --boundary
@@ -1349,6 +1376,7 @@ sub parse_and_build_mime_multipart_chain
 	#    XXX we malloc(), "my $tmpbuf", to store the delimeter string.
 	if ($pe > $mpb_end) { # check the closing of the blocks or not
 	    if ($broken_close_delimiter) {
+		print "   broken close-delimiter\n" if $debug;
 		; # not close multipart ;)
 	    }
 	    else {
@@ -1366,10 +1394,23 @@ sub parse_and_build_mime_multipart_chain
 	    if ($pb == $pe) {
 		print "   *** broken condition pb=$pb pe=$pe ***\n" if $debug;
 	    }
-	    else {
+	    elsif ($pb < $pe) {
 		print "   delimiter\n" if $debug;
 
 		my $buf = $delimeter."\n";
+		$m[ $i++ ] = $self->_alloc_new_part({
+		    data           => \$buf,
+		    data_type      => $virtual_data_type{'delimiter'},
+		    base_data_type => $base_data_type,
+		});
+	    }
+	    else {
+		# The format of "mulitpart" part must be invalid.
+		# For example without mime header.
+		# We anyway print out only delimiter and exit ASAP.
+		print "  invalid condition ($pb > $pe)\n" if $debug;
+
+		my $buf = $delimeter;
 		$m[ $i++ ] = $self->_alloc_new_part({
 		    data           => \$buf,
 		    data_type      => $virtual_data_type{'delimiter'},
@@ -1671,7 +1712,8 @@ sub encoding_mechanism
     my ($self) = @_;
     my $buf = $self->message_fields();
 
-    if ($buf =~ /Content-Transfer-Encoding:\s*(\S+)/mi) {
+    if (defined($buf) &&
+	($buf =~ /Content-Transfer-Encoding:\s*(\S+)/mi)) {
 	my $mechanism = $1;
 	$mechanism =~ tr/A-Z/a-z/;
 	return $mechanism;
@@ -1723,7 +1765,13 @@ get whole body size for this object ($self)
 sub whole_message_header_size
 {
     my ($self) = @_;
-    $self->{ data_info }->{ header_size };
+
+    if (defined $self->{ data_info }->{ header_size }) {
+	return $self->{ data_info }->{ header_size };
+    }
+    else {
+	return 0;
+    }
 }
 
 
@@ -1734,7 +1782,13 @@ sub whole_message_header_size
 sub whole_message_body_size
 {
     my ($self) = @_;
-    $self->{ data_info }->{ body_size };
+
+    if (defined $self->{ data_info }->{ body_size }) {
+	$self->{ data_info }->{ body_size };
+    }
+    else {
+	return 0;
+    }
 }
 
 
@@ -1752,7 +1806,13 @@ return reverse_path for this object ($self)
 sub envelope_sender
 {
     my ($self) = @_;
-    $self->{ data_info }->{ envelope_sender };
+
+    if (defined $self->{ data_info }->{ envelope_sender }) {
+	return $self->{ data_info }->{ envelope_sender };
+    }
+    else {
+	return '';
+    }
 }
 
 
@@ -1819,9 +1879,14 @@ sub nth_paragraph
     my $data = $self->{ data };
     my $pmap = $self->_evaluate_pmap();
 
-    $i--; # shift $i: 1 => 0, 2 =>1, et. al.
-    my ($pb, $pe) = ($pmap->[ $i ], $pmap->[ $i + 1 ]);
-    return substr($$data, $pb, $pe - $pb);
+    if (defined($$data) && $$data) {
+	$i--; # shift $i: 1 => 0, 2 =>1, et. al.
+	my ($pb, $pe) = ($pmap->[ $i ], $pmap->[ $i + 1 ]);
+	return substr($$data, $pb, $pe - $pb);
+    }
+    else {
+	return undef;
+    }
 }
 
 
@@ -1837,6 +1902,10 @@ sub _evaluate_pmap
     my $pe      = $self->{ offset_end };
     my $bodylen = $self->size;
     my $data    = $self->{ data };
+
+    unless (defined $data) {
+	return [];
+    }
 
     my $i  = 0; # the number of paragraphs
     my $p  = $pb;
