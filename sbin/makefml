@@ -1751,6 +1751,9 @@ sub ResetVariables
 	$REAL_CGI_PATH = $EXEC_DIR. '/share/'.$REAL_CGI_PATH;
     }
 
+    # www directory
+    $CGI_AUTHDB_DIR = $CGI_AUTHDB_DIR || "$EXEC_DIR/www/authdb";
+    
     if ($CurConfig{'GROUP'} && !$GID) { 
 	print "Group of ML operatos is not defined in /etc/group\n";
 	print "Please define it in first!\n";
@@ -5873,7 +5876,7 @@ package main;
 
 # set up cgi for admin (full access for fml system)
 #    $EXEC_DIR/www/cgi-bin/admin/.htaccess
-#    $EXEC_DIR/www/authdb/admin/htpasswd
+#    $CGI_AUTHDB_DIR/admin/htpasswd
 sub SetUpCGIadmin
 {
     local($cmd);
@@ -5902,20 +5905,21 @@ sub SetUpCGIadmin
 	  "$REAL_CGI_PATH/admin/.htaccess");
 
     # first time!
-    if (-f "$EXEC_DIR/www/authdb/admin/htpasswd") {
-	print STDERR "   FYI: $EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
-	print STDERR "        not edit $EXEC_DIR/www/authdb/admin/htpasswd\n";
+    if (-f "$CGI_AUTHDB_DIR/admin/htpasswd") {
+	print STDERR "   FYI: $CGI_AUTHDB_DIR/admin/htpasswd already exists.\n";
+	print STDERR "        not edit $CGI_AUTHDB_DIR/admin/htpasswd\n";
     } 
     else {
-	&MkDirHier("$EXEC_DIR/www/authdb/admin");
+	&MkDirHier("$CGI_AUTHDB_DIR/admin");
+	&MkDirHier("$CGI_AUTHDB_DIR/ml-admin");
 	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
-	      "$EXEC_DIR/www/authdb/admin/htpasswd");
+	      "$CGI_AUTHDB_DIR/admin/htpasswd");
 
 	local($htp) = &search_path('htpasswd');
 	if (-x $htp) {
 	    print STDERR 
-		"   $htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
-	    system "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin";
+		"   $htp -c $CGI_AUTHDB_DIR/admin/htpasswd admin\n";
+	    system "$htp -c $CGI_AUTHDB_DIR/admin/htpasswd admin";
 	}
 	else {
 	    print STDERR "   Warn: cannot find \"htpasswd\" program\n";
@@ -5953,6 +5957,7 @@ sub SaveCGIConf
 	# log date 
 	print CF "\# $MailDate(configured by $0)\n\n";
 	print CF "\$REAL_CGI_PATH   = \"$REAL_CGI_PATH\";\n";
+	print CF "\$CGI_AUTHDB_DIR  = \"$CGI_AUTHDB_DIR\";\n";
 	print CF "\$SSL_REQUIRE_SSL = \"$SSL_REQUIRE_SSL\";\n";
 	print CF "1;\n";
 	close(CF);
