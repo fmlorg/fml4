@@ -1,0 +1,199 @@
+.C	POP による FML の起動
+
+.S	POP経由の自動RefileやＭＬの実行 (bin/popfml.pl)
+
+POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
+れの専用プログラムとして実装されています。
+
+	メールは pop3 で読めるだけ
+	メールをうけた MTA から program を呼べない policy である
+	そういう機能のない Operationg System 附属のメールシステム
+
+等のために存在します。このやり方は汎用なので pop でメールが読める場合
+ならどんなＯＳでも原理的にはＭＬが実行できるということになりますが、あ
+くまで裏技というカテゴリでしょう。
+
+理屈としては
+
+	pop を使って取り寄せつつ MH の rcvstore へPIPEで投げる(inc)
+	pop を使って取り寄せつつPIPEで fml へ投げる(ML)
+
+は同じです。実行する下請けプログラムが違うだけ。後はこれを cron で実行
+すれば、
+
+	サイトに一台 UNIX マシンがあれば
+	sendmail が動いていなくてもＭＬは可能
+だし	
+	自分のマシンがメールを受けられなくても 
+	pop経由で自動的にメールをスプールできます。
+
+ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
+できるでしょう。なお、MHと同様パスワードは $HOME/.netrc からとられます。
+
+inc_via_pop.pl は昔の名前（今はリンク）で、pop2recv.pl は backward
+compatible の目的で popfml.pl にリンクされています。
+
+
+SYNOPSIS:
+
+    popfml.pl [-user username] [-h host] [-fhd]
+    
+    -user username			
+    -host host(pop server running)
+    -f    config-file
+    -h    this message
+    -d    debug mode
+
+例： ユーザ fukachan が POP Server hikari にアクセスする
+.k	{ユーザ fukachan が POP Server hikari にアクセスする}
+
+	popfml.pl -user fukachan -host hikari
+
+
+.S	bin/popfml.pl の設定
+.l	popfml.pl
+.k	libexec/popfml.pl
+.xref	cron
+.xref	fml_local
+
+設定ファイル： 設定ファイル popfml で実行するコマンドを定義する
+
+   ~/.popexecrc か ~/.popfmlrc のどちらでもよい(backward compat)。
+
+もし、 ~/.popexecrc と ~/.popfmlrc 両方あると .popexecrc が優先されま
+す。
+
+
+設定の仕方：
+	設定ファイルを書いて、Cron を設定する。
+	
+設定例：
+	全部のメールを fml.pl へ渡していいなら、
+
+~/.popexecrc の中は
+
+	$POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
+	1;
+
+でいいわけですが、普通はＭＬと自分宛をわけたりするためにフィルタ
+(e.g. fml_local)が必要な場合もあるでしょうが、基本的には同じです。
+
+	$POP_EXEC の中身はフィルタのプログラムになります。
+
+注意： いつもと違って "| で始らないことに注意してください。
+
+この後、pop-server が hikari、 user が fukachan なら
+
+* * * * * popfml.pl -user fukachan -host hikari
+
+のような内容の crontab を書いて、crontab crontab とかします。
+この辺はＯＳによって異なります。
+.xref cron
+
+
+解説：
+
+   ~/.popexecrc という設定ファイルを使って、POP経由でfml_localへ渡す。
+   またcronで popfml.pl を動かし、ＭＬと同様のことをすることにする。
+
+   ~/.popexecrc の中は
+
+   $POP_EXEC = "/usr/libexec/fml/fml_local -user fukachan || exit 75";
+   1;
+
+と書いておく。cron で
+
+	popfml.pl -user fukachan -host hikari
+
+を一分おきに起こす。
+＃NetBSD の cron だと 
+＃	* * * * * popfml.pl -user fukachan -host hikari
+＃です。
+
+これで
+	一分に一回 POPサーバへメールが来ているかどうかを見にいって
+	もしメールがあればそれを取り込んで一通ずつfml_local へ渡す
+	fml_local が条件(~/.fmllocalrc)に従いrefile等を行なう
+
+もし、このメールが来ている先が uja-ml で
+
+   $POP_EXEC = "/usr/libexec/fml/fml.pl /var/spool/ml/uja-ml";
+
+になっていれば 
+
+	”POP経由でＭＬ（uja-ml）を運用している”
+
+ことと同じです。
+
+このやりかたを使うことで自分のマシンで sendmail を起こしていてメールを
+受け止められなくてはいけないという制約はなくなります。
+
+これで原理的に perl が動くＯＳなら WINDOWS だろうが Macintosh だろうが
+動くはずですが…？（未確認）
+
+
+.S	変数
+.l	$POPFML_PROG
+.l	$POP_PASSWORD
+.l	$POP_TIMEOUT
+.l	$POP_USER
+.l	$POP_QUEUE_DIR
+.l	$POP_LOGFILE
+.l	$POPFML_MAX_CHILDREN
+.l	$POP_PORT
+.l	$POP_SERVER
+
+	$POPFML_PROG
+	$POP_EXEC
+
+POP3 で読んできたメールをどの program へ渡せばいいのか？
+例:
+   $POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
+
+	$POP_SERVER
+
+POP Server。 
+
+	$POP_USER
+
+ＭＬの管理者。
+
+	$POP_PASSWORD
+
+通常 ~/.netrc からとられる。当然 $POP_USER と一組みです。
+
+	$POP_TIMEOUT
+
+POP Server がずっこけた場合等に切断する秒数。デフォールトは45秒
+
+	$POP_QUEUE_DIR
+
+POP で読んできたメールを一回保存する場所。
+デフォールトは
+
+	$DIR/var/pop.queue
+.k	$DIR/var/pop.queue
+.k	var/pop.queue
+
+	$POP_LOGFILE
+
+POP のサーバとの通信のログ。デフォールトは
+	$DIR/var/log/_poplog
+.k	$DIR/var/log/_poplog
+.k	var/log/_poplog
+
+
+	$POPFML_MAX_CHILDREN
+
+一回(通常1分)にする処理数。あんまりやると OS がひさん
+
+	$POP_PORT
+
+110/tcp と違う場合に設定する。
+
+
+.# $Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
