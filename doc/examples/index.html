@@ -19,8 +19,21 @@
 
 <A HREF="index-e.html">[English] is here</A>
 
+<BR>
+<!- menu ->
+	<A HREF="#overview">概要</A>
+	<A HREF="#fundamental-config">基本設定</A>
+	<A HREF="#advanced-config">やや進んだ設定</A>
+	<A HREF="#debug">デバッグ</A>
+	<A HREF="#more-advanced">より進んだ設定</A>
+	<A HREF="#experimental-project">実験プロジェクト(CGI)</A>
+<!- menu ->
+
+<HR>
+
 <UL>
 	<LI>
+	<A NAME="overview">
 	概要
 	<UL>
 		<LI>
@@ -39,10 +52,20 @@
 		<A HREF="postfix-install.html">
 		Postfix のインストールの例 (NetBSD-current)
 		</A>
+
+		<LI>
+		MTA (Mail Transport Agent)別の注意
+		<BR>
+		<A HREF="../INSTALL_with_SENDMAIL/index.html">sendmail</A>
+		<A HREF="../INSTALL_with_POSTFIX/index.html">postfix</A>
+		<A HREF="../INSTALL_with_QMAIL/index.html">qmail</A>
+		<A HREF="../INSTALL_with_EXIM/index.html">exim</A>
+		<A HREF="../INSTALL_with_ZMAILER/index.html">zmailer</A>
 	</UL>
 
 
 	<LI>
+	<A NAME="fundamental-config">
 	<P> 基本的な設定
 	<UL>
 		<LI>
@@ -88,6 +111,7 @@
 
 
 	<LI>
+	<A NAME="advanced-config">
 	<P> 少し進んだ設定
 	<UL>
 		<LI>
@@ -118,6 +142,7 @@
 	</UL>
 
 	<LI>
+	<A NAME="debug">
 	<P> エラーとデバッグ
 	<UL>
 		<LI>
@@ -127,6 +152,7 @@
 	</UL>
 
 	<LI>
+	<A NAME="more-advanced">
 	<P>
 	その他の細かいパラメータ設定をする人のために
 	<BR>
@@ -166,6 +192,35 @@
 		<LI>
 		<A HREF="../op/index.html#fmlserv">fmlserv 
 		(listserv, majordomoのようなユーザインターフェイスエミュレータ)
+		</A>
+	</UL>
+
+	<LI>
+	<A NAME="experimental-project">
+	<P> 実験的プロジェクト
+	<BR>
+	(CGI以外の面もfml-3.0とは若干異なります。
+	fml-3.0-BETAのコードにCGIその他の改造が付け加えられた実験バージョンです)
+	<UL>
+		<LI>
+		<A HREF="examples/makefml.cgi.txt">
+		CGI計画のメモ(TODO, インストールについて)
+		</A>
+
+		<LI>
+		<A HREF="cgi-INSTALL.txt">
+		CGIのインストールについて
+		</A>
+
+		<LI>
+		<A HREF="cgi-IMPLEMENTATION.txt">
+		CGIの実装
+		</A>
+
+		<LI>
+		<A HREF="cgi-TODO.txt">
+		CGIでやるべきこと
+>>>>>>> 1.14
 		</A>
 	</UL>
 </UL>
