@@ -3,7 +3,7 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 #
-# $Id$
+# q$Id$;
 
 
 sub ConfirmationModeInit
