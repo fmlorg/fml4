@@ -78,9 +78,14 @@ sub __EnvelopeFilter
 	$xbuf = &GetFirstMultipartBlock(*e);
     }
     else {
+	$p = 0;
+	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
+
 	# skip the first three paragraph
-	$p = index($e{'Body'}, "\n\n");
+	$p = index($e{'Body'}, "\n\n", $p);
+	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
 	$p = index($e{'Body'}, "\n\n", $p + 1);
+	while (substr($e{'Body'}, $p, 1) eq "\n") { $p++;} # skip null lines.
 	$p = index($e{'Body'}, "\n\n", $p + 1);
 	if ($p > 0) {
 	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
@@ -88,6 +93,8 @@ sub __EnvelopeFilter
 	else { # may be null or continuous character buffer?
 	    $xbuf = substr($e{'Body'}, 0, 1024);
 	}
+
+	&Debug("--EnvelopeFilter::InitialBuffer($xbuf\n)\n") if $debug;
     }
 
 
