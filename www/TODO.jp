@@ -4,22 +4,6 @@
 
 ○ apache-ssl (1.3.9 base)の解説の用意をする
 
-○ インストーラがどうパスワードを生成するべきか？
-
-   makefml admin.cgi
-
-	この時に admin/.htpasswd を生成するようにしたい
-
-
-   makefml mladmin.cgi $ml
-
-	この時に $DIR/$ml/etc/passwd から生成か？
-	リモートでいじる権限という観点から同じでいいだろうとおもう
-	share/ 以下を直接使わないなら
-	別の手段で保守するという案もあるだろう。
-
-   makefml ml.cgi $ml (仮) ？
-
 ○ ＭＬを作るには newaliases と連動させる必要があるが、
    MTAの設定はいつどこでする？
 
@@ -35,25 +19,3 @@
 ○ makefml config メニューを日本語にする？
 
 	Message Language Extension をつかう
-
-------------------------------------------------------------------
-[DONE]
-
-○ makefml コマンド
-
-   makefml admin.cgi
-
-	/usr/local/fml/share/cgi-bin/fml/admin/ を生成
-			menu.cgi
-			makefml.cgi
-
-  makefml mladmin.cgi $ml
-
-	/usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/ を生成
-			menu.cgi
-			makefml.cgi
-
-○ htdocs/
-
-	廃止 (share/ の下にはない)
-	templateにのみ使う

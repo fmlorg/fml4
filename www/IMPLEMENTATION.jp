@@ -20,7 +20,7 @@
 	   $EXEC_DIR/www/htdocs/
 	   $EXEC_DIR/www/conf/		(apache/conf/httpd.conf example)
 	   $EXEC_DIR/www/etc/		(.ht{access,passwd} example)
-	   $EXEC_DIR/www/db/		パスワードの実体置き場
+	   $EXEC_DIR/www/authdb/		パスワードの実体置き場
 
 
 ○ 基本設定ファイル
@@ -41,37 +41,41 @@
 	$EXEC_DIR/www/cgi-bin/admin/.htaccess
 		参照するパスワードは $EXEC_DIR/www/db/admin/htpasswd
 
-初期設定は
+デフォールトは
 
        User: admin
    Password: admin
 
-なので、インストールしたらすかさず変更すること:)
-＃注意: htpasswd だけは上書きしてはいけない
+htpasswd プログラムを発見できたらそれを使って admin パスワードをいれさ
+せる。
 
-2. とりあえず admin (一番上の階層)の画面だけは出るように準備をしておく?
 
-	そこからMLを作る
-	初期化(既存のMLをWWWインターフェイスでも?)
+2. admin 画面
 
-	そこからMLを削除	  
+とりあえず admin (一番上の階層)の画面だけは出るように準備をしておく
+
+	パスワードの変更なり管理者アカウントの整理をする
+
+	MLを作る/そこからMLを削除 などのテストを行なう
 
 
 ○   makefml コマンド(下請け)
 
- * 全体の管理者用 (実装済み)
-   makefml admin.cgi
+これらは必要ない make install-withcgi が行なう
+   XXX 
+   XXX     * 全体の管理者用 (実装済み)
+   XXX       makefml admin.cgi
+   XXX 	$EXEC_DIR/www/cgi-bin/fml/admin/ 以下にCGIを生成
+   XXX 			menu.cgi
+   XXX 			makefml.cgi
+   XXX 
+   XXX     * 各MLの管理者用 (実装済み)
+   XXX       makefml mladmin.cgi $ml
+   XXX 	$EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
+   XXX 			menu.cgi
+   XXX 			makefml.cgi
+   XXX 
 
-	$EXEC_DIR/www/cgi-bin/fml/admin/ 以下にCGIを生成
-			menu.cgi
-			makefml.cgi
-
- * 各MLの管理者用 (実装済み)
-   makefml mladmin.cgi $ml
-
-	$EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
-			menu.cgi
-			makefml.cgi
 
  * 一般ユーザ用のはどうする? (未実装)
    makefml ml.cgi $ml とかにするのか?
