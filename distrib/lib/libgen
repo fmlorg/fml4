@@ -79,6 +79,11 @@ COPY_DOCS () {
 	   mkdir $DESTDIR/distrib/doc/tutorial.Japanese;
 	   rsync -av Japanese/ $DESTDIR/distrib/doc/tutorial.Japanese/;
 	fi
+	if [ -d English ]
+	then
+	   mkdir $DESTDIR/distrib/doc/tutorial.English;
+	   rsync -av English/ $DESTDIR/distrib/doc/tutorial.English/;
+	fi
    )
    (
 	echo " "; echo "Copying 'contrib' Documents (doc/master)...";
