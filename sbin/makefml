@@ -47,15 +47,13 @@ exit 0;
 #################### LIBLARIES ####################
 sub InitMakeFml
 {
-    $| = 1;
+    # flush;
+    select(STDOUT); $| = 1;
 
     &GetTime;
 
     require 'getopts.pl';
     &Getopts("dhf:A:");
-
-    # flush;
-    select(STDOUT); $| = 1;
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -994,6 +992,12 @@ sub Conv
 	s/_OPTIONS_/$opts/g;
 	s/XXUID/$uid/g;
 	s/XXGID/$gid/g;
+
+	if (/dev\.null.*\@domain\.uja/) {
+	    s/domain\.uja/$DOMAIN/g;
+	    s/dev\.null/$ml/g;
+	}
+
 	print CF $_;
     }
 
@@ -1302,10 +1306,10 @@ sub do_newml
     &FixIncludeHeader;
 
     # doc/drafts -> help,deny,guide,objective
-    &Copy("$EXEC_DIR/doc/drafts/help", "$ML_DIR/fmlserv/help");
-    &Copy("$EXEC_DIR/doc/drafts/deny", "$ML_DIR/fmlserv/deny");
-    &Copy("$EXEC_DIR/doc/drafts/guide", "$ML_DIR/fmlserv/guide");
-    &Copy("$EXEC_DIR/doc/drafts/objective", "$ML_DIR/fmlserv/objective");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/guide", "$ML_DIR/$ml/guide");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/objective", "$ML_DIR/$ml/objective");
 
     # here backed to the writable bit == 077 or 007
     &SetWritableUmask;
@@ -1536,7 +1540,7 @@ sub do_fmlserv
     # fmlserv (uid != owner ) can read help
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
-    &Copy("$EXEC_DIR/doc/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
+    &Conv($ml, "$EXEC_DIR/doc/drafts/help-fmlserv", "$ML_DIR/fmlserv/help");
 
     # the last info
     print "\n   Please see several examples in $ML_DIR/$ml\n";
