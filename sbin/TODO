@@ -1,0 +1,11 @@
+XXX DatabaseAccess
+
+we do not use makefml to database in the first version!
+ 
+  * how to nuke this ? (for database access)
+	sbin/makefml:4563:	if (&CheckMember($member, $f)) {
+
+
+
+-----
+$Id$

@@ -575,7 +575,10 @@ sub ProcAdminSubscribe
     }
     
     ## duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
-    if (&CheckMember($addr, $file_to_regist)) {	
+    if ($USE_DATABASE) { # XXX disabled anyway
+	;
+    }
+    elsif (&CheckMember($addr, $file_to_regist)) {	
 	&LogWEnv("admin $proc [$addr] is duplicated in the file to regist", *e);
 	&Mesg(*e, $NULL, 'already_subscribed', $addr);
 	&Mesg(*e, "   different sub-domain address already exists?");

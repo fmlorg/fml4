@@ -116,7 +116,10 @@ sub AutoRegist
     }
 	
     ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
-    if (&CheckMember($from, $file_to_regist)) {	
+    if ($USE_DATABASE) { # XXX disabled anyway
+	; 
+    }
+    elsif (&CheckMember($from, $file_to_regist)) {	
 	&Log("AutoRegist: Dup $from");
 	&Mesg(*e, "Address [$from] already subscribed.",
 	      "already_subscribed", $from);
