@@ -1616,6 +1616,9 @@ $SMTP_OPEN_HOOK .= q#
 ----------------------------------------------------------------
 
 
+
+
+
 .# ##########################################################
 .C	config.phのその他の設定
 .label	{config-misc}
@@ -2798,6 +2801,50 @@ $POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
 
 とおなじ（まず、これがうごかなきゃだめだね〜）
 ＃もっともmhがいんすとーるしてなきゃ意味ないけど…
+
+
+.S	たとえば、Received: のようなヘッダを残すには？
+
+Current(1.6以降) では、すべての変数は 
+
+	$Envelope{"field名を小文字にした単語:"}
+	＃ いまのばあい、$Envelope{'received:'}
+
+に、はいってるので、 これを どっかの hook で Add するとかでＯＫでしょう。
+もっとも、
+
+	$Envelope{'received:'} =~ s/(\w)Received:/$1\nReceived:/g;
+
+とかして、（つながってますんで、）複数行にもどさないと あきまへん…
+
+古いやつだと、直接 next if /^Received:/ をけずって、addするしかありま
+せんが
+.q
+--- fml.pl	Tue Nov 14 16:49:28 1995
++++ fml.pl.new	Tue Nov 14 16:49:02 1995
+@@ -173,6 +173,11 @@
+ 
+ 	# Fields to skip. Please custumize below.
+ 	next if /^Received:/io;
++
++	if (/^Received:/io) {
++	    $ReceivedHeaders .= "X-Received: $contents\n"; #?
++	}
++
+ 	next if /^In-Reply-To:/io && (! $SUPERFLUOUS_HEADER);
+ 	next if /^Return-Path:/io;
+ 	next if /^X-M\S+:/io;
+@@ -518,6 +523,8 @@
+     $body .= $_cf{'MIME', 'header'} if (!$PREVENT_MIME) && $_cf{'MIME', 'header'};
+     $body .= $SuperfluousHeaders    if $SUPERFLUOUS_HEADERS;
+ 
++    $body .= $ReceivedHeaders;
++
+     # Additional hook;
+     $body .= "Message-Id: $Message_Id\n" if $USE_ORIGINAL_MESSAGE_ID;
+     $HEADER_ADD_HOOK && &eval($HEADER_ADD_HOOK, 'Header Add Hook');
+.~q
+
 
 
 .# ##########################################################

@@ -468,3 +468,81 @@ X-Mail-Count: 00702
 
 .~q
 
+
+.S	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
+
+Perl 5 が正しくインストールされてないと起きるみたいですね。
+＃それも 5.000 のようだが… 
+
+０．	なんとかして use Socket; を実行しなければいいと(^^)
+１．	use Socket;(libsmtp.pl)	 の部分をカットする
+２．	$START_HOOK .= q# $_cf{'perlversion'} = 4;#;
+３．	とにかく	
+	なんとかして、require sys/socket.ph ; だけをやらせる
+
+
+.S	自動登録したときにファイルが送られない事件(1.6 〜 1.6.1?)
+
+推測？：
+libutils.pl[AutoRegist] -> libsmtp.pl[SendFile]
+GenerateHeaders のパラメータがうまく渡ってない
+原因は 変数空間のスコープ かな？
+
+.q
+sub SendFile
+{
+    local(@to, *e, *rcpt);
+    local($to, $subject, $file, $zcat, @to) = @_;
+
+つまり *to -> @to にしたら動いたりとか？
+ついでに、    
+	local(@to, *e, *rcpt);
+を
+	local(@to, %e, *rcpt);
+とか、
+	local(@to, *e, *rcpt);
+
+をなくすとうごくとか ？
+.~q
+
+
+
+.S	bin/expire.plを“Ｎ個のファイルを残す”のを間違えます
+
+	該当範囲：libexpire.pl のないバージョン(95/11/11以前)
+
+ ”spool/数字” 全体に対して qsort() をかけちゃうんで
+sort 後の結果が間違ってしまいます。
+
+  # sort ->  1 , 2, 3, ... incresing order.
+  @f = sort {$a <=> $b} @f;
+
+は spool/数字 ではなく 数字 だけで実行しなければならないわけです。
+いまのはなおってます。
+
+逆に、spool/数字 を sort するには、たとえばこんなことをすればできます
+けど…どうも美しくないね…
+
+.q
+@f = sort fp_sort {$a <=> $b} @f;
+sub fp_sort
+{
+    local($na, $nb, $wa, $wb);
+    $xa = $a;
+    $xb = $b;
+
+    $xa =~ s/^(\D+)(\d+)/$wa = $1, $na = $2/e;
+    $xb =~ s/^(\D+)(\d+)/$wb = $1, $nb = $2/e;
+
+    if ($na || $nb) {
+	# print STDERR "($wa cmp $wb) || ($na <=> $nb);\n";
+	($wa cmp $wb) || ($na <=> $nb);
+    }
+    else {
+	$a cmp $b;
+    }
+}
+
+.~q
+
+
