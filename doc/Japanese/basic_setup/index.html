@@ -30,7 +30,7 @@
 	　<A HREF="#fundamental-config">やさしいカスタマイズ</A>
 	　<A HREF="#advanced-config">やや進んだカスタマイズ</A>
 <BR>
-	　<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.en/namazu.cgi">
+	　<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">
 	  [検索]
 	  </A>
 <!- menu ->
@@ -39,30 +39,35 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	ＭＬの作り方の概要: 例は elena ＭＬです。pathは適当に読みかえてください。
+	ＭＬの作り方の概要: 
+		例は elena ＭＬです。パス名は適当に読みかえてください。
+
 	<P>
 	注意: このページは fml をインストールしたマシンの上で行なう操作方法です。
-	<BR>
-	(GUIについては<A HREF="../GUI/">../GUI</A>をみてね)
-	<BR>
+	(GUIについては<A HREF="../GUI/">../GUI</A>を参照)
+
 
 	<UL>
-	<LI> (前提条件: MTA (sendmail,postfix,qmail,...) の設定はすでに終っているはず)
+	<LI> 	前提として、すでにメールサーバ(sendmail, postfix, qmail,...)
+		の設定はすでに終っているはず。
 
-	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
+	<LI>	 (もしないなら)グループ fml、ユーザ fml を作る。
+
+	<LI> 	ユーザ fml になり、
+		<A HREF="sample.ls_fml">/usr/local/fml</A>
 		に fml をインストールする
 
-	<LI> elena MLを作る
+	<LI> 	elena MLを作る
 		(作られるディレクトリ:
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
 
-	<LI> <A HREF="sample.aliases">/var/spool/ml/elena/aliases</A>
+	<LI>	<A HREF="sample.aliases">/var/spool/ml/elena/aliases</A>
 		を /etc/aliases に付け加える(ファイルの編集)。
 		編集したら newaliases などを忘れずに
 		(update の手順は使っているMTAに依存します)。
 		
-	<LI> <A HREF="add.html">メンバーを登録</A>する。
+	<LI>	<A HREF="add.html">メンバーを登録</A>する。
 
 	</UL>
 	<A HREF="howto-customize.html">カスタマイズ</A>
@@ -104,6 +109,11 @@
 		<LI>
 		<A HREF=server_movement.html>
 		fmlを別の(新)サーバへ移動させる方法
+		</A>
+
+		<LI>
+		<A HREF="../../UPGRADE/index.html">
+		注: fml 3.0 or 3.0.1 から 4.0 へのアップグレード
 		</A>
 
 		<LI>
@@ -179,12 +189,11 @@
 
 		<LI>
 		<A HREF="config-remote.html">
-		リモートからメールでメーリングリストの設定をいじる
+		リモートからメールでメーリングリストの設定を変更する
 		</A>
 		<BR>
 		"リモート管理"	
 		<A HREF="../remote_control/index.html">[詳細]</A>
-
 
 		<LI>
 		<A HREF="../header_rewrite/index.html">

@@ -161,7 +161,8 @@ executable bit を落してください。/ から全階層をたどって検査して下さい。
 .S	Insecure dependency in chdir, Permission denied, ... 
 .k	Insecure dependency in chdir 
 .k	Permission denied
-.xref	c-wrapper, calling-fml.pl
+.xref	c-wrapper
+.xref	calling-fml.pl
 .xref	non_privileged_user
 
 / から全階層をたどって permission を検査して下さい。

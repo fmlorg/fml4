@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 <TITLE>
-"fml" Mailing List Server Package
+"fml" mailing list server/manager package
 </TITLE>
 <META http-equiv="Content-Type"
 	content="text/html; charset=ISO-2022-JP">
@@ -16,7 +16,7 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" Mailing List Server Package
+"fml" mailing list server/manager package
 </CENTER>
 </H1>
 
@@ -67,8 +67,7 @@ basic コース: まず最初に見てみてほしい場所
 </UL>
 
 
-<P>
-fml リリースの<A HREF="releng.ja.html">流れ</A>。
+<P>fml リリースの<A HREF="releng.ja.html">流れ</A>。
 <A HREF="ftp://ftp.fml.org/pub/fml/current/">
 fml-current
 </A>
@@ -89,18 +88,16 @@ fml-stable の一番新しい日付がお薦めです
 <TR>
 	<TD><A HREF="WHATS_NEW/index.html">What's new</A></TD>
 	<TD><A HREF="FEATURES/index.html">特徴</A></TD>
-
-<TR>
 	<TD><A HREF="download.html">ダウンロード</A></TD>
 	<TD><A HREF="Japanese/tutorial.html">チュートリアル</A></TD>
 
 <TR>
 	<TD><A HREF="#fml">配布ドキュメント(current)</A></TD>
 	<TD><A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/fml/sources/stable/src/doc/html/index-j.html"> 配布ドキュメント(stable) </A></TD>
-	<TD><A HREF="advisories/index.html">FML アドバイザリィ</A></TD>
+	<TD><A HREF="advisories/index.html">アドバイザリィ</A></TD>
 
 <TR>
-	<TD><A HREF="mailinglist.html">Mailing List</A></TD>
+	<TD><A HREF="mailinglist.html">メーリングリスト</A></TD>
 	<TD><A HREF="TODO/index.html">TODO</A></TD>
 	<TD><A HREF="WISH_LIST/index.html">WISHLIST</A></TD>
 
@@ -111,6 +108,7 @@ fml-stable の一番新しい日付がお薦めです
 
 <TR>
 </TABLE>
+
 <P>config.ph で設定可能な変数名
 <TABLE>
         <TD><A HREF="variable-list.ja.html">[一覧]</A>
@@ -118,8 +116,14 @@ fml-stable の一番新しい日付がお薦めです
         <TD><A HREF="Japanese/internals/index.html#functions">HOOKに便利かもしれない関数</A>
 </TABLE>
 
+
 <P> アップグレード
 <UL>
+        <LI>
+	<A HREF="UPGRADE/index.html">
+	4.0 へアップグレードする際の注意
+	</A>
+
         <LI>
 	<A HREF="3.0-new-features.html">
 	3.0 highlights (2.2.1と3.0の主な違い)
@@ -170,36 +174,23 @@ fml-current 最新版のパッケージ附属ドキュメント(HTML版)より…
 
 
 <P>
-
-<A NAME=#installation>インストールとアップグレード
-
+	<A NAME=#installation>インストールとアップグレード
 
 	<LI>
-
 	<A HREF="UPGRADE/index.html">
 	アップグレードの際の注意
-
 	</A>
 
 	<LI>
 	<A NAME="#install-on-unix">
-
 	<A HREF="INSTALL/index.html">
-	インストール・ガイド
+	インストール
 	</A>
-	(インストール, makefmlの使い方など全般)
+	(インストール 〜  makefmlの使い方など全般のガイド)
+
+	<P>
+	メールサーバごとの注意点
 	<BR>
-	<A HREF="INSTALL_CGI/index.html">
-	CGIのインストール・ガイド
-	</A>
-
-
-<P>
-
-	MTAごとの注意点。sendmail はINSTALLファイルを参照のこと
-
-	<BR>
-
 	<A HREF="INSTALL_with_SENDMAIL/index.html">sendmail</A>
 	<A HREF="INSTALL_with_POSTFIX/index.html">postfix</A>
 	<A HREF="INSTALL_with_QMAIL/index.html">qmail</A>
@@ -207,18 +198,17 @@ fml-current 最新版のパッケージ附属ドキュメント(HTML版)より…
 	<A HREF="INSTALL_with_ZMAILER/index.html">zmailer</A>
 
 
-
-<P> Operating systems
-	<LI>
-
+	<P>	
+	オペレーティングシステム依存の注意
+	<BR>
 	<A HREF="INSTALL/index.html">[UNIXはINSTALLガイド]</A>
-
 	<A HREF="INSTALL_on_NT4/index.html">[Windows NT4]</A>
-
 	<A HREF="INSTALL_on_MacOS_X_Server/index.html">[Mac OS X Server]</A>
 
-
-
+	<P>
+	<A HREF="INSTALL_CGI/index.html">
+	CGIのインストール・ガイド
+	</A>
 <P>
 
 <A NAME="#misc">その他
@@ -229,24 +219,19 @@ fml-current 最新版のパッケージ附属ドキュメント(HTML版)より…
 	</A>
 
 	<LI>
-
 	<A HREF="COPYING">
-
 	GNU PUBLIC LICENSE
 	</A>
 
 	<LI>
-
 	<A HREF="devel/index.html">いろんなソフトウエアの雑多なメモ</A>
 
-
 	<LI>
-
         <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
-
-
 </UL>
 
+
+<!-- =================================================================== -->
 <HR>
 <P>
 
