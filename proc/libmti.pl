@@ -29,30 +29,9 @@ sub MTICache
     $xsender = &Conv2mailbox($e{'h:x-sender:'}, *e);
 
     ## Received:
-    $buf = $e{"sh:received:"};
-    $buf =~ s/\n\s/ /g;
-    $buf =~ s/\(/ \(/g;
-
-    if ($buf =~ /\@localhost.*by\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
+    if ($e{"sh:received:"}) {
+	($host, $rdate) = &ExtractInfoFromReceived($e{"sh:received:"});
     }
-    elsif ($buf =~ /from\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
-    }
-    elsif ($buf =~ /^\s*by\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
-    }
-    else {
-	&Log("MTI: not match Received: [$buf]");
-    }
-
-    # Received: date
-    &Log("MTI: Received info: host=$host [$rdate]") if $debug_mti;
-    $rdate = &Date2UnixTime($rdate) if $rdate;
-
 
     ### OPEN HASH TABLES (SWITCH)
     if ($mode eq 'distribute') {
@@ -77,30 +56,19 @@ sub MTICache
     for ($from, $rp, $sender, $xsender) {
 	next unless $_;
 	next if $uniq{$_};
-	next if $MTI{$_} =~ /$time/; # uniq
+	next if $MTI{$_} =~ /${time}:/; # uniq
 
 	&MTICleanUp(*MTI, $_, $time);
-	$MTI{$_} .= " $time";
+	$MTI{$_} .= " $time:$date";
 	$uniq{$_} = $_;
     }
 
-    ## cache host info
-    # we check both $date and $rdate to check
-    # whether Date: may be a fake?, if a fake we use time shown in Received:
-    # since Received: field's "date" may be more reliable.
-    # (Received: time can be appended on the first relayed host
-    # Anyway I belive old time of either Date: or Received:
-    # which must be the real sent time.
-    # 
-    # Problems: Oops, in the case of UUCP?
-    # If a host over UUCP sent queued mails when UUCP ups, 
-    # "Date:" must be very older than the current time.
-    # We trap this fact.
-    # If a host sent mails with the current Date: when UUCP or DIP ups,
-    # he may be a bomber. We cannot determine whether he is a real bomber
+    ## cache host info with Date: or Received: 
+    # Under the in-coming mail date CORRELATION CHECKS,
+    # if a host sent queued mails when UUCP or DIP wakes up,
+    # we cannot determine whether he is a real bomber
     # or to be a bomber by a mistake.
-    # 
-    # record speculated time when the mail left the host.
+    # Here we record time estimated as when the mail left the host.
     if ($host && ($date || $rdate)) {
 	&MTICleanUp(*HI, $host, $rdate);
 	$HI{$host} .= " ". &ValidateDate($date, $rdate);
@@ -145,6 +113,37 @@ sub MTICache
     &MTIDBMClose;
 }
 
+sub ExtractInfoFromReceived
+{
+    local($buf) = @_;
+    local($host, $rdate);
+
+    $buf =~ s/\n\s/ /g;
+    $buf =~ s/\(/ \(/g;
+
+    if ($buf =~ /\@localhost.*by\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$rdate = $2;
+    }
+    elsif ($buf =~ /from\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$rdate = $2;
+    }
+    elsif ($buf =~ /^\s*by\s+(\S+).*;(.*)/) { 
+	$host = $1;
+	$rdate = $2;
+    }
+    else {
+	&Log("MTI: not match Received: [$buf]");
+    }
+
+    # Received: date
+    &Log("MTI: Received info: host=$host [$rdate]") if $debug_mti;
+    $rdate = &Date2UnixTime($rdate) if $rdate;
+
+    ($host, $rdate);
+}
+
 sub ValidateDate
 {
     local($date, $rdate) = @_;
@@ -176,7 +175,7 @@ sub MTIProbe
     local($c, $s, $ss);
 
     if ($mode eq "distribute:max_traffic") {
-	$c = split(/\s+/, $MTI{$addr});
+	$c = split(/\s+/, $MTI{$addr});	# count irrespective of contents
 
 	if ($c > $MTI_DISTRIBUTE_TRAFFIC_MAX) {
 	    $s  = "Distribute traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
@@ -188,7 +187,7 @@ sub MTIProbe
 	}
     }
     elsif ($mode eq "command:max_traffic") {
-	$c = split(/\s+/, $MTI{$addr});
+	$c = split(/\s+/, $MTI{$addr});	# count irrespective of contents
 
 	if ($c > $MTI_COMMAND_TRAFFIC_MAX) {
 	    $s  = "Command traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
@@ -217,13 +216,14 @@ sub MTIGabageCollect
 sub MTICleanUp
 {
     local(*MTI, $addr, $time) = @_;
-    local($mti);
+    local($mti, $t);
 
     $MTI_EXPIRE_UNIT = $MTI_EXPIRE_UNIT || 3600;
     
     for (split(/\s+/, $MTI{$addr})) {
 	next unless $_;
-	next if ($time - $_) > $MTI_EXPIRE_UNIT;
+	($t) = (split(/:/, $_))[0];
+	next if ($time - $t) > $MTI_EXPIRE_UNIT;
 	$mti .= $mti ? " $_" : $_;
     }
 
@@ -359,19 +359,42 @@ sub BomberP
 sub MTICost
 {
     local($s) = @_;
-    local($prev, $sum, $epsilon);
+    local($prev, $sum, $epsilon, $time, $date, $p_date, $cr);
+    local($x, $cx);
 
     # against divergence
     $epsilon = $MTI_EPSILON || 0.1; 
 
     for (split(/\s+/, $s)) {
 	next unless $_;
+	($time, $date) = split(/:/, $_);
+	if ($prev) { $sum += 1 / &ABS($time - $prev + $epsilon);}
 
-	if ($prev) { $sum += 1 / &ABS($_ - $prev + $epsilon);}
-	$prev = $_;	
+	printf STDERR "=== %d\t%d\t%d\t%d\n",  $time, $prev, $date, $p_date;
+
+	if ($p_date) { 
+	    printf STDERR "--- %1.3f\t%1.3f\n", 
+	    &ABS($time - $prev + $epsilon),
+	    &ABS($date - $p_date + $epsilon);
+
+	    $cr += 1 / &ABS($date - $p_date + $epsilon);
+
+	    $x += 
+1 / (&ABS($time - $prev + $epsilon) * &ABS($date - $p_date + $epsilon));
+
+	    $cx += 
+(&ABS($time - $prev + $epsilon) * &ABS($date - $p_date + $epsilon));
+	}
+
+	$prev   = $time;
+	$p_date = $date;
     }
 
     $sum;
+
+    &Log( sprintf("sum=%1.2f cr=%1.2f", $sum, $cr) ) if $sum && $cr;
+    &Log("x=$x") if $x;
+    &Log("cx=$cx") if $cx;
 }
 
 
