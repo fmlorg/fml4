@@ -151,10 +151,19 @@ syncwww: doc
 syncinfo:
 	$(JCONV) $(WORK_DOC_DIR)/INFO > $(SNAPSHOT_DIR)/info
 
+search:
+	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
+
+##### make distribution #####
+update_configuration: libkern menu.conf.toggle
+
 libkern: proc/libkern.pl
+
+menu.conf.toggle: etc/makefml/menu.conf.toggle
 
 proc/libkern.pl: kern/fml.pl
 	sed '/^$$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
 
-search:
-	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
+etc/makefml/menu.conf.toggle: cf/MANIFEST
+	perl distrib/bin/gen_menu.conf.toggle cf/MANIFEST \
+		> etc/makefml/menu.conf.toggle

@@ -1,0 +1,146 @@
+#!/usr/local/bin/perl
+#-*- perl -*-
+#
+# Copyright (C) 2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#
+# $Id$
+#
+
+# getopt()
+require 'getopts.pl';
+&Getopts("dh");
+
+&Init;
+
+while (<>) {
+    $match = 0 if /^\s*$/;
+
+    if (m@1/0@) { 
+	$match = 1;
+	next;
+    }
+
+    if ($match && /^[A-Z]/) {
+	if (/^([A-Z])(\S+)?:/) {
+	    $KEY{$1}       = 1;
+	    $VALUE{$1. $2} = 1;
+	}
+	$match = 0;
+    } 
+}
+
+############################################################
+my ($p);
+
+# /OPTION/VARIABLE_OFF_ON
+print $MENU_OFF_ON_TOP_TEMPLATE;
+
+# /OPTION/VARIABLE_OFF_ON/{A,L}
+{
+    my $which;
+    for $which ('A', 'L') {
+	my $expand;
+
+	for $p (sort keys %VALUE) {
+	    if ($which eq &WHICH($p)) {
+		$expand .= sprintf("\t_i_  %-40s   %s\n",
+				   $p, 
+				   "\$SUMMARY{'$p'}");
+	    }
+	}
+
+	my $temp = $MENU_TEMPLATE;
+	$temp =~ s/__WHICH__/$which/;
+	$temp =~ s/__EXPAND__/$expand/;
+	print $temp;
+    }
+}
+
+# /OPTION/VARIABLE_OFF_ON/{A,L}/$VARIABLE
+for $p (sort keys %VALUE) {
+    if ($p =~ /^([A-Z])(\S+)/) {
+	&REPL($1, $p);
+    }
+}
+
+exit 0;
+
+
+sub WHICH
+{
+    my ($k) = @_;
+
+    if (($k cmp 'L') < 0) { 
+	$k = 'A';
+    }
+    else {
+	$k = 'L';
+    }
+}
+
+
+sub REPL
+{
+    my ($k, $x) = @_;
+    my ($tmpl)  = $TEMPLATE;
+    my ($h)     = &WHICH($k);
+
+    # $tmpl =~ s/_HIER_/$h\/$k/g;
+    $tmpl =~ s/_HIER_/$h/g;
+    $tmpl =~ s/_NAME_/$x/g;
+    print $tmpl;
+}
+
+
+sub Init
+{
+
+$MENU_OFF_ON_TOP_TEMPLATE = q#
+/OPTION/VARIABLE_OFF_ON
+
+=name
+
+=menu
+	off/on variable 
+
+        _i_  END
+        _i_  A           A-K (the name matches ^A .. ^K)
+        _i_  L           L-Z (the name matches ^L .. ^Z)
+
+=query
+	type:	select
+#;
+
+$MENU_TEMPLATE = q#
+/OPTION/VARIABLE_OFF_ON/__WHICH__
+
+=name
+
+=menu
+	off/on variable 
+
+	_i_  END		
+__EXPAND__
+
+=query
+	type:	select
+#;
+
+$TEMPLATE = q#
+/OPTION/VARIABLE_OFF_ON/_HIER_/_NAME_
+
+=name
+	_NAME_
+
+=config
+	_NAME_
+
+=menu
+	_NAME_	$SUMMARY{'_NAME_'}
+
+=query
+	type:	y-or-n
+#;
+
+}

@@ -3257,6 +3257,7 @@ sub GetCF
 	}
 	else {
 	    ($key, $value) = split(/\s+/, $_, 2);
+	    $CFdefined{$key} = 1;
 	    push(@ConfigOrder, $key);
 	}
     }
@@ -3573,6 +3574,11 @@ sub do_config
     # menu.conf version
     $MENU = "$EXEC_DIR/etc/makefml/menu.conf";
     &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG,*HOOK);#';
+
+    local($menuf) = $MENU.".toggle";
+    if (-f $menuf) {
+	&Menu'InitMenu(*config,*menuf,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG,*HOOK);#';
+    }
 
     # MAIN LOOP 
     if ($HtmlConfigMode) {
@@ -4093,7 +4099,7 @@ sub SaveCF
 	}
     }
 
-    if (open(CF, "> $cf")) {
+    if (open(CF, "> ${cf}.new")) {
 	select(CF); $| = 1; select(STDOUT);
 
 	# believe the config conservation
@@ -4136,7 +4142,16 @@ sub SaveCF
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
 
-	print "   Configuration is saved in ${cf}.\n";
+	if (-s "${cf}.new") {
+	    &Copy($cf, "${cf}.bak");
+	    if (rename("${cf}.new", $cf)) {
+		print "   Configuration is saved in ${cf}.\n";
+	    }
+	    else {
+		&Error("cannot save $cf");
+		print "   Configuration is not saved in ${cf}.\n";
+	    }
+	}
     }
 }
 
@@ -6067,11 +6082,26 @@ sub EvalMenu
     $Count = 0;
 
     ### YES/NO MAP
-    for (REMOTE_ADMINISTRATION, 
+    my ($key);
+    for $key (REMOTE_ADMINISTRATION, 
 	 PASS_ALL_FIELDS_IN_HEADER,
 	 @YES_OR_NO
 	 ) {
-	$SUMMARY{$_} = $config{$_} ? "YES" : "NO";
+	# $DIR/cf has this variable entry
+	if ($CFdefined{$key}) {
+	    $SUMMARY{$key} = $config{$key} ? "YES" : "NO";
+	}
+	# $DIR/cf has not this variable entry, use cf/MANIFEST default value
+	else {
+	    # must be not set by anybody.
+	    if ($config{$key} eq '') {
+		$SUMMARY{$key} = $MANIFEST{$key} ? "YES" : "NO";
+	    }
+	    # must be set by 'makefml config'
+	    else {
+		$SUMMARY{$key} = $config{$key} ? "YES" : "NO";
+	    }
+	}
     }
 
     ### others
