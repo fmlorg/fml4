@@ -14,7 +14,7 @@
 
 ##### local scope in Calss:Smtp #####
 local($SmtpTime, $FixTransparency, $LastSmtpIOString, $CurModulus, $Port);
-local($SoErrBuf, $RetVal);
+local($SoErrBuf, $RetVal, $PipeLineWindow);
 
 # sys/socket.ph is O.K.?
 sub SmtpInit
@@ -25,8 +25,7 @@ sub SmtpInit
     $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
     $e{'macro:s'}    = $e{'macro:s'}    || $FQDN;
 
-    # Pipelining waiting receive queue length
-    $PipeLineMaxRcvQueue = 100;
+    $PipeLineWindow = 2000;
 
     # Set Defaults (must be "in $DIR" NOW)
     $SmtpTime  = time() if $TRACE_SMTP_DELAY;
@@ -394,7 +393,7 @@ sub SmtpIO
 	else {
 	    &SmtpPut2Socket("RCPT TO:<$OUTGOING_ADDRESS>", $ipc);
 	}
-	    
+
 	$Current_Rcpt_Count = 1;
     }
     elsif ($e{'mode:_Deliver'}) { 
@@ -413,7 +412,8 @@ sub SmtpIO
     else { # not-DLA is possible;
 	for (@rcpt) { 
 	    $Current_Rcpt_Count++ if $_;
-	    if ($e{'mci:pipelining'}){
+	    if ($e{'mci:pipelining'} &&
+		(($Current_Rcpt_Count % $PipeLineWindow) != 0)) {
 		&SmtpPut2Socket_NoWait("RCPT TO:<$_>", $ipc) if $_;
 	    }
 	    else {
@@ -496,7 +496,7 @@ sub SmtpIO
 	    $LastSmtpIOString = $_;
 	}
 	else {
-	    $LastSmtpIOString = substr($e{'Body'}, -128);
+	    $LastSmtpIOString = $e{'Body'};
 	}
     }
 
@@ -551,22 +551,24 @@ sub SmtpPut2Socket_NoWait
 {
     $PipeLineCount++; # the number of wait after 'DATA' request.
     &SmtpPut2Socket(@_, 0, 0, 1);
+    print STDERR "{$Current_Rcpt_Count,$PipeLineCount}>", $_[0],"\n";
+
 }
 
 
 sub GetPipeLineReply
 {
     local($ipc) = @_;    
-    local($wc)  = int($PipeLineCount/2);
-    while ($wc-- > 0) {
+    local($wc) = int($PipeLineCount/2);
+    print STDERR "--GetPipeLineReply\n";
+    while ($wc-->0) {
 	&WaitForSmtpReply($ipc, 1, 0);
 	$PipeLineCount--;
     }
+    print STDERR "--GetPipeLineReply end\n";
 }
 
 
-# XXX If $Current_Rcpt_Count is no longer used, 
-# XXX remove it! (must be true in the future. logged on 1999/06/21).
 sub WaitFor354
 {
     local($ipc) = @_;
@@ -589,6 +591,7 @@ sub WaitForSmtpReply
     if ($ipc) {
 	do { 
 	    print SMTPLOG $_ = <S>; 
+	    print STDERR $_;
 	    $RetVal .= $_ if $getretval;
 	    $SoErrBuf = $_  if /^[45]/o;
 	    &Log($_) if /^[45]/o && (!$ignore_error);
@@ -758,7 +761,8 @@ sub SmtpPutActiveList2Socket
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 
-	if ($e{'mci:pipelining'}){
+	if ($e{'mci:pipelining'} &&
+	    (($Current_Rcpt_Count % $PipeLineWindow) != 0)) {
 	    &SmtpPut2Socket_NoWait("RCPT TO:<$rcpt>", $ipc);
 	}
 	else {
@@ -769,7 +773,7 @@ sub SmtpPutActiveList2Socket
 	    &Log("SMTP::Prof $rcpt slow");
 	}
 
-	if ($e{'mci:pipelining'} && ($PipeLineCount > $PipeLineMaxRcvQueue)) {
+	if ($e{'mci:pipelining'} && ($PipeLineCount > 5)) {
 	    &GetPipeLineReply($ipc);
 	}
 
