@@ -394,7 +394,7 @@ sub AutoRegistError
 	  'amctl.info',
 	  $MAIL_LIST, 
 	  $AUTO_REGISTRATION_KEYWORD,
-	  $MAINTAINER,
+	  $s || 'subscribe',
 	  $key);
     &MesgMailBodyCopyOn;
 }

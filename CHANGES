@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/04/02
+
+   proc/libamctl.pl
+	bug fix "amctl.info" message
+
 2001/03/25
 
    cf/MANIFEST 
