@@ -102,20 +102,15 @@
     <A NAME=mlpassword>
 	<LI>管理者パスワードの設定
 	これは
-	<BR>
-	admin と approve コマンドのパスワード
-	<BR>
-	およびGUIのメニューに入る
-	<BR>
+	「admin と approve コマンドのパスワード」
+	「およびCGIのメニューに入る」
 	時に使うパスワードです。
 	<BR>
-	簡単化のためGUIメニューではこの３つに同じパスワードを設定します。
-	<BR>
-	CUIの makefml htpasswd を用いることでコマンド用とCGI用と
-	別々のパスワードをつけることが可能です。
+	簡単化のためCGIメニューではこの３つに同じパスワードを設定します。
+	makefml mladmin.cgi config からリモート管理用と CGI 用とで
+	別のパスワードをつけることが可能です。
 	<BR>
 	注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
-	<BR>
 
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
@@ -175,10 +170,14 @@
 <HR>	
 <CENTER>管理メニュー</CENTER>
 <UL>
-
    <A NAME=export>
-   <LI> 既存の特定のＭＬを CGI 経由で操作可能にする
-	<BR>
+   <LI> 既存の特定のＭＬを CGI 経由で操作可能にするには
+	以下の 2 ステップからなります。
+	特定の ML を CGI 操作可能にし、
+	CGI 操作可能なメンバーを登録して下さい。
+	
+   <UL>
+	<LI> 既存の特定のＭＬを CGI 経由で操作可能にする
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
@@ -196,7 +195,14 @@
 	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 	</FORM>
-	
+
+	<LI>     
+	<A HREF="#mlpassword">
+	既存の特定のＭＬを CGI 操作可能な人の登録/削除
+	</A>
+	<BR>
+	注: リモート管理者の登録と同じメニューです。
+    </UL>
 
 <HR>	
    <A NAME=cgiadmin>
