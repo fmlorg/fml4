@@ -2936,6 +2936,8 @@ sub do_install
 	print "Please do \"makefml\" in the top directory of the source\n";
     }
 
+    # disable .crc in installation mode
+    undef $CHECK_SUM;
     &MakeConfigPH("$EXEC_DIR/cf/config", "$EXEC_DIR/cf/MANIFEST", 
 		  "", "$EXEC_DIR/default_config.ph");
 
@@ -5867,12 +5869,13 @@ sub FLock
 
     $lockdir  = "$mldir/$ml/";
     $lockdir .= $SPOOL_DIR{$ml} || "spool";
+    $DIR      = $DIR || "$main::ML_DIR/$ml";
 
     # why $ml/$ml -> $ml conversion? (may be historical reason)
     # if (!-d $lockdir) { $lockdir  =~ s#$ml/$ml#$ml#;}
 
     $lockf = $main'UNISTD ? $lockdir : ">> $DIR/lockfile"; #';
-    $lockf = $main'FlockFile || $lockf;
+    $lockf = ">> ${DIR}/$main::__FlockFile" if $main::__FlockFile;
 
     &SetFlockParam;
 
