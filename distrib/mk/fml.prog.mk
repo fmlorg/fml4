@@ -6,6 +6,8 @@ RSYNC     = rsync --rsh ssh
 FETCH     = /usr/bin/ftp
 TAR       = /usr/bin/tar
 INSTALL   = /usr/bin/install -c 
+CP        = /bin/cp -p
+PERL      = perl
 
 # Convert to Japanese/English
 JCONV     = nkf -j
