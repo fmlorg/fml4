@@ -10,6 +10,11 @@
 # $Id$
 
 
+# ContentHandler() by <t-nakano@imasy.or.jp>
+# see fml-support ML articles for more details. For example, 
+# 6229 6230 6233 6234 6235 6242 6243 6244 6245 6246 6247 6248 6253 6257
+# 6263 6265 6270 6276 6313 6314 6331 6332 6333 6346 6348 6349 6350 6374
+# 6379 6381 6393 6396 6397 6408 ...
 sub ContentHandler
 {
     local(*e) = @_;
@@ -30,7 +35,7 @@ sub ContentHandler
     $ptr = 0;
     $multipart = 1;
     while ($multipart) {
-	local ($bodiesp, $action);
+	local($bodiesp, $action);
 	
 	# Check Content-Type Header
 	if ($nonMime) {
@@ -42,16 +47,18 @@ sub ContentHandler
 	    $multipart = 0;
 	    $header = $type;
 	    $bodiesp = -1;
-	} else {
+	}
+	else {
 	    if ($type ne 'multipart') {
 		$xtype = '';
 		$xsubtype = '';
 		$multipart = 0;
 		$header = $type;
 		$bodiesp = -1;
-	    } else {
+	    }
+	    else {
 		local(@xheader, $str);
-	    
+		
 		# MIME mail
 		$prevp = $ptr;
 		($header, $body, $ptr) = &GetNextMultipartBlock(*e, $ptr);
@@ -78,7 +85,7 @@ sub ContentHandler
 	# Decide action to this part
 	$action = 'allow';
 	foreach (@MailContentHandler) {
-	    local ($t, $st, $xt, $xst, $act) = split(/\t/);
+	    local($t, $st, $xt, $xst, $act) = split(/\t/);
 	    
 	    if ($type =~ /^$t$/i && $subtype =~ /^$st$/i &&
 		$xtype =~ /^$xt$/i && $xsubtype =~ /^$xst$/i) {
@@ -102,21 +109,23 @@ sub ContentHandler
 	&MesgMailBodyCopyOn;
 	&Log("Reject multipart mail");
 	return "reject";
-    } else {
-	local ($outputbody) = '';
-	local ($deletebody) = '';
+    } 
+    else {
+	local($outputbody) = '';
+	local($deletebody) = '';
 	
 	if ($multipart) {
 	    if ($boundary eq '') {
 		$boundary = 'simplebounrady==';
 	    }
 	    foreach (@actions) {
-		local ($bodiesp, $action) = split(/\t/);
+		local($bodiesp, $action) = split(/\t/);
 		
 		if ($bodiesp == -1) {
 		    $body = $e{'Body'};
 		    $header = '!MIME';
-		} else {
+		} 
+		else {
 		    ($header, $body, $ptr) =
 			&GetNextMultipartBlock(*e, $bodiesp);
 		}
@@ -126,14 +135,17 @@ sub ContentHandler
 		    if ($header eq '!MIME') {
 			$outputbody .= '--' . $boundary . "\n" .
 			    "Content-Type:" . $e{'h:content-type:'} . "\n\n" .
-			    $body;
-		    } else {
+				$body;
+		    } 
+		    else {
 			$outputbody .= $header . $body;
 		    }
-		} elsif ($action eq 'strip+notice') {
+		} 
+		elsif ($action eq 'strip+notice') {
 		    if ($header eq '!MIME') {
 			$deletebody .= $body . "\n";
-		    } else {
+		    }
+		    else {
 			$deletebody .= $header . $body . "\n";
 		    }
 		}
@@ -147,17 +159,19 @@ sub ContentHandler
 		$e{'h:Mime-Version:'} = '1.0';
 		$e{'h:Content-Transfer-Encoding:'} = '7bit';
 	    }
-	} else {
-	    local ($singlepart) = 0;
+	} 
+	else {
+	    local($singlepart) = 0;
 	    
 	    foreach (@actions) {
-		local ($bodiesp, $action) = split(/\t/);
+		local($bodiesp, $action) = split(/\t/);
 		
 		if ($bodiesp == -1) {
 		    $body = $e{'Body'};
 		    $header = '!MIME';
 		    $singlepart = 1;
-		} else {
+		} 
+		else {
 		    ($header, $body, $ptr) =
 			&GetNextMultipartBlock(*e, $bodiesp);
 		}
@@ -166,7 +180,8 @@ sub ContentHandler
 		} elsif ($action eq 'strip+notice') {
 		    if ($header eq '!MIME') {
 			$deletebody .= $body . "\n";
-		    } else {
+		    } 
+		    else {
 			$deletebody .= $header . $body . "\n";
 		    }
 		}
