@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.129 2001/05/05 04:36:47 fukachan Exp $
+# $FML: fml.pl,v 2.130 2001/05/09 15:22:54 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -2554,7 +2554,7 @@ sub PerlModuleExistP
     local($pm) = @_;
     if ($] !~ /^5\./) { &Log("ERROR: using $pm requires perl 5"); return 0;}
     eval("use $pm");
-    if ($@) { &Log("${pm}5.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
+    if ($@) { &Log("${pm}.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
     1;
 }
 
