@@ -1,8 +1,18 @@
 .C	自動登録
 .l	auto-regist
 .l	autoregist
+.xref	access_policy access_policy_and_auto_regist
 
-.S	Introduction
+自動登録の設定は大きく
+
+	自動登録をするか？しないか？
+	$AUTO_REGISTRATION_TYPE  (タイプの選択)
+
+の２つからなっています。以下では自動登録のがいようとタイプ/種類につい
+て解説します。
+
+
+.S	自動登録の概要
 .k	自動登録のIntroduction
 .k	$ML_MEMBER_CHECK
 
@@ -36,12 +46,17 @@ fml は作った最初の時(1993)から
 
    また、管理者へ登録した旨をメールで知らせます。
 
-という一連の動作のことです。
+という一連の動作のことです。この動作や登録メールに使うキーワード等は
 
-なお、1997/02 以降の 2.1 GAMMA TEST (2.0 current) の自動登録には 
-confirmation モードが実装されています(詳細は後述)。現在のお勧めはこの
-モードを使うことです。このセクションでは”confirmation 以外の自動登録”
-について記述します。
+	$AUTO_REGISTRATION_TYPE
+.xref	auto_regist_type
+ 
+という変数で変わります。現在の推奨は confirmation というタイプです
+＃confirmation タイプは 1997/02 以降のものに実装されている
+.xref	confirmation
+
+confirmation はやや毛色が異なるので、ここではそれ以外の自動登録につい
+て概要を解説します。
 
 
 ○ メンバーチェックおよび登録に使うアドレスは 
@@ -127,15 +142,15 @@ $WELCOME_FILE は送り返す歓迎の文章を書いたファイル (とりあえず、guide
 にすれば「投稿用のアドレスで自動登録」もできます。
 
 
-.S	自動登録の仕方のvariation(登録するアドレスとキーワードについて)
-.k	自動登録: 手順
+.S	自動登録のタイプ
+.k	自動登録: タイプ
 .k	自動登録: 方法のvariation
 .k 	自動登録: 登録に使うアドレス
 .k 	自動登録: Subject にキーワードを宣言してもらう
 .k 	自動登録: メール本文にキーワードを宣言してもらう
 
 
-variation は
+自動登録のタイプ
     
 	登録すべきアドレスをどこから選ぶか？
 	登録アクションの起動にキーワード等を必要とするか？
@@ -144,6 +159,8 @@ variation は
 
 	$AUTO_REGISTRATION_TYPE 
 .k	$AUTO_REGISTRATION_TYPE 
+.l	auto_regist_type
+.l	$AUTO_REGISTRATION_TYPE 
 
 という変数で振舞いが変わります。この変数は
 
@@ -159,7 +176,10 @@ variation は
 のうちの一つです。それぞれについて解説します。confirmation は次説参照。
 
 
-   1 自動登録を設定してそれ以外特に設定をしない時
+.S	自動登録のタイプ: no-keyword
+.k	自動登録: no-keyword
+
+『特別なキーワード等は必要としない。メンバー以外は自動的に登録』です。
 
 	$AUTO_REGISTRATION_TYPE = "no-keyword";
 .k	$AUTO_REGISTRATION_TYPE
@@ -192,9 +212,10 @@ variation は
 	[歴史] この形式はもともとOFF会用MLなんかに便利です。
 		例：「出席します」メールがそのまま流れる。
 
+.S	自動登録のタイプ: subject
+.k	自動登録: subject
 
-
-   2 自動登録のためには Subject: にキーワードを必要とする場合
+『自動登録のためには Subject: にキーワードを必要とする場合』
 
 	$AUTO_REGISTRATION_TYPE = "subject";
 
@@ -214,7 +235,10 @@ variation は
 	登録の仕方が間違っているとユーザにメールが送られます。
 
 
-   3 自動登録のためにはメール本文にキーワードを必要とする場合
+.S	自動登録のタイプ: body
+.k	自動登録: body
+
+『自動登録のためにはメール本文にキーワードを必要とする場合』
 
 	$AUTO_REGISTRATION_TYPE = "body";
 
@@ -236,10 +260,10 @@ variation は
 	登録の仕方が間違っているとユーザにメールが送られます。
 
 
-.S	Confirmation モード (推奨)
+.S	自動登録のタイプ: confirmation (推奨)
+.k	自動登録: confirmation (推奨)
 .l	confirmation
 .l	confirmation-mode
-.k	自動登録: 確認(confirmation)を求める(推奨)
 .k	confirmation mode
 .k	$CONFIRMATION_ADDRESS
 .k	$CONFIRMATION_LIST
@@ -314,6 +338,26 @@ subscribe というキーワードは変更できます。
 ($CONFIRMATION_RESET_KEYWORDで設定) というコマンドで同じことができます
 が、まぁもう一度 subscribe してもらえばよいでしょう。
 
+[confirmation のフロー]
+____________________________________________________________________________
+
+ユーザ				ＭＬサーバ
+
+subscribe	→		
+				リクエスト受領
+		←		「confirm パスワード(数字) あなたの名前」
+				というメールを送って欲しいという返事
+
+confirm パスワード あなたの名前
+		→		
+				「confirm パスワード あなたの名前」
+				が正しいものなら登録
+
+		←		登録しましたというメール
+
+____________________________________________________________________________
+
+
 
 .S	登録とメンバーチェックに使うファイルについて
 .k	$MEMBER_LIST
@@ -371,7 +415,7 @@ subscribe というキーワードは変更できます。
 
 しかしながら、流すという設定をしても、subscribe だけのメール (じつは8
 行)は流しません。管理者以外は見てもうれしくないという配慮からです。
-＃off 用ならともかく『subscribe』と signature 4行くらいしかなかったり
+＃off 会用ならともかく『subscribe』と signature 4行くらいしかなかったり
 ＃するメールを流してもしょうがないです。
 
 8 = 1 + 3行本文 + 4行シグニチャア ということで、デフォールトでは
@@ -393,25 +437,21 @@ fml にはありえます _o_
 .key	+ トリック
 .key	/etc/aliases ＋ アーカイブ
 
-要約:
-この trick は From: のないようにかかわらず誰でもＯＫという風になります。
-この時デフォールトでは誰にでもコマンドが実行できるようにはしていません。
+	$PERMIT_POST_FROM	= "anyone";
 
-解説:
-現在では配送するだけのモード設定というのがあるので (makefml ではデフォー
-ルトですが) listname と listname-ctl と２つのアドレス(デフォールト)を
-使えるなら、これを使うより配送用とコマンド用をわけた方が良いと思います。
+です(makefml config でも設定可能)。コマンドをだれにでも許すならさらに
 
-例: 
-	config.ph で &DEFINE_MODE('post=anyone') 
+	$PERMIT_COMMAND_FROM	= "anyone";
 
-そういう観点では backward compatibility という趣はあります。
+です。
 
-使い方: members ($MEMBER_LIST) に
+[歴史]
++ trick は認証をしない、つまり誰でもＯＫという風にFMLに思わせる悪魔的
+なやり方です。実装は members ($MEMBER_LIST) に
 
 	+
 
-と書いておくと、この行に出あった時点で認証されたとみなします。
+と書いておくことで、、この行に出あった時点で認証されたとみなします。
 ＃シンタックスはNISにならっているです:-)
 
 つまり + を書いてあると
@@ -425,11 +465,17 @@ fml にはありえます _o_
 せん。ＭＬのメンバーでない人に解放しているからといってコマンドも実行さ
 せてよいとは限らないからです。
 
+obsolete ですが昔は
+
     	$PROHIBIT_COMMAND_FOR_STRANGER = 1; (default)
 .k    	$PROHIBIT_COMMAND_FOR_STRANGER
 
-という変数が定義されています。これを 0 にすればコマンドが使えるように
-なります。
+という変数があって、0 にすれば + trick でもコマンドが使えるようになり
+ました。つまり現在の 
+
+	$PERMIT_COMMAND_FROM	= "anyone";
+
+です。
 
 
 .S	複数アドレスから投稿だが配送先は一つ(自動登録モード)
@@ -480,49 +526,53 @@ fukachan@phys.titech.ac.jp	matome
 	user@domain 形式でないメールアドレスは登録の対象になるか？ 
 という問題に還元されます。
 
-RFC82 に従い user@domain 形式でないメールアドレスは ILLEGAL とみなすべ
-きです。つまりこれに対して何らかかの Operation を実行するのはよくない。
-と考えられます。
+RFC822 に従い user@domain 形式でないメールアドレスは ILLEGAL とみなす
+べきです。つまりこれに対して何らかかの Operation を実行するのはよくな
+い。と考えられます。
 
 localhost とからとか条件をつけて、$PeerAddr を利用すると少しまともな
 気がしますが
 .xref $PeerAddr
 
-user@domain フォームでない ILLEGAL なメールアドレス がすどおりして、サ
-イトを越えて Deliver されてしまうようなこともありうると考えられます。
+user@domain フォームでない ILLEGAL なメールアドレス が素通りして、サイ
+トを越えて配送されてしまうようなこともありうると考えられます。
 ＃もちろんよくないが実際に出来てしまう。
 
-よって変な補整を加えてしまうとかえってまずいとおもうんです。そういう場
-合こそ管理者が吟味してＭＬの設定をメインテナンスするべきでしょう。
+よって変な補整を加えてしまうとかえってまずいとおもいます。そういう場合
+こそ管理者が吟味してＭＬの設定をメインテナンスするべきでしょう。
 
 それにもかかわらず自動的に登録するやり方としては次のようなものが考えら
 れます。
 
 ○ sendmail.cf をいじる
 
-これが一番まともな方法だと思うのですが、Rule Set 10 で
+これが一番まともな方法だと思うのですが、例えば Rule Set 10 で
 
 R$+			$@$1<@$S>			user w/o host
 
 で、user -> user@domain に変換する。
-＃事前に DS$m されている（$m == domain である）
+＃事前に DS$m されている（$m == domain です）
 
-○ MHをいじる等のインターフェイスの制御でもＯＫですが、
-   すべての場合にＯＫとは限らない
+
+○ MHをいじる等のインターフェイスの制御でもOKですが、
+   ただし、これはすべての場合にOKとは限らないやりかた
+
 
 ○ subscribe 形式の強制
 
 “From行のアドレスに@以下をつけないでメールが送られてくる”
 
 をやらせないために、ローカルドメインの人は 
+
 	subscribe uja@localhost-name.uja.jp 
-形式を必ず使ってもらう。
+
+形式を必ず使ってもらう(confirmationではだめ)。
 
 
 ○ フックによる自動補正
 
-自動補整も やってやれなくはないです。でも変なこと（or illegal）
-がおこってもおこらないでね:-) YOUR OWN RISK
+自動補整も やってやれなくはないです。変なことがおきえますから、YOUR
+OWN RISK でやってください
 
 $START_HOOK  = q#
 	if ($From_address !~ /\@/) {
@@ -530,7 +580,7 @@ $START_HOOK  = q#
 	}
 #;
 
-ローカルなドメイン は自分のドメイン です。
+ここでローカルなドメインは自分のドメインです。
 
 
 .S	自動登録の際の配送モード
@@ -557,6 +607,8 @@ $START_HOOK  = q#
 .l	$AUTO_REGISTRATION_HOOK
 .k	$AUTO_REGISTRATION_HOOK
 
+例:
+
 $AUTO_REGISTRATION_HOOK = q#
     $e{'GH:Reply-To:'} = $MAINTAINER;
 #;
@@ -565,7 +617,11 @@ WELCOMEのメールの Reply-To: を管理者宛にする
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
