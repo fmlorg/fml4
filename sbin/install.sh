@@ -47,7 +47,7 @@ test -d $DOC_DIR    || mkdir $DOC_DIR
 test -d $DRAFTS_DIR || mkdir $DRAFTS_DIR
 
 (cd src; tar cf - *.pl )      | (cd $EXEC_DIR; tar xf - )
-(cd src/arch/; tar cf - *.pl) | (cd $ARCH_DIR; tar xf - )
+(cd src/arch/; tar cf - .)    | (cd $ARCH_DIR; tar xf - )
 (cd doc/drafts/; tar cf - .)  | (cd $DRAFTS_DIR; tar xf - )
 
 (
