@@ -1,0 +1,156 @@
+.C	FRED （汎関数的正規表現分解）ライブラリ
+
+.S	Funtional Regular Expressional Decomposer
+
+正規表現にマッチするか否かを調べ マッチした時 しない時にそれぞれ定義さ
+れた関数を実行します。マッチは
+
+		項目	値
+
+の組、たとえば 投票や アンケート といった一般的に良くありうる形式につ
+いて当てはまるすべてのものに適用可能です。
+
+例：
+	ADDRESS:		fukachan@sapporo.iij.ad.jp
+	FAVORITE_ACTORESS:	西原久美子
+	FAVORITE_ACTORESS:	こおろぎさとみ
+	FAVORITE_ACTORESS:	荘真由美
+	FAVORITE_ACTORESS:	矢島晶子
+	COMMENT:		うじゃ
+				うじゃうじゃ
+
+＃注意： lib/Elena (VotingSystem) を拡張しなおしたものと考えても良い
+
+
+.S	FRED Configuration file の例：
+
+   #CONFIG:
+   
+   # DEBUG
+   
+   TAB
+   #RFC822
+   
+   CATCH \S+ BODY
+   
+   INC     /home/beth/fukachan/w/fml/iij
+   INCLUDE libiij.pl
+   
+   #BODY:
+   
+   #
+   ### DEFAULT	*	&Nothing	&Warn	###
+   # VARIABLE	IF				THEN		ELSE	
+   # Domain:		[0-9A-Z_\-]+\.[0-9A-Z_\-]+\.[0-9A-Z_\-]+
+   #
+   # FIELD SYNTAX:
+   # ENTRY	PATTERN(IF)	FUNCTION(THEN)	FUNCTION(ELSE)
+   
+   NAME		(\S+)		AddAL
+   SPOOL		(\S+)		AddAL
+   MAIL		(\S+)		AddAL
+
+
+解説：
+
+行の先頭が "#" で始まる行はコメントです。しかしながら
+
+	#PART: 
+
+というシンタックスは例外で、PART の始まりを宣言しています。
+コメントは 
+
+	# 空白 コメント
+
+の形をとると良いでしょう。
+
+基本的な形としては、例えばメールは ヘッダとボディからなりますが、この
+場合妥当なconfigは
+
+		   #CONFIG:
+			
+			定義
+		
+		   #HEADER:
+		
+			定義
+		
+		   #BODY:
+		
+			定義
+		
+からなるでしょう。
+
+#BODY: では
+
+   変数のラベル パターン 関数（マッチした時） 関数（マッチしない時）
+
+
+
+
+
+.S	#CONFIG: 部
+
+基本設定を行ないます。
+
+   DEBUG	デバッグモードに入る。
+
+
+   TAB		は TAB で区切られた項目が仮定されます。
+
+	例：
+
+	ADDRESS	fukachan@sapporo.iij.ad.jp
+
+
+   RFC822	は ”FIELD: VALUE”を仮定します。
+		VALUEはRFC822 folding rule で書かれていれば	
+		複数行のデータを扱えます。
+
+	例：
+	From:	fukachan@sapporo.iij.ad.jp
+	Cc:	fukachan@sapporo.iij.ad.jp,
+		Elena@phys.titech.ac.jp
+
+
+   INC     directory
+		directory を perl のサーチパスに加えます。
+
+   INCLUDE file
+		file をインクルードします。
+		例えば fred で使う関数を別のファイルで保守管理すると良
+		いでしょう。
+
+
+   CATCH pattern part
+
+		pattern にマッチする行を見つけると
+		「 part 部分に入った」と見なし、part 部のデータ形式として
+		宣言（下述）されているフォーマットに従い
+		パターンマッチとそれに bind された関数の実行を行ないます。
+
+	例：
+		CATCH ADDRESS: BODY	
+
+	ADDRESS: で始まる部分を見つけたらそれ以降を本文（BODY パート）
+	とみなす。
+	
+
+.S	#BODY: 部
+
+基本パターン   
+
+   名前 パターン マッチしたら実行する関数 マッチしなかった時実行する関数
+
+の組からなります。後ろの２つの関数部分は１つでもいいし、両方省略もでき
+ます。その場合は パターンの形が正しいか否か？のみをチェックしているこ
+とになります。
+
+
+
+例：
+   
+   NAME		(\S+)		AddAL
+   SPOOL	(\S+)		AddAL
+   MAIL		(\S+)		AddAL
+
