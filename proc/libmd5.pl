@@ -27,10 +27,21 @@ sub Md5
 sub main::MailBodyMD5Cksum
 {
     local(*e) = @_;
+    local($buf, $p, $pe);
+
+    $pe = length($e{'Body'});
 
     $md5 = new MD5;
     $md5->reset();
-    $md5->add($e{'Body'});
+
+    $p = 0;
+    while (1) {
+	last if $p > $pe;
+	$_  = substr($e{'Body'}, $p, 128);
+	$p += 128;
+	$md5->add($_);
+    }
+
     $digest = $md5->digest();
     unpack("H*", $digest);
 }
