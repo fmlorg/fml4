@@ -1,10 +1,10 @@
 	WANTED / TODO LIST TOWARD fml 2.3
 
-.C	TODO
+--- TODO
 
-.S	more beautiful codes
+* more beautiful codes
 
-.S	documents
+* documents
 
    * want FAQ for beginners
 
@@ -13,21 +13,23 @@
 	operations guide
 	The design and implementation 
 
-.S	WWW Interface ?
+* WWW Interface ?
 
-.S	makefml menu extension ?
+* makefml menu extension ?
 
-.S	more elaborate port on NT4 ?
+* more elaborate port on NT4 ?
 
-.S	integrated system, which may be related with ...
+* integrated system, which may be related with ...
 
 	(like a minimum group ware) 
 	irc
 	database search 
 	...
 
-.S	makefml menu extension (full menu? It seems incredible)
+* makefml menu extension (full menu? It seems incredible)
 
-.S	MANIFEST Japanese comments?
+* MANIFEST Japanese comments?
+
+* msend light weight version?
 
 $Id$
