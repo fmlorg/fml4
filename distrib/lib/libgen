@@ -353,12 +353,12 @@ GEN_BRANCH_ARCHIVE () {
 
 GEN_ARCHIVE () {
 	### Section: initialize
-	if [ ! -d $FTP_DIR ]; then
+	if [ X$FTP_DIR = X ]; then
 		echo ignore GEN_ARCHIVE since \$FTP_DIR is not defined
 		return
 	fi
 
-	if [ ! -d $WWW_DIR ]; then
+	if [ X$WWW_DIR = X ]; then
 		echo ignore GEN_ARCHIVE since \$WWW_DIR is not defined
 		return
 	fi
