@@ -1,0 +1,64 @@
+.C	MIME関係
+
+.S	MIME処理
+=E.S	Header Mime Decoding (To Japanese)
+.# .k	MIME
+.# .l	MIME-header
+
+本来MIME関係はクライアントプログラムが処理すればいいことなのでサーバと
+しては素通しでいいはずです。
+
+fmlのMIME関係の処理は
+
+0.	基本的に素通し
+
+1.	可読性のためにsummary(サマリー)ファイルなどで
+	base64, quoted-printableにエンコードされた
+	Subjectを日本語に戻しておく
+
+2.	MIME/Multipart形式のまとめおくりやファイルの送り返し
+	をオプションとして提供する
+	(デフォールトをMIME/Multipartにすることも可能)
+
+などからなります。それ以外にも『過去に某BBSのせいで流行ったが、本来やっ
+てはいけないオプション』などもあります。
+
+前述の1は$USE_MIMEという変数が設定されていないとサマリーは生のBASE64な
+どのまま書き込まれます。デフォールトでは日本語に変換します。
+
+	$USE_MIME = 1; (default 1)
+.k	$USE_MIME
+.l	$USE_MIME
+
+Example:
+	...
+	Subject: Re: TELEPHONE 
+	   =?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+
+というメールが来たとすると、summary ファイルには
+=E
+is saved in summary file as 
+
+	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
+
+のようにないります。
+
+注意: subject をちょんぎったりはしませんが、一行にしてからdecodeして全
+部書いてます。summaryは1行1メールがわかりやすくていいでしょ?
+
+
+.S	記事を MIME Decode して保存
+=E.S	Decoding articles stored in $DIR/spool.
+
+にふてぃ〜とかのださださ対策の一貫の名残です。
+現代では使うべきではありません。
+
+	$MIME_DECODED_ARTICLE          = 1;
+.k	$MIME_DECODED_ARTICLE
+
+と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
+時に日本語へ逆変換した内容を書き込みます。ただしこれをすると 
+MIME/Multipart とかでエラーになるのでやってはいけません。
+
+
+.# $Id$
