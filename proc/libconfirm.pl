@@ -70,10 +70,11 @@ sub Confirm
 	) {
 
 	if ($r eq 'expired') {
-	 $m .= "Your confirmation for \"subscribe request to $MAIL_LIST\"\n";
-	 $m .= "is TOO LATE (ALREADY EXPIRED).\n";
-	 $m .= "So we treat you request is the first time request.\n";
-	 $m .= "Please try it from the first time as follows\n\n";
+	    $m .= 
+		"Your confirmation for \"subscribe request for $MAIL_LIST\"\n";
+	    $m .= "is TOO LATE (ALREADY EXPIRED).\n";
+	    $m .= "So we treat you request is the first time request.\n";
+	    $m .= "Please try it from the first time as follows\n\n";
 	}
 
 	# $name == "Elena Lolabrigita";
@@ -81,7 +82,7 @@ sub Confirm
 
 	 # required info format 
 	 # [addr id time(for expire) signature]
-	 $id   = &Confirm'GenKey($from);#';
+	 $id = &Confirm'GenKey($from);#';
 
 	 # var/log/confirm;
 	 &Append2("$time\t$addr\t$id\t$name", $CONFIRMATION_LIST);
@@ -92,6 +93,7 @@ sub Confirm
 	 $m .= "please send the following phrase to $CONFIRMATION_ADDRESS\n\n";
 	 $m .= "$CONFIRMATION_KEYWORD $id $name\n";
 	 &Mesg(*e, $m);
+
 	 $e{'message:append:files'} = $CONFIRMATION_FILE;
 	 return 0;
     }
@@ -102,7 +104,7 @@ sub Confirm
 	return $r;
     }
     else {
-    $e{"GH:Subject:"} = "Subscribe with confirmation error $ML_FN";
+	$e{"GH:Subject:"} = "Subscribe with confirmation error $ML_FN";
 	&Log("Confirm: Error exception");
 	return 0;
     }
@@ -121,8 +123,8 @@ sub Open         { &main'Open(@_);} #';
 sub IdCheck
 {
     local(*e, *r, $addr, $buffer) = @_;
-    local($time, $a, $id, $name, $m);
-    ($time, $a, $id, $name) = @r;
+    local($time, $a, $id, $name)  = @r;
+    local($m);
 
     # reset anyway;
     if ($buffer =~ /$CONFIRMATION_RESET_KEYWORD/) {
@@ -144,8 +146,8 @@ sub IdCheck
     else {
 	&Log("confirm[confirm] syntax error");
 	&Log("confirm request[$buffer]");
-	$m .= "Confirmation Syntax Error:\n";
-	$m .= "The Syntax is following style, check again\n\n";
+	$m .= "Confirmation Syntax or Password Error:\n";
+	$m .= "Syntax is following style, check again syntax and password\n\n";
 	$m .= "$CONFIRMATION_KEYWORD password $name\n";
 	$m .= "\nwhere this \"password\" can be seen\n";
 	$m .= "in the confirmation request mail from $main'MAIL_LIST.\n";
@@ -207,11 +209,12 @@ sub BufferSyntax
 
 # IMPORTANT (Reset by plural "subscribe" is based below;)
 # LAST MATCH EVEN IF PLURAL ENTRIES MATCH ADDR;
+# return *r is only for &IdCheck;
 sub FirstTimeP
 {
     local(*r, $addr, $cur_time) = @_;
     local($time, $key_addr, $a, $id, $name, $match, $addr_found);
-    local($status);
+    local($status) = 'first-time'; # default
 
     # init variables;
     $cur_time   = time;
@@ -242,8 +245,7 @@ sub FirstTimeP
     }
     close(FILE);
 
-    @r = ($time, $a, $id, $name);
-    return ($status ? $status : 'first-time');
+    $status; 
 }
 
 
