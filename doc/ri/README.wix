@@ -86,10 +86,12 @@ in Japan from 1993 to 1998. FML contains
 FML design policy is based on the degree of freedom, so that I respect
 "each environment for each man/women".
 
-デフォールトは『メンバーは手動で登録しメンバーだけが投稿やコマンド操作
-などができる状態』です。必要なら makefml (対話設定プログラム) で"明示
-的に"(例えば自動登録やリモート管理)機能を有効にできます。細かいパラメー
-タのチューニングや高度な設定は設定ファイルに変更を加えます。
+デフォールトでは
+	ＭＬの参加希望者のアドレスを管理者が登録する
+	登録された人だけが投稿やコマンド操作などができる
+設定です。必要なら makefml (対話設定プログラム) で"明示的に"(例えば自
+動登録やリモート管理)機能を有効にできます。細かいパラメータのチューニ
+ングや高度な設定は設定ファイルに変更を加えます。
 =E
 I assume that ML is a private communication so that the default fml
 policy is manual edit: "you add a new member in hand, only members can
