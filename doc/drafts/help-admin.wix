@@ -1,4 +1,6 @@
-		$B4IM}<T%3%^%s%I$N%X%k%W(B
+		´ÉÍý¼Ô¥³¥Þ¥ó¥É¤Î¥Ø¥ë¥×
+=E
+		Help File For Administrators
 
 ________________________________
 #.index
@@ -7,187 +9,297 @@ ________________________________
 
 .C	Overview
 
-.S	$B%3%^%s%I$K$D$$$F(B
+.S	¥³¥Þ¥ó¥É¤Ë¤Ä¤¤¤Æ
+=E.S	Administrative Commands
 
-"# admin $B%3%^%s%I(B" == "# approve $B%Q%9%o!<%I(B $B%3%^%s%I(B" 
-$B$HF1$8$G$9!#%Q%9%o!<%I$OJ?J8$G=q$$$F$/$@$5$$!#(B
+"# admin ¥³¥Þ¥ó¥É" == "# approve ¥Ñ¥¹¥ï¡¼¥É ¥³¥Þ¥ó¥É" 
+¤ÈÆ±¤¸¤Ç¤¹¡£¥Ñ¥¹¥ï¡¼¥É¤ÏÊ¿Ê¸¤Ç½ñ¤¤¤Æ¤¯¤À¤µ¤¤¡£
+=E
+	# admin command arguments
+or
+	# approve PASSWORD command arguments	 
 
-#approve $B7A<0$O3F9T$K%Q%9%o!<%I$r=q$/I,MW$,$"$j$^$9$,!"(B
-#admin $B7A<0$NJ}$G$O:G=i$K$@$1%Q%9%o!<%I$NG'>Z$,I,MW$J$@$1$G$9!#(B
+=E
+syntaxes are available where the password (PASSWORD) is plain.
 
-$B$J$*(BPGP$B%b!<%I$G%Q%9%o!<%I$r=q$/I,MW$O$"$j$^$;$s!#$h$C$F(BPGP$B$N>l9g(B admin
-pass $B9T$OI,MW$J$$$7!"(Bapprove $B%3%^%s%I$OL50UL#$G$9(B($BL50UL#$K%Q%9%o!<%IBG(B
-$B$A4V0c$($K$h$k%(%i!<$G:.Mp$9$k2DG=@-$b$"$j$^$9(B)$B!#(B
+#approve ·Á¼°¤Ï³Æ¹Ô¤Ë¥Ñ¥¹¥ï¡¼¥É¤ò½ñ¤¯É¬Í×¤¬¤¢¤ê¤Þ¤¹¤¬¡¢
+#admin ·Á¼°¤ÎÊý¤Ç¤ÏºÇ½é¤Ë¤À¤±¥Ñ¥¹¥ï¡¼¥É¤ÎÇ§¾Ú¤¬É¬Í×¤Ê¤À¤±¤Ç¤¹¡£
 
+¤Ê¤ªPGP¥â¡¼¥É¤Ç¥Ñ¥¹¥ï¡¼¥É¤ò½ñ¤¯É¬Í×¤Ï¤¢¤ê¤Þ¤»¤ó¡£¤è¤Ã¤ÆPGP¤Î¾ì¹ç admin
+pass ¹Ô¤ÏÉ¬Í×¤Ê¤¤¤·¡¢approve ¥³¥Þ¥ó¥É¤ÏÌµ°ÕÌ£¤Ç¤¹(Ìµ°ÕÌ£¤Ë¥Ñ¥¹¥ï¡¼¥ÉÂÇ
+¤Á´Ö°ã¤¨¤Ë¤è¤ë¥¨¥é¡¼¤Çº®Íð¤¹¤ë²ÄÇ½À­¤â¤¢¤ê¤Þ¤¹)¡£
+=E
+In PGP mode, you should do clear sign but no plain password.
 
-$B%3%^%s%I$NNc(B:
-
-	# admin pass $B%Q%9%o!<%I(B
+¥³¥Þ¥ó¥É¤ÎÎã:
+=E 
+Example:
+	# admin pass ¥Ñ¥¹¥ï¡¼¥É
+=E
+	# admin pass PASSWORD
 	# admin ls
 
+¤Ï¼¡¤Î¹Ô¤ÈÆ±¤¸¤Ç¤¹¡£
+=E
+is the same as
 
-$B$O<!$N9T$HF1$8$G$9!#(B
-	# approve $B%Q%9%o!<%I(B ls
-
-
-.C	$B%3%^%s%I(B
-
-.S	$B%Q%9%o!<%I4X78(B
-
-# admin pass $B%Q%9%o!<%I(B
-# admin password $B%Q%9%o!<%I(B
-	$B$b$7%Q%9%o!<%I$rI,MW$H$9$k@_Dj$J$iI,$:@hF,$K$3$l$,$J$$$H$$$1$^(B
-	$B$;$s!#%-!<%o!<%I$O(Bpasswd$B$K$7$h$&$+$H;W$C$?$1$I!"(B
-	$B$=$&$9$k$H!"%3%^%s%I%i%$%s$H$4$C$A$c$K$J$k$+$i(Bftp$B$+$i$H$C$F(B
-	$B$-$F(Bpass$B$H$$$&%-!<%o!<%I$r;H$$$^$9!#(B
-
-# admin passwd $B?7$7$$%Q%9%o!<%I(B
-	$B%Q%9%o!<%I$NJQ99(B
-	shell% passwd $B$C$F$d$D$H$*$J$8$C$9(B($BJ#?t2s$OMW5a$5$l$^$;$s$,(B)$B!#(B
-
-# admin initpass $B%"%I%l%9(B $B%Q%9%o!<%I(B
-	$B%"%I%l%9$KBP$9$k%Q%9%o!<%I$r(B"$B%Q%9%o!<%I(B"$B$G=i4|2=$9$k(B
-	$B=i4|2=$OJQ99$H0c$$FCJL07$$$G$9!#(Bbin/passwd -i $B$H$*$J$8$G$9!#(B
+	# approve ¥Ñ¥¹¥ï¡¼¥É ls
+=E
+	# approve PASSWORD ls
 
 
-.S	$B%X%k%W(B
+.C	¥³¥Þ¥ó¥É¥ê¥¹¥È
+=E.C	Command List
+
+.S	¥Ñ¥¹¥ï¡¼¥É´Ø·¸
+=E.S	Around Password 
+
+# admin pass ¥Ñ¥¹¥ï¡¼¥É
+# admin password ¥Ñ¥¹¥ï¡¼¥É
+	¤â¤·¥Ñ¥¹¥ï¡¼¥É¤òÉ¬Í×¤È¤¹¤ëÀßÄê¤Ê¤éÉ¬¤ºÀèÆ¬¤Ë¤³¤ì¤¬¤Ê¤¤¤È¤¤¤±¤Þ
+	¤»¤ó¡£¥­¡¼¥ï¡¼¥É¤Ïpasswd¤Ë¤·¤è¤¦¤«¤È»×¤Ã¤¿¤±¤É¡¢
+	¤½¤¦¤¹¤ë¤È¡¢¥³¥Þ¥ó¥É¥é¥¤¥ó¤È¤´¤Ã¤Á¤ã¤Ë¤Ê¤ë¤«¤éftp¤«¤é¤È¤Ã¤Æ
+	¤­¤Æpass¤È¤¤¤¦¥­¡¼¥ï¡¼¥É¤ò»È¤¤¤Þ¤¹¡£
+=E
+# admin pass PASSWORD
+# admin password PASSWORD
+	In the first phase before the administrative commands begin,
+	you need to show the password PASSWORD.
+
+# admin passwd ¿·¤·¤¤¥Ñ¥¹¥ï¡¼¥É
+	¥Ñ¥¹¥ï¡¼¥É¤ÎÊÑ¹¹
+	shell% passwd ¤Ã¤Æ¤ä¤Ä¤È¤ª¤Ê¤¸¤Ã¤¹(Ê£¿ô²ó¤ÏÍ×µá¤µ¤ì¤Þ¤»¤ó¤¬)¡£
+=E
+# admin passwd PASSWORD
+	"passwd" command to set new password where PASSWORD is the new one. 
+	% passwd
+
+# admin initpass ¥¢¥É¥ì¥¹ ¥Ñ¥¹¥ï¡¼¥É
+	¥¢¥É¥ì¥¹¤ËÂÐ¤¹¤ë¥Ñ¥¹¥ï¡¼¥É¤ò"¥Ñ¥¹¥ï¡¼¥É"¤Ç½é´ü²½¤¹¤ë
+	½é´ü²½¤ÏÊÑ¹¹¤È°ã¤¤ÆÃÊÌ°·¤¤¤Ç¤¹¡£bin/passwd -i ¤È¤ª¤Ê¤¸¤Ç¤¹¡£
+=E
+# admin initpass ADDRESS PASSWORD
+	Initialize PASSWORD for ADDRESS in remote.
+	% "bin/passwd -i".
+
+.S	¥Ø¥ë¥×
+=E.S	Help
 
 # admin help
-	$B4IM}<T%3%^%s%I%X%k%W$r<h$j4s$;$k(B($B$3$N%U%!%$%k(B)
+	´ÉÍý¼Ô¥³¥Þ¥ó¥É¥Ø¥ë¥×¤ò¼è¤ê´ó¤»¤ë(¤³¤Î¥Õ¥¡¥¤¥ë)
+=E
+	get help file for administrators
 
-
-
-.S	$B%m%0%U%!%$%k(B
+.S	¥í¥°¥Õ¥¡¥¤¥ë
+=E.S	Log File
 
 # admin log
-	$B%m%0$N:G6a$N(B100$B9T$r<h$j4s$;$k(B
+	¥í¥°¤ÎºÇ¶á¤Î100¹Ô¤ò¼è¤ê´ó¤»¤ë
+=E
+	get the latest 1000 lines in the log file.
 
-# admin log -N($B?t;z(B)
-	$B%m%0$N:G6a$N(B N$B9T$r<h$j4s$;$k!#Nc(B admin log -40 ($B:G6a$N(B40$B9T(B)
+# admin log -N
+	¥í¥°¤ÎºÇ¶á¤Î N¹Ô¤ò¼è¤ê´ó¤»¤ë¡£Îã admin log -40 (ºÇ¶á¤Î40¹Ô)
+=E
+	get the latest N lines in the log file (N is the number).
 	
 # admin log all
-	$B%m%0%U%!%$%kA4BN$r<h$j4s$;$k!#$H$F$bBg$-$$$+$bCN$l$J$$$N$GCm0U!#(B
+	¥í¥°¥Õ¥¡¥¤¥ëÁ´ÂÎ¤ò¼è¤ê´ó¤»¤ë¡£¤È¤Æ¤âÂç¤­¤¤¤«¤âÃÎ¤ì¤Ê¤¤¤Î¤ÇÃí°Õ¡£
+=E
+	get the whole log file.
 
-
-.S	$B%a%s%P!<%j%9%H$NJQ99(B
+.S	¥á¥ó¥Ð¡¼¥ê¥¹¥È¤ÎÊÑ¹¹
+=E.S	Change member/active lists 
 
 # admin add address
-	address $B$N?M$r(BML$B$KEPO?$9$k(B
+	address ¤Î¿Í¤òML¤ËÅÐÏ¿¤¹¤ë
+=E
+	register address to ML
 
 # admin off address
-	address $B$N?M$r(BML$B0l;~$*$d$9$_$K$9$k(B
-	(actives file $B$K$N$_:nMQ$9$k(B)
+	address ¤Î¿Í¤òML°ì»þ¤ª¤ä¤¹¤ß¤Ë¤¹¤ë
+	(actives file ¤Ë¤Î¤ßºîÍÑ¤¹¤ë)
+=E
+	remove address from a recipient of ML but the address remains
+	as a ML member. "# admin on" command enables again address as a
+	recipient.
 
 # admin on address
-	address $B$N?M$N(BML$B0l;~$*$d$9$_$r2r=|(B
-	(actives file $B$K$N$_:nMQ$9$k(B)
-
+	address ¤Î¿Í¤ÎML°ì»þ¤ª¤ä¤¹¤ß¤ò²ò½ü
+	(actives file ¤Ë¤Î¤ßºîÍÑ¤¹¤ë)
+=E
+	enables address as a recipient which is disabled by "admin off".
+	
 # admin bye address
-	address $B$N?M$r(BML$B%a%s%P!<$+$i:o=|(B
+	address ¤Î¿Í¤òML¥á¥ó¥Ð¡¼¤«¤éºï½ü
+=E
+	remove address from a ML member and recipient
 
 # admin chaddr old-addr new-addr
 # admin change old-addr new-addr
 # admin change-address old-addr new-addr
-	old-addr$B$r:o=|$7$F!"(Bnew-addr$B$rEPO?$9$k(B
+	old-addr¤òºï½ü¤·¤Æ¡¢new-addr¤òÅÐÏ¿¤¹¤ë
+=E
+	change address old-addr (old address) to new-addr (new address)
 
-# admin matome address $B0z?t(B 
-	address $B$N?M$r(B $B$^$H$a$*$/$j$K(B
-	$B0z?t$O(B 6 6u 6i $BEy(B
+# admin matome address °ú¿ô 
+	address ¤Î¿Í¤ò ¤Þ¤È¤á¤ª¤¯¤ê¤Ë
+	°ú¿ô¤Ï 6 6u 6i Åù
+=E
+# admin matome address argument
+	set address to the digest mode. The argument is digest mode option.
 
 # admin skip address
-	$B$3$N(B address $B$rG[Aw$O$7$J$$$1$IEj9F$O$G$-$k$h$&$K$9$k(B
+	¤³¤Î address ¤òÇÛÁ÷¤Ï¤·¤Ê¤¤¤±¤ÉÅê¹Æ¤Ï¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë
+=E
+	set this address to be not a recipient but remains as a ML member.
 
-
-.S	$B4IM}<T%a%s%P!<%j%9%H$NJQ99(B
+.S	´ÉÍý¼Ô¥á¥ó¥Ð¡¼¥ê¥¹¥È¤ÎÊÑ¹¹
+=E.S	Change Administrator Lists
 
 # admin addadmin address
 # admin addpriv  address
-	address $B$N?M$r4IM}<T%a%s%P!<$H$7$FEPO?(B
+	address ¤Î¿Í¤ò´ÉÍý¼Ô¥á¥ó¥Ð¡¼¤È¤·¤ÆÅÐÏ¿
+=E
+	add address to an administrator
 
 # admin byeadmin address
 # admin byepriv  address
-	address $B$N?M$r4IM}<T%a%s%P!<$+$i:o=|(B
+	address ¤Î¿Í¤ò´ÉÍý¼Ô¥á¥ó¥Ð¡¼¤«¤éºï½ü
+=E
+	remove address to an administrator
 
-
-.S	$B%U%!%$%kA`:n(B
+.S	¥Õ¥¡¥¤¥ëÁàºî
+=E.S	File Operations
 
 # admin dir
-	ML$B$N$"$k>l=j$N3,AXA4It$N%j%9%H(B(ls -lR)
+	ML¤Î¤¢¤ë¾ì½ê¤Î³¬ÁØÁ´Éô¤Î¥ê¥¹¥È(ls -lR)
+	Ãí°Õ: $DIR ²¼Á´Éô¤Ê¤Î¤Ç¤Ç¤Ã¤«¤¤¤«¤â¤·¤ì¤Ê¤¤
+=E
+	list up files and directories under $DIR recursively.
+	Attention: the result may be big!
+	% ls -lR ML's HOME
 
 # admin ls options
-	ML$B$N$"$k>l=j$N%j%9%H(B(ls)
+	ML¤Î¤¢¤ë¾ì½ê¤Î¥ê¥¹¥È(ls)
+=E
+	list up options(files/directories)
+	% ls options in $DIR (ML's HOME)
 
 	# admin ls -l
 	# admin ls -l spool
-	$B$N$h$&$K%*%W%7%g%s(B($B0l9T$K=q$/8B$j$$$/$D$"$C$F$b$$$$(B)$B$b;H$($k(B
+	¤Î¤è¤¦¤Ë¥ª¥×¥·¥ç¥ó(°ì¹Ô¤Ë½ñ¤¯¸Â¤ê¤¤¤¯¤Ä¤¢¤Ã¤Æ¤â¤¤¤¤)¤â»È¤¨¤ë
 
 # admin get filename
-	ML$B$N$"$k>l=j$N(B filename $B$H$$$&%U%!%$%k$r$H$C$F$/$k(B
+	ML¤Î¤¢¤ë¾ì½ê¤Î filename ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤ò¤È¤Ã¤Æ¤¯¤ë
+=E
+	get back filename under $DIR
 
 # admin resend filename address
-	ML$B$N$"$k>l=j$N(B filename $B$H$$$&%U%!%$%k$r(B address $B$XAw$k!#(B
+	ML¤Î¤¢¤ë¾ì½ê¤Î filename ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤ò address ¤ØÁ÷¤ë¡£
+=E
+	send filename in $DIR to address
 
 # admin forward
-	admin forward $B9T$h$j8e$m$r#M#L$X%U%)%o!<%I$9$k(B
-	$BK\Mh(B moderated $B%b!<%I$G;H$&$?$a$N$b$N(B
-	$B$G$b$3$N%3%^%s%I$r(BTYPO$B$7$F!D$H$$$&4m81$O$"$j$&$k$N$GCm0U(B
+	admin forward ¹Ô¤è¤ê¸å¤í¤ò£Í£Ì¤Ø¥Õ¥©¥ï¡¼¥É¤¹¤ë
+	ËÜÍè¥â¥Ç¥ì¡¼¥¿¥â¡¼¥É¤Ç»È¤¦¤¿¤á¤Î¤â¤Î
+	¤Ç¤â¤³¤Î¥³¥Þ¥ó¥É¤òTYPO¤·¤Æ¡Ä¤È¤¤¤¦´í¸±¤Ï¤¢¤ê¤¦¤ë¤Î¤ÇÃí°Õ
+=E
+	forward the mail body after 'admin forward' line to ML,
+	that is an article. It is useful in moderator mode.
 
 # admin newinfo
 # admin newguide
+	¤³¤ÎÌ¿Îá¤ËÂ³¤¯¥á¡¼¥ëËÜÊ¸¤Î»Ä¤êÉôÊ¬¤ò¿·¤·¤¤ GUIDE ¥Õ¥¡¥¤¥ë¤È¤·¤Æ
+	Æþ¤ì´¹¤¨¤ë
+=E
+	overwrite GUIDE file. The new content is the mail body after this line.
 
-	$B$3$NL?Na$KB3$/%a!<%kK\J8$N;D$jItJ,$r?7$7$$(B GUIDE $B%U%!%$%k$H$7$F(B
-	$BF~$l49$($k(B
-
-
-*** $BCm0U(B ***
-$B%U%!%$%k$r:o=|!">e=q$-$r$9$k%3%^%s%I$O(B security $B>e$NLdBj$,$"$j$^$9!#>e(B
-$B=q$-$9$k%U%!%$%k$O(B @REMOTE_RECONFIGURABLE_FILES $B$H$$$&G[Ns$KF~$C$F$$$k(B
-$B%U%!%$%k72$G$9!#I,MW$J$i$3$NG[Ns$KIU$12C$($F$/$@$5$$!#(B
+*** Ãí°Õ ***
+¥Õ¥¡¥¤¥ë¤òºï½ü¡¢¾å½ñ¤­¤ò¤¹¤ë¥³¥Þ¥ó¥É¤Ï security ¾å¤ÎÌäÂê¤¬¤¢¤ê¤Þ¤¹¡£¾å
+½ñ¤­¤¹¤ë¥Õ¥¡¥¤¥ë¤Ï @REMOTE_RECONFIGURABLE_FILES ¤È¤¤¤¦ÇÛÎó¤ËÆþ¤Ã¤Æ¤¤¤ë
+¥Õ¥¡¥¤¥ë·²¤Ç¤¹¡£É¬Í×¤Ê¤é¤³¤ÎÇÛÎó¤ËÉÕ¤±²Ã¤¨¤Æ¤¯¤À¤µ¤¤¡£
+=E
+*** Attention ***
+To remove and overwrite files in $DIR must be insecure. 
+The files in @REMOTE_RECONFIGURABLE_FILES can be changed. 
 
 # admin put filename
-	ML$B$N$"$k>l=j$N(B filename $B$H$$$&%U%!%$%k$rCV$/!#(B
-	$B$b$7(B filename $B$H$$$&%U%!%$%k$,$"$k>l9g$O!"(B
-	$B8E$$(B filename $B$O(B filename.back $B$KJQ$($F$*$/(B
+	ML¤Î¤¢¤ë¾ì½ê¤Î filename ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤òÃÖ¤¯¡£
+	¤â¤· filename ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤¬¤¢¤ë¾ì¹ç¤Ï¡¢
+	¸Å¤¤ filename ¤Ï filename.bak ¤ËÊÑ¤¨¤Æ¤ª¤¯
+=E
+	overwrite $DIR/filename and change the old filename to filename.bak
 
 # admin remove filename
-	ML$B$N$"$k>l=j$N(B filename $B$H$$$&%U%!%$%k$r:o=|(B
+	ML¤Î¤¢¤ë¾ì½ê¤Î filename ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤òºï½ü
+=E
+	remove $DIR/filename 
 
 # admin rename filename1 filename2
-	ML$B$N$"$k>l=j$N(B filename1 $B$H$$$&%U%!%$%k$r(B filename2 $B$H$$$&L>(B
-	$BA0$K$9$k!#(B
+	ML¤Î¤¢¤ë¾ì½ê¤Î filename1 ¤È¤¤¤¦¥Õ¥¡¥¤¥ë¤ò filename2 ¤È¤¤¤¦Ì¾
+	Á°¤Ë¤¹¤ë¡£
+=E
+	rename $DIR/filename1 to $DIR/filename2
 
-$B$?$@$7(B rename $B$O(B filename1 filename2 $B$H$b(B @REMOTE_RECONFIGURABLE_FILES 
-$B$N%U%!%$%k$G$J$$$H$$$1$J$$$?$a;H$$F;$O$"$^$j$J$$$@$m$&!#(B
+¤¿¤À¤· rename ¤Ï filename1 filename2 ¤È¤â @REMOTE_RECONFIGURABLE_FILES 
+¤Î¥Õ¥¡¥¤¥ë¤Ç¤Ê¤¤¤È¤¤¤±¤Ê¤¤¤¿¤á»È¤¤Æ»¤Ï¤¢¤Þ¤ê¤Ê¤¤¤À¤í¤¦¡£
+=E
+Both files should be in @REMOTE_RECONFIGURABLE_FILES, so this command
+may be not useful.
 
+# admin unlink-article ID
+# admin remove-article ID
+	µ­»öÈÖ¹æ ID ¤Îµ­»ö¤òºï½ü¤·¤Æ¡¢¥Õ¥¡¥¤¥ë¤ÎÃæ¿È¤Ï "removed by an
+	administrator" ¤È¤¤¤¦¥Õ¥ì¡¼¥º¤ËÃÖ¤­´¹¤¨¤é¤ì¤ë¡£html ·Á¼°¤Î¥Õ¥¡
+	¥¤¥ë¤âºî¤ë¤³¤È¤Ë¤Ê¤Ã¤Æ¤¤¤ì¤Ð¤½¤ì¤âÃÖ¤­´¹¤¨¤ë¡£¤Ê¤ªexpire¤ò¹ÍÎ¸
+	¤·¤Æ»þ¹ï¤ÏÃÖ¤­´¹¤¨¤ë¥Õ¥¡¥¤¥ë¤Î¤â¤Î¤ÈÆ±¤¸¤ËÀßÄê¤·Ä¾¤·¤Æ¤¤¤ë¡£
+	Ãí°Õ: ´Ö°ã¤Ã¤¿µ­»ö¤ò¾Ã¤·¤Æ¤â¼è¾Ã¤Ï¤Ç¤­¤Ê¤¤¡£
+=E
+	remove $SPOOL_DIR/ID and overwrite the content to be
+	"removed by an administrator". In html file generation mode,
+	fml also recreate corresponding html files.
+	Attention!: DO NOT "UNDO" this operation.
 
 .S	PGP (Pretty Good Privacy)
 
 # admin pgp -ka 
-
-$B%a!<%k$N$3$N9T0J9_$NItJ,$r(B pubric key $B$H$7$F#M#L%5!<%P$N(B pubring $B$K2C$($k(B
+	¥á¡¼¥ë¤Î¤³¤Î¹Ô°Ê¹ß¤ÎÉôÊ¬¤ò pubric key ¤È¤·¤Æ£Í£Ì¥µ¡¼¥Ð¤Î 
+	pub-ring ¤Ë²Ã¤¨¤ë
+=E
+	add the key in this mail to a pubring
 
 # admin pgp -kv
+	¸½ºß¤Î key-ring ¤ò¸«¤ë 
+=E
+	see the current keyring list
 
-$B8=:_$N(B keyring $B$r8+$k(B 
+¡ö¤»¤Ã¤«¤¯PGP»È¤¦¤ó¤À¤«¤é¡¢¥ê¥â¡¼¥È´ÉÍý¤ÎÇ§¾Ú¥â¡¼¥É¤ÏPGP¤¬Ë¾¤Þ¤·¤¤¤Ç¤·¤ç
+¡ö¤¦¤Í
 
-$B!v$;$C$+$/(BPGP$B;H$&$s$@$+$i!"%j%b!<%H4IM}$NG'>Z%b!<%I$O(BPGP$B$,K>$^$7$$$G$7$g(B
-$B!v$&$M(B
+.S	ÆÃ¼ì¤Ê¤â¤Î
+=E.S	Specials
 
-
-.S	$BFC<l$J$b$N(B
-
-admin $B$O$D$+$J$$$1$I!D(B
+admin ¤Ï¤Ä¤«¤Ê¤¤¤±¤É¡Ä
 
 # set debug		
-		$B%G%P%C%0%b!<%I$r%*%s(B
+	¥Ç¥Ð¥Ã¥°¥â¡¼¥É¤ò¥ª¥ó
+=E
+	debug on
 
 # set addr_check_max LEVEL
-		$B%"%I%l%9$N%A%'%C%/$r(B LEVEL($B?t;z(B)$B$X!#$D$^$j(B
-		$ADDR_CHECK_MAX = LEVEL $B$X(B
+	¥¢¥É¥ì¥¹¤Î¥Á¥§¥Ã¥¯¤ò LEVEL(¿ô»ú)¤Ø¡£¤Ä¤Þ¤ê
+	$ADDR_CHECK_MAX = LEVEL ¤Ø
+=E
+	$ADDR_CHECK_MAX = LEVEL;
 
 # set exact
-		$B%"%I%l%9$N%A%'%C%/$r(BExact $B$X(B
-		$B<B$O(B $ADDR_CHECK_MAX = 9; $B$G$9(B:-)
+	¥¢¥É¥ì¥¹¤Î¥Á¥§¥Ã¥¯¤òExact ¤Ø
+	¼Â¤Ï $ADDR_CHECK_MAX = 9; ¤Ç¤¹:-)
+=E
+	$ADDR_CHECK_MAX = 9;
+
+AUTHOR: Ken'ichi Fukamachi <fukachan@fml.org>
 
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
