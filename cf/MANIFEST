@@ -809,12 +809,19 @@ MIME_DECODED_ARTICLE:
 
 
 # ## Sub Section: Preamble and Trailer for Mail Body ##
-# If you always append some message in the mail body, you can use these.
-# e.g. mail body becomes
+# If you always append some message in the command reply mail body, 
+# you can use these variables. For example, the mail body becomes
 #
 #    $PREAMBLE_MAILBODY
 #    original body
 #    $TRAILER_MAILBODY
+#
+# If you use the article distributed in ML, you must use some hooks.
+# For example, append this in the last of config.ph (but before 1;)
+# $SMTP_OPEN_HOOK = q# 
+#   $e{'Body'} = $PREAMBLE_MAILBODY. $e{'Body'} .$TRAILER_MAILBODY;
+# #;
+# Please see doc/op.$language for our policy behind this.
 #
 # value: string
 PREAMBLE_MAILBODY:
