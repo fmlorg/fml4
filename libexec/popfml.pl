@@ -139,6 +139,12 @@ qq#
    -d      debug mode
    -D      dumpvar
 
+   -include_file  include file
+   -pwfile        .netrc style 
+   -pop_passwd    password
+   -perl_prog     perl program path
+
+   -arch          architecture
 #;
 }
 
