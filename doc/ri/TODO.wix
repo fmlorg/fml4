@@ -65,10 +65,12 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 
 .S	Memory Usage
 
-	MD5
-	WholeMail()
+  fix memory usage routine
+	MD5 around
 	Forw()
 	Warn() 
+
+  remove WholeMail(), ForwMail()
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -103,7 +105,7 @@ Especially basse64 encoder. RFC2047 is incomplete for Japanese.
 
 
 .S	日本語化問題
-=E.s	Japanese configuration files
+=E.S	Japanese configuration files
 
 cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
 ＃時間次第か？(難易度は低くても辛さ度は最大)
@@ -367,20 +369,36 @@ $LOG_FILE_SUFFIX = ".%C%y";
 	PGP 6
 	OpenPGP ...
 
-何がデファクトになるのか…
+	RFC2015
 
 
 .S	ヘッダ関係
 =E.S	Header and the around it
 
-fml-support: 05843
-MANY MANY "; post only (only members can post)"  ...
+ *  bug ???
+	fml-support: 05843
+	MANY MANY "; post only (only members can post)"  ...
+
+ *  Recieved: handling rule for each distributing article and Saved file
 
 
 .S	Memory Usage
 
-	PGP
-	Sendmail()
+入力データサイズによる変動が少ないように要チューニング
+
+ * PGP (libpgp.pl)
+
+ * Sendmail()
+
+   proc/libcompat_fml20.pl:21:
+	&Sendmail($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
+
+   proc/liblop.pl:257:
+	&Sendmail($e{'Addr2Reply:'}, "", $body);
+
+   libexec/popfml.pl:465: 
+	&Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
+
 
 
 .C	日本特有の問題
