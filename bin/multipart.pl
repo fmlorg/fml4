@@ -3,7 +3,7 @@
 # Converter from Multipart/Mixed or Multipart/Alternative to Text/Plain
 # (C) 1996-1999 Yuao Tanigawa
 #
-# $Id$
+# $Id: multipart.pl,v 1.3.1.2 1999/04/24 10:41:37 yuao Exp $
 #
 
 $count = 0;
