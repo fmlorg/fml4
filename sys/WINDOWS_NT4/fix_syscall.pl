@@ -14,6 +14,7 @@
 while (<>) {
     s/^(\$ENV{'PATH'}\s*=.*)/## not set on NT, $_/;
     s/rename\(/&Rename(/g;
+    s/crypt\(/&NT4Crypt(/g;
     print;
 }
 
