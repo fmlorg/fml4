@@ -10,7 +10,7 @@
 # $Id$
 
 
-sub AgainstOutLook
+sub AgainstHtmlMail
 {
     local(*e) = @_;
     local($boundary) = $e{'MIME:boundary'};
@@ -33,8 +33,7 @@ sub AgainstOutLook
     }
 }
 
-
-sub AgainstEudora
+sub AgainstReplyWithNoRef
 {
     local(*e, $pat) = @_;
     local($buf, @buf);
