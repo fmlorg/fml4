@@ -112,12 +112,26 @@ It makes examples under $ML_DIR/etc/qmail.
 +:fml:65535:10:/var/spool/ml/etc:-::
 .
 
-のように書いて /var/qmail/bin/qmail-newu を走らせます。
-(fml じゃなくて自分のアカウントにしちゃったら普通に edit もできる)。
+のような内容を付け加えます。そして /var/qmail/bin/qmail-newu を走らせ
+ます。(fml じゃなくて自分のアカウントにしちゃったら普通に edit もでき
+る)。
 =E
 After this edit, run /var/qmail/bin/qmail-newu. This is just an
 example. User name, uid, gid, home is customizable (If your account is
 used, you have not only to su).
+
+注意: 自分宛のメール用に more specific な設定をしておかないとメールは
+すべてユーザfmlの人に全部飛んでいってしまう。
+例: mikoto宛のメールはmikotoが受け取る。それ以外の宛先は全部ＭＬ用。
+マニュアルqmail-users(5)を参照のこと
+=E
+ATTETION: All mails are forwarded to ML in this "assign" config.
+If user "mikoto" like to receive her mail in this host, she require
+the following configuration. Please see manual of qmail-users(5).
+
++:fml:65535:10:/var/spool/ml/etc:-::
++mikoto:mikoto:100:10:/home/mikoto:-::
+.
 
 ○ ユーザ fml で作業
 =E
@@ -275,10 +289,10 @@ When you use this function, please set $USE_DOT_QMAIL_EXT = 1;
 
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
