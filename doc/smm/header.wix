@@ -29,7 +29,7 @@ orders the header fields of distribution following an array
 
 $PASS_ALL_FIELDS_IN_HEADER という変数を指定すると @HdrFieldsOrder にな
 いフィールドも通過させます。@HdrFieldsOrder にないフィールドは入力の順
-番でヘッダに現れます。2.2のデフォールトでは１です(素通し)。
+番でヘッダに現れます。2.2以降のデフォールトでは１です(素通し)。
 =E
 If $PASS_ALL_FIELDS_IN_HEADER is defined, fml.pl passed all fields in a
 header except for Received: and Return-Receipt-To: (fields defined in
