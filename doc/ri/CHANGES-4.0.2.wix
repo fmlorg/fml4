@@ -5,10 +5,35 @@
 
    [4.0.2 の主な変更点]
 	* 新機能は fml 5.0 のモジュールベースに変更 
+	* ドキュメントの一部を 5.0 branch へ移行
+		doc/devel/OS_and_Perl (OS デフォルトの perl 情報一覧)
+		doc/devel/ 全体
 	* IPv6 をデフォルトで使う
 	* サマータイムの考慮
+	* List- ヘッダを個別にカスタマイズ可能にする
+	* 全受信者数を数えている変数を作る
+		$Total_Rcpt_Count
 	* bug fixes
 		FreeBSD での CGI 
+		spool2html で module が @INC にない
+
+
+2001/06/18
+
+   List-*
+	null string by default
+
+	List- ヘッダに変な値が設定されないように、
+	デフォルト値を修正する。
+
+2001/06/17
+
+   bin/spool2html.pl
+	add ${EXEC_DIR,opt_I}/module to @INC by default
+
+	@INC に module/* を入れるように修正
+	これをしないと Mail::Address が見つからないなどという
+	エラーが出る（が、spool2html は動くけど）
 
 2001/06/14
 
@@ -21,6 +46,27 @@
 
    www/lib/libcgi_makefml.pl (1.60-1.61)
 	add /usr/local/sbin as a search path for postalias
+
+2001/06/10
+
+   List-* ヘッダをカスタマイズできるようにする。変数は
+
+	$USE_RFC2369 を 1 （デフォルト）で、
+	0 にすると List-* ものが全部なくなります。
+
+	List-* ヘッダを個別にカスタマイズしたい場合は、
+	次の変数があります。
+
+		$LIST_SOFTWARE   
+		$LIST_POST       
+		$LIST_OWNER      
+		$LIST_HELP       
+		$LIST_UNSUBSCRIBE
+		$LIST_ID         
+
+2001/06/03
+
+   4.0.1 release
 
 2001/05/11
 
@@ -61,7 +107,7 @@
 	一つは IPv6 のため、もう一つは mead で使う
 	エラーメール解析エンジンの輸入でした。
 
-$FML: CHANGES-4.0.2.wix,v 1.2 2001/05/25 12:09:44 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.3 2001/06/17 04:58:13 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
