@@ -12,7 +12,7 @@ The Design and Implementation of "fml" Mailing List Server
 #endif
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rel="stylesheet" 
-	    type="text/css" href="master.css">
+	    type="text/css" href="fml.css">
 <LINK rev="Contents" href="index.html">
 #ifdef JAPANESE
 <LINK rev="alternate" lang="en" href="index-e.html">
@@ -35,19 +35,46 @@ The Design and Implementation of "fml" Mailing List Server
 
 <!-- =================================================================== -->
 <HR>
-<PRE>NOW 2.2 BETA PHASE (2.2 RELEASE IS COMING SOON).</PRE>
+#ifdef DIST
+#else /* DIST */
+<PRE>
+[Latest Information]
 
-<P>
+NOW 2.2 BETA PHASE (2.2 RELEASE IS COMING SOON).
+
 #ifdef JAPANESE
+NT Press #3 に fml for NT で10ページほどの記事を書きました。概要として
+は(NT,UNIX問わず)割と良くまとまったものじゃないかなと自分でおもってた
+りします:)
+</PRE>
+#else
+</PRE>
+#endif
+#endif /* DIST */
+
+#ifdef DIST
+	<A HREF="http://www.fml.org/fml/">
+	FML HOME PAGE (http://www.fml.org/fml/);
+#ifdef JAPANESE 
+	ここからFMLドキュメントのサーチへたどっていける
+#else
+	From here you will find to go to SEARCH over FML documents!
+#endif
+	</A>
+#else
+<P>
+#ifdef JAPANESE 
 	<A HREF="search-j.html">
 	FML配布ドキュメント群へのサーチ
 #else
 	<A HREF="search-e.html">
-	Search over FML documents
+	Search over FML documents;
+	Anyway try to search keywords around your question
 #endif
 	</A>
+#endif /* ! DIST */
 
-	<LI>
+<P>
 #ifdef JAPANESE
 	<A HREF="CHECK_LIST/">
 	CHECK LIST (質問の前にチェックしてみて欲しいリスト)
@@ -84,16 +111,16 @@ Information and HTML version documents in the fml source distribution
 #else
 	<A HREF="README-e/">
 #endif
-	README
+	README; Overview and Pointers
 	</A>
 
 	<LI>
 #ifdef JAPANESE
 	<A HREF="INSTALL/">
-	INSTALL ガイド
+	INSTALL ガイド; インストールと makefml の使い方
 #else
 	<A HREF="INSTALL-e/">
-	GUIDE on INSTALLATION
+	GUIDE on INSTALLATION and How to use makefml (user interface)
 #endif
 	</A>
 	<BR>
@@ -113,7 +140,7 @@ Information and HTML version documents in the fml source distribution
 	アップグレードの際の注意
 #else
 	<A HREF="UPGRADE-e/">
-	FOR UPGRADE
+	ATTENTIONS and TIPS FOR UPGRADE
 #endif
 	</A>
 	<BR>
@@ -128,18 +155,34 @@ Information and HTML version documents in the fml source distribution
 
 	<LI>
 #ifdef JAPANESE
-	<A HREF="op/index.html">
 	Fml 2.2 の設計と実装 (Deamon Book for fml)
+#ifdef DIST
+	<A HREF="http://www.fml.org/fml/op/index.html">
+	http://www.fml.org/fml/op/index.html
+	</A>
+	をみにいくかfmlのソースの一番上のディレクトリで
+	make doc を走らせて作ってください。
+#else
+	<A HREF="op/index.html">
+#endif /* DIST */
 	設計、運用、変数の意味とカスタマイズについてなど全般について
 	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
+#else /* JAPANESE */
+#ifdef DIST
+	Please see
+	<A HREF="http://www.fml.org/fml/op/index-e.html">
+	http://www.fml.org/fml/op/index-e.html (latest version)
+	</A>
+	or run "make doc" on the top directory of fml source.
 #else
 	<A HREF="op-e/index.html">
+#endif /* DIST */
 	Fml 2.2's daemon book to show design, operations, varialbes
 	and the customize and so o....
 	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
-#endif
+#endif /* JAPANESE */
 	<BR>
 	(generated from fml-source-tree/doc/smm/)
 	</A>
@@ -150,7 +193,11 @@ Information and HTML version documents in the fml source distribution
 	</A>
 
 	<LI>
+#ifdef DIST
+	<A HREF="../COPYING">
+#else
 	<A HREF="GPL.html">
+#endif
 	GNU PUBLIC LICENSE
 	</A>
 </UL>
@@ -163,6 +210,8 @@ Information and HTML version documents in the fml source distribution
 #endif
 </H3>
 <UL>
+#if DIST
+#else /* DIST */
 	<LI>
 	<A HREF="fml-current.tar.gz">
 #ifdef JAPANESE
@@ -170,6 +219,7 @@ Information and HTML version documents in the fml source distribution
 #else
 	fml latest source code package (fml-current.tar.gz)
 #endif
+#endif /* DIST */
 	</A>
 
 	<LI>
@@ -339,11 +389,13 @@ links around mail systems
 	ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/
 	</A>
 
-
-
 	<P> Operating Systems and Architectures
 	<LI>
+#ifdef DIST
+	<A HREF="http://www.fml.org/fml/nt.html">
+#else
 	<A HREF="nt.html">
+#endif
 	links around Windows NT
 	</A>	
 </UL>
@@ -368,7 +420,19 @@ links around mail systems
 <PRE>
 * other topics
 
-1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP受賞作品"></A>
+#ifdef DIST
+#ifdef JAPANESE
+1996                   FSP(Free Software Prize)受賞作品
+#else
+1996                   FSP(Free Software Prize)
+#endif
+#else /* DIST */
+#ifdef JAPANESE
+1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP(Free Software Prize)受賞作品"></A>
+#else
+1996                   <A HREF="http://www.nmda.or.jp/enc/fsp/index.html"><IMG SRC="p_list.gif" ALIGN=RIGHT ALT="FSP(Free Software prize) 1996"></A>
+#endif
+#endif /* DIST */
 
 </PRE>
 
