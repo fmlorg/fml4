@@ -541,7 +541,7 @@ sub DoSetMemberList
 	    (! &AddressMatch($From_address, $Fld[2]))) {
 	    &Log("$cmd: Security Error: requests to change another member's address '$Fld[2]'");
 	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$Fld[2]'.");
-	    &Mesg(*e, $NULL, 'chaddr.invalid_addr');
+	    &Mesg(*e, $NULL, 'chaddr.invalid_addr', $Fld[2]);
 	    return $NULL;
 	}
 
