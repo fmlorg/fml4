@@ -55,7 +55,7 @@ sub InitSendFax
 
     ##### ML Preliminary Session Phase 01: set and save ID
     # Get the present ID
-    &Open(IDINC, $SEQUENCE_FILE) || return; # test
+    if (! open(IDINC, $SEQUENCE_FILE)) { return;} # test
     $ID = &GetFirstLineFromFile($SEQUENCE_FILE);
     $ID++;			# increment, GLOBAL!
 

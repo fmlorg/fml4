@@ -244,7 +244,7 @@ sub CheckMemberNameFile
     $address =~ s/^\s*//;
     ($addr) = split(/\@/, $address);
     
-    &Open(FILE, $file) || return $NULL;
+    if (! open(FILE, $file)) { return $NULL;}
 
   getline: while (<FILE>) {
       chop; 

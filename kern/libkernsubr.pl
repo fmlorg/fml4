@@ -78,22 +78,23 @@ sub __RejectAddrP
 	return $NULL;
     }
 
-    &Open(RAL, $REJECT_ADDR_LIST) || return $NULL;
-    while (<RAL>) {
-	chop;
-	next if /^\s*$/;
+    if (open(RAL, $REJECT_ADDR_LIST)) {
+	while (<RAL>) {
+	    chop;
+	    next if /^\s*$/;
 
-	# adjust syntax
-	s#\@#\\\@#g;
-	s#\\\\#\\#g;
+	    # adjust syntax
+	    s#\@#\\\@#g;
+	    s#\\\\#\\#g;
 
-	if ($from =~ /^($_)$/i) { 
-	    &Log("RejectAddrP: we reject [$from] which matches [$_]");
-	    close(RAL);
-	    return 1;
+	    if ($from =~ /^($_)$/i) { 
+		&Log("RejectAddrP: we reject [$from] which matches [$_]");
+		close(RAL);
+		return 1;
+	    }
 	}
+	close(RAL);
     }
-    close(RAL);
 
     0;
 }
