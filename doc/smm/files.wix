@@ -8,6 +8,7 @@
    libAuceaSyscall.pl	Aucea
    libMIME.pl		MIME 操作関数インターフェイス
    libamctl.pl		actives members ファイルの制御ライブラリ
+   libarchive.pl	Archive ライブラリ
    libaref.pl		AREF Library
    libcompat.pl		COMPAT コード
    libcompat_cf1.pl	COMPAT コード
