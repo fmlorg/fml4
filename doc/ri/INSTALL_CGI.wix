@@ -10,15 +10,18 @@
 				Ken'ichi Fukamachi
 .fi
 .toc
-
 .~HTML_PRE
 
-注: 以下の $EXEC_DIR は /usr/local/fml です。
+注: fml CGI インターフェイスはいくつかの組み合わせで動くことが一応確認
+されていますが、まだテスト段階と思って下さい。多くの組み合わせて検証さ
+れてはいないとおもいます。また、メニュー項目が洗練されているかもまだわ
+かりません。有志の方が挑戦していただけると幸いです。
 
-捕捉: fml CGI インタフェイスは Unix でしかテストされたことがありません。
-      なんとなく apache for NT があれば 2000/NT でも動く気がしますが
-      試したことはありません。チャレンジャーを募集中です:)
+また、fml CGI インタフェイスは Unix でしかテストされたことがありません。
+なんとなく apache for NT があれば 2000/NT でも動く気がしますが
+試したことはありません。チャレンジャーを募集中です:)
 
+なお以下の $EXEC_DIR は /usr/local/fml です。
 
 
 .C	Overview
@@ -39,38 +42,25 @@ sendmail か postfix です。
 ＃ qmail はどう組み合わせるのがよいかを検討中です。
 
 
-.S	CGI のセットアップ
+.S	CGI のセットアップ手順
 =E.S	step of CGI setup
 
-	CGI スクリプトの準備	htpasswd .htaccess などの設定
-	apache の変更		(設定変更の見本があります)
-	メールサーバの変更	(設定変更の見本があります)
+次の３ステップからなります。
 
-の３ステップからなります。
+   CGI スクリプトの準備	htpasswd .htaccess などの設定
+   apache の変更	設定変更の見本を参考にして下さい(後述)
+   メールサーバの変更	設定変更の見本を参考にして下さい(後述)
 
-注意:
+本ドキュメント本編は fml GUI 専用サーバを作る前提で書かれています。
+もし、稼働中の WWW サーバを大きく改造することができない場合
+suexec (=> .ptr{suexec} 章) などを使い、~fml/cgi-bin/ などといった
+URL で fml CGI を使うことになります(後述)。
 
-1. 本ドキュメント本編は fml GUI 専用サーバを作る前提で書かれています。
-
-2. もし、稼働中の WWW サーバを大きく改造することができない場合
-   例: いまさら User nobody は変更できない
-
-たぶん suexec (=> .ptr{suexec}) を使ってユーザ fml のページで fml CGI 
-を動かすとなるのでしょう。これは簡単に付録で解説してあります。
-
-
-.S	トラブルシュート
-=E.S	troubleshoot
-
-うまくいかない時は fml 自体ではなく WWW サーバもしくはメールサーバの
-設定でつまづいていることが多いようです。
-まずそれぞれのサーバのログを確認しエラー等がないかを確認して下さい。
-また各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマ
-ニュアルや文献を確認して下さい。
 
 
 .C	CGI 階層のモデル
 =E.C	hierarychy of CGI model
+
 
 URL の階層がどういう前提で分けられているか、各ディレクトリの権限につい
 てまとめます。
@@ -130,23 +120,21 @@ which ? (0-7) [0]
 
 使い方も意味は何となくわかるとおもいます。
 
-1. ssl をつかうかいなか
+1. SSL をつかうか否か
 2. WWW サーバにとって /cgi-bin/fml/ になるディレクトリです。
 3. htpasswd をおくディレクトリです。
 
-1. 2. 3. は基本的な設定といえます。この３つの設定後
+1. 2. 3. は基本的な設定といえます。SSL を使わない場合は 1. で NO にし
+てください。そして 2, 3 のパス名を適当に修正して下さい。デフォールトで
+は 2, 3 はそのままでも構いません。
 
-4. でユーザとパスワードをつけます。
+この３つの設定をした後 4. でユーザとパスワードをつけてください。
 
-終了する時に CGI スクリプトを作りなおすか？と聞かれるので y と答えると
+6, 7 は aliases の更新をどのように実行するかを指定する項目です。
+デフォルトは sendmail になっています。6と7は本来一組かもしれませんが、
+便宜上２つにわけてあります。
 
-$REAL_CGI_PATH 以下のスクリプトを再生成します。
-
-6, 7 はメールサーバと newaliases をどのように実行するかを指定する項目
-です。デフォルトは 共に sendmail 用になっています。
-6と7は本来一組かもしれませんが、便宜上２つにわけてあります。
-
-postfix にするには 6, 7 をそれぞれ変更して下さい。
+メールサーバを postfix にするには 6, 7 をそれぞれ次のように変更して下さい。
 
 	6	postfix
 	7	postalias /var/spool/ml/etc/aliases
@@ -154,59 +142,41 @@ postfix にするには 6, 7 をそれぞれ変更して下さい。
 です。
 
 
+○ 終了時
+
+終了時には CGI スクリプトを作りなおすか？と聞かれます。そこで y と答え
+ると $REAL_CGI_PATH 以下のスクリプトと .htaccess を再生成します。
+パスを変更した場合などには再生成が必要です。
+
+
+
 .C	WWW サーバの設定の変更 (apache 1.3.x)
 =E.C	modify apache's httpd.conf
 
-/usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに適宜
-付け足す。
-
-
-.S	apache と sendmail を使っている場合
-=E.S	the case when you use apache and sendmail 
-
-まず /usr/local/apache/conf/httpd.conf を編集します。
+/usr/local/fml/www/examples/ の下に変更点の見本があります。それを参考
+にして /usr/local/apache/conf/httpd.conf を編集してください。
 
 a) ユーザの設定
 
 	User fml
 
-   つまり /usr/local/fml /var/spool/ml のオーナーと同じにして下さい。
+つまり /usr/local/fml や /var/spool/ml のオーナと同じにして下さい。
 
-b) ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行をコメントアウト
+b) ScriptAlias 行を変更する。
 
 	# ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
 
-httpd.conf ファイルの最後に
+最初の行が有効になってしまうので
+ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 
 
-	/usr/local/fml/www/examples/apache/httpd.conf.patch
-
-を付け足して下さい。
-付け足しただけでうまくいくかもしれないしすでにCGIの設定があるならそれ
-とうまくマージしないといけないです。分からなかったら apache デフォール
-トに戻して上述の作業をして下さい。そしてリスタートしてみて下さい
-
-c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
-
-場合はその行より前に
+行も有効にしたい場合は、その行より前に
 
 	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/www/share/cgi-bin/fml/"
 
-を足して下さい。
+を足して下さい。例:
 
-例:
 	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/www/share/cgi-bin/fml/"
-
-	... 略 ...
-
 	ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
-
-
-.S	apache と postfix を使っている場合
-=E.S	the case when you use apache and postfix 
-
-同上
-=E
-same as description above.
 
 
 
@@ -216,36 +186,42 @@ same as description above.
 .S	sendmail 8.9.3 まで の場合
 =E.S	untile sendmali 8.9.3 
 
-   /etc/sendmail.cf を編集する。編集する内容は
+/etc/sendmail.cf を編集する。編集する箇所は
 
-	/usr/local/fml/www/examples/sendmail/sendmail.cf	
+   O AliasFile=/etc/aliases
 
-   にある alias ファイルの定義に差し替えて下さい。
+行です。ここを
 
-   root になって
+   O AliasFile=/etc/aliases,/var/spool/ml/etc/aliases
+
+に変更して下さい。
+
+次に、ユーザ root になり
   
    # touch /var/spool/ml/etc/aliases.db
 
-   などとしておいて下さい。.db なのか .pag .dir なのかはOSによります。
-   4.4BSD では .db です。
+などとしておいて下さい。サフィックスが .db なのか .pag .dir なのかは 
+OS によります。4.4BSD では .db です。そして sendmail をリスタートして
+ください。
 
-   sendmail を restart
 
 .S	sendmail 8.10 以降の場合
 =E.S	after sendmail 8.10
 
-	/etc/mail/sendmail.cf に trusted user として fml を付け足す。
+前述の 8.9.3 の場合と同様に作業をして下さい。その後、さらに
+/etc/mail/sendmail.cf に trusted user として fml を付け足してください。
 
 	T fml
 
-	を付け足して restart する。これをしないと newaliases を
-	実行できない。
+を付け足して sendmail をリスタートして下さい。これを実行しないと 
+newaliases を実行できません。
 
 	
 .S	postfix の場合
 =E.S	postfix
 
-   /etc/postfix/main.cf を
+/etc/postfix/main.cf を次のように変更した後、
+"postfix reload" を実行して下さい。
 
 	alias_database = hash:/etc/aliases, 
 		hash:/var/spool/ml/etc/aliases
@@ -253,79 +229,59 @@ same as description above.
 	# gateway, you should also include $mydomain. Do not specify the
 	allow_mail_to_commands = alias,forward,include
 
-  と書き換えて、"postfix reload" を走らせる。
-
 
 
 .C	httpd のリスタート
 =E.C	restart apache (httpd)
 
+.S	httpd のリスタート
+=E.S	restart apache (httpd)
+
 	# apachectl configtest
 
-で、OKかどうかをたしかめて
+で、設定ファイルのシンタックスが OK かどうかを確かめ、
 
 	# apachectl restart
 
-する。
+を実行して下さい。
 
 
-.C	WWWにアクセスしてみる
-=E.C	Here we go to access CGI menu
+.S	テスト: WWWにアクセスしてみる
+=E.S	Here we go to access CGI menu
 
-例:
+例えば URL は
 
-    http://the.fml.host/cgi-bin/fml/admin/menu.cgi
+    http://web.fml.org/cgi-bin/fml/admin/menu.cgi
 
-この後ひととおりのことはWWWでできるはず。できること
+などとなります。この画面で次のようなことが可能になります。
 
 	 ML をつくる, 消す
 	 ML のユーザ登録,削除
 	 ML の管理者の登録,削除
 	 ML の設定(makefml config メニューでできることと同じ)
 	ログをみる
-	MTAの設定(特に newaliases のかけ方)
-
-などです。
 
 
-.C	特定の ML だけはCGIでいじれるようにしてあげる
-=E.C	enable a mailing list to be configured on cgi menu
-
-	% makefml ml-admin.cgi elena config
-
-使い方は admin.cgi と同様です。
-
-
-.appendix
 
 .C	suEXEC を使う場合
 =E.C	When you use suEXEC
 .l	suexec
 
+どうすれば
+
    http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
 
-でアクセスできるようにすることを考えます。手順はドキュメント本編と同様
-ですがapache の設定以降は異なります。
-
-	fml をインストールする
-	メールサーバの設定をする
-	apache の設定 (ユーザ fml で suexec が動くようにすること)
-	fml の設定変更をすること ( /usr/local/fml/.fml/cgi.conf )
-	~fml/public_html/ 以下に fml CGI 一式を作ること
-
-という感じになります。
+のように CGI にアクセスできるようになるかを説明します。
+基本的に手順は前述の fml CGI 専用機の場合と同様です。
 
 	
-.S	前提
+.S	ユーザ fml を用意する。
 =E.S	Condition for suEXEC
 
-ユーザ fml は
-
-    user fml
-   group fml
-
-としましょう。この fml の uid gid は suexec の制限に引っかから
-ないようにして下さい。例えば uid は 1000、gid 1000 とします。
+まず、ユーザ fml を用意します。ユーザ fml の所属するグループは fml と
+しましょう。この fml の uid および gid は suEXEC の制限(ちいさ過ぎる 
+UID や GID は禁止)に引っかからないようにして下さい。例えばここで ユー
+ザ fml の uid は 1000、gid 1000 とします。
 
 
 .S	apache で suexec を可能にする。
@@ -336,16 +292,17 @@ suexec がうごくことを確認して下さい。
 
 典型的なインストール例は以下の通りです。
 .q
-# tar zxvf apache_1.3.12.tar.gz
-# cd apache_1.3.12/
-# ./configure --enable-suexec --suexec-caller=www
+# tar zxvf apache_1.3.14.tar.gz
+# cd apache_1.3.14/
+# ./configure --enable-suexec --suexec-caller=nobody
 # make
 # make install 
 .~q
 
-/usr/local/apache/conf/httpd.conf の変更が必要かも知れません。例えば、
-この2箇所辺りです。config ファイルでの ExecCGI の追加と AddHandler の
-定義について調べて下さい。
+
+おそらく /usr/local/apache/conf/httpd.conf の変更が必要です。例えば、
+この 2 箇所辺りです。config ファイルでの ExecCGI の追加と AddHandler 
+の定義について調べて下さい。
 .q
 <Directory /home/*/public_html>
     AllowOverride FileInfo AuthConfig Limit
@@ -355,53 +312,81 @@ suexec がうごくことを確認して下さい。
 AddHandler cgi-script .cgi
 .~q
 
+ExecCGI と AddHandler cgi-script .cgi の部分が特に重要です。
 
-.S	~/public_html/ の準備
+
+.S	CGI スクリプトの生成
 =E.S	prepare ~/public_html/
 
-% su fml
-% mkdir ~/public_html
-% chmod 755 ~/public_html
+次に、ユーザ fml で ~/public_html/ を作って下さい。
+
+	% su fml
+	% mkdir ~/public_html
+	% chmod 755 ~/public_html
+
+そして、このディレクトリの下に CGI スクリプトを生成します。
+
+	% makefml admin.cgi config
+
+を実行すると以下のメニュー画面になります。
+   
+   0     END
+   1     USE_MOD_SSL         YES
+   2     REAL_CGI_PATH       /usr/local/fml/www/share/cgi-bin/fml
+   3     CGI_AUTHDB_DIR      /usr/local/fml/www/authdb
+   4     CHANGE PASSWORD
+   5     REMAKE CGI SCRIPTS
+   6     MTA                 sendmail
+   7     HOW TO UPDATE ALIAS newaliases
+   
+   which ? (0-7) [0] 
+
+2 を選択し、/home/fukachan/public_html/cgi-bin/fml に変更します。
+次に 4 を実行して、ユーザとパスワードを設定して下さい。
+そして 5 を実行すると
+
+	~/public_html/cgi-bin/fml/admin/*.cgi
+
+が生成されます。
+
+(たぶん必要ないと思いますけど)念には念をいれて
+
+	% su fml
+	% chown -R fml ~/public_html
+	% chgrp -R fml ~/public_html
+	% chmod -R go-w ~/public_html
+
+を実行しパーミッションの念押しをしておくとなお良いと思います。
 
 
-.S	/usr/local/fml/.fml/cgi.conf の編集
-=E.S	modify /usr/local/fml/.fml/cgi.conf
 
-cgi.conf に
+.C	特定の ML だけはCGIでいじれるようにしてあげる
+=E.C	enable a mailing list to be configured on cgi menu
 
-	$CGI_PATH        = '/~fml/cgi-bin/fml'; 
+例えば elena ML の設定を有効にするには次のようなコマンドを実行して下さい。
 
-を付け足します。また $REAL_CGI_PATH を ~/public_html に
-書きなおしておくとよいでしょう。
+   % makefml ml-admin.cgi elena config
 
-例:
-.q
-$REAL_CGI_PATH   = "/usr/local/fml/www/share/cgi-bin/fml";
-$CGI_AUTHDB_DIR  = "/usr/local/fml/www/authdb";
-$SSL_REQUIRE_SSL = "";
+   0     END
+   1     USE_MOD_SSL         YES
+   2     CHANGE PASSWORD
+   3     REMAKE CGI SCRIPTS
 
-$REAL_CGI_PATH   = "/home/fml/public_html/cgi-bin/fml";
-$CGI_PATH        = '/~fml/cgi-bin/fml';
-
-1;
-.~q
-
-この編集後に
-
-	% makefml admin.cgi
-	% makefml mladmin.cgi elena
-
-を実行すると ~/public_html/ 以下に作られます。
+使い方は admin.cgi と同様です。1 は SSL を使うか否か？です。2 でユーザ
+とパスワードを設定して下さい。3 で ml-admin/ 以下の CGI スクリプトと 
+.htaccess が再生成されます。
 
 
-（たぶん必要ないと思いますけど）念には念をいれて
-.q
-% su fml
-% chown -R fml ~/public_html
-% chgrp -R fml ~/public_html
-% chmod -R go-w ~/public_html
-.~q
-をして permission の念押しをしておくとなお良いと思います。
+
+.appendix
+.C	トラブルシュート
+=E.C	troubleshoot
+
+うまくいかない時は fml 自体ではなく WWW サーバもしくはメールサーバの
+設定でつまづいていることが多いようです。
+まずそれぞれのサーバのログを確認しエラー等がないかを確認して下さい。
+また各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマ
+ニュアルや文献を確認して下さい。
 
 
 $Id$
@@ -413,4 +398,3 @@ $Id$
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
-
