@@ -1986,14 +1986,14 @@ sub do_config
 	if ((stat($cf))[9] < (stat("$ML_DIR/$ml/config.ph"))[9]) {
 	    print "\n   *** Warning ***\n";
 	    print "   Hmm... \"config.ph\" is newer than \"cf\" file\n";
-	    print "   You had manually edited it, is\'nt it?\n\n";
+	    print "   You had manually edited it, isn\'t it?\n\n";
 	    print "   \"makefml config\" overwrites config.ph.\n";
 
 	    local($cmd);
 	    $cmd = &Query("   Can I overwrite config.ph?", "y/n", "y|n", "n");
 
 	    if ($cmd eq "n") { 
-		print "   O.K. makefml stops now. Happy hacking!\n\n";
+		print "   O.K. makefml stops now.\n\n";
 		return;
 	    }
 	}
