@@ -29,7 +29,7 @@
 
 
 .# ##########################################################
-.P	Desing Overview of the fml 
+.P	Design Overview of the fml 
 
 
    パートＩでは、fml の設計思想の概略について述べます。
@@ -616,7 +616,7 @@ sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
 
 
 
-.P	fml の起動、起動オプション、Configuration file による設定
+.P	インストールと設定の優先アルゴリズム
 
 ここでは fml の起動の仕方、起動時の設定の有効になる順番について述べます。
 
@@ -735,6 +735,355 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 .# ##########################################################
 .#	command line options
 .include clo.wix
+
+
+.C	Install && Configurations
+.label	{configuration}
+
+ここはおおむね概論です。細かい詳細（フラッグ等のsetting）は後の章を御
+覧下さい（その名前の章があれば…ですが）。
+
+
+.S	Version up
+
+Version up は *.pl をコピーすれば終りです。
+＃fml 1.x 時代への注意は .seealso{appendix:fmlR1}
+
+
+.S	インストール後にサーバの設定（パラメータ）をいじるには？
+.key	fml.plの起動のしかた
+.key	exec fml.pl
+.key	$DIR
+.key	$LIBDIR
+.key	fml.c
+.key	fml.plの引数
+.label	{c-wrapper}
+
+例によって複数のやり方があります:-)
+
+○	ひとつしかMLがない場合
+	
+	config.ph をいじるか コマンドラインオプションで変更します。
+	
+○	複数のMLがある場合
+
+	ML固有の変更はそれぞれのMLの config.ph へ変更を加えるか
+
+	include file 等で fml.pl --distribute のようにコマンドラインオ
+	プションで変更するか？
+
+ですが、複数のMLに共通の設定であれば libsmtp.pl 等がおいてある場所に 
+sitedef.ph を作って、これの中にいれておくとよいでしょう。
+
+
+.S	fml.plの呼び方、引数の渡し方(4.3BSD)
+.key	fml.plの起動のしかた
+.key	fml.plの引数
+.key	:include:
+.key	onwer-list
+.label	{calling-fml.pl}
+.seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
+
+fml.pl の中に変数は今はもうありません（fml 1.2）。
+
+fml.cの中でfml.pl directoryという形で呼ぶようになってます。
+＃ fml.pl config.phのあるdirectry libaries の形で呼ぶ
+
+上と同じことを↓こういう書き方（ちゃんと動くか否かはsendmail の 
+version依存）ができます。
+
+	/etc/aliases では
+
+	Elena: :include:/usr/local/list/Elena
+	owner-Elena:fukachan
+
+	/usr/local/list/Elenaの中身は
+
+	"|/usr/libexec/fml/fml.pl directory"
+
+こうするとElena（ファイル）の所有者のＩＤで動くようになります。
+
+
+
+.S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
+.label	{calling-fml.pl-POSIX}
+.key	POSIXなsetuid
+.key	POSIX
+.key	fml.plの起動のしかた
+.key	fml.plの引数
+.key	:include:
+.key	onwer-list
+
+もし POSIX なら 
+
+% make OPT=-DPOSIX 
+
+とすると、 uid gid を今の環境からわりだして自動的にこういう風にcompile
+します。↓
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+perl sbin/ccfml cc -s -O -DPOSIX   fml.c -o fml
+O.K. I'll try to guess your OS...
+-f /usr/include/sys/types.h
+-f /usr/include/unistd.h
+#	... No OS= option specified; dynamically determining OS type
+#	... OS appears to be "nos4"
+
+cc -s -O fml.c -o fml  -DXXUID=65536 -DXXGID=999 -DPOSIX  -DOS=nos4 
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+fml ができたら スーパーユーザー権限で
+
+# chown root fml
+# chmod 4755 fml
+
+これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
+たのuidに設定して fml.pl を起動します。
+＃これ最後の手段だから…
+
+こういう時は /usr/local/ml/driver/fml とかにして そこは root 以外は絶
+対に書けないとかにしておくくらいの注意を払いたいものです。
+それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
+せん。管理者の方と相談して見てください。
+
+新しい発見 or bugがあったら fml-support ML か fml-bugs （fukachan@ に
+のみフォワード）に御一報くださいませ _o_
+
+
+.S	binary の driver 
+
+
+	/usr/local/list/Elena というファイルを sendmail が実行し
+	その中身は
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+	のように書いてある。
+
+と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
+があります。
+
+その場合次のような setuid された driver(binary) を使うということになり
+ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
+あなたの環境に併せて変更されていますが、確認はしてみてください。
+
+それは次のような内容です。fml.c の中に
+
+	fml.plの場所   config.phのある場所   ライブラリの場所
+
+の形でexecするように埋め込んで最初にcompileしました。
+directoryを変えるにはここを書き換えてrecompileです。
+＃since 1.1.2.17 1994.3.14 version
+
+例： fml.c
+
+execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+      "(fml)", 
+      "/usr/spool/EXP", /* config.ph は どこ？ */
+      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      NULL);
+
+これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
+イル等を見ながら直してみて下さい。
+
+version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
+の設定を変更する必要ありません。
+
+.S	binary の driver 
+
+
+	/usr/local/list/Elena というファイルを sendmail が実行し
+	その中身は
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+	のように書いてある。
+
+と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
+があります。
+
+その場合次のような setuid された driver(binary) を使うということになり
+ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
+あなたの環境に併せて変更されていますが、確認はしてみてください。
+
+それは次のような内容です。fml.c の中に
+
+	fml.plの場所   config.phのある場所   ライブラリの場所
+
+の形でexecするように埋め込んで最初にcompileしました。
+directoryを変えるにはここを書き換えてrecompileです。
+＃since 1.1.2.17 1994.3.14 version
+
+例： fml.c
+
+execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+      "(fml)", 
+      "/usr/spool/EXP", /* config.ph は どこ？ */
+      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      NULL);
+
+これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
+イル等を見ながら直してみて下さい。
+
+version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
+の設定を変更する必要ありません。
+
+ただ、この binary driver 方式では root に setuid した binary を作る必
+要があります＃ POSIX 準拠の場合
+
+これは、非常にいやらしいし、setuid コマンドは慎重に扱う必要があります。
+それでできれば sendmail が正しく動いて setuid の部分をうけもってくれる
+ことが望ましいとおもわれます。
+
+
+.S	fml.plの呼び方 と OS一覧
+.label	{calling-fml.pl-and-OS}
+.key	OS_dependence
+
+INSTALLにOSのまとめ一覧があります。ご覧ください
+
+
+.S	まとめおくり
+.label	{msend-0}
+.key	UNIX FROM
+.key	RFC934
+.key	RFC1153
+.key	MIME-Multipart
+.key	まとめおくり
+.key	Cron
+.key	Not using Cron
+.seealso msend-c, msend-1, msend-2, msend-3
+
+選択肢は
+	Release 4 で system にbundleされたCRON をつかう
+		か
+	fml の cron.pl (CRON clone)
+	を使う
+
+各ユーザーごとに
+
+	UNIX FROM形 でメールをひとセットにする
+	RFC934形    でメールをひとセットにする
+	RFC1153形   でメールをひとセットにする
+	MIME/Multipart
+	tar + gzip でまとめる
+	lzh + ish でまとめる
+
+を（ユーザーが）えらべます。
+
+ソースは MSendv4.pl があれば十分で、
+[Ｎ通たまったらメールを送る まとめおくり]だけは別で
+Contrib/Matomeokuri-NOCRONの下に
+	store-and-deliver.ph	(configuratio file)
+	store-and-deliver.pl
+があります。
+
+くわしくは、まとめおくりの章をご覧ください
+.seealso msend-c
+
+まとめおくり Release 4 は
+「特定時間になるとactivesの情報に基づき、その時間におくることになって
+いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
+ということをしています
+
+
+.S	コントロール専用アドレス
+.label	{control-addr}
+.seealso calling-fml.pl
+.key	$CONTROL_ADDRESS
+.key	コマンドの専用アドレス
+.key	コントロール専用アドレス
+
+config.phの中で
+
+$CONTROL_ADDRESS = 'Elena-ctl';
+
+をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
+けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
+ルがきても配送はしない
+
+この場合/etc/aliasesに
+
+	Elena-ctl:"|/usr/libexec/fml/fml"
+
+とか書くことが必要です。
+＃あ、newaliasesも忘れずにね
+
+
+.S	メンバーチェックのはなし
+.seealso	auto-regist
+
+ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
+た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
+MLMemberCheck)。
+
+チェックするか否かはconfig.phの中で
+
+$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+
+で指定します。ここを（↓自動登録ということ）
+
+$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
+
+にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
+るようになる（subroutine MLMemberCheck）。
+注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
+の両方を兼任する形になっています。
+
+単にメンバーチェックをしない時はMLMemberCheck が常にreturn 1; としても
+いいでしょう
+
+
+.S	$MAINTAINERって何？
+.key	UNIX FROM
+.key	$MAINTAINER
+
+“大雑把に”いうとエラ−メ−ルの帰る場所です。
+＃エラーが変える時にこれがＭＬ宛になっていると無限ループするわけですね
+
+[歴史]	hml 1.6 はこのアドレスを
+
+	sendmail -f"$MAINTAINER"
+
+の形で使っていました。
+
+
+.S	他の人にＭＬのスプールを見せないような設定はどうするんですか？
+
+% ls .
+Elena	lib	driver
+
+という directory とする。
+＃以下省略して書くので適当にdirectory名は補ってください
+
+driver/driver には "|lib/fml.pl Elena lib"
+
+lib Elena は 700、driver は755としておけば、
+
+	sendmail(uid = 1)
+	→	
+	driver/driver を起動すると、uidが あなたのuidに変わる。
+	→	
+	ここから後は、lib, Elena は自分のuidになっているので、700でＯ
+	Ｋです。
+
+
+.S	デバッグモード
+.label	{debug-mode}
+
+デバッグモードのフラッグ。１がデバッグモード。配送以外のことは全部でき
+るので、テストに使って下さいませ。０にすると配送もするようになります。
+.key	$debug
+	$debug        = 1;
+
+.S	配送されるメールのヘッダのカスタマイズ
+.seealso header-custom
+
+.S 	OS, MISC: OTHER CUSTOM OPTIONS
+.seealso config-misc
+
+.S HOOKS: ML-specific hooks e.g. "# list"
+.seealso	customize
+
+フックの章をみてください
+
+
+
 
 
 .C	fml のプロセス
@@ -1332,358 +1681,11 @@ $SMTP_OPEN_HOOK = q#
 	$Envelope{'Body'} .= "Mail Count: $ID\n\n".$Envelope{'Body'};
 #;
 
-
-.P	インストール
-
-ここではインストールについて
-
-.C	Install && Configurations
-.label	{configuration}
-
-ここはおおむね概論です。細かい詳細（フラッグ等のsetting）は後の章を御
-覧下さい（その名前の章があれば…ですが）。
-
-
-.S	Version up
-
-Version up は *.pl をコピーすれば終りです。
-＃fml 1.x 時代への注意は .seealso{appendix:fmlR1}
-
-
-.S	インストール後にサーバの設定（パラメータ）をいじるには？
-.key	fml.plの起動のしかた
-.key	exec fml.pl
-.key	$DIR
-.key	$LIBDIR
-.key	fml.c
-.key	fml.plの引数
-.label	{c-wrapper}
-
-例によって複数のやり方があります:-)
-
-○	ひとつしかMLがない場合
-	
-	config.ph をいじるか コマンドラインオプションで変更します。
-	
-○	複数のMLがある場合
-
-	ML固有の変更はそれぞれのMLの config.ph へ変更を加えるか
-
-	include file 等で fml.pl --distribute のようにコマンドラインオ
-	プションで変更するか？
-
-ですが、複数のMLに共通の設定であれば libsmtp.pl 等がおいてある場所に 
-sitedef.ph を作って、これの中にいれておくとよいでしょう。
-
-
-.S	fml.plの呼び方、引数の渡し方(4.3BSD)
-.key	fml.plの起動のしかた
-.key	fml.plの引数
-.key	:include:
-.key	onwer-list
-.label	{calling-fml.pl}
-.seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
-
-fml.pl の中に変数は今はもうありません（fml 1.2）。
-
-fml.cの中でfml.pl directoryという形で呼ぶようになってます。
-＃ fml.pl config.phのあるdirectry libaries の形で呼ぶ
-
-上と同じことを↓こういう書き方（ちゃんと動くか否かはsendmail の 
-version依存）ができます。
-
-	/etc/aliases では
-
-	Elena: :include:/usr/local/list/Elena
-	owner-Elena:fukachan
-
-	/usr/local/list/Elenaの中身は
-
-	"|/usr/libexec/fml/fml.pl directory"
-
-こうするとElena（ファイル）の所有者のＩＤで動くようになります。
-
-
-
-.S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
-.label	{calling-fml.pl-POSIX}
-.key	POSIXなsetuid
-.key	POSIX
-.key	fml.plの起動のしかた
-.key	fml.plの引数
-.key	:include:
-.key	onwer-list
-
-もし POSIX なら 
-
-% make OPT=-DPOSIX 
-
-とすると、 uid gid を今の環境からわりだして自動的にこういう風にcompile
-します。↓
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-perl sbin/ccfml cc -s -O -DPOSIX   fml.c -o fml
-O.K. I'll try to guess your OS...
--f /usr/include/sys/types.h
--f /usr/include/unistd.h
-#	... No OS= option specified; dynamically determining OS type
-#	... OS appears to be "nos4"
-
-cc -s -O fml.c -o fml  -DXXUID=65536 -DXXGID=999 -DPOSIX  -DOS=nos4 
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-fml ができたら スーパーユーザー権限で
-
-# chown root fml
-# chmod 4755 fml
-
-これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
-たのuidに設定して fml.pl を起動します。
-＃これ最後の手段だから…
-
-こういう時は /usr/local/ml/driver/fml とかにして そこは root 以外は絶
-対に書けないとかにしておくくらいの注意を払いたいものです。
-それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
-せん。管理者の方と相談して見てください。
-
-新しい発見 or bugがあったら fml-support ML か fml-bugs （fukachan@ に
-のみフォワード）に御一報くださいませ _o_
-
-
-.S	binary の driver 
-
-
-	/usr/local/list/Elena というファイルを sendmail が実行し
-	その中身は
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
-	のように書いてある。
-
-と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
-があります。
-
-その場合次のような setuid された driver(binary) を使うということになり
-ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
-あなたの環境に併せて変更されていますが、確認はしてみてください。
-
-それは次のような内容です。fml.c の中に
-
-	fml.plの場所   config.phのある場所   ライブラリの場所
-
-の形でexecするように埋め込んで最初にcompileしました。
-directoryを変えるにはここを書き換えてrecompileです。
-＃since 1.1.2.17 1994.3.14 version
-
-例： fml.c
-
-execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
-      "(fml)", 
-      "/usr/spool/EXP", /* config.ph は どこ？ */
-      "/usr/spool/lib", /* fml packeage の library はどこ？ */
-      NULL);
-
-これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
-イル等を見ながら直してみて下さい。
-
-version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
-の設定を変更する必要ありません。
-
-.S	binary の driver 
-
-
-	/usr/local/list/Elena というファイルを sendmail が実行し
-	その中身は
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
-	のように書いてある。
-
-と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
-があります。
-
-その場合次のような setuid された driver(binary) を使うということになり
-ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
-あなたの環境に併せて変更されていますが、確認はしてみてください。
-
-それは次のような内容です。fml.c の中に
-
-	fml.plの場所   config.phのある場所   ライブラリの場所
-
-の形でexecするように埋め込んで最初にcompileしました。
-directoryを変えるにはここを書き換えてrecompileです。
-＃since 1.1.2.17 1994.3.14 version
-
-例： fml.c
-
-execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
-      "(fml)", 
-      "/usr/spool/EXP", /* config.ph は どこ？ */
-      "/usr/spool/lib", /* fml packeage の library はどこ？ */
-      NULL);
-
-これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
-イル等を見ながら直してみて下さい。
-
-version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
-の設定を変更する必要ありません。
-
-ただ、この binary driver 方式では root に setuid した binary を作る必
-要があります＃ POSIX 準拠の場合
-
-これは、非常にいやらしいし、setuid コマンドは慎重に扱う必要があります。
-それでできれば sendmail が正しく動いて setuid の部分をうけもってくれる
-ことが望ましいとおもわれます。
-
-
-.S	fml.plの呼び方 と OS一覧
-.label	{calling-fml.pl-and-OS}
-.key	OS_dependence
-
-INSTALLにOSのまとめ一覧があります。ご覧ください
-
-
-.S	まとめおくり
-.label	{msend-0}
-.key	UNIX FROM
-.key	RFC934
-.key	RFC1153
-.key	MIME-Multipart
-.key	まとめおくり
-.key	Cron
-.key	Not using Cron
-.seealso msend-c, msend-1, msend-2, msend-3
-
-選択肢は
-	Release 4 で system にbundleされたCRON をつかう
-		か
-	fml の cron.pl (CRON clone)
-	を使う
-
-各ユーザーごとに
-
-	UNIX FROM形 でメールをひとセットにする
-	RFC934形    でメールをひとセットにする
-	RFC1153形   でメールをひとセットにする
-	MIME/Multipart
-	tar + gzip でまとめる
-	lzh + ish でまとめる
-
-を（ユーザーが）えらべます。
-
-ソースは MSendv4.pl があれば十分で、
-[Ｎ通たまったらメールを送る まとめおくり]だけは別で
-Contrib/Matomeokuri-NOCRONの下に
-	store-and-deliver.ph	(configuratio file)
-	store-and-deliver.pl
-があります。
-
-くわしくは、まとめおくりの章をご覧ください
-.seealso msend-c
-
-まとめおくり Release 4 は
-「特定時間になるとactivesの情報に基づき、その時間におくることになって
-いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
-ということをしています
-
-
-.S	コントロール専用アドレス
-.label	{control-addr}
-.seealso calling-fml.pl
-.key	$CONTROL_ADDRESS
-.key	コマンドの専用アドレス
-.key	コントロール専用アドレス
-
-config.phの中で
-
-$CONTROL_ADDRESS = 'Elena-ctl';
-
-をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
-けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
-ルがきても配送はしない
-
-この場合/etc/aliasesに
-
-	Elena-ctl:"|/usr/libexec/fml/fml"
-
-とか書くことが必要です。
-＃あ、newaliasesも忘れずにね
-
-
-.S	メンバーチェックのはなし
-.seealso	auto-regist
-
-ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
-た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
-MLMemberCheck)。
-
-チェックするか否かはconfig.phの中で
-
-$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
-
-で指定します。ここを（↓自動登録ということ）
-
-$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
-
-にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
-るようになる（subroutine MLMemberCheck）。
-注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
-の両方を兼任する形になっています。
-
-単にメンバーチェックをしない時はMLMemberCheck が常にreturn 1; としても
-いいでしょう
-
-
-.S	$MAINTAINERって何？
-.key	UNIX FROM
-.key	$MAINTAINER
-
-“大雑把に”いうとエラ−メ−ルの帰る場所です。
-＃エラーが変える時にこれがＭＬ宛になっていると無限ループするわけですね
-
-[歴史]	hml 1.6 はこのアドレスを
-
-	sendmail -f"$MAINTAINER"
-
-の形で使っていました。
-
-
-.S	他の人にＭＬのスプールを見せないような設定はどうするんですか？
-
-% ls .
-Elena	lib	driver
-
-という directory とする。
-＃以下省略して書くので適当にdirectory名は補ってください
-
-driver/driver には "|lib/fml.pl Elena lib"
-
-lib Elena は 700、driver は755としておけば、
-
-	sendmail(uid = 1)
-	→	
-	driver/driver を起動すると、uidが あなたのuidに変わる。
-	→	
-	ここから後は、lib, Elena は自分のuidになっているので、700でＯ
-	Ｋです。
-
-
-.S	デバッグモード
-.label	{debug-mode}
-
-デバッグモードのフラッグ。１がデバッグモード。配送以外のことは全部でき
-るので、テストに使って下さいませ。０にすると配送もするようになります。
-.key	$debug
-	$debug        = 1;
-
-.S	配送されるメールのヘッダのカスタマイズ
-.seealso header-custom
-
-.S 	OS, MISC: OTHER CUSTOM OPTIONS
-.seealso config-misc
-
-.S HOOKS: ML-specific hooks e.g. "# list"
-.seealso	customize
-
-フックの章をみてください
-
-
 .# ##########################################################
+.include msend.wix
+.include remote.wix
+
+
 .C	自動登録
 .label	{auto-regist}
 
@@ -1975,6 +1977,10 @@ $START_HOOK  = q#
 
 ローカルなドメイン は自分のドメイン
 
+
+
+.# ##########################################################
+.P	カスタマイズ
 
 
 .# ##########################################################
@@ -2690,7 +2696,6 @@ Quoted from 4.4BSD:/usr/share/man/cat1/sh.0
 
 
 .# ##########################################################
-.include mget.wix
 .include hook.wix
 .include os.wix
 .include trouble.wix
@@ -3169,15 +3174,19 @@ which とか
 
 
 .# ##########################################################
-.include msend.wix
-.include remote.wix
 .include forward.wix
 .include fml_local.wix
 .include ftpmail.wix
 .include modify.wix
-.include function.wix
 .include localhack.wix
 .include href.wix
+
+
+
+.P	ライブラリ関数資料集
+
+.include mget.wix
+.include function.wix
 .include cwhois.wix
 .include fred.wix
 
