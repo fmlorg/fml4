@@ -4123,6 +4123,32 @@ sub v7'WholeMail  { &main'WholeMail(@_);}
 sub v7'SetEvent   { &main'SetEvent(@_);}
 
 
+sub GetTime
+{
+    local($time) = @_;
+
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time||time))[0..6];
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
+		   $year % 100, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			1900 + $year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+
+    $MailDate;
+}
+
+
 sub MkDir { &Mkdir(@_);}
 sub Mkdir
 {
@@ -4205,6 +4231,8 @@ sub MakeFml_V7Lock
 	print STDERR "LOCK_FILE     $LOCK_FILE\n";
 	print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
     }
+
+    &GetTime(time);
 
     &V7Lock;
 
