@@ -79,6 +79,12 @@ sub InitS2P
     $DIR = $opt_D || $ENV{'PWD'};
     $ConfigFile = $opt_f;
 
+    if (! $ConfigFile) {
+	print STDERR "FYI: you must need '-f \$DIR/config.ph' option in usual case\n";
+	print STDERR "     but O.K. if you know your own business :)\n";
+	print STDERR "     spool2html process continues ...\n\n";
+    }
+
     # include search path
     $opt_h && do { &Usage; exit 0;};
     push(@INC, $opt_I);
