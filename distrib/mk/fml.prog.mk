@@ -1,3 +1,7 @@
+#
+# $FML$
+#
+
 # search ${HOME} also for ~/.fmlmk.conf
 .PATH: ${HOME}
 
@@ -21,8 +25,8 @@ MKDIR    ?= ${PERL} ${FML}/distrib/bin/mkdirhier.pl
 
 # Convert to Japanese/English
 # NKF      ?= /usr/local/bin/nkf
-JCONV    ?= /usr/local/bin/nkf -j
-ECONV    ?= /usr/local/bin/nkf -e
+JCONV    ?= /usr/pkg/bin/nkf -j
+ECONV    ?= /usr/pkg/bin/nkf -e
 
 # version up 
 VERSION  ?= ${PERL} ${FML}/distrib/bin/version.pl
