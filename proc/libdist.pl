@@ -76,6 +76,8 @@ sub DoDistribute
 	}
     }
 
+    if ($DO_NOTHING) { return 0;}
+
     ### declare distribution mode (see libsmtp.pl) # (preamble, trailer);
     $e{'mode:dist'} = 1;
 
