@@ -799,6 +799,9 @@ sub DoChangeMemberList
 	if ($cmd eq 'MATOME' && $misc) { 
 	    $mib{'_value'} = $misc ? "m=$misc" : NULL;
 	}
+	elsif ($cmd eq 'CHADDR' && $misc) { 
+	    $mib{'_value'} = $misc;
+	}
 
 	&DataBaseMIBPrepare(\%mib, $cmd, {'address' => $curaddr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);

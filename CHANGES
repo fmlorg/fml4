@@ -4,6 +4,11 @@
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
 
+2001/02/26
+
+  apply patch (fml-support: 09289) to the PostgreSQL toymodel 
+	thanks shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
+
 2001/02/18
 
    fix perl search path algorithm
