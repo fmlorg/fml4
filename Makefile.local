@@ -85,6 +85,11 @@ e:	testsetup
 	@ echo 'make m is to re-generate /tmp/e/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /tmp/e/.fml/system install)
 
+cgi:	testsetup
+	@ echo 'make m is to re-generate /tmp/e/makefml'
+	@ (cd $(DESTDIR)/fml-current; pwd ; \
+		perl makefml -W cgi -f /tmp/e/.fml/system install)
+
 m:	testsetup
 	if [ -d /tmp/e ]; then \
 	 perl w/repl.pl sbin/makefml > /tmp/e/makefml ; fi
