@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/05/25
+
+   module/fml-devel/Mail/Delivery/
+	bug fix IPv6 error handling
+
+	IPv6 エラーコードのバグ修正
+
 2001/05/20
 
    sbin/makefml
