@@ -23,6 +23,22 @@
 		spool2html で module が @INC にない
 		_smtplog の expire が変なのを修正
 
+2001/07/23
+
+   4.0.2 release   
+
+2001/07/22
+
+   sbin/makefml (2.218-2.219):
+	correct _NULL_ handling in menu
+	fix $LANGUAGE handling in the case English
+
+   etc/makefml/menu.conf (1.25-1.26): 
+	use _NULL_ to select null for $SUBJECT_TAG_TYPE      
+	define /OPTION/LANGUAGE/LANGUAGE       
+
+	メニューから $SUBJECT_TAG_TYPE で空文字列を選べないバグを修正
+	$LANGUAGE の選択をできるようにする（自動ではない）
 
 2001/07/16
 
@@ -154,7 +170,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.2.wix,v 1.4.2.5 2001/07/12 09:27:35 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.7 2001/07/22 04:25:12 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
