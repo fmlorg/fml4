@@ -40,7 +40,7 @@ DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
 DOC_EXAMPLE_SOURCES  = postfix-install fml-install
 DOC_EXAMPLE_SOURCES += config-default config-auto-subscribe 
 DOC_EXAMPLE_SOURCES += config-asymmetric-regist config-remote
-DOC_EXAMPLE_SOURCES += config-moderated
+DOC_EXAMPLE_SOURCES += config-moderated setup-more-secure
 
 ### RULES ###
 .include "distrib/mk/fml.sys.mk"
