@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/06/12
+
+  proc/libra.pl 
+	check if the adddress for addmin is an admin member.
+
 2002/06/03
 
   4.0F
@@ -305,7 +310,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.250 2002/06/03 13:14:18 fukachan Exp $
+	add $FML: CHANGES,v 1.251 2002/06/03 23:35:13 fukachan Exp $
 
 2001/10/03
 
