@@ -213,7 +213,7 @@ sub DoProcedure
       tr/A-Z/a-z/;
 
       # extract each proc local message buffer (e.g. for plural "chaddr")
-      &MesgSetBreakPoint;	
+      &MesgSetBreakPoint;
 
       if ($proc = $Procedure{$_}) {
 	  $trap_counter++; # found in %Procedure;
