@@ -3,6 +3,20 @@
 .k	trouble shooting
 .n	trouble
 
+.S	Executable files not allowed 
+
+aliase database /etc/aliases rebuilt by root
+cannot open /var/spool/ml/etc/aliases 
+Executable files not allowed 
+
+executable bit を落す。
+.q
+% chmod a-x /var/spool/ml/etc/aliases
+.~q
+
+＃それより普通にやるとつかないもんなので環境設定もみなおすのが吉でしょ
+
+
 .S	Insecure dependency in chdir, Permission denied, ... 
 .k	Insecure dependency in chdir 
 .k	Permission denied
