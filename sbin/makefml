@@ -1907,9 +1907,11 @@ sub MakeWritableDir
     if ($GroupWritable) {	# for backup files
 	-d $_[0] || mkdir($_[0], 0775);
 	chown $<, $GID, $_[0] if $GID;
+	&SetGidBit($_[0]);
     }
     else {
 	-d $_[0] || mkdir($_[0], 0755);
+	&SetGidBit($_[0]);
     }
 }
 
@@ -1920,9 +1922,11 @@ sub MakeDir
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || mkdir($_[0], 0775);
 	chown $<, $GID, $_[0] if $GID;
+	&SetGidBit($_[0]);
     }
     else {
 	-d $_[0] || mkdir($_[0], 0755);
+	&SetGidBit($_[0]);
     }
 }
 
@@ -1933,10 +1937,24 @@ sub MakeSubDir
     if ($GroupWritable eq 'fmlserv') {	# for backup files
 	-d $_[0] || mkdir($_[0], 0770);
 	chown $<, $GID, $_[0] if $GID;
+	&SetGidBit($_[0]);
     }
     else {
 	-d $_[0] || mkdir($_[0], 0700);
     }
+}
+
+
+sub SetGidBit
+{
+    local($file) = @_;
+    local($mode);
+
+    return if $OS_TYPE eq 'BSD44';
+
+    $mode = (stat($file))[2];
+    $mode = $mode | 02000;
+    chmod $mode, $file;
 }
 
 
@@ -2047,7 +2065,6 @@ sub Mkdir
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
 }
-
 
 sub LoadConfigPH
 {
