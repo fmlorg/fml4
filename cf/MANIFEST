@@ -473,6 +473,10 @@ FILTER_ATTR_REJECT_ONE_LINE_BODY:	1
 # value: 1/0
 FILTER_ATTR_REJECT_MS_GUID: 1
 
+# try to convert Japanese HANKAKU chars in the mail body to ZENAKKU
+# value: 1/0
+USE_HANKAKU_CONVERTER:	0
+
 # reject HTML mails that the same content exist in the form of both
 # plain and html. e.g. some versions of M$ outlook, netscape mail
 # "AGAINST_HTML_MAIL: 1/0" is old style, which works for compatibility though.
