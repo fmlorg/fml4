@@ -1,18 +1,26 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
+#
+
+
+no strict qw(subs);
+use vars qw($debug $debug_cksum);
+use vars qw($PCurrentTime);
+use vars qw(%CachedMailBodyCksum);
+
 
 sub MD5_cksum
 {
     local(*e, $prog) = @_;
-    local($cksum, @path);
+    my ($cksum, @path);
 
     @path = ('/usr/bin', '/sbin', '/usr/local/bin', '/usr/gnu/bin', 
 	     '/usr/pkg/bin');
@@ -43,7 +51,8 @@ sub MD5_cksum
 sub MailBodyCksum
 {
     local(*e) = @_;
-    local(@path, $prog);
+    my (@path, $prog);
+    my $mid = 0;
 
     if ($MD5 && -x $MD5) {
 	$prog = $MD5;
@@ -62,20 +71,21 @@ sub MailBodyCksum
     }
     elsif ($prog && -x $prog) {
 	&Log("run prog=$prog") if $debug_cksum;
-	&use('cksum');
 	$mid = &MD5_cksum(*e, $prog);
     }
     else {
 	&Log("ERROR: neither MD5.pm nor program 'md5' found");
-	$NULL;
+	$mid = '';
     }
+
+    return $mid;
 }
 
 
 sub CheckMailBodyCKSUM
 {
     local(*e) = @_;
-    local($status, $mid);
+    my ($status, $mid);
 
     $CHECK_MAILBODY_CKSUM || return 0;
 
@@ -90,7 +100,7 @@ sub CheckMailBodyCKSUM
     }
 
     if ($status) {
-	local($s) = "Duplicated mail body CKSUM";
+	my ($s) = "Duplicated mail body CKSUM";
 	&Log("Loop Alert: $s");
 	&WarnE("Loop Alert: $s $ML_FN", "$s in <$MAIL_LIST>.\n\n");
 	1;
@@ -105,14 +115,13 @@ sub CheckMailBodyCKSUM
 sub CacheMailBodyCksum
 {
     local(*e, $id) = @_;
-    local($id);
     
     $CHECK_MAILBODY_CKSUM || return 0;
 
-    $id = $msgid || &MailBodyCksum(*e);
+    $id = $id || &MailBodyCksum(*e);
 
     if ($CachedMailBodyCksum{$id}) {
-	&Log("CacheMailBodyCksum: warning: duplicated input") if $debug_loop;
+	&Log("CacheMailBodyCksum: warning: duplicated input") if $debug;
 	return 0;
     }
 
