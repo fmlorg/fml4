@@ -416,6 +416,7 @@ sub Mail
 {
     local($ml, $buf) = @_;
     local($maintainer) = $ml'MAA{$ml} ;#';
+    local($sendmail);
 
     return unless $ml;
 
@@ -424,8 +425,15 @@ sub Mail
 	return $NULL;
     }
 
-    open(MAIL, "| $EXEC_DIR/bin/sendmail -t") || 
-	&Die("cannot execute $EXEC_DIR/bin/sendmail");
+    $sendmail = $SENDMAIL || &SearchPath("sendmail") || 
+	&SearchPath("qmail-smtpd", "/var/qmail/bin") ||
+	    &SearchPath("exim", "/usr/local/exim/bin");
+
+    if (! $sendmail) {
+	&Die("cannot find $sendmail");
+    }
+
+    open(MAIL, "| $sendmail -t") || &Die("cannot execute $sendmail");
 
     print MAIL "From: ". $ml'MAA{$ml} . "\n"; #';
     print MAIL "Reply-To: ". $ml'CA{$ml} . "\n"; #';
@@ -435,6 +443,16 @@ sub Mail
     print MAIL $buf;
 
     close(MAIL);
+}
+
+
+# mainly search e.g. "sendmail"
+sub SearchPath
+{
+    local($prog, @path) = @_;
+    for ("/usr/sbin", "/usr/lib", @path) {
+	if (-e "$_/$prog" && -x "$_/$prog") { return "$_/$prog";}
+    }
 }
 
 
@@ -535,7 +553,7 @@ sub Init
     $| = 1;
 
     require 'getopts.pl';
-    &Getopts("dD:e:S:hC:i:l:M:m:E:p:");
+    &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:");
     $opt_h && die(&Usage);
     $debug  = $opt_d;
     $EXPIRE = $opt_e || 14; # days
@@ -558,6 +576,9 @@ sub Init
 
     # mode
     $MODE = $opt_m || 'report';
+
+    # MTA
+    $SENDMAIL = $opt_z;
 
     # touch
     &Touch($CACHE);
