@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libloadconfig.pl,v 2.20 2001/08/21 09:10:18 fukachan Exp $
+# $FML: libloadconfig.pl,v 2.21 2001/08/25 12:44:38 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -327,8 +327,11 @@ sub DEFINE_FIELD_OF_REPORT_MAIL
 
 sub DEFINE_FIELD_PAT_TO_REJECT
 { 
-    $REJECT_HDR_FIELD_REGEXP{$_[0]} = $_[1];
-    $REJECT_HDR_FIELD_REGEXP_REASON{$_[0]} = $_[2] if $_[2];
+    my ($key, $value) = @_;
+    $key =~ tr/A-Z/a-z/;
+    $key = &FieldCapitalize($key);
+    $REJECT_HDR_FIELD_REGEXP{ $key }        = $value;
+    $REJECT_HDR_FIELD_REGEXP_REASON{ $key } = $value if $value;
 }
 
 sub DEFINE_FIELD_LOOP_CHECKED
