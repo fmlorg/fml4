@@ -2,6 +2,9 @@
 ### libfop.pl liblop.pl
 ###
 
+fop.receive.submit:
+	_ARG0_ リクエストを受け付けました
+
 fop.no_numeric_filename:
 	_ARG0_: ファイル名が数字ではありません
 

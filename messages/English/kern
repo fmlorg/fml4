@@ -1,3 +1,12 @@
+unlink:
+	removed _ARG0_
+
+unlink.fail:
+	failed to remove _ARG0_
+
+wait_a_little:
+	Please wait a little
+
 failed:
 	failed
 
@@ -72,6 +81,9 @@ command_syntax_error:
 invalid_addr_syntax:
 	_ARG0_ is invalid syntax.
 	It shouldbe "account@domain" format.
+
+invalid_syntax:
+	_ARG0_ is invalid syntax.
 
 mailloop:
 	Error: address<_ARG0_> may cause mail loop

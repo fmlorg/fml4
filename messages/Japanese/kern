@@ -1,3 +1,12 @@
+unlink:
+	_ARG0_ ファイルを消去しました
+
+unlink.fail:
+	_ARG0_ ファイルの消去に失敗しました
+
+wait_a_little:
+	ちょっと待ってみて下さい
+
 failed:
 	うまくいきませんでした。
 
@@ -72,6 +81,9 @@ command_syntax_error:
 invalid_addr_syntax:
 	_ARG0_ のシンタックスは不正です。
 	"アカウント@ドメイン"という形式であるべきです。
+
+invalid_syntax:
+	_ARG0_ のシンタックスは不正です。
 
 mailloop:
 	エラー: アドレス<_ARG0_>はメール・ループを起こす可能性があります。
