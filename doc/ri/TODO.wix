@@ -1,5 +1,5 @@
 .HTML_PRE
-	TODO of FML Mailing List Server Package
+	TODO of fml Mailing List Server Package
 .if LANG == JAPANESE
 	やり残し、やろうかなとおもってること
 	(誰かやってたらパッチください:-)
@@ -29,10 +29,15 @@ fml-support:6899
 
 ２つにわけるべきか？
 =E
-Should we split it to two parts?
+Should we split doc/smm/ (doc/op) to two parts?
 
 	1. fml operations guide
+
 	2. The design and implementation of ml
+
+doc/examples/ がある。これは実例とチュートリアルとして位置付けている。
+=E
+now we have doc/examples/ as for examples and tutorials.
 
 
 .S	MIMEライブラリーの書き直し
@@ -49,15 +54,16 @@ Xref: fml-support:05948
 .S	日本語化問題
 =E.S	Japanese configuration files
 
-cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
-＃時間次第か？(難易度は低くても辛さ度は最大)
+『cf/MANIFEST での全変数定義 & コメント日本語化』は
+cf/MANIFEST.Japanese に定義されている。しかし定義されているだけで
+config.ph には反映されていない。
 
-*	cf/MANIFEST のコメントの日本語化計画
-	cf/MANIFEST 未定義変数探し
+CGIモードで使うだろう
+
+*	cf/MANIFEST 未定義変数探し
 =E
-*	Japanese cf/MANIFEST
-	search undefined variables on cf/MANIFEST
-
+*	search undefined variables on cf/MANIFEST
+	
 *	ヘルプファイルのupdate, mnews ML版とうまくマージすること
 =E
 *	merge mnews help merge
@@ -89,7 +95,7 @@ command" to handle pgp key for usual users.
 .S	makefml config full menu
 
 全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
-のでやらない。そんなことよりWWW
+のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
 =E 
 All variables can be configurable in the menu? 
 I may not do it since it only confuses the customize.
@@ -112,8 +118,11 @@ I may not do it since it only confuses the customize.
 =E
 *  update filter dynamically 
 
+   http://www.fml.org/some/where/filter-rule.html ? 
+
 
 * Filter module ?
+
 
 * MTIの理論の解説書(本の厚さとはいわないが…)
 =E
@@ -164,7 +173,10 @@ A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 .S	CGI ユーザ・インターフェイス
 =E.S	CGI 
 
-makefml -i stdin を kick すりゃいいだけ
+now "alpha phase"
+
+makefml -i stdin を kick すりゃいいだけ。11月はCGIの強化月間。
+これをβフェイズにもっていくのがテーマ。
 =E
 CGI => inject input to "makefml -i stdin".
 
@@ -231,7 +243,7 @@ NT4 はだめだが NT5 fs には link(2)はある。
    $HTML_BASE_URL
 
 
-.S	HTML番外変
+.S	HTML番外編
 =E.S	HTML again
 
 Content-Type: application/ms-tnef でずっこける場合(たぶんOS依存)って…
@@ -241,23 +253,7 @@ Content-Type: application/ms-tnef breaks down fml html generator ;-) ..
 but it is o.k. now? (on some OS?)
 
 
-.S	ポーティング 
-=E.S	Porting
-
-* NT と makefml ?
-
-  fml/sys/WINDOWS_NT4: makefml.pl 
-    XXX: anyway not overwrite sitedef.ph (incomplete hack)
-    We need to update POP server information to somewhere, so now
-    we use sitedef.ph to include pop.ph and overwrite it always.
-    It is a bug since sitedef.ph may be customized.
-    Hence now change it to "appended to it" but it is not essential.
-    We should change it to more functional solution.
-
-* more elaborate port on NT4 ?
-
-
-.S	Y2K
+.S	RFC1153
 
 * RFC1153のライブラリはどうする？
 =E
@@ -310,23 +306,6 @@ $LOG_FILE_SUFFIX = ".%C%y";
  *  $REWRITE_TO not number value
 
 
-.S	Memory Usage
-
-入力データサイズによる変動が少ないように要チューニング
-
- * PGP (libpgp.pl)
-
- * Sendmail()
-
-   proc/libcompat_fml20.pl:21:
-	&Sendmail($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
-
-   proc/liblop.pl:257:
-	&Sendmail($e{'Addr2Reply:'}, "", $body);
-
-   libexec/popfml.pl:465: 
-	&Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
-
 .S	&Open()
 
 remove &Open()
@@ -344,6 +323,10 @@ command to rewrite addresses in one action ?
 
 .C	パッケージ
 =E.C	Packages
+
+作る必要があるもの、興味があるもの。統合化されていることをめざす。cvs
+的に fml/ の下に来るとは限らない。
+
 
 .S	トラブルチケットシステム
 =E.S	Trouble Ticket System
@@ -363,10 +346,14 @@ command to rewrite addresses in one action ?
 	...
 
 
-.C	Windows NT 固有の問題
-=E.C	Windows NT specific problems
+.C	UNIX 以外のOS固有の問題
+=E.C	NOT UNIX system specific problems
 
-.S	tail command emulation
+.S	NT: tail command emulation
+
+.S	NT: fork
+
+.S	NT: alarm
 
 
 .C	日本特有の問題
@@ -476,6 +463,9 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 * アドヴァイザリィ
 =E
 * y2k advisory
+
+
+.S	tuning memory usage
 
 
 .# $Id$
