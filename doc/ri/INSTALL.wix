@@ -412,12 +412,22 @@ of the fml system. In this directory, please run
 =E
 to install the fml to your system.
 
-perlのpathを特定のもの(例 /usr/local/bin/perl5)にしたいなら
+補足1: perlのpathの書換えをします。これは通常自動探索ですが、もし特定
+のもの(例 /usr/local/bin/perl5)にしたいなら次のように環境変数を指定し
+て下さい
 =E
-To replace perl path with some special path
+Note 1: To replace perl path with some special path
 (e.g. /usr/local/bin/perl5), run
 
    % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
+
+補足2: インストール時はロックをします。ロックなしでインストールなら
+=E
+Note 2: fml locks ML's in installing. If you install under unlocking,
+run 
+
+	perl makefml -U install
+
 
 この時に以下のような項目を聞いて来ます。
 =E
