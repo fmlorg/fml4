@@ -9,10 +9,19 @@
 のオプションの話のことです。
 デバッグの時に shell 上で手動実行する時でも同様です。
 
-SYNOPSIS
+makefml 等で変数は config.ph の中を書き換えるので、通常設定をいじるの
+は config.ph だけにして、デバッグ以外の目的では使わない方が無難です。
+
+＊＊＊注意＊＊＊
+なお makefml で作る include-ctl というファイル中には --ctladdr という
+オプションがついていますが、これは外さないで下さい。
+
+
+
+SYNOPSIS:
    fml.pl   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
 
-	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
+	fml.pl msend.pl sid.pl は同じ引数のとりかたをします。
 	注意：fml_local.pl は MH を意識してるので異なります。
 
 オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
