@@ -300,8 +300,11 @@ sub DEFINE_FIELD_ORIGINAL
 
 sub DEFINE_FIELD_OF_REPORT_MAIL 
 { 
-    local($_) = $_[0]; $Envelope{"GH:$_:"} = $_[1];
-    &ADD_FIELD(&FieldCapitalize($_));
+    my ($key, $value) = @_;
+
+    $key = &FieldCapitalize($key);
+    $Envelope{"GH:${key}:"} = $value;
+    &ADD_FIELD($key);
 }
 
 sub DEFINE_FIELD_PAT_TO_REJECT
