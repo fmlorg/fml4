@@ -132,7 +132,7 @@ MANUAL_REGISTRATION_CONFIRMATION_FILE:	$DIR/confirm.msub
 # If at least either REJECT_{POST,COMMAND}_HANDLER is "auto_subscribe"
 # or "auto_regist",
 # PLEASE SELECT THE TYPE OF AUTOMATIC REGISTRATION
-# value: confirmation/subject/body/no-keywrod
+# value: confirmation/subject/body/no-keyword
 AUTO_REGISTRATION_TYPE:	confirmation
 
 # $REQUIRE_SUBSCRIBE (CFVersion 2) => $AUTO_REGISTRATION_KEYWORD
@@ -262,12 +262,12 @@ MODERATOR_FORWARD_TYPE:	2
 # If this file does not exist, moderator == $MAINTAINER.
 #
 # Moderators who certificate articles posted to this mailing list
-# They receive articles posted here. We do not check moderators's
+# They receive articles posted here. We do not check moderator's
 # addresses. We check only "moderators knows passwords or identifiers". 
 # value: filename string 
 MODERATOR_MEMBER_LIST:	$DIR/moderators
 
-# expire not certifield submission to moderated ML
+# expire not certified submission to moderated ML
 # default: 2 weeks
 # value: number
 MODERATOR_EXPIRE_LIMIT:	14
@@ -354,7 +354,7 @@ FILTER_ATTR_REJECT_COMMAND:
 # value: 1/0
 FILTER_ATTR_REJECT_2BYTES_COMMAND:
 
-# reject MIME/multipart mails wich Microsoft GUID within it, 
+# reject MIME/multipart mails with Microsoft GUID within it, 
 # We intend to reject "Melissa virus" family by it.
 # value: 1/0
 FILTER_ATTR_REJECT_MS_GUID: 1
@@ -404,7 +404,7 @@ LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
 NUM_LOG_MAIL:	100
 LOG_MAIL_FILE_SIZE_MAX:	2048
 
-# PGP Encrpyted ML
+# PGP Encrypted ML
 # value: 1/0
 USE_ENCRYPTED_DISTRIBUTION:
 
@@ -689,7 +689,7 @@ MSEND_NOTIFICATION_SUBJECT:
 # value: 1/0
 MSEND_NOT_USE_X_ML_INFO:
 
-# not do newsyslog in the sunday morning. $NOT_USE_NEWSYSLOG (CFVersion 2)
+# not do newsyslog in the Sundays morning. $NOT_USE_NEWSYSLOG (CFVersion 2)
 # value: 1/0
 MSEND_NOT_USE_NEWSYSLOG:
 
@@ -975,7 +975,7 @@ AMLIST_NEWSYSLOG_LIMIT:	150K
 # HTML Mode Configurations (libsynchtml.pl)
 # Please see doc/op for the details.
 # AUTO_HTML_GEN == AUTOmatic HTML GENeration
-# if $AUTO_HTML_GEN, we generte html'ed articles in $DIR/$HTML_DIR
+# if $AUTO_HTML_GEN, we generate html'ed articles in $DIR/$HTML_DIR
 # value: 1/0
 AUTO_HTML_GEN:
 HTML_THREAD:			1
