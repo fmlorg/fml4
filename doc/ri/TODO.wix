@@ -45,7 +45,7 @@ check
 .S	auto_subscribe
 
 members actives をちゃんと２つ使う自動登録。
-auto_regist は互換性のため有効だが、 fml 3.0 ではこれを使うこと。
+auto_regist は互換性のため有効だが、 fml 3.0 以降ではこれを使うこと。
 この機能を意識させるため major version を 3.x にあげるべきだ。
 
 check it out!

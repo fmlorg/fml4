@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML 3.0 Mailing List Server Package
+	FML 3.0.1 Mailing List Server Package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -9,10 +9,15 @@
 .fi
 
 .if LANG == JAPANESE
+以下ドキュメント中では3.0を適当に3.0.1に読み変えて下さい。
+
 [ガイド]
 
-   3.0へのアップグレードの注意
+   3.0.1/3.0へのアップグレードの注意
 .url http://www.fml.org/fml/UPGRADE-3.0/
+
+   3.0〜3.0.1の間の修正点について
+.url http://www.fml.org/fml/CHANGES-3.0.1/
 
    3.0と2.2.1の主な違い
 .url http://www.fml.org/fml/3.0-new-features.html
@@ -27,15 +32,20 @@
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 .if LANG == ENGLISH
+Please identify 3.0 as 3.0.1 case by case.
+
 [Guide]
 
-   Please read when you upgrade from 2.x to 3.0.
+   Please read when you upgrade from 2.x to 3.0.1/3.0.
 .url http://www.fml.org/fml/UPGRADE-3.0-e/
 
-   differences between 2.2.1 and 3.0
+   differences between 3.0.1 and 3.0.
+.url http://www.fml.org/fml/CHANGES-3.0.1/
+
+   differences between 2.2.1 and 3.0.
 .url http://www.fml.org/fml/3.0-new-features-e.html
 
-   quick guide: outline of installation and fundamental configurations
+   quick guide: outline of installation and fundamental configurations.
 .url http://www.fml.org/fml/examples/index-e.html
 
    home page of fml
@@ -64,7 +74,7 @@ MLをリモートで管理するためのもの)などからなります。また対話設定プログ
 にするエミュレータなどの多くの補助プログラムなどもついています。
 .fi
 .if LANG == ENGLISH
-FML 3.0 is a package of mailing list server and utility programs. It
+FML is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
 in Japan from 1993 to 1998. FML contains
 
