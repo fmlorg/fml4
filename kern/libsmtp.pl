@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.62 2002/05/24 12:34:30 fukachan Exp $
+# $FML: libsmtp.pl,v 2.63 2002/06/03 11:34:25 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -575,10 +575,11 @@ sub __SmtpIO
 	if ($USE_VERP) {
 	    # postfix xverp
 	    if ($e{'mci:xverp'}) {
-		# Example: elena-admin+rudo@nuiniu.net@fml.org
+		# Example: elena-admin+rudo=nuiniu.net@fml.org
 		# you need set up alias
 		#    elena-admin: :include:/var/spool/ml/include-mead
-		$xverp = ' XVERP';
+		my $vd = $POSTFIX_VERP_DELIMITERS || '+=';
+		$xverp = " XVERP=$vd";
 		$mail_from = $SMTP_SENDER || $MAINTAINER;
 	    }
 	    # qmail

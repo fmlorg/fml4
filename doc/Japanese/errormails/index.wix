@@ -9,14 +9,15 @@
 .include overview.wix
 .include mead.wix
 .include qmail-mead.wix
+.include postfix-mead.wix
 .include loop.wix
 .include confirmd.wix
 
 .# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000,2003 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2003 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
