@@ -342,7 +342,7 @@ sub CWhoisUsage
     fml is free software distributed under the terms of the GNU General;
     Public License. see the file COPYING for more details.;
     ;
-    If you find a bug, please send it to fml-bugs\@axion.phys.titech.ac.jp;
+    If you find a bug, please send it to fml-bugs\@ffs.fml.org;
 !;
 
     $s =~ s/;//g;
