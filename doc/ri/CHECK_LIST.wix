@@ -89,6 +89,7 @@ ERROR などのキーワードが内科道かを探して下さい。
 
 
 .C	基本的なエラーの確認
+=E.C	fundamental checks
 
 .S	エラーや疑問点についてドキュメントを検索したか？
 =E.S	Search keywords on problems over fml documents?
@@ -142,12 +143,11 @@ before asking.
 			did not newaliases ?
 .fi
 
-$Id$
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+$FML$
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
