@@ -1,5 +1,15 @@
-.C	WWW, HTTP, HREF とか…
+.C	WWW関係を自動的におこなう。ファイル生成、WWWへのリレー …
+.key	WWW
+.key	href
+.key	http
+.key	gopher
+.key	ftp
+.key	localftp
+
 .S	自動的に スプールを html 化する(Expire なし)
+.key	自動html生成
+.key	libsynchtml.pl
+
 
 Obsolete： SyncHtml.p[lh]
 
@@ -21,10 +31,59 @@ $HTML_EXPIRE を０以下にしているときは ファイルの ファイル.html を
 $FML_EXIT_HOOK か $DISTRIBUTE_CLOSE_HOOK に＃どっちでもいい
 
 $FML_EXIT_HOOK .= q#;
-&use('synchtml');
-$HTTP_DIR = 'tmp/http';
-&SyncHtml($HTTP_DIR, "$HTTP_DIR/$ID", *Envelope);
+	&use('synchtml');
+	$HTTP_DIR = 'tmp/http';
+	&SyncHtml($HTTP_DIR, $ID, *Envelope);
 #;
 
 で、自力で実行できるようにしてみました…
+
+
+.S	変数一覧
+.key	libsynchtml.pl
+
+.key	$HTML_DIR
+$HTML_DIR
+	httpd にアクセスさせる directory 
+	デフォールトは スプール （$SPOOL_DIR）
+
+
+.key	$HTML_EXPIRE
+$HTML_EXPIRE
+	expire の“日”数。もし０以下ならおこなわない。
+	これが指定されていないときは index.html は増える一方だが:-)
+
+.key	@HTML_FIELD
+@HTML_FIELD
+
+	分野ごとに index.html を作るときの分野指定
+	メールの keyword: もしくは field: 指定で
+	メールを分野ごとに分類する。
+
+	@HTML_FIELD のために 毎回 index.html を作り直すので
+	Overhead がかかる
+
+.key	$DEFAULT_HTML_FIELD
+$DEFAULT_HTML_FIELD
+
+	分野ごとに index.html を作るときの デフォールト
+	デフォールトがないと misc がデフォールト（へんな日本語:-)）
+
+.key	$HTML_INDEX_TITLE
+$HTML_INDEX_TITLE
+	index.html のタイトル。もし指定しないときは "Spool $ML_FN"
+
+e.g. 
+
+
+	$HTTP_DIR = 'tmp/http';
+
+	$HTML_EXPIRE = 14;
+
+	@HTML_FIELD = ('misc', 'uja');
+	# $DEFAULT_HTML_FIELD = "Elena";
+
+	$HTML_INDEX_TITLE = "Fj.Sci.Physics FAQ Project";
+
+
 
