@@ -66,7 +66,8 @@ sub MgetCompileEntry
 	    # XXX: "# command" is internal represention
 	    # XXX: remove '# command' part if exist since not essential
 	    $fld =~ s/^\#\s*//;
-	    &Mesg(*e, "\n>>> $fld\n\tfailed.");
+	    &Mesg(*e, "\n>>> $fld");
+	    &Mesg(*e, "\tfailed.", 'failed');
 	};
 
 	&Log("$proc:[$$] $key $fld: $status");

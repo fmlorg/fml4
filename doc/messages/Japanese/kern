@@ -1,3 +1,9 @@
+failed:
+	うまくいきませんでした。
+
+failed4xxx:
+	_ARG0_ はうまくいきませんでした。
+
 not_found:
 	_ARG0_がみつかりません。
 
