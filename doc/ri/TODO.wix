@@ -17,6 +17,10 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	default_config.ph をcvs treeに?
+
+for fml-stable
+
 .S	chkerror
 
 Author: i16@forest.ne.jp
@@ -26,6 +30,8 @@ package としてくみこむ作業がのこってる
 .S	fukui newconfig
 
 やっぱりいろいろ不都合あり。要いろいろチェック
+
+fml-stable に default_config.ph をつっこむべき。
 
 fml-support: 06987
 
@@ -477,6 +483,15 @@ A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
    
 利点として makefml config の日本語変換
 Message Language Extensionの関数ライブラリをよぶ
+
+.S	apache-ssl (1.3.9 base)の解説の用意をする
+
+.S	acl model
+
+○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといけない
+
+○ 一般ユーザ用のWWWアクセスモデルの構築
+
    
    
 .C	パッケージ
