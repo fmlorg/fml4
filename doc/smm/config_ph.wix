@@ -1,6 +1,121 @@
 .C	config.phのその他の設定について
 .label	{config-misc}
 
+
+.S	ヘッダを MIME Decoding してログをとること
+.key	MIME
+.label	MIME-header
+.l	MIME-1
+.l	$USE_MIME
+.xref	MIME-hack
+
+本来 MIME をクライアントプログラムが処理すればいいことなので、サーバと
+しては素通しでいいはずです。が、ログを日本語変換してから保存したいとい
+う要求があるらしいので、これらの機能が実装されています。
+
+まず各種の MIME Decoding を行うためには、
+
+	$USE_MIME	= 1;
+
+を定義します。これがないと必要なライブラリをロードしません。
+
+
+.S	summary に書くsubjectをMIME decodeをしてから書き込む
+.k	summary に書くsubjectをMIME decodeをしてから書き込む
+
+これは
+
+	$USE_MIME	= 1;  
+
+が設定されていれば実行されます。
+
+例：
+	……
+	Subject: Re: TELEPHONE 
+	   =?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+
+	……
+というメールが来たとすると、summary ファイルには
+
+	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
+
+と記録されます
+
+注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
+部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
+
+
+.S	記事をMIME Decoding してから保存する場合
+.k	$MIME_DECODED_ARTICLE
+
+	$MIME_DECODED_ARTICLE          = 1;
+
+と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
+時に日本語へ逆変換した内容を書き込みます。
+
+
+.S	ISO-2022-JP trap
+.l	MIME-Memo
+
+ISO-2022-JP の文字がない限りは require しません(たいして軽くはならない
+でしょうが…)。
+
+.key RFC1522
+RFC1522	2. Syntax of encoded-words
+
+   encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+   charset = token    ; see section 3
+   encoding = token   ; see section 4
+   token = 1*<Any CHAR except SPACE, CTLs, and especials>
+
+
+.S	MIME処理に関するカスタマイズ変数
+.k	MIME処理に関するカスタマイズ変数
+.label	MIME-customizing
+.label	MIME-2
+.key	$MIME_VERSION
+.key	$MIME_CONTENT_TYPE
+.key	$MIME_MULTIPART_BOUNDARY
+.key	$MIME_MULTIPART_PREAMBLE
+.key	$MIME_MULTIPART_TRAILER
+
+以下はＭＬ本来の配送には普通関係ないです。
+
+右辺はデフォールトの値（Built-in）です。
+ファイルの取り寄せ等のモードにMIME関係もありますが、その時に使われてい
+ます。
+
+   Mime-Version:
+   Content-Type:
+
+	$MIME_VERSION = '1.0';
+	$MIME_CONTENT_TYPE = 'multipart/mixed;';
+
+以下は MIME/Multipart で使う変数です。
+
+	$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
+
+な形で日付を設定します。
+
+そのあと、これら↓の変数を設定してます。
+
+	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
+	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
+	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
+
+くぎり
+
+	$MIME_MULTIPART_BOUNDARY = "--日付--"
+
+本文の前口上
+
+	$MIME_MULTIPART_PREAMBLE = なし
+
+本文の後につく部分
+
+	$MIME_MULTIPART_TRAILER = なし
+
+
 .S	実際の配送を担当するマシンを別にする場合
 .xref	smtp
 
