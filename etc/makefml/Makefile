@@ -20,7 +20,7 @@ MODE   = 4755
 all:
 	@ echo ""
 	@ echo "\"make config.ph\"	make config.ph from ./cf"
-	@ echo "\"make fml-wrap\"	make C wrapper from fmlwrapper.c"
+	@ echo "\"make fml-wrapper\"	make C wrapper from fmlwrapper.c"
 	@ echo "\"make config\"		\"makefml config _ML_\" # run CUI menu"
 	@ echo "			You can control fundamental parameters"
 	@ echo "\"make spool2html\"	convert spool to html files"
@@ -39,14 +39,14 @@ config.ph: cf
 
 
 fml: fmlwrapper
-fml-wrapper: fml-wrap
-fmlwrapper: fml-wrap
+fml-wrap: fml-wrapper
+fmlwrapper: fml-wrapper
 
-fml-wrap: fmlwrapper.c fmlwrapper.h
-	$(CC) $(CFLAGS) -o fml-wrap fmlwrapper.c
-	$(CHMOD) $(MODE) fml-wrap
-	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrap fmlwrapper.c
-	$(CHMOD) $(MODE) fml-ctl-wrap
+fml-wrapper: fmlwrapper.c fmlwrapper.h
+	$(CC) $(CFLAGS) -o fml-wrapper fmlwrapper.c
+	$(CHMOD) $(MODE) fml-wrapper
+	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl-wrapper fmlwrapper.c
+	$(CHMOD) $(MODE) fml-ctl-wrapper
 
 spool2html:
 	perl _EXEC_DIR_/bin/spool2html.pl \
