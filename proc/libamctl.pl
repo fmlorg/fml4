@@ -26,45 +26,44 @@ sub AutoRegist
     if ($set_addr) { undef $REQUIRE_SUBSCRIBE; $from = $set_addr;}
 
     # for &Notify,  reply-to ? reply-to : control-address
-    $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'CtlAddr:'};
+    $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $MAIL_LIST;#|| $e{'CtlAddr:'};
+
+    # report mail such as WELCOME ..;
+    $e{'GH:Reply-To:'} = $MAIL_LIST;
 
     if ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
 	# Syntax e.g. "subscribe" in the body
-	$s = &GetSubscribeString($e{'Body'});
 
-	if ($from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s)) {
-	    ;
-	}
-	else {
+	$s    = &GetSubscribeString($e{'Body'});
+	$from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s);
+
+	if (! $from) {
 	    &AutoRegistError(*e, 'Body', $s);
 	    return 0;
 	}
     }
     elsif ($REQUIRE_SUBSCRIBE) {
 	# Syntax e.g. "Subject: subscribe"...
-	$s = &GetSubscribeString($e{'h:Subject:'});
 
-	if ($from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s)) {
-	    ;
-	}
-	else {
+	$s    = &GetSubscribeString($e{'h:Subject:'});
+	$from = &GetAddr2Regist($REQUIRE_SUBSCRIBE, $s);
+
+	if (! $from) {
 	    &AutoRegistError(*e, 'Subject', $s);
 	    return 0;
 	}
     }
     else {
-	# DEFAULT
-	# Determine the address to check
 	# In default, when changing your registered address
 	# use "subscribe your-address" in body.
+	# if not found, use $From-address;
 
-	$s = $set_addr || $e{'Body'};
-	$s =~ s/(^\#\s*|^\s*)//;
+	$s    = &GetSubscribeString($set_addr || $e{'Body'});
 	$from = &GetAddr2Regist($DEFAULT_SUBSCRIBE || "subscribe", $s);
+	$from = $from ? $from : $From_address;
+    }
 
-    }# end of REQUIRE_SUBSCRIBE;
-
-    # already $from = $From_address appliced in &GetAddr2Regist;
+    # Check $from appliced already in regist_to_file (GetAddr2Regist())
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
 
     return 0 if     &LoopBackWarn($from); 	# loop back check	
@@ -81,7 +80,7 @@ sub AutoRegist
     ##### ADD the newcomer to the member list
     local($ok, $er);		# ok and error-strings
 
-    # WHEN CHECKING MEMBER...
+    # WHEN CHECKING MEMBER MODE
     if ($ML_MEMBER_CHECK) {
 	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	&Append2($from, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
@@ -135,9 +134,8 @@ sub AutoRegist
 sub GetAddr2Regist
 {
     local($key, $s) = @_;
-    local($from);
 
-    &Debug("AUTO REGIST BODY ENTRY [$s]") if $debug;
+    &Debug("--GetAddr2Regist(\n$key, $s\n)\n") if $debug;
 
     if ($s =~ /^$key\s+(\S+).*/i) { 
 	return $1;
@@ -146,7 +144,7 @@ sub GetAddr2Regist
 	return $From_address;
     }
     else {
-	0;
+	"";
     }
 }
 
@@ -156,9 +154,11 @@ sub GetSubscribeString
 {
     local($_) = @_;
 
+    &Debug("--GetSubscribeString(\n$_\n);\n") if $debug;
+
     s/(^\#[\s\n]*|^[\s\n]*)//;
     s/^\033\050\112\s*//;
-    (split(/\n/, $s))[0]; # GET THE FIRST LINE ONLY
+    (split(/\n/, $_))[0]; # GET THE FIRST LINE ONLY
 }
 
 # &AutoRegistError(*e, 'Subject', $s);
@@ -167,7 +167,7 @@ sub AutoRegistError
     local(*e, $key, $s) = @_;
     local($b, $sj);
 
-    &Debug("AUTO REGIST $key[$s] SYNTAX ERROR") if $debug;
+    &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
 
     $sj = "Bad Syntax $key in AutoRegistration";
     $b  = "${key}: $REQUIRE_SUBSCRIBE [your-email-address]\n";
