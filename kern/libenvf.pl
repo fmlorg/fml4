@@ -218,8 +218,9 @@ sub __EnvelopeFilter
 	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", 
 	       "Mail from $From_address\nis rejected for '$r'.\n\n");
 	if ($FILTER_NOTIFY_REJECTION) {
-	    &Mesg(*e, $NULL, 'filter.rejected', $r);
-	    &Mesg(*e, "Your mail is rejected for '$r'.\n");
+	    &Mesg(*e, 
+		  "Your mail is rejected for '$r'.\n", 
+		  'filter.rejected', $r);
 	    &MesgMailBodyCopyOn;
 	}
     }

@@ -363,9 +363,9 @@ sub AdminCommand
     local($buf) = join(" ", $cmd, @opt);
     if (! &SecureP($buf, 'admin')) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
-	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
-	  &Mesg(*e, "Execuse me. Please check your request.");
-	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
+	  &Mesg(*e, 
+		"trap special charactors, so process stops for security reason",
+		'filter.insecure_p.stop');
 	  &Log("stop for insecure syntax [ $cmd @opt ]");
 	  return 0; # 0 == LAST(libfml.pl);
     }

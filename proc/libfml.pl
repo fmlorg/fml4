@@ -960,9 +960,11 @@ sub ProcSubscribe
 
     # if member-check mode, forward the request to the maintainer
     if (&NonAutoRegistrableP) {
-	&LogWEnv("$proc request is forwarded to Maintainer", *e);
-	&Mesg(*e, "Please wait a little");
-	&Mesg(*e, $NULL, 'req.subscribe.forwarded_to_admin', $proc);
+	&Log("$proc request is forwarded to Maintainer", *e);
+	&Mesg(*e, 
+	      "$proc request is forwarded to Maintainer".
+	      "Please wait a little",
+	      'req.subscribe.forwarded_to_admin', $proc);
 	&WarnE("$proc request from $From_address", $NULL);
     }
     else {
@@ -1327,8 +1329,8 @@ sub CheckCommandHook
 
     foreach $s (@s) {
 	if ($s =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
-	    &Mesg(*e, "Should NOT include META Char's.");
-	    &Mesg(*e, $NULL, 'filter.has_meta_char');
+	    &Mesg(*e, "Should NOT include META Char's.", 
+		  'filter.has_meta_char');
 	    return 0;
 	};
     }

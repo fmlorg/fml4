@@ -173,8 +173,9 @@ sub Ftp
 
 	  if (! &SecureP($f)) {
 	      &Log("Get: Insecure matching: $f");
-	      &Mesg(*e, "\tGet: Insecure Variable, STOP!");
-	      &Mesg(*e, $NULL, 'filter.insecure_p.stop');
+	      &Mesg(*e, 
+		"trap special charactors, so process stops for security reason",
+		'filter.insecure_p.stop');
 	      last;
 	  }
 

@@ -103,9 +103,7 @@ sub ContentHandler
     
     # Rebuild message body
     if ($reject) {
-	&Mesg(*e, $NULL, 'filter.reject_non_text_mail');
-	&Mesg(*e, "This mailing list <$MAIL_LIST> denies by mailing list.");
-	&Mesg(*e, "Obey your mailing list rule.");
+	&Mesg(*e, "We deny non plaintext mails", 'filter.reject_non_text_mail');
 	&MesgMailBodyCopyOn;
 	&Log("Reject multipart mail");
 	return "reject";
@@ -197,9 +195,8 @@ sub ContentHandler
 	$e{'Body'} = $outputbody;
 	if ($deletebody ne '') {
 	    # Notice
-	    &Mesg(*e, $NULL, 'filter.strip_notice_non_text_mail');
-	    &Mesg(*e, "This mailing list <$MAIL_LIST> is limited by mail's");
-	    &Mesg(*e, "Content-Type. Folloing parts deleted from your mail.");
+	    &Mesg(*e, "strip attachments", 
+		  'filter.strip_notice_non_text_mail');
 	    &Mesg(*e, $deletebody);
 	    &Log("Strip multipart mail and return notice");
 	    return ('strip+notice');

@@ -608,18 +608,18 @@ sub mget3_SearchInArchive
       if (! &SecureP($fn)) {
 	  &Log("SECURITY_LEVEL: $SECURITY_LEVEL");
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
-	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
-	  &Mesg(*e, "Execuse me. Please check your request.");
-	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
+	  &Mesg(*e, 
+		"trap special charactors, so process stops for security reason",
+		'filter.insecure_p.stop');
 	  &Log("STOP for insecure [$fn]");
 	  return 0;
       }
 
       if ($Permit{'ShellMatchSearch'} && (! &SecureP($fn))) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
-	  &Mesg(*e, $NULL, 'filter.insecure_p.stop');
-	  &Mesg(*e, "Execuse me. Please check your request.");
-	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
+	  &Mesg(*e, 
+		"trap special charactors, so process stops for security reason",
+		'filter.insecure_p.stop');
 	  &Log("STOP for insecure [$fn]");
 	  return 0;
       }
