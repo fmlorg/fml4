@@ -1,21 +1,21 @@
-.C	Subject $B$O$C$/(B
+.C	Subject д╧д├дп
 
-.S	$B$9$l$C$I$N@hF,$K$@$1HV9f$r$U$k!)(B
+.S	д╣дьд├д╔д╬└ш╞мд╦д└д▒╚╓╣цдЄд╒дыбй
 
-fml-support: 07772 $B6aJU(B
+fml-support: 07772 ╢с╩╒
 
-Q: $B%9%l%C%I$N@hF,$N5-;v$K$@$1(B Subject: $B$KDL$7HV9f$r?6$j!"JV?.%a!<%k$K(B
-   $B4X$7$F$O(B Subject: $B$O$$$8$i$J$$(B
+Q: е╣еье├е╔д╬└ш╞мд╬╡н╗Ўд╦д└д▒ Subject: д╦─╠д╖╚╓╣цдЄ┐╢дъбв╩╓┐оесб╝еыд╦
+   ┤╪д╖д╞д╧ Subject: д╧ддд╕дщд╩дд
 
-A: $B$H$F$bLLE]$N$h$&$G$9!#(B
+A: д╚д╞дт╠╠┼▌д╬дшджд╟д╣бг
 
-   1$BDLL\(B: Subject: [ML:1] $B85$N7oL>(B
-   2$BDLL\(B: Subject: Re: [ML:1] $B85$N7oL>(B
-   3$BDLL\(B: Subject: Re: [ML:1] $B85$N7oL>(B
-   4$BDLL\(B: Subject: [ML:4] $BJL$N7oL>(B
-   5$BDLL\(B: Subject: Re: [ML:4] $BJL$N7oL>(B
+   1─╠╠▄: Subject: [ML:1] ╕╡д╬╖я╠╛
+   2─╠╠▄: Subject: Re: [ML:1] ╕╡д╬╖я╠╛
+   3─╠╠▄: Subject: Re: [ML:1] ╕╡д╬╖я╠╛
+   4─╠╠▄: Subject: [ML:4] ╩╠д╬╖я╠╛
+   5─╠╠▄: Subject: Re: [ML:4] ╩╠д╬╖я╠╛
 
-$B$J$i(B
+д╩дщ
 
    $SMTP_OPEN_HOOK = q#
        if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
@@ -24,11 +24,11 @@ A: $B$H$F$bLLE]$N$h$&$G$9!#(B
        }
    #;
    
-$B$G$$$1$^$9!#(B
+д╟ддд▒д▐д╣бг
 
-$B$7$+$7!"(B4 $BDLL\$O(B [ML:2] $B$H%+%&%s%H$7$F$[$7$$$J$i!"(B
-$B$$$o$f$k5-;vHV9f$H$OJL$K%+%&%s%H$9$k$7$+$"$j$^$;$s!#(B
-$BNc$($PJL$N(B sequence $B%U%!%$%k$r$D$/$C$F%+%&%s%H$r$7$F$$$-$^$9!#(B
+д╖длд╖бв4 ─╠╠▄д╧ [ML:2] д╚ележеєе╚д╖д╞д█д╖ддд╩дщбв
+дддядцды╡н╗Ў╚╓╣цд╚д╧╩╠д╦ележеєе╚д╣дыд╖длдвдъд▐д╗дєбг
+╬удид╨╩╠д╬ sequence е╒ебедеыдЄд─дпд├д╞ележеєе╚дЄд╖д╞ддднд▐д╣бг
    
 .q   
    $SMTP_OPEN_HOOK = q`
@@ -48,4 +48,4 @@ A: $B$H$F$bLLE]$N$h$&$G$9!#(B
    `;
 .q   
 
-$BCm(B: $B$3$NNc$G$bF0$-$^$9$,!"%(%i!<%A%'%C%/$OIT==J,$H$$$($^$9!#(B
+├э: д│д╬╬уд╟дт╞░днд▐д╣дмбвеиещб╝е┴езе├епд╧╔╘╜╜╩мд╚дддид▐д╣бг
