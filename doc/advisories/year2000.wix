@@ -55,7 +55,7 @@ READMEの通りY2Kに限らず汎用的な答えはいつも『currentを使う』です。
 例: どのファイルか分からない時はとりあえず全部にあててしまえばOKでしょ
 う。無関係なファイルは無修正のままになるだけです。
 
-   % perl -i.bak -nple fix-gettime.pl /usr/local/fml/*pl
+   % perl -i.bak fix-gettime.pl /usr/local/fml/*pl
 
 file permissionが変わるかも知れないので、この後に念のため
 
