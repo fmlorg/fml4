@@ -51,11 +51,6 @@ for (;;) {
     # e.g. 18:00 
     if ($min == 0 || $debug_msend) {
 	for $ml (keys %IncludeFile) {
-print qq#
-	    next if !-f $ML_DIR/$ml/config.ph;
-	    next if !-f $MsendRc{$ml};
-#;
-
 	    next unless $ml;
 	    next if !-f "$ML_DIR/$ml/config.ph";
 	    next if !-f $MsendRc{$ml};
