@@ -1,0 +1,128 @@
+		TODO toward 4.0.5
+		Last Modified: $Date$
+
+* Config 名前空間の汚染問題
+
+	X-ML-Name: fml-help
+	X-Mail-Count: 00692
+
+* 並行開発 ブランチはどうする？
+
+	sendmail 8.12 は？
+
+	postfix-verps	Postfix current VERP's hack branch
+		break from main:current-20010722
+
+* sbin/makefml ?
+
+    # Lock all when "install"
+    if ($TheFirstTime || $NOT_LOCK{$fp}) {
+	# XXX TODO for 4.0.3 
+	# XXX I don't understand why this hack locates here ???
+	# XXX reload $LANGUAGE to translate messages on Web CGI
+	# XXX &GetConfigPH($ml) if (!$TheFirstTime);
+    }
+
+* makefml add のときに welcome を送る ?
+
+	fml-help: 00675
+
+* ntfml 内部構造の tune up を…
+
+	+fml-todo をみよ
+
+
+* コードの clean up
+
+	current-20010823 〜
+
+
+$FML: TODO-4.0.4,v 1.5 2001/09/20 15:01:15 fukachan Exp $
+
+
+--------
+CHANGES of clean up
+
+kern/fml.pl 
+	modify EmulRFC2469 to take HASHREF argument
+
+kern/libkernsubr2.pl 
+kern/liblmtp.pl 
+kern/libsmtphack.pl 
+kern/libsmtpmci.pl 
+kern/libsmtpsubr.pl 
+kern/libsmtpsubr2.pl 
+kern/libsmtputils.pl
+	o my()-ify
+	o remove not used variables if exists
+	o use vars qw( ... ) for package local variables
+
+kern/libsmtpsubr.pl 
+kern/libtrap.pl
+	o use vars qw($debug) to avoid warning
+
+kern/libsmtphack.pl
+	o use vars qw($debug $debug_smtp) to avoid warning
+	o remove $debug_smtp_hack
+	o fix close() argument bug
+
+kern/libsmtputils.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $ExistJcode
+	o remove ... if $debug && $rcsid
+
+kern/libsmtpmci.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $CurModulus
+	o remove ... if $debug_mci
+
+kern/libenvf.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $FILTER_ATTR_LEAST_NUM_PARAGRAPHS
+
+kern/libenvfsubr.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+
+kern/libloadconfig.pl 
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o remove $debug_30B
+	o pass \$s not *s to jcode.pl
+
+kern/libsmtp.pl 
+	o remove obsolete debug codes
+	o my()-ify if possible
+	o use vars qw( ... ) for package local variables
+	o fix $SMTP_LOG_ROTATE_TYPE ($USE_SMTP_LOG_ROTATE_TYPE is wrong).
+	o remove %RcptListsCB
+	o change __SmtpIOClose() argument
+	  __SmtpIOClose(*e, $ipc) -> __SmtpIOClose($ipc)
+	o remove $debug_mci, $debug_dla
+
+
+DecodeMimeStrings() -> DecodeMimeString()
+
+	kern/libkernsubr2.pl
+	kern/libsmtpsubr.pl
+	kern/libenvf.pl
+	proc/libdist.pl
+	proc/libdisthack.pl
+	proc/liberror.pl
+	proc/libfop.pl
+	proc/liblibrary.pl
+	proc/librfc1153.pl
+	proc/libsynchtml.pl
+	proc/libwhois.pl
+	proc/libhtmlsubr.pl
+
+
+* mimedecode ?
+
+	proc/libmodeutils.pl:	$e{'h:Subject:'} = &mimedecode($s);
+	proc/libmodeutils.pl:	$e{'h:X-Subject:'} = &mimedecode($s);
+
+$FML: TODO-4.0.4,v 1.5 2001/09/20 15:01:15 fukachan Exp $
