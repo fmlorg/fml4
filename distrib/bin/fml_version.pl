@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML: fml_version.pl,v 1.18.2.1 2001/04/05 14:58:58 fukachan Exp $
+# $FML: fml_version.pl,v 1.18.2.2 2001/06/03 13:48:46 fukachan Exp $
 #
 
 require 'getopts.pl';
@@ -39,7 +39,8 @@ else {
 
 # release !
 if ($Trunk =~ /^[\d\.]+$/) {
-	print $Trunk; exit 0;
+	print STDERR "*** release mode ***\n";
+	$release_mode = 1;
 }
 
 if ($opt_T) {
@@ -66,6 +67,10 @@ $MailDate = &GetDate;
 $PL = "${PL}pl$patchlevel" if $patchlevel;
 
 $DailyID = $BRANCH. " ". &YYYYMMDD;
+
+$DailyID = $Trunk if $release_mode;
+$MODE    = 'daily' if $release_mode;
+
 
 # 3.0B new id system
 if ($opt_N || $RCSID_FNAME) {
