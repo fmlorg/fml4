@@ -5,7 +5,44 @@
 =E
 				Ken'ichi Fukamachi
 
-[ 3.0pl5 ]
+[ 3.0pl#17 == 3.0.1_BETA #6 ]
+
+	spool2html
+		fix bug no variable import from config.ph
+
+		config.ph の内容を反映しないのを修正
+
+
+[ 3.0pl#16 == 3.0.1_BETA #5 ]
+
+	一回リリースエンジニアリングの体制を仕切り直す。
+	いまは 3.0pl#16 は 3.0.1_BETA #5 と同じ意味
+	＃以下 3.0.1 リリースまでしばらくこのconventionを使う
+
+	merge 3.0.1
+
+	  fix miscellaneous y2k
+		PR by fml-support: 07189 OGAWA Kunihiko
+
+		bin/daily.pl
+		bin/gen_summary.pl
+		bin/spool2html.pl
+		contrib/utilities/packmbox.pl
+		contrib/localhack/release-1/vote/vote.pl
+
+		y2k?
+		  src/libcompat.pl
+		  src/libcompat_fml15.pl
+
+	  bin/passwd.pl
+		PR fml-support: 07190 Masaaki Hirono
+		fix undefined function bug
+		see also libcrypt.pl change below
+
+	  libcrypt.pl
+	 	fix SRand() call bug
+
+[ 3.0pl#15 ]
 
   html generator
 	fix title to YYYY/MM/DD
@@ -45,7 +82,7 @@
 	apply patch to fix scope bug from Teruyuki Morimura
 	<lisa@sandalwood.net>. fml-support: 07135
 
-[ 3.0pl14 ]
+[ 3.0pl#14 ]
 
    DEFINE_FIELD_LOOP_CHECKED()
    UNDEF_FIELD_LOOP_CHECKED()
@@ -66,7 +103,7 @@
 		libexec/fmlserv.pl
 		sbin/makefml
 
-[ 3.0pl13 ]
+[ 3.0pl#13 ]
 
   member_name extension
 	cutoff approve password in logfile
@@ -84,7 +121,7 @@
   moderator mode
 	try to check default $MODERATOR_MEMBER_LIST if not defined
 
-[ 3.0pl12 ]
+[ 3.0pl#12 ]
 
    sbin/makefml
 	import a subset of 2.49-2.50: Conv() preserves file mode
@@ -100,7 +137,7 @@
    sbin/makefml	(2.44-2.45)
 	validate config.guess existence
 
-[ 3.0pl11 ]
+[ 3.0pl#11 ]
 
    proc/libra.pl
 	fix typo
@@ -117,7 +154,7 @@
    etc/makefml/Makefile (1.16-1.17)
 	validate config.ph.new before mv .ph.new to .ph
 
-[ 3.0pl10 ]
+[ 3.0pl#10 ]
 
    bin/fwix.pl
 	fix IndexExpand() avoid to match unexpected '+' string
@@ -129,11 +166,11 @@
    sbin/makefml (2.43-2.44)
 	define dummy DEFINE_FIELD_PAT_TO_REJECT()
 
-[ 3.0pl9 ] 
+[ 3.0pl#9 ] 
 
   fix qmail examples (qmail/users/assign)
 
-[ 3.0pl8 ] 
+[ 3.0pl#8 ] 
 
    fix "admin remove-article" command bug with html creation mode
 
@@ -142,7 +179,7 @@
 	HTMLスプールを生成することになっている場合に"admin remove-article"
 	command を使うとその命令を送ったメールもついでに再生成されてしまうbug
 
-[ 3.0pl7 ] 
+[ 3.0pl#7 ] 
 
    etc/makefml/dot-qmail-default 
 
@@ -164,7 +201,7 @@
   libexec/mead.pl, doc/smm/mead.wix
 	add missing options mead.pl help shows
 
-[ 3.0pl6 ] 
+[ 3.0pl#6 ] 
 
   clean up/changes documents mainly
 
@@ -178,7 +215,7 @@
 	not expand .ptr with <PRE>
 
 
-[ 3.0pl5 ]
+[ 3.0pl#5 ]
 
   sbin/makefml
 	PR: fml-support:06764
@@ -198,7 +235,7 @@
 	INSTALL_on_MacOS_X_Server
 
 
-[ 3.0pl4 ]
+[ 3.0pl#4 ]
 
   etc/makefml/include-mead
 	fix spelling 
@@ -214,7 +251,7 @@
 	added. Japanese description for variables
 
 
-[ 3.0pl3 ]
+[ 3.0pl#3 ]
 
    add INSTALLATION NOTES on MacOS X Server
 
@@ -238,7 +275,7 @@
    doc/ri/INSTALL.wix
 	fix 2 bytes "-" statements (Japanese specific)
 
-[ 3.0pl2 ]
+[ 3.0pl#2 ]
 
    doc/ri/
    doc/examples/
@@ -249,7 +286,7 @@
 
 	correct handling of "apporove PASSWORD name ..." case
 
-[ 3.0pl1 ]
+[ 3.0pl#1 ]
 
    cf/config
 
