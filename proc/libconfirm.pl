@@ -789,7 +789,13 @@ sub GenUnsubscribeConfirmReplyText
 
     if ($mode eq 'Confirm::GenPreamble') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	if ($e{'trap:ctk'}) {
+	    $s .= "PLEASE SEND BACK THE FOLLOWING LINE ONLY\n";
+	    $s .= "$e{'trap:ctk'}$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	}
+	else {
+	    $s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	}
 	$s .= "Please reply this mail to confirm your unsubscribe request\n";
 	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
 	$s .= "If confirmed, you are removed from MAILING LIST <$MAIL_LIST>.";
@@ -871,7 +877,13 @@ sub GenChaddrConfirmReplyText
 
     if ($mode eq 'Confirm::GenPreamble') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	if ($e{'trap:ctk'}) {
+	    $s .= "PLEASE SEND BACK THE FOLLOWING LINE ONLY\n";
+	    $s .= "$e{'trap:ctk'}$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	}
+	else {
+	    $s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+	}
 	$s .= "Please reply this mail to confirm your Chaddr request\n";
 	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
 	$s .= "If confirmed, you are removed from MAILING LIST <$MAIL_LIST>.";

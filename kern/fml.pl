@@ -93,14 +93,20 @@ sub ModeBifurcate
     $Envelope{'mode:stranger'} = 1 unless $member_p;
 
     # chaddr is available from new address if old to "chaddr" is a member;
+    # hml compatible case (not default)
     if (!$member_p && $Envelope{'mode:uip:chaddr'}) {
 	&use('utils');
 	if (&ChAddrModeOK($Envelope{'mode:uip:chaddr'})) {
 	    $Envelope{'mode:uip'} = $member_p = 1;
 	}
     }
+    # hml compatible case (not default)
+    elsif ($CHADDR_AUTH_TYPE eq 'confirmation' && 
+	   $Envelope{'mode:uip:chaddr-confirm'}) {
+	$Envelope{'mode:uip'} = 1;
+    }
 
-    # fml 0.x - fml 2.1gamma compat
+    # fml 0.x - fml 2.1gamma compat (not default)
     $compat_hml = &CompatFMLv1P;
 
     # default
@@ -904,6 +910,12 @@ sub CheckCurrentProc
 	$cc++;
 	print STDERR " SCAN BUF> $_ ($cc line)\n\n" if $debug;
 
+	# skip useless checks
+	if (! $e{'trap:ctk'}) {
+	    print STDERR "  -skip fml rel. 1 compatible scan\n" if $debug;
+	    next;
+	}
+
 	# Guide Request from the unknown
 	if ($GUIDE_CHECK_LIMIT-- > 0) { 
 	    $e{'mode:req:guide'} = 1 if /^\#\s*$GUIDE_KEYWORD\s*$/i;
@@ -920,6 +932,8 @@ sub CheckCurrentProc
 	    $e{'mode:uip'} = 'on'    if /^\#\s*\w+\s|^\#\s*\w+$/;
 	    $e{'mode:uip:chaddr'} = $_ 
 		if /^\#\s*($CHADDR_KEYWORD)\s+/i;
+	    $e{'mode:uip:chaddr-confirm'} = $_ 
+		if /^\#\s*($CHADDR_CONFIRMATION_KEYWORD)\s+/i;
 	}
 
 	$nclines++ if /^\#/o;    # the number of command lines
