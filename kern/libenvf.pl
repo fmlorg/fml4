@@ -118,7 +118,6 @@ sub __EnvelopeFilter
     else { # may be null or continuous character buffer?
 	my ($i);
 	for ($i = 0; $i < $#pmap && $pmap[$i] < 1024; $i++) {;}
-	&Log("EnvelopeFilter: check from $pmap[0] to $pmap[$i] since too big");
 	$xbuf = substr($e{'Body'}, $pmap[0], $pmap[$i]);
     }
     $n_paragraph = $#pmap;

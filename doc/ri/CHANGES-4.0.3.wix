@@ -16,6 +16,16 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
 
+2001/10/14
+
+   kern/libenvf.pl (2.18-2.19):
+	nuke debug 
+
+2001/10/13
+
+   proc/libamctl.pl
+	bug fix: chaddr error in encountering avoid duplication
+
 2001/10/10
 
    cf/MANIFEST (1.88-1.89):
@@ -194,7 +204,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.25 2001/10/03 14:36:26 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.26 2001/10/10 15:34:26 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
