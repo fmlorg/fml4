@@ -1,6 +1,18 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/05/15
+
+  sbin/makefml (2.124-2.126):
+	import update-config.ph from current
+
+	% (cd /var/spool/ml/elena; make config.ph) 
+
+	と同じことをするコマンドとして
+
+	% makefml update-config.ph elena
+	% makefml elena::update-config.ph
+
 2000/05/10
 
   bin/spool2html.pl (2.16-2.17):
