@@ -4,6 +4,31 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/10/28
+
+   FML Security Advisory: FA2001_001 を修正する
+	libsynchtml.pl libhtmlsubr.pl のコードを current へ
+	マージする。厳密にはこの修正は 2 つのカテゴリからなる。
+	1. careless miss
+	2. attachment の扱い方
+
+	新変数 $HTML_PERMIT_HTML_ATTACHMENT
+	これを指定すると、添付ファイルを生のまま出力するようになる。
+	デフォルトでは、あらゆるものに metachar 修正を施す
+
+2001/10/27
+
+   FML Security Advisory: FA2001_001 (2nd ed.)
+
+2001/10/26
+
+   FML Security Advisory: FA2001_001
+
+	http://www.fml.org/software/fml/advisories/FA2001_001/	
+
+	fml 内蔵 HTML 化機構をお使いの方は必ずこのアドバイザリを御覧下さい
+
+
 2001/10/22
 
    proc/libamctl.pl
@@ -46,7 +71,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.219 2001/10/21 15:13:57 fukachan Exp $
+	add $FML: CHANGES,v 1.220 2001/10/22 14:56:44 fukachan Exp $
 
 2001/10/03
 
