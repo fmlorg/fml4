@@ -113,7 +113,7 @@ sub MakefmlInputTranslate
 
     # print "(debug) &MesgLE(*xe, makefml.$command, $ml, @argv);\n";
     $buf = &MesgLE(*xe, "makefml.$command", $ml, @argv);
-    print $buf, "\n";
+    &P($buf);
 }
 
 
@@ -256,7 +256,7 @@ sub OUTPUT_FILE
 		$ncache{$inbuf} = 1;
 
 		# output with language conversion
-		print &XSTranslate($xbuf), "\n" if $xbuf;
+		&P( &XSTranslate($xbuf) )  if $xbuf;
 
 		next;
 	    }
@@ -289,7 +289,7 @@ sub OUTPUT_FILE
 	    # hide environment
 	    s/$EXEC_DIR/\$EXEC_DIR/g;
 	    s/$ML_DIR/\$ML_DIR/g;
-	    print $_, "\n";
+	    &P($_);
 	}
 	close($file);
     }
@@ -372,10 +372,13 @@ sub Translate2LogOption
 
 sub Command
 {
-    &ShowReferer;
+    # &ShowReferer;
 
     if ($PROC eq 'add' || $PROC eq 'bye') {
 	&Control($ML, $PROC, $MAIL_ADDR);
+	&P("</PRE>");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&P("<PRE>");
     }
     elsif ($PROC eq 'add_admin' || $PROC eq 'bye_admin') {
 	$PROC =~ s/_admin/admin/;
@@ -468,7 +471,7 @@ sub Finish
     if ($ErrorString) { &Exit($ErrorString);}
 
     &P("</PRE>");
-    &ShowReferer;
+    # &ShowReferer;
     &P("</BODY>");
     &P("</HTML>");
 }

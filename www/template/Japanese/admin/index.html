@@ -13,12 +13,6 @@
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
-<H2>
-<CENTER>
-<A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
-</CENTER>
-</H2>
-
 <PRE>
 このページはfmlの管理下にある全ＭＬの設定を更新/変更する画面です。
 基本的にサーバにはいって makefml コマンドを使える管理者と同じ権限です。
@@ -28,16 +22,17 @@
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#newml">新規メーリングリストの作成</A>
-<LI><A HREF="#config">既存メーリングリストの詳細設定/登録/削除など</A>
-<LI><A HREF="#destructml">既存メーリングリストの削除</A>
+<LI><A HREF="#newml">新規ＭＬの作成</A>
+<LI><A HREF="#config">既存ＭＬの詳細 (詳細設定/登録/削除)</A>
+<LI><A HREF="#destructml">既存ＭＬの削除</A>
 <LI><A HREF="#cgiadmin">この画面(CGI)を操作可能なユーザの設定</A>
-<LI><A HREF="#server_config">サーバの設定関係(初回の確認必須)</A>
+<LI><A HREF="#server_config">サーバの設定(初回の確認必須)</A>
 </UL>
 
 
 <HR>
-<A NAME=newml><P>新規メーリングリストの作成
+<UL>
+<A NAME=newml><LI><P>新規ＭＬの作成
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -57,28 +52,17 @@ _____________________________
 
 <HR>
 <A NAME=config>
-<P>
-既存メーリングリストの設定/登録/削除など
+<LI><P>
+詳細設定
 
 <FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=PROC VALUE=config>
 <INPUT TYPE=hidden NAME=PTR  VALUE=/>
 
-<TABLE>
-	<TR>
-		<TD ALIGN=right> メーリングリスト:
-		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
-		<TABLE>
-			<TD ALIGN=left>既存リストからの選択:
-			<TD ALIGN=right>
-			<SELECT NAME=ML>
-			__EXPAND_OPTION_ML__
-			</SELECT>
-		</TABLE>
-</TABLE>
-_____________________________
-<BR>
+	<SELECT NAME=ML>
+	__EXPAND_OPTION_ML__
+	</SELECT>
 <INPUT NAME=submit-p TYPE=submit VALUE=GO>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
@@ -113,7 +97,8 @@ _____________________________
 
 
 <HR>
-<A NAME=destructml><P>既存メーリングリストの消去
+<A NAME=destructml>
+<LI><P>既存メーリングリストの消去
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -187,7 +172,9 @@ _____________________________
 
 
 <HR>
-<A NAME=server_config><P>サーバの設定
+<A NAME=server_config>
+<LI><P>
+サーバの設定
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
@@ -210,7 +197,7 @@ _____________________________
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
-<P>
+<LI><P>
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
@@ -240,7 +227,7 @@ _____________________________
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
-<P>
+<LI><P>
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
@@ -250,6 +237,7 @@ aliasesを更新する:
 <INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
 </FORM>
 
+</UL>
 <HR>
 
 <PRE>

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+_ML_ mailing list configuration
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H2>
+<CENTER>
+<A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
+
+<P>
+_ML_ メーリングリストの設定
+</CENTER>
+</H2>
+
+<!-- __START__ -->
+<HR>
+<A NAME=add.bye><P>メンバーの削除 (_ML_ ＭＬ)
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+<INPUT TYPE=hidden NAME=PROC VALUE=BYE>
+
+<P>
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Email アドレス:
+		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR_DEF SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=right>
+			<SELECT NAME=MAIL_ADDR>
+			__EXPAND_OPTION_MEMBER_LIST__
+			</SELECT>
+		</TABLE>
+</TABLE>
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+<PRE>
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

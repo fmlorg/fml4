@@ -25,6 +25,11 @@ sub Init
     # fml system configuration
     require "$CONFIG_DIR/system";
 
+    push(@INC, $EXEC_DIR);
+
+    require 'jcode.pl';
+    eval "&jcode'init;";
+
     # cgi.conf
     $CGI_CONF = $CGI_CONF || "$EXEC_DIR/.fml/cgi.conf";
     if (-f $CGI_CONF) {	require $CGI_CONF;}
@@ -191,10 +196,14 @@ sub ExpandCGIAdminMemberList
 
 sub Convert
 {
-    local($file) = @_;
+    local($file, $inline) = @_;
 
     if (open($file, $file)) {
 	while (<$file>) {
+	    if ($inline) {
+		next if 1 .. /__START__/;
+	    }
+
 	    if (/__EXPAND_OPTION_ML__/) {
 		&ExpandOption;
 		next;
@@ -301,7 +310,12 @@ sub Exit
 sub ERROR { &P(@_);}
 
 
-sub P { print @_, "\n";}
+sub P
+{ 
+    local($s) = @_;
+    &jcode'convert(*s, 'jis'); #';
+    print $s, "\n";
+}
 
 
 ### Section: conf/cgi.cf
@@ -376,6 +390,34 @@ sub SpawnProcess
 
 	&ERROR("exit (" .($? & 255). ")") if $? & 255;
 	# &ERROR($!) if $!;
+    }
+}
+
+
+
+### Real Function of *.cgi
+sub __Run_mlmenu
+{
+    $PROC = $Config{'PROC'};
+
+    if ($PROC =~ /^[a-z]+$/) {
+	if ($Config{'LANGUAGE'} eq 'Japanese') {
+	    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html");
+	}
+	elsif ($Config{'LANGUAGE'} eq 'English') {
+	    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/$PROC.html");
+	}
+	else {
+	    if ($LANGUAGE eq 'Japanese') {
+		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html");
+	    }    
+	    else {
+		&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/$PROC.html");
+	    }
+	}
+    }
+    else {
+	&Error("insecure");
     }
 }
 

@@ -26,21 +26,7 @@ $ML = $Config{'ML'};
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-
-if ($Config{'LANGUAGE'} eq 'Japanese') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/mlindex.html");
-}
-elsif ($Config{'LANGUAGE'} eq 'English') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/mlindex.html");
-}
-else {
-    if ($LANGUAGE eq 'Japanese') {
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/mlindex.html");
-    }    
-    else {
-	&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/mlindex.html");
-    }
-}
+&__Run_mlmenu;
 
 if ($ErrorString) { &Exit($ErrorString);}
 

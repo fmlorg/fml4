@@ -27,17 +27,17 @@ if ($ErrorString) { &Exit($ErrorString);}
 
 
 if ($Config{'LANGUAGE'} eq 'Japanese') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/index.html");
+    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/menu.html");
 }
 elsif ($Config{'LANGUAGE'} eq 'English') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/index.html");
+    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/menu.html");
 }
 else {
     if ($LANGUAGE eq 'Japanese') {
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/index.html");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/menu.html");
     }    
     else {
-	&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/index.html");
+	&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/menu.html");
     }
 }
 
