@@ -189,7 +189,6 @@ sub __MemberP
     my ($mib, $file, $addr) = @_;
     my ($query, $res, $ml, @row);
 
-    $addr  = "\L$addr";
     $ml     = $mib->{'_ml_acct'};
     $query  = "select address from ml ";
     $query .= " where ml = '$ml' ";
@@ -262,7 +261,6 @@ sub __ListCtl
 
     $addr = $addr || $mib->{'_address'};
     $ml   = $mib->{'_ml_acct'};
-    $addr = "\L$addr";
 
     &main::Log("$mib->{'_action'} $addr");
 
@@ -326,7 +324,7 @@ sub __ListCtl
     elsif ($mib->{'_action'} eq 'chaddr') {
 
 	my ($old_addr) = $addr;
-	my ($new_addr) = "\L$mib->{'_value'}";
+	my ($new_addr) = $mib->{'_value'};
 
 	for $file ('actives', 'members') {
 	    $query  = " update ml ";

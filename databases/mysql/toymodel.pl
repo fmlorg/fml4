@@ -68,6 +68,7 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'unsubscribe' ||
 	       $mib->{'_action'} eq 'on'     ||
 	       $mib->{'_action'} eq 'off'    ||
+	       $mib->{'_action'} eq 'chaddr'    ||
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
 	       $mib->{'_action'} eq 'addadmin' ||
@@ -275,6 +276,7 @@ sub __ListCtl
 
 	$query  = " insert into ml ";
 	$query .= " values ('$ml', 'actives', '$addr', 0, '$NULL') ";
+	&__Execute($mib, $query) || return $NULL;
 
 	$query  = " insert into ml ";
 	$query .= " values ('$ml', 'members', '$addr', 0, '$NULL') ";
@@ -328,8 +330,8 @@ sub __ListCtl
     }
     elsif ($mib->{'_action'} eq 'chaddr') {
 
-	my ($old_addr) = $mib->{'_old_address'};
-	my ($new_addr) = $mib->{'_new_address'};
+	my ($old_addr) = $addr;
+	my ($new_addr) = $mib->{'_value'};
 
 	for $file ('actives', 'members') {
 	    $query  = " update ml ";

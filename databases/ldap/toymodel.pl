@@ -61,6 +61,7 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'unsubscribe' ||
 	       $mib->{'_action'} eq 'on'     ||
 	       $mib->{'_action'} eq 'off'    ||
+	       $mib->{'_action'} eq 'chaddr' ||
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
 	       $mib->{'_action'} eq 'addadmin' ||
@@ -264,15 +265,16 @@ sub __ListCtl
 	    &__Error("fail to add $addr to active");
     }
     elsif ($mib->{'_action'} eq 'chaddr') {
-	$entry->removeValue("member", $mib->{'_old_address'}) ||
-	    &__Error("fail to remove $mib->{'_old_address'}");
-	$entry->addValue("member",    $mib->{'_new_address'}) ||
-	    &__Error("fail to add $mib->{'_new_address'}");
+	my $new_addr = $mib->{'_value'};
+	$entry->removeValue("member", $addr) ||
+	    &__Error("fail to remove $addr");
+	$entry->addValue("member",    $new_addr) ||
+	    &__Error("fail to add $new_addr");
 
-	$entry->removeValue("active", $mib->{'_old_address'}) ||
-	    &__Error("fail to remove $mib->{'_old_address'}");
-	$entry->addValue("active",    $mib->{'_new_address'}) ||
-	    &__Error("fail to add $mib->{'_new_address'}");
+	$entry->removeValue("active", $addr) ||
+	    &__Error("fail to remove $addr");
+	$entry->addValue("active",    $new_addr) ||
+	    &__Error("fail to add $new_addr");
     }
     elsif ($mib->{'_action'} eq 'digest' ||
 	   $mib->{'_action'} eq 'matome') {
