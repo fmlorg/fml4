@@ -1,13 +1,3 @@
-### local configuration 
-FTP_DIR      = $(HOME)/.ftp
-FTP_DIR      = /usr/local/ftp/pub/net/fml-current
-SNAPSHOT_DIR = $(FTP_DIR)/snapshot
-WWW          = /sofs/www/htdocs/staff/fukachan/fml
-WWW_DIR      = $(WWW)
-WWW_DB_DIR   = $(WWW)/doc.db
-DESTDIR      = /var/tmp
-MASTER_SITE  = ftp://ftp.sapporo.iij.ad.jp/pub/IIJ/dist/fukachan/fml/utils/pkgsrc/
-
 check:
 	env FML=${FML} sh distrib/bin/check.sh
 
