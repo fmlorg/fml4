@@ -148,5 +148,6 @@ __htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
 htmlbuild: ${__htmlbuild__}
 	@ echo ""
 #	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
+#	@ apply echo ${__HTML_TUTORIAL__}
 	@ echo --htmlbuild done.
 	@ echo ""
