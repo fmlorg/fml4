@@ -2780,16 +2780,22 @@ elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac} 参照。
 =E.C	Security Consideration
 .l	secure-configure
 
-◯ デフォールトの cf を以下で説明する設定にすることもできます。
-   インストール時に、次の用にインストーラを実行して下さい。
+◯ デフォルトの cf をお薦めの設定にすることができます。
+   インストール時に、次の用に make を実行して下さい。
 =E
 * run in the installation if you use recommended secure cf template.
 
    % env RECOMMEND=yes perl makefml install
 
 
-○ MLのHOMEで make secure とすると代表的な設定は有効になるように
-   cf を書きかえます。現在付け加えられる設定は以下のようなものです。
+○ 既存の cf をより安全な設定にするには
+   ML の HOME で 
+
+	% make secure 
+
+   を実行して下さい。cf を書きかえ、config.ph を再生成します。
+   その際に付け加えられる変更点は次のようなものです
+   (注:以下の例ではコメントが省略されています)。
 =E
 run "make secure" in your ML HOME to enable typical secure
 options. These are a part of the following ones. Configurations to add
@@ -2802,12 +2808,19 @@ $USE_DISTRIBUTE_FILTER		= 1;
 $FILTER_ATTR_REJECT_COMMAND	= 1;
 $USE_MTI			= 1;
 
-@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
+&DENY_PROCEDURE('member');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('active');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('members'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('actives'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('status');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('stat');    # _this_line_is_added_by_makefml_
 .~q
 
 .if LANG == JAPANESE
-○ メンバーファイルを取り寄せるコマンドなどを使えないようにする。
-config.ph の最後 (cf の最後)に付け加える
+   ＊＊＊ 以下、各論です ＊＊＊
+
+○ メンバーファイルを取り寄せるコマンドなどを使えないようにするには
+config.ph の最後 (cf の最後)に付け加えてください。
 .fi
 .if LANG == ENGLISH
 * Disable members/actives command 
@@ -2815,13 +2828,27 @@ config.ph の最後 (cf の最後)に付け加える
 Append in config.ph (before the last "1;")
 .fi		
 
-	@DenyProcedure = ('member', 'active', 'members', 'actives');
+&DENY_PROCEDURE('member');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('active');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('members'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('actives'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('status');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('stat');    # _this_line_is_added_by_makefml_
+
+補足: 上記は 4.0 風です。3.0 風の
+
+ @DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
+
+という書き方でも同じ効果があります。どちらでも自分が分かりやすいと思う
+方を使って下さい。
+
 
 .if LANG == JAPANESE
-○ セキュリティ関連のオプションを有効にする。関連するオプション 
+○ セキュリティ関連のオプションを有効にする。
+   関連する代表的なオプションは次の通りです。 
 
 	$INCOMING_MAIL_SIZE_LIMIT メールサイズの上限
-	$USE_DISTRIBUTE_FILTER    フィルタ
+	$USE_DISTRIBUTE_FILTER    フィルタリング
 	$USE_MTI                  トラフィックモニタ
 	$UNSUBSCRIBE_AUTH_TYPE    登録のときと同様に抜ける時の確認要求
 	$USE_LOG_MAIL             fmlが受けたメール(記事,コマンド両方)の記録 
