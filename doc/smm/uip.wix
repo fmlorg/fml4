@@ -612,6 +612,7 @@ m=1u みたいに常に送りつけるように設定しておいて送り時間は cron でコン
 
 
 .S	X-Stardate: をつける（mh-e）
+.l	x-stardate
 .k	STAR TREK
 .k	stardate.el
 .xref	stardate.el

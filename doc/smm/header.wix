@@ -437,6 +437,7 @@ $HEADER_ADD_HOOK = q#
 
 
 .S	宇宙歴 (外国TVシリーズMLで使ってます:-)
+.l	startrek
 .k	STAR TREK
 .k	StarDate
 .k	$APPEND_STARDATE
