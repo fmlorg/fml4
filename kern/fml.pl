@@ -1791,11 +1791,11 @@ sub Notify
     # send the report mail ot the maintainer;
     $Envelope{'error'} .= $m;
     if ($Envelope{'error'}) {
-	&Warn("Fml System Error Message $ML_FN",$Envelope{'error'}.&WholeMail);
+	&Warn("fml system error message $ML_FN",$Envelope{'error'}.&WholeMail);
     }
 
     if ($Envelope{'message:to:admin'}) {
-	&Warn("Fml System Message $ML_FN", $Envelope{'message:to:admin'});
+	&Warn("fml system message $ML_FN", $Envelope{'message:to:admin'});
     }
 }
 
