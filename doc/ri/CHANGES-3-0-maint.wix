@@ -6,6 +6,30 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl3 ]
+
+   add INSTALLATION NOTES on MacOS X Server
+
+   proc/libsynchtml.pl 
+	fix dup check of htdocs/index.html
+
+   proc/libmesgle.pl 
+	&Mesg() repl may has invalid input
+	check the input and wrap repl in euc and back to jis
+
+   sbin/makefml
+	modify jperl check code
+
+   fix distribution package lacks some plaintext
+	distribute all INSTALL* (plaintext) 
+
+   proc/libra.pl
+	remove-article always checks spool and archive (tar.gz)
+
+   doc/ri/README.wix
+   doc/ri/INSTALL.wix
+	fix 2 bytes "-" statements (Japanese specific)
+
 [ 3.0pl2 ]
 
    doc/ri/
