@@ -141,8 +141,7 @@ sub InitS2P
     # WARNING;
     -d $SPOOL_DIR || 
 	&Die("At least one argument is required for \$SPOOL_DIR");
-    -d $HTML_DIR  || 
-	&MkDir($HTML_DIR);
+    -d $HTML_DIR  || &MkDir($HTML_DIR, 0755); # export as public
 	# &Die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED");
 
     ########## library loading ##########
