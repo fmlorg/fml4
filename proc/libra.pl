@@ -26,13 +26,8 @@ sub DoSetAdminMode
     $ADMIN_HELP_FILE	= $ADMIN_HELP_FILE   || "$DIR/help-admin";
     $PASSWD_FILE        = $PASSWD_FILE       || "$DIR/etc/passwd";
     $REMOTE_AUTH        = $REMOTE_AUTH       || 0;
-    $PGP_PATH           = $PGP_PATH          || "$DIR/etc/pgp";
 
-    # PGP_PATH: PGP Directory
-    if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp") {
-	-d $PGP_PATH || &Mkdir($PGP_PATH);
-	$ENV{'PGPPATH'} = $PGP_PATH;
-    }
+    &__InitPGP(*e);
 
     # touch
     -f $PASSWD_FILE || &Touch($PASSWD_FILE);
@@ -86,7 +81,8 @@ sub DoApprove
     $ADMIN_HELP_FILE	= $ADMIN_HELP_FILE   || "$DIR/help-admin";
     $PASSWD_FILE        = $PASSWD_FILE       || "$DIR/etc/passwd";
     $REMOTE_AUTH        = 0;	# important
-    $PGP_PATH           = $PGP_PATH          || "$DIR/etc/pgp";
+
+    &__InitPGP(*e);
 
     # touch
     (!-f $PASSWD_FILE) && open(TOUCH,">> $_") && close(TOUCH);
@@ -1306,6 +1302,27 @@ sub ProcAdminWhois
     undef $e{'tmp:whois:addr'};
     $e{'h:From:'} = $se_from;
 }
+
+
+sub __InitPGP
+{
+    local(*e) = @_;
+
+    # PGP_PATH: PGP Directory
+    $PGP_PATH = $PGP_PATH || "$DIR/etc/pgp";
+
+    if ($REMOTE_ADMINISTRATION_AUTH_TYPE =~ /pgp|pgp2|pgp5|gpg/) {
+	$_PCB{'asymmetric_key'}{'keyring_dir'} = $ADMIN_AUTH_KEYRING_PATH;
+
+	if ($CFVersion >= 6.1) {
+	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
+	}
+	else {
+	    -d $PGP_PATH || &Mkdir($PGP_PATH);
+	    $ENV{'PGPPATH'} = $PGP_PATH;
+	}
+    }
+} 
 
 
 ##### DEBUG #####

@@ -528,7 +528,20 @@ sub _PGPInit
 	return;
     }
 
-    $ENV{'PGPPATH'} = $PGP_PATH;
+    # fml 4.0 new-pgp-hier
+    if ($CFVersion >= 6.1) {
+	if ($_PCB{'asymmetric_key'}{'keyring_dir'}) {
+	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
+	}
+	else {
+	    &Log("\$CFVersion >= 6.1 but no suitable PGPPATH defined");
+	    &Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
+	    return 0;
+	}
+    }
+    else {
+	$ENV{'PGPPATH'} = $PGP_PATH;
+    }
 
     # Set Language for easy analize by fml.
     &LoadPGPConfig($path, "+Language=en");

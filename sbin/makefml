@@ -557,6 +557,25 @@ sub SetHashDefaults
 	$Default{'ML_DIR'}   = "$dir\\fml\\ml";
     }
 
+    # If you customize "makefml pgp" command, run in the following way
+    # % env MAKEFML_PGP_MODE_COMPAT30=dist-encrypt makefml elena::pgp ...
+    my ($pgp_compat_mode) = $ENV{'MAKEFML_PGP_MODE_COMPAT30'} || 'admin-auth';
+    %MakeFmlProcAlias = (
+			 # fml 4.0
+			 'da' => 'dist-auth',     
+			 'de' => 'dist-encrypt',  
+			 'aa' => 'admin-auth',    
+			 'ae' => 'admin-encrypt',
+
+			 # compatible with fml 3.0
+			 'pgp'  => "$pgp_compat_mode.pgp",
+			 'pgp5' => "$pgp_compat_mode.pgp5",
+			 'pgpk' => "$pgp_compat_mode.pgpk",
+			 'pgps' => "$pgp_compat_mode.pgps",
+			 'pgpe' => "$pgp_compat_mode.pgpe",
+			 'pgpv' => "$pgp_compat_mode.pgpv",
+			 );
+
     %MakeFmlProc = ('install',  'do_install',
 		    '0#install', 'Install the fml system',
 		    'info',     'do_info',
@@ -630,6 +649,12 @@ sub SetHashDefaults
 		    # NT extension
 		    'popfml',     'do_popfml',
 		    'pop_passwd', 'do_pop_passwd',
+
+		    # fml 4.0 new asymmetric key encryptions
+		    'dist-auth',     'do_dist_auth',
+		    'dist-encrypt',  'do_dist_encrypt',
+		    'admin-auth',    'do_admin_auth',
+		    'admin-encrypt', 'do_admin_encrypt',
 
 		    # PGP 2
 		    'pgp',	'do_pgp2',
@@ -1542,6 +1567,17 @@ sub ExecCmd
     # function pointer;
     $fp = shift @argv;
     $fp = $FP{$fp} ? $FP{$fp} : $fp; # this line is not used ?
+    $fp = $MakeFmlProcAlias{$fp} || $fp; # aliases
+
+    # special treat of "." extension
+    if ($fp =~ /(\S+)\.(pgp.*|gpg)$/) {
+	$fp = $1; $EncryptionMethodHint = $2;
+    }
+
+    $fp = $MakeFmlProcAlias{$fp} || $fp; # aliases
+    if ($EncryptionMethodHint) {
+	print STDERR "\$fp = $fp; \$EncryptionMethodHint = $2;\n";
+    }
 
     # valid command?
     if (! $MakeFmlProc{$fp}) {
@@ -1602,7 +1638,6 @@ sub ExecCmd
     else {
 	&MakeFmlLock($fp eq 'install' ? "" : $argv[0], $ML_DIR);
     }
-
 
     if ($MakeFmlProc{$fp}) {
 	$SavedFP = $fp;	# Function Pointer
@@ -3546,6 +3581,37 @@ sub Value
     $v;
 }
 
+# fml 4.0 extension
+sub __assymetric_key_maniuplate
+{
+    my ($mode, $ml, @argv) = @_;
+
+    $NewEncryptionDefaultDir = $NewEncryptionHier = $mode;
+    $NewEncryptionHier  =~ s/-/_/g;
+    $NewEncryptionHier  =~ tr/a-z/A-Z/;
+    $NewEncryptionHier .= "_KEYRING_PATH";
+
+    if ($EncryptionMethodHint =~ /pgp$|pgp2$/i) {
+	&do_pgp2($ml, @argv);
+    }
+    elsif ($EncryptionMethodHint =~ /(pgp5$|pgp[ksve])$/i) {
+	my($fp) = $1;
+	&do_pgp5($fp, $ml, @argv);
+    }
+    elsif ($EncryptionMethodHint =~ /gpg/i) {
+	&do_gpg($ml, @argv);
+    }
+    else {
+	&Error("unknown \$EncryptionMethodHint = $EncryptionMethodHint");
+    }
+
+    undef $NewEncryptionHier;
+}
+sub do_dist_auth     { &__assymetric_key_maniuplate(    'dist-auth', @_);}
+sub do_admin_auth    { &__assymetric_key_maniuplate(   'admin-auth', @_);}
+sub do_dist_encrypt  { &__assymetric_key_maniuplate( 'dist-encrypt', @_);}
+sub do_admin_encrypt { &__assymetric_key_maniuplate('admin-encrypt', @_);}
+
 
 # makefml pgp elena PGP-OPTIONS
 sub do_pgp2
@@ -3558,10 +3624,24 @@ sub do_pgp2
     # &GetCF($cf, $ml, *config, *cur_config); 
     &GetConfigPH($ml);
 
-    $xdir = &Value('PGP_PATH');
-    $ENV{'PGPPATH'} = $xdir;
-    &MkDirHier($xdir, 0700);
-    
+    if ($NewEncryptionHier) {
+	print STDERR "\$xdir = &Value($NewEncryptionHier); \n";
+	$xdir = &Value($NewEncryptionHier);
+	$ENV{'PGPPATH'} = $xdir || "$ML_DIR/$ml/etc/$NewEncryptionDefaultDir";
+    }
+    else {
+	$xdir = &Value('PGP_PATH');
+	$ENV{'PGPPATH'} = $xdir;
+    }
+
+    if ($ENV{'PGPPATH'}) {
+	&MkDirHier($ENV{'PGPPATH'}, 0700);
+    }
+    else {
+	&Error("cannot set up PGPPATH");
+	return 0;
+    }
+
     $| = 1;
     print "\n--- PGP BEGIN ---\n";
     print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
@@ -3579,14 +3659,14 @@ sub do_pgp2
 
 
 # makefml pgp[ksev] elena PGP-OPTIONS
-sub do_pgpk { local($xfp) = $fp; &do_pgp5(@_);}
-sub do_pgps { local($xfp) = $fp; &do_pgp5(@_);}
-sub do_pgpv { local($xfp) = $fp; &do_pgp5(@_);}
-sub do_pgpe { local($xfp) = $fp; &do_pgp5(@_);}
+sub do_pgpk { local($ml, @argv) = @_; &do_pgp5($fp, $ml, @argv);}
+sub do_pgps { local($ml, @argv) = @_; &do_pgp5($fp, $ml, @argv);}
+sub do_pgpv { local($ml, @argv) = @_; &do_pgp5($fp, $ml, @argv);}
+sub do_pgpe { local($ml, @argv) = @_; &do_pgp5($fp, $ml, @argv);}
 
 sub do_pgp5
 {
-    local($ml, @argv) = @_;
+    local($xfp, $ml, @argv) = @_;
     local($xdir);
 
     $xfp =~ s/do_//;
@@ -3596,9 +3676,23 @@ sub do_pgp5
     # &GetCF($cf, $ml, *config, *cur_config); 
     &GetConfigPH($ml);
 
-    $xdir = &Value('PGP_PATH');
-    $ENV{'PGPPATH'} = $xdir;
-    &MkDirHier($xdir, 0700);
+    if ($NewEncryptionHier) {
+	print STDERR "\$xdir = &Value($NewEncryptionHier); \n";
+	$xdir = &Value($NewEncryptionHier);
+	$ENV{'PGPPATH'} = $xdir || "$ML_DIR/$ml/etc/$NewEncryptionDefaultDir";
+    }
+    else {
+	$xdir = &Value('PGP_PATH');
+	$ENV{'PGPPATH'} = $xdir;
+    }
+
+    if ($ENV{'PGPPATH'}) {
+	&MkDirHier($ENV{'PGPPATH'}, 0700);
+    }
+    else {
+	&Error("cannot set up PGPPATH");
+	return 0;
+    }
 
     &Touch("$xdir/pgp.cfg") unless -f "$xdir/pgp.cfg";
 

@@ -36,8 +36,12 @@ sub DoDistribute
     if ($USE_ENCRYPTED_DISTRIBUTION) {
 	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp'  ||
 	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp2' ||
-	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp5') {
+	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp5' ||
+	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'gpg') {
 	    require 'libpgp.pl';
+
+	    $_PCB{'asymmetric_key'}{'keyring_dir'} = 
+		$DIST_ENCRYPT_KEYRING_PATH;
 
 	    # check PGP signature
 	    if (&PGPGoodSignatureP(*e, 1)) {
