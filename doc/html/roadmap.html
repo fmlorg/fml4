@@ -13,19 +13,24 @@ Roadmap in fml project to the future
 </CENTER>
 </H1>
 
-<PRE>
+CVS enables this pararell maintenance. fml 3.0.1 release is
+maintenance release cut off from fml-3-0-maint branch.
 
-                        -- CGI test branch
-                       /           \
- 2.2  2.2A     2.2F   /             \         X.Y ?
----------------------------          \ -----------> MAIN TRUNK
-          |           |
-          |        3.0_BETA
-          |           |
-          |        3.0 Release ----- 3.0 maintenance branch --->
-      2.2.1_BETA 
-          |
-      2.2.1 Release
+<PRE>           
+                     <CGI development branch> merged
+               --------------
+              /              | <developement branch (main trunk)>
+------------------------------------------> fml-current
+  |           |
+  |        3.0_BETA
+  |           |            <fml-3-0-maint: maintenance branch>
+  |            ----------------------> fml-3.0pl[0-9]*
+  |                |           |       
+  |              3.0release  3.0.1 release
+  |                       
+2.2.1_BETA 
+  |
+2.2.1 Release
 
 <A HREF="INFO.html">What's new</A>
 
