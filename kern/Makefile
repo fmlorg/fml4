@@ -16,8 +16,13 @@ GENHOST   = _`hostname`_
 
 include usr/mk/prog
 
+all:
+	perl ./makefml
 
-all:	fml.c src/fml.pl config.ph
+install:
+	perl ./makefml install
+
+old-install:	fml.c src/fml.pl config.ph
 	perl sbin/ccfml $(CC) $(CFLAGS) $(OPTS) fml.c -o fml
 	chmod 4755 fml
 	chmod 755 src/fml.pl src/msend.pl sbin/* bin/* libexec/*
