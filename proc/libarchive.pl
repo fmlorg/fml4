@@ -14,7 +14,7 @@ sub Archive
     $archive_dir = $ARCHIVE_DIR[0] || $ARCHIVE_DIR || "var/archive";
     $max_seq     = &GetFirstLineFromFile($SEQUENCE_FILE);
     $unit        = $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;
-    
+
     &Archive'Init; #';
     &Archive'Archive($archive_dir, $max_seq, $unit, $limit); #';
 }
