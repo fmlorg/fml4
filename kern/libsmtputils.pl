@@ -130,7 +130,8 @@ sub DoNeonSendFile
 		&Log("ERROR: NeonSendFile: $f != JIS ?");
 
 		# AUTO CONVERSION 
-		$ExistJcode = eval "require 'jcode.pl';", $@ eq "";
+		eval "require 'jcode.pl';";
+		$ExistJcode = $@ eq "" ? 1 : 0;
 
 		if ($ExistJcode) {
 		    &Log("NeonSendFile: $f != JIS ? Try Auto Code Conversion");

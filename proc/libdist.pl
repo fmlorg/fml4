@@ -18,7 +18,7 @@ sub DoDistribute
     local($status, $s, $id);
 
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
-    @Rcpt = (); $Rcpt;
+    @Rcpt = (); $Rcpt = 0;
 
     $DISTRIBUTE_START_HOOK && 
 	&eval($DISTRIBUTE_START_HOOK, 'Distribute Start hook'); 
