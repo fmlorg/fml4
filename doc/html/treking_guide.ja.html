@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" バイブル -- fml trekking guide --
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+
+<CENTER>
+<A HREF="http://www.oreilly.co.jp/soon.htm">
+"fml" バイブル -- fml trekking guide -- 
+</A>
+</CENTER>
+(
+<A HREF="http://www.oreilly.co.jp/">
+オライリージャパン
+</A>
+より 2001年 01月 刊)
+<BR>
+ISBN: 4-87311-032-7
+
+
+<HR>
+
+fml 4.0 プロジェクトの(非公式な意味ですが)3大柱(目標)は
+マニュアル、CGI (プロトタイプ)、そしてデータベースアクセスです。
+
+高度なフックの応用などではなく、初心者向けにステップバイステップで記述
+を進めること、そして料理のレシピ集のようなハウツーもののコレクションで
+あるように心がけたつもりです。
+
+<HR>
+注意:
+<BR>
+
+3.0 と 4.0 は内部構造としてはほとんど変わりません。
+そのためほとんどの話題は 4.0 でなくてもあてはまります。
+
+しかし、以下に挙げるようなコマンドは 3.0 や 3.0.1 にはありません。
+注意して下さい。
+
+<P> makefml の例: 次のコマンドは 4.0 にしかない。
+
+<UL>
+	<LI> ＭＬのセットアップ関係
+	<UL>
+		<LI>makefml update-config
+		<LI>makefml destructml
+		<LI>makefml recollect-aliases
+		<LI>makefml addmembers
+		<LI>makefml add2members
+		<LI>makefml addactives
+		<LI>makefml add2actives
+	</UL>
+
+	<LI> 4.0 で拡張された pgp 操作コマンド群
+
+	<LI>mead のセットアップ
+	<UL>
+		<LI>makefml mead
+	</UL>
+
+	<LI> CGI 関係
+	<UL>
+		<LI>makefml admin.cgi
+		<LI>makefml mladmin.cgi
+	</UL>
+
+	<LI> その他
+	<UL>
+		<LI>makefml log
+		<LI>makefml tail
+		<LI>makefml resend
+		<LI>makefml showconf
+	</UL>
+</UL>
+
+
+
+<PRE>
+Copyright (C) 1993-2001 Ken'ichi Fukamachi
+         All rights reserved.
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
