@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.210.2.11 2002/08/10 14:01:39 fukachan Exp $
+# $FML: makefml,v 2.210.2.12 2002/10/20 14:25:41 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -3417,7 +3417,7 @@ sub do_qmail_setup
 	return;
     }
 
-    &QmailSetUp;
+    &QmailSetUp($ml);
 }
 
 
@@ -3513,6 +3513,44 @@ sub QmailSetUp
 	rename("$qmail_users_dir/assign.new.$$", "$qmail_users_dir/assign")
 	    || &Log("cannot rename assign.new.$$ assign");
     }
+
+    &QmailSetUpByVirtualDomains($ml);
+}
+
+
+# Descriptions: create ~/.qmail-$domain-$ml{,*} by using
+#               /var/qmail/control/virtualdomains 
+#    Arguments: STR($ml)
+# Side Effects: create ~/.qmail-$domain-$ml{,*}
+# Return Value: none
+sub QmailSetUpByVirtualDomains
+{
+    local($ml) = @_;
+
+    &ResetVariables;
+
+    my $domain   = $DOMAIN; $domain =~ s/\./:/g;
+    my $pathtmpl = "$HOME/.qmail-$domain-$ml";
+
+    print "\n   Generate qmail template files in $HOME\n";
+
+    # Generating etc/.qmail*
+    &Conv($ml, "$mf/dot-qmail",         $pathtmpl);
+    &Conv($ml, "$mf/dot-qmail-ctl",     $pathtmpl . "-ctl");
+    &Conv($ml, "$mf/dot-qmail-default", $pathtmpl . "-default");
+
+    # &GobbleAlignedBuffer(".qmail-$domain-$ml-admin");
+    &Write2($USER, "$pathtmpl-admin");
+
+    # &GobbleAlignedBuffer(".qmail-$domain-$ml-request");
+    &Write2($USER, "$pathtmpl-request");
+
+    # &PrintAlignedBuffer;
+    &ResetAlignedBuffer;
+
+    print "\tYou need the following rule in /var/qmail/control/virtualdomains\n";
+    print "\tto use $HOME/.qmail-$domain-* files\n";
+    print "\t$DOMAIN:$USER-$DOMAIN\n";
 }
 
 
