@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/07
+
+  makefml
+	modify initialize process to check $EXEC_DIR more but ...
+
+  etc/makefml/menu.conf
+  cf/MANIFEST
+	MENU -> SECURITY_AND_FILTER -> PGP_VERSION -> 2 or 5
+
 2000/06/05
 
   Mesg() Translation M/N ....
