@@ -114,10 +114,26 @@ sub AutoRegist
 	    return 0;
 	}
     }
-	
+
     ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
     if ($USE_DATABASE) { # XXX disabled anyway
-	; 
+	&use('databases');
+
+	# try to probe server
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'member_p', {'address' => $from});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib{'error'}) {
+	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
+	    return 0;
+	}
+	if ($mib{'_result'}) {
+	     &Log("AutoRegist: Dup $from");
+	     &Mesg(*e, "Address [$from] already subscribed.",
+	           "already_subscribed", $from);
+	     &MesgMailBodyCopyOn;
+	     return 0;
+	}
     }
     elsif (&CheckMember($from, $file_to_regist)) {	
 	&Log("AutoRegist: Dup $from");
