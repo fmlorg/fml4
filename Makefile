@@ -155,7 +155,7 @@ search:
 	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
 
 ##### make distribution #####
-update_configuration: libkern menu.conf.toggle
+update_configuration: libkern menu.conf.toggle etc/makefml/list.procedure etc/makefml/cf.recommended
 
 libkern: proc/libkern.pl
 
@@ -168,6 +168,18 @@ etc/makefml/menu.conf.toggle: cf/MANIFEST
 	perl distrib/bin/gen_menu.conf.toggle cf/MANIFEST \
 		> etc/makefml/menu.conf.toggle
 
+etc/makefml/list.procedure: proc/libfml.pl
+	perl distrib/bin/show_procedure.pl proc/libfml.pl > etc/makefml/list.procedure.new
+	mv etc/makefml/list.procedure.new etc/makefml/list.procedure
+
+etc/makefml/cf.recommended: etc/makefml/cf etc/makefml/secure_config.ph etc/makefml/secure_local_config
+	cp etc/makefml/cf etc/makefml/cf.recommended
+	echo >> etc/makefml/cf.recommended
+	echo LOCAL_CONFIG >> etc/makefml/cf.recommended
+	perl -i.bak bin/more_secure_cf.pl \
+		-c etc/makefml/secure_config.ph \
+		-f etc/makefml/secure_local_config \
+		etc/makefml/cf.recommended
 
 ### utils
 bsdmake:

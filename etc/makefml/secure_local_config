@@ -1,2 +1,11 @@
 # FOR SECURITY, Disable user to retrieve member list
-@DenyProcedure = ('member', 'active', 'members', 'actives', 'status', 'stat');
+# fml 3.0 style
+# @DenyProcedure = ('member','active','members','actives','status','stat');
+#
+# fml 4.0 style
+&DENY_PROCEDURE('member');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('active');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('members'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('actives'); # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('status');  # _this_line_is_added_by_makefml_
+&DENY_PROCEDURE('stat');    # _this_line_is_added_by_makefml_
