@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/08
+
+  EnvelopeFilter
+	analyze based on paragraph map (pmap)
+
 2000/06/07
 
   makefml
