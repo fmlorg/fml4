@@ -3411,6 +3411,11 @@ sub do_config_template
 
     &do_config($ml);
 
+    if ($debug) {
+	$| = 1;
+	eval system("diff -u $org_cf $tmp_cf");
+    }
+    print STDERR "   Copy($tmp_cf, $org_cf);\n";
     &Copy($tmp_cf, $org_cf);
     $UnderConfigTemplate = 0;
 
