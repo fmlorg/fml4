@@ -250,9 +250,6 @@ NOTE: 1999/10/04
 	保護する必要がある。HOOkなどで呼び出してる人は注意。
 
 
-.# 自動登録
-.include autoregist.wix
-
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
