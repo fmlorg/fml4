@@ -2,13 +2,12 @@
 .l	clo
 .k	コマンドライン オプション
 
-.S	コマンドライン オプションについて
 
-コマンドラインといっても、/etc/aliases から呼ばれるinclude file の
+コマンドラインオプションは /etc/aliases から呼ばれる include file の
 
 	"|/usr/libexec/fml/fml.pl $DIR $LIBDIR -option" 
 
-のオプションの話のことです。
+のオプション部分(上の -option)の話のことです。
 当然デバッグの時に shell 上で手動実行する時でも同様に使えます。
 
 makefml は config.ph の中の変数を書き換えるので、通常設定をいじる時は
@@ -17,6 +16,9 @@ config.ph の中にすべての設定を書くようにして下さい。コマンドラインはデ
 
 コマンドラインは使い方(e.g. デバッグ)によってはとっても便利ですが、
 どういうものかよくわからない人は使わないで下さい。
+
+なおコマンドラインオプションの一覧は .ptr{command-line-option-index} 
+にあります。
 
 			＊＊＊注意＊＊＊
 
@@ -114,14 +116,14 @@ config.ph の後評価されるので、ロングラインオプションを使ってある値だけ
 		&DEFINE_MODE('mode');
 
 になります。なお、コマンドラインの --mode は config.ph で指定する 
-$Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外は 
-&DEFINE_MODE('mode'); を使って一箇所で集中管理するのが良いでしょう。
+$Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外では使わない
+方がいいでしょう(developer 向け)。
 
 例:
-		fml.pl --html
+		fml.pl --ctladdr
 
 
-.S	配送モードの指定に関する注意
+.S	--ctladdr 指定について (コマンド用のアドレス)
 
 現在の makefml ではすべての設定を config.ph の値を書き直すことで行ない
 ます。そのためコマンドラインオプションはいじりません。
@@ -137,55 +139,22 @@ include-ctl を呼びますが、この include-ctl の中には
 	コマンド用のアドレス宛のメールを処理するという意味を
 	fml.pl へ伝えるためのコマンドラインオプション
 
-を使っています。この --ctladdr は消さないで下さい。
+を使っています。この --ctladdr は消さないで下さい。--ctladdr ですが、
+次のような理由で使われています。もしこの ctladdr 指定がないと起動され
+たプロセスが何用なのか判定できません。
 
-makefml を使っている限りでは気にする必要はありません。場合によってはコ
-マンドラインオプションを使っている方がわかりやすい場合がありうるでしょ
-う。makefml に頼らないという人は使い易い方を選択すれば良いと思います。
+コマンド用のコマンド fmlcommand.pl を呼び出すようにしても同じことです
+が複数のファイルを保守するのは嫌なので、FML 2.1 では fml.pl を用い --
+ctladdr で挙動を変える実装にしています。
+＃これにより、backward も可能になるという理由もあります。
 
-配送のモード以外の指定に関してはコマンドラインでも config.ph どちらで
-も特に問題はないはずですので、config.ph の最後で &DEFINE_MODE() を使え
-ばいいでしょう。
-
-例：	リレー用のアドレスを用意する
-
-この場合 どっか/listname/config.ph で
-
-	&DEFINE_MODE('post=anyone');
-.k	&DEFINE_MODE('post=anyone');
-
-のように書きます。makefml を使えば対話的にこのように↑この部分を書き加
-えてくれます。この時 makefml が準備するのは
-
-	listname 	をだれでも投稿できるアドレス
-	listname-ctl 	を登録されているメンバーのためのコマンドサーバ
-
-です。もちろんリレーの場合には /etc/aliases に listname-ctl を登録せず
-listname というアドレスでの再配送だけに専念するのが良いでしょう。例え
-ば ip-connection とかです。
-
-さて --ctladdr ですが、次のような理由で使われています。
-
-   config.ph はすべての場合に常に読み込まれるファイルです。そのため 
-   makefml が作るコマンドサーバ用の include-ctl というファイルには 
-   "--ctladdr" というコマンドラインオプションがついています。もしこの 
-   ctladdr 指定がないと配送モード指定
-
-	&DEFINE_MODE('post=anyone'); 
-
-   により listname も listname-ctl も配送専用になってしまいます。そのため
-
-		--ctladdr 
-
-   で listname-ctl 宛にきたメールの場合起動する fml.pl はコマンド処理
-   に専念するという宣言を ctladdr はしているわけです。
-
-
-.S	コマンドラインオプションの一覧
-.xref	command-line-option-index
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
