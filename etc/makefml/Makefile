@@ -7,7 +7,9 @@
 # $Id$
 
 all:
+	@ echo ""
 	@ echo \"make config.ph\"	to make config.ph from ./cf
+	@ echo ""
 
 config.ph: cf
 	@ eval 'mv -f config.ph config.ph.old >/dev/null 2>&1'
