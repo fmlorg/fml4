@@ -1,4 +1,4 @@
-.C	モデレーター
+.C	モデレータ
 =E.C	Moderator
 .n	moderator
 .l	moderators
@@ -7,6 +7,9 @@
 
 この章は『ＭＬに流す前に査読をする人がいるというシステム』についてです。
 
+注: モデレータは moderator コマンドを使うためにＭＬのメンバーでないと
+    だめです。members ないし members-admin にモデレータの人の
+    アドレスを追加しておいて下さい。
 
 .S	Overview
 
