@@ -15,6 +15,7 @@
 
 .appendix
 .include postfix.wix
+.include sendmail.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

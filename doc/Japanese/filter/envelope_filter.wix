@@ -149,3 +149,23 @@ XXX "reason"はまだ実装されていません。
 Define regular expression for a field. Please see an examle below.
 XXX "reason" is not yet implemented now.
 .fi
+
+.S	警告するだけにする
+
+弾くのではなく、警告を与えるだけで投稿は許して良いという意味なんでしょ
+うか？
+
+フィルタリング機構はそういうためのものではありません。
+弾くために作られています。
+なので、むりくり HOOK を使うと(たぶん)できるようなきがします。
+
+$START_HOOK = q#
+   if ($USE_DISTRIBUTE_FILTER) {
+        &EnvelopeFilter(*e, 'distribute');
+        undef $DO_NOTHING;
+    }
+#;
+
+説明: EnvelopeFilter() の結果だけは利用するけど:-)
+      $DO_NOTHING をリセットしてしまえばひっかかってもひかからなくても
+      この後普通のＭＬプロセスになるから
