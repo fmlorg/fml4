@@ -364,8 +364,8 @@ sub mget3_SendingEntry
 	    if $debug;
 
 	&SendingBackInOrder($file, $t, $subject, $sleep, $to);
-	&mget3_unlink($r)    if $r;    # remove extracted files
-	&mget3_unlink($file) if $file;
+	&mget3_Unlink($r)    if $r;    # remove extracted files
+	&mget3_Unlink($file) if $file;
 
 	# MIME Info Desctructor;
 	undef $Envelope{'GH:Mime-Version:'};
@@ -390,7 +390,7 @@ sub mget3_SendingEntry
 }
 
 
-sub mget3_unlink
+sub mget3_Unlink
 {
     local($_) = @_;
 
@@ -398,7 +398,7 @@ sub mget3_unlink
 	next if /^\./;
 	next unless -f $_;
 
-	&Debug("mget3_unlink $_") if $debug;
+	&Debug("mget3_Unlink $_") if $debug;
 	unlink $_;
     }
 }
