@@ -84,6 +84,9 @@ clean:
 	tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] \
 	tmp/release.info* tmp/sendfilesbysplit* 
 	(chdir $(HOME)/var/simulation/var; gar queue*/*)
+	(chdir w; 	gar *~ _* proc/*~ \
+	tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] \
+	tmp/release.info* tmp/sendfilesbysplit* )
 
 
 cleanfr:
@@ -226,7 +229,8 @@ v3:
 
 sync:
 	# scp -v -p /var/tmp/distrib/src/*.pl eriko:~/.fml
-	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/*pl eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/ eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/libexec/ eriko:~/.fml/libexec
 
 test:
 	(bin/emumail.pl; echo test )|perl fml.pl $(PWD) $(PWD)/proc
