@@ -15,34 +15,61 @@
 -----------------
 .toc
 -----------------
-			
+
+.# ifdef-3.0
 .C	3.0 RELEASE と 2.2.1 RELEASE の間の差について
 =E.C	The difference between 2.2.1 and 3.0
 
-.S	アップグレードの際の注意
+現在自動登録を使っていないなら気にしなくて構いません。
 
-・「自動登録」の際の members と actives の扱いが決定的に異なります。
-・現在自動登録を使っていないなら何も変わりません。
+.S	『自動登録』を使っている場合の注意
+
+「自動登録」の際に members と actives を両方使います。
+ この点が以前と大きく異なります。
+=E
+How to handle member and actives files is different. If you do not use
+automatic registration, you feel no difference.
 
 この点が最も注意が必要です。選択肢は大きく二通りになるでしょう。
 
-1. 3.0 の設定へ移行することが前提
+1. 3.0 の設定へ移行することが前提 (auto_subscribeを使う)
+=E
+1. from 2.x to 3.0 (use "auto_subscribe" handler)
 
-各MLのHOME directoryで members を actives にコピーすることが必要です。
+3.0 の自動登録では auto_regist の代わりに auto_subscribe というハンド
+ラを使います。このハンドラは actives と members 両方を使います。
+=E
+fml 3.0 automatic registration uses "auto_subscribe" handler
+irrespective of "auto_regist". When you use "auto_subscribe", you
+should copy members to actives before you change "auto_regist" to
+"auto_subscribe".
+
+auto_regist から auto_subscribe へ切替える前に 各MLのHOME directoryで 
+members を actives にコピーすることが必要です。
+=E
+Firstly copy members to actives. You have only to do this.
 
 	% cp members actives
 
-これだけでいいです。
+この後 auto_subscribe へ切替えて下さい。
 
-2. fml 1.x 2.x の設定ファイルをそのまま使う。
+
+2. auto_regist を使い続ける。
+   つまり fml 1.x 2.x の設定ファイルをそのまま使う。
    設定は何もいじらないという自信があるならそのままで構わない。
-
+=E
+2. use "auto_regist" in fml 3.0. 
+   If you use old (fml 1.x 2.x) configuration file and you continue to
+   use 2.x configuration, you can use it.
 
 注意: その時はそうおもっても後で変更をする際にはまる可能性大なので
       案2はあまりお勧めできません。
+=E
+Caution: but I do not recommend caes 2 since your policy will change.
 
 
 .S	変更点について
+=E.S	Changes from 2.2.1 to 3.0
 
 ○ 自動登録の際のファイルの扱いについて
    自動か否かを問わず常に members と actives 両方を使う
@@ -59,6 +86,7 @@ $REJECT_POST_HANDLER, $REJECT_COMMAND_HANDLERには新しいハンドラー名を
 させることができる。よって、3.0をインストールしても以前の config.ph を
 そのまま使えばmembers だけを使う振舞いになる点に注意されたい。
 
+.# endif-3.0
 
 ○ 返されるメッセージの日本語化/英語化
 =E
@@ -71,6 +99,7 @@ $MESSAGE_LANGUAGE で指定された言語でメッセージを返す$MESSAGE_LANGUAGE
 return message in language defined as $MESSAGE_LANGUAGE.
 The default of $MESSAGE_LANGUAGE is $LANGUAGE. 
 $LANGUAGE is defined in installation.
+
 
 
 .C	2.2.1 RELEASE と 2.2 RELEASE の間の差について

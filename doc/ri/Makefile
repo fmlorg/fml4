@@ -15,3 +15,6 @@ scan:
 
 clean:
 	gar *~
+
+UPGRADE-3.0.wix: UPGRADE.wix
+	../../distrib/doc/bin/make-upgrade.sh UPGRADE.wix > UPGRADE-3.0.wix
