@@ -453,7 +453,7 @@ sub Command
 
 	if ($PASSWORD && $PASSWORD_VRFY) {
 	    if ($PASSWORD eq $PASSWORD_VRFY) {
-		&Control($ML, "html_passwd", $MAIL_ADDR, $PASSWORD);
+		&Control($ML, $PROC, $CGI_ADMIN_USER || $MAIL_ADDR, $PASSWORD);
 
 		&P("</PRE>");
 		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${saved_proc}.html", 1);
