@@ -71,11 +71,11 @@ Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
 
 	--tag='( )'
 
-		Subject: (Elena:100)
+		Subject: (Elena 100)
 
 	--tag='[ ]'
 
-		Subject: [Elena:100]
+		Subject: [Elena 100]
 
 
 	--tag='[,]'
