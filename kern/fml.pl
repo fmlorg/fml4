@@ -1291,7 +1291,7 @@ sub DoMailListMemberP
 	    &Debug("   DoMailListMemberP(\n\t$addr\n\tin $file);\n");
 	}
 
-	if (-f $file && &CheckMember($addr, $file)) {
+	if (-f $file && &Lookup($addr, $file)) {
 	    &Debug("+++Hit: $addr in $file") if $debug;
 	    $SubstiteForMemberListP = 0;
 	    return $file;
@@ -1303,6 +1303,8 @@ sub DoMailListMemberP
 
 sub MailListMemberP { return &DoMailListMemberP(@_, 'm');}
 sub MailListActiveP { return &DoMailListMemberP(@_, 'a');}
+
+sub MailListAdminMemberP { &Lookup($_[0], $ADMIN_MEMBER_LIST);}
 
 sub NonAutoRegistrableP { ! &AutoRegistrableP;}
 sub AutoRegistrableP
@@ -1347,8 +1349,9 @@ sub IgnoreHandler
     &Warn("Ignored NOT MEMBER article from $From_address $ML_FN", &WholeMail);
 }
 
-# CheckMember(address, file)
-# return 1 if a given address is authenticated as member's
+# Lookup(key, file); return 1 if the "key" is found in the "file".
+# e.g. Lookup(addr, member-list-file)
+# return 1 if a given address is authenticated as member's (found in the file).
 #
 # performance test example 1 (100 times for 158 entries == 15800)
 # fastest case
@@ -1359,9 +1362,10 @@ sub IgnoreHandler
 # new 9.050u  0.190s 0:09.90 93.3% 74+36k 0+1io 0pf+0w
 #
 # the actual performance is the average between values above 
-# but the new version is stable performance
+# but the new version provides stable performance.
 #
-sub CheckMember
+sub CheckMember { &Lookup(@_);}
+sub Lookup
 {
     local($address, $file) = @_;
     local($addr, $has_special_char, $auto_registrable);
@@ -2065,7 +2069,7 @@ sub DupMessageIdP
 
     # 1. scan current and 
     if (-f $LOG_MESSAGE_ID) {
-	$status = &CheckMember($mid, $LOG_MESSAGE_ID);
+	$status = &Lookup($mid, $LOG_MESSAGE_ID);
     }
 
     # 2. scan all available caches
@@ -2074,7 +2078,7 @@ sub DupMessageIdP
 	    last; # end if non null $status is returned.
 	}
 	elsif (-f "$LOG_MESSAGE_ID.$i") {
-	    $status = &CheckMember($mid, "$LOG_MESSAGE_ID.$i");
+	    $status = &Lookup($mid, "$LOG_MESSAGE_ID.$i");
 	}
     }
 
