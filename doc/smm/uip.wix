@@ -3,7 +3,8 @@
 .l	uip
 
 ここでは bin/ 以下と contrib/Utilities/ 以下の階層で提供しているプログ
-ラムについて解説します。
+ラムについて解説します。あったら便利かもしれないというプログラムです。
+使い方について理解している必要があるわけではありません。
 =E
 In this chapter we describe utility programs under bin/ and
 contrib/Utilities/.
@@ -662,10 +663,10 @@ check this code on mule-2.3.
 れます(mule-2.3で確認)。
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

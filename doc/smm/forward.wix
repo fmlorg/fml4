@@ -1,17 +1,21 @@
-.C	~/.forward でＭＬ
+.C	~/.forwardを利用したＭＬ
 =E.C	~/.forward and ML
 .l	.forward
 .k	.forward
 .k	~/.forward
 .k	$HOME/.forward
 
+
 /etc/aliases をいじれないユーザや密かにＭＬを実行する:-)ユーザ向けの話
-です。
+です。普通これを使うことはありません。またこのトリックを使わざるをえな
+い状況は使用しているMTAに強く依存します。何よりも優先されることはMTAの
+マニュアルをよむことです。
 =E
 You can configure .forward to run ML in secret in the following
 way:-).  It is same as :include: method except for that you need to
 create accounts and write their ~/.forward for one another addresses
 in set up ML's.
+
 
 .S	.forward での方法の概論
 =E.S	Overview to use .forward 
@@ -127,11 +131,16 @@ run by the filter.
 あなたのメールスプールいきということです。
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+
+
+
+
+

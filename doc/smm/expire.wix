@@ -3,6 +3,9 @@
 .l	expire
 .k	expire
 
+この章は「古いファイルを自動的に消す」「ローテーションしながら古いファ
+イルは消えていく」動作について解説します。
+
 .S	Introduction
 
 Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
@@ -322,10 +325,10 @@ The unit is bytes. You can use 10K (10 Kiro bytes) and 1M (1 Mega
 bytes) syntaxes.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -1,5 +1,5 @@
-.S	Cron (FML original bin/cron.pl)
-=E.S	Cron (FML original bin/cron.pl)
+.S	Cron (FML Vixie cron compatible program, bin/cron.pl)
+=E.S	Cron (FML Vixie cron compatible program, bin/cron.pl)
 .l	cron
 .l	cron.pl
 .k	cron.pl
@@ -7,38 +7,59 @@
 .k	etc/crontab
 .k	$DIR/crontab
 
-システムにユーザごとに定義できる cron がない場合に使います。まずはユー
-ザごとに定義できる cron がないかどうかを調べて下さい。まずはマニュアル
-を引いてみて下さい。man cron, man crontab を試してみることからです。
+○ cron.pl って何？
+cron.pl(例: /usr/local/fml/bin/cron.pl)はシステムにユーザごとに定義で
+きる cron がない場合に使います。まずはユーザごとに定義できる cron がな
+いかどうかを調べて下さい。まずはマニュアルを引いてみて下さい。
+	man cron
+	man crontab
+を試してみるのが最初です。
 =E
 The present OS may have a cron for users. Please check it in the
 first.  e.g. man cron, man crontab If only root can set up OS's cron
 so a general user cannot control cron, you can use FML cron (clone of
 4.4BSD cron).
 
-動きとしては system の cron と同じ働きをします。つまり１分に一回おきて 
-crontab をみて実行します。
+○ どう動くの？
+動きとしてはOS附属の cron と同じです。つまり１分に一回起きて今やるべき
+ことがあるかどうかを確認するためにcrontabを見ます。そしてするべきこと
+があればそれを実行します。
 =E
 FML cron sleeps and runs once a minute.  If the crontab entry has a
 job now, cron run it.  It is same as UNIX cron daemon.
 
-管理者が手で起動してもいいし、fml.pl が cron.pl を走らせてもよいです。
-注意として fml.pl から cron.pl を走らせると各ＭＬごとに一つ走ります。
-複数のＭＬがある場合は一つの cron.pl で複数のＭＬを担当するような
-設定ファイルを書くのが良いです。
+○ cron.pl は誰がいつ走らせるか？
+管理者が手で起動してもいいし、fml.pl が cron.pl を走らせてるようにして
+もよいです。注意として fml.pl から cron.pl を走らせると各ＭＬごとに一
+つのcronが走って無駄です。複数のＭＬがある場合は一つの cron.pl で複数
+のＭＬを担当するような設定ファイルを書くのが良いです。
 =E
 You can run cron manually. fml.pl can run cron.pl automatically. If
 fml.pl automatically runs cron.pl, it runs each cron.pl for each
 ML. It is of no use. It is enough that one cron.pl for one user.
 
 fml.pl から起動すると何回も cron.pl を起動しますが、複数は走りません。
-各ＭＬごとに一つです。$CRON_PIDFILE ($DIR/var/run/cron.pid)というファ
-イルにプロセス番号を保存し一意性を保証しています。
+最初の一個以外は自殺します。各ＭＬごとに一つです。$CRON_PIDFILE
+($DIR/var/run/cron.pid)というファイルにプロセス番号を保存し一意性を保
+証しています。
 =E
 fml.pl runs only one cron.pl, not plural for one ML. fml.pl checks
 $CRON_PIDFILE ($DIR/var/run/cron.pid) to ensure only one cron.pl
 running.
 
+○ cron.plは一度起動するとずっと走っている？
+
+理想的としてはそうです。が、cron.pl が知らない間に落ちてるかもしれない？
+という可能性もあります。システムの cron なら大丈夫ですが、マシンがリブー
+トしたら当然FMLのcronは止まったままになってしまいます。そのため何らか
+の方法で定期的に起動しなおしてやる必要があります。
+=E
+cron.pl may be down. OS does not run cron.pl automatically, so 
+digest delivery does not run until you are aware of it. 
+For it, you can set up fml.pl runs cron.pl when a mail comes in.
+
+
+○ 注意
 また長く走り過ぎておかしくなる場合も考慮してデフォールトでは24時間で次
 の cron.pl を起動しなおします。これは予防策であって必ずしもする必要は
 ありません。-n オプションをつけるとずっと走り続けるようになります。
@@ -46,6 +67,8 @@ running.
 In default cron.pl itself exits, and new cron.pl runs to avoid strange
 behavior when a process runs long long time.
 However -n option enables infinite running.
+
+○ コマンドシンタックス
 
 SYNOPSIS
 	cron.pl [-a] [-d] [-b43] [-fcrontab] [-bd] $DIR [$LIBDIR]
@@ -98,6 +121,8 @@ cron.pl becomes daemon by itself. In default
 4.4BSD には Paul Vixie の書いた各ユーザごとに cron を定義できる cron 
 が入っています。これがあるなら cron.pl は要らないです。詳しくはシステ
 ムのマニュアルを見て下さい。
+＃全然関係ないけど vixie enterprise にftp.NetBSD.ORGとかあります。
+＃Vixie偉い
 =E
 4.4BSD has Vixie Cron, so you can use it for yourself. Please use it
 on 4.4BSD. Also firstly you should check your OS's manuals. 
@@ -109,17 +134,18 @@ crontab (5) - tables for driving cron
 .~q
 
 古いOSにはありません。しかし元々入っていなくても管理者の人がインストー
-ルしているかもしれません。探してみる価値はあります。
+ルしているかもしれません。探してみる価値/聞いてみる価値はあります。
 =E
 An old OS has no such cron. However an administrator installed Vixie
 cron. It is of value to trek your system:-)
 
-cron.pl はあくまでもそういう cron を提供してくれていないOSでまとめ送り
-をしたい場合のためのものです。
+FMLのcron.plはあくまでも『そういう cron を提供してくれていないOS』でま
+とめ送りを支援するためのものです。こういうサービスはOSが提供してくれる
+のが本筋というべきでしょう。
 =E
 cron.pl is a clone for such an old OS.
 
-.S	cron.plのインストール
+.S	cron.plを自動的に起動するようにするためには？
 =E.S	How To Install cron.pl
 
 システムが定期的に何かをしてくれないので、cron.pl をなんとかして(疑似
@@ -179,55 +205,31 @@ cron.pid は cron.pl の pid を記録するファイルです(/var/run/cron.pidに
 相当するもの)。
 =E
 cron.pid ($DIR/var/run/cron.pid) corresponds to /var/run/cron.pid but
-exists for each ML.
+exists for each ML under FML.
 
-crontab は システムの /etc/crontab に相当するものです。makefml newml 
-した時に各ＭＬの HOME (config.phのある場所)には crontab という見本
-(4.4BSD形式) が作られます。4.4BSD 形式ではこれを使えばまとめ送りの設定
-ができます。
+crontab は システムの /var/cron/tabs/$USER (4.3BSDの/etc/crontab)に相
+当するものです。makefml newml した時に各ＭＬの HOME (config.phのある場
+所)には crontab という見本(4.4BSD形式) が作られます。4.4BSD 形式ではこ
+れを使えばまとめ送りの設定ができます。
 =E
 When you run "makefml newml", FML sets up each crontab for each ML.
 It is an example for Vixie cron.  You can use it on 4.4BSD and under
 Vixie cron.
 
+[Example]
+	% makefml newml elena
+	  ...
+	% cd /var/spool/ml/elena
+	% crontab crontab
+
 ＊＊＊注意＊＊＊
 cron.pl は 4.4BSD FORMAT を理解します。4.3BSDの形式ではありません
 
-.S	cron.pl を使う際の注意
-=E.S	Attentions to cron.pl use
-
-上述のように cron.pl を sendmail が exec して実行するというのはcrontab 
-をユーザー毎に設定できない OS への対応です。できるなら user ごとに 
-crontab を設定できるほうがいいとおもうんですが世の中そういう OS ばっか
-りじゃないわけで困ってしまうわけです。
-=E
-You should use system cron if possible, cron.pl is a clone for old
-OS's.
-
-例えば、24時間でおきかえるっていうのも安全策なだけで別に1週間走らせて
-もOKです(-n option)。つまり無理に sendmail にcron.pl を走らせさせなく
-ても、ML管理者が login したときだけ cron.pl をいれかえる(実行すれば勝
-手に入れ替わる)のでも大丈夫です。
-
-ただ cron.pl が知らない間に落ちてるかもしれない？という可能性もありま
-す。machine が reboot したら当然落ちています。
-システムの cron は /etc/rc が実行するので、reboot してもいいんですが…
-cron.pl の場合はもしマシンがおちたらそれに気づくまでまとめおくりが実行
-されません。
-=E
-cron.pl may be down. OS does not run cron.pl automatically, so 
-digest delivery does not run until you are aware of it. 
-For it, you can set up fml.pl runs cron.pl when a mail comes in.
-
-そのため、fml.pl が cron.pl をたちあげなおすという技も使えます。
-それは HOOK で実現することができます($FML_EXIT_PROG)。
-.k	$FML_EXIT_PROG
-
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

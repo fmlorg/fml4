@@ -1,9 +1,15 @@
 .C	MAIL to IRC (Internet Relay Chat)
 .l	mail2irc
 
-何の役に立つのか分からないのがおしゃれ(爆笑)
+何の役に立つのか分からないのがおしゃれ(謎:-)まぁあるとすれば
 =E
-Hmm ... meaningless must be nice :D
+Hmm ... meaningless must be nice :D one idea is
+
+-----------------------------------------------------
+	ML -> mail2irc -> irc server
+	ML <- pirc <-----
+?
+-----------------------------------------------------
 
 .S	IRCへのリレー
 =E.S	Relay to IRC
@@ -13,6 +19,7 @@ IRCへ入って、書いて、抜けるという一撃離脱の処理をするルーチンがありま
 =E
 Mail2irc enters an IRC server, write and get out from it:).
 
+.if LANG == JAPANESE
 .q
 fml.pl -> 処理
 	
@@ -25,6 +32,9 @@ fml.pl -> 処理
 
 	IRCから抜ける 	
 .~q
+.fi
+.if LANG == ENGLISH
+.fi
 
 .S	変数
 =E.S	Variables
@@ -105,10 +115,10 @@ tail -f 何かのログファイル | perl stdin2irc.pl -f 設定ファイル
 where a logfile is /var/log/messages and so on. Is it useful?:D
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

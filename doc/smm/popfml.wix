@@ -5,6 +5,11 @@
 .k	POP3
 .k	FML based on POP3
 
+
+この章はPOPを使ったＭＬのエミュレーションについて説明します。UNIX上で
+これを使うことはまずありません。NTの上ではこれを利用しています。
+
+
 .S	Introduction
 
 POP3 を使う場合は設定手順は3段階から成ります。
@@ -275,10 +280,10 @@ concern it.
 expire limit of queue spool.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -1,10 +1,8 @@
 .C	References (参考文献)
 =E.C	References
 
-.S	参考文献(本)
-=E.S	Reference Books
+.S	Books
 .l	books
-.k	参考文献:本
 
 S. J. Leffler, K. Bostic, M. J. Karels and J. S. Quarterman, 
 "The design and implementation of the 4.4BSD UNIX Operating System"
@@ -40,150 +38,12 @@ perl texinfo in Japanee --- version 4.0.19.2
 .url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl/perl.texinfo-j4.0.19.2.tar.gz
 
 
-.S	参考文献(RFC)
-=E.S	References: RFC
-.k	参考文献:RFC
-
-rfc822				headers of mail
-rfc821				smtp
-
-rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
-
-rfc934				Proposed Standard for Message Encapsulation
-rfc1153				digest format
-
-rfc1425-1428			ESMTP
-
-1495  PS  H. Alvestrand, S. Kille, R. Miles, M. Rose, S. Thompson, "Mapping  
-           between X.400 and RFC-822 Message Bodies", 08/26/1993. (Pages=15) 
-           (Format=.txt) (Updates RFC1327) 
-
-1870  S   J. Klensin, N. Freed, K. Moore, "SMTP Service Extension for Message 
-           Size Declaration", 11/06/1995. (Pages=9) (Format=.txt) 
-           (Obsoletes  RFC1653) (STD 10) 
-
-1653  DS  J. Klensin, N. Freed, K. Moore, "SMTP Service Extension for Message 
-           Size Declaration", 07/18/1994. (Pages=8) (Format=.txt) 
-           (Obsoletes  RFC1427) (Obsoleted by RFC1870) 
-
-1652  DS  J. Klensin, N. Freed, M. Rose, E. Stefferud, D. Crocker, "SMTP  
-           Service Extension for 8bit-MIMEtransport", 07/18/1994. (Pages=6) 
-           (Format=.txt) (Obsoletes RFC1426) 
-
-1651  DS  J. Klensin, N. Freed, M. Rose, E. Stefferud, D. Crocker, "SMTP  
-           Service Extensions", 07/18/1994. (Pages=11) (Format=.txt) 
-           (Obsoletes RFC1425) (Obsoleted by RFC1869) 
-
-2033 Local Mail Transfer Protocol. J. Myers. October 1996. (Format:
-     TXT=14711 bytes) (Status: INFORMATIONAL)
-
-2034 SMTP Service Extension for Returning Enhanced Error Codes. N.
-     Freed. October 1996. (Format: TXT=10460 bytes) (Status: PROPOSED
-     STANDARD)
-
-2049  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
-           (MIME) Part Five:  Conformance Criteria and Examples", 
-           12/02/1996.  (Pages=24) (Format=.txt) (Obsoletes RFC1521) 
-
-2048  BC  N. Freed, J. Klensin, J. Postel, "Multipurpose Internet Mail  
-           Extensions (MIME) Part Four:  Registration Procedures", 
-           01/28/1997. (Pages=21) (Format=.txt) (Obsoletes RFC1590) 
-
-2047  DS  K. Moore, "MIME (Multipurpose Internet Mail Extensions) Part Three: 
-           Message Header Extensions for Non-ASCII Text", 12/02/1996.  
-           (Pages=15) (Format=.txt) (Obsoletes RFC1522) 
-
-2046  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
-           (MIME) Part Two:  Media Types", 12/02/1996. (Pages=44) 
-           (Format=.txt) (Obsoletes RFC1521) 
-
-2045  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
-           (MIME) Part One:  Format of Internet Message Bodies", 12/02/1996.  
-           (Pages=31) (Format=.txt) (Obsoletes RFC1521) 
-
-2184 MIME Parameter Value and Encoded Word Extensions: Character Sets,
-     Languages, and Continuations. N. Freed, K. Moore. August 1997.
-     (Format: TXT=17635 bytes) (Obsoletes RFC2184) (Obsoleted by RFC2184,
-     RFC2231) (Updates RFC2045, RFC2047, RFC2183) (Status: PROPOSED
-     STANDARD)
-
-2231 MIME Parameter Value and Encoded Word Extensions: Character Sets,
-     Languages, and Continuations. N. Freed, K. Moore. November 1997.
-     (Format: TXT=19280 bytes) (Obsoletes RFC2184) (Updates RFC2045,
-     RFC2047 RFC2183) (Status: PROPOSED STANDARD)
-
-
-[IP Address]
-
-2050  BC  K. Hubbard, M. Kosters, D. Conrad, D. Karrenberg, J. Postel,  , 
-           "INTERNET REGISTRY IP ALLOCATION GUIDELINES", 11/05/1996.  
-           (Pages=13) (Format=.txt) (Obsoletes RFC1466) 
-
-[Glossary]
-
-1594  I   A. Marine, J. Reynolds, G. Malkin, "FYI on Questions and Answer  
-           Answers to Commonly asked ``New Internet User'' Questions", 
-           03/11/1994. (Pages=44) (Format=.txt) (FYI 4) (Obsoletes RFC1325) 
-
-以下RFCのインターネットスタンダード集より関係ありそうな部分のみの抜粋
-＃ 96/9/14記
-=E
-(checked on 96/09/14)
-
-0001 INTERNET OFFICIAL PROTOCOL STANDARDS. J. Postel, Editor. February
-     1997. (Format: TXT=121356 bytes) (Obsoletes RFC1920, 1880, 1800,
-     1780, 1720, 1610, 1600, 1540, 1500, 1410, 1360, 1280, 1250, 1200,
-     1140, 1130, 1100, 1083, RFC1720, RFC1780, RFC1800) (Also RFC2000)
-
-0010 SMTP Service Extensions. J. Klensin, N. Freed, M. Rose, E.
-     Stefferud & D. Crocker. November 1995. (Format: TXT=23299 bytes)
-     (Obsoletes RFC1651) (Also RFC821, RFC1869)
-
-0011 SMTP Service Extension for Message Size Declaration. J. Klensin,
-     N. Freed, & K. Moore. November 1995. (Format: TXT=18226 bytes)
-     (Obsoletes RFC1653) (Also RFC822, RFC1870)
-
-0013 Domain Name System. P. Mockapetris. November 1987. (Format:
-     TXT=248726 bytes) (Also RFC1034, RFC1035)
-
-0014 Mail Routing and the Domain System. C. Partridge. January 1986.
-     (Format: TXT=18182 bytes) (Also RFC0974)
-
-0053 Post Office Protocol - Version 3. J. Myers & M. Rose. May 1996.
-     (Format: TXT=47018 bytes) (Obsoletes RFC1725) (Also RFC1939)
-
-.S	Important RFCs for electronic mail
-.k	Important RFCs for electronic mail
-
-	RFC821	SMTP protocol
-	RFC822	Mail header format
-	RFC974	MX routing
-	RFC976	UUCP mail format
-	RFC1123	Host requirements (modifies 821, 822, and 974)
-	RFC1413	Identification server
-	RFC1869	SMTP Service Extensions (ESMTP spec)
-	RFC1652	SMTP Service Extension for 8bit-MIMEtransport
-	RFC1870	SMTP Service Extension for Message Size Declaration
-	RFC1521	MIME: Multipurpose Internet Mail Extensions
-	RFC1344	Implications of MIME for Internet Mail Gateways
-	RFC1428	Transition of Internet Mail from Just-Send-8 to
-		8-bit SMTP/MIME
-	RFC1891	SMTP Service Extension for Delivery Status Notifications
-	RFC1892	Multipart/Report Content Type for the Reporting of
-		Mail System Administrative Messages
-	RFC1893	Enhanced Mail System Status Codes
-	RFC1894	An Extensible Message Format for Delivery Status
-		Notifications
-	RFC1985	SMTP Service Extension for Remote Message Queue Starting
-
-その他の関連もの：
-
-	RFC987	Mapping between RFC822 and X.400
-	RFC1049	Content-Type header field (extension to RFC822)
-
 .S	fj.sourcesに過去リリースした記事のMessage-IDリスト
 =E.S	fj.sources Message-ID Lists (posted in the past)
 .k	fj.sources
+
+Release Version 2.2
+Message-ID: <FUKACHAN.98Sep29002731@beth.sapporo.iij.ad.jp>
 
 Release Version 2.1
 Message-ID: <FUKACHAN.97Aug18033427@beth.sapporo.iij.ad.jp>
@@ -252,11 +112,12 @@ Ken'ichi Fukamachi,
 =E
 though it lacks figures.
 
+
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -9,13 +9,44 @@
 あくまで現在確認できている部分なので、このほかにOS依存した不具合・不動
 作・その対策等を発見された方はご一報下さい。
 
-.S	4.4BSD
-.k	4.4BSD
+.S	4.4BSD derived systems
+.k	4.4BSD derived systems
+
+.S	NetBSD
 
 NetBSD 1.x はターゲットマシンなので、なにもなし。BSDI 2.1, 3.0 では動
 くのを確認済み。他の 4.4 BSD ベースのOS については不明だけどきっと動く
 でしょう。
 =E 4.4BSD is the target machine. Nothing annoys you.
+
+.S	FreeBSD
+
+FreeBSDのパスワードについてはcrypt or md5どちらを使う？問題があります
+がcurrentはどちらでも動くようになっているはずです。
+
+.S	OpenBSD
+
+NetBSDの親戚だから大丈夫？
+
+
+.S	BSD/OS 3.0, 4.0
+
+struct sockaddrがBSD traditionalとは違い拡張されている。インストーラが
+自動半別できるはず。3.0以前に作成したＭＬを3.0へもってくるとはまる可能
+性があります。その時は
+
+移った先でSTRUCT_SOCKADDRという文字列をMLのホームの設定ファイル中で探
+してみて手で置き換える
+
+ＭＬを移った先で作り直して、手で差分だけ反映させる。cf ファイルだけあ
+れば自動でできるはず。cfファイルだけもってきたら STRUCT_SOCKADDR 行を
+消して make config.ph すると自動調整されるとおもいます。
+
+
+.S	BSD/OS 3.0 以前
+
+何もしなくても動くような気がします。
+
 
 .S	4.3BSD
 .k	4.3BSD
@@ -503,10 +534,10 @@ emulation? Now I believe flock(2) works well also on solaris.
 
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

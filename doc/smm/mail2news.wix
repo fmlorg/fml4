@@ -29,7 +29,7 @@ libsmtp.pl の入ってる場所)へ入れます。
 Install contrib/mail2news/libnntp.pl to the search path of perl
 include path or FML installed directory (e.g. fml.pl lib*pl). 
 
-.S	Mail2news の設定
+.S	Mail2newsの変数
 =E.S	Mail2news configurations
 
 まずこのライブラリを fml.pl の最後に実行するように組み込みます。
@@ -108,10 +108,10 @@ Please define following variables:
 	Hash of contents of overwritten fields. e.g. Organization?
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -128,14 +128,36 @@ When "unsubscribe" request comes in, FML sends back a confirmation
 request to verify the will. See .ptr{autoregist} and speculate the
 action.
 
+.S	chaddr
+
+1999/10/04
+   chaddr: check the new address and the current address similarity
+	For example, unless this, sub-domain change must be an error.
+	e.g. chaddr foo@a.b.x.y.z foo@123.b.x.y.z
+	So, we gains the ADDR_CHECK_MAX if we encounters this case.
+	And we need SaveACL and RetACL to get back to the
+	original state after this function calling(like Context Switch).
+
+	chaddr でサブドメインだけを変更しようとすると通常はエラーになる
+	というのは変更先のアドレスがすでにメンバーリストにあるので。
+	そのため
+
+		chaddr foo@a.b.x.y.z foo@123.b.x.y.z
+
+	のような時は、アドレスの似ている度合いを見て一時的に
+	$ADDR_CHECK_MAX の値を上げることで正しく動作させる。
+	これに伴い &SaveACL, &RetACL でこの関数呼び出しを
+	保護する必要がある。HOOkなどで呼び出してる人は注意。
+
+
 .# 自動登録
 .include autoregist.wix
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

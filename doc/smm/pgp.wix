@@ -6,18 +6,23 @@
 .S	PGP (Pretty Good Privacy)
 .l	pgp
 
-注意: 以下では公開鍵暗合やPGPについては既知のものとしています。
-PGP 2.6.3ui を使っています。PGP 5 には対応していません。
-PGP/MIME なども考慮していません。
+注意: 
+○ 以下では公開鍵暗合やPGPについては既知のものとしています。
+○ PGP 2.6.3uiを使っています。PGP 5には対応していません。PGP/MIMEや
+OpenPGPなども考慮していません(次世代もの乱立状態の間のあるものはもちょっ
+と静観)。でもそれ用のコードを書いた人は是非ください:-)
 =E
-Attention: I assume you know PGP well. I checked a combination of FML
-and PGP 2.6.3ui but not PGP 5. Also I do not consider PGP/MIME.
+Caution:
+I assume you know PGP well. I checked a combination of FML and PGP
+2.6.3ui but not PGP 5. Also I do not consider PGP/MIME, OpenBGP,
+etc....
 
-公開鍵暗合の代表的な応用例。
-PGP自体についてはここでは解説しませんが、例えば参考文献としては
+公開鍵暗合の代表的な応用例PGP自体についてはここでは解説しません。参考
+文献としては例えば
 
 	O'Reilly の PGP
-	MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？) 
+	MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？)
+
 
 .S	PGP での認証に基づくリモート管理
 =E.S	PGP Authenticated Remote Administration
@@ -226,10 +231,10 @@ Example:
 	admin pgp -kvv
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

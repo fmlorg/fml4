@@ -238,6 +238,10 @@ they ignore In-Reply-To: and References: fields.
 このように両方のファイルが作られ別の階層が形成されるので、見る人にはどっ
 ちか好きな方をたどってみてもらえば良いでしょう。
 
+$HTML_INDENT_STYLE (default "UL")はスレッドを作る際に使うHTMLのスタイ
+ル?です。現在あるスタイルは『文法<UL>を段をずらすために利用するか？』
+か否か？だけです。
+
 $HTML_THREAD_REF_TYPE は依存関係の作り方のタイプです。デフォールトでは
 References: In-Reply-To: のすべてのリファレンスへリンクをはります。た
 とえ thread.html の中で重複していてもです。リンクは一つだけを選びたい
@@ -553,10 +557,10 @@ An example of functions is bin/geturl.pl
 .xref bin/geturl.pl
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -1,23 +1,34 @@
-.C	WHOIS データベースとサーバ
+.C	WHOIS データベース
 =E.C	Whois Database
 .k	whois 
 .l	whois
 .xref	whois-security
 
+whoisはMLローカルに持っているデータベースへのアクセスのことを指してい
+ます。が、本もの?のwhoisサーバへリレーすることなどもオプションとして可
+能です。コマンドは"whois", "iam", "who"です。コマンドについてはHELPファ
+イル参照。
+=E
+"whois" is FMl local database access method. It is a series of
+commands e.g. "whois", "iam", "who". Please see help file for the
+usage.
+
+.S	Introduction
+
 FML の whois コマンドは
 =E
 "whois" command of FML provides both local data access
 (var/db/whoisdb) and tcp/ip based relay to whois servers at other
-hosts. The data format is plain text not usual DB such as Berkeley DB. 
-"-h host" option makes FML to relay the query to the host whois. If
-without -h option, FML uses the local database.
+hosts. The data format of local database is plain text not usual DB
+such as Berkeley DB. "-h host" option makes FML relay the query to the
+host whois. If without -h option, FML uses the local database.
 
-	本物の whois server とプロセス間通信して内容を送り返す
-	ＭＬローカルに持っているデータベースへのアクセス
+1. 本物の whois server とプロセス間通信して内容を送り返す
+2. ＭＬローカルに持っているデータベースへのアクセス
 
-の両方を行ないます。切替えはキーワードに -h host があればプロセス間通
-信、そうでないならローカルなデータベース (var/db/whoisdb)を使います。
-よって whois サーバをあげる必要はありません。
+の両方を行ないます。切替えはキーワードに -h host があれば 1、そうでな
+いなら 2 です。ローカルなデータベースはvar/db/whoisdbです。よって 
+whois サーバをあげる必要はありません。
 
 .S	Whois コマンド
 =E.S	Whois command
@@ -51,11 +62,11 @@ Example 2: query fukachan to whois of the host
 
    % echo "whois -h host fukachan" | Mail Elena-ctl@phys.titech.ac.jp
 
-.S	Whois のカスタマイズすべき変数
-=E.S	Whois Customizing Variables
+.S	Whois の変数
+=E.S	Whois Variables
 .l	$DEFAULT_WHOIS_SERVER
 
-	$DEFAULT_WHOIS_SERVER = "localhost";
+	$DEFAULT_WHOIS_SERVER (default "localhost")
 .k	$DEFAULT_WHOIS_SERVER
 
 で デフォールトの whois サーバを変更できます。コマンドの -h オプション
@@ -64,10 +75,10 @@ Example 2: query fukachan to whois of the host
 This variable is the default whois sever. However without -h option is
 local database search, so the default of whois server is of no mean.
 
-	$WHOIS_DB
+	$WHOIS_DB (default "$FP_VARLOG_DIR/whoisdb")
 .k	$WHOIS_DB
 
-ローカルにもっているデータベースです。デフォールトは "$FP_VARLOG_DIR/whoisdb" 
+ローカルにもっているデータベースです。
 =E
 local database file (default $FP_VARLOG_DIR/whoisdb).
 
@@ -85,7 +96,7 @@ local database file (default $FP_VARLOG_DIR/whoisdb).
 =E.S	Whois And Japanese Code Translation
 .k	$WHOIS_JCODE_P
 
-	$WHOIS_JCODE_P
+	$WHOIS_JCODE_P	(default 0)
 
 をセットすると日本語変換をしてから答えを返します。これが toggle flag 
 として実装されているのは変な答えを変換しようとして落ちたりすることもあ
@@ -95,10 +106,10 @@ local database file (default $FP_VARLOG_DIR/whoisdb).
 using jcode to translate the result to JIS. Default is 0 (do not translate).
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

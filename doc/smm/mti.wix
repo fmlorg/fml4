@@ -2,6 +2,12 @@
 .l	mti
 .l	MTI
 
+fmlはメールトラフィックの監視をし、バースト状態になったらメールの拒否
+をするなどの処理をします。当然さまざまなトレードオフがあります。デフォー
+ルトは「使わない」状態になっています。しかしこの機能をONにしておくこと
+を推奨しています。
+
+
 .S	How to
 
 てっとりばやいカスタマイズを最初にいっておくと
@@ -450,10 +456,10 @@ OSに依存する。各自マニュアルを参考にe.g. DB_File, NDBM_File, ...
 use "tie" function in MTI sub system.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

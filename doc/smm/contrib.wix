@@ -13,7 +13,7 @@ Here is a list of contrib
 MIME				
 cwhois				(.ptr{cwhois})
 ftpmail				(.ptr{ftp})
-lexical				(.ptr{aucea}, .ptr{fred})
+lexical				
 localhack
 localhack/release-1		contrib for FML release-1
 localhack/release-1/mnews	mnews ML
@@ -40,10 +40,10 @@ www-utils
 .include traffic.wix
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -3,7 +3,17 @@
 .k	WIX Language
 .xref	bin/fwix.pl
 
-   "WIX" == "With Index and X-reference"
+"WIX" == "With Index and X-reference"
+
+WIX言語はFMLのドキュメンテーション言語です。
+plaintext,html,nroff,texinfoをどう時に生成するという目標のために作られ
+ました。が、plaintext,htmlにしか対応していません。ドキュメントを書く人
+以外には無関係です。僕は全部これを利用して書いていますが…
+
+言語的には手抜をしているNROFFのような感じです。
+注意: ドキュメントへのパッチを無理にWIXで書く必要はないです。
+      書いた人は今だかつていませんが…;)
+
 
 .S	WIX Language Introduction
 
@@ -242,10 +252,10 @@ which is translated to a <PRE> ... </PRE> block. fwix.pl ignore this
 block not in html mode.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
