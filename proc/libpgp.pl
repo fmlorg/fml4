@@ -62,7 +62,10 @@ sub PGPGoodSignatureP
     require 'open2.pl';
     &Log("pgp input size=". length($e{'Body'})) if $debug_pgp;
     &Log("run $PGP{'pgp -f'} 2>&1") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || &Log("PGP: $!");
+    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || do {
+	&Log("PGP: $!");
+	$PGPError .= "cannot exec \$PGP{'pgp -f'}\n";
+    };
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $e{'Body'};
     close(WPGP);
@@ -88,7 +91,10 @@ sub PGPGoodSignatureP
 	&Mesg(*e, $NULL, 'pgp.incorrect_signature') unless $auth;
     }
 
-    &Log("ERROR: PGP no good signature.") unless $auth;
+    if (! $auth) {
+	&Log("ERROR: PGP no good signature.");
+	$PGPError .= "no good signature\n";
+    }
 
     $auth;
 }
@@ -119,7 +125,10 @@ sub PGPDecode
     $bs = '-----BEGIN PGP MESSAGE-----';
     $es = '-----END PGP MESSAGE-----';
 
-    &_PGPInit(*e) || return 0;
+    &_PGPInit(*e) || do {
+	$PGPError .= "fail to initialize\n";
+	return 0;
+    };
 
     # check each line and PGP Blocks
     my ($c) = 0;
@@ -149,6 +158,7 @@ sub PGPDecode
 
     if ($c == 0) {
 	&Log("Error: PGPDecode: cannot find PGP block(s) to decode");
+	$PGPError .= "cannot find pgp block, so fail to decode\n";
     } 
 }
 
@@ -168,7 +178,10 @@ sub PGPDecode2
     # PGP Signature Check
     &Log("run $PGP{'pgp -f'} 2>&1") if $debug || $debug_pgp;
     &Log("pgp input size=". length($buf)) if $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || &Log("PGPDecode2: $!");
+    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || do { 
+	$PGPError .= "cannot exec \$PGP{'pgp -f'}\n";
+	&Log("PGPDecode2: $!");
+    };
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
     close(WPGP);
@@ -179,24 +192,36 @@ sub PGPDecode2
 
     if (! $auth) {
 	&Log("Error: PGPDecode2: cannot find good PGP signature");
+	$PGPError .= "cannot find good PGP signature\n";
     }
 
     # 2>&1 is required to detect "Good signature"
     &Log("run $PGP{'pgp -o'} $tmpf") if $debug || $debug_pgp;
     &Log("pgp input size=". length($buf)) if $debug_pgp;
-    open(WPGP, "|$PGP{'pgp -o'} $tmpf")||&Log("PGPDecode2: $!");
+    open(WPGP, "|$PGP{'pgp -o'} $tmpf") || do {
+	$PGPError .= "cannot exec \$PGP{pgp -o}\n";
+	&Log("PGPDecode2: $!");
+    };
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
     close(WPGP);
 
-    open(RPGP, $tmpf) || &Log("PGPDecodeAndSave: cannot open $tmpf");
-    while (<RPGP>) {
-	$dcbuf .= $_;
-	print STDERR "PGP (decode and save) OUT:$_" if $debug;
+    if (open(RPGP, $tmpf)) {
+	while (<RPGP>) {
+	    $dcbuf .= $_;
+	    print STDERR "PGP (decode and save) OUT:$_" if $debug;
+	}
+	close(RPGP);
     }
-    close(RPGP);
+    else {
+	$PGPError .= "cannot open temporary file\n";	
+	&Log("PGPDecodeAndSave: cannot open $tmpf");
+    }
 
-    unlink $tmpf || &Log("PGPDecode2: cannot unlink $tmpf");;
+    unlink $tmpf || do {
+	$PGPError .= "cannot unlink temporary file\n";	
+	&Log("PGPDecode2: cannot unlink $tmpf");
+    };
 
     &Log("ERROR: PGP no good signature.") unless $auth;
 
@@ -216,7 +241,10 @@ sub DoPGPDecode
 
     # PGP Signature Check
     &Log("run $PGP{'pgp -f'} 2>&1") if $debug || $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || &Log("PGPDecode: $!");
+    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>&1") || do {
+	$PGPError .= "cannot exec \$PGP{pgp -f}\n";
+	&Log("PGPDecode: $!");
+    };
     &Log("pgp input size=". length($buf)) if $debug_pgp;
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
@@ -230,12 +258,16 @@ sub DoPGPDecode
 
     if (! $auth) {
 	&Log("Error: DoPGPDecode: cannot find good PGP signature");
+	$PGPError .= "cannot find PGP signature\n";
     }
 
     # 2>&1 is required to detect "Good signature"
     &Log("run $PGP{'pgp -f'} 2>/dev/null") if $debug || $debug_pgp;
     &Log("pgp input size=". length($buf)) if $debug_pgp;
-    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>/dev/null")||&Log("PGPDecode: $!");
+    &open2(RPGP, WPGP, "$PGP{'pgp -f'} 2>/dev/null") || do {
+	$PGPError .= "cannot exec pgp -f\n";
+	&Log("PGPDecode: $!");
+    };
     select(WPGP); $| = 1; select(STDOUT);
     print WPGP $buf;
     close(WPGP);
@@ -266,7 +298,8 @@ sub DoPGPEncode
 
     if (! $buf) { 
 	&Log("PGPEncode: empty input");
-	return;
+	$PGPError .= "encoder recieves empty input\n";
+	return 0;
     }
 
     &Log("DoPGPEncode sets in ") if $debug || $debug_pgp;
@@ -283,13 +316,17 @@ sub DoPGPEncode
     require 'open2.pl';
     if ($PGP_VERSION == 5) {
 	&Log("run $PGP{'pgpe'} $whom -fsa") if $debug || $debug_pgp;
-	&open2(RPGP, WPGP, "$PGP{'pgpe'} $whom -fsa 2>&1") ||
+	&open2(RPGP, WPGP, "$PGP{'pgpe'} $whom -fsa 2>&1") || do {
+	    $PGPError .= "cannot exec pgp encoder\n";
 	    &Log("PGPEncode: $!");
+	};
     }
     else {
 	&Log("run $PGP{'pgp -f -sea'} $whom 2>$tmpbuf") if $debug || $debug_pgp;
-	&open2(RPGP, WPGP, "$PGP{'pgp -f -sea'} $whom 2>$tmpbuf") || 
+	&open2(RPGP, WPGP, "$PGP{'pgp -f -sea'} $whom 2>$tmpbuf") || do {
+	    $PGPError .= "cannot exec pgp encoder\n";
 	    &Log("PGPEncode: $!");
+	};
     }
     &Log("pgp input size=". length($buf)) if $debug_pgp;
     select(WPGP); $| = 1; select(STDOUT);
@@ -334,6 +371,7 @@ sub DoPGPEncode
 
     close(RPGP); # XXX close open2()
     &Log("ERROR: encoded buffer is empty") unless $encbuf;
+    $PGPError .= "cannot exec pgp encoder\n" unless $encbuf;
 
     $encbuf;
 }
@@ -387,6 +425,8 @@ sub _PGPScan
     }
     close(RPGP);
 
+    $PGPError .= "pgp scanner cannot find effective keys\n" unless $count;
+
     $count;
 }
 
@@ -408,6 +448,7 @@ sub _PGPUserExistP
     close(RPGP);
 
     &Log("PGP: no such user $user");
+    $PGPError .= "no such user $user\n";
 
     0;
 }
@@ -425,6 +466,7 @@ sub _PGPInit
     local(*e) = @_;
     my ($path);
 
+    undef $PGPError; # initialize
     $PGP_VERSION = 2 unless $PGP_VERSION;
 
     if ($e{'Body'} =~  /^[\s\n]*$/) {
@@ -439,7 +481,7 @@ sub _PGPInit
 	if (! $PGP) {
 	    &Log("ERROR: PGPInit: program \$PGP is not defined");
 	    &Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
-	    $PGPError = 'pgp program not defiend';
+	    $PGPError .= "pgp program not defiend\n";
 	    return 0;
 	}
 	elsif (&DiagPrograms('PGP')) {
@@ -448,7 +490,7 @@ sub _PGPInit
 	else {
 	    &Log("ERROR: PGPInit: \$PGP is not found");
 	    &Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
-	    $PGPError = 'pgp program not found';
+	    $PGPError .= "pgp program not found\n";
 	    return 0;
 	}
 
@@ -461,7 +503,7 @@ sub _PGPInit
 	    if (! $prog) {
 		&Log("ERROR: PGPInit: a program of pgp5 is not defined");
 		&Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
-		$PGPError = 'pgp program not defiend';
+		$PGPError .= "pgp program not defiend\n";
 		return 0;
 	    }
 	    elsif (-x $prog) {
@@ -470,7 +512,7 @@ sub _PGPInit
 	    else {
 		&Log("ERROR: PGPInit: \$PGP is not found");
 		&Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
-		$PGPError = 'pgp program not found';
+		$PGPError .= "pgp program not found\n";
 		return 0;
 	    }
 	}	
@@ -482,7 +524,7 @@ sub _PGPInit
 	&Log("PGP 6 is not implemented");
     }
     else {
-	$PGPError = 'unknown pgp version';
+	$PGPError .= "unknown pgp version\n";
 	return;
     }
 
