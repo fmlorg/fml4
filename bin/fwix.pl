@@ -16,7 +16,7 @@ require 'getopts.pl';
 ##### Config VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
-$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
+$KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr|url';
 $FORMAT  = 'q|~q';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
@@ -93,9 +93,13 @@ sub CopyRight
 {
 q%
 <PRE>
-This Document(html format) is automatically geneareted by fwix.pl. 
-All rights reserved (c) fukachan@sapporo.iij.ad.jp
+Copyright (C) 1993-1997 Ken'ichi Fukamachi
+All rights of this page is reserved.
 
+# This Document(html format) is automatically geneareted by fwix.pl. 
+# fwix (Formatter of WIX Language) is fml document formatter system
+# intended to generate plaintext, html, texinfo and nroff from one file.
+#
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
@@ -459,6 +463,7 @@ sub OutputHtml
 
 	s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+	s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
 	s/^(\#\.index)/$Index{$Lang}/; 
 	s/^=S//;
 
@@ -530,6 +535,7 @@ sub OutputFile
 	    }
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+	    s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
 	    s/^(\#\.index)/$Index{$Lang}/; 
 
 	    print STDERR "   $prev   $_\n" if $Error; $prev = $_;
@@ -546,6 +552,7 @@ sub OutputFile
 
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+	    s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
 	    s/^(\#\.index)/$Index{$Lang}/; 
 	    s/^=S//;
 
@@ -572,10 +579,12 @@ sub Format
     if ($c eq 'q') {
 	$Tag = "    ";
 	$r = "<PRE>"  if $mode eq 'html';
+	$In_PRE = 1;
     }
     elsif ($c eq '~q') {	# destructor:-)
 	undef $Tag;
 	$r = "</PRE>" if $mode eq 'html';
+	undef $In_PRE;
     }
 
     $r;
@@ -655,7 +664,7 @@ sub Expand
 	    $Index{$CurLang} .= 
 		"<HR><LI><H3><A HREF=\"$ch.html#C${ch}S${se}\">$s</A></H3>\n";
 	    $s      = "<HR>\n<A NAME=\"C${ch}S${se}\">$s</A>\n";
-	    $s     .= "<PRE>";
+	    $s     .= "<PRE>"; 	$In_PRE = 1;
 
 	    $InPre++ unless $LANG;
 
@@ -684,7 +693,7 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>";
+	    $s     .= "<PRE>";  	$In_PRE = 1;
 
 	    &HtmlSplitHere();
 
@@ -709,7 +718,7 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>";
+	    $s     .= "<PRE>";  	$In_PRE = 1;
 	    $InPre++ unless $LANG;
 	}
 	elsif ($mr) {
@@ -741,7 +750,7 @@ sub Expand
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
-	    $s     .= "<PRE>";
+	    $s     .= "<PRE>";  	$In_PRE = 1;
 
 	    &HtmlSplitHere();
 	}
@@ -764,6 +773,16 @@ sub Expand
     elsif ($c eq 'seealso' || $c eq 'xref') {
 	$s = "\#.xref $s";
     }
+    elsif ($c eq 'url') {
+	if ($mode eq 'html') {
+	    $index{"url=$s"} = "<A HREF=$s>$s</A>";
+	    $index{"url=$s"} = "</PRE>".$index{"url=$s"}."<PRE>" if $In_PRE;
+	    $s = "\#.url url=$s";
+	}
+	else {
+	    $s = "\t$s"; 
+	}
+    }
     elsif ($c eq 'ptr') {
 	$s = "\#.ptr{$s}";
     }
@@ -780,7 +799,7 @@ sub Expand
 	}
 	elsif ($mode eq 'html') {
 	    $index{$s} = 
-		"</PRE><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$Chapter.$Section</A><PRE>";
+		"</PRE><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$Chapter.$Section</A><PRE>";  	$In_PRE = 1;
 	}
 	elsif ($mode eq 'roff') {
 	    $index{$s}  = "$Chapter.$Section"; 
@@ -818,8 +837,10 @@ sub PtrExpand
 
 sub IndexExpand
 {
-    local($org, $r, $result, @index);
-    local($x) = @_;
+    local($org, $r, $result, @index, $fyi);
+    local($x, $show_only) = @_;
+
+    $fyi = "See also: " unless $show_only;
 
     print STDERR "IndexExpand: [$x] -> [" if $debug;
 
@@ -839,11 +860,11 @@ sub IndexExpand
     print STDERR "]\n" if $debug;
 
     if ($mode eq 'html') {
-	$result =~ s#</PRE>#</PRE>See also: #;
+	$result =~ s#</PRE>#</PRE>$fyi#;
 	$result;
     }
     else {
-	"See also: $result";  # "Xref: $result";
+	"$fyi$result";  # "Xref: $result";
     }
 
 }
@@ -855,8 +876,8 @@ sub HtmlExpand
 
     print STDERR "HtmlExpand::($_, $s, $file, $mode);\n" if $debug;
 
-    /~HTML_PRE/ && ($s = "</PRE>\n");
-    /HTML_PRE/  && ($s = "<PRE>");
+    /~HTML_PRE/ && ($s = "</PRE>\n") && ($In_PRE = 0);
+    /HTML_PRE/  && ($s = "<PRE>")    && ($In_PRE = 1);
 
     $s;
 }
