@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.86 2001/08/26 03:13:32 fukachan Exp $
+# $FML: MANIFEST,v 1.87 2001/09/27 15:42:17 fukachan Exp $
 #
 
 
@@ -1008,7 +1008,11 @@ SMTP_LOG_ROTATE_TYPE:	number
 # IF $TRACE_SMTP_DELAY IS 1, we log the delay of response between SMTP server.
 # value: 1/0
 NOT_TRACE_SMTP:  	0
-TRACE_SMTP_DELAY:	
+TRACE_SMTP_DELAY:
+
+# smtp profile for debug
+# value: 1/0
+USE_SMTP_PROFILE:	0
 
 # You can use plural MTA for parallel delivery.
 # $MCI_SMTP_HOSTS is the number of hosts you use.
