@@ -1,0 +1,109 @@
+.C	投稿メールのフィルタリング事例
+
+.S	Message-Id: がないものを reject
+=E	reject null Message-Id:
+
+	&DEFINE_FIELD_PAT_TO_REJECT('message-id', '^\s*$');
+
+.S	Subject:に特定のパターンがあったら拒否する
+
+Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
+	SPAMとみなして捨てる(でもこれするとFreesoftも捨てちゃうね;-)
+	最初と最後の / はあってもなくてもよいです。/ 以外は使わないで下さい
+=E
+	reject Subject: with FREE, SEX, ADULT, XXX.
+	(but this config ignores "free software" content ?;-).
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+.S	Subject:に特定のパターン(大文字小文字を問わず)があったら拒否する
+
+	Adult も ADULT も大文字小文字に関係なく許否。/i というperlで
+	おなじみの形式を使います。/ 以外は使わないで下さい。
+=E
+	reject Subject: with FREE, SEX, ADULT, XXX (case insensitive).
+
+	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/free|sex|adult|xxx/i');
+
+
+.S	received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'h:received:'} =~ /from spam.co.jp/) {
+	return 'from a host in spam blacklist';
+    }
+#;
+
+
+.S	本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+	return 'mail with appended HTML documents';
+    }
+#;
+
+
+.S	From: のドメインが Message-ID に含まれていないなら拒否
+
+$DISTRIBUTE_FILTER_HOOK = q#
+   local($domain) = (split(/@/, $From_address))[1];
+   if ($e{'h:message-id:'} !~ /$domain/i) {
+	return 'Message-Id conflicts your From: address';
+   }
+#;
+
+
+.S	前者３つ全部
+
+例: (not tested ;-)
+○ received: 行のどこかに spam.co.jp というドメインを見つけたら拒否する。
+○ 本文に http-equiv=3DContent-Type なHTMLをつけてくる迷惑なメール
+   は reject する
+○ From: のドメインが Message-ID にも含まれているかどうか？
+   含まれていないならメールの偽造とみなして reject
+=E
+Example:
+	* reject if a Received: line has "from spam.co.jp".
+	* reject if http-equiv=3DContent-Type exists in the body.
+	* reject $From_address conflicts with Message-Id:'s domain.
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'h:received:'} =~ /from spam.co.jp/) {
+	return 'from a host in spam blacklist';
+    }
+
+    if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+	return 'mail with appended HTML documents';
+    }
+
+   local($domain) = (split(/@/, $From_address))[1];
+   if ($e{'h:message-id:'} !~ /$domain/i) {
+	return 'Message-Id conflicts your From: address';
+   }
+
+#;
+
+
+.S	sendmail の PICKY_HELO_CHECK と組み合わせる
+
+=E
+Example 2: When you configure PICKY_HELO_CHECK is on in config.h of
+sendmail, reject mail when it has X-Authentication-Warning by
+PICKY_HELO_CHECK. However this filter does not work well 
+since virtual domain users matches them even if they are not spammers;D
+
+    # PICKY_HELO_CHECK
+    if ($e{'h:x-authentication-warning:'} !~ /Host \S+ claimed to be \S+/) {
+	$r = "Your SMTP session or your host config is invalid";
+    }
+
+でもメールを出す人が virtual domain とかだとバソバソ reject されて困っ
+ちゃうだろう ＃それでも構わないという人は使ってみよう(強引)
+
+
+.#
+.# $Id$
+.#

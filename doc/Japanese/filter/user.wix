@@ -1,0 +1,81 @@
+.C	ユーザレベルでのフィルタリング
+.l	user-level-filtering
+
+UNIXなら procmail や mailagent, MHの slocal などをはじめそういうものは
+世の中いっぱいあります。
+
+一般論として
+
+	UNIXの場合は toolbox oriented なOSなので、フィルタリングプログ
+	ラムに下請けにだすことでフィルタをする。
+	つまりそういう設定を ~/.forward などに書くわけです。
+
+	それ以外のOSではメールソフト（クライアント）に内蔵されている機
+	能を使うことが多い。つまり自分のソフトになければそこで終り
+	＃UNIXのようなこともできないわけじゃないんだろうけど多分とても大変
+
+.S	メール関係の Filtering FAQ
+
+メール関係の Filtering FAQ というものもあります。URLは
+=E
+Filtering FAQ is
+
+.url	http://www.ii.com/internet/faqs/launchers/mail/filtering-faq/
+
+plaintext version は
+=E
+The plain text version is 
+
+.url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
+
+[procmail faq]
+
+    Html and text version of pm-tips
+
+.url        http://www.procmail.org/jari/pm-tips.html
+.url        http://www.procmail.org/jari/pm-tips.txt
+
+    Other procmail docuemts
+
+        Era's exellent procmail pages (including procmail faq) are at:
+
+.url            http://www.iki.fi/~era/procmail/links.html
+.url            http://www.iki.fi/~era/procmail/mini-faq.html
+
+.S	MH slocal Interface
+.key	slocal
+.key	.maildelivery
+.l	slocal-1
+
+ここでは slocal を用いたやりかたを述べます。
+=E
+MH slocal is used like
+
+	~/.forward に
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+=E
+	in ~/.forward 
+	"|/usr/local/lib/mh/slocal -user username || exit 75"
+
+と書きます。よく名前を聞く slocal ってやつですね。
+slocal では、設定は  ~/.maildelivery で設定します。
+
+例：
+To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
+それ以外は全部スプールに落す（普通の挙動）
+=E
+Example: 
+Mail with "To: username@domain (uja)"  is injected to fml.pl.
+All others are saved in /var/mail/fukachan.
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+#field   pattern   action  result    string
+To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
+
+# drop to the personal mail-spool
+default  -       >       ?      /var/mail/fukachan
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+この場合 PIPE で fml.pl へ渡すとき UNIX FROM がおちてしまうのかもしれ
+ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
+す。
+

@@ -1,0 +1,129 @@
+.C	フィルタリング機構の内部構造
+
+.S	配送メールへのフィルタリング
+=E.S	Filtering
+.l	EnvelopeFilter
+.n	envf
+
+	$USE_DISTRIBUTE_FILTER
+.l	$USE_DISTRIBUTE_FILTER
+.k	$USE_DISTRIBUTE_FILTER
+
+をセットすると、配送処理に入る直前(&Distribute ルーチンの先頭)で 
+%Envelope のデータ群(ヘッダやメール本文)に対してフィルタリング操作をか
+けます。そして問題のある内容のメールの配送をしないなどができるようにな
+ります。
+=E
+enables the filtering for distribute mails. This filter checks
+in-coming mails based on %Envelope data. You can set up your own hook
+using %Envelope. 
+
+	$USE_DISTRIBUTE_FILTER
+
+をセットしただけのデフォールトでは(現在(97/12/14))次のようなメールは 
+reject します。
+=E
+loads the following filter rule in default.
+
+	○ 本文が何もないメール
+	○ help や unsubscribe などの英語一行メール
+	○ %echo ふがほげ の行
+	   1999/02/24からはこの行がひっかかった時点で拒否
+	   これ以前はあるパラグラフがこの行そのものの時のみ拒否
+	   つまり『空行＋%echoなんとか行＋空行』の時だけだった
+	○ Message-Id: が朗かに addr-spec でないのは SPAM メール
+=E
+	* reject null body
+	* reject one line English words mail
+	  e.g. "help", "unsubscribe"
+	* reject invalid Message-Id mails (may be SPAM mails)
+	* other strange syntaxes
+
+   [options]
+
+	$FILTER_ATTR_REJECT_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_COMMAND
+
+	○ #unsubscribe などのコマンドをはじく
+=E
+	reject '#unsubscribe' like commands
+
+	$FILTER_ATTR_REJECT_2BYTES_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_2BYTES_COMMAND
+
+	○ ２バイト英文字ではじまる行を拒否
+	   例: ＵＮＳＵＢＳＣＲＩＢＥ ほえほえ
+=E
+	* reject a line begining with Japanese 2-byte English Characters
+	  e.g. 2-byte "unsubscribe"
+
+これ以外の高度なチェックは
+=E
+You can use a hook to write your own more complicated filtering rules.
+Attention: in this hook you can refer %Envelope as %e.
+
+	$DISTRIBUTE_FILTER_HOOK (for post)
+.k	$DISTRIBUTE_FILTER_HOOK
+.k	$REJECT_DISTRIBUTE_FILTER_HOOK
+.if LANG == JAPANESE
+＃ $REJECT_DISTRIBUTE_FILTER_HOOK でも可能です(obsolete)。
+＃ 同様に $REJECT_COMMAND_FILTER_HOOK もありますが obsolete
+.k	$REJECT_COMMAND_FILTER_HOOK
+.fi
+
+	$COMMAND_FILTER_HOOK (for command)
+.k	$COMMAND_FILTER_HOOK
+
+で直接 perl の構文で %e (%Envelope) ハッシュの変数を使って記述して下さ
+い。HOOK 内部では $e{'h:from:'} などでハッシュにアクセスして下さい。
+＃このために独自の言語とかをまた新たに導入するのは面倒だとおもうので
+＃perl で生書きです。
+
+この HOOK では次のようなことを期待しています。
+=E
+In this hook, please write in the following way.
+
+	reject する場合は reject の理由を含む文を return する
+	そうでないなら 何も返さない (return ''; など)
+=E
+	* if reject, write the code
+		return 'the reason of rejection';
+	  where this reason is logged in $LOGFILE.
+	* if OK, 
+		return '';	 
+
+この reject の理由はログに残されます。また、
+=E
+In default fml.pl does not notify the reason of rejection to the
+sender (From: address) since no more information is good for security
+in one sense. If you want to notify the rejection to the sender, set
+
+	$FILTER_NOTIFY_REJECTION
+.k	$FILTER_NOTIFY_REJECTION
+
+という変数が設定されていれば、その理由をそのメールの送り主に送り返しま
+す。デフォールトでは単に無視するだけです。
+
+
+.S	特定のフィールドの内容によっては拒否する
+=E.S	Reject if a field matches reject patterns
+
+.if LANG == JAPANESE
+	&DEFINE_FIELD_PAT_TO_REJECT(ヘッダフィールド, 正規表現, REASON)
+.l	&DEFINE_FIELD_PAT_TO_REJECT
+.k	&DEFINE_FIELD_PAT_TO_REJECT
+
+という関数は EnvelopeFilter 中で使われる %REJECT_HDR_FIELD_REGEXP とい
+うハッシュの内容を設定できます。これはあるフィールド(例えば Subject:)
+の特定の内容について reject します。Case Sensitive です。ADULT と書く
+と adult にマッチしません。
+XXX "reason"はまだ実装されていません。
+.fi
+.if LANG == ENGLISH
+	&DEFINE_FIELD_PAT_TO_REJECT(field-name, regexp, reason)
+.l	&DEFINE_FIELD_PAT_TO_REJECT
+.k	&DEFINE_FIELD_PAT_TO_REJECT
+
+Define regular expression for a field. Please see an examle below.
+XXX "reason" is not yet implemented now.
+.fi

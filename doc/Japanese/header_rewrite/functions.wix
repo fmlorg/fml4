@@ -1,0 +1,115 @@
+.C	ヘッダのカスタマイズをする関数群
+=E.C	Customize Fields of the Mail Header 
+.n	headers
+.l	header-custom
+
+.S	ヘッダフィールドの内容の強制
+=E.S	Enforce the content for a header field
+.l	&DEFINE_FIELD_FORCED
+.l	DEFINE_FIELD_FORCED
+.k	--fh:field
+
+SYNOPSIS:
+	&DEFINE_FIELD_FORCED('field', "field-contents");
+
+@HdrFieldsOrder 内で定義されているフィールドに対し、フィールドの内容を
+強制操作します。なお
+=E
+Enforces the value of "field" to "field-contents". where the field is
+one of fields defined in @HdrFieldsOrder.  This function sets up
+
+	$Envelope{'fh:field:'} = "field-contents";
+
+と同じです。
+＃obsolete ですがコマンドラインの --fh:field="field-contents" と同じ
+
+例: X-Ml-Info: の内容を"書きたいこと"に設定する。
+	&DEFINE_FIELD_FORCED('x-ml-info', "書きたいこと");
+=E
+Example: set "X-ML-Info: ML Information"
+==
+	&DEFINE_FIELD_FORCED('x-ml-info', "ML Information");
+
+.S	ヘッダフィールドをオリジナルのままにする
+=E.S	Enforce the value of a field to one of the in-coming mail header
+.l	&DEFINE_FIELD_ORIGINAL
+.l	DEFINE_FIELD_ORIGINAL
+.k	--oh:field
+
+SYNOPSIS:
+	&DEFINE_FIELD_ORIGINAL('field');
+
+@HdrFieldsOrder 内で定義されているフィールドに対しオリジナルの値(MLサー
+バへ入ってきた時のヘッダの値)にしておきたいフィールドを指定します。こ
+れは
+=E
+enforce the value of a field to one of the in-coming mail header.  The
+field must be one of elements of @HdrFieldsOrder. This function sets
+up
+
+	$Envelope{'oh:field:'};
+
+と同じです。
+＃obsoleteですが --oh:field  (コマンドライン)と同じ
+
+例: To:, Cc:, Reply-To: をオリジナルの内容のままにする。
+=E
+Example: Let the value of To:, Cc:, Reply-To: be original.
+
+	&DEFINE_FIELD_ORIGINAL('to');
+	&DEFINE_FIELD_ORIGINAL('cc');
+	&DEFINE_FIELD_ORIGINAL('reply-to');
+
+To: Cc: フィールドをオリジナルのままにして配送する。
+
+.S	ヘッダのフィールドを増やす or 減らす
+=E.S	Add or Remove @HdrFieldsOrder entries
+.k	ヘッダのフィールドを増やす or 減らす
+
+&ADD_FIELD, &DELETE_FIELD という関数も用意しています。
+例: X-Uja を付け加える。
+=E
+To add or remove header fields, set up @HdrFieldsOrder in config.ph.
+Also FML provides macros, &ADD_FIELD, &DELETE_FIELD, for them. To add
+a field "X-Uja" in the last of @HdrFieldsOrder,
+
+	&ADD_FIELD('X-Uja');
+.l	ADD_FIELD
+
+Cc: フィールドを“つけない”なら
+=E
+If you always remove 'Cc:' field in distribution mail, you can set it
+up by
+
+	&DELETE_FIELD('Cc');
+.l	DELETE_FIELD
+
+.if LANG == JAPANESE
+注意: 96/11/2 $NOT_USE_CC を削除しました。@HdrFieldsOrder を直接いじる
+か &DELETE_FIELD('Cc') を使って下さい。
+.k	$NOT_USE_CC
+.fi
+
+ヘッダに現れる順番が重要な場合は @HdrFieldsOrder という配列を直接いじ
+るしかありません。
+
+例: 先頭に X-Some-Thing をつける
+
+	unshift(@HdrFieldsOrder, 'X-Some-Thing');
+
+.S	特定のヘッダ・フィールドのコピー
+=E.S	COPY_FIELD
+.l	&COPY_FIELD
+.l	COPY_FIELD
+
+@HdrFieldsOrder 内で定義されているフィールドに対し、
+
+where the field is one of fields defined in @HdrFieldsOrder.
+
+		&COPY_FIELD(field, new-field);
+	Example:
+		&COPY_FIELD('Sender', 'X-Sender');
+
+.#
+.# $Id
+.#

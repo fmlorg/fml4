@@ -1,12 +1,18 @@
 .C	ヘッダのいろいろな操作
 
+fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
+ドの並び変えや特定のフィールドの削除などを行なっています。FML 2.2 以降
+のデフォールトは『Return-Receipt-To と Received を除き素通し』に設定さ
+れています。ヘッダの一部を切ったり、付け加えるにはconfig.phに &DEFINE_
+なんとか という関数呼びだしを設定して行ないます。
+
+
 .S	サブジェクトの書き換え
 
 	$SUBJECT_TAG_TYPE	[elena:00100] みたいな部分の選択
 .xref	$SUBJECT_TAG_TYPE
 
 	$SUBJECT_TAG_FIGURE	       ↑これの桁数
-.xref	$SUBJECT_TAG_FIGURE
 
 .q
 [メニュー画面]
@@ -16,7 +22,7 @@ makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
 .~q
 
 .S	ヘッダフィールドの値をコピーする
-.xref	&COPY_FIELD
+.xref	COPY_FIELD
 
 	&COPY_FIELD(コピー元, コピー先);
 
@@ -24,7 +30,7 @@ makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
 	&COPY_FIELD('Sender', 'X-Sender');
 
 .S	ヘッダフィールドの値をある値に強制的にする
-.xref	&DEFINE_FIELD_FORCED
+.xref	DEFINE_FIELD_FORCED
 
 	&DEFINE_FIELD_FORCED(フィールド名, 値);
 
@@ -38,7 +44,7 @@ makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
 	DEFINE_FIELD_ORIGINAL()
 
 .S	ヘッダフィールドを加える
-.xref	&ADD_FIELD
+.xref	ADD_FIELD
 
 	&ADD_FIELD(フィールド名);
 
@@ -51,7 +57,7 @@ $PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 
 
 .S	ヘッダフィールドを消す
-.xref	&DELETE_FIELD
+.xref	DELETE_FIELD
 
 	&DELETE_FIELD(フィールド名);
 
@@ -63,7 +69,7 @@ $PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 
 
 .S	ヘッダフィールドの値をオリジナルのまま通すようにする
-.xref	&DEFINE_FIELD_ORIGINAL
+.xref	DEFINE_FIELD_ORIGINAL
 
 	&DEFINE_FIELD_ORIGINAL(フィールド名);
 
@@ -72,7 +78,7 @@ $PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 
 
 .S	コマンドの返事メールのヘッダの値を設定する
-.xref	&DEFINE_FIELD_OF_REPORT_MAIL
+.xref	DEFINE_FIELD_OF_REPORT_MAIL
 
 	&DEFINE_FIELD_OF_REPORT_MAIL(フィールド名, 値);
 
