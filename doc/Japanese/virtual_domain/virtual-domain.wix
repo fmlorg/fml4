@@ -72,6 +72,7 @@ info@domain2.orgをつくる
 [postfix]
 
 /etc/postfix/virtual.pcre で行なう。
+.xref	virtual-domain-postfix-example
 
 [sendmail]
 

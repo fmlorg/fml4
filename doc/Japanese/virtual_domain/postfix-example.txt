@@ -1,4 +1,5 @@
 .C	postfix での virtual domain 設定
+.l	virtual-domain-postfix-example
 
 /etc/postfix/virtual:
 
