@@ -853,10 +853,13 @@ sub Cat
 sub Copy
 {
     local($in, $out) = @_;
+    local($mode) = (stat($in))[2];
 
     open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
     open(OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
     select(OUT); $| = 1; select(STDOUT); 
+    chmod $mode, $out;
+
     while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
     close(OUT);
     close(COPY_IN);
