@@ -10,7 +10,7 @@ $rcsid .= ($id =~ /Id: (\S+),v\s+(\S+)\s+/ && "$1 $2");
 
 &Init;
 
-print "Daily Report\n   $rcsid\n";
+print "Daily Report ($rcsid)\n";
 
 for (@ARGV) {
     &SearchInterests($_);
