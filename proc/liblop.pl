@@ -193,7 +193,12 @@ sub ResentForwFileInSpool
 	 $_ = $field = shift @Hdr, $contents = shift @Hdr) {
 	next if /^From\s+(\S+)/i;
 	next if /^\s*$/o;
+
+	# &GenerateHeader is to a new header not reuse;
+	$contents =~ s/^\s*//;	
 	$e{"GH:$field"} = $contents;
+
+	# conserve the original header information
 	$field =~ s/://;
 	push(@ResentForwHdrFieldsOrder, $field);
     }
