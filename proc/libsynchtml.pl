@@ -1103,7 +1103,7 @@ sub AppendIndexInformation
 # entry point to recreate index.html
 #    RemakeIndex() -> ReConfigureIndex() -> htdocs/{index,thread}.html
 #       TOP_DIR/{index,thread}.html
-#    gabble index.{hdr,list,..} information to make htdocs/{index,thread}.html
+#    gobble index.{hdr,list,..} information to make htdocs/{index,thread}.html
 #
 sub ReConfigureIndex
 {

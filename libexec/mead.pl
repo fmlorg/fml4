@@ -45,11 +45,11 @@ exit 0;
 
 sub Parse
 {
-    my($new_block, $gabble, $curf, $first_header_part);
+    my($new_block, $gobble, $curf, $first_header_part);
     my($mp_block);
 
     $new_block = 1;
-    $gabble    = 0;
+    $gobble    = 0;
     $curf      = $NULL;
     $first_header_part = 1;
 
@@ -119,7 +119,7 @@ sub Parse
 	if ($first_header_part) {
 	    if (/^(To|Cc):.*/i) {
 		if ($new_block && $gabbble == 0) {
-		    &Debug("$new_block, $gabble> rset \%return_addr\n") if $debug;
+		    &Debug("$new_block, $gobble> rset \%return_addr\n") if $debug;
 		    undef %return_addr;
 		}
 
@@ -130,7 +130,7 @@ sub Parse
 		next;
 	    }
 	    # 822 folding
-	    elsif (/^\s+/ && $gabble) {
+	    elsif (/^\s+/ && $gobble) {
 		&ExtractAddr($_);
 		next;	
 	    }
@@ -186,7 +186,7 @@ sub Parse
 	    &Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
 	}
 
-	$gabble = 0;
+	$gobble = 0;
 
 	# ignore Japanese strings.
 	next if /$RE_JIN/;

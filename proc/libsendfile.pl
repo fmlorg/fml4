@@ -780,7 +780,7 @@ sub GetArchiveBoundary
 
     # Reset $bound
     # if exists archive-directory/1000.tar.gz, must be bound=1000;
-    # since e.g. Archive.pl gabble 901-1000 in 1000.tar.gz.
+    # since e.g. Archive.pl gobble 901-1000 in 1000.tar.gz.
     # Archiver ignores 1001-1099 until the article 1100 appears.
     if ($id = &GetID){
 	for ($i = $ar_unit; $i < $id; $i += $ar_unit) {

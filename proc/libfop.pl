@@ -467,7 +467,7 @@ sub f_zip
 }
 
 
-sub f_uu_conf_gabble
+sub f_uu_conf_gobble
 {
     local($out, *conf) = @_;
 
@@ -475,7 +475,7 @@ sub f_uu_conf_gabble
     select(OUT); $| = 1; select(STDOUT);
 
     for (@conf) {
-	&Debug("   f_uu_conf_gabble::open($_)\n") if $debug;
+	&Debug("   f_uu_conf_gobble::open($_)\n") if $debug;
 	if (open(F, $_)) { 
 	    while (<F>) { print OUT $_;};
 	    close(F);
@@ -498,7 +498,7 @@ sub f_uu
 	$output = $tmpf;
 	$input  = "$TMP_DIR/msend.uu";
 	$name   = $r;
-	&f_uu_conf_gabble($input, *conf);
+	&f_uu_conf_gobble($input, *conf);
     }
     # Example: $r=old/100.tar.gz $old=old $f=100.tar.gz if @conf == 1;
     else {
@@ -514,7 +514,7 @@ sub f_uu
     $name =~ s#^.*/(.*)#$1#;
 
     if ($debug) {
-	&Debug("\n   f_uu_conf_gabble::($input @conf)");
+	&Debug("\n   f_uu_conf_gobble::($input @conf)");
 	&Debug("   f_uu::conf=$conf r=$r misc=$misc name=$name");
 	&Debug("   f_uu::system(uuencode < $input > $tmpf)");
 	&Debug("   system($UUENCODE $name, $output, $input);");
