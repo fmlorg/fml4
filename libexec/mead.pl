@@ -214,6 +214,18 @@ while (<>) {
     }
 }
 
+# VERPs: qmail specific
+# Suppose list-admin-account=domain@$mydomain syntax, ...
+{
+    local($addr) = $ENV{'RECIPIENT'};
+    if ($addr =~ /=/) {
+	$addr =~ s/\@\S+$//;
+	$addr =~ s/=/\@/;
+	$addr =~ s/^\S+\-admin\-//; # fml specific 
+	&CacheOn($addr, " ");
+    }
+}
+
 &CacheOut;
 &CacheHints;
 
