@@ -25,7 +25,7 @@ doc/messages/
 PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
-pkgsrc/jcode/jcode.pl
+dist/jcode/jcode.pl
 pkgsrc/mimepls2/mimer.pl
 pkgsrc/mimepls2/mimew.pl
 pkgsrc/mimepls2/mimer202.pl
