@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: Makefile,v 2.99 2001/07/22 02:40:06 fukachan Exp $
+# $FML$
 
 ### themost important variable ! ###
 FML  = ${.CURDIR}
@@ -103,7 +103,7 @@ snapshot:
 
 release:
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
-	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -rp 2>&1|\
+	(env ${EXPORT_ENV} RELEASE=yes /bin/sh ${DIST_BIN}/generator -rp 2>&1|\
 		tee $(DESTDIR)/_release.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
 
