@@ -180,7 +180,7 @@ sub PopFmlLock
 
     # anyway shutdown after 45 sec (60 sec. must be a unit).
     $SIG{'ALRM'} = "PopFmlProgShutdown";
-    alarm($ALARM || 45);
+    alarm($TimeOut{"pop:flock"} || 45);
 
     open(LOCK, $queue_dir);
     flock(LOCK, $LOCK_EX);
