@@ -41,7 +41,7 @@ Please check /etc/aliases or equivalent for your MTA.
 
 fml MTI (Mail Traffic Information) may help you in some cases.
 
-.url ../op-e/index.html#mti
+.url ../resource_control/index.html
 
 2. not use "anyone" but "moderator" if traffic is small.
 

@@ -6,11 +6,11 @@
    filtering of posted articles	
 	reject null content mail
 	reject only "unsubscribe" mailbody
-.url ../op/index.html#envf
+.url ../filter/index.html
 
    traffic monitor
 	reject mail bomb
-.url ../op/index.html#mti
+.url ../resouce_control/index.html
 
    disable some commands to retrieve member lists
 
@@ -29,9 +29,6 @@
 to make the same effect.
 
 * variables
-
-For more details, please see
-.url ../op-e/index.html
 
 .# perl $FML/distrib/bin/manifest2index.pl -L English -V Variable $FML/cf/MANIFEST
 .# USE_DISTRIBUTE_FILTER

@@ -6,9 +6,10 @@ TUTORIAL_LANGUAGE    = Japanese
 
 DOC_TUTORIAL_RAW_SUBDIR += tips
 
+DOC_TUTORIAL_EXC_SUBDIR += basic_setup
+
 DOC_TUTORIAL_SUBDIR += GUI
 DOC_TUTORIAL_SUBDIR += Japanese
-DOC_TUTORIAL_SUBDIR += basic_setup
 DOC_TUTORIAL_SUBDIR += command
 DOC_TUTORIAL_SUBDIR += daily
 DOC_TUTORIAL_SUBDIR += debug
@@ -33,3 +34,5 @@ DOC_TUTORIAL_SUBDIR += smtp
 DOC_TUTORIAL_SUBDIR += tips
 DOC_TUTORIAL_SUBDIR += troubleshoot
 DOC_TUTORIAL_SUBDIR += virtual_domain
+
+.include "basic_setup/Makefile"

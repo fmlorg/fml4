@@ -59,11 +59,8 @@
 
 で変更できます。
 
-詳細については doc/op.jp を読んで下さい。
-.url ../op/index.html
-
 ○ メールの中身のフィルタリングについて
-.url ../op/index.html#envf
+.url ../filter/index.html
 
     "本文がないメール"や"unsubscribe だけ"のメールをＭＬに流さない。
     MIME/Multipart の場合は最初のブロックの中身を評価の対象にします。
@@ -78,7 +75,7 @@
    拒否した旨をその送り主に伝える
 
 ○ USE_MTI (トラフィックモニタ; default No)
-.url ../op/index.html#mti
+.url ../resource_control/index.html
 
     使うなら yes 。ＭＬのトラフィックを監視し一気にメールが来たらメール爆
     弾とみなすなどを行なう。ものすごーく手の込んだものは reject できないか
