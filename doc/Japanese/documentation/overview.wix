@@ -1,0 +1,16 @@
+.C	Overview
+
+ドキュメントの記述言語はWIXと呼ばれている NROFF もどきの言語です。
+一回書けば text, html, (nroff, texinfo は今だ未完) の複数のフォーマッ
+トを同時に生成するという目的のために作られました。
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
