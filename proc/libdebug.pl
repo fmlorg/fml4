@@ -41,12 +41,18 @@ sub OutputEventQueue
     }
 }
 
+
 sub InitSimulationDebug
 {
     if ($debug_on_target) {
 	push(@HdrFieldsOrder, 'X-Simulation-ID');
 	$e{'GH:X-Simulation-ID:'} = $e{'h:X-Simulation-ID:'} 
 	= $e{'h:x-simulation-id:'};
+
+	$REPORT_HEADER_CONFIG_HOOK .= q#;
+	push(@ResentHdrFieldsOrder, "X-Simulation-ID");
+	$le{"GH:X-Simulation-ID:"} = $Envelope{"h:x-simulation-id:"};
+	#;
     }
 }
 
