@@ -1915,6 +1915,8 @@ root のケースでは rootでしかかけない /usr/local/ml/driver
 .C	コマンドの実行に関する２、３のこと…
 
 .S	ＭＬで使えるコマンドを増やすor減らす
+.l	add-procedures
+.xref	add-admin-procedures
 
 config.ph でコントロールできます。
 いくつかの変数がありますが、次のように作動します

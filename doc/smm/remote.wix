@@ -185,6 +185,44 @@ multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 		filename1 というファイルをfilename2 という名前にする
 
 
+.S	リモート管理で使えるコマンドを増やすor減らす
+.l	add-admin-procedures
+.xref	add-procedures
+.k	リモート管理で使えるコマンドを増やすor減らす
+
+普通のコマンドを増やす要領で同じようにやれば良いです。
+config.ph でコントロールできます。
+いくつかの変数がありますが、次のように作動します
+
+   1	@PermitAdminProcedure が定義してあるなら
+	@PermitAdminProcedure で許しているコマンドだけを設定します。
+	もし、定義されていなければデフォールトのすべてのコマンドが
+	利用可能になります。
+	これらの設定はグローバル変数の %AdminProcedure に定義されます。
+
+   2	%LocalAdminProcedure が定義されているなら
+	1 で定義された %AdminProcedure を %LocalAdminProcedure で上書きします。
+
+   3	@DenyAdminProcedure が定義されているなら
+	@DenyAdminProcedure のコマンドだけを使えなくする
+
+例：
+	○ 管理者用の helpとaddadminのみを使用可能、それ以外はすべて使用不可
+
+	@PermitAdminProcedure = ('admin:help', 'admin:addadmin');
+
+	○デフォールトに加え自分で定義した hack コマンドも使える
+
+	%LocalAdminProcedure = ('admin:hack', 'ProcAdminHack');
+
+	もちろんこの場合はどこかで sub ProcAdminHack { ...; } があって
+	この関数を用意しておく必要がある。
+
+	○デフォールトの中で addadmin は使えなくする
+	@DenyAdminProcedure = ('admin:addadmin');
+
+
+
 .S	パスワードファイルの初期化と設定
 .l	bin/passwd.pl
 .label	set-passwd
