@@ -1,8 +1,12 @@
 .C	その多諸々
+=E.C	misc
 
 .S	どこで作業すればいいんですか？
+=E.S	where can I work for installation?
 
 fml というユーザで書き込みのできるディレクトリならどこでもいいです。
+=E
+If you read/write somewhere, you do there.
 
 自分のホーム( ~/ )の下にディレクトリをつくって作業するのが普通です。
 ディスク制限のある場合は /var/tmp/ の下にディレクトリを掘って
@@ -15,5 +19,8 @@ fml というユーザで書き込みのできるディレクトリならどこでもいいです。
 
 
 .S	off と skip はちがうの？
+=E.S	"off" and "skip" commands differ ??
 
 いえ、いっしょです（歴史的事情により現在では同じ意味です）。
+=E
+There are the same though they differs historically and internally.

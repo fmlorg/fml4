@@ -1,8 +1,12 @@
 .C	ドキュメント類
+=E.C	Documents
 
 .S	ドキュメントはどこにありますか？
+=E.S	How can I get fml documents
 
 インストールしたドキュメントをみましょう。
+=E
+See the following directory after fml install.
 
 /usr/local/fml/doc/
 
@@ -10,9 +14,12 @@
 
 なお http://www.fml.org/fml/ は常に最新版の current のドキュメントです。
 そのためあなたの手元の fml と異なっているかも知れません。
+=E
+You can always see the latest documents at http://www.fml.org/.
 
 
 .S	fml-current の最新版のドキュメントはどこにありますか？
+=E.S	How can I get the latest documents of fml-current
 
 .url http://www.fml.org/fml/
 
@@ -21,10 +28,16 @@
 
 
 .S	fml-stable の一番新しいドキュメントはどこにありますか？
+=E.S	How can I get the latest documents of fml-stable
 
 .url http://www.fml.org/fml/sources/stable/src/doc/html/index-j.html
 
+
 .S	http://www.fml.org/fml/ をダウンロードしたい
+=E.S	Can I get download one archive file for http://www.fml.org/fml/
+
+=E
+Please get htmldocs-current-YYYYMMDD.tar.gz in the following URL:
 
 .url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/
 
@@ -38,10 +51,15 @@ drwxr-xr-x  59 fukachan  wheel     2560 Aug 25 02:01 htdocs/
 .~q
 
 .S	ドキュメントの最新版だけを追っかけたい
+=E.S	How can I track the latest document
 
 前節参照
+=E
+See the previous entories.
+
 
 .S	ドキュメントのサーチは？
+=E.S	I wanna search latest documents
 
 .url http://www.fml.org/fml/search-j.html
 

@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Mailing List Server Package
+</TITLE>
+<META http-equiv="Content-Type"
+
+	content="text/html; charset=ISO-2022-JP">
+
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+
+<LINK rev="alternate" lang="en" href="index-e.html">
+
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+<CENTER>
+"fml" Mailing List Server Package
+</CENTER>
+</H1>
+
+
+
+<P><A HREF="index-e.html">[English]</A> is here. 
+<A HREF="menu.html" TARGET="_top">Japenese FRAME version</A> is here.
+<HR>
+<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">[検索]</A>
+<A HREF="Japanese/FAQ/index.html">[FAQ]</A>
+<A HREF="Japanese/tutorial.html">[チュートリアル]</A>
+<A HREF="download.html">[ダウンロード]</A>
+<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/cvsweb.cgi/">[cvsweb]</A>
+<A HREF="anoncvs.ja.html">[anoncvs]</A>
+<A HREF="Japanese/troubleshoot/index.html">[トラブルシュート]</A>
+<BR>
+チュートリアルの 
+<A HREF="Japanese/basic_setup/index.html">
+basic コース: まず最初に見てみてほしい場所
+</A>
+
+
+
+<P>最近のトピックス
+<UL>
+   <LI><A HREF="ftp://ftp.fml.org/pub/fml/current/">
+	4.0_ALPHA をはじめます
+	</A>
+
+   <LI><A HREF="ftp://ftp.fml.org/pub/fml/">
+	ftp.fml.org 正式にオープンです
+	</A>
+
+   <LI>
+   データベースへのアクセス
+   <A HREF="Japanese/LDAP/index.html">[LDAP]</A>
+   <A HREF="Japanese/RDBMS/index.html">[PostgreSQL/MySQL]</A>
+   <A HREF="Japanese/examples/DATABASE_TOY_MODEL.txt">
+   [玩具モデル]
+   </A>
+
+   <LI>
+   <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/">
+   current
+   </A>
+   のCGIインターフェイスを試してくれると嬉しいっす
+   <A HREF="CGIstatus.ja.html">[現状]</A>
+</UL>
+
+
+
+
+<P>
+fml リリースの流れ: <A HREF="releng.gif">[流れの図]</A>。
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/">
+fml-current
+</A>
+は開発版。
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/">
+fml-stable
+</A>
+は 3.0 release にbug fixをしている版です。
+fml-stable の一番新しい日付がお薦めです
+(開発サイドとしてはfml-currentのテストをしてくれる方がもちろんあり難いです)。
+</UL>
+
+
+<!-- =================================================================== -->
+
+<P>ドキュメント
+<TABLE>
+<TR>
+	<TD><A HREF="WHATS_NEW/index.html">What's new</A></TD>
+	<TD><A HREF="FEATURES/index.html">特徴</A></TD>
+
+<TR>
+	<TD><A HREF="download.html">ダウンロード</A></TD>
+	<TD><A HREF="Japanese/tutorial.html">チュートリアル</A></TD>
+
+<TR>
+	<TD><A HREF="#fml">配布ドキュメント(current)</A></TD>
+	<TD><A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/fml/sources/stable/src/doc/html/index-j.html"> 配布ドキュメント(stable) </A></TD>
+	<TD><A HREF="advisories/index.html">FML アドバイザリィ</A></TD>
+
+<TR>
+	<TD><A HREF="mailinglist.html">Mailing List</A></TD>
+	<TD><A HREF="TODO/index.html">TODO</A></TD>
+	<TD><A HREF="WISH_LIST/index.html">WISHLIST</A></TD>
+
+<TR>
+	<TD><A HREF="history.html">History</A></TD>
+	<TD><A HREF="people.html">People</A></TD>
+	<TD><A HREF="pictures/index.html">fmlのマスコットキャラクタ</A></TD>
+
+<TR>
+</TABLE>
+<P>config.ph で設定可能な変数名
+<TABLE>
+        <TD><A HREF="variable-list.ja.html">[一覧]</A>
+	<TD><A HREF="sorted-variable-list.ja.html">[アルファベット順 ]</A>
+        <TD><A HREF="Japanese/internals/index.html#functions">HOOKに便利かもしれない関数</A>
+</TABLE>
+
+<P> アップグレード
+<UL>
+        <LI>
+	<A HREF="3.0-new-features.html">
+	3.0 highlights (2.2.1と3.0の主な違い)
+	</A>
+
+        <LI>
+	<A HREF="UPGRADE-3.0/index.html">
+	3.0へ移行する際の注意 (*** 重要 ***)
+	</A>
+
+        <LI>
+	<A HREF="CHANGES-3.0.2/index.html">
+	fml-stable CHANGES (from 3.0.1 to 3.0.2)
+	</A>
+
+        <LI>
+	<A HREF="CHANGES-3.0.1/index.html">
+	3.0.1 CHANGES (3.0 to 3.0.1)
+	</A>
+</UL>
+
+
+
+
+<!-- =================================================================== -->
+<HR>
+<H3>
+<A NAME="fml">
+
+fml-current 最新版のパッケージ附属ドキュメント(HTML版)より…
+
+</H3>
+<UL>
+	<LI>
+
+	<A HREF="README/index.html">
+	README; 概要と情報へのポインタについて
+
+	</A>
+
+	<LI>
+
+	<A HREF="CHECK_LIST/index.html">
+	CHECK LIST
+	</A>
+	(質問の前にチェックしてみて欲しいリスト)
+
+
+
+<P>
+
+<A NAME=#installation>インストールとアップグレード
+
+
+	<LI>
+
+	<A HREF="UPGRADE/index.html">
+	アップグレードの際の注意
+
+	</A>
+
+	<LI>
+	<A NAME="#install-on-unix">
+
+	<A HREF="INSTALL/index.html">
+	インストール・ガイド
+	</A>
+	(インストール, makefmlの使い方など全般)
+	<BR>
+	<A HREF="INSTALL_CGI/index.html">
+	CGIのインストール・ガイド
+	</A>
+
+
+<P>
+
+	MTAごとの注意点。sendmail はINSTALLファイルを参照のこと
+
+	<BR>
+
+	<A HREF="INSTALL_with_SENDMAIL/index.html">sendmail</A>
+	<A HREF="INSTALL_with_POSTFIX/index.html">postfix</A>
+	<A HREF="INSTALL_with_QMAIL/index.html">qmail</A>
+	<A HREF="INSTALL_with_EXIM/index.html">exim</A>
+	<A HREF="INSTALL_with_ZMAILER/index.html">zmailer</A>
+
+
+
+<P> Operating systems
+	<LI>
+
+	<A HREF="INSTALL/index.html">[UNIXはINSTALLガイド]</A>
+
+	<A HREF="INSTALL_on_NT4/index.html">[Windows NT4]</A>
+
+	<A HREF="INSTALL_on_MacOS_X_Server/index.html">[Mac OS X Server]</A>
+
+
+
+<P>
+
+<A NAME="#misc">その他
+
+	<LI>
+	<A HREF="RELEASE_NOTES.html">
+	Release Notes
+	</A>
+
+	<LI>
+
+	<A HREF="COPYING">
+
+	GNU PUBLIC LICENSE
+	</A>
+
+	<LI>
+
+	<A HREF="devel/index.html">いろんなソフトウエアの雑多なメモ</A>
+
+
+	<LI>
+
+        <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
+
+
+</UL>
+
+<HR>
+<P>
+
+その他のソフトウエア
+
+   <BR>
+   <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/index.html">
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/
+   </A>	
+
+<!-- =================================================================== -->
+<HR>
+<ADDRESS>
+
+[Author] Ken'ichi Fukamachi
+<BR>
+<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/index.html">
+http://www.sapporo.iij.ad.jp/staff/fukachan/
+</A>
+</ADDRESS>
+
+<PRE>
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
+         All rights reserved.
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

@@ -1,14 +1,20 @@
-.C
+.C	場変
+=E.C	movement
 
 .S	fml の管理者が変わる
+=E.S	If fml administrator changes, ... ?
 
 本書では fml という仮想ユーザを使っています。
 fml というユーザになれる人を変更/増減するだけなので、
 特に問題はありません。
+=E
+If you use virtual "fml" user, you should do nothing.
 
 
 .S	他のＭＬドライバから fml への移行
+=E.S	change other ML drivers to "fml"
 
+.q
    0.	fml で ML を普通につくる
    	(以下 $DIR は /var/spool/ml/elena とかのこと)
    
@@ -31,3 +37,8 @@ fml というユーザになれる人を変更/増減するだけなので、
    やったことがないからわからない(bin/gen_summary.pl)。
    奇麗にフォーマットされていることが前提なのでたぶんちゃんとはできない。
    歯抜けができるようなきがする。はぬけならたぶんつくれるとおもう。
+.~q
+
+
+
+

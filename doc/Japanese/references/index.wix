@@ -1,8 +1,15 @@
 .HTML_PRE
 		リファレンス
+=E
+		References
 
 .toc
 .~HTML_PRE
+
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER SINCE HERE IS ON OBSOLETE THINGS.
+.return
+.fi
 
 .include indexes.wix
 

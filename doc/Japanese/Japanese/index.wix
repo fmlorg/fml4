@@ -1,9 +1,16 @@
 .HTML_PRE
 .# .__repl_title__
                 日本語処理について
+=E
+		Japanese functions
 
 .toc
 .~HTML_PRE
+
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER SINCE HERE IS ON OBSOLETE THINGS.
+.return
+.fi
 
 .# .__repl_include__
 .include overview.wix
