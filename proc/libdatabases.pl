@@ -43,7 +43,7 @@ sub DataBaseMIBPrepare
     # set up action, method, ...
     # cached file which is the dumped data from database server.
     $mib->{'DATABASE_METHOD'} = $DATABASE_METHOD;
-    $mib->{'DATABASE_LIB'}    = $DATABASE_LIB;
+    $mib->{'DATABASE_DRIVER'} = $DATABASE_DRIVER;
     $mib->{'_action'}         = $action;
 
     my ($suffix) = $DATABASE_CACHE_FILE_SUFFIX || ".dbcache";
@@ -104,8 +104,10 @@ sub _GenSQLTemplate
     my ($mib) = @_;
 
     $mib->{'host'}         = $SQL_SERVER_HOST;
+    $mib->{'port'}         = $SQL_SERVER_PORT;
     $mib->{'user'}         = $SQL_SERVER_USER;
     $mib->{'password'}     = $SQL_SERVER_PASSWORD;
+    $mib->{'dbname'}       = $SQL_DATABASE_NAME;
 }
 
 
@@ -131,8 +133,8 @@ sub main::DataBaseCtl
     if ($mib->{'DATABASE_METHOD'} =~ /^LDAP$/i  ||
 	$mib->{'DATABASE_METHOD'} =~ /^MySQL$/i ||
 	$mib->{'DATABASE_METHOD'} =~ /^PostgreSQL$/i) {
-	if ($mib->{'DATABASE_LIB'}) {
-	    eval(" require \"$mib->{'DATABASE_LIB'}\"; ");
+	if ($mib->{'DATABASE_DRIVER'}) {
+	    eval(" require \"$mib->{'DATABASE_DRIVER'}\"; ");
 	    if ($@) {
 		&Log($@);
 		$mib->{'error'} = 'internal error';
@@ -148,7 +150,7 @@ sub main::DataBaseCtl
 	    }
 	}
 	else {
-	    &Log("ERROR: DataBaseCtl: \$DATABASE_LIB not defined");
+	    &Log("ERROR: DataBaseCtl: \$DATABASE_DRIVER not defined");
 	    $mib->{'error'} = 'internal error' if $@;
 	}
     }
