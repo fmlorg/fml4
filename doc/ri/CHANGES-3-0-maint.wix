@@ -5,6 +5,39 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#28 == 3.0.1_BETA #17 ]
+
+	changed to accpet From: $MAIL_LIST
+
+	3.0 のループチェックではじいている From: $MAIL_LIST のケース
+	をデフォールトでは適用しない
+
+[ 3.0pl#27 == 3.0.1_BETA #16 ]
+
+  sbin/makefml (2.65-2.66): 
+	resolve conflicts around doc-template
+
+	先日直したdoc-templateまわりの２つの修正がそれぞれは正しいが
+ 	２つあわさると互いに妨害してしまうbugの修正
+
+[ 3.0pl#26 == 3.0.1_BETA #15 ]
+
+  sbin/makefml: 2.64-2.65
+
+	PR in fml-support: 07167
+	CreateDocTemplate: bug fix %config by GetCF() again here since
+	SaveCF() resets this hash (why?).
+
+  sbin/makefml: 2.63-2.64
+	makefml config
+
+	suspect default value of y/n only when y-or-n/r everse-y-or-n
+	type
+
+	makefml config メニューのenbug fix (0 のところが n になる)
+	
+[ 3.0pl#25 == 3.0.1_BETA #14 ]
+
    doc/
 	TODO: remove all but add ptr to http://www.fml.org/
 
