@@ -7,10 +7,6 @@ How to use anoncvs.fml.org
 <META http-equiv="Content-Type"
 	content="text/html; charset=ISO-2022-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
-<LINK rel="stylesheet" 
-	    type="text/css" href="fml.css">
-<LINK rev="Contents" href="index.html">
-<LINK rev="alternate" lang="en" href="index-e.html">
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
@@ -20,8 +16,8 @@ anonymous cvs (anoncvs.fml.org) の使い方
 </CENTER>
 </H1>
 
-anoncvs はfmlのCVS tree へ read only なアクセスを許します。
-ここではCVSの使い方は知っているものとします。
+anoncvs は fml のCVS tree へ read only なアクセスを許します。
+ここでは CVS の使い方は知っているものとします。
 <PRE>
 
 % cvs -d :pserver:anoncvs@anoncvs.fml.org:/exports/cvsroot login
@@ -36,8 +32,24 @@ anoncvs はfmlのCVS tree へ read only なアクセスを許します。
 
 つまり最初の login さえしておけば、"-d cvsrootの指定" のところ以外は一緒。
 
-fml-current (after 2000/04 end) にはこれのための "anoncvs" (under
-bin/) という wrapper がはいる予定です。
+fml 4.0 には上記のことを行なう wrapper "anoncvs" コマンド
+( /usr/local/fml/bin/anoncvs ) が入っています。
+
+anoncvs で取り出した後は 
+<PRE>
+% cd fml
+% make build
+</PRE>
+で、fml のスナップショット一式を作ることができます。
+なお BSD make が必須です。
+
+BSD make コマンド( cvs tree に入っています) を利用すれば
+linux カーネルを使うディストリビューション上でも、
+make することができます。
+
+NetBSD と GNU Debian/linux (slink) でこの make build が動作することを
+確認しています。詳しくは cvs ソースをで取り出した後 README.Japanese を
+御覧下さい。
 
 <PRE>
 $Id$
