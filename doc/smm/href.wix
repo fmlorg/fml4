@@ -1,0 +1,30 @@
+.C	WWW, HTTP, HREF とか…
+.S	自動的に スプールを html 化する(Expire なし)
+
+Obsolete： SyncHtml.p[lh]
+
+[fml-support: 00613]
+
+fml.pl の中から SyncHTMLfiles.pl $DIR とかを呼んで
+外部のものにやらせるのは美しくないので;-)、
+かきなおしました。
+
+分野別 もしくは Expire するとなると index.html を毎回作り直さなければ
+いけないので、おもたくなりますが、それがいらないなら 
+つまり
+『スプールの中身をどんどこ、どんどこ変換していくだけ』
+でいいんなら、簡単ですね。
+
+$HTML_EXPIRE を０以下にしているときは ファイルの ファイル.html を
+つくって、index.html へ 新規のでーたを append するだけにしてみました。
+
+$FML_EXIT_HOOK か $DISTRIBUTE_CLOSE_HOOK に＃どっちでもいい
+
+$FML_EXIT_HOOK .= q#;
+&use('synchtml');
+$HTTP_DIR = 'tmp/http';
+&SyncHtml($HTTP_DIR, "$HTTP_DIR/$ID", *Envelope);
+#;
+
+で、自力で実行できるようにしてみました…
+
