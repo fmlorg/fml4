@@ -69,17 +69,14 @@ MAIN ()
 		gendoc
 	done
 
-	#####
-	trap "rm -f /tmp/makefml$$" 0 1 3 15
-
-	echo "make depend "
-	(
-		echo var/doc/op.jp: doc/smm/*wix
-		echo "	/bin/sh distrib/bin/DocReconfigure.op"
-	) > /tmp/makefml$$
-
-	make -f /tmp/makefml$$
-
+	### XXX: remove the old code 
+	# trap "rm -f /tmp/makefml$$" 0 1 3 15
+	# echo "make depend "
+	# (
+	# 	echo var/doc/op.jp: doc/smm/*wix
+	# 	echo "	/bin/sh distrib/bin/DocReconfigure.op"
+	# ) > /tmp/makefml$$
+	# make -f /tmp/makefml$$
 }
 
 
