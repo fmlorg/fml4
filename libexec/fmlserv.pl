@@ -415,12 +415,13 @@ sub DoFmlServProc
 
     if ($auth) {
 	local($req);
-	for $req (split(/\n/, $proc)) {
-	    for (split(/\n/, $req)) {
-		&Mesg(*e, "${ml}> $_");
-	    }
-	}
+	$MesgTag = $ml;
+	&Mesg(*e, "*** Processing command(s) for $ml");
+	# for $req (split(/\n/, $proc)) {
+	# for (split(/\n/, $req)) { &Mesg(*e, "${ml}> $_");}
+	# }
 	&Command($proc);
+	undef $MesgTag;
     }
     else {
 	local($mesg, $buf);
@@ -445,7 +446,7 @@ sub DoFmlServProc
 	    }
 
 	    if (/^(subscribe|confirm)\s*(.*)/i){ 
-		if ($ML_MEMBER_CHECK) {
+		if (&NonAutoRegistrableP) {
 		    &Mesg(*e, $mesg);
 		    &Warn("Subscribe Request $ML_FN", &WholeMail);
 		}
@@ -526,8 +527,7 @@ sub MLContextSwitch
     }
 
     ### CF Version 3;
-    if ($REJECT_POST_HANDLER =~ /auto.*regist/i ||
-	$REJECT_COMMAND_HANDLER =~ /auto.*regist/i) {
+    if (&AutoRegistrableP) {
 	$ML_MEMBER_CHECK = 0;
 	$touch = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
 	&Touch($touch) if ! -f $touch;
