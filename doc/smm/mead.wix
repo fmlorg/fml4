@@ -143,6 +143,9 @@ Options:
                             us: service unavaiable
                        default: default value for phrases not above 
 
+    -k action        'bye' is default,  off or bye.
+                     change the action when mead detects a bad address.
+
 .S	ÌäÂêÅÀ
 =E.S	Discussion
 
