@@ -125,6 +125,7 @@ etc/RELEASE_FILES
 etc/release_date
 etc/release_version
 etc/daily.ignore
+etc/mime.types
 
 
 OBSOLETE_SBIN_SOURCES:
