@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: DB.pm,v 1.19 2002/01/13 13:35:30 fukachan Exp $
+# $FML: DB.pm,v 1.26 2002/03/31 02:25:44 fukachan Exp $
 #
 
 package Mail::ThreadTrack::DB;
@@ -12,7 +12,7 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-my $debug = defined $ENV{'debug'} ? 1 : 0;
+my $debug = 0;
 
 =head1 NAME
 
@@ -60,10 +60,11 @@ sub db_open
     my $db_type = $self->{ config }->{ db_type } || 'AnyDBM_File';
     my $db_dir  = $self->{ _db_dir };
 
+    use File::Spec;
     eval qq{ use $db_type; use Fcntl;};
     unless ($@) {
         for my $db (@kind_of_databases) {
-            my $file = "$db_dir/${db}";
+	    my $file = File::Spec->catfile($db_dir, $db);
             my $str  = qq{
                 my \%$db = ();
                 tie \%$db, \$db_type, \$file, O_RDWR|O_CREAT, 0644;
@@ -192,7 +193,10 @@ sub db_mkdb
 	$self->{ _config }->{ article_id } = $id;
 
 	# analyze
-	my $file = File::Spec->catfile($spool_dir, $id);
+	my $file = $self->filepath({
+	    baes_dir => $spool_dir,
+	    id       => $id,
+	});
 	my $fh   = new FileHandle $file;
 	next unless (defined $fh);	# for file missing
 	my $msg  = Mail::Message->parse({ fd => $fh });
@@ -256,13 +260,41 @@ sub db_hash
 }
 
 
+=head2 db_last_modified()
+
+return the last modified time of our dateabase as unix time.
+This time is the latest modified time among all database files.
+
+=cut
+
+
+# Descriptions: return the last modified time (unix time) of database
+#    Arguments: OBJ($self) STR($db_type)
+# Side Effects: none
+# Return Value: STR or UNDEF
+sub db_last_modified
+{
+    my ($self, $db_type) = @_;
+    my $db_dir        = $self->{ _db_dir };
+    my $last_modified = 0;
+
+    use File::Spec;
+    my $file = File::Spec->catfile($db_dir, "date.db");
+    if (-f $file) {
+	$last_modified = (stat($file))[8];
+    }
+
+    return $last_modified;
+}
+
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

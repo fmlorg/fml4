@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: DBI.pm,v 1.10 2001/12/24 07:40:56 fukachan Exp $
+# $FML: DBI.pm,v 1.14 2002/02/01 12:03:58 fukachan Exp $
 #
 
 package IO::Adapter::DBI;
@@ -12,6 +12,8 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use IO::Adapter::ErrorStatus qw(error_set error error_clear);
+
+my $debug = 0;
 
 =head1 NAME
 
@@ -73,7 +75,7 @@ sub execute
     my $dbh   = $self->{ _dbh };
     my $query = $args->{  query };
 
-    print STDERR "execute query={$query}\n" if $ENV{'debug'};
+    print STDERR "execute query={$query}\n" if $debug;
 
     undef $self->{ _res };
 
@@ -179,17 +181,39 @@ same as C<getline()> now.
 sub getline
 {
     my ($self, $args) = @_;
-    $self->get_next_value($args);
+    $self->get_next_key($args);
 }
 
 
-# Descriptions: get from DBI map
-#    Arguments: OBJ($self) HASH_REF($args)
+# Descriptions: return key from DBI map
+#    Arguments: OBJ($self) HASH_REF($args) STR($mode)
+# Side Effects: none
+# Return Value: STR
+sub get_next_key
+{
+    my ($self, $args) = @_;
+    $self->_get_next_xxx($args, 'key');
+}
+
+
+# Descriptions: return value(s) from DBI map
+#    Arguments: OBJ($self) HASH_REF($args) STR($mode)
 # Side Effects: none
 # Return Value: STR
 sub get_next_value
 {
     my ($self, $args) = @_;
+    $self->_get_next_xxx($args, 'value');
+}
+
+
+# Descriptions: get from DBI map
+#    Arguments: OBJ($self) HASH_REF($args) STR($mode)
+# Side Effects: none
+# Return Value: STR
+sub _get_next_xxx
+{
+    my ($self, $args, $mode) = @_;
 
     # for the first time
     unless ($self->{ _res }) {
@@ -213,7 +237,16 @@ sub get_next_value
 
 	my @row = $self->{ _res }->fetchrow_array;
 	$self->{ _row_pos }++;
-	join(" ", @row);
+	if ($mode eq 'key') {
+	    $row[0];
+	}
+	elsif ($mode eq 'value') {
+	    shift @row;
+	    join(" ", @row);
+	}
+	else {
+	    warn("invalid option");
+	}
     }
     else {
 	$self->error_set( $DBI::errstr );
@@ -237,7 +270,7 @@ sub replace
     my (@addr);
 
     # firstly, get list matching /$regexp/i;
-    my $a = $self->find($regexp, { all => 1});
+    my $a = $self->find($regexp, { want => 'key', all => 1});
 
     # secondarly double check: get list matchi /$regexp/;
     for my $addr (@$a) {
@@ -259,7 +292,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

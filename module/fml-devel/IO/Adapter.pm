@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Adapter.pm,v 1.11 2001/12/24 07:40:55 fukachan Exp $
+# $FML: Adapter.pm,v 1.16 2002/02/17 03:13:49 fukachan Exp $
 #
 
 package IO::Adapter;
@@ -12,6 +12,8 @@ use vars qw(@ISA @ORIG_ISA $FirstTime $AUTOLOAD);
 use strict;
 use Carp;
 use IO::Adapter::ErrorStatus qw(error_set error error_clear);
+
+my $debug = 0;
 
 # prepare error_set() is called
 @ISA = qw(IO::Adapter::ErrorStatus);
@@ -61,6 +63,34 @@ RDBMS (Relational DataBase Management System)
 et. al.
 Once you create and open a C<map>,
 you can use the same methods as usual file IO.
+
+=head2 DATA STRUCTURE
+
+Consider file with space separators. The data structure in a file
+is described like this:
+
+	file content = {
+		key1 => undef,
+		key2 => [ value2 ],
+		key3 => [ value3a, value3b ],
+	};
+
+IO::Adapter converts data in arbitrary map e.g. file, /etc/group,
+RDBMS into this structure described above.
+Also,
+IO::Adapter provides unified access methods to this structure.
+
+
+Instead of unification, IO::Adapter may provide amibugous IO.
+For example, IO into array is not described as above.
+/etc/group must be described as
+
+	wheel group = {
+		"root" => undef,
+		key2   => undef,
+		key3   => undef,
+	};
+
 
 =head2 MAP
 
@@ -165,7 +195,7 @@ sub new
     @ORIG_ISA = @ISA unless $FirstTime++;
     @ISA      = ($pkg, @ORIG_ISA);
 
-    printf STDERR "%-20s %s\n", "IO::Adapter::ISA:", "@ISA" if $ENV{'debug'};
+    printf STDERR "%-20s %s\n", "IO::Adapter::ISA:", "@ISA" if $debug;
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {
 	$pkg->configure($me, $args) if $pkg->can('configure');
@@ -242,44 +272,42 @@ sub touch
 }
 
 
-=head2
+=head2 getXXX(), methods to retrieve data
+
+getXXX() should be classified into:
+
+   getline()        raw data
+                    which may consist of "key" and "value" pair.
+   get_next_key()   next primary key
+   get_next_value() next value for (the next) key
+
+For a file map, following usage is intuitive such that
+getline() returns "key value1 value2 ...",
+get_next_key() returns "key" and
+get_next_value() returns "value1 value2 ...", isn't it ?
+
+If possible, getline() should not be used since the definition of
+getline() for a file map is valid but amgibuous for other maps e.g.
+/etc/group, DBMS (SQL based) et. al.
 
 =item C<getline()>
 
 In C<file> map case, it is the same as usual getline() for a file.
 In other maps, it is the same as C<get_next_value()> method below.
 
+=item C<get_next_key()>
+
+return the next primary key.
+
 =item C<get_next_value()>
+
+return the next values (for the next key).
 
 get the next value from the specified database (map).
 For example, this function returns the first column in the next line
 for C<file> map.
 It return the next element of the array,
 in C<array_reference>, C<unix.group>, C<nis.grouop> maps.
-
-=item C<get_member()>
-
-an alias of C<get_next_value()> now.
-
-=item C<get_active()>
-
-an alias of C<get_next_value()> now.
-
-=item C<get_recipient()>
-
-an alias of C<get_next_value()> now.
-
-=cut
-
-# Descriptions: aliases for convenience
-#               request is forwarded to get_next_value() method.
-#    Arguments: OBJ($self)
-# Side Effects: none
-# Return Value: STR
-sub get_member    { my ($self) = @_; $self->get_next_value;}
-sub get_active    { my ($self) = @_; $self->get_next_value;}
-sub get_recipient { my ($self) = @_; $self->get_next_value;}
-
 
 =head2 C<add( $address )>
 
@@ -357,12 +385,26 @@ It searches C<$regexp> in case insenssitive by default.
 You can change the search behaviour by C<$args> (HASH REFERENCE).
 
     $args = {
+	want           => 'key', # 'key' or 'key,value'
 	case_sensitive => 1, # case senssitive
 	all            => 1, # get all entries matching $regexp as ARRAY REF
     };
 
-Normaly the result is given as a string.
+The result returned by find() is primary key of data or key and value
+e.g the whole line in the file format. find() returns the whole one
+line by default. If want options is specified in $args, return value
+changes. 'want' options is 'key' or 'key,value', 'key,value' by default.
+
+find() returns the result as STRING or ARRAY REFERENCE.
+You get only the first entry as string by default.
 If you specify C<all>, you get the result(s) as ARRAY REFERENCE.
+
+For example, to search mail addresses in recipient list,
+
+    my $a = $self->find($regexp, { want => 'key', all => 1});
+    for my $addr (@$a) {
+        do_somethig() if ($addr =~ /$regexp/);
+    }
 
 =cut
 
@@ -376,6 +418,7 @@ sub find
     my ($self, $regexp, $args) = @_;
     my $case_sensitive = $args->{ case_sensitive } ? 1 : 0;
     my $show_all       = $args->{ all } ? 1 : 0;
+    my $want           = 'key,value';
     my (@buf, $x);
 
     # forward the request to SUPER class (md = map dependent)
@@ -383,9 +426,21 @@ sub find
 	return $self->md_find($regexp, $args);
     }
 
+    # What we want, key or  key+value ?
+    if (defined $args->{ want }) {
+	if ($args->{ want } eq 'key' ||
+	    $args->{ want } eq 'key,value') {
+	    $want = $args->{ want };
+	}
+	else {
+	    warn("invalid option");
+	}
+    }
+
     # search regexp by reading the specified map.
     $self->open;
-    while (defined ($x = $self->get_next_value())) {
+    my $fp = $want eq 'key' ? 'get_next_key' : 'getline';
+    while (defined ($x = $self->$fp())) {
 	if ($show_all) {
 	    if ($case_sensitive) {
 		push(@buf, $x) if $x =~ /$regexp/;
@@ -473,7 +528,7 @@ Ken'ichi Fukamchi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamchi
+Copyright (C) 2001,2002 Ken'ichi Fukamchi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

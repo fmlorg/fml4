@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Analyze.pm,v 1.24 2002/01/16 13:43:22 fukachan Exp $
+# $FML: Analyze.pm,v 1.25 2002/02/01 12:04:03 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Analyze;
@@ -12,7 +12,7 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 
-my $debug = defined $ENV{'debug'} ? 1 : 0;
+my $debug = 0;
 
 =head1 NAME
 
@@ -283,7 +283,7 @@ sub _is_ignore
     while (($field, $rule) = each %$filterlist) {
 	if (defined $header->get($field)) {
 	    my $value = $header->get($field);
-	    if ($ENV{'debug'}) {
+	    if ($debug) {
 		print STDERR "ignore $field: $value\n" if $value =~ /$rule/m;
 	    }
 	    return 1 if $value =~ /$rule/;

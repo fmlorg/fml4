@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: ThreadTrack.pm,v 1.24 2001/12/26 14:23:29 fukachan Exp $
+# $FML: ThreadTrack.pm,v 1.26 2002/03/31 02:25:43 fukachan Exp $
 #
 
 package Mail::ThreadTrack;
@@ -500,13 +500,42 @@ sub log
 }
 
 
+=head2 filepath($args)
+
+return article file path.
+
+   $args = {
+	base_dir   => DIR,
+	id         => NUM,
+	use_subdir => 1 or 0,
+   };
+
+=cut
+
+
+# Descriptions: return the article file path.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR(file path)
+sub filepath
+{
+    my ($self, $args) = @_;
+
+    use Mail::Message::Spool;
+    my $spool = new Mail::Message::Spool;
+    my $file  = $spool->filepath($args);
+
+    return $file;
+}
+
+
 =head1 AUTHOR
 
 Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Ken'ichi Fukamachi
+Copyright (C) 2001,2002 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
