@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/09
+
+   review CGI codes
+	more strict variable checks
+
+	変数の表現空間をよりきびしいチェックする
+
 2000/12/06
 
    prepare doc/English/ 
