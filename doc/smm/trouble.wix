@@ -862,6 +862,19 @@ $SMTP_OPEN_HOOK .= q!;
 .~q
 
 
+.S	lha または ish が見つからない…
+
+
+某プロバイダのように UNIX の shell のアカウントのあるマシンには 
+/usr/local/bin/lha があっても ＭＬサーバを実行するマシンにはなかったり
+するんだそうです。で、インストールの時のテストではうまくいっても、その
+後ＭＬサーバでコマンドを実行すると動かない。
+
+あと、shared library が違うということもありますので compile するなら 
+static である必要がありますね
+＃どうしてそういう config にするかの裏の真の理由は理解できるけどね
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
