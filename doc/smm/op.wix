@@ -151,35 +151,15 @@ In this part we describe FML internals more deeply.
 .P	あとがき
 =E.P	Postscripts
 
-＃出典のヒントくらいはするかなっ………と P(^^;;;
-＃この辺の並びでそよ風を感じる人(おぉ同志よ:-)メールください(^^)
-=E
-Can you understand sources of quotations?:-)
-.url	http://www.fml.org/Anime/AminoTetsuro.html
-
 .C	あしたリリースオフ
 =E.C	Release off tomorrow
 
-.S	主に言葉ではなくコーディングする姿から伝わってくるもの
-=E.S	Wind blown mainly from coding style not languages
+サンプルに使っている出典のヒントだけ :)
+=E
+Can you understand sources of quotations?:-)
 
-「それぞれの道は違っても…」
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/Anime/AminoTetsuro.html
 
-.S	シーラカンス
-=E.S	?
-
-この話も二重三重の意味がある話だ。
-
-.S	ポリシー＆アイデンティティ
-=E.S	Policy & Identity
-
-「…流の意地ってやつなのかな」(謎)
-あくまでも枠組、メタレベルの実装をすべきだと…
-
-.S	あしたリリースオフ
-=E.S	Release off tomorrow
-
-深い意味はないんだけど…:-) まぁいいんじゃないの(謎++)
 
 
 .# ##########################################################
