@@ -1,0 +1,43 @@
+.HTML_PRE
+
+	makefml -f configfile
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+
+makefml -f 
+
+ちなみに
+
+   -f systemファイル
+   -i コマンド入力チャンネル
+
+ね:-) 
+
+◯ -i STDIN は CGI なんかが使ってます。
+
+  CGI -> 入力チェック -> open(MAKEFML, "|  makefml -i STDIN  ") ..
+
+◯ -f はこういうかんじ↓です。
+
+  makefml -f /some/where/virtual-domain-1 install
+
+  makefml -f /some/where/virtual-domain-2 install
+
+ここの /some/where/virtual-domain-1,2 は /usr/local/fml/.fml/system
+で、ドメイン部分が変更されているものです。
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
