@@ -32,7 +32,7 @@ sub CompatFML15_Post
 
     # misc
     $Envelope{'mode:uip'}       = $CommandMode;
-    $Envelope{'req:guide'}      = $GUIDE_REQUEST;
+    $Envelope{'mode:req:guide'} = $GUIDE_REQUEST;
     $Envelope{'Header'}         = $MailHeaders;
     $Envelope{'Body'}           = $MailBody;
 
@@ -68,7 +68,7 @@ sub CompatFML15_Pre
 
     # misc
     $CommandMode   = $Envelope{'mode:uip'};
-    $GUIDE_REQUEST = $Envelope{'req:guide'};
+    $GUIDE_REQUEST = $Envelope{'mode:req:guide'};
     $MailHeaders   = $Envelope{'Header'};
     $MailBody      = $Envelope{'Body'};
     $BodyLines     = $Envelope{'nlines'};
