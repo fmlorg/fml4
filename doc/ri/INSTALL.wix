@@ -617,6 +617,29 @@ e.g.
 You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
 
+
+.S	設定ファイルについての注意
+
+まず config.ph というファイルが設定ファイルです。makefml は cf という
+ファイルを編集するインターフェイスです。この cf というファイルから 
+config.ph を毎回作っています(cf -> config.ph)。
+
+この画面で設定できない(進んだ)設定をするためには
+
+	1. cf ファイルを編集する。
+	   cf ファイルをいじって config.ph を作る。
+	   make config.ph というコマンドで cf -> config.ph はつくられます。
+
+	2. 今後は cf も makefml も使わない。
+	   config.ph を手で編集することにする。
+
+そういう意味で cf ファイルは config.ph のマスターですが、config.ph を
+直接編集してももちろん構いません。むしろ望ましいです。しかし、
+config.ph を手でいじって、そのあと makefml config を使うとせっかくの設
+定が上書きされて消されてしまうので注意して下さい(この場合 makefml は警
+告を出して一回止まりこのまま進んでいいかどうか尋ねてきます)。
+
+
 .S	TOP メニュー
 =E.S	TOP MENU
 
