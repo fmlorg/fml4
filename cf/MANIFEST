@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.90 2001/10/14 06:37:10 fukachan Exp $
+# $FML$
 #
 
 
@@ -662,6 +662,7 @@ LIST_SOFTWARE:
 LIST_POST:		
 LIST_OWNER:		
 LIST_HELP:		
+LIST_SUBSCRIBE:	
 LIST_UNSUBSCRIBE:	
 LIST_ID:		
 
