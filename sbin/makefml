@@ -2406,7 +2406,7 @@ sub __html_htpasswd_repl
     }
     # first time
     else {
-	print $fnew $x;
+	print $fnew $x, "\n";
     }
 
     close($fnew);
@@ -4827,6 +4827,10 @@ sub do_setup_mladmin_cgi
 	&Conv($ml, $template, $outfile);
 	chmod 0755, $outfile;
     }
+
+    &Conv($ml, "$EXEC_DIR/www/etc/dot_htaccess.ml-admin",
+	  "$REAL_CGI_PATH/ml-admin/$ml/.htaccess");
+
 
     print "\n   done.\n";
 }
