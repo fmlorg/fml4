@@ -1,0 +1,25 @@
+[ following postfix how-to ... ]
+
+# primary, secondary !
+$SQL_SERVER_HOST @SQL_SERVER_HOST 
+$SQL_SERVER_PORT
+
+$SQL_SERVER_USER
+$SQL_SERVER_PASSWORD
+$SQL_DB_NAME
+$SQL_TABLE
+
+#
+select_field = forw_addr
+where_field = alias
+
+# you may specify additional_conditions here
+additional_conditions = and status = 'paid'
+
+
+
+[how to select]
+
+select forw_addr 
+	from mxaliases
+	where alias = '$lookup' and status = 'paid'
