@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/03
+
+   cf/MANIFEST
+	prototype for email-address form should be null for 
+	default_config.ph template.
+
+	default_config.ph で $MAIL_LIST, $CONTROL_ADDRESS, $MAINTAINER
+	のアドレスの template がNULLになるように設定を変更 	
+
 2000/04/30
 
    $LOGFILE_SUFFIX	(default NULL)
