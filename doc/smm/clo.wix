@@ -258,7 +258,10 @@ config.ph では
 
 .k	--remote
  --remote
-	リモート管理モード（パスワードを要求する）
+.k	--ra
+ --ra
+	Remote Administration Mode
+	リモート管理モード(パスワードを要求する)
 	具体的には
 		$REMOTE_ADMINISTRATION = 1;
 		$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;

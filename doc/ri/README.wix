@@ -119,7 +119,7 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。
 
 
-.S	anonymous ftp でのソースの入手方法 
+.S	Anonymous ftp でのソースの入手方法 
 
 国内、国外共にマスターサーバは
 
@@ -453,7 +453,6 @@ perl, operating systems and so on.
 Please see CHANGES and RELEASE_NOTES
 
 
-Last Modified
 $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp

@@ -38,15 +38,18 @@ FAILしてどこかのポストマスタにうっかり見えてしまう可能性もあります(普
 ロングラインオプションで
 
 	fml.pl --remote
+	fml.pl --ra
 か
 	config.ph で &DEFINE_MODE('remote');
+	             &DEFINE_MODE('ra');
 
-で設定できます。このモード設定は
+で設定できます(ra == Remote Administration)。
+このモード設定は
 
 	$REMOTE_ADMINISTRATION = 1;
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
 
-です(後述)。つまり
+をしていることと同じです(後述)。つまり
 
 	リモート管理を認め
 	管理者であることを証明するためにはパスワード認証が必要
