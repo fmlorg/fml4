@@ -719,6 +719,12 @@ RFC1153_VOL:
 # value: filename string
 RFC1153_SEQUENCE_FILE:
 
+# ## Sub Section: MTA specific ##
+# qmail specific extension
+# To send "get 1" to ml-ctl@domain is equivalent to that
+# send anything to ml-get-1@domain if this variable is defined.
+# value: 1/0
+USE_DOT_QMAIL_EXT:	0
 
 # ## Sub Section: Headers of reply from FML ##
 # obsolete
