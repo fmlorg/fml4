@@ -156,6 +156,11 @@ htmldoc:	doc/smm/op.wix
 	@ (chdir doc/html; make op)
 	@ echo "Please see ./var/html/index.html for html version documents"
 
+search:
+	@ echo ""
+	@ sh .release/search_doc_generator
+	@ (cd /usr/local/SSE; make)
+
 message: 
 
 fix-rcsid:
@@ -210,8 +215,8 @@ syncwww:
 syncinfo:
 	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
 
-bethdoc: INFO syncinfo newdoc
-newdoc: htmldoc syncwww syncinfo
+bethdoc: INFO syncinfo newdoc search
+newdoc: htmldoc syncwww syncinfo 
 
 varcheck:
 	perl usr/sbin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
