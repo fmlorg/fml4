@@ -104,6 +104,7 @@ bin/weekend-msend.sh
 bin/emumail.pl
 bin/msend_master.sh
 bin/more_secure_cf.pl
+bin/translate.pl
 
 SBIN_SOURCES:
 sbin/localtest.pl

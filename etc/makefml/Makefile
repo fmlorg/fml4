@@ -66,3 +66,5 @@ secure:
 	@ perl -i.bak _EXEC_DIR_/bin/more_secure_cf.pl cf
 	@ make config.ph
 
+domain-translate:
+	perl _EXEC_DIR_/bin/translate.pl -f _EXEC_DIR_/etc/mgrdomains actives members
