@@ -1,9 +1,13 @@
 .C	ライブラリ関数
+.k	ライブラリ関数
 
-ここでは、カスタマイズに役にたちそうなライブラリ関数の説明をします。
-とりあえず、選んで説明:-)
+ここでは、カスタマイズに役に立ちそうなライブラリ関数の説明をします。
+とりあえずいきあたりばったりに選んで説明:-)
+
 
 .S	daemon (libutils.pl)
+.k	daemon()
+.k	setsid()
 
 (4.4BSDにならって) 今のプロセスをデーモンにします。
 ＃4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
@@ -24,7 +28,7 @@ STDIN,STDOUT,STDERRを閉じます。
 ＃注意：4.4BSDの setsid()は 新しいセッションをはじめること
 
 例：
-	$FML_EXIT_HOOK = q#
+	$FML_EXIT_HOOK .= q#
 		&use('utils');
 		&daemon;
 		exec("$LIBDIR/bin/cron.pl $DIR -a");
@@ -37,6 +41,7 @@ $NOT_USE_TIOCNOTTY を セットしないと、うまく daemonさんになってくれな
 
 
 .S	Sendmail (libsmtp.pl)
+.k	Sendmail
 
 SYNOPSIS
 	&Sendmail($to, $subject, $body, @to);
@@ -48,6 +53,7 @@ SYNOPSIS
 
 
 .S	SendFile (libsmtp.pl)
+.k	SendFile
 
 SYNOPSIS
 	&SendFile($to, $subject, $file, $zcat, @to);
@@ -65,6 +71,7 @@ SYNOPSIS
 
 
 .S	NeonSendFile (libsmtp.pl)
+.k	NeonSendFile
 
 複数のアドレスとファイルを一辺にハンドリングし、メールで送り返すための
 インターフェイス
@@ -78,5 +85,421 @@ SYNOPSIS
 	@files		送りたいファイル（複数可能）
 
 
+.S	Addr2FQDN              (fml.pl)
+.k	Addr2FQDN
 
-.# $Id$;
+SYNOPSIS:
+	&Addr2FQDN($addr);
+
+もし与えられた文字列($addr)が @ を含んでいない時は 
+
+	$addr@$FQDN
+
+に変換。@ を含んでいればそのまま返す。
+
+
+.S	AddressMatch           (fml.pl)
+.k	AddressMatch
+
+SYNOPSIS:
+	&AddressMatching($addr1, $addr2)
+
+$addr1 と $addrs が同じものかどうか調べる。
+
+
+.S	Append2                (fml.pl)
+.k	Append2
+
+SYNOPSIS:
+	&Append2(文字列, ファイル)
+	
+
+.S	AutoRegist             (libutils.pl)
+.k	AutoRegist
+
+SYNOPSIS:
+	&AutoRegist(*Envelope);
+
+自動登録ルーチン。明示的に
+
+	&AutoRegist(*Envelope, 文字列);
+
+と呼び出すことで文字列を登録すべきアドレスにすることができる
+
+
+.S	ChangeMemberList       (libfml.pl)
+.k	ChangeMemberList
+
+$ADDR_CHECK_MAX(default 10) 回、アドレスチェックを厳しくしながら
+
+	&DoChangeMemberList(@_);
+
+を繰り返し適用する。つまりデフォールトでは３段階までしかアドレスチェッ
+クをしないので
+
+	fukachan@sapporo.iij.ad.jp
+
+の iij.ad.jp までしか比べないが、それだけでは曖昧な場合は
+４段階つまり sapporo.iij.ad.jp までアドレスをチェックする。
+
+例：
+	fukachan@iij.ad.jp
+	fukachan@sapporo.iij.ad.jp
+
+の両方がファイル中に現れる場合。	
+
+
+.S	ChangePasswd           (libcrypt.pl)
+.k	ChangePasswd
+
+SYNOPSIS:
+	&ChangePasswd($PASSWD_FILE, $addr, $new)
+
+$PASSWD_FILE 中の $addr に対してのパスワードを $new にする。
+なお、この時点でパスワード認証は終っていなければならない。
+
+
+.S	CheckMember            (fml.pl)
+.k	CheckMember
+
+SYNOPSIS:
+	 &CheckMember($From_address, $MEMBER_LIST);
+
+$MEMBER_LIST の中に $From_address が現れるかどうかしらべる。
+
+
+.S	CmpPasswd              (libcrypt.pl)
+.k	CmpPasswd
+
+SYNOPSIS:
+	&CmpPasswd($encrypt, $plain-passwd)
+
+etc/passwd 中の
+	cryptがかかったパスワード ($encrypt)
+と
+	user が送り込んだ plain password ($plain-passwd)
+を比較する
+
+
+.S	CmpPasswdInFile        (libcrypt.pl)
+.k	CmpPasswdInFile
+
+SYNOPSIS:
+	&CmpPasswdInFile($PASSWD_FILE, $addr, $pass)
+
+$PASSWD_FILE 中のアドレス $addr に対しパスワード $pass で認証できるか
+否か？
+
+
+.S	Conv2mailbox           (fml.pl)
+.k	Conv2mailbox
+
+SYNOPSIS:
+    $From_address        = &Conv2mailbox($from, *e);
+
+$from の中の アドレス部分（ユーザ＠ドメイン 部分）だけを取り出す。
+
+なお *e はあってもなくてもよい;
+
+
+.S	DecodeMimeStrings      (libMIME.pl)
+.k	DecodeMimeStrings
+
+SYNOPSIS:
+	$s = &DecodeMimeStrings($s);
+
+$s 中のMIME文字列を日本語へ変換する。関数の返り値が日本語化された文字
+列である。
+
+
+.S	Flock                  (fml.pl)
+.k	Flock
+
+SYNOPSIS:
+	&Flock();
+
+$FP_SPOOL_DIR へ対して flock(2) をかける。
+
+なお $TIMEOUT 秒後 SIGALRM が fml.pl へ返るように設定している。
+この時 $SIG{'ALRM'} で定義された関数が実行される。
+標準は &TimeOut; が実行され、fml はタイムアウトエラーで終る。
+
+
+.S	Ftp                    (libftp.pl)
+.k	Ftp
+.xref	ftp
+
+
+.S	Funlock                (fml.pl)
+.k	Funlock
+
+$FP_SPOOL_DIR に対する flock(2) をはずす。
+
+
+.S	GetID                  (libfml.pl)
+.k	GetID
+
+SYNOPSIS:
+	&GetID;
+
+$SEQUENCE_FILE の値を返す。
+
+
+.S	GetTime                (fml.pl)
+.k	GetTime
+
+SYNOPSIS:
+	&GetTime;
+
+localtime(); を実行し、フォーマットの違ういくつかの日付変数(グローバル)
+を設定する。
+
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+
+
+.S	HRef                   (libhref.pl)
+.k	HRef
+.xref	href
+
+
+.S	Lock                   (fml.pl)
+.k	Lock
+
+SYNOPSIS:
+	&Lock;
+
+	if $USE_FLOCK がセットされいるなら
+		&Flock;
+	else 
+		liblock.pl で定義されている link() を使う
+		UNIX V7 時代からあった懐かしいロックアルゴリズムを使う
+		require liblock.pl;
+		&V7Lock;
+
+
+.S	Log                    (fml.pl)
+.k	Log
+
+SYNOPSIS:
+	&Log($s);
+
+$s 文字列を $LOGFILE に書き込む。
+
+
+.S	LogWEnv                (fml.pl)
+.k	LogWEnv
+
+SYNOPSIS:
+	&LogWEnv($s, *e);
+
+は
+	&Log($s)
+	$e{'message'} .= "$s\n";
+
+です。$LOGFILE への書き込みと、&Notify で返されるfml Status Reportの
+内容に $s を付け加える。
+
+
+.S	Mesg                   (fml.pl)
+.k	Mesg
+
+SYNOPSIS:
+	&Mesg(*Envelope, $s);
+
+	$Envelope{'message'} .= "$s\n";
+
+&Notify で返されるfml Status Reportの内容へ $s を付け加える。
+
+
+.S	NewSyslog              (libnewsyslog.pl)
+.k	NewSyslog
+.xref	newsyslog
+
+
+.S	Notify                 (fml.pl)
+.k	Notify
+
+SYNOPSIS:
+	&Notify;
+
+ようするに "fml Status report $ML_FN" を送り返している関数。
+
+   宛先:	$Envelope{'message:h:to'} 
+		がなければ $Envelope{'Addr2Reply:'}
+   宛先(複数):	$Envelope{'message:h:@to'} にアドレスリストを入れる。
+   Subject:	$Envelope{'message:h:subject'}
+		default は "fml Status report $ML_FN"
+
+$PROC_GEN_INFO (default 'GenInfo') で生成されるヘルプメッセージをつけ
+て、$Envelope{'message'} をユーザに送り返す。
+
+また、$Envelope{'error'} があればそれを管理者へ送る。
+
+
+.S	RunHooks               (fml.pl)
+.k	RunHooks
+
+SYNOPSIS:
+	&RunHooks;
+
+
+もし $FML_EXIT_HOOK があれば
+	eval $FML_EXIT_HOOK
+
+
+もし $FML_EXIT_PROG が定義されていれば
+	exec $FML_EXIT_PROG;
+
+を実行する。
+
+
+.S	SecureP                (fml.pl)
+.k	SecureP
+
+SYNOPSIS:
+	&SecureP($request);
+
+コマンド等のユーザからＭＬサーバへのリクエスト($request)が
+”安全と思われる”シンタックスのみで表現されているかどうか？
+を調べる。
+
+例外処理をする場合は SecureP を呼び出す前にケースバイケースで処理する。
+
+
+.S	SendingBackInOrder     (libfop.pl)
+.k	SendingBackInOrder
+
+SYNOPSIS:
+	&SendingBackInOrder($returnfile, $total, $subj, $sleeptime, @to)
+
+	$returnfile	tmp/uja のようなファイル
+	$total		全部で何分割しているか？
+	$subj		Subject: 
+	$sleeptime	何分おきに配送するか
+	@to		配送リスト
+
+まとめ送りサーバ msend.pl や mget の中で使われている代表的なファイル送
+り返し関数。
+
+
+.S	SocketInit             (libsmtp.pl)
+.k	SocketInit
+
+SYNOPSIS:
+	&SocketInit;
+
+プロセス間通信をはじめる前にはこれを呼ぶ。libsmtp.pl の中にあるので、
+普通はどこからでも呼べる。
+
+
+.S	SyncHtml               (libsynchtml.pl)
+.xref	SyncHtml
+
+
+.S	TalkWithHttpServer     (libhref.pl)
+.xref	TalkWithHttpServer
+
+
+.S	TurnOverW0             (libnewsyslog.pl)
+.k	TurnOverW0
+
+SYNOPSIS:
+	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
+
+$LOG_MESSAGE_ID に newsyslog を適用する。
+
+
+.S	Unlock                 (fml.pl)
+.k	Unlock
+.xref	Lock
+
+上述の Lock の逆をやる。
+
+
+.S	Warn                   (fml.pl)
+.k	Warn
+
+SYNOPSIS:
+	&Warn($subject, $body);
+
+中身は
+	&Sendmail($MAINTAINER, $subject, $body);
+
+と同じ。つまり管理者宛のメールを出す。
+
+
+.S	WholeMail              (fml.pl)
+.k	WholeMail
+
+SYNOPSIS:	
+	&WholeMail;
+
+オリジナルのメールをスペース３文字インデントしたものを返す。インデント
+はぱっと見た時に明らかに本文の中で違う意味を示すようにするためである。
+
+エラーメール等で使う場合が多いため、変なフォーマットにする等の小細工は
+せず単純なインデントですませるべきであろう。
+
+
+.S	eval                   (fml.pl)
+.k	eval
+
+SYNOPSIS:
+	&eval($eval_string)
+
+$eval_string を eval する。
+$COMPAT_FML15 を指定すると eval の前後で補正コードが適用され
+fml 1.5 依然のデータ構造でもほとんど動くはずである。
+＃完璧に補正できる保証はないと思う。
+
+
+.S	ipc                    (libutils.pl)
+.k	ipc
+
+SYNOPSIS:
+	&ipc(*ipc, *r);
+
+プロセス間通信インターフェイス
+
+	$ipc{'host'}	相手のホスト
+	$ipc{'serve'}	ポート (/etc/services)
+	$ipc{'tcp'}	TCP/IP を宣言
+	$ipc{'pat'}	構造体パターン
+
+	@ipc		相手サーバへのINPUT文字列
+
+	$r		答えはこの中に入り返される。
+
+
+.S	system                 (libutils.pl)
+.k	system
+
+SYNOPSIS:
+	&system($s, $out, $in, $read, $write)
+
+$s 文字列を実行する。チェックメカニズムを除けば内容的にＯＳの提供する 
+system(3) とほとんど変わらない。
+
+その際
+
+	$in ファイルから読み
+	$outファイルへ出力
+
+	$write ファイルハンドルから読みこみ
+	 $read ファイルハンドルへ書く
+
+なお	
+
+    /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/
+
+の文字列にマッチした場合 security のため system() は実行されない。
+
+
+.# $Id$

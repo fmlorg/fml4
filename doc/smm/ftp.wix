@@ -1,4 +1,5 @@
 .C	local spoolへのftp-likeなアクセス (ftpmail)
+.label	ftp
 
 .S	libftp.pl イントロダクション
 .k	libftp.pl

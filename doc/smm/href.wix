@@ -1,4 +1,6 @@
 .C	WWW関係を自動的におこなう。ファイル生成、WWWへのリレー …
+.l	href
+
 .key	WWW
 .key	href
 .key	http
@@ -9,7 +11,7 @@
 .S	自動的に スプールを html 化する(Expire なし)
 .key	自動html生成
 .key	libsynchtml.pl
-
+.l	SyncHtml
 
 Obsolete： SyncHtml.p[lh]
 
@@ -85,6 +87,10 @@ e.g.
 
 	$HTML_INDEX_TITLE = "Fj.Sci.Physics FAQ Project";
 
+
+.S	TalkWithHttpServer
+.l	TalkWithHttpServer
+.k	TalkWithHttpServer
 
 
 .# $Id$

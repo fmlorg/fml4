@@ -1,4 +1,8 @@
 .C	Caching Whois (libexec/cwhois.pl)
+.k	libexec/cwhois.pl
+.k	cwhois.pl
+.k	Caching-Whois
+.k	Whois-with-Cache
 
 .S	Whois Server with Cache
 
@@ -22,6 +26,10 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 
 
 .S	一次キャッシュと２次キャッシュも含む探索アルゴリズム
+.k	$WHOIS_SERVER
+.k	#keyword
+.k	all#keyword
+.k	option#keyword
 
 一次キャッシュと２次キャッシュも含む探索アルゴリズムは次のようになる。
 
@@ -55,6 +63,7 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 
 
 .S	/etc/inetd.conf 
+.k	/etc/inetd.conf 
 
 例：
 	whois stream tcp nowait fukachan \
@@ -70,6 +79,7 @@ cwhois.pl の引数の directory にある config.ph を見ます。
 
 
 .S	本来の whois データベースサーバの設定
+.k	$WHOIS_SERVER
 
 このフォーワード先、つまり本来聞きたい先の whois server はあらかじめ 
 設定ファイル中に定義しておく必要があります。
@@ -80,6 +90,7 @@ $WHOIS_SERVER を定義して下さい。
 
 
 .S	client 側での whois command の使い方
+.k	whois
 
 コマンドラインで
 
@@ -105,6 +116,7 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 
 
 .S	configuration file の設定一覧
+.k	$CACHE_SEARCH_PROG
 
 設定できる変数は次の通りです。
 
@@ -116,6 +128,8 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 ＃ ちなみに &ScanDB(*key, *set, *db, *spool, *misc); のように呼び出します
 
 ○キャッシュスプールとデータベース対応させる配列（連想配列）
+.k	%CWHOIS_CACHE_SPOOL
+.k	%CWHOIS_CACHE_DB
 
     KEYWORD => スプール（directory）
 
@@ -128,6 +142,7 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 例：
 	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply');
 	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb');
+
 
 
 必要なら（対応する） spool1:spool2 という形で
@@ -143,6 +158,7 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	デフォールトでは proc#keyword 形	
 
 	$CHMODE             = '#';
+.k	$CHMODE
 
 オプションとキーワードの区切り。ここでは # なので	
 
@@ -155,10 +171,12 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 ○デフォールトフォワード先の whois server
 
 	$WHOIS_SERVER       = 'whois.nic.ad.jp';
+.k	$WHOIS_SERVER
 
 ○WHOIS の TCP CONNECTION をあきらめるまでの時間
 
 	$TIMEOUT            = 5;#20;
+.k	$TIMEOUT
 
 
 .S	Cwhois の Search Algorithm
@@ -225,6 +243,8 @@ cron を使って１時間に一度とかの割合で update をかけるのが良いでしょう。
 
 
 .S	gendb.pl (lib/cwhois/gendb.pl)
+.k	lib/cwhois/gendb.pl
+.k	gendb.pl
 
 有効なキャッシュは良いデータベースがあってはじめて有効となります:-)
 ＃『良い展示には良い暗幕』という諺のようなものですね（謎）
@@ -238,6 +258,7 @@ sub CacheOn という example が gendb.pl の中にありますので、
 
 
 .S	データベース生成関数の例
+.k	$CACHE_PROG
 
 データベース生成関数（ここの例は CacheOn）というこの関数は 
 メールのヘッダと本文を渡され、
@@ -293,10 +314,13 @@ sub CacheOn
 
 
 .S	scandb.pl (lib/cwhois/scandb.pl)
+.k	lib/cwhois/scandb.pl
+.k	scandb.pl
+.k	$CWHOIS_SEARCH_PROG
+.k	ScanDB
 
 	require $CWHOIS_SEARCH_PROG;
 	&ScanDB(*key, *set, *db, *spool, *misc);
-
 
 
 .# $Id$

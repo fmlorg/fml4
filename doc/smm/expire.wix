@@ -1,61 +1,43 @@
-.C	Expire
-.S	expire
+.C	Expire (一定日数より古いファイルは消す)とNewSyslog
+
+.S	一定日数以上古いファイルを消去
 .label	{expire}
 .key	$FML_EXIT_HOOK
+.k	&Expire
 
-形式： &Expire(場所, 日数(以上古いファイルを消す));
+SYNOPSIS:
+	&Expire(場所, 日数(以上古いファイルを消す));
 
-$FML_EXIT_HOOK = q#
-	&use('expire');
-	&Expire($SPOOL_DIR, 7);
-#;
+例：
+	$FML_EXIT_HOOK .= q#
+		&use('expire');
+		&Expire($SPOOL_DIR, 7);
+	#;
 
 と設定すれば、$SPOOL_DIR 以下のファイルにたいして 7日以上古いファイル
 を消します（いきなり消します。注意）
 
-今： libexpire.pl を作った。
-旧： expire.pl を perl の inlcude pathのどこかにいれてください
 
-まぁこれだと、毎回起動するたびに一個ずつ消すことになるので、やることの
-わりにおおげさですね。
+.S	ファイル数で消すファイルを決める
+.k	&Expire
 
-cron で 
-	expire.pl -s spool-directory -e expire-period 
-とかを設定して、週一くらいで動かせばいいのでは？
+SYNOPSIS:
+	&Expire(場所, 残しておきたい記事数, 1);
 
+例：
+	$FML_EXIT_HOOK .= q#
+		&use('expire');
+		&Expire($SPOOL_DIR, 100, 1);
+	#;
 
-.S	expireを残すファイルの数で指定して行なう
-.label	{expire_with_number}
-.key	$FML_EXIT_HOOK
-
-形式： &Expire(場所, 残すファイル数 , 1（ファイルで実行を指示するため）);
-
-$FML_EXIT_HOOK = q#
-	&use('expire');
-	&Expire($SPOOL_DIR, 50, 1);
-#;
-
-今： libexpire.pl を作った。
-旧： expire.pl を perl の inlcude pathのどこかにいれてください
-
-と設定すれば、$SPOOL_DIR 以下のファイルにたいして 
-	”５０個残して”（注意）
-それ以外の古いファイルを消します（いきなり消します。注意）
-
-cron で 
-	expire.pl -s spool-directory -e expire-period 
-とかを設定して、週一くらいで動かせばいいのでは？
+と設定すれば、$SPOOL_DIR 以下の最新の100個のみを残して後は消去します
+(いきなり消します。注意)。
 
 
-.S 	いきなりExpireの実験はしないほうが…
-
-$SPOOL_DIR じゃなくて tmp の下に tmp/spool とか作って、実験したほうが
-いいですね。
-
-
-.S	expire.pl コマンドラインオプション
-.label	{expire_getopt}
-.label	{expire.pl}
+.S	expire.pl コマンドラインオプション (bin/expire.pl)
+.k	bin/expire.pl
+.label	expire_getopt
+.label	expire.pl
 .key	$FML_EXIT_HOOK
 
 expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
@@ -65,21 +47,21 @@ expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
     -n （残すファイル数を設定して、expireするモード）
 
 
-
 .S	logファイルの整理、消去をする → newsyslog
-.seealso	newsyslog
+.xref	newsyslog
 
 
-.S	newsyslogをする（デフォールト）
-.label	{newsyslog}
+.S	newsyslogをする(デフォールト)
+.label	newsyslog
 .key	$NOT_USE_NEWSYSLOG
 .key	@NEWSYSLOG_FILES
+.k	libnewsyslog.pl
 
-まとめおくりの MSendv4.pl は日曜朝６時に（デフォールト）
+まとめおくりの msend.pl は日曜朝6時に(デフォールト)
 
 	libnewsyslog.pl を実行します
 
-この３つのファイル（デフォールト）に対し
+この3つのファイル(デフォールト)に対し
 
 @NEWSYSLOG_FILES = 
 	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak")
@@ -100,13 +82,13 @@ ln -s members.bak 	var/log/members.0
 とか	config.ph に書いておいてください。
 
 
-.S	cronでnewsyslogをする
+.S	cronでnewsyslogをする (OBSOLETE shell version)
 
 たとえば、
 
-0	6	*	*	0	(chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
+0 6 * * 0 (chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
 
-とかかく
+とか書くわけです。
 
 
 .S	newsyslogをしない

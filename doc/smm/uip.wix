@@ -3,11 +3,6 @@
 ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
 について解説します。
 
-以下まだ未解説;-)
-	bin/inc_via_pop.pl
-	bin/split_and_msend.pl
-
-
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
 .key	bin/Archive.pl
 .key	bin/Archive.sh
@@ -91,7 +86,7 @@ DNS のテストをする、ちょっとしたプログラム。
 
 
 .S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
-.xref	expire
+.xref	expire.pl
 
 
 .S	FMLのコマンドへのユーザインターフェイス (bin/fmlctl.pl)
@@ -301,6 +296,41 @@ fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
 .xref moderated
 .xref REMOTE-ADMINISTRATION
 
+
+.S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/pop2recv.pl)
+.k	bin/pop2recv.pl
+.k	bin/inc_via_pop.pl
+.k	pop2recv.pl
+.k	inc_via_pop.pl
+
+理屈としては
+
+	pop を使って取り寄せつつ MH の rcvstore へPIPEで投げる(inc)
+	pop を使って取り寄せつつPIPEで fml へ投げる(ML)
+
+は同じです。実行する下請けプログラムが違うだけ。後はこれを cron で実行
+すれば、
+
+	サイトに一台 UNIX マシンがあれば
+	sendmail が動いていなくてもＭＬは可能
+だし	
+	自分のマシンがメールを受けられなくても 
+	pop経由で自動的にメールをスプールできます。
+
+ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
+できるでしょう。
+
+注意： inc_via_pop.pl が古いプログラムの名前（今はリンク）
+
+
+
+.S	与えられたファイルを分割して送り出すプログラム (bin/split_and_msend.pl)
+.k	bin/split_and_msend.pl
+.k	split_and_msend.pl
+
+与えられたファイルを分割して送り出すプログラムを太古の昔使ってた名残。
+事実上使ってない。fml 2.x では OBSOLETE
+ 
 
 .S	MLを止めて(ロックして)config.phの edit をしたい (bin/vipw.pl)
 .key	vipw.pl
