@@ -162,33 +162,35 @@ sub SmtpConnect
 {
     local(*host, *error) = @_;
 
-    eval {
-	my $mta = 'localhost:25' || '[::1]:25';
-	my $obj;
-	my $pkg = "Mail::Delivery";
+    if ($USE_INET6) {
+	eval {
+	    my $mta = "$host:$Port" || 'localhost:25' || '[::1]:25';
+	    my $pkg = "Mail::Delivery";
 
-	eval "require $pkg; $pkg->import();";
-	unless (@$) {
-	    $obj = new Mail::Delivery { 
-		protocol     => 'SMTP', 
-		log_function => \&Log,
-	    };
+	    eval "use Socket6; require $pkg; $pkg->import();";
+	    unless ($@) {
+		my $obj = new Mail::Delivery { 
+		    protocol     => 'SMTP', 
+		    log_function => \&Log,
+		};
 
-	    if (defined $obj) {
-		$obj->connect6( { _mta => $mta } );
-		&Log($@) if $@;
+		if (defined $obj) {
+		    $obj->connect6( { _mta => $mta } );
+		    &Log($@) if $@;
 
-		if (defined $obj->{ _socket }) {
-		    *S = $obj->{ _socket };
-		    return "";
-		}
-		else {
-		    &Log( $obj->error() ) if $obj->error();
-		    &Log("cannot connect $mta by IPv6");
+		    if (defined $obj->{ _socket }) {
+			&Log("use $mta by IPv6");
+			*S = $obj->{ _socket };
+			return "";
+		    }
+		    else {
+			&Log( $obj->error() ) if $obj->error();
+			&Log("cannot connect $mta by IPv6");
+		    }
 		}
 	    }
-	}
-    };
+	};
+    }
 
     local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
