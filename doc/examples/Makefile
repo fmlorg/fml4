@@ -11,6 +11,7 @@ DOC_EXAMPLES_SOURCES += config-post-from-anyone
 DOC_EXAMPLES_SOURCES += howto-customize
 DOC_EXAMPLES_SOURCES += errormail-handling
 DOC_EXAMPLES_SOURCES += errormail-handling-qmail
+DOC_EXAMPLES_SOURCES += files
 
 # samples
 DOC_EXAMPLES_SAMPLES += sample.aliases
