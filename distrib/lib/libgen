@@ -436,6 +436,12 @@ GEN_ARCHIVE () {
 	      rm -f fml-current.tar.gz
 	      ln -s current/$FMLID.tar.gz fml-current.tar.gz # backward compatibility
 	   )
+	elif [ X$MODE = X -a X$BRANCH = Xstable ]; then
+	   (
+	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      rm -f fml-stable-latest.tar.gz
+	      ln -s stable/$FMLID.tar.gz fml-stable-latest.tar.gz
+	   )
 	fi
 
 	echo ""
