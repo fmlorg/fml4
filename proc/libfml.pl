@@ -960,11 +960,9 @@ sub ProcSubscribe
 
     # if member-check mode, forward the request to the maintainer
     if (&NonAutoRegistrableP) {
-	&Log("$proc request is forwarded to Maintainer", *e);
-	&Mesg(*e, 
-	      "$proc request is forwarded to Maintainer".
-	      "Please wait a little",
-	      'req.subscribe.forwarded_to_admin', $proc);
+	&LogWEnv("$proc request is forwarded to Maintainer", *e);
+	&Mesg(*e, "Please wait a little");
+	&Mesg(*e, $NULL, 'req.subscribe.forwarded_to_admin', $proc);
 	&WarnE("$proc request from $From_address", $NULL);
     }
     else {

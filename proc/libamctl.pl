@@ -445,10 +445,9 @@ sub DoSetDeliveryMode
 
 	if ($NOT_USE_SPOOL) {
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
-	    &Mesg(*e, 
-		  "ERROR: $proc is disabled".
-		  "       since we have no spooled articles",
-		  'req.digest.no_spool', $proc);
+	    &Mesg(*e, "ERROR: $proc is disabled");
+	    &Mesg(*e, "       since we have no spooled articles");
+	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
 	    return $NULL;
 	}
 
