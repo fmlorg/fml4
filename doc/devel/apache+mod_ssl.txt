@@ -1,4 +1,4 @@
-		make apache-ssl on NetBSD (should be removed)
+		make apache+mod_ssl on NetBSD
 
 1) get sources 
 
