@@ -240,7 +240,7 @@ sub Finish
 }
 
 
-### Sectoin: common
+### Section: IO
 sub GetBuffer
 {
     local(*s) = @_;
@@ -270,21 +270,8 @@ sub GetBuffer
     $buffer;
 }
 
-
-### Section: IO
-
-sub ERROR
-{
-    local($s) = @_;
-    print $s, "\n";
-}
-
-
-sub P
-{
-    print @_;
-    print "\n";
-}
+sub ERROR { &P(@_);}
+sub P { print @_, "\n";}
 
 
 1;
