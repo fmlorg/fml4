@@ -15,3 +15,6 @@ pgp.cmd.disabled:
 pgp.cmd.not_supported:
 	_ARG0_はサポートされていません。
 
+pgp.encryption.error:
+	PGP 暗号化に失敗しました。
+	配送は行なわれません。

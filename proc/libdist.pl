@@ -32,14 +32,27 @@ sub DoDistribute
 
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {
-	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp') {
+	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp'  ||
+	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp2' ||
+	    $ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp5') {
 	    require 'libpgp.pl';
 
 	    # check PGP signature
 	    if (&PGPGoodSignatureP(*e, 1)) {
 		&Log("PGP encryption mode sets in");
+		undef $PGPError;
 		&PGPDecode(*e);
 		&PGPEncode(*e);
+
+		if ($PGPError) {
+		    &Log("no delivery for something errors of PGP");
+		    &Mesg(*e, 
+			  "something PGP error occors, ". 
+			  "so it seems encrpytion fails.\n",
+			  "pgp.encryption.error");
+		    &Mesg(*e, $NULL, 'EAUTH');
+		    return 0;
+		}
 	    }
 	    else {
 		&Log("invalid PGP signature, no delivery");

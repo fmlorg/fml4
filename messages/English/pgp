@@ -14,3 +14,6 @@ pgp.cmd.disabled:
 
 pgp.cmd.not_supported:
 	_ARG0_ is not supported
+
+pgp.encryption.error:
+	PGP encryption fails. not distribute your article. Sorry
