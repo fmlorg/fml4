@@ -172,6 +172,7 @@ sub ResentForwFileInSpool
     }
 
     # for tar.gz syntax;
+    &Debug("ResentForwFileInSpool: $cat{$SPOOL_DIR/$ID}") if $debug;
     $cat{"$SPOOL_DIR/$ID"} = 1;
 
     if ($ar eq 'TarZXF') {  
