@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Examples
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+
+<CENTER>
+add a member to elena ＭＬ
+</CENTER>
+
+<PRE>
+If you add nospam@fml.org as a member to elena ML, run the following
+command. 
+
+% /usr/local/fml/makefml add elena nospam@fml.org
+
+Contrarly, remove nospam@fml.org, run this way.
+
+% /usr/local/fml/makefml bye elena nospam@fml.org
+
+
+Copyright (C) 1999-2000 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</BODY>
+</HTML>

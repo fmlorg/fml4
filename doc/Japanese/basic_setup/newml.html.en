@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Examples
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+
+<CENTER>
+ＭＬの作成 (概要も概要)
+</CENTER>
+
+<PRE>
+% /usr/local/fml/makefml newml elena
+% su
+# cat /var/spool/ml/elena/aliases >> /etc/aliases
+# newaliases
+
+<P>
+ＭＬ名に避けた方が良いアドレスはありますか？
+
+RFC2142 に以下のようなリストがあります。一番左の列がそのアドレスです。
+これは(spammer が狙いそうな)各組織に必ず存在しているだろうと思われてい
+るアドレスと考えられます。
+
+企業の場合 info や sales support といったアドレスはまさにこれですが、
+逆に変なフィルタ制限をかけるとはまることがあります。変なメールを送るお
+客さんかもしれないからです。
+
+しかし組織内利用等のＭＬ名にはこれらを避けておく方が吉でしょう。
+
+   アドレス       サービス            仕様について
+   -----------    ----------------    ---------------------------
+   INFO           Marketing           Packaged information about the
+                                      organization, products, and/or
+                                      services, as appropriate
+   MARKETING      Marketing           Product marketing and
+                                      marketing communications
+   SALES          Sales               Product purchase information
+   SUPPORT        Customer Service    Problems with product or
+                                      service
+
+   ABUSE          Customer Relations  Inappropriate public behaviour
+   NOC            Network Operations  Network infrastructure
+   SECURITY       Network Security    Security bulletins or queries
+
+   POSTMASTER     SMTP                [RFC821], [RFC822]
+   HOSTMASTER     DNS                 [RFC1033-RFC1035]
+   USENET         NNTP                [RFC977]
+   NEWS           NNTP                Synonym for USENET
+   WEBMASTER      HTTP                [RFC 2068]
+   WWW            HTTP                Synonym for WEBMASTER
+   UUCP           UUCP                [RFC976]
+   FTP            FTP                 [RFC959]
+
+Copyright (C) 1999-2000 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</BODY>
+</HTML>

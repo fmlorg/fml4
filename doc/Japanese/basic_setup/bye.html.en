@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Examples
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+
+<CENTER>
+remove a member from elena ＭＬ
+</CENTER>
+
+<PRE>
+remove nospam@fml.org 
+
+% /usr/local/fml/makefml bye elena nospam@fml.org
+
+
+Copyright (C) 1999-2000 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</BODY>
+</HTML>

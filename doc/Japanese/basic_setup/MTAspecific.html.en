@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Examples
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rev="Contents" href="index.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H1>
+<CENTER>
+MTA 依存性
+</CENTER>
+</H1>
+
+<UL>
+	<LI>
+	MTA (Mail Transport Agent)別の注意
+	<BR>
+	<A HREF="../../INSTALL_with_SENDMAIL/index.html">sendmail</A>
+	<A HREF="../../INSTALL_with_POSTFIX/index.html">postfix</A>
+	<A HREF="../../INSTALL_with_QMAIL/index.html">qmail</A>
+	<A HREF="../../INSTALL_with_EXIM/index.html">exim</A>
+	<A HREF="../../INSTALL_with_ZMAILER/index.html">zmailer</A>
+	<BR>
+	<A HREF="http://www.y-min.or.jp/~nob/qmail/qmail+fml.html">
+	[link]qmailの基本的なインストール・メモ
+	</A>
+
+	<LI>
+	<A HREF="postfix-install.html">
+	Postfix のインストールの例 (NetBSD-currentのpackage system)
+	</A>
+	<BR>
+	最近のpostfixはmake installするとインストーラが
+	対話的に聞いてくれる。それに答えていけば
+	基本設定はそれだけで十分だ。
+</UL>
