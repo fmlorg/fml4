@@ -21,8 +21,8 @@ localhack/release-2		FML release-2 мя
 localhack/release-2/kizu	
 localhack/release-2/doc-changes	doc-changes@ffs.fml.org
 mail2fax			
+msend-anytime 			(.ptr{msend-anytime})
 netutils			a few examples applied based on fml librarys
-				()
 pager				(.ptr{pager})
 traffic				(.ptr{libtraffic.pl})
 utilities			(.ptr{uip})
