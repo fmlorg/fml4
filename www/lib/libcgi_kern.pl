@@ -538,7 +538,8 @@ sub SpawnProcess
     undef $!;
 
     # open(PROG, "$prog 2>&1 |")
-    open(PROG, "-|") || exec $prog, "2>&1";
+    my (@prog) = split(/\s+/, $prog);
+    open(PROG, "-| 2>&1") || exec @prog;
 
     if ($? || $!) {
 	&ERROR("cannot execute $prog");

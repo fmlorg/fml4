@@ -159,7 +159,7 @@ sub MailServerConfig
 	    # /usr/sbin/postalias
 	    $ENV{'PATH'} = '/bin:/usr/ucb:/usr/bin:/sbin:/usr/sbin';
 
-	    &P("updated aliases (ran \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\")");
+	    &_P("updated aliases (ran \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\")");
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
 	}
 	else {
@@ -220,6 +220,19 @@ sub Log
 }
 
 
+sub _P
+{
+    my ($s) = @_;
+
+    if ($UseLogMessage) {
+	$LogMessage .= $s."\n";
+    }
+    else {
+	&P($s);	
+    }
+}
+
+
 sub OUTPUT_FILE
 {
     local($file) = @_;
@@ -238,7 +251,7 @@ sub OUTPUT_FILE
 		$ncache{$inbuf} = 1;
 
 		# output with language conversion
-		&P( &XSTranslate($xbuf) )  if $xbuf;
+		&_P( &XSTranslate($xbuf) )  if $xbuf;
 
 		next;
 	    }
@@ -271,7 +284,7 @@ sub OUTPUT_FILE
 	    # hide environment
 	    s/$EXEC_DIR/\$EXEC_DIR/g;
 	    s/$ML_DIR/\$ML_DIR/g;
-	    &P($_);
+	    &_P($_);
 	}
 	close($file);
     }
@@ -361,8 +374,16 @@ sub Command
 	&P("<HR>");
 	&PRE;
 
+	$UseLogMessage = 1;
 	&Control($ML, $PROC);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
+
+	if ($ErrorString) { &P($ErrorString);}
+	if ($LogMessage) {
+	    &PRE;
+	    &P($LogMessage);
+	    &EndPRE;
+	}
     }
     elsif ($PROC eq 'destructml' || $PROC eq 'rmml') {
 	&PRE;
