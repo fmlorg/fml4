@@ -14,6 +14,12 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
 
+2001/09/13
+
+   proc/libhtmlsubr.pl (1.8-1.9)
+   proc/libsynchtml.pl (2.44-2.45)   
+	fix multipart counter
+
 2001/09/11
 
    proc/libsynchtml.pl(2.43-2.44): 
@@ -122,7 +128,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.14 2001/09/11 11:29:59 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.15 2001/09/11 13:51:56 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
