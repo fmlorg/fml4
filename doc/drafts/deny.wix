@@ -1,15 +1,15 @@
 .if LANG == JAPANESE
-あなたはこのメーリングリスト <_MAIL_LIST_> のメンバーではありません。
+あなたはこのメーリングリスト <_MAIL_LIST_> のメンバーではありません。
 
-メーリングリストについての一般的な案内はメールの本文に
+メーリングリストについての一般的な案内はメールの本文に
 
-	# guide
+	_CTK_guide
 
-と書いたメールを
+と書いたメールを
 
 	_CTLADDR_
 
-宛に送ると送られてきます。
+宛に送ると送られてきます。
 .fi
 .if LANG == ENGLISH
 You are not a member of this mailing list <_MAIL_LIST_>.
@@ -17,7 +17,7 @@ You are not a member of this mailing list <_MAIL_LIST_>.
 If you know the general guide of this list, please send a mail with
 the mail body 
 
-	# guide
+	_CTK_guide
 
 to the address
 

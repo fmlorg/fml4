@@ -17,31 +17,24 @@ This mail contains the fundamental usage of the mailing list server.
 Plaese send commands in the mail body not subject to the address
 <_CTLADDR_>.
 
-コマンドのシンタックスは
+コマンドのシンタックスは English word 
 =E
 The command syntax is as follows:
 
-	# help
-または
-	help 
-=E
-	# help
-or	
-	help 
+	_CTK_help
 
-のようなシンタックスです。どちらでも結構です。コマンドの一覧とサーバの
-使い方の解説はアドレス <_CTLADDR_> に
+です。コマンドの一覧とサーバの使い方の解説はアドレス <_CTLADDR_> に
 =E
-Plaese send the "# help" to the address <_CTLADDR_> for help and
+Plaese send the "_CTK_help" to the address <_CTLADDR_> for help and
 server functions overview
 
-	# help
+	_CTK_help
 
 を送ることで得られます。またメーリングリストに関する一般的な情報は
 =E
 to get general information on this list
 
-	# guide
+	_CTK_guide
 
 コマンドを送って下さい。
 
