@@ -302,6 +302,9 @@ TIMEOUT 等は現在実行している処理内容によらず特定の時間が来たら (割り込
 
 
 
+.include clo.wix
+
+ 
 .C	fml 内部におけるデータ構造
 .l	data-structure
 .xref	hack
@@ -1563,9 +1566,6 @@ sub Distribute で
 実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
 
 
-.include clo.wix
-
- 
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 
