@@ -5,6 +5,26 @@
 
 2000/08/12
 
+   3.0I	incompatible changes of authentication method by
+		PGP2 PGP5
+
+	PGP 回りの変更をしたために PGP 認証などが非互換になります。
+
+	1. /var/spool/ml/etc/fml/site_force.ph に
+
+		$DIST_ENCRYPT_KEYRING_PATH = $PGP_PATH;
+		$ADMIN_AUTH_KEYRING_PATH   =  $PGP_PATH;
+
+	   と書くと、3.0H までと同じになります。
+
+	2. もっと後向きな or 危ない解決方法として
+
+		% cd /var/spool/ml/elena/etc
+		% ln -s pgp dist-encrypt
+		% ln -s pgp admin-auth
+
+	    でも 3.0H までと同じことになります。
+	
    "makefml help" show shelp by $ENV{'PAGER'} if defined.
 
    $PGP_VERSION is removed
