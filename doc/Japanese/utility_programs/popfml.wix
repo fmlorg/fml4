@@ -95,6 +95,29 @@ password パスワード
 という感じのファイルです。~/.netrc 形式です。意味は ftp のマニュアルな
 どをみて(.netrcという項目をサーチして)ください。
 
+.S	Q: ~/.popfmlrc ってなんですか？
+
+今ではもぉ気にしないで下さい:) それがなくても動きます
+
+確かに最初ある目的があって作った覚えがあるけど、NT version になるとき
+に -include で実行する内容を指定するようになったので使っても使わなくて
+もよいはずです
+
+.S	Q: crontab にかくんですか?
+.xref	cron
+
+そうです。そういう呪文をずらずら書くことになります。
+
+  */5 * * * * 呪文(popfml.pl ...ずらずら...)
+
+みたいなのを書きます。
+
+でもきっと crontab をずらずらかくうっとおしいので、適当なファイルをつ
+くって(例: /var/spool/ml/etc/popfml/master.sh (適当))、その中に例の呪
+文を書いておく方が見やすくていいとおもいます。
+
+  */5 * * * * 	/var/spool/ml/etc/popfml/master.sh
+
 
 .S	Popfml.pl Reference 
 .l	popfml.pl 
