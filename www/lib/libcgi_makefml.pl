@@ -57,6 +57,10 @@ sub Parse
     # 
     $SCRIPT_NAME  = $ENV{'SCRIPT_NAME'};
     $HTTP_REFERER = $ENV{'HTTP_REFERER'};
+    my $REQUEST_URI  = $ENV{'REQUEST_URI'};
+    $REQUEST_URI  =~ qq{/cgi-bin/fml/([A-Za-z\-\.]+)/(|[A-Za-z\-\.]+)(|/)makefml.cgi};
+    my ($cgimode , $cgiml) = ($1,$2);
+    $ML = $cgiml if($cgimode ne "admin");
 
     # fix (tricky:-)
     $SCRIPT_NAME  =~ s/makefml.cgi$/menu.cgi/;
