@@ -110,7 +110,7 @@ sub FmlServ
 {
     local(*e) = @_;
     local($eval, $hook);
-    local($message, $error); # save the %Envelope return values; 
+    local($message, $error, $apfiles); # save the %Envelope return values; 
 
     ### 00: Load Command Library 
     require 'libfml.pl'; # if %ReqInfo;
@@ -270,6 +270,9 @@ sub FmlServ
 	    &Debug("$ml::message: ---\n$Envelope{'message'}\n---\n");
 	    &Debug("$ml::error:   ---\n$Envelope{'error'}\n---\n");
 	}
+
+	$apfiles .= "$;$Envelope{'message:append:files'}"
+	    if $Envelope{'message:append:files'};
 	$message .= $Envelope{'message'};
 	$error   .= $Envelope{'error'};
 	%Envelope = %OrgEnvelope;
@@ -280,6 +283,7 @@ sub FmlServ
     $FML_EXIT_HOOK = $hook;
     $DIR           = $FMLSERV_DIR; 
 
+    $Envelope{'message:append:files'} .= $apfiles;
     $Envelope{'message'} .= $message;
     $Envelope{'error'}   .= $error;
 
@@ -308,7 +312,7 @@ sub FmlServ
 
     ### We ALWAYS append the simple help ###
     if (-f "$FMLSERV_DIR/help") {
-	$e{'message:append:files'} = "$FMLSERV_DIR/help";
+	$e{'message:append:files'} .= "$;$FMLSERV_DIR/help";
     }
     else {
 	&AppendFmlServInfo(*e);
