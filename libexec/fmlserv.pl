@@ -215,7 +215,8 @@ sub FmlServ
 	# if it succeeds, lock and do the processing;
 	chdir $DIR || do {
 	    &Log("cannot chdir DIR[$DIR], ignore given commands for $ml");
-	    &Mesg(*e, "Hmm, ... I cannot find $ml. $ml really exists?");
+	    &Mesg(*e, "Hmm, ... I cannot find $ml. $ml really exists?",
+		  'fmlserv.ml.not_found', $ml);
 	    next;
 	};
 
@@ -335,7 +336,7 @@ sub FmlServ
 	$e{'message:append:files'} .= "$;$FMLSERV_DIR/help";
     }
 
-    &Mesg(*e, "\n*** Processing Done.");
+    &Mesg(*e, "\n*** Processing Done.", 'fmlserv.done');
 
     # IF HELP ONLY, DO NOT &Notify
     if ($help_only && (! $proc_count)) {
@@ -465,7 +466,8 @@ sub ProcessEachMLReq
 	    
 	    if (/^(guide|info)/i)    { 
 		&GuideRequest(*e); # bug fix 97/10/24 ando@iij-mc.co.jp
-		&Mesg(*e, "   guide is sent to $From_address");
+		&Mesg(*e, "   guide is sent to $From_address",
+		      'fmlserv.guide.sent', $From_address);
 		next;
 	    }
 
@@ -489,6 +491,7 @@ sub ProcessEachMLReq
 
 	    &Debug("ProcessEachMLReq::$_(){YOU ARE NOT MEMBER($ml)") if $debug;
 	    &Mesg(*e, "   forbidden since you are not member of '$ml' ML");
+	    &Mesg(*e, $NULL, 'not_ml_member', $ml);
 	}
     }
 }
@@ -646,12 +649,16 @@ sub SortRequest
 	    &Log("invalid [$cmd] command request");
 	    &Mesg(*e, "lists command is prohibited.");
 	    &Mesg(*e, "*** Processing stops for critical error");
+	    &Mesg(*e, $NULL, 'not_avail', $cmd);
+	    &Mesg(*e, $NULL, 'fmlserv.stop');
 	    last;
 	}
 	if ($cmd eq 'which' && (!$FMLSERV_PERMIT_WHICH_COMMAND)) {
 	    &Log("invalid [$cmd] command request");
 	    &Mesg(*e, "which command is prohibited.");
 	    &Mesg(*e, "*** Processing stops for critical error");
+	    &Mesg(*e, $NULL, 'not_avail', $cmd);
+	    &Mesg(*e, $NULL, 'fmlserv.stop');
 	    last;
 	}
 
@@ -684,10 +691,12 @@ sub SortRequest
 	    &Mesg(*e, " <<< $_");
 
 	    if ($ml) {
-		&Mesg(*e, "   ignore request since no such '$ml' ML exists.\n");
+		&Mesg(*e,"   ignore request since no such '$ml' ML exists.\n");
+		&Mesg(*e, $NULL, 'fmlserv.ml.not_found', $ml);
 	    }
 	    else {
 		&Mesg(*e, "   unknown fmlserv commands");
+		&Mesg(*e, $NULL, 'no_such_command', $_);
 	    }
 	}
     }    
@@ -858,6 +867,7 @@ sub ProcLists
     # For security, we should unset "lists" command
     if (! $FMLSERV_PERMIT_LISTS_COMMAND) {
 	&Mesg(*e, "*** We do not permit \"$proc\" FOR SECURITY.");
+	&Mesg(*e, $NULL, 'not_avail', $proc);
 	&Log("not permit $proc for security.");
 	&Log("To enable 'lists', set \$FMLSERV_PERMIT_LISTS_COMMAND = 1");
 	return;
@@ -867,6 +877,7 @@ sub ProcLists
     local($ml, $value);
 
     &Mesg(*e, "  $MAIL_LIST serves the following lists:\n");
+    &Mesg(*e, $NULL, 'fmlserv.serv', $MAIL_LIST);
 
     &MLMapopen;
 
@@ -893,6 +904,7 @@ sub ProcWhich
     # For security, we should unset "which" command
     if (! $FMLSERV_PERMIT_WHICH_COMMAND) {
 	&Mesg(*e, "*** We do not permit \"$proc\" FOR SECURITY.");
+	&Mesg(*e, $NULL, 'not_avail', $proc);
 	&Log("not permit $proc for security.");
 	&Log("To enable 'which', set \$FMLSERV_PERMIT_WHICH_COMMAND = 1");
 	return;
@@ -927,12 +939,14 @@ sub ProcWhich
 
     if ($hitc) { 
 	&Mesg(*e, "   \"$addr\" is registered in the following lists:\n");
+	&Mesg(*e, $NULL, 'fmlserv.subscribed_lists', $addr);
 	&Mesg(*e, sprintf("   %-15s\t%s", 'List', 'Address'));
 	&Mesg(*e, "   ".('-' x 50));
 	&Mesg(*e, $reply);
     }
     else {
 	&Mesg(*e, "*** \"$addr\" is not registered in any lists.");
+	&Mesg(*e, $NULL, 'fmlserv.not_any_member', $addr);
     }
 }
 
@@ -945,7 +959,8 @@ sub ProcHRef
     &Debug("$proc, @Fld, *e, *misc)");
 
     ($request = $Fld[2]) || do {
-	&Mesg(*e, "\tERROR: NO GIVEN PARAMETER");
+	&Mesg(*e, "\tError: no arguments");
+	&Mesg(*e, $NULL, 'no_args', $proc);
 	return;
     };
 

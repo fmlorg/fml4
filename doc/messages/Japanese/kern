@@ -35,6 +35,9 @@ invalid_args:
 not_implemented:
 	_ARG0_ は実装されていません。
 
+not_avail:
+	_ARG0_ は使用できません。
+
 obsolete_command:
 	_ARG0_は_ARG1_で削除されたため使用できません。
 
@@ -46,6 +49,9 @@ already_subscribed:
 
 not_member:
 	メーリングリストのメンバーではありません。
+
+not_ml_member:
+	_ARG0_ メーリングリストのメンバーではありません。
 
 configuration_error:
 	システム内でのエラーが発生しました。
