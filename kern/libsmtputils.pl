@@ -206,6 +206,7 @@ sub DoGenerateHeader
     @to || do { &Log("GenerateHeader:ERROR: NO \@to"); return;};
 
     # prepare: *rcpt for Smtp();
+    local($x, $lc_rcpt);
     for (@to) {
 	# Address Representation Range Check
 	&ValidAddrSpecP($_) || /^[^\@]+$/ || do {
@@ -215,6 +216,13 @@ sub DoGenerateHeader
 
 	push(@rcpt, $_); # &Smtp(*le, *rcpt);
 	$tmpto .= $tmpto ? ", $_" : $_; # a, b, c format
+
+	# always relay
+	if ($DEFAULT_RELAY_SERVER) {
+	    $lc_rcpt = $_;
+	    $lc_rcpt =~ tr/A-Z/a-z/; # lower case;
+	    $RelayRcpt{$lc_rcpt} = "\@${DEFAULT_RELAY_SERVER}:$_";
+	}
     }
 
     $Rcsid  =~ s/\)\(/,/g;
