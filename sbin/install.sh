@@ -20,7 +20,7 @@ do
 	tar cf - $dir|(cd $EXEC_DIR; tar xf -)
 done
 
-echo "Installing perl scripts (*.pl) files ..."
+echo "Installing perl scripts (fml-source/src/*.pl) files ..."
 chmod -R +w $EXEC_DIR/*
 
 # since rm -fr ...
