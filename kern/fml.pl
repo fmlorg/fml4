@@ -272,6 +272,7 @@ sub ModeBifurcate
 	}
 	elsif ($PERMIT_COMMAND_FROM eq "moderator") { # dummay ?
 	    &use('moderated');
+	    $Envelope{'mode:moderator:command'} = 1;
 	    &ModeratedDelivery(*Envelope); # Moderated: check Approval;
 	}
 	else {

@@ -179,9 +179,10 @@ sub ModeratedDeliveryTypeII
 
     local($r, $info);
 
-    $r = &Translate(*e, 'submission request', 
-		    'moderator.submission', 
-		    $e{'CtlAddr:'});
+    my $key = $e{'mode:moderator:command'} ? 
+	    'moderator.command.submission' :
+		'moderator.article.submission';
+    $r = &Translate(*e, 'submission request', $key, $e{'CtlAddr:'});
 
     $info = &GenModeratorInfo;
 

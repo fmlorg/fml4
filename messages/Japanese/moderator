@@ -1,7 +1,13 @@
-moderator.submission:
+moderator.article.submission:
 	モデレータの方へ: 
 	リクエストをフォワードします。
 	以下のメールが適当でメーリングリストへ流してよいなら
+	次のキーワード(の行だけ)を<_ARG0_>宛に送って下さい。
+
+moderator.command.submission:
+	モデレータの方へ: 
+	コマンド・リクエストをフォワードします。
+	以下のコマンドを承認するなら
 	次のキーワード(の行だけ)を<_ARG0_>宛に送って下さい。
 
 moderator.no_such_id:
