@@ -1,5 +1,5 @@
 .HTML_PRE
-	MTA に qmail を使う場合
+	fml を qmail とともに使う場合
 =E
 	FML under qmail environment
 
@@ -10,7 +10,7 @@
 
 .toc
 
-.C	fml with Qmail
+.C	注意点
 
 .if LANG == JAPANESE
 参考: 簡単なqmail上でのfmlの設定の仕方のメモがあります。大雑把な流れが
@@ -18,7 +18,7 @@
 .url http://www.y-min.or.jp/~nob/qmail/qmail+fml.html
 .fi
 
-.S	Overview
+.S	ML 作成時
 
 .if LANG == JAPANESE
 qmail ではそのマシンにアカウントがあればそのユーザへ送られます(rootは
@@ -29,6 +29,9 @@ sendmail の /etc/aliases では postmaster や www-admin のようなアカウン
 存在しないユーザについては /var/qmail/alias/.qmail-$USER を使います。
 postmaster は/var/qmail/alias/.qmail-postmaster にフォワード先を書き込
 みます。
+
+fml でも :include: ではなく .qmail-elena などのファイルを使います。
+makefml newml 時にもそのようなファイルの見本が作成されます。
 .fi
 .if LANG == ENGLISH
 ~/.forward of sendmail corresponds to ~/.qmail. /var/qmail/alias is
@@ -36,7 +39,7 @@ similar to /etc/aliases in sendmail case but differs a lot.
 Please see manuals and http://www.qmail.org/ and so on.
 .fi
 
-.S	Qmail Configuration
+.S	メール転送の設定について
 
 qmail-smtpd は /var/qmail/control/rcpthosts に書かれているホストあての
 メイルしか受け取りません。fml はSMTPでMTAと通信するのでMLの配送をその
@@ -104,9 +107,9 @@ functional to use "qmail-users" described just below.
 .S	qmail-users (owner は fml など or 自由)
 =E.S	qmail-users 
 
-まず makefml newml elena を走らせます($ML_DIR/elena以下に作成されると
-しよう)。見本が $ML_DIR/etc/qmail/alias $ML_DIR/etc/qmail/users
-に作られます。
+まず makefml newml elena を実行します($ML_DIR/elena以下に作成されると
+しよう)。見本が $ML_DIR/etc/qmail/alias $ML_DIR/etc/qmail/users に作ら
+れます。
 =E
 Let "makefml newml elena" to create elena ML.
 It makes examples under $ML_DIR/etc/qmail.
