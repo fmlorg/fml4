@@ -326,6 +326,26 @@ sub DNS
 	$DOMAINNAME = 'domain.uja';
 	return;
     }
+
+    # fml 4.0
+    local($system) = $0;
+    $system  =~ s/config$//;
+    $system .= ($ENV{'OS'} =~ /Windows_NT/) ? "..\\_fml\\" : "../.fml/";
+    $system .= 'system';
+    if (-f $system) {
+	print STDERR "use system = $system\n" if $debug0;
+	package __system;
+	eval require $main::system;
+	$main::HOSTNAME = $main::FQDN = $FQDN;
+	$main::DOMAINNAME = $DOMAIN;
+	package main;
+	if ($@) { 
+	    print STDERR $@;
+	}
+	else {
+	    return ;
+	}
+    }
  
     print STDERR "Verifying DNS...\n" if $debug;
 
