@@ -18,7 +18,7 @@ var/html/pictures/index.html: doc/html/pictures/index.html
 # logo
 HTML_MISC += var/html/logo.jpg
 var/html/logo.jpg: doc/html/pictures/logo.jpg
-	cp -p doc/html/pictures/logo.jpg var/tml
+	cp -p doc/html/pictures/logo.jpg var/html
 
 # history
 HTML_MISC += var/html/p_list.gif
