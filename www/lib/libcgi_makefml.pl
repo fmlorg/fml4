@@ -34,6 +34,9 @@ sub Parse
     $PASSWORD      = $Config{'PASSWORD'};
     $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
 
+    # MTA
+    $MTA = $Config{'MTA'};
+
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
     $PROC      =~ tr/A-Z/a-z/;
@@ -124,6 +127,22 @@ sub Control
     }
 
     unlink $tmpbuf;
+}
+
+
+sub MailServerConfig
+{
+    local($proc, $mta) = @_;
+    local(%config);
+
+    if ($mta =~ /^(sendmail|postfix|qmail)$/) {
+	$CGI_CF{'MTA'} = $mta;
+	&SaveCGICF;
+    }
+    else {
+	&ERROR("unknown MTA (Mail Trasnport Agent)");
+	&ERROR("I have preparations for sendmail, postfix, qmail.");
+    }
 }
 
 
@@ -332,6 +351,9 @@ sub Command
 	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
 	}
     }
+    # not "makefml" calls
+    elsif ($PROC eq 'mail_server_config') {
+	&MailServerConfig($PROC, $MTA);
     else {
 	&ERROR("unknown PROC");
     }

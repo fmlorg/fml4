@@ -26,10 +26,11 @@ sub Init
     require "$CONFIG_DIR/system";
 
     $WWW_DIR      = "$EXEC_DIR/www";
-    $WWW_CONF_DIR = "$EXEC_DIR/www/conf";
+    $WWW_CONF_DIR = "$WWW_DIR/conf";
+    $CGI_CF       = "$WWW_CONF_DIR/cgi.cf";
 
-    if (-f "$WWW_CONF_DIR/cgi_config.ph") {
-        eval("require \"$WWW_CONF_DIR/cgi_config.ph\";");
+    if (-f $CGI_CF) {
+        eval("&LoadCGICF;");
 	&Err($@) if $@;
     }
 
@@ -156,6 +157,51 @@ sub ERROR { &P(@_);}
 
 
 sub P { print @_, "\n";}
+
+
+### Section: conf/cgi.cf
+###
+### %CGI_CF is global.
+###
+sub LoadCGICF
+{
+    local($key, $value);
+
+    if (open(CFTMP, $CGI_CF)) {
+	while (<CFTMP>) {
+	    next if /^\#/;
+	    next if /^\s*$/;
+	    chop;
+
+	    ($key, $value) = split(/\s+/, $_, 2);
+	    $CGI_CF{$key} = $value;
+	}
+	close(CFTMP);
+    }
+    else {
+	&ERROR("cannot open $CGI_CF");
+    }
+}
+
+
+sub SaveCGICF
+{
+    local($key, $value);
+    local($new);
+
+    $new = $CGI_CF. ".new";
+
+    if (open(CFTMP, "> $new")) {
+	foreach $key (sort keys %CGI_CF) {
+	    print CF $key, "\t", $CGI_CF{$key}, "\n";
+	} 
+	close(CFTMP);
+	rename($new, $CGI_CF) || &ERROR("cannot rename $new $CGI_CF");
+    }
+    else {
+	&ERROR("cannot open $CGI_CF");
+    }
+}
 
 
 1;
