@@ -1,4 +1,7 @@
-		INSTALL of fml
+		fml INSTALL guide
+
+				深町 賢一
+				fukachan@sapporo.iij.ad.jp
 
 .C	Introduction
 
@@ -29,9 +32,13 @@ fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
 ＃実際にはアドレスをあなたの作りたいML名に変えて実行です (^^)
 
 自動的に /var/spool/ml/Elena/etc/samples/ に aliases や include ファイ
-ルの見本ができます。あとは aliases に書いて
+ルの見本ができます。あとは aliases を適当に切り剥ぎして、/etc/aliases 
+に書いて、newaliases と。
+members actives にあなたのアドレス、メンバーのアドレス等を書いて
 
 					はい、おしまひ(^^)
+
+
 
 
 .C	基本設定
