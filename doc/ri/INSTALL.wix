@@ -19,19 +19,19 @@
     3.0へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単な install と設定例などについては以下のURLに
-   より詳細なものがこのドキュメントです。
+   簡単な install と設定例などについては以下のURLにあります。
+   もう少し詳細なものがこのドキュメントです。
 .url http://www.fml.org/fml/examples/
 
    デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
    doc/op.jp というファイルをみてください
-.url	http://www.fml.org/fml/op/ 
+.url http://www.fml.org/fml/op/
 
    細かいカスタマイズは part III「インストールとカスタマイズ」を
-.url	http://www.fml.org/fml/op/index.html#Configurations
+.url http://www.fml.org/fml/op/index.html#Configurations
 
    MTAごとの設定やNTではどうするか？などはファイルが別にあります。
-.url	http://www.fml.org/fml/
+.url http://www.fml.org/fml/
 
 
 [用語]
@@ -51,7 +51,7 @@
 
    For more details on advanced settings, please see the part III of
    doc/op.en		(plain text)
-.url	http://www.fml.org/fml/op/index.html#Configurations
+.url	http://www.fml.org/fml/op-e/index.html#Configurations
 
    For installation on Windows NT4, please also see INSTALL_on_NT4.
 
