@@ -3246,7 +3246,7 @@ sub EachLevelQuery
 	    if ($v) {
 		$config{$v} = $r eq "y" ? 1 : 0;
 	    }
-	    elsif ($HOOK{$top_level}) {
+	    elsif ($r eq 'y' && $HOOK{$top_level}) {
 		print STDERR "\trun hook ...\n";
 		eval $HOOK{$top_level};
 		&Debug($@) if $@;
