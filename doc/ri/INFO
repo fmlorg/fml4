@@ -43,6 +43,69 @@ WWW が使えるなら
 
 === WHAT'S NEW  fml 2.0 current (version 2 pre release version) ===
 
+お手軽インストールのバグをなおす;_;
+
+	・こないだ直し過ぎて勢い余ってしまっているところ;_;
+
+	% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
+
+	MAINTAINER=ML管理者のアドレス	がちゃんと反映されてない
+	＃ cf/config を使ってFIX処理を行なうように変更
+
+
+html mode definition
+	default を 日毎に別の directory に保存するのを デフォールトへ
+	＃前にしたつもりだったんだが…なおしそこねてた
+
+
+libsubjectdef.pl
+	subject フォームの見本
+	e.g. 
+		[Elena:100]
+		[Elena 100]
+		(Elena 100)
+	あとどういうのがあるかな…
+
+mode setting in &LoadConfig 
+	コマンドラインとconfig.ph の間の compatibility のために必要
+
+fix 
+	chaddr がモード保存してないけど…一応するように
+	＃環境ちがうんだから リセット するものだとはおもうのだが…
+
+	chaddr a b with conserving the a's option e.g. m=..  s=..
+
+
+perl5.002 の話
+
+    local($returnfile)	 = "${TMP_DIR}/m:${opt}:${$}return";
+    perl5 だとまずい部分のFIX
+
+	libsendfile, libsmtp 
+
+
+
+起動時に DNS ひいて $j $m $w あたりを推測する
+config.ph に書いてある内容は有効だが、cache はやめた↓。
+
+fml-support:00817
+>普段使う部分のprofile強化月間：で、 可能なマクロは config.ph 
+>に cache します。overwrite したいときは、しちゃって:-)
+>
+>例：	
+>$Envelope{'macro:m'}	= 'phys.titech.ac.jp';
+>$Envelope{'macro:s'}	= 'axion.phys.titech.ac.jp';
+>$Envelope{'macro:ca'}	= 'pollyanna';
+>$Envelope{'macro:fqca'}	= 'pollyanna@axion.phys.titech.ac.jp';
+
+
+ここまでは 96/07/05 以降の  update 情報です↑
+
+この↓期間の情報は fml-support ML にはあるのですが…
+こっちに書く暇がない そのうち書きます _o_
+
+----------------------
+
 この2カ月くらい このファイルに反映されてません _o_ #暇なし
 fml-support ML には情報を投げていますけど…
 
