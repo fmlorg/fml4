@@ -763,7 +763,7 @@ $USE_MD5 = 1; を設定すると crypt ではなく MD5 になります
 .include msend.wix
 .include remote.wix
 .include autoregist.wix
-
+.include pgp.wix
 
 
 .C	コマンドの実行に関する２、３のこと…
