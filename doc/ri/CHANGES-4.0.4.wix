@@ -15,6 +15,11 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/05/20
+
+   proc/liblop.pl (2.11-2.12):
+	fix header boundary
+
 2002/05/18
 
    updated IM to im141 + local patch
@@ -129,7 +134,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.16 2002/04/21 15:25:56 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.17 2002/05/18 11:24:16 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
