@@ -3,6 +3,12 @@
 .l	fmlserv.pl
 
 
+.S	インストール
+
+一番楽なインストール方法は makefml を使ってインストールする方法です。
+詳細は INSTALL というファイルを見て下さい。
+
+
 .S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)
 
 ここでは LISTSERV (or MAJORDOMO) COMPATIBLE MODE について述べます。

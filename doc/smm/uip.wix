@@ -314,13 +314,19 @@ bin/passwd.pl を使って下さい。使い方は、
     -f etc/passwd に代わるパスワードファイルを指定
 
 例：
-	% passwd.pl -i fukachan@phys.titech.ac.jp uja
-で、
+	% passwd.pl -i fukachan@phys.titech.ac.jp 
+
+とユーザ名つきで入れると
+
+	Address: fukachan@phys.titech.ac.jp 
+	Password: 
+
+となるのでパスワードを入れて下さい。
 
 	fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
 
-のように etc/passwd が初期化される。32ZrV/XvYj1kY は uja を暗号化した
-結果です。
+のように etc/passwd が初期化される。ここの32ZrV/XvYj1kY は入力したパス
+ワードを暗号化した結果です。
 
 この etc/passwd は
 
