@@ -202,9 +202,9 @@ sub Open4Read
 
 sub OutputHtml
 {
-    local($IN) = @_;
+    local($input) = @_;
 
-    while (<$IN>) {
+    while (<$input>) {
 	undef $Error;
 
 	if (/^\#\.CUT:(\S+)/) {
@@ -272,9 +272,9 @@ sub OutputFile
 	close(OUTROFF);
     }
     elsif ($mode eq 'text') {
-	$IN = $Lang eq 'ENGLISH' ? 'ENG' : 'TMPF';
+	$input = $Lang eq 'ENGLISH' ? 'ENG' : 'TMPF';
 
-	while (<$IN>) {
+	while (<$input>) {
 	    undef $Error;
 
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
