@@ -1,13 +1,13 @@
 #-*- perl -*-
 #
-# Copyright (C) 1999-2001 Ken'ichi Fukamachi
+# Copyright (C) 1999-2003 Ken'ichi Fukamachi
 #          All rights reserved. 
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libcgi_kern.pl,v 1.54 2001/08/20 12:29:52 fukachan Exp $
+# $FML: libcgi_kern.pl,v 1.55 2001/08/20 12:38:31 fukachan Exp $
 #
 
 
@@ -83,6 +83,37 @@ sub Init
     $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
     $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
     $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
+}
+
+
+sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
+
+
+sub MkDir { &Mkdir(@_);}
+sub Mkdir
+{
+    if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
+    &MkDirHier($_[0], $DEFAULT_DIR_MODE || 0700);
+    if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
+    if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
+}
+
+sub MkDirHier
+{
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
+
+    while ($_[0] =~ m:$pat:go) {
+        next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
+
+        if ($` ne "" && !-d $`) {
+            mkdir($`, $_[1] || 0777) || do { 
+                &Log("cannot mkdir $`: $!"); 
+                return 0;
+            };
+        }
+    }
+
+    1;
 }
 
 
@@ -291,6 +322,12 @@ sub ExpandCGIAdminMemberListForEachML
     local($list);
 
     $list = "$CGI_AUTHDB_DIR/ml-admin/$ml/htpasswd";
+
+    unless (-f $list) {
+	use File::Basename;
+	&MkDir(dirname($list));
+	&Touch($list);
+    }
 
     if (open(LIST, $list)) {
 	while (<LIST>) {
