@@ -108,3 +108,12 @@ testsetup: libkern
 	rsync -C -a proc/ /usr/local/fml/
 	rsync -C -a libexec/ /usr/local/fml/libexec/
 	rsync -C -a bin/ /usr/local/fml/bin/
+
+update:
+	rsync -C -a kern/ /usr/local/fml-current/
+	rsync -C -a proc/ /usr/local/fml-current/
+	rsync -C -a libexec/ /usr/local/fml-current/libexec/
+	rsync -C -a bin/ /usr/local/fml-current/bin/
+	rsync -C -a module /usr/local/fml-current/
+
+
