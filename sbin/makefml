@@ -567,6 +567,7 @@ sub SetHashDefaults
 
 			 # compatible with fml 3.0
 			 'pgp'  => "$pgp_compat_mode.pgp",
+			 'pgp2' => "$pgp_compat_mode.pgp2",
 			 'pgp5' => "$pgp_compat_mode.pgp5",
 			 'pgpk' => "$pgp_compat_mode.pgpk",
 			 'pgps' => "$pgp_compat_mode.pgps",
