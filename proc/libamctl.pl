@@ -771,6 +771,14 @@ sub DoChangeMemberList
 
     &Debug("DoChangeMemberList($cmd, $curaddr, $file, $misc)") if $debug;
 
+    if ($USE_DATABASE) {
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, $cmd, {'address' => $curaddr});
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	&Log("fail to $cmd for $curaddr") if $mib{'error'};
+	return ($mib{'error'} ? 0 : 1);
+    }
+
     if (! $file) {
 	&Log("DoChangeMemberList:: arg's file == null");
 	return $NULL;
