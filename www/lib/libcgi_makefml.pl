@@ -47,8 +47,8 @@ sub Parse
     $HTTP_REFERER = $ENV{'HTTP_REFERER'};
 
     # fix (tricky:-)
-    $SCRIPT_NAME  =~ s/makefml.cgi$/menu.cgi/;
-    $HTTP_REFERER =~ s/makefml.cgi$/menu.cgi/;
+    $SCRIPT_NAME  =~ s/makefml.cgi.+$/menu.cgi/;
+    $HTTP_REFERER =~ s/makefml.cgi.+$/menu.cgi/;
     
     # We should not use raw $LANGUAGE (which is raw input from browser side).
     # We should check it matches something exactly and use it.
@@ -355,7 +355,7 @@ sub ShowReferer
 	print "<H2>\n";
 	print "<A HREF=\"";
 	print $HTTP_REFERER || $SCRIPT_NAME;
-	print "\">[back to menu]</A>\n";
+	print "\">[back to main menu]</A>\n";
 	print "</H2>\n";
     }
 }
