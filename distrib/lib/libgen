@@ -1,7 +1,10 @@
 GEN_DOC () {
 
 	echo "Generating Plain Doc"
-	(chdir $FML; $MAKE plaindoc);
+	( 
+		chdir $FML
+		make plaindoc
+	)
 
 	echo "Generating WWW Doc"
 	(
@@ -341,7 +344,7 @@ GEN_BRANCH_ARCHIVE () {
 }
 
 GEN_ARCHIVE () {
-	if [ X$__FML_MASTER_MACHINE__ -eq X ]
+	if [ X$__FML_MASTER_MACHINE__ = X ]
 	then
 		echo ignore GEN_ARCHIVE not on fml distribution master machine
 		return
