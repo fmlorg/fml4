@@ -10,21 +10,23 @@ package jcode;
 ;# Copyright (c) 1992,1993,1994 Kazumasa Utashiro
 ;# Software Research Associates, Inc.
 ;#
+;# Use and redistribution for ANY PURPOSE are granted as long as all
+;# copyright notices are retained.  Redistribution with modification
+;# is allowed provided that you make your modified version obviously
+;# distinguishable from the original one.  THIS SOFTWARE IS PROVIDED
+;# BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES ARE
+;# DISCLAIMED.
+;#
 ;# Original version was developed under the name of srekcah@sra.co.jp
 ;# February 1992 and it was called kconv.pl at the beginning.  This
 ;# address was a pen name for group of individuals and it is no longer
 ;# valid.
 ;#
-;# Use and redistribution for ANY PURPOSE, without significant
-;# modification, is granted as long as all copyright notices are
-;# retained.  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND
-;# ANY EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED.
-;#
 ;# The latest version is available here:
 ;#
 ;#	ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
 ;#
-;; $rcsid = q$Id: jcode.pl,v 2.10 1999/01/10 13:43:14 utashiro Exp $;
+;; $rcsid = q$Id: jcode.pl,v 2.11 1999/12/26 17:16:47 utashiro Exp $;
 ;#
 ;######################################################################
 ;#
@@ -166,9 +168,15 @@ package jcode;
 ;#
 ;# PERL5 INTERFACE:
 ;#
-;#	Current jcode.pl is written in Perl 4 but it is possible to
-;#	use from Perl 5 using `references'.  Fully perl5 capable version
-;#	is future issue.
+;# Current jcode.pl is written in Perl 4 but it is possible to use
+;# from Perl 5 using `references'.  Fully perl5 capable version is
+;# future issue.
+;#
+;# Since lexical variable is not a subject of typeglob, *string style
+;# call doesn't work if the variable is declared as `my'.  Same thing
+;# happens to special variable $_ if the perl is compiled to use
+;# thread capability.  So using reference is generally recommented to
+;# avoid the mysterious error.
 ;#
 ;#	jcode::getcode(\$line)
 ;#	jcode::convert(\$line, $ocode [, $icode [, $option]])
@@ -197,33 +205,43 @@ package jcode;
 ;#
 ;# Convert any Kanji code to JIS and print each line with code name.
 ;#
-;#	while (<>) {
-;#	    $code = &jcode'convert(*_, 'jis');
-;#	    print $code, "\t", $_;
+;#	while (defined($s = <>)) {
+;#	    $code = &jcode'convert(*s, 'jis');
+;#	    print $code, "\t", $s;
 ;#	}
 ;#	
 ;# Convert all lines to JIS according to the first recognized line.
 ;#
-;#	while (<>) {
-;#	    print, next unless /[\033\200-\377]/;
-;#	    (*f, $icode) = &jcode'convert(*_, 'jis');
+;#	while (defined($s = <>)) {
+;#	    print, next unless $s =~ /[\033\200-\377]/;
+;#	    (*f, $icode) = &jcode'convert(*s, 'jis');
 ;#	    print;
 ;#	    defined(&f) || next;
-;#	    while (<>) { &f(*_); print; }
+;#	    while (<>) { &f(*s); print; }
 ;#	    last;
 ;#	}
 ;#
 ;# The safest way of JIS conversion.
 ;#
-;#	while (<>) {
-;#	    ($matched, $code) = &jcode'getcode(*_);
-;#	    print, next unless (@buf || $matched);
-;#	    push(@buf, $_);
-;#	    next unless $code;
-;#	    eval "&jcode'${code}2jis(*_), print while (\$_ = shift(\@buf));";
-;#	    eval "&jcode'${code}2jis(*_), print while (\$_ = <>);";
+;#	while (defined($s = <>)) {
+;#	    ($matched, $icode) = &jcode'getcode(*s);
+;#	    if (@buf == 0 && $matched == 0) {
+;#		print $s;
+;#		next;
+;#	    }
+;#	    push(@buf, $s);
+;#	    next unless $icode;
+;#	    while (defined($s = shift(@buf))) {
+;#		&jcode'convert(*s, 'jis', $icode);
+;#		print $s;
+;#	    }
+;#	    while (defined($s = <>)) {
+;#		&jcode'convert(*s, 'jis', $icode);
+;#		print $s;
+;#	    }
 ;#	    last;
 ;#	}
+;#	print @buf if @buf;
 ;#		
 ;######################################################################
 
@@ -251,6 +269,7 @@ sub init {
     $re_jp      = "$re_jis0208|$re_jis0212";
     $re_asc     = '\e\([BJ]';
     $re_kana    = '\e\(I';
+
     $esc_0208 = "\e\$B";
     $esc_0212 = "\e\$(D";
     $esc_asc  = "\e(B";
@@ -337,45 +356,48 @@ sub get_inout {
 ;# Recognize character code.
 ;#
 sub getcode {
-    local(*_) = @_;
+    local(*s) = @_;
     local($matched, $code);
 
-    if (!/[\e\200-\377]/) {	# not Japanese
+    if ($s !~ /[\e\200-\377]/) {	# not Japanese
 	$matched = 0;
 	$code = undef;
-    }				# 'jis'
-    elsif (/$re_jp|$re_asc|$re_kana/o) {
+    }					# 'jis'
+    elsif ($s =~ /$re_jp|$re_asc|$re_kana/o) {
 	$matched = 1;
 	$code = 'jis';
     }
-    elsif (/$re_bin/o) {	# 'binary'
+    elsif ($s =~ /$re_bin/o) {		# 'binary'
 	$matched = 0;
 	$code = 'binary';
     }
-    else {			# should be 'euc' or 'sjis'
-	local($sjis, $euc);
+    else {				# should be 'euc' or 'sjis'
+	local($sjis, $euc) = (0, 0);
 
-	$sjis += length($1) while /(($re_sjis_c)+)/go;
-	$euc  += length($1) while /(($re_euc_c|$re_euc_kana|$re_euc_0212)+)/go;
-
+	while ($s =~ /(($re_sjis_c)+)/go) {
+	    $sjis += length($1);
+	}
+	while ($s =~ /(($re_euc_c|$re_euc_kana|$re_euc_0212)+)/go) {
+	    $euc  += length($1);
+	}
 	$matched = &max($sjis, $euc);
 	$code = ('euc', undef, 'sjis')[($sjis<=>$euc) + $[ + 1];
     }
     wantarray ? ($matched, $code) : $code;
 }
-sub max { $_[ $[ + ($_[$[] < $_[$[+1]) ]; }
+sub max { $_[ $[ + ($_[ $[ ] < $_[ $[ + 1 ]) ]; }
 
 ;#
 ;# Convert any code to specified code.
 ;#
 sub convert {
-    local(*_, $ocode, $icode, $opt) = @_;
-    return (undef, undef) unless $icode = $icode || &getcode(*_);
+    local(*s, $ocode, $icode, $opt) = @_;
+    return (undef, undef) unless $icode = $icode || &getcode(*s);
     return (undef, $icode) if $icode eq 'binary';
     $ocode = 'jis' unless $ocode;
     $ocode = $icode if $ocode eq 'noconv';
     local(*f) = $convf{$icode, $ocode};
-    &f(*_, $opt);
+    &f(*s, $opt);
     wantarray ? (*f, $icode) : $icode;
 }
 
@@ -386,43 +408,43 @@ sub jis  { &to('jis',  @_); }
 sub euc  { &to('euc',  @_); }
 sub sjis { &to('sjis', @_); }
 sub to {
-    local($ocode, $_, $icode, $opt) = @_;
-    &convert(*_, $ocode, $icode, $opt);
-    $_;
+    local($ocode, $s, $icode, $opt) = @_;
+    &convert(*s, $ocode, $icode, $opt);
+    $s;
 }
 sub what {
-    local($_) = @_;
-    &getcode(*_);
+    local($s) = @_;
+    &getcode(*s);
 }
 sub trans {
-    local($_) = shift;
-    &tr(*_, @_);
-    $_;
+    local($s) = shift;
+    &tr(*s, @_);
+    $s;
 }
 
 ;#
 ;# SJIS to JIS
 ;#
 sub sjis2jis {
-    local(*_, $opt, $n) = @_;
-    &sjis2sjis(*_, $opt) if $opt;
-    s/(($re_sjis_c|$re_sjis_kana)+)/&_sjis2jis($1) . $esc_asc/geo;
+    local(*s, $opt, $n) = @_;
+    &sjis2sjis(*s, $opt) if $opt;
+    $s =~ s/(($re_sjis_c|$re_sjis_kana)+)/&_sjis2jis($1) . $esc_asc/geo;
     $n;
 }
 sub _sjis2jis {
-    local($_) = shift;
-    s/(($re_sjis_c)+|($re_sjis_kana)+)/&__sjis2jis($1)/geo;
-    $_;
+    local($s) = shift;
+    $s =~ s/(($re_sjis_c)+|($re_sjis_kana)+)/&__sjis2jis($1)/geo;
+    $s;
 }
 sub __sjis2jis {
-    local($_) = shift;
-    if (/^$re_sjis_kana/o) {
-	$n += tr/\241-\337/\041-\137/;
-	$esc_kana . $_;
+    local($s) = shift;
+    if ($s =~ /^$re_sjis_kana/o) {
+	$n += $s =~ tr/\241-\337/\041-\137/;
+	$esc_kana . $s;
     } else {
-	$n += s/($re_sjis_c)/$s2e{$1}||&s2e($1)/geo;
-	tr/\241-\376/\041-\176/;
-	$esc_0208 . $_;
+	$n += $s =~ s/($re_sjis_c)/$s2e{$1}||&s2e($1)/geo;
+	$s =~ tr/\241-\376/\041-\176/;
+	$esc_0208 . $s;
     }
 }
 
@@ -430,75 +452,88 @@ sub __sjis2jis {
 ;# EUC to JIS
 ;#
 sub euc2jis {
-    local(*_, $opt, $n) = @_;
-    &euc2euc(*_, $opt) if $opt;
-    s/(($re_euc_c|$re_euc_kana|$re_euc_0212)+)/&_euc2jis($1) . $esc_asc/geo;
+    local(*s, $opt, $n) = @_;
+    &euc2euc(*s, $opt) if $opt;
+    $s =~ s/(($re_euc_c|$re_euc_kana|$re_euc_0212)+)/
+	&_euc2jis($1) . $esc_asc
+    /geo;
     $n;
 }
 sub _euc2jis {
-    local($_) = shift;
-    s/(($re_euc_c)+|($re_euc_kana)+|($re_euc_0212)+)/&__euc2jis($1)/geo;
-    $_;
+    local($s) = shift;
+    $s =~ s/(($re_euc_c)+|($re_euc_kana)+|($re_euc_0212)+)/&__euc2jis($1)/geo;
+    $s;
 }
 sub __euc2jis {
-    local($_) = shift;
-    local($esc) = tr/\216//d ? $esc_kana : tr/\217//d ? $esc_0212 : $esc_0208;
-    $n += tr/\241-\376/\041-\176/;
-    $esc . $_;
+    local($s) = shift;
+    local($esc);
+
+    if ($s =~ tr/\216//d) {
+	$esc = $esc_kana;
+    } elsif ($s =~ tr/\217//d) {
+	$esc = $esc_0212;
+    } else {
+	$esc = $esc_0208;
+    }
+
+    $n += $s =~ tr/\241-\376/\041-\176/;
+    $esc . $s;
 }
 
 ;#
 ;# JIS to EUC
 ;#
 sub jis2euc {
-    local(*_, $opt, $n) = @_;
-    s/($re_jp|$re_asc|$re_kana)([^\e]*)/&_jis2euc($1,$2)/geo;
-    &euc2euc(*_, $opt) if $opt;
+    local(*s, $opt, $n) = @_;
+    $s =~ s/($re_jp|$re_asc|$re_kana)([^\e]*)/&_jis2euc($1,$2)/geo;
+    &euc2euc(*s, $opt) if $opt;
     $n;
 }
 sub _jis2euc {
-    local($esc, $_) = @_;
-    if ($esc !~ /$re_asc/o) {
-	$n += tr/\041-\176/\241-\376/;
-	if ($esc =~ /$re_kana/o) {
-	    s/([\241-\337])/\216$1/g;
+    local($esc, $s) = @_;
+    if ($esc !~ /^$re_asc/o) {
+	$n += $s =~ tr/\041-\176/\241-\376/;
+	if ($esc =~ /^$re_kana/o) {
+	    $s =~ s/([\241-\337])/\216$1/g;
 	}
-	elsif ($esc =~ /$re_jis0212/o) {
-	    s/([\241-\376][\241-\376])/\217$1/g;
+	elsif ($esc =~ /^$re_jis0212/o) {
+	    $s =~ s/([\241-\376][\241-\376])/\217$1/g;
 	}
     }
-    $_;
+    $s;
 }
 
 ;#
 ;# JIS to SJIS
 ;#
 sub jis2sjis {
-    local(*_, $opt, $n) = @_;
-    &jis2jis(*_, $opt) if $opt;
-    s/($re_jp|$re_asc|$re_kana)([^\e]*)/&_jis2sjis($1,$2)/geo;
+    local(*s, $opt, $n) = @_;
+    &jis2jis(*s, $opt) if $opt;
+    $s =~ s/($re_jp|$re_asc|$re_kana)([^\e]*)/&_jis2sjis($1,$2)/geo;
     $n;
 }
 sub _jis2sjis {
-    local($esc, $_) = @_;
-    if ($esc =~ /$re_jis0212/o) {
-	s/../$undef_sjis/g;
+    local($esc, $s) = @_;
+    if ($esc =~ /^$re_jis0212/o) {
+	$s =~ s/../$undef_sjis/g;
 	$n = length;
     }
-    elsif ($esc !~ /$re_asc/o) {
-	$n += tr/\041-\176/\241-\376/;
-	s/($re_euc_c)/$e2s{$1}||&e2s($1)/geo if $esc =~ /$re_jp/o;
+    elsif ($esc !~ /^$re_asc/o) {
+	$n += $s =~ tr/\041-\176/\241-\376/;
+	if ($esc =~ /^$re_jp/o) {
+	    $s =~ s/($re_euc_c)/$e2s{$1}||&e2s($1)/geo;
+	}
     }
-    $_;
+    $s;
 }
 
 ;#
 ;# SJIS to EUC
 ;#
 sub sjis2euc {
-    local(*_, $opt,$n) = @_;
-    $n = s/($re_sjis_c|$re_sjis_kana)/$s2e{$1}||&s2e($1)/geo;
-    &euc2euc(*_, $opt) if $opt;
+    local(*s, $opt,$n) = @_;
+    $n = $s =~ s/($re_sjis_c|$re_sjis_kana)/$s2e{$1}||&s2e($1)/geo;
+    &euc2euc(*s, $opt) if $opt;
     $n;
 }
 sub s2e {
@@ -526,9 +561,9 @@ sub s2e {
 ;# EUC to SJIS
 ;#
 sub euc2sjis {
-    local(*_, $opt,$n) = @_;
-    &euc2euc(*_, $opt) if $opt;
-    $n = s/($re_euc_c|$re_euc_kana|$re_euc_0212)/$e2s{$1}||&e2s($1)/geo;
+    local(*s, $opt,$n) = @_;
+    &euc2euc(*s, $opt) if $opt;
+    $n = $s =~ s/($re_euc_c|$re_euc_kana|$re_euc_0212)/$e2s{$1}||&e2s($1)/geo;
 }
 sub e2s {
     local($c1, $c2, $code);
@@ -556,21 +591,21 @@ sub e2s {
 ;# JIS to JIS, SJIS to SJIS, EUC to EUC
 ;#
 sub jis2jis {
-    local(*_, $opt) = @_;
-    s/$re_jis0208/$esc_0208/go;
-    s/$re_asc/$esc_asc/go;
-    &h2z_jis(*_) if $opt =~ /z/;
-    &z2h_jis(*_) if $opt =~ /h/;
+    local(*s, $opt) = @_;
+    $s =~ s/$re_jis0208/$esc_0208/go;
+    $s =~ s/$re_asc/$esc_asc/go;
+    &h2z_jis(*s) if $opt =~ /z/;
+    &z2h_jis(*s) if $opt =~ /h/;
 }
 sub sjis2sjis {
-    local(*_, $opt) = @_;
-    &h2z_sjis(*_) if $opt =~ /z/;
-    &z2h_sjis(*_) if $opt =~ /h/;
+    local(*s, $opt) = @_;
+    &h2z_sjis(*s) if $opt =~ /z/;
+    &z2h_sjis(*s) if $opt =~ /h/;
 }
 sub euc2euc {
-    local(*_, $opt) = @_;
-    &h2z_euc(*_) if $opt =~ /z/;
-    &z2h_euc(*_) if $opt =~ /h/;
+    local(*s, $opt) = @_;
+    &h2z_euc(*s) if $opt =~ /z/;
+    &z2h_euc(*s) if $opt =~ /h/;
 }
 
 ;#
@@ -591,27 +626,28 @@ sub flushcache {
 ;# X0201 -> X0208 KANA conversion routine
 ;#
 sub h2z_jis {
-    local(*_, $n) = @_;
-    if (s/$re_kana([^\e]*)/$esc_0208 . &_h2z_jis($1)/geo) {
-	1 while s/(($re_jis0208)[^\e]*)($re_jis0208)/$1/o;
+    local(*s, $n) = @_;
+    if ($s =~ s/$re_kana([^\e]*)/$esc_0208 . &_h2z_jis($1)/geo) {
+	1 while $s =~ s/(($re_jis0208)[^\e]*)($re_jis0208)/$1/o;
     }
     $n;
 }
 sub _h2z_jis {
-    local($_) = @_;
-    $n += s/([\41-\137]([\136\137])?)/$h2z{$1}/g;
-    $_;
+    local($s) = @_;
+    $n += $s =~ s/([\41-\137]([\136\137])?)/$h2z{$1}/g;
+    $s;
 }
 
 sub h2z_euc {
-    local(*_) = @_;
-    s/\216([\241-\337])(\216([\336\337]))?/$h2z{"$1$3"}/g;
+    local(*s) = @_;
+    $s =~ s/\216([\241-\337])(\216([\336\337]))?/$h2z{"$1$3"}/g;
 }
 
 sub h2z_sjis {
-    local(*_, $n) = @_;
-    s/(($re_sjis_c)+)|(([\241-\337])([\336\337])?)/
-	$1 || ($n++, $e2s{$h2z{$3}} || &e2s($h2z{$3}))/geo;
+    local(*s, $n) = @_;
+    $s =~ s/(($re_sjis_c)+)|(([\241-\337])([\336\337])?)/
+	$1 || ($n++, $e2s{$h2z{$3}} || &e2s($h2z{$3}))
+    /geo;
     $n;
 }
 
@@ -619,34 +655,38 @@ sub h2z_sjis {
 ;# X0208 -> X0201 KANA conversion routine
 ;#
 sub z2h_jis {
-    local(*_, $n) = @_;
-    s/($re_jis0208)([^\e]+)/&_z2h_jis($2)/geo;
+    local(*s, $n) = @_;
+    $s =~ s/($re_jis0208)([^\e]+)/&_z2h_jis($2)/geo;
     $n;
 }
 sub _z2h_jis {
-    local($_) = @_;
-    s/((\%[!-~]|![\#\"&VW+,<])+|([^!%][!-~]|![^\#\"&VW+,<])+)/&__z2h_jis($1)/ge;
-    $_;
+    local($s) = @_;
+    $s =~ s/((\%[!-~]|![\#\"&VW+,<])+|([^!%][!-~]|![^\#\"&VW+,<])+)/
+	&__z2h_jis($1)
+    /ge;
+    $s;
 }
 sub __z2h_jis {
-    local($_) = @_;
-    return $esc_0208 . $_ unless /^%/ || /^![\#\"&VW+,<]/;
-    $n += length($_) / 2;
-    s/(..)/$z2h{$1}/g;
-    $esc_kana . $_;
+    local($s) = @_;
+    return $esc_0208 . $s unless /^%/ || $s =~ /^![\#\"&VW+,<]/;
+    $n += length($s) / 2;
+    $s =~ s/(..)/$z2h{$1}/g;
+    $esc_kana . $s;
 }
 
 sub z2h_euc {
-    local(*_, $n) = @_;
+    local(*s, $n) = @_;
     &init_z2h_euc unless defined %z2h_euc;
-    s/($re_euc_c|$re_euc_kana)/$z2h_euc{$1} ? ($n++, $z2h_euc{$1}) : $1/geo;
+    $s =~ s/($re_euc_c|$re_euc_kana)/
+	$z2h_euc{$1} ? ($n++, $z2h_euc{$1}) : $1
+    /geo;
     $n;
 }
 
 sub z2h_sjis {
-    local(*_, $n) = @_;
+    local(*s, $n) = @_;
     &init_z2h_sjis unless defined %z2h_sjis;
-    s/($re_sjis_c)/$z2h_sjis{$1} ? ($n++, $z2h_sjis{$1}) : $1/geo;
+    $s =~ s/($re_sjis_c)/$z2h_sjis{$1} ? ($n++, $z2h_sjis{$1}) : $1/geo;
     $n;
 }
 
@@ -658,12 +698,16 @@ sub z2h_sjis {
 ;# X0201 Kana character in the any situation.
 ;#
 sub init_z2h_euc {
-    local($k, $_);
-    s/([\241-\337])/\216$1/g && ($z2h_euc{$k} = $_) while ($k, $_) = each %z2h;
+    local($k, $s);
+    while (($k, $s) = each %z2h) {
+	$s =~ s/([\241-\337])/\216$1/g && ($z2h_euc{$k} = $s);
+    }
 }
 sub init_z2h_sjis {
-    local($_, $v);
-    /[\200-\377]/ && ($z2h_sjis{&e2s($_)} = $v) while ($_, $v) = each %z2h;
+    local($s, $v);
+    while (($s, $v) = each %z2h) {
+	$s =~ /[\200-\377]/ && ($z2h_sjis{&e2s($s)} = $v);
+    }
 }
 
 ;#
@@ -671,23 +715,24 @@ sub init_z2h_sjis {
 ;#
 sub tr {
     # $prev_from, $prev_to, %table are persistent variables
-    local(*_, $from, $to, $opt) = @_;
+    local(*s, $from, $to, $opt) = @_;
     local(@from, @to);
     local($jis, $n) = (0, 0);
     
-    $jis++, &jis2euc(*_) if /$re_jp|$re_asc|$re_kana/o;
+    $jis++, &jis2euc(*s) if $s =~ /$re_jp|$re_asc|$re_kana/o;
     $jis++ if $to =~ /$re_jp|$re_asc|$re_kana/o;
 
-    if ($from ne $prev_from || $to ne $prev_to) {
+    if (!defined($prev_from) || $from ne $prev_from || $to ne $prev_to) {
 	($prev_from, $prev_to) = ($from, $to);
 	undef %table;
 	&_maketable;
     }
 
-    s/([\200-\377][\000-\377]|[\000-\377])/
-	defined($table{$1}) && ++$n ? $table{$1} : $1/ge;
+    $s =~ s/([\200-\377][\000-\377]|[\000-\377])/
+	defined($table{$1}) && ++$n ? $table{$1} : $1
+    /ge;
 
-    &euc2jis(*_) if $jis;
+    &euc2jis(*s) if $jis;
 
     $n;
 }
@@ -698,8 +743,10 @@ sub _maketable {
     &jis2euc(*to) if $to =~ /$re_jp|$re_asc|$re_kana/o;
     &jis2euc(*from) if $from =~ /$re_jp|$re_asc|$re_kana/o;
 
-    grep(s/(([\200-\377])[\200-\377]-\2[\200-\377])/&_expnd2($1)/ge,$from,$to);
-    grep(s/($ascii-$ascii)/&_expnd1($1)/geo,$from,$to);
+    grep(s/(([\200-\377])[\200-\377]-\2[\200-\377])/&_expnd2($1)/ge,
+	 $from, $to);
+    grep(s/($ascii-$ascii)/&_expnd1($1)/geo,
+	 $from, $to);
 
     @to   = $to   =~ /[\200-\377][\000-\377]|[\000-\377]/g;
     @from = $from =~ /[\200-\377][\000-\377]|[\000-\377]/g;
@@ -708,26 +755,26 @@ sub _maketable {
 }
 
 sub _expnd1 {
-    local($_) = @_;
-    s/\\(.)/$1/g;
-    local($c1, $c2) = unpack('CxC', $_);
+    local($s) = @_;
+    $s =~ s/\\(.)/$1/g;
+    local($c1, $c2) = unpack('CxC', $s);
     if ($c1 <= $c2) {
-	for ($_ = ''; $c1 <= $c2; $c1++) {
-	    $_ .= pack('C', $c1);
+	for ($s = ''; $c1 <= $c2; $c1++) {
+	    $s .= pack('C', $c1);
 	}
     }
-    $_;
+    $s;
 }
 
 sub _expnd2 {
-    local($_) = @_;
-    local($c1, $c2, $c3, $c4) = unpack('CCxCC', $_);
+    local($s) = @_;
+    local($c1, $c2, $c3, $c4) = unpack('CCxCC', $s);
     if ($c1 == $c3 && $c2 <= $c4) {
-	for ($_ = ''; $c2 <= $c4; $c2++) {
-	    $_ .= pack('CC', $c1, $c2);
+	for ($s = ''; $c2 <= $c4; $c2++) {
+	    $s .= pack('CC', $c1, $c2);
 	}
     }
-    $_;
+    $s;
 }
 
 1;
