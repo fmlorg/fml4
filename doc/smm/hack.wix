@@ -794,8 +794,8 @@ is "addresses(From: address) which do not match permit_domain.co.jp".
 =E
 is "Sender: does not contains permit_domain.co.jp string".
 
-.C	『自動登録』かつ『ポストできる人を制限する』設定例その２
-=E.C	Example: "automatic registration" and "restrict members who can post"
+.S	『自動登録』かつ『ポストできる人を制限する』設定例その２
+=E.S	Example: "automatic registration" and "restrict members who can post"
 .xref auto_asymmetric_regist
 
 $REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
@@ -871,6 +871,44 @@ elena が elena-regist/members を open する時に elena-regist をロックし
 =E
 [Discussion]
 FML cannot lock elena-regist ML in default but works well I believe:)
+
+.S	たわけたHTMLメール対策
+=E.S	Cut off except the first multipart block
+
+	$AGAINST_OUTLOOK = 1; (default 0)
+
+OUTLOOKを使っているユーザからのメールでMIME/Multipartは中身を問わず一
+番最初のマルチパートブロックだけを残して後はぶったぎる。つまり中身が一
+緒のplainとHTML部分を持つメールが来たらplain部分だけを残そうとする。で
+も常に正しい処理かどうかは不明(大抵正しそうだが)。
+=E
+Cut off except the first multipart block if
+1.	Content-Type: mime/multipart
+2.	X-Mailer: looks "outlook" !
+
+.S	In-Reply-To: や References: をつけないREPLYメールを返すMUA対策
+=E.S	Against replied mails without In-Reply-To: nor References:
+
+	$AGAINST_MAIL_WITHOUT_REFERENCE = 1; (default 0)
+
+.if LANG == JAPANESE
+非常〜〜に後ろ向きなオプション
+Eudora 等の In-Reply-To: References: をつけてくれないMUA対策
+0. Subject: にTAGをつけることは前提(not default)
+1. Message-ID: はＭＬ独自のものをつける
+2. Subject: Re: [elena 00100] のようなTAGを解析する
+ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
+オリジナルのMessage-ID:はX-Original-Message-ID:に移動される
+(2.2A#28はbugでつけてない, fixed in 2.2A#29)
+.fi
+.if LANG == ENGLISH
+0. you require to set up 'fml puts the subject tag'.
+1. add ML specific Message-ID: 
+2. analyze the subject tag e.g. Subject: Re: [elena 00100]
+In this mode, fml emulates Message-ID: always based on rule 2. 
+Hence fml can ensure the consistency of ML threads against
+some MUA's e.g. Eudora...
+.fi
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
