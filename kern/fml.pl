@@ -198,11 +198,11 @@ sub ModeBifurcate
 	    }
 	    # chaddr-confirm
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr-confirm'}) {
-		&Trap__ChaddrConfirm(*e);
+		&Trap__ChaddrConfirm(*Envelope);
 	    }
 	    # chaddr
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr'}) {
-		&Trap__ChaddrRequest(*e);
+		&Trap__ChaddrRequest(*Envelope);
 	    }
 	    # we should return reply for "guide" request from even "stranger";
 	    elsif ((! $member_p) &&
@@ -2108,6 +2108,12 @@ sub LogFileNewSyslog
 	    &Touch($LOGFILE);
 	}
     }
+}
+
+sub DBCtl
+{
+    &use('db');
+    &FML_SYS_DBCtl(@_);
 }
 
 ####### Section: Security 
