@@ -94,4 +94,11 @@ $s;
 
 sub Log { print STDERR "   @_\n";}
 
+sub SRand
+{
+    local($i) = time;
+    $i = (($i & 0xff) << 8) | (($i >> 8) & 0xff) | 1;
+    srand($i + $$); 
+}
+
 1;
