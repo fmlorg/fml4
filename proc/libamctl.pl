@@ -77,6 +77,13 @@ sub AutoRegist
 	return 0;
     }
 
+    ##### Confirm Mode: We request a confirm to $from before ADD.
+    ##### listserv emulation code;
+    if ($e{'mode:confirm'}) {
+	&use('confirm');
+	&AutoRegistConfirm(*e, $from);
+    }
+
     ##### ADD the newcomer to the member list
     local($ok, $er);		# ok and error-strings
 
