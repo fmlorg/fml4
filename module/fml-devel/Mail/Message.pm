@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.47 2002/01/18 15:38:41 fukachan Exp $
+# $FML: Message.pm,v 1.51 2002/04/13 14:43:09 fukachan Exp $
 #
 
 package Mail::Message;
@@ -12,7 +12,7 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD $InComingMessage);
 use Carp;
 
-my $debug = $ENV{'debug'} ? $ENV{'debug'} : 0;
+my $debug = 0;
 
 # virtual content-type
 my %virtual_data_type =
@@ -534,7 +534,7 @@ sub _parse
 #               get reverse_path if possible.
 #    Arguments: OBJ($self) HASH_REF($r)
 # Side Effects: update $r
-# Return Value: HASH_ARRAY
+# Return Value: ARRAY_REF
 sub _parse_header
 {
     my ($self, $r) = @_;
@@ -654,6 +654,18 @@ sub whole_message_body
 {
     my ($self) = @_;
     $self->whole_message_body_head();
+}
+
+
+# Descriptions: return the incoming message on memory as string reference
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR_REF
+sub whole_message_as_string_ref
+{
+    my ($self) = @_;    
+
+    return $InComingMessage;
 }
 
 
@@ -1318,7 +1330,7 @@ sub parse_and_build_mime_multipart_chain
 	    if ($debug) {
 		my $r = substr($$data, $pb, $pe - $pb);
 		print "[ data_type=$args->{ data_type } ]\n";
-		print "{$r}\n" if $ENV{'debug'} > 1;
+		print "{$r}\n" if $debug > 1;
 	    }
 
 	    $m[ $i++ ] = $self->_alloc_new_part($args);
@@ -1502,6 +1514,24 @@ sub _alloc_new_part
 
     __build_message($me, $args);
     return bless $me, ref($self);
+}
+
+# Descriptions: delete message part link
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: null
+sub delete_message_part_link
+{
+    my ($self) = @_;
+    my $mp   = $self;
+    my $prevmp = $mp->{ prev };
+    my $nextmp = $mp->{ next };
+    my $data_type = $mp->data_type();
+
+    return if($data_type eq "text/rfc822-headers");
+
+    _prev_message_is($nextmp,$prevmp);
+    _next_message_is($prevmp,$nextmp);
 }
 
 
@@ -1798,7 +1828,7 @@ sub nth_paragraph
 # Descriptions: analyze paragraph position map in this object
 #    Arguments: OBJ($self)
 # Side Effects: none
-# Return Value: HASH_ARRAY
+# Return Value: ARRAY_REF
 sub _evaluate_pmap
 {
     my ($self) = @_;
