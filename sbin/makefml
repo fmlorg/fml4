@@ -2656,6 +2656,8 @@ sub GetCF
 	    print STDERR "\$config{$key} = [$value]\n" if $debug;
 
 	    # set up evalbuf to get the current values
+	    $value =~ s/@/\\@/g;
+	    while ($value =~ s/\\\\@/\\@/g) { 1;}
 	    $evalbuf .= qq# \$cur_config{'${key}'} = \"$value\"; \n#;
 	}
 	else {
