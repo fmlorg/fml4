@@ -151,7 +151,7 @@ sub Grep
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("C:H:cdpI:w");
+    &Getopts("dwI:");
 
     $debug = 1 if $opt_d;
 
