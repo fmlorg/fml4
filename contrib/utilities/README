@@ -23,3 +23,7 @@ my-mh-post.pl	postproc をいれかえて X-Stardate: をつける
 
 stardate.pl 	X-Stardate: をつける mh-e 
 		(fukachan@phys.titech.ac.jp)	
+
+mdchar-conv.pl	機種依存文字を伏せ字(?)にする
+		fml-support: 06313
+		(t-nakano@ccs.mt.nec.co.jp)
