@@ -1,4 +1,5 @@
 .HTML_PRE
+
 	INSTALL guide on Mac OS X Server
 
 このファイルはfmlのインストールについて Unix 版との相違点について記述
@@ -19,6 +20,9 @@ ______________________________
 OSの見かけはともかくとして:-)、fml のインストールの際にはMach 2.5起源
 の 4.4BSD に似ているOSとして考えてください。現状若干の違いを除き普通の 
 4.4BSD として扱えばうまくいくらしいということがわかっています。
+=E
+Mac OS X Server is 4.4BSD like system. In this document we describe
+difference with INSTALL between Mac OS and usual UNIX-like system.
 
 以下では(多くのUNIX共通の) INSTALL ファイルとの差について記述します。
 大筋では他のUNIX様システム上でのインストールと同じです。差分を頭に入れ
@@ -26,10 +30,14 @@ OSの見かけはともかくとして:-)、fml のインストールの際にはMach 2.5起源
 
 
 .S	推奨されるシステム構成について
+=E.C	Recommendation
 
 デフォールトのものを使っても動かすことはできます。しかしデフォールトで
 インストールされているソフトウエアは古いので新しいものにすることが推奨
 されます。
+=E
+You can use fml on default OS. But we recommend upgrade of some
+programs.
 
 Example:
 
@@ -66,6 +74,9 @@ http://www.peanuts.org/peanuts/MacOSX/unix/connectivity/mail/postfix_19990317-pl
 sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fmlのドキュ
 メントでは設定を /etc/aliases に書くということになっていますが、デフォー
 ルトでは /etc/aliases というファイルを見ていません。修正の仕方は
+=E
+Default sendmail des not see /etc/aliases. You need to modify
+/etc/sendmail.cf.
 
 1. 最低限直してそのまま使う
 2. この際なので一から作り直す。例えばCFなどを使って作る。
@@ -73,6 +84,8 @@ sendmail を使う場合には /etc/sendmail.cf の設定が必要です。fmlのドキュ
 のいづれかでしょう。
 
 1. 最低限直してそのまま使う。
+=E
+1. modify /etc/sendmail.cf
 
   /etc/sendmail.cf の /etc/aliases を有効にする必要があります。
 
@@ -85,6 +98,8 @@ O AliasFile=/etc/aliases
 .~q
 
 2. CF を使う
+=E
+2. create /etc/sendmail.cf from scratch. For example, CF is useful.
 
    CF  (sendmail.cf generator)
 
@@ -96,37 +111,55 @@ INSTALL マニュアルの通りです。CFの使い方は附属のマニュアル
 
 
 .C	fmlのインストール時の注意点
+=E.C	Cautions
 
 インストール作業(make installを走らせる)の前に作成する項目、確認する項
 目が2、3あります。確認後、INSTALL ファイルにしたがってインストールをし
 てください。
+=E
+Installation of Mac OS X server differs little from usual UNIX like
+system. Please see INSTALL file without the following some
+differences.
 
 INSTALL はUNIXでのシェルやMS-DOS prompt上で走らせるコマンドや入力につ
 いて書いています。このOS上では Terminal.app を開いてINSTALLに書かれて
 いるコマンドをうつ(例えば: make install)というような操作をすることにな
 ります。
+=E
+You need terminal to input answers to some questions. Please use
+Terminal.app
 
 .S	/etc/aliases
+.xref /etc/sendmail.cf
 
 まず /etc/sendmail.cf は /etc/aliases を見るようになっている必要があり
 ます(前述)。
-.xref /etc/sendmail.cf
+=E
+/etc/sendmail.cf does not see /etc/aliases in default.
+Please see => .ptr{/etc/sendmail.cf}.
 
 NetInfo というものを使ってもできるようだけど普通にやるとうまくいかない
 らしいので、とりあえず NetInfo のことは忘れて下さい。
-
+=E
+You can use "NetInfo" but it does not work well?
 
 .S	fmlというアカウントを作る
+=E.S	Create user "fml"
 
 アップルメニューの「サーバの管理」から「NetworkManager」を呼び出し作成
 します。
+=E
+Apple menu => Server administration => NetworkManager
 
 .S	fml という group を作る
+=E.S	Create group "fml"
 
 /etc/groupというファイルはダミーらしいので変更しても無駄です。
 
 アップルメニューの「サーバの管理」から「NetworkManager」を呼び出して作
 成します。
+=E
+Apple menu => Server administration => NetworkManager
 
 .C	Acknowledgement
 
@@ -138,14 +171,15 @@ for example, what it is "niload".
 
 .appendix
 .C	niload の使い方
+=E.C	How to use "niload"
 .l	niload
 
 (参考までに)一応コマンドラインでもpasswdやgroupをいじることができます。
 詳しくはマニュアルを参照して下さい。
 ＃インストーラとか書こうと思う人がいたら参考になるかもしれません:)
 
-
 .S	niload でアカウント(passwd)の設定をいじる
+=E.S	Create account "fml" by "niload"
 
 例: fml というアカウントを作る
 
@@ -154,6 +188,7 @@ echo 'fml:*:32765:32765::0:0:fml:/nonexistent:/sbin/nologin' | niload passwd .
 .~q
 
 .S	niload で group の設定をいじる
+=E.S	Create group "fml" by "niload"
 
 例: fml という group を作る 
 
@@ -169,6 +204,8 @@ nidump group .
 
 
 例: (すでにある) fml という group の内容を上書きする
+=E
+Example: overwrite group "fml" content
 
 .q
 echo 'fml:*:32765:fukachan,elena' | niload -d group .
