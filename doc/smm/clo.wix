@@ -1,5 +1,7 @@
 .C	コマンドライン オプション
 
+.S	コマンドライン オプション -\S+
+
 コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
 "|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
 
@@ -43,8 +45,33 @@ $LIBDIR にセットされます。
 デバッグモード かつ $FIX_SLOCAL_PIPE =1; で 変数のダンプを行なう。
 
 
-.S	簡易モード設定 （ロングラインオプション）
+.S	ロングラインオプション --\S+=\S+
+
+	--MAINTAINER=fukachan@sapporo.iij.ad.jp
+
+$MAINTAINER の値を fukachan@sapporo.iij.ad.jp で Overwrite します。
+config.ph の後評価されるので、ロングラインオプションを使って ある値だ
+けを変更することが可能です。
+
+複数のMLがある時に便利だと思います。
+一番便利な使い方は、config.ph をひとつ用意して、コピーして使い回し、
+アドレスだけを 
+
+	--MAIL_LIST=mailing-list-name@domain 
+
+で変更する などの使い方でしょう。
+ML作成の二つ目以降では、普通アドレスしか変えないものですから:-)
+
+P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
+
+
+.S	簡易モード設定 （ロングラインオプション）--\S+
 ＃さぁこれで N 秒はやく設定できる？（苦笑）
+
+--mode の形で 簡単に作動モードを変更することが出来ます。細かい変更をす
+るためには config.ph をいじるべきですが、config.ph に慣れていない人や、
+お手軽に変更する、２つ目以降の簡易ML作成 には非常に便利です。
+
 
 注意： 	コマンドラインの  --mode は config.ph で指定する 
 	$Envelope{mode:$mode} と同じです。

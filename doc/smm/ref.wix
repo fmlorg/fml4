@@ -1,4 +1,11 @@
-.C	References
+.A	References
+
+The design and implementation of 4.4BSD
+
+The design and implementation of 4.3BSD
+
+UNIX Network Programing
+
 
 rfc822				headers of mail
 rfc821				smtp
@@ -9,6 +16,7 @@ rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
 rfc934				Proposed Standard for Message Encapsulation
 rfc1153				digest
 
+rfc1521				MIME
 rfc1522				MIME part 2
 
 rfc1594				�Ѹ콸

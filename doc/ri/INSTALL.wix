@@ -3,6 +3,10 @@
 				深町 賢一
 				fukachan@sapporo.iij.ad.jp
 
+#.index
+
+
+
 .C	Introduction
 
 まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
@@ -19,6 +23,9 @@ Maintainer of ML	Elena-request@axion.phys.titech.ac.jp
 ＭＬのdirectory		/var/spool/ml/Elena
 (fml.plやconfig.ph等がある場所）			
 
+なお便宜上以下 % を shell の prompt 、 # を root の時のshell promptと
+することにします。
+
 
 .C	お手軽インストール
 
@@ -26,24 +33,46 @@ Maintainer of ML	Elena-request@axion.phys.titech.ac.jp
 
 fml を広げた directory へいって、（今の例では /var/spool/ml/Elena）
 
-% make MAIL_LIST=Elena@axion.phys.titech.ac.jp MAINTAINER=Elena-request@axion.phys.titech.ac.jp	
+% make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
 
-と打ってみてください
+とうってみてください。
 ＃実際にはアドレスをあなたの作りたいML名に変えて実行です (^^)
 
-自動的に /var/spool/ml/Elena/etc/samples/ に aliases や include ファイ
-ルの見本ができます。あとは aliases を適当に切り剥ぎして、/etc/aliases 
-に書いて、newaliases と。
-members actives にあなたのアドレス、メンバーのアドレス等を書いて
+例：
+% make MAIL_LIST=Elena@axion.phys.titech.ac.jp MAINTAINER=Elena-request@axion.phys.titech.ac.jp	
 
+自動的に /var/spool/ml/Elena/samples/ に aliases や include ファイルの
+見本ができます。あとは aliases を適当に切り剥ぎして、/etc/aliases に書
+いて、newaliases と。
+そして members actives にあなたのアドレス、メンバーのアドレス等を書い
+たら…
 					はい、おしまひ(^^)
 
+
+ちなみに samples/ の中身は
+
+   samples/aliases               /etc/aliases の見本
+   samples/include               基本的な include の見本（以下同様）
+   samples/include-auto          自動登録をするML
+   samples/include-distribute    フォワードするだけのML
+   samples/include-fmlserv       fmlserv の設定
+   samples/include-remote        このマシン以外からメールでMLを管理する場合
+
+日本語で解説がついてますので、実際にシステムにインストールする前に
+要らない部分は切り取ってからしかけるとよいでしょう。
+
+
+以下の数節はよりきめの細かい設定のための解説です。とりあえずMLを動かすのなら
+.ptr{start-of-check} 節（このファイルの最後の方）へ飛んで構いません。
 
 
 
 .C	基本設定
 
-より自分好みのMLにしたいあなたの場合は、もちょっと手間をかけてみましょう。
+より自分好みのMLにしたい場合は、もちょっと手間をかけて config.ph を設
+定する必要があります。
+お手軽設定より少し複雑ですが、その分きめの細かい設定が出来ます。
+MLの運用に慣れたら
 
 cf directory にいって、sample をコピーして、適当な名前にしておきます。
 ＃ここでは、ファイル名を Elena とします
@@ -283,6 +312,7 @@ Elena-request: fukachan
 
 
 .C	Configurations for fml.pl and config.ph
+.key	start-of-check
 
 config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailのメン
 バーへの配送処理をしません。この場合、配送以外のすべての機能は動いてい
