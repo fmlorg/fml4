@@ -25,6 +25,11 @@ $init++  if $opt_i;
 
 push(@INC, 'proc');
 push(@INC, $opt_I);
+
+# push $FML/bin, $FML 
+$0 =~ m#^(.*)/(.*)#     && do { unshift(@INC, $1), unshift(@LIBDIR, $1);};
+$0 =~ m#^(.*)/bin/(.*)# && do { unshift(@INC, $1), unshift(@LIBDIR, $1);};
+
 require 'libcrypt.pl';
 
 &Log("Force to change password ...");
