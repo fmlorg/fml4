@@ -2892,7 +2892,12 @@ sub do_newml
 	return;
     }
 
-    if ($< == 0) { &WarnYourAreRoot;}
+    if ($UNISTD) {
+	&WarnYourAreRoot if $< == 0;
+    }
+    elsif ($ENV{'USERNAME'} eq 'Administrator') {
+	&WarnYourAreRoot;
+    }
 
     print "---Creating $ml mailing list\n";
 
