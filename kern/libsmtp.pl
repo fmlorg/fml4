@@ -56,9 +56,8 @@ sub SmtpInit
 
 		# unlink $SMTP_LOG if first time in this process thread;
 		if ($IncrementCounterCalled{"$VARLOG_DIR/.seq"} == 1) {
-		    &Log("unlink $SMTP_LOG") if $debug_fml_org;
 		    unlink $SMTP_LOG if -f $SMTP_LOG;
-		    open($SMTP_LOG, ">$SMTP_LOG"); # XXX: prefer basic function
+		    open($SMTP_LOG, ">$SMTP_LOG"); # XXX: prefer basic style
 		    unlink $org_smtp_log if -f $org_smtp_log;
 		    link($SMTP_LOG, $org_smtp_log)  if     $UNISTD;
 		    &Copy($SMTP_LOG, $org_smtp_log) unless $UNISTD;
@@ -94,7 +93,7 @@ sub SmtpInit
 
 sub SocketInit
 {
-    local($eval, $exist_socket_ph);
+    my ($exist_socket_ph);
 
     ## set up @RcptLists which has lists of recipients.
     ## Its purpose is to split lists to sub-organization but
@@ -237,7 +236,7 @@ sub SmtpConnect
 sub Smtp 
 {
     local(*e, *rcpt, *files) = @_;
-    local(@smtp, $error, %cache, $nh, $nm, $i);
+    local(@smtp, $error, $i);
 
     # Initialize, e.g. use Socket, sys/socket.ph ...
     &SmtpInit(*e, *smtp);
@@ -855,14 +854,6 @@ sub SmtpPutActiveList2Socket
     if ($smtp_pcb{'mci'}) {
 	require 'libsmtpsubr2.pl';
 	($size, $mci_window_start, $mci_window_end) = &GetMCIWindow($file);
-	print STDERR "window $file:($start, $end)\n" if $debug_mci;
-	&Log("window size=$size $mci_window_start/$mci_window_end")
-	    if $debug_fml_org;
-	if ($debug_mci_window2) {
-	    local($fn) = $file;
-	    $fn =~ s#$DIR/##;
-	    &Log("mci_window $fn:($mci_window_start, $mci_window_end)");
-	}
     }
 
     # when crosspost, delivery info is saved in crosspost.db;
