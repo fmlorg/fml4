@@ -1,6 +1,11 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/08/07
+
+   proc/libamctl.pl (2.40-2.41):
+	fix subject subscribe with MIME/muiltpart 
+
 2000/07/29
 
    proc/libamctl.pl(2.43-2.44):
