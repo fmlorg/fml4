@@ -14,11 +14,11 @@ DOC_TUTORIAL_SUBDIR += command
 DOC_TUTORIAL_SUBDIR += daily
 DOC_TUTORIAL_SUBDIR += debug
 DOC_TUTORIAL_SUBDIR += digest
+DOC_TUTORIAL_SUBDIR += documentation
 DOC_TUTORIAL_SUBDIR += encryption
 DOC_TUTORIAL_SUBDIR += errormails
 DOC_TUTORIAL_SUBDIR += extension
 DOC_TUTORIAL_SUBDIR += filter
-DOC_TUTORIAL_SUBDIR += hack_samples
 DOC_TUTORIAL_SUBDIR += header_rewrite
 DOC_TUTORIAL_SUBDIR += how_to_subscribe
 DOC_TUTORIAL_SUBDIR += install
@@ -32,6 +32,7 @@ DOC_TUTORIAL_SUBDIR += remote_control
 DOC_TUTORIAL_SUBDIR += resource_control
 DOC_TUTORIAL_SUBDIR += smtp
 DOC_TUTORIAL_SUBDIR += troubleshoot
+DOC_TUTORIAL_SUBDIR += utility_programs
 DOC_TUTORIAL_SUBDIR += virtual_domain
 
 .include "basic_setup/Makefile"
