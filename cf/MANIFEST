@@ -1085,6 +1085,9 @@ USE_MEMBER_NAME:
 #
 # value: 1/0
 USE_EXPIRE:			0
+
+# expire summary file when $USE_EXPIRE is enabled.
+# value: 1/0
 EXPIRE_SUMMARY:
 
 # expire how old articles 
