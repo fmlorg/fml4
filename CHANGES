@@ -34,7 +34,18 @@
 	07/02 以降の 4.0-current の変更は 4.0.2 に反映されるものと
 	反映されないものがあります。  
 
+2001/07/22
 
+   messages/{Japanese,English}/misc 
+	removed since this file is not used
+
+   etc/makefml/menu.conf
+	use _NULL_ to select null for $SUBJECT_TAG_TYPE
+	define /OPTION/LANGUAGE/LANGUAGE
+
+	メニューから $SUBJECT_TAG_TYPE で空文字列を選べないバグを修正
+
+	$LANGUAGE の選択をできるようにする（自動ではない）
 
 2001/07/16
 
