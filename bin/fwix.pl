@@ -16,7 +16,7 @@ require 'getopts.pl';
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
 $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr|url';
-$FORMAT  = 'q|~q';
+$FORMAT  = 'q|~q|appendix';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
 $BGColor   = "E6E6FA";# lavender ("E0FFFF" == lightcyan);
@@ -75,7 +75,7 @@ $SIG{'HUP'}  = 'CleanUp';
 
     &Init;
 
-    print STDERR "fwix generation mode:\t$mode\n";
+    print STDERR "fwix generation mode:\t$mode (Language=$Lang)\n";
 
     &Formatter($mode);		# main;
 }
@@ -179,7 +179,10 @@ sub CleanUp
     print STDERR "Caught a SIG$sig--shutting down\n" if $sig;
     print STDERR "debug mode: not unlink temporary files\n" if $debug;
 
-    if (! $debug) {
+    if ($debug) {
+	print STDERR "tmp file is $TmpFile $TmpFile_Eng\n";
+    }
+    else {
 	unlink $TmpFile;
 	unlink $TmpFile_Eng;
     }
@@ -192,15 +195,29 @@ sub CleanUp
 sub ShowIndex
 {
     print "\n\t\tINDEX\n\n";
-    foreach $x (sort keys %key) {
+    foreach $x (sort ci_sort keys %key) {
 	printf "%-40s   ...   %s\n", $x, $keylist{$x};
     }
 }
 
 
+# case insensitive
+sub ci_sort
+{
+    local($ta, $tb) = ($a, $b);
+
+    $ta =~ tr/A-Z/a-z/;
+    $tb =~ tr/A-Z/a-z/;
+    $ta =~ s/[\$\%\@\#\&\'\"\-\s]//g;
+    $tb =~ s/[\$\%\@\#\&\'\"\-\s]//g;
+
+    $ta cmp $tb;
+}
+
+
 sub LogManifest
 {
-    open(MANIFEST, "> $ManifestFile") || die $!;
+    open(MANIFEST, "> $ManifestFile") || die("CANNOT OPEN $ManifestFile:$!");
     print MANIFEST $Manifest;
     close(MANIFEST);
 }
@@ -284,7 +301,7 @@ sub ReadFile
     # info
     {	
 	local($c) = $Chapter + 1;
-	printf STDERR " --Including %-40s  %s\n", $file,
+	printf STDERR " --include %-40s  %s\n", $file,
 	"(".($Appendix ? "App.$Appendix " : ""). "Chap.$c)";
     }
     
@@ -343,7 +360,32 @@ sub ReadFile
 	/$COMMENT/i && next;                    # Comments
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
 
-	# PATTERN
+	# FOOTNOTE
+	# buffer alloc
+	if (/\.fn\s*\{/ .. /^\.~fn/)  { 
+	    if (/\.fn\s*\{/) {
+		$FootNote++;
+		s/\.fn\s*\{/\#\.fn${FootNote}/;
+	    }
+	    else {
+		/^\.~fn/ && next;
+		$FootNote{$FootNote} .= "$_\n";
+		next;
+	    }
+	}
+
+	# caption
+	if (/\.caption/ .. /^\.~caption/)  { 
+	    if (/\.caption/) {
+		s/\.caption/\[Caption $Chapter.$Figure\] \{/;
+	    }
+	    else {
+		s/^\.~caption/\}/;
+	    }
+	}
+
+
+	### PATTERN
 	
 	if (/^\.($HTML_KEYWORD)/) {
 	    print STDERR "\tCATCH HTML($&)\n" if $verbose;
@@ -357,13 +399,15 @@ sub ReadFile
 
 	# seealso{guide}
 	if (/^\.($KEYWORD)\{(\S+)\}/) {
-	    print STDERR "\tCATCH $1"."{$2}\n"; # against perl 5
+	    print STDERR "\t--catch{}syntax $1"."{$2}\n"; # against perl 5
 	    s/\.($KEYWORD)\{(\S+)\}/&Expand($1, $2, $file, $mode)/e;
 	}
 
 	s/^\.($KEYWORD)\s+(.*)/$_ = &Expand($1, $2, $file, $mode)/e;
 	s/^\.($FORMAT)\s*(.*)/$_  = &Format($1, $2, $file, $mode)/e;
 
+	# Exception ???
+	s/\.(ptr|fig|ps)\s*\{(\S+)\}/&Expand($1, $2, $file, $mode)/ge;
 
 
 	# NEXT
@@ -418,11 +462,22 @@ sub ReadFile
 }
 
 
+sub GabbleUntil
+{
+    local($last_key, $s) = @_;
+    local($flag);
+
+    $s =~ /$last_key/ && ($flag = 0);
+    ($s, $flag);
+}
+
 ##### Section: Output Handlers
 sub OutputHtml
 {
     local($input) = @_;
     local($cur_n);
+
+    print STDERR "$input -> ", select,"\n";
 
     while (<$input>) {
 	undef $Error;
@@ -431,12 +486,13 @@ sub OutputHtml
 	    $name = $outfile = $1;
 	    $name =~ s#.*/##;
 	    if ($name =~ /^(\d+)\.html/) {
-		$PREV_URL_NUMBER = $1 - 1;
-		$PREV_URL_NUMBER = $PREV_URL_NUMBER > 0 ? $PREV_URL_NUMBER : 1;
+		$PrevUrlPointer = $1 - 1;
+		$PrevUrlPointer = $PrevUrlPointer > 0 ? $PrevUrlPointer : 1;
 	    }
 
 	    print STDERR "---Skipping\t$outfile";
-	    print STDERR "(prev->$PREV_URL_NUMBER)\n" if $verbose;
+	    print STDERR "(prev->$PrevUrlPointer)" if $verbose;
+	    print STDERR "\n";
 
 	    next;
 	}
@@ -445,12 +501,12 @@ sub OutputHtml
 	    $name = $outfile = $1;
 	    $name =~ s#.*/##;
 
-	    $prev_url_pointer =  $CUR_URL_POINTER;
+	    $prev_url_pointer =  $CurUrlPointer;
 
 	    # here the cur_n is the next number (attention) 
 	    # since here is close() phase for the next chapter;
 	    if ($name =~ /^(\d+)\.html/) {
-		print OUTHTML ($CUR_URL_POINTER = &ShowPointer($1));
+		print OUTHTML ($CurUrlPointer = &ShowPointer($1));
 		print OUTHTML &CopyRight;
 	    }
 
@@ -465,6 +521,11 @@ sub OutputHtml
 	    next;		# cut the line "^#.CUT";
 	}
 
+	s%\#\.fn(\d+)%<A HREF=footnote.html#footnote$1>* $1</A>%g;
+
+	s%\#\.ps\{(\S+)\}%<A HREF=$1>$1</A>%i;
+	s/\#\.fig\{(\S+)\}/&FigExpand($1)/gei;
+
 	s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
@@ -478,6 +539,24 @@ sub OutputHtml
     }
 
     close(OUTHTML);
+
+    if (%FootNote) {
+	print STDERR "   generating\t$HtmlDir/footnote.html\n";
+	open(OUTHTML, "> ${HtmlDir}/footnote.html") || die "$!\n";
+    
+	print OUTHTML "<TITLE>FootNote</TITLE>\n";
+
+	for (sort {$a <=> $b} keys %FootNote) {
+	    print OUTHTML "<P>\n";
+	    print OUTHTML "<A NAME=\"footnote$_\">* $_ </A>\n";
+	    print OUTHTML "$FootNote{$_}\n\n";
+	}
+
+	print OUTHTML "\n\n";
+
+	close(OUTHTML);
+    }
+
 }
 
 
@@ -491,18 +570,22 @@ sub ShowPointer
 
     if ($cur_n != 2) {
 	$n = $cur_n - 2;
-	$n = $PREV_URL_NUMBER < $n ? $PREV_URL_NUMBER : $n;
-	$s .= "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+	$n = $PrevUrlPointer < $n ? $PrevUrlPointer : $n;
+
+	# ignore -1
+	if ($n > 0) {
+	    $s .= "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+	}
     }
 
-    print STDERR " --Generating\t$outfile (prev-> $n, ";
+    print STDERR "   generating\t$outfile (prev-> $n, ";
     
     $n = $cur_n;
     $s .= "<A HREF=${n}.html> [NEXT CHAPTER]</A>\n";
 
     print STDERR "next -> $n)\n";
 
-    $PREV_URL_NUMBER = 10000;
+    $PrevUrlPointer = 10000;
 
     $s;
 }
@@ -516,8 +599,12 @@ sub OutputFile
     if ($mode eq 'html') {
 	$Index = "<UL>\n$Index\n</UL>";
 
-	&OutputHtml('ENG');  # why dup ?
-	&OutputHtml('TMPF');
+	if ($Lang eq 'ENGLISH'){
+	    &OutputHtml('ENG');
+	}
+	else {
+	    &OutputHtml('TMPF');
+	}
     }
     elsif ($mode eq 'roff') {
 	print ".SH\n$Copyright\n" if $Copyright;
@@ -537,6 +624,7 @@ sub OutputFile
 
 		next;		# cut the line "^#.CUT";
 	    }
+
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	    s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
@@ -554,7 +642,10 @@ sub OutputFile
 	while (<$input>) {
 	    undef $Error;
 
+	    s/\#\.fn(\d+)/*$1/g;
+	    s/\#\.ps\{(\S+)\}/Figure $PostScript{$1}/i;
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
+	    s/\#\.fig\{(\S+)\}/&FigExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
 	    s/^\#\.url\s+(.*)/&IndexExpand($1,1)/gei;
 	    s/^(\#\.index)/$Index{$Lang}/; 
@@ -564,6 +655,14 @@ sub OutputFile
 	    $prev = $_;
 
 	    print $_;
+	}
+
+	if (%FootNote) {
+	    print "___________\nFootnote\n\n";
+	    for (sort {$a <=> $b} keys %FootNote) {
+		print "$_: $FootNote{$_}\n\n";
+	    }
+	    print "\n\n";
 	}
     }
     elsif ($mode eq 'latex') {
@@ -615,6 +714,10 @@ sub Format
 	undef $Tag;
 	$r = "</PRE>" if $mode eq 'html';
 	undef $In_PRE;
+    }
+    elsif ($c eq 'appendix') {	# set flag, return without effect;
+	$InAppendix = 1;
+	$r = "";
     }
 
     $r;
@@ -677,6 +780,11 @@ sub Expand
 	$s = $1; # if $mt; 
     }
 
+
+    if ($InAppendix) {
+	$c = 'A' if $c eq 'C';
+    }
+
     ###  Part
     if ($c eq 'P') {
 	&FormatReset;
@@ -714,6 +822,7 @@ sub Expand
 	$Chapter++ unless $LANG;
 	$Section    = 0;
 	$InAppendix = 0;
+	$Figure     = 0;
 
 	$s = "$Chapter\t$s";
 
@@ -792,17 +901,6 @@ sub Expand
     elsif ($c eq 'http') {
 	;
     }
-    elsif ($c eq 'key' || $c eq 'k') {
-	$key{$s} = $CurPosition;
-	$keylist{$s} .= "$CurPosition ";
-
-	$Manifest .= "key=$s\n$CurPosition";
-	$Manifest .= "   $CurrentSubject\n";
-	return '#.next';
-    }
-    elsif ($c eq 'seealso' || $c eq 'xref') {
-	$s = "\#.xref $s";
-    }
     elsif ($c eq 'url') {
 	if ($mode eq 'html') {
 	    $index{"url=$s"} = "<A HREF=$s>$s</A>";
@@ -814,9 +912,45 @@ sub Expand
 	}
     }
     elsif ($c eq 'ptr') {
+	&Log("ptr:: -> \#.ptr{$s}") if $debug;
 	$s = "\#.ptr{$s}";
     }
+    elsif ($c eq 'fig') {
+	&Log(".fig{$s} -> \#.fig{$s}") if $debug;
+	$s = "\#.fig{$s}";
+    }
+    elsif ($c eq 'ps') {
+	$Figure++;
+
+	&Log(".ps{$s} -> $Chapter.$Figure") if $debug;
+
+	if ($figure_index{$s}) {
+	    &Log("Error: $s is already assinged as $figure_index{$s}");
+	}
+	else {
+	    $figure_index{$s} = "$Chapter.$Figure";
+	}
+
+	$PostScript{$s} = "$Chapter.$Figure";
+	$s = "#.ps{$s}";
+    }
+    elsif ($c eq 'seealso' || $c eq 'xref') {
+	$s = "\#.xref $s";
+    }
+    elsif ($c eq 'key' || $c eq 'k') {
+	$key{$s} = $CurPosition;
+	if ($keylist{$s} !~ /$CurPosition/) {
+	    $keylist{$s} .= "$CurPosition ";
+	}
+
+	$Manifest .= "key=$s\n$CurPosition";
+	$Manifest .= "   $CurrentSubject\n";
+
+	return '#.next';
+    }
     elsif ($c eq 'label' || $c eq 'l') {
+	# label is internal use, so we should split .l and .k ;-)
+
 	if ($index{$s}) {
 	    &Log("   $s already exists\tin \%index[$file::line=$.]");
 	    &Log("      xref: $_index{$s}") ;
@@ -828,8 +962,11 @@ sub Expand
 	    $index{$s}  = $CurPosition;
 	}
 	elsif ($mode eq 'html') {
-	    $index{$s} = 
-		"</PRE><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$Chapter.$Section</A><PRE>";  	$In_PRE = 1;
+	    $index{$s}  = "</PRE>";
+	    $index{$s} .= "<A HREF=\"$Chapter.html#C${Chapter}S${Section}\">";
+	    $index{$s} .= "$Chapter.$Section</A>";
+	    $index{$s} .= "<PRE>";
+	    $In_PRE = 1;
 	}
 	elsif ($mode eq 'roff') {
 	    $index{$s}  = "$Chapter.$Section"; 
@@ -860,8 +997,30 @@ sub HtmlSplitHere
 sub PtrExpand
 {
     local($k) = @_;
-    print STDERR "PtrExpand::($k)   $k -> $key{$k}\n" if $debug;
-    $key{$k};
+
+    &Log("PtrExpand::($k)   $k -> index[$index{$k}]") if $debug;
+
+    if (! $index{$k}) {
+	&Log("PtrExpand::Error($k)  index[$k] -> NULL");
+    }
+
+    # $key{$k};
+    $index{$k};    
+}
+
+
+sub FigExpand
+{
+    local($k) = @_;
+
+    &Log("FigExpand::($k)   $k -> figure_index[$figure_index{$k}]") if $debug;
+
+    if (! $figure_index{$k}) {
+	&Log("FigExpand::Error($k)  figure_index[$k] -> NULL");
+    }
+
+    # $key{$k};
+    "Fig. $figure_index{$k}";
 }
 
 
