@@ -132,9 +132,9 @@ sub AutoRegist
 	if (&CheckResourceLimit(*e, 'member') > $MAX_MEMBER_LIMIT) {
 	    &Log("AutoRegist: reject subscribe request",
 		 "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
-	    &Mesg(*e, "Sorry, the number of this ML exceeds the limit.");
-	    &Mesg(*e, "Hence we cannot accept your request.");
-	    &Mesg(*e, $NULL, 'resource.exceed_max_member_limit');
+	    &Mesg(*e, 
+		  'Sorry, deny your request for too many subscribers', 
+		  'resource.exceed_max_member_limit');
 	    return 0;
 	}
     }
@@ -445,9 +445,10 @@ sub DoSetDeliveryMode
 
 	if ($NOT_USE_SPOOL) {
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
-	    &Mesg(*e, "ERROR: $proc is disabled");
-	    &Mesg(*e, "       since we have no spooled articles");
-	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
+	    &Mesg(*e, 
+		  "ERROR: $proc is disabled".
+		  "       since we have no spooled articles",
+		  'req.digest.no_spool', $proc);
 	    return $NULL;
 	}
 

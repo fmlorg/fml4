@@ -1,0 +1,15 @@
+### Section: Resource Limit
+resource.too_big:
+	your mail is too big
+
+resource.exceed_max_member_limit:
+	deny subscribe request since the maximum number of members 
+	is too many.
+
+resource.exceed_max_command_input:
+	Error: too many commands in one mail
+
+# &Mesg(*e, $NULL, 'resource.exceed_max_proc_req',$_,$limit);
+resource.exceed_max_proc_req:
+	Error: the number of commands exceeds _ARG0_, the maximum in one mail
+	_ARG0_ commands in one mail should be less than _ARG1_ one mail

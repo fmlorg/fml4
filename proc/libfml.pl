@@ -198,7 +198,8 @@ sub DoProcedure
 	  &Log("$input_command_count++ >= $MAXNUM_COMMAND_INPUT");
 	  if ($input_command_count++ >= $MAXNUM_COMMAND_INPUT) {
 	      &Log("input commans >= $MAXNUM_COMMAND_INPUT, force to a stop");
-	      &Mesg(*e, $NULL, 'resource.exceed_max_command_input');
+	      &Mesg(*e, 'too many ocmmands in one mail', 
+		    'resource.exceed_max_command_input');
 	      &Mesg(*e, "FYI: The following requests are processed.");
 	      &Mesg(*e, $history);
 	      last GivenCommands;
@@ -258,8 +259,7 @@ sub DoProcedure
 		  $s .= "Sorry, we suppress the maximum number of requests\n";
 		  $s .= "*** for $xbuf command in one mail up to $limit.\n";
 		  $s .= "*** STOP PROCESSING IMMEDIATELY.\n";
-		  &Mesg(*e, $s);
-		  &Mesg(*e, $NULL, 'resource.exceed_max_proc_req',$xbuf,$limit);
+		  &Mesg(*e, $s, 'resource.exceed_max_proc_req',$xbuf,$limit);
 		  &Mesg(*e, "FYI: The following requests are processed.");
 		  &Mesg(*e, $history);
 		  last GivenCommands;
@@ -960,9 +960,11 @@ sub ProcSubscribe
 
     # if member-check mode, forward the request to the maintainer
     if (&NonAutoRegistrableP) {
-	&LogWEnv("$proc request is forwarded to Maintainer", *e);
-	&Mesg(*e, "Please wait a little");
-	&Mesg(*e, $NULL, 'req.subscribe.forwarded_to_admin', $proc);
+	&Log("$proc request is forwarded to Maintainer", *e);
+	&Mesg(*e, 
+	      "$proc request is forwarded to Maintainer".
+	      "Please wait a little",
+	      'req.subscribe.forwarded_to_admin', $proc);
 	&WarnE("$proc request from $From_address", $NULL);
     }
     else {

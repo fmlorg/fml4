@@ -50,10 +50,11 @@ sub NotifyMailSizeOverFlow
 
 sub NotifyMailSizeOver2Sender
 {
-    &Mesg(*e, $NULL, 'resource.too_big');
-    &Mesg(*e, "ATTENTION! Your mail is too big, so not processed!!!");
-    &Mesg(*e, "This ML <$MAIL_LIST> restricts the maximum mail size,");
-    &Mesg(*e, "so pay attention to the mail with e.g. attachments.");
+    my ($s);
+    $s .= "ATTENTION! Your mail is too big, so not processed!!!\n";
+    $s .= "This ML <$MAIL_LIST> restricts the maximum mail size,\n";
+    $ s.= "so pay attention to the mail with e.g. attachments.";
+    &Mesg(*e, $s, 'resource.too_big');
 }
 
 
