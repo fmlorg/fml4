@@ -5,7 +5,7 @@
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
-$Rcsid   = 'fml 2.0L #: Tue, 25 Jun 96 22:10:27 JST 1996';
+$Rcsid   = 'fml 2.0 Exp #: Wed, 7 Aug 96 02:36:32 JST 1996';
 
 ### Import: fml.pl ###
 
@@ -34,11 +34,29 @@ unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 chdir $DIR || die $!;
 
 &CWhoisInit;
-&CWhoisSearch(*e, $WHOIS_SERVER, $Key);
 
-if ($Key =~ /^help$/i) { 
-    print ("\#" x 60); print "\n";
-    print &CWhoisUsage;
+# RETURN HELP FOR "help#" or NULL
+if ($Key =~ /^help${CHMODE}$/oi || (! $Key) ) { 
+    &Usage;
+}
+# O.K. Here we go!
+else {
+    # RUN-HOOKS START HOOK
+    &eval($CWHOIS_START_HOOK, 'CWHOIS_START_HOOK');
+
+if ($USE_CWHOIS_FIRST_CACHE &&
+    &CWhoisProbeFirstCache($Key)) {
+    &CWhoisSearch(*e, $WHOIS_SERVER, "fcache${CHMODE}${Key}");
+}
+else {
+    &CWhoisSearch(*e, $WHOIS_SERVER, $Key) unless $FirstCacheHit;
+
+    # WHEN whois -h server host, append the help of this server
+    if ($Key =~ /^help$/i) { print ("\#" x 60); print "\n"; &Usage;}
+
+    # RUN-HOOKS EXIT HOOK
+    &eval($CWHOIS_EXIT_HOOK, 'CWHOIS_EXIT_HOOK');
+}
 }
 
 exit 0;
@@ -46,33 +64,54 @@ exit 0;
 ##### libexec/whois.pl Libraries
 sub CWhoisInit
 {
+    # default;
+    $CHMODE = $KEY_SEPARATOR = '#';
+    $Set  = '';
+    $Mode = 'help';
+    $MATCH_THE_LATEST = 1; # show the latest target
+
+    # first cache
+    $FIRST_CACHE_DB      = "/var/tmp/cwhois_first_cachedb";
+    $FIRST_CACHE_SPOOL   = "/var/tmp";
+    $FIRST_CACHE_EXPIRE  = 3600;
+    $FIRST_CACHE_TIMEOUT = 5;
+
+    # we ask only in English!
+    $CWHOIS_JCODE_P = $CWHOIS_JCODE_P || 0;
+
     $CF = "$DIR/config.ph";
 
     if (-f $CF) {
 	require $CF;
     }
     else {
-	##### KEYWORD and Defaults #####
-	$HOME               = '/home/beth/fukachan';
-	$HIKARI             = '/home/hikari/sapporo/op/tools/whois/bin';
-	$HIKARI_VARDB       = '/home/hikari/sapporo/var/db';
-	$HIKARI_SPOOL       = '/home/hikari/sapporo/var/mail/apply';
-	$CACHE_SEARCH_PROG  = "$HIKARI/scandb.pl";
-
-	%WhoisCacheSpool    = ('apply', $HIKARI_SPOOL);
-	%WhoisCacheDB       = ('apply', "$HIKARI_VARDB/applydb");
-
-	$CHMODE             = '#';
-	$LOCAL_HELP_KEYWORD = "help$CHMODE";
-	$LOCAL_CACHE_SEARCH = "$CHMODE(\\S+)";
-	$LOCAL_COMMAND_MODE = "(\\S+)$CHMODE(\\S+)";
-
-	$WHOIS_SERVER       = 'whois.nic.ad.jp';
-	$From_address       = 'WHOIS';
-	$TIMEOUT            = 5;#20;
-
-	##### KEYWORD and Defaults ENDS #####
+	die "Please define \CF (configuration file)\n";
     }
+
+    &GetKey;
+
+    # including libraries
+    require '__fml.pl';		# only subroutines from fml.pl
+    require 'libsmtp.pl';
+    require 'libwhois.pl';
+
+    &InitConfig;		# the sames as fml.pl;
+
+    &eval('&GetPeerInfo;');	# alternative for From:
+
+    # Variables
+    $WHOIS_SERVER = $WHOIS_SERVER || $DEFAULT_WHOIS_SERVER;
+    $From_address = $PeerAddr     || $From_address;
+    undef $PeerAddr;
+}
+
+# <STDIN> -> Key
+sub GetKey
+{
+    local($pat, $key);
+
+    # default 
+    $Set  = $DEFAULT_SET  || $Set;
 
     # via /usr/sbin/inetd
     # Generate the key 
@@ -80,39 +119,46 @@ sub CWhoisInit
     chop $Key; 
     chop $Key;
 
-    # Fixing Key
-    $Key =~ s/^\s*(.*)\s*$/$1/;
-
-    if ($Key =~ /^$LOCAL_HELP_KEYWORD$/oi || (! $Key) ) { 
-	&Cat($HELP_FILE) if $HELP_FILE;
-	print &CWhoisUsage;
-	exit 0; 
+    # securiy check
+    local($skey) = $Key;
+    $skey =~ s#(\w)/(\w)#$1$2#g;
+    if ($skey !~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
+	die("YOUR REQUEST IS INSECURE, SO EXIT IMMEDIATELY\n\n");
     }
 
-    # libraries
-    require '__fml.pl';
-    require 'libsmtp.pl';
-    require 'libwhois.pl';
-
-    &InitConfig; # fml.pl;
-
-    &eval('&GetPeerInfo;');
-
-    # Variables
-    $WHOIS_SERVER = $WHOIS_SERVER || $WHOIS_SERVER;
-    $From_address = $PeerAddr     || $From_address;
-    undef $PeerAddr;
+    # Fixing Key
+    $Key =~ s/^\s*(.*)\s*$/$1/;
 }
 
 
+sub SetSelect
+{
+    local($s) = @_;
+
+    if ($s =~ /^debug$/i) { $debug++; undef $s;}
+    if ($s =~ /^history$/i) { undef $MATCH_THE_LATEST; undef $s;}
+    if ($s =~ /^(rev|reverse)$/i) { 
+	$REVERSE_ORDER++;
+	undef $s;
+    }
+    if ($s =~ /^(normal|historical)$/i) { 
+	$HISTORICAL_ORDER++; 
+	undef $s;
+    }
+
+    $s;
+}
+
+# Caching (spooling) function
 # Derived From fml.pl::Distribute()" Distribute mail to members"
-sub CWhoisCache
+sub CWhoisCacheOn
 {
     local(*e) = @_;
 
     $0 = "--Caching $Key <$FML $LOCKFILE>";
     local($status, $num_rcpt, $s, @Rcpt, $id);
 
+    &Flock;			# LOCK!
 
     ##### ML Preliminary Session Phase 01: set and save ID
     # Get the present ID
@@ -138,9 +184,14 @@ sub CWhoisCache
 	&Warn("ERROR:ARTICLE ID dupulication", 
 	      "Try save > $FP_VARLOG_DIR/DUP$CurrentTime\n$e{'Hdr'}\n$e{'Body'}");
     }
+
+    &CWhoisFirstCacheOn;
+
+    &Funlock;			# UNLOCK!
 }
 
 
+# System call called by SIGARLM
 sub CWhoisTimeOut
 {
     &Log("Caught(SIGALRM)");
@@ -152,25 +203,27 @@ sub CWhoisTimeOut
 }
 
 
+# Master Search algorithm classifier
 sub CWhoisSearch
 {
-    local($r, @r, %r, $pat, $all);
+    local($r, @r, %r, $pat, $all, %db, %spool, $proc, $key);
     local(*e, $host, $pat) = @_;
 
-    # we ask only in English!
-    $WHOIS_JCODE_P = 0;
-
-    if ($pat =~ /^$LOCAL_CACHE_SEARCH$/) {
-	$key = $1;
-	print "CACHE SEARCHING key=$key ... \n\n";
-	&CWhoisCacheSearch($key);
+    # first cache
+    if ($pat =~ /^fcache${CHMODE}(\S+)$/) { 
+	&CWhoisFirstCacheSearch($1);
     }
-    elsif ($pat =~ /^$LOCAL_COMMAND_MODE/) { # "proc#key"
-	$proc = $1; 
+    # both "proc\#key" and "opt1#opt2#proc#key" are available
+    # and "fcache#key" is the first cache search
+    elsif ($pat =~ /^(.*)$CHMODE(\S+)$/) { 
+	$proc = $1;
 	$key  = $2;
-	print "CACHE SEARCHING key=$key (proc=$proc) ... \n\n";
-	&CWhoisCacheSearch($key, $proc);
+
+	print "CACHE SEARCHING key=$key opt=$proc ... \n\n";
+	&CWhoisCacheSearch(*key, *proc, 
+			   *CWHOIS_CACHE_DB, *CWHOIS_CACHE_SPOOL);
     }
+    # 43/TCP
     else {
 	# Signal handling WHEN IPC
 	$SIG{'ALRM'} = 'CWhoisTimeOut';
@@ -184,58 +237,87 @@ sub CWhoisSearch
 	$e{'Body'} = $e{'message'};
 	$e{'Body'} =~ s/\($ML_FN\)//g;
 	print "$e{'Body'}\n";
-	&CWhoisCache(*e);
+
+	&CWhoisCacheOn(*e); # both first and second cache on;
     }
+
+    # special information for the first cache
+    if ($proc ne 'local') { $TCP_CONNECTION_OK = 1;}
 }
 
 
+# we should determine the mode since 
+# the format is "options#key "
+# and "opt1#opt2#proc#key" is also available
+#      $proc          $key part
+#
 sub CWhoisCacheSearch
 {
-    local($key, @proc) = @_;
-    local($proc);
-
-    undef $debug;
-    undef %Cache; # reset %Cache(global varialbe);
-
-    foreach $proc (@proc) {
-	# NOT request of specific ML? e.g. --KEY=apply 
-	if (! $WhoisCacheSpool{$proc}) { $proc = $KEY;}
-
-	if ($proc =~ /^debug$/i) { $debug++; next;}
-	if ($proc =~ /^(rev|reverse)$/i) { 
-	    $REVERSE_ORDER__; next;
-	}
-	if ($proc =~ /^(normal|historical)$/i) { 
-	    $HISTORICAL_ORDER++;
-	}
-
-	if ($WhoisCacheSpool{$proc}) {
-	    @spool = split(/:/, $WhoisCacheSpool{$proc});
-	    @db    = split(/:/, $WhoisCacheDB{$proc});
-	    do {
-		$spool = shift @spool;
-		$db    = shift @db;
-		$Cache{$db} = $spool;
-		print "\$CacheSpool{$db} $spool\n" if $debug;
-	    }
-	    while (@db && @spool);
-	}
+    local($set, $k);
+    local(*key, *proc, *db, *spool) = @_;
+    
+    # Define ($Set == Database-name) (subset in all the set)
+    # %KeySetClass
+    # AddressSet -> /\d+\.\d+.../ 
+    # domain and host differs but "last" call ends it
+    # before the difference detected
+    $k = $key;
+    $k =~ s/.*$CHMODE//; #extract key from opt#key FORM
+    while (($class, $pat) = each %KeySetClass) {
+	# print "$k =~ /^($pat)\$/\n";
+	$k =~ /^($pat)$/i && ($keyclass = $class);
     }
 
-    print "CacheSearch key=$key proc=$proc" if $debug;
-    &Log("CacheSearch key=$key proc=$proc");
-    eval "require '$CACHE_SEARCH_PROG';";
+
+    # extract options or sets declarations if exists;
+    foreach (split(/\#/, $proc)) { # local is a trick
+	print "Parsed Key Opt[$_](\$key=$key)\n" if $debug;
+
+	# NOT request of specific ML? e.g. --KEY=apply 
+	$spool{$_} && ($set = $_);
+
+	/^fcache/         && ($set = 'fcache', next);
+	/^debug/i         && ($debug++, next);
+	/^history/i       && (undef $MATCH_THE_LATEST, next);
+	/^(rev|reverse)/i && ($REVERSE_ORDER++, next);
+	/^(normal|historical)/i && ($HISTORICAL_ORDER++, next);
+    }
+
+
+    # which subset we should do search?
+    # KEY Class "is the second match"
+    # e.g.
+    # UJA.ORG    -> domain class 
+    # ip#UJA.ORG -> all the ip data search (explicitly defined case)
+    # 
+
+    $set = $set || $keyclass || $CWHOIS_DEFAULT_SET || 'local';
+
+    print "CacheSearch key=$key set=$set\n" if $debug;
+
+    &Log("CacheSearch key=$key set=$set");
+
+    ### SHOULD BE PREPARED INDEPENDENTLY FROM THE WHOIS SERVER
+    if ($CWHOIS_SEARCH_PROG) { 
+	require $CWHOIS_SEARCH_PROG;
+	&ScanDB(*key, *set, *db, *spool, *misc);
+    }
+    else {
+	print "\n\$CWHOIS_SEARCH_PROG NOT DEFINED.\nCANNOT LOCAL SCAN\n\n";
+    }
+
     &Log($@) if $@;
-    print STDERR $@ if $@;
+    print $@ if $@; # whois reply including logs > STDOUT
 }
 
+sub Usage { -f $HELP_FILE ? &Cat($HELP_FILE) : &CWhoisUsage;}
 
 sub CWhoisUsage
 {
     local($rcsid) = $Rcsid;
     $rcsid =~ s/fml/Caching whois server \#fml/;
 
-    local(@db) = keys %WhoisCacheDB;
+    local(@db) = keys %WHOIS_CACHE_DB;
 
     $s = qq!;
     Caching Whois Server HELP (FOR YOUR HELP);
@@ -280,9 +362,71 @@ sub CWhoisUsage
 !;
 
     $s =~ s/;//g;
-    "$s\n";
+    print "$s\n";
 }
 
+sub CWhoisCacheGiveUp
+{
+    print "I've been able to Cache On. Give up it.\n";
+}
+
+
+##### FIRST CACHE #####
+#
+# Caching Spool is the same as the local cache
+# BUT 
+# the use of the first cache is determined by WITHIN the LATEST LIMIT OR NOT
+
+# Cache on using the present time
+sub CWhoisFirstCacheOn
+{
+    local($now)  = time;
+    &Append2("UT${now}:", $FIRST_CACHE_DB);
+    &Append2("$ID: $Key ", $FIRST_CACHE_DB);
+}
+
+
+sub CWhoisProbeFirstCache
+{
+    local($k) = @_;
+    local($now)       = time - $FIRST_CACHE_EXPIRE;
+    local($cache_hit) = 0;
+    local($ok);
+
+    open(DB, $FIRST_CACHE_DB) || return;
+    while (<DB>) {
+	chop;
+
+	if (/UT(\d+):/) {
+	    next if $ok;
+	    $ok = 1 if $1 > $now;
+	}
+
+	next unless $ok;
+
+	if (/\s$k\s/i) { $cache_hit = 1; last;}
+    }
+    close(DB);
+
+    $cache_hit;
+}
+
+
+sub CWhoisFirstCacheSearch
+{
+    local(%db, %spool, $proc);
+    local($key) = @_;
+
+    print "\n[$Key] HIT IN THE FIRST CACHE (within $FIRST_CACHE_EXPIRE sec.)\n";
+    print "   TRY \"tcp#$Key\" to query $WHOIS_SERVER DIRECTLY NOW.\n\n";
+
+    $key    = " $key ";
+    %db     = ('fcache', $FIRST_CACHE_DB);
+    %spool  = ('fcache', $FIRST_CACHE_SPOOL);
+    $proc   = "fcache";
+
+    &CWhoisCacheSearch(*key, *proc, *db, *spool);
+}
 
 
 ##### Import: fml.pl
@@ -297,5 +441,30 @@ sub Cat
     close(IN); 
 }
 
-1;
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub Flock
+{
+    $LOCK_SH                       = 1;
+    $LOCK_EX                       = 2;
+    $LOCK_NB                       = 4;
+    $LOCK_UN                       = 8;
 
+    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
+
+    $SIG{'ALRM'} = 'CWhoisCacheGiveUp';
+
+    eval alarm(10); # cache writing timeout
+    open(LOCK, $DIR); # spool is also a file!
+    flock(LOCK, $LOCK_EX);
+}
+
+sub Funlock {
+    $0 = "--Unlock <$FML $LOCKFILE>";
+
+    close(LOCK);
+    flock(LOCK, $LOCK_UN);
+    undef $SIGARLM;
+}
+
+1;
