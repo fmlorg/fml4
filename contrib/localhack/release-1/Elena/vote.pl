@@ -188,6 +188,8 @@ sub Vote {
 
 	# Get fields sequence, a little tricky
 	$GET_FIELD .= "if(/^$key:/o) { \$Sum$key .= \$_.\"\\n\";}\n\t";
+	$GET_FIELD .= "if(/^$key:/o) { print STDERR \$Sum$key.\"<\\n\";}\n\t"
+	    if $debug;
 #	$GET_FIELD .= "if((/^$key:(.*)\\(/o || /^$key:(.*)/o )";
 	$GET_FIELD .= "if(/^$key:(.*)\\(/o) { \$NonEffective$key += 1; next;};\n\t";
 	$GET_FIELD .= "if(/^$key:(.*)/o ";
@@ -215,7 +217,10 @@ sub Vote {
         y/£°-£¹/0-9/;
         y/¡Ê¡§/\(:/;
  	s/[¡¡\\s]//g;# Spaces
+
         $JNAMECONV\n\t# Jname and Name conversion
+
+        s/\\\(.\*\\\)//g;
         $GET_FIELD\n
     }
 
@@ -252,12 +257,17 @@ sub VoteOutput {
 
     foreach $key (@keyword) {
 	$title = $Jname{$key} ? $Jname{$key} : $key;
-	if(!$SUMMARY_MODE) {
+	    $GET_FIELD .= 
+		"\$Effctive$key = 0;\n";
+
+		if(!$SUMMARY_MODE) {
 	    $GET_FIELD .= 
 		"\tforeach(keys \%$key) {
                  \tpush(\@$key, \"\$_\");
+	          \$Effctive$key += \$$key{\$_};
             \t};\n\t
-            \$Effective$key = scalar(\@$key);
+           # \$Effective$key = scalar(\@$key);
+               \$Effective$key = 0 unless \$Effective$key;
             ";
 	}else {
 	    $GET_FIELD .= 
