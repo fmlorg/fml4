@@ -2340,6 +2340,7 @@ which д╚дл
 .include fml_local.wix
 .include sid.wix
 .include ftpmail.wix
+.include modify.wix
 .include localhack.wix
 .include href.wix
 
