@@ -5931,6 +5931,10 @@ sub SetUpCGIadmin
     # make cgi-bin/admin/
     &do_setup_admin_cgi;
 
+    # set up examples
+    print STDERR "   - make CGI config examples for MTA and httpd.\n";
+    for (<www/examples/*/*>) { &Conv($NULL, $_, "$EXEC_DIR/$_");}
+
     print STDERR "\n";
 }
 
