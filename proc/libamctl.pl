@@ -455,7 +455,11 @@ sub DoChangeMemberList
 
     &Debug("DoChangeMemberList($cmd, $curaddr, $file, $misc)") if $debug;
 
-    if (!-f $file) {
+    if (! $file) {
+	&Log("DoChangeMemberList:: arg's file == null");
+	return $NULL;
+    }
+    elsif (! -f $file) {
 	&Log("DoChangeMemberList::Cannot open file[$file]");
 	return $NULL;
     }
