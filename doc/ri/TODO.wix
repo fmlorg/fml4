@@ -1,5 +1,5 @@
 .HTML_PRE
-	TODO of FML Mailing List Server Package
+	TODO of fml Mailing List Server Package
 .if LANG == JAPANESE
 	やり残し、やろうかなとおもってること
 	(誰かやってたらパッチください:-)
@@ -14,101 +14,74 @@
 .toc
 -------------------------------
 
-.C	終ったものリスト
-=E.C	DONE
-
-.S	日本語のエラーがかえる
-=E.S	Japanese Error String
-
-.S	HTML_DEFAULT_HANDLERの拡張
-=E.S	Enhance $HTML_DEFAULT_HANDLER
-
-.S	マクロ
-=E.S	Macro
-
-&DEFINE_MAILER(); は必要か？
-定義はしてるけど、どうかなぁ
-=E
-&DEFINE_MAILER(); is required ? 
-
-   to define "ipc" or "prog" mailer
-
-.S	MEAD
-
-sendmailのつける特殊なヘッダについてはトレースする。
-アドレス展開するのが逆追跡できる場合がある。
-=E
-check
-
-	Received: for <ADDRESS>
-
-.S	auto_subscribe
-
-members actives をちゃんと２つ使う自動登録。
-auto_regist は互換性のため有効だが、 fml 3.0 以降ではこれを使うこと。
-この機能を意識させるため major version を 3.x にあげるべきだ。
-
-check it out!
-.q
-libexec/fmlserv.pl:		if (&NonAutoRegistrableP) {
-libexec/fmlserv.pl:    if (&AutoRegistrableP) {
-kern/fml.pl:		   &NonAutoRegistrableP) {
-kern/fml.pl:		   &NonAutoRegistrableP) {
-kern/fml.pl:    if (&AutoRegistrableP) {
-kern/fml.pl:    if ($status = &AutoRegistrableP) {
-kern/fml.pl:sub NonAutoRegistrableP { ! &AutoRegistrableP;}
-kern/fml.pl:sub AutoRegistrableP
-kern/fml.pl:    local($x) = &AutoRegistrableP;
-kern/fml.pl:    $auto_registrable = &AutoRegistrableP;
-proc/libamctl.pl:    if (&NonAutoRegistrableP) {
-proc/libamctl.pl:    elsif (&NonAutoRegistrableP) {
-proc/libfml.pl:    if (&NonAutoRegistrableP) {
-proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
-.~q
-
-.S	配送関係
-=E.S	Delivery
-
-* VERPs
-
-.S	Memory Usage
-
-  fix memory usage routine
-	MD5 around
-	Forw()
-	Warn() 
-
-  remove WholeMail(), ForwMail()
-
-.S	HTML around
-
-* <DIV>の定義に反する使い方？
-=E
-* <DIV> 
-
-
-.S	Y2K advisory
-
-* GetTimeを入れ換えるキット
-=E
-* &GetTime 
-
-* アドヴァイザリィ
-=E
-* y2k advisory
-
-
-
-
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
-.S	ドキュメント: FAQ をつくる
-=E.S	Document: make FAQ
+.S	makefml (bye|chaddr|?) address(regexp)
 
-ドキュメント関連: FAQ をつくる。がんばろう;)
+fml-support: 07101
+fml-support: 07104
+Incomplate but effective fix is done.
+We should rewrite address match routine.
 
-.url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+.S	makefml add ML addr options ?
+
+for example,
+
+	makefml add ML addr s=skip 
+
+? 
+
+.S	bug fix Content Hanlder 
+
+Content Hanlder ちょっと変 (allow+multipartの時だけ?)
+=E
+bug fix Content Hanlder ... only in the "allow+multipart" case ?
+
+
+.S	redistribute emulation command
+
+再配送を行なうコマンド
+=E
+command to redistribute an aritcle
+
+Example:
+
+   /usr/local/fml/bin/resend.pl email-address article-number ?
+
+.S	chaddr reply
+
+chaddrのレポートメールのTo: CC: にuniqかける
+=E
+aggregate addresses to reply
+
+.S	mead
+
+fml-support: 6897
+
+mead が判定不能だったメールを知らせる
+=E
+if mead finds unknown error format, notify it to administrator.
+
+.S	$DEFAULT_DIR_MODE in makefml ?
+
+makefml 内での $DEFAULT_DIR_MODE の取り扱い
+
+fml-support: 06899
+   ># newml 実行時ってのとき、spool や tmp や var って
+   ># まとめて作ってしまうんでしたっけ? (覚えてない)
+   
+   spool  だけはつくられていますねぇ…(lockのため)。
+   ＃ &mkdir(ディレクトリ) でよびだすところはほとんどないんですが、
+   ＃ ここで stat(2)して mode が $DEFAULT_DIR_MODE か否か見て
+   ＃ もし違ってたら$DEFAULT_DIR_MODEに直すといいかな…と一瞬おもったけど
+   ＃ 意図的にchmodしててもこれに戻されちゃうとかあって問題だろうなぁ
+   
+.S	makefml mkdir()
+
+fml-support:6899
+3016:  &Mkdir($dir);
+4817:      $s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 
 
 .S	ドキュメント: doc/op
@@ -116,10 +89,15 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 
 ２つにわけるべきか？
 =E
-Should we split it to two parts?
+Should we split doc/smm/ (doc/op) to two parts?
 
 	1. fml operations guide
+
 	2. The design and implementation of ml
+
+doc/examples/ がある。これは実例とチュートリアルとして位置付けている。
+=E
+now we have doc/examples/ as for examples and tutorials.
 
 
 .S	MIMEライブラリーの書き直し
@@ -136,15 +114,16 @@ Xref: fml-support:05948
 .S	日本語化問題
 =E.S	Japanese configuration files
 
-cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
-＃時間次第か？(難易度は低くても辛さ度は最大)
+『cf/MANIFEST での全変数定義 & コメント日本語化』は
+cf/MANIFEST.Japanese に定義されている。しかし定義されているだけで
+config.ph には反映されていない。
 
-*	cf/MANIFEST のコメントの日本語化計画
-	cf/MANIFEST 未定義変数探し
+CGIモードで使うだろう
+
+*	cf/MANIFEST 未定義変数探し
 =E
-*	Japanese cf/MANIFEST
-	search undefined variables on cf/MANIFEST
-
+*	search undefined variables on cf/MANIFEST
+	
 *	ヘルプファイルのupdate, mnews ML版とうまくマージすること
 =E
 *	merge mnews help merge
@@ -176,7 +155,7 @@ command" to handle pgp key for usual users.
 .S	makefml config full menu
 
 全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
-のでやらない。そんなことよりWWW
+のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
 =E 
 All variables can be configurable in the menu? 
 I may not do it since it only confuses the customize.
@@ -184,6 +163,8 @@ I may not do it since it only confuses the customize.
 
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
+
+* 1バイト2バイトいりみだれ文字列ははじけない "chａddr"
 
 * ２バイトはじきすぎ問題
 
@@ -199,8 +180,11 @@ I may not do it since it only confuses the customize.
 =E
 *  update filter dynamically 
 
+   http://www.fml.org/some/where/filter-rule.html ? 
+
 
 * Filter module ?
+
 
 * MTIの理論の解説書(本の厚さとはいわないが…)
 =E
@@ -251,11 +235,86 @@ A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 .S	CGI ユーザ・インターフェイス
 =E.S	CGI 
 
-makefml -i stdin を kick すりゃいいだけ
+now "alpha phase"
+
+makefml -i stdin を kick すりゃいいだけ。11月はCGIの強化月間。
+これをβフェイズにもっていくのがテーマ。
 =E
 CGI => inject input to "makefml -i stdin".
 
-
+.S	もろもろ
+=E.S	misc
+   
+   Q: CUIとGUIどっちが本体？
+   
+   A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
+   
+      利点として makefml config の日本語変換ができますね
+   	どうせMessage Language Extensionの関数ライブラリをよんでる
+   	だけですが
+   
+   in fml-support ML's Count:06557 
+   "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp> さん  wrote:
+   >○ TODO
+   >/cgi-bin/fml/admin/ の下とかがいいんではないのか？
+   
+   Q: CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
+   		or
+   	複数のサーバソフトのCGIがうごきうるだろうか？
+   
+   という仮定についてはどうか？
+   
+   A: Ｎ通りについて考えるのが面倒なので
+   
+   	/cgi-bin/fml/admin/menu.cgi	   (何でもできる権限人用)
+   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定のＭＬ $ml の管理者だけ用)
+   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
+   
+   みたいに決めうちしておく。
+   
+   Q:	/cgi-bin/fml/ml/$ml
+   
+   	/cgi-bin/fml/ml/$ml/
+   	/cgi-bin/fml/ml/$ml/*.cgi
+   
+   *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
+   
+   >インストーラ
+   
+   誰でもやるとはおもえないので
+   
+   	makefml install
+   	makefml cgi-setup 
+   
+   の2段構えくらいにしておく？
+   
+   Q:	makefml cgi-setup 
+   
+   A:	
+   	1. 前述の構造を掘る
+   
+   >	MTAごとの補正、補助
+   >	WWWの設定の補助
+   >	パスワード設定などについて
+   
+   	2. /cgi-bin/fml/admin/.htpasswd をつくるまではする
+   
+   	(for "thttpd" compiled with AUTH_FILE options)
+   
+   Q:	makefml newml ?
+   
+   >newaliases との連動
+   
+   	optional ?
+   
+   >入力のチェック機構
+   >他のエントリは？順番は？
+   >他にエミュレーションするべきもの？
+   
+   	makefml passwd
+   
+   
+   
 .S	配送関係
 =E.S	Delivery
 
@@ -318,7 +377,7 @@ NT4 はだめだが NT5 fs には link(2)はある。
    $HTML_BASE_URL
 
 
-.S	HTML番外変
+.S	HTML番外編
 =E.S	HTML again
 
 Content-Type: application/ms-tnef でずっこける場合(たぶんOS依存)って…
@@ -328,23 +387,7 @@ Content-Type: application/ms-tnef breaks down fml html generator ;-) ..
 but it is o.k. now? (on some OS?)
 
 
-.S	ポーティング 
-=E.S	Porting
-
-* NT と makefml ?
-
-  fml/sys/WINDOWS_NT4: makefml.pl 
-    XXX: anyway not overwrite sitedef.ph (incomplete hack)
-    We need to update POP server information to somewhere, so now
-    we use sitedef.ph to include pop.ph and overwrite it always.
-    It is a bug since sitedef.ph may be customized.
-    Hence now change it to "appended to it" but it is not essential.
-    We should change it to more functional solution.
-
-* more elaborate port on NT4 ?
-
-
-.S	Y2K
+.S	RFC1153
 
 * RFC1153のライブラリはどうする？
 =E
@@ -397,23 +440,6 @@ $LOG_FILE_SUFFIX = ".%C%y";
  *  $REWRITE_TO not number value
 
 
-.S	Memory Usage
-
-入力データサイズによる変動が少ないように要チューニング
-
- * PGP (libpgp.pl)
-
- * Sendmail()
-
-   proc/libcompat_fml20.pl:21:
-	&Sendmail($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
-
-   proc/liblop.pl:257:
-	&Sendmail($e{'Addr2Reply:'}, "", $body);
-
-   libexec/popfml.pl:465: 
-	&Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
-
 .S	&Open()
 
 remove &Open()
@@ -431,6 +457,10 @@ command to rewrite addresses in one action ?
 
 .C	パッケージ
 =E.C	Packages
+
+作る必要があるもの、興味があるもの。統合化されていることをめざす。cvs
+的に fml/ の下に来るとは限らない。
+
 
 .S	トラブルチケットシステム
 =E.S	Trouble Ticket System
@@ -450,10 +480,14 @@ command to rewrite addresses in one action ?
 	...
 
 
-.C	Windows NT 固有の問題
-=E.C	Windows NT specific problems
+.C	UNIX 以外のOS固有の問題
+=E.C	NOT UNIX system specific problems
 
-.S	tail command emulation
+.S	NT: tail command emulation
+
+.S	NT: fork
+
+.S	NT: alarm
 
 
 .C	日本特有の問題
@@ -479,6 +513,93 @@ fml-support: 06265
 * all ranges
 
 * clean up mget3 internals
+
+
+.C	終ったものリスト
+=E.C	DONE
+
+.S	日本語のエラーがかえる
+=E.S	Japanese Error String
+
+.S	HTML_DEFAULT_HANDLERの拡張
+=E.S	Enhance $HTML_DEFAULT_HANDLER
+
+.S	マクロ
+=E.S	Macro
+
+&DEFINE_MAILER(); は必要か？
+定義はしてるけど、どうかなぁ
+=E
+&DEFINE_MAILER(); is required ? 
+
+   to define "ipc" or "prog" mailer
+
+.S	MEAD
+
+sendmailのつける特殊なヘッダについてはトレースする。
+アドレス展開するのが逆追跡できる場合がある。
+=E
+check
+
+	Received: for <ADDRESS>
+
+.S	auto_subscribe
+
+members actives をちゃんと２つ使う自動登録。
+auto_regist は互換性のため有効だが、 fml 3.0 ではこれを使うこと。
+この機能を意識させるため major version を 3.x にあげるべきだ。
+
+check it out!
+.q
+libexec/fmlserv.pl:		if (&NonAutoRegistrableP) {
+libexec/fmlserv.pl:    if (&AutoRegistrableP) {
+kern/fml.pl:		   &NonAutoRegistrableP) {
+kern/fml.pl:		   &NonAutoRegistrableP) {
+kern/fml.pl:    if (&AutoRegistrableP) {
+kern/fml.pl:    if ($status = &AutoRegistrableP) {
+kern/fml.pl:sub NonAutoRegistrableP { ! &AutoRegistrableP;}
+kern/fml.pl:sub AutoRegistrableP
+kern/fml.pl:    local($x) = &AutoRegistrableP;
+kern/fml.pl:    $auto_registrable = &AutoRegistrableP;
+proc/libamctl.pl:    if (&NonAutoRegistrableP) {
+proc/libamctl.pl:    elsif (&NonAutoRegistrableP) {
+proc/libfml.pl:    if (&NonAutoRegistrableP) {
+proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
+.~q
+
+.S	配送関係
+=E.S	Delivery
+
+* VERPs
+
+.S	Memory Usage
+
+  fix memory usage routine
+	MD5 around
+	Forw()
+	Warn() 
+
+  remove WholeMail(), ForwMail()
+
+.S	HTML around
+
+* <DIV>の定義に反する使い方？
+=E
+* <DIV> 
+
+
+.S	Y2K advisory
+
+* GetTimeを入れ換えるキット
+=E
+* &GetTime 
+
+* アドヴァイザリィ
+=E
+* y2k advisory
+
+
+.S	tuning memory usage
 
 
 .# $Id$
