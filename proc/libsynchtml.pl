@@ -1,13 +1,13 @@
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsynchtml.pl,v 2.46 2001/10/14 04:57:12 fukachan Exp $
+# $FML: libsynchtml.pl,v 2.47 2001/10/28 15:14:18 fukachan Exp $
 #
 
 
@@ -630,6 +630,7 @@ sub Write
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 		&ConvSpecialChars(*s);
 		$s =~ s/\n(\s+)/$1/g; # 822 unfolding
+		$s =~ s/^\s*//;
 		print OUT "<SPAN CLASS=$_>$_</SPAN>: ";
 		print OUT "<SPAN CLASS=$_-value>$s</SPAN>\n";
 	    }
