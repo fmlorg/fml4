@@ -11,6 +11,11 @@
 		%ADMIN_COMMAND_END_HOOK
 
 
+2002/02/01
+
+   update virus_check.ph
+	import 1.13 from current
+
 2002/01/24
 
    kern/fml.pl (2.141-2.142):
@@ -44,7 +49,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.5 2002/01/10 14:28:37 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.6 2002/01/25 15:11:23 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
