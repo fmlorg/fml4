@@ -575,25 +575,17 @@ $CFVersion 3 以前にあった $HML_FORM_LONG_ID は config.ph が CFVersion
 .l	Uniq_Identifier_of_Message-ID
 .key	$USE_ORIGINAL_MESSAGE_ID
 
-	$USE_ORIGINAL_MESSAGE_ID = 1; (obsolete but has the same effect)
+	$USE_ORIGINAL_MESSAGE_ID = 1; (default)
 
 とするとオリジナルの Message-ID を保存してヘッダにつけます。
 
-	&DEFINE_FIELD_ORIGINAL('Message-Id');
-
-と同じです(ヘッダフィールドを扱う関数が汎用でなかった時代の変数の名残)。
-オリジナルを使うべきか？サーバでつけるべきか？どっちがいいかという議論
-ですが
-=E
-has same effect.
-
 .if LANG == JAPANESE
-in fml-support ML's Count: 02687
-.q
->| デフォールトは fml がつけます。それはオリジナルを通すより、強制的につ
->| けるとより無限 loop 検出がしやすくなるためです。
+References: fml-support ML's Count: 02687 あたりを参照
 
-っていう doc/op.jp の論理は正しいかな？
+デフォールトは original の Message-ID: をつかいます。
+
+.q
+quoted from fml-support ML's Count: 02687
 
 original で妙な pattern の Message-ID を使われてて、ちゃんと detect で
 きないとかあると嫌ね＃そうそうあるとはおもえないのだが
@@ -611,6 +603,8 @@ fml 自体がつける場合、キャッシュテーブルの有効な大きさが半分になってし
 
 という論理になるような気がする。
 .~q
+
+true ?
 .fi
 
 .S	ML 独自の Message-ID フォーマット
