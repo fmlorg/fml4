@@ -119,3 +119,5 @@ fml-2-2D-start	2.2D start
 
 fml-3-0-maint	3.0 release branch
 fml-3-0-bb0	3.0_BETA start point
+fml-3-0		3.0 release
+		XXX: update -j fml-3-0-maint:"1999-8-16 00:39" -j fml-3-0-maint
