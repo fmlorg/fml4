@@ -13,15 +13,9 @@
 sub MesgLE
 {
     local(*e, $key, @argv) = @_;
-    my ($dir) = "messages/$MESSAGE_LANGUAGE";
-    my ($secondary_mesg_dir) = "$DIR/../etc/fml/$dir";
-    my ($mesg_dir, $x, $msg);
+    my ($dir, $x, $msg);
 
     &Log("MesgLE: key=$key (@argv)") if $debug_mesgle;
-
-    # 0. search messages/Japanese/ directory to set up $mesg_dir as it.
-    for (@LIBDIR) { if (-d "$_/$dir") { $mesg_dir = "$_/$dir"; last;}}
-    &Log("MesgLE: mesg_dir=$mesg_dir ") if $debug_mesgle;
 
     # 1. check whether the message template with the key exists?
     # 1.1. search messages.conf if exists
@@ -38,9 +32,14 @@ sub MesgLE
 
     # 1.2. search under $mesg_dir
     if (! $msg) {
-	for my $dir ($secondary_mesg_dir, $mesg_dir) {
+	for my $xdir (@LIBDIR) {
+	    # e.g. /usr/local/fml/messages/Japanese/
+	    $dir = "$xdir/messages/$MESSAGE_LANGUAGE";
+
+	    &Log("MesgLE: mesg_dir=$dir ") if $debug_mesgle;
 	    &Log("MesgLE: $dir not exists") if $debug_mesgle && (! -d $dir);
 	    next unless -d $dir;
+
 	    &Log("MesgLE: search key='$key' under $dir") if $debug_mesgle;
 	    $msg = &MesgLESearchInMessagesDir($key, $dir);
 	    last if $msg;
@@ -230,6 +229,8 @@ if ($0 eq __FILE__) {
     eval 'sub Log { print @_, "\n"; }';
 
     $debug_mesgle = 1;
+
+    &Log("MesgLE: INC: @LIBDIR ") if $debug_mesgle;
 
     if (@ARGV) {
 	($key, @argv) = @ARGV;
