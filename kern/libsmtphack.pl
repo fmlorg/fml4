@@ -16,12 +16,12 @@ sub SmtpHackInit
     if (! $DISTRIBUTE_DUMMY_RECIPIENT) {
 	&Log("\$DISTRIBUTE_DUMMY_RECIPIENT is not defined.");
     }
+    
+    $DISTRIBUTE_DUMMY_RCPTLIST = $DISTRIBUTE_DUMMY_RCPTLIST || "$VARDB_DIR/rcptlist";
 
-    $DISTRIBUTE_LIST = $DISTRIBUTE_LIST || "$VARDB_DIR/rcptlist";
+    -f $DISTRIBUTE_DUMMY_RCPTLIST || &Touch($DISTRIBUTE_DUMMY_RCPTLIST);
 
-    -f $DISTRIBUTE_LIST || &Touch($DISTRIBUTE_LIST);
-
-    $howold = -M $DISTRIBUTE_LIST;
+    $howold = -M $DISTRIBUTE_DUMMY_RCPTLIST;
 
     for (@ACTIVE_LIST) { if ($howold > (-M $_)) { $renew = 1;}}
 
@@ -31,7 +31,7 @@ sub SmtpHackInit
 
 sub SmtpHackRebuildList
 {
-    local($new) = "$DISTRIBUTE_LIST.new";
+    local($new) = "$DISTRIBUTE_DUMMY_RCPTLIST.new";
 
     open(OUT, "> $new") || do { 
 	&Log("SmtpHackRebuildList: cannot open $new");
@@ -61,13 +61,13 @@ sub SmtpHackRebuildList
     close(NEW);
 
     if (-z $new) { 
-	&Log("\$DISTRIBUTE_LIST.new is size 0, not replaced");
+	&Log("\$DISTRIBUTE_DUMMY_RCPTLIST.new is size 0, not replaced");
     }
     else {
-	rename($new, $DISTRIBUTE_LIST) ||
-	    &Log("fail to rename $DISTRIBUTE_LIST");
+	rename($new, $DISTRIBUTE_DUMMY_RCPTLIST) ||
+	    &Log("fail to rename $DISTRIBUTE_DUMMY_RCPTLIST");
 
-	&Log("rebuild $DISTRIBUTE_LIST") if $debug_smtp_hack;
+	&Log("rebuild $DISTRIBUTE_DUMMY_RCPTLIST") if $debug_smtp_hack;
     }
 }
 
