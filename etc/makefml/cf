@@ -1,0 +1,60 @@
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
+
+CFVersion			3
+
+### DNS
+DOMAINNAME			_DOMAIN_
+FQDN				_FQDN_
+
+debug				0
+
+MAINTAINER			_ML_-admin@$DOMAINNAME
+
+### Access Policy
+MAIL_LIST			_ML_@$DOMAINNAME
+PERMIT_POST_FROM		members_only
+REJECT_POST_HANDLER		reject
+
+CONTROL_ADDRESS			_ML_-ctl@$DOMAINNAME
+PERMIT_COMMAND_FROM		members_only
+REJECT_COMMAND_HANDLER		reject
+
+### Auto Registration
+AUTO_REGISTRATION_TYPE		confirmation
+
+### Remote Administration 
+REMOTE_ADMINISTRATION
+REMOTE_ADMINISTRATION_AUTH_TYPE	crypt
+PGP_PATH			_ML_DIR/_ML_/etc/pgp
+
+### Automatic Html Generation
+AUTO_HTML_GEN
+
+### Header
+ML_FN				(_ML_ ML)
+XMLNAME		 		X-ML-Name: _ML_
+XMLCOUNT			X-Mail-Count
+
+BRACKET				_ML_
+
+SUBJECT_TAG_TYPE
+
+### Misc
+USE_MIME
+
+### Architecture
+CPU_TYPE_MANUFACTURER_OS	_CPU_TYPE_MANUFACTURER_OS_
+STRUCT_SOCKADDR			_STRUCT_SOCKADDR_
+
+
+### Others
