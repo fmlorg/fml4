@@ -32,6 +32,9 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
+Backward Compatibility:
+	$COMPAT_FML15 = 1; 
+
 ＊＊＊ヴァージョンアップの場合の注意＊＊＊
 
 基本的なデータ構造を call by reference 用に書き直したので、
