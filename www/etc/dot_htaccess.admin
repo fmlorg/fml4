@@ -1,4 +1,4 @@
-SSLRequireSSL
+_SSL_REQUIRE_SSL_
 AuthName ByPassword
 AuthType Basic
 AuthUserFile _EXEC_DIR_/www/authdb/admin/htpasswd
