@@ -2747,8 +2747,9 @@ sub EnvelopeFilter
 	$xbuf = &GetFirstMultipartBlock(*e);
     }
     else {
-	# skip the first two paragraph
+	# skip the first three paragraph
 	$p = index($e{'Body'}, "\n\n");
+	$p = index($e{'Body'}, "\n\n", $p + 1);
 	$p = index($e{'Body'}, "\n\n", $p + 1);
 	if ($p > 0) {
 	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
@@ -2762,11 +2763,13 @@ sub EnvelopeFilter
     $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
     $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
 
-    # XXX: remove check "block1 null-line block2" (already this syntax)
-    # $p = index($xbuf, "\n\n"); # forward ...
-    # if ($p > 0) { $p = rindex($xbuf, "\n\n"); # backward ...
-    #               $xbuf = substr($xbuf, 0, $p) if $p > 0;}
-    # 
+    # XXX: remove the signature (we suppose) part
+    $p = index($xbuf, "\n\n"); # forward ...
+    if ($p > 0) { 
+	$p = rindex($xbuf, "\n\n"); # backward ...
+	$xbuf = substr($xbuf, 0, $p) if $p > 0;
+    }
+
     # count up "\n\n" lines;
     # If one paraghaph (+ signature), must be $c == 0. 
     $c = $p = 0;
