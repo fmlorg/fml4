@@ -1,9 +1,27 @@
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+
 #### SIMULATION DEBUG #####
+
+&Log("-------------------") if $0 =~ /\/fml.pl/;
 
 # Debug Pattern Custom for &GetFieldsFromHeader
 sub FieldsDebug
 {
 local($s) = q#"
+PERMIT_POST_FROM     $PERMIT_POST_FROM
+PERMIT_COMMAND_FROM  $PERMIT_COMMAND_FROM
+REJECT_POST          $REJECT_POST_HANDLER
+REJECT_COMMAND       $REJECT_COMMAND_HANDLER
+
 FQDN                 $FQDN
 DOMAIN               $DOMAINNAME
 
@@ -12,7 +30,7 @@ UNIX FROM            $Envelope{'UnixFrom'}
 From(Original):      $Envelope{'from:'}
 From_address:        $From_address
 Original Subject:    $Envelope{'subject:'}
-To:                  $Envelope{'mode:chk'}
+To:                  $Envelope{'trap:rcpt_fields'}
 Reply-To:            $Envelope{'h:Reply-To:'}
 Addr2Reply:          $Envelope{'Addr2Reply:'}
 
@@ -49,6 +67,25 @@ sub StdinLog
     local($date) = sprintf("%04d%02d%02d", 1900 + $year, $mon + 1, $mday);
     &Append2($Envelope{'Header'}."\n".$Envelope{'Body'}, 
 	     "$VARLOG_DIR/STDIN_LOG_$date");
+}
+
+
+###
+package fmldebug;
+sub main'MStat #";
+{
+    open(STAT, "ps -u -p $$|"); 
+    while (<STAT>) { 
+	next if /USER/;
+
+	@x = split;
+	$p = $x[4] - $px[4];
+	$q = $x[5] - $px[5];
+	$px[4] = $x[4];
+	$px[5] = $x[5];
+	printf STDERR "%4d\t%4d\n", $p, $q;
+    }
+    close(STAT); 
 }
 
 1;
