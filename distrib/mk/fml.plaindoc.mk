@@ -43,9 +43,12 @@ var/doc/${file}: doc/ri/${file}
 ### MAIN ###
 __initplaindocbuild__:
 	@ echo --plaindoc
+	@ test -d var/doc || mkdir var/doc
 	@ test -d var/doc/drafts     || mkdir var/doc/drafts
 	@ test -d var/doc/advisories || mkdir var/doc/advisories
-	@ test -d var/doc || mkdir var/doc
+	@ test -d var/doc/Japanese   || mkdir var/doc/Japanese
+	@ test -d var/doc/English    || mkdir var/doc/English
 
-plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} op
+plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} op __plainbuild_new
 	@ echo --plaindoc done.
+#	@ echo ${__DOC_TARGETS__} |tr ' ' '\012'

@@ -1,4 +1,5 @@
 HTML_FILTER = $(FML)/bin/fwix.pl -m html -f tmp/html_index.ph
+TEXT_FILTER = $(FML)/bin/fwix.pl -m text -f tmp/text_index.ph
 
 WORK_TUTORIAL_DIR = ${WORK_HTML_DIR}/${TUTORIAL_LANGUAGE}
 
@@ -23,11 +24,19 @@ ${WORK_TUTORIAL_DIR}/${dir}:
 	test -d ${WORK_TUTORIAL_DIR}/${dir} ||\
 	   ${MKDIR} ${WORK_TUTORIAL_DIR}/${dir}
 
-# creation rule
+# html: creation rule
 ${WORK_TUTORIAL_DIR}/${dir}/index.html: doc/${TUTORIAL_LANGUAGE}/${dir}/*wix
 	${HTML_FILTER} -L ${TUTORIAL_LANGUAGE} \
 		-D ${WORK_TUTORIAL_DIR}/${dir} \
 		doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix
+
+# plaintext:
+__TUTORIAL_DOC_TARGETS__ += var/doc/${TUTORIAL_LANGUAGE}/${dir}
+
+var/doc/${TUTORIAL_LANGUAGE}/${dir}: doc/${TUTORIAL_LANGUAGE}/${dir}/*.wix
+	${TEXT_FILTER} doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix \
+		 > var/doc/${TUTORIAL_LANGUAGE}/${dir}
+
 .endfor
 
 .for dir in ${DOC_TUTORIAL_RAW_SUBDIR}
@@ -81,3 +90,7 @@ tmp/html_index.ph: ${__HTML_TUTORIAL_SOURCES__}
 	@ mv tmp/html_index.ph.new tmp/html_index.ph
 	@ perl -cw tmp/html_index.ph
 	@ echo done.
+
+
+__plainbuild_new: ${__TUTORIAL_DOC_TARGETS__}
+
