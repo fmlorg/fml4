@@ -1,0 +1,9 @@
+.S	Is there a way to dynamically pause delivery?
+
+To suspend smtp delivery:
+
+    postconf -e defer_transports=smtp; postfix reload
+
+To enable smtp delivery:
+
+    postconf -e defer_transports=; postfix reload; postfix flush
