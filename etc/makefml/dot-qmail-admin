@@ -1,4 +1,4 @@
 _USER_
 
-# If you use VERPs, comment out the following line
+# If you use VERPs, remove "# " in the following line
 # |_EXEC_DIR_/libexec/mead.pl -m report -S _ML_DIR_ -D _ML_DIR_/_ML_ -E _EXEC_DIR_
