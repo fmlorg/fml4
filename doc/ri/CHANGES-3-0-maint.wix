@@ -6,6 +6,22 @@
 				Ken'ichi Fukamachi
 
 
+[ 3.0pl#20 == 3.0.1_BETA #9 ]
+
+	download.html
+		updated (sync with current)
+
+	sbin/makefml 
+		doc-template: fix import variable bug 2/2
+
+[ 3.0pl#19 == 3.0.1_BETA #8 ]
+
+	sbin/makefml 
+		doc-template: fix import variable bug 1/2
+
+	doc/advisories/year2000
+		fix url	
+
 [ 3.0pl#18 == 3.0.1_BETA #7 ]
 
 	url updates
