@@ -28,7 +28,7 @@ chdir $DIR || die "cannot chdir $DIR\n";
 &MainFC;
 &fc_report;
 
-exit0;
+exit 0;
 
 
 #################### LIBLARIES ####################
