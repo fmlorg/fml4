@@ -1,0 +1,80 @@
+.C	フィルタリング機能
+=E.C	Filtering Function
+.l	configure-filtering
+
+.S	fml フィルタリング機能について
+=E.S	FML Filtering
+
+fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
+つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
+る」などができます。
+＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
+＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
+＃動くバージョンです。
+=E
+Fml has filtering mechanism based on mail header and body after fml
+2.2 (2.2 officially but fml 2.1 current unofficially). You can
+deny/reject mail with some patterns. If you can find
+$USE_DISTRIBUTE_FILTER in fml source, the version has filtering
+function.
+
+デフォールトではフィルタリング機能はOFFです。そのため、まずフィルタリ
+ングをONにする必要があります(以下elena MLを例にとる)。
+=E
+In default fml filtering is off. Firstly you should turn on it. 
+Consider elena ML hereafter as an example.
+
+フィルタリング機能を有効にするには以下の節のいづれか一つの方法を行ない
+ます。どれも作業の結果は同じですが、使いなれている方法でどうぞ。
+=E
+To enable filtering function, you can do one of the following methods
+which are the same. Please use one you are familliar with.
+
+.S	makefml config を使う人
+=E.S	use "makefml config"
+
+   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
+
+.S	cf 書きの人
+=E.S	write cf 
+
+=E
+Write
+
+   USE_DISTRIBUTE_FILTER 1
+
+を書く。その後
+=E
+and run to remake config.ph
+
+	% make config.ph
+
+で config.ph を作り直す。
+
+.S	config.ph 生書きの人
+=E.S	write config.ph
+
+   $USE_DISTRIBUTE_FILTER = 1;
+
+.S	make secure
+
+この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
+部有効にする
+=E
+To enable all typical security options, run
+
+   % cd /var/spool/ml/elena
+   % make secure
+
+するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
+やってる設定は画面に表示される。
+
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

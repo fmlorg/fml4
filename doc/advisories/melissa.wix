@@ -29,53 +29,9 @@ fmlのレベルでの対策は「特定のSubject:でフィルタリング」になる。できれ
 
 
 .P	フィルタリング
+=E.P	Filtering
 
-.C	フィルタリング機能
-
-.S	fml フィルタリング機能について
-
-fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
-つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
-る」などができます。
-＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
-＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
-＃動くバージョンです。
-
-この機能の一例としてmelissaによるメールを拒否する方法について、以下で
-は述べます。
-
-まずフィルタリングをONにする必要があります(以下elena MLを例にとる)。
-以下の節のいづれか一つの方法を行ないます。
-どれも作業の結果は同じですが、使いなれている方法でどうぞ。
-
-.S	makefml config を使う人
-
-   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
-
-.S	cf 書きの人
-
-   USE_DISTRIBUTE_FILTER 1
-
-を書く。その後
-
-	% make config.ph
-
-で config.ph を作り直す。
-
-.S	config.ph 生書きの人
-
-   $USE_DISTRIBUTE_FILTER = 1;
-
-.S	make secure
-
-この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
-部有効にする
-
-   % cd /var/spool/ml/elena
-   % make secure
-
-するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
-やってる設定は画面に表示される。
+.include enable_filter.wix
 
 
 .C	フィルタリングに新ルールを加える
@@ -114,5 +70,12 @@ config.ph生書きの人は
 
 より組織だったフィルタリングルール集を作れるか？
 
-
-$Id$
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

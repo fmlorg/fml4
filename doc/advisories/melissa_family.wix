@@ -14,14 +14,23 @@ Update 1999-003
 [Abstract]
 
 Melissaが何か？については Cert Advisory を参照してください
+=E
+What is melissa virus? See
+
 .url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
 
 Melissa originalはSubject:で弾けます。
+=E
+You can reject Melissa original by Subject: keyword. See
+
 .url http://www.fml.org/fml/advisories/melissa/index.html
 
 Melissaの変種はSubject:で弾く子どもだましの手は使えません。
 以下ではMelissa一族(Melissaと同様の祖先を持つウィルス群)をどう弾くか？
 という理論とfmlの設定例について述べます。
+=E
+However you cannot reject Melissa variation. Here we describe how do
+we reject Melissa and the descendents and fml configurations.
 
 補足:これらもできればMTAで弾く方がよいですがMTAレベルでは大変でしょう。
 
@@ -34,26 +43,42 @@ Melissaの変種はSubject:で弾く子どもだましの手は使えません。
 
 
 .C	特殊なWordファイルは弾く
+=E.C	How to reject special word file
 
 .S	理論
+=E.S	Theory of rejection
 
 [条件1]
+=E
+Condition 1.
 
 .url http://www.zdnet.co.jp/news/9903/30/melissa3.html
 
 によればMelissa virusにはGUIDという一種の個人情報が埋め込まれている。
 普通のWORDファイルを(binaryだけど)強引に読むとGUIDは見えない(マクロな
 どを定義しないならつかないらしい?)。
+=E
+tells us that Melissa virus has GUID which is personal information
+key. But the ordinary word file has no such GUID. GUID may be appended
+if the file contains macros.
 
 
 [条件2]
+=E
+Condition 2.
 
 GUIDの正規表現はわかっている。
+=E
+We know GUID regexp.
 
 
 .S	弾く条件
+=E.S	Condition of rejection
 
 GUIDは通常条件下ではつかないらしい。よって
+=E
+The word file does not have GUID under usual environment.
+Fml tries to reject the mail of MIME/Multipart with GUID.
 
 ・ MIME/Multipartで送られてくるメール
 ・ GUIDらしきものを含んでいる
@@ -71,33 +96,49 @@ GUIDは通常条件下ではつかないらしい。よって
 ＃あとは実際に叩き込んでみないと分からない
 
 .S	弾けるであろうとおもわれるvirus
+=E.S	What virus can we reject
 
 Melissa original とMelissaの子孫及びMelissaと共通の祖先のvirus
 例: Melissa, PDS2000
-
+=E
+Melissa original and Melissa descenders.
+Example:  Melissa, PDS2000
 
 
 .C	fml 2.2A#42以降での設定
+=E.C	Configuration after fml 2.2A#42
 
 .S	概要
+=E.S	Introduction
 
 単純なルールでは弾けないので、2.2A#42以前のものではHOOKをごりごりかか
 ないといけないだろう。fml 2.2A#42ではウィルスチェックのライブラリがつ
 いている。2.2A#42では『フィルタリング機能をを有効にする』だけでこのウィ
 ルスチェックは適用される。
+=E
+fml-current, fml 2.2.1 release and current after fml 2.2A#42 has virus
+check function within fml filter. If you eanble fml filtering (FML
+Envelope Filter), you can use this virus check also.
 
 逆にこのチェックが不必要だという人は$FILTER_ATTR_REJECT_MS_GUIDを0に設
 定する。
+=E
+If you do not want virus check, unset $FILTER_ATTR_REJECT_MS_GUID.
+ref: Filtering => .ptr{configure-filtering}
 
 フィルタリングを有効にする => .ptr{configure-filtering}
 
 
 .C	fml 2.2A#41まで(2.2A#42以前のもの)
+=E.C	Configuration before fml 2.2A#42
 
 あまり古いとだめな気がしますが、おそらくfml 1.6以降なら有効と"思われる
 "設定方法を書いておきます。＃動かなかったらあきらめて下さい _o_
+=E
+Please give up if you use fml before fml 1.6.
 
 .S	必要なファイル
+=E.S	Files to get
 
 ○ libviruschk.pl を入手する。それを/usr/local/fmlのようなfmlをインス
 トールしてある場所に置く。
@@ -110,17 +151,22 @@ Melissa original とMelissaの子孫及びMelissaと共通の祖先のvirus
 
 
 .S	cfの場合
+=E.S	cf case
 
 以下にしめすHOOKをcfファイルのLOCAL_CONFIGの後に張り付けて
+=E
+Cut and paste the hook below after 'LOCAL_CONFIG' line in cf and run
 
 	% make config.ph
 
 .S	config.ph
 
 以下にしめすHOOKをconfig.phの最後の1;より前にはりつける。
-
+=E
+Cut and paste the hook below in config.ph (before 1;).
 
 .S	はりつけるべきHOOK
+=E.S	Hook to paste
 
 ---------->8---------->8---------->8---------->8---------->8----------
 $START_HOOK = q!;
@@ -151,49 +197,14 @@ if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
 
 
 .appendix
-.C	フィルタリング機能
-.l	configure-filtering
+.include enable_filter.wix
 
-.S	fml フィルタリング機能について
-
-fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
-つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
-る」などができます。
-＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
-＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
-＃動くバージョンです。
-
-まずフィルタリングをONにする必要があります(以下elena MLを例にとる)。フィ
-ルタリング機能を有効にするには以下の節のいづれか一つの方法を行ないます。
-どれも作業の結果は同じですが、使いなれている方法でどうぞ。
-
-.S	makefml config を使う人
-
-   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
-
-.S	cf 書きの人
-
-   USE_DISTRIBUTE_FILTER 1
-
-を書く。その後
-
-	% make config.ph
-
-で config.ph を作り直す。
-
-.S	config.ph 生書きの人
-
-   $USE_DISTRIBUTE_FILTER = 1;
-
-.S	make secure
-
-この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
-部有効にする
-
-   % cd /var/spool/ml/elena
-   % make secure
-
-するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
-やってる設定は画面に表示される。
-
-$Id$
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
