@@ -1,0 +1,183 @@
+.HTML_PRE
+	FML Security Advisory 1999-004: melissa family
+	========================================
+	
+Topic:Melissa Macro Virus 一族(?)対策
+Update 1999-003
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 1999 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+
+[Abstract]
+
+Melissaが何か？については Cert Advisory を参照
+.url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
+
+Melissa originalはSubject:で弾けます。
+.url http://www.fml.org/fml/advisories/melissa/index.html
+
+Melissaの変種は子どもだましのSubject:で弾く手は使えません。
+以下ではMelissa一族をどう弾くか？という理論について述べます。
+
+これらもできればMTAで弾く方がよいですがMTAレベルでは大変でしょう。
+
+-------------------------
+.toc
+-------------------------
+
+細かい手順の意味についてはINSTALLマニュアルを参照して下さい
+.url	http://www.fml.org/fml/INSTALL/
+
+
+.C	特殊なWordファイルは弾く
+
+.S	理論
+
+[条件1]
+
+.url http://www.zdnet.co.jp/news/9903/30/melissa3.html
+
+によればMelissa virusにはGUIDという一種の個人情報が埋め込まれている。
+普通のWORDファイルを(binaryだけど)強引に読むとGUIDは見えない(マクロな
+どを定義しないならつかないらしい?)。
+
+
+[条件2]
+
+GUIDの正規表現はわかっている。
+
+
+.S	弾く条件
+
+GUIDは通常条件下ではつかないらしい。よって
+
+・ MIME/Multipartで送られてくるメール
+・ GUIDらしきものを含んでいる
+
+の２つの条件を満たしたら該当するメールをすべて拒否することで
+怪しげなファイルを全部弾くことにする。
+
+確かに理論上は多く弾きすぎだが、ログファイルにGUIDは残すのでデータが集
+まったら怪しげなGUIDのリストを作ることでvirus spamlistが生成できる。
+
+
+.C	fml 2.2A#42以降での設定
+
+.S	概要
+
+単純なルールでは弾けないので、2.2A#42以前のものではHOOKをごりごりかか
+ないといけないだろう。fml 2.2A#42ではウィルスチェックのライブラリがつ
+いている。フィルタリングを有効にして$FILTER_ATTR_REJECT_MS_GUIDも設定
+する。2.2A#42をインストールするとデフォールトでこの機能を使うことになっ
+ているので『フィルタリングを有効にする』だけでよい。
+
+フィルタリングを有効にする => .ptr{configure-filtering}
+
+
+.C	fml 2.2A#41まで(2.2A#42以前のもの)
+
+あまり古いとだめな気がしますが、おそらくfml 1.6以降なら有効と"思われる
+"設定方法を書いておきます。＃動かなかったらあきらめて下さい _o_
+
+.S	必要なファイル
+
+○ libviruschk.pl を入手する。
+
+[ftp]
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/src/libviruschk.pl
+
+[www]
+.url http://www.sapporo.iij.ad.jp/staff/fukachan/archive/snapshot/src/libviruschk.pl
+
+
+.S	cfの場合
+
+以下にしめすHOOKをcfファイルのLOCAL_CONFIGの後に張り付けて
+
+	% make config.ph
+
+.S	config.ph
+
+以下にしめすHOOKをconfig.phの最後の1;より前にはりつける。
+
+
+.S	はりつけるべきHOOK
+
+---------->8---------->8---------->8---------->8---------->8----------
+$START_HOOK = q!;
+
+local(%e) = %Envelope;
+local($boundary);
+
+# MIME skip mode; against automatic-MIME-encapsulated fool MUA
+if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
+    $e{'h:content-type:'} =~ /boundary=\s*(\S+)/i) {
+    $boundary = $1;
+    $boundary = "--$boundary";
+    $e{'MIME:boundary'} = $boundary;
+
+    require 'libviruschk.pl';
+    $r = &VirusCheck(*e);
+
+    if ($r) { 
+	$DO_NOTHING = 1;
+	&Log("EnvelopeFilter::reject for '$r'");
+	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
+	      "A mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
+    }
+}
+
+!;
+---------->8---------->8---------->8---------->8---------->8----------
+
+
+.appendix
+.C	フィルタリング機能
+.l	configure-filtering
+
+.S	fml フィルタリング機能について
+
+fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
+つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
+る」などができます。
+＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
+＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
+＃動くバージョンです。
+
+まずフィルタリングをONにする必要があります(以下elena MLを例にとる)。フィ
+ルタリング機能を有効にするには以下の節のいづれか一つの方法を行ないます。
+どれも作業の結果は同じですが、使いなれている方法でどうぞ。
+
+.S	makefml config を使う人
+
+   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
+
+.S	cf 書きの人
+
+   USE_DISTRIBUTE_FILTER 1
+
+を書く。その後
+
+	% make config.ph
+
+で config.ph を作り直す。
+
+.S	config.ph 生書きの人
+
+   $USE_DISTRIBUTE_FILTER = 1;
+
+.S	make secure
+
+この際なのでフィルタリングをはじめ、セキュリティ関連の基本的な部分を全
+部有効にする
+
+   % cd /var/spool/ml/elena
+   % make secure
+
+するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
+やってる設定は画面に表示される。
+
+$Id$

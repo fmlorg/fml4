@@ -338,6 +338,15 @@ FILTER_NOTIFY_REJECTION:
 # value: 1/0
 FILTER_ATTR_REJECT_COMMAND:
 
+# reject Japanese "2byes English words"
+# value: 1/0
+FILTER_ATTR_REJECT_2BYTES_COMMAND:
+
+# reject MIME/multipart mails wich Microsoft GUID within it, 
+# We intend to reject "Melissa virus" family by it.
+# value: 1/0
+FILTER_ATTR_REJECT_MS_GUID: 1
+
 # reject HTML mails that the same content exist in the form of both
 # plain and html. e.g. some versions of M$ outlook, netscape mail
 # value: 1/0

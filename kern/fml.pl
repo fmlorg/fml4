@@ -2512,6 +2512,13 @@ sub EnvelopeFilter
     # Spammer?  Message-Id should be <addr-spec>
     if ($e{'h:message-id:'} !~ /\@/) { $r = "invalid Message-Id";}
 
+    # [VIRUS CHECK against a class of M$ products]
+    # Even if Multipart, evaluate all blocks agasint virus checks.
+    if ($FILTER_ATTR_REJECT_MS_GUID && $e{'MIME:boundary'}) {
+	&use('viruschk');
+	$r = &VirusCheck(*e);
+    }
+
     if ($r) { 
 	$DO_NOTHING = 1;
 
