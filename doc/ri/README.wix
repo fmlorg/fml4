@@ -16,33 +16,39 @@ fml Mailing List Server Package
 
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
-＃おまけCDROMつき雑誌等にある「…の改良」の記述は間違った推測なのです
+＃おまけCDROMつき雑誌等にある「hmlの改良」の記述は誤解を招く言い回しで
+＃すね
 
-ML server, management tool, .forward 等メールを使う各種インターフェイスの
-集合体です。
+ML server 本体、ML management tool、.forward や POP経由でMLを実行等メー
+ルを使う各種インターフェイスの集合体です。
 
-これは（歴史的理由により）デフォールトでは hml 1.6 という Perl Script 
-を Emulationします。
+これは（歴史的理由により）デフォールトでは hml 1.6 のEmulationをします。
 ＃正確にはその元祖の shell script の program というべきであらう
 
-subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
-ように作動させることができます。
+設定すればユーザにとってもＭＬ管理者にとっても使い勝手が同じになるよう
+に作動させることができます。
 
-デフォールトの挙動はそうですが、さまざまな動作を実行できます
+デフォールトの挙動はそうですが、それ以外にも様々な動作の実行および互換
+インターフィエスの提供ができます。例えば
 
-	○コマンド機能等を一切使わずにフォワードするだけ等
-	   配送だけして「spoolingするaliasesと同じ」
-	○hml のシンタックスで使う （Default Emulation）
-	○listserv or majordomo インターフェイス
-	   みかけがあたかも listserv のように fml のコマンド群を使う
-	○ moderated モード
-	   一回管理者へフォワードし、管理者が査読しOKならＭＬへ流す
-	○forward でのMLのための仕組み(slocal や vacation)
-	   .forward に仕掛けて slocal や
-	   .forward から fml の機能を使うことで自分のaccountでMLを実行
-	○まとめおくり等の配送の仕方の制御
+	○ まとめおくり等の配送の仕方の制御
 	   メールをリアルタイムに配送したり、
 	   一定時間ごとにためてまとめておくる
+
+	○ コマンド機能等を一切使わずにフォワードするだけ等
+	   配送だけして「spoolingするaliasesと同じ」
+
+	○ hml のコマンドシンタックスを理解する（Default Emulation）
+
+	○ listserv or majordomo インターフェイス
+	   みかけがあたかも listserv のように fml のコマンド群を使う
+
+	○ 様々なモード
+	   リモート管理、moderated、member check, 自動登録…
+
+	○ forward でのMLのための仕組み (slocal や vacation)
+	   .forward に仕掛けて slocal や
+	   .forward から fml の機能を使うことで自分のaccountでMLを実行
 
 等はすぐに実行できます。例えばリモートでＭＬを管理や HTML へ変換してス
 プールするとか expire をかける等さまざまな機能はモジュールとして配布パッ
@@ -51,9 +57,9 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 必要に応じて、コマンドラインオプション か Configuration file で機能の
 追加・削減を行うことができます。
 
-ようは、インターフェイスだけを変えて、ユーザにとってどう見えるか？とい
-う部分を用意すればよいので、様々なコマンド、ライブラリ群を好きなインター
-フェイスで使えるということです。
+要はインターフェイスだけを変えて、ユーザにとってどう見えるか？という部
+分を用意すればよいので、様々なコマンド、ライブラリ群を好きなインターフェ
+イスで使えるということです。
 
 
 .S	目的
