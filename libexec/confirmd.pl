@@ -14,11 +14,20 @@
 &Init;
 
 # switch
-if ($CONFIRMD_EXPIRE_UNIT !~ /^\d+$/) {
+if ($CONFIRMD_ACK_EXPIRE_UNIT !~ /^\d+$/) {
     print "Error: confirmd invalid expire unit, exit\n";
 }
 elsif (-f "$DIR/config.ph") {
-    &ConfirmRequest($CONFIRMD_EXPIRE_UNIT);
+    &ConfirmRequest(*e, *first_time, *mqueue, $CONFIRMD_ACK_EXPIRE_UNIT);
+
+    # critical region
+    &Lock;
+
+    &CleanUpAckLog(*e, *first_time, *mqueue, *remove_addr, $CONFIRMD_ACK_EXPIRE_UNIT);
+    &RemoveMembers(*e, *mqueue, *remove_addr);
+
+    &Unlock;
+    # critical region ends
 }
 else {
     print "Error: confirmd cannot find \$DIR/config.ph, exit\n";
@@ -33,7 +42,7 @@ exit 0;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("du:");
+    &Getopts("du:w:");
 
     # varialbes: argv[1] must be $DIR.
     $DIR  = shift @ARGV;
@@ -43,9 +52,9 @@ sub Init
     # fix include path
     local($libdir) = $0;
     $libdir =~ s#/libexec/confirmd.pl##;
-    push(@INC, $libdir);
-    push(@INC, $DIR);
-    push(@INC, @ARGV);
+    push(@INC, $libdir); push(@LIBDIR, $libdir);
+    push(@INC, $DIR); push(@LIBDIR, $DIR);
+    push(@INC, @ARGV); push(@LIBDIR, @ARGV);
 
     # initialize
     require 'libsmtp.pl';
@@ -56,9 +65,12 @@ sub Init
     $From_address = 'confirmd';
     $debug = $opt_d;
 
-    $CONFIRMD_EXPIRE_UNIT = 
-	&UnitCanonicalize($opt_u || $CONFIRMD_EXPIRE_UNIT || "1month");
+    $CONFIRMD_ACK_EXPIRE_UNIT = 
+	&UnitCanonicalize($opt_u || $CONFIRMD_ACK_EXPIRE_UNIT || "2months");
 
+    $CONFIRMD_ACK_WAIT_UNIT = 
+	&UnitCanonicalize($opt_w || $CONFIRMD_ACK_WAIT_UNIT || "2weeks");
+    
     # acknowledge of continue
     $CONFIRMD_ACK_LOGFILE = 
 	$CONFIRMD_ACK_LOGFILE || "$DIR/var/log/confirmd.ack";
@@ -70,7 +82,11 @@ sub UnitCanonicalize
 {
     local($_) = @_;
 
-    if (/^(\d+)(month|months)$/) {
+    # seconds (direct representation)
+    if (/^(\d+)$/) {
+	$1;
+    }
+    elsif (/^(\d+)(month|months)$/) {
 	$1 * (30 * 24 * 3600);
     }
     elsif (/^(\d+)(week|weeks)$/) {
@@ -80,20 +96,20 @@ sub UnitCanonicalize
 	$1 * (24 * 3600);
     }
     else {
-	&Log("invalid expire unit");
+	&Log("invalid expire unit [$_]");
     }
 }
 
 
 sub ConfirmRequest
 {
-    local($expire_unit) = @_;
-    local(%uniq, $list, $addr);
+    local(*e, *first_time, *mqueue, $expire_unit) = @_;
+    local(%uniq, $list);
 
     # debug
     if ($debug) { require 'libdebug.pl';}
 
-    &GetAckLog(*ack);
+    &GetAckLog(*ack, *ack_req);
 
     # scan member list
     for $list (@MEMBER_LIST, $MEMBER_LIST) {
@@ -104,23 +120,23 @@ sub ConfirmRequest
 	next if $uniq{$list}; $uniq{$list} = $list;
 
 	# scan member list and compare ack time and now
-	&Scan(*addr, *ack, $expire_unit, $list);
+	&Scan(*mqueue, *ack, *ack_req, *first_time, $expire_unit, $list);
     }
 
     # address
-    if (%addr) {
-	&Query(*addr);
+    if (%mqueue) {
+	&Query(*mqueue);
     }
     else {
-	&Log("no address to query");
+	&Log("no address to query") if $debug_confirmd;
     }
 } 
 
 
 sub GetAckLog
 {
-    local(*ack) = @_;
-    local($addr, $time);
+    local(*ack, *ack_req) = @_;
+    local($addr, $last_ack, $send_ack_req);
 
     if (! open(ACK, $CONFIRMD_ACK_LOGFILE)) {
 	&Log("cannot open confirmd ack log [$CONFIRMD_ACK_LOGFILE]");
@@ -131,8 +147,9 @@ sub GetAckLog
 	next if /^\#/;
 	next if /^\s*$/;
 
-	($addr, $time) = split(/\s+/, $_);
-	$ack{$addr} = $time;
+	($addr, $last_ack, $send_ack_req) = split(/\s+/, $_);
+	$ack{$addr}     = $last_ack;
+	$ack_req{$addr} = $send_ack_req;
     }
     close(ACK);
 }
@@ -140,14 +157,15 @@ sub GetAckLog
 
 sub Scan
 {
-    local(*addr, *ack, $expire_unit, $list) = @_;
-    local($time) = time;
+    local(*mqueue, *ack, *ack_req, *first_time, $expire_unit, $list) = @_;
+    local($now) = time;
 
     if (! open(LIST, $list)) {
 	&Log("cannot open member list [$list]");
     }
 
     while (<LIST>) {
+	next if /^#\.FML/o .. /^\#\.endFML/o;
 	next if /^\#\#/;
 	next if /^\s*$/;
 
@@ -155,22 +173,37 @@ sub Scan
 	/^\#\s*(.*)/ && ($_ = $1);
 	/^\s*(\S+)\s*.*$/o && ($_ = $1); # including .*#.*
 
-	# If latest ack is enough old, 
-	# we query whether you continues to be in this list or not?
-	# 
+	# cache for unique
+	next if $mqueue{$_};
+	next if $first_time{$_};
+
+	# not first time
 	if ($ack{$_}) {
+	    # we query whether you continues to be in this list or not?
+
+	    # query and wait for reply
+	    if ($ack{$_} < $ack_req{$_}) {
+		&Log("wait for reply from [$_]") if $debug_confirmd;
+		next;
+	    }
+	    else { ;}
+
+	    &Debug(sprintf("%-30s   %10d > %-10d", 
+			   $_, $now - $ack{$_}, $expire_unit)) if $debug;
+
 	    # the previous ack is expired
-	    if ($time - $ack{$_} > $expire_unit) {
-		&Log("[".($time - $ack{$_})." > $expire_unit] sent to $_") if $debug;
-		$addr{$_} = $_;
+	    if ($now > $ack{$_} + $expire_unit) {
+		### add it to the address list to send ###
+		$mqueue{$_} = $_;
 	    }
 	    else {
 		; # O.K. under acknowledge
 	    }
 	}
-	# the first time
+	# Suppose he/she is "ack"ed state when the first time.
+	# When the first time, just "entry in ack.log", "not send ack request".
 	else {
-	    $addr{$_} = $_;
+	    $first_time{$_} = $_;
 	}
     }
     close(LIST);
@@ -179,118 +212,191 @@ sub Scan
 
 sub Query
 {
-    local(*addr) = @_;
-    local($subject, $to, @to, $n);
+    local(*mqueue) = @_;
+    local($subject, $to, $arg0, $req_file, $draft);
 
-    print STDERR "confirmd::Query($addr)\n" if $debug;
+    $subject  = "confirmation request $ML_FN";
+    $req_file = ($CONFIRMD_ACK_REQ_FILE || "$DIR/confirmd.ackreq");    
 
-    @to      = keys %addr;
-    $subject = "confirmation request $ML_FN";
-    @files   = ($CONFIRMD_ACK_REQ_FILE || "$DIR/confirmd.ackreq");    
-    $n       = $#to + 1;
+    if (!-f $req_file) {
+	$draft = $req_file; $draft =~ s#^.*/##;
+	for (@LIBDIR) { 
+	    # print STDERR "try -f $_/$draft\n" if $debug_confirmd;
+	    $req_file = "$_/drafts/$draft" if -f "$_/drafts/$draft";
+	    if (-f $req_file) {
+		&Log("$req_file found") if $debug_confirmd;
+	    }
+	}
+    }
+
+    # unit
+    $arg0 = $CONFIRMD_ACK_WAIT_UNIT;
+    if ($LANGUAGE eq 'Japanese') {
+	$arg0 = &Japanize($arg0);
+    }
+    else {
+	$arg0 =~ s/^(\d+)(\S+)/$1 $2/;
+    }
 
     # substitute
     $Envelope{'mode:doc:repl'} = 1;
     $Envelope{'CtlAddr:'}      = &CtlAddr;
+    $Envelope{'doc:repl:arg0'} = $arg0;
 
-    &Log("send ack request to $n address".($n > 1 ? "es": ""));
-    &DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', $CONTROL_ADDRESS);
-    &NeonSendFile(*to, *subject, *files);
+    &DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', &CtlAddr);
+
+    for (keys %mqueue) {
+	next unless $mqueue{$_};
+	&Log("send ack request to [$_]");
+	&SendFile($_, $subject, $req_file);
+    }
 }
 
 
-### Section: fundamental
-sub GetTime
+### Section: Clean up
+sub CleanUpAckLog
 {
-    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    local(*e, *first_time, *mqueue, *remove_addr, $expire_unit) = @_;
+    local($too_old, $now, $new, $bak);
+    local($last_ack, $send_ack_req);
+
+    ## TIME
+    # threshold: 2month(expired) + 2 weeks(ack wait)
+    $now     = time;
+    $too_old = $expire_unit + &UnitCanonicalize($CONFIRMD_ACK_WAIT_UNIT);
+
+    if ($too_old !~ /^\d+$/) {
+	&Log("CleanUpAckLog: invalid threshold [$CONFIRMD_ACK_EXPIRE_UNIT + $CONFIRMD_ACK_WAIT_UNIT], stop");
+	return $NULL;
+    }
+
+    ## FILES
+    $bak = "$CONFIRMD_ACK_LOGFILE.bak";
+    $new = "$CONFIRMD_ACK_LOGFILE.new";
+
+    ## IO
+    if (! open(ACK, $CONFIRMD_ACK_LOGFILE)) {
+	&Log("cannot open confirmd ack log [$bak]");
+	return $NULL;
+    }
+    if (! open(NEW, "> $new")) {
+	select(NEW); $| = 1; select(STDOUT);
+	&Log("cannot open new confirmd ack log [$new]");
+	return $NULL;
+    }
+
+    ## HERE WE GO 
+    while (<ACK>) {
+	$line = $_;
+	next if /^\#/;
+	next if /^\s*$/;
+
+	($addr, $last_ack, $send_ack_req) = split(/\s+/, $_);
+
+	# for overwrite
+	if ($remove_addr{$addr}) {
+	    &Log("remove remove_queue [$addr]") if $debug_confirmd;
+	    undef $remove_addr{$addr};
+	}
+
+	# set addresses to remove; The threshold is after 
+	# "$CONFIRMD_ACK_EXPIRE_UNIT + $CONFIRMD_ACK_WAIT_UNIT";
+	if ($now - $last_ack > $too_old) {
+	    if (&MailListMemberP($addr)) {
+		&Log("add_remove_queue [$addr]") if $debug_confirmd;
+		$remove_addr{$addr} = $addr;
+	    }
+	}
+
+	# remove entries from $CONFIRMD_ACK_LOGFILE if the ack is too old.
+	# The threshold is 2 times threshold of %remove_addr.
+	# Operspec is for safety.
+	if ($now - $last_ack > 2*$too_old) {
+	    &Log("acklog::remove [$addr]") if $debug_confirmd;
+	    next;
+	}
+	else {
+	    # sent this time
+	    if ($mqueue{$addr}) {
+		printf NEW "%-30s   %-10d   %-10d\n", $addr, $last_ack, $now;
+	    }
+	    else {
+		print NEW $line;
+	    }
+	}
+    }
+
+    # logs first time enties
+    for (keys %first_time) {
+	next unless $first_time{$_};
+	&Log("acklog::add [$_]");
+	printf NEW "%-30s   %-10d   %-10d\n", $_, $now if $_;
+    }
+
+    close(NEW);
+    close(ACK);
+
+    # turn over;
+    if (! rename($CONFIRMD_ACK_LOGFILE, $bak)) {
+	&Log("cannot rename $CONFIRMD_ACK_LOGFILE -> $bak");
+	return $NULL;
+    }
+
+    if (! rename($new, $CONFIRMD_ACK_LOGFILE)) {
+	&Log("cannot rename $new -> $CONFIRMD_ACK_LOGFILE");
+	return $NULL;
+    }
+
+    &use('newsyslog');
+    &NewSyslog($bak);
+}
+
+
+sub RemoveMembers
+{
+    local(*e, *mqueue, *remove_addr) = @_;
+
+    &use('amctl');
+
+    # administration mode
+    $e{'mode:admin'} = 1;
+    $_cf{'mode:addr:multiple'} = 1;
+
+    for (keys %remove_addr) {
+	next unless $remove_addr{$_};
+	next unless &MailListMemberP($_);
+	&Log("member::remove $_");
+	$Fld[2] = $_;
+	&DoSetMemberList('BYE', *Fld, *e, *misc);
+    }
     
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
-    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
-			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
-
-    # /usr/src/sendmail/src/envelop.c
-    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
-    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-    # 
-    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
-			   1900 + $year, $mon + 1, $mday, $hour, $min);
+    $e{'mode:admin'} = 0;
 }
 
-### Section: IO
-sub Log 
-{ 
-    local($str, $s) = @_;
-    local($package, $filename, $line) = caller; # called from where?
-    local($from) = $PeerAddr ? "$From_address[$PeerAddr]" : $From_address;
-    local($error);
 
-    &GetTime;
-
-    $str =~ s/\015\012$//; # FIX for SMTP (cut \015(^M));
-
-    if ($debug_smtp && ($str =~ /^5\d\d\s/)) {
-	$error .= "Sendmail Error:\n";
-	$error .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
-    }
-
-    $str = "$filename:$line% $str" if $debug_caller;
-
-    # existence and append(open system call check)
-    if (-f $LOGFILE && open(APP, ">> $LOGFILE")) {
-	&Append2("$Now $str ($from)", $LOGFILE);
-	&Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
-    }
-    else {
-	print STDERR "$Now ($package, $filename, $line) $LOGFILE\n";
-	print STDERR "$Now $str ($from)\n\t$s\n";
-    }
-
-    $Envelope{'error'} .= $error if $error;
-
-    print STDERR "*** $str; $s;\n" if $debug;
-}
-
-# append $s >> $file
-# if called from &Log and fails, must be occur an infinite loop. set $nor
-# return NONE
-sub Append2 
-{ 
-    &Write2(@_, 1) || do {
-	local(@caller) = caller;
-	print STDERR "Append2(@_)::Error caller=<@caller>\n";
-    };
-}
-
-sub Write2
+sub Japanize
 {
-    local($s, $f, $o_append) = @_;
+    local($_) = @_;
+    local($s);
 
-    if ($o_append && $s && open(APP, ">> $f")) { 
-	select(APP); $| = 1; select(STDOUT);
-	print APP "$s\n";
-	close(APP);
+    if (/^(\d+)$/) {
+	$s = "${1}ÉÃ";
     }
-    elsif ($s && open(APP, "> $f")) { 
-	select(APP); $| = 1; select(STDOUT);
-	print APP "$s\n";
-	close(APP);
+    elsif (/^(\d+)(month|months)$/) {
+	$s = "${1}¤«·î";
+    }
+    elsif (/^(\d+)(week|weeks)$/) {
+	$s = "${1}½µ´Ö";
+    }
+    elsif (/^(\d+)(day|days)$/) {
+	$s = "${1}Æü";
     }
     else {
-	local(@caller) = caller;
-	print STDERR "Write2(@_)::Error caller=<@caller>\n";
-	return 0;
+	&Log("invalid expire unit [$_]");
     }
 
-    1;
+    &JSTR($s);
 }
 
-sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
-
-sub Debug { print STDERR @_;}
 
 1;
