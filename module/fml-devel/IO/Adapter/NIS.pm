@@ -4,8 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: NIS.pm,v 1.14 2001/05/04 14:32:34 fukachan Exp $
-# $FML: NIS.pm,v 1.14 2001/05/04 14:32:34 fukachan Exp $
+# $FML: NIS.pm,v 1.15 2001/05/30 14:35:11 fukachan Exp $
 #
 
 package IO::Adapter::NIS;
@@ -16,19 +15,6 @@ use Carp;
 use IO::Adapter::Array;
 
 @ISA = qw(IO::Adapter::Array);
-
-
-sub configure
-{
-    my ($self, $me) = @_;
-    my ($type) = ref($self) || $self;
-
-    # emulate an array on memory
-    my $key        = $me->{_name};
-    my (@x)        = split(/:/, `ypmatch $key group.byname`);
-    my (@elements) = split ',', $x[3];
-    $me->{_array_reference} = \@elements;
-}
 
 
 =head1 NAME
@@ -56,6 +42,25 @@ C<CAUTION: this map is read only>.
 =head1 METHODS
 
 See L<IO::Adapter::Array>.
+
+=head2 C<configure($obj)>
+
+Configure $obj for array IO emulation.
+
+=cut
+
+sub configure
+{
+    my ($self, $me) = @_;
+    my ($type) = ref($self) || $self;
+
+    # emulate an array on memory
+    my $key        = $me->{_name};
+    my (@x)        = split(/:/, `ypmatch $key group.byname`);
+    my (@elements) = split ',', $x[3];
+    $me->{_array_reference} = \@elements;
+}
+
 
 =head1 SEE ALSO
 

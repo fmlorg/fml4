@@ -4,8 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $Id: Delivery.pm,v 1.1.1.1 2001/04/03 09:53:28 fukachan Exp $
-# $FML: Delivery.pm,v 1.1.1.1 2001/04/03 09:53:28 fukachan Exp $
+# $FML: Delivery.pm,v 1.3 2001/05/31 11:02:33 fukachan Exp $
 #
 
 package Mail::Delivery;
@@ -29,7 +28,6 @@ Mail::Delivery - mail delivery system interface
     };
     if ($service->error) { Log($service->error); return;}
 
-
     $map_params = {
 	'mysql:toymodel' => {
 	    getline        => "select ... ",
@@ -49,12 +47,12 @@ Mail::Delivery - mail delivery system interface
                           recipient_limit => 1000,
 			  map_params      => $map_params,
 
-                          header          => $header_object,
-                          body            => $body_object,
+                          message         => $message,
                       });
     if ($service->error) { Log($service->error); return;}
 
-Actually the real estate of this class is 
+This class provides the entrance for sub classes.
+Actually implementation of this class is 
 almost C<Mail::Delivery::SMTP> class.
 Please see it for more details.
 

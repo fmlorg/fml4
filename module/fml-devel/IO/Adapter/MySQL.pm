@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $Id: MySQL.pm,v 1.10 2001/05/04 14:32:34 fukachan Exp $
+# $Id: MySQL.pm,v 1.11 2001/05/30 14:35:10 fukachan Exp $
 #
 
 
@@ -219,5 +219,4 @@ See C<http://www.fml.org/> for more details.
 
 =cut
 
-1;
 1;

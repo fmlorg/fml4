@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Queue.pm,v 1.1 2001/05/09 00:55:54 fukachan Exp $
+# $FML: Queue.pm,v 1.5 2001/05/31 11:02:33 fukachan Exp $
 #
 
 package Mail::Delivery::Queue;
@@ -31,6 +31,9 @@ Mail::Delivery::Queue - hashed directory holding queue files
     # ok to deliver this queue !
     $queue->setrunnable() || croak("fail to set queue deliverable");
 
+    # get the filename of this $queue object
+    my $filename = $queue->filename();
+
 =head1 DESCRIPTION
 
 C<Mail::Delivery::Queue> provides basic manipulation of mail queue.
@@ -50,13 +53,21 @@ method.
 
    $queue_dir/new/$qid  --->  $queue_dir/active/$qid
 
+The actual delivery is done by other modules such as 
+C<Mail::Delivery>.
+C<Mail::Delivery::Queue> manipulats only queue around things.
+
 =head1 METHODS
 
 =head2 C<new($args)>
 
-constructor. You must specify $args->{ dirctory } (C<queue directory>).
-C<new()> assigns the queue id, queue files to be used but do no actual
-works.
+constructor. You must specify C<queue directory> as
+
+    $args->{ dirctory } .
+
+If C<id> is not specified,
+C<new()> assigns the queue id, queue files to be used.
+C<new()> assigns them but do no actual works.
 
 =cut
 
@@ -68,14 +79,20 @@ sub new
     my $me     = {};
 
     my $dir = $args->{ directory } || croak("specify directory");
-    my $id  = _new_queue_id();
+    my $id  = $args->{ id } ||  _new_queue_id();
     $me->{ _directory } = $dir;
     $me->{ _id }        = $id;
     $me->{ _status }    = "new";
     $me->{ _new_qf }    = "$dir/new/$id";
     $me->{ _active_qf } = "$dir/active/$id";
 
-    for ($dir, "$dir/active", "$dir/new", "$dir/deferred", "$dir/info") {
+    # infomation for delivery
+    $me->{ _info }->{ sender }     = "$dir/info/sender/$id";
+    $me->{ _info }->{ recipients } = "$dir/info/recipients/$id";
+
+    for ($dir, 
+	 "$dir/active", "$dir/new", "$dir/deferred",
+	 "$dir/info", "$dir/info/sender", "$dir/info/recipients") {
 	-d $_ || _mkdirhier($_);
     }
 
@@ -113,7 +130,7 @@ sub id
 
 =head2 C<filename()>
 
-return the file name of the quque id assigned to the object C<$self>.
+return the file name of the queue id assigned to the object C<$self>.
 
 =cut
 
@@ -124,15 +141,141 @@ sub filename
 }
 
 
+=head2 C<list()>
+
+return queue list as ARRAY REFERENCE.
+It is a list of queue filenames in C<active/> directory.
+
+    $ra = $queue->list();
+    for $qid (@$ra) {
+	something for $qid ...
+     }
+
+where C<$qid> is like this: 990157187.20792.1
+
+=cut
+
+sub list
+{
+    my ($self) = @_;
+    my $dir = $self->{ _directory }. "/active";
+    my @r; # result array which holds active queue list
+
+    use DirHandle;
+    my $dh = new DirHandle $dir;
+    if (defined $dh) {
+	while (defined ($_ = $dh->read)) {
+	    next unless /^\d+/;
+	    push(@r, $_);
+	}
+    }
+
+    \@r;
+}
+
+
+=head1 METHODS TO MANIPULATE INFORMATION
+
+=head2 C<getidinfo($id)>
+
+return information related with the queue id C<$id>.
+The returned information is
+
+	id         => $id,
+	path       => "$dir/active/$id",
+	sender     => $sender,
+	recipients => \@recipients,
+
+=cut
+
+sub getidinfo
+{
+    my ($self, $id) = @_;
+    my $dir = $self->{ _directory };
+    my ($fh, $sender, @recipients);
+
+    # validate queue id is given
+    $id = $id || $self->id();
+
+    # sender
+    use FileHandle;
+    $fh = new FileHandle "$dir/info/sender/$id";
+    if (defined $fh) {
+	$sender = $fh->getline;
+	$sender =~ s/[\n\s]*$//;
+	$fh->close;
+    }
+
+    # recipient array
+    $fh = new FileHandle "$dir/info/recipients/$id";
+    if (defined $fh) {
+	while (defined( $_ = $fh->getline)) {
+	    s/[\n\s]*$//;
+	    push(@recipients, $_);
+	}
+	$fh->close;
+    }
+
+    return {
+	id         => $id,
+	path       => "$dir/active/$id",
+	sender     => $sender,
+	recipients => \@recipients,
+    };
+}
+
+
+=head1 LOCK
+
+=head2 C<lock()>
+
+=head2 C<unlock()>
+
+=cut
+
+use POSIX qw(EAGAIN ENOENT EEXIST O_EXCL O_CREAT O_RDONLY O_WRONLY); 
+use FileHandle;
+
+sub LOCK_SH {1;}
+sub LOCK_EX {2;}
+sub LOCK_NB {4;}
+sub LOCK_UN {8;}
+
+
+sub lock
+{
+    my ($self, $args) = @_;
+    my $fh   = new FileHandle $self->{ _active_qf };
+    my $wait = defined $args->{ wait } ? $args->{ wait } : 10; 
+
+    eval {
+	local($SIG{ALRM}) = sub { croak("lock timeout");}; 
+        alarm( $wait );
+	flock($fh, &LOCK_EX);
+	$self->{ _lock }->{ _fh } = $fh;
+    };
+
+    ($@ =~ /lock timeout/) ? 0 : 1;
+}
+
+
+sub unlock
+{
+    my ($self) = @_;
+    my $fh = $self->{ _lock }->{ _fh };
+    flock($fh, &LOCK_UN);
+}
+
+
 =head2 C<in($msg)>
 
 You specify C<$msg>, which is C<Mail::Message> object.
 C<in()> creates a queue file in C<new/> directory 
 (C<queue_directory/new/>.
 
+REMEMBER YOU MUST DO C<setrunnable()> for the queue to deliver.
 If you not C<setrunnable()> it, the queue file is removed by
 C<DESTRUCTOR>. 
-REMEMBER YOU MUST SET THE QUEUE C<setrunnable()>.
 
 =cut
 
@@ -153,25 +296,49 @@ sub in
 }
 
 
-=head2 C<info($args)>
+=head2 C<set($key, $args)>
 
-   $args = {
-	sender     => $sender,
-	recipients => [ $recipient ],
-   }
+   $queue->set('sender', $sender);
+   $queue->set('recipients', [ $recipient0, $recipient1 ] );
+
+It sets up delivery information in C<info/sender/> and
+C<info/recipients/> directories.
+
+=cut
+
+sub set
+{
+    my ($self, $key, $value) = @_;
+    my $qf_sender     = $self->{ _info }->{ sender };
+    my $qf_recipients = $self->{ _info }->{ recipients };
+
+    use FileHandle;
+
+    if ($key eq 'sender') {
+	my $fh = new FileHandle "> $qf_sender";
+	if (defined $fh) {
+	    print $fh $value, "\n";
+	    $fh->close;
+	}
+    }
+    elsif ($key eq 'recipients') {
+	my $fh = new FileHandle "> $qf_recipients";
+	if (defined $fh) {
+	    for (@$value) { print $fh $_, "\n";}
+	    $fh->close;
+	}
+    }
+}
+
 
 =head2 C<setrunnable()>
 
 set the status of the queue assigned to this object C<$self>
 deliverable. 
-This file is scheduled to be delivered (in near future).
+This file is scheduled to be delivered.
 
-In fact setrunnable() C<rename>s the queue id file from C<new/>
+In fact, setrunnable() C<rename>s the queue id file from C<new/>
 directory to C<active/> directory like C<postfix> queue strategy.
-
-=head2 C<remove()>
-
-remove all queue assigned to this object C<$self>.
 
 =cut
 
@@ -183,22 +350,65 @@ remove all queue assigned to this object C<$self>.
 sub setrunnable
 {
     my ($self) = @_;
+    my $qf_new        = $self->{ _new_qf };
+    my $qf_sender     = $self->{ _info }->{ sender };
+    my $qf_recipients = $self->{ _info }->{ recipients };
+
+    # There must be a set of these three files.
+    unless (-f $qf_new && -f $qf_sender && -f $qf_recipients) {
+	return 0;
+    }
+
+    # move new/$id to active/$id
     rename( $self->{ _new_qf }, $self->{ _active_qf } );
 }
+
+
+
+=head2 C<remove()>
+
+remove all queue assigned to this object C<$self>.
+
+=head2 C<valid()>
+
+It checks the queue file is broken or not.
+return 1 (valid) or 0.
+
+=cut
 
 
 sub remove
 {
     my ($self) = @_;
-    unlink $self->{ _new_qf }    if -f $self->{ _new_qf };
-    unlink $self->{ _active_qf } if -f $self->{ _active_qf };
+
+    for ($self->{ _new_qf },
+	 $self->{ _active_qf },
+	 $self->{ _info }->{ sender },
+	 $self->{ _info }->{ recipients }) {
+	unlink $_ if -f $_;
+    }
+}
+
+
+sub valid
+{
+    my ($self) = @_;
+    my $ok = 0;
+
+    for ($self->{ _active_qf },
+	 $self->{ _info }->{ sender },
+	 $self->{ _info }->{ recipients }) {
+	$ok++ if -f $_ && -s $_;
+    }
+
+    ($ok == 3) ? 1 : 0;
 }
 
 
 sub DESTROY
 {
     my ($self) = @_;
-    unlink $self->{ _new_qf }    if -f $self->{ _new_qf };
+    unlink $self->{ _new_qf } if -f $self->{ _new_qf };
 }
 
 
