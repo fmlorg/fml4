@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -12,269 +12,26 @@
 # MEAD: Mail Error Analyze Daemon
 # $Id$
 
+### VERY FUNDAMENTAL CONFIG ###
+$ErrorCodePat = '55\d|5\.\d\.\d';
+$TrapWord     = 'unknown \S+|\S+ unknown|\S+ not known';
+
+# regexp
+$RE_SJIS_C = '[\201-\237\340-\374][\100-\176\200-\374]';
+$RE_SJIS_S = "($RE_SJIS_C)+";
+$RE_EUC_C  = '[\241-\376][\241-\376]';
+$RE_EUC_S  = "($RE_EUC_C)+";
+$RE_JIN    = '\033\$[\@B]';
+$RE_JOUT   = '\033\([BJ]';
+###############################
+
+
+### MAIN ###
 &Init;
 
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-$error_code_pat = '55\d|5\.\d\.\d';
-$TrapWord       = 'unknown \S+|\S+ unknown|\S+ not known';
-$new_block = 1;
-$gabble = 0;
-$curf = $NULL;
-$first_header_part = 1;
-
-while (<>) {
-    chop;
-
-    # ignore the first header
-    # we should ignore header for <maintainer>
-    $first_header_part = 0 if /^$/;
-
-    # save excursion
-    $PrevLine = $CurLine;
-    $CurLine  = $_;
-
-    # check the current block
-    if (/^Content-Type:\s*(.*)/i) { 
-	&Debug("<<< $_ >>>");
-	$mp_block = $1;
-    }
-
-    if (/^(Content-Description:\s*Notification).*/i) { 
-	&Debug("<<< $_ >>>");
-	$mp_block = $1;
-    }
-
-    # Store Received: field 
-    if (! $first_header_part) {
-	if (/^([-A-Za-z]+):(.*)/) {
-	    $curf  = $1;
-	    $value = $2;
-	    $Received .= "\n".$value if $curf =~ /Received/i;
-	}
-	elsif (/^\s+(.*)/) {
-	    $value = $1;
-	    $Received .= $value if $curf =~ /Received/i;
-	}
-    }
-
-    if ($original_mail && $found && $debug) {
-	&Debug("   --- $_") if $debug;
-    }
-    elsif ($debug) {
-	&Debug("   | $_") if $debug;
-    }
-
-    $new_block = 1 if /^\s*$/;
-
-    if (/^From:.*mailer-daemon/i ||
-	/^From:.*postmaster/) {
-	undef %return_addr;
-	$original_mail = $found = 0;
-	undef $MTA;
-	undef $CurAddr;
-    }
-
-    # guess MTA ...
-    if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) { 
-	$MTA = "exim";
-	next;
-    }
-    if (/qmail-send/) {
-	$MTA = "qmail";
-	next;
-    }
-
-    # get returned addresses
-    if ($first_header_part) {
-	if (/^(To|Cc):.*/i) {
-	    if ($new_block && $gabbble == 0) {
-		&Debug("$new_block, $gabble> rset \%return_addr\n") if $debug;
-		undef %return_addr;
-	    }
-
-	    $new_block = 0;
-	    $gabbble = 1;
-
-	    &ExtractAddr($_);
-	    next;
-	}
-	# 822 folding
-	elsif (/^\s+/ && $gabble) {
-	    &ExtractAddr($_);
-	    next;	
-	}
-    }
-
-
-    ###
-    ### RFC1891,1894 DSN
-    ###
-    if ($mp_block =~ /delivery\-status/i) {
-	if (/^Final-Recipient:.*\s+(\S+\@\S+)/i) {
-	    $DSN_FinalRecipient = &BareAddr($1);
-	}
-	elsif (/^Original-Recipient:.*\s+(\S+\@\S+)/i) {
-	    $DSN_OriginalRecipient =  &BareAddr($1);
-	}
-	elsif (/^Status:\s*5/i) {
-	    if ($DSN_OriginalRecipient) {
-		&CacheOn($DSN_OriginalRecipient, " ");
-	    }
-	    if ($DSN_FinalRecipient) {
-		&CacheOn($DSN_FinalRecipient, " ");
-	    }
-
-	    $found++;	    
-	}
-    }
-
-    #####
-    ##### MTA szpecific
-    #####
-    # postfix
-    # <uja@beth.fml.org>: unknown user
-    if ($mp_block eq 'Content-Description: Notification') {
-	if (/^\s*(\S+\@\S+):\s*unknown user/) {
-	    $CurAddr = $1;
-	    $CurAddr =~ s/[\<\>]//g;
-	    $CurAddr =~ s/\s*//g;	
-	    &Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
-	    $MTA = 'postfix';
-	}
-    }
-
-    # exim || qmail
-    if ($MTA eq 'qmail' && /This is a permanent error/) {
-	$RABuf .= $_;
-    }
-
-    if ($MTA eq 'exim' || $MTA eq 'qmail') {
-	/^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
-	$CurAddr =~ s/[\<\>]//g;
-	$CurAddr =~ s/\s*//g;
-	&Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
-    }
-
-    $gabble = 0;
-
-    # ignore Japanese strings.
-    next if /$RE_JIN/;
-    next if /$RE_JOUT/;
-    next if /$RE_SJIS_S/;
-    next if /$RE_EUC_S/;
-
-    ### unknown MTA  ###
-    if (/(\S+\@[-A-Z0-9\.]+)/i) {
-	/(\S+\@[-A-Z0-9\.]+)/i && ($P_CurAddr = $1); # pseudo
-	$P_CurAddr =~ s/[\<\>]//g;
-	$P_CurAddr =~ s/\s*//g;
-	&Debug("P_CurAddr => $P_CurAddr") if $debug && $P_CurAddr;
-    }
-
-    # error message line
-    # next if /<<<.*\@/;
-    # next if /^Diagnostic-Code:/i;
-
-    # ignore the original mails
-    # &Debug("next") if $original_mail && $found;
-    next if $original_mail && $found;
-    $original_mail = 1 if /^received:/i;
-
-    ##### TRAP CODE #####
-    if (/fatal error/i) { $fatal++;}
-
-    if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_); $found++; }
-    if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_); $found++; }
-
-    ### unknown MTA
-    # e.g. uset not known
-    if (/$TrapWord/i && $P_CurAddr) {
-	&AnalyzeErrorWord($_, $P_CurAddr); 
-	$found++;	
-    }
-
-    ### postfix
-    if (/$TrapWord/i && $MTA eq 'postfix') { 
-	&AnalyzeErrorWord($_, $CurAddr); 
-	$found++;
-    } 
-
-    ###
-    ### exim
-    ###
-    if (/$TrapWord/i && $MTA eq 'exim') { 
-	&AnalyzeErrorWord($_, $CurAddr); 
-	$found++;
-    }
-
-    # EXIM pattern
-    if (/failed/i && $MTA eq 'exim') { 
-	$trap_want_addr = $_;
-	next;
-    }
-    if ($trap_want_addr && /\@/ && $MTA eq 'exim') { 
-	local($a);
-	/^\s*(\S+\@\S+)/ && ($a = $1);
-	$a =~ s/[\<\>:]//g;
-	&CacheOn($a, " ") if $a; # space is a dummy
-	undef $trap_want_addr;
-    }
-
-    if (/($error_code_pat)/ && $MTA eq 'exim') { 
-	&AnalyzeErrorWord($_, $CurAddr); 
-	$found++;
-    }
-
-    ###
-    ### qmail
-    ###
-    if (/\#5\.\d+\.\d+/ && $MTA eq 'qmail') { 
-	&AnalyzeErrorWord($_, $CurAddr);
-	$found++;
-    }
-
-    if ($MTA eq 'qmail' && $CurAddr && $RABuf) {
-	&AnalyzeErrorWord($RABuf, $CurAddr);
-	$found++;
-    }
-
-    ###
-    ### sendmail
-    ###
-    if ($fatal) {
-	local($a);
-	/^\s*(\S+\@\S+)/ && ($a = $1);
-	$a =~ s/[\<\>]//g;
-	&CacheOn($a, " ") if $a; # space is a dummy
-    }
-    # end of fatal block
-    if ($fatal && /^$/) {    
-	undef $fatal;
-    }
-}
-
-# VERPs: qmail specific
-# Suppose list-admin-account=domain@$mydomain syntax, ...
-{
-    local($ra, $addr);
-
-    $addr = $ENV{'RECIPIENT'};
-    $ra   = $ENV{'RECIPIENT'};
-
-    if ($addr =~ /=/) {
-	$addr =~ s/\@\S+$//;
-	$addr =~ s/=/\@/;
-	$addr =~ s/^\S+\-admin\-//; # fml specific 
-
-	$ra =~ s/admin\-\S+\@/admin@/;
-
-	&Debug("qmail:". $addr);
-	&Debug("qmail return_addr:". $ra);
-	$return_addr{$ra} = 1;
-	&CacheOn($addr, " ");
-    }
-}
+&Parse;
 
 &CacheHints;
 &CacheOut;
@@ -284,6 +41,271 @@ while (<>) {
 &Report;
 
 exit 0;
+
+
+sub Parse
+{
+    my($new_block, $gabble, $curf, $first_header_part);
+    my($mp_block);
+
+    $new_block = 1;
+    $gabble    = 0;
+    $curf      = $NULL;
+    $first_header_part = 1;
+
+
+    while (<STDIN>) {
+	chop;
+
+	# ignore the first header
+	# we should ignore header for <maintainer>
+	$first_header_part = 0 if /^$/;
+
+	# save excursion
+	$PrevLine = $CurLine;
+	$CurLine  = $_;
+
+	# check the current block
+	if (/^Content-Type:\s*(.*)/i) { 
+	    &Debug("<<< $_ >>>");
+	    $mp_block = $1;
+	}
+
+	if (/^(Content-Description:\s*Notification).*/i) { 
+	    &Debug("<<< $_ >>>");
+	    $mp_block = $1;
+	}
+
+	# Store Received: field 
+	if (! $first_header_part) {
+	    if (/^([-A-Za-z]+):(.*)/) {
+		$curf  = $1;
+		$value = $2;
+		$Received .= "\n".$value if $curf =~ /Received/i;
+	    }
+	    elsif (/^\s+(.*)/) {
+		$value = $1;
+		$Received .= $value if $curf =~ /Received/i;
+	    }
+	}
+
+	if ($original_mail && $found && $debug) {
+	    &Debug("   --- $_") if $debug;
+	}
+	elsif ($debug) {
+	    &Debug("   | $_") if $debug;
+	}
+
+	$new_block = 1 if /^\s*$/;
+
+	if (/^From:.*mailer-daemon/i || /^From:.*postmaster/) {
+	    undef %return_addr;
+	    $original_mail = $found = 0;
+	    undef $MTA;
+	    undef $CurAddr;
+	}
+
+	# guess MTA ...
+	if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) { 
+	    $MTA = "exim";
+	    next;
+	}
+	if (/qmail-send/) {
+	    $MTA = "qmail";
+	    next;
+	}
+
+	# get returned addresses
+	if ($first_header_part) {
+	    if (/^(To|Cc):.*/i) {
+		if ($new_block && $gabbble == 0) {
+		    &Debug("$new_block, $gabble> rset \%return_addr\n") if $debug;
+		    undef %return_addr;
+		}
+
+		$new_block = 0;
+		$gabbble = 1;
+
+		&ExtractAddr($_);
+		next;
+	    }
+	    # 822 folding
+	    elsif (/^\s+/ && $gabble) {
+		&ExtractAddr($_);
+		next;	
+	    }
+	}
+
+
+	###
+	### RFC1891,1894 DSN
+	###
+	if ($mp_block =~ /delivery\-status/i) {
+	    if (/^Final-Recipient:.*\s+(\S+\@\S+)/i) {
+		$DSN_FinalRecipient = &BareAddr($1);
+	    }
+	    elsif (/^Original-Recipient:.*\s+(\S+\@\S+)/i) {
+		$DSN_OriginalRecipient =  &BareAddr($1);
+	    }
+	    elsif (/^Status:\s*5/i) {
+		if ($DSN_OriginalRecipient) {
+		    &CacheOn($DSN_OriginalRecipient, " ");
+		}
+		if ($DSN_FinalRecipient) {
+		    &CacheOn($DSN_FinalRecipient, " ");
+		}
+
+		$found++;	    
+	    }
+	}
+
+	#####
+	##### MTA szpecific
+	#####
+	# postfix
+	# <uja@beth.fml.org>: unknown user
+	if ($mp_block eq 'Content-Description: Notification') {
+	    if (/^\s*(\S+\@\S+):\s*unknown user/) {
+		$CurAddr = $1;
+		$CurAddr =~ s/[\<\>]//g;
+		$CurAddr =~ s/\s*//g;	
+		&Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
+		$MTA = 'postfix';
+	    }
+	}
+
+	# exim || qmail
+	if ($MTA eq 'qmail' && /This is a permanent error/) {
+	    $RABuf .= $_;
+	}
+
+	if ($MTA eq 'exim' || $MTA eq 'qmail') {
+	    /^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
+	    $CurAddr =~ s/[\<\>]//g;
+	    $CurAddr =~ s/\s*//g;
+	    &Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
+	}
+
+	$gabble = 0;
+
+	# ignore Japanese strings.
+	next if /$RE_JIN/;
+	next if /$RE_JOUT/;
+	next if /$RE_SJIS_S/;
+	next if /$RE_EUC_S/;
+
+	### unknown MTA  ###
+	if (/(\S+\@[-A-Z0-9\.]+)/i) {
+	    /(\S+\@[-A-Z0-9\.]+)/i && ($P_CurAddr = $1); # pseudo
+	    $P_CurAddr =~ s/[\<\>]//g;
+	    $P_CurAddr =~ s/\s*//g;
+	    &Debug("P_CurAddr => $P_CurAddr") if $debug && $P_CurAddr;
+	}
+
+	# error message line
+	# next if /<<<.*\@/;
+	# next if /^Diagnostic-Code:/i;
+
+	# ignore the original mails
+	# &Debug("next") if $original_mail && $found;
+	next if $original_mail && $found;
+	$original_mail = 1 if /^received:/i;
+
+	##### TRAP CODE #####
+	if (/fatal error/i) { $fatal++;}
+
+	if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_); $found++; }
+	if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_); $found++; }
+
+	### unknown MTA
+	# e.g. uset not known
+	if (/$TrapWord/i && $P_CurAddr) {
+	    &AnalyzeErrorWord($_, $P_CurAddr); 
+	    $found++;	
+	}
+
+	### postfix
+	if (/$TrapWord/i && $MTA eq 'postfix') { 
+	    &AnalyzeErrorWord($_, $CurAddr); 
+	    $found++;
+	} 
+
+	###
+	### exim
+	###
+	if (/$TrapWord/i && $MTA eq 'exim') { 
+	    &AnalyzeErrorWord($_, $CurAddr); 
+	    $found++;
+	}
+
+	# EXIM pattern
+	if (/failed/i && $MTA eq 'exim') { 
+	    $trap_want_addr = $_;
+	    next;
+	}
+	if ($trap_want_addr && /\@/ && $MTA eq 'exim') { 
+	    local($a);
+	    /^\s*(\S+\@\S+)/ && ($a = $1);
+	    $a =~ s/[\<\>:]//g;
+	    &CacheOn($a, " ") if $a; # space is a dummy
+	    undef $trap_want_addr;
+	}
+
+	if (/($ErrorCodePat)/ && $MTA eq 'exim') { 
+	    &AnalyzeErrorWord($_, $CurAddr); 
+	    $found++;
+	}
+
+	###
+	### qmail
+	###
+	if (/\#5\.\d+\.\d+/ && $MTA eq 'qmail') { 
+	    &AnalyzeErrorWord($_, $CurAddr);
+	    $found++;
+	}
+
+	if ($MTA eq 'qmail' && $CurAddr && $RABuf) {
+	    &AnalyzeErrorWord($RABuf, $CurAddr);
+	    $found++;
+	}
+
+	###
+	### sendmail
+	###
+	if ($fatal) {
+	    local($a);
+	    /^\s*(\S+\@\S+)/ && ($a = $1);
+	    $a =~ s/[\<\>]//g;
+	    &CacheOn($a, " ") if $a; # space is a dummy
+	}
+	# end of fatal block
+	if ($fatal && /^$/) {    
+	    undef $fatal;
+	}
+    }
+
+    # VERPs: qmail specific
+    # Suppose list-admin-account=domain@$mydomain syntax, ...
+    {
+	local($ra, $addr);
+
+	$addr = $ENV{'RECIPIENT'};
+	$ra   = $ENV{'RECIPIENT'};
+
+	if ($addr =~ /=/) {
+	    $addr =~ s/\@\S+$//;
+	    $addr =~ s/=/\@/;
+	    $addr =~ s/^\S+\-admin\-//; # fml specific 
+
+	    $ra =~ s/admin\-\S+\@/admin@/;
+
+	    &Debug("qmail:". $addr);
+	    &Debug("qmail return_addr:". $ra);
+	    $return_addr{$ra} = 1;
+	    &CacheOn($addr, " ");
+	}
+    }
+}
 
 
 sub BareAddr
@@ -354,7 +376,7 @@ sub AnalyzeErrorCode
     if (/(\S+\@[\.A-Za-z0-9\-]+)/) {
 	$addr = $1;
 
-	if (/^($error_code_pat)|\D($error_code_pat)\D/) {
+	if (/^($ErrorCodePat)|\D($ErrorCodePat)\D/) {
 	    &CacheOn($addr, $r = &AnalWord($_));
 	}
     }
@@ -652,7 +674,7 @@ sub Report
 	    &Append("\#!/bin/sh", $tmp);
 
 	    # [format]
-	    # $MakeFmlTemplate{$ml} .= "$MAKEFML $KILL $ml $addr\n";
+	    # $MakeFmlTemplate{$ml} .= "$MAKEFML $ACTION $ml $addr\n";
 	    for $ml (keys %MakeFmlTemplate) {
 		@addr = split(/\s+/, $MakeFmlTemplateAddr{$ml});
 		$addr = $addr[0];
@@ -796,11 +818,11 @@ sub Action
     ###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
 
     if ($MODE eq 'auto') {
-	&MakeFml("$KILL $ml $addr", $addr, $ml);
+	&MakeFml("$ACTION $ml $addr", $addr, $ml);
     }
     elsif ($MODE eq 'report') {
-	$Template{$ml}            .= $CTK{$ml}."admin $KILL $addr\n";
-	$MakeFmlTemplate{$ml}     .= "$MAKEFML $KILL $ml $addr\n";
+	$Template{$ml}            .= $CTK{$ml}."admin $ACTION $addr\n";
+	$MakeFmlTemplate{$ml}     .= "$MAKEFML $ACTION $ml $addr\n";
 	$MakeFmlTemplateAddr{$ml} .= $addr. "\t";
     }
     else {
@@ -820,8 +842,8 @@ sub MakeFml
 
     $ok = 0;
 
-    $LogBuf{$ml} .= "mead> $KILL $ml $addr\n";
-    $MFSummary{$ml} .= "mead> $KILL $ml $addr\n";
+    $LogBuf{$ml} .= "mead> $ACTION $ml $addr\n";
+    $MFSummary{$ml} .= "mead> $ACTION $ml $addr\n";
 
     require 'open2.pl';
 
@@ -890,45 +912,45 @@ sub Init
     $opt_h && die(&Usage);
     $debug = $opt_d ? 1 : 0;
 
-
-    ### at the first stage, evaluate the configuration file ###
-    if ($opt_f && -f $opt_f) {
-	&EvalCF($opt_f);
-    }
-
-    $EXPIRE = $opt_e || $EXPIRE || 14; # days
-    $KILL   = $opt_k || $KILL || 'bye';
-
-    # expire check interval
-    $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
-
-    $LIMIT  = $opt_l || $LIMIT || 5;
-
-    $DIR    = $opt_D || $DIR ||
-	die("Please define -D \$DIR, mead.pl working directory\n");
-    $ML_DIR = $opt_S || $ML_DIR ||
-	die("Please define -S ML_DIR e.g. -S /var/spool/ml\n");
-    $CACHE  = $opt_C || $CACHE || "$DIR/errormaillog";
-
-    # program
+    # program directory
     if (! $EXEC_DIR) {
 	$EXEC_DIR = $0;
 	$EXEC_DIR =~ s#/libexec/mead.pl##;
     }
-    $EXEC_DIR = $opt_E || $EXEC_DIR;
-    $MAKEFML  = $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
+    $ML_DIR = $opt_S;
 
-    # mode
-    $MODE = $opt_m || $MODE || 'report';
+    # at the first stage, evaluate the configuration file
+    # overwrite -m, -S, -D, -E ?
+    if ($opt_f && -f $opt_f) {
+	$ConfigFile = $opt_f;
+    }
+    elsif (-f "$ML_DIR/etc/mead/mead_config.ph") {
+	$ConfigFile = "$ML_DIR/etc/mead/mead_config.ph";
+    }
 
-    # MTA
-    $SENDMAIL = $opt_z || $SENDMAIL;
+    &EvalCF($ConfigFile) if -f $ConfigFile;
 
-    # touch
-    &Touch($CACHE);
+
+    $LIMIT  = $FORCE_LIMIT  || $opt_l || $LIMIT  || 5;
+    $EXPIRE = $FORCE_EXPIRE || $opt_e || $EXPIRE || 14; # days
+    $ACTION = $FORCE_ACTION || $opt_k || $ACTION || 'bye';
+    $MODE   = $FORCE_MODE   || $opt_m || $MODE || 'report'; # mode
+
+    # expire check interval
+    $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
+
+    # directories / files
+    $DIR    = $FORCE_DIR     || $opt_D || $DIR;
+    $ML_DIR = $FORECE_ML_DIR || $opt_S || $ML_DIR;
+    $CACHE  = $FORCE_CACHE   || $opt_C || $CACHE || "$DIR/errormaillog";
+    $EXEC_DIR = $FORCE_EXEC_DIR || $opt_E || $EXEC_DIR;
+
+    # programs
+    $MAKEFML  = $FORCE_MAKEFML  || $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
+    $SENDMAIL = $FORCE_SENDMAIL || $opt_z || $SENDMAIL;
 
     # priority; $opt_p
-    $PRI{'uu'} = 1;
+    $PRI{'uu'}      = 1;
     $PRI{'default'} = 0.25;
     for (split(/,/, $opt_p . $PRIORITY)) {
 	if (/(\S+)=(\S+)/) {
@@ -937,27 +959,31 @@ sub Init
 	}
     }
 
-    # Regular Expression
-    $RE_SJIS_C = '[\201-\237\340-\374][\100-\176\200-\374]';
-    $RE_SJIS_S = "($RE_SJIS_C)+";
-    $RE_EUC_C  = '[\241-\376][\241-\376]';
-    $RE_EUC_S  = "($RE_EUC_C)+";
-    $RE_JIN    = '\033\$[\@B]';
-    $RE_JOUT   = '\033\([BJ]';
+    # touch
+    &Touch($CACHE);
+
+    # diagnostics
+    $DIR    || die("Please define -D \$DIR, mead.pl working directory\n");
+    $ML_DIR || die("Please define -S ML_DIR e.g. -S /var/spool/ml\n");
 }
 
 
 sub EvalCF
 {
     package mead;
-    require $main'opt_f; #';
+    eval require $main'ConfigFile; #';
     package main;
 
     for ("debug", 
-	 EXPIRE, KILL, CHECK_INTERVAL, LIMIT, 
+	 OVERWRITE_COMMAND_LINE_OPTIONS,
+	 EXPIRE, ACTION, CHECK_INTERVAL, LIMIT, 
 	 DIR, ML_DIR, CACHE, EXEC_DIR, MAKEFML, 
 	 MODE, SENDMAIL, PRIORITY, MEAD_REPORT_HOOK) {
-	eval("\$main'${_} = \$mead'${_};"); 
+	eval("\$main'${_} = \$mead'${_};");
+
+	if ($OVERWRITE_COMMAND_LINE_OPTIONS) {
+	    eval("\$main'FORCE_${_} = \$mead'${_};");
+	}
     }
 }
 
@@ -1021,10 +1047,12 @@ sub Out
 
 package ml;
 
+
 sub Debug
 {
     &main'Debug(@_); #';
 }
+
 
 sub main'MLEntryOn #';
 {
