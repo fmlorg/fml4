@@ -4,6 +4,13 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+
+2001/09/18
+
+   proc/libhtmlsubr.pl
+	implement _get_suffix() by Kasui Nayumi (fml-help: 00721) to
+	extract suffix
+
 2001/09/14
 
     proc/libMIME.pl

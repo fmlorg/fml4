@@ -7,8 +7,25 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libhtmlsubr.pl,v 1.8 2001/09/02 15:33:33 fukachan Exp $
+# $FML: libhtmlsubr.pl,v 1.9 2001/09/13 03:36:36 fukachan Exp $
 #
+
+
+# based on patch by Kasui Nayumi <kasui@flux.gr.jp> (fml-help: 00721)
+sub _get_suffix
+{
+    my ($bh) = @_;
+    my $suffix     = '';
+    my $token_char = '[^\x00-\x20()<>\@,;:\\"/\[\]?=\x7f-\xff]';
+    my $qs_part    = '[\x01-\x21\x23-\x7f]+|\\[\x00-\x7f]';
+
+    if ($bh =~ /;\s*(file)?name=(".*\.([a-z0-9-]+)"|.*\.([a-z0-9-]+))/i) {
+	$suffix = $3 || $4;
+    }
+
+    return $suffix;
+}
+
 
 # speculate multipart block
 #
@@ -45,16 +62,16 @@ sub MPBProbe
 	}
 	# speculate type by filename if not valid mime type
 	else {
+	    # firstly, mime decode header (at multipart block)
 	    if ($bh =~ /iso/i) {
 		require 'libMIME.pl';
 		$bh = &DecodeMimeStrings($bh);
 	    }		
 
-	    if ($bh =~ /filename=\".*\.([a-z0-9-]+)\"/i) {
-		$suffix = $1;
-	    }
-	    elsif ($bh =~ /;\*name=\".*\.([a-z0-9-]+)\"/i) {
-		$suffix = $1;
+	    # if name="filename.xxx" is not found, try name=token
+	    if ( (! $suffix) || ($suffix eq 'bin'))  {
+		$suffix = _get_suffix($bh);
+		&Log("suffix = $suffix = _get_suffix()") if $debug;
 	    }
 	}
 
