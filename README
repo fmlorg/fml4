@@ -88,14 +88,14 @@ Appendix D: CVS TAGS, BRANCH
 
 [4.0 series]
 
-      fml-4-0-maint
+      fml-4-0-maint (branch)
      -------------------
     |
 ------------
   A A
-  | |- fml-4-0-1-pre-alpha
+  | |- fml-4-0-1-pre-alpha (tag)
   |
- fml-4-0
+ fml-4-0 (tag)
 
 
 [3.0 series]
