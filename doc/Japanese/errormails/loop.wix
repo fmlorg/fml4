@@ -1,0 +1,39 @@
+.C	Mail Loops
+.l	loop
+
+.S	Message-ID: Cache
+.xref	$CHECK_MESSAGE_ID
+
+Message-ID: は時空全体で一意です。なので同じMessage-ID:のメールが突っ
+込まれることは有り得ません。ありうる場合は
+
+1.	出した方のソフト(MUA,MSA,MTA?)のどれかがRFC違反
+2.	どっかでエラーして２通になった
+	どっかに消えて無くなるよりは「疑わしい時は再送」という
+	デザインのMTAもあるので、これはあってもしょうがない
+3.	そのマシンのエラーで、２通になった
+	例: fmlの処理の途中でマシンがリブートした時
+
+$DIR/var/run/ の下にキャッシュファイルが作られています。デフォールトで
+は各ファイルは $MESSAGE_ID_CACHE_BUFSIZE (default 60*100) bytesを越え
+るとrotateしながら古いものから消去されます。最大 $NEWSYSLOG_MAX + 2 個
+のキャッシュが作られます。概ね過去 100 * ($NEWSYSLOG_MAX + 2) アドレス
+ほどに対して二重でないかどうかのチェックがされます。
+
+.S	一意なX-ML-Info: 
+=E.S	Unique X-ML-Info: header field
+
+X-ML-Info: フィールドにはＭＬのアドレス(MLのアドレス、コマンドのアドレ
+ス、管理者のアドレスのいづれか)が出てきます。例え多段のＭＬ(例えば 
+ML-A -> ML-B -> ML-C -> ... のML-B)であってもX-ML-Info: に自分のＭＬア
+ドレス(X-ML-Info: ML-B)はでないはずという仮定です。
+=E
+X-ML-Info: field has the ML address. It must be unique. Mail with
+"X-ML-Info: ML" must not be injected to the fml.  Under this
+conjecture, we check and reject mails with "X-ML-INfo: our ML".
+
+メールループはMessage-ID: Cacheをすり抜けても、このルールがループと見
+なすことになります。ただし「ヘッダが削除されない」という前提条件は必要
+です。
+
+
