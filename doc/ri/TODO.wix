@@ -182,6 +182,13 @@ I may not do it since it only confuses the customize.
 
    http://www.fml.org/some/where/filter-rule.html ? 
 
+* cannot reject ;)
+.q
+fml-support: 7155
+
+# mget 6869,6870,6880,6908-6917,6970,6992,6994 unpack
+# end
+.~q
 
 * Filter module ?
 
