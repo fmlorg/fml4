@@ -1,11 +1,11 @@
 .HTML_PRE
-		     Fml Operations Guide
 
-   "The Design and Implementation of the fml Mailing List Server"
+   The Design and Implementation of the "fml" Mailing List Server
+		with "fml operations guides"
 
-   			深町 賢一
-   			fukachan@sapporo.iij.ad.jp
-			fukachan@fml.org
+	   			深町 賢一
+	   			fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
 
    [smm/op.wix: smm = System Management Manual]
    http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
@@ -17,7 +17,6 @@
    fml is free software distributed under the terms of the GNU General
    Public License. see the file COPYING for more details.
 
-
    このドキュメントは昔 FAQ という名前でしたが中身は理念、デザイン、実
    装を初め FAQ、設定、改造の仕方等に関するガイドになっています。
    ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
@@ -28,6 +27,8 @@
 #.index
 
 総索引
+=E
+Index
 ------------------------
 
 
@@ -47,16 +48,14 @@
 とすることにします。また directory 等はあくまで見本だということに注意
 して下さい。そこに自動的に作られるわけでも、推奨なわけでもありません。
 各々自分の環境に合わせて読み替えて下さい。
-
 =E
-  In the first part, there describes the design concept of the fml.
+In the first part, there describes the design concept of the fml.
 Detailed configurations are in the second part or later.
-
-  In these documents, % means a shell prompt, # means a shell prompt
-when root. And you please keep in mind that these directories and so 
-on as follows are only samples, not be made automatically , much 
-less I recommend.
-==
+=S
+In these documents, % means a shell prompt, # means a shell prompt
+when root. And you please keep in mind that these directories and so
+on as follows are only samples, not be made automatically , much less
+I recommend.  
 
 .# DOV == Design OverView
 .include dov.wix
@@ -70,8 +69,8 @@ less I recommend.
 ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
 いて解説します。
 =E
-  Relation between fml proceses and other programs, and how to 
-launch fml.
+This section describes the relation between fml proceses and other
+programs, and how to launch fml.
 ==
 .include pov.wix
 
@@ -124,26 +123,35 @@ launch fml.
 
 .# ##########################################################
 .P	あとがき
+=E.P	Postscripts
 
 ＃出典のヒントくらいはするかなっ………と P(^^;;;
 ＃この辺の並びでそよ風を感じる人(おぉ同志よ:-)メールください(^^)
+=E
+Can you understand sources of quotations?:-)
+.url	http://www.sapporo.iij.ad.jp/staff/fukachan/Anime/AminoTetsuro.html
 
 .C	あしたリリースオフ
+=E.C	Release off tomorrow
 
 .S	主に言葉ではなくコーディングする姿から伝わってくるもの
+=E.S	Something from coding style not languages
 
 「それぞれの道は違っても…」
 
 .S	シーラカンス
+=E.S	?
 
 この話も二重三重の意味がある話だ。
 
 .S	ポリシー＆アイデンティティ
+=E.S	Policy & Identity
 
 「…流の意地ってやつなのかな」(謎)
 あくまでも枠組、メタレベルの実装をすべきだと…
 
 .S	あしたリリースオフ
+=E.S	Release off tomorrow
 
 深い意味はないんだけど…:-) まぁいいんじゃないの(謎++)
 
@@ -174,4 +182,3 @@ launch fml.
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
-
