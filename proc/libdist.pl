@@ -177,7 +177,7 @@ sub DoDistribute
 
 	if ($AGAINST_MAIL_WITHOUT_REFERENCE) {
 	    if ($pat) {
-		&use('distsubr');
+		&use('disthack');
 		&AgainstEudora(*e, $pat);
 	    }
 	    else {
