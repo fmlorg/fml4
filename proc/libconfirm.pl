@@ -230,7 +230,7 @@ sub GenConfirmReplyText
 
     &Log("GenConfirmReplyText: $mode") if $debug_confirm;
 
-    $s .= "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
+    $s .= "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
 
     # extensions for confirmd
     if ($CONFIRM_REPLAY_TEXT_FUNCTION) {
@@ -243,7 +243,7 @@ sub GenConfirmReplyText
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
 
-	$s .= "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
+	$s .= "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
 	$s .= "Please reply this mail to confirm your subscribe request\n";
 	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
 	$s .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";

@@ -304,7 +304,7 @@ sub AutoRegistError
     &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
 
     $sj = "AutoRegist: NOT A ML MEMBER or bad subscribe syntax";
-    $b  = "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
+    $b  = "Hi, I am fml ML manager for the ML <$MAIL_LIST>.\n";
     $b .= "I find some errors. Please check your mail!\nFor example,\n\n";
     $b .= "   - The address you used IS NOT A ML MEMBER?\n";
     $b .= "     (TRUE if you try to subscribe)\n";
