@@ -2185,6 +2185,9 @@ sub CtlAddrList
 
     # XXX tricky hack
     $addr =~ s/\./\\\./g;
+    $addr =~ s/\?/\\\?/g;
+    $addr =~ s/\+/\\\+/g;
+    $addr =~ s/\//\\\//g;
 
     $filenew = $file.".new.$$";
 
