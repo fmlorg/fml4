@@ -1,5 +1,89 @@
 .C	いろいろ
 
+.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+=E.S	Not Deliver From: Field Address Of In-Coming Mail. 
+.k	%SKIP
+.k	$SKIP{アドレス}
+.k	skip
+.k	$START_HOOK
+
+こういう処理を config.ph にかいてください。
+=E
+If you do not deliver an article when you yourself post it, set
+
+$START_HOOK = q#
+	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+
+こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
+↑ここは actives とかに現れるものと同じにして下さい。
+
+複数あるなら 全部を うえのフックに加えて下さい。
+
+
+.S	off と skip
+
+fml-support: 07144
+
+off はメンバ用
+skip は管理者だけが使えるように
+
+Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
+んですが) として on off matome のメンバには定期的に個別にメイルを送って
+ます。(skip の場合には送らないようにしている)
+
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
+
+
+.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+fml-support: 07521 より
+
+Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
+      へ投稿した場合は、
+   [1] members ファイルに自動登録する。
+   [2] 投稿されたメールをmembersに配送する。
+
+これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
+いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+
+B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   へメールを送信した場合は、
+
+   [1] membersに自動登録する。
+
+A: config.ph でちょっと tricky だが 
+   
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+
+のような設定をする。
+
+
 .S	skip コマンドの操作対象のファイルは？
 
 fml-support: 07656, 07716

@@ -180,4 +180,17 @@ Example: Append "how to get help" to the last of a distributed article.
 
    %;
 
+
+.S	command status report をしなくさせる
+
+command status をおくりかえしている部分を disable するには
+＃コマンドの普通の受け答え（？）の類をやみにほうむるには
+
+    &DEFINE_MODE('disablenotify'); 
+
+と config.ph に書くとこの関数がダミーの状態で呼ばれるけど何もしないよ
+うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
+れじゃだめなんですけどね
+
+
 .# $Id$

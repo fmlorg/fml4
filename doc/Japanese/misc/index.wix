@@ -7,7 +7,8 @@
 .P	いろいろ
 .include examples.wix
 .include lock.wix
-
+.include spool.wix
+.include misc.wix
 
 .P	レンタルサーバというかISPのサービスというか…
 .include isp_specific.wix

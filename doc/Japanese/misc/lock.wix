@@ -22,3 +22,10 @@ flock(2) is only in kernel.  If the machine shutdowns or reboots
 suddenly, temporary lock files may be left in the lock spool. If
 exists, please remove them. 
 
+
+.S	ロックで変になっている時にlockfileを全部消してもいいですか？
+
+多くの(古そうな)ファイルは消してもいいですが、走ってるプロセスに関係し
+てるのだけは避けた方がいいです。その時は rm -f var/run/lockfile.v7 (た
+ぶん日付があきらかかに一時間以上古いはず)っていうファイルだけ消してみ
+るのが良いです。
