@@ -375,7 +375,7 @@ sub SpawnProcess
 	close(PROG);
 
 	&ERROR("exit (" .($? & 255). ")") if $? & 255;
-	&ERROR($!) if $!;
+	# &ERROR($!) if $!;
     }
 }
 
