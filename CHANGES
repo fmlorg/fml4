@@ -5,6 +5,8 @@
 
 2000/04/27
 
+   fix version numbering in sources and packages (fml-stable) 
+
    new functions used in config.ph (kern/libloadconfig.pl)
 	add DEFINE_PROCEDURE()
 
