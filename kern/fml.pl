@@ -2685,6 +2685,23 @@ sub ADD_CONTENT_HANDLER
 	  join("\t", $type, $subtype, $xtype, $xsubtype, $action));
 }
 
+# "get ID by auto-increment" for user 
+sub GET_ID_AUTOINC
+{
+    local($f) = @_; 
+
+    if (-f $f) { # Get the present ID
+	local($id) = &GetFirstLineFromFile($f);
+	$id++; 
+	&Write2($id, $f);
+	$id;
+    }
+    else {
+	&Log("GET_ID_AUTOINC: cannot open $f");
+	0;
+    }
+}
+
 # Get Next MIME Multipart Block
 sub GetNextMPBPtr
 {
