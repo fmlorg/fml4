@@ -367,6 +367,79 @@ is defined, delivery routine works after sorting recipients by domain.
 .# %WMD is not a user defined variable.
 .#
 
+
+.S	$OUTGOING_ADDRESS: perl の生存時間を短くする 
+=E.S	$OUTGOING_ADDRESS: shorten perl life time
+
+.if LANG == JAPANESE
+貧弱なCPUのマシンに貧弱なメモリしかない場合(486で8M,16Mみたいな…)には、
+fmlが直接MTAへSMTP配送する時間すら惜しんで perl の生存時間を短くしたい
+という需要があります。そのための機能を提供します。
+$USE_OUTGOING_ADDRESS が non zero の時に次のように動きます。
+
+まず $OUTGOING_ADDRESS は:include:するだけの単純なMLです。例えば
+/etc/aliasesで
+
+	list-going: :include:/some/where/list
+
+のようにかきます。/some/where/list は actives などから生成されたＭＬの
+配送リストです。MTAはこのlistの人に配送を試みます。
+
+   if ($USE_OUTGOING_ADDRESS) {
+	1. fml は一つのアドレス $OUTGOING_ADDRESS だけに送り終了
+	   perl はこの時点で終了します。
+	2. MTAが前述の :include: 先の配送リストを展開しそのメンバーに配送
+   }
+
+XXX: minmin 様にささぐっす(謎)
+.fi
+.if LANG == ENGLISH
+$OUTGOING_ADDRESS is a simple :include: style ML. The member is
+recipients of this ML. Fml generates the file from recipient lists,
+@ACTIVE_LISTS files. 
+
+   if ($USE_OUTGOING_ADDRESS) {
+	1. fml sends article to $OUTGOING_ADDRESS.
+	   Hence perl dies here!
+	2. MTA expands the include and delivers the article to ML members.
+   }
+.fi
+
+[設定の手順]
+=E
+[How to configure]
+
+0.	elena MLを例にとります。
+=E
+0.	Consider elena ML
+
+1.	include の見本を作る(include-outgoing)
+=E
+1.	make include examles
+
+   % cd /var/spool/ml/elena
+   % make outgoing 
+
+include-outgoing という見本のファイルが生成されます。 
+=E
+You can see elena/include-outgoing file.
+
+2.	/etc/aliases に書いて newaliases
+=E
+2.	add elena-outgogin to /etc/aliases and run newaliases
+
+   elena-outgoing: :include:/var/spool/ml/elena/include-outgoing
+
+3. 	makefml config でこの機能を有効にする。
+=E
+3.	run 'makefml config' to enable this function
+
+	-> OPTIONS -> SMTP -> USE_OUTGOING_ADDREESS -> "y"
+
+$USE_OUTGOING_ADDDRESS を1にします。
+=E
+$USE_OUTGOING_ADDDRESS changes from zero/null to 1.
+
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 .#          All rights reserved. 
