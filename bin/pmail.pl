@@ -40,10 +40,10 @@ sub Init
 
     ### getopts() ###
     require 'getopts.pl';		# Getopt
-    &Getopts('s:f:hv8I:D:H:d');
+    &Getopts('s:f:hvI:D:H:d');
     die(&USAGE) if $opt_h;
 
-    push(@INC, $opt_I) if $opt_I;
+    push(@INC, split(/:/,$opt_I)) if $opt_I;
 
     # variables
     $user    = (split(/:/, getpwuid($<), 999))[0];
@@ -151,13 +151,21 @@ local($prog) = $0;
 $prog =~ s#.*/##;
 
 qq#
-$prog [-vh] [-s subject] [-f envelop-from] addr
-[option]
+$prog [-vdh] [-s subject] [-f from] [-I include] [-H host] [-D domain] addr
 
-\t-s subject
-\t-v verbose
-\t-f UNIX from
+  options:
+
 \t-h this help
+\t-v verbose
+\t-d debug/verbose
+
+\t-I directory      includes
+\t-I dir1:dir2      includes dir1, dir2, .. 
+
+\t-D domain         \@domain part
+\t-H smtp-server    SMTP Server
+\t-s subject        subject
+\t-f Envelope-From  UNIX from
 #;
 }
 
