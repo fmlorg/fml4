@@ -13,7 +13,7 @@
 .if LANG == JAPANESE
 [ガイド]
 
-   大まかな流れを掴むには、以下の URL を参照して下さい。
+   大まかな流れを掴むために、まず以下の URL を参照して下さい。
 .url http://www.fml.org/fml/Japanese/basic_setup/
 
    fml チュートリアルはテーマごとに事例を取り上げたページです。
@@ -138,7 +138,7 @@ INSTALL_on_NT4.
    postfix 19991231-pl11 + perl 5.004_04 on NetBSD/sparc (1.4-stable)
 
 さらに配送系は複数のMTAを使った並列配送実験をしています(通称 MTA みく
-じです ^^;)。(最近は一旦２つに減っています。またその内増えるかも:)
+じです ^^;)。(最近は一旦２つに減っていますが、そのうち増えるかも:)
 =E
 The delivery system on fml.ORG consists of 2 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
