@@ -14,7 +14,8 @@ $CONFIG_DIR = '/usr/local/fml/.fml'; # __MAKEFML_AUTO_REPLACED_HERE__
 
 ### MAIN ###
 &Init;
-&Parse;
+&Parse; # set %config
+
 &UpperHalf;
 
 if (&SecureP) { &Command;}
@@ -76,6 +77,11 @@ sub UpperHalf
     &P("</HEAD>");
     &P("<BODY>");
     &P("<PRE>");
+
+    if ($debug) {
+	while (($k, $v) = each %ENV)    { &P("ENV: $k => $v");}
+	while (($k, $v) = each %config) { &P("config: $k => $v");}
+    }
 }
 
 
@@ -83,6 +89,8 @@ sub Control
 {
     local($ml, $command, @argv) = @_;
     local($tmpbuf) = "/tmp/makefml.ctlbuf.$$";
+
+    &P("---Control($ml, $command, @argv)") if $debug;
 
     if (open(CTL, "|$MAKE_FML -E HTTPD -i stdin > $tmpbuf 2>&1")) {
 	select(CTL); $| = 1; select(STDOUT);
@@ -102,6 +110,7 @@ sub Control
 }
 
 
+# XS: eXit Status
 sub XSTranslate
 {
     local($mesg) = @_;
@@ -151,12 +160,16 @@ sub OUTPUT_FILE
 	}
 	close($file);
 
-	print "\n\n";
-
 	open($file, $file);
 	while (<$file>) {
+	    next if 1 .. /config.ph; /;
+	    next if /^\-\-\-/;
 	    next if /^ExitStatus:/;
-	    print $_;
+	    chop;
+	    $_ ? ($space_count = 0) : $space_count++;
+	    next if $space_count > 1;
+	    
+	    print $_, "\n";
 	}
 	close($file);
     }
@@ -201,7 +214,17 @@ sub Command
 	&Control($ML, $PROC);
     }
     elsif ($PROC eq 'config') {
-	&ERROR("not yet implemented PROC=$PROC");
+	$PROC = 'html_config';
+	local($ptr) = $config{'PTR'};
+	$ptr =~ s#^\/{1,}#\/#;
+
+	if ($config{'VARIABLE'} && $config{'VALUE'}) {
+	    &Control($ML, "html_config_set", $ptr, 
+		     $config{'VARIABLE'}, $config{'VALUE'});
+	}
+	else {
+	    &Control($ML, $PROC, $ptr);
+	}
     }
     else {
 	&ERROR("unknown PROC=$PROC");
