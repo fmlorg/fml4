@@ -1218,8 +1218,10 @@ sub Expand
 	if ($mode eq 'html') {
 	    print STDERR "url::html {\$s = <$s>}\n" if $debug;
 
+	    # XXX 3.0D 2000/05/02 true (actually ignore In_PRE) ?
 	    $index{"url=$s"} = "<A HREF=$s>$s</A>";
 	    $index{"url=$s"} = "</PRE>".$index{"url=$s"}."<PRE>" if $In_PRE;
+	    $index{"url=$s"} = "<A HREF=$s>$s</A>" if $In_PRE;
 	    $s = "\#.url url=$s";
 	}
 	else {
