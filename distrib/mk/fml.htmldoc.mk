@@ -131,6 +131,11 @@ var/html/${file}: doc/ri/${file}
 var/html/fml.css: doc/html/fml.css
 	cp -p doc/html/fml.css var/html/fml.css
 
+var/html/index.html: doc/html/index.ja.html
+	${JCONV} doc/html/index.ja.html > var/html/index.html
+
+var/html/index-e.html: doc/html/index.en.html
+	${JCONV} doc/html/index.en.html > var/html/index-e.html
 
 ### main ###
 .include "distrib/mk/fml.cf.mk"
@@ -144,6 +149,7 @@ __htmlbuild__ += ${__HTML_CPP__}
 __htmlbuild__ += ${__HTML_EXAMPLES__}
 __htmlbuild__ += ${__HTML_TUTORIAL__}
 __htmlbuild__ += ${__HTML_MANIFEST__}
+__htmlbuild__ += var/html/index.html var/html/index-e.html
 __htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
 htmlbuild: ${__htmlbuild__}
 	@ echo ""
