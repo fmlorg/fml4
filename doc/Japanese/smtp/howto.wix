@@ -162,6 +162,37 @@ usual, but @HOSTS if $HOST is down.
 
 See .ptr{VERP}. 
 
+
+.S	MAIL FROM: を指定したい
+
+MAIL FROM:<アドレス> のアドレス部分は、通常$MAINAINER です。しかし 
+SPAM 対策のため $MAINAINER につかっているドメイン名では ISP のメールサー
+バに拒否される場合があります。
+
+そういった場合は $SMTP_SENDER で MAIL FROM: の値だけを変更することがで
+きます。
+
+例:
+/var/spool/ml/etc/fml/site_force.ph を作り、このファイルは
+次のようにかきます。
+
+	$HOST        = "転送ホスト名";
+	$SMTP_SENDER = 'ml-admin@転送ドメイン';
+	1;
+
+もし、ML ごとに $SMTP_SENDER を変更するなら
+
+
+	$HOST="転送ホスト名";
+	$myDOMAIN = '転送ドメイン';
+
+	$SMTP_SENDER = $MAINTAINER;
+	$SMTP_SENDER =~ s/$DOMAINNAME/$myDOMAIN/;
+	1;
+
+などとして SMTP_SENDER を動的に変更するのが楽でしょう。
+
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

@@ -12,6 +12,7 @@
 .include envelope_filter.wix
 .include content-handler.wix
 .include user.wix
+.include hack.wix
 
 .appendix
 .include postfix.wix
