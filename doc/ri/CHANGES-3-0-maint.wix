@@ -6,22 +6,33 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl2 ]
+
+   doc/ri/
+   doc/examples/
+
+	sync with cvs main-trunk
+
+   libmember_name.pl
+
+	correct handling of "apporove PASSWORD name ..." case
+
 [ 3.0pl1 ]
 
-cf/config
+   cf/config
 
 	TZone cannot accpet -0800 style.
 
-doc/examples/index*html
+   doc/examples/index*html
 
 	remove fml.css stylesheet definition since fml.css does not exist
 
-doc/ri/INSTALL.wix
+   doc/ri/INSTALL.wix
 
 	add how to pass perl path in "make install"
 	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
 
-sbin/makefml
+   sbin/makefml
 
 	fix perl path in "make install"
 	   % env _PATH_PERL=/usr/local/bin/perl5 perl makefml install
