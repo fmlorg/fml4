@@ -186,6 +186,15 @@ Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
 		Subject: [Elena:100]
 
 
+	--tag='[,]'
+
+		Subject: [Elena,100]
+
+	--tag='(,)'
+
+		Subject: (Elena,100)
+
+
 なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
 れるので注意。例： HML Emulation mode  (--hml)
 

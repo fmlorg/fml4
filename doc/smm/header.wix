@@ -30,14 +30,14 @@ config.ph 等で定義しなおしてください。
 のように定義されています。
 
 @HdrFieldsOrder で定義された必要なフィールドのみをきりだしますが、
-Received: Return-Receipt-To: を除くすべてのフィールドを使うには
+Received: と Return-Receipt-To: を除くすべてのフィールドを使うには
 
 config.ph で
 
 	$SUPERFLUOUS_HEADERS = 1;
 	&DEFINE_MODE('through');
 
-かコマンドラインで --through と定義してください。
+とするかコマンドラインで --through と定義してください。
 .k	$SUPERFLUOUS_HEADERS
 .k	DEFINE_MODE('through')
 .k	&DEFINE_MODE('through')
@@ -46,7 +46,7 @@ config.ph で
 	fml.pl $DIR --through 
 
 
-@HdrFieldsOrder 中で
+また @HdrFieldsOrder 中では
 
 	:body:
 	:any:
@@ -63,17 +63,25 @@ config.ph で
 
 	:XMLNAME:	$XMLNAME を展開する (X-ML-Name: フィールド)
 
-のような特殊な目的に使われます。Backward Compatibility という趣が強い
-例外処理です。
+のような特殊な目的に使われます。
+これらは Backward Compatibility という趣が強い例外処理です。
 
 
 
 .S	Received: もヘッダにつける
 .k	Received: もヘッダにつける
 
-歴史的に「サーバで受けたところまではＯＫなんだから、その後だけをユーザ
-には見せれば良い」という思想に基づき、デフォールトでは Received: はつ
-けていません。つける時は
+歴史的に「サーバで受けたところまではＯＫなんだから、管理者が責任を持っ
+て、ユーザにはＭＬサーバからユーザまでの配送分を見せれば十分だろう(余
+計なものは見せてもらわない方が幸せだろう)」という思想に基づき、デフォー
+ルトでは Received: はつけていません。
+
+なお、Posted: (user が出した時間)と Date: (サーバが配送した時間) の違
+いを見るとサーバにたどり着くまでの時間差(Network 的にどのくらい遠いか？)
+がわかります。
+.k	Posted:(user が出した時間)とDate:(サーバが配送した時間)の差
+
+Received: フィールドをつける時は
 
 	unshift(@HdrFieldsOrder, 'Received');
 
@@ -89,38 +97,12 @@ Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
 ＃配列を直接いじるか、shift や unshift を使うと良いでしょう。
 
 
-.S	To: と Cc: の Rewriting 処理
-.l	$NOT_REWRITE_CC
-
-可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
-スが出るようになっています。
-original header を通すという設定の場合はそうはならずオリジナルのままです。
-
-ですが、apparent-to: になっていて、見辛いとか一体どうしてこのＭＬに来
-たメールなの？とかよくわからないメールも多いので、それよりは可読性を重
-視して、こういう実装になっています。
-
-現在は
-	1 To: に   $MAIL_LIST が含まれているなら、そのまま
-	2 To: には $MAIL_LIST が含まれていない場合は
-
-	  To: $MAIL_LIST
-          Cc: に元の To: を付け加えて、情報を保存しておく
-
-To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
-の SMTP としてはなんら区別はしていません。ですから、情報を落さず、To: 
-は可読性のために $MAIL_LIST としています。
-
-[蛇足] なお、To: Cc: の中に重複して現れるアドレスには普通それらを一つ
-にまとめて一通分のみが配送されます。だから複数あっても気にしないでね
-
-
 .S	Cc: フィールドを“つけない”
 .k	$NOT_USE_CC
 
-デフォールトではつけますので、切り落とすときは
-
-	$NOT_USE_CC = 1;
+今では単に @HdrFieldsOrder から Cc を落せばＯＫです。
+デフォールトではつけますので、切り落とすときは $NOT_USE_CC = 1; でも落
+せます。
 
 
 .S	コマンドの結果やユーザへのメッセージのヘッダをカスタマイズする
@@ -128,17 +110,31 @@ To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 .xref	data-structure
 .k	$Envelope{'GH:field:'} 
 
+コマンドの結果やユーザへのメッセージのメールヘッダは
+
 	$Envelope{'GH:field:'} 
 
 で変更できます。GH というキーワードなのは SMTP Library の 
 GenerateHeader() という関数内で使われるためです。
+.k	GenerateHeader()
+.k	&GenerateHeader()
 
-例えば、コマンドの結果のメールの From: を変えたいなら
+なお、ヘッダの並び順は @HdrFieldsOrder の順番です。
+
+例：
+
+コマンドの結果のメールの From: を特定のアドレス(および signatureつき等)
+に変えたいなら
 
 	$Envelope{'GH:From:'} = "uja@aoi.chan.panic (AOICHAN PANIC)";
 
-等それぞれのフィールドを設定します。ヘッダの並び順は
-@HdrFieldsOrder の順番です。
+とでもすればよいわけです。通常は From: は $MAINTAINER です。
+
+From: $MAINTAINER に限っては $MAINTAINER_SIGNATURE で signature をつけ
+ることはできますが、まぁ形を気にするなら↑の方法で直接定義した方がより
+よいでしょう。
+.k	$MAINTAINER
+.k	$MAINTAINER_SIGNATURE
 
 
 .S	Subject: を (Elena 100) とかの任意の形に成形する
@@ -169,6 +165,9 @@ GenerateHeader() という関数内で使われるためです。
 	$END_BRACKET       = ']';
 	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
 
+なお、このやりかたは複雑なので次の節のような簡易インターフェイスが用意
+されています。
+
 
 .S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
 .l	&DEFINE_SUBJECT_TAG
@@ -197,6 +196,14 @@ Subject:の本体の情報を減らすタグはつけるべきではない」です。
 
 		Subject: [Elena:100]
 
+	[,]
+
+		Subject: [Elena,100]
+
+	(,)
+
+		Subject: (Elena,100)
+
 
 なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
 れるので注意。例： HML Emulation mode  (--hml)
@@ -218,7 +225,7 @@ config.ph では
 	
 
 
-.S	hml 1.6 のSubjectのフォーマット
+.S	hml 1.6 の Subject フォーマット
 .S	Subject: [Elena:ID] という形にする
 .key	$SUBJECT_HML_FORM
 .key	$BRACKET
@@ -240,20 +247,22 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 	$SUBJECT_HML_FORM = 1;
 	$BRACKET	  = 'Elena';
 
-で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
-＃今のFrom は ML名 じゃなくて ユーザー名
+形にしようと思います。
+
+しかし Fromの 処理が hml 1.6 と違うので
+＃From が ML名 じゃなくて ユーザー名 を使っている
 
 最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
 つまり（今の場合だと）
 
 	Subject: [Elena:ID] サブジェクト
-#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
 
 の形になります。この場合
 
 	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
 
-にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+にしてます（config.phの中で）
+＃必要な処理なので自動的に設定しています。
 
 
 .S	TAGの [Elena:00001] の五桁の数字をＮ桁に変更
@@ -271,13 +280,16 @@ $SUBJECT_HML_FORM = 1; の時にのみ有効。
 $SUBJECT_FREE_FORM 使用時に有効な変数。
 
 
-.S	Message-IDの保存
+.S	オリジナルの Message-ID
 .key	Message-ID
 .key	Uniq_Identifier_of_Message-ID
 .key	$USE_ORIGINAL_MESSAGE_ID
 
-$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
-てヘッダにつけます。デフォールトは fml がつけます。
+$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルの Message-ID を保存
+してヘッダにつけます。
+
+デフォールトは fml がつけます。それはオリジナルを通すより、強制的につ
+けるとより無限 loop 検出がしやすくなるためです。
 
 
 .S	Message-IDを個人の趣味でカスタム化する
@@ -287,25 +299,28 @@ $USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
 Message-ID: uja@aoi.chan.panic とするなら
 
 $HEADER_ADD_HOOK = q#
-$body .= "Message-ID: uja@aoi.chan.panic\n";
+   $body .= "Message-ID: uja@aoi.chan.panic\n";
 #;
 
-と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
+と、config.ph にでも書けば $body の内容が @HdrFieldsOrder 中の :body: 
+で展開されます。そのためHOOKを使うなら :body: を切ってはいけません。
+
 
 他の例：
 Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
 
 $HEADER_ADD_HOOK = q#
-$body .= "Message-ID: ".
+   $body .= "Message-ID: ".
 	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
 	"Elena.Lolobrigita@Baycity.jp");
 #;
 
 
 .S	宇宙歴(外国TVシリーズMLで使ってます:-)
+.k	StarDate
 .k	$APPEND_STARDATE
 
-   http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+   http://www.sapporo.iij.ad.jp/staff/fukachan/href/Startrek/
 
 config.ph で
 
@@ -322,11 +337,15 @@ config.ph で
 
 	…本文略…
 
-みたいになります。スタートレックＦＡＱにプログラムがのっています
-libStardate.pl はその perl 版です。
+みたいになります。スタートレックFAQに C progarm がのっていますが、
+libstardate.pl はその perl 版です。
+.k	libstardate.pl
+.k	スタートレックFAQ
 
 
-.S	ヘッダでの MIME 問題
+.S	メールヘッダとMIME
+.l	メールヘッダとMIME
+.l	MIME-in-Header
 .key	$PREVENT_MIME
 
 デフォールトでは MIME 関係の次の３つのフィールドを通しています。
@@ -361,13 +380,15 @@ MIME反対派の方は $PREVENT_MIME をセットしてください。
 
 	$USE_MIME	= 1;
 
-と定義します。これがないと必要なライブラリをロードしません。
+を定義します。これがないと必要なライブラリをロードしません。
 
-これを定義した場合
 
-○ summaryに書くsubjectをMIME decodeをしてから書き込む
+.S	summary に書くsubjectをMIME decodeをしてから書き込む
+.k	summary に書くsubjectをMIME decodeをしてから書き込む
 
-ようになります。
+	$USE_MIME	= 1;  
+
+だけでこれは実行します。
 
 例：
 	……
@@ -385,7 +406,8 @@ MIME反対派の方は $PREVENT_MIME をセットしてください。
 部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
 
 
-○ 記事をMIME Decoding してから保存する場合
+.S	記事をMIME Decoding してから保存する場合
+.k	$MIME_DECODED_ARTICLE
 
 	$MIME_DECODED_ARTICLE          = 1;
 
@@ -396,8 +418,8 @@ MIME反対派の方は $PREVENT_MIME をセットしてください。
 .S	MIME Decoding を行なうに関するメモ…
 .l	MIME-Memo
 
-ISO-2022-JP の文字がない限りは require しません（ま、たいして軽くはな
-らんが…）。
+ISO-2022-JP の文字がない限りは require しません(ま、たいして軽くはなら
+んが…)。
 
 .key RFC1522
 RFC1522	2. Syntax of encoded-words
@@ -408,7 +430,8 @@ RFC1522	2. Syntax of encoded-words
    token = 1*<Any CHAR except SPACE, CTLs, and especials>
 
 
-.S	MIMEのカスタマイズ変数
+.S	MIME処理に関するカスタマイズ変数
+.k	MIME処理に関するカスタマイズ変数
 .label	MIME-customizing
 .label	MIME-2
 .key	$MIME_VERSION
@@ -417,15 +440,22 @@ RFC1522	2. Syntax of encoded-words
 .key	$MIME_MULTIPART_PREAMBLE
 .key	$MIME_MULTIPART_TRAILER
 
+以下はＭＬ本来の配送には普通関係ないですね。
+
 右辺はデフォールトの値（Built-in）です。
+ファイルの取り寄せ等のモードにMIME関係もありますが、その時に使われてい
+ます。
 
-$MIME_VERSION = '1.0';
+   Mime-Version:
+   Content-Type:
 
-$MIME_CONTENT_TYPE = 'multipart/mixed;';
+
+	$MIME_VERSION = '1.0';
+	$MIME_CONTENT_TYPE = 'multipart/mixed;';
 
 以下は MIME/Multipart で使う変数です。
 
-$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
+	$MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
 
 な形で日付を設定します。
 
@@ -457,47 +487,11 @@ $MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
 とすると、Subjectから [ML:fukachan] みたいな部分をカットする。
 これは Subject: [Elena:ID] の形で配送するための前処理です。
 
-	    # e.g. Subject: [Elena:001] Uso...
-	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
-	    $Subject = $contents;
 
-にしちゃいました:-)。つまり multiple Re: 問題はサーバがメール本文をい
-じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
-変更は個人がやってくれると期待して）いじらないことにしました。
+.S	1つのMLに複数の投稿用アドレスとヘッダ
+.key	1つのMLに複数の投稿用アドレスとヘッダ
 
-
-解説：昔は、
-
-	Subject: Re: [*] Re: サブジェクト
-				→	Subject: Re: サブジェクト
-	Subject: Re: [*] サブジェクト
-				→	Subject: Re: サブジェクト
-	Subject: [*] サブジェクト
-				→	Subject: サブジェクト
-
-ということをするために
-
-	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*Re:[\s\n]*([\s\S\n]*)/o) {
-		$Subject = "Re: $1"; next;
-	}
-	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*([\s\S\n]*)/o) {
-		$Subject = "Re: $1"; next;
-	}
-	if(/^[\s\n]*\[[\s\S\n]*\][\s\n]*(.*)/o) {
-		$Subject = $1; next;
-	}
-	$Subject = $contents; next;
-
-こんなけったいな処理をしていましたが、やめました:-)
-＃このコードにもどせばmultiple Re:を削ることができます。
-
-何のために必要な前処理かというと、次を見てみよう(^^;;
-
-
-.S	1つのMLに複数の投稿用アドレス
-.key	1つのMLに複数の投稿用アドレス
-
-何の意味があるのかは聞かないでください（笑）
+何の意味があるのかは聞かないでください(笑)
 
 例：
 Elena@phys.titech.ac.jp というＭＬで
@@ -508,6 +502,7 @@ Elena@phys.titech.ac.jp というＭＬで
 
 config.ph に次のような設定をしてください
 .k	@PLAY_TO
+.l	@PLAY_TO
 
 	@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
 			'Anna@phys.titech.ac.jp'
@@ -530,7 +525,7 @@ $SMTP_OPEN_HOOK .= q#
 配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
 
 こうすると Elena になげても Anna に投げても どっちでもＯＫで、
-to: と reply-to:を変更します。
+To: と Reply-To:を変更します。
 ＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
 .k	$Playing_to
 
@@ -543,6 +538,9 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 
 	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
 
+実際には $Envelope{'GH:Reply-To:'} への代入と全く同じです。
+Backward compatibility で残っているともいえます。
+
 
 .S	X-ML-Info: の内容を指定する
 .k	$X_ML_INFO_MESSAGE
@@ -553,10 +551,36 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 はモードによって適当に作られた user friendly な内容が付け加えられます。
 
 
-.S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
-.label	{NIFTY}
-.label	{$AGAINST_NIFTY}
-.label	{against-nifty}
+.S	To: と Cc: の Rewriting 処理
+.l	$NOT_REWRITE_CC
+
+可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
+スが出るようになっています。
+original header を通すという設定の場合はそうはならずオリジナルのままです。
+
+ですが、apparent-to: になっていて、見辛いとか一体どうしてこのＭＬに来
+たメールなの？とかよくわからないメールも多いので、それよりは可読性を重
+視して、こういう実装になっています。
+
+現在は
+	1 To: に   $MAIL_LIST が含まれているなら、そのまま
+	2 To: には $MAIL_LIST が含まれていない場合は
+
+	  To: $MAIL_LIST
+          Cc: に元の To: を付け加えて、情報を保存しておく
+
+To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
+の SMTP としてはなんら区別はしていません。ですから、情報を落さず、To: 
+は可読性のために $MAIL_LIST としています。
+
+[蛇足] なお、To: Cc: の中に重複して現れるアドレスには普通それらを一つ
+にまとめて一通分のみが配送されます。だから複数あっても気にしないでね
+
+
+.S	NIFTY対策をするか?(参加者にNIFの人もいる)
+.label	NIFTY
+.label	$AGAINST_NIFTY
+.label	against-nifty
 
 注意：もう必要ないらしい
 
@@ -574,7 +598,7 @@ config.ph あたりで
 
 がつきます。これで NIFTY からのエラーメールが $MAINTAINER に返るように
 なってくれます。後向きな解決法ですが;_;。
-＃前向きなのは、みんなで文句をいって直させること
+前向きなのは、みんなで文句をいって直させることです。
 ＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
 らいいいつづけないとだめなんだろうなぁ（はぁ）
 
