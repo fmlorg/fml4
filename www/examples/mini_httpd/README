@@ -13,7 +13,7 @@ SSL_LIBS =      -L$(SSL_LIBDIR) -lssl -lcrypto
 
 * How to run
 
-# (cd /usr/local/fml/www/; mini_httpd -S -c 'cgi-bin/*/*.cgi' -u fml )
+# (cd /usr/local/fml/www/; mini_httpd -S -c 'cgi-bin/fml/*/*.cgi' -u fml )
 
 
 $Id$

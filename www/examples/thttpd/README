@@ -12,7 +12,7 @@ References:
 
 * How to run/How to start thttpd	
 
-/usr/pkg/sbin/thttpd  -u fml -nor -d /usr/local/fml/www -c 'cgi-bin/*/*cgi' 
+/usr/pkg/sbin/thttpd  -u fml -nor -d /usr/local/fml/www -c 'cgi-bin/fml/*/*cgi' 
 
 Is it right? (I think so). The worst thing is "-nor" option which
 enforces "not chroot" but we need perl . If you have power, you may
