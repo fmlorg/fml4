@@ -91,18 +91,9 @@ COPY_DOCS () {
    echo " "; echo "Copying doc/man/"
    rsync -C -av doc/man/ $DESTDIR/distrib/doc/man/;
 
-   (
-	echo " "; echo "Copying Documents (doc/smm/)...";
-	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
-	(chdir $DESTDIR/distrib/doc; tar xvf - )
-
-	perl distrib/bin/fix-wix.pl -X $FML -R doc/smm/op.wix \
-	> $DESTDIR/distrib/doc/smm/op.wix
-
-	echo " "; echo "Copying Documents (doc/ri/)...";
-	(chdir doc; tar cf - ri/*.wix) |\
-	(chdir $DESTDIR/distrib/doc; tar xvf - ) 
-   )
+   echo " "; echo "Copying Documents (doc/ri/)...";
+   (chdir doc; tar cf - ri/*.wix) |\
+   (chdir $DESTDIR/distrib/doc; tar xvf - ) 
 
    # http
    echo " ";

@@ -43,12 +43,12 @@ sys/
 DOC:
 INFO.jp
 INFO.en
-op.jp
-op.en
 README.jp
 README.en
 INSTALL.jp
 INSTALL.en
+INSTALL_CGI.jp
+INSTALL_CGI.en
 INSTALL_on_*.jp
 INSTALL_on_*.en
 INSTALL_with_*.jp
