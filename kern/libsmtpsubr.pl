@@ -64,16 +64,16 @@ sub DoSmtpFiles2Socket
 	    # XXX We should be split %Envelope to %Envelope and %PCB ?
 	    if ($Envelope{'mode:doc:ignore#'}) {
 		next if $hdr_found && (1 .. /^\#\.endFML HEADER/);
-		next if /^\#/ && $e{'mode:doc:ignore#'} eq 'a';
-		# next if /^\#\#/ && $e{'mode:doc:ignore#'} eq 'm';
-		if ($e{'mode:doc:ignore#'} eq 'm') {
+		next if /^\#/ && $Envelope{'mode:doc:ignore#'} eq 'a';
+		# next if /^\#\#/ && $Envelope{'mode:doc:ignore#'} eq 'm';
+		if ($Envelope{'mode:doc:ignore#'} eq 'm') {
 		    next if /^\#\#/;
 		    s/^\#\s*//;
 		}
 	    }
 
 	    # guide, help, ...
-	    if ($e{'mode:doc:repl'}) {
+	    if ($Envelope{'mode:doc:repl'}) {
 		s/_DOMAIN_/$DOMAINNAME/g;
 		s/_FQDN_/$FQDN/g;
 
