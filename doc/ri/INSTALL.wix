@@ -997,6 +997,7 @@ Remove "fukachan@baycity.asia" in "Elena" ML.
 
 .C	makefml のメニューで ＭＬの基本的な設定変更をする
 =E.C	To change the configuration of a mailing list
+.n	makefml-config
 .l	makefml-config
 
 メニュー形式で基本的な設定の変更ができます。

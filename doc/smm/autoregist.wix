@@ -269,6 +269,7 @@ $AUTO_REGISTRATION_ACCEPT_ADDR は自動登録ルーチンにだけ作用する変数で
 .S	ポストできる人は制限したいが、配送される人は自動登録したい場合
 =E.S	Restrict persons who can post to ML assuming automatic registration
 .l	auto_asymmetric_regist
+.n	auto_asymmetric_regist
 
 $REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
 ります。これは配送と認証のリストを非対称に使う時に使います。ただし 

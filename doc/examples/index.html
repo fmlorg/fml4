@@ -15,28 +15,37 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml"(関係)のいくつかの設定例
+"fml"(関係)設定ガイド
 </CENTER>
 </H1>
 
 <UL>
 	<LI>
-	<A HREF="fml-install.html">
-	fmlのインストールの概観
-	</A>
-	<A HREF="../INSTALL/index.html">
-	　(詳細)	
-	</A>
+	概要
+	<UL>
+		<LI>
+		<A HREF="fml-install.html">
+		fmlのインストールの概観
+		</A>
+		<A HREF="../INSTALL/index.html">
+		　(詳細)	
+		</A>
 
-	<LI>
-	<A HREF="postfix-install.html">
-	Postfix のインストールの例 (NetBSD-current)
-	</A>
+		<LI>
+		<A HREF="postfix-install.html">
+		Postfix のインストールの例 (NetBSD-current)
+		</A>
+	</UL>
 
 
 	<LI>
 	<P> 基本的な設定
 	<UL>
+		<LI>
+		<A HREF="../INSTALL/index.html#makefml-config">
+		設定メニュー(makefml config)の使い方
+		</A>
+
 		<LI>
 		<A HREF="config-default.html">
 		fmlの設定(生の状態)
@@ -45,38 +54,51 @@
 		<LI>
 		<A HREF="config-auto-subscribe.html">
 		fmlの設定(自動登録)
+		<A HREF="../op/index.html#auto-subscribe">[詳細]</A>
 		</A>
 
 		<LI>
 		<A HREF="config-remote.html">
 		リモートからメールでメーリングリストの設定をいじる
+		</A>
 		<BR>
 		"リモート管理"	
-		</A>
+		<A HREF="../op/index.html#remote-admin">[詳細]</A>
 
 		<LI>
 		<A HREF="setup-more-secure.html">
 		よりセキュアに
 		</A>
+		<BR>
+		詳細:
+		<A HREF="../op/index.html#envf">フィルタ</A>
+		<A HREF="../op/index.html#mti">トラフィクモニタ</A>
+		<A HREF="../op/index.html#mail_size_limit">メールサイズ</A>
+		<BR>
+		<A HREF="../advisories/index.html">FMLセキュリティアドバイザリィ</A> 
+
 	</UL>
 
 	<LI>
 	<P> 少し進んだ設定
 	<UL>
 		<LI>
+		例えばメールマガジン?
+		<BR>
 		<A HREF="config-asymmetric-regist.html">
 		メールを一方的に送るような場合にユーザに自分で登録させたい
-		<BR>
-		例えばメールマガジン?
 		</A>
+		<A HREF="../op/index.html#auto_asymmetric_regist">[詳細]</A>
 
 		<LI>
-		<A HREF="config-moderated.html">
-		メーリングリストの記事はながれる前に査読をうける場合
 		"モデレータ" 
 		<BR>
-		例えばアナウンス用やSPAMよけ?
+		<A HREF="config-moderated.html">
+		メーリングリストの記事はながれる前に査読をうける場合
 		</A>
+		<BR>
+		例えばアナウンス用やSPAMよけ?
+		<A HREF="../op/index.html#moderator">[詳細]</A>
 	</UL>
 
 </UL>

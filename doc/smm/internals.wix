@@ -1808,6 +1808,7 @@ NOTE: 1998/11/08 permit "admin add MAR+KUN@DOMAIN " syntax
 
 .S	投稿メールのサイズの制限
 =E.S	Limit of size for a posted article
+.n	mail_size_limit
 
 あまり大きいメールを送られてもサーバもメンバーの端末でも負荷が高くなる
 だけです。ＭＬサーバーが受けとる時に切り捨てます。コマンド、投稿を問わ
