@@ -1,0 +1,52 @@
+amctl.change.ok:
+	change member and recipient lists
+
+amctl.change.fail:
+	fail to	change member and recipient lists
+
+amctl.change.only_delivery_list:
+	change recipient list not member list
+
+amctl.change.only_member_list:
+	change member list not recipient list
+
+amctl.multiply.match:
+	multiple addresses matches. try again address matching more restrictly
+
+amctl.no_args:
+	no argument. I use default value (3).
+
+amctl.msend_rehash.send:
+	send articles from _ARG0_ to _ARG1_ 
+
+amctl.msend_rehash.send_nothing:
+	no more article to send
+
+### Section: subscribe
+amctl.added:
+	I am "fml" for <_ARG1_> mailing list
+	I added the following address as a new member
+
+	     Email address: <_ARG0_>
+	      Mailing List: <_ARG1_>
+
+amctl.added.notify2ml:
+	I added the following address as a new member
+	     Email address: <_ARG0_>
+
+amctl.added.notify2ml.subject:
+	_ARG0_ is added to <_ARG1_>
+
+amctl.added.caution:
+	Caution: If you reply this mail, the recipient is mailing list!
+	post articles	<_ARG1_>
+	commands	<_ARG2_>
+	maintainer	<_ARG0_>
+
+amctl.mail.undelivered:
+	FYI: a mail with no content withtout subscribe requiest is
+	not delivered
+
+### Section: others
+# dummy to adjust '\n' above
+amctl.dummy:

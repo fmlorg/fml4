@@ -989,8 +989,7 @@ sub CtlMatome
 	    $matome = 3;
 	    $s = "Hmm.. no given parameter. use default[m=3]";
 	    &Log($s);
-	    &Mesg(*e, "$s");
-	    &Mesg(*e, "So your request is accepted but modified to m=3");
+	    &Mesg(*e, $s);
 	    &Mesg(*e, $NULL, 'amctl.no_args');
 	}
     }
