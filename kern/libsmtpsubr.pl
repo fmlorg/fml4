@@ -11,6 +11,10 @@
 #
 # $Id$
 
+### Mail Forwarding
+sub ForwardSeparatorBegin { "\n------- Forwarded Message\n\n";}
+sub ForwardSeparatorEnd { "\n\n------- End of Forwarded Message\n";}
+
 sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
@@ -106,14 +110,38 @@ sub Copy2SocketFromHash
     $pp     = 0;
     $maxlen = length($Envelope{$key});
 
+    if ($MIME_CONVERT_WHOLEMAIL && $key eq 'Header') { 
+	&use('MIME'); 
+	# $_ .= &DecodeMimeStrings($Envelope{'Header'});
+    }
+
     while (1) {
 	$p   = index($Envelope{$key}, "\n", $pp);
 	$len = $p  - $pp + 1;
 	$buf = substr($Envelope{$key}, $pp, ($p < 0 ? $maxlen-$pp : $len));
+
+	if ($MIME_CONVERT_WHOLEMAIL && $key eq 'Header') { 
+	    $buf = &DecodeMimeStrings($buf);
+	}
+
 	if ($buf !~ /\r\n$/) { $buf =~ s/\n$/\r\n/;}
 
-	print SMTPLOG "   ", $buf;
-	print S "   ", $buf;
+	# ForwMail()
+	if ($Envelope{'ctl:smtp:forw:ebuf2socket'}) {
+	    if ($key eq 'Header' && $buf =~ /^From /i) {
+		; # ignore UNIX FROM line
+	    }
+	    else {
+		print SMTPLOG $buf;
+		print S $buf;
+	    }
+	}
+	# WholeMail()
+	else {
+	    print SMTPLOG "   ", $buf;
+	    print S "   ", $buf;
+	}
+
 	$LastSmtpIOString = $buf;
 
 	last if $p < 0;

@@ -539,13 +539,27 @@ sub SmtpIO
 	undef $e{'Body:append:files'};
     }
 
-    # special control
+    # special control: direct buffer copy from %Envelope.
     if ($Envelope{'ctl:smtp:ebuf2socket'}) {
 	require 'libsmtpsubr.pl';
+
+	if ($Envelope{'ctl:smtp:forw:ebuf2socket'}) {
+	    print S &ForwardSeparatorBegin;
+	    print SMTPLOG &ForwardSeparatorBegin;
+	}
+
 	&Copy2SocketFromHash('Header');
+
+	# Separator between Header and Body
 	print SMTPLOG "\r\n";
 	print S "\r\n";
+
 	&Copy2SocketFromHash('Body');
+
+	if ($Envelope{'ctl:smtp:forw:ebuf2socket'}) {
+	    print S &ForwardSeparatorEnd;
+	    print SMTPLOG &ForwardSeparatorEnd;
+	}
     }
 
     # Trailer

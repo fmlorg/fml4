@@ -96,4 +96,38 @@ sub DefineDefaultField
 }
 
 
+###
+### KernSubr::Sectoin: Message (obsolete functions)
+###
+
+sub __WholeMail
+{
+    $_ = "\n";
+
+    if ($MIME_CONVERT_WHOLEMAIL) { 
+	&use('MIME'); 
+	$_ .= &DecodeMimeStrings($Envelope{'Header'});
+    }
+
+    $_ .= "\n".$Envelope{'Header'}."\n".$Envelope{'Body'};
+    s/\n/\n   /g; # against ">From ";
+    
+    $title = $Envelope{"tmp:ws"} || "Original mail as follows";
+    "\n$title:\n$_\n";
+}
+
+
+sub __ForwMail
+{
+    local($s) = $Envelope{'Header'};
+    $s =~ s/^From\s+.*\n//;
+
+    $_  = "\n------- Forwarded Message\n\n";
+    $_ .= $s."\n".$Envelope{'Body'};
+    $_ .= "\n\n------- End of Forwarded Message\n";
+
+    $_;
+}
+
+
 1;

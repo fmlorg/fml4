@@ -1655,32 +1655,12 @@ sub AddressMatch
 
 ####### Section: Info
 # Recreation of the whole mail for error infomation
-sub WholeMail   
-{ 
-    $_ = "\n";
-
-    if ($MIME_CONVERT_WHOLEMAIL) { 
-	&use('MIME'); 
-	$_ .= &DecodeMimeStrings($Envelope{'Header'});
-    }
-
-    $_ .= "\n".$Envelope{'Header'}."\n".$Envelope{'Body'};
-    s/\n/\n   /g; # against ">From ";
-    
-    $title = $Envelope{"tmp:ws"} || "Original mail as follows";
-    "\n$title:\n$_\n";
+sub WholeMail { 
+    local(@xargv) = @_; &use('kernsubr2'); &__WholeMail(@xargv);
 }
 
-sub ForwMail
-{
-    local($s) = $Envelope{'Header'};
-    $s =~ s/^From\s+.*\n//;
-
-    $_  = "\n------- Forwarded Message\n\n";
-    $_ .= $s."\n".$Envelope{'Body'};
-    $_ .= "\n\n------- End of Forwarded Message\n";
-
-    $_;
+sub ForwMail {
+    local(@xargv) = @_; &use('kernsubr2'); &__ForwMail(@xargv);
 }
 
 sub Translate
@@ -1740,7 +1720,16 @@ sub WarnFile
     undef $Envelope{'preamble'};
 }
 
-# Extended Warn()
+# Warn() with direct buffer copy from %Envelope to Socket
+# and with "mh forwarding" separators (added in smtp library).
+sub WarnF
+{
+    $Envelope{'ctl:smtp:forw:ebuf2socket'} = 1;
+    &WarnE(@_);
+    $Envelope{'ctl:smtp:forw:ebuf2socket'} = 0;
+}
+
+# Extended Warn() with direct buffer copy from %Envelope to Socket
 sub WarnE
 {
     local($subject, $body, $preamble, $trailor) = @_;

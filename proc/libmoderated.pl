@@ -50,7 +50,8 @@ sub ModeratedDeliveryTypeI
 	else {
 	    $auth = 0; 
 	    &Log("Moderated: Approval FAILED");
-	    &Warn("Moderated: Approval FAILED $ML_FN", &ForwMail);
+	    &WarnF("Moderated: Approval FAILED $ML_FN", 
+		 "Moderated: Approval FAILED");
 
 	    $DO_NOTHING = 1;	# PASS TO THE USUAL ROUTINE;
 	}
@@ -61,10 +62,9 @@ sub ModeratedDeliveryTypeI
 	if ($MODERATOR_FORWARD_TYPE == 1) {
 	    $e{'h:Reply-To:'} = $MAIL_LIST;
 	    &Log("Moderated: Forwarded to maintainer");
-	    &Warn("Forwarded Message: [MODERATED MODE] $ML_FN",
+	    &WarnF("Forwarded Message: [MODERATED MODE] $ML_FN",
 		  &GenModeratorInfo .
-		  "Please check the following mail.\n".
-		  &ForwMail);
+		  "Please check the following mail.\n");
 	}
 	# TYPE III, do nothing
 
@@ -202,10 +202,17 @@ sub ModeratedDeliveryTypeII
     print APP "\n", $e{'Body'}, "\n";
     close(APP);
 
+    require 'libsmtpsubr.pl';
+
     open(APP, "> $f_info") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
     print APP "\n$info\n";
-    print APP &ForwMail;
+
+    print APP &ForwardSeparatorBegin;
+    print APP $e{'Header'};
+    print APP "\n";
+    print APP $e{'Body'};
+    print APP &ForwardSeparatorEnd;
     close(APP);
 
     &ModeratorNotify(*MODERATOR_MEMBER_LIST, $subject, $f_info);
@@ -275,9 +282,8 @@ sub ModeratorProcedure
 
     if ($moderated'Fld{$id}) { #';
 	&Log("moderator: duplicated input [@Fld]");
-	&Warn("fml Moderator routine error $ML_FN",
-	      "We trap the duplicated input. Please check \n".
-	      &ForwMail);
+	&WarnF("fml Moderator routine error $ML_FN",
+	       "We trap the duplicated input. Please check \n");
 	return $NULL;
     }
     else {

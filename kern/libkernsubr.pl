@@ -135,7 +135,7 @@ sub __Write3
 
 
 ###
-### KernSubr::Sectoin: Notify()
+### KernSubr::Sectoin: Message
 ###
 
 # Notification of the mail on warnigs, errors ... 
