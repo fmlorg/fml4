@@ -17,6 +17,131 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 .fi
 
 
+2001/01/10
+
+   doc/Japanese/examples/virus_check.ph
+	add rules against win32/mtx
+
+
+2000/12/29
+
+   makefml html_config
+	fix null value check
+
+
+2000/12/28
+
+   makefml
+	nuke undefined ERROR()
+
+
+2000/12/24
+
+	CGI fix the behaviour in /ml-admin/$ml layer
+
+		/ml-admin/$ml/ 階層の修正
+
+2000/12/22
+
+	htpasswd 関連の表示を修正
+
+2000/12/17
+
+   CGI
+	fix charset of META 
+	EUC'fy
+
+2000/12/13
+
+   /bin/fwix.pl 
+	add pointer (to previous, to next) in the top of each page.
+	nuke too many <PRE></PRE> magic code
+
+2000/12/11 --
+
+	clean up, fix, update documents, documents, documents, ...
+		....
+			....
+
+2000/12/10
+
+   4.0_BETA
+
+2000/12/09
+
+   translate CGI menu to English
+
+   review CGI codes
+	more strict variable checks
+
+	変数の表現空間をよりきびしいチェックする
+
+2000/12/06
+
+   prepare doc/English/ 
+	imported it anyway
+
+2000/12/04
+
+   proc/libsynchtml.pl
+	apply patch by fml-support:8935
+		 ( Tomoki Ichinoseki <ichinskt@synap.co.jp> )
+
+2000/12/03
+
+   help file
+	apply patch by <kazuto@Kz-soft.com> (fml-support: 09081)
+
+	help ファイルに MH フォルダの場合の復元のし方
+	についてのメモを付け加える
+
+   databases/postgresql/DBI_toymodel.pl
+	PostgreSQL DBI version
+
+	This library is based on the patch ( fml-support: 09069 ) by
+	Toshimi Aoki.
+
+   sbin/makefml
+	fix 12/02 bug fixes more.
+
+2000/12/02
+
+   sbin/makefml
+	preserver inode permission in manipulate *passwd.
+	modify lockfile only if virtual ml is 'etc' (that is
+	/var/spool/ml/etc).
+
+2000/11/30
+
+   clean up cgi around (clean up for 4.0 release ...)
+	clean up 
+	modify temorary buffer allocation code
+	
+2000/11/28
+
+   kern/Makefile
+	remove not used environmental variables
+
+2000/11/17
+
+   kern/fml.pl
+   module/CPAN/
+	modify conv2mailbox() to use Mail::Address module for more
+	correctness. apply patches in
+	fml-support: 09026, 09027 by OGAWA Kunihiko <kuni@edit.ne.jp>
+
+  fix internal to make fml/ml-admin/ ... hier
+
+2000/11/07
+
+   drafts/English/
+	fix language over these templates
+
+2000/11/06
+
+   makefml
+	consider ? + / in the mailing list address
+
 2000/10/30
 
   makefml
