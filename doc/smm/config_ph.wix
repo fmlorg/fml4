@@ -1,0 +1,710 @@
+.# ##########################################################
+.C	ヘッダのカスタマイズ
+.label	{header-custom}
+
+
+.S	ヘッダの形とadditionalなものをそのまま保存すること
+.key	ヘッダの保存
+.key	$PREVENT_MIME
+
+デフォールトはMIME の３つのフィールドは↓通します。
+
+$PREVENT_MIME をセットしない限り常に 
+	MIME-Version:
+	Content-Type:
+	Content-Transfer-Encoding:
+をとおす。（１．４）
+
+＃つまり MIME反対派の方は $PREVENT_MIME をセットしてください
+
+それ以外のすべてのヘッダを通す（Received等はのぞく）時は
+
+.key	$SUPERFLUOUS_HEADERS
+	$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+とすると実行できます。0なら案１です。
+＃保存する時はsub GetFieldsFromHeaderでマッチしないフィールドは保存し
+ている
+
+
+.S	CC: フィールドを“つけない”
+
+デフォールトではつけます
+$NOT_USE_CC = 1;
+
+
+.S	CC: フィールドだけをつける
+.key	$HEADER_ADD_HOOK
+
+［Obsolete］（やると↓二重についちゃうぞ）
+config.ph で
+
+$SUPERFLUOUS_HEADERS = 0;	# preserve more header fields
+
+として、なおかつ
+
+$HEADER_ADD_HOOK = q#
+    $body .= "Cc: $Cc\n" if($Cc);
+#;
+
+
+.S	MIME decodingを行なう
+.key	MIME
+.label	{MIME-1}
+
+summaryに書くsubjectをMIME decodeをしてから書き込むようにするなら１です。
+
+.key	$USE_LIBMIME
+	$USE_LIBMIME	= 1;		# when use MIME Extension in libMIME.pl
+
+例：
+	……
+	Subject: Re: TELEPHONE 
+	=?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+
+	……
+というメールが来たとすると、summary ファイルには
+
+	94/04/03 20:47:47 [1:fukachan@phys.t] Re: TELEPHONE そんなぁ〜
+
+
+と記録されます
+
+注意：subject をちょんぎったりはしませんが、一行にしてからdecodeして全
+部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
+もし、２行のsubjectは２行でというなら
+
+at sub GetFieldsFromHeader in fml.pl
+
+    # for summary file
+    $Summary_Subject = $Subject;
+#    $Summary_Subject =~ s/\n(\s+)/$1/g;	←この行を削る
+    $User = substr($From_address, 0, 15);
+
+とでもしておいて下さい。
+
+注意２ or メモ： ISO-2022-JP の文字がない限りは require しません（ま、
+たいしてかるくはならんが…）。fml.pl中の
+
+	local($INCLUDE_LIBMIME) = 1 if($MailHeaders =~ /ISO\-2022\-JP/o);
+
+.key RFC1522
+RFC1522	2. Syntax of encoded-words
+
+   encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+   charset = token    ; see section 3
+   encoding = token   ; see section 4
+   token = 1*<Any CHAR except SPACE, CTLs, and especials>
+
+
+.S	配送するメールのMIME部分はDecodeしてしまいたい
+.label	{MIME-2}
+.seealso MIME-1
+
+では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
+例えば、fml.pl の sub GetFieldsFromHeaderで
+
+    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+    }
+
+を
+
+    if($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+	$MailBody = &DecodeMimeStrings($MailBody);
+    }
+
+で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+
+
+.S	MIME decodeをするためのライブラリ libMIME.pl はどこにあるか？
+.label	{MIME-3}
+	$LIBMIMEDIR	= "$LIBDIR/contrib/MIME";
+					# location in libMIME.pl
+
+mimer.plというものを使うinterface部分です。適当に移してくださいませ。
+最初はもっと大層なことをしていたのですが、今はmimer.plの関数を一個呼ぶ
+くらいです。改造はlibMIME.plの中をいじる方がいいでしょう。
+
+MIME decodingの解説：
+最初は、fj.sources,fj.lang.perlにながれた
+Message-ID: <C1977.94Jan24130052@crcsn82.mdc.crc.co.jp>
+という	mime_pls 1.00a	というもので
+
+mime_pls.doc   mimer.pl       mimew.pl       
+
+の３つセットです。この記事の後のパッチもあててあります。
+#thanks to c1977@crcsn82.mdc.crc.co.jp (private communication)
+
+いまでは 1.11a です。2.00alpha  も ftp.physにおいてあります
+
+
+.S	MIMEのカスタマイズ変数
+.label	{MIME-customizing}
+.key	$MIME_VERSION
+.key	$MIME_CONTENT_TYPE
+.key	$MIME_MULTIPART_BOUNDARY
+.key	$MIME_MULTIPART_PREAMBLE
+.key	$MIME_MULTIPART_TRAILER
+
+右辺はデフォールトの値（Built-in）です。
+
+$MIME_VERSION = '1.0';
+
+$MIME_CONTENT_TYPE = 'multipart/mixed;';
+
+以下は MIME/Multipart で使う変数です。
+
+$MIME_MULTIPART_BOUNDARY   = "--Thu_18_May_95_02:36:26--"な形で日付を設定します。
+
+そのあと、これら↓の変数を設定してます。
+	$MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
+	$MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
+	$MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
+
+くぎり
+
+$MIME_MULTIPART_BOUNDARY = 
+
+本文の前口上
+
+$MIME_MULTIPART_PREAMBLE = なし
+
+本文の後につく部分
+
+$MIME_MULTIPART_TRAILER = なし
+
+
+.S	Subject: [Elena:ID] サブジェクト の [Elena:ID] を抜く
+.key	Subjectから[Elena:ID]を抜く
+.key	$STRIP_BRACKETS
+
+これは Subject: [Elena:ID] の形で配送するための前処理です。今は、
+
+	    # e.g. Subject: [Elena:001] Uso...
+	    $contents =~ s/\[$BRACKET:\d+\]\s*//g;
+	    $Subject = $contents;
+
+にしちゃいました:-)。つまり multiple Re: 問題はサーバがメール本文をい
+じるのは気持ち悪いので、そういうことを極力少なくするために（Subjectの
+変更は個人がやってくれると期待して）いじらないことにしました。
+
+変数は
+	$STRIP_BRACKETS = 0;		# Strip e.g. [ML:fukachan] in Subject
+
+１ならSubjectから [ML:fukachan] みたいな部分をカットする。
+
+解説：昔は、
+
+	Subject: Re: [*] Re: サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: Re: [*] サブジェクト
+				→	Subject: Re: サブジェクト
+	Subject: [*] サブジェクト
+				→	Subject: サブジェクト
+
+ということをするために
+
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*Re:[\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^Re:[\s\n]*\[[\s\S\n]*\][\s\n]*([\s\S\n]*)/o) {
+		$Subject = "Re: $1"; next;
+	}
+	if(/^[\s\n]*\[[\s\S\n]*\][\s\n]*(.*)/o) {
+		$Subject = $1; next;
+	}
+	$Subject = $contents; next;
+
+こんなけったいな処理をしていましたが、やめました:-)
+＃このコードにもどせばmultiple Re:を削ることができます。
+
+何のために必要な前処理かというと、次を見てみよう(^^;;
+
+
+.S	hml 1.6 のSubjectの形がいいの
+
+次項参照↓
+
+
+.S	Subject: [Elena:ID] サブジェクトという形にする
+.key	$SUBJECT_HML_FORM
+.key	$BRACKET
+.key	hml形のSubject
+
+オリジナルの hml 1.6 は
+……
+From:	エレナさんＭＬ
+Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
+……
+
+こんな形のヘッダですね。で、私が嫌いなので:-)、
+＃無駄に多いヘッダは嫌いなんですよぉ。To: 見りゃわかるのにX-ML-Nameと
+＃か…X-ML-Count は違う種類の情報（Reference）だからいいんですが…
+
+デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
+ようにしました。
+
+	$SUBJECT_HML_FORM = 1;
+	$BRACKET	= 'Elena';
+
+で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
+＃今のFrom は ML名 じゃなくて ユーザー名
+
+最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
+つまり（今の場合だと）
+
+	Subject: [Elena:ID] サブジェクト
+#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
+
+の形になります。この場合
+
+	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
+
+にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+
+
+.S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
+.label	{NIFTY}
+.label	{$AGAINST_NIFTY}
+.label	{against-nifty}
+
+注意：もう必要ないらしい
+
+	$AGAINST_NIFTY = 1;（対策をする）
+
+NIFTY は非常識にも、Errors-to という時代おくれの部分しかみてないので;_;、
+config.ph あたりで
+
+	$AGAINST_NIFTY = 1
+
+とするとメール本文に
+
+.key	Errors-To: $MAINTAINER
+	Errors-To: $MAINTAINER
+
+がつきます。これで NIFTY からのエラーメールが $MAINTAINER に返るように
+なってくれます。後向きな解決法ですが;_;。
+＃前向きなのは、みんなで文句をいって直させること
+＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
+らいいいつづけないとだめなんだろうなぁ（はぁ）
+
+
+.S	Message-IDの保存
+.key	Message-ID
+.key	Uniq_Identifier_of_Message-ID
+.key	$USE_ORIGINAL_MESSAGE_ID
+
+$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
+てヘッダにつけます。
+
+
+.S	Message-IDを個人の趣味でカスタム化する
+.key	Message-IDのカスタム化
+.key	$HEADER_ADD_HOOK
+
+Message-ID: uja@aoi.chan.panic とするなら
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: uja@aoi.chan.panic\n";
+#;
+
+と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
+
+他の例：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	宇宙歴0403.3238…（おあそびその１）
+
+＊＊＊ 削除しました(95/10/2) ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
+
+しゃれで作りました (_o_)
+
+	$STAR_TREK_FORM = 1;
+とか config.ph でしておくと
+
+Subject: [0403.00128] 外国ＴＶシリーズＭＬむけですね、これは
+＃もちろん外国ＴＶ ＭＬといえど実際には使ってないけど:-)
+
+みたいに、宇宙歴もどきとＩＤがセットの形をつけます（おあそび）。
+＃お遊びですが、One-actionだから許して(_o_)
+
+余談ですが、このStardateに意味はありません。翻訳の時に適当につけられた
+ものです。詳しくは、エンサイクロペディア等をごらんください。
+＃http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+
+
+.S	宇宙歴その２
+
+外国ＴＶシリーズＭＬで使ってます:-)
+＃http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+
+config.ph で	$APPEND_STARDATE = 1;
+
+Date: Fri, 19 May 95 22:31:09  JST
+From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
+Subject: Re: Nantonaku Leonard Nimoy 
+To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
+X-ML-Name: Prisoner
+X-Stardate: [-31]5697.816493
+
+…本文略…
+
+みたいになります。
+スタートレックＦＡＱにプログラムがのっています
+libStardate.pl はその perl 版です。
+
+
+.S	1つのMLに複数の投稿用アドレス
+.key	1つのMLに複数の投稿用アドレス
+
+何の意味があるのかは聞かないでください（笑）
+
+例：
+Elena@phys.titech.ac.jp というＭＬで
+Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
+の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
+
+config.ph に次の設定をする。その複数のアドレスを(ループチェックに使うために)
+
+@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
+		'Anna@phys.titech.ac.jp');
+
+のように、かいてください。配列の先頭がオリジナルのアドレス(==
+$MAIL_LIST)です。
+
+こうすると Elena になげても Anna に投げても どっちでもＯＫで、
+to: と reply-to:を変更します。
+＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
+
+＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
+
+
+あと、↓このように書いてみてください。
+
+例（全体）： 
+----------------------------------------------------------------
+# Here is a playing of "To addresses change"; string to eval
+$SMTP_OPEN_HOOK .= q#
+    local($a);
+    foreach (@PLAY_TO) {
+        $a = (split(/\@/, $_))[0];
+        if ($Envelope{"to:"} =~ /$a/) {
+            $MAIL_LIST = $_;
+        }
+    }
+#;
+
+----------------------------------------------------------------
+
+
+
+
+
+.# ##########################################################
+.C	config.phのその他の設定
+.label	{config-misc}
+.S	どのマシンのSendmailを使う？
+
+・Sendmailが動くマシン（デフォールトは今ソースを広げたマシンです）
+
+.key	$HOST
+	$HOST         = 'localhost';
+
+デフォールトはそのマシンです。もしＭＬサーバのマシン（受けるマシン）が
+貧弱ならそのマシンが何十通もメールを送り出すのは酷です。
+そういう場合上の変数を書き換えて、別のマシンに配送を任すこともできます。
+その時は
+
+	$HOST         = 'beth.foo.bar.ac.jp';
+
+のようにそのマシン名を書いて下さい。
+＃ただしgethostbynameできないようなマシンじゃだめですが。
+＃もちろんアクセスできないマシンとかではできません（あったりする）
+
+勝手にそのマシンのパワーを使うことになるのでそのマシンを使う許可を得る
+べきでしょう。
+
+
+.S	ロックアルゴリズムの選択と変数の設定
+.seealso fml-mechanism, seq-file
+
+＃fml 1.2.2 からあとでは flockでどのＯＳでも大丈夫だとおもいます。
+
+ロックアルゴリズムは二通り用意されてます。
+一つはプロセスＩＤで区別するやりかた。もう一つがflock system callを使
+うもの。flockがお奨めです
+
+.key	$USE_FLOCK
+	$USE_FLOCK    = 1;
+
+でflock system call
+
+	$USE_FLOCK    = 0;
+
+でＩＤを使うやり方にセットできます（デフォールトはflock）。
+
+・プロセスＩＤで区別するやりかたでそのＩＤをもったロック用ファイル
+をつくるdirectoryの指定
+
+.key	$LOCKDIR
+	$LOCKDIR      = "$DIR/LOCK";
+
+・その場合のデフォールトのＩＤのとり方。
+
+.key	$LOCKFILE
+	$LOCKFILE     = "$$";
+＃$$はプロセスのＩＤ（% man sh）
+
+
+.S	# helpとかの形式がいや。#helpとか#getfileがいいの
+次節
+
+.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
+
+コマンドの書き方についてのオプションです。
+
+hml 1.6 では
+	# get 1
+	# help
+のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
+たので、今度は
+
+	# get 1 と #get 1は同じものとみなす（両方使える）
+	すべてのコマンドで同じように "# " -> "#" 解釈する。
+	さらに#getfile ...も# get ...と理解する。
+
+としました。つまり、
+
+	# get 1
+	#get 1
+	# getfile 1
+	#getfile 1
+
+は同じもの。同様に
+
+	# help
+	#help
+
+も同じものです。
+
+.key	$COMMAND_SYNTAX_EXTENSION
+	$COMMAND_SYNTAX_EXTENSION = 1;
+	両方解釈するなら１、"# summary"みたいなhml 1.6形だけなら０。
+
+
+.S	コマンドは一辺に実行できるか？２
+.seealso	command-plural2
+
+
+.S	WHOISを使うか？
+.key	whois
+.seealso whois
+.key	$USE_WHOIS
+
+	$USE_WHOIS = 0;			# Use Whois library
+
+０ならｆｍｌデフォールト（whoisは使わない）。１なら使う。ただし、これ
+はｈｍｌとは違い、本物の任意のwhois serverとソケット間通信をするための
+ものです。
+＃ｈｍｌは独自に自分だけのｗｈｏｉｓを抱えていた（無意味＆＆security
+hole）
+
+例：
+
+% echo  "# whois fukachan" | Mail -v Elena@phys.titech.ac.jp
+
+% echo "# whois -h どっかのwhois fukachan" | Mail Elena@phys.titech.ac.jp
+
+は ”どっかのwhois” に聞きにいきます。
+
+	$DEFAULT_WHOIS_SERVER = "localhost";
+
+で デフォールトの whois サーバを変更できます。コマンドの -h オプション
+で変更できるわけですが、コマンドの-hオプションが優先します。
+
+例：
+	"# whois -h どっかのwhois fukachan"
+
+
+.S	まとめおくり(Rel. 4)のデフォールトで RFC934 形をつかうか？
+.key	$USE_RFC934
+
+	$USE_RFC934 = 0;
+
+まとめおくり(Rel. 4)で、０はデフォールトのUNIX FROMで区切られたメールを
+送り出すが、１なら次のような形のものを送るようになる。これは mh の
+burstで複数の展開に展開できます。
+＃あと、どういうソフトがあるのか知らない…:-)
+
+９３４形式の例：
+------- Forwarded Message
+From: uja
+Subject: daa 
+
+うじゃ
+------- Forwarded Message
+From: uja
+Subject: daa
+
+あおいちゃんパニック もいいけど せいふくもの もよくてよ
+------- Forwarded Message
+
+
+.S	まとめ送りのデフォールトを RFC1153 digest へ
+.label	{RFC1153}
+.key	RFC1153
+
+これは それぞれに通し番号をつけなければなりませんので、まとめおくりの
+デフォールトを1153にすることになります。
+
+つまりコマンド # matome 3 はgzip ではなく 1153 形を意味します。
+
+config.ph で $USE_RFC1153_DIGEST = 1; としてください。
+
+デフォールト以上の細かい部分は librfc1153.pl でフォーマットを決めてく
+ださい
+
+注意：
+一時期 デフォールトで 3時間に 強制的に設定しておいてある version があ
+りますが、ようは番号の整合性をとるためです。
+１時間おきの１１５３送りの人と、３時間おきの１１５３送りの人、があると
+番号が食い違ってしまいますから
+
+番号の整合性を無視すれば、どうでもいいことなんですが…
+とりあえず、この部分はコメントアウトしてあります（95/6/27)
+
+
+.S	コマンドのフック
+.label	{command-hook}
+.key	customize-of-commands
+.key	コマンドのカスタマイズ
+.key	$COMMAND_HOOK
+
+インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
+config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
+様にカスタマイズできる）。
+
+これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
+
+--------- in config.ph ---------
+$COMMAND_HOOK =q#
+      if(/list/io) {
+	  &Logging("List ($From_address)");
+	  &SendFile($to, "List $ML_FN", "$DIR/list");
+	  next GivenCommands;
+      }
+#;
+--------- in config.ph ---------
+
+この例だとは # 〜 # の間をquoteしています。#...コメントをとかははさめ
+ません。
+＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
+quoteする関数（本当の意味での関数ではないそうだ）
+
+fml 1.3 ではライブラリの多くの機能はこれを使うことを前提にＲＥＡＤＭＥ
+等が書かれています。
+
+応用は フックの章 に例題がのっています。
+
+
+
+.S	lzh + ish option
+.key	lzh
+.key	ish
+.key	$LHA
+.key	$ISH
+
+	# mget 200-210 ish
+
+の用に指定するとlzh して ish(s7 mode)したものを送り返します。
+
+$LHA = "/usr/share/bin/lha";
+$ISH = "/home/axion/fukachan/bin/ish";
+
+等をどこかで（config.phとか）で設定して下さい。
+しないと上の↑Built-inデフォールト値になります。
+
+
+.S	SJIS にファイルを変換して送る （lzh + ish option）
+.key	lzh
+.key	ish
+
+config.ph で $USE_SJIS_in_ISH = 1; をセットしてください。
+
+使う時は jcode.pl を INCLUDE PATH へいれておいてください。
+^M ^Z もつけます。すべて、外部コマンドを使わずに自力でやります。
+
+
+.S	コマンドで単なるシンタックスエラーの警告をしない
+.label	{USE_WARNING}
+.key	$USE_WARNING
+
+明示的に $USE_WARNING をセット
+e.g. in config.ph
+
+	$USE_WARNING = 1;
+
+するとコマンドメールでの単なるシンタックスエラーの警告をしない
+
+e.g. 
+# helps 			←コマンドのエラーは警告
+＃うじゃ			←シンタックスエラー警告なし
+＃しぐにちゃ〜	uja@uja.ac.jp	←シンタックスエラー警告なし
+
+
+.S	mgetのファイルサイズ（送り返し）
+.key	$MAIL_LENGTH_LIMIT
+
+in libsendfile.pl
+
+	$MAIL_LENGTH_LIMIT = 1000;
+
+を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
+いますよね。
+＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
+＃参照 http://www.iij.ad.jp/sapporo/staff/fukachan/fml/ の下
+＃pc-van は何の問題もなかったと思いました（たしか）
+
+１０００行でだいたい５０ｋくらいになります。
+
+
+
+.S	mgetのシンタックスの Shell Match Pattern(e.g. * 1? )
+.key	$SECURITY_LEVEL
+
+$SECURITY_LEVEL < 2 では 
+
+	# mget * 
+とか
+	# mget 10? 
+
+が使えます。パッケージは １ （Backward Compatibility）にして配布してま
+す。＃前のヴァージョンとおなじになるように
+
+
+.S	mgetのシンタックス
+
+何もしなくても、
+
+# mget 正規表現 送り返されるメールの時間間隔（ｓｅｃ）
+
+	と
+
+# mget2 1-10,5みたいなsyntax 送り返されるメールの時間間隔（ｓｅｃ）
+
+の両方を理解します。サーバが自動的に切替えます。
+
+.# $Id$
