@@ -3,6 +3,40 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/17
+
+  documents
+	update test environments information
+
+  CGI
+	makefml mladmin.cgi ML installs .htaccess
+
+	sort the result of ml choice
+
+	add mladminpasswd
+
+	   フレームメニューから管理者パスワードの設定画面へ飛ぶように
+
+	index.cgi
+
+	   管理者パスワードの設定をもどす
+	   
+
+2000/02/15
+
+  ReReRe problem
+	cut off Re(2): and Re*2: in Subject:
+
+	レレレ問題。切り落とすフォーマットを拡張
+	今デフォールトで叩き落すのは
+
+	Re: Re2: Re[2]: Re(2): Re*2: Re^2: 
+
+	など
+
+  $TOP_DIR/CHANGES (this file :-)
+	required for distributed environments
+
 2000/02/13
 
   clean up campaign
