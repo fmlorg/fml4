@@ -112,6 +112,17 @@ sub AutoRegist
     ##### ADD the newcomer to the member list
     local($ok, $er);		# ok and error-strings
 
+    ### check resource limit
+    if ($MAX_MEMBER_LIMIT) {
+	if (&CheckResourceLimit(*e, 'member') > $MAX_MEMBER_LIMIT) {
+	    &Log("AutoRegist: reject subscribe request",
+		 "number of ML members exceeds the limit $MAX_MEMBER_LIMIT");
+	    &Mesg(*e, "Sorry, the number of this ML exceeds the limit.");
+	    &Mesg(*e, "Hence we cannot accept your request.");
+	    return 0;
+	}
+    }
+
     ### RUN HOOKS
     # report mail such as WELCOME ..;
     $e{'GH:Reply-To:'} = $MAIL_LIST;
@@ -817,6 +828,55 @@ sub ConfigMSendRC
     else { 
 	&Log("ConfigMSendRC: Cannot open $MSEND_RC");
     }
+}
+
+
+package ResourceLimit;
+
+sub Log 
+{ 
+    &main'Log(@_); #';
+} 
+
+
+sub main'MemberLimitP #';
+{
+    local(*e) = @_;
+    local($total, @a);
+
+    @a = @main'ACTIVE_LIST; #';
+
+    for (@a) {
+	 print STDERR "ACTIVE_LIST: $_\n";
+	 next unless -f $_;
+
+	 $total += &CountEffectiveMember($_);
+    }
+
+    $total;
+}
+
+
+sub CountEffectiveMember
+{
+    local($f) = @_;
+    local($count) = 0;
+
+    if (open(LIST, $f)) {
+	while (<LIST>) {
+	    next if /^\#/;
+	    next if /^\s*$/;
+	    next if /s=/;	# skip
+
+	    $count++;
+	}
+	close(LIST);
+    }
+    else {
+	&Log("CountEffectiveMember: cannot open $f [$@]");
+    }
+
+    $count;
 }
 
 
