@@ -1,0 +1,49 @@
+.C	Overview
+
+.S	fml の返すメッセージ
+
+fml の返すメッセージとはエラーやコマンドの結果として返す応答のことです。
+例:
+	登録された時に返すメッセージ (/var/spool/ml/elena/welcome)
+	コマンドのシンタックスが間違っていた時に返るエラーメッセージ
+
+エラーメッセージはソースに(英語で)埋め込まれていますが、現在徐々に 
+/usr/local/fml/messages/Japanese/ の下のファイルへの移行が進んでいます。
+
+つまり
+
+	エラーメッセージの日本語化
+	エラーメッセージをユーザがカスタマイズ可能なようにする
+
+という作業が進んでいます。
+
+.S	ファイルとして用意されるものは？
+
+各ＭＬのHOMEに用意されるファイルは
+
+     confirm             confirm モードの登録用
+     confirmd.ackreq     confirm モードの登録継続確認用
+     deny                メンバ外
+     guide               ML の guide
+     help                ML の使い方の help
+     help-admin          admin メンバ用 help
+     objective           ML の objective (目的)
+     welcome             入会メッセージ
+
+などです。これらはメッセージとしてはかなり長いものです。短いものは全部
+
+	/usr/local/fml/messages/ 下で定義されているか
+	埋め込まれているか
+
+のいづれかです。
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

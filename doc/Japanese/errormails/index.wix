@@ -8,6 +8,7 @@
 .include overview.wix
 .include list.wix
 .include mead.wix
+.include qmail-mead.wix
 .include confirmd.wix
 
 .# $Id$

@@ -22,7 +22,7 @@ errormails		エラーメールをどうするか？
 documentation		ドキュメントについて
 
 .part 拡張
-hack_samples		いろいろな事例
+QandA			いろいろな改造事例集
 command			コマンドについて
 extension		拡張
 

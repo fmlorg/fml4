@@ -1,5 +1,6 @@
 .C	投稿メールのフィルタリング事例
 
+
 .S	Message-Id: がないものを reject
 =E	reject null Message-Id:
 
@@ -17,6 +18,7 @@ Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
 	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
 
 .S	Subject:に特定のパターン(大文字小文字を問わず)があったら拒否する
 
@@ -122,6 +124,7 @@ resource.too_big:
 編集する場合は copy を /var/spool/ml/etc/fml/messages/ にコピーして
 /var/spool/ml/etc/fml/messages/resouce を編集しておくのがよいです。
 
+
 .S	ヘッダ情報の容量制限の設定ってのはあるんでしょうか？
 
 いまのサイズ制限はヘッダと本文と全部含んだ長さについてです。
@@ -131,6 +134,23 @@ resource.too_big:
 ヘッダは普通で本文がでかい場合には、どうせヘッダの大きさは誤差でしょう
 という感じです。＃そのあいだの微妙な場合はかんがえてないといえばない
 
+
+.S	To: とか Cc: にメーリングリストがないのはSPAMだ！
+
+fml-support: 06389
+fml-support: 07286
+
+SPAM メールを弾くために
+
+To: および Cc: 行に ML のアドレス (大文字/小文字は区別しない) が入って
+なければ，そのメールを拒否する
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+    if (($e{'h:to:'} !~ /$MAIL_LIST/i) && ($e{'h:cc:'} !~ /$MAIL_LIST/i)){
+        return 'Not addressed to mailing list';
+    }
+#;
 
 
 .#
