@@ -1,0 +1,22 @@
+#!/bin/sh
+
+GEN="perl .release/html_split.pl"
+
+for dir in README INSTALL op README-e INSTALL-e op-e
+do
+   if [ ! -d var/db/$dir -o \
+	var/html/$dir/index.html -nt var/db/$dir/.touch ]
+   then
+	$GEN -R ../../$dir/ -U http://www.fml.org/fml/$dir \
+		-D var/db/$dir var/html/$dir/[0-9]*html
+   fi
+
+   touch var/db/$dir/.touch
+done
+
+echo ""
+echo "perl .release/find_older.pl |perl -nple unlink"
+echo ""
+perl .release/find_older.pl |perl -nple unlink
+
+exit 0;
