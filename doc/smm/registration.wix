@@ -141,19 +141,104 @@ When "unsubscribe" request comes in, FML sends back a confirmation
 request to verify the will. See .ptr{autoregist} and speculate the
 action.
 
-.S	chaddr
+.S	アドレスの変更 ("chaddr" command)
+=E.S	change address ("chaddr" command)
 
-1999/10/04
+.if LANG == JAPANESE
+ISPを変わった時、ドメイン名が変更になった場合などには新しいアドレスに
+変更する必要があります。old-address を new-address へ変えるには
+
+	1. chaddr コマンド
+	2. 一回抜けてもう一度入る
+
+の２つの方法があります。chaddrコマンドは
+
+	chaddr old-address new-address
+
+というシンタックスのコマンドです。
+.fi
+.if LANG == ENGLISH
+
+When you change your ISP, domain ... you need to change your address
+registered in ML. To change it, there are two methods
+
+	1. chaddr command
+	2. unsubscribe once and subscribe again
+.fi
+
+○ fml 2.2 の仕様, fml 2.2.1 の仕様 (default)
+必ず『古いアドレスから』このコマンドを送ってください
+=E
+* fml 2.2, fml 2.2.1 default
+  Please send the following address from "old-address" to change
+	old to new one registered in ML member lists.
+
+	From: old-address
+	To: list-ctl@domain
+
+	chaddr old-address new-address
+
+○ fml 2.2.1 のオプション  "chaddr confirmation"
+=E
+* fml 2.2.1 option "chaddr confirmation"
+
+.if LANG == JAPANESE
+chaddr を実行する前にconfirmationを行なうオプションがあります。
+
+	$CHADDR_AUTH_TYPE = 'confirmation';
+
+0. 	chaddrリクエストがfmlに来たら、それを行なっていいか？の確認の
+	メールを送り返します。新旧両方のアドレスへ送ります。
+
+1. 	新旧のアドレスのどちらか一方から chaddr を確認するメールがfml
+	に届いたら chaddr 処理を実行以下の条件が必要です。
+
+ 1.1 コマンドを送ったメールのFrom: に設定したアドレスが、オプションに指
+ 　　定したアドレスのどちらかと一致する
+ 1.2 指定したアドレスのどちらかはすでにメンバー
+
+2. 	結果にかかわらず、新旧両方のアドレスとＭＬサーバの管理者の３人に変
+	更の通知がメールで送られます。
+	＃ 管理者には届かないようにすることはできます。
+	＃ @DenyProcedure('r2a#chaddr');
+.fi
+.if LANG == ENGLISH
+fml 2.2.1 and fml-current (2.2B) has an option
+
+	$CHADDR_AUTH_TYPE = 'confirmation';
+
+to enable "chaddr confirmation". Fml confirms the chaddr to old and
+new addresses. The process is as follows:
+
+0.	Fml receives chaddr request. Fml sends back the confirmation.
+
+1.	If fml receives the confirmation from each of old and new
+	addresses, fml does chaddr process.
+
+	chaddr process needs
+
+   1.1	From: old-address or From: new-address	
+   1.2	either of old-address or From: new-address should be a member	
+
+2.	Fml sends back the result to both old-address, new-address
+	and ML-maintainer. 
+	# If you set 
+	#	@DenyProcedure('r2a#chaddr');  (in config.ph)
+	# maintainer will not receive a mail of the chaddr result.
+.fi
+
+NOTE: 1999/10/04
+
+	chaddr でサブドメインだけを変更しようとすると通常はエラーになる
+	というのは変更先のアドレスがすでにメンバーリストにあるので。
+	そのため
+=E
    chaddr: check the new address and the current address similarity
 	For example, unless this, sub-domain change must be an error.
 	e.g. chaddr foo@a.b.x.y.z foo@123.b.x.y.z
 	So, we gains the ADDR_CHECK_MAX if we encounters this case.
 	And we need SaveACL and RetACL to get back to the
 	original state after this function calling(like Context Switch).
-
-	chaddr でサブドメインだけを変更しようとすると通常はエラーになる
-	というのは変更先のアドレスがすでにメンバーリストにあるので。
-	そのため
 
 		chaddr foo@a.b.x.y.z foo@123.b.x.y.z
 
