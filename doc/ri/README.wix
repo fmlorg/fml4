@@ -123,7 +123,7 @@ edit of config.ph.
 インストール作業の前準備として次のものが必要があります。
 
    インストール先のマシンに(自分もしくはML専用の)アカウントがある
-   perl 4 もしくは perl 5 (今時perlは最初からOSに入ってるとおもう)
+   perl 
    メール配送プログラムがあること(default は sendmail R8 を想定)
 
 です。必要ならこれらをインストールしてちゃんと動くようにセットアップし
@@ -131,17 +131,24 @@ edit of config.ph.
 は INSTALL_on_NT4 を参照してください。いくつかのMTA(現在は sendmail,
 postfix, qmail and exim)についての注意点が INSTALL_with_MTA名 というファ
 イルにあります。
+
+一部 perl 5 でしか動きませんが、普通に使う部分は perl 4 でも 5 でも動
+くはずです。ただとっくの昔に保守されていない perl 4 はあまりお勧めでき
+ないのではないかと思っています。
 .fi
 .if LANG == ENGLISH
 FML fundamentally needs
 
 	a UNIX account
-	perl (4 or 5, at least after 4.019?)
+	perl 
 	MTA (e.g. sendmail,qmail,exim,...).
 
 See INSTALL for more details on installation.
 See INSTALL_on_NT4 for fml on Windows NT4.
 See INSTALL_with_QMAIL when you use fml with qmail.
+
+You can use perl4 or perl5 but I recommend perl 5 since perl 4 is not
+maintained.
 .fi
 
 プロバイダのサービスを利用している場合どうすればよいかは一概にはいえま
@@ -197,8 +204,8 @@ You can obtain fml sources at the URL
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
 この下に stable/ と current/ というディレクトリにそれぞれ安定版と開発
-版のソースがあります。便利なようにそれぞれのシリーズの最新版にはリンク
-がはってあります。
+版のソースがあります。ファイルに日付が入っているので新しいものを使って
+下さい。
 =E
 This directory has stable/ (stable sereis) and current/ (development
 series). I do the following symlink(2) to latest snapshot in both
@@ -208,13 +215,13 @@ serieses.
 =E
 * latest stable snapshot
 
-.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/stable/
 
 * 開発版(bug fixと機能拡張) 
 =E
 * latest development snapshot
 
-.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz 
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
 
 リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼
 ばれています。

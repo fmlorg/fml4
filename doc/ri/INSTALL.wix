@@ -84,7 +84,7 @@ versionの数字や作られるディレクトリについては適当に読み変えて下さい。
 .q
 ○ ソースを以下のURLから持ってくる。
 
-% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz
+% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/fml-3.0.1.tar.gz
 Connected to ftp.iij.ad.jp.
 220 ftp.iij.ad.jp FTP server ready.
 … (snip) …
@@ -99,15 +99,15 @@ Connected to ftp.iij.ad.jp.
 =E
 extract tar.gz to create the directory.
 
-% gunzip fml-stable-latest.tar.gz 
-% tar xf fml-stable-latest.tar
+% gunzip fml-3.0.1.tar.gz 
+% tar xf fml-3.0.1.tar
 
 ○ 作られたdirectoryに移る(名前はfml-バージョン-pl(patch level)番号のようになる)
 =E
 change directory to it. The name format is fml-${version}-pl${number}
 (pl == patch level). 
 
-% cd fml-3.0pl23
+% cd fml-3.0.1
 
 ○ インストール開始。インストールする場所等の質問に答える。
 % make install
