@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # MEAD: Mail Error Analyze Daemon
-# $FML: mead.pl,v 1.33 2001/05/09 15:22:56 fukachan Exp $
+# $FML: mead.pl,v 1.34 2002/05/22 15:24:31 fukachan Exp $
 #
 
 $Rcsid = 'mead 4.0';
@@ -330,12 +330,24 @@ sub Parse
 	    $addr =~ s/=/\@/;
 	    $addr =~ s/^\S+\-admin\-//; # fml specific 
 
-	    $ra =~ s/admin\-\S+\@/admin@/;
+	    # postfix style
+	    if ($ra =~ /admin\+\S+/) {
+		$ra =~ s/admin\+\S+\@/admin@/;
 
-	    &Debug("qmail:". $addr);
-	    &Debug("qmail return_addr:". $ra);
-	    $return_addr{$ra} = 1;
-	    &CacheOn($addr, " ");
+		&Debug("postfix:". $addr);
+		&Debug("postfix return_addr:". $ra);
+		$return_addr{$ra} = 1;
+		&CacheOn($addr, " ");
+	    }
+	    # qmail style
+	    elsif ($ra =~ /admin\-\S+/) {
+		$ra =~ s/admin\-\S+\@/admin@/;
+
+		&Debug("qmail:". $addr);
+		&Debug("qmail return_addr:". $ra);
+		$return_addr{$ra} = 1;
+		&CacheOn($addr, " ");
+	    }
 	}
     }
 }
