@@ -57,9 +57,12 @@ FYI: THIS FILE IS "EUC-JAPAN".
 
         2. ~/.fmlmk.conf を編集する。
 
-        3. make build
-             環境変数 PERL と MAKE は指定した方がいいです。
+        3. make build を bmake で行なう。
 
+	% bmake build
+
+        もしかしたら環境変数 PERL と MAKE を指定した方がいいのかも
+        しれません。
 	% env PERL=`which perl` MAKE=bmake bmake build
 
 
