@@ -739,7 +739,7 @@ sub SetHashDefaults
 		    '1000#tail ML [opt]',  'syntax sugar of log',
 
 		    'showconfig',          'do_showconfig',
-		    '8000#showconfig',     'show environment, version, ..',
+		    '8000#showconf',       'show environment, version, ..',
 		    'showconf',            'do_showconfig',
 		    'send-pr',             'do_send_pr',
 		    'bug-report-template', 'do_send_pr',
