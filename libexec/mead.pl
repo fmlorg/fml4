@@ -36,12 +36,12 @@ while (<>) {
 
     # check the current block
     if (/^Content-Type:\s*(.*)/i) { 
-	print STDERR "<<< $_ >>>\n";
+	&Debug("<<< $_ >>>");
 	$mp_block = $1;
     }
 
     if (/^(Content-Description:\s*Notification).*/i) { 
-	print STDERR "<<< $_ >>>\n";
+	&Debug("<<< $_ >>>");
 	$mp_block = $1;
     }
 
@@ -257,11 +257,21 @@ while (<>) {
 # VERPs: qmail specific
 # Suppose list-admin-account=domain@$mydomain syntax, ...
 {
-    local($addr) = $ENV{'RECIPIENT'};
+    local($ra, $addr);
+
+    $addr = $ENV{'RECIPIENT'};
+    $ra   = $ENV{'RECIPIENT'};
+
     if ($addr =~ /=/) {
 	$addr =~ s/\@\S+$//;
 	$addr =~ s/=/\@/;
 	$addr =~ s/^\S+\-admin\-//; # fml specific 
+
+	$ra =~ s/admin\-\S+\@/admin@/;
+
+	&Debug("qmail:". $addr);
+	&Debug("qmail return_addr:". $ra);
+	$return_addr{$ra} = 1;
 	&CacheOn($addr, " ");
     }
 }
@@ -391,21 +401,22 @@ sub CacheOn
 
     # cache check
     if ($debug && $Cached{"$addr:$reason"}) {
-	print STDERR "CacheOn already cached\n";
+	&Debug("CacheOn already cached");
     }
 
     return if $Cached{"$addr:$reason"};
     $Cached{"$addr:$reason"} = 1;
 
     if ($debug) {
-	unless (%return_addr)   { print STDERR "no return_addr\n";}
-	for (keys %return_addr) { print STDERR "return_addr = $_\n";}
+	unless (%return_addr)   { &Debug("no return_addr");}
+	for (keys %return_addr) { &Debug("return_addr = $_");}
     }
 
     for (keys %return_addr) {
 	if ($debug) {
 	    if (/^\s*$/ || ($_ eq $addr)) {
-		print STDERR "ignore $_\n";
+		&Debug("ignore null return_addr") unless $_;
+		&Debug("ignore $_ (eq \$addr)") if $_ eq $addr;
 	    }
 	}
 
@@ -522,7 +533,7 @@ sub DeadOrAlive
 
     ### check whether a user is dead or alive
     ### expire old entries 
-    local($time, $addr, $ml, $expire_range);
+    local($time, $addr, $ml, $expire_range, $debugbuf);
     local($new) = "$CACHE.".$$."new";
     local($expire_time) = $now - int($EXPIRE*24*3600);
 
@@ -566,9 +577,10 @@ sub DeadOrAlive
 	    $pri = $NULL;
 	    for (@opts) { /r=(\S+)/ && ($pri = $1);}
 
-	    print STDERR "$addr : $addr{\"$addr $ml\"}\t" if $debug;
+	    $debugbuf = "$addr : $addr{\"$addr $ml\"}\t" if $debug;
 	    $addr{"$addr $ml"} += $PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
-	    print STDERR "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
+	    $debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
+	    &Debug($debugbuf) if $debug;
 	}
     }
 
@@ -622,10 +634,9 @@ sub Report
     &GetTime;
 
     if ($debug) {
-	print STDERR "--report MODE=$MODE\n{";
-	print STDERR join(" ", %MakeFmlTemplate);
-	print STDERR "}\n";
-	# print STDERR "HOOK={$MEAD_REPORT_HOOK}\n";
+	&Debug( "--report MODE=$MODE\n{".
+	        join(" ", %MakeFmlTemplate) .
+	       "}\n" );
     }
 
     if ($MODE eq 'report') {
@@ -648,6 +659,7 @@ sub Report
 
 		if ($MEAD_REPORT_HOOK) {
 		    eval($MEAD_REPORT_HOOK);
+		    &Debug($@) if $@;
 		    print STDERR $@,"\n" if $@;
 		}
 		else {
@@ -713,7 +725,7 @@ sub Mesg
 sub CacheHints
 {
     for (reverse split(/\n/, $Received)) {
-	print STDERR "RECV>: <$_>\n";
+	&Debug("RECV>: <$_>");
 
 	if (/from\s+([-A-Za-z0-9]+\.[-A-Za-z0-9\.]+)/i) {
 	    $Hint{$1} = $1;
@@ -723,7 +735,7 @@ sub CacheHints
 	}
 
 	if (/for\s+<(\S+\@[A-Za-z0-9\.]+)>/) {
-	    print STDERR "--&CacheOn($1, $CurReason);\n";
+	    &Debug("--&CacheOn($1, $CurReason);");
 	    &CacheOn($1, $CurReason);
 	}
     }
@@ -993,7 +1005,11 @@ sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
 
 sub Debug
 {
-    print STDERR "$_[0]\n";
+    open(DEBUG, ">> /tmp/debugbuf");
+    print DEBUG @_, "\n";
+    close(DEBUG);
+    return unless $debug;
+    print STDERR @_, "\n";
 }
 
 
