@@ -218,4 +218,33 @@ sub EvalRejectFilterHook
 }
 
 
+# check the given buffer has unusual Japanese (not ISO-2022-JP)
+sub NonJISP
+{
+    local($buf) = @_;
+
+    # check 8 bit on
+    if ($buf =~ /[\x80-\xFF]/ ){
+	return 1;
+    }
+
+    # check SI/SO
+    if ($buf =~ /[\016\017]/) {
+	return 1;
+    }
+
+    # HANKAKU KANA
+    if ($buf =~ /\033\(I/) {
+	return 1;
+    }
+
+    # MSB flag or other control sequences
+    if ($buf =~ /[\001-\007\013\015\020-\032\034-\037\177-\377]/) {
+	return 1;
+    }
+
+    0; # O.K.
+}
+
+
 1;
