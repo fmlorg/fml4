@@ -1,0 +1,74 @@
+Received: by hikari.sapporo.iij.ad.jp (8.9.3/3.4W6+Hikari-2.1) with ESMTP id AAA12409 for <fukachan@sapporo.iij.ad.jp>; Tue, 28 Mar 2000 00:17:00 +0900 (JST)
+Received: by eve.sapporo.iij.ad.jp; id AAA24451; Tue, 28 Mar 2000 00:17:00 +0900 (JST)
+Received: from 154.83.149.210.economy.2iij.net(210.149.83.154) by eve.sapporo.iij.ad.jp via smap (V4.2)
+	id xma024449; Tue, 28 Mar 00 00:16:40 +0900
+Received: from ffs.fml.org (localhost.sapporo.iij.ad.jp [127.0.0.1])
+	by ahodori.fml.org (Postfix) with ESMTP
+	id ABE5386648; Tue, 28 Mar 2000 00:15:13 +0900 (JST)
+Received: from beth.sapporo.iij.ad.jp (154.83.149.210.economy.2iij.net [210.149.83.154])
+	by ahodori.fml.org (Postfix) with ESMTP id 2943E86643
+	for <fml-support@ffs.fml.org>; Tue, 28 Mar 2000 00:15:09 +0900 (JST)
+Received: from sapporo.iij.ad.jp (beth.sapporo.iij.ad.jp [192.168.148.3])
+	by beth.sapporo.iij.ad.jp (Postfix) with ESMTP id 7273AA6871
+	for <fml-support@ffs.fml.org>; Tue, 28 Mar 2000 00:15:04 +0900 (JST)
+Delivered-To: fml-support@ffs.fml.org
+Date: Tue, 28 Mar 2000 00:15:11 +0900
+X-Posted: Tue, 28 Mar 2000 00:15:04 +0900
+From: "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp>
+Reply-To: fml-support@ffs.fml.org
+Subject: Re: Get=?ISO-2022-JP?B?GyRCJHIkVSRkJDkhIxsoSg==?=
+To: fml-support@ffs.fml.org
+Message-Id: <20000327151504.7273AA6871@beth.sapporo.iij.ad.jp>
+In-Reply-To: your message of "Sat, 25 Mar 2000 23:07:20 +0900 ."
+             <B502F723.23D%k-sasa@air.linkclub.or.jp> 
+X-ML-Name: fml-support
+X-Mail-Count: 07712
+X-MLServer: fml [fml 3.0.1_RC (20000318)]; post only (only members can post)
+X-Stardate: [-30]4568.14
+X-ML-Info: If you have a question, send e-mail with the body
+	"help" (without quotes) to the address fml-support-ctl@ffs.fml.org;
+	help=<mailto:fml-support-ctl@ffs.fml.org?body=help>
+Precedence: bulk
+Lines: 38
+Sender: fml-support-admin@ffs.fml.org
+X-UIDL: ad9a07119cf8fc7af64d17587116528e
+
+in fml-support ML's Count:07705 
+"Kiyoshi 'Kent' Sasagawa" <k-sasa@air.linkclub.or.jp> さん  wrote:
+>Get以外のCommandで、(別に付くって)MLとは別のファイルを取り出すようにするには
+
+   "archive コマンド"をサーチする
+   doc/op の Chapter 14 とか…
+
+ってのはどうかなという答だけでも何なので
+
+>具体的には
+>「# get-XXX 1」をCommandとして送る。
+>　　↓
+>XXXのDirectoryの1と言うファイルが返ってくる。
+
+こんなんかな。"get-etc passwd" を elena-ctl におくると 
+/var/spool/ml/elena/etc/passwd が返ってくる。
+＃わかるとおり、チェックあまあまですが、まぁ prototype だから
+
+%LocalProcedure = (
+		   'get-spool', 'mySendFile',    # $DIR/spool
+		   'get-archive', 'mySendFile',  # $DIR/archive
+		   'get-etc', 'mySendFile',      # $DIR/etc
+		   );
+
+sub mySendFile
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    if ($proc =~ /^get-([a-z]+)$/io) {
+	local($dir) = $1;
+	if (-f "$dir/$Fld[2]") {
+	    &SendFile($to, "Get $dir/$Fld[2] $ML_FN", "$dir/$Fld[2]");
+	}
+    }
+}
+
+深町％さっぽろ＠IIJ
+
+

@@ -1,0 +1,168 @@
+.HTML_PRE
+
+	いろいろ (fml-support より)
+=E
+	miscellaneous tips
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.toc
+
+.HTML_PRE
+
+.S	off と skip
+
+fml-support: 07144
+
+off はメンバ用
+skip は管理者だけが使えるように
+
+Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
+んですが) として on off matome のメンバには定期的に個別にメイルを送って
+ます。(skip の場合には送らないようにしている)
+
+.S	登録/削除以外は限りなく不必要
+
+fml-support: 07271
+
+条件1. 登録者に一切報告メール(welcome も)は送らない
+条件2. 登録した、退会した、旨のメールのみ送る
+条件3. よってコマンドは subscribe と bye 以外不要だろう
+
+@PermitProcedure = ('subscribe', 'confirm', 'bye');
+
+で、この３つ以外のコマンドをdisableして、さらに
+
+     &DEFINE_MODE('disablenotify');
+
+とかするとほとんどなくなるでしょうかね…
+
+.S	fmlでのwelcomeメールのsubjectを日本語にする
+
+fml-support: 07219
+
+ＭＬのHOMEにあるcfというファイルの最後(LOCAL_CONFIGという行より後)に
+
+$START_HOOK = q#
+
+	&use('MIME');
+	$WELCOME_STATEMENT  = "ようこそここへ、うふふ";
+	$WELCOME_STATEMENT  = &STR2EUC($WELCOME_STATEMENT);
+	$WELCOME_STATEMENT  = &mimeencode($WELCOME_STATEMENT);
+
+#;
+
+と呪文を書いておいて、その場所で
+
+make config.ph
+
+で config.ph をつくりなおす
+
+.S	fmlでのwelcomeメールの本文をハックする
+
+◯ $DIR/welcome ファイルをいじる
+
+◯ 一番先頭の
+
+   メーリングリストへの投稿は	<foo@bar.jp>
+   コマンドは			<foo-ctl@bar.jp>
+   管理者宛のメールは		<foo-admin@bar.jp>
+
+のような部分をいじりたい場合は
+
+/usr/local/fml/messages/Japanese/amctl というファイルの
+
+amctl.added.caution:
+	注意: このメールにリプライするとメーリングリスト宛になります。
+	メーリングリストへの投稿は	<_ARG1_>
+	コマンドは			<_ARG2_>
+	管理者宛のメールは		<_ARG0_>
+	へ送って下さい。
+
+という部分をいじってください。
+
+[KNOWN_BUGS]
+
+XXX ただこのファイルはインストール時に上書きされてしまうので
+XXX /var/spool/ml/etc/fml/messages/Japanese/amctl などという場所へコピー
+XXX してそのファイルを好きなようにいじるべきです。しかし今度は fml を
+XXX updateしたときに新しい /usr/local/fml/messages/Japanese/amctl の内
+XXX 容が最新版を反映してくれません。現在のコードを修正してだめなら 
+XXX /usr/local/fml のほうもさがすように修正するべきでしょう。
+
+
+.S	command status report をしなくさせる
+
+command status をおくりかえしている部分を disable するには
+＃コマンドの普通の受け答え（？）の類をやみにほうむるには
+
+    &DEFINE_MODE('disablenotify'); 
+
+と config.ph に書くとこの関数がダミーの状態で呼ばれるけど何もしないよ
+うになります。ただし新規登録の時の welcome 部分は例外処理してるからこ
+れじゃだめなんですけどね
+
+.S	登録のconfirmationメールのsubjectをいじる
+
+   "Subscribe confirmation request $ML_FN";
+
+のような subject を自由にカスタマイズするのはちょっと面倒です。という
+のは状態によってさまざまなsubjectに変わるので、それは今関数のなかに埋
+め込まれてしまっています。
+
+XXX 本来は messages/$LANGUAGE/ に押し出して外のファイルから定義を
+XXX 変更できるようににするべきでしょうね。外側からそのてのフレーズをい
+XXX じれるようにする作業はエラーとかは一通り終ってるけどそれ以外は...
+
+例: 現状ではたぶんこんなんをかかないといけないす( not tested )
+
+.include myGenConfirmReplySubject.pl
+
+
+.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+fml-support: 07521 より
+
+Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
+      へ投稿した場合は、
+   [1] members ファイルに自動登録する。
+   [2] 投稿されたメールをmembersに配送する。
+
+これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
+いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+
+B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   へメールを送信した場合は、
+
+   [1] membersに自動登録する。
+
+A: config.ph でちょっと tricky だが 
+   
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+
+のような設定をする。
+
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
