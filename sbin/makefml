@@ -697,8 +697,10 @@ sub search_path
     local($path) = $ENV{'PATH'};
     local(@path) = split(/:/, $path);
 
+    # too pesimistic?
     for ("/usr/local/bin", "/usr/share/bin", 
-	 "/usr/contrib/bin", "/usr/gnu/bin") {
+	 "/usr/contrib/bin", "/usr/gnu/bin", 
+	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb") {
 	push(@path, $_);
     }
 
@@ -1764,6 +1766,15 @@ sub do_config
 sub MakeConfigPH
 {
     local($config, $manifest, $cf, $config_ph) = @_;
+    local($perl);
+
+    $perl = &search_path('perl');
+
+    if (! $perl) { 
+	print STDERR "I cannot find perl!! Dead Ends!\n";
+	print STDERR "Hence I cannot make config.ph.\n";
+	return "";
+    }
 
     print STDERR "Generating $config_ph from $cf ...\n";
     for ($config, $manifest, $cf) { # config.ph may not exist; 
@@ -1773,7 +1784,7 @@ sub MakeConfigPH
 	}
     }
 
-    open(EXEC_CF, "perl $config -m $manifest $cf|") || 
+    open(EXEC_CF, "$perl $config -m $manifest $cf|") || 
 	(&Warn("cannot exec $config -m $manifest $cf"), return 0);
     open(SAVE, "> $config_ph") || (&Warn("cannot open $config_ph"), return 0);
     select(SAVE); $| = 1; select(STDOUT);
