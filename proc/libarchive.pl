@@ -28,7 +28,7 @@ sub Archive
 
 package Archive;
 
-
+sub Archive'DiagPrograms      { &main'DiagPrograms(@_);}
 sub Archive'Log               { &main'Log(@_);}
 sub Archive'Debug             { &main'Debug(@_);}
 sub Archive'Append2           { &main'Append2(@_);}

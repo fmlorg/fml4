@@ -5,6 +5,8 @@
 
 2000/05/24
 
+  libarchive.pl: fix function import bug (Thanks Yasuyuki Nakasone)
+
   add toggle menu for configuration menu on CUI and GUI.
 	Please see "makefml config"
 	   MAIN_MENU => OPTION => VARIABLE_OFF_ON => ...
