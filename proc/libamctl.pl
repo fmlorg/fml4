@@ -378,8 +378,14 @@ sub DoSetMemberList
 
     ### Modification routine is called recursively in ChangeMemberList;
     local($r, $list);
-    if ($ML_MEMBER_CHECK) {
-	$list = &MailListMemberP($curaddr);
+
+    $list = &MailListMemberP($curaddr);
+
+    if (&ListIncludePatP($list, $ProcedureException{"bye", "ignore_list"})) {
+	&Log("ProcedureException: bye ignore $list");
+	$r++;
+    }
+    elsif ($ML_MEMBER_CHECK) {
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
 	&Log("$cmd MEMBER [$curaddr] $c O.K.")   if $r == 1 && $debug_amctl;
 	&Log("$cmd MEMBER [$curaddr] $c failed") if $r != 1;
@@ -389,7 +395,10 @@ sub DoSetMemberList
 	$r++;
     }
 
+    # special flag
     return $NULL if $Envelope{'mode:majordomo:chmemlist'};
+
+
     $list = &MailListActiveP($curaddr);
     &ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
     &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $r == 2 && $debug_amctl;

@@ -524,6 +524,15 @@ From: Yuao Tanigawa <yuao@infonia.or.jp>
 .~q
 
 
+.S	$ProcedureException{"bye", "ignore_list"} (将来もあるかは未定)
+
+   $ProcedureException{"bye", "ignore_list"} = $MEMBER_LIST;
+
+とかすると、member list に operation したふりだけして何もしないという 
+exception code いれたけど、裏技なのでdocumentにはかかず状態
+このコードはSNMPなMIB的になってしまふのかしらん… あななやまし
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
