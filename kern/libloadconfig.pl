@@ -150,6 +150,9 @@ sub LoadDummyMacros
     eval "sub PERMIT_PROCEDURE { 1;}";
     eval "sub DENY_PROCEDURE { 1;}";
     eval "sub DEFINE_PROCEDURE { 1;}";
+    eval "sub PERMIT_ADMIN_PROCEDURE { 1;}";
+    eval "sub DENY_ADMIN_PROCEDURE { 1;}";
+    eval "sub DEFINE_ADMIN_PROCEDURE { 1;}";
 
     # for convenience
     eval "sub DUMMY { ;}";
@@ -419,6 +422,42 @@ sub DEFINE_PROCEDURE
 {
     local($proc, $fp) = @_;
     $LocalProcedure{$proc} = $fp;
+}
+
+# XXX overwritten by %LocaAdminProcedure and @DenyAdminProcedure
+sub PERMIT_ADMIN_PROCEDURE
+{
+    local($proc) = @_;
+
+    push(@PermitAdminProcedure, $proc);
+
+    # may be defined by DENY_ADMIN_PROCEDURE() ?
+    if ($LocalAdminProcedure{$proc} eq 'ProcDeny') {
+	delete $LocalAdminProcedure{$proc};
+    }
+
+    # remove entry in @DenyAdminProcedure
+    if (@DenyAdminProcedure) {
+	my(@x, $x);
+	for $x (@DenyAdminProcedure) {
+	    push(@x, $x) if $x ne $proc;
+	}
+	@DenyAdminProcedure = @x;
+    }
+}
+
+# XXX overwrite @PermitAdminProcedure
+sub DENY_ADMIN_PROCEDURE
+{
+    local($proc) = @_;
+    $LocalAdminProcedure{$proc} = 'ProcDeny';
+}
+
+# set up Hash %LocalAdminProcedure
+sub DEFINE_ADMIN_PROCEDURE
+{
+    local($proc, $fp) = @_;
+    $LocalAdminProcedure{$proc} = $fp;
 }
 
 sub Debug { print STDERR "@_\n";}
