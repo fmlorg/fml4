@@ -1,4 +1,9 @@
 #!/usr/local/bin/perl
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+
 
 require 'getopts.pl';
 &Getopts("hpf:d:");
@@ -10,21 +15,21 @@ $DIR    = $opt_d || $ARGV[0] || $ENV{'PWD'} || '.';
 require "$DIR/config.ph" if -f "$DIR/config.ph";
 
 $EDITOR = $ENV{'EDITOR'} || 'vi';
-$PASSWD = "$DIR/etc/passwd";
+$PASSWD_FILE = "$DIR/etc/passwd";
 
 if ($opt_p) {
-    $FILE   = $PASSWD;
+    $file   = $PASSWD_FILE;
 }
 elsif ($opt_f) {
-    $FILE   = "$DIR/$opt_f";
+    $file   = "$DIR/$opt_f";
 }
 else {
-    $FILE   = "$DIR/config.ph";
+    $file   = "$DIR/config.ph";
 }
 
 &Flock;
 
-system("$EDITOR $FILE");
+system("$EDITOR $file");
 
 # &EnCryption($PASSWD);
 

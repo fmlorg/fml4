@@ -1,8 +1,12 @@
 #!/usr/local/bin/perl
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
 
 &mhgetopt;
 
-open(F, $FILE) || die("cannot open $FILE;$!\n");
+open(F, $File) || die("cannot open $File;$!\n");
 
 while(<F>) {
     /mconf/i && $ok++;
@@ -10,15 +14,15 @@ while(<F>) {
     if (/^(\S+):/ && (!/^\$/) && (!/^MSend:/) && (!/^AL:/)) {
 	if ($ok) {
 	    $r .= '*' x 60;
-	    $r .= "\n\n\t\t[ $ML ]\n\n";
+	    $r .= "\n\n\t\t[ $maillist ]\n\n";
 	    $r .= $s;
-	    $s{$ML}.= "$m\n";
+	    $s{$maillist}.= "$m\n";
 	}
 	undef $s;
 	undef $m;
 	undef $ok;
 
-	$ML = $1;
+	$maillist = $1;
 	next;
     };
     
@@ -38,10 +42,10 @@ print "\n\n*** Summary ***\n";
 print $r;
 
 if ($truncate) {
-    truncate($FILE, 0);
+    truncate($File, 0);
 }
 else {
-    print STDERR "$FILE not zero\'d\n";
+    print STDERR "$File not zero\'d\n";
 }
 
 exit 0;
@@ -52,15 +56,14 @@ sub mhgetopt
 
     # DEFAULT
     $truncate = 0;
-    $FILE     = 'STDIN';
-    $folder   = $DEFAULT_FOLDER;
+    $File     = 'STDIN';
 
     while($_ = shift @ARGV) {
 	if (/^\+(\S+)$/) {
 	    $folder = $1;
 	}
 	elsif (/^\-file$/) {
-	    $FILE = shift @ARGV;
+	    $File = shift @ARGV;
 	}
 	elsif (/^\-truncate$/) {
 	    $truncate = 1;
