@@ -38,12 +38,16 @@ sub Parse
     $PTR       =~ s#^\/{1,}#\/#;
     $PROC      =~ tr/A-Z/a-z/;
 
+    # We should not use raw $LANGUAGE (which is raw input from browser side).
+    # We should check it matches something exactly and use it.
     if ($LANGUAGE eq 'Japanese') {
 	push(@INC, $EXEC_DIR);
 	require 'jcode.pl';
 	eval "&jcode'init;";
 	require 'libmesgle.pl';
-	$MESG_FILE = "$EXEC_DIR/messages/Japanese/cgi";
+	$MESG_FILE        = "$EXEC_DIR/messages/$LANGUAGE/cgi";
+	$MESSAGE_LANGUAGE = $LANGUAGE;
+	push(@LIBDIR, $EXEC_DIR);
     }
 }
 
@@ -70,6 +74,18 @@ sub UpperHalf
 }
 
 
+# I'll try to show what do we do now?
+sub MakefmlInputTranslate
+{
+    local($command, $ml, @argv) = @_;
+    local($buf, %xe);
+
+    # print "(debug) &MesgLE(*xe, makefml.$command, $ml, @argv);\n";
+    $buf = &MesgLE(*xe, "makefml.$command", $ml, @argv);
+    print $buf, "\n";
+}
+
+
 sub Control
 {
     local($ml, $command, @argv) = @_;
@@ -79,6 +95,8 @@ sub Control
 
     if (open(CTL, "|$MAKE_FML -E HTTPD -i stdin > $tmpbuf 2>&1")) {
 	select(CTL); $| = 1; select(STDOUT);
+
+	&MakefmlInputTranslate($command, $ml, @argv);
 
 	print CTL join("\t", $command, $ml, @argv);
 	print CTL "\n";
@@ -104,9 +122,9 @@ sub XSTranslate
     $mesg =~ s/^\s*//;
 
     if ($mesg =~ /OK:/) {
-	&Mesg2Japanese('OK') || $mesg;
+	&Mesg2Japanese('cgi.ok') || $mesg;
     }
-    elsif ($mesg =~ /(ERROR:|WARN:)\s*(\S+)(.*)/) {
+    elsif ($mesg =~ /(ERROR:|WARN:)\s*(\S+)(.*)/i) {
 	local($tag, $key, $tbuf) = ($1, $2, $3);
 	$r = &Mesg2Japanese($key);
 	$tag ." ". ($r ? $r : $key.$tbuf);
@@ -166,16 +184,32 @@ sub OUTPUT_FILE
 	}
 	close($file);
 
+	local($found);
+	$found = &Grep('End of HtmlConfigMode Header', $file);
 
 	open($file, $file);
 	while (<$file>) {
-	    next if 1 .. /config.ph; /;
-	    next if /^\-\-\-/;
+	    if ($found) {
+		next if 1 .. /### End of HtmlConfigMode Header/;
+	    }
+	    else {
+		next if /THIS HOST/;
+		next if /Loading the configuration/
+	    }
+
+	    next if /^\-\-\-/ && (!/(lock|unlock)/i);
 	    next if /^ExitStatus:/;
+	    next if /config.ph;.*\$CFVersion/;
+	    next if /^\*\*\* /;
+
 	    chop;
+
 	    $_ ? ($space_count = 0) : $space_count++;
 	    next if $space_count > 1;
-	    
+
+	    # hide environment
+	    s/$EXEC_DIR/\$EXEC_DIR/g;
+	    s/$ML_DIR/\$ML_DIR/g;
 	    print $_, "\n";
 	}
 	close($file);
@@ -183,6 +217,18 @@ sub OUTPUT_FILE
     else {
 	&ERROR("cannot open logfile");	
     }
+}
+
+
+sub Grep
+{
+    local($key, $file) = @_;
+
+    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<IN>) { return $_ if /$key/i;}
+    close(IN);
+
+    $NULL;
 }
 
 
@@ -231,17 +277,13 @@ sub SecureP
 sub Command
 {
     if ($PROC eq 'add' || $PROC eq 'bye') {
-	&P("&Control($ML, $PROC, $MAIL_ADDR);") if $debug;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
     elsif ($PROC eq 'add_admin' || $PROC eq 'bye_admin') {
 	$PROC =~ s/_admin/admin/;
-	&P("&Control($ML, $PROC, $MAIL_ADDR);") if $debug;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
     elsif ($PROC eq 'newml') {
-	&P("&Control($ML, $PROC);") if $debug;
-	&P("&Control($ML, $PROC);");
 	&Control($ML, $PROC);
     }
     elsif ($PROC eq 'config') {
