@@ -2,6 +2,9 @@
 .if LANG == JAPANESE
 	CGIのインストールについて (fml-current)
 
+	〜かきかけ〜
+
+
 				深町 賢一
 .fi
 .if LANG == ENGLISH
@@ -16,6 +19,7 @@ __________________________________________
 
 
 .C	おおざっぱな手順
+=E.C	Overview
 
 fml-current をインストールする。
 
@@ -31,7 +35,8 @@ fml-current をインストールする。
 などです。
 
 
-.C	fmlのインストール
+.C	fml-current のインストール
+=E.C	installation of fml-current
 
 current をもってくる。
 
@@ -58,6 +63,7 @@ current をもってくる。
 
 
 .C	httpd の設定
+=E.C	configure httpd
 
 例えば apache なら
 
@@ -75,7 +81,8 @@ current をもってくる。
 する。
 
 
-.C	アクセスしてみる
+.C	WWWにアクセスしてみる
+=E.C	go to cgi menu!
 
 例:
 
@@ -94,6 +101,7 @@ current をもってくる。
 
 
 .C	特定のＭＬだけはCGIでいじれるようにしてあげる
+=E.C	enable a mailing list to be configured on cgi menu
 
 	makefml mladmin.cgi ML
 
