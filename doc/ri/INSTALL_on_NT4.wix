@@ -103,7 +103,7 @@ For this lack of functions, two variations of fml for NT4 exist.
 	1.	the same as UNIX (prog mailer type)
 		Configuration is the same as on UNIX.	
 	2.	POP3 type
-		fml gets a mail from POP server and 
+		fml gets mail from POP server and 
 		injects it to fml.pl to run a mailing list.
 
 の2種類です。タイプ1は現在のところ事実上 MetaInfo Sendmail 用でUNIX と
@@ -175,7 +175,7 @@ NT の多くのMTAでは sendmail が受けとってもその後にプログラムを起動して
 =E
 A lot of MTA on NT4 has only SMTP and POP servers and cannot run the
 program. In POP version you need to set up ML name account in POP
-server. fml extracts a mail for ML by POP3 and injects it to fml.pl
+server. fml extracts mail for ML by POP3 and injects it to fml.pl
 (mailing list emulation). # This function is implemented on UNIX in
 1995, and the same technique # is used on NT4.
 
@@ -237,7 +237,7 @@ ntfml.pl (ずっとはしっている)の無限ループ {
 		----> POP SERVER account = elena
 		<----
 
-	If a mail for elena ML exist
+	If mail for elena ML exist
 		runs fml.pl
 
 	elsif not, sleep again
@@ -387,7 +387,7 @@ some functions are changed for this type reasons.
 
 メールが来た時だけ起動して働きます。ほおって置いて構いません。
 =E
-fml runs when a mail comes. Please let it be.
+fml runs when mail comes. Please let it be.
 
 * POP 版
 =E

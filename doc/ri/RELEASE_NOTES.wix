@@ -439,7 +439,7 @@ Thanks to: Takuro KITAME / =?ISO-2022-JP?B?GyRCS0xMXBsoQiAbJEJCc086GyhC?=
 	 <kitame@northeye.com>
 In fml-support ML's Count: 04551
 
-add Precedence: in a mail from msend.pl
+add Precedence: in mail from msend.pl
 
 ------------------------------------------
 Date:    Tue, 26 May 1998 21:19:03 +0900
@@ -2998,7 +2998,7 @@ Thanks to Seiji Yoshiki <s-yosiki@pub.nes.nec.co.jp>
 FIX Comman Reply Infomation
 
 IF	もし知らない人からへのヘルプとして上の文章をつける時は
-	send a mail .. をつけない
+	send e-mail .. をつけない
 
 ------------------------------------------
 Date:    Wed, 12 Jun 96 11:09:20 JST

@@ -315,10 +315,9 @@ bd -t" (A BIG MISTAKE).
 かかります。よって、MAINTAINER は -request とかにするのがおすすめです。
 なお、
 =E
-Also if $MAINTAINER is yourself address and you send a mail to fml.pl
-on its host, this mechanism works and rejects your mail a a mail loop.
-Hence we recommend $MAINTAINER is -admin or -request form. 
-If 
+Also if $MAINTAINER is yourself address and you send e-mail to fml.pl
+on its host, this mechanism works and rejects your mail as mail loop.
+Hence we recommend $MAINTAINER is -admin or -request form. If
 
 	$NOT_USE_UNIX_FROM_LOOP_CHECK = 1; (default 0)
 
@@ -787,7 +786,7 @@ mail loop.
 .k	trouble shooting
 
 .S	ヘッダの時間がおかしい?
-=E.S	Strange time zone of a mail header
+=E.S	Strange time zone of mail header
 .key	TZ
 .key	sendmail.cf
 

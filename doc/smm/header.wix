@@ -327,15 +327,15 @@ $DATE_TYPE default is "original-date".
 
 	received-date
 	received-date+posted
-		Date:	When FML receives a mail
+		Date:	When FML receives mail
 		Posted:	Date: of the original mail
 
 	received-date+x-posted
-		Date:	When FML receives a mail
+		Date:	When FML receives mail
 		X-Posted:	Date: of the original mail
 
 	received-date+x-original-date
-		Date:	When FML receives a mail
+		Date:	When FML receives mail
 		X-Original-Date:	Date: of the original mail
 
 	original-date
@@ -897,8 +897,8 @@ $TRAILER_MAILBODY. The command mail reply body becomes
 注意： 配送されるメール本体につける方法。これは倫理的な問題があるので
 変数などで容易にできるように実装されていません。
 =E
-FML DOES NOT IMPLEMENT THE VARIABLE TO REWRITE A MAIL BODY IN TO
-PRESERVE MORAL. It is against morals to rewrite a mail body even if it
+FML DOES NOT IMPLEMENT THE VARIABLE TO REWRITE MAIL BODY IN TO
+PRESERVE MORAL. It is against morals to rewrite mail body even if it
 is an electric mail. We should treat it as the same as a postal mail.
 The rewriting is to cut out a postal mail and rewrite it is mail
 forgery.

@@ -181,9 +181,9 @@ Type III は I の変形です。パスワードを知っている人(モデレータ)は査読に
 関わらず出せます。Approval: パスワード つきでメールをだせば査読にまわ
 らずそのまま通過します。
 =E
-Type III is a variation of type I. A mail from a moderator pass
-through without certification. A mail with Approva: password is not
-checked.
+Type III is a variation of type I. The mail from a moderator pass
+through without certification. The mail with Approva: password is not
+checked. 
 
 See also "admin forward" command.
 .xref	moderator-type-1

@@ -412,7 +412,7 @@ base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 ユーザが与えた名前は security 上使いません。
 =E
 If $BASE64_DECODE is defined, FML tries to decode BASE64 parts
-contained in a mail when a HTML article is created.
+contained in the mail when a HTML article is created.
 
 Example:
 	$BASE64_DECODE = "/usr/local/bin/mewdecode";

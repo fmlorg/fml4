@@ -14,7 +14,7 @@
 .if LANG == ENGLISH
 You are not a member of this mailing list <_MAIL_LIST_>.
 
-If you know the general guide of this list, please send a mail with
+If you know the general guide of this list, please send mail with
 the mail body 
 
 	_CTK_guide

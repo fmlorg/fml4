@@ -71,8 +71,8 @@ SYNOPSIS
 	@to		$to 以外の複数の送り先アドレスを配列で
 =E
 	$to		recipient
-	$subject	subject of a mail to send
-	$body		body of a mail to send
+	$subject	subject of mail to send
+	$body		body of mail to send
 	@to		recipients except $to 
 
 .S	SendFile (libsmtp.pl)
@@ -90,7 +90,7 @@ SYNOPSIS
 	@to		上以外の複数のアドレス
 =E
 	$to		recipient
-	$subject	subject of a mail to send
+	$subject	subject of mail to send
 	$file		a file to send
 	$zcat		conversion flag (not used)
 	@to		recipients except $to 
@@ -115,7 +115,7 @@ SYNOPSIS
 	@files		送りたいファイル（複数可能）
 =E
 	@to		recipients (array)
-	$subject	subject of a mail to send
+	$subject	subject of mail to send
 	@files		array of files to send
 
 .S	Addr2FQDN              (fml.pl)
@@ -195,7 +195,7 @@ SYNOPSIS:
 =E
 Auto Registration routine. The argument is *Envelope or *Envelope and
 $string. If $string is given, the routine checks $string as an input.
-If not, $Envelope{'Body'} which is a mail body. 
+If not, $Envelope{'Body'} which is mail body. 
 
 .S	ChangeMemberList       (libfml.pl)
 .k	ChangeMemberList

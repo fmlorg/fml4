@@ -56,7 +56,7 @@ running.
 =E
 cron.pl may be down. OS does not run cron.pl automatically, so 
 digest delivery does not run until you are aware of it. 
-For it, you can set up fml.pl runs cron.pl when a mail comes in.
+For it, you can set up fml.pl runs cron.pl when mail comes in.
 
 
 ○ 注意
@@ -183,7 +183,7 @@ following ways:
 
    3. MLサーバにメールが来たときに起動させる↓とか…
 =E
-   3. fml.pl runs cron.pl when a mail comes in.
+   3. fml.pl runs cron.pl when mail comes in.
 
 が考えられます。３の設定としては config.ph に
 =E

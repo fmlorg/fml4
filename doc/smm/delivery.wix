@@ -230,9 +230,9 @@ If you can use several machines as delivery, you can set
 sendmail がないシステムでは qmail-smtpd, exim なdも試します。
 =E
 to use machine-* parallelly. FML breaks out recipients up to
-$MCI_SMTP_HOSTS groups. A mail to deliver is injected to each MTA on
+$MCI_SMTP_HOSTS groups. Mail to deliver is injected to each MTA on
 $HOST and @HOSTS. If all connections to hosts fail, FML tries to send
-a mail with "sendmail" called as a command.
+mail with "sendmail" called as a command.
 
 .S	リレー(RFC821)
 =E.S	Relaying based on RFC821
@@ -358,7 +358,7 @@ or.jp ドメイン宛のメールは mlrelay0.domain0 へ全部送る。それ以外は
 $HOST (通常自分のマシン) で定義されるマシンで配送を行なう。
 =E
 CF style example: 
-	send a mail for or.jp domain to mlrelay0.domain0.
+	send e-mail for or.jp domain to mlrelay0.domain0.
 
 	GW smtp-ignmx:  mlrelay0.domain0
 	DOM or.jp
@@ -369,7 +369,7 @@ co.jp にマッチしないドメイン宛のメールはすべて mlrelay.domain というマ
 =E
 CF style example2:
 	send mails not for co.jp to mlrelay.domain.
-	send a mail for or.jp domain to mlrelay0.domain0.	 
+	send e-mail for or.jp domain to mlrelay0.domain0.	 
 
 	NGW smtp-ignmx: mlrelay.domain
 	DOM co.jp

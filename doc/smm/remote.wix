@@ -59,8 +59,8 @@ ML.
 でもヘッダの Approval: password フィールドは見えてしまいます。
 =E
 SMTP (Simple Mail Transfer Protocol) cannot certify who are you. We
-cannot trust password authentications since the password is a plain
-text and a mail is not encrypted, so some people read error mails or
+cannot trust password authentications since the password is plain
+text and the mail is not encrypted, so some people read error mails or
 files in mqueue spool. Using the "Approval: password" field in a
 header is out of discussion.
 

@@ -38,7 +38,7 @@ servers. In this chapter we describe fml internals.
    sendmail 等のSMTPサーバがメールの配送を行なう。
 .fi
 .if LANG == ENGLISH
-	A mail comes by SMTP.
+	mail comes via SMTP.
 		|
 	MTA e.g. sendmail receives it.
 	Here after we suppose MTA is sendmail. 
@@ -106,8 +106,8 @@ The content of /usr/local/list/Elena is
 
 のようになっています。
 =E
-This implies that sendmail passes a mail to fml.pl via PIPE (pipe(2)).
-fml.pl receives a mail via STDIN. fml.pl works with this input.
+This implies that sendmail passes mail to fml.pl via PIPE (pipe(2)).
+fml.pl receives mail via STDIN. fml.pl works with this input.
 
 次に fml が上の引数は /var/spool/ml/elena を Elena ML の HOME だと見な
 し /var/spool/ml/elena/config.ph に従い fml の設定を行います。
@@ -1053,7 +1053,7 @@ private communication のファイルを public な場所にファイルを残すことは
 	ＭＬがメンバーチェックをしている時
 	メンバー以外からメールが来た時に返す断りの文章
 =E
-	file to send back when fml.pl rejects a mail from a non member.
+	file to send back when fml.pl rejects mail from a non member.
 	This is not used in auto registration mode.
 		
 	$WELCOME_FILE	 	$DIR/guide
@@ -2197,7 +2197,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 例2:	sendmail の option で PICKY_HELO_CHECK をかけている場合
 =E
 Example 2: When you configure PICKY_HELO_CHECK is on in config.h of
-sendmail, reject a mail when it has X-Authentication-Warning by
+sendmail, reject mail when it has X-Authentication-Warning by
 PICKY_HELO_CHECK. However this filter does not work well 
 since virtual domain users matches them even if they are not spammers;D
 
@@ -2466,7 +2466,7 @@ it. If the list follows
 	# addr3
 	addr4
 
-Fml delivers a mail to addr4 not addr1,addr2,addr3 but accepts post
+Fml delivers mail to addr4 not addr1,addr2,addr3 but accepts post
 from addr1,addr2,addr3,addr4.
 .fi
 
@@ -2532,7 +2532,7 @@ X-ML-Info: フィールドにはＭＬのアドレス(MLのアドレス、コマンドのアドレ
 ML-A -> ML-B -> ML-C -> ... のML-B)であってもX-ML-Info: に自分のＭＬア
 ドレス(X-ML-Info: ML-B)はでないはずという仮定です。
 =E
-X-ML-Info: field has the ML address. It must be unique. A mail with
+X-ML-Info: field has the ML address. It must be unique. Mail with
 "X-ML-Info: ML" must not be injected to the fml.  Under this
 conjecture, we check and reject mails with "X-ML-INfo: our ML".
 

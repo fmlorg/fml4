@@ -33,7 +33,7 @@ are access control variables.
    $REJECT_COMMAND_HANDLER	メンバー以外からのコマンドが来たらどうするか?
 =E
    $PERMIT_POST_FROM		permit posting from whom ?
-   $REJECT_POST_HANDLER		If a not member posts a mail, 
+   $REJECT_POST_HANDLER		If a not member posts mail, 
 				what should we do?
    $PERMIT_COMMAND_FROM		permit commands from whom ?
    $REJECT_COMMAND_HANDLER	If a not member posts a command mail, 
@@ -63,7 +63,7 @@ HANDLER はいずれの場合も管理者へメールでの報告はいきます。
 [whom]
 	anyone			from anyone
 	members_only		members only (in $MEMBER_LIST @MEMBER_LIST)
-	moderator		forward a mail from anyone to moderators
+	moderator		forward mail from anyone to moderators
 
 [handler]
 	reject			reject (sends the file "deny" to From:)
@@ -74,7 +74,7 @@ When non usual event occurs in any case, fml.pl sends a report to
 $MAINTAINER.
 
 In "anyone", "members_only" and "moderators", $REJECT_ADDR is applied.
-If a mail comes from public addresses e.g. "root', "postmaster",
+If mail comes from public addresses e.g. "root', "postmaster",
 "mailer-daemon", fml.pl rejects it. If you can pass it, change
 $REJECT_ADDR.
 
@@ -139,7 +139,7 @@ For example, configure
 
 のようになることです。この場合はメンバー以外の人が
 =E
-In this case, fml.pl rejects a mail posted from a not member.
+In this case, fml.pl rejects mail posted from a not member.
 Subscribe request from a not member to the command address is passed
 to automatic registration routine.
 
@@ -155,7 +155,7 @@ to automatic registration routine.
 にすれば「投稿用のアドレスにメンバー以外からメールが来たら自動登録」に
 することもできます。
 =E
-enables to pass a mail from a not member to the automatic registration
+enables to pass mail from a not member to the automatic registration
 routine.
 
 .S	配送用のアドレス ($MAIL_LIST)
@@ -187,7 +187,7 @@ $CFVersion 3 の config.ph では
 .fi
 .if LANG == ENGLISH
 Consider if you set $MAIL_LIST == $CONTROL_ADDRESS. The combination is
-possible to set up. In this case fml.pl cannot recognize a mail is
+possible to set up. In this case fml.pl cannot recognize the mail is
 commands or a usual article. However special keywords to show this
 mail is for commands can control fml.pl action mode. The keyword
 syntax is '# command' syntax. For example, "# help".

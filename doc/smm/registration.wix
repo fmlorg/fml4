@@ -224,7 +224,7 @@ new addresses. The process is as follows:
 	and ML-maintainer. 
 	# If you set 
 	#	@DenyProcedure('r2a#chaddr');  (in config.ph)
-	# maintainer will not receive a mail of the chaddr result.
+	# maintainer will not receive mail of the chaddr result.
 .fi
 
 NOTE: 1999/10/04

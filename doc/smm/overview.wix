@@ -37,7 +37,7 @@
 送を行ないます。つまり配送はＭＬサーバの役目ではありません。
 =E
 A ML server is a filtering process. MTA (Mail Transfer Agent) on a
-host receives a mail and injects it to a program (fml.pl).  The
+host receives mail and injects it to a program (fml.pl).  The
 program checks the member or not, surgeries the header and passes the
 mail to MTA. The ML server does not deliver mails by itself.
 
@@ -52,7 +52,7 @@ mail to MTA. The ML server does not deliver mails by itself.
 
 ＭＬのメンバーからのメール
 =E
-a mail from a member
+mail from a member
 
    |
    V
@@ -96,7 +96,7 @@ sender.
 cronというオペレーティングシステムが提供する機能を使っています。
 .xref cron
 =E
-A ML server runs only when a mail comes in. It is irregular and event
+A ML server runs only when mail comes in. It is irregular and event
 driven. If a user receives articles not real time but once three
 hours, another program (msend.pl) needs to run periodically. This is
 called "digest delivery". FML uses cron to execute msend.pl
@@ -176,7 +176,7 @@ address for commands for each mailing list (default).
 To provides the degree of freedom of customization, FML configuration
 file has a lot of variables (like a sendmail.cf. FML prepares
 listserv(majordomo) style command server interface.  If you can not
-set up "a MTA receives a mail and runs FML", you can use POP3 based
+set up "a MTA receives mail and runs FML", you can use POP3 based
 mailing list.
 
 ＭＬサーバというものは一番肝心な部分はかなり簡単なのですが、実際にはさ
@@ -266,7 +266,7 @@ FML provides addresses for post and commands.
 	address for command	$CONTROL_ADDRESS
 
 You can set $MAIL_LIST == $CONTROL_ADDRESS. But in its case, FML
-requires the keyword to identify a mail is for post or for commands.
+requires the keyword to identify mail is for post or for commands.
 .fi
 
 ＭＬサーバの現在の代表的な機能は以下のようなものです。
@@ -705,7 +705,7 @@ The top menu of "makefml config" shows
 
 You can choice the following values for
     * PERMIT POST or COMMANDS FROM WHOM ?
-    * IF A MAIL COMES FROM NOT MEMBER, WHAT FML DOES?
+    * IF MAIL COMES FROM NOT MEMBER, WHAT FML DOES?
 
 The choice for "* PERMIT POST or COMMANDS FROM WHOM ?" is one of
 
@@ -713,14 +713,14 @@ The choice for "* PERMIT POST or COMMANDS FROM WHOM ?" is one of
 	members_only	(default)
 	moderator (.ptr{moderators})
 
-The choice of function for "* IF A MAIL COMES FROM NOT MEMBER, WHAT
+The choice of function for "* IF MAIL COMES FROM NOT MEMBER, WHAT
 FML DOES?" is one of
 
 	reject		(default)
 	auto_regist
 	ignore
 
-FML checks a in-coming mail is from a member or not. It is default. If
+FML checks in-coming mail is from a member or not. It is default. If
 from not member, FML reject the mail and notifies it to the sender. If
 from not member and automatic registrable (auto_regist is selected),
 FML try to do automatic registration.
@@ -784,7 +784,7 @@ command permits only "number" as the file name to put.
 =E
 Fundamentally FML passes MIME header fields through. FML decodes
 Subject: and save it in the summary file (default). If a base64
-decoder is defined, FML decodes the base64 part in a mail when a HTML
+decoder is defined, FML decodes the base64 part in mail when a HTML
 article is created.
 
 .S	リモートでＭＬを管理すること
@@ -913,9 +913,9 @@ deliver a distribution mail. The default configuration is
 
 	$Envelope{'mci:mailer'} = 'ipc'; (default)
 
-is 'ipc'. FML makes a connection via SMTP to MTA and sends a mail to
+is 'ipc'. FML makes a connection via SMTP to MTA and sends mail to
 it. If 'prog' is defined, fml.pl executes sendmail ($SENDMAIL) as a
-program and injects a mail to it.
+program and injects the mail to it.
 .fi
 
 	$Envelope{'mci:mailer'} = 'prog';
@@ -934,7 +934,7 @@ are also available as a MTA. FML connects via SMTP. If no host runs
 MTA, use 'prog'.
 
 .S	MTAがメールを受けとれないマシンの時
-=E.S	When your machine which FML runs on cannot receive a mail
+=E.S	When your machine which FML runs on cannot receive mail
 .xref	popfml
 
 逆にどうやってメールを受けとるかという問題があります。通常 SMTP を理解
@@ -942,9 +942,9 @@ MTA, use 'prog'.
 えば一定時間間隔で POP をかけてＭＬを動かし、配送はサイトの SMTP サー
 バにやらせることでＭＬを実行するこは可能です。
 =E
-How FML receives a mail is a problem. For security some sites prohibit
+How FML receives mail is a problem. For security some sites prohibit
 MTA to run a program. If so, you can use popfml.pl. popfml.pl connects
-a POP server via POP3, receives a mail for a ML and injects it to
+a POP server via POP3, receives mail for a ML and injects it to
 fml.pl.
 
 .S	セキュリティ
@@ -1201,7 +1201,7 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 いアドレスにたいしてです。というのはＭＬとは個人と個人を結び付けるもの
 だと思われるからです。現在は
 =E
-In default FML does not permit a mail from root, postmaster even if
+In default FML does not permit mail from root, postmaster even if
 $PERMIT_POST_FROM == "anyone" or $PERMIT_COMMAND_FROM == "anyone". We
 think we cannot permit a post from non personal addresses such as
 root, postmaster since a ML is for private communication. It is useful
@@ -1335,7 +1335,7 @@ Posted:	is the time when the original sender posted.
 The concept of ML must be two ways of thinking.
 
 	1	just relay.
-	2	ML server receives a mail and sends it again. 
+	2	ML server receives mail and sends it again. 
 		not just relay.
 
 We think FML should be type 2. You can sort articles by Date: since it

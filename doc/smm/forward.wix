@@ -36,7 +36,7 @@ Sendmail injects the mail to fml.pl.
 この場合の問題は、自分自身へも配送するのでループ(bounce)問題をどう避け
 るか? が問題になります。.forward 方式では2通りの考え方ができます。
 =E
-But in general .forward is for the owner, so a mail to .forward ML is
+But in general .forward is for the owner, so mail to .forward ML is
 delivered to the owner itself again. It creates a loop problem.
 To avoid this, consider the following two ways.
 
@@ -98,7 +98,7 @@ This requires your ISP provides, what is called, "shell service".
 				 → 	ML2
 			...
 =E
-Your account receives a mail. A filter run through .forward checks 
+Your account receives mail. A filter run through .forward checks 
 keywords in the mail to determine
 	injects it to local spool ?
 	runs ML1 ?

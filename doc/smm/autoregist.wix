@@ -173,7 +173,7 @@ where $ML_FN = "(Elena ML)".
 
 です。自動登録は"投稿がメンバーだけ"(members_only)の場合に
 =E
-If $PERMIT_COMMAND_FROM == "members_only" and a mail (subscribe
+If $PERMIT_COMMAND_FROM == "members_only" and mail (subscribe
 request) comes from a not member, fml.pl calls
 $REJECT_COMMAND_HANDLER function. In default $REJECT_COMMAND_HANDLER
 is "reject", so fml.pl notifies denial of service for a not member.
@@ -214,7 +214,7 @@ re-configured config.ph for automatic registration
 
 のようになることです。この場合はメンバー以外の人が
 =E
-Now FML permits only members can post to ML and reject a mail from a
+Now FML permits only members can post to ML and reject mail from a
 not member. FML permits commands from a member and do automatic
 registration for a subscriber request mail from a not member.
 

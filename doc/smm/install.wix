@@ -127,7 +127,7 @@ Example:
 ら手動 edit できます。
 =E
 If no process runs, you can edit any files :-). However in general we
-do not know when a mail comes in.  You should lock FML to edit files.
+do not know when mail comes in.  You should lock FML to edit files.
 
 .if LANG == JAPANESE
 makefml lock ML		MLをロックする。プロセスを殺すか
@@ -502,7 +502,7 @@ How to kick off "fml.pl" is
 の形です。このコマンドを起動して STDIN からメールを突っ込んで下さい。
 つまり(PIPEで)
 =E
-MTA runs this command and injects a mail to it. That is 
+MTA runs this command and injects mail to it. That is 
 
 	| fml.pl $DIR $LIBDIR
 
@@ -515,7 +515,7 @@ Consider Elena mailing list setting. Sendmail reads the content of
 /var/spool/ml/Elena/include (file to include) and checks the owner of
 the file. Sendmail runs "|/usr/local/fml/fml.pl /var/spool/ml/elena "
 (precisely e.g. sh -c "|/usr/local/fml/fml.pl /var/spool/ml/elena ")
-as the owner process and passes a mail for Elena to it.
+as the owner process and passes mail for Elena to it.
 
    [/etc/aliases]
 
@@ -856,7 +856,7 @@ variables, like a
 たはメンバーでないからだめやねん』というメールを送り主に送り返します。
 これを auto_regist に設定すると自動登録を行ないます。
 =E
-The default value is "reject". If ML receives a mail from a not
+The default value is "reject". If ML receives mail from a not
 member, ML rejects the request and sends back warning to a sender.  If
 you set it to be "auto_regist", FML do automatic registration.
 
@@ -871,7 +871,7 @@ This is a typical case of "automatic registration".
 「メンバー以外からのメールは拒否するが、その際自動登録処理」に入る。以
 下いくつかの設定パターンについて考えます。
 =E
-If $PERMIT_COMMAND_FROM is "members_only" and a mail (subscribe
+If $PERMIT_COMMAND_FROM is "members_only" and mail (subscribe
 request) comes from a not member, fml.pl calls $REJECT_COMMAND_HANDLER
 function. In default $REJECT_COMMAND_HANDLER is "reject", so fml.pl
 notifies denial of service to the requester.  If
@@ -906,9 +906,9 @@ fml.pl compares From: address and entries in $MEMBER_LIST
 されます。例えば MAILER-DAEMON からのＭＬへの投稿などがそれに当てはま
 ります。これはループなどの検出にも役に立ちます。
 =E
-fml.pl denies a mail from $REJECT_ADDR e.g. root, mailer-daemon. It is
-useful to check mail error loops and also to deny a mail from public
-users (a mail from "nobody"? who are you?) since we assume ML is private
+fml.pl denies mail from $REJECT_ADDR e.g. root, mailer-daemon. It is
+useful to check mail error loops and also to deny mail from public
+users (mail from "nobody"? who are you?) since we assume ML is private
 communication.
 
 モデレータの場合はちょっと違うのでモデレータの章を参照 .ptr{moderators}。
@@ -929,7 +929,7 @@ registration.
 .xref auto-regist
 
 .if LANG == ENGLISH
-Described above, if $PERMIT_COMMAND_FROM == "members_only", a mail
+Described above, if $PERMIT_COMMAND_FROM == "members_only", mail
 (subscribe request) comes from a not member and
 $REJECT_COMMAND_HANDLER == "auto_regist", fml.pl calls auto_regist
 hander to set in the automatic registration routine.
@@ -950,7 +950,7 @@ $MEMBER_LIST).
 $MEMBER_LIST しか使っていないのです。なお、このモードでは $ACTIVE_LIST
 と $MEMBER_LIST は同じものに設定されています。
 =E
-ATTENTION: In automatic registration, fml.pl delivers a mail to
+ATTENTION: In automatic registration, fml.pl delivers mail to
 members in $MEMBER_LIST not $ACTIVE_LIST. This is historical (but I
 cannot change it for backward compatibility;-). It does not annoy you
 if you do not edit member lists by hand. Please see .ptr{auto-regist}

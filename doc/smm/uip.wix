@@ -264,7 +264,7 @@ saveします。画像データや音声データでも同様にファイルに落せます。
 うな wrapper が必要になります。あるファイル TEXT を入力するメールの見
 本として使いたい時
 =E
-To inject TEXT as a mail input into fml.pl, you cannot test in the
+To inject TEXT as mail input into fml.pl, you cannot test in the
 following:
 
 	cat TEXT | perl fml.pl $PWD 
@@ -416,7 +416,7 @@ where this "32ZrV/XvYj1kY" is a crypted password.
 libexec/popfml.pl がこの目的の専用プログラムです。
 .xref	popfml
 =E
-This gets mails from a mail servers via POP3 and injects them into
+This gets mails from a mail server via POP3 and injects them into
 fml.pl and runs ML. The real program is libexec/popfml.pl, others is a
 link to it.
 
