@@ -922,6 +922,7 @@ sub InitFmlConfig
     $FML_CONFIG = "$CONFIG_DIR/system";
     $CGI_CONFIG = "$CONFIG_DIR/cgi.conf";
     
+
     $buf = &Dumpvar('Config');
     &SaveConfig($buf) if $buf;
 
@@ -2026,6 +2027,10 @@ sub ResetVariables
     $VENDOR   = $CurConfig{'VENDOR'};
     $CGI_PATH = $CurConfig{'CGI_PATH'} || $ENV{'CGI_PATH'} || '/cgi-bin/fml';
 
+    # CGI mail server configurations
+    $MTA                 = $CurConfig{'MTA'} || 'sendmail';
+    $HOW_TO_UPDATE_ALIAS = $CurConfig{'HOW_TO_UPDATE_ALIAS'} || 'newaliases';
+
     # overwritten for each ml
     $LANGUAGE = &Value('LANGUAGE') || $CurConfig{'LANGUAGE'};
 
@@ -2999,6 +3004,7 @@ sub do_setq
 {
     #print STDERR "setq \$Config'$_[0] = '$_[1]';\n"  if $debug;;
     eval("\$Config'$_[0] = '$_[1]';");
+    eval("\$FML_Config'$_[0] = '$_[1]';");
     &main'Warn($@) if $@; #';
 }
 
@@ -5994,9 +6000,10 @@ package dumpvar;
 
 sub Warn { &main'Warn(@_);} #';
 
-sub main'Dumpvar 
+sub main::Dumpvar 
 {
     ($package, @vars) = @_;
+    my ($buf);
 
     $package = 'Config';
 
@@ -6995,8 +7002,7 @@ sub SetUpCGIadmin
     # make cgi-bin/admin/
     print STDERR "\n";
     print STDERR "Setup CGI examples ";
-    # print STDERR "     $REAL_CGI_PATH/admin/ (CGI)\n";
-    # print STDERR "     $EXEC_DIR/www/examples/ (examples for MTA and httpd)\n";
+
 
     $SilentMode = 1;
     &do_setup_admin_cgi_scripts($NULL);
@@ -7034,7 +7040,10 @@ sub SaveCGIConf
 	print CF "\$REAL_CGI_PATH   = \"$REAL_CGI_PATH\";\n";
 	print CF "\$CGI_AUTHDB_DIR  = \"$CGI_AUTHDB_DIR\";\n";
 	print CF "\$SSL_REQUIRE_SSL = \"$SSL_REQUIRE_SSL\";\n";
-	print CF "1;\n";
+	print CF "\n# MTA configuration\n";
+	print CF "\$MTA                 = \"$MTA\";\n";
+	print CF "\$HOW_TO_UPDATE_ALIAS = \"$HOW_TO_UPDATE_ALIAS\";\n";
+	print CF "\n1;\n";
 	close(CF);
     }
     else {
@@ -7057,6 +7066,7 @@ sub do_admin_cgi_config
 {
     local($ml) = @_;
     local($cf);
+
     &ResetVariables;
 
     $cf  = $CGI_CONFIG || "$CONFIG_DIR/cgi.conf";
@@ -7070,6 +7080,10 @@ sub do_admin_cgi_config
     $main::REAL_CGI_PATH   = $REAL_CGI_PATH;
     $main::CGI_AUTHDB_DIR  = $CGI_AUTHDB_DIR;
     $main::SSL_REQUIRE_SSL = $SSL_REQUIRE_SSL;
+
+    # MTA
+    $main::MTA                 = $MTA;
+    $main::HOW_TO_UPDATE_ALIAS = $HOW_TO_UPDATE_ALIAS; 
     package main;
     &Die($@) if $@;
 
@@ -7091,6 +7105,9 @@ sub do_admin_cgi_config
 		     'SSL_REQUIRE_SSL' => $SSL_REQUIRE_SSL,
 		     'REAL_CGI_PATH'   => $REAL_CGI_PATH,
 		     'CGI_AUTHDB_DIR'  => $CGI_AUTHDB_DIR,
+
+		     'MTA'                 => $MTA,
+		     'HOW_TO_UPDATE_ALIAS' => $HOW_TO_UPDATE_ALIAS, 
 		     );
     $query{'SSL_REQUIRE_SSL'} = $SSL_REQUIRE_SSL eq 'SSLRequireSSL' ? "YES" : "NO";
 
@@ -7131,6 +7148,8 @@ sub do_admin_cgi_config
 			 3 => "CGI_AUTHDB_DIR      $query{'CGI_AUTHDB_DIR'}",
 			 4 => "CHANGE PASSWORD",
 			 5 => "REMAKE CGI SCRIPTS",
+			 6 => "MTA                 $query{'MTA'}",     
+			 7 => "HOW TO UPDATE ALIAS $query{'HOW_TO_UPDATE_ALIAS'}",
 			 );
 	    %varname = (
 			1 => "SSL_REQUIRE_SSL",
@@ -7138,6 +7157,8 @@ sub do_admin_cgi_config
 			3 => "CGI_AUTHDB_DIR",
 			4 => "CHANGE PASSWORD",
 			5 => "REMAKE CGI SCRIPTS",
+			6 => "MTA",
+			7 => "HOW_TO_UPDATE_ALIAS",
 			);
 	}
 
@@ -7146,7 +7167,7 @@ sub do_admin_cgi_config
 	    $r = &Query("which ?", "0-3", "0|1|2|3", '0');
 	}
 	else {
-	    $r = &Query("which ?", "0-5", "0|1|2|3|4|5", '0');
+	    $r = &Query("which ?", "0-7", "0|1|2|3|4|5|6|7", '0');
 	}
 
 	if ($r == 0) {
@@ -7167,6 +7188,9 @@ sub do_admin_cgi_config
 	    'SSLRequireSSL' : $NULL;
 	$REAL_CGI_PATH   = $query{'REAL_CGI_PATH'};
 	$CGI_AUTHDB_DIR  = $query{'CGI_AUTHDB_DIR'};
+
+	$MTA                 = $query{'MTA'};
+	$HOW_TO_UPDATE_ALIAS = $query{'HOW_TO_UPDATE_ALIAS'};
 	&SaveCGIConf;
 	print "\n";
 
@@ -7212,6 +7236,16 @@ sub cgi_menu_mainloop
 {
     local(*query, $which, $ml) = @_;
 
+    local (%mta) = (0 => 'END',
+		    1 => 'sendmail',
+		    2 => 'postfix'
+		    );
+    local (%alias) = (0 => 'END',
+		      1 => 'newaliases',
+		      2 => "postalias $ML_DIR/etc/aliases",
+		      );
+
+
     # SSL ?
     if ($which eq 'SSL_REQUIRE_SSL') {
 	while (1) {
@@ -7224,24 +7258,19 @@ sub cgi_menu_mainloop
 	}
     }
     elsif ($which eq 'REAL_CGI_PATH' || $which eq 'CGI_AUTHDB_DIR') {
-	# PATH
-	my $i = 0;
-
-	for $q ($which) {
-	    while (1) {
-		my $r   = $query{ $q };
-		my $buf = &Query("Q: $q", 'directory', '[\d\w\/\\\\]+', $r);
-		$query{$q} = $buf;
-		last;
-
-		# print "   $q = \"$buf\";\n";
-		# $r = &Query("   O.K.?", "y/n", "y|n", 'n');
-		# if ($r eq 'y') {
-		# $query{$q} = $buf;
-		# last;
-		# }
-	    }
-	}
+	my $r   = $query{ $which };
+	my $buf = &Query("Q: $which", 'directory', '[\d\w\/\\\\]+', $r);
+	$query{$which} = $buf;
+    }
+    elsif ($which eq "MTA") {
+	&cgi_config_show(*mta);
+	$r = &Query("which ?", "0-2", "0|1|2", '0');
+	$query{$which} = $mta{$r} if $r > 0;
+    }
+    elsif ($which eq "HOW_TO_UPDATE_ALIAS") {
+	&cgi_config_show(*alias);
+	$r = &Query("which ?", "0-2", "0|1|2", '0');
+	$query{$which} = $alias{$r} if $r > 0;
     }
     elsif ($which eq "CHANGE PASSWORD") {
 	&ResetVariables;

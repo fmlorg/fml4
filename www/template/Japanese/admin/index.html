@@ -42,7 +42,6 @@
 	<LI>サーバの設定
 	<UL>
 		<LI><A HREF="#cgiadmin">CGIを操作可能なユーザの登録</A>
-		<LI><A HREF="#server_config">MTAの設定(初回の確認必須)</A>
 	</UL>
 </UL>
 
@@ -254,74 +253,6 @@
 </UL>
 
 
-<!-- ------------------------------------------------------------------>
-<HR>
-<CENTER>サーバの設定</CENTER>
-<UL>
-   <A NAME=server_config>
-   <LI>MTAの設定
-	<BR>
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
-	<INPUT TYPE=hidden NAME=ML VALUE=etc>
-	
-	<TR>
-		<TABLE>
-			<TD ALIGN=left>MTA:
-			<TD ALIGN=right>
-			<SELECT NAME=MTA SIZE=2 >
-			<OPTION VALUE=sendmail>sendmail
-			<OPTION VALUE=postfix>postfix
-			<OPTION VALUE=qmail>qmail
-			</SELECT>
-		</TABLE>
-	<TR>
-	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-	</FORM>
-	
-
-   <LI>newaliases
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
-	<INPUT TYPE=hidden NAME=ML VALUE=etc>
-	
-	<TABLE>
-		<TR>
-			<TD ALIGN=right> 現在のaliasesの更新方法:
-			<TD ALIGN=left> _HOW_TO_UPDATE_ALIAS_
-		<TR>
-			<TD ALIGN=right> 更新方法:
-			<TD ALIGN=left>
-			<INPUT NAME=HOW_TO_UPDATE_ALIAS SIZE=80>
-		<TR>
-			<TABLE>
-				<TD ALIGN=left> いくつかの例:
-				<TD ALIGN=right>
-				<SELECT NAME=HOW_TO_UPDATE_ALIAS SIZE=2 >
-				__EXPAND_HOW_TO_UPDATE_ALIASES__
-				</SELECT>
-			</TABLE>
-	</TABLE>
-	
-	<BR>
-	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-	</FORM>
-	
-   <LI>
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
-	<INPUT TYPE=hidden NAME=ML VALUE=etc>
-	
-	aliasesを更新する: 
-	<INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
-	</FORM>
-	
-</UL>
 <HR>
 
 <PRE>
