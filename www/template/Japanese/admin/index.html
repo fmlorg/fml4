@@ -24,10 +24,13 @@
 	<LI>基本設定
 	<UL>
 		<LI><A HREF="#newml">新規ＭＬの作成</A>
-		<LI><A HREF="#add">メンバーの登録</A>
-		<LI><A HREF="#bye">メンバーの削除</A>
-		<LI><A HREF="#config">既存ＭＬの詳細設定</A>
-		<LI><A HREF="#destructml">既存ＭＬの削除</A>
+		<LI><A HREF="#add">ＭＬメンバーの登録</A>
+		<LI><A HREF="#bye">ＭＬメンバーの削除</A>
+		<LI><A HREF="#admin.add">ＭＬ管理者の登録</A>
+		<LI><A HREF="#admin.bye">ＭＬ管理者の削除</A>
+		<LI><A HREF="#mlpassword">ＭＬ管理者パスワードの設定</A>
+		<LI><A HREF="#config">ＭＬの詳細設定</A>
+		<LI><A HREF="#destructml">ＭＬの削除</A>
 	</UL>
 
 	<LI>管理メニュー
@@ -72,26 +75,88 @@
 	<BR>
 	<INPUT NAME=PROC TYPE="radio" VALUE="bye">メンバー削除
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin">管理者の登録
-	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">管理者の削除
-	<BR>
-	選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
 	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
 	</FORM>
 
+   <A NAME=admin.add>
+   <A NAME=admin.bye>
+   <LI>ＭＬ管理者の登録・削除
+	<BR>
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
+		TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked>管理者の登録
+	<BR>
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">管理者の削除
+	<BR>
+	ＭＬの選択: 
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	</FORM>
+
+    <A NAME=mlpassword>
+	<LI>管理者パスワードの設定
+	<BR>
+	ＭＬを選択して、管理者のパスワードを設定して下さい。
+	これは
+	<BR>
+	admin と approve コマンドのパスワード
+	<BR>
+	およびGUIのメニューに入る
+	<BR>
+	時に使うパスワードです。
+	<BR>
+	簡単化のためGUIメニューではこの３つに同じパスワードを設定します。
+	<BR>
+	CUIの makefml htpasswd を用いることでコマンド用とCGI用と
+	別々のパスワードをつけることが可能です。
+	<BR>
+	注意: 新しい管理者名を入力すると、管理者の新規登録扱いになります
+	<BR>
+
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" 
+		TARGET="right" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=passwd>
+	<BR>
+	ＭＬの選択: 
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+	<TABLE>
+	<TR>
+		<TD ALIGN=right> 管理者 アカウントもしくはEmail アドレス:
+		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
+	<TR>
+		<TD ALIGN=right> パスワード:
+		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
+
+	<TR>
+		<TD ALIGN=right> 確認のため同じパスワード:
+		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
+	</TABLE>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+
+
    <A NAME=config>
-   <LI>ＭＬの詳細設定
+   <LI>ＭＬの詳細設定 (makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-	選択: 
+	ＭＬの選択: 
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -106,10 +171,10 @@
 	<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
 	
 	<TR>
-		<TD ALIGN=right> メーリングリスト:
+		<TD ALIGN=right> ＭＬ:
 		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=left>	ＭＬの選択: 
 			<TD ALIGN=right>
 			<SELECT NAME=ML>
 			__EXPAND_OPTION_ML__
