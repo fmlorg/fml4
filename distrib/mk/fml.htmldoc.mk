@@ -1,5 +1,5 @@
 #
-# $FML$
+# $FML: fml.htmldoc.mk,v 1.30 2001/06/17 04:59:35 fukachan Exp $
 #
 
 .for file in ${HTML_MISC_SOURCES}
@@ -16,9 +16,12 @@ var/html/pictures/index.html: doc/html/pictures/index.html
 		${JCONV} > var/html/pictures/index.html
 
 # logo
-HTML_MISC += var/html/logo.jpg
+HTML_MISC += var/html/logo.jpg var/html/pointer.jpg 
 var/html/logo.jpg: doc/html/pictures/logo.jpg
 	cp -p doc/html/pictures/logo.jpg var/html
+
+var/html/pointer.jpg: doc/html/pictures/pointer.jpg
+	cp -p doc/html/pictures/pointer.jpg var/html
 
 # history
 HTML_MISC += var/html/p_list.gif

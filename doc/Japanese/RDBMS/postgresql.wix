@@ -83,4 +83,4 @@ $DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
 .url ftp://ring.asahi-net.or.jp/
 .url http://member.nifty.ne.jp/hippo2000/
 
-.# $FML$
+.# $FML: postgresql.wix,v 1.5 2001/06/02 14:28:42 fukachan Exp $

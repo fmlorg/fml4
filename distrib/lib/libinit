@@ -3,7 +3,7 @@ INIT_PACKAGE () {
    	cp /dev/null $PATCHLEVEL_DIR/version
 
 	echo " "; echo "Fixing permissions ... ";
-	chmod 755 kern/*.pl bin/* sbin/* libexec/*
+	chmod 755 kern/{fml,msend}.pl bin/* sbin/* libexec/*
 	chmod 644 kern/lib*.pl proc/*.pl
 }
 
@@ -54,18 +54,8 @@ INIT_VERSION () {
 	date 		>> $RELEASE_MANIFEST
 	echo "" 	>> $RELEASE_MANIFEST
 
-	RS="kern/*.pl proc/*.pl bin/*.pl sbin/[a-z]* libexec/*.pl contrib/*/*.pl sys/*/[a-z]*"
-
 	if [ $package = 1 ]
 	then
-		echo ""; 
-		echo "-- export list of RCS ID in snapshot balls for [$RID]"
-		echo ""; 
-		for file in $RS
-		do
-			${PERL} $FML/distrib/bin/show-rcsid.pl $file |\
-			tee -a $RELEASE_MANIFEST
-		done
 
 		############################
 		##### distrib/history/ #####
@@ -76,7 +66,8 @@ INIT_VERSION () {
 
 		# not use $RELEASE_MANIFEST
 		# cat $RELEASE_MANIFEST >> distrib/history/$TID/$RID
-		RID=`${PERL} distrib/bin/fml_version.pl -r`
+		RID=`${PERL} distrib/bin/fml_version.pl -r |sed s@/.*@@`
+		echo RID=$RID; echo ""
 
 		# log cvs status unless $MODE
 		if [ X$MODE = X ]; then

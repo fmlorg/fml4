@@ -257,7 +257,7 @@ fml 4.0 では
 	makefml de.gpg
 
 .C	3.0 以前から 4.0 へのアップグレード
-=E.S	upgrade from 3.0 before to 4.0 
+=E.C	upgrade from 3.0 before to 4.0 
 
 .if LANG == JAPANESE
 
@@ -276,13 +276,13 @@ for more details.
 .fi
 
 
-$Id$
+$FML: UPGRADE.wix,v 1.11 2001/05/27 01:39:01 fukachan Exp $
 
 .~HTML_PRE
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2000 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML: fml.pl,v 2.134 2001/06/30 08:30:15 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -404,7 +404,7 @@ sub SetDefaults
 	 'References', 'Keywords', 'Comments', 'Encrypted',
 	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
 	 'XRef', 'X-Stardate', 'X-ML-Info', 
-	 'X-Mailer',
+	 'X-Mailer', 'X-Dispatcher', 'X-Newsreader', 'User-Agent',
 	 'Mail-Followup-To',	# I-D now?
 	 ':body:', ':any:', 
 	 'X-Authentication-Warning',
@@ -421,12 +421,13 @@ sub GetTime
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, 
+			$isdst ? $TZONE_DST : $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
@@ -454,6 +455,8 @@ sub InitConfig
     # fml 4.0 modules
     push(@INC, "$ExecDir/module");
     push(@INC, "$ExecDir/module/CPAN");
+    push(@INC, "$ExecDir/module/Japanese");
+    push(@INC, "$ExecDir/module/fml-devel");
 
     # a little configuration before the action
     if (defined $FML_UMASK) {
@@ -2552,7 +2555,7 @@ sub PerlModuleExistP
     local($pm) = @_;
     if ($] !~ /^5\./) { &Log("ERROR: using $pm requires perl 5"); return 0;}
     eval("use $pm");
-    if ($@) { &Log("${pm}5.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
+    if ($@) { &Log("${pm}.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
     1;
 }
 
@@ -2681,9 +2684,9 @@ sub DBCtl
 sub MailLoopP
 {
     if ($Envelope{'h:x-ml-info:'}) {
-	if ($Envelope{'h:x-ml-info:'} =~ /$MAINTAINER/i ||
-	    $Envelope{'h:x-ml-info:'} =~ /$MAIL_LIST/i ||
-	    $Envelope{'h:x-ml-info:'} =~ /$CONTROL_ADDRESS/i) {
+	if ($Envelope{'h:x-ml-info:'} =~ /contact $MAINTAINER/i ||
+	    $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$MAIL_LIST/i ||
+	    $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$CONTROL_ADDRESS/i) {
 	    &Log("Loop Alert: dup X-ML-Info:");
 	    &WarnE("Loop Alert: dup X-ML-Info: $ML_FN", 
 		   "fml <$MAIL_LIST> has detected a loop condition so that\n"

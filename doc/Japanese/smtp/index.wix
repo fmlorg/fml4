@@ -12,6 +12,7 @@
 .include howto.wix
 .include internals.wix
 .include relay.wix
+.include ipv6.wix
 .include QandA.wix
 
 .# $Id$

@@ -1,10 +1,18 @@
 .HTML_PRE
-	やり残し、やろうかなとおもってること
+	TODO リスト / やり残し、やろうかなとおもってること
 	(誰かすでにやってたらパッチ下さい)
 =E
 	TODO of fml Mailing List Server Package
 
 ＃ WISH_LIST は WISH_LIST のほうをごらんください
+
+.if LANG == JAPANESE
+TODO リストは fml 5.0 プロジェクトへ引き継がれました。
+そちらを参照して下さい。
+
+.url http://www.fml.org/devel/fmlsrc/Documentation/ja/todo/
+.return
+.fi
 
 .toc
 
@@ -17,6 +25,51 @@
 
 
 .# ############################################################
+.C	fml 5.0 へ
+=E.C	Toward fml 5.0
+
+.S	upgrade
+
+  Q: fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
+  A: fml-devel では可能。done.
+
+  Q: postfix の $smtpd_recipient_restriction とうまくやる
+  A: fml-devel では可能。done.
+
+
+.S	配送関係
+=E.S	Delivery
+
+* smtpfeedを直接叩く?
+  kick off smtpfeed, 
+  errorはSMTPでどっかにまるなげ
+=E
+* kick off smtpfeed directly
+
+
+
+.S	トラブルチケットシステム
+=E.S	Trouble Ticket System
+
+原始的なものはすでに完了。 
+
+.url	http://www.fsck.com/projects/rt/
+.url	http://sourceforge.net/
+.url	http://freshmeat.net/
+.url	http://linas.org/linux/pm.html
+
+
+.S	より統合されたパッケージ
+=E.S	more fully integrated packages
+
+	サーチエンジンとの連携
+	スケジュールソフト
+=E
+	search engine
+	scheduler
+
+
+
 .C	TODO (特に current)
 =E.C	TODO (current specific)
 
@@ -250,13 +303,6 @@ fml-support: 7155
 * personal, group, ? 
 
 
-.S	配送関係
-=E.S	Delivery
-
-* $smtpd_recipient_restriction
-see /etc/postfix/sample*cf
-
-
 .S	ファイル操作
 =E.S	file operation
 
@@ -470,25 +516,6 @@ for apache 1.3.x
 的に fml/ の下に来るとは限らない。
 
 
-.S	トラブルチケットシステム
-=E.S	Trouble Ticket System
-
-.url	http://www.fsck.com/projects/rt/
-.url	http://sourceforge.net/
-.url	http://freshmeat.net/
-.url	http://linas.org/linux/pm.html
-
-
-.S	より統合されたパッケージ
-=E.S	more fully integrated packages
-
-	サーチエンジンとの連携
-	スケジュールソフト
-=E
-	search engine
-	scheduler
-
-
 .C	UNIX 以外のOS固有の問題
 =E.C	NOT UNIX system specific problems
 
@@ -512,54 +539,22 @@ for apache 1.3.x
 .S	美しいコード
 =E.S	more beautiful codes
 
-* all ranges
-
-* clean up mget3 internals
-
-XXX まぁそれ以前に「美しい」 って何だ？っていう哲学的問題があるわけだ
-XXX が…
-XXX 時代によって「美しい」という意味は変わるだろうし
-XXX 難しくて保守できないようなコードじゃ意味がないわけで
-XXX 「美しいコード」という命題自体がかなり無意味な気がする
-XXX わかりやすいコードというべきなんだろうな
+fml 5.0 へ持ち越し
+.url http://www.fml.org/devel/fmlsrc/index.ja.html 
 
 
 .C	obsolete ?
-
 
 * $OUTGOING_ADDRESSの設定をもっと簡単に？
 =E
 * easy configuration for $OUTGOING_ADDRESS 
 
-* smtpfeedを直接叩く?
-  kick off smtpfeed, 
-  errorはSMTPでどっかにまるなげ
-=E
-* kick off smtpfeed directly
 
-
-* アップグレードについて
-=E
-* upgradeing
-
-  fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
-  MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
-  今は stat() して reload をするようになっている
-
-* makefml config full menu
-
-全部の変数をメニュー形式で？画面が一杯あり過ぎてもしょうがないとおもう
-のでやらない。WWW（CGI）モードでも一覧ってのはやらない。
-=E 
-All variables can be configurable in the menu? 
-I may not do it since it only confuses the customize.
-
-
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+$FML: TODO.wix,v 1.105 2001/06/07 15:06:19 fukachan Exp $
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

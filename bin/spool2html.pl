@@ -1,13 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
+#
+# $FML: spool2html.pl,v 2.20 2001/06/17 14:25:13 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -93,7 +95,7 @@ sub InitS2P
 
     # include search path
     $opt_h && do { &Usage; exit 0;};
-    push(@INC, $opt_I);
+    push(@INC, $opt_I) if -d $opt_I;
 
     local($inc) = $0;
     $inc =~ s#^(\S+)/bin.*$#$1#;
@@ -102,6 +104,15 @@ sub InitS2P
     # @LIBDIR
     push(@LIBDIR, $opt_I);
     push(@LIBDIR, $inc);
+
+    # import modules/
+    for (@INC) {
+	if (-d "$_/module") {
+	    for my $inc (<$_/module/*>) {
+		push(@INC, $inc) if -d $inc;
+	    }
+	}
+    }
 
     # set opt
     for (split(/:/, $opt_o)) { 
@@ -279,12 +290,13 @@ sub SetTime
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
     
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($mtime))[0..6];
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($mtime);
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, 
+			$isdst ? $TZONE_DST : $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,

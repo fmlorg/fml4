@@ -8,6 +8,17 @@
 とりあえずエラーメッセージにでてくる単語でサーチをしてみて、ドキュメン
 トのエラーリストなりに事例がないかを調べて下さい。
 .url http://www.fml.org/fml/search-j.html
+
+動作テスト、過去数年間の代表的なトラブルの事例とその解決方法は
+書籍「fml バイブル」（オライリージャパン刊）中で詳しく扱っています。
+
+.url http://www.fml.org/fml/treking_guide.ja.html
+
+うまくいかない場合には、以下のチェックリストに沿って設定を確認し、
+.url	http://www.fml.org/fml/CHECK_LIST/
+
+www.fml.org のサーチエンジンで過去に似たような事例がないかを
+検索して下さい。
 .fi
 .if LANG == ENGLISH
 Anyway search please!

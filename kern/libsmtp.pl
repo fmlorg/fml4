@@ -162,6 +162,42 @@ sub SmtpConnect
 {
     local(*host, *error) = @_;
 
+    if ($USE_INET6) {
+	my $mta = "$host:$Port" || 'localhost:25' || '[::1]:25';
+	my $pkg = "Mail::Delivery";
+
+	eval "use Socket6; require $pkg; $pkg->import();";
+	unless ($@) {
+	    my $service = new Mail::Delivery { 
+		protocol     => 'SMTP', 
+		log_function => \&Log,
+	    };
+	    &Log( $service->error() ) if $service->error();
+
+	    if (defined $service) {
+		$service->connect6( { _mta => $mta } );
+
+		unless ( $service->error() ) {
+		    if (defined $service->{ _socket }) {
+			print SMTPLOG "socket ok (IPv6)\n";
+			print SMTPLOG "connect ok (IPv6)\n";
+			*S = $service->{ _socket };
+			$error = "";
+			return "";
+		    }
+		    else {
+			&Log( $service->error() ) if $service->error();
+			&Log("cannot connect $mta by IPv6");
+		    }
+		}
+		else {
+		    &Log( $service->error() );
+		    &Log("cannot connect $mta by IPv6");
+		}
+	    }
+	}
+    }
+
     local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host = $host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
@@ -251,6 +287,8 @@ sub SmtpIO
 
     &ConvHdrCRLF(*e);
 
+    $Total_Rcpt_Count = 0;
+
     if ($e{'mode:__deliver'}) { # consider mci in distribute() 
 	local($n, $i);
 	$n = $MCI_SMTP_HOSTS > 1 ? $MCI_SMTP_HOSTS : 1;
@@ -264,6 +302,8 @@ sub SmtpIO
 
 	    # @RcptLists loop under "fixed smtp server"
 	    &__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+            $Total_Rcpt_Count += $Current_Rcpt_Count;
+
 	    &__SmtpIOClose(*e, $smtp_pcb{'ipc'});
 
 	    push(@HOSTS, $HOST); # last resort for insurance :)
@@ -277,6 +317,8 @@ sub SmtpIO
 	return $smtp_pcb{'fatal'} if $smtp_pcb{'fatal'}; # fatal return
 
 	&__SmtpIO(*e, *smtp_pcb, *rcpt, *smtp, *files);
+        $Total_Rcpt_Count += $Current_Rcpt_Count;
+
 	&__SmtpIOClose(*e, $smtp_pcb{'ipc'});
     }
     &RevConvHdrCRLF(*e);

@@ -71,16 +71,23 @@ sub EmulRFC2369
 			    "<mailto:$addr?body=${trap}subscribe>");
     }
     else {
-	&DefineDefaultField("List-Software", $Rcsid);
-	&DefineDefaultField("List-Post", "<mailto:$MAIL_LIST>");
-	&DefineDefaultField("List-Owner", "<mailto:$MAINTAINER>");
-	&DefineDefaultField("List-Help", 
-			    "<mailto:$addr?body=${trap}help>");
-	&DefineDefaultField("List-Unsubscribe", 
-			    "<mailto:$addr?body=${trap}unsubscribe>");
-	my $id = $MAIL_LIST;
-	$id =~ s/\@/./g;
-	&DefineDefaultField("List-ID", $id);
+	my ($software, $post, $owner, $help, $unsubscribe);
+	my $id = $MAIL_LIST; $id =~ s/\@/./g;
+
+	$id       = $LIST_ID       || $id;
+	$software = $LIST_SOFTWARE || $Rcsid;
+	$post     = $LIST_POST     || "<mailto:$MAIL_LIST>";
+	$owner    = $LIST_OWNER    || "<mailto:$MAINTAINER>";
+	$help     = $LIST_HELP     || "<mailto:$CONTROL_ADDRESS?body=help>";
+	$unsubscribe = $LIST_UNSUBSCRIBE ||
+	    "<mailto:$CONTROL_ADDRESS?body=unsubscribe>";
+
+	&DefineDefaultField("List-ID",          $id);
+	&DefineDefaultField("List-Software",    $software);
+	&DefineDefaultField("List-Post",        $post);
+	&DefineDefaultField("List-Owner",       $owner);
+	&DefineDefaultField("List-Help",        $help);
+	&DefineDefaultField("List-Unsubscribe", $unsubscribe);
     }
 
 }

@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2000,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -10,7 +10,6 @@
 # q$Id$;
 
 require 'mimer.pl';
-require 'mimew.pl';
 
 
 sub ProbeMIMEpm
@@ -42,6 +41,28 @@ sub DecodeMimeString
 	&mimedecode(@_);
     }
 }
+
+
+sub mimeencode
+{
+    my ($s) = @_;
+
+    my $pkg = 'IM::Iso2022jp';
+    eval qq{ require $pkg; $pkg->import();};
+    unless ($@) {
+	line_iso2022jp_mimefy($s);
+    }
+    else {
+	Log("mimeencode cannot load $pkg, fallback to mimew.pl");
+	Log($@);
+
+	# XXX CAUTION: mimew.pl overload main::mimeencode(), so
+	# XXX          this block is called once before overloading.
+	require 'mimew.pl';
+	mimeencode($s);
+    }    
+}
+
 
 
 # defined for convenience

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: libcompat_fml20.pl,v 1.2 2000/06/16 12:00:32 fukachan Exp $
+# $Id: libcompat_fml20.pl,v 1.3 2001/04/08 07:05:42 fukachan Exp $
 
 
 sub ProcRetrieveFileInSpool_FML_20

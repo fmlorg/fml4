@@ -1,16 +1,16 @@
 INFO:
 # FML Configurable Variable Definitions
 #
-# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2000 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML: MANIFEST,v 1.84 2001/06/18 15:20:29 fukachan Exp $
 #
 
 
@@ -631,6 +631,15 @@ APPEND_STARDATE:
 # value: 1/0
 USE_RFC2369:	1
 
+# List-*
+LIST_SOFTWARE:		
+LIST_POST:		
+LIST_OWNER:		
+LIST_HELP:		
+LIST_UNSUBSCRIBE:	
+LIST_ID:		
+
+
 # obsolete in fml 3.0
 # We should force "To: $MAIL_LIST" form "For Eye" or NOT?
 # default is "NO".
@@ -653,6 +662,10 @@ Date:		 not.found
 # TIME ZONE;  +0900 is RFC822 syntax (I like JST but ... ;-)
 # value: +\d{4} / -\d{4} 
 TZone:		 +0900
+
+# time zone within summer time if you use summer time.
+# thank HIROSHIMA Naoki <naoki@bcrossing.com> on this idea
+TZONE_DST:
 		
 # ## Sub Section: Pass All Header ? ##
 # In some cases you need to pass only defined fields of the header
@@ -925,7 +938,11 @@ LOCK_FILE:	 $VARRUN_DIR/lockfile.v7
 # $HOST is an arbitrary host (if you can access it) which runs MTA
 # (e.g. sendmail). If the Mailing List Server machine is week, 
 # you can use the sendmail of another powerful host(host).
-#
+
+# always try IPv6 connection by default
+# value: 1/0
+USE_INET6: 1
+
 # value: string
 HOST:		localhost
 

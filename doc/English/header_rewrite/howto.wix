@@ -499,7 +499,6 @@ $HEADER_ADD_HOOK = q#
 .k	STAR TREK
 .k	StarDate
 .k	$APPEND_STARDATE
-.url	http://www.fml.org/href/Startrek/
 
 config.ph で $APPEND_STARDATE = 1; とすると宇宙歴がつきます:-)
 =E

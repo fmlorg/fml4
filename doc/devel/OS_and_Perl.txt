@@ -1,3 +1,13 @@
+***************************** CAUTION *******************************
+
+  This master site is moved to
+
+     http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/perl.html
+
+$FML: OS_and_Perl.txt,v 1.13 2001/05/03 02:21:59 fukachan Exp $
+*********************************************************************
+
+
 NetBSD				none
 
 OpenBSD				?
@@ -24,6 +34,9 @@ BSD/OS 3.1			4.036 (but broken)
 BSD/OS 4.0.1			4.036 (/usr/bin/perl)
 				5.004_02 (/usr/bin/perl5)
 BSD/OS 4.1			4.036    (/usr/bin/perl4)
+				5.005_03 (/usr/bin/perl)
+				5.005_03 (/usr/bin/perl5)
+BSD/OS 4.2			4.036    (/usr/bin/perl4)
 				5.005_03 (/usr/bin/perl)
 				5.005_03 (/usr/bin/perl5)
 
@@ -71,6 +84,11 @@ Windows Services for UNIX 2.0 (JP) 5.6.0
 				(ActivePerl 5.6.0 build 613 
 				MSWin32-x86-multi-thread)
 
+
+SEE ALSO:
+   http://www.cyber-magic.org/~taka/perl-versions.html
+   http://www.uinet.or.jp/~taka/perl-versions.html
+
 ---
 checked by
 	katino@cvs.fml.org
@@ -80,4 +98,4 @@ checked by
 	toshi@he.kobelcosys.co.jp
 	Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
 
-$Id$
+$FML: OS_and_Perl.txt,v 1.13 2001/05/03 02:21:59 fukachan Exp $

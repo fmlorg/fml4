@@ -18,13 +18,21 @@
 <A HREF="http://www.nuinui.net/menu.html" TARGET=_top>
 <IMG SRC="logo.jpg" ALIGN="left">
 </A>
-"fml" <B>4.0.1</B> mailing list server/manager package
+"fml" <B>4.0</B> mailing list server/manager package
+<A HREF="http://www.oreilly.co.jp/BOOK/fml/">
+<IMG SRC="pointer.jpg" ALIGN="right">
+</A>
 </H2>
 
-<P> 4.0.1 は 4.0 リリースのバグ修正版です。
-    新機能(例: IPv6)は 4.0.2 移行に入ります。
+<EM>
+お知らせ: 
+</EM>
+2001/06/27: anoncvs.fml.org 復旧しました。
 
-<!-- ===================================================== -->
+2001/06/24:
+ハウジング場所の事故でなくなった ftp.fml.org の 機材の交換も終り、新ホ
+ストで本番の運用に戻っています。ミラーなどにはこちらをどうぞ。
+
 
 <P>
 	<A HREF="index-e.html">[English]</A>,
@@ -52,7 +60,49 @@ basic コース: まず最初に見てみてほしい場所
 <P>最近のトピックス
 <UL>
 	<LI>
+	MIME エンコーディングエンジンを mimepls から IM ベースへ変更
+	
+	<LI>
+	<A HREF="ftp://ftp.fml.org/pub/fml/release/">
+	4.0.1 リリース
+	</A>
+	<A HREF="CHANGES-4.0.1/index.html">[ 4.0 からの変更点一覧 ]</A>
+	<BR>
+	お薦めのバージョンは
+	<A HREF="ftp://ftp.fml.org/pub/fml/stable/">
+	4.0 stable シリーズ
+	</A>
+	です。最新版はたまたま 4.0.1 リリースです。
+	<BR>
 	<A HREF="CHANGES-4.0.1/index.html">[ 4.0.1 の変更点一覧 ]</A>
+	<A HREF="CHANGES-4.0.2/index.html">[ 4.0.2 の変更点一覧 ]</A>
+
+	<LI>
+	<A HREF="Japanese/smtp/5.html">
+	4.0 current は IPv6 ready 
+	</A>
+	です( 
+		<A HREF="http://www.fml.org/devel/fmlsrc/index.html.ja">
+		fml-devel (5.0)
+		</A> 
+		の IPv6 モジュールを輸入
+	)。
+
+	<LI>
+	次世代プロジェクト(fml-devel):
+	(将来の)
+	<A HREF="http://www.fml.org/devel/fmlsrc/index.html.ja" TARGET=_top>
+	fml 5.0
+	</A>
+	を考え、実装するプロジェクトです。
+	すでに 4.0 の doc/devel/ のドキュメントの一部は
+	<A HREF="http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/">
+	5.0 branch のドキュメント (SGML)
+	</A>
+	として保守されています。例:
+	<A HREF="http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/perl.html">
+	OS 附属 Perl バージョンの一覧
+	</A>
 
 	<li>
 	<A HREF="UPGRADE/index.html"> 4.0 へのアップグレードについて</A>
@@ -63,7 +113,7 @@ basic コース: まず最初に見てみてほしい場所
 		4.0 用のガイドブック
 		</A>
 		(初心者〜)
-		<A HREF="http://www.oreilly.co.jp/">
+		<A HREF="http://www.oreilly.co.jp/BOOK/fml/">
 		[オライリージャパン刊]
 		</A>
 		<BR>
@@ -276,7 +326,7 @@ http://www.sapporo.iij.ad.jp/staff/fukachan/
 Copyright (C) 1993-2001 Ken'ichi Fukamachi
          All rights reserved.
 
-$FML: index.ja.html,v 1.31 2001/05/26 13:12:59 fukachan Exp $
+$FML: index.ja.html,v 1.36 2001/06/29 13:35:13 fukachan Exp $
 </PRE>
 </BODY>
 </HTML>

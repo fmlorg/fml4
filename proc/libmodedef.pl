@@ -251,13 +251,17 @@ sub SmtpLogExpire
     $limit = $limit * 24 * 3600;
     $target =~ s/\.\d+$//;
 
-    opendir(VARLOG_DIR, $VARLOG_DIR);
+    opendir(VARLOG_DIR, $FP_VARLOG_DIR);
     while ($f = readdir(VARLOG_DIR)) {
 	next if $f =~ /^\./o;
 	if ($f =~ /$target/) {
-	    my @stat = stat( $VARLOG_DIR .'/'. $f);
-	    if ( (time - $stat[ 9 ]) >  $limit ) {
-		unlink $f && &Log("remove $f");
+	    my $fpf  = $FP_VARLOG_DIR .'/'. $f;
+	    if (-f $fpf) {
+		my @stat = stat( $fpf );
+		if ( (time - $stat[ 9 ]) >  $limit ) {
+		    unlink $fpf;
+		    &Log("removed $f") unless -f $fpf;
+		}
 	    }
 	}
     }

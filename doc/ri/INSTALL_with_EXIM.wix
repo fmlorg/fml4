@@ -34,6 +34,24 @@ However don't forget the following configuratino change.
    # sender_host_reject_relay = *
 
 
+2. fml を運用するユーザ名を system_aliases: などで定義して下さい。
+   例えば
+
+	user = fml
+
+となります。
+
+Example:
+
+system_aliases:
+  driver = aliasfile
+  file_transport = address_file
+  pipe_transport = address_pipe
+  file = /etc/aliases
+  search_type = lsearch
+  user = fml
+
+
 .appendix
 .C	Virtual domain
 
@@ -56,15 +74,20 @@ virtual:
 
 end
 
+.C	Acknowledgement
 
+caution on "user = fml"
+
+	fml-help: 00198
+	Masaki Ikeda <masaki@orange.co.jp>
+
+$FML: INSTALL_with_EXIM.wix,v 1.9 2001/05/27 01:39:00 fukachan Exp $
 .~HTML_PRE
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
-.#
-.# $Id$

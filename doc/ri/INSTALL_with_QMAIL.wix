@@ -287,7 +287,7 @@ your-email-address
 
 .appendix
 .C	特殊な話題
-=E.S	other topics
+=E.C	special topics
 
 .S	VERPs
 
@@ -317,11 +317,11 @@ When you use this function, please set $USE_DOT_QMAIL_EXT = 1;
 
 .~HTML_PRE
 
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# $FML: INSTALL_with_QMAIL.wix,v 1.8 2001/05/27 01:39:00 fukachan Exp $
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

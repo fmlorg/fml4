@@ -16,6 +16,187 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 *** RELEASE_NOTES for contributors and the contribution.
 .fi
 
+2001/06/02
+
+   4.0.1_BETA2
+
+   doc/html/booknotes.ja.html (2.4-2.5):
+   doc/Japanese/RDBMS/postgresql.wix (1.4-1.5): 
+	caution: seems not work with postgresql 7.1.x ;)
+
+2001/05/25
+
+   module/fml-devel/Mail/Delivery/
+	bug fix IPv6 error handling
+
+	IPv6 エラーコードのバグ修正
+
+2001/05/20
+
+   sbin/makefml
+
+	CGI で: htpasswd のデフォルト permission をユーザ nobody でも
+		見えるように修正する。
+		＃いいのか？それで、という気もするのだが…
+
+2001/05/11
+
+   IPv6 by default
+
+	常に IPv6 でメールサーバに接続することに挑戦してみる。
+	もし、失敗したら IPv4 で挑戦する。
+	これがデフォルト
+
+	$USE_INET6 を 0 にすると IPv4 オンリーに戻ります。
+
+2001/05/10
+
+   kern/libsmtp.pl
+	enable IPv6
+
+	IPv6 を有効にする(fml 5.0 の IPv6 モジュールを使っている)。
+
+   messages/Japanese/amctl (1.5-1.6):
+	fix Japanese to be more friendly for newbies
+
+2001/05/03
+
+   sbin/makefml (2.210-2.211):
+	fix mladmin.cgi help typo
+
+2001/04/27
+
+   module/Japanese/liblangdep.pl (1.7-1.8): 
+	remove Re> pattern in subject
+
+   proc/libamctl.pl (2.47-2.48):
+	correct subscribe keyword in warning
+
+   kern/libkernsubr2.pl (2.5-2.6):
+	add List-ID
+
+2001/04/17
+
+   www/lib/libcgi_makefml.pl (1.59-1.60):
+	more friendly error message
+
+2001/04/11
+
+   sys/SOLARIS2/depend.pl (1.2-1.3):
+	mkdir $DIR/var/run if not exists for lock
+
+   databases/postgresql/DBI_toymodel.pl (1.3-1.4):
+	nuke MySQL string
+
+2001/04/05
+
+   solaris 上でのロックのバグの修正
+
+2001/04/02
+
+   proc/libamctl.pl
+	bug fix "amctl.info" message
+
+2001/03/25
+
+   cf/MANIFEST 
+	ML_FN = null by default
+
+2001/03/23
+
+   proc/libamctl.pl
+	apply patch by shigetoshi hirano (fml-support: 09336)
+	check the member who subscribes this list is duplicated or not
+
+2001/03/15
+
+   proc/libexpire.pl
+	$*_seq initialization bug of expiration by number
+   	patch by Tatsuya Shimizu <shimizu@np.bs1.fc.nec.co.jp>
+	fml-help: 00039
+
+2001/03/09
+
+    コマンドの返事をする時に、
+    もし $LANGUAGE eq 'Japanese' ならいつも
+
+	Mime-Version: 1.0
+	Content-Type: text/plain; charset=iso-2022-jp
+
+	＃ちょっとうそっぽい…      
+
+2001/03/07
+
+  define $SMTP_LOG_ROTATE_EXPIRE_LIMIT 
+	90 days by default
+
+	$SMTP_LOG_ROTATE_TYPE が day の時に、この
+	$SMTP_LOG_ROTATE_EXPIRE_LIMIT を指定すると
+	古い _smtplog.日付 ファイルを消す。
+	デフォルトは 90 日以上古いファイル。
+
+2001/03/04
+
+  lowerize the domain part of mail addresses in database access methods 
+
+2001/02/26
+
+  apply patch (fml-support: 09289) to the PostgreSQL toymodel 
+	thanks shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
+
+2001/02/18
+
+   fix perl search path algorithm
+	thanks Yu Ooasa <you@dearest.net> (fml-support: 09276, 09277)
+
+   fix NT 4.0
+	link($SMTP_LOG, $org_smtp_log) only on unix
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09271)
+
+   fix NT installer bugs
+	install also ("databases", "messages", "drafts", "module")
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09235)
+
+2001/02/07,08
+
+   update documents
+
+2001/02/06
+
+   fml/libexec/fmlserv.pl 
+	s/RunHooks/RunExitHooks/ to fix missing renamed function definition
+	thanks KAWADE Koji <kawade@rd.casio.co.jp> (fml-support: 09238)
+
+2001/02/03
+
+  fmlserv
+	oops, RunHooks() is not used now.
+	fix it to use RunexitHooks().
+
+2001/02/01
+
+  ドキュメント修正
+	オライリー本への補足、誤植等について…
+	welcome ファイルを送り返さない方法
+	DEFINE_MODE(disablenotify) について補足
+
+   makefml
+	fix _PERL_PATH handling
+
+	env _PERL_PATH= makefml ...
+	の指定をする時も perl をさがしてしまうバグをなおす
+
+2001/01/22
+
+   4.0-stable series start
+
+   apply patch to html converter (fml-support:09166) 
+	not to ignore forwarded messages
+
+	KUBO Hiroya <hiroya@netcom.mag.keio.ac.jp>
+
+2001/01/15
+   4.0 release
 
 2001/01/10
 

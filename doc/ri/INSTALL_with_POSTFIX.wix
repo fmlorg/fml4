@@ -69,6 +69,24 @@ After you modified main.cf, don't forget to run "postfix reload" !
 
 .S	注意点
 
+1. mynetworks
+
+デフォルトでは fml から postfix への通信は loopback インターフェイスで
+す。そのため mynetworks に、
+
+	127.0.0.1/8
+
+を記述するのを忘れないようにして下さい。そうしないと、fmlからのメール
+の発信ができなくなります。IPv6 環境では
+
+	::1
+
+の追加も忘れずに( 可能な場合、fml は IPv6 で、失敗したら IPv4 でトライ
+します)。
+
+
+2. smtpd_recipient_limit
+
 postfix では SMTP で通信する時（デフォルトです）に
 一回の SMTP トランザクションで受け付ける受信者数は 1000 です。
 これは smtpd_recipient_limit という変数で決まっています。

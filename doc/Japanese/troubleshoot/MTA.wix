@@ -224,11 +224,10 @@ smrshを使っていると @LIBDIR に/usr/local/fmlが入らない。
 
 の場所などでエラーになる。
 
-回避例:
+回避例(『fml バイブル』 5.2.3 節より):
 
 /var/spool/ml/etc/fml/site_init.ph というファイルに
 .q
-push(@LIBDIR, "/usr/local/fml");
 push(@INC,   "/usr/local/fml");
 1;
 .~q
@@ -238,10 +237,17 @@ smrsh のディレクトリが /usr/adm/sm.bin とすると
 .q
 # ln -s /usr/local/fml/fml.pl /usr/adm/sm.bin
 # ln -s /usr/local/fml/libloadconfig.pl /usr/adm/sm.bin/
+# ln -s /usr/local/fml/default_config.ph /usr/adm/sm.bin/
+# ln -s /usr/local/fml/site_init.ph /usr/adm/sm.bin/
 .~q
 
-注意: fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl の link 
-が必要です。それ以前の current, fml-3.0-stable などでは必要ありません。
+注意: fml-current 3.0B 以降は /usr/local/fml/libloadconfig.pl および 
+default_config.ph の link が必要です。それ以前の current,
+fml-3.0-stable などでは必要ありません。
+
+補足: Red Hat Linux 7.x ではディレクトリは
+      /usr/adm/sm.bin ではなく /etc/smrsh になるそうです。
+      (thanks Koichi Honda)
 
 References: fml-support ML:
 

@@ -45,3 +45,36 @@ difficult since fml need to do queue management when fml does so.
 =E
 	@HOSTS = (hostA, hostB, hostC, ...)
 and sort it randomly :-)
+
+
+.S	受信者リストを分割する
+
+
+fml 4.0 で自動でやるのはちょっとひと工夫必要です。
+
+MTA の設定と追従していくことも必要です。
+postfix  を例にとります。
+
+4.0 は $MCI_SMTP_HOSTS の値で配送リストを分割しています。
+受信者数が 4500 で、$MCI_SMTP_HOSTS が 3 なら、
+
+	1500 
+	1500 
+	1500 	
+
+に分割します(MCI window と呼ばれています)。@HOSTS がないなら $HOSTS
+(== "localhost" by default) に対して3回コネクションを張ります。だから
+
+	$MCI_SMTP_HOSTS = 受信者数 / 1000 + 1;
+
+を毎回計算すれば OK です。もっとただしいのは (ざっくりかくと)
+
+ $START_HOOK = q#
+
+	$limit = `postconf smtpd_recipient_limit` して数をもらう;
+	$n     = `wc $ACTIVE_LIST` して受信者数;
+	$MCI_SMTP_HOSTS = $n / $limit + 1;
+
+ #;
+
+みたいにしておけば postfix の設定と自動追従していくはずです。

@@ -1,15 +1,15 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1997,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1997,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML: ntfml.pl,v 1.3 2001/05/09 15:23:00 fukachan Exp $
 #
 
 ### MAIN
@@ -227,12 +227,13 @@ sub GetTime
     @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
     
-    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-		   $year % 100, $mon + 1, $mday, $hour, $min, $sec);
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			1900 + $year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, 
+			$isdst ? $TZONE_DST : $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,

@@ -1,0 +1,92 @@
+sub Parse
+{
+    $first_header_part = 1;
+
+    my ($msgbufp, $msgbufp1);
+    for ($msgbufp = 0; $msgbufp <= $pmax; ) {
+	$msgbufp1 = index($MessageBuffer, "\n", $msgbufp);
+	last if $msgbufp1 < 0;
+	$_        = substr($MessageBuffer, $msgbufp, $msgbufp1 - $msgbufp);
+	$msgbufp  = $msgbufp1 + 1;
+
+	if ($MTA eq 'exim' || $MTA eq 'qmail') {
+	    /^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
+	    $CurAddr =~ s/[\<\>]//g;
+	    $CurAddr =~ s/\s*//g;
+	    &Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
+	}
+
+	### unknown MTA  ###
+	if (/(\S+\@[-A-Z0-9\.]+)/i) {
+	    /(\S+\@[-A-Z0-9\.]+)/i && ($P_CurAddr = $1); # pseudo
+	    $P_CurAddr =~ s/[\<\>]//g;
+	    $P_CurAddr =~ s/\s*//g;
+	    &Debug("P_CurAddr => $P_CurAddr") if $debug && $P_CurAddr;
+	}
+
+	##### TRAP CODE #####
+	if (/fatal error/i) { $fatal++;}
+
+	if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_); $found++; }
+	if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_); $found++; }
+
+	### unknown MTA
+	# e.g. uset not known
+	if (/$TrapWord/i && $P_CurAddr) {
+	    &AnalyzeErrorWord($_, $P_CurAddr); 
+	    $found++;	
+	}
+
+	# EXIM pattern
+	if (/failed/i && $MTA eq 'exim') { 
+	    $trap_want_addr = $_;
+	    next;
+	}
+	if ($trap_want_addr && /\@/ && $MTA eq 'exim') { 
+	    local($a);
+	    /^\s*(\S+\@\S+)/ && ($a = $1);
+	    $a =~ s/[\<\>:]//g;
+	    &CacheOn($a, " ") if $a; # space is a dummy
+	    undef $trap_want_addr;
+	}
+
+	if (/($ErrorCodePat)/ && $MTA eq 'exim') { 
+	    &AnalyzeErrorWord($_, $CurAddr); 
+	    $found++;
+	}
+
+	### sendmail
+	if ($fatal) {
+	    local($a);
+	    /^\s*(\S+\@\S+)/ && ($a = $1);
+	    $a =~ s/[\<\>]//g;
+	    &CacheOn($a, " ") if $a; # space is a dummy
+	}
+	# end of fatal block
+	if ($fatal && /^$/) {    
+	    undef $fatal;
+	}
+    }
+
+    # VERPs: qmail specific
+    # Suppose list-admin-account=domain@$mydomain syntax, ...
+    {
+	local($ra, $addr);
+
+	$addr = $ENV{'RECIPIENT'};
+	$ra   = $ENV{'RECIPIENT'};
+
+	if ($addr =~ /=/) {
+	    $addr =~ s/\@\S+$//;
+	    $addr =~ s/=/\@/;
+	    $addr =~ s/^\S+\-admin\-//; # fml specific 
+
+	    $ra =~ s/admin\-\S+\@/admin@/;
+
+	    &Debug("qmail:". $addr);
+	    &Debug("qmail return_addr:". $ra);
+	    $return_addr{$ra} = 1;
+	    &CacheOn($addr, " ");
+	}
+    }
+}

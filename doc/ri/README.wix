@@ -1,12 +1,12 @@
 .HTML_PRE
 
 .if LANG == JAPANESE
-	fml 4.0.1 メーリングリスト サーバ/マネージャ
+	fml 4.0-current メーリングリスト サーバ/マネージャ
 
 				深町 賢一
 .fi
 .if LANG == ENGLISH
-	fml 4.0.1 mailing list server/manager package
+	fml 4.0-current mailing list server/manager package
 
 				Ken'ichi Fukamachi
 .fi
@@ -23,9 +23,20 @@
    fml のホームページ
 .url http://www.fml.org/fml/
 
-   ソース
+   ソースのダウンロード先
 .url	ftp://ftp.fml.org/pub/fml/
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+
+   動作テスト、過去数年間の代表的なトラブルの事例とその解決方法
+
+     書籍「fml バイブル」（オライリージャパン刊）が最も詳しく扱っています。
+.url http://www.fml.org/fml/treking_guide.ja.html
+
+    うまくいかない場合には、以下のチェックリストに沿って設定を確認し、
+.url	http://www.fml.org/fml/CHECK_LIST/
+
+    www.fml.org のサーチエンジンで過去の事例を検索して下さい。
+ 
 .fi
 .if LANG == ENGLISH
 [Guide]
@@ -129,7 +140,7 @@ INSTALL_on_NT4.
 =E
 * Development Environment:
 
-   postfix release-20010228 + perl 5.00503 on NetBSD/i386 1.4Y
+   postfix release-20010228 + perl 5.00503 on NetBSD/i386 1.5.1
 
 * テスト環境: fml.org の実運用テスト環境は
 =E
