@@ -3,10 +3,22 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+
+2000/11/30
+
+   clean up cgi around (clean up for 4.0 release ...)
+	clean up 
+	modify temorary buffer allocation code
+	
+2000/11/28
+
+   kern/Makefile
+	remove not used environmental variables
+
 2000/11/17
 
-  kern/fml.pl
-  module/CPAN/
+   kern/fml.pl
+   module/CPAN/
 	modify conv2mailbox() to use Mail::Address module for more
 	correctness. apply patches in
 	fml-support: 09026, 09027 by OGAWA Kunihiko <kuni@edit.ne.jp>
@@ -15,12 +27,12 @@
 
 2000/11/07
 
-  drafts/English/
+   drafts/English/
 	fix language over these templates
 
 2000/11/06
 
-  makefml
+   makefml
 	consider ? + / in the mailing list address
 
 ---------------------------------------------------------------------------
