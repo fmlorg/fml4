@@ -8,6 +8,7 @@
 .include doc.wix
 .include unix.wix
 .include nt.wix
+.include net.wix
 .include misc.wix
 
 .# $Id$
