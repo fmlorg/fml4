@@ -306,8 +306,8 @@ sub MTIWarn
 sub Date2UnixTime
 {
     my ($date) = @_;
-    use FML::Date;
-    return FML::Date::date_to_unixtime( $date );
+    use Mail::Message::Date;
+    return Mail::Message::Date::date_to_unixtime( $date );
 }
 
 

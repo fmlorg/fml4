@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: spool2html.pl,v 2.20.2.2 2001/07/02 21:53:07 fukachan Exp $
+# $FML: spool2html.pl,v 2.21 2001/07/03 04:18:19 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -210,13 +210,13 @@ sub _speculate_unixtime
     use FileHandle;
     eval q{
 	use Mail::Header;
-	use FML::Date;
+	use Mail::Message::Date;
     };
 
     my $fh    = new FileHandle $f;
     my $head  = new Mail::Header $fh;
     my $date  = $head->get('date');
-    my $utime = FML::Date::date_to_unixtime($date);
+    my $utime = Mail::Message::Date::date_to_unixtime($date);
 
     return ($date, $utime);
 }
