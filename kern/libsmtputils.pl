@@ -219,7 +219,7 @@ sub DoGenerateHeader
     # @Rcpt is passed as "@to" even if @to has one addr;
     # WE SHOULD NOT TOUCH "$to" HERE;
     local(*to, *le, *rcpt) = @_;
-    local($tmpto);
+    local($tmpto, %dup);
 
     # Resent (RFC822)
     @ResentHdrFieldsOrder = ("Resent-Reply-To", "Resent-From", "Resent-Sender",
@@ -260,6 +260,9 @@ sub DoGenerateHeader
     # 
     if (@ResentForwHdrFieldsOrder) { 
 	for (@ResentForwHdrFieldsOrder, @ResentHdrFieldsOrder) {
+	    &Debug("DUP FIELD\t$_") if $dup{$_} && $debug;
+	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
+
 	    if ($Envelope{"GH:$_:"} || $le{"GH:$_:"}) {
 		$le{'Hdr'} .= "$_: ".($Envelope{"GH:$_:"}||$le{"GH:$_:"})."\n";
 	    }
@@ -267,6 +270,9 @@ sub DoGenerateHeader
     }
     else {
 	for (@HdrFieldsOrder, @ResentHdrFieldsOrder) {
+	    &Debug("DUP FIELD\t$_") if $dup{$_} && $debug;
+	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
+
 	    if ($Envelope{"GH:$_:"} || $le{"GH:$_:"}) {
 		$le{'Hdr'} .= "$_: ".($Envelope{"GH:$_:"}||$le{"GH:$_:"})."\n";
 	    }
