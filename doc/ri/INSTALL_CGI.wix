@@ -16,25 +16,48 @@
 
 .toc
 
-注意: このドキュメントは fml GUI 専用サーバを作る前提で書かれています。
-もっと高度なユーザごとの権限の使い分けは、専用サーバを動かすことができ
-た後で考えればいいでしょう というスタンスです。
 
-うまくいかない時はまず間違いなく fml 自体ではなくWWWサーバの設定でつま
-づいているので、まずWWWサーバの設定の仕方、方法についてマニュアルや文
-献を確認して下さい。
+.C	Overview
 
-まま、メールサーバの単なる設定の付け加え忘れもあるようです。
+おおまかには
+
+	fml のインストール
+	apache の変更		(設定変更の sample patch あり)
+	メールサーバの変更	(設定変更の sample patch あり)
+
+の3ステップからなります。
+
+注意:
+
+1. このドキュメントは fml GUI 専用サーバを作る前提で書かれています。
+
+2. すでに WWW サーバが動いてるところへ fml CGIも入れる場合
+
+   http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
+
+たぶん suexec を使ってユーザ fml のページで fml CGI を動かすとなるので
+しょう。これは簡単に付録で解説してあります。例えばすでに WWW サーバが
+動いているので改造ができない状態で、fml CGIを追加する場合を想定してい
+ます。本ドキュメントの本編は fml 専用サーバのためのガイドです。
+	
+
+トラブルシュート: うまくいかない時はまず間違いなく fml 自体ではなくWWW
+サーバもしくはメールサーバ絡みの設定でつまづいているので、まずそれぞれ
+のサーバのエラー等を良く見て下さい。
+
+各 WWW サーバの詳細な設定の仕方、方法についてそれぞれのサーバのマニュ
+アルや文献を確認して下さい。
+メールサーバの単なる設定の付け加え忘れもあるようです。
 
 
-.C	手順
+
+.C	fml のインストール手順
 =E.C	Overview
+
 
 .S	概要
 
 	fml-current をインストール
-	WWWサーバの設定変更    (sample patch あり)
-	メールサーバの設定変更 (sample patch あり)
 
 
 .S	fml-current のインストール
@@ -64,39 +87,54 @@ current をもってくる。
 できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
 
 
-.S	WWW サーバの設定の変更
+.C	WWW サーバの設定の変更
 
 /usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに適宜
 付け足す。
 
-例: apache と sendmail を使っている場合
+.S	apache と sendmail を使っている場合
 
-◯ /usr/local/apache/conf/httpd.conf を編集
+まず /usr/local/apache/conf/httpd.conf を編集します。
 
-   1. ユーザの設定
+a) ユーザの設定
 
 	User fml
 
    つまり /usr/local/fml /var/spool/ml のオーナーと同じにしてください。
 
-   2. ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行をコメントアウト
+b) ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行をコメントアウト
+
 	# ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
 
-   して
+httpd.conf ファイルの最後に
 
 	/usr/local/fml/www/examples/apache/httpd.conf.patch
 
-   を付け足して下さい。
+を付け足して下さい。
+付け足しただけでうまくいくかもしれないしすでにCGIの設定があるならそれ
+とうまくマージしないといけないです。分からなかったら apache デフォール
+トに戻して上述の作業をして下さい。そしてリスタートしてみてください
 
-	付け足しただけでうまくいくかもしれないしすでにCGIの設定がある
-	ならそれとうまくマージしないといけないです。
+c) もし ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/" 行も有効にしたい
 
-	分からなかったら apache デフォールトに戻して上述の作業をして下
-	さい。そしてリスタートしてみてください
+場合はその行より前に
 
-.S	メールサーバ
+	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/share/cgi-bin/fml/"
 
- (sendmail の例)
+を足して下さい。
+
+例:
+	ScriptAlias /cgi-bin/fml/ "/usr/local/fml/share/cgi-bin/fml/"
+
+	... 略 ...
+
+	ScriptAlias /cgi-bin/ "/usr/local/apache/cgi-bin/"
+
+
+
+.C	メールサーバの設定
+
+.S	sendmail 8.9 まで の場合
 
    /etc/sendmail.cf を編集する。編集する内容は
 
@@ -113,7 +151,17 @@ current をもってくる。
 
    sendmail を restart
 
- (postfix の例)
+.S	sendmail 8.10 以降の場合
+
+	/etc/mail/sendmail.cf に trusted user として fml を付け足す。
+
+	T fml
+
+	を付け足して restart する。これをしないと newaliases を
+	実行できない。
+
+	
+.S	postfix の場合
 
    /etc/postfix/main.cf を
 
@@ -125,16 +173,6 @@ current をもってくる。
 
   と書き換えて、"postfix reload" を走らせる。
 
-.S	ためしてみるだ 		
-
-◯ このあとはWWW画面で一通りできるようになります。"一通り"できることの
-範囲は
-
-	ＭＬの新規作成/削除
-	ユーザの登録/削除
-	管理者ユーザの登録/削除
-
-などです。左のメニューバーあたりをみてください。
 
 
 .C	httpd のリスタート
@@ -217,11 +255,22 @@ httpd の設定をいじること
 .appendix
 
 .C	suexec を使う場合
+.l	suexec
 
    http://www.xxx.yyy/~fml/cgi-bin/fml/admin/menu.cgi
 
-	でアクセスできるようにすることを考えます。
+でアクセスできるようにすることを考えます。手順はドキュメント本編と同様
+ですがapache の設定以降は異なります。
 
+	fml をインストールする
+	メールサーバの設定をする
+	apache の設定 (ユーザ fml で suexec が動くようにすること)
+	fml の設定変更をすること ( /usr/local/fml/.fml/cgi.conf )
+	~fml/public_html/ 以下に fml CGI 一式を作ること
+
+という感じになります。
+
+	
 .S	前提
 
 ユーザ fml は
@@ -240,17 +289,18 @@ suexec がうごくことを確認して下さい。
 
 典型的なインストール例は以下の通りです。
 .q
-# tar zxvf ~ftp/pub/net/www/apache/apache_1.3.12.tar.gz
+# tar zxvf apache_1.3.12.tar.gz
 # cd apache_1.3.12/
 # ./configure --enable-suexec --suexec-caller=www
 # make
 # make install 
 .~q
 
-/usr/local/apache/conf/httpd.conf の変更が必要かも知れません。
-例えば、この2箇所辺りです。
+/usr/local/apache/conf/httpd.conf の変更が必要かも知れません。例えば、
+この2箇所辺りです。config ファイルでの ExecCGI の追加と AddHandler の
+定義について調べて下さい。
 .q
-<Directory /home/*/*/public_html>
+<Directory /home/*/public_html>
     AllowOverride FileInfo AuthConfig Limit
     Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec ExecCGI
 </Directory>
@@ -264,10 +314,7 @@ AddHandler cgi-script .cgi
 % su fml
 % mkdir ~/public_html
 % chmod 755 ~/public_html
-% rsync -a /usr/local/fml/share/ ~/public_html/
-% chown -R fml ~/public_html
-% chgrp -R fml ~/public_html
-% chmod -R go-w ~/public_html
+
 
 .S	/usr/local/fml/.fml/cgi.conf の編集
 
@@ -296,6 +343,16 @@ $CGI_PATH        = '/~fml/cgi-bin/fml';
 	% makefml mladmin.cgi elena
 
 を実行すると ~/public_html/ 以下に作られます。
+
+
+（たぶん必要ないと思いますけど）念には念をいれて
+.q
+% su fml
+% chown -R fml ~/public_html
+% chgrp -R fml ~/public_html
+% chmod -R go-w ~/public_html
+.~q
+をして permission の念押しをしておくとなお良いと思います。
 
 
 $Id$
