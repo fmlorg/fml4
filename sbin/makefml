@@ -34,6 +34,11 @@ else {
 
 &MakeFmlUnLock;
 
+if ($GroupWritable) {
+    print STDERR "\n   Please check the group permission in $MLDir\n";
+    print STDERR "   Enjoy Internetworking!\n";
+}
+
 exit 0;
 
 
@@ -54,7 +59,7 @@ sub InitMakeFml
 
     # umask 077?
     # if a group mainteints the fml system, umask(007)?;
-    umask(077);
+    umask(002);
 
     $USER = $ENV{'USER'} || (getpwuid($<))[0];
 
@@ -84,8 +89,9 @@ sub InitMakeFml
 
     # initialize files
     if (-f $FML_CONFIG) {
-	package Config;
+	print STDERR "---Loading the configuration file $FML_CONFIG\n\n";
 
+	package Config;
 	eval("require \$main'FML_CONFIG;\#'");
 	print STDERR $@ if $@;
 
@@ -131,7 +137,8 @@ sub InitMakeFml
 	       'FQDN',     'FQDN', 
 	       ); 
 
-    %Default = ('EXEC_DIR', '/usr/local/fml',
+    %Default = ('PERSONAL_OR_GROUP', 'personal',
+		'EXEC_DIR', '/usr/local/fml',
 		'ML_DIR',   '/var/spool/ml', 
 		'DOMAIN',   $DOMAINNAME,
 		'FQDN',     $FQDN,
@@ -148,10 +155,22 @@ sub InitMakeFml
 		    'adduser', 'do_adduser',
 		    'bye',     'do_byeuser',
 		    'byeuser', 'do_byeuser',
+		    'addadmin', 'do_addadmin',
+		    'byeadmin', 'do_byeadmin',
+		    'help',	'do_help',
+		    'passwd',	'do_passwd',
 		    );
 
     ### anyway reload and set the present config for convenience;
     &GetCurConfig;
+    &ResetVariables;
+
+    # fix include path for *.pl
+    push(@INC, $ExecDir);
+
+    if ($CurConfig{'PERSONAL_OR_GROUP'} eq 'group') {
+	$GroupWritable = 1;
+    }
 
     ### signal handling
     $SIG{'ALRM'} = 'TimeOut';
@@ -165,6 +184,14 @@ sub InitFmlConfig
 
     print "---Please Define Your Fml System Configurations\n\n";
 
+    # personal or group-shared?
+    printf "%-25s ", 'Personal Use? or ML-Admin-Group-Shared?';
+    $cmd = &Query("Personal or Group ", "personal/group", 
+		  "personal|group", "personal");    
+    $cmd = ($cmd !~ /^\s*$/) ? $cmd : $v;
+    &do_setq("PERSONAL_OR_GROUP", $cmd);
+
+    # values;
     for (@Config) {
 	$k = $_;
 	$p = $Config{$_};
@@ -183,12 +210,13 @@ sub InitFmlConfig
 
     &GetCurConfig;
 
-    print "CONFIG_DIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
-    print "Config Saved in [$CurConfig{'EXEC_DIR'}/.fml] ";
+    # print "CONFIG_DIR (e.g. $HOME/.fml, $CurConfig{'EXEC_DIR'}/.fml ...)\n";
+    # print "Config Saved in [$CurConfig{'EXEC_DIR'}/.fml] ";
+    # $cmd = &GetString;
+    # $cmd = ($cmd !~ /^\s*$/) ? $cmd : "$CurConfig{'EXEC_DIR'}/.fml";
+    # $CONFIG_DIR = $cmd;
 
-    $cmd = &GetString;
-    $cmd = ($cmd !~ /^\s*$/) ? $cmd : "$CurConfig{'EXEC_DIR'}/.fml";
-    $CONFIG_DIR = $cmd;
+    $CONFIG_DIR = "$CurConfig{'EXEC_DIR'}/.fml";
 
     # mkdir CONFIG_DIR;
     {
@@ -199,7 +227,7 @@ sub InitFmlConfig
 
 	    if (! -d $dir) {
 		print "   mkdir $dir\n";
-		mkdir($dir, 0700);
+		mkdir($dir, 0755);
 	    }
 	}
     }
@@ -381,6 +409,23 @@ sub ExecCmd
     @argv = split(/\s+/, $_);
 
     &GetCurConfig;
+    &ResetVariables;
+
+    if ($TheFirstTime) {
+	;
+    }
+    else {
+	if (!-d $ExecDir) {
+	    print STDERR "ExecDir($ExecDir) NOT FOUND, STOP\n";
+	    return;
+	}
+	if (!-d $MLDir) {
+	    print STDERR "MLDir($MLDir) NOT FOUND, STOP\n";
+	    return;
+	}
+    }
+
+
 
     # function pointer;
     $fp = shift @argv;
@@ -422,18 +467,33 @@ sub GetString
 
 
 ##########################################################
+sub do_help
+{
+    print "makefml:\n";
+    print "   available commands\nt";
+    print join("\n\t", (keys %MakeFmlProc));
+    print "\n\n";
+}
+
 sub do_init
 {
-    print "\n";
-    
-    for ($Config'EXEC_DIR, $Config'ML_DIR) {
-	if (! -d $_) {
-	    print "   mkdir $_\n";
-	    mkdir($_, 0755);
+    &ResetVariables;
+
+    if (! -d $ExecDir) {
+	print "   mkdir $ExecDir\n";
+	mkdir($ExecDir, 0755);		
+    }
+
+    if (! -d $MLDir) {
+	if ($GroupWritable) {
+	    mkdir($MLDir, 0775);
+	a}
+	else {
+	    mkdir($MLDir, 0755);
 	}
     }
+
     print "\n";
-    return 'LAST';
 }
 
 
@@ -441,7 +501,7 @@ sub do_install
 {
     local($cmd);
 
-    print "---Install the Fml system to $CurConfig{'EXEC_DIR'}. O.K.? [y/n] ";
+    print "---Install the Fml system to $CurConfig{'EXEC_DIR'}. O.K.? y/n [n] ";
     $cmd = &GetString;
 
     if ($cmd ne 'y') {
@@ -457,13 +517,26 @@ sub do_install
     &FixPath("sbin/makefml");
     &FixPath("cf/config");
 
-    $exec_dir = $Config'EXEC_DIR; #';
+    &ResetVariables;
 
-    # $exec_dir/sbin/install.sh is NOT yet installed 
+    # /var/spool/ml/etc/
+    umask(002);
+    if ($GroupWritable) {
+	print STDERR "Group Writable\n" if $debug;
+	print STDERR "mkdir $ML_ETC_DIR\n" if $debug;;
+	-d $ML_ETC_DIR || mkdir($ML_ETC_DIR, 0775);
+    }
+    else {
+	print STDERR "Personal Use\n" if $debug;;
+	print STDERR "mkdir $ML_ETC_DIR\n" if $debug;;
+	-d $ML_ETC_DIR || mkdir($ML_ETC_DIR, 0755);
+    }
+
+    # $ExecDir/sbin/install.sh is NOT yet installed 
     if (-f "sbin/install.sh") {
 	$SH = $ENV{'SH'} || "/bin/sh";
-	system "$SH ./sbin/install.sh $exec_dir";
-	eval symlink($CONFIG_DIR, "$exec_dir/Configurations");
+	system "$SH ./sbin/install.sh $ExecDir";
+	eval symlink($CONFIG_DIR, "$ExecDir/Configurations");
     }
     else {
 	print "Please do \"makefml\" in the top directory of the source\n";
@@ -524,6 +597,7 @@ sub search_path
 
 sub do_setq
 {
+    #print STDERR "setq \$Config'$_[0] = '$_[1]';\n"  if $debug;;
     eval("\$Config'$_[0] = '$_[1]';");
     print "$@\n--@_\n" if $@;
 }
@@ -551,58 +625,72 @@ sub do_new { &do_newml(@_);}
 sub do_newml
 {
     local($ml) = @_;
-    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex);
 
     print "---Creating $ml mailing list\n";
 
-    &InitLocalVariables;
+    ### umask;
+    umask(002);
 
-    # mkdir ML Directory
-    mkdir("$ml_dir/$ml", 0700);
-    mkdir("$CONFIG_DIR/$ml", 0700);
+    &ResetVariables;
 
-    print STDERR "$exec_dir/cf/__makefml -> $CONFIG_DIR/$ml/cf\n";
-    &Conv($ml, "$exec_dir/cf/__makefml", "$CONFIG_DIR/$ml/cf");
+    ### mkdir ML Directory
+    # group writable;
+    if ($GroupWritable) {
+	print STDERR "Group Writable\n"  if $debug;;
+	print STDERR "mkdir etc crontab\n" if $debug;;
+	-d $ML_ETC_DIR           || mkdir($ML_ETC_DIR, 0775);
+	-d "$ML_ETC_DIR/crontab" || mkdir("$ML_ETC_DIR/crontab", 0775);
+    }
+    else {
+	print STDERR "Personal Use\n" if $debug;;
+	print STDERR "mkdir etc crontab\n" if $debug;;
+	-d $ML_ETC_DIR           || mkdir($ML_ETC_DIR, 0755);
+	-d "$ML_ETC_DIR/crontab" || mkdir("$ML_ETC_DIR/crontab", 0755);
+    }
 
-    if ($OS_TYPE && open(CF, ">> $CONFIG_DIR/$ml/cf")) {
+    # group read but not-write apermission;
+    -d "$ML_ETC_DIR/$ml"     || mkdir("$ML_ETC_DIR/$ml", 0755);
+
+    # owner only read-write
+    umask(077);
+    -d "$MLDir/$ml"         || mkdir("$MLDir/$ml", 0700);
+
+    ### cf file; 
+    umask(022);
+
+    #print STDERR "$ExecDir/cf/__makefml -> $ML_ETC_DIR/$ml/cf\n";
+    &Conv($ml, "$ExecDir/cf/__makefml", "$ML_ETC_DIR/$ml/cf");
+
+    if ($OS_TYPE && open(CF, ">> $ML_ETC_DIR/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
     }
 
-    # 
-    # make ml/config.ph
-    $exec  = "perl $exec_dir/cf/config -m $exec_dir/cf/MANIFEST ";
-    $exec .= "$CONFIG_DIR/$ml/cf";    
-    system "$exec > $ml_dir/$ml/config.ph";
+    &ResetVariables;
 
-    ### generate samples, includes and aliases in $exec_dir/include ###
-    umask(022);
-
-    mkdir("$exec_dir/include", 0755);
     # include file is public readable;
-    &Conv($ml, "$exec_dir/etc/samples/__include", "$exec_dir/include/$ml");
-
-    # 
-    umask(077);
-
-    # directory to store the config for each ML
-    mkdir("$CONFIG_DIR/$ml", 0700);
-    symlink("$CONFIG_DIR/$ml", "$ml_dir/$ml/samples");
-
-    # generating samples ...;
-    &Conv($ml, "$exec_dir/etc/samples/__aliases", "$CONFIG_DIR/$ml/aliases");
-    &Conv($ml, "$exec_dir/etc/samples/__include", "$CONFIG_DIR/$ml/include");
-    &Conv($ml, "$exec_dir/etc/samples/__crontab", "$CONFIG_DIR/$ml/crontab");
-    &Conv($ml, "$exec_dir/etc/samples/__fml.c",   "$CONFIG_DIR/$ml/fml.c");
+    # why for () fails?;
+    &Conv($ml, "$ExecDir/etc/samples/__include", "$ML_ETC_DIR/$ml/include");
+    &Conv($ml, "$ExecDir/etc/samples/__aliases", "$ML_ETC_DIR/$ml/aliases");
+    &Conv($ml, "$ExecDir/etc/samples/__crontab", "$ML_ETC_DIR/$ml/crontab");
+    &Conv($ml, "$ExecDir/etc/samples/__fml.c", "$ML_ETC_DIR/$ml/fml.c");
+    &FixIncludeHeader;
 
     &GenCrontab;
 
+    # make ml/config.ph
+    umask(077);
+
+    $exec  = "perl $ExecDir/cf/config -m $ExecDir/cf/MANIFEST ";
+    $exec .= "$ML_ETC_DIR/$ml/cf";
+    system "$exec > $MLDir/$ml/config.ph";
+
     # the last info
-    print "Please see several examples in $CONFIG_DIR/$ml\n";
-    print "\n# Example of Aliases ($CONFIG_DIR/$ml/aliases)\n";
-    &Cat("$CONFIG_DIR/$ml/aliases");
+    print "\n   Please see several examples in $ML_ETC_DIR/$ml\n";
+    print "\n# Example of Aliases ($ML_ETC_DIR/$ml/aliases)\n";
+    &Cat("$ML_ETC_DIR/$ml/aliases");
     print "\n";
 }
 
@@ -610,16 +698,15 @@ sub do_newml
 sub do_config
 {
     local($ml) = @_;
-    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex);
 
     local($cf, $local_config, $config);
     local(@config, %config);
 
     print "---Configure $ml mailing list ... \n";
 
-    &InitLocalVariables;
+    &ResetVariables;
 
-    $cf = "$CONFIG_DIR/$ml/cf";
+    $cf = "$ML_ETC_DIR/$ml/cf";
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
@@ -705,8 +792,8 @@ sub do_config
     }
 
     # make ml/config.ph
-    $exec = "perl $exec_dir/cf/config $cf ";
-    system "$exec > $ml_dir/$ml/config.ph";
+    $exec = "perl $ExecDir/cf/config $cf ";
+    system "$exec > $MLDir/$ml/config.ph";
 }
 
 
@@ -934,34 +1021,52 @@ sub OptionQuery
 }
 
 
-sub InitLocalVariables
+sub ResetVariables
 {
     # anyway set;
     &GetCurConfig;
 
-    $USER     = (getpwuid($<))[0];
-    $exec_dir = $CurConfig{'EXEC_DIR'};
-    $ml_dir   = $CurConfig{'ML_DIR'};
-    $domain   = $CurConfig{'DOMAIN'};
-    $fqdn     = $CurConfig{'FQDN'};
+    $USER    = (getpwuid($<))[0];
+    $ExecDir = $CurConfig{'EXEC_DIR'};
+    $MLDir   = $CurConfig{'ML_DIR'};
+    $DOMAIN  = $CurConfig{'DOMAIN'};
+    $FQDN    = $CurConfig{'FQDN'};
+
+    if ($CurConfig{'PERSONAL_OR_GROUP'} eq 'group') {
+	$GroupWritable = 1;
+    }
+    else {
+	$GroupWritable = 0;	
+    }
 
     # Mailing list name is all lower case;
     $ml =~ tr/A-Z/a-z/;
+
+    $ML_ETC_DIR = "$MLDir/etc";
 }
 
 
 sub GenCrontab
 {
-    open(TAB, "> $CONFIG_DIR/crontab") || 
-	(&Warn("cannot open $CONFIG_DIR/crontab"), return);
+    local($uid);
+
+    print STDERR "\n";
+    print STDERR "   Crontab for all ${USER}'s ML's is saved in\n";
+    print STDERR "   $ML_ETC_DIR/crontab/$USER\n";
+
+    open(TAB, "> $ML_ETC_DIR/crontab/$USER") || 
+	(&Warn("cannot open $ML_ETC_DIR/crontab/$USER"), return);
     select(TAB); $| = 1; select(STDOUT);
 
-    opendir(DIRD, $CONFIG_DIR) || (&Warn("cannot open $CONFIG_DIR"), return);
+    opendir(DIRD, $ML_ETC_DIR) || (&Warn("cannot open $ML_ETC_DIR"), return);
     for (readdir(DIRD)) {
 	next if /^\./;
 
-	if (-f "$CONFIG_DIR/$_/crontab") {
-	    if (open(IN, "$CONFIG_DIR/$_/crontab") ) {
+	$uid = (stat("$ML_ETC_DIR/$_/crontab"))[4];
+
+	# if $uid == real-UID;
+	if (($uid == $<) && -f "$ML_ETC_DIR/$_/crontab") {
+	    if (open(IN, "$ML_ETC_DIR/$_/crontab") ) {
 		while (<IN>) {  print TAB $_;}
 		close(IN);
 	    }
@@ -970,28 +1075,52 @@ sub GenCrontab
     }
     closedir(DIRD);
 
+    close(TAB);
 }
 
+
+sub do_addadmin
+{
+    $AdminMode = 1;
+    &do_adduser(@_);
+    $AdminMode = 0;
+}
+
+sub do_byeadmin
+{
+    $AdminMode = 1;
+    &do_byeuser(@_);
+    $AdminMode = 0;
+}
 
 sub do_adduser
 {
     local($ml, $member) = @_;
-    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex);
+    local(@files);
+
+    umask(077);
 
     print "---Addming $member to $ml mailing list\n";
 
-    &InitLocalVariables;
+    if ($AdminMode) {
+	@files = ("$MLDir/$ml/members-admin");
+    }
+    else {
+	@files = ("$MLDir/$ml/members", "$MLDir/$ml/actives");
+    }
+
+    &ResetVariables;
 
     # mkdir ML Directory
-    if (! -d "$ml_dir/$ml") {
+    if (! -d "$MLDir/$ml") {
 	print "***Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	return;
     }
 
     # add 
-    for ("$ml_dir/$ml/members", "$ml_dir/$ml/actives") {
-	print "Append $member to $member\n" if $debug;
+    for (@files) {
+	print "Append $member to $_\n" if $debug;
 	&AppendString2File($member, $_);
     }
 }
@@ -1000,21 +1129,31 @@ sub do_adduser
 sub do_byeuser
 {
     local($ml, $member) = @_;
-    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex);
+    local(@files);
 
     print "---Delete $member in $ml mailing list\n";
 
-    &InitLocalVariables;
+    umask(077);
+
+
+    if ($AdminMode) {
+	@files = ("$MLDir/$ml/members-admin");
+    }
+    else {
+	@files = ("$MLDir/$ml/members", "$MLDir/$ml/actives");
+    }
+
+    &ResetVariables;
 
     # mkdir ML Directory
-    if (! -d "$ml_dir/$ml") {
+    if (! -d "$MLDir/$ml") {
 	print "***Error: $ml ML NOT CREATED\n";
 	print "   Firstly,please do \"perl makefml newml $ml\"!\n";
 	return;
     }
 
     # delete 
-    for ("$ml_dir/$ml/members", "$ml_dir/$ml/actives") {
+    for (@files) {
 	if (&Repl($member, $_)) {
 	    print "Delete $member in $_\n" if $debug;
 	}
@@ -1049,31 +1188,98 @@ sub Repl
 }
 
 
+sub do_passwd
+{
+    local($ml, $member, $passwd) = @_;
+    local($passwd_file);
+
+    umask(077);
+
+    print "---Changing Passwd of Admin $member in $ml mailing list\n";
+
+    &ResetVariables;
+
+    # $ml/etc
+    -d "$MLDir/$ml/etc" || mkdir("$MLDir/$ml/etc", 0700);
+    $passwd_file= "$MLDir/$ml/etc/passwd";
+
+    -f $passwd_file || &Touch($passwd_file);
+
+    while (!$member || !$passwd) {
+	if (! $member) {
+	    print "Address: ";
+	    chop($member = <STDIN>);
+	}
+	else {
+	    print "Address: $member\n";
+	}
+
+	if (! $passwd) {
+	    # no echo
+	    system "stty", "-echo";
+
+	    print "Passwd: ";
+	    chop($passwd = <STDIN>);
+	    print "\n";
+
+	    system "stty", "echo";
+	}
+
+	if (!$member || !$passwd) {
+	    &Warn("Error: Please input NOT NULL Address and Password.");
+	}
+    }
+
+    require 'libcrypt.pl';
+    $init = 1;	# if new-comer, initialize the passwd;
+
+    print "\n";
+
+    if (&ChangePasswd($passwd_file, $member, $passwd, $init)) {
+	print "   Passwd Changed ($passwd_file).\n";
+    }
+    else {
+	print "   Passwd Change Fails ($passwd_file).\n";
+    }
+
+}
+
+
+sub Mesg { print STDERR "$_[1]\n";}
+
+
 sub Conv
 {
-    local($exec_dir, $ml_dir, $cf, $domain, $fqdn);
     local($ml, $example, $out) = @_;
-
-    &InitLocalVariables;
-
-    open(NEW, $example)  || &Log("cannot open $example");
+    local($uid, $gid);
+    open(IN, $example)  || &Log("cannot open $example");
     open(CF, "> $out")   || &Log("cannot open $out");
     select(CF); $| = 1; select(STDOUT);
     
-    while (<NEW>) {
-	s/_EXEC_DIR_/$exec_dir/g;
-	s/_ML_DIR_/$ml_dir/g;
+    print STDERR "\tGenerating $out\n";
+
+    $uid   = $uid || (getpwuid($<))[2];
+    $gid   = $gid || (getpwuid($<))[3];
+
+    while (<IN>) {
+	s/_EXEC_DIR_/$ExecDir/g;
+	s/_ML_DIR_/$MLDir/g;
 	s/_ML_/$ml/g;
-	s/_DOMAIN_/$domain/g;
-	s/_FQDN_/$fqdn/g;
+	s/_DOMAIN_/$DOMAIN/g;
+	s/_FQDN_/$FQDN/g;
 	s/_USER_/$USER/g;
 	s/_OPTIONS_/$opts/g;
+	s/XXUID/$uid/g;
+	s/XXGID/$gid/g;
 	print CF $_;
     }
-    close(NEW);
+
+    close(IN);
     close(CF);
 }
 
+
+sub Touch  { open(APPEND, ">> $_[0]"); close(APPEND);}
 
 sub GetTime
 {
@@ -1095,6 +1301,34 @@ sub GetTime
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
 }
+
+
+sub FixIncludeHeader
+{
+    local($file, $include, @include, $INCDIR);
+
+    $include =q#sys/types.h unistd.h#;
+    @include = split(/\s+/, $include);
+    $INCDIR  = '/usr/include';
+
+    &ResetVariables;
+
+    print STDERR "\tGenerating $ML_ETC_DIR/$ml/config.h\n";
+
+    if (open(GUESS, "> $ML_ETC_DIR/$ml/config.h")) {
+	foreach $file (@include) {
+	    if ( -f "$INCDIR/$file" ) {
+		print GUESS "\#include <$file>\n";
+	    }
+	    else {
+		# print STDERR "Not Found $INCDIR/$file\n";
+	    }
+	}
+
+	close(GUESS);
+    }
+}
+
 
 #####
 package dumpvar;
@@ -1132,9 +1366,10 @@ sub main'Dumpvar
 		 )
 		||
 		(($] =~ /5\.\d\d\d/) && 
-		 $key ne "$package::" && $key ne "DB::" && defined %entry
-		 && ($dumpPackages or $key !~ /::$/)
-		 && ($key !~ /^_</ or $dumpDBFiles)
+		 $key ne "$package::" && $key ne "DB::" && 
+		 (defined %entry) && 
+		 ($dumpPackages || $key !~ /::$/)
+		 && ($key !~ /^_</ || $dumpDBFiles)
 		 && !($package eq "dumpvar" && $key eq "stab")
 		 )
 		) {
