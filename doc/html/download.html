@@ -30,64 +30,41 @@ The Design and Implementation of "fml" Mailing List Server
 
 <H3>
 #ifdef JAPANESE
-	ソースコード
+	ソースのダウンロード
+	<BR>
+	関連するツール類も参考までに一緒に置いてあります。
 #else
-	Source codes and so on ...
+	Source codes and related things
+	<BR>
+	things related with mailing lists
 #endif
 </H3>
 <UL>
 #if DIST
 #else /* DIST */
 	<LI>
-	<A HREF="fml-current.tar.gz">
-#ifdef JAPANESE
-	fml 最新版ソースコード一式 (fml-current.tar.gz)
-#else
-	fml latest source code package (fml-current.tar.gz)
-#endif
-#endif /* DIST */
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 	</A>
 
 	<LI>
 	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
-#ifdef JAPANESE
-	fml のソースと関連するアーカイブ (WWW.SAPPORO.IIJ.AD.JP)
-#else
-	fml sources and related things (WWW.SAPPORO.IIJ.AD.JP)
-#endif
-	<BR>
-	(the same as on ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/)
+	http://www.sapporo.iij.ad.jp/staff/fukachan/archive/
 	</A>
+#ifdef JAPANESE
+	<BR>
+	(ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/と中身は一緒です。
+	ホストとprotocolが違うだけです:-)
+#else
+	<BR>
+	(contents are the same as 
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/.)
+#endif
 
-	<LI>
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-#ifdef JAPANESE
-	fml ソース (FTP)
-#else
-	fml sources (FTP)
-#endif
-	<BR>
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-	</A>
 	<BR>
 	lha, ish and mime_pls.* sendmail, smtpfeed, bind, ntperl
 #ifdef JAPANESE
-	等も参考までに一緒に置いてあります。
-	<BR>
-	あと、
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
-	snapshot
-	</A>
-	の下には current のソースが広がった形でおいてあります
-	(時として tar.gz にまとめられる前のものもあり得る)。
-#else
-	exist here for convenience. Also you find the fml latest source tree
-	on
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/
-	</A>
-#endif
-
+	
 <PRE>
 Copyright (C) 1993-1999 Ken'ichi Fukamachi
          All rights reserved. 
