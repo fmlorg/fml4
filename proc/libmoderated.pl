@@ -261,7 +261,25 @@ sub ModeratorNotify
     $cp = $Envelope{'preamble'};
     $Envelope{'preamble'} = $preamble;
 
-    if (-f $distfile) {
+    # default declaration
+    $distfile = $distfile || "$DIR/moderators";
+
+    if ($debug_moderator) {
+	if ($distfile) { 
+	    if (-f $distfile) {
+		&Log("debug: distfile $distfile is used");
+	    }
+	    else {
+		&Log("debug: distfile $distfile is defined but not exists");
+		&Log("debug: forwarded to \$MAINTAINER");
+	    }
+	}
+	else {
+	    &Log("debug: distfile is not defined");
+	}
+    }
+
+    if ($distfile && -f $distfile) {
 	$misc{'hook'} = q#;
 	$le{'GH:Reply-To:'} = $Envelope{'CtlAddr:'}
 	#;
