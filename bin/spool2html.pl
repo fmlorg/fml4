@@ -89,7 +89,7 @@ exit 0;
 
 sub Ctl
 {
-    local($id);
+    local($id) = @_;
 
     print STDERR "$label::Ctl $_[0] .. $_[1]\n" if $verbose;
 
