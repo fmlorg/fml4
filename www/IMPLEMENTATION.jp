@@ -1,4 +1,4 @@
-		CGIの実装について
+			CGIの実装について
 
 ○ 基本的なディレクトリ構成
 
@@ -38,37 +38,28 @@
  * 一般ユーザ用のはどうする？ (未実装)
    makefml ml.cgi $ml とかにするのか？
 
+	   /usr/local/fml/share/cgi-bin/fml/$ml/ (仮)  以下にCGIを生成？
 
 
-○ インストーラがどうパスワードを生成するべきか？
+○ 各ディレクトリの権限
 
-   makefml admin.cgi
-
-	この時に admin/.htpasswd を生成するようにしたい
-
-
-   makefml mladmin.cgi $ml
-
-	この時に $DIR/$ml/etc/passwd から生成か？
-	リモートでいじる権限という観点から同じでいいだろうとおもう
-	share/ 以下を直接使わないなら
-	別の手段で保守するという案もあるだろう。
-
-
-
-○ admin/ を触れる人の権限は
+   /usr/local/fml/share/cgi-bin/fml/admin/
  
-	makefml でできることが全部できる人
-	各ＭＬの管理者とは別の集合である可能性あり
-	よってパスワードは別途設定する(特にインストール時)
+	そのホスト上で makefml を使える人
+	つまり何でもできる権限がある人と等価
 
-○ htdocs/
+	各ＭＬの管理者とは別の集合である可能性がある
+	よってパスワードは別途設定するべき(特にインストール時)
 
-	廃止 (share/ の下にはない)
-	templateにのみ使う
+   /usr/local/fml/share/cgi-bin/fml/ml-admin/$ml/
 
-○ /cgi-bin/fml/admin/makefml.cgi
+	各ＭＬの管理者の権限
+	メーリングリストサーバのホストに入れるとは限らない
 
-	/cgi-bin/fml/admin/menu.cgi => /cgi-bin/fml/admin/makefml.cgi
+	パスワード認証をともなうべきで
+	adminコマンドと同じパスワード？
+ 
+   /usr/local/fml/share/cgi-bin/fml/$ml/ (仮)
 
-	必要ならこの時にパスワード制限をかける
+	一般ユーザが入る階層
+	パスワード認証をともなうべき
