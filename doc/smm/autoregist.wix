@@ -390,6 +390,31 @@ $START_HOOK  = q#
 ローカルなドメイン は自分のドメイン です。
 
 
+.S	$AUTO_REGISTRATION_DEFAULT_MODE
+
+登録を
+
+	アドレス $AUTO_REGISTRATION_DEFAULT_MODE
+
+の形で行なう。fml の内部表現↑で設定する必要があるので注意して下さい。
+
+例: デフォールトを skip にする
+
+	$AUTO_REGISTRATION_DEFAULT_MODE	= "s=1"; 
+
+    まとめおくりで３時間に一回 Multipart に設定。
+
+	$AUTO_REGISTRATION_DEFAULT_MODE	= "m=3mp"; 
+
+
+.S	$AUTO_REGISTRATION_HOOK
+
+$AUTO_REGISTRATION_HOOK = q#
+    $e{'GH:Reply-To:'} = $MAINTAINER;
+#;
+
+WELCOMEのメールの Reply-To: を管理者宛にする
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
