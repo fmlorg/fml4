@@ -1,3 +1,4 @@
+.HTML_PRE
 	CHANGES from 0.x(1993) to fml-current
 
 				¿¼Ä® ¸­°ì
@@ -3969,11 +3970,12 @@ Subject: hml1.6: a powerful mailing list server
 Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 
 $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
-.#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
-.# 
-.# FML is free software; you can redistribute it and/or modify
-.# it under the terms of GNU General Public License.
-.# See the file COPYING for more details.
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+.HTML_PRE

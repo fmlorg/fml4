@@ -1,3 +1,4 @@
+.HTML_PRE
 	On Porting to Non UNIX Operating Systems
 
 				¿¼Ä® ¸­°ì
@@ -134,3 +135,4 @@ I hope browsers can handle makefml directly but ....
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+.~HTML_PRE

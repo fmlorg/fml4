@@ -1,3 +1,4 @@
+.HTML_PRE
 		RELEASE NOTES
 
 				¿¼Ä® ¸­°ì
@@ -5677,12 +5678,13 @@ hml 1.6 (1991/05/01)	hirano@tkl.iis.u-tokyo.ac.jp
        not queueing $QUEUE_FLUSH_COMMAND = '/usr/lib/sendmail -oi -q'
        and a little modification for another ML server
 
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
-.#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
-.# 
-.# FML is free software; you can redistribute it and/or modify
-.# it under the terms of GNU General Public License.
-.# See the file COPYING for more details.
+# $Id$
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+.~HTML_PRE

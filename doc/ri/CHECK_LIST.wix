@@ -1,3 +1,4 @@
+.HTML_PRE
 	質問をする際に調べておいてほしいリスト
 =E
 	CHECK LIST BEFORE ASKING
@@ -170,3 +171,4 @@ $Id$
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+.~HTML_PRE
