@@ -4,15 +4,15 @@
 =E.k	mail2news (ML -> News)
 .l	mail2news
 
-おまけ機能のメーリングリストからニュースへ垂れ流す例です。
-注意: ベータテストですぅ
+注意: ベータテストですぅ。また Perl 5 でないと使えません。
 
-NNTPClient.pm の使い方の例とでもいう方がいいでしょう。
 
-perl 5 でのみ使える機能です。また NNTPClient.pm がインストールされてい
-ることが必要です。
+おまけ機能のメーリングリストからネットニュースへも流す例です:-)
+NNTPClient.pm の使い方の例とでもいう方がいいかもしれない。perl 5 での
+み使える機能です。また NNTPClient.pm がインストールされていることが必
+要です。
 
-libnnt.pl は contrib/mail2news に入っています。
+なお libnntp.pl は contrib/mail2news に入っています。
 
 
 .S	mail2news の組み込み方
@@ -32,7 +32,7 @@ libsmtp.pl の入ってる場所)へ入れます。
 		&NntpPost(*Envelope);
 	#;
 
-また、必要な変数を設定します。
+また、必要な変数を設定します (e.g. config.ph に設定する)。
 
     $NEWS_SERVER
 
@@ -61,7 +61,11 @@ libsmtp.pl の入ってる場所)へ入れます。
 	Organization とかか？
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

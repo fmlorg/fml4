@@ -3,9 +3,9 @@
 .k	pager
 .k	mail2pager
 
-注意: モデムを呼ぶ部分については、ＯＳ、ハード依存なので聞かれても困り
-ます。またこまかいパラメータは pager に依存です。だから聞かないでね(つぅ
-か聞かれてもその分野は知らない)。ここはあくまで前処理プログラムです。
+注意: モデムを呼ぶ部分についてはOSやハード依存なので聞かれても困ります。
+またこまかいパラメータは pager に依存です。だから聞かないでね(つぅか聞
+かれてもその分野は知らない)。ここはあくまで前処理プログラムです。
 
 
 .S	euc2jiskuten.pl 
@@ -20,7 +20,7 @@ EUC(できるだけ事前に全角文字に変換しておいてからいれるのが無難で推奨)
 で euc2jiskuten.pl に突っ込めば、JIS句点コードに変換します。
 この文字列をモデムで pager の電話番号にかければ
 
-	メール→ポケベル
+	メール → ポケベル
 
 の出来上がりです。モデムで電話を書ける部分は自分で工夫して下さい。
 
@@ -28,7 +28,7 @@ EUC(できるだけ事前に全角文字に変換しておいてからいれるのが無難で推奨)
 クな日本語表示とかちゃんとでるのかどうか試してないので知りません。
 
 
-.S	fml を使う例
+.S	FMLと組合せてポケベルを呼ぶ例
 
 どうすればいいかというと
 
@@ -44,12 +44,16 @@ EUC(できるだけ事前に全角文字に変換しておいてからいれるのが無難で推奨)
 	$DO_NOTHING = 1;
 
 みたいなのを設定。後の問題はこの modem2pager の部分です。この部分は 
-spooler, queuing, Pagerサービスの制御、待ち時間等に合わせて細かいチュー
-ニングをしないとちゃんと出ないでしょう。
+spooler, queuing, pagerサービスの制御、待ち時間等に合わせて細かいチュー
+ニングをしないと常に/緊急時に使えるものにはならないでしょう。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

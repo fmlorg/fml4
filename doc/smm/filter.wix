@@ -2,10 +2,12 @@
 .k	Filtering
 .l	filter
 
-ちなみに Filtering FAQ のURLは
+.S	Filtering FAQ
+
+メール関係の Filtering FAQ というものもあります。URLは
 .url	http://www.cis.ohio-state.edu/hypertext/faq/usenet/mail/filtering-faq/faq.html
 
-その plaintext version は
+plaintext version は
 .url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
 
 
@@ -74,9 +76,11 @@ slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
-
-
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

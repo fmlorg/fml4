@@ -1,4 +1,4 @@
-.C	POP による FML の起動
+.C	POP による FML の運用
 .k	POP3 を使った FML
 .l	popfml
 
@@ -10,21 +10,21 @@
 	2 ~/.popfmlrc に popfml の設定を書く
 	3 cron で定期的に popfml を呼ぶ
 
-これで、MLが作れました。なお、まとめおくりはまた別です。以下で各STEPを
-説明します。
+これで、MLが作れました。なお、まとめおくりはまた別です。以下でPOPとFML
+の設定について各ステップを説明します。
 
 
 .S	POP経由の自動RefileやＭＬの実行 (bin/popfml.pl)
 
 POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
-れの専用プログラムとして実装されています。対象としているケースは
+れの専用プログラムとして実装されています。想定されているケースは
 
 	メールはPOP3で読めるだけ
 	メールを受けとめてプログラムを呼べないという
 		OS附属のメールシステム or ポリシー
 
-等のために存在します。このやり方は汎用なのでPOP3でメールが読める場合な
-らどんなOSでも原理的にはMLが実行できるということになります。
+等の場合のために存在します。このやり方は汎用なのでPOP3でメールが読める
+場合ならどんなOSでも原理的にはMLが実行できるということになります。
 ＃でもまああくまで裏技というカテゴリでしょう。
 
 理屈としては
@@ -33,14 +33,16 @@ POP経由でスプールへ、POP3 を使ってＭＬを実行するlibexec/popfml.pl がそ
 	pop を使って取り寄せつつパイプで fml へ投げる (ML)
 
 は同じです。実行する下請けプログラムが違うだけです。後はこれを cron で
-実行すれば、サイトに一台 UNIX マシンがあれば自分のマシンがメールを受け
-られなくてもPOP3経由で自動的にメールをスプールできます。
+実行します。サイトに一台 UNIX マシンがあれば自分のマシンがメールを受け
+られなくてもPOP3経由で自動的にメールをスプールしたりＭＬを作ったりでき
+ます。
 
 ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
 できるでしょう。なおMHと同様パスワードは $HOME/.netrc からとられます。
-どこかにパスワードを書いておかないといけないことは最大の弱点です。
+どこかにパスワードを書いておかないといけないことがこの方法の最大の弱点
+です。
 
-inc_via_pop.pl は昔の名前(今はリンク)で、pop2recv.pl は backward
+注意: inc_via_pop.pl は昔の名前(今はリンク)で、pop2recv.pl は backward
 compatible の目的で popfml.pl にリンクされています。
 
 
@@ -142,73 +144,84 @@ popfml で実行するコマンドを定義する設定ファイルは
 このやりかたを使うことで自分のマシンで sendmail を起こしていてメールを
 受け止められなくてはいけないという制約はなくなります。
 
-これで原理的に perl が動くＯＳなら WINDOWS だろうが Macintosh だろうが
-動くはずですが…？（未確認）
-
+これで原理的に perl が動くOSなら WINDOWS だろうが Macintosh だろうが動
+くはずですが…?(未確認)
+＃ Error Handling できないのを無視すれば(おい) 、NT は動くよ
 
 .S	変数
-.l	$POPFML_PROG
-.l	$POP_PASSWORD
-.l	$POP_TIMEOUT
-.l	$POP_USER
-.l	$POP_QUEUE_DIR
-.l	$POP_LOGFILE
-.l	$POPFML_MAX_CHILDREN
-.l	$POP_PORT
-.l	$POP_SERVER
 
 	$POPFML_PROG
+.l	$POPFML_PROG
 	$POP_EXEC
+.l	$PO_EXEC
 
 POP3 で読んできたメールをどの program へ渡せばいいのか？
 例:
    $POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
 
 	$POP_SERVER
+.l	$POP_SERVER
+.k	$POP_SERVER
 
 POP Server。 
 
 	$POP_USER
+.l	$POP_USER
+.k	$POP_USER
 
 ＭＬの管理者。
 
 	$POP_PASSWORD
+.l	$POP_PASSWORD
+.k	$POP_PASSWORD
 
 通常 ~/.netrc からとられる。当然 $POP_USER と一組みです。
 
 	$POP_TIMEOUT
+.l	$POP_TIMEOUT
+.k	$POP_TIMEOUT
 
 POP Server がずっこけた場合等に切断する秒数。デフォールトは45秒
 
 	$POP_QUEUE_DIR
+.l	$POP_QUEUE_DIR
+.k	$POP_QUEUE_DIR
 
-POP で読んできたメールを一回保存する場所。
-デフォールトは
+POP で読んできたメールを一回保存する場所。デフォールトは
 
 	$DIR/var/pop.queue
 .k	$DIR/var/pop.queue
 .k	var/pop.queue
 
 	$POP_LOGFILE
+.l	$POP_LOGFILE
+.k	$POP_LOGFILE
 
 POP のサーバとの通信のログ。デフォールトは
+
 	$DIR/var/log/_poplog
 .k	$DIR/var/log/_poplog
 .k	var/log/_poplog
 
 	$POPFML_MAX_CHILDREN
 .k	$POPFML_MAX_CHILDREN
+.l	$POPFML_MAX_CHILDREN
 
 一回(通常1分)にする処理数。あんまりやると OS がひさん
 
 	$POP_PORT
 .k	$POP_PORT
+.l	$POP_PORT
 
-110/tcp と違う場合に設定する(普通は設定しなくても大丈夫だろう)。
+110/tcp と違う場合に設定する(普通は設定しなくても大丈夫)。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

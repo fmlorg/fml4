@@ -1,7 +1,7 @@
 .C	改造について
 .l	hack
 
-改造の話は fml のデータ構造の章は読んでおくとよりわかり易くなります。
+改造の話はFMLのデータ構造の章は読んでおくとよりわかり易くなります。
 .xref	data-structure
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
@@ -11,8 +11,8 @@
 
 …略…
 
-○ 私 printf デバッグがすきなので、$debug = 1; にした時の画面に出るエ
-ラー情報から推測するのが多いです。
+○ 私 printf デバッグがすきなので $debug = 1; にした時の画面に出るエラー
+情報から推測するのが多いです。
 
 もしくは
 
@@ -39,24 +39,24 @@ SMTP		libsmtp.pl
 てもOKです。まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじっ
 てはいけないのも同様の理由です。そうでないときなら手動 edit できます。
 
-そりゃさすがに code の debug は今動いているＭＬとは別のところでやった
-ほうがいいですけど…
+そりゃさすがに code の debug は今動いているMLとは別のところでやったほ
+うがいいですけど…
 
 間違って消して一番困りそうなのは seq と var/log/msendrc あたりです :-)
-ようするにＭＬの今の記事番号や uniqueness を保存しているログですね
+ようするにＭＬの今の記事番号や uniqueness を保存しているログですね。
 
-seq ファイルの番号が狂うと 記事を overwrite したりはしないかわりに管理
-者にエラーメールがきます。
-var/log にメールは保存されるので、復旧は簡単ですが面倒は面倒です。
+seq ファイルの番号が狂うと記事を上書きしたりはしないかわりに管理者にエ
+ラーメールがきます。var/log にメールは保存されるので、復旧は簡単ですが
+面倒は面倒です。
 
 間違って seq を消してしまった時は 即効で spool の一番大きい番号を調べて
-その値を seq へ書き込みます(^^)
+その値を seq へ書き込めばよいです。
 
 msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
-次回 msend.pl が起動する時に自動復旧されることを期待するか…
-ただ、これは最新のメールしか送らないから↑、たまっていた分はログみない
-と不明のままになります。
+次回 msend.pl が起動する時に自動復旧されることを期待するか…ただ、これ
+は最新のメールしか送らないから↑、たまっていた分はログみないと不明のま
+まになります。
 
 
 .S	MIME文字列を日本語へ変換すること
@@ -453,12 +453,10 @@ $START_HOOK     = q# $Envelope{'req:guide'} = 1;#;
 
 設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
 てくるのですが、こういったものを作るには、どのような設定をすればいい？
-
-いまでは libSendBack.pl ってのにまとまってます。
 /usr/ucb/vacation ってのはこれとほぼ同じですね。
 ＃もっともあれは unix from をみるんですが
 
-理屈は コードをけずっただけ（笑）というだけですが、
+(基本的な理屈はFMLのコードをけずっただけ(笑)というだけですが)
 
 ０．いつもの通り仕掛ける
 １．ロック
@@ -495,7 +493,7 @@ exit 0;				# the main ends.
 
 .S	たとえば、Received: のようなヘッダを残すには？
 
-2.1 では
+FML 2.1 では
 
     unshift(@HdrFieldsOrder, 'received');
 
@@ -554,7 +552,11 @@ lib/Utilitites/packmbox.pl を使って、
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -12,10 +12,10 @@
 (4.4BSDにならって) 今のプロセスをデーモンにします。
 ＃4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
 
-cron.pl を動かすんなら、これをつかう…とうまくいくといいな…:-)
+fml.pl から cron.pl を動かすんなら、これをつかうとうまくいくといいです
+な:-)
 ＃4.3BSDでしか動作確認してないけど…
-
-なにがうれしいって、mailq にのこらない:-)
+＃なにがうれしいって、mailq にのこらない:-)
 
 本来の使い方は /dev/console とかから たちあげるときに
 
@@ -220,8 +220,7 @@ SYNOPSIS:
     $From_address        = &Conv2mailbox($from, *e);
 
 $from の中の アドレス部分（ユーザ＠ドメイン 部分）だけを取り出す。
-
-なお *e はあってもなくてもよい;
+なお *e はあってもなくてもよい。
 
 
 .S	DecodeMimeStrings      (libMIME.pl)
@@ -244,7 +243,7 @@ $FP_SPOOL_DIR へ対して flock(2) をかける。
 
 なお $TIMEOUT 秒後 SIGALRM が fml.pl へ返るように設定している。
 この時 $SIG{'ALRM'} で定義された関数が実行される。
-標準は &TimeOut; が実行され、fml はタイムアウトエラーで終る。
+標準は &TimeOut; が実行され、fml.pl はタイムアウトエラーで終る。
 
 
 .S	Ftp                    (libftp.pl)
@@ -338,7 +337,7 @@ SYNOPSIS:
 
 	$Envelope{'message'} .= "$s\n";
 
-&Notify で返されるfml Status Reportの内容へ $s を付け加える。
+&Notify で返される fml Status Reportの内容へ $s を付け加える。
 
 
 .S	NewSyslog              (libnewsyslog.pl)
@@ -545,7 +544,11 @@ system(3) とほとんど変わらない。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

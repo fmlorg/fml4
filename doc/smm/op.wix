@@ -1,25 +1,24 @@
 .HTML_PRE
 
-   The Design and Implementation of the "fml" Mailing List Server
-		with "fml operations guides"
+   The Design and Implementation of the FML 2.1 Mailing List Server
 
 	   			深町 賢一
 	   			fukachan@sapporo.iij.ad.jp
 				fukachan@fml.org
 
-   [smm/op.wix: smm = System Management Manual]
+   http://www.fml.org/fml/
    http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
    Last modified: 
 
-   Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-   Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-   fml is free software distributed under the terms of the GNU General
-   Public License. see the file COPYING for more details.
-
-   このドキュメントは昔 FAQ という名前でしたが中身は理念、デザイン、実
-   装を初め FAQ、設定、改造の仕方等に関するガイドになっています。
-   ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+   Copyright (C) 1993-1997 Ken'ichi Fukamachi
+            All rights reserved. 
+                 1993-1996 fukachan@phys.titech.ac.jp
+                 1996-1997 fukachan@sapporo.iij.ad.jp
+   
+   FML is free software; you can redistribute it and/or modify
+   it under the terms of GNU General Public License.
+   See the file COPYING for more details.
 
 .~HTML_PRE
 
@@ -37,7 +36,8 @@ Index
 .P	Design Overview of the fml 
 .k	Design Overview
 
-パートIでは、fml の設計思想の概略について述べます。
+パートIでは、fml の設計思想の概略について述べます。設計思想を知ってい
+ると設定のデフォールトがどうなっているかを推測するに役立つでしょう。
 実際の細かい設定についてはパートII以降へ譲ります。
 
 なおこのドキュメント中では便宜上
@@ -59,7 +59,7 @@ I recommend.
 
 .# DOV == Design OverView
 .include dov.wix
-
+.include terms.wix
 
 .# ##########################################################
 .P	Process overview of the fml
@@ -158,7 +158,6 @@ Can you understand sources of quotations?:-)
 
 .include ref.wix
 
-.include fml-2-1.wix
 .include cloindex.wix
 .include ftp.wix
 .include whois.wix
@@ -170,7 +169,8 @@ Can you understand sources of quotations?:-)
 .include aucea.wix
 .include fred.wix
 
-.include obsoletes.wix
+.include fml-2-1.wix
+.include fml-1.wix
 .include app/fmlR1.wix
 .include app/vars.wix
 .include app/misc.wix
@@ -180,7 +180,11 @@ Can you understand sources of quotations?:-)
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -117,16 +117,15 @@ Security 対策のため cd ./ みたいなコマンドは実行させません。
 もできます。今どこにいるか把握しているので疑似的に chroot() した先より
 上にいこうとしたらエラーになります。
 
-またコマンド ftp と connect は実装していません。つまり、あるマシンのアー
+またコマンド ftp と connect は実装していません。つまりあるマシンのアー
 カイブを対象にした簡易版で、他のマシンへコネクトしてとってきたりはでき
-ません。
-＃そこまでやるなら ほんものの ftpmail を使うべきでしょう(^^;)
+ません。＃そこまでやるなら ほんものの ftpmail を使うべきでしょう(^^;)
 
 ftpmail だと
 
 	quit 
 
-書くところを fml 流の書き方になれている人のために
+書くところをFML流の書き方になれている人のために
 
 # quit 
 
@@ -142,7 +141,7 @@ ftpmail serverへ経由する設定になっていれば、そのサーバーへ
 
 	$FTPMAIL_SERVER = 'ftpmail@beth.phys.titech.ac.jp';
 
-のように設定しているので、bethへリレーする。あとはftpmailへまかせる
+のように設定しているので、beth へリレーする。あとはftpmailへまかせる。
 当然ながら、任意のサイトへ ftp かけられます。
 
 
@@ -193,7 +192,11 @@ libftp.pl はローカルディスクへアクセスおよびftpmailへのリレー両方を担
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

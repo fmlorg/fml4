@@ -7,10 +7,10 @@
 
 .S	WIX Language Introduction
 
-WIX は４種類のフォーマットのドキュメントを同時生成するために考え出され
-た（妥協ともいう）言語です。名前の通り Index や Xref(Cross Rerefence)
-は重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言
-語です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
+WIX は4種類のフォーマットのドキュメントを同時生成するために考え出され
+た(妥協ともいう)言語です。名前の通り Index や Xref(Cross Rerefence)は
+重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言語
+です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
 
 言語自体はおおむね nroff like + texinfo like 折衷版くらいです
 
@@ -39,48 +39,52 @@ WIX Language は
 .k	WIX 言語仕様
 
 WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
-うなコマンドの後つづく部分は全部が新しい構造の一部とみなされます。
-つまり .S (Section宣言) は新しいsectionの始まりを意味しますが、
-それ以降のパラグラフはどれも新しいセクションの一部です。
-空行があったら次のセクションのようにはカウントしません。
+うなコマンドの後につづく部分は全部が新しい構造の一部とみなされます。つ
+まり .S (Section宣言) は新しいセクションの始まりを意味します。それ以降
+のパラグラフはどれも新しいセクションの一部です。空行があったら次のセク
+ションのようにはカウントしません。
 
+[章立て/構造]
 	.P	Part
 	.C	Chapter
 	.S	Section
 	.SS	Sub Section 
 
+	.A	Appendix	Appendix (付録)。
+
 TeX も同様なデータ構造を持つので理解はしやすいと思います。
 
+[索引]
 	.key	KEYWORD
 	.k	KEYWORD
 
-KEYWORDと現在の Chapter.Section との対応づけ。
-索引に使われる
+KEYWORDと現在の Chapter.Section との対応づけ。索引に使われる
+
+[ラベルづけ]
 
 	.label	KEYWORD
 	.l	KEYWORD
 
 現在の Chapter.Section にラベルをつけ、xref でたどれるようにするための
 もの。KEYWORDと現在の Chapter.Section との対応づけに使われます。
-xref が使うポインタで索引にも亜和われます。
+xref が使うポインタで索引にも使われます。ラベルの参照は
 
 	.xref	KEYWORD
 	.seealso KEYWORD
 
-.label でラベルづけした Chapter.Section への Cross Reference。
+.label でラベルづけした Chapter.Section への Cross Reference です。
 この Cross Reference は分中では
 
 	see also 10.3 
 
 のように変換されます。
 
-	.A	Appendix
-
-Appendix (付録)。
-
 	.ptr	KEYWORD
 
 役目は xref と同じだが see also の部分は付け加えられない。
+
+
+[引用]
 
 	.q	引用開始
 	.~q	引用終り
@@ -147,7 +151,7 @@ FILE をその部分に挿入する。
 	=S
 	は、"パラグラフ"内の空行に変換されます。英語文章中、空行を区切
 	りにしたくない場合に使用します。
-	実のところなくてもいいのですが、たまに便利なことがあります。
+	実のところなくてもいいのですが、あるとたまに便利なことがあります。
 
 
 .S	WIX と HTML 例外処理
@@ -159,7 +163,11 @@ FILE をその部分に挿入する。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

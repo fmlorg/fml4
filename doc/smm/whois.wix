@@ -3,13 +3,14 @@
 .l	whois
 .xref	whois-security
 
-fml の whois コマンドは
+FML の whois コマンドは
 
 	本物の whois server とプロセス間通信して内容を送り返す
 	ＭＬローカルに持っているデータベースへのアクセス
 
 の両方を行ないます。切替えはキーワードに -h host があればプロセス間通
-信、そうでないならローカルなデータベースです。
+信、そうでないならローカルなデータベース (var/db/whoisdb)を使います。
+よって whois サーバをあげる必要はありません。
 
 
 .S	WHOIS コマンド
@@ -17,13 +18,12 @@ fml の whois コマンドは
 
 	$USE_WHOIS = 0;			# Use Whois library
 
-0 なら fml のデフォールト(whoisは使わない) 1 なら使うようになります。
+0 なら FML のデフォールト(whoisは使わない) 1 なら使うようになります。
 これは基本的なポリシー「明示的に許さない限り機能は増やさない」に沿うも
 のです。
 
 ただし、これはhmlとは違い、本物の任意のwhois serverとプロセス間通信を
 するためのものです。
-
 ＃hml は独自に自分だけの whois を抱えていた (なおかつ security hole だっ
 た)
 
@@ -32,9 +32,10 @@ fml の whois コマンドは
 
 ローカルなデータベースの中から fukachan を含むデータを探して送り返す。
 
-   % echo "# whois -h どっかのwhois fukachan" | Mail Elena@phys.titech.ac.jp
+   % echo "# whois -h どっかのwhoisサーバ fukachan" | Mail Elena@phys.titech.ac.jp
 
 は ”どっかのwhois” に聞きにいきます。
+
 
 .S	Whois のカスタマイズすべき変数
 .l	$DEFAULT_WHOIS_SERVER
@@ -71,7 +72,11 @@ fml の whois コマンドは
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

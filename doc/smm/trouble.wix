@@ -1,22 +1,17 @@
-.C	trouble shooting
+.C	トラブル・シューティング
+=E.C	trouble shooting
 .k	trouble shooting
 
-.S	ありそうなこと
-
-動かなくてまずありそうなことといえば…（詳細はこの後の各sections）
+例えば
 
 ・setuid problem
-	でもケースバイケースなんですよねぇ
-
-・ソラリス２ でソケット の定数が違うので動かない
-  ＃$COMPAT_SOLARIS2 がセットされているかチェック
-
-・SYSVでflock, trancate等の実装がおかしい。（よってPerlでもおかしい）
-
+・ソラリス2 で socket の定数が違うので動かない
+・SYSVでflock, trancate等の実装がおかしい(よってPerlでもおかしい)
 ・OSのバグでlseek system callがおかしい。
-
 ・Bourne Shellの実装が違う
-	＃そんな極端なのあるか？（ぼそっ）
+
+等々…あります。OS依存性とも関係しています。
+.xref	os-dependence
 
 
 .S	Insecure dependency in chdir 
@@ -35,10 +30,10 @@
 
 のようにｓがありますか？（↑これは 4.3BSD の場合）
 
-解説：（versionによりこまごまと違うんですが…）
-setuidしないと sendmailは root (昔 daemon(どらえもん:-))) のプロセスな
-ので何箇所かdaemon に権限がなければならない変更が出てきます。しかし、
-それは気分が良くありません。それでsetuidということが話題になるわけです。
+解説: (versionによりこまごまと違うんですが…)setuidしないと sendmailは 
+root (昔 daemon(どらえもん:-))) のプロセスなので何箇所かdaemon に権限
+がなければならない変更が出てきます。しかし、それは危ないし気分が良くあ
+りません。それでsetuidということが話題になるわけです。
 
 fml.cはC wrapperでsetuidするため（だけ）のものです。
 使用は必須ではありませんし、どちらかというと苦肉の策的なものです。
@@ -48,8 +43,7 @@ fml.cはC wrapperでsetuidするため（だけ）のものです。
 	setuid(geteuid());
 	setgid(getgid());
 
-をしているだけです。問題は、これを ユーザー ができるのは ４．３ＢＳＤ
-までです。
+をしているだけです。ユーザーが setuid できるのは 4.3BSD までです。
 
 4.4BSD (POSIX準拠) では
 
@@ -66,7 +60,7 @@ fml.cはC wrapperでsetuidするため（だけ）のものです。
 
 	-rwsr-xr-x  1 root guild 24576 Nov 26 04:43 fml
 
-みたいになります。この場合
+みたいになります。この場合のプロセスは
 
 メール	→	sendmail(uid = 1)
 	-> 	fml
@@ -74,16 +68,19 @@ fml.cはC wrapperでsetuidするため（だけ）のものです。
 	-> 	setuid(uid → fukachan) して fml.pl を実行
 	->	fml.pl directory libdir
 
-この時は
+のようになります。この時は
+
 	getuid() == geteuid()
+
 かつ
+
 	getgid() == getegid()
+
 になっているはずです。そうでない時 Insecure といって perl は停止します。
 
-どのＯＳで、fml(user で setuid)、:include:、fml(root で setuid) すべき
-かは INSTALL を見て下さい。
-新しい発見があったら fml-bugs か fml-support Mailing list まで御一報を
-(^^)
+どのOSで、fml(user で setuid)、:include:、fml(root で setuid) すべきか
+は Chapter .ptr{os-dependence} を見て下さい。新しい発見があったら 
+fml-bugs か fml-support Mailing list まで御一報を(^^)
 
 
 .S	:include:うじゃ is unsafe for mailing to program ...
@@ -116,7 +113,7 @@ check：		includeするファイルおよびそこまでのパスの
 		% man setreuid ででてくる設定は多分setuid
 		なんかとおなじだとおもいますが…
 
-回避：
+回避:
 		/usr/local/ml/include-file
 		とか local disk 上にうつして permission をきびしくする
 		＃111 とかまで？…:-)
@@ -125,9 +122,9 @@ check：		includeするファイルおよびそこまでのパスの
 		rootにsetuidした C-wrapper を同様な場所につくる
 		＃要注意な作業	
 
-		sendmail の chownsafe() が常に真を返すように改造する
-
-理由：
+		sendmail の chownsafe() が常に真を返すように改造(裏技)
+		
+理由:
 
 QUNSAFEADDR フラッグがONになるのは、
 
@@ -163,7 +160,7 @@ operator が（-T なんでもけっこう変みたい）おかしくて Plain Text か否か？
 としておいてください。
 
 
-.S	log ファイルに残るの 550... みたいな数字は何？
+.S	log ファイルに残る 550... みたいな数字は何？
 
 Sendmail からのエラーメッセージの記録です。メッセージは [45]\d\d 形式
 です。ログの前後を調べて何が原因か調べてみて下さい。
@@ -289,7 +286,7 @@ sendmail.cf をみて、sendmail -d1-100.99 みたいにデバッグモードにして
 変数の中身を確認するのもよいですね
 
 
-解答０： localhost.変なドメイン → マシン名
+解答0: localhost.変なドメイン → マシン名
 
 localhost.変なドメイン に関してだけは
 
@@ -300,10 +297,10 @@ localhost.変なドメイン に関してだけは
 ＃う〜ん、後向きな解決法だなぁ…
 
 
-解答１： Received: from  ... by ... を
+解答1: Received: from  ... by ... を
 	 Received: by ... にする
 
-例：	sendmail.cf 	を
+例:	sendmail.cf 	を
 
 HReceived: by $j ($v/$Z); $b
 
@@ -343,21 +340,24 @@ UNIX FROM loop の方のチェックは それとはちがって
 .S	Solaris 2.4 でプロセス間通信がうまくいかない
 .k	Solaris 2.4 でプロセス間通信がうまくいかない
 
-とりあえず、 config.ph で
+makefml がインストール時にOSやアーキテクチャアについて推測し config.ph 
+に書き込みます。
 
-  $COMPAT_SOLARIS2 = 1;
+	$CPU_TYPE_MANUFACTURER_OS 
 
-をセットして、ためしてみてください。
+という変数に solaris2 という文字列がちゃんとあるかどうか確かめて下さい。
+OEM等ではちゃんと判定できない場合もあります。 
+
+ソラリス互換２で強制的に実行するには config.ph で $COMPAT_SOLARIS2 =
+1; をセットして、ためしてみてください。
 
 ソラリスでは意味不明に(意地悪く?)定数が違うので、ちゃんと 
 /usr/include/sys/socket.h から作った sys/socket.ph
 (/usr/local/lib/perl(/OS名)/sys/socket.ph あたり) を呼んでいないと動き
 ません。
 
-それともちがうなら 次の手段にでるっす↓
 
-
-.S	プロセス間通信がうまくいかない
+.S	プロセス間通信がうまくいかない→プログラムの起動
 .key	ソケットがつくれまへん
 .key	プロセス間通信
 .key	IPC
@@ -380,7 +380,7 @@ config.ph で
 で定義されたプログラムです。インストール時に自動的に探してこの変数はセッ
 トされているとはおもいますが、念のためチェックして下さい。デフォールトは
 
-	$SENDMAIL = "/usr/sbin/sendmail -bs ";
+	$SENDMAIL = "/usr/sbin/sendmail";
 
 です。
 
@@ -562,15 +562,16 @@ sub fp_sort
 
 .S	最新版にバージョンアップする時に、config.ph は前のままでＯＫ？
 
-そうです。 
+基本的にそうです。 適宜自動補正ルーチンが走ります。
+ちなみに現在の config.ph は $CFVersion 3 というものです。
 
 1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
 いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
 使ってない場合はそのままでＯＫです。
 
-ただ、たまぁ〜〜〜〜に 変数名の スペリングの間違いを直すとか〜で かわっ
-ちゃうことがありますけど compat はできるだけ補正するし、そういうのは 
-doc/INFO 等に書いておきますので、見てもらえばＯＫのはずです。
+ただたまに変数名のスペリングの間違いを直すとか〜で かわっちゃうことが
+ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
+書いておきますので、見てもらえばOKのはずです。
 
 
 .S	$Envelope{'macro:s'}  = 'localhost'; にしておくとまずい？
@@ -733,16 +734,16 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 	elena-request: :include:/var/spool/ml/driver/elena-request
 
    ファイル elena-request の中は
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --ctladdr"
 
 のようになっている必要があります。
 
-また、そのアドレスをコマンド専用にするために config.ph で、
+また配送するメールのヘッダ等の関係があるのでそのアドレスをconfig.ph に
 
 	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
 .k    	$CONTROL_ADDRESS
 
-みたいにするとなお良いとおもいます。
+と登録する必要があります。
 
 問題はこの場合 $MAINTAINER をどうするかですが、-request のままだとエラー
 の時恐いので、 elena-admin 等をつくってそれは本当の単なる管理者宛の
@@ -912,11 +913,10 @@ pop でメールを読む環境ならPOPを使ったMLが実行できます。
 そもそもメールの本文をいじるなんてとんでもない話ですが…
 そういうことをする provider なり会社を許してはいけませんね。
 
-そもそも、これ通信の秘密に関わる問題なので、許してはいけません。
-それができるということは内容の改竄もできるし、機密保持も存在していない
-わけです。
+そもそもこれは通信の秘密に関わる問題なので、許してはいけません。それが
+できるということは内容の改竄もできるし機密保持も存在していないわけです。
 
-切り出して追加の例：＃別に split じゃなくてもいいんだけど
+切り出して追加の例: ＃別に split じゃなくてもいいんだけど
 
 .k	$SMTP_OPEN_HOOK
 $SMTP_OPEN_HOOK = q#
@@ -972,7 +972,11 @@ root で install してたりしたら(そもそもそんなことは本来してはいけませ
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

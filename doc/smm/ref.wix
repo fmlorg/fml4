@@ -1,4 +1,4 @@
-.A	References (参考文献)
+.C	References (参考文献)
 
 
 .S	Books (参考文献:本)
@@ -181,10 +181,7 @@ Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 
 
 
-.# ##########################################################
-
-
-.A	メーリングリストの挙動と1/fゆらぎ とDoctor論文と fml
+.C	メーリングリストの挙動と1/fゆらぎ とDoctor論文と fml
 .k	1/f fluctuations
 .k	1/f ゆらぎ
 .k	学位論文(理学博士)
@@ -211,7 +208,11 @@ Ken'ichi Fukamachi,
 じものです。
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -11,11 +11,11 @@
 .S	Perl 4 or 5 ?
 
 fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
-れています。5は upper compatible のはずなので4でも5でもOKです。
-ただOSによっては5でないとそもそもperlがちゃんと動かないことがあるので
-(5の方が新しいからOS適応性が上なのは当然ですが)
+れています。5は upper compatible のはずなので4でも5でもOKです。ただOS
+によっては5でないとそもそもperlがちゃんと動かないことがあります(5の方
+が新しいからOS適応性が上なのは当然ですが)。
 
-例: 64ビットマシンやソラリス2なんかは5の方が無難だとおもう。
+例: 64ビットマシンやソラリス2なんかは5の方が無難だろう。
 
 
 .S	exec LIST
@@ -126,11 +126,10 @@ perlの書き方は見ての通り、
 の知識がちょっとあれば書けるものです。
 
 初心者でもわかるように 変な書き方をしないよう気をつけているつもりです
-けど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+けど…あと、わざと同じものをいろいろな書き方で書いてたりもします。
 
 ただ、変なOSやperlのために悲しいことにくどい書き方とかしなきゃいけない
 ところもあってちょっと…;_;;_;;_;
-
 
 
 気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
@@ -194,7 +193,11 @@ GNU は汎用過ぎて unifdef(1)  とかしないと わかりにくいでしょう
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

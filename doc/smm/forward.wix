@@ -10,13 +10,12 @@
 .S	.forward での方法の概論
 .l	forward-intro
 
-~/.forward もsendmailは/etc/aliasesと同様に実行されます。
-~/.forward に
+~/.forward も /etc/aliases と同様に実行されます。~/.forward に
 
 "|/home/beth/rosy/ml/fml.pl /home/beth/rosy/ml /home/beth/rosy/ml" 
 
-とかけば、 ＭＬを作ることができます。この場合 sendmail は 
-fml.pl の STDIN にSMTPでもらったメールの内容を送りこみます。
+とかけば、 ＭＬを作ることができます。この場合 sendmail は fml.pl の 
+STDIN に SMTP でもらったメールの内容を送りこみます。
 
 この場合の問題は、自分自身へも配送するのでループ(bounce)問題をどう避け
 るか? が問題になります。.forward 方式では2通りの考え方ができます。
@@ -68,7 +67,11 @@ Subject: に [Elena] を含むメールが来たらＭＬへ流すとか
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -64,20 +64,17 @@ libsendfile.pl では
 	tar して gzip をかけたフォーマット(binary)
 
 で送り返されます。このデフォールトは $MGET_MODE_DEFAULT で変更できます。
-定義して意味のある変数は 上述のmgetのオプションと同じ田と思っていれば
-良いです。
-
-正確には(libutils.pl中で定義されている) %MSendOpt というハッシュテーブ
-ルのKEYです。
+定義して意味のある変数は 上述のmgetのオプションと同じと思って構いませ
+ん。正確には(libutils.pl中で定義されている) %MSendOpt というハッシュテー
+ブルのKEYです。
 .k	%MSendOpt
-
 
 ○ アーカイブ(var/archive や library コマンドや…)のencodingのデフォールト
 
 spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 	電話番号簿(TEXT)
-	１００個ずつにまとめたスプールの記事(BINARY)
+	100個ずつにまとめたスプールの記事(BINARY)
 
 このアーカイブを取り寄せる時のデフォールトは
 
@@ -95,8 +92,9 @@ spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 
 ○	Subject の設定 
-.k	$DEFAULT_MGET_SUBJECT (CFv2)
-.k	$NOT_SHOW_DOCMODE (CFv2)
+.k	$DEFAULT_MGET_SUBJECT (config.ph CFv2)
+.k	$NOT_SHOW_DOCMODE (config.ph CFv2)
+.k	$MGET_SUBJECT_TEMPLATE
 
 	$MGET_SUBJECT_TEMPLATE
 
@@ -113,7 +111,7 @@ spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 という置換えが行なわれ、最終的に
 
-   Subject: resutl for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
+   Subject: result for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
 
 という形で mget の result が送り返されます。よってこの変数を適当に削る
 なりすれば subject をカスタマイズできます。
@@ -143,7 +141,7 @@ obsolete になりました。
 		ほとんど Exact にアーカイブ内を探索
 		return
 
-	elsif V1 format 探索もOK? (default は禁止)
+	elsif V1 format 探索 (廃止)
 		なら、実行
 		return
 
@@ -167,7 +165,7 @@ obsolete になりました。
 態度です。sitede.ph 等で一回ちゃんと記述してあとはほっておくというのも
 よい手です。
 
-現在自動的に検出し設定されるのは次のコマンドです。 
+現在ファイル操作関係で自動的に検出し設定されるのは次のコマンドです。 
 
 	変数名				設定例
 
@@ -195,8 +193,8 @@ obsolete になりました。
 
 送り返すものが複数になった時のために”分割の数字”は必要であるのは自明
 だが、一意にファイルを定めるためにはプロセスIDとモード名までがセットに
-なる必要がある。というのは一つのプロセスで複数のモードで mget コマンド
-を使うことができるからである。
+なる必要がある。というのは一つのメールで「複数のモードの mget コマンド
+を使う」ことができるからである。
 		
    ○	ロックをはずす (&Unlock();)
 
@@ -219,9 +217,9 @@ mget3_SendingEntry は %mget_list に従い下位インターフェイスを呼び出す。
 る。mget コマンドで明示的に指定される場合以外はデフォールトの 
 $SLEEPTIME が優先される。
 
-注意：なお、通常いま送り返そうとしている中間ファイルが overwrite され
-ることはありえない。異常な場合は有り得るだろうが…（そんな状態のOS下で
-プロセスはマトモに動かないだろう）
+注意：なお通常の条件下では今送り返そうとしている中間ファイルが 上書き
+されることはありえない。異常な場合は有り得るだろうが…（そんな状態のOS
+下でプロセスはマトモに動かないだろう）
 
 
 .S	コマンドで単なるシンタックスエラーの警告をしない
@@ -247,7 +245,7 @@ e.g.
 	$MAIL_LENGTH_LIMIT (default は 1000)
 
 で変更します(libsendfile.pl)。Internetならともかく、パソコン通信の人へ
-も配送する時は気を使いますよね。
+も配送する時は気を使いますよね(最近ではそうでもないのか？よくしらない)。
 
 目安としては1000行でだいたい50kくらいです。
 
@@ -326,9 +324,9 @@ Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
 「なんとなく いいかんじだな〜 そのほうがおもしろいし 」
 につきますね、この番組
 「明日に」でも「明日へ」でも「明日」でもない「あしたキックオフ」なんで
-すよ（う〜ん、なんとなくわかるが（笑））
+すよ(う〜ん、なんとなくわかるが(笑))
 
-（ふ）：やっぱり、＃３、＃７、＃２３、＃２７、＃３２ ですか
+(ふ):やっぱり、#3、#7、#12、#23、#27、#32 ですね(^^)
 
 ----Thu_18_May_95_22:32:56--
 Content-Type: message/rfc822
@@ -401,7 +399,8 @@ X-Mail-Count: 01932
 
 エレナさんの特技は水撒きだってば(^^) 水撒き
 
-（ふ）「とんでもだめだよ、おにいちゃん。アルバトロスは風にのるんだ」
+--fukachan 
+「とんでもだめだよ、おにいちゃん。アルバトロスは風にのるんだ」
 
 ------------------------------
 
@@ -474,7 +473,11 @@ config.ph で $USE_SJIS_IN_ISH = 1; をセットしてください。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

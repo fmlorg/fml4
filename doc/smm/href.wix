@@ -16,11 +16,12 @@
 .k	$AUTO_HTML_GEN
 
 $AUTO_HTML_GEN = 1; をセットすると、自動的にHTML化された記事も作ります。
-この時普通のPLAINTEXTスプールも同時に作っています。EXPIREもしていません。
-EXPIRE等は別途明示的に設定する必要があります。
+この時普通のPLAINTEXTのスプール($SPOOL_DIRへ溜る)も同時に作っています。
+HTML化は全く別のプロセスです。スプールに関しては何もしません。
+必要ならスプールのEXPIRE等は別途明示的に設定する必要があります。
 .xref	expire
 
-実体としては HOOK で実装されています。
+HTML化の実体は HOOK で呼び出されます。
 fml.pl の中から外部の SyncHTMLfiles.pl を呼んでやらせるのは美しくない
 ので;-)、HOOK でやれるように書き直しました。
 注意: libsynchtml.pl により SyncHtml.pl は obsolete になりました
@@ -170,7 +171,7 @@ expire だと判定された場合です。よって、ある directory 中の一部のファイ
 
 base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 された base64 decoder を使って展開しその結果をHTMLの中に埋め込みます。
-なお展開した結果はfmlが勝手につけた名前でファイルに落されます。
+なお展開した結果はFMLが勝手につけた名前でファイルに落されます。
 ユーザが与えた名前は security 上使いません。
 
 例：
@@ -282,12 +283,16 @@ $request は
 を理解します。ftp はローカル or ftpmailへのリレーへ自動的に切替えます。
 また、もしバイナリデータの場合はuuencodeして送り返します。
 
-実例として bin/geturl.pl の中を見ると良いでしょう。
+関数の使い方の実例としては bin/geturl.pl 
 .xref bin/geturl.pl
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

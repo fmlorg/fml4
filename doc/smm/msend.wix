@@ -1,4 +1,4 @@
-.C	まとめおくり (MatomeOkuri or Digest)
+.C	まとめおくり
 .l	msend
 .k	msend
 .k	digest
@@ -19,9 +19,9 @@
 のように動いて、一定時間ごとにまとめて配送しようとするわけです。
 
 これをどう実行するか？ということですが、システムが勝手に一定時間ごとに
-チェックしてくれるわけではありません。
+チェックしてくれるわけではありません。システムに
 
-	システムに一定時間ごとに仕事がないかチェックしろ！
+	一定時間ごとに仕事がないかチェックしろ！
 
 と教える必要があります。それが「cron をしかける」という意味です。
 
@@ -40,7 +40,7 @@ matome もしくは digest というコマンドです。
 	やることがあるかどうかチェックする	(msend.pl)
 	やることがあるなら エントリ(actives の m= 部分)に従って
 	実行する (msend.pl)
-	(で、実行結果の保存 > var/log/msendrc というファイルへ)
+	(どこまで送ったかの記録を var/log/msendrc というファイルへ保存)
    }
 
 です。cron の部分はシステムのcronが使えればその方が良いのですが、不可
@@ -60,8 +60,8 @@ SYNOPSIS
    注意：fml_local.pl は MH を意識してるので異なります。
 
 オプションと引数が共存するときは、引数が - ではじまるならオプション、
-それ以外は Directoryの変数 だと仮定します。順番は関係ありません
-Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
+それ以外は directoryの変数 だと仮定します。順番は関係ありません
+directory に関しては そのdirectoryが存在すれば、引数の順に $DIR、
 $LIBDIR にセットされます。
 
 次のようなオプション及びlong line options を取ります。
@@ -85,8 +85,8 @@ $LIBDIR にセットされます。
 .k	crontab (4.4BSD)
 .k	$DIR/crontab
 
-INSTALL 時に make していれば $DIR/crontab に cron の設定のしかたの見本
-ができています。ここで $DIR は各ＭＬのHOMEです(config.phのある場所)。
+makefml で newml すると $DIR/crontab に cron の設定の見本ができていま
+す。(以下の説明では $DIR は各ＭＬのHOMEです(config.phのある場所))。
 
 4.4BSD では各個人ごとに cron の設定が可能です。その場合、
 
@@ -102,15 +102,13 @@ INSTALL 時に make していれば $DIR/crontab に cron の設定のしかたの見本
 せん。1時間に一回 msend.pl を実行しなさいとマシンに教える」設定が必要
 です。それがこの cron の設定なわけです。
 
-
-
-.S	プログラムの名称 msend.pl (旧 MSendv4.pl)
+[歴史]
+	プログラムの名称 msend.pl (旧 MSendv4.pl)
 .k	MSendv4.pl->msend.pl
 
 最初実験プロジェクトのつもりではじめた時の version 4 というのがついた
-MSendv4.pl というプログラム名のまま使ってきましたが、msend.pl に正式に
-変更しました。ただし backward compatibility のため、 MSendv4.pl には 
-link がはってあります。
+MSendv4.pl というプログラム名のまま使ってきましたが、msend.pl に変更し
+ました。
 
 
 .S	プログラムのログファイル $MSEND_RC (名称が変更されました)
@@ -123,10 +121,9 @@ fml 1.x から version up する時に問題になるかも知れません。
 config.ph で $MSEND_RC が明示的に指定していないと msend.pl は
 $MSEND_RC を定義してくれと警告を(logファイルへ)吐くでしょう。
 
-まとめおくりが”よきにはかって”動くようにすることはできるのですが、
-「中途半端に動くより今何をやっているか？を管理者が知っていること」を重
-視して、わざと $MSEND_RC を明示的に指定してくれというようになっていま
-す。
+まとめおくりが"よきにはかって"動くようにすることはできるのですが、「中
+途半端に動くより今何をやっているか?を管理者が知っていること」を重視し
+て、わざと $MSEND_RC を明示的に指定してくれというようになっています。
 
 ＃注意：実は fml の他の部分はほとんどよきにはからえで動きます(^^)
 ＃まとめおくりが例外です。それは間違って大量のメールを送ったりしては大
@@ -153,6 +150,7 @@ fml-1.4.1 以降、各ユーザーごとにまとめ送りの様式を決めることができま
 
 
 .S	まとめ送りメールに付くSubjectの設定
+.l	$MSEND_SUBJECT_TEMPLATE
 .k	$MSEND_SUBJECT_TEMPLATE
 .k	$MSEND_DEFAULT_SUBJECT (CFv2)
 
@@ -173,14 +171,17 @@ fml-1.4.1 以降、各ユーザーごとにまとめ送りの様式を決めることができま
 
    Digest -Matome Okuri- Article 768 [last:10 tar + gzip] (1/1) (Elena ML)
 
-のようになるようにしあした。この変数を customize すれば (1/1) を削る
-(_PART_を切る)とかが簡単にできます。
+のようになります。この変数を適当にカスタマイズすれば
 
-これにより$NOT_SHOW_DOCMODE (CFVersion 2) や $MSEND_DEFAULT_SUBJECT は 
-obsolete になりました。
+	 (1/1) を削る(_PART_を切る)
+
+とかが簡単にできます。これにより$NOT_SHOW_DOCMODE (CFVersion 2) や 
+$MSEND_DEFAULT_SUBJECT は obsolete になりました。
+.k	$NOT_SHOW_DOCMODE
+.k	$MSEND_DEFAULT_SUBJECT
 
 
-.S	まとめ送り処理をhookする場合
+.S	まとめ送り処理のHOOK
 .k	$MSEND_START_HOOK
 
 $MSEND_START_HOOK 
@@ -192,16 +193,12 @@ msend の Subject: 等を変更する場合に使用します。
 
 
 .S	まとめ形式のデフォールト
-.k	$MSEND_MODE_DEFAULT
 .xref	$MGET_MODE_DEFAULT
-.k	$USE_RFC1153_DIGEST
-.k	$USE_RFC1153
-.k	$USE_RFC934
-
 
 gzip で複数のファイルを一つにして送るのがデフォールトですが、 
 
 	$MSEND_MODE_DEFAULT
+.k	$MSEND_MODE_DEFAULT
 
 の値で、まとめ送りサーバの設定を変更することが出来ます。使えるパラメー
 タは $MGET_MODE_DEFAULT と同様です。
@@ -221,13 +218,18 @@ gzip で複数のファイルを一つにして送るのがデフォールトですが、
 ＃	$USE_RFC1153		デフォールトをRFC1153
 ＃	$USE_RFC934		デフォールトをRFC934
 ＃
-＃でした。CFVersion 2 になっていれば自動的に変換します。
-
-
-.S	まとめおくりのデフォールトで RFC934 形をつかうか？
+＃でした。CFVersion 3 以下の config.ph の場合は自動的に補正/変換します。
+.k	$USE_RFC1153_DIGEST
+.k	$USE_RFC1153
 .k	$USE_RFC934
 
-	$USE_RFC934 = 0 or 1;
+
+例:
+	まとめおくりのデフォールトを RFC934 へ
+.k	まとめおくりのデフォールトを RFC934
+.k	$USE_RFC934
+
+	$MSEND_MODE_DEFAULT = "rfc934";
 
 まとめおくりで、0はデフォールトのUNIX FROMで区切られたメールを送り出す
 が、1なら次のような形のものを送るようになる。これは mh のburstで複数の
@@ -247,20 +249,19 @@ mailに展開できます。＃あと、どういうソフトがあるのか知らない…:-)
 	あおいちゃんパニック もいいけど せいふくもの もよくてよ
 	------- Forwarded Message
 
-
-.S	まとめ送りのデフォールトを RFC1153 digest にする
-.l	msend-RFC1153
+例:
+	まとめ送りのデフォールトを RFC1153 digest へ
+.k	まとめ送りのデフォールトを RFC1153 digest へ
 .k	RFC1153
 .k	$USE_RFC1153
 .k	$USE_RFC1153_DIGEST
+
+	$MSEND_MODE_DEFAULT = "rfc1153";
 
 これには、それぞれまとめた束に、通し番号をつけなければなりません。よっ
 てまとめおくりのデフォールトを1153に統一することになります。ユーザがコ
 マンド # matome 3 としても、 gzip ではなく 1153 形を意味するようになり
 ます。この形式では通し番号はばらばらで各ユーザ毎に適当についてます。
-
-config.ph で $USE_RFC1153 = 1; としてください。
-＃ Backward Compat で $USE_RFC1153_DIGEST も同じ意味
 
 もし細かい所を変えたい場合は、 librfc1153.pl でフォーマットを決めてく
 ださい
@@ -273,11 +274,11 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 まぁ番号を気にしないならいいんですが…
 
 [注意]
-一時期 デフォールトで 3時間に 強制的に設定しておいてある version があ
-りますが、ようは番号の整合性をとるためです。１時間おきの１１５３送りの
-人と、３時間おきの１１５３送りの人、があると番号が食い違ってしまいます。
-番号の整合性を無視すれば、どうでもいいことなんですが…。とりあえず、こ
-の部分はコメントアウトしてあります（95/6/27)
+一時期デフォールトで 3時間に強制的に設定しておいてある version があり
+ますが、ようは番号の整合性をとるためです。1時間おきの1153送りの人と、3
+時間おきの1153送りの人、があると番号が食い違ってしまいます。番号の整合
+性を無視すれば、どうでもいいことなんですが…。とりあえず、この部分はコ
+メントアウトしてあります(95/6/27)
 
 
 .S	msend.pl のコマンド一覧 (help fileより)
@@ -332,13 +333,13 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 			＃matome 5 は５時間“おき” という意味
 
 
-.S	まとめ送りをしたと msend からメールが出る
+.S	まとめ送りをしたと msend がメールを出す設定
 .k	$MSEND_NOTIFICATION
 .k	$MSEND_NOTIFICATION_SUBJECT
 
 	$MSEND_NOTIFICATION = 1;
 
-の時、 msend は「まとめ送りをした」ことをメールで管理者へ知らせます。
+の時  msend は「まとめ送りをした」ことをメールで管理者へ知らせます。
 
 4.3BSD用だとおもえばよいでしょう。あの頃の cron はログをフォワードした
 い時は explicit に書かないといけなかったので…
@@ -358,7 +359,7 @@ RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
 
 	$MSEND_NOT_USE_X_ML_INFO = 1;
 
-で付けないようにします。(注意： $NO_ML_INFO から名称変更)
+で付けないようにします(注意: $NO_ML_INFO から名称変更)。
 
 
 .S	捕捉：まとめおくりと$ACTIVE_LISTと$MSEND_RCと実際の動き…
@@ -404,15 +405,16 @@ activesがこんなかんじだとします。
 
 そのため各個人ごとに送り方を完全にカスタマイズすることが可能になるわけです。
 
-また送る時の記事のまとめ方も、 mget コマンドと同じだけの自由度が選べます。
+また送る時の記事のまとめ方も mget コマンドと同じだけの自由度が選べます。
 .xref	mget
 
 
 .S	まとめおくりの いつ送るか？の判定を変える
 
-msend.pl の sub MSendP で行っています。この変更でできます…。
+msend.pl の sub MSendP で行っています。この部分の変更をすればできます
+が hard coding になってしまいますね。
 
-例：今の設定
+例: 今の設定
 
    if (($ID - $Request{$who}) >= 0) {
 	送るべきメールがあるか？
@@ -430,9 +432,9 @@ msend.pl の sub MSendP で行っています。この変更でできます…。
 contrib/msend-anytime にテスト版の「リアルタイム配送はしないで全員にま
 とめおくりをする場合のパッチ」があります。
 
-設定は、このパッチをあてて -a と -A オプションつきで msend.pl を起動す
-るように改造します。まとめ送りのタイミングは cron から起動する時間で調
-節して下さい。
+設定はこのパッチをあてて -a と -A オプションつきで msend.pl を起動する
+ように改造します。まとめ送りのタイミングは cron から起動する時間で調節
+して下さい。
 
 まとめ送りの設定をしていないユーザへのまとめ送りのモードは
 
@@ -457,21 +459,29 @@ cron は 昔からある Unix の Daemon process で １分に一回起きて、やるこ
 
 『ユーザがUnixマシンの機能を使えるサービス内容で、それにお金を払ってい
 る契約の場合』（契約書はよく読んでくださいね、そうでないところもありま
-す）は迷うことなく加入している provider に聞いて見るのが確実でしょう
+す）は迷うことなく加入しているプロバイダに聞いて見るのが確実でしょう
 (^^)
 
 どうしてもわからない時は、そのマシンの管理者に尋ねてみるとよいでしょう。
-ただ volunteer で管理者をやってるケースも多いですからできるだけ自分で
+ただボランティアで管理者をやってるケースも多いですからできるだけ自分で
 やることが望ましいです。
 ＃ネットワーク管理者は激務なのでいたわってあげてください（お願い）
+
+
+.S	一週間に一度まとめ送り?
+.xref	weekend-msend
+
 
 .#########################################################################
 .# bin/cron.pl
 .include cron.wix
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
-
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -8,34 +8,41 @@
 .S	リモート管理 イントロダクション
 .xref	bin/passwd.pl
 
-FMLで”リモート管理”といっているのは、ＭＬ管理者が config.ph や 
-members 等を、そのＭＬサーバのマシンに入って直接いじるのではなく、サー
-バにコマンドメールを送ってＭＬの設定をメインテナンスすることを意図して
-います。リモート管理ができる人は
+FML で"リモート管理"といっているのは、ML管理者が config.ph や members 
+等をその MLサーバのマシンに入って直接いじるのではなく、サーバにコマン
+ドメールを送って ML の設定をメインテナンスすることを意図しています。リ
+モート管理ができる人は
 
-	メンバーリストに登録されている
+	メンバーリストに登録されている($ADMIN_MEMBER_LISTへ登録)
 .xref $ADMIN_MEMBER_LIST
 かつ
 	パスワードを知っている
-	複数人いたらそれぞれに別のパスワードを付けることができます。
+
+必要があります。パスワードは複数人いたらそれぞれに別のパスワードを付け
+ることができます。パスワード認証が要らない等のカスタマイズもできます。
 
 現在では makefml があるので、これを使って登録とパスワードの初期化をす
-るとよいでしょう。
+るとよいでしょう。また PGP の設定は環境変数の設定が必要なので間違えな
+いように常に makefml pgp を使うと便利です。
 
 問題は SMTP (Simple Mail Transfer Protocol) では原理的に認証はできない
-というところにあります。パスワードによる認証もまた当てにはなりません。
+というところにあります。パスワードによる認証もまたあてにはなりません。
 パスワードを含むメールが FAIL してどこかのポストマスタにうっかり見えて
-しまう可能性もあります(普通はヘッダだけですが)。でもヘッダの Approval:
-password フィールドは見えちゃいますよね、その場合は。
+しまう可能性もあります(普通はヘッダだけですが)。でもその場合でもヘッダ
+の Approval: password フィールドは見えてしまいます。
 
-そういう意味で決して”推奨していません”が、実用上しかたなく使うことに
-なるケースも一杯あるらしいので実装しています。そういうものだと心に止め
-ておいて下さい。
+そういう意味でリモート管理は決して"推奨していません"が、実用上しかたな
+く使うことになるケースも一杯あるらしいので実装しています。そういうもの
+だと心に止めておいて下さい。
+
+認証に関してはPGPベースがもっとも安全です。PGPベースでのリモート管理なら
+まぁ推奨してもよいです:)
 
 
 .S	より安全を考えると
 
-SMTP でやるより、Secure Shell で RSA 認証して、
+より安全を考えるならそもそも SMTP でコントロールしてはいけません。
+例えば Secure Shell で(認証は RSA して)
 .k	SSH 
 .k	Secure Shell
 
@@ -46,21 +53,25 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 	newguide を編集
 	scp newguide remote-host:$FML/ml/elena/guide
 
-のような操作をする方がはるかに優れていると思います。
-これならコネクションがRSA認証されていてなおかつIDEA(default)暗号化され
-ているという優れ物です。
+のような操作をする方がはるかに優れていると思います。これならコネクショ
+ンがRSA認証されていてなおかつ128bitのIDEAで暗号化されるという優れ物で
+す。
 
 なおマシンの上で他の人に覗かれた場合は少しだけましで、etc/passwd とい
 うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
-います。$USE_MD5 をセットすれば、MD5 で保存します。
-.xref	$USE_MD5
+います。
 
-そのためパスワードファイルの編集には makefml もしくは bin/passwd.pl を
-使うと良いでしょう(自分で crypt してもいいですけどね、普通手動ではしな
-かろう:)。
+	$REMOTE_ADMINISTRATION_AUTH_TYPE = "md5";
+
+の時は MD5 で保存します(旧 $USE_MD5)。
+.k	MD5
+
+そのためパスワードファイルの編集には makefml passwd もしくは 
+bin/passwd.pl を使うのが良いでしょう(もちろん自分で crypt してもいいで
+すけど普通手動ではしないでしょう:)。
 
 
-.S	リモート管理モード
+.S	リモート管理モードを有効にする
 .k	リモート管理モード
 .k	&DEFINE_MODE('remote')
 
@@ -94,9 +105,18 @@ config.ph に
 	$REMOTE_ADMINISTRATION_AUTH_TYPE = "address";
 
 とすればそうなりますが、これはするべきではありません。
+$REMOTE_ADMINISTRATION_AUTH_TYPE は
+.k	$REMOTE_ADMINISTRATION_AUTH_TYPE
+
+		address		From:での認証
+		crypt		From:での認証＋パスワード(cryptして保存)
+		md5		From:での認証＋パスワード(MD5で保存)
+		pgp		PGPベースでの認証(Chapter .ptr{pgp})
+
+のいずれかです。
 
 
-.S	コマンド
+.S	admin コマンド
 .k	admin コマンド
 
 リモートで管理を許される人は
@@ -106,8 +126,8 @@ config.ph に
 というシンタックスのコマンドをＭＬサーバに送ることで様々な操作をするこ
 とができます。
 
-パスワード認証を必要とする場合、一般に次のような一連のコマンドをいれる
-ことになるでしょう。
+パスワード認証(crypt or md5)を必要とする場合、一般に次のような一連のコ
+マンドをいれることになります。
 注意: パスワードが関係するのは $REMOTE_ADMINISTRATION_AUTH_TYPE が 
 crypt と md5 の時だけです。
 	
@@ -159,9 +179,6 @@ crypt と md5 の時だけです。
 
 
 .S	リモート管理の設定
-.l	$ADMIN_MEMBER_LIST
-.k	$ADMIN_MEMBER_LIST
-.k	$ADMIN_HELP_FILE
 .k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 .k	$PASSWD_FILE
 .k	$DIR/etc/passwd
@@ -169,14 +186,19 @@ crypt と md5 の時だけです。
 リモートで管理を許される人のリスト
 
 	$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
+.l	$ADMIN_MEMBER_LIST
+.k	$ADMIN_MEMBER_LIST
 
 このリモート管理サーバのコマンドのヘルプ
 
 	$ADMIN_HELP_FILE	= "$DIR/help-admin";
+.l	$ADMIN_HELP_FILE
+.k	$ADMIN_HELP_FILE
 
 もし、リモートの管理者にパスワードを要求するなら、
 
 	$REMOTE_ADMINISTRATION_AUTH_TYPE = "crypt";
+.l	$REMOTE_ADMINISTRATION_AUTH_TYPE
 or
 	$REMOTE_ADMINISTRATION_AUTH_TYPE = "md5"; (perl 5 のみ)
 
@@ -190,7 +212,7 @@ or
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 	$REMOTE_AUTH 
 
-はobsolete です($REMOTE_AUTH (TYPO で $REMORE_AUTH) が古い変数名)。
+は obsolete です($REMOTE_AUTHは昔の変数名です)。
 
 
 .S	リモート管理モードでのアドレスの複数マッチ問題について 
@@ -329,10 +351,12 @@ config.ph でコントロールできます。
 	@DenyAdminProcedure = ('admin:addadmin');
 
 
-.S	リモートで管理する人を増やす時
+.S	リモートで管理する人を増やす時(PGP以外)
 .k	admin addadmin
 .k	admin addpriv
 .k	admin initpass
+
+PGPの場合については Chapter .ptr{pgp} を参照。
 
 fukachan@sapporo.iij.ad.jp を管理者に加える時は
 
@@ -340,7 +364,7 @@ fukachan@sapporo.iij.ad.jp を管理者に加える時は
 
    # admin addadmin fukachan@sapporo.iij.ad.jp
 
-だけを、パスワード認証もしている時は
+だけを、パスワード認証(crypt or md5)もしている時は
 
    # admin addadmin fukachan@sapporo.iij.ad.jp
    # admin initpass  fukachan@sapporo.iij.ad.jp パスワード
@@ -374,7 +398,9 @@ Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet
 .k	byeadmin
 .k	byepriv
 
-   # admin byeadmin fukachan@sapporo.iij.ad.jp
+コマンドは
+
+	# admin byeadmin fukachan@sapporo.iij.ad.jp
 
 です。
 
@@ -389,8 +415,8 @@ Secure Shell を使えば実現できます。SSL(Secure Socket Layer)化 telnet
 例：
 	makefml passwd ML名 ...
 
-fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
-初期化はＭＬサーバを edit できる人にしかできません。
+fukachan@phys.titech.ac.jp のパスワードを初期化する。初期化はＭＬサー
+バを edit できる人にしかできません。
 
 
 .S	リモートでパスワードの変更
@@ -423,7 +449,11 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

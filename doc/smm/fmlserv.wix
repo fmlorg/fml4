@@ -1,4 +1,4 @@
-.C	fmlserv
+.C	fmlserv - Listserv style interface -
 .k	fmlserv
 .l	fmlserv
 .l	fmlserv.pl
@@ -14,17 +14,19 @@
 でセットアップされます。
 
 
-.S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)
+.S	Listserv (or Majordomo) style interface (libexec/fmlserv.pl)
 .k	listserv compatibility
 .k	marjodomo compatibility
 
-ここでは LISTSERV (or MAJORDOMO) COMPATIBLE MODE について述べます。
-つまり、fml コマンドを Listserv のようなインターフェイスで呼ぶための仕
-組みです。それ以上のものではありません。単なる別種のインターフェイスに
-すぎません。
+ここでは Listserv (or Majordomo) compatible mode について述べます。つ
+まり FML コマンドを Listserv のようなインターフェイスで呼ぶための仕組
+みです。それ以上のものではありません。つまり単なる別種のインターフェイ
+スです。
 
-例えば今 Elena ML と Freekick ML があるとすると、普通 Elena ML へコン
-トロールコマンドを送り込む形でコマンドを実行できます。
+例えば今 Elena ML (elena@baycity.asia) と Freekick ML
+(freekick@baycity.asia)があるとすると、デフォールトでは
+elena-ctl@baycity.asia へコントロールコマンドを送り込む形でコマンドを
+実行できます。
 
    "# get 1-10 mp"		というメールを
    Elena-ctl@baycity.asia	へ送る
@@ -156,7 +158,11 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 	lists		fmlserv のコントロール下にあるＭＬ一覧
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
