@@ -129,7 +129,7 @@ sub CopyRight
 {
 q%
 <PRE>
-Copyright (C) 1993-2000 Ken'ichi Fukamachi
+Copyright (C) 1993-2001 Ken'ichi Fukamachi
 All rights of this page is reserved.
 
 # This Document(html format) is automatically geneareted by fwix.pl. 
