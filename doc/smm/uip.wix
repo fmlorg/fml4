@@ -268,27 +268,20 @@ libnewsyslog.pl がなかった時代の産物。
 fml でのパスワードは crypt された形で保存されます。つまり UNIX の 
 /etc/passwd と同じようにです。
 
-fmlのソース/bin/passwd.pl 
+bin/passwd.pl を使って下さい。使い方は、
 
-というのがあります。使い方は、
-
-passwd.pl [-i] [-p password-file] username new-password
+ passwd.pl [-i] [-f password-file] user password
+    -i で user のパスワードを password で初期化
+    -f etc/passwd に代わるパスワードファイルを指定
 
 例：
-% passwd.pl fukachan@phys.titech.ac.jp uja
+	% passwd.pl -i fukachan@phys.titech.ac.jp uja
 で、
 
-fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
+	fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
 
-こういう fukachan@phys.titech.ac.jp 用のエントリを 
-
-	fmlのソース/etc/passwd
-
-につくります（デフォールト）。もし、他の場所なら 
-
-% bin/passwd.pl -p /some/directory/passwd fukachan	uja
-
-のように -p オプションで指定してください。
+のように etc/passwd が初期化される。32ZrV/XvYj1kY は uja を暗号化した
+結果です。
 
 この etc/passwd は
 

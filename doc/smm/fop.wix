@@ -1,4 +1,7 @@
 .C	ファイルをまとめて操作する関数群 (mget と まとめおくり)
+.l	mget
+	
+.S	mget options (help file より)
 
 	mgetはそのコマンドごとに
 	まとめおくりはユーザーごとに
@@ -44,7 +47,7 @@ help ファイルより抜粋
 に関して記述します。
 
 
-.S	mget3 インターフェイス：パターンマッチ戦略
+.S	mget3 インターフェイス:パターンマッチ戦略
 .key	mget3
 .label	mget3
 
@@ -73,8 +76,43 @@ help ファイルより抜粋
 		NO MATCH or V1 FORMAT ERROR
 
 
+.S	プログラムのパス
+.xref	sitedef.ph
+.k	$TAR
+.k	$UUENCODE
+.k	$COMPRESS
+.k	$ZCAT
+.k	$LHA
+.k	$ISH
+
+多くのプログラムは下請けのプログラムを呼びます。これらはインストールの
+時の make で自動的に検出され設定されるはずです。
+
+しかし自分でチェックしながら config.ph に書くのは管理者として望ましい
+態度です。sitede.ph 等で一回ちゃんと記述しておくのもよいです。
+
+現在自動的に検出し設定されるのは次のコマンドです。 
+
+	$TAR                           = "/usr/bin/tar cf -";
+	$UUENCODE                      = "/usr/bin/uuencode";
+	$COMPRESS                      = "/usr/bin/gzip -c";
+	$ZCAT                          = "/usr/bin/zcat";
+	$LHA                           = "/usr/local/bin/lha";
+	$ISH                           = "/usr/local/bin/ish";
+
+
+.S	UNIX FROM 形式
+.l	UNIX-FROM
+
+4.4BSD UNIX の sendmail は /usr/libexec/mail.local を使い各ユーザ(e.g. 
+fukachan) 宛のメールを /var/mail/fukachan に保存しています。
+この形式が UNIX FROM 形式です。$HOME/mbox も同様ですね。
+
+MH の inc はこの形式のファイルを処理することを前提にしています。
+
+
 .S	MIME/MultipartのBNF表現（RFC1521より）
-.label	{MIME-Multipart}
+.label	MIME-Multipart
 
    boundary := 0*69<bchars> bcharsnospace
 
@@ -132,7 +170,7 @@ Date: Thu, 18 May 95 21:45:17 JST
 From: fukachan@phys.titech.ac.jp
 Subject: あほうどり
 To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
-Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
 
 「なんとなく いいかんじだな〜 そのほうがおもしろいし 」
 につきますね、この番組
@@ -148,7 +186,7 @@ Date: Thu, 18 May 95 22:00:29 JST
 From: Elena@phys.titech.ac.jp
 Subject: あしたキックオフ
 To: Elena@phys.titech.ac.jp (Elena Lolobrigita ML)
-Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.jp>
+Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.asia>
 
 はまるとあの変な雰囲気から抜けられなくなります（笑）やっぱり 
 アミノテツロー の謎のマニアックな味？とでもいうのがこの番組が
@@ -159,6 +197,7 @@ Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.jp>
 
 
 .S	RFC934
+.l	RFC934
 
 rfc934	"Proposed Standard for Message Encapsulation"
 
@@ -184,9 +223,11 @@ Subject: Albatoros
 
 
 .S	RFC1153 digest 
+.l	RFC1153
+.k	RFC1153-digest
 
-comp.sys.ibm.pc.digest とかでみるでしょ？あれです
-ＲＦＣは読んでもよくわかりません;_;
+comp.sys.ibm.pc.digest とかでみるでしょ？あれです。RFC は aboutすぎて
+読んでもよくわかりません;_;
 
 例：
 Date: Sat, 20 May 95 01:33:50 JST
@@ -217,7 +258,28 @@ End of GODAI BBS Digest V95 Issue #120
 
 
 .S	1153 のカスタマイズ
+.k	librfc1153.pl
+.k	&Rfc1153Custom($mode, *conf)
 
+$RFC1153_ISSUE		ＭＬの記事番号ではなく1153形式で送り出す時の番号
+$RFC1153_SEQUENCE_FILE	その番号を保存するファイル
+
+	このルーチンが呼ばれるたびにカウンタは進みますが、
+	前述のように各ユーザごとに1153で送る場合を考えると
+	送り方はそれぞれ違うのだから
+	番号はちゃんとつながってはくれません。
+	これを解決する方法はありません
+
+$RFC1153_LISTNAME 	まとめ送りする1153 digest につけるタイトル
+$RFC1153_VOL		Volume 例えば96年度のまとめ送りなら Volume 96の
+			ようなレベルの番号
+
+
+$RFC1153_CUSTOM_HOOK	&Rfc1153Custom($mode, *conf) の中で
+			行なわれるフック
+
+
+&Rfc1153Custom($mode, *conf) の内部：
 
     ########## CUSTOMIZE BELOW ##########
     $issue     = $RFC1153_ISSUE    || 1;

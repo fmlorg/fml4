@@ -3,6 +3,32 @@
 .key	$REMOTE_ADMINISTRATION
 
 
+.S	リモート管理 イントロダクション
+.xref	bin/passwd.pl
+
+”リモート管理”といっているのは config.ph や members 等をＭＬ管理者が
+そのＭＬサーバのマシンに入って直接メインテナンスをするのではなく、ＭＬ
+管理者がサーバにコマンドを送ってＭＬの設定をメインテナンスすることを意
+図しています。
+
+SMTP (Simple Mail Transfer Protocol) では原理的に認証はできません。パ
+スワードによる認証もまた当てにはなりません。パスワードを含むメールが
+FAILしてどこかのポストマスタにうっかり見えてしまう可能性もあります(普
+通はヘッダだけですが)。でもヘッダの Approval: password フィールドは見
+えちゃいますよね、その場合は。
+
+そういう意味で決して「推奨していません」が、実用上しかたなく使うことに
+なるケースも一杯あるらしいので実装しています。そういうものだ心に止めて
+おいて下さい。
+
+なおマシンの上で他の人に除かれた場合は少しだけましで、etc/passwd とい
+うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
+います。
+
+そのためパスワードファイルの編集には bin/passwd.pl を使うと良いでしょ
+う。
+
+
 .S	リモート管理モード ('remote')
 .k	リモート管理モード
 .k	--remote
@@ -14,23 +40,83 @@
 か
 	config.ph で &DEFINE_MODE('remote');
 
-の方が楽だとおもいますね。このモード設定は
+で設定できます。このモード設定は
 
 	$REMOTE_ADMINISTRATION = 1;
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
 
-を設定します(後述)。つまりリモート管理を認め、なおかつ管理者であること
-を証明するためにはパスワード認証が必要という設定です。
+です(後述)。つまり
+
+	リモート管理を認め
+	管理者であることを証明するためにはパスワード認証が必要
+
+という設定です。
 
 
-.S	カスタマイズできる変数
+.S	コマンド
+.k	admin
+
+リモートで管理を許される人は
+
+	# admin コマンド オプション
+
+というシンタックスのコマンドをＭＬサーバに送ることで様々な操作をするこ
+とができます。
+
+パスワード認証を必要とする場合、一般に次のような一連のコマンドをいれる
+ことになるでしょう。
+
+例：
+	# admin pass パスワード
+	# admin addadmin fukachan@sapporo.iij.ad.jp
+	# admin add      fukachan@sapporo.iij.ad.jp
+
+
+.S	approve password command SYNTAX
+.key	approve
+.xref	fmlserv.pl
+.label	admin:approve
+
+# admin 形式は
+   password認証して、その後は全部認証したものとみなす
+
+# approve 形式は
+   毎回 password を書く 
+
+どっちもそれなりに面倒くさいですが…
+
+ようはapporveは毎回 password を書くことだと思えばいいでしょう。このコ
+マンドは Listserv Compatibitlity のために付け加えられました
+
+例：	(上と同じコマンド)
+	# approve パスワード addadmin fukachan@sapporo.iij.ad.jpa
+	# approve パスワード add      fukachan@sapporo.iij.ad.jpa
+
+
+つまり
+
+	# approve password commands 
+
+は ２行分
+
+	# pass  password
+	# admin commands
+
+と同じです。つまりパスワードを付け加えれば 
+
+	# admin コマンド == # approve password コマンド
+
+ということですね。
+
+
+.S	リモート管理の設定
 .k	$ADMIN_MEMBER_LIST
 .k	$ADMIN_HELP_FILE
 .k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
 .k	$PASSWD_FILE
 .k	$DIR/etc/passwd
 
-リモートで管理者になれる人のリスト
+リモートで管理を許される人のリスト
 
 	$ADMIN_MEMBER_LIST	= "$DIR/members-admin";
 
@@ -49,46 +135,32 @@
 	$PASSWD_FILE = "$DIR/etc/passwd";
 
 注意：
-$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は
-REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
-＃Backward compatible にしてあるので、どっちの変数でもいいんですけど
-
-
-.S	approve password command SYNTAX
-.key	{approve}
-.key	{for SID approve}
-.label	admin:approve
-
-どっちもどっちですが、
-
-   password認証して、その後は全部認証したものとみなす
-   毎回 password を書く 
-
-＃どっちもそれなりに面倒くさいが…
-
-ようは 毎回 password を書く っとことです。
-これは Listserv もどきインターフェイス拡張のために付け加えられました
+$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は $REMOTE_AUTH (TYPO で 
+$REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
+の変数でもいいです。
 
 
 .S	アドミンモードでのアドレスの複数マッチ問題について 
 .key	アドレスの複数マッチ
 .key	アドミンコマンド
 
-OFF コマンド等は multiple-matching を認めません。
+リモートの場合 OFF コマンド等での multiple-matching を認めません。
 つまり、
 
 	fukachan@aoi.chan.panic
  と
 	fukachan@uja.aoi.chan.panic
 
-は両方ともマッチしてしまう時、チェックをきびしくしてひとつのアドレスだ
-けを選ぶのがデフォールトの挙動ですが、
+は両方ともマッチしてしまう時、
 
-アドミンコマンドの時だけは multiple です。
-つまり、上の両方のアドレスを一気に消して、新しく add したりできるわけです。
+	チェックをきびしくしてひとつのアドレスだけを選ぶ
+
+のがデフォールトのfmlの挙動ですが、リモート管理のコマンドの時だけは 
+multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
+たりできるわけです。
 
 
-.S	アドミンのコマンド一覧
+.S	アドミンのコマンド一覧 (help-admin より)
 
 # admin pass パスワード（もしパスワードを必要とする設定なら）
 # admin passwd 新しいパスワード（もしパスワードを必要とする設定なら）
@@ -113,87 +185,38 @@ OFF コマンド等は multiple-matching を認めません。
 		filename1 というファイルをfilename2 という名前にする
 
 
-.S	アドミンのコマンド一覧(approve) 2
-.label	admin:approve-2
-
-# approve password commands 
-
-は ２行分
-
-# pass  password
-# admin commands
-
-と同じです。全部上のコマンドで # admin を # approve password に置き換
-えれば同じです。
-
-
-.S	パスワードファイルの設定
+.S	パスワードファイルの初期化と設定
+.l	bin/passwd.pl
 .label	set-passwd
-
-fmlのソース/bin/passwd.pl 
-
-っていうのがあります。使い方は、
-
-passwd.pl [-i] [-p password-file] username new-password
+.k	etc/passwd
+.k	bin/passwd.pl
 
 例：
-% passwd.pl fukachan@phys.titech.ac.jp uja
-で、
+   % passwd.pl -i fukachan@phys.titech.ac.jp uja
 
-fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
-
-こういう fukachan@phys.titech.ac.jp 用のエントリを 
-
-	fmlのソース/etc/passwd
-
-につくります（デフォールト）。もし、他の場所なら 
-
-% bin/passwd.pl -p /some/directory/passwd fukachan	uja
-
-のように -p オプションで指定してください。
+fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
+初期化はＭＬサーバを edit できる人にしかできません。
 
 
-.S	パスワード設定:昔のドキュメント採録:
+.S	リモートでパスワードの変更
 
-#lib/remote/README に 1例が詳しく書いてありますんで、そちらも参照く
-#ださい。(Written by oota@pes.com1.fc.nec.co.jp)
-****************************
-passwdの作り方書いてなくて、、もうしわけないです。
+コマンドで
 
-<初期パスワードのつくりかた>
-passwdの文字列を uja とすると(11という数字に意味はない、なん
-か適当は数字です、DESのアルゴリズムの番号です)
-% perl -e 'print crypt("uja", 11)' 
-のOUTPUT をencrypted passwdとして使って下さい
+	# admin pas	パスワード
+	# admin passwd	新しいパスワード
 
-etc/passwd の中身のシンタックス(デフォールト)は
-mail-address	encrypted-passwd 
-です。
- 
-初期パスワードをなんらかの形で相手に与えてすぐに変えてもらうこ
-とが重要でしょう
-#できればメールでなく電話とかがいいんだろうなぁ
- 
-mailの エラー時 ヘッダしか普通はpostmasterにはいきません。
-本文にパスワードを書くようにしたのはそのためですが、
-運悪くいってしまうかもしれません。気をつけて下さい。
-#securityはsmtpもtelnetもどっこいどっこいってか;-)
+をサーバへ送り込むことで変更(etc/passwdの設定変更)をすることができます。
+approve コマンドなら
 
-% chmod 600    etc/passwd
-% chown 管理者 etc/passwd
-もわすれずに
+	# apporve パスワード passwd 新しいパスワード
 
+ですね。
+	
 
-.S	ログファイルがＭＬ本体と管理者コマンドで同じなんだけど…
+.S	ログファイルがＭＬ本体と管理者コマンドで同じだが…
 
-ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってるん
-ですよね。分けた方がいいのかなぁ？？？
-
-もし変えたいなら
-libhml.pl で こうなってますんでいじってください
-      if(/^admin$/io) {
-	  # if you would like to change logfile for admin commands.
-	  # $LOGFILE	= "$DIR/log-admin"; 
+ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってます。
+分けた方がいいとおもう場合は… &Log を直接いじるしかないですかね…
 
 
 .S	リモート管理の古い設定への注意
@@ -201,32 +224,9 @@ libhml.pl で こうなってますんでいじってください
 
 古い設定のままでは動きません。ごめんなさい
 
-昔は、リモートでの管理は eval へ渡すフックをしかけることで実装していま
-した。 
+昔、リモート管理はフックをしかけることで実装していました。 
 いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
 (libfml.pl 1.5.2 から)
-
-以下に出てくる $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は、
-REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
-#Backward compatible にしてあるので、どっちの変数でもOKですが
-
-
-.S	Client インターフェイス
-.xref	fmlctl.pl
-
-FmlRemoreControl はリモートでMLをコントロールするためのインターフェ
-イスです。
-Bourne Shell script です。
-先頭の ML というとこをろMLのアドレスにして使って下さい。
-INPUT したコマンドをMLに投げます。
-
-INPUT> ls
-
-    は
-
-% echo "# admin ls" | mail -v $ML
-
-と同じです
 
 
 .# $Id$

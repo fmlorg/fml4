@@ -17,7 +17,7 @@ fml Mailing List Server Package
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
 ＃おまけCDROMつき雑誌等にある「hmlの改良」の記述は誤解を招く言い回しで
-＃すね
+＃すよね…
 
 ML server 本体、ML management tool、.forward や POP経由でMLを実行等メー
 ルを使う各種インターフェイスの集合体です。

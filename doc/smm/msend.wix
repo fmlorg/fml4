@@ -1,4 +1,6 @@
-.C	まとめおくり
+.C	まとめおくり (MatomeOkuri or Digest)
+.k	digest
+.k	matomeokuri
 .label	{msend-c}
 .key	samples/crontab
 
@@ -25,63 +27,67 @@
 
 まとめおくり を行う時間間隔と まとめるやり方 は ユーザごとに自由に設定
 できます。設定はユーザが自分でリモートでコントロールできます。
-matome もしくは digest というコマンドでです。
+matome もしくは digest というコマンドでできます。
 コマンドについては後の節で説明します。
 
-英語では何というのかよくわかりませんが（苦笑）、たぶん digest とでも呼
-んでいるんでしょう。
+英語では何というのかよくわかりませんが(苦笑)、たぶん digest とでも呼ん
+でいるんでしょう。
 ＃ちなみに matome というコマンドと digest というコマンドは同じです。
 
 
-.S	プログラム群との対応
-
 ちなみにプログラム群のそれぞれどの部分に対応するかというと
 
-	for(;;) {		(bin/cron.pl)
-		寝て、待つ	(bin/cron.pl)
-		やることがあるかどうかチェックスル	(msend.pl)
-		やることがあるなら エントリ(actives の m= 部分)にしたがって 
-		実行する(msend.pl -> libsmtp.pl)
-		（で、実行結果の保存 ＞ var/log/msendrc)
-	}
+   for(;;) {		(cron)
+	寝て、待つ	(cron)
+	やることがあるかどうかチェックスル	(msend.pl)
+	やることがあるなら エントリ(actives の m= 部分)に従って
+	実行する (msend.pl)
+	(で、実行結果の保存 > var/log/msendrc)
+   }
+
+です。cron の部分はシステムのcronが使えればその方が良いのですが、不可
+能なら bin/cron.pl をシステムのcronの代わりに使えばよいわけです。
 
 
-です。bin/cron.pl を システムの Cron におきかえれば 同じ論法が成立します。
 
-
- .S	まとめおくりサーバ msend.pl 
+.S	まとめおくりサーバ  msend.pl 
+.S	msend.pl
+.S	MSendv4.pl
 
 まとめおくりを実行する スクリプト
 
 SYNOPSIS
-	msend.pl    [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
+   msend.pl    [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
 
-	fml.pl MSendv4.pl fmlserv.pl は同じ引数のとりかたをします。
-	注意：fml_local.pl は MH を意識してるので異なります。
+   fml.pl msend.pl fmlserv.pl は同じ引数のとりかたをします。
+   注意：fml_local.pl は MH を意識してるので異なります。
 
 オプションと引数が共存するときは、引数が -ではじまるならオプション、そ
 れ以外は Directoryの変数 だと仮定します。順番は関係ありません
 Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
 $LIBDIR にセットされます。
 
+次のようなオプション及びlong line options を取ります。
 
-	-d		デバッグモード
+   -d		デバッグモード
 			（ＭＬへの配送以外すべてを実行可能）
-	-bt   		アドレステストモード	(Become Test)
+   -bt   		アドレステストモード	(Become Test)
 			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
 			いまのところ debug mode とかわらへんねん:-)
-	-bd		デーモンモード	(Become Daemon)
-	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
-	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
-	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
-	-q		quiet mode (エラーとかWarnig以外は何も出力しない)
-			POSIX の cron では OUTPUT をひろうので、-q なら
-			エラー時以外はメールが来ないようにするため
-
-これ以外に long line options が使えます。
+   -bd		デーモンモード	(Become Daemon)
+   -sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
+   -uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
+   -lfile	file を $LOAD_LIBRARY 変数に代入する 
+		e.g. -llibfml.pl 
+   -q		quiet mode (エラーとかWarnig以外は何も出力しない)
+		POSIX の cron では OUTPUT をひろうので、-q なら
+		エラー時以外はメールが来ないようにするため
 
 
 .S	crontab の見本
+.k	crontab
+.k	crontab(4.4BSD)
+.k	samples/crontab
 
 INSTALL 時に make していれば samples/crontab に cron の設定のしかたの
 見本があります。
@@ -92,13 +98,13 @@ INSTALL 時に make していれば samples/crontab に cron の設定のしかたの
 
 で個人ごとのcronが設定できます。samples/crontab は例えば
 
-0 * * * *	/var/spool/ml/Elena/msend.pl /var/spool/ml/Elena
+0 * * * * /usr/libexec/fml/msend.pl /var/spool/ml/Elena /usr/libexec/fml
 
-とかきます。
+のように書きます。
 
-まとめおくりは msend.pl が行ないますが、自動では行ないません。
-1時間に一回 msend.pl を実行しなさいとマシンに教える設定が必要です。
-それがこの cron の設定です。
+上述のように「まとめおくりは msend.pl が行ないますが、自動では行なえま
+せん。1時間に一回 msend.pl を実行しなさいとマシンに教える」設定が必要
+です。それがこの cron の設定なわけです。
 
 
 
@@ -131,10 +137,10 @@ $MSEND_RC を定義してくれと警告を(logファイルへ)吐くでしょう。
 ＃変だからです。
 
 
-.S	各ユーザーごとにどういうふうに送るかを決める
+.S	コマンドで各ユーザーごとにどういうふうに送るかを決めること
 
-fml 1.4.1以降は各ユーザーごとにどういうふうに送るかを決めることができます。
-デフォールトは UNIX FROM の gzip したフォーマットです。
+fml-1.4.1 以降 各ユーザーごとにどういうふうに送るかを決めることができ
+ます。デフォールトは UNIX FROM の gzip したフォーマットです。
 
 各ユーザはコマンドをサーバに送ることで自分でユーザごとの設定をすること
 ができます。
@@ -145,29 +151,30 @@ fml 1.4.1以降は各ユーザーごとにどういうふうに送るかを決めることができます。
 
 をコマンドとして送ります。UNIXのSHELL上なら
 
-   (shell prompt)% echo "# matome 3u" | Mail mail-list@domain
+   (shell prompt)% echo "# matome 3u" | Mail mail-listのアドレス
+
+ですね
 
 
 .S	msend.pl のコマンド一覧 (help fileより)
 .k	まとめ送りコマンド一覧
 
-まとめ送り希望の方へ：（基本的に Ｎ時間“おき”）
+○まとめ送り希望の方へ：（基本的に Ｎ時間“おき”）
+なお # digest と # matome は同じコマンド(引数も当然同じ)です。
+
 # matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
 			だから 17 なんてやっても一日一回と同じです(_o_)
 			default は gzip した Unix From つきのファイルの固まり
-# matome 数字(13-29)	上の特別の場合で、一日一回Ｎ時にまとめおくり
+# matome 数字(13-36)	上の特別の場合で、一日一回Ｎ時にまとめおくり
 			１３〜３６の数字がこのケースに当てはまります
 			午前５時に一回だけまとめおくり慕いときは、
 			２４＋５＝２９ をおくりこんでください。午後５
 			時は１７でいいんですが、午前中はこうしないと判
 			別がつかないので…
-
-# matome 数字オプション
-# matome 数字u		とすれば plain(unpack)、つまりplain textををかえします
-# matome 数字i 		とすれば lha + ish で
-
-			オプションなしは GZIP(UNIX FROM) と同じ
-
+   例：
+	# matome 数字u	plain(unpack)、つまりplain textを
+	# matome 数字i 	lha + ish でまとめて送ります
+   オプション：
 		オプションなしはGZIP(UNIX FROM)
 	u	PLAINTEXT(UNIX FROM)
 	uf	PLAINTEXT(UNIX FROM)
@@ -200,93 +207,90 @@ fml 1.4.1以降は各ユーザーごとにどういうふうに送るかを決めることができます。
 			＃matome 5 は５時間“おき” という意味
 
 
-
 .S	まとめ送りとRFC1153とフォーマット…
 
-ただし、RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に
-番号をつけるので、この機能と矛盾してしまいます。
-まぁ番号きにしないならいいんですが…
+RFC1153 をデフォールトに変更すると、1153はまとめおくりの記事に番号をつ
+けるので、個人個人に1153で送ると人によって番号が違うはずなので、矛盾が
+おきてしまいます。
+＃NetNewsなんかで1153形式を見ればわかるとおもうんですが…
+
+まぁ番号を気にしないならいいんですが…
 
 
 .S	捕捉：まとめおくりと$ACTIVE_LISTと$MSEND_RCと実際の動き…
 
-activesがこんなかんじだとしましょう。
--------- actives --------
-katri
-pollyanna	m=6u
--------- actives --------
+activesがこんなかんじだとします。
 
-	cron で一時間に一度 MatomeOkuri-ctl.sh(これはあくまで見本ね) を呼びます。
+	-------- actives --------
+	katri
+	pollyanna	m=6u
+	-------- actives --------
+
+	cron で一時間に一度 msend.pl を呼びます。
 
 			↓
 
 	activesをしらべて pollyanna はまとめおくりで６時間に一度で
-	gzipかけないで配送（uがついてる）希望だとわかる。
-	＃このとき各ユーザーにどういうふうに送るかも読み取る
+	gzipかけないで配送（uがついてるから）希望だとわかる。
+	この時に各ユーザごとにどういうふうに送るかを読み取っています
 
 			↓
 
-	もし 今の時間 % 6 が０（ｍｏｄ　６） なら、つまり、６、１２、
-	１８、２４時なら、配送することにして
-	＃２９なら 一日一回午前５時です。
+	もし 今の時間 % 6 が0(mod 6) なら、つまり、6、12、
+	18、24時なら、配送することにして
+	＃もし 29 なら 一日一回午前5時です。
 
 			↓
 
-	var/log/msendrc(旧 MSendrc)という、今までの配送記録を見て、ス
-	プールとくらべ 送ってない分を決定する
+	var/log/msendrc(旧 MSendrc)という、今までの配送記録とスプールの記事
+	のたまり具合を比べ送ってない分がどの記事か？を決定する。
+	記事がない場合はそのまま終り
 
 			↓
 
-	そして、その送ってない分をスプールから掘り出して配送する。
+	送ってない分をスプールから取り出して配送する。
 
-「特定時間になるとそれまでためたメールを送る」
+つまり 
+	「特定時間になるとあらかじめためてあったメールを送る」
+のではなく、
+	「特定時間になるとactivesの情報に基づき、その時間に送ることに
+	なっている人に、まだ送っていなかった分のメールをスプールから取
+	り出して送る」
+わけです。
 
-		のではなく、
+そのため各個人ごとに送り方を完全にカスタマイズすることが可能になるわけです。
 
-「特定時間になるとactivesの情報に基づき、その時間におくることになって
-いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
-
-
-ただし、Ｒ１にくらべると、ちょっと重いことになります、
-送る人一人一人について独立に走るので。
-その代わりに、１時間〜２３時間おき（＝一日一回とおなじ、無意味:-)）まで
-任意の時間指定が可能になります。
-
-	% echo "# matome 6"|Mail -v ml-address 
-
-のように、ユーザー個人がまとめおくりのコントロールをすることができます。
-
-mget と同じだけ自由に送り方の設定をユーザーごとに設定することができます（次節）
-＃ help をみてね
-
+また送る時の記事のまとめ方も mget コマンドと同じだけの自由度が選べます。
+.xref	mget
 
 
 .S	まとめおくりの いつ送るか？の判定を変える
 
-msend.pl の sub MSendP を変える。
+msend.pl の sub MSendP を変えることでできますが…。
+
 例：今の設定
 
-if (($ID - $Request{$who}) >= 0) {
-送るべきメールがあるか？
+   if (($ID - $Request{$who}) >= 0) {
+	送るべきメールがあるか？
 
 	return 1 if(0 == ($HOUR % $When{$who}));
 	$When{$who} おきに送るのだが、いまの時間は？
 		
 	return 1 if($When{$who} > 12 && ($HOUR + 24 == $When{$who}));
 	一日一回送る人には 今がその時か？
-…
+	…
 
 
-.S	システムの cron の代わりに bin/cron.pl を使う場合
+.S	捕捉：システムの cron の代わりに bin/cron.pl を使う場合
 
 歴史的な流れを見てる人には見えてるとおもいますけど、bin/cron.pl は
 4.3BSD用に開発したものです。crontab の Syntax は 4.4 ですが
 
 Vixie cron をいれてるとか POSIX なOSは個人のcronエントリが設定できます。
 
-cron は 昔からある Unix の Daemon process で １分に一回掟、やることが
-ないか調べて、やることがあれば、実行、しなければ、６０秒間ねて待つ と
-いうことをします。
+cron は 昔からある Unix の Daemon process で １分に一回起きて、やるこ
+とがないか調べて、やることがあれば、実行、しなければ、６０秒間ねて待つ 
+ということをします。
 
 今時の cron はユーザー権限で走ってくれるとおもうのですが、
 詳しくは man cron でマニュアルを読んでください。
