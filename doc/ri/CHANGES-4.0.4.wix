@@ -15,6 +15,11 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/01/15
+
+   cf/config (2.9-2.10):
+	bug fix ^\d+$ ml name for BRACKET
+
 2002/01/14
 
    messages/English.
@@ -216,7 +221,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.31 2002/12/22 14:35:59 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.32 2003/01/14 14:14:41 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
