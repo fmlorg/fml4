@@ -198,8 +198,6 @@ reset:
 	gar var/log/*.[0-9]
 
 
-diff:
-	usr/bin/rcsdiff++.sh *.pl
 
 capital:
 	cat `echo *pl proc/*pl | sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
@@ -271,6 +269,12 @@ libkern:
 
 asuka:
 	(chdir sbin; ( echo put makefml; echo quit;) | ftp -ivd asuka)
+
+diff:
+	fvs diff * proc/* libexec/* 
+
+docdiff:
+	fvs diff doc/ri/*wix doc/smm/*wix
 
 scan:
 	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix |\
