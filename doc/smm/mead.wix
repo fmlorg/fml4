@@ -220,6 +220,36 @@ which is not on $ACTIVE_LIST nor $MEMBER_LIST.
 	sort |uniq してキャッシュする(first match では user unknownが
 	上書きされたりするかもしれないのを回避)
 
+.S	VERPs (Variable Envelope Return Paths)
+.l	VERP
+
+とりあえず qmail の場合についてのみ説明します。
+
+VERPs については
+.url http://www.jp.qmail.org/qmaildoc/RFC/RFCVERP.html
+=E
+VERPs: Variable Envelope Return Paths. See 
+http://www.qmail.org/.
+
+$USE_VERP を設定すると $MAINTAINER アドレスをかえて qmail が送り出しま
+す。
+=E
+If you enable $USE_VERP variable, fml uses VERPs.
+
+	$USE_VERP = 1; (default 0)
+
+2.2C#6 (1999/06/19) 以降のversionではmakefml が作る見本の
+.qmail-listname-default はVERPsを見越して mead を呼ぶようになっています。
+=E
+After 2.2C#6 (1999/06/19), I change .qmail-listname-default for VERPs,
+which calls mead.
+
+makefml config では
+=E
+On "makefml config", you can do
+
+   top menu => SECURITY_AND_FILTER => CHECK_MAILBODY_CKSUM => "y"
+
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 

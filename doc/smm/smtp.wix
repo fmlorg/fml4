@@ -6,8 +6,9 @@
 .C	Simple Mail Transfer Protocol
 =E.C	Simple Mail Transfer Protocol
 
-.C	配送効率についての考察
-=E.C	Discussion On Delivery Efficiency
+配送効率についての考察
+=E
+Discussion On Delivery Efficiency
 
 .S	配送プロセスの律速段階とは
 =E.S	Blocking Stage Of Delivery Process
@@ -131,6 +132,10 @@ actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
 まくいかせない可能性はあります。
 =E
 Attention: This technique may break host cache of sendmail R8.
+
+.S	VERPs
+
+See .ptr{VERP}. 
 
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
