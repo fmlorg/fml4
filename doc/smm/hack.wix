@@ -446,8 +446,10 @@ Reply-To: address があったらそれを設定する。
 
 $START_HOOK = q!
     local($pat) = '.*\s*reply-to:\s*';
+    local($s);
     if ($Envelope{'Body'} =~ /^$pat(\S+)/i) {
-	&DEFINE_FIELD_FORCED('reply-to', $1);
+	&DEFINE_FIELD_FORCED('reply-to', $s=$1);
+        &Log("reply-to: <$s>");
 	$Envelope{'Body'} =~ s/^$pat\S+\n//io;
     }
 !;
@@ -909,6 +911,16 @@ In this mode, fml emulates Message-ID: always based on rule 2.
 Hence fml can ensure the consistency of ML threads against
 some MUA's e.g. Eudora...
 .fi
+
+.S	Reply-To: を From: + $MAIL_LIST に設定する   
+=E.S	Set Reply-To: be From: adress + $MAIL_LIST
+
+$START_HOOK = q#
+      &DEFINE_FIELD_FORCED("reply-to", "$From_address, $MAIL_LIST");
+#;
+
+You need to use a hook since From: address is dynamic variable, so
+cannot define static setting in config.ph.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
