@@ -75,22 +75,23 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 
 もちろんはじめて作る場合も同様ですね。
 
-例： Elena と Mirei ＭＬを作ろうと思ったら
+例： Elena ＭＬを作ろうと思ったら
 
-   /usr/local/fml/sbin/fmladmin newml elena
-と
-   /usr/local/fml/sbin/fmladmin newml mirei
+	/usr/local/fml/sbin/fmladmin newml elena
 
-を実行すれば終りです。それぞれのＭＬ用の include ファイルの
+を実行すれば終りです。ＭＬ用の include ファイルの
 
 	/usr/local/fml/include/elena
-	/usr/local/fml/include/mirei
 
 がそれぞれできます。それを呼ぶように設定された aliases の見本が
 
-  ~/.fml/aliases.elena と ~/.fml/aliases.mirei
+	~/.fml/aliases.elena 
 
-にできているので、それを /etc/aliases に加えて下さい。
+にできているので、それを /etc/aliases に加えて newalises して下さい。
+
+別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を mirei に
+変えて実行すればよいです。
+
 
 
 .S	ユーザをＭＬに加える場合（未実装）
