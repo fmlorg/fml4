@@ -17,8 +17,12 @@
 .include ptr.wix
 
 .HTML_PRE
+.if LANG == ENGLISH
+.include config-default.en.wix
+.return
+.fi
 
-elena メーリングリストを例にとろう。生の状態では
+elena メーリングリストを例にとろう。デフォールトの状態では
 
 	管理者がメンバーの登録/削除
 
