@@ -2231,6 +2231,8 @@ sub IncrementCounter
 {
     my ($f, $modulus) = @_;
     my ($id) = 0;
+
+    &Touch($f) unless -f $f;
     if (-f $f) {
 	$id = &GetFirstLineFromFile($f);
 	$id++;
