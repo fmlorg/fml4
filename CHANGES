@@ -3,6 +3,26 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/20
+
+   nuke C/ since it is obsolete. 
+
+   databases/ in distribution (new)
+	clean up under this.
+
+   kern/libloadconfig.pl
+	apply patch from Naoki IDO (fml-support: 08476)
+	resolve undefined bug in $debug on
+
+   3.0H
+	enable distribute via recipients list from database
+
+	データベースから引いた配送リストを有効にする
+	(3.0G ではデータベースアクセスのみで配送時に有効にはなっていなかった)
+
+   kern/fml.pl databases/ldap/examples/libldap.pl proc/libdatabases.pl
+	clarify variable convention between database functions
+
 2000/07/19
 
    sys/WINDOWS_NT4/makefml.cmd
