@@ -124,6 +124,9 @@ sub PopFmlGetOpts
 	/^\-d/    && $debug++;
 	/^\-D/    && $DUMPVAR++;
 
+	# queue directory
+	/^\-queue_dir/    && ($PopConf{'QUEUE_DIR'} = shift @ARGV) && next; 
+
 	/^\-include_file/ && ($PopConf{'INCLUDE_FILE'} = shift @ARGV) && next;
 	/^\-pwfile/       && ($PopConf{'NETRC'} = shift @ARGV) && next;
 	/^\-pop_passwd/   && ($PopConf{'POP_PASSWD'} = shift @ARGV) && next;
