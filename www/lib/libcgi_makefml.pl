@@ -230,7 +230,12 @@ sub OUTPUT_FILE
 	close($file);
     }
     else {
-	&ERROR("cannot open logfile");	
+	my $f = $file;
+
+	# hide environment
+	$f =~ s/$EXEC_DIR/\$EXEC_DIR/g;
+	$f =~ s/$ML_DIR/\$ML_DIR/g;
+	&ERROR("cannot open logfile $f");	
     }
 }
 
