@@ -51,7 +51,7 @@ sub DataBaseMIBPrepare
 	$mib->{'_cache_file'}     = $ACTIVE_LIST. $suffix;
     }
     elsif ($action =~ /member/) {
-	$mib->{'_cache_file'}     = $MEMBER_LIST. $suffix;	
+	$mib->{'_cache_file'}     = $MEMBER_LIST. $suffix;
     }
     else {
 	$mib->{'_cache_file'}     = $MEMBER_LIST. $suffix;
