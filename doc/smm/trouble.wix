@@ -798,6 +798,30 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 ターフェイスあるんだって？？？
 
 
+.S	>sh: /var/spool/ml/src/fml.pl: No such file or directory
+
+ようするに ファイルがない と言ってるわけですが、
+
+	/var/spool/ml/src/fml.pl の場所にない
+
+
+.S	>sh: /var/spool/ml/src/fml.pl: command not found
+
+	/var/spool/ml/src/fml.pl は perl が実行しますが
+	先頭の #!/usr/local/bin/perl の場所に perl がない時にでます。
+
+＃ make 時に configure が自動的に補正することにはなっているんですが… 
+
+
+.S	/var/spool/ml/src/fml.pl: permission denied
+
+実行 permission がない。ls -l fml.pl とやって
+
+	rwxr-xr-x 
+
+のように permission が表示されるかどうかを確認する。
+＃ chmod(1) chmod(2) chown(8)
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
