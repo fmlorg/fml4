@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libsmtp.pl,v 2.56 2001/08/25 12:47:28 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -105,23 +105,24 @@ sub SmtpInit
 	}
     }
 
+    # update @RcptLists always when Smtp() starts.
+    &__UpdateRcptLists();
+
     return 1 if $SocketOK;
     return ($SocketOK = &SocketInit);
 }
 
 
-sub SocketInit
+# set up @RcptLists which has lists of recipients.
+# Its purpose is to split lists to sub-organization but
+# deliver to all of them. For example each admin maintains
+# each labolatory. 
+# @ACTIVE_LIST = (arrays of each laboratory actives).
+# It is of no use if @ACTIVE_LIST == ($ACTIVE_LIST)
+# which is true in almost cases.
+# We should sort here? But the order may be of mean ...
+sub __UpdateRcptLists
 {
-    my ($exist_socket_ph);
-
-    ## set up @RcptLists which has lists of recipients.
-    ## Its purpose is to split lists to sub-organization but
-    ## deliver to all of them. For example each admin maintains
-    ## each labolatory. 
-    ## @ACTIVE_LIST = (arrays of each laboratory actives).
-    ## It is of no use if @ACTIVE_LIST == ($ACTIVE_LIST)
-    ## which is true in almost cases.
-    # We should sort here? But the order may be of mean ...
     @RcptLists = @ACTIVE_LIST;
     push(@RcptLists, $ACTIVE_LIST) 
 	unless grep(/$ACTIVE_LIST/, @RcptLists);
@@ -130,6 +131,12 @@ sub SocketInit
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
     }
+}
+
+
+sub SocketInit
+{
+    my ($exist_socket_ph);
 
     for (@INC) { if (-r "$_/sys/socket.ph") { $ExistSocketPH = 1;}}
 
