@@ -194,6 +194,8 @@ sub ResentForwFileInSpool
 	next if /^From\s+(\S+)/i;
 	next if /^\s*$/o;
 	$e{"GH:$field"} = $contents;
+	$field =~ s/://;
+	push(@ResentForwHdrFieldsOrder, $field);
     }
 
     # Resent;
@@ -211,6 +213,8 @@ sub ResentForwFileInSpool
     for (keys %org_e) { $e{$_} = $org_e{$_};}
 
     &Log("Get $ID, Success");
+
+    undef @ResentHdrFieldsOrder;
 }
 
 1;

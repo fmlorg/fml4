@@ -213,6 +213,12 @@ sub DoGenerateHeader
     local(*to, *le, *rcpt) = @_;
     local($tmpto);
 
+    # Resent (RFC822)
+    @ResentHdrFieldsOrder = ("Resent-Reply-To", "Resent-From", "Resent-Sender",
+			     "Resent-Date", 
+			     "Resent-To", "Resent-Cc", "Resent-Bcc", 
+			     "Resent-Message-Id");
+
     # @to is required; but we can make $from appropriatedly;
     @to || do { &Log("GenerateHeader:ERROR: NO \@to"); return;};
 
@@ -244,9 +250,18 @@ sub DoGenerateHeader
     # MIME (see RFC1521)
     # $_cf{'header', 'MIME'} => $Envelope{'GH:MIME:'}
     # 
-    for (@HdrFieldsOrder) {
-	if ($Envelope{"GH:$_:"} || $le{"GH:$_:"}) {
-	    $le{'Hdr'} .= "$_: ".($Envelope{"GH:$_:"} || $le{"GH:$_:"})."\n";
+    if (@ResentForwHdrFieldsOrder) { 
+	for (@ResentForwHdrFieldsOrder, @ResentHdrFieldsOrder) {
+	    if ($Envelope{"GH:$_:"} || $le{"GH:$_:"}) {
+		$le{'Hdr'} .= "$_: ".($Envelope{"GH:$_:"}||$le{"GH:$_:"})."\n";
+	    }
+	}
+    }
+    else {
+	for (@HdrFieldsOrder, @ResentHdrFieldsOrder) {
+	    if ($Envelope{"GH:$_:"} || $le{"GH:$_:"}) {
+		$le{'Hdr'} .= "$_: ".($Envelope{"GH:$_:"}||$le{"GH:$_:"})."\n";
+	    }
 	}
     }
 }
