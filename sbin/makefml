@@ -210,6 +210,9 @@ sub InitMakeFml
 		    'passwd',	'do_passwd',
 		    '8#passwd ML address',	'to change the administrator passwd',
 
+		    'test',	'do_test',
+		    '8#test',	'test ',
+
 		    'fmlserv',  'do_fmlserv',
 		    'listserv', 'do_fmlserv',
 		    'marjodomo','do_fmlserv',
@@ -1418,6 +1421,52 @@ sub do_newml
     print "\n";
 }
 
+
+sub do_test
+{
+    local($ml) = @_;
+
+    local($cf, $local_config, $config);
+    local(@config, %config);
+
+    print "---Testing $ml mailing list ... \n";
+
+    &ResetVariables;
+    &GetTime;
+
+    chdir "$ML_DIR/$ml" || die("$!\n");
+
+    &TestInit;
+
+    do "$ML_DIR/$ml/config.ph";
+
+    $e{'h:Return-Path:'} = "<$MAINTAINER>";        # needed?
+    $e{'h:Date:'}        = $MailDate;
+    $e{'h:To:'}          = "$MAIL_LIST $ML_FN";    # rewrite To:
+    $e{'h:Posted:'}      = $e{'h:date:'} || $e{'h:Date:'};
+    $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
+    $e{'h:Lines:'}       = $e{'nlines'};
+
+    $e{"h:Message-ID:"}  = "$CurrentTime/$$\@$FQDN";
+    
+    print "From $USER\@$FQDN $MailDate\n";
+    for (@HdrFieldsOrder) {
+	print "$_: $e{'h:$_'}\n";
+    }
+}
+
+sub TestInit
+{
+    @HdrFieldsOrder =	# rfc822; fields = ...; Resent-* are ignored;
+	('Return-Path', 'Date', 'Posted', 
+	 'From', 'Reply-To', 'Subject', 'Sender', 
+	 'To', 'Cc', 'Errors-To', 'Message-Id', 'In-Reply-To', 
+	 'References', 'Keywords', 'Comments', 'Encrypted',
+	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
+	 'XRef', 'X-Stardate', 'X-ML-Info', ':body:', ':any:', 
+	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
+	 'Precedence', 'Lines');
+}
 
 sub do_config
 {
