@@ -39,6 +39,11 @@ If you do not use automatic registration, you have nothing to do.
 
 fml 3.0 に移行する場合の支援ツールを用意してあります(次節)
 
+注意: fml 1.x のconfig.phをそのまま使うにはtrickyなことが必要です。
+      たぶん3.0に書き換える方がやさしいです。
+.# endif-3.0
+      => .ptr{1.0-to-3.0}
+.# ifdef-3.0
 
 .S	アップグレードの支援ツールについて
 =E.S	Helper tool to upgrade fml 2.x to fml 3.0
@@ -349,6 +354,22 @@ config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
 (INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
 設定が必要です。
 
+.appendix
+.C	古いfml 1.x から3.0へ
+.l	1.0-to-3.0
+
+fml.orgで動いている古いconfig.phで auto_subscribe にするには３つおまじ
+ないが必要でした;-)
+
+.q
+   $COMPAT_CF1 = 1;
+   $CFVersion  = 4;
+   $REJECT_COMMAND_HANDLER = "auto_subscribe";
+.~q
+
+たぶんこれだけでいけますが、小手先をいじくるよりは3.0に書き換える方が
+いいきがしています。きっと将来呪文が意味不明だと自分で思う日が来ると思
+うので勧められないきがする。
 
 $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi

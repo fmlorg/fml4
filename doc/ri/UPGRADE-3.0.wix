@@ -23,6 +23,10 @@ If you do not use automatic registration, you have nothing to do.
 
 fml 3.0 に移行する場合の支援ツールを用意してあります(次節)
 
+注意: fml 1.x のconfig.phをそのまま使うにはtrickyなことが必要です。
+      たぶん3.0に書き換える方がやさしいです。
+.# endif-3.0
+.# ifdef-3.0
 
 .S	アップグレードの支援ツールについて
 =E.S	Helper tool to upgrade fml 2.x to fml 3.0
