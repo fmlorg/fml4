@@ -1,5 +1,5 @@
 .C	trouble shooting
-
+.k	trouble shooting
 
 .S	ありそうなこと
 
@@ -20,12 +20,13 @@
 
 
 .S	Insecure dependency in chdir 
+.k	Insecure dependency in chdir 
 
 	次です↓
 
 
 .S	動かない？（setuid or tperl ...）
-.seealso c-wrapper, calling-fml.pl, plural-handling-1, plural-handling-2
+.xref	c-wrapper, calling-fml.pl, plural-handling-1, plural-handling-2
 
 ちゃんとfmlが4755になってますか？makeはしましたか？
 つまり
@@ -44,8 +45,8 @@ fml.cはC wrapperでsetuidするため（だけ）のものです。
 
 中では
 
-  setuid(geteuid());
-  setgid(getgid());
+	setuid(geteuid());
+	setgid(getgid());
 
 をしているだけです。問題は、これを ユーザー ができるのは ４．３ＢＳＤ
 までです。
@@ -86,6 +87,7 @@ fml.cはC wrapperでsetuidするため（だけ）のものです。
 
 
 .S	:include:うじゃ is unsafe for mailing to program ...
+.k	:include:... is unsafe for mailing to program ...
 
 Posted:  Fri, 21 Jul 1995 03:10:25 JST
 X-Mail-Count: 00476
@@ -147,8 +149,8 @@ forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
 
 
 .S	ガイドとかが なぜか返送されない（no file in Sub SendFile[logfile]）
-.key	$SUN_OS_413
-.key	$SENDFILE_NO_FILECHECK
+.k	SUN OS 4.1.3
+.k	$SENDFILE_NO_FILECHECK
 
 妙に SUN OS 4.1.3 (+JLE) の場合が多かったんですが、perl の file test
 operator が（-T なんでもけっこう変みたい）おかしくて Plain Text か否か？
@@ -156,13 +158,9 @@ operator が（-T なんでもけっこう変みたい）おかしくて Plain Text か否か？
 
 とりあえず config.ph  の最初の方で
 
-	$SUN_OS_413 = 1;
+	$SENDFILE_NO_FILECHECK = 1;
 
 としておいてください。
-
-この変数の実体は $SENDFILE_NO_FILECHECK という変数を １ にすることです。
-config.ph の後半で再代入しています。上の名前は単にわかりやすいようにで
-す。
 
 
 .S	log ファイルに残るの 550... みたいな数字は何？
@@ -172,13 +170,14 @@ Sendmail からのエラーメッセージの記録です。メッセージは [45]\d\d 形式
 
 
 .S	Can't locate sys/socket.ph in @INC
+.k	Can't locate sys/socket.ph in @INC
 .key	sys/socket.ph
 
 今はパッケージを広げるとfml.pl に対して sys/socket.ph という場所に
 一応BSD用の socket.ph があるので何とかなると思うのですが
 
- Can't locate sys/socket.ph in @INC (did you run h2ph?) at ...
- 554 "|/usr/spool/driver/fml"... unknown mailer error 2
+	Can't locate sys/socket.ph in @INC (did you run h2ph?) at ...
+	554 "|/usr/spool/driver/fml"... unknown mailer error 2
 
 perlのインストールの時にh2phを走らせて
 
@@ -187,16 +186,17 @@ perlのインストールの時にh2phを走らせて
 あたりにあるとおもうんですが、やってないとファイルがないので怒られるわ
 けです。
 
-% (cd /usr/include; h2ph * sys/*)
+	% (cd /usr/include; h2ph * sys/*)
 
-で	/usr/local/lib/perl	に作ってくれると思います。
+で /usr/local/lib/perl に作ってくれると思います。
 ＃% man h2ph
 
-ただ本来は、こういうsystemからみのfileはちゃんとインストールするべきだ
+本来はこういう system からみのファイルはちゃんとインストールするべきだ
 と思いますけどね？
 
 
-.S	"You should install sys/socket.ph using h2ph."
+.S	You should install sys/socket.ph using h2ph.
+.k	You should install sys/socket.ph using h2ph.
 .key	h2ph
 
 	"You should install sys/socket.ph using h2ph."
@@ -340,8 +340,8 @@ UNIX FROM loop の方のチェックは それとはちがって
 とすると、このループチェックメカニズムを使わなくなります。
 
 
-.S	Solaris 2.4 でプロセス間通信がうまくいかない時
-.k	Solaris 2.4でプロセス間通信がうまくいかない
+.S	Solaris 2.4 でプロセス間通信がうまくいかない
+.k	Solaris 2.4 でプロセス間通信がうまくいかない
 
 とりあえず、 config.ph で
 
@@ -386,6 +386,7 @@ config.ph で
 
 
 .S	The flock() function is unimplemented ...
+.k	The flock() function is unimplemented ...
 
 ０	perl がちゃんとコンパイルされていない
 １	flock() がないＯＳ
@@ -394,11 +395,12 @@ config.ph で
 あたりかな？perl をコンパイルしなおすか、
 
 	$USE_FLOCK = 0;
+.k	$USE_FLOCK
 
 にしてみてください。
 
 
-.S	Solaris 2.3 (SUN OS 5) で flock がうごかない？？？
+.S	Solaris 2.3 (SUN OS 5) で flock がうごかない
 .k	Solaris 2.3 (SUN OS 5) で flock がうごかない
 
 flock がだめというエラーメッセージがでたら
@@ -409,9 +411,9 @@ flock がだめというエラーメッセージがでたら
 
 
 .S	CC:Mail でのトラブル その１
-.key	nkf
-.key	CC:Mail
-.key	パソコンメールソフト
+.k	nkf
+.k	CC:Mail
+.k	メールソフト
 
 cc:Mail は[\033\050\112]を日本語が絡みそうな部分には強制的に入れている
 らしいです。
@@ -427,7 +429,7 @@ e.g.
 private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
 
 
-.S	PC-VANがちゃんとうけとってくれない 事件
+.S	PC-VAN がちゃんとうけとってくれない 事件
 .k	PC-VAN
 
 message-id で < > がちゃんとついてないと だーめ。
@@ -477,7 +479,7 @@ sub SendFile
 .~q
 
 
-.S	bin/expire.plで“Ｎ個のファイルを残す”のを間違えます
+.S	bin/expire.plで“N個のファイルを残す"のを間違えます
 
 	該当範囲：libexpire.pl のないバージョン(95/11/11以前)
 
@@ -527,7 +529,6 @@ sub fp_sort
 ＃ 記： Wed Nov 22 07:02:26 JST 1995
 
 
-
 .S	503 Need RCPT (recipient) 
 .k	503 Need RCPT (recipient) 
 
@@ -573,6 +574,7 @@ doc/INFO 等に書いておきますので、見てもらえばＯＫのはずです。
 
 
 .S	$Envelope{'macro:s'}  = 'localhost'; にしておくとまずい？
+.k	$Envelope{'macro:s'}
 
 昔はMessage-ID もこの変数使っていたので @locahost とかついちゃいました。
 そういうことをすると、Message-ID が Unique でなくなるからだめです。
@@ -647,63 +649,6 @@ Elena@Baycity.jp  m=1u
 となります。
 
 
-.S	:include:うじゃ is unsafe for mailing to program
-.k	:include:うじゃ is unsafe for mailing to program
-
-check：		includeするファイルおよびそこまでのパスの	
-		どこかで危ないことがないか？
-		
-		でも、fpathconf とか  fchown ってよくわからない
-		意外なものも判定条件にしてるかも…（わからないけど）
-		＃sun os4.1.3JLEも変とかいってたし…
-
-ＯＳ：
-		fpathconf はPOSIXです。
-
-		EWS は…よくわかりません… がマニュアルにPOSIXとかかい
-		てあればきっと同じような現象でしょう。
-
-		HP では fchown() ではんていしてるらしいです。
-		あと、HP では setuid() じゃなくて まだ setreuid() を
-		使ってるとおもうので、
-		default の fml.c ではうまくいかないでしょう
-		setuid -> setreuid にしてでいいのかな…
-		% man setreuid ででてくる設定は多分setuid
-		なんかとおなじだとおもいますが…
-
-回避：
-		/usr/local/ml/include-file
-		とか local disk 上にうつして permission をきびしくする
-		＃111 とかまで？…:-)
-
-		限界までpermissionをおとして、
-		rootにsetuidした C-wrapper を同様な場所につくる
-		＃要注意な作業	
-
-		sendmail の chownsafe() が常に真を返すように改造する
-
-理由：
-
-QUNSAFEADDR フラッグがONになるのは、
-
-１	chown がちゃんとできないとき
-２	world writable であるとき
-
-です。で、１のほうは fpathconf() とか  fchown() だとすれば
-
-これは、fpathconf() かな？＃たぶん…:-)
-
-sendmail -> 
-forkした sendmail -> includeを評価	→ /bin/shをfork()→exec fml.pl
-			このとき
-			fpathconf()が安全性をチェックする
-
-の時に fpathconf() が bugってるか、それともpath
-のどこかにファイルの所有者以外への write permission が与えられていると
-か、NFSごし だとか… 
-
-
-
 .S	Return-Receipt-To:事件と CC:Mail等ＭＵＡ
 .k	Return-Receipt-To:とCC:Mail等ＭＵＡ
 .k	CC:Mail
@@ -735,6 +680,7 @@ Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
 
 
 .S	EUC のファイルを perl はバイナリと認識する
+.k	EUC
 
     stat($f);
     if (-T _ && -r _ && -o _ ) { return $f;}
@@ -745,8 +691,8 @@ binary と判定するからです
 
 
 .S	[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID] 
-.key	$SUBJECT_HML_FORM
-.key	CyberDog-1.1J-beta
+.k	$SUBJECT_HML_FORM
+.k	CyberDog-1.1J-beta
 
 .q
 From:    easy@pfu.co.jp
@@ -793,7 +739,8 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 
 また、そのアドレスをコマンド専用にするために config.ph で、
 
-    $CONTROL_ADDRESS               = "elena-request\@$DOMAINNAME";
+	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
+.k    	$CONTROL_ADDRESS
 
 みたいにするとなお良いとおもいます。
 
@@ -813,6 +760,7 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 
 
 .S	>sh: /var/spool/ml/src/fml.pl: No such file or directory
+.k	sh: /var/spool/ml/src/fml.pl: No such file or directory
 
 ようするに ファイルがない と言ってるわけですが、
 
@@ -822,6 +770,7 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 
 
 .S	>sh: /var/spool/ml/src/fml.pl: command not found
+.k	>sh: /var/spool/ml/src/fml.pl: command not found
 
 /var/spool/ml/src/fml.pl は perl が実行しますが
 先頭の #!/usr/local/bin/perl の場所に perl がない時にでます。
@@ -833,6 +782,7 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 
 
 .S	/var/spool/ml/src/fml.pl: permission denied
+.k	/var/spool/ml/src/fml.pl: permission denied
 
 実行 permission がない。ls -l fml.pl とやって
 
@@ -877,6 +827,8 @@ $SMTP_OPEN_HOOK .= q!;
 
 
 .S	lha または ish が見つからない…
+.k	lha not found
+.k	ish not found
 
 
 某プロバイダのように UNIX の shell のアカウントのあるマシンには 
@@ -890,6 +842,7 @@ static である必要がありますね
 
 
 .S	AL-Mailを使うとループ・アラートが出る？場合
+.k	AL-Mail
 
 以下のような場合にはなります。作者様からフォローいただきました(たんく
 す_o_)
@@ -913,6 +866,7 @@ static である必要がありますね
 
 
 .S	CC:Mail 事件 そのN(泣)
+.k	CC:Mail
 
 in fml-support: 01813 
 
@@ -934,7 +888,7 @@ actives には”MLからの受信がOKなアドレス”だけ
 を書いておく。あと、
 ＃ fml-support: 01818
 
-   @MEMBER_LIST  = (members, members-BAKA-NA-CCMAIL-NO-SHIRINUGUI);
+	@MEMBER_LIST  = (members, members-BAKA-NA-CCMAIL-NO-SHIRINUGUI);
 
 とかにして、認証は両方通すとかするとよいかもしれないですね〜どれが迷惑
 をかけているアドレスつぅかサイトつぅかソフトつぅかが一目でわかるかなと
@@ -948,18 +902,12 @@ actives には”MLからの受信がOKなアドレス”だけ
 ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
 れず、そのマシンの上でないとDISKも十分でない場合。
 
-次のような pop を使う技が使えます。
-.xref	pop2recv.pl
-
-	cron で pop2recv.pl を１分に一回とか呼ぶ。
-	pop2recv.pl が pop server からメールを持ってきて
-	fml.pl を起動する。
-
-これで pop でメールを読む環境ならＯＫっす。
+pop でメールを読む環境ならPOPを使ったMLが実行できます。
 .xref	popfml
 
 
 .S	勝手についてしまう signature を取る
+.k	signature
 
 そもそもメールの本文をいじるなんてとんでもない話ですが…
 そういうことをする provider なり会社を許してはいけませんね。
@@ -968,9 +916,9 @@ ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
 それができるということは内容の改竄もできるし、機密保持も存在していない
 わけです。
 
-
 切り出して追加の例：＃別に split じゃなくてもいいんだけど
 
+.k	$SMTP_OPEN_HOOK
 $SMTP_OPEN_HOOK = q#
 	local($uja);
 	for (split(/\n/, $e{'Body'})) {
@@ -1002,6 +950,7 @@ fml-support: 02353
 
 
 .S	article ID duplication error 
+.k	article ID duplication error 
 
 次を見てね↓
 
@@ -1013,6 +962,7 @@ flock やってるふりして、できてない？そのため SEQUENCE_FILE がちゃんと
 
 
 .S	include's owner != config.ph's owner.
+.k	include's owner != config.ph's owner.
 
 in fml-support: 02475, 02469, 02472 あたり
 
