@@ -5,6 +5,46 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl5 ]
+
+  html generator
+	fix title to YYYY/MM/DD
+
+  update fwix.pl 
+	fix cross reference, so I've recreate ducuments.
+
+	ドキュメントのcross referenceのバグ修正
+
+  fix "traffic" command (traffic command module)
+	update "libtraffic.pl" to 1.2
+	fix y2k related (looks of report) bugs.
+	PR from Yuao Tanigawa (author).
+
+	trafficコマンドの見栄えが悪い(y2k;)のを修正
+	作者の谷川さんに最新版をもらったので入れ換え
+
+  update multipart.pl (multipart mail prefilter) to 1.3.1.2
+	PR from Yuao Tanigawa (author).
+
+	multipart フィルタを最新版にアップデート
+
+  smm/hack.wix (2.17-2.18)
+	update url. PR from Yuao Tanigawa
+
+  update to use jcode.pl-2.11
+	PR from Fumitoshi UKAI
+
+	jcode.pl を最新版に
+
+  synchtml.pl
+	sync w/ head 2.31-2.32
+	import critical bug fix: $ID here should be local
+
+  fml.pl
+	sync w/ head (2.73-2.74)
+	apply patch to fix scope bug from Teruyuki Morimura
+	<lisa@sandalwood.net>. fml-support: 07135
+
 [ 3.0pl14 ]
 
    DEFINE_FIELD_LOOP_CHECKED()
