@@ -12,9 +12,14 @@
 sub MD5_cksum
 {
     local(*e, $prog) = @_;
-    local($cksum);
+    local($cksum, @path);
 
-    $prog = $prog || $MD5 || &SearchPath('md5') || &SearchPath('md5sum');
+    @path = ('/usr/bin', '/sbin', '/usr/local/bin', '/usr/gnu/bin', 
+	     '/usr/pkg/bin');
+
+    $prog = $prog || $MD5 || 
+	&SearchPath('md5', @path) || 
+	    &SearchPath('md5sum', @path);
 
     if ($prog && -x $prog) {
 	require 'open2.pl';
