@@ -10,8 +10,14 @@ Copy Received: of the input article to X-Received: and remove the
 field.
 .fi
 
-[Example]
+[Configuration]
 
 .include config/x-received
+
+[·ë²Ì]
+=E
+[Result]
+
+.include x-received.article
 
 .~HTML_PRE
