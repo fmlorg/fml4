@@ -15,11 +15,14 @@ umask(077);
 
 &FmlLocalInitialize;		# preliminary
 
-chdir $HOME || die("Cannot chdir \$HOME=$OME\n"); # meaningless but for secure
+chdir $HOME || die("Cannot chdir \$HOME=$HOME\n"); # meaningless but for secure
 
 &FmlLocalReadCF($CONFIG_FILE);	# set %VAR, %CF, %_cf
 &FmlLocalGetEnv;		# set %ENV, $DIR, ...
 
+chdir $DIR  || die("Cannot chdir \$DIR=$DIR\n");
+
+&FmlLocalFixEnv;
 &Parsing;			# Phase 1(1st pass), pre-parsing here
 &GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
 
@@ -229,10 +232,11 @@ sub FmlLocalInitialize
 
     $Envelope{'mci:mailer'} = 'ipc'; # use IPC(default)
 
-    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
-	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
+    @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, TMP,
+	    TMP_DIR, PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
 	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
-	    MY_FUNCTIONS, CASE_INSENSITIVE);
+	    LOG_MESSAGE_ID,
+	    MY_FUNCTIONS, CASE_INSENSITIVE, MAIL_LENGTH_LIMIT);
 
     # getopts
     while(@ARGV) {
@@ -282,8 +286,14 @@ sub FmlLocalReadCF
     }
     $pat = "($pat)";
 
+    # FOR ARRAY
+    $array_pat = "(INC)";
+
     ### Special pattern /$sp_pat\s+(.*)/
-    $sp_pat = '(PASSWORD|MAINTAINER_SIGNATURE)';
+    $sp_pat  = 'PASSWORD|MAINTAINER_SIGNATURE';
+    $sp_pat .= 'TAR|UUENCODE|RM|CP|COMPRESS|ZCAT'; # system (.*) for "gzip -c"
+    $sp_pat .= '|LHA|ISH'; # system (.*) for "gzip -c"
+    $sp_pat  = "($sp_pat)";
 
     #### read config file
     CF: while(<CF>) {
@@ -294,8 +304,10 @@ sub FmlLocalReadCF
 
 	# Set environment variables
 	/^DEBUG/i && $debug++ && next CF;
-	/^$sp_pat\s+(.*)/ && (eval "\$$1 = '$2';", $@ eq "") && next CF;
-	/^$pat\s+(\S+)/   && (eval "\$$1 = '$2';", $@ eq "") && next CF;
+	/^$sp_pat\s+(.*)/    && (eval "\$$1 = '$2';", $@ eq "") && next CF;
+	/^$array_pat\s+(.*)/ && 
+	    (eval "push(\@$1, '$2');", $@ eq "") && next CF;
+	/^$pat\s+(\S+)/      && (eval "\$$1 = '$2';", $@ eq "") && next CF;
 
 	# already must be NOT ENV VAR
 	# AND OPERATION
@@ -322,26 +334,27 @@ sub FmlLocalGetEnv
 	    $ENV{'HOME'} || $ENV{'LOGDIR'} || (getpwuid($<))[7] ||
 		die("You are homeless!\n");
 
-    $DIR     = $DIR    || $HOME;
-    $LIBDIR  = $LIBDIR || $DIR;
-    $LOGFILE = $LOG    || "$DIR/log";
+    $DIR         = $DIR         || $HOME;
+    $LIBDIR      = $LIBDIR      || $DIR;
+    $LOGFILE     = $LOG         || "$DIR/log";
     $ARCHIVE_DIR = $ARCHIVE_DIR || "$DIR/.archive";
-    
-    $FML_PL = $FML_PL || 
-	(-f "$LIBDIR/fml.pl" && "$LIBDIR/fml.pl") ||
-	    (-f "$DIR/fml.pl" && "$DIR/fml.pl") ||
-		(-f "$ENV{'FML'}/fml.pl" && "$ENV{'FML'}/fml.pl") ||
-		    ($NOT_EXIST_FML_PL = 1);
 
-    $USER   = $USER || getlogin || (getpwuid($<))[0] || 
-	die "USER not defined\n";
+    # Fix
+    $USER = $USER || getlogin || (getpwuid($<))[0] || 
+	die "Cannot define USER, exit\n";
 
-    $MAIL_SPOOL = $MAIL_SPOOL || 
-	(-r "/var/mail/$USER"       && "/var/mail/$USER") ||
-	    (-r "/var/spool/mail/$USER" && "/var/spool/mail/$USER") ||
-		(-r "/usr/spool/mail/$USER" && "/usr/spool/mail/$USER");
+    # Fix, after "chdir $DIR" 
+    $TMP_DIR = $TMP_DIR || $TMP || "./tmp";
+    $TMP_DIR =~ s/$DIR//g;
+    &Log("TMP_DIR = $TMP_DIR") if $debug;
 
-    $VACATION_RC = $VACATION   || "$HOME/.vacationrc";
+    if (! $MAIL_SPOOL) {
+	for ("/var/mail", "/var/spool/mail", "/usr/spool/mail") {
+	    $MAIL_SPOOL = "$_/$USER" if -r "$_/$USER";
+	}
+    }
+
+    $VACATION_RC = $VACATION || "$HOME/.vacationrc";
 
     if (! $DOMAIN) {
 	$DOMAIN = (gethostbyname('localhost'))[1];
@@ -354,7 +367,17 @@ sub FmlLocalGetEnv
     # include ~/.vacationrc
     &FmlLocalReadCF($VACATION_RC) if -f $VACATION_RC;
 
+    # logs message id against loopback
+    $LOG_MESSAGE_ID = $LOG_MESSAGE_ID || "$TMP_DIR/log.msgid";
+
     1;
+}
+
+
+# FIX TO BE FIXED AFTER CHDIR $DIR;
+sub FmlLocalFixEnv
+{
+    -d $TMP_DIR || mkdir($TMP_DIR, 0700);
 }
 
 
@@ -470,6 +493,7 @@ sub FmlLocalReplace
     s/\$DIR/$DIR/g;
     s/\$LIBDIR/$LIBDIR/g;
     s/\$ARCHIVE_DIR/$ARCHIVE_DIR/g;
+    s/\$TMP_DIR/$TMP_DIR/g;
 
     $_;
 }
@@ -643,14 +667,7 @@ sub Parsing
     
     while (<STDIN>) { 
 	if (1 .. /^$/o) {	# Header
-	    if (/^$/o) { #required for split(tricky)
-		$Envelope{'Header'} .= "\n";
-		next;
-	    } 
-
-	    $Envelope{'Header'} .= $_;
-	    $Envelope{'MIME'}    = 1 if /ISO\-2022\-JP/o;
-
+	    $Envelope{'Header'} .= $_ unless /^$/o;
 	} 
 	else {
 	    # Guide Request from the unknown
@@ -698,7 +715,11 @@ sub GetFieldsFromHeader
 	$Envelope{'Header'} = "From $u $MailDate\n".$Envelope{'Header'};
     }
 
-    local($s) = $Envelope{'Header'};
+    # MIME
+    $Envelope{'MIME'}= 1 if $Envelope{'Header'} =~ /ISO\-2022\-JP/o;
+
+    # preliminary to get fields
+    local($s) = $Envelope{'Header'}."\n";
     $s =~ s/\n(\S+):/\n\n$1:\n\n/g; #  trick for folding and unfolding.
     
     ### PLEASE CUSTOMIZE BELOW FOR 'FIELDS TO SKIP'
@@ -762,8 +783,9 @@ sub GetFieldsFromHeader
 
     # Some Fields need to "Extract the user@domain part"
     # $Envelope{'h:Reply-To:'} is "reply-to-user"@domain FORM
-    $From_address               = &Conv2mailbox($Envelope{'h:from:'});
-    $Envelope{'h:Reply-To:'}    = &Conv2mailbox($Envelope{'h:reply-to:'});
+    $From_address            = &Conv2mailbox($Envelope{'h:from:'});
+    $Envelope{'h:Reply-To:'} = &Conv2mailbox($Envelope{'h:reply-to:'});
+    $Envelope{'Addr2Reply:'} = $Envelope{'h:Reply-To:'} || $From_address;
 
     # Subject:
     # 1. remove [Elena:id]
@@ -790,64 +812,19 @@ sub GetFieldsFromHeader
     ### For CommandMode Check(see the main routine in this flie)
     $Envelope{'mode:chk'} = 
 	$Envelope{'h:to:'} || $Envelope{'h:apparently-to:'};
-    $Envelope{'mode:chk'} .= ", $Envelope{'h:cc:'}, $Envelope{'h:bcc:'},";
+    $Envelope{'mode:chk'} .= ", $Envelope{'h:Cc:'}, ";
     $Envelope{'mode:chk'} =~ s/\n(\s+)/$1/g;
 
     # Correction. $Envelope{'req:guide'} is used only for unknown ones.
     if ($Envelope{'req:guide'} && &CheckMember($From_address, $MEMBER_LIST)) {
 	undef $Envelope{'req:guide'}, $Envelope{'mode:uip'} = 'on';
     }
-#.IF CROSSPOST
 
-    {
-	local($cps) = 'Crossed among:';
-	local(%addr, $n_cr);
-	&Debug("\n*** CROSSPOST? ***\n") if $debug;
-
-	# Crosspost extension
-	# the tricky syntax ", " is required for the splitting(put above) 
-	foreach (split(/\s*,\s*/, $Envelope{'mode:chk'})) {
-	    next if /^\s*$/o;
-
-	    # uniq emulation since ORDER is important, so "cannot sort" 
-	    next if $addr{$_};
-	    
-	    &Debug("Candidate:\t$_") if $debug;
-
-	    # lacking of this code leads to strange working...
-	    # e.g. when it has a name or ..
-	    # 95/08/07 fukachan@phys.titech.ac.jp
-	    # delete (..) e.g. Elen@fuwafuwa.or.jp (Fuwafuwa Elen)
-	    $_ = &Conv2mailbox($_);
-
-	    # EXCEPT FOR From_address
-	    if (! &AddressMatch($_, $From_address)) {
-		$cps .= " [$_]"; # LOG MATCHED ADDR
-		$n_cr++;
-		&Debug("Crossed:\t$_") if $debug;
-	    }
-	    else {
-		$cps .= " $_";	# LOG 'NOT MATCHED ONE'
-		&Debug("HIS OWN:\t$_") if $debug;
-	    }
-
-	    $addr{$_} = 1;	# uniq emulation
-	}
-
-	&Debug($n_cr > 1 ? "\nCROSSPOST" : "\nNot Crosspost") if $debug;
-
-	# include $MAIL_LIST own, so (> 1)	
-	# if plural addresses, call, COMMAND MODE->do nothing
-	if ((!$Envelope{'mode:uip'}) && ($n_cr > 1)) {
-	    $Envelope{'crosspost'} = 1;
-	    &Log($cps);
-	    &use(crosspost);
-	    &Crosspost; 
-	}
-
-	&Debug("\n*** CROSSPOST ROUTINE ENDS ***\n") if $debug;
-    }
-#.FI CROSSPOST
+    # Set Control-Address for reply, notify and message
+    $Envelope{'Reply2:'} = $CONTROL_ADDRESS ? do {
+	($CONTROL_ADDRESS =~ /\@/o) ? $CONTROL_ADDRESS :
+	    "$CONTROL_ADDRESS\@".(split(/\@/, $MAIL_LIST))[1];
+    } : $MAINTAINER;
 
     ### SUBJECT: GUIDE SYNTAX 
     if ($USE_SUBJECT_AS_COMMANDS) {
@@ -865,7 +842,7 @@ sub GetFieldsFromHeader
     ###### LOOP CHECK PHASE 1
     ($Message_Id) = ($Envelope{'h:Message-Id:'} =~ /\s*\<(\S+)\>\s*/);
 
-    if (&CheckMember($Message_Id, $LOG_MESSAGE_ID)) {
+    if ($CHECK_MESSAGE_ID && &CheckMember($Message_Id, $LOG_MESSAGE_ID)) {
 	&Log("WARNING: Message ID Loop");
 	&Warn("WARNING: Message ID Loop", &WholeMail);
 	exit 0;
@@ -985,7 +962,7 @@ sub AddressMatch
 
     # try exact match. must return here in a lot of cases.
     if ($addr1 eq $addr2) {
-	&Debug("Exact Match") if $debug;
+	&Debug("\tAddr::match { Exact Match;}") if $debug;
 	return 1;
     }
 
@@ -994,21 +971,21 @@ sub AddressMatch
     local($acct2, $addr2) = split(/@/, $addr2);
 
     # At first, account is the same or not?;    
-    if ($acct1 ne $acct2) {return 0;}
+    if ($acct1 ne $acct2) { return 0;}
 
     # Get an array "jp.ac.titech.phys" for "fukachan@phys.titech.ac.jp"
-    local(@domain1) = reverse split(/\./, $addr1);
-    local(@domain2) = reverse split(/\./, $addr2);
+    local(@d1) = reverse split(/\./, $addr1);
+    local(@d2) = reverse split(/\./, $addr2);
 
     # Check only "jp.ac.titech" part( = 3)(default)
     # If you like to strict the address check, 
     # change $ADDR_CHECK_MAX = e.g. 4, 5 ...
     local($i);
-    while ($domain1[$i] && $domain2[$i] && 
-	  ($domain1[$i] eq $domain2[$i])) { $i++;}
+    while ($d1[$i] && $d2[$i] && ($d1[$i] eq $d2[$i])) { $i++;}
 
-    &Debug("$i >= ($ADDR_CHECK_MAX || 3)") if $debug;
-    return ($i >= ($ADDR_CHECK_MAX || 3));
+    &Debug("\tAddr::match { $i >= ($ADDR_CHECK_MAX || 3);}") if $debug;
+
+    ($i >= ($ADDR_CHECK_MAX || 3));
 }
 
 
@@ -1018,12 +995,13 @@ sub AddressMatch
 # delete \015 and \012 for seedmail return values
 # $s for ERROR which shows trace infomation
 sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
+sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
 sub Log { 
     local($str, $s) = @_;
     local($package,$filename,$line) = caller; # called from where?
+    local($status);
 
     &GetTime;
-
     $str =~ s/\015\012$//;	# FIX for SMTP
     $str = "$filename:$line% $str" if $debug_log;
 
@@ -1041,7 +1019,7 @@ sub Append2
 {
     local($s, $f, $w, $nor) = @_;
 
-    if (! open(APP, $w ? ">$f": ">>$f")) {
+    if (! open(APP, $w ? "> $f": ">> $f")) {
 	local($r) = -f $f ? "cannot open $f" : "$f not exists";
 	$nor ? (print STDERR "$r\n") : &Log($r);
 	return $NULL;
@@ -1049,37 +1027,34 @@ sub Append2
     select(APP); $| = 1; select(STDOUT);
     print APP $s . ($nonl ? "" : "\n") if $s;
     close(APP);
+
+    1;
 }
 
 
+sub Touch  { &Append2("", @_, 1);}
+
+
+sub Write2 { &Append2(@_, 1);}
 
 
 # Warning to Maintainer
-sub Warn
-{
-    local($s, $b) = @_;
-    &Sendmail($MAINTAINER, $s, $b);
-}
+sub Warn { &Sendmail($MAINTAINER, $_[0], $_[1]);}
 
 
 # eval and print error if error occurs.
 # which is best? but SHOULD STOP when require fails.
-sub use
-{
-    local($s) = @_;
-    require "lib$s.pl"; # &eval("require \"lib$s.pl\";"); 
-}
+sub use { require "lib$_[0].pl";}
 
 
 # eval and print error if error occurs.
 sub eval
 {
-    local($exp, $s) = @_;
+    &CompatFML15_Pre  if $COMPAT_FML15;
+    eval $_[0]; 
+    &CompatFML15_Post if $COMPAT_FML15;
 
-    eval $exp; 
-    &Log("$s:".$@) if $@;
-
-    return 1 unless $@;
+    $@ ? (&Log("$_[1]:$@"), 0) : 1;
 }
 
 
@@ -1108,21 +1083,17 @@ LOAD_LIBRARY:        $LOAD_LIBRARY
 }
 
 
-sub Debug
-{
-    local($s) = @_;
-
-    print STDERR "$s\n";
-    $Envelope{'message'} .= "\nDEBUG $s\n" if $_cf{'debug'};
+sub Debug 
+{ 
+    print STDERR "$_[0]\n";
+    $Envelope{'message'} .= "\nDEBUG $_[0]\n" if $message_debug;
 }
 
 
-sub Debug
-{
-    local($s) = @_;
-
-    print STDERR "$s\n";
-    $Envelope{'message'} .= "\nDEBUG $s\n" if $_cf{'debug'};
+sub Debug 
+{ 
+    print STDERR "$_[0]\n";
+    $Envelope{'message'} .= "\nDEBUG $_[0]\n" if $message_debug;
 }
 
 
@@ -1139,9 +1110,8 @@ sub Debug
 # Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
 # Please obey GNU Public License(see ./COPYING)
 
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+
+$rcsid .= " :smtp[1.6.1.2]";
 
 
 ##### local scope in Calss:Smtp #####
@@ -1154,36 +1124,57 @@ sub SmtpInit
 {
     local(*e, *rcpt, *smtp) = @_;
 
+    # IF NOT SPECIFIED, [IPC]
+    $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
+
     @smtp = ("HELO $e{'macro:s'}", "MAIL FROM: $MAINTAINER");
 
-    # Set Defaults
+    # Set Defaults (must be "in $DIR" NOW)
     $SMTP_TIME = time() if $TRACE_SMTP_DELAY;
-
-    $VAR_DIR    = $VAR_DIR    || "$DIR/var";
-    $VARLOG_DIR = $VARLOG_DIR || "$DIR/var/log";  # absolute for ftpmail
-    $SMTP_LOG0  = $SMTP_LOG0  || "$DIR/_smtplog"; # Backward compatibility;
+    $SMTP_LOG0  = $SMTP_LOG0  || "_smtplog"; # Backward compatibility;
     $SMTP_LOG   = $SMTP_LOG   || "$VARLOG_DIR/_smtplog";
 
     # LOG: on IPC
+    # Recovery for the universal use
     if ($NOT_TRACE_SMTP) {
 	$SMTP_LOG = '/dev/null';
+    }
+    elsif (!defined($VAR_DIR) || !defined($VARLOG_DIR)) {
+	$SMTP_LOG = -e '/dev/stderr' ? '/dev/stderr': '/dev/null';
     }
     else {
 	(-d $VAR_DIR)    || mkdir($VAR_DIR, 0700);
 	(-d $VARLOG_DIR) || mkdir($VARLOG_DIR, 0700);
-	(-l $SMTP_LOG0)  || do {
+
+	if (! -l $SMTP_LOG0) {
 	    $symlink_exists = (eval 'symlink("", "");', $@ eq "");
 	    unlink $SMTP_LOG0;
-	    $symlink_exists && symlink($SMTP_LOG, $SMTP_LOG0);
+
+	    # When link cut $DIR 
+	    # but absolute link is required for e.g. ftp..
 	    if ($symlink_exists) {
+		local($pwd);
+		chop( $pwd = `pwd` );
+		$SMTP_LOG  =~ s/$DIR/\./g; $SMTP_LOG0 =~ s/$DIR/\./g; 
+
+		chdir $DIR if $DIR ne $pwd; # chdir ML's HOME;
+		$symlink_exists && symlink($SMTP_LOG, $SMTP_LOG0);
+		chdir $pwd if $DIR ne $pwd; # return the original directory;
+
 		&Log("ln -s $SMTP_LOG $SMTP_LOG0");
 	    }
-	    else {
+	    else {# already unlinked above;
 		&Log("unlink $SMTP_LOG0, log -> $SMTP_LOG");
 	    }
-	};
+	}
     }
 
+    return &SocketInit;
+}
+
+
+sub SocketInit
+{
     ##### PERL 5  
     local($eval, $ok);
     if ($_cf{'perlversion'} == 5) { 
@@ -1193,15 +1184,15 @@ sub SmtpInit
     }
 
     ##### PERL 4
-    $EXIST_SOCKET_PH = eval "require 'sys/socket.ph';", $@ eq "";
-    &Log("sys/socket.ph is O.K.") if $EXIST_SOCKET_PH && $debug;
+    local($ExistSocket_ph) = eval("require 'sys/socket.ph';"), ($@ eq "");
+    &Log("sys/socket.ph is O.K.") if $ExistSocket_ph && $debug;
 
-    if ((! $EXIST_SOCKET_PH) && $COMPAT_SOLARIS2) {
+    if ((! $ExistSocket_ph) && $COMPAT_SOLARIS2) {
 	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
 	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
 	&eval($eval) && $debug && &Log("Set socket [Solaris2]");
     }
-    elsif (! $EXIST_SOCKET_PH) {	# 4.4BSD
+    elsif (! $ExistSocket_ph) {	# 4.4BSD
 	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
 	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
 	&eval($eval) && $debug && &Log("Set socket [4.4BSD]");
@@ -1220,15 +1211,15 @@ sub Smtp
     ### Initialize, e.g. use Socket, sys/socket.ph ...
     &SmtpInit(*e, *rcpt, *smtp);
     
-
-    ### open LOG
+    ### open LOG;
     open(SMTPLOG, "> $SMTP_LOG") || (return "Cannot open $SMTP_LOG");
-
 
     ### IPC 
     if ($e{'mci:mailer'} eq 'ipc') {
 	local($addrs) = (gethostbyname($HOST || 'localhost'))[4];
-	local($port, $proto) = (getservbyname('smtp', 'tcp'))[2..3];
+	local($proto) = (getprotobyname('tcp'))[2];
+	local($port)  = (getservbyname('smtp', 'tcp'))[2];
+
 	$port = 25 unless defined($port); # default port
 	local($target) = pack($pat, &AF_INET, $port, $addrs);
 
@@ -1282,9 +1273,9 @@ sub Smtp
     ### BODY INPUT
     # putheader()
     $0 = "-- BODY <$FML $LOCKFILE>";
-    print SMTPLOG ('-' x30)."\n";
+    print SMTPLOG ('-' x 30)."\n";
     print SMTPLOG $e{'Hdr'}."\n";
-    print S $e{'Hdr'}."\n";
+    print S $e{'Hdr'}."\n";	# "\n" == separator between body and header;
 
     # Preamble
     if ( (! $e{'mode:dist'}) && $e{'preamble'}) {
@@ -1298,6 +1289,7 @@ sub Smtp
     if ($e{'file'}) { 
 	while(<FILE>) { 
 	    s/^\./../; 
+	    &jcode'convert(*_, 'jis') if $AutoConv;#';
 	    print S $_;
 	    print SMTPLOG $_;
 	};
@@ -1322,7 +1314,7 @@ sub Smtp
     }
 
     # close smtp with '.'
-    print SMTPLOG ('-' x30)."\n";
+    print SMTPLOG ('-' x 30)."\n";
     print S ".\n";
     $s = "BODY";		#CONVENIENCE: infomation for errlog
     do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d+\-/o);
@@ -1365,20 +1357,45 @@ sub SendFile
 	$enc = "uja.gz";
     }
 
-    if (open(FILE, $file) && ($SENDFILE_NO_FILECHECK ? 1 : -T $file)) { 
-	;
+    ### check again $file existence
+    if (! -f $file) {
+	local(@info) = caller;
+	&Log("sub SendFile: $file is not found.", "[ @info ]");
+	&Warn("ERROR in SendFile", "$file is not found.\n[ @info ]\n");
+	$file =~ s/$DIR/\$DIR/;
+	$Envelope{'message'} .= "Sorry.\nError SendFile: $file is not found.";
+	return $NULL;
+    }
+
+    ### AUTO CONVERSION 
+    $ExistJcode = eval "require 'jcode.pl';", $@ eq "";
+
+    # $SENDFILE_NO_FILECHECK ? 1 : -T $file;
+    if (open(FILE, $file) && ($SENDFILE_NO_FILECHECK || $ExistJcode)) {
+	if (-T $file) {
+	    ;
+	} 
+	elsif (-B $file && $ExistJcode) {
+	    &Log("sub SendFile: $file == NOT JIS ? Try Auto Code Conversion");
+	    $AutoConv = 1;
+	}
+	elsif (-B $file) {
+	    &Log("ERROR: sub SendFile: $file == NOT JIS ?");
+	}
     }
     elsif ((1 == $zcat) && 
-	   $ZCAT && -r $file && open(FILE, "$ZCAT $file|")) {
+	   $ZCAT && -r $file && 
+	   (open(FILE,"-|") || exec $ZCAT, $file)) {
 	;
     }
     elsif ((2 == $zcat) 
-	   && $ZCAT && -r $file && open(FILE, "$UUENCODE $file $enc|")) {
+	   && $ZCAT && -r $file && 
+	   (open(FILE,"-|") || exec $UUENCODE, $file, $enc)) {
 	;
     }
     else { 
 	&Log("sub SendFile: no $file") if !-f $file;
-	&Log("sub SendFile: binary?O.K.?: $file [zcat=$zcat]") 
+	&Log("sub SendFile: binary? or just NOT JIS?: $file [zcat=$zcat]") 
 	    if (!$zcat) && -B $file;
 	&Log("sub SendFile: \$ZCAT not defined") unless $ZCAT; 	
 	&Log("sub SendFile: cannot read $file")  unless -r $file;
@@ -1574,7 +1591,7 @@ sub getmyspool_nopasswd
 #.USAGE:     認証した場合 送り返します。
 #.USAGE:    .fmllocalrcの例:
 #.USAGE:    body get my spool (\.*) & getmyspool
-#.USAGE: 
+#.USAGE:
 sub getmyspool
 {
     if ($F1 eq $PASSWORD) {
@@ -1584,6 +1601,74 @@ sub getmyspool
 	&Log("ILLEGAL PASSWORD [$F1] != [$PASSWORD]");
     }
 }
+
+#.USAGE: getmyspool2
+#.USAGE:     メールスプールを送り返します
+#.USAGE:     正規表現でマッチした
+#.USAGE:            第１フィールドをパスワードとして認証します
+#.USAGE:            第２フィールドを配送のモードとして使います。
+#.USAGE:            第２フィールドがないときはspoolのファイルの形のままです。
+#.USAGE:    
+#.USAGE:    .fmllocalrcの例:
+#.USAGE:    body getmyspool\s+(\S+)\s+(.*) & getmyspool2
+#.USAGE:    body getmyspool password mode & getmyspool2
+#.USAGE:    
+#.USAGE:    e.g.
+#.USAGE:    eecho getmyspool password uf |Mail (大学|会社)のアドレス 
+#.USAGE: 
+#.USAGE:    使えるモード(第２フィールド)は
+#.USAGE:                指定しないときは uf に設定
+#.USAGE: 	uf	PLAINTEXT(UNIX FROM)
+#.USAGE:    	tgz	tar+gzip で spool.tar.gz
+#.USAGE: 	gz	GZIP(UNIX FROM)
+#.USAGE: 	b	lha + ish 
+#.USAGE: 	ish	lha + ish 
+#.USAGE: 	rfc934	RFC934 format 	PLAINTEXT
+#.USAGE: 	unpack	PLAINTEXT(UNIX FROM)
+#.USAGE: 	uu	UUENCODE
+#.USAGE: 	d	RFC1153 format 	PLAINTEXT
+#.USAGE: 	rfc1153	RFC1153 format 	PLAINTEXT
+#.USAGE: 
+#.USAGE:     ＊＊＊注意＊＊＊
+#.USAGE:     libutils.pl を使うので、このファイルのDirectoryを
+#.USAGE:     .fmllocalrc で 
+#.USAGE:     INC Directory 
+#.USAGE:     のように書いてください（INC=include-path）
+#.USAGE: 
+#.USAGE:     それから、圧縮等のためにはシステムのコマンドを使います。
+#.USAGE:     fml本体ではインストールプログラムが自動的に探しますが、
+#.USAGE:     fml_local のみを使う場合はこれらの設定をしてください。
+#.USAGE: 
+#.USAGE:     例: .fmllocalrc に COMPRESS /usr/local/bin/gzip -c
+#.USAGE:         のようにです。
+#.USAGE: 
+#.USAGE:	$TAR		= "/usr/local/bin/tar cf -";
+#.USAGE:	$UUENCODE	= "/bin/uuencode";
+#.USAGE:	$RM		= "/sbin/rm -fr";
+#.USAGE:	$CP		= "/bin/cp";
+#.USAGE:	$COMPRESS	= "/usr/local/bin/gzip -c";
+#.USAGE:	$ZCAT		= "/usr/local/bin/zcat";
+#.USAGE: 
+#.USAGE:    ＊自分で自動的に探すようにもできるけど危険だからしない
+#.USAGE: 
+sub getmyspool2
+{
+    umask(077);		       
+    require 'libutils.pl';
+
+    local($d, $mode, $tmpf, $tmps, $to);
+
+    $MAIL_LENGTH_LIMIT = $MAIL_LENGTH_LIMIT || 2850;
+
+    $mode       = $F2 || 'uf';
+    ($d, $mode) = &ModeLookup("3$mode");
+    $to         = $Envelope{'Addr2Reply:'};
+
+    # ($f, $mode, $subject, @to)
+    &SendFilebySplit($MAIL_SPOOL, $mode, 'getmyspool2', $to);
+}
+
+
 
 #.USAGE: forward
 #.USAGE:     メールを特定のアドレスへフォワードする
@@ -1654,14 +1739,6 @@ sub getback { &sendback(@_);}
 #.USAGE: getmyspool_pw は getmyspool と同じ
 #.USAGE: 
 sub getmyspool_pw { &getmyspool(@_);}
-
-
-
-
-
-
-
-
 
 
 
