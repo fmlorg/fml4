@@ -122,12 +122,14 @@ INIT_VERSION () {
 
 INIT_CLEAN_UP () {
    (
-	chdir $DESTDIR
+	chdir $DESTDIR || exit 1
+
+	test -d FML || mkdir FML
 
 	for x in fml-*
 	do
-		echo mv $x $FML/$x.$$
-		mv $x $FML/$x.$$
+	   echo mv $x FML/$x.$$
+		mv $x FML/$x.$$
 	done
    )
 
