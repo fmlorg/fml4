@@ -1,0 +1,198 @@
+.C	トラブル・シューティング (主にMUA関係)
+=E.C	Trouble Shooting (around MUA's)
+.k	trouble shooting around MUA
+
+.S	Microsoft Exchange で [Elena:数字] が消える
+=E.S	Microsoft Exchange cannot handle subject tags?
+.k	Microsoft Exchange
+
+fml-support: 01508
+
+Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
+[Elena:数字]がなくなる。
+=E
+Since it is Micro$oft products. sigh ...
+
+.S	cc:Mail でのトラブル その１
+=E.S	Cc:Mail trouble 1
+.k	nkf
+.k	cc:Mail
+.k	メールソフト
+
+.if LANG == JAPANESE
+cc:Mail は[\033\050\112]を日本語が絡みそうな部分には強制的に入れている
+らしいです。
+
+他のツールとの兼ね合いや、bug fix、各ケース全部を叩き潰すよりも、
+/etc/aliasesなどでnkfをパイプするようにした方がはやいかもしれないそう
+です
+
+e.g. 
+本文に記述した"# help"などのMLのコントロールメールに関しても
+"[\033\050\112]# help"となってしまうそうです。
+
+# private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
+.fi
+.if LANG == ENGLISH
+*** not translated. This Cc:Mail bug is Japanese version only. ***
+.fi
+
+.S	cc:Mail 事件 そのN(泣)
+=E.S	Cc:Mail case N ;_;
+.k	cc:Mail
+
+.if LANG == JAPANESE
+in fml-support: 01813 
+
+普通の addr-spec (Elena@domain) の形式で登録すると
+
+	MLからの受信OK
+	MLへの送信×
+
+cc:Mail形式のアドレス( abc_def_ghi_jkl@abc.co.jp )で登録すると
+
+	MLからの受信×
+	MLへの送信OK
+
+はぁ？？？？？？？？？？？？？？？？？？？？？＞ cc:Mail
+
+members には両方のアドレス
+actives には”MLからの受信がOKなアドレス”だけ
+
+を書いておく。あと、
+＃ fml-support: 01818
+
+	@MEMBER_LIST  = (members, members-BAKA-NA-CCMAIL-NO-SHIRINUGUI);
+
+とかにして、認証は両方通すとかするとよいかもしれないですね〜どれが迷惑
+をかけているアドレスつぅかサイトつぅかソフトつぅかが一目でわかるかなと
+.fi
+.if LANG == ENGLISH
+I dont' know the solution. BUT If you use Cc:Mail, a lot of people
+may dislike you.
+.fi
+
+.S	Re: でなく Re[2] 等の変換を勝手にやるらしいクライアント
+=E.S	Re: -> Re[2]: 
+
+fml-support Count: 01640, for example "Becky! ver 1.10".
+
+.S	References を最後の値だけにする
+=E.S	Cut off References: fields but left the latest one in it.
+
+.if LANG == JAPANESE
+in fml-support: 01662
+.q
+  References って書く人が自分の記事の references はこのあたりってのを
+  記すものなんだから、サーバが制御するのはまずいよね、だからすどおし
+  ＃今はそうなってる
+
+って話をしてるんじゃないんだよねぇ;_;
+
+でもこれ表現の自由度を考えると…最後のだけ拾うのって自動じゃできないよ
+うな気がするんだけど？msgid しか来ないっていう仮定の元で
+$SMTP_OPEN_HOOK で最後のだけにしちゃう とかならできるとおもう。
+
+Example:
+
+$SMTP_OPEN_HOOK .= q!;
+	if ($_ = $e{"h:References:"}) {
+	    s/\n(\s)/$1/g;
+	    if (/(<\S+>)\s*$/) { $_ = $&;}
+	    local(@r) = split(/</, $_);
+	    $_ = @r[$#r];
+	    $e{"h:References:"} = /^</ ? $_ : "<$_";
+	}
+!;
+
+.~q
+.fi
+.if LANG == ENGLISH
+Each user should do it. If you want to setup automatic conversion by
+FML, 
+
+$SMTP_OPEN_HOOK .= q!;
+	if ($_ = $e{"h:References:"}) {
+	    s/\n(\s)/$1/g;
+	    if (/(<\S+>)\s*$/) { $_ = $&;}
+	    local(@r) = split(/</, $_);
+	    $_ = @r[$#r];
+	    $e{"h:References:"} = /^</ ? $_ : "<$_";
+	}
+!;
+
+.fi
+
+.S	AL-Mailを使うとループ・アラートが出る？場合
+=E.S	AL-Mail (MUA)
+.k	AL-Mail
+
+.if LANG == JAPANESE
+以下のような場合にはなります。作者様からフォローいただきました(たんく
+す_o_)
+
+.q
+   From: naka@imasy.or.jp (=?ISO-2022-JP?B?GyRCQ2ZCPDYpO1YbKEo=?=)
+
+   AL-Mailでは必ずユニークな Message-Id を付けるように
+   なっているのですが、以下のよう状況では同一の Message-Id
+   となってしまう可能性があります。
+   
+   AL-Mailでは送信テンプレートという機能がありまして、
+   ヘッダを含めた送信メールのテンプレートを作っておくことが
+   できるようになっています。
+   このテンプレートのヘッダに Message-Id フィールドがあると
+   送信時にそのまま残ってしまい、２つの Message-Idフィールド
+   が付いてしまいます。
+   送信テンプレートのヘッダには、Message-Id フィールドを付加
+   しないようにお願いします。
+.~q
+.fi
+.if LANG == ENGLISH
+AL-Mail (MUA) is a mail client. The mistake of template customization
+may lead to always same Message-Id.
+.fi
+
+.S	Eudora と Reply-To: 
+=E.S	Eudora cannot understand Reply-To:
+
+要するに だめ〜なそふと？すか
+=E
+Some MUA's cannot handle Reply-To fields. e.g. Eudora.
+
+fml-support: 02353
+＃ふりーのEudoraで Bcc: -> Reply-To: とするパッチがあるらしい…
+=E
+fml-support: 02353
+Eudora case: There may exist a patch to enable Reply-To: recognition.
+
+.S	Return-Receipt-To:事件と cc:Mail等ＭＵＡ
+=E.S	Return-Receipt-To: and cc:Mail
+.k	Return-Receipt-To:とcc:Mail等ＭＵＡ
+.k	cc:Mail
+
+.if LANG == JAPANESE
+.q
+From: tanigawa@tribo.mech.nitech.ac.jp 
+
+１．MLにReturn-Receipt-To:（発信者のアドレス）をつけて投稿する。配送さ
+れたメールに対して cc:Mailが Return-Receipt-To:に書いてあるアドレスで
+はなくて( Reply-To: || From: ) のアドレスに開封確認のメイルを送ってし
+まう。ループする
+
+MLサーバーで切りとっても、MLサーバーに到着した時点で、まず
+Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
+と思います。おそらく、発信者もそれを意図していると思うのです。
+
+.~q
+
+結論として
+
+	『ＭＬサーバは親切に Return-Receipt-To: を取ってあげる』;_; 
+
+を実行するように デフォールトを変更しました。
+.fi
+.if LANG == ENGLISH
+FML cuts off Return-Receipt-To:! If with it, e.g. Cc:Mail causes an
+mail loop.
+.fi

@@ -1,0 +1,360 @@
+.C	トラブル・シューティング (主にFMLそのものについて)
+=E.C	Trouble Shooting (around FML itself)
+.k	trouble shooting around FML itself
+
+.S	最新版にバージョンアップする時に、config.ph は前のままでＯＫ？
+=E.S	I can use the same old config.ph when version up?
+
+基本的にそうです。 適宜自動補正のルーチンが処理されます。config.ph は 
+$CFVersion という変数の値でバージョンが定められています。この値によっ
+て互換性を保つルーチンが呼ばれます。2.1 では CFVersion 3.0 で現在
+(2.2ALPHA)の config.ph は 3.2 です。
+=E
+Yes, FML is backward compatible except for contents of your hooks, so
+understand the old config.ph. FML checks $CFVersion in config.ph. Pay
+attention hooks you customized uses obsolete functions in old FML. If
+so, such hooks do not work and you need to write hooks based on
+current functions.
+
+1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
+いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
+使ってない場合はそのままでＯＫです。
+
+ただたまに変数名のスペリングの間違いを直すとか〜で かわっちゃうことが
+ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
+書いておきますので、見てもらえばOKのはずです。
+
+.S	ML-request をコマンド用のアドレスにする
+=E.S	Set up listname-request as a command address
+.k	ML-request をコマンド用のアドレスにする
+
+1 	-request 宛をコマンドにするためには、-request 宛が fml.pl を
+     	呼ぶようにしなければなりません。つまり /etc/aliases を変更し
+	listname-request がコマンド用の include-ctl を呼ぶようにしていないと
+	いけません。例: elena ML の場合
+=E
+   1 set up listname-request to run fml.pl with command mode
+
+	elena-request: :include:/var/spool/ml/elena/include-ctl
+
+   ファイル include-ctl は
+=E
+   The content of file elena-request is such as
+
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr"
+
+のようになっている必要があります。
+
+2 	また配送するメールのヘッダではコマンドの送り先情報を
+	書いています。ユーザの便宜のためアドレスも変えて下さい。
+	config.ph  なら
+=E
+2	FML distribution article has information of commands in the header.
+	Please set 
+
+	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
+.k    	$CONTROL_ADDRESS
+
+と登録する必要があります。問題はこの場合 $MAINTAINER をどうするかです。-
+request のままだとエラーの時恐いので、 elena-admin 等をつくってそれは
+本当の単なる管理者宛のフォワード等にするとよいとおもいます。ちなみにデ
+フォールトは elena-admin なのでそのままで大丈夫でしょう。
+=E
+In config.ph. If $MAINTAINER is the same as $CONTROL_ADDRESS, please
+change it to different one. In default it is o.k. since $MAINTAINER is
+listname-admin.
+
+.S	log ファイルに残る 550... みたいな数字は何？
+=E.S	550 and so on ... in log file
+
+Sendmail からのエラーメッセージの記録です。メッセージは [45]\d\d 形式
+です。ログの前後を調べて何が原因か調べてみて下さい。
+=E
+FML logs error messages from sendmail which messages begin with 4XX or
+5XX. Check log file of FML and sendmail. $DIR/var/log/_smtplog (SMTP
+session log) may be useful.
+
+.S	WARNING: UNIX FROM Loop
+.k	WARNING: UNIX FROM Loop
+
+メールがMLにまた帰ってくる場合があります(ループ)。例えば自動登録の時に 
+ＭＬ本体とかを間違って登録した場合や、同じメールをそのままＭＬへ送り返
+してくるMTAが走っている場合などです。例えば『/usr/sbin/sendmail -bd -t 
+みたいな間違った設定をしたせいで 無限ループ事件というのが先日おきた』
+のを ふせぐための コードです。
+=E
+Warning against mail loop. This warning occurs if the mail is MAIL
+FROM: $MAINTAINER. IT MUST BE INVALID since it implies the mail comes
+from fml.pl itself. This error may occur when a site runs "sendmail -
+bd -t" (A BIG MISTAKE).
+
+この警告は自分自身に同じメールが返ってきた時に MAIL FROM: $MAINTAINER 
+だった時に出ます。
+
+ふつうは MAINTAINER に登録するものは ML-request とか ML-admin みたいな
+ものを別に作って登録するという暗黙の前提をしてます。そのため自分でＭＬ
+にメールをだして 『自分 == $MAINTAINER』の場合もこの loop check にひっ
+かかります。よって、MAINTAINER は -request とかにするのがおすすめです。
+なお、
+=E
+Also if $MAINTAINER is yourself address and you send e-mail to fml.pl
+on its host, this mechanism works and rejects your mail as mail loop.
+Hence we recommend $MAINTAINER is -admin or -request form. If
+
+	$NOT_USE_UNIX_FROM_LOOP_CHECK = 1; (default 0)
+
+とすると、このループチェックメカニズムを使わなくなります。
+=E
+this mechanism does not work.
+	
+.S	Try mci:prog since smtp connections cannot be opened
+.key	ソケットがつくれまへん
+.key	プロセス間通信
+.key	IPC
+.key	libsmtp.pl
+
+FMLのデフォールトではIPCでMTAに配送をまかしています。しかしエラーでど
+うしてもソケットが張れなかった場合にはあきらめてプログラムを起動して使
+います。あまりにもこのエラーが頻繁に出るようならIPCをつかわないライブ
+ラリに変えてみてください。そのためには config.ph で
+=E
+FML connects MTA as a delivery system via SMTP connection. If socket()
+or connect() establishment fails, FML executes local programs
+e.g. sendmail and use it. If this log message occurs a lot of times,
+it is better to enforce to run sendmail as a command always not using
+socket connection to sendmail, To do it, set up in config.ph
+
+	$Envelope{'mci:mailer'} = 'prog';
+
+とします。プロセス間通信ではなくて sendmail を直接実行します。
+この時実行するプログラムは
+=E
+In this case fml.pl runs $SENDMAIL as a delivery program.
+
+	$SENDMAIL (default "/usr/sbin/sendmail")
+
+で定義されたプログラムです。インストール時に自動的に探してこの変数はセッ
+トされているとはおもいますが、念のためチェックして下さい。なお 
+qmail-smtpd や exim も動かそうと努力します。
+
+.S	The flock() function is unimplemented ...
+.k	The flock() function is unimplemented ...
+
+.if LANG == JAPANESE
+０	perl がちゃんとコンパイルされていない
+１	flock() がないＯＳ
+２	flock を使わないようにコンパイルされている？
+
+あたりかな？perl をコンパイルしなおすか、
+
+	$USE_FLOCK = 0;
+.k	$USE_FLOCK
+
+にしてみてください。
+.fi
+.if LANG == ENGLISH
+* compilation of perl fails
+* you compiled perl as not using flock()
+* perl cannot emulate flock() on some SYSV?
+
+If you cannot avoid this, please set 
+
+	$USE_FLOCK = 0;
+
+in config.ph. FML does not use flock(2) but use link(2) style lock
+algorithm.
+.fi
+
+.S	503 Need RCPT (recipient) 
+.k	503 Need RCPT (recipient) 
+
+.if LANG == JAPANESE
+有効な送り返し先のアドレスがないためにでるはずです。該当する人から DM 
+をもらってみると分かるのではないかと思います。例えば
+
+	ヘッダのどっかが一行あいてる
+	(いいかげんなsendmailが経路のどこかにいるとか)
+		とか
+	From: のかたちが 特殊
+		とか
+	Reply-to: (なにもアドレスなし)になっている
+		とか
+
+822でみとめているアドレス形式は もっと いろいろかけるんですが、実用
+的には sendmail.cf のデフォールトのどっちかの形 つまり 4.4 BSD の 
+/usr/share/doc/smm/08.sendmailop/op.me にかいてある形式
+
+	Full Name <address>
+	address (comment)
+
+を仮定しています。#完全な822サポートはすごくたいへんなので…てぬき
+
+だから
+	From: ("< uja ") <uja@uja.baycity.jp> 
+
+とかは間違ってないんだけど… うまく parsing できないということがありえ
+ますね…
+.fi
+.if LANG == ENGLISH
+Check mail headers from the person.
+
+* header is invalid?
+* cannot extract address part from From: field?
+
+.fi
+
+.S	fml.pl はうごくのに msend.pl とか cron.pl とかはちゃんと動かない
+=E.S	fml.pl works well but msend.pl and cron.pl cannot work. Why?
+
+そのマシンで sendmail は動いてますか？ 動いてないと log に 
+Smtp:connect:なんとか とかエラーがでるんじゃないかとおもいます。
+
+メールを受けて fml.pl を起動するマシンと UNIX の Shell サービスを提供
+しているマシン、つまり msend.pl を動かすマシンが違う場合がありえます。
+例えばRIMNET。
+=E
+In some ISP's, a host where user's cron job runs and a host receiving
+in coming mails are different, in addition they are different
+operations systems. This is a special case, so please consult with
+your ISP or administrators of your host.
+
+.S	まとめおくりファイルの文法は違う？
+=E.S	Grammer of msend control file
+
+.if LANG == JAPANESE
+ある意味では悪いんです;-) すいません_o_
+
+   Elena@Baycity.asia  matome   1u
+
+で、実はこれは古いフォーマットなのですが、fml.pl とか libfml.pl は理解
+できます。普通メール経由で まとめおくりの命令を与えたら、古いフォーマッ
+トになるはずがないので、
+
+   Elena@Baycity.jp  m=1u
+
+となっていなくてはいけない msend.pl は仮定しています。このときファイル
+(members とか actives)は
+.fi
+.if LANG == ENGLISH
+*** not translated sine this is in the old age.
+
+msend.pl understand the following format. Hence if you edit the digest
+control file (active file) by hand, you should write the following
+format.
+
+	address	m=digest-parameter
+
+.fi
+.q
+#.FML HEADER
+# NEW FORMAT FOR FURTHER EXTENSION
+# e.g. fukachan@phys r=relayserver m=3u s=skip 
+# r= relayserver
+# m= matomeokuri parameter is time and option
+# s= skip. can post from this address but not delivered here.
+#
+# the same obsolete format is compatible with new format and as follows:
+# e.g. fukachan@phys relay-server matome 3u
+#.endFML HEADER
+Elena@Baycity.jp  m=1u
+
+.~q
+.if LANG == JAPANESE
+こうなります。そして、msend.pl はこのフォーマットだけを理解します。
+
+また配送リストだけをいじって msendrc に記入しないと
+
+	WARNING: /usr/local/ml/hitomi/MSend/MSendrc filesize=0 O.K.?
+
+が出るかも知れません(最初の一人の時だけしか該当しません)。
+.fi
+
+.S	EUC のファイルを perl はバイナリと認識する
+=E.S	Perl understand EUC file as a binary file
+.k	EUC
+
+.if LANG == JAPANESE
+ファイルを送り返すルーチンは
+
+    stat($f);
+    if (-T _ && -r _ && -o _ ) { return $f;}
+
+という判定が入っていてテキストファイルのみを送り返す対象にしています。
+
+ファイルがEUCになっていると -T (普通のファイルなら真)では贋になります。
+perl は8ビット目が立っているものがある量 or ファイル全体の10%を越える
+ファイルを binary と判定するからです
+.fi
+.if LANG == ENGLISH
+*** Japanese specific problem. 
+.fi
+
+.S	user@domain でないと自動登録できない
+=E.S	FML accepts only user@domain form, denies addr without domain part
+.xref	reject-address-in-autoregist
+
+.S	lha または ish が見つからない…
+=E.S	Lha or ish is not found
+.k	lha not found
+.k	ish not found
+
+.if LANG == JAPANESE
+某プロバイダのように UNIX の shell のアカウントのあるマシンには 
+/usr/local/bin/lha があっても ＭＬサーバを実行するマシンにはなかったり
+するんだそうです。で、インストールの時のテストではうまくいっても、その
+後ＭＬサーバでコマンドを実行すると動かない。
+
+あと、shared library が違うということもありますので compile するなら 
+static である必要があります
+＃どうしてそういう実装にするかの裏の理由は知ってるけどとても迷惑;)
+.fi
+.if LANG == ENGLISH
+*	lha or ish not exist
+*	shared library is different 
+	Some ISP's provide a user for several hosts with different OS's. 
+	So fml.pl and msend.pl works differently.
+.fi
+
+.S	MLとWWWのマシンが別々の場合
+=E.S	A ML host and a WWW host are different
+
+メールを受けるマシンと WWW のマシンは別々(にある日強制的にさせられてし
+まったケース)で、WWWマシンの上でMLをやりたい場合などが該当するでしょう。
+=E
+If you runs fml.pl on a host but the host file system is different one
+the www server uses, you cannot provide www access. One possible
+solution is to run fml.pl using POP3.
+.xref	popfml
+
+ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
+れず、そのマシンの上でないとDISKも十分でない場合。pop でメールを読む環
+境ならPOPを使ったMLが実行できます。
+.xref popfml
+
+.S	勝手についてしまう signature を取る
+=E.S	ISP enforce to append a signature to your mail 
+.k	signature
+
+そもそもメールの本文をいじるなんてとんでもない話ですが…
+そういうことをする provider なり会社を許してはいけませんね。
+=E
+Such an ISP is terrible since it implies YOU HAVE NO SECRET, someone
+can rewrite your mail.
+
+これができるということは内容の改竄もできるし機密保持も存在していないわ
+けです。ということは通信の秘密に関してモラルがない企業ということではな
+いでしょうか？
+
+その部分を削るHOOKの例:
+=E
+To cut off the last signature.
+
+$SMTP_OPEN_HOOK = q#
+	local($uja);
+	for (split(/\n/, $e{'Body'})) {
+	   next if /=+/ .. /\-+/;
+	   $uja .= "$_\n";
+	}
+
+	$e{'Body'} = $uja;
+#;

@@ -1,0 +1,294 @@
+=E.C	Trouble Shooting (around header)
+.k	trouble shooting
+
+.S	ヘッダの時間がおかしい?
+=E.S	Strange time zone of mail header
+.key	TZ
+.key	sendmail.cf
+
+.if LANG == JAPANESE
+システムで環境変数 TZ がちゃんと定義されてない or ちゃんと Sendmail に
+渡されない場合
+「変な TZ が設定されているため GMT を使ってしまう」
+
+例えば sendmail.cf が古いので sendmail を新しくしたらそれが顕在化した
+ケースとかありました。
+
+fml.pl内で呼ばれるlocaltimeが正しい値を返さないため、
+変な TZ の渡し方をして、結果としてGMTをかえしてしまう
+
+例えば、JLEでないSUN-OS4.1.3でおこる。JLEの場合は正しい値を返す
+
+sendmail.cf に TZ=japan-time みたいに見知らぬものがついてたら削るかそ
+のOSの正しい書き方にする。
+
+もうひとつの後向きな考え方は fml.pl で 
+	$ENV{'TZ'} = 'JST';
+のようにセットしてしまうこと
+
+SunOS 4.1.3_U1(English)では、$ENV{'TZ'} = 'Japan';  だそうです。
+#thanks to hogawa@mesh.ad.jp
+.fi
+.if LANG == ENGLISH
+Please check time zone of sendmail.cf if you use old sendmail.cf.
+The last method is to configure $ENV{'TZ'} in config.ph.
+.fi
+
+.S	Received: from  (localhost.変なドメイン) by ...
+=E.S	Received: from  (localhost.domain) by ...
+.key	Received:
+.key	sendmail.cf
+
+少なくとも localhost ってところだけは関係ありますが後は sendmail,
+sendmail.cf および DNS の問題であって fml の問題ではありません。
+=E
+If the mail header delivered from fml.pl has "Received: from
+localhost.domain", it comes from connection information since fml.pl
+uses loopback to connect sendmail. Please set $HOST to your machine
+external interface name to reveal your hostname in the header.
+
+謎の sendmail.cf が変な展開とか resolver が変とかもありうるかもしれま
+せんが、fml.pl が loopback を使ってメールを出してるならそれで正しいは
+ずです。
+
+	$HOST		= 'FMLが走るマシン名';
+
+にしてそのマシンの loopback でないのがつくこともあります。
+＃でも普通は自分自身へのroutingは loopback interface 使ってないかなぁ 
+
+別解答: Received: from  ... by ... を Received: by ... にする
+	sendmail.cf 	を HReceived: by $j ($v/$Z); $b などへ
+
+.S	JST問題
+=E.S	JST problem
+
+.if LANG == JAPANESE
+"  JST"(スペース2個) はだめで、" JST"(スペース1個) はOKな変なメールイン
+ターフェイスあるんだって？？？
+.fi
+.if LANG == ENGLISH
+*** Japanese specific ***
+.fi
+
+
+.C	トラブル・シューティング (その他)
+=E.C	Trouble Shooting (others)
+.k	trouble shooting
+
+.S	Can't locate sys/socket.ph in @INC
+.k	Can't locate sys/socket.ph in @INC
+.key	sys/socket.ph
+
+今はパッケージを広げるとfml.pl に対して sys/socket.ph という場所に
+一応BSD用の socket.ph があるので何とかなると思うのですが
+
+	Can't locate sys/socket.ph in @INC (did you run h2ph?) at ...
+	554 "|/usr/spool/driver/fml"... unknown mailer error 2
+
+perlのインストールの時にh2phを走らせて
+/usr/local/lib/perl/sys/socket.ph あたりにあるとおもうんですが、やって
+ないとファイルがないので怒られるわけです。
+=E
+You need to create e.g. /usr/local/lib/perl/sys/socket.ph by running h2ph.
+
+	% (cd /usr/include; h2ph * sys/*)
+
+で /usr/local/lib/perl に作ってくれると思います。
+＃h2phの詳細についてはマニュアルを読んで下さい。c.f.   % man h2ph
+
+本来はこういう system からみのファイルはちゃんとインストールするべきだ
+と思いますけどね？
+
+.S	You should install sys/socket.ph using h2ph.
+.k	You should install sys/socket.ph using h2ph.
+.key	h2ph
+
+デバックモードで出てくる理由は前セクション参照。
+＃後向きな解決法なのでインストールを促しています
+=E
+Please see the previous session for the reason.
+
+
+.#######################################################################
+.# .include trouble-obsolete.wix
+.C	トラブル・シューティング (古い記述)
+=E.C	Trouble Shooting (obsoletes)
+.k	trouble shooting (obsoletes)
+
+.S	PC-VAN がちゃんとうけとってくれない 事件
+=E.S	PC-VAN, fool BBS
+.k	PC-VAN
+
+.if LANG == JAPANESE
+message-id で < > がちゃんとついてないと だーめ。
+
+PC-VAN は、<uja@aja.or.jp> という Message-Id: を@の前で切り取って、
+<uja> にする？ んだそうです。＃なんだ、それ？？？
+.fi
+.if LANG == ENGLISH
+*** Japan specific
+.fi
+
+.S	自動登録したときにファイルが送られない事件 (fml 1.6 〜 1.6.1?)
+=E.S	
+
+.if LANG == JAPANESE
+推測？：
+libutils.pl[AutoRegist] -> libsmtp.pl[SendFile]
+GenerateHeaders のパラメータがうまく渡ってない
+原因は 変数空間のスコープ かな？
+
+.q
+sub SendFile
+{
+    local(@to, *e, *rcpt);
+    local($to, $subject, $file, $zcat, @to) = @_;
+
+つまり *to -> @to にしたら動いたりとか？
+ついでに、    
+	local(@to, *e, *rcpt);
+を
+	local(@to, %e, *rcpt);
+とか、
+	local(@to, *e, *rcpt);
+
+をなくすとうごくとか ？
+.~q
+.fi
+.if LANG == ENGLISH
+*** not translated since this bug is fml 1.6.x.
+.fi
+
+.S	bin/expire.plで“N個のファイルを残す"のを間違えます
+=E.S	bin/expire.pl
+
+.if LANG == JAPANESE
+	該当範囲：libexpire.pl のないバージョン(95/11/11以前)
+
+ ”spool/数字” 全体に対して qsort() をかけちゃうんで
+sort 後の結果が間違ってしまいます。
+
+  # sort ->  1 , 2, 3, ... increasing order.
+  @f = sort {$a <=> $b} @f;
+
+は spool/数字 ではなく 数字 だけで実行しなければならないわけです。
+いまのはなおってます。
+
+逆に、spool/数字 を sort するには、たとえばこんなことをすればできます
+けど…どうも美しくないね…
+
+.q
+@f = sort fp_sort {$a <=> $b} @f;
+sub fp_sort
+{
+    local($na, $nb, $wa, $wb);
+    $xa = $a;
+    $xb = $b;
+
+    $xa =~ s/^(\D+)(\d+)/$wa = $1, $na = $2/e;
+    $xb =~ s/^(\D+)(\d+)/$wb = $1, $nb = $2/e;
+
+    if ($na || $nb) {
+	# print STDERR "($wa cmp $wb) || ($na <=> $nb);\n";
+	($wa cmp $wb) || ($na <=> $nb);
+    }
+    else {
+	$a cmp $b;
+    }
+}
+
+.~q
+.fi
+.if LANG == ENGLISH
+*** not translated. this bug is before 1996/11/11. ***  
+.fi
+
+.S	ファイルがちゃんとおくりかえされない(自動登録とかガイド請求の時)
+=E.S	A bug of sending back files
+
+.if LANG == JAPANESE
+なんなんでしょうねぇ〜 1.6.{0,1} の頃の話なんですが… 1.6.2 Current 以
+降はＯＫみたいです。
+＃変数のスコープとかの問題らしいのだが…
+
+ちなみに、非常に機種依存です;_;。
+ターゲットマシンの perl 4 on News OS4.2 では 1.6 は正常に動きますんで
+＃ 記： Wed Nov 22 07:02:26 JST 1995
+.fi
+.if LANG == ENGLISH
+*** not translated. this bug is in the age of fml 1.6.x. ***
+.fi
+
+.S	[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID] 
+=E.S	[X-ML-NAME:ID] Japanese title [X-ML-NAME:ID] 
+.k	$SUBJECT_HML_FORM
+.k	CyberDog-1.1J-beta
+
+.if LANG == JAPANESE
+.q
+From:    easy@pfu.co.jp
+
+Subjectを、[X-ML-NAME:ID] real subject という形式にした場合、日本語の
+Subjectを使うと、CyberDog 1.1J beta User は、
+
+[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID]
+
+と、なってしまう。
+CyberDog正式版に期待しましょう。
+.~q
+.if LANG == ENGLISH
+*** Japanese specific problem. 
+.fi
+
+.S	$Envelope{'macro:s'}  = 'localhost'; にしておくとまずい？
+=E.S	$Envelope{'macro:s'}  = 'localhost'; is valid?
+.k	$Envelope{'macro:s'}
+
+.if LANG == JAPANESE
+昔はMessage-ID もこの変数使っていたので @localhost とかついちゃいました。
+そういうことをすると、Message-ID が Unique でなくなるからだめです。
+
+この辺の話をすると
+
+   Sendmail に HELO と呼びかける時に使う変数が	$Envelope{'macro:s'}
+   Message-ID につけてるのが			$FQDN
+	例： "<$CurrentTime.FML$$\@$FQDN>" フォーム
+
+   fml の $FQDN 	は sendmail.cf の $j
+   fml の $DOMAINNAME	は sendmail.cf の $m
+.fi
+.if LANG == ENGLISH
+This variable is the host "HELO host" in SMTP session. 
+This variable should be FQDN of your host.
+.fi
+
+.S	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
+.k	Can't locate auto/Socket/AF_INET.al in @INC at libsmtp.pl ...
+
+.if LANG == JAPANESE
+Perl 5 が正しくインストールされてないと起きるみたいですね。
+#それも 5.000 のようだが… 
+
+0.	なんとかして use Socket; を実行しなければいいと(^^)
+1.	use Socket;(libsmtp.pl)	 の部分をカットする
+2.	$START_HOOK .= q# $_cf{'perlversion'} = 4;#;
+3.	とにかく	
+	なんとかして、require sys/socket.ph ; だけをやらせる
+
+あー、でも まとめおくり で START_HOOK って存在しないので、2はまずい。
+#というわけで、msend.pl にもフックをつくりました。
+.fi
+.if LANG == ENGLISH
+perl 5.000 cannot work well.
+.fi
+
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

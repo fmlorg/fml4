@@ -1,0 +1,61 @@
+.C	トラブル事例の概要
+
+とりあえずエラーメッセージにでてくるキーワードであてはまるものがないか
+見渡して欲しいとしかいいようがありません。トラブルといっても多岐に渡り
+ます。
+
+◯ OSの問題  => .ptr{os-dependence}
+
+	permission がない
+	OSの設定がおかしい
+	附属のパッケージがおかしい、ソースから作り直すべき
+
+などいろいろです。OS特有の設定とかおまじないが必要な場合もあります。
+
+◯ MTAの問題
+
+MTA特有の問題があります。しかしMTAのせいにみえてもOSの設定のせいでうま
+く動かないとか単にOSの出荷時の初期設定のせいだったりして動かないとかも
+多いです。
+
+◯ FML自体の問題
+
+.S	おねがい
+
+.if LANG == JAPANESE
+トラブルの元は複数考えられます。
+	FML自体の設定のミス
+	perlの変なバージョンを使っているために挙動が不審
+	OS依存性
+	などなど…
+
+OSのログファイルとFMLのログ($DIR/log)のチェックは当然として、トラブル・
+シューティングには debug モード(config.ph で $debug = 1,2)でのprintfデ
+バッグなどが役に立ちます。
+
+なお質問の前に
+   CHECK_LIST.jp というファイルに従って一通りチェックしてみること
+   ドキュメント群に対して適当なキーワードでサーチをしてみること	
+をお願いしています。
+.url http://www.fml.org/fml/CHECK_LIST/
+
+c.f. OS依存性: .ptr{os-dependence}
+.fi
+.if LANG == ENGLISH
+All software must have bugs and also several OS dependent
+inconveniences. Before query, please check in the following check list
+.xref	os-dependence
+.url http://www.fml.org/fml/CHECK_LIST-e/
+and search appropriate keyword over the documents.
+.fi
+
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

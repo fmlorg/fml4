@@ -1,0 +1,128 @@
+.C	デバッグの HOW-TO 
+=E.C	How to debug
+.l	debug
+
+.S	How to debug (1)
+
+in fml-support: 5282
+.if LANG == JAPANESE
+.q
+1. OSのメールのログを調べる。
+   see INSTALL file Appendix A.
+
+2. fml のログを調べる。$DIR/log (ML's HOME ログファイル)
+
+3. fml からMTAへちゃんと渡せているかのログを調べる。
+   ($DIR/var/log/_smtplog)
+
+4. "makefml test ML" で fml 自体が動いているかを調べる。
+   このテストはMTAとは完全に無関係に動くのでこれが動くならMTAの問題
+
+	makefml test ML
+
+と打つとデバッグモードでの動作テストができます。画面に debug 情報が一
+杯出るので emacs の shell mode なり /usr/bin/script などでログをとるな
+りして見て下さい。makefml test ML を起動すると配送のテストかコマンドの
+テストか？選択をしろといわれます。
+.~q
+.fi
+.if LANG == ENGLISH
+.q
+1. check OS's maillog.
+   following the check list in INSTALL file Appendix A.
+
+2. check fml log, $DIR/log.
+
+3. check the connection between fml and MTA, $DIR/var/log/_smtplog.
+
+4. "makefml test ML" helps you to test fml.
+
+.~q
+.fi
+
+.S	How to debug (2)［デバッグのポイント］
+=E.S	How to debug (2)
+.k	debug
+
+From: fml-support: 01411
+
+…略…
+
+○ 私 printf デバッグがすきなので $debug = 1; にした時の画面に出るエラー
+情報から推測するのが多いです。
+=E
+* Printf debug is fundamental technique. FML has $debug variable. If
+you know the details of processing, set $debug = 1, which helps your
+debug. If $debug is 1, FML shows all debug information.
+
+もしくは
+
+○ perl -d オプションで perl debugger を使う
+=E
+* perl -d enables perl debugger. See perl manual for how to use it.
+
+Example:
+
+	% ($FML/bin/emumail.pl; echo something )|perl -d $FML/fml.pl $PWD
+	....debugger starts ...
+	<1> t
+	<2> c
+	.... debug information flood! ....
+
+
+○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
+=E
+* Which file is libraries for an object?
+  A lib"NAME".pl library corresponds to functions on "NAME".
+  e.g. libsmtp.pl is SMTP (Simple Mail Transfer Protocol) routines.
+
+	基本関数	fml.pl
+	SMTP		libsmtp.pl
+	その他		lib(それっぽい名前).pl
+
+	[Naming Convention Example]
+	ra  = remote administration
+	fop = file operation
+	...
+
+とか省略系もあるけど… ちなみに
+.ptr{library-lists} にライブラリの説明一覧があります。
+
+.S	古典の printf debug の例
+=E.S	printf debug
+.k	debug: printf
+ 
+.q
+From: fukachan@phys.titech.ac.jp
+X-Mail-Count: 00702 
+
+例えば次のような適当な printf 構文をつっこむ
+=E
+For example, insert the following string.
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+
+のあいだにはさんで、
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&InitConfig;			# initialize date etc..
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+とかしておいて、
+
+% perl sbin/localtest.pl |sed 's/test/#guide/' | perl fml.pl $PWD -d 
+
+とかして、この REQ:GUIDE の値の変化をみるというのはどうでしょう？
+
+ただしいばあいは &Parsing のあと １になって そのままのはずですよね
+
+.~q
