@@ -507,6 +507,9 @@ sub InitConfig
     &DEFINE_MODE('expire')  if $USE_EXPIRE;  # 2.1 release built-in expire
     &DEFINE_MODE('archive') if $USE_ARCHIVE; # 2.1 release built-in archive;
     &DEFINE_MODE('html')    if $AUTO_HTML_GEN;
+
+    # command trap keywrod : '# ' ; in default, we not use it.
+    $Envelope{'trap:ctk'} = &CompatFMLv1P ? '# ' : '';
     
     # signal handling
     $SIG{'ALRM'} = 'Tick';
