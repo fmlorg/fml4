@@ -1,4 +1,4 @@
-fml Mailing List Packeges release rivison 1.5   Bulletin
+fml Mailing List Packeges release rivison 1.6   Bulletin
 
 ＃バグ、質問等はfml-bugs@phys.titech.ac.jpまでおねがいします。
 
@@ -31,15 +31,15 @@ WWW が使えるなら
 という「ＭＬサーバの設計と実装」というところを御覧下さいませ。
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
-========== WHAT'S NEW  1.5 current ==========
+========== WHAT'S NEW  1.6 current ==========
+＊＊＊ヴァージョンアップの場合の注意＊＊＊
 
-	＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
-	○	注意： call by reference へ移行したいので、
-	＊＊＊ 一部のコードを Playing_to は削除しました。 ＊＊＊
+基本的なデータ構造を call by reference 用に書き直したので、
 
 libcompat.pl にBackward compatibility のためのコードがあります。
-適当によんでやってください:-) 
-＃たとえば、 $START_HOOK =q#require 'libcompat.pl';#;
+昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
+る程度まで compatible にできます。
+＃コードの都合上実現できないカスタマイズもありえます_o_
 
 FAQ は新しい形で書き直されています。
 
@@ -47,6 +47,9 @@ e.g.	Playing_to
 	STAR_TREK_FORM
   ＊Replyt_to とかへの特別の操作を フックでやってたりすると要注意です＊
 ＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+
+========== CHANGES  1.5 -> 1.6 ==========
 
 ・ bin/inc_via_pop.pl を経由して、fml.pl を動かすことで、
    SMTPをうけつけないマシンで ＭＬ をつくるとか

@@ -243,6 +243,14 @@ Backward Compatibility は保証していますが 万が一 consistencyのないもの
 変数の定義の仕方の変更等はあっても内部で自動的に補整してますので気にし
 なくて大丈夫です
 
+		＊＊＊注意＊＊＊
+1.6では、基本的なデータ構造を call by reference 用に書き直したので、
+いままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
+libcompat.pl にBackward compatibility のためのコードがあります。
+昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
+る程度まで compatible にできます。
+＃コードの都合上実現できないカスタマイズもありえます_o_
+
 current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
 ファイル）に ちょっと書いてあります
 
