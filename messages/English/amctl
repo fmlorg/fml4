@@ -4,7 +4,7 @@ amctl.change.ok:
 amctl.change.fail:
 	fail to	change member and recipient lists
 
-amctl.change.only_delivery_list:
+amctl.change.only_recipient_list:
 	change recipient list not member list
 
 amctl.change.only_member_list:

@@ -445,9 +445,10 @@ sub DoSetDeliveryMode
 
 	if ($NOT_USE_SPOOL) {
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
-	    &Mesg(*e, "ERROR: $proc is disabled");
-	    &Mesg(*e, "       since we have no spooled articles");
-	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
+	    &Mesg(*e, 
+		  "ERROR: $proc is disabled".
+		  "       since we have no spooled articles",
+		  'req.digest.no_spool', $proc);
 	    return $NULL;
 	}
 
@@ -688,7 +689,7 @@ sub DoSetMemberList
 	&Log("$cmd [$curaddr] $c succeed for actives not members");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted".
 	      " for delivery but not member list.");
-	&Mesg(*e, $NULL, 'amctl.change.only_delivery_list');
+	&Mesg(*e, $NULL, 'amctl.change.only_recipient_list');
     }
     else {
 	&Log($mcs);

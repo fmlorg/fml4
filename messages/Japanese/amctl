@@ -4,7 +4,7 @@ amctl.change.ok:
 amctl.change.fail:
 	配送/メンバーリストの変更に失敗しました。
 
-amctl.change.only_delivery_list:
+amctl.change.only_recipient_list:
 	配送リストは変更しました
 	(メンバーリストは変更しませんでした)。
 
