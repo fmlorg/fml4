@@ -326,4 +326,4 @@ rel:
 	show -form $(PWD)/hack/release-notes.format 2501-3000 +release-notes >> /tmp/relnotes
 
 libkern:
-	sed '/^$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
+	sed '/^$$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
