@@ -23,7 +23,7 @@ require 'getopts.pl';
 $opt_h && do { &Usage; exit 0;};
 $HTML_INDEX_UNIT = $opt_t || 'day';
 $DIR             = $opt_D || $ENV{'PWD'};
-$HTTP_DIR        = $opt_d;
+$HTML_DIR        = $opt_d;
 $SPOOL_DIR       = shift;
 $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
@@ -45,7 +45,7 @@ for (split(/:/, $opt_o)) {
 ########## MAIN ##########
 ### WARNING;
 -d $SPOOL_DIR || die("At least one argument is required for \$SPOOL_DIR\n");
--d $HTTP_DIR  || die("\$HTTP_DIR not exists? FYI: -d \$HTTP_DIR REQUIRED\n");
+-d $HTML_DIR  || die("\$HTML_DIR not exists? FYI: -d \$HTML_DIR REQUIRED\n");
 
 ### Libraries
 require $ConfigFile if -f $ConfigFile;
@@ -65,7 +65,7 @@ if ($LastRange) {
 }
 
 ### TOO OVERHEADED ;_;
-$label = $HTTP_DIR;
+$label = $HTML_DIR;
 $label =~ s#.+/(\S+)#$1#;
 
 
@@ -91,7 +91,7 @@ for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
 }
 
 if ($opt_F) {
-    &SyncHtmlExpire($HTTP_DIR, $file, *Envelope);
+    &SyncHtmlExpire($HTML_DIR, $file, *Envelope);
 }
 
 exit 0;
@@ -115,7 +115,7 @@ sub Ctl
 
 	# tricky
 	$e{'stat:mtime'} = $mtime = (stat("$SPOOL_DIR/$id"))[9];
-	next if &SyncHtmlProbeOnly($HTTP_DIR, $id, *e);
+	next if &SyncHtmlProbeOnly($HTML_DIR, $id, *e);
 
 	%Envelope = %e = ();
 
@@ -124,7 +124,7 @@ sub Ctl
 	$0 = "spool2html: $label $id/($_[0] -> $_[1])";
 
 	&SetTime($mtime);
-	&Parse;
+	&Parse;	# close(STDIN) here
 	&GetFieldsFromHeader;	# -> %Envelope
 	&Fix(*Envelope);
 
@@ -134,14 +134,16 @@ sub Ctl
 
 	# since undef %e above;
 	$Envelope{'stat:mtime'} = (stat("$SPOOL_DIR/$id"))[9]; 
-	&SyncHtml($HTTP_DIR, $id, *Envelope);
+	&SyncHtml($HTML_DIR, $id, *Envelope);
 
 	# &dumpvar('SyncHtml') if $verbose;
+
+	close(STDIN);
     }
 
     # tricky 
     if (%RequireReGenerateIndex) {
-	&SyncHtmlReGenerateIndex($HTTP_DIR, $id, *Envelope);
+	&SyncHtmlReGenerateIndex($HTML_DIR, $id, *Envelope);
     }
 }
 
@@ -204,10 +206,10 @@ sub Usage
     local($s);
 
     $s = q#;
-    spool2html.pl [-h] [-I INC] [-f config.ph] [-d HTTP_DIR] [-t TYPE] SPOOL;
+    spool2html.pl [-h] [-I INC] [-f config.ph] [-d HTML_DIR] [-t TYPE] SPOOL;
     ;
     -h    this message;
-    -d    $HTTP_DIR;
+    -d    $HTML_DIR;
     -f    config.ph;
     -t    number of day ($HTML_INDEX_UNIT);
     -M    Minimum (MIN, default 1);
