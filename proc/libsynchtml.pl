@@ -104,7 +104,7 @@ sub SyncHtml
 	    elsif (&Grep("in the week\\s+100", "$html_dir/index.html")) {  
 		$remake_index = 1;
 	    }
-	    elsif (&Grep("in the year\\s+100", "$html_dir/index.html")) {  
+	    elsif (&Grep("in the month\\s+100", "$html_dir/index.html")) {  
 		$remake_index = 1;
 	    }
 
@@ -1071,6 +1071,11 @@ sub ReConfigureIndex
 	    $yyy  = $1;
 	    $yyyy = $yyy + 1900;
 	    s@(HREF.*in the week\s+)$yyy/@$1$yyyy/@;
+	}
+	if (/HREF.*in the month\s+(\d{3})\/\d+/) {
+	    $yyy  = $1;
+	    $yyyy = $yyy + 1900;
+	    s@(HREF.*in the month\s+)$yyy/@$1$yyyy/@;
 	}
 
 	# existence check
