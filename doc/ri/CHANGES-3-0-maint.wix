@@ -5,6 +5,16 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#30 == 3.0.1_BETA #19 ]
+
+   sbin/makefml
+	sync w/ HEAD (2.100-2.101): 
+	FixDefault: no operation.. if debug
+
+   doc/smm/header.wix
+	sync w/ HEAD (2.10-2.11): 
+	clean up $USE_ORIGINAL_MESSAGE_ID around
+
 [ 3.0pl#29 == 3.0.1_BETA #18 ]
 
    makefml (2.68-2.69):
