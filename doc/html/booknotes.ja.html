@@ -22,20 +22,61 @@
 </CENTER>
 への補足
 
+<UL>
+	<LI>
+	<A HREF=#15>15章　fmlの返すメッセージをカスタマイズする
+
+	<LI>
+	<A HREF=#29>29章　バーチャルドメイン
+
+	<LI>
+	<A HREF=#version>バージョン依存性について
+</UL>
+
+
 <HR>
 
-<P> Q: 
+
+<!---------- chapter 15 ------>
+<A HREF="15">
+<P>
+『15章　fmlの返すメッセージをカスタマイズする』への補足
+
+<BR> Q: 
 <A HREF="Japanese/how_to_subscribe/index.html#not-send-back-welcome-file">
 welcome を送り返すのを止める。
 </A>
 
-<P>
+<BR>
 Q: コマンドの返事のメッセージを抑制する。
 <BR>
 DEFINE_MODE("disablenotify") 
 を使うとやりすぎになることがあります。
 例えば、自動登録の際の confirmation まで送られなくなることがあります。
 
+
+
+<!---------- chapter 29 ------>
+<P>
+<A HREF="29">
+『29章　バーチャルドメイン』への補足 
+
+
+本文では sendmali で virtusertable を使う話で、マップの扱いの注意点を
+述べています。
+
+そのドメインでうけとるためには、バーチャルドメインのドメイン名を class
+w へ付け足すことも必要です。例えば
+<PRE>
+Cw localhost
+を
+Cw localhost virtual-1.domain
+</PRE>
+にして sendmail に HUP シグナルを送ります。 
+
+
+<HR>
+<A NAME="version">
 
 <BR>
 Q: 4.0-stable については？
