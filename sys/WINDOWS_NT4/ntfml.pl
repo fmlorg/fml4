@@ -143,7 +143,8 @@ sub GetConf
 		$Maintainer{$ml}        = $MAINTAINER;
 	    }
 
-	    if ($ctladdr ne $ml) {
+	    # Consider null $CONTROL_ADDRESS !
+	    if ($ctladdr && ($ctladdr ne $ml)) {
 		if (-f "$ML_DIR/$ml/include-ctl" && 
 		    &GetPopPasswd($ctladdr, $cf)) {
 		    $IncludeFile{$ctladdr} = "$ML_DIR/$ml/include-ctl";
