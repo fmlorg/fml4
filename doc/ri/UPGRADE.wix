@@ -1,6 +1,6 @@
 .HTML_PRE
 .if LANG == JAPANESE
-		UPGRADE をする人向けの注意
+		3.0.1 への UPGRADE をする人向けの注意
 
 				深町 賢一
 .fi
@@ -17,6 +17,14 @@
 -----------------
 
 .# ifdef-3.0
+.C	3.0.1 RELEASE と 3.0 RELEASE の間の違いについて
+=E.C	The difference between 3.0.1 and 3.0
+
+基本的に 3.0 へのbug fixのみで機能拡張はありません。
+変更リストについては CHANGES-3.0.1 を見て下さい。
+=E
+3.0.1 is the bug fixed version of 3.0. See CHANGES-3.0.1 for changes.
+
 .C	3.0 RELEASE と 2.2.1 RELEASE の間の違いについて
 =E.C	The difference between 2.2.1 and 3.0
 
