@@ -34,7 +34,7 @@ libStardate.pl	スタートレック
 librfc1153.pl	RFC1153の設定
 
 
-./bin
+bin:
 MatomeOkuri-ctl.sh	crontab から起動させるシェルスクリプトの見本
 maintenance.pl	Maintenance用flockするスクリプト
 pmail.pl	Ｐｓｅｕｄｏ　Ｍａｉｌコマンド（for libsmtp demonstration)
@@ -48,12 +48,12 @@ RecreateConfig.pl
 		config.ph につくりかえるための Utility
 
 
-./etc	
+etc:
 crontab-4.3	4.3BSDでの見本
 crontab-4.4	4.4BSDでの見本
 		（bin/cron.pl はこの形式です）
 
-Directory:
+[directory]
 LOCK		ロック用ファイルのディレクトリ（pid用）
 lib		contributions。	see README in contrib		
 contrib		同上
