@@ -67,8 +67,8 @@ DOC_CONTRIB:
 doc/ri/COPYING
 doc/ri/CROSSPOST_PROTOCOL.jp
 doc/ri/TODO_LISTS
-doc/master/help.eng 
-doc/master/help.example2
+doc/drafts/help.eng 
+doc/drafts/help.example2
 
 
 DOC_APPENDED:
