@@ -71,28 +71,31 @@ sub GetBufferFromFile
     local($FD) = @_;
     local($BUFFER) = "";
     local($WHOLE_MAIL);
+    local($MailHeaders) = "";
 
     open(FD, "$JCONVERTER $FD|") || (&VoteLog("cannot open $FD"), return);
     eval "while(<FD>) {
-	    $READ_FILE_Hook
-		\$WHOLE_MAIL .= \$_;
+	    if(1 .. /^\$/) {
+	        \$MailHeaders .= \$_;
+	    };
+
+	    $READ_FILE_Hook;
+	    \$WHOLE_MAIL .= \$_;
 	}";
     print STDERR $@ if $@;
     close(FD);
-    
-    &GetFrom($WHOLE_MAIL);
+
+    &GetFrom($MailHeaders);
     $Original_From_address = &DecodeMimeStrings($Original_From_address);
+
     return split(/\n/, $WHOLE_MAIL, 9999);
 }
 
 sub GetFrom
 {
     # Tricky for folding and unfolding.
-    local($WHOLE_MAIL) = @_;
-    local($MailBodyIndex) = index($WHOLE_MAIL, "\n\n");
-    $StoredMailHeaders = $MailHeaders = 
-	substr($WHOLE_MAIL, 0, $MailBodyIndex);
-    
+    local($MailHeaders) = @_;
+
     # No UNIX FROM!(a possibility)
     $MailHeaders =~ s/^(\S+):/$1:\n\n/;
     $MailHeaders =~ s/\n(\S+):/\n\n$1:\n\n/g;
@@ -137,19 +140,16 @@ sub Vote {
     # generate regexp for given fields(One Line Matching)
     foreach $key (@keywords) {
 	$RESET .= "\$Count{$key} = 0;\n";
-	$RESET .= "undef %Var;\n";
-	$JNAMECONV .= "\ts/^$Jkeywords[$i]/$key/;\n" if $Jkeywords[$i];
+	$RESET .= "undef %Var$key;\n";
+	$JNAMECONV .= "\ts/^$Jname{$key}/$key/;\n" if $Jname{$key};
 
 	$GET_FIELD .= "if((/^$key:(.*)\\(/o || /^$key:(.*)/o )";
-#	$GET_FIELD .= "&& \$Count{$key}++ < $maxkeywords[$i])\n";
-#	$GET_FIELD .= "\t{ \$KEY{$key} .=  \"\$1\\n\";}\n\t";
-
 	$GET_FIELD .= "&& \$Count{$key}++ < $maxkeywords[$i])\n\t";
-	$GET_FIELD .= "{ \$Var{\$1} += 1;}";
+	$GET_FIELD .= "{ \$Var$key{\$1} += 1;}";
 	$GET_FIELD .= "\n\t";
 
 	$AsA2A     .= "\n\t";
-	$AsA2A     .= "foreach(keys %Var) { \$KEY{$key} .= \"\$_\\n\";}";
+	$AsA2A     .= "foreach(keys %Var$key) { \$$key{\$_} += 1;}\n";
 	$i++;
     }
 
@@ -188,33 +188,14 @@ sub VoteOutput {
 
     # generate evaled strings
     foreach $key (@keywords) {
-	$GET_FIELD .= "open(POUT, \"|cat \");\n";
-	if( $Jkeywords[$i] ) {
-	    $GET_FIELD .= 
-		sprintf("printf POUT \"\\n%-20s \";", $Jkeywords[$i]); 
-	}else {
-	    $GET_FIELD .= "print POUT \"\\n$key:\\t\";";
-	}
-	$GET_FIELD .= "print POUT \"\\n\";" if( $maxkeywords[$i] > 1);
-	$GET_FIELD .= "print POUT \"\\n\";" if $SUMMARY_MODE;
-	$GET_FIELD .= "close POUT;\n";
-
-	if($SUMMARY_MODE) {
-	    $GET_FIELD .= "open(OUT, \"|sort |uniq -c |sort -nr\");";
-	    $GET_FIELD .= "print STDERR \">>>\",\$KEY{$key},\"<<<\\n\";\n";
-	} else {
-	    $GET_FIELD .= "open(OUT, \"|cat\");";
-	}
-	if( $maxkeywords[$i] > 1) {
-	    $GET_FIELD .= "\$KEY{$key} =~ s/\\n/\\n                     /g;\n";
-	    $GET_FIELD .= 
-		"\$KEY{$key} = \"                     \" . \$KEY{$key};\n";
-	}
-
-	$GET_FIELD .= "print OUT \$KEY{$key};\n";
-	$GET_FIELD .= "close OUT;\n";
-
-	$i++;
+	$title = $Jname{$key} ? $Jname{$key} : $key;
+	$GET_FIELD .= 
+	    "foreach(keys \%$key) { 
+                 push(\@$key, \"\$$key{\$_} \$_\");
+            }
+            print \"$title\\n\\n\t\", 
+                  join(\"\\n\\t\", sort {\$b <=> \$a;} \@$key), \"\\n\\n\";
+            ";
     }
 
     print STDERR ">",$GET_FIELD . $HookOut,"<\n" if $debug;
