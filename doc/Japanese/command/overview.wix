@@ -30,7 +30,7 @@ elena ＭＬのヘルプファイルは /var/spool/ml/elena/help
 	@PermitProcedure = ('guide', 'summary');
 
 .S	特定のコマンドだけを使用不能にする
-.xref	@DenyPrecedure
+.xref	@DenyProcedure
 
 @DenyPrecedure を使います。この配列で指定したコマンド以外は全部使用可
 能のままです
