@@ -381,6 +381,19 @@ config.ph で
 です。
 
 
+.S	The flock() function is unimplemented ...
+
+０	perl がちゃんとコンパイルされていない
+１	flock() がないＯＳ
+２	flock を使わないようにコンパイルされている？
+
+あたりかな？perl をコンパイルしなおすか、
+
+	$USE_FLOCK = 0;
+
+にしてみてください。
+
+
 .S	Solaris 2.3 (SUN OS 5) で flock がうごかない？？？
 .k	Solaris 2.3 (SUN OS 5) で flock がうごかない
 

@@ -1169,6 +1169,45 @@ RFC822 は BNF表現でできる理論限界を表現している文書です。確かに使って
 http://www.tis.com/
 http://www.iij.ad.jp/service/FIREWALL.html
 
+
+.S	smrsh.c
+
+smrsh.c は、
+	"|program ..."
+
+の program が何を実行するか？ではなく program の名前が /usr/adm/sm.bin 
+の中にあるかどうか？を見ています。＃ access(2) で、
+
+よって、link するのが perl なら include を perl fml.pl のように書き直
+す必要があります。もしくはインストールしてしまって 
+/usr/adm/sm.bin/fml.pl ですね:-)
+
+
+.S	access(2) 
+
+smrsh.c は acceess(2) を使っています。
+
+=E
+smrsh.c uses acceess();
+
+--- NetBSD 1.2REL /usr/share/man/cat2/access.0
+
+CAVEAT
+     Access() is a potential security hole and should never be used.
+
+4th Berkeley Distribution     September 15, 1996                             2
+
+--- perl5.003/perl.c
+
+	/* On this access check to make sure the directories are readable,
+	 * there is actually a small window that the user could use to make
+	 * filename point to an accessible directory.  So there is a faint
+	 * chance that someone could execute a setuid script down in a
+	 * non-accessible directory.  I don't know what to do about that.
+	 * But I don't think it's too important.  The manual lies when
+	 * it says access() is useful in setuid programs.
+	 */
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
