@@ -4139,10 +4139,9 @@ sub do_edit_template
     local($f) = @_;
     local($editor, $file, @master_dir, @dir, @file);
 
-    @master_dir = ("$EXEC_DIR/drafts", 
-		   "$EXEC_DIR/etc/makefml");
-
-    @dir = ("$ML_ETC_DIR/fml/drafts/",
+    @dir = ("$EXEC_DIR/drafts/$LANGUAGE", 
+	    "$EXEC_DIR/etc/makefml",
+	    "$ML_ETC_DIR/fml/drafts/$LANGUAGE",
 	    "$ML_ETC_DIR/makefml"
 	    );
 
@@ -4181,7 +4180,7 @@ sub do_edit_template
 
 	# check validity of the file
 	if (-f $file) {
-	    print STDERR "  template file is \"$file\"\n\n";
+	    print STDERR "   template file is \"$file\"\n\n";
 	}
 	else {
 	    &Error("cannot find $f template");
@@ -4192,14 +4191,20 @@ sub do_edit_template
 	&Log("makefml::edit_template cannot find $f");
 
 	print "\nUsage: makefml edit-template TEMPLATE\n";
-	print "   Avaialbe TEMPLATE:\n\n";
+	print "   Avaiable templates:\n\n";
 
-	for (@dir) {
-	    if (opendir(DIRD, $_)) {
+	my ($dir, %uniq);
+	for $dir (@dir) {
+	    if (opendir(DIRD, $dir)) {
 		for (readdir(DIRD)) {
 		    next if /^\./;
 		    next if /^\@/;
-		    print "\t$_\n";
+		    next if /\~$/;
+		    next if /\.bak$/;
+
+		    next if $uniq{$_};
+		    $uniq{$_} = 1;
+		    print "\t$_\n" if -f "$dir/$_";
 		}
 		closedir(DIRD);
 	    }
@@ -4212,14 +4217,14 @@ sub do_edit_template
 	$editor = $ENV{'EDITOR'} || "vi";
     }
     else {
-	print "I cannot find EDITOR (Environment variable).\n";
-	print "Editor you use(e.g. mule, ng, vi, ed ... default \"vi\") [vi] ";
+	print "   I cannot find EDITOR (Environment variable).\n";
+	print "   Editor you like(e.g. mule, ng, vi, ed ... default \"vi\") [vi] ";
 	$editor = &GetString;
     }
 
     $editor = $editor || $ENV{'EDITOR'} || "vi";
 
-    print STDERR "\n   $editor $file\n\n"; 
+    print STDERR "\n   \"$editor $file\"\n\n"; 
     sleep 1;
     &Log("makefml::edit $editor $file");
 
