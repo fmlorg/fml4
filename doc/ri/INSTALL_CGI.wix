@@ -114,7 +114,8 @@ root になり
 
 .S	apache の設定
 
-apache をインストールするところから解説します。
+apache をインストールするところから解説します。suEXEC を有効にするため
+に configure を次のように実行します。
 
     # tar zxvf apache_1.3.14.tar.gz
     # cd apache_1.3.14/
@@ -153,6 +154,13 @@ httpd.conf の編集後、
 といったログが出ていればとりあえずは成功です。しかし、このログが出てい
 ても suEXEC がうまくいかないことは多々あります。
 付録のトラブルシュート例を参考に、設定の確認をして下さい。
+
+.S	テストをする
+
+	http://そのホスト/~fml/cgi-bin/fml/admin/menu.cgi
+
+にアクセスしていろいろ操作してみて下さい。
+
 
 
 .C	CGI 階層のモデル
@@ -573,6 +581,11 @@ authdb/ 以下はユーザ nobody などが読めるようになっていないといけません。
 	# chmod -R go+r /usr/local/fml/www/authdb
 
 としてください。 
+
+注意: ユーザ nobody にも読めるように o+r をする必要がありますが、これ
+      はよくありません。グループ fml に nobody を加え、g+r だけにすることが
+      のぞましいのかもしれません。
+
 
 Q: Options ExecCGI is off in this directory
 
