@@ -44,6 +44,11 @@ sub Init
 	&Err($@) if $@;
     }
 
+    # overwrite
+    $CGI_CF{'MTA'}                 = $MTA || $CGI_CF{'MTA'};
+    $CGI_CF{'HOW_TO_UPDATE_ALIAS'} = $HOW_TO_UPDATE_ALIAS ||
+	$CGI_CF{'HOW_TO_UPDATE_ALIAS'};
+
     # makefml location
     $MAKE_FML = "$EXEC_DIR/makefml";
 

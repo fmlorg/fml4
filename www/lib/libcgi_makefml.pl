@@ -34,7 +34,7 @@ sub Parse
     $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
 
     # MTA
-    $MTA    = $Config{'MTA'};
+    $MTA    = $MTA || $Config{'MTA'};
 
     # misc
     $OPTION = $Config{'OPTION'};
