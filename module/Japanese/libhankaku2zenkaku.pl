@@ -6,11 +6,11 @@
 # Auther: Toshiyuki Nakano (t-nakano@marimo.org)
 # Create: Jun 15, 1999
 # Modify: Mar 10, 2000
-#		for Mail __JConvert (recognize header)
+#		for Mail JConvert (recognize header)
 #		Input and Output => JIS
 
 #
-# $Id: libhankaku2zenkaku.pl,v 1.2 2000/03/18 15:14:54 fukachan Exp $
+# $Id: libhankaku2zenkaku.pl,v 1.3 2000/06/12 11:22:07 fukachan Exp $
 #
 
 sub FixJapaneseMDChars
@@ -49,7 +49,7 @@ sub FixJapaneseMDChars
 
 package han2zen;
 
-sub __JConvert;	# Convert Code
+sub JConvert;	# Convert Code
 
 sub main::ConvertHankakuToZenkaku
 {
@@ -59,7 +59,7 @@ sub main::ConvertHankakuToZenkaku
 
     &InitTable;
 
-    &jcode::jis(&__JConvert(jcode::sjis($input)));
+    &jcode::jis(&JConvert(jcode::sjis($input)));
 }
 
 
@@ -358,7 +358,7 @@ sub InitTable
 }
 
 # Convert SJIS -> EUC with Hankaku-Kana & Machine-dependent
-sub __JConvert #(str) return $str
+sub JConvert #(str) return $str
 {
     my ($str) = @_;
     my ($len, $retstr);
