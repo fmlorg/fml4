@@ -4,7 +4,7 @@
 				<fukachan@fml.org>
 				1999 January
 
-XXX ATTENTION: you need "BSD make" not gmake.
+Caution: you need "BSD make" not gmake.
 
 -----------------------------------------------------------------
 * Firstly cvs checkout !
@@ -36,6 +36,11 @@ where 'history' is the alias of 'release/history'.
 	% make htmldoc
 
 4.	O.K., now start your hack!
+
+
+5.	When you make distribution, you need several programs
+	such as ssh, rsync, .... Please see distrib/mk/fml.prog.mk 
+	for more details.
 
 
 -----------------------------------------------------------------
