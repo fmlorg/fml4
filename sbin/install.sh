@@ -137,8 +137,8 @@ chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 	rm -f bin/pop2recv.pl
 	ln libexec/popfml.pl bin/pop2recv.pl
 
-	rm -f bin/localtest.pl
-	ln sbin/localtest.pl bin/localtest.pl
+	# rm -f bin/localtest.pl
+	# ln sbin/localtest.pl bin/localtest.pl
 
 	rm -f bin/inc_via_pop.pl
 	ln bin/pop2recv.pl bin/inc_via_pop.pl
