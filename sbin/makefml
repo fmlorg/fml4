@@ -5068,7 +5068,7 @@ sub do_pop_passwd
 
 sub do_lock
 {
-    local($ml, $timeout) = @_;
+    local($ml, $timeout, @shell_args) = @_;
     local(@files);
     local($proc) = $fp;
     $proc =~ s/do_//;
@@ -5084,10 +5084,17 @@ sub do_lock
     }
 
     print "\n";
-    print "   lock and sleep for $timeout secs.\n";
-    print "   Please interrupt this by CONTROL-C to stop this lock\n";
 
-    sleep($timeout);
+    if ($timeout eq '-e') {
+	&__system(@shell_args);
+    }
+    else {
+	print "   makefml[$$] succeeded to lock $ml\n";
+	print "   I sleep for $timeout seconds after now.\n";
+	print "   Please interrupt this by CONTROL-C to stop this lock\n";
+
+	sleep($timeout);
+    }
 }
 
 
