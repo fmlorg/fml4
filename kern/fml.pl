@@ -10,6 +10,7 @@
 # See the file COPYING for more details.
 #
 # $Id$
+
 $Rcsid   = 'fml 2.2';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -196,6 +197,14 @@ sub ModeBifurcate
 		require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 		&Command() if $ForceKickOffCommand;
 	    }
+	    # chaddr-confirm
+	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr-confirm'}) {
+		&Trap__ChaddrConfirm(*Envelope);
+	    }
+	    # chaddr
+	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr'}) {
+		&Trap__ChaddrRequest(*Envelope);
+	    }
 	    # we should return reply for "guide" request from even "stranger";
 	    elsif ((! $member_p) &&
 		   ($Envelope{'mode:req:guide'} || $Envelope{'req:guide'})) {
@@ -345,6 +354,7 @@ sub SetDefaults
     $SKIP_FIELDS  = 'Received|Return-Receipt-To';
     $ADD_URL_INFO = $ML_MEMBER_CHECK = $CHECK_MESSAGE_ID = $USE_FLOCK = 1;
     $NOTIFY_MAIL_SIZE_OVERFLOW = 1;
+    $CHADDR_CONFIRMATION_KEYWORD = 'chaddr-confirm';
 
     ### default distribution and command mode
     $PERMIT_POST_FROM    = $PERMIT_COMMAND_FROM    = "members_only";
@@ -862,8 +872,21 @@ sub CheckCurrentProc
 	    $e{'mode:req:subscribe'} = 1;
 	    $e{'buf:req:subscribe'} .= $_."\n";
 	}
+
+	if ($CHADDR_AUTH_TYPE eq 'confirmation' &&
+	    (/^(\s*|\#\s*)$CHADDR_KEYWORD\s+/i)) {
+	    $e{'mode:req:chaddr'} = 1;
+	    $e{'buf:req:chaddr'} .= $_."\n";
+	}
+
+	# chaddr-confirm trap (may be with citatin e.g. ">")
+	if ($CHADDR_AUTH_TYPE eq 'confirmation' &&
+	    /$CHADDR_CONFIRMATION_KEYWORD\s+\S+/i) {
+	    $e{'mode:req:chaddr-confirm'} = 1;
+	    $e{'buf:req:chaddr-confirm'} .= $_."\n";
+	}
 	# confirm trap (may be with citatin e.g. ">")
-	if (/$CONFIRMATION_KEYWORD\s+\S+/i) {
+	elsif (/$CONFIRMATION_KEYWORD\s+\S+/i) {
 	    $e{'mode:req:confirm'} = 1;
 	    $e{'buf:req:confirm'} .= $_."\n";
 	}
@@ -2099,6 +2122,12 @@ sub LogFileNewSyslog
     }
 }
 
+sub DBCtl
+{
+    &use('db');
+    &FML_SYS_DBCtl(@_);
+}
+
 ####### Section: Security 
 # anyway alias now (1998/05/03)
 # If sent back directly, X-ML-Info: exists and must contains e.g. $MAIL_LIST .
@@ -2690,6 +2719,41 @@ sub MOVE_FIELD
     &DELETE_FIELD($_[0]);
 }
 
+####### Section: TRAP
+### Hmm, I call this section locore but .. :-)
+sub Trap__ChaddrConfirm
+{
+    local(*e) = @_;
+
+    &Log("Trap__ChaddrConfirm");
+
+    if ($CHADDR_AUTH_TYPE ne 'confirmation') {
+	&Log("Trap__ChaddrConfirm: invalid trap");
+	&Log("\$CHADDR_AUTH_TYPE != confirmation");
+	return $NULL;
+    }
+
+    &Log("chaddr-confirm request") if $debug;
+    &use('confirm');
+    &FML_SYS_ChaddrConfirm(*e, $e{'buf:req:chaddr-confirm'});
+}
+
+sub Trap__ChaddrRequest
+{
+    local(*e) = @_;
+
+    &Log("Trap__ChaddrRequest");
+
+    if ($CHADDR_AUTH_TYPE ne 'confirmation') {
+	&Log("Trap__ChaddrConfirm: invalid trap");
+	&Log("\$CHADDR_AUTH_TYPE != confirmation");
+	return $NULL;
+    }
+
+    &Log("chaddr request") if $debug;
+    &use('confirm');
+    &FML_SYS_ChaddrRequest(*e, $e{'buf:req:chaddr'});
+}
 
 ####### Section: Switch
 sub SaveACL { $ProcCtlBlock{"main:ADDR_CHECK_MAX"} = $ADDR_CHECK_MAX;}
