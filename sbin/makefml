@@ -2450,6 +2450,10 @@ sub do_newml
     print "# ---------- /etc/aliases example ends ----------\n";
     print "\n";
 
+    &ConcatenateAliases($ml, 
+			"$ML_ETC_DIR/aliases", 
+			"$ML_DIR/$ml/aliases");
+
     # always cf is newer than config.ph (against manual edit check)
     &Touch("$ML_DIR/$ml/cf");
 
@@ -2457,6 +2461,31 @@ sub do_newml
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
 
     $XStatus = 'OK:';
+}
+
+
+sub ConcatenateAliases
+{
+    local($ml, $target, @sources) = @_;
+    local($f);
+
+    &Append2("\n# $ml aliases (added by makefml at $MailDate)", 
+	     $target);
+
+    for $f (@sources) {
+	if (open($f, $f)) {
+	    while (<$f>) {
+		next if /^\#/;
+
+		chop;
+		&Append2($_, $target);
+	    }
+	    close($f);
+	}
+	else {
+	    &Log("cannot open $f");
+	}
+    }
 }
 
 
