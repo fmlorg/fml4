@@ -77,7 +77,7 @@ loop:
 
 e:	testsetup
 	@ echo 'make m is to re-generate /usr/local/fml/makefml'
-	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /usr/local/fml/.fml/system install)
+	@ (cd $(DESTDIR)/fml-current; pwd ; env MKDOC=no perl makefml -f /usr/local/fml/.fml/system install)
 
 cgi:	testsetup cgisetup cgisync
 
