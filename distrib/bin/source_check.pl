@@ -77,7 +77,7 @@ for my $file (@ARGV) {
     my $rh = new FileHandle;
     my @inc = <module/*>;
     my $opt = "-I" . join(" -I ", @inc);
-    if (open($rh, "perl $opt -cw $tmp 2>&1 |")) {
+    if (open($rh, "$^X $opt -cw $tmp 2>&1 |")) {
 	print STDERR "check $file ... ";
 
 	my $buf;
