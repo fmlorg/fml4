@@ -74,3 +74,35 @@ You need to set "conf/release" based on information not in cvs.
 
 ^fml/distrib/history
 		-> /cvsroot/log/fml/commitlog
+
+-----------------------------------------------------------------
+* TAG, BRANCH
+
+When you make "fml x.y.z release", you will work on the branch split
+off from the main trunk. For example
+
+	   2.2 -----> 2.2 A --*--> 2.2B ----->	(main trunk)
+	                      |
+	                  2.2.1 BETA		(branch)
+	                      |			(* == fml-2-2-bb0)
+	                  2.2.1 Release
+
+If you do "make snapshot", the following "make_wrapper" may be useful.
+
+	#!/bin/sh
+	FML=$PWD;            export FML
+	BRANCH_SNAPSHOT=yes; export BRANCH_SNAPSHOT
+	exec make $*
+
+If $BRANCH_SNAPSHOT is set, distrib/bin/generator does not synchronize
+the fml distribution with www and ftp/snapshot/ directory.
+
+
+[ALREADY ASSIGNED TAGS]
+
+fml-2-1		2.1 Release
+fml-2-2		2.2 Release
+fml-2-2-bb0	2.2 Release Branch BreakPoint 0
+		the road to 2.2.1
+fml-2-2-1-prep	== fml-2-2-bb0's alias
+		the road to 2.2.1
