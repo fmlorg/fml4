@@ -16,16 +16,7 @@ GEN_DOC () {
 
 
 GEN_WWW () {
-   if [ X$MODE = X ]; then
-	echo
-	echo --no www search db make. now namazu runs on external www server.
-	echo 
-	return
-	echo "ReGenerating WWW Search Environment";
-	(cd $FML; ${MAKE} syncwww search)
-   else
-	echo ignore www updates
-   fi
+
 }
 
 
