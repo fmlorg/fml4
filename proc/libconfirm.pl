@@ -51,6 +51,11 @@ sub Confirm
 
     &Log("Confirm::FirstTimeP r=$r");
 
+    if ($debug_confirm) {
+	&Warn("Confirm::FirstTimeP r=$r $ML_FN", 
+	      "Confirm::FirstTimeP r=$r\n\n". &WholeMail);
+    }
+
     if ($r eq 'first-time' || $r eq 'expired') {
 	if ($r eq 'expired') {
 	 $m .= "Your confirmation for \"subscribe request to $MAIL_LIST\"\n";
