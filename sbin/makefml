@@ -1172,27 +1172,17 @@ sub FlockP
     local($eval);
 
     # default
+    undef $eval; # ensure (though useless)
     $eval .= "\$USE_FLOCK = 1;\n";
 
     # default=flock if first time or no config.ph;
     return 1 unless -f "$mldir/$ml/config.ph";
 
     # XXX 3.0B-TODO
-    open(PH, "$mldir/$ml/config.ph") || 
-	(&Warn("cannot open $mldir/$ml/config.ph[$!]"), return);
-    while (<PH>) {
-	/\$USE_FLOCK/ && ($eval .= $_);
-	/\$SPOOL_DIR/ && ($eval .= $_);
-    }
-    close(PH);
+    &GetConfigPH($ml);
 
-    eval("package flockp; eval(\$main'eval); package main; #';");
-    &main'Warn($@) if $@; #';
-
-    $ml'FLockP{$ml}    = $flockp'USE_FLOCK;
-    $ml'SPOOL_DIR{$ml} = $flockp'SPOOL_DIR;
-
-    return $flockp'USE_FLOCK; #';
+    $ml'SPOOL_DIR{$ml} = &Value('SPOOL_DIR');
+    $ml'FLockP{$ml}    = &Value('USE_FLOCK'); # return value
 }
 
 sub Lock
@@ -1328,6 +1318,10 @@ sub ExecCmd
 {
     local($_) = @_;
     local(@argv, $fp, $ml);
+
+    # XXX 3.0B-TODO: defined to remove dummy "sub DEFINE_*" ...;
+    require 'libloadconfig.pl';
+    &LoadDummyMacros;
 
     # extension: permit ML{::,->}command syntax
     s/^(\S+)::(\S+)/$2 $1/;	# ML::command
@@ -3256,62 +3250,34 @@ sub GetCF
     }
 }
 
-# dummy functions agasint the compile errors of config.ph
-sub DEFINE_SUBJECT_TAG { 1;}
-sub DEFINE_MODE  { 1;}
-sub DEFINE_FIELD_FORCED  { 1;}
-sub DEFINE_FIELD_ORIGINAL { 1;}
-sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
-sub DEFINE_FIELD_PAT_TO_REJECT { 1;}
-sub DEFINE_FIELD_LOOP_CHECKED { 1;}
-sub UNDEF_FIELD_LOOP_CHECKED  { 1;}
-sub ADD_FIELD     { 1;}
-sub DELETE_FIELD  { 1;}
-
-
-package config_ph;
-sub DEFINE_SUBJECT_TAG { 1;}
-sub DEFINE_MODE  { 1;}
-sub DEFINE_FIELD_FORCED  { 1;}
-sub DEFINE_FIELD_ORIGINAL { 1;}
-sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
-sub DEFINE_FIELD_PAT_TO_REJECT { 1;}
-sub DEFINE_FIELD_LOOP_CHECKED { 1;}
-sub UNDEF_FIELD_LOOP_CHECKED  { 1;}
-sub ADD_FIELD     { 1;}
-sub DELETE_FIELD  { 1;}
-sub COPY_FIELD  { 1;}
-sub ADD_CONTENT_HANDLER { 1;}
-sub Load 
-{
-    local($f) = @_;
-    eval require($f);
-    $@;
-}
-
-
-package main;
 
 # XXX 3.0B-TODO
 sub GetConfigPH
 {
     local($ml) = @_;
-    local($status, $cf);
+    local($status, $config_ph);
+
+    # debug 3.0B new loadconfig
+    $debug_30B = 0;
 
     &ResetVariables;
 
-    $cf  = "$ML_DIR/$ml/config.ph";
-    $DIR = "$ML_DIR/$ml";
+    $DIR       = "$ML_DIR/$ml";
+    $config_ph = "$DIR/config.ph";
+    
+    if (-f $config_ph) {
+	$config_ph'DIR    = $main'DIR;
+	@config_ph'LIBDIR = @main'LIDIR;
+	@config_ph'INC    = @main'INC;
 
-    if (-f $cf) {
-	$config_ph'DIR = $main'DIR;
-
-	# 3.0B
-	$status = &config_ph'Load($DefaultConfigPH); #';
+	# 3.0B-TODO
+	package config_ph;
+	undef %INC;
+	require 'libloadconfig.pl'; 
+	eval "&__LoadConfiguration;";
 	print STDERR $@ if $@;
-
-	$status = &config_ph'Load($cf); #';
-	print STDERR $@ if $@;
+	&main'Log($@) if $@; #';
+	package main;
     }
     else {
 	die("GetConfigPH: $cf does not exists\n");
@@ -3324,6 +3290,7 @@ sub Value
     local($key) = @_;
     local($v);
     $key || return $NULL;
+    print STDERR "\$v = \$config_ph'$key ;\n" if $debug_30B;
     eval("\$v = \$config_ph'$key ;"); #';
     print STDERR $@ if $@;
     $v;
@@ -5294,6 +5261,7 @@ sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
 sub v7'SRand      { &main'SRand(@_);}
 sub v7'Log        { &main'Log(@_);}
 sub v7'Warn       { &main'Warn(@_);}
+sub v7'WarnE      { print STDERR join("\t", @_), "\n";}
 sub v7'WholeMail  { &main'WholeMail(@_);}
 sub v7'SetEvent   { &main'SetEvent(@_);}
 
@@ -5374,14 +5342,24 @@ sub MakeFml_V7Lock
 {
     local($ml, $mldir) = @_;
 
-    &LoadConfigPH($ml, $mldir);
+    $EXEC_DIR = $main'EXEC_DIR;
+    $ML_DIR   = $main'ML_DIR;
+    $DIR      = "$mldir/$ml";
+
+    &main'GetConfigPH($ml); #';
+    $LOCK_FILE     = &main'Value('LOCK_FILE'); #';
+    $VARRUN_DIR    = &main'Value('VARRUN_DIR'); #';
+    $FP_VARRUN_DIR = "$mldir/$ml/$VARRUN_DIR";
+    $VARLOG_DIR    = &main'Value('VARLOG_DIR'); #';
+    $FP_VARLOG_DIR = "$mldir/$ml/$VARLOG_DIR";
 
     require 'liblock.pl';
 
-    if ($debug) {
+    if ($debug || 1) {
 	print STDERR "\n";
 	print STDERR "LOCK_FILE     $LOCK_FILE\n";
 	print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
+	print STDERR "FP_VARLOG_DIR $FP_VARLOG_DIR\n";
     }
 
     &GetTime(time);
