@@ -28,51 +28,98 @@ The Design and Implementation of "fml" Mailing List Server
 <A HREF="download.html">[Japanese] is here.</A>
 #endif
 
-<H3>
+<P> 
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+[master ftp server] ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+</A>
+<P>
+<BR>
+<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
+[master www server]
+http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+</A>
+
+
 #ifdef JAPANESE
-	ソースのダウンロード
-	<BR>
-	関連するツール類も参考までに一緒に置いてあります。
-#else
-	Source codes and related things
-	<BR>
-	things related with mailing lists
-#endif
+<LI>
+<H3>
+<P>	ソースのダウンロード
 </H3>
+<UL>
+
+<LI>
+3.0 Release にバグ修正だけをほどこしたstableシリーズと
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz (stableシリーズの最新版)
+</A>
+
+<LI>
+開発版(bug fixと機能拡張)
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+</A>
+があります。
+
+<BR>
+currentもある程度まとまったところで作るのでそれなりに動きますが、たま
+に失敗していることもあります。テストをしてくれる人が多ければ多いほどリ
+リースが充実するのでcurrentでひとみ悟空になっていただける or currentも
+ちょっとくらい失敗してもいいＭＬで使ってみてもらえると非常にあり難いで
+す。
+
+<BR>
+また毎日作っているスナップショットもありますがより賭けに近くなります。
+おっかけをする人向け。
+
+<LI>
+ftpサーバ上の階層構造については
+<A HREF=ftphier.ja.html>ここ</A>をみてください。
+
+#else
+<P>	Download fml source codes
+
+<UL>
+
+<LI>
+stable: 3.0 Release + bug fixes.
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz (stableシリーズの最新版)
+</A>
+
+<LI>
+current:  development and bug fixes
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+</A>
+
+<LI>
+See hierarchy on ftp server
+<P><A HREF=ftphier.html>here</A>
+#endif
+
+</UL>
 <UL>
 #if DIST
 #else /* DIST */
 	<LI>
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+	daily html documents snapshot
+	<BR>
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/">
+	"htmldocs-current-YYYYMMDD.tar.gz"
 	</A>
-
-	<LI>
-	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/htmldocs-current.tar.gz">
-	"htmldocs-YYYYMMDD.tar.gz"
-	</A>
+	<BR>
 #ifdef JAPANESE
 	http://www.fml.org/fml/ の下をかためたもの (毎日更新)
 #else
 	package of documents under http://www.fml.org/fml/ (updated daily)
 #endif
 
-	<LI>
-	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
-	http://www.sapporo.iij.ad.jp/staff/fukachan/archive/
-	</A>
-#ifdef JAPANESE
-	<BR>
-	(ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/と中身は一緒です。
-	ホストとprotocolが違うだけです:-)
-#else
-	<BR>
-	(contents are the same as 
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/.)
 #endif
 	
 <PRE>
-Copyright (C) 1993-1999 Ken'ichi Fukamachi
+Copyright (C) 1993-2000 Ken'ichi Fukamachi
          All rights reserved. 
 
 $Id$

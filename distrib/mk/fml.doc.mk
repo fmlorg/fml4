@@ -11,6 +11,7 @@ FIX_WIX         = $(PERL) ${FML}/distrib/bin/fix-wix.pl -X ${FML}
 ### sources ###
 HTML_MISC_SOURCES += roadmap.html nt.html search-j.html search-e.html 
 HTML_MISC_SOURCES += releng.ja.html
+HTML_MISC_SOURCES += ftphier.ja.html ftphier.html
 
 ### targets ###
 HTML_REQ_CPP_SOURCES  = index history download links mailinglist people
