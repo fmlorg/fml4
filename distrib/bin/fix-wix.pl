@@ -1,9 +1,10 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("dR");
+&Getopts("dRX:");
 
-chop($ID = `perl distrib/bin/fml_version.pl -s`);
+$FML = $opt_X || $ENV{'FML'};
+chop($ID = `perl "$FML/distrib/bin/fml_version.pl -X $FML" -s`);
 chop($date = `date`);
 
 while(<>) {

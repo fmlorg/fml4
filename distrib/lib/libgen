@@ -82,7 +82,7 @@ COPY_DOCS () {
 	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
 	(chdir $DESTDIR/distrib/doc; tar xvf - )
 
-	perl distrib/bin/fix-wix.pl -R doc/smm/op.wix \
+	perl distrib/bin/fix-wix.pl -X $FML -R doc/smm/op.wix \
 	> $DESTDIR/distrib/doc/smm/op.wix
 
 	echo " "; echo "Copying Documents (doc/ri/)...";
