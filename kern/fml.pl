@@ -609,6 +609,12 @@ sub Parse
 	}
     }
 
+    # oops, header only mail ?! (2000/05/31 by fukachan)
+    if ($in_header) {
+	$Envelope{'Header'} = $Envelope{'Body'};
+	undef $Envelope{'Body'};
+    }
+
     # Really? but check "what happen if no input is given?".
     if ($bufsiz == 0) {
 	&Log("no input, stop");
@@ -633,7 +639,7 @@ sub GetFieldsFromHeader
     }
 
     ### Header Fields Extraction
-    $s = "$Envelope{'Header'}\n";
+    $s = $Envelope{'Header'}."\n";
     $* = 0;			# match one line
     if ($s =~ /^From\s+(\S+)/i) {
 	# XXX NO REACH HERE (1999/10/27 by fukachan)
@@ -641,7 +647,7 @@ sub GetFieldsFromHeader
 	$s =~ s/^From\s+.*//i;
     }
 
-    $s = "\n$s";		# tricky
+    $s = "\n".$s;		# tricky
     $s =~ s/\n(\S+):/\n\n$1:\n\n/g; #  trick for folding and unfolding.
     $s =~ s/^\n*//;		# remove the first null lines;
 
