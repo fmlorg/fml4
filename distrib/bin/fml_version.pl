@@ -1,10 +1,11 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:");
+&Getopts("iqtsp:L:X:");
 
-$RELEASE_ID   = "$ENV{'FML'}/etc/release_version";
-$RELEASE_DATE = "$ENV{'FML'}/etc/release_date";
+$FML          = $opt_X || $ENV{'FML'};
+$RELEASE_ID   = "$FML/etc/release_version";
+$RELEASE_DATE = "$FML/etc/release_date";
 $SHOW_ID      = $opt_s;
 $query        = $opt_q;
 $patchlevel   = $opt_p;
