@@ -46,7 +46,7 @@ sub Init
 	die("no -f file:\nPlease define the pattern table to ignore\n");
 
     local($mday,$mon,$year,$wday) = (localtime(time - 3600*24*$prev))[3..6];
-    $Date = sprintf("%2d/%02d/%02d", $year, $mon + 1, $mday);
+    $Date = sprintf("%02d/%02d/%02d", $year % 100, $mon + 1, $mday);
     print STDERR "Date: $Date\n" if $debug;
 
     open(F, $PatFile) || die ("cannot open $PatFile\n");
