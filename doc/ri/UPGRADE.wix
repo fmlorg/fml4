@@ -33,6 +33,12 @@ fml 3.0 provides new automatic registration.
 =E
 If you do not use automatic registration, you have nothing to do.
 
+大きく分けると
+	fml 2.x の設定ファイル(config.ph)をそのまま使う
+	fml 3.0 に移行する
+
+fml 3.0 に移行する場合の支援ツールを用意してあります(次節)
+
 
 .S	アップグレードの支援ツールについて
 =E.S	Helper tool to upgrade fml 2.x to fml 3.0
@@ -84,9 +90,9 @@ Your choice follows
 
 あります。
 
-1. auto_subscribeを使う == 3.0 の設定へ移行
+* 1. auto_subscribeを使う == 3.0 の設定へ移行
 =E
-1. use "auto_subscribe" handler == move from 2.x to 3.0
+* 1. use "auto_subscribe" handler == move from 2.x to 3.0
 
 3.0 の自動登録では auto_regist の代わりに auto_subscribe というハンド
 ラが推奨です。このハンドラは actives と members 両方を使います。
@@ -107,11 +113,11 @@ Firstly copy members to actives. You have only to do this.
 この後 auto_subscribe へ切替えて下さい。
 
 
-2. auto_regist を使い続ける。
+* 2. auto_regist を使い続ける。
    つまり fml 1.x 2.x の設定ファイルをそのまま使う場合で
    この場合特にすることはない。
 =E
-2. You can continue to use "auto_regist" in fml 3.0 too.
+* 2. You can continue to use "auto_regist" in fml 3.0 too.
    You have nothing to do in this case.
 
 つまり設定は何もいじらないという自信があるならそのままで構わない:)
