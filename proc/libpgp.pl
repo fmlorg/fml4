@@ -467,6 +467,9 @@ sub _PGPInit
     local(*e) = @_;
     my ($path);
 
+    $debug = 1 if $debug_fml40;
+    &Log("PGP_VERSION $PGP_VERSION") if $debug;
+
     undef $PGPError; # initialize
     $PGP_VERSION = 2 unless $PGP_VERSION;
 
@@ -548,6 +551,8 @@ sub _PGPInit
 
     # Set Language for easy analyze by fml.
     &LoadPGPConfig($path, "+Language=en");
+
+    $debug = 0 if $debug_fml40;
 
     1;
 }
