@@ -1,7 +1,7 @@
 .C	PGP (Pretty Good Privacy)
+.l	PGP2
 
 .S	PGP (Pretty Good Privacy)
-.l	pgp
 
 注意: 
 ○ 以下では公開鍵暗合やPGPについては既知のものとしています。
@@ -144,36 +144,6 @@ Example: show the public key list of elena ML.
 	$DIR/etc/pgp/). If the mail is from the author (authenticated),  
 	the server runs commands.
 
-
-.S	管理用のコマンド
-=E.S	Pgp Commands To Maintain ML'S PGP Keys 
-
-管理者が pgp -kv などをリモートでできるようにしてあります。KEYの編集な
-どはリモートではできません。公開鍵を加える、削除。一覧を見るなどをでき
-るようにしてあります。できるようにしてあるのは
-=E
-Available options via FML are
-
-	-ka
-	-kr
-	-krs
-	-h
-	-kx
-	-kxa
-	-kv
-	-kvv
-	-kvc
-	-kc	
-
-です。コマンドの意味はPGPの本を見て下さい。
-=E
-Please read PGP books if you cannot understand them.
-
-例:
-=E
-Example:
-
-	admin pgp -kvv
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

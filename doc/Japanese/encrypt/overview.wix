@@ -1,19 +1,28 @@
-.C	PGP 2 (Pretty Good Privacy versio 2)
+.C	PGP 2 (Pretty Good Privacy version 2)
 
-.S	概要
+.S	暗号関係の概要
 
 ◯ PGP2 用です。
+	PGP5, OpenPGP, GPG, S/MIME 用のモデュールなどはないです。
+	すでにあったらください;)
 
-◯ コマンドメールの認証にPGPを使います。
+◯ コマンドメールの認証にPGP2を使います。
+   いわゆる『リモート管理の認証』という話の枠組です。
 
-◯ 配送メールの暗号をします
+関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
+関連事項:  PGP2        => .ptr{PGP2}
+
+◯ 配送メールの暗号をPGP2でする
 
 	$USE_ENCRYPTED_DISTRIBUTION
 .xref	$USE_ENCRYPTED_DISTRIBUTION
 
+◯ PGPの設定は makefml 経由で設定をして下さい。
+.xref makefml-pgp
 
 .S	makefml による PGP の公開鍵の登録
 =E.S	Register PGP Public Keys
+.l	makefml-pgp
 
 ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
 必ず makefml をつかうこと
@@ -26,6 +35,40 @@ makefml は
 
 例:
 	makefml pgp elena -ka public.asc
+
+
+.S	PGP2 管理用のコマンド
+=E.S	PGP2 Commands To Maintain ML'S PGP Keys 
+
+関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
+
+管理者が pgp -kv などをリモートでできるようにしてあります。KEYの編集な
+どはリモートではできません。公開鍵を加える、削除。一覧を見るなどをでき
+るようにしてあります。できるようにしてあるのは
+=E
+Available options via FML are
+
+	-ka
+	-kr
+	-krs
+	-h
+	-kx
+	-kxa
+	-kv
+	-kvv
+	-kvc
+	-kc	
+
+です。コマンドの意味はPGPの本を見て下さい。
+=E
+Please read PGP books if you cannot understand them.
+
+例:
+=E
+Example:
+
+	admin pgp -kvv
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
