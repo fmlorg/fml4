@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: fwix.pl,v 2.37 2002/03/24 12:34:33 fukachan Exp $
 #
 
 unshift(@ARGV, split(/\s+/, $ENV{'FWIX_OPTS'}));
@@ -1508,7 +1508,7 @@ sub IndexExpand
     if ($mode eq 'html') {
 	if ($InPre) {
 	    $result =~ s#\<\/PRE\>\s*\<PRE\>\s*##;
-	    $result =~ s#\<\PRE\>\s*\<\/PRE\>\s*##;
+	    $result =~ s#\<PRE\>\s*\<\/PRE\>\s*##;
 	    $result =~ s#\<\/PRE\>##;
 	    $result =~ s#\<PRE\>\s*$##;
 	}
