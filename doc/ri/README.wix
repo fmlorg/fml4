@@ -350,10 +350,10 @@ INSTALL.advanced というファイルを見て下さい。
 fml のターゲットマシンでのテスト環境は
 
 2.1 は
-	sendmail 8.8.4 + perl4.036 on NetBSD 1.2 RELEASE
+	sendmail 8.8.4 + perl5.003 on NetBSD 1.2 RELEASE
 	sendmail 8.8.4 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.8.4 + perl4.036 on NetBSD 1.1B Current
-	(fwtk も併用) 
+	sendmail 8.8.4 + perl4.036 on NetBSD 1.1B(fwtk も併用)
+	sendmail 8.8.4 + perl5.003 on NetBSD 1.1B(fwtk も併用)
 
 2.0 まで
 	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2.1R 
