@@ -44,7 +44,11 @@ sub DoDistribute
 	    last if $waitc++ > 10;
 	    sleep 1;
 	}
-	&Log("FYI: $waitc secs for SEQUENCE_FILE SYNC") if $waitc > 1;
+
+	&Log("FYI: $waitc secs for \$SEQUENCE_FILE sync") if $waitc > 1;
+
+	# to fix duplicated ID's; ?(but how we can detect all cases)
+	# if (-f "$FP_SPOOL_DIR/$ID") { &use('er'); &FixID;}
     }
 
     ##### ML Preliminary Session Phase 02: $DIR/summary
