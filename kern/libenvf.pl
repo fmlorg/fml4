@@ -90,6 +90,7 @@ sub __EnvelopeFilter
 	}
     }
 
+
     # remove the last block which must be a signature.
     $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
     $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
@@ -105,8 +106,8 @@ sub __EnvelopeFilter
     # count up "\n\n" lines;
     # If one paraghaph (+ signature), must be $c == 0. 
     $c = $p = 0;
-    $pe = rindex($e{'Body'}, "\n\n"); # ignore the last signature
-    while (($p = index($e{'Body'}, "\n\n", $p + 1)) > 0) {
+    $pe = rindex($xbuf, "\n\n"); # ignore the last signature
+    while (($p = index($xbuf, "\n\n", $p + 1)) > 0) {
 	last if $p >= $pe;
 	$c++;
     }
