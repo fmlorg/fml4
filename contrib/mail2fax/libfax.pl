@@ -42,7 +42,7 @@ else {
 sub InitSendFax
 {
     # directory
-    $TMP_DIR   = $TMP_DIR || "/tmp";
+    $TMP_DIR   = $FP_TMP_DIR || $TMP_DIR || "/tmp";
 
     # prog
     $FORMATTER = $FORMATTER || "/usr/local/bin/a2ps -nt -ns -nh -p ";
