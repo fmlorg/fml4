@@ -48,6 +48,7 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 				# even if $DO_NOTHING = 1;
 
 &Lock;				# Lock!
+&ReloadMySelf;
 
 if ($USE_LOG_MAIL) { &use('logmail'); &MailCacheDir;}
 
@@ -2572,6 +2573,21 @@ sub Lock
     $LockQueueId = &SetEvent($TimeOut{'lock'} || $TimeOut{'flock'} || 3600, 
 			     'TimeOut') if $HAS_ALARM;
     $USE_FLOCK ? &Flock   : (&use('lock'), &V7Lock);
+}
+
+# for installer ?
+sub ReloadMySelf
+{
+    # If myself is changed after exec'ed, reload it again.
+    if ((-M __FILE__) < 0) {
+	&Log("FYI: reload myself against installation");
+	for ("libkern.pl", keys %INC) {
+	    next unless /^lib\S+\.pl$|\/lib\S+\.pl$/;
+	    delete $INC{$_};
+	    &Log("reload $_ agasin against installation") if $debug;
+	    require $_;
+	}
+    }
 }
 
 sub Unlock 

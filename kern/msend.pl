@@ -148,6 +148,7 @@ sub ExecMSend
 sub MSend4You
 {
     &Lock;
+    &ReloadMySelf;
 
     &GetID;				# set $ID
     &GetDistributeList;

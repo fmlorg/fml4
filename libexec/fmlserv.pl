@@ -218,6 +218,7 @@ sub FmlServ
 
 	### PROCESS BEGIN;
 	&Lock;			# LOCK each ML (lock $FP_SPOOL_DIR)
+	&ReloadMySelf;
 
 	### Processing $proc For $ml ###
 	# DoFmlServProc emulation;
