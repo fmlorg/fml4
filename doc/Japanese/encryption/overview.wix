@@ -10,25 +10,27 @@
 
 .S	暗号関係の概要
 
-◯ PGP2 用です。
-	PGP5, OpenPGP, GPG, S/MIME 用のモデュールなどはないです。
-	すでにあったらください;)
+◯ PGP2 および PGP5 用です。(以下 {2,5} と略します)
+	OpenPGP, GPG, S/MIME 用のモデュールなどはないです。
 
-◯ コマンドメールの認証にPGP2を使います。
+◯ コマンドメールの認証にPGP{2,5}を使います。
    いわゆる『リモート管理の認証』という話の枠組です。
 
 関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
 関連事項:  PGP2        => .ptr{PGP2}
 
-◯ 配送メールの暗号をPGP2でするというオプションもありますが…
+◯ 配送メールの暗号をPGP{2,5}でするというオプションもありますが…
 
 	$USE_ENCRYPTED_DISTRIBUTION
 
 ◯ PGPの設定は makefml 経由で設定をして下さい。
 .xref makefml-pgp
 
-.S	makefml による PGP の公開鍵の登録
-=E.S	Register PGP Public Keys
+
+.C	PGP2
+
+.S	makefml による PGP2 の公開鍵の登録
+=E.S	Register PGP2 Public Keys
 .l	makefml-pgp
 
 ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
@@ -76,6 +78,17 @@ Example:
 
 	admin pgp -kvv
 
+.C	PGP5
+
+.S	makefml
+
+	makefml のコマンドは
+		PGP2	pgp
+		PGP5	pgpk, pgps, pgpv, pgpe
+
+	で使い分けて下さい。
+
+.S	admin コマンドはまだつくってないす
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
