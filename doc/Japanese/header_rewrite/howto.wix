@@ -755,6 +755,36 @@ $START_HOOK =q%
    }
 %;
 
+.S	サポート用のＭＬ
+
+Q:
+
+このＭＬで、問い合わせへの返事＋スタッフ間の連絡で兼用
+しています。
+
+(1) 誰でも投稿できる(投稿だけ)。
+(2) 配信されたメールに対して、
+   (A)「ＭＬ加入者への返信」と
+   (B)「問い合わせた人＋ＭＬ加入者への返信」
+  を簡単に使い分けられるようにします。
+
+そこで Reply-To を残したまま CC: に元メールの From: をいれておきたい。
+そうすると(名称はメールソフトによるが)「ふつうに返信」で (A)、「全員に
+返信」で (B) が実現できる。
+
+答え:
+
+$SMTP_OPEN_HOOK = q#
+    if ($Envelope{'h:Cc:'}) {
+        &DEFINE_FIELD_FORCED('Cc', 
+		$Envelope{'h:Cc:'}. ", ". $From_address );
+    } else {
+        &DEFINE_FIELD_FORCED('Cc', $From_address);
+    }
+#;
+
+注意: この場合のポイントは HOOK を使うことです。使わずに書くと 
+      config.ph が評価される時に $From_address の値がまだ不定なのです。
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
