@@ -5,19 +5,25 @@ $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: (.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
 require 'getopts.pl';
-&Getopts("hd:b:m:M:t:vT:D:");
+&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:");
+
 
 ##### VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
-$KEYWORD = 'C|ST|S|C\.S|http|label|key|seealso|xref';
+$KEYWORD = 'C|ST|S|C\.S|P|http|label|key|seealso|xref';
 $FORMAT  = 'q|~q';
 
 $HTML_KEYWORD = 'HTML_PRE|HTML_ENDPRE';
 
 $|        = 1;
+$no_index = 1 if $opt_n eq 'i';
 $debug    = $opt_v; 
+$Author   = $opt_I;
+$Copyright = $opt_C;
+$DIR      = $opt_d || $opt_I;
 $HTML_DIR = $opt_D;
+$ROFF_DIR = $opt_R;
 $Title    = $opt_T || "NONE TITLE";
 $TMPDIR   = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; # this order is correct.
 -d $TMPDIR || mkdir($TMPDIR, 0700);
@@ -80,11 +86,11 @@ sub Formatter
     if (@ARGV) {
 	foreach (@ARGV) {
 	    s/(\S+)\/(\S+)/$dir = $1, $_ = $2/e;
-	    &$Prog($_, ($opt_d || $dir || '.'), $mode);
+	    &$Prog($_, ($DIR || $dir || '.'), $mode);
 	}
     }
     else { # STDIN;
-	&$Prog($_, ($opt_d || '.'), $mode);
+	&$Prog($opt_N, ($DIR || '.'), $mode);
     }
     close(TMPF);
 
@@ -92,14 +98,15 @@ sub Formatter
     ### PHASE 02:
     $Prog = $Prog{"phase2:$mode"};
     &Open4Read;
-    &$Prog($_, ($opt_d || $dir || '.'), $mode);
+    &$Prog($_, ($DIR || $dir || '.'), $mode);
     close(TMPF);
 
     ### PHASE 03:
     if ($mode eq 'text') {
 	&LogManifest;
-	&ShowIndex;
+	&ShowIndex unless $no_index;
     }
+
 }
 
 
@@ -159,7 +166,8 @@ sub Open4Write
     open(ENG, "> $TMP_ENG") || die($!);
     select(ENG); $| = 1; select(STDOUT);
 
-    print TMPF "#.CUT:$HTML_DIR/index.html\n" if $mode eq 'html'; 
+    print TMPF "\#.CUT:${HTML_DIR}/index.html\n" if $mode eq 'html'; 
+    print ENG  "\#.CUT:${HTML_DIR}/index.html\n" if $mode eq 'html'; 
 }
 
 
@@ -180,6 +188,7 @@ sub OutputFile
 
 	while (<TMPF>) {
 	    if (/^\#\.CUT:(\S+)/) {
+		print STDERR ">>>$_\n";
 		$name = $outfile = $1;
 		$name =~ s#.*/##;
 		print STDERR "> $outfile\n";
@@ -198,6 +207,29 @@ sub OutputFile
 	}
 
 	close(OUTHTML);
+    }
+    elsif ($mode eq 'roff') {
+	print ".SH\n$Copyright\n" if $Copyright;
+	while (<TMPF>) {
+	    if (/^\#\.CUT:(\S+)/) {
+		$name = $outfile = $1;
+		$name =~ s#.*/##;
+		print STDERR "> $outfile\n";
+
+		close(OUTROFF);
+		open(OUTROFF, "> $outfile") || die "$!\n";
+		print OUTROFF ".SH $Title\n.SH $name\n";
+
+		next;		# cut the line "^#.CUT";
+	    }
+
+	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+	    s/^(\#\.index)/$INDEX/; 
+
+	    print OUTROFF $_;
+	}
+
+	close(OUTROFF);
     }
     elsif ($mode eq 'text') {
 	while (<TMPF>) {
@@ -236,11 +268,21 @@ sub Format
 sub FormatReset
 {
     undef $TAG;
-    print TMPF "</PRE>\n" if $InPre;
+    if ($InPre) {
+	print TMPF "</PRE>\n";
+	print ENG  "</PRE>\n";
+    }
     undef $InPre;
 }
 
 
+########################
+# ROFF
+# .TH 
+# .SH 
+# .B 
+# .br
+#
 sub Expand
 {
     local($c, $s, $file, $mode) = @_;
@@ -260,8 +302,47 @@ sub Expand
 	$s = $1; # if $mt; 
     }
 
+    ###  Part
+    if ($c eq 'P') {
+	&FormatReset;
+	$CurrentSubject = $s;
+
+	%Part = (1, 'I',
+		 2, 'II',
+		 3, 'III',
+		 4, 'IV',
+		 5, 'V',
+		 6, 'VI',
+		 7, 'VII',
+		 8, 'X',
+		 9, 'XI',
+		 10, 'XII',
+		 );
+
+	$Part++;
+	$s = "$Part{$Part}\t$s";
+
+	if ($mt) {
+	    $INDEX .= "\n$s\n";
+	}
+	elsif ($mh) {
+	    $INDEX .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
+	    $s     .= "<PRE>\n";
+
+	    # split after the tmpfile is generated;
+	    $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
+
+	    $InPre++;
+	}
+	elsif ($mr) {
+	    $s = ".SH\n$s\n";
+	}
+
+
+    }
     ###  Chapter
-    if ($c eq 'C') {
+    elsif ($c eq 'C') {
 	&FormatReset;
 	$CurrentSubject = $s;
 
@@ -278,10 +359,14 @@ sub Expand
 	    $s     .= "<PRE>\n";
 
 	    # split after the tmpfile is generated;
-	    $s     = "#.CUT:$HTML_DIR/$Chapter.html\n<HR>\n$s"; 
+	    $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
 
 	    $InPre++;
 	}
+	elsif ($mr) {
+	    $s = ".SH\n$s\n";
+	}
+
     }
     elsif ($c eq 'S' || $c eq 'C.S') {
 	&FormatReset;
@@ -299,6 +384,10 @@ sub Expand
 	    $s     .= "<PRE>\n";
 	    $InPre++;
 	}
+	elsif ($mr) {
+	    $s = ".SH\t$s\n";
+	}
+
     }
     elsif ($c eq 'ST') {
 	$CurrentSubject .= $s;
@@ -323,7 +412,18 @@ sub Expand
 	&Log("$s already exists\tin \%index[$.]\n  ALREADY $_index{$s}") 
 	    if $index{$s};
 	$_index{$s} = "$c $s($.)";
-	$index{$s}  = "$Chapter.$Section"; 
+
+	if ($mode eq 'text') {
+	    $index{$s}  = "$Chapter.$Section"; 
+	}
+	elsif ($mode eq 'html') {
+	    $index{$s} = 
+		"</PRE><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$Chapter.$Section</A><PRE>";
+	}
+	elsif ($mode eq 'roff') {
+	    $index{$s}  = "$Chapter.$Section"; 
+	}
+
 	return '#.next';
     }
 
@@ -359,6 +459,18 @@ sub ReadFile
 	print STDERR "Including $file\n";
     }
 
+
+    ### split after the tmpfile is generated;
+    if ($mode eq 'html') {
+	;#; print TMPF "#.CUT:$HTML_DIR/$fname\n";
+    }
+    elsif ($mode eq 'roff') {
+	$fname =~ s/\.wix/.1/;
+	print TMPF "#.CUT:$ROFF_DIR/$fname\n";
+	print ENG  "#.CUT:$ROFF_DIR/$fname\n";
+    }
+
+
     while (<$file>) {
 	chop;
 
@@ -366,29 +478,49 @@ sub ReadFile
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
 
 	# PATTERN
-	s/^\.($HTML_KEYWORD)/($_  = &HtmlExpand($1, $2, $file, $mode)) || next/e;
+	
+	if (/^\.($HTML_KEYWORD)/) {
+	    if ($mode eq 'html')  {
+		s/^\.($HTML_KEYWORD)/($_  = &HtmlExpand($1, $2, $file, $mode)) || next/e;
+	    }
+	    else {
+		next;		# skip .HTML.*
+	    }
+	}
+
 	s/^\.($KEYWORD)\s+(.*)/$_ = &Expand($1, $2, $file, $mode)/e;
 	s/^\.($FORMAT)\s*(.*)/$_  = &Format($1, $2, $file, $mode)/e;
+
+
 
 	# NEXT
 	next if /^\#.next/o;
 
-	# INCLUDE
+	# INCLUDE; anyway including. we add ".CUT" commands to Temporary Files
 	s/^\.include\s+(\S+)/&ReadFile($1, $dir || '.', $mode)/e;
+
+	select(TMPF);
 
 	# Save the body
 	if ($mode eq 'text') {
-	    print TMPF $TAG;
-	    print TMPF "$_\n";
+	    print $TAG;
+	    print "$_\n";
 	}
 	elsif ($mode eq 'html') {
-	    print TMPF "$_\n";
+	    print "$_\n";
+	}
+	elsif ($mode eq 'roff') {
+	    print "$_\n";
 	}
 
-	/^\.(\S+)/ && &Log("Error? ^.$1"); 
+
+	# Try to detect ERROR
+	if ($mode ne 'roff') { /^\.(\S+)/ && &Log("Error? ^.$1");}
     }# WHILE;
 
     close($file);
+
+    select(STDOUT);
 
     "";
 }
