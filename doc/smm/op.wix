@@ -1481,6 +1481,9 @@ $body .= "Message-ID: ".
 
 .S	宇宙歴0403.3238…（おあそびその１）
 
+＊＊＊ 削除しました(95/10/2) ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
+
 しゃれで作りました (_o_)
 
 	$STAR_TREK_FORM = 1;
@@ -1528,41 +1531,37 @@ Elena@phys.titech.ac.jp というＭＬで
 Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
 の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
 
-config.ph に次の設定をする
+config.ph に次の設定をする。その複数のアドレスを(ループチェックに使うために)
 
-@Playing_to にフルアドレスを、			＃ループチェックに使う
-
-@Playing_to = (	'Elena@phys.titech.ac.jp', 
+@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
 		'Anna@phys.titech.ac.jp');
 
-のように、かいてください。配列の先頭がオリジナルのアドレスです。
+のように、かいてください。配列の先頭がオリジナルのアドレス(==
+$MAIL_LIST)です。
 
 こうすると Elena になげても Anna に投げても どっちでもＯＫで、
 to: と reply-to:を変更します。
 ＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
-＃もちろん昔の名前でもＯＫですが（sub InitConfigでコンヴァートしてます）
 
-例（全体）：
+＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
+libcompat.pl にBackward compatibility のためのコードがあります。
+
+
+あと、↓このように書いてみてください。
+
+例（全体）： 
 ----------------------------------------------------------------
-# Here is a playing of "To addresses change"; for &addressmatching
-@Playing_to = (	'Elena@phys.titech.ac.jp', 
-		'Anna@phys.titech.ac.jp');
-
 # Here is a playing of "To addresses change"; string to eval
 $SMTP_OPEN_HOOK .= q#
-        local($OrgAddr);	
-	foreach $Playing (@Playing_to) {
-	    ($Playing) = ($Playing =~ /(\S+)@/, $1);
-	    $OrgAddr = $Playing unless $OrgAddr;
-
-	    if($To_address =~ /$Playing/i) {
-		local($mail_list) = $MAIL_LIST;
-		if($mail_list =~ s/^$OrgAddr/$Playing/) {
-		    $MAIL_LIST = $mail_list;
-		}
-	    }
-	}
+    local($a);
+    foreach (@PLAY_TO) {
+        $a = (split(/\@/, $_))[0];
+        if ($Envelope{"to:"} =~ /$a/) {
+            $MAIL_LIST = $_;
+        }
+    }
 #;
+
 ----------------------------------------------------------------
 
 
