@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.76.2.4 2001/08/17 14:43:45 fukachan Exp $
+# $FML: MANIFEST,v 1.76.2.5 2001/09/27 15:43:01 fukachan Exp $
 #
 
 
@@ -1067,6 +1067,10 @@ USE_SMTPFEED_F_OPTION:
 # default 1 from 2.1C#13
 # value: 1/0
 USE_MIME:		1
+
+# special hack to treat broken MIME ending (e.g. by MacOS X)
+# value: 1/0
+MIME_BROKEN_ENCODING_FIXUP:	0
 
 # obsolete and Japanese specific 
 # NOT RECOMMENDED OPTION: 

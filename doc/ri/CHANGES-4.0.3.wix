@@ -16,6 +16,11 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 (4.0.2 after)
 
 
+2001/10/10
+
+   cf/MANIFEST (1.88-1.89):
+	define MIME_BROKEN_ENCODING_FIXUP
+
 2001/10/03
 
    kern/libsmtp.pl (2.56-2.57):
@@ -189,7 +194,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.24 2001/10/03 12:10:02 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.25 2001/10/03 14:36:26 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
