@@ -6,6 +6,14 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+   proc/libmoderated.pl (2.10-2.11)
+
+	missing Japanese message
+	apply patch by Satoshi Tatsuoka <satoshi@softagency.co.jp>
+
+   sbin/makefml	(2.44-2.45)
+	validate config.guess existence
+
 [ 3.0pl11 ]
 
    proc/libra.pl
