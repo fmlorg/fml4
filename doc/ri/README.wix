@@ -47,8 +47,8 @@ FML includes
 じことができるのであればユーザ・インターフェイスはどのようなものでもい
 い』と思うからです。
 =E
-FML is based on that "each man/women, each environment", so the degree
-of freedom is important.
+FML is based on that "each man/women, each environment", since I think
+that the degree of freedom is important.
 
 なおデフォールトでは Private Communication を前提としています。よって
 メンバーは手動で登録しメンバーだけが投稿やコマンド操作などができる状態
@@ -57,10 +57,10 @@ of freedom is important.
 つけ加えて下さい。妙に凝った:)設定でないなら設定ファイルだけでなんとか
 なるはずです。
 =E
-I suppose that ML is a private communication so the default is you add
-a new member in hand, only members can post and user commands.  If you
-use extension functions, you modify or add the configurations to
-config.ph(FML configuration file) EXPLICITLY.
+I suppose that ML is a private communication so the default is "you
+add a new member in hand, only members can post and user commands".
+If you use extended functions, you need to add and to modify
+configurations to config.ph (FML configuration file) EXPLICITLY.
 
 
 .S	必要な環境
@@ -74,12 +74,15 @@ config.ph(FML configuration file) EXPLICITLY.
 です。
 =E
 FML requires 
-	UNIX acount
-	perl
+	an UNIX acount
+	perl (4 or 5, at least after 4.019?)
 	MTA (e.g. sendmail).
 
 プロバイダのサービスを利用している場合どうすればよいかは一概にはいえま
 せん。詳しくは自分の使っているプロバイダに聞いて下さい。
+=E
+If you use an ISP service, e.g. shell accounts, you should consult
+ISP for details of environments when you use FML.
 
 一般にはいわゆる「シェルアカウント/シェルサービス」などと呼ばれる UNIX 
 マシンを使えるサービスを利用している必要があるはずです。ホームページレ
@@ -94,7 +97,7 @@ ML is a filtering process, so it consists of
 	"SMTPを理解する配送プロセス"
 =E
 	the process receives an incoming mail and kicks a fml process off
-	the delivery process kicked by fml
+	the delivery process kicked by fml, which process understands SMTP
 
 の２つの動作からなります。メールを受けることと配送することは概念的に別
 のものです。原則的に fml はメールを受けるホスト上で動きます。ただ配送
@@ -104,21 +107,24 @@ ML is a filtering process, so it consists of
 The delivery and kick-off processes are essentially different
 ones. FML runs on the host which receives in-coming mails. The
 delivery system can be another host other than the host which receives
-in-coming mails.  You can use arbitrary delivery system which can
+in-coming mails.  You can use arbitrary delivery systems which can
 understand SMTP.
-
-メールを受けるホストでfmlをkickすることができない場合はPOP3を使ってML
-を実行するような裏技が必要になります(でもしょせん裏技なのでちょっと…)。
-=E
+=S
 FML sends mails via SMTP, so you do not need sendmail runs on your
 machine.  In addition, you can set up that FML runs on an old machine
 but distribution is done on new machine.
 
+メールを受けるホストでfmlをkickすることができない場合はPOP3を使ってML
+を実行するような裏技が必要になります(でもしょせん裏技なのでちょっと…)。
+=E
+If you cannot configure FML cannot be kicked by MTA on your system,
+you can setup FML via POP3, an underhanded trick :D
+
 なおありうる環境はいろいろですが、ドキュメントはターゲットの NetBSD
-(4.4BSD) を想定して書いてあります。
+(4.4BSD derived system) を想定して書いてあります。
 =E 
-Since the target machine is 4.4BSD, the document is based on sendmail
-and perl (4 or 5) enveironment.
+Since the target machine is NetBSD (4.4BSD derived system), the
+document is based on sendmail and perl (4 or 5) enveironment.
 
 
 .S	ソースコードと情報へのポインタ
@@ -157,7 +163,7 @@ Home page
 なお試験的に配布ドキュメント群へのサーチができるようになっています。
 キーワードのサーチに使えるといいな。
 =E
-You can use search engine over distributed documents in
+You can use search engine over distributed documents at
 http://www.fml.org/fml/ .
 
 
@@ -169,7 +175,7 @@ fml@ffs.fml.org へ何でもいいからメールを送ると最新情報を返すようにして
 =E
 If you can use only Email, you can obtain the latest information on
 fml to send a mail (any body is O.K.) to the address fml@ffs.fml.org
-though my updates of documents is slow.
+though my updates of documents is slow for the lack of time.
 
 また最新版のソースコードは、なんでもいいからメールを
 fml-current@ffs.fml.org に送ると自動的に(50Kbytes程度で分割して)送り返
@@ -291,15 +297,16 @@ fml 2.1 のターゲットマシン/テスト環境は
 The target and experimental machines are
 
 	sendmail 8.8.8 + perl5.003 on NetBSD 1.2 RELEASE
-	sendmail 8.8.8 + perl4.036/perl5.003 on NetBSD 1.2 Beta
+	sendmail 8.8.8 + perl5.003 on NetBSD 1.2 Beta
+	sendmail 8.8.8 + perl4.036/perl5.003 on NetBSD 1.1B
 
 なおFML.ORGの配送システムは
 =E
-and the delivery system on FML.ORG is combination of 4 MTA's:
+and the delivery system on FML.ORG consists of 4 MTA's:
 
-	sendmail 8.8.7+smtpfeed α 
-	生 sendmail 8.8.8
-	exim 1.70
+	sendmail 8.8.8 + WIDE patch + smtpfeed
+	sendmail 8.8.8
+	exim  1.70
 	qmail 1.01
 
 の4つのMTAを使った並列配送で数十倍速になっています:)。
@@ -316,8 +323,8 @@ which accelerate the delivery.
 ＃ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
 ＃判定できないようなどマイナ〜だったらわかりませんが
 =E
-The target OS is NetBSD (4.4BSD). You may use FML on almost UNIX. 
-The installer (makefml) ajdust FML when installing.
+The target OS is NetBSD (4.4BSD derived system). You may use FML on
+almost UNIX. The installer (makefml) ajdust FML when installing.
 
 sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 ドが入っています。そもそも NT 上の perl, sendmail などが何となく動いて
@@ -326,8 +333,9 @@ sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 補足説明が書いてあります。インストールは INSTALL と INSTALL_on_NT4 両
 方を参照して下さい。
 =E
-sys/arch src/arch have Windows NT4.0 dependent codes. 
-If FML runs well on NT, you are lucky:).
+sys/arch and src/arch have Micro$oft Windows NT4.0 dependent codes. If
+FML runs well on NT, you are lucky:). Please read INSTALL and
+INSTALL_on_NT4.
 
 
 .S	アップグレード・インストールをしようとしている人へ
@@ -349,7 +357,7 @@ If FML runs well on NT, you are lucky:).
    「管理者のルーチンワークを少しでも減らす」間の妥協』
 です。
 =E
-fml has been developed to offer 
+FML has been developed to offer 
 =S
 	extend the degrees of freedom for users and maintainers as
 	could as possible.
