@@ -2261,8 +2261,8 @@ lib/remote/REAMDE をみてもらうとわかりますね。
 ・setuid problem
 	でもケースバイケースなんですよねぇ
 
-・perlのインストール（socket.phがない）
-	（たぶん）4.019以上なら動くと思うんですが…
+・ソラリス２ でソケット の定数が違うので動かない
+  ＃$COMPAT_SOLARIS2 がセットされているかチェック
 
 ・SYSVでflock, trancate等の実装がおかしい。（よってPerlでもおかしい）
 
@@ -2270,6 +2270,7 @@ lib/remote/REAMDE をみてもらうとわかりますね。
 
 ・Bourne Shellの実装が違う
 	＃そんな極端なのあるか？（ぼそっ）
+
 
 .S	Insecure dependency in chdir 
 
