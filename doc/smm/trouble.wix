@@ -804,12 +804,17 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 
 	/var/spool/ml/src/fml.pl の場所にない
 
+同様のメッセージが次の perl がないみたい場合にもありえます。
+
 
 .S	>sh: /var/spool/ml/src/fml.pl: command not found
 
-	/var/spool/ml/src/fml.pl は perl が実行しますが
-	先頭の #!/usr/local/bin/perl の場所に perl がない時にでます。
+/var/spool/ml/src/fml.pl は perl が実行しますが
+先頭の #!/usr/local/bin/perl の場所に perl がない時にでます。
 
+「コマンドがない」という理由は fml.pl を perl fml.pl に展開してから実
+行するので、perl がないというつもりで「コマンドがない」というエラーメッ
+セージになります。
 ＃ make 時に configure が自動的に補正することにはなっているんですが… 
 
 
