@@ -1083,8 +1083,6 @@ sub ConvertCF2to3
     ### Section: Remove obsolete variable
     undef $config{"ML_MEMBER_CHECK"};
 
-    $config{"CFVersion"} = 3;
-
     ### Section: Acces Policy and Auto Registration
 
     # default 
@@ -1110,7 +1108,6 @@ sub ConvertCF2to3
     }
     undef $MAKE_FML{"DELIVERY_MODE"};
 
-    ### Section: Subject Tag
     if ($MAKE_FML{"SUBJECT_TAG"}) {
 	$config{"SUBJECT_TAG"} = $MAKE_FML{"SUBJECT_TAG"};
 	undef $MAKE_FML{"SUBJECT_TAG"};
@@ -1123,6 +1120,24 @@ sub ConvertCF2to3
     ### Version 3 
     $config{'REMOTE_ADMINISTRATION_AUTH_TYPE'} = "crypt";
     $config{'PGP_PATH'} = "$ML_DIR/$ml/etc/pgp";
+
+    ### convertion ends; so we declare now 3!;
+    $config{"CFVersion"} = 3;
+}
+
+
+sub ConvertCF3to3_1
+{
+    local(*config, *MAKE_FML) = @_;
+
+    ### Section: Header
+    # 3.1 (1997/10/14) is after 2.1A#8 
+    $config{'REWRITE_TO'} = 1 if $config{'CFVersion'} < 3.1; 
+    # 2.1 release default;
+    $config{'REWRITE_TO'} = 0 if $config{'NOT_REWRITE_TO'}; 
+
+    ### convertion ends; so we declare now 3.1!;
+    $config{"CFVersion"} = 3.1;
 }
 
 
@@ -1941,12 +1956,17 @@ sub GetCF
     if (!$config{"CFVersion"} || 
 	$config{"CFVersion"} < 3 ||
 	$COMPAT_CF2) {
-	print STDERR "   (config.ph; connvert \$CFVersion 2 -> 3)\n\n";	
+	print STDERR "   (config.ph; connvert \$CFVersion 2 -> 3)\n\n";
 	&Log("makefml::config convert config.ph::\$CFVersion 2 -> 3");
 	&ConvertCF2to3(*config, *MAKE_FML);
     }
     else {
-	print STDERR "   (config.ph; \$CFVersion 3)\n\n";
+	print STDERR "   (config.ph; \$CFVersion $config{'CFVersion'})\n\n";
+    }
+
+    if ($config{"CFVersion"} < 3.1) {
+	print STDERR "   (config.ph; connvert \$CFVersion 3 -> 3.1)\n\n";
+	&ConvertCF3to3_1(*config, *MAKE_FML);
     }
 }
 
@@ -2692,7 +2712,8 @@ sub FLock
 	return 0;
     };
 
-    flock($lockdir, $LOCK_EX);
+    eval("flock(\$lockdir, \$LOCK_EX);");
+    print STDERR "\nError: $@\n" if $@;
 
     $FLockP{$ml}   = 1;
     $LockFile{$ml} = $lockdir;
@@ -2705,7 +2726,8 @@ sub FUnLock
     local($lockdir) = $LockFile{$ml};
 
     close($lockdir);
-    flock($lockdir, $LOCK_UN);
+    eval("flock(\$lockdir, \$LOCK_UN);");
+    print STDERR "\nError: $@\n" if $@;
 }
 
 
@@ -2836,6 +2858,7 @@ sub TrySmtpConnect
     }
     
     if (connect(S, $target)) { 
+	sysread(S, $result, 4096); # anyway get it.
 	$result = "connect ok";
      } 
     else { 
@@ -3054,6 +3077,18 @@ sub EvalMenu
 
     $SUMMARY{'CONTROL_ADDRESS'} = 
 	$config{'CONTROL_ADDRESS'} || "*** Command Unavailable ***";
+
+
+    if ($config{'REWRITE_TO'} == 0) {
+	$SUMMARY{'REWRITE_TO'} = "To: is original (pass through)";
+    }
+    elsif ($config{'REWRITE_TO'} == 1) {
+	$SUMMARY{'REWRITE_TO'} = "To: MAIL_LIST, others";
+    }
+    elsif ($config{'REWRITE_TO'} == 2) {
+	$SUMMARY{'REWRITE_TO'} = "To: MAIL_LIST";
+    }
+
 
 
     for (split(/\n/, $MenuTemplate{$menu})) {
