@@ -285,7 +285,7 @@ You can obtaion the latest (fml-current) documents and sources here.
 You can obtain the latest information on fml to send a mail (any body
 is O.K.) to the address
 
-	fml@axion.phys.titech.ac.jp
+	fml@ffs.fml.org
 
 へ何でもいいからメールを送ると最新情報を返すようにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
@@ -316,7 +316,7 @@ ftp が使えない場合メールでは、なんでもいいからメールを
 =E
 If you cannot use ftp, please send a mail (body is anything O.K.) to 
 
-	fml-current@axion.phys.titech.ac.jp 
+	fml-current@ffs.fml.org 
 
 に送ると自動的に送り返されます。
 ＃自動的に分割して送り返します。なお送り返すのは UNIX Version の方です。
@@ -332,7 +332,7 @@ You receive auto-suplitted mails of the latest source (Unix version).
 =E
 * The mailing list on fml discussion is the address 
 
-	fml-support@axion.phys.titech.ac.jp (Japanese, Automatically Added)
+	fml-support@ffs.fml.org (Japanese, Automatically Added)
 
 =E
 # Attention! This address adds your address as a member of fml-support
@@ -343,7 +343,7 @@ ML if you are now not a member and send a mail to this address.
 =E
 * you can make a contact with only the author to send a mail to the address
 
-	fml-bugs@axion.phys.titech.ac.jp (forwarded to the author only)
+	fml-bugs@ffs.fml.org (forwarded to the author only)
 
 に御一報くださいませ。
 
@@ -357,14 +357,14 @@ ML if you are now not a member and send a mail to this address.
 The address "fml-query" is to forward the in-coming mail to
 fml-support but the sender is not registered automatically.
 
-	fml-query@axion.phys.titech.ac.jp 	
+	fml-query@ffs.fml.org 	
 
 を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
 ことなく fml-support へフォワードを行います。
 
 どうしても 内密な相談とか、DMで聞きたいことは 
 
-	fml-bugs@axion.phys.titech.ac.jp
+	fml-bugs@ffs.fml.org
 
 へ投げておいてください。ただ返事は遅れぎみです _o_ 
 .# ＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)

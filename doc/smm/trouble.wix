@@ -997,6 +997,13 @@ $SMTP_OPEN_HOOK = q#
 #;
 
 
+.S	Eudora と Reply-To: 
+
+要するに だめ〜なそふと？すか
+
+fml-support: 02353
+＃ふりーのEudoraで Bcc: -> Reply-To: とするパッチがあるらしい…
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
