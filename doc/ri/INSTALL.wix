@@ -2405,7 +2405,16 @@ http://www.fml.org/fml/CHECK_LIST/ にリストアップされている項目をチェッ
 クします。
 =E
 Please check items e.g. logfiles referred in CHECK_LIST.en (package),
-http://www.fml.org/fml/CHECK_LIST/.
+http://www.fml.org/fml/CHECK_LIST-e/.
+
+.if LANG == JAPANESE
+doc/opにはトラブル事例集の章があります。
+http://www.fml.org/fml/op/index.html#trouble
+.fi
+.if LANG == ENGLISH
+See chapters on troubles in doc/op.
+http://www.fml.org/fml/op-e/index.html#trouble
+.fi
 
 例えばエラーメールの中に含まれる適当な文字列を見つけます。そして、 
 

@@ -29,6 +29,7 @@ and search appropriate keyword over the documents.
 .C	トラブル・シューティング (主に permission 問題まわり)
 =E.C	Trouble Shooting (around permission)
 .k	trouble shooting
+.n	trouble
 
 .S	Insecure dependency in chdir, Permission denied, ... 
 .k	Insecure dependency in chdir 
