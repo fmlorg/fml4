@@ -289,6 +289,10 @@ NOT_USE_UNIX_FROM_LOOP_CHECK:  0
 # value: 1/0
 CHECK_MESSAGE_ID:	1
 
+# loop check based on mailbody md5 cksum cache
+# value: 1/0
+CHECK_MAILBODY_CKSUM:	0
+
 # Logs the getpeername()
 # value: 1/0
 LOG_CONNECTION:	0
