@@ -28,6 +28,9 @@ sub __LoadConfiguration
 	exit(1);
     }
 
+    # reset to overload many times
+    for (keys %INC) { delete $INC{$_} if /config.ph/;}
+
     # fix @INC to suppose
     # 1. $DIR
     # 2. $DIR/../etc/fml/ (e.g. /var/spool/ml/etc/fml/ )
@@ -74,6 +77,12 @@ sub __LoadConfiguration
 	&Log("require $SiteforcePath") if $debug;
 	require($SiteforcePath);
 	last;
+    }
+
+    # reset to overload many times to ensure next time loading
+    for (keys %INC) {
+	delete $INC{$_} if /config.ph/;
+	delete $INC{$_} if /loadconfig.pl/;
     }
 }
 
