@@ -1,0 +1,485 @@
+.C	Security 
+.l	security
+
+.S	Security 関係の基本思想
+=E.S	On security
+
+基本的に
+
+   1	デフォールトではすべてを認めない
+   2	大丈夫と思われるものを通すようにする
+   3	疑わしきものははじいて判断をＭＬの管理者へあおぐ
+
+という風に構成されています。
+=E
+Fundamentally
+	1	deny all
+	2	permit explicitly things we believe as secure 
+	3	ask ambiguous situations to a maintainer
+		e.g. insecure syntax commands?
+
+.S	Security Check Routine
+.l	SecureP
+.l	InSecureP
+.k	InSecureP
+.k	SecureP
+
+ファイアウォールでも同様ですが、概念的に２種類の考え方が出来ます。
+
+	1 明らかに危ないものを除いていく
+	2 安全なものを許可していってそれ以外は拒否する
+=E
+Two security policy concepts for security are typical.
+==
+	1 deny all, permit secure conditions
+	2 permit all, deny known insecure conditions.
+
+fml は 1 のポリシーを採用しています。fml-support: 00950 でも述べていますが
+=E
+fml works under policy 1.
+
+	1.x は外掘から埋める方式 (関数 InSecureP)
+	2.y は内掘から埋める方式 (関数 SecureP)
+
+といってます(^^)。1.x と 2.y の関係はそのまま 上の 1 と 2 の違いといっ
+て間違いありません。
+
+SecureP は以下のように『コマンドとしてうけいれる命令(メールの一行全体
+について実行)の形を限定』します。
+=E
+&SecureP function checks under the policy "1 deny all, permit secure
+conditions". It restricts the fml command syntax. The rule is
+
+.if LANG == JAPANESE
+    １ 	\w/\w の部分は見逃す。＃ ../ とか .[a.]/ とかはだ〜め
+       	/ でOKのところは消去する
+	また、まとめ送り等の m=数字 等の特別なシンタックスは消去する。
+    
+    ２ 	/^[\#\s\w\-\.\,\@\:]+$/
+
+    の形はゆるす。
+    ＃注意： \w は [A-Za-z0-9_] なので、 "-" を加えた
+
+    [Extension]
+	ユーザの拡張用に %SECURE_REGEXP というハッシュが用意されています。
+	このハッシュ(KEYは適当でよい)のいずれかの正規表現
+	にマッチしたら、ＯＫになるように動きます。
+	これは YOUR OWN RISK で定義して下さい。
+.l	%SECURE_REGEXP
+.k	%SECURE_REGEXP
+.k	SecurePの拡張: %SECURE_REGEXP
+
+	逆に %INSECURE_REGEXP ハッシュはまずいパターンを記述できます。
+.l	%INSECURE_REGEXP
+.k	%INSECURE_REGEXP
+.k	SecurePの拡張: %INSECURE_REGEXP
+
+
+    ３ 	これ以外を含んでいたらエラー
+
+    ４ 	特殊なケース（admin コマンドの admin addr m=3) は
+	事前に例外処理をした後 &SecureP にまわす。
+
+例：	許される例
+
+   summary
+   mget 1-20,30,last:20 mp 1
+   mget 10? mp 1			(default では許さない)
+   mget 1[012]? mp 1			(default では許さない)
+   chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp 
+
+
+例：	許されない例
+   mget `domainname`
+.fi
+.if LANG == ENGLISH
+    1 	ignore \w/\w , deny both ../ and .[a.]/
+	permit special command syntax m=\d+.
+
+    2   permit /^[\#\s\w\-\.\,\@\:]+$/
+
+    3   A user can use %SECURE_REGEXP hash table.
+.l	%SECURE_REGEXP
+.k	%SECURE_REGEXP
+.k	SecureP Extension: %SECURE_REGEXP
+
+	Example:
+	$SECURE_REGEXP{'whois'} = 
+	'\s*whois\s+\033\$[\@B][\041-\176]+\033\([BJ]\s*';
+
+	%INSECURE_REGEXP to reject special patterns, 
+	which you think as insecure.
+.l	%INSECURE_REGEXP
+.k	%INSECURE_REGEXP
+
+    4   errors if syntax contains others.
+
+Example: 
+
+   summary				(permit)
+   mget 1-20,30,last:20 mp 1		(permit)
+   mget 10? mp 1			(denied in default)
+   mget 1[012]? mp 1			(denied in default)
+   chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp (permit)
+.fi
+
+例外処理として:
+
+   whois 日本語
+
+をどうしよう？という問題があります。今のところ”通さない”設定のままで
+すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
+.l	whois-security
+.k	whoisと日本語の問題
+
+例：	許されるパターンを拡張する例(%SECURE_REGEXPを使う)
+
+   $SECURE_REGEXP{'whois'} = '\s*whois\s+\033\$[\@B][\041-\176]+\033\([BJ]\s*';
+
+   ＃注意:
+   ＃このパターンを調べるべき対象の文字列全体にマッチさせるので
+   ＃最後のスペース等がありうるのなら、それらも考慮する必要がある
+
+
+[捕捉] 許されるコマンドのシンタックス
+シェルと関係しています。
+=E
+The pattern is related with UNIX shell.
+
+Quoted from 4.4BSD:/usr/share/man/cat1/sh.0 
+.q
+       Shell Patterns
+
+       A pattern consists of normal characters, which match them-
+       selves, and meta-characters.   The meta-characters are
+       ``!'', ``*'', ``?'', and ``[''.  These  characters lose
+       there special meanings if they are quoted.  When command
+       or variable substitution is performed and the dollar sign
+       or back quotes are not double quoted, the value of the
+       variable or the output of the command is scanned for these
+       characters and they are turned into meta-characters.
+
+       An asterisk (``*'') matches any string of characters.   A
+       question mark matches any single character. A left bracket
+       (``['') introduces a character class.  The end of the
+       character class is indicated by a ``]''; if the ``]'' is
+       missing then the ``['' matches a ``['' rather than intro-
+       ducing a character class.  A character class matches any
+       of the characters between the square brackets.   A range
+       of characters may be specified using a minus sign.  The
+       character class may be complemented by making an exclama-
+       tion point the first character of the character class.
+
+       To include a ``]'' in a character class, make it the first
+       character listed (after the ``!'', if any).  To include a
+       minus sign, make it the first or last character listed
+.~q
+
+NOTE: 1998/11/08 permit "admin add MAR+KUN@DOMAIN " syntax
+
+  +'ed user <addr+ext@domain> (for sendmail users):
+	fix to permit this address syntax when automagic registration.
+	but not fix to permit command with this addr beautifully.
+	# so require more eloborate design
+
+  +'d ユーザのアドレス体系を扱えるように修正
+
+
+.S	DNS Spoofing
+.l	DNS Spoofing
+.k	DNS Spoofing
+.k	$LOG_CONNECTION
+.l	$PeerAddr
+.k	$PeerAddr
+
+デフォールトでは何もしていませんが $LOG_CONNECTION がONの時は
+=E
+If
+
+	$LOG_CONNECTION = 1;
+
+コネクションを張ってきた相手先のIPアドレスを $PeerAddr に設定します。
+firewall 越しだったりすると無意味ですが…$PeerAddr という変数に相手の
+ホストのIPアドレスが保存されます。$PeerAddr を使って DNS Spoofing
+Check コードをHOOK掛ければよいでしょう。
+=E
+is defined, fml.pl logs the host address connecting to fml.pl running
+server. The value is taken by getpeername(). The result is set in
+$PeerAddr. You can use DNS check by this.
+
+.S	Address Spoofing
+.l	Address Spoofing
+.k	Address Spoofing
+
+これは無理っす。もっと下のlayerで何とかしてね。
+=E
+no answer since this spoof is in low layers.
+
+.S	SYN Flooding
+.l	SYN Flooding
+.k	SYN Flooding
+
+これもカーネルレベルの話。根本的な対策は難しい。
+=E
+no answer in lower layers.
+
+.S	Email アドレスの表現とRFC822
+=E.S	Email address and RFC822 representation
+.k	Email アドレスの表現
+.k	RFC822
+
+.if LANG == JAPANESE
+	From: なんか / なんか (なんか)
+
+とかいう怪しげなフィールドを作ると経路の途中でエラーになって、その先に
+配送されないことがあります。securiity 関係の話なので詳しいことは説明し
+ませんが…
+
+それは(設計思想として)「疑わしきものははじく」ということから来ています。
+sendmail のソースを読めばなぜ弾くのか理解できます。
+
+RFC822 はBNF表現でできる理論限界を表現している文書です。確かに使っても
+構わないのですが、表現のクラスをかなり制限したアドレスを使っていないと
+通信できない可能性はあります。
+
+では、どういうものならよいのか？というとすべてを網羅した表現はうまくで
+きませんが…
+.fi
+.if LANG == ENGLISH
+For example, a famous fwtk firewall toolkit checks address
+syntax. RFC822 permits a syntax but it may be insecure related to
+sendmail's implementation.
+
+RFC822 is theoretical limit of representation. The syntax does not
+corresponds to usually used syntax.
+.fi
+
+.S	smrsh.c
+.k	smrsh.c
+
+smrsh.c は、
+	"|program ..."
+の program が何を実行するか？ではなく program の名前が /usr/adm/sm.bin 
+の中にあるかどうか？を見ています。＃ access(2) で、
+=E
+smrsh.c restricts executables run by sendmail. For example you can
+restrict executables only in /usr/adm/sm.bin runs under this system.
+In this case you should rewrite include file /usr/adm/sm.bin/fml.pl.
+smrsh.c is in sendmail packages.
+
+よって、/usr/adm/sm.bin/fml.pl ですね:-)
+
+.S	access(2) 
+.k	access(2) 
+
+smrsh.c は access(2) を使っていますが…うぅ
+
+=E
+smrsh.c uses access();D but ...
+
+--- NetBSD 1.2REL /usr/share/man/cat2/access.0
+
+CAVEAT
+     Access() is a potential security hole and should never be used.
+
+4th Berkeley Distribution     September 15, 1996                             2
+
+--- perl5.003/perl.c
+
+	/* On this access check to make sure the directories are readable,
+	 * there is actually a small window that the user could use to make
+	 * filename point to an accessible directory.  So there is a faint
+	 * chance that someone could execute a setuid script down in a
+	 * non-accessible directory.  I don't know what to do about that.
+	 * But I don't think it's too important.  The manual lies when
+	 * it says access() is useful in setuid programs.
+	 */
+
+
+.S	Precedence Priority
+.k	Precedence
+
+sendmail 8.8.5 operations manual tells:
+
+             5.7.  P -- Precedence Definitions
+
+                     Values for the "Precedence:" field may be defined
+                using  the  P  control line.  The syntax of this field
+                is:
+
+                    Pname==num
+
+                When the name is found in a "Precedence:"  field,  the
+                message  class  is  set  to  num.  Higher numbers mean
+                higher precedence.  Numbers less than  zero  have  the
+                special  property  that if an error occurs during pro-
+                cessing the body of the message will not be  returned;
+                this  is  expected  to be used for "bulk" mail such as
+                through mailing  lists.   The  default  precedence  is
+                zero.  For example, our list of precedences is:
+
+                    Pfirst-class=0
+                    Pspecial-delivery=100
+                    Plist=-30
+                    Pbulk=-60
+                    Pjunk=-100
+
+                People  writing  mailing list exploders are encouraged
+                to use "Precedence: list".  Older versions of sendmail
+                (which discarded all error returns for negative prece-
+                dences)  didn't  recognize  this  name,  giving  it  a
+                default  precedence  of  zero.  This allows list main-
+                tainers to see error returns on both old and new  ver-
+                sions of sendmail.
+
+
+.S	4.4BSD vacation
+.k	vacation
+
+     No message will be sent unless login (or an alias supplied using the -a
+     option) is part of either the ``To:'' or ``Cc:'' headers of the mail.  No
+     messages from ``???-REQUEST'', ``Postmaster'', ``UUCP'', ``MAILER'', or
+     ``MAILER-DAEMON'' will be replied to (where these strings are case insen-
+     sitive) nor is a notification sent if a ``Precedence: bulk'' or
+     ``Precedence: junk'' line is included in the mail headers.  The people
+     who have sent you messages are maintained as a db(3) database in the file
+     .vacation.db in your home directory.
+
+.S	File and Directory Permission Default
+
+umask(2) default is customizable.
+
+	$FML_UMASK	for fml.pl
+	$MSEND_UMASK	for msend.pl
+	$UMASK	is used if neither $FML_UMASK nor $MSEND_UMASK is not defined.
+
+.S	Directory Permissions
+
+複数の人が fmlserv と一緒に使う場合 fmlserv はメンバーリストを書き変え
+る等のために group permission が必要です。
+＃ そのために root process を作れば、そうでなくてもできなくはないはず
+＃ ですが、root process を増やすことはやりたくないので
+=E
+When plural maintainers maintain mailing lists directory and they uses
+fmlserv.pl also, group writable permission is required. However
+sendmail denies such settings for security today in default. It is
+desirable to prepare a user e.g. "fml" to maintenance mailing lists
+configurations. Or you can change /etc/sendmail.cf
+e.g. DontBlameSendmail.
+
+	$USE_FML_WITH_FMLSERV
+.l	$USE_FML_WITH_FMLSERV
+.k	$USE_FML_WITH_FMLSERV
+
+変数はそれを意味するための内部変数ですが、普通は fml.pl が $DIR の隣に 
+fmlserv という directory があるなら自動的に設定します。うまくいかない
+ときは explicit に設定して下さい。それから $GID も fmlserv のために導
+入された変数です。
+=E
+is automatically set up by fml.pl if fml.pl can find $DIR/../fmlserv
+directory. If it is set, fml.pl recognizes it myself works with
+fmlserv.pl. If HOME of fmlserv.pl exists not in $DIR/../fmlserv, you
+need to set this variable manually in config.ph. $GID is also a
+variable for fmlserv.pl.
+.l	$GID
+.k	$GID
+
+
+.S	sendmail 8.8 における check_* ルールセットについて
+=E.S	On sendmail 8.8 check_* rule sets
+
+.if LANG == JAPANESE
+詳しくは CF を読んでね。sendmail 8.8 では様々なアクセス制御を容易にカ
+スタマイズできるように以下のようなルールセットが用意されています。CFで
+物足りない場合（そうはないとおもうぞ）はこれらを使ってごりごり 
+sendmail.cf を書きます。
+
+.q
+check_mail          発信者のチェック
+check_rcpt          受信者のチェック
+check_relay         SMTP接続のチェック
+check_compat        発信者および受信者のペアについてのチェック
+.~q
+
+またSMTPコネクションの接続要求に対して tcp_wrapper のライブラリである
+libwrap.a を使うように sendmail を compile しておけば、
+/etc/hosts.allow などで制御できるようになります。NetBSD 1.3 などの最新
+のOSではこれが配布されるソースでのデフォールトです。
+ちなみに tcp_wrapper におけるデーモン名は sendmail です。
+
+.q
+Example:
+
+[/etc/hosts.allow]
+
+sendmail: mikoto.fml.org
+
+
+[/etc/hosts.deny]
+
+ALL: ALL
+
+.~q
+
+check_mail と check_rcpt はSMTP処理ルーチン srvrsmtp() 内でそれぞれ 
+MAIL FROM: と RCPT TO: の命令の引数に対して適用されます。つまりそれぞ
+れ SMTP で渡される MAIL FROM:のアドレス(発信者)と RCPT TO:のアドレス
+(配送先)のチェックに使われます
+
+check_relay はSMTPコネクションが張られた時に適用されます。check_relay 
+は validate_connection() で呼ばれ接続が成立した SMTPコネクションが接続
+を許可されているホストからのものか？などについてチェックをします。
+validate_connection() では tcp_wrapper 形式の制御も可能です(前述)。
+
+check_compat は単純なチェックではなく送信者と受取人の組で判定をしなけ
+ればならないような複雑な判定に使います。
+check_compat は配送ルーチン deliver() で適用されメールの送り主と配送
+先のペアについてSMTP translation だけでなく配送するメールの全てについ
+て適用されます。
+.fi
+.if LANG == ENGLISH
+Please see sendmail's book (bat book).
+.fi
+
+.S	SMTP and Authentication
+
+draft-myers-smtp-auth-11.txt (submitted to be Proposed Standard)
+RFC2222 (SASL)
+
+SASL: Simple Authentication and Security Layer
+
+draft-hoffman-smtp-ssl-06.txt (SMTP over secured layer)
+
+.S	&system() function
+
+system は perl の内部関数ではなく独自に書いた system を使っています。
+何故かうまく動かない場合や、fork() がないNTなどでは perl 附属の 
+system() を使わざるを得ない場合があります。デフォールトでは perl 附属
+の system() を使っていません。
+=E
+Fml does not use perl's system() but the original &system(). When the
+perl on OS has no fork(), we have to use perl's system(). On some
+environment, a few commands cannot work well with our &system().
+
+コマンドがうまく動かない場合に 
+=E
+When some commands do not work well, try to set
+
+	$INSECURE_SYSTEM = 1;  (default 0)
+.k	$INSECURE_SYSTEM
+.l	$INSECURE_SYSTEM
+
+という変数設定をして動くことがあるかもしれません。
+=E
+in config.ph. It may enable you to use the command.
+
+なお NT では system() を使っています。
+=E
+On NT4, fml uses perl's system() since ntperl has no fork().
+
+いずれの場合でもシンタックスチェックが事前に行なわれ、その後 system を
+呼んでいます。
+=E
+In any cases fml checks the syntax of arguments passwd to
+system(). After checks, fml calls system().
+

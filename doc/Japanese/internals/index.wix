@@ -9,3 +9,7 @@
 .include overview.wix
 .include fop.wix
 .include internals.wix
+.include file_format.wix
+.include security.wix
+.include functions.wix
+.include porting.wix
