@@ -126,7 +126,9 @@ sub Confirm
 
 package Confirm;
 
-
+sub Confirm'FixFmlservConfirmationMode { 
+    &main'FixFmlservConfirmationMode(@_);
+} 
 sub AddressMatch { &main'AddressMatch(@_);} #';
 sub Log          { &main'Log(@_);} #';
 sub Mesg         { &main'Mesg(@_);} #';
