@@ -66,7 +66,9 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 .S	Memory Usage
 
 	MD5
-
+	WholeMail()
+	Forw()
+	Warn() 
 
 
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
@@ -338,6 +340,10 @@ $LOG_FILE_SUFFIX = ".%C%y";
 =E.S	lightweight digest
 
 
+.S	トラブルチケットシステム
+=E.S	Trouble Ticket System
+
+
 .S	より統合されたパッケージ
 =E.S	fully integrated package
 
@@ -375,9 +381,6 @@ MANY MANY "; post only (only members can post)"  ...
 
 	PGP
 	Sendmail()
-	WholeMail()
-	Forw()
-	Warn() 
 
 
 .C	日本特有の問題
