@@ -3,7 +3,8 @@
 #
 
 .part Basic Configuration
-basic			基礎的なこと
+basic_setup		基礎的なこと
+how_to_subscribe	メンバー登録について
 install			インストール
 daily			日々の運用についてのTIPS
 encryption		暗号化関係
@@ -16,8 +17,10 @@ GUI			GUI interface
 messages		コマンドの結果や警告メールのメッセージ文について
 virtual_domain		virtual domain
 digest			まとめおくり
+errormails		エラーメールをどうするか？
 
 .part 拡張
+examples		いろいろな事例
 command			コマンドについて
 extension		拡張
 
@@ -29,6 +32,7 @@ troubleshoot		トラブルシューティング
 misc			その他
 smtp			配送関係
 Japanese		日本語処理について
+references		文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
 devel			内部構造や実装の理屈についてなど
