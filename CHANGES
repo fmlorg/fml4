@@ -3,6 +3,26 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/24
+
+  update INSTALL_on_NT4
+	IMail "program aliases" works on NT4
+
+	NT4 での話: IMail Server gold のプログラムエイリアスって 
+	program つまり fml を起動してくれるんですね。えらいぞ
+
+2000/05/23
+
+  sbin/makefml 
+	define 'tail' as an alises of 'log' command 
+	Example:
+
+	makefml elena::tail 
+
+	は tail -10 と同じです
+
+	makefml elena::tail -10
+
 2000/05/22
 
   sbin/makefml
