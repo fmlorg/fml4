@@ -23,7 +23,7 @@ if ($opt_I) {
     for (split(/:/, $opt_I)) { push(@INC, $_);}
 }
 
-require 'mimer202.pl';
+require 'mimer.pl';
 
 undef $/;
 undef $body;
