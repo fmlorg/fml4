@@ -12,16 +12,27 @@
 
 use MD5;
 
-sub Md5
+sub main::Md5
 {
     local($data) = @_;
+    local($buf, $p, $pe);
+
+    $pe = length($data);
 
     $md5 = new MD5;
     $md5->reset();
-    $md5->add($data);
-    $digest = $md5->digest();
-    unpack("H*", $digest);
+
+    $p = 0;
+    while (1) {
+	last if $p > $pe;
+	$_  = substr($data, $p, 128);
+	$p += 128;
+	$md5->add($_);
+    }
+
+    $md5->hexdigest();
 }
+
 
 # XXX: called under perl 5
 sub main::MailBodyMD5Cksum
@@ -42,7 +53,7 @@ sub main::MailBodyMD5Cksum
 	$md5->add($_);
     }
 
-    $digest = $md5->hexdigest();
+    $md5->hexdigest();
 }
 
 
