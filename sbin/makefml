@@ -1079,6 +1079,8 @@ sub do_passwd
     # $ml/etc
     &MakeWritableDir("$ML_DIR/$ml/etc");
 
+    # here we go! 
+    &SetWritableUmask;
     $passwd_file= "$ML_DIR/$ml/etc/passwd";
 
     -f $passwd_file || &Touch($passwd_file);
