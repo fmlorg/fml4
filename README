@@ -1,4 +1,4 @@
-		How to maintain fml CVS tree
+		How to maintain fml CVS repository
 
 				Ken'ichi Fukamachi
 				<fukachan@fml.org>
@@ -17,23 +17,28 @@ Caution: you need "BSD make" not gmake.
 	% cvs co fml
 	% cd fml
 
-1.1	If you are the maintainer to make 'snapshot', you need distrib/history.
-	The repository distrib/history is special. Please check out it:
+1.1	If you are the maintainer to make 'snapshot', you need to set up 
+	distrib/history. The repository distrib/history is special. 
+	Please check out it:
 
 	% cd distrib
 	% cvs co history
 
-where 'history' is the alias of 'release/history'.
+where 'history' is the alias of 'release/history'. This directory is
+ignored in fml/ repository since it is maintained separetely.
 
 2.	generate pkgsrc/. NOTE: You need Intenet connection to 'make pkgsrc'. 
 
 	% make pkgsrc
 
-3.	set up $FML/.info and make documents
+3.	run "make build", which process follows:
 
 	% touch .info	(or get the latest .info)
 	% make plaindoc
 	% make htmldoc
+
+which generate basic snapshot without pkgsrc and stop just before
+tar.gz.
 
 4.	O.K., now start your hack!
 
@@ -107,3 +112,7 @@ fml-2-2-bb0	2.2 Release Branch BreakPoint 0 and working branch line
 		which is the road to 2.2.1.
 fml-2-2-1-prep	== fml-2-2-bb0's alias
 		the road to 2.2.1
+
+fml-2-2A-end	2.2A end
+fml-2-2D	2.2D start
+fml-2-2D-start	2.2D start
