@@ -425,3 +425,46 @@ private communication to Yasushi Mochizuki <yasushi@pier.fuji-ric.co.jp>.
 .comment %%%%% The second %%%%%
 
 
+.S	PC-VANがちゃんとうけとってくれない 事件
+
+message-id で < > がちゃんとついてないと だーめ。
+
+PC-VAN は、<uja@aja.or.jp> という Message-Id: を@の前で切り取って、
+<uja> にする？ んだそうです。＃なんだ、それ？？？
+
+
+
+.S	古典の printf debug 
+
+.q
+From: fukachan@phys.titech.ac.jp
+X-Mail-Count: 00702 
+
+じゃ、
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+を、
+
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+
+のあいだにはさんで、
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&InitConfig;			# initialize date etc..
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+とかしておいて、
+
+% perl sbin/localtest.pl |sed 's/test/#guide/' | perl fml.pl $PWD -d 
+
+とかして、この REQ:GUIDE の値の変化をみるというのはどうでしょう？
+
+ただしいばあいは &Parsing のあと １になって そのままのはずですよね
+
+.~q
+
