@@ -4,6 +4,23 @@
 ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
 について解説します。
 
+
+.S 	analize_mail_error.pl, analize_mail_error.sh 
+.l 	analize_mail_error.pl
+.l	analize_mail_error.sh 
+
+ベータ版。エラーメール(複数でもよい)の入力すると 解析してエラーレポー
+トを吐く。
+
+   analize_mail_error.pl [-c cut_pattern] [-e exluce_pattern]
+		-c アドレスの中から削除するパターン
+		-e この文字列を含む排除するアドレスのパターン
+
+例:
+	show all +errormail |\
+	analize_mail_error.pl -c hostname -e mydomain
+
+
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
 .key	bin/Archive.pl
 .key	bin/Archive.sh
@@ -12,14 +29,6 @@
 .xref	archive
 
 アーカイブの節を参照
-
-
-.S	SPOOLをHTML化する (bin/Html.pl)
-.k	bin/Html.pl
-.k	Html.pl
-
-current directory の config.ph をみてそこで指定されているデータに従い
-HTML化を実行します。
 
 
 .S	cron (bin/cron.pl)
@@ -75,7 +84,7 @@ main(argc, argv)
 .~q
 
 
-.S	Daily （日々のログ解析）
+.S	daily （日々のログ解析）
 .k	bin/daily.pl
 .k	etc/daily.ignore
 
@@ -102,8 +111,16 @@ DNS のテストをする、ちょっとしたプログラム。
 とするとこのプログラムを実行する。
 
 
+.S	emumail.pl
+.l	emumail.pl
+.l	bin/emumail.pl
+
+sendmail -> fml.pl の 「sendmail -> 」の部分を emulation します。
+debug に便利かなと
+
+
 .S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
-.xref	expire.pl
+.xref	expire expire.pl
 
 
 .S	FMLのコマンドへのユーザインターフェイス (bin/fmlctl.pl)
@@ -214,11 +231,11 @@ SYNOPSIS
 .S	WIX言語フォーマッタ (bin/fwix.pl)
 .l	fwix.pl
 .l	bin/fwix.pl
-.key	bin/fwix.pl
-.key	fwix.pl
 .xref	WIX
 
 WIX言語のフォーマッタ 
+
+
 .k	$LANG
 .k	$COMMENT (bin/fwix.pl)
 .k	$KEYWORD (bin/fwix.pl)
@@ -244,11 +261,23 @@ WIX言語のフォーマッタ
    $LANG は 日本語か英語かが入り動作モードを制御しています。
 
 
+.S	gen_summary.pl (summary ファイルを再生成する)
+.l	gen_summary.pl
+.l	bin/gen_summary.pl
+
+MLの spool から summary を再生成する。
+
+in fml-support ML's Count: 02393
+
+   gen_summary.pl -I /usr/local/fml めーりんぐりすとのDIR/spool > summary
+
+        -I lib*.pl のある場所（必須）
+        -m オプションで MIME Decoding もします。
+
+
 .S	URL の中身を取り出す (bin/geturl.pl)
 .l	geturl.pl
 .l	bin/geturl.pl
-.key	bin/geturl.pl
-.key	geturl.pl
 .k	$WWW_HOME
 .k	$WITH_WWW_WATCH
 .k	$LIBRARY_TO_OVERWRITE
@@ -270,13 +299,15 @@ saveします。画像データや音声データでも同様にファイルに落せます。
    % ls -l index.html 
    -rw-r--r--  1 fukachan  wheel  2046 Sep 15 18:41 index.html
 
-なお、引数がないと環境変数 $WWW_HOME の内容を落します。
+なお引数がないと環境変数 $WWW_HOME の内容を落します。libhref.pl の使い
+方のデモだと思えば良いでしょう。
 
+一般には例えば GNU wget 等のWWWデータを落すソフトが多数あります。
 
 
 .S	ローカルテスト (bin/localtest.pl)
-.k	bin/localtest.pl
-.k	localtest.pl
+.l	bin/localtest.pl
+.l	localtest.pl
 
 gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
 これを使わずにローカルテストをするとメールがループしているとみなしてし
@@ -299,16 +330,38 @@ gmake localtest の実体。メッセージIDチェックをチェックしている都合上、
 libnewsyslog.pl がなかった時代の産物。
 
 
-.S	SMTPライブラリを使った /usr/bin/mail のemulation (bin/pmail.pl)
+.S	Multipart Canceler フィルタ (bin/multipart.pl)
+.k	bin/multipart.pl
+.k	multipart.pl
+
+なお makefml で作るとサンプルに見本がついています。
+
+.q
+From:    Yuao TANIGAWA <yuao@infonia.or.jp>
+Subject: Multipart Canceler
+To:      fml-support@axion.phys.titech.ac.jp (fml supporting ML)
+Date:    Fri, 10 Jan 1997 21:09:03 +0200
+X-Mail-Count: 01937
+
+  最近、ML に Multipart/Mixed とか Multipart/Alternative とかの
+形式で、メールを送ってくる人がいるので（特にコマンドの処理がで
+きないので）、Multipart Canceler なるフィルタを作ってみました。
+  Multimart/Mixed の場合は、# End of Document No.??? でつなげる。
+Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
+いうことをしています。
+  使い方は、fml を起動するのに "|/fmlpath/fml.pl ..." と記述し
+ているところを "|/scriptpath/multipart.pl|/fmlpath/fml.pl ..."
+などと記述すれば機能します。
+.~q
+
+
+.S	SMTPライブラリを使った /usr/bin/Mail のemulation (bin/pmail.pl)
 .k	bin/pmail.pl
 .k	pmail.pl
 
 
-
-
-.S	パスワードの初期化、変更 (bin/passwd.pl)
+.S	パスワードの初期化と変更 (bin/passwd.pl)
 .l	bin/passwd.pl
-.key	bin/passwd.pl
 .key	passwd.pl
 
 fml でのパスワードは crypt された形で保存されます。つまり UNIX の 
@@ -341,8 +394,7 @@ bin/passwd.pl を使って下さい。使い方は、
 	moderated モード
 
 等で使われます。
-.xref mode:moderated
-.xref REMOTE-ADMINISTRATION
+.xref REMOTE-ADMINISTRATION mode:moderated
 
 
 .S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/pop2recv.pl)
@@ -350,126 +402,17 @@ bin/passwd.pl を使って下さい。使い方は、
 .k	bin/inc_via_pop.pl
 .k	pop2recv.pl
 .k	inc_via_pop.pl
+.xref	popfml cron fml_local
 
-*** OBSOLETE ***
-
-libexec/popfml.pl がそれの専用プログラムとして実装される予定です（まだ
-３／４くらい）
-
-理屈としては
-
-	pop を使って取り寄せつつ MH の rcvstore へPIPEで投げる(inc)
-	pop を使って取り寄せつつPIPEで fml へ投げる(ML)
-
-は同じです。実行する下請けプログラムが違うだけ。後はこれを cron で実行
-すれば、
-
-	サイトに一台 UNIX マシンがあれば
-	sendmail が動いていなくてもＭＬは可能
-だし	
-	自分のマシンがメールを受けられなくても 
-	pop経由で自動的にメールをスプールできます。
-
-ついでに、その後 cron で自動でfolderに入れるプログラムを走らせることも
-できるでしょう。なお、MHと同様パスワードは $HOME/.netrc からとられます。
+libexec/popfml.pl がこの目的の専用プログラムです。
+.xref	popfml
 
 注意： inc_via_pop.pl は昔の名前（今はリンク）
 
 
-SYNOPSIS:
-
-    pop2recv.pl [-user username] [-h host] [-fhd]
-    
-    -user username			
-    -host host(pop server running)
-    -f    config-file
-    -h    this message
-    -d    debug mode
-
-例： ユーザ fukachan が POP Server hikari にアクセスする
-.k	{ユーザ fukachan が POP Server hikari にアクセスする}
-
-	pop2recv.pl -user fukachan -host hikari
-
-
 .S	POP経由の自動RefileやＭＬの実行 (bin/pop2recv.pl)
 .l	pop2recv.pl
-.k	POP経由の自動RefileやＭＬの実行
-.k	bin/pop2recv.pl
-.xref	cron
-.xref	fml_local
-
-設定ファイル：
-
-   ~/.popexecrc 設定ファイル pop2recv で実行するコマンドを定義する
-
-設定の仕方：
-	設定ファイルを書いて、Cron を設定する。
-	
-設定例：
-	全部のメールを fml.pl へ渡していいなら、
-
-~/.popexecrc の中は
-
-	$POP_EXEC = "/usr/local/fml/fml.pl /var/spool/ml/Elena";
-	1;
-
-でいいわけですが、普通はＭＬと自分宛をわけたりするためにフィルタ
-(e.g. fml_local)が必要な場合もあるでしょうが、基本的には同じです。
-
-	$POP_EXEC の中身はフィルタのプログラムになります。
-
-注意： いつもと違って "| で始らないことに注意してください。
-
-この後、pop-server が hikari、 user が fukachan なら
-
-* * * * * pop2recv.pl -user fukachan -host hikari
-
-のような内容の crontab を書いて、crontab crontab とかします。
-この辺はＯＳによって異なります。
-.xref cron
-
-
-解説：
-
-   ~/.popexecrc という設定ファイルを使って、POP経由でfml_localへ渡す。
-   またcronで pop2recv.pl を動かし、ＭＬと同様のことをすることにする。
-
-   ~/.popexecrc の中は
-
-   $POP_EXEC = "/usr/libexec/fml/fml_local -user fukachan || exit 75";
-   1;
-
-と書いておく。cron で
-
-	pop2recv.pl -user fukachan -host hikari
-
-を一分おきに起こす。
-＃NetBSD の cron だと 
-＃	* * * * * pop2recv.pl -user fukachan -host hikari
-＃です。
-
-これで
-	一分に一回 POPサーバへメールが来ているかどうかを見にいって
-	もしメールがあればそれを取り込んで一通ずつfml_local へ渡す
-	fml_local が条件(~/.fmllocalrc)に従いrefile等を行なう
-
-もし、このメールが来ている先が uja-ml で
-
-   $POP_EXEC = "/usr/libexec/fml/fml.pl /var/spool/ml/uja-ml";
-
-になっていれば 
-
-	”POP経由でＭＬ（uja-ml）を運用している”
-
-ことと同じです。
-
-このやりかたを使うことで自分のマシンで sendmail を起こしていてメールを
-受け止められなくてはいけないという制約はなくなります。
-
-これで原理的に perl が動くＯＳなら WINDOWS だろうが Macintosh だろうが
-動くはずですが…？（未確認）
-
+.xref	popfml cron fml_local
 
 
 .S	与えられたファイルを分割して送り出すプログラム (bin/split_and_msend.pl)
@@ -573,7 +516,6 @@ X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 %?(match NetBSD.ORG)NetBSD\
 
 
-
 .S	mgetで得たファイルをmh以外で読む時 (lib/Utilities/packmbox.pl)
 .key	lib/Utilitites/packmbox.pl
 .key	packmbox.pl
@@ -620,8 +562,9 @@ MHのpost部分をいれかえて、
 のような宇宙歴をヘッダにつける。
 
 post を入れ換えるべき 
+
 	SHELL VERSION が my-mh-post
-	PERL VERSION  が my-mh-post.pl
+	PERL  VERSION が my-mh-post.pl
 
 libstardate.pl はコマンドラインで呼ぶと宇宙歴そのものをOUTPUTします。
 これを使って、mh-e レベルで宇宙歴をヘッダにつけるEmacs Lisp が 
@@ -635,29 +578,31 @@ stardate.el です。
 fml 2.x では配布されていません。 fml 1.x 用なので OBSOLETE です。
 
 
-.S	Multipart Canceler フィルタ (bin/multipart.pl)
-.k	bin/multipart.pl
-.k	multipart.pl
+.S	weekend-msend.sh
 
-なお、makefml ではサンプルがついています。
+設定ファイルを別に持ち msend.pl を一週間に一度起動するようにすれば一週
+間に一度まとめ送りするようになります。
+それを一週間に一度送るための script の例です。
 
-.q
-From:    Yuao TANIGAWA <yuao@infonia.or.jp>
-Subject: Multipart Canceler
-To:      fml-support@axion.phys.titech.ac.jp (fml supporting ML)
-Date:    Fri, 10 Jan 1997 21:09:03 +0200
-X-Mail-Count: 01937
+m=1u みたいに常に送りつけるように設定しておいて送り時間は cron でコン
+トロールするようにします。もっともコマンドでコントロールできません。管
+理者が手で設定すると仮定しています。
+＃まぁそれ用の別のアドレス作ってしまえばできますけどね
 
-  最近、ML に Multipart/Mixed とか Multipart/Alternative とかの
-形式で、メールを送ってくる人がいるので（特にコマンドの処理がで
-きないので）、Multipart Canceler なるフィルタを作ってみました。
-  Multimart/Mixed の場合は、# End of Document No.??? でつなげる。
-Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
-いうことをしています。
-  使い方は、fml を起動するのに "|/fmlpath/fml.pl ..." と記述し
-ているところを "|/scriptpath/multipart.pl|/fmlpath/fml.pl ..."
-などと記述すれば機能します。
-.~q
+要点は
+
+        MSEND_RC=$DIR/weekend/msendrc
+        ACTIVE_LIST=$DIR/weekend/actives
+        MEMBER_LIST=$DIR/weekend/members
+
+で ACTIVE_LIST に 
+
+	address m=1オプション
+
+	例：
+	address m=1u
+
+とか書いておくという部分です。
 
 
 .S	X-Stardate: をつける（mh-e）
