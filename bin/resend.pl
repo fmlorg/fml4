@@ -7,6 +7,10 @@
 # $Id$
 #
 
+$EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+push(@INC, $EXEC_DIR);
+push(@INC, $ENV{'PWD'});
+
 # getopt()
 require 'getopts.pl';
 &Getopts("dhv");
@@ -18,6 +22,7 @@ $debug = $opt_d ? 1 : 0;
 eval($uname = `uname`);
 $uname || die("This program runs only on unix.\n");
 
+require 'libloadconfig.pl'; &__LoadConfiguration;
 if (-f "config.ph") { require 'config.ph';}
 
 &Resend(@ARGV);

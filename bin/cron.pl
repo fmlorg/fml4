@@ -32,7 +32,10 @@ $LIBDIR	= $LIBDIR || $DIR;
 unshift(@INC, $DIR);
 
 #################### MAIN ####################
-require 'config.ph';
+$EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+require 'libloadconfig.pl'; &__LoadConfiguration;
 
 ###### Customizable Varaibles
 $From_address   = "Cron.pl";

@@ -79,6 +79,10 @@ sub InitS2P
     $DIR = $opt_D || $ENV{'PWD'};
     $ConfigFile = $opt_f;
 
+    $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+    push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+    push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+
     if (! $ConfigFile) {
 	print STDERR "FYI: you must need '-f \$DIR/config.ph' option in usual case\n";
 	print STDERR "     but O.K. if you know your own business :)\n";
@@ -117,6 +121,7 @@ sub InitS2P
 	     ."\tPlease define -D ML_HOME_DIR.");
     }
 
+    require 'libloadconfig.pl'; &__LoadConfiguration;
     require $ConfigFile if -f $ConfigFile;
     
     # command line options overwrite variables

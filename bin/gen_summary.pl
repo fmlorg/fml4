@@ -28,7 +28,11 @@ $debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
 $Minimum         = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
-push(@INC, $opt_I);
+
+push(@INC, split(/:/,$opt_I));
+$EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
 
 # gen_summary extension
 $USE_MIME        = $opt_m;
@@ -45,6 +49,7 @@ for (split(/:/, $opt_o)) {
 
 
 ### Libraries
+require 'libloadconfig.pl'; &__LoadConfiguration;
 require $ConfigFile if -f $ConfigFile;
 require 'libkern.pl';
 

@@ -32,7 +32,8 @@ unshift(@INC, $DIR);
 # including libraries
 require 'libkern.pl';
 
-require 'config.ph';		# configuration file for each ML
+#require 'config.ph';		# configuration file for each ML
+require 'libloadconfig.pl'; &__LoadConfiguration;
 eval("require 'sitedef.ph';");  # common defs over ML's
 &use('smtp');			# a library using smtp
 

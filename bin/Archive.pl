@@ -11,24 +11,27 @@
 #
 # $id = q$Id$;
 
+$EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
+push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+
 chop ($PWD = `pwd`);
+$DIR = $PWD;
 
 require 'getopts.pl';
-&Getopts("dhu:A:U");
+&Getopts("dhu:A:UI:");
 
 $opt_h && die(&Usage);
 
-$debug       = $opt_d;
-undef $debug if $opt_U;
-# $Unit        = $opt_u || 100;
-$ARCHIVE_DIR = "var/archive";
-$DIR         = $PWD;
-
-# FIX
-$SPOOL_DIR   = "spool";
-
 # eval config.ph (do the force of eval by "do")
-if (-f "./config.ph")  { do "./config.ph";}
+require 'libloadconfig.pl'; &__LoadConfiguration;
+
+$debug       = $opt_d;
+$ARCHIVE_DIR = "var/archive" unless $ARCHIVE_DIR;
+$SPOOL_DIR   = "spool" unless $SPOOL_DIR;
+
+undef $debug if $opt_U;
+
 if (-f $SEQUENCE_FILE) { chop ($MaxSeq = `cat $SEQUENCE_FILE`);}
 
 # CLO
@@ -123,17 +126,5 @@ sub Usage
 }
 
 sub Mesg { print STDERR "@_\n";}
-
-# dummy functions agasint the compile errors of config.ph
-sub DEFINE_SUBJECT_TAG { 1;}
-sub DEFINE_MODE  { 1;}
-sub DEFINE_FIELD_FORCED  { 1;}
-sub DEFINE_FIELD_ORIGINAL { 1;}
-sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
-sub DEFINE_FIELD_LOOP_CHECKED { 1;}
-sub UNDEF_FIELD_LOOP_CHECKED  { 1;}
-sub ADD_FIELD     { 1;}
-sub DELETE_FIELD  { 1;}
-
 
 1;
