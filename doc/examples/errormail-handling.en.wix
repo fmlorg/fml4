@@ -1,0 +1,67 @@
+* overview
+
+In small mailing list, you could handle error mails. 
+However you expect fml to handle error mails automatically.
+
+* handle error mails
+
+Especially in the end of the year, users apart from university or
+company but forget to change the address registered in ML. In that
+case, "user unknown" mail returns to $MAINTAINER.
+
+libexec/mead.pl in fml package analyses these error mails and removes
+such invalid users from member list.
+
+In default mead.pl shows address to remove from list. You can
+configure mead.pl removes bad user automatically.
+
+* configure
+
+% makefml newml elena
+
+generates include-mead (/var/spool/ml/elena/include-mead).  The
+content is
+.q
+# MEAD: Mail Error Analyze Daemon ("-m auto" to remove addrs automatically)
+# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
+"|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+.~q
+
+/var/spool/ml/elena/aliases has the (commented) entry to call
+include-mead
+.q
+# Mail Error Analyzer Daemon
+# If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
+#elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+
+To enable "mead" to work, write
+.q
+# Mail Error Analyzer Daemon
+# If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+to /etc/aliases and run newaliases.
+
+
+* remove invalid user automatically
+
+change "-m report" to "-m auto" in /var/spool/ml/elena/include-mead.
+.q
+"|/usr/local/fml/libexec/mead.pl -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+.~q
+
+/etc/aliases is the same as described above. To enable "mead" to work,
+write
+.q
+# Mail Error Analyzer Daemon
+# If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+to /etc/aliases and run newaliases.
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

@@ -1,0 +1,84 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- エラーメールの処理 --
+=E
+	fml 3.0 -- handling error mail ---
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include error mail-handling.en.wix
+.return
+.fi
+○ ＭＬの規模が小さい場合はエラーメールも個別に処理できるが
+   規模が大きくなると自動的になんとかしたいとおもうようになる
+
+
+○ 自動処理
+
+例えば大学や会社を辞めたのにアドレスの変更などをしないままにする人は多
+い。この場合 user unknown などが返ってくるようになる。
+
+fml 附属の libexec/mead.pl というプログラムはこのエラーメールを解析し
+一定回数以上のエラーが返ってくるとそのユーザを削除するようにできる。
+
+デフォールトでは「このユーザは消すべきだと管理者に教える」ようになって
+いるが、自動的に削除してしまうようにすることもできる。
+
+
+○ 設定
+
+% makefml newml elena
+
+でＭＬを作成した際には include-mead という設定ファイルが作成される。
+中身は次のようなものである
+.q
+# MEAD: Mail Error Analyze Daemon ("-m auto" to remove addrs automatically)
+# a lot of available options. see op.{jp,en} e.g. mead.pl -f perl-script
+"|/usr/local/fml/libexec/mead.pl -m report -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+.~q
+
+また作成される aliases 中にもコメントアウトされているがmeadの見本が入っ
+ている。
+.q
+# Mail Error Analyzer Daemon
+# If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
+#elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+
+mead での処理を有効にするためには /etc/aliases に
+.q
+# Mail Error Analyzer Daemon
+# If you use mead.pl, comment out elena-admin: line and UNCOMMENT OUT here.
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+を書いて newaliases を走らせるだけで良い。
+
+
+○ 自動で削除をする
+
+/var/spool/ml/elena/include-mead で -m report を -m auto にする
+.q
+"|/usr/local/fml/libexec/mead.pl -m auto -S /var/spool/ml -D /var/spool/ml/elena -E /usr/local/fml"
+.~q
+
+/etc/aliases の設定は特に変更する必要はない。同様に
+.q
+elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
+.~q
+を書いて newaliases を走らせるだけで良い。
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
