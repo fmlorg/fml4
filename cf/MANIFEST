@@ -71,8 +71,8 @@ MAINTAINER_SIGNATURE:
 # ### Section: Automatic Registration ###
 # If at least either REJECT_{POST,COMMAND}_HANDLER is "auto_regist", 
 # PLEASE SELECT THE TYPE OF AUTOMATIC REGISTRATION
-# choice is "confirm", "subject", "body", "nokeyword"
-AUTO_REGISTRATION_TYPE:	confirm
+# choice is "confirmation", "subject", "body", "no-keyword"
+AUTO_REGISTRATION_TYPE:	confirmation
 
 # $REQUIRE_SUBSCRIBE (CFVersion 2) => $AUTO_REGISTRATION_KEYWORD
 AUTO_REGISTRATION_KEYWORD:	subscribe
@@ -149,6 +149,9 @@ PASSWD_FILE: 		$DIR/etc/passwd
 # "admin log" is "tail -100 log"
 ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 
+# PGP PATH
+PGP_PATH:		$DIR/etc/pgp
+
 
 #####################################################################
 # ### Section: Security ###
@@ -157,8 +160,8 @@ ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 # since these are clearly NOT individuals.
 REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc
 
-# list of spammers to be rejected, which corresponds /etc/sendmail.spammers
-REJECT_ADDR_LIST:	$DIR/spammers
+# list of spammers to be rejected, which corresponds /etc/sendmail.spamlist
+REJECT_ADDR_LIST:	$DIR/spamlist
 
 # DO CHECK UNIX From Loop or not
 NOT_USE_UNIX_FROM_LOOP_CHECK:  0
@@ -327,11 +330,17 @@ RFC1153_VOL:
 # we force Reply-To: $FORCE_COMMAND_REPLY_TO ?(default is $CONTROL_ADDRESS)
 FORCE_COMMAND_REPLY_TO:
 
-# In "mget" reply, not show the present format of the bundle.
-NOT_SHOW_DOCMODE:
-
-# In "mget" reply, the former part of Subject:
-DEFAULT_MGET_SUBJECT:
+# Subject template in "mget" reply. 
+# automatic substitute is done before send the reply; For example, 
+# Subject: resutl for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
+#
+#   _DOC_MODE_   <=>    [last:10 tar + gzip]
+#   _PART_       <=>    (1/4)
+#   _ML_FN_      <=>    $ML_FN (here is "(Elena Lolabrigita ML)") 
+#
+# $NOT_SHOW_DOCMODE is obsolete, it equals you discard _PART_.
+#
+MGET_SUBJECT_TEMPLATE:	result for mget _DOC_MODE_ _PART_ _ML_FN_
 
 
 #####################################################################
@@ -340,6 +349,20 @@ DEFAULT_MGET_SUBJECT:
 # $MSEND_MODE_DEFAULT is the default of msend (when e.g. m=3)
 # and the format is the same as $MGET_MODE_DEFAULT.
 # which is "tar.gz" format.
+
+# Subject template in Digest/matome okuri.
+# automatic substitute is done before send the reply; For example, 
+# Digest -Matome Okuri- Article 768 [last:10 tar + gzip] (1/1) (Elena ML)
+#
+#   _ARTICLE_RANGE_  <=>    Article 768
+#   _DOC_MODE_       <=>    [last:10 tar + gzip]
+#   _PART_           <=>    (1/4)
+#   _ML_FN_          <=>    $ML_FN (here is "(Elena ML)") 
+#
+# $NOT_SHOW_DOCMODE is obsolete, it equals you discard _PART_.
+#
+MSEND_SUBJECT_TEMPLATE:	Digest -Matome Okuri- _ARTICLE_RANGE_ _DOC_MODE_ _PART_ _ML_FN_
+
 
 # Digest/Matome Okuri rc file
 MSEND_RC:	 $VARLOG_DIR/msendrc
@@ -565,14 +588,20 @@ LIBRARY_ARCHIVE_DIR:		archive
 # ### Section: Html Configurations ###
 # HTML Mode Configurations (libsynchtml.pl)
 # Please see doc/op for the details.
-HTML_EXPIRE:
+# AUTO_HTML_GEN == AUTOmatic HTML GENeration
+# if $AUTO_HTML_GEN, we generte html'ed articles in $DIR/$HTML_DIR
+AUTO_HTML_GEN:
+HTML_DIR:			htdocs
+
+# options: Please see doc/op for the details.
+HTML_EXPIRE_LIMIT:
 HTML_INDEX_TITLE:
 HTML_DATA_CACHE:
 HTML_OUTPUT_FILTER:
-HTML_THREAD:
+HTML_THREAD:			1
 HTML_DATA_THREAD:
-HTML_INDEX_REVERSE_ORDER:
-HTML_INDEX_UNIT:
+HTML_INDEX_REVERSE_ORDER:	1
+HTML_INDEX_UNIT:		day
 BASE64_DECODE:
 
 
