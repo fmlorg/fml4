@@ -17,22 +17,67 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 # attention! largest match
 sub RelayHack
 {
-    local($mx, $domain);
+    local($gw, $domain, $negative_gw);
 
     &Open(CF_DEF, $CF_DEF) || return 0;
     while (<CF_DEF>) {
-	next if /^\#/o;	 # skip comment and off member
+	next if /^\#/o;	  # skip comments
 	next if /^\s*$/o; # skip null line
 
-	/^GW\s+smtp-ignmx:\s*(\S+)/ && ($mx = $1);
-	/^DOM\s+(\S+)/ && ($domain = $1);
+	tr/A-Z/a-z/; # lower case;
 
-	if ($mx && $domain) {
-	    $RELAY_SERVER{$domain} = $mx;
-	    undef $mx; undef $domain; # reset;
+	# CF Definitions
+	# GW  relay host;
+	if (/^(GW|NGW)/i) {
+	    undef $negative_gw;
+	    s/\S+://;
+	    if (/^GW\s+(\S+)/i)  { $gw = $1;}
+	    if (/^NGW\s+(\S+)/i) { $negative_gw = 1; $gw = $1;}
+	}
+
+	# DOM domain (may be multiple lines, multiple domains);
+	/^DOM\s+(.*)/i && ($domain = $1);
+
+	# 'domains <=> one mx' available (saito@sol.cs.ritsumei.ac.jp)
+	if ($negative_gw) {
+	    for (split(/\s+/, $domain)) { 
+		$RELAY_NGW{$_} = $gw;
+		$RELAY_NGW_DOM{$gw} .= $RELAY_NGW_DOM{$gw} ? " $_" : $_;
+	    }
+	}
+	else {
+	    for (split(/\s+/, $domain)) { $RELAY_GW{$_} = $gw;}
 	}
     }
     close(CF);
+
+    if ($debug_relay) {
+	while (($k, $v) = each %RELAY_GW)  { print STDERR "GW\t$k\t$v\n";}
+	while (($k, $v) = each %RELAY_NGW) { print STDERR "NGW\t$k\t$v\n";}
+    }
+}
+
+# if $already_relay == 1, rcpt == @relay:user@domain form;
+sub SearchNegativeGw
+{
+    local($rcpt, $already_relay) = @_;
+    local($match, $ngw, $not_domains);
+
+    # @relay:user@domain or @relay2,@relay1:user@domain
+    if ($already_relay) { ($rcpt) = split(/[,:]/, $rcpt);}
+
+    # not_domains -> negative-gw 
+    for $ngw (keys %RELAY_NGW_DOM) {
+	$match = 0;
+	for (split(/\s+/, $RELAY_NGW_DOM{$ngw})) {
+	    $rcpt =~ /$_$/ && $match++;
+	}
+
+	# if anything matches, fails;
+	if (! $match) { return $ngw;}
+    }
+
+    return $NULL;
 }
 
 1;
