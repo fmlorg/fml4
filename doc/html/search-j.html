@@ -1,0 +1,45 @@
+<HTML>
+<HEAD>
+<TITLE>FML.ORG Search Engine.</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFF0">
+<BR><BR>
+<BLOCKQUOTE>
+
+Please input the keywords.<BR><BR>
+<FORM METHOD="post" ACTION="http://mikoto.sapporo.iij.ad.jp/cgi-bin/sj.pl">
+<INPUT TYPE="hidden" NAME="dbname" VALUE="/usr/local/SSE/db/fml-j">
+<NOBR>
+Keyword: <INPUT TYPE="text" NAME="query" SIZE=40 VALUE=" ">
+<INPUT TYPE="submit" VALUE="Search!"><BR>
+Category: <SELECT NAME="url">
+<OPTION>ALL
+</SELECT>
+Format: <SELECT NAME="format">
+<OPTION >short
+<OPTION SELECTED>long
+<OPTION>listkey</SELECT>
+</NOBR>
+</FORM>
+
+<P>
+<PRE>
+and, or, notを用いた論理演算ができます。
+( )カッコは半角で入力してください。
+
+例: エレナ and あしたへフリーキック
+
+・アルファベットの大文字小文字は区別されません。
+・キーワードと、and、or、not の間は、半角スペースを入れてください。
+・半角カタカナ（JIS X 0201で規定される片仮名等）は使えません。
+
+なお複数の単語をスペースで区切って入力した場合は、AND演算を指定された
+ものとみなします。
+</PRE>
+
+<BR>
+This url uses SSE-1.1 (by Sony).
+
+</BODY>
+</HTML>
