@@ -263,8 +263,9 @@ sub ArrangeMSendProc
 {
     local($ml) = @_;
     local($p);
+
     $p  = "perl $Wrapper -p $PerlProgram ";
-    $p . "$EXEC_DIR/msend.pl ";
+    $p .= "$EXEC_DIR/msend.pl ";
     $p .= "$ML_DIR/$ml $EXEC_DIR ";
     $p .= "-d " if $debug;
     $p .= "--COMPAT_ARCH=$COMPAT_ARCH " if $COMPAT_ARCH;
