@@ -112,6 +112,7 @@ sub ProcAdminSetMemberNameFile
     @Fld = ('#', $proc, @opt);
 
     if ( $proc =~ /^($NAME_KEYWORD)$/i ) { # NAME
+	$cmdline = &HideApprovePassword($cmdline);
 	$cmdline =~ s/^#\s*//;
 	&Log($cmdline);
 
@@ -155,6 +156,7 @@ sub DoSetMemberNameFile
 	}
     
         $newname = $Fld;
+	$newname = &HideApprovePassword($newname);
         $newname =~ s/^#\s*//;
         if ( $e{'mode:admin'} ) {
             # COMMAND 'ADMIN NAME Address [NEWNAME]'
@@ -506,5 +508,15 @@ sub ProcFileSendBackMemberNameFile
     # unlink temporally MEMBER_LIST
     unlink("$TMP_DIR/members.$$");
 }
+
+
+sub HideApprovePassword
+{
+    local($fld) = @_;
+    return $fld unless $fld =~ /approve/i;
+    $fld =~ s/(approve)\s+\S+/$1 xxxxxxxx/;
+    $fld;
+}
+
 
 1;
