@@ -1,0 +1,430 @@
+	_ML_@_DOMAIN_ メーリングリスト の使い方について
+
+----- Index -----
+#.index
+-----------------
+
+
+.C	基本的な使い方
+
+.S	メーリングリストとは？
+
+メーリングリストは、配送用のアドレス _ML_@_DOMAIN_ に来たメールをメー
+リングリストのメンバー全員に配送します。
+
+
+.S	コマンドの使い方
+
+メーリングリストサーバにコマンドを送り、過去の記事を取り寄せたり、配送
+を一時停止するためには、アドレス
+
+	_ML_-ctl@_DOMAIN_ 
+
+にコマンドを含むメールを送って下さい。送るべき内容は
+
+	# コマンド オプション 
+
+注意：通常コマンドは英語と数字だけからなります。また、コマンド自体は大
+文字小文字を問いません。オプションは普通大文字小文字を区別します。
+
+例：
+--------- メール本文 --------------
+# help
+-----------------------------------
+
+メール本文が↑のメールを送ると、このヘルプ・ファイルが送られてきます。
+またコマンドは help でも HELP でも構いません（大文字小文字を問わない）。
+
+
+.S	もし、わからなくなったら？
+
+基本的な情報はメーリングリストから送られてくるメールを見てみて下さい。
+＊＊＊注意＊＊＊
+”メールを読むためのソフト”の中には、これらのX-なんとかという行を 勝
+手に削るものがあります。その場合、これらの有益な情報は見えません。
+
+例 1：
+   意訳:↓ このアドレスでは配送とコマンドともにうけつけます。
+
+   X-MLServer: fml [fml 2.1_RELEASE](distribute + commands available mode)
+   X-ML-Info: If you have a question, 
+   	send "# help" to the address fml-support-ctl@fml.org
+
+   意訳:↑わからんかったら fml-support-ctl@fml.org へ "# help" を送ってね
+
+例 2：
+   X-MLServer: fml [fml 2.1_RELEASE](distribute only mode)
+
+   意訳:↑ このアドレスは配送専用です。
+
+
+どうしてもわからないとか、エラーメール等が返ってきたりした場合は、メー
+リングリストの管理者
+
+	_ML_-admin@_DOMAIN_
+
+までメールを送って下さい。出来るだけ、
+
+	何をして、そうなったのか？
+	その時投げたメール、返ってきたメール
+
+をつけてメールしてもらえると、問題解決の手掛かりになりますので、よろし
+くお願いします。
+
+
+
+.C	コマンドの一覧
+
+以下の説明は
+
+コマンド		説明と具体例
+
+の形でならんでいます。具体例は次の章で説明します。
+
+
+.S	情報の取り寄せ・基本的なコマンド
+
+# help			コマンドのヘルプ
+# objective		メーリング・リストの目的、約束事を読む
+# guide			(非)メンバが案内を得る
+
+# msg			管理者へメールを送る
+
+
+# summary  [引数]	過去の記事一覧を得る(Summary全体を送る)
+			引数: 特定の過去をしめすキーワード
+			例: 
+			summary		summary ファイル全体
+			summary last:10 最近の10個の記事のサマリー
+			summary 100-200 記事100〜200 のサマリーだけをみる
+# exit			
+# end			
+# quit			コマンド終り(Signature あっても大丈夫)
+
+
+
+.S	メンバー情報や配送の停止・脱会等
+
+# members		(投稿できる)メンバのリストを得る
+# actives		(実際に配送されている)メンバのリストを得る
+
+# status 引数
+# stat   引数		現在の設定について知らせる(まとめおくりとかOFFとか)
+			デフォールト(# stat(us))は自分自身の状態
+
+	〜 配送のモード等について 〜
+
+	複数のアドレスが登録してある場合の ON, OFF, MATOME 等の操作は、
+	操作するべきアドレスが一つに特定できるまでアドレスを一意に特定
+	できるまでアドレスのチェックを厳しくしてチャレンジします。
+	＃どうしてもだめな場合だけは管理者へコンタクトをして下さい。
+
+# skip	 		From:のアドレス をそこから投稿はできるが、配送
+			はされないものと設定する
+# noskip 		上の逆。配送するようにする。
+# off	 		ＭＬを一時的に離脱する
+# on	 		一時的離脱をやめてＭＬに再参加する
+# bye	 		ＭＬをやめる
+# unsubscribe 		ＭＬをやめる
+
+
+・メンバーリストのファイルの形式について
+
+　actives に掲載されているアドレスが実際にメイルの配送される先になり
+　ます。行頭に「#」が付いているだけのものは一時的に配送を止めているもの
+　で、「# on」によって再開されます。「##BYE」は脱退された方の残骸です。
+
+
+.S	ドメイン名が変更になった場合
+
+# chaddr old-address new-address	
+
+			old-address を new-address へ変える
+			old-address, new-address のどちらからだしてもＯＫです。
+			いたずらされると困るので確認の旨のメールが
+			old-address, new-address そして管理者へだされます。
+
+# chaddr 古いメイルアドレス 新しいメイルアドレス
+
+　という内容のメイルを送るとメイルアドレスを変更することができます。変
+　更できる条件は
+
+     From: とどっちかが一致する
+               かつ
+     アドレスのどっちかはすでにメンバ
+
+　です。
+
+　　結果にかかわらず、新旧両方のアドレスと世話係りの３人に変更の通知を
+　メイルで送るようになっています。
+
+
+.S	まとめ送り
+
+まとめ送りは、即時配送ではなく、Ｎ時間“おき”にまとめて送られる配送方
+式です。この N を matome コマンドの引数にして指定して下さい。
+例：
+	# matome 3mp
+	3時間おきに MIME/Multipart 形式でおくる。
+
+
+# digest 数字(0-23)	
+# matome 数字(0-23)	配送時間は実はmodulus（笑）if(0 == (24 % time))
+			だから 17 なんてやっても一日一回と同じです(_o_)
+			default は gzip した Unix From つきのファイルの固まり
+
+# digest 数字(13-36)	
+# matome 数字(13-36)	上の特別の場合で、一日一回Ｎ時にまとめおくり
+			１３〜３６の数字がこのケースに当てはまります
+			午前５時に一回だけまとめおくり慕いときは、
+			２４＋５＝２９ をおくりこんでください。午後５
+			時は１７でいいんですが、午前中はこうしないと判
+			別がつかないので…
+   例：
+	# matome 数字u	plain(unpack)、つまりplain textを
+	# matome 数字i 	lha + ish でまとめて送ります
+   オプション：
+		オプションなしはGZIP(UNIX FROM)
+	u	PLAINTEXT(UNIX FROM)
+	uf	PLAINTEXT(UNIX FROM)
+	i	lha + ish 
+	ish	lha + ish 
+	mp	MIME/Muptilpart	PLAINTEXT
+	d	RFC1153 format 	PLAINTEXT
+	b	RFC934 format 	PLAINTEXT(mh-burst)
+	rfc934	
+	ish	lha + ish 
+	lhaish
+	i
+	li
+	lu	lha + uuencode
+	lhauu
+	unpack	PLAINTEXT(UNIX FROM)
+
+
+# digest 0		
+# matome 0		普通の配送へ戻す
+
+   例：
+   # matome 1		まとめ送り １時間に一回(gzipd)
+   # matome 2		まとめ送り ２時間に一回(gzipd)
+   # matome 2u		まとめ送り ２時間に一回(plain text)
+   # matome 2mp		まとめ送り ２時間に一回 MIME/Multipart形式で
+   # matome 17		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は１７時に来る
+   # matome 29		まとめ送り 一日一回と同じ(gzipd)
+			#この場合は午前５時に来る
+			＃matome 5 は５時間“おき” という意味
+
+
+.S	過去の記事の取り寄せ 
+
+# index			get できうるファイルのリストをかえす
+			index ファイルがあるのなら、それを返します
+
+# get  ID		
+# send ID		過去の記事を得る(ひとつずつ plain text で送り返す)
+
+# mget 1-10,5みたいなsyntax 	[モード]	[時間間隔]
+# mget 正規表現 		[モード]	[時間間隔]
+			ファイルをまとめて送り返す
+			スプールの記事や、
+			(もしあれば)アーカイブにあるファイル
+   引数：
+	範囲を指定	1-10,12,15-100 1,2,10
+			first first:10 last:30 100-last(mh的 Syntax)
+	正規表現	e.g. * ? 1? 1?? 
+	モード		gz tgz ish rfc934 b rfc1153 d unpack uf(default=tgz)
+	時間間隔	送り返すメールが複数の時の間隔(default=300)	
+   モード：
+		オプションなしは tar+gzip で spool.tar.gz
+	tgz	同上
+	uf	PLAINTEXT(UNIX FROM)
+	gz	GZIP(UNIX FROM)
+	b	RFC934 format 	PLAINTEXT(mh-burst)
+	rfc934	
+	ish	lha + ish 
+	lhaish
+	i
+	li
+	lu	lha + uuencode
+	lhauu
+	unpack	PLAINTEXT(UNIX FROM)
+	uu	UUENCODE
+	d	RFC1153 format 	PLAINTEXT
+	rfc1153	RFC1153 format 	PLAINTEXT
+
+
+.C	標準でないコマンド
+
+これらコマンドは管理者のポリシーによって使っていないこともあります。
+デフォールトでは使えません。
+
+.S	ライブラリ
+
+ユーザがファイルを登録したり、それを取り寄せたりするためのものです。
+
+# library 命令		ライブラリへのアクセス。アーカイブとの違いは
+			ほとんどないが、put ができるのが大きく違う。
+			＃ただしファイル名は記事番号指定のみ(for security)
+
+# library get 数字	mget と同じ引数がつかえます
+# library put 		普通のメールスプールのようにアーカイブしていきます
+# library index		ライブラリにたくわえられているファイルのサマリ
+# library summary	同上
+
+
+.S	whois database による情報交換
+
+# whois [-h host] key	whois で key を探す。
+			host が与えられた場合はそのhostへIPCで、
+			もしそうでない場合は
+			ＭＬローカルな whois database を探します
+# whois -a		特殊オプションで、すべての登録エントリを表示する
+# iam			自己紹介を登録する
+# who			自己紹介の一覧を得る
+
+
+.S	traffic コマンド(投稿量の統計)
+
+　　traffic コマンドはメイルの投稿量の統計をとるコマンドです。
+
+　　使い方は、
+
+     # traffic [-n <best?>] [-m <mails>] [-d]
+
+　で、オプションを指定しないで、
+
+     # traffic
+
+　とすると、デフォルトで、
+
+     1. 月毎のメイル投稿量
+     2. メイル投稿量毎の日数
+     3. 時間帯別の投稿量
+     4. 1 日 25 通以上投稿があった日
+     5. 投稿者ベストテン
+     6. 1 日当たりの平均投稿量と最大投稿量
+
+　が得られます。
+
+　　オプションで、-d を指定すると、さらに、
+
+     0. 日毎の投稿量
+
+　も得られます。デフォルトでは表示されません。
+
+　　オプション -n は、5. の投稿量の多い人のベスト何人まで表示するかを
+　数字で指定します。デフォルトでは、-n 10 と同じです。
+
+　　オプション -m は、4. の何通以上あった日を表示するかを数字で指定し
+　ます。デフォルトでは、-m 25 と同じです。
+
+
+.S	その他
+
+# addr aoi@chan.panic
+
+	現在では管理者用です。複数のアドレスにマッチした場合は
+	一つに特定できるまでアドレスのマッチルールを厳しくして
+	コマンドを実行しようとします。通常必要ありません。
+
+			複数の配送先を持つ人はＯＦＦコマンド等で
+			サーバの設定によっては複数マッチしてしまう
+			e.g. aoi@chan.panic と aoi@hayakawa.chan.panic
+			も両方マッチしてしまう時、
+			今は aoi@chan.panic についてのコマンドを行ないたい時
+			に使うと、このコマンド以降の他のコマンドを 
+			aoi@chan.panic に対してのみ行なうようにする。
+			まんがいち複数マッチをしたら サーバは自動的に
+			アドレスのチェックの精度をあげてトライをするの
+			でたぶん必要ないとおもます
+
+
+.C	コマンドの使い方の具体例
+
+.S	過去のメールの取り寄せ方
+
+   ○ 個々に取り寄せる場合
+
+　　個々に過去のメイルを取り寄せるには「# get」を使います。以下にメイル
+　の本文に書く例を示します。いずれも
+
+     mnews-request@leo.chubu.ac.jp
+
+　宛てに送ります。
+
+　(1) 1 番目のメイルが欲しい
+
+     # get 1
+
+　(2) 1 〜 3 番目のメイルが欲しい
+
+     # get 1
+     # get 2
+     # get 3
+  
+   ○ まとめて取り寄せる場合
+
+　　まとめて過去のメイルを取り寄せるには「# mget」を使います。以下にメ
+　イルの本文に書く例を示します。
+
+　(1) 100 〜 200 番目のメイルが欲しい
+
+     # mget 100-200
+
+　(2) 100 〜 200 番目のメイルを複数になる場合は 30 秒間隔で欲しい
+
+     # mget 100-200 30
+
+　(3) 100 〜 200 番目のメイルを PLAIN TEXT で欲しい
+
+     # mget 100-200 unpack
+
+　(4) 100 〜 200 番目のメイルを LHA + ISH で欲しい
+
+     # mget 100-200 ish
+
+　(5) 100 〜 200 番目のメイルを 30 秒間隔、PLAIN TEXT で欲しい
+
+     # mget 100-200 30 unpack
+
+　　返送されるメイルは 1000 行で切ってバラバラに送られるので、送り返さ
+　れてくるメイルとメイルの時間間隔を指定して下さい。先の例では 30 なの
+　で 30 秒間隔で送り返されます。
+
+　　指定しなかった場合の時間間隔は 5 分です。
+
+　　フォーマットを指定しなかった場合、ファイルは tar でまとめられ gzip
+　され uuencode されて送り返されます。
+
+　　1000 行を越える場合は複数のメイルに分けますので、自分でつなげて(^^;
+　例えば bar というファイルにしたとします。
+＃uuencode されている場合は undecode を使えば順番さえ合わせれば自動展開
+＃されます。
+
+     % uudecode bar
+     % ls 
+     spool.tar.gz
+     % gzip -cd spool.tar.gz | tar xf - 
+     % ls 
+     spool.tar.gz spool
+     % ls -l
+     -rw-r--r-- .......................... spool.tar.gz
+     drwxr-xr-x .......................... spool
+
+　という具合に spool ディレクトリというのが出来ます。この中に取り寄せた
+　メイルがしまわれています。
+
+
+付記： このヘルプファイルは fml 2.1 RELEASE のために 
+fukachan@sapporo.iij.ad.jp がそれ以前の help (original) help.example2
+(mnews ML, contributed by umura@nn.solan.chubu.ac.jp, thanks!) を参考に
+して再編集したものです。
+
+
+$Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
