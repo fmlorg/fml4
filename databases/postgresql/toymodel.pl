@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $Id$
+# $FML$
 #
 
 
@@ -71,6 +71,10 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'chaddr'    ||
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
+	       $mib->{'_action'} eq 'addmembers' ||
+	       $mib->{'_action'} eq 'add2members' ||
+	       $mib->{'_action'} eq 'addactives' ||
+	       $mib->{'_action'} eq 'add2actives' ||
 	       $mib->{'_action'} eq 'addadmin' ||
 	       $mib->{'_action'} eq 'byeadmin' ) {
 	    &__ListCtl($mib);
@@ -88,6 +92,8 @@ sub DataBases::Execute
 	}
 	else {
 	    &Log("ERROR: PostgreSQL: unkown ACTION $mib->{'_action'}");
+	    $mib->{'error'} = "ERROR: PostgreSQL: unkown ACTION $mib->{'_action'}";
+	    return 0;
 	}
 
 	if ($mib->{'error'}) { 
