@@ -1,15 +1,16 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1998,2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 $Rcdid   = "fml_local $rcsid";
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -667,6 +668,7 @@ if ($debug_fml_local) {
     require 'libdebug.pl';
 }
 
+#.include kern/libloadconfig.pl
 #.include kern/libsmtp.pl
 #.include kern/libsmtputils.pl
 #.include proc/libkern.pl
