@@ -1,6 +1,7 @@
 .C	WWW 関係 (HyperReference ...)
 .l	href
 .key	WWW
+.k	ローカルスプールへのftp操作
 .key	localftp
 .key	http://
 .key	gopher://

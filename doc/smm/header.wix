@@ -443,6 +443,16 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
 
 
+.S	X-ML-Info: の内容を指定する
+.k	$X_ML_INFO_MESSAGE
+
+	$X_ML_INFO_MESSAGE
+
+で指定した内容を優先して X-ML-Info: につけて配送します。そうでない場合
+はモードによって適当に作られた user friendly な内容が付け加えられます。
+
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
