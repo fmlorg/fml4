@@ -1,16 +1,31 @@
 		README of fml
 
-fml 2.0 Mailing List Server Package (compatible with hml 1.6).
+fml 2.x Mailing List Server Package (compatible with hml 1.6).
 				fukachan@phys.titech.ac.jp
 
 .C	fml 2.0 
 
-fml 2.0 は Mailing List Server package(Perl Scripts package)です。
+fml 2.0 は Mailing List Server package(Perl Scripts package)で、
+壱から Full Scratch したものです。
+＃雑誌等のおまけCDROMの解説は間違いなんです
 ＃ server and management っていうべきなのかな？
 
-これはhml 1.6 という Perl Script をお手本にしています。
-もっとも実際には中身は別物です。ユーザーからの見かけとか設定に使うファ
-イル名等の部分には名残が見てとれるでしょう。
+これは（歴史的理由等により）デフォールトでは hml 1.6 という Perl
+Script と見かけが同じになるように作動します。
+＃正確にはその元祖の shell script の program というべき
+
+インターフェイスさけ変えてしまえばいいだけの話なので、
+サーバのコマンドの機能は
+
+	hml のシンタックスで使う （Default Emulation）
+	listserv or majordomo インターフェイスに見せかける
+	もしくはコマンド機能等を一切使わずにフォワードするだけ等
+
+を Emulation します。
+
+
+ユーザーからの見かけとか設定に使うファイル名等の部分には名残が見てとれ
+るでしょうが、中身は別物です。
 ＃ "# command" syntax にこだわっているわけでもないし
 
 今の version は hml 1.6 の Upper Compatible になっているはずです。
