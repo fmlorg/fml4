@@ -172,7 +172,6 @@ Can you understand sources of quotations?:-)
 .include cloindex.wix
 .include ftp.wix
 .include whois.wix
-.include cwhois.wix
 
 .include pager.wix
 .include mail2news.wix
