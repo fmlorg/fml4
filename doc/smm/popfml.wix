@@ -1,4 +1,5 @@
 .C	POP による FML の起動
+.l	popfml
 
 .S	POP経由の自動RefileやＭＬの実行 (bin/popfml.pl)
 
