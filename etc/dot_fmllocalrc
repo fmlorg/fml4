@@ -1,0 +1,210 @@
+#FORMAT V2 (DO NOT DELETE THIS LINE!)
+#
+# Copyright (C) 1995 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
+# $rcsid   = q$Id$;
+#
+# configuration file for fml_local.pl
+# #行はコメントです。
+# 最後にマッチしたエントリを実行します。
+# default は常に実行するエントリです。
+# 詳しくは fml のFAQ を。簡単なヘルプは fml_local.pl -h 
+
+
+
+###########################################################################
+##### SYSTEM 変数
+#CONFIGURE
+TAR		/usr/local/bin/tar cf -
+UUENCODE	/bin/uuencode
+RM		/sbin/rm -fr
+CP		/bin/cp
+COMPRESS	/usr/local/bin/gzip -c
+ZCAT		/usr/local/bin/zcat
+
+
+###########################################################################
+##### VARIABLES 変数
+
+# デバッグモード
+DEBUG
+
+# USER	-user fukachan で設定する変数と同じ意味
+USER	fukachan
+
+# From: であり、エラーメールが返る場所。もっともふつう〜は
+# 自分自身以外に設定仕様がないですね
+MAINTAINER 	fukachan@phys.titech.ac.jp
+
+# HOME	$HOME変数。
+# Bourne Shell 風にしているので、~/ を展開するようにはなっていません
+HOME	/home/axion/fukachan
+
+# $DIR 変数の設定。下で使われると $DIR を次の値で展開するため
+DIR	/home/vivian/fukachan/work/EXP
+
+# $LIBDIR 変数の設定。下で使われると $LIBDIR を次の値で展開するため
+LIBDIR	/home/vivian/fukachan/work/EXP
+
+# メールスプールの場所
+MAIL_SPOOL	/var/mail/fukachan
+
+# ログファイル デフォールトは ~/log
+LOG		$HOME/work/fml/log
+
+# パスワード
+PASSWORD	uja uja 
+
+# get とかで使う アーカイブの置き場所。もし設定してないと HOME
+ARCHIVE_DIR	/home/uja/uja/work/archive
+
+# From: in MAINTAINER's SIGNATURE
+# From: $MAINTAINER ($MAINTAINER_SIGNATURE) になる
+# e.g. 返るメールのFrom:が、
+# From: fukachan@phys.titech.ac.jp (Prisoner No.6 Fukachan)
+# になる
+MAINTAINER_SIGNATURE	Prisoner No.6 Fukachan
+
+# Vacation program compatible で vacation の働きもする。
+#VACATION	/home/uja/uja/.vacationrc
+
+# フィールドセパレータを変更する
+#FS	\s+
+
+# ユーザーが自分用に設定した関数を 別のファイルにしまいたいなら
+# そのファイル名を設定する。デフォールトは ~/.myfunctions.pl
+#MY_FUNCTIONS	/home/your-function-file
+
+
+###### SYSTEM 
+TAR		/usr/local/bin/tar cf -
+UUENCODE	/bin/uuencode
+RM		/sbin/rm -fr
+CP		/bin/cp
+COMPRESS	/usr/local/bin/gzip -c
+ZCAT		/usr/local/bin/zcat
+
+
+###########################################################################
+##### ACTIONS
+# slocalと違って4つしかないから注意
+#  
+# メールのフィールド	パターン	&か|か>		実行すること
+#
+# 各フィールドは スペースとタブ の塊で区切られます。
+#
+# メールのフィールド	To, subject, 等。なんでもいい
+# パターン		perlの正規表現が使えます。
+#			スペースとかは含めないので
+#			get\s+(\S+) 
+#			こんな形になります。
+#			() でマッチした変数は順に
+#			$F1 $F2 $F3 に設定されます
+# タイプ		& は perl の関数呼びだし
+#			> は そのファイルにアペンドです
+#			| は パイプで渡します。
+#			UNIX FROMつきのまま渡します
+#			UNIX FROMを抜いた形でプログラムへ渡すには
+#			|の代わりにmhと書いてください
+#			(mhへ渡すことを想定している)
+#
+# exec			実行するもの。関数orファイル
+#
+
+#####################################################################
+#field		pattern		type	exec
+#####################################################################
+
+
+# (/usr/libexec/mail.local にならう)
+# スプール (例 /var/mail/fukachan )に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+From		fukachan	&	MailLocal
+
+# MH の folder へいれる。MH本来の slocal はこう使うんだろうなぁ
+From		fukachan@phys	mh	/usr/local/lib/mh/rcvstore +inbox
+
+# ML ごとにフォルダーわけする
+# 外国TVシリーズMLからのメールは
+# TO:enterprise@phys.titech.ac.jp になるから、それにマッチしたら
+# ~/Mail/enterprise というフォルダーにいれる
+To		Enterprise@phys mh	/usr/local/lib/mh/rcvstore +enterprise
+
+# または
+X-ML-Name	prisoner	 mh	/usr/local/lib/mh/rcvstore +enterprise
+
+# File Retrieving 
+# perl の関数を呼ぶ。(\S+)でマッチしたファイル($F1)を送り返す 
+# つまり $ARCHIVE_DIR/$F1  というファイルです
+
+Subject		get\s+(\S+)	&	sendback
+
+# でも、ファイル名は可能なファイルに制限したほうがいいでしょうね
+# そういうSubjectのメールがこないという保証は何もないっすから
+# たとえば、
+
+# $ARCHIVE_DIR/INFO をおくりかえす
+Subject		(INFO)		&	sendback
+
+# とか
+
+# $ARCHIVE_DIR/HELP もしくは $ARCHIVE_DIR/INFO をおくりかえす
+Subject		get\s+(HELP|GUIDE)	&	sendback
+
+
+############################################################
+# MLは 
+# From 自分
+# のマッチパターンの後にないと 自分でMLへメールがだせない:-)
+#
+############################################################
+# MLをする その1
+# MLサーバ fml.pl を呼ぶ。
+# 今の場合管理者宛のメールは上のFrom や X-MLserverでスプールに落すので
+# ループはしない
+# To: 自分 (uja) というヘッダーがきたら、MLを実行する
+
+to		(uja)		|	$DIR/fml.pl $DIR $DIR
+
+
+# 簡単な フォワード (簡単なMLやね)をする その1
+#ヘッダをいじったり、スプールしたりはしません、フォワードだけです
+# address-1 address-2 へフォワード
+to		(uja)		& 	forward address-1 address-2
+
+# 簡単な フォワード (簡単なMLやね)をする その2
+# ファイル /home/uja/inc の中のアドレスへ配送
+to		(uja)		& 	forward :include:/home/uja/inc
+
+# 特定のアドレス uja から来たら捨てる（無視）
+From		uja		& 	discard
+
+# は、これでも同じ
+From		uja		> 	/dev/null
+
+######################################################################
+#     これは最後にマッチするべき、これで絶対にループしないはず
+######################################################################
+# MailLocal は
+# (/usr/libexec/mail.local にならう)
+# スプール (例 /var/mail/fukachan )に Appendします
+# From:fukachan の場合、From:fukachan@phys.titech...もマッチする
+# From		fukachan	&	MailLocal
+# もし ML からきたら、ローカルにおとす
+X-MLserver	\S+		&	MailLocal
+
+
+# default	anything 
+# 常に実行するエントリ(が“デフォールト エントリ"の正しい仕様?)
+# メールが来たら常に  西原久美子の声で「速達ですぅ〜」
+# とかマシンにいわせるとかすると きっと もえもえですぜ、だんなぁ（馬鹿）
+# default		.*		|	kick_off_sound.pl -d
+
+default		.*		&	MailLocal
+
+
+# たぶん日本語でもマッチするとおもいますけど…
+# （このファイルが JIS でないといけないとおもうが）
+#
+# body	いなばくん.*かわいい	mh /usr/local/lib/mh/rcvstore +Alice
+#

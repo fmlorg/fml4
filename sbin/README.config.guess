@@ -1,0 +1,14 @@
+I added this template to GNU automake 1.3 config.guess. This is the
+diff between the original.
+
+--- config.guess	1998-06-30 13:03:32+09	1.2
++++ config.guess	1998-06-30 23:59:11+09
+@@ -742,7 +742,7 @@
+     news*:NEWS-OS:*:6*)
+ 	echo mips-sony-newsos6
+ 	exit 0 ;;
+-    R3000:*System_V*:*:* | R4000:UNIX_SYSV:*:*)
++    R3000:*System_V*:*:* | R4000:UNIX_SYSV:*:* | R4000:UNIX_SV:*:*)
+ 	if [ -d /usr/nec ]; then
+ 	        echo mips-nec-sysv${UNAME_RELEASE}
+ 	else
