@@ -68,6 +68,9 @@ sub Init
     # safe tmp buffer
     $TmpDir = "/tmp/fmlcgi$$";
     -d $TmpDir || mkdir($TmpDir, 0700);
+
+    # signal handling
+    $SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
 }
 
 
@@ -75,6 +78,7 @@ sub CleanUp
 {
     -d $TmpDir && rmdir($TmpDir);
 }
+
 
 sub ShowHeader
 {
