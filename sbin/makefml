@@ -1301,7 +1301,11 @@ sub do_newml
     &Conv($ml, "$EXEC_DIR/etc/makefml/fml.c",   "$ML_DIR/$ml/fml.c");
     &FixIncludeHeader;
 
+    # doc/drafts -> help,deny,guide,objective
     &Copy("$EXEC_DIR/doc/drafts/help", "$ML_DIR/fmlserv/help");
+    &Copy("$EXEC_DIR/doc/drafts/deny", "$ML_DIR/fmlserv/deny");
+    &Copy("$EXEC_DIR/doc/drafts/guide", "$ML_DIR/fmlserv/guide");
+    &Copy("$EXEC_DIR/doc/drafts/objective", "$ML_DIR/fmlserv/objective");
 
     # here backed to the writable bit == 077 or 007
     &SetWritableUmask;
