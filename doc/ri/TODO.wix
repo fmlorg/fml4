@@ -17,7 +17,8 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
-.S	Subject: unsubscribe で自動削除?
+.S	automatic-unsubscribe when "Subject: unsubscribe" mail comes
+=E.S	Subject: unsubscribe で自動削除?
 
 もともとの設問の意図が「そういう一行メールが多いので、こういうときは自
 動的にTRAPして削除処理をしよう」っていう変数があるとしあわせ？
@@ -26,7 +27,8 @@
 これがデフォルトはまずいとおもうんだが、optional ならOK？
 
 
-.S	れれれのおねえさん
+.S	Re Re Re problem
+=E.S	れれれのおねえさん
 
 	Re:*2
 ?
@@ -35,7 +37,8 @@
 
 いまでは MesgLE() をつかって再実装するべきだ
 
-.S	default_config.ph をcvs treeに?
+.S	cvs add default_config.ph ?
+=E.S	default_config.ph をcvs treeに?
 
 for fml-stable
 
@@ -510,7 +513,8 @@ A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
 利点として makefml config の日本語変換
 Message Language Extensionの関数ライブラリをよぶ
 
-.S	apache-ssl (1.3.9 base)の解説の用意をする
+.S	prepare documents to make apache-ssl (1.3.9 base)
+=E.S	apache-ssl (1.3.9 base)の解説の用意をする
 
 .S	acl model
 
