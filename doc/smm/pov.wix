@@ -725,6 +725,7 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 	
 	$SMTPLOG		$VARLOG_DIR/_smtplog
 .l	$SMTPLOG
+.l	$VARLOG_DIR/_smtplog
 		プロセス間通信(SMTP)のログ(デバッグの役に立つ)
 
 	$SUMMARY_FILE 	 	$DIR/summary	
@@ -773,6 +774,14 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 			Be seeing you P(^^)
 
 		のようになる。		 
+
+
+○ 古い変数として他の名前に置き換えられたもの
+.k	$GUIDE_REQUEST
+.k	$RPG_ML_FORM_FLAG
+
+   $GUIDE_REQUEST	-> $GuideRequest
+   $RPG_ML_FORM_FLAG	-> $COMMAND_SYNTAX_EXTENSION
 
 
 
@@ -1304,6 +1313,75 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 も fmlserv のために導入された変数ですね。
 
 
+
+.C	Emailアドレスの判定方法とSecurity
+
+.S	アドレスのチェックを緩めたい or きつくしたい
+.key	$ADDR_CHECK_MAX
+
+メンバーチェックは送られてきたメールの発信者のアドレスと members に書
+かれたアドレスとが一致するか否かで判断しています。今の設定は
+＃1.3.2からは…緩くした
+
+	fukachan@titech.ac.jp
+	fukachan@phys.titech.ac.jp
+	fukachan@beth.phys.titech.ac.jp
+	fukachan@exelion.phys.titech.ac.jp
+
+はすべて同じにみなしてます。つまり phys.titech.ac.jp のjp側から数えて
+３つの部分の判定チェックですね。（木構造のルートから数える）
+＃経験的にここまでやれば十分でしょう
+
+４つ（jp ac phys titech の４つ）までチェックしたいなら、
+
+$ADDR_CHECK_MAX = 4;
+
+と config.ph のどっかに書いておいて下さい。$ADDR_CHECK_MAX という変数
+が設定されてない場合は３として動きます。
+
+
+.S	複数アドレスから投稿したいがうけとりは一つ( "# skip" )
+.key	skip
+.key	noskip
+.label	{skip}
+
+複数アドレスから投稿可能だがうけとりはあるアドレスに送って欲しい。
+＃この１週間だけこのアドレスも使いたいしぃ〜とかの場合にも効果的です
+
+という場合を考えて、actives(自動登録では members = actives) で
+
+fukachan@phys.titech.ac.jp	skip
+
+と書いておけば認証（新人さんチェック）には使うけど配送はしないという動
+作をします
+
+つまり
+
+	fukachan@phys.titech.ac.jp	skip
+	Elena@phys.titech.ac.jp	
+	Pollyanna@phys.titech.ac.jp	skip
+
+になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
+が、配送はelenaにしか行なわれないということです。
+
+ユーザーがこれを自分でコントロールしたいなら、コマンドは
+＃ Admin command でのみ引数が有効です。
+ 
+# skip	 [引数]		From:のアドレス もしあれば 引数のアドレスを
+			そこから投稿はできるが、配送はされないものと設定する
+# noskip [引数]		上の逆。配送するようにする。
+
+です。例：
+# skip 
+	From: のアドレスを skip に
+
+# skip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp を skip に
+
+# noskip pollyanna@phys.titech.ac.jp
+	pollyanna@phys.titech.ac.jp へも配送を
+
+
 .S	特定のアドレスを拒否する (spam mails)
 .k	spam mails
 .l	$REJECT_ADDR_LIST
@@ -1321,6 +1399,7 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 
 みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
 れます。
+
 
 
 .C	Portings
