@@ -1,13 +1,13 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000-2001 Ken'ichi Fukamachi
+# Copyright (C) 2000-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libloadconfig.pl,v 2.21 2001/08/25 12:44:38 fukachan Exp $
+# $FML: libloadconfig.pl,v 2.22 2002/01/08 03:56:58 fukachan Exp $
 #
 
 use vars qw($debug);

@@ -1,14 +1,14 @@
 #-*- perl -*-
-# Copyright (C) 1993-1999,2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999,2001,2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999,2001 fukachan@sapporo.iij.ad.jp
+#               1996-1999,2001,2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libkernsubr2.pl,v 2.10 2001/09/24 12:44:41 fukachan Exp $
+# $FML: libkernsubr2.pl,v 2.11 2002/01/09 15:08:18 fukachan Exp $
 #
 
 use vars qw($debug $PeerAddr);
