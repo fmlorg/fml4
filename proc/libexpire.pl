@@ -36,7 +36,7 @@ sub Expire
 	else {
 	    # expire with date(default)
 	    $f  = "$spool_dir/$f";
-	    $d  = time - (stat($f))[10];
+	    $d  = time - (stat($f))[9]; # mtime (ctime->mtime 1999/10/28)
 	    $d /= $OneDay;
 	    
 	    &Debug("?:expire $f if $d > $expire") if $debug; 
