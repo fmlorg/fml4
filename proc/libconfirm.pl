@@ -43,7 +43,7 @@ sub ConfirmationModeInit
 sub Confirm
 {
     local(*e, $addr, $buffer) = @_;
-    local($id, $r, @r, %r, $time, $m, $gh_subject);
+    local($id, $r, @r, %r, $time, $m, $gh_subject, $type);
 
     $e{"GH:Subject:"} = "Subscribe request result $ML_FN";
 
@@ -53,14 +53,20 @@ sub Confirm
     # result code; @r is the identifier;
     $r = &Confirm'FirstTimeP(*r, $addr, $time);#';
 
-    &Log("Confirm::FirstTimeP r=$r");
+    # Mail is "subscribe" ? or "confirm" ? else ? (error?)
+    $type = &Confirm'BufferSyntaxType(*e, $buffer); #';
+
+    &Log("Confirm::FirstTimeP r=$r type=$type");
 
     if ($debug_confirm) {
 	&Warn("Confirm Request[$r] $ML_FN", 
-	      "Confirm::FirstTimeP r=$r\n\n". &WholeMail);
+	      "Confirm::FirstTimeP r=$r type=$type\n\n". &WholeMail);
     }
 
-    if ($r eq 'first-time' || $r eq 'expired') {
+    if ($r eq 'first-time' || $r eq 'expired' || 
+	($r eq 'confirmed' && $type eq 'subscribe') 
+	) {
+
 	if ($r eq 'expired') {
 	 $m .= "Your confirmation for \"subscribe request to $MAIL_LIST\"\n";
 	 $m .= "is TOO LATE (ALREADY EXPIRED).\n";
@@ -147,6 +153,21 @@ sub IdCheck
     }
 }
 
+sub BufferSyntaxType
+{
+    local(*e, $buffer) = @_;
+
+    if ($buffer =~ /$CONFIRMATION_SUBSCRIBE/) {
+	return 'subscribe';
+    }
+    elsif ($buffer =~ /$CONFIRMATION_KEYWORD/) {
+	return 'confirm';
+    }
+    else {
+	return '';
+    }
+}
+
 sub BufferSyntax
 {
     local(*e, $buffer) = @_;
@@ -182,6 +203,8 @@ sub BufferSyntax
     }
 }
 
+# IMPORTANT (Reset by plural "subscribe" is based below;)
+# LAST MATCH EVEN IF PLURAL ENTRIES MATCH ADDR;
 sub FirstTimeP
 {
     local(*r, $addr, $cur_time) = @_;
@@ -204,6 +227,7 @@ sub FirstTimeP
 	# address match
 	&AddressMatch($addr, $a) || next;
 
+	# LAST MATCH EVEN IF PLURAL ENTRIES MATCH ADDR;
 	# already address is OK;
 	if ($time + ($CONFIRMATION_EXPIRE*3600) < $cur_time) {
 	    &Log("Confirmation [id=$id] is already Expired");
