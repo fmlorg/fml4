@@ -1,5 +1,175 @@
 		fml toymodel for database access
 
-Sorry, not translated.
 
-$FML$
+* LIBRARY DEPENDENCE
+
+     fml -> libdatabaes.pl -> model specific driver (e.g. toymodel)
+
+  fml
+    | 
+    V
+    &DataBaseCtl() ( defined in libdatabases.pl ) calls
+       |     
+       V     
+       model specific driver (such as /usr/local/fml/databaes/ldap/toymodel.pl)
+
+
+"toymodel.pl" should have all low level functions needed to
+communicate with an SQL or LDAP server.  On the other hand,
+"libdatabases.pl" is an abstraction layer, so it should not have model
+specific codes.
+
+
+* HOW FML CALLS DATABASE DRIVER
+
+Fml calls driver like this:
+
+  # try to probe server
+  my (%mib, %result, %misc, $error);
+  &DataBaseMIBPrepare(\%mib, ACTION, OPTION);
+  &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+  if ($mib{'error'}) {
+	LOG ERROR.
+	DO SOMETHING IF ERROR.
+  }
+
+For example, to check if $From_address is a member of ML:
+
+   &DataBaseMIBPrepare(\%mib, 'member_p', {'address' => $From_address});
+
+If some error occurs, $mib{'error'} logs it.
+
+DataBaseMIBPrepare() set the action at $mib{'_action'}.  The model
+specific driver sees this value and switch the function.
+
+
+* SQL TABLE STRUCTURE
+
+See databases/examples/$type-$model/. 
+
+For example, if you use "toymodel" by MySQL,
+"databases/examples/mysql-toymodel/toymodel.sql" describes basic sql
+statements: how to create table, add user, list up ML member et.al.
+
+	EXAMPLE: mysql toymodel
+
+		create table ml (
+			ml char(64),
+			file char(64),
+			address char(64),
+			off int,
+			options char(64)
+		);
+
+
+* METHODS OF MODEL SPECIFIC DRIVER
+
+Each model specific driver should provide the following functions.
+The request by fml is specified at $mib->{'_action'}.
+
+	$mib->{'_action'}		descriptions
+	-----------------------------------------------------------------
+	get_status
+		return the status of $mib->{'_address'} (address).
+		Typically, the information is on whether the delivery
+		to this address is real time or digest.
+
+		"status" command calls this method.
+
+		NOTE: 	"status" command includes value specified at
+			$mib{'_result'} into the result.
+
+	num_active
+		return the total number of recipients.
+
+	num_member
+		return the total number of members, who can post.
+
+	get_active_list
+	dump_active_list
+		save list of all recipients at the specified file.
+		please specify the file as $mib->{'_cache_file'}.
+
+		NOTE: save addresses returned by SQL/DALP server
+		at the temporary file specified as $mib->{'_cache_file'}.
+
+	get_member_list
+	dump_member_list
+		save list of all members at the specified file.
+		please specify the file as $mib->{'_cache_file'}.
+
+		NOTE: save addresses returned by SQL/DALP server
+		at the temporary file specified as $mib->{'_cache_file'}.
+
+	active_p
+		check if the address specified as $mib->{'_address'}
+		is a recipient?
+
+		return the result at $mib->{'_result'}, which value is
+		1 (yes) or 0 (no).
+
+	member_p
+		check if the address specified as $mib->{'_address'}
+		is a member (the address can post article to this ML) ?
+
+		return the result at $mib->{'_result'}, which value is
+		1 (yes) or 0 (no).
+
+	admin_member_p
+		check if the address specified as $mib->{'_address'}
+		is an admin member ?
+
+		return the result at $mib->{'_result'}, which value is
+		1 (yes) or 0 (no).
+
+	add
+	bye
+	subscribe
+	unsubscribe
+	on
+	off
+	addadmin
+	byeadmin
+		modify database for the address specified as $mib->{'_address'}.
+
+	add2actives
+	addactives
+	add2members
+	addmembers
+		modify database for the address specified as $mib->{'_address'}.
+
+	chaddr
+		"old_address" and "new_address" are passed to this method.
+		change "old_address" to "new_address" on database.
+
+	digest
+	matome
+		enable/disable digest delivery.
+
+		NOTE: The digest parameter, such as "m=3u", is given as
+		$mib->{'_value'}.
+
+	store_article
+		If you store the article into your database,
+		please write the code here.
+
+		After the distribution (SMTP to MTA) ends, this method
+		is called.
+
+		You can use $e->{'Body'} and $mib->{'_article_id'}.
+		$e->{'Body'} is the article itself,
+		$mib->{'_article_id'} is the article number.
+
+	store_subscribe_mail
+		( hmm, this variable name is strange ???)
+
+		called at the last of automatic subscribe code.
+		If you store the message at subscribe request,
+		write the code here.
+
+		NOTE: 	this message must be a result of confirmation,
+			so this operation is meaningless almost cases.
+			But useful in some cases.
+
+
+$FML: TOY_MODEL.English,v 1.3 2003/01/14 23:02:08 fukachan Exp $
