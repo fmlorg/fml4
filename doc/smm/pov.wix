@@ -756,7 +756,14 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 		このファイルがない場合はその場でMLのHOME内容を調べて
 		返す
 
+
 .S	単に便利なためにある変数
+
+	$DO_NITHING
+.l	$DO_NITHING
+
+	何もしないという分岐をするための変数。特殊なサーバを作る時や
+	特別なHOOKをかけたりする場合に有用である。
 
 	$NULL
 .l	$NULL
@@ -775,6 +782,11 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
 		のようになる。		 
 
+	$INCLUDE_SIM_PATH
+.l	$INCLUDE_SIM_PATH
+
+	Simulation で使う。気にしないで下さい:)
+
 
 ○ 古い変数として他の名前に置き換えられたもの
 .k	$GUIDE_REQUEST
@@ -782,6 +794,9 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
 
    $GUIDE_REQUEST	-> $GuideRequest
    $RPG_ML_FORM_FLAG	-> $COMMAND_SYNTAX_EXTENSION
+
+○ obsolete なもの
+   $NON_PORTABILITY
 
 
 
@@ -946,7 +961,17 @@ msend.pl は $ACTIVE_LIST を見て、
 です。つまり UNIX 伝統のパスワードファイル形式の先頭の部分です。
 ＃crypt(3) についてはマニュアル参照
 
-ＭＬサーバのリモート管理で使われます。
+1997/06/10 以降の current では
+.l	$USE_MD5
+
+		$USE_MD5 = 1;
+
+を設定すると crypt() は crypt(3) ではなく MD5 の値を返すようになります。
+これは MD5.pm を用いた実装なので perl 5 であることと MD5-1.7.tar.gz の
+インストールが必要です。MD5-1.7 は fml の directory に一緒に置いてあり
+ます。
+
+これらの cryptography はＭＬサーバのリモート管理で使われます。
 .xref	remote
 
 あるアドレスをこのファイルへ登録する時などは bin/passwd.pl を使うと良
