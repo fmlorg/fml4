@@ -21,13 +21,12 @@
 
 .S	upgrade
 
-* アップグレードについて
-=E
-* upgradeing
+  Q: fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
+  A: fml-devel では可能。done.
 
-  fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
-  MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
-  今は stat() して reload をするようになっている
+  Q: postfix の $smtpd_recipient_restriction とうまくやる
+  A: fml-devel では可能。done.
+
 
 .S	配送関係
 =E.S	Delivery
@@ -38,8 +37,6 @@
 =E
 * kick off smtpfeed directly
 
-* $smtpd_recipient_restriction
-see /etc/postfix/sample*cf
 
 
 .S	トラブルチケットシステム
