@@ -1,13 +1,16 @@
+#!/bin/sh
+
 buf=/tmp/buf$$
 tmp=/tmp/p$$
 sed=/tmp/sed$$
 
 CHECK_IGNORE=distrib/etc/check.ignore
+OK_IGNORE=distrib/etc/check.allow
 
 trap "rm -f $buf $tmp $sed" 0 1 3 15
 
 echo ""
-echo "Ignore Pattern: $FML/.check_ignore";
+echo "Ignore Pattern: $OK_IGNORE";
 echo ""
 
 for x in kern/*.pl bin/*pl sbin/*pl sbin/makefml proc/*.p? libexec/*.p? 
@@ -24,7 +27,7 @@ do
 	   sed -f $sed $buf |\
 	   awk -v x=$x '{printf("5 %-20s %s\n", x, $0)}'
 	)|\
-	egrep -iv -f $FML/.check_ignore | tee -a $tmp
+	egrep -iv -f $OK_IGNORE | tee -a $tmp
 
 done
 
