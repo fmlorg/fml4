@@ -1,24 +1,17 @@
 .HTML_PRE
-	CHANGES from 3.0.1 to 3.0.2
+	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
-				深町 賢一
-=E
-				Ken'ichi Fukamachi
+2000/03/31
 
-.if LANG == JAPANESE
-3.0 stable branch の 3.0.1 〜 3.0.2 の間の CHANGES についてのみ記して
-います。3.0, 3.0.1 の CHANGES は http://www.fml.org/fml/ からたどって
-ください。
-.fi
-.if LANG == ENGLISH
-This document logs CHANGES in fml stable branch.
-See http://www.fml.org/ for CHANGES in fml-current. 
-.fi
+   EnvelopFilter
+	skip plural null lines between paragraphs
 
+	最初のＮ行のパラグラフをえぐりだす部分を直す
+	FIX: 複数の空行を一行とみなさないとおかしい
 
 2000/03/26
 
-	3.0.1 release
+   3.0.1 release
 
 $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
