@@ -27,11 +27,47 @@
 まま、メールサーバの単なる設定の付け加え忘れもあるようです。
 
 
-.C	おおざっぱな手順
+.C	手順
 =E.C	Overview
 
-fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
-分をWWWサーバやメールサーバに適宜付け足す。
+.S	概要
+
+	fml-current をインストール
+	WWWサーバの設定変更    (sample patch あり)
+	メールサーバの設定変更 (sample patch あり)
+
+
+.S	fml-current のインストール
+=E.S	installation of fml-current
+
+current をもってくる。
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
+
+普通のfmlと同様にソースを広げてインストール。ただしその時のmakeの引数
+が違って
+
+	make install-withcgi
+	(makefml -W cgi install を実行する)
+
+として実行する。インストールの最後に対話的に２、３のことを聞かれる。
+これは
+
+	$EXEC_DIR/share/cgi-bin/fml/admin/.htacces
+	$EXEC_DIR/share/cgi-bin/fml/admin/*.cgi
+
+	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
+		admin:$CRYPTED_PASSWORD
+
+の設定を行なうためで、このホスト上でmakefmlを使って実行することと同等
+のことを行なえるようにする。例: ＭＬをつくる、けす。どのＭＬでも設定が
+できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
+
+
+.S	WWW サーバの設定の変更
+
+/usr/local/fml/www/examples/ の下の差分をWWWサーバやメールサーバに適宜
+付け足す。
 
 例: apache と sendmail を使っている場合
 
@@ -58,12 +94,30 @@ fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
 	分からなかったら apache デフォールトに戻して上述の作業をして下
 	さい。そしてリスタートしてみてください
 
-◯ /etc/sendmail.cf を編集する。編集する内容は
+.S	メールサーバ
+
+ (sendmail の例)
+
+   /etc/sendmail.cf を編集する。編集する内容は
 
 	/usr/local/fml/www/examples/sendmail/sendmail.cf	
 
    にある alias ファイルの定義に差し替えて下さい。
-		
+   sendmail を restart
+
+ (postfix の例)
+
+   /etc/postfix/main.cf を
+
+	alias_database = hash:/etc/aliases, 
+		hash:/var/spool/ml/etc/aliases
+
+	# gateway, you should also include $mydomain. Do not specify the
+	allow_mail_to_commands = alias,forward,include
+
+  と書き換えて、"postfix reload" を走らせる。
+
+.S	ためしてみるだ 		
 
 ◯ このあとはWWW画面で一通りできるようになります。"一通り"できることの
 範囲は
@@ -73,33 +127,6 @@ fml-current をインストールする。/usr/local/fml/www/examples/ の下の差
 	管理者ユーザの登録/削除
 
 などです。左のメニューバーあたりをみてください。
-
-
-.C	fml-current のインストール
-=E.C	installation of fml-current
-
-current をもってくる。
-
-.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/current/
-
-普通のfmlと同様にソースを広げてインストール。ただしその時のmakeの引数
-が違って
-
-	make install-withcgi
-	(makefml -W cgi install を実行する)
-
-として実行する。インストールの最後に対話的に２、３のことを聞かれる。
-これは
-
-	$EXEC_DIR/share/cgi-bin/fml/admin/.htacces
-	$EXEC_DIR/share/cgi-bin/fml/admin/*.cgi
-
-	$EXEC_DIR/www/db/admin/htpasswd	(初回のみ)
-		admin:$CRYPTED_PASSWORD
-
-の設定を行なうためで、このホスト上でmakefmlを使って実行することと同等
-のことを行なえるようにする。例: ＭＬをつくる、けす。どのＭＬでも設定が
-できる。ユーザ登録、管理者登録、パスワードの強制上書きなど
 
 
 .C	httpd のリスタート
