@@ -561,7 +561,7 @@ sub __SmtpIO
     # "DATA" Session BEGIN; no reply via socket
     # BODY INPUT ; putheader()
     print SMTPLOG ('-' x 30), "\n";
-    $0 = "$FML:  BODY <$LOCKFILE>";
+    $0 = "${FML}:  BODY <$LOCKFILE>";
 
     print SMTPLOG $e{'Hdr'};
     print S $e{'Hdr'};	# "\n" == separator between body and header;
@@ -762,7 +762,7 @@ sub SmtpPut2Socket
 
     # return if $s =~ /^\s*$/; # return if null;
 
-    $0 = "$FML:  $s <$LOCKFILE>"; 
+    $0 = "${FML}:  $s <$LOCKFILE>"; 
     print SMTPLOG $s, "<INPUT\n";
     print S $s, "\r\n";
 

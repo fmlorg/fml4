@@ -16,7 +16,7 @@ sub __ExecNewProcess
 
     if ($s = $FML_EXIT_PROG) {
 	print STDERR "\nmain::exec $s\n\n" if $debug;
-	$0 = "$FML: Run Hooks(prog) <$LOCKFILE>";
+	$0 = "${FML}: Run Hooks(prog) <$LOCKFILE>";
 	exec $s || do { &Log("cannot exec $s");}
     }
 }
@@ -24,7 +24,7 @@ sub __ExecNewProcess
 sub __SpawnProcess
 {
     local($p) = @_;
-    $0 = "$FML: Spawn Process <$LOCKFILE>";
+    $0 = "${FML}: Spawn Process <$LOCKFILE>";
 
     $p =~ s/^\s*\|\s*//;
 

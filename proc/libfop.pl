@@ -918,7 +918,7 @@ sub SendBackInOrder
 	    $file = ($returnfile =~ m%^/% ? "" : $DIR)."/$returnfile.$now";
 	}
 	
-	$0 = "$FML: SendingBackInOrder $now/$total";
+	$0 = "${FML}: SendingBackInOrder $now/$total";
 	&Log("SendBackInOrder[$$] $now/$total $to");
 
         # subject is reset anytime;
@@ -940,7 +940,7 @@ sub SendBackInOrder
 		 
 	unlink $file unless $debug;
 
-	$0 = "$FML: SendingBackInOrder sleep($sleeptime) cur=$now/$total";
+	$0 = "${FML}: SendingBackInOrder sleep($sleeptime) cur=$now/$total";
 
 	# remove event handler
 	&ClearEvent($evid)  if $evid;  $evid  = 0;
@@ -974,7 +974,7 @@ sub DelaySendFileDividedly
     local($sleep) = ($SLEEPTIME || 3);
     local($tmp)   = "$TMP_DIR/sfbs:${DSFD_Counter}:$$";
 
-    $0 = "$FML: split and send back $f to $to <$LOCKFILE>";
+    $0 = "${FML}: split and send back $f to $to <$LOCKFILE>";
     $s = $enc || $DEFAULT_MGET_SUBJECT;
 
     ### IF MIME mode, you are afraid of a lot ...
@@ -1049,7 +1049,7 @@ sub SendFileDividedly
     local($sleep) = ($SLEEPTIME || 3);
     local($tmp)   = "$TMP_DIR/sfbs:${SFD_Counter}:$$";
 
-    $0 = "$FML: split and send back $f to $to <$LOCKFILE>";
+    $0 = "${FML}: split and send back $f to $to <$LOCKFILE>";
     $s = $enc || $DEFAULT_MGET_SUBJECT;
 
     if ($mode eq 'mp') {

@@ -29,7 +29,7 @@ sub MgetCompileEntry
     # Do nothing if no entry.
     return unless %mget_list;
 
-    $0 = "$FML: Command Mode loading mget library: $LOCKFILE>";
+    $0 = "${FML}: Command Mode loading mget library: $LOCKFILE>";
 
     while (($key, $value) = each %mget_list) {
 	print STDERR "TRY MGET ENTRY [$key]\t=>\t[$value]\n" if $debug;
@@ -44,13 +44,13 @@ sub MgetCompileEntry
 	@value = split(/\s+/, $value); 
 
 	# Process Table
-	$0 = "$FML: Command Mode mget[$key $fld]: $LOCKFILE>";
+	$0 = "${FML}: Command Mode mget[$key $fld]: $LOCKFILE>";
 
 	# mget3 is a new interface to generate requests of "mget"
 	$fld = $key;		# to make each "sending entry"
 	$status = &mget3(*value, *fld, *e);
 
-	$0 = "$FML: Command Mode mget[$key $fld] status=$status: $LOCKFILE>";
+	$0 = "${FML}: Command Mode mget[$key $fld] status=$status: $LOCKFILE>";
 
 	# regardless of RETURN VALUE;
 	return if $_PCB{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
@@ -116,7 +116,7 @@ sub mget3
     local($fn, $dir, $tmpf, $prev, $m, $total, $s, @filelist);
     local($log_s) = "mget[$$]:";
     
-    $0 = "$FML: mget3 initialize $LOCKFILE>";
+    $0 = "${FML}: mget3 initialize $LOCKFILE>";
 
     &mget3_Init(*cf, *e);	# default values and ADDR_CHECK_MAX?(security)
 				# set -> %cf
@@ -125,7 +125,7 @@ sub mget3
     &mget3_Getopt(*cf,*opt,*e); # parsing options 
 				# set -> %cf
 
-    $0 = "$FML: mget3 searching files $LOCKFILE>";
+    $0 = "${FML}: mget3 searching files $LOCKFILE>";
 
     $r = &mget3_Search(*cf, *value, *opt, *sp, *ar, *e);
 				# Search and if found
@@ -171,7 +171,7 @@ sub mget3
     # %sp is $sp{100.tar.gz} = 99. ...
     # @r is extracted filelists to send
     # SO @r SHOULD BE UNLINKED AFTER COMPRESSED FILES GENERATED
-    $0 = "$FML: mget3 extracting files $LOCKFILE>";
+    $0 = "${FML}: mget3 extracting files $LOCKFILE>";
     &Debug("--mget3 extract session") if $debug;
     if (%sp) {		
 	$m += &ExtractFiles(*sp, *r);
@@ -190,7 +190,7 @@ sub mget3
     # Here @filelist has already the list to send back.
     #
     if (0 == $m) {
-	$0 = "$FML: mget3 error, so ends $LOCKFILE>";
+	$0 = "${FML}: mget3 error, so ends $LOCKFILE>";
 	&Log("$log_s: NO MATCHED FILE[\$m == 0]");
 	return 0;
     }
@@ -201,7 +201,7 @@ sub mget3
     }
 
     ###### for Headers and a few variables
-    $0 = "$FML: mget3 try send-back-processes $LOCKFILE>";
+    $0 = "${FML}: mget3 try send-back-processes $LOCKFILE>";
     &Debug("--mget3 try send back session") if $debug;
 
     local($mode_doc);

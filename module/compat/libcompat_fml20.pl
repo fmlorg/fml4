@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: libcompat_fml20.pl,v 1.1.1.1 2000/02/20 15:49:55 fukachan Exp $
+# $Id: libcompat_fml20.pl,v 1.2 2000/06/16 12:00:32 fukachan Exp $
 
 
 sub ProcRetrieveFileInSpool_FML_20
@@ -38,7 +38,7 @@ sub DoMLMemberCheck
 {
     local($k, $v, $file);
 
-    $0 = "$FML: Checking Members or not <$LOCKFILE>";
+    $0 = "${FML}: Checking Members or not <$LOCKFILE>";
 
     &AdjustActiveAndMemberLists; # tricky
 
@@ -84,7 +84,7 @@ sub DoMLMemberCheck
     else {
 	# original designing is for luna ML (Manami ML)
 	# If failed, add the user as a new member of the ML	
-	$0 = "$FML: Checking Members and add if new <$LOCKFILE>";
+	$0 = "${FML}: Checking Members and add if new <$LOCKFILE>";
 
 	&use('amctl');
 	return &AutoRegist(*Envelope);
