@@ -1,13 +1,10 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-# fml is free software distributed under the terms of the GNU General
-# Public License. see the file COPYING for more details.
-
+# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
 
 $rcsid   = q$Id$;
-$rcsid .= " :".($id =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
+($rcsid) = ($rcsid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 
 # For the insecure command actions
 undef %ENV;
@@ -31,13 +28,19 @@ unshift(@INC, $DIR);
 require 'config.ph';
 
 ###### Customizable Varaibles
-
 $From_address   = "Cron.pl";
 $NOT_TRACE_SMTP = 1;
 $CRON_NOTIFY    = 1;		# if you want to know cron's log, set 1;
 $NOT_USE_TIOCNOTTY = 1;		# no ioctl
-
 ##### 
+
+# GETOPT
+$Eternal      = 1 if $_cf{'opt:a'};
+$debug        = 1 if $_cf{'opt:d'};
+$CRON_NOTIFY  = 0 if $_cf{'opt:b'} eq '43';
+$CRONTAB      = $_cf{'opt:f'} || $CRONTAB || "etc/crontab";
+$Daemon       = 1 if $_cf{'opt:b'} eq 'd';
+$NOT_USE_TIOCNOTTY = 0 if $_cf{'opt:o'} eq 'notty';
 
 ### chdir HOME;
 $_cf{'opt:h'} && die(&USAGE);
@@ -45,24 +48,19 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 $ENV{'HOME'} = $DIR;
 
 ### MAIN
-&CronInit; 
-
 print STDERR "DEBUG MODE ON\n" if $debug;
 
 print STDERR "Become Daemon\n" if $debug && $Daemon;
 &daemon if $Daemon;
-
+ 
 $pid = &GetPID;
 
 if ($pid > 0 && 1 == kill(0, $pid) && (! &RestartP)) {
     print STDERR "cron.pl Already Running, exit 0\n";
 }
 else {
-    if (! $NoRestart) {
-	&Log((&RestartP ? "New day.! " : "")."cron.pl Restart!");
-	&OutPID;
-    }
-    
+    &Log((&RestartP ? "New day.! " : "")."cron.pl Restart!");
+    &OutPID;
     &Cron;
 }
 
@@ -78,7 +76,6 @@ sub USAGE
     options;
     -d                debug mode;
     -a                run eternally(default: 180sec. = 60sec. * 3times);
-    -n                working all times without RESTART;
     -mtimes           run from now to (60 * times) sec. after;
     -fcrontab-file    alternative crontab;
     -h                show this help and exit;
@@ -120,8 +117,7 @@ sub RestartP { (localtime(time))[3] != &GetDayofTime($CRON_PIDFILE);}
 
 sub abs { $_[0] > 0 ? $_[0]: - $_[0];}
 
-sub Opt 
-{ 
+sub Opt { 
     ($_[0] =~ /^\-(\S)/)      && ($_cf{"opt:$1"} = 1);
     ($_[0] =~ /^\-(\S)(\S+)/) && ($_cf{"opt:$1"} = $2);
 }
@@ -165,24 +161,6 @@ sub MailTo
 }
 
 
-
-sub CronInit
-{
-    # GETOPT
-    $Eternal      = 1 if $_cf{'opt:a'};
-    $NoRestart    = 1 if $_cf{'opt:n'};
-    $debug        = 1 if $_cf{'opt:d'};
-    $CRON_NOTIFY  = 0 if $_cf{'opt:b'} eq '43';
-    $CRONTAB      = $_cf{'opt:f'} || $CRONTAB || "etc/crontab";
-    $Daemon       = 1 if $_cf{'opt:b'} eq 'd';
-    $NOT_USE_TIOCNOTTY = 0 if $_cf{'opt:o'} eq 'notty';
-
-    $VAR_DIR        = $VAR_DIR    || "./var"; # LOG is /var/log (4.4BSD)
-    $VARRUN_DIR     = $VARRUN_DIR || "./var/run"; 
-    $CRON_PIDFILE   = $CRON_PIDFILE || "$VARRUN_DIR/cron.pid"; # default;
-}
-
-
 sub Cron
 {
     local($max_wait) = ($_cf{'opt:m'} || 3);
@@ -194,7 +172,6 @@ sub Cron
   CRON: while ($Eternal || $max_wait--> 0) {
       $0 = "--Cron <$FML $LOCKFILE>";
       $0 = "--Cron [$max_wait] times <$FML $LOCKFILE>" unless $Eternal; 
-
       ### Restart if cron may be running over 24 hours
       $pid = &GetPID;
       if ($$ != $pid) { last CRON;};
@@ -386,6 +363,212 @@ sub CrontabExpand
 # 
 # PERL:
 # When index("$&*(){}[]'\";\\|?<>~`\n",*s)) > 0, 
-#           which impli#!/bin/sh
+#           which implies $s has shell metacharacters in it, 
+#      execl sh -c $s
+# if not in it, (automatically)
+#      execvp($s) 
+# 
+# and wait untile the child process dies
+# 
+sub system
+{
+    local($s, $out, $in, $read, $write) = @_;
+    local($c_w, $c_r) = ("cw$$", "cr$$"); # for child handles
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+    &Debug("system ($s, $out, $in, $read, $write)") if $debug;
+
+    # File Handles "pipe(READHANDLE,WRITEHANDLE)"
+    $read  && (pipe($read, $c_w)  || (&Log("ERROR pipe(pr, wr)"), return));
+    $write && (pipe($c_r, $write) || (&Log("ERROR pipe(cr, pw)"), return));
+
+    # Go!;
+    if (($pid = fork) < 0) {
+	&Log("Cannot fork");
+    }
+    elsif (0 == $pid) {
+	if ($write){
+	    open(STDIN, "<& $c_r") || die "child in";
+	}
+	elsif ($in){
+	    open(STDIN, $in) || die "in";
+	}
+	else {
+	    close(STDIN);
+	}
+
+	if ($read) {
+	    open(STDOUT, ">& $c_w") || die "child out";
+	    $| = 1;
+	}
+	elsif ($out){
+	    open(STDOUT, '>'. $out) || die "out";
+	    $| = 1;
+	}
+	else {
+	    close(STDOUT);
+	}
+
+	exec $s;
+	&Log("Cannot exec $s:".$@);
+    }
+
+    close($c_w) if $c_w;# close child's handles.
+    close($c_r) if $c_r;# close child's handles.
+    
+    # Wait for the child to terminate.
+    while (($dying = wait()) != -1 && ($dying != $pid) ){
+	;
+    }
+}
+
+
+########## 
+#:include: fml.pl
+#:sub Log Debug Logging LogWEnv GetTime Append2 use 
+#:~sub 
+#:replace
+sub GetTime
+{
+    @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+    @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    
+    ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+		   $year, $mon + 1, $mday, $hour, $min, $sec);
+    $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
+			$WDay[$wday], $mday, $Month[$mon], 
+			$year, $hour, $min, $sec, $TZone);
+
+    # /usr/src/sendmail/src/envelop.c
+    #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+    #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+    # 
+    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+			   1900 + $year, $mon + 1, $mday, $hour, $min);
+}
+
+
+
+
+# Log: Logging function
+# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
+# delete \015 and \012 for seedmail return values
+# $s for ERROR which shows trace infomation
+sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
+sub LogWEnv { local($s, *e) = @_; &Log($s); $e{'message'} .= "$s\n";}
+sub Log { 
+    local($str, $s) = @_;
+    local($package,$filename,$line) = caller; # called from where?
+    local($status);
+
+    &GetTime;
+    $str =~ s/\015\012$//;	# FIX for SMTP
+    if ($debug_sendmail_error && ($str =~ /^5\d\d\s/)) {
+	$Envelope{'error'} .= "Sendmail Error:\n";
+	$Envelope{'error'} .= "\t$Now $str $_\n\t($package, $filename, $line)\n\n";
+    }
+    
+    $str = "$filename:$line% $str" if $debug_caller;
+
+    &Append2("$Now $str ($From_address)", $LOGFILE, 0, 1);
+    &Append2("$Now    $filename:$line% $s", $LOGFILE, 0, 1) if $s;
+}
+
+
+# append $s >> $file
+# $w   if 1 { open "w"} else { open "a"}(DEFAULT)
+# $nor "set $nor"(NOReturn)
+# if called from &Log and fails, must be occur an infinite loop. set $nor
+# return NONE
+sub Append2
+{
+    local($s, $f, $w, $nor) = @_;
+
+    if (! open(APP, $w ? "> $f": ">> $f")) {
+	local($r) = -f $f ? "cannot open $f" : "$f not exists";
+	$nor ? (print STDERR "$r\n") : &Log($r);
+	return $NULL;
+    }
+    select(APP); $| = 1; select(STDOUT);
+    print APP $s . ($nonl ? "" : "\n") if $s;
+    close(APP);
+
+    1;
+}
+
+
+# eval and print error if error occurs.
+# which is best? but SHOULD STOP when require fails.
+sub use { require "lib$_[0].pl";}
+
+
+sub Debug 
+{ 
+    print STDERR "$_[0]\n";
+    $Envelope{'message'} .= "\nDEBUG $_[0]\n" if $message_debug;
+}
+
+
+
+1;
+#:~replace
+########## 
+#:include: proc/libutils.pl
+#:sub daemon
+#:~sub 
+#:replace
+# NAME
+#      daemon - run in the background
+# 
+# SYNOPSIS
+#     #include <stdlib.h>
+#     daemon(int nochdir, int noclose)
+#
+# C LANGUAGE
+#  f = open( "/dev/tty", O_RDWR, 0);
+#  if( -1 == ioctl(f ,TIOCNOTTY, NULL))
+#    exit(1);
+#  close(f);
+sub daemon
+{
+    local($nochdir, $noclose) = @_;
+    local($s, @info);
+
+    if ($ForkCount++ > 1) {	# the precautionary routine
+	$s = "WHY FORKED MORE THAN ONCE"; 
+	&Log($s, "[ @info ]"); 
+	die($s);
+    }
+
+    if (($pid = fork) > 0) {	# parent dies;
+	exit 0;
+    }
+    elsif (0 == $pid) {		# child is new process;
+	if (! $NOT_USE_TIOCNOTTY) {
+	    eval "require 'sys/ioctl.ph';";
+
+	    if (defined &TIOCNOTTY) {
+		require 'sys/ioctl.ph';
+		open(TTY, "+> /dev/tty")   || die("$!\n");
+		ioctl(TTY, &TIOCNOTTY, "") || die("$!\n");
+		close(TTY);
+	    }
+	}
+
+	close(STDIN);
+	close(STDOUT);
+	close(STDERR);
+	return 1;
+    }
+    else {
+	&Log("daemon: CANNOT FORK");
+	return 0;
+    }
+}
+
+
+
+
+
+1;
