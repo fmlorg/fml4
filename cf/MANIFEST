@@ -1,13 +1,16 @@
 INFO:
-# FML Release 2.1: Configurable Variable Definitions
+# FML Configurable Variable Definitions
 #
-# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996-1998 fukachan@sapporo.iij.ad.jp
-# fml is free software distributed under the terms of the GNU General
-# Public License. see the file COPYING for more details.
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
-# $Id$
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
 #
+# $Id$
 #
 
 
@@ -123,6 +126,7 @@ AUTO_REGISTRATION_DEFAULT_MODE:
 CONFIRMATION_ADDRESS:
 CONFIRMATION_SUBSCRIBE:		subscribe
 CONFIRMATION_KEYWORD:		confirm
+CONFIRMATION_WELCOME_STATEMENT:
 
 # explanation of confirmation
 CONFIRMATION_FILE:	 $DIR/confirm
@@ -216,6 +220,10 @@ MODERATOR_FORWARD_TYPE:	2
 # addresses. We check only "moderators knows passwords or identifiers". 
 MODERATOR_MEMBER_LIST:	$DIR/moderators
 
+# expire not certifield submission to moderated ML
+# default: 2 weeks
+MODERATOR_EXPIRE_LIMIT:	14
+
 
 #####################################################################
 # ### Section: Security ###
@@ -273,14 +281,25 @@ FILTER_NOTIFY_REJECTION:
 # rejects "# command" syntax just before distribution (&Distribute;)
 FILTER_ATTR_REJECT_COMMAND:
 
+# reject HTML mails that the same content exist in the form of both
+# plain and html. e.g. some versions of M$ outlook, netscape mail
+AGAINST_HTML_MAIL:
+
 # Mail Traffic Information: internal traffic monitor
 USE_MTI:
+
+# MIT warning (mail bomb report) negative cache interval
+# to avoid mail bomb of "mail bomb attack report" itself.
+MTI_WARN_INTERVAL: 3600
+MTI_WARN_LASTLOG:
 
 # Optional. If UNSUBSCRIBE_AUTH_TYPE is 'confirmation', FML sends back
 # confirmation against a fake. In default, FML does not do confirmation.
 # available type is "confirmation" only.
 UNSUBSCRIBE_AUTH_TYPE:
 
+# chaddr checks confirmation (not implemented)
+CHADDR_AUTH_TYPE:
 
 # LOGGING THE LATEST IN-COMING MAILS
 # Logs an in-coming mail to $LOG_MAIL_DIR/$id 
@@ -824,6 +843,8 @@ LHA:		&path(lha)
 ISH:		&path(ish)
 ZIP:		&path(zip)
 PGP:		&path(pgp)
+RCS:		&path(rcs)
+CI:		&path(ci)
 
 # base64
 BASE64_DECODE:
@@ -848,4 +869,3 @@ LOCAL_CONFIG:
 # @MEMBER_LIST, @ACTIVE_LIST, @CROSSPOST_CF
 # @HOST, @HOSTS, @MAIL_LIST_ALIASES, @HdrFieldsOrder
 #
-
