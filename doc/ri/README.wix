@@ -442,7 +442,7 @@ config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 .S	変更点について
 =E.S	Changes
 
-CHANGES と RELEASE_NOTES を参照のこと。
+CHANGES と RELEASE_NOTES を参照してください。
 =E
 Please see CHANGES and RELEASE_NOTES.
 
@@ -456,32 +456,19 @@ Please see CHANGES and RELEASE_NOTES.
 GNU General Public License です。詳しくは COPYING というファイルを読ん
 で下さい。
 
-   Copyright (C) 1993-2000 Ken'ichi Fukamachi
+   Copyright (C) 1993-2001 Ken'ichi Fukamachi
  
    fml is free software; you can redistribute it and/or modify
    it under the terms of GNU General Public License.
    See the file COPYING for more details.
 
-.S	使用上の注意
-=E.S	Attention when you use
-
-このソフトウエアはIIJの業務とは”一切関係ありません”。
-単なる私の趣味です。質問等は上記のアドレスへ送って下さい _o_ 
-また”絶対に IIJ のサポート窓口等に質問をしない”ようにして下さい。
-=E
-This software is a my hobby, so has no relation with IIJ (Internet
-Initiative Japan Inc.). "ftp.iij.ad.jp" is just a ftp server as the
-fml master distribution server.
-
-よろしくお願いします。
-
 
 
 $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
