@@ -4,6 +4,12 @@ var/html/${file}: doc/html/${file}
 	$(CP) doc/html/${file} $(FML)/var/html/ 
 .endfor
 
+# mascot
+HTML_MISC += var/html/pictures/index.html
+var/html/pictures/index.html: doc/html/pictures/index.html
+	test -d var/html/pictures || mkdir var/html/pictures
+	${CP} doc/html/pictures/index.html var/html/pictures/index.html
+
 .for file in ${DOC_RI_SOURCES}
 __HTML_RI__ += var/html/${file}/index.html
 var/html/${file}/index.html: doc/ri/${file}.wix
