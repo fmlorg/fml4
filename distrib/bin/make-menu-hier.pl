@@ -23,10 +23,21 @@ _EOF_
 
 while (<>) {
     if (m@^(/.*)@) {
-	$hier = $1;
-	$hier =~ s@/@ -> @g;
+	$tophier = 0;
+	$curhier = $1;
+	$hier    = $1;
+	# $hier =~ s@/@ -> @g;
+
+	if ($curhier =~ m@^/\S+/@) {
+	    $tophier = 0;
+	}
+	else {
+	    print STDERR "TOP $curhier\n";
+	    $tophier = 1;
+	}
 
 	undef $found;
+	undef $found_name;
 	undef $varname;
 	next;
     }
@@ -36,11 +47,27 @@ while (<>) {
 	next;
     }
 
+    if (/^=name/) {
+	$found_name = 1;
+	next;
+    }
+
     if ($found) {
 	s/^\s*//g;
 	($varname) = split;
 	$HIER{$varname} = $hier;
 	undef $found;
+    }
+
+    if ($found_name && $tophier) {
+	s/^\s*//g;
+	s/\s*$//g;
+	my ($varname) = $_;
+	$varname =~ s/\s*\(.*$//;
+	$ALIAS .= "\$x =~ s!$curhier!/ $varname!;\n";
+	print STDERR $ALIAS;
+	$found_name = 0;
+	next;
     }
 
     if ($query) {
@@ -72,9 +99,19 @@ foreach my $n (sort keys %HIER) {
 	&ResetAlignedBuffer;
 
 	print "\n";
-	printf "変数名 %s\n", $n;
 
-	my $x = "メニュー". $HIER{$n}. " -> ". $TYPE{$n};
+	if ($DESCRIPTION{$n}) {
+	    printf "変数 \$%s (%s)\n", $n, $DESCRIPTION{$n};
+	}
+	else {
+	    printf "変数 \$%s\n", $n;
+	}
+
+	my $x = $HIER{$n};
+	eval $ALIAS;
+	$x =~ s@/@ -> @g;
+	print STDERR $@ if $@;
+	$x = "メニュー". $x. " -> ". $TYPE{$n};
 	for my $s (split(/\s+/, $x)) {
 	    &GobbleAlignedBuffer($s);
 	}
@@ -111,12 +148,12 @@ sub GobbleAlignedBuffer
     my($x) = $OutBuffer[$OutBufferLine];
 
     # next line
-    if (length($x) + length($s) > 65) { 
+    if (length($x) + length($s) > 68) { 
         $OutBufferLine++;
-        $OutBuffer[$OutBufferLine] = "        ";
+        $OutBuffer[$OutBufferLine] = "    ";
     }
     elsif (! $x) {
-        $OutBuffer[$OutBufferLine] = "        ";
+        $OutBuffer[$OutBufferLine] = "    ";
     }
 
     $OutBuffer[$OutBufferLine] .= " ". $s;
