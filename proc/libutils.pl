@@ -188,7 +188,7 @@ sub GetProtoByMode
     local($type, $mode) = @_;
 
     if ($type =~ /matome/) {
-	$mode =~ /tgz/ ? "matome.tar.gz" : "matome.gz", 
+	$mode =~ /tgz/ ? "matome.tar.gz" : "matome.gz";
     }
 }
 
