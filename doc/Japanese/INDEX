@@ -53,6 +53,7 @@ references		文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
 internals		内部構造や実装の理屈についてなど
+LDAP			LDAP
 
 	</HTML>
 	</BODY>
