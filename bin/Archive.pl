@@ -39,7 +39,7 @@ $i = 1;
 
 # Adjust following config.ph; moved here;
 # fml-support: 02590 <fujita@soum.co.jp>
-$Unit  = $opt_u   || $DEFAULT_ARCHIVE_UNIT || 100;
+$Unit  = $opt_u   || $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;
 $limit = $ARGV[0] || ($Unit * int ($MaxSeq / $Unit )) || 1000;
 
 # useless when seq(103) < unit(1000)
@@ -123,5 +123,15 @@ sub Usage
 }
 
 sub Mesg { print STDERR "@_\n";}
+
+# dummy functions agasint the compile errors of config.ph
+sub DEFINE_SUBJECT_TAG { 1;}
+sub DEFINE_MODE  { 1;}
+sub DEFINE_FIELD_FORCED  { 1;}
+sub DEFINE_FIELD_ORIGINAL { 1;}
+sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
+sub ADD_FIELD     { 1;}
+sub DELETE_FIELD  { 1;}
+
 
 1;
