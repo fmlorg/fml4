@@ -594,6 +594,7 @@ sub IdCheck
 	return 0;
     }
 
+    &Log("Search /$CONFIRMATION_KEYWORD $id/ within { $buffer }") if $debug;
     # since some user set Japanese strings as $name, it becomes errors;_;
     if ($buffer =~ /$CONFIRMATION_KEYWORD $id/) {
 	return 1;
