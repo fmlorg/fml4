@@ -1,0 +1,19 @@
+NetBSD				none
+OpenBSD				?
+FreeBSD 2.2.5-RELEASE		4.036
+FreeBSD 2.2.7-RELEASE		4.036
+FreeBSD 2.2.8-RELEASE		4.036
+FreeBSD 3.1-RELEASE		5.005_02 built for i386-freebsd	
+FreeBSD 3.2-RELEASE		5.005_03 built for i386-freebsd
+FreeBSD 3.3-RELEASE		5.005_03 built for i386-freebsd
+FreeBSD 3.4-RELEASE		5.005_03 built for i386-freebsd
+BSD/OS 2.0			4.036 (but broken)
+BSD/OS 2.1			4.036 (but broken)
+BSD/OS 3.1			4.036 (but broken)
+
+---
+searched by
+	katino@cvs.fml.org
+	fukachan@cvs.fml.org
+
+$Id$
