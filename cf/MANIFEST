@@ -1082,6 +1082,7 @@ RCS:		&path(rcs)
 CI:		&path(ci)
 BASE64_DECODE:
 BASE64_ENCODE:
+MD5:		&path(md5:md5sum)
 
 
 LOCAL_CONFIG:
