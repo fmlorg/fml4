@@ -428,7 +428,7 @@ GEN_ARCHIVE () {
 	### Section: generate snapshot {tar,zip}balls
 	(
 	   chdir $FTP
-	   rm -f fml-${BRANCH}*tar.gz fml-${BRANCH}*zip
+	   rm -f fml-${BRANCH}*tar.gz fml-${BRANCH}*zip fml-${BRANCH}*bz2
 	)
 
 	echo " "
