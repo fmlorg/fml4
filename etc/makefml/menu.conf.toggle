@@ -100,6 +100,7 @@
 	_i_  USE_SJIS_IN_ISH                            $SUMMARY{'USE_SJIS_IN_ISH'}
 	_i_  USE_SMTPFEED_F_OPTION                      $SUMMARY{'USE_SMTPFEED_F_OPTION'}
 	_i_  USE_SMTP_LOG_ROTATE                        $SUMMARY{'USE_SMTP_LOG_ROTATE'}
+	_i_  USE_SMTP_PROFILE                           $SUMMARY{'USE_SMTP_PROFILE'}
 	_i_  USE_SUBJECT_AS_COMMANDS                    $SUMMARY{'USE_SUBJECT_AS_COMMANDS'}
 	_i_  USE_VERP                                   $SUMMARY{'USE_VERP'}
 	_i_  USE_WARNING                                $SUMMARY{'USE_WARNING'}
@@ -1030,6 +1031,20 @@
 
 =menu
 	USE_SMTP_LOG_ROTATE	$SUMMARY{'USE_SMTP_LOG_ROTATE'}
+
+=query
+	type:	y-or-n
+
+/OPTION/VARIABLE_OFF_ON/L/USE_SMTP_PROFILE
+
+=name
+	USE_SMTP_PROFILE
+
+=config
+	USE_SMTP_PROFILE
+
+=menu
+	USE_SMTP_PROFILE	$SUMMARY{'USE_SMTP_PROFILE'}
 
 =query
 	type:	y-or-n
