@@ -44,42 +44,6 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
 の取り扱いも同じ
 
 
-.S	perl の習得はやさしいか？
-
-perlの書き方は見ての通り、
-
-	shell script, awk, C, sed
-
-の知識がちょっとあれば書けるものです。
-
-初心者でもわかるように 変な書き方をしないよう気をつけているつもりです
-けど…あと、わざと同じものをいろいろな書き方でしてたりもします。
-
-ただ、変なOSやperlのために悲しいことにくどい書き方とかしなきゃいけない
-ところもあってちょっと…;_;;_;;_;
-
-
-
-気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
-
-* Traps::			注意点
-
-あたりにあります。このperl.texinfoの日本語版は持っていて損はしないです。
-＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容である。
-＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
-
-perl texinfo in japanese --- version 4.0.19.2
-・perl.texinfo		perl.man を日本語に訳して texinfo 形式にしたもの
-
-というものがfj.sourcesに投稿されています。ちなみに
-
-   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-
--r--r--r--  1 fukachan  wheel  112181 Mar 17  1992 perl.texinfo-j4.0.19.2.tar.gz
-
-にもおいてあります。
-
-
 .S	perlはinterpreter
 
 必要のないコードは評価しない方が“少しは”はやいよね、きっと
@@ -151,6 +115,84 @@ require 'sys/socket.ph';
 
 %SIG	SIGNAL
 	signal(3)
+
+
+.S	perl の習得はやさしいか？
+
+perlの書き方は見ての通り、
+
+	shell script, awk, C, sed
+
+の知識がちょっとあれば書けるものです。
+
+初心者でもわかるように 変な書き方をしないよう気をつけているつもりです
+けど…あと、わざと同じものをいろいろな書き方でしてたりもします。
+
+ただ、変なOSやperlのために悲しいことにくどい書き方とかしなきゃいけない
+ところもあってちょっと…;_;;_;;_;
+
+
+
+気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
+
+* Traps::			注意点
+
+あたりにあります。このperl.texinfoの日本語版は持っていて損はしないです。
+＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容である。
+＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
+
+perl texinfo in japanese --- version 4.0.19.2
+・perl.texinfo		perl.man を日本語に訳して texinfo 形式にしたもの
+
+というものがfj.sourcesに投稿されています。ちなみに
+
+   ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
+
+-r--r--r--  1 fukachan  wheel  112181 Mar 17  1992 perl.texinfo-j4.0.19.2.tar.gz
+
+にもおいてあります。
+
+
+.q
+fml-support Count: 01582
+in fml-support ML's Count:01566 
+○Perlの勉強に役にたつ書籍・サイト(URL)情報
+
+年寄りの意見かもしれませんが;-)#しかも中身があまりない徒然草(苦笑)
+
+■
+  ○らくだ本と本質的な部分は 
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
+
+		↑を info で入れておくとすごく便利
+
+  ○らくだ本にでてくるソースコードはFTPにころがってる
+
+ので、らくだを買う必要は実はないです:-) 後は
+
+  ○いいソースコードを比較検討することでしょうね。
+
+  歌代師匠のは高級過ぎて初心者向きでないような気がしますが（苦笑）…
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
+
+
+■一番好きだったのは むか〜〜しの うにっくすまがじん です。でも改めて…
+は手に入らないでしょうね…
+＃まだ『東工大と阪大の同人誌』してたころのUNIまが（苦笑）
+
+■プログラミングスタイルの「絶対」というのはないんですが、やっぱり伝統
+の味で、＃個人的に好き（& 影響を受けてるのは）
+
+	4.4BSD
+	X11
+
+のいいなぁと思うところだけまねするってあたりでしょうか…
+＃X11 は R5 の方が internationalization がちゃんとしているので R6 より 
+＃R5 の方が完成度は高いといえるんですかね（謎のまた聞き）…
+
+GNU は汎用過ぎて unifdef(1)  とかしないと わかりにくいでしょう
+
+.~q
 
 
 .# $Id$
