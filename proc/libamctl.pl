@@ -603,11 +603,7 @@ sub DoSetMemberList
     local($rm, $ra) = (0, 0);
 
     # obsolete code but left for compatibility.
-    if (&ListIncludePatP($list, $ProcedureException{"bye", "ignore_list"})) {
-	&Log("ProcedureException: bye ignore $list");
-	$rm++;
-    }
-    elsif (&UseSeparateListP) {
+    if (&UseSeparateListP) {
 	$list = &MailListMemberP($curaddr);
 	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
 	if ($rm == 1) {
