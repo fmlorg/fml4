@@ -14,7 +14,7 @@ foreach (@ARGV) {
     /^\-/   && &Opt($_) || push(@INC, $_);
     $LIBDIR || ($DIR  && -d $_ && ($LIBDIR = $_));
     $DIR    || (-d $_ && ($DIR = $_));
-    -d $_ || push(@CMD, $_);
+    -d $_ || push(@InputCommand, $_);
 }
 $DIR    = $DIR || $opt_d || $ENV{'PWD'} || die "\$DIR is not Defined, EXIT!\n";
 $LIBDIR	= $LIBDIR || $DIR;
@@ -52,7 +52,7 @@ sub MainFC
 	
 	if ($ENABLE) { print "ADMIN MODE (# admin ...)\n";}
 	
-	$cmd = join(" ", @CMD);
+	$cmd = join(" ", @InputCommand);
 	$cmd = $ENABLE ? "admin $cmd" : $cmd;
 	
 	print "   INPUT> $cmd\n";
