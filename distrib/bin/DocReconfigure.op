@@ -2,16 +2,16 @@
 
 
 echo " "
-sh .release/bin/make-fmllocal.man.sh
+sh distrib/bin/make-fmllocal.man.sh
 
 echo "Makeing var/doc/op"
 
 (cd var/doc; version.pl)
 
-perl .release/bin/fix-wix.pl doc/smm/op.wix |\
+perl distrib/bin/fix-wix.pl doc/smm/op.wix |\
 perl bin/fwix.pl -M tmp/MANIFEST -d doc/smm > var/doc/op.jp
 
-perl .release/bin/fix-wix.pl doc/smm/op.wix |\
+perl distrib/bin/fix-wix.pl doc/smm/op.wix |\
 perl bin/fwix.pl -M tmp/MANIFEST -d doc/smm -L ENGLISH > var/doc/op.en
 
 exit 0;
