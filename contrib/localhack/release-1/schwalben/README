@@ -1,0 +1,62 @@
+＃ rcsid = q$Id$;
+
+libsch.plというのがfml.plへの差分ファイルです。
+fml.plの中で（1.1.2.13なら３８行目）に
+require 'libsch.pl';
+を付け足して下さい。
+後は下のカスタマイズの説明とfml.pl本体の説明を読んで設定して下さい。
+
+fml.plの例：
+………ぞろぞろ………
+require 'libsch.pl';←−−この行を付け足して下さい。
+
+if($ML_MEMBER_CHECK) { 
+………
+以下略
+
+
+libsch.plの中の先頭にあるカスタマイズパートの説明：
+＃実際のコードには説明がコメントがもっとありますが対応場所はわかります
+よね？
+
+##### Custumization #####
+
+○schwalben-info@cs.titech.ac.jpはSchwalbenに関する最新情報のアドレス
+それのアドレス、ファイル、送り返すメールのサブジェクトの設定
+
+$INFOADDR     = "schwalben-info@phys.titech.ac.jp";
+$INFO         = "$DIR/info";
+$INFOSubject  = "Schwalben Chor Info";
+
+○schwalben-list@cs.titech.ac.jpに関するアドレス、ファイル、送り返すメー
+ルのサブジェクトの設定（上と同様）
+
+$LISTADDR     = "schwalben-list@phys.titech.ac.jp";
+$ALLLIST_FILE = "$DIR/alllist";
+$LISTSubject  = "Schwalben Chor All List";
+
+○schwalben-allのような使えるアドレスの設定。もしこのリストにないアド
+レスが使われるとログをとりユーザーには警告のメールを返す。
+
+@addr = ('all', 'top', 'sec', 'bari', 'bass', 'student', '1987');
+
+fmlは多くの設定ファイルやログをとるファイルを使うが一つのサーバですべ
+てをこなす拡張として
+schwalben-allのアドレスに対し	
+spool-all	schwalben-all アドレス用のスプール
+summary-all	サマリファイル
+actives-all	schwalben-all アドレスで配布するアドレスリスト
+members-all	schwalben-all アドレスに投稿できるメンバーリスト
+seq-all		schwalben-all アドレスでの投稿のメールカウント
+
+”ほげ−ほげほげ”の形のファイルは上の@addrのリストの候補すべてについ
+て存在する。＃存在しなければ勝手に作る。
+
+# configuratrion for each available MailingList Address and the files
+$ML_THREAD = "\
+    \$SPOOL_DIR	        = \"\$DIR/spool-\$ADDR\";\
+    \$MEMBER_LIST 	= \"\$DIR/members-\$ADDR\";\
+    \$ACTIVE_LIST 	= \"\$DIR/actives-\$ADDR\";\
+    \$SUMMARY_FILE 	= \"\$DIR/summary-\$ADDR\";\
+    \$SEQUENCE_FILE 	= \"\$DIR/seq-\$ADDR\";\
+";
