@@ -35,9 +35,8 @@ all:
 # since "config.ph is newer than cf" implies you must edit config.ph not cf. 
 config.ph: cf
 	@ eval 'cp -p config.ph config.ph.old >/dev/null 2>&1'
-	perl _EXEC_DIR_/cf/config -m _EXEC_DIR_/cf/MANIFEST ./cf > config.ph.new
-	perl -c config.ph.new && mv config.ph.new config.ph
-	@ touch cf
+	perl _EXEC_DIR_/makefml update-config _ML_
+
 
 fml: fml.c config.h
 	$(CC) $(CFLAGS) -o fml fml.c
