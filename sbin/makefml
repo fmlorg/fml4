@@ -3059,6 +3059,12 @@ sub QmailSetUp
     print STDERR "\t$qmail_alias_dir/.qmail-$ml-request\n";
     &Write2($USER, "$qmail_alias_dir/.qmail-$ml-request");
 
+    print STDERR "\t$qmail_alias_dir/.qmail-owner-$ml\n";
+    &Write2($USER, "$qmail_alias_dir/.qmail-owner-$ml");
+
+    print STDERR "\t$qmail_alias_dir/.qmail-owner-$ml-ctl\n";
+    &Write2($USER, "$qmail_alias_dir/.qmail-owner-$ml-ctl");
+
     # WINDOWS_NT4
     if ((!$HAS_GETPWUID) && (!$HAS_GETPWGID)) {
 	print STDERR "On NT4, we do not gerenate qmail/users/assign.\n";
@@ -3091,6 +3097,10 @@ sub QmailSetUp
 
 	if (! &Grep('\+:', "$qmail_users_dir/assign")) {
 	    print OUT "+:$USER:$uid:$gid:$qmail_alias_dir:-::\n";
+	}
+
+	if (! &Grep('\+owner:', "$qmail_users_dir/assign")) {
+	    print OUT "+owner:$USER:$uid:$gid:$qmail_alias_dir:-:owner:\n";
 	}
 
 	if (! &Grep("\\+$ml\\-:", "$qmail_users_dir/assign")) {

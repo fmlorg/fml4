@@ -5,6 +5,13 @@
 
 2000/04/15
 
+  sbin/makefml
+	apply patch fml-support: 07762 From: Akira Ohashi
+	make template of owner-* for qmail case.
+
+	qmailの時に owner-* のためのtemplateファイルを作る
+	(単なる便宜上)
+
   EnvelopeFilter
 	fix paragraph count up method
 	fix how to ignore the last paragraph as a signature
