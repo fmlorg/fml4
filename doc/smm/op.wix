@@ -1829,7 +1829,7 @@ e.g.
 .S	mgetのファイルサイズ（送り返し）
 .key	$MAIL_LENGTH_LIMIT
 
-in SendFile.pl
+in libsendfile.pl
 
 	$MAIL_LENGTH_LIMIT = 1000;
 
@@ -2176,8 +2176,6 @@ include する時は
 ただし、コマンドの改造はフックを用いれば簡単です
 .seealso	command-hook
 
-注意２：mget で使う SendFile.pl は LIBDIR という変数の場所を探すように
-してあるので mget まわりをいじる時は気をつけてください
 
 
 .S	ひとつのfmlで複数のＭＬを扱う方法(setuid programをばらばらに作る)

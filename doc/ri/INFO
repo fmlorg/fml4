@@ -32,6 +32,12 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
+・ libsendfile.pl SendFile.plが旧名称
+
+・ bin/cron.pl は 実行したらcrontab の持ち主にメールをだす （４．４）
+   ４．３のようにするには $CRON_NOTIFY をオフにするか
+   cron.pl DIR -b43 のように起動する 
+
 ・ libsmtp.pl  ファイルを JIS へ 自動変換（jcode.plがないときはエラーだが）
 
 ・ libutils.pl ish+lzh mode bug fix
