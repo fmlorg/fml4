@@ -21,6 +21,9 @@ The original author and the maintainer is Ken'ichi Fukamachi
    src/libtraffic.pl          Yuao TANIGAWA <yuao@infonia.or.jp>
    src/libmember_name.pl      Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
 
+   ContentHanlder()           <t-nakano@imasy.or.jp>
+   (within src/libdisthack.pl) 
+
 * I use the following MIME library in standard libraries
 
    src/mime*                  c1977@crcsn82.mdc.crc.co.jp (Noboru Ikuta)
