@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: Makefile,v 2.96 2001/03/29 16:03:19 fukachan Exp $
 
 ### themost important variable ! ###
 FML  = ${.CURDIR}
@@ -68,17 +68,14 @@ usage:
 	@ echo ""
 	@ echo "\"make all\"       not works!!!"
 	@ echo ""
-	@ echo "\"make build\"     to set up fundamentals and run \"make dist\""
+	@ echo "\"make build\"     make a full set for snapshot"
 	@ echo "                   It is suitable for the first time."	
 	@ echo ""
 	@ echo "\"make release\"   to make the release"
 	@ echo "\"make snapshot\"  to make a snapshot to export"
-	@ echo "\"make dist \"     to make a snapshot to use internally" 
-	@ echo "\"make distsnap\"  to export snapshot to ftp.iij.ad.jp"
+	@ echo "\"make __dist \"   to make a snapshot for internal use
+	@ echo "\"make distsnap\"  to export snapshot to ftp.fml.org"
 	@ echo "";
-	@ echo "-- Makefile.local";
-	@ echo "\"make sync\"      to syncrhonize -> fml.org mail server"
-	@ echo ""
 
 __dist:
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
