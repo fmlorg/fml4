@@ -61,7 +61,7 @@ sub DoDistribute
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
     {
-	local($rcpt, $opt, $w, $relay, $who, $domain, $mxhost, $k, $v);
+	local($rcpt, $lc_rcpt, $opt, $w, $relay, $who, $domain, $mxhost, $k, $v);
 
 	# default setting %SKIP and compat (obsolete %Skip);
 	# append something to the current %SKIP;
@@ -80,8 +80,6 @@ sub DoDistribute
 	  next line if /^\#/o;	 # skip comment and off member
 	  next line if /^\s*$/o; # skip null line
 
-	  tr/A-Z/a-z/;		 # lower case;
-
 	  # strip comment, not \S+ for mx;
 	  s/(\S+)\s+\#.*$/$1/;
 
@@ -92,11 +90,14 @@ sub DoDistribute
 	  ($rcpt, $opt) = split(/\s+/, $_, 2);
 	  $opt = ($opt && !($opt =~ /^\S=/)) ? " r=$opt " : " $opt ";
 
+	  $lc_rcpt = $rcpt;
+	  $lc_rcpt =~ tr/A-Z/a-z/; # lower case;
+
 	  printf STDERR "%-30s %s\n", $rcpt, $opt if $debug;
 
 	  # Crosspost Extension. if matched to other ML's, no deliber
 	  if ($USE_CROSSPOST && $e{'crosspost'}) {
-	      $w = $rcpt;
+	      $w = $lc_rcpt;
 	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
 	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
 	      if ($NoRcpt{$w}) { # no add to @Rcpt
@@ -106,7 +107,7 @@ sub DoDistribute
 	  }
 
 	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
-	  next line if $SKIP{$rcpt}; # SKIP FIELD;
+	  next line if $SKIP{$lc_rcpt}; # SKIP FIELD;
 
 	  # Relay server (RFC821 syntax 97/02/01)
 	  # % relay hack is not refered in RFC, but effective in Sendmail's;
@@ -117,7 +118,8 @@ sub DoDistribute
 	      # DLA_HACK: $rcpt is original "addr" in ACTIVE_LIST;
 	      # $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
 	      # $rcpt = "${who}\%${mxhost}\@${relay}";
-	      $RelayRcpt{$rcpt} = "\@${relay}:$rcpt";
+	      # "Key" of %RclayRcpt is lower case for convenice;
+	      $RelayRcpt{$lc_rcpt} = "\@${relay}:$rcpt";
 	      $rcpt = "\@${relay}:$rcpt";
 	  }
 
