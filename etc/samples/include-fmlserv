@@ -1,6 +1,0 @@
-#"|$EXECDIR/libexec/fmlserv.pl $FMLSERVDIR $EXECDIR"
-#  or when using without config.ph
-#"|$EXECDIR/libexec/fmlserv.pl $FMLSERVDIR $EXECDIR --mladdr=$MAIL_LIST $OPTIONS"
-
-"|$EXECDIR/libexec/fmlserv.pl $FMLSERVDIR $EXECDIR --mladdr=$MAIL_LIST $OPTIONS "
-

@@ -1,9 +1,0 @@
-# "|$EXECDIR/fml.pl $MLDIR --remote"
-#   or when using without config.ph
-# "|$EXECDIR/fml.pl $MLDIR --remote --mladdr=$MAIL_LIST $OPTIONS"
-
-"|$EXECDIR/fml.pl $MLDIR --remote --mladdr=$MAIL_LIST $OPTIONS "
-
-# "|$EXECDIR/fml.pl $MLDIR --ra --mladdr=$MAIL_LIST $OPTIONS"
-# "|$EXECDIR/fml.pl $MLDIR --ra --mladdr=$MAIL_LIST $OPTIONS "
-

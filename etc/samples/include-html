@@ -1,6 +1,0 @@
-#"|$EXECDIR/fml.pl $MLDIR --html"
-#  or when using without config.ph
-#"|$EXECDIR/fml.pl $MLDIR --html --mladdr=$MAIL_LIST $OPTIONS"
-
-"|$EXECDIR/fml.pl $MLDIR --html --mladdr=$MAIL_LIST $OPTIONS "
-
