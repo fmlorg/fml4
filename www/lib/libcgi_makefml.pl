@@ -152,6 +152,10 @@ sub MailServerConfig
     local($proc, *config) = @_;
     local($s);
 
+    &P("");
+    &P("*** setup aliases ***");
+    &P("");
+
     if ($proc eq 'mail_server_config') {
 	$s = $config{'MTA'};
 	if ($s =~ /^(sendmail|postfix|qmail)$/) {
@@ -383,6 +387,7 @@ sub Command
     }
     elsif ($PROC eq 'newml') {
 	&Control($ML, $PROC);
+	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
     }
     elsif ($PROC eq 'mladmincgi') {
 	&Control($ML, 'mladmin.cgi');
