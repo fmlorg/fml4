@@ -1,8 +1,6 @@
 .HTML_PRE
 	INSTALL guide on Mac OS X Server
 
-				Ken'ichi Fukamachi
-
 このファイルはfmlのインストールについて Unix 版との相違点について記述
 しています。インストールの大枠は INSTALL を見て下さい。
 =E
@@ -116,6 +114,14 @@ NetInfo というものを使ってもできるようだけど普通にやるとうまくいかない
 
 アップルメニューの「サーバの管理」から「NetworkManager」を呼び出して作
 成します。
+
+.C	Acknowledgement
+
+I don't know Mac OS X Server. This installation note is basically
+based on memo by Masayuki Nii <msyk@locus.co.jp>. I also thank
+Tomoyuki Asakawa <tomoyuki@poison.marimo.or.jp> for valuable comments,
+for example, what it is "niload".
+
 
 .appendix
 .C	niload の使い方
