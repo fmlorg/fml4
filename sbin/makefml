@@ -401,7 +401,10 @@ sub GetCurPolicy
 {
     local($s);
 
-    if (! -f $FML_POLICY) { die("Cannot find the file \$FML_POLICY");}
+    if (! -f $FML_POLICY) {
+	&Touch($FML_POLICY);
+	return;
+    }
 
     package Policy;
     eval("do \$main'FML_POLICY;\#'");
