@@ -1,13 +1,15 @@
-	-----	fml [Tuning and FAQ]	-----
+	Fml Operations Guide
+
+	[smm/op.wix: smm = System Management Manual]
 	http://www.phys.titech.ac.jp/uja/fml/
 	Last modified: 
 
-このファイルは歴史的な理由をひきずったままFAQという名前ですが、
-FAQ、Setting、改造の仕方等に関する読みものになっています。
-＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
+	このファイルは昔FAQという名前でした。
+	FAQ、Setting、改造の仕方等に関するガイドになっています。
+	＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
 	ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/
 	http://www.phys.titech.ac.jp/uja/fml/
-＃see README
+	＃README, INFOも見てくださいね、んがんん…
 
 
 ----------目次----------
