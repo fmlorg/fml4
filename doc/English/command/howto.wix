@@ -1,4 +1,5 @@
 .C	コマンドの動作
+=E.C	how fml command works
 
 .S	一つのメールで使えるコマンドの数の上限
 =E.S	Maximum Number Of Commands In On Mail

@@ -1,51 +1,39 @@
-.C	CGIのよもやまのメモ
+.C	CGI のよもやまのメモ
+=E.C	miscellaneous memo
 
-たとえば $EXEC_DIR = '/usr/local/fml' 
+以下では
 
-.S	インストーラ
-
-admin でのアクセスを可能にする。つまりあとはWWWだけで閉じるようにする
-ということ
+   $EXEC_DIR = '/usr/local/fml' 
 
 
 .S	基本的なディレクトリ構成
+=E.S	Directory Structure
 
-   $EXEC_DIR/www/ は template やライブラリの場所
-
-   $EXEC_DIR/share/ 以下はWWWで見える場所、つまり httpd の管理下。
-
-   $EXEC_DIR/www/authdb/ パスワードの実体置き場
+   $EXEC_DIR/www/ 	  template やライブラリの場所
+   $EXEC_DIR/www/share/   以下はWWWで見える場所、つまり httpd の管理下。
+   $EXEC_DIR/www/authdb/  パスワードの実体置き場
+=E
+   $EXEC_DIR/www/	 templates and libraries
+   $EXEC_DIR/www/share/	 export	under httpd (apache)
+   $EXEC_DIR/www/authdb/ htpasswd location
 
 
 .S	パスワードファイル
+=E.S	password file
 
 	$EXEC_DIR/www/cgi-bin/admin/.htaccess 
 
 の参照するパスワードは 
+=E
+see
 
 	$EXEC_DIR/www/db/admin/htpasswd
 
-のような関係になる。デフォールトは
+のような関係になる。デフォールトは設定されない。インストール後に
 
-       User: admin
-   Password: admin
+	makefml admin.cgi conf
 
-が設定されている。インストール時に htpasswd プログラムを発見できたらそ
-れを使って admin パスワードをいれさせる。
-
-
-
-.S	基本設定ファイル
-
-   require $EXEC_DIR/.fml/system
-	このファイルはCGIからは変更不可
-
-[TODO]
-
-   eval("require $EXEC_DIR/.fml/cgi.conf") if -f "$EXEC_DIR/.fml/cgi.conf";
-	別にしておく方がいいだろう
-	このファイルはCGIからも変更可能であるべき
-
+のメニューからパスワードの設定を選び、ユーザとパスワードは設定してください。
 
 
 $Id$

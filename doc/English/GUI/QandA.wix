@@ -1,27 +1,26 @@
 .C	Q and A
 
-.S	インストールが終りました。その次は？
+.S	fml のインストールが終りました。その次は？
+=E.S	What to do next after fml installation ?
 
-インストールの時にユーザ admin のパスワードを入力させられたはずです。
-そのユーザでアクセスして下さい。
-
-もし debug のため認証をはずしたいなら /usr/local/fml/share 以下にある 
- .htaccess ファイルを消して下さい。例:
-.q
-% find /usr/local/fml/share/ -name .htaccess -print |perl -nple unlink
-.~q
+.url ../INSTALL_CGI/
 
 
 .S	何ができますか？
+=E.S	What can I do on fml CGI interface?
 
 画面に書いてあることだけです。
+=E
+See your browser :-)
 
 
 .S	ということは管理者向けですか？
-
+=E.S	CGI interface is for fml administrators ?
 
 現状ではそうです。各ＭＬ管理者がそれぞれのＭＬをWWWで設定を変更するこ
 とはできます。
+=E
+Almost yes. You can also set up each CGI for each ML.
 
 「＊＊ＭＬを WWW で登録可能にする」ということは実装されていません。
 それを可能にする(例えば以下に本人が登録を使用としているかを認証するか？)
@@ -33,88 +32,100 @@
 
 
 .S	/var/spool/ml/ 以下のオーナーは？
+=E.S	What user owns /var/spool/ml ?
 
 apache の設定依存です。
+apache のプロセスのオーナ(ユーザ)が読み書きできないといけません
+=E
+It depends your apache configuration. If your apache is only for fml
+CGI interface, "User" line in httpd.conf should be the same as the
+user "fml" which is the owner of /var/spool/ml directory.
 
-fml GUI専用WWWサーバなら apache の User の行と合わせます。他の user 権
-限をどーたらこーたら（ apache の本なりその筋に聞くなりしてね ）してい
-るなら、そのユーザに合わせます。
+fml GUI 専用WWWサーバなら apache の User の行と合わせます。他の user 
+権限をどーたらこーたら（ apache の本なりその筋に聞くなりしてね ）して
+いるなら、そのユーザに合わせます。例:
 
-ようすすに apache のプロセスはだれ（ユーザ）か？
-そのユーザが読み書きできないといけません
-
-例:
    apache/httpd.conf
 
 	User fml
 
-   /var/spool/ml/ 以下の owner も fml   
+そして  /var/spool/ml/ 以下の owner も fml
 
 
-.S	httpd.conf は fml/share/ の下について設定すれば十分か？
+.S	httpd.conf は fml/www/share/ の下について設定すれば十分か？
+=E.S	httpd.conf is configured for fml/www/share/ directry?
 
-そういう設定を書きます
+はい、そういう設定です。
 
 
-.S	fml/www/ と fml/share/ の違いは？
+.S	fml/www/ と fml/www/share/ の違いは？
+=E.S	What is the difference between fml/www/ and fml/www/share/ ?
 
-www 経由でアクセスさせる場所が fml/share/
+www 経由でアクセスさせる場所が fml/www/share/
 ライブラリやテンプレートを格納する場所が fml/www/
+=E
+fml/www/ is allocated for fml CGI interface, fml/www/share/ is where
+apache sees.
 
 
-.S	CGI導入以前に作られたものはどう処理する？自動的に有効か？
-
-CGIをいじれる人がそのＭＬの設定の変更はできる。
-   
-CGIをいじれる人は概ねそのサーバに入ってmakefmlでの設定変更を使える人と
-同じ権限が使える。そのユーザリストはhtpasswdに設定する。
-この人たちは以前(makefml)と同じ権限レベルになる。
-
-一方、各ＭＬで admin コマンドを使っている場合にその人たちがCGIを使える
-ようになるか？というと自動ではならない。
-
-1	CGIのメニュー「あるＭＬをCGIで設定可能にする」がある
-2.	makefml mladmin.cgi ML
-
-どちらでも効果は同じ
+.S	CGI 導入以前に作られたものはどう処理する？自動的に有効か？
+=E.S	fml CGI interface conflicts fml before 4.0 ?
 
 
-.S	CGI操作ユーザの設定追加/変更/削除
-
-1.	CGIからおこなう
-
-2.	makefml htpasswd ML ユーザ名
+オーナが同じであれば yes
+=E
+Yes.
 
 
-.S	CGI操作ユーザのパスワードの変更
+.S	CGI を操作可能なユーザの追加と削除
+=E.S	add/delete a user which can use fml CGI interface
+
+1.	CGI からおこなう
+=E
+1.	do on CGI
+
+2.	makefml admin.cgi conf
+
+	MENU -> CHANGE PASSWORD
+
+
+.S	CGI を操作可能なユーザのパスワード変更
+=E.S	change the password for a user which can use fml CGI interface
 
 GUI: メニューの『管理者パスワードの設定』で設定
+=E
+You can do it on CGI menu.
 
 初期設定の時だけは 'admin' コマンドでつかうものを自動的に htpasswd へ
 反映させる。その後は自動 sync はしない(別のパスワードを使えるように)
 
 
-.S	ＭＬを作るには newaliases と連動させる必要があるが …
+.S	メールサーバの選択
+=E.S	select mail servers
 
-WWWで aliases の方法は設定できる。MTAと対で設定する必要があるだろう。
-たとえば postfix と sendmail では同じDBを見るが program の構造が違う 
+makefml admin.cgi conf
 
+   MENU -> 	
+	6     MTA                
+	7     HOW TO UPDATE ALIAS
 
-.S	MTAの設定はいつどこでする？(途中でMTAが変わるかも知れない)
-A: メインメニューにいちおうあるが…それがいいのか？
-   
 
 .S	WWW下のCGI PATHは？
+=E.S	Can I change CGI PATH ?
 
 makefml でインストールする時に決まる
 
 
 .S	MTA 依存の問題: postfix 特有の事情
+=E.S	Case Study: postfix specific problmes
 
-postalias /var/spool/ml/etc/aliases ではしらえる
+   % postalias /var/spool/ml/etc/aliases
+
+を実行すること(実行するのはユーザ fml )。
 
 
 .S	sendmail 特有の事情
+=E.S	Case Study: sendmail specific problmes
 
 /var/spool/ml/etc/aliases.db に root 権限のファイルが必要
 
@@ -124,63 +135,47 @@ postalias /var/spool/ml/etc/aliases ではしらえる
 
 しておく必要がある
 
+
 .S	qmail
 
 「qmail はどうすればいいんだろぉ…」とおもったけど一回設定したら要らな
 いのか？という気がするが、ためしたことがない;-)
-
-
-.S	makefml config メニューを日本語にできるか？
-
-Message Language Extension をつかう 。対応済み
-
-
-.S	既存のシステムからの移行は？
-
-ようするに makefml のGUIとおもってほしい。
-デフォールトではサーバ管理者がmakefmlをつかうようにWWWを使用可能
-各々のＭＬ管理者はWWWはつかえない。
-
-
-.S	各々のＭＬも自動的にWWW上で操作可能にできないのか？
-
-サーバ管理者はなんでも可能だが、あるＭＬの管理者にWWWアクセセウを許す
-かは明示的に設定が必要
-
-画面ないしmakefml mladmin.cgi ML で設定する
-
-つまり
-
-1. そのＭＬをWWWでいじれるようにするか否かはサーバ全体の管理者が決定する。
-   デフォールトはさせない
-
-2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
-   WWWでそのＭＬをいじらせることができる。
+=E
+under condideration ...
 
 
 .S	apache が Forbidden とエラーをはく
+=E.S	Errors from apache
 
 例: /usr/local/apache/logs/error_log で
 
 You don't have permission to access /cgi-bin/fml/admin/menu.cgi on this server.
 
 0. apache の User と /usr/local/fml のオーナーは一緒ですか？
+=E
+0. check the User of httpd.conf and fml user.
 
    もしそうでないなら、suexec なり何か拡張をしているとおもいますが
    その設定は正しいですか？
 
-1. /usr/local/fml/share/ の menu.cgi に permission がない(?)
+1. /usr/local/fml/www/share/ の menu.cgi に permission がない(?)
+=E
+1. check the executable permission for menu.cgi in /usr/local/fml/www/share/
 
    その menu.cgi を apache の User が実行可能ですか？
 
 2. ディレクトリに permission がない
+=E
+2. check the directory permission
 
-	/usr/local/fml/share/
+	/usr/local/fml/www/share/
 	/usr/local/fml/www/
 
    以下の permission を確認して下さい。
 
 3. apache のCGIまわりの設定 (/usr/local/apache/conf/)
+=E
+3. check httpd.conf 
 
 	Directory ディレクティブ
 	.htaccess ?
@@ -189,18 +184,22 @@ You don't have permission to access /cgi-bin/fml/admin/menu.cgi on this server.
 
 
 .S	登録作業は独立 ??
+=E.S	registration processes (e.g. CGI, makefml, ..) are independent ?
 
 もちろん WWW の機構と自動登録機構は独立したものなので、どっちを利用し
 ても登録作業はできます。入りたいユーザにどうしてもらうか？は運用形態の
 問題です(管理者の手間暇をかけるか、かけないかとか…)
+=E
+Yes. Plural methods work well each other when the owner of these
+processes is the same as "fml".
 
 
-.# $Id$
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
-.#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# $Id$ 
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi 
+.# All rights reserved. 
+.# 1993-1996 fukachan@phys.titech.ac.jp 
+.# 1996-2000 fukachan@sapporo.iij.ad.jp 
 .# 
-.# FML is free software; you can redistribute it and/or modify
-.# it under the terms of GNU General Public License.
+.# FML is free software; you can redistribute it and/or modify 
+.# it under the terms of GNU General Public License.  
 .# See the file COPYING for more details.

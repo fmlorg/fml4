@@ -1,6 +1,8 @@
 .HTML_PRE
 .# .__repl_title__
                 コマンドについて
+=E
+		customize fml commands
 
 .toc
 .~HTML_PRE
@@ -11,9 +13,11 @@
 .include howto.wix
 
 .P	内部構造他
+=E.P	Internals
 .include internals.wix
 
 .P	コマンド各論
+=E.P	Several commands
 .include library.wix
 .include member_name.wix
 .include traffic.wix

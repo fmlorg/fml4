@@ -1,4 +1,5 @@
 .C	その他のTIPS
+=E.C	other tips
 
 .S	cronでnewsyslogをする (OBSOLETE shell version)
 =E.S	Cron Runs Newsyslog (obsolete)

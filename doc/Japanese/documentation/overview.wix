@@ -4,7 +4,9 @@
 ドキュメントの記述言語はWIXと呼ばれている NROFF もどきの言語です。
 一回書けば text, html, (nroff, texinfo は今だ未完) の複数のフォーマッ
 トを同時に生成するという目的のために作られました。
-
+=E
+WIX is fml documentation system language, which converts wix format to
+html, plain text.
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

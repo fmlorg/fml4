@@ -24,7 +24,7 @@ scan:
 		tee __scan__ || echo 'nothing changes'
 
 clean:
-	gar *~ *.bak
+	gar *~ */*~ *.bak
 
 diag:
 	@ sh ../../distrib/doc/bin/diag_tutorial.sh

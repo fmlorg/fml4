@@ -1,9 +1,13 @@
 .C	tips
 
 .S	Webサーバとfmlのサーバが別の時に何かいい方法は？
+=E.S	releation between web and fml
 
 WWW サーバで登録し、登録は fml のサーバで、そして、その結果を WWW サー
 バで表示したい。つまり連携プレーをする必要があります。
+=E
+You can input commands into makefml via pipe. For example, 
+% echo help |/usr/local/fmlmakefml
 
 fml GUI は makefml -i STDIN でコマンドを放り込むという方法で実装されて
 います。入力されたもののチェックは makefml はしていません。フロントエ

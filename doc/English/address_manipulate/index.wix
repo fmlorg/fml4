@@ -1,17 +1,20 @@
 .HTML_PRE
 		アドレス関係の操作
+=E
+	manipulate mail addresses
 
 .toc
 
-ここではアドレスについての
+ここではアドレスについての登録の仕方について詳しくは
+ .ptr{how_to_subscribe} 節をみて下さい。
 
-登録の仕方について詳しくは .ptr{how_to_subscribe} をみてね
 .url ../how_to_subscribe/
 
-特定のアドレスを弾きたいとかはフィルタリング .ptr{filter} を参照して下
-さい。
+特定のアドレスを弾きたいといった場合は、
+フィルタリング( .ptr{filter} 節)を参照して下さい。
 
-リモート管理の時の認証については .ptr{remote_control}
+また、リモート管理の時の認証については .ptr{remote_control} 節を参照し
+てください。
 
 .~HTML_PRE
 
