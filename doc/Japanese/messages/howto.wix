@@ -1,5 +1,24 @@
 .C	事例集
 
+.S	本文へ注意をつけたす (2000/06/05 以降の fml-current)
+
+$START_HOOK = q#
+	my ($s) = &GET_BUFFER_FROM_FILE("$DIR/info");
+	&ENVELOPE_APPEND('Body', &STR2JIS($s));
+#;
+
+ここで $DIR/info は /var/spool/ml/elena/info に展開される。
+/var/spool/ml/elena/info というファイルを作りこの中に
+.q
+◯◯◯ ＭＬの抜け方は ……… です。
+.~q
+
+などと書いておきます。
+
+過去のリリース、fml-stable および 2000/06 以前の current では
+%Envelope を直接いじってください。
+
+
 .S	例: fmlでの confirm のメールの本文をハックする (ひとつのＭＬだけ)
 
 fml-support: 07974, 07975

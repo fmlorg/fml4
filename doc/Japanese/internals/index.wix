@@ -8,5 +8,4 @@
 .# .__repl_include__
 .include overview.wix
 .include fop.wix
-.include function.wix
 .include internals.wix

@@ -1,0 +1,42 @@
+.C	Porting to other Operationg Systems
+.l	porting
+
+.S	Micro$oft NT 4.0
+.k	Micro$oft NT 4.0
+.k	$HAS_GETPWUID
+.k	$HAS_GETPWGID
+.k	$HAS_ALARM
+
+	$HAS_GETPWUID
+	$HAS_GETPWGID
+	$HAS_ALARM
+
+の変数はOFFになります。U*ix ではデフォールトでONです。 
+ライブラリによっては次の変数をセットしているものもあります。
+=E
+are disabled when fml.pl on NT4. Also 
+
+	$COMPAT_WIN32 = 1;
+.l	$COMPAT_WIN32
+.k	$COMPAT_WIN32
+
+=E
+in some libraries.
+
+.S	sys/ Directory
+.k	$COMPAT_ARCH
+
+fml.pl の次の行は
+
+    if ($COMPAT_ARCH)  { require "arch/${COMPAT_ARCH}/depend.pl";}
+
+Architecture 依存コードをロードするためのものです。
+Architecture 依存は
+
+	sys/OS/perlスクリプト
+
+のように並び適宜ローディングされます。
+=E
+sys/OPERATING_SYSTEM/ directories are locations of architecture
+dependent libraries or configuration files.
+

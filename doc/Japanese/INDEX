@@ -27,6 +27,7 @@ messages		fml の返すメッセージをいじる
 filter			フィルタリング
 virtual_domain		virtual domain
 command			コマンド、そして拡張について
+hooks			HOOK を使った拡張について
 resource_control	リソースの制御	
 digest			まとめおくり
 html_convert		記事の HTML への変換

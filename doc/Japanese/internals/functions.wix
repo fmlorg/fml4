@@ -2,6 +2,7 @@
 =E.C	Library Functions
 .n	functions
 .k	ライブラリ関数
+.l	internal_functions
 
 ここでは、カスタマイズに役に立ちそうなライブラリ関数の説明をします。
 とりあえずいきあたりばったりに選んで説明:-)

@@ -17,9 +17,6 @@
 .include postfix-pop-before-smtp.wix
 
 
-.P	HOOK
-.include hook.wix
-
 .P	examples
 .C	examples
 
