@@ -33,6 +33,13 @@ WWW が使えるなら
 
 
 ========== WHAT'S NEW  fml current (1.6.2) ==========
+
+bin/split_and_msend.pl 
+	unix from のかたちの file の まとめおくり 
+	ようするに obsolute の まとめおくりＲ１ の現代版（苦笑）
+	PLAIN TEXT ONLY っすけど。
+
+
 ・ lha して uuencode する モード
 
 
