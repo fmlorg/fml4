@@ -99,13 +99,13 @@ sub FmlServ
 {
     local(*e) = @_;
     local($eval, $hook);
+    local($message, $error); # save the %Envelope return values; 
 
     ### 00: Load Command Library 
     require 'libfml.pl'; # if %ReqInfo;
 
     ### 01: Configuration ...;
     &InitFmlServProcedure; # initialize fmlserv procedures;
-    &MakePreambleOfReply(*e); # The first reply message;
 
     $e{'mode:fmlserv'} = 1; # Declare (for e.g. mkdir permission change)
 
@@ -113,7 +113,11 @@ sub FmlServ
     # ML::constructor() for fmlserv@$DOMAIN
     #   fmlserv = new ML(Fmlserv);
     # 
+    # ATTENTION!: $Enveoope{'mode:*'} is also set. so require the reset
     &NewML($FMLSERV_DIR, 'fmlserv', *e);
+
+    # save current envelope
+    %OrgEnvelope = %e;
 
     # for logging all log's in fmlserv/log, SET AGAIN
     # &InitFmlServ: LOGFILE = $FMLSERV_DIR/log 
@@ -142,6 +146,10 @@ sub FmlServ
 
     $FMLSERV_DIR = $DIR;	# save the $DIR (must be == $FMLSERV_DIR)
 
+    if ($debug) {
+	&DebugEnvelopeDump("pre e");
+    }
+
     ### 05.01: GO Processing For Each ML's ...;
     # 
     # Requests to $ml are available if %MailList has the entry;
@@ -165,6 +173,10 @@ sub FmlServ
 
 	# Load $ml NAME SPACE from $list/config.ph
 	&NewML($DIR, $ml, *e, *MailList);
+
+	if ($debug) {
+	    &DebugEnvelopeDump("$ml e");
+	}
 
 	# test chdir $DIR, next if it fails;
 	# if it succeeds, lock and do the processing;
@@ -223,6 +235,15 @@ sub FmlServ
 	# Reload NS from main'NS
 	&DestructCompatMajordomo if $e{'mode:majordomo'};
 	&ResetNS;
+
+	# reset %Envelope;
+	if ($debug) {
+	    &Debug("$ml::message: ---\n$Envelope{'message'}\n---\n");
+	    &Debug("$ml::error:   ---\n$Envelope{'error'}\n---\n");
+	}
+	$message .= $Envelope{'message'};
+	$error   .= $Envelope{'error'};
+	%Envelope = %OrgEnvelope;
     } # each ML ends;
 
     ### 06: FMLSERV INTERNAL (ITSELF) FUNCTIONS;
@@ -230,7 +251,15 @@ sub FmlServ
     $FML_EXIT_HOOK = $hook;
     $DIR           = $FMLSERV_DIR; 
 
-    if ($debug) { &Debug("---Processing ML fmlserv");}
+    $Envelope{'message'} .= $message;
+    $Envelope{'error'}   .= $error;
+
+    if ($debug) {
+	&Debug("fmlserv::message: ---\n$Envelope{'message'}\n---\n");
+	&Debug("fmlserv::error:   ---\n$Envelope{'error'}\n---\n");
+	&DebugEnvelopeDump("fmlserv e");
+	&Debug("---Processing ML fmlserv");
+    }
 
     # chdir $FMLSERV_DIR; 
     chdir $DIR || die("$!:cannot chdir FMLSERV_DIR[$DIR]\n");
@@ -255,6 +284,23 @@ sub FmlServ
     else {
 	&AppendFmlServInfo(*e);
     }
+
+    # preparation for &Notify;
+    &MakePreambleOfReply(*e); # The first reply message;
+}
+
+
+sub DebugEnvelopeDump
+{
+    local($log)= @_;
+
+    $_ = "Addr2Reply:";
+    &Debug("$log: $_\t=>$e{$_}") if $e{$_};
+
+    for (keys %Envelope) {
+	next unless /^mode:/;
+	&Debug("$log: $_\t=>$e{$_}") if $e{$_};
+    }
 }
 
 
@@ -271,8 +317,10 @@ sub Opt { push(@SetOpts, @_);}
 sub MakePreambleOfReply
 {
     local(*e) = @_;
-    &Mesg(*e, "Fmlserv (Fml Listserv-Like Interface) Results:");
+    $e{'message'} = 
+	"Fmlserv (Fml Listserv-Like Interface) Results:\n$e{'message'}";
 }
+
 
 sub DoFmlServItselfFunctions
 {
@@ -689,17 +737,18 @@ sub ResetNS
     local($eval);
 
     # undef main NS
-    foreach (keys %ML_NameSpaceS)  { $eval .= "undef \$main'$_;\n";}
-    foreach (keys %ML_NameSpaceA)  { $eval .= "undef \@main'$_;\n";}
-    foreach (keys %ML_NameSpaceAA) { $eval .= "undef \%main'$_;\n";}
+    for (keys %ML_NameSpaceS)  { $eval .= "undef \$main'$_;\n";}
+    for (keys %ML_NameSpaceA)  { $eval .= "undef \@main'$_;\n";}
+    for (keys %ML_NameSpaceAA) { $eval .= "undef \%main'$_;\n";}
 
     # load main NS from org(saved main) NS
-    foreach (keys %NameSpaceS)  { $eval .= "\$main'$_ = \$org'$_;\n";}
-    foreach (keys %NameSpaceA)  { $eval .= "\@main'$_ = \@org'$_;\n";}
-    foreach (keys %NameSpaceAA) { $eval .= "\%main'$_ = \%org'$_;\n";}
+    for (keys %NameSpaceS)  { $eval .= "\$main'$_ = \$org'$_;\n";}
+    for (keys %NameSpaceA)  { $eval .= "\@main'$_ = \@org'$_;\n";}
+    for (keys %NameSpaceAA) { $eval .= "\%main'$_ = \%org'$_;\n";}
 
     &Debug($eval) if $debug_ns;
-    eval $eval || &Log($@);
+    eval($eval);
+    &Log($@) if $@;
 }
 
 
