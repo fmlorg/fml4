@@ -3,7 +3,7 @@
 # Please obey GNU Public Licence(see ./COPYING)
 
 local($id);
-$id = q$Id: libtraffic.pl,v 1.1 1995/12/12 11:58:29 YUAO $;
+$id = q$Id: libtraffic.pl,v 1.2 1999/12/27 06:01:03 yuao Exp yuao $;
 $rcsid  .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 if ($0 eq __FILE__) {
@@ -181,7 +181,7 @@ sub Traffic {
 	$mails += $count;
 	($ey,$em,$ed)=(localtime)[5,4,3];
 	$em++;
-	$end = $to_flg ? $end : sprintf("%02d/%02d/%02d",$ey,$em,$ed);
+	$end = $to_flg ? $end : sprintf("%02d/%02d/%02d",($ey % 100),$em,$ed);
 	$days = &difday( $start, $end );
 	if ( $mails == 0 ) {
 		$e{'message'} .= "\nTotal:$mails mails are posted ";

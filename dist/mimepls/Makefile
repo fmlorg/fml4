@@ -3,16 +3,21 @@ INSTALL_DIR = /usr/local
 LIB_DIR = $(INSTALL_DIR)/lib/perl
 BIN_DIR = $(INSTALL_DIR)/bin
 
-APPLICATION = rmime wmime
+APPLICATION = rmime wmime rbody wbody
 LIBRARY = mimer.pl mimew.pl
-DOCUMENT = mime_pls.doc history Makefile
-ARCHIVE = mime_pls
-SUF = gz
+DOCUMENT = mime_pls.doc history Makefile \
+	   index.html document.html history.html
+
+ARCHIVE = mime_pls202
+CSUF = gz
+SUF = tgz
+
 TAR = tar
 COMPRESS = gzip
 INSTALL = install -c
+RENAME = mv
 
-all: ppack archive
+all: rats archive
 
 install: $(APPLICATION) $(LIBRARY)
 	$(INSTALL) -m 755 -o root $(APPLICATION) $(BIN_DIR)
@@ -24,17 +29,18 @@ uninstall:
 	cd $(LIB_DIR);\
 	rm -f $(LIBRARY)
 
-ppack: $(ARCHIVE).pp
+rats: $(ARCHIVE).rat
 
-$(ARCHIVE).pp: $(APPLICATION) $(LIBRARY) $(DOCUMENT)
-	ppack $(DOCUMENT) $(LIBRARY) $(APPLICATION) > $(ARCHIVE).pp
+$(ARCHIVE).rat: $(APPLICATION) $(LIBRARY) $(DOCUMENT)
+	rat $(DOCUMENT) $(LIBRARY) $(APPLICATION) > $(ARCHIVE).rat
 
-archive: $(ARCHIVE).tar.$(SUF).uue
+archive: $(ARCHIVE).$(SUF).uue
 
-$(ARCHIVE).tar.$(SUF).uue: $(APPLICATION) $(LIBRARY) $(DOCUMENT)
+$(ARCHIVE).$(SUF).uue: $(APPLICATION) $(LIBRARY) $(DOCUMENT)
 	$(TAR) cvf $(ARCHIVE).tar $(DOCUMENT) $(LIBRARY) $(APPLICATION)
 	$(COMPRESS) $(ARCHIVE).tar
-	uuencode $(ARCHIVE).tar.$(SUF) $(ARCHIVE).tar.$(SUF) > $(ARCHIVE).tar.$(SUF).uue
+	$(RENAME) $(ARCHIVE).tar.$(CSUF) $(ARCHIVE).$(SUF)
+	uuencode $(ARCHIVE).$(SUF) $(ARCHIVE).$(SUF) > $(ARCHIVE).$(SUF).uue
 
 clean:
-	rm -f $(ARCHIVE).tar.* $(ARCHIVE).pp
+	rm -f $(ARCHIVE).tar* $(ARCHIVE).$(SUF)* $(ARCHIVE).rat
