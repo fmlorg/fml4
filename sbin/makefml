@@ -593,6 +593,7 @@ sub SetHashDefaults
 		    # 
 		    'admin.cgi',    'do_setup_admin_cgi',
 		    'mladmin.cgi',  'do_setup_mladmin_cgi',
+		    'ml-admin.cgi', 'do_setup_mladmin_cgi',
 		    '500#mladmin.cgi', 'set up ml-admin/$ml/*.cgi',
 
 		    # utilities
