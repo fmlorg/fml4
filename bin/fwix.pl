@@ -14,7 +14,7 @@
 unshift(@ARGV, split(/\s+/, $ENV{'FWIX_OPTS'}));
 
 require 'getopts.pl';
-&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:S:Z:Fo:");
+&Getopts("f:i:hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:S:Z:Fo:");
 
 $debug=1;
 
@@ -59,6 +59,10 @@ $RoffDir     = $opt_R;
 $Title       = $opt_T || "NONE TITLE";
 $TmpDir      = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; 
 
+# index list
+$IndexFile   = $opt_f || $NULL; # list of lidex
+$MakeIndex   = $opt_i || $NULL; # make index table (only table)
+
 $OUTPUT_FILE = $opt_o;
 
 $OnFml       = 1 if $opt_F;
@@ -94,7 +98,12 @@ $SIG{'HUP'}  = 'CleanUp';
 
     &Init;
 
-    print STDERR "fwix generation mode:\t$mode (Language=$Lang)\n";
+    if ($MakeIndex) {
+	print STDERR "\t-- make index list mode\n" if $debug_make_index;
+    }
+    else {
+	print STDERR "fwix generation mode:\t$mode (Language=$Lang)\n";
+    }
 
     &Formatter($mode);		# main;
 }
@@ -188,6 +197,19 @@ sub Formatter
     close(TMPF);
     close(ENG);
 
+    if ($MakeIndex) {
+	&FlushMakeIndex;
+	print STDERR "\t-- \$MakeIndex mode ends\n" if $debug_make_index;
+	return;
+    }
+
+    # load index list to overwrite %index by %indexlist
+    # (e.g. {text,html}_index.ph)
+    if ($IndexFile && -f $IndexFile) {
+	require $IndexFile;
+	while (($k, $v) = each %index) { $indexlist{$k} = $v;}
+	%index = %indexlist;
+    }
 
     ### PHASE 02:
     $Prog = $Prog{"phase2:$mode"};
@@ -203,6 +225,14 @@ sub Formatter
 	&ShowIndex unless $no_index;
     }
 
+}
+
+
+sub FlushMakeIndex
+{
+    while (($k, $v) = each %MakeIndex) {
+	print "\$indexlist{'$k'} = '$v';\n\n";
+    }
 }
 
 
@@ -1245,6 +1275,12 @@ sub Expand
 
 	if ($mode eq 'text') {
 	    $index{$s}  = $CurPosition;
+
+	    if ($MakeIndex) {
+		print STDERR "\$MakeIndex{$s} = $MakeIndex $CurPosition\n"
+		    if $debug_make_index;
+		$MakeIndex{$s} = "$MakeIndex $CurPosition";
+	    }
 	}
 	elsif ($mode eq 'html') {
 	    $index{$s}  = "</PRE>";
@@ -1252,6 +1288,15 @@ sub Expand
 	    $index{$s} .= "$Chapter.$Section</A>";
 	    $index{$s} .= "<PRE>";
 	    $In_PRE = 1;
+
+	    if ($MakeIndex) {
+		print STDERR "\$MakeIndex{$s} = $MakeIndex $CurPosition\n"
+		    if $debug_make_index;
+		$MakeIndex{$s} = "</PRE>".
+		    "<A HREF=\"../$MakeIndex/$Chapter.html#C${Chapter}S${Section}\">".
+			"../$MakeIndex $Chapter.$Section</A>".
+			    "<PRE>";
+	    }
 	}
 	elsif ($mode eq 'roff') {
 	    $index{$s}  = "$Chapter.$Section"; 
