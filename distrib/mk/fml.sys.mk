@@ -22,6 +22,7 @@ SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 WWW          = $(DESTDIR)/exports/www
 WWW_DIR      = $(WWW)
 
+TMP_DIR         = $(FML)/tmp
 VAR_DIR         = $(FML)/var
 WORK_DOC_DIR    = $(VAR_DIR)/doc
 WORK_HTML_DIR   = $(VAR_DIR)/html
@@ -34,6 +35,7 @@ WORK_DRAFTS_DIR = $(WORK_DOC_DIR)/drafts
 ###
 __ALL__  = $(DESTDIR) $(FTP_DIR) $(SNAPSHOT_DIR) $(WWW_DIR)
 __ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_HTML_DIR) $(WORK_DRAFTS_DIR)
+__ALL__ += $(TMP_DIR)
 
 .for dir in ${__ALL__}
 .PHONY: ${dir}
