@@ -1,5 +1,6 @@
 DOC_EXAMPLES_SOURCES += postfix-install
 DOC_EXAMPLES_SOURCES += fml-install
+DOC_EXAMPLES_SOURCES += server_movement
 DOC_EXAMPLES_SOURCES += config-default 
 DOC_EXAMPLES_SOURCES += config-auto-subscribe 
 DOC_EXAMPLES_SOURCES += config-asymmetric-regist 

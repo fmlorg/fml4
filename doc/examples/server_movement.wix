@@ -1,0 +1,66 @@
+.HTML_PRE
+
+	fmlを新しいサーバへ移転する
+=E
+	move fml to another new server
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+.if LANG == JAPANESE
+◯ 新しいサーバへ移転する仕方について
+
+0. 新しいサーバのMTAのインストールおよび設定を終らせておく
+
+1. 新サーバにfmlをインストールする。
+
+つまり /usr/local/fml 以下に実行ファイルがインストールされる。
+
+通常ここにはＭＬの設定ファイルは含まれないことに注意。また 
+/var/spool/ml 以下が設定やスプールの場所である。ここはインストールとは
+無関係である。
+
+2. 古いホストのMTAを止める。ＭＬ宛の溜っているメールがなくなるまで待つ。
+   例えば mailq コマンドなどでＭＬ宛のメールがないことを確認
+
+3. 古いサーバの /var/spool/ml を新しいサーバの /var/spool/ml へコピーする
+
+例:
+
+   rsync --rsh ssh -av /var/spool/ml/ new-server:/var/spool/ml/
+
+4. DNS的に新しいマシンに配送先を切替える。
+
+注意: 古いマシンのMTAをずっと止めていられないのならもうちょっと考える
+べきことがあるが fml 自体の移動とは直接関係ないのでここでは省略させて
+もらう。
+
+◯ /usr/local/fml/sitedef.ph ないし site_init.ph を使っているかたへ
+
+現在では /var/spool/ml/etc/fml/ の下に
+
+	sitedef.ph
+	site_init.ph
+	site_force.ph 
+
+などの全ＭＬ共通の設定ファイルをおくことが推奨されています。インストー
+ルの時に左右されないためです。是非この方法へ移行して(copyすればおわり)
+作業をしてみてください。
+
+.fi
+.if LANG == ENGLISH
+.fi
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
