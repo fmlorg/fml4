@@ -6,8 +6,7 @@ local($id);
 $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
-local($HasCrypt) = eval "crypt('fukachan', 11);", $@ eq "";
-
+$HasCrypt = eval "crypt('fukachan', 11);", $@ eq ""; # should be global!
 
 # PLAIN passwd -> crypt(passwd, DES-function)
 # return 'encrypted passwd' if     crypt() exists
@@ -15,6 +14,8 @@ local($HasCrypt) = eval "crypt('fukachan', 11);", $@ eq "";
 sub Crypt
 {
     local($passwd, $salt) = @_;
+
+    &Log("HasCrypt: $HasCrypt");
 
     # if not have crypt();
     return $passwd unless $HasCrypt;
@@ -33,13 +34,11 @@ sub CmpPasswd
 {
     local($c, $p) = @_;
 
-    &Log("CmpPasswd($c,$p)") if $debug;
+    &Log("CmpPasswd: $c eq crypt($p)") if $debug;
 
-    if ($c =~ /^(\S\S)/) {
-	$p = &Crypt($p, $1);
-    }
+    ($c =~ /^(\S\S)/) && ($p = &Crypt($p, $1));
 
-    &Log("CmpPasswd($c,$p)") if $debug;
+    &Log("CmpPasswd: $c eq $p") if $debug;
 
     ($c eq $p) ? 1: 0;
 }
@@ -58,14 +57,14 @@ sub CmpPasswdInFile
 	chop;
 
 	if (/^$from\s+(\S+)/) {
-	    #CmpPasswd(encrypt,plain)
-	    &CmpPasswd($1,$passwd) && $ok++;#|| undef($ok);
-	    &Log("O.K. CmpPasswd($1,$passwd)") if $debug && $ok;
+	    #CmpPasswd(encrypt, plain-passwd)
+	    &CmpPasswd($1, $passwd) && $ok++; 
+	    &Log("O.K. CmpPasswdInFile: $passwd Authentified") if $debug && $ok;
 	}
     }
     close(FILE);
 
-    $ok ? 1: 0;
+    $ok ? 1 : 0;
 }
 
 

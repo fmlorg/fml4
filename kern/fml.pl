@@ -26,6 +26,7 @@ unshift(@INC, $DIR);
 #################### MAIN ####################
 # including libraries
 require 'config.ph';		# configuration file for each ML
+require 'config.ph';		# configuration file for each ML
 eval("require 'sitedef.ph';");  # common defs over ML's
 &use('smtp');			# a library using smtp
 
@@ -120,7 +121,8 @@ sub InitConfig
     &GetTime;			        # Time
 
     # COMPATIBILITY
-    if ($COMPAT_FML15) { &use('fixenv'); &use('compat');}
+    if ($COMPAT_CF1)   { &use('compat_cf1');}
+    if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
     
     ### Initialize DIR's and FILE's of the ML server
     for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR, $VARRUN_DIR) { 
@@ -1048,6 +1050,9 @@ sub CheckUGID
 # which address to use a COMMAND control.
 sub CtlAddr { $CONTROL_ADDRESS =~ /\@/ ? $CONTROL_ADDRESS : "$CONTROL_ADDRESS\@$FQDN";}
 
+# Security 
+sub SecureP { ($_[0] =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) ? 1 : (&use('utils'), &SecWarn(@_), 0);}
+
 # Check Looping 
 # return 1 if loopback
 sub LoopBackWarning { &LoopBackWarn(@_);}
@@ -1057,11 +1062,11 @@ sub LoopBackWarn
     local($ml);
 
     foreach $ml ($MAIL_LIST, $CONTROL_ADDRESS, @PLAY_TO) {
-	next if $ml =~ /^$/oi;	# for null control addresses
+	next if $ml =~ /^\s*$/oi;	# for null control addresses
 	if (&AddressMatch($to, $ml)) {
-	    &Debug("&AddressMatch($to, $ml)") if $debug;
-	    &Log("Loop Back Warning: ", "[$From_address] or [$to]");
-	    &Warn("Loop Back Warning: $ML_FN", &WholeMail);
+	    &Debug("AddressMatch($to, $ml)") if $debug;
+	    &Log("Loop Back Warning: ", "$to eq $ml");
+	    &Warn("Loop Back Warning: [$to eq $ml] $ML_FN", &WholeMail);
 	    return 1;
 	}
     }

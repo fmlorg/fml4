@@ -47,6 +47,8 @@ sub Command
       # skip null line
       next GivenCommands if /^\s*$/o; 
 
+      &SecureP($_) || last GivenCommands;
+
       # e.g. *-ctl server, not require '# command' syntax
       $_ = "# $_" if $COMMAND_ONLY_SERVER && (!/^\#/o); 
 
@@ -105,10 +107,8 @@ sub Command
       }
 
       # Special hook e.g. "# list",should be used as a ML's specific hooks
-      if ($COMMAND_HOOK) {
-	  &CheckCommandHook($_, @Fld) || last GivenCommands;
-	  &eval($COMMAND_HOOK, 'Command hook');
-      }
+      eval $COMMAND_HOOK; 
+      &Log("COMMAND_HOOK ERROR", $@) if $@;
 
       # if undefined commands, notify the user about it and abort.
       &Log("Unknown Cmd $_");
@@ -414,11 +414,6 @@ sub ProcRetrieveFileInSpool
     local($proc, *Fld, *e, *misc) = @_;
     local(*cat);
     local($ID) = $Fld[2]; 
-
-    if (&InSecureP($ID)){ 
-	$e{'message'} .= "\n>>> $org_str\nget $Fld[2] failed.\n";
-	return 'LAST';
-    }
 
     local($mail_file, $ar) = &ExistP($ID);# return "$SPOOL_DIR/ID" form;
     &Debug("GET: local($mail_file, $ar)") if $debug;
@@ -1333,44 +1328,6 @@ sub ExistP
 }
 
 
-# the syntax is insecure or not
-# return 1 if insecure 
-sub InSecureP
-{
-    local($ID) = @_;
-
-    print STDERR "\t   [INSECURE CHECK:$ID]\n" if $debug;
-
-    if ($ID =~ /..\//o || $ID =~ /\`/o){ 
-	local($s)  = "INSECURE and ATTACKED WARNING";
-	local($ss) = "Match: $ID  -> $`($&)$'";
-	&Log($s, $ss);
-	&Warn("Insecure $ID from $From_address. $ML_FN", 
-	      "$s\n$ss\n".('-' x 30)."\n". &WholeMail);
-	return 1;
-    }
-
-    0;
-}
-
-
-# Check the string contains Shell Meta Characters
-# return 1 if match
-sub MetaCharP
-{
-    local($r) = @_;
-
-    print STDERR "\t   [META     CHECK:$r]\n" if $debug;
-
-    if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
-	&Log("Match: $r -> $`($&)$'");
-	return 1;
-    }
-
-    0;
-}
-
-
 # Check arguments whether secure or not. 
 # require META-CHAR check against e.g. unlink('log'), getpwuid()...
 # return 1 if secure.
@@ -1380,8 +1337,8 @@ sub CheckCommandHook
     local($s);
 
     foreach $s (@s) {
-	if(&MetaCharP($s)) {
-	    $e{'message'} .= "NOT permit META Char's in parameters.\n";
+	if ($s =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	    $e{'message'} .= "Should NOT include META Char's.\n";
 	    return 0;
 	};
     }

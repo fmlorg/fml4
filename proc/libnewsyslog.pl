@@ -125,7 +125,6 @@ sub TurnOver
 }
 
 
-
 # DEBUG in NewSyslog NAME SPACE;
 if ($0 eq __FILE__) {
     $DIR        =  $ENV{'PWD'};

@@ -444,9 +444,9 @@ sub system
     # Metacharacters check, but we permit only '|' and ';'.
     local($r) = $s;
     $r =~ s/[\|\;]//g;		
-
-    if (&MetaP($r)) {
-	&Log("$s matches the shell metacharacters, exit");
+    
+    if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	&Log("System:[$s] matches the shell metacharacters, exit");
 	return 0;
     }
 
@@ -507,18 +507,40 @@ sub Copy
 }
 
 
-# Check the string contains Shell Meta Characters
-# return 1 if match
-sub MetaP
+sub Move
 {
-    local($r) = @_;
+    local($old, $new) = @_;
 
-    if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
-	&Log("Match: $r  -> $`($&)$'");
-	return 1;
+    if (-f "$new.0") { unlink "$new.0"; &Log("unlink $new.0");}
+    if (-f $new)     { rename($new, "$new.0"); &Log("$new -> $new.0");}
+    rename($old, $new) && &Log("$old -> $new");
+}
+
+
+sub Link
+{
+    local($old, $new) = @_;
+    local($symlink_exists);
+    $symlink_exists = (eval 'symlink("", "");', $@ eq "");
+
+    if ($symlink_exists) {
+	symlink($old, $new);
+	&Log("ln -s $old $new");
     }
+    else {
+	&Log("link failed [ln -s $old $new]");
+    }
+}
 
-    0;
+
+sub SecWarn
+{
+    local($s);
+    if ($_[0] =~ /[\#\s\w_\-\[\]\?\*\.\\\:]+/) {
+	&Log("INSECURE [$_[0]] has illegal characters", "$`($&)$'");
+	$s = "INSECURE WARNING\nFrom: $From_address\n\n$_[0]\nIllegal chars \"$`$'\"\n";
+    }
+    &Warn("Insecure [$_[0]] $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
 }
 
 

@@ -8,17 +8,16 @@ $rcsid  .= "/$libid";
 
 ##################################################################
 ##### Ftp for Local Directory #####
-
-local(*FtpEntry, *FtpEntrySubject, *Ftp);
+local($FtpEntry, %FtpEntry, %FtpEntrySubject);
 local($CurrentDir, $TopDir, $LocalDir, $Mode);
 
 sub Ftp
 {
-    local(*e, $body) = @_;
-    local(*Fld, $withhelp);
+    local(*e, $body) = @_;	# the second for the further extension
+    local(@Fld);
     local(@FtpDirStack) = ('.');
 
-    require 'libutils.pl';
+    require 'libfop.pl';
     
     ### variables
     $ps        = "--PSEUDO FML FTP FOR LOCALDIR";# Process Table
@@ -52,17 +51,13 @@ sub Ftp
 
       $e{'message'} .= "\n>>> $_\n";
 
-      if (! /^\#/o) {
-	  &LogWEnv("Command Syntax Error [$_]", *e);
-	  $withhelp = 1;
-	  next;
-      }
-
+      /^\#/o || ($_ = "# $_");
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
       @Fld = split(/\s+/, $_, 999);
-      $_ = $Fld[1];
-      $0 = "$ps :processing[$_] $FML $LOCKFILE>";
-      print STDERR "Now command is >$_<\n" if $debug;
+      $_   = $Fld[1];
+      $0   = "$ps :processing[$_] $FML $LOCKFILE>";
+
+      print STDERR "Now local Ftp request >$_<\n" if $debug;
 
       # not implemented
       if (/^(ftp|connect)$/io) { 
@@ -81,15 +76,14 @@ sub Ftp
 	  local($ok, $f);
 
 	LS: for $f ("$TopDir/ls-lR.gz", "$TopDir/ls-lR.Z", "$TopDir/ls-lR") {
-	    next LS unless -f $_;
-
+	    next LS unless -f $f;
 	    $ok++;
 	    &Log("ls-lR");
-	    $f = $_;
 	}
 	  
 	  if (! $ok) {
 	      &LogWEnv("Cannot find ls-lR(|.gz|.Z)", *e);
+	      &Log("Ftp(local): please create ls-lR.gz when use ls-lR");
 	      next;
 	  }
 
@@ -156,13 +150,19 @@ sub Ftp
       
       # get one article from the spool, then return it
       if (/^(get|send|getfile)$/io) {
-	  local($f)    = $Fld[2];
-	  local($mode) = $Fld[3] || $Mode;
+	  local($f) = $Fld[2];
+	  local($mode);
+
+	  foreach (@Fld) {
+	      /^(\d+)$/o && ($SLEEPTIME = $1, next);
+	      $mode = $Mode;
+	  }
+
 	  local($s)    = &DocModeLookup("#3$mode");
 	  &Log("Get $f in $LocalDir");
 
-	  if (&InSecureP($f)) {
-	      &Log("Get: Insecure matching: $file");
+	  if (! &SecureP($f)) {
+	      &Log("Get: Insecure matching: $f");
 	      $e{'message'} .= "\tGet: Insecure Variable, STOP!\n";
 	      last;
 	  }
@@ -183,7 +183,9 @@ sub Ftp
 
     $e{'message'} .= "\n\t*** Pseudo Ftpmail Mode Ends. ***\n";
 
-    $FML_EXIT_HOOK .= ' &FtpSendingEntry;';
+    if ($FML_EXIT_HOOK !~ /\&FtpSendingEntry/) {
+	$FML_EXIT_HOOK .= ' &FtpSendingEntry;';
+    }
 }
 
 
@@ -191,6 +193,8 @@ sub FtpSetFtpEntry
 {
     local($dir, $file, $mode) = @_;
     local($total);
+    local($ftpdir) = $FTP_DIR;
+    local($tmpf)   = "$TMP_DIR/Ftp$$:$FtpEntry";
 
     printf STDERR "FtpEntry %-15s => %s\n", $dir, $file if $debug;
 
@@ -198,18 +202,13 @@ sub FtpSetFtpEntry
     $MAIL_LENGTH_LIMIT = $MAIL_LENGTH_LIMIT || 1000;
     $FtpEntry++; # for temporary file identification
 
-    local($tmpf) = "$TMP_DIR/Ftp$$:$FtpEntry";
+    $mode || ($mode = -T "$dir/$file" ? 'mp' : 'uu');
 
-    if ($mode) {
-	;
-    }
-    else {
-	$mode = -T "$dir/$file" ? 'uf' : 'uu';
-    }
+    chdir $DIR || &Log("Can't chdir to $DIR");
 
-    chdir $DIR        || &Log("Can't chdir to $DIR");
+    $ftpdir =~ s#$DIR/##g;
+    $total  = &DraftGenerate($tmpf, $mode, "$ftpdir/$dir/$file", "$ftpdir/$dir/$file");
 
-    $total = &DraftGenerate($tmpf, $mode, "$dir/$file", "$dir/$file");
     $FtpEntrySubject{"$FtpEntry:$total"} = "Ftp(local) $dir/$file";
     $FtpEntry{"$FtpEntry:$total"}        = $tmpf; 
 
@@ -228,7 +227,7 @@ sub FtpDirStack
     }
     
     if ($LocalDir =~ /\.\w/o || $LocalDir =~ /\`/o){ 
-	&Log("LocalDir $`($&)$'");
+	&Log("ERROR: LocalDir $`($&)$'");
 	return 0;
     }
     
@@ -236,8 +235,8 @@ sub FtpDirStack
 	if ($_ eq '..') {
 	    pop @FtpDirStack;
 	}
-	elsif ($_ =~ /\.\S/) {	# paranoia?
-	    &Log("Parts of LocalDir $`($&)$'");
+	elsif ($_ =~ /(\.\S)/) {	# paranoia?
+	    &Log("ERROR: LocalDir $`($&)$'");
 	    return 0;
 	}
 	else {

@@ -33,39 +33,9 @@ require 'libfop.pl';		# file operations
 # a little configuration before the action
 umask (077);			# rw-------
 
-$Envelope{'h:From:'} = $From_address  = "MSend R4";
-$Envelope{'h:Reply-To:'} = $MAIL_LIST;	# for reply for matomeokuri
-
-$DEFAULT_WHEN   = 0;		# Default synchronous mode for 1153
-$Hour = (localtime(time))[2];	# Only this differ from &GetTime in fml.pl
-$Hour = (0 == $Hour) ? 24 : $Hour;
-
-$MSendTouchFile = "$TMP_DIR/msend_last_touch";
-
-### SET DEFAULT MODE
-if ($USE_RFC1153_DIGEST || $USE_RFC1153) {# 1153 digest;
-    # the standard for 1153-counter, but required?
-    # anyway comment out below 95/6/27
-    #    $DEFAULT_WHEN    = $DEFAULT_WHEN || 3;
-    $MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'rfc1153';%;
-}
-
-if ($USE_RFC934) {	# 934 
-    $MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'rfc934';%;
-}
-
-# DEFAULT ACTION is not 'mget'. 
-$MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'gz';%;
-
 chdir $DIR || die "Can't chdir to $DIR\n";
 
-# Default , $DIR/MSendrc and about 50k
-if (! defined($MSEND_RC))          { $MSEND_RC = "$DIR/MSendrc";}
-if (! defined($MAIL_LENGTH_LIMIT)) { $MAIL_LENGTH_LIMIT = 1000;}
-
-# newsyslog
-@NEWSYSLOG_FILES = ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak")
-    unless @NEWSYSLOG_FILES;
+&MSendInit;
 
 ########## PROCESS GO! ##########
 if ($0 eq __FILE__) {
@@ -267,13 +237,13 @@ sub GetDistributeList
 
       # Matomeokuri 
       if ($opt =~ /\sm=(\d+)\s/i) {
-	  $When{$rcpt}  = $DEFAULT_WHEN || $1;
+	  $When{$rcpt}  = $DefaultWhen || $1;
 	  local($d, $m) = &ModeLookup($1.$2);
 	  $mode{$rcpt}  = $m;
 	  # $mode{$rcpt} = 'gz';
       }
       elsif ($opt =~ /\sm=(\d+)([A-Za-z]+)\s/i) {
-	  $When{$rcpt}  = $DEFAULT_WHEN || $1;
+	  $When{$rcpt}  = $DefaultWhen || $1;
 	  local($d, $m) = &ModeLookup($1.$2);
 	  $mode{$rcpt}  = $m;
       }
@@ -318,7 +288,7 @@ sub MSending
 {
     local($left, $right, $PACK_P, @to) = @_;
     local($to) = join(" ", @to);
-    local(@filelist);
+    local(@filelist, $total);
 
     $0 = "--MSending to $to $ML_FN <$FML $LOCKFILE>";
 
@@ -341,18 +311,18 @@ sub MSending
     $0 = "--MSending to $to $ML_FN ends <$FML $LOCKFILE>";
 
     # matome.gz -> matome.ish in LhaAndEncode2Ish().
-    local($TOTAL, $tmp, $mode, $name, $s);
+    local($total, $tmp, $mode, $name, $s);
     $tmp   = "$TMP_DIR/MSend$$";
     $mode = $mode{$to[0]};
-    $TOTAL = &DraftGenerate($tmp, $mode, "matome.gz", @filelist);
+    $total = &DraftGenerate($tmp, $mode, "matome.gz", @filelist);
 
     # Make a subject here since mode::constructor in DraftGenerate. 
     $s    = ($_cf{'subject', $mode} || "Matomete Send");
     $name = &DocModeLookup("#3$mode");
     $s   .= " [$name]";
 
-    if ($TOTAL) {
-	&SendingBackInOrder($tmp, $TOTAL, $s, ($SLEEPTIME || 3), @to);
+    if ($total) {
+	&SendingBackInOrder($tmp, $total, $s, ($SLEEPTIME || 3), @to);
 	$0 = "--MSending to $to $ML_FN ends <$FML $LOCKFILE>";
     }
 }
@@ -570,6 +540,41 @@ sub MSendNotifyP {
 	(time - (stat($SEQUENCE_FILE))[9]) > (24 * 3600);
 }
 
+
+sub MSendInit
+{
+    $Envelope{'h:From:'}     = $From_address  = "MSend R4";
+    $Envelope{'h:Reply-To:'} = $MAIL_LIST;	# for reply for matomeokuri
+
+    $DefaultWhen   = 0;		# Default synchronous mode for 1153
+    $Hour = (localtime(time))[2];	# Only this differ from &GetTime in fml.pl
+    $Hour = (0 == $Hour) ? 24 : $Hour;
+
+    $MSendTouchFile = "$TMP_DIR/msend_last_touch";
+
+    ### SET DEFAULT MODE
+    if ($USE_RFC1153_DIGEST || $USE_RFC1153) {# 1153 digest;
+	# the standard for 1153-counter, but required?
+	# anyway comment out below 95/6/27
+	#    $DefaultWhen    = $DefaultWhen || 3;
+	$MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'rfc1153';%;
+    }
+
+    if ($USE_RFC934) {	# 934 
+	$MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'rfc934';%;
+    }
+
+    # DEFAULT ACTION is not 'mget'. 
+    $MSEND_OPT_HOOK .= q%$MSendOpt{''} = 'gz';%;
+
+    if (-f "$DIR/MSendrc") {
+	&use('utils');
+	&Move("$DIR/MSendrc", $MSEND_RC);
+	&Link($MSEND_RC, "$DIR/MSendrc");
+    }
+}
+
+
 ##################################################################
 #:include: fml.pl
 #:sub GetTime InitConfig Logging Log Append2 Warn eval Opt Flock Funlock
@@ -605,13 +610,6 @@ sub InitConfig
 {
     # a little configuration before the action
     umask (077);			# rw-------
-    $Envelope{'mode:uip'}  	= '';	# default UserInterfaceProgram is nil.
-    $Envelope{'req:guide'} 	= 0;	# not member && guide request only
-
-    &SetCommandLineOptions;
-    if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
-
-    &GetTime;
 
     ### Against the future loop possibility
     if (&AddressMatch($MAIL_LIST, $MAINTAINER)) {
@@ -619,53 +617,30 @@ sub InitConfig
 	exit 0;
     }
 
-    ### Set Defaults
-    $_cf{'perlversion'} = 5 if ($] =~ /5\.\d\d\d/);
-    $TMP_DIR = ( $TMP_DIR || "./tmp" ); # backward compatible
-    $VAR_DIR    = $VAR_DIR    || "./var"; # LOG is /var/log (4.4BSD)
-    $VARLOG_DIR = $VARLOG_DIR || "./var/log"; # absolute for ftpmail
-    $LOG_MESSAGE_ID = $LOG_MESSAGE_ID || "$VARLOG_DIR/log.msgid";
-    $SECURITY_LEVEL = ($SECURITY_LEVEL || 2); # Security (default=2 [1.4d])
-    $Envelope{'mci:mailer'} = $Envelope{'mci:mailer'} || 'ipc'; # use IPC(default)
+    &SetCommandLineOptions;	        # Options
+    if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
+
+    $_cf{'perlversion'} = 5 if ($] =~ /5\.\d\d\d/); # Set Defaults
+
+    &GetTime;			        # Time
+
+    # COMPATIBILITY
+    if ($COMPAT_FML15) { &use('fixenv'); &use('compat');}
     
-    # Exceptional procedure KEYWORD to detect before &CheckMember
-    # CHECK KEYWORDS. Default is 'guide'
-    $GUIDE_KEYWORD  = $GUIDE_KEYWORD  || 'guide'; 
-
-    # CHECK CHADDR_KEYWORDS. Default ...
-    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
-
-    # message-id: loop check
-    $CHECK_MESSAGE_ID = 1;
-
-    ### Backward Compatibility
-    push(@ARCHIVE_DIR, @StoredSpool_DIR); # FIX INCLUDE PATH
-    push(@INC, $LIBMIMEDIR) if $LIBMIMEDIR;
-    $SPOOL_DIR =~ s/$DIR\///;
-    ($REMORE_AUTH||$REMOTE_AUTH) && $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD++;
-    &use('compat') if $COMPAT_FML15;
-    
-    ### Initialize the ML server, spool and log files.  
-    ### moved from Distribute and codes are added to check log files
-    for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR) { 
+    ### Initialize DIR's and FILE's of the ML server
+    for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR, $VARRUN_DIR) { 
 	-d $_ || mkdir($_, 0700);
     }
-
     for ($ACTIVE_LIST, $LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
 	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
 	-f $_ || &Touch($_);	
     }
 
     # Turn Over log file (against too big)
-    if ((stat($LOG_MESSAGE_ID))[7] > 25*100) { # once about 100 mails.
+    if ((stat($LOG_MESSAGE_ID))[7] > 25*100) { # once per about 100 mails.
 	&use('newsyslog');
 	&NewSyslog'TurnOver($LOG_MESSAGE_ID);#';
     }
-
-    ### HELO in SMTP ($s in /etc/sendmail.cf)
-    # Define for $s in config.ph by Configure since 1.3.1.23 
-    # 95/09/14, 95/10/1 fukachan@phys.titech.ac.jp
-    if (! $Envelope{'macro:s'}) { &use('utils'); &Define_s;}
 
     ### misc 
     $FML .= "[".substr($MAIL_LIST, 0, 8)."]"; # For tracing Process Table
@@ -746,6 +721,8 @@ sub Log {
 sub Append2
 {
     local($s, $f, $w, $nor) = @_;
+    local(@info) = caller;
+    print STDERR "Append2: @info \n" if $debug_caller && (!-f $f);
 
     if (! open(APP, $w ? "> $f": ">> $f")) {
 	local($r) = -f $f ? "cannot open $f" : "$f not exists";
@@ -753,14 +730,14 @@ sub Append2
 	return $NULL;
     }
     select(APP); $| = 1; select(STDOUT);
-    print APP $s . ($nonl ? "" : "\n") if $s;
+    print APP "$s\n" if $s;
     close(APP);
 
     1;
 }
 
 
-sub Touch  { &Append2("", @_, 1);}
+sub Touch  { &Append2("", $_[0]);}
 
 
 sub Write2 { &Append2(@_, 1);}
@@ -887,10 +864,6 @@ sub Funlock {
     close(LOCK);
     flock(LOCK, $LOCK_UN);
 }
-
-1;
-
-
 
 
 

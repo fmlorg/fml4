@@ -386,7 +386,7 @@ sub mget3_SearchInArchive
       $fn = $target;
       
       ### SECURITY ROUTINES, STOP!
-      if (&InSecureP($fn)) {
+      if (! &SecureP($fn)) {
 	  &Log("SECURITY_LEVEL: $SECURITY_LEVEL");
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  $e{'message'}   .= "Execuse me. Please check your request.\n";
@@ -395,7 +395,7 @@ sub mget3_SearchInArchive
 	  return 0;
       }
 
-      if (($SECURITY_LEVEL > 1) && (&MetaP($fn) || &InSecureP($fn))) {
+      if ($Permit{'ShellMatchSearch'} && (! &SecureP($fn))) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  $e{'message'}   .= "Execuse me. Please check your request.\n";
 	  $e{'message'}   .= "  PROCESS STOPS FOR SECURITY REASON\n\n";
@@ -526,7 +526,7 @@ sub mget3_V1search
     print STDERR "MGET V1 Request [$f]\n" if $debug;
 
     # Check Again and Again;
-    &InSecureP($f) && (return 0);
+    &SecureP($f) || (return 0);
 
     # old type mget. Not using ARCHIVE_DIR;
     foreach (<./$SPOOL_DIR/$f>) {

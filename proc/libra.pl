@@ -91,7 +91,7 @@ sub AdminCommand
     ### initialize
     &AdminModeInit;		
 
-    if (&InSecureP(" $cmd @opt ") ) {
+    if (! &SecureP(" $cmd @opt ") ) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  $e{'message'}   .= "Execuse me. Please check your request.\n";
 	  $e{'message'}   .= "  PROCESS STOPS FOR SECURITY REASON\n\n";
