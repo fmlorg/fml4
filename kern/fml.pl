@@ -915,12 +915,13 @@ sub CheckCurrentProc
 {
     local(*e, $ccp_mode) = @_;
 
-    # connection info
+    ### SubSection: Log socket connection info
     &eval("&use('kernsubr2'); &GetPeerInfo;") if $LOG_CONNECTION;
 
-    ##### SubSection: Check Body Contents (For Command Mode)
+    ### SubSection: Check Body Contents (For Command Mode)
     local($limit, $p, $buf, $boundary, $nclines, $cc);
 
+    ### SubSection: MIME info
     # MIME skip mode; against automatic-MIME-encapsulated fool MUA
     if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
 	$e{'h:content-type:'} =~ /boundary=\s*(\S+)/i) {
@@ -933,11 +934,13 @@ sub CheckCurrentProc
 	&Log("Content-Type: $e{'h:content-type:'}");
     }
 
-    # Check the range to scan
+    ### SubSection: Check command in mail body
+    # the range to scan
     $limit =  $GUIDE_CHECK_LIMIT > $COMMAND_CHECK_LIMIT ? 
 	$GUIDE_CHECK_LIMIT  : $COMMAND_CHECK_LIMIT;
 
-    # dot-qmail(5) ~alias/.uja-default emulates uja-help@domain ("-> #help")
+    ## QMAIL command hook
+    ## dot-qmail(5) ~alias/.uja-default emulates uja-help@domain ("-> #help")
     if ($USE_DOT_QMAIL_EXT && 
 	(!&AddressMatch($MAIL_LIST, $ENV{'RECIPIENT'}))) { 
 	&Log("sets in dot-qmail-ext") if $debug_qmail;
@@ -1046,13 +1049,11 @@ sub CheckCurrentProc
     $e{'size'}    = $bufsiz;
     $e{'h:Lines:'} = $e{'nlines'};
 
-    ##### SubSection: special trap
+    ### SubSection: special trap
     return 0 if $CheckCurrentProcUpperPartOnly;
     return 0 if $ccp_mode eq 'upper_part_only';
 
-    ##### SubSection: misc
-
-    ### MailBody Size
+    ### SubSection: MailBody Size
     if ($e{'trap:mail_size_overflow'}) {
 	&use('error');
 	&NotifyMailSizeOverFlow(*e);
@@ -1101,10 +1102,10 @@ sub CheckCurrentProc
 	}
     }
 
-
-    ### WE SHOULD REJCECT "CANNOT IDENTIFIED AS PERSONAL" ADDRESSES;
-    ###   In addition, we check another atack possibility;
-    ###      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
+    ### SubSection: Access Control based on address
+    ## WE SHOULD REJCECT "CANNOT IDENTIFIED AS PERSONAL" ADDRESSES;
+    ##   In addition, we check another atack possibility;
+    ##      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
     if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@(\S+)/i) {
 	local($addr, $domain) = ($1, $2);
 	&Log("reject mail from $addr\@$domain");
@@ -1138,7 +1139,7 @@ sub CheckCurrentProc
 	}
     }
 
-    ### security level
+    ## security level (?)
     while (($k, $v) = each %SEVERE_ADDR_CHECK_DOMAINS) {
 	print STDERR "/$k/ && ADDR_CHECK_MAX += $v\n" if $debug; 
 	($From_address =~ /$k/) && ($ADDR_CHECK_MAX += $v);
@@ -1158,12 +1159,13 @@ sub CheckCurrentProc
 	}
     }
 
+    ### SubSection: misc
     ### For CommandMode Check(see the main routine in this flie)
     $e{'trap:rcpt_fields'}  = $e{'h:to:'} || $e{'h:apparently-to:'};
     $e{'trap:rcpt_fields'} .= ", $e{'h:Cc:'}, ";
     $e{'trap:rcpt_fields'}  =~ s/\n(\s+)/$1/g;
 
-    ### SUBJECT: GUIDE SYNTAX 
+    # SUBJECT: GUIDE SYNTAX 
     if ($USE_SUBJECT_AS_COMMANDS && $e{'h:Subject:'}) {
 	local($_) = $e{'h:Subject:'};
 	s/^\s*//;
@@ -1179,13 +1181,14 @@ sub CheckCurrentProc
     # ? for --distribute, here and again in &MLMemberCheck; 
     &AdjustActiveAndMemberLists;
 
-    ### DEBUG 
+    ### SubSection: debug info dump
     if ($debug) { &eval(&FieldsDebug, 'FieldsDebug');}
 
-    ###### LOOP CHECK PHASE 1: Message-Id
+    ### SubSection: Mail Loop Check
+    ## LOOP CHECK PHASE 1: Message-Id
     if ($CHECK_MESSAGE_ID && &DupMessageIdP) { exit 0;}
 
-    ###### LOOP CHECK PHASE 2
+    ## LOOP CHECK PHASE 2
     # now before flock();
     if ((! $NOT_USE_UNIX_FROM_LOOP_CHECK) && 
 	&AddressMatch($UnixFrom, $MAINTAINER)) {
@@ -1195,11 +1198,12 @@ sub CheckCurrentProc
 	exit 0;
     }
 
-    ### Address Test Mode; (Become Test Mode)
+    ### SubSection: Address Test Mode; (Become Test Mode)
     if ($_cf{"opt:b"} eq 't') { 
 	$DO_NOTHING = 1; &Log("Address Test Mode:Do nothing");
     } 
 
+    ### SubSection: Crosspost emulation
     # Check crosspost in To: and Cc:
     if ($USE_CROSSPOST) { &use('crosspost');}
 }
