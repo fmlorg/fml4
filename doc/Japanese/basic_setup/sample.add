@@ -1,0 +1,7 @@
+% makefml add elena rudo@test.fml.org
+DO "add rudo@test.fml.org" for elena mailing list.
+done.
+% cat /var/spool/ml/elena/actives
+rudo@test.fml.org
+% cat /var/spool/ml/elena/members
+rudo@test.fml.org

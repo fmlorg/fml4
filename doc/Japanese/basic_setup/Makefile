@@ -20,6 +20,7 @@ TUTORIAL_BASIC_SAMPLES += sample.include
 TUTORIAL_BASIC_SAMPLES += sample.include-ctl
 TUTORIAL_BASIC_SAMPLES += sample.ls_elena
 TUTORIAL_BASIC_SAMPLES += sample.ls_fml
+TUTORIAL_BASIC_SAMPLES += sample.add
 
 # install index.html
 TUTORIAL_BASIC_SAMPLES += index.html

@@ -36,31 +36,37 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	概要:
-	インストール手順の簡単なまとめ
-	(以下pathは適当に読みかえてください)
+	ＭＬの作り方の概要: 例は elena ＭＬです。pathは適当に読みかえてください。
+	<P>
+	注意: このページは fml をインストールしたマシンの上で行なう操作方法です。
+	<BR>
+	(GUIについては<A HREF="../GUI/">../GUI</A>をみてね)
+	<BR>
 
 	<UL>
-	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
-		にインストールする。もしくはすでにされている
+	<LI> (前提条件: MTA (sendmail,postfix,qmail,...) の設定はすでに終っているはず)
 
-	<LI> elena MLを作ったら
-		(ディレクトリは 
+	<LI> <A HREF="sample.ls_fml">/usr/local/fml</A>
+		に fml をインストールする
+
+	<LI> elena MLを作る
+		(作られるディレクトリ:
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
 
-	<LI> <A HREF="howto-customize.html">
-		/var/spool/ml/elena/config.ph の設定をする
-		</A>	
-
-	<LI> <A HREF="sample.aliases">/etc/aliases</A>
-		に設定/設定したことを確認する(MTA依存)
+	<LI> <A HREF="sample.aliases">/var/spool/ml/elena/aliases</A>
+		を /etc/aliases に付け加える(ファイルの編集)。
+		編集したら newaliases などを忘れずに
+		(update の手順は使っているMTAに依存します)。
 		
+	<LI> <A HREF="add.html">メンバーを登録</A>する。
+
 	</UL>
-	でインストールは終りです。
-	カスタマイズは
-	<A HREF="files.html">設定ファイル</A>
-	config.phで行ないます。
+	<A HREF="howto-customize.html">カスタマイズ</A>
+	は設定ファイル (/var/spool/ml/elena/config.ph)で行ないます。
+	ＭＬごとに異なる設定です。	
+	<BR>
+	設定ファイルのメインテナンス方法については松竹梅(?)あります。
 
 	<HR>
 	<UL>
@@ -72,7 +78,6 @@
 		<A HREF="../../INSTALL/index.html">
 		(詳細)	
 		</A>
-
 		　
 		<A HREF="installer-QandA.html">
 		[Q and A]
@@ -84,11 +89,6 @@
 		</A>
 
 		<LI>
-		<A HREF="../../UPGRADE-3.0/index.html">
-		注: fml 2.x から 3.0 へのアップグレード
-		</A>
-
-		<LI>
 		<A HREF=MTAspecific.html>
 		MTA 別の注意 
 		</A>
@@ -96,6 +96,11 @@
 		<LI>
 		<A HREF=server_movement.html>
 		fmlを別の(新)サーバへ移動させる方法
+		</A>
+
+		<LI>
+		<A HREF="../../UPGRADE-3.0/index.html">
+		注: fml 2.x から 3.0 へのアップグレード
 		</A>
 	</UL>
 
@@ -126,13 +131,19 @@
 		</UL>
 
 		<LI>
+		<A HREF="files.html">設定ファイル</A>の読み込む順と
+		ＭＬ共通の設定ファイルについて		
+
+		<LI>
 		<A HREF="../../INSTALL/index.html#makefml-config">
 		設定メニュー(makefml config)の使い方
 		</A>
 		<BR>
 		注: CGIでは日本語のメニューです。
 		<BR>
-		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義するとその文字コードで表示されます。<A HREF=../makefml/index.html>例:</A>
+		注: CUIでも環境変数MAKEFML_LANGにeucなどと定義すると
+		その文字コードで表示されます。
+		<A HREF=../makefml/index.html>例:</A>
 		<BR>
 		<A HREF="../../INSTALL/index.html#cf-and-config.ph">
 		設定ファイルについて(cfとconfig.phの違いは?)
