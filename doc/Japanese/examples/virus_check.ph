@@ -72,5 +72,6 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #
 #   Index server だと uuencode されていることがあるそうなので
 #   uuencode も一度分解してから検査するモード
+#   uuencode, base64, quoted-printable, binhex, ... 
 
 1;
