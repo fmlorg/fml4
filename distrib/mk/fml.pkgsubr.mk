@@ -18,3 +18,22 @@ extract:
 	@ if [ ! -d work ] ; then mkdir work ; fi
 	@ ( cd work; $(TAR) zxvf ../${DISTNAME} )
 .endif
+
+
+.if ${PERL_MODULE} == "yes"
+compile:
+	(cd work/${COMPILE_DIR}; perl Makefile.PL; make)
+
+install:
+	(cd work/${COMPILE_DIR}; make install)
+
+clean:
+	rm -fr work ${DISTNAME}
+.else
+compile:
+
+install:
+
+clean:	
+.endif
+
