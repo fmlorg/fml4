@@ -3,7 +3,7 @@
 # Please obey GNU Public Licence(see ./COPYING)
 
 $libid   = q$Id$;
-($libid) = ($libid =~ /Id: *(.*) *\d\d\d\d\/\d+\/\d+.*/); 
+($libid) = ($libid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid  .= "/$libid";
 
 &FTPMAIL if ($LOAD_LIBRARY eq 'libftpmail.pl') || (!$MASTER_FML);
@@ -42,9 +42,9 @@ sub FTPMAIL
     local(@dir_stack) = ('.');
 
   GivenCommands: foreach (split(/\n/, $MailBody, 999)) {
-      next GivenCommands if(/^$/o); # skip null line
+      next GivenCommands if (/^$/o); # skip null line
 
-      if(! /^#/o) {
+      if (! /^#/o) {
 	 $_cf{'return'} .= "\n>>> $_\nCommand Syntax Error\n";
 	 $_cf{'return', 'withhelp'} = 1;
 	 &Logging("Command Syntax Error");
@@ -56,31 +56,33 @@ sub FTPMAIL
       $_cf{'return'} .= "\n>>> $_\n";
       $_ = $Fld[1];
       $0 = "--PSEUDO FTPMAIL COMAPTIBLE Mode processing $_: $FML $LOCKFILE>";
-      print STDERR "Now command is >$_<\n" if($debug);
+      print STDERR "Now command is >$_<\n" if ($debug);
 
       # not implemented
-      if(/^ftp$/io || /^connect$/io) { 
+      if (/^ftp$/io || /^connect$/io) { 
 	  $_cf{'return'} .= "Sorry. ftp or connect is not implemented\n";	  
 	  next GivenCommands;
       }
 
       # end of requests
-      if(/^quit$/io || /^exit$/io) { 
+      if (/^quit$/io || /^exit$/io) { 
 	  $_cf{'return'} .= "exit of current process\n";
 	  last GivenCommands;
       }
 
-      if(/^ls$/io || /^ls-lR$/io) { 
+      if (/^ls$/io || /^ls-lR$/io) { 
 	  local($s) = "$FTPMAIL_SUBJECT ";
-	  if(-f "$TOPDIR/ls-lR.gz") {
+	  if (-f "$TOPDIR/ls-lR.gz") {
 	      &Log("ls-lR.gz");
 	      $f = "ls-lR.gz";
 	      $s .= "[ls-lR.gz]";
-	  }elsif(-f "$TOPDIR/ls-lR.Z") {
+	  }
+	  elsif (-f "$TOPDIR/ls-lR.Z") {
 	      &Log("ls-lR.Z");
 	      $f = "ls-lR.Z";
 	      $s .= "[ls-lR.Z]";
-	  }else {
+	  }
+	  else {
 	      &Log("FAIL $TOPDIR/ls-lR.gz or .Z");
 	      $_cf{'return'} .= "Fail to Send Back ls-lR.gz or .Z\n";
 	      next GivenCommands;
@@ -92,15 +94,16 @@ sub FTPMAIL
       }
 
       # change the current directory
-      if(/^cd$/io || /^chdir$/io) { 
+      if (/^cd$/io || /^chdir$/io) { 
 	  $LOCAL_DIR = $Fld[2];
 	  &Log("Try chdir $LOCAL_DIR in ".join("/", @dir_stack));
 
-	  if(&dir_stack(*dir_stack, $LOCAL_DIR)) {
+	  if (&dir_stack(*dir_stack, $LOCAL_DIR)) {
 	      $LOCAL_DIR = join("/", @dir_stack);
 	      $CURRENT_DIR = $TOPDIR . "/". $LOCAL_DIR;
 	      print STDERR "CURRENT DIR = $CURRENT_DIR\n";
-	  }else {
+	  }
+	  else {
 	      &Logging("Cd: Insecure matching: $CURRENT_DIR");
 	      $_cf{'return'} .= "Cd: Insecure directory changes\n";
 	      last GivenCommands;
@@ -118,7 +121,7 @@ sub FTPMAIL
       }
 
       # help for usage of commands
-      if(/^help$/io) {		# help or HELP
+      if (/^help$/io) {		# help or HELP
 	  &SendFile($to, "Help $ML_FN", "$TOPDIR/help");
 	  &Logging("FTPMAIL Help");
 	  $_cf{'return'} .= "Sent back [help] file to ". $to ."\n";
@@ -126,7 +129,7 @@ sub FTPMAIL
       }
       
       # return address change
-      if(/^mail$/io || /^reply\-to$/) {		# help or HELP
+      if (/^mail$/io || /^reply\-to$/) {		# help or HELP
 	  $to = $Fld[2];
 	  $_cf{'return'} .= "Return address change to ". $to ."\n";
 	  &Logging("RECIPIENT CHANGE: ". $From_address ."-> ". $to);
@@ -134,12 +137,12 @@ sub FTPMAIL
       }
       
       # get one article from the spool, then return it
-      if(/^get$/io || /^send$/io || /^getfile$/io) {
+      if (/^get$/io || /^send$/io || /^getfile$/io) {
 	  local($f) = local($file) = $Fld[2];
 	  local($s) = "$FTPMAIL_SUBJECT ";
 	  &Log("Get $f in $LOCAL_DIR");
 
-	  if(&InSecureP($f)) {
+	  if (&InSecureP($f)) {
 	      &Logging("Get: Insecure matching: $file");
 	      $_cf{'return'} .= "Get: Insecure Variable, exit\n";
 	      last GivenCommands;
@@ -162,8 +165,8 @@ sub FTPMAIL
     $_cf{'return'} .= "\nPseudo Ftpmail Mode Ends.\n";
 
     # return "ERROR LIST"
-    if($_cf{'return'}) {
-	if($_cf{'return', 'withhelp'}) {
+    if ($_cf{'return'}) {
+	if ($_cf{'return', 'withhelp'}) {
 	    $_cf{'return'} .= "\n\n\tHELP FILE\n\n".&ReadFile($FTPMAIL_HELP);
 	}
 
@@ -182,18 +185,20 @@ sub  dir_stack
     print STDERR "dir_stack $LOCAL_DIR\n" if $debug;    
     print STDERR "Stack: ".join("/",@dir_stack)."\n" if $debug;
     
-    if($LOCAL_DIR =~ /\.\w/o || $LOCAL_DIR =~ /\`/o){ 
+    if ($LOCAL_DIR =~ /\.\w/o || $LOCAL_DIR =~ /\`/o){ 
 	&Log("LOCAL_DIR $`($&)$'");
 	return 0;
     }
     
     foreach(split(/\//, $LOCAL_DIR, 9999)) {
-	if($_ eq '..') {
+	if ($_ eq '..') {
 	    pop @dir_stack;
-	}elsif($_ =~ /\.\S/) {	# paranoia?
+	}
+	elsif ($_ =~ /\.\S/) {	# paranoia?
 	    &Log("Parts of LOCAL_DIR $`($&)$'");
 	    return 0;
-	}else {
+	}
+	else {
 	    push(@dir_stack, $_);
 	}
 	
@@ -209,19 +214,21 @@ sub SendBack
     local($tmpf)    = "$TMP_DIR/ftpmail$$";
     local($tmpfile) = "$DIR/$TMP_DIR/ftpmail$$";
 
-    if($_cf{'SendBack', 'plaintext'}) {
+    if ($_cf{'SendBack', 'plaintext'}) {
 	system "cd $dir; $CP $f $tmpfile";
-    }else {
+    }
+    else {
 	system "cd $dir; $UUENCODE $f $f > $tmpfile";
     }
 
     local($lines)   = &WC($tmpfile);
     local($TOTAL)   = int($lines/$MAIL_LENGTH_LIMIT + 1);
 
-    if(($TOTAL > 1) && 0 == &SplitFiles($tmpfile, $lines, $TOTAL)){
+    if (($TOTAL > 1) && 0 == &SplitFiles($tmpfile, $lines, $TOTAL)){
 	&Log("Cannot split $returnfile");
 	return 0;
-    }elsif(1 == $TOTAL) {	# tricky
+    }
+    elsif (1 == $TOTAL) {	# tricky
 	rename($tmpfile, "$tmpfile.1"); 
     }
 
@@ -231,11 +238,11 @@ sub SendBack
 }
 
 # may be a DUPLICATED SUBROLUTINE
-if(! defined(&InSecureP)) {
+if (! defined(&InSecureP)) {
     sub InSecureP
     {
 	local($ID) = @_;
-	if($ID =~ /..\//o || $ID =~ /\`/o){ 
+	if ($ID =~ /..\//o || $ID =~ /\`/o){ 
 	    &Logging("Insecure matching: $ID  -> $`($&)$'");
 	    &Sendmail($MAINTAINER, "Insecure $ID from $From_address. $ML_FN");
 	    return 1;
@@ -243,7 +250,7 @@ if(! defined(&InSecureP)) {
     }
 }
 
-if(! defined(&ReadFile)) {
+if (! defined(&ReadFile)) {
 sub ReadFile
 {
     local($f) = @_;
