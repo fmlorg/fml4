@@ -30,7 +30,17 @@ sub DataBases::Execute
 	&LDAP::Connect($mib);
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
-	if ($mib->{'ACTION'} eq 'get_active_list' ||
+	if ($mib->{'ACTION'} eq 'get_status') {
+	    &Log("not yet implemented");
+	    # &GetStatus($mib, $mib->{'_address'});
+	}
+	elsif ($mib->{'ACTION'} eq 'num_active') {
+	    &Log("not yet implemented");
+	}
+	elsif ($mib->{'ACTION'} eq 'num_member') {
+	    &Log("not yet implemented");
+	}
+	elsif ($mib->{'ACTION'} eq 'get_active_list' ||
 	    $mib->{'ACTION'} eq 'dump_active_list') {
 	    &GetActiveList($mib);
 	}
