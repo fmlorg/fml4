@@ -177,7 +177,25 @@ dist-encrypt は de で代用できます。
 	makefml de.pgpk
 
 
-.S	admin コマンドはまだつくってないす
+.S	PGP bug (from BUGTRAQ@SECURITYFOCUS.COM)
+
+Message-ID:  <Pine.NEB.4.10.10008241020110.29902-100000@setec.org>
+Message-ID:  <Pine.LNX.4.21.0008260958320.983-100000@hero.lannet.com.au>
+
+だいじょうぶ
+
+PGP-2.6.3ia UNIX    not vulnerable - doesn't support V4 signatures
+PGP-5.0i UNIX       not vulnerable
+GnuPG-1.0.1 UNIX    not vulnerable
+
+だめ
+
+PGP-5.5.3i WINDOWS  VULNERABLE
+PGP-6.5.1i WINDOWS  VULNERABLE
+PGP-6.5.1i for UNIX VULNERABLE
+
+.url http://senderek.de/security/key-experiments.html
+
 
 
 .# $Id$
