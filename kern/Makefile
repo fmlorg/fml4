@@ -209,8 +209,8 @@ v3:
 	@ wc tmp/VARLIST
 
 sync:
-	scp -v -p /tmp/distrib/src/*.pl eriko:~/.fml
-	scp -v -p /tmp/distrib/src/*.pl iris:/usr/local/mail2fax/fml
+	# scp -v -p /var/tmp/distrib/src/*.pl eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-curent/src/*pl eriko:~/.fml
 
 test:
 	(bin/emumail.pl; echo test )|perl fml.pl $(PWD) $(PWD)/proc
