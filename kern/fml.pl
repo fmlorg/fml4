@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.131 2001/05/11 17:15:21 fukachan Exp $
+# $FML: fml.pl,v 2.132 2001/06/14 13:39:49 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -455,6 +455,7 @@ sub InitConfig
     # fml 4.0 modules
     push(@INC, "$ExecDir/module");
     push(@INC, "$ExecDir/module/CPAN");
+    push(@INC, "$ExecDir/module/Japanese");
     push(@INC, "$ExecDir/module/fml-devel");
 
     # a little configuration before the action
