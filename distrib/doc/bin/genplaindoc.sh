@@ -1,5 +1,7 @@
 #!/bin/sh
 
+exit 1
+
 # formatter
 # -Z address
 # -S stylesheet
