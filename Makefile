@@ -160,7 +160,6 @@ htmldoc: doc/smm/op.wix
 search:
 	@ echo ""
 	@ sh .release/search_doc_generator
-	@ (cd /usr/local/SSE; make)
 
 message: 
 
@@ -276,7 +275,7 @@ asuka:
 	(chdir sbin; ( echo put makefml; echo quit;) | ftp -ivd asuka)
 
 diff:
-	fvs diff * proc/* libexec/* 
+	fvs diff * proc/* libexec/* sbin/makefml 
 
 ci:
 	fvs ci * proc/* libexec/* 
@@ -285,7 +284,7 @@ docdiff:
 	fvs diff doc/ri/*wix doc/smm/*wix
 
 scan:
-	fvs scan * proc/* libexec/* doc/ri/*wix doc/smm/*wix |\
+	fvs scan * proc/* libexec/* sbin/makefml doc/ri/*wix doc/smm/*wix |\
 	tee /tmp/_scan_
 	@ grep Modified /tmp/_scan_ || echo OK
 	@ rm /tmp/_scan_
