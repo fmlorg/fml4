@@ -360,7 +360,7 @@ FORCE_COMMAND_REPLY_TO:
 
 # Subject template in "mget" reply. 
 # automatic substitute is done before send the reply; For example, 
-# Subject: resutl for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
+# Subject: result for mget [last:3 tar + gzip] (1/1) (Elena Lolabrigita ML)
 #
 #   _DOC_MODE_   <=>    [last:10 tar + gzip]
 #   _PART_       <=>    (1/4)
