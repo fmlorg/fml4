@@ -65,7 +65,7 @@ Connected to ftp.iij.ad.jp.
 %
 
 ○ ソースを展開する。directoryができる。
-% gunzip -c fml-current.tar.gz
+% gunzip fml-current.tar.gz
 % tar xf fml-current.tar
 
 ○ 作られたdirectoryに移る(名前はfml-バージョン-snapshot番号のようになる)
