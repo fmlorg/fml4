@@ -80,8 +80,8 @@ sub SecureP
 {
     my ($ok) = 1;
 
-    &P("ERROR: ML is empty.")   unless $ML;
-    &P("ERROR: PROC is empty.") unless $PROC;
+    &ERROR("ML is empty.")   unless $ML;
+    &ERROR("PROC is empty.") unless $PROC;
 
     my ($secure_pat) = '[A-Za-z0-9\-_]+';
     my ($num_pat)    = '[0-9]+';
@@ -89,47 +89,47 @@ sub SecureP
     my ($account)    = '[A-Za-z0-9\-_]+';
 
     if ($ML !~ /^($secure_pat)$/i) {
-	&P("ERROR: ML is insecure.");
+	&ERROR("ML is insecure.");
 	$ok = 0;
     }
     elsif ($PROC !~ /^($secure_pat)$/i) {
-	&P("ERROR: PROC is insecure.");
+	&ERROR("PROC is insecure.");
 	$ok = 0;
     }
     elsif ($LANGUAGE && ($LANGUAGE !~ /^[A-Za-z]+$/)) {
-	&P("ERROR: LANGUAGE is insecure.");
+	&ERROR("LANGUAGE is insecure.");
 	$ok = 0;
     }
     elsif ($MAIL_ADDR && ($MAIL_ADDR !~ /^($mail_addr)$/)) {
-	&P("ERROR: MAIL_ADDR is insecure.");
+	&ERROR("MAIL_ADDR is insecure.");
 	$ok = 0;
     }
     elsif ($CGI_ADMIN_USER && ($CGI_ADMIN_USER !~ /^($mail_addr|$account)$/)) {
-	&P("ERROR: CGI_ADMIN_USER is insecure.");
+	&ERROR("CGI_ADMIN_USER is insecure.");
 	$ok = 0;
     }
     elsif ($VARIABLE && ($VARIABLE !~ /^($secure_pat)$/i)) {
-	&P("ERROR: VARIABLE $VARIABLE is insecure.");
+	&ERROR("VARIABLE $VARIABLE is insecure.");
 	$ok = 0;	
     }
     elsif ($VALUE && ($VALUE !~ /^($secure_pat)$/i)) {
-	&P("ERROR: VALUE is insecure.");
+	&ERROR("VALUE is insecure.");
 	$ok = 0;	
     }
     elsif ($OPTION && ($OPTION !~ /^($secure_pat)$/i)) {
-	&P("ERROR: OPTION is insecure.");
+	&ERROR("OPTION is insecure.");
 	$ok = 0;	
     }
     elsif ($ACTION && ($ACTION !~ /^($secure_pat)$/i)) {
-	&P("ERROR: ACTION is insecure.");
+	&ERROR("ACTION is insecure.");
 	$ok = 0;	
     }
     elsif ($MTA && ($MTA !~ /^([a-z]+)$/i)) {
-	&P("ERROR: MTA is insecure.");
+	&ERROR("MTA is insecure.");
 	$ok = 0;	
     }
     elsif ($PTR && ($PTR !~ /^([0-9A-Z_\/]+)$/i)) {
-	&P("ERROR: PTR is insecure.");
+	&ERROR("PTR is insecure.");
 	$ok = 0;	
     }
     else {
@@ -140,7 +140,7 @@ sub SecureP
 		    $SafeConfig{ $k } = $Config{ $k };
 		}
 		else {
-		    &P("ERROR: $k is insecure.");
+		    &ERROR("$k is insecure.");
 		    $ok = 0;
 		}
 	    }
@@ -150,7 +150,7 @@ sub SecureP
     # ambiguous (cannot restrict it ...)
     if ((length($Config{'PASSWORD'})      > 64) ||
 	(length($Config{'PASSWORD_VRFY'}) > 64) ) {
-	&P("ERROR: too long password.");
+	&ERROR("too long password.");
 	$ok = 0;
     }
 
