@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.61 2002/05/24 12:16:41 fukachan Exp $
+# $FML: libsmtp.pl,v 2.62 2002/05/24 12:34:30 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -560,6 +560,7 @@ sub __SmtpIO
 
     # XXX only for postfix
     # try verp per day for effecient delivery
+    $SavedVerps = $USE_VERP;
     if ($USE_VERP && $TRY_VERP_PER_DAY) {
 	if (is_delivered_today()) { 
 	    $USE_VERP = 0;
@@ -793,6 +794,9 @@ sub __SmtpIO
 
     ## "DATA" Session ENDS; ##
     &SmtpPut2Socket("\r\n.", $ipc);
+
+    # saved value	    
+    $USE_VERP = $SavedVerps;
 
     $NULL;
 }
