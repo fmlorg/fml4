@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.25 2001/06/02 12:38:20 fukachan Exp $
+# $FML: Message.pm,v 1.35 2001/10/29 13:54:20 fukachan Exp $
 #
 
 package Mail::Message;
@@ -12,7 +12,7 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD $InComingMessage);
 use Carp;
 
-my $debug = $ENV{'debug'} ? 1 : 0;
+my $debug = $ENV{'debug'} ? $ENV{'debug'} : 0;
 
 # virtual content-type
 my %virtual_data_type = 
@@ -237,6 +237,10 @@ sub new
     my ($self, $args) = @_;
     my ($type) = ref($self) || $self;
     my $me     = {};
+    my $data   = '';
+
+    # alloc memory area to hold the whole message.
+    $InComingMessage = \$data;
 
     bless $me, $type;
 
@@ -273,7 +277,8 @@ sub _build_message
     $self->_set_up_template($args);
 
     # parse the non multipart mail and build a chain
-    if ($args->{ data_type } =~ /multipart/i) {
+    if (defined( $args->{ data_type } ) && 
+	$args->{ data_type } =~ /multipart/i) {
 	$self->parse_and_build_mime_multipart_chain($args);
     }
     # parse the mail data.
@@ -459,7 +464,7 @@ sub parse
     $ref_body->prev_message( $me );
 
     # return information
-    $result->{ body_size } = length($InComingMessage);
+    $result->{ body_size } = length($$InComingMessage);
     $me->{ data_info }     = $result;
 
     # return the object
@@ -483,19 +488,24 @@ sub _parse
 	if (($p = index($buf, "\n\n", 0)) > 0) {
 	    $header      = substr($buf, 0, $p + 1);
 	    $header_size = $p + 1;
-	    $InComingMessage = substr($buf, $p + 2);
+	    $$InComingMessage = substr($buf, $p + 2);
 	    last;
 	}
     }
 
-    # extract mail body and put it to $InComingMessage
+    # extract mail body and put it to $$InComingMessage
     while ($p = sysread($fd, $_, 1024)) {
 	$total_buffer_size += $p;
-	$InComingMessage   .= $_;
+	$$InComingMessage   .= $_;
     }
 
     # read the message (mail body) from the incoming mail
-    my $body_size = length($InComingMessage);
+    my $body_size = length($$InComingMessage);
+
+    if ($debug > 2) {
+	print STDERR "  (debug) header_size: $header_size\n";
+	print STDERR "  (debug)   body_size: $body_size\n";
+    }
 
     # result to return
     $result->{ header }      = $header;
@@ -567,7 +577,7 @@ sub _build_body_object
     return new Mail::Message {
 	boundary  => $self->_header_mime_boundary($result->{ header }),
 	data_type => $self->_header_data_type($result->{ header }),
-	data      => \$InComingMessage,
+	data      => $InComingMessage,
     };
 }
 
@@ -687,7 +697,7 @@ sub _header_mime_boundary
     my ($self, $header) = @_;
     my $m = $header->get('content-type');
 
-    if ($m =~ /boundary\s*=\s*\"(.*)\"/i) { # case insensitive
+    if (defined($m) && ($m =~ /boundary\s*=\s*\"(.*)\"/i)) { # case insensitive
 	return $1;
     }
     else {
@@ -703,13 +713,17 @@ sub _header_mime_boundary
 sub _header_data_type
 {
     my ($self, $header) = @_;
-    my ($type) = split(/;/, $header->get('content-type'));
-    if (defined $type) {
-	$type =~ s/\s*//g;
-	$type =~ tr/A-Z/a-z/;
-	return $type;
+
+    if (defined $header->get('content-type')) {
+	my ($type) = split(/;/, $header->get('content-type'));
+	if (defined $type) {
+	    $type =~ s/\s*//g;
+	    $type =~ tr/A-Z/a-z/;
+	    return $type;
+	}
     }
-    undef;
+
+    return undef;
 }
 
 
@@ -924,14 +938,41 @@ sub _print_messsage_on_memory
     # 2. print content body: write each line in buffer
     my ($p, $len, $buf, $pbuf);
     my $maxlen = length($$data);
+    if ($debug > 1) {
+	my $r = substr($$data, $pp, $p_end - $pp);
+	print STDERR "output($pp, $p_end) = {$r}\n";
+    }
   SMTP_IO:
     while (1) {
 	$p = index($$data, "\n", $pp);
-	last SMTP_IO if $p >= $p_end;
+	print STDERR "try to print(p=$p pp=$pp < $p_end)\n" if $debug > 1;
+
+	# handle buffer (MIME part) without trailing "\n".
+	# index("\n") can pick up both 
+	#     the last "\n" of the MIME part
+	# and
+	#     "\n" of MIME delimiter string "CRLF delimiter"
+	# since index() searches the whole not a part of the mail.
+	# We need to identify these two cases restrictly.
+	last SMTP_IO if $p == $p_end && substr($$data, $p-1, 1) eq "\n";
+	last SMTP_IO if $p > $p_end;
 
 	$len = $p - $pp + 1;
-	$len = ($p < 0 ? ($maxlen - $pp) : $len);
+
+	# handle buffer wihtout trailing "\n" 
+	if ($p == $p_end && substr($$data, $p-1, 1) ne "\n") {
+	    $len = $p_end - $pp;
+	}
+	else {
+	    $len = ($p < 0 ? ($maxlen - $pp) : $len);
+	}
 	$buf = substr($$data, $pp, $len);
+
+	if ($debug > 1) {
+	    print STDERR "	\$len = $p - $pp + 1;\n";
+	    print STDERR "	$len = ($p < 0 ? ($maxlen - $pp) : $len);\n";
+	    print STDERR "print($pp,$len){$buf}\n";
+	}
 
 	# do nothing, get away from here 
 	last SMTP_IO if $len == 0;
@@ -1170,10 +1211,11 @@ sub parse_and_build_mime_multipart_chain
 	if ($pe > $pb) { # XXX not effective region if $pe <= $pb
 	    print "   new block ($pb, $pe) " if $debug;
 
-	    my ($header, $pb) = _get_mime_header($data, $pb);
+	    my ($header, $pb) = _get_mime_header($data, $pb, $pe);
 	    if ($debug) {
 		my $type; $header =~ /(\w+\/\w+)/ && ($type = $1);
 		print "type=$type ";
+		print "\n   *new block ($pb, $pe) header={$header}\n";
 	    }
 
 	    my $args = {
@@ -1298,11 +1340,16 @@ sub _get_data_type
 
 sub _get_mime_header
 {
-    my ($data, $pos_begin) = @_;
+    my ($data, $pos_begin, $pos_end) = @_;
     my $pos = index($$data, "\n\n", $pos_begin) + 1;
     my $buf = substr($$data, $pos_begin, $pos - $pos_begin);
 
-    if ($buf =~ /Content-Type:\s*(\S+)\;/i) {
+    print "\t_get_mime_header pos=$pos should be < end=$pos_end\n" if $debug;
+
+    if ($pos > $pos_end) {
+	return ('', $pos_begin);
+    }
+    elsif ($buf =~ /Content-Type:\s*(\S+)\;/i) {
 	return ($buf, $pos + 1);
     }
     elsif ($buf =~ /Content-Type:\s*(\S+)\s*$/i) {
@@ -1483,6 +1530,47 @@ sub is_empty
 }
 
 
+=head2 C<get_encoding_mechanism()>
+
+return encoding type for specified Mail::Message not whole mail.
+The return value is one of base64, quoted-printable or undef.
+
+=cut
+
+sub get_encoding_mechanism
+{
+    my ($self) = @_;
+    my $buf = $self->header_in_body_part();
+
+    if ($buf =~ /Content-Transfer-Encoding:\s*(\S+)/mi) {
+	my $mechanism = $1;
+	$mechanism =~ tr/A-Z/a-z/;
+	return $mechanism;
+    }
+    else {
+	return undef;
+    }
+}
+
+
+=head2 C<get_offset()>
+
+return offset information in the data.
+return value is ARRAY 
+
+   ($offset_begin, $offset_end)
+
+on the Mail::Message object.
+
+=cut
+
+sub get_offset
+{
+    my ($self) = @_;
+    return( $self->{ offset_begin }, $self->{ offset_end });
+}
+
+
 =head2 C<header_size()>
 
 =head2 C<body_size()>
@@ -1631,9 +1719,9 @@ sub _evaluate_pmap
 
 alias of C<header_in_body_part()>.
 
-=head2 C<data()>
+=head2 C<data( ... )>
 
-alias of C<body_in_body_part()>.
+alias of C<body_in_body_part( ... )>.
 
 =cut
 
@@ -1647,12 +1735,12 @@ sub header
 
 sub data
 {
-    my ($self) = @_;
-    $self->data_in_body_part(@_[1 .. $#_]);
+    my ($self, @args) = @_;
+    $self->data_in_body_part(@args);
 }
 
 
-=head2 C<header_in_body_part($size)>
+=head2 C<header_in_body_part()>
 
 return header in the message content.
 It is not mail header but header for each message such as
@@ -1660,8 +1748,10 @@ mime header information of one part in a multipart.
 
 =head2 C<data_in_body_part($size)>
 
-get body part in the message content, 
-which is the whole mail (plain text) or a part of multipart.
+get body part in the message content, which is the whole mail (plain
+text) or body part of a block of multipart.
+
+If C<$size> is specified, return the first $size bytes in the body.
 
 =cut
 
@@ -1700,9 +1790,12 @@ sub data_in_body_part
 	$msglen    = length($$data);
     }
 
-    $size ||= 512;
-    if ($msglen < $size) { $size = $msglen;}
-    return substr($$data, $pos_begin, $size);
+    if (defined $size) {
+	return substr($$data, $pos_begin, $size);
+    }
+    else {
+	return substr($$data, $pos_begin, $msglen);
+    }
 }
 
 
@@ -1775,14 +1868,20 @@ This is defined for debug and removed in the future.
 # Return Value: none
 sub get_data_type_list
 {
-    my ($msg) = @_;
+    my ($msg, $args) = @_;
     my ($m, @buf, $i);
+    my $debug = defined $args->{ debug } ? 1 : 0;
 
     for ($i = 0, $m = $msg; defined $m ; $m = $m->{ 'next' }) {
 	$i++;
 	my $data = $m->{'data'};
-	push(@buf, sprintf("type[%2d]: %-25s | %s", 
-			   $i, $m->{'data_type'}, $m->{'base_data_type'}));
+	if ($debug) {
+	    push(@buf, sprintf("type[%2d]: %-25s | %s", 
+			       $i, $m->{'data_type'}, $m->{'base_data_type'}));
+	}
+	else {
+	    push(@buf, $m->{'data_type'});
+	}
     }
     \@buf;
 }

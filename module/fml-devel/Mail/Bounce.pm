@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Bounce.pm,v 1.8 2001/04/12 14:12:00 fukachan Exp $
+# $FML: Bounce.pm,v 1.15 2001/10/19 13:14:27 fukachan Exp $
 #
 
 package Mail::Bounce;
@@ -20,11 +20,73 @@ Mail::Bounce - analye error messages
 
 =head1 SYNOPSIS
 
+    use Mail::Message;
+    my $msg = Mail::Message->parse( { fd => \*STDIN } );
+
+    use Mail::Bounce;
+    my $bouncer = new Mail::Bounce;
+    $bouncer->analyze( $msg );
+
+    # show results
+    for my $a ( $bouncer->address_list ) {
+	print "address: $a\n";
+
+	print " status: ";
+	print $bouncer->status( $a );
+	print "\n";
+
+	print " reason: ";
+	print $bouncer->reason( $a );
+	print "\n";
+	print "\n";
+    }
+
+
 =head1 DESCRIPTION
+
+try to analyze the given error message, which is a Mail::Message
+object.
+
+For non DSN pattern,
+try to analyze it by using modules in C<Mail::Bounce::> 
+which can recognize MTA specific and domian specific patterns.
+
+For example,
+
+  Mail::Bounce
+      
+                $msg
+              --------> Mail::Bounce::DSN::analyze()
+              <--------
+               $result
+
+returned C<$result> provides the following information:
+
+    $result = {
+	address1 => {
+	    Original-Recipient => 'rfc822; addr',
+	    Final-Recipient    => 'rfc822; addr',
+	    Diagnostic-Code    => 'reason ...',
+	    Action             => 'failed',
+	    Status             => '4.0.0',
+	    Reporting-MTA      => 'dns; server.fml.org',
+	    Received-From-MTA  => 'DNS; server.fml.org',
+	    hints              => ... which module matches ...,
+	},
+
+	address2 => {
+	    ... snip ...
+	},
+
+	...
+    };
+
 
 =head1 METHODS
 
 =head2 C<new()>
+
+standard new() method.
 
 =cut
 
@@ -38,16 +100,29 @@ sub new
 }
 
 
+=head2 C<analyze($msg)>
+
+C<$msg> is a C<Mail::Message> object.  
+This routine is a top level switch which provides the entrance 
+for C<Mail::Bounce::> modules, for example, C<Mail::Bounce::DSN>.
+
+C<Mail::Bounce::$model::analyze( \$msg, \$result )> 
+method in each module is the actual model specific analyzer.
+C<$result> has an answer of analyze if the error message pattern is
+already known.
+
+=cut
+
 sub analyze
 {
     my ($self, $msg) = @_;
     my $result = {};
 
     if ($debug) {
-	my $h = $msg->get_data_type_list;
-	print "   ----- dump msg -----\n";
-	for (@$h) { print "   ", $_, "\n";}
-	print "   ----- dump msg end -----\n";
+	my $h = $msg->get_data_type_list( { debug => 1 } );
+	print STDERR "   ----- dump msg -----\n";
+	for (@$h) { print STDERR "   ", $_, "\n";}
+	print STDERR "   ----- dump msg end -----\n";
     }
 
     for my $pkg (
@@ -59,7 +134,7 @@ sub analyze
 		 'SimpleMatch', 
 		 ) {
 	my $module = "Mail::Bounce::$pkg";
-	print "\n   --- module: $module\n" if $debug;
+	print STDERR "\n   --- module: $module\n" if $debug;
 	eval qq { 
 	    require $module; $module->import();
 	    $module->analyze( \$msg , \$result );
@@ -67,13 +142,24 @@ sub analyze
 	croak($@) if $@;
 
 	if (keys %$result) { 
-	    print "\n   match $module\n" if $debug;
+	    print STDERR "\n   match $module\n" if $debug;
 	    last;
+	}
+
+        if ($debug) {
+	    print STDERR "   * not match $module\n" unless %$result;
 	}
     }
 
     $self->{ _result } = $result;
 }
+
+
+=head2 C<address_list()>
+
+return ARRAY of addresses found in the error message.
+
+=cut
 
 
 sub address_list
@@ -82,6 +168,19 @@ sub address_list
     my $result = $self->{ _result };
     return keys %$result;
 }
+
+
+=head2 C<status($addr)>
+
+return status (string) for C<$addr>.
+The status is extracted from C<result> analyze() method gives. 
+
+=head2 C<reason($addr)>
+
+return error reason (string) for C<$addr>.
+It is extracted from C<result> analyze() method gives. 
+
+=cut
 
 
 sub status
@@ -104,6 +203,21 @@ sub reason
 }
 
 
+sub hints
+{
+    my ($self, $addr) = @_;
+    $self->{ _result }->{ $addr }->{ 'hints' };
+}
+
+
+=head2 C<look_like_japanese(string)>
+
+return 1 if C<string> looks Japanese one in JIS/SJIS/EUC code.
+return 0 unless.
+
+=cut
+
+
 my $RE_SJIS_C = '[\201-\237\340-\374][\100-\176\200-\374]';
 my $RE_SJIS_S = "($RE_SJIS_C)+";
 my $RE_EUC_C  = '[\241-\376][\241-\376]';
@@ -120,7 +234,7 @@ my @REGEXP = (
 	      $RE_JOUT,
 	      );
 
-sub look_japanese
+sub look_like_japanese
 {
     my ($self, $buf) = @_;
 
@@ -132,15 +246,26 @@ sub look_japanese
 }
 
 
+=head2 C<address_clean_up(type, addr)>
+
+clean up C<addr> and return it.
+
+C<type> gives a special hint for some specific MTA or domain.
+It is rarely used.
+
+=cut
+
 sub address_clean_up
 {
-    my ($self, $type, $addr) = @_;
+    my ($self, $hint, $addr) = @_;
+
+    if ($debug) { print STDERR "address_clean_up($hint, $addr)\n";}
 
     # nuke predecing and trailing strings around user@domain pattern
     my $prev_addr = $addr;
     do { 
 	$prev_addr = $addr;
-	print "    address_clean_up.in: $prev_addr\n" if $debug;
+	print STDERR "    address_clean_up.in: $prev_addr\n" if $debug;
 
 	$addr      =~ s/\.$//;
 	$addr      =~ s/^\<//;
@@ -148,15 +273,14 @@ sub address_clean_up
 	$addr      =~ s/^\"//;
 	$addr      =~ s/\"$//;
 
-	print "   address_clean_up.out: $addr\n" if $debug;
+	print STDERR "   address_clean_up.out: $addr\n" if $debug;
     } while ($addr ne $prev_addr);
 
-    if ($type eq 'nifty.ne.jp' && $addr !~ /\@/) {
-	$addr . '@nifty.ne.jp';
-    }
-    else {
-	$addr;
-    }
+    # Mail::Bounce::FixBrokenAddress class provides irrgular
+    # address handlings, so handles domain/MTA specific addresses.
+    # For example, nifty.ne.jp, webtv.ne.jp, ...
+    use Mail::Bounce::FixBrokenAddress;
+    return Mail::Bounce::FixBrokenAddress::FixIt($hint, $addr);
 }
 
 

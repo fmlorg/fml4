@@ -4,14 +4,17 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Adapter.pm,v 1.5 2001/06/29 05:57:33 fukachan Exp $
+# $FML: Adapter.pm,v 1.9 2001/09/17 11:59:23 fukachan Exp $
 #
 
 package IO::Adapter;
-use vars qw(@ISA @ORIG_ISA $FirstTime);
+use vars qw(@ISA @ORIG_ISA $FirstTime $AUTOLOAD);
 use strict;
 use Carp;
 use IO::Adapter::ErrorStatus qw(error_set error error_clear);
+
+# prepare error_set() is called
+@ISA = qw(IO::Adapter::ErrorStatus);
 
 BEGIN {}
 END   {}
@@ -39,30 +42,13 @@ For example, C<$map_params> is:
 	    user           => 'fml',
 	    user_password  => "secret password :)",
 
-	    # this driver specific SQL statements
-	    getline        => "select ... ",
-	    get_next_value => "select ... ",
-	    add            => "insert ... ",
-	    delete         => "delete ... ",
-	    replace        => "set address = 'value' where ... ",
-	},
-    };
-
-In another way, you can specify your own module to provide
-specific SQL statements.
-
-    $map_params = {
-	'mysql:toymodel' => {
-	    sql_server     => 'mysql.fml.org',
-	    database       => 'fml',
-	    table          => 'ml',
-	    user           => 'fml',
-	    user_password  => "secret password :)",
-
+	    # model specific driver module
 	    driver         => 'My::Driver::Module::Name',
 	},
     };
 
+where you can specify your own module to provide specific SQL
+statements.
 
 =head1 DESCRIPTION
 
@@ -179,9 +165,14 @@ sub new
     @ORIG_ISA = @ISA unless $FirstTime++;
     @ISA      = ($pkg, @ORIG_ISA);
 
+    printf STDERR "%-20s %s\n", "IO::Adapter::ISA:", "@ISA" if $ENV{'debug'};
     eval qq{ require $pkg; $pkg->import();};
-    $pkg->configure($me, $args) if $pkg->can('configure');
-    error_set($me, $@) if $@;
+    unless ($@) {
+	$pkg->configure($me, $args) if $pkg->can('configure');
+    }
+    else {
+	error_set($me, $@);
+    }
 
     return bless $me, $type;
 }
@@ -223,6 +214,23 @@ sub open
     }
     else {
 	$self->error_set("Error: type=$self->{_type} is unknown type.");
+    }
+}
+
+
+=head2 C<touch()>
+
+create a file if not exists. 
+This method is avaialble for file: type.
+
+=cut
+
+sub touch
+{
+    my ($self) = @_;
+
+    if ($self->{'_type'} eq 'file') {
+	$self->SUPER::touch( { file => $self->{_file} } );
     }
 }
 
@@ -274,7 +282,7 @@ add $address to the specified map.
 
 delete lines which matches $regexp from this map.
 
-=head2 C<regexp( $regexp, $value )>
+=head2 C<replace( $regexp, $value )>
 
 replace lines which matches $regexp with $value.
 
@@ -358,14 +366,21 @@ sub find
     my $show_all       = $args->{ all } ? 1 : 0;
     my (@buf, $x);
 
-    # forward the request to SUPER class
-    if ($self->SUPER::can('_find')) { $self->_find($regexp, $args);}
+    # forward the request to SUPER class (md = map dependent)
+    if ($self->SUPER::can('md_find')) { 
+	return $self->md_find($regexp, $args);
+    }
 
     # search regexp by reading the specified map.
     $self->open;
     while (defined ($x = $self->get_next_value())) {
 	if ($show_all) {
-	    push(@buf, $x) if $x =~ /$regexp/;	    
+	    if ($case_sensitive) {
+		push(@buf, $x) if $x =~ /$regexp/;
+	    }
+	    else {
+		push(@buf, $x) if $x =~ /$regexp/i;
+	    }
 	}
 	else {
 	    if ($case_sensitive) {
@@ -383,6 +398,10 @@ sub find
 }
 
 
+=head2 C<DESTROY> 
+
+=cut
+
 # Descriptions: destructor
 #               request is forwarded to close() method.
 #    Arguments: $self $args
@@ -393,6 +412,33 @@ sub DESTROY
     my ($self) = @_;
     $self->close;
     undef $self;
+}
+
+
+
+=head2 C<AUTOLOAD(@varargs)>
+
+=cut
+
+sub AUTOLOAD
+{
+    my ($self, @varargs) = @_;
+
+    return if $AUTOLOAD =~ /DESTROY/;
+
+    my $comname = $AUTOLOAD;
+    $comname =~ s/.*:://;
+
+    # try md_something() for something()
+    my $fp = "md_${comname}";
+
+    if ($self->can($fp)) {
+	$self->$fp(@varargs);
+    }
+    else {
+	croak("${comname}() nor md_${comname}() is not found");
+	croak($@);
+    }
 }
 
 
