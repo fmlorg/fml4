@@ -20,6 +20,9 @@ sub DoDistribute
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
     @Rcpt = (); $Rcpt = 0;
 
+    $DISTRIBUTE_START_HOOK && 
+	&eval($DISTRIBUTE_START_HOOK, 'DISTRIBUTE_START_HOOK');
+
     # Cut off multipart or reject by mail's Content-Type handler
     # The existence of $AGAINST_HTML_MAIL and $HTML_MAIL_DEFUALT_HANDLER
     # are backward compatible.
@@ -28,7 +31,6 @@ sub DoDistribute
     	local($status) = &ContentHandler(*e);
 	if ($status eq 'reject') { return $NULL;}
     }
-
 
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {
@@ -68,9 +70,6 @@ sub DoDistribute
 	    &Log("unknown \$ENCRYPTED_DISTRIBUTION_TYPE = $ENCRYPTED_DISTRIBUTION_TYPE");
 	}
     }
-
-    $DISTRIBUTE_START_HOOK && 
-	&eval($DISTRIBUTE_START_HOOK, 'Distribute Start hook'); 
 
     ### declare distribution mode (see libsmtp.pl) # (preamble, trailer);
     $e{'mode:dist'} = 1;
@@ -321,6 +320,13 @@ sub DoDistribute
     ##### ML Distribute Phase 04: SMTP
     # IPC. when debug mode or no recipient, no distributing 
     &Deliver;
+
+    ##### ML Distribute Phase 05: ends
+    $DISTRIBUTE_END_HOOK .= $SMTP_CLOSE_HOOK;
+    $DISTRIBUTE_END_HOOK .= $DISTRIBUTE_CLOSE_HOOK;
+    if ($DISTRIBUTE_END_HOOK) {
+	&eval($DISTRIBUTE_END_HOOK, 'DISTRIBUTE_END_HOOK');
+    }
 }
 
 
@@ -422,12 +428,6 @@ sub Deliver
     &StatDelivery($smtp_time, $Rcpt) if $debug_stat;
 
     undef $Envelope{'mode:__deliver'};
-
-    ##### ML Distribute Phase 05: ends
-    $DISTRIBUTE_CLOSE_HOOK .= $SMTP_CLOSE_HOOK;
-    if ($DISTRIBUTE_CLOSE_HOOK) {
-	&eval($DISTRIBUTE_CLOSE_HOOK, 'Distribute close Hook');
-    }
 }
 
 sub StatDelivery
