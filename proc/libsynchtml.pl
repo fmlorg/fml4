@@ -565,11 +565,19 @@ sub Write
     }
     else {
 	# XXX malloc() too much?
-	$_ = $e{'Body'};
-	&ConvSpecialChars(*_);
-	# s#(http://\S+)#<A HREF="$1">$1</A>#g;
-	s#(http://\S+)#&Conv2HRef($1)#ge;
-	print OUT $_;
+	local($pp, $p, $x);
+	$pp = 0;
+	while (1) {
+	    $p = &main'GetLinePtrFromHash(*e, "Body", $pp); #';
+	    $x = substr($e{'Body'}, $pp, $p-$pp+1);
+
+	    &ConvSpecialChars(*x);
+	    $x =~ s#(http://\S+)#&Conv2HRef($1)#ge;
+	    print OUT $x;
+
+	    last if $p < 0;
+	    $pp = $p + 1;
+	}
     }
 
     print OUT "    </PRE>\n";
