@@ -60,12 +60,19 @@ sub DoDistribute
     $Rcsid =~ s/^(.*)(\#\d+:\s+.*)/$1.($USE_CROSSPOST?"(rmsc)":"(rms)").$2/e;
     $Rcsid =~ s/\)\(/,/g;
 
+    # Under DLA_HACK, PreProcessing Section;
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
     {
-	local($rcpt, $opt, $w, $relay, $who, $mxhost, $k, $v);
+	local($rcpt, $opt, $w, $relay, $who, $domain, $mxhost, $k, $v);
 
-	for ($MAIL_LIST, $CONTROL_ADDRESS) { tr/A-Z/a-z/; $SKIP{$_} = 1;}
+	# default setting %SKIP and compat (obsolete %Skip);
+	for ($MAIL_LIST, $CONTROL_ADDRESS) {
+	    $k = $_; $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    ($who) = split(/\@/, $_);
+	    $k = "$who\@$DOMAIN"; $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    $k = "$who\@$FQDN";   $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
+	}
 	while (($k, $v) = each %Skip) { $SKIP{$k} = $v;}
 	while (($k, $v) = each %SKIP) { $v =~ tr/A-Z/a-z/; $SKIP{$k} = $v;}
 
@@ -94,8 +101,10 @@ sub DoDistribute
 	      $w = $rcpt;
 	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
 	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
-	      $SKIP{$w} = 1;
-	      next line if $NoRcpt{$w}; # no add to @Rcpt
+	      if ($NoRcpt{$w}) { # no add to @Rcpt
+		  $SKIP{$w} = 1;
+		  next line;
+	      } 
 	  }
 
 	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
@@ -107,15 +116,21 @@ sub DoDistribute
 	      $relay = $1 || $DEFAULT_RELAY_SERVER;
 	      ($who, $mxhost) = split(/@/, $rcpt, 2);
 
-	      if ($DLA_HACK) {
+	      if ($DLA_HACK) { # $rcpt is original "addr" in ACTIVE_LIST;
 		  $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
 	      }
 
 	      $rcpt = "${who}\%${mxhost}\@${relay}";
 	  }
 
-	  print STDERR "DdDistribute::RCPT:<$rcpt>\n\n" if $debug;
-	  push(@Rcpt, $rcpt) unless $DLA_HACK;
+	  if ($DLA_HACK) {
+	      ;# if DirectListAccess (List == ACTIVE_LIST), delivery in Smtp;
+	  }
+	  else {
+	      print STDERR "DoDistribute::RCPT:<$rcpt>\n\n" if $debug;
+	      push(@Rcpt, $rcpt);
+	  }
+
 	  $Rcpt++; # count the number of recipients;
       }
 
