@@ -52,14 +52,15 @@ __inithtml__:
 .for file in ${HTML_REQ_CPP_SOURCES}
 
 __HTML_CPP__ += var/html/${file}.html
+__HTML_CPP__ += var/html/${file}-e.html
 
 var/html/${file}.html: doc/html/${file}.html
 	$(CPP) -P -DJAPANESE doc/html/${file}.html |\
 	$(JCONV) > $(FML)/var/html/${file}.html
 
 var/html/${file}-e.html: doc/html/${file}.html
-	$(CPP) -P -DJAPANESE doc/html/${file}.html |\
-	$(JCONV) > $(FML)/var/html/${file}.html
+	$(CPP) -P -UJAPANESE doc/html/${file}.html |\
+	$(JCONV) > $(FML)/var/html/${file}-e.html
 
 .endfor
 
