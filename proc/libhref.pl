@@ -15,34 +15,30 @@ sub HRef
     local($_, *e) = @_;
     local($host, $port, $request, $tp, $hp);
 
+    # http://www.phys.titech.ac.jp/... -> (http, www.phys.titech.ac.jp/...)
     if (/(\S+):\/\/(\S+)/) {
-	$tp = $1;# http, gopher, ftp...
-	$hp = $2;# http://www.phys.titech.ac.jp/...;
-
-	foreach (split(/\//, $hp)) {
-	    if (! $host) { 
-		$host = $_;
-
-		if ($host =~ /(\S+):(\d+)/) {
-		    $host = $1;
-		    $port = $2;
-		}
-
-		next;
-	    }
-
-	    $request .= "/".$_;	 
-	}
-	
+	$tp = $1;# http, gopher, ftp...     ;
+	$hp = $2;# www.phys.titech.ac.jp/...;
     }
     else {
-	&Log("Illegal HRef [$_]");
-    }# split http://host -> (http, host, ...);
+	&LogWEnv("Illegal HRef [$_]", *e);
+	return;
+    }# "split http://host (http, host, ...);;";
+	
+    foreach (split(/\//, $hp)) { # www.phys.titech.ac.jp/...
+	if (! $host) { 
+	    $host = $_;
+	    s/(\S+):(\d+)/$host = $1, $port = $2/e;# $host:80
+	    next;# get host entry and go next!;
+	}
+
+	$request .= "/".$_;	 
+    }
 
     # Calling
     if ($tp =~ /http/i) {
 	$host = $host || $DEFAULT_HTTP_SERVER;
-	$port = $port || 80;
+	$port = $port || $DEFAULT_HTTP_PORT || 80;
 
 	# connect http server
 	$e{'message'} .= ">>> HREF=$tp://$host$request\n\n";
@@ -51,16 +47,16 @@ sub HRef
     } 
     elsif ($tp =~ /gopher/i) {
 	$host = $host || $DEFAULT_GOPHER_SERVER;
-	$port = $port || $DEFAULT_GOPHER_PORT;
+	$port = $port || $DEFAULT_GOPHER_PORT || 70;
 
 	$e{'message'} .= ">>>PLAIN TEXT(Begin with 0)\n\n";
 	&TalkWithHttpServer($host, $port, "0$request", $tp, *e); 
+
 	$e{'message'} .= ">>>DIRECTORY(Begin with 1)\n\n";
 	&TalkWithHttpServer($host, $port, "1$request", $tp, *e); 
-
     }
     else {
-	$e{'message'} .= ">>>Sorry not implemented for $tp://host..\n\n";
+	$e{'message'} .= ">>>Sorry.\n\t$tp://$host... is NOT IMPLEMENTED\n\n";
     }
 }
 
@@ -95,7 +91,7 @@ sub TalkWithHttpServer
 	}
 	elsif ($tp =~ /gopher/io) {
 	    $gopherflag = 1;
-	    $gopherflag = 0 if $body =~ /^0/;
+	    $gopherflag = 0 if $body =~ /^0/o;
 	    print S "$body\n";
 	}
 	else {
@@ -114,7 +110,8 @@ sub TalkWithHttpServer
 		if(! $gopherflag) {
 		    s/\064//g;
 		    print HOUT $_;
-		}else {
+		}
+		else {
 		    /^\d\S+\s+(\S+)/;
 		    print HOUT "$1\n";
 		}
@@ -125,27 +122,26 @@ sub TalkWithHttpServer
 	close S;
 	
 	if (-T $tmpf) {
-	    open(HIN, $tmpf) || do{
+	    if (! open(HIN, $tmpf)) {
 		$re{'message'} .= "canont open tmpf"; 
 		return;
-	    };
+	    }
 	    while (<HIN>) { $re{'message'} .= $_;}
 	    close(HIN);
 	}
 	else {
 	    local($name) = reverse split(/\//, $body);
-	    open(HIN, "$UUENCODE $tmpf $host:$name|") || do{
+	    if (! open(HIN, "$UUENCODE $tmpf $host:$name|")) {
 		$re{'message'} .= "canont open tmpf"; 
 		return;
-	    };
+	    }
 	    while (<HIN>) { $re{'message'} .= $_;}
 	    close(HIN);
 	}
     } 
     # fails of socket or connect
     else { 
-	&Log("Cannot connect $host");
-	$re{'message'} .= "Cannot connect $host\n";
+	&LogWEnv("Cannot connect $host", *re);
     }
 }
 
