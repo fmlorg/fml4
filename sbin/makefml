@@ -4752,12 +4752,13 @@ sub do_log
     # tail options
     $flag = "-$lines" if $lines;
 
-    if ($dpat =~ m@(\d{4})/(\d{2})/(\d{2})@) {
-	$pat = ($1 - 1900) .'/'.  $2 .'/'.  $3;
-	print STDERR "rewrite $dpat => $pat\n";
+    if ($dpat =~ m@^(\d{4})(\d{2})(\d{2})$@) {
+	$pat = (($1 - 1900) % 100).'/'.  $2 .'/'.  $3;
+	print STDERR "rewrite $dpat => $pat\n" if $debug;
     }
     elsif ($dpat) {
 	$pat = $dpat;
+	print STDERR "rewrite $dpat => $pat\n" if $debug;
     }
 
     if ($pat) {
