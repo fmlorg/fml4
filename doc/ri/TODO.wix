@@ -1,0 +1,195 @@
+		TODO リスト (after fml 2.2.1 release)
+
+				Ken'ichi Fukamachi
+
+-------------------------------
+.toc
+-------------------------------
+
+.C	終ったものリスト ;-)
+
+.S	日本語のエラーがかえる
+
+.S	HTML_DEFAULT_HANDLERの拡張
+
+
+.C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
+
+
+.S	FAQ をつくる
+
+.url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+
+
+.S	MIMEライブラリーの書き直し
+
+特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
+る。それを考慮すること
+
+
+.S	日本語化問題
+
+cf/MANIFEST での全変数定義 & コメント日本語化     低〜中?
+＃時間次第か？(難易度は低くても辛さ度は最大)
+
+*	cf/MANIFEST 日本語化計画
+
+*	merge mnews help merge
+
+*	cf/MANIFEST 未定義変数探し
+
+
+.S	[認証] $SENDER_AUTH_TYPE
+
+$SENDER_AUTH_TYPE = address / pgp
+
+makefml でのPGP操作をどうするべきなのか？
+＃makefml pgp は管理者用に使ってしまったから
+＃一般メンバー操作には適用できない
+
+
+.S	間違いメールのフィルタリング
+
+* ２バイトはじきすぎ問題
+
+* シグニチャー判定問題
+
+  今は @ をふくんでいる最後のパラグラフはsignatureのパラグラムだと判定
+  してむしするようになっているが、ひっかかないものもある。
+
+
+.S	Naming Convention
+
+* sitedef.ph , site_init の naming convention
+
+* personal, group の naming convention
+   share ?
+
+
+.S	アップグレードについて
+
+* fml の入れ換え中に mail が送られてきても大丈夫なようにならないか?
+
+* MTAを止めずに100％保証しろってのは無理だとおもうけどなぁ
+
+* 今は stat() して reload をするようになっている
+
+
+.S	リモート管理のノウハウについて
+
+ドキュメント
+
+>ごめんなさい、その通りです。
+>書いたつもりでしたが、読み返すと確かに書かれていませんでした。
+>どうもすみません。
+>
+>自動登録のケースは随所に記述がありますが、管理者登録のケースは
+>あまりまとまった情報がなく、試行錯誤が必要になります。
+
+=> FAQ ?
+
+Q: pgp のときに address 登録なんていらないやんか
+A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
+
+
+.S	CGI ユーザ・インターフェイス
+
+makefml -i stdin を kick すりゃいいだけ
+
+
+.S	マクロ
+
+&DEFINE_MAILER(); は必要か？
+
+   to define "ipc" or "prog" mailer
+
+
+.S	配送関係
+
+* $OUTGOING_ADDRESSの設定をもっと簡単に？
+
+* smtpfeedを直接叩く
+  kick off smtpfeed, 
+  errorはSMTPでどっかにまるなげ
+
+* VERPs
+
+* $smtpd_recipient_restriction 問題
+see /etc/postfix/sample*cf
+
+
+.S	エラーアドレスの自動削除
+
+meadと各種MTA対応
+   postfix 対応
+   qmail =>  http://www.jp.qmail.org/qmaildoc/RFC/RFCQSBMF.html
+
+
+.S	モデレータモードとexpire
+
+fml-support ML's Count: 05639
+
+
+.S	ファイル操作
+
+tar.gz の中に spool/file tmp/spool/file が混在する問題
+
+See fml-support: 5564 
+but ファイル操作の link(2) version がのぞましい。
+
+NT4 はだめだが NT5 fs には link(2)はある。
+＃ NT4 については対応を見捨てても良い > つまり tmp/spool spool/混在可
+＃ それに tar.gz つかってるかねぇってのもあるしねぇ > on NT4
+
+
+.S	HTML関係
+
+* <DIV>の定義に反する使い方？
+
+* BASE_URL な変数
+
+* fml-support: 05984
+
+   $HTML_BASE_URL
+
+
+.S	ポーティング 
+
+* NT と makefml ?
+
+  fml/sys/WINDOWS_NT4: makefml.pl 
+    XXX: anyway not overwrite sitedef.ph (incomplete hack)
+    We need to update POP server information to somewhere, so now
+    we use sitedef.ph to include pop.ph and overwrite it always.
+    It is a bug since sitedef.ph may be customized.
+    Hence now change it to "appended to it" but it is not essential.
+    We should change it to more functional solution.
+
+
+.S	Y2K advisory
+
+* GetTimeを入れ換えるキット
+
+* アドヴァイザリィ
+
+* RFC1153のライブラリはどうする？
+
+
+.S	ログファイル
+
+log file に年号をつけるモード。backup が楽
+例: $DIR/log.1999
+
+
+.S	かるいまとめおくり？
+
+
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
