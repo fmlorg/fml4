@@ -1,5 +1,5 @@
 _SSL_REQUIRE_SSL_
 AuthName ByPassword
 AuthType Basic
-AuthUserFile _EXEC_DIR_/www/authdb/ml-admin/_ML_/htpasswd
+AuthUserFile _CGI_AUTHDB_DIR_/ml-admin/_ML_/htpasswd
 require valid-user
