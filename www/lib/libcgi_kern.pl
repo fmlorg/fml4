@@ -50,6 +50,9 @@ sub Init
 
     # /cgi-bin/ in HTML
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
+
+    # 3.0B
+    $DefaultConfigPH = "$EXEC_DIR/default_config.ph";
 }
 
 
@@ -78,17 +81,30 @@ sub ExpandOption
 sub ExpandMemberList
 {
     local($config_ph, @list, $list, $addr);
+    local(%uniq);
 
-    if (-f "$ML_DIR/$ML/config.ph") {
-	$config_ph = "$ML_DIR/$ML/config.ph";
+    $config_ph = "$ML_DIR/$ML/config.ph";
+    $DIR       = "$ML_DIR/$ML";
+
+    if (-f $config_ph) {
 	package config_ph;
+	$DIR = $main'DIR; #';
+	eval require $main'DefaultConfigPH if -f $main'DefaultConfigPH;
 	eval require $main'config_ph; #';
 	package main;
     }
+    else {
+	&ERROR("cannot open $config_ph");
+    }
 
-    @list = @config_ph'MEMBER_LIST; #';
+    @list = ($config_ph'MEMBER_LIST, @config_ph'MEMBER_LIST);
 
+    undef %uniq;
     for $list (@list) {
+	next unless $list;
+	# uniq
+	next if $uniq{$list}; $uniq{$list} = 1;
+
 	if (open(LIST, $list)) {
 	    while (<LIST>) {
 		next if /^\#/;
@@ -99,7 +115,7 @@ sub ExpandMemberList
 	    close(LIST);
 	}
 	else {
-	    &ERROR("cannot open \$ML_DIR/$ML/config.ph");
+	    &ERROR("cannot open '$list'");
 	}
     }
 }
