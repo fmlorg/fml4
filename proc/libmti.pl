@@ -473,7 +473,7 @@ sub MTIHintOut
     if ($e{'h:return-path:'}) {
 	$rp = &Conv2mailbox($e{'h:return-path:'});
 
-	if (! &CheckMember($rp, $hint)) {
+	if (! &Lookup($rp, $hint)) {
 	    &Append2(&Conv2mailbox($e{'h:return-path:'}, *e), $hint);
 	}
     }
