@@ -12,3 +12,32 @@ libexec/fml_local.pl             2.5 2.6
 
 # 2000/04/15
 kern/libenvf.pl			 2.8 2.9
+
+# 2000/05/12  DiagPrograms()
+
+kern/fml.pl
+2.93 <- 2.92
+
+kern/libsmtpsubr.pl
+1.7 <- 1.6
+
+proc/libarchive.pl
+2.4 <- 2.3
+
+proc/libfop.pl
+2.7 <- 2.6
+
+proc/libhref.pl
+2.11 <- 2.10
+
+proc/libra.pl
+2.17 <- 2.16
+
+proc/librcs.pl
+1.3 <- 1.2
+
+proc/libsendfile.pl
+2.8 <- 2.7
+
+proc/libutils.pl
+2.8 <- 2.7
