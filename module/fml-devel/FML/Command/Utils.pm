@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Utils.pm,v 1.5 2002/09/22 14:56:43 fukachan Exp $
+# $FML: Utils.pm,v 1.6 2002/12/18 04:46:22 fukachan Exp $
 #
 
 package FML::Command::Utils;
@@ -25,6 +25,8 @@ FML::Command::Utils - command utilities
 =head1 METHODS
 
 =cut
+
+# XXX-TODO: nothing implemented yet.
 
 
 # Descriptions: standard constructor

@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: ThreadTrack.pm,v 1.35 2002/10/28 09:58:12 tmu Exp $
+# $FML: ThreadTrack.pm,v 1.38 2002/12/24 10:19:47 fukachan Exp $
 #
 
 package FML::Process::ThreadTrack;
@@ -38,7 +38,7 @@ create a C<FML::Process::Kernel> object and return it.
 
 =head2 C<prepare()>
 
-adjust ml_* and load configuration files.
+adjust ml_*, load configuration files and fix @INC.
 
 =cut
 
@@ -56,7 +56,7 @@ sub new
 }
 
 
-# Descriptions: adjust ml_* and load configuration files
+# Descriptions: adjust ml_*, load configuration files and fix @INC.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -178,6 +178,7 @@ sub run
     elsif ($command eq 'close') {
 	my $thread_id = $argv->[ 2 ];
 	if (defined $thread_id) {
+	    # XXX-TODO: method-ify.
 	    _close($thread, $thread_id, 1, $max_id);
 	}
 	else {
@@ -185,6 +186,8 @@ sub run
 	}
     }
     else {
+	# XXX-TODO: hmm, run interactive session unless @ARGV ?
+	# XXX-TODO: showing help is appropriate ?
 	if ($argv->[ 0 ] ne '') {
 	    push(@ISA, 'FML::Process::ThreadTrack::CUI');
 	    $ttargs->{ ml_name } = $argv->[ 0 ];
@@ -202,10 +205,10 @@ sub run
 }
 
 
-# Descriptions:
+# Descriptions: speculate the last id our thread system processed.
 #    Arguments: OBJ($curproc) OBJ($thread)
 # Side Effects: none
-# Return Value: none
+# Return Value: NUM
 sub _speculate_last_id
 {
     my ($curproc, $thread) = @_;
@@ -228,7 +231,7 @@ sub _speculate_last_id
 
     # The condition "$sf_last_modified < $db_last_modified" is always
     # true since FML::Process::Distribute updates the thread db after
-    # updaiteing $seq_file.
+    # updating $seq_file.
     # XXX 3600 is the magic number. How long time is appropriate ?
     if (-f $seq_file &&
 	($sf_last_modified + 3600 > $db_last_modified)) {
@@ -264,7 +267,7 @@ sub _speculate_last_id
 }
 
 
-# Descriptions: speculate maximum sequence number for ML article
+# Descriptions: speculate the maximum sequence number for ML articles.
 #    Arguments: OBJ($curproc) STR($spool_dir)
 # Side Effects: none
 # Return Value: NUM
@@ -350,7 +353,9 @@ sub _close
 
     for my $id (@$ra) {
 	# e.g. 100 -> elena/100
-	if ($id =~ /^\d+$/) { $id = $thread->_create_thread_id_strings($id);}
+	if ($id =~ /^\d+$/) {
+	    $id = $thread->_create_thread_id_strings($id);
+	}
 
 	# check "elena/100" exists ?
 	if ($thread->exist($id)) {
@@ -388,8 +393,7 @@ _EOF_
 }
 
 
-# Descriptions: clean up in the end of the curreen process.
-#               return error messages et. al.
+# Descriptions: dummy.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: queue flush
 # Return Value: none

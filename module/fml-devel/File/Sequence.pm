@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Sequence.pm,v 1.28 2002/10/28 10:03:26 tmu Exp $
+# $FML: Sequence.pm,v 1.30 2002/12/23 14:35:32 fukachan Exp $
 #
 
 package File::Sequence;
@@ -97,7 +97,7 @@ sub new
 # Descriptions: increment the sequence number
 #    Arguments: OBJ($self) [STR($file)]
 #               If $file is not specified,
-#               the sequence_file parameter in new().
+#               use the sequence_file parameter in new().
 # Side Effects: the number holded in $file is incremented
 # Return Value: NUM(sequence number)
 sub increment_id
@@ -127,9 +127,11 @@ sub increment_id
     use IO::Adapter::AtomicFile;
     my ($rh, $wh) = IO::Adapter::AtomicFile->rw_open($seq_file);
 
+    # XXX-TODO: share codes between get_id() and increment_id() .
     # read the current sequence number
     if (defined $rh) {
 	$id = $rh->getline;
+	$id =~ s/[\s\r\n]*$//;
 	$rh->close;
     }
     else {
@@ -161,10 +163,10 @@ sub increment_id
 }
 
 
-# Descriptions: get sequence
+# Descriptions: get sequence number.
 #    Arguments: OBJ($self) [STR($file)]
 #               If $file is not specified,
-#               the sequence_file parameter in new().
+#               the sequence_file parameter in new() is used.
 # Side Effects: the number holded in $file is incremented
 # Return Value: NUM(sequence number)
 sub get_id
@@ -202,7 +204,55 @@ sub get_id
 	return 0;
     }
 
-    return chomp($id);
+    $id =~ s/[\s\r\n]*$//;
+    return $id;
+}
+
+
+# Descriptions: store sequence number into specified $file
+#    Arguments: OBJ($self) NUM($id) [STR($file)]
+#               If $file is not specified,
+#               the sequence_file parameter in new() is used.
+# Side Effects: create sequence file if not found.
+# Return Value: NUM(sequence number)
+sub set_id
+{
+    my ($self, $id, $file) = @_;
+    my $seq_file = defined $file ? $file : $self->{ _sequence_file };
+
+    unless (defined $seq_file) {
+	$self->error_set("the sequence file is undefined");
+	return 0;
+    };
+
+    unless ($seq_file) {
+	$self->error_set("the sequence file is not specified");
+	return 0;
+    };
+
+    # touch the sequence file if it does not exist.
+    unless (-f $seq_file) {
+	eval q{
+	    use File::Utils qw(touch);
+	    touch($seq_file);
+	};
+    };
+
+    use IO::Adapter::AtomicFile;
+    my ($rh, $wh) = IO::Adapter::AtomicFile->rw_open($seq_file);
+
+    # read the current sequence number
+    if (defined $wh) {
+	print $wh $id, "\n";
+	$wh->close;
+    }
+    else {
+	$self->error_set("cannot open the sequence file");
+	return 0;
+    }
+
+    $id =~ s/[\s\r\n]*$//;
+    return $id;
 }
 
 

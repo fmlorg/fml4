@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Switch.pm,v 1.76 2002/11/07 10:53:52 fukachan Exp $
+# $FML: Switch.pm,v 1.79 2002/12/21 12:15:54 fukachan Exp $
 #
 
 package FML::Process::Switch;
@@ -280,6 +280,11 @@ sub ProcessSwitch
 }
 
 
+#
+# XXX-TODO: hmm, we should use config file such as /etc/fml/module.cf ?
+#
+
+
 # Descriptions: return the suitable getopt options
 #    Arguments: STR($myname)
 # Side Effects: none
@@ -294,6 +299,7 @@ sub _module_specific_options
     if ($myname eq 'fml.pl'     ||
 	$myname eq 'distribute' ||
 	$myname eq 'command'    ||
+	$myname eq 'digest'     ||
 	$myname eq 'mead'       ||
 	$myname eq 'error'      ||
 	$myname eq 'loader' ) {
@@ -327,6 +333,9 @@ sub _module_specific_options
 	return qw(debug! help! -c=s n!);
     }
     elsif ($myname eq 'fmlalias') {
+	return qw(debug! help! -c=s n!);
+    }
+    elsif ($myname eq 'fmlsummary') {
 	return qw(debug! help! -c=s n!);
     }
     elsif ($myname eq 'config.cgi' || $myname eq 'menu.cgi') {
@@ -408,6 +417,9 @@ sub _module_we_use
     elsif ($name eq 'mead' || $name eq 'error') {
 	$pkg = 'FML::Process::Error';
     }
+    elsif ($name eq 'digest') {
+	$pkg = 'FML::Process::Digest';
+    }
     elsif ($name eq 'fmlserv') {
 	$pkg = 'FML::Process::ListServer';
     }
@@ -425,6 +437,9 @@ sub _module_we_use
     }
     elsif ($name eq 'fmlalias') {
 	$pkg = 'FML::Process::Alias';
+    }
+    elsif ($name eq 'fmlsummary') {
+	$pkg = 'FML::Process::Summary';
     }
     elsif ($name eq 'fmlthread') {
 	$pkg = 'FML::Process::ThreadTrack';

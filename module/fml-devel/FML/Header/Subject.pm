@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Subject.pm,v 1.32 2002/10/28 09:51:21 fukachan Exp $
+# $FML: Subject.pm,v 1.35 2002/12/20 03:44:52 fukachan Exp $
 #
 
 package FML::Header::Subject;
@@ -24,7 +24,7 @@ FML::Header::Subject - manipule the mail header subject
 
 =head1 DESCRIPTION
 
-a collection of functions to manipulate the header subject.
+collection of functions to manipulate the header subject.
 
 =head1 METHODS
 
@@ -52,7 +52,7 @@ sub new
 
 add or rewrite the subject tag for C<$header>.
 This mothod cuts off Re: (reply identifier) in subject: and
-replace the subject with the newer content.
+replace the subject with the newer content e.g. including the ML tag.
 
 =cut
 
@@ -64,19 +64,66 @@ replace the subject with the newer content.
 sub rewrite_article_subject_tag
 {
     my ($self, $header, $config, $args) = @_;
+    my ($in_code, $out_code);
+
+    # XXX-TODO: need $article_subject_tag expaned already e.g. "\Lmlname\E"
+    # XXX-TODO: we should include this exapansion method within this module?
+    my $tag     = $config->{ article_subject_tag };
+    my $subject = $header->get('subject');
+
+    # decode MIME encoded string and get charset info if could.
+    ($subject, $in_code, $out_code) = $self->decode($subject, $tag);
+
+    # cut off Re: Re: Re: ...
+    $self->_cut_off_reply(\$subject);
+
+    # XXX-TODO: method-ify _delete_subject_tag() ?
+    # de-tag
+    $subject = _delete_subject_tag( $subject, $tag );
+
+    # cut off Re: Re: Re: ...
+    $self->_cut_off_reply(\$subject);
+
+    use Mail::Message::Encode;
+    my $obj = new Mail::Message::Encode;
+
+    # add(prepend) the rewrited tag with mime encoding.
+    $tag = sprintf($tag, $args->{ id });
+    my $new_subject = $tag." ".$subject;
+    $new_subject = $obj->encode_mime_string($new_subject, 'base64', $in_code);
+    $header->replace('Subject', $new_subject);
+}
+
+
+# Descriptions: delete subject tag
+#    Arguments: OBJ($self) STR($subject) STR($tag)
+# Side Effects: none
+# Return Value: STR
+sub clean_up
+{
+    my ($self, $subject, $tag) = @_;
+    my ($s, $in_code, $out_code) = $self->decode($subject, $tag);
+    return $self->delete_subject_tag($s, $tag);
+}
+
+
+# Descriptions: exapnd special regexp(s) and mime-decode subject.
+#    Arguments: OBJ($self) STR($subject) STR($tag)
+# Side Effects: none
+# Return Value: ARRAY(STR, STR, STR)
+sub decode
+{
+    my ($self, $subject, $tag) = @_;
     my ($in_code, $out_code) = ();
 
     # for example, ml_name = elena
-    my $ml_name  = $config->{ ml_name };
-    my $tag      = $config->{ article_subject_tag };
-    my $subject  = $header->get('subject');
-
     # if $tag has special regexp such as \U$ml_name\E or \L$ml_name\E
     if ($tag =~ /\\E/o && $tag =~ /\\U|\\L/o) {
 	eval qq{ \$tag = "$tag";};
 	Log($@) if $@;
     }
 
+    # XXX-TODO: care for not Japanese !
     if ($subject =~ /=\?iso-2022-jp\?/i) {
 	$in_code  = 'jis-jp';
 	$out_code = 'euc-jp';
@@ -90,20 +137,18 @@ sub rewrite_article_subject_tag
     my $obj = new Mail::Message::Encode;
     $subject = $obj->decode_mime_string($subject , $out_code);
 
-    # cut off Re: Re: Re: ...
-    $self->_cut_off_reply(\$subject);
+    return ($subject, $in_code, $out_code);
+}
 
-    # de-tag
-    $subject = _delete_subject_tag( $subject, $tag );
 
-    # cut off Re: Re: Re: ...
-    $self->_cut_off_reply(\$subject);
-
-    # add(prepend) the rewrited tag
-    $tag = sprintf($tag, $args->{ id });
-    my $new_subject = $tag." ".$subject;
-    $new_subject = $obj->encode_mime_string($new_subject, 'base64', $in_code);
-    $header->replace('Subject', $new_subject);
+# Descriptions: delete subject tag
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: STR
+sub delete_subject_tag
+{
+    my ($self, $subject, $tag) = @_;
+    return _delete_subject_tag($subject, $tag);
 }
 
 
@@ -188,6 +233,7 @@ sub is_reply
 
     return 1 if $subject =~ /^\s*Re:/i;
 
+    # XXX-TODO: care for not Japanese string!
     my $pkg = 'Mail::Message::Language::Japanese::Subject';
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {
@@ -198,7 +244,7 @@ sub is_reply
 }
 
 
-# Descriptions: cut off reply keywords like "Re:"
+# Descriptions: cut off reply keywords like "Re:".
 #    Arguments: OBJ($self) STR_REF($r_subject)
 #               $r_subject is SCALAR REREFENCE to the subject string
 # Side Effects: $r_subject is rewritten
@@ -207,6 +253,7 @@ sub _cut_off_reply
 {
     my ($self, $r_subject) = @_;
 
+    # XXX-TODO: care for not Japanese string!
     my $pkg = 'Mail::Message::Language::Japanese::Subject';
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {

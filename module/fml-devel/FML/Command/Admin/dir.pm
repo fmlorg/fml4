@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: dir.pm,v 1.6 2002/09/22 14:56:44 fukachan Exp $
+# $FML: dir.pm,v 1.8 2002/12/15 14:13:16 fukachan Exp $
 #
 
 package FML::Command::Admin::dir;
@@ -15,7 +15,7 @@ use Carp;
 
 =head1 NAME
 
-FML::Command::Admin::dir - show "ls" results
+FML::Command::Admin::dir - show "ls -l" results
 
 =head1 SYNOPSIS
 
@@ -23,7 +23,7 @@ See C<FML::Command> for more details.
 
 =head1 DESCRIPTION
 
-show "ls" results
+show "ls -l" results.
 
 =head1 METHODS
 
@@ -67,12 +67,13 @@ sub process
 
     use FML::Restriction::Base;
     my $safe   = new FML::Restriction::Base;
-    my $regexp = $safe->basic_variables();
+    my $regexp = $safe->basic_variable();
     my $dirreg = $regexp->{ directory };
 
     # analyze ...
+    # XXX-TODO: "admin ls -i -a tmp" ignores "tmp" but not inform the error.
     for my $x (@$options) {
-	# restrict the file name
+	# XXX-TODO: correct? we restrict the "ls" option pattern here.
 	if ($x =~ /^($dirreg)$/) {
 	    $du_args->{ opt_ls } = $1;
 	}
@@ -80,7 +81,9 @@ sub process
 	    push(@argv, $x);
 	}
     }
-    $du_args->{ options } = \@argv;
+
+    # XXX-TODO: $du_args->{ options } is used later for what ?
+    # $du_args->{ options } = \@argv;
 
     use FML::Command::DirUtils;
     my $obj = new FML::Command::DirUtils;

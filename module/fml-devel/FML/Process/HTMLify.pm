@@ -3,7 +3,7 @@
 # Copyright (C) 2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: HTMLify.pm,v 1.24 2002/09/22 14:56:53 fukachan Exp $
+# $FML: HTMLify.pm,v 1.26 2002/12/22 03:46:20 fukachan Exp $
 #
 
 package FML::Process::HTMLify;
@@ -41,7 +41,7 @@ create a C<FML::Process::Kernel> object and return it.
 
 =head2 C<prepare()>
 
-adjust ml_* and load configuration files.
+adjust ml_*, load configuration files and fix @INC.
 
 =cut
 
@@ -59,7 +59,7 @@ sub new
 }
 
 
-# Descriptions: adjust ml_* and load configuration files
+# Descriptions: adjust ml_*, load configuration files, and fix @INC.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -80,7 +80,7 @@ sub prepare
 }
 
 
-# Descriptions: dummy to avoid to take data from STDIN
+# Descriptions: dummy.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -99,9 +99,10 @@ sub verify_request
 
 =head2 C<run($args)>
 
-call the actual thread tracking system.
+call &FML::Command::HTMLify::convert().
 
 =cut
+
 
 # Descriptions: convert text format article to HTML by Mail::Message::ToHTML
 #    Arguments: OBJ($curproc) HASH_REF($args)
@@ -116,7 +117,7 @@ sub run
     my $src_dir = $argv->[0];
     my $dst_dir = $argv->[1];
 
-    print STDERR "htmlify\t$src_dir =>\n\t\t$dst_dir\n" if $debug;
+    print STDERR "htmlify\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
 
     my $eval = $config->get_hook( 'fmlhtmlify_run_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
@@ -160,7 +161,7 @@ _EOF_
 }
 
 
-# Descriptions: dummy to avoid to take data from STDIN
+# Descriptions: dummy.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -177,7 +178,7 @@ sub finish
 }
 
 
-# Descriptions: dummy to avoid to take data from STDIN
+# Descriptions: dummy.
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
 # Return Value: none

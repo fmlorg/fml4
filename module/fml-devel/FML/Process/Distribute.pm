@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Distribute.pm,v 1.99 2002/10/03 22:10:15 fukachan Exp $
+# $FML: Distribute.pm,v 1.103 2002/12/25 08:41:18 fukachan Exp $
 #
 
 package FML::Process::Distribute;
@@ -255,8 +255,8 @@ print <<"_EOF_";
 
 Usage: $0 \$ml_home_prefix/\$ml_name [options]
 
-   For example, distribute of elena ML
-   $0 /var/spool/ml/elena
+   For example, distribute of elena\@fml.org ML
+   $0 elena\@fml.org
 
 _EOF_
 }
@@ -330,6 +330,11 @@ sub _distribute
     # spool in the article before delivery
     $article->spool_in($id);
 
+    # update summary
+    use FML::Article::Summary;
+    my $summary = new FML::Article::Summary $curproc;
+    $summary->append($article, $id);
+
     # delivery starts !
     $curproc->_deliver_article($args);
 
@@ -370,6 +375,7 @@ sub _header_rewrite
     my $rules  = $config->{ article_header_rewrite_rules };
     my $id     = $args->{ id };
 
+    # XXX-TODO: use $config->get_as_array_ref()
     for my $rule (split(/\s+/, $rules)) {
 	Log("_header_rewrite( $rule )") if $config->yes('debug');
 
@@ -399,6 +405,7 @@ sub _deliver_article
     my $body    = $curproc->article_message_body();   # Mail::Message object
 
     unless ( $config->yes( 'use_article_delivery' ) ) {
+	Log("not delivery (\$use_article_delivery = no)");
 	return;
     }
 
@@ -413,10 +420,11 @@ sub _deliver_article
     my $sfp = sub { my ($s) = @_; print $s; print "\n" if $s !~ /\n$/o;};
     my $handle = undef;
 
+    # overload $sfp log function pointer.
     my $wh = $curproc->open_outgoing_message_channel();
     if (defined $wh) {
 	$sfp = sub { print $wh @_;};
-	$handle = $wh;
+	$handle = undef; # $wh;
     }
 
     # delay loading of module
@@ -506,6 +514,8 @@ sub htmlify
     my $article_id     = $pcb->get('article', 'id');
     my $article_file   = $article->filepath($article_id);
     my $index_order    = $config->{ html_archive_index_order_type };
+
+    # XXX-TODO: care for non Japanese.
     my $htmlifier_args = {
 	directory   => $html_dir,
 	charset     => 'euc-jp',

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Kernel.pm,v 1.139 2002/10/22 02:28:57 fukachan Exp $
+# $FML: Kernel.pm,v 1.149 2002/12/25 03:11:02 fukachan Exp $
 #
 
 package FML::Process::Kernel;
@@ -346,7 +346,7 @@ sub _lock_init
 	my $fh = new FileHandle $lock_file, "a";
 	if (defined $fh) {
 	    print $fh "\n";
-	    $fh->close if $fh;
+	    $fh->close;
 	}
     }
 
@@ -394,7 +394,8 @@ sub get_event_timeout
     if (-f $qf) {
 	use FileHandle;
 	my $fh = new FileHandle $qf;
-	my $t  = $fh->getline(); $t =~ s/\s*//g;
+	my $t  = $fh->getline();
+	$t =~ s/\s*//g;
 
 	return $t;
     }
@@ -429,7 +430,6 @@ sub set_event_timeout
 sub _init_event_timeout
 {
     my ($curproc, $channel) = @_;
-
     my $config = $curproc->config();
     my $dir    = $config->{ event_queue_dir };
 
@@ -443,7 +443,10 @@ sub _init_event_timeout
     unless (-f $qf) {
 	use FileHandle;
 	my $wh = new FileHandle ">> $qf";
-	print $wh "\n" if defined $wh;
+	if (defined $wh) {
+	    print $wh "\n";
+	    $wh->close;
+	}
     }
 
     return $qf;
@@ -462,6 +465,7 @@ a side effect.
 #               as a side effect
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: set the return value of $curproc->sender().
+#               stop the current process if needed.
 # Return Value: none
 sub verify_sender_credential
 {
@@ -481,6 +485,8 @@ sub verify_sender_credential
 	$curproc->stop_this_process("cannot extract From:");
 	LogError("cannot extract From:");
     }
+
+    # XXX-TODO: check $from should match safe address regexp.
 
     # XXX "@addrs must be empty" is valid since From: is unique.
     unless (@addrs) {
@@ -509,7 +515,7 @@ See C<FML::Header> object for more details.
 
 # Descriptions: top level of loop checks
 #    Arguments: OBJ($curproc) HASH_REF($args)
-# Side Effects: none
+# Side Effects: stop the current process if needed.
 # Return Value: none
 sub simple_loop_check
 {
@@ -519,7 +525,7 @@ sub simple_loop_check
     my $rules  = $config->get_as_array_ref( 'header_loop_check_rules' );
     my $match  = 0;
 
-  RULES:
+  RULE:
     for my $rule (@$rules) {
 	if ($header->can($rule)) {
 	    $match = $header->$rule($config, $args) ? $rule : 0;
@@ -528,7 +534,7 @@ sub simple_loop_check
 	    Log("header->${rule}() is undefined");
 	}
 
-	last RULES if $match;
+	last RULE if $match;
     }
 
     if ($match) {
@@ -557,9 +563,9 @@ with considering virtual domains.
 =cut
 
 
-# Descriptions:
+# Descriptions: determine ml_* variables with considering virtual domains.
 #    Arguments: OBJ($curproc) HASH_REF($args)
-# Side Effects:
+# Side Effects: update $config->{ ml_* } variables.
 # Return Value: none
 sub resolve_ml_specific_variables
 {
@@ -570,19 +576,23 @@ sub resolve_ml_specific_variables
     my $myname  = $args->{ myname };
     my $ml_addr = '';
 
+    # XXX-TODO: $config should determine makefml like argument or not ?
+    # XXX-TODO: for example, if ($config->is_makefml_argv_style( $myname ) {;}
     # 1. virtual domain or not ?
     # 1.1 search ml@domain syntax arg in @ARGV
-    if ($myname eq 'makefml' || $myname eq 'fmlthread') {
+    if ($myname eq 'makefml' ||
+	$myname eq 'fmlthread' ||
+	$myname eq 'fmlsummary') {
 	my $default_domain = $curproc->default_domain();
 	($command, $ml_name, @options) = @ARGV;
 
 	# makefml $ml->$command
-	if ($command =~ /\-\>/) {
+	if (defined $command && $command =~ /\-\>/) {
 	    ($command, @options) = @ARGV;
 	    ($ml_name, $command) = split('->', $command);
 	}
 	# makefml $ml::$command
-	elsif ($command =~ /::/) {
+	elsif (defined $command && $command =~ /::/) {
 	    ($command, @options) = @ARGV;
 	    ($ml_name, $command) = split('::', $command);
 	}
@@ -597,25 +607,31 @@ sub resolve_ml_specific_variables
 	}
     }
     else {
+	use FML::Restriction::Base;
+	my $safe    = new FML::Restriction::Base;
+	my $regexp  = $safe->basic_variable();
+	my $pattern = $regexp->{ address };
+
+	# XXX-TODO: searching ml_addr should be first match. ok?
 	# XXX "fmlconf -n elena@fml.org" works ?
 	# XXX yes, but "fmlconf -n elena" works ? no ;-)
+      ARGV:
 	for my $arg (@ARGV) {
-	    if ($arg =~ /\S+\@\S+/) { $ml_addr = $arg;}
+	    if ($arg =~ /^($pattern)$/) {
+		$ml_addr = $arg;
+		last ARGV;
+	    }
 	}
 
 	# not found. Hmm, "fmlconf -n elena" case ?
 	unless ($ml_addr) {
 	    my $default_domain = $curproc->default_domain();
-
-	    use FML::Restriction::Base;
-	    my $safe    = new FML::Restriction::Base;
-	    my $regexp  = $safe->basic_variable();
-	    my $pattern = $regexp->{ ml_name };
+	    my $pattern        = $regexp->{ ml_name };
 
 	  ARGS:
 	    for my $arg (@ARGV) {
 		last ARGS if $ml_addr;
-		next ARGS if $arg =~ /^-/o;
+		next ARGS if $arg =~ /^-/o; # options
 
 		if ($arg =~ /^($pattern)$/) {
 		    $ml_addr = $arg. '@' . $default_domain;
@@ -661,7 +677,7 @@ sub resolve_ml_specific_variables
 	  ARGS:
 	    for my $arg (@ARGV) {
 		last ARGS if $ml_addr;
-		next ARGS if $arg =~ /^-/o;
+		next ARGS if $arg =~ /^-/o; # options
 
 		# the first directory name e.g. /var/spool/ml/elena
 		if (-d $arg) {
@@ -722,8 +738,8 @@ sub __debug_ml_xxx
 }
 
 
-# Descriptions: analyze argument vector
-#    Arguments: OBJ($curproc)
+# Descriptions: analyze argument vector and return ml_home_dir and .cf list.
+#    Arguments: OBJ($curproc) HASH_REF($main_cf)
 # Side Effects: none
 # Return Value: HASH_REF
 sub _find_ml_home_dir_in_argv
@@ -821,7 +837,7 @@ sub load_config_files
 sub fix_perl_include_path
 {
     my ($curproc) = @_;
-    my $config = $curproc->{ config };
+    my $config    = $curproc->{ config };
 
     # XXX update @INC here since we should do after loading configurations.
     # update @INC for ml local libraries
@@ -873,14 +889,14 @@ sub parse_incoming_message
     $curproc->{ incoming_message }->{ body  }   = $msg->whole_message_body;
 
     # save input message for further investigation
-    my $config  = $curproc->{ config };
+    my $config = $curproc->{ config };
     if ($config->yes('use_incoming_mail_cache')) {
 	my $dir     = $config->{ incoming_mail_cache_dir };
 	my $modulus = $config->{ incoming_mail_cache_size };
 	use File::CacheDir;
         my $obj     = new File::CacheDir {
-            directory  => $dir,
-	    modulus    => $modulus,
+            directory => $dir,
+	    modulus   => $modulus,
         };
 
 	if (defined $obj) {
@@ -909,7 +925,7 @@ The restriction rules follows the order of C<command_restrictions>.
 
 # Descriptions: permit this post process
 #    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
+# Side Effects: set the error reason at "check_restriction" in pcb.
 # Return Value: NUM(1 or 0)
 sub permit_post
 {
@@ -920,7 +936,7 @@ sub permit_post
 
 # Descriptions: permit this command process
 #    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
+# Side Effects: set the error reason at "check_restriction" in pcb.
 # Return Value: NUM(1 or 0)
 sub permit_command
 {
@@ -931,8 +947,8 @@ sub permit_command
 
 # Descriptions: permit this $type process based on the rules defined
 #               in ${type}_restrictions.
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects: none
+#    Arguments: OBJ($self) HASH_REF($args) STR($type)
+# Side Effects: set the error reason at "check_restriction" n pcb.
 # Return Value: NUM(1 or 0)
 sub _check_restrictions
 {
@@ -942,9 +958,12 @@ sub _check_restrictions
     my $pcb    = $curproc->{ pcb };
     my $sender = $cred->sender();
 
+    # XXX-TODO: method()-ify these functions for further enhancement.
+
+    # XXX-TODO: we should use $config->get_as_array_ref().
     for my $rule (split(/\s+/, $config->{ "${type}_restrictions" })) {
 	if ($rule eq 'reject_system_accounts') {
-	    my $match  = $cred->match_system_accounts($sender);
+	    my $match = $cred->match_system_accounts($sender);
 	    if ($match) {
 		Log("${rule}: $match matches sender address");
 		$pcb->set("check_restrictions", "deny_reason", $rule);
@@ -1087,6 +1106,61 @@ makefml not support message handling not yet.
 =cut
 
 
+sub _analyze_recipients
+{
+    my ($curproc, $args) = @_;
+    my $recipient      = [];
+    my $recipient_maps = [];
+    my $rcpt = $args->{ recipient }      if defined $args->{ recipient };
+    my $map  = $args->{ recipient_map }  if defined $args->{ recipient_map };
+    my $maps = $args->{ recipient_maps } if defined $args->{ recipient_maps };
+
+    if (defined($rcpt)) {
+	if (ref($rcpt) eq 'ARRAY') {
+	    $recipient = $rcpt if @$rcpt;
+	}
+	elsif (ref($rcpt) eq '') {
+	    $recipient = [ $rcpt ] if $rcpt;
+	}
+	else {
+	    LogError("reply_message: wrong type recipient");
+	}
+    }
+
+    if (defined($map)) {
+	if (ref($map) eq '') {
+	    $recipient_maps = [ $map ] if $map;
+	}
+	else {
+	    LogError("reply_message: wrong type recipient_map");
+	}
+    }
+
+    if (defined($maps)) {
+	if (ref($maps) eq 'ARRAY') {
+	    $recipient_maps = $maps if @$maps;
+	}
+	else {
+	    LogError("reply_message: wrong type recipient_maps");
+	}
+    }
+
+    # if both specified, use default sender.
+    unless (@$recipient || @$recipient_maps) {
+	$recipient = [ $curproc->{ credential }->sender() ];
+    }
+
+    return ($recipient, $recipient_maps);
+}
+
+
+sub _analyze_header
+{
+    my ($curproc, $args) = @_;
+    return $args->{ header };
+}
+
+
 # Descriptions: set reply message
 #    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
 # Side Effects: none
@@ -1102,16 +1176,9 @@ sub reply_message
 	return;
     }
 
-    my $recipient = [ $curproc->{ credential }->sender() ];
-
-    if (defined($args->{recipient})) {
-	if (ref($args->{recipient}) eq 'ARRAY') {
-	    $recipient = $args->{ recipient };
-	}
-	elsif (ref($args->{recipient}) eq '') {
-	    $recipient = [ $args->{ recipient } ];
-	}
-    }
+    # recipients list
+    my ($recipient, $recipient_maps) = $curproc->_analyze_recipients($args);
+    my $hdr                          = $curproc->_analyze_header($args);
 
     # check text messages and fix if needed.
     unless (ref($msg)) {
@@ -1119,7 +1186,9 @@ sub reply_message
 	$msg .= "\n" unless $msg =~ /\n$/;
     }
 
-    $curproc->_append_message_into_queue($msg, $args, $recipient);
+    $curproc->_append_message_into_queue($msg, $args,
+					 $recipient, $recipient_maps,
+					 $hdr);
 
     if (defined $args->{ always_cc }) {
 	# only if $recipient above != always_cc, duplicate $msg message.
@@ -1136,7 +1205,9 @@ sub reply_message
 
 	if (_array_is_different($sent, $recipient)) {
 	    Log("cc: [ @$recipient ]");
-	    $curproc->_append_message_into_queue($msg, $args, $recipient);
+	    $curproc->_append_message_into_queue($msg, $args,
+						 $recipient, $recipient_maps,
+						 $hdr);
 	}
     }
 }
@@ -1165,21 +1236,24 @@ sub _array_is_different
 
 
 # Descriptions: add the specified $msg into on memory queue
-#    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args) ARRAY_REF($recipient)
+#    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
+#               ARRAY_REF($recipient) ARRAY_REF($recipient_maps)
 # Side Effects: update on momory queue which is on PCB area.
 # Return Value: none
 sub _append_message_into_queue
 {
-    my ($curproc, $msg, $args, $recipient) = @_;
+    my ($curproc, $msg, $args, $recipient, $recipient_maps, $hdr) = @_;
     my $pcb      = $curproc->{ pcb };
     my $category = 'reply_message';
     my $class    = 'queue';
     my $rarray   = $pcb->get($category, $class) || [];
 
     $rarray->[ $#$rarray + 1 ] = {
-	message   => $msg,
-	type      => ref($msg) ? ref($msg) : 'text',
-	recipient => $recipient,
+	message        => $msg,
+	type           => ref($msg) ? ref($msg) : 'text',
+	recipient      => $recipient,
+	recipient_maps => $recipient_maps,
+	header         => $hdr,
     };
 
     $pcb->set($category, $class, $rarray);
@@ -1200,19 +1274,24 @@ sub _reply_message_recipient_keys
     my $rarray   = $pcb->get($category, $class) || [];
     my %rcptattr = ();
     my %rcptlist = ();
-    my ($rcptlist, $key, $type) = ();
+    my %rcptmaps = ();
+    my %hdr      = ();
+    my ($rcptlist, $rcptmaps, $key, $type) = ();
 
     for my $m (@$rarray) {
 	if (defined $m->{ recipient } ) {
 	    $rcptlist = $m->{ recipient };
+	    $rcptmaps = $m->{ recipient_maps };
 	    $type     = ref($m->{ message });
-	    $key      = _gen_recipient_key( $rcptlist );
+	    $key      = _gen_recipient_key( $rcptlist, $rcptmaps );
 	    $rcptattr{ $key }->{ $type }++;
 	    $rcptlist{ $key } = $rcptlist;
+	    $rcptmaps{ $key } = $rcptmaps;
+	    $hdr{ $key }      = $m->{ header };
 	}
     }
 
-    return ( \%rcptattr, \%rcptlist );
+    return ( \%rcptattr, \%rcptlist, \%rcptmaps, \%hdr );
 }
 
 
@@ -1222,14 +1301,33 @@ sub _reply_message_recipient_keys
 # Return Value: STR
 sub _gen_recipient_key
 {
-    my ($rarray) = @_;
+    my ($rarray, $rmaps) = @_;
+    my (@c) = caller;
+    my $key = '';
 
     if (defined $rarray) {
-	return join(" ", @$rarray);
+	if (ref($rarray) eq 'ARRAY') {
+	    if (@$rarray) {
+		$key = join(" ", @$rarray);
+	    }
+	}
+	else {
+	    LogError("wrong \$rarray");
+	}
     }
-    else {
-	return '';
+
+    if (defined $rmaps) {
+	if (ref($rmaps) eq 'ARRAY') {
+	    if (@$rmaps) {
+		$key .= " ".join(" ", @$rmaps);
+	    }
+	}
+	else {
+	    LogError("wrong \$rmaps");
+	}
     }
+
+    return $key;
 }
 
 
@@ -1357,7 +1455,7 @@ sub inform_reply_messages
     #    2. pick up messages for it/them.
     #       merge messages by types if needed.
     #
-    my ($attr, $list)  = $curproc->_reply_message_recipient_keys();
+    my ($attr, $list, $maps, $hdr) = $curproc->_reply_message_recipient_keys();
     my $need_multipart = 0;
 
     for my $key (keys %$list) {
@@ -1367,7 +1465,9 @@ sub inform_reply_messages
 		$curproc->queue_in($category, {
 		    recipient_key  => $key,
 		    recipient_list => $list->{ $key },
+		    recipient_maps => $maps->{ $key },
 		    recipient_attr => $attr,
+		    header         => $hdr->{ $key },
 		});
 	    }
 	}
@@ -1396,18 +1496,25 @@ sub queue_in
     my $is_multipart = 0;
     my $rcptkey      = '';
     my $rcptlist     = [];
+    my $rcptmaps     = [];
     my $msg          = '';
+    my $hdr_to       = '';
 
     # override parameters (may be processed here always)
     if (defined $optargs) {
 	my $a = $optargs;
+	my $h = $optargs->{ header };
+	my $c = $optargs->{ header }->{ 'content-type' };
 
 	# override parameters
-	$sender    = $a->{'sender'}         if defined $a->{'sender'};
-	$charset   = $a->{'charset'}        if defined $a->{'charset'};
-	$subject   = $a->{'subject'}        if defined $a->{'subject'};
+	$sender    = $h->{'sender'}         if defined $h->{'sender'};
+	$subject   = $h->{'subject'}        if defined $h->{'subject'};
+	$hdr_to    = $h->{'to'}             if defined $h->{'to'};
+	$reply_to  = $h->{'reply-to'}       if defined $h->{'reply-to'};
+	$charset   = $c->{'charset'}        if defined $c->{'charset'};
 	$rcptkey   = $a->{'recipient_key'}  if defined $a->{'recipient_key'};
 	$rcptlist  = $a->{ recipient_list } if defined $a->{'recipient_list'};
+	$rcptmaps  = $a->{ recipient_maps } if defined $a->{'recipient_maps'};
 
 	# we need multipart style or not ?
 	if (defined $a->{'recipient_attr'}) {
@@ -1454,10 +1561,11 @@ sub queue_in
     croak($@) if $@;
 
     if ($is_multipart) {
+	my $_to = $hdr_to || $rcptkey;
 	eval q{
 	    $msg = new Mail::Message::Compose
 		From     => $sender,
-		To       => $rcptkey,
+		To       => $_to,
 		Subject  => $subject,
 		Type     => "multipart/mixed";
 	};
@@ -1471,7 +1579,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key( $m->{ recipient } );
+	    my $r = _gen_recipient_key($m->{ recipient },
+				       $m->{ recipient_maps } );
 
 	    # pick up only messages returned to specified $rcptkey
 	    next QUEUE unless $r eq $rcptkey;
@@ -1494,7 +1603,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key( $m->{ recipient } );
+	    my $r = _gen_recipient_key($m->{ recipient },
+				       $m->{ recipient_maps } );
 
 	    next QUEUE unless $r eq $rcptkey;
 
@@ -1525,7 +1635,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key( $m->{ recipient } );
+	    my $r = _gen_recipient_key($m->{ recipient },
+				       $m->{ recipient_maps });
 
 	    next QUEUE unless $r eq $rcptkey;
 
@@ -1542,10 +1653,11 @@ sub queue_in
 	    }
 	}
 
+	my $_to = $hdr_to || $rcptkey;
 	eval q{
 	    $msg = new Mail::Message::Compose
 		From     => $sender,
-		To       => $rcptkey,
+		To       => $_to,
 		Subject  => $subject,
 		Data     => $s,
 	};
@@ -1568,8 +1680,17 @@ sub queue_in
     };
 
     if (defined $queue) {
-	$queue->set('sender',     $sender);
-	$queue->set('recipients', $rcptlist);
+	$queue->set('sender', $sender);
+
+	if ($rcptlist) {
+	    $queue->set('recipients', $rcptlist);
+	}
+
+	# $rcptlist and $rcptmaps duplication is ok.
+	if ($rcptmaps) {
+	    $queue->set('recipient_maps', $rcptmaps);
+	}
+
 	$queue->in( $msg ) && Log("queue=$qid in");
 	$queue->setrunnable();
 
