@@ -526,7 +526,7 @@ sub GetHostInfo
 
     for (@chain) {
 	if ($_ > $threshold) {
-	    return "network error? @chain";
+	    return "network is jammed? @chain";
 	}
     }
 
