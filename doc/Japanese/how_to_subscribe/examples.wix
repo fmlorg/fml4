@@ -1,0 +1,31 @@
+.S	skip コマンドの操作対象のファイルは？
+
+fml-support: 07656, 07716
+
+◯ list1 ,list2 というメーリングリストがあり、list1 の config.ph で
+	push( @MEMBER_LIST, "$DIR/../list2/members" );
+として list1,list2 は 包含関係にある。
+
+◯ list1,list2 両方に 同じアドレスを登録してある人がいる。
+
+どちらのＭＬのアドレスを操作しようとするか？
+
+@MEMBER_LIST 配列の順にさがしていってそのアドレスが最初に見つかったファ
+イルに対して操作を行ないます。
+
+これは config.ph で定義した値は
+
+  loading config.ph
+  @MEMBER_LIST を再設定
+  ...
+
+の順で初期化をしているために list2 list1 の順でさがして list2 でみつかっ
+て list2 のほうにそうさをしようとしてしまいます。
+
+2.2A でなんとかするなら
+
+$START_HOOK = q#
+   push( @MEMBER_LIST, "$DIR/../list2/members" );
+#;
+
+$Id$

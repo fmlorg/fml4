@@ -1,0 +1,17 @@
+Q: この場合、どれが（特定MLで）活動しているFMLか見極める方法
+
+A:  /etc/aliases にある
+
+elena: :include:/var/spool/ml/elena/include
+elena-ctl: :include:/var/spool/ml/elena/include-ctl
+
+1. この include のファイルのある path
+
+2. includeの中に書いてあるファイルとディレクトリ
+   例:
+	    ↓                      ↓
+	"|/usr/local/fml/fml.pl /var/spool/ml/elena "
+
+に該当しないディレクトリは無関係です。これでわかるでしょうか？
+
+$Id$
