@@ -134,7 +134,7 @@ COPY_SOURCES () {
 	# cf
 	echo " "; echo "cf/ ...";
 	(cd cf;
-	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS|FVS'|grep -v '~'` \
+	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS|CVS|FVS'|grep -v '~'` \
 	$DESTDIR/distrib/cf;
 	)
 
@@ -243,7 +243,7 @@ FIX_DISTRIBUTION_LINKS () {
 
 # XXX: need DESTDIR !!!
 GEN_CONTRIB () {
-   ( cd $FML/contrib; make FML=${FML} DESTDIR=${DESTDIR} )
+   ( cd $FML/contrib; make FML=${FML} DESTDIR=${DESTDIR} distribution )
 }
 
 
