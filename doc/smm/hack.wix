@@ -30,7 +30,7 @@ SMTP		libsmtp.pl
 	fop = file operation
 
 とか省略系もあるけど… ちなみに
-.ptr{FILES} にライブラリの説明がありますね。
+.ptr{library-lists} にライブラリの説明がありますね。
 
 
 .S	消してもいいファイル…
