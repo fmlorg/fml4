@@ -201,9 +201,13 @@ sub InitMakeFml
 	$UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 0;
     }
 
-    # Anyway try once ... (may be re-installation ?)
-    # Dame moto sune:-)
-    if (! $CONFIG_DIR) {
+    # XXX important to reset when $ARGV[0] eq 'install'
+    # XXX and even if $CONFIG_DIR is defined in 'install'
+    # XXX We should ignore $CONFIG_DIR in 'install' since it may be twice time.
+    # Anyway try once ... (may be re-installation ?) Dame moto sune:-)
+    if ((! $CONFIG_DIR) || ($ARGV[0] eq 'install')) {
+	undef $CONFIG_DIR;
+
 	for ("$HOME/.fml", "/usr/local/fml/.fml") {
 	    $CONFIG_DIR = $_ if -d $_;
 	}
