@@ -1,0 +1,17 @@
+.C	links ?
+
+.url http://www.ldapcentral.com/
+.url http://www.openldap.org/
+.url http://www.kingsmountain.com/ldapRoadmap.shtml
+.url http://www.umich.edu/~dirsvcs/ldap/doc/guides/slapd/
+.url http://www.padl.com/
+.url http://www.rage.net/ldap/
+.url http://www.terminator.net/ldapconf/ldap.html
+.url http://people.netscape.com/bjm/whyLDAP.html
+.url http://developer.netscape.com/docs/manuals/ldap/
+
+NOTE:
+
+Netscape ldap is downloadable and extremely easy to setup and configure.
+Additionally, it doesn't require licenseing for a small amount of users.
+
