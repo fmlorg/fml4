@@ -1,20 +1,3 @@
-hack for Database 
-
-[TODO]
-	?
-
-[DONE]
-   enable MailList*P() to access to database
-
-	Lookup()
-	 * DoMailListMemberP()
-		kern/fml.pl:1504: if (-f $file && &Lookup($addr, $file)) { ...}
-	 * MailListAdminMemberP()
-		kern/fml.pl:1526: &Lookup($_[0], $ADMIN_MEMBER_LIST);
-
-   nuke or disable CheckMember()
-
-------------------------------------
 強烈な複数行マッチを試みるとメモリを食うので、
 パラグラフ単位で切り出して、マッチングを試みるか
 関数をフィルタリング機構に用意しておく
@@ -31,6 +14,43 @@ add hook in msend.pl
 
 any comments?
 
+
+------------------------------------
+Hmm, ... any comments?
+
+--- kern/fml.pl	Sat Jul 29 12:36:22 2000
++++ kern/fml.pl.new	Sat Jul 29 11:59:55 2000
+@@ -2744,13 +2744,27 @@
+ sub InSecureP { (! &SecureP(@_));}
+ 
+ sub SecureP {
+-    local(@xargv) = @_; &use('kernsubr'); &__SecureP(@xargv);
++    my (@xargv) = @_; &use('kernsubr'); &__SecureP(@xargv);
+ }
+ 
+ sub ValidAddrSpecP
+ {
+-    ($_[0] !~ /\s|\033\$[\@B]|\033\([BJ]/ && 
+-     $_[0] =~ /^[\0-\177]+\@[\0-\177]+$/) ? 1 : 0;
++    my ($addr) = @_;
++    my ($bad) = 0;
++
++    # check domain parts (correct?)
++    # if ($addr !~ /\@[-0-9A-Z_\.]+$/i) { return 0;}
++
++    # check Japanese Charactor included ?
++    if ($addr !~ /\s|\033\$[\@B]|\033\([BJ]/ && 
++	$addr =~ /^[\0-\177]+\@[\0-\177]+$/) {
++	# ok.
++    }
++    else {
++	$bad++;
++    }
++
++    $bad ? 0 : 1;
+ }
+ 
+ # Check Looping 
 
 
 -----
