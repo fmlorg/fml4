@@ -119,6 +119,19 @@ INIT_CLEAN_UP () {
 	echo mv fml-* FML/
 	mv fml-* FML/
    )
+
+   volume=` df $DESTDIR |grep /dev/|awk '{print $4}' `
+
+   echo ""
+   echo "VOLUME CHECK: $DESTDIR left=$volume"
+
+   if [ $volume -lt 10000 ]
+   then
+	echo "ERROR: $DESTDIR is too small. (left < ${volume}K)"
+	exit 1
+    fi
+
+echo ""
 }
 
 
