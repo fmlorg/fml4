@@ -531,8 +531,8 @@ sub SetHashDefaults
 		    'delivery_mode',  'do_delivery_mode',
 
 		    '100#fmlserv', 'set up fmlserv (listserv-like command interface)',
-		    '100#listserv','set up fmlserv (listserv-like command interface)',
-		    '100#majordomo','set up fmlserv (listserv-like command interface)',
+		    # '100#listserv','set up fmlserv (listserv-like command interface)',
+		    # '100#majordomo','set up fmlserv (listserv-like command interface)',
 
 		    # misc
 		    'lock', 'do_lock',
