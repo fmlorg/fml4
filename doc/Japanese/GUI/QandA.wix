@@ -1,4 +1,22 @@
-.C	Overview
+.C	Q and A
+
+.S	/var/spool/ml/ 以下のオーナーは？
+
+apache の設定依存です。
+
+fml GUI専用WWWサーバなら apache の User の行と合わせます。他の user 権
+限をどーたらこーたら（ apache の本なりその筋に聞くなりしてね ）してい
+るなら、そのユーザに合わせます。
+
+ようすすに apache のプロセスはだれ（ユーザ）か？
+そのユーザが読み書きできないといけません
+
+例:
+   apache/httpd.conf
+
+	User fml
+
+   /var/spool/ml/ 以下の owner も fml   
 
 
 .S	httpd.conf は fml/share/ の下について設定すれば十分か？
