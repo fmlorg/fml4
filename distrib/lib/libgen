@@ -264,9 +264,9 @@ FIX_DISTRIBUTION_PERMISSION () {
 	find $DESTDIR/distrib |\
 	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 
-	if [ -d $FTP_DIR ]
+	if [ -d $FTP_DIR/${BRANCH} ]
 	then
-		find $FTP_DIR |\
+		find $FTP_DIR/${BRANCH} |\
 		perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
 	fi
 
@@ -344,16 +344,7 @@ GEN_BRANCH_ARCHIVE () {
 
 
 GEN_ARCHIVE () {
-	if [ X$__FML_MASTER_MACHINE__ = X ]; then
-		echo ignore GEN_ARCHIVE not on fml distribution master machine
-		return
-	fi
-
-	# FIX_LANGUATE
-
-	FTP=$FTP_DIR
- 	WWW=$WWW_DIR
-
+	### Section: initialize
 	if [ ! -d $FTP_DIR ]; then
 		echo ignore GEN_ARCHIVE since \$FTP_DIR is not defined
 		return
@@ -364,46 +355,53 @@ GEN_ARCHIVE () {
 		return
 	fi
 
-	if [ X$IN_RELEASE_BRANCH = X ]
-	then
-		echo ""
-		echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
-		rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
-	fi
-
-	###################################################################
-
 	echo ""
-	chdir $DESTDIR
+	echo chdir $DESTDIR
+	chdir $DESTDIR || return
 
+	# fml identifier
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-	FMLID=`echo $FMLID| sed 's/pl\#/pl/'` # handle $release.$patchlevel case
+	FMLID=`echo $FMLID| sed 's/pl\#/pl/'` 
 	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
-	DATE=`date +%y%h%d`
+
+	# date YYYYMMDD
 	DATE=` $FML/distrib/bin/date `
 
-	# for fml 2.x.y branch series
-	# If fml 2.x.y branch series, DO NOT synchronize
-	if [ X$IN_RELEASE_BRANCH = X ]
-	then
-		echo "Synchronizing $FTP/snapshot ..."
-		echo " "
-		test -d $FTP/current || mkdir $FTP/current;
-		rsync --delete -av distrib/ $FTP/current/src/
+	# directory
+	FTP=$FTP_DIR/${BRANCH}
+ 	WWW=$WWW_DIR
 
-		echo "Synchronizing $WWW ..."
-		echo " "
-		echo rsync -av $FML/var/html/ $WWW/
-		rsync -av $FML/var/html/ $WWW/
-	fi
+
+	### Section: export to ftp,www
+	echo " "
+	echo "-- sync w/ ftp server"
+	echo " "
+	test -d $FTP/src || mkdir $FTP/src
+	test -d $WWW || mkdir $WWW
+
+	rsync --delete -C -av distrib/ $FTP/src/
 
 	echo " "
-	echo "Unlinking *~ ..."
+	echo "-- sync w/ www server"
+	echo " "
+	echo rsync --delete -C -av distrib/doc/html/	$WWW/
+	rsync --delete -C -av distrib/doc/html/	$WWW/
+
+	test -d $WWW/${BRANCH} || mkdir $WWW/${BRANCH}
+	echo rsync --delete -C -av distrib/doc/html/	$WWW/${BRANCH}/
+	rsync --delete -C -av distrib/doc/html/	$WWW/${BRANCH}/
+
+
+	### Section: cleanup
+	echo " "
+	echo "-- unnlink *~ ..."
 	echo " "
 	find distrib -name '*~' -print|perl -nple unlink
 
+
+	### Section: generate snapshot {tar,zip}balls
 	echo " "
-	echo "Making tar.gz ...a "
+	echo "-- make $FMLID.tar.gz ... "
 	echo " "
 	mv distrib $FMLID
 	tar cvf $FMLID.tar $FMLID
@@ -412,87 +410,29 @@ GEN_ARCHIVE () {
 	echo cp -p $FMLID.tar.gz $FTP
 	cp -p $FMLID.tar.gz $FTP
 
-	if [ X$IN_RELEASE_BRANCH = X ]
-	then
-		echo ""
-		echo XXX current/ branch
-		echo ""
-
-		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
-
-		echo update www.fml.org/fml/
-		echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
-		cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
-
-	   (
-		set -vx
-
+	(
 		chdir $FTP
 		rm -f fml-current.*.tar.gz fml-current.tar.gz 
-
-		ln $FMLID.tar.gz current/$FMLID.tar.gz
-		ln $FMLID.tar.gz old/$FMLID.tar.gz
-		ln $FMLID.tar.gz fml-current.tar.gz
-
-		chdir current/
-		rm -f fml-current.*.tar.gz fml-current.tar.gz 
-
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
-	   )
-	else
-		echo ""
-		echo XXX release/ branch
-		echo ""
+	)
 
-	   (
-		set -vx
-
-		chdir $FTP
-		ln $FMLID.tar.gz old/$FMLID.tar.gz
-		mv $FMLID.tar.gz official
-	   )
-	fi
-
-	echo "Generating $FMLID.zip";
+	echo ""
+	echo "-- make $FMLID.zip";
+	echo ""
 	find $FMLID |zip -q -@ $FMLID.zip
-
-	echo "   remove *zip"
+	cp -p $FMLID.zip $FTP/
 	(
-		echo 	chdir $FTP; chdir $FTP
-
-		if [ X$IN_RELEASE_BRANCH = X ]
-		then
-			echo 	rm -f *.zip official/fml*zip
-			rm -f *.zip official/fml*zip
-		else
-			echo 	rm -f *.zip current/fml*zip
-			rm -f *.zip current/fml*zip
-		fi
+		chdir $FTP
+		rm -f *.zip current/fml*zip
+		ln $FMLID.zip fml-current.zip
 	)
 
-	echo "   install *zip"
-	if [ X$IN_RELEASE_BRANCH = X ]
-	then
-		cp -p $FMLID.zip $FTP/official/
-	else
-		cp -p $FMLID.zip $FTP/current/
-	fi
-
-	echo "   relink *zip"
-	(
-		if [ X$IN_RELEASE_BRANCH = X ]
-		then
-			echo 	chdir $FTP/current
-			echo 	ln $FMLID.zip fml-current.zip
-			chdir $FTP/current
-			ln $FMLID.zip fml-current.zip
-		fi
+	echo ""
+	echo "-- create MD5 check sum"
+	echo ""
+	( 
+		chdir $FTP;
+		md5 *gz *zip |sort |tee MD5SUM
 	)
-
-	echo "Creating MD5"
-
-	( chdir $FTP;          md5 *gz *zip |sort |tee MD5SUM )
-	( chdir $FTP/current ; md5 *gz *zip |sort |tee MD5SUM )
-	( chdir $FTP/official;     md5 *gz *zip |sort |tee MD5SUM )
 }
