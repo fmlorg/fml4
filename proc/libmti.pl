@@ -92,6 +92,7 @@ sub MTIProbe
 	    $ss = "Reject post from $From_address for a while.";
 	    &Log("MTI: $s");
 	    &Log($ss);
+	    &Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
 	}
     }
     elsif ($mode eq "command:max_traffic") {
@@ -103,6 +104,7 @@ sub MTIProbe
 	    $ss = "Reject command from $From_address for a while.";
 	    &Log("MTI: $s");
 	    &Log($ss);
+	    &Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
 	}
     }
 
