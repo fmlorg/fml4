@@ -47,7 +47,7 @@ sub InitMakeFml
     &GetTime;
 
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:");
+    &Getopts("dhf:A:O:p:D:v");
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -69,7 +69,8 @@ sub InitMakeFml
 	$USER = $ENV{'USER'} || (getpwuid($<))[0];
     }
 
-    $debug = $opt_d;
+    $debug   = $opt_d;
+    $verbose = $opt_v;
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
@@ -179,6 +180,8 @@ sub InitMakeFml
 	$OS_TYPE = (split(/\-/, $CPU_TYPE_MANUFACTURER_OS))[2];
 	$OS_TYPE =~ tr/a-z/A-Z/;
     }
+
+    &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
 
     if ($Config'OS_TYPE{$FQDN}) { #';
 	$OS_TYPE = $Config'OS_TYPE{$FQDN} || $OS_TYPE; #';
@@ -853,6 +856,8 @@ sub OutPutLocalConfig
     print CF "NON_PORTABILITY\t1\n";
     print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
     print CF "CPU_TYPE_MANUFACTURER_OS\t$CPU_TYPE_MANUFACTURER_OS\n";
+
+    print CF "STRUCT_SOCKADDR\t$STRUCT_SOCKADDR\n";
 
     while (($k, $v) = each %MAKE_FML) {
 	next unless $v;
@@ -1951,6 +1956,8 @@ sub GetCF
 	    $config{$key} = $value; # entry can be overwritten;
 	    push(@config, $key) unless $uniq{$key}; # entry is unique;
 	    $uniq{$key}   = 1;	# unique
+
+	    print STDERR "\$config{$key} = $value\n";
 	}
 	else {
 	    next if /^LOCAL_CONFIG/;
@@ -2775,8 +2782,13 @@ sub FYI
 	$m .= &MX;
     }
 
-    print STDERR "\nFYI: $m\n" if $m;
+    if ($m) {
+	print STDERR "\nFYI: $m\n";
+	print STDERR "\nHence, fml must send mails by 'exec sendmail' NOT IPC.\n";	
+    }
+ 
 }
+
 
 sub MX
 {
@@ -2787,6 +2799,44 @@ sub MX
 	/mail exchanger\s*=\s*(\S+)/ && ($m .= "\t$1\n");
     }
     $m;
+}
+
+
+sub SetSockAddr
+{
+    local($ostype) = @_;
+    local($r);
+
+    $r = &ProbeSockAddr;
+
+    return if ($r eq 'connect ok');
+
+    if ($ostype =~ /netbsd|bsdi/) {
+	$STRUCT_SOCKADDR = "n n a4 x8";
+    }
+    else {
+	$STRUCT_SOCKADDR = "S n a4 x8";
+    }
+}
+
+
+sub ProbeSockAddr
+{
+    local($r);
+
+    for ("n n a4 x8", "S n a4 x8", "S a4 x8", "S a4 x4", "n a4 x4") {
+	$STRUCT_SOCKADDR = $_;
+
+	$r = &TrySmtpConnect("localhost");
+
+	if ($r eq 'connect ok') { 
+	    print STDERR "OK  $_\n" if $verbose;
+	    return $r;
+	}
+	else {
+	    print STDERR "NOT $_\n" if $verbose;
+	}
+    }
 }
 
 sub ProbePerlVersion
