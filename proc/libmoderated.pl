@@ -336,6 +336,11 @@ sub ModeratorResend
 	# remove except for header info but pass "[of]h:field:"
 	for (keys %Envelope) { /^\w+h:\S+:$/ || (undef $Envelope{$_});}
     
+	# pass mode: and pcb: to temporal %Envelope
+	for (keys %Envelope) { 
+	    if (/^(mode:|pcb:)/) { $Envelope{$_} = $org_e{$_};}
+	}
+
 	&Parse;                         # Phase 1, pre-parsing here
 	&GetFieldsFromHeader;           # Phase 2, extract fields
     }
@@ -360,35 +365,13 @@ sub ModeratorResend
 	}
     }
 
-    #if  --ctladdr, eval commands
-    # Hmm, this mode may have two modes ;_;
-    # 1. distribute
-    # 2. command mode
-    if ($PERMIT_COMMAND_FROM eq "moderator") {
-	# save and reset
-	$ppf = $PERMIT_POST_FROM;
-	$pcf = $PERMIT_COMMAND_FROM;
-	$mlac = $MAIL_LIST_ACCEPT_COMMAND;
-
-	# moderator certified, so not check authentication anymore.
-        $PERMIT_POST_FROM = $PERMIT_COMMAND_FROM  = "anyone";
-
+    ## [branch:moderator-state-info]
+    ## We recover state-info from mqueue.
+    # if $fx (xq$id) exists, queue is for command mode.
+    if (-f $fx) { 
 	&FixHeaderFields(*Envelope);
-
-	$CheckCurrentProcUpperPartOnly = 1;
-	# XXX: oops against CTK ;D
-	$MAIL_LIST_ACCEPT_COMMAND = 1;
-	&CheckCurrentProc(*Envelope);
-	$CheckCurrentProcUpperPartOnly = 0;
-
-	$ForceKickOffCommand = 1; # enforce &Command() call.
-	&ModeBifurcate(*Envelope);      # Main Procedure
-	$ForceKickOffCommand = 0;
-
-	# reset
-	$PERMIT_POST_FROM    = $ppf;
-	$PERMIT_COMMAND_FROM = $pcf;
-	$MAIL_LIST_ACCEPT_COMMAND = $mlac;
+	&CheckCurrentProc(*Envelope, 'upper_part_only');
+	&Command();
     }
     else {
 	&FixHeaderFields(*e); # e.g. checking MIME
