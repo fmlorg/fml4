@@ -1,5 +1,11 @@
 .C	改造についていろいろ
 .l	hack
+.xref	data-structure
+
+
+なお fml のデータ構造の章は読んでおくとよりわかり易くなります。
+.xref	data-structure
+
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
 
@@ -55,68 +61,6 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 ただ、これは最新のメールしか送らないから↑、たまっていた分はログみない
 と不明のまま
 
-
-
-.S	変数の名前つけには組織的な何かがあるんですか？
-.key	変数の名前つけ
-.key	Naming-Convention
-
-あります。例えば config.ph の中でみられる
-
-	$ML_MEMBER_CHECK
-
-という大文字（[A-Z0-9_]+）だけの塊はユーザーのカスタマイズで使う目的の
-Global Variables。
-
-	$MailBody	$Reply_to
-	*Envelope	*_cf
-
-のように”大文字ではじまる”単語はメール本体やヘッダをSubroutine間で渡
-し会うためのGlobal Variables。
-＃*_cf は システム情報をもっている名前空間です。
-
-小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言さ
-れているでしょう。
-
-ついでに subroutine の名前はX11風だったりします。最近のはlisp風味も混
-ざってます:-)
-#おおむねX11風ですね
-
-なお、Directory を定義する $*_DIR タイプの変数には
-
-	$*_DIR 		$DIR からの相対パス
-	$FP_*_DIR 	絶対パス
-
-の２種類があります。 $FP_*_DIR タイプの変数は自動的に変換され定義され
-ます。基本的には絶対パスが使われます。
-
-	$FP_TMP_DIR
-	$FP_VARDB_DIR
-	$FP_VARLOG_DIR
-	$FP_VARRUN_DIR
-	$FP_VAR_DIR
-    	$FP_SPOOL_DIR
-.k	$FP_TMP_DIR
-.k	$FP_VARDB_DIR
-.k	$FP_VARLOG_DIR
-.k	$FP_VARRUN_DIR
-.k	$FP_VAR_DIR
-.k    	$FP_SPOOL_DIR
-
-
-.S	変数の名前つけの例外
-
-fml 1.5 以降では若干例外があります。まとめ送り関係の関数で
-
-	変換インターフェイスとしての 	f_関数 名
-	＃いつか、なくなるだろう
-
-		と 
-
-	そのモードのコンストラクタ	Cnstr_関数 名
-	そのモードのディストラクタ	Destr_関数 名
-
-が例外です
 
 
 .S	MIME文字列を日本語へ変換すること

@@ -209,6 +209,132 @@ $PORT = 25 (25/tcp) で通信しますが、
 	@MEMBER_LIST
 
 
+.C	fml 内部におけるデータ構造
+.l	data-structure
+.xref	hack
+
+
+ここでは fml 内部処理におけるデータ構造について解説します。これらの知
+識は改造する上で必須の事柄でしょうが、単に変数を1 or 0 にセットするだ
+けしか config をいじらないなら読む必要はないでしょう。
+
+
+.S	変数名の Naming Convention
+.key	変数の名前つけ
+.key	変数の Naming Convention
+.key	Naming Convention
+
+
+○ 大文字（[A-Z0-9_]+）だけの塊はユーザーのカスタマイズで使う目的の
+   Global 変数です。
+
+	例：	$ML_MEMBER_CHECK
+
+○ ”１単語の先頭一文字が大文字、残りは小文字”の塊からなる単語はメー
+   ル本体やヘッダをSubroutine間で渡しあうための Global 変数です。
+
+	$MailBody	$Reply_to
+	%Envelope	*_cf
+
+	例外： *_cf は システム情報をもっている名前空間です。
+
+   %Envelope は最も重要な変数です。
+   しかしながら、こういう変数は本来出来るだけ少なくするべきです。
+
+○ 小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言
+   されています。
+
+
+○ 補足
+なお、Directory を定義する $*_DIR タイプの変数には
+
+	$*_DIR 		$DIR からの相対パス
+	$FP_*_DIR 	絶対パス
+
+の２種類があります。 $FP_*_DIR タイプの変数は自動的に変換され定義され
+ます。基本的には絶対パスが使われます。
+
+	$FP_TMP_DIR
+	$FP_VARDB_DIR
+	$FP_VARLOG_DIR
+	$FP_VARRUN_DIR
+	$FP_VAR_DIR
+    	$FP_SPOOL_DIR
+.k	$FP_TMP_DIR
+.k	$FP_VARDB_DIR
+.k	$FP_VARLOG_DIR
+.k	$FP_VARRUN_DIR
+.k	$FP_VAR_DIR
+.k    	$FP_SPOOL_DIR
+
+
+.S	subroutine 名の Naming Convention
+.k	subroutine 名の Naming Convention
+
+例外を除いて
+    ”１単語の先頭一文字が大文字、残りは小文字”の塊からなる単語
+です。
+
+基本的に subroutine の名前はX11風だったりします。最近のはlisp風味も混
+ざってます:-) #おおむねX11風ですね
+
+○ fml 1.5 以降では若干例外があります。
+
+ファイル操作をする関数で
+
+	変換インターフェイスとしての 	f_関数 名
+	＃いつか、なくなるだろう
+
+		と 
+
+	そのモードのコンストラクタ	Cnstr_関数 名
+	そのモードのディストラクタ	Destr_関数 名
+
+が例外です。「将来 replace するべきです」と当時言ったまま replace され
+ないままですが:-)
+
+
+.S	%Envelope
+.k	%Envelope
+.k	struct envelope e;
+
+
+sendmail の struct envelople e; に対応するものです。
+しかし、perl 4 を本来ターゲットにしているため
+
+	$Envelope->$Header->$From = "uja@domain";
+
+のような使い方はしません（できない）。
+これと同様のことを意図したシンタックスが
+
+	$Envelope{"h:From:"}  = "uja@domain";
+
+で表現されています。 h = header で From: はわざとFieldだとわかりやすい
+ように : まで含めています。
+
+   %Envelope
+	ヘッダの各フィールドデータ
+
+	h:Capital:	補正されたデータ
+	h:lower-case:	オリジナルデータ
+
+   例：
+	h:From: は配送されるヘッダ中に現れるフィールドです  
+	
+    $e{'h:Return-Path:'} = "<$MAINTAINER>";        # needed?
+    $e{'h:Date:'}        = $MailDate;
+    $e{'h:To:'}          = "$MAIL_LIST $ML_FN";    # rewrite To:
+    $e{'h:Posted:'}      = $e{'h:date:'} || $MailDate;
+    $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
+    $e{'h:Lines:'}       = $e{'nlines'};
+
+
+
+
+
+
+
+
 
 .C	Security 
 
