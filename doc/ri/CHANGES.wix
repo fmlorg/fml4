@@ -1,4 +1,4 @@
-	CHANGES from 0.x(1993) to 1998/05
+	CHANGES from 0.x(1993) to FML 2.2
 
 				深町 賢一
 =E
@@ -14,6 +14,385 @@
 *** (Excuse me, this document is not fully translated to English).
 .fi
 
+98/09/27
+	2.2 RELEASE
+
+98/09/20
+	bug fix 'actives' 'members' in 'automatic registration'
+	bug fix ntfml.pl listname-ctl case (consider null $CONTROL_ADDRESS)
+
+98/09/18
+
+	remove 'addr' command
+
+	[2.2BETA#27]
+	bug fix 'chaddr' (mis-patched by fukachan , sorry > fukui)
+
+98/09/04
+	[2.2BETA#24]
+	add ANNOUNCE_MAIL_SIZE_OVERFLOW for "message/partial" case
+	# n == 1 の時だけさらしものにします(そうしないと怒涛のさらしが…;-)
+
+	[2.2BETA#23]
+	add ANNOUNCE_MAIL_SIZE_OVERFLOW
+	でっかいめーるをなげるとＭＬでさらしものにされてしまう:)
+	＃でふぉーるとは使わない
+
+	etc/makefml/Makefile; remove $(PWD) (of no mean)
+
+	add menus in "makefml config"	
+
+	SECURITY_AND_FILTER -> ANNOUNCE_MAIL_SIZE_OVERFLOW
+	OPTION -> HTML_GENERATION -> HTML_INDEX_UNIT
+	OPTION -> HTML_GENERATION -> HTML_INDEX_UNIT -> TIME_RANGE
+	OPTION -> HTML_GENERATION -> HTML_INDEX_UNIT -> NUMBER_OF_ARTICLES
+
+98/09/02
+	makefml; 余計な処理を整理する
+	＃βのテストをしてくれてる方へ; makefml のそれぞれの操作で
+	＃cf の STRUCT_SOCKADDR がちゃんと定義されてるのを確認してみて下さい
+
+98/09/01
+	bug fix: 
+		crypt() in FreeBSDでcryptな場合のみ
+		ADDR_CHECK_MAX >= 10 の時の判定ミス
+
+	まぎらわしいのでドキュメントの version をやめる	
+	＃package version ではなく作った時の version になっている 
+
+98/08/30
+	[2.2_BETA#18]
+	bug fix: X-ML-Info (to maintainer case) 
+	ntfml.pl: add sleep(1) before &Arrange*Proc();
+
+98/08/29
+	msend.pl -s (slow start) オプションをつけると
+	スタートをゆっくりにする。
+	複数のＭＬがある場合には msend_master.sh を使うと良い
+
+	crontab の見本生成で起動する時間を乱数で少しふる
+	(msend の slow start の補助)
+
+	msend_master.sh (見本)を作ってみる。ようするに
+		for ML (@ML) {
+			msend for ML
+		}
+	するだけのスクリプト
+
+98/08/27
+	improve INSTALL まにゅある(２、３の注意点)
+	msend.pl のスタートをゆっくりにする。
+	(乱数で最大3分以内のsleepをして待ってみる)
+	本当は crontab をちゃんとずらして設定しないといけないが
+	しない人がいそうなので
+
+98/08/24
+	improve Message-ID cache
+	fix warning unless effective commands.
+
+	ん〜 今日あたり 2.2 release のはずだったんだけど;_;
+	とりあえず one week 延期
+
+	2.2 BETA#14
+
+	liblop.pl: pull down to 2.2BETA#12
+	summary 分割送り直し問題の修正
+
+
+	2.2 BETA#13
+	makefml newml; modify to append 'LOCAL_CONFIG' to $DIR/cf
+	since makefml did not do this to avoid duplicated LOCAL_CONFIG.
+
+	fix summary split problem
+	(anyway, may fix again it by more elaborate way)
+	
+
+98/08/18,9
+	re-configure doc/html/
+	update index.html in both a package and http://www.fml.org/fml/
+
+98/08/17
+	fwix.pl; fix to that .toc works
+
+	I think 2.2 IS READY FOR RELEASE. 
+	NOW WE OBSERVE THIS VERSION A LITTLE.
+	THOUGH DOCUMENTS CLEAN UPS MAY CONTINUES ... ;-)
+
+	upgrade/clean ups documents
+	English translation of "help" file.
+
+98/08/16
+	help と help.eng を融合する(編集の前にとりあえず合体)
+	# by Jason.Chen@efi.com's Translation (95/11)
+
+	update documents ... (はつづくよ、どこまでも ;_;)
+	あとは help だけか？
+
+	bug fix; listname-ctl への guide もちゃんとうけつける
+	(#guideだけでなく)
+
+	英語モードのバグふぃっくす
+
+98/08/15
+	update documents, makefml config menu 
+	のこりは README help
+
+	makefml -U install は lock なしにインストールを実行
+
+98/08/14
+	bug fix libarchive.pl
+
+98/08/13
+	member_name.wix を書く、英訳する。include する
+	doc/ri/FILES を改良
+	
+
+98/08/12
+	・actives/members ファイルのバックアップ: .bak => .0 =>.1 
+
+	$AMLIST_NEWSYSLOG_LIMIT	(default 50*3000 = 150K bytes)
+
+	・ログファイル($DIR/log)の turn over
+
+	ログファイルがある大きさを越えたら log -> log.0 -> log.1 のようにずら
+	していきます。大きさの基準は次の変数にいれます。
+
+	log -> log.0 -> log.1 ...
+
+	$LOGFILE_NEWSYSLOG_LIMIT (default "")
+
+	update FILES (Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>)
+	modify makefml (perl4 case)
+
+	NT4: bug fix libexec/popfml.pl
+
+	fix typo: MAXNUM_COMMAND_INPUT
+
+98/08/11
+	bug fix makefml lock (not flock) algorithm
+	bug fix libexec/mead.pl cache
+
+	NT4 port: ActivePerl で動くように修正(したつもり)
+
+98/08/09
+	2.2BETA は10日〜2週間程度の予定です。
+	特別な問題がない限りこの形が 2.2 になります。
+	(一部のドキュメントはまだ修正します)
+
+98/08/09
+	2.2BETA
+
+	add NOTIFY_MAIL_SIZE_OVERFLOW (default 1)
+	巨大なメールが送られた時は送り主にはその旨を伝えるべきである
+	(経験的には)そうでないと2度3度と送ってくるものだから。
+	なお message/partial の時は n==1 の時だけ返事を返す
+	(そうしないとメール爆弾の応酬合戦になってしまう)
+	
+98/08/07
+	○ [デバッグ用途]
+	最近fmlが受けたメールを保存する(デフォールトは NO, 使わない)
+	投稿、コマンドは問わずに保存。
+
+	(stdinlog のかわりに使えるよね？)
+	最近 $NUM_LOG_MAIL 通のメールの先頭2048バイトを $LOG_MAIL_DIR 
+	($DIR/var/Mail) に保存する。各ファイルのサイズの上限は
+	$LOG_MAIL_FILE_SIZE_MAX bytes。このくらいあればヘッダとメール
+	の最初の方は十分収まるのでデバッグには十分だろう。
+	101通めは1を上書きするなどのようにファイルは円環上に使用される
+	(このために各ＭＬ、平均１Ｍ程度のディレクトリが必要になる)
+
+		LOG_MAIL_DIR:	$VAR_DIR/Mail
+		LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
+		NUM_LOG_MAIL:	100
+		LOG_MAIL_FILE_SIZE_MAX:	2048
+
+	○ $USE_DOT_QMAIL_EXT: (qmail 使用時)
+
+	コマンドの - が使えないので
+	elena-mget--1-3-mp@DOMAIN 宛のメールを
+	"mget 1-3 mp" コマンドと解釈するようにする
+
+98/08/06
+	フィルタリングコードの改良
+
+	members, actives ファイルのバックアップが大きくなったら
+	自動的に newsyslog をかけて var/log/ へまわす。
+
+	ユーザ用の actives members コマンドでは
+	ヘッダやコメントやすでにいない人などを省略する。
+	管理者用コマンドでは今までどおり省略はしない
+
+	hack query "number", "string" type of makefml
+
+98/08/04
+	clean up, fix documents
+	コマンドのalias 
+		undigest	-> digest 0
+		unmatome	-> matome 0
+
+98/08/02
+	sbin/makefml: $CPU_TYPE_MANUFACTURER_OS キャッシュ
+
+	$AMLIST_BACKUP_TYPE: rcs
+	もし未定義なら従来どおりの方法で .bak ファイルが作られる。
+	RCSの場合も作成されるが .bak には一番最近の状態のものがあるだけ
+
+98/08/01
+	mead.pl
+		user unkown などの単語でも解析する
+		user unkown を 1 それ以外は 0.25 に値を変更する。
+		-p オプションで変更する。
+
+	○ Solaris と NT4 の人だけ
+	   sys/arch/ を廃止して sys/ の下に統一しました
+	   インストールして何かあったらいってください。
+
+	* HTML 生成コードを少し改良   
+
+98/07/31
+	makefml -f /usr/local/fml/.fml/system install
+	とかやったら入力を促さない
+	再インストールやパッケージなどに便利か？
+
+	FieldCapitalize(); X-ML- は X-ML-
+	e.g. X-ML-Info が上書きできない(X-Ml-Info に変換しちゃうから)のを修正
+
+98/07/27
+	INSTALL ファイルを 2.2 用に奇麗にする。
+	その他奇麗に作業…
+	rename $BASE64ENCODE $BASE64_ENCODE (libfop.pl)
+	cf に定義
+
+98/07/26
+	$USE_DOT_QMAIL_EXT: qmail 使用時
+	listname-command をエミュレーションする
+	
+98/07/22
+	某サーバからの返事らしきもの？は弾く
+	$REJECT_ADDR .= '|\S+\-suscribe|\S+\-unsuscribe|\S+\-help';
+
+98/07/21
+	bug fix mis-preservation of the comment word
+	in files when "chaddr" command
+
+98/07/19
+	英訳作業(2nd check): 終了したもの
+		doc/op 
+		drafts/ の下(helpを除いて)
+
+	INSTALL_on_NT4 の再構成/update/英訳
+
+98/07/15
+	modify lock code on WINDOWS NT4
+	これで謎の config.ph size 0 問題が回避できるか？
+	回避できたぽいぞ？ためしてみてね〜
+
+	fix "index" search algorithm
+	fix MTI code a little more friendly?
+
+98/07/10
+	fix typo msend.pl _o_
+
+98/07/06
+	modify mkdirhier against perl4 bug?
+
+98/07/05
+	Change "search site*ph " code to use SearchFileInLIBDIR
+	bug fix CPU_TYPE * check for solaris2
+	define &ATOI() to expand 2M -> 2*1024*1024
+	define &FieldCapitalize to capitalize reply-to to Reply-To
+	enhance COPY_FIELD to handle  both subject and Subject
+
+	makefml config の security menu を増やした
+	zip mode: should check $ZIP existence 
+
+98/07/04
+	enhance &COPY_FIELD(), 
+	add &ADD_FIELD() operation to &DEFINE_FIELD_* 
+	modify message-id duplication check range over all ID caches
+	add $MESSAGE_ID_CACHE_BUFSIZE (default 50*100);
+
+98/06/30
+	sysv4 == solaris2 ということにする:)
+	config.guess を新しくする, NEC4800でばぐるのもなおす
+	add /usr/ucblib to search_path for EWS4800
+
+98/06/28
+	ファイル操作(get,mget,msendなどからみ): 
+		圧縮操作関数とencoding操作関数を分離する  
+
+	ファイル操作に zip モードを加える (test phase)
+
+	confirm: subscribe などがにほんごだったら日本語だとちゅういする
+
+98/06/27
+	moderator: duplication check code for test
+
+	fix confirm key generation 
+	fix $REGISTRATION_ACCEPT_ADDR to work in "admin subscribe"
+
+	福井さんぱっちをあてる: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+
+	○ admin モードでなければ、自分 ($From_address) 以外のメンバーを
+	   old-addr に指定して chaddr することはできない
+
+	○ new-addr が既にメンバーとして登録されていたらエラー
+
+	○ '# bye' '# admin bye' のときも、bye するメンバーがメンバーかどうかを
+	   最初にチェック
+
+	○ '# admin bye' のとき、bye の対象者にも mail を送るようにした。
+
+	○ '# chaddr' '# admin chaddr' のエラーチェックにひっかかったとき、
+	   無条件に 管理者, old-addr, new-addr に通知 mail を送っていたのを、
+	   関係ありそうな人にだけ通知 mail を送るように変更
+
+	○ libmember_name.pl
+		'unsubscribe-confirm' コマンドに対応した。
+
+98/06/20-23
+	タイムアウト関係の bug fix, parameter の tune
+
+	MEAD (Mail Error Analyzer Daemon)
+	エラーメールを解析して自動的にユーザを削除
+	これにあわせて makefml newml 時のサンプルに例を付け加え
+	MEADまわりの minor bug fix
+
+	sys/arch/WINDOWS_NT4
+		IDLE_PRIORITY で呼び出す
+		POP verison: デフォールトのループの時間を180秒に
+
+	fix synchtml warning condition (case of no html directory)
+
+98/06/19
+	HTMLスプール: http:// 自動変換 bug fix
+
+	spool2html; not fork() on NT4
+
+	confirmd; bug fix not "chdir $DIR"
+
+	msend.pl
+		fix MSEND_MODE_DEFAULT to be effective
+
+	libra.pl
+		bug fix plural chaddr requests in one mail
+
+	doc/ri/INSTALL.wix
+		Add /usr/doc/fml/ on Debian
+
+	doc/ri/INSTALL_on_NT4.wix
+		http://member.nifty.ne.jp/~ssk/download.html
+
+	fml.pl
+		change calling of Notify to &Notify().
+		bug fix COPY_FIELD (plural lines of a field)
+		bug fix boundary= (boundary=".*" not \S+)
+		fix ADD_FIELD to check the uniqueness of fields
+		COPY_FIELD: ADD_FIELD is added
+		&MOVE_FIELD(old-field, new-field)
+
+	e.g.
+		&MOVE_FIELD('Subject', 'X-Original-Subject');
 
 98/05/26
 	fix libsynchtml.pl
