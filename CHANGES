@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/30
+
+  bin/archive.sh
+	clean up to enable to
+	execute archive.pl automatically over all ML's under /var/spool/ml 
+
 2000/06/29
 
   change the locatoin for message template files
