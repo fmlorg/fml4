@@ -27,9 +27,6 @@ rm -f $tmp
 if [ "X$MAKE" = X -o "X$PERL" = X ];then
 	echo "MAKE or PERL is not defined";
 	exit 1;
-else
-	echo "MAKE: $MAKE";
-	echo "PERL: $PERL";
 fi
 
 
@@ -85,3 +82,8 @@ then
 else
 	echo $DESTDIR	
 fi
+
+echo "-- debug";
+echo "(debug)MAKE: $MAKE";
+echo "(debug)PERL: $PERL";
+echo "-- etc/config ends";
