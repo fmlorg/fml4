@@ -6,11 +6,6 @@ kern/Makefile
 sys/WINDOWS_NT4/ntinstall.cmd
 
 
-C_SOURCES:
-C/fml.c
-C/config.h
-
-
 DRAFTS_SOURCES:
 var/doc/drafts/*
 

@@ -130,7 +130,6 @@ COPY_SOURCES () {
 
 	echo ""; echo "Copying Main Sources ... ";
 	cp -p  $SOURCES 	$DESTDIR/distrib/
-	cp -p  $C_SOURCES	$DESTDIR/distrib/C
 	cp -p  $PERL_SOURCES	$DESTDIR/distrib/src
 
 	echo ""
