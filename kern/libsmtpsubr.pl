@@ -58,9 +58,11 @@ sub DoSmtpFiles2Socket
 
 	    # header
 	    $hdr_found  = 1 if /^\#\.FML HEADER/;
-	    
+
 	    # guide, help, ...
-	    if ($e{'mode:doc:ignore#'}) {
+	    # XXX Here we must use %Envelope not %e ! (attention)
+	    # XXX We should be split %Envelope to %Envelope and %PCB ?
+	    if ($Envelope{'mode:doc:ignore#'}) {
 		next if $hdr_found && (1 .. /^\#\.endFML HEADER/);
 		next if /^\#/ && $e{'mode:doc:ignore#'} eq 'a';
 		# next if /^\#\#/ && $e{'mode:doc:ignore#'} eq 'm';
