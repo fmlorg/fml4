@@ -57,6 +57,15 @@ var/html/index-e.html: doc/html/index.html
 	$(CPP) -P -UJAPANESE doc/html/index.html \
 	> $(FML)/var/html/index-e.html
 
+
+var/html/advisories/index.html: doc/advisories/index.html
+	$(CPP) -P -DJAPANESE doc/advisories/index.html |\
+	$(JCONV) > $(FML)/var/html/advisories/index.html
+
+var/html/advisories/index-e.html: doc/advisories/index.html
+	$(CPP) -P -UJAPANESE doc/advisories/index.html \
+	> $(FML)/var/html/advisories/index-e.html
+
 var/html/op/index.html: doc/smm/*wix
 	test -d var/html/op || mkdir var/html/op
 	test -h var/html/op-jp || ln -s var/html/op var/html/op-jp

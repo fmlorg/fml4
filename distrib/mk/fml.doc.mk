@@ -13,6 +13,7 @@ HTML_MISC_SOURCES = roadmap.html nt.html search-j.html search-e.html
 
 ### targets ###
 HTML_MISC         = var/html/index.html var/html/index-e.html
+HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
 HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 
 ## doc/ri

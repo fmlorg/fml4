@@ -105,6 +105,10 @@ COPY_DOCS () {
    HTML_DIR=$DESTDIR/distrib/doc/html
    $CPP -DJAPANESE doc/html/index.html > $HTML_DIR/index-j.html
    $CPP -UJAPANESE doc/html/index.html > $HTML_DIR/index-e.html
+
+   $CPP -DJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-j.html
+   $CPP -UJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-e.html
+
    cp doc/html/release-index.html $HTML_DIR/index.html
    cp doc/html/fml.css $HTML_DIR/
 
