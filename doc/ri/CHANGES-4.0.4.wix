@@ -14,6 +14,15 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/03/03
+
+   kern/libsmtp.pl (2.58-2.60):
+	use postfix XVERP if available
+
+	$USE_VERP が設定されている時
+	postfix が XVERP 対応だと分かったら、postfix でも verp を
+	使う。これで qmail でも postfix 1.1 以降でも VERPs が
+	使えます。  
 
 2002/02/27
 
@@ -92,7 +101,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.11 2002/02/27 14:28:37 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.12 2002/03/03 14:00:27 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
