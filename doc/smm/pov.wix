@@ -391,9 +391,56 @@ sendmail の struct envelople e; に対応するものです。
 	は来たメールの Re: をとり
 	必要なら [Elena 100] のようなものを処理したもの
 
-   のような違いがある。	配送されるヘッダは大文字ではじまる単語
-	Date: To: Sujbect: 
-   のようなものからなる。
+   のような違いがある。	配送されるヘッダと大文字ではじまる単語
+   は次のように対応する
+
+   配送メールのヘッダ	%Envelope
+	Date: 		h:Date:
+	From:		h:From:
+	To: 		h:To:
+	Sujbect: 	h:Subject:
+
+
+
+.S	データ構造の初期化
+.k	データ構造の初期化
+
+各データの初期化は次の順序で行なわれる。
+
+	&InitConfig
+	   &SetDefaults
+		%Envelope
+		DNS 設定
+		各種設定
+		@HdrFieldsOrder
+
+	   &LoadConfig
+		$DIR/config.ph
+		sitedef.ph
+
+   	   &SetOpts
+		コマンドリンオプション
+
+	   COMPATIBILITY CODE
+   
+	&Parse
+		%Envelope へ Header Body 等のオリジナルデータをセット
+		
+	&GetFieldsFromHeader
+		%Envelope へ h:field: および h:Field: をセット
+
+	&FixHeaders
+		h:Field: への各種補正を行なう
+
+	&CheckEnv
+		%Envelope による設定、動作モードチェック
+
+	この後各種フックがそれぞれの場所で評価される。
+	例：
+		$START_HOOK
+		$SMTP_OPEN_HOOK
+		$FML_EXIT_HOOK
+
 
 
 
