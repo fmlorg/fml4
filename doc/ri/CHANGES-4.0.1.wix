@@ -1,5 +1,31 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
+	$Date$
+
+   [4.0.1 の主な変更点]
+	* さまざまな minor bug fixes
+	* 自動登録時のエラーメッセージの bug fix
+	* SMTP のログ(_smtplog)の rotation と自動 expire 機能
+	* データベースとのアクセス
+		ドメイン名を常に lowercase にする(デフォルト)
+		chaddr コマンドを使えるように修正
+		自動登録時の重複チェック
+	* メールヘッダ
+		List-ID: をつける (RFC2919)
+		Subject: の Re> も reply message を示すものとして削除
+	* expire で初回に bug る問題を fix
+	* multipart の記事を html にする時に message/rfc822 も考慮する
+	* makefml
+		perl のパス指定/検索の bug fix
+		www/authdb/ 以下を初期化する際の permission を変更する
+	* SUN Solaris 2
+		初回インストール時のロックの不具合を修正
+	* Windows NT4 / 2000
+		 インストールするものが足りない点を修正
+	* CVS の ID タグを FML へ移行
+
+
+			--------------------------
 
 2001/05/20
 
@@ -189,11 +215,10 @@
    4.0 release
 
 
-$FML: CHANGES-4.0.1.wix,v 1.1.2.15 2001/05/21 14:46:52 fukachan Exp $
-.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+$FML: CHANGES-4.0.1.wix,v 1.1.2.18 2001/05/24 04:46:36 fukachan Exp $
+.# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
-.#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2001 fukachan@sapporo.iij.ad.jp
+.#               2001 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
