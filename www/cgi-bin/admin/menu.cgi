@@ -9,7 +9,7 @@
 
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
-$CONFIG_DIR = '/usr/local/fml/.fml'; # __MAKEFML_AUTO_REPLACED_HERE__
+$CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 
 ### MAIN ###
