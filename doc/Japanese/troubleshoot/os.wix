@@ -147,6 +147,82 @@ sendmail 8.8.8	include style fails but
 		C Wrapper (fml.c fml-ctl.c) works
 
 
+.S	Solaris 2.4 でプロセス間通信がうまくいかない
+=E.S	Socket connection does not work on Solaris 2.4
+.k	Solaris 2.4 でプロセス間通信がうまくいかない
+
+makefml がインストール時にOSやアーキテクチャアについて推測し config.ph 
+に書き込みます。
+=E
+Now "makefml" probes your operations system and writes it into
+config.ph as a variable
+
+	$CPU_TYPE_MANUFACTURER_OS 
+
+という変数に solaris2 という文字列がちゃんとあるかどうか確かめて下さい。
+OEM等ではちゃんと判定できない場合もあります。 
+=E
+Please check it contains "solaris2". If your host is OEM of solaris2,
+it may not have the string.
+
+ソラリス互換２で強制的に実行するには config.ph で 
+=E
+Enforce Solaris 2 compatible socket constants to fml.pl, please set
+
+	$COMPAT_SOLARIS2 = 1; 
+
+をセットしてためしてみてください。強制的に $CPU_TYPE_MANUFACTURER_OS 
+を定義するのも可です。
+
+ソラリスでは意味不明に(意地悪く?)定数が違うので、ちゃんと 
+/usr/include/sys/socket.h から作った sys/socket.ph
+(/usr/local/lib/perl(/OS名)/sys/socket.ph あたり) を呼んでいないと動き
+ません。
+
+
+.S	Solaris 2.3 (SUN OS 5) で flock がうごかない
+=E.S	flock(2) cannot work on Solaris 2.3
+.k	Solaris 2.3 (SUN OS 5) で flock がうごかない
+
+flock がだめというエラーメッセージがでたら
+=E
+Please try 
+
+	$USE_FLOCK = 0;
+
+にしてみてください
+
+
+.S	DEC alpha(OSF1 V3.0)上の perl4 で config 等が動かない
+=E.S	perl 4 cannot work on DEC alpha(OSF1 V3.0) ?
+.k	DEC alpha(OSF1 V3.0)
+
+perl4 だと多分動かないとおもう。perl5 を install して試してみてくださ
+い。
+=E
+Please try perl 5.
+
+.S	article ID duplication error 
+.k	article ID duplication error 
+
+次を見てね↓
+=E
+Please see below.
+
+
+.S	perl 5.003 flock と そらりす 2.5 2.5.1 ?
+=E.S	perl 5.003 flock on solaris 2.5 2.5.1 ?
+
+fml 2.1 current のどこかで直った
+＃flock やってるふりしてできてない？そのため SEQUENCE_FILE がちゃんと
+＃更新されなくて article ID duplication error が出る？
+＃参照: fml-support:241? あたり
+=E
+Fixed at somewhere from 2.1 to 2.2. It comes the bug flock(2)
+emulation? Now I believe flock(2) works well also on solaris.
+
+
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 

@@ -1,0 +1,45 @@
+.C	GUI 関係
+
+.S	newaliases を実行すると permission denied という
+
+root が
+
+       /etc/aliaes.db  /var/spool/ml/etc/aliases.db
+
+というファイルを作るために
+
+       /etc/        /var/spool/ml/etc/
+
+それぞれのディレクトリに書き込めるか？ それができなかった という話です。
+
+sendmail という名前で postfix かも:-) ということもあるので
+sendmail.{com,org} の sendmail と仮定しますが
+＃ ということはきにしなくてもOK？ > FreeBSD 4.0
+
+sendmail では最初の一回  
+
+       /etc/aliaes.db  /var/spool/ml/etc/aliases.db
+
+を作っておけばあとはどのユーザから newaliases を実行しても作ることがで
+きるはずです。ですが root でやる癖をつけるのはそれはそれでOKです。
+
+.q
+FYI:
+逆に CGI を使う時、MTAが postfix なら次のように設定しています。
+この場合は それぞれの .db を作る担当のユーザが別々です。
+
+/etc/aliaes
+	fml はさわらない
+
+/etc/aliaes.db
+	オーナーは root 
+
+/var/spool/ml/etc/aliases
+	fml はここだけを編集する
+
+/var/spool/ml/etc/aliases.db
+	オーナーは fml
+	fml CGI はこの db だけを作り直す
+
+になります。
+.~q

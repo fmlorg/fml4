@@ -16,9 +16,13 @@ Anyway search please!
 
 .# .__repl_include__
 .include overview.wix
-.include permission.wix
+.include GUI.wix
+.include MTA.wix
+.include MUA.wix
+.include errormails.wix
 .include fml.wix
-.include misc.wix
+.include header.wix
+.include obsolete.wix
 .include os.wix
 
 .# $Id$
