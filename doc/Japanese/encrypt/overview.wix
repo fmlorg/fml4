@@ -1,0 +1,38 @@
+.C	PGP 2 (Pretty Good Privacy versio 2)
+
+.S	概要
+
+◯ PGP2 用です。
+
+◯ コマンドメールの認証にPGPを使います。
+
+◯ 配送メールの暗号をします
+
+	$USE_ENCRYPTED_DISTRIBUTION
+.xref	$USE_ENCRYPTED_DISTRIBUTION
+
+
+.S	makefml による PGP の公開鍵の登録
+=E.S	Register PGP Public Keys
+
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+必ず makefml をつかうこと
+
+makefml は
+
+	makefml pgp <ML> PGPのオプション
+=E
+	makefml pgp <ML> PGP's options
+
+例:
+	makefml pgp elena -ka public.asc
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
