@@ -793,7 +793,7 @@ sub EvalCF
     require $main'opt_f; #';
     package main;
 
-    for (debug, 
+    for ("debug", 
 	 EXPIRE, KILL, CHECK_INTERVAL, LIMIT, 
 	 DIR, ML_DIR, CACHE, EXEC_DIR, MAKEFML, 
 	 MODE, SENDMAIL, PRIORITY) {
