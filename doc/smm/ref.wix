@@ -21,7 +21,7 @@ W.リチャード・スティーヴンス 著／篠田 陽一 訳
 ISBN4-8101-8509-5'').
 
 perl texinfo in japanese --- version 4.0.19.2
-(ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz)
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
 
 
 .S	RFC  (参考文献：RFC)
@@ -35,9 +35,6 @@ rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
 rfc934				Proposed Standard for Message Encapsulation
 rfc1153				digest format
 
-rfc1425				ESMTP
-rfc1426				ESMTP
-rfc1427				ESMTP
 rfc1428				ESMTP
 
 1495  PS  H. Alvestrand, S. Kille, R. Miles, M. Rose, S. Thompson, "Mapping  
@@ -205,8 +202,8 @@ Ken'ichi Fukamachi,
 1995年度 学位論文 (理学博士)東京工業大学
 
 上記URLでもこのドクター論文のポストスクリプト版を手に入れることができ
-ます。図がない部分が結構あるので正式版とはやや異なりますが、中身は同じ
-です。
+ます。図がない部分が結構あるので正式版とはやや異なりますが内容的には同
+じものです。
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
