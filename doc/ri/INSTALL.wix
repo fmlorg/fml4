@@ -502,6 +502,7 @@ configurations (e.g. config.ph, include).
 
 
 .C	fml の扱い方の概要について
+=E.C	Overview on how to treat fml 
 
 MLの設定のカスタマイズやユーザの登録/削除などはfml の動いているホスト
 に入り、設定ファイルやメンバーリストを変更することで行ないます。これが
