@@ -35,6 +35,7 @@ sub RelayHack
 	    s/\S+://;
 	    if (/^GW\s+(\S+)/i)  { $gw = $1;}
 	    if (/^NGW\s+(\S+)/i) { $negative_gw = 1; $gw = $1;}
+	    next;
 	}
 
 	# DOM domain (may be multiple lines, multiple domains);
