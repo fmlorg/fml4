@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.60 2002/02/16 10:39:32 fukachan Exp $
+# $FML: libsmtp.pl,v 2.61 2002/05/24 12:16:41 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -491,6 +491,30 @@ sub RevConvHdrCRLF
     $NULL;
 }
 
+
+# Descriptions: check an article is deliverted today ?
+#    Arguments: none
+# Side Effects: none
+# Return Value: NUM(1 or 0)
+sub is_delivered_today
+{
+    my $status = 0;
+
+    # must be in delivery mode
+    if ($ID) {
+	my $prev_id = $ID -1; 
+	my $article = "$SPOOL_DIR/$prev_id";
+	my ($mtime) = (stat($article))[9];
+	my ($prev)  = (localtime($mtime))[3];
+	my ($today) = (localtime(time))[3];
+
+	if ($prev == $today) { return 1;}
+    }
+
+    return 0;
+}
+
+
 sub __SmtpIO
 {
     local(*e, *smtp_pcb, *rcpt, *smtp, *files) = @_;
@@ -533,6 +557,18 @@ sub __SmtpIO
     # XXX MAIL FROM:<mailing-list-maintainer@domain>
     # XXX If USE_VERP (e.g. under qmail), you can use VERPs
     # XXX "VERPs == Variable Envelope Return-Path's".
+
+    # XXX only for postfix
+    # try verp per day for effecient delivery
+    if ($USE_VERP && $TRY_VERP_PER_DAY) {
+	if (is_delivered_today()) { 
+	    $USE_VERP = 0;
+	}
+	else {
+	    &Log("try VERPs once today");
+	}
+    }
+
     {
 	my ($mail_from, $xverp);
 	if ($USE_VERP) {
