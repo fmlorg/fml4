@@ -78,8 +78,9 @@ __________________________________________
 .n	overview
 
 インストールの大まかな流れは次のようになります。詳しくは後述します。
-versionの数字や作られるDIRECTORYについては適当に読み変えて下さい。コマ
-ンドの動きはOSによって若干異なります。OSのマニュアルを参照してください。
+versionの数字や作られるディレクトリについては適当に読み変えて下さい。
+コマンドの動きはOSによって若干異なります。OSのマニュアルを参照してくだ
+さい。
 
 .q
 ○ ソースを以下のURLから持ってくる。
@@ -323,7 +324,7 @@ The write permission of the fml system changes in each type.
 	1. それぞれのアカウントで自由に作成することができる
 	2. 常に fml というアカウントで必要な操作を行なう
 
-という２つの運用方ポリシーが考えられます。
+という２つの運用ポリシーが考えられます。
 =E
 If only you create and maintain mailing lists on a machine, please
 select "personal". When plural people create and maintain plural
@@ -1179,7 +1180,7 @@ commands, please enable it explicitly.
         UNSUBSCRIBE_AUTH_TYPE              address
 
 上述のアクセス制御で auto_subscribe を選んだ場合に自動登録の仕方を選ぶ
-ことができます。デフォールトは 「確認」 を求めるやり方です。
+ことができます。デフォールト(confirmation)は 「確認」を求めるやり方です。
 =E
 The automatic registration type. The default is "confirm" which
 requires the confirmation of subscription will.
@@ -1193,7 +1194,7 @@ requires the confirmation of subscription will.
 デフォールトでは listname に対し listname-ctl を使います。また、
 	listname でコマンドも受け付けるようにする
 	コマンドは fmlserv を使う
-等の設定変更ができます(fmlservのための追加設定等は別途必要です)。
+等の設定変更ができます(fmlservを使うにはfmlservの設定が別途必要です)。
 =E
 The address for command (=> Section .ptr{COMMAND_ADDRESS_POLICY}).
 You can select e.g.
@@ -1204,10 +1205,10 @@ You can select e.g.
 ○ リモート管理 (=> Section .ptr{REMOTE_ADMINISTRATION})
 
    4    ML REMOTE ADMINISTRATION              
-                     PERMIT ?              yes
-                     AUTH_TYPE             address
+                     PERMIT ?              NO
+                     AUTH_TYPE             crypt
 
-リモートでＭＬの設定をいじることを可能にするか？(デフォールトはしない)
+リモートでＭＬの設定を変更を可能にするか？(デフォールトは"できない")
 =E
 You maintain the ML in remote? or not. And the default type is
 "crypt". This is "password authentication" and the password is saved
@@ -1247,6 +1248,8 @@ Special functions for security (=> Section .ptr{SECURITY_AND_FILTER} .ptr{secure
 .S	メンバーの登録の仕方(手動/自動)とアクセス制御のポリシー
 =E.S	Manual/Automatic Registration and Access Control Policy
 .l	ACCESS_POLICY
+
+  MENU => POLICY OF ACCESS (WHO CAN POST AND USE COMMANDS)
 
    WHO CAN POST AND COMMAND
 
@@ -1294,6 +1297,18 @@ If mail comes from not a ML member, what action should be done?
 	もしメンバー以外から来たら自動登録 → auto_subscribe へ変更
 
 することで行ないます。
+注意: auto_regist は fml 3.0 でも使えますが、公式にはobsoleteです。
+      fml 2.xの時代の互換性のために残っています。
+.if LANG == JAPANESE
+.url http://www.fml.org/fml/UPGRADE-3.0/index.html
+.fi
+=E
+Caution: you can use "auto_regist" but it is obsolete in fml 3.0.
+         It works even in fml 3.0 for compatibility.
+.if LANG == ENGLISH
+.url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
+.fi
+
 自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
 =E
 The example of an automatic registration setting.
@@ -1385,6 +1400,8 @@ in fact, not define $REJECT_ADDR in config.ph.
 =E.S	The type of Automatic Registration
 .l	REGISTRATION_METHOD
 
+MENU => REGISTRATION METHOD TYPE => AUTO_REGISTRATION_TYPE
+
 上述のアクセス制御で auto_subscribe を選んだ場合に自動登録モードになり
 ます。自動登録の手続きのやりかたを選択できます。
 =E
@@ -1395,7 +1412,7 @@ REJECT_COMMAND_HANDLER, you can see the following menu
    AUTO_REGISTRATION_TYPE       confirm
 
    0    END
-   1    confirm
+   1    confirmation
    2    body
    3    subject
    4    no-keyword
@@ -1403,7 +1420,7 @@ REJECT_COMMAND_HANDLER, you can see the following menu
 
 それぞれのキーワードは以下のような意味です。
 
-	confirm		subscribe request に対し一度確認を求めるメールを
+	confirmation	subscribe request に対し一度確認を求めるメールを
 			送り確認メールをもらって初めて登録する。
 			subscribe attack 阻止のため推奨します
         
@@ -1417,7 +1434,7 @@ REJECT_COMMAND_HANDLER, you can see the following menu
 
 =E
 [description]
-	confirm
+	confirmation
 			RECOMMENDED AGAINST SUBSCRIBE ATTACK!
 			the server asks the user (From:) the confirmation
 			of subscription will.
@@ -1439,6 +1456,20 @@ subject の場合は subscribe aoi@chan.panic のような指定の仕方もできます
 がセキュリティ的に推奨できないので confirm タイプが望ましいです。
 ＃なお subscribe などのキーワードをいじる場合は直接cfを edit してくだ
 ＃さい(=> Chapter .ptr{configure}, .ptr{config-file})。
+
+同様に"confirmation"が可能なオプションには以下のものがあります。
+
+MENU => REGISTRATION METHOD TYPE => UNSUBSCRIBE_AUTH_TYPE
+
+抜ける時のコマンドでもconfirmationをかけるか？(default "NO")
+=E
+enable confirmation in "unsubscribe" command?(default "NO")
+
+MENU => REGISTRATION METHOD TYPE => CHADDR_AUTH_TYPE	        
+
+chaddr コマンドでもconfirmationをかけるか？(default "NO")
+=E
+enable confirmation in "chaddr" command?(default "NO")
 
 
 .########### Menu Section ##########
