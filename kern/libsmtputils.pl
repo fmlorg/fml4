@@ -74,6 +74,10 @@ sub DoSmtpFiles2Socket
     foreach $f (@f) {
 	&Debug("SmtpFiles2Socket::($f)") if $debug;
 
+	if ($f{$f, 'zcat'}) {
+	    &Log("SmtpFiles2Socket: \$ZCAT not defined") unless $ZCAT;
+	}
+
 	if ($f{$f, 'zcat'} && open(FILE, " $ZCAT $f|")) {
 	    &Log("SmtpFiles2Socket: cannot zcat $f"); close(FILE); next;
 	}
@@ -158,7 +162,6 @@ sub DoNeonSendFile
 	    }
 
 	    # misc checks
-	    &Log("NeonSendFile: \$ZCAT not defined") unless $ZCAT;
 	    &Log("NeonSendFile: cannot read $file")  unless -r $f;
 	}
 	### NOT EXISTS 
