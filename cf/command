@@ -1,7 +1,0 @@
-TAR:		&path(tar) cf -
-UUENCODE:	&path(uuencode)
-COMPRESS:	&path(gzip) -c
-ZCAT:		&path(zcat)
-LHA:		&path(lha)
-ISH:		&path(ish)
-
