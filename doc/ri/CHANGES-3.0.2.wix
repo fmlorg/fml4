@@ -1,6 +1,19 @@
 .HTML_PRE
 	CHANGES-3.0.2: CHANGES from 3.0.1 to 3.0.2
 
+2000/07/29
+
+   proc/libamctl.pl(2.43-2.44):
+	check address to regist more severly by SecureP()
+
+   libexec/mead.pl(1.15-1.16):
+	check address syntax more
+
+2000/07/17
+
+   sbin/install.sh(2.10-2.11):
+	 install makefml not makefml*
+
 2000/06/28
 
    sbin/makefml(2.151-2.152):
