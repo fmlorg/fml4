@@ -20,6 +20,7 @@ DOC_TUTORIAL_SUBDIR += errormails
 DOC_TUTORIAL_SUBDIR += filter
 DOC_TUTORIAL_SUBDIR += header_rewrite
 DOC_TUTORIAL_SUBDIR += how_to_subscribe
+DOC_TUTORIAL_SUBDIR += html_convert
 DOC_TUTORIAL_SUBDIR += internals
 DOC_TUTORIAL_SUBDIR += makefml
 DOC_TUTORIAL_SUBDIR += messages
