@@ -9,14 +9,23 @@ XXX ATTENTION: you need "BSD make" not gmake.
 -----------------------------------------------------------------
 * Firstly cvs checkout !
 
-0.	checkout fml repository
+0.	set up TCP/IP to the Internet if needed. 
 
+1.	checkout fml repository
+
+	% setenv CVSROOT cvs.fml.org:/cvsroot
 	% cvs co fml
 	% cd fml
 
-1.	set up TCP/IP to the Internet if needed. You need it for 'make pkgsrc'.
+1.1	If you are the maintainer to make 'snapshot', you need distrib/history.
+	The repository distrib/history is special. Please check out it:
 
-2.	generate pkgsrc/
+	% cd distrib
+	% cvs co history
+
+where 'history' is the alias of 'release/history'.
+
+2.	generate pkgsrc/. NOTE: You need Intenet connection to 'make pkgsrc'. 
 
 	% make pkgsrc
 
@@ -55,6 +64,7 @@ You need to set "conf/release" based on information not in cvs.
 
 ^fml/doc
 		-> doc-changes@fml.org 
+		-> source-changes@fml.org 
 		-> /cvsroot/log/fml/commitlog
 
 ^fml/distrib/history
