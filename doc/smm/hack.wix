@@ -488,6 +488,26 @@ $SPEED_HACK をセットした場合は flock() を外してから配送をします。とい
 等の理由であくまでも SPEED HACK なのです。
 
 
+.S	配送するメールのMIME部分はDecodeしてから配送したい
+.label	MIME-hack
+.xref 	MIME-header
+
+＃注意：以下試していない。
+
+sub Distribute で
+
+    for (@HdrFieldsOrder) {
+	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
+
+という部分を
+
+    for (@HdrFieldsOrder) {
+	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
+
+とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
+実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp

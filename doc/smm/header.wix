@@ -1,45 +1,336 @@
 .C	ヘッダのカスタマイズ
+.l	header-customizing
 .l	header-custom
 
 
-.S	ヘッダのフォーマット
-.key	ヘッダの保存
+.S	ヘッダのフィールドの順番(フォーマット)
+.key	ヘッダのフィールドの順番(フォーマット)
 .key	@HdrFieldsOrder 
 .key	--through
+.xref	data-structure
 
-fml はヘッダのフィールドの成形を行います。これは配列変数
+fml はヘッダのフィールドの成形を行います。これは変数配列
 
 	@HdrFieldsOrder 
 
 に従い、その順番に並べかえます。凝る場合:-)は、 @HdrFieldsOrder を 
-config.ph 等で定義してください。
+config.ph 等で定義しなおしてください。
 
-@HdrFieldsOrder で定義された必要なフィー
-ルドのみをきりだしますが、Received: Return-Receipt-To: を除くすべての
-フィールドを使うには
+デフォールトは
+
+    @HdrFieldsOrder = 
+	('Return-Path', 'Date', 'From', 'Subject', 'Sender',
+	 'To', 'Reply-To', 'Errors-To', 'Cc', 'Posted',
+	 ':body:', 'Message-Id', ':any:', ':XMLNAME:', 
+	 ':XMLCOUNT:', 'X-MLServer',
+	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
+	 'XRef', 'X-Stardate', 'X-ML-Info', 
+	 'References', 'In-Reply-To', 'Precedence', 'Lines');
+
+のように定義されています。
+
+@HdrFieldsOrder で定義された必要なフィールドのみをきりだしますが、
+Received: Return-Receipt-To: を除くすべてのフィールドを使うには
+
+config.ph で
 
 	$SUPERFLUOUS_HEADERS = 1;
+	&DEFINE_MODE('through');
 
 かコマンドラインで --through と定義してください。
+.k	$SUPERFLUOUS_HEADERS
+.k	DEFINE_MODE('through')
+.k	&DEFINE_MODE('through')
+
 例：
 	fml.pl $DIR --through 
 
 
-.S	To: Cc: Rewriting;
+@HdrFieldsOrder 中で
+
+	:body:
+	:any:
+	:XMLNAME:
+
+の特殊な変数が使われています。それぞれ
+
+	:body:		$body を展開する場所
+			$STMP_OPEN_HOOK や $HEAD_ADD_HOOK 等で独自ヘッダを
+			$body で定義した場合等に使われる(Backward Compatible)
+
+	:any:		$SUPERFLUOUS_HEADERS の時 @HdrFieldsOrder
+			に明示的に現れないフィールドを展開する場所
+
+	:XMLNAME:	$XMLNAME を展開する (X-ML-Name: フィールド)
+
+のような特殊な目的に使われます。Backward Compatibility という趣が強い
+例外処理です。
+
+
+
+.S	Received: もヘッダにつける
+.k	Received: もヘッダにつける
+
+歴史的に「サーバで受けたところまではＯＫなんだから、その後だけをユーザ
+には見せれば良い」という思想に基づき、デフォールトでは Received: はつ
+けていません。つける時は
+
+	unshift(@HdrFieldsOrder, 'Received');
+
+とでもして、@HdrFieldsOrder につけ足せば良いでしょう。
+
+
+.S	ヘッダのフィールドを増やす or 減らす
+.k	ヘッダのフィールドを増やす or 減らす
+
+例えば、Return-Path: フィールドが要らないなら、@HdrFieldsOrder から
+Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
+上述のように @HdrFieldsOrder につけ足せば良いでしょう。
+＃配列を直接いじるか、shift や unshift を使うと良いでしょう。
+
+
+.S	To: と Cc: の Rewriting 処理
 .l	$NOT_REWRITE_CC
+
+可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
+スが出るようになっています。
+original header を通すという設定の場合はそうはならずオリジナルのままです。
+
+ですが、apparent-to: になっていて、見辛いとか一体どうしてこのＭＬに来
+たメールなの？とかよくわからないメールも多いので、それよりは可読性を重
+視して、こういう実装になっています。
+
+現在は
+	1 To: に   $MAIL_LIST が含まれているなら、そのまま
+	2 To: には $MAIL_LIST が含まれていない場合は
+
+	  To: $MAIL_LIST
+          Cc: に元の To: を付け加えて、情報を保存しておく
+
+To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
+の SMTP としてはなんら区別はしていません。ですから、情報を落さず、To: 
+は可読性のために $MAIL_LIST としています。
+
+[蛇足] なお、To: Cc: の中に重複して現れるアドレスには普通それらを一つ
+にまとめて一通分のみが配送されます。だから複数あっても気にしないでね
 
 
 .S	Cc: フィールドを“つけない”
+.k	$NOT_USE_CC
 
 デフォールトではつけますので、切り落とすときは
 
 	$NOT_USE_CC = 1;
 
 
+.S	コマンドの結果やユーザへのメッセージのヘッダをカスタマイズする
+.k	コマンドの結果やユーザへのメッセージのヘッダをカスタマイズ
+.xref	data-structure
+.k	$Envelope{'GH:field:'} 
+
+	$Envelope{'GH:field:'} 
+
+で変更できます。GH というキーワードなのは SMTP Library の 
+GenerateHeader() という関数内で使われるためです。
+
+例えば、コマンドの結果のメールの From: を変えたいなら
+
+	$Envelope{'GH:From:'} = "uja@aoi.chan.panic (AOICHAN PANIC)";
+
+等それぞれのフィールドを設定します。ヘッダの並び順は
+@HdrFieldsOrder の順番です。
+
+
+.S	Subject: を (Elena 100) とかの任意の形に成形する
+.l	$SUBJECT_FREE_FORM
+
+	fml 	Subject: はいじらない
+	hml	Subject: [Elena:100]
+
+なんですが、他のフォーマットを使うために 
+例えば、
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '(';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET \\d+\\)";
+
+と定義すると (Elena 100) の形になり、Reply のメールの (Elena 99) をは
+ずし新しい (Elena 100) をつけるようになります。
+
+他の例： Subject: [Elena 100]
+
+	$SUBJECT_FREE_FORM = 1;
+	$BEGIN_BRACKET     = '[';
+	$BRACKET           = 'Elena';
+	$BRACKET_SEPARATOR = ' ';
+	$END_BRACKET       = ']';
+	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+
+
+.S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
+.l	&DEFINE_SUBJECT_TAG
+.k	&DEFINE_SUBJECT_TAG
+.xref	--mode
+
+Subject のTAGを定義する。fml のデフォールトは「有効に使いもしないのに、
+Subject:の本体の情報を減らすタグはつけるべきではない」です。
+＃注意：この問題は本来はメールインターフェイスプログラムが賢いか？
+＃否か？という問題に還元されるべきものです。
+
+
+	(:)
+
+		Subject: (Elena:100)
+
+	[:]
+
+		Subject: [Elena:100]	(HMLタイプ)
+
+	( )
+
+		Subject: (Elena:100)
+
+	[ ]
+
+		Subject: [Elena:100]
+
+
+なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
+れるので注意。例： HML Emulation mode  (--hml)
+
+これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
+できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
+フェイスになるようにしたものです。
+
+config.ph では
+
+	&DEFINE_SUBJECT_TAG("(:)");
+
+コマンドラインでは 
+
+	--tag="(:)"
+	--subjecttag="(:)"
+
+のように呼び出してあげて下さい。
+	
+
+
+.S	hml 1.6 のSubjectのフォーマット
+.S	Subject: [Elena:ID] という形にする
+.key	$SUBJECT_HML_FORM
+.key	$BRACKET
+.key	hml形のSubject
+
+オリジナルの hml 1.6 は
+……
+From:	エレナさんＭＬ
+Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
+……
+
+こんな形のヘッダですね。で、私が嫌いなので:-)、
+＃無駄に多いヘッダは嫌いなんですよぉ。To: 見りゃわかるのにX-ML-Nameと
+＃か…X-ML-Count は違う種類の情報（Reference）だからいいんですが…
+
+デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
+ようにしました。
+
+	$SUBJECT_HML_FORM = 1;
+	$BRACKET	  = 'Elena';
+
+で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
+＃今のFrom は ML名 じゃなくて ユーザー名
+
+最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
+つまり（今の場合だと）
+
+	Subject: [Elena:ID] サブジェクト
+#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
+
+の形になります。この場合
+
+	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
+
+にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+
+
+.S	TAGの [Elena:00001] の五桁の数字をＮ桁に変更
+.k	$HML_FORM_LONG_ID
+
+５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
+$SUBJECT_HML_FORM = 1; の時にのみ有効。
+
+一般には
+
+	$SUBJECT_FORM_LONG_ID
+.k	$SUBJECT_FORM_LONG_ID
+
+で、５桁がデフォールトだが $SUBJECT_FORM_LONG_ID 桁にする。
+$SUBJECT_FREE_FORM 使用時に有効な変数。
+
+
+.S	Message-IDの保存
+.key	Message-ID
+.key	Uniq_Identifier_of_Message-ID
+.key	$USE_ORIGINAL_MESSAGE_ID
+
+$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
+てヘッダにつけます。デフォールトは fml がつけます。
+
+
+.S	Message-IDを個人の趣味でカスタム化する
+.key	Message-IDのカスタム化
+.key	$HEADER_ADD_HOOK
+
+Message-ID: uja@aoi.chan.panic とするなら
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: uja@aoi.chan.panic\n";
+#;
+
+と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
+
+他の例：
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+
+$HEADER_ADD_HOOK = q#
+$body .= "Message-ID: ".
+	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
+	"Elena.Lolobrigita@Baycity.jp");
+#;
+
+
+.S	宇宙歴(外国TVシリーズMLで使ってます:-)
+.k	$APPEND_STARDATE
+
+   http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+
+config.ph で
+
+	$APPEND_STARDATE = 1; 
+
+とすると宇宙歴がつきます:-)
+
+	Date: Fri, 19 May 95 22:31:09  JST
+	From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
+	Subject: Re: Nantonaku Leonard Nimoy 
+	To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
+	X-ML-Name: Prisoner
+	X-Stardate: [-31]5697.8164
+
+	…本文略…
+
+みたいになります。スタートレックＦＡＱにプログラムがのっています
+libStardate.pl はその perl 版です。
+
+
 .S	ヘッダでの MIME 問題
 .key	$PREVENT_MIME
 
-デフォールトでMIME の３つのフィールドを通しています。
+デフォールトでは MIME 関係の次の３つのフィールドを通しています。
+＃ @HdrFieldsOrder で定められています。
 
 	MIME-Version:
 	Content-Type:
@@ -47,29 +338,41 @@ config.ph 等で定義してください。
 
 	$PREVENT_MIME = 1; 
 
-とするとこれらのフィールドを切り落とします。
-＃つまり MIME反対派の方は $PREVENT_MIME をセットしてください
+MIME反対派の方は $PREVENT_MIME をセットしてください。
+そうするとこれらのフィールドを切り落として配送します。
+
+@HdrFieldsOrder をいじって、上のフィールドをけずっても同じことができま
+す。
 
 
-.S	MIME Decoding を行なう
+.S	ヘッダと MIME Decoding してログをとること
 .key	MIME
-.label	{MIME-1}
+.label	MIME-header
+.l	MIME-1
 .key	$USE_MIME
+.xref	MIME-hack
 
-各種の MIME Decoding を行うためには、
+本来 MIME をクライアントプログラムが処理すればいいことなので、サーバと
+しては素通しでいいはずです。が、ログを日本語変換してから保存したいとい
+う要求があるらしいので、これらの機能が実装されています。
+
+
+まず、各種の MIME Decoding を行うためには、
 
 	$USE_MIME	= 1;
 
-と定義します。これを定義した場合
+と定義します。これがないと必要なライブラリをロードしません。
 
-	「summaryに書くsubjectをMIME decodeをしてから書き込む」
+これを定義した場合
+
+○ summaryに書くsubjectをMIME decodeをしてから書き込む
 
 ようになります。
 
 例：
 	……
 	Subject: Re: TELEPHONE 
-	=?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
+	   =?ISO-2022-JP?B?GyRCJD0kcyRKJCEhQRsoQg==?=
 
 	……
 というメールが来たとすると、summary ファイルには
@@ -82,7 +385,16 @@ config.ph 等で定義してください。
 部書いてます。summaryは１行１メールがわかりやすくていいでしょ？
 
 
+○ 記事をMIME Decoding してから保存する場合
+
+	$MIME_DECODED_ARTICLE          = 1;
+
+と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
+時に日本語へ逆変換した内容を書き込みます。
+
+
 .S	MIME Decoding を行なうに関するメモ…
+.l	MIME-Memo
 
 ISO-2022-JP の文字がない限りは require しません（ま、たいして軽くはな
 らんが…）。
@@ -96,28 +408,9 @@ RFC1522	2. Syntax of encoded-words
    token = 1*<Any CHAR except SPACE, CTLs, and especials>
 
 
-.S	配送するメールのMIME部分はDecodeしてから配送したい
-.label	{MIME-2}
-.seealso MIME-1
-
-＃注意：以下試していない。
-
-sub Distribute で
-
-    for (@HdrFieldsOrder) {
-	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
-
-という部分を
-
-    for (@HdrFieldsOrder) {
-	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
-
-とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
-実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
-
-
 .S	MIMEのカスタマイズ変数
-.label	{MIME-customizing}
+.label	MIME-customizing
+.label	MIME-2
 .key	$MIME_VERSION
 .key	$MIME_CONTENT_TYPE
 .key	$MIME_MULTIPART_BOUNDARY
@@ -144,15 +437,15 @@ $MIME_MULTIPART_BOUNDARY = "--Thu_18_May_95_02:36:26--"
 
 くぎり
 
-$MIME_MULTIPART_BOUNDARY = 
+	$MIME_MULTIPART_BOUNDARY = "--日付--"
 
 本文の前口上
 
-$MIME_MULTIPART_PREAMBLE = なし
+	$MIME_MULTIPART_PREAMBLE = なし
 
 本文の後につく部分
 
-$MIME_MULTIPART_TRAILER = なし
+	$MIME_MULTIPART_TRAILER = なし
 
 
 .S	Subject: の成形 ([Elena:ID] を抜く)
@@ -201,130 +494,63 @@ $MIME_MULTIPART_TRAILER = なし
 何のために必要な前処理かというと、次を見てみよう(^^;;
 
 
-.S	hml 1.6 のSubjectのフォーマット
-.S	Subject: [Elena:ID] という形にする
-.key	$SUBJECT_HML_FORM
-.key	$BRACKET
-.key	hml形のSubject
+.S	1つのMLに複数の投稿用アドレス
+.key	1つのMLに複数の投稿用アドレス
 
-オリジナルの hml 1.6 は
-……
-From:	エレナさんＭＬ
-Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
-……
+何の意味があるのかは聞かないでください（笑）
 
-こんな形のヘッダですね。で、私が嫌いなので:-)、
-＃無駄に多いヘッダは嫌いなんですよぉ。To: 見りゃわかるのにX-ML-Nameと
-＃か…X-ML-Count は違う種類の情報（Reference）だからいいんですが…
+例：
+Elena@phys.titech.ac.jp というＭＬで
 
-デフォールトは[]ものはなしで、オプショナルで次のようなSubject形になる
-ようにしました。
+	Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
 
-	$SUBJECT_HML_FORM = 1;
-	$BRACKET	  = 'Elena';
+の両方を投稿可能にする(いくつあっても全部配列にして ずらずらかけば同じ)
 
-で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
-＃今のFrom は ML名 じゃなくて ユーザー名
+config.ph に次のような設定をしてください
+.k	@PLAY_TO
 
-最近よく見られる形の [MLの名前:articleのID] という形を採用しました。
-つまり（今の場合だと）
+	@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
+			'Anna@phys.titech.ac.jp'
+		    );
 
-	Subject: [Elena:ID] サブジェクト
-#	Subject: [$BRACKET:$ID] $Subject	というコードが書いてある
+そして、次のフックを仕掛けます。
 
-の形になります。この場合
+# Here is a playing of "To addresses change"; string to eval
+$SMTP_OPEN_HOOK .= q#
+    local($a);
+    foreach (@PLAY_TO) {
+        $a = (split(/\@/, $_))[0];
+        if ($Envelope{"to:"} =~ /$a/) {
+            $MAIL_LIST = $_;
+        }
+    }
+#;
 
-	$SUBJECT_HML_FORM = 1; なら $STRIP_BRACKETS = 1;
+その複数のアドレスを(ループチェックに使うために) @PLAY_TO が必要です。
+配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
 
-にしてます（config.phの中で）＃必要なので勝手にonしてしまいます
+こうすると Elena になげても Anna に投げても どっちでもＯＫで、
+to: と reply-to:を変更します。
+＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
+.k	$Playing_to
 
-
-.S	Subject: を (Elena 100) とかの任意の形に成形する
-.l	$SUBJECT_FREE_FORM
-
-	fml 	Subject: はいじらない
-	hml	Subject: [Elena:100]
-
-なんですが、他のフォーマットを使うために 
-例えば、
-
-	$SUBJECT_FREE_FORM = 1;
-	$BEGIN_BRACKET     = '(';
-	$BRACKET           = 'Elena';
-	$BRACKET_SEPARATOR = ' ';
-	$END_BRACKET       = ')';
-	$SUBJECT_FREE_FORM_REGEXP = "\\($BRACKET \\d+\\)";
-
-と定義すると (Elena 100) の形になり、Reply のメールの (Elena 99) をは
-ずし新しい (Elena 100) をつけるようになります。
-
-他の例： Subject: [Elena 100]
-
-	$SUBJECT_FREE_FORM = 1;
-	$BEGIN_BRACKET     = '[';
-	$BRACKET           = 'Elena';
-	$BRACKET_SEPARATOR = ' ';
-	$END_BRACKET       = ']';
-	$SUBJECT_FREE_FORM_REGEXP = "\\[$BRACKET \\d+\\]";
+注意： Playing_to は削除しました。
+libcompat.pl にBackward compatibility のためのコードがあります。
 
 
-.S	SubjectのTAGの定義 &DEFINE_SUBJECT_TAG("(:)");
-.l	&DEFINE_SUBJECT_TAG
-.k	&DEFINE_SUBJECT_TAG
-.xref	--mode
+.S	コマンドメールの結果のメールの Reply-To: を変更する
+.k	$FORCE_COMMAND_REPLY_TO
 
-Subject のTAGを定義する。fml のデフォールトは「使いもせず情報を減らす」
-タグはつけない。
-
-	(:)
-
-		Subject: (Elena:100)
-
-	[:]
-
-		Subject: [Elena:100]	(HMLタイプ)
-
-	( )
-
-		Subject: (Elena:100)
-
-	[ ]
-
-		Subject: [Elena:100]
+	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
 
 
-なお、モード指定中でTAGを定義している場合は後で評価された内容が優先さ
-れるので注意。例： HML Emulation mode  (--hml)
+.S	X-ML-Info: の内容を指定する
+.k	$X_ML_INFO_MESSAGE
 
-これらのTAGは $SUBJECT_FREE_FORM の変数を定義すれば自由にカスタマイズ
-できるのですが、それをあらかじめ定義しておくことで便利なユーザインター
-フェイスになるようにしたものです。
+	$X_ML_INFO_MESSAGE
 
-config.ph では
-
-	&DEFINE_SUBJECT_TAG("(:)");
-
-コマンドラインでは 
-
-	--tag="(:)"
-	--subjecttag="(:)"
-
-のように呼び出してあげて下さい。
-	
-
-.S	$HML_FORM_LONG_ID
-.k	$HML_FORM_LONG_ID
-
-
-５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
-$SUBJECT_HML_FORM = 1; の時にのみ有効。
-
-
-.S	$SUBJECT_FORM_LONG_ID
-.k	$SUBJECT_FORM_LONG_ID
-
-５桁がデフォールトだが $HML_FORM_LONG_ID 桁にする。
-$SUBJECT_FREE_FORM 使用時に有効なの変数。
+で指定した内容を優先して X-ML-Info: につけて配送します。そうでない場合
+はモードによって適当に作られた user friendly な内容が付け加えられます。
 
 
 .S	ＮＩＦＴＹ対策をするか？（参加者にＮＩＦの人もいる）
@@ -351,109 +577,6 @@ config.ph あたりで
 ＃前向きなのは、みんなで文句をいって直させること
 ＃でも、僕はアカウントをもってない;_;。アカウントを持ってる人が一年く
 らいいいつづけないとだめなんだろうなぁ（はぁ）
-
-
-.S	Message-IDの保存
-.key	Message-ID
-.key	Uniq_Identifier_of_Message-ID
-.key	$USE_ORIGINAL_MESSAGE_ID
-
-$USE_ORIGINAL_MESSAGE_ID = 1; とすると、オリジナルのMessage-IDを保存し
-てヘッダにつけます。デフォールトは fml がつけます。
-
-
-.S	Message-IDを個人の趣味でカスタム化する
-.key	Message-IDのカスタム化
-.key	$HEADER_ADD_HOOK
-
-Message-ID: uja@aoi.chan.panic とするなら
-
-$HEADER_ADD_HOOK = q#
-$body .= "Message-ID: uja@aoi.chan.panic\n";
-#;
-
-と、config.ph にでも書く。あとはずらずらかく（あはは、うじゃ）
-
-他の例：
-Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
-
-$HEADER_ADD_HOOK = q#
-$body .= "Message-ID: ".
-	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
-	"Elena.Lolobrigita@Baycity.jp");
-#;
-
-
-.S	宇宙歴(外国TVシリーズMLで使ってます:-)
-
-   http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
-
-config.ph で	$APPEND_STARDATE = 1; とすると宇宙歴がつきます:-)
-
-	Date: Fri, 19 May 95 22:31:09  JST
-	From: "No.6 Fukachan" <fukachan@phys.titech.ac.jp>
-	Subject: Re: Nantonaku Leonard Nimoy 
-	To: enterprise@phys.titech.ac.jp (Foreign TV Series ML)
-	X-ML-Name: Prisoner
-	X-Stardate: [-31]5697.8164
-
-	…本文略…
-
-みたいになります。スタートレックＦＡＱにプログラムがのっています
-libStardate.pl はその perl 版です。
-
-
-.S	1つのMLに複数の投稿用アドレス
-.key	1つのMLに複数の投稿用アドレス
-
-何の意味があるのかは聞かないでください（笑）
-
-例：
-Elena@phys.titech.ac.jp というＭＬで
-Elena@phys.titech.ac.jp	と Anna@phys.titech.ac.jp
-の両方を投稿可能にする（いくつあっても全部配列にして ずらずらかけばおなじ。）
-
-config.ph に次のような設定をしてください
-
-@PLAY_TO = (	'Elena@phys.titech.ac.jp', 
-		'Anna@phys.titech.ac.jp');
-
-# Here is a playing of "To addresses change"; string to eval
-$SMTP_OPEN_HOOK .= q#
-    local($a);
-    foreach (@PLAY_TO) {
-        $a = (split(/\@/, $_))[0];
-        if ($Envelope{"to:"} =~ /$a/) {
-            $MAIL_LIST = $_;
-        }
-    }
-#;
-
-その複数のアドレスを(ループチェックに使うために) @PLAY_TO が必要です。
-配列の先頭がオリジナルのアドレス(==$MAIL_LIST)です。
-
-こうすると Elena になげても Anna に投げても どっちでもＯＫで、
-to: と reply-to:を変更します。
-＃名前の変更 in 1.5delta. Playing_to  -> SMTP_OPEN_HOOK
-
-＊＊＊ 注意： Playing_to は削除しました。 ＊＊＊
-libcompat.pl にBackward compatibility のためのコードがあります。
-
-
-.S	コマンドメールの結果のメールのReply-To:を変更する
-.k	$FORCE_COMMAND_REPLY_TO
-
-	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
-
-
-.S	X-ML-Info: の内容を指定する
-.k	$X_ML_INFO_MESSAGE
-
-	$X_ML_INFO_MESSAGE
-
-で指定した内容を優先して X-ML-Info: につけて配送します。そうでない場合
-はモードによって適当に作られた user friendly な内容が付け加えられます。
-
 
 
 .# $Id$
