@@ -134,6 +134,9 @@ sub main'IrcParseArgv #'
     # now 'irc' name space;
     $debug = $main'debug = $opt_d ? 1 : 0; #';
     $USE_SYSLOG = $opt_S ? 1 : 0;
+
+    # logfile ; logged even under syslog() works.
+    $LOGFILE = $opt_L || $ENV{'PWD'}."/log";
     
     $SetProcTitle = $opt_t;
 
