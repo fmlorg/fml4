@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # MEAD: Mail Error Analyze Daemon
-# $FML: mead.pl,v 1.34 2002/05/22 15:24:31 fukachan Exp $
+# $FML: mead.pl,v 1.35 2002/06/03 12:18:12 fukachan Exp $
 #
 
 $Rcsid = 'mead 4.0';
@@ -372,9 +372,10 @@ sub ExtractAddr
     for (split(/,/, $addr)) {
 	s/</ /g; s/>/ /g; s/\.\.\./ /;
 	if (/(\S+\@[\.A-Za-z0-9\-]+)/) { 
-	    $return_addr{$1} = 1;
-	    $pickup_addr = $1 if $pickup_p;
-	    &Debug("add \$return_addr{$1}") if $debug;
+	    my $a = $1; $a =~ s/admin\+\S+\=\S+\@/admin/;
+	    $return_addr{$a} = 1;
+	    $pickup_addr = $a if $pickup_p;
+	    &Debug("add \$return_addr{$a}") if $debug;
 	}
     }
 
