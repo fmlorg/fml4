@@ -8,9 +8,10 @@
 
    /usr/local/fml/share/
 
-	makefmlが生成する場所
-	この場所を直接使ってもいいし、
-	ここからさらにせいせいしてもよい
+	makefmlがCGIを生成する場所
+
+	httpdはこの場所を直接使ってもいいし、
+	ここからさらに生成してもよい
 
   例: thttpd (target httpd) 
      /usr/pkg/sbin/thttpd -nor -u fml \
@@ -38,7 +39,7 @@
  * 一般ユーザ用のはどうする？ (未実装)
    makefml ml.cgi $ml とかにするのか？
 
-	   /usr/local/fml/share/cgi-bin/fml/$ml/ (仮)  以下にCGIを生成？
+       /usr/local/fml/share/cgi-bin/fml/ml/$ml/ (仮) 以下にCGIを生成？
 
 
 ○ 各ディレクトリの権限
@@ -59,7 +60,7 @@
 	パスワード認証をともなうべきで
 	adminコマンドと同じパスワード？
  
-   /usr/local/fml/share/cgi-bin/fml/$ml/ (仮)
+   /usr/local/fml/share/cgi-bin/fml/ml/$ml/ (仮)
 
 	一般ユーザが入る階層
 	パスワード認証をともなうべき
