@@ -1348,8 +1348,8 @@ sub PtrExpand
 
     &Log("PtrExpand::($k)   $k -> index[$index{$k}]") if $debug;
 
-    if (! $index{$k}) {
-	&Log("PtrExpand::Error($k)  index[$k] -> NULL");
+    if ((! $index{$k}) && (! $indexlist{$k})) {
+	&Log("PtrExpand::Error($k)  {index,indexlist}[$k] -> NULL");
     }
 
     # $key{$k};
@@ -1390,12 +1390,13 @@ sub IndexExpand
     @index = split(/\s+|\s*,\s+/, $x);
     foreach (@index) {
 	$org = $_;
-	$r = $index{$_} || $_;
+	$r = $index{$_} || $indexlist{$_} || $_;
 	print STDERR $r if $debug;	    
 	$result .= "$r ";
 
 	if (index($r, $org) == 0) {
-	    &Log("[$. lines] error or not defined?\n[$org] => [$r]\n");
+	    &Log(sprintf("%20s | %s", 
+			 $org, "[$. lines] error? cannot expand"));
 	    $Error = 1;
 	}
     }
