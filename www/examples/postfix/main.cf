@@ -1,0 +1,2 @@
+alias_database = hash:/etc/aliases, 
+	hash:/var/spool/ml/etc/aliases

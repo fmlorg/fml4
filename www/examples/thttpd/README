@@ -1,0 +1,22 @@
+	thttpd - tiny/turbo/throttling HTTP server
+
+* url
+
+   http://www.acme.com/software/thttpd/
+
+* You should use thttpd > 2.06.
+
+References:
+   To: BUGTRAQ@SECURITYFOCUS.COM
+   Message-ID:  <382DA5D5.A9D1F810@thievco.com>
+
+* How to run/How to start thttpd	
+
+/usr/pkg/sbin/thttpd  -u fml -nor -d /usr/local/fml/www -c 'cgi-bin/*/*cgi' 
+
+Is it right? (I think so). The worst thing is "-nor" option which
+enforces "not chroot" but we need perl . If you have power, you may
+should install perl under chroot-ed environment but ...
+
+$Id$
+
