@@ -96,6 +96,20 @@ qmail-newu をしわすれてないか確認を
 
 などなど…
 
+その他:
+
+日付を保存するようにしてしてcopyなどはしないと何かとはまります。
+例えば
+
+1. scp -pr source/ host:/some/where/
+
+2. rsync --rsh ssh -av source/ host:/some/where/destination/
+
+3. tar -C source -cpf - . |ssh host tar -C /some/where/destination -xvpf - (gnu
+ tar)
+
+など…
+
 .fi
 .if LANG == ENGLISH
 .fi
