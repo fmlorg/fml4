@@ -28,6 +28,12 @@ sub SyncHtml
     local($id, $subdir, $title, $list, $mtime, $probe, $li, $html_dir);
     local($remake_index, $subdir_first_time);
 
+    # work in distribution mode only
+    if (! $e{'mode:dist'}) { # flag on when through Distribute()
+	&Log("SyncHtml does not run under non distribute mode");
+	return ;
+    }
+
     # import
     $SyncHtml'debug = 1 if $main'debug;
 
