@@ -102,8 +102,8 @@ $(WORK_DOC_DIR)/INFO-e: INFO-common
 
 plaindoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
-	@ $(GEN_PLAIN_DOC)
-	@ env FML=${FML} make -f distrib/mk/fml.doc.mk op
+#	@ $(GEN_PLAIN_DOC)
+	@ env FML=${FML} make -f distrib/mk/fml.doc.mk plaindocbuild
 
 htmldoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
