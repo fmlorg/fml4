@@ -5,7 +5,7 @@
 _ML_ mailing list configuration
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <LINK rev="alternate" lang="en" href="index-e.html">
@@ -15,22 +15,22 @@ _ML_ mailing list configuration
 <!-- =================================================================== -->
 <!-- __START__ -->
 <CENTER>
-_ML_ $B#M#L$N%j%b!<%H4IM}<T$N@_Dj(B
+_ML_ £Í£Ì¤Î¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÀßÄê
 </CENTER>
-$B%j%b!<%H4IM}<T$N%a!<%k%"%I%l%9$H!"$=$N%Q%9%o!<%I$r@_Dj$7$F2<$5$$!#(B
-$B$3$l$O(B
+¥ê¥â¡¼¥È´ÉÍý¼Ô¤Î¥á¡¼¥ë¥¢¥É¥ì¥¹¤È¡¢¤½¤Î¥Ñ¥¹¥ï¡¼¥É¤òÀßÄê¤·¤Æ²¼¤µ¤¤¡£
+¤³¤ì¤Ï
 <UL>
-<LI>admin $B$H(B approve $B%3%^%s%I$N%Q%9%o!<%I(B
-<LI>$B$*$h$S(BGUI$B$N%a%K%e!<$KF~$k(B
+<LI>admin ¤È approve ¥³¥Þ¥ó¥É¤Î¥Ñ¥¹¥ï¡¼¥É
+<LI>¤ª¤è¤ÓGUI¤Î¥á¥Ë¥å¡¼¤ËÆþ¤ë
 </UL>
-$B$N:]$K;H$o$l$k%Q%9%o!<%I$G$9!#(B
-$B4JC12=$N$?$a(B CGI $B%$%s%?%U%'%$%9$N%a%K%e!<$+$i$O!"(B
-$B$3$N#3$D$KF1$8%Q%9%o!<%I$r@_Dj$7$^$9!#(B
+¤ÎºÝ¤Ë»È¤ï¤ì¤ë¥Ñ¥¹¥ï¡¼¥É¤Ç¤¹¡£
+´ÊÃ±²½¤Î¤¿¤á CGI ¥¤¥ó¥¿¥Õ¥§¥¤¥¹¤Î¥á¥Ë¥å¡¼¤«¤é¤Ï¡¢
+¤³¤Î£³¤Ä¤ËÆ±¤¸¥Ñ¥¹¥ï¡¼¥É¤òÀßÄê¤·¤Þ¤¹¡£
 <BR>
-CUI$B$N(B makefml htpasswd $B$rMQ$$$k$3$H$G%3%^%s%IMQ$H(BCGI$BMQ$H(B
-$BJL!9$N%Q%9%o!<%I$r$D$1$k$3$H$,2DG=$G$9!#(B
+CUI¤Î makefml htpasswd ¤òÍÑ¤¤¤ë¤³¤È¤Ç¥³¥Þ¥ó¥ÉÍÑ¤ÈCGIÍÑ¤È
+ÊÌ¡¹¤Î¥Ñ¥¹¥ï¡¼¥É¤ò¤Ä¤±¤ë¤³¤È¤¬²ÄÇ½¤Ç¤¹¡£
 <BR>
-$BCm0U(B: $B?7$7$$4IM}<TL>$rF~NO$9$k$H!"4IM}<T$N?75,EPO?07$$$K$J$j$^$9(B
+Ãí°Õ: ¿·¤·¤¤´ÉÍý¼ÔÌ¾¤òÆþÎÏ¤¹¤ë¤È¡¢´ÉÍý¼Ô¤Î¿·µ¬ÅÐÏ¿°·¤¤¤Ë¤Ê¤ê¤Þ¤¹
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" 
 	TARGET="right" METHOD=POST>
@@ -39,21 +39,21 @@ CUI$B$N(B makefml htpasswd $B$rMQ$$$k$3$H$G%3%^%s%IMQ$H(BCGI$BMQ$H(B
 <INPUT TYPE=hidden NAME=PROC VALUE=mladminpasswd>
 
 
-$B%"%+%&%s%H$b$7$/$O(BEmail $B%"%I%l%9(B:
+¥¢¥«¥¦¥ó¥È¤â¤·¤¯¤ÏEmail ¥¢¥É¥ì¥¹:
 <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 <BR>
-	$B4{B8$N%j%b!<%H4IM}<T%j%9%H$+$i$NA*Br(B:
+	´ûÂ¸¤Î¥ê¥â¡¼¥È´ÉÍý¼Ô¥ê¥¹¥È¤«¤é¤ÎÁªÂò:
 	<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
 	__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST_FOR_EACH_ML__
 	</SELECT>
 
 <TABLE>
 <TR>
-	<TD ALIGN=right> $B%Q%9%o!<%I(B:
+	<TD ALIGN=right> ¥Ñ¥¹¥ï¡¼¥É:
 	<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 <TR>
-	<TD ALIGN=right> $B3NG'$N$?$aF1$8%Q%9%o!<%I(B:
+	<TD ALIGN=right> ³ÎÇ§¤Î¤¿¤áÆ±¤¸¥Ñ¥¹¥ï¡¼¥É:
 	<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 </TABLE>
 _____________________________

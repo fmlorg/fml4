@@ -5,7 +5,7 @@
 "fml" Configuration Interface
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <LINK rev="alternate" lang="en" href="index-e.html">
@@ -14,49 +14,49 @@
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <PRE>
-$B$3$N%Z!<%8$O(Bfml$B$N4IM}2<$K$"$kA4#M#L$N@_Dj$r99?7(B/$BJQ99$9$k2hLL$G$9!#(B
-$B4pK\E*$K%5!<%P$K$O$$$C$F(B makefml $B%3%^%s%I$r;H$($k4IM}<T$HF1$88"8B$G$9!#(B
-$B!t(B(makefml$B$K$O$"$k$1$I(BCGI$B$G$OMQ0U$5$l$F$$$J$$5!G=$b$"$j$^$9(B)
+¤³¤Î¥Ú¡¼¥¸¤Ïfml¤Î´ÉÍý²¼¤Ë¤¢¤ëÁ´£Í£Ì¤ÎÀßÄê¤ò¹¹¿·/ÊÑ¹¹¤¹¤ë²èÌÌ¤Ç¤¹¡£
+´ðËÜÅª¤Ë¥µ¡¼¥Ð¤Ë¤Ï¤¤¤Ã¤Æ makefml ¥³¥Þ¥ó¥É¤ò»È¤¨¤ë´ÉÍý¼Ô¤ÈÆ±¤¸¸¢¸Â¤Ç¤¹¡£
+¡ô(makefml¤Ë¤Ï¤¢¤ë¤±¤ÉCGI¤Ç¤ÏÍÑ°Õ¤µ¤ì¤Æ¤¤¤Ê¤¤µ¡Ç½¤â¤¢¤ê¤Þ¤¹)
 </PRE>
 
 <P>
 <UL>
-	<LI>$B4pK\@_Dj(B
+	<LI>´ðËÜÀßÄê
 	<UL>
-		<LI><A HREF="#newml">$B?75,#M#L$N:n@.(B</A>
-		<LI><A HREF="#add">$B#M#L%a%s%P!<$NEPO?(B</A>
-		<LI><A HREF="#bye">$B#M#L%a%s%P!<$N:o=|(B</A>
-		<LI><A HREF="#admin.add">$B%j%b!<%H4IM}<T$NEPO?(B</A>
-		<LI><A HREF="#admin.bye">$B%j%b!<%H4IM}<T$N:o=|(B</A>
-		<LI><A HREF="#mlpassword">$B%j%b!<%H4IM}<T%Q%9%o!<%I$N@_Dj(B</A>
-		<LI><A HREF="#config">$B#M#L$N>\:Y@_Dj(B</A>
-		<LI><A HREF="#destructml">$B#M#L$N:o=|(B</A>
+		<LI><A HREF="#newml">¿·µ¬£Í£Ì¤ÎºîÀ®</A>
+		<LI><A HREF="#add">£Í£Ì¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿</A>
+		<LI><A HREF="#bye">£Í£Ì¥á¥ó¥Ð¡¼¤Îºï½ü</A>
+		<LI><A HREF="#admin.add">¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿</A>
+		<LI><A HREF="#admin.bye">¥ê¥â¡¼¥È´ÉÍý¼Ô¤Îºï½ü</A>
+		<LI><A HREF="#mlpassword">¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É¤ÎÀßÄê</A>
+		<LI><A HREF="#config">£Í£Ì¤Î¾ÜºÙÀßÄê</A>
+		<LI><A HREF="#destructml">£Í£Ì¤Îºï½ü</A>
 	</UL>
 
-	<LI>$B4IM}%a%K%e!<(B
+	<LI>´ÉÍý¥á¥Ë¥å¡¼
 	<UL>
 		<LI>
-		<A HREF="#export">$B4{B8#M#L$r(BCGI$BA`:n2DG=$K$9$k(B</A>
+		<A HREF="#export">´ûÂ¸£Í£Ì¤òCGIÁàºî²ÄÇ½¤Ë¤¹¤ë</A>
 	</UL>
 
-	<LI>$B%5!<%P$N@_Dj(B
+	<LI>¥µ¡¼¥Ð¤ÎÀßÄê
 	<UL>
-		<LI><A HREF="#cgiadmin">CGI$B$rA`:n2DG=$J%f!<%6$NEPO?(B</A>
+		<LI><A HREF="#cgiadmin">CGI¤òÁàºî²ÄÇ½¤Ê¥æ¡¼¥¶¤ÎÅÐÏ¿</A>
 	</UL>
 </UL>
 
 
 <HR>
-<CENTER>$B4pK\@_Dj(B</CENTER>
+<CENTER>´ðËÜÀßÄê</CENTER>
 <UL>
    <A NAME=newml>
-   <LI>$B?75,#M#L$N:n@.(B
+   <LI>¿·µ¬£Í£Ì¤ÎºîÀ®
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-	$B%a!<%j%s%0%j%9%HL>(B:<INPUT NAME=ML SIZE=15>
+	¥á¡¼¥ê¥ó¥°¥ê¥¹¥ÈÌ¾:<INPUT NAME=ML SIZE=15>
 
 	<BR>
 	<INPUT NAME=submit-p TYPE=submit VALUE=Create>
@@ -65,16 +65,16 @@
 
    <A NAME=add>
    <A NAME=bye>
-   <LI>$B#M#L%a%s%P!<$NEPO?(B/$B:o=|(B
+   <LI>£Í£Ì¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿/ºï½ü
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>$B%a%s%P!<EPO?(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>¥á¥ó¥Ð¡¼ÅÐÏ¿
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="bye">$B%a%s%P!<:o=|(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="bye">¥á¥ó¥Ð¡¼ºï½ü
 	<BR>
-	$B#M#L$NA*Br(B:
+	£Í£Ì¤ÎÁªÂò:
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -83,16 +83,16 @@
 
    <A NAME=admin.add>
    <A NAME=admin.bye>
-   <LI>$B%j%b!<%H4IM}<T$NEPO?(B/$B:o=|(B
+   <LI>¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿/ºï½ü
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked>$B4IM}<T$NEPO?(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin" checked>´ÉÍý¼Ô¤ÎÅÐÏ¿
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">$B4IM}<T$N:o=|(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">´ÉÍý¼Ô¤Îºï½ü
 	<BR>
-	$B#M#L$NA*Br(B:
+	£Í£Ì¤ÎÁªÂò:
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -100,24 +100,24 @@
 	</FORM>
 
     <A NAME=mlpassword>
-	<LI>$B%j%b!<%H4IM}<T%Q%9%o!<%I$N@_Dj(B
-	$B$3$l$O(B
-	$B!V(Badmin $B$H(B approve $B%3%^%s%I$N%Q%9%o!<%I!W(B
-	$B!V$*$h$S(BCGI$B$N%a%K%e!<$KF~$k!W(B
-	$B;~$K;H$&%Q%9%o!<%I$G$9!#(B
+	<LI>¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É¤ÎÀßÄê
+	¤³¤ì¤Ï
+	¡Öadmin ¤È approve ¥³¥Þ¥ó¥É¤Î¥Ñ¥¹¥ï¡¼¥É¡×
+	¡Ö¤ª¤è¤ÓCGI¤Î¥á¥Ë¥å¡¼¤ËÆþ¤ë¡×
+	»þ¤Ë»È¤¦¥Ñ¥¹¥ï¡¼¥É¤Ç¤¹¡£
 	<BR>
-	$B4JC12=$N$?$a(BCGI$B%a%K%e!<$G$O$3$N#3$D$KF1$8%Q%9%o!<%I$r@_Dj$7$^$9!#(B
-	makefml mladmin.cgi config $B$+$i%j%b!<%H4IM}MQ$H(B CGI $BMQ$H$G(B
-	$BJL$N%Q%9%o!<%I$r$D$1$k$3$H$,2DG=$G$9!#(B
+	´ÊÃ±²½¤Î¤¿¤áCGI¥á¥Ë¥å¡¼¤Ç¤Ï¤³¤Î£³¤Ä¤ËÆ±¤¸¥Ñ¥¹¥ï¡¼¥É¤òÀßÄê¤·¤Þ¤¹¡£
+	makefml mladmin.cgi config ¤«¤é¥ê¥â¡¼¥È´ÉÍýÍÑ¤È CGI ÍÑ¤È¤Ç
+	ÊÌ¤Î¥Ñ¥¹¥ï¡¼¥É¤ò¤Ä¤±¤ë¤³¤È¤¬²ÄÇ½¤Ç¤¹¡£
 	<BR>
-	$BCm0U(B: $B?7$7$$4IM}<TL>$rF~NO$9$k$H!"4IM}<T$N?75,EPO?07$$$K$J$j$^$9(B
+	Ãí°Õ: ¿·¤·¤¤´ÉÍý¼ÔÌ¾¤òÆþÎÏ¤¹¤ë¤È¡¢´ÉÍý¼Ô¤Î¿·µ¬ÅÐÏ¿°·¤¤¤Ë¤Ê¤ê¤Þ¤¹
 
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi"
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT NAME=PROC TYPE="hidden" VALUE="mladminpasswd">
 	<BR>
-	$B#M#L$NA*Br(B:
+	£Í£Ì¤ÎÁªÂò:
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -126,14 +126,14 @@
 
 
    <A NAME=config>
-   <LI>$B#M#L$N>\:Y@_Dj(B (makefml config)
+   <LI>£Í£Ì¤Î¾ÜºÙÀßÄê (makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-	$B#M#L$NA*Br(B:
+	£Í£Ì¤ÎÁªÂò:
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -141,17 +141,17 @@
 	</FORM>
 
    <A NAME=destructml>
-   <LI>$B#M#L$N:o=|(B
+   <LI>£Í£Ì¤Îºï½ü
 	<BR>	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
 	
 	<TR>
-		<TD ALIGN=right> $B#M#L(B:
+		<TD ALIGN=right> £Í£Ì:
 		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>	$B#M#L$NA*Br(B:
+			<TD ALIGN=left>	£Í£Ì¤ÎÁªÂò:
 			<TD ALIGN=right>
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
@@ -168,23 +168,23 @@
 
 <!-- ------------------------------------------------------------------>
 <HR>	
-<CENTER>$B4IM}%a%K%e!<(B</CENTER>
+<CENTER>´ÉÍý¥á¥Ë¥å¡¼</CENTER>
 <UL>
    <A NAME=export>
-   <LI> $B4{B8$NFCDj$N#M#L$r(B CGI $B7PM3$GA`:n2DG=$K$9$k$K$O(B
-	$B0J2<$N(B 2 $B%9%F%C%W$+$i$J$j$^$9!#(B
-	$BFCDj$N(B ML $B$r(B CGI $BA`:n2DG=$K$7!"(B
-	CGI $BA`:n2DG=$J%a%s%P!<$rEPO?$7$F2<$5$$!#(B
+   <LI> ´ûÂ¸¤ÎÆÃÄê¤Î£Í£Ì¤ò CGI ·ÐÍ³¤ÇÁàºî²ÄÇ½¤Ë¤¹¤ë¤Ë¤Ï
+	°Ê²¼¤Î 2 ¥¹¥Æ¥Ã¥×¤«¤é¤Ê¤ê¤Þ¤¹¡£
+	ÆÃÄê¤Î ML ¤ò CGI Áàºî²ÄÇ½¤Ë¤·¡¢
+	CGI Áàºî²ÄÇ½¤Ê¥á¥ó¥Ð¡¼¤òÅÐÏ¿¤·¤Æ²¼¤µ¤¤¡£
 	
    <UL>
-	<LI> $B4{B8$NFCDj$N#M#L$r(B CGI $B7PM3$GA`:n2DG=$K$9$k(B
+	<LI> ´ûÂ¸¤ÎÆÃÄê¤Î£Í£Ì¤ò CGI ·ÐÍ³¤ÇÁàºî²ÄÇ½¤Ë¤¹¤ë
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
 
-	$B%a!<%j%s%0%j%9%HL>(B: <INPUT NAME=ML SIZE=30>
+	¥á¡¼¥ê¥ó¥°¥ê¥¹¥ÈÌ¾: <INPUT NAME=ML SIZE=30>
 	<TABLE>
-		<TD ALIGN=left>$B4{B8%j%9%H$+$i$NA*Br(B:
+		<TD ALIGN=left>´ûÂ¸¥ê¥¹¥È¤«¤é¤ÎÁªÂò:
 		<TD ALIGN=right>
 		<SELECT NAME=ML SIZE=2 >
 		__EXPAND_OPTION_ML__
@@ -198,20 +198,20 @@
 
 	<LI>     
 	<A HREF="#mlpassword">
-	$B4{B8$NFCDj$N#M#L$r(B CGI $BA`:n2DG=$J?M$NEPO?(B/$B:o=|(B
+	´ûÂ¸¤ÎÆÃÄê¤Î£Í£Ì¤ò CGI Áàºî²ÄÇ½¤Ê¿Í¤ÎÅÐÏ¿/ºï½ü
 	</A>
 	<BR>
-	$BCm(B: $B%j%b!<%H4IM}<T$NEPO?$HF1$8%a%K%e!<$G$9!#(B
+	Ãí: ¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿¤ÈÆ±¤¸¥á¥Ë¥å¡¼¤Ç¤¹¡£
     </UL>
 
 <HR>	
    <A NAME=cgiadmin>
    <LI>
-	$B$3$N2hLL$rA`:n2DG=$J(B(CGI)$B4IM}<T%"%+%&%s%H$N%Q%9%o!<%I@_Dj(B
+	¤³¤Î²èÌÌ¤òÁàºî²ÄÇ½¤Ê(CGI)´ÉÍý¼Ô¥¢¥«¥¦¥ó¥È¤Î¥Ñ¥¹¥ï¡¼¥ÉÀßÄê
 	<BR>
-	$BDI2C(B: $B%"%+%&%s%H$H%Q%9%o!<%I$NAH$rF~NO$9$l$PDI2C$K$J$j$^$9!#(B
+	ÄÉ²Ã: ¥¢¥«¥¦¥ó¥È¤È¥Ñ¥¹¥ï¡¼¥É¤ÎÁÈ¤òÆþÎÏ¤¹¤ì¤ÐÄÉ²Ã¤Ë¤Ê¤ê¤Þ¤¹¡£
 	<BR>
-	$B:o=|(B: $B>C$7$?$$%"%+%&%s%H$rF~NO$7!":o=|%b!<%I$K$7$F(BGO$B$G$9!#(B
+	ºï½ü: ¾Ã¤·¤¿¤¤¥¢¥«¥¦¥ó¥È¤òÆþÎÏ¤·¡¢ºï½ü¥â¡¼¥É¤Ë¤·¤ÆGO¤Ç¤¹¡£
 	<BR>
 	
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
@@ -219,24 +219,24 @@
 	<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
 	<INPUT TYPE=hidden NAME=ML   VALUE=etc>
 	
-	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>$BDI2C(B
-	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">$B:o=|(B
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>ÄÉ²Ã
+	<INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">ºï½ü
 
-	<BR> Email $B%"%I%l%9(B $B$J$$$7%"%+%&%s%HL>(B:
+	<BR> Email ¥¢¥É¥ì¥¹ ¤Ê¤¤¤·¥¢¥«¥¦¥ó¥ÈÌ¾:
 		<INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
 	<BR>
-		$B4{B8$N%"%+%&%s%H$+$i$NA*Br(B:
+		´ûÂ¸¤Î¥¢¥«¥¦¥ó¥È¤«¤é¤ÎÁªÂò:
 		<SELECT NAME=CGI_ADMIN_USER SIZE=2 >
 		__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
 		</SELECT>
 
 	<TABLE>	
 		<TR>
-			<TD ALIGN=right> $B%Q%9%o!<%I(B:
+			<TD ALIGN=right> ¥Ñ¥¹¥ï¡¼¥É:
 			<TD ALIGN=left>
 			<INPUT TYPE=password NAME=PASSWORD SIZE=30>
 		<TR>
-			<TD ALIGN=right> $B3NG'$N$?$aF1$8%Q%9%o!<%I(B:
+			<TD ALIGN=right> ³ÎÇ§¤Î¤¿¤áÆ±¤¸¥Ñ¥¹¥ï¡¼¥É:
 			<TD ALIGN=left>
 			<INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>

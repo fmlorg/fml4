@@ -456,7 +456,7 @@ sub ERROR
 sub P
 { 
     local($s) = @_;
-    &jcode'convert(*s, 'jis'); #';
+    &jcode'convert(*s, 'euc'); #';
     print $s, "\n";
 }
 

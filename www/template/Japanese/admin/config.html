@@ -5,7 +5,7 @@
 _ML_ mailing list configuration
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <LINK rev="alternate" lang="en" href="index-e.html">
@@ -18,12 +18,12 @@ _ML_ mailing list configuration
 <A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ Configuration Interface
 
 <P>
-_ML_ $B%a!<%j%s%0%j%9%H$N@_Dj(B
+_ML_ ¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤ÎÀßÄê
 </CENTER>
 </H2>
 
 <HR>
-<A NAME=config><P>_ML_ $B%a!<%j%s%0%j%9%H$N>\:Y@_Dj(B (makefml config)
+<A NAME=config><P>_ML_ ¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Î¾ÜºÙÀßÄê (makefml config)
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -36,7 +36,7 @@ _ML_ $B%a!<%j%s%0%j%9%H$N@_Dj(B
 
 
 <HR>
-<A NAME=adminadd.bye><P>$B%j%b!<%H4IM}<T$NEPO?(B/$B:o=|(B
+<A NAME=adminadd.bye><P>¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿/ºï½ü
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -45,10 +45,10 @@ _ML_ $B%a!<%j%s%0%j%9%H$N@_Dj(B
 <P>
 <TABLE>
 	<TR>
-		<TD ALIGN=right> $B%a!<%k%"%I%l%9(B:
+		<TD ALIGN=right> ¥á¡¼¥ë¥¢¥É¥ì¥¹:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>$B4{B8%j%9%H$+$i$NA*Br(B:
+			<TD ALIGN=left>´ûÂ¸¥ê¥¹¥È¤«¤é¤ÎÁªÂò:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
@@ -56,11 +56,11 @@ _ML_ $B%a!<%j%s%0%j%9%H$N@_Dj(B
 		</TABLE>
 
 	<TR>
-		<TD ALIGN=right> $BEPO?(B/$B:o=|(B:
+		<TD ALIGN=right> ÅÐÏ¿/ºï½ü:
 		<TD ALIGN=left> 
 		<SELECT NAME=PROC SIZE=2 >
-		<OPTION VALUE=ADD_ADMIN>ADD ADMIN $B%j%b!<%H4IM}<T$H$7$FEPO?(B
-		<OPTION VALUE=BYE_ADMIN>BYE ADMIN $B%j%b!<%H4IM}<T$H$7$F:o=|(B
+		<OPTION VALUE=ADD_ADMIN>ADD ADMIN ¥ê¥â¡¼¥È´ÉÍý¼Ô¤È¤·¤ÆÅÐÏ¿
+		<OPTION VALUE=BYE_ADMIN>BYE ADMIN ¥ê¥â¡¼¥È´ÉÍý¼Ô¤È¤·¤Æºï½ü
 		</SELECT>
 </TABLE>
 _____________________________
@@ -72,15 +72,15 @@ _____________________________
 
 
 <HR>
-<A NAME=password><P>$B%j%b!<%H4IM}<T%Q%9%o!<%I$N@_Dj(B
+<A NAME=password><P>¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É¤ÎÀßÄê
 <BR>
-admin $B$J$$$7(B approve $B%3%^%s%I$N%Q%9%o!<%I$H(BGUI$B$N%a%K%e!<$K$O$$$k$?$a$N(B
-$B%Q%9%o!<%I$rF1;~$K99?7$7$^$9!#(B
+admin ¤Ê¤¤¤· approve ¥³¥Þ¥ó¥É¤Î¥Ñ¥¹¥ï¡¼¥É¤ÈGUI¤Î¥á¥Ë¥å¡¼¤Ë¤Ï¤¤¤ë¤¿¤á¤Î
+¥Ñ¥¹¥ï¡¼¥É¤òÆ±»þ¤Ë¹¹¿·¤·¤Þ¤¹¡£
 <BR>
-GUI$B$G$O$H$j$"$($:$3$l$i$K$D$$$F$OF1$8%Q%9%o!<%I$G$9!#(B
+GUI¤Ç¤Ï¤È¤ê¤¢¤¨¤º¤³¤ì¤é¤Ë¤Ä¤¤¤Æ¤ÏÆ±¤¸¥Ñ¥¹¥ï¡¼¥É¤Ç¤¹¡£
 <BR>
-CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(B
-$B2DG=$G$9!#(B
+CUI¤ÎÊý¤Î makefml htpasswd ¤òÍÑ¤¤¤ë¤³¤È¤ÇÊÌ¤Î¥Ñ¥¹¥ï¡¼¥É¤ò¤Ä¤±¤ë¤³¤È¤Ï
+²ÄÇ½¤Ç¤¹¡£
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -89,10 +89,10 @@ CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(
 
 <TABLE>
 	<TR>
-		<TD ALIGN=right> Email $B%"%I%l%9(B:
+		<TD ALIGN=right> Email ¥¢¥É¥ì¥¹:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>$B4{B8%j%9%H$+$i$NA*Br(B:
+			<TD ALIGN=left>´ûÂ¸¥ê¥¹¥È¤«¤é¤ÎÁªÂò:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
@@ -100,11 +100,11 @@ CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(
 		</TABLE>
 
 	<TR>
-		<TD ALIGN=right> $B%Q%9%o!<%I(B:
+		<TD ALIGN=right> ¥Ñ¥¹¥ï¡¼¥É:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> $B3NG'$N$?$aF1$8%Q%9%o!<%I(B:
+		<TD ALIGN=right> ³ÎÇ§¤Î¤¿¤áÆ±¤¸¥Ñ¥¹¥ï¡¼¥É:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 </TABLE>
 _____________________________
@@ -115,7 +115,7 @@ _____________________________
 
 
 <HR>
-<A NAME=log><P>$B%a!<%j%s%0%j%9%H$N%m%0$r8+$k(B
+<A NAME=log><P>¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Î¥í¥°¤ò¸«¤ë
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -123,10 +123,10 @@ _____________________________
 <INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
 <BR>
-<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>$B:G8e$N#N9T(B
+<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>ºÇ¸å¤Î£Î¹Ô
 <INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=10>
 <BR>
-<INPUT NAME="OPTION" TYPE="radio" VALUE="all">$BA4It(B
+<INPUT NAME="OPTION" TYPE="radio" VALUE="all">Á´Éô
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Go>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>

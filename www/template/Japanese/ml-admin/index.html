@@ -5,7 +5,7 @@
 "fml" Configuration Interface for _ML_ mailing list
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <LINK rev="alternate" lang="en" href="index-e.html">
@@ -20,45 +20,45 @@
 </H2>
 
 <PRE>
-$B$3$N%Z!<%8$O(B _ML_ $B%a!<%j%s%0%j%9%H$N@_Dj$r99?7(B/$BJQ99$9$k2hLL$G$9!#(B
+¤³¤Î¥Ú¡¼¥¸¤Ï _ML_ ¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤ÎÀßÄê¤ò¹¹¿·/ÊÑ¹¹¤¹¤ë²èÌÌ¤Ç¤¹¡£
 </PRE>
 
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/ml-admin/_ML_/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#add.bye">$B%a%s%P!<$NEPO?(B/$B:o=|(B</A>
-<LI><A HREF="#adminadd.bye">$B%j%b!<%H4IM}<T$NEPO?(B/$B:o=|(B</A>
-<LI><A HREF="#config">_ML_ $B#M#L$N>\:Y@_Dj(B</A>
-<LI><A HREF="#password">$B%j%b!<%H4IM}<T%Q%9%o!<%I$N@_Dj(B</A>
-<LI><A HREF="#log">$B%m%0$r8+$k(B</A>
+<LI><A HREF="#add.bye">¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿/ºï½ü</A>
+<LI><A HREF="#adminadd.bye">¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿/ºï½ü</A>
+<LI><A HREF="#config">_ML_ £Í£Ì¤Î¾ÜºÙÀßÄê</A>
+<LI><A HREF="#password">¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É¤ÎÀßÄê</A>
+<LI><A HREF="#log">¥í¥°¤ò¸«¤ë</A>
 </UL>
 
 
 <HR>
 <UL>
 
-   <LI>$B#M#L%a%s%P!<$NEPO?(B/$B:o=|(B
+   <LI>£Í£Ì¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿/ºï½ü
 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> $B%a!<%k%"%I%l%9(B:
+		<TD ALIGN=right> ¥á¡¼¥ë¥¢¥É¥ì¥¹:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>$BA*Br(B:
+			<TD ALIGN=left>ÁªÂò:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_MEMBER_LIST__
 			</SELECT>
 		</TABLE>
 	<TR>
-		<TD ALIGN=right> $B%a%s%P!<$NEPO?(B/$B:o=|(B:
+		<TD ALIGN=right> ¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿/ºï½ü:
 		<TD ALIGN=left> 
 		<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 		<SELECT NAME=PROC SIZE=2 >
-		<OPTION VALUE=ADD>ADD $B%a%s%P!<$NEPO?(B
-		<OPTION VALUE=BYE>BYE $B%a%s%P!<$N:o=|(B
+		<OPTION VALUE=ADD>ADD ¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿
+		<OPTION VALUE=BYE>BYE ¥á¥ó¥Ð¡¼¤Îºï½ü
 		</SELECT>
 	</TABLE>
 	_____________________________
@@ -70,17 +70,17 @@
 
    
    <A NAME=adminadd.bye>
-   <LI>$B%j%b!<%H4IM}<T$NEPO?(B/$B:o=|(B
+   <LI>¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿/ºï½ü
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> $B%a!<%k%"%I%l%9(B:
+		<TD ALIGN=right> ¥á¡¼¥ë¥¢¥É¥ì¥¹:
 		<TD ALIGN=left> <INPUT NAME=SPECIFIC_MAIL_ADDR SIZE=30>
 		<TABLE>
-			<TD ALIGN=left>$BA*Br(B:
+			<TD ALIGN=left>ÁªÂò:
 			<TD ALIGN=right>
 			<SELECT NAME=MAIL_ADDR SIZE=2 >
 			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
@@ -88,11 +88,11 @@
 		</TABLE>
 
 	<TR>
-		<TD ALIGN=right> $BEPO?(B/$B:o=|(B:
+		<TD ALIGN=right> ÅÐÏ¿/ºï½ü:
 		<TD ALIGN=left> 
 		<SELECT NAME=PROC SIZE=2 >
-		<OPTION VALUE=ADD_ADMIN>ADD ADMIN $B%j%b!<%H4IM}<T$H$7$FEPO?(B
-		<OPTION VALUE=BYE_ADMIN>BYE ADMIN $B%j%b!<%H4IM}<T$H$7$F:o=|(B
+		<OPTION VALUE=ADD_ADMIN>ADD ADMIN ¥ê¥â¡¼¥È´ÉÍý¼Ô¤È¤·¤ÆÅÐÏ¿
+		<OPTION VALUE=BYE_ADMIN>BYE ADMIN ¥ê¥â¡¼¥È´ÉÍý¼Ô¤È¤·¤Æºï½ü
 		</SELECT>
 	</TABLE>
 	_____________________________
@@ -103,7 +103,7 @@
 
 <HR>
    <A NAME=config>
-   <LI>$B>\:Y@_Dj(B (makefml config)
+   <LI>¾ÜºÙÀßÄê (makefml config)
 	<BR>
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -117,15 +117,15 @@
 
 <HR>
 	<A NAME=password>
-	<LI>$B%j%b!<%H4IM}<T%Q%9%o!<%I$N@_Dj(B
+	<LI>¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É¤ÎÀßÄê
 	<BR>
-	admin $B$J$$$7(B approve $B%3%^%s%I$N%Q%9%o!<%I$H(BGUI$B$N%a%K%e!<$K$O$$$k$?$a$N(B
-	$B%Q%9%o!<%I$rF1;~$K99?7$7$^$9!#(B
+	admin ¤Ê¤¤¤· approve ¥³¥Þ¥ó¥É¤Î¥Ñ¥¹¥ï¡¼¥É¤ÈGUI¤Î¥á¥Ë¥å¡¼¤Ë¤Ï¤¤¤ë¤¿¤á¤Î
+	¥Ñ¥¹¥ï¡¼¥É¤òÆ±»þ¤Ë¹¹¿·¤·¤Þ¤¹¡£
 	<BR>
-	GUI$B$G$O$H$j$"$($:$3$l$i$K$D$$$F$OF1$8%Q%9%o!<%I$G$9!#(B
+	GUI¤Ç¤Ï¤È¤ê¤¢¤¨¤º¤³¤ì¤é¤Ë¤Ä¤¤¤Æ¤ÏÆ±¤¸¥Ñ¥¹¥ï¡¼¥É¤Ç¤¹¡£
 	<BR>
-	CUI$B$NJ}$N(B makefml htpasswd $B$rMQ$$$k$3$H$GJL$N%Q%9%o!<%I$r$D$1$k$3$H$O(B
-	$B2DG=$G$9!#(B
+	CUI¤ÎÊý¤Î makefml htpasswd ¤òÍÑ¤¤¤ë¤³¤È¤ÇÊÌ¤Î¥Ñ¥¹¥ï¡¼¥É¤ò¤Ä¤±¤ë¤³¤È¤Ï
+	²ÄÇ½¤Ç¤¹¡£
 
 	<!- apply patch by ikeda@meple.or.jp ->
 	<!- http://www.maple.or.jp/~ikeda/diffs/fml/ml-admin_index_html.diff ->
@@ -135,15 +135,15 @@
 	<INPUT TYPE=hidden NAME=ML VALUE=_ML_>
 	<TABLE>
 	<TR>
-		<TD ALIGN=right> $B%a!<%k%"%I%l%9(B:
+		<TD ALIGN=right> ¥á¡¼¥ë¥¢¥É¥ì¥¹:
 		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> $B%Q%9%o!<%I(B:
+		<TD ALIGN=right> ¥Ñ¥¹¥ï¡¼¥É:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
 
 	<TR>
-		<TD ALIGN=right> $B3NG'$N$?$aF1$8%Q%9%o!<%I(B:
+		<TD ALIGN=right> ³ÎÇ§¤Î¤¿¤áÆ±¤¸¥Ñ¥¹¥ï¡¼¥É:
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>
 	_____________________________
@@ -154,7 +154,7 @@
 
    <HR>
    <A NAME=log>
-   <LI>$B%a!<%j%s%0%j%9%H$N%m%0$r8+$k(B
+   <LI>¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Î¥í¥°¤ò¸«¤ë
 
 	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -162,10 +162,10 @@
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>$B:G8e$N#N9T(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>ºÇ¸å¤Î£Î¹Ô
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">$B$"$kF|(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">¤¢¤ëÆü
 	<SELECT NAME="YYYY" SIZE=2 >
 	__EXPAND_YYYY__
 	</SELECT>
@@ -176,7 +176,7 @@
 	__EXPAND_DD__
 	</SELECT>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">$BA4It(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">Á´Éô
 
 	<BR>
 

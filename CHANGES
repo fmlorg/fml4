@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/17
+
+   CGI
+	fix charset of META 
+	EUC'fy
+
 2000/12/13
 
    /bin/fwix.pl 

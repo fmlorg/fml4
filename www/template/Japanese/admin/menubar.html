@@ -5,7 +5,7 @@
 "fml" Configuration Interface
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="menubar.html">
 <LINK rev="alternate" lang="en" href="menubar-e.html">
@@ -21,29 +21,29 @@ fml _FML_VERSION_
 </CENTER>
 
 <!--- ------------------------------------------------------------------- -->
-<CENTER><H3>$B4pK\@_Dj(B</H3></CENTER>
+<CENTER><H3>´ðËÜÀßÄê</H3></CENTER>
 <UL>
 	<LI>
 	<A HREF="_CGI_PATH_/admin/newml.cgi" TARGET="right">
-	$B#M#L$N?75,:n@.(B
+	£Í£Ì¤Î¿·µ¬ºîÀ®
 	</A>
 
-	<LI>$B#M#L$N%a%s%P!<(B
+	<LI>£Í£Ì¤Î¥á¥ó¥Ð¡¼
 	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" 
 		TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>$B#M#L%a%s%P!<$NEPO?(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>£Í£Ì¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="bye">$B#M#L%a%s%P!<$N:o=|(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="bye">£Í£Ì¥á¥ó¥Ð¡¼¤Îºï½ü
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin">$B%j%b!<%H4IM}<T$NEPO?(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin">¥ê¥â¡¼¥È´ÉÍý¼Ô¤ÎÅÐÏ¿
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">$B%j%b!<%H4IM}<T$N:o=|(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">¥ê¥â¡¼¥È´ÉÍý¼Ô¤Îºï½ü
 	<BR>
 	<BR>
-	<INPUT NAME=PROC TYPE="radio" VALUE="mladminpasswd">$B%j%b!<%H4IM}<T%Q%9%o!<%I(B
+	<INPUT NAME=PROC TYPE="radio" VALUE="mladminpasswd">¥ê¥â¡¼¥È´ÉÍý¼Ô¥Ñ¥¹¥ï¡¼¥É
 	<BR>
-	$BA*Br(B: 
+	ÁªÂò: 
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -51,13 +51,13 @@ fml _FML_VERSION_
 	</FORM>
 
 	<LI>
-	$B#M#L$N>\:Y@_Dj(B
+	£Í£Ì¤Î¾ÜºÙÀßÄê
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-	$BA*Br(B: 
+	ÁªÂò: 
 			<SELECT NAME=ML SIZE=2 >
 			__EXPAND_OPTION_ML__
 			</SELECT>
@@ -67,24 +67,24 @@ fml _FML_VERSION_
 
 	<LI>
 	<A HREF="_CGI_PATH_/admin/rmml.cgi" TARGET="right">
-	$B#M#L$N:o=|(B
+	£Í£Ì¤Îºï½ü
 	</A>
 </UL>
 
 <!--- ------------------------------------------------------------------- -->
 <HR>
-<CENTER><H3>$B4IM}%a%K%e!<(B</H3></CENTER>
+<CENTER><H3>´ÉÍý¥á¥Ë¥å¡¼</H3></CENTER>
 
 <UL>
 	<LI>
-	$B%m%0$r8+$k(B
+	¥í¥°¤ò¸«¤ë
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>$B:G8e$N#N9T(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>ºÇ¸å¤Î£Î¹Ô
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">$B$"$kF|(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="day">¤¢¤ëÆü
 	<BR>
 	<SELECT NAME="YYYY" SIZE=2 >
 	__EXPAND_YYYY__
@@ -96,10 +96,10 @@ fml _FML_VERSION_
 	__EXPAND_DD__
 	</SELECT>
 	<BR>
-	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">$BA4It(B
+	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">Á´Éô
 
 	<BR>
-	$BA*Br(B: <SELECT NAME=ML SIZE=2 >
+	ÁªÂò: <SELECT NAME=ML SIZE=2 >
 	__EXPAND_OPTION_ML__
 	</SELECT>
 
@@ -109,17 +109,17 @@ fml _FML_VERSION_
 
 <!--- ------------------------------------------------------------------- -->
 <HR>
-<CENTER><H3>CGI $B$N@_Dj(B</H3></CENTER>
+<CENTER><H3>CGI ¤ÎÀßÄê</H3></CENTER>
 
 <UL>
 	<LI>
 	<A HREF="_CGI_PATH_/admin/index.cgi#cgiadmin" TARGET="right">
-	CGI $B$NA`:n$r5v$9%f!<%6(B
+	CGI ¤ÎÁàºî¤òµö¤¹¥æ¡¼¥¶
 	</A>
 
 	<LI>
 	<A HREF="_CGI_PATH_/admin/index.cgi#export" TARGET="right">
-	$BFCDj$N(B ML $B$r(B CGI $BA`:n2DG=$K(B
+	ÆÃÄê¤Î ML ¤ò CGI Áàºî²ÄÇ½¤Ë
 	</A>
 </UL>
 

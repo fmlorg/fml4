@@ -23,6 +23,9 @@ sub UpperHalf
     &P("");
     &P("<HTML>");
     &P("<HEAD>");
+    &P("<HEAD>");
+    &P("<META http-equiv=\"Content-Type\"
+        content=\"text/html; charset=EUC-JP\">");
     &P("<TITLE>");
     &P("fml configuration interface");
     &P("</TITLE>");
@@ -143,7 +146,7 @@ sub MesgConv
 	$x = &MesgLE::Lookup($key, $MESG_FILE);
 	return $NULL unless $x;
 
-	&jcode::convert(*x, 'jis');
+	&jcode::convert(*x, 'euc');
 	$x;
     }
     else {
