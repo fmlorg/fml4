@@ -200,7 +200,11 @@ sub DoDistribute
 
     ##### ML Distribute Phase 02: Generating Hdr
     # This is the order recommended in RFC822, p.20. But not clear about X-*
+    local(%dup);
     for (@HdrFieldsOrder) {
+	&Debug("DoDistribute:DUP FIELD\t$_") if $dup{$_} && $debug;
+	next if $dup{$_}; $dup{$_} = 1; # duplicate check;
+
 	# for more readability
 	$e{"h:$_:"} =~ s/^(\S)/ $1/;
 
