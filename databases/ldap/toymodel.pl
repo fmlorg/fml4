@@ -30,14 +30,13 @@ sub DataBases::Execute
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
 	if ($mib->{'_action'} eq 'get_status') {
-	    &Log("not yet implemented");
-	    # &GetStatus($mib, $mib->{'_address'});
+	    &Log("$mib->{'_action'} not yet implemented");
 	}
 	elsif ($mib->{'_action'} eq 'num_active') {
-	    &Log("not yet implemented");
+	    &Log("$mib->{'_action'} not yet implemented");
 	}
 	elsif ($mib->{'_action'} eq 'num_member') {
-	    &Log("not yet implemented");
+	    &Log("$mib->{'_action'} not yet implemented");
 	}
 	elsif ($mib->{'_action'} eq 'get_active_list' ||
 	    $mib->{'_action'} eq 'dump_active_list') {
@@ -254,8 +253,9 @@ sub __ListCtl
 	$entry->addValue("active",    $mib->{'_new_address'}) ||
 	    &__Error("fail to add $mib->{'_new_address'}");
     }
-    elsif ($mib->{'_action'} eq 'digest') {
-	&Log("not yet implemented");
+    elsif ($mib->{'_action'} eq 'digest' ||
+	   $mib->{'_action'} eq 'matome') {
+	&Log("$mib->{'_action'} not yet implemented");
     }
     elsif ($mib->{'_action'} eq 'addadmin') {
 	$entry->addValue("admin", $addr) ||
