@@ -319,7 +319,7 @@ sub InitFmlConfig
     $FML_CONFIG  = "$CONFIG_DIR/system";
 
     $buf = &Dumpvar('Config');
-    &SaveConfig($buf);
+    &SaveConfig($buf) if $buf;
 
     print "\nThe Current Config is saved in $FML_CONFIG\n";
 }
@@ -1630,7 +1630,7 @@ sub main'Dumpvar
     ($package, @vars) = @_;
 
     if ($] =~ /5\.\d\d\d/) { 
-	*stab = *{"$package::"};
+	*stab = *{"${package}::"}; # syntax Error? but this {} is required;
     }
     else {
 	(*stab) = eval("*_$package");
