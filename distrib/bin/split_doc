@@ -1,6 +1,23 @@
 #!/bin/sh
 
+LINK=$1
+
+if [ X$LINK = X ]
+then
+	echo "$0: require one argument (dst to symlink)"
+	exit 1
+fi
+
 GEN="perl distrib/bin/html_split.pl"
+
+if [ -d var/db ]
+then
+	echo "var/db exists! STOP "; 
+	exit 1
+else
+	rm -f var/db
+	ln -s $LINK var/db
+fi
 
 tmp=/tmp/splitdoc$$
 
