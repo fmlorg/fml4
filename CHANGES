@@ -5,6 +5,9 @@
 
 2000/05/31
 
+  messages/
+	fix search miss (relation between filename and key)
+
   messages/English/ 
 	create the directory and translates all templates (anyway ;-)
 
