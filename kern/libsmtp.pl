@@ -1,15 +1,15 @@
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.59 2002/02/16 10:31:42 fukachan Exp $
+# $FML: libsmtp.pl,v 2.60 2002/02/16 10:39:32 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -538,7 +538,10 @@ sub __SmtpIO
 	if ($USE_VERP) {
 	    # postfix xverp
 	    if ($e{'mci:xverp'}) {
-		$xverp = ' XVERP=-=';
+		# Example: elena-admin+rudo@nuiniu.net@fml.org
+		# you need set up alias
+		#    elena-admin: :include:/var/spool/ml/include-mead
+		$xverp = ' XVERP';
 		$mail_from = $SMTP_SENDER || $MAINTAINER;
 	    }
 	    # qmail
