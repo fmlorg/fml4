@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.210.2.5 2001/07/08 14:17:06 fukachan Exp $
+# $FML$
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -6101,6 +6101,13 @@ sub main::Dumpvar
 	{
 	    # $_ form
 	    next if $key =~ /^_/;
+
+	    # XXX workaround, quick hack
+	    # XXX makefml install may fail to run on 5.6.x or 5.7.x 
+	    # thanks: Yu-ji Hosokawa <yu-ji@hoso.net>
+	    # thanks: Tomohiro Yamauchi <handy@nid.co.jp>
+	    next if $key =~ /^EXPORT/;
+	    next if $key =~ /^Config/;
 
 	    next if @vars && !grep($key eq $_,@vars);
 	    local(*entry) = $val;
