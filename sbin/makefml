@@ -1231,6 +1231,55 @@ sub SRand
 }
 
 
+sub CompareCRC
+{
+    my ($src, $dst) = @_;
+    &TraditionalATTUnixCheckSum($src) <=> &TraditionalATTUnixCheckSum($dst);
+}
+
+sub CompareWithCRCCache
+{
+    my ($f) = @_;
+    my ($crc, $total, $cache);
+
+    ($crc, $total) = &TraditionalATTUnixCheckSum($f);
+    $cache = &Grep('^config.ph', $CHECK_SUM);
+    $cache = (split(/\s+/, $cache))[1];
+    print STDERR "CompareWithCRCCache: $crc $cache\n" if $debug;
+
+    ($crc == $cache) ? 1 : 0;
+}
+
+# Reference: NetBSD:/usr/src/usr.bin/cksum/sum2.c
+#  *** cksum utility is expected to conform to IEEE Std 1003.2-1992 ***
+sub TraditionalATTUnixCheckSum
+{
+    my ($f) = @_;
+    my ($crc, $total, $nr);
+
+    $crc = $total = 0;
+    if (open($f, $f)) {
+	while (($nr = sysread($f, $buf, 1024)) > 0) {
+	    my ($i) = 0;
+	    $total += $nr;
+
+	    for ($i = 0; $i < $nr; $i++) {
+		$r = substr($buf, $i, 1);
+		$crc += ord($r);
+	    }
+	}
+	close($f);
+	$crc = ($crc & 0xffff) + ($crc >> 16);
+	$crc = ($crc & 0xffff) + ($crc >> 16);
+    }
+    else {
+	print STDERR "ERROR: no such file $f\n";
+    }
+
+    ($crc, $total);
+}
+
+
 ##### Section: IO misc
 sub ResetAlignedBuffer
 {
@@ -1950,6 +1999,9 @@ sub ResetVariables
     if ((! $NOT_CHECK_ML_EXIST) && $ml && (! -d "$ML_DIR/$ml")) {
 	&Die("Cannot find $ml. you've not created it yet?\n");
     }
+
+    # check sum cache for cf and config.ph diagnostic check
+    $CHECK_SUM = "$ML_DIR/$ml/.crc";
 }
 
 
@@ -3689,18 +3741,12 @@ sub do_config
 
     # if config.ph is newer than cf?
     if (-f $cf && -f "$ML_DIR/$ml/config.ph") {
-	$t_cf       = (stat($cf))[9];
-	$t_configph = (stat("$ML_DIR/$ml/config.ph"))[9];
-
-	if ($t_cf < $t_configph) {
+	if (! &CompareWithCRCCache("$ML_DIR/$ml/config.ph")) {
 	    print "\n   *** Warning ***\n";
-	    print &GetTime($t_cf); print "\n";
-	    print &GetTime($t_configph); print "\n";
-	    print "   Hmm... \"config.ph\" is newer than \"cf\" file\n";
 	    print "   You had manually edited it, isn\'t it?\n\n";
 	    print "   \"makefml config\" overwrites config.ph.\n";
 
-	    local($cmd);
+	    my($cmd);
 	    $cmd = &Query("   Can I overwrite config.ph?", "y/n", "y|n", "n");
 
 	    if ($cmd eq "n") { 
@@ -4334,9 +4380,10 @@ sub Grep
 {
     local($key, $file) = @_;
 
-    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
-    while (<IN>) { return $_ if /$key/i;}
-    close(IN);
+    open(GREP_IN, $file) || 
+	(&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<GREP_IN>) { return $_ if /$key/i;}
+    close(GREP_IN);
 
     $NULL;
 }
@@ -4345,9 +4392,10 @@ sub CSGrep
 {
     local($key, $file) = @_;
 
-    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
-    while (<IN>) { return $_ if /$key/;}
-    close(IN);
+    open(CSGREP_IN, $file) || 
+	(&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<CSGREP_IN>) { return $_ if /$key/;}
+    close(CSGREP_IN);
 
     $NULL;
 }
@@ -4486,7 +4534,15 @@ sub MakeConfigPH
 	    print STDERR "failed:";
 	    print STDERR "   $perl $config -m $manifest $cf > $config_ph\n\n";
 	}
+	return $NULL;
     }
+    # O.K. !
+    else {
+	my ($crc, $total) = &TraditionalATTUnixCheckSum($config_ph);
+	&Write2("config.ph $crc", $CHECK_SUM) if $CHECK_SUM;
+    }
+
+    return 1;
 }
 
 
@@ -5016,10 +5072,13 @@ sub do_update
     if ($x eq 'config.ph') {
 	print "O.K. Try to re-create $target !!!\n";
 	# make ml/config.ph
-	&MakeConfigPH("$EXEC_DIR/cf/config", 
-		      "$EXEC_DIR/cf/MANIFEST", 
-		      "$ML_DIR/$ml/cf", 
-		      "$ML_DIR/$ml/config.ph");	
+	my ($status);
+	$status = &MakeConfigPH("$EXEC_DIR/cf/config", 
+				"$EXEC_DIR/cf/MANIFEST", 
+				"$ML_DIR/$ml/cf", 
+				"$ML_DIR/$ml/config.ph");
+	# sync w/ "make config.ph" behaviour
+	# &Touch("$ML_DIR/$ml/cf") if $status;
 	return 1;
     }
 

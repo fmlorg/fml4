@@ -3,6 +3,17 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/18
+
+  check sum to validate relation between cf and config.ph
+	(algorithm used by traditional AT&T UNIX)
+	sbin/makefml
+	bin/cksum.pl
+
+  etc/makefml/Makefile
+	use 'makefml update-config'
+
+
 2000/07/17
 
    installation
