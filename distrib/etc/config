@@ -8,13 +8,20 @@ branch=0
 ### user defined variables ###
 
 # prog
-MAKE=make
+MAKE=/usr/bin/make
 INCLUDE_PROG="perl distrib/bin/_include.pl "
 
 FWIX_OPTS=-F
 
-# working directory
-DESTDIR=/var/tmp
+# imports distrib/mk/fml.sys.mk
+#    e.g. working directory
+tmp=/tmp/config$$
+make __import_variables > $tmp
+echo "------------------------------"
+cat $tmp
+echo "------------------------------"
+. $tmp
+rm -f $tmp
 
 TMP=$DESTDIR/release.info.$$ 
 
