@@ -247,6 +247,7 @@ NT4 はだめだが NT5 fs には link(2)はある。
 =E
 * RFC1153 library
 
+
 .S	ログファイル
 =E.S	log file
 
@@ -255,6 +256,13 @@ log file に年号をつけるモード。backup が楽
 log filename with year
 
 For example: $DIR/log.1999
+
+$LOG_FILE_SUFFIX = ".%C%y";
+
+(perl5 only solution)
+
+   use POSIX;
+   $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
 
 
 .S	かるいまとめおくり？
