@@ -100,11 +100,20 @@ sub InitConfig
 			$mday, $Month[$mon], $year, $hour, $min, $sec, $TZone);
 }
 
+
 # Logging(String as message)
 sub Logging
 {
+
+    local($family, $port, $addr) = unpack('S n a4 x8', getpeername(STDIN));
+    local($clientaddr) = gethostbyaddr($addr, 2);
+
+    if (! defined($clientaddr)) {
+	$clientaddr = sprintf("%d.%d.%d.%d", unpack('C4', $addr));
+    }
+
     open(LOGFILE, ">> $LOGFILE");
-    printf LOGFILE "%s %s\n", $Now, @_;
+    printf LOGFILE "$Now @_ ($clientaddr)\n";
     close(LOGFILE);
 }
 
