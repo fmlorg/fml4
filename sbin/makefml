@@ -134,6 +134,7 @@ sub InitMakeFml
     if ($OS_TYPE = $opt_O) {
 	$OS_TYPE =~ tr/a-z/A-Z/;
 	print "   YOU DEFINE THIS HOST ($FQDN)'s OS == $OS_TYPE.\n";
+	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
     elsif ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
 	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
