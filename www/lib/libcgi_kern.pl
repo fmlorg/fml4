@@ -536,16 +536,21 @@ sub SpawnProcess
 
     undef $?;
     undef $!;
+    undef $@;
 
     # open(PROG, "$prog 2>&1 |")
     my (@prog) = split(/\s+/, $prog);
-    open(PROG, "-| 2>&1") || exec @prog;
 
-    if ($? || $!) {
+    eval { system $prog;};
+
+    if ($? || $! || $@) {
 	&ERROR("cannot execute $prog");
+	&ERROR($!) if $!;
+	&ERROR($@) if $@;
 	&ERROR("exit (" .($? & 255). ")") if $? & 255;
     }
     else {
+	eval { open(PROG, "$prog 2>&1 |"); };
 	while (<PROG>) { &P($_);}
 	close(PROG);
     }

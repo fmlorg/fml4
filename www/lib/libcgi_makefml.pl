@@ -317,6 +317,7 @@ sub Command
 	$UseLogMessage = 1;
 	&Control($ML, $PROC);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
+	$UseLogMessage = 0;
 
 	if ($ErrorString) { &P($ErrorString);}
 	if ($LogMessage) {
