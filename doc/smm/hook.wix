@@ -1,6 +1,5 @@
 .C	フック、カスタマイズ（例を見る方がはやいかも）
 .l	hook
-.label	{customize}
 
 .S	インタプリタとconfig.ph
 .seealso	command-hook
@@ -10,9 +9,10 @@
 
 その HOOK でちょっと複雑な設定やダイナミックなサーバの挙動の変更をした
 りできます。config.ph で定義するのでMLが複数あってもMLごとに変更できる
-わけです。
+わけです。一方 sitedef.ph で行なえばML共通のHOOKを仕掛けることができま
+す。
 
-以下、HOOKおよび、それを使ういくつかの例です。
+以下 HOOKおよび、それを使ういくつかの例です。
 
 
 .S	$START_HOOK
@@ -45,7 +45,7 @@ $START_HOOK =q%
 	$body .= "X-Baycity-Weather: Mizumaki\n";
     #;
 
-ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる（意味不明（笑））
+ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる(意味不明(笑))
 
 例２：
 Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
@@ -66,14 +66,15 @@ $HEADER_ADD_HOOK = q#
 .S	$SMTP_OPEN_HOOK
 .key	$SMTP_OPEN_HOOK
 
-このフックの後、 Sendmail へ渡すヘッダの処理が始まります。
-ここで強制的にヘッダの内容を変えたりすると効果的です。
+このフックの後 Sendmail へ渡すヘッダの処理が始まります。ここで強制的か
+つダイナミックにヘッダの内容を変えたりすると効果的です。
+単にヘッダの各フィールドを書き換えるのなら &DEFINE_FIELDうじゃうじゃ 
+関数シリーズが用意されています。そちらを使うのがよいでしょう。
+.xref	&DEFINE_FIELD_FORCED &DEFINE_FIELD_ORIGINAL
 
 例：	Reply-To: フィールドをＭＬ自体へ強制書き換え
 
-実はコマンドラインで --oh:reply-to=mailing-list でできちゃうんですが(^^;)
-
-一応別解は一杯あって、別解の一つは (fh == forced header がみそ)
+&DEFINE_FIELD_うじゃうじゃ以外にも別解はいくつかあって別解の一つが
 
 $SMTP_OPEN_HOOK = q#
 	$Envelope{'fh:reply-to:'} = $MAIL_LIST; 	
@@ -90,8 +91,8 @@ $SMTP_OPEN_HOOK = q#
 
 .S	$SMTP_CLOSE_HOOK
 
-$SMTP_CLOSE_HOOK は配送が終った後で、かつまだロックされている状態で実
-行されます。具体的には &Distribute; を離れる直前に実行されます。
+$SMTP_CLOSE_HOOK は配送が終った後でかつまだロックされている状態で実行
+されます。具体的には &Distribute; を離れる直前に実行されます。
 
 
 .S	$FML_EXIT_HOOK
@@ -100,9 +101,9 @@ $SMTP_CLOSE_HOOK は配送が終った後で、かつまだロックされている状態で実
 
 fml.pl が最後に実行する フック。このときすでに 
 
-	”排他制御の lock も解除”（＊＊＊重要！＊＊＊）
+	”排他制御の lock が解除されている”
 
-されていることに注意。expire とかがその例ですね。
+いることに注意して下さい。
 
 
 .S	$MSEND_OPT_HOOK
@@ -134,9 +135,9 @@ sub MSendModeSet  という関数を見るとわかるとおもいます。
 .key	コマンドのカスタマイズ
 .key	$COMMAND_HOOK
 
-インタプリタですから、コマンドでそのＭＬ独自の機能をもたせたかったら
-config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
-様にカスタマイズできる）。
+インタプリタですから、コマンドでそのML独自の機能をもたせたかったら
+config.ph にセットして下さい(そうすれば、MLが複数あってもそれぞれ別様
+にカスタマイズできる)。
 
 これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
 
@@ -155,6 +156,9 @@ $COMMAND_HOOK =q#
 ＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
 quoteする関数（本当の意味での関数ではないそうだ）
 
+注意: 実はHOOKをかけなくても上のような簡単なコマンドは 
+.ptr{my-file-sendback-command} のように簡単に作れます。
+
 
 .S	コマンドの増やし方
 
@@ -171,6 +175,7 @@ config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
 
 例：
 	# list		list リストファイルを取り寄せる
+.xref	my-file-sendback-command
 
 sub Command では $to にコマンドの結果の返し先が設定されています。
 
@@ -272,7 +277,7 @@ $START_HOOK = q#
 #;
 
 
-.S	ＭＬメンバーの人数制限
+.S	$START_HOOK でＭＬメンバーの人数制限をする
 
 $START_HOOK = q%;
 
