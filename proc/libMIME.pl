@@ -12,13 +12,6 @@
 require 'mimer.pl';
 require 'mimew.pl';
 
-### debug ###
-if ($0 eq __FILE__) { 
-    while (<>) { 
-	print &MIME'MimeBDecode($_); #';
-    }
-}
-
 
 sub ProbeMIMEpm
 {
@@ -36,7 +29,8 @@ sub ProbeMIMEpm
 }
 
 
-sub DecodeMimeStrings 
+sub DecodeMimeStrings { &DecodeMimeString(@_); }
+sub DecodeMimeString
 { 
     # &ProbeMiIMEpm;
 
@@ -48,6 +42,13 @@ sub DecodeMimeStrings
 	&mimedecode(@_);
     }
 }
+
+
+# defined for convenience
+sub MimeEncode { &mimeencode(@_); }
+sub MimeDecode { &DecodeMimeString(@_); }
+sub MIMEEncode { &mimeencode(@_); }
+sub MIMEDecode { &DecodeMimeString(@_); }
 
 
 sub EnvelopeMimeDecode
@@ -129,5 +130,23 @@ sub MimeDecode
     $_;
 }
 
+
+package main;
+
+# debug #
+if ($0 eq __FILE__) {
+    while (<>) {
+	my ($x) = $_;
+	chop $x;
+
+	print "    IN> ", $x, "\n";
+
+	$x = &MimeEncode($x);
+	print "encode> ", $x, "\n";
+
+	$x = &MimeDecode($x);
+	print "decode> ", $x, "\n";
+    }
+}
 
 1;
