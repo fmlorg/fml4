@@ -4,6 +4,12 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/01/24
+
+   kern/fml.pl
+	fix wrong function call when $NOTIFY_MAIL_SIZE_OVERFLOW. 
+	applied patch by anthrax@unixuser.org, thanks.   
+
 2002/01/21
 
    import modules from fml-devel-20020120
@@ -165,7 +171,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.231 2002/01/10 14:27:39 fukachan Exp $
+	add $FML: CHANGES,v 1.232 2002/01/21 13:18:29 fukachan Exp $
 
 2001/10/03
 
