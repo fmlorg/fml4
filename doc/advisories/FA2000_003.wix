@@ -22,12 +22,12 @@ Topic:	Love Letter Worm
 
 
 [References]
-   "CERT Advisory CA-2000-04 Love Letter Worm"
-   http://www.cert.org/advisories/CA-2000-04.html
+  "CERT Advisory CA-2000-04 Love Letter Worm"
+.url http://www.cert.org/advisories/CA-2000-04.html
 
-  http://www.sophos.com/virusinfo/analyses/vbsloveleta.html
-  http://www.sophos.com/virusinfo/analyses/trojloveleta.html
-
+.url http://www.sophos.com/virusinfo/analyses/vbsloveleta.html
+.url http://www.sophos.com/virusinfo/analyses/trojloveleta.html
+.url http://www.thepope.org/index.pl?node_id=140
 
 .~HTML_PRE
 -------------------------
@@ -118,7 +118,11 @@ Message-ID:  <20000504163541.D14933@securityfocus.com>
 .S	postfix filtering
 
 .q
-/Content.*LOVE-LETTER-FOR-YOU.TXT.vbs/  REJECT
+[/etc/postfix/main.cf]
+header_checks = regexp:/etc/postfix/header_checks
+
+[/etc/postfix/header_checks]
+/^Subject.*ILOVEYOU/  REJECT
 .~q
 
 .S	sendmail
