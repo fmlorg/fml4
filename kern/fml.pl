@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.150 2003/04/02 13:37:35 tmu Exp $
+# $FML: fml.pl,v 2.151 2003/05/01 14:23:26 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -444,9 +444,6 @@ sub GetTime
 
 sub InitConfig
 {
-    &SetDefaults;
-    &LoadConfig;
-
     # XXX SetDefaults but works after &__LoadConfiguration, so defined here.
     # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
     # disabled by fukachan (2000/06/19), PR8220 pointed out by MURASHITA Takuya
@@ -465,10 +462,14 @@ sub InitConfig
     # fml 4.0 modules
     unshift(@INC, "$ExecDir/module/fml-devel");
     unshift(@INC, "$ExecDir/module/CPAN");
+    unshift(@INC, "$ExecDir/module/Jcode");
     unshift(@INC, "$ExecDir/module/Japanese");
     unshift(@INC, "$ExecDir/module");
     unshift(@INC, $LIBDIR) if $LIBDIR;
     unshift(@INC, $DIR);
+
+    &SetDefaults;
+    &LoadConfig;
 
     # a little configuration before the action
     if (defined $FML_UMASK) {
