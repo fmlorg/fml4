@@ -1010,7 +1010,7 @@ sub CheckCurrentProc
 	# '# help\s*' is OK. '# guide"JAPANESE"' & '# JAPANESE' is NOT!
 	# BUT CANNOT JUDGE '# guide "JAPANESE CHARS"' SYNTAX;-);
 	if ($COMMAND_CHECK_LIMIT-- > 0) { 
-	    $e{'mode:uip'} = 'on'    if /^\#\s*\w+\s|^\#\s*\w+$/;
+	    $e{'mode:uip'} = 'on'    if /^\#\s*[\w\-]+\s|^\#\s*[\w\-]+$/;
 	    $e{'mode:uip:chaddr'} = $_ 
 		if /^\#\s*($CHADDR_KEYWORD)\s+/i;
 	    $e{'mode:uip:chaddr-confirm'} = $_ 
@@ -1150,11 +1150,11 @@ sub CheckCurrentProc
 	s/^\s*//;
 
 	$e{'mode:req:guide'}++ if /^\#\s*$GUIDE_KEYWORD\s*$/i;
-	$e{'mode:uip'} = 'on'  if /^\#\s*\w+\s|^\#\s*\w+$/;
+	$e{'mode:uip'} = 'on'  if /^\#\s*[\w\-]+\s|^\#\s*[\w\-]+$/;
 	$e{'mode:req:guide'}++          
 	    if $COMMAND_ONLY_SERVER && /^\s*$GUIDE_KEYWORD\s*$/i;
 	$e{'mode:uip'} = 'on' 
-	    if $COMMAND_ONLY_SERVER && /^\s*\w+\s|^\s*\w+$/;
+	    if $COMMAND_ONLY_SERVER && /^\s*[\w\-]+\s|^\s*[\w\-]+$/;
     }    
 
     # ? for --distribute, here and again in &MLMemberCheck; 
