@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/27
+
+  new snapshot ID system
+	new ftp hierarchy. For example
+	
+		current/fml-3.0B-current-YYYYMMDD.tar.gz
+		stable/fml-3.0-stable-YYYYMMDD.tar.gz
+
 2000/02/22
 
   3.0B newconfig: cf/config
