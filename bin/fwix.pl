@@ -329,6 +329,7 @@ sub ReadFile
 
 	undef $Both;
 	undef $NotFormatReset;
+	undef $NotIncrement;
 
 	# language declared
 	# reset Language if it encounters null line; 
@@ -351,6 +352,7 @@ sub ReadFile
 	    s/^=E//; 
 	    $LANG = 'ENGLISH';
 	    $NotFormatReset = 1;
+	    $NotIncrement = 1;
 	}
 
 	if (/^==/) { 
@@ -797,8 +799,8 @@ sub Expand
     if ($c eq 'P') {
 	&FormatReset;
 	$CurrentSubject = $s;
-
-	$Part++ unless $LANG;
+	
+	$Part++ if !$LANG && !$NotIncrement;
 	$s = "$Part{$Part}\t$s";
 
 	if ($mt) {
@@ -827,7 +829,7 @@ sub Expand
 	&FormatReset;
 	$CurrentSubject = $s;
 
-	$Chapter++ unless $LANG;
+	$Chapter++ if !$LANG && !$NotIncrement;
 	$Section    = 0;
 	$InAppendix = 0;
 	$Figure     = 0;
@@ -884,11 +886,11 @@ sub Expand
 	&FormatReset;
 	$CurrentSubject = $s;
 
-	$Chapter++ unless $LANG;
+	$Chapter++ if !$LANG && !$NotIncrement;
 	$InAppendix = 1;
 	$Section = 0;
 
-	$Appendix = shift @AlpTable;
+	$Appendix = shift @AlpTable if !$NotIncrement;
 	$s = "Appendix $Appendix\t$s";
 
 	if ($mt) {
