@@ -1428,8 +1428,12 @@ sub do_config
     }
 
     # make ml/config.ph
-    $exec = "perl $EXEC_DIR/cf/config $cf ";
-    system "$exec > $ML_DIR/$ml/config.ph";
+    open(EXEC_CF, "perl $EXEC_DIR/cf/config $cf|");
+    open(SAVE, "> $ML_DIR/$ml/config.ph");
+    select(SAVE); $| = 1; select(STDOUT);
+    while (<EXEC_CF>) { print SAVE $_;}
+    close(SAVE);
+    close(EXEC_CF);
 }
 
 
@@ -1626,7 +1630,7 @@ sub main'Dumpvar
     ($package, @vars) = @_;
 
     if ($] =~ /5\.\d\d\d/) { 
-	*stab = *{"${package}::"};
+	*stab = *{"$package::"};
     }
     else {
 	(*stab) = eval("*_$package");
@@ -1644,7 +1648,7 @@ sub main'Dumpvar
 	    if (defined @entry) {
 		$buf .= "\@$key = (\n";
 		foreach $num ($[ .. $#entry) {
-		    $buf .= "  $num\t'",$entry[$num],"'\n";
+		    $buf .= "  $num\t'$entry[$num]'\n";
 		}
 		$buf .= ");\n";
 	    }
