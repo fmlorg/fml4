@@ -623,6 +623,8 @@ sub SetHashDefaults
 		    'conv',             'do_conv',
 		    'update',           'do_update',
 		    'update-config.ph', 'do_update_config_ph',
+		    'update-config',    'do_update_config_ph',
+		    'config-update',    'do_update_config_ph',
 		    '400#update-config.ph ML', 'make config.ph (cf -> config_ph)',
 
 		    # upgrade from 2.x to 3.0
