@@ -18,7 +18,7 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
-◯ リモート管理のドキュメント
+.S	リモート管理のドキュメント
 
 .if LANG == JAPANESE
 >ごめんなさい、その通りです。
@@ -27,6 +27,22 @@ XXX 一月くらいで消すこと
 >
 >自動登録のケースは随所に記述がありますが、管理者登録のケースは
 >あまりまとまった情報がなく、試行錯誤が必要になります。
+
+.S	ログファイル
+=E.S	log file
+
+log file に年号をつけるモード。backup が楽
+=E
+log filename with year
+
+For example: $DIR/log.1999
+
+$LOG_FILE_SUFFIX = ".%C%y";
+
+(perl5 only solution)
+
+   use POSIX;
+   $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
 
 
 .C	current
@@ -406,23 +422,6 @@ but it is o.k. now? (on some OS?)
 * RFC1153のライブラリはどうする？
 =E
 * RFC1153 library
-
-
-.S	ログファイル
-=E.S	log file
-
-log file に年号をつけるモード。backup が楽
-=E
-log filename with year
-
-For example: $DIR/log.1999
-
-$LOG_FILE_SUFFIX = ".%C%y";
-
-(perl5 only solution)
-
-   use POSIX;
-   $LOGFILE .= strftime($LOG_FILE_SUFFIX, localtime(time));
 
 
 .S	かるいまとめおくり？

@@ -570,6 +570,12 @@ sub InitConfig
 	&ADD_CONTENT_HANDLER('text/plain',   '.*/.*',      'allow');
 	&ADD_CONTENT_HANDLER('!MIME',        '.*/.*',      'allow');
     }
+
+    # For example, $LOGFILE_SUFFIX = ".%C%y";
+    if ($LOGFILE_SUFFIX) {
+	use POSIX;
+	$LOGFILE .= strftime($LOGFILE_SUFFIX, localtime(time));
+    }
 }
 
 # one pass to cut out the header and the body
