@@ -816,21 +816,6 @@ sub InitFmlServProcedure
     %Procedure = (
 		  'fmlserv:lists',	'ProcLists',
 		  'fmlserv:which',	'ProcWhich',
-
-		  # WWW Interface
-		  # WWW Interface
-		  # 'fmlserv:href',	'ProcHRef',
-		  # 'r#fmlserv:href',	1,
-		  # 'fmlserv:http',	'ProcHRef',
-		  # 'r#fmlserv:http',	1,
-		  # 'fmlserv:gopher',	'ProcHRef',
-		  # 'r#fmlserv:gopher',	1,
-		  # 'fmlserv:ftp',	'ProcHRef',
-		  # 'r#fmlserv:ftp',	1,
-		  #
-		  # ftpmail == ftp ( anyway.. 95/10)
-		  # 'fmlserv:ftpmail',	'ProcHRef',
-		  # 'r#fmlserv:ftpmail',	1,
 		  );
 
     if (! $FMLSERV_PERMIT_WHICH_COMMAND) {
@@ -954,30 +939,6 @@ sub ProcWhich
 	&Mesg(*e, "*** \"$addr\" is not registered in any lists.");
 	&Mesg(*e, $NULL, 'fmlserv.not_any_member', $addr);
     }
-}
-
-
-sub ProcHRef
-{
-    local($proc, *Fld, *e, *misc) = @_;
-    local(*r, $s, $DIR, $request);
-
-    &Debug("$proc, @Fld, *e, *misc)");
-
-    ($request = $Fld[2]) || do {
-	&Mesg(*e, "\tError: no arguments");
-	&Mesg(*e, $NULL, 'no_args', $proc);
-	return;
-    };
-
-    &Log("$proc $request");
-
-    # Include required library
-    require 'libhref.pl';
-
-    &HRef($request, *e);
-
-    1;
 }
 
 
