@@ -348,6 +348,8 @@ sub SmtpIO
 	undef $SoErrBuf;
     }
 
+    $e{'mci:pipelining'} = 0 if $NOT_USE_ESMTP_PIPELINING;
+
     &SmtpPut2Socket("MAIL FROM:<$MAINTAINER>", $ipc);
     if ($SoErrBuf =~ /^[45]/) {
 	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
