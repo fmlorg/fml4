@@ -25,6 +25,13 @@ ${WORK_EXAMPLES_DIR}/${file}-e.html: doc/examples/${file}.wix
 		-o ${WORK_EXAMPLES_DIR}/${file}-e.html doc/examples/${file}.wix
 .endfor
 
+.for file in ${DOC_EXAMPLES_RAW_SOURCES}
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}
+
+${WORK_EXAMPLES_DIR}/${file}: doc/examples/${file}
+	cp doc/examples/${file} ${WORK_EXAMPLES_DIR}/${file}
+.endfor
+
 
 
 ### doc/examples/*txt
