@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/22
+
+  3.0B newconfig: cf/config
+	fix conversion dependence of explicitly defined keys in $DIR/cf
+
+  sbin/makefml and drafts/{help, welcome, guide, ... } files
+	Conv() use _MAINTAINER_ to make templates
+
 2000/02/21
 
   CVS repository hier
