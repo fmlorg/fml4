@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself. 
 #
-# $FML: Adapter.pm,v 1.2 2001/05/30 14:35:10 fukachan Exp $
+# $FML: Adapter.pm,v 1.5 2001/06/29 05:57:33 fukachan Exp $
 #
 
 package IO::Adapter;
@@ -33,11 +33,33 @@ For example, C<$map_params> is:
 
     $map_params = {
 	'mysql:toymodel' => {
+	    sql_server     => 'mysql.fml.org',
+	    database       => 'fml',
+	    table          => 'ml',
+	    user           => 'fml',
+	    user_password  => "secret password :)",
+
+	    # this driver specific SQL statements
 	    getline        => "select ... ",
 	    get_next_value => "select ... ",
 	    add            => "insert ... ",
 	    delete         => "delete ... ",
 	    replace        => "set address = 'value' where ... ",
+	},
+    };
+
+In another way, you can specify your own module to provide
+specific SQL statements.
+
+    $map_params = {
+	'mysql:toymodel' => {
+	    sql_server     => 'mysql.fml.org',
+	    database       => 'fml',
+	    table          => 'ml',
+	    user           => 'fml',
+	    user_password  => "secret password :)",
+
+	    driver         => 'My::Driver::Module::Name',
 	},
     };
 
@@ -83,7 +105,6 @@ This wrapper provides IO like a usual file for the specified C<$map>.
                    For example, nis.group:fml
 
    mysql           mysql:$schema_name
-                   *** not yet implemented ***
 
    postgresql      postgresql:$schema_name
                    *** not yet implemented ***
@@ -322,7 +343,11 @@ You can change the search behaviour by C<$args> (HASH REFERENCE).
 
     $args = {
 	case_sensitive => 1, # case senssitive
+	all            => 1, # get all entries matching $regexp as ARRAY REF
     };
+
+Normaly the result is given as a string.
+If you specify C<all>, you get the result(s) as ARRAY REFERENCE.
 
 =cut
 
@@ -330,7 +355,8 @@ sub find
 {
     my ($self, $regexp, $args) = @_;
     my $case_sensitive = $args->{ case_sensitive } ? 1 : 0;
-    my $x;
+    my $show_all       = $args->{ all } ? 1 : 0;
+    my (@buf, $x);
 
     # forward the request to SUPER class
     if ($self->SUPER::can('_find')) { $self->_find($regexp, $args);}
@@ -338,17 +364,23 @@ sub find
     # search regexp by reading the specified map.
     $self->open;
     while (defined ($x = $self->get_next_value())) {
-	if ($case_sensitive) {
-	    last if $x =~ /$regexp/;
+	if ($show_all) {
+	    push(@buf, $x) if $x =~ /$regexp/;	    
 	}
 	else {
-	    last if $x =~ /$regexp/i;
+	    if ($case_sensitive) {
+		last if $x =~ /$regexp/;
+	    }
+	    else {
+		last if $x =~ /$regexp/i;
+	    }
 	}
     }	   
-    $self->close;
-    $x;
-}
 
+    $self->close;
+
+    $show_all ? \@buf : $x;
+}
 
 
 # Descriptions: destructor
