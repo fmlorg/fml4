@@ -1,0 +1,77 @@
+Files:（Japanese）
+
+README		読んでくださいね
+INFO		最新情報リスト
+Makefile	Makefile
+COPYING		GNU Public Licence
+PREHISTORY	ｈｍｌの時代の名残を示すヒストリー
+INSTALL		インストールの注意書き
+INSTALL.eng	HOW TO INSTALL(English)
+FAQ		ＦＡＱ
+FILES		このファイル
+Configure	Configure(config.phのコマンド設定用)
+EasyConfigure.euc
+		日本語対話式ＭＬサーバ設定スクリプト
+		ＥＵＣなので適宜変換してください
+config.ph	こまごまとした設定（一応目を通すことを勧めます）
+fml.c		Ｃ　ｗｒａｐｐｅｒ
+fml.pl		本体
+guide		ＭＬのガイドファイル（サンプル）
+help		ＭＬサーバのヘルプファイル（サンプル）
+libfml.pl	サーバのコマンド群
+libsmtp.pl	ｓｍｔｐ制御ライブラリ	
+libutils.pl	ｍｉｓｃなライブラリ
+libnewsyslog.pl	newsyslog 
+SendFile.pl	1.2.1.4 から
+		ｍｇｅｔコマンドが呼ぶファイルを分割して待って送り返す
+		新しいコード（独立したコマンドとして使える）
+MSendv4.pl	まとめおくり ver.4（３の少しだけ改良版）、３と全く同じ
+		使い方をしてください。内部コードが改良されています。
+libSendBack.pl	送り返しライブラリ
+libStardate.pl	スタートレック
+librfc1153.pl	RFC1153の設定
+
+
+./bin
+MatomeOkuri-ctl.sh	crontab から起動させるシェルスクリプトの見本
+maintenance.pl	Maintenance用flockするスクリプト
+pmail.pl	Ｐｓｅｕｄｏ　Ｍａｉｌコマンド（for libsmtp demonstration)
+Archive.pl	tar.gz フォームのアーカイブを作るスクリプト
+Archive.cron	Archive.pl の cron用インターフェイス
+cron.pl		4.4BSD cron 互換
+expire.pl	expire 	
+newsyslog.sh	newsyslog の shell script版
+RecreateConfig.pl
+		昔の config.ph の設定を尊重しつつ新しい機能のために
+		config.ph につくりかえるための Utility
+
+
+./etc	
+crontab-4.3	4.3BSDでの見本
+crontab-4.4	4.4BSDでの見本
+		（bin/cron.pl はこの形式です）
+
+Directory:
+LOCK		ロック用ファイルのディレクトリ（pid用）
+lib		contributions。	see README in contrib		
+contrib		同上
+bin		user binary
+sbin		fml system binary
+etc
+var
+spool
+
+---------------------------------------------------------------
+Backward Compatibility
+
+liblock.pl	Lockライブラリ(pidで制御。flock版は組み込み)
+
+
+Backward Compatibility で lib/Compatibility に移動したもの
+
+sendmail.pl	ｈｍｌ互換用。普通にsendmailへ渡すライブラリ
+split_and_sendmail.pl	
+		ｍｇｅｔコマンドが呼ぶファイルを分割して待って送り返す
+		コード（独立したコマンドとして使える）
+		1.2.1.4 から廃止
+
