@@ -7,7 +7,9 @@
 # $Id$
 
 CC     = cc
-CFLAGS = -DPOSIX
+# CFLAGS = -DPOSIX
+CFLAGS = 
+
 CHMOD  = chmod
 MODE   = 4755
 
