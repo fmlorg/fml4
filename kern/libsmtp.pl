@@ -42,18 +42,25 @@ sub SmtpInit
 	my ($org_smtp_log) = $SMTP_LOG;
 
 	if ($USE_SMTP_LOG_ROTATE) {
-	    my ($id) = &IncrementCounter("$VARLOG_DIR/.seq", 
-					 $NUM_SMTP_LOG_ROTATE || 8);
-	    $SMTP_LOG .= ".$id" if $SMTP_LOG !~ /\.$id$/;
+	    if ($USE_SMTP_LOG_ROTATE_TYPE eq 'day') {
+		my ($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime;
+		$SMTP_LOG .= sprintf(".%04d%02d%02d", 
+				    1900 + $year, $mon + 1, $mday);
+	    }
+	    else {
+		my ($id) = &IncrementCounter("$VARLOG_DIR/.seq", 
+					     $NUM_SMTP_LOG_ROTATE || 8);
+		$SMTP_LOG .= ".$id" if $SMTP_LOG !~ /\.$id$/;
 
-	    # unlink $SMTP_LOG if first time in this process thread;
-	    if ($IncrementCounterCalled{"$VARLOG_DIR/.seq"} == 1) {
-		&Log("unlink $SMTP_LOG") if $debug_fml_org;
-		unlink $SMTP_LOG if -f $SMTP_LOG;
-		open($SMTP_LOG, ">$SMTP_LOG"); # XXX: prefer basic functions
-		unlink $org_smtp_log if -f $org_smtp_log;
-		link($SMTP_LOG, $org_smtp_log)  if     $UNISTD;
-		&Copy($SMTP_LOG, $org_smtp_log) unless $UNISTD;
+		# unlink $SMTP_LOG if first time in this process thread;
+		if ($IncrementCounterCalled{"$VARLOG_DIR/.seq"} == 1) {
+		    &Log("unlink $SMTP_LOG") if $debug_fml_org;
+		    unlink $SMTP_LOG if -f $SMTP_LOG;
+		    open($SMTP_LOG, ">$SMTP_LOG"); # XXX: prefer basic function
+		    unlink $org_smtp_log if -f $org_smtp_log;
+		    link($SMTP_LOG, $org_smtp_log)  if     $UNISTD;
+		    &Copy($SMTP_LOG, $org_smtp_log) unless $UNISTD;
+		}
 	    }
 	}
 	else {
