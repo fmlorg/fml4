@@ -31,9 +31,21 @@ Q:	qmail
 
 ○ makefml config メニューを日本語にできるか？
 
-	Message Language Extension をつかう
+A: 	Message Language Extension をつかう 
+
+	DONE.
 
 Q: 既存のシステムからの移行は？
 
-現行のシステムでは cgi 中から makefml newml をよんでしまうが…
+A:
+	全体の管理者 cgi-bin/admin/menu.cgi
 
+permission さえあっていれば自由にいじれる	
+
+	各ＭＬの管理者 cgi-bin/ml-admin/$ml/menu.cgi
+
+1. そのＭＬをWWWでいじれるようにするか否かはサーバ全体の管理者が決定する。
+   デフォールトはさせない
+
+2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
+   WWWでそのＭＬをいじらせることができる。
