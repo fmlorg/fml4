@@ -1,4 +1,4 @@
-.C	FRED （汎関数-正規表現-微分）ライブラリ
+~.C	FRED （汎関数-正規表現-微分）ライブラリ
 
 .S	Funtional Regular Expressional Derivative
 
@@ -34,8 +34,8 @@
    
    CATCH \S+ BODY
    
-   INC     /home/beth/fukachan/w/fml/iij
-   INCLUDE libiij.pl
+   INC     /usr/libexec/fml
+   INCLUDE myfred.pl
    
    #BODY:
    
@@ -59,6 +59,8 @@
 	#PART: 
 
 というシンタックスは例外で、"PART"部の始まりを宣言しています。
+＃汎用性を重視したため変な宣言文になってしまっています _o_ 
+
 コメントは 
 
 	# 空白 コメント
@@ -70,6 +72,8 @@ PART には ヘッダ、ボディ といったものが来ます。
 例えばメールはヘッダ部とボディ部からなるわけで、自然なメールの構造の分
 類は #HEADER: と #BODY: からなると考えることでしょう。
 
+またボディ部が複数のパートからなることも考えられます。
+つまり #BODY1:, #BODY2:, #BODY3: … のようにです。
 目印が存在すれば ボディ部の細かい構造を反映させることもできます。
 例えばアンケートでは、メールのボディの中にさらに、
 
@@ -79,8 +83,29 @@ PART には ヘッダ、ボディ といったものが来ます。
 	…
 
 のような構造をもつでしょう。
+これらの目印と特定のPART部の間の対応関係は CATCH 構文で定義します。
 
-目印と○○部の間の対応関係は CATCH 構文で定義します。
+例外として、#BODY1:, #BODY2:, #BODY3: のように複数のブロックからなる場
+合にキーワードが同じもので始まる場合、
+
+例えば
+	---------------------------------------------
+	UJA1:
+		…
+	---------------------------------------------
+	UJA2:
+		…
+	---------------------------------------------
+	UJA3:
+		…
+
+のような形式をとる場合、
+
+	CATCH \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\- BODY
+
+で定義された CATCH 構文はパターンマッチするたびに自動的にインクリメントし
+各ブロックを	BODY1	BODY2	BODY3 … のデータ構造としてとらえます。
+
 
 基本的な形としては、例えばメールは ヘッダとボディからなります。
 この場合自然な config は、
@@ -126,7 +151,7 @@ PART には ヘッダ、ボディ といったものが来ます。
 			FIELD: VALUE
 		の形であると仮定します。
 		VALUEはRFC822 folding rule で書かれていれば	
-		複数行のデータを扱えます。
+		複数行のデータを扱えます(要点)。
 
 	例：
 	From:	fukachan@sapporo.iij.ad.jp
@@ -178,6 +203,53 @@ PART には ヘッダ、ボディ といったものが来ます。
    NAME		(\S+)		AddAL
    SPOOL	(\S+)		AddAL
    MAIL		(\S+)		AddAL
+
+
+パターンマッチした場合 &AddAL を呼び出します。&AddAL等の呼び出される関
+数の引数は固定されていて、
+
+	$ok = 'AddAL';
+	&$ok(*key, *value, *pat, *fred, *opt, *mesg);
+
+のような関数呼び出しをされます。
+
+	$key	フィールド	e.g. ADDR:
+	$value	フィールドの値	e.g. fukachan@sapporo.iij.ad.jp
+	%fred	$key $value のセット
+	$pat	ADDR: に期待するパターン e.g. fukachan@\S+
+	@opt	$pat にマッチした $1, $2 等のリスト
+	$mesg	AddAL から返ってくる答えを格納する場所
+
+例：
+
+sub AddAL
+{
+    local(*key, *value, *pat, *fred, *opt) = @_;
+
+    print "push [$value] for key=[$key]\n" if $debug;
+    $C{$key} .= "$value\n";
+}
+
+
+sub Summary
+{
+    print "Summary Information:\n\n";
+    while (($k, $v) = each %C) { 
+	print "KEYWORD ($k) :: ENTRY {\n$v\n}\n\n";
+    }
+}
+
+sub DomainCheck
+{
+    local(*key, *value, *pat, *fred, *opt, *mesg) = @_;
+
+    if ($value !~ /^[\w\-]+\.\w\w.JP$/i) {
+	$mesg .= "エラー：ドメイン名の階層が３段でない\n";
+	return;
+    }
+
+	…
+}
 
 
 .# $Id$

@@ -1,24 +1,34 @@
 .C	リモート管理
-.label	{REMOTE-ADMINISTRATION}
+.label	REMOTE-ADMINISTRATION
 .key	$REMOTE_ADMINISTRATION
 
 
-.S	リモート管理の古い設定への注意
-.key	リモート管理の古い設定への注意
+.S	リモート管理モード ('remote')
+.k	リモート管理モード
+.k	--remote
+.k	&DEFINE_MODE('remote')
 
-古い設定のままでは動きません。ごめんなさい
+ロングラインオプションで
 
-昔は、リモートでの管理は eval へ渡すフックをしかけることで実装していま
-した。 
-いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
-(libfml.pl 1.5.2 から)
+	fml.pl --remote
+か
+	config.ph で &DEFINE_MODE('remote');
 
-以下に出てくる $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は、
-REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
-＃Backward compatible にしてあるので、どっちの変数でもOKですが
+の方が楽だとおもいますね。このモード設定は
+
+	$REMOTE_ADMINISTRATION = 1;
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+
+を設定します(後述)。つまりリモート管理を認め、なおかつ管理者であること
+を証明するためにはパスワード認証が必要という設定です。
 
 
 .S	カスタマイズできる変数
+.k	$ADMIN_MEMBER_LIST
+.k	$ADMIN_HELP_FILE
+.k	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD
+.k	$PASSWD_FILE
+.k	$DIR/etc/passwd
 
 リモートで管理者になれる人のリスト
 
@@ -44,33 +54,20 @@ REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
 ＃Backward compatible にしてあるので、どっちの変数でもいいんですけど
 
 
-.S	ログファイルがＭＬ本体と管理者コマンドで同じなんだけど…
-
-ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってるん
-ですよね。分けた方がいいのかなぁ？？？
-
-もし変えたいなら
-libhml.pl で こうなってますんでいじってください
-      if(/^admin$/io) {
-	  # if you would like to change logfile for admin commands.
-	  # $LOGFILE	= "$DIR/log-admin"; 
-
-
 .S	approve password command SYNTAX
 .key	{approve}
 .key	{for SID approve}
 .label	admin:approve
 
 どっちもどっちですが、
-・password認証して、その後は全部認証したものとみなす
 
-・毎回 password を書く 
+   password認証して、その後は全部認証したものとみなす
+   毎回 password を書く 
 
 ＃どっちもそれなりに面倒くさいが…
 
 ようは 毎回 password を書く っとことです。
-で、これは Listserv もどきインターフェイス拡張のために付け加えられました
-(.seealso SID, SID:approve)
+これは Listserv もどきインターフェイス拡張のために付け加えられました
 
 
 .S	アドミンモードでのアドレスの複数マッチ問題について 
@@ -80,9 +77,10 @@ libhml.pl で こうなってますんでいじってください
 OFF コマンド等は multiple-matching を認めません。
 つまり、
 
-fukachan@aoi.chan.panic
-	と
-fukachan@uja.aoi.chan.panic
+	fukachan@aoi.chan.panic
+ と
+	fukachan@uja.aoi.chan.panic
+
 は両方ともマッチしてしまう時、チェックをきびしくしてひとつのアドレスだ
 けを選ぶのがデフォールトの挙動ですが、
 
@@ -155,45 +153,72 @@ fukachan@phys.titech.ac.jp 32ZrV/XvYj1kY
 のように -p オプションで指定してください。
 
 
-.S	パスワード設定：昔のドキュメント採録：
+.S	パスワード設定:昔のドキュメント採録:
 
-＃lib/remote/README に １例が詳しく書いてありますんで、そちらも参照く
-＃ださい。(Written by oota@pes.com1.fc.nec.co.jp)
-＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+#lib/remote/README に 1例が詳しく書いてありますんで、そちらも参照く
+#ださい。(Written by oota@pes.com1.fc.nec.co.jp)
+****************************
 passwdの作り方書いてなくて、、もうしわけないです。
 
-＜初期パスワードのつくりかた＞
-passwdの文字列を uja とすると（１１という数字に意味はない、なん
-か適当は数字です、ＤＥＳのアルゴリズムの番号です）
+<初期パスワードのつくりかた>
+passwdの文字列を uja とすると(11という数字に意味はない、なん
+か適当は数字です、DESのアルゴリズムの番号です)
 % perl -e 'print crypt("uja", 11)' 
 のOUTPUT をencrypted passwdとして使って下さい
 
-etc/passwd の中身のシンタックス（デフォールト）は
+etc/passwd の中身のシンタックス(デフォールト)は
 mail-address	encrypted-passwd 
 です。
  
 初期パスワードをなんらかの形で相手に与えてすぐに変えてもらうこ
 とが重要でしょう
-＃できればメールでなく電話とかがいいんだろうなぁ
+#できればメールでなく電話とかがいいんだろうなぁ
  
 mailの エラー時 ヘッダしか普通はpostmasterにはいきません。
 本文にパスワードを書くようにしたのはそのためですが、
 運悪くいってしまうかもしれません。気をつけて下さい。
-＃securityはｓｍｔｐもｔｅｌｎｅｔもどっこいどっこいってか;-)
+#securityはsmtpもtelnetもどっこいどっこいってか;-)
 
 % chmod 600    etc/passwd
 % chown 管理者 etc/passwd
 もわすれずに
 
-＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
 
-.S	Ｃｌｉｅｎｔ インターフェイス
+.S	ログファイルがＭＬ本体と管理者コマンドで同じなんだけど…
 
-FmlRemoreControl はリモートでＭＬをコントロールするためのインターフェ
+ログファイル ってＭＬ本体と管理者コマンドって同じファイルを使ってるん
+ですよね。分けた方がいいのかなぁ？？？
+
+もし変えたいなら
+libhml.pl で こうなってますんでいじってください
+      if(/^admin$/io) {
+	  # if you would like to change logfile for admin commands.
+	  # $LOGFILE	= "$DIR/log-admin"; 
+
+
+.S	リモート管理の古い設定への注意
+.key	リモート管理の古い設定への注意
+
+古い設定のままでは動きません。ごめんなさい
+
+昔は、リモートでの管理は eval へ渡すフックをしかけることで実装していま
+した。 
+いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
+(libfml.pl 1.5.2 から)
+
+以下に出てくる $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD は、
+REMOTE_AUTH (TYPO で REMORE_AUTH) が古い変数名。
+#Backward compatible にしてあるので、どっちの変数でもOKですが
+
+
+.S	Client インターフェイス
+.xref	fmlctl.pl
+
+FmlRemoreControl はリモートでMLをコントロールするためのインターフェ
 イスです。
 Bourne Shell script です。
-先頭の ML というとこをろＭＬのアドレスにして使って下さい。
-INPUT したコマンドをＭＬに投げます。
+先頭の ML というとこをろMLのアドレスにして使って下さい。
+INPUT したコマンドをMLに投げます。
 
 INPUT> ls
 
@@ -202,8 +227,6 @@ INPUT> ls
 % echo "# admin ls" | mail -v $ML
 
 と同じです
-
-
 
 
 .# $Id$

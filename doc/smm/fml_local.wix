@@ -3,114 +3,229 @@
 .key	manual of libexec/fml_local.pl
 .label	{manual of libexec/fml_local.pl}
 
-.S	~/.forward
+
+~/.forward は通常アドレスのフォワードに使われますが、本質的に 
+/etc/aliases と同じように作動しますので、ここにプログラムを設定すれば
+自動仕分けやこじんまりとした(手抜き)MLを実行することが可能です。
+
+実際の仕分けやプログラムへ渡す前の前処理段階つまりヘッダ等のパターンを
+見て何をすればいいのか判定するプログラムが libexec/fml_local.pl です。
+
+	libexec/fml_local.pl
+	libexec/fml_local2.pl
+
+と２つありますが、パターンマッチの仕方が違うだけです。後述のように 
+fml_local.pl は最後にマッチした条件(以下 LAST MATCH)を実行、
+fml_local2.pl は最初にマッチした条件(以下 FIRST MATCH)を実行します。
+
+
+.S	fml_local と ~/.forward の設定
 
 ~/.forwardに
-"|/some/directory/libexec/fml_local.pl -user username || exit 75"
+"|/usr/libexec/fml/libexec/fml_local.pl -user username || exit 75"
 
 とか書いて使います。usename はあなたの account名です。
 
+SYNOPSIS: 
+  fml_local.pl [-Ddh] [-f config_file] [-user username]
+    -h     this help
+    -d     debug mode on
+    -D     dump variable 
+    -f     configuration file for ~/.fmllocalrc
+    -user  usename
 
-.S	~/.fmllocalrc 1
+デフォールトでは $HOME/.fmllocalrc という設定ファイルにしたがってパター
+ンマッチングとその処理を実行します。
 
-fml_local.pl は ~/.fmllocalrc で制御します。
-見本が etc/dot_fmllocalrc に入っています。
+この時 ~/.fmllocalrc を上から順番にパターンマッチするか？否か？を試し
+て“最後にマッチするエントリを実行します”。
 
-	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
+これは主に歴史的な理由で last match なのですが、FIRST_MATCH を定義する
+か libexec/fml_local2.pl を使えば最初にパターンマッチした処理を実行す
+るように変更できます。
 
-	“最後にマッチするエントリを実行します”
-
-	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
-
-また # ではじまる行はコメントです。空行は無視して次へいきます
+以下 LAST MATCH する場合について記述しています。FIRST MATCH の場合は逆
+になるので注意して下さい。
 
 
-.S	~/.fmllocalrc 2
+.S	~/.fmllocalrc 
+
+fml_local.pl は ~/.fmllocalrc で制御します。見本が etc/dot_fmllocalrc 
+です。
+
+いつものように
+	# ではじまる行はコメント
+	空行は無視して次へ進む
+
+です。
 
 デフォールトは自分のスプールへ、そしてローカルなＭＬの配送はスプールへ
 落すようにセットしてループしないようにするべきです。
 
-	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
-だから、最後に必ず
+だから、LAST MATCH の場合、最後に必ず
 
-From		自分	&	MailLocal
-X-MLserver 	\S+	& 	MailLocal
+	From		自分	&	MailLocal
+	X-MLserver 	\S+	& 	MailLocal
 
-のエントリをかくことがループを防ぐためにもっとも大事になります
+のエントリをかくことがループを防ぐためにもっとも大事になります。
+
+もちろんループを検出した場合は強制的に MailLocal を実行して /var/mail 
+等へ入れてしまいます。
+
 さらに、ＭＬをやるときは
-From		自分	&	MailLocal
 
-ＭＬの設定
+	From		自分	&	MailLocal
 
-X-MLserver 	\S+	& 	MailLocal
+	# ＭＬの設定
+	X-MLserver 	\S+	& 	MailLocal
 
-のように 挟んでください。そうしないと自分ではＭＬへ投稿できません（笑）
-＃後にあると From がマッチしてしまう
-	＊＊＊＊＊＊ 注意 ＊＊＊＊＊＊
-
-
-.S	~/.fmllocalrc 3
-
-４つの変数が スペース で区切ってやってほしいことをかきます。
-「フィールド パターン 実行のタイプ 実行すること」
-
-それ以外に変数を定義できます。それらの変数は 実行内容の中で展開して使
-われます。
-セットされる変数一覧（@VAR の中身）は後述します(.seealso fml_local-var )
+のように挟んでください。そうしないと自分ではＭＬへ投稿できません（苦笑）
+＃後にあると From がマッチしてしまう(last match の場合の例であることに注意)
 
 
-.S	正規表現
+.S	~/.fmllocalrc のフィールド
 
-以下で実際に出てくる基本的な表現だけをすこし説明します。
+４つの変数をSPACE or TABで区切ってやってほしいことをかきます。
 
-○ . なんでもいいから一文字
-○ \s 空白文字 e.g. space TAB 
-○ \S は空白でない文字
-○ + は１個以上、* は０個以上です。
+	フィールド パターン 実行のタイプ 実行すること
 
-○ ()でくくったものがマッチしたもので fml_local.pl では
-左から順番に グローバル変数 $F1 $F2 $F3 にセットされます
+です。空行で区切られた各パラグラフが条件文です。
 
+	フィールド1 パターン1
+	フィールド2 パターン2 実行のタイプ 実行すること
+
+のように複数行あるパラグラフはANDの条件文です。つまり、上の場合
+「フィールド1 パターン1」かつ「フィールド2 パターン2」の条件を満たすな
+ら実行する…という意味になります。
+
+それ以外に変数を定義できます。
+
+例：
+	HOME	/home/beth/fukachan
+	DIR	/home/beth/fukachan
+	DEBUG
+
+
+それらの変数は実行内容の中で展開して使われます。セットされる変数一覧
+（@VAR の中身）は後述します(.ptr{fml_local-var})
+
+また”フィールド パターン”はメールのヘッダのすべての行について、
+
+	if (そのフィールドの値 =~ /パターン/ )
+
+の形で判定されます。つまり
+
+	subject: の特定のキーワードでＭＬを起動する
+
+や、X-ML: というのをヘッダにつけてもらい
+
+	X-ML:	uja というフィールドがあったらＭＬを起動する
+
+等の設定も自由自在ます。しかし逆に意識的に設定しない限り
+
+	Subject: uja
+	Subject: ujauja
+	Subject: Elena Sayori uja uja UJA
+
+等はすべて同じものに見なしてしまいます。
+
+
+各フィールドの意味は次の通りです。
+
+フィールド	To, subject, 等。なんでもいい。
+		body という特別なフィールドもあります
+		これはメール本文を仮想的にヘッダのフィールドと同様に扱
+		うことで実装しています。
+
+パターン	perlの正規表現が使えます。
+		スペースとかは含めないので
+		get\s+(\S+) 
+		こんな形になります。
+		() でマッチした変数は順に
+		$F1 $F2 $F3 に設定されます。
+		話をややこしくしないために $F1 等はグローバル変数です。
+		
+実行のタイプ	& は perl の関数呼びだし
+		> は そのファイルにアペンドです
+		| は パイプで渡します。
+		UNIX FROMつきのまま渡します
+		UNIX FROMを抜いた形でプログラムへ渡すには
+		|の代わりにmhと書いてください
+		（mhへ渡すことを想定している）
+
+実行するもの	実行するもの。関数 or ファイル
+
+
+
+
+.S	パターンの記述に用いることのできる正規表現
+
+以下で実際に出てくる基本的な正規表現をすこし説明します。
+
+	. 	なんでもいいから一文字
+	\s 	空白文字 e.g. space TAB 
+	\S 	空白でない文字
+	+ 	１個以上
+	* 	０個以上です。
+	\S+	１個以上の空白でない文字列
+	.*	０個以上の文字列(なんでもいい)
+
+	()でくくったものがマッチしたもので fml_local.pl では
+	左から順番に グローバル変数 $F1 $F2 $F3 にセットされます
+
+
+.S	パターンの例
+
+例１：
 	to	(uja)		|	$DIR/fml.pl $DIR $DIR
 
 To: フィールドのどっかに uja という文字列があれば、それにマッチする
+例えば To: fukachan@sapporo.iij.ad.jp (uja)
 
+なお、
 	to	\(uja\)		|	$DIR/fml.pl $DIR $DIR
 
-uja ではなく (uja)  にまっちします。
+は uja ではなく (uja)  にマッチします。
 
-○“１個以上の空白でない文字”
+
+例２：
+
 	Subject	get\s+(\S+)	&	sendback
 
-	Subject: get GUIDE FILE の GUIDE だけにまっち 
+例えば Subject: get GUIDE FILE の GUIDE だけにまっち 
 
-○“０個以上のなんでも”
-
+例３：
 	body	get my spool (.*)	& 	getmyspool
 
 メール本文に 
 	get my spool uja uja
 とあれば、"uja uja" の部分を $F1 にセットします。.* だからスペースにも
-マッチしてます。これでパスワードに空白も使えると
+マッチしてます。これでパスワードに空白も使えますね。
 
 
-S	~/.fmllocalrc の例
+
+.S	~/.fmllocalrc でＭＬを行なう例
+
+LAST MATCH に注意！
 
 ＭＬをセットする ~/.fmllocalrc の例：
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-DIR	/usr/local/fml
 
-From		fukachan	&	MailLocal
+   DIR	/usr/local/fml
+   
+   From		fukachan	&	MailLocal
+   
+   to		\(uja\)		|	$DIR/fml.pl $DIR $DIR
+   
+   to		\(sayori\)	|	$DIR/fml.pl $HOME/var/sayori 
+   
+   X-MLserver	\S		&	MailLocal
 
-to		\(uja\)		|	$DIR/fml.pl $DIR $DIR
 
-to		\(sayori\)	|	$DIR/fml.pl $HOME/var/sayori $DIR
 
-X-MLserver	\S		&	MailLocal
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+	To: username@somewhere.jp (uja) 
+というメールがきたら
+	"|$DIR/fml.pl $DIR $DIR" 
 
-で、To: username@somewhere.jp (uja) というメールがきたら
-"|$DIR/fml.pl $DIR $DIR" 
 という普通の形でＭＬを作動させるというものです。
 ここで $DIR は上の DIR の行の値で展開されます。
 
@@ -120,30 +235,16 @@ X-MLserver	\S		&	MailLocal
 
 また、 (uja)  は 
 	うじゃＭＬ（/usr/local/fmlの下にconfig.phでカスタマイズ）を、
+
 (sayori) はまた別の 
 	さよりちゃんＭＬ（/usr/local/fml/var/sayori/config.ph）
+
 を起動します。
 
-これ以外の、From: fukachan…（@phys とかついてても なくてもいい） 
-や、X-MLserver: フィールドのあるメール、いづれにもマッチしないメールは
-すべて /var/mail/fukachan のように sendmail が普通ためておく場所に
-おとします。
-
-
-.S	フィールドはヘッダの任意のフィールドです
-
-「フィールド パターン 実行のタイプ 実行すること」
-
-フィールド パターン はメールのヘッダのすべての行について、
-
-	if ( そのフィールドの値 =~ /パターン/ ) 
-
-が実行されます。というわけで、
-
-	subject: の特定のキーワードでＭＬを起動する
-	X-ML:	uja というフィールドがあったらＭＬを起動する
-
-等も自由に設定できます。
+これ以外の、From: fukachan…（@phys とかついてても なくてもいい） や、
+X-MLserver: フィールドのあるメール、いづれにもマッチしないメールはすべ
+て /var/mail/fukachan のように sendmail が普通スプールする場所にスプー
+ルされます。
 
 
 .S	フィールドはヘッダ以外に body  があります
@@ -159,7 +260,7 @@ body	getmyspool\s+(\S+)	&	getmyspool_pw
 % echo "getmyspool password-is-required" |Mail 自分のアドレス
 
 
-.S	変数’ｓ
+.S	変数一覧
 .label	fml_local-var
 
 もし変数を明示的にセットしないときは適当な値がデフォールト設定されます。
@@ -257,31 +358,6 @@ SECURE_FML_LOCAL	0
 その上で Secure にするべきであろう。
 
 
-
-.S	フィールド パターン 実行のタイプ 実行すること
-
-各フィールドは スペースとタブ の塊で区切られます。
-# slocalと違って４つしかないから注意
-
-フィールド	To, subject, 等。なんでもいい
-
-パターン	perlの正規表現が使えます。
-		スペースとかは含めないので
-		get\s+(\S+) 
-		こんな形になります。
-		() でマッチした変数は順に
-		$F1 $F2 $F3 に設定されます
-実行のタイプ	& は perl の関数呼びだし
-		> は そのファイルにアペンドです
-		| は パイプで渡します。
-		UNIX FROMつきのまま渡します
-		UNIX FROMを抜いた形でプログラムへ渡すには
-		|の代わりにmhと書いてください
-		（mhへ渡すことを想定している）
-
-実行するもの	実行するもの。関数 or ファイル
-
-
 .S	フィールド設定の例
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 #field		pattern		type	exec
@@ -349,7 +425,7 @@ body            getmyspool\s+(\S+)	&	getmyspool_pw
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
 
-.S	BUILD-IN Functions
+.S	fml_local BUILD-IN Functions 一覧
 .include fml_local_builtin_functions.wix
 
 

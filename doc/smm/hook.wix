@@ -50,7 +50,7 @@ $START_HOOK =q%
 Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
 
 $HEADER_ADD_HOOK = q#
-$body .= "Message-ID: ".
+   $body .= "Message-ID: ".
 	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
 	"Elena.Lolobrigita@Baycity.asia");
 #;
@@ -83,7 +83,8 @@ $SMTP_OPEN_HOOK = q#
 
 .S	$SMTP_CLOSE_HOOK
 
-$SMTP_CLOSE_HOOK は
+$SMTP_CLOSE_HOOK は配送が終った後で、かつまだロックされている状態で実
+行されます。具体的には &Distribute; を離れる直前に実行されます。
 
 
 .S	$FML_EXIT_HOOK
@@ -125,7 +126,7 @@ sub MSendModeSet  という関数を見るとわかるとおもいます。
 次を参照
 
 
-.S	コマンドをふやそう！♪でっきるかな〜♪でっきるかな
+.S	コマンドの増やし方
 
 config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
 します。こういうことをしてもいいというのは、大抵コマンドは一メールあた
@@ -133,7 +134,7 @@ config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
 さの方が優先という経験と観察に基づいてます。
 
 
-.S	コマンドをふやそう！例： "# list" and "# rsummary"
+.S	HOOKによるコマンドの実装例： "# list" and "# rsummary"
 .key	$COMMAND_HOOK
 
 注意： rsummary は現在は summary 引数 の形で実行できます
@@ -164,13 +165,13 @@ $COMMAND_HOOK = q#
 	    local($a) = $1; 
 	    local($b) = $2; 
 
-	    open(TMP, "$DIR/summary") || do { &Log($!); next GivenCommands;};
+	    open(TMP, $SUMMARY_FILE) || do { &Log($!); next GivenCommands;};
 	    while (<TMP>) {
 		if (/\[$a:/ .. /\[$b:/) { $r .= $_;}
 	    }
 	    close(TMP);
 
-	    &Sendmail($to, "Restricted  Summary $Fld[2]", $r);
+	    &Mesg(*e, "Restricted  Summary $Fld[2]\n$r\n");
         }
 	else {
 	    &Log("Summary ($From_address)");
@@ -182,7 +183,7 @@ $COMMAND_HOOK = q#
 #;
 
 
-.S	コマンドをふやそう！例： "# sget"
+.S	HOOKによろコマンド実装例： "# sget"
 .key	$COMMAND_HOOK
 
 # sget uja		subjectに uja というキーワードが入っているファ
@@ -205,12 +206,12 @@ $COMMAND_HOOK =q#
 	}
 
 	&Log("Search and Get $Fld[2]");
-	&Sendmail($to, "Search and Get ". $Fld[2] . $ML_FN, $s);
+	&Sendmail($to, "Search and Get $Fld[2] $ML_FN", $s);
     }
 #;
 
 
-.S	コマンドをふやそう！例： "# admin" アドミンコマンド
+.S	HOOKによるコマンド実装例： "# admin" アドミンコマンド
 .key	$COMMAND_HOOK
 .key	$ADMIN_MEMBER_LIST
 .key	$ADMIN_HELP_FILE
@@ -219,12 +220,12 @@ $COMMAND_HOOK =q#
 .key	アドミンコマンド
 .seealso	REMOTE-ADMINISTRATION 
 
-"# admin" アドミンコマンド って昔あったんですが、いまは、
+"# admin" アドミンコマンド って昔あったんですが、今は、
 内蔵しちゃったので、わざわざ（次節）しなくても、
 
-1	コマンドラインオプションで --remote
-2	config.ph で &DEFINE_MODE('remote');
-3	$REMOTE-ADMINISTRATION フラッグをON
+   1	コマンドラインオプションで --remote
+   2	config.ph で &DEFINE_MODE('remote');
+   3	$REMOTE-ADMINISTRATION フラッグをON
 
 どれでも同じですが、設定だけでできるようにしました。
 
@@ -234,7 +235,7 @@ $COMMAND_HOOK =q#
 lib/remote/REAMDE をみてもらうとわかりますね。 
 
 
-.S	そこで，ある行数を越えるメールは廃棄する設定
+.S	HOOKの例：ある行数を越えるメールは廃棄する設定
 
 	
 $START_HOOK = q#
@@ -243,8 +244,6 @@ $START_HOOK = q#
 	$DO_NOTHING = 1;
     }
 #;
-
-
 
 
 .# $Id$
