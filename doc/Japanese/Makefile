@@ -4,7 +4,7 @@
 
 TUTORIAL_LANGUAGE    = Japanese
 
-# DOC_TUTORIAL_RAW_SUBDIR += tips
+DOC_TUTORIAL_RAW_SUBDIR += examples
 
 DOC_TUTORIAL_EXC_SUBDIR += basic_setup
 
