@@ -36,7 +36,7 @@ eval umask 022;
 
 DIRS="bin sbin libexec cf etc sys src drafts messages www"
 
-if [ X$MKDOC != Xno ]
+if [ X$MKDOC != Xno -a X$MKDOC != XNO ]
 then
     DIRS="$DIRS doc"
 fi
