@@ -877,12 +877,29 @@ sub Format
 
     if ($c eq 'q') {
 	$Tag = "    ";
-	$r = "<PRE>"  if $mode eq 'html';
-	$In_PRE = 1;
+	if ($mode eq 'html') {
+	    if ($In_PRE) {
+		$QuoteInPRE = 1;
+	    }
+	    else {
+		$r = "<PRE>";
+		$In_PRE = 1;
+	    }
+	}
     }
     elsif ($c eq '~q') {	# destructor:-)
 	undef $Tag;
-	$r = "</PRE>" if $mode eq 'html';
+	if ($mode eq 'html') {
+	    if ($QuoteInPRE) {
+		$QuoteInPRE = 0;
+	    }
+	    elsif ($In_PRE) {
+		$r = "</PRE>";
+	    }
+	    else {
+		;
+	    }
+	}
 	undef $In_PRE;
     }
     elsif ($c eq 'appendix') {	# set flag, return without effect;
