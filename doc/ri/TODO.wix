@@ -14,92 +14,6 @@
 .toc
 -------------------------------
 
-.C	終ったものリスト
-=E.C	DONE
-
-.S	日本語のエラーがかえる
-=E.S	Japanese Error String
-
-.S	HTML_DEFAULT_HANDLERの拡張
-=E.S	Enhance $HTML_DEFAULT_HANDLER
-
-.S	マクロ
-=E.S	Macro
-
-&DEFINE_MAILER(); は必要か？
-定義はしてるけど、どうかなぁ
-=E
-&DEFINE_MAILER(); is required ? 
-
-   to define "ipc" or "prog" mailer
-
-.S	MEAD
-
-sendmailのつける特殊なヘッダについてはトレースする。
-アドレス展開するのが逆追跡できる場合がある。
-=E
-check
-
-	Received: for <ADDRESS>
-
-.S	auto_subscribe
-
-members actives をちゃんと２つ使う自動登録。
-auto_regist は互換性のため有効だが、 fml 3.0 ではこれを使うこと。
-この機能を意識させるため major version を 3.x にあげるべきだ。
-
-check it out!
-.q
-libexec/fmlserv.pl:		if (&NonAutoRegistrableP) {
-libexec/fmlserv.pl:    if (&AutoRegistrableP) {
-kern/fml.pl:		   &NonAutoRegistrableP) {
-kern/fml.pl:		   &NonAutoRegistrableP) {
-kern/fml.pl:    if (&AutoRegistrableP) {
-kern/fml.pl:    if ($status = &AutoRegistrableP) {
-kern/fml.pl:sub NonAutoRegistrableP { ! &AutoRegistrableP;}
-kern/fml.pl:sub AutoRegistrableP
-kern/fml.pl:    local($x) = &AutoRegistrableP;
-kern/fml.pl:    $auto_registrable = &AutoRegistrableP;
-proc/libamctl.pl:    if (&NonAutoRegistrableP) {
-proc/libamctl.pl:    elsif (&NonAutoRegistrableP) {
-proc/libfml.pl:    if (&NonAutoRegistrableP) {
-proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
-.~q
-
-.S	配送関係
-=E.S	Delivery
-
-* VERPs
-
-.S	Memory Usage
-
-  fix memory usage routine
-	MD5 around
-	Forw()
-	Warn() 
-
-  remove WholeMail(), ForwMail()
-
-.S	HTML around
-
-* <DIV>の定義に反する使い方？
-=E
-* <DIV> 
-
-
-.S	Y2K advisory
-
-* GetTimeを入れ換えるキット
-=E
-* &GetTime 
-
-* アドヴァイザリィ
-=E
-* y2k advisory
-
-
-
-
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
@@ -109,6 +23,13 @@ proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist))
 ドキュメント関連: FAQ をつくる。がんばろう;)
 
 .url http://www.jwntug.or.jp/wg/ntfml/faq/announce.html
+
+
+.S	makefml mkdir()
+
+fml-support:6899
+3016:  &Mkdir($dir);
+4817:      $s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
 
 
 .S	ドキュメント: doc/op
@@ -479,6 +400,90 @@ fml-support: 06265
 * all ranges
 
 * clean up mget3 internals
+
+
+.C	終ったものリスト
+=E.C	DONE
+
+.S	日本語のエラーがかえる
+=E.S	Japanese Error String
+
+.S	HTML_DEFAULT_HANDLERの拡張
+=E.S	Enhance $HTML_DEFAULT_HANDLER
+
+.S	マクロ
+=E.S	Macro
+
+&DEFINE_MAILER(); は必要か？
+定義はしてるけど、どうかなぁ
+=E
+&DEFINE_MAILER(); is required ? 
+
+   to define "ipc" or "prog" mailer
+
+.S	MEAD
+
+sendmailのつける特殊なヘッダについてはトレースする。
+アドレス展開するのが逆追跡できる場合がある。
+=E
+check
+
+	Received: for <ADDRESS>
+
+.S	auto_subscribe
+
+members actives をちゃんと２つ使う自動登録。
+auto_regist は互換性のため有効だが、 fml 3.0 ではこれを使うこと。
+この機能を意識させるため major version を 3.x にあげるべきだ。
+
+check it out!
+.q
+libexec/fmlserv.pl:		if (&NonAutoRegistrableP) {
+libexec/fmlserv.pl:    if (&AutoRegistrableP) {
+kern/fml.pl:		   &NonAutoRegistrableP) {
+kern/fml.pl:		   &NonAutoRegistrableP) {
+kern/fml.pl:    if (&AutoRegistrableP) {
+kern/fml.pl:    if ($status = &AutoRegistrableP) {
+kern/fml.pl:sub NonAutoRegistrableP { ! &AutoRegistrableP;}
+kern/fml.pl:sub AutoRegistrableP
+kern/fml.pl:    local($x) = &AutoRegistrableP;
+kern/fml.pl:    $auto_registrable = &AutoRegistrableP;
+proc/libamctl.pl:    if (&NonAutoRegistrableP) {
+proc/libamctl.pl:    elsif (&NonAutoRegistrableP) {
+proc/libfml.pl:    if (&NonAutoRegistrableP) {
+proc/libra.pl:    if (&NonAutoRegistrableP && ($ACTIVE_LIST ne $file_to_regist)) {
+.~q
+
+.S	配送関係
+=E.S	Delivery
+
+* VERPs
+
+.S	Memory Usage
+
+  fix memory usage routine
+	MD5 around
+	Forw()
+	Warn() 
+
+  remove WholeMail(), ForwMail()
+
+.S	HTML around
+
+* <DIV>の定義に反する使い方？
+=E
+* <DIV> 
+
+
+.S	Y2K advisory
+
+* GetTimeを入れ換えるキット
+=E
+* &GetTime 
+
+* アドヴァイザリィ
+=E
+* y2k advisory
 
 
 .# $Id$
