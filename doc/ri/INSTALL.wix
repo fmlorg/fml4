@@ -10,8 +10,9 @@
 .C	Introduction
 
 まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
-のdirectoryができてその下にひとセット入ってます。
-＃で、directoryの名前は適当に変えて下さい。
+の directory ができてその下にひとセット入ってます。
+directory の名前は適当に変えるといいでしょう。ここでは 
+/var/spool/ml/Elena という名前に変えたとすることにします。
 
 
 .S	以下での設定例（例えば次のように設定することにしましょう）
@@ -21,7 +22,8 @@ Mailing List 		Elena Lolobrigita ML
 address of it		Elena@axion.phys.titech.ac.jp
 Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
 ＭＬのdirectory		/var/spool/ml/Elena
-			注意：fml.plやconfig.ph等が広がっている場所です
+			config.ph 等が広がっている場所です。今は
+			fml.pl やライブラリは /var/spool/ml/Elena/src です
 
 なお便宜上以下 % を shell の prompt 、 # を root の時のshell promptと
 することにします。
@@ -307,7 +309,7 @@ C-wrapper を使うべきだという方は、 doc/op を見てください。
 
 :include:するべきファイルの中身は
 
-"|/var/spool/ml/Elena/fml.pl /var/spool/ml/Elena /var/spool/ml/Elena"
+"|/var/spool/ml/Elena/src/fml.pl /var/spool/ml/Elena"
 
 みたいに書きます（これで一行です↑）。samples/ の下の各ファイルを見ると
 わかるとおもいます。
