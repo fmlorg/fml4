@@ -3,76 +3,33 @@
 
 .S	Introduction to Aucea
 
-[SYNOPSIS]
-	特定のフォーマットで与えられるフィールドが正規表現にマッチする
-	か否かを調べパターンにマッチした時およびしない時にそれぞれ定義
-	された関数を実行する。
-
 例えば ファイルの形式が
 
 		項目	値
 
 のようなものは世の中に多くあります。特定の書類、投票やアンケートのフォー
 マット等の一般的に良くありうる形式について当てはまるすべてのものに適用
-可能です。
+可能です。つまり
+
+.q
+特定のフォーマットで与えられるフィールドが正規表現にマッチする
+か否かを調べパターンにマッチした時およびしない時にそれぞれ定義
+された関数を実行する。
+.~q
+
+ものです。例えば、投票や アンケート といった一般的に良くありうる形式に
+ついて当てはまるすべてのものに適用可能なように設計されています。
 
 投票システム lib/Elena (VotingSystem) や FRED ライブラリの可読性をあげ、
-汎用的に拡張しなおしたものと考えてよいでしょう。
+汎用的に拡張しなおしたものと考えればよいでしょう。
 
 
-.S	Auceaインターフェイスとデータ構造
-
-   require 'libAucea.pl';
-   &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
-
-   INPUT:	*Envelope を Aucea に入れる
-   OUTPUT:	*Envelope, *Buf, *CF, *Result が変える。
-
-   *Envelope 
-	メールの場合はヘッダ、メール本文の各値
-	コマンドラインではこれの形式に合わせて変換して突っ込む。
-
-   *Result 
-	各種結果、エラーレポート、Trace log 等が変える。
-	現在サポートされているデータは
-
-	%Result の key が Error, Warn, Report, Trace
-	の四種類
-
-
-   *** 附随してくるデータ構造
-
-   *Buf
-	メール本文から CF ファイルの定義に従い得られた各値
-
-   *CF
-	CF ファイルの定義
-
-
-.S	関数呼び出しの例
-    
-    $AUCEA_CF 
-    $AUCEA_SYSCALL_LIBRARY を定義する。
-
-    *CF に定義を読み込む。
-
-    *Envelope にデータを入れる。
-
-    &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
-	処理は Aucea 名前空間で処理される。
-
-	また CF の中で使われる関数は Syscall 名前空間への
-	呼び出し処理で実行される。
-
-    %Result を使って結果を出力する。
-
-
-.S	config の例
+.S	config と入力 の簡単な例
 .k	Aucea config の例
 
 例：人気投票…
 
-datatype ACTRESS
+	datatype 	ACTRESS
 	data-begin	\[ACTORESS\]
 
 	field-if  "best" match &BestP required
@@ -86,7 +43,83 @@ datatype ACTRESS
 	field-if  "how" match /(\d+)/ required
 		&Err("エラー: best と how は両方の項目が同時に必要です")
 
-.S	構文 (statements)
+   INPUTのメール本文が
+
+		………
+	[ACTRESS]
+	best	西原久美子
+	best	こおろぎさとみ
+		………
+
+
+.S	Auceaインターフェイスとデータ構造
+
+   [呼び出し方・書き方の例]
+
+   require 'libAucea.pl';
+   &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
+
+   INPUT:	*Envelope を Aucea に入れる
+   OUTPUT:	*Envelope, *Buf, *CF, *Result が返る
+
+   *Envelope 
+	メールの場合はヘッダ、メール本文の各値
+	コマンドラインではこれの形式に合わせて変換して突っ込む
+	通常データは $Envelope{'Body'} (メール本文)から
+	*CF に従い解析され、各 *Buf 内に alloc される。
+
+   *Result 
+	各種結果、エラーレポート、Trace log 等が返る
+	現在サポートされているデータは 
+	%Result の key が Error, Warn, Report, Trace
+	の四種類
+
+   *** 附随してくるデータ構造 ***
+
+   *Buf
+	メール本文から CF ファイルの定義に従い得られた各値
+
+   *CF
+	CF ファイルの定義
+
+	本来*CFの一部だが、$Aucea::AuceaConfig という変数は
+	現在 *CF 内には	alloc されていない。これは .config で
+	定義される CF の inititialization code である。
+
+
+.S	コマンドの作り方の例
+    
+    $AUCEA_CF 			Configuration file
+    $AUCEA_SYSCALL_LIBRARY 	ユーザ用の関数
+
+	を定義する(getopts.pl でも使えば良いでしょう)。
+
+    *CF に定義を読み込む (Configuration fileから)。
+
+    *Envelope にデータを入れる。
+
+    &Aucea'Aucea(*Envelope, *Buf, *CF, *Result);#';
+	処理は Aucea 名前空間で処理される。
+
+	また CF の中で使われる関数は Syscall 名前空間への
+	呼び出し処理で実行される。
+
+    %Result を使って結果を出力する。
+	%Result	を STDOUT へ入れる or 
+	result としてメールにつけて distributer function へ渡す。
+
+	例：  &Mesg(*Envelope, $Result{'Error'});
+
+
+.S	Configuration file と ライブラリ
+
+特定の目的に対する cf と 対応する各ターゲットごとに異なる関数ライブラ
+リはそれぞれに保守されるべきであり、共通の部分は再利用可能 (それぞれの
+なライブラリとして保守し、各ライブラリは最初に include すればよい)なよ
+うに作るべきであろう。
+
+
+.S	Aucea の構文 (statements)
 
 空白は [\s\t]+ で余計な空白は解釈されない。また空白はいくらあってもよ
 い。
@@ -122,7 +155,7 @@ datatype ACTRESS
 
 .S	field-if 構文
 
-以下では BNF-もどき表現で示す。
+以下では BNF(もどき)表現で示す。
 	
    field-if 項目名 match パターン オプション
 
@@ -178,10 +211,6 @@ datatype ACTRESS
 と共に、Syscall Name Space 内の関数への呼び出しがかかります。
 
 詳しくは LEX_FUNCTION を参照。
-
-
-.S	例
-
 
 
 .# $Id$
