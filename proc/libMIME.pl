@@ -23,8 +23,8 @@ if ($0 eq __FILE__) {
 sub DecodeMimeStrings 
 { 
     # 2.1A4 test phase (2.1REL - 2.1A3 requires explicit $MIME_EXT_TEST=1)
-    if (0) {
-	&MIME'MimeBDecode(@_); #';
+    if ($MIME_EXT_TEST) {
+	&MIME'MimeDecode(@_);
     }
     else {
 	&mimedecode(@_);
@@ -70,7 +70,7 @@ sub StripMIMESubject
 
 ###
 ### import fml-support: 02651 (hirono@torii.nuie.nagoya-u.ac.jp)
-### 
+### import fml-support: 03440, Masaaki Hirono <hirono@highway.or.jp>
 package MIME;
 
 sub MimeQDecode
@@ -82,7 +82,7 @@ sub MimeQDecode
 }
 
 
-sub MimeBDecode 
+sub MimeDecode 
 {
     local($_, $out) = @_;
 
@@ -95,7 +95,7 @@ sub MimeBDecode
 
     while (s/($MimeBEncPat)[ \t]*\n?[ \t]+($MimeBEncPat)/$1$3/o) {;}
 
-    s/$MimeBEncPat/&kconv(&MimeBDecode($1))/geo;
+    s/$MimeBEncPat/&kconv(&mimedecode($1))/geo;
     s/$MimeQEncPat/&kconv(&MimeQDecode($1))/geo;
 
     s/(\x1b[\$\(][BHJ@])+/$1/g;
