@@ -1,6 +1,6 @@
-.n	headers
 .C	ヘッダのカスタマイズ
 =E.C	Customize Fields of the Mail Header 
+.n	headers
 .l	header-custom
 
 fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール

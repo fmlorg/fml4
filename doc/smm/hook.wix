@@ -1,6 +1,6 @@
-.n	hooks
 .C	フック、カスタマイズ（例を見る方がはやいかも）
 =E.C	Hooks
+.n	hooks
 .l	hook
 
 .S	インタプリタとconfig.ph

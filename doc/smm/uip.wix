@@ -1,6 +1,6 @@
-.n	uip
 .C	各種ユーザ用ユーティリティ等 (bin/, lib/Utilities/ ...)
 =E.C	Several Utilities (bin/, lib/Utilities/ ...)
+.n	uip
 .l	uip
 
 ここでは bin/ 以下と contrib/Utilities/ 以下の階層で提供しているプログ

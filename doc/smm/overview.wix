@@ -1,6 +1,6 @@
-.n	overview
 .C	メーリングリストサーバ Overview
 =E.C	Mailing list server overview
+.n	overview
 
 .if LANG == JAPANESE
 -- ＭＬサーバの設計ポリシーとはなんだろうか…

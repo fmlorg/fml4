@@ -1,6 +1,6 @@
-.n	gen_html
 .C	HTML形式の記事を作成する
 =E.C	Generating HTML Articles 
+.n	gen_html
 .l	href
 .k	WWW
 

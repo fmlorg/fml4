@@ -1,6 +1,6 @@
-.n	functions
 .C	ライブラリ関数
 =E.C	Library Functions
+.n	functions
 .k	ライブラリ関数
 
 ここでは、カスタマイズに役に立ちそうなライブラリ関数の説明をします。

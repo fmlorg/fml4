@@ -1,5 +1,5 @@
-.n	mead
 .C	MEAD (Mail Error Analyze Daemon)
+.n	mead
 
 [概要]
 この章は「エラーメールを解析して、メールが届かないメンバーのアドレスを

@@ -1,6 +1,6 @@
-.n	registration
 .C	メンバーの登録について
 =E.C	Registration
+.n	registration
 
 ○ 手動登録とは『fmlの動いているホストに入って、メンバーリストをいじる』
 場合です。エディターないしmakefmlを使って行ないます。登録意志の確認を

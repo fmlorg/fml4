@@ -1,6 +1,6 @@
-.n	acl
 .C	配送とコマンド、そしてそのアクセス制御
 =E.C	Delivery, commands and access controls
+.n	acl
 .l	delivery-mode
 
 .S	アクセス制御のポリシー

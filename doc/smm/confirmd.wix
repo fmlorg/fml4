@@ -1,5 +1,5 @@
-.n	confirmd
 .C	Confirmation Daemon (libexec/confirmd.pl)
+.n	confirmd
 
 注意: FML 2.1B#2 以降の機能です。
 =E

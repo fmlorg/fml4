@@ -2067,6 +2067,7 @@ variable for fmlserv.pl.
 .S	配送メールへのフィルタリング
 =E.S	Filtering
 .l	EnvelopeFilter
+.n	envf
 
 	$USE_DISTRIBUTE_FILTER
 .l	$USE_DISTRIBUTE_FILTER
