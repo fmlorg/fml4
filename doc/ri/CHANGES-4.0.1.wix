@@ -1,6 +1,11 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+2001/05/10
+
+   messages/Japanese/amctl (1.5-1.6):
+	fix Japanese to be more friendly for newbies
+
 2001/05/03
 
    sbin/makefml (2.210-2.211):
