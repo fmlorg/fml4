@@ -740,6 +740,48 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 .include clo.wix
 
 
+.S	Security Check Code
+
+fml-support: 00950
+
+	1.x は外掘から埋める方式 (関数 InSecureP)
+	2.x は内掘から埋める方式 (関数 SecureP)
+
+といってます(^^)
+
+SecureP は以下のように作動します。
+
+コマンドとしてうけいれる命令(メールの一行全体について実行)は次の形に限
+る。
+
+    １ 	\w/\w の部分は見逃す。＃ ../ とか .[a.]/ とかはだ〜め
+       	/ でOKのところは消去し、
+
+    ２ 	/^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/
+
+    の形はゆるす。
+    ＃注意： \w は [A-Za-z0-9_] なので、 "-" を加えた
+
+    ３ 	これ以外を含んでいたらエラー
+
+    ４ 	特殊なケース（admin コマンドの admin addr m=3) は
+	事前に例外処理をした後 &SecureP にまわす。
+	
+
+例：	許される例
+
+   # summary
+   # mget 1-20,30,last:20 mp 1
+   # mget 10? mp 1			(default では許さない)
+   # mget 1[012]? mp 1			(default では許さない)
+   # chaddr fukachan@phys.titech.ac.jp fukachan@beth.phys.titech.ac.jp 
+
+
+例：	許されない例
+   # mget `domainname`
+
+
+
 .C	Install && Configurations
 .label	{configuration}
 
@@ -969,7 +1011,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 を（ユーザーが）えらべます。
 
-ソースは MSendv4.pl があれば十分で、
+ソースは msend.pl があれば十分で、
 [Ｎ通たまったらメールを送る まとめおくり]だけは別で
 Contrib/Matomeokuri-NOCRONの下に
 	store-and-deliver.ph	(configuratio file)
@@ -999,6 +1041,19 @@ $CONTROL_ADDRESS = 'Elena-ctl';
 をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
 けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
 ルがきても配送はしない
+
+ちなみに
+	'Elena-ctl';
+
+でも
+	'Elena-ctl@axion.phys.titech.ac.jp';
+
+のようにフルアドレスを書いても良いです。
+
+ローカルからコマンドメールを出す時のことを考えると、
+フルアドレスじゃないほうが望ましいという意見もあります。
+＃ sendmail.cf 等に依存した話なので断言はできませんが…
+
 
 この場合/etc/aliasesに
 
@@ -1037,7 +1092,7 @@ $ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
 .key	$MAINTAINER
 
 “大雑把に”いうとエラ−メ−ルの帰る場所です。
-＃エラーが変える時にこれがＭＬ宛になっていると無限ループするわけですね
+＃エラーが返る時にこれがＭＬ宛になっていると無限ループするわけですね
 
 [歴史]	hml 1.6 はこのアドレスを
 
@@ -2470,7 +2525,7 @@ Subject: [3:fukachan] フリーキックはやっぱりエレナさんが最高さ
 ようにしました。
 
 	$SUBJECT_HML_FORM = 1;
-	$BRACKET	= 'Elena';
+	$BRACKET	  = 'Elena';
 
 で、こういう形にしようと思いますが、Fromの処理がhml 1.6と違うので
 ＃今のFrom は ML名 じゃなくて ユーザー名
@@ -2820,7 +2875,7 @@ config.ph にセットして下さい（そうすれば、ＭＬが複数あってもそれぞれ別
 --------- in config.ph ---------
 $COMMAND_HOOK =q#
       if(/list/io) {
-	  &Logging("List ($From_address)");
+	  &Log("List ($From_address)");
 	  &SendFile($to, "List $ML_FN", "$DIR/list");
 	  next GivenCommands;
       }
@@ -3272,7 +3327,7 @@ $LOGFILE	= "$DIR/fmlinfo-log";		# activity log file
 $to             = $Reply_to ? $Reply_to : $From_address;
 
 &SendFile($to, "Info $ML_FN", $INFO_FILE);
-&Logging("Info request from $From_address");
+&Log("Info request from $From_address");
 
 #---------------- CHANGE ENDS --------------------
 
@@ -3383,5 +3438,3 @@ received になってしまってちょっと情けないかも知れませんが…
 
 
 .# $Id$
-
-

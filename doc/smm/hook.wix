@@ -19,12 +19,9 @@
 る行があっても普通のメールとおもうようにする。
 
 $START_HOOK =q%
-    if($Envelope{'req:guide'} &&
-       (! ($MailBody =~ /\#\s*msg/)) &&
-       ($BodyLines - $_cf{'cl'} > 8)
-       ) {
-	$Envelope{'req:guide'} = "";
-    };
+    if ($Envelope{'nlines'} - $Envelope{'nclines'} >= 8) {
+	undef $Envelope{'mode:uip'};
+    }
 %;
 
 
@@ -32,22 +29,25 @@ $START_HOOK =q%
 .key	$HEADER_ADD_HOOK
 
 ヘッダに”新たに”つけくわえる フィールドをかいて、カスタマイズするた
-めのフック
+めのフック。
+
+現在では $body という変数はこのためだけに使われる。
+＃注意：昔は違った
 
 例：
     $HEADER_ADD_HOOK = q#
-	$body .= "X-Baycity-weather: Mizumaki";
+	$body .= "X-Baycity-Weather: Mizumaki";
     #;
 
-ヘッダに X-Baycity-weather: Mizumaki とつけくわえる（意味不明（笑））
+ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる（意味不明（笑））
 
 例２：
-Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.jp>
+Message-ID: <19950518.01905.Elena.Lolobrigita@Baycity.asia>
 
 $HEADER_ADD_HOOK = q#
 $body .= "Message-ID: ".
 	sprintf("<19%2d%02d%02d.%05d.%s>\n", $year, $mon + 1, $mday, $ID, 
-	"Elena.Lolobrigita@Baycity.jp");
+	"Elena.Lolobrigita@Baycity.asia");
 #;
 
 
@@ -55,28 +55,40 @@ $body .= "Message-ID: ".
 .key	$SMTP_OPEN_HOOK
 
 このフックの後、 Sendmail へ渡すヘッダの処理が始まります。
-ここで、強制的にヘッダの内容を変えたりすると効果的です。
+ここで強制的にヘッダの内容を変えたりすると効果的です。
 
-例：
-Reply-To: フィールドをＭＬ自体へ強制書き換え(1.6, 1.5でもＯＫ)
-Precedence: を bulk へ
+例：	Reply-To: フィールドをＭＬ自体へ強制書き換え
+
+実はコマンドラインで --oh:reply-to=mailing-list でできちゃうんですが(^^;)
+
+一応別解は一杯あって、別解の一つは (fh == forced header がみそ)
 
 $SMTP_OPEN_HOOK = q#
-	$Envelope{'h:reply-to:'}   = $Reply_to = $MAIL_LIST; 
-	$Envelope{'h:Precedence:'} = $PRECEDENCE = 'bulk';
+	$Envelope{'fh:reply-to:'} = $MAIL_LIST; 	
 #;
 
-＊＊＊1.5 と 1.6 と注意＊＊＊ 
-$COMPAT_FML15 = 1; とすれば 
-$Reply_to = $MAIL_LIST; 
-という昔(1.6以前)の形でも理解します。
+例２：	Precedence: を bulk へ
+
+$SMTP_OPEN_HOOK = q#
+	$Envelope{'h:Precedence:'} = 'bulk';
+#;
+
+実は config.ph で $PRECEDENCE = 'bulk'; でＯＫです。
+
+
+.S	$SMTP_CLOSE_HOOK
+
+$SMTP_CLOSE_HOOK は
 
 
 .S	$FML_EXIT_HOOK
 .key	$FML_EXIT_HOOK
 .seealso expire
 
-fml.pl が最後に実行する フック。このときすでに 排他制御の lock も解除
+fml.pl が最後に実行する フック。このときすでに 
+
+	”排他制御の lock も解除”（＊＊＊重要！＊＊＊）
+
 されていることに注意。expire とかがその例ですね。
 
 
@@ -122,36 +134,48 @@ config.ph に↓書くと、コマンドチェックのループの最後にこのフックを評価
 注意： rsummary は現在は summary 引数 の形で実行できます
 
 例：
-# list 			list リストファイルを取り寄せる
-# rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
+	# list		list リストファイルを取り寄せる
+
+sub Command では $to にコマンドの結果の返し先が設定されています。
+
+$COMMAND_HOOK は sub Command の中で定義されています。
 
 $COMMAND_HOOK =q#
-print STDERR $COMMAND_HOOK;
-      if(/list/io) {
-	  &Logging("List ($From_address)");
+      if (/list/io) {
+	  &Log("List ($From_address)");
 	  &SendFile($to, "List $ML_FN", "$DIR/list");
 	  next GivenCommands;
       }
-
-	if(/rsummary/io) {
-	    &Logging("R Summary ". $Fld[2]);
-	    if($Fld[2] =~ /^(\d+)\-(\d+)$/) {
-		local($a) = $1; local($b) = $2; local($RETURN);
-		open(TMP, "$DIR/summary") || do { &Logging("$!"); next GivenCommands;};
-		while(<TMP>) {
-		    if(/\[$a:/ .. /\[$b:/) {
-			$RETURN .= $_;						
-		    }
-		}
-		close(TMP);
-		&Sendmail($to, "Restricted  Summary $Fld[2]", $RETURN);
-	    }else {
-		&Logging("Summary ($From_address)");
-		&SendFile($to, "Summary $ML_FN", "$DIR/summary");
-	    }
-	    next GivenCommands;
-	}
 #;
+
+例：
+# rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
+
+$COMMAND_HOOK = q#
+    if (/rsummary/io) {
+	&Log("R Summary ". $Fld[2]);
+	if ($Fld[2] =~ /^(\d+)\-(\d+)$/) {
+	    local($r);
+	    local($a) = $1; 
+	    local($b) = $2; 
+
+	    open(TMP, "$DIR/summary") || do { &Log($!); next GivenCommands;};
+	    while (<TMP>) {
+		if (/\[$a:/ .. /\[$b:/) { $r .= $_;}
+	    }
+	    close(TMP);
+
+	    &Sendmail($to, "Restricted  Summary $Fld[2]", $r);
+        }
+	else {
+	    &Log("Summary ($From_address)");
+	    &SendFile($to, "Summary $ML_FN", "$DIR/summary");
+	}
+
+	next GivenCommands;
+    }
+#;
+
 
 .S	コマンドをふやそう！例： "# sget"
 .key	$COMMAND_HOOK
@@ -160,22 +184,24 @@ print STDERR $COMMAND_HOOK;
 			イルを取り寄せる
 
 $COMMAND_HOOK =q#
-      if(/^sget$/io) {
-	  local($s);
-	  if(open(F, $SUMMARY_FILE)) {
-	      while(<F>) {
-		  /$Fld[2]/ && do {/\s\[(\d+):/ && ($s .= $s ? ",$1" : $1);}
-	      }
-	      close(F);
-	  }else {
-	      $s = "Fail";
-	      &Logging("Search and Get $Fld[2] Fail");
-	      next GivenCommands;
-	  }
+    if (/^sget$/io) {
+	local($s);
 
-	  &Logging("Search and Get $Fld[2]");
-	  &Sendmail($to, "Search and Get ". $Fld[2] . $ML_FN, $s);
-      }
+	if (open(F, $SUMMARY_FILE)) {
+	    while (<F>) {
+		/$Fld[2]/ && do {/\s\[(\d+):/ && ($s .= $s ? ",$1" : $1);}
+	    }
+	    close(F);
+	}
+	else {
+	    $s = "Fail";
+	    &Log("Search and Get $Fld[2] Fail");
+	    next GivenCommands;
+	}
+
+	&Log("Search and Get $Fld[2]");
+	&Sendmail($to, "Search and Get ". $Fld[2] . $ML_FN, $s);
+    }
 #;
 
 
@@ -191,13 +217,29 @@ $COMMAND_HOOK =q#
 "# admin" アドミンコマンド って昔あったんですが、いまは、
 内蔵しちゃったので、わざわざ（次節）しなくても、
 
-$REMOTE-ADMINISTRATION フラッグをONにすれば、できるようにしました。
-(.seealso REMOTE-ADMINISTRATION )をみてね
+1	コマンドラインオプションで --remote
+2	config.ph で &DEFINE_MODE('remote');
+3	$REMOTE-ADMINISTRATION フラッグをON
+
+どれでも同じですが、設定だけでできるようにしました。
 
 
 .S	"# admin" アドミンの昔の呼出し方
 
 lib/remote/REAMDE をみてもらうとわかりますね。 
+
+
+.S	そこで，ある行数を越えるメールは廃棄する設定
+
+	
+$START_HOOK = q#
+    if ($Envelope{'nlines'} > 1000) {
+	&Warn("Discarded on the behalf of too Large Mail", &WholeMail);	
+	$DO_NOTHING = 1;
+    }
+#;
+
+
 
 
 .# $Id$

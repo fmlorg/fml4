@@ -5,11 +5,11 @@
 
 .S	daemon (libutils.pl)
 
-   (4.4BSDにならって)今のプロセスをデーモンにします。
-   #4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
+(4.4BSDにならって) 今のプロセスをデーモンにします。
+＃4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
 
-   cron.pl を動かすんなら、これをつかう…とうまくいくといいな…:-)
-   #でも、4.3BSDでしか動作確認してないけど…
+cron.pl を動かすんなら、これをつかう…とうまくいくといいな…:-)
+＃4.3BSDでしか動作確認してないけど…
 
 なにがうれしいって、mailq にのこらない:-)
 
@@ -21,7 +21,7 @@
 
 みたいにすると、 &daemon; のところで、TTYを切り放し、
 STDIN,STDOUT,STDERRを閉じます。
-＃4.4BSDの setsid()は 新しいセッションをはじめること
+＃注意：4.4BSDの setsid()は 新しいセッションをはじめること
 
 例：
 	$FML_EXIT_HOOK = q#
@@ -33,7 +33,7 @@ STDIN,STDOUT,STDERRを閉じます。
 $NOT_USE_TIOCNOTTY を セットしないと、うまく daemonさんになってくれな
 いかもしれませんが…＃このへんの挙動はいまひとつわからない…
 
-４．４ＢＳＤでは setsid() ですが、そのへんの細かいところは無視:-)
+4.4BSD では setsid() ですが、そのへんの細かいところは省略…
 
 
 .S	Sendmail (libsmtp.pl)
@@ -63,4 +63,20 @@ SYNOPSIS
 	実際には、$zcat	@to エントリは使ってませんが…
 	＃いつ、第４エントリ以降をなくすか保証しない
 
-.# $Id$
+
+.S	NeonSendFile (libsmtp.pl)
+
+複数のアドレスとファイルを一辺にハンドリングし、メールで送り返すための
+インターフェイス
+
+SYNOPSIS
+	&NeonSendFile(*to, *subject, *files);
+
+	@to		配送したいアドレスリスト
+			一人分のアドレスを $to にいれて渡してもＯＫ
+	$subject	メールのSubject
+	@files		送りたいファイル（複数可能）
+
+
+
+.# $Id$;

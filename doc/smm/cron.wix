@@ -22,12 +22,13 @@ fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
 
 ちなみに、複数のcron.plは走りません、cron.pid をみて一つのＭＬにつき一
 つしか走らないようになってます。
-＃あと 長く走り過ぎておかしくなること防止で、２４時間くらいで 次の
-cron.plを起動しなおします。
+＃あと 長く走り過ぎておかしくなること防止で、デファオールトでは２４時
+＃間くらいで 次のcron.plを起動しなおします。
 
 インストール：
+
 ○システムが定期的に何かをしてくれないので、
-cron.pl をなんとかして（疑似定期的に）起動すればいいわけです。
+cron.pl をなんとかして(疑似定期的に)起動すればいいわけです。
 
 % cron.pl ML's-Directory(config.phの場所) Library's(libsmtp.plとかの場所) 
 
@@ -49,16 +50,15 @@ $CRON_PIDFILE = "$DIR/var/run/cron.pid";
 $CRONTAB      = "$DIR/etc/crontab-4.4";
 ＃ directory がなかったらつくってくださいませ
 
-$DISTRIBUTE_CLOSE_HOOK = q#
-	$_cf{'hook', 'prog'} = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
-#;
+$FML_EXIT_PROG = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
 
-をつけたす。＃いずれも適当にパスとかは変えてください
+をつけたす。
+＃いずれも適当にパスとかは変えてください
 
-cron.pid は cron.pl の pid を記録するファイル（/var/run/cron.pidに相当
-するもの）。
+cron.pid は cron.pl の pid を記録するファイル（ /var/run/cron.pidに相
+当するもの）。
 
-crontab-4.4  は システムの/etc/crontab  に相当するものです。
+crontab-4.4  は システムの /etc/crontab に相当するものです。
 ＃注意： cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
 
 適当な設定をして下さい。
@@ -68,7 +68,7 @@ cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
 あるようだ）
 
 
-.S	cron.plを使う際の注意
+.S	cron.pl を使う際の注意
 .label	{Matomeokuri-not-cron_2fix}
 .key	Matomeokuri-not-cron_2fix
 .key	attention-4-cron.pl
