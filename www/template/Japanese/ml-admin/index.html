@@ -25,7 +25,7 @@
 
 <P>
 <UL>
-<LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
+<LI><A HREF="_CGI_PATH_/ml-admin/_ML_/menu.cgi?LANGUAGE=English">[English]</A>
 <LI><A HREF="#add.bye">ユーザ登録/削除</A>
 <LI><A HREF="#adminadd.bye">管理者登録/削除</A>
 <LI><A HREF="#config">_ML_ ＭＬの詳細設定</A>
@@ -71,7 +71,7 @@
    
    <A NAME=adminadd.bye>
    <LI>管理者の登録/削除 関係
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
 
@@ -105,7 +105,7 @@
    <A NAME=config>
    <LI>詳細設定(makefml config)
 	<BR>
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=config>
 	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
@@ -156,7 +156,7 @@
    <A NAME=log>
    <LI>メーリングリストのログをみる
 
-	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<FORM ACTION="_CGI_PATH_/ml-admin/_ML_/makefml.cgi" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
 	<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
