@@ -13,6 +13,7 @@
 ### themost important variable ! ###
 FML = $(PWD)
 
+.include "distrib/mk/fml.release.mk"
 .include "distrib/mk/fml.sys.mk"
 .include "distrib/mk/fml.prog.mk"
 .include "distrib/mk/fml.doc.mk"
@@ -48,7 +49,7 @@ distsnap:
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
-snapshot:
+snapshot: __init_snapshot
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
 	(/bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
