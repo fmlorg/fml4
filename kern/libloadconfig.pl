@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libloadconfig.pl,v 2.22 2002/01/08 03:56:58 fukachan Exp $
+# $FML: libloadconfig.pl,v 2.23 2002/01/09 15:39:23 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -382,6 +382,7 @@ sub COPY_FIELD
 	$xnew = &FieldCapitalize($new);
 	$xold = &FieldCapitalize($old);
 	$Envelope{"h:${xnew}:"} = $Envelope{"h:${xold}:"};
+	$Envelope{"h:${xnew}:"} =~ s/\n$xold/\n$xnew/sgi;
     }
     else { # in *.ph files
 	# XXX pass real operation to the later function
