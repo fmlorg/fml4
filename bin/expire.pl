@@ -58,7 +58,7 @@ sub Expire
 		else {
 		    # expire with date(default)
 		    $f = "$SPOOL_DIR/$f";
-		    $d = time - (stat($f))[10];
+		    $d = time - (stat($f))[9];
 		    $d /= $oneday;
 		    
 		    print STDERR "?:expire $f if $d > $Expire\n" if $debug; 
