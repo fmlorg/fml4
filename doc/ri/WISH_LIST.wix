@@ -1,5 +1,5 @@
 .HTML_PRE
-	WISH LIST (fml project)
+	WISH LIST of fml project
 
 .if LANG == JAPANESE
      WISH_LIST 助けの欲しいリスト
@@ -7,6 +7,8 @@
 人手 ;_;
 
   * ドキュメントを組織的に査読しておかしいと思うところをレポートしてくれる人
+
+  * stable branch のリリースエンジニアリングをするプロジェクトマネージャー
 
 英語の分かる人 ;_; ;_;
 

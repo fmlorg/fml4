@@ -1,36 +1,36 @@
 fml Mailing List Packeges release revison 3.0 current Bulletin
 
-				深町 賢一
+				深町 賢一
 
-○ メーリングリストなど
+○ メーリングリストなど
 
-＃バグ、質問等は fml-query@ffs.fml.org までおねがいします。
+＃バグ、質問等は fml-query@ffs.fml.org までおねがいします。
 
-ちなみに FML.ORG での関連アドレスは
+ちなみに fml.org での関連アドレスは
 
-	fml: このファイルが返される
-	fml-support = fml に関するＭＬ(自動登録)
-	fml-query     fml-support へフォワードする(＊＊登録はしない＊＊)
-		      DM は見落とす恐れもあるし、情報が二元化されてしまうので
-		      できるだけ ML に反映されたいので、bugs (下述) より query
-		      へお願いします。	
-	fml-request, fml-bugs: 管理者いき
+	fml: このファイルが返される
+	fml-support = fml に関するＭＬ(自動登録)
+	fml-query     fml-support へフォワードする(＊＊登録はしない＊＊)
+		      DM は見落とす恐れもあるし、情報が二元化されてしまうので
+		      できるだけ ML に反映されたいので、bugs (下述) より query
+		      へお願いします。	
+	fml-request, fml-bugs: 管理者いき
 
-です。使用・改造をする場合は常に update, bugfixes, extensions が行なわ
-れているので最新版のfml-current を手に入れてからしてもらえると幸いです。
+です。使用・改造をする場合は常に update, bugfixes, extensions が行なわ
+れているので最新版のfml-current を手に入れてからしてもらえると幸いです。
 
-○ FMLの入手方法
+○ fmlの入手方法
 
-最新版のソースは
+最新版のソースは
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-の下です。ファイル名はfml-current.日付.tar.gzです。日付の新しいのを使っ
-てみて下さい。過去の正式リリースは
+の下です。ファイル名はfml-current.日付.tar.gzです。日付の新しいのを使っ
+てみて下さい。過去の正式リリースは
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/
 
-の下にあります。
+の下にあります。
 
 HOME PAGE: 
 

@@ -1,5 +1,5 @@
 .HTML_PRE
-	fml 4.0_ALPHA Mailing List Server Package
+	fml 4.0	"mailing list server/driver/manager" package
 
 .if LANG == JAPANESE
 				深町 賢一
@@ -22,6 +22,7 @@
 .url http://www.fml.org/fml/
 
    ソース
+.url	ftp://ftp.fml.org/pub/fml/
 .url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 .if LANG == ENGLISH
@@ -51,16 +52,16 @@
 =E.S	Introduction
 
 .if LANG == JAPANESE
-FML は Mailing List (以下 ML) Server package です。perl を使って書かれ
-ています。FML は配送プログラムや多くのコマンド用のサーバ(ユーザー用や
+fml は Mailing List (以下 ML) Server package です。perl を使って書かれ
+ています。fml は配送プログラムや多くのコマンド用のサーバ(ユーザー用や
 MLをリモートで管理するためのもの)などからなります。また対話設定プログ
 ラムやコマンドサーバのインターフェイスを listserv / majordomo スタイル
 にするエミュレータなどの多くの補助プログラムなどもついています。
 .fi
 .if LANG == ENGLISH
-FML 4.0 is a package of mailing list server and utility programs. It
+fml 4.0 is a package of mailing list server and utility programs. It
 consists of perl scripts. It has been developed, tested and advanced
-in Japan from 1993 to 1998. FML contains
+in Japan from 1993 to 1998. fml contains
 
    distributer (filter program which passes articles to MTA to deliver)
    command server for users
@@ -77,7 +78,7 @@ in Japan from 1993 to 1998. FML contains
 じことができるのであればユーザ・インターフェイスはどのようなものでもい
 い』と思うからです(そういう意味ではいかにも perl ぽいですですかね:)。
 =E
-FML design policy is based on the degree of freedom, so that I respect
+fml design policy is based on the degree of freedom, so that I respect
 "each environment for each man/women".
 
 デフォールトでは
@@ -115,7 +116,7 @@ postfix, qmail and exim)についての注意点が INSTALL_with_MTA名 というファ
 イルにあります。
 .fi
 .if LANG == ENGLISH
-FML fundamentally needs
+fml fundamentally needs
 
 	a UNIX account
 	perl5
@@ -155,7 +156,7 @@ ML is a filtering process, so it consists of
    2. delivery process which process understands SMTP
 
 The delivery (MTA 2) and kick-off (MTA 1) processes can be essentially
-different ones. FML runs on the host which receives mail submitted
+different ones. fml runs on the host which receives mail submitted
 to ML. MTA 2 (delivery system) can run on another hosts other than MTA
 1. Plural MTA's for delivery are available to accelerate it.
 .fi
@@ -203,7 +204,7 @@ doc/ and html documents under doc/html/.
 
 最新版のドキュメント/ソースなどは
 =E
-The HOME PAGE of the Fml is 
+The HOME PAGE of the fml is 
 
 .url	http://www.fml.org/
 
@@ -218,14 +219,14 @@ pages. This site provides the search engine over fml distribution
 documents. 
 .fi
 
-.S	FML Advisories
+.S	fml Advisories
 
-現在のfml-currentにはFML Advisoriesというドキュメント群があります。旬
+現在のfml-currentにはfml Advisoriesというドキュメント群があります。旬
 の特定のテーマについてまとめたものです。セキュリティ関係が主なテーマで
 すが、それ以外のテーマもあります。
 例: happy99, Melissa
 =E
-FML Advisories are a series of documents to advice some kinds of
+fml Advisories are a series of documents to advice some kinds of
 current topics, for example, happy99, Melissa ...
 
 .url	http://www.fml.org/fml/advisories/
@@ -235,7 +236,7 @@ current topics, for example, happy99, Melissa ...
 =E.S	Mailing Lists
 
 .if LANG == JAPANESE
-FMLに関する議論、バグレポート、質問、要望などあらゆる:)目的に
+fmlに関する議論、バグレポート、質問、要望などあらゆる:)目的に
 fml-support ML (言語は日本語)が用意されています。
 
 	fml-support@ffs.fml.org (日本語)
@@ -248,7 +249,7 @@ fml-support MLへの自動登録は fml-support-ctl@ffs.fml.org へ
 をメールの本文に書いて送って下さい。登録意志確認のメールが届くのでその
 メールに返事をして下さい。
 
-BUGレポートはどのOS,MTA, FML version を使っていてデフォールトから何を
+BUGレポートはどのOS,MTA, fml version を使っていてデフォールトから何を
 変えて何をどうしてどうなったのか? を書いて下さい。そういう場合にチェッ
 クして欲しい項目は doc/CHECK_LIST.jp (日本語)にあります。
 
@@ -348,7 +349,7 @@ questions or answers on some topics, please click here
 というファイルを見て下さい。
 .fi
 .if LANG == ENGLISH
-To install FML, you can only run
+To install fml, you can only run
 
 	(shell prompt)% perl makefml install 
 
@@ -381,15 +382,15 @@ UPGRADE というファイルを見て下さい。古い config.ph をそのまま使おうと
 ＃ソラリスは2.4以前のものはいろいろうまく動かないらしい？です。
 ＃判定できないようなどマイナ〜なOSだったらどうなるかわかりませんが
 =E
-Fml can run on almost UNIX like operating systems. The installer
-(makefml) tries to adjust FML to your OS in installing as could as
-possible. Fml master source has been tested on NetBSD (4.4BSD derived
+fml can run on almost UNIX like operating systems. The installer
+(makefml) tries to adjust fml to your OS in installing as could as
+possible. fml master source has been tested on NetBSD (4.4BSD derived
 system).
 
 WINDOWS NT 4.0 上でも動きます。INSTALL と INSTALL_on_NT4 というドキュ
 メントを参照して下さい。
 =E
-Fml on Windows NT4.0 can work also. Please read INSTALL and
+fml on Windows NT4.0 can work also. Please read INSTALL and
 INSTALL_on_NT4.
 
 ○ 開発環境
@@ -407,15 +408,15 @@ INSTALL_on_NT4.
 さらに配送系は複数のMTAを使った並列配送実験をしています(通称MTAみくじ
 です ^^;)。最近は一旦２つに減っています。その内増えるでしょう:)
 =E
-The delivery system on FML.ORG consists of 2 MTA's to accelerate the
+The delivery system on fml.ORG consists of 2 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
    qmail 1.03
    postfix 19991231-pl04
 
 
-.C	FML 4.0 の機能の概要
-=E.C	FML 4.0 Function Overview
+.C	fml 4.0 の機能の概要
+=E.C	fml 4.0 Function Overview
 
 .include FEATURES.wix
 
@@ -454,7 +455,7 @@ INSTALL for more details.
 =E
 *** translation is abbreviated ***
 
-FML では config.ph という設定ファイルが振舞いを決めます。config.ph に
+fml では config.ph という設定ファイルが振舞いを決めます。config.ph に
 も version ($CFVersion)という概念があります。この $CFVersion を利用し設
 定ファイルの昔の変数名などは変わっていても、基本的に自動補正/変換が加
 えられ昔作った config.ph をそのまま使っても大丈夫なようになっています。
@@ -482,7 +483,7 @@ GNU General Public License です。詳しくは COPYING というファイルを読ん
 
    Copyright (C) 1993-2000 Ken'ichi Fukamachi
  
-   FML is free software; you can redistribute it and/or modify
+   fml is free software; you can redistribute it and/or modify
    it under the terms of GNU General Public License.
    See the file COPYING for more details.
 
@@ -506,7 +507,7 @@ fml master distribution server.
 I thank a lot of people for valuable comments, suggestions, bug
 reports, contributions, fixes and patches both on fml-support ML and
 in private communication. I distribute some contributed codes as a
-part of FML distribution. I refer each contribution in RELEASE_NOTES.
+part of fml distribution. I refer each contribution in RELEASE_NOTES.
 
 I greatly appreciate softwares developed and distributed under freedom
 of programming. For convenience I bundle to my package, config.guess
@@ -520,6 +521,6 @@ $Id$
 .#               1993-1996 fukachan@phys.titech.ac.jp
 .#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
-.# FML is free software; you can redistribute it and/or modify
+.# fml is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.

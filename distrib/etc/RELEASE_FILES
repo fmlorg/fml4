@@ -51,8 +51,6 @@ UPGRADE.jp
 UPGRADE.en
 CHECK_LIST.jp
 CHECK_LIST.en
-FILES.jp
-FILES.en
 
 
 DOC_ADVISORIES:
@@ -60,15 +58,12 @@ DOC_ADVISORIES:
 
 DOC_CONTRIB:
 doc/ri/COPYING
-doc/ri/CROSSPOST_PROTOCOL.jp
 drafts/help.eng 
 drafts/help.example2
 
 
 
 DOC_APPENDED:
-USERS_GUIDE.jp
-USERS_GUIDE.en
 
 
 
@@ -102,6 +97,7 @@ bin/translate.pl
 bin/resend.pl
 bin/confirmd_master.sh
 
+
 SBIN_SOURCES:
 sbin/install.sh
 sbin/makefml
@@ -128,20 +124,5 @@ etc/mgrdomains
 
 
 OBSOLETE_SBIN_SOURCES:
-sbin/arch
-sbin/ccfml
-sbin/configure.pl
-sbin/configure_fml2
-sbin/configure_fml
-sbin/configure_advanced
-sbin/configure_ph
-sbin/findhdr
-sbin/os-type
-sbin/gen-samples.pl
-sbin/compat_p.pl
-
 
 OBSOLETE_SOURCES:
-split_and_sendmail.pl
-libnounistd.pl
-MSend-cron.pl
