@@ -29,14 +29,18 @@
 
 .C	PGP2
 
+fml 4.0 で整理されました。 
+.ptr{makefml-pgp-howto} を参照して下さい。
+
 .S	makefml による PGP2 の公開鍵の登録
 =E.S	Register PGP2 Public Keys
 .l	makefml-pgp
 
-ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
-必ず makefml をつかうこと
 
-makefml は
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+ので必ず makefml をつかってください。
+
+fml 3.0 までの makefml では
 
 	makefml pgp <ML> PGPのオプション
 =E
@@ -44,6 +48,38 @@ makefml は
 
 例:
 	makefml pgp elena -ka public.asc
+
+
+同じことを fml 4.0 では
+
+	makefml モード.コマンド <ML> PGPコマンドのオプション
+
+というシンタックスになります。
+
+例: admin コマンドの PGP 認証鍵の操作
+
+	makefml admin-auth.pgp <ML> PGPのオプション
+
+例: ＭＬの暗号化の鍵の操作
+
+	makefml dist-encrypt.pgp <ML> PGPのオプション
+
+なお互換性のため
+
+	makefml pgp <ML> PGPのオプション
+
+は
+	makefml admin-auth.pgp <ML> PGPのオプション
+
+と同じです。またあまりに長いので admin-auth を aa で代用できます :-) 
+dist-encrypt は de で代用できます。
+例:
+
+	makefml aa.pgp
+	makefml de.pgp
+
+
+SEE ALSO: 詳しくは .ptr{makefml-pgp-howto} 参照
 
 
 .S	PGP2 管理用のコマンド
@@ -80,19 +116,69 @@ Example:
 
 .C	PGP5
 
-$PGP_VERSION = 5; 
 
-を定義して下さい。
+ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
+ので必ず makefml をつかってください。また fml 4.0 では PGP5 の操作も 
+PGP2 同様に整理されました。
+
+fml 3.0 までの makefml では
+
+	makefml pgpk <ML> PGPのオプション
+=E
+	makefml pgpk <ML> PGP's options
+
+などとしています。fml 4.0 では
+
+例: admin コマンドの PGP 認証鍵の操作
+
+	makefml admin-auth.pgpk <ML> PGPのオプション
+
+例: ＭＬの暗号化の鍵の操作
+
+	makefml dist-encrypt.pgpk <ML> PGPのオプション
+
+
+互換性のため
+
+	makefml pgpk <ML> PGPのオプション
+
+は
+	makefml admin-auth.pgpk <ML> PGPのオプション
+
+と同じになります。
+	
+
+SEE ALSO: 詳しくは .ptr{makefml-pgp-howto}  参照
+
 
 .S	makefml
 
-	makefml のコマンドは
-		PGP2	pgp
-		PGP5	pgpk, pgps, pgpv, pgpe
+makefml のコマンドは
 
-	で使い分けて下さい。
+	pgpk, pgps, pgpv, pgpe
+
+を使い分けて下さい。
+
+例:
+
+	makefml admin-auth.pgpk
+	makefml admin-auth.pgps
+	makefml admin-auth.pgpe
+	makefml admin-auth.pgpv
+
+あまりに長いので admin-auth を aa で代用できます :-) 
+例:
+
+	makefml aa.pgpk
+
+dist-encrypt は de で代用できます。
+例:
+
+	makefml de.pgpk
+
 
 .S	admin コマンドはまだつくってないす
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

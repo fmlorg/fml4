@@ -12,3 +12,4 @@
 .include toggle.wix
 .include edit.wix
 .include getopts.wix
+.include pgp.wix

@@ -1,13 +1,5 @@
-.HTML_PRE
-		fml 4.0 へのアップグレードについて 
-
-.toc
-.~HTML_PRE
-
-
-.P	4.0 へのアップグレードの際の注意
-
-.C	PGP まわり ( fml-current (3.0I) 2000/08/12 以降 )
+.C	PGP コマンドまわりについて ( fml-current (3.0I) 2000/08/12 以降 )
+.l	makefml-pgp-howto
 
 .S	ディレクトリについて
 
@@ -168,4 +160,4 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 	PGP version 2 で admin コマンドメールの PGP 認証
 	のために PGP2 の鍵を操作することになります。
 
-$Id$
+.# $Id$
