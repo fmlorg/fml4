@@ -1,0 +1,24 @@
+.HTML_PRE
+
+		昔の fml package の Y2K 修正キット
+
+
+fml.pl などがある場所を /usr/local/fml と仮定します。適当に読みかえて
+下さい。
+
+0.	一応バックアップをとっておく
+
+1.	パッケージをひろげて fix-gettime.pl を取り出す。
+
+2.	ＭＬをとめる
+
+3.	fix-gettime.pl を走らせる
+
+% perl -i.bak -nple fix-gettime.pl /usr/local/fml/*pl
+
+
+         Copyright (C) 1999 Ken'ichi Fukamachi
+                  All rights reserved. 
+
+$Id$
+.~HTML_PRE
