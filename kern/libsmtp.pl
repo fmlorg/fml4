@@ -69,11 +69,6 @@ sub SocketInit
 {
     local($eval, $exist_socket_ph);
 
-    ### XXX: Set up @RcptLists ###
-    @RcptLists = @ACTIVE_LIST;
-    push(@RcptLists, $ACTIVE_LIST) 
-	unless grep(/$ACTIVE_LIST/, @RcptLists);
-
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
@@ -188,8 +183,7 @@ sub Smtp
 	}
     }
     else { # not use pararell hosts to deliver;
-	$error = &SmtpIO(*e, *rcpt, *smtp, *files);
-	return $error if $error;
+	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
     }
 
     ### SMTP CLOSE
@@ -197,9 +191,7 @@ sub Smtp
     0; # return status BAD FREE();
 }
 
-# 
-# SMTP chat with given channel <S>; from HELO to QUIT
-#
+
 # Deliver using one of $HOSTS or prog mailer
 # This routine ignore the contents of a set of recipients,
 # which is controlled by the parent routine calling this routine.
@@ -357,8 +349,22 @@ sub SmtpIO
     }
 
     $e{'mci:pipelining'} = 0 if $NOT_USE_ESMTP_PIPELINING;
-
-    &SmtpPut2Socket("MAIL FROM:<$MAINTAINER>", $ipc);
+    
+    # XXX MAIL FROM:<mailing-list-maintainer@domain>
+    # XXX If USE_VERP (e.g. under qmail), you can use VERPs
+    # XXX "VERPs == Variable Envelope Return-Path's".
+    {
+	local($mail_from);
+	if ($USE_VERP) {
+	    $mail_from = $MAINTAINER;
+	    $mail_from =~ s/\@/-\@/;
+	    $mail_from .= '-@[]';
+	} else {
+	    $mail_from = $MAINTAINER;
+	}
+	&SmtpPut2Socket("MAIL FROM:<$mail_from>", $ipc);
+    }
+    
     if ($SoErrBuf =~ /^[45]/) {
 	&Log("SmtpIO error: smtp session stop and NOT SEND ANYTHING!");
 	&Log("reason: $SoErrBuf");
@@ -381,14 +387,17 @@ sub SmtpIO
 	$Current_Rcpt_Count = 1;
     }
     elsif ($e{'mode:_Deliver'}) { 
-	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*RcptLists);}
+	push(@ACTIVE_LIST, $ACTIVE_LIST) 
+	    unless grep(/$ACTIVE_LIST/, @ACTIVE_LIST);
 
-	for $a (@RcptLists) { # plural active lists
+	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*ACTIVE_LIST);}
+
+	for $a (@ACTIVE_LIST) { # plural active lists
 	    next if $a{$a}; $a{$a} = 1; # uniq;
 	    &SmtpPutActiveList2Socket($ipc, $a);
 	}
 
-	if ($SMTP_SORT_DOMAIN) { &SDFin(*RcptLists);}
+	if ($SMTP_SORT_DOMAIN) { &SDFin(*ACTIVE_LIST);}
     }
     elsif ($e{'mode:delivery:list'}) { 
 	&SmtpPutActiveList2Socket($ipc, $e{'mode:delivery:list'});
@@ -580,7 +589,7 @@ sub SmtpPut2Socket
 
     $0 = "$FML:  $s <$LOCKFILE>"; 
     print SMTPLOG "$s<INPUT\n";
-    print S $s, "\r\n";
+    print S "$s\r\n";
 
     # no wait
     return $NULL if $no_wait;
@@ -720,8 +729,7 @@ sub SmtpPutActiveList2Socket
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
-	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n"
-	    if $debug_mci;
+	print STDERR "$mci_count:($MCIWindowStart, $MCIWindowEnd)> $rcpt\n";
 
 	if ($USE_SMTP_PROFILE) { $xtime = time;}
 
