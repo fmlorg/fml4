@@ -24,7 +24,7 @@ $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
 $debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
-Minimum          = $opt_M > 0 ? $opt_M : 1;
+$Minimum          = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
 push(@INC, $opt_I);
 
@@ -53,7 +53,7 @@ sub PS { $FML = 'spool2html'; system "ps uw|grep spool2html";}
 $max = &GetMax($SPOOL_DIR);
 
 if ($LastRange) {
-    Minimum = $max - $LastRange > 0 ? $max - $LastRange : 1;
+    $Minimum = $max - $LastRange > 0 ? $max - $LastRange : 1;
 }
 
 ### TOO OVERHEADED ;_;
@@ -62,7 +62,7 @@ $label =~ s#.+/(\S+)#$1#;
 
 
 
-for ($i = Minimum; $i <  ($max + 100); $i += 100) {
+for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
     print STDERR "fork() [$$] ($i -> ".($i+100).")\n" if $verbose;
     $0 = "spool2html(Parent): $label::Ctl $i -> ". ($i + 100);
 
