@@ -594,7 +594,6 @@ group-writable が必要なだけです
 
 以上の簡易インストールでは作られるＭＬの設定で debug モードは切ってあ
 るのですでにメールは配送可能な状態です。
-またいくつかの点で portability を無視してあります。
 
 
 .C	ＭＬへのユーザの登録・削除
@@ -1032,6 +1031,22 @@ We suppose several environments,
 下の階層が、そのようなポリシーの変更を行ないます。
 
    ************************************************************
+   0    END
+   1    CONTROL_ADDRESS                 elena-ctl@sapporo.iij.ad.jp
+   2    MAIL_LIST_ACCEPT_COMMAND        NOT USE
+   ************************************************************
+
+この下の階層はそれぞれ
+
+   ************************************************************
+   1    CONTROL_ADDRESS                 elena-ctl@sapporo.iij.ad.jp
+   ************************************************************
+
+は次のようになります。
+=E
+gives the following menu.
+
+   ************************************************************
    COMMAND ADDRESS                      elena-ctl@fml.org
 
    For command, which address you use?
@@ -1080,6 +1095,19 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
    COMMAND ADDRESS                      *** Command Unavailable ***
 
 のようになります。
+
+一方２の
+
+   ************************************************************
+   2    MAIL_LIST_ACCEPT_COMMAND        NOT USE
+   ************************************************************
+
+は elena と elena-ctl 両方つくってなおかつ elena でもコマンドを受けた
+い(つまり両方とも "# command" コマンドトラップを起こせる)ように設定す
+るメニュー。
+=E
+This menu enables both elena and elena-ctl accepts "# command" trap
+for backward compatibility.
 
 
 .S	リモート管理
