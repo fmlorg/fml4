@@ -8,6 +8,10 @@
 # See the file COPYING for more details.
 #
 # $Id$;
+#
+
+use vars qw($debug $debug_smtp $debug_relay);
+
 
 # Example of CF Definition;
 #
@@ -52,7 +56,7 @@ sub RelayHack
 	    for (split(/\s+/, $domain)) { $RELAY_GW{$_} = $gw;}
 	}
     }
-    close(CF);
+    close(CF_DEF);
 
     if ($debug_relay) {
 	while (($k, $v) = each %RELAY_GW)  { print STDERR "GW\t$k\t$v\n";}
