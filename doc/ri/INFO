@@ -32,9 +32,11 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.5 current ==========
-＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
-○	注意： call by reference へ移行したいので、
-＊＊＊ 一部のコードを Playing_to は削除しました。 ＊＊＊
+
+	＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+	○	注意： call by reference へ移行したいので、
+	＊＊＊ 一部のコードを Playing_to は削除しました。 ＊＊＊
+
 libcompat.pl にBackward compatibility のためのコードがあります。
 適当によんでやってください:-) 
 ＃たとえば、 $START_HOOK =q#require 'libcompat.pl';#;
@@ -45,6 +47,13 @@ e.g.	Playing_to
 	STAR_TREK_FORM
   ＊Replyt_to とかへの特別の操作を フックでやってたりすると要注意です＊
 ＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+・ bin/inc_via_pop.pl を経由して、fml.pl を動かすことで、
+   SMTPをうけつけないマシンで ＭＬ をつくるとか
+   SMTPをうけつけないマシンで .forward に相当することをやるとか
+   つまり、bin/inc_via_pop.pl から fml_local.pl をよべばＯＫ
+
+   たぶん WINDOWS NT でもうごくはずなんだけど… （実験中）
 
 
 ・TYPO-FIX: $USE_SUBJECT_AS_COMMANDS が正しい、$USE_SUBECT_AS_COMMANDS 
