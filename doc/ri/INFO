@@ -1,4 +1,4 @@
-fml Mailing List Packeges release revison 2.1   Bulletin
+fml Mailing List Packeges release revison 2.2A Bulletin
 
 
 				深町 賢一
@@ -18,7 +18,6 @@ fml Mailing List Packeges release revison 2.1   Bulletin
 		      できるだけ ML に反映されたいので、bugs (下述) より query
 		      へお願いします。	
 	fml-request, fml-bugs: 管理者いき
-	fml-current, fml-src: currentのソースの送り返し
 
 です。使用・改造をする場合は常に update, bugfixes, extensions が行なわ
 れているので最新版のfml-current を手に入れてからしてもらえると幸いです。
@@ -27,15 +26,10 @@ fml Mailing List Packeges release revison 2.1   Bulletin
 
 最新版のソースは
 
-	fml-current@ffs.fml.org
-
-に送ると自動的に送り返されます。
-
-IP reachable なら anonymous ftpが御利用いただけます。
-
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-の下です。（名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ）
+の下です。
+(名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ)
 
 WWW が使えるなら
 
@@ -44,4 +38,3 @@ WWW が使えるなら
 
 という「ＭＬサーバの設計と実装」というところからたどって下さい。そこで
 最新版のドキュメントやらソースやらが見られます。
-
