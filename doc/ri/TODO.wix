@@ -15,6 +15,49 @@ XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
 
+＊＊＊ PGP 関係の再構成 ＊＊＊
+
+◯ makefml でのPGP操作をどうするべきなのか？
+	＃makefml pgp は管理者用に使ってしまったから
+	＃一般メンバー操作には適用できない
+=E
+makefml pgp ??? This command is for administrators.
+Which command could we use for usual member PGP authentication?
+
+
+◯	暗号化の問題 (USE_ENCRYPTION_DISTRIBUTION)
+=E
+	USE_ENCRYPTION_DISTRIBUTION
+
+この時に使う PGP は $DIR/etc/pgp/ ではよくない。別につくるべき。
+この時の makefml のコマンドは？ 
+=E
+DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
+command" to handle pgp key for usual users.
+
+.q
+fml-support: 08120
+
+$DIR/$ml/etc/pgp/
+	デフォールトではさようなら 
+	＃互換: 変数を $DIR/$ml/etc/pgp2/admin/ から etc/pgp/ にもどすと
+	＃これになるようにする 
+
+$DIR/$ml/etc/pgp2/
+	$DIR/$ml/etc/pgp2/dist/		(post ? distribute ?)
+	$DIR/$ml/etc/pgp2/admin/
+
+$DIR/$ml/etc/pgp5/
+	$DIR/$ml/etc/pgp5/dist/		(post ? distribute ?)
+	$DIR/$ml/etc/pgp5/admin/
+
+とかでわかりますかね？（いい、ねーみんぐ募集中)
+＃ dist/	記事の暗号化をするＭＬのための $PGPPATH
+＃ admin/	admin コマンドの認証のための $PGPPATH
+.~q
+
+
+
 
 
 .# ############################################################
@@ -214,46 +257,7 @@ fml-support:6899
 
 $SENDER_AUTH_TYPE = address / pgp
 
-makefml でのPGP操作をどうするべきなのか？
-＃makefml pgp は管理者用に使ってしまったから
-＃一般メンバー操作には適用できない
-=E
-makefml pgp ??? This command is for administrators.
-Which command could we use for usual member PGP authentication?
-
 S/MIME
-
-
-.S	暗号化の問題 (USE_ENCRYPTION_DISTRIBUTION)
-=E.S	USE_ENCRYPTION_DISTRIBUTION
-
-この時に使う PGP は $DIR/etc/pgp/ ではよくない。別につくるべき。
-この時の makefml のコマンドは？ 
-=E
-DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
-command" to handle pgp key for usual users.
-
-.q
-fml-support: 08120
-
-$DIR/$ml/etc/pgp/
-	デフォールトではさようなら 
-	＃互換: 変数を $DIR/$ml/etc/pgp2/admin/ から etc/pgp/ にもどすと
-	＃これになるようにする 
-
-$DIR/$ml/etc/pgp2/
-	$DIR/$ml/etc/pgp2/dist/		(post ? distribute ?)
-	$DIR/$ml/etc/pgp2/admin/
-
-$DIR/$ml/etc/pgp5/
-	$DIR/$ml/etc/pgp5/dist/		(post ? distribute ?)
-	$DIR/$ml/etc/pgp5/admin/
-
-とかでわかりますかね？（いい、ねーみんぐ募集中)
-＃ dist/	記事の暗号化をするＭＬのための $PGPPATH
-＃ admin/	admin コマンドの認証のための $PGPPATH
-.~q
-
 
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
