@@ -7,6 +7,5 @@
 .include overview.wix
 .include functions.wix
 .include list.wix
-.include examples.wix
 
 .# $Id$

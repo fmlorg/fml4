@@ -39,6 +39,30 @@ ENVELOPE_PREPEND( hash_key, value )
 	%Envelope ハッシュのあるキーに値をつけたすが、現在の内容の
 	直前に挿入する。
 
-.S	
+.S	ファイルを読む
 
 GET_BUFFER_FROM_FILE( file )
+
+	ファイルを読んで来てその値を返す。
+	大きなファイルは読まない方がいいとおもうぞ
+
+	$s = &GET_BUFFER_FROM_FILE( "$DIR/xxx" );
+
+
+.S	これらの関数を使う例 (本文へ注意をつけたす)
+
+(2000/06/05 以降の fml-current)
+
+$START_HOOK = q#
+	my ($s) = &GET_BUFFER_FROM_FILE("$DIR/info");
+	&ENVELOPE_APPEND('Body', &STR2JIS($s));
+#;
+
+ここで $DIR/info は /var/spool/ml/elena/info に展開される。
+/var/spool/ml/elena/info というファイルを作りこの中に
+.q
+◯◯◯ ＭＬの抜け方は ……… です。
+.~q
+
+などと書いておきます。過去のリリース、fml-stable および 2000/06 以前の 
+current では %Envelope を直接いじってください。
