@@ -1,20 +1,21 @@
 .C	summary ファイル
+=E.C	summary file
 
-.S	 summary をかえる 
+.S	 summary file format を変更する
+=E.S	change summary file format
 
-.q
 98/09/10 10:19:28 [1:hoge-admin] テスト
 98/09/10 16:52:23 [2:hoge@hoge.hoge] おめでとう
-.~q
  
 を
 
-.q 
 98/09/10 10:19:28 [1] テスト
 98/09/10 16:52:23 [2] おめでとう
-.~q
  
-のようにアドレスを記載しないようにしたい。
+のようにアドレスを記載しないようにしたい場合、次のような HOOK をつかい、
+フォーマットをコントロールできる。これを簡単にやる方法はない。
+=E
+It is no easy way. When you change summary file format, use this hook. 
 
 .q
 $DISTRIBUTE_SUMMARY_HOOK = q#

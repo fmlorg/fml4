@@ -1,4 +1,5 @@
 .C	おもちゃのモデル
+=E.C	toymodel
 .l	sql-toymodel
 
 
@@ -6,7 +7,7 @@
 以上のものは期待されないモデルのようにおもいます。
 それぞれのテーブルの定義は以下のようになっています。
 
-.S	PostgreSQL
+.S	PostgreSQL Case
 
   create table ml (ml text,
 		file text, 
@@ -28,7 +29,7 @@ fml> select * from ml
 .~q
 
 
-.S	MySQL
+.S	MySQL Case
 
   create table ml (
 	ml char(64),

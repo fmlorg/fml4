@@ -1,14 +1,23 @@
 .C	Q and A
 
 .S	管理者コマンドでメンバーのクリア＆登録を行いたい
+=E.S	remove all members by admin commands
 
 admin remove ってのがあります
 ＃alias で unlink でも同じです。
+=E
+use "admin remove" command. For example
 
 	admin pass パスワード
 	admin remove members
 	admin remove actives
 	admin add aaa@bbb.co.jp
+=E
+	admin pass PASSWORD
+	admin remove members
+	admin remove actives
+	admin add aaa@bbb.co.jp
+
 
 というコマンドのメールを elena-ctl へおくると
 

@@ -2,12 +2,15 @@
 .l	PostgreSQL
 
 .S	必要なもの
+=E.S	what you need
 
-Pg.pm です。まだ DBI を利用したものは作ってありません。
-＃ DBI 版をつくったひとがいたら、ぱっちをください
+Pg.pm です。DBI 版もあります。一応 toymodel.pl はまだ Pg.pm 版です。
 
+	/usr/local/fml/databases/postgresql/Pg_toymodel.pl
+	/usr/local/fml/databases/postgresql/DBI_toymodel.pl
 
 .S	config.ph の設定例
+=E.S	config.ph sample
 
 ポイントは
 
@@ -16,6 +19,9 @@ Pg.pm です。まだ DBI を利用したものは作ってありません。
 で指定するファイルです。デフォールトでは LDAP のおもちゃのモデル
 ( .ptr{sql-toymodel} 参照)を使うようになっています。
 PostgreSQL の玩具モデルの見本は
+=E
+is the library file name. It has all raw level codes to access RDBMS
+server. By default, the file is
 
 	/usr/local/fml/databases/postgresql/toymodel.pl
 
@@ -27,12 +33,17 @@ PostgreSQL の玩具モデルの見本は
 などの泥くさい部分が全て封じ込められています。この toymodel.pl を手本
 に自分の使っているスキーマに合わせて定義を書き換えてみてください。
 そのファイルを
+=E
+If you prepare your own customized file, it is better to use another
+file.
 
 	/var/spool/ml/etc/fml/mysqldriver.pl
 
 などをするとよいでしょう。スキーマの詳細はこの中に封じ込めて下さい。
-
 この場合 config.ph に書くべき項目の見本はこのようになります。
+=E
+For example,
+
 .q
 $USE_DATABASE        = 1;
 $DATABASE_METHOD     = 'PostgreSQL';
@@ -41,11 +52,15 @@ $SQL_SERVER_USER     = 'fukachan';
 $SQL_DATABASE_NAME   = 'fml';
 $DATABASE_DRIVER     = 'mysqldriver.pl';
 
-# もしくは FULL PATH か
-$DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
-
 1;
 .~q
+
+もしくは FULL PATH でかいてください。
+=E
+fully expaned PATH is avaialble.
+
+$DATABASE_DRIVER     = '/var/spool/ml/etc/fml/mysqldriver.pl';
+
 
 .S	some pointers
 

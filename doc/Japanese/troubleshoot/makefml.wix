@@ -1,4 +1,5 @@
 .C	makefml のだすエラーメッセージ
+=E.C	error messages from makefml
 
 .S	Please check the group permission in /var/spool/ml
 

@@ -1,7 +1,8 @@
 .C	ユーティリティ
-
+=E.C	Utilities
 
 .S	diff をとる
+=E.S	diff
 
 cygnus
 

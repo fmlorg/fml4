@@ -1,4 +1,5 @@
 .C	フィルタリング機構の内部構造
+=E.C	Internals
 
 .S	配送メールへのフィルタリング
 =E.S	Filtering

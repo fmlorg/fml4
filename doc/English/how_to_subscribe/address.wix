@@ -1,4 +1,5 @@
 .C	アドレス関係
+=E.C	used address
 
 .S	コマンドコントロール専用のアドレス
 =E.S	Address for commands

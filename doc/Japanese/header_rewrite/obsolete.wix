@@ -1,4 +1,5 @@
 .C	事例
+=E.C	Examles
 
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
 =E.S	Example: set up Reply-To if required when Reply-To == $MAIL_LIST

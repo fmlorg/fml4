@@ -1,21 +1,28 @@
 .C	＊＊＊に制限を加えること
+=E.C	restrict ***
 
 .S	ＭＬのメンバーの上限数
+=E.S	maximum number of members in one ML 
 .xref	$MAX_MEMBER_LIMIT
 
-デフォールトは無制限
+デフォールトは無制限です。 $MAX_MEMBER_LIMIT で上限を指定します。
+=E
+inifinit by default. use $MAX_MEMBER_LIMIT for restriction.
 
 
 .S	メールサイズの制限
+=E.S	upper limit of mail size
 
 投稿/コマンドメールを問わず入力されるデータの大きさをチェックします。
-デフォールトは無制限
-
-.xref $MAX_MEMBER_LIMIT
+デフォールトは無制限。$INCOMING_MAIL_SIZE_LIMIT で上限をきめます
+=E
+inifinit by default. use $INCOMING_MAIL_SIZE_LIMIT for restriction.
 
 
 .S	メール一通あたりのコマンド数の上限
 .xref $MAXNUM_COMMAND_INPUT
+
+$MAXNUM_COMMAND_INPUT
 
 
 .S	トラフィックの制御
@@ -24,6 +31,8 @@
 一気にメールを送ってくる人のメールは拒否します。
 この制御機構の名前は MTI (Mail Traffic Information)と呼ばれています。
 この機構を有効にするには
+=E
+use MTI (Mail Traffic Information).
 
 	$USE_MTI = 1; (default 0)
 

@@ -1,9 +1,13 @@
 .C	ひっこし
+=E.C	movement
 
 .S	NT の引越し時 (pop version)
+=E.S	fml pop versoin on NT
 
 Q: NT4 にPOP版fmlを入れてMLを運用しています。
    POP、SMTPサーバのアドレスが変更された時にはどこを変更しますか？
+=E
+Q: change POP/SMTP server name?
 
 	C:\fml\_fml\pop
 

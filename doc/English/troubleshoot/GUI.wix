@@ -1,6 +1,7 @@
-.C	GUI 関係
+.C	CGI
 
 .S	管理者パスワードを忘れました。
+=E.S	when I forget remote administrator passwords
 
 default なら /usr/local/fml/www/authdb/admin/htpasswd というのが
 パスワードファイルです。fml のサーバに入って

@@ -1,4 +1,5 @@
 .C	改造
+=E.C	hacks
 
 .S	たわけたHTMLメール対策
 =E.S	Cut off except the first multipart block

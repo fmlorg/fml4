@@ -1,4 +1,5 @@
 .C	内部構造
+=E.C	Internals
 
 .S	ヘッダ・フィールドのフォーマット
 =E.S	Configure Header Fields

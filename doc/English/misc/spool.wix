@@ -1,23 +1,28 @@
 .C	spool 
 
 .S	spool は何を保存してるの？
+=E.C	spool saved what ?
 
 配送された記事です。get などの取り寄せ時に同じものが返るように、配送さ
 れたものと同じものを保存しています。
 fml に入力されたものとは違います。
-
+=E
+articles delivered in mailing list. 
+Each ML has each spool directory where one article is one file.
 
 .S	fml に入力されたものを spool/ に保存できますか？
+=E.S	data input to fml is saved ?
 
 そういうオプションはありません。
 
 expire してもいいなら $USE_LOG_MAIL を on にすると入力(のメール)を 
 var/Mail/ の下に貯めていけます。
+=E
+use $USE_LOG_MAIL to save input in var/Mail/.
 
-spool.orig とかに元記事をずっと貯めておきたいなら、こんなかんじですか
-ね
+もし spool.orig とかに元記事をずっと貯めておきたいなら、こんなかんじですか
+ね。注意： $ID は $START_HOOK ではまだ決まっていないので、この最後の HOOK を利用しています。
 
-# $ID は $START_HOOK ではまだ決まっていないので最後のHOOKにする
 $FML_EXIT_HOOK = q#
 	my ($f) = "$SPOOL_DIR.orig/$ID";
 	-d "$SPOOL_DIR.orig" || mkdir("$SPOOL_DIR.orig", 0700);
