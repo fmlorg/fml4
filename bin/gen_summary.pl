@@ -143,10 +143,10 @@ sub Ctl
 
 	# Date -> Now
 	# Date: Fri, 28 Mar 97 01:31:00 +0900
-	# $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+	# $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 	# $year, $mon + 1, $mday, $hour, $min, $sec);
 	if ($Envelope{"h:date:"} =~ /$DatePat/) {
-	     $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+	     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 			    $3, $Month{$2}, $1, $4, $5, $6);
 	}
 
@@ -192,7 +192,7 @@ sub SetTime
 	      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($mtime))[0..6];
-    $Now = sprintf("%2d/%02d/%02d %02d:%02d:%02d", 
+    $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
 		   $year, $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
