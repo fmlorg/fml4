@@ -23,6 +23,13 @@
 		spool2html で module が @INC にない
 		_smtplog の expire が変なのを修正
 
+
+2001/07/03
+
+   proc/libdist.pl (2.27-2.28): fix MIME encoding bug
+	apply fml-help:00418 (by OGAWA Kunihiko <kuni@edit.ne.jp>) to
+	fix MIME encoding.
+
 2001/06/30
 
    X-ML-Info: ループチェックの仕方の微修正
@@ -103,7 +110,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.2.wix,v 1.4.2.1 2001/07/01 03:37:30 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.2 2001/07/01 13:31:47 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp

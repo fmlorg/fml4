@@ -209,6 +209,11 @@ sub DoDistribute
 	    $e{'h:Subject:'} = "$pat $subject";
 	}
 
+	if ($USE_MIME && $e{'h:Subject:'} =~ /=\?ISO-2022-JP\?/i) {
+	    $e{'h:Subject:'} = &DecodeMimeStrings($e{'h:Subject:'});
+	    $e{'h:Subject:'} = &mimeencode($e{'h:Subject:'});
+	}
+
 	if ($AGAINST_MAIL_WITHOUT_REFERENCE) {
 	    if ($pat) {
 		&use('disthack');
