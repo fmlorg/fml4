@@ -125,13 +125,13 @@ sub LogIndex
     local(*e, $cp) = @_;
     my ($tid, $date, $index);
 
-    $tid  = $cp->{'tid'};
+    $tid   = $cp->{'tid'};
     $date  = $cp->{'date'};
     $index = $cp->{'index'};
     $description = $cp->{'description'};
 
-    my ($tid) = $cp->{'tid'};
-    my ($date) = $cp->{'date'};
+    $tid  = $cp->{'tid'};
+    $date = $cp->{'date'};
     my ($dir1, $dir2) = &SubDir($tid);
 
     if (open($index, ">> $index")) {
