@@ -18,9 +18,6 @@ sub MesgLE
 
     &Log("MesgLE: key=$key (@argv)") if $debug_mesgle;
 
-    # it is default. no translation
-    if ($MESSAGE_LANGUAGE eq 'English') { return $NULL;}
-
     # 0. check whether the message template directory exists?
     for (@LIBDIR) { 
 	if (-d "$_/$dir") { 
