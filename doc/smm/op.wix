@@ -2341,7 +2341,7 @@ which д╚дл
 .include sid.wix
 .include ftpmail.wix
 .include localhack.wix
-
+.include href.wix
 
 .# ##########################################################
 .C	misc
