@@ -33,6 +33,31 @@ WWW が使えるなら
 
 
 ========== WHAT'S NEW  1.6.1 current ==========
+・FIX libra.pl help, log
+・FIX libfml.pl approve 
+
+・ daemon($proc, $prog)  (libutils.pl)
+  は、デーモンへ移ってから 引数を eval or exec します。
+
+    インターフェイスとして 
+    daemon_eval($eval_string) 
+    daemon_exec($exec_string) 
+
+   cron.pl を動かすんなら、これをつかうべきでは？
+   ＃でも、４．３ＢＳＤでしか動作確認してないけど…
+
+$FML_EXIT_HOOK = q#
+	&use('utils');
+	&daemon_exec("$LIBDIR/bin/cron.pl $DIR -a");
+#;
+
+
+・ file operations は libfop.pl へ
+
+・ # library  コマンド	（liblibrary.pl）
+   put も使える 別のちょっとちがう アーカイブ操作形式
+
+
 ・ whois iam who コマンドを復活させました。
    hmlと実装方式は全く別ですが:-)
 

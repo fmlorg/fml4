@@ -252,7 +252,7 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 ＃コードの都合上実現できないカスタマイズもありえます_o_
 
 current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
-ファイル）に ちょっと書いてあります
+ファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
 
 ＃古いライブラリも一応Packageに一緒に入ってます。
 ＃lib/Compatibility に移動しておきました。
