@@ -1,4 +1,4 @@
-# $FML: virus_check.ph,v 1.14 2002/05/01 03:06:09 fukachan Exp $
+# $FML: virus_check.ph,v 1.15 2002/05/23 14:57:57 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -78,10 +78,9 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .scr: win32/MTX
 #   .lnk: sircam ?  
 $DISTRIBUTE_FILTER_HOOK .= q#
+    my($extension) = 
+	'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
     if ($e{'h:content-type:'} =~ /multipart/i) {
-	my($extension) = 
-	    'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
-
 	if ($e{'Body'} =~ /(filename|name)=.*\.($extension)/i) {
 	    return 'dangerous attatchment ?';
 	}
@@ -110,13 +109,15 @@ $DISTRIBUTE_FILTER_HOOK .= q{
 #
 # でも、これだとウィルス駆除されたどうでもいいメールも流れてしまうです。
 # このメールを弾きたい場合 (0) を (1) にしてください。 
-if (0) {
-    my $re = ';\s*(file)?name='
-	.'("(DELETED\d+\.TXT|.*\.($extension))"|.*\.($extension))';
-    if ($e{'Body'} =~ /$re/i){
-	return 'disabled virus attachment';
+$DISTRIBUTE_FILTER_HOOK .= q#
+    if ($e{'h:content-type:'} =~ /multipart/i) {
+	my $re = ';\s*(file)?name='
+	    .'("(DELETED\d+\.TXT|.*\.($extension))"|.*\.($extension))';
+	if ($e{'Body'} =~ /$re/i) {
+	    return 'disabled virus attachment';
+	}
     }
-};
+# if (0);
 
 
 # XXX TODO 
