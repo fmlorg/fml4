@@ -80,6 +80,7 @@ bin/base64encode.pl
 bin/base64decode.pl
 bin/pmail.pl
 bin/cron.pl
+bin/cksum.pl
 bin/newsyslog.sh
 bin/fwix.pl
 bin/split_and_msend.pl
