@@ -200,7 +200,7 @@ sub  dir_stack
 	print STDERR "Stack: ".join("/",@dir_stack)."\n"  if $debug;
     }
     
-    return 1 if @dir_stack > 0;
+    return 1 if length(@dir_stack) > 0;
 }
 
 sub SendBack
