@@ -303,6 +303,10 @@ init-makefml:
 	cp sbin/makefml /tmp/distrib
 	(chdir /tmp/distrib ; perl makefml )
 
+admin-ci:
+	ci usr/bin/[^c^r]* usr/sbin/*
+	chmod 755 usr/*bin/*
+
 ci:
 	ci *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
 	chmod 755 fml.pl msend.pl libexec/*pl
