@@ -1,6 +1,63 @@
 .C	メール配送について
 =E.C	Mail Delivery System Tuning
 
+.S	SMTPライブラリについて
+.l	smtp
+.k	SMTP (Simple Mail Transfer Protocol)
+.k	MTA (Mail Transport Agent)
+
+SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
+Transport Agent)と通信するライブラリです。
+
+$PORT = 25 (25/tcp) で通信しますが、
+
+	$PORT 
+.k	$PORT 
+
+を変えることで別のポートで通信することもできます。また、標準で
+
+	$SMTP_LOG (default は "var/log/_smtplog")
+.k	$SMTP_LOG
+
+というファイルに通信のログを残します。このログはデバッグに非常に役立ち
+ます。
+
+	$NOT_TRACE_SMTP 
+.k	$NOT_TRACE_SMTP 
+
+をセットすると、このログは残りません。また、どのマシンの sendmail を使
+うかも自由に設定できます。デフォールトはそのマシンです。もしMLサーバの
+マシン(受けるマシン)が貧弱ならそのマシンが何十通もメールを送り出すのは
+酷です。
+
+	$HOST         = 'localhost';
+.key	$HOST
+
+そういう場合変数 $HOST を書き換えて別のマシンに配送を任すこともできま
+す。その時は
+
+	$HOST         = 'beth.foo.bar.ac.jp';
+
+のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
+ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
+のでそのマシンを使う許可を得るべきです。
+
+
+.S	予備のSMTPサーバ
+.k	予備のSMTPサーバ
+.k	@HOSTS
+
+もし SMTP サーバに何かあった時のために @HOSTS に複数台の予備の 
+sendmail の走っているマシンを定義することが出来ます。
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+この場合、もし $HOST に connect() できない時は、machine-1 に、
+もし machine-1 に connect() できない時は machine-2 へ…とい
+う風に予備のサーバを使い何とか配送をしようと試みます。
+全部だめだった場合は sendmail コマンドを使って配送します。
+
+
 .S	リレー(RFC821)
 =E.S	Relaying based on RFC821
 .k	%リレー (obsolete)
@@ -36,14 +93,15 @@ actives には
 のように渡されます。sendmail 8.x での配送は axion.phys.titech.ac.jp ま
 で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
 
-パケットの数もサーバの負担も軽くなるのでもしリレーしていいっていう許可
-が得られればどこかでリレーサーバを使えるといいですね。
+パケットの数もサーバの負担も軽くなるのでもしリレーしていいという許可が
+得られればどこかでリレーサーバを使えるといいですね。
 
 [捕捉]
 
-fml 1.3.2 からは内部表現が拡張性のため違う形になっています。古いフォー
-マットで書いた場合は、自動的にNEW FORMAT に自動変換して解釈しています。
-気にしないで下さい:-)
+fml 1.3.2 からは actives 等の表現が拡張性のため違う形になっています。
+古いフォーマットで書いた場合は、自動的にNEW FORMAT に自動変換して解釈
+しています。
+.xref	fml-file-structure
 
 OLD FORMATでは
 	fukachan@phys.titech.ac.jp	axion.phys.titech.ac.jp
@@ -202,7 +260,11 @@ sendmailとのやりとりの記録(もっとも最近のものだけ)デバッグに便利です。
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
