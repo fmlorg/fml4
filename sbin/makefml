@@ -3569,8 +3569,9 @@ sub do_adduser
 		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members", 
-		  &Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives");
+	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
+	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
+	    if (! &AutoRegistrableP);
     }
 
     &ResetVariables;
@@ -3636,8 +3637,9 @@ sub do_byeuser
 		  "$ML_DIR/$ml/members-admin");
     }
     else {
-	@files = (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members", 
-		  &Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives");
+	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
+	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
+	    if (! &AutoRegistrableP);
     }
 
     &ResetVariables;
