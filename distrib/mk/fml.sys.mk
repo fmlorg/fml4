@@ -1,4 +1,4 @@
-.include "distrib/mk/fml.prog.mk"
+.include "$(FML)/distrib/mk/fml.prog.mk"
 
 .if !defined(FML)
 FML     = $(PWD)
