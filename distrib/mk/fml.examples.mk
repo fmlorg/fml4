@@ -16,7 +16,9 @@ ${WORK_EXAMPLES_DIR}/${file}-e.html: doc/examples/${file}.wix
 # doc/examples/index{,-e}.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index-e.html
-__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/makefml.cgi.txt
+
+# doc/examples/*txt
+__HTML_EXAMPLES_TXT__ = makefml.cgi cgi-INSTALL cgi-TODO cgi-IMPLEMENTATION
 
 ${WORK_EXAMPLES_DIR}/index.html: doc/examples/index.html
 	${JCONV} doc/examples/index.html > ${WORK_EXAMPLES_DIR}/index.html
@@ -24,5 +26,8 @@ ${WORK_EXAMPLES_DIR}/index.html: doc/examples/index.html
 ${WORK_EXAMPLES_DIR}/index-e.html: doc/examples/index-e.html
 	${JCONV} doc/examples/index-e.html > ${WORK_EXAMPLES_DIR}/index-e.html
 
-${WORK_EXAMPLES_DIR}/makefml.cgi.txt: doc/examples/makefml.cgi.txt
-	${JCONV} doc/examples/makefml.cgi.txt > ${WORK_EXAMPLES_DIR}/makefml.cgi.txt
+.for file in ${__HTML_EXAMPLES_TXT__}
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}.txt
+${WORK_EXAMPLES_DIR}/${file}.txt: doc/examples/${file}.txt
+	${JCONV} doc/examples/${file}.txt > ${WORK_EXAMPLES_DIR}/${file}.txt
+.endfor
