@@ -181,7 +181,7 @@ sub InitMakeFml
 	$OS_TYPE =~ tr/a-z/A-Z/;
     }
 
-    print &Dumpvar('Config');
+    print &Dumpvar('Config') if $debug;
 
     &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
 
