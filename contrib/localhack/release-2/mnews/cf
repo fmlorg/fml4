@@ -1,0 +1,158 @@
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
+# $Id$
+#
+
+CFVersion			3
+
+### DNS
+DOMAINNAME			leo.chubu.ac.jp
+FQDN				leona.leo.chubu.ac.jp
+
+debug				0
+
+MAINTAINER			mnews-admin@$DOMAINNAME
+
+### Access Policy
+MAIL_LIST			mnews@$DOMAINNAME
+PERMIT_POST_FROM		anyone
+REJECT_POST_HANDLER		
+
+CONTROL_ADDRESS			mnews-request@$DOMAINNAME
+PERMIT_COMMAND_FROM		members_only
+REJECT_COMMAND_HANDLER		reject
+
+### Auto Registration
+AUTO_REGISTRATION_TYPE		confirmation
+
+### Remote Administration 
+REMOTE_ADMINISTRATION
+REMOTE_ADMINISTRATION_AUTH_TYPE	crypt
+PGP_PATH			$DIR/etc/pgp
+
+### Automatic Html Generation
+AUTO_HTML_GEN
+
+### Header
+ML_FN				(mnews ML)
+XMLNAME		 		X-ML-Name: mnews ML
+XMLCOUNT			X-Mail-Count
+
+BRACKET				mnews
+
+SUBJECT_TAG_TYPE		[:]
+
+### Misc
+USE_MIME			1
+
+### Architecture
+CPU_TYPE_MANUFACTURER_OS	sparc-sun-sunos4.1.4_JL
+STRUCT_SOCKADDR			n n a4 x8
+
+
+### Others
+# zcat のパスを指定; 自動検出のパスではちと違う
+ZCAT                     	/usr/local/bin/zcat
+# 茶目っ気 (^^;
+FACE_MARK			(^_^)/~
+# 自動登録の際のメールは管理者にだけで十分 :)
+AUTO_REGISTERED_UNDELIVER_P	1
+# 余分なログが残るので行数チェックをだます
+AUTO_REGISTRATION_LINES_LIMIT	-1
+# メイリングリスト本体にコマンドメイルが流れないように
+MAIL_LIST_ACCEPT_COMMAND	1
+# 「#help」と「# help」は同一視
+COMMAND_SYNTAX_EXTENSION	1
+# 不必要なヘッダは削除
+SUPERFLUOUS_HEADERS      	1
+# 削除されるヘッダの一覧（自動応答の類は ML では混乱の元）
+SKIP_FIELDS              	Received|Return-Receipt-To|X-Confirm-Reading-To|Apparently-To|X-NSubject
+# 念のためニフティ対策
+USE_ERRORS_TO			1
+# サイトによってはサブドメインまでは見て欲しいらしい
+ADDR_CHECK_MAX           	4
+
+
+LOCAL_CONFIG
+
+#__MAKEFML_LOCAL_CONFIG__
+# configured by ./makefml on Sun, 14 Sep 97 20:51:40 
+# *** DO NOT EDIT MANUALLY THIS BLOCK!!! ***
+#__END_OF_MAKEFML_LOCAL_CONFIG__
+
+
+# YOU CAN EDIT MANUALLY AFTER HERE.
+
+# アーカイブディレクトリは昔のままでお願い; 階層が深くなるのが嫌いなんです
+@ARCHIVE_DIR = ('old');
+# fml の思想からは外れるけど、mnews ML でいう自動登録モード
+$MODE_BIFURCATE_HOOK = q@
+    local($subscribe_key, $confirm_key);
+    $subscribe_key = $REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE || 'subscribe';
+    $confirm_key   = $CONFIRMATION_KEYWORD || 'confirm';
+    $_ = $Envelope{'Body'};
+    if ($Envelope{'mode:ctladdr'} || $COMMAND_ONLY_SERVER) {
+        s/^\s*[#\s]\s*//;
+        if (/^($subscribe_key|$confirm_key)/i)  {
+            if ($member_p)  {
+                &Log("AutoSubscribe: Dup");
+                &Sendmail($From_address,
+                  "You ($From_address) are already subscribed $ML_FN",
+                  "The address [$From_address] is already subscribed.\n".
+                  "If you have any questions or problems,\n".
+                  "   please make a contact with " . $MAINTAINER . "\n\n".
+                  &WholeMail);
+                $DO_NOTHING = 1;
+            } else {
+                &use('amctl');
+                &AutoRegist(*Envelope);
+                $DO_NOTHING = 1;
+            }
+        }
+    } elsif (/^\s*#/) {
+        &Log("Rejected: Unsupport Command Mail on ML Address");
+        &SendFile($From_address,
+             "Unsupport Command Mail on ML Address $ML_FN", "$DIR/fail");
+        $DO_NOTHING = 1;
+    }
+@;
+# To: の候補に Apparently-To: も追加し、Reply-To: は固定
+# Subject: はデコードして欲しい（mnews ML だからね）
+$SMTP_OPEN_HOOK = q#
+    $Envelope{'h:To:'}       = $Envelope{'h:to:'}
+          || $Envelope{'h:apparently-to:'} || "$MAIL_LIST $ML_FN";
+    $Envelope{'h:Reply-To:'} = $Envelope{'h:reply-to:'} = $MAIL_LIST;
+    if ($USE_LIBMIME && $Envelope{'MIME'}) {
+        &use('MIME');
+        $Envelope{'h:Subject:'} = &DecodeMimeStrings($Envelope{'h:Subject:'});
+    }
+#;
+# それで、デコードは X-NSubject: にも適用されます
+$HEADER_ADD_HOOK = q#
+    if ($Envelope{'x-nsubject:'}) {
+        if ($STRIP_BRACKETS) {
+            $_ = $Envelope{'x-nsubject:'};
+            local($r)  = 10;
+            s/\[$BRACKET:\d+\]\s*//g;
+            while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
+            $Envelope{'x-nsubject:'} = $_;
+        }
+        if ($USE_LIBMIME && $Envelope{'MIME'}) {
+            &use('MIME');
+            $Envelope{'x-nsubject:'} =
+                  &DecodeMimeStrings($Envelope{'x-nsubject:'});
+        }
+        $body .= "X-Nsubject: [$BRACKET:$ID]$Envelope{'x-nsubject:'}\n";
+    }
+#;
+# 意外とまとめ送りでもエラーが多いので極力管理者にメールが届かないように
+$REPORT_HEADER_CONFIG_HOOK = q#
+    $le{'GH:Precedence:'} = $PRECEDENCE || 'junk';
+#;
