@@ -6,54 +6,131 @@ $libid   = q$Id$;
 ($libid) = ($libid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid  .= "/$libid";
 
-sub GetFileWithUnixFrom
+sub OpenStream_OUT
 {
-    local(@filelist) = @_;
-    local(@tmp);
-    local($linecounter);
+    local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
 
-    foreach $file (@filelist) {
-	open(FILE, $file) || next;
-	push(@tmp, "From $MAINTAINER\n");
-	while(<FILE>) { push(@tmp, $_); $linecounter++;}
-	close(FILE);
-	push(@tmp, "\n");
+    if($PACK_P) {
+	open(OUT, "|$COMPRESS|$UUENCODE $FILE > $WHERE.$TOTAL") || return 0;
+    }else {
+	open(OUT, "> $WHERE.$TOTAL") || return 0;
     }
 
-    return ($linecounter > 0) ? @tmp : ();
+    return 1;
 }
 
-# Sending Given buffer cut by cut adjusting the location of UNIX FROM.
-# so this routine is for plain text.
-sub OrderedSendingOnMemory 
+
+sub CloseStream_OUT { close(OUT);}
+
+# Word Count
+sub WC
 {
-    local($to, $Subject, $MAIL_LENGTH_LIMIT, $SLEEP_TIME, @BUFFER) = @_;
-    local($TOTAL) = int( scalar(@BUFFER) / $MAIL_LENGTH_LIMIT + 1);
-    local($mails) = 1;
-    local($ReturnBuffer, $mailbuffer);
+    local($lines) = 0;
 
-    foreach (@BUFFER) {
-	# UNIX FROM, when plain text
-	if(/^From\s+/oi){ $ReturnBuffer .= $mailbuffer; $mailbuffer = "";}
+    open(TMP, "< @_") || return 0;
+    while(<TMP>) { last if(eof(TMP)); $lines++;}
+    close(TMP);
 
-	# add the current line to the buffer
-	$mailbuffer .= $_; $totallines++;
-
-	# send and sleep
-	if($totallines > $MAIL_LENGTH_LIMIT) {
-	    $totallines = 0; 
-	    &Sendmail($to, "$Subject ($mails/$TOTAL) $ML_FN", $ReturnBuffer);
-	    $ReturnBuffer = "";
-	    $mails++;
-	    sleep($SLEEP_TIME);
-	}
-    }# foreach;
-
-    # final mail
-    $ReturnBuffer .= $mailbuffer;
-    &Logging("SendFile: Send a $_/$TOTAL to $to");
-    &Sendmail($to, "$Subject ($mails/$TOTAL) $ML_FN", $ReturnBuffer);
+    return $lines;
 }
+
+
+sub SplitFiles
+{
+    local($file, $totallines, $TOTAL) = @_;
+    local($lines) = 0;
+    local($limit) = int($totallines/$TOTAL); # equal lines in each file
+    local($i) = 1;
+
+    open(BUFFER,"< $file") || do { &Logging("$!"); return 0;};
+    open(OUT,   "> $file.$i") || do { &Logging("$!"); exit 1;};
+    while(<BUFFER>) {
+	print OUT $_; $lines++;
+	
+	if($lines > $limit) { # reset
+	    $lines = 0; close OUT; $i++;
+	    open(OUT, "> $returnfile.$i") || 
+		do { &Logging("$!"); return 0;};
+	}
+    }# WHILE
+
+    unlink $file;
+    return 1;
+}
+
+
+sub MakeFilesWithUnixFrom { &MakeFileWithUnixFrom(@_);}
+sub MakeFileWithUnixFrom
+{
+    local($WHERE, $PACK_P, $FILE, @filelist) = @_;
+    local($linecounter);
+    local($TOTAL)      = $PACK_P ? 0: 1;
+    
+    print STDERR "MakeFileWithUnixFrom:($WHERE, $PACK_P, @filelist)\n"
+	if $debug;
+
+    # Open Stream
+    if(0 == &OpenStream_OUT($WHERE, 0, $FILE, $TOTAL)) { return 0;}
+
+    # Get files
+    foreach $file (@filelist) {
+	local($lines) = &WC($file);
+
+	# reset
+	if((0 == $PACK_P) && ($linecounter + $lines) > $MAIL_LENGTH_LIMIT) {
+	    close(OUT);
+	    $TOTAL++;
+	    if(0 == &OpenStream_OUT($WHERE, 0, $FILE, $TOTAL)) { return 0;}
+	}
+
+	# Get
+	open(FILE, $file) || next;
+	print OUT $USE_RFC934 ? 
+	    "\n------- Forwarded Message\n\n" : "From $MAINTAINER\n";
+	$linecounter++;
+	while(<FILE>) { print OUT $_; $linecounter++;}
+	close(FILE);
+	print OUT "\n"; $linecounter++;
+    }
+    close(OUT);
+
+    # Exceptional action for gzip
+    if($PACK_P) {
+	$TOTAL = int($linecounter/$MAIL_LENGTH_LIMIT + 1);
+
+	system "$COMPRESS $WHERE.0|$UUENCODE $FILE > $WHERE";
+	$totallines = &WC($WHERE);
+	$TOTAL = int($totallines/$MAIL_LENGTH_LIMIT + 1);
+
+	if(($TOTAL > 1) && 0 == &SplitFiles($WHERE, $totallines, $TOTAL)) {
+	    &Logging("SendFile: Cannot split $WHERE");
+	    return 0;
+	}elsif(1 == $TOTAL) {	# tricky
+	    rename($WHERE, "$WHERE.1"); 
+	}
+    }
+
+    return $TOTAL;
+}
+
+
+# Sending files back 
+sub SendingBackOrderly
+{
+    local($returnfile, $TOTAL, $SUBJECT, $SLEEPTIME) = @_;
+
+    foreach $now (1..$TOTAL) {
+	local($file) = "$DIR/$returnfile.$now";
+	
+	&Logging("SendFile: Send a $now/$TOTAL to $to");
+	&SendFile($to, "$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0);
+	unlink $file unless $debug;
+	sleep($SLEEPTIME ? $SLEEPTIME : 3);
+    }
+
+    unlink $returnfile unless $debug;
+}
+
 
 sub Whois
 {
@@ -110,11 +187,11 @@ sub talkWhois # ($host, $headers, $body)
     } else { &Logging("Cannot connect $host");}
 }
 
+
+# FOR DEBUG
 if($0 =~ __FILE__) {
     @test = ("./spool/1", "./spool/2");
-
     $MAINTAINER = "Elena@phys.titech.ac.jp";
-    print  &GetFileWithUnixFrom(@test);
 }
 
 1;
