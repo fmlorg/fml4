@@ -201,8 +201,9 @@ sub ResentForwFileInSpool
 	    close(ARTICLE);
 	}
 	else {
-	    &Log("Cannot open Article $ID");
+	    &Log("ResentForwFileInSpool: cannot open \$DIR/$mail_file");
 	    &Log("Get $ID, Fail");
+	    return;
 	}
     }
 
