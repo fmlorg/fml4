@@ -1,0 +1,14 @@
+# environment variable: MODE
+#         return value: DATE, FMLID
+GEN_FMLID () {
+   # date YYYYMMDD
+   DATE=`date -u +"%C%y%m%d"`
+
+   if [ X$MODE = X ]; then
+	# 3.0B new release engineering	
+	FML_REL=`cat $FML/conf/release`
+	FMLID=fml-${FML_REL}-${BRANCH}-${DATE}
+   else
+	FMLID=fml-${BRANCH}-${DATE}
+   fi
+}
