@@ -123,18 +123,43 @@ obsolete ?
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO
 
-.S	よくわからない --;;
+.S	MIMEライブラリーの書き直し
+=E.S	rewrite MIME library
 
-fml-support: 7790
+特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
+る。それを考慮すること
+=E
+Especially base64 encoder. RFC2047 is incomplete for Japanese.
 
-makefml remove-article ってあるべきなんかなぁ…
-そんなに需要があるんでしょうか…
+Xref: fml-support:05948
+
+
+.S	エラーアドレスの自動削除
+=E.S	automatic unsubscribe error addresses
+
+meadと各種MTA対応
+=E
+mead for each MTA
+
+   postfix 対応
+=E
+   postfix
+
+   qmail =>  http://www.jp.qmail.org/qmaildoc/RFC/RFCQSBMF.html
+
+
+.S	モデレータモードとexpire
+=E.S	moderator and expire
+
+fml-support ML's Count: 05639
+
 
 .S	spool2html
 
 fml-suppport: 07638
 ソートは stat(2) の結果をつかうけど、表面的な Date: くらいはファイルの
 中からひろいあげるべき？
+
 
 .S	Subject: unsubscribe で自動削除?
 =E.S	automatic-unsubscribe when "Subject: unsubscribe" mail comes
@@ -192,6 +217,7 @@ chaddrのレポートメールのTo: CC: にuniqかける
 =E
 aggregate addresses to reply
 
+
 .S	mead
 
 fml-support: 6897
@@ -217,22 +243,12 @@ fml-support: 06899
    ＃ 意図的にchmodしててもこれに戻されちゃうとかあって問題だろうなぁ
 .fi
 
+
 .S	makefml mkdir()
 
 fml-support:6899
 3016:  &Mkdir($dir);
 4817:      $s .= "-d \$$_ || &Mkdir(\$$_); \$$_ =~ s#$DIR/##g;\n";
-
-
-.S	MIMEライブラリーの書き直し
-=E.S	rewrite MIME library
-
-特に base64 encoder 。RFC2047準拠ではヨーロッパ系言語以外では矛盾があ
-る。それを考慮すること
-=E
-Especially base64 encoder. RFC2047 is incomplete for Japanese.
-
-Xref: fml-support:05948
 
 
 .S	日本語化問題
@@ -316,38 +332,11 @@ XRef: fml-support:05930
    share ?
 
 
-.S	リモート管理のノウハウについて
-=E.S	remote administration
-
-Q: pgp のときに address 登録なんていらないやんか
-A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
-
-
 .S	配送関係
 =E.S	Delivery
 
 * $smtpd_recipient_restriction
 see /etc/postfix/sample*cf
-
-
-.S	エラーアドレスの自動削除
-=E.S	automatic unsubscribe error addresses
-
-meadと各種MTA対応
-=E
-mead for each MTA
-
-   postfix 対応
-=E
-   postfix
-
-   qmail =>  http://www.jp.qmail.org/qmaildoc/RFC/RFCQSBMF.html
-
-
-.S	モデレータモードとexpire
-=E.S	moderator and expire
-
-fml-support ML's Count: 05639
 
 
 .S	ファイル操作
@@ -459,13 +448,21 @@ but may seem too difficult ...
 fml-support: 07525
 
 
+.S	よくわからない --;;
+
+fml-support: 7790
+
+makefml remove-article ってあるべきなんかなぁ…
+そんなに需要があるんでしょうか…
+
+
 .C	CGI
 .l	CGI
 
 
 .S	modify file ?
 
- Hmm..., impossible?
+Hmm..., impossible?
 
 
 .S	configure mead 
@@ -559,13 +556,9 @@ Message Language Extensionの関数ライブラリをよぶ
 
 	サーチエンジンとの連携
 	スケジュールソフト
-	IRC
-	...
 =E
 	search engine
 	scheduler
-	IRC
-	...
 
 
 .C	UNIX 以外のOS固有の問題
