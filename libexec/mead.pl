@@ -815,8 +815,10 @@ Options:
     -d              debug mode on
     -m mode         mode; report or auto ('report' in default).
 
-    -e number      expire of error data cache (unit is 'day')
-    -i number      check interval (unit is 'second')
+    -f configfile   load configuration from this file at the first
+                    Other command line options can overwrite it.
+    -e number       expire of error data cache (unit is 'day')
+    -i number       check interval (unit is 'second')
 
     -C cachefile    mead data cache file
     -D directory    \$DIR (mead.pl working directory)
