@@ -3,6 +3,7 @@ _ML_-ctl: :include:_ML_DIR_/_ML_/include-ctl
 _ML_-request: _ML_-admin
 _ML_-admin: _USER_
 owner-_ML_: _USER_
+owner-_ML_-ctl: _USER_
 
 # Mail Error Analyzer Daemon
 # If you use mead.pl, comment out _ML_-admin: line and UNCOMMNET OUT here.
