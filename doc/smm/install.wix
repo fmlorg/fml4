@@ -8,7 +8,8 @@
 
 fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
 では makefml という対話的にインストールや簡単なＭＬの設定を行なうイン
-ターフェイスが附属しています。それの使い方が INSTALL というファイルです。
+ターフェイスが附属しています。使い方は INSTALL というファイルにありま
+す。
 
 INSTALL +α でこの doc/op というファイルと INSTALL の中間に当たるユー
 ザーズガイドが整備される予定ですが、2.1-RELEASE に間に合うように統合さ
@@ -39,16 +40,28 @@ makefml install を使えば必要な作業を行なってくれます。
 
 
 .S	本当に残しておく必要のあるファイルは？
+.l	files-to-need
 
 たまにどこが必要な部分ですか？と聞かれますが、makefml install を使えば
-core の部分だけが概ねインストールされます。ドキュメントが大きいので 
-www.sapporo.iij.ad.jp を見るから doc/html は要らないから消すということ
-はありうるでしょう。
+core の部分だけが概ねインストールされます。
 
 makefml でインストールすると document 群も入れます。documents は大きい
 です。インストール先の doc の下にまとまってるので、ここは消して構いま
-せん。祖霊がいに何を消していいかは機能をどこまで使うかに依存しているの
-で一概にはいえません。
+せん。ドキュメントは「www.sapporo.iij.ad.jp を見るから doc/html は要ら
+ないから消す」という選択はありうるでしょう。ただ www では常に最新版の
+内容だという点で注意が必要です。
+
+それ以外に何を消していいかは機能をどこまで使うかに依存しているので一概
+にはいえません。
+
+ちなみに
+
+	doc 	ドキュメント
+	libexec 特殊なもの fml_local とかも含む
+		fmlserv があるから消しちゃ駄目かもしれない
+	bin 	fml 自体は使わない user 支援 program 群
+
+etc, sbin, cf は消しちゃダメです。
 
 
 .S	インストール後にサーバの設定(パラメータ)をいじる
@@ -57,24 +70,44 @@ makefml でインストールすると document 群も入れます。documents は大きい
 .xref	order-of-option-effeciency
 .xref	init-data-structure
 
-複数のやり方があります。本質的にはどれも configuration file を書き換え
-るということです。コマンドラインオプションで同じ設定が可能ですが、保守
-や makefml インターフェイスとの整合性のため 2.1-RELEASE では推奨されて
-いません。
+複数のやり方があります。本質的にはどれも設定ファイル(config.ph)を書き
+換えるということです。コマンドラインオプションで同じ設定が可能ですが、
+保守や makefml インターフェイスとの整合性のため 2.1-RELEASE では推奨さ
+れていません。
 
 
 1	makefml
 .k	makefml
 
 初心者で内部構造がよくわからない場合はインストール時に使った makefml 
-というコマンドを使って、ＭＬの設定ができます。makefml config ML で 
-ML-directory/config.ph が変更できます。よく使いそうだと思われる基本的
-な設定はこれで十分でしょう。この辺のことについては INSTALL を読んで下
-さい。
+というコマンドを使って、ＭＬの設定ができます。makefml config ML で Ｍ
+ＬのHOME/config.ph が変更できます。よく使いそうだと思われる基本的な設
+定はこれで十分でしょう。この辺のことについては INSTALL を読んで下さい。
 
 インターフェイスが複雑になるのが嫌なので、ここでいじることのできる設定
 は基本的なものに限っています。将来もできるだけ makefml config は少数精
 鋭の config のみを入れていく予定です。
+
+[注意] 各ＭＬのHOMEには
+
+	cf
+	config.ph 
+
+というファイルがあります。実は makefml config でいじっているのは cf で 
+毎回 cf から config.ph を再生成しています。そのため config.ph をいじっ
+ても、その後 makefml config をしてしまうと、ほとんどの設定は上書きされ
+てしまいます。よって
+
+   ・ cf を常にマスターとして、make config.ph で作成
+	ちょうど CF と sendmail.cf の関係のように
+
+	この場合は makefml config を使っても大丈夫
+
+か
+
+   ・ 最初だけ makefml config でいじり、あとは全て config.ph を手動編集
+
+必要があります。
 
 
 2	config.ph
@@ -286,8 +319,7 @@ Elena-ctl宛のメールはコマンドのルーチンだけしか呼ばないようになります。
 	Elena-ctl: Elena
 
 とか書いてあることが必要です。newaliasesも忘れずに。
-
-makefml の指示通にすればこの設定もしているはずですけど。
+makefml の指示通りにすればこの設定もしているはずですけど。
 
 
 .S	メンバーチェックと自動登録について
@@ -298,28 +330,36 @@ makefml の指示通にすればこの設定もしているはずですけど。
 またこれは security 上望ましいことです。
 .xref auto-regist
 
-メンバーチェックをするか否かは config.ph の中で
+メンバーのアクセス制御については Chapter .ptr{access_policy} を参照。
+基本的には
+
+	$REJECT_COMMAND_HANDLER = "auto_regist";
+
+で auto_regist のように設定されていれば自動登録を行ないます。
+
+なお、昔は
 
 	$ML_MEMBER_CHECK 
 
-という変数で決まります。
+という変数で決めていましたが、今これは内部変数として使われています。
+HOOK等で使われるだろうということを想定し歴史的変数として残っています。
+
+	$ML_MEMBER_CHECK 
+
+が重要なのはこの変数によって メンバーリストと配送リストが異なるからです。
 
 [メンバーチェック]
 
-	$ML_MEMBER_CHECK = 1;
-
-の時は $MEMBER_LIST (デフォールト members) の中に From: 行のアドレスが
-存在するか否か？を調べます。ない場合は管理者へ知らせ、さらに From: 行
-のアドレスの人へ $DENY_FILE を送り返します。
-この場合の配送は $ACTIVE_LIST に従って配送されます。
+この時は $MEMBER_LIST (デフォールト members) の中に From: 行のアドレス
+が存在するか否か？を調べます。ない場合は管理者へ知らせ、さらに From: 
+行のアドレスの人へ $DENY_FILE を送り返します。この場合の配送は 
+$ACTIVE_LIST に従って配送されます。
 
 
 [自動登録]
 
-	$ML_MEMBER_CHECK = 0;
-
-の時は $MEMBER_LIST (デフォールト members) の中に From: 行のアドレスが
-存在するか否か？を調べます。
+$MEMBER_LIST (デフォールト members) の中に From: 行のアドレスが存在す
+るか否か？を調べます。
 
 存在しない場合は管理者へ知らせ、(例えば From: 行の)アドレスを自動的に 
 $MEMBER_LIST に登録します。
@@ -360,7 +400,7 @@ $MEMBER_LIST に登録します。
 
 のように設定しています。そのためどちらのアドレスへ送られても管理者へそ
 のメールは届くわけです。makefml のデフォールトは listname-admin です。
-provider 等ではそれぞれの設定があったりするので注意して下さい。
+プロバイダではそれぞれの設定があったりするので注意して下さい。
 
 
 .S	他の人にＭＬのスプールを見せない設定
@@ -370,7 +410,7 @@ provider 等ではそれぞれの設定があったりするので注意して下さい。
 
 例外としてメーリングリストの directory でも htdocs だけはすべての人が
 読めるようになっています。これは httpd がどのユーザ権限で走っているか
-わからないためです(nobodyとかで走っている)。
+わからないためです(通常 nobodyとかで走っている)。
 
 
 .S	スプールに記事をためない
@@ -381,28 +421,8 @@ DISKが足りない等で記事をためずに配送するだけにしたいなら
 
 	$NOT_USE_SPOOL = 1;
 
-と設定してください。もちろんその場合は記事の取り寄せ等ができません(当
-たり前)。
-
-
-.S	makefml install 後使わなさそうなファイルを消す
-
-例えば makefml install で /usr/local/fml なり ~/fml なりにインストール
-したとします。その directory には document 等も入っているので
-
-	DISKが足らない
-	document が要らない ;_;
-	ドキュメントは www.fml.org で見るから別に要らない 
-
-等の要求はあると思います。この場所で普通消しても困らないものは
-
-	doc 	ドキュメント
-	libexec 特殊なもの fml_local とかも含む
-		fmlserv があるから消しちゃ駄目かもしれない
-	bin 	fml 自体は使わない user 支援 program 群
-
-etc, sbin, cf は消しちゃダメです。
-
+と設定してください。もちろんその場合は古い記事の取り寄せ等ができません
+(当たり前)。
 
 
 .C	配送とコマンド、そしてそのアクセス制御
@@ -439,9 +459,9 @@ FML 2.1 (config.ph の CFVersion が 3)では
 .k	$PERMIT_COMMAND_FROM
 .k	$REJECT_COMMAND_HANDLER
 
-という４つの変数がアクセス制御の鍵を握っています。また自動登録をするか
-否か？もアクセス制御の一部としてこれらの変数で制御されます。
-それぞれの意味は
+という4つの変数がアクセス制御の鍵を握っています。また自動登録をするか
+否か?もアクセス制御の一部としてこれらの変数で制御されます。それぞれの
+意味は
 
    $PERMIT_POST_FROM		だれからの投稿を許すか?
    $REJECT_POST_HANDLER		メンバー以外からの投稿があったらどうするか?
@@ -482,7 +502,10 @@ FML 2.1 (config.ph の CFVersion が 3)では
 
 のようになっています(elena MLの場合)。
 
-○ 自動登録
+
+.S	自動登録とアクセス制御
+.l	access_policy_and_auto_regist
+.xref	auto-regist
 
 自動登録は
 
@@ -640,9 +663,8 @@ $CONTROL_ADDRESS にアドレスを登録するとコマンド専用のＭＬサーバが作れ
 と解釈します。ただこのやり方ではヘッダを場合わけの根拠にしているため曖
 昧さがあります。
 
-曖昧さをなくすためには listname-ctl アドレスを使うのが良いでしょう。配
-送用の listname を使わなくてよいなら &DEFINE_MODE('ctladdr'); を設定し
-てもよいです。これを設定すると配送サーバは使えなくなります。
+曖昧さをなくすためにはfml.pl が --ctladdr つきで起動される 
+listname-ctl アドレスを使うのが良いでしょう。
 
 
 .S	Subject: にコマンドを書く場合
@@ -665,58 +687,11 @@ $COMMAND_ONLY_SERVER がセットされている場合は、キーワード # の有無に関
 
 
 .S	リモートで管理する設定
-.xref	REMOTE-ADMINISTRATION
-.xref	bin/passwd.pl
+.xref	REMOTE-ADMINISTRATION pgp bin/passwd.pl
 
 SMTPでは所詮どうしようもないのでデフォールトではリモートでサーバを管理
 するようにはなっていません。可能な限り避けるべきです。リモート管理より
 Secure Shell で makefml を起動させるような仕組みがあるとよいですね。
-
-リモートで管理もできるようにモードを変えるには、
-
-	$REMOTE_ADMINISTRATION = 1;
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
-
-を設定して下さい。お勧めではありませんが &DEFINE_MODE("remote"); でも
-同じです。
-
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD 
-
-をセットしないならパスワード認証をせず
-	管理者のメンバーリスト $ADMIN_MEMBER_LIST
-
-だけでアドレスの認証だけをします。この設定はするべきではありません。
-
-パスワードは $DIR/etc/passwd に crypt された形で保存されます。
-.xref bin/passwd.pl
-
-$USE_MD5 = 1; を設定すると crypt ではなく MD5 になります
-(注意: perl 5 でなおかつ MD5.pm が必要です)。
-.xref $USE_MD5
-
-
-新たにパスワードを初期化する場合は 
-
-○ makefml を使う(INSTALL を見て下さい)
-
-○ コマンドでは fml-install-dir/bin/passwd -i mail-address 
-
-○ アドミンコマンドの初期化用の initpass というコマンド
-.xref	remote
-
-リモート管理関係のカスタマイズ変数は
-
-   アドミンと認めるメンバーのリスト（Email-address）
-   $ADMIN_MEMBER_LIST	= "$DIR/members-admin";
-
-   アドミンのコマンドのHELPファイル
-   $ADMIN_HELP_FILE	= "$DIR/help-admin";
-
-   リモート管理にパスワードを要求する場合には１に
-   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
-
-   その場合のパスワードを保存するファイル
-   $PASSWD_FILE        = "$DIR/etc/passwd";
 
 詳細は「リモート管理」の章を見てください。
 .xref REMOTE-ADMINISTRATION 
@@ -725,203 +700,9 @@ $USE_MD5 = 1; を設定すると crypt ではなく MD5 になります
 .# ##########################################################
 .include msend.wix
 .include remote.wix
-.include autoregist.wix
 .include pgp.wix
-
-
-.C	コマンドの実行に関する２、３のこと…
-
-.S	ＭＬで使えるコマンドを増やすor減らす
-.l	add-procedures
-.xref	add-admin-procedures
-
-config.ph でコントロールできます。
-いくつかの変数がありますが、次のように作動します
-
-   1	@PermitProcedure が定義してあるなら
-	@PermitProcedure で許しているコマンドだけを設定します。
-	もし、定義されていなければデフォールトのすべてのコマンドが
-	利用可能になります。
-	これらの設定はグローバル変数の %Procedure に定義されます。
-
-   2	%LocalProcedure が定義されているなら
-	1 で定義された %Procedure を %LocalProcedure で上書きします。
-
-   3	@DenyProcedure が定義されているなら
-	@DenyProcedure のコマンドだけを使えなくする
-
-例：
-	○ guide と summary のみを使用可能、それ以外はすべて使用不可
-
-	@PermitProcedure = ('guide', 'summary');
-
-	○デフォールトに加え自分で定義した hack コマンドも使える
-
-	%LocalProcedure = ('hack', 'ProcHack');
-
-	もちろんこの場合はどこかで sub ProcHack { ...; } があって
-	この関数を用意しておく必要がある。
-
-	○デフォールトの中で get 関係は使えなくする
-	@DenyProcedure = ('get', 'send', 'mget', 'msend');
-
-
-.S	コマンドの # syntax は必要か？ 
-.k	# コマンド シンタックス
-
-配送とコマンドが同じアドレスなら動作を切替えるためのキーワードが必要で
-す。それが # syntax です。
-
-makefml が作る listname-ctl アドレスはコマンド専用なので要りません。
-もちろんあっても # 部分は勝手に解釈するのでどっちでも構いません。
-
-“コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
-もし、コマンド専用のアドレスで
-
-	# get 1
-		も
-	get 1
-
-同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
-
-	config.ph に $COMMAND_ONLY_SERVER = 1;
-
-
-.S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
-.k	# help ではなく #help 形式
-
-以下は コマンドの書き方についてのオプションです。
-
-	# get 1
-	# help
-
-のような書き方をしてきました。で、こうでない書き方は解釈してくれなかっ
-たので、今度は
-
-	# get 1 と #get 1は同じものとみなす（両方使える）
-	すべてのコマンドで同じように "# " -> "#" 解釈する。
-	さらに#getfile ...も# get ...と理解する。
-
-としました。つまり、
-
-	# get 1
-	#get 1
-	# getfile 1
-	#getfile 1
-
-は同じもの。同様に
-
-	# help
-	#help
-
-を同じものにみなします。
-
-.key	$COMMAND_SYNTAX_EXTENSION
-	$COMMAND_SYNTAX_EXTENSION = 1;
-
-両方解釈するなら１、"# summary" みたいな形式だけなら０
-
-
-.S	コマンドは一辺に実行できるか？
-
-例えば
-
-	# get 1
-	# get 2
-	# get 3
-	# help
-	# summary
-
-という内容のメールをＭＬサーバへ入れると
-
-1、 2、 3 の記事を取り寄せ、ヘルプとさらにサマリファイルも取り寄せると
-いう働きをします。bye を除き 一行一コマンドずつ順番にすべて実行します。
-
-それは各行ごとにどんどん処理をするようになっているからです。
-＃ ただし # exit はコマンドの終りです。ここで exit == end == quit
-
-
-しかしながら
-
-	uja
-	# get 1
-	# get 2
-
-というメールの内容とエラーです。というのは、最初の３行のどこかで#では
-じまる行があればコマンドモードとみなして処理を行なうためです。
-
-最初の行は空行で２行目に#があるメールが、間違えて流れたりしないための
-防止機構です。この“３”行の“３”を変えたいときは config.ph の中の
-
-	$COMMAND_CHECK_LIMIT = 3;
-
-を変えます（最初の３行をチェックする）。
-
-
-.S	間違ったコマンドを送ってきた人への警告
-.k	USE_WARNING 
-
-デフォールトでは警告しません。
-
-	$USE_WARNING = 1; 
-
-でない限り、間違ったコマンドへの警告メールをだすことはありません。
-これは signature を自動的に付ける設定をしている場合への対処です。
-# exit 等で明示的にコマンド指定を終わらせるのが良いでしょう。
-
-
-.S	コマンドの終り(シグニチャア対策)
-.key	signature 対策
-
-	# exit 
-	# end
-	# quit
-
-というコマンドを追加しました。このコマンドのところでアクションは終了し
-ます。signature があってもいいように、こうしました。
-
-
-.S	ＭＬサーバの作業エリア 
-.key	$TMP_DIR
-
-デフォールトでは $DIR/tmp (つまり $TMP_DIR = './tmp';) を使います。
-変更したい場合は $TMP_DIR を変更して下さい。
-
-/tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
-private communication のファイルを public な場所にファイルを残すことは
-しないためです。
-
-その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
-存されます。
-
-
-.S	メールの最後に付加情報をつける設定
-
-	$PREAMBLE_MAILBODY	（前）
-	$TRAILER_MAILBODY	（後）
-	を本文の前後に必ず付けます。
-
-つまり、
-	e.g. HELP コマンドにたいして、
-
-	$PREAMBLE_MAILBODY	（前）
-	HELPファイル本文
-	$TRAILER_MAILBODY	（後）
-
-のようになります。昔のやり方は
-
-   $SMTP_OPEN_HOOK = q# $e{'Body'} .= $PREAMBLE_BODY.$e{'Body'}; #;
-   ＃注：普通のＭＬのメールに $PREAMBLE_BODY がついて配送
-
-ですが今は汎用性のためSMTPライブラリ中で処理されます。
-
-これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
-
-   $SMTP_OPEN_HOOK = q# $e{'Body'} .= "Mail Count: $ID\n\n".$e{'Body'}; #;
-
-注意：このHOOKが走る関数中では %e == %Envelope 
-
-
+.include autoregist.wix
+.include proc.wix
 .include forward.wix
 .include filter.wix
 .include fmlserv.wix
@@ -936,7 +717,6 @@ private communication のファイルを public な場所にファイルを残すことは
 
 
 .S	複数のメーリングリストを作る。
-
 
 INSTALL を見て下さい。メーリングリストを作るには
 
@@ -962,10 +742,10 @@ INSTALL を見て下さい。メーリングリストを作るには
 
 fml は
 
-	config.ph （とその置き場所以下の階層、つまりＭＬのホーム）
+	config.ph (とその置き場所以下の階層、つまりMLのホーム)
 
 ですべての挙動が決まります。つまりこの部分さえ別に保守すれば複数のＭＬ
-はすぐに操作可能です。
+が独立に同時に動くわけです。
 
 
 .S	２つのメーリングリストの運用の設定例
@@ -993,8 +773,7 @@ fml は
 	Elena:	  :include:/usr/local/ml/include/Elena
 	freekick: :include:/usr/local/ml/include/freekick
 
-のように別のアドレス（当たり前）で別の INCLUDE ファイルを呼び出します。
-
+のように別のアドレス（当たり前）で別の include ファイルを呼び出します。
 この場合
 
 	/usr/local/ml/include/Elena は
@@ -1011,7 +790,7 @@ fml は
 に従い、それぞれの directory 以下の階層に記事やログを残すので
 別々のＭＬとして挙動することになります。
 
-○ :include: が使えないＯＳ
+○ :include: が使えないOS
 
 上述のようにfmlの呼び出し方をそれぞれ変えるので、
 setuid program を各ＭＬ用に作ればいいわけです。
@@ -1041,11 +820,14 @@ fml.c を参考にして下さい。fml.c を
 .include archive.wix
 .include expire.wix
 .include href.wix
-.include proc.wix
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
