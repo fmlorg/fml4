@@ -9,6 +9,8 @@
 #
 # q$Id$;
 
+# default "yes"
+local($ConfirmationReplyWithHelpP) = 1;
 
 sub ConfirmationModeInit
 {
@@ -19,6 +21,17 @@ sub ConfirmationModeInit
     # common
     $CONFIRMATION_ADDRESS = $CONFIRMATION_ADDRESS || $e{'CtlAddr:'};
     $CONFIRMATION_EXPIRE  = $CONFIRMATION_EXPIRE || 7*24; # unit is "hour"
+
+    # definition whether we should add help file for confirmation reply?
+    if (! %CONFIRMATION_REPLY_WITH_HELP_P) {
+	%CONFIRMATION_REPLY_WITH_HELP_P = (
+					   'BufferSyntax::Error',       0,
+					   'BufferSyntax::InvalidAddr', 1,
+					   'Confirm::Confirmed',        1,
+					   'Confirm::Error',            1,
+					   'Confirm::GenPreamble',      1,
+					   'Confirm::expired',          1);
+    }
 
     # EXTENTION "unsubscribe" confirmation
     if ($mode eq 'unsubscribe') {
@@ -168,9 +181,15 @@ sub Confirm
 
 	&Mesg(*e, $m);
 
-	if (-f $CONFIRMATION_FILE) {
+ 	if (-f $CONFIRMATION_FILE && $ConfirmationReplyWithHelpP) {
 	    $e{'message:append:files'} = $CONFIRMATION_FILE;
 	}
+	elsif (! $ConfirmationReplyWithHelpP) {
+	    undef $e{'message:append:files'};
+	}
+
+	&Debug("Confirm->\$e{'message:append:files'} = $e{'message:append:files'}")
+	    if $debug;
 
 	# undef $e{"GH:Subject:"};
 	return 0;
@@ -254,6 +273,10 @@ sub GenConfirmReplyText
     if ($CONFIRM_REPLAY_TEXT_FUNCTION) {
 	return &$CONFIRM_REPLAY_TEXT_FUNCTION(@_);
     }
+
+    $ConfirmationReplyWithHelpP = $CONFIRMATION_REPLY_WITH_HELP_P{$mode};
+
+    &Debug("\$ConfirmationReplyWithHelpP=$ConfirmationReplyWithHelpP mode=$mode") if $debug;
 
     if ($mode eq 'Confirm::GenPreamble') {
 	&Mesg(*e, $NULL, 'confirm.auto_regist.preamble',
