@@ -36,7 +36,7 @@ sub AutoRegist
     ##### listserv emulation code;
     # Confirmation Mode; 
     # check the MailBody to search $CONFIRMATION_KEYWORD
-    if ($e{'mode:confirm'}) {
+    if ($e{'mode:artype=confirm'}) {
 	&use('confirm');
 	&ConfirmationModeInit;
 
@@ -483,7 +483,7 @@ sub DoChangeMemberList
     print NEW &GenFmlHeader;
 
     # $c == conserve comment;
-    local($c, $rcpt, $o);
+    local($c, $rcpt, $o, $comment);
 
     in: while (<FILE>) {
 	chop;
@@ -500,9 +500,10 @@ sub DoChangeMemberList
 	# Backward Compatibility.	tricky "^\s".
 	next in if /^#\.FML/o .. /^\#\.endFML/o;
 	if (! /^\#/o) {
-	    undef $c;		# reset comment;
+	    undef $c;		# reset comment (local);
 
-	    s/\s(\#.*)$/$c = $2/e; # comment extension 96/10/08,16;
+	    # comment extension 96/10/08,16; fix 97/05/08
+	    s/\s(\#.*)$/$c = $1, $NULL/e; 
 	    s/\smatome\s+(\S+)/ m=$1 /i;
 	    s/\sskip\s*/ s=skip /i;
 
@@ -512,14 +513,14 @@ sub DoChangeMemberList
 	    s/\s+$/ /g;
 	}
 
-	print STDERR "TRY DChML:[$_]\n" if $debug;
+	&Debug("--change member list($_)") if $debug;
 
 	# Backup
 	print BAK "$_\n";
 	next in if /^\s*$/o;
 
 	# get $addr for ^#\s+$addr$. if ^#, skip process except for 'off' 
-	$addr = '';
+	$comment = $addr = '';
 	if (/^\s*(\S+)\s*(.*)/o)   { $addr = $1;}
 	if (/^\#\s*(\S+)\s*(.*)/o) { $addr = $1;}
 
@@ -533,7 +534,13 @@ sub DoChangeMemberList
 	    next in;
 	}
 
-	# if matched, get "$addr including mx or comments"
+	######################################################
+	### HERE WE GO; $addr == $curaddr (target address)
+	# phase 01: extract $comment;
+	s/\s(\#.*)$/$comment = $1, $NULL/e; 
+
+	# phase 02: if matched, get "$addr including mx or comments"
+	s/\s+/ /g; # "  " -> " ";
 	if (/^\s*(.*)/o)   { $addr = $1;}
 	if (/^\#\s*(.*)/o) { $addr = $1;}
 
@@ -546,42 +553,42 @@ sub DoChangeMemberList
 	# may not be effecient.
 	if ($cmd =~ /^ON|OFF|BYE|SKIP|NOSKIP|MATOME|CHADDR$/) {
 	    # Return to the ML
-	    print NEW "$addr\n" 	if $cmd eq 'ON';
+	    print NEW "$addr $comment\n" 	if $cmd eq 'ON';
 
 	    # Good Bye to the ML temporarily
-	    print NEW "\#\t$addr\n"     if $cmd eq 'OFF';
+	    print NEW "\#\t$addr $comment\n"     if $cmd eq 'OFF';
 
 	    # Good Bye to the ML eternally
-	    print NEW "\#\#BYE $addr\n" if $cmd eq 'BYE';
+	    print NEW "\#\#BYE $addr $comment\n" if $cmd eq 'BYE';
 
 	    # Address to SKIP
-	    print NEW "$addr\ts=skip\n" if $cmd eq 'SKIP';
+	    print NEW "$addr\ts=skip $comment\n" if $cmd eq 'SKIP';
 
  	    # Delete SKIP
 	    if ($cmd eq 'NOSKIP') {
 		$addr =~ s/\ss=(\S+)//ig; # remover s= syntax
-		print NEW "$addr\n"; 
+		print NEW "$addr $comment\n"; 
 	    }
 
 	    # Matome Okuri Control 
 	    # $addr is reset each time, $org_addr is reused after if matome 0
 	    if ($cmd eq 'MATOME') {
 		($addr, $org_addr) = &CtlMatome($addr, *misc);
-		print NEW "$addr\n"; 
+		print NEW "$addr $comment\n"; 
 	    }
 
 	    # Matome Okuri Control
 	    if ($cmd eq 'CHADDR') {
 		&Log("ChangeMemberList:$addr -> $misc");
 		if ($addr =~ /^(\S+)\s*(.*)/o) { $addr = $1; $addr_opt = $2;}
-		print NEW "$misc $addr_opt\n"; 
+		print NEW "$misc $addr_opt $comment\n"; 
 	    }
 
 	    $status = 'done'; 
 	    $log .= "$cmd $addr; "; $log_c++;
 	}# CASE of COMMANDS;
 	else {
-	    print NEW "$_\n"; 
+	    print NEW "$_ $comment\n"; 
 	    &Log("ChangeMemberList:Unknown cmd = $cmd");
 	}
     } # end of while loop;
