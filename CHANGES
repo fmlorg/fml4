@@ -4,6 +4,15 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/05/18
+
+   update IM to 141 + local patch
+
+2002/05/16
+
+   proc/liblop.pl
+	fix header boundary bug (fml-help:01794)
+
 2002/05/01
 
    virus_check.ph
@@ -268,7 +277,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.245 2002/04/14 15:56:50 fukachan Exp $
+	add $FML: CHANGES,v 1.246 2002/05/01 15:06:27 fukachan Exp $
 
 2001/10/03
 
