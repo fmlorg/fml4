@@ -5,6 +5,29 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl14 ]
+
+   DEFINE_FIELD_LOOP_CHECKED()
+   UNDEF_FIELD_LOOP_CHECKED()
+
+	Define DEFINE_FIELD_LOOP_CHECKED() and UNDEF_FIELD_LOOP_CHECKED() to
+	be controllable by maintainer since customer support mailing
+	list may need this function. Define default
+	DEFINE_FIELD_LOOP_CHECKED('from') to be 3.0.1 compatible with
+	3.0's "From: $MAIL_LIST" rejection.
+
+	3.0 では From: $MAIL_LIST はループの可能性を避けるために
+	拒否するようになっているが、サポートＭＬなどでは必要かも知れないので
+	管理者がその設定を解除できるようにする
+
+	update dummy {DEFINE,UNDEF}_FIELD_LOOP_CHECKED()
+		bin/Archive.pl
+		bin/spool2html.pl
+		libexec/fmlserv.pl
+		sbin/makefml
+
+[ 3.0pl13 ]
+
   member_name extension
 	cutoff approve password in logfile
 	(not appear in mail but logfile)
