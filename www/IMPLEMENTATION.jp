@@ -3,6 +3,10 @@
 
 ○ ターゲットの httpd を apache 1.3.9 (apache-ssl) へ
 
+    templateは
+	$EXEC_DIR/www/conf/apache-httpd.conf.diff (apache, apache-ssl)
+
+
 ○ 基本的なディレクトリ構成
 
 たとえば $EXEC_DIR = '/usr/local/fml' 
@@ -13,29 +17,47 @@
 	apache 1.3.9 directory style
 
 	   $EXEC_DIR/www/cgi-bin/
+	   $EXEC_DIR/www/htdocs/
 	   $EXEC_DIR/www/conf/		(apache/conf/httpd.conf example)
 	   $EXEC_DIR/www/etc/		(.ht{access,passwd} example)
-	   $EXEC_DIR/www/htdocs/
+	   $EXEC_DIR/www/db/		パスワードの実体置き場
 
-	   $EXEC_DIR/www/db/
-		パスワードの実体置き場
 
 ○ 基本設定ファイル
 
    require $EXEC_DIR/.fml/system
 	このファイルはCGIからは変更不可
 
-   eval("require $EXEC_DIR/.fml/cgi.conf");
+   eval("require $EXEC_DIR/.fml/cgi.conf") if -f "$EXEC_DIR/.fml/cgi.conf";
 	別にしておく方がいいだろう
 	このファイルはCGIからも変更可能であるべき
 
-○ make install 時に $EXEC_DIR/www/ 以下に構築するだけ構築したい
 
-とりあえず一番上の階層の画面だけは出るように準備をしておく？
-	そこからＭＬを作る/初期化(既存のＭＬをWWWインターフェイスでも？)
-	そこからＭＬを削除	  
+○ インストーラー
 
-   makefml コマンド(下請け)
+1. make install 時に $EXEC_DIR/www/ 以下に admin 用のものだけは最低構
+築する。
+
+	$EXEC_DIR/www/cgi-bin/admin/.htaccess
+		参照するパスワードは $EXEC_DIR/www/db/admin/htpasswd
+
+初期設定は
+
+       User: admin
+   Password: admin
+
+なので、インストールしたらすかさず変更すること:)
+＃注意: htpasswd だけは上書きしてはいけない
+
+2. とりあえず admin (一番上の階層)の画面だけは出るように準備をしておく?
+
+	そこからMLを作る
+	初期化(既存のMLをWWWインターフェイスでも?)
+
+	そこからMLを削除	  
+
+
+○   makefml コマンド(下請け)
 
  * 全体の管理者用 (実装済み)
    makefml admin.cgi
@@ -44,17 +66,21 @@
 			menu.cgi
 			makefml.cgi
 
- * 各ＭＬの管理者用 (実装済み)
+ * 各MLの管理者用 (実装済み)
    makefml mladmin.cgi $ml
 
 	$EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/ 以下にCGIを生成
 			menu.cgi
 			makefml.cgi
 
- * 一般ユーザ用のはどうする？ (未実装)
-   makefml ml.cgi $ml とかにするのか？
+ * 一般ユーザ用のはどうする? (未実装)
+   makefml ml.cgi $ml とかにするのか?
 
-       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/ (仮) 以下にCGIを生成？
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/subscribe/ (without .htaccess)
+
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/$command/  (with .htaccess)
+		or
+       $EXEC_DIR/www/cgi-bin/fml/ml/$ml/command/command.cgi ? (with .htaccess)
 
 
 ○ 各ディレクトリの権限
@@ -64,16 +90,16 @@
 	そのホスト上で makefml を使える人
 	つまり何でもできる権限がある人と等価
 
-	各ＭＬの管理者とは別の集合である可能性がある
+	各MLの管理者とは別の集合である可能性がある
 	よってパスワードは別途設定するべき(特にインストール時)
 
    $EXEC_DIR/www/cgi-bin/fml/ml-admin/$ml/
 
-	各ＭＬの管理者の権限
+	各MLの管理者の権限
 	メーリングリストサーバのホストに入れるとは限らない
 
 	パスワード認証をともなうべきで
-	adminコマンドと同じパスワード？
+	adminコマンドと同じパスワード?
  
    $EXEC_DIR/www/cgi-bin/fml/ml/$ml/ (仮)
 
