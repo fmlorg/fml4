@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: ntfml.pl,v 1.3 2001/05/09 15:23:00 fukachan Exp $
+# $FML$
 #
 
 ### MAIN
@@ -34,7 +34,7 @@ for (;;) {
 
 	&Log("start $ml pop session") if $debug;
 
-	sleep(1);
+	sleep($SLEEP_UNIT) if $SLEEP_UNIT;
 	$p = &ArrangeProc($ml, " -mode POP_ONLY");
 	system $p;
     }
@@ -46,7 +46,7 @@ for (;;) {
 
 	&Log("start $ml exec session") if $debug;
 
-	sleep(1);
+	sleep($SLEEP_UNIT) if $SLEEP_UNIT;
 	$p = &ArrangeProc($ml, " -mode EXEC_ONLY_ONCE");
 	system $p;
     }
@@ -68,7 +68,7 @@ for (;;) {
 	    
 	    &Log("start $ml msend session") if $debug;
 
-	    sleep(1);
+	    sleep($SLEEP_UNIT) if $SLEEP_UNIT;
 	    $p = &ArrangeMSendProc($ml);
 	    system $p;
 	}
@@ -177,6 +177,7 @@ sub Init
     $debug       = $opt_d;
     $debug_msend = $opt_o eq 'debug_msend' ? 1 : 0;
     $LOOP_UNIT   = $opt_u || 60*3;
+    $SLEEP_UNIT  = int($LOOP_UNIT /100); # 1 by default
 
     ### COMPAT CODE ###
     if ($ENV{'OS'} =~ /Windows_NT/) {
