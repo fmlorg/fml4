@@ -836,7 +836,7 @@ sub DoChangeMemberList
 	    # Matome Okuri Control 
 	    # $addr is reset each time, $org_addr is reused after if matome 0
 	    if ($cmd eq 'MATOME') {
-		($addr, $org_addr) = &CtlMatome($addr, *misc);
+		($addr, $org_addr) = &CtlMatome($addr, $curaddr, *misc);
 		print NEW "$cbuf$addr $comment\n";
 	    }
 
@@ -915,7 +915,7 @@ sub DoChangeMemberList
 
 sub CtlMatome
 {
-    local($a, *m)    = @_;
+    local($a, $curaddr, *m)    = @_;
     local($matome)   = $m;	# set value(0 implies Realtime deliver)
     local($org_addr) = $a;	# save excursion
     local($s);
@@ -940,6 +940,9 @@ sub CtlMatome
     }
     elsif ($matome == 0) {
 	$matome = 'RealTime';
+    }
+    elsif (&ProbeMSendRC($curaddr)) {
+	$NotAppendMsendRc = 1;
     }
     else { # modify ?
 	# $NotAppendMsendRc = 1;
@@ -1003,6 +1006,19 @@ sub Rehash
     ($l <= $r) && &ProcMgetMakeList('Rehash:EntryIn', *fld);
 
     1;
+}
+
+
+sub ProbeMSendRC
+{
+    local($a) = @_;
+
+    if (-f $MSEND_RC) {
+	&Lookup($a, $MSEND_RC) ? 1 : 0;
+    }
+    else {
+	0;
+    }
 }
 
 
