@@ -36,10 +36,10 @@ sub DoSetAdminMode
 
     # touch
     -f $PASSWD_FILE || &Touch($PASSWD_FILE);
-
+    
     # pgp mode is not required of member check.
     if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp" ||
-	&CheckMember($curaddr, $ADMIN_MEMBER_LIST)) {
+	&MailListAdminMemberP($curaddr)) {
 	$e{'mode:admin'} = 1;	# AUTHENTICATED, SET MODE ADMIN
 
 	$status = &AdminCommand(*Fld, *e);
@@ -95,7 +95,7 @@ sub DoApprove
 
     # member check
     if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "pgp" ||
-	&CheckMember($curaddr, $ADMIN_MEMBER_LIST)) {
+	&MailListAdminMemberP($curaddr)) {
 	;
     }
     else {
@@ -536,8 +536,8 @@ sub ProcAdminInitPasswd
     $s =~ s/$proc\s+(\S+)\s+(\S+).*/$who = $1, $pass = $2/e;
 
     &Log("admin $proc ${who}\'s password.");
-
-    if (! &CheckMember($who, $ADMIN_MEMBER_LIST)) {
+    
+    if (! &MailListAdminMemberP($who)) {
 	&Mesg(*e, 'not a remote maintainer', 'auth.admin_not_member');
 	return 0;
     }
