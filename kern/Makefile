@@ -1,31 +1,77 @@
 # fml Makefile
+#
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+#
 # $Id$
 
 CC 	  = cc
 CFLAGS	  = -s -O
 SH	  = /bin/sh
-PWD       = /home/beth/fukachan/w/fml
+PWD       = `pwd`
 CONFIG_PH = ./config.ph
-#XXFMLDIR  = $(PWD)
-XXFMLDIR  = /home/beth/fukachan/w/fml
-HOME      = /home/beth/fukachan
+GENHOST   = _`hostname`_
 
 include usr/mk/prog
 
 
-all:	fml.c fml.pl config.ph
+all:	fml.c src/fml.pl config.ph
 	perl sbin/ccfml $(CC) $(CFLAGS) $(OPTS) fml.c -o fml
 	chmod 4755 fml
-	chmod 755 *.pl
+	chmod 755 src/fml.pl src/msend.pl sbin/* bin/* libexec/*
+	@ if [ ! -f etc/config.ph.org -a -f config.ph ];then \
+		echo "";echo "*** backuping config.ph at etc/config.ph.org";\
+		cp -p config.ph etc/config.ph.org;\
+	  elif [ -f config.ph ] ; then \
+		echo "";echo "*** backuping config.ph at tmp/config.ph.org";\
+		cp -p config.ph tmp/config.ph.org;\
+	  fi
+	@ touch config.ph
+	@ perl sbin/compat_p.pl > cf/__compat__
 	@ echo " "
-	@ echo "Generating sample settings"
-	perl ./sbin/gen-samples.pl $(CONFIG_PH) $(XXFMLDIR)
+	@ cp /dev/null cf/$(GENHOST)
+	@ if [ "X$(MAIL_LIST)" != "X" ];  then \
+		echo MAIL_LIST	$(MAIL_LIST)  >> cf/$(GENHOST);\
+		echo MAINTAINER	$(MAINTAINER) >> cf/$(GENHOST);\
+		perl sbin/compat_p.pl	      >> cf/$(GENHOST);\
+	  fi
+	@ echo "Reconfiguring fml to fit your environment ... "
+	@ if [ -s cf/$(GENHOST) ]; then \
+		echo "	Generating your config.ph from cf/$(GENHOST) ... "; \
+		echo "	perl cf/config cf/$(GENHOST) > config.ph"; \
+		echo ""; \
+		perl cf/config cf/$(GENHOST) > config.ph; \
+	  fi
+	@ perl cf/config -c -I cf/compat.ignore > src/libcompat_cf1.pl 
 	@ echo " "
-	@ echo "Configure..."
+	@ (perl etc/samples/configure.pl etc/samples/[ai]* \
+		etc/samples/crontab |tee tmp/samples)
+	@ perl cf/config -F cf/command > samples/sitedef.ph
+	@ echo "		samples/sitedef.ph" | tee -a tmp/samples
+	@ echo " "
+	@ echo "Configure..."; echo " ";
 	( SH=$(SH); export SH; $(SH) ./sbin/configure_fml2 )
-#	( SH=$(SH); export SH; $(SH) ./sbin/configure_fml )
 	@ echo " "
 	@ if [ -f etc/motd ]; then cat etc/motd; fi
+
+
+
+
+# @ echo "Generating sample settings"
+# perl ./sbin/gen-samples.pl $(CONFIG_PH) $(FMLDIR)
+#	( SH=$(SH); export SH; $(SH) ./sbin/configure_fml )
+
+fixenv:
+	@ echo " "
+	@ echo "Reconfiguring fml to fit your environment ... "
+	@ perl cf/config -c -I cf/compat.ignore > src/libcompat_cf1.pl 
+	@ echo " "
+
+sampels: sample
+sample:
+	@ (perl etc/samples/configure.pl etc/samples/[ai]*)
 
 newconfig:
 	perl cf/config cf/Elena > config.ph
@@ -35,7 +81,20 @@ reconfig: fml.c
 	chmod 4755 fml
 	chmod 755 *.pl
 
-localtest:
+dns_check:
+	@ perl bin/dns_check.pl
+
+localtest: 
+	@ echo " "
+	@ echo "LOCALLY CLOSED TEST in DEBUG MODE(-d option)"
+	@ echo "perl sbin/localtest.pl | perl $(PWD)src/fml.pl -d $(PWD) "
+	@ echo " "
+	@ echo IF YOU WOULD LIKE TO TEST THE DELIVERY WITHOUT Sendmail
+	@ echo JUST TYPE
+	@ echo "perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -udebug $(PWD)"
+	@ echo " "
+	@ echo " "
+	@ echo "O.K.?(wait 3 sec.)"; sleep 3;
 	@ echo INPUT:
 	@ echo "-----------------------------------"
 	@ perl sbin/localtest.pl 
@@ -43,20 +102,18 @@ localtest:
 	@ echo " "
 	@ echo " "
 	@ echo " "
-	@ echo OUTPUT: debug info from fml.pl 
+	@ echo "This Header O.K.?(wait 3 sec.)"; sleep 3;
+	@ echo OUTPUT: debug info from src/fml.pl 
+	@ echo "   *** DEBUG MODE! ***  "
 	@ echo "-----------------------------------"
-	perl sbin/localtest.pl | perl fml.pl $(PWD) $(PWD)
-
+	perl sbin/localtest.pl | perl $(PWD)/src/fml.pl -d $(PWD) 
+	@ echo "   DEBUG MODE!   "
+	@ echo "-----------------------------------"
 
 link:	etc/list_of_use
 	(cd lib/perl; ln `cat ../../etc/list_of_use` .)
 
-doc: 	html
-
-html:	doc/smm/op.wix
-	@ echo "Making WWW pages of doc/smm/op => var/html/op"
-	@ test -d var/html/op || mkdir var/html/op
-	@ perl bin/fwix.pl -T smm/op -m html -D var/html/op -I doc/smm doc/smm/op.wix
+doc: 	htmldoc
 
 roff:	doc/smm/op.wix
 	@ echo "Making nroff of doc/smm/op => var/man"
@@ -75,89 +132,54 @@ versionup:
 allclean: clean cleanfr
 
 clean:
-	gar *~ _* proc/*~ tmp/mget* core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*:*.[0-9]
+	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9]
 
 cleanfr:
-	gar *.frbak proc/*.frbak
+	gar *.frbak */*.frbak
+
+
 
 DISTRIB: distrib 
-#DISTRIB: distrib export archive versionup 
-### CUT OUT HEREAFTER WHEN RELEASE
+### ATTENTION! CUT OUT HEREAFTER WHEN RELEASE
+#
+# OLD# 
+#     DISTRIB: distrib export archive versionup 
+#     fj: distrib archive fj.sources
 
-fj: distrib archive fj.sources
+local: distrib 
 
-
-local:  local-update
-local-update:  distrib UpDate
-snap: DISTRIB SNAPSHOT
-
-update:  DISTRIB SNAPSHOT UpDate sid_update fml_local_update
-#snapshot: DISTRIB SNAPSHOT sid_update fml_local_update
+dist:	distrib 
+distrib:
+	(/bin/sh usr/sbin/release.sh 2>&1| tee /var/tmp/_distrib.log)
+	@ usr/sbin/error_report.sh /var/tmp/_distrib.log
 
 snapshot: 
-	(/bin/sh usr/sbin/release.sh 2>&1| tee /var/tmp/release.log)
+	(/bin/sh usr/sbin/release.sh -ip 2>&1| tee /var/tmp/_release.log)
+	@ usr/sbin/error_report.sh /var/tmp/_release.log
 
-export:
+faq:	 plaindoc
+textdoc: plaindoc
 
-#	(cd ../distrib/; RCP2 -h beth -d .ftp/pub/net/fml-current/snapshot .)
-
-mirror:
-	(cd ..; \
-	 tar cvf - EXP |gzip > EXP.tar.gz; \
-	 RCP2 -h paffy.hss -d work 		EXP.tar.gz; \
-	 rcp EXP.tar.gz exelion:/var/local ; \
-	 rm -f EXP.tar.gz;\
-	)
-
-UpDate:  $(SOURCES)
-	@ echo "if [ ! -d $(UPDIR)/distrib ]; then ln -s $(UPDIR)/fml-$(RCSID) $(UPDIR)/distrib ;fi"
-	@ if [ ! -d $(UPDIR)/distrib ]; then ln -s $(UPDIR)/fml-$(RCSID) $(UPDIR)/distrib ;fi
-	@ (cd $(FML);perl usr/sbin/lock4update.pl 'cd ../lib;./UpDate;cd ../SID;./UpDate')
-
-sid_update:
-	(cd $(FML); sh usr/sbin/make-sid.sh)
-	
-fml_local_update:
-	(cd $(FML); sh usr/sbin/make-fmllocal.sh)
-
-SNAPSHOT: uuencode ftp
-
-uuencode:
-	@ echo "uuencode ../fml-$(RCSID)$(LIBID).tar.gz fml-$(RCSID)$(LIBID)_$(DATE).tar.gz > ../fml-current/fml-current"
-	@ uuencode ../fml-$(RCSID)$(LIBID).tar.gz fml-$(RCSID)$(LIBID)_$(DATE).tar.gz > ../fml-current/fml-current
-
-ftp:
-	@ echo "$(FML)/usr/sbin/UpDate_in_A_FTP fml-$(RCSID)$(LIBID).tar.gz fml-current.$(DATE).tar.gz"
-#	@ rsh ftp "$(FML)/usr/sbin/UpDate_in_A_FTP \"fml-$(RCSID)$(LIBID).tar.gz\" fml-current.$(DATE).tar.gz"
-#	@ rsh beth "$(FML)/usr/sbin/UpDate_in_A_FTP \"fml-$(RCSID)$(LIBID).tar.gz\" fml-current.$(DATE).tar.gz"
-
-#cur-chk:
-#	rsh ftp "cd /usr/local/ftp/pub/net/fml-current; ls -l;"
-
-SID:
-	sh $(FML)/usr/sbin/make-sid.sh
-
-faq:	make-faq
-make-faq: doc/smm/op.wix
+plaindoc: doc/smm/op.wix
+	@ if [ ! -d /var/tmp/.fml ]; then mkdir /var/tmp/.fml; fi
+	@ rm -f /var/tmp/.fml/INFO
+	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README) |\
+		nkf -e > /var/tmp/.fml/INFO
 	@ sh usr/sbin/sync-rcs-of-doc.sh
-	@ (echo -n "Last modified: "; date) > /tmp/__TMP__
-	@ (echo -n "	Last modified: "; date) > /tmp/__TMP2__
 	@ sh usr/sbin/DocReconfigure
-	@ rm -f /tmp/__TMP__ /tmp/__TMP2__
 
-
-distrib: message fix-include fix-rcsid make-faq dist
-
-compat:
-	perl cf/config -c > proc/libcompat_cf1.pl
+htmldoc:	doc/smm/op.wix
+	@ echo "Making WWW pages of doc/smm/op => var/html/op"
+	@ test -d var/html/op || mkdir var/html/op
+	@ perl doc/ri/conv-install.pl < doc/ri/INSTALL > doc/smm/install-new.wix 
+	@ perl usr/sbin/fix-wix.pl doc/smm/op.wix |\
+	  perl bin/fwix.pl -T smm/op -m html -D var/html/op -I doc/smm
+	@ echo "Please see ./var/html/index.html for html version documents"
 
 message: 
 	@echo  "" 
-	@echo  "YOU USE        gmake        ? O.K.?" 
-	@echo  "" 
-
-#@rm -f $(UPDIR)/distrib $(UPDIR)/fml-$(RCSID)
-#@echo  "" 
+#	@echo  "YOU USE        gmake        ? O.K.?" 
+#	@echo  "" 
 
 fix-rcsid:
 	@ echo " "; echo "Fixing rcsid ... " 
@@ -165,55 +187,13 @@ fix-rcsid:
 	@ chmod 755 *.pl bin/*.pl sbin/*.pl libexec/*.pl 
 	@ echo " Done. " 
 
-
-dist: compat $(SOURCES)
-	@ (chdir var/run; version.pl)
-	(BIN_SOURCES="$(BIN_SOURCES)"; export BIN_SOURCES;\
-	DOC="$(DOC)"; export DOC;\
-	HOME="$(HOME)"; export HOME;\
-	MDOC="$(MDOC)"; export MDOC;\
-	OLDSOURCES="$(OLDSOURCES)"; export OLDSOURCES;\
-	PWD="$(PWD)"; export PWD;\
-	SOURCES="$(SOURCES)"; export SOURCES;\
-	TMP="$(TMP)"; export TMP;\
-	UPDIR="$(UPDIR)"; export UPDIR;\
-	sh usr/sbin/make-distribution.sh )
-	@ echo " "
-	@ echo "Fixing Makefile"
-	sed '/^DISTRIB/,$$d' Makefile | sed 's/gar/rm \-f/' |\
-	sed '/^include/'d > $(UPDIR)/distrib/Makefile
-
-archive:
-	@ (chdir var/run; version.pl)
-	if [ ! -d $(UPDIR)/distrib ]; then ln -s $(UPDIR)/fml-$(RCSID) $(UPDIR)/distrib ;fi
-	@ echo  "LIBID = " $(LIBID)
-	@ echo -n Fixing Directory ...
-	@ /bin/sh usr/sbin/MoveDir $(UPDIR) $(TRASH) $(RCSID)
-	@ echo done.; echo " "
-	@ echo "(cd $(UPDIR); mv distrib fml-$(RCSID))"
-	@ (cd $(UPDIR); mv distrib fml-$(RCSID))
-	@ echo "(cd $(UPDIR); ln -s fml-$(RCSID) distrib)"
-	@ (cd $(UPDIR); ln -s fml-$(RCSID) distrib)
-	@ echo "(cd $(UPDIR); tar cvf fml-$(RCSID)$(LIBID).tar fml-$(RCSID) )"
-	@ (cd $(UPDIR); tar cvf fml-$(RCSID)$(LIBID).tar fml-$(RCSID))
-	@ echo "(cd $(UPDIR); gzip -9 -f fml-$(RCSID)$(LIBID).tar)"
-	@ (cd $(UPDIR); gzip -9 -f fml-$(RCSID)$(LIBID).tar)
-
-fj.sources:
-
-
-print:	fml.pl pmail.pl libsmtp.pl liblock.pl libfml.pl split_and_sendmail.pl libsendfile.pl setup.pl config.ph 
-	ra2ps fml.pl libfml.pl config.ph README INSTALL FILES FAQ | lpr -St
-
-#doc:	fml.pl pmail.pl libsmtp.pl liblock.pl libfml.pl split_and_sendmail.pl libsendfile.pl setup.pl config.ph 
-#	ra2ps README INSTALL FAQ config.ph| lpr -St
-
 contents: FAQ
 	sed -n '/Appendix/,$$p' FAQ |\
 	egrep '^[0-9]\.' | perl -nle '/^\d\.\s/ && print ""; print $_'
 
 check:	fml.pl
-	(for x in *.pl proc/*.p? libexec/*.p? ; do perl -c $$x;done)
+	(for x in *.pl proc/*.p? libexec/*.p? ; do perl -c $$x; perl5.003 -c $$x ;done)
+	@ echo "gmake varcheck IS ALSO USEFUL"
 #	(for x in `sh sbin/bin.list.sh` ; do perl -c $$x;done)
 
 c:	*.p?
@@ -222,17 +202,6 @@ c:	*.p?
 
 C:
 	rsh beth "cd $(PWD); make c"
-
-vivian: 
-	(chdir ..; tar chf - EXP/*.pl EXP/*bin*/*.pl EXP/libexec/*.pl) |\
-	rsh vivian.psy.titech.ac.jp 'chdir work; tar xvhf -'
-
-paffy: 
-	(chdir ..; tar chf - EXP/*.pl EXP/*bin*/*.pl EXP/libexec/*.pl) |\
-	rsh paffy.psy.titech.ac.jp 'chdir work; tar xvhf -'
-
-fml.local:
-	RCP2 -h vivian.psy -d work/EXP/libexec libexec/fml_local.pl
 
 fix-include: 
 	sh usr/sbin/fix-include.sh
@@ -271,3 +240,44 @@ capital:
 
 
 
+test:
+	h.pl | $(HOME)/libexec/fml/fml.pl $(FML) -d --distribute
+	(h.pl; echo "# mget last:2 mp") |\
+	 $(HOME)/libexec/fml/fml.pl $(FML) -d --caok
+
+syncwww:
+	sh usr/sbin/syncwww
+
+bethdoc: newdoc
+newdoc: plaindoc htmldoc syncwww
+
+varcheck:
+	perl usr/sbin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
+	tee tmp/VARLIST
+	@ wc tmp/VARLIST
+
+v2: varcheck2
+
+varcheck2:
+	perl usr/sbin/search-config-variables.pl -E -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
+	tee tmp/VARLIST
+	@ wc tmp/VARLIST
+
+v3:
+	perl usr/sbin/search-config-variables.pl \
+	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
+	tee tmp/VARLIST
+	@ wc tmp/VARLIST
+sync:
+	rcp -p /tmp/distrib/src/*.pl eriko:~/.fml
+
+TEST:
+	tar cf - `find etc/ sbin |grep -v RCS` | ( chdir /tmp/distrib ; tar xvf - )
+
+ruby:
+	tar cf - bin cf *.p? etc libexec proc sbin |\
+	/usr/bin/rsh ruby 'chdir /usr/local/fml; tar xvf -'
+
+
+makefml:
+	sh usr/sbin/reset-makefml
