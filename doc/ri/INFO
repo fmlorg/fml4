@@ -1,9 +1,6 @@
-fml Mailing List Packeges release revison 2.2A Bulletin
-
+fml Mailing List Packeges release revison 2.2.1 Bulletin
 
 				深町 賢一
-				fukachan@fml.org
-				fukachan@sapporo.iij.ad.jp
 
 ○ メーリングリストなど
 
@@ -28,13 +25,17 @@ fml Mailing List Packeges release revison 2.2A Bulletin
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-の下です。
-(名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ)
+の下です。ファイル名はfml-current.日付.tar.gzです。日付の新しいのを使っ
+てみて下さい。過去の正式リリースは
 
-WWW が使えるなら
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml/
+
+の下にあります。WWWでは
 
 	http://www.sapporo.iij.ad.jp/staff/fukachan/
 	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 
 という「ＭＬサーバの設計と実装」というところからたどって下さい。そこで
 最新版のドキュメントやらソースやらが見られます。
+
+	http://www.sapporo.iij.ad.jp/staff/fukachan/archive/
