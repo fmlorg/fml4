@@ -1,11 +1,14 @@
 .HTML_PRE
-			README
+	README
+	--- fml Mailing List Server Package ---
 
-
-fml Mailing List Server Package 
 
 				深町 賢一
+=E
+				Ken'ichi Fukamachi
+==
 				fukachan@sapporo.iij.ad.jp
+
 
 .~HTML_PRE
 
@@ -13,12 +16,8 @@ fml Mailing List Server Package
 
 
 
-
-.C	fml Introduction
-=E.C	fml Introduction
-
-.S	fml 2.1 Overview
-=E.S	fml 2.1 Overview
+.C	Introduction
+=E.C	Introduction
 
 fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 僕が壱から Full Scratch したものです。
@@ -26,73 +25,130 @@ fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 ＃言い回しですよね…
 
 =E 
-Fml 2.1 is the Mailing List Server package I've coded. It consists of
-perl scripts.
+Fml 2.1 is a package of Mailing List Server functions. 
+It consists mainly of perl scripts.
 
-ML server 本体、ML management tool、.forward や POP経由でのMLを実行等
-メールを使う各種インターフェイスの集合体です。
+ML server 本体、ML management tool、.forward や POP経由でのMLの実行等
+メールを利用する機能全般を統一的に扱うための各種インターフェイスの集合
+体です。
 
 =E
-Fml consits of several ML Servers 
+Fml consits of several Mailing List functions
+=S
 	distributer
 	serveral useful commands
-	Listserv(or majordomo) Interface for Fml system
+	Listserv (or majordomo) Interface for Fml system
 	ML using POP(and cron) or .forward
 	
-これは（歴史的理由により）デフォールトでは hml 1.6 のEmulationをします。
+新規の場合でも、replaceする場合でも、設定次第でユーザ・ＭＬ管理者双方
+に使い勝手が便利or今までと同じになるように作動させることができるでしょ
+う。
+
+いくつかのものについては簡単に見かけを合わせる用意がされています。
+例: hml 1.6-like, listserv-like, ...
+
+(歴史的理由により)デフォールトでは hml 1.6 のEmulationをします。
 ＃正確にはその元祖の shell script の program というべきであらう
 
-設定すればユーザにとってもＭＬ管理者にとっても使い勝手が同じになるよう
-に作動させることができます。
-
 =E
-Fml has been developed and begin developed as servers seen as the same
-for users who have used a lot of several tools.
-To integrate a lot of Fml functions, Fml has a lot of interfaces which 
-use the same fml library functions.
-Fml can emulate such as hml 1.6, listserv(or majordomo) ...
+Fml has been developed and being developed as the same outlook 
+as similar tools. 
+Fml has integrated a log of functions to offer different interfaces
+which use the same fml library functions.
+Fml can emulate such as hml 1.6, listserv (or majordomo) ...
 
-=E 
+fml は基本的な"MTAからprogとして起動"なサーバだけでなくさまざまな実行
+方式および互換インターフェイスの提供をします。例えば
 
+○配送の仕方
+=E
+* The ways of delivery
+=S
+   Matome Okuri (Digest Delivery) controls 
 
-デフォールトの挙動はそうですが、それ以外にも様々な動作の実行および互換
-インターフェイスの提供ができます。例えば
+メールをリアルタイムに配送する(普通の配送)だけでなく、『まとめおくり』
+つまり『一定時間ごとにためてまとめておくる』ことができます。
+当然各ユーザごとに時間・複数メールの圧縮の仕方を各ユーザが設定できます。
 
-	○ まとめおくり等の配送の仕方の制御
-	   メールをリアルタイムに配送したり、
-	   一定時間ごとにためてまとめておくる
+○サーバの様々な運用の設定
+=E
+* The ways of server operations
+=S
+	Several Delivery Mode
+		Distribution only
+		Command Only
+		Member-Check(closed) or Auto-Registration (Auto Subscription)
+		Remote Administratoin
+		Moderated
+	Attention! For mainly historically reason, the default mode is 
+		ML address recognize distribution and commands 
+		(a command is a line begin with "#")
 
-	○ 様々なモード(配送・管理の仕方)
-	   リモート管理、moderated、member check、自動登録、
-	   コマンド機能等を一切使わずにフォワードするだけ
-	   (配送だけして "spoolingするaliasesと同じ") 等…
+デフォールトはＭＬのアドレスに来たら配送、"# command" syntaxはコマンド
+実行ですが、
 
-	○ listserv or majordomo インターフェイス
-	   みかけがあたかも listserv のように fml のコマンド群を使う
+	リモートでサーバのメインテナンス(管理)
+	moderated にする（メールは管理者が一回査読してからＭＬで配送）
+	メンバーチェックをする(closed) or 自動登録
+	ＭＬのアドレスでコマンドも実行できてしまう、コマンドだけ、配送だけ
+	＃配送だけ ==  "spoolingするaliasesと同じ" ですね
 
-	○ forward での ML のための仕組み (slocal や vacation)
-	   .forward に仕掛けて slocal や
-	   .forward から fml の機能を使うことで自分のaccountでMLを実行
+	ＭＬの記事のスプールを
+		HTML へ自動変換しながら走る(スレッド処理もする)
+		古い記事を消しながら走る
 
-	○ 様々な Emulation コード
-	   (歴史的にDefaultでは) hml のコマンドシンタックスを理解する
+	…
+等各種選択できます。
 
-等は簡単に実行できます。
+○ インターフェイス
+=E
+* Several Interfaces 
 
-それ以外には、例えばリモートで ML を管理や HTML へ変換してスプールする
-とか自動的に expire しながら走る等さまざまな機能はモジュールとして配布
-パッケージにセットにされています。
+	listserv or majordomo インターフェイス
 
-必要に応じて、コマンドラインオプションか Configuration file で機能の追
-加・削減を行うことができます。
+つまり、みかけがあたかも listserv のように fml のコマンド機能が使える
+
+	.forward 
+
+当然 .forward でＭＬは作れるんですが、.forward から実行の際条件分岐す
+るためのインターフェイス(でも結局slocalと同じになっちゃったから…)
+	
+○ 様々な Emulation 
+=E
+* Several Emulation Codes
+
+○ Dynamic Loading 
+=E
+* Dynamic Loading 
+=S
+Fml consists of several modules and dynamic-load thme when required.
+Hence you have only to replace them when version up.
+
+securityやsimple is bestという観点から、機能の拡張(設定の変更)は明示的
+に(意識的に)行なわれるべきです。また要らないコードを呼ぶべきでもないで
+しょう。
+
+必要に応じて、コマンドラインオプションか Configuration file での設定で
+機能の追加・削減を行うことができます。
+
+デフォールトでは配送とユーザのためのコマンド(詳しくはhelp等を参照して
+下さい)です。明示的に設定をすると他の機能が使えます。必要な時に必要な
+programを動的に実行するようになっています。
+
+○ その他
 
 要はインターフェイスだけを変えて、ユーザにとってどう見えるか？という部
 分を用意すればよいので、様々なコマンド、ライブラリ群を好きなインターフェ
 イスで使えるということです。
 
-
-.S	目的
-=E.S	Objective
+○ 理想…
+=E
+* Toward ...
+=S
+fml has been designed and developed for you who will create ML's and
+enjoys doing hacks of ML server:-). 
+fml offers fundamental functions which the present environment demands
+on for the ML.
 
 これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
 いたいとおもっている方には改造の PLATFORM として利用していただけるかと
@@ -104,9 +160,23 @@ Fml can emulate such as hml 1.6, listserv(or majordomo) ...
    『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
    『「明示的な指定があって初めて機能は増やすべきである」と
    「管理者のルーチンワークを少しでも減らす」間の妥協』
-です。
-
-			＊＊＊注意＊＊＊ 
+といえるでしょう。
+=E
+fml has been developed to offer 
+=S
+	automatic-maintained as could as possible 
+	to release administrators from the cost of the maintenace
+=S
+	the balance of functions between automatic(less maintenance by hand)
+	and convenicence
+	When you hope more convenience, 
+	fml should soon offer the useful functions.
+=S	
+	A user can use the ML server by his way as could as possible.
+	
+○ ＊＊＊ 注意 ＊＊＊ 
+=E
+Attention!
 
 各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
 カルな再配送』のような場合はコマンド機能を落して使うほうがよいでしょう。
@@ -114,76 +184,161 @@ Fml can emulate such as hml 1.6, listserv(or majordomo) ...
    ip-connection を受けるアドレスに使う時は --distribute モードで使う
 
 
-.S	インストール
-=E.S	Install
 
-=E
-To install Fml system, 
-	perl makefml
-when you make a new ML 
-	perl makefml newml ML
-e.g. to make elena@your-domain mailng list
-	perl makefml newml elena
-
-=E
-Please see the file INSTALL for the detail.
+.C	インストール
+=E.C	Install
 
 とりあえず細かいチューニングを行なわなくてよいなら
+=E
+The simplest way to install Fml system is to do in the top directory
+of the fml source
+# Hence a lot of variables are pre-defined.
 
-	 perl makefml 
+	perl makefml 
+
+=E
+when you make a new ML 
+=S
+	perl makefml newml ML-Name
+=S
+e.g. to make elena@your-domain mailng list
+=S
+	perl makefml newml elena
 
 ことで、インストールをします。ML の作成は
 
 	perl makefml newml ＭＬの名前
 
 で何個でも作れます。説明は INSTALL というファイルを見て下さい。
+=E
+Please see the file INSTALL for the detail.
 
+これだけで十分動くようになりますが、簡単な分、初心者用にいろいろな値を
+決め打ちしています。もう少し好みのインストールがしたい場合は 
+INSTALL_advanced というファイルを見て下さい。
+＃ INSTALL_advanced が昔のINSTALLです＞昔からの人:-)
+=E
+INSTALL_advanced is a document for you to customize more closely.
+
+今時最初からOSに入ってるとおもいますが perl は必須です。
+また、sendmail のようなSMTPを理解してくれるサーバが必要です。
+=E
+fml requires perl and MTA like a sendmail which recongizes SMTP(Simple
+Mail Transfer Protocol).
+
+自分のマシンで sendmail が走っている必要は必ずしもありませんし、SMTPを
+喋れるなら sendmail である必要もありません。pop を使ってＭＬを動かすこ
+ともできますし、sendmail以外のMTAもありますから拘る必要はありませんが、
+4.4BSD がターゲットマシンなので sendmail + perl を想定してドキュメント
+の大部分は書いてあります。
+=E
+Sendmail on your machine do not have to run, but your site should be
+at least one machine where MTA like a sendmail runs. 
+Since the target machine is 4.4BSD, the document is based on sendmail
++ perl enveironment.
+
+実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
+ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
+プロバイダ等では違うこともありえます。その辺の詳細は自分の環境の管理者
+の方に聞いて下さい。
+
+
+.C	Information
+=E.C	Information
 
 .S	Update や bug fix 等の情報について
-=E.S	Information on updates and bug-fixed
+=E.S	on updates and bug-fixes of sources
 
-できるだけ最新版の fml-current のソースコードを手に入れてから改造等は
-していただけるとよろしいかと存じます (_o_)
+この手の外とInteractionを行なうプログラムはなんでもそうですが、最新版
+のソースコードを手に入れて使うべきだとおもいます。
+また、改造も最新版についてしていただけるとよろしいかと存じます (_o_)
 
-○ fml のWWWのページは 
+=E
+Please use the latest version since programs which contact external
+worlds should be always latest e.g. for security, evoluting
+environments, ....
+Hence it is better to do hasks latest version if you like(^^). 
+
+.S	fmlのホームページ
+=E.S	The home page of the fml 
+
 =E
 The HOME PAGE of the Fml is 
 
 	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 
 =E
-You can obtaion the latest (fml-current) documents and sources.
+You can obtaion the latest (fml-current) documents and sources here.
 
-最新のドキュメント、ソースともにここに揃っています。 
+最新のドキュメント・ソース共にここに揃っています。 
 
-○ fml@axion.phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を
-返すようにしてあります。
+
+.S	最新の情報
+=E.S	How to get the latest information
+
+=E 
+You can obtain the latest information on fml to send a mail (any body
+is O.K.) to the address
+
+	fml@axion.phys.titech.ac.jp
+
+へ何でもいいからメールを送ると最新情報を返すようにしてあります。
 ＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
+=E
+Sorry for may slow updates of documents...
+=S
+You could see the latest topics on fml-support Mailing Lists and fml
+Home page
 
-○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
-可能です。ftp が使えない場合メールでは、なんでもいいからメールを
-fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
-＃自動的に分割して送り返します。
+最新のネタは MLで聞くか、fml のホームページを覗いてみるというのも有効
+です(^^)。
 
 
-.S	Anonymous ftp でのソースの入手方法 
+.S	ソースの入手方法 
+=E.S	how to obtain the source on the Anonymous ftp
 
-国内、国外共にマスターサーバは
+最新版のfml-currentのソースコードは、以下の anonymous ftp から入手可能
+です。国内、国外共にマスターサーバは
+=E
+You can obtain sources at the URL
 
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 
-です。名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
+です。ファイル名はfml-current.日付.tar.gzですので、日付の新しい生きの
+いい:-)のをどうぞ。
+
+ftp が使えない場合メールでは、なんでもいいからメールを
+=E
+If you cannot use ftp, please send a mail (body is anything O.K.) to 
+
+	fml-current@axion.phys.titech.ac.jp 
+
+に送ると自動的に送り返されます。
+＃自動的に分割して送り返します。なお送り返すのは UNIX Version の方です。
+=E
+You receive auto-suplitted mails of the latest source (Unix version).
 
 
-.S	fml の ML と bug-report のアドレス
+.S	メーリングリストについて
+=E.S	on Mailing Lists
 
 ○ バグ、質問、要望、新しい発見(謎)があったら 
-	fml-support ML (例によって自動登録です)
-	fml-support@axion.phys.titech.ac.jp
+	fml-support ML (言語は日本語。例によって自動登録です)
+=E
+* The mailing list on fml discussion is the address 
+
+	fml-support@axion.phys.titech.ac.jp (Japanese, Automatically Added)
+
+=E
+# Attention! This address adds your address as a member of fml-support
+ML if you are now not a member and send a mail to this address.
 
 か 
 	fml-bugs (作者にのみフォワード)
-	fml-bugs@axion.phys.titech.ac.jp
+=E
+* you can make a contact with only the author to send a mail to the address
+
+	fml-bugs@axion.phys.titech.ac.jp (forwarded to the author only)
 
 に御一報くださいませ。
 
@@ -193,6 +348,9 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 ＃ＭＬならわかる人がすぐに答えてくれる可能性がありますから
 
 2.1 からはＭＬへ登録して欲しくない方のために
+=E
+The address "fml-query" is to forward the in-coming mail to
+fml-support but the sender is not registered automatically.
 
 	fml-query@axion.phys.titech.ac.jp 	
 
@@ -204,10 +362,11 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
 	fml-bugs@axion.phys.titech.ac.jp
 
 へ投げておいてください。ただ返事は遅れぎみです _o_ 
-＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
+.# ＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
 
 	 
 .S	Compatibility
+=E.S	Compatibility
 
 ○ fml 1.x を使っていて fml 2.y に入れ換える場合
    そのまま perl script 群だけを入れ換えれば動きます。
@@ -215,62 +374,89 @@ fml-current@axion.phys.titech.ac.jp に送ると自動的に送り返されます。
    ちょっと注意がいるかもしれません。
    ＃詳しくは doc/op 参照
 
+=E
+* When you replace fml 1.x to fml 2.y, please replace a set of perl
+scripts (*.pl files)
+
 ○ hml 1.6 との compatibility
+=E
+*  compatibility with hml 1.6
 
 members や log file等をそのままに、*pl 群と config.phを差し替えればい
 きなり動くはずです。
 
 
 .S	使用上の注意
+=E.S	attentions
 
 このソフトウエアはIIJの業務とは”一切関係ありません”。
 単なる私の趣味です。質問等は上記のアドレスへ送って下さい _o_ 
 また”絶対に IIJ のサポート窓口等に質問をしない”ようにして下さい。
+=E
+This software is a my hobby, so has no relation with IIJ (Internet
+Initiative Japan Inc.). 
+"ftp.iij.ad.jp" is just a ftp server as a master server. 
 
 よろしくお願いします。
 
 
-.C	fml でやれること
+.C	fml の機能のあらまし
+=E.C	Overview on fml 
+
+.S	Overview on fml 2.1
+=E.S	Overview on fml 2.1
 
 詳細についてはパッケージの中の doc/op ("The Design and Implementation
 of the fml Mailing List Server") を読んで下さいね(^^;)
-＃ http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
+ちなみに、doc/op の最新版のHTML形式版は以下のURLでも読めます。
+=E
+You can read the details on fml in doc/op which is contained in the
+fml source. doc/op is "Devil's Book" for fml. 
+The Html version of doc/op is the following URL:
 
-fml 2.1 が hml 1.6 と同様に目指したものは
-	(以下 hml 1.6 README.jpn より)
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
 
-	＊ 大規模なメーリング・リストでの使用に耐えます。
-	＊ 豊富なコマンドを持っています。
-	   ヘルプ、過去の記事の一覧、入手、一時的な離脱／再開など。
-	＊ メンバのアドレスのチェックをしていますので、非メンバからの不法な
-	   アクセスを防止することが可能です。
-	＊ perl で書いてあるので改造が容易です。
+○ 様々な機能を簡単に拡張できます。
+	さらなるカスタマイズも perl で書いてあるので改造は容易です。
+=E
+* highly customizable 
 
-そして………
+○ 豊富なコマンドを提供します。拡張・増減等も容易にできます。
+=E
+* a lot of available functions as a command
 
-○ 簡単なインストーラーによるお手軽インストール から複雑な設定まで
-   サポートすること
+○ 簡単なインストーラーによるお手軽インストールから
+   凝りたい人には凝った設定までサポートすること
+=E
+* simple installer and eacy to do hacks
 
 ○ たくさんのドキュメント（複数のフォーマットで）
-	英語版(file.English)はまだ途中のものが多いです_o_
 
+PLAINTEXT版はあらかじめ用意されています。
 =E
-	English Version(file.English) is now underway _o_
-	
-	PLAINTEXT版はあらかじめ用意されています。
-=E
-	Plaintext version documents are available in the source.
+* a lot of documents, from guides to Devil's Book. 
+fml offers several complete manuals for beginners and hackers.
+Plaintext version documents are available in the source.
+***English Version(file.English) is now underway***
 
-	HTML 版は doc/html の下に用意されいますが、
-	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
-	shell% make doc でつくってください
-	最新版は
+HTML 版は doc/html の下に用意されいますが、
+doc/op (Devil's Book)は巨大なのでこれの HTML 版は
+make doc でつくってください。最新版は
+=E
+Html version of doc/op is available at the URL
+
 	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
-	をのぞいてみてください
+
+をのぞいてみてください
 
 ○ user 権限で実行します＃ daemon とかではなく
+=E
+* a user (not daemon) mode
 
 ○ モジュール化 
+=E
+* Moduled libraries
+
 	メンテもしやすいですが、自分だけのモジュールを独立にメンテする
 	ことも容易です。
 	応用として
@@ -286,13 +472,21 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 		Whois（ローカルキャッシュと本物の whois の両方）
 
 ○ 容易なカスタマイズ
+=E
+* easily customizable
+
 	ソースコードを直接いじらなくてもたくさんの制御変数と
 	フックでカスタマイズできます。
 	カスタマイズは config.ph とコマンドラインオプション両方で行えます
 
 ○ まとめ送り サポート ＃ ユーザごとに細かく設定可能
+=E
+* Matome Okuri (Digest Delivery)
 
 ○ 自動的にメンバー登録をする。メンバーチェックをする等各種動作モード
+=E
+* Automatic Registration
+
    ・自動登録のし方のカスタマイズ
 	メールだすだけ（もともとオフミ用）
 	Subject: subscribe形
@@ -300,6 +494,9 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 	等（キーワードは変えられます）
 
 ○ 豊富なファイル操作
+=E
+* multiplf functions to handle a bundle of articles
+
 	mget と まとめおくりでの User interface は次のようなものが取り
 	揃えられています。ユーザーごとに設定できます
 
@@ -319,6 +516,8 @@ fml 2.1 が hml 1.6 と同様に目指したものは
   ・応用として user が put get できるように拡張されたコマンドも実装
 
 ○ MIME の処理 （HTML モードでの画像等の変換処理を含む）
+=E
+* MIME
 
 ○ コマンド インターフェイス の拡張
     デフォールトは "# command" syntax だが専用サーバなら#の必要はない 
@@ -326,17 +525,17 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 
 ○ リモート管理（アドミンコマンド）での Password system(cryptもする)
 
+○ 機能
+	Lock Mechanism by flock(2) (lock by link() if it does not work) 
+	expiration
+	newsyslog 	e.g. log -> var/log/log.0
+
+
 ○ さまざまなインターフェイス
 	 ~/.forward インターフェイス 	 libexec/fml_lcoal.pl
 	 Listserv 互換用インターフェイス libexec/fmlserv.pl
 
-○ flock によるロック処理（２種類選択式）
-
 ○ リレーサーバの処理 ＃ % hack 
-
-○ Expire 機能のサポート
-
-○ newsyslog サポート	e.g. log -> var/log/log.0
 
 ○ ＭＬ間クロスポスト サポート ＃サイトにまたがる場合は実験段階
 
@@ -355,19 +554,11 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 ○ Sendmail 8.x を意識してつくる(もちろん 5.x でも動きますが…)
 
 
-.S	Brief History
+.C	備考 --付加的な情報--
+=E.C	Mischievous information
 
-	1.3 -> 2.0 の道のりを簡単にまとめると
-	1.3 -> 1.4 よく使うコード、普段使わないものを再構成する
-	1.4 -> 1.5 まとめおくりおよびmgetのUser Interface拡張
-	1.5 -> 1.6 call by reference, fml_local.pl, sid.pl
-	1.6 -> 2.0 cf/ doc/ libexec/ まわりの再構成、libexec/fmlserv.pl
-
-
-
-.C	インストールに必要な環境（条件）
-
-.S	Supporeted Architectures
+.S	Supporeted architectures
+=E.S	Supporeted architectures
 
 Unix 上では INSTALL というファイルを NTでは INSTALL_on_NT4 を参照して
 下さい。ほとんど自力で動くプログラムなのだから、NT用のperlがちゃんと動
@@ -381,38 +572,8 @@ WINDOWS NT 4.0 へ porting された ntfml (苦笑)はすでに稼働しています。
 現在はベータテスト段階です。
 
 
-
-.S	インストールと環境
-
-	 perl makefml 
-
-ことで、インストールをします。ML の作成は
-
-	perl makefml newml ＭＬの名前
-
-で何個でも作れます。説明は INSTALL というファイルを見て下さい。
-
-これだけで十分動くようになりますが、簡単な分、初心者用にいろいろな値を
-決め打ちしています。もう少し好みのインストールがしたい場合は 
-INSTALL_advanced というファイルを見て下さい。
-＃ INSTALL_advanced が昔のINSTALLです＞昔からの人:-)
-
-今時最初からOSに入ってるとおもいますが perl は必須です。
-また、sendmail のようなSMTPを理解してくれるサーバが必要です。
-
-自分のマシンで sendmail が走っている必要は必ずしもありませんし、SMTPを
-喋れるなら sendmail である必要もありません。pop を使ってＭＬを動かすこ
-ともできますし、sendmail以外のMTAもありますから拘る必要はありませんが、
-4.4BSD がターゲットマシンなので sendmail + perl を想定してドキュメント
-の大部分は書いてあります。
-
-実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
-ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
-プロバイダ等では違うこともありえます。その辺の詳細は自分の環境の管理者
-の方に聞いて下さい。
-
-
-.S	参考：ターゲットマシンの環境
+.S	ターゲットマシンの環境
+=E.S	Target machine environment
 
 fml のターゲットマシンでのテスト環境は
 
@@ -433,25 +594,18 @@ fml のターゲットマシンでのテスト環境は
 INSTALL で説明の足りない部分は doc/op を見てください。
 
 
-.S	対話式設定プログラム
-
-基本設定を(日本語で)対話的に行なうために、 EasyConfigure.euc (名前のと
-おり EUC の形で配布しています)スクリプトを走らせても良いです。(端末に
-合わせてファイルコードをかえてからどうぞ)。
-
-1.5 以降のスクリプトは flock や自動登録等の設定も対話的に行えます。
-＃将来、全ての変数を対話的に設定できるように拡張する予定です。
-
-
-.S	自分のマシンで sendmail が走っていない場合 (例:POP3 経由…)
+.S	POP3 を利用してのＭＬ(sendmail等を経由して起動しないorできない場合)
+=E.S	ML via pop3
 
 sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
 もできますが、そういうtrickyな話題については doc/op を見てください(^^;)
 
 
-.C	Version up について
+.S	Version up について
+=E.S	on Version up
 
-.S	cp -pr src/*.pl your-fml-library-directory
+	cp -pr src/*.pl your-fml-library-directory
+	cp -pr src/*.pl your-fml-library-directory
 
 新しいソースを /var/tmp にでも広げて下さい。広げると src に下に perl
 scripts (*.pl) だけが集まっているので、今使っている .pl ファイルを入れ
@@ -459,6 +613,7 @@ scripts (*.pl) だけが集まっているので、今使っている .pl ファイルを入れ
 
 
 .S	新しい機能を有効にするには？
+=E.S	To make new functions effective
 
 新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで指定す
 るかしないと使えません。つまり、新しい機能・オプションは明示的に指定し
@@ -466,6 +621,7 @@ scripts (*.pl) だけが集まっているので、今使っている .pl ファイルを入れ
 
 
 .S	Backward Compatibility 
+=E.S	Backward Compatibility 
 
 Backward Compatibility は保証していますが 万が一 consistency のないも
 のがあったら上述のＭＬ等へ御一報ください。
@@ -474,7 +630,8 @@ Backward Compatibility は保証していますが 万が一 consistency のないも
 ＃注意：複雑なフックの場合は注意がいるとは思いますが…
 
 
-.S	1.6 より前からの移行について
+.S	fml 1.6 より前からの移行について
+=E.S	From fml 1.6
 
 	＊＊＊注意＊＊＊
 
@@ -489,27 +646,21 @@ libcompat.pl にBackward compatibility のためのコードがあります。昔の設
 さい。
 
 
-.S	document ...
 
-fml current snapshot でドキュメントがおいつかない部分は INFO
-（fml@axion.phys.titech.ac.jpで返すファイル）に ちょっと書いてあります 
-＃注意：パッケージ中では doc/INFO です。
+.C	配布条件 --- Copyright ---
+=E.C	Copyright
 
-最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
-
-
-
-.C	配布条件
-
-GPL(GNU Public License)に従うこと。COPYINGを読んでください
-
-Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+GPL(GNU Public License)です。詳細についてはCOPYINGというファイルを読ん
+でください
+=E
 fml is free software distributed under the terms of the GNU General
 Public License. see the file COPYING for more details.
 
+	Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+	Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 
-.C	Acknowledgement 
+.C	Acknowledgements 
+=E.C	Acknowledgements 
 
 I thank a lot of people for valuable comments, suggestions,
 contributions of bug reports, fixes and patches both on fml-support ML
@@ -524,12 +675,14 @@ can obtain on anonymous ftps.
 I greatly appreciate softwares developed and distributed under freedom
 of programming.
 
-Lastly I am greatful to tsubai@phys.titech.ac.jp for fruitful
-discussion on the design and implementation of Mailing List server,
-perl, operating systems and so on.
+Lastly I am greatful to tsubai@yokyun.rim.or.jp
+(tsubai@phys.titech.ac.jp) for fruitful discussion on the design and
+implementation of Mailing List server, perl, operating systems and so
+on.
 
 
 .C	Changes
+=E.C	Changes
 
 Please see CHANGES and RELEASE_NOTES
 
