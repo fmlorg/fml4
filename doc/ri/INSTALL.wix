@@ -6,16 +6,17 @@
 のdirectoryができてその下にひとセット入ってます。
 ＃で、directoryの名前は適当に変えて下さい。
 
-◎以下での設定例（例えば次のように設定することにしましょう）
+.S	以下での設定例（例えば次のように設定することにしましょう）
+
 設定するマシン		axion.phys.titech.ac.jp
-Mailing List 		Elena Lolabrigita ML
+Mailing List 		Elena Lolobrigita ML
 address of it		Elena@axion.phys.titech.ac.jp
 Maintainer of ML	Elena-request@axion.phys.titech.ac.jp	
-ＭＬの本体のあるdirectoryが
-			/home/axion/fukachan/work/spool/Elena
+ＭＬのdirectory		/home/axion/fukachan/work/spool/Elena
+(fml.plやconfig.ph等がある場所）			
 
 
-.C	How to install
+.C	基本設定
 
 cf directory にいって、sample をコピーして、適当な名前にしておきます。
 ＃ここでは、ファイル名を Elena とします
@@ -23,40 +24,45 @@ cf directory にいって、sample をコピーして、適当な名前にしておきます。
 % cd cf
 % cp sample Elena
 
-別に cf へ移動しなくても構わないのですが、後々のメンテ（複数のメーリン
-グリストを管理する等）を考えると、
-大元の configuration files を一箇所で面倒見たほうがいいでしょ？
+cf/Elena は デフォールトの設定とどこが異なるのか？”だけ” を記述する
+ためのファイルになります。
+後々のメンテ（複数のメーリングリストを管理する や version up等）を考え
+ると、大元の configuration files を一箇所で面倒見たほうがいいでしょ？
 
 Elena の中身は必須の変数の設定だけが書かれています。
-(perl と同様に行の # 以降の部分はコメントです。無視してください)
 
 	FQDN		axion.phys.titech.ac.jp
 	MAIL_LIST	Elena@axion.phys.titech.ac.jp
-	ML_FN		(Elena Lolabrigita ML)
+	ML_FN		(Elena Lolobrigita ML)
 	XMLNAME	 	X-ML-Name: Elena
 	XMLCOUNT	X-Mail-Count
 	MAINTAINER	Elena-request@axion.phys.titech.ac.jp
+
+perl と同様に行の # 以降の部分はコメントです。無視してください。
+シンタックスは
+	最初のキーワード 空白（SPACEとTAB) キーワードの内容
+です。空白はいくつあっても構いません。
 
 以下、変数の意味を順番に説明します。
 
 	FQDN		axion.phys.titech.ac.jp
 
-FQDN(Fully Qualified Domain Name) には fml を設定するマシン名のドメイ
-ン名まで含む Full Name を書いてください。
-＃この名前は sendmail に「自分はこのマシンからメールをだす」と告げるた
-＃めに使われます。
+FQDN(Fully Qualified Domain Name) には fml を設定するマシンのドメイン
+名まで含む Full Name を書いてください。
+＃この名前は sendmail に「自分はこのマシンからメールをだしています」と
+＃告げるために使われます。
 
 	MAIL_LIST	Elena@axion.phys.titech.ac.jp
 
 メーリングリストのアドレスが Elena@axion.phys.titech.ac.jp になります。
 つまり、このアドレスにきたメールがメンバーに配送されます。
 	
-	ML_FN		(Elena Lolabrigita ML)
+	ML_FN		(Elena Lolobrigita ML)
 
 この変数は、配送されるメールの To: の部分を書き換えるために使われます。
 今の場合、
 
-	To: Elena@axion.phys.titech.ac.jp (Elena Lolabrigita ML)
+	To: Elena@axion.phys.titech.ac.jp (Elena Lolobrigita ML)
 
 に置き換えられます（置き換えには 上の MAIL_LIST と ML_FN が使われているわけです）
 
@@ -90,21 +96,29 @@ Elena-requestとかElena-adminとかを作り、あなた宛にフォワードするように
 
 .C	config.ph 
 
+.S	config.ph を作る
+
 fml.pl が メーリングリスト（ＭＬ）ごとの設定をするために使う config.ph 
 というファイルを使います。このファイルを 上の Elena というファイルでカ
 スタマイズした内容で生成するために
 
-	% ./config Elena > ../config.ph
+	% ./config Elena > config.ph
 
-を実行してください。今 cf にいるから .. がＭＬのホームなのでconfig.ph 
-の置き場所は上の directory の .. です。
+を実行してください。今 cf にいるので 一つ上（..）がＭＬのホームなので
+そこへ移してください。
+
+	% cp config.ph ..
+
 ＃ＭＬのホームにいるなら、% cf/config cf/Elena > config.ph ですね。
 
 この config.ph には つかえるすべての変数が適当なデフォールト設定で入っ
 ています。とりあえずは、デフォールトのまま使えばいいでしょう。
 細かいカスタマイズは、doc/op に書いてあります。
 
-作ったら以下の確認をしてください。
+.S	config.ph の確認
+
+作ったら一応、以下の確認をしてください。
+それ以外の変数はすべてデフォールトのままにまだなってます。
 
 上の Elena から作られた config.phの例：
 
@@ -115,11 +129,32 @@ fml.pl が メーリングリスト（ＭＬ）ごとの設定をするために使う config.ph
 
 $FQDN                          = "axion.phys.titech.ac.jp";
 $MAIL_LIST                     = "Elena\@axion.phys.titech.ac.jp";
-$ML_FN                         = "(Elena Lolabrigita ML)";
+$ML_FN                         = "(Elena Lolobrigita ML)";
 $XMLNAME                       = "X-ML-Name: Elena";
 $XMLCOUNT                      = "X-Mail-Count";
 
 $MAINTAINER                    = "Elena-request\@axion.phys.titech.ac.jp";
+
+
+.S	コマンドのパス
+
+ファイル操作に必要な uuencode や gzip の絶対パスファイルの確認もしてく
+ださい。config.ph の最後に、cf/config が自動的に生成した（必要な引数も
+ついた）コマンドのパスが設定されています。適切なものかどうかチェックし
+てください。現在設定する変数は
+
+TAR		/some/directory/tar cf -
+UUENCODE	/some/directory/uuencode
+COMPRESS	/some/directory/gzip -c
+ZCAT		/some/directory/zcat
+LHA		/some/directory/lha
+ISH		/some/directory/aish
+
+です。必要なら ファイル cf/Elena に 
+
+TAR		/usr/local/bin/gtar cf -
+
+のように書いて、もう一度、config.ph を作り直してください。
 
 
 
@@ -130,10 +165,7 @@ make してください。
 ＯＳは make の中で自動判定するはずです
 最後に /etc/aliases の書き方についての診断メッセージがでます 
 
-いまはSolaris2も自動的に判定できると思いますけど…
-もしこけたら、
-Solaris2 では make OPT=-DPOSIX として make してください
-なお、 -DBSD43 は 4.3BSD的に compile します。
+Solaris2も自動的に判定できると思いますけど…
 Ultrix 4.x では make SH=/bin/sh5 として /bin/sh5 を使って
 Bourne Shell scriptを実行してください。
 デフォールトのSH変数（わざわざSHELLとは別の変数名にした）は 
@@ -156,7 +188,7 @@ include-file のサンプル 	etc/include.example
 
 /etc/aliases では
 
-	Elena: :include:/some/path/include-file 
+	Elena: :include:/usr/local/fml/include-file 
 
 もしくは
 
@@ -166,7 +198,7 @@ include-file のサンプル 	etc/include.example
 
 しかし、ＯＳによってうまくいったりいかなかったりします。ここでは、
 
-	 :include:/some/path/include-file 
+	 :include:/usr/local/fml/include-file 
 
 のタイプだけを説明します。
 これでうまくいかないＯＳ もしくは 個人のポリシーとして setuid された 
@@ -182,28 +214,28 @@ C-wrapper を使うべきだという方は、 doc/op を見てください。
 	/home/axion/fukachan/work/spool/Elena/etc/include.example
 
 というファイルだとしましょう。
-＃ /home/axion/fukachan/work/spool/Elena/driver にコピーしたりする
-＃ なり /usr/local/ml-driver/Elena とかにするなりその辺は各自適当にどうぞ
+/home/axion/fukachan/work/spool/Elena/driver にコピーしたりするなり 
+/usr/local/ml-driver/Elena とかにするなりその辺は各自適当にどうぞ
 
 ファイルdriverの中身は
 
 "|/home/axion/fukachan/work/spool/Elena/fml.pl /home/axion/fukachan/work/spool/Elena /home/axion/fukachan/work/spool/Elena"
 
-みたいに書きます（これ一行です↑）
+みたいに書きます（これで一行です↑）
 
 
 .S	:include:するべきファイルの所有者
 
-:include:するべきファイル（etc/include.example）の所有者の権限でサーバ
+includeするファイル（ここでは include.example）の所有者の権限でサーバ
 は走ります。（そのファイルの所有者ユーザのuidにsetuidされる）。
-ファイルの所有者を確認してください。
+ファイルの所有者が あなた自身であることを確認してください。
 
 
 
 .S	/etc/aliases 
 
 /etc/aliases にはこう書くことになります。
-＃ etc/aliases.example を見てみてください。
+＃ etc/aliases.example に一通り設定されています。それを見てみてください。
 
 	Elena::include:/home/axion/fukachan/work/spool/Elena/driver
 
@@ -225,21 +257,20 @@ Elena-request: fukachan
 
 .C	Configurations for fml.pl and config.ph
 
-config.ph はデフォールトで デバッグモードになっていますから、配送処理
-はしません（注意！）。
-
-config.ph の設定や spool/の下のファイルでヘッダの確認をし、
-debug = 0; にして運用してください。
-
-注意：
-config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailの配布
-をしません。この場合、配布以外のすべての機能は動いています。テストにど
-うぞご利用下さい。
+config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailのメン
+バーへの配送処理をしません。この場合、配送以外のすべての機能は動いてい
+ます。テストにどうぞご利用下さい。
 この状態でどういうメールヘッダになるか等をlogファイルやsummaryファイル
 やspoolの中の様子を見るとよいでしょう。
 
+config.ph の設定や spool/の下のファイルでヘッダの確認をし、
 
-これでサーバの設定は終りました
+		debug = 0; 
+
+にして運用してください。
+
+
+これでサーバとＯＳの設定は終りました。あとはＭＬの細部の設定です。
 
 
 
@@ -248,33 +279,38 @@ config.phのなかでdebug mode（$debug = 1;）にするとサーバーはmailの配布
 
 .S	メンバーの登録
 
-あとはメンバーの登録をmembers,activesにするだけですね。
+あとはメンバーの登録を members と actives にするだけですね。
 
-それぞれ一行に一人分のアドレスを書きます。#の後はコメントです。 
+それぞれ一行に一人分のアドレス（必要なら、と付加情報）を書きます。
+# の後はコメントになります。
 
-・メンバーチェックモード：
+.S	メンバーチェックモード
+
 メンバー登録は管理者が両方のファイルにアドレスを書いて下さい。
 
 members		メンバーの認証につかうもの。配布、コマンド共にこれを見
 		る。
+
 actives		配布する時に使うもの。sendmailへ渡すアドレスのリスト
 		リレーサーバ情報とかはここに書く。
 
-・自動登録モード：membersしか使いません。
+.S	自動登録モード
+
+membersのみを使います。
+
 members		登録と配布に使う。勝手に登録するのでほっておいていいで
 		す。
-＃メンバーチェックをせず、さらに自動登録もしないやり方もあります（see
-FAQ） ＝ スプールとかコマンドがついた /etc/aliases にずらずら…と同じ
-やね
+
+メンバーチェックをせず、さらに自動登録もしないやり方もあります
+スプールとかコマンドがついた /etc/aliases にずらずら…と同じケース等
+＃くわしくは doc/op を参照してください。
 
 
-こんな感じのファイルになるはずです。(ON, OFFの意味は下かhelpファイルを
-見てね)
+.S	例：
 
-#の後はコメントです。 
-	# actives list
+こんな感じのファイルになるはずです。
 	
-またＭＬをOFFしている人も↓このようになってます。
+またＭＬをOFF(いまは一時的に配送してしない)している人も↓このようになってます。
 
 	# fukachan@beth.phys.titech.ac.jp
 
@@ -282,8 +318,8 @@ FAQ） ＝ スプールとかコマンドがついた /etc/aliases にずらずら…と同じ
 
 	##BYE fukachan
 
-となるようにしてます。その行の消去はしません（脱退した人も一応記録して
-おく）
+となるようにしてます。
+その行の消去はしません（脱退した人も一応記録しておく）
 
 --------------- members の見本 ---------------
 # Member list. This line is a comment. 
@@ -299,11 +335,11 @@ fukachan@phys.titech.ac.jp
 Elena@phys.titech.ac.jp		axion.phys.titech.ac.jp
 ##BYE fukachan
 #cocoa@phys.titech.ac.jp	axion.phys.titech.ac.jp
-pollyanna	matome 	3
+pollyanna	m=3
 ----------------------------------------------
 
 注意：
-pollyanna	matome 	3 はpollyannaは３時間のまとめ送りの意味です
+pollyanna	m=3 はpollyannaは３時間のまとめ送りの意味です
 
 
 .S	ＭＬのファイルの設定
@@ -317,16 +353,19 @@ objective		ＭＬの目的の説明（世界征服とかさぁ〜:-)）
 
 です。
 ＃ help.example2 は コマンドの使い方が systematic にかかれた 見本とし
-＃て収録させていただいたものです。立派に作るとこんな感じになるという:-)
-＃thanks to umura@nn.solan.chubu.ac.jp
-＃（カスタマイズされてるのでデフォールトの挙動とは違うことに注意してく
-＃ださい）
+＃ て収録させていただいたものです。立派に作るとこんな感じになるという:-)
+＃ thanks to umura@nn.solan.chubu.ac.jp
+＃（カスタマイズされてるのでデフォールトの挙動とは違うことに注意）
+
+
+.S	おしまひ
+
+ここまでで、インストールはすべておしまいです。 
+debug modeとかを使いながら慣れて下さい。
 
 
 .S	ログファイル等
 
-ここまでで、インストールはすべておしまいです。 
-debug modeとかを使いながら慣れて下さい。
 なお、実際に動かすと次のようなファイルやdirectoryができます。
 
 spool		記事のスプール・ディレクトリ（数字のファイル）
@@ -342,8 +381,13 @@ var/run		（もし使うなら）ロックファイル等
 tmp		temporary に使う
 
 
+
+.C	ローカルにテスト
+
 .S	 ローカルにテスト
- % make localtest 
+
+	% make localtest 
+
 を実行すると、sendmail をつかわずに、local にテストを実行します。
 この場合 変数は config.ph からとられます。
 
@@ -358,3 +402,4 @@ tmp		temporary に使う
 
 Last Modified
 $Id$
+
