@@ -13,12 +13,69 @@ $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 ### MAIN ###
 umask(077);
 
-&FmlLocalInitilize;
-&FmlLocalConfigure;
-&FmlLocalMainProc;
+&FmlLocalInitilize;		# preliminary
+&FmlLocalReadCF($CONFIG_FILE);	# set %VAR, %CF, %_cf
+&FmlLocalGetEnv;		# set ENV vars, $DIR, ...
+
+&Parsing;			# Get $MailHeaders and $MailBody
+&FmlLocalGetFields;		# set %FIELD
+
+&FmlLocalSearch;		# pattern matching, and default set
+&FmlLocalAdjustVariable;		# e.g. for $F1 ... and Reply-to: ...
+
+&FmlLocalMainProc;		# calling the matched procedure && do default
 
 exit 0;
 ################# LIBRALY ################# 
+
+
+
+sub USAGE
+{
+    if (open(F, __FILE__)) {
+	while(<F>) { 
+	    /^\#\.USAGE:(.*)/ && ($USAGE_OF_BUILD_IN_FUNCTIONS .= "$1\n");
+	}
+	close(F);
+    }
+
+    print STDERR <<"EOF";
+
+$rcsid
+
+USAGE: fml_local.pl [-Ddh] [-f config_file] [-user username]
+    -h     this help
+    -d     debug mode on
+    -D     dump variable 
+    -f     configuration file for \~/.fmllocalrc
+    -user  usename
+
+FILE:  \$HOME/.fmllocalrc
+
+                  Please read FAQ for the details.
+
+BUILD-IN FUNCTIONS:
+$USAGE_OF_BUILD_IN_FUNCTIONS
+
+EXAMPLES for \~/.fmllocalrc
+#field		pattern		type	exec
+
+# "Subject: get filename"
+# send \$ARCHIVE_DIR/filename to Reply-to: or From:
+Subject    get\s+(\S+)            &       sendback
+
+# MailBody is 
+# "getmyspool password"
+# send the owner's mailspool to the owner
+body       getmyspool\s+(\S+)     &       getmyspool_pw
+
+# Subject: guide
+# send a \$ARCHIVE_DIR/guide to "From: address"
+Subject    (guide)                  &       sendback
+
+EOF
+
+}
 
 
 sub MailLocal
@@ -62,30 +119,26 @@ sub MailLocal
 
 sub Append2MBOX
 {
-    local($cut_unix_from) = 0;
-    local($cut_unix_from) = @_;
+    local($cut_unix_from) = (@_ ? 1 : 0);
     local(@s);
 
-    # APPEND!
+    # fflush()
     select(MBOX); $| = 1;
 
-    # Header
-    if ($cut_unix_from) {
-	@s = split(/\n/, $MailHeaders);
-	while(@s) {
-	    $_ = shift @s;
-	    next if /^From /i;
-	    print MBOX $_,"\n";
-	}
-
-	# separator between Header and Body
-	print MBOX "\n";
-    }
-    else {  
-	print MBOX $MailHeaders;
+    ### Header
+    @s = split(/\n/, $MailHeaders);
+    while(@s) {
+	$_ = shift @s;
+	next if /^From /i && $cut_unix_from;
+	print MBOX $_,"\n";
     }
 
-    # Body
+    print MBOX "X-FML-LOCAL: ENFORCE MAIL.LOCAL\n";
+
+    # separator between Header and Body
+    print MBOX "\n";
+
+    ### Body
     @s = split(/\n/, $MailBody);
     while(@s) {
 	$_ = shift @s;
@@ -153,21 +206,29 @@ sub FmlLocalInitilize
     $AUTH      = 0;
     $NOT_TRACE_SMTP = 1;
     $FS = '\s+';			# DEFAULT field separator
-    
+    $CONFIG_FILE = '';
+    $_Ds = 'localhost';
+
     @VAR = (HOME, DIR, LIBDIR, FML_PL, USER, MAIL_SPOOL, LOG, 
 	    PASSWORD, DEBUG, AND, ARCHIVE_DIR, VACATION,
-	    MAINTAINER, MAINTAINER_SIGNATURE);
+	    MAINTAINER, MAINTAINER_SIGNATURE, FS,
+	    MY_FUNCTIONS);
 
     # getopts
-    local($ARGV_STR) = " ". join(" ", @ARGV). " ";
-    undef @ARGV;
-    if ($ARGV_STR =~ /\s+\-user\s+(\S+)/) {
-	$USER = $1;
+    while(@ARGV) {
+	$_ =  shift @ARGV;
+	/^\-user/ && ($USER = shift @ARGV) && next; 
+	/^\-f/    && ($CONFIG_FILE = shift @ARGV) && next; 
+	/^\-h/    && &USAGE && exit(0);
+	/^\-d/    && $debug++;
+	/^\-D/    && $DUMPVAR++;
     }
 
-    if ($ARGV_STR =~ /\s+\-h\s+/) {
-	&USAGE;
-	exit 0;
+    # DEBUG
+    if ($debug) {
+	print STDERR "GETOPT:\n";
+	print STDERR "\$USER\t$USER\n";
+	print STDERR "\$CONFIG_FILE\t$CONFIG_FILE\n\n";
     }
 
     # a few variables
@@ -177,61 +238,64 @@ sub FmlLocalInitilize
 }
 
 
+# %VAR
+# %CF 
 sub FmlLocalReadCF
 {
     local($INFILE) = @_;
+    local($entry)  = 0;
 
     $INFILE = $INFILE || $FML_LOCAL_RC;
-    
     open(CF, "< $INFILE") || do {
 	&Log("fail to open $INFILE");
 	die "FmlLocalReadCF:$!\n";
     };
 
+    ### make a pattern /$pat\s+(\S+)/
+    foreach (@VAR) { 
+	$pat .= $pat ? "|$_" : $_;
+
+	# for FmlLocal_get and 
+	# next CF if $VAR{$FIELD} in FmlLocalEntryMatch
+	tr/A-Z/a-z/; # lower
+	$VAR{$_} = 1;
+    }
+    $pat = "($pat)";
+
+    ### Special pattern /$sp_pat\s+(.*)/
+    $sp_pat = '(PASSWORD|MAINTAINER_SIGNATURE)';
+
+    #### read config file
     CF: while(<CF>) {
 	# Skip e.g. comments, null lines
-	next CF if /^\s*$/o;
+	/^\s*$/o && $entry++ && next CF;
 	next CF if /^\#/o;
 	chop;
 
-	# debug options
-	$debug  = 1 if /^DEBUG/i;
-	$debug  = $debug2 = 1 if /^DEBUG2/i;
-
 	# Set environment variables
-	foreach $VAR (@VAR) { 
-	    # special. permit SPACE.
-	    if (/^(PASSWORD|MAINTAINER_SIGNATURE)\s+(.*)/) { 
-		eval "\$$1 = '$2';";
-		next;
-	    }
+	/^DEBUG/i && $debug++ && next CF;
+	/^$sp_pat\s+(.*)/ && (eval "\$$1 = '$2';", $@ eq "") && next CF;
+	/^$pat\s+(\S+)/   && (eval "\$$1 = '$2';", $@ eq "") && next CF;
 
-	    if (/^$VAR\s+(\S+)/) {
-		eval "\$$VAR = '$1';";
-		eval "print STDERR \"\$$VAR = '$1';\"\n" if $debug;
-		next;
-	    }
-	}
+	# already must be NOT ENV VAR
+	# AND OPERATION
+	next CF if /^AND/i;
+	$CF{$entry} .= $_."\n";
 
-	# store configurations
-	$VAR =~ tr/A-Z/a-z/; # lower WHY?
-	push(@CF, $_);
+	# for later trick
+	/^body/i && ($_cf{'has-body-pat'} = 1);
     }
+
+    # record the number of matched entry
+    $_cf{'entry'} = $entry;
+
     close(CF);
-
-    # for FmlLocal_get and 
-    # next CF if $VAR{$field} in FmlLocalEntryMatch
-    foreach $VAR (@VAR) { 
-	$VAR =~ tr/A-Z/a-z/; # lower
-	$VAR{$VAR} = 1;
-    }
 }
 
 
-sub FmlLocalConfigure
+sub FmlLocalGetEnv
 {
     # include ~/.fmllocalrc
-    $EVAL = &FmlLocalReadCF;
     print STDERR $EVAL if $debug;
 
     $HOME = $HOME || (getpwnam($USER))[7] || 
@@ -274,16 +338,15 @@ sub FmlLocalConfigure
 }
 
 
-sub FmlLocalPatternMatch
+# $FIELD{$_} = $contents;
+sub FmlLocalGetFields
 {
     # IF WITHOUT UNIX FROM e.g. for slocal bug??? 
     if (! ($MailHeaders =~ /^From\s+\S+/i)) {
 	$MailHeaders = "From $USER $MailDate\n".$MailHeaders;
     }
 
-    local($MATCH_P, $AND, $PREV_MATCH);
     local($s) = $MailHeaders;
-    
     $s =~ s/\n(\S+):/\n\n$1:\n\n/g;
     local(@MailHeaders) = split(/\n\n/, $s, 999);
 
@@ -303,136 +366,90 @@ sub FmlLocalPatternMatch
 
 	next if /^\s*$/o;	# if null, skip. must be mistakes.
 
-	printf STDERR "=> %-10s %-40s\n", $_, $contents if $debug;
-
-	##### Pattern match searching #####
 	tr/A-Z/a-z/;		# lower
-	$field{$_} = $contents;
+	$FIELD{$_} = $contents;
     }# WHILE @MAILHAEDERS;
 
+    # TRICK! deal MailBody like a body: field.
+    # has-body-pat is against useless malloc 
+    $FIELD{'body:'} = $MailBody if $_cf{'has-body-pat'};
+    
     if ($debug) {
-	while (($key,$value) = each %field) {
+	while (($key, $value) = each %FIELD) {
 	    print STDERR "[$key]=[$value]\n";
 	}
     }
-
-    1;
 }
 
 
-# Expand mailbox in RFC822
-# From_address is modified for e.g. member check, logging, commands
-# Original_From_address is preserved.
-# return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
-sub Expand_mailbox
+# Predicate whether match or not
+# trick:
+#      body is 'body:' field :-) 
+# this makes the code simple
+#
+# if has no 3rd entry, NOT ILLEGAL
+# it must be AND OPERATION, REQUIRE 'multiple matching'
+#
+sub FmlLocalMatch_and_Set
 {
-    local($mb) = @_;
+    local($s)   = @_;
+    local($f, $p, $type, $exec, @opt);
+    local($ok, $cnt);
+    local(@pat) = split(/\n/, $s);
 
-    $mb =~ s/\n(\s+)/$1/g;
+    # for multiple lines. the entry to match is within "one line"
+    $* = 0;
 
-    # Hayakawa Aoi <Aoi@aoi.chan.panic>
-    ($mb =~ /^\s*.*\s*<(\S+)>.*$/io) && (return $1);
+    foreach $pat (@pat) {
+	$cnt++;			# counter
 
-    # Aoi@aoi.chan.panic (Chacha Mocha no cha nu-to no 1)
-    ($mb =~ /^\s*(\S+)\s*.*$/io)     && (return $1);
+	# field pattern type exec
+	# ATTENTION! @OPT is GLOBAL
+	($f, $p, $type, $exec, @opt) = split(/$FS/, $pat);
+	print STDERR "PAT: ($f, $p, $type, $exec)\n";
 
-    # Aoi@aoi.chan.panic
-    return $mb;
-}	
+	$f =~ tr/A-Z/a-z/;	# lower
 
+	if ($FIELD{"$f:"} =~ /$p/) {
+	    print STDERR "Match: [$f:$`($&)$']\n" if $debug;
+	    &Log("Match [$f:$`($&)$']") if $debug;
+	    $ok++;
 
-sub FmlLocalEntryMatch
-{
-    local($field, $pattern, $type, $exec, @exec, $pat);
-    local($AND_UNMATCH) = 0;
-    local(@default);
-
-  CF: while(@CF) {
-      print STDERR "CF\t" if $debug;
-
-      # get
-      ($field, $pattern, $type, $exec) = &FmlLocal_get($pat = shift @CF);
-      next CF if $VAR{$field};
-
-      # skip
-      next CF if $pat =~ /^\s*$/o;
-      next CF if $pat =~ /^\#/o;
-
-      ##### FOR AND SYNTAX #####
-      $AND_UNMATCH = 0;
-
-      # HEADER MATCHING PATTERN
-      if ($field{"$field:"} =~ /$pattern/) {
-	  &FmlLocalSet($type, $exec, $1, $2, $3) if $type;
-      }
-
-      # BODY MATCHING PATTERN
-      elsif ($field =~ /^body$/i && 
-	  &FmlLocalMatchInBody($pattern, $type, $exec)) {
-	  ( $type && (!$AND_UNMATCH) ) || &FmlLocalUnSet;
-      }
-      elsif ($field =~ /^default$/i) {
-	  @default = ($type, $exec, $1, $2, $3) if $type;
-      }
-      else {
-	  $AND_UNMATCH = 1;
-      }
-
-    AND: while(! $type) {
-	# get
-	print STDERR "AND\t" if $debug;
-	($field, $pattern, $type, $exec) = &FmlLocal_get($pat = shift @CF);
-
-	# skip
-	next AND if $pat =~ /^\#/o;
-	last AND if $pat =~ /^\s*$/o; # ATTENTION!
-
-	# HEADER MATCHING PATTERN
-	if ($field{"$field:"} =~ /$pattern/) {
-	    &FmlLocalSet($type, $exec, $1, $2, $3) if $type && (!$AND_UNMATCH);
-	    next AND;
+	    # MULTIPLE MATCH
+	    $type && ($ok == $cnt) && (@OPT = @opt) &&
+		&FmlLocalSetVar($type, $exec, $1, $2, $3);
 	}
 
-	# BODY MATCHING PATTERN
-	if ($field =~ /^body$/i && 
-	    &FmlLocalMatchInBody($pattern, $type, $exec)) {
-	    ( $type && (!$AND_UNMATCH) ) || &FmlLocalUnSet;
-	    next AND;
-	}
-
-	print STDERR "AND\tUNMATCH\t1\n" if $debug;
-	$AND_UNMATCH = 1;# must be 'not matched field exists'.
-    }# AND;
-  }# CF;
-
-    # default is "always GO!"
-    &FmlLocalSet(@default) if @default;
+	($f =~ /^default/i) && ($_cf{'default'} = $pat);
+    }
 }
 
 
-sub FmlLocal_get
+sub FmlLocalSearch
 {
-    local($pat) = @_;
-    
-    # get variables
-    ($field, $pattern, $type, @exec) = split(/$FS/, $pat);
-    $field =~ tr/A-Z/a-z/;
-    $exec  = join(" ", @exec);
+    local($i);
 
-    print STDERR "($field, $pattern, $type, $exec)\n" if $debug;
-    ($field, $pattern, $type, $exec);
+    for($i = 0; $i < $_cf{'entry'}; $i++) {
+	$_ = $CF{$i};
+	next if /^\s*$/o;
+	next if /^\#/o;
+
+	&FmlLocalMatch_and_Set($_);
+    }
 }
 
 
-sub FmlLocalUnSet 
+sub FmlLocalUnSetVar 
 { 
     ($package,$filename,$line) = caller;
 
-    print STDERR "UNSET called from $line\n";
+    print STDERR "UNSET called from $line\n" if $debug;
     undef $TYPE, $EXEC, $F1, $F2, $F3;
+    undef @OPT;
 }
 
-sub FmlLocalSet
+
+sub FmlLocalSetVar
 {
     local($type, $exec, $f1, $f2, $f3) = @_;
 
@@ -445,7 +462,6 @@ sub FmlLocalSet
     $F3  = $f3;
 
     if ($debug) {
-	print STDERR "\tMATCH\t$field =~ /$pattern/\n";
 	print STDERR "\tDO\t$TYPE$EXEC\n";
 	print STDERR "\tF1\t$F1\n" if $F1;
 	print STDERR "\tF2\t$F2\n" if $F2;
@@ -456,53 +472,12 @@ sub FmlLocalSet
 }
 
 
-sub FmlLocalMatchInBody
-{
-    local($pat, $type, $exec) = @_;
-    local($result) = 0;
-    local(@MailBody) = split(/\n/, $MailBody);
-
-    print STDERR "FmlLocalMatchInBody sets in \n";
-
-    while(@MailBody) {
-	  $_ = shift @MailBody;
-	  next if /^\s*$/;
-
-	  print STDERR "MATCH " if /$pat/i && $debug;
-	  print STDERR "\tBODY $_\n" if $debug;
-
-	  if (/$pat/i) {	# match!
-	      &FmlLocalSet($type, $exec, $1, $2, $3);
-	      return;
-	  }
-
-	  if (/^\#\s*PASS\s+(.*)/ || /^\#\s*PASSWORD\s+(.*)/) {
-	      ($1 eq $PASSWORD) && $AUTH++ && 
-		  &Log("AUTHENTIFIED") && $result++;
-	  }
-
-	  if (/^\#\s*PASSWD\s+(.*)/) {
-	      if (! $AUTH) {
-		  &Log("NOT AUTHENTIFIED BUT PASSWD REQUEST. STOP!");
-		  undef $result;
-		  last;
-	      }
-	      &Log("PASSWD [$PASSWORD] -> [$1]");
-	      &FmlLocalAppend2CF("\nPASSWORD $1\n"); # additional '\n'
-	      $result++;
-	  }
-      }
-
-    $result;
-}
-
-
-sub FmlLocalAdjust
+sub FmlLocalAdjustVariable
 {
     # adjustment
     $EXEC =~ s/\$F1/$F1/g;
     $EXEC =~ s/\$F2/$F2/g;
-    $EXEC =~ s/\$F3/$F4/g;
+    $EXEC =~ s/\$F3/$F3/g;
     $EXEC =~ s/\$From_address/$From_address/g;
     $EXEC =~ s/\$To_address/$To_address/g;
     $EXEC =~ s/\$Subject/$Subject/g;
@@ -512,11 +487,11 @@ sub FmlLocalAdjust
     $EXEC =~ s/\$LIBDIR/$LIBDIR/g;
 
     # Headers
-    $Reply_to              = &Expand_mailbox($field{'reply-to:'});
+    $Reply_to              = &Expand_mailbox($FIELD{'reply-to:'});
     $Original_To_address   = $To_address 
-	                   = $field{'to:'};
-    $Original_From_address = $field{'from:'};
-    $From_address          = &Expand_mailbox($field{'from:'});
+	                   = $FIELD{'to:'};
+    $Original_From_address = $FIELD{'from:'};
+    $From_address          = &Expand_mailbox($FIELD{'from:'});
 
     1;
 }
@@ -524,18 +499,34 @@ sub FmlLocalAdjust
 
 sub FmlLocalMainProc
 {
-    # include fml.pl if needed
-    eval &FmlLocalReadFML || &Log("Loading fml.pl:$@");
-    eval $EVAL            || &Log("ReadCF::eval:$@");
+    # SECURITY CHECK
+    for $x ($F1, $F2, $F3) {
+	if (&InSecureP($x)|| &MetaCharP($x)) {
+	    &Log("INSECURE, hence STOP!");
+	    return;
+	}
+    }
+	    
+    # Load user-defined-functions
+    if (-f $MY_FUNCTIONS) {
+	(eval "do '$MY_FUNCTIONS';", $@ eq "") || 
+	    &Log("Cannot load $MY_FUNCTIONS");
+    }
 
-    &Parsing;
-    &FmlLocalPatternMatch;	# headers
-    &FmlLocalEntryMatch;	# match
-    &FmlLocalAdjust;		# adjust variables
+    # DEBUG OPTION
+    if ($DUMPVAR) {
+	require 'dumpvar.pl';
+	&dumpvar('main');
+    }
 
+    # ENFORCE DROP TO THE MAIL SPOOL AGAINST INFINITE LOOP
+    if (($FIELD{'x-fml-local:'} =~ /ENFORCE\s+MAIL.LOCAL/i)) {
+	&Log("X-FML-LOCAL: ENFORCE mail.local") if $debug;
+	&MailLocal;	
+    }
     # IF UNMATCHED ANYWHERE, 
     # Default action equals to /usr/libexec/mail.local(4.4BSD)
-    if ($UNMATCH_P) {
+    elsif ($UNMATCH_P) {
 	print STDERR "\n&MailLocal;\n\n" if $debug;
 	&Log("Default::mail.local") if $debug;
 	&MailLocal;
@@ -546,6 +537,14 @@ sub FmlLocalMainProc
 	&MailProc($TYPE, $EXEC);
     }
 
+    # default is "ALWAYS GO!"
+    local($a, $b, $type, $exec);
+    undef @OPT;
+    ($a, $b, $type, $exec, @OPT) = split(/\s+/, $_cf{'default'});
+    if ($type) {
+	&FmlLocalSetVar($type, $exec);
+	&MailProc($TYPE, $EXEC);
+    }
 }
 
 
@@ -649,6 +648,26 @@ sub Parsing
     }# END OF WHILE LOOP;
 }
 
+# Expand mailbox in RFC822
+# From_address is modified for e.g. member check, logging, commands
+# Original_From_address is preserved.
+# return "1#mailbox" form ?(anyway return "1#1mailbox" 95/6/14)
+sub Expand_mailbox
+{
+    local($mb) = @_;
+
+    $mb =~ s/\n(\s+)/$1/g;
+
+    # Hayakawa Aoi <Aoi@aoi.chan.panic>
+    ($mb =~ /^\s*.*\s*<(\S+)>.*$/io) && (return $1);
+
+    # Aoi@aoi.chan.panic (Chacha Mocha no cha nu-to no 1)
+    ($mb =~ /^\s*(\S+)\s*.*$/io)     && (return $1);
+
+    # Aoi@aoi.chan.panic
+    return $mb;
+}	
+
 # Recreation of the whole mail for error infomation
 sub WholeMail
 {
@@ -666,31 +685,51 @@ sub eval
     return 1 unless $@;
 }
 
-# Alias but delete \015 and \012 for seedmail return values
+# Log: Logging function
+# ALIAS:Logging(String as message) (OLD STYLE: Log is an alias)
+# delete \015 and \012 for seedmail return values
+# $s for ERROR which shows trace infomation
+sub Logging { &Log(@_);}	# BACKWARD COMPATIBILITY
 sub Log { 
     local($str, $s) = @_;
-    $str =~ s/\015\012$//;
-    &Logging($str);
-    &Logging("   ERROR: $s", 1) if $s;
-}
-
-# Logging(String as message)
-# $errf(FLAG) for ERROR
-sub Logging
-{
-    local($str, $e) = @_;
+    local($package,$filename,$line) = caller; # called from where?
 
     &GetTime;
-    
-    open(LOGFILE, ">> $LOGFILE");
-    select(LOGFILE); $| = 1; select(STDOUT);
-    print LOGFILE "$Now $str ". ((!$e)? "($Unix_From)\n": "\n");
-    close(LOGFILE);
+
+    $str =~ s/\015\012$//;	# FIX for SMTP
+    $str = "$filename:$line% $str" if $debug_log;
+
+    &Append2("$Now $str ($From_address)", $LOGFILE);
+    &Append2("$Now    $filename:$line% $s", $LOGFILE) if $s;
+}
+
+# append $s >> $file
+sub Append2
+{
+    local($s, $file) = @_;
+
+    if (open(S, ">> $file")) {	# APPEND!
+	select(S); $| = 1; select(STDOUT);
+	print S $s."\n";
+	close(S);
+    }
+
+    $s;
 }
 
 
 ########### libsmtp.pl 
-sub InitSmtp
+# Smtp library functions, 
+# smtp does just connect and put characters to the sockect.
+# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
+
+local($id);
+$id = q$Id$;
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+
+# sys/socket.ph is O.K.?
+sub SmtpInit
 {
     $EXIST_SOCKET_PH = eval "require 'sys/socket.ph';", $@ eq "";
     &Log("sys/socket.ph is O.K.") if $EXIST_SOCKET_PH && $debug;
@@ -717,11 +756,30 @@ sub Smtp # ($host, $headers, $body)
     local($pat)  = 'S n a4 x8';
     # local($pat)  = 'S n C4 x8'; # which is correct?
 
-    # 
-    &InitSmtp;
+    &SmtpInit;			# sys/socket.ph
 
     # VARIABLES:
-    $host       = $HOST       || 'localhost';
+    $host       = $HOST       || $host || 'localhost';
+    $VAR_DIR    = $VAR_DIR    || "$DIR/var";
+    $VARLOG_DIR = $VARLOG_DIR || "$DIR/var/log";  # absolute for ftpmail
+    $SMTP_LOG0  = $SMTP_LOG0  || "$DIR/_smtplog"; # Backward compatibility;
+    $SMTP_LOG   = $SMTP_LOG   || "$VARLOG_DIR/_smtplog";
+
+    # LOG: on IPC
+    (-d $VAR_DIR)    || mkdir($VAR_DIR, 0700);
+    (-d $VARLOG_DIR) || mkdir($VARLOG_DIR, 0700);
+    (-l $SMTP_LOG0)  || do {
+	$symlink_exists = (eval 'symlink("", "");', $@ eq "");
+	unlink $SMTP_LOG0;
+	$symlink_exists && symlink($SMTP_LOG, $SMTP_LOG0);
+	if ($symlink_exists) {
+	    &Log("ln -s $SMTP_LOG $SMTP_LOG0");
+	}
+	else {
+	    &Log("unlink $SMTP_LOG0, log -> $SMTP_LOG");
+	}
+    };
+    $SMTP_LOG .= ".$Smtp_logging_hook" if $Smtp_logging_hook;
 
     if ($NOT_TRACE_SMTP) {
 	open(SMTPLOG, "> /dev/null") || &Log("Cannot open /dev/null");
@@ -731,7 +789,6 @@ sub Smtp # ($host, $headers, $body)
 	    (return "$MailDate: cannot open $SMTP_LOG");
     }
 
-#.IF SMTP
     # DNS. $HOST is global variable
     # it seems gethostbyname does not work if the parameter is dirty?
     # 
@@ -758,63 +815,68 @@ sub Smtp # ($host, $headers, $body)
     # need flush of sockect <S>;
     select(S);       $| = 1; select(STDOUT);
     select(SMTPLOG); $| = 1; select(STDOUT);
-#.ELSE SMTP
-#.    require 'open2.pl';
-#.    &open2(OUT, S, $SENDMAIL) || return "Cannot exec $SENDMAIL";
-#.FI SMTP
 
     ###### Here We go! ##### 
     # interacts smtp port, see the detail in $SMTPLOG
     do { print SMTPLOG $_ = <S>; &Log($_) if /^[45]/o;} while(/^\d\d\d\-/o);
     foreach $s (@headers) {
+	$0 = "-- $s <$FML $LOCKFILE>";
 	if ($TRACE_DNS_DELAY) { &GetTime; $prev = 60*$min + $sec;};
+
 	print SMTPLOG ($s . "<INPUT\n");
-	if (! $debug0) {
-	    print S ($s . "\n");
-	    do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
-	    while(/^\d\d\d\-/o);
-	}
+	print S ($s . "\n");
+	do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
+	while(/^\d\d\d\-/o);
+
 	if ($TRACE_DNS_DELAY) {
 	    &GetTime, $time = 60*$min + $sec;
 	    $time -= $prev;
 	    ($time > 2) && &Log("SMTP DELAY[$time sec.]:$s");
 	}
+
+	sleep(3) if (!$_);	# DIRTY HACK;_; WHY NO ANSWER from <S>?
     }
+    ### ALREADY, (HELO .. DATA) sequence ends
 
     # rfc821 4.5.2 TRANSPARENCY, fixed by koyama@kutsuda.kuis.kyoto-u.ac.jp
-    $body =~ s/\n\./\n../g;	# enough for body ^. syntax
-    $body =~ s/\.\.$/./g;	# trick the last "."
+    $body .= $PREAMBLE_MAILBODY 
+	if $_cf{'ADD2BODY'} && $PREAMBLE_MAILBODY;#(smtp:1.5.7)
+    $body  =~ s/\n\./\n../g;	# enough for body ^. syntax
+    $body  =~ s/\.\.$/./g;	# trick the last "."
 
     # BODY INPUT
+    $0 = "-- BODY <$FML $LOCKFILE>";
     print SMTPLOG "-------------\n";
     if ($_cf{'Smtp', 'readfile'}) { # For FILE INPUT
 	print SMTPLOG $body;
-	print S $body unless $debug0;
+	print S $body;
 	while(<FILE>) { 
 	    s/^\./../; 
-	    print S $_ unless $debug0;
+	    print S $_;
 	    print SMTPLOG $_;
 	};
+	
+	print S ($_ = $TRAILER_MAILBODY) 
+	    if $_cf{'ADD2BODY'} &&  $TRAILER_MAILBODY;
+	print S "\n" if (!/\n$/); # fix the lost '\012'
 	print SMTPLOG "-------------\n";
-	print S ".\n" unless $debug0;
+	print S ".\n";
     } 
     else {			# $body has both header and body.
 	print SMTPLOG "$body-------------\n";
-	print S $body unless $debug0;
+	print S $body;
     }
 
     $s = "BODY";		#CONVENIENCE: infomation for errlog
-    if (! $debug0) {
-	do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
-	while(/^\d\d\d\-/o);
-    }
+    do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
+    while(/^\d\d\d\-/o);
+
     $s = "QUIT";		#CONVENIENCE: infomation for errlog
-    print S "QUIT\n" unless $debug0;
+    $0 = "-- $s <$FML $LOCKFILE>";
+    print S "QUIT\n";
     print SMTPLOG "$s<INPUT\n";
-    if (! $debug0) {
-	do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
-	while(/^\d\d\d\-/o);
-    }
+    do { print SMTPLOG $_ = <S>; &Log($_,$s) if /^[45]/o;} 
+    while(/^\d\d\d\-/o);
 
     close S; 
     close SMTPLOG;
@@ -885,12 +947,14 @@ sub Sendmail
     local($to, $subject, $MailBody) = @_;
     push(@to, $to);		# extention for GenerateHeaders
     local($host, $body, @headers) = &GenerateHeaders(*to, $subject);
-
+    
+    $body .= $PREAMBLE_MAILBODY if $_cf{'ADD2BODY'} && $PREAMBLE_MAILBODY;
     $body .= $MailBody;
+    $body .= $TRAILER_MAILBODY  if $_cf{'ADD2BODY'} && $TRAILER_MAILBODY;
     $body .= "\n" if(! ($MailBody =~ /\n$/o));
 
     $Status = &Smtp($host, "$body.\n", @headers);
-    &Logging("Sendmail:$Status") if $Status;
+    &Log("Sendmail:$Status") if $Status;
 }
 
 
@@ -942,8 +1006,29 @@ sub GenerateHeaders
     return ($host, $body, @headers);
 }
 
+1;
+
+
 
 ########## libfml.pl
+# the syntax is insecure or not
+# return 1 if insecure 
+sub InSecureP
+{
+    local($ID) = @_;
+    if ($ID =~ /..\//o || $ID =~ /\`/o){ 
+	local($s)  = "INSECURE and ATTACKED WARNING";
+	local($ss) = "Match: $ID  -> $`($&)$'";
+	&Log($s, $ss);
+	&Warn("Insecure $ID from $From_address. $ML_FN", 
+	      "$s\n$ss\n".('-' x 30)."\n". &WholeMail);
+	return 1;
+    }
+
+    0;
+}
+
+
 # Check the string contains Shell Meta Characters
 # return 1 if match
 sub MetaCharP
@@ -961,111 +1046,115 @@ sub MetaCharP
 
 
 ############################################################
-########## Built-In Functions
+############################################################
+############################################################
+##### Built-In Functions
 
+#.USAGE: sendback
+#.USAGE:     内部定義関数としては &sendback(ファイル) は
+#.USAGE:     ファイル を送り返します
+#.USAGE:     引数なしに sendback を使うと
+#.USAGE:        e.g. .fmllocalrc で from uja & sendback
+#.USAGE:     正規表現でマッチした第一フィールドのファイルを送り返す
+#.USAGE:     .fmllocalrcの例:
+#.USAGE:     subject get (\S+) & sendback
+#.USAGE: 
 sub sendback
 {
-    local($ARCHIVE_DIR) = $ARCHIVE_DIR || $DIR;
+    local($file) = @_ || $F1;
+    local($to)   = $Reply_to ? $Reply_to : $From_address;
+    local($dir)  = $ARCHIVE_DIR || $DIR;
 
-    chdir $ARCHIVE_DIR || do {
-	&Log("cannot chdir $DIR");
-	&Warn("cannot chdir $DIR");
-	return 0;
-    };
+    chdir $dir || &Log("cannot chdir $dir") && return 0;
 
-    print STDERR "&SendFile($Reply_to ? $Reply_to : $From_address,
-		  \"Send $F1\",
-		  $F1);\n" if $debug;
-
-    if (-f $F1 && (! &MetaCharP($F1))) {
+    if (-f $file) {
 	&Log("getback $F1");
-	&SendFile($Reply_to ? $Reply_to : $From_address,
-		  "Send $F1",
-		  $F1);
+	&SendFile($to, "Send $file", $file);
     }
     else {
-	&Log("fail to getback $F1");
+	&Log("cannot find $file");
     }
 
     1;
 }
 
-# ALIAS
-sub getback { &sendback(@_);}
 
-# USAGE:
-# getmyspool 
-sub getmyspool
+#.USAGE: getmyspool_nopasswd
+#.USAGE:     メールスプールを送り返します
+#.USAGE:     パスワードは必要ありません。
+#.USAGE:     内部定義関数として使うべきです
+#.USAGE: 
+sub getmyspool_nopasswd
 {
     undef $F1,$F2,$F2;
-    $F1 = $MAIL_SPOOL;
-
-    if (-f $F1 && (! &MetaCharP($F1))) {
-	&Log("getmyspool $F1");
-	&SendFile($Reply_to ? $Reply_to : $From_address,
-		  "Send $F1",
-		  $F1);
-    }
-    else {
-	&Log("fail to getmyspool $F1");
-    }
-
-    1;
+    &Log("getmyspool");
+    &sendback($MAIL_SPOOL);
 }
 
 
-# USAGE:
-# getmyspool password
-sub getmyspool_pw
+#.USAGE: getmyspool 
+#.USAGE:     メールスプールを送り返します
+#.USAGE:     正規表現でマッチした第一フィールドをパスワードとして認証します
+#.USAGE:     認証した場合 送り返します。
+#.USAGE:    .fmllocalrcの例:
+#.USAGE:    body get my spool (\.*) & getmyspool
+#.USAGE: 
+sub getmyspool
 {
     if ($F1 eq $PASSWORD) {
-	&getmyspool;
+	&getmyspool_nopasswd;
     }
     else {
 	&Log("ILLEGAL PASSWORD [$F1] != [$PASSWORD]");
     }
 }
 
-
-sub USAGE
+#.USAGE: forward
+#.USAGE:     メールを特定のアドレスへフォワードする
+#.USAGE:     アドレスは forward の後に空白で続けて 
+#.USAGE:     \@OPT の中に入ってます。
+#.USAGE:     簡単なメーリングリストですね
+#.USAGE:    .fmllocalrcの例:
+#.USAGE:    To (uja) & forward address-1 address-2 ..
+#.USAGE: 
+sub forward
 {
-    print STDERR <<"EOF";
+    local($host) = 'localhost';
+    local($body);
+    &Log("Forward");
 
-$rcsid
+    &GetTime;
 
-USAGE: fml_local.pl [-h] [-user username]
+    $body .= "Date: $MailDate\n";
+    $body .= "From: $Original_From_address\n";
+    $body .= "Subject: $Subject\n" if $Subject;
+    $body .= "To: $To_address \n"; # since against no infinite loop
+    $body .= $Reply_to ? "Reply-To: $Reply_to\n" : "Reply-To: $MAIL_LIST\n";
+    $body .= "Errors-To: $MAINTAINER\n";
+    $body .= "X-FML-LOCAL: ENFORCE MAIL.LOCAL\n";
+    $body .= "X-MLServer: $rcsid\n" if $rcsid;
+    $body .= "Precedence: ".($PRECEDENCE || 'list')."\n"; 
+    $body .= $MailBody;
 
-FILE:  $HOME/.fmllocalrc
+    @headers = ("HELO $_Ds", "MAIL FROM: $MAINTAINER");
+    foreach $rcpt (@OPT) {
+	push(@headers, "RCPT TO: $rcpt");
+    }
+    push(@headers, "DATA");
 
-BUILD-IN FUNCTIONS:
-    sendback             send \$1(REGULAR EXPRESSION) to (Reply-to: or From:)
-                         The file is in \$ARCHIVE_DIR or \$HOME
-    getmyspool           send the Owner's mail-spool to the owner
-                         require NO password
-    getmyspool_pw  password
-                         send the Owner's mail-spool to the owner
-                         require password to authentify the owner.
-
-EXAMPLES for ~/.fmllocalrc
-#field		pattern		type	exec
-
-# "Subject: get filename"
-# send \$ARCHIVE_DIR/filename to Reply-to: or From:
-Subject    get\s+(\S+)            &       sendback
-
-# MailBody is 
-# "getmyspool password"
-# send the owner's mailspool to the owner
-body       getmyspool\s+(\S+)     &       getmyspool_pw
-
-# Subject: guide
-# send a \$ARCHIVE_DIR/guide to "From: address"
-Subject    (guide)                  &       sendback
-
-EOF
+    $Status = &Smtp($host, "$body.\n", @headers);
+    &Log("Sendmail:$Status") if $Status;
 }
 
+#.USAGE: 
+#.USAGE: ALIASES:
+#.USAGE: getback       は sendback と同じ
+#.USAGE: 
+sub getback { &sendback(@_);}
 
-############################################################
+#.USAGE: getmyspool_pw は getmyspool と同じ
+#.USAGE: 
+sub getmyspool_pw { &getmyspool(@_);}
+
 
 1;
