@@ -86,7 +86,7 @@ COPY_DOCS () {
    )
 
    echo " "; echo "Copying doc/man/"
-   rsync -av doc/man/ $DESTDIR/distrib/doc/man/;
+   rsync -C -av doc/man/ $DESTDIR/distrib/doc/man/;
 
    (
 	echo " "; echo "Copying Documents (doc/smm/)...";
