@@ -22,10 +22,10 @@ anything. FML removes you after an interval.
 
 .fi
 			_MAIL_LIST_ ´ÉÍý¼Ô
-			_ML_-admin@_DOMAIN_
+			_MAINTAINER_
 =E
 			_MAIL_LIST_ mailing list maintainer
-			_ML_-admin@_DOMAIN_
+			_MAINTAINER_
 
 Thanks in advace.
 .# $Id$

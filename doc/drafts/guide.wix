@@ -31,11 +31,11 @@ in the mail body (not subject) to the address <_CTLADDR_>.
 
 .if LANG == JAPANESE
 				_MAIL_LIST_ ´ÉÍý¿Í
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 .if LANG == ENGLISH
 				_MAIL_LIST_ Maintainer
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

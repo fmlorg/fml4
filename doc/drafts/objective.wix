@@ -8,11 +8,11 @@ This mailing list <_MAIL_LIST_> is set up for ...
 
 .if LANG == JAPANESE
 				_MAIL_LIST_ 管理人
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 .if LANG == ENGLISH
 				_MAIL_LIST_ Maintainer
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 
 .# $Id$

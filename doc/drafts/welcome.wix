@@ -47,7 +47,7 @@ to get general information on this list
 If you want to make a contact with the mailing list maintainer, please
 e-mail to
 
-	_ML_-admin@_DOMAIN_
+	_MAINTAINER_
 
 へメールを出して下さい。しかしながら管理者の手間を省くためにメーリング
 リストサーバはあるものです。できるだけサーバを使ってみて下さい。
@@ -57,11 +57,11 @@ to use server functions as could as possible.
 
 .if LANG == JAPANESE
 				_MAIL_LIST_ 管理人
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 .if LANG == ENGLISH
 				_MAIL_LIST_ Maintainer
-				_ML_-admin@_DOMAIN_			
+				_MAINTAINER_			
 .fi
 
 .# $Id$
