@@ -83,8 +83,9 @@ USERS_GUIDE.en
 
 
 BIN_SOURCES:
-bin/Archive.pl
-bin/Archive.sh
+bin/anoncvs
+bin/archive.pl
+bin/archive.sh
 bin/base64encode.pl
 bin/base64decode.pl
 bin/pmail.pl

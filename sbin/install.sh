@@ -119,6 +119,12 @@ chmod 755 $EXEC_DIR/libexec/* $EXEC_DIR/bin/* $EXEC_DIR/sbin/*
 (
 	cd $EXEC_DIR;
 
+	rm -f bin/Archive.pl
+	ln bin/archive.pl bin/Archive.pl
+
+	rm -f bin/Archive.sh
+	ln bin/archive.sh bin/Archive.sh
+
 	rm -f libexec/listserv_compat.pl
 	ln libexec/fmlserv.pl libexec/listserv_compat.pl
 

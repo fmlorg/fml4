@@ -1,5 +1,5 @@
-.C	アーカイブ, Archive
-=E.C	Archive
+.C	アーカイブ, archive
+=E.C	archive
 .n	auto-archive
 .l	archive
 .k	archive
@@ -24,7 +24,7 @@ seems an appropriate size for one mail. You can save spaces a lot by
 archiving articles.
 
 .S	自動アーカイブと自動 expire の諸注意
-=E.S	Automatic Archive and Expire 
+=E.S	Automatic archive and Expire 
 
 ここでいう『アーカイブ』とはある程度の数のメールを一つにまとめて保存す
 る(方法の)ことを意味しています。$DIR/spool に一通ずつためるのもアーカ
@@ -208,17 +208,17 @@ is very high since each headers are similar each other.
 
 .S	gzip file にする(アーカイブへの変換)
 =E.S	Conversion to "gzip"ed file (archive file)
-.l	Archive.pl
-.k	Archive.pl
+.l	archive.pl
+.k	archive.pl
 .xref	cron
 
 $USE_ARCHIVE の自動操作にまかせずに時々手で もしくは cron 等でこのプロ
 グラムを動かしても良いです。
 .xref	cron
 =E
-If you would like to create archives by hand, please run Archive.pl.
+If you would like to create archives by hand, please run archive.pl.
 
-	Archive.pl [-dh] [-A ARCHIVE_DIR][-u unit] range
+	archive.pl [-dh] [-A ARCHIVE_DIR][-u unit] range
 
 	-d	debug mode
 	-h	help 
@@ -243,18 +243,18 @@ Please run thig program in $DIR, a mailing list home (config.ph
 location).  E.g.
 
 	% cd /var/spool/ml/Elena
-	% perl bin/Archive.pl
+	% perl bin/archive.pl
 
 のように使うことを期待されています。
 
-これは Archive.pl 2000 とかすると、2000 までのファイルを 100 個ずつの
-塊にして、archiveに作ります。変数は Archive.pl の先頭でセットしてくだ
+これは archive.pl 2000 とかすると、2000 までのファイルを 100 個ずつの
+塊にして、archiveに作ります。変数は archive.pl の先頭でセットしてくだ
 さい。スプールのオリジナルは消さないので、注意を払って消して下さい
 (とりかえしがききませんから、それは)
 ＃自分じゃ、念のため ある程度まとまったところでこうやって手動でつくっ
 ＃てます。
 =E
-Run "Archive.pl -u 100 2000" to crate 20 tar.gz files in $ARCHIVE_DIR. 
+Run "archive.pl -u 100 2000" to crate 20 tar.gz files in $ARCHIVE_DIR. 
 Each tar.gz file contains 100 articles. $DIR/spool has original
 articles in tar.gz, which are not removed. Please remove them by hand
 after checking tar.gz contents.
@@ -275,7 +275,7 @@ summary		welcome
 
 % test -d var || mkdir var
 % test -d var/archive || mkdir var/archive
-% perl Archive.pl 3800
+% perl archive.pl 3800
 
 	…たくさんメッセージが出るが省略…
 =E
@@ -293,17 +293,17 @@ spoolの 3800 までの 100 個ずつのパッケージを作りました。spoolの方の元
 メールを自動的に消しはしない(安全のため)ので、自分で消して下さい。
 
 .S	アーカイブ作成を cron で自動処理
-=E.S	Automatic archive creation (run Archive.pl by cron)
+=E.S	Automatic archive creation (run archive.pl by cron)
 .k	archive by cron
 
 cronで自動的(例えば週一日曜の朝とか)に次の形で
 =E
-For example, you can run the following command to run Archive.pl by
+For example, you can run the following command to run archive.pl by
 cron once in a week (morning on Sun) in the following:
 
-   (chdir /var/spool/ml/Elena; /usr/local/bin/perl bin/Archive.pl)
+   (chdir /var/spool/ml/Elena; /usr/local/bin/perl bin/archive.pl)
 
-とでもすれば良いでしょう。bin/Archive.sh がその見本です。いくつかＭＬ
+とでもすれば良いでしょう。bin/archive.sh がその見本です。いくつかＭＬ
 があるなら、シェルスクリプトにまとめて呼べば楽です。まとめ送りと同様に 
 crontab に記述すればよいです。
 =E
@@ -319,8 +319,8 @@ crontab example:
 
 	#!/bin/sh
 
-	(cd /var/spool/ml/Elena;    /usr/local/bin/perl bin/Archive.pl)
-	(cd /var/spool/ml/Freekick; /usr/local/bin/perl bin/Archive.pl)
+	(cd /var/spool/ml/Elena;    /usr/local/bin/perl bin/archive.pl)
+	(cd /var/spool/ml/Freekick; /usr/local/bin/perl bin/archive.pl)
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

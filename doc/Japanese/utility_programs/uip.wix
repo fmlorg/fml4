@@ -18,13 +18,13 @@ contrib/Utilities/.
 
 use libexec/mead.pl.
 
-.S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
+.S	アーカイブの作成 (bin/archive.pl bin/archive.sh)
 =E.S	Archive Generator
-.l	bin/Archive.pl
-.l	bin/Archive.sh
-.k	Archive.pl
-.k	Archive.sh
-.xref	Archive.pl
+.l	bin/archive.pl
+.l	bin/archive.sh
+.k	archive.pl
+.k	archive.sh
+.xref	archive.pl
 
 アーカイブの節を参照 (.ptr{archive})
 =E
