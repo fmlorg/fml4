@@ -103,13 +103,13 @@ $(WORK_DOC_DIR)/INFO-e: INFO-common
 plaindoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ $(GEN_PLAIN_DOC)
+	@ env FML=${FML} make -f distrib/mk/fml.doc.mk op
 
 htmldoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ find $(WORK_HTML_DIR) -type l -print |perl -nle unlink
-	@ (chdir doc/html; make)
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
-	@ (chdir doc/html; make op)
+	@ env FML=${FML} make -f distrib/mk/fml.doc.mk htmlbuild
 
 syncwww:
 	$(RSYNC) -av $(WORK_HTML_DIR)/ $(WWW)/
