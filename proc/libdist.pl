@@ -67,14 +67,15 @@ sub DoDistribute
 	local($rcpt, $opt, $w, $relay, $who, $domain, $mxhost, $k, $v);
 
 	# default setting %SKIP and compat (obsolete %Skip);
+	# append something to the current %SKIP;
+	for $k (keys %Skip) { $k =~ tr/A-Z/a-z/; $SKIP{$_} = 1;}
+
 	for ($MAIL_LIST, $CONTROL_ADDRESS) {
-	    $k = $_; $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    $k = $_; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
 	    ($who) = split(/\@/, $_);
-	    $k = "$who\@$DOMAIN"; $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
-	    $k = "$who\@$FQDN";   $k = ~tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    $k = "$who\@$DOMAINNAME"; $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
+	    $k = "$who\@$FQDN";   $k =~ tr/A-Z/a-z/; $SKIP{$k} = 1;
 	}
-	while (($k, $v) = each %Skip) { $SKIP{$k} = $v;}
-	while (($k, $v) = each %SKIP) { $v =~ tr/A-Z/a-z/; $SKIP{$k} = $v;}
 
       line: while (<ACTIVE_LIST>) {
 	  chop;
