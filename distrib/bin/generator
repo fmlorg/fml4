@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PATH=${PATH}:/usr/local/bin:/usr/pkg/bin; export PATH
+PATH=${PATH}:/usr/local/bin:/usr/pkg/bin:/usr/X11R6/bin; export PATH
 
 umask 022
 
@@ -89,3 +89,5 @@ fi
 
 echo " "; echo "Done. "; echo " "
 (echo -n "END:	"; date ) >> $DATE_LOG
+
+exit 0
