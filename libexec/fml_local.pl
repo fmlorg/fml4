@@ -896,10 +896,16 @@ sub CheckEnv
     }
 
     ### SUBJECT: GUIDE SYNTAX 
-    if ($USE_SUBJECT_AS_COMMANDS) {
-	($e{'h:Subject:'} =~ /^\#\s*$GUIDE_KEYWORD\s*$/i) && $e{'req:guide'}++;
-	$COMMAND_ONLY_SERVER &&	
-	    ($e{'h:Subject:'} =~ /^\s*$GUIDE_KEYWORD\s*$/i) && $e{'req:guide'}++;
+    if ($USE_SUBJECT_AS_COMMANDS && $e{'h:Subject:'}) {
+	local($_) = $e{'h:Subject:'};
+
+	$e{'req:guide'}++            if /^\#\s*$GUIDE_KEYWORD\s*$/i;
+	$Envelope{'mode:uip'} = 'on' if /^\#\s*\w+\s|^\#\s*\w+$/;
+
+	$e{'req:guide'}++          
+	    if $COMMAND_ONLY_SERVER && /^\s*$GUIDE_KEYWORD\s*$/i;
+	$Envelope{'mode:uip'} = 'on' 
+	    if $COMMAND_ONLY_SERVER && /^\s*\w+\s|^\s*\w+$/;
     }    
     
     ### DEBUG 
@@ -949,6 +955,12 @@ sub CheckMember
 {
     local($address, $file) = @_;
     local($addr) = split(/\@/, $address);
+    local($has_special_char);
+    
+    # MUST BE ONLY * ? () [] but we enhance the category -> shell sc
+    if ($addr =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	$has_special_char = 1; 
+    }
 
     open(FILE, $file) || return 0;
 
@@ -972,7 +984,7 @@ sub CheckMember
       }
 
       # for high performance
-      next getline unless /^$addr/i;
+      if (! $has_special_char) { next getline unless /^$addr/i;}
 
       # This searching algorithm must require about N/2, not tuned,
       if (1 == &AddressMatch($_, $address)) {
