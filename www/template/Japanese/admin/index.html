@@ -28,16 +28,16 @@
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#config">特定のメーリングリストの設定/登録/削除 関係</A>
-<LI><A HREF="#newml">メーリングリストの作成</A>
-<LI><A HREF="#destructml">メーリングリストの削除</A>
-<LI><A HREF="#cgiadmin">CGI操作可能な管理者の設定</A>
+<LI><A HREF="#newml">新規メーリングリストの作成</A>
+<LI><A HREF="#config">既存メーリングリストの詳細設定/登録/削除など</A>
+<LI><A HREF="#destructml">既存メーリングリストの削除</A>
+<LI><A HREF="#cgiadmin">この画面(CGI)を操作可能なユーザの設定</A>
 <LI><A HREF="#server_config">サーバの設定関係(初回の確認必須)</A>
 </UL>
 
 
 <HR>
-<A NAME=newml><P>メーリングリストの作成
+<A NAME=newml><P>新規メーリングリストの作成
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -58,7 +58,7 @@ _____________________________
 <HR>
 <A NAME=config>
 <P>
-特定のメーリングリストの設定/登録/削除など
+既存メーリングリストの設定/登録/削除など
 
 <FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -84,7 +84,7 @@ _____________________________
 </FORM>
 
 <BR>
-・メーリングリストをWWWでいじれるように設定する
+既存メーリングリストをWWWでいじれるように設定する
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -113,7 +113,7 @@ _____________________________
 
 
 <HR>
-<A NAME=destructml><P>メーリングリストの消去
+<A NAME=destructml><P>既存メーリングリストの消去
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
