@@ -3,8 +3,6 @@ sub AggregateLinks
     local(*links) = @_;
     local($p, $q, $recursive, %prev, %cache);
 
-    $debug_thread = 1; # XXX
-
     while ($recursive++ < 16) {
 	%prev = %links;
 	undef %cache;
@@ -52,12 +50,12 @@ sub DoAggregateLinks
 	    undef $links{$tp};
 	}
     }
-    
-    print STDERR "=====\n";
-    for $hp (sort {$a <=> $b} keys %links) {
-	print STDERR "$hp => $links{$hp}\n";
+
+    if ($debug_html) {
+	for $hp (sort {$a <=> $b} keys %links) {
+	    print STDERR "$hp => $links{$hp}\n";
+	}
     }
-    print STDERR "=====\n";
 }
 
 
