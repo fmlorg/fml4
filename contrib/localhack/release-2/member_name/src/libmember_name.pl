@@ -1,3 +1,6 @@
+# version control is only by fukachan@sapporo.iij.ad.jp
+# $Id$
+
 
 &InitMemberName;
 
@@ -13,7 +16,8 @@ sub InitMemberName
 	$NAME_KEYWORD = $NAME_KEYWORD || 'NAME';
 
 	# Rewrite built-in command procedure
-	for ('chaddr', 'change-address', 'change', 'bye', 'unsubscribe') {
+	for ( 'chaddr', 'change-address', 'change',
+	      'bye', 'unsubscribe', 'unsubscribe-confirm' ) {
 		$ExtProcedure{$_} = 'ProcSetMemberNameFile';
 	}
 
@@ -26,10 +30,13 @@ sub InitMemberName
 	$ExtProcedure{'r#name'} = 1;
 
 	# Rewrite built-in admin command procedure
-	for ('admin:chaddr', 'admin:change-address', 'admin:change'
-	   , 'admin:bye', 'admin:unsubscribe') {
+	for ( 'admin:chaddr', 'admin:change-address', 'admin:change',
+	      'admin:bye', 'admin:unsubscribe' ) {
 		$ExtAdminProcedure{$_} = 'ProcAdminSetMemberNameFile';
 	}
+
+	# Rewrite 'admin members' command procedure
+	$ExtAdminProcedure{'admin:members'} = 'ProcFileSendBackMemberNameFile';
 
 	# Define 'admin name' command proc
 	$ExtAdminProcedure{'admin:name'} = 'ProcAdminSetMemberNameFile';
@@ -84,31 +91,33 @@ sub ProcSetMemberNameFile
     local($proc, *Fld, *e, *misc) = @_;
     local($status);
 
-    &use('amctl');
-    $status = &DoSetMemberList($proc, *Fld, *e, *misc);
-    return $NULL if ( $status eq $NULL);
-    &DoSetMemberNameFile($proc, *Fld, *e, *misc);
+    $status = &ProcSetMemberList($proc, *Fld, *e, *misc);
+    return $NULL if ( $status eq $NULL );
+    &DoSetMemberNameFile($proc, *Fld, *e);
     return $status;
 }
 
 sub ProcAdminSetMemberNameFile
 {
-    local($proc, *Fld, *opt, *e) = @_;
+    local($proc, *Fld, *e, *opt) = @_;
     local($cmdline) = $Fld;
-
-    $cmdline =~ s/^#\s*//;
-    &Log($cmdline);
 
     # Variable Fixing...
     @Fld = ('#', $proc, @opt);
 
     if ( $proc =~ /^($NAME_KEYWORD)$/i ) { # NAME
-        &Debug("A::DoSetMemberNameFile($proc, (@Fld), *e);") if $debug;
-        &DoSetMemberNameFile($proc, *Fld, *e);
+	$cmdline =~ s/^#\s*//;
+	&Log($cmdline);
+
     } else { # CHADDR, BYE
-        &Debug("A::ProcSetMemberNameFile($proc, (@Fld), *e);") if $debug;
-        &ProcSetMemberNameFile($proc, *Fld, *e);
+	local($address) = $opt;
+	&Log("admin $proc ".join(" ", @opt));
+	&Debug("A::SetMemberList($proc, (@Fld), *e, $address);")   if $debug;
+	return 1 unless &ProcSetMemberList($proc, *Fld, *e, *address);
     }
+
+    &Debug("A::DoSetMemberNameFile($proc, (@Fld), *e);") if $debug;
+    &DoSetMemberNameFile($proc, *Fld, *e);
 
     1;
 }
@@ -121,19 +130,31 @@ sub DoSetMemberNameFile
     # KEYWORD for 'chaddr'
     $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
 
+    # $curaddr, $newaddr, $newname define
+    $curaddr = $e{'mode:admin'} ? $Fld[2] : ($Addr || $From_address);
+
     $cmd = $proc; $cmd =~ tr/a-z/A-Z/; $_ = $cmd;
 
-    # $curaddr, $newaddr, $newname define
     if ( /^($NAME_KEYWORD)$/i ) { # NAME
+        if ($curaddr !~ /\@/) {
+            &Log("NAME: Error: empty address is given");
+            &Mesg(*e, "$cmd: Error: $cmd requires non-empty address.");
+            return $NULL;
+        }
+
+	# LOOP CHECK
+	if (&LoopBackWarn($curaddr)) {
+	    &Log("$cmd: LOOPBACK ERROR, exit");
+	    return $NULL;
+	}
+    
         $newname = $Fld;
         $newname =~ s/^#\s*//;
         if ( $e{'mode:admin'} ) {
             # COMMAND 'ADMIN NAME Address [NEWNAME]'
-            $curaddr = $Fld[2];
             $newname =~ s/^admin\s+($NAME_KEYWORD)\s+\S+\s*//i;
         } else {
             # COMMAND 'NAME [NEWNAME]'
-            $curaddr = $Addr || $From_address;
             $newname =~ s/^($NAME_KEYWORD)\s*//i;
         }
 
@@ -147,42 +168,20 @@ sub DoSetMemberNameFile
 
         $newaddr = '';
 
+        &Mesg(*e, "\t set $cmd => NAME") if $cmd ne "NAME";
+        &Mesg(*e, "\tTry change name to '$newname'\n");
+        $cmd = 'NAME';
+
     } elsif ( /^($CHADDR_KEYWORD)$/i ) { # CHADDR
-        $curaddr = $Fld[2];
         $newaddr = $Fld[3];
+	$cmd = 'CHADDR';
     } else { # BYE
-        $curaddr = $e{'mode:admin'} ? $Fld[2] : ($Addr || $From_address);
-        $newaddr = '';
+        $newaddr = $curaddr;
+	$cmd = 'BYE';
     }
 
     &Debug("\n   DoSetMemberNameFile::(\n\tcur  $curaddr\n\tnew  $newaddr\n") if $debug;
 
-    # LOOP CHECK
-    if (&LoopBackWarn($curaddr)) {
-	&Log("$cmd: LOOPBACK ERROR, exit");
-	return $NULL;
-    }
-    
-    $_ = $cmd;
-
-    if (/^($CHADDR_KEYWORD)$/i) {
-	$cmd = 'CHADDR';
-    }
-    elsif (/^($NAME_KEYWORD)$/i) {
-        &Mesg(*e, "\t set $cmd => NAME") if $cmd ne "NAME";
-        $cmd = 'NAME';
-        &Mesg(*e, "\tTry change name to '$newname'\n");
-
-        if ($curaddr !~ /\@/) {
-            &Log("NAME Error: empty address is given");
-            &Mesg(*e, "Error: NAME requires non-empty address.");
-            return $NULL;
-        }
-    }
-    else {
-	$newaddr = $curaddr; # tricky;
-	$cmd = 'BYE';
-    }
 
     ### Modification routine is called recursively in ChangeMemberNameFile;
 
@@ -196,8 +195,7 @@ sub DoSetMemberNameFile
     if ( &ChangeMemberNameFile($cmd, $curaddr, $MEMBER_NAME_FILE, *newname, *newaddr) ) {
         &Log("$cmd MEMBER_NAME_FILE [$curaddr] accepted");
         &Mesg(*e, "$cmd MEMBER_NAME_FILE [$curaddr] accepted.");
-    }
-    else {
+    } else {
         &Log("$cmd MEMBER_NAME_FILE [$curaddr] failed");
         &Mesg(*e, "$cmd MEMBER_NAME_FILE [$curaddr] failed.");
     }
@@ -213,7 +211,7 @@ sub MailListMemberNameP
     local($file) = $MEMBER_NAME_FILE;
 
     if (-f $file) {
-            &Debug("   MailListMemberNameP(\n\t$addr\n\tin $file);\n") if ($debug);
+        &Debug("   MailListMemberNameP(\n\t$addr\n\tin $file);\n") if ($debug);
 
         if (&CheckMemberNameFile($addr)) {
             &Debug("+++Hit: $addr in $file") if $debug;
@@ -419,8 +417,10 @@ sub DoChangeMemberNameFile
 sub ProcFileSendBackMemberNameFile
 {
     local($proc, *Fld, *e, *misc) = @_;
-    local(%Addr2NameCache,%AddrCache,%FileCache);
+    local(%Addr2NameCache,%FileCache);
+    local(@f);
     local($file,$orgline,$addr,$bye,$pre);
+    local($c);
 
     # Read $MEMBER_NAME_FILE
     open(MEMBER_NAME,"< $MEMBER_NAME_FILE") || (&Log($!), return $NULL);
@@ -438,11 +438,21 @@ sub ProcFileSendBackMemberNameFile
 
     close(MEMBER_NAME);
 
+    foreach $file ($MEMBER_LIST, @MEMBER_LIST) {
+        next if $FileCache{$file}++;
+        next if ( ($file eq $ADMIN_MEMBER_LIST) && !$e{'mode:admin'} );
+        next unless (-f $file);
+        push(@f, $file);
+    }
+
+    $c = $#f;
+
     # Read $MEMBER_LIST & Create temporally MEMBER_LIST
     open(TMP_MEMBERS, "> $TMP_DIR/members.$$") || (&Log($!), return $NULL);
 
-    foreach $file ($MEMBER_LIST, @MEMBER_LIST) {
-        next if $FileCache{$file}++;
+    foreach $file (@f) {
+        print TMP_MEMBERS ('-' x 60)."\n" if $c;
+
         open(MEMBERS,"< $file") || (&Log($!), return $NULL);
 
         while (<MEMBERS>) {
@@ -462,19 +472,13 @@ sub ProcFileSendBackMemberNameFile
 
             $addr = ( /^(\S+)/ ? $1 : '' );
             print $orgline, next unless $addr;
-            next if $AddrCache{"$bye$addr"};
 
             if ($Addr2NameCache{"$bye$addr"}) {
-                 print TMP_MEMBERS $pre,$addr," (",$Addr2NameCache{"$bye$addr"},")\n";
-                 $AddrCache{"$addr"}++ unless $bye;
-                 next;
-            }
-
-            if ($pre) {
+                print TMP_MEMBERS $pre,$addr," (",$Addr2NameCache{"$bye$addr"},")\n";
+            } elsif ($pre) {
                 print TMP_MEMBERS $orgline;
             } else {
                 print TMP_MEMBERS $addr,"\n";
-                $AddrCache{$addr}++;
             }
         }
 
@@ -484,7 +488,12 @@ sub ProcFileSendBackMemberNameFile
     close(TMP_MEMBERS);
 
     # Send temporally MEMBER_LIST
-    $Procedure{"#$proc"} = "$TMP_DIR/members.$$";
+    if ( $e{'mode:admin'} ) {
+	$AdminProcedure{"#$proc"} = "$TMP_DIR/members.$$";
+    } else {
+	$Procedure{"#$proc"} = "$TMP_DIR/members.$$";
+    }
+
     &ProcFileSendBack($proc, *Fld, *e, *misc);
 
     # unlink temporally MEMBER_LIST
