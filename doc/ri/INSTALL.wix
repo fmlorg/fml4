@@ -389,8 +389,8 @@ Samples are the following files:
 elena@fml.org でコマンド "# command" を受け付けるようにはなっていませ
 ん。『$COMMAND_ADDRESS = $MAIL_LIST;』と設定することで elena@fml.org 
 がコマンド "# command" をコマンドとして理解するようになります。
-＃makefml config で設定できます。詳細は .ptr{post-or-command-addr} を参照
-＃elena elena-ctl 両方ともコマンド兼用で運用したい場合の注意は .ptr{post-ac}
+設定は makefml config でもできます。詳細は .ptr{post-or-command-addr} を参照。
+elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac}
 
 .S	まとめおくり
 =E.S	Matome Okuri (Digest delivery)
@@ -1253,18 +1253,29 @@ machine since it requires a lot of attention.
 にしつつ、root の人とよく相談しながら設定して下さい。
 
 
-.C	コマンド用のアドレスについて 
+.C	コマンド用のアドレスについての捕捉 
 .l	post-ac
 
-.ptr{post-or-command-addr} で述べられている通りにすれば elena@fml.org 
-でコマンドを受け付けます。当然 include-ctl を aliases に設定していれば 
-elena-ctl@fml.org もコマンド(専用)を受け付けます。ヘルプファイルも最初
-から elena-ctl になっているので混乱は生じないでしょう。
+.ptr{post-or-command-addr} で述べられている通りに
 
-これによる問題は配送されるメールのヘッダの X-ML-Info: の情報が 
-「elene-ctl があるにもかかわらずコマンドは elena 宛」というふうになっ
-てしまいます。これは強制的にヘッダフィールドを書き換える関数で書き換え
-る必要があります。
+	$COMMAND_ADDRESS = $MAIL_LIST;
+
+とすれば elena@fml.org でコマンドを受け付けます。この場合は配送メール
+の X-ML-Info: というフィールドやコマンドのREPLYもすべて elena@fml.org 
+宛になるように設定されます。（helpファイルは手動で書き直してください）
+
+# command というシンタックスのコマンドをelena@fml.org も 
+elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
+
+	$MAIL_LIST_ACCEPT_COMMAND = 1;
+
+とする必要があります。
+＃ 意味的には Backward Compatible というカテゴリですが、
+＃ $COMPAT_なんとか にすると何の compatible の話か見えにくくなるので
+＃ こういう変数名になってます。
+＃ 以前の version ではヘッダで「elena-ctl へ」とか書いてるのに実は 
+＃ elena でも受け付けてたという仕様上の問題を再現するためのオプションです。
+＃ いわば option TCP_COMPAT_42 みないなもんですかね
 
 
 .C	POP3 を利用してのML(sendmail等を経由して起動しないorできない場合)
