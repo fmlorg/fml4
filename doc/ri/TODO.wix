@@ -18,22 +18,7 @@
 =E.C	TODO, WISH LIST
 
 .S	CGI
-
-X-Mail-Count: 07111
-
-片方だけのファイルを操作するための
-
-   makefml {add,bye}ファイル名
-   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
-
-(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
-がします。
-
-e.g. makefml addactives ML addr
-     makefml addmembers ML addr
-
-なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
-思うので実装しなくてはいけないとおもいました。
+.xref	CGI
 
 .S	msend.pl should not tr/A-Z/a-z/
 
@@ -263,79 +248,6 @@ Q: pgp のときに address 登録なんていらないやんか
 A: 例外処理をいれるよりは念を入れさせる方がいいとおもうな
 
 
-.S	CGI
-=E.S	CGI
-   
-   Q: CUIとGUIどっちが本体？
-   
-   A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
-   
-      利点として makefml config の日本語変換ができますね
-   	どうせMessage Language Extensionの関数ライブラリをよんでる
-   	だけですが
-   
-   in fml-support ML's Count:06557 
-   "Ken'ichi Fukamachi" <fukachan@sapporo.iij.ad.jp> さん  wrote:
-   >○ TODO
-   >/cgi-bin/fml/admin/ の下とかがいいんではないのか？
-   
-   Q: CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
-   		or
-   	複数のサーバソフトのCGIがうごきうるだろうか？
-   
-   という仮定についてはどうか？
-   
-   A: Ｎ通りについて考えるのが面倒なので
-   
-   	/cgi-bin/fml/admin/menu.cgi	   (何でもできる権限人用)
-   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定のＭＬ $ml の管理者だけ用)
-   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
-   
-   みたいに決めうちしておく。
-   
-   Q:	/cgi-bin/fml/ml/$ml
-   
-   	/cgi-bin/fml/ml/$ml/
-   	/cgi-bin/fml/ml/$ml/*.cgi
-   
-   *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
-   
-   >インストーラ
-   
-   誰でもやるとはおもえないので
-   
-   	makefml install
-   	makefml cgi-setup 
-   
-   の2段構えくらいにしておく？
-   
-   Q:	makefml cgi-setup 
-   
-   A:	
-   	1. 前述の構造を掘る
-   
-   >	MTAごとの補正、補助
-   >	WWWの設定の補助
-   >	パスワード設定などについて
-   
-   	2. /cgi-bin/fml/admin/.htpasswd をつくるまではする
-   
-   	(for "thttpd" compiled with AUTH_FILE options)
-   
-   Q:	makefml newml ?
-   
-   >newaliases との連動
-   
-   	optional ?
-   
-   >入力のチェック機構
-   >他のエントリは？順番は？
-   >他にエミュレーションするべきもの？
-   
-   	makefml passwd
-   
-   
-   
 .S	配送関係
 =E.S	Delivery
 
@@ -484,6 +396,66 @@ clean up distribution generator
 I depends on NetBSD (bsd)make.
 
 
+.C	CGI
+.l	CGI
+
+.S 	CGIコントローラを作る場合fmlしか動かないホストをつくるだろうか？
+=E.S	Do you construct a host for fml CGI only ?
+
+   		or
+   	複数のサーバソフトのCGIがうごきうるだろうか？
+   
+   という仮定についてはどうか？
+   
+A: Ｎ通りについて考えるのが面倒なので
+   
+   	/cgi-bin/fml/admin/menu.cgi	   (何でもできる権限人用)
+   	/cgi-bin/fml/ml-admin/$ml/menu.cgi (特定のＭＬ $ml の管理者だけ用)
+   	/cgi-bin/fml/ml/$ml/menu.cgi	   (特定のＭＬ $ml の一般ユーザ用)
+   
+みたいに決めうちしておく。
+   
+.S	/cgi-bin/fml/ml/$ml
+   
+   	/cgi-bin/fml/ml/$ml/
+   	/cgi-bin/fml/ml/$ml/*.cgi
+   
+   *.cgi はパラメータを埋め込むためだけのwrapperをmakefml newml が作る
+   
+XXX 実装済み
+XXX Q: インストーラ
+XXX make install-with-cgi
+XXX	htpasswd のための入力を促す
+XXX	SSLを使うかどうかをたずねる
+   
+.S   	makefml passwd のエミュレーション
+=E.S	emulate "makefml passwd"
+   
+fml-support: 07111
+
+片方だけのファイルを操作するための
+
+   makefml {add,bye}ファイル名
+   makefml ファイル名.{add,bye} (objectひとむけ？:-) 
+
+(という関数名でわかりやすいかどうかともかくとして)そういう類が必要なき
+がします。
+
+e.g. makefml addactives ML addr
+     makefml addmembers ML addr
+
+なんでかというと、この機能はどうせ CGIからコントロールするのに必要だと
+思うので実装しなくてはいけないとおもいました。
+
+.S 	CUIとGUIどっちが本体？
+=E.S	whether of CUI and GUI is fundamental 
+   
+A: CUIが基本でGUIがおまけ。というわけでGUIでやってもみかけはCUIと一緒:-)
+   
+利点として makefml config の日本語変換
+Message Language Extensionの関数ライブラリをよぶ
+   
+   
 .C	パッケージ
 =E.C	Packages
 
