@@ -654,6 +654,40 @@ msend.pl は $ACTIVE_LIST を見て、
 .xref	bin/passwd.pl
 
 
+.k	fmlインストール後のmaintenanceとversion upに関する一考察
+.k	How to maintan the installed fml source
+.k	インストール後のメインテナンスとversion up
+
+上述のデータ構造とファイルの扱いを考慮した場合、インストール後の
+version up や maintenance に便利な形は次のようなものだと思っています。
+少なくとも僕はそういう風にやってます。
+＃以下 $HOME は適当に各自の環境に合わせて展開して考えて下さいね
+
+	$HOME/libexec/fml/ に *.pl を全部いれておく
+
+また、ＭＬのスプールを
+
+	$HOME/w/spool/fml-support
+	$HOME/w/spool/foreign-tv-ml
+
+のように作っておく。config.ph や spool としてＭＬの記事の保存場所はこ
+こです。よって、include は
+
+	"|$HOME/libexec/fml/fml.pl $HOME/w/spool/fml-support"
+
+のようなファイルを /etc/aliases から呼び出します。僕はＭＬ用には
+$HOME/etc/aliases を使ってたりしますが:-)
+＃ sendmail.cf は O AliasFile=/etc/aliases, それ以外のaliasファイル
+.k	O AliasFile=...
+
+version up の仕方は、例えば次のようになるでしょう。
+
+	% cd /var/tmp
+	% tar zxvf fml-current.tar.gz
+	% cp -p fml-2.1何か/*.pl $HOME/libexec/fml
+
+で終りだと:-)
+
 
 .C	Security 
 .l	security

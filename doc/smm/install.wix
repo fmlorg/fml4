@@ -685,7 +685,6 @@ config.ph でコントロールできます。
 	@DenyProcedure = ('get', 'send', 'mget', 'msend');
 
 
-
 .S	コマンドの # syntax は必要か？ 
 
 “コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
