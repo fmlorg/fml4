@@ -12,6 +12,8 @@
 # $Id$
 #
 
+# SecureP()
+require 'libcgi_cleanup.pl';
 
 sub Parse
 {
@@ -292,55 +294,6 @@ sub Grep
     close(IN);
 
     $NULL;
-}
-
-
-sub SecureP
-{
-    local($secure_pat) = '[A-Za-z0-9\-_]+';
-    local($mail_addr)  = '[A-Za-z0-9\.\-_]+\@[A-Za-z0-9\.\-]+';
-    local($account)    = '[A-Za-z0-9\-_]+';
-
-    &P("ERROR: ML is empty.") unless $ML;
-    &P("ERROR: PROC is empty.") unless $PROC;
-
-    if ($ML !~ /^($secure_pat)$/i) {
-	&P("ERROR: ML is insecure.");
-	0;
-    }
-    elsif ($PROC !~ /^($secure_pat)$/i) {
-	&P("ERROR: PROC is insecure.");
-	0;
-    }
-    elsif ($LANGUAGE && ($LANGUAGE !~ /^[A-Za-z]+$/)) {
-	&P("ERROR: LANGUAGE is insecure.");
-	0;
-    }
-    elsif ($MAIL_ADDR && ($MAIL_ADDR !~ /^($mail_addr)$/)) {
-	&P("ERROR: MAIL_ADDR is insecure.");
-	0;
-    }
-    elsif ($CGI_ADMIN_USER && ($CGI_ADMIN_USER !~ /^($mail_addr|$account)$/)) {
-	&P("ERROR: CGI_ADMIN_USER is insecure.");
-	0;
-    }
-    elsif ($VARIABLE && ($VARIABLE !~ /^($secure_pat)$/i)) {
-	&P("ERROR: VARIABLE $VARIABLE is insecure.");
-	0;	
-    }
-    elsif ($VALUE && ($VALUE !~ /^($secure_pat)$/i)) {
-	&P("ERROR: VALUE is insecure.");
-	0;	
-    }
-    elsif ($PTR && ($PTR !~ /^([0-9A-Z_\/]+)$/i)) {
-	&P("ERROR: PTR is insecure.");
-	0;	
-    }
-    else {
-        # if (@PROC_ARGV) { 1;} # check 'ARGV'
-
-	1;
-    }
 }
 
 
