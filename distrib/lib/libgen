@@ -145,7 +145,7 @@ COPY_SOURCES () {
 
 	echo ""
 	echo Copying www/
-	rsync --exclude CVS -av www/ $DESTDIR/distrib/www
+	rsync --exclude CVS --exclude .cvsignore -av www/ $DESTDIR/distrib/www/
 
 	echo ""
 	echo Copying sys/
