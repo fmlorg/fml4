@@ -15,6 +15,179 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 *** Please see RELEASE_NOTES for contributors and the contribution.
 .fi
 
+1999/03/29
+	FML Advisory 1999-03: Melissa Macro Virus
+
+1999/03/28
+	FML Advisory 1999-02: or.jp -> ne.jp problems
+
+1999/03/27
+   or.jp -> ne.jp translator: Japanese specific
+
+	or.jp -> ne.jp へメンバーファイルなどを変換するツールを
+	加える。ＭＬのディレクトリで
+
+		make translate-domain
+
+	を実行すると or.jp -> ne.jp 移行をするドメインをne.jpに移行する
+
+	注意: これでメールソフトの設定をちゃんと更新しないメンバーは
+	逆に"メンバーではない"といわれるようになることに注意。	
+
+
+1999/03/26
+   HTML Generator: define umask variables
+
+	$HTML_DEFAULT_UMASK
+	$HTML_WRITE_UMASK
+
+
+1999/03/25
+   EnvelopeFilter: fix 2-byte command filter toggle flag
+	if $FILTER_ATTR_REJECT_2BYTES_COMMAND is defined, 
+	reject 2-bytes commands.
+
+	$FILTER_ATTR_REJECT_2BYTES_COMMAND が定義されている時だけ
+	２バイトコマンドを拒否する
+
+1999/03/16
+   EnvelopeFilter: fix 2-byte command rejection (Japanese specific)
+
+	bug fix: 日本語英文字コマンドの拒否のバグFIX
+		拒否 "ＵＮＳＵＢＳＣＲＩＢＥ"
+		拒否 "ＵＮＳＵＢＳＣＲＩＢＥ なんか"
+		拒否 "ＵＮＳＵＢＳＣＲＩＢＥ　なんか"
+		OK   "ＵＮＳＵＢＳＣＲＩＢＥざますぅ。"
+	など
+
+1999/03/14
+   chaddr: implement $CHADDR_AUTH_TYPE == confirmation mode
+
+	chaddr の confirmation の実装
+
+   fmlserv: listserv style interface
+	clean up for 2.2.1
+
+   cf/MANIFEST: add value: definition for each variable
+
+	各変数にとりうる値についてのコメントをつける
+
+1999/03/13
+   2.1A#37: rearrange doc/op for 2.2.1
+
+	ただいま2.2.1にむけての整備まっしぐら月間
+
+1999/03/09
+   mead.pl: consider DSN also
+
+1999/02/28
+   cf/MANIFEST: update definitions
+
+1999/02/27
+   EnvelopeFilter: reject 2 byte alphabets
+
+   ［フィルタリングルールの追加］
+	メールの最初のパラグラフに
+	"ＵＮＳＵＢＳＣＲＩＢＥ ほえほえ" のような２バイト英文字ではじまる
+	行があったらREJECTする。
+
+1999/02/26
+   FML Advisory 1999-001: happy99.exe 
+
+	[www] http://www.fml.org/fml/advisories/happy99/
+
+	FMLアドバイザリィ  happy99.exe 対策を加えました。
+	doc/advisories/も他のドキュメント同様WWWとPlainTextです。
+
+   CHADDR: remove $MAINTAINER as a copied user but enable
+	$Procedure{'r2a#chaddr'} control.  
+
+   BYE:	remove additional info e.g. "change delivery list.." in
+	default but works under $debug_amctl on.
+
+    makefml: check ADDR_CHECK_MAX value whether defined or not.
+
+1999/02/24
+   makefml:
+	show more explicitly /etc/aliases example
+
+   AddressMatch: 
+	more polite or friendly message
+
+   DEFINE_FIELD_PAT_TO_REJECT: 
+	enhance arguments to be (field,	pat, reason) 
+
+    EnvelopeFilter: 
+	modify 'invalid command line' pattern to reject '% echo ...' 
+	line with or without lines/paragraphs after it.
+
+1998/02/23
+	clean up for more y2k
+
+1998/02/21
+	against "happy99.exe"
+	bin/multipart.pl : reject happy99
+
+	bug fix: active/member asymmetric registerd case.
+
+	   bug fix: actives/membersの片方にしかアドレスがない場合の挙動
+
+1998/02/17
+   include-outgoing:
+	remove DISTRIBUTE_DUMMY_RECIPIENT and define
+	$USE_OUTGOING_ADDRESS	1/0 (== yes/no)
+	$OUTGOING_ADDRESS	address
+
+	if ($USE_OUTGOING_ADDRESS) {
+		fml sends article to $OUTGOING_ADDRESS.
+	}
+
+	1.	include の見本を作る(include-outgoing)
+
+	   % cd /var/spool/ml/elena
+	   % make outgoing 
+
+	2.	/etc/aliases に書く
+
+	   elena-outgoing: :include:/var/spool/ml/elena/include-outgoing
+
+	3. 	makefml config で enable
+
+		-> OPTIONS -> SMTP -> USE_OUTGOING_ADDREESS -> "y"
+
+1998/02/12
+   bin/pmail.pl: update and extend it
+
+1998/02/11
+   include-outgoing:
+	You can use "make outgoing" now.
+	add "include-outgoing" and remove "include-disthack"
+
+	DISTRIBUTE_DUMMY_RECIPIENT 	list-outgoing@$DOMAINNAME
+
+    $AGAINST_MAIL_WITHOUT_REFERENCE
+	check References: and In-Reply-To: field has already
+	Message-ID we intend to add now.
+
+	References:/In-Reply-To: がこれからつけようとしている
+	Message-ID:を持っているかどうかをチェック。
+	既についていたらつけない。
+
+1998/02/08
+	Y2K: $Now becomes ' 0/01/01' not '00/01/01'.
+	     IT SHOULD TO BE '00/01/01', is'nt it?
+
+1998/02/05
+	update jcode.pl to 2.10
+	update mime_pls to 2.02
+	modify libMIME.pl to use mime_pls 2.02
+	
+1998/02/03
+	Added: doc/ri/INSTALL_with_ZMAILER
+
+	bug fix: fml on nt (pop version) overwrites sitedef.ph but
+		 SHOULD NOT DO IT. 
+
 1999/02/01
 	begin to prepare 2.2.1 release ...
 
