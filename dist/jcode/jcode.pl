@@ -3,13 +3,20 @@ package jcode;
 ;#
 ;# jcode.pl: Japanese character code conversion library
 ;#
-;# Copyright (c) 1991,1992 Software Research Associates, Inc.
-;#	Original by srekcah@sra.co.jp, Feb 1992
+;# Copyright (c) 1995 Kazumasa Utashiro <utashiro@iij.ad.jp>
+;# Internet Initiative Japan Inc.
+;# Sanban-cho, Chiyoda-ku, Tokyo 102, Japan
 ;#
-;#	Maintained by Kazumasa Utashiro <utashiro@sra.co.jp>
-;#	Software Research Associates, Inc., Japan
+;# Copyright (c) 1992,1993,1994 Kazumasa Utashiro
+;# Software Research Associates, Inc.
+;# Original by srekcah@sra.co.jp, Feb 1992
 ;#
-;; $rcsid = q$Id: jcode.pl,v 1.9 1994/02/14 06:16:29 utashiro Exp $;
+;# Redistribution for any purpose, without significant modification,
+;# is granted as long as all copyright notices are retained.  THIS
+;# SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+;# IMPLIED WARRANTIES ARE DISCLAIMED.
+;#
+;; $rcsid = q$Id: jcode.pl,v 1.12.1.1 1996/09/08 14:42:16 utashiro Exp $;
 ;#
 ;######################################################################
 ;#
@@ -17,11 +24,12 @@ package jcode;
 ;#
 ;#	&jcode'getcode(*line)
 ;#		Return 'jis', 'sjis', 'euc' or undef according to
-;#		Japanese character code in $line.
+;#		Japanese character code in $line.  Return 'binary' if
+;#		the data has non-character code.
 ;#
 ;#	&jcode'convert(*line, $ocode [, $icode])
 ;#		Convert the line in any Japanese code to specified
-;#		code in second argument $ocode.  $ocode is one of
+;#		code in second argument $ocode.  $ocode is any of
 ;#		'jis', 'sjis' or 'euc'.  Input code is recognized
 ;#		automatically from the line itself when $icode is not
 ;#		supplied.  $icode also can be specified, but xxx2yyy
@@ -53,6 +61,24 @@ package jcode;
 ;#		The value of this associative array is pointer to the
 ;#		subroutine jcode'xxx2yyy().
 ;#
+;#	&jcode'cache()
+;#	&jcode'nocache()
+;#	&jcode'flush()
+;#		Usually, converted character is cached in memory to
+;#		avoid same calculations have to be done many times.
+;#		To disable this caching, call &jcode'nocache().  It
+;#		can be revived by &jcode'cache() and cache is flushed
+;#		by calling &jcode'flush().  &cache() and &nocache()
+;#		functions return previous caching state.
+;#
+;#	---------------------------------------------------------------
+;#
+;#	&jcode'tr(*line, $from, $to [, $option]);
+;#		&jcode'tr emulates tr operator for 2 byte code.  This
+;#		funciton is under construction and doesn't have full
+;#		feature of tr.  Range operator like a-z is not
+;#		supported.  Only 'd' is interpreted as option.
+;#
 ;#	---------------------------------------------------------------
 ;#
 ;#	&jcode'init()
@@ -83,7 +109,7 @@ package jcode;
 ;#	    last;
 ;#	}
 ;#
-;# The safest way for converting to JIS
+;# The safest way for converting to JIS.
 ;#
 ;#	while (<>) {
 ;#	    ($matched, $code) = &jcode'getcode(*_);
@@ -115,7 +141,9 @@ sub init {
     $re_euc_s  = "($re_euc_c)+";
     $re_jin    = '\033\$[\@B]';
     $re_jout   = '\033\([BJ]';
+    $re_binary = '[\000-\006\177\377]';
     &jis_inout("\033\$B", "\033(B");
+    $cache = 1;
 
     for $from ('jis', 'sjis', 'euc') {
 	for $to ('jis', 'sjis', 'euc') {
@@ -152,6 +180,7 @@ sub getcode {
     local(*_) = @_;
     return undef unless /[\033\200-\377]/;
     return 'jis' if /$re_jin|$re_jout/o;
+    return 'binary' if /$re_binary/o;
 
     local($sjis, $euc);
     $sjis += length($&) while /$re_sjis_s/go;
@@ -166,6 +195,7 @@ sub max { $_[ $[ + ($_[$[] < $_[$[+1]) ]; }
 sub convert {
     local(*_, $ocode, $icode) = @_;
     return (undef, undef) unless $icode = $icode || &getcode(*_);
+    return (undef, $icode) if $icode eq 'binary';
     $ocode = 'jis' unless $ocode;
     local(*convf) = $convf{$icode, $ocode};
     do convf(*_);
@@ -243,7 +273,7 @@ sub sjis2euc {
     s/$re_sjis_c/$s2e{$&}||&s2e($&)/geo;
 }
 sub s2e {
-    ($c1, $c2) = unpack('CC', $code = shift);
+    local($c1, $c2) = unpack('CC', $code = shift);
     if ($c2 >= 0x9f) {
 	$c1 = $c1 * 2 - ($c1 >= 0xe0 ? 0xe0 : 0x60);
 	$c2 += 2;
@@ -251,7 +281,11 @@ sub s2e {
 	$c1 = $c1 * 2 - ($c1 >= 0xe0 ? 0xe1 : 0x61);
 	$c2 += 0x60 + ($c2 < 0x7f);
     }
-    $s2e{$code} = pack('CC', $c1, $c2);
+    if ($cache) {
+	$s2e{$code} = pack('CC', $c1, $c2);
+    } else {
+	pack('CC', $c1, $c2);
+    }
 }
 
 ;#
@@ -262,7 +296,7 @@ sub euc2sjis {
     s/$re_euc_c/$e2s{$&}||&e2s($&)/geo;
 }
 sub e2s {
-    ($c1, $c2) = unpack('CC', $code = shift);
+    local($c1, $c2) = unpack('CC', $code = shift);
     if ($c1 % 2) {
 	$c1 = ($c1>>1) + ($c1 < 0xdf ? 0x31 : 0x71);
 	$c2 -= 0x60 + ($c2 < 0xe0);
@@ -270,7 +304,11 @@ sub e2s {
 	$c1 = ($c1>>1) + ($c1 < 0xdf ? 0x30 : 0x70);
 	$c2 -= 2;
     }
-    $e2s{$code} = pack('CC', $c1, $c2);
+    if ($cache) {
+	$e2s{$code} = pack('CC', $c1, $c2);
+    } else {
+	pack('CC', $c1, $c2);
+    }
 }
 
 ;#
@@ -278,5 +316,43 @@ sub e2s {
 ;#
 sub sjis2sjis { 0; }
 sub euc2euc { 0; }
+
+;#
+;# Cache control functions
+;#
+sub cache {
+    ($cache, $cache = 1)[$[];
+}
+sub nocache {
+    ($cache, $cache = 0)[$[];
+}
+sub flushcache {
+    undef %e2s;
+    undef %s2e;
+}
+
+;#
+;# TR function for 2-byte code
+;#
+sub tr {
+    local(*_, $from, $to, $opt) = @_;
+    local(@from, @to, %table);
+    local($wasjis, $count) = (0, 0);
+    
+    &jis2euc(*_), $wasjis++	if $_    =~ /$re_jin/o;
+    &jis2euc(*from)		if $from =~ /$re_jin/o;
+    &jis2euc(*to), $wasjis++	if $to   =~ /$re_jin/o;
+
+    @from = $from =~ /[\200-\377].|./g;
+    @to = $to =~ /[\200-\377].|./g;
+    push(@to, ($opt =~ /d/ ? '' : $to[$#to]) x (@from - @to)) if @to < @from;
+    @table{@from} = @to;
+
+    s/[\200-\377].|./defined($table{$&}) && ++$count ? $table{$&} : $&/ge;
+
+    &euc2jis(*_) if $wasjis;
+
+    $count;
+}
 
 1;
