@@ -41,7 +41,6 @@ documentation		ドキュメントについて
 RDBMS			データベースへのアクセス(リレーショナル: PostgreSQL, MySQL)
 LDAP			データベースへのアクセス(LDAP)
 
-
 .part エラー
 errormails		エラーメールをどうするか？
 debug			デバッグについて
@@ -54,7 +53,7 @@ smtp			配送関係
 Japanese		日本語処理について
 utility_programs	その他便利かもしれないプログラム
 mail2xxx		メールから別のプログラムへ渡す(参考事例)
-references		文献など
+references		参考文献など
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
 internals		内部構造や実装の理屈についてなど
