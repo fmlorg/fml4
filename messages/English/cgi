@@ -1,0 +1,13 @@
+### Section: CGI
+
+cgi.ok:
+	request succeed
+
+cgi.password.different:
+	Error: wrong CGI password
+
+cgi.password.empty:
+	Error: empty CGI password
+
+cgi.adduser.already_member:
+	Error: a member already
