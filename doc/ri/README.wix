@@ -105,7 +105,7 @@ edit of config.ph.
 インストール作業の前準備として次のものが必要があります。
 
    インストール先のマシンに(自分もしくはML専用の)アカウントがある
-   perl 4 もしくは perl 5 (今時perlは最初からOSに入ってるとおもう)
+   perl 5
    メール配送プログラムがあること(default は sendmail R8 を想定)
 
 です。必要ならこれらをインストールしてちゃんと動くようにセットアップし
@@ -118,7 +118,7 @@ postfix, qmail and exim)についての注意点が INSTALL_with_MTA名 というファ
 FML fundamentally needs
 
 	a UNIX account
-	perl (4 or 5, at least after 4.019?)
+	perl5
 	MTA (e.g. postfix,sendmail,qmail,exim,...).
 
 See INSTALL for more details on installation.
