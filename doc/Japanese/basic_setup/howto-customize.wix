@@ -78,11 +78,7 @@ cfの構文はperlではありません。機械処理しやすいフォーマットになっていま
 	構文は perl の構文そのもの(何でも出来る)。
 	歴史的にはこの３が元々の形です。
 
-○ ＭＬ全部に共通の設定をする時は sitedef.ph, site_init.ph などを使い
-ます。
-
-
-           Copyright (C) 1999 Ken'ichi Fukamachi
+           Copyright (C) 1999-2000 Ken'ichi Fukamachi
                    All rights reserved. 
 
 $Id$

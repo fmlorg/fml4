@@ -9,6 +9,7 @@ TUTORIAL_BASIC_SOURCES += config-moderated
 TUTORIAL_BASIC_SOURCES += setup-more-secure 
 TUTORIAL_BASIC_SOURCES += config-post-from-anyone
 TUTORIAL_BASIC_SOURCES += howto-customize
+TUTORIAL_BASIC_SOURCES += site_xxx
 TUTORIAL_BASIC_SOURCES += errormail-handling
 TUTORIAL_BASIC_SOURCES += errormail-handling-qmail
 TUTORIAL_BASIC_SOURCES += files

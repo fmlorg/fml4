@@ -15,7 +15,21 @@
 
 .HTML_PRE
 
-% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+ここではＭＬをユーザ fml で行なうとします。
+
+まず最初にインストールする際は /usr/local/fml /var/spool/ml を作ってお
+きます。それらのディレクトリはユーザ fml にしておきます。
+
+% su root
+# mkdir /usr/local/fml /var/spool/ml
+# chown fml  /usr/local/fml /var/spool/ml
+# exit
+
+ダウンロードする場所、広げる場所は読み書きできればどこでもいいです。
+自分のホーム ~/ で行なうのが普通です。レンタルサーバなどでは /var/tmp/ 
+の下で作業してもいいです(礼儀正しく作業後は消してしておきましょう)。
+
+% ftp ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/currnet/fml-3.0I-current-20000822.tar.gz
 Connected to ftp.iij.ad.jp.
 
 	.... だ〜 ...
@@ -24,8 +38,8 @@ Connected to ftp.iij.ad.jp.
 
 	.... だ〜 ...
 
-% tar zxf fml-current.tar.gz
-% cd fml-3.0
+% tar zxf fml-3.0I-current-20000822.tar.gz
+% cd fml-3.0I-current-20000822
 
   (できるディレクトリ名はその時時で変わる。
    名前は『fml-バージョン番号-スナップショット番号』のようになっている)
