@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.221 2001/09/01 15:31:08 fukachan Exp $
+# $FML: makefml,v 2.222 2001/09/11 10:43:53 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -4922,18 +4922,9 @@ sub do_adduser
     local($acm) = $ADDR_CHECK_MAX;
     $ADDR_CHECK_MAX = 10;
 
-    if ( $config_ph'USE_DATABASE ) {
-	require 'libdatabases.pl';
-        require 'libkern.pl';
+    if ( $config_ph::USE_DATABASE ) {
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
-	$MAIL_LIST = $ml;
-	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
-	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
-	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
-	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
-	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
-	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
-	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+	&InitDataBaseAccess($ml);
 
 	for $f (@dbfiles) {
 	    my (%mib, %result, %misc, $error);
@@ -5040,17 +5031,8 @@ sub do_byeuser
     local($file, $found);
 
     if ( $config_ph'USE_DATABASE ) {
-	require 'libdatabases.pl';
-        require 'libkern.pl';
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
-	$MAIL_LIST = $ml;
-	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
-	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
-	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
-	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
-	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
-	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
-	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+	&InitDataBaseAccess($ml);
 
 	for $file (@dbfiles) {
 	    my (%mib, %result, %misc, $error);
@@ -5173,17 +5155,8 @@ sub do_ctladdr
     # delete 
     local($file, $found);
     if ( $config_ph'USE_DATABASE ) {
-	require 'libdatabases.pl';
-        require 'libkern.pl';
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
-	$MAIL_LIST = $ml;
-	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
-	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
-	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
-	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
-	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
-	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
-	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+	&InitDataBaseAccess($ml);
 
 	$XStatus = '';
 	for $file (@dbfiles) {
@@ -7620,6 +7593,28 @@ sub FixErrorBuffer
 	# print "  (debug)\$HtmlExitBuffer> $XStatus\n";
 	# print "  --- debug end\n";
     }
+}
+
+
+################################################################
+#
+# USE_DATABASE
+#
+sub InitDataBaseAccess
+{
+    my ($ml) = @_;
+
+    require 'libdatabases.pl';
+    require 'libkern.pl';
+
+    $MAIL_LIST           = $ml;
+    $DATABASE_METHOD     = $config_ph::DATABASE_METHOD;
+    $DATABASE_DRIVER     = $config_ph::DATABASE_DRIVER;
+    $SQL_SERVER_HOST     = $config_ph::SQL_SERVER_HOST;
+    $SQL_SERVER_PORT     = $config_ph::SQL_SERVER_PORT;
+    $SQL_SERVER_USER     = $config_ph::SQL_SERVER_USER;
+    $SQL_SERVER_PASSWORD = $config_ph::SQL_SERVER_PASSWORD;
+    $SQL_DATABASE_NAME   = $config_ph::SQL_DATABASE_NAME;
 }
 
 
