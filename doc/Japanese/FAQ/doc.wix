@@ -1,0 +1,36 @@
+.C	ドキュメント類
+
+.S	ドキュメントはどこにありますか？
+
+/usr/local/fml/doc/
+
+をみましょう。
+
+なお http://www.fml.org/fml/ が常に最新版です。
+そのため手元の fml と異なっているかも知れません。
+
+
+.S	http://www.fml.org/fml/ をダウンロードしたい
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/
+
+ここに htmldocs-current-日付.tar.gz というファイルがあります。
+html 形式のドキュメントを
+
+.q
+total 6989
+drwxr-xr-x  59 fukachan  wheel     2560 Aug 25 02:01 htdocs/
+-rw-r--r--   1 fukachan  wheel   829631 Aug 25 01:38 htmldocs-current-20000824.tar.gz
+.~q
+
+.S	ドキュメントの最新版だけを追っかけたい
+
+前節参照
+
+.S	ドキュメントのサーチは？
+
+.url http://www.fml.org/fml/search-j.html
+
+
+
+.# $Id$

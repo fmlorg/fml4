@@ -5,6 +5,7 @@
 .~HTML_PRE
 
 .include general.wix
+.include doc.wix
 .include unix.wix
 .include nt.wix
 .include misc.wix
