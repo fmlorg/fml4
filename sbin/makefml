@@ -2809,11 +2809,15 @@ sub FYI
     }
     elsif ($r =~ /Smtp\:\:socket/) {
 	$m .= "Hmm... perl's socket() fails on this machine.\n";
+	$m .= "($r)\n\n" if $r;
+
 	$m .= "But don't worry!\n";
 	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
     }
     elsif ($r =~ /Smtp\:\:connect.*connection refused/) {
 	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
+	$m .= "($r)\n\n" if $r;
+
 	$m .= "But don't worry!\n";
 	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
 
@@ -2823,6 +2827,8 @@ sub FYI
     }
     else {
 	$m .= "Hmm... fml cannot connect sendmail on this machine.\n";
+	$m .= "($r)\n\n" if $r;
+
 	$m .= "But don't worry!\n";
 	$m .= "fml would send mails by 'exec sendmail' NOT IPC.\n";
     }
@@ -2832,9 +2838,7 @@ sub FYI
 	$m =~ s/\n/\n   /g;
 	$r =~ s/\n/\n   /g;
 
-	print STDERR "\n  For Your Information:\n   $m";
-	print STDERR "($r)\n" if $r;
-	print STDERR "\n";
+	print STDERR "\n  For Your Information:\n   $m\n";
     }
 }
 
