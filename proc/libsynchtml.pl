@@ -1174,13 +1174,15 @@ sub ReConfigureIndex
 sub Copy
 {
     local($in, $out) = @_;
-
-    open(COPY_IN,  $in) || (&Log("Error: Copy cannot open [$in]"), return);
-    open(OUT, "> $out") || (&Log("Error: Copy cannot open [$out]"), return);
-    select(OUT); $| = 1; select(STDOUT); 
-    while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
-    close(OUT);
-    close(COPY_IN); 
+    local($mode) = (stat($in))[2];
+    open(COPYIN,  $in)      || (&Log("Error: Copy::In [$!]"), return 0);
+    open(COPYOUT, "> $out") || (&Log("Error: Copy::Out [$!]"), return 0);
+    select(COPYOUT); $| = 1; select(STDOUT);
+    chmod $mode, $out;
+    while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}
+    close(COPYOUT);
+    close(COPYIN); 
+    1;
 }
 
 

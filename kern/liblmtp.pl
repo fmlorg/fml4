@@ -38,12 +38,15 @@ package lmtp;
 sub Copy
 {
     local($in, $out) = @_;
-    open(IN,  $in)      || (&Log("CopyIN: $!"), return);
-    open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
-    select(OUT); $| = 1; select(STDOUT); 
-    while (<IN>) { print OUT $_;}
-    close(OUT);
-    close(IN); 
+    local($mode) = (stat($in))[2];
+    open(COPYIN,  $in)      || (&Log("Error: Copy::In [$!]"), return 0);
+    open(COPYOUT, "> $out") || (&Log("Error: Copy::Out [$!]"), return 0);
+    select(COPYOUT); $| = 1; select(STDOUT);
+    chmod $mode, $out;
+    while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}
+    close(COPYOUT);
+    close(COPYIN); 
+    1;
 }
 
 

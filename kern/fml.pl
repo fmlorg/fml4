@@ -1939,9 +1939,12 @@ sub Open
 
 sub Copy
 {
-    open(COPYIN,  $_[0])     || (&Log("Error: Copy::In [$!]"), return 0);
-    open(COPYOUT, "> $_[1]") || (&Log("Error: Copy::Out [$!]"), return 0);
-    select(COPYOUT); $| = 1; select(STDOUT); 
+    local($in, $out) = @_;
+    local($mode) = (stat($in))[2];
+    open(COPYIN,  $in)      || (&Log("Error: Copy::In [$!]"), return 0);
+    open(COPYOUT, "> $out") || (&Log("Error: Copy::Out [$!]"), return 0);
+    select(COPYOUT); $| = 1; select(STDOUT);
+    chmod $mode, $out;
     while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}
     close(COPYOUT);
     close(COPYIN); 
