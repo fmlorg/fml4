@@ -1,14 +1,17 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
+
+use vars qw($debug $debug_filter $debug_envf_rule);
+use vars qw($COMMAND_FILTER_HOOK); # used for compatibility
 
 # Called under $USE_DISTRIBUTE_FILTER is not null.
 # IF *HOOK is not defined, we apply default checkes.
@@ -17,11 +20,11 @@
 sub __EnvelopeFilter
 {
     local(*e, $mode) = @_;
-    local($xbuf);
     local(@pmap); # paragraph map: the array of the first ptr in paragraph
-    my($c, $p, $r, $org_mlp, $bodylen);
-    my($lparbuf, $fparbuf, $n_paragraph);
-    my($one_line_check_p);
+    my ($xbuf);
+    my ($c, $p, $r, $org_mlp, $bodylen);
+    my ($lparbuf, $fparbuf, $n_paragraph);
+    my ($one_line_check_p);
 
 
     ### 0. preparation
@@ -30,9 +33,6 @@ sub __EnvelopeFilter
     # force plural line match
     $org_mlp = $*;
     $* = 0;
-
-    $FILTER_ATTR_LEAST_NUM_PARAGRAPHS = 5;
-
 
     ### 1. run-hooks
     # compatible 
@@ -68,7 +68,7 @@ sub __EnvelopeFilter
 	    $buf = $e{"h:$hf:"};
 	    if ($buf =~ /ISO-2022-JP/i) { 
 		&use('MIME');
-		$buf = &DecodeMimeString($buf);
+		$buf = &DecodeMimeStrings($buf);
 	    }
 	    $buf = &STR2EUC($buf);
 
@@ -202,7 +202,7 @@ sub __EnvelopeFilter
 	   $fparbuf =~ /\033\044\102(\043[\101-\132\141-\172])/) {
 	# /JIS"2byte"[A-Za-z]+/
 	
-	$s = &STR2EUC($fparbuf);
+	my $s = &STR2EUC($fparbuf);
 
 	my ($n_pat, $sp_pat);
 	$n_pat  = '\243[\301-\332\341-\372]';
@@ -276,8 +276,9 @@ sub EvalRejectFilterHook
 {
     local(*e, *filter) = @_;
     return $NULL unless $filter;
-    local($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
-    eval($r); &Log($@) if $@;
+    my ($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
+    eval($r); 
+    &Log($@) if $@;
     $r = &DoEvalRejectFilterHook;
     $r || $NULL;
 }
@@ -289,7 +290,7 @@ sub EvalRejectFilterHook
 # check the given buffer has unusual Japanese (not ISO-2022-JP)
 sub NonJISP
 {
-    local($buf) = @_;
+    my ($buf) = @_;
 
     # check 8 bit on
     if ($buf =~ /[\x80-\xFF]/ ){
