@@ -49,7 +49,203 @@ the design and implementation of Mailing List server, perl, operating
 systems and so on.
 
 
-********** UNTIL Sun Sep  6 15:51:59 JST 1998 *************
+********** UNTIL 1999/02/17 *************
+
+---------------------------------------------
+
+Date:    Wed, 17 Feb 1999 13:06:43 +0900
+Thanks to: Yuao Tanigawa <yuao@infonia.ne.jp>
+In fml-support ML's Count: 05863
+
+bin/multipart.pl happy99 patch
+
+---------------------------------------
+Date:    Mon, 25 Jan 1999 00:29:36 +0900
+Thanks to: Takashi Waniishi <wani@kt.rim.or.jp>
+In fml-support ML's Count: 05765
+
+bug fix libsmtp.pl
+
+
+------------------------------------------
+Date:    Sat, 23 Jan 1999 17:53:35 +0900
+Thanks to: "Y.Watanabe" <yuw@t3.rim.or.jp>
+In fml-support ML's Count: 05762
+
+fix fop and 1153 library based on this
+
+
+------------------------------------------
+Date:    Mon, 11 Jan 1999 15:35:05 +0900
+Thanks to: watanabe@xxir10.ls.noda.sut.ac.jp (Y.Watanabe)
+In fml-support ML's Count: 05692
+
+based on this idea, define "timeout" option in 'makefml lock ML timeout'.
+
+
+------------------------------------------
+Date:    Sat, 9 Jan 1999 22:22:45 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 05678
+
+patch for makefml chaddr bug
+
+
+------------------------------------------
+Date:    Sat, 9 Jan 1999 22:20:37 +0900
+In fml-support ML's Count: 05671
+
+mead.pl -k option
+
+
+------------------------------------------
+Date:    Tue, 15 Dec 1998 18:16:34 +0900
+Thanks to: MURATA Nobuhiro <nob@makioka.y-min.or.jp>
+In fml-support ML's Count: 05608
+
+not use but bug fix libsynchtml following this hint
+
+
+------------------------------------------
+Date:    Tue, 8 Dec 1998 23:27:17 +0900
+Thanks to: chisaka@upu.wlw.co.jp
+In fml-support ML's Count: 05580
+
+trace makefml SMTP check bug 
+
+Date:    Tue, 15 Dec 1998 18:12:35 +0900
+Thanks to: Yuao Tanigawa <yuao@infonia.or.jp>
+In fml-support ML's Count: 05607
+
+bug fix makefml smtp check
+
+
+------------------------------------------
+Date:    Tue, 8 Dec 1998 22:37:36 +0900
+Thanks to: OGAWA Kunihiko <kuni@edit.ne.jp>
+In fml-support ML's Count: 05579
+
+patch for html generation
+
+
+------------------------------------------
+Date:    Mon, 7 Dec 1998 18:29:05 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 05565
+
+doc typo 
+
+------------------------------------------
+Date:    Fri, 27 Nov 1998 16:22:35 +0900
+Thanks to: Toshiyuki Nakano <t-nakano@spls87.ccs.mt.nec.co.jp>
+In fml-support ML's Count: 05525
+
+patch doc typo
+
+------------------------------------------
+Date:    Wed, 18 Nov 1998 23:47:39 +0900
+Thanks to: HIROSE Masaaki <hirose31@t3.rim.or.jp>
+In fml-support ML's Count: 05493
+
+MTI patch
+
+------------------------------------------
+Date:    Thu, 12 Nov 1998 16:09:04 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 05460
+
+change confirm message
+
+------------------------------------------
+Date:    Mon, 26 Oct 1998 00:07:41 +0900
+Thanks to: MakotoYokoi <yokoi@rsc.or.jp>
+In fml-support ML's Count: 05366
+
+fix typo
+
+------------------------------------------
+Date:    Mon, 19 Oct 1998 15:36:04 +0900
+Thanks to: t-nakano@ccs.mt.nec.co.jp (=?ISO-2022-JP?B?GyRCQ2ZMbklSOVQbKEIv?=
+	 =?ISO-2022-JP?B?VG9zaGl5dWtp?= Nakano)
+In fml-support ML's Count: 05331
+
+bug fix: liblibrary patch
+
+
+------------------------------------------
+Date:    Wed, 7 Oct 1998 20:37:04 +0900
+Thanks to: Akihiro KAYAMA <kayama@personal-media.co.jp>
+In fml-support ML's Count: 00215
+X-UIDL:  605f6c0bb1c56f949286c523d31afa61
+
+fix typo in member_name.wix
+
+
+------------------------------------------
+Date:    Wed, 7 Oct 1998 11:51:33 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 05253
+
+analyze ModeBifurcate() bug 
+
+
+------------------------------------------
+Date:    Mon, 5 Oct 1998 11:33:34 +0900
+Thanks to: Hiroaki Suda <u-dash@nurs.or.jp>
+In fml-support ML's Count: 05239
+
+fix typo of $REJECT_ADDR
+
+------------------------------------------
+Date:    Sat, 3 Oct 1998 16:01:06 +0900
+In fml-support ML's Count: 05182
+In fml-support ML's Count: 05221
+
+"subscribe" five way hand shake when manual registration
+
+
+------------------------------------------
+Date:    Fri, 2 Oct 1998 16:37:04 +0900
+Thanks to: tmu@ikegami.co.jp (MURASHITA Takuya)
+In fml-support ML's Count: 05214
+
+"makefml chaddr" patch
+
+
+------------------------------------------
+Date:    Mon, 21 Sep 1998 15:21:35 +0900
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+In fml-support ML's Count: 05148
+
+libamctl patch
+
+Date:    Mon, 21 Sep 1998 18:43:06 +0900
+In fml-support ML's Count: 05150
+
+Thanks to: Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
+check patch again
+
+
+------------------------------------------
+Date:    Thu, 10 Sep 1998 11:07:06 +0900
+Following  OGAWA Kunihiko <kuni@edit.ne.jp>
+In fml-support ML's Count: 05110
+
+"makefml newml" checks the existence the ml to be created now
+
+------------------------------------------
+Date:    Thu, 3 Sep 1998 11:26:35 +0900
+Following  Tomoyuki Asakawa <tomoyuki@poison.marimo.or.jp>
+In fml-support ML's Count: 05094
+
+add $(PWD) to $DIR/Makefile spool2html rule.
+reconfigure a menu html around 
+
+------------------------------------------
+Date:    Wed, 2 Sep 1998 09:32:35 +0900
+In fml-support ML's Count: 05089
+
+add FreeBSD, OpenBSD to ignore setgid.
 
 ------------------------------------------
 Date:    Wed, 2 Sep 1998 02:34:05 +0900
