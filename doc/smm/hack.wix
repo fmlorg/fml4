@@ -761,6 +761,52 @@ $START_HOOK = q#
 You need to use a hook since From: address is dynamic variable, so
 cannot define static setting in config.ph.
 
+.S	Reply-To: を From: + $MAIL_LIST に設定する(2)   
+=E.S	Set Reply-To: be From: adress + $MAIL_LIST (2)
+
+fml-support: 06240
+
+○ やりたいこと
+=E
+* What do you do ?
+
+   if メンバー以外からの投稿
+	Reply-To: From:のアドレス, メーリングリスト
+   else
+	Reply-To: メーリングリスト	
+=E
+   if post from not member
+	Reply-To: From:'s address and mailing list
+   else
+	Reply-To: mailing list
+
+○ config.phの書き換えだけでうまくいくのでしょうか？
+=E
+* How do you config?
+
+変数のon/offという意味なら no です。
+HOOKを書いていいなら yes です。
+
+config.ph は単なるperlのプログラムです。fmlのあちこちには hook をはし
+らせることができます。複雑な操作を全部変数にしているときりがないので
+ある程度以上はHOOKでおこなうことで、設定ファイルをfml本体とは分けて保
+守するというというデザインになっています。
+＃Emacs みたいなもんだとおもってくれればOK
+=E
+config.ph is a perl script. The design of fml is so that you can write
+hooks in config.ph if the configuration you want is not just switch
+(on/off) of some variables. So you maintain configuration apart from
+fml upgrade.
+
+$START_HOOK =q%
+   if (&MailListMemberP($From_address)) {
+	&DEFINE_FIELD_FORCED("reply-to", $MAIL_LIST);
+   }
+   else {
+	&DEFINE_FIELD_FORCED("reply-to", "$From_address, $MAIL_LIST");
+   }
+%;
+
 .# $Id$
 .# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
