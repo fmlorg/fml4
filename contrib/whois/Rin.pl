@@ -4,9 +4,9 @@ $rcsid = q$Id$;
 ($rcsid) = ($rcsid =~ /Id:.*.pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/); 
 $rcsid = " Rin Russel". $rcsid;
 
-$FILE      = "/home/axion/fukachan/work/spool/whois/whoisdb";
-$LOGFILE   = "/home/axion/fukachan/work/spool/whois/log";
-$HELP_FILE = "/home/axion/fukachan/work/spool/whois/help";
+$FILE      = "/home/axion/fukachan/work/spool/EXP/contrib/whois/whoisdb";
+$LOGFILE   = "/home/axion/fukachan/work/spool/EXP/contrib/whois/log";
+$HELP_FILE = "/home/axion/fukachan/work/spool/EXP/contrib/whois/help";
 $USAGE = "Whois Server($rcsid): USAGE\n";
 
 &InitConfig;
@@ -28,10 +28,10 @@ if ($Key =~ /help/oi || (! $Key) ) {
 }
 elsif (&MetaCharP($Key)) {
     &Logging("Help for metachars");
-    print ('*' x40);
+    print ('*' x 40);
     print "\n";
     print "NOT PERMIT META CHARACTERS\n";
-    print ('*' x40);
+    print ('*' x 40);
     print "\n\n";
     print $USAGE;
     exit 0;
@@ -115,7 +115,6 @@ sub InitConfig
 # Logging(String as message)
 sub Logging
 {
-
     local($family, $port, $addr) = unpack('S n a4 x8', getpeername(STDIN));
     local($clientaddr) = gethostbyaddr($addr, 2);
 
@@ -124,7 +123,7 @@ sub Logging
     }
 
     open(LOGFILE, ">> $LOGFILE");
-    printf LOGFILE "$Now @_ ($clientaddr)\n";
+    printf LOGFILE "$Now ".@_." ($clientaddr)\n";
     close(LOGFILE);
 }
 
