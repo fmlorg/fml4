@@ -400,7 +400,11 @@ sub AppendString2File
 }
 
 
-sub Warn { print STDERR @_; print STDERR "\n";}
+sub Warn 
+{
+    local(@caller) = caller;
+    print STDERR "Warning:(called from @caller)\n@_\n";
+}
 
 
 sub Log 
@@ -743,7 +747,7 @@ sub ShowMainMenu
     1 MEMBER CHECK or AUTO REGISTRATION        $ShowMenu{'auto_regist'};
     2 SUBJECT TYPE                             $MAKE_FML{'SUBJECT_TAG'};
     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       $ShowMenu{'option_summary'};
-    4 Delivery Mode (distribute-only, distribute+command);
+    4 Delivery Mode (distribute-only, distribute+command); (UNIMPLEMENTED YET)
     ;
     ;#;
 
@@ -1055,8 +1059,8 @@ sub Conv
 {
     local($ml, $example, $out) = @_;
     local($uid, $gid);
-    open(EXAMPLE, $example)  || &Log("cannot open $example");
-    open(CF, "> $out")   || &Log("cannot open $out");
+    open(EXAMPLE, $example)  || (&Warn("cannot open $example"), return 0);
+    open(CF, "> $out")       ||  (&Warn("cannot open $out"), return 0);
     select(CF); $| = 1; select(STDOUT);
     
     print STDERR "\tGenerating $out\n";
@@ -1721,7 +1725,7 @@ sub SetPublicUmask
 
 sub GetGID
 {
-    open(GROUP, "/etc/group") || (&Log("cannot open /etc/group"), return '');
+    open(GROUP, "/etc/group") || (&Warn("cannot open /etc/group"), return '');
     while (<GROUP>) { /^$_[0]/ && (return (split(/:/, $_))[2]);}
     close(GROUP);
 
