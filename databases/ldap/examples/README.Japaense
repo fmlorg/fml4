@@ -56,7 +56,23 @@ cn=elena, dc=enkai, dc=org, cn=virtual, dc=fml, dc=org
   elena
 
 
------
+¢þ LDIF
+
+#  search_base: cn=elena, dc=fml, dc=org
+# query_filter: (objectclass=*)
+
+dn: cn=elena, dc=fml, dc=org
+cn: elena@fml.org
+o: fml.org
+objectclass: maillist
+member: fukachan@fml.org
+member: fukachan@sapporo.iij.ad.jp
+active: fukachan@fml.org
+active: fukachan@sapporo.iij.ad.jp
+admin: fukachan@sapporo.iij.ad.jp
+
+
+
 ¢þ References
 
 http://home.netscape.com/eng/server/directory/schema/oc_msgto.htm

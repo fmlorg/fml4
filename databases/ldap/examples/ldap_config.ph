@@ -1,5 +1,6 @@
 $USE_DATABASE            = 1;
 $DATABASE_METHOD         = 'LDAP';
+$DATABASE_LIB            = 'databases/ldap/toymodel.pl';
 $DATABASE_CACHE_LIFETIME = 1800;
 
 $LDAP_SERVER_HOST      = "ldap.fml.org";
