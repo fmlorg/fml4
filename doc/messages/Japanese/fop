@@ -2,6 +2,24 @@
 ### libfop.pl liblop.pl
 ###
 
+fop.no_numeric_filename:
+	_ARG0_: ファイル名が数字ではありません
+
+fop.unlink:
+	_ARG0_ ファイルを消去しました。
+
+fop.unlink.fail:
+	_ARG0_ ファイルの消去に失敗しました。
+
+fop.rename.fail:
+	_ARG0_ ファイルのrename(_ARG0_ => _ARG1_)に失敗しました。
+
+fop.write.fail:
+	_ARG0_ ファイルに書き込めませんでした。
+
+ftp.not_configure:
+	fmlの設定が不充分です。
+
 fop.not_found:
 	該当するファイルが一つも見つかりませんでした。
 

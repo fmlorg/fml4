@@ -4,6 +4,10 @@ auth.ok:
 auth.fail:
 	認証に失敗しました。
 
+auth.not_admin:
+	リモート管理する資格がありません。
+	リクエスト(_ARG0_)は拒否されました。 
+
 auth.change_password.ok:
 	パスワード変更しました。
 

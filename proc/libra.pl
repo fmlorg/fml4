@@ -60,6 +60,7 @@ sub DoSetAdminMode
 	return $NULL;
     }
     else {
+	&Mesg(*e, $NULL, 'auth.not_admin', $proc);
 	&LogWEnv("$proc request from not administrator, ends", *e);
 	$e{'mode:admin'} = 0;	# UNSET for hereafter
 	return 'LAST';
@@ -98,6 +99,7 @@ sub DoApprove
 	;
     }
     else {
+	&Mesg(*e, $NULL, 'auth.not_admin', $proc);
 	&LogWEnv("$proc request from not administrator, ends", *e);
 	return 'LAST';
     }
@@ -407,7 +409,9 @@ sub AdminCommand
     }
     else {
 	# if undefined commands, notify the user about it and abort.
+	&Mesg(*e, $NULL, 'no_such_admin_command', $cmd);
 	&LogWEnv("*** unknown admin command $cmd ***", *e);
+	&Mesg(*e, $NULL, 'info.ra', $CONTROL_ADDRESS);
 	&Mesg(*e, "   FYI: To get help for administrators,");
 	&Mesg(*e, "   send 'admin help' or 'approve PASSWORD help' to $CONTROL_ADDRESS.");
 	return 0; # 0 == LAST(libfml.pl);
@@ -586,7 +590,9 @@ sub ProcAdminSubscribe
 	    $swf = 1;
 	}
 	else {
-	    &LogWEnv("ERROR: admin $proc [$!]",*e);
+	    local($r) = $!;
+	    &LogWEnv("ERROR: admin $proc [$r]",*e);
+	    &Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	    $swf = 0;
 	}
     }
@@ -598,7 +604,9 @@ sub ProcAdminSubscribe
 	$swf += 1;
     }
     else {
-	&LogWEnv("Error: admin $proc [$!]",*e);
+	local($r) = $!;
+	&LogWEnv("Error: admin $proc [$r]",*e);
+	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	$swf = 0;
     }
 
@@ -678,7 +686,9 @@ sub ProcAdminAddAdmin
 	&Mesg(*e, "   O.K.");
     }
     else {
-	&LogWEnv("Error: admin $proc [$!]", *e);
+	local($r) = $!;
+	&LogWEnv("Error: admin $proc [$r]", *e);
+	&Mesg(*e, $NULL, 'error_reason', "admin $proc", $r);
 	return $NULL;
     }
 
@@ -701,6 +711,7 @@ sub ProcAdminByeAdmin
     &use('amctl');
     &ChangeMemberList($proc, $opt, $ADMIN_MEMBER_LIST, *misc) && $ok++;
     &LogWEnv("admin $proc ".($ok || "Fails ")."[$opt]");
+    &Mesg(*e, $NULL, 'error', "admin $proc") unless $ok;
 
     1;
 }
@@ -752,7 +763,10 @@ sub ProcAdminLog
 
 	&Mesg(*e, $_ = `$prog $flag $LOGFILE`);
 
-	&LogWEnv("Error: admin $proc $opt", *e) if $@;
+	if ($@) {
+	    &LogWEnv("Error: admin $proc $opt", *e);
+	    &Mesg(*e, $NULL, 'error', "admin $proc");
+	}
     }
 
 
@@ -829,7 +843,10 @@ sub ProcAdminDir
     $prog = &SearchUsualPath('ls');
 
     &Mesg(*e, $_ = `$prog $flag $opt`); # this cast (->scaler)is required;
-    &LogWEnv("Error: admin $proc $opt", *e) if $@;
+    if ($@) {
+	&LogWEnv("Error: admin $proc $opt", *e);
+	&Mesg(*e, $NULL, 'error', "admin $proc");
+    }
 
     1;
 }
@@ -849,6 +866,7 @@ sub ProcAdminUnlink
     }
     else {
 	&LogWEnv("admin remove cannot find \$DIR/$opt, STOP!", *e);
+	&Mesg(*e, $NULL, 'no_such_file', "\$DIR/$opt");
 	return $NULL;		# dangerous, should stop
     }
 
@@ -876,11 +894,13 @@ sub ProcAdminUnlinkArticle
 	}
 	else {
 	    &LogWEnv("admin $proc: cannot find $opt, STOP!", *e);
+	    &Mesg(*e, $NULL, 'no_such_file', $opt);
 	    return $NULL;		# dangerous, should stop
 	}
     }
     else {
 	&LogWEnv("admin $proc $opt: invalid argument, STOP!", *e);
+	&Mesg(*e, $NULL, 'invalid_args', "admin $proc $opt"); 
 	return 0; 
     }
 
@@ -922,6 +942,7 @@ sub ProcAdminRetrieve
     }
     else {
 	&LogWEnv("admin $proc cannot find \$DIR/$opt");
+	&Mesg(*e, $NULL, 'no_such_file', "\$DIR/$opt");
     }
 
     1;
@@ -971,6 +992,7 @@ sub ProcAdminPutFile
 	}
 	else {
 	    &LogWEnv("Error: admin $proc cannot rename $file -> $file.bak",*e);
+	    &Mesg(*e, $NULL, 'fop.rename.fail', $file, $file.".bak");
 	}
 
 	&Touch($file);
@@ -983,6 +1005,7 @@ sub ProcAdminPutFile
     }
     else {
 	&LogWEnv("Error: admin $proc >> \$DIR/$opt FAILS", *e);
+	&Mesg(*e, $NULL, 'fop.write.fail', "\$DIR/$opt");
 	0; # should stop Body is to put, not commands.
     }
 
@@ -1009,8 +1032,10 @@ sub ProcAdminRename
 	if (-f $new) {
 	    local($mode) = (stat($new))[2];
 
-	    rename($new, "$new.bak") || 
+	    rename($new, "$new.bak") || do {
 		&LogWEnv("Error: admin $proc $new -> $new.bak Fails, stop",*e);
+		&Mesg(*e, $NULL, 'fop.rename.fail', $new, $new.".bak");
+	    };
 
 	    chmod $mode, $new;
 	}
@@ -1018,13 +1043,19 @@ sub ProcAdminRename
 	local($mode) = (stat($file))[2];
 
 	# rename
-	rename($file, $new) ? &LogWEnv("admin $proc $opt to $new", *e) :
+	if (rename($file, $new)) {
+	    &LogWEnv("admin $proc $opt to $new", *e);
+	}
+	else {
 	    &LogWEnv("Error: admin $proc $opt to $new FAILS", *e);
+	    &Mesg(*e, $NULL, 'fop.rename.fail', $file, $new);
+	}
 
 	chmod $mode, $file;
     }
     else {
 	&LogWEnv("Error: admin $proc cannot find \$DIR/$opt", *e);
+	&Mesg(*e, $NULL, 'no_such_file', "\$DIR/$opt");
     }
 
     1;

@@ -106,6 +106,7 @@ sub ProcLibrary4PlainArticle
 	    $target = "$arc_dir/$target";
 	}
 	else {
+	    &Mesg(*e, $NULL, 'fop.no_numeric_filename');
 	    &LogWEnv("filename($n) is not numeric, STOP!", *e);
 	    return;
 	}
@@ -121,10 +122,12 @@ sub ProcLibrary4PlainArticle
 	}
 
 	if (unlink($target)) {
+	    &Mesg(*e, $NULL, 'fop.unlink', $target);
 	    &LogWEnv("Unlink $target", *e);
 	    &LibraryExpireSummary($summary, $n);
 	}
 	else {
+	    &Mesg(*e, $NULL, 'fop.unlink.fail', $target);
 	    &LogWEnv("Fail to unlink $target", *e);
 	}
     }

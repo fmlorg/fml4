@@ -13,11 +13,21 @@ no_such_article:
 no_such_command:
 	_ARG0_というコマンドはありません。
 
+no_such_command:
+	_ARG0_という管理用コマンドはありません。
+
 no_such_request:
 	そのような _ARG0_ のリクエストはありません。
 
 no_args:
 	_ARG0_: 引数がありません。
+
+error_reason:
+	エラー: _ARG0_ コマンドはエラーです。
+	理由: _ARG1_
+
+error:
+	エラー: _ARG0_ コマンドはエラーです。
 
 invalid_args:
 	_ARG0_: 引数が変です。
@@ -53,4 +63,3 @@ invalid_addr_syntax:
 
 mailloop:
 	エラー: アドレス<_ARG0_>はメール・ループを起こす可能性があります。
-
