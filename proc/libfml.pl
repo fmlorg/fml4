@@ -121,7 +121,7 @@ sub DoProcedure
 	  &Log("Procedure: command only server") if $debug;
 	  $xbuf = "\# $xbuf";
       }
-      elsif ($e{'mode:ctladdr'} && ($xbuf !~ /^\#/o)) {
+      elsif (($e{'mode:ctladdr'} || $e{'mode:uip'}) && ($xbuf !~ /^\#/o)) {
 	  &Log("Procedure: mode:ctladdr") if $debug;
 	  for $p (keys %Procedure) {
 	      if ($p && $xbuf =~ /^$p/) {
