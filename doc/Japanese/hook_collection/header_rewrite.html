@@ -17,6 +17,8 @@
 <A Href="#Anchor5">腐った Message-Idを矯正</A> 
 <A Href="#Anchor6">Cc: を元メールの Cc:,From にしたい</A> 
 <A Href="#Anchor7">オリジナルのFrom:を本文に付け加える</A>
+<A Href="#Anchor8">Subject: に [ML-NAME:数字] が書いてあったら、タグをつけない</A>
+
 </pre><Br><Br>
 <Font Size=4><B><A Name="Anchor1">●ある特定のユーザだけヘッダを書き換えて配信する</A>
 </B></Font>
@@ -153,6 +155,19 @@ $START_HOOK = q%
 
 
 </pre>
+<Font Size=4><B><A Name="Anchor8">●Subject: に [ML-NAME:数字] が書いてあったら、タグをつけない</A>
+</B></Font>
+<pre>
+【fml-help:01695】
+
+$HEADER_ADD_HOOK .= q{
+  my($subject) ;
+  $subject = $Envelope{'h:subject:'} ;
+  if ( $subject =~ /\[ML-NAME:\d+\]/ )
+  {
+    $Envelope{'h:Subject:'} = $subject ;
+  }
+};
 </Div>
 </Body>
 </Html>
