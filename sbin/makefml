@@ -174,12 +174,14 @@ sub InitMakeFml
 	print STDERR $@ if $@;
 
 	chop $CPU_TYPE_MANUFACTURER_OS;
-	eval("\$Config'CPU_TYPE_MANUFACTURER_OS{'$FQDN'} = '$CPU_TYPE_MANUFACTURER_OS';");
+	$Config'CPU_TYPE_MANUFACTURER_OS{$FQDN} = $CPU_TYPE_MANUFACTURER_OS;#';
 	print STDERR $@ if $@;
 
 	$OS_TYPE = (split(/\-/, $CPU_TYPE_MANUFACTURER_OS))[2];
 	$OS_TYPE =~ tr/a-z/A-Z/;
     }
+
+    print &Dumpvar('Config');
 
     &SetSockAddr($CPU_TYPE_MANUFACTURER_OS);
 
@@ -405,7 +407,8 @@ sub InitFmlConfig
     }
 
     $FML_CONFIG  = "$CONFIG_DIR/system";
-
+    
+    $buf = &Dumpvar('Config');
     &SaveConfig($buf) if $buf;
 
     print "\nThe Current Config is saved in $FML_CONFIG\n";
@@ -2566,6 +2569,8 @@ sub main'Dumpvar
 {
     ($package, @vars) = @_;
 
+    $package = 'Config';
+
     if ($] =~ /5\.\d\d\d/) { 
 	*stab = *{"${package}::"}; # syntax Error? but this {} is required;
     }
@@ -2725,7 +2730,7 @@ sub TrySmtpConnect
     local($result, $eval, $perl5_socket_ok);
 
     ### PERL 5  
-    if ($] =~ /^5\./) { 
+    if (0 && $] =~ /^5\./) { 
 	eval("use Socket;");
 	$perl5_socket_ok = 1 if ($@ eq '');
     }
