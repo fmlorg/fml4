@@ -399,6 +399,13 @@ makefml remove-article ってあるべきなんかなぁ…
 .l	CGI
 
 
+.S	script 一発インストーラ (きめうち)
+
+	postfix  + apache + fml-current
+	sendmail + apache + fml-current
+	qmail    + apache + fml-current
+
+
 .S	modify file ?
 
 Hmm..., impossible?
@@ -408,14 +415,13 @@ Hmm..., impossible?
 
 
 .S	右から左のメニューへ update があがってない
-	e.g. newml
 
+e.g. newml
 
-.S	script 一発インストーラ (きめうち)
-
-	postfix  + apache + fml-current
-	sendmail + apache + fml-current
-	qmail    + apache + fml-current
+右の画面の newml の結果が出る時に左のメニュバーのフレームに強制的に 
+TARGET 指定をして reload はできないのか？
+＃規格的にはできなさそうだけど…
+＃全体を一括管理されたものとかにしてゴリゴリしないとだめなのか？
 
 
 .S	ＭＬを消したら対応する authdb/ml-admin/$ml/ 以下も消す

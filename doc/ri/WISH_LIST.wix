@@ -1,0 +1,35 @@
+.HTML_PRE
+	WISH LIST (fml project)
+
+.if LANG == JAPANESE
+     WISH_LIST 助けの欲しいリスト
+
+人手 ;_;
+
+  * ドキュメントを組織的に査読しておかしいと思うところをレポートしてくれる人
+
+英語の分かる人 ;_; ;_;
+
+  * エラーを知らせる文などの変な英語を直す (優先順位高し)
+
+  * ドキュメントの英語を直す
+.endif
+.if LANG == ENGLISH
+
+man power
+
+I wanna volunteers who certifies English in source code (e.g. error
+messages) and documents. My English is broken from native perspective.
+
+.endif
+
+.~HTML_PRE
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
