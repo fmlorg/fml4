@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: HTMLify.pm,v 1.15 2003/01/11 16:05:14 fukachan Exp $
+# $FML: HTMLify.pm,v 1.19 2003/09/13 09:14:31 fukachan Exp $
 #
 
 package FML::Command::HTMLify;
@@ -41,11 +41,11 @@ sub convert
 {
     my ($curproc, $args, $optargs) = @_;
     my $config  = $curproc->config();
+    my $ml_name = $config->{ ml_name };
+    my $udb_dir = $config->{ udb_base_dir };
     my $src_dir = $optargs->{ src_dir };
     my $dst_dir = $optargs->{ dst_dir };
-
-    # XXX-TODO: care for non Japanese.
-    my $charset = 'euc-jp';
+    my $charset = $curproc->language_of_html_file();
 
     croak("src_dir not defined") unless defined $src_dir;
     croak("src_dir not exists")  unless -d $src_dir;
@@ -60,15 +60,21 @@ sub convert
 
     print STDERR "  convert\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
 
+    unless (-d $udb_dir) { $curproc->mkdir($udb_dir);}
+
     my $index_order    = $config->{ html_archive_index_order_type };
     my $htmlifier_args = {
-	directory   => $dst_dir,
 	charset     => $charset,
-	index_order => $index_order,
+
+	output_dir  => $dst_dir,     # ~fml/public_html/mlarchive/$domain/$ml/
+	db_base_dir => $udb_dir,     # /var/spool/ml/@udb@
+	db_name     => $ml_name,     # elena
+
+	index_order => $index_order, # normal/reverse
     };
 
     my ($is_subdir_exists, $subdirs) = _check_subdir_exists($src_dir);
-    if ($is_subdir_exists) { Log("looks subdir exists");}
+    if ($is_subdir_exists) { $curproc->log("looks subdir exists");}
 
     if (defined $dst_dir) {
         unless (-d $dst_dir) {
@@ -77,7 +83,7 @@ sub convert
 
 	if ($is_subdir_exists) {
 	    my (@x) = sort _sort_subdirs @$subdirs;
-	    print STDERR "   subdirs: @x\n";
+	    print STDERR "   subdirs: @x\n" if $debug;
 	    for my $xdir (@x) {
 		eval q{
 		    use Mail::Message::ToHTML;
@@ -88,7 +94,7 @@ sub convert
 	    }
 	}
 	else {
-	    print STDERR "   hmm, looks not subdir style.\n";
+	    print STDERR "   hmm, looks not subdir style.\n" if $debug;
 	    eval q{
 		use Mail::Message::ToHTML;
 		my $obj = new Mail::Message::ToHTML $htmlifier_args;

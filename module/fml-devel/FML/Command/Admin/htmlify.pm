@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: htmlify.pm,v 1.20 2002/12/20 03:40:12 fukachan Exp $
+# $FML: htmlify.pm,v 1.22 2003/09/08 15:06:04 fukachan Exp $
 #
 
 package FML::Command::Admin::htmlify;
@@ -57,7 +57,7 @@ sub process
 {
     my ($self, $curproc, $command_args) = @_;
     my $args    = $command_args->{ args };
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $src_dir = $config->{ spool_dir };
     my $dst_dir = $config->{ html_archive_dir };
     my $debug   = 0;
@@ -87,7 +87,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

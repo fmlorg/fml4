@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Qmail.pm,v 1.15 2003/01/11 16:05:16 fukachan Exp $
+# $FML: Qmail.pm,v 1.19 2003/10/15 01:03:33 fukachan Exp $
 #
 
 package FML::MTAControl::Qmail;
@@ -49,7 +49,7 @@ sub qmail_install_alias
 sub qmail_remove_alias
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config       = $curproc->{ config };
+    my $config       = $curproc->config();
     my $template_dir = $curproc->template_files_dir_for_newml();
     my $ml_home_dir  = $params->{ ml_home_dir };
 
@@ -70,9 +70,11 @@ sub qmail_remove_alias
 	my $dst   = File::Spec->catfile($fml_owner_home_dir, $xfile);
 
 	if (-f $dst) {
-	    print STDERR "removing $dst\n";
+	    $curproc->ui_message("removing $dst");
 	    unlink $dst || do {
-		print STDERR "   failed to remove $dst !!!\n";
+		my $s = "failed to remove $dst";
+		$curproc->ui_message("error: $s");
+		$curproc->logerror($s);
 	    };
 	}
     }
@@ -137,7 +139,7 @@ sub qmail_alias_maps
 sub qmail_setup
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config       = $curproc->{ config };
+    my $config       = $curproc->config();
     my $template_dir = $curproc->template_files_dir_for_newml();
     my $ml_home_dir  = $params->{ ml_home_dir };
 
@@ -158,16 +160,15 @@ sub qmail_setup
 	my $src   = File::Spec->catfile($template_dir, $file);
 	my $dst   = File::Spec->catfile($fml_owner_home_dir, $xfile);
 
-	print STDERR "creating $dst\n";
+	$curproc->ui_message("creating $dst");
 	$self->_install($src, $dst, $params);
     }
 
     my $virtual_domain_conf = $config->{ qmail_virtualdomains_file };
     unless (-f $virtual_domain_conf) {
 	if (0) {
-	    print STDERR "  XXX We assume $ml_domain:fml-$ml_domain\n";
-	    print STDERR "  XXX in $virtual_domain_conf\n";
-	    print STDERR "  XXX\n";
+	    $curproc->ui_message("  XXX We assume $ml_domain:fml-$ml_domain");
+	    $curproc->ui_message("  XXX in $virtual_domain_conf");
 	}
     }
 
@@ -187,7 +188,7 @@ sub qmail_install_virtual_map
 {
     my ($self, $curproc, $params) = @_;
     my $fmlowner     = $curproc->fml_owner();
-    my $config       = $curproc->{ config };
+    my $config       = $curproc->config();
     my $ml_domain    = $config->{ ml_domain };
     my $virtual      = $config->{ qmail_virtual_map_file };
 
@@ -195,15 +196,16 @@ sub qmail_install_virtual_map
     my $found = 0;
     my $fh    = new FileHandle $virtual;
     if (defined $fh) {
-	while (<$fh>) {
-	    $found = 1 if /^$ml_domain:/i;
+	my $buf;
+	while ($buf = <$fh>) {
+	    $found = 1 if $buf =~ /^$ml_domain:/i;
 	}
 	$fh->close();
     }
 
     # 2. if not found
     unless ($found) {
-	print STDERR "updating $virtual\n";
+	$curproc->ui_message("updating $virtual");
 
 	my $fh = new FileHandle ">> $virtual";
 	if (defined $fh) {
@@ -212,7 +214,7 @@ sub qmail_install_virtual_map
 	}
     }
     else {
-	print STDERR "skip updating $virtual\n";
+	$curproc->ui_message("skip updating $virtual");
     }
 }
 

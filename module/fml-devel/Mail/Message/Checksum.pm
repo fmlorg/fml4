@@ -1,17 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Checksum.pm,v 1.6 2002/12/22 03:09:56 fukachan Exp $
+# $FML: Checksum.pm,v 1.10 2003/08/23 05:15:14 fukachan Exp $
 #
 
 package Mail::Message::Checksum;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
-use FML::Log qw(Log LogWarn LogError);
 
 =head1 NAME
 
@@ -25,7 +24,7 @@ Mail::Message::Checksum - utilities for check sum
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 the constructor.
 It checks we can use MD5 perl module or we need to use external programs
@@ -70,17 +69,21 @@ sub _init
 	$self->{ _type } = 'native';
     }
     else {
-	# XXX-TODO: hmm, we should remove search_program() dependence?
-	eval qq{ require File::Utils; import File::Utils qw(search_program);};
-	my $prog = search_program('md5') || search_program('md5sum');
-	if (defined $prog) {
-	    $self->{ _program } = $prog;
-	}
+	eval q{
+	    use Mail::Message::Utils;
+	    my $prog = Mail::Message::Utils::search_program('md5') ||
+	      Mail::Message::Utils::search_program('md5sum');
+
+	    if (defined $prog) {
+		$self->{ _program } = $prog;
+	    }
+	};
+	carp($@) if $@;
     }
 }
 
 
-=head2 C<md5(\$string)>
+=head2 md5(\$string)
 
 return the md5 checksum of the given string C<$string>.
 
@@ -123,9 +126,9 @@ sub _md5_native
     $p = 0;
     while (1) {
 	last if $p > $pe;
-	$_  = substr($$r_data, $p, 128);
-	$p += 128;
-	$md5->add($_);
+	$buf = substr($$r_data, $p, 128);
+	$p  += 128;
+	$md5->add($buf);
     }
 
     $md5->hexdigest();
@@ -164,7 +167,7 @@ sub _md5_by_program
 }
 
 
-=head2 C<cksum1($file)>
+=head2 cksum1($file)
 
 C<not implemented>.
 
@@ -172,7 +175,7 @@ This is a 16-bit checksum. The algorithm used by historic BSD systems
 as the sum(1) algorithm and by historic AT&T System V UNIX systems as
 the sum algorithm when using the C<-r> option.
 
-=head2 C<cksum2($file)>
+=head2 cksum2($file)
 
 return the traditional checksum of the given C<$file>.
 
@@ -209,14 +212,14 @@ sub cksum2
         $crc = ($crc & 0xffff) + ($crc >> 16);
     }
     else {
-        Log("ERROR: no such file $file");
+        croak("ERROR: no such file $file");
     }
 
     return ($crc, $total);
 }
 
 
-=head2 C<crc($file)>
+=head2 crc($file)
 
 C<not implemented>.
 
@@ -258,7 +261,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

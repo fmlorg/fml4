@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Subject.pm,v 1.36 2003/01/11 16:05:16 fukachan Exp $
+# $FML: Subject.pm,v 1.40 2003/08/23 04:35:36 fukachan Exp $
 #
 
 package FML::Header::Subject;
@@ -28,7 +28,7 @@ collection of functions to manipulate the header subject.
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 constructor.
 
@@ -48,7 +48,7 @@ sub new
 }
 
 
-=head2 C<rewrite_article_subject_tag($header, $config, $args)>
+=head2 rewrite_article_subject_tag($header, $config, $args)
 
 add or rewrite the subject tag for C<$header>.
 This mothod cuts off Re: (reply identifier) in subject: and
@@ -72,7 +72,7 @@ sub rewrite_article_subject_tag
     my $subject = $header->get('subject');
 
     # decode MIME encoded string and get charset info if could.
-    ($subject, $in_code, $out_code) = $self->decode($subject, $tag);
+    ($subject, $tag, $in_code, $out_code) = $self->decode($subject, $tag);
 
     # cut off Re: Re: Re: ...
     $self->_cut_off_reply(\$subject);
@@ -110,7 +110,7 @@ sub clean_up
 # Descriptions: exapnd special regexp(s) and mime-decode subject.
 #    Arguments: OBJ($self) STR($subject) STR($tag)
 # Side Effects: none
-# Return Value: ARRAY(STR, STR, STR)
+# Return Value: ARRAY(STR, STR, STR, STR)
 sub decode
 {
     my ($self, $subject, $tag) = @_;
@@ -118,9 +118,11 @@ sub decode
 
     # for example, ml_name = elena
     # if $tag has special regexp such as \U$ml_name\E or \L$ml_name\E
-    if ($tag =~ /\\E/o && $tag =~ /\\U|\\L/o) {
-	eval qq{ \$tag = "$tag";};
-	Log($@) if $@;
+    if (defined $tag) {
+	if ($tag =~ /\\E/o && $tag =~ /\\U|\\L/o) {
+	    eval qq{ \$tag = "$tag";};
+	    Log($@) if $@;
+	}
     }
 
     # XXX-TODO: care for not Japanese !
@@ -137,7 +139,7 @@ sub decode
     my $obj = new Mail::Message::Encode;
     $subject = $obj->decode_mime_string($subject , $out_code);
 
-    return ($subject, $in_code, $out_code);
+    return ($subject, $tag, $in_code, $out_code);
 }
 
 
@@ -169,7 +171,7 @@ sub _delete_subject_tag
 }
 
 
-=head2 C<regexp_compile($string)>
+=head2 regexp_compile($string)
 
 build a regular expression to trap C<$string>.
 
@@ -198,23 +200,28 @@ sub _regexp_compile
 {
     my ($s) = @_;
 
-    $s = quotemeta( $s );
-    $s =~ s@\\\%@\%@g;
-    $s =~ s@\%s@\\S+@g;
-    $s =~ s@\%d@\\d+@g;
-    $s =~ s@\%0\d+d@\\d+@g;
-    $s =~ s@\%\d+d@\\d+@g;
-    $s =~ s@\%\-\d+d@\\d+@g;
+    if (defined $s) {
+	$s = quotemeta( $s );
+	$s =~ s@\\\%@\%@g;
+	$s =~ s@\%s@\\S+@g;
+	$s =~ s@\%d@\\d+@g;
+	$s =~ s@\%0\d+d@\\d+@g;
+	$s =~ s@\%\d+d@\\d+@g;
+	$s =~ s@\%\-\d+d@\\d+@g;
 
-    # quote for regexp substitute: [ something ] -> \[ something \]
-    # $s =~ s/^(.)/quotemeta($1)/e;
-    # $s =~ s/(.)$/quotemeta($1)/e;
+	# quote for regexp substitute: [ something ] -> \[ something \]
+	# $s =~ s/^(.)/quotemeta($1)/e;
+	# $s =~ s/(.)$/quotemeta($1)/e;
 
-    return $s;
+	return $s;
+    }
+    else {
+	return '';
+    }
 }
 
 
-=head2 C<is_reply($subject_string)>
+=head2 is_reply($subject_string)
 
 speculate C<$subject_string> looks a reply message or not?
 It depends on each language specific representations.
@@ -257,8 +264,8 @@ sub _cut_off_reply
     my $pkg = 'Mail::Message::Language::Japanese::Subject';
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {
-	$$r_subject =
-	    &Mail::Message::Language::Japanese::Subject::cut_off_reply_tag($$r_subject);
+	my $obj = new Mail::Message::Language::Japanese::Subject;
+	$$r_subject = $obj->cut_off_reply_tag($$r_subject);
     }
     else  {
 	Log($@);

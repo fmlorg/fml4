@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Analyze.pm,v 1.30 2002/12/24 10:19:49 fukachan Exp $
+# $FML: Analyze.pm,v 1.33 2003/08/23 04:35:48 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Analyze;
@@ -28,7 +28,7 @@ See C<Mail::ThreadTrack> perl module for more detail.
 
 =head1 METHODS
 
-=head2 C<analyze($mesg)>
+=head2 analyze($mesg)
 
 C<$mesg> is Mail::Message object.
 
@@ -552,7 +552,8 @@ sub _speculate_time
 
     if (defined $header->get('date')) {
 	use Mail::Message::Date;
-	return Mail::Message::Date::date_to_unixtime($header->get('date'));
+	my $obj = new Mail::Message::Date;
+	return $obj->date_to_unixtime($header->get('date'));
     }
     else {
 	return time;
@@ -646,7 +647,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

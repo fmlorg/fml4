@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: off.pm,v 1.6 2002/12/24 10:19:45 fukachan Exp $
+# $FML: off.pm,v 1.11 2003/08/29 15:34:00 fukachan Exp $
 #
 
 package FML::Command::User::off;
@@ -29,7 +29,7 @@ after confirmation succeeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -54,6 +54,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: change delivery mode from real time to digest
 #               after confirmation succeeds.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
@@ -63,7 +70,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     #
     # XXX-TODO: correct to use primary_*_map for on/off ?
@@ -85,7 +92,7 @@ sub process
     # if not member, off request is wrong.
     unless ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.not_member');
-	LogError("off request from not member");
+	$curproc->logerror("off request from not member");
 	croak("off request from not member");
 	return;
     }
@@ -93,12 +100,12 @@ sub process
     # if not recipient, off request is wrong.
     unless ($cred->is_recipient($address)) {
 	$curproc->reply_message_nl('error.not_recipient');
-	LogError("off request from not recipient");
+	$curproc->logerror("off request from not recipient");
 	croak("off request from not recipient");
     }
     # try confirmation before off
     else {
-	Log("off request, try confirmation");
+	$curproc->log("off request, try confirmation");
 
         use FML::Confirm;
 	my $confirm = new FML::Confirm {
@@ -125,7 +132,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: CacheDir.pm,v 1.22 2002/12/23 14:34:22 fukachan Exp $
+# $FML: CacheDir.pm,v 1.25 2003/08/23 04:35:42 fukachan Exp $
 #
 
 package File::CacheDir;
@@ -178,7 +178,7 @@ sub _take_file_name
 }
 
 
-=head2 C<open(file, mode)>
+=head2 open(file, mode)
 
 no argument.
 
@@ -217,7 +217,7 @@ sub open
 }
 
 
-=head2 C<close()>
+=head2 close()
 
 no argument.
 
@@ -278,7 +278,7 @@ sub get_latest_value
     opendir($dh, $dir);
 
     my @dh = ();
-    for (readdir($dh)) { push(@dh, $_) if /^\d+/;}
+    for my $dir (readdir($dh)) { push(@dh, $dir) if $dir =~ /^\d+/;}
     @dh = sort { $b <=> $a } @dh;
 
     eval q{ use File::Spec;};
@@ -396,7 +396,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

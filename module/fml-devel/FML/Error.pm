@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Error.pm,v 1.11 2003/01/05 05:15:21 fukachan Exp $
+# $FML: Error.pm,v 1.26 2003/10/15 01:03:27 fukachan Exp $
 #
 
 package FML::Error;
@@ -14,7 +14,7 @@ use Carp;
 use FML::Log qw(Log LogWarn LogError);
 
 
-my $debug = 1;
+my $debug = 0;
 
 
 =head1 NAME
@@ -52,18 +52,156 @@ sub new
     my ($self, $curproc) = @_;
     my ($type) = ref($self) || $self;
     my $me     = { _curproc => $curproc };
+    my $config = $curproc->config();
+    my $fp     = $config->{ error_analyzer_function } || 'simple_count';
+
+    # defautl analyzer function
+    $me->{ _analyzer_function_name } = $fp;
+
     return bless $me, $type;
+}
+
+
+=head2 get_lock_channel_name()
+
+return the lock channel name to be used to lock/unlock error related
+functions.
+
+=cut
+
+
+# Descriptions: lock channel we should use to lock this object.
+#    Arguments: OBJ($self)
+# Side Effects: lock "error_analyzer_cache_dir" channel
+# Return Value: STR
+sub get_lock_channel_name
+{
+    my ($self) = @_;
+
+    # LOCK_CHANNEL: error_analyzer_cache
+    return 'error_analyzer_cache';
+}
+
+
+=head1 LOCK ACCESS TO ERROR CACHE DB
+
+=head2 lock()
+
+=head2 unlock()
+
+=cut
+
+
+# Descriptions: lock
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub lock
+{
+    my ($self) = @_;
+    my $curproc = $self->{ _curproc };
+    my $channel = $self->get_lock_channel_name();
+    $curproc->lock($channel);
+}
+
+
+# Descriptions: unlock
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub unlock
+{
+    my ($self) = @_;
+    my $curproc = $self->{ _curproc };
+    my $channel = $self->get_lock_channel_name();
+    $curproc->unlock($channel);
+}
+
+
+=head1 DATABASE
+
+=head2 db_open()
+
+=head2 db_close()
+
+=cut
+
+
+# Descriptions: open cache database.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: OBJ
+sub db_open
+{
+    my ($self)  = @_;
+    my $curproc = $self->{ _curproc };
+
+    use FML::Error::Cache;
+    $self->{ _db } = new FML::Error::Cache $curproc;
+    return $self->{ _db };
+}
+
+
+# Descriptions: dummy.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: none
+sub db_close
+{
+    my ($self)  = @_;
+    my $curproc = $self->{ _curproc };
+}
+
+
+=head2 add($info)
+
+add bounce info into cache where $info is a HASH_REF.  Currently,
+$info expects "address", "status" (status code) and "reason".
+"address" and "status" are mandatory.
+
+    $info = {
+	address => $address,
+	status  => $status,
+	reason  => $reason,
+    };
+
+The format to store these information depends on FML::Error::Cache
+module, which conceals the detail of cache structure.
+
+=cut
+
+
+# Descriptions: add bounce info into cache.
+#               in fact, this is a wrapper of FML::Error::Cache::add()
+#               to clarify that we should lock.
+#    Arguments: OBJ($self) HASH_REF($info)
+# Side Effects: update cache
+# Return Value: none
+sub add
+{
+    my ($self, $info) = @_;
+    my $curproc = $self->{ _curproc };
+    my $db      = $self->{ _db };
+    my $addr    = $info->{ address };
+
+    if (defined $db) {
+	$self->lock();
+	$db->add($addr, $info);
+	$self->unlock();
+    }
+    else {
+	$curproc->logerror("db not open");
+    }
 }
 
 
 =head2 analyze()
 
-open error message cache and 
-analyze the data by the analyzer function.
-The function is specified by $config->{ error_analyzer_function }.
-Available functions are located in C<FML::Error::Analyze>.
-C<simple_count> function is used by default if $config->{
-error_analyzer_function } is unspecified.
+open error message cache and analyze the data by the analyzer
+function.  The function is specified by $config->{
+error_analyzer_function }.  Available functions are located in
+C<FML::Error::Analyze>.  C<simple_count> function is used by default
+if $config->{ error_analyzer_function } is unspecified.
 
 =cut
 
@@ -71,52 +209,112 @@ error_analyzer_function } is unspecified.
 # Descriptions: open error message cache and analyze the data by
 #               the specified analyzer function.
 #    Arguments: OBJ($self)
-# Side Effects: set up $self->{ _remove_addr_list } used internally. 
+# Side Effects: set up $self->{ _removal_addr_list } used internally.
 # Return Value: none
 sub analyze
 {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $curproc = $self->{ _curproc };
-    my $config  = $curproc->config();
-
-    use FML::Error::Cache;
-    my $cache = new FML::Error::Cache $curproc;
-    my $rdata = $cache->get_all_values_as_hash_ref();
+    my $cache   = $self->db_open();
+    my $rdata   = $cache->get_all_values_as_hash_ref();
 
     use FML::Error::Analyze;
     my $analyzer = new FML::Error::Analyze $curproc;
-    my $fp       = $config->{ error_analyzer_function } || 'simple_count';
-    my $list     = $analyzer->$fp($curproc, $rdata);
+    my $fp       = $self->{ _analyzer_function_name };
 
-    $self->{ _analyzer } = $analyzer;
+    # critical region: access to db under locked.
+    $self->lock();
+    $analyzer->$fp($curproc, $rdata);
+    $self->unlock();
 
-    # pass address list to remove
-    $self->{ _remove_addr_list } = $list;
+    # saved for further reference.
+    $self->{ _analyzer }          = $analyzer;
+    $self->{ _removal_addr_list } = $analyzer->removal_address();
+
+    # clean up.
+    $self->db_close();
 }
 
 
-# Descriptions: get data detail for the current result as HASH_REF.
+=head2 set_analyzer_function($fp)
+
+set the function for error cost evaluator. Acutually, the contet
+locates at C<FML::Error::Analyze::$fp>.
+
+=head2 get_analyzer_function($fp)
+
+get the current function.
+
+=cut
+
+
+# Descriptions: set analyzer function name
+#    Arguments: OBJ($self) STR($fp)
+# Side Effects: one
+# Return Value: STR
+sub set_analyzer_function
+{
+    my ($self, $fp) = @_;
+    $self->{ _analyzer_function_name } = $fp;
+}
+
+
+# Descriptions: set analyzer function name
 #    Arguments: OBJ($self)
-# Side Effects: none
-# Return Value: HASH_REF
-sub get_data_detail
+# Side Effects: one
+# Return Value: STR
+sub get_analyzer_function
 {
     my ($self) = @_;
-    my $analyzer = $self->{ _analyzer };
+    return $self->{ _analyzer_function_name };
+}
 
-    if (defined $analyzer) {
-	return $analyzer->get_data_detail();
+
+=head1 ADDRESS MANIPULATION
+
+=head2 is_list_address($addr)
+
+check whether $addr is one of addresses this ML uses.
+
+=cut
+
+
+# Descriptions: check whether $addr is one of addresses this ML uses.
+#    Arguments: OBJ($self) STR($addr)
+# Side Effects: none
+# Return Value: NUM
+sub is_list_address
+{
+    my ($self, $addr)  = @_;
+    my $curproc = $self->{ _curproc };
+    my $config  = $curproc->config();
+    my $addrs   = $config->get_as_array_ref('list_addresses');
+    my $match   = 0;
+
+    use FML::Credential;
+    my $cred = new FML::Credential $curproc;
+    $cred->set_compare_level(100); # match strictly!
+    for my $sysaddr (@$addrs) {
+	if (defined $sysaddr && $sysaddr) {
+	    $curproc->log("check is_same_address($addr, $sysaddr)") if $debug;
+	    if ($cred->is_same_address($addr, $sysaddr)) {
+		$curproc->log("match") if $debug;
+		$match++;
+	    }
+	    else {
+		$curproc->log("not match") if $debug;
+	    }
+	}
     }
-    else {
-	return {}
-    }
+
+    return $match;
 }
 
 
 =head2 remove_bouncers()
 
-delete mail addresses, analyze() determined as bouncers, by deluser()
-method.
+delete mail addresses which analyze() determined as bouncers by
+deluser() method.
 
 You need to call analyze() method before calling remove_bouncers() to
 list up addresses to remove.
@@ -132,30 +330,41 @@ sub remove_bouncers
 {
     my ($self) = @_;
     my $curproc = $self->{ _curproc };
-    my $list    = $self->{ _remove_addr_list };
+    my $list    = $self->{ _removal_addr_list };
 
     use FML::Credential;
     my $cred = new FML::Credential $curproc;
 
     use FML::Restriction::Base;
-    my $safe    = new FML::Restriction::Base;
-    my $addrreg = $safe->regexp( 'address' );
+    my $safe = new FML::Restriction::Base;
 
-  ADDR:
-    for my $addr (@$list) {
-	# check if $address is a safe string.
-	if ($addr =~ /^($addrreg)$/) {
-	    if ($cred->is_member( $addr ) || $cred->is_recipient( $addr )) {
-		$self->deluser( $addr );
+    # XXX need no lock here since lock is done in FML::Command::* class.
+    if (defined $list) {
+      ADDR:
+	for my $addr (@$list) {
+	    unless ($self->is_list_address($addr)) {
+		# check if $address is a safe string.
+		if ($safe->regexp_match('address', $addr)) {
+		    if ($cred->is_member( $addr ) ||
+			$cred->is_recipient( $addr )) {
+			$self->deluser( $addr );
+		    }
+		    else {
+			$curproc->log("remove_bouncers: <$addr> seems not member");
+		    }
+		}
+		else {
+		    $curproc->logerror("remove_bouncers: <$addr> unsafe expr");
+		    next ADDR;
+		}
 	    }
 	    else {
-		Log("remove_bouncers: <$addr> seems not member");
+		$curproc->logwarn("remove_bouncers: <$addr> ignored");
 	    }
 	}
-	else {
-	    LogError("remove_bouncers: <$addr> is invalid");
-	    next ADDR;
-	}
+    }
+    else {
+	$curproc->logerror("undefined list");
     }
 }
 
@@ -175,19 +384,18 @@ sub deluser
 {
     my ($self, $address) = @_;
     my $curproc = $self->{ _curproc };
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $ml_name = $config->{ ml_name };
 
     use FML::Restriction::Base;
-    my $safe    = new FML::Restriction::Base;
-    my $addrreg = $safe->regexp( 'address' );
+    my $safe = new FML::Restriction::Base;
 
     # check if $address is a safe string.
-    if ($address =~ /^($addrreg)$/) {
-	Log("deluser <$address>");
+    if ($safe->regexp_match('address', $address)) {
+	$curproc->log("deluser <$address>");
     }
     else {
-	LogError("deluser: invalid address");
+	$curproc->logerror("deluser: invalid address");
 	return;
     }
 
@@ -217,14 +425,42 @@ sub deluser
         }
         else {
             my $r = $@;
-            LogError("command $method fail");
-            LogError($r);
+            $curproc->logerror("command $method fail");
+            $curproc->logerror($r);
             if ($r =~ /^(.*)\s+at\s+/) {
                 my $reason = $1;
-                Log($reason); # pick up reason
+                $curproc->log($reason); # pick up reason
                 croak($reason);
             }
         }
+    }
+}
+
+
+=head1 DUMP ADDRESS AND STATUS
+
+=head2 print([$handle])
+
+print list of addresses and the corresponding point.
+
+=cut
+
+
+# Descriptions: dump { address => the current point }
+#    Arguments: OBJ($self) HANDLE($handle)
+# Side Effects: none
+# Return Value: none
+sub print
+{
+    my ($self, $handle) = @_;
+    my $wh       = $handle || \*STDOUT;
+    my $analyzer = $self->{ _analyzer };
+
+    if (defined $analyzer) {
+	my $info = $analyzer->summary();
+	for my $k (keys %$info) {
+	    $analyzer->print($k);
+	}
     }
 }
 

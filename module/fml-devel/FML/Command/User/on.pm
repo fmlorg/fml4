@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: on.pm,v 1.6 2002/12/24 10:19:45 fukachan Exp $
+# $FML: on.pm,v 1.11 2003/08/29 15:34:00 fukachan Exp $
 #
 
 package FML::Command::User::on;
@@ -29,7 +29,7 @@ After confirmation succeeds, on process proceeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -54,6 +54,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: change delivery mode from digest to real time
 #               after confirmation.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
@@ -63,7 +70,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     #
     # XXX-TODO: correct to use primary_*_map for on/off ?
@@ -85,7 +92,7 @@ sub process
     # if not member, on request is wrong.
     unless ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.not_member');
-	LogError("on request from not member");
+	$curproc->logerror("on request from not member");
 	croak("on request from not member");
 	return;
     }
@@ -101,7 +108,7 @@ sub process
     }
     # if not, try confirmation before on
     else {
-	Log("on request, try confirmation");
+	$curproc->log("on request, try confirmation");
 	use FML::Confirm;
 	my $confirm = new FML::Confirm {
 	    keyword   => $keyword,
@@ -127,7 +134,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Encode.pm,v 1.12 2003/01/11 15:16:35 fukachan Exp $
+# $FML: Encode.pm,v 1.16 2003/11/08 05:56:22 fukachan Exp $
 #
 
 package Mail::Message::Encode;
@@ -22,7 +22,7 @@ Mail::Message::Encode - encode/decode/charset conversion routines
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 standard constructor.
 
@@ -39,8 +39,9 @@ sub new
     my ($type) = ref($self) || $self;
     my $me     = {};
 
-    if ($] > 5.008) {
-	eval q{ Encode;};
+    # XXX we do not use Encode yet, so disabled anyway.
+    if (0 && $] > 5.008) {
+	eval q{ use Encode;};
 	croak("cannot load Encode") if $@;
     }
     elsif ($] <= 5.006001) {
@@ -49,18 +50,22 @@ sub new
     }
 
     # default language
+    # XXX 'japanese' includes both Japanese and English.
     $me->{ _language } = 'japanese';
 
     return bless $me, $type;
 }
 
 
-=head2 C<detect_code($str)>
+=head2 detect_code($str)
 
-speculate the code of $str string.
-$str is checked by Unicode::Japanese.
+speculate the code of $str string. $str is checked by
+Unicode::Japanese. Unicode::Japanes::getcode() can detect the follogin
+code: jis, sjis, euc, utf8, ucs2, ucs4, utf16, utf16-ge, utf16-le,
+utf32, utf32-ge, utf32-le, ascii, binary, sjis-imode, sjis-doti,
+sjis-jsky.
 
-C<CAUTION>: we handle only Japanese.
+C<CAUTION>: we handle only Japanese and English.
 
 =cut
 
@@ -75,13 +80,18 @@ sub detect_code
     my $lang = $self->{ _language };
 
     # XXX-TODO: care for non Japanese.
-    if ($lang eq 'japanese') {
+    if ($lang eq 'japanese' || $lang eq 'english') {
+	# getcode() can detect the follogin code:
+	# jis, sjis, euc, utf8, ucs2, ucs4, utf16, utf16-ge, utf16-le,
+	# utf32, utf32-ge, utf32-le, ascii, binary, sjis-imode,
+	# sjis-doti, sjis-jsky.
 	use Unicode::Japanese;
 	my $obj = new Unicode::Japanese;
-	$obj->getcode($str);
+	return $obj->getcode($str);
     }
     else {
-	croak("Mail::Message::Encode: unknown language");
+	carp("Mail::Message::Encode: unknown language");
+	return 'unknown';
     }
 }
 
@@ -141,7 +151,7 @@ sub convert_str_ref
     }
 
     # XXX-TODO: care for non Japanese.
-    if ($lang eq 'japanese') {
+    if ($lang eq 'japanese' || $lang eq 'english') {
 	# 1. if the encoding for the given $str_ref is unknown, return ASAP.
 	unless (defined $in_code) {
 	    $in_code = $self->detect_code($$str_ref);
@@ -203,7 +213,7 @@ So, execute $proc like this.
     my $obj         = new Mail::Message::Encode;
     my $conv_status = $obj->convert_str_ref($s, $out_code, $in_code);
 
-   &$proc($s, $args);
+    &$proc($s, $args);
 
 It means run $proc() after $s is converted to $out_code code.
 
@@ -237,7 +247,7 @@ sub run_in_code
 }
 
 
-=head1 utilities
+=head1 UTILITIES
 
 =head2 is_iso2022jp_string($buf)
 
@@ -263,6 +273,7 @@ sub is_iso2022jp_string
 #                  Takahiro Kambe <taca@sky.yamashina.kyoto.jp>
 #               check the given buffer has unusual Japanese (not ISO-2022-JP)
 #    Arguments: STR($buf)
+#      History: imported fml 4.0 functions.
 # Side Effects: none
 # Return Value: NUM(1 or 0)
 sub _look_not_iso2022jp_string
@@ -440,7 +451,7 @@ sub qp
 }
 
 
-=head2 C<decode_mime_string(string, [$options])>
+=head2 decode_mime_string(string, [$options])
 
 decode a base64/quoted-printable encoded string to a plain message.
 The encoding method is automatically detected.
@@ -448,6 +459,20 @@ The encoding method is automatically detected.
 C<$options> is a HASH REFERENCE.
 You can specify the charset of the string to return
 by $options->{ charset }.
+
+[reference] RFC1554 says:
+
+      reg#  character set      ESC sequence                designated to
+      ------------------------------------------------------------------
+      6     ASCII              ESC 2/8 4/2      ESC ( B    G0
+      42    JIS X 0208-1978    ESC 2/4 4/0      ESC $ @    G0
+      87    JIS X 0208-1983    ESC 2/4 4/2      ESC $ B    G0
+      14    JIS X 0201-Roman   ESC 2/8 4/10     ESC ( J    G0
+      58    GB2312-1980        ESC 2/4 4/1      ESC $ A    G0
+      149   KSC5601-1987       ESC 2/4 2/8 4/3  ESC $ ( C  G0
+      159   JIS X 0212-1990    ESC 2/4 2/8 4/4  ESC $ ( D  G0
+      100   ISO8859-1          ESC 2/14 4/1     ESC . A    G2
+      126   ISO8859-7(Greek)   ESC 2/14 4/6     ESC . F    G2
 
 =cut
 
@@ -462,6 +487,8 @@ sub decode_mime_string
     my $lang    = $self->{ _language };
     my $str_out = '';
 
+    unless ($str) { return $str;}
+
     if ($lang eq 'japanese') {
 	eval q{
 	    use IM::EncDec;
@@ -469,12 +496,102 @@ sub decode_mime_string
 	};
 
 	return $str if $@;
+
+	# XXX IM returns "ESC$(B ... " string but
+	# XXX mule 2.3 cannot read "ESC$(B ... ESC(B" string as JIS.
+	# XXX ng detects it as ASCII.
+	# XXX Whereas, w3m looks to be able to read it ?
+	$str_out   =~ s/^\e\$\(B/\e\$B/; # make mule read this string.
+	$in_code   = $self->detect_code($str_out);
+	$out_code |= 'euc-jp'; # euc-jp by default.
     }
     else {
 	croak("Mail::Message::Encode: unknown language");
     }
 
-    return $self->convert($str_out, $out_code);
+    return $self->convert($str_out, $out_code, $in_code);
+}
+
+
+# Descriptions: decode MIME base64 encoded-string
+#    Arguments: OBJ($self) STR($str) STR($out_code) STR($in_code)
+# Side Effects: none
+# Return Value: STR
+sub decode_base64_string
+{
+    my ($self, $str, $out_code, $in_code) = @_;
+    my $lang    = $self->{ _language };
+    my $str_out = undef;
+
+    if ($lang eq 'japanese') {
+	eval q{
+	    use MIME::Base64;
+	    $str_out = decode_base64( $str );
+	};
+
+	return $str if $@;
+
+	$in_code   = $self->detect_code($str_out);
+	$out_code |= 'euc-jp'; # euc-jp by default.
+    }
+    else {
+	croak("Mail::Message::Encode: unknown language");
+    }
+
+    return $self->convert($str_out, $out_code, $in_code);
+}
+
+
+# Descriptions: decode MIME quoted-printable encoded-string
+#    Arguments: OBJ($self) STR($str) STR($out_code) STR($in_code)
+# Side Effects: none
+# Return Value: STR
+sub decode_qp_string
+{
+    my ($self, $str, $out_code, $in_code) = @_;
+    my $lang    = $self->{ _language };
+    my $str_out = undef;
+
+    if ($lang eq 'japanese') {
+	eval q{
+	    use MIME::QuotedPrint;
+	    $str_out = decode_qp( $str );
+	};
+	return $str if $@;
+
+	$in_code   = $self->detect_code($str_out);
+	$out_code |= 'euc-jp'; # euc-jp by default.
+    }
+    else {
+	croak("Mail::Message::Encode: unknown language");
+    }
+
+    return $self->convert($str_out, $out_code, $in_code);
+}
+
+
+=head1 DEBUG
+
+=head2 str_dump($str)
+
+=cut
+
+
+# Descriptions: dump $str as the style by "od -a"
+#    Arguments: OBJ($self) STR($str)
+# Side Effects: none
+# Return Value: none
+sub str_dump
+{
+    my ($self, $str) = @_;
+
+    $| = 1;
+    use FileHandle;
+    my $th = new FileHandle "|od -a";
+    if (defined $th) {
+	print $th $str;
+	$th->close();
+    }
 }
 
 

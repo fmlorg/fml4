@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Confirm.pm,v 1.9 2002/12/22 04:43:05 fukachan Exp $
+# $FML: Confirm.pm,v 1.12 2003/11/17 13:06:11 fukachan Exp $
 #
 
 package FML::Confirm;
@@ -40,7 +40,7 @@ This module provides several utilitiy functions for confirmation.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 usual constructor.
 
@@ -258,14 +258,17 @@ specify $found (database value) for $id as argument.
 
 
 # Descriptions: request for $id is expired or not
-#    Arguments: OBJ($self) STR($found) NUM($howold)
+#    Arguments: OBJ($self) STR($id) NUM($howold)
 # Side Effects: none
 # Return Value: 1 or 0
 sub is_expired
 {
-    # XXX-TODO: strange argument ? should be is_expired($id) ?
-    my ($self, $found, $howold) = @_;
+    my ($self, $id, $howold) = @_;
+    my $found = $self->find($id);
     my ($time, $commont) = split(/\s+/, $found);
+
+    # expired in 2 weeks by default.
+    $howold ||= 14*24*3600;
 
     if ((time - $time) > $howold) {
 	return 1; # expired

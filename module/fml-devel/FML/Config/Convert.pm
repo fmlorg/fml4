@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Convert.pm,v 1.13 2002/12/20 03:40:48 fukachan Exp $
+# $FML: Convert.pm,v 1.16 2003/04/19 06:13:01 fukachan Exp $
 #
 
 
@@ -61,9 +61,10 @@ sub convert
    my ($in, $out, $config) = @_;
 
    if (defined $in && defined $out && defined $config) {
-       while (<$in>) {
-	   $_ = _replace($_, $config) if /__/;
-	   print $out $_;
+       my $buf;
+       while ($buf = <$in>) {
+	   $buf = _replace($buf, $config) if $buf =~ /__/;
+	   print $out $buf;
        }
    }
    else {
@@ -130,6 +131,26 @@ sub _replace
 	$buf =~ s/__ml_name__/$config->{ ml_name }/g;
     }
 
+    if (defined $config->{ _ml_name_admin }) {
+	$buf =~ s/__ml_name_admin__/$config->{ _ml_name_admin }/g;
+    }
+
+    if (defined $config->{ _ml_name_ctl }) {
+	$buf =~ s/__ml_name_ctl__/$config->{ _ml_name_ctl }/g;
+    }
+
+    if (defined $config->{ _ml_name_error }) {
+	$buf =~ s/__ml_name_error__/$config->{ _ml_name_error }/g;
+    }
+
+    if (defined $config->{ _ml_name_post }) {
+	$buf =~ s/__ml_name_post__/$config->{ _ml_name_post }/g;
+    }
+
+    if (defined $config->{ _ml_name_request }) {
+	$buf =~ s/__ml_name_request__/$config->{ _ml_name_request }/g;
+    }
+
     if (defined $config->{ ml_domain }) {
 	$buf =~ s/__ml_domain__/$config->{ ml_domain }/g;
     }
@@ -164,7 +185,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

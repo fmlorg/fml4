@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Article.pm,v 1.52 2002/12/26 15:07:49 fukachan Exp $
+# $FML: Article.pm,v 1.58 2003/08/23 14:37:58 fukachan Exp $
 #
 
 package FML::Article;
@@ -13,6 +13,9 @@ use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
 use Carp;
 use FML::Log qw(Log LogWarn LogError);
+
+use FML::Article::Sequence;
+@ISA = qw(FML::Article::Sequence);
 
 
 =head1 NAME
@@ -52,7 +55,7 @@ This is the basic structure of the article object.
 
 =head1 METHODS
 
-=head2 C<new(curproc)>
+=head2 new(curproc)
 
 prepare an article message, which is duplicated from the incoming
 message $curproc->{ incoming_message }.
@@ -73,9 +76,22 @@ sub new
     if (defined $curproc->{ 'incoming_message' }->{ message }) {
 	_setup_article_template($curproc);
     }
-    $me->{ curproc } = $curproc;
+    $me->{ _curproc } = $curproc;
 
     return bless $me, $type;
+}
+
+
+# Descriptions: return lock channel name.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub get_lock_channel_name
+{
+    my ($self) = @_;
+
+    # XXX LOCK_CHANNEL: article_spool
+    return 'article_spool';
 }
 
 
@@ -101,83 +117,7 @@ sub _setup_article_template
 }
 
 
-=head2 C<increment_id()>
-
-increment the sequence number of this article C<$self> and
-save it to C<$sequence_file>.
-
-This routine uses C<File::Sequence> module.
-
-=cut
-
-
-# Descriptions: determine article id (sequence number)
-#    Arguments: OBJ($self)
-# Side Effects: save and update the current article sequence number
-# Return Value: NUM(sequence identifier)
-sub increment_id
-{
-    my ($self) = @_;
-    my $curproc  = $self->{ curproc };
-    my $config   = $curproc->config();
-    my $pcb      = $curproc->pcb();
-    my $seq_file = $config->{ sequence_file };
-
-    # XXX-TODO we should enhance IO::Adapter module to handle
-    # XXX-TODO sequential number.
-    use File::Sequence;
-    my $sfh = new File::Sequence { sequence_file => $seq_file };
-    my $id  = $sfh->increment_id;
-    if ($sfh->error) { LogError( $sfh->error ); }
-
-    # save $id in pcb (process control block) and return $id
-    $pcb->set('article', 'id', $id);
-
-    return $id;
-}
-
-
-=head2 C<id()>
-
-return the current article sequence number.
-
-=cut
-
-# Descriptions: return the article id (sequence number)
-#    Arguments: OBJ($self)
-# Side Effects: none
-# Return Value: NUM(sequence number)
-sub id
-{
-    my ($self) = @_;
-    my $curproc  = $self->{ curproc };
-    my $config   = $curproc->config();
-    my $pcb      = $curproc->pcb();
-
-    my $n = $pcb->get('article', 'id');
-
-    # within Process::Distribute
-    if ($n) {
-	return $n;
-    }
-    # processes not Process::Distribute
-    else {
-	my $seq_file = $config->{ sequence_file };
-	my $n        = 0;
-
-	use File::Sequence;
-	my $sfh = new File::Sequence { sequence_file => $seq_file };
-	if (defined $sfh) {
-	    $n = $sfh->get_id();
-	    $sfh->close();
-	}
-
-	return $n;
-    }
-}
-
-
-=head2 C<spool_in(id)>
+=head2 spool_in(id)
 
 save the article to the file name C<id> in the article spool.
 If the variable C<$use_spool> is 'yes', this routine works.
@@ -192,18 +132,29 @@ If the variable C<$use_spool> is 'yes', this routine works.
 sub spool_in
 {
     my ($self, $id) = @_;
-    my $curproc    = $self->{ curproc };
+    my $curproc    = $self->{ _curproc };
     my $config     = $curproc->config();
     my $spool_dir  = $config->{ spool_dir };
     my $use_subdir = $config->{ spool_type } eq 'subdir' ? 1 : 0;
+    my $channel    = $self->get_lock_channel_name();
 
-    if ( $config->yes( 'use_spool' ) ) {
+    if ($config->yes( 'use_spool' )) {
+	$curproc->lock($channel);
+
 	unless (-d $spool_dir) {
 	    $curproc->mkdir($spool_dir, "mode=private");
 	}
 
 	# translate the article path e.g. spool/1900,  spool/2/1900
 	my $file = $self->filepath($id);
+
+	# verify and create subdir if not found before spool in.
+	if ($use_subdir) {
+	    my $dir = $self->subdirpath($id);
+	    unless (-d $dir) {
+		$curproc->mkdir($dir, "mode=private");
+	    }
+	}
 
 	unless (-f $file) {
 	    use FileHandle;
@@ -214,15 +165,17 @@ sub spool_in
 		print $fh "\n";
 		$curproc->{ article }->{ body }->print($fh);
 		$fh->close;
-		Log("article $id");
+		$curproc->log("article $id");
 	    }
 	}
 	else {
-	    LogError("$id article already exists");
+	    $curproc->logerror("$id article already exists");
 	}
+
+	$curproc->unlock($channel);
     }
     else {
-	Log("not spool article $id");
+	$curproc->log("not spool article $id");
     }
 }
 
@@ -269,7 +222,7 @@ sub subdirpath
 sub _filepath
 {
     my ($self, $id) = @_;
-    my $curproc    = $self->{ curproc };
+    my $curproc    = $self->{ _curproc };
     my $config     = $curproc->config();
     my $spool_dir  = $config->{ spool_dir };
     my $use_subdir = $config->{ spool_type } eq 'subdir' ? 1 : 0;
@@ -284,88 +237,9 @@ sub _filepath
 	subdir_unit => $unit,
     } ;
     my $file = $spool->filepath($args);
-    my $dir  = $spool->dirpath($args);
-
-    unless (-d $dir) {
-	$curproc->mkdir($dir, "mode=private");
-    }
+    my $dir  = $spool->dirpath($args); # spool/ or spool/$subdir/
 
     return ($file, $dir);
-}
-
-
-=head2 speculate_max_id([$spool_dir])
-
-scan the spool_dir and get the max number among files in it. It must
-be the max (latest) article number in its folder.
-
-=cut
-
-
-# Descriptions: scan the spool_dir and get max number among files in it.
-#               It must be the max (latest) article number in its folder.
-#    Arguments: OBJ($curproc) STR($spool_dir)
-# Side Effects: none
-# Return Value: NUM(sequence number) or undef
-sub speculate_max_id
-{
-    my ($curproc, $spool_dir) = @_;
-    my $config     = $curproc->config();
-    my $use_subdir = $config->{ spool_type } eq 'subdir' ? 1 : 0;
-
-    unless (defined $spool_dir) {
-	$spool_dir = $config->{ spool_dir };
-    }
-
-    Log("max_id: (debug) scan $spool_dir subdir=$use_subdir");
-
-    if ($use_subdir) {
-	use DirHandle;
-	my $dh = new DirHandle $spool_dir;
-
-	if (defined $dh) {
-	    my $fn         = ''; # file name
-	    my $subdir     = '';
-	    my $max_subdir = 0;
-
-	  ENTRY:
-	    while (defined($fn = $dh->read)) {
-		next ENTRY unless $fn =~ /^\d+$/;
-
-		use File::Spec;
-		$subdir = File::Spec->catfile($spool_dir, $fn);
-
-		if (-d $subdir) {
-		    my $max_subdir = $max_subdir > $fn ? $max_subdir : $fn;
-		}
-	    }
-
-	    $dh->close();
-
-	    # XXX-TODO wrong? to speculate max_id in subdir spool?
-	    $subdir = File::Spec->catfile($spool_dir, $max_subdir);
-	    Log("max_id: (debug) scan $subdir");
-	    $curproc->speculate_max_id($subdir);
-	}
-    }
-
-    use DirHandle;
-    my $dh = new DirHandle $spool_dir;
-    if (defined $dh) {
-	my $max = 0;
-	my $fn  = ''; # file name
-
-	while (defined($fn = $dh->read)) {
-	    next unless $fn =~ /^\d+$/;
-	    $max = $max < $fn ? $fn : $max;
-	}
-
-	$dh->close();
-
-	return( $max > 0 ? $max : undef );
-    }
-
-    return undef;
 }
 
 
@@ -385,7 +259,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QueueManager.pm,v 1.11 2003/01/11 06:58:46 fukachan Exp $
+# $FML: QueueManager.pm,v 1.15 2003/08/23 08:50:43 fukachan Exp $
 #
 
 package FML::Process::QueueManager;
@@ -35,7 +35,7 @@ queue flush!
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
 
 constructor.
 
@@ -61,7 +61,7 @@ sub new
 }
 
 
-=head2 C<send($curproc, $id)>
+=head2 send($curproc, $id)
 
 try to send all mails in the queue.
 If queue id C<$id> is specified, send queue for C<$id>.
@@ -94,12 +94,12 @@ sub send
 	    }
 	    else {
 		# XXX-TODO: $q->remove() if invalid queue ?
-		Log("$qid is invalid");
+		$curproc->log("$qid is invalid");
 	    }
 	    $q->unlock();
 	}
 	else {
-	    Log("$qid is locked. retry");
+	    $curproc->log("$qid is locked. retry");
 	}
     }
 }
@@ -112,6 +112,7 @@ sub send
 sub _send
 {
     my ($self, $curproc, $q) = @_;
+    my $cred  = $curproc->{ credential };
     my $info  = $q->getidinfo();
     my $qfile = $info->{ 'path' };
     my $qid   = $info->{ 'id' };
@@ -120,7 +121,9 @@ sub _send
     my $msg = Mail::Message->parse( { file => $qfile } );
 
     use FML::Mailer;
-    my $obj = new FML::Mailer;
+    my $obj = new FML::Mailer $curproc;
+
+    # XXX queue is already locked and need no lock for recipient maps here.
     my $r   = $obj->send({
 	sender     => $info->{ sender },
 	recipients => $info->{ recipients },
@@ -129,10 +132,10 @@ sub _send
     });
 
     if ($r) {
-	Log("queue=$qid status=sent");
+	$curproc->log("queue=$qid status=sent");
     }
     else {
-	Log("queue=$qid status=fail");
+	$curproc->log("queue=$qid status=fail");
     }
 
     return $r;

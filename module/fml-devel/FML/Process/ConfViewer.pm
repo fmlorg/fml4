@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: ConfViewer.pm,v 1.20 2003/01/11 16:05:17 fukachan Exp $
+# $FML: ConfViewer.pm,v 1.24 2003/08/29 15:34:07 fukachan Exp $
 #
 
 package FML::Process::ConfViewer;
@@ -33,16 +33,16 @@ FML::Process::ConfViewer provides the main function for C<fmlconf>.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 ordinary constructor.
 It make a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 fix @INC, adjust ml_* and load configuration files.
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 show help unless @ARGV.
 
@@ -69,12 +69,12 @@ sub new
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_prepare_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $curproc->resolve_ml_specific_variables( $args );
@@ -84,7 +84,7 @@ sub prepare
     $eval = $config->get_hook( 'fmlconf_prepare_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
@@ -98,12 +98,12 @@ sub verify_request
 {
     my ($curproc, $args) = @_;
     my $argv   = $curproc->command_line_argv();
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_verify_request_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     if (length(@$argv) == 0 || (not $argv->[0])) {
@@ -114,12 +114,12 @@ sub verify_request
     $eval = $config->get_hook( 'fmlconf_verify_request_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
 the top level dispatcher for C<fmlconf>.
 
@@ -139,14 +139,14 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
     my $eval = $config->get_hook( 'fmlconf_run_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $curproc->_fmlconf($args);
@@ -154,7 +154,7 @@ sub run
     $eval = $config->get_hook( 'fmlconf_run_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
@@ -194,23 +194,23 @@ _EOF_
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmlconf_finish_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 
     $eval = $config->get_hook( 'fmlconf_finish_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
-	print STDERR $@ if $@;
+	$curproc->logwarn($@) if $@;
     }
 }
 
 
-=head2 C<_fmlconf($args)> (INTERNAL USE)
+=head2 _fmlconf($args)
 
 run dump_variables of C<FML::Config>.
 
@@ -224,7 +224,7 @@ run dump_variables of C<FML::Config>.
 sub _fmlconf
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $mode   = $args->{ options }->{ n } ? 'difference_only' : 'all';
     my $argv   = $curproc->command_line_argv();
 

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: FileUtils.pm,v 1.10 2003/01/11 16:05:14 fukachan Exp $
+# $FML: FileUtils.pm,v 1.14 2003/08/29 15:33:57 fukachan Exp $
 #
 
 package FML::Command::FileUtils;
@@ -80,12 +80,12 @@ sub delete
 sub remove
 {
     my ($self, $curproc, $command_args, $du_args) = @_;
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $argv     = $du_args->{ options };
     my $is_error = 0;
 
-    # regexp allowed here for file 
-    my $file_regexp = $self->{ _safe }->regexp( 'file' );
+    # regexp allowed here for file
+    my $safe = $self->{ _safe };
 
     # chdir $ml_home_dir firstly. return ASAP if failed.
     my $ml_home_dir    = $config->{ ml_home_dir };
@@ -93,23 +93,23 @@ sub remove
 
     for my $file (@$argv) {
 	# If $file is a safe pattern, o.k. Try to remove it!
-	if ($file =~ /^$file_regexp$/) {
+	if ($safe->regexp_match('file', $file)) {
 	    if (-f $file) {
 		unlink $file;
 
 		if (-f $file) {
-		    LogError("fail to remove $file");
+		    $curproc->logerror("fail to remove $file");
 		    $is_error++;
 		}
 		else {
-		    Log("remove $file");
+		    $curproc->log("remove $file");
 		    $curproc->reply_message_nl("command.remove_file",
 					       "removed $file",
 					       { _arg_file => $file } );
 		}
 	    }
 	    else {
-		LogWarn("no such file $file");
+		$curproc->logwarn("no such file $file");
 		$curproc->reply_message_nl("command.no_such_file",
 					   "no such file $file",
 					   { _arg_file => $file } );
@@ -118,7 +118,7 @@ sub remove
 	}
 	# $file filename is unsafe. stop.
 	else {
-	    LogError("<$file> is insecure");
+	    $curproc->logerror("<$file> is insecure");
 	    $curproc->reply_message_nl('command.insecure',
 				       "insecure input");
 	    croak("remove: insecure argument");

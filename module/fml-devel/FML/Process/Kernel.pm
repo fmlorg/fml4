@@ -4,14 +4,14 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Kernel.pm,v 1.152 2003/01/07 08:38:34 fukachan Exp $
+# $FML: Kernel.pm,v 1.192 2003/11/05 03:37:52 fukachan Exp $
 #
 
 package FML::Process::Kernel;
 
 use strict;
 use Carp;
-use vars qw(@ISA @Tmpfiles $TmpFileCounter);
+use vars qw(@ISA @Tmpfiles $TmpFileCounter %LockInfo);
 use File::Spec;
 
 use FML::Process::Flow;
@@ -49,7 +49,7 @@ in the process flow.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 1. import variables such as C<$ml_home_dir> via C<libexec/loader>
 
@@ -58,8 +58,8 @@ in the process flow.
 3. initialize current process struct C<$curproc> such as
 
     $curproc->{ main_cf }
-    $curproc->{ config }
-    $curproc->{ pcb }
+    $curproc->config()
+    $curproc->pcb()
 
 For example, this C<main_cf> provides the pointer to /etc/fml/main.cf
 parameters.
@@ -93,23 +93,32 @@ sub new
 	}
     }
 
-    # 1.2 import XXX_dir variables from /etc/fml/main.cf
-    for my $dir_var (qw(
-			config_dir
-			default_config_dir
-			lib_dir
-			libexec_dir
-			share_dir
-			local_lib_dir
+    # 1.2 import XXX_dir variables as fml_XXX_dir from /etc/fml/main.cf.
+    #     ( *_dir *_maps *_cf ).
+    for my $main_cf_var (qw(
+			    config_dir
+			    default_config_dir
+			    lib_dir
+			    libexec_dir
+			    share_dir
+			    local_lib_dir
+
+			    primary_ml_home_prefix_map
+			    ml_home_prefix_maps
+			    default_config_cf
+			    site_default_config_cf 
+			    
 			)) {
-	if (defined $args->{ main_cf }->{ $dir_var }) {
-	    $cfargs->{ 'fml_'.$dir_var } = $args->{ main_cf }->{ $dir_var };
+	if (defined $args->{ main_cf }->{ $main_cf_var }) {
+	    my $key = sprintf("fml_%s", $main_cf_var);
+	    $cfargs->{ $key } = $args->{ main_cf }->{ $main_cf_var };
 	}
     }
 
     # 1.3 import $fml_version
     if (defined $args->{ fml_version }) {
-	$cfargs->{ fml_version } = "fml-devel ". $args->{ fml_version };
+	$cfargs->{ fml_version } = 
+	    sprintf("fml-devel %s", $args->{ fml_version });
     }
 
     # 2.1 speculate $fml_owner_home_dir by the current process uid
@@ -145,6 +154,9 @@ sub new
     # 3.6 default printing style
     $curproc->_print_init;
 
+    # 3.7 set up message queue for logging.
+    $curproc->_log_message_init();
+
     # 4.1 debug. XXX remove this in the future !
     $curproc->__debug_ml_xxx('loaded:');
 
@@ -175,7 +187,7 @@ sub _signal_init
 
     $SIG{'ALRM'} = $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = sub {
 	my ($signal) = @_;
-	Log("SIG$signal trapped");
+	$curproc->log("SIG$signal trapped");
 	sleep 1;
 	croak("SIG$signal trapped");
     };
@@ -226,7 +238,7 @@ sub _trap_help
 }
 
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 preparation before the main part starts.
 
@@ -266,22 +278,35 @@ unlock a giant lock if the channel is not specified.
 sub lock
 {
     my ($curproc, $channel) = @_;
+    my $pcb       = $curproc->pcb();
     my $lock_file = '';
+    my $time_in   = time;
+
+    if (defined $LockInfo{ $channel } && $LockInfo{ $channel }) {
+	my @c = caller;
+	$curproc->logwarn( "channel=$channel already locked ($c[0] $c[1])" );
+	return;
+    }
 
     # initialize
     ($channel, $lock_file) = $curproc->_lock_init($channel);
 
     require File::SimpleLock;
-    my $lockobj = new File::SimpleLock;
+    my $lockobj = $pcb->get('lock', $channel) || new File::SimpleLock;
 
     my $r = $lockobj->lock( { file => $lock_file } );
     if ($r) {
-	my $pcb = $curproc->{ pcb };
+	my $t = time - $time_in;
+	if ($t > 1) {
+	    $curproc->log("lock requires $t sec.");
+	}
+
 	$pcb->set('lock', $channel, $lockobj);
-	Log("lock channel=$channel");
+	$LockInfo{ $channel } = 1;
+	$curproc->log("lock channel=$channel");
     }
     else {
-	LogError("cannot lock");
+	$curproc->logerror("cannot lock");
 	croak("Error: cannot lock");
     }
 }
@@ -295,25 +320,32 @@ sub unlock
 {
     my ($curproc, $channel) = @_;
     my $lock_file = '';
+    my $time_in   = time;
 
     # initialize
     ($channel, $lock_file) = $curproc->_lock_init($channel);
 
-    my $pcb     = $curproc->{ pcb };
+    my $pcb     = $curproc->pcb();
     my $lockobj = $pcb->get('lock', $channel);
 
     if (defined $lockobj) {
 	my $r = $lockobj->unlock( { file => $lock_file } );
 	if ($r) {
-	    Log("unlock channel=$channel");
+	    my $t = time - $time_in;
+	    if ($t > 1) {
+		$curproc->log("unlock requires $t sec.");
+	    }
+
+	    delete $LockInfo{ $channel };
+	    $curproc->log("unlock channel=$channel");
 	}
 	else {
-	    LogError("cannot unlock");
+	    $curproc->logerror("cannot unlock");
 	    croak("Error: cannot unlock");
 	}
     }
     else {
-	LogError("object undefined, cannot unlock");
+	$curproc->logerror("object undefined, cannot unlock");
 	croak("Error: object undefined, cannot unlock");
     }
 }
@@ -326,12 +358,17 @@ sub unlock
 sub _lock_init
 {
     my ($curproc, $channel) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
+    my $home_dir  = $config->{ ml_home_dir };
     my $lock_dir  = $config->{ lock_dir };
     my $lock_type = $config->{ lock_type };
 
     # our lock channel
     $channel ||= 'giantlock';
+
+    unless (-d $home_dir) {
+	croak("cannot lock: \$ml_home_dir not exists");
+    }
 
     # only user "fml" should read lock files.
     unless (-d $lock_dir) {
@@ -376,7 +413,7 @@ sub is_event_timeout
 	return (time > $t) ? 1 : 0;
     }
     else {
-	LogWarn("visit timeout channel=$channel at the first time");
+	$curproc->logwarn("visit timeout channel=$channel at the first time");
 	return 1;
     }
 }
@@ -453,7 +490,7 @@ sub _init_event_timeout
 }
 
 
-=head2 C<verify_sender_credential($args)>
+=head2 verify_sender_credential($args)
 
 validate the mail sender (From: in the header not SMTP SENEDER).  If
 valid, it sets the adddress within $curproc->{ credential } object as
@@ -483,30 +520,49 @@ sub verify_sender_credential
     }
     else {
 	$curproc->stop_this_process("cannot extract From:");
-	LogError("cannot extract From:");
+	$curproc->logerror("cannot extract From:");
     }
-
-    # XXX-TODO: check $from should match safe address regexp.
 
     # XXX "@addrs must be empty" is valid since From: is unique.
-    unless (@addrs) {
-	# XXX o.k. From: is proven to be valid now.
-	# XXX log it anyway
-	Log("sender: $from");
-	use FML::Credential;
-	my $cred = new FML::Credential $curproc;
-	$curproc->{'credential'} = $cred;
-	$curproc->{'credential'}->set( 'sender', $from );
+    if (@addrs) {
+	$curproc->logwarn("invalid From: duplicated addresses");
+	$curproc->logwarn("use $from as the sender");
+	my $i = 0;
+	for my $a ($addr, @addrs) {
+	    my $s = $a->address;
+	    ++$i;
+	    $curproc->logwarn("From[$i] $s");
+	}
+    }
+
+    if ($from) {
+	$curproc->log("sender: $from");
+
+	# check $from should match safe address regexp.
+	use FML::Restriction::Base;
+	my $safe = new FML::Restriction::Base;
+	if ($safe->regexp_match('address', $from)) {
+	    # o.k. From: is proven to be valid now.
+	    use FML::Credential;
+	    my $cred = new FML::Credential $curproc;
+	    $curproc->{'credential'} = $cred;
+	    $curproc->{'credential'}->set( 'sender', $from );
+	}
+	else {
+	    $curproc->stop_this_process();
+	    $curproc->logerror("unsafe From: $from");
+	}
     }
     else {
-	LogError("invalid From:");
+	$curproc->stop_this_process();
+	$curproc->logerror("no valid From:");
     }
 }
 
 
-=head2 C<simple_loop_check($args)>
+=head2 simple_loop_check($args)
 
-loop checks following rules of $config->{ header_loop_check_rules }.
+loop checks following rules of $config->{ incoming_mail_header_loop_check_rules }.
 The autual check is done by header->C<$rule()> for a C<rule>.
 See C<FML::Header> object for more details.
 
@@ -520,9 +576,9 @@ See C<FML::Header> object for more details.
 sub simple_loop_check
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $header = $curproc->incoming_message_header();
-    my $rules  = $config->get_as_array_ref( 'header_loop_check_rules' );
+    my $rules  = $config->get_as_array_ref( 'incoming_mail_header_loop_check_rules' );
     my $match  = 0;
 
   RULE:
@@ -531,7 +587,7 @@ sub simple_loop_check
 	    $match = $header->$rule($config, $args) ? $rule : 0;
 	}
 	else {
-	    Log("header->${rule}() is undefined");
+	    $curproc->log("header->${rule}() is undefined");
 	}
 
 	last RULE if $match;
@@ -540,7 +596,7 @@ sub simple_loop_check
     if ($match) {
 	# we should stop this process ASAP.
 	$curproc->stop_this_process();
-	Log("mail loop detected for $match");
+	$curproc->logerror("mail loop detected for $match");
     }
 }
 
@@ -572,7 +628,7 @@ sub resolve_ml_specific_variables
     my ($curproc, $args) = @_;
     my ($ml_name, $ml_domain, $ml_home_prefix, $ml_home_dir);
     my ($command, @options, $config_cf_path);
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $myname  = $args->{ myname };
     my $ml_addr = '';
 
@@ -616,16 +672,14 @@ sub resolve_ml_specific_variables
     }
     else {
 	use FML::Restriction::Base;
-	my $safe    = new FML::Restriction::Base;
-	my $regexp  = $safe->basic_variable();
-	my $pattern = $regexp->{ address };
+	my $safe = new FML::Restriction::Base;
 
-	# XXX-TODO: searching ml_addr should be first match. ok?
-	# XXX "fmlconf -n elena@fml.org" works ?
-	# XXX yes, but "fmlconf -n elena" works ? no ;-)
+	# XXX searching of ml_addr by the first match. ok?
+	# "fmlconf -n elena@fml.org" works ? yes
+	# "fmlconf -n elena" works ?         yes
       ARGV:
 	for my $arg (@ARGV) {
-	    if ($arg =~ /^($pattern)$/) {
+	    if ($safe->regexp_match('address', $arg)) {
 		$ml_addr = $arg;
 		last ARGV;
 	    }
@@ -634,21 +688,21 @@ sub resolve_ml_specific_variables
 	# not found. Hmm, "fmlconf -n elena" case ?
 	unless ($ml_addr) {
 	    my $default_domain = $curproc->default_domain();
-	    my $pattern        = $regexp->{ ml_name };
 
 	  ARGS:
 	    for my $arg (@ARGV) {
 		last ARGS if $ml_addr;
-		next ARGS if $arg =~ /^-/o; # options
+		next ARGS if $arg =~ /^\-/o; # options
 
-		if ($arg =~ /^($pattern)$/) {
+		if ($safe->regexp_match('ml_name', $arg)) {
 		    $ml_addr = $arg. '@' . $default_domain;
 		}
 	    }
 	}
     }
 
-    # 1.2 ml@domain may be specified in command line args.
+    # 1.2 set up ml_* in config space.
+    # 1.2(a) ml@domain found. It may be specified in command line args.
     if ($ml_addr) {
 	($ml_name, $ml_domain) = split(/\@/, $ml_addr);
 	$config->set( 'ml_name',   $ml_name );
@@ -661,56 +715,73 @@ sub resolve_ml_specific_variables
 
 	$config_cf_path = $curproc->config_cf_filepath($ml_name, $ml_domain);
     }
+    # 1.2(b) argv must have dirname (ml_home_dir).
     # Example: "| /usr/local/libexec/fml/fml.pl /var/spool/ml/elena"
     #    XXX the following code is true if config.cf has $ml_name definition.
     else {
 	my $r = $curproc->_find_ml_home_dir_in_argv($args->{ main_cf });
 
-	# determine default $ml_home_dir and $hom_home_prefix by main.cf
+	# [1.2.b.1]
+	# determine default $ml_home_dir and $hom_home_prefix by main.cf.
 	if (defined $r->{ ml_home_dir }) {
 	    use File::Basename;
-	    my $dir    = $r->{ ml_home_dir };
-	    my $prefix = dirname( $dir );
+	    my $home_dir = $r->{ ml_home_dir };
+	    my $prefix   = dirname( $home_dir );
 	    $config->set( 'ml_home_prefix', $prefix);
-	    $config->set( 'ml_home_dir',    $dir);
+	    $config->set( 'ml_home_dir',    $home_dir);
 
 	    use File::Spec;
-	    $config_cf_path = File::Spec->catfile($dir, "config.cf");
+	    $config_cf_path = File::Spec->catfile($home_dir, "config.cf");
 	}
 
+	# [1.2.b.2]
+	# lastly, we need to determine $ml_name and $ml_domain.
 	# parse the argument such as "fml.pl /var/spool/ml/elena ..."
 	unless ($ml_name) {
-	    Log("(debug) parse @ARGV");
+	    $curproc->log("(debug) parse @ARGV");
 
 	  ARGS:
 	    for my $arg (@ARGV) {
-		last ARGS if $ml_addr;
-		next ARGS if $arg =~ /^-/o; # options
+		last ARGS if $ml_name;
+		next ARGS if $arg =~ /^\-/o; # options
 
 		# the first directory name e.g. /var/spool/ml/elena
 		if (-d $arg) {
 		    my $default_domain = $curproc->default_domain();
 
-		    use File::Basename;
-		    $ml_name     = basename( $arg );
-		    $ml_home_dir = dirname( $arg );
+		    use File::Spec;
+		    my $_cf_path = File::Spec->catfile($arg, "config.cf");
 
-		    $config->set( 'ml_name',     $ml_name );
-		    $config->set( 'ml_domain',   $default_domain );
-		    $config->set( 'ml_home_dir', $arg );
+		    if (-f $config_cf_path) {
+			$config_cf_path = $_cf_path;
 
-		    Log("(debug) ml_name=$ml_name ml_home_dir=$ml_home_dir");
+			use File::Basename;
+			$ml_name     = basename( $arg );
+			$ml_home_dir = dirname( $arg );
+
+			$config->set( 'ml_name',     $ml_name );
+			$config->set( 'ml_domain',   $default_domain );
+			$config->set( 'ml_home_dir', $arg );
+
+			my $s = "ml_name=$ml_name ml_home_dir=$ml_home_dir";
+			$curproc->log("(debug) $s");
+		    }
 		}
 	    }
 	}
     }
 
-    # debug
-    $curproc->__debug_ml_xxx('resolv:');
+    if ($config_cf_path) {
+	# debug
+	$curproc->__debug_ml_xxx('resolv:');
 
-    # add this ml's config.cf to the .cf list.
-    my $list = $args->{ cf_list };
-    push(@$list, $config_cf_path);
+	# add this ml's config.cf to the .cf list.
+	my $list = $args->{ cf_list };
+	push(@$list, $config_cf_path);
+    }
+    else {
+	$curproc->logerror("cannot determine which ml_name");
+    }
 }
 
 
@@ -718,20 +789,20 @@ sub resolve_ml_specific_variables
 my @delayed_buffer = ();
 
 # Descriptions: debug log. removed in the future
-#    Arguments: OBJ($curproc)
+#    Arguments: OBJ($curproc) STR($str)
 # Side Effects: none
 # Return Value: none
 sub __debug_ml_xxx
 {
     my ($curproc, $str) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     if (defined $config->{ log_file } && (-w $config->{ log_file })) {
-	for (@delayed_buffer) { Log( $_ ); }
+	for my $buf (@delayed_buffer) { $curproc->log( $buf ); }
 	@delayed_buffer = ();
 
 	for my $var (qw(ml_name ml_domain ml_home_prefix ml_home_dir)) {
-	    Log(sprintf("%-25s = %s", '(debug)'.$str. $var,
+	    $curproc->log(sprintf("%-25s = %s", '(debug)'.$str. $var,
 			(defined $config->{ $var } ? $config->{ $var } : '')));
 	}
     }
@@ -753,18 +824,19 @@ sub __debug_ml_xxx
 sub _find_ml_home_dir_in_argv
 {
     my ($curproc, $main_cf) = @_;
-    my $ml_home_prefix = $main_cf->{ default_ml_home_prefix };
+    my $ml_home_prefix = $curproc->ml_home_prefix();
     my $ml_home_dir    = '';
     my $found_cf       = 0;
     my @cf             = ();
 
-    # "elena" is translated to "/var/spool/ml/elena"
+    # Example: "elena" is translated to "/var/spool/ml/elena"
   ARGV:
-    for (@ARGV) {
+    for my $argv (@ARGV) {
 	# 1. for the first time
-	#   a) speculate "/var/spool/ml/$_" looks a $ml_home_dir ?
+	#  a) speculate "/var/spool/ml/$_" looks a $ml_home_dir
+	#     (== default $ml_home_dir)?
 	unless ($found_cf) {
-	    my $x  = File::Spec->catfile($ml_home_prefix, $_);
+	    my $x  = File::Spec->catfile($ml_home_prefix, $argv);
 	    my $cf = File::Spec->catfile($x, "config.cf");
 	    if (-d $x && -f $cf) {
 		$found_cf    = 1;
@@ -776,17 +848,17 @@ sub _find_ml_home_dir_in_argv
 	last ARGV if $found_cf;
 
 	# 2. /var/spool/ml/elena looks a $ml_home_dir ?
-	if (-d $_) {
-	    $ml_home_dir = $_;
-	    my $cf = File::Spec->catfile($_, "config.cf");
+	if (-d $argv) {
+	    $ml_home_dir = $argv;
+	    my $cf = File::Spec->catfile($argv, "config.cf");
 	    if (-f $cf) {
 		push(@cf, $cf);
 		$found_cf = 1;
 	    }
 	}
 	# 3. looks a file, so /var/spool/ml/elena/config.cf ?
-	elsif (-f $_) {
-	    push(@cf, $_);
+	elsif (-f $argv) {
+	    push(@cf, $argv);
 	}
     }
 
@@ -797,7 +869,7 @@ sub _find_ml_home_dir_in_argv
 }
 
 
-=head2 C<load_config_files($files)>
+=head2 load_config_files($files)
 
 read several configuration C<@$files>.
 The variable evaluation (expansion) is done on demand when
@@ -806,7 +878,7 @@ $config->get() of FETCH() method is called.
 =cut
 
 # Descriptions: load configuration files and evaluate variables
-#    Arguments: OBJ($curproc) HASH_REF($args)
+#    Arguments: OBJ($curproc) ARRAY_REF($files)
 # Side Effects: none
 # Return Value: none
 sub load_config_files
@@ -816,12 +888,12 @@ sub load_config_files
     # load configuration variables from given files e.g. /some/where.cf
     # XXX overload variables from each $cf
     for my $cf (@$files) {
-      $curproc->{ config }->overload( $cf );
+      $curproc->config()->overload( $cf );
     }
 
     # XXX We need to expand variables after we load all *cf files.
     # XXX 2001/05/05 changed to dynamic expansion for hook
-    # $curproc->{ config }->expand_variables();
+    # $curproc->config()->expand_variables();
 
     # XXX simple sanity check
     #     MAIL_LIST != MAINTAINER
@@ -832,20 +904,20 @@ sub load_config_files
     use FML::Credential;
     my $cred = new FML::Credential $curproc;
     if ($cred->is_same_address($maintainer, $ml_address)) {
-	LogError("invalid configuration: \$maintainer == \$address_for_post");
+	$curproc->logerror("invalid configuration: \$maintainer == \$address_for_post");
 	$curproc->stop_this_process("configuration error");
     }
 }
 
 
 # Descriptions: add ml local library path into @INC
-#    Arguments: OBJ($OBJ)
+#    Arguments: OBJ($curproc)
 # Side Effects: update @INC
 # Return Value: none
 sub fix_perl_include_path
 {
     my ($curproc) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
 
     # XXX update @INC here since we should do after loading configurations.
     # update @INC for ml local libraries
@@ -857,7 +929,7 @@ sub fix_perl_include_path
 }
 
 
-=head2 C<parse_incoming_message($args)>
+=head2 parse_incoming_message($args)
 
 C<preapre()> method calls this to
 parse the message to a set of header and body.
@@ -897,7 +969,7 @@ sub parse_incoming_message
     $curproc->{ incoming_message }->{ body  }   = $msg->whole_message_body;
 
     # save input message for further investigation
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     if ($config->yes('use_incoming_mail_cache')) {
 	my $dir     = $config->{ incoming_mail_cache_dir };
 	my $modulus = $config->{ incoming_mail_cache_size };
@@ -913,17 +985,23 @@ sub parse_incoming_message
 	    $obj->close();
 	}
     }
+
+    # Accept-Language: handling
+    if (defined $msg) {
+	my $list = $msg->accept_language_list();
+	$curproc->set_accept_language_list($list);
+    }
 }
 
 
 =head1 CREDENTIAL
 
-=head2 C<premit_post($args)>
+=head2 premit_post($args)
 
 permit posting.
 The restriction rules follows the order of C<post_restrictions>.
 
-=head2 C<premit_command($args)>
+=head2 premit_command($args)
 
 permit fml command use.
 The restriction rules follows the order of C<command_restrictions>.
@@ -932,7 +1010,7 @@ The restriction rules follows the order of C<command_restrictions>.
 
 
 # Descriptions: permit this post process
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: set the error reason at "check_restriction" in pcb.
 # Return Value: NUM(1 or 0)
 sub permit_post
@@ -943,7 +1021,7 @@ sub permit_post
 
 
 # Descriptions: permit this command process
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: set the error reason at "check_restriction" in pcb.
 # Return Value: NUM(1 or 0)
 sub permit_command
@@ -955,69 +1033,41 @@ sub permit_command
 
 # Descriptions: permit this $type process based on the rules defined
 #               in ${type}_restrictions.
-#    Arguments: OBJ($self) HASH_REF($args) STR($type)
+#    Arguments: OBJ($curproc) HASH_REF($args) STR($type)
 # Side Effects: set the error reason at "check_restriction" n pcb.
 # Return Value: NUM(1 or 0)
 sub _check_restrictions
 {
     my ($curproc, $args, $type) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $cred   = $curproc->{ credential }; # user credential
-    my $pcb    = $curproc->{ pcb };
+    my $pcb    = $curproc->pcb();
     my $sender = $cred->sender();
+    my $rules  = $config->get_as_array_ref( "${type}_restrictions" );
 
-    # XXX-TODO: method()-ify these functions for further enhancement.
+    use FML::Restriction::Post;
+    my $acl = new FML::Restriction::Post $curproc;
 
-    # XXX-TODO: we should use $config->get_as_array_ref().
-    for my $rule (split(/\s+/, $config->{ "${type}_restrictions" })) {
-	if ($rule eq 'reject_system_accounts') {
-	    my $match = $cred->match_system_accounts($sender);
-	    if ($match) {
-		Log("${rule}: $match matches sender address");
-		$pcb->set("check_restrictions", "deny_reason", $rule);
-		return 0;
-	    }
-	}
-	elsif ($rule eq 'permit_anyone') {
-		return 1;
-	}
-	elsif ($rule eq 'permit_member_maps') {
-	    # Q: the mail sender is a ML member?
-	    if ($cred->is_member($sender)) {
-		# A: Yes, we permit to distribute this article.
-		return 1;
-	    }
-	    else {
-		# A: No, deny distribution
-		LogError("$sender is not an ML member");
-		LogError( $cred->error() );
-		$curproc->reply_message_nl('error.not_member',
-					   "you are not a ML member." );
-		$curproc->reply_message( "   your address: $sender" );
-
-		$pcb->set("check_restrictions", "deny_reason", $rule);
-		return 0;
-	    }
-	}
-	elsif ($rule eq 'permit_commands_for_stranger') {
-	    use FML::Command::DataCheck;
-	    my $check = new FML::Command::DataCheck;
-	    if ($check->find_commands_for_stranger($curproc)) {
-		Log("$rule matched. accepted.");
-		return 1;
-	    }
-	}
-	elsif ($rule eq 'reject') {
-	    $pcb->set("check_restrictions", "deny_reason", $rule);
-	    return 0;
+    my ($match, $result) = (0, 0);
+    for my $rule (@$rules) {
+	if ($acl->can($rule)) {
+	    # match  = matched. return as soon as possible from here.
+	    #          ASAP or RETRY the next rule, depends on the rule.
+	    # result = action determined by matched rule.
+	    ($match, $result) = $acl->$rule($rule, $sender);
 	}
 	else {
-	    LogWarn("unknown rule=$rule");
+	    ($match, $result) = (0, undef);
+	    $curproc->logwarn("unknown rule=$rule");
+	}
+
+	if ($match) {
+	    $curproc->log("match rule=$rule sender=$sender");
+	    return($result eq "permit" ? 1 : 0);
 	}
     }
 
-    # deny by default
-    return 0;
+    return 0; # deny by default
 }
 
 
@@ -1081,7 +1131,179 @@ sub is_refused
 
 =head1 MESSAGE HANDLING
 
-=head2 C<reply_message($msg)>
+=cut
+
+
+# Descriptions: log message queue
+#    Arguments: OBJ($curproc)
+# Side Effects: set up $curproc->{ log_message_queue }.
+# Return Value: none
+sub _log_message_init
+{
+    my ($curproc) = @_;
+
+    use FML::IPC::Queue;
+    my $queue = new FML::IPC::Queue;
+    $curproc->{ log_message_queue } = $queue;
+}
+
+
+# Descriptions: append message into the message queue.
+#    Arguments: OBJ($curproc) HASH_REF($msg)
+# Side Effects: update message queue.
+# Return Value: none
+sub _msg_queue_append
+{
+    my ($curproc, $msg) = @_;
+    my $msg_queue = $curproc->{ log_message_queue };
+
+    $msg->{ time } = time;
+    $msg_queue->append($msg);
+}
+
+
+# Descriptions: log message queue
+#    Arguments: OBJ($curproc)
+# Side Effects: set up $curproc->{ log_message_queue }.
+# Return Value: none
+sub _log_message_print
+{
+    my ($curproc) = @_;
+    my $msg_queue = $curproc->{ log_message_queue };
+    my $msg_list  = $msg_queue->list();
+    my ($buf);
+
+    for my $m (@$msg_list) {
+	$buf = $m->{ buf } || '';
+	$buf =~ s/\n/ /g;
+	printf "%10d %5s %s\n", $m->{ time }, $m->{ level }, $buf;
+    }
+}
+
+
+=head2 log_message($msg, $msg_args)
+
+?
+    log(STR)       log_message(STR, { level => "ok"      })
+    logwarn(STR)   log_message(STR, { level => "warning" })
+    logerror(STR)  log_message(STR, { level => "error"   })
+
+=head2 log($msg, $msg_args)
+
+=head2 logwarn($msg, $msg_args)
+
+=head2 logerror($msg, $msg_args)
+
+=cut
+
+
+# Descriptions: log message
+#    Arguments: OBJ($curproc) STR($msg) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub log_message
+{
+    my ($curproc, $msg, $msg_args) = @_;
+    my $_msg_args   = $msg_args->{ msg_args };
+    my $level       = $msg_args->{ level };
+    my $at_package  = $msg_args->{ caller }->[ 0 ];
+    my $at_function = $msg_args->{ caller }->[ 1 ];
+    my $at_line     = $msg_args->{ caller }->[ 2 ];
+
+    if ($level eq 'info') {
+	Log($msg);
+    }
+    elsif ($level eq 'warn') {
+	LogWarn($msg);
+    }
+    elsif ($level eq 'error') {
+	LogError($msg);
+    }
+
+    # update message queue
+    $curproc->_msg_queue_append({
+	buf   => $msg,
+	level => $level,
+	hints => {
+	    at_package  => $at_package,
+	    at_function => $at_function,
+	    at_line     => $at_line,
+	},
+    });
+}
+
+
+# Descriptions: log message
+#    Arguments: OBJ($curproc) STR($msg) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub log
+{
+    my ($curproc, $msg, $msg_args) = @_;
+    my (@c) = caller;
+
+    $curproc->log_message($msg, {
+	msg_args => $msg_args,
+	level    => 'info',
+	caller   => \@c,
+    });
+}
+
+
+# Descriptions: log message as warning.
+#    Arguments: OBJ($curproc) STR($msg) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub logwarn
+{
+    my ($curproc, $msg, $msg_args) = @_;
+    my (@c) = caller;
+
+    $curproc->log_message($msg, {
+	msg_args => $msg_args,
+	level    => 'warn',
+	caller   => \@c,
+    });
+}
+
+
+# Descriptions: log message as error.
+#    Arguments: OBJ($curproc) STR($msg) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub logerror
+{
+    my ($curproc, $msg, $msg_args) = @_;
+    my (@c) = caller;
+
+    $curproc->log_message($msg, {
+	msg_args => $msg_args,
+	level    => 'error',
+	caller   => \@c,
+    });
+}
+
+
+# Descriptions: informational message CUI shows into STDERR.
+#    Arguments: OBJ($curproc) STR($msg) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub ui_message
+{
+    my ($curproc, $msg, $msg_args) = @_;
+    my (@c) = caller;
+
+    print STDERR $msg, "\n";
+
+    $curproc->log_message($msg, {
+	msg_args => $msg_args,
+	level    => 'info',
+	caller   => \@c,
+    });
+}
+
+
+=head2 reply_message($msg)
 
 C<reply_message($msg)> holds message C<$msg> sent back to the mail
 sender.
@@ -1115,6 +1337,63 @@ makefml not support message handling not yet.
 =cut
 
 
+# Descriptions: set reply message
+#    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
+sub reply_message
+{
+    my ($curproc, $msg, $args) = @_;
+    my $myname = $curproc->myname();
+
+    $curproc->caller_info($msg, caller) if $debug;
+
+    # XXX-TODO: hard-coded. move condition statements to configuration file.
+    # XXX makefml not support message handling not yet.
+    if ($myname eq 'makefml' ||
+	$myname eq 'fml'     ||
+	$myname =~ /\.cgi$/) {
+	$curproc->logwarn("(debug) $myname disables reply_message()");
+	return;
+    }
+
+    # get recipients list
+    my ($recipient, $recipient_maps) = $curproc->_analyze_recipients($args);
+    my $hdr                          = $curproc->_analyze_header($args);
+
+    # check text messages and fix if needed.
+    unless (ref($msg)) {
+	# \n in the last always.
+	$msg .= "\n" unless $msg =~ /\n$/;
+    }
+
+    $curproc->_append_message_into_queue2($msg, $args,
+					 $recipient, $recipient_maps,
+					 $hdr);
+
+    if (defined $args->{ always_cc }) {
+	# only if $recipient above != always_cc, duplicate $msg message.
+	my $sent = $recipient;
+	my $cc   = $args->{ always_cc };
+
+	my $recipient = [];
+	if (ref($cc) eq 'ARRAY') {
+	    $recipient = $cc;
+	}
+	else {
+	    $recipient = [ $cc ];
+	}
+
+	if (_array_is_different($sent, $recipient)) {
+	    $curproc->log("cc: [ @$recipient ]");
+	    $curproc->_append_message_into_queue($msg, $args,
+						 $recipient, $recipient_maps,
+						 $hdr);
+	}
+    }
+}
+
+
 # Descriptions: return recipient info.
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
@@ -1136,7 +1415,7 @@ sub _analyze_recipients
 	    $recipient = [ $rcpt ] if $rcpt;
 	}
 	else {
-	    LogError("reply_message: wrong type recipient");
+	    $curproc->logerror("reply_message: wrong type recipient");
 	}
     }
 
@@ -1145,7 +1424,7 @@ sub _analyze_recipients
 	    $recipient_maps = [ $map ] if $map;
 	}
 	else {
-	    LogError("reply_message: wrong type recipient_map");
+	    $curproc->logerror("reply_message: wrong type recipient_map");
 	}
     }
 
@@ -1154,7 +1433,7 @@ sub _analyze_recipients
 	    $recipient_maps = $maps if @$maps;
 	}
 	else {
-	    LogError("reply_message: wrong type recipient_maps");
+	    $curproc->logerror("reply_message: wrong type recipient_maps");
 	}
     }
 
@@ -1162,6 +1441,10 @@ sub _analyze_recipients
     unless (@$recipient || @$recipient_maps) {
 	$recipient = [ $curproc->{ credential }->sender() ];
     }
+
+    # aggregation of recepients: [ A, A, B ] -> [ A, B ]
+    $recipient      = $curproc->unique( $recipient );
+    $recipient_maps = $curproc->unique( $recipient_maps );
 
     return ($recipient, $recipient_maps);
 }
@@ -1175,61 +1458,6 @@ sub _analyze_header
 {
     my ($curproc, $args) = @_;
     return $args->{ header };
-}
-
-
-# Descriptions: set reply message
-#    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
-# Side Effects: none
-# Return Value: none
-sub reply_message
-{
-    my ($curproc, $msg, $args) = @_;
-    my $myname = $curproc->myname();
-
-    # XXX makefml not support message handling not yet.
-    if ($myname eq 'makefml' || 
-	$myname eq 'fml'     || 
-	$myname eq 'error'   ||
-	$myname =~ /\.cgi$/) {
-	LogWarn("(debug) $myname disables reply_message()");
-	return;
-    }
-
-    # recipients list
-    my ($recipient, $recipient_maps) = $curproc->_analyze_recipients($args);
-    my $hdr                          = $curproc->_analyze_header($args);
-
-    # check text messages and fix if needed.
-    unless (ref($msg)) {
-	# \n in the last always.
-	$msg .= "\n" unless $msg =~ /\n$/;
-    }
-
-    $curproc->_append_message_into_queue($msg, $args,
-					 $recipient, $recipient_maps,
-					 $hdr);
-
-    if (defined $args->{ always_cc }) {
-	# only if $recipient above != always_cc, duplicate $msg message.
-	my $sent = $recipient;
-	my $cc   = $args->{ always_cc };
-
-	my $recipient = [];
-	if (ref($cc) eq 'ARRAY') {
-	    $recipient = $cc;
-	}
-	else {
-	    $recipient = [ $cc ];
-	}
-
-	if (_array_is_different($sent, $recipient)) {
-	    Log("cc: [ @$recipient ]");
-	    $curproc->_append_message_into_queue($msg, $args,
-						 $recipient, $recipient_maps,
-						 $hdr);
-	}
-    }
 }
 
 
@@ -1257,13 +1485,13 @@ sub _array_is_different
 
 # Descriptions: add the specified $msg into on memory queue
 #    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
-#               ARRAY_REF($recipient) ARRAY_REF($recipient_maps)
+#               ARRAY_REF($recipient) ARRAY_REF($recipient_maps) OBJ($hdr)
 # Side Effects: update on momory queue which is on PCB area.
 # Return Value: none
 sub _append_message_into_queue
 {
     my ($curproc, $msg, $args, $recipient, $recipient_maps, $hdr) = @_;
-    my $pcb      = $curproc->{ pcb };
+    my $pcb      = $curproc->pcb();
     my $category = 'reply_message';
     my $class    = 'queue';
     my $rarray   = $pcb->get($category, $class) || [];
@@ -1280,6 +1508,43 @@ sub _append_message_into_queue
 }
 
 
+# Descriptions: add the specified $msg into on memory queue
+#    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
+#               ARRAY_REF($recipient) ARRAY_REF($recipient_maps) OBJ($hdr)
+# Side Effects: update on momory queue which is on PCB area.
+# Return Value: none
+sub _append_message_into_queue2
+{
+    my ($curproc, $msg, $args, $recipient, $recipient_maps, $hdr) = @_;
+    my $pcb      = $curproc->pcb();
+    my $category = 'reply_message';
+    my $class    = 'queue';
+    my $rarray   = $pcb->get($category, $class) || [];
+
+    for my $rcpt (@$recipient) {
+	$rarray->[ $#$rarray + 1 ] = {
+	    message        => $msg,
+	    type           => ref($msg) ? ref($msg) : 'text',
+	    recipient      => [ $rcpt ],
+	    recipient_maps => [],
+	    header         => $hdr,
+	};
+    }
+
+    for my $map (@$recipient_maps) {
+	$rarray->[ $#$rarray + 1 ] = {
+	    message        => $msg,
+	    type           => ref($msg) ? ref($msg) : 'text',
+	    recipient      => [],
+	    recipient_maps => [ $map ],
+	    header         => $hdr,
+	};
+    }
+
+    $pcb->set($category, $class, $rarray);
+}
+
+
 # Descriptions: built and return recipient type and list in
 #               on memory queue.
 #    Arguments: OBJ($curproc) OBJ($msg) HASH_REF($args)
@@ -1288,7 +1553,7 @@ sub _append_message_into_queue
 sub _reply_message_recipient_keys
 {
     my ($curproc, $msg, $args) = @_;
-    my $pcb      = $curproc->{ pcb };
+    my $pcb      = $curproc->pcb();
     my $category = 'reply_message';
     my $class    = 'queue';
     my $rarray   = $pcb->get($category, $class) || [];
@@ -1303,7 +1568,7 @@ sub _reply_message_recipient_keys
 	    $rcptlist = $m->{ recipient };
 	    $rcptmaps = $m->{ recipient_maps };
 	    $type     = ref($m->{ message });
-	    $key      = _gen_recipient_key( $rcptlist, $rcptmaps );
+	    $key      = $curproc->_gen_recipient_key( $rcptlist, $rcptmaps );
 	    $rcptattr{ $key }->{ $type }++;
 	    $rcptlist{ $key } = $rcptlist;
 	    $rcptmaps{ $key } = $rcptmaps;
@@ -1316,12 +1581,12 @@ sub _reply_message_recipient_keys
 
 
 # Descriptions: make a key
-#    Arguments: ARRAY_REF($rarray)
+#    Arguments: OBJ($curproc) ARRAY_REF($rarray) ARRAY_REF($rmaps)
 # Side Effects: none
 # Return Value: STR
 sub _gen_recipient_key
 {
-    my ($rarray, $rmaps) = @_;
+    my ($curproc, $rarray, $rmaps) = @_;
     my (@c) = caller;
     my $key = '';
 
@@ -1332,7 +1597,7 @@ sub _gen_recipient_key
 	    }
 	}
 	else {
-	    LogError("wrong \$rarray");
+	    $curproc->logerror("wrong \$rarray");
 	}
     }
 
@@ -1343,7 +1608,7 @@ sub _gen_recipient_key
 	    }
 	}
 	else {
-	    LogError("wrong \$rmaps");
+	    $curproc->logerror("wrong \$rmaps");
 	}
     }
 
@@ -1351,7 +1616,7 @@ sub _gen_recipient_key
 }
 
 
-=head2 C<reply_message_nl($class, $default_msg, $args)>
+=head2 reply_message_nl($class, $default_msg, $args)
 
 This is a wrapper for C<reply_message()> with natural language support.
 The message in natural language corresponding with C<$class> is sent.
@@ -1376,24 +1641,43 @@ This $args is passed through to reply_message().
 sub reply_message_nl
 {
     my ($curproc, $class, $default_msg, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $buf    = $curproc->message_nl($class, $default_msg, $args);
+
+    $curproc->caller_info($class, caller) if $debug;
 
     if (defined $buf) {
 	if ($buf =~ /\$/) {
 	    $config->expand_variable_in_buffer(\$buf, $args);
 	}
 
+	# XXX-TODO: jis-jp is hard-coded.
 	eval q{
 	    use Mail::Message::Encode;
 	    my $obj = new Mail::Message::Encode;
 	    $curproc->reply_message( $obj->convert( $buf, 'jis-jp' ), $args);
 	};
-	LogError($@) if $@;
+	$curproc->logerror($@) if $@;
     }
     else {
 	$curproc->reply_message($default_msg, $args);
     }
+}
+
+
+# Descriptions: add header info.
+#    Arguments: OBJ($curproc) HASH_REF($msg_args)
+# Side Effects: none
+# Return Value: none
+sub reply_message_add_header_info
+{
+    my ($curproc, $msg_args) = @_;
+    my $tag     = '   ';
+    my $hdr     = $curproc->incoming_message_header();
+    my $hdr_str = sprintf("\n%s\n", $hdr->as_string());
+    $hdr_str    =~ s/\n/\n$tag/g;
+
+    $curproc->reply_message($hdr_str, $msg_args);
 }
 
 
@@ -1404,14 +1688,14 @@ sub reply_message_nl
 sub message_nl
 {
     my ($curproc, $class, $default_msg, $args) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $dir       = $config->{ message_template_dir };
     my $local_dir = $config->{ ml_local_message_template_dir };
-    my $charset   = $config->{ template_file_charset } || 'en';
+    my $charset   = $curproc->get_charset("template_file");
     my $buf       = '';
 
     use File::Spec;
-    $class =~ s@\.@/@g; # XXX replace the first "." only
+    $class =~ s@\.@/@g; # XXX . -> /
 
     my $local_file = File::Spec->catfile($local_dir, $charset, $class);
     my $file       = File::Spec->catfile($dir,       $charset, $class);
@@ -1424,19 +1708,38 @@ sub message_nl
 	use FileHandle;
 	my $fh = new FileHandle $file;
 	if (defined $fh) {
-	    while (<$fh>) { $buf .= $_;}
-	    close($fh);
+	    my $xbuf;
+	    while ($xbuf = <$fh>) { $buf .= $xbuf;}
+	    $fh->close();
 	}
     }
     else {
-	LogWarn("no such file: $file");
+	$curproc->logwarn("no such file: $file");
     }
 
-    return $buf;
+    if (defined $buf) {
+	my $config = $curproc->config();
+        if ($buf =~ /\$/o) {
+            $config->expand_variable_in_buffer(\$buf, $args);
+        }
+    }
+
+    return( $buf || $default_msg || '' );
 }
 
 
-=head2 C<inform_reply_messages($args)>
+# Descriptions: log message with info returned by caller().
+#    Arguments: OBJ($curproc) STR($msg) STR($pkg) STR($fn) NUM($line)
+# Side Effects: none
+# Return Value: none
+sub caller_info
+{
+    my ($curproc, $msg, $pkg, $fn, $line) = @_;
+    $curproc->log("msg='$msg' $fn $line");
+}
+
+
+=head2 inform_reply_messages($args)
 
 inform the error messages to the sender or maintainer.
 C<inform_reply_messages($args)> checks existence of message(s) of the
@@ -1461,12 +1764,12 @@ Prepare the message and queue it in by C<Mail::Delivery::Queue>.
 #               msg = header + "text" + $r->[0] + $r->[1] + ...
 #
 #    Arguments: OBJ($curproc) HASH_REF($args)
-# Side Effects:
+# Side Effects: none
 # Return Value: none
 sub inform_reply_messages
 {
     my ($curproc, $args) = @_;
-    my $pcb = $curproc->{ pcb };
+    my $pcb = $curproc->pcb();
 
     # We should classify reply messages by
     # a set of ( category,  recipient(s) , + more ? what ??? );
@@ -1495,7 +1798,7 @@ sub inform_reply_messages
 }
 
 
-=head2 C<queue_in($category, $optargs)>
+=head2 queue_in($category, $optargs)
 
 =cut
 
@@ -1507,10 +1810,10 @@ sub inform_reply_messages
 sub queue_in
 {
     my ($curproc, $category, $optargs) = @_;
-    my $pcb          = $curproc->{ pcb };
-    my $config       = $curproc->{ config };
+    my $pcb          = $curproc->pcb();
+    my $config       = $curproc->config();
     my $sender       = $config->{ maintainer };
-    my $charset      = $config->{ "${category}_charset" } || 'us-ascii';
+    my $charset      = $curproc->get_charset($category);
     my $subject      = $config->{ "${category}_subject" };
     my $reply_to     = $config->{ address_for_command };
     my $is_multipart = 0;
@@ -1519,6 +1822,10 @@ sub queue_in
     my $rcptmaps     = [];
     my $msg          = '';
     my $hdr_to       = '';
+
+    use Mail::Message::Date;
+    my $_nowdate     = new Mail::Message::Date time;
+    my $our_date     = $_nowdate->{ mail_header_style };
 
     # override parameters (may be processed here always)
     if (defined $optargs) {
@@ -1565,10 +1872,10 @@ sub queue_in
     }
 
 
-    Log("debug: queue_in: sender=$sender");
-    Log("debug: queue_in: recipient=$rcptkey");
-    Log("debug: queue_in: rcptlist=[ @$rcptlist ]");
-    Log("debug: queue_in: is_multipart=$is_multipart");
+    $curproc->log("debug: queue_in: sender=$sender");
+    $curproc->log("debug: queue_in: recipient=$rcptkey");
+    $curproc->log("debug: queue_in: rcptlist=[ @$rcptlist ]");
+    $curproc->log("debug: queue_in: is_multipart=$is_multipart");
 
 
     ###############################################################
@@ -1584,12 +1891,14 @@ sub queue_in
 	my $_to = $hdr_to || $rcptkey;
 	eval q{
 	    $msg = new Mail::Message::Compose
-		From     => $sender,
-		To       => $_to,
-		Subject  => $subject,
-		Type     => "multipart/mixed";
+		From      => $sender,
+		To        => $_to,
+		Subject   => $subject,
+		Type      => "multipart/mixed",
+	        Datestamp => undef,
 	};
 	$msg->add('Reply-To' => $reply_to);
+	$msg->add('Date' => $our_date);
 	_add_info_on_header($config, $msg);
 
 	my $mesg_queue = $pcb->get($category, 'queue');
@@ -1599,8 +1908,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key($m->{ recipient },
-				       $m->{ recipient_maps } );
+	    my $r = $curproc->_gen_recipient_key($m->{ recipient },
+						 $m->{ recipient_maps } );
 
 	    # pick up only messages returned to specified $rcptkey
 	    next QUEUE unless $r eq $rcptkey;
@@ -1611,6 +1920,9 @@ sub queue_in
 	}
 
 	# 1. eat up text messages and put it into the first part.
+	# XXX-TODO: wrong handling of $charset ???
+	# XXX-TODO: reply message should be determined by context and
+	# XXX-TODO: accept-language: information.
 	if ($s) {
 	    $msg->attach(Type => "text/plain; charset=$charset",
 			 Data => $s,
@@ -1623,8 +1935,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key($m->{ recipient },
-				       $m->{ recipient_maps } );
+	    my $r = $curproc->_gen_recipient_key($m->{ recipient },
+						 $m->{ recipient_maps } );
 
 	    next QUEUE unless $r eq $rcptkey;
 
@@ -1639,8 +1951,8 @@ sub queue_in
 				 Disposition => $q->{ disposition });
 		}
 		else {
-		    # Log("queue_in: type=<$t> aggregated") if $t eq 'text';
-		    Log("queue_in: unknown type=<$t>") unless $t eq 'text';
+		    # $curproc->log("queue_in: type=<$t> aggregated") if $t eq 'text';
+		    $curproc->log("queue_in: unknown type=<$t>") unless $t eq 'text';
 		}
 	    }
 	}
@@ -1655,8 +1967,8 @@ sub queue_in
 	for my $m ( @$mesg_queue ) {
 	    my $q = $m->{ message };
 	    my $t = $m->{ type };
-	    my $r = _gen_recipient_key($m->{ recipient },
-				       $m->{ recipient_maps });
+	    my $r = $curproc->_gen_recipient_key($m->{ recipient },
+						 $m->{ recipient_maps });
 
 	    next QUEUE unless $r eq $rcptkey;
 
@@ -1668,7 +1980,7 @@ sub queue_in
 		    $s .= $q;
 		}
 		else {
-		    Log("queue_in: unknown typ $t");
+		    $curproc->log("queue_in: unknown typ $t");
 		}
 	    }
 	}
@@ -1676,13 +1988,15 @@ sub queue_in
 	my $_to = $hdr_to || $rcptkey;
 	eval q{
 	    $msg = new Mail::Message::Compose
-		From     => $sender,
-		To       => $_to,
-		Subject  => $subject,
-		Data     => $s,
+		From      => $sender,
+		To        => $_to,
+		Subject   => $subject,
+		Data      => $s,
+	        Datestamp => undef,
 	};
 	$msg->attr('content-type.charset' => $charset);
 	$msg->add('Reply-To' => $reply_to);
+	$msg->add('Date' => $our_date);
 	_add_info_on_header($config, $msg);
     }
 
@@ -1711,8 +2025,13 @@ sub queue_in
 	    $queue->set('recipient_maps', $rcptmaps);
 	}
 
-	$queue->in( $msg ) && Log("queue=$qid in");
-	$queue->setrunnable();
+	$queue->in( $msg ) && $curproc->log("queue=$qid in");
+	if ($queue->setrunnable()) {
+	    $curproc->log("queue=$qid runnable");
+	}
+	else {
+	    $curproc->log("queue=$qid broken");
+	}
 
 	# return queue object
 	return $queue;
@@ -1739,7 +2058,7 @@ sub _append_rfc822_message
 	$wh->close;
     }
     else {
-	LogError("_append_rfc822_message: cannot create \$tmpfile");
+	$curproc->logerror("_append_rfc822_message: cannot create \$tmpfile");
     }
 
     if (-f $tmpfile) {
@@ -1752,13 +2071,13 @@ sub _append_rfc822_message
 	    $rh->close;
 	}
 	else {
-	    LogError("_append_rfc822_message: cannot open \$tmpfile");
+	    $curproc->logerror("_append_rfc822_message: cannot open \$tmpfile");
 	}
 
 	$curproc->add_into_clean_up_queue( $tmpfile );
     }
     else {
-	LogError("_append_rfc822_message: \$tmpfile not found");
+	$curproc->logerror("_append_rfc822_message: \$tmpfile not found");
     }
 }
 
@@ -1792,7 +2111,7 @@ sub clean_up_tmpfiles
 
     if (defined $queue) {
 	for my $q (@$queue) {
-	    Log("unlink $q") if $debug;
+	    $curproc->log("unlink $q") if $debug;
 	    unlink $q;
 	}
     }
@@ -1806,13 +2125,44 @@ sub clean_up_tmpfiles
 sub temp_file_path
 {
     my ($curproc) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $tmp_dir = $config->{ tmp_dir };
 
     $TmpFileCounter++; # ensure uniqueness
+    my $f = sprintf("tmp.%s.%s.%s", $$, time, $TmpFileCounter);
+
+    if (-d $tmp_dir && -w $tmp_dir) {
+	use File::Spec;
+	return File::Spec->catfile($tmp_dir, $f);
+    }
+    else {
+	my $tmp_dir = $curproc->global_tmp_dir_path();
+	use File::Spec;
+	return File::Spec->catfile($tmp_dir, $f);
+    }
+}
+
+
+# Descriptions: generate string $ml_home_prefix/@tmp@.
+#               Also, create it if not exists.
+#    Arguments: OBJ($curproc) STR($ml_domain)
+# Side Effects: create $ml_home_prefix/@tmp@ if not exists.
+# Return Value: STR
+sub global_tmp_dir_path
+{
+    my ($curproc, $ml_domain) = @_;
+    my $config = $curproc->config();
+    my $domain = $ml_domain || $config->{ ml_domain } || '';
 
     use File::Spec;
-    return File::Spec->catfile( $tmp_dir, "tmp.$$.". time . $TmpFileCounter);
+    my $ml_home_prefix = $curproc->ml_home_prefix($domain);
+    my $global_tmp_dir = File::Spec->catfile($ml_home_prefix, '@tmp@');
+
+    unless (-d $global_tmp_dir) {
+	$curproc->mkdir($global_tmp_dir, "mode=private");
+    }
+
+    return $global_tmp_dir;
 }
 
 
@@ -1833,12 +2183,13 @@ sub _add_info_on_header
 	type    => 'MIME::Lite',
 	message => $msg,
     };
+  FML::Header->add_message_id($config, $args);
   FML::Header->add_software_info($config, $args);
   FML::Header->add_rfc2369($config, $args);
 }
 
 
-=head2 C<queue_flush($queue)>
+=head2 queue_flush($queue)
 
 flush all queue.
 
@@ -1855,7 +2206,7 @@ C<TODO:>
 sub queue_flush
 {
     my ($curproc, $queue) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $queue_dir = $config->{ mail_queue_dir };
 
     eval q{
@@ -1867,7 +2218,7 @@ sub queue_flush
 }
 
 
-=head2 C<expand_variables_in_file>
+=head2 expand_variables_in_file
 
 expand $xxx variables in template (e.g. $help_file).  return file name
 string, which is a new template converted by this routine.
@@ -1898,7 +2249,7 @@ C<Caution:>
 sub prepare_file_to_return
 {
     my ($curproc, $args) = @_;
-    my $config      = $curproc->{ config };
+    my $config      = $curproc->config();
     my $tmp_dir     = $config->{ tmp_dir };
     my $tmpf        = File::Spec->catfile($tmp_dir, $$);
     my $src_file    = $args->{ src };
@@ -1918,13 +2269,16 @@ sub prepare_file_to_return
 	};
 
 	if (defined $obj) {
-	    while (<$rh>) {
-		if (/\$/) { $config->expand_variable_in_buffer(\$_, $args);}
-		$wh->print( $obj->convert( $_, 'jis-jp' ) );
+	    my $buf;
+	    while ($buf = <$rh>) {
+		if ($buf =~ /\$/o) {
+		    $config->expand_variable_in_buffer(\$buf, $args);
+		}
+		$wh->print( $obj->convert( $buf, 'jis-jp' ) );
 	    }
 	}
 	else {
-	    LogError("Mail::Message::Encode object undef");
+	    $curproc->logerror("Mail::Message::Encode object undef");
 	}
 
 	close($wh);
@@ -1947,7 +2301,7 @@ sub prepare_file_to_return
 sub open_outgoing_message_channel
 {
     my ($curproc, $optargs) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     # save message for further investigation
     if ($config->yes('use_outgoing_mail_cache')) {
@@ -1971,11 +2325,6 @@ sub open_outgoing_message_channel
 }
 
 
-=head1 ERROR HANDLING
-
-=cut
-
-
 # Descriptions: parse exception error message and return (key, reason)
 #    Arguments: OBJ($curproc) STR($exception)
 # Side Effects: none
@@ -1994,6 +2343,76 @@ sub parse_exception
 }
 
 
+# Descriptions: close and re-open STDERR channel.
+#    Arguments: OBJ($curproc)
+# Side Effects: close(STDERR)
+# Return Value: none
+sub _reopen_stderr_channel
+{
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
+    my $option    = $curproc->command_line_options();
+
+    if ($curproc->is_cgi_process()       ||
+	$curproc->is_under_mta_process() ||
+	defined $option->{ quiet }  || defined $option->{ q } ||
+	$config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	my $tmpfile = $curproc->temp_file_path();
+	my $pcb     = $curproc->pcb();
+	$pcb->set("stderr", "logfile", $tmpfile);
+	$pcb->set("stderr", "use_log_dup", 1);
+
+	open(STDERR, "> $tmpfile") || croak("fail to open $tmpfile");
+	$curproc->add_into_clean_up_queue($tmpfile);
+    }
+}
+
+
+# Descriptions: close and log messages written into STDERR channel.
+#    Arguments: OBJ($curproc)
+# Side Effects: close(STDERR)
+# Return Value: none
+sub _finalize_stderr_channel
+{
+    my ($curproc) = @_;
+    my $config    = $curproc->config();
+    my $option    = $curproc->command_line_options();
+    my $pcb       = $curproc->pcb();
+
+    if (defined $pcb) {
+	my $tmpfile   = $pcb->get("stderr", "logfile");
+	my $is_logdup = $pcb->get("stderr", "use_log_dup") || 0;
+
+	# avoid duplicated calls.
+	return unless $is_logdup;
+
+	if ($curproc->is_cgi_process()       ||
+	    $curproc->is_under_mta_process() ||
+	    defined $option->{ quiet }  || defined $option->{ q } ||
+	    $config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+
+	    close(STDERR);
+	    open(STDERR, ">&STDOUT");
+
+	    if (-s $tmpfile) {
+		use FileHandle;
+		my $fh = new FileHandle $tmpfile;
+		if (defined $fh) {
+		    my $buf;
+		    while ($buf = <$fh>) {
+			chomp $buf;
+			$curproc->logwarn($buf);
+		    }
+		    $fh->close();
+		}
+	    }
+	}
+
+	$pcb->set("stderr", "use_log_dup", 0);
+    }
+}
+
+
 =head1 MISCELLANEOUS METHODS
 
 =cut
@@ -2007,7 +2426,7 @@ sub parse_exception
 sub set_umask_as_public
 {
     my ($curproc) = @_;
-    my $pcb = $curproc->{ pcb };
+    my $pcb = $curproc->pcb();
 
     # reset umask since html archives should be public open.
     my $saved_umask = umask;
@@ -2023,11 +2442,62 @@ sub set_umask_as_public
 sub reset_umask
 {
     my ($curproc) = @_;
-    my $pcb = $curproc->{ pcb };
+    my $pcb = $curproc->pcb();
     my $saved_umask = $pcb->get('umask', 'saved_umask');
 
     # back to the original umask;
     umask($saved_umask);
+}
+
+
+# Descriptions: close.
+#    Arguments: OBJ($curproc)
+# Side Effects: none
+# Return Value: none
+sub be_quiet
+{
+    my ($curproc) = @_;
+    my $debug     = $curproc->get_debug_level();
+    my $config    = $curproc->config();
+    my $option    = $curproc->command_line_options();
+
+    if ($curproc->is_cgi_process()       ||
+	$curproc->is_under_mta_process() ||
+	defined $option->{ quiet }  || defined $option->{ q } ||
+	$config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+}
+
+
+# Descriptions: finalize curproc.
+#    Arguments: OBJ($curproc)
+# Side Effects: non
+# Return Value: none
+sub finalize
+{
+    my ($curproc) = @_;
+    my $debug     = $curproc->get_debug_level();
+    my $config    = $curproc->config();
+    my $option    = $curproc->command_line_options();
+
+    if ($config->yes('use_log_dup') || $option->{ 'log-dup' } ) {
+	$curproc->_finalize_stderr_channel();
+	$curproc->_log_message_print();
+    }
+
+    if ($debug > 100) {
+	$curproc->log("debug: dump curproc structure");
+	eval q{
+	    use FML::Process::Debug;
+	    my $obj = new FML::Process::Debug;
+	    $obj->dump_curproc($curproc);
+	};
+	$curproc->logerror($@) if $@;
+    }
 }
 
 

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: HTML.pm,v 1.16 2003/01/11 15:16:37 fukachan Exp $
+# $FML: HTML.pm,v 1.18 2003/03/09 03:11:14 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print::HTML;
@@ -63,27 +63,35 @@ sub show_articles_in_thread
 	use FileHandle;
 
 	my $s = '';
-	for (split(/\s+/, $articles)) {
+	for my $article (split(/\s+/, $articles)) {
 	    my $file = $self->filepath({
 		base_dir => $spool_dir,
-		id       => $_,
+		id       => $article,
 	    });
-	    my $fh   = new FileHandle $file;
-	    while (defined($_ = $fh->getline())) {
-		# ignore header part.
-		next if 1 .. /^$/;
 
-		# XXX-TODO: care for non Japanese char(s).
-		# XXX-TODO: to avoid CSS bug, convert all special char(s).
-		# XXX-TODO: create method safe_html_string() in Mail::Message ?
-		$s = STR2EUC($_);
-		$s =~ s/&/&amp;/g;
-		$s =~ s/</&lt;/g;
-		$s =~ s/>/&gt;/g;
-		$s =~ s/\"/&quot;/g;
-		print $s;
+	    # XXX-TODO: care for non Japanese char(s).
+	    # XXX-TODO: to avoid CSS bug, convert all special char(s).
+	    # XXX-TODO: create method safe_html_string() in Mail::Message ?
+	    if (-f $file) {
+		my $fh = new FileHandle $file;
+
+		if (defined $fh) {
+		    my $buf;
+
+		    while (defined($buf = $fh->getline())) {
+			# ignore header part.
+			next if 1 .. $buf =~ /^$/o;
+
+			$s = STR2EUC($buf);
+			$s =~ s/&/&amp;/g;
+			$s =~ s/</&lt;/g;
+			$s =~ s/>/&gt;/g;
+			$s =~ s/\"/&quot;/g;
+			print $s;
+		    }
+		    $fh->close;
+		}
 	    }
-	    $fh->close;
 	}
     }
 
@@ -101,7 +109,7 @@ sub __start_thread_summary
     my $config  = $self->{ _config };
     my $ml_name = $config->{ ml_name };
     my $fd      = $self->{ _fd } || \*STDOUT;
-    my $action  = $config->{ myname };
+    my $action  = $curproc->safe_cgi_action_name();
     my $target  = '_top';
 
     # statistics
@@ -169,7 +177,7 @@ sub __print_thread_summary
     my $config    = $self->{ _config };
     my $ml_name   = $config->{ ml_name };
     my $spool_dir = $config->{ spool_dir };
-    my $action    = $config->{ myname };
+    my $action    = $curproc->safe_cgi_action_name();
     my $target    = $config->{ thread_cgi_target_window } || '_top';
 
     my $date      = $optargs->{ date };

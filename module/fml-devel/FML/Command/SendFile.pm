@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SendFile.pm,v 1.24 2002/12/23 14:44:11 fukachan Exp $
+# $FML: SendFile.pm,v 1.34 2003/10/15 11:57:02 fukachan Exp $
 #
 
 package FML::Command::SendFile;
@@ -39,13 +39,39 @@ and file(s) in C<$ml_home_dir>.
 
 =head1 METHODS
 
-=head2 C<send_article($curproc, $command_args)>
+=head2 send_article($curproc, $command_args)
 
 send back articles where C<article> is a file named as /^\d+$/ in the
 ml spool $spool_dir.  This is used in C<FML::Command::User> and
 C<FML::Command::Admin> modules.
 
 =cut
+
+
+# Descriptions: return the number of files specified in $command_args.
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+# Side Effects: none
+# Return Value: none
+sub num_files_in_send_article_args
+{
+    my ($self, $curproc, $command_args) = @_;
+    my $command = $command_args->{ command };
+    my $count   = 0;
+
+    # command buffer = get 1
+    # command buffer = get 1,2,3
+    # command buffer = get last:3
+    my (@files) = split(/\s+/, $command);
+    shift @files; # remove get
+    for my $fn (@files) {
+	my $filelist = $self->_get_valid_article_list($curproc, $fn);
+	if (defined $filelist) {
+	    $count = $#$filelist + 1;
+	}
+    }
+
+    return $count;
+}
 
 
 # Descriptions: send back articles
@@ -56,10 +82,9 @@ sub send_article
 {
     my ($self, $curproc, $command_args) = @_;
     my $command   = $command_args->{ command };
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $ml_name   = $config->{ ml_name };
     my $spool_dir = $config->{ spool_dir };
-    my $charset   = $config->{ template_file_charset };
     my $is_error  = 0;
 
     # command buffer = get 1
@@ -75,22 +100,28 @@ sub send_article
 		my $article  = new FML::Article $curproc;
 		my $filepath = $article->filepath($filename);
 		if (-f $filepath) {
-		    Log("send back article $filename");
+		    $curproc->log("send back article $filename");
 		    $curproc->reply_message( {
-			type        => "message/rfc822; charset=$charset",
+			type        => "message/rfc822",
 			path        => $filepath,
 			filename    => $filename,
 			disposition => "$ml_name ML article $filename",
 		    });
 		}
 		else {
-		    Log("no such file: $filepath");
+		    $curproc->reply_message_nl('command.no_such_article',
+					       "no such article $filename",
+					       {
+						   _arg_article => $filename,
+					       }
+					       );
+		    $curproc->log("no such file: $filepath");
 		}
 	    }
 	}
 	# invalid argument
 	else {
-	    LogError("send_article: invalid argument $fn");
+	    $curproc->logerror("send_article: invalid argument $fn");
 	    $is_error = 1;
 	}
     }
@@ -116,14 +147,9 @@ sub _get_valid_article_list
 	return [];
     }
 
-    use File::Sequence;
-    my $config   = $curproc->{ config };
-    my $file     = $config->{ sequence_file };
-    my $sequence = new File::Sequence { sequence_file => $file };
-    my $last_id  = $sequence->get_id();
-
     use Mail::Message::MH;
     my $mh      = new Mail::Message::MH;
+    my $last_id = $curproc->article_max_id();
 
     # XXX expand() validates $fn. o.k.
     # XXX we assume min_id = 1, but not correct always.
@@ -131,7 +157,7 @@ sub _get_valid_article_list
 }
 
 
-=head2 C<send_file($curproc, $command_args)>
+=head2 send_file($curproc, $command_args)
 
 send back file specified as C<$command_args->{ _filepath_to_send }>.
 
@@ -148,14 +174,14 @@ sub send_file
     my ($self, $curproc, $command_args) = @_;
     my $filename = $command_args->{ _filename_to_send };
     my $filepath = $command_args->{ _filepath_to_send };
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
 
     # XXX-TODO: handle non Japanese.
     # XXX-TODO: care for Accept-Language: header field.
-    my $charset  = $config->{ reply_message_charset };
+    my $charset  = $curproc->get_charset("reply_message");
 
     # XXX-TODO: who validate $filename and $filepath ?
-    Log("send_file: $filepath");
+    $curproc->log("send_file: $filepath");
 
     # template substitution: kanji code, $varname expansion et. al.
     # we prepare file to send back which has proper kanji code et.al.
@@ -180,7 +206,7 @@ sub send_file
 }
 
 
-=head2 C<send_user_xxx_message($curproc, $command_args, $type)>
+=head2 send_user_xxx_message($curproc, $command_args, $type)
 
 Send back a help file if "help" is found in $ml_home_dir
 (e.g. /var/spool/ml/elena) for backward compatibility.
@@ -197,7 +223,7 @@ Sebd back the default help message if not found.
 sub send_user_xxx_message
 {
     my ($self, $curproc, $command_args, $type) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     # XXX-TODO: care for non Japanese
     # XXX-TODO: hmm, we can handle file.ja file.ja.euc file.en file.ru ?
@@ -226,7 +252,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

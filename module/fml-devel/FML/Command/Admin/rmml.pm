@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: rmml.pm,v 1.13 2003/01/07 08:38:32 fukachan Exp $
+# $FML: rmml.pm,v 1.21 2003/10/15 01:03:30 fukachan Exp $
 #
 
 package FML::Command::Admin::rmml;
@@ -33,7 +33,7 @@ and the corresponding alias entries.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -67,7 +67,7 @@ sub process
 {
     my ($self, $curproc, $command_args) = @_;
     my $options        = $curproc->command_line_options();
-    my $config         = $curproc->{ 'config' };
+    my $config         = $curproc->config();
     my $ml_name        = $config->{ ml_name };
     my $ml_domain      = $config->{ ml_domain };
     my $ml_home_prefix = $curproc->ml_home_prefix($ml_domain);
@@ -115,18 +115,20 @@ sub _remove_ml_home_dir
     my $ml_home_prefix = $params->{ ml_home_prefix };
     my $ml_home_dir    = $params->{ ml_home_dir };
 
-    print STDERR "removing ml_home_dir for $ml_name\n";
+    $curproc->ui_message("removing ml_home_dir for $ml_name");
 
     # /var/spool/ml/elena -> /var/spool/ml/@elena
-    use File::Spec;
-    my $removed_dir = File::Spec->catfile($ml_home_prefix, '@'.$ml_name);
+    my $removed_dir =
+	$curproc->removed_ml_home_dir_path($ml_home_prefix, $ml_name);
     rename($ml_home_dir, $removed_dir);
 
     if (-d $removed_dir && (! -d $ml_home_dir)) {
-	print STDERR "\tremoved.\n";
+	$curproc->ui_message("removed");
     }
     else {
-	print STDERR "\tfailed.\n";
+	my $s = "failed to remove ml_home_dir";
+	$curproc->ui_message("error: $s");
+	$curproc->logerror($s);
     }
 }
 
@@ -141,7 +143,7 @@ sub _remove_ml_home_dir
 sub _remove_aliases
 {
     my ($self, $curproc, $command_args, $params) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $ml_name = $params->{ ml_name };
     my $list    = $config->get_as_array_ref('newml_command_mta_config_list');
 
@@ -162,7 +164,8 @@ sub _remove_aliases
 
 
 # Descriptions: show cgi menu for rmml
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: create home directories, update aliases, ...
 # Return Value: none
 sub cgi_menu
@@ -171,8 +174,8 @@ sub cgi_menu
     my $r = '';
 
     eval q{
-        use FML::CGI::Admin::ML;
-        my $obj = new FML::CGI::Admin::ML;
+        use FML::CGI::ML;
+        my $obj = new FML::CGI::ML;
         $obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {

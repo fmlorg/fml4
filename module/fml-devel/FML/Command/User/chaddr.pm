@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: chaddr.pm,v 1.16 2002/12/24 10:19:45 fukachan Exp $
+# $FML: chaddr.pm,v 1.23 2003/10/17 14:00:52 fukachan Exp $
 #
 
 package FML::Command::User::chaddr;
@@ -29,7 +29,7 @@ processed.  After confirmation succeeds, chaddr process proceeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 If either old or new addresses in chaddr arguments is an ML member,
 try to confirm this request. The confirmation is returned to "From:"
@@ -58,6 +58,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: chaddr adapter: confirm before chaddr operation
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update database for confirmation.
@@ -66,7 +73,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     #
     # XXX-TODO: correct to use *_maps not primary_*_map for chaddr?
@@ -86,6 +93,9 @@ sub process
     use FML::Credential;
     my $cred = new FML::Credential $curproc;
 
+    # exatct match as could as possible.
+    $cred->set_compare_level( 100 );
+
     # addresses we check and send back confirmation messages to
     my $optargs = {};
     my $x = $command_args->{ command };
@@ -94,7 +104,7 @@ sub process
     $optargs->{ recipient } = [ $sender, $old_addr, $new_addr ];
 
     # prompt again (since recipient differs)
-    my $prompt  = $config->{ command_prompt } || '>>>';
+    my $prompt  = $config->{ command_mail_reply_prompt } || '>>>';
     $curproc->reply_message("\n$prompt $command", $optargs);
 
     # if either old or new addresses in chaddr arguments is an ML member,
@@ -102,7 +112,7 @@ sub process
     # 1. request from $old_addr : $old_addr (member now) -> $new_addr
     # 2. request from $new_addr : $old_addr -> $new_addr (member now)
     if ($cred->is_member($old_addr) || $cred->is_member($new_addr)) {
-	Log("chaddr request, try confirmation");
+	$curproc->log("chaddr request, try confirmation");
 
 	# XXX-TODO: should be FML::Confirm { ... address => [ @addr ] } ?
 	use FML::Confirm;
@@ -135,7 +145,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

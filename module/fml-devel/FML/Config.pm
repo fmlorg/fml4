@@ -3,7 +3,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Config.pm,v 1.77 2003/01/11 06:58:44 fukachan Exp $
+# $FML: Config.pm,v 1.85 2003/09/27 06:50:25 fukachan Exp $
 #
 
 package FML::Config;
@@ -94,7 +94,7 @@ called.
 
 =head1 METHODS
 
-=head2  C<new( ref_to_curproc )>
+=head2 new( ref_to_curproc )
 
 special method used only in the fml initialization phase.
 This method binds $curproc and the %_fml_config hash on memory.
@@ -141,15 +141,15 @@ sub new
 }
 
 
-=head2  C<get( key )>
+=head2 get( key )
 
 get value for key.
 
-=head2  C<get_as_array_ref( key )>
+=head2 get_as_array_ref( key )
 
 get value for key as an array reference.
 
-=head2  C<set( key, value )>
+=head2 set( key, value )
 
 set value for key.
 
@@ -227,11 +227,11 @@ sub update
 }
 
 
-=head2  C<overload( filename )>
+=head2 overload( filename )
 
 alias of C<load_file( filename )>.
 
-=head2  C<load_file( filename )>
+=head2 load_file( filename )
 
 read the configuration file, split keys and the values in it and set
 them to %_fml_config.
@@ -259,21 +259,22 @@ sub load_file
     my ($self, $file) = @_;
     my $config = \%_fml_config;
 
-    # XXX-TODO: check if -f $file here.
-    # read configuration file
-    $self->_read_file({
-	file   => $file,
-	config => $config,
-    });
+    if (-f $file) {
+	# read configuration file
+	$self->_read_file({
+	    file   => $file,
+	    config => $config,
+	});
 
-    # At the first time, save $config to another hash, which is used
-    # as a default value at variable comparison.
-    unless (%_default_fml_config) {
-	%_default_fml_config = %_fml_config;
+	# At the first time, save $config to another hash, which is used
+	# as a default value at variable comparison.
+	unless (%_default_fml_config) {
+	    %_default_fml_config = %_fml_config;
+	}
+
+	# flag on: we need $config->{ key } needs variable expansion
+	$need_expansion_variables = 1;
     }
-
-    # flag on: we need $config->{ key } needs variable expansion
-    $need_expansion_variables = 1;
 }
 
 
@@ -306,7 +307,7 @@ sub _read_file
 
     if (defined $fh) {
 	my ($key, $value, $curkey, $comment_buffer);
-	my ($after_cut, $hook);
+	my ($after_cut, $hook, $buf);
 	my $name_space = ''; # by default
 
 	# For example
@@ -318,36 +319,37 @@ sub _read_file
 	# [mysql:fml]
 	#    var = key1 ...
 	#
-	while (<$fh>) {
+      LINE:
+	while ($buf = <$fh>) {
 	    # Example: [mysql:fml]
 	    #   switched to the new name space.
-	    if (/^\[([\w\d\:]+)\]\s*$/o) {
+	    if ($buf =~ /^\[([\w\d\:]+)\]\s*$/o) {
 		$name_space = "[$1]";
 	    }
 
 	    if ($after_cut) {
-		$hook     .= $_ unless /^=/o;
-		$after_cut = 0  if /^=\w+/o;
-		next;
+		$hook     .= $buf unless $buf =~ /^=/o;
+		$after_cut = 0        if $buf =~ /^=\w+/o;
+		next LINE;
 	    }
-	    $after_cut = 1 if /^=cut/o; # end of postfix format
+	    $after_cut = 1 if $buf =~ /^=cut/o; # end of postfix format
 
-	    if (/^=/o) { # ignore special keywords of pod formats
+	    if ($buf =~ /^=/o) { # ignore special keywords of pod formats
 		$name_space = '';
-		next;
+		next LINE;
 	    }
 
 	    if ($mode eq 'raw') { # save comment buffer
-		if (/^\s*\#/o) { $comment_buffer .= $_;}
+		if ($buf =~ /^\s*\#/o) { $comment_buffer .= $buf;}
 	    }
 	    else { # by default, nuke trailing "\n"
-		chomp;
+		chomp $buf;
 	    }
 
 	    # case 1. "key = value1"
-	    if (/^([A-Za-z0-9_]+)\s*(=)\s*(.*)/o   ||
-		/^([A-Za-z0-9_]+)\s*(\+=)\s*(.*)/o ||
-		/^([A-Za-z0-9_]+)\s*(\-=)\s*(.*)/o) {
+	    if ($buf =~ /^([A-Za-z0-9_]+)\s*(=)\s*(.*)/o   ||
+		$buf =~ /^([A-Za-z0-9_]+)\s*(\+=)\s*(.*)/o ||
+		$buf =~ /^([A-Za-z0-9_]+)\s*(\-=)\s*(.*)/o) {
 		my ($key, $xmode, $value) = ($1, $2, $3);
 		$xmode  =~ s/=//o;
 		$value  =~ s/\s*$//o;
@@ -366,7 +368,7 @@ sub _read_file
 		}
 	    }
 	    # case 2. "^\s+value2"
-	    elsif (/^\s+(.*)/o && defined($curkey)) {
+	    elsif ($buf =~ /^\s+(.*)/o && defined($curkey)) {
 		my $value = $1;
 		__append_config($config, $curkey, $value, $name_space);
 	    }
@@ -384,7 +386,7 @@ sub _read_file
 
 
 # Descriptions: update $config by re-evaluating variables relation.
-#    Arguments: HASH_REF($config) 
+#    Arguments: HASH_REF($config)
 #               STR($key) STR($value) STR($name_space) STR($mode)
 # Side Effects: update $config on memory.
 # Return Value: none
@@ -413,7 +415,7 @@ sub __update_config
 
 
 # Descriptions: append $value into $config
-#    Arguments: HASH_REF($config) 
+#    Arguments: HASH_REF($config)
 #               STR($key) STR($value) STR($name_space) STR($mode)
 # Side Effects: update $config
 # Return Value: none
@@ -438,7 +440,7 @@ sub __append_config
 #                  key becomes "value1 value3".
 #               If "key += value4, key becomes
 #                  "value1 value2 value3 value4".
-#    Arguments: HASH_REF($config) 
+#    Arguments: HASH_REF($config)
 #               STR($key) STR($mode) STR($value) STR($name_space)
 # Side Effects: update $config by $mode
 # Return Value: STR(new value for $config{ $key })
@@ -447,15 +449,20 @@ sub _evaluate
     my ($config, $key, $mode, $value, $name_space) = @_;
     my @buf = ();
 
-    # XXX-TODO: we need apply s/\s*//; ?
     if ($name_space) {
 	if (defined $config->{ $name_space }->{ $key }) {
-	    @buf = split(/\s+/, $config->{ $name_space }->{ $key });
+	    my $x = $config->{ $name_space }->{ $key };
+	    $x    =~ s/^\s*//;
+	    $x    =~ s/\s*$//;
+	    @buf  = split(/\s+/, $x);
 	}
     }
     else {
 	if (defined $config->{ $key }) {
-	    @buf = split(/\s+/, $config->{ $key });
+	    my $x = $config->{ $key };
+	    $x    =~ s/^\s*//;
+	    $x    =~ s/\s*$//;
+	    @buf  = split(/\s+/, $x);
 	}
     }
 
@@ -487,13 +494,13 @@ sub _evaluate
 }
 
 
-=head2 C<read(file)>
+=head2 read(file)
 
 read configuration from the specified file.
 Internally it holds configuration and comment information in
 appearing order.
 
-=head2 C<write(file)>
+=head2 write(file)
 
 =cut
 
@@ -596,7 +603,7 @@ sub write
 }
 
 
-=head2 C<expand_variables()>
+=head2 expand_variables()
 
 expand all variables in C<%_default_fml_config> and C<%_fml_config>.
 The expanded result is saved in the same hash.
@@ -712,8 +719,18 @@ sub _expand_variables
 	while ($max++ < 16) {
 	    $org = $config->{ $x };
 
+	    # expand $prefix -> something
 	    $config->{$x} =~
 		s/\$([a-z_]+[a-z0-9])/(defined $config->{$1} ?
+				       $config->{$1} :
+				       (defined $hints->{$1} ?
+					$hints->{$1} :
+					''
+					))/ge;
+
+	    # expand ${prefix} -> something
+	    $config->{$x} =~
+		s/\$\{([a-z_]+[a-z0-9])\}/(defined $config->{$1} ?
 				       $config->{$1} :
 				       (defined $hints->{$1} ?
 					$hints->{$1} :
@@ -759,7 +776,7 @@ sub __expand_special_macros
 }
 
 
-=head2 C<expand_variable_in_buffer($rbuf)>
+=head2 expand_variable_in_buffer($rbuf)
 
 expand $varname to $config->{ varname } in C<$rbuf>.
 
@@ -785,25 +802,25 @@ sub expand_variable_in_buffer
 	my $varname = $1;
 	if (defined $config->{ $varname }) {
 	    my $x = $config->{ $varname };
-	    $$rbuf =~ s/\$$varname/$x/;
+	    $$rbuf =~ s/\$$varname/$x/g;
 	}
 	if (defined $args->{ $varname }) {
 	    my $x = $args->{ $varname };
-	    $$rbuf =~ s/\$$varname/$x/;
+	    $$rbuf =~ s/\$$varname/$x/g;
 	}
     }
 }
 
 
-=head2 C<yes( key )>
+=head2 yes( key )
 
 useful method to return 1 or 0 according the value to the given key.
 
-=head2 C<no( key )>
+=head2 no( key )
 
 useful method to return 1 or 0 according the value to the given key.
 
-=head2 C<has_attribute( key, attribute )>
+=head2 has_attribute( key, attribute )
 
 Some types of C<key> has a list as a value.
 If C<key> has the C<attribute> in the list, return 1.
@@ -820,9 +837,8 @@ sub yes
 {
     my ($self, $key) = @_;
 
-    # XXX-TODO: case-sensitive ?
     if (defined $_fml_config{$key}) {
-	$_fml_config{$key} eq 'yes' ? 1 : 0;
+	$_fml_config{$key} =~ /^yes$/i ? 1 : 0;
     }
     else {
 	0;
@@ -838,9 +854,8 @@ sub no
 {
     my ($self, $key) = @_;
 
-    # XXX-TODO: case-sensitive ?
     if (defined $_fml_config{$key}) {
-	$_fml_config{$key} eq 'no' ? 1 : 0;
+	$_fml_config{$key} =~ /^no$/i ? 1 : 0;
     }
     else {
 	0;
@@ -861,7 +876,6 @@ sub has_attribute
     return 0 unless defined $attribute;
 
     if (defined $_fml_config_result{$key}) {
-	# XXX-TODO: nuke \s* here ?
 	my (@attribute) = split(/\s+/, $_fml_config_result{$key});
 
       ATTR:
@@ -876,7 +890,7 @@ sub has_attribute
 }
 
 
-=head2  C<dump_variables()>
+=head2 dump_variables()
 
 show all {key => value} for debug.
 
@@ -971,7 +985,7 @@ sub is_hook_defined
 	$FML::Config::_fml_user_hooks;
 	package FML::Config;
     };
-    print STDERR $@ if $@;
+    carp($@) if $@;
 
     my $is_defined = 0;
     my $hook = sprintf("%s::%s::%s::%s", 'FML', 'Config', 'Hook', $hook_name);
@@ -981,7 +995,7 @@ sub is_hook_defined
 	    \$is_defined = 1;
 	}
     };
-    print STDERR $@ if $@;
+    carp($@) if $@;
 
     return $is_defined;
 }
@@ -1006,7 +1020,7 @@ sub get_hook
 	package FML::Config;
     };
     eval $eval;
-    print STDERR $@ if $@;
+    carp($@) if $@;
 
     my $r    = ''; # return value;
     my $namel = $hook_name; $namel =~ tr/A-Z/a-z/; # lowercase
@@ -1023,7 +1037,7 @@ sub get_hook
 	    \$r = $hooku;
 	}
     };
-    print STDERR $@ if $@;
+    carp($@) if $@;
 
     return "no strict;\n". $r;
 }
@@ -1060,7 +1074,7 @@ sub FETCH
 {
     my ($self, $key) = @_;
 
-    # XXX-TODO: how to handle next level ?
+    # XXX-TODO: how to handle the next level ?
 
     if ($need_expansion_variables) {
 	$self->expand_variables();
@@ -1094,7 +1108,7 @@ sub STORE
 {
     my ($self, $key, $value) = @_;
 
-    # XXX-TODO: how to handle next level ?
+    # XXX-TODO: how to handle the next level ?
 
     # inform fml we need to expand variable again when FETCH() is
     # called.
@@ -1116,7 +1130,7 @@ sub DELETE
 {
     my ($self, $key) = @_;
 
-    # XXX-TODO: handle the next level.
+    # XXX-TODO: how to handle the next level ?
     delete $_fml_config_result{$key};
     delete $_fml_config{$key};
 }
@@ -1142,13 +1156,14 @@ sub CLEAR
 sub FIRSTKEY
 {
     my ($self) = @_;
-    my @keys = keys %_fml_config_result;
-    $self->{ '_keys' } = \@keys;
+
+    $self->expand_variables();
+
+    my (%keys) = %_fml_config_result;
+    $self->{ '_keys' } = \%keys;
 
     my $keys = $self->{ _keys };
-
-    # XXX-TODO: BUG: return each()
-    shift @$keys;
+    return each %$keys;
 }
 
 
@@ -1161,8 +1176,22 @@ sub NEXTKEY
     my ($self) = @_;
     my $keys = $self->{ '_keys' };
 
-    # XXX-TODO: BUG: return each()
-    shift @$keys;
+    return each %$keys;
+}
+
+
+#
+# debug
+#
+if ($0 eq __FILE__) {
+    my %db     = () ;
+    my $config = new FML::Config;
+    $config->load_file( "etc/default_config.cf.ja" );
+
+    tie %db, 'FML::Config';
+    for my $k (keys %db) {
+	printf "%30s => %s\n", $k, $db{ $k };
+    }
 }
 
 

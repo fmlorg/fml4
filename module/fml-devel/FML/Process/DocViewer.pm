@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: DocViewer.pm,v 1.23 2003/01/11 16:05:17 fukachan Exp $
+# $FML: DocViewer.pm,v 1.26 2003/08/29 15:34:07 fukachan Exp $
 #
 
 package FML::Process::DocViewer;
@@ -39,16 +39,16 @@ See C<FML::Process::Flow> for the program flow.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 standard constructor.
 It inherits C<FML::Process::Kernel>.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 load default configuration files and fix @INC.
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 show help unless @ARGV.
 
@@ -75,17 +75,17 @@ sub new
 sub prepare
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmldoc_prepare_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     # $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
     $eval = $config->get_hook( 'fmldoc_prepare_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -98,10 +98,10 @@ sub verify_request
 {
     my ($curproc, $args) = @_;
     my $argv   = $curproc->command_line_argv();
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmldoc_verify_request_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     if (length(@$argv) == 0) {
 	$curproc->help();
@@ -109,11 +109,11 @@ sub verify_request
     }
 
     $eval = $config->get_hook( 'fmldoc_verify_request_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
-=head2 C<run($args)>
+=head2 run($args)
 
 the main top level dispatcher.
 It kicks off internal function C<_fmlconf($args)> for
@@ -129,7 +129,7 @@ C<fmlconf($args)>.
 sub run
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
@@ -144,12 +144,12 @@ sub run
 sub _fmldoc
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
     my $eval = $config->get_hook( 'fmldoc_run_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     my (@opts);
     push(@opts, '-v') if $args->{ options }->{ v };
@@ -167,7 +167,7 @@ sub _fmldoc
     croak($@);
 
     $eval = $config->get_hook( 'fmldoc_run_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 
@@ -216,13 +216,13 @@ finalize.
 sub finish
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     my $eval = $config->get_hook( 'fmldoc_finish_start_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 
     $eval = $config->get_hook( 'fmldoc_finish_end_hook' );
-    if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
+    if ($eval) { eval qq{ $eval; }; $curproc->logwarn($@) if $@; }
 }
 
 

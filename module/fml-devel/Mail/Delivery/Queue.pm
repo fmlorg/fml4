@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Queue.pm,v 1.22 2002/12/20 03:50:27 fukachan Exp $
+# $FML: Queue.pm,v 1.27 2003/10/15 01:03:39 fukachan Exp $
 #
 
 package Mail::Delivery::Queue;
@@ -60,7 +60,7 @@ C<Mail::Delivery::Queue> manipulats only queue around things.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 constructor. You must specify C<queue directory> as
 
@@ -106,14 +106,14 @@ sub new
       File::Spec->catfile($dir, "info", "recipients", $id);
 
     # create directories in queue if not exists.
-    for ($dir,
-	 File::Spec->catfile($dir, "active"),
-	 File::Spec->catfile($dir, "new"),
-	 File::Spec->catfile($dir, "deferred"),
-	 File::Spec->catfile($dir, "info"),
-	 File::Spec->catfile($dir, "info", "sender"),
-	 File::Spec->catfile($dir, "info", "recipients")) {
-	-d $_ || _mkdirhier($_);
+    for my $_dir ($dir,
+		File::Spec->catfile($dir, "active"),
+		File::Spec->catfile($dir, "new"),
+		File::Spec->catfile($dir, "deferred"),
+		File::Spec->catfile($dir, "info"),
+		File::Spec->catfile($dir, "info", "sender"),
+		File::Spec->catfile($dir, "info", "recipients")) {
+	-d $_dir || _mkdirhier($_dir);
     }
 
     return bless $me, $type;
@@ -147,7 +147,7 @@ sub _new_queue_id
 }
 
 
-=head2 C<id()>
+=head2 id()
 
 return the queue id assigned to this object C<$self>.
 
@@ -165,7 +165,7 @@ sub id
 }
 
 
-=head2 C<filename()>
+=head2 filename()
 
 return the file name of the queue id assigned to this object C<$self>.
 
@@ -183,7 +183,7 @@ sub filename
 }
 
 
-=head2 C<list()>
+=head2 list()
 
 return queue list as ARRAY REFERENCE.
 It is a list of queue filenames in C<active/> directory.
@@ -213,10 +213,11 @@ sub list
     my $dh = new DirHandle $dir;
     if (defined $dh) {
 	my @r = ();
+	my $file;
 
-	while (defined ($_ = $dh->read)) {
-	    next unless /^\d+/;
-	    push(@r, $_);
+	while (defined ($file = $dh->read)) {
+	    next unless $file =~ /^\d+/o;
+	    push(@r, $file);
 	}
 
 	return \@r;
@@ -228,7 +229,7 @@ sub list
 
 =head1 METHODS TO MANIPULATE INFORMATION
 
-=head2 C<getidinfo($id)>
+=head2 getidinfo($id)
 
 return information related with the queue id C<$id>.
 The returned information is
@@ -268,9 +269,10 @@ sub getidinfo
     # recipient array
     $fh = new FileHandle File::Spec->catfile($dir, "info", "recipients", $id);
     if (defined $fh) {
-	while (defined( $_ = $fh->getline)) {
-	    s/[\n\s]*$//;
-	    push(@recipients, $_);
+	my $buf;
+	while (defined($buf = $fh->getline)) {
+	    $buf =~ s/[\n\s]*$//;
+	    push(@recipients, $buf);
 	}
 	$fh->close;
     }
@@ -286,9 +288,9 @@ sub getidinfo
 
 =head1 LOCK
 
-=head2 C<lock()>
+=head2 lock()
 
-=head2 C<unlock()>
+=head2 unlock()
 
 =cut
 
@@ -313,6 +315,7 @@ sub lock
 	flock($fh, &LOCK_EX);
 	$self->{ _lock }->{ _fh } = $fh;
     };
+    alarm(0);
 
     ($@ =~ /lock timeout/) ? 0 : 1;
 }
@@ -330,7 +333,7 @@ sub unlock
 }
 
 
-=head2 C<in($msg)>
+=head2 in($msg)
 
 C<in()> creates a queue file in C<new/> directory
 (C<queue_directory/new/>.
@@ -368,7 +371,7 @@ sub in
 }
 
 
-=head2 C<set($key, $args)>
+=head2 set($key, $args)
 
    $queue->set('sender', $sender);
    $queue->set('recipients', [ $recipient0, $recipient1 ] );
@@ -402,7 +405,7 @@ sub set
 	my $fh = new FileHandle ">> $qf_recipients";
 	if (defined $fh) {
 	    # XXX-TODO: validate $value == ARRAY_REF.
-	    for (@$value) { print $fh $_, "\n";}
+	    for my $rcpt (@$value) { print $fh $rcpt, "\n";}
 	    $fh->close;
 	}
     }
@@ -415,8 +418,10 @@ sub set
 		my $obj = new IO::Adapter $map;
 		if (defined $obj) {
 		    $obj->open();
-		    while ($_ = $obj->get_next_key()) {
-			print $fh $_, "\n";
+
+		    my $buf;
+		    while ($buf = $obj->get_next_key()) {
+			print $fh $buf, "\n";
 		    }
 		    $obj->close();
 		}
@@ -428,7 +433,7 @@ sub set
 }
 
 
-=head2 C<setrunnable()>
+=head2 setrunnable()
 
 set the status of the queue assigned to this object C<$self>
 deliverable.
@@ -457,16 +462,20 @@ sub setrunnable
     }
 
     # move new/$id to active/$id
-    rename( $self->{ _new_qf }, $self->{ _active_qf } );
+    if (rename( $self->{ _new_qf }, $self->{ _active_qf } )) {
+	return 1;
+    }
+
+    return 0;
 }
 
 
 
-=head2 C<remove()>
+=head2 remove()
 
 remove all queue assigned to this object C<$self>.
 
-=head2 C<valid()>
+=head2 valid()
 
 It checks the queue file is broken or not.
 return 1 (valid) or 0.
@@ -482,11 +491,11 @@ sub remove
 {
     my ($self) = @_;
 
-    for ($self->{ _new_qf },
-	 $self->{ _active_qf },
-	 $self->{ _info }->{ sender },
-	 $self->{ _info }->{ recipients }) {
-	unlink $_ if -f $_;
+    for my $f ($self->{ _new_qf },
+	       $self->{ _active_qf },
+	       $self->{ _info }->{ sender },
+	       $self->{ _info }->{ recipients }) {
+	unlink $f if -f $f;
     }
 }
 
@@ -500,10 +509,10 @@ sub valid
     my ($self) = @_;
     my $ok = 0;
 
-    for ($self->{ _active_qf },
-	 $self->{ _info }->{ sender },
-	 $self->{ _info }->{ recipients }) {
-	$ok++ if -f $_ && -s $_;
+    for my $f ($self->{ _active_qf },
+	       $self->{ _info }->{ sender },
+	       $self->{ _info }->{ recipients }) {
+	$ok++ if -f $f && -s $f;
     }
 
     ($ok == 3) ? 1 : 0;
@@ -531,7 +540,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: HeaderRewrite.pm,v 1.13 2002/12/22 03:21:33 fukachan Exp $
+# $FML: HeaderRewrite.pm,v 1.15 2003/08/23 15:33:17 fukachan Exp $
 #
 
 package Mail::ThreadTrack::HeaderRewrite;
@@ -22,7 +22,7 @@ Mail::ThreadTrack::HeaderRewrite - header manipulation
 
 =head1 METHODS
 
-=head2 C<rewrite_header($msg)>
+=head2 rewrite_header($msg)
 
 C<$msg> is Mail::Message object.
 
@@ -117,7 +117,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

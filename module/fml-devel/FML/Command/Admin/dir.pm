@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: dir.pm,v 1.9 2003/01/03 07:05:09 fukachan Exp $
+# $FML: dir.pm,v 1.13 2003/08/29 15:33:58 fukachan Exp $
 #
 
 package FML::Command::Admin::dir;
@@ -27,7 +27,7 @@ show "ls -l" results.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -59,21 +59,20 @@ sub need_lock { 0;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config   = $curproc->{ config };
+    my $config   = $curproc->config();
     my $log_file = $config->{ log_file };
     my $options  = $command_args->{ options };
     my $du_args  = {};
     my @argv     = ();
 
     use FML::Restriction::Base;
-    my $safe   = new FML::Restriction::Base;
-    my $dirreg = $safe->regexp( 'directory' );
+    my $safe = new FML::Restriction::Base;
 
     # analyze ...
     # XXX-TODO: "admin ls -i -a tmp" ignores "tmp" but not inform the error.
     for my $x (@$options) {
 	# XXX-TODO: correct? we restrict the "ls" option pattern here.
-	if ($x =~ /^($dirreg)$/) {
+	if ($safe->regexp_match('directory', $x)) {
 	    $du_args->{ opt_ls } = $1;
 	}
 	else {
@@ -91,7 +90,8 @@ sub process
 
 
 # Descriptions: cgi menu (dummy)
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $member_map $recipient_map
 # Return Value: none
 sub cgi_menu

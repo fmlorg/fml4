@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Procmail.pm,v 1.5 2002/12/18 04:03:16 fukachan Exp $
+# $FML: Procmail.pm,v 1.15 2003/09/14 03:53:47 fukachan Exp $
 #
 
 package FML::MTAControl::Procmail;
@@ -38,7 +38,7 @@ set up aliases and virtual maps for procmail.
 sub procmail_install_alias
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config       = $curproc->{ config };
+    my $config       = $curproc->config();
     my $template_dir = $curproc->template_files_dir_for_newml();
 
     use File::Spec;
@@ -48,7 +48,7 @@ sub procmail_install_alias
 
     $self->_install($src, $dst, $params);
 
-    print STDERR "updating $alias\n";
+    $curproc->ui_message( "updating $alias\n");
 
     use File::Utils qw(append);
     append($dst, $alias);
@@ -64,7 +64,7 @@ sub procmail_install_alias
 sub procmail_remove_alias
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config    = $curproc->{ config };
+    my $config    = $curproc->config();
     my $alias     = $config->{ procmail_aliases_file };
     my $alias_new = $alias."new.$$";
     my $ml_name   = $params->{ ml_name  };
@@ -73,30 +73,34 @@ sub procmail_remove_alias
 
     my $key = $params->{ ml_name };
 
-    print STDERR "removing $key in $alias\n";
+    $curproc->ui_message( "removing $key in $alias\n");
 
     use FileHandle;
     my $rh = new FileHandle $alias;
     my $wh = new FileHandle "> $alias_new";
     if (defined $rh && defined $wh) {
+	my $buf;
+
       LINE:
-	while (<$rh>) {
-	    if (/\<ALIASES\s+$key\@/ .. /\<\/ALIASES\s+$key\@/) {
+	while ($buf = <$rh>) {
+	    if ($buf =~ /\<ALIASES\s+$key\@/
+		  ..
+		$buf =~ /\<\/ALIASES\s+$key\@/) {
 		$removed++;
 		next LINE;
 	    }
 
-	    print $wh $_;
+	    print $wh $buf;
 	}
 	$wh->close;
 	$rh->close;
 
 	if ($removed > 3) {
 	    if (rename($alias_new, $alias)) {
-		print STDERR "\tremoved.\n";
+		$curproc->ui_message( "\tremoved.\n");
 	    }
 	    else {
-		print STDERR "\twarning: fail to rename alias files.\n";
+		$curproc->ui_message( "\twarning: fail to rename alias files.\n");
 	    }
 	}
     }
@@ -129,20 +133,24 @@ sub procmail_find_key_in_alias_maps
     my ($self, $curproc, $params, $optargs) = @_;
     my $key  = $optargs->{ key };
     my $maps = $self->procmail_alias_maps($curproc, $optargs);
+    my $addr = sprintf("%s\@%s", $params->{ ml_name }, $params->{ ml_domain });
 
     for my $map (@$maps) {
-	print STDERR "scan key = $key, map = $map\n" if $debug;
+	$curproc->ui_message( "scan key = $key, map = $map") if $debug;
 
-	use FileHandle;
-	my $fh = new FileHandle $map;
-	if (defined $fh) {
-	    while (<$fh>) {
-		return 1 if /^$key:/;
+	if (-f $map) {
+	    use FileHandle;
+	    my $fh = new FileHandle $map;
+	    if (defined $fh) {
+		my $buf;
+		while ($buf = <$fh>) {
+		    return 1 if $buf =~ /ALIASES\s*$addr/;
+		}
+		$fh->close;
 	    }
-	    $fh->close;
-	}
-	else {
-	    warn("cannot open $map");
+	    else {
+		warn("cannot open $map");
+	    }
 	}
     }
 
@@ -158,7 +166,7 @@ sub procmail_find_key_in_alias_maps
 sub procmail_get_aliases_as_hash_ref
 {
     my ($self, $curproc, $params, $optargs) = @_;
-    my $config     = $curproc->{ config };
+    my $config     = $curproc->config();
     my $alias_file = $config->{ mail_aliases_file };
     my $key        = $optargs->{ key };
     my $mode       = $optargs->{ mode };
@@ -171,20 +179,20 @@ sub procmail_get_aliases_as_hash_ref
     }
 
     for my $map (@$maps) {
-	print STDERR "scan key = $key, map = $map\n" if $debug;
+	$curproc->ui_message( "scan key = $key, map = $map") if $debug;
 
 	use FileHandle;
 	my $fh = new FileHandle $map;
 	if (defined $fh) {
-	    my ($key, $value);
+	    my ($buf, $key, $value);
 
 	  LINE:
-	    while (<$fh>) {
-		next LINE if /^#/;
-		next LINE if /^\s*$/;
+	    while ($buf = <$fh>) {
+		next LINE if $buf =~ /^#/;
+		next LINE if $buf =~ /^\s*$/;
 
-		chomp;
-		($key, $value)   = split(/:/, $_, 2);
+		chomp $buf;
+		($key, $value)   = split(/:/, $buf, 2);
 		$value =~ s/^\s*//;
 		$value =~ s/s*$//;
 		$aliases->{ $key } = $value;
@@ -208,8 +216,10 @@ sub procmail_get_aliases_as_hash_ref
 sub procmail_alias_maps
 {
     my ($self, $curproc, $params, $optargs) = @_;
+    my $config = $curproc->config();
+    my $alias  = $config->{ procmail_aliases_file };
 
-    return [];
+    return [ $alias ];
 }
 
 
@@ -226,12 +236,9 @@ sub procmail_setup
 }
 
 
-#
-# XXX-TODO: how to handle procmail virtual maps ?
-#
-
-
-# Descriptions: rewrite $params
+# Descriptions: dummy.
+#               This module do not need to handle virtual issue since
+#               ml_name@ml_domain is written in procmailrc.
 #    Arguments: OBJ($self)
 #               OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update $params
@@ -239,11 +246,12 @@ sub procmail_setup
 sub _procmail_rewrite_virtual_params
 {
     my ($self, $curproc, $params, $optargs) = @_;
-
 }
 
 
-# Descriptions: install procmail virtual_maps
+# Descriptions: dummy.
+#               This module do not need to handle virtual issue since
+#               ml_name@ml_domain is written in procmailrc.
 #    Arguments: OBJ($self)
 #               OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: install/udpate procmail virtual_maps and the .db
@@ -251,12 +259,12 @@ sub _procmail_rewrite_virtual_params
 sub procmail_install_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
-
 }
 
 
-
-# Descriptions: remove procmail virtual_maps
+# Descriptions: dummy.
+#               This module do not need to handle virtual issue since
+#               ml_name@ml_domain is written in procmailrc.
 #    Arguments: OBJ($self)
 #               OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: remove/udpate procmail virtual_maps and the .db
@@ -264,11 +272,12 @@ sub procmail_install_virtual_map
 sub procmail_remove_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
-
 }
 
 
-# Descriptions: regenerate virtual.db
+# Descriptions: dummy.
+#               This module do not need to handle virtual issue since
+#               ml_name@ml_domain is written in procmailrc.
 #    Arguments: OBJ($self)
 #               OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
@@ -276,7 +285,6 @@ sub procmail_remove_virtual_map
 sub procmail_update_virtual_map
 {
     my ($self, $curproc, $params, $optargs) = @_;
-
 }
 
 
@@ -290,7 +298,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

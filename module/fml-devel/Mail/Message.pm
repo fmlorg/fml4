@@ -4,12 +4,13 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.72 2003/01/11 15:13:51 fukachan Exp $
+# $FML: Message.pm,v 1.87 2003/10/15 09:09:13 fukachan Exp $
 #
 
 package Mail::Message;
 use strict;
 use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD
+	    $override_print_mode
 	    $override_log_function);
 use Carp;
 
@@ -109,19 +110,23 @@ Described below, C<MIME delimiter> is also treated as a virtual
 message for convenience.
 
    $message = {
-                version        => 1.0
+                version        => 1.0,
 
-                next           => \$next_message
-                prev           => \$prev_message
+                next           => \$next_message,
+                prev           => \$prev_message,
 
-                base_data_type => "text/plain"
+                base_data_type => "text/plain",
 
-                mime_version   => 1.0
-                header         => $header
-                data_type      => "text/plain"
-                data           => \$message_body
+                mime_version   => 1.0,
+                header         => $header,
+                data_type      => "text/plain",
+                data           => \$message_body,
 
-                data_info      => \$information
+		# optional. if unknonw, speculate it from header info.
+		charset        => "iso-2022-jp",
+		encoding       => "7bit",
+
+                data_info      => \$information,
                }
 
    key                value
@@ -334,6 +339,7 @@ sub __build_message
     # try to get data on both memory and disk
     my $r_data   = $args->{ data }     || undef;
     my $filename = $args->{ filename } || undef;
+    my $parent   = $args->{ parent }   || undef; # top level header info
 
     # set up object for data on memory
     if (defined $r_data) {
@@ -348,6 +354,14 @@ sub __build_message
 
 	$self->{ data }         = $args->{ data } || '';
 	$self->{ _on_memory }   = 1; # flag to indicate data is on memory
+
+	# top level header info (head of a chain).
+	# 'text/plain' part does not know its charset and encoding, so
+	# we need to tell it by using the header info.
+	if (defined $parent) {
+	    $self->{ charset  } = $parent->charset();
+	    $self->{ encoding } = $parent->encoding_mechanism();
+	}
     }
     # set up object for data on disk
     elsif (defined $filename) {
@@ -399,8 +413,8 @@ sub dup_header
 	my $body    = $self->{ next };
 
 	# 1. copy header and the first body part
-	for (keys %$self) { $dupmsg->{ $_ }  = $self->{ $_ };}
-	for (keys %$body) { $dupmsg2->{ $_ } = $body->{ $_ };}
+	for my $k (keys %$self) { $dupmsg->{ $k }  = $self->{ $k };}
+	for my $k (keys %$body) { $dupmsg2->{ $k } = $body->{ $k };}
 
 	# 2. overwrite only header data in $dupmsg
 	my $header = $self->{ data };
@@ -624,6 +638,12 @@ sub _build_body_object
     # XXX we use data_type (type defined in Content-Type: field) here.
     # XXX "base_data_type" is used only internally.
     return new Mail::Message {
+	# XXX We need to pass the top header part (head of the chain)
+	# XXX for the main text/* part to know its charset and encoding.
+	# XXX This info is needed only in text/* case not multipart/*.
+	parent    => $self,
+
+	# fundamental information
 	boundary  => $self->_header_mime_boundary($result->{ header }),
 	data_type => $self->_header_data_type($result->{ header }),
 	data      => $data_ptr,
@@ -663,6 +683,18 @@ sub whole_message_header
 }
 
 
+# Descriptions: get header content as string.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub whole_message_header_as_str
+{
+    my ($self) = @_;
+    my $m = $self->whole_message_header();
+    return $m->as_string();
+}
+
+
 # Descriptions: get the head OBJ of body part in the chain.
 #               header -> body1 (HERE) -> body2 -> ...
 #    Arguments: OBJ($self)
@@ -688,14 +720,94 @@ sub whole_message_body
 }
 
 
-# Descriptions: return the incoming message on memory as string reference
-#    Arguments: OBJ($self)
+=head2 whole_message_as_str($args)
+
+To extract the first 2048 bytes in the whole message (body),
+specify the following parameters in $args.
+
+    $args = {
+	start => 0,
+	end   => 2048,
+	type  => 'exact',
+    };
+
+By default, parameters
+
+    $args = {
+	start  => 0,
+	end    => 2048,
+	indent => '   ',
+    };
+
+It returns the text until the first null line over the first 2048
+bytes.
+
+=cut
+
+
+# Descriptions: return the incoming message on memory as string
+#    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
-# Return Value: STR_REF
-sub whole_message_as_string_ref
+# Return Value: STR
+sub whole_message_as_str
 {
-    my ($self) = @_;
-    return $self->{ __data };
+    my ($self, $args) = @_;
+    my $r_data = $self->{ __data };
+    my $start  = $args->{ start } || 0;
+    my $end    = $args->{ end }   || 2048; # the first 2048 bytes by default.
+    my $type   = $args->{ type }  || 'find paragraph boundary if could';
+    my $indent = $args->{ indent } || '';
+    my $hdrobj = $self->whole_message_header();
+    my $header = $hdrobj->as_string();
+    my $s      = '';
+
+    if ($type eq 'exact') {
+	$s = substr($$r_data, $start, $end - $start);
+    }
+    else {
+	$s = _fuzzy_substr($r_data, $start, $end);
+    }
+
+    # XXX line -> ${indent}line for your eyes.
+    $s = sprintf("%s\n%s", $header, $s);
+    $s =~ s/^/$indent/;
+    $s =~ s/\n/\n$indent/g;
+    $s =~ s/$indent$//;
+
+    return $s;
+}
+
+
+# Descriptions: paragraph based extraction of the body head part.
+#    Arguments: STR_REF($r_data) NUM($start) NUM($end)
+# Side Effects: none
+# Return Value: STR
+sub _fuzzy_substr
+{
+    my ($r_data, $start, $end) = @_;
+    my $max = 4196;
+    my $p = index($$r_data, "\n\n", $end);
+
+    # if not found, return the first $max bytes.
+    $p = $p > 0 ? $p : $max;
+
+    if ($p <= $max) {
+	return substr($$r_data, $start, $p - $start);
+    }
+    else {
+	my ($last_p, $i);
+	$i = 10;
+	$p = 0;
+
+      PAR:
+	while ($i-- > 0) {
+	    $p = index($$r_data, "\n\n", $p + 1);
+	    last PAR if $p > $max;
+	    $last_p = $p;
+	}
+
+	return substr($$r_data, $start, $last_p - $start);
+    }
 }
 
 
@@ -730,6 +842,9 @@ sub _header_mime_boundary
     my $m = $header->get('content-type');
 
     if (defined($m) && ($m =~ /boundary\s*=\s*\"(.*)\"/i)) { # case insensitive
+	return $1;
+    }
+    if (defined($m) && ($m =~ /boundary\s*=([^\s\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]+)/i)) { # case insensitive
 	return $1;
     }
     else {
@@ -953,7 +1068,7 @@ sub print
 sub reset_print_mode
 {
     my ($self) = @_;
-    $self->{ _print_mode } = 'raw';
+    $override_print_mode = 'raw';
 }
 
 
@@ -967,12 +1082,12 @@ sub set_print_mode
     my ($self, $mode) = @_;
 
     if (defined($mode) && $mode) {
-    if ($mode eq 'raw') {
-	$self->{ _print_mode } = 'raw';
-    }
-    elsif ($mode eq 'smtp') {
-	$self->{ _print_mode } = 'smtp';
-    }
+	if ($mode eq 'raw') {
+	    $override_print_mode = 'raw';
+	}
+	elsif ($mode eq 'smtp') {
+	    $override_print_mode = 'smtp';
+	}
     }
 }
 
@@ -1033,7 +1148,7 @@ sub _print_messsage_on_memory
     my ($self, $fd, $args) = @_;
 
     # \n -> \r\n
-    my $raw_print_mode = 1 if $self->{ _print_mode } eq 'raw';
+    my $raw_print_mode = 1 if $override_print_mode eq 'raw';
 
     # set up offset for the buffer
     my $data  = $self->{ data };
@@ -1148,7 +1263,7 @@ sub _print_messsage_on_disk
     my ($self, $fd, $args) = @_;
 
     # \n -> \r\n
-    my $raw_print_mode = 1 if $self->{ _print_mode } eq 'raw';
+    my $raw_print_mode = 1 if $override_print_mode eq 'raw';
     my $header   = $self->{ header }   || undef;
     my $filename = $self->{ filename } || undef;
     my $logfp    = $override_log_function || $self->{ _log_function };
@@ -1168,9 +1283,7 @@ sub _print_messsage_on_disk
 	my $buf;
 
       SMTP_IO:
-	while (<$fh>) {
-	    $buf = $_;
-
+	while ($buf = <$fh>) {
 	    unless (defined $raw_print_mode) {
 		# fix \n -> \r\n in the end of the line
 		if ($buf !~ /\r\n$/) { $buf =~ s/\n$/\r\n/;}
@@ -1229,7 +1342,7 @@ sub build_mime_multipart_chain
 	$head = $msg unless $head; # save the head $msg
 
 	# boundary -> data -> boundary ...
-	if (defined $prev_m) { 
+	if (defined $prev_m) {
 		$prev_m->_next_message_is( $msg );
 		_prev_message_is( $msg, $prev_m );
 	}
@@ -1304,21 +1417,56 @@ sub parse_and_build_mime_multipart_chain
     my $dash_boundary   = "--".$boundary;
     my $delimeter       = "\n". $dash_boundary;
     my $close_delimeter = $delimeter ."--";
+    my $no_preamble     = 0;
 
     # 1. check the preamble before multipart blocks
     #    XXX mpb = multipart-body
-    my $mpb_begin       = index($$data, $delimeter, 0);
+    #
+    #    XXX-TODO: bug fix logic to find the start point of multipart.
+    #    2003/08/16: modify $mpb_begin search logic,
+    #    which is effective but wrong.
+    #    The first delimeter should be handled specially.
+    #    Exactly, it is a dash-boundary not delimeter!
+    my $mpb_begin         = -1;
+    my $pos_dash_boundary = -1;
+    {
+	# dirty hack to avoid wrong logic. should be fixed in the future.
+	my $pdd = index($$data, $delimeter, 0);     # ^.+dash-boundary
+	my $pdb = index($$data, $dash_boundary, 0); # ^dash-boundary
+
+	# save potision of the first dash-boundary for further reference.
+	$pos_dash_boundary = $pdb;
+
+	if ($pdb == 0) {
+	    $mpb_begin = 0;
+	}
+	else {
+	    $mpb_begin = $pdd;
+	}
+    }
     my $mpb_end         = index($$data, $close_delimeter, 0);
     my $pb              = 0; # pb = position of the beginning in $data
     my $pe              = $mpb_begin; # pe = position of the end in $data
+
+    # XXX here, the block {0, ($pe - $pb)} is the preamble.
+    # XXX So, it may be 0 ($pe == $pb == 0).
+
+    # tell where _next_part_pos() search the next $delimeter from.
+    # set the current position to be the next byte after the preamble.
     $self->_set_pos( $pe + 1 );
 
-    # fix the end of multipart block against broken MIME/multipart
+    # fix the end of multipart block against broken MIME/multipart.
+    # If close-delimeter not found, $broken_close_delimiter = 1.
     my $broken_close_delimiter = 1 if $mpb_end < 0;
     {
 	# oops, no delimiter is not found !!!
 	if ($mpb_begin < 0) {
-	    print "   *** broken multipart message.\n" if $debug;
+	    if ($debug) {
+		print "   *** broken multipart message (mpb_begin < 0).\n";
+		print "   delimeter={$delimeter}\n" if $debug > 2;
+		print "        data={$$data}\n"     if $debug > 2;
+	    }
+
 	    my $args = {
 		offset_begin => 0,
 		offset_end   => $data_end,
@@ -1333,34 +1481,42 @@ sub parse_and_build_mime_multipart_chain
 	    print "   * broken close-delimiter multipart message.\n" if $debug;
 	    $mpb_end = $data_end;
 	}
+	else {
+	    print "   * ok ? mpb begin=$mpb_begin end=$mpb_end\n" if $debug;
+	}
     }
 
     # XXX We should check the first string is delimiter or not.
     # XXX We need Content-Type: in each block. This may be a bug ?
     # XXX To avoid the first part without no content-type, we check
     # XXX the first string in the body data.
-    my $preamble = "\n".substr($$data, 0, length($delimeter) - 1);
-    my $no_preamble = 1 if $preamble eq $delimeter;
-
     #
-    # HERE WE GO but debug firstly :)
-    #
-    print "\tmpb($mpb_begin, $mpb_end)\n\t----------\n\n" if $debug;
-    print "\tno preamble\n" if $debug && $no_preamble;
+    # XXX The first delimeter should be handled specially.
+    # XXX Exactly, it is dash-boundary not delimeter!
+    my $dp = index($$data, $dash_boundary, 0); # ^dash-boundary
+    $no_preamble = 1 if $dp == 0;
 
+    if ($debug) {
+	print "\tmpb($mpb_begin, $mpb_end)\n\t----------\n\n";
+	print "\tno_preamble   = ", ($no_preamble ? "yes" : "no"), "\n";
+	print "\tdelimeter size: ", length($delimeter), "\n";
+    }
 
     # prepare lexical variables
     my ($msg, $next_part, $prev_part, @m);
-    my $i = 0; # counter to indicate the $i-th message
+    my $i       = 0; # counter to indicate the $i-th message
+    my $loopcnt = 0; # loop counter.
 
     do {
+	$loopcnt++; print "\n// $loopcnt\n" if $debug;
+
 	# 2. analyze the region for the next part in $data
 	#     we should check the condition "$pe > $pb" here
 	#     to avoid the empty preamble case.
 	# XXX this function is not called
 	# XXX if there is not the prededing preamble.
 	if ($pe > $pb) { # XXX not effective region if $pe <= $pb
-	    print "   new block ($pb, $pe) " if $debug;
+	    print "   [$loopcnt] new multipart block ($pb, $pe) " if $debug;
 
 	    my ($header, $pb) = _get_mime_header($data, $pb, $pe);
 	    if ($debug) {
@@ -1396,7 +1552,8 @@ sub parse_and_build_mime_multipart_chain
 	}
 
 	# 3. where is the region for the next part?
-	($pb, $pe) = $self->_next_part_pos($data, $delimeter);
+	($pb, $pe) = $self->_next_part_pos($data, $delimeter,
+					   $loopcnt, $pos_dash_boundary);
 	if ($debug) {
 	    print "\tnext block:";
 	    print "   ($pb, $pe)\t$mpb_begin<->$mpb_end/$data_end\n";
@@ -1427,9 +1584,14 @@ sub parse_and_build_mime_multipart_chain
 		print "   *** broken condition pb=$pb pe=$pe ***\n" if $debug;
 	    }
 	    elsif ($pb < $pe) {
-		print "   delimiter\n" if $debug;
-
 		my $buf = $delimeter."\n";
+		print "   set up delimiter\n" if $debug;
+
+		# Exception: $data =~ /^dash-boudary/ NOT /^.+delimeter/;
+		if ($loopcnt == 1 && $pos_dash_boundary == 0) {
+		    $buf = $dash_boundary."\n";
+		}
+
 		$m[ $i++ ] = $self->_alloc_new_part({
 		    data           => \$buf,
 		    data_type      => $virtual_data_type{'delimiter'},
@@ -1523,7 +1685,11 @@ sub _get_mime_header
     my $pos = index($$data, "\n\n", $pos_begin) + 1;
     my $buf = substr($$data, $pos_begin, $pos - $pos_begin);
 
-    print "\t_get_mime_header pos=$pos should be < end=$pos_end\n" if $debug;
+    if ($debug) {
+	print "\n\t_get_mime_header($pos_begin, $pos_end): ";
+	print "$pos_begin -> pos=$pos should be < end=$pos_end\n";
+	print "\tmime_header={$buf}\n" if $debug;
+    }
 
     if ($pos > $pos_end) {
 	return ('', $pos_begin);
@@ -1618,13 +1784,20 @@ sub delete_message_part_link
 
 # Descriptions: search the next MIME boundary
 #    Arguments: OBJ($self) HASH_STR($data) STR($delimeter)
+#               NUM($loopcnt) NUM($mpb_begin)
 # Side Effects: none
 # Return Value: (NUM, NUM)
 sub _next_part_pos
 {
-    my ($self, $data, $delimeter) = @_;
+    my ($self, $data, $delimeter, $loopcnt, $mpb_begin) = @_;
     my ($len, $p, $pb, $pe, $pp);
     my $maxlen = length($$data);
+    my $lendel = length($delimeter);
+
+    # Exception: $data =~ /^dash-boudary/ NOT $data =~ /^.+delimeter/;
+    if ($loopcnt == 1 && $mpb_begin == 0) {
+	$lendel -= 1;
+    }
 
     # get the next deliemter position
     $pp  = $self->_get_pos();
@@ -1635,8 +1808,8 @@ sub _next_part_pos
     print "\t_next_part_pos( p=$p pp=$pp maxlen=$maxlen )\n" if $debug;
 
     $len = $p > 0 ? ($p - $pp) : ($maxlen - $pp);
-    $pb  = $pp + length($delimeter);
-    $pe  = $pb + $len - length($delimeter);
+    $pb  = $pp + $lendel;
+    $pe  = $pb + $len - $lendel;
 
     # but broken if $p == $pp == 0 !!!
     if ($pp == 0) { $pb = $pe = $maxlen;}
@@ -1748,9 +1921,50 @@ return this message has empty content or not.
 sub is_multipart
 {
     my ($self) = @_;
-    my $type = $self->whole_message_header_data_type();
+    my $type = $self->whole_message_header_data_type() || '';
 
     return( ($type =~ /multipart/i) ? 1 : 0 );
+}
+
+
+=head2 charset()
+
+return charset.
+
+=cut
+
+
+# Descriptions: return the charset of this object.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: STR
+sub charset
+{
+    my ($self) = @_;
+    my $buf = $self->message_fields() || '';
+
+    # special case: $self equals to header object (head of a chain)
+    unless ($buf) {
+	my $data = $self->{ data };
+	if (ref($data) eq 'Mail::Header' || ref($data) eq 'FML::Header') {
+	    $buf = $data->get('content-type') || '';
+	    $buf =~ s/\s+/ /g;
+	    $buf = "content-type: $buf";
+	}
+    }
+
+    if (defined $self->{ charset } && $self->{ charset }) {
+	return $self->{ charset };
+    }
+    elsif (defined($buf) &&
+	   ($buf =~ /Content-Type:.*charset=\"(\S+)\"/mi)) {
+	my $charset = $1;
+	$charset =~ tr/A-Z/a-z/;
+	return $charset;
+    }
+    else {
+	return undef;
+    }
 }
 
 
@@ -1770,9 +1984,21 @@ The return value is one of base64, quoted-printable or undef.
 sub encoding_mechanism
 {
     my ($self) = @_;
-    my $buf = $self->message_fields();
+    my $buf = $self->message_fields() || '';
 
-    if (defined($buf) &&
+    # special case: $self equals to header object (head of a chain)
+    unless ($buf) {
+	my $data = $self->{ data };
+	if (ref($data) eq 'Mail::Header' || ref($data) eq 'FML::Header') {
+	    $buf = $data->get('content-transfer-encoding') || '';
+	    $buf = "Content-Transfer-Encoding: $buf";
+	}
+    }
+
+    if (defined $self->{ encoding }) {
+	return $self->{ encoding };
+    }
+    elsif (defined($buf) &&
 	($buf =~ /Content-Transfer-Encoding:\s*(\S+)/mi)) {
 	my $mechanism = $1;
 	$mechanism =~ tr/A-Z/a-z/;
@@ -2049,13 +2275,24 @@ sub message_text
     # if the content is undef, do nothing.
     return undef unless $data;
 
+    if (ref($data) eq 'FML::Header' || ref($data) eq 'Mail::Header') {
+	my $buf = $data->as_string();
+	$data   = \$buf;
+    }
+
     if ($base_data_type =~ /multipart/i) {
 	$pos_begin = $self->{ offset_begin };
 	$msglen    = $self->{ offset_end } - $pos_begin;
     }
     else {
 	$pos_begin = 0;
-	$msglen    = length($$data);
+
+	if (ref($data) eq 'SCALAR') {
+	    $msglen = length($$data);
+	}
+	else {
+	    $msglen = -1;
+	}
     }
 
     if (defined $size) {
@@ -2188,6 +2425,21 @@ sub data_type_list
     }
     \@buf;
 }
+
+
+=head1 UTILITY for Accept-Language:
+
+=head2 accept_language_list()
+
+return list of languages to accept as ARRAY_REF such as [ 'ja', 'en',
+'*' ] but [ '*' ] if Accept-Language: unavailable.
+
+=cut
+
+
+# Accept-Language: handling
+use Mail::Message::Language;
+push(@ISA, "Mail::Message::Language");
 
 
 =head1 METHODS to make a whole mail message

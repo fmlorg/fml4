@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Subject.pm,v 1.13 2003/01/11 15:16:36 fukachan Exp $
+# $FML: Subject.pm,v 1.16 2003/08/23 04:35:48 fukachan Exp $
 #
 
 
@@ -53,7 +53,23 @@ my $pattern  = 'Re:|Re\d+:|Re\[\d+\]:|Re\(\d+\):|Re\^\d+:|Re\*\d+:|Re>';
 
 =head1 METHODS
 
-=head2 C<is_reply($string)>
+=cut
+
+
+# Descriptions: constructor.
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: OBJ
+sub new
+{
+    my ($self, $args) = @_;
+    my ($type) = ref($self) || $self;
+    my $me     = {};
+    return bless $me, $type;
+}
+
+
+=head2 is_reply($string)
 
 check whether C<$string> looks like a reply message.
 C<$string> is a C<Subject:> of the mail header.
@@ -79,7 +95,7 @@ sub is_reply
 }
 
 
-=head2 C<cut_off_reply_tag($subject)>
+=head2 cut_off_reply_tag($subject)
 
 cut off C<Re:> in the string C<$subject> like C<Re: ... >
 within C<Subject:>.
@@ -105,15 +121,13 @@ within C<Subject:>.
 
 
 # Descriptions: remove Re:
-#    Arguments: STR($subject)
+#    Arguments: OBJ($self) STR($subject)
 # Side Effects: none
 # Return Value: STR
 sub cut_off_reply_tag
 {
-    my ($subject) = @_;
+    my ($self, $subject) = @_;
     my ($y, $limit);
-
-    # XXX-TODO: method-ify ?
 
     Jcode::convert(\$subject, 'euc');
 

@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #
-# $FML: Date.pm,v 1.18 2003/01/11 15:16:35 fukachan Exp $
+# $FML: Date.pm,v 1.24 2003/09/13 09:02:01 fukachan Exp $
 #
 
 package Mail::Message::Date;
@@ -38,17 +38,17 @@ The style you use follows:
 You can also method like $date->$style() style.
 specify the C<style> name described above as a method.
 
-=head2 C<log_file_style()>
+=head2 log_file_style()
 
-=head2 C<mail_header_style()>
+=head2 mail_header_style()
 
-=head2 C<YYYYMMDD()>
+=head2 YYYYMMDD()
 
-=head2 C<current_time()>
+=head2 current_time()
 
-=head2 C<precise_current_time()>
+=head2 precise_current_time()
 
-=head2 C<stardate()>
+=head2 stardate()
 
 return STAR TREK stardate :-)
 
@@ -88,8 +88,7 @@ sub _date
     my @Month = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
 
-    # XXX-TODO: default timezone is +0900. o.k. ? :-)
-    $TimeZone ||= '+0900';
+    $TimeZone ||= speculate_timezone();
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($time))[0..6];
 
     $date->{'log_file_style'} =
@@ -231,7 +230,7 @@ sub stardate
 }
 
 
-=head2 C<date_to_unixtime($date)>
+=head2 date_to_unixtime($date)
 
 eat patter in Date: and return the corresponding unix time.
 For example, let C<$date> be
@@ -274,37 +273,36 @@ my %zone = ("JST", "+0900",
 sub _log
 {
     my ($s) = @_;
+
+    # XXX_TODO: valid use of STDERR ???
     print STDERR $s, "\n" if defined $s;
 }
 
 
 # Descriptions: convert Date: string to UNIXTIME (sec)
-#    Arguments: STR($in)
+#    Arguments: OBJ($self) STR($in)
 # Side Effects: none
 # Return Value: NUM(unix time)
 sub date_to_unixtime
 {
-    my ($in) = @_;
-    my ($input) = $in;
-    my ($day, $month, $year, $hour, $min, $sec, $pm);
-    my ($shift, $shift_t, $shift_m);
-    my (%month);
-    my ($zone);
+    my ($self, $in) = @_;
+    my ($day, %month, $month, $year, $hour, $min, $sec, $pm, $zone,
+	$shift, $shift_t, $shift_m);
 
-    # XXX-TODO: method-ify date_to_unixtime() ?
-    # XXX-TODO: more documents
-
-    $in =~ s/[\s\n]*$//;
-
-    require 'timelocal.pl';
+    # cheap sanity, but "return 0" is ok?;)
+    return 0 unless defined $in;
+    return 0 unless $in;
 
     # hints
     my $c = 1;
-    for ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-	 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec') {
-	$month{ $_ } = $c++;
+    for my $month ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec') {
+	$month{ $month } = $c++;
     }
 
+    # $in = clean up-ed string. $input = original one.
+    my $input = $in;
+    $in =~ s/[\s\n]*$//;
     if ($in =~ /([A-Z]+)\s*$/) {
 	$zone = $1;
 	if ($zone{$zone} ne "") {
@@ -328,15 +326,15 @@ sub date_to_unixtime
     if ($in =~
 	/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+([\+\-])(\d\d)(\d\d)/) {
 	if ($debug_mti) { print STDERR "Date2UnixTime: Standard\n";}
-	$day   = $1;
-	$month = ($month{$2} || $month) - 1;
-	$year  = $3 > 1900 ? $3 - 1900 : $3;
-	$hour  = $4;
-	$min   = $5;
-	$sec   = $6;
+	$day     = $1;
+	$month   = ($month{$2} || $month) - 1;
+	$year    = $3 > 1900 ? $3 - 1900 : $3;
+	$hour    = $4;
+	$min     = $5;
+	$sec     = $6;
 
 	# time zone
-	$pm    = $7;
+	$pm      = $7;
 	$shift_t = $8;
 	$shift_m = $9;
     }
@@ -346,15 +344,15 @@ sub date_to_unixtime
 	    print STDERR "Date2UnixTime: Standard without \$sec\n";
 	}
 
-	$day   = $1;
-	$month = ($month{$2} || $month) - 1;
-	$year  = $3 > 1900 ? $3 - 1900 : $3;
-	$hour  = $4;
-	$min   = $5;
-	$sec   = 0;
+	$day     = $1;
+	$month   = ($month{$2} || $month) - 1;
+	$year    = $3 > 1900 ? $3 - 1900 : $3;
+	$hour    = $4;
+	$min     = $5;
+	$sec     = 0;
 
 	# time zone
-	$pm    = $6;
+	$pm      = $6;
 	$shift_t = $7;
 	$shift_m = $8;
     }
@@ -362,15 +360,15 @@ sub date_to_unixtime
     # no timezone case ... WHAT SHOULD WE DO ? ;_;
     elsif ($in =~ /([A-Za-z]+)\s+(\d{1,2})\s+(\d+):(\d+):(\d+)\s+(\d{4})\s*/) {
 	if ($debug_mti) { print STDERR "Date2UnixTime: Japan specific?\n";}
-	$month = ($month{$1} || $month) - 1;
-	$day   = $2;
-	$hour  = $3;
-	$min   = $4;
-	$sec   = $5;
-	$year  = $6 > 1900 ? $6 - 1900 : $6;
+	$month   = ($month{$1} || $month) - 1;
+	$day     = $2;
+	$hour    = $3;
+	$min     = $4;
+	$sec     = $5;
+	$year    = $6 > 1900 ? $6 - 1900 : $6;
 
 	# time zone
-	$pm    = '+';
+	$pm      = '+';
 	$shift_t = '09';
 	$shift_m = '00';
     }
@@ -394,13 +392,15 @@ sub date_to_unixtime
 	return 0;
     }
 
-    # get gmtime
+    # calculate shift between local time and UTC
     $shift_t =~ s/^0*//;
     $shift_m =~ s/^0*//;
     $shift_m = 0 unless $shift_m;
+    $shift   = $shift_t + ($shift_m/60);
+    $shift   = ($pm eq '+' ? -1 : +1) * $shift;
 
-    $shift = $shift_t + ($shift_m/60);
-    $shift = ($pm eq '+' ? -1 : +1) * $shift;
+    # conversion to gmtime (UTC)
+    require 'timelocal.pl';
 
     if ($debug_mti) {
 	print STDERR
@@ -412,6 +412,39 @@ sub date_to_unixtime
     _log($@) if $@;
 
     return $t;
+}
+
+
+# Descriptions: speculate timezone and return the string e.g. +0900.
+#    Arguments: NUM($_offset)
+# Side Effects: none
+# Return Value: STR
+sub speculate_timezone
+{
+    my ($_offset) = @_;
+
+    use Time::Timezone;
+    my $offset = $_offset || tz_local_offset();
+    my $hour   = int(abs($offset)/3600);
+    my $shift  = (abs($offset) - $hour*3600)/3600;
+
+    if ($offset > 0) {
+	return sprintf("+%02d%02d", $hour, $shift*60);
+    }
+    elsif ($offset < 0) {
+	return sprintf("-%02d%02d", $hour, $shift*60);
+    }
+    else {
+	return '+0000';
+    }
+}
+
+
+if ($0 eq __FILE__) {
+    print "default\ttimezone = ", speculate_timezone(), "\n";
+    for my $t (qw(-5400 1800 3600 5400 7200)) {
+	print "$t\ttimezone = ", speculate_timezone($t), "\n";
+    }
 }
 
 

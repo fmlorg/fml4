@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digeston.pm,v 1.2 2002/12/15 13:46:29 fukachan Exp $
+# $FML: digeston.pm,v 1.6 2003/09/27 03:00:17 fukachan Exp $
 #
 
 package FML::Command::Admin::digeston;
@@ -27,7 +27,7 @@ enable digest mode for the specified address.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -52,9 +52,17 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: digest mode off/on for the specified user.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update $recipient_map,$digest_recipient_maps
+# Return Value: none
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
@@ -71,7 +79,8 @@ sub process
 
 
 # Descriptions: show cgi menu for digeston
-#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
+#    Arguments: OBJ($self)
+#               OBJ($curproc) HASH_REF($args) HASH_REF($command_args)
 # Side Effects: update $recipient_map
 # Return Value: none
 sub cgi_menu
@@ -80,8 +89,8 @@ sub cgi_menu
     my $r = '';
 
     eval q{
-	use FML::CGI::Admin::User;
-	my $obj = new FML::CGI::Admin::User;
+	use FML::CGI::User;
+	my $obj = new FML::CGI::User;
 	$obj->cgi_menu($curproc, $args, $command_args);
     };
     if ($r = $@) {
@@ -100,7 +109,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

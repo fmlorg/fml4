@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: QMail.pm,v 1.15 2002/12/18 04:43:52 fukachan Exp $
+# $FML: QMail.pm,v 1.18 2003/08/29 15:34:09 fukachan Exp $
 #
 
 package FML::Process::QMail;
@@ -67,17 +67,17 @@ C<NOT YET IMPLERMENTED>.
 sub DotQmailExt
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
+    my $config = $curproc->config();
 
     # get ?
     my $ext = $ENV{'EXT'};
 
     unless ($ext) {
-	Log("no extension address");
+	$curproc->log("no extension address");
 	return;
     }
 
-    &Log("dot-qmail-ext[0]: $ext");
+    &$curproc->log("dot-qmail-ext[0]: $ext");
     my ($key)    = (split(/\@/, $config->{ address_for_post }))[0];
     my ($keyctl) = (split(/\@/, $config->{ address_for_command }))[0];
 
@@ -88,12 +88,12 @@ sub DotQmailExt
 	return '';
     }
 
-    &Log("dot-qmail-ext: $ext");
+    &$curproc->log("dot-qmail-ext: $ext");
     $ext =~ s/^$key//i;
     $ext =~ s/\-\-/\@/i; # since @ cannot be used
     $ext =~ s/\-/ /g;
     $ext =~ s/\@/-/g;
-    &Log("\$ext -> $ext");
+    &$curproc->log("\$ext -> $ext");
 
     # XXX: "# command" is internal represention
     return sprintf("# %s", $ext);
@@ -110,7 +110,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

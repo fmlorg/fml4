@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: DirUtils.pm,v 1.11 2003/01/03 07:05:04 fukachan Exp $
+# $FML: DirUtils.pm,v 1.15 2003/08/29 15:33:57 fukachan Exp $
 #
 
 package FML::Command::DirUtils;
@@ -57,26 +57,26 @@ sub new
 sub dir
 {
     my ($self, $curproc, $command_args, $du_args) = @_;
-    my $config  = $curproc->{ config };
+    my $config  = $curproc->config();
     my $path_ls = $config->{ path_ls };
     my $argv    = $du_args->{ argv };
     my $opt_ls  = '';
 
-    # XXX-TODO: define and use safe "option" regexp in FML::Restriction?
-    # XXX-TODO: safe "option" regexp [-A-Za-z0-9] ?
     # option: permit "ls [-A-Za-z]" syntax
     if (defined($du_args->{ opt_ls })) {
-	my $opt = $du_args->{ opt_ls };
-	if ($opt =~ /^-[A-Za-z]+$/) {
+	use FML::Restriction::Base;
+	my $safe = new FML::Restriction::Base;
+	my $opt  = $du_args->{ opt_ls };
+	if ($safe->regexp_match('command_line_options', $opt)) {
 	    $opt_ls = $opt;
 	}
 	else {
-	    LogWarn("deny ls options '$opt'");
+	    $curproc->logwarn("deny ls options '$opt'");
 	}
     }
 
     # regexp allowed to use here
-    my $dir_regexp = $self->{ _safe }->regexp( 'directory' );
+    my $safe = $self->{ _safe };
 
     # chdir the ml's home dir
     my $ml_home_dir    = $config->{ ml_home_dir };
@@ -85,27 +85,28 @@ sub dir
     # build safe arguments
     my $y = '';
     for my $x (@$argv) {
-	if ($x =~ /^$dir_regexp$/ || $x =~ /^\s*$/) {
+	if ($safe->regexp_match('directory', $x) || $x =~ /^\s*$/) {
 	    $y .= " ". $x;
 	}
     }
 
     if (-x $path_ls) {
 	my $eval = "$path_ls $opt_ls $y";
-	Log("dir: run \"$eval\"");
+	$curproc->log("dir: run \"$eval\"");
 
 	use FileHandle;
 	my $fh = new FileHandle "$eval|";
 	if (defined $fh) {
-	    while (<$fh>) { $curproc->reply_message($_);}
+	    my $buf = undef;
+	    while ($buf = <$fh>) { $curproc->reply_message($buf);}
 	    $fh->close();
 	}
 	else {
-	    LogError("tail to run '$eval'");
+	    $curproc->logerror("tail to run '$eval'");
 	}
     }
     else {
-	LogError("\$path_ls is not found");
+	$curproc->logerror("\$path_ls is not found");
 	croak("\$path_ls is not found");
     }
 }

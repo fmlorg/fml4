@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2002 Ken'ichi Fukamachi
+# Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Scheduler.pm,v 1.20 2002/12/18 04:43:52 fukachan Exp $
+# $FML: Scheduler.pm,v 1.23 2003/04/04 05:05:03 fukachan Exp $
 #
 
 package FML::Process::Scheduler;
@@ -16,19 +16,29 @@ use FML::Config;
 
 =head1 NAME
 
-FML::Process::Scheduler -- Scheduler utility.
+FML::Process::Scheduler -- scheduler.
 
 =head1 SYNOPSIS
 
+    use FML::Process::Scheduler;
+    my $scheduler = new FML::Process::Scheduler $curproc;
+    $curproc->{ scheduler } = $scheduler;
+
 =head1 DESCRIPTION
 
+This class provides utility for scheduler.
+However this module is dummy now.
+
 =head1 METHODS
+
+=head2 new($curproc)
+
+constructor. mkdir $event_queue_dir if needed.
 
 =cut
 
 
-# Descriptions: dummy constructor.
-#               avoid the default fml new() since we do not need it.
+# Descriptions: constructor. mkdir $event_queue_dir if needed.
 #    Arguments: OBJ($self) OBJ($curproc)
 # Side Effects: none
 # Return Value: OBJ
@@ -48,28 +58,6 @@ sub new
 }
 
 
-# Descriptions:
-#    Arguments: OBJ($self) STR($key)
-# Side Effects:
-# Return Value: none
-sub queue_in
-{
-    my ($self, $key) = @_;
-
-    # XXX-TODO: NOT IMPLEMENTED
-}
-
-
-# Descriptions:
-#    Arguments: OBJ($self) HASH_REF($args)
-# Side Effects:
-# Return Value: none
-sub exits
-{
-    # XXX-TODO: NOT IMPLEMENTED
-}
-
-
 =head1 CODING STYLE
 
 See C<http://www.fml.org/software/FNF/> on fml coding style guide.
@@ -80,7 +68,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

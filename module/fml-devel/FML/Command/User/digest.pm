@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 MURASHITA Takuya
+#  Copyright (C) 2002,2003 MURASHITA Takuya
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: digest.pm,v 1.3 2002/12/24 10:19:45 fukachan Exp $
+# $FML: digest.pm,v 1.8 2003/08/29 15:34:00 fukachan Exp $
 #
 
 package FML::Command::User::digest;
@@ -28,7 +28,7 @@ digest mode change on or off
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -53,6 +53,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: digest off/on adapter.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
 # Side Effects: update database for confirmation.
@@ -61,7 +68,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     #
     # XXX-TODO: correct to use primary_*_map for chaddr ?
@@ -84,7 +91,7 @@ sub process
     # if not member, "on" request is wrong.
     unless ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.not_member');
-	LogError("digest request from not member");
+	$curproc->logerror("digest request from not member");
 	croak("digest request from not member");
 	return;
     }
@@ -94,7 +101,7 @@ sub process
     }
 
     if ($mode) {
-	Log("digest $mode");
+	$curproc->log("digest $mode");
 
 	$command_args->{ command_data } = $address;
 	$command_args->{ options }->[0] = $address;
@@ -106,12 +113,12 @@ sub process
 	    $obj->process($curproc, $command_args);
 	}
 	else {
-	    LogError("unknown digest mode");
+	    $curproc->logerror("unknown digest mode");
 	    croak("no such digest mode: off or on");
 	}
     }
     else {
-	LogError("digest: mode not specified");
+	$curproc->logerror("digest: mode not specified");
 	croak("digest: mode not specified");
     }
 }
@@ -127,7 +134,7 @@ MURASHITA Takuya
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 MURASHITA Takuya
+Copyright (C) 2002,2003 MURASHITA Takuya
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

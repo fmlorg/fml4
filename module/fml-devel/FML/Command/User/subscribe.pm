@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: subscribe.pm,v 1.16 2002/12/18 04:22:37 fukachan Exp $
+# $FML: subscribe.pm,v 1.22 2003/08/29 15:34:01 fukachan Exp $
 #
 
 package FML::Command::User::subscribe;
@@ -29,7 +29,7 @@ After confirmation succeeds, subcribe process proceeds.
 
 =head1 METHODS
 
-=head2 C<process($curproc, $command_args)>
+=head2 process($curproc, $command_args)
 
 =cut
 
@@ -54,6 +54,13 @@ sub new
 sub need_lock { 1;}
 
 
+# Descriptions: lock channel
+#    Arguments: none
+# Side Effects: none
+# Return Value: STR
+sub lock_channel { return 'command_serialize';}
+
+
 # Descriptions: subscribe adapter.
 #               we confirm it before real subscribe process.
 #    Arguments: OBJ($self) OBJ($curproc) HASH_REF($command_args)
@@ -63,7 +70,7 @@ sub need_lock { 1;}
 sub process
 {
     my ($self, $curproc, $command_args) = @_;
-    my $config        = $curproc->{ config };
+    my $config        = $curproc->config();
 
     # XXX we handle primary_* . o.k.
     my $member_map    = $config->{ primary_member_map };
@@ -80,6 +87,9 @@ sub process
     use FML::Credential;
     my $cred = new FML::Credential $curproc;
 
+    # exatct match as could as possible.
+    $cred->set_compare_level( 100 );
+
     # if already member, subscriber request is wrong.
     if ($cred->is_member($address)) {
 	$curproc->reply_message_nl('error.already_member',
@@ -91,7 +101,7 @@ sub process
     }
     # if not, try confirmation before subscribe
     else {
-	Log("new subscriber, try confirmation");
+	$curproc->log("new subscriber, try confirmation");
 	use FML::Confirm;
 	my $confirm = new FML::Confirm {
 	    keyword   => $keyword,
@@ -117,7 +127,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
