@@ -1,29 +1,27 @@
 <TITLE>
-Mailing List Server の設計と実装(The Design and Implementation of the fml current Mailing List Server)
+Mailing List Server の設計と実装
+<br>
+The Design and Implementation of the fml current Mailing List Server
 </TITLE>
+<-! -----------------------------------------------------------------------
+<H1>
+Mailing List Server の設計と実装
+</H1>
+<H2>
+The Design and Implementation of the fml current 
+2.x Mailing List Server
+</H2>
 
-<! ###################################################################
-
-	<H1>
-	Mailing List Server の設計と実装
-
-	</H1>
-
-	<H2>
-	The Design and Implementation of the fml current 
-	1.x Mailing List Server
-	</H2>
-
-<! ###################################################################
-
+<-! -----------------------------------------------------------------------
 <HR>
-	ｆｍｌ 
+	fml 2.1 (BEING RELEASE-Prepared、リリース用に調整中)
+	<IMG SRC=p_list.gif>
 <UL>
 
 	<LI>
 	<A HREF=INFO.html>
 	最新の情報(INFO)
-	[fml@phys.titech.ac.jpにメールを出すと返送されるもの]
+	[fml@axion.phys.titech.ac.jpにメールを出すと返送されるもの]
 	</A>
 
 	<LI>
@@ -38,9 +36,11 @@ Mailing List Server の設計と実装(The Design and Implementation of the fml curren
 
 	<LI>
 	<A HREF=op/index.html>
-	Fml オペレイションマニュアル (旧 FAQ)
+	Fml 2.1 の設計と実装 (Devil's Book for fml)
 	<br>
-	Fml System Management Manual (doc/smm/)
+	The Design and Implementation of the Fml Mailing List Server 
+	<br>
+	(fml-source-tree/doc/smm/)
 	</A>
 
 	<LI>
@@ -54,50 +54,48 @@ Mailing List Server の設計と実装(The Design and Implementation of the fml curren
 	</A>
 </UL>
 
-<! ###################################################################
-<PRE>
-FIGURE:
-   sendmail 
-	fml (fml.pl original form)
-	→ :include: "|fml.pl $FML'DIR  $FML'LIBDIR "
-
-	sid (ListServ Like Interface for libfml.pl)
-	→ sid@DOMAIN 
-	   subscription, index, "command list" syntax for multiple ML's
-
-	fml_local (.forward interface with simple user functions for fml.pl)
-	→ ~/.forward → libexec/fml_local.pl 	→ fml.pl
-						→ mail.local to /var/mail/user
-						→ USER's custamized functions
-</PRE>
-
-<! ###################################################################
-
 <HR>
 ソースへのリンク
 <UL>
+
 	<LI>
-	<A HREF=ftp://ftp.phys.titech.ac.jp/pub/net/fml-current>
+	<A HREF=fml-current.tar.gz>
+	fml 最新版ソースコード一式(fml-current.tar.gz)
+	</A>
+
+	<LI>
+	<A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/>
 	fml のcurrentソースコード (fml-current)
+	<br>
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 	</A>
 	<br>
-	lha, ish and mime_pls.* も一緒に置いてあります。御利用下さい
-	<br>
-	libexec の fml_local と SID の部分を取り出したセットもあります。
+	lha, ish and mime_pls.* sendmail, bind, ntperl 
+	等も一緒に置いてあります。御利用下さい
 	<br>
 	あと、
-	<A HREF=ftp://ftp.phys.titech.ac.jp/pub/net/fml-current/snapshot>
+	<A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/>
 	snapshot
 	</A>
 	の下にはcurrentのソースが広がった形でおいてあります。
 
-
-	その他
-	</H1>
 	<LI>
-	<A HREF=http://www.wide.ad.jp/sendmail.html>
-	Sendmail
+	<A HREF=http://www.sendmail.org/?
+	http://www.sendmail.org
 	</A>
+
+	<A HREF=http://www.perl.com/CPAN/ports/>
+	http://www.perl.com/CPAN/ports/
+	</A>
+
+	<A HREF=http://www.perl.org/>
+	http://www.perl.org
+	</A>
+
+	<A HREF=ftp://ftp.iis.u-tokyo.ac.jp/pub6/winsock/papa.indstate.edu/WindowsNT/Daemons/>
+	ftp://ftp.iis.u-tokyo.ac.jp/pub6/winsock/papa.indstate.edu/WindowsNT/Daemons/
+	</A>
+
 </UL>
 
 <! ###################################################################
@@ -204,25 +202,21 @@ Binary
 Winbiff
 </A>
 
-<br>
-<PRE> ########## </PRE>
-<br>
-
 <A HREF=ftp://ftp.ipc.chiba-u.ac.jp/ftp.kyoto-u.ac.jp/.u3/doc/MscSummary-190-240.txt.Z>
 MscSummary-190-240.txt.Z
 </A>
 <br>
 
-<PRE> ########## </PRE>
 <A HREF=ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz>
 ftp://ftp.lab.kdd.co.jp/usenet/fj.sources/1995/jan/mime_pls-2.00alpha.tar.gz
 </A>
 <br>
 
-<H2>HOME PAGE:   
-<A HREF=http://www.phys.titech.ac.jp/uja/index.html>
-fukachan@phys.titech.ac.jp
+<H2>
+<br><A HREF=http://www.sapporo.iij.ad.jp/staff/fukachan/>
+http://www.sapporo.iij.ad.jp/staff/fukachan/
+<br>
 </A>
-
-<! ###################################################################
-
+<A HREF=mailto:fukachan@sapporo.iij.ad.jp>
+fukachan@sapporo.iij.ad.jp
+</A>
