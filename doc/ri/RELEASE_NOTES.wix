@@ -49,8 +49,73 @@ the design and implementation of Mailing List server, perl, operating
 systems and so on.
 
 
-********** UNTIL 1999/04/06 *************
+********** UNTIL 1999/07/02 *************
 
+Date:    Fri, 2 Jul 1999 03:36:36 +0900
+Thanks to: OGAWA Kunihiko <kuni@edit.ne.jp>
+In fml-support ML's Count: 06412
+
+libexpire.pl patch
+
+---------------------------------------
+Date:    Mon, 28 Jun 1999 20:45:36 +0900
+Thanks to: Koji Sudo <koji@cherry.or.jp>
+In fml-support ML's Count: 06384
+
+fix @DenyProcedure 'make secure' does.
+
+------------------------------------------
+Date:    Thu, 24 Jun 1999 17:58:05 +0900
+Thanks to: Atushi Sakauchi <sakauchi@micon.co.jp>
+In fml-support ML's Count: 06368
+
+patch to fix libcrosspost.pl
+
+------------------------------------------
+Date:    Sat, 5 Jun 1999 18:42:15 +0900
+Thanks to: Mikage Sawatari (Taku Sano) <mikage@mikage.to>
+In fml-support ML's Count: 06249
+
+VERPs
+
+pipelining flow control based on this idea (but not use this idea)
+
+------------------------------------------
+Date:    Fri, 28 May 1999 16:25:36 +0900
+Thanks to: <t-nakano@ccs.mt.nec.co.jp>
+In fml-support ML's Count: 06230
+
+special filter for each multipart block
+
+&ContentHandler();
+&ADD_CONTENT_HANDLER();
+
+see fml-support ML articles for more details. For example, 
+6229 6230 6233 6234 6235 6242 6243 6244 6245 6246 6247 6248 6253 6257
+6263 6265 6270 6276 6313 6314 6331 6332 6333 6346 6348 6349 6350 6374
+6379 6381 6393 6396 6397 6408 ...
+
+------------------------------------------
+Date:    Sat, 15 May 1999 15:49:34 +0900
+Thanks to: Hiroshi Kokubo <kokubo@okisoft.co.jp>
+In fml-support ML's Count: 06219
+
+patch for $AGAINST_MAIL_WITHOUT_REFERENCE
+
+------------------------------------------
+Date:    Thu, 13 May 1999 21:08:33 +0900
+Thanks to: Ritsu Seo <rseo@osa.att.ne.jp>
+In fml-support ML's Count: 06216
+
+document typo
+
+------------------------------------------
+Date:    Thu, 13 May 1999 13:49:22 +0900
+Thanks to: AOKI Tetsuo <aoki@crl.go.jp>
+
+document typo
+
+---------------------------------------------
 
 Date:    Tue, 6 Apr 1999 00:02:37 +0900
 Thanks to: Tomoyuki Asakawa <tomoyuki@poison.marimo.or.jp>
