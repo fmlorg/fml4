@@ -74,8 +74,14 @@ directory が存在すれば引数の順に $DIR、$LIBDIR にセットされます。
 
 	-d		デバッグモード
 			（ＭＬへの配送以外すべてを実行可能）
+	-d2		debug mode level 2
+			debug message is logged to $DEBUG_LOGFILE
+			(== $DIR/log.debug in default).
 =E
 	-d		debug mode (FML does not distribute)
+	-d2		debug mode level 2
+			debug message is logged to $DEBUG_LOGFILE
+			(== $DIR/log.debug in default).
 
 	-bt   		アドレステストモード	(Become Test)
 			メンバーチェックのところまで実行する。
