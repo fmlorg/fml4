@@ -3,6 +3,17 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/12
+
+   fix cf/config which should be read .fml/system if exists
+	(PR fml-support: 08636 by Masayuki FUKUI)
+
+   fix NT installer
+
+	Windows 2000/NT でのインストーラの不具合を直す
+		エラーをつぶす
+		perl path がうまくかわらないのをなおす
+
 2000/09/10
 
    ADD_FIELD() always convert the args to be capitalized
