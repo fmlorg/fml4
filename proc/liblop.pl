@@ -82,14 +82,26 @@ sub SearchKeyInSummary
 sub MemberStatus
 {
     local($who) = @_;
-    local($s, $rcpt, $opt, $d, $mode);
-    
-    &use('utils');
-
-    open(ACTIVE_LIST, $ACTIVE_LIST) || 
-	(&Log("cannot open $ACTIVE_LIST when $ID:$!"), return "No Match");
+    local($r);
+    local(@file) = @ACTIVE_LIST;
 
     &Log("Status [$who]");
+
+    &use('utils');
+
+    &Uniq(*file);
+    for (@file) { $r .= &DoStatusInFile($who, $_);}
+
+    $r ? $r : "$who is NOT matched\n";
+}
+
+sub DoStatusInFile
+{
+    local($who, $file) = @_;
+    local($s, $rcpt, $opt, $d, $mode);
+
+    open(ACTIVE_LIST, $file) || 
+	(&Log("cannot open $ACTIVE_LIST when $ID:$!"), return "No Match");
 
     in: while (<ACTIVE_LIST>) {
 	next if /^\#\#/o;
@@ -138,8 +150,7 @@ sub MemberStatus
     }
 
     close(ACTIVE_LIST);
-
-    $s ? $s : "$who is NOT matched\n";
+    $s;
 }
 
 
