@@ -1673,6 +1673,9 @@ sub do_newml
     &Conv($ml, "$EXEC_DIR/etc/makefml/fml.c",   "$ML_DIR/$ml/fml.c");
     &FixIncludeHeader;
 
+    # fmlserv (uid != owner ) can read help
+    ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
+
     # doc/drafts -> help,deny,guide,objective
     &Conv($ml, "$EXEC_DIR/doc/drafts/help", "$ML_DIR/$ml/help");
     &Conv($ml, "$EXEC_DIR/doc/drafts/deny", "$ML_DIR/$ml/deny");
