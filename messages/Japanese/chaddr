@@ -1,0 +1,17 @@
+chaddr.no_args:
+	エラー: 引数がありません。
+	_ARG0_コマンドは
+	   chaddr 古いアドレス 新しいアドレス
+	という形式です。
+
+chaddr.same_args:
+	エラー: 引数が不正(古いアドレス == 新しいアドレス)です。
+	_ARG0_コマンドは
+	   chaddr 古いアドレス 新しいアドレス
+	という形式です。
+
+chaddr.invalid_addr:
+	エラー: 他人のアドレス<_ARG0_>の変更は認められません。
+
+chaddr.from.oldaddr:
+	古いアドレスから出して下さい。
