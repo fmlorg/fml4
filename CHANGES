@@ -4,6 +4,16 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/12/19
+
+   kern/fml.pl (2.140-2.141):
+        perl module の include path を修正
+        fml 附属モジュールが最優先です。
+
+   bin/gen_summary.pl
+	add -B into help message (PR by fml-help:1273)
+	fix typo of Getopts(): m: -> m
+
 2001/12/14
 
    update module/fml-devel
@@ -107,7 +117,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.226 2001/11/28 14:16:58 fukachan Exp $
+	add $FML: CHANGES,v 1.227 2001/12/14 14:59:43 fukachan Exp $
 
 2001/10/03
 
