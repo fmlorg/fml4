@@ -4,7 +4,6 @@
 				¿¼Ä® ¸­°ì
 =E
 				Ken'ichi Fukamachi
-.~HTML_PRE
 
    proc/libmoderated.pl (2.10-2.11)
 
@@ -194,3 +193,5 @@ $Id$
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
+
+.~HTML_PRE
