@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: gen_summary.pl,v 2.6 2001/05/09 15:22:50 fukachan Exp $
+# $FML$
 #
 
 $rcsid   = q$Id$;
@@ -17,7 +17,7 @@ $rcsid   = q$Id$;
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vVTHM:L:o:m");
+&Getopts("d:f:ht:I:D:vVTHM:L:o:mB");
 
 eval(' chop ($PWD = `pwd`); ');
 $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
@@ -33,6 +33,7 @@ $debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
 $Minimum         = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
+$NoBracket       = $opt_B;
 
 push(@INC, split(/:/,$opt_I));
 $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
@@ -106,7 +107,9 @@ sub InitGenSummary
     # h:date -> Now 
     # Date: Fri, 28 Mar 97 01:31:00 +0900
     # 97/03/19 12:16:01 [1:fukachan@sappor] 
-    $DatePat = '(?:\w\w\w,\s)?(\d\d)\s(\w\w\w)\s(\d+)\s(\d\d):(\d\d):(\d\d)';
+    # $DatePat = '(?:\w\w\w,\s)?(\d\d)\s(\w\w\w)\s(\d+)\s(\d\d):(\d\d):(\d\d)';
+    # 01/11.27 fml-help: 01254
+    $DatePat = '(?:\w\w\w,\s)?(\d\d?)\s(\w\w\w)\s(\d+)\s(\d\d):(\d\d):(\d\d)';
 }
 
 sub Ctl
@@ -150,6 +153,9 @@ sub Ctl
 
 	# fml-support: 02007
 	$s =~ s/^\s*//; # required???
+
+        # fml-help: 01251
+        if ($NoBracket){ $s =~ s/\[($BRACKET)*[:,\s]*[\d+]*\]\s+//; }
 
 	# Date -> Now
 	# Date: Fri, 28 Mar 1997 01:31:00 +0900
@@ -230,6 +236,7 @@ sub Usage
     -f    config.ph;
     -m    use mime conversion;
     -L    the number of Last sequence to process (hence MIN = MAX - $opt_L);
+    -B    strip bracket
     ;
     SPOOL $SPOOL_DIR;
     ;#;
