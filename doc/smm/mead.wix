@@ -94,6 +94,24 @@ threshold, mead.pl does "notify removing address to $MAINTAINER" or
 "call makefml and remove error mail addresses automatically". In
 default "notify removing address to $MAINTAINER".
 
+
+.S	設定ファイル
+=E.S	Configuration file
+
+コマンドラインの -f config-file オプションで設定ファイル(perl script)
+を指定できます。コマンドラインオプションはこのファイルの後に評価される
+ので、コマンドラインオプションの方が強いです。
+デフォールトでは設定ファイルは使っていません。すべてコマンドラインです。
+=E
+"-f configfile" option loads configuration from this file at the first
+stage.  Other command line options can overwrite it.  In default
+mead.pl does not use the configuration file but use only command line
+options.
+
+e.g.
+	mead.pl -f /usr/local/fml/mead_config.ph ...
+
+
 .S	mead.pl コマンドラインオプション
 =E.S	mead.pl Command Line Option
 
@@ -104,8 +122,11 @@ Options:
     -d              debug mode on
     -m mode         mode; report or auto ('report' in default).
 
-    -e number      expire of error data cache (unit is 'day')
-    -i number      check interval (unit is 'second')
+    -f configfile   load configuration from this file at the first
+                    Other command line options can overwrite it.
+
+    -e number       expire of error data cache (unit is 'day')
+    -i number       check interval (unit is 'second')
 
     -C cachefile    mead data cache file
     -D directory    $DIR (mead.pl working directory)
