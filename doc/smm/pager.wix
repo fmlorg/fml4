@@ -1,4 +1,5 @@
 .A	PAGER (ポケベル) を呼ぶための前処理プログラム
+.l	pager
 
 注意: モデムを呼ぶ部分については、ＯＳ、ハード依存なので聞かれても困り
 ます。またこまかいパラメータは pager に依存です。だから聞かないでね(つぅ
@@ -7,7 +8,6 @@
 
 .S	euc2jiskuten.pl 
 .k	euc2jiskuten.pl 
-.k	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/calling-pager/
 
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/calling-pager/
 
