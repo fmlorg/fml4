@@ -1,22 +1,26 @@
 .C	もろもろ
+=E.C	misc
 
 .S	NetBSD の場合の注意
+=E.S	NetBSD specific topics
 
-   openldap ではなく /usr/pkgsrc/devel/ldapsdk/ をいれる。
+openldap ではなく /usr/pkgsrc/devel/ldapsdk/ をいれる。
+=E
+I used /usr/pkgsrc/devel/ldapsdk/ not openldap.
 
 	% LDAPSDKDIR=/usr/pkg perl Makefile.PL 
 	% make
 	# make install
 
-
 .S	データベースの設計についての２、３の考察…
+=E.S	a few condiderations
 
 データベースの構造をいかに設計するべきかが肝心な点だとおもうんですが、
 斜め読みのせいかもしれないんですが…
 やっぱり肝心な点が今一つ素人にはわからないっす(素人過ぎ？)ねぇ。
 
-LDAP の例
-.q     
+LDAP Schema Example:
+
      cn=$file,dc=$ml,dc=$FQDN
      
      cn=actives,dc=elena,dc=fml.org
@@ -31,6 +35,16 @@ LDAP の例
               ml=$ml
              /    |
      cn=actives   cn=members
-.~q
+
 
 .# $Id$
+
+
+
+
+
+
+
+
+
+

@@ -6,10 +6,18 @@
 例えば
 spool/100 spool/102 のように 101 がとんでしまうと
 だめです。適当に 101 をでっちあげるとうごくようになります
+=E
+spool/100 spool/102 
+
 
 .S	アップグレードしたら mget などがうまく動かなくなった
+=E.S	mget not works well after upgrade
 
    config.ph で $INSECURE_SYSTEM = 1; とすると動いたりしますか？
+=E
+try 
+	$INSECURE_SYSTEM = 1;
+in config.ph.
 
 ＃ fml 2.2_BETA 以前のものからアップグレードした場合あたりで
 ＃ ありうるようです。

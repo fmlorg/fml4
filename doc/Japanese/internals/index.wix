@@ -1,6 +1,8 @@
 .HTML_PRE
 .# .__repl_title__
                 内部構造や実装の理屈についてなど
+=E
+		Internals
 
 .toc
 .~HTML_PRE

@@ -2,6 +2,7 @@
 .l	errorlist
 
 .S	perlのだしているエラー
+=E.S	error messages from perl
 
 これはおそらくMTAの問題ではなくfml自体( fml.pl )を実行し損なっていると
 いう意味です。

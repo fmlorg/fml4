@@ -1,10 +1,14 @@
 .HTML_PRE
 	その他(うまく分類できなかった)いくつかのこと
+=E
+	miscellaneous topics
 
 .toc
 .~HTML_PRE
 
 .P	いろいろ
+=E.P	misc
+
 .include examples.wix
 .include lock.wix
 .include spool.wix
@@ -15,6 +19,7 @@
  
 
 .P	レンタルサーバというかISPのサービスというか…
+=E.P	rentalled servers (e.g. ISP ...)
 .include isp_specific.wix
 
 

@@ -2,8 +2,12 @@
 =E.C	Overview
 
 フィルタリングについては => .ptr{filter}
+=E
+Filtering => .ptr{filter}
 
 リレーについて => .ptr{relay}
+=E
+Relay  => .ptr{relay}
 
 このドキュメントは配送にまつわるその他もろもろについて述べます。
 

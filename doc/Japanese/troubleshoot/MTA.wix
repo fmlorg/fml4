@@ -2,6 +2,7 @@
 .l	troubles.mailserv
 
 .S	エラーメールの例
+=E.S	Error message examples
 
 エラーメールが返ってきたら,こんな風になっていると思います。
 この

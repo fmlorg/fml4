@@ -1,8 +1,12 @@
 .C	Header
 
 .S	メールサーバがグリニッジな時間をつけてるぞ！
+=E.S	Date: is GMT ?
 
 素の qmail なら、そういうものです。いやなら patch をあてましょう。
+=E
+If you use qmail, that is qmail.
+
 .xref http://www.qmail.org/
 
 

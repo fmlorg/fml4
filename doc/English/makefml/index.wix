@@ -1,5 +1,7 @@
 .HTML_PRE
 		makefml (/usr/local/fml/makefml) 卞勾中化
+=E
+		makefml (/usr/local/fml/makefml)
 
 .toc
 .~HTML_PRE
@@ -7,9 +9,11 @@
 .# .__repl_include__
 
 	←←← 引分引分踏五銨戶匹允 ←←←
+=E
+	now under construction
 
 .include overview.wix
-.include toggle.wix
+.# .include toggle.wix
 .include edit.wix
 .include getopts.wix
 .include pgp.wix

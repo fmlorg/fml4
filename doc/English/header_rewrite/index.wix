@@ -1,6 +1,8 @@
 .HTML_PRE
 .# .__repl_title__
                 ヘッダの書き換え
+=E		
+		header rewriting
 
 .toc
 .~HTML_PRE

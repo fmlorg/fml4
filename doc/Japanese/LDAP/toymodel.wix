@@ -1,11 +1,12 @@
 .C	おもちゃのモデル
+=E.C	toymodel
 
-
-libldap.pl （どっかにおいてね /usr/local/fml )
 .url ../examples/ldap-toymodel.pl
 
-
 config.ph で設定するデータベースの部分の例(差分)
+=E
+config.ph examples
+
 .url ../examples/ldap-config.ph
 
 .q

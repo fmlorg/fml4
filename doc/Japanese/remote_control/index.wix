@@ -1,6 +1,8 @@
 .HTML_PRE
 .# .__repl_title__
 	REMOTE_ADMINISTRATION: メールで遠隔からfmlを操作する
+=E
+	REMOTE_ADMINISTRATION: control fml by mails
 
 .toc
 .~HTML_PRE

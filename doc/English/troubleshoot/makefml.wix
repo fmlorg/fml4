@@ -9,6 +9,8 @@ owner,group のことではなくて group writable "permission" がやばいとい
 
 2. もし、意図せず、このような↓ことになっているなら group writable を
    はずしてください
+=E
+Check the group writable or not. For example, this is bad premission.
 
 >drwxrwxr-x  3 fml   fml    512 Jun  7 23:39 .
 >drwxrwxr-x  7 bin   mail  7168 Jun 13 16:07 ..
