@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" mailing list server/manager package
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+
+<CENTER>
+how to use virus_check.ph 
+</CENTER>
+
+
+<P>
+download 
+<A HREF=http://www.fml.org/fml/Japanese/examples/virus_check.ph>
+http://www.fml.org/fml/Japanese/examples/virus_check.ph
+</A>
+, which is the rule for EnvelopeFilter.
+
+If you apply these rules for all mailing lists, 
+it is better to use 
+/var/spool/ml/etc/fml/site_force.ph.
+
+For example, put virus_check.ph at
+/var/spool/ml/etc/fml/virus_check.ph.
+Please write the following perl scripts in
+/var/spool/ml/etc/fml/site_force.ph.
+<PRE>
+eval require 'virus_check.ph';
+1;
+</PRE>
+
+
+<P> references:
+
+<BR>
+fintering
+<A HREF=http://www.fml.org/fml/English/filter/index.html>
+http://www.fml.org/fml/English/filter/index.html
+</A>
+
+<BR>
+fml tutorial
+<A HREF=http://www.fml.org/fml/English/tutorial.html>
+http://www.fml.org/fml/English/tutorial.html
+</A>
+
+<PRE>
+Copyright (C) 1993-2001 Ken'ichi Fukamachi
+         All rights reserved.
+
+$Id$
+</PRE>
+</BODY>
+</HTML>

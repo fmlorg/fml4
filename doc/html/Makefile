@@ -7,4 +7,4 @@
 #
 
 DOC_MULTIVIEW_HTML  = index download anoncvs search
-DOC_MULTIVIEW_HTML += menu menubar
+DOC_MULTIVIEW_HTML += menu menubar virus_check

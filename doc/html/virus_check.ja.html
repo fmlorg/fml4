@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" mailing list server/manager package
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=ISO-2022-JP">
+<LINK rev="made" href="mailto:fml-bugs@fml.org">
+<LINK rel="stylesheet" 
+	    type="text/css" href="fml.css">
+<LINK rev="Contents" href="index.html">
+<LINK rev="alternate" lang="en" href="index-e.html">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+
+<CENTER>
+virus_check.ph の使い方
+</CENTER>
+
+
+注意: メーリングリスト名やディレクトリは適当に読みかえてくださいここで
+はデフォールトの値( /usr/local/fml と /var/spool/ml )を使って説明して
+います。
+
+<P>
+<A HREF=http://www.fml.org/fml/Japanese/examples/virus_check.ph>
+http://www.fml.org/fml/Japanese/examples/virus_check.ph
+</A>
+はちょっとしたEnvelope Filter で使うフィルタルール集です(不定期に更新
+しています)。
+
+
+このファイルをダウンロードして、使って下さい。
+全ＭＬにこれらのルールを一気に適用するためには
+    /var/spool/ml/etc/fml/site_force.ph
+に付け加えて使用するとよいでしょう。
+
+たとえば 
+	/var/spool/ml/etc/fml/virus_check.ph
+におき、
+	/var/spool/ml/etc/fml/site_force.ph 
+には
+<PRE>
+eval require 'virus_check.ph';
+1;
+</PRE>
+などとします。
+
+
+<P>リンク
+
+<BR>
+フィルタリング全般
+<A HREF=http://www.fml.org/fml/Japanese/filter/index.html>
+http://www.fml.org/fml/Japanese/filter/index.html
+</A>
+
+<BR>
+fml チュートリアル
+<A HREF=http://www.fml.org/fml/Japanese/tutorial.html>
+http://www.fml.org/fml/Japanese/tutorial.html
+</A>
+
+<PRE>
+Copyright (C) 1993-2001 Ken'ichi Fukamachi
+         All rights reserved.
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
