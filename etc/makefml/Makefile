@@ -28,6 +28,7 @@ all:
 	@ echo "			e.g. disable a user to get member list"
 	@ echo "			set the mail size limit,"
 	@ echo "			filter on, traffic monitor on ..."
+	@ echo "\"make doc-template\"	create documents e.g. help,welcome,..."
 	@ echo ""
 
 config.ph: cf
@@ -51,6 +52,9 @@ spool2html:
 
 config:
 	perl _EXEC_DIR_/makefml config _ML_
+
+doc-template:
+	perl _EXEC_DIR_/makefml create-doc-template _ML_
 
 secure:
 	@ echo "Converting cf to be more secure"
