@@ -329,13 +329,13 @@ fukachan@sapporo.iij.ad.jp を管理者に加える時は
 だけを、パスワード認証もしている時は
 
    # admin addadmin fukachan@sapporo.iij.ad.jp
-   # admin inipass  fukachan@sapporo.iij.ad.jp パスワード
+   # admin initpass  fukachan@sapporo.iij.ad.jp パスワード
 
 をコマンドで送りこみます。
 
 より良いのは、
 
-   # admin inipass  fukachan@sapporo.iij.ad.jp パスワード
+   # admin initpass  fukachan@sapporo.iij.ad.jp パスワード
 
 の代わりに、そのマシンで (ML の HOME で)
 
