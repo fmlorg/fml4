@@ -296,15 +296,15 @@ sub TarZXF
 sub ipc
 {
     local(*ipc, *r) = @_;
-    local($err) = "Error of IPC";
+    local($err)     = "Error of IPC";
 
     local($addrs)  = (gethostbyname($ipc{'host'} || 'localhost'))[4];
-    local($proto)  = (getprotobyname($ipc{'tcp'}))[2];
+    local($proto)  = (getprotobyname($ipc{'tcp'} || 'tcp' ))[2];
     local($port)   = (getservbyname($ipc{'serve'}, $ipc{'tcp'}))[2];
     $port          = 13 unless defined($port); # default port:-)
     local($target) = pack($ipc{'pat'}, &AF_INET, $port, $addrs);
 
-    socket(S, &PF_INET, &SOCK_STREAM, 6) || (&Log($!), return $err);
+    socket(S, &PF_INET, &SOCK_STREAM, $proto) || (&Log($!), return $err);
     connect(S, $target)                  || (&Log($!), return $err);
     select(S); $| = 1; select(STDOUT); # need flush of sockect <S>;
 
