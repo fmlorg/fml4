@@ -199,7 +199,7 @@ sub ModeratedDeliveryTypeII
     open(APP, "> $f") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
     print APP $h;
-    print APP "\n$e{'Body'}\n";
+    print APP "\n", $e{'Body'}, "\n";
     close(APP);
 
     open(APP, "> $f_info") || (&Log("cannot open $f"), return '');

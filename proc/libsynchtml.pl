@@ -564,7 +564,8 @@ sub Write
 	&ParseMultipart($dir, $file, *e);
     }
     else {
-	$_ = $e{"Body"};
+	# XXX malloc() too much?
+	$_ = $e{'Body'};
 	&ConvSpecialChars(*_);
 	# s#(http://\S+)#<A HREF="$1">$1</A>#g;
 	s#(http://\S+)#&Conv2HRef($1)#ge;
@@ -683,6 +684,7 @@ sub ParseMultipart
 	print STDERR "boundary='$boundary'\n" if $debug;
     }
  
+    # XXX malloc() too much?
     # Split Body
     local($decode, $sep, $base64, $quoted_printable, $pb);
     local($buf) = $e{'Body'};

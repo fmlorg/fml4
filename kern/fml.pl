@@ -597,6 +597,7 @@ sub Parse
 	$Envelope{'Body'} .= $_;
     }
 
+    # XXX malloc() too much?
     # Split buffer to Header and Body
     $p = index($Envelope{'Body'}, "\n\n");
     $Envelope{'Header'} = substr($Envelope{'Body'}, 0, $p + 1);
@@ -1960,15 +1961,15 @@ sub Write2
 {
     local($s, $f, $o_append) = @_;
 
-    if ($o_append && $s && open(APP, ">> $f")) { 
-	select(APP); $| = 1; select(STDOUT);
-	print APP "$s\n";
-	close(APP);
+    if ($o_append && $s && open(WRITE2_OUT, ">> $f")) { 
+	select(WRITE2_OUT); $| = 1; select(STDOUT);
+	print WRITE2_OUT $s, "\n";
+	close(WRITE2_OUT);
     }
-    elsif ($s && open(APP, "> $f")) { 
-	select(APP); $| = 1; select(STDOUT);
-	print APP "$s\n";
-	close(APP);
+    elsif ($s && open(WRITE2_OUT, "> $f")) { 
+	select(WRITE2_OUT); $| = 1; select(STDOUT);
+	print WRITE2_OUT $s, "\n";
+	close(WRITE2_OUT);
     }
     else {
 	local(@caller) = caller;
@@ -2648,9 +2649,11 @@ sub EnvelopeFilter
     # skip the first multipart separator block
     # evalute the first multipart block
     if ($e{'MIME:boundary'}) {
+	# XXX malloc() too much?
 	$_ = &GetFirstMultipartBlock(*e, $e{'Body'}) || $e{'Body'};
     }
     else {
+	# XXX malloc() too much?
 	$_ = $e{'Body'};
     }
 

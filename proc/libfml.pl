@@ -54,7 +54,7 @@ sub DoProcedure
     local(@Fld, $misc, @misc, %misc, $to, $mailbody, $org_str);
     local($trap_counter);
     $to       = $e{'Addr2Reply:'}; # backward compatible (for COMMAND_HOOK);
-    $mailbody = $mb || $e{'Body'};
+    $mailbody = $mb || $e{'Body'}; # XXX malloc() too much?
 
     # Security: Mail Traffic Information
     if ($USE_MTI) { 
@@ -787,6 +787,8 @@ sub ProcForward
     local($proc, *Fld, *e, *misc) = @_;
     
     &Log('Msg');
+
+    # XXX malloc() too much?
     &Warn("Msg ($From_address)", 
 	  "*** Forwarded Message to the maintainer ***\n".
 	  "From: $From_address\n".

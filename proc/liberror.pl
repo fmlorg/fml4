@@ -39,6 +39,8 @@ sub NotifyMailSizeOverFlow
     # forwarded to maintainer
     $e{'ctl:smtp:stdin2socket'} = 1;
     &Log("Forwarded to \$MAINTAINER");
+
+    # XXX malloc() too much? though restricted by upper bound here.
     &Warn($subj, $body.$e{'Header'}."\n".$e{'Body'});
     undef $e{'ctl:smtp:stdin2socket'};
 

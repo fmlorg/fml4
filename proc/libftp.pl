@@ -316,7 +316,7 @@ sub Ftpmail
 	push(@to, $FTPMAIL_SERVER);
 
 	# Mail to Ftpmail Server
-	print STDERR "$d{'Hdr'}\n$d{'Body'}\n";
+	print STDERR $d{'Hdr'}, "\n", $d{'Body'}, "\n";
 	&Smtp(*d, *to);
 
 	# Log

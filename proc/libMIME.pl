@@ -55,6 +55,7 @@ sub EnvelopeMimeDecode
     local(*e) = @_;
 
     if (1) {
+	# XXX malloc() too much?
 	$e{'Hdr'}  = &DecodeMimeStrings($e{'Hdr'});
 	$e{'Body'} = &DecodeMimeStrings($e{'Body'});
     }

@@ -810,6 +810,7 @@ sub ProcAdminForward
     $lines = 0;
     $skip_p = 1;
 
+    # XXX malloc() too much?
     for  (split(/\n/, $e{'Body'})) {
 	# remove admin procedures until forw
 	undef $skip_p if /admin\s+forward/i;
@@ -819,6 +820,7 @@ sub ProcAdminForward
 	$lines++;
     }
 
+    # XXX malloc() too much?
     # not include command 
     $e{'Body'} = $s;
 
