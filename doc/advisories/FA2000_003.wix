@@ -25,6 +25,7 @@ Topic:	Love Letter Worm
   "CERT Advisory CA-2000-04 Love Letter Worm"
 .url http://www.cert.org/advisories/CA-2000-04.html
 
+.url http://www.f-secure.com/v-descs/love.htm
 .url http://www.sophos.com/virusinfo/analyses/vbsloveleta.html
 .url http://www.sophos.com/virusinfo/analyses/trojloveleta.html
 .url http://www.thepope.org/index.pl?node_id=140
@@ -41,6 +42,30 @@ See INSTALL manual for more details on how to configure fml.
 .url	http://www.fml.org/fml/INSTALL/
 
 "CERT Advisory CA-2000-04 Love Letter Worm"
+
+.C	Love Letter Worn
+
+.url http://www.f-secure.com/v-descs/love.htm
+
+.S	original Love Letter
+
+Subject: ILOVEYOU
+
+添付ファイル: VB script
+=E
+Attachment: VB script
+
+.S	Variant 1
+
+  Subject:    Susitikim shi vakara kavos puodukui...
+  Body:       kindly check the attached LOVELETTER coming from me.
+  Attachment: LOVE-LETTER-FOR-YOU.TXT.vbs
+
+.S	Variant 2
+
+  Subject:    fwd: Joke
+  Attachment: Very Funny.vbs
+
 
 .P	フィルタリング
 =E.P	Filtering
