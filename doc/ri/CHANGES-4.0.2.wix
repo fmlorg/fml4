@@ -7,7 +7,20 @@
 	* 新機能は fml 5.0 のモジュールベースに変更 
 	* IPv6 をデフォルトで使う
 	* サマータイムの考慮
+	* bug fixes
+		FreeBSD での CGI 
 
+2001/06/14
+
+   kern/fml.pl
+	apply patch by OGAWA Kunihiko <kuni@edit.ne.jp> (fml-support: 09378)
+	add X-Dispatcher, X-Newsreader, User-Agent to @HdrFieldsOrder
+
+	@HdrFieldsOrder に追加する。元々ヘッダは素通しなので、
+	並ぶ順がきれいか否か程度の意味しかない:)
+
+   www/lib/libcgi_makefml.pl (1.60-1.61)
+	add /usr/local/sbin as a search path for postalias
 
 2001/05/11
 
@@ -48,7 +61,7 @@
 	一つは IPv6 のため、もう一つは mead で使う
 	エラーメール解析エンジンの輸入でした。
 
-$FML: CHANGES-4.0.2.wix,v 1.1 2001/05/12 13:02:34 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.2 2001/05/25 12:09:44 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
