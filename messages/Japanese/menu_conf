@@ -246,7 +246,7 @@ menu_conf.OPTION.SMTP:
 	メール配送関係
 
 menu_conf.OPTION.SMTP.USE_OUTGOING_ADDRESS:
-	
+	OUTGOING ハックを使う
 
 menu_conf.OPTION.SMTP.USE_VERP:
 	VERPsを使う
