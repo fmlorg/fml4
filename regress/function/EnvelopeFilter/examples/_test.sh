@@ -1,8 +1,13 @@
 #!/bin/sh
 
 dirname=`dirname $0`
+files="$dirname/[a-z]*"
 
-for file in $dirname/[a-z]*
+if [ "X$1" != X ];then
+	files="$*"
+fi
+
+for file in $files
 do
 	x=`basename $file`
 	echo "===================="
