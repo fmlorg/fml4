@@ -117,3 +117,4 @@ ln -s members.bak 	var/log/members.0
 $NOT_USE_NEWSYSLOG = 1; なら実行しません
 
 
+.# $Id$

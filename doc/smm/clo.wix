@@ -2,10 +2,13 @@
 
 .S	コマンドライン オプション -\S+
 
-コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
-"|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
+コマンドラインといっても、/etc/aliases から呼ばれるinclude file の
+	"|/usr/libexec/fml/fml.pl $DIR $LIBDIR -option" 
+のオプションの話のことです。
+デバッグの時に shell 上で手動実行する時でも同様です。
 
-	fml.pl 	   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
+SYNOPSIS
+   fml.pl   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
 
 	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
 	注意：fml_local.pl は MH を意識してるので異なります。
@@ -15,19 +18,23 @@
 Directory に関しては そのDirectoryが存在すれば、引数の順に $DIR、
 $LIBDIR にセットされます。
 
-
+DESCRIPTION
 	-d		デバッグモード
 			（ＭＬへの配送以外すべてを実行可能）
+
 	-bt   		アドレステストモード	(Become Test)
-			（メンバーチェックのところまで。ＭＬへの配送やコマンドは実行しない）
+			メンバーチェックのところまで実行する。
+			ＭＬへの配送やコマンドは実行しない。
 			いまのところ debug mode とかわらへんねん:-)
 	-bd		デーモンモード	(Become Daemon)
+
 	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
 	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
-	-lfile	file を $LOAD_LIBRARY 変数に代入する (e.g. -llibfml.pl 下↓参照)
+	-lfile		file を $LOAD_LIBRARY 変数に代入する 
+			e.g. -llibfml.pl 下↓参照
 
 
-注意：sendmail のように『空白なし』です。(だってその方がコードが簡単なんだもん:-)
+＊＊注意：-btのように『空白は無し』です。(だってその方がコードが簡単:-)＊＊
 
 例：
 	-llibfml.pl とすると、コマンド専用アドレスのできあがりです
@@ -35,14 +42,14 @@ $LIBDIR にセットされます。
 
 	-llibftpmail.pl ftpmail 専用アドレス
 	-sdebug		debug mode
-	-sFIX_SLOCAL_PIPE	$FIX_SLOCAL_PIPE = 1;と同じ
+	-sUSE_MIME	$USE_MIME = 1; と同じ
 
 とかできるわけです
 
 例：
-"|/Baycity/fml.pl /Baycity /Baycity/lib -d -sFIX_SLOCAL_PIPE -sDUMPVAR"
+"|/usr/libexec/fml/fml.pl /Baycity /Baycity/lib -d -sUSE_MIME -sDUMPVAR"
 
-デバッグモード かつ $FIX_SLOCAL_PIPE =1; で 変数のダンプを行なう。
+デバッグモード かつ $USE_MIME =1; で 変数のダンプも行なう。
 
 
 .S	ロングラインオプション --\S+=\S+
@@ -62,23 +69,64 @@ config.ph の後評価されるので、ロングラインオプションを使って ある値だ
 で変更する などの使い方でしょう。
 ML作成の二つ目以降では、普通アドレスしか変えないものですから:-)
 
-P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
+
+.S	設定ファイルとコマンドラインオプション
+
+各ＭＬの場所に config.ph を置く代わりにfmlのライブラリが置いてある場所
+にocnfig.ph もしくは sitedef.ph をひとつだけ置いてそれだくを保守するの
+も便利です。この場合は
+
+   1	(もしあれば) 共用directory の config.ph  を loading
+   2	(もしあれば) 共用directory の sitedef.ph を loading
+   3	その後コマンドラインオプションを評価
+
+なので、例えばコマンドの設定パス($TAR $UUENCODE)等はマシンが同じなら
+一回設定すれば後は同じなので、コマンドラインオプションでＭＬ名を決めると
+かすると設定が一瞬で終りますね:-) 
+
+例：
+
+mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
+
+例２：
+
+あと共用の $START_HOOK なんかもあるでしょう。sitedef.ph の $START_HOOK 
+でＭＬ共通のヘッダ変換
+
+	Subject: は Origina-Subject: へ保存
+	Subject: から情報を減らす[ML名 数字]を消したSubject:に変換
+
+とかしますよね？(^^;)
 
 
 .S	簡易モード設定 （ロングラインオプション）--\S+
-＃さぁこれで N 秒はやく設定できる？（苦笑）
 
---mode の形で 簡単に作動モードを変更することが出来ます。細かい変更をす
-るためには config.ph をいじるべきですが、config.ph に慣れていない人や、
-お手軽に変更する、２つ目以降の簡易ML作成 には非常に便利です。
+＃さぁこれで N 秒はやく設定できるぜ（苦笑）
+
+		--mode
+
+の形で 簡単に作動モードを変更することが出来ます。細かい変更をするため
+には config.ph をいじるべきですが、config.ph に慣れていない人や、お手
+軽に変更する、２つ目以降の簡易ＭＬ作成 には非常に便利です。
+
+同じことを config.ph でする時は
+
+		--mode
+は
+		&DEFINE_MODE('mode');
+
+になります。もっともアドレスによって挙動を変えるとかができない
+（config.phは共通だから）ので、そういう場合は等価ではなくなります。
+その場合はコマンドラインオプションの方が便利ですね。
 
 
 注意： 	コマンドラインの  --mode は config.ph で指定する 
-	$Envelope{mode:$mode} と同じです。
+	$Envelope{"mode:$mode"} と同じです。
 
-例：	"| fml.pl  --distribute $DIR " は 
-	$DIR/config.ph での $Envelope{'mode:distribute'} = 1; 
-	と同じ
+例：	
+	"| fml.pl  --distribute $DIR " 
+は $DIR/config.ph での $Envelope{'mode:distribute'} = 1; と同じ
+
 
  --distribute	
 
@@ -94,7 +142,6 @@ P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
 	#ip-connections ML のようなものの受け口に使う場合には
 	#このモードを使うようにするべきである。
 
-
  --mladdr=uja@domain	
 
 	config.ph がなくても
@@ -102,14 +149,22 @@ P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
 	MAIL_LIST  = uja@domain
 	MAINTAINER = uja-request@domain
 
-	等よきにはからう:-)	
-	request なのは USENET 依頼の伝統
+	等アドレス設定をよきにはからう:-)
+	＃とりあえず -request なのは USENET 依頼の伝統芸なだけ
 
  --auto
 	投稿者がメンバーでない場合自動的にMLに登録する
 
  --check 
 	投稿者がMLのメンバーか否かチェックを行う(default)
+
+ --moderated
+	メールは一回管理者へフォワードされる。
+	管理者が査読してOKとみなしたらＭＬへ投げる。
+	Approval: password フィールドをヘッダにつけてＭＬに
+	投げればメールは配送される。
+	よってＭＬに投稿できるのはパスワードを知っている人に限られる。
+	パスワードはリモート管理のし方と同様に保守して下さい。
 	
  --fml
 	MAINTAINER = uja-admin@domain 
@@ -210,6 +265,7 @@ P.S. config.ph の代わりに sitedef.ph を使うのも便利です。
 	--MAINTAINER=fml-admin@uja
 
 例：
-	デバッグモードオン
+	デバッグモードをオン！
 	perl $FML/fml.pl $MAIL_LIST_DIR/fml-query --debug
 
+.# $Id$

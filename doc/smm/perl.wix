@@ -119,3 +119,5 @@ require 'sys/socket.ph';
 
 \w ¤Ï [0-9A-Za-z_]  ¤Ç¤¹
 
+.# $Id$
+

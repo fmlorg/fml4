@@ -1853,6 +1853,40 @@ root のケースでは rootでしかかけない /usr/local/ml/driver
 
 .C	コマンドの実行に関する２、３のこと…
 
+.S	ＭＬで使えるコマンドを増やすor減らす
+
+config.ph でコントロールできます。
+いくつかの変数がありますが、次のように作動します
+
+   1	@PermitProcedure が定義してあるなら
+	@PermitProcedure で許しているコマンドだけを設定します。
+	もし、定義されていなければデフォールトのすべてのコマンドが
+	利用可能になります。
+	これらの設定はグローバル変数の %Procedure に定義されます。
+
+   2	%LocalProcedure が定義されているなら
+	1 で定義された %Procedure を %LocalProcedure で上書きします。
+
+   3	@DenyProcedure が定義されているなら
+	@DenyProcedure のコマンドだけを使えなくする
+
+例：
+	○ guide と summary のみを使用可能、それ以外はすべて使用不可
+
+	@PermitProcedure = ('guide', 'summary');
+
+	○デフォールトに加え自分で定義した hack コマンドも使える
+
+	%LocalProcedure = ('hack', 'ProcHack');
+
+	もちろんこの場合はどこかで sub ProcHack { ...; } があって
+	この関数を用意しておく必要がある。
+
+	○デフォールトの中で get 関係は使えなくする
+	@DenyProcedure = ('get', 'send', 'mget', 'msend');
+
+
+
 .S	コマンドの # syntax は必要か？ 
 
 “コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
@@ -3328,3 +3362,5 @@ received になってしまってちょっと情けないかも知れませんが…
 
 
 .# $Id$
+
+

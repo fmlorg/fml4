@@ -353,5 +353,4 @@ body            getmyspool\s+(\S+)	&	getmyspool_pw
 .include fml_local_builtin_functions.wix
 
 
-.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
 .# $Id$

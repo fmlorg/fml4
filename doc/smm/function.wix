@@ -63,5 +63,4 @@ SYNOPSIS
 	実際には、$zcat	@to エントリは使ってませんが…
 	＃いつ、第４エントリ以降をなくすか保証しない
 
-.# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
 .# $Id$

@@ -129,3 +129,4 @@ body       getmyspools+(S+)     &       getmyspool_pw
 # send a $ARCHIVE_DIR/guide to "From: address"
 Subject    (guide)                  &       sendback
 
+.# $Id$

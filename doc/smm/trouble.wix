@@ -757,4 +757,20 @@ Return-Receipt-To: のアドレスにメールが返るので、特に問題ない
 binary と判定するからです
 
 
+.S	[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID] 
+.key	$SUBJECT_HML_FORM
+.key	CyberDog-1.1J-beta
+.q
+From:    easy@pfu.co.jp
+
+Subjectを、[X-ML-NAME:ID] real subject という形式にした場合、日本語の
+Subjectを使うと、CyberDog 1.1J beta User は、
+
+[X-ML-NAME:ID]日本語の題名[X-ML-NAME:ID]
+
+と、なってしまう。
+CyberDog正式版に期待しましょう。
+.~q
+
+
 .# $Id$
