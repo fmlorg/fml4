@@ -1061,9 +1061,12 @@ version up の仕方は、例えば次のようになるでしょう。
 
 	% cd /var/tmp
 	% tar zxvf fml-current.tar.gz
-	% cp -pr fml-2.1何か/src/*.pl $HOME/libexec/fml
+	% cd fml-version番号他の名前
+	% make install
 
-で終りだと:-)
+ML のHOME はいじらないので、config.ph 等は問題ありません。fml.pl を筆
+頭に lib*pl 群は overwrite されますから自分でいじってしまっている場合
+は一旦バックアップを取っておくことが必要です。
 
 maintenance は コマンドのパスやＭＬ全体共通の設定は
 
@@ -1466,7 +1469,7 @@ fukachan@phys.titech.ac.jp	skip
 この場合配送、コマンド、自動登録すべての場合にそこへいく前に reject します。
 
    \S+@spam.org (*@spam.org でも補正するので大丈夫)
-   manager@\S+  (あらゆるサイトの個人を代表しないアドレスは許否)
+   manager@\S+  (あらゆるサイトの個人を代表しないアドレスは拒否)
 
 
 みたいな形式です。なおデフォールトの $REJECT_ADDR はこれとは別に適用さ
