@@ -35,7 +35,8 @@ STDIN,STDOUT,STDERRを閉じます。
 	#;
 
 $NOT_USE_TIOCNOTTY を セットしないと、うまく daemonさんになってくれな
-いかもしれませんが…＃このへんの挙動はいまひとつわからない…
+いかもしれませんが…
+＃このへんの挙動はいまひとつわからない…
 
 4.4BSD では setsid() ですが、そのへんの細かいところは省略…
 
@@ -100,11 +101,30 @@ SYNOPSIS:
 
 .S	AddressMatch           (fml.pl)
 .k	AddressMatch
+.xref	$ADDR_CHECK_MAX
 
 SYNOPSIS:
 	&AddressMatching($addr1, $addr2)
 
-$addr1 と $addrs が同じものかどうか調べる。
+$addr1 と $addr2 が同じものかどうか調べる。
+
+
+.S	MailListMemberP        (fml.pl)
+
+SYNOPSIS:
+	&MailListMemberP(アドレス)
+
+アドレスがメンバーファイルの候補(@MEMBER_LIST)の中にあるかどうかを調べ
+る。もしあればそのファイル名を返す。
+
+
+.S	MailListActiveP        (fml.pl)
+
+SYNOPSIS:
+	&MailListActiveP(アドレス)
+
+アドレスがメンバーファイルの候補(@ACTIVE_LIST)の中にあるかどうかを調べ
+る。もしあればそのファイル名を返す。
 
 
 .S	Append2                (fml.pl)
