@@ -2746,6 +2746,7 @@ $POP_EXEC のデフォールトは mh のスプールへおとすやつをさがすので、
 .include smtp.wix
 .include uip.wix
 .include lib.wix
+.include log.wix
 .include perl.wix
 .include ref.wix
 
