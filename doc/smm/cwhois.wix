@@ -47,8 +47,8 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
     KEYWORD => スプール（directory）
     KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
 
-	%WhoisCacheSpool    = ('apply', '/var/spool/apply');
-	%WhoisCacheDB       = ('apply', '/var/db/applydb');
+	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply');
+	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb');
 
 	必要なら（対応する） key1:key2, spool1:spool2 という形で
 
@@ -80,8 +80,8 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
     KEYWORD => スプール（directory）
     KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
 
-	%WhoisCacheSpool    = ('apply', '/var/spool/apply');
-	%WhoisCacheDB       = ('apply', '/var/db/applydb');
+	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply');
+	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb');
 
 
 .S	Cwhois の Search Algorithm
