@@ -6,6 +6,19 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl6 ] 
+  clean up/changes documents mainly
+
+  doc/examples/
+	Please refer www.fml.org for current tutorial
+
+  doc/
+	regenerate HTML documents since fwix.pl converter changed.
+
+  bin/fwix.pl
+	not expand .ptr with <PRE>
+
+
 [ 3.0pl5 ]
 
   sbin/makefml
