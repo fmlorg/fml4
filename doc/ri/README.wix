@@ -66,18 +66,22 @@ to customize basic functions. Advanced configuration needs the manual
 edit of config.ph.
 
 
-.S	必要な環境
-=E.S	Environment you need
+.S	インストールの前に
+=E.S	Environment you need in installation of fml
 
 .if LANG == JAPANESE
-基本的な前提は
+インストール作業については INSTALL というファイルを読んで下さい。
+インストール作業の前準備として次のものが必要があります。
 
-   UNIX マシンに(自分もしくはML専用の)アカウントがある
+   インストール先のマシンに(自分もしくはML専用の)アカウントがある
    perl 4 もしくは perl 5 (今時perlは最初からOSに入ってるとおもう)
    メール配送プログラムがあること(default は sendmail R8 を想定)
 
-です。Windows NT4 上での fml (β version) については INSTALL_on_NT4 を
-参照してください。MTA が qmail の場合は INSTALL_with_QMAIL も読んで下さい
+です。必要ならこれらをインストールしてちゃんと動くようにセットアップし
+てからfml のインストールに進んで下さい。Windows NT4 上での fml (β 
+version) については INSTALL_on_NT4 を参照してください。いくつかの
+MTA(現在は sendmail, postfix, qmail and exim)についての注意点が 
+INSTALL_with_MTA名 というファイルにあります。
 .fi
 .if LANG == ENGLISH
 FML fundamentally needs
@@ -139,11 +143,15 @@ You can obtain fml sources at the URL
 です。リリース以降に手が入ったもの/作業中の最新版は (fml-)current と呼
 ばれ fml-current.日付.tar.gz という名前で置かれています。日付の新しい
 (生きのいい:-)のをどうぞ。ここの階層以下にはメールに関連するプログラム
-群も置いてあります。
+群も置いてあります。最新版は
 =E
 Please get the latest one, which is called fml-current. You'll find
 fml-current, official released and other mail related sources at the
-URL.
+URL. The latest one is
+
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
+
+です。
 
 [Documents] 
 
@@ -329,7 +337,7 @@ The delivery system on FML.ORG consists of 4 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
 	sendmail 8.8.8 + WIDE patch + smtpfeed
-	sendmail 8.9.1
+	sendmail 8.9.2
 	qmail 1.03
 	exim 2.04
 
