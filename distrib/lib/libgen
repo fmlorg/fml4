@@ -31,7 +31,6 @@ GEN_LIBRARY () {
 
 
 INCREMENT_VERSION () {
-	# (chdir var/run; version.pl)
 	echo " "; 
 }
 
@@ -101,12 +100,8 @@ COPY_DOCS () {
    cp doc/html/release-index.html $HTML_DIR/index.html
    cp doc/html/fml.css $HTML_DIR/
 
-   (
-	chdir var/html;
-	echo "rsync -av [A-Z]* $DESTDIR/distrib/doc/html/"
-	rsync -av [A-Z]* $DESTDIR/distrib/doc/html/
-   )	
-
+   echo "rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/"
+   rsync -av var/html/[A-Z]* $DESTDIR/distrib/doc/html/
 }
 
 
@@ -154,7 +149,7 @@ COPY_SOURCES () {
 
 	# libexec
 	echo " "; echo "Copying libexec/ ";
-	cp .fmllocalrc 	$DESTDIR/distrib/etc/dot_fmllocalrc
+	cp $FML/etc/dot_fmllocalrc $DESTDIR/distrib/etc/dot_fmllocalrc
 	cp -p $LIBEXEC_SOURCES $DESTDIR/distrib/libexec
 
 	# etc
@@ -278,26 +273,26 @@ FIX_DISTRIBUTION_PERMISSION () {
 
 
 PATCHLEVEL_INCREMENT () {
-   ( 
-	chdir $FML
-	perl $FML/distrib/bin/fml_version.pl -p $PATCHLEVEL kern/$file |\
+	echo "$src => $dst"
+	perl $FML/distrib/bin/fml_version.pl -p $PATCHLEVEL $src |\
 	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
 	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
-	> $DESTDIR/distrib/$target
-   )
+	> $dst
 }
 
 
 DISTRIBUTION_PATCHLEVEL_INCREMENT () {
 	for file in fml.pl msend.pl
 	do
-		target=src/$file
+		src=$FML/kern/$file
+		dst=$DESTDIR/distrib/src/$file
 		PATCHLEVEL_INCREMENT
 	done
 
 	for file in libexec/fmlserv.pl libexec/popfml.pl
 	do
-		target=$file
+		src=$FML/$file
+		dst=$DESTDIR/distrib/$file
 		PATCHLEVEL_INCREMENT
 	done
 
