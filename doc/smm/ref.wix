@@ -14,39 +14,94 @@ S. J. Leffler, M. K. McKusick, M. J. Karels and J. S. Quarterman,
 W. R. Stevens, 
 "UNIX Network Programing" 
 (A Simon \& Schuster Company, NJ, 1990)
-(``UNIXネットワークプログラミング
+
+なお邦訳は(``UNIXネットワークプログラミング
 W.リチャード・スティーヴンス 著／篠田 陽一 訳
  プリンティスホール／トッパン 定価7,900円
 ISBN4-8101-8509-5'').
-
-
-
-.S	RFC  (参考文献：RFC)
-
-rfc822				headers of mail
-rfc821				smtp
-rfc142[5678]			about esmtp
-
-rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
-
-rfc934				Proposed Standard for Message Encapsulation
-rfc1153				digest
-
-rfc1521				MIME
-rfc1522				MIME part 2
-
-rfc1594				用語集
 
 perl texinfo in japanese --- version 4.0.19.2
 (ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz)
 
 
+.S	RFC  (参考文献：RFC)
+=E.S	RFC
+
+rfc822				headers of mail
+rfc821				smtp
+
+rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
+
+rfc934				Proposed Standard for Message Encapsulation
+rfc1153				digest format
+
+rfc1425				ESMTP
+rfc1426				ESMTP
+rfc1427				ESMTP
+rfc1428				ESMTP
+
+1495  PS  H. Alvestrand, S. Kille, R. Miles, M. Rose, S. Thompson, "Mapping  
+           between X.400 and RFC-822 Message Bodies", 08/26/1993. (Pages=15) 
+           (Format=.txt) (Updates RFC1327) 
+
+1870  S   J. Klensin, N. Freed, K. Moore, "SMTP Service Extension for Message 
+           Size Declaration", 11/06/1995. (Pages=9) (Format=.txt) 
+           (Obsoletes  RFC1653) (STD 10) 
+
+1653  DS  J. Klensin, N. Freed, K. Moore, "SMTP Service Extension for Message 
+           Size Declaration", 07/18/1994. (Pages=8) (Format=.txt) 
+           (Obsoletes  RFC1427) (Obsoleted by RFC1870) 
+
+1652  DS  J. Klensin, N. Freed, M. Rose, E. Stefferud, D. Crocker, "SMTP  
+           Service Extension for 8bit-MIMEtransport", 07/18/1994. (Pages=6) 
+           (Format=.txt) (Obsoletes RFC1426) 
+
+1651  DS  J. Klensin, N. Freed, M. Rose, E. Stefferud, D. Crocker, "SMTP  
+           Service Extensions", 07/18/1994. (Pages=11) (Format=.txt) 
+           (Obsoletes RFC1425) (Obsoleted by RFC1869) 
+
+2049  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
+           (MIME) Part Five:  Conformance Criteria and Examples", 
+           12/02/1996.  (Pages=24) (Format=.txt) (Obsoletes RFC1521) 
+
+2048  BC  N. Freed, J. Klensin, J. Postel, "Multipurpose Internet Mail  
+           Extensions (MIME) Part Four:  Registration Procedures", 
+           01/28/1997. (Pages=21) (Format=.txt) (Obsoletes RFC1590) 
+
+2047  DS  K. Moore, "MIME (Multipurpose Internet Mail Extensions) Part Three: 
+           Message Header Extensions for Non-ASCII Text", 12/02/1996.  
+           (Pages=15) (Format=.txt) (Obsoletes RFC1522) 
+
+2046  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
+           (MIME) Part Two:  Media Types", 12/02/1996. (Pages=44) 
+           (Format=.txt) (Obsoletes RFC1521) 
+
+2045  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
+           (MIME) Part One:  Format of Internet Message Bodies", 12/02/1996.  
+           (Pages=31) (Format=.txt) (Obsoletes RFC1521) 
+
+
+[IP Address]
+
+2050  BC  K. Hubbard, M. Kosters, D. Conrad, D. Karrenberg, J. Postel,  , 
+           "INTERNET REGISTRY IP ALLOCATION GUIDELINES", 11/05/1996.  
+           (Pages=13) (Format=.txt) (Obsoletes RFC1466) 
+
+[Glossary]
+
+1594  I   A. Marine, J. Reynolds, G. Malkin, "FYI on Questions and Answer  
+           Answers to Commonly asked ``New Internet User'' Questions", 
+           03/11/1994. (Pages=44) (Format=.txt) (FYI 4) (Obsoletes RFC1325) 
+
+
+
 以下RFCのインターネットスタンダード集より関係ありそうな部分のみの抜粋
 ＃ 96/9/14記
 
-0001 INTERNET OFFICIAL PROTOCOL STANDARDS. J. Postel, Editor. March
-     1996. (Format: TXT=91936 bytes) (Obsoletes RFC1780, RFC1720, RFC1800
-     RFC1880) (Also RFC1920)
+0001 INTERNET OFFICIAL PROTOCOL STANDARDS. J. Postel, Editor. February
+     1997. (Format: TXT=121356 bytes) (Obsoletes RFC1920, 1880, 1800,
+     1780, 1720, 1610, 1600, 1540, 1500, 1410, 1360, 1280, 1250, 1200,
+     1140, 1130, 1100, 1083, RFC1720, RFC1780, RFC1800) (Also RFC2000)
 
 0010 SMTP Service Extensions. J. Klensin, N. Freed, M. Rose, E.
      Stefferud & D. Crocker. November 1995. (Format: TXT=23299 bytes)
