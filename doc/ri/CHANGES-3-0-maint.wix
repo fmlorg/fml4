@@ -6,6 +6,13 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+  proc/libra.pl
+	fix file validation check" in the case regexp-like directory name
+
+  update (sync with HEAD (cvs main trunk))
+	INSTALL_on_MacOS_X_Server
+
+
 [ 3.0pl4 ]
 
   etc/makefml/include-mead
