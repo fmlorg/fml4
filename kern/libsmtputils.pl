@@ -188,7 +188,7 @@ sub DoSendmail
 }
 
 
-sub DoSendmail2Rcpts
+sub DoSendmail2
 {
     local(*distfile, $subject, $body) = @_;
     local(@a, $a);
@@ -203,13 +203,31 @@ sub DoSendmail2Rcpts
 	}
 	close(DIST);
 
-	$a = shift @a; # Hmm... tricky and dirty ;)
+	$a = shift @a; # Hmm... tricky and dirty ;D
 	&DoSendmail($a, $subject, $body, @a);
     }
     else {
 	&Log("cannot open $distfile");
 	0;
     }
+}
+
+# SendFile2(*to, *subject, *files);
+sub DoSendFile2 { &DoNeonSendFile(@_);}
+
+# SendFile2(*distfile, *subject, *files);
+sub DoSendFile3
+{
+    local(*distfile, *subject, *files) = @_;
+    local(@to, $to);
+
+    $REPORT_HEADER_CONFIG_HOOK = qq#;
+    print STDERR \$REPORT_HEADER_CONFIG_HOOK;
+    \$le{'mode:delivery:list'} = \"$distfile\";
+    #;
+
+    @to = ($MAINTAINER); # dummy
+    &DoNeonSendFile(*to, *subject, *files);
 }
 
 
@@ -245,10 +263,14 @@ sub DoGenerateHeader
     $le{'macro:s'}    = $Envelope{'macro:s'};
     $le{'mci:mailer'} = $Envelope{'mci:mailer'};
 
+    local($m);
+    $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
+	($ENV{'USER '}|| $ENV{'USERNAME'});
+
+    $le{'GH:From:'}        = $MAINTAINER || "$m\@$DOMAINNAME";
     $le{'GH:To:'}          = $tmpto;
-    $le{'GH:From:'}        = $MAINTAINER ||((getpwuid($<))[0])."\@$DOMAINNAME";
     $le{'GH:Date:'}        = $MailDate;
-    $le{'GH:X-MLServer:'}  =  $Rcsid;
+    $le{'GH:X-MLServer:'}  = $Rcsid;
     $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $le{'GH:From:'}       .= " ($MAINTAINER_SIGNATURE)"
 	if $MAINTAINER_SIGNATURE;
