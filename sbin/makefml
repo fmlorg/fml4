@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -555,7 +555,8 @@ sub SetHashDefaults
 		    '300#create-doc-template', 'create document templates e.g. help, guide, ...',
 
 		    # conversion
-		    'conv', 'do_conv',
+		    'conv',   'do_conv',
+		    'update', 'do_update',
 		    );
 
     # functions not to lock
@@ -3673,6 +3674,71 @@ sub do_conv
     &Conv($ml, $org, "$ML_DIR/$ml/$file");
 
     print "done.\n";
+}
+
+
+sub do_update
+{
+    local($ml, $file) = @_;
+    local($x) = $file;
+    local($t, $fail, $target);
+
+    &ResetVariables;
+
+    # file: $x
+    $x =~ s#.*/##;
+    $target = "$ML_DIR/$ml/$x";
+
+    if (-f "$EXEC_DIR/etc/makefml/$x") {
+	$t = "$EXEC_DIR/etc/makefml/$x";
+    }
+    elsif ($LANGUAGE eq 'Japanese') {
+	if (-f "$EXEC_DIR/drafts/$x.jp") {
+	    $t = "$EXEC_DIR/drafts/$x";
+	}
+    }
+    elsif ($LANGUAGE eq 'English') {
+	if (-f "$EXEC_DIR/drafts/$x.en") {
+	    $t = "$EXEC_DIR/drafts/$x";
+	}
+    }
+
+    print "\n   Updating $ML_DIR/$ml/$file ...\n\n";
+
+    if ($t) {
+	print "   Converting $t to \n";
+	&Conv($ml, $t, "$ML_DIR/$ml/$x.new");
+	if (rename($target, "$target.bak")) {
+	    ;
+	}
+	else {
+	    &Log("fail to rename $target $target.bak");
+	    $fail = 1;
+	}
+
+	if (rename("$target.new", $target)) {
+	    print "\trename $target.new $target\n";
+	}
+	else {
+	    &Log("fail to rename $target.new $target");
+	    $fail = 1;
+	}
+
+	if ($fail) {
+	    print "   $target is NOT updated\n";
+	}
+	else {
+	    print "   $target is updated\n";
+	}
+    }
+    else {
+	print "\n";
+	print "*** Error: I cannot find the template\n";
+	print "***        FAILS TO UPDATE $file\n";
+	print "\n";
+    }
+
+    print "\n";
 }
 
 
