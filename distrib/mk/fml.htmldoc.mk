@@ -8,7 +8,7 @@ var/html/${file}: doc/html/${file}
 HTML_MISC += var/html/pictures/index.html
 var/html/pictures/index.html: doc/html/pictures/index.html
 	test -d var/html/pictures || mkdir var/html/pictures
-	${CP} doc/html/pictures/index.html var/html/pictures/index.html
+	${RSYNC} -C -av doc/html/pictures/ var/html/pictures/
 
 .for file in ${DOC_RI_SOURCES}
 __HTML_RI__ += var/html/${file}/index.html
