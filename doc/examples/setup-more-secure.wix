@@ -1,6 +1,8 @@
 .HTML_PRE
 
 	fml 3.0 の設定 -- よりセキュアに --
+=E
+	fml 3.0 -- more secure --
 
  [用語]
    % はユーザの prompt
@@ -15,6 +17,11 @@
 .include ptr.wix
 
 .HTML_PRE
+
+.if LANG == ENGLISH
+.include setup-more-secure.en.wix
+.return
+.fi
 
 ○ 目的
 

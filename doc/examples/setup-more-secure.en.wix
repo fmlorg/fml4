@@ -1,0 +1,123 @@
+* Overview
+ add restriction to be more secure
+
+   mail size restriction
+
+   filtering of posted articles	
+	reject null content mail
+	reject only "unsubscribe" mailbody
+.url ../op/index.html#envf
+
+   traffic monitor
+	reject mail bomb
+.url ../op/index.html#mti
+
+   disable some commands to retrive member lists
+
+* how to configure
+
+1. makefml
+
+% makefml config elena
+
+   main menu -> security -> MORE_SECURE -> "y"
+
+2. or you can run in /var/spool/ml/elena
+
+   % make secure
+
+to make the same effect.
+
+* variables
+
+For more details, please see
+.url ../op-e/index.html
+
+.# perl $FML/distrib/bin/manifest2index.pl -L English -V Variable $FML/cf/MANIFEST
+.# USE_DISTRIBUTE_FILTER
+.# FILTER_ATTR_REJECT_COMMAND
+.# FILTER_NOTIFY_REJECTION
+.# USE_MTI
+.# MAX_MAIL_SIZE
+.# NOTIFY_MAIL_SIZE_OVERFLOW
+.# ADDR_CHECK_MAX
+.# MAXNUM_COMMAND_INPUT
+.# REJECT_ADDR
+.# USE_LOG_MAIL
+
+$USE_DISTRIBUTE_FILTER
+   Filter of posted article.
+   &EnvelopeFilter is called in the top of &Distribute if you set
+   $USE_DISTRIBUTE_FILTER = 1;
+   value: 1/0
+
+$FILTER_ATTR_REJECT_COMMAND
+   Attribute of filter of posted article
+   When $FILTER_ATTR_REJECT_COMMAND is 1 under distribution mode, 
+   rejects "# command" syntax just before distribution (&Distribute;)
+   value: 1/0
+
+$FILTER_NOTIFY_REJECTION
+   $FILTER_NOTIFY_REJECTION enables fml.pl notifies the rejection to
+   the sender.
+   value: 1/0
+
+$USE_MTI
+   Traffic Monitoring Mechanism within fml
+   Mail Traffic Information: internal traffic monitor
+   value: 1/0
+
+$MAX_MAIL_SIZE
+
+$NOTIFY_MAIL_SIZE_OVERFLOW
+   When fml reject too big mail, 
+   if $NOTIFY_MAIL_SIZE_OVERFLOW is set, notify the rejection to the sender.
+   value: 1/0
+
+$ADDR_CHECK_MAX
+   address check levels, which level is the tree depth from the root.
+   For example
+   fukachan@phys.titech.ac.jp
+   fukachan@axion.phys.titech.ac.jp
+   
+   fml checks $ADDR_CHECK_MAX level from the name space root. That is
+   compare "jp" -> compare "ac" -> titech -> phys -> axion ...
+   
+   When $ADDR_CHECK_MAX = 3, fml regards these two are the same.
+   When $ADDR_CHECK_MAX = 4, fml regards these two are the same.
+   When $ADDR_CHECK_MAX = 5, fml regards these two are DIFFERENT!
+   
+   value: number
+
+$MAXNUM_COMMAND_INPUT
+   The maximum number of commands in one command mail.
+   The variable \$MAXNUM_COMMAND_INPUT controls this.
+   If the value is 3, fml permits 3 commands in one command mail.
+   0 or NULL implies infinite (default). 
+   value: number
+
+$REJECT_ADDR
+   We reject $REJECT_ADDR@ARBITRARY.DOM.AIN since these are clearly NOT
+   individuals. It also may be effective to avoid mail loop since 
+   some error or automatic reply comes from not individual addresses.
+   This restriction is stronger than $PERMIT_*_FROM variable.
+   For example, if $PERMIT_POST_FROM is "anyone", fml does not permit
+   post from root@some.domain. If you permit it, please define $REJECT_ADDR.
+   
+   XXX This variable name is ambiguous. It should be $REJECT_ACCOUNT?
+   
+   value: regexp string
+
+$USE_LOG_MAIL
+   LOGGING THE LATEST IN-COMING MAILS
+   Logs an in-coming mail to $LOG_MAIL_DIR/$id 
+   where ($id = `cat $LOG_MAIL_SEQ`; $id = $id % $NUM_LOG_MAIL; $id++).
+   Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and each file size
+   is limited up to $LOG_MAIL_FILE_SIZE_MAX bytes to save disk.
+   value: 1/0
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
