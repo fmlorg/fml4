@@ -29,34 +29,48 @@
 .# ##########################################################
 .P	Desing Overview of the fml 
 
+
+   パートＩでは、fml の設計思想の概略について述べます。
+   実際の細かい設定についてはパートＩI以降へ譲ります。
+   急ぐ人はパートＩＩ以降へ進んで下さい。
+
 .C	ＭＬサーバ Overview
 
-.S	ＭＬサーバは何をするのか？何をしてほしいか？
+.S	Brief Hisotry and Overview
 
-Private Communication を便利にするツール（Filter）です。
+『bug っているサーバ、機能の足りないサーバ、直すより自分で書いた方が早
+い』単にそういう話でした。
+
+歴史的に hml 1.6 を一時期使っていて、その設定ファイルをコンバートする
+のは面倒でした。そのため デフォールトの emulation は hml 1.6 を 
+support しています。
+
+また、Mailing List == Private Communication を便利にするツール（Filter） 
+という観点を重視しました。
 そのためデフォールトでは メンバーチェック をするという考え方を尊重して
 います。
-設定でいくらでも変えられるので、拘る必要はないですが。
 
-むしろ日々の routine work をいかに自動処理化できるか？を考えることが重
-要でしょう。
+その辺は設定(config file or command line option)でいくらでも変えられる
+ので、拘る必要はないのですが、設定のデフォールトがどうなっているかが
+推測できるでしょう。
 
+日々の routine work をいかに自動処理化できるか？を考えることが重要
+なような気がします。
 
-.# HIKARI ##########################################################
+サーバの一番肝心な部分はかなり簡単ですが、実際にはそれ以外のさまざまな
+例外処理は発生します。
 
-.S	fml Histry
-
-これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
-いたいとおもっている方には改造の PLATFORM として利用していただけるかと
-思います。
-＃現状のＭＬサーバに求められる基本機能のコード（の“一例”）は一通り揃っ
-ていると思います。最適解ってわけじゃないけど :-)
+また、環境による違いを吸収するためにさまざまな関数をサポートする必要が
+ありした。e.g. ish, lha サポート
 
 基本的な方針は
    『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
 です。
+そして、それらの Configuration を簡単に設定できるようにするべきです。
 
-			＊＊＊注意＊＊＊ 
+これからＭＬをはじめる方にはそのまま、 ＭＬサーバをカスタマイズして使
+いたいとおもっている方には改造の PLATFORM として利用していただけるかと
+思います。
 
 各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
 カルな再配送』のような場合はコマンド機能を落して使うほうがよいでしょう。
@@ -120,82 +134,27 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 詳しくは INSTALL というファイルを見て下さい。
 
 
-.S	Update や bug fix等の情報について
+.S	fml 1.x とのCompatibility
 
-最新版の fml-current のソースコードを手に入れてから改造等はしていただ
-けるとよろしいかと存じます(_o_)。
-
-○ fml のWWWのページは http://www.phys.titech.ac.jp/uja/fml/ です。
-   最新のドキュメント、ソースともにここに揃っています。 
-
-○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
-うにしてあります。
-＃大抵ドキュメントのupdateが遅れぎみです、ごめんなさい
-
-○ 最新版のfml-currentのソースコードは、以下の anonymous ftp から入手
-可能です。
-ftp が使えない場合メールでは、なんでもいいからメールを
-fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
-＃自動的に分割して送り返します。
-
-
-.S	anonymous ftp でのソースの入手方法 
-
-	国内のマスター
-	ftp.phys.titech.ac.jp:/pub/net/fml-current/
-
-	国内のミラー
-	ftp://ftp.nis.co.jp/pub/mail/mailing-list-mgr/fml/
-
-	国外用のミラー
-	ftp://ftp.nisiq.net/pub/mail/mailing-list-mgr/fml/
-
-
-＃名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ
-
-
-.S	fml の ＭＬ と bug-reportのアドレス
-
-○バグ、質問、新しい発見があったら fml-support ML（例によって自動登録
-です） か fml-bugs （作者にのみフォワード）に御一報くださいませ。
-
-ただ、個人宛にメールがくるとどこかへまぎれたり、
-忙しくて時間が取れない場合も多々あります。
-できるだけ fml-support Mailing List 宛へ投げてください _o_
-ＭＬならわかる人がすぐに答えてくれる可能性があります。
-
-2.1 からはＭＬへ登録して欲しくない方のために
-
-	fml-query@phys.titech.ac.jp 	
-
-を用意しました。ここへ投げていただければ fml-support MLへ自動登録する
-ことなく fml-support へフォワードを行います。
-
-どうしても 内密な相談とか、DMで聞きたいことは 
-
-	fml-bugs@phys.titech.ac.jp
-
-へ投げておいてください。ただ返事は遅れぎみです _o_ 
-＃タイミングがよい場合だと一瞬で返事が返ることもあります(^^)
-
-	 
-.S	Compatibility
-
-○ fml 1.x を使っていて fml 2.x に入れ換える場合
+fml 1.x を使っていて fml 2.x に入れ換える場合
    そのまま perl script 群だけを入れ換えれば動きます。
    config.ph で複雑な HOOK を書けている場合は
    ちょっと注意がいるかもしれません。
    ＃詳しくは doc/op 参照
 
-○ hml 1.6 との compatibility
+.S	 hml 1.6 との compatibility
 
 members や log file等をそのままに、*pl 群と config.phを差し替えればい
 きなり動きます。
 
 
-.C	fml でやれること
+.C	Brief Overview of functions [fml の機能についてのサマリ]
 
-fml 2.1 が hml 1.6 と同様に目指したものは
+以下、代表的な機能一覧について見る
+
+.S	基本機能
+
+	fml 2.1 が hml 1.6 と同様に目指したものは
 	(以下 hml 1.6 README.jpn より)
 
 	＊ 大規模なメーリング・リストでの使用に耐えます。
@@ -205,56 +164,161 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 	   アクセスを防止することが可能です。
 	＊ perl で書いてあるので改造が容易です。
 
-そして………
 
-○ 簡単なインストーラーによるお手軽インストール から複雑な設定まで
-   サポートすること
+.S	簡単なインストーラーから複雑な設定まで
 
-○たくさんのドキュメント（複数のフォーマットで）
 
-	PLAINTEXT版はあらかじめ用意されています。
+初心者には、簡単なインストーラーによるお手軽インストールでよいとおもい
+ます。最初は何をやっているか良くわからないものです。
 
-	HTML 版は var/html/ の下に用意されいますが、
-	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
-	shell% make doc でつくってください
-	最新版は
-		http://www.phys.titech.ac.jp/uja/fml/ 
-	をのぞいてみてください
+しかし、必要なら複雑な設定まで（コードを直接いじることなく）できるべき
+だとおもいます。
 
-○user 権限で実行します＃ daemon とかではなく
+そうでないとソフトの複数のプラットホームでの作動が保証できないというの
+ことでもあります。
 
-○モジュール化 
-	メンテもしやすいですが、自分だけのモジュールを独立にメンテする
-	ことも容易です。
-	応用として
-	   ・ひとつのfmlで複数のＭＬを扱うように拡張
-	   ・コマンド専用サーバ
-   	   ・特定の目的のサーバ
-		例：ftpmail専用サーバ 
+そこで、代表的な『ある動作をするか？否か？』についてはすべて config
+file もしくはコマンドラインオプションで ON OFF することができます。
 
-	whois や ftpmail はライブラリモジュールとして提供されています。	
-	その他にもさまざまな改造事例集(contrib/)がついています
-	例： 	投票サーバ例
-		WWW-MAIL(Mail で WWW Server とのリレーをし返送)
-		Whois（ローカルキャッシュと本物の whois の両方）
+そして、アーカイブやスプール、help ファイルの場所 や
+『tar ish lha のような system のコマンド』
+のようなものもすべて hard coding ではなく user が外部から制御できる変数
+として定義されています。
+＃変数リストは cf/MANIFEST を見て下さい。
 
-○容易なカスタマイズ
-	ソースコードを直接いじらなくてもたくさんの制御変数と
-	フックでカスタマイズできます。
-	カスタマイズは config.ph とコマンドラインオプション両方で行えます
 
-○まとめ送り サポート ＃ ユーザごとに細かく設定可能
+.S	たくさんのドキュメント（複数のフォーマットで）
 
-○自動的にメンバー登録をする。メンバーチェックをする等各種動作モード
-   ・自動登録のし方のカスタマイズ
-	メールだすだけ（もともとオフミ用）
-	Subject: subscribe形
-	本文に Subscribe 形
-	等（キーワードは変えられます）
+PLAINTEXT版はあらかじめ用意されています。
 
-○豊富なファイル操作
-	mget と まとめおくりでの User interface は次のようなものが取り
-	揃えられています。ユーザーごとに設定できます
+HTML 版は var/html/ の下に用意されいますが、
+operation manual (旧FAQ) は巨大なのでこれの HTML 版は
+shell% make doc でつくってください
+最新版は
+	http://www.phys.titech.ac.jp/uja/fml/ 
+をのぞいてみてください
+
+
+.S	user 権限で実行
+
+daemon とかで動かすのはなく user 権限で動かすために setuid() 
+を行なった後 fml.pl へ渡します。
+
+fml は実装上 Trusted User 等を気にする必要はありませんから daemon で動
+かす必要はありません。
+
+POSIX 準拠 OSは setuid() をちゃんと行なえる user はroot に限られます。
+これは、これで正しい選択ですし、ターゲットの 4.4BSD もそういう実装をとっ
+ています。そのため setuid() はできるだけ sendmail 等の SMTP をうけるプ
+ログラムを信頼します。
+
+sendmail 等がうまく setuid() を実行できない場合、 4.3 BSD では fml.c 
+を compile して使えば良いでしょう。
+
+fml.c を user 環境にあわせて compile するには直接 edit してもよいです
+が、make すれば自動的に環境に合わせて fml という wrapper program を生
+成します。これはすでに setuid() されています。
+
+POSIX 準拠等では ＊非常に危ないですが＊ この fml を root 権限に setuid 
+しなければなりません。fml.c のcode と fml をどこにおいて使うべきか？に
+ついて自信がない場合あなたのサイト or マシンの管理者に相談するとよいで
+しょう。
+
+
+
+.S	モジュール化 
+
+
+モジュール化にすることにより、 メンテもしやすいですが、自分だけのモジュー
+ルを独立にメンテすることも容易になります。
+
+もともとSMTP部分の独立保守と 常時使うわけではないコマンド部分を切り離
+すことを目的としたモジュール化でしたが、現在では必要に応じて dynamic
+loading するさまざまなライブラリをデフォールトで提供しています。
+
+また、libtraffic.pl のように contribution されたコードも同様に配布して
+います。libtraffic.pl は 
+
+	libfml.pl の関数呼びだしインターフェイスに合わせれば、後は
+	すべて user defined で作れる
+
+というよい例です。
+＃ぼくは中身についてタッチしていません。fml master code tree とは独立
+＃に保守されています（感謝）
+
+module はＭＬに configuration file と別の場所におくとよいでしょう。そ
+うすることで、『ひとつのfmlで複数のＭＬを扱うように拡張』が容易になり
+ますし、version up も楽です。
+
+
+ＭＬを配送ではなく特定の目的のサーバのみを dynamic loading して
+『特定の目的のサーバ』にすることも簡単にできます。
+＃ $LOAD_LIBRARY に設定するだけ
+
+これにより、
+	コマンド 専用サーバ
+	ftp 用サーバ
+	ftpmail  専用サーバ 
+	メールで request をうけてURLの中身を返すサーバ
+
+等をカスタマイズできます。	
+
+whois や ftpmail はライブラリモジュールとして提供されています。	
+
+その他にもさまざまな改造事例集(contrib/)がついています
+例： 	投票サーバ例
+	WWW-MAIL(Mail で WWW Server とのリレーをし返送)
+	Whois（ローカルキャッシュと本物の whois の両方）
+
+
+.include tbl_lib.tbl
+
+
+.S	容易なカスタマイズとその保守
+
+各種変数は user が define できます。また Lisp のように多くのフックが用
+意されています。
+そのため、ソースコードを直接いじらなくてもたくさんの制御変数とフックで
+カスタマイズできます。
+
+また、それで不十分な場合モジュール化されているため、自分のモジュールを
+書いて置き換え、それだけをメンテナンスすればよいことになります。
+
+カスタマイズは config.ph とコマンドラインオプション両方で行えます。
+
+
+.S	自動的にメンバー登録をするとかしないとか…
+
+
+前述のとおりデフォールトは来たメールの From: を見て、メンバーチェック
+をします。
+
+自動的に登録することも、メンバーチェックをせずにす通しをすることもでき
+ます。
+
+
+各種動作モード等
+
+	す通しをする。つまりスプールし再配送するだけ
+	メンバーチェックし、メンバーなら配送しコマンドもうけつける
+	メンバーチェックし、メンバーでないなら
+		中身に関わらず登録
+		Subject: に subscribe のようなキーワードを必要
+		本文に subscribe のようなキーワードを必要
+
+ちなみにキーワードは変えられます。
+
+
+.S	豊富なファイル操作：取り寄せとまとめ送りと…
+
+それぞれのユーザごとに細かく設定可能です。
+
+get, mget, matome 等のコマンドにはオプションで MIME/Mulitpart 形で記事
+をまとめて送り返して欲しい 等の変更ができます。
+
+mget と まとめおくりでの User interface は次のようなものが取り揃えられ
+ています。
+
 
 	PLAINTEST 
 		UNIX FROM
@@ -268,115 +332,171 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 		tar + gzip
 		uuencode
 
-  ・標準のＭＬの記事スプール以外にもアーカイブは設定できます。
-  ・応用として user が put get できるように拡張されたコマンドも実装
-
-○ MIME の処理 （HTML モードでの画像等の変換処理を含む）
-
-○ コマンド インターフェイス の拡張
-    デフォールトは "# command" syntax だが専用サーバなら#の必要はない 
-    コマンド操作の誤チェック機能
-
-○ リモート管理（アドミンコマンド）での Password system(cryptもする)
-
-○ さまざまなインターフェイス
-	 ~/.forward インターフェイス 	 libexec/fml_lcoal.pl
-	 Listserv 互換用インターフェイス libexec/fmlserv.pl
-
-○ flock によるロック処理（２種類選択式）
-
-○ リレーサーバの処理 ＃ % hack 
-
-○ Expire 機能のサポート
-
-○ newsyslog サポート	e.g. log -> var/log/log.0
-
-○ ＭＬ間クロスポスト サポート ＃サイトにまたがる場合は実験段階
-
-○ sendmail とは IPC
-
-   自分のマシンで sendmail が走っている必要はありません。
-   もっとも SMTP を理解してくれるなら sendmail である必要もないですし
-   配送用に使えるSMTPサーバ があれば動きます。
-
-   例えば 一定時間間隔で POP をかけてＭＬを動かし
-   配送はサイトのSMTPサーバにやらせることでＭＬを実行するこは可能です
-
-○スタートレック宇宙歴サポート（笑）
-	宇宙歴をつけるmh, mh-e user interface つき:-)
-
-○ Sendmail 8.x を意識してつくる…＃(もちろん 5.x でも動きます)
+mget で取り寄せられるのは デフォールトは $SPOOL_DIR (default "spool") 
+ですが、対象は標準のＭＬの記事スプール以外にも @ARCHIVE_DIR でいくらで
+も設定できます。
 
 
-.S	Brief History
+ファイル操作の応用編として user が put も get できるように拡張されたコ
+マンドも実装しています（library コマンド）。
 
-	1.3 -> 2.0 の道のりを簡単にまとめると
-	1.3 -> 1.4 よく使うコード、普段使わないものを再構成する
-	1.4 -> 1.5 まとめおくりおよびmgetのUser Interface拡張
-	1.5 -> 1.6 call by reference, fml_local.pl, sid.pl
-	1.6 -> 2.0 cf/ doc/ まわりの再構成、
+ただし、デフォールトでは、put するファイル名は security 上選べません。
+ファイル名を明示的に指定する場合は安全のため管理者が変更するべきです。
 
 
+コマンドを認識するようになっている場合、デフォールトは最初の3行のどこ
+かに "# command（英文字Only）" syntax をコマンドと認識します。
+これは配送メールとコマンドメールを識別するために必要な処理です。
 
-.C	インストールに必要な環境（条件）
+しかし専用サーバなら # でモードを切替える必要はないわけで、 コマンド 
+インターフェイス は拡張され、コマンド専用の場合 # はなくてもかまいません。
+コマンド操作の誤チェック機能も実装しました。
 
-.S	インストールと環境
-
-インストール自体はおおむね make 一発です:-)。
-＃実際のインストールはINSTALLというファイルを見て下さい。
-
-perl は必須です、最も今時最初からOSに入ってるとおもいますが。
-自分のマシンで sendmail が走っている必要は必ずしもありませんし、
-SMTPを喋れるなら sendmail である必要もありません。
-
-pop を使ってＭＬを動かすこともできますし、sendmail以外のMTAもあります
-から拘る必要はありませんが、4.4BSD がターゲットマシンなので sendmail +
-perl を想定してドキュメントの大部分は書いてあります。
-
-実際には、サイトに少なくとも一台の sendmail 等の SMTP を使う配送プログ
-ラムが走っていれば十分です。普通は自分のマシンで走ってるでしょうけど、
-プロバイダ等では違うこともありえます。その辺の詳細は自分の環境の管理者
-の方に聞いて下さい。
+当然、Listserv 形式のシンタックスをうけつけるように拡張されたインター
+フェイス(libexec/fmlserv.pl)を使う場合には、どっちでもいいわけです。
 
 
-.S	参考：ターゲットマシンの環境
-
-fml のターゲットマシンでのテスト環境は
-
-2.1 は
-	sendmail 8.7.5 + perl4.036 on NetBSD 1.2 Beta
-	sendmail 8.7.5 + perl4.036 on NetBSD 1.1B Current
-	(fwtk 1.3 も併用) 
-
-2.0 まで
-	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2.1R 
-	sendmail 8.6.12+2.4W, perl4.036 on NetBSD 1.0
-	sendmail 8.6.12+2.4W, perl5.001 on NetBSD 1.0
-	sendmail 8.6.12+2.4W, perl5.001 on NetBSD-1.0current/sun3/60
-です。
-
-その他のこまごまとしたことについては doc/op (旧 FAQ)というファイルがあ
-ります。INSTALL で説明の足りない部分は doc/op （Operation Manual）を見
-てください。
+.S	 MIME や base64 等の処理 
 
 
-.S	対話式設定プログラム
+基本的にすどおしですが、MIME 処理は下請けにだして、Subject をdecode し
+てから save 等が可能です。
 
-基本設定を（日本語で）対話的に行なうために、 EasyConfigure.euc (名前の
-とおり EUC の形で配布しています)スクリプトを走らせても良いです。（端末
-に合わせてファイルコードをかえてからどうぞ）。
-
-1.5 以降のスクリプトは flock や自動登録等の設定も対話的に行えます。
-＃将来、全ての変数を対話的に設定できるように拡張する予定です。
+また、base64 の HTML モードでの画像等の変換処理をも行ないます。
+つまり、メール中の gif ファイルを変換してメールの記事の html を生成し
+ます。
 
 
-.S	自分のマシンで sendmail が走っていない場合(例:POP3 経由…)
-
-sendmail が走っていなくても POP でメールを引っ張って実行する等のやり方
-もできますが、そういうtrickyな話題は doc/op を見てください。
+.S	リモートでＭＬを管理すること
 
 
-.C	Version up について
+管理者として登録された人に対し
+
+	From: 行での認証
+	管理者一人ごとのパスワード
+
+の２つで認証をします。デフォールトは2段階ですが、パスワードがいらない
+というのであれば、外すことができます。
+＃ $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
+
+
+fml 1.0 で『管理者が本当に操作しているかどうか?という点に関して保証で
+きない』という理由ではずしたリモート管理(アドミンコマンド)を再実装し、
+サポートします。
+
+保証できないという意味は From: での認証は簡単に偽造できるからです。
+
+そのため普通パスワードも併用します。このパスワードは 各管理者ごとに設
+定できます。管理者全体で一つの共通パスワードというような ださい実装な
+んかしていません。
+
+これは普通の UNIX の パスワードシステム のミニチュア版です。
+サーバ側では etc/passwd に 管理者ごとにパスワードを保存しています。 
+保証の度合が上がったわけではありませんが、Password は crypt し保存して
+います。一応かつての UNIX 程度の保証はされます。
+
+しかしながら、メールの中では平文パスワードを書く必要がありますし、ひと
+りの管理者のパスワードは毎回同じで使い捨てではありません（時系列に沿っ
+て）。
+よって、間違ってメールが読まれた場合を考えると危険なわけです。
+
+
+S/KEY 版を実装し、管理用のメールも 使い捨てパスワード にし安全の度合を
+あげる予定です。
+
+
+.S	 さまざまなインターフェイス
+
+   ~/.forward インターフェイス 	 	libexec/fml_lcoal.pl
+
+通常 /etc/aliases をいじるのですが、.forward は本質的に同じものです。
+もっとも .forward の場合 user 名以外のものを使うことはできないわけです
+が。
+
+
+   Listserv 互換用インターフェイス 	libexec/fmlserv.pl
+
+fmlserv.pl を呼ぶようにした場合 コマンドは
+
+	コマンド ＭＬ名前 オプション
+
+になります。ようは Listserv 形式のしんたっくすで fml のコマンドを使え
+るようにしたインターフェイスです。
+
+	listserv:  fmlserv
+	majordomo: fmlserv
+	fmlserv: :include:/var/spool/ml/include/fmlserv
+
+のようにしても大丈夫です。
+
+fmlserv.pl のコマンドラインでの --majordomo オプションは 今まで 
+majordomo 構造だった directory structure もうけつけるようにするための 
+emulation 命令です。
+
+
+
+.S	sendmail との通信
+
+デフォールトでは fml は sendmail 等の SMTP配信エージェントと自力で通信
+します。
+
+	$Envelope{'mci:mailer'} = 'ipc'; 
+
+がデフォールトですが、
+
+	$Envelope{'mci:mailer'} = 'prog';
+
+とすることで、$SENDMAIL という変数のプログラムを起動して、それに配送を
+させることもできます。
+
+	$Envelope{'mci:mailer'} = 'ipc'; 
+
+の場合、自分のマシンで走っている sendmail と通信しようとしますが、
+必ずしも自分のマシンで sendmail が走っている必要はありません。
+
+もっとも SMTP を理解してくれるなら sendmail である必要もないですし
+配送用に使えるSMTPサーバ があれば動きます。
+サイトで走っているSMTPを理解してくれる配送プログラムがあればよいです。
+それもなければ、sendmail を 'prog' で起動すればよいだけでよいわけですが…
+
+
+逆にどうやってメールを受けとるかという問題があります。通常 SMTP を理解
+する受けとるサーバが走っていて、メールを受けとり fml.pl へ渡します。
+
+しかし、そうでなくてもよいわけで、例えば 一定時間間隔で POP をかけてＭ
+Ｌを動かし、配送はサイトのSMTPサーバにやらせることでＭＬを実行するこは
+可能です。
+
+
+.S	その他の機能
+
+
+ロックは flock によるロック処理をデフォールトにしています。が flock() 
+が動かない場合 UNIX V7 依頼の link() によるロックを使います。
+
+% hack によるリレーサーバを処理します。例えば、関東方面、関西方面にこ
+ねがあって、マシンが調達できる場合、関東方面のメールを一回そのマシンに
+送ることで関東方面へおくるメールを一つのメールでいっきにおくって、配送
+はそのリレー先にまかすことで、配送を高速化できます。
+
+プロバイダ等でDISKに制限があったりする場合は、古い記事は消したいとおも
+いますが、そのための Expire 機能をサポートします。
+
+また、同様に newsyslog をサポートし、古いログは自動的に
+	e.g. log -> var/log/log.0 
+のように変換し保存するようにしています。デフォールトでは members file 
+や まとめおくりのログに対して newsyslog を実行しています。
+
+一つのマシン上にある ＭＬ間のクロスポスト の場合、
+複数のＭＬに入っている人には一通しか送らないようにします。
+＃サイトにまたがる場合はデータのシンクロが必要なため実験段階です
+
+
+おまけ機能として、スタートレックの宇宙歴をサポート（笑）します。
+contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
+
+
+.C	Version up と Compatibility 
 
 .S	cp *.pl your-fml-directory
 
@@ -402,88 +522,54 @@ Backward Compatibility は保証していますが 万が一 consistencyのないもの
 ＃lib/Compatibility に移動しておきました。
 ＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
 
+
 .S	1.6より前からの移行について
 
-	＊＊＊注意＊＊＊
 1.6では、基本的なデータ構造を call by reference 用に書き直したので、
 いままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
 libcompat.pl にBackward compatibility のためのコードがあります。
-昔の設定を変えたくないなら、config.ph に $COMPAT_FML15 = 1; とかくとあ
-る程度まで compatible にできます。
+昔の設定を変えたくないなら、config.ph に 
 
+	$COMPAT_FML15 = 1; 
+
+と書くと複雑なフックをしかけていない限り compatible にできます。
 コードの都合上どうしても実現できないカスタマイズもありえます_o_
-昔できたことは必ず今の実装でもできるので doc/op を参照してみて下さい。
 
-.S	document ...
-
-current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
-ファイル）に ちょっと書いてあります ＃注意： ./doc/INFO です
-
-最新のネタは MLで聞くか、fml のホームページを覗いてみてください(^^)。
+昔できたことは必ず今の実装でも必ずできるので以下を参照してみて下さい。
 
 
+.C	fml の基本動作、起動オプション…
 
-.C	配布条件
-
-GPL(GNU Public License)に従うこと。COPYINGを読んでください
-
-
-.C	Acknowledgement 
-
-I thank a lot of people valuable comments, suggestions, contributions
-of bug reports, fixes and patches both on fml-support ML and with
-private communication.
-I refer each contribution in RELEASE_NOTES. 
-
-It is useful to study several ascpects of 4.4BSD for OS automatic
-detection, and mime_pls 1.00 - 2.00a on MIME.
-For convenience I bundle to my package OS detection codes derived from
-amd package, a few useful codes jcode.pl and mime_pls 1.11a, which you
-can obtain on anonymous ftps.
-I greatly appreciate softwares developed and distributed under freedom
-of programming.
-
-Lastly I am greatful to tsubai@phys.titech.ac.jp for fruitful
-discussion on the design and implementation of Mailing List server,
-perl, operating systems and so on.
+.S	ＭＬサーバの動作
+.key	ＭＬサーバの動作
 
 
-.C	Changes
+メールが SMTP で送られてくる ＃注意：SMTPは通信方式のこと
 
-Please see CHANGES and RELEASE_NOTES
-
-
-Last Modified
-$Id$
-
-
-
-
-
-
-
-.# HIKARI ##########################################################
-
-.S	ＭＬサーバの動作理論
-.key	ＭＬサーバの理屈
-
-
-メール → Sendmailがうけとる
              ↓
-	ＭＬサーバへ渡す。
+
+    	SMTP で待ち構えているプログラムがうけとる
+	例えば sendmail が受けとる
+
+             ↓
+
+	fml へ渡す。
+
              ↓
 	フィルター操作（しないなら/etc/aliasesいじるだけ）
-	さらにヘッダをいじるとか…
-	＃これくらいならsed＋αでも十分
+	さらにヘッダを一定形式でフォーマットする…
              ↓
+
 	なんらかのリストにしたがって配送
-	＃“配るだけ”ならSendmail 8.xでも十分
-
-＋αでログをとり、スプールし、必要なら取り寄せられるようにちょこっとだ
-け複雑なことをしようとするならこのサーバまで必要です。
 
 
-.S	fml の動作
+フィルタだけなら sed でも十分だし、“配るだけ”なら Sendmail 8.x でも
+十分でしょう。しかし、＋αでログをとり、スプールし、必要なら取り寄せら
+れるようにちょこっとだけ複雑なことをしようとするならこの サーバ まで必
+要です。
+
+
+.S	fml に渡された後の動作
 
 sendmail から fml へメールが渡されると 次のように動作します。
 
@@ -511,7 +597,8 @@ sendmail から fml へメールが渡されると 次のように動作します。
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena --distribute "
 
 のように書きます。引数の書き方の順番は任意です。引数の最初の directry 
-を MLのホームと見なします。
+をMLのホーム(config.phのある場所 もしくは spool やメンバーファイルのあ
+る場所)と見なします。
 
 
 
@@ -535,11 +622,11 @@ sendmail から fml へメールが渡されると 次のように動作します。
 それでもかなりのものです。
 
 論理をひっくりかえすと、fml 自体を tuning して速度を 0.1 sec 上げても
-ML の配送プロセスには何のメリットも生じないということです。
+ML の配送プロセスには何のメリットも生じないということでもあります。
 
 余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
-ことができたほうがおもしろいでしょう？という思想的背景はここに起因して
-います。
+ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
+す。
 
 
 .S	プロセスは誰の権限で動くか？
@@ -561,19 +648,106 @@ ML の配送プロセスには何のメリットも生じないということです。
 	つまり sendmail がうけとって fml を起動する場合
 
 	外→	
-		sendmail は uid = 1で起動（daemon）
+		sendmail は uid = 0 daemon で待っている。
+		＃昔の sendmail だと daemon の場合もあるだろう
+
 		→ setuidしてユーザー権限(uid=your own)にして
-		   → fml.pl を起動する
-	＃これは fml.c で作った fml を使うか
-	＃:include list 形
-	.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
+		   fml.pl を起動し、メールを fml.pl へ渡す
+		＃これは fml.c で作った fml を使うか
+		＃:include list 形
 
-	→ fml.plに渡す
+.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
 
-この辺でsetuidの話とかが関係するわけですね。
+ここでsetuidの話が関係するわけです。
 
-各ＯＳでどう setuid をすればうまくいくか？については INSTALL にまとめ
-一覧があります。そちらをみてくださいませ
+各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
+
+注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
+は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
+いくことにしてます。
+
+
+.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
+
+make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
+fml（fml.c から作る）自体は、make の時fml.c を自動的に補正してくれてい
+るはずです。
+
+/etc/aliases では
+	Elena: :include:/include-file 
+		もしくは
+	Elena: "|/directory/fml-1.4/fml"
+の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
+ます。
+sendmail が setuid をちゃんと実行できないからで、けっこうターゲットマ
+シンのＢＳＤ以外では挙動がまちまちみたいです
+
+問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
+
+［４．３ＢＳＤ］
+	fml でも :include: でもＯＫでしょう
+
+［４．４、ＰＯＳＩＸ準拠のＯＳ、その他］
+	:include: 式か 
+	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
+
+以下は実際にテストされたＯＳ一覧です
+
+	キーワード：
+	uid		ownerが自分自身で 4755 した fml
+	include		sendmail に setuid をまかせる :include:を使う
+	root		ownerがrootで 4755 した fml
+			＃こういうことは最後の手段であまりやりたくない…
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+4.3BSD			uid include
+4.4BSD 			include
+BSD386 1.1		include
+SUN4.1.2 - 4.1.3JLE 	uid include
+Solaris 2.4 		include
+Solaris 2.3J 		だめ？
+DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+OSF/1 Alpha AXP V2.1 	include
+HP UX 9?		[:include でかつ perl -U が必要？]
+			＃なんか、setreuid しかないんだけど…＞HP-UX
+SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+manualで確認した機種一覧
+4.3BSD系	SONY NEWS 4.x
+		4.1.3JLE
+		SVR3
+
+POSIX準拠	4.4BSD
+		NetBSD 
+		BSD/OS 2.x
+		BSD386 1.1
+		Solaris 2.4	
+
+その他の注意：
+・単にNFSだから という場合もあるでしょう
+
+そのときはsetuid する時だけ local ならいいわけで、
+たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
+home とかにおいてある という風にしてあればＯＫでしょう
+
+・NFSごしにファイルが存在すると setuid を認めない機種 もある
+たとえば
+		SUN 4.1.3JLE 4.1.4
+		＃これは fpathconf の return 値が問題
+
+・uid と include を試してみてどっちもうまくいかなかったら
+最後の手段（root）： 
+
+まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
+make OPT=-DPOSIX として make してください
+
+root のケースでは rootでしかかけない /usr/local/ml/driver 
+とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
+は注意してくださいね。管理者とよく相談してみてください（重要）
+＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
+＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
+
 
 
 .S	自動登録について
