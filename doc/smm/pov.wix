@@ -1342,7 +1342,7 @@ fmlserv という directory があるなら自動的に設定します。うまくいかない
 .C	Emailアドレスの判定方法とSecurity
 
 .S	アドレスのチェックを緩めたい or きつくしたい
-.key	$ADDR_CHECK_MAX
+.l	$ADDR_CHECK_MAX
 
 メンバーチェックは送られてきたメールの発信者のアドレスと members に書
 かれたアドレスとが一致するか否かで判断しています。今の設定は
