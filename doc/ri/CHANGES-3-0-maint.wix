@@ -6,6 +6,9 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+   sbin/makefml
+	modify jperl check code
+
    fix distribution miss package
 	distribute all INSTALL* (plaintext) 
 
