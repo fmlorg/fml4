@@ -131,3 +131,7 @@ syncinfo:
 
 libkern:
 	sed '/^$$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
+
+clean:
+	find . |grep '/\.#' |perl -nple unlink
+
