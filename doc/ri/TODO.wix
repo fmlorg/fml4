@@ -14,6 +14,28 @@
 .toc
 -------------------------------
 
+.C	終ったもの
+=E.C	DONE
+
+XXX 終ったもの/終ったつもりのものはここに一回書いておく
+XXX 一月くらいで消すこと
+
+◯ 3.0B
+
+(stable, current)
+package にダミーの default_config.ph をいれよう 
+
+(stable)
+エラーにならないだけなら "1;" だけのものでもいい気はする。
+
+3.0B は基本的に終り
+
+◯ Open() 削除キャンペーン 
+
+◯ 言語依存 repository は fml/module/$LANGUAGE/ に決定
+   module/ に言語依存と互換ものを集めた
+
+
 .C	current
 
 .S	3.0C (to be 3.0C in the new future)
