@@ -4,8 +4,11 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-push(@INC, './proc');
-push(@INC, './src');
+require 'getopts.pl';
+&Getopts("I:");
+
+push(@INC, $opt_I);
+push(@INC, @ARGV);
 
 require 'libkern.pl';
 require 'config.ph';
@@ -43,7 +46,7 @@ From: $From
     (uja)
 To: $MAIL_LIST
 Subject: make localtest 
-Message-Id: <0403.1218.CAA$$Elena.Lolobrigita\@Baycity.or.jp>
+Message-Id: <0403.1218.CAA${$}Elena.Lolobrigita\@Baycity.or.jp>
 MIME-Version: 1.0
 Content-type: multipart/mixed; boundary="simple      boundary"
 #;
