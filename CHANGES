@@ -3,6 +3,42 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/08/06
+
+   messages
+	modify search order
+
+	/var/spool/ml/elena/messages.Japanese.conf  (<- newly added)
+	/var/spool/ml/elena/messages.conf
+	/var/spool/ml/elena/messages/Japanese/$file
+	/var/spool/ml/etc/fml/messages/Japanese/$file
+	/usr/local/fml/messages/Japanese/$file
+
+2000/08/05
+
+   messages
+	modify search order
+
+	エラーメッセージなどのカスタマイズをするファイルの
+	サーチ順を変えました。elena MLの場合は
+
+	/var/spool/ml/elena/messages.conf
+	/var/spool/ml/elena/messages/Japanese/$file
+	/var/spool/ml/etc/fml/messages/Japanese/$file
+	/usr/local/fml/messages/Japanese/$file
+
+	$file はいろいろです。kern, auth , ...
+	それぞれのファイルの意味は
+	
+	/usr/local/fml/messages/Japanese/MANIFEST.Japanese
+	http://www.fml.org/fml/messages-list.ja.txt
+
+	を見て下さい。デフォールトでは
+
+	/usr/local/fml/messages/Japanese/$file
+
+	にしかファイルはないので、ここのファイルが使われます。
+
 2000/07/29
 
    check address more severely
