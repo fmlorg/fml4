@@ -167,6 +167,7 @@ sub readfile
 
     # RESET
     if ($file_substitute) { @order = @local_order;}
+    @CFDefiend = @local_order;
 }
 
 
@@ -240,6 +241,21 @@ sub output
 	# patched by racsho@cpdc.canon.co.jp (96/11/14)
 	if (!$install && !$rewritten{$key}) {
 	    $cf = '# ';
+	}
+
+	# dependent on keys in "cf"
+	if (($key ne 'LOCAL_CONFIG') && (! $rewritten{$key})) {
+	    local($xkey);
+	    for $xkey (@CFDefiend) {
+		next if $xkey =~ /^_/;
+		next if $xkey =~ /^LOCAL_CONFIG/;
+
+		if ($value{$key} =~ /\$${xkey}/) {
+		    printf STDERR "   %-25s depends %s\n", 
+			$key, $xkey if $debug;
+		    undef $cf;
+		}
+	    }
 	}
 
 	#print STDERR "[$cf]$key\t$value{$key}\n";
