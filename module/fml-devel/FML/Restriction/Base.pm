@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Base.pm,v 1.16 2002/12/15 15:18:35 fukachan Exp $
+# $FML: Base.pm,v 1.17 2003/01/03 07:04:08 fukachan Exp $
 #
 
 package FML::Restriction::Base;
@@ -19,8 +19,8 @@ FML::Restriction::Base -- define safe data representations
 =head1 SYNOPSIS
 
     use FML::Restriction::Base;
-    $safe = new FML::Restriction::Base;
-    my $regexp = $safe->basic_variable();
+    my $safe   = new FML::Restriction::Base;
+    my $regexp = $safe->regexp( 'type' );
 
     if ($data =~ /^($regexp)$/) {
 	# o.k. do something ...
@@ -111,13 +111,46 @@ my %basic_variable =
      );
 
 
-# Descriptions: return HASH_REF of basic variable regexp list
-#    Arguments: none
+=head2 basic_variable()
+
+return basic variable regexp list as HASH_REF.
+
+=cut
+
+
+# Descriptions: return basic variable regexp list as HASH_REF.
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: HASH_REF
 sub basic_variable
 {
+    my ($self) = @_;
+
     return \%basic_variable;
+}
+
+
+=head2 regexp( class )
+
+return the allowed regexp for C<class>.
+
+=cut
+
+
+# Descriptions: return allowed regexp for $class.
+#    Arguments: OBJ($self) STR($class)
+# Side Effects: none
+# Return Value: STR or UNDEF
+sub regexp
+{
+    my ($self, $class) = @_;
+
+    if (defined $basic_variable{ $class }) {
+	return $basic_variable{ $class };
+    }
+    else {
+	return undef;
+    }
 }
 
 
@@ -141,7 +174,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

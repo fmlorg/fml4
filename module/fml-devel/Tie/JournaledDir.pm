@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: JournaledDir.pm,v 1.17 2002/12/22 03:37:15 fukachan Exp $
+# $FML: JournaledDir.pm,v 1.19 2003/01/11 15:16:37 fukachan Exp $
 #
 
 package Tie::JournaledDir;
@@ -345,7 +345,7 @@ which is by default.
 
 
 # Descriptions: get all values for the key as ARRAY_REF.
-#    Arguments: OBJ($self) STR($key)
+#    Arguments: OBJ($self)
 # Side Effects: none
 # Return Value: HASH_REF
 sub get_all_values_as_hash_ref
@@ -393,7 +393,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

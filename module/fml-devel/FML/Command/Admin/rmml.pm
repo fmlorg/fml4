@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: rmml.pm,v 1.11 2002/12/24 10:19:44 fukachan Exp $
+# $FML: rmml.pm,v 1.13 2003/01/07 08:38:32 fukachan Exp $
 #
 
 package FML::Command::Admin::rmml;
@@ -143,11 +143,12 @@ sub _remove_aliases
     my ($self, $curproc, $command_args, $params) = @_;
     my $config  = $curproc->{ config };
     my $ml_name = $params->{ ml_name };
+    my $list    = $config->get_as_array_ref('newml_command_mta_config_list');
 
     eval q{
 	use FML::MTAControl;
 
-	for my $mta (qw(postfix qmail procmail)) {
+	for my $mta (@$list) {
 	    my $optargs = { mta_type => $mta };
 	    my $obj = new FML::MTAControl;
 	    $obj->remove_alias($curproc, $params, $optargs);
@@ -190,7 +191,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

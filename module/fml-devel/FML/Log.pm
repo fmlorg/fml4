@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #
-# $FML: Log.pm,v 1.24 2002/12/18 03:42:28 fukachan Exp $
+# $FML: Log.pm,v 1.26 2003/01/11 06:58:45 fukachan Exp $
 #
 
 package FML::Log;
@@ -79,7 +79,7 @@ same as Log("error: $message", $args);
 
 
 # Descriptions: write message $msg to logfile
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: update logfile
 # Return Value: none
 sub Log
@@ -120,8 +120,12 @@ sub Log
     my $fh     = undef;
     my $sender = FML::Credential->sender;
 
-    if (defined $file && -f $file) {
+    if (defined $file) {
+	my $old_mask = umask(077);
 	$fh = new FileHandle ">> $file";
+	umask($old_mask);
+
+	$fh = \*STDERR unless $fh;
     }
     else {
 	$fh = \*STDERR;
@@ -152,7 +156,7 @@ sub Log
 
 # Descriptions: write message "warn: $msg", call Log() ASAP.
 #               send the message into stderr if Log() failed.
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub LogWarn
@@ -170,7 +174,7 @@ sub LogWarn
 
 # Descriptions: write message "error: $msg", call Log() ASAP.
 #               send the message into stderr if Log() failed.
-#    Arguments: STR($msg) HASH_REF($args)
+#    Arguments: STR($mesg) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub LogError
@@ -202,7 +206,7 @@ Ken'ichi Fukamachi <F<fukachan@fml.org>>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

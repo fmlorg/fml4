@@ -1,37 +1,34 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: HTMLify.pm,v 1.27 2003/01/11 16:05:19 fukachan Exp $
+# $FML: Super.pm,v 1.2 2003/01/11 16:05:20 fukachan Exp $
 #
 
-package FML::Process::HTMLify;
+package FML::Process::Super;
 
-use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 use strict;
 use Carp;
-
-use FML::Process::Kernel;
+use vars qw($debug @ISA @EXPORT @EXPORT_OK);
 use FML::Log qw(Log LogWarn LogError);
 use FML::Config;
 
-my $debug = 0;
-
+use FML::Process::Kernel;
 @ISA = qw(FML::Process::Kernel);
+
+my $debug = 0;
 
 
 =head1 NAME
 
-FML::Process::HTMLify -- htmlify articles
+FML::Process::Super -- small maintenance jobs on the queue spool
 
 =head1 SYNOPSIS
 
-See C<Mail::Message::ToHTML> module.
-
 =head1 DESCRIPTION
 
-This class drives thread tracking system in the top level.
+This class drives provides utility funtions for the ML queue.
 
 =head1 METHODS
 
@@ -39,9 +36,13 @@ This class drives thread tracking system in the top level.
 
 create a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare()>
+=head2 C<prepare($args)>
 
-adjust ml_*, load configuration files and fix @INC.
+ajdust ml_* variables, load config files and fix @INC.
+
+=head2 C<verify_request($args)>
+
+show help.
 
 =cut
 
@@ -59,49 +60,59 @@ sub new
 }
 
 
-# Descriptions: adjust ml_*, load configuration files, and fix @INC.
+# Descriptions: fix ml_*, load config and fix @INC.
 #    Arguments: OBJ($curproc) HASH_REF($args)
-# Side Effects: none
+# Side Effects: fix @INC
 # Return Value: none
 sub prepare
 {
     my ($curproc, $args) = @_;
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlhtmlify_prepare_start_hook' );
+    my $eval = $config->get_hook( 'fmlsuper_prepare_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 
     $curproc->resolve_ml_specific_variables( $args );
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
-    $eval = $config->get_hook( 'fmlhtmlify_prepare_end_hook' );
+    $eval = $config->get_hook( 'fmlsuper_prepare_end_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 }
 
 
-# Descriptions: dummy.
+# Descriptions: dummy to avoid to take data from STDIN
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub verify_request
 {
     my ($curproc, $args) = @_;
+    my $argv   = $curproc->command_line_argv();
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlhtmlify_verify_request_start_hook' );
+    my $eval = $config->get_hook( 'fmlsuper_verify_request_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 
-    $eval = $config->get_hook( 'fmlhtmlify_verify_request_end_hook' );
+    if (length(@$argv) == 0 || (not $argv->[0])) {
+	$curproc->help();
+	exit(0);
+    }
+
+    $eval = $config->get_hook( 'fmlsuper_verify_request_end_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 }
 
 
 =head2 C<run($args)>
 
-call &FML::Command::HTMLify::convert().
+small jobs on the queue maintenance.
 
 =cut
+
+#
+# XXX-TODO: clean up run() more.
+#
 
 
 # Descriptions: convert text format article to HTML by Mail::Message::ToHTML
@@ -112,30 +123,16 @@ sub run
 {
     my ($curproc, $args) = @_;
     my $config  = $curproc->{ config };
-    my $argv    = $curproc->command_line_argv();
     my $options = $curproc->command_line_options();
-    my $src_dir = $argv->[0];
-    my $dst_dir = $argv->[1];
 
-    print STDERR "htmlify\n\t$src_dir =>\n\t$dst_dir\n" if $debug;
-
-    my $eval = $config->get_hook( 'fmlhtmlify_run_start_hook' );
+    my $eval = $config->get_hook( 'fmlsuper_run_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 
-    # prepend $opt_I as @INC
-    if (defined $options->{ I }) {
-	print STDERR "\t\tprepend $options->{ I } (\@INC)\n" if $debug;
-	unshift(@INC, $options->{ I });
-    }
+    # if -p specified, run _purge(); 
+    # if not, run _check();
+    $curproc->_queue($args);
 
-    # main converter
-    use FML::Command::HTMLify;
-    &FML::Command::HTMLify::convert($curproc, $args, {
-	src_dir => $src_dir,
-	dst_dir => $dst_dir,
-    });
-
-    $eval = $config->get_hook( 'fmlhtmlify_run_end_hook' );
+    $eval = $config->get_hook( 'fmlsuper_run_end_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 }
 
@@ -151,17 +148,19 @@ sub help
 
 print <<"_EOF_";
 
-Usage: $name [-I dir] src_dir dst_dir
+Usage: $name [-p] ML
 
 options:
 
--I dir      prepend dir into include path
+-p          purge stale files.
+
+ML          ml_name. Example: elena, rudo\@nuinui.net
 
 _EOF_
 }
 
 
-# Descriptions: dummy.
+# Descriptions: dummy to avoid to take data from STDIN
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
@@ -170,19 +169,35 @@ sub finish
     my ($curproc, $args) = @_;
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlhtmlify_finish_start_hook' );
+    my $eval = $config->get_hook( 'fmlsuper_finish_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 
-    $eval = $config->get_hook( 'fmlhtmlify_finish_end_hook' );
+    $eval = $config->get_hook( 'fmlsuper_finish_end_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
 }
 
 
-# Descriptions: dummy.
-#    Arguments: OBJ($self) HASH_REF($args)
+# Descriptions: dummy to avoid to take data from STDIN
+#    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
 sub DESTROY {}
+
+
+sub _queue
+{
+    my ($curproc, $args) = @_;
+    my $config    = $curproc->config();
+    my $queue_dir = $config->{ mail_queue_dir };
+
+    use Mail::Delivery::Queue;
+    my $queue = new Mail::Delivery::Queue { directory => $queue_dir };
+    my $ra    = $queue->list();
+
+    for my $qid (@$ra) {
+	print $qid, "\n";
+    }
+}
 
 
 =head1 CODING STYLE
@@ -195,14 +210,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-FML::Process::Kernel first appeared in fml8 mailing list driver package.
+FML::Process::Super first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

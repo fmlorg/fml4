@@ -1,15 +1,16 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.68 2002/09/22 14:57:00 fukachan Exp $
+# $FML: Message.pm,v 1.72 2003/01/11 15:13:51 fukachan Exp $
 #
 
 package Mail::Message;
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+use vars qw(@ISA @EXPORT @EXPORT_OK $AUTOLOAD
+	    $override_log_function);
 use Carp;
 
 my $debug = 0;
@@ -478,8 +479,8 @@ sub parse
     my $ref_body = $me->_build_body_object($args, $result);
 
     # make a chain such as "undef -> header -> body -> undef"
-    $me->_next_message_is( $ref_body );
-    $ref_body->_prev_message_is( $me );
+    _next_message_is( $me, $ref_body );
+    _prev_message_is( $ref_body, $me );
 
     # return information
     if (defined($data) && $data) {
@@ -720,7 +721,7 @@ sub whole_message_header_data_type
 
 
 # Descriptions: return boundary defined in Content-Type
-#    Arguments: OBJ($self) OBJ($Header)
+#    Arguments: OBJ($self) OBJ($header)
 # Side Effects: none.
 # Return Value: STR
 sub _header_mime_boundary
@@ -892,7 +893,7 @@ The previous part of C<$self> object is C<$obj>.
 
 
 # Descriptions: set next message in the chain
-#    Arguments: OBJ($self) OBJ(ref_next_message)
+#    Arguments: OBJ($self) OBJ($ref_next_message)
 # Side Effects: update next pointer in object
 # Return Value: OBJ
 sub _next_message_is
@@ -903,7 +904,7 @@ sub _next_message_is
 
 
 # Descriptions: set previous message in the chain
-#    Arguments: OBJ($self) OBJ(ref_prev_message)
+#    Arguments: OBJ($self) OBJ($ref_prev_message)
 # Side Effects: update prev pointer in object
 # Return Value: OBJ
 sub _prev_message_is
@@ -1039,7 +1040,7 @@ sub _print_messsage_on_memory
     my $type  = $self->{ data_type } || croak("no data_type");
     my $pp    = $self->{ offset_begin };
     my $p_end = $self->{ offset_end };
-    my $logfp = $self->{ _log_function };
+    my $logfp = $override_log_function || $self->{ _log_function };
     $logfp    = ref($logfp) eq 'CODE' ? $logfp : undef;
 
     # 1. print content header if exists
@@ -1150,7 +1151,7 @@ sub _print_messsage_on_disk
     my $raw_print_mode = 1 if $self->{ _print_mode } eq 'raw';
     my $header   = $self->{ header }   || undef;
     my $filename = $self->{ filename } || undef;
-    my $logfp    = $self->{ _log_function };
+    my $logfp    = $override_log_function || $self->{ _log_function };
     $logfp       = ref($logfp) eq 'CODE' ? $logfp : undef;
 
     # 1. print content header if exists
@@ -1228,8 +1229,12 @@ sub build_mime_multipart_chain
 	$head = $msg unless $head; # save the head $msg
 
 	# boundary -> data -> boundary ...
-	if (defined $prev_m) { $prev_m->_next_message_is( $msg );}
+	if (defined $prev_m) { 
+		$prev_m->_next_message_is( $msg );
+		_prev_message_is( $msg, $prev_m );
+	}
 	$msg->_next_message_is( $m );
+	_prev_message_is( $m, $msg );
 
 	# for the next loop
 	$prev_m = $m;
@@ -1243,6 +1248,7 @@ sub build_mime_multipart_chain
 	data           => \$delbuf_end,
     };
     $prev_m->_next_message_is( $msg ); # ... -> data -> close-delimeter
+    _prev_message_is( $msg, $prev_m );
 
     return $head; # return the pointer to the head of a chain
 }
@@ -1319,6 +1325,7 @@ sub parse_and_build_mime_multipart_chain
 		data         => $data,
 	    };
 	    my $m = $self->_alloc_new_part($args);
+	    _prev_message_is($m, $self);
 	    return _next_message_is($self, $m);
 	}
 	# close-delimiter is not found.
@@ -1471,14 +1478,17 @@ sub parse_and_build_mime_multipart_chain
     for ($j = 0; $j < $i; $j++) {
 	if (defined $m[ $j + 1 ]) {
 	    _next_message_is( $m[ $j ], $m[ $j + 1 ] );
+	    _prev_message_is( $m[ $j +1 ], $m[ $j ] );
 	}
 	if (($j > 1) && defined $m[ $j - 1 ]) {
 	    _prev_message_is( $m[ $j ], $m[ $j - 1 ] );
+	    _next_message_is( $m[ $j -1 ], $m[ $j ] );
 	}
     }
 
     # chain $self and our chains built here.
     _next_message_is($self, $m[0]);
+    _prev_message_is($m[0], $self);
 }
 
 
@@ -1594,10 +1604,15 @@ sub delete_message_part_link
     my $nextmp = $mp->{ next };
     my $data_type = $mp->data_type();
 
-    return if($data_type eq "text/rfc822-headers");
+    return if ($data_type eq "text/rfc822-headers");
 
-    _prev_message_is($nextmp,$prevmp);
-    _next_message_is($prevmp,$nextmp);
+    if (defined $prevmp && defined $nextmp) {
+	_prev_message_is($nextmp, $prevmp);
+	_next_message_is($prevmp, $nextmp);
+    }
+    else {
+	carp("$mp has invalid chain");
+    }
 }
 
 
@@ -1716,6 +1731,26 @@ sub is_empty
 
     # false
     return 0;
+}
+
+
+=head2 is_multipart()
+
+return this message has empty content or not.
+
+=cut
+
+
+# Descriptions: return 1 if this message object is a multipart.
+#    Arguments: OBJ($self)
+# Side Effects: none
+# Return Value: NUM( 1 or 0 )
+sub is_multipart
+{
+    my ($self) = @_;
+    my $type = $self->whole_message_header_data_type();
+
+    return( ($type =~ /multipart/i) ? 1 : 0 );
 }
 
 
@@ -2033,7 +2068,7 @@ sub message_text
 
 
 # Descriptions: get body in message as ARRAY REF
-#    Arguments: OBJ($self) NUM($size)
+#    Arguments: OBJ($self) VARARGS(@argv)
 # Side Effects: none
 # Return Value: ARRAY_REF
 sub message_text_as_array_ref
@@ -2090,17 +2125,35 @@ sub find_first_plaintext_message
 
 internal use. set CODE REFERENCE to the log function
 
+=head2 unset_log_function()
+
+unset CODE REFERENCE used as log functions.
+
 =cut
 
 
 # Descriptions: set log function pointer (CODE REFERNCE)
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) CODE_REF($fp) CODE_REF($fp_override)
 # Side Effects: set log function pointer to $self object
 # Return Value: REF_CODE
 sub set_log_function
 {
-    my ($self, $fp) = @_;
+    my ($self, $fp, $fp_override) = @_;
     $self->{ _log_function } = $fp;
+    $override_log_function   = $fp_override if defined $fp_override;
+}
+
+
+# Descriptions: unset log function pointers
+#    Arguments: OBJ($self)
+# Side Effects: unset log function pointer to $self object and global one
+# Return Value: none
+sub unset_log_function
+{
+    my ($self) = @_;
+
+    delete $self->{ _log_function } if defined $self->{ _log_function };
+    undef $override_log_function    if defined $override_log_function;
 }
 
 
@@ -2230,7 +2283,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

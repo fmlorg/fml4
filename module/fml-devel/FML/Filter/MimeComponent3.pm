@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: MimeComponent3.pm,v 1.6 2002/12/24 10:19:46 fukachan Exp $
+# $FML: MimeComponent3.pm,v 1.11 2003/01/11 16:05:15 fukachan Exp $
 #
 
 package FML::Filter::MimeComponent;
@@ -53,9 +53,8 @@ my $debug = 0;
 # default rules
 my $filter_rules = [
 		    ['text/plain',   '*',  'permit'],
-		    ['text/*',       '*',  'reject'],
+		    ['text/html' ,   '*',  'reject'],
 		    ['multipart/*',  '*',  'reject'],
-		    ['*',            '*',  'reject'],
 		    ];
 
 
@@ -92,6 +91,8 @@ C<Usage>:
 
 my $default_action = 'permit';
 
+my $opt_cut_off_empty_part = 1;
+
 
 # Descriptions: top level dispatcher
 #    Arguments: OBJ($self) OBJ($msg) HASH_REF($args)
@@ -100,12 +101,12 @@ my $default_action = 'permit';
 sub mime_component_check
 {
     my ($self, $msg, $args) = @_;
-    my ($data_type, $prevmp, $nextmp, $mp, $action, $reason);
-    my $is_match  = 0;
-    my $is_cutoff = 0;
+    my ($data_type, $prevmp, $nextmp, $mp, $action, $reject_reason);
+    my $is_cutoff = 0; # debug 
     my $i = 1;
     my $j = 1;
-    my %count = ();
+    my %count  = ();
+    my %reason = ();
 
     # whole message type
     my $whole_data_type = $msg->whole_message_header_data_type();
@@ -124,27 +125,53 @@ sub mime_component_check
 
 	__dprint("\n   msg($i) $data_type");
 
+	# apply all rules for this message $mp.
       RULE:
 	for my $rule (@$filter_rules) {
 	    __dprint("\n\trule ${j}: (@$rule)");
 	    $j++;
 
 	    $action = $self->_rule_match($msg,$rule,$mp,$whole_data_type);
-	    $count{ $action }++;
+	    if (defined $action) {
+		$count{ $action }++;
+		$reason{ $action } = join(" ", @$rule);
 
-	    if ($action eq 'reject' || $action eq 'permit') {
-		__dprint("\n\t! action = $action.");
-		if ($action eq 'reject') {
-		    $reason = join(" ", @$rule);
+		if ($action eq 'reject' || $action eq 'permit') {
+		    __dprint("\n\t! action = $action.");
+		    if ($action eq 'reject') {
+			$reject_reason = join(" ", @$rule);
+		    }
 		}
-	    }
-	    elsif ($action eq 'cutoff') {
-		__dprint("\n\t! action = $action.");
-		$is_cutoff = 1;
-		$self->_cutoff($mp);
+		elsif ($action eq 'cutoff') {
+		    __dprint("\n\t! action = $action.");
+		    $is_cutoff = 1;
+		    $self->_cutoff($mp);
+		}
 	    }
 
 	    $i++; # prepare for the next _rule_match().
+	}
+
+	# cut off this part if empty.
+	if ($opt_cut_off_empty_part) {
+	    if ($mp->is_empty()) {
+		__dprint("\n\t! action = cutoff due to empty.");
+		$is_cutoff = 1;
+		$self->_cutoff($mp);
+	    }
+	}
+    }
+
+    # reject if all effective parts are cutoff.
+    if ($opt_cut_off_empty_part) {
+	if ($msg->is_multipart()) {
+	    # reject if no effective part.
+	    unless ($self->_has_effective_part($msg)) {
+		my $reason = "no effective part in this multipart";
+		Log($reason);
+		$count{ 'reject' }++; 
+		$reason{ 'reject' } = $reject_reason = $reason;
+	    }
 	}
     }
 
@@ -152,16 +179,26 @@ sub mime_component_check
     if ($is_cutoff && $debug) { $self->dump_message_structure($msg);}
 
     # if matched with "reject" at laest once, reject the whole mail.
+    my $decision = $default_action;
+    my $_reason  = undef;
     if (defined $count{ 'reject' } && $count{ 'reject' } > 0) {
-	$is_match = 1;
-	$action   = 'reject';
+	$decision = 'reject';
+	$_reason  = $reject_reason;
     }
     else {
-	$action   = 'permit';
+	# save the reason(s).
+	for my $key (keys %reason) {
+	    if ($key ne 'reject') {
+		$_reason .= $_reason ? " + ".$reason{ $key } : $reason{ $key };
+	    }
+
+	    if ($key eq 'permit') {
+		$decision = 'permit';
+	    }
+	}
     }
 
-    my $decision = $is_match ? $action : $default_action;
-    my $_reason  = $is_match ? $reason : "default action";
+    $_reason ||= "default action";
     Log("mime_component_filter: $decision ($_reason)");
     __dprint("\n   our desicion: $decision ($_reason)");
 
@@ -197,6 +234,8 @@ sub _rule_match
     else {
 	__dprint("\t\tnot check (whole_type not matched)");
     }
+
+    return undef;
 }
 
 
@@ -285,6 +324,33 @@ sub _cutoff
 }
 
 
+# Descriptions: check if the object chain has effective part ?
+#    Arguments: OBJ($self) OBJ($msg)
+# Side Effects: none
+# Return Value: NUM( 1 or 0 )
+sub _has_effective_part
+{
+    my ($self, $msg) = @_;
+    my ($mp, $data_type, $in_multipart);
+    my $i = 0;
+
+  MSG:
+    for ($mp = $msg; $mp; $mp = $mp->{ next }) {
+	$data_type    = $mp->data_type();
+	$in_multipart = 1 if $data_type eq 'multipart.delimiter';
+	$in_multipart = 0 if $data_type eq 'multipart.close-delimiter';
+
+	next MSG if $data_type =~ /multipart\./o;
+
+	if ($in_multipart) {
+	    $i++;
+	}
+    }
+
+    return( $i ? 1 : 0 );
+}
+
+
 =head1 UTILITY FUNCTIONS
 
 =cut
@@ -345,9 +411,20 @@ sub dump_message_structure
     for ($mp = $msg, $i = 1; $mp; $mp = $mp->{ next }) {
 	$data_type = $mp->data_type();
 	next MSG if ($data_type eq "text/rfc822-headers");
-	next MSG if ($data_type =~ "multipart\.");
+	# next MSG if ($data_type =~ "multipart\.");
 	__dprint("\t\t\t$data_type");
 	$i++;
+    }
+
+    if ($debug > 7) {
+	for ($mp = $msg, $i = 1; $mp; $mp = $mp->{ next }, $i++) {
+	    my ($p, $c, $n) = ("$mp->{ prev }", "$mp", "$mp->{ next }");
+	    $p =~ s/Mail::Message=HASH\((\S+)\)/$1/;
+	    $c =~ s/Mail::Message=HASH\((\S+)\)/$1/;
+	    $n =~ s/Mail::Message=HASH\((\S+)\)/$1/;
+	    __dprint(sprintf("%2d %25s | %10s | %10s | %10s", 
+			     $i, $mp->data_type(), $p, $c, $n));
+	}
     }
 }
 
@@ -439,7 +516,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

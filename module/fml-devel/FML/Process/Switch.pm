@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Switch.pm,v 1.79 2002/12/21 12:15:54 fukachan Exp $
+# $FML: Switch.pm,v 1.83 2003/01/11 16:05:20 fukachan Exp $
 #
 
 package FML::Process::Switch;
@@ -255,7 +255,7 @@ C<$args> is like this:
 # Descriptions: top level process switch
 #               emulates "use $package" but $package is dynamically
 #               determined by e.g. $0.
-#    Arguments: HASH_REF($args)
+#    Arguments: STR($myname) HASH_REF($args)
 # Side Effects: process switching :-)
 #               ProcessSwtich() is exported to main:: Name Space.
 # Return Value: STR(package name)
@@ -326,7 +326,7 @@ sub _module_specific_options
 	# perldoc [-h] [-v] [-t] [-u] [-m] [-l]
 	return qw(debug! help! params=s -c=s v! t! u! m! l!);
     }
-    elsif ($myname eq 'makefml') {
+    elsif ($myname eq 'makefml' || $myname eq 'fml') {
 	return qw(debug! help! force! params=s -c=s);
     }
     elsif ($myname eq 'fmladdr') {
@@ -353,6 +353,12 @@ sub _module_specific_options
     elsif ($myname eq 'fmlspool') {
 	return qw(debug! help! -I=s convert! style=s srcdir=s);
     }
+    elsif ($myname eq 'fmlsuper') {
+	return qw(debug! help!);
+    }
+    elsif ($myname eq 'fmlerror') {
+	return qw(debug! help!);
+    }
     else {
 	croak "no such program $myname.\n";
     }
@@ -373,7 +379,7 @@ sub _ml_name_is_required
     elsif ($myname eq 'fmlsch' || $myname eq 'fmlsch.cgi') {
 	return 0;
     }
-    elsif ($myname eq 'makefml') {
+    elsif ($myname eq 'makefml' || $myname eq 'fml') {
 	return 0;
     }
     elsif ($myname eq 'fmladdr') {
@@ -429,7 +435,7 @@ sub _module_we_use
     elsif ($name eq 'fmlconf') {
 	$pkg = 'FML::Process::ConfViewer';
     }
-    elsif ($name eq 'makefml') {
+    elsif ($name eq 'makefml' || $name eq 'fml') {
 	$pkg = 'FML::Process::Configure';
     }
     elsif ($name eq 'fmladdr') {
@@ -470,6 +476,12 @@ sub _module_we_use
     elsif ($name eq 'fmlspool') {
 	$pkg = 'FML::Process::Spool';
     }
+    elsif ($name eq 'fmlsuper') {
+	$pkg = 'FML::Process::Super';
+    }
+    elsif ($name eq 'fmlerror') {
+	$pkg = 'FML::Process::ErrorViewer';
+    }
     else {
 	return '';
     }
@@ -499,7 +511,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Error.pm,v 1.8 2002/12/18 04:24:26 fukachan Exp $
+# $FML: Error.pm,v 1.11 2003/01/05 05:15:21 fukachan Exp $
 #
 
 package FML::Error;
@@ -19,15 +19,26 @@ my $debug = 1;
 
 =head1 NAME
 
-FML::Error - analyze error messages.
+FML::Error - front end for the analyze of error messages.
 
 =head1 SYNOPSIS
+
+    use FML::Error;
+    my $error = new FML::Error $curproc;
+
+    # analyze error messages and holds the result within the object.
+    $error->analyze();
+
+    # remove addresses analyze() determined as bouncers.
+    $error->remove_bouncers();
 
 =head1 DESCRIPTION
 
 =head1 METHODS
 
-=head2 C<new()>
+=head2 new()
+
+usual constructor.
 
 =cut
 
@@ -45,9 +56,22 @@ sub new
 }
 
 
-# Descriptions: error message analyzer
+=head2 analyze()
+
+open error message cache and 
+analyze the data by the analyzer function.
+The function is specified by $config->{ error_analyzer_function }.
+Available functions are located in C<FML::Error::Analyze>.
+C<simple_count> function is used by default if $config->{
+error_analyzer_function } is unspecified.
+
+=cut
+
+
+# Descriptions: open error message cache and analyze the data by
+#               the specified analyzer function.
 #    Arguments: OBJ($self)
-# Side Effects: none
+# Side Effects: set up $self->{ _remove_addr_list } used internally. 
 # Return Value: none
 sub analyze
 {
@@ -64,14 +88,45 @@ sub analyze
     my $fp       = $config->{ error_analyzer_function } || 'simple_count';
     my $list     = $analyzer->$fp($curproc, $rdata);
 
+    $self->{ _analyzer } = $analyzer;
+
     # pass address list to remove
     $self->{ _remove_addr_list } = $list;
 }
 
 
-# Descriptions: delete addresses analyze() determines as bouncers
+# Descriptions: get data detail for the current result as HASH_REF.
 #    Arguments: OBJ($self)
 # Side Effects: none
+# Return Value: HASH_REF
+sub get_data_detail
+{
+    my ($self) = @_;
+    my $analyzer = $self->{ _analyzer };
+
+    if (defined $analyzer) {
+	return $analyzer->get_data_detail();
+    }
+    else {
+	return {}
+    }
+}
+
+
+=head2 remove_bouncers()
+
+delete mail addresses, analyze() determined as bouncers, by deluser()
+method.
+
+You need to call analyze() method before calling remove_bouncers() to
+list up addresses to remove.
+
+=cut
+
+
+# Descriptions: delete addresses analyze() determined as bouncers
+#    Arguments: OBJ($self)
+# Side Effects: update user address lists.
 # Return Value: none
 sub remove_bouncers
 {
@@ -84,8 +139,7 @@ sub remove_bouncers
 
     use FML::Restriction::Base;
     my $safe    = new FML::Restriction::Base;
-    my $regexp  = $safe->basic_variable();
-    my $addrreg = $regexp->{ address };
+    my $addrreg = $safe->regexp( 'address' );
 
   ADDR:
     for my $addr (@$list) {
@@ -106,7 +160,14 @@ sub remove_bouncers
 }
 
 
-# Descriptions: delete the specified address
+=head2 deluser( $address )
+
+delete the specified address by C<FML::Command::Admin::unsubscribe>.
+
+=cut
+
+
+# Descriptions: delete the specified address.
 #    Arguments: OBJ($self) STR($address)
 # Side Effects: none
 # Return Value: none
@@ -119,8 +180,7 @@ sub deluser
 
     use FML::Restriction::Base;
     my $safe    = new FML::Restriction::Base;
-    my $regexp  = $safe->basic_variable();
-    my $addrreg = $regexp->{ address };
+    my $addrreg = $safe->regexp( 'address' );
 
     # check if $address is a safe string.
     if ($address =~ /^($addrreg)$/) {
@@ -179,7 +239,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

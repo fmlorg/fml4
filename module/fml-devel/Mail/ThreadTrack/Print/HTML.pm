@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: HTML.pm,v 1.14 2002/12/22 03:21:33 fukachan Exp $
+# $FML: HTML.pm,v 1.16 2003/01/11 15:16:37 fukachan Exp $
 #
 
 package Mail::ThreadTrack::Print::HTML;
@@ -160,7 +160,7 @@ sub __end_thread_summary
 
 # Descriptions: This shows summary on C<$thread_id> in HTML language.
 #               It is used in C<FML::CGI::ThreadSystem>.
-#    Arguments: OBJ($self) HASH_REF($args)
+#    Arguments: OBJ($self) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: none
 sub __print_thread_summary
@@ -267,7 +267,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

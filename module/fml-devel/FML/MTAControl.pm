@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2002 Ken'ichi Fukamachi
+#  Copyright (C) 2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: MTAControl.pm,v 1.14 2002/12/18 04:12:47 fukachan Exp $
+# $FML: MTAControl.pm,v 1.17 2003/01/11 16:05:13 fukachan Exp $
 #
 
 package FML::MTAControl;
@@ -15,9 +15,11 @@ use Carp;
 use FML::MTAControl::Postfix;
 use FML::MTAControl::Qmail;
 use FML::MTAControl::Procmail;
+use FML::MTAControl::Sendmail;
 @ISA = qw(FML::MTAControl::Postfix
 	  FML::MTAControl::Qmail
 	  FML::MTAControl::Procmail
+	  FML::MTAControl::Sendmail
 	  );
 
 my $debug = 0;
@@ -76,8 +78,9 @@ sub is_valid_mta_type
 {
     my ($self, $mta_type) = @_;
 
-    if ($mta_type eq 'postfix' ||
-	$mta_type eq 'qmail'   ||
+    if ($mta_type eq 'postfix'  ||
+	$mta_type eq 'qmail'    ||
+	$mta_type eq 'sendmail' ||
 	$mta_type eq 'procmail') {
 	return 1;
     }
@@ -108,7 +111,7 @@ sub setup
 
 
 # Descriptions: update alias.db from alias file
-#    Arguments: OBJ($self) HASH_REF($curproc) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
 # Return Value: none
 sub update_alias
@@ -127,7 +130,7 @@ sub update_alias
 
 
 # Descriptions: find key in alias maps
-#    Arguments: OBJ($self) HASH_REF($curproc) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: none
 sub find_key_in_alias_maps
@@ -147,7 +150,7 @@ sub find_key_in_alias_maps
 
 
 # Descriptions: return aliases as HASH_REF
-#    Arguments: OBJ($self) HASH_REF($curproc) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: none
 # Return Value: HASH_REF
 sub get_aliases_as_hash_ref
@@ -166,8 +169,7 @@ sub get_aliases_as_hash_ref
 
 
 # Descriptions: install alias file
-#    Arguments: OBJ($self)
-#               HASH_REF($curproc) HASH_REF($params) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
 # Return Value: none
 sub install_alias
@@ -186,8 +188,7 @@ sub install_alias
 
 
 # Descriptions: remove entry in alias maps
-#    Arguments: OBJ($self)
-#               HASH_REF($curproc) HASH_REF($params) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
 # Return Value: none
 sub remove_alias
@@ -206,8 +207,7 @@ sub remove_alias
 
 
 # Descriptions: install/update virtual map file
-#    Arguments: OBJ($self)
-#               HASH_REF($curproc) HASH_REF($params) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
 # Return Value: none
 sub install_virtual_map
@@ -226,8 +226,7 @@ sub install_virtual_map
 
 
 # Descriptions: remove entry in virtual maps
-#    Arguments: OBJ($self)
-#               HASH_REF($curproc) HASH_REF($params) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update aliases
 # Return Value: none
 sub remove_virtual_map
@@ -246,7 +245,7 @@ sub remove_virtual_map
 
 
 # Descriptions: update virtual_map
-#    Arguments: OBJ($self) HASH_REF($curproc) HASH_REF($optargs)
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
 # Side Effects: update virtual_map
 # Return Value: none
 sub update_virtual_map
@@ -280,6 +279,60 @@ sub _install
 }
 
 
+# Descriptions: remove the specified entry in the postfix style map
+#    Arguments: OBJ($self) OBJ($curproc) HASH_REF($params) HASH_REF($optargs)
+#               HASH_REF($p)
+# Side Effects: update virtual_map
+# Return Value: none
+sub _remove_postfix_style_virtual
+{
+    my ($self, $curproc, $params, $optargs, $p) = @_;
+    my $removed = 0;
+    my $key     = $p->{ key };
+
+    use File::Spec;
+    my $virtual     = $p->{ map };
+    my $virtual_new = $virtual . 'new'. $$;
+
+    if (-f $virtual) {
+	print STDERR "removing $key in $virtual\n";
+    }
+    else {
+	return;
+    }
+
+    use FileHandle;
+    my $rh = new FileHandle $virtual;
+    my $wh = new FileHandle "> $virtual_new";
+    if (defined $rh && defined $wh) {
+      LINE:
+	while (<$rh>) {
+	    if (/\<VIRTUAL\s+$key\@/ .. /\<\/VIRTUAL\s+$key\@/) {
+		$removed++;
+		next LINE;
+	    }
+
+	    print $wh $_;
+	}
+	$wh->close;
+	$rh->close;
+
+	if ($removed > 3) {
+	    if (rename($virtual_new, $virtual)) {
+		print STDERR "\tremoved.\n";
+	    }
+	    else {
+		print STDERR "\twarning: fail to rename virtual files.\n";
+	    }
+	}
+    }
+    else {
+	warn("cannot open $virtual")     unless defined $rh;
+	warn("cannot open $virtual_new") unless defined $wh;
+    }
+}
+
+
 =head1 CODING STYLE
 
 See C<http://www.fml.org/software/FNF/> on fml coding style guide.
@@ -290,7 +343,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2002 Ken'ichi Fukamachi
+Copyright (C) 2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

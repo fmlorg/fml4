@@ -1,8 +1,8 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #
-# $FML: Date.pm,v 1.16 2002/12/24 10:19:49 fukachan Exp $
+# $FML: Date.pm,v 1.18 2003/01/11 15:16:35 fukachan Exp $
 #
 
 package Mail::Message::Date;
@@ -157,7 +157,7 @@ sub YYYYMMDD
 
 
 # Descriptions: return e.g. 1999/09/13 style
-#    Arguments: OBJ($self) NUM($time)
+#    Arguments: OBJ($self) NUM($time) STR($sep)
 # Side Effects: none
 # Return Value: STR
 sub YYYYxMMxDD
@@ -425,7 +425,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: JournaledFile.pm,v 1.24 2002/12/22 03:37:15 fukachan Exp $
+# $FML: JournaledFile.pm,v 1.27 2003/01/11 15:14:27 fukachan Exp $
 #
 
 package Tie::JournaledFile;
@@ -226,7 +226,7 @@ sub get_all_values_as_hash_ref
     use IO::File;
     my $fh = new IO::File;
 
-    if (-f $file) {
+    if (-f $file && defined $fh) {
 	$fh->open($file, "r");
 
 	if (defined $fh) {
@@ -274,7 +274,7 @@ parameter at C<new()> method. C<first_match> by default.
 
 
 # Descriptions: return the array of line(s) with the specified key.
-#    Arguments: OBJ($self) STR($key)
+#    Arguments: OBJ($self) STR($key) STR($mode)
 # Side Effects: none
 # Return Value: ARRAY_REF
 sub find
@@ -404,7 +404,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.

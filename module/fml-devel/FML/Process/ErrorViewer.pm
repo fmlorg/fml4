@@ -1,12 +1,12 @@
 #-*- perl -*-
 #
-# Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+# Copyright (C) 2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: ConfViewer.pm,v 1.20 2003/01/11 16:05:17 fukachan Exp $
+# $FML: ErrorViewer.pm,v 1.2 2003/01/11 16:05:19 fukachan Exp $
 #
 
-package FML::Process::ConfViewer;
+package FML::Process::ErrorViewer;
 use strict;
 use Carp;
 use vars qw($debug @ISA @EXPORT @EXPORT_OK);
@@ -17,32 +17,32 @@ use FML::Process::Kernel;
 
 =head1 NAME
 
-FML::Process::ConfViewer -- show configuration variables
+FML::Process::ErrorViewer -- show bounce messages status
 
 =head1 SYNOPSIS
 
-    use FML::Process::ConfViewer;
-    $curproc = new FML::Process::ConfViewer;
+    use FML::Process::ErrorViewer;
+    $curproc = new FML::Process::ErrorViewer;
        ...
     $curproc->run();
        ...
 
 =head1 DESCRIPTION
 
-FML::Process::ConfViewer provides the main function for C<fmlconf>.
+FML::Process::ErrorViewer provides the main function for C<fmlerror>.
 
 =head1 METHODS
 
-=head2 C<new($args)>
+=head2 new($args)
 
 ordinary constructor.
 It make a C<FML::Process::Kernel> object and return it.
 
-=head2 C<prepare($args)>
+=head2 prepare($args)
 
 fix @INC, adjust ml_* and load configuration files.
 
-=head2 C<verify_request($args)>
+=head2 verify_request($args)
 
 show help unless @ARGV.
 
@@ -52,7 +52,7 @@ show help unless @ARGV.
 # Descriptions: ordinary constructor
 #    Arguments: OBJ($self) HASH_REF($args)
 # Side Effects: none
-# Return Value: FML::Process::ConfViewer object
+# Return Value: FML::Process::ErrorViewer object
 sub new
 {
     my ($self, $args) = @_;
@@ -71,7 +71,7 @@ sub prepare
     my ($curproc, $args) = @_;
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlconf_prepare_start_hook' );
+    my $eval = $config->get_hook( 'fmlerror_prepare_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -81,7 +81,7 @@ sub prepare
     $curproc->load_config_files( $args->{ cf_list } );
     $curproc->fix_perl_include_path();
 
-    $eval = $config->get_hook( 'fmlconf_prepare_end_hook' );
+    $eval = $config->get_hook( 'fmlerror_prepare_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -100,7 +100,7 @@ sub verify_request
     my $argv   = $curproc->command_line_argv();
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlconf_verify_request_start_hook' );
+    my $eval = $config->get_hook( 'fmlerror_verify_request_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -111,7 +111,7 @@ sub verify_request
 	exit(0);
     }
 
-    $eval = $config->get_hook( 'fmlconf_verify_request_end_hook' );
+    $eval = $config->get_hook( 'fmlerror_verify_request_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -143,15 +143,15 @@ sub run
     my $myname = $curproc->myname();
     my $argv   = $curproc->command_line_argv();
 
-    my $eval = $config->get_hook( 'fmlconf_run_start_hook' );
+    my $eval = $config->get_hook( 'fmlerror_run_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
     }
 
-    $curproc->_fmlconf($args);
+    $curproc->_fmlerror($args);
 
-    $eval = $config->get_hook( 'fmlconf_run_end_hook' );
+    $eval = $config->get_hook( 'fmlerror_run_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -177,11 +177,7 @@ sub help
 
 print <<"_EOF_";
 
-Usage: $name [-n] \$ml_name
-
-          show all configuration variables
-
--n        show only difference from default
+Usage: $name \$ml_name
 
 _EOF_
 }
@@ -196,13 +192,13 @@ sub finish
     my ($curproc, $args) = @_;
     my $config = $curproc->{ config };
 
-    my $eval = $config->get_hook( 'fmlconf_finish_start_hook' );
+    my $eval = $config->get_hook( 'fmlerror_finish_start_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
     }
 
-    $eval = $config->get_hook( 'fmlconf_finish_end_hook' );
+    $eval = $config->get_hook( 'fmlerror_finish_end_hook' );
     if ($eval) {
 	eval qq{ $eval; };
 	print STDERR $@ if $@;
@@ -217,24 +213,28 @@ run dump_variables of C<FML::Config>.
 =cut
 
 
-# Descriptions: show configurations variables in the sytle "key = value".
+# Descriptions: show error messages
 #    Arguments: OBJ($curproc) HASH_REF($args)
 # Side Effects: none
 # Return Value: none
-sub _fmlconf
+sub _fmlerror
 {
     my ($curproc, $args) = @_;
-    my $config = $curproc->{ config };
-    my $mode   = $args->{ options }->{ n } ? 'difference_only' : 'all';
-    my $argv   = $curproc->command_line_argv();
+    my $config = $curproc->config();
 
-    # if variable name is given, show the value.
-    if (defined $argv->[1]) {
-	my $k = $argv->[1];
-	print "$k = ", $config->{ $k }, "\n";
-    }
-    else {
-	$config->dump_variables({ mode => $mode });
+    use FML::Error;
+    my $obj  = new FML::Error $curproc;
+    my $data = $obj->analyze();
+    my $info = $obj->get_data_detail();
+
+    my ($k, $v);
+    while (($k, $v) = each %$info) {
+	if (ref($v) eq 'ARRAY') {
+	    print "$k => (@$v)\n";
+	}
+	else {
+	    print "$k => $v\n";
+	}
     }
 }
 
@@ -249,14 +249,14 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
+Copyright (C) 2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 HISTORY
 
-FML::Process::ConfViewer first appeared in fml8 mailing list driver package.
+FML::Process::ErrorViewer first appeared in fml8 mailing list driver package.
 See C<http://www.fml.org/> for more details.
 
 =cut

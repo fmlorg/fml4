@@ -1,9 +1,9 @@
 #-*- perl -*-
 #
-# Copyright (C) 2001,2002 Ken'ichi Fukamachi
+# Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 #          All rights reserved.
 #
-# $FML: Addr.pm,v 1.3 2002/12/18 04:42:37 fukachan Exp $
+# $FML: Addr.pm,v 1.5 2003/01/07 08:38:34 fukachan Exp $
 #
 
 package FML::Process::Addr;
@@ -181,7 +181,13 @@ sub help
 
 print <<"_EOF_";
 
-Usage: $name \$command \$ml_name [options]
+Usage: $name [options]
+
+-n   show fml specific aliases.
+
+[BUGS]
+	support only fml8 + postfix case.
+	also, we assume /etc/passwd exists.
 
 _EOF_
 }
@@ -205,9 +211,7 @@ See <FML::Process::Switch()> on C<$args> for more details.
 sub _fmladdr
 {
     my ($curproc, $args) = @_;
-    my $config  = $curproc->{ config };
-    my $myname  = $curproc->myname();
-    my $argv    = $curproc->command_line_argv();
+    my $config = $curproc->{ config };
 
     my $eval = $config->get_hook( 'fmladdr_run_start_hook' );
     if ($eval) { eval qq{ $eval; }; LogWarn($@) if $@; }
@@ -262,7 +266,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
