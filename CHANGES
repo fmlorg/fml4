@@ -5,6 +5,19 @@
 
 2000/05/24
 
+  add toggle menu for configuration menu on CUI and GUI.
+	Please see "makefml config"
+	   MAIN_MENU => OPTION => VARIABLE_OFF_ON => ...
+
+	ある変数を off/on のどちらかにする( 1 or 0)くらいは
+	全部メニューでできるようにしてみたです。
+
+	   メニュー => OPTION => VARIABLE_OFF_ON => *1 => 変数名リスト => y/n
+
+	*1 画面からはみ出るのをふせぐために変数名をソートして、
+	   さらにアルファベット順の前半、後半で分けています。
+	   前半は ^A .. ^K, 後半は ^L .. ^Z と画面に説明が出ています
+
   update INSTALL_on_NT4
 	IMail "program aliases" works on NT4
 
