@@ -69,6 +69,11 @@ sub SocketInit
 {
     local($eval, $exist_socket_ph);
 
+    ### XXX: Set up @RcptLists ###
+    @RcptLists = @ACTIVE_LIST;
+    push(@RcptLists, $ACTIVE_LIST) 
+	unless grep(/$ACTIVE_LIST/, @RcptLists);
+
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
@@ -376,17 +381,14 @@ sub SmtpIO
 	$Current_Rcpt_Count = 1;
     }
     elsif ($e{'mode:_Deliver'}) { 
-	push(@ACTIVE_LIST, $ACTIVE_LIST) 
-	    unless grep(/$ACTIVE_LIST/, @ACTIVE_LIST);
+	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*RcptLists);}
 
-	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*ACTIVE_LIST);}
-
-	for $a (@ACTIVE_LIST) { # plural active lists
+	for $a (@RcptLists) { # plural active lists
 	    next if $a{$a}; $a{$a} = 1; # uniq;
 	    &SmtpPutActiveList2Socket($ipc, $a);
 	}
 
-	if ($SMTP_SORT_DOMAIN) { &SDFin(*ACTIVE_LIST);}
+	if ($SMTP_SORT_DOMAIN) { &SDFin(*RcptLists);}
     }
     elsif ($e{'mode:delivery:list'}) { 
 	&SmtpPutActiveList2Socket($ipc, $e{'mode:delivery:list'});

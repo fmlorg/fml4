@@ -26,7 +26,7 @@ sub SmtpHackInit
 
     $howold = -M $OUTGOING_RCPTLIST;
 
-    for (@ACTIVE_LIST) { if ($howold > (-M $_)) { $renew = 1;}}
+    for (@RcptLists) { if ($howold > (-M $_)) { $renew = 1;}}
 
     &SmtpHackRebuildList if $renew;
 
@@ -54,7 +54,7 @@ sub SmtpHackRebuildList
     };
     select(OUT); $| = 1; select(STDOUT);
 
-    for (@ACTIVE_LIST) {
+    for (@RcptLists) {
 	next unless -f $_;
 
 	if (open(IN, $_)) {
