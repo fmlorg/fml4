@@ -468,7 +468,7 @@ GEN_ARCHIVE () {
 		echo ""
 		echo "-- touch current ID"
 		echo ""
-		rm -f $FTP/00LATEST_${BRANCH}_IS*
+		rm -f $FTP/00LATEST_${BRANCH}_SNAPSHOT_IS*
 		eval " touch '$FTP/00LATEST_${BRANCH}_SNAPSHOT_IS__${FMLID}__' ";
 		echo ""
 
