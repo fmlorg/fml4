@@ -41,8 +41,8 @@ $LANGUAGE                      = "Japanese";
 #    DOMAINNAME the domain name              e.g. fml.org
 #    FQDN       Fully Qualified Domain Name  e.g. beth.fml.org
 #
-$DOMAINNAME                    = "sapporo.iij.ad.jp";
-$FQDN                          = "beth.sapporo.iij.ad.jp";
+$DOMAINNAME                    = "_DOMAIN_";
+$FQDN                          = "_FQDN_";
 
 #####################################################################
 # ### Section: Mailing List Policy (for Post, Commands), Maintainer ###
