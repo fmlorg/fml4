@@ -1,7 +1,23 @@
-		how to release
+◯ 最初の一回
 
-% echo 3.0.x > conf/release
-% echo 3.0.x > conf/release_version
-% make release
+   % cvs -d cvs.fml.org:/cvsroot co fml
+
+	さぁエディット！
+
+◯ snapshot の作り方
+
+   % cvs -d cvs.fml.org:/cvsroot co fml
+   % make build
+   % make snapshot
+
+   注意: BSD make じゃないと make 不能
+
+◯ リリースの仕方
+
+   % cvs -d cvs.fml.org:/cvsroot co fml
+   % make build
+   % echo 3.0.x > conf/release
+   % echo 3.0.x > conf/release_version
+   % make release
 
 $Id$
