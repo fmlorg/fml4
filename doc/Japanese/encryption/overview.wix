@@ -196,7 +196,23 @@ PGP-6.5.1i for UNIX VULNERABLE
 
 .url http://senderek.de/security/key-experiments.html
 
+.url http://www.pgp.com/other/advisories/adk.asp
+.url http://web.mIt.edu/network/pgp.html
 
+.q
+Message-ID:  <20000826121158.13915.qmail@securityfocus.com>
+To: BUGTRAQ@SECURITYFOCUS.COM
+
+PGP updated softwares (http://web.mIt.edu/network/pgp.html):
+---------------------
+PGP Freeware v6.5.8 is now available for Windows 
+95/98/NT/2000! and the Macintosh
+PGP Freeware v6.5.8 is MacOS 7.6.1+
+PGP Command Line Freeware v6.5.2 is now available for 
+AIX/HP-UX/Linux/Solaris!
+PGP Certificate Server Freeware v2.5.1 is now available for 
+Windows NT/2000 and Solaris!
+.~q
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
