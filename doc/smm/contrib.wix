@@ -1,4 +1,4 @@
-.C	contrib 以下について
+.C	contrib
 .l	contrib
 
 lib/ == contrib/ の階層のリストと簡単な説明です。
@@ -21,27 +21,26 @@ localhack/release-2		FML release-2 用
 localhack/release-2/kizu	
 localhack/release-2/doc-changes	doc-changes@ffs.fml.org
 mail2fax			
+mail2news			(.ptr{mail2news})
 msend-anytime 			(.ptr{msend-anytime})
 netutils			a few examples applied based on fml librarys
 pager				(.ptr{pager})
 traffic				(.ptr{libtraffic.pl})
 utilities			(.ptr{uip})
 whois				(.ptr{whois})
-www-utils			(.ptr{www-utils})
+www-utils			
 .~q
 
 
 .include traffic.wix
 
 
-.S	lib/www-utils
-.l	www-utils
-
-cgi program の例。 forw.cgi 。深い意味はない(謎)
-
-
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
