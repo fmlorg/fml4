@@ -4,6 +4,10 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/03/18
+
+   makefml admin.cgi でディレクトリ名に . が使えないのを直す 
+
 2002/02/24
 
    4.0E
@@ -230,7 +234,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.238 2002/02/24 14:47:02 fukachan Exp $
+	add $FML: CHANGES,v 1.239 2002/02/28 22:09:01 fukachan Exp $
 
 2001/10/03
 
