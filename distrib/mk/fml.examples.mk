@@ -29,7 +29,7 @@ ${WORK_EXAMPLES_DIR}/${file}-e.html: doc/examples/${file}.wix
 
 ### doc/examples/*txt
 __HTML_EXAMPLES_TXT__        = makefml.cgi 
-__HTML_EXAMPLES_IMPORT_TXT__ = INSTALL TODO IMPLEMENTATION
+__HTML_EXAMPLES_IMPORT_TXT__ = INSTALL TODO IMPLEMENTATION QandA
 
 .for file in ${__HTML_EXAMPLES_TXT__}
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/${file}.txt
