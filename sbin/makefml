@@ -734,11 +734,14 @@ sub SetHashDefaults
 		    '1000#log ML [opt]',  'show log: [-i] [-NUMBER] [all] [-pPATTERN]',
 		    '1000#tail ML [opt]',  'syntax sugar of log',
 
-		    'showconfig',   'do_showconfig',
-		    '8000#showconfig',   'show environment, version, ..',
-		    'showconf',     'do_showconfig',
-		    'bug-report-template',     'do_send_pr',
-		    'send-pr',     'do_send_pr',
+		    'showconfig',          'do_showconfig',
+		    '8000#showconfig',     'show environment, version, ..',
+		    'showconf',            'do_showconfig',
+		    'send-pr',             'do_send_pr',
+		    'bug-report-template', 'do_send_pr',
+
+		    # update /var/spool/ml/etc/aliases
+		    'recollect-aliases',   'do_collect_aliases'
 		    );
 
     # functions not to lock
@@ -765,6 +768,7 @@ sub SetHashDefaults
 		 'show', 1,
 		 'send-pr', 1,
 		 'bug-report-template', 1,
+		 'recollect-aliases', 1,
 		 );
 
     # <ML> argument is not required.
@@ -778,7 +782,8 @@ sub SetHashDefaults
 	 "admin.cgi", "html_cgiadmin_passwd",
 
 	 # utility
-	 "show", "showconfig", "showconf", 'send-pr', 'bug-report-template'
+	 "show", "showconfig", "showconf", 'send-pr', 'bug-report-template',
+	 "recollect-aliases"
 	 );
 }
 
@@ -5535,6 +5540,13 @@ sub do_send_pr
     printf $format, "Fix:";
     print "\n";
     print "\n";
+}
+
+
+sub do_collect_aliases
+{
+    &CollectAliases;
+    print "   Don't forget to run newaliases.\n";
 }
 
 
