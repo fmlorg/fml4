@@ -12,7 +12,7 @@ FIX_WIX         = $(PERL) ${FML}/distrib/bin/fix-wix.pl -X ${FML}
 HTML_MISC_SOURCES = roadmap.html nt.html search-j.html search-e.html
 
 ### targets ###
-HTML_REQ_CPP_SOURCES  = index history download links mailinglist 
+HTML_REQ_CPP_SOURCES  = index history download links mailinglist people
 HTML_REQ_CPP_SOURCES += 3.0-new-features
 
 HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
@@ -34,7 +34,7 @@ DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 
 
 ## doc/advisory
-DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
+DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year2000
 
 
 ### doc/examples

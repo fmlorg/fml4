@@ -4,6 +4,12 @@ var/html/${file}: doc/html/${file}
 	$(CP) doc/html/${file} $(FML)/var/html/ 
 .endfor
 
+# mascot
+HTML_MISC += var/html/pictures/index.html
+var/html/pictures/index.html: doc/html/pictures/index.html
+	test -d var/html/pictures || mkdir var/html/pictures
+	${CPP} -P -UDIST doc/html/pictures/index.html > var/html/pictures/index.html
+
 .for file in ${DOC_RI_SOURCES}
 __HTML_RI__ += var/html/${file}/index.html
 var/html/${file}/index.html: doc/ri/${file}.wix
@@ -96,7 +102,7 @@ var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix
 
 var/html/WHATS_NEW-e/index.html: distrib/compile/WHATS_NEW.wix
 	distrib/bin/remove_japanese_line.pl distrib/compile/WHATS_NEW.wix |\
-	${FWIX} -L ENGLISh -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
+	${FWIX} -L ENGLISH -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
 
 
 ### main ###

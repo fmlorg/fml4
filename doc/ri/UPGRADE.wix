@@ -166,6 +166,7 @@ The default of $MESSAGE_LANGUAGE is $LANGUAGE.
 $LANGUAGE is defined in installation.
 
 .S	その他の(目に見える)変更
+=E.S	Other Changes
 
 SKIP_FIELDS のデフォールトを変更して Received: を通すのがデフォールト
 =E
@@ -342,6 +343,7 @@ elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
 
 
 .C	その他互換性について
+=E.C	Compatibility
 
 .S	fml 1.6 より前からの移行について (2.1 READMEより)
 

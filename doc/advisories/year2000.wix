@@ -1,6 +1,18 @@
-		2000年問題
+.HTML_PRE
+	FML Security Advisory 1999-005: How to fix Y2K in old fml packages
+	========================================
+
+Topic:		2000年問題について
 =E
-		YEAR 2000 Problems
+Topic:		YEAR 2000 Problems
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 1999 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+
+[Abstract]
 
 わかっている範囲の問題と対応しているversionについての情報です。
 =E
@@ -9,6 +21,48 @@ Best current practise on fml y2k.
 READMEの通りY2Kに限らず汎用的な答えはいつも『currentを使う』です。
 =E
 "Please use current" is always true answer.
+
+
+.toc
+
+
+
+.C	修正ツールについて
+=E.C	Tools to fix
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/y2k-fix.tar.gz
+
+から入手して下さい。これを広げると fix-gettime.pl というコマンドが入っ
+ています。&GetTimeとはなにか？は次の章で説明されています。
+この関数の定義を直す(関数の最後に正しいコードを付け加えて該当する変数
+を上書きしてしまう)コマンドです。
+
+以下ディレクトリ名などは適当に読みかえて下さい。
+
+1.  パッケージをひろげて fix-gettime.pl を取り出す。
+
+2. ＭＬをとめる
+
+3. 念のため/usr/locla/fml/のバックアップをとります。
+
+例:
+
+   % cp -pr /usr/local/fml /usr/local/fml.bak
+
+4. fix-gettime.pl を走らせて、'sub GetTime' という関数定義のあるファイ
+ルに全部パッチを当てる。
+
+例: どのファイルか分からない時はとりあえず全部にあててしまえばOKでしょ
+う。無関係なファイルは無修正のままになるだけです。
+
+   % perl -i.bak -nple fix-gettime.pl /usr/local/fml/*pl
+
+file permissionが変わるかも知れないので、この後に念のため
+
+   % chmod 755 /usr/local/fml/fml.pl /usr/local/fml/msend.pl
+
+などしておいてください。
+
 
 
 .C	Overview

@@ -34,7 +34,13 @@ list=/tmp/.fml-install$$
 
 eval umask 022;
 
-DIRS="bin sbin libexec cf etc sys src drafts messages doc"
+DIRS="bin sbin libexec cf etc sys src drafts messages"
+
+if [ X$MKDOC != Xno ]
+then
+    DIRS="$DIRS doc"
+fi
+
 CHDIRS="bin sbin libexec"
 EXEC_DIR=$1
 SYS_DIR="$1/sys"

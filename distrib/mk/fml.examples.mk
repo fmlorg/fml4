@@ -16,9 +16,13 @@ ${WORK_EXAMPLES_DIR}/${file}-e.html: doc/examples/${file}.wix
 # doc/examples/index{,-e}.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index.html
 __HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/index-e.html
+__HTML_EXAMPLES__ += ${WORK_EXAMPLES_DIR}/makefml.cgi.txt
 
 ${WORK_EXAMPLES_DIR}/index.html: doc/examples/index.html
 	${JCONV} doc/examples/index.html > ${WORK_EXAMPLES_DIR}/index.html
 
 ${WORK_EXAMPLES_DIR}/index-e.html: doc/examples/index-e.html
 	${JCONV} doc/examples/index-e.html > ${WORK_EXAMPLES_DIR}/index-e.html
+
+${WORK_EXAMPLES_DIR}/makefml.cgi.txt: doc/examples/makefml.cgi.txt
+	${JCONV} doc/examples/makefml.cgi.txt > ${WORK_EXAMPLES_DIR}/makefml.cgi.txt

@@ -6,3 +6,6 @@
 		(updated by 1999-004)
 1999-004	How to reject Melissa Macro Virus Familly
 		(update 1999-003)
+1999-005	Fix y2k
+		See also distrib/patch-kit/y2k/ and 
+		fml/y2k-fix.tar.gz in ftp server.
