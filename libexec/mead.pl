@@ -261,7 +261,7 @@ sub AnalyzeErrorWord
     $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
     $addr = $_[1];
 
-    &Debug("AnalyzeErrorWord(@_)");
+    &Debug("AnalyzeErrorWord(@_)") if $debug;
 
     if (/user unknown|unknown user/i && /(\S+\@[\.A-Za-z0-9\-]+)/) {
 	&CacheOn($addr = $1, &AnalWord($_));
@@ -280,7 +280,7 @@ sub CacheOn
     local($addr, $reason) = @_;
     local($hit);
 
-    &Debug("--CacheOn ($addr, $reason);");
+    &Debug("--CacheOn ($addr, $reason);") if $debug;
 
     # cache check
     return if $Cached{"$addr:$reason"};
@@ -388,10 +388,9 @@ sub DeadOrAlive
 
     ($last) = (split(/\s+/, $buf))[1];
 
-    &Debug("if ($now - $last > $CHECK_INTERVAL) {");
     if ($now - $last > $CHECK_INTERVAL) {
 	&MLEntryOn($ML_DIR);	# set %ml'ML
-	&Debug("check time comes");
+	&Debug("check time comes") if $debug;
     }
     else {
 	&Debug("check time comes not yet") if $debug;
@@ -405,7 +404,7 @@ sub DeadOrAlive
     local($new) = "$CACHE.".$$."new";
     local($expire_time) = $now - int($EXPIRE*24*3600);
 
-    &Debug("expire time is". ($EXPIRE*24*3600)/3600 ."hour(s)") if $debug;
+    &Debug("expire time is " . ($EXPIRE*24*3600)/3600 ." hour(s)") if $debug;
 
     open(CACHE, $CACHE) || &Die("CacheOn: cannot read CACHE $CACHE\n");
     open(NEW, "> $new") || &Die("CacheOn: cannot open $new\n");
@@ -500,6 +499,13 @@ sub Report
 {
     &GetTime;
 
+    if ($debug) {
+	print STDERR "--report MODE=$MODE\n{";
+	print STDERR join(" ", %MakeFmlTemplate);
+	print STDERR "}\n";
+	# print STDERR "HOOK={$MEAD_REPORT_HOOK}\n";
+    }
+
     if ($MODE eq 'report') {
 	# make "makefml ..." shell script for convenience
 	# This file includes all ML's script if 
@@ -508,11 +514,23 @@ sub Report
 	if (%MakeFmlTemplate) {
 	    local($tmp)  = "$DIR/,mead.sh$$";
 	    local($file) = "$DIR/remove${CurrentTime}.sh";
+	    local($addr, @addr);
 
 	    &Append("\#!/bin/sh", $tmp);
 
+	    # [format]
+	    # $MakeFmlTemplate{$ml} .= "$MAKEFML $KILL $ml $addr\n";
 	    for $ml (keys %MakeFmlTemplate) {
-		&Append($MakeFmlTemplate{$ml}, $tmp);
+		@addr = split(/\s+/, $MakeFmlTemplateAddr{$ml});
+		$addr = $addr[0];
+
+		if ($MEAD_REPORT_HOOK) {
+		    eval($MEAD_REPORT_HOOK);
+		    print STDERR $@,"\n" if $@;
+		}
+		else {
+		    &Append($MakeFmlTemplate{$ml}, $tmp);
+		}
 
 		&Mesg($ml, "\n");
 		&Mesg($ml, "2. The script to remove dead users is also generated.");
@@ -640,8 +658,9 @@ sub Action
 	&MakeFml("$KILL $ml $addr", $addr, $ml);
     }
     elsif ($MODE eq 'report') {
-	$Template{$ml} .= $CTK{$ml}."admin $KILL $addr\n";
-	$MakeFmlTemplate{$ml} .= "$MAKEFML $KILL $ml $addr\n";
+	$Template{$ml}            .= $CTK{$ml}."admin $KILL $addr\n";
+	$MakeFmlTemplate{$ml}     .= "$MAKEFML $KILL $ml $addr\n";
+	$MakeFmlTemplateAddr{$ml} .= $addr. "\t";
     }
     else {
 	&Debug("mode $MODE is unknown");
@@ -728,7 +747,7 @@ sub Init
     require 'getopts.pl';
     &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:k:f:");
     $opt_h && die(&Usage);
-    $debug  = $opt_d;
+    $debug = $opt_d ? 1 : 0;
 
 
     ### at the first stage, evaluate the configuration file ###
@@ -796,13 +815,9 @@ sub EvalCF
     for ("debug", 
 	 EXPIRE, KILL, CHECK_INTERVAL, LIMIT, 
 	 DIR, ML_DIR, CACHE, EXEC_DIR, MAKEFML, 
-	 MODE, SENDMAIL, PRIORITY) {
+	 MODE, SENDMAIL, PRIORITY, MEAD_REPORT_HOOK) {
 	eval("\$main'${_} = \$mead'${_};"); 
     }
-
-    require 'dumpvar.pl';
-    &dumpvar('main');
-    exit 0;
 }
 
 
