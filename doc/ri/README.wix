@@ -1,5 +1,5 @@
 .HTML_PRE
-	FML 2.1 Mailing List Server Package
+	FML 2.2 Mailing List Server Package
 
 
 				深町 賢一
@@ -26,7 +26,7 @@ package です。perl を使って書かれています。
 ＃おまけCDROMつき雑誌等にある「hmlの改良」の記述はちょっと誤解を招く
 ＃言い回しですよね…歴史的に hml compatbile な動作ができるだけです
 =E 
-FML 2.1 is a package or tool kit of Mailing List Server programs. It
+FML 2.2 is a package or tool kit of Mailing List Server programs. It
 consists of perl scripts.
 
 FML は配送プログラムや多くのコマンド用のサーバ(ユーザー用やMLをリモー
@@ -62,8 +62,8 @@ add a new member in hand, only members can post and user commands".
 If you use extended functions, you need to add and to modify
 configurations to config.ph (FML configuration file) EXPLICITLY.
 
-
 .S	必要な環境
+=E.S	Environment you need
 
 基本的な前提は
 
@@ -126,7 +126,6 @@ you can setup FML via POP3, an underhanded trick :D
 Since the target machine is NetBSD (4.4BSD derived system), the
 document is based on sendmail and perl (4 or 5) enveironment.
 
-
 .S	ソースコードと情報へのポインタ
 =E.S	How to get the latest information
 
@@ -148,10 +147,10 @@ ML(後述)かここへどうぞ
 =E
 The HOME PAGE of the Fml is 
 =S
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/index-e.html (English)
+	http://www.fml.org/fml/index-e.html (English)
 	http://www.fml.org/index-e.html (English)
 
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+.url	http://www.fml.org/fml/
 .url	http://www.fml.org/
 
 =E
@@ -185,17 +184,23 @@ If you cannot use ftp, please send a mail (body is anything O.K.) to
 fml-current@ffs.fml.org. You can receive auto-suplitted mails of the
 latest source (UNIX version).
 
-
 .S	メーリングリストについて
 =E.S	on Mailing Lists
 
 ○ FMLに関する議論、バグレポート、質問、要望などあらゆる:)目的に
-fml-support ML (言語は日本語。自動登録(confirmationモード))
-が用意されています。
+fml-support ML (言語は日本語。自動登録(confirmationモード))が用意され
+ています。BUGレポートはどのOS,MTA, FML version を使っていてデフォール
+トから何を変えて何をどうしてどうなったのか? を書いて下さい。
+質問の前に最低限チェックして欲しい項目が doc/CHECK_LIST.jp (日本語)に
+あります。
 =E
 * The mailing list on FML discussion is the address 
 
 	fml-support@ffs.fml.org (Japanese, Automatically Added)
+
+=E
+Please check your environment folowoing doc/CHECK_LIST.en before you
+ask me, us, mailing lists.
 
 また別途 fml-bugs という(作者にのみフォワードされる)アドレス
 =E
@@ -265,6 +270,7 @@ very slowly;-)
 や簡単な設定の変更は makefml という対話設定プログラムで行なえます。
 
 .S	makefml (インストーラー及び設定インターフェイス)
+=E.S	makefml (installer and CUI interface for configurations)
 
 とりあえず
 =E
@@ -288,31 +294,28 @@ e.g. to make elena@your-domain mailng list
 =E
 Please see the file INSTALL for the detail.
 
-
 .S	ターゲットマシン/テスト環境
 =E.S	Target machine environment
 
-fml 2.1 のターゲットマシン/テスト環境は
+fml 2.2 のターゲットマシン/テスト環境は
 =E
 The target and experimental machines are
 
-	sendmail 8.8.8 + perl5.003 on NetBSD 1.3
-	sendmail 8.8.8 + perl5.003 on NetBSD 1.2_BETA
-	sendmail 8.8.8 + perl4.036/perl5.003 on NetBSD 1.1B
+	sendmail 8.9.1 + perl 5.005_01 on NetBSD 1.3G
+	sendmail 8.9.1 + perl 4.036    on NetBSD 1.3G
 
 なおFML.ORGの配送システムは
 =E
 and the delivery system on FML.ORG consists of 4 MTA's:
 
 	sendmail 8.8.8 + WIDE patch + smtpfeed
-	sendmail 8.8.8
+	sendmail 8.9.1
 	exim  1.70
-	qmail 1.01
+	qmail 1.03
 
 の4つのMTAを使った並列配送で数十倍速になっています:)。
 =E
 which accelerate the delivery.
-
 
 .S	Supporeted Architectures
 =E.S	Supporeted Architectures
@@ -326,19 +329,18 @@ which accelerate the delivery.
 The target OS is NetBSD (4.4BSD derived system). You may use FML on
 almost UNIX. The installer (makefml) ajdust FML when installing.
 
-sys/arch/ src/arch/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
+sys/ の下にはベータテスト版の WINDOWS NT 4.0 用の依存コー
 ドが入っています。そもそも NT 上の perl, sendmail などが何となく動いて
 るような動いてないような変なところはいろいろあるので、まぁ動いたらラッ
 キ〜と思ってください。UNIX version との違いについて INSTALL_on_NT4 に
 補足説明が書いてあります。インストールは INSTALL と INSTALL_on_NT4 両
 方を参照して下さい。
 =E
-sys/arch and src/arch have Micro$oft Windows NT4.0 dependent codes. If
-FML runs well on NT, you are lucky:). Please read INSTALL and
-INSTALL_on_NT4.
-
+sys/ have Micro$oft Windows NT4.0 dependent codes. If FML runs well on
+NT, you are lucky:). Please read INSTALL and INSTALL_on_NT4.
 
 .S	アップグレード・インストールをしようとしている人へ
+=E.S	For upgrade
 
 アップグレードする人で「新たに config.ph を作り直すところから始めよう」
 と思っている人は注意が必要です。UPGRADE というファイルも見て下さい。古
@@ -346,9 +348,8 @@ INSTALL_on_NT4.
 は別として)。
 
 
-
-.C	FML 2.1 の機能の概要
-=E.C	Overview on FML 2.1
+.C	FML 2.2 の機能の概要
+=E.C	Overview on FML 2.2
 
 
 基本的な設計方針は
@@ -478,7 +479,6 @@ environments, ....
 Hence it is better to do hasks latest version if you like(^^). 
 
 
-
 .C	Version Up と互換性(Compatibility)
 =E.C	Version Up and Compatibility
 
@@ -500,7 +500,6 @@ adjust your OS.
 
 などを makefml が行ないます。
 
-
 .S	新しい機能を有効にするには？
 =E.S	To make new functions effective
 
@@ -511,12 +510,11 @@ adjust your OS.
 Please define new options in config.ph explicitly. In default, new
 mechanism does not work if not defined.
 
-
 .S	互換性について
 =E.S	Compatibility
 
-詳細はINSTALL と doc/op の part I に「Version Up と互換性について」と
-いう章があるので、そちらを読んで下さい。
+詳細はINSTALL と doc/op.jp の part I に「Version Up と互換性について」
+という章があるので、そちらを読んで下さい。
 
 FML では config.ph という設定ファイルが振舞いを決めます。config.ph に
 も version ($CFVerion)という概念があります。この $CFVersion を利用し設
@@ -525,10 +523,10 @@ FML では config.ph という設定ファイルが振舞いを決めます。config.ph に
 
 config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 いうのはHOOKで使う関数や変数等が今でもサポートされているとは限らないか
-らです。ただ、昔できたことは必ず今の実装でもできるので doc/op を参照し
-てみて下さい。
+らです。ただ、昔できたことは必ず今の実装でもできるので doc/op.jp を参
+照してみて下さい。
 
-できるだけ互換性を保つように作られていますが、2.1 RELEASE では
+できるだけ互換性を保つように作られていますが、2.2 RELEASE では
    『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
 が昔と異なり『配送専用』です。
    『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
@@ -547,12 +545,11 @@ reference に書き直しました。それ以前の HOOK はまずそのままでは反映され
 =E
 *  compatibility with hml 1.6
 
-歴史的に hml 1.6 を基本的にemulationできます。直接 FML 2.1 へ移行する
+歴史的に hml 1.6 を基本的にemulationできます。直接 FML 2.2 へ移行する
 場合は、members や log ファイル等はそのままで構いません。*pl 群と 
-config.ph を差し替えれば動くはずです。ただ FML 2.1 では makefml config
+config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
 (INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
 設定が必要です。
-
 
 .S	Changes
 =E.S	Changes
@@ -580,9 +577,8 @@ GNU General Public License です。詳しくは COPYING というファイルを読ん
    it under the terms of GNU General Public License.
    See the file COPYING for more details.
 
-
 .S	使用上の注意
-=E.S	attentions
+=E.S	Attention when you use
 
 このソフトウエアはIIJの業務とは”一切関係ありません”。
 単なる私の趣味です。質問等は上記のアドレスへ送って下さい _o_ 
@@ -595,7 +591,6 @@ Initiative Japan Inc.).
 よろしくお願いします。
 
 
-
 .C	Acknowledgments 
 =E.C	Acknowledgments 
 
@@ -604,16 +599,11 @@ reports, contributions, fixes and patches both on fml-support ML and
 with private communication. I distribute some contributed codes as a
 part of FML distribution. I refer each contribution in RELEASE_NOTES.
 
-
 I greatly appreciate softwares developed and distributed under freedom
-of programming.  For convenience I bundle to my package, config.guess
+of programming. For convenience I bundle to my package, config.guess
 (GNU autoconf), a few useful codes jcode.pl and mime_pls 1.11a, which
 you can obtain on anonymous ftp's. 4.4BSD has been a start point to
 study several aspects of OS details.
-
-Lastly I am grateful to tsubai@iri.co.jp (tsubai@phys.titech.ac.jp)
-for fruitful discussion on the design and implementation of Mailing
-List server, perl, operating systems and so on.
 
 
 $Id$
