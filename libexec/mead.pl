@@ -257,12 +257,22 @@ while (<>) {
 # VERPs: qmail specific
 # Suppose list-admin-account=domain@$mydomain syntax, ...
 {
-    local($addr) = $ENV{'RECIPIENT'};
+    local($ra, $addr);
+
+    $addr = $ENV{'RECIPIENT'};
+    $ra   = $ENV{'RECIPIENT'};
+
     if ($addr =~ /=/) {
-	$addr =~ s/\@\S+$//;
-	$addr =~ s/=/\@/;
-	$addr =~ s/^\S+\-admin\-//; # fml specific 
-	&CacheOn($addr, " ");
+        $addr =~ s/\@\S+$//;
+        $addr =~ s/=/\@/;
+        $addr =~ s/^\S+\-admin\-//; # fml specific
+
+        $ra =~ s/admin\-\S+\@/admin@/;
+
+        &Debug("qmail:". $addr);
+        &Debug("qmail return_addr:". $ra);
+        $return_addr{$ra} = 1;
+        &CacheOn($addr, " ");
     }
 }
 
@@ -993,13 +1003,13 @@ sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
 
 sub Debug
 {
-    print STDERR "$_[0]\n";
+    print STDERR @_, "\n";
 }
 
 
 sub Out
 {
-    print STDERR "$_[0]\n";
+    print STDERR @_, "\n";
 }
 
 
