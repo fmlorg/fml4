@@ -23,5 +23,68 @@ X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 
 
 
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+.key	lib/Utilitites/packmbox.pl
+.key	packmbox.pl
+
+lib/Utilitites/packmbox.pl を使って、
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+
+.S	maintenance.pl
+.key	maintenance.pl
+
+flockを使っていて夜中とかじゃなくてメールが来得る時間帯にメインテナン
+スをしたい時は？
+
+maintenance.plはMaintenance用のflockするスクリプトで、fmlと同じロック
+ファイルにflockでアクセスしてサーバーを止めるためのものです。中身は
+	flock 
+	sleep 600 
+	flockをはずす
+だけです。使い方は
+
+	maintenance.pl -s sleeptime [directory]
+# [directory] のデフォールトは PWD です（いまいるところ）
+
+で -s でスリープする時間を変更できます。
+
+flock 使わずに pid 式の ロックを使っているなら
+% touch LOCK/1
+とでもして、作業の後それを消せばいいわけです。
+
+
+.S	ロックしてconfig.phのｅｄｉｔをしたい
+.key	vipw.pl
+.key	bin/vipw.pl
+.key	maintenance.pl
+
+flockを使って夜中とかじゃなくてメールが来得る時間帯にメインテナン
+スをしたい時は？
+
+% bin/vipw.pl 
+
+とすれば、MLの機能をflockでロックして、
+
+	shell% $EDITOR $PWD/config.ph
+
+を vipw.pl は実行します。maintenance.pl の発展版ですかね
+
+vipw.pl [-d $DIR] [-p] [-h] [-f file-to-edit] [$DIR(of ML)] 
+    -h help
+    -d ＭＬのconfig.phのあるdirectory
+    -p ＭＬのconfig.phのあるdirectoryのしたのetc/passwdを代わりにedit
+    -f editしたいファイル
+    ＭＬのconfig.phのあるdirectory
+
+すべてを省略した場合 $PWD の config.ph 
+もっとも、-f とかの場合ちゃんと ロックしたかったら directory の指定が
+必要ですね
+
+
 .# Id: README.eng,v 1.1 1995/10/11 11:30:11 fukachan Exp 
 .# $Id$
