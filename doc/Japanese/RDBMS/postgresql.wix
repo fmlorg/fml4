@@ -1,4 +1,5 @@
 .C	PostgreSQL へのアクセス
+.l	PostgreSQL
 
 .S	config.ph の設定例
 

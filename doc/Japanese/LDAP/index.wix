@@ -4,7 +4,7 @@
 .toc
 .~HTML_PRE
 
-.# .include overview.wix
+.include overview.wix
 
 .appendix
 .include toymodel.wix

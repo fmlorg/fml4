@@ -4,7 +4,10 @@
 .toc
 .~HTML_PRE
 
+LDAP の呼び出しについては .ptr{LDAP} 参照
+
 .include postgresql.wix
+.include mysql.wix
 
 .appendix
 .include toymodel.wix
