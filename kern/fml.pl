@@ -2513,6 +2513,35 @@ sub SRand
     srand($i + $$); 
 }
 
+# Reference: NetBSD:/usr/src/usr.bin/cksum/sum2.c
+#  *** cksum utility is expected to conform to IEEE Std 1003.2-1992 ***
+sub TraditionalATTUnixCheckSum
+{
+    my ($f) = @_;
+    my ($crc, $total, $nr);
+
+    $crc = $total = 0;
+    if (open($f, $f)) {
+	while (($nr = sysread($f, $buf, 1024)) > 0) {
+	    my ($i) = 0;
+	    $total += $nr;
+
+	    for ($i = 0; $i < $nr; $i++) {
+		$r = substr($buf, $i, 1);
+		$crc += ord($r);
+	    }
+	}
+	close($f);
+	$crc = ($crc & 0xffff) + ($crc >> 16);
+	$crc = ($crc & 0xffff) + ($crc >> 16);
+    }
+    else {
+	print STDERR "ERROR: no such file $f\n";
+    }
+
+    ($crc, $total);
+}
+
 sub LogFileNewSyslog
 {
     $LOGFILE_NEWSYSLOG_LIMIT = &ATOI($LOGFILE_NEWSYSLOG_LIMIT);
