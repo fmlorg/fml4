@@ -302,8 +302,11 @@ sub DoFmlServProc
     # check member-lists (2.1 extentions)
     @MEMBER_LIST || do { @MEMBER_LIST = ($MEMBER_LIST);};
 
-    foreach $file (@MEMBER_LIST) {
-	&Debug("---MLMemberCheck($From_address in $file);") if $debug;
+    foreach $file (@MEMBER_LIST, $MEMBER_LIST) {
+	if ($debug) {
+	  &Debug("---DoFmlServProc::MLMemberCheck(");
+	  &Debug("\n\tml=$ml\n\taddr=$From_address in $file)");
+	}
 	-f $file && &CheckMember($From_address, $file) && ($auth++, last);
     }
 
@@ -384,8 +387,9 @@ sub NewML
 
     if ($debug) {
 	for (FQDN, DOMAINNAME, MAIL_LIST, CONTROL_ADDRESS, 
-	     ML_FN, XMLNAME, XMLCOUNT, MAINTAINER) {
-	    eval "printf STDERR \"%-20s %s\\n\", '$_', \$$_;";
+	     ML_FN, XMLNAME, XMLCOUNT, MAINTAINER,
+	     MEMBER_LIST, ACTIVE_LIST) {
+	    eval("printf STDERR \"%-20s %s\\n\", '$_', \$$_;");
 	}
     }
 
