@@ -2353,11 +2353,24 @@ sub SetUpCGIadmin
     &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
 	  "$EXEC_DIR/www/cgi-bin/admin/.htaccess");
 
-    &MkDirHier("$EXEC_DIR/www/db/admin");
-    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
-	  "$EXEC_DIR/www/db/admin/htpasswd");
+    # first time!
+    if (-f "$EXEC_DIR/www/authdb/admin/htpasswd") {
+	print STDERR "$EXEC_DIR/www/authdb/admin/htpasswd already exists.\n";
+    } 
+    else {
+	&MkDirHier("$EXEC_DIR/www/authdb/admin");
+	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
+	      "$EXEC_DIR/www/authdb/admin/htpasswd");
 
-
+	local($htp) = &search_path('htpasswd');
+	if (-x $htp) {
+	    print STDERR "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin\n";
+	    system "$htp -c $EXEC_DIR/www/authdb/admin/htpasswd admin";
+	}
+	else {
+	    print STDERR "cannot find \"htpasswd\" program\n";
+	}
+    }
 
     print STDERR "\n";
 }
