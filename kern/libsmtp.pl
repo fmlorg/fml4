@@ -183,7 +183,8 @@ sub Smtp
 	}
     }
     else { # not use pararell hosts to deliver;
-	($error = &SmtpIO(*e, *rcpt, *smtp, *files)) && (return $error);
+	$error = &SmtpIO(*e, *rcpt, *smtp, *files);
+	return $error if $error;
     }
 
     ### SMTP CLOSE
@@ -191,7 +192,9 @@ sub Smtp
     0; # return status BAD FREE();
 }
 
-
+# 
+# SMTP chat with given channel <S>; from HELO to QUIT
+#
 # Deliver using one of $HOSTS or prog mailer
 # This routine ignore the contents of a set of recipients,
 # which is controlled by the parent routine calling this routine.
@@ -575,7 +578,7 @@ sub SmtpPut2Socket
 
     $0 = "$FML:  $s <$LOCKFILE>"; 
     print SMTPLOG "$s<INPUT\n";
-    print S "$s\r\n";
+    print S $s, "\r\n";
 
     # no wait
     return $NULL if $no_wait;
