@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 
-# Copyright (C) 1994 Noboru Ikuta <ikuta@crc.co.jp>
+# Copyright (C) 1994,1997 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
 #
-# wbody: MIME base64 encoder Ver.0.01
-#        ¥Ç¡¼¥¿¤ò MIME base64 ¤Ç¥¨¥ó¥³¡¼¥É¤¹¤ë¡£
+# wbody: MIME encoder Ver.0.02
+#        $B%G!<%?$r(B MIME base64 $B$^$?$O(B Quoted-Printable $B$G%(%s%3!<%I$9$k!#(B
 #
-# »È¤¤Êý : [ [j]perl ] wbody [ ¥Õ¥¡¥¤¥ëÌ¾ ...]
+# $B;H$$J}(B : [ [j]perl ] wbody {-q|-b} [ $B%U%!%$%kL>(B ...]
 #
-#         mimew.pl ¤Ï¡¢´Ä¶­ÊÑ¿ô HOME¢ªwbody¤ÈÆ±¤¸¢ªÄÌ¾ï¤Î@INC ¤Î½ç¤Ë¥µ
-#         ¡¼¥Á¤µ¤ì¤Þ¤¹¡£
+#         mimew.pl $B$O!"4D6-JQ?t(B HOME$B"*(Bwbody$B$HF1$8"*DL>o$N(B@INC $B$N=g$K%5(B
+#         $B!<%A$5$l$^$9!#(B
 #
-# ÇÛÉÛ¾ò·ï : Ãøºî¸¢¤ÏÊü´þ¤·¤Þ¤»¤ó¤¬¡¢ÇÛÉÛ¡¦²þÊÑ¤Ï¼«Í³¤È¤·¤Þ¤¹¡£
+# $BG[I[>r7o(B : $BCx:n8"$OJ|4~$7$^$;$s$,!"G[I[!&2~JQ$O<+M3$H$7$^$9!#(B
 
-## ¥Ç¡¼¥¿½èÍý¤Î¥Ö¥í¥Ã¥¯Ä¹¡Ê¥Ð¥¤¥È¡Ë
-$len = 1026; ## ¼Â¹Ô»þ¤Î¥á¥â¥ê¤¬¸·¤·¤¤¾ì¹ç¤Ï 54 ¤Þ¤Ç¸º¤é¤·¤Æ¤ß¤Æ¤¯¤À¤µ¤¤¡£
-             ## (mimew.plÃæ¤Î$foldcol)/4*3 (¥Ç¥Õ¥©¥ë¥È¤Ç54)¤ÎÇÜ¿ô¤Ë¤¹¤ë¤È
-             ## ¸úÎ¨¤¬¤è¤¯¤Ê¤ê¤Þ¤¹¡£54¤ÎÇÜ¿ô¤Ç¤Ê¤¯¤Æ¤âÌäÂê¤Ê¤¯Æ°¤­¤Þ¤¹¡£
+## $B%G!<%?=hM}$N%V%m%C%/D9!J%P%$%H!K(B
+$len = 1026; ## $B<B9T;~$N%a%b%j$,87$7$$>l9g$O(B 54 $B$^$G8:$i$7$F$_$F$/$@$5$$!#(B
+             ## (mimew.pl$BCf$N(B$foldcol)/4*3 ($B%G%U%)%k%H$G(B54)$B$NG\?t$K$9$k$H(B
+             ## $B8zN($,$h$/$J$j$^$9!#(B54$B$NG\?t$G$J$/$F$bLdBj$J$/F0$-$^$9!#(B
 
 $home = $ENV{'HOME'};
 $perl_dir = $0;
@@ -24,12 +24,26 @@ substr($perl_dir, rindex($perl_dir, "/")) = '';
 unshift(@INC, $home, $perl_dir);
 require 'mimew.pl';
 
+if ($#ARGV >= $[){
+    if ($ARGV[$[] =~ /^-q$/i){
+	shift;
+	$coding = "qp";
+    }elsif ($ARGV[$[] =~ /^-b$/i){
+	shift;
+	$coding = "b64";
+    }else{
+	$coding = "b64";
+    }
+}else{
+    $coding = "b64";
+}
+
 unshift(@ARGV, '-') if $#ARGV < $[;
 while ($ARGV = shift) {
     open(ARGV, $ARGV) || die "Can't open $ARGV.\n";
     binmode ARGV;
     while(read(ARGV, $_, $len)){
-        print &bodyencode($_);
+        print &bodyencode($_,$coding);
     }
-    print &benflush;
+    print &benflush($coding);
 }

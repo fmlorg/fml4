@@ -1,16 +1,17 @@
 #!/usr/bin/perl
 
-# Copyright (C) 1994 Noboru Ikuta <ikuta@crc.co.jp>
+# Copyright (C) 1994,1997 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
 #
-# rbody: MIME base64 decoder Ver.0.01
-#        MIME base64 encoding ¤µ¤ì¤¿¥Ç¡¼¥¿¤ò¥Ç¥³¡¼¥É¤¹¤ë¡£
+# rbody: MIME decoder Ver.0.02
+#        MIME base64 encoding $B$^$?$O(B Quoted-Printable encoding $B$5$l$?(B
+#        $B%G!<%?$r%G%3!<%I$9$k!#(B
 #
-# »È¤¤Êý : [ [j]perl ] rbody [ ¥Õ¥¡¥¤¥ëÌ¾ ...]
+# $B;H$$J}(B : [ [j]perl ] rbody {-q|-b} [ $B%U%!%$%kL>(B ...]
 #
-#         mimer.pl ¤Ï¡¢´Ä¶­ÊÑ¿ô HOME¢ªrbody¤ÈÆ±¤¸¢ªÄÌ¾ï¤Î@INC ¤Î½ç¤Ë¥µ
-#         ¡¼¥Á¤µ¤ì¤Þ¤¹¡£
+#         mimer.pl $B$O!"4D6-JQ?t(B HOME$B"*(Brbody$B$HF1$8"*DL>o$N(B@INC $B$N=g$K%5(B
+#         $B!<%A$5$l$^$9!#(B
 #
-# ÇÛÉÛ¾ò·ï : Ãøºî¸¢¤ÏÊü´þ¤·¤Þ¤»¤ó¤¬¡¢ÇÛÉÛ¡¦²þÊÑ¤Ï¼«Í³¤È¤·¤Þ¤¹¡£
+# $BG[I[>r7o(B : $BCx:n8"$OJ|4~$7$^$;$s$,!"G[I[!&2~JQ$O<+M3$H$7$^$9!#(B
 
 $home = $ENV{'HOME'};
 $perl_dir = $0;
@@ -19,8 +20,23 @@ substr($perl_dir, rindex($perl_dir, "/")) = '';
 unshift(@INC, $home, $perl_dir);
 require 'mimer.pl';
 
+if ($#ARGV >= $[){
+    if ($ARGV[$[] =~ /^-q$/i){
+	shift;
+	$coding = "qp";
+	print STDERR "Quoted-Printable decoding\n";
+    }elsif ($ARGV[$[] =~ /^-b$/i){
+	shift;
+	$coding = "b64";
+	print STDERR "Base64 decoding\n";
+    }else{
+	$coding = "b64";
+	print STDERR "Base64 decoding\n";
+    }
+}
+
 binmode STDOUT;
 while(<>){
-    print &bodydecode($_);
+    print &bodydecode($_,$coding);
 }
-print &bdeflush;
+print &bdeflush($coding);

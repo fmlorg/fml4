@@ -1,128 +1,184 @@
-<mime_pls.doc>                                               94/08/30
-       ¡Ôperl library ÈÇ MIME base64 encoder/decoder ¤Ë¤Ä¤¤¤Æ¡Õ
+<mime_pls.doc>                                             1997/12/30
+                    $B!T(Bmime_pls Ver.2.02$B$K$D$$$F!U(B
 
-  MIME base64 encode/decode ¤¹¤ë¤¿¤á¤Î perl library ¤Ç¤¹¡£¥á¥Ã¥»¡¼¥¸¥Ø
-¥Ã¥À¥Õ¥£¡¼¥ë¥ÉÃæ¤Î MIME(part 2) ¤Ï ISO-2022-JP ¤Î base64 encode/decode
-¤Î¤ß¤ò¥µ¥Ý¡¼¥È¤·¤Þ¤¹¡£EUC/SJIS ¤ÎÆüËÜ¸ìÊ¸»úÎó¤Ï ISO-2022-JP ¤Ø¤Î¼«Æ°ÊÑ
-´¹¤ò¹Ô¤¦¤³¤È¤Ë¤è¤ê MIME(part 2) encode/decode ¤ÎÂÐ¾Ý¤È¤·¤Æ°·¤¦¤³¤È¤¬¤Ç
-¤­¤Þ¤¹¡£body Éô¤Î MIME base64 encode/decode ¤ÏËÜ¥Ð¡¼¥¸¥ç¥ó¤«¤é¤ÎÄÉ²Ãµ¡
-Ç½¤Ç¤¹¡£
-  ¾­Íè¹½ÁÛ¤È¤·¤Æ¤Ï¡¢Quoted-Printable encoding µ¡Ç½¤òÄÉ²Ã¤¹¤ë¤³¤È¤È ISO
--2022-JP °Ê³°¤ÎÊ¸»ú¥³¡¼¥É¥»¥Ã¥È¤ò°·¤¨¤ë¤è¤¦¤Ë¤¹¤ë¤³¤È¡¢Content-Type ¥Ø
-¥Ã¥ÀÅù¤Î½èÍý¤ò¹Ô¤¦¤³¤È¤Ë¤è¤ê MIME ¥á¥Ã¥»¡¼¥¸¤ò´°Á´¤Ë°·¤¨¤ë¤è¤¦¤Ë¤¹¤ë¤³
-¤È¤Î£³¤Ä¤ò¹Í¤¨¤Æ¤¤¤Þ¤¹¡£
-  DOS¥Þ¥·¥óÅù¤Î¾®¥á¥â¥ê¥Þ¥·¥ó¤Ç»ÈÍÑ¤Ç¤­¤ë¤è¤¦¤Ë¡¢mimer.pl ¤È mimew.pl
-¤Î£²¤Ä¤Î¥é¥¤¥Ö¥é¥ê¥Õ¥¡¥¤¥ë¤ËÊ¬³ä¤·¤Þ¤·¤¿¡£Áí¾ÎÌ¾¤È¤·¤Æ¤Ï mime_pls ¤ÈÌ¾
-ÉÕ¤±¤Þ¤¹¡£¡ÊºÇ¸å¤Î s ¤ÏÊ£¿ô¤Î°ÕÌ£¤Ç¤¹¡£¡Ë
-  ¤³¤Î¥É¥­¥å¥á¥ó¥È°Ê³°¤Ë³Æ¥Õ¥¡¥¤¥ë¤ÎÀèÆ¬¤Ë¤â¥É¥­¥å¥á¥ó¥È¤òÉÕ¤±¤Þ¤·¤¿¤Î
-¤Ç»²¾È¤·¤Æ¤¯¤À¤µ¤¤¡£
+$B!}(Bmime_pls$B$H$O(B
 
-¡ýºÆÇÛÉÛ¤Ë¤Ä¤¤¤Æ
-  ¤³¤Î¥é¥¤¥Ö¥é¥ê¤òÍøÍÑ¤·¤¿¥¢¥×¥ê¥±¡¼¥·¥ç¥ó¤ò½ñ¤«¤ì¤¿¾ì¹ç¤Ë¤Ï¡¢¤³¤Î¥é¥¤
-¥Ö¥é¥ê¤½¤Î¤â¤Î¤òÅºÉÕ¤·¤Æ¤¤¤¿¤À¤¤¤Æ¹½¤¤¤Þ¤»¤ó¡£¤¿¤À¤·¡¢É¬¤ºËÜ¥É¥­¥å¥á¥ó
-¥È¤ò´Þ¤àÇÛÉÛ¥Õ¥¡¥¤¥ë¤òÁ´¤ÆÅºÉÕ¤·¤Æ¤¯¤À¤µ¤¤¡£
-  ²þÊÑ¤·¤ÆºÆÇÛÉÛ¤¹¤ë¾ì¹ç¤Ï¥é¥¤¥Ö¥é¥ê¥Õ¥¡¥¤¥ëÃæ¤Î¡ÖÇÛÉÛ¾ò·ï¡×¤Ë½¾¤Ã¤Æ¤¯
-¤À¤µ¤¤¡£
+  mime_pls$B$O!"(BMIME encode/decode$B$N$?$a$N(Bperl library$B$G$9!#%a%C%;!<%8(B
+$B%X%C%@%U%#!<%k%ICf$NF|K\8lJ8;zNs$N(BMIME encode/decode(RFC2047$B;2>H(B)$B$H!"(B
+$B%a%C%;!<%8%\%G%#$N(BBase64$B7A<0$*$h$S(BQuoted-Printable$B7A<0$N(Bencode/decode
+(RFC2045$B;2>H(B)$B$N5!G=$r(BPerl$B$N4X?t$H$7$FDs6!$7$^$9!#(B
 
-¡ýÇÛÉÛ¥Õ¥¡¥¤¥ë¤Ë¤Ä¤¤¤Æ
-  ¢£mime_pls.doc
-    ¤³¤Î¥Õ¥¡¥¤¥ë¤Ç¤¹¡£
+  $B%a%C%;!<%8%X%C%@%U%#!<%k%ICf$NF|K\8lJ8;zNs$N(BMIME$B2=$O(BISO-2022-JP$B$N(B
+B-encoding$B$N$_$r%5%]!<%H$7$^$9!#(BEUC$B$^$?$O(BShiftJIS$B$NF|K\8lJ8;zNs$O(B
+ISO-2022-JP$B$K<+F0JQ49$5$l!"(BB-encoding$B$K$h$j(BMIME encoded-word$B$KJQ49(B
+$B$5$l$^$9!#$^$?!"(BMIME encoded-word$B$r%G%3!<%I$9$k:]$K=PNO4A;z%3!<%I$r(B
+$B;XDj$9$k$H!"(BISO-2022-JP$B%3!<%I$r(BEUC$B%3!<%I$d(BShiftJIS$B%3!<%I$KJQ49$7$F(B
+$B=PNO$9$k$3$H$,$G$-$^$9!#(B
 
-  ¢£mimer.pl
-    require ¤¹¤ë¤³¤È¤Ë¤è¤ê¡¢&mimedecode, &bodydecode, &bdeflush ¤Î£³¤Ä
-  ¤Î´Ø¿ô¤¬»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+  DOS$B%^%7%sEy$N>.%a%b%j%^%7%s$G;HMQ$G$-$k$h$&$K!"(Bmimer.pl$B$H(Bmimew.pl$B$N(B
+2$B$D$N%i%$%V%i%j%U%!%$%k$KJ,3d$7$^$7$?!#Am>NL>$H$7$F$O(Bmime_pls($B$^$$$`!&(B
+$B$W$k$9(B)$B$HL>IU$1$^$9!#(B
 
-    ¢¡&mimedecode($string,$kout)
-      $string Ãæ¤Î encoded-word ¤Î¤¦¤Á¡¢charset=ISO-2022-JP,encoding=B
-    ¤Î¤â¤Î¤òÁªÂòÅª¤Ë¥Ç¥³¡¼¥É¤·¡¢$kout ¤Î»ØÄê¤Ë¤·¤¿¤¬¤Ã¤Æ´Á»ú¥³¡¼¥ÉÊÑ´¹
-    ¤ò¹Ô¤Ê¤Ã¤¿·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£¤Ê¤ª¡¢$kout ¤Ï "SJIS" ¤Þ¤¿¤Ï "EUC" ¤¬Í­
-    ¸ú¤Ç¤¹¡£$kout ¤ËÍ­¸ú¤Ê»ØÄê¤¬¤µ¤ì¤Ê¤«¤Ã¤¿¾ì¹ç¡Ê¤Þ¤¿¤Ï¾ÊÎ¬¤·¤¿¾ì¹ç¡Ë
-    ¤Ï ISO-2022-JP¡Ê¤¤¤ï¤æ¤ë7bit JIS¡Ë¤òÆ©²á¤ÇÊÖ¤·¤Þ¤¹¡£
-      RFC1522¤Ë´ð¤Å¤­¡¢encoded-word ¤Ë¤Ï¤µ¤Þ¤ì¤¿LWS¡Ê¶õÇò¡¢¥¿¥ÖÊ¸»ú¡¢
-    ²þ¹Ô¡Ü¥¿¥Ö¤Þ¤¿¤Ï¶õÇò¡Ë¤Ïºï½ü¤µ¤ì¤Þ¤¹¡£
-      ¥Ç¥³¡¼¥É¤·¤¿¤¢¤È¡¢ISO-2022-JP(RFC1468)¤ÇÄêµÁ¤µ¤ì¤¿¥¨¥¹¥±¡¼¥×¥·¡¼
-    ¥±¥ó¥¹¤Î¤¦¤ÁÉÔÉ¬Í×¤Ê¤â¤Î¤¬¤¢¤ì¤Ðºï½ü¤·¤Þ¤¹¡£
+  $B$3$N%I%-%e%a%s%H0J30$K3F%U%!%$%k$N@hF,$K$b%I%-%e%a%s%H$rIU$1$?$N$G(B
+$B;2>H$7$F$/$@$5$$!#(B
 
-    ¢¡&bodydecode($encoded)
-      $encoded ¤ËÆþ¤ì¤é¤ì¤¿Ê¸»úÎó¤ò MIME base64 ¥¨¥ó¥³¡¼¥É¤µ¤ì¤¿¥Ç¡¼¥¿
-    ¤È¤ß¤Ê¤·¤Æ¥Ç¥³¡¼¥É¤·¤½¤Î·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£base64 alphabet(A-Za-z0-9+/=)
-    °Ê³°¤ÎÊ¸»ú¤¬Â¸ºß¤·¤Æ¤âÃ±¤ËÌµ»ë¤·¤Æ½èÍý¤·¤Þ¤¹¡£
-      ¥Ç¥³¡¼¥É¤Ï£´¥Ð¥¤¥ÈÃ±°Ì¤Ë¹Ô¤ï¤ì¤ë¤Î¤Ç¡¢È¾Ã¼¤ÊÉôÊ¬¡ÊºÇ¸å¤Î£±¡Á£³¥Ð
-    ¥¤¥È¡Ë¤Ï¥Ð¥Ã¥Õ¥¡Ãæ¤ËÊÝÂ¸¤µ¤ì¼¡¤Î¸Æ¤Ó½Ð¤·»þ¤Ë¤¤¤Ã¤·¤ç¤Ë¥Ç¥³¡¼¥É¤µ¤ì
-    ¤Þ¤¹¡£¥Ð¥Ã¥Õ¥¡¤ò¥¯¥ê¥¢¤¹¤ë¤Ë¤Ï &bdeflush ´Ø¿ô¤ò»ÈÍÑ¤·¤Þ¤¹¡£
 
-    ¢¡&bdeflush
-      &bodydecode ´Ø¿ô¤Ë¤è¤ê¥Ð¥Ã¥Õ¥¡¤ËÊÝÂ¸¤µ¤ì¤¿¥Ç¡¼¥¿¤ò¡ÊºÇ¸å¤ËÅ¬Åö¤Ê
-    padÊ¸»ú'=' ¤ò²¾Äê¤·¤Æ¡Ë¥Ç¥³¡¼¥É¤·¤½¤Î·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£
-      ¤³¤Î´Ø¿ô¤¬¸Æ¤Ð¤ì¤ë¤È &bodydecode ¤Î¥Ð¥Ã¥Õ¥¡¤¬¥¯¥ê¥¢¤µ¤ì¤Þ¤¹¡£
+$B!}(BWWW$B>e$N(Bmime_pls$B$N%Z!<%8$K$D$$$F(B
 
-  ¢£mimew.pl
-    require ¤¹¤ë¤³¤È¤Ë¤è¤ê¡¢&mimeencode, &bodyencode, &benflush ¤Î£³¤Ä
-  ¤Î´Ø¿ô¤¬»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+  mime_pls$B$N%Z!<%8(B <http://www.cc.rim.or.jp/~ikuta/mime_pls/> $B$r8x3+(B
+$B$7$^$7$?!#$3$N%Z!<%8$G$O!"(Bmime_pls$B$K$D$$$F$N>pJsDs6!$H(Bmime_pls$B$NG[I[(B
+$B$r9T$J$$$^$9!#(B
 
-    ¢¡&mimeencode($string)
-      $string Ãæ¤Î´Á»ú¤ÎÉôÊ¬¤ò ISO-2022-JP¡Ê¤¤¤ï¤æ¤ë7bit JIS¡Ë¤ËÊÑ´¹¤·
-    ¤¿¤¢¤È MIME(part2) ¥¨¥ó¥³¡¼¥É¤·¡¢¤½¤Î·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£
-      ´Á»ú¥³¡¼¥É¤ÏÆ±»þ¤Ë Shift-JIS ¤È EUC ¤¬´Þ¤Þ¤ì¤ë¾ì¹ç¤ò½ü¤­¡Ê7bit
-    JIS ¤È Shift-JIS/EUC ¤ÎÁÈ¤ß¹ç¤ï¤»¤Ê¤éÌäÂê¤¢¤ê¤Þ¤»¤ó¡Ë¡¢¼«Æ°È½ÃÇ¤·
-    ¤Þ¤¹¡£¥¨¥ó¥³¡¼¥É¤µ¤ì¤ë ISO-2022-JP ¤Î¥¨¥¹¥±¡¼¥×¥·¡¼¥±¥ó¥¹¤Ï¥é¥¤¥Ö
-    ¥é¥ê¥Õ¥¡¥¤¥ë¤ÎºÇ½é¤ÎÊý¤ÇÀßÄê¤Ç¤­¤Þ¤¹¡£
-      $string Ãæ¤Î Shift-JIS ¤Þ¤¿¤Ï EUC ¤òÀµ¾ï¤Ë¥¨¥ó¥³¡¼¥É¤¹¤ë¤¿¤á¤Ë¤Ï¡¢
-    ±Ñ¸ìÈÇ¤Î perl ¤ò»ÈÍÑ¤¹¤ë¤«¡¢¤Þ¤¿¤Ï jperl-1.4 ¤ò -Llatin ¥ª¥×¥·¥ç¥ó
-    ÉÕ¤­¤Ç»ÈÍÑ¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£¡Êjperl ¤Î 2¥Ð¥¤¥ÈÊ¸»ú¥â¡¼¥É¤Ç¤Ï´Á»ú
-    ¥³¡¼¥ÉÊÑ´¹µ¡Ç½¤¬Àµ¾ï¤ËÆ°¤­¤Þ¤»¤ó¡£:-)¡Ë
-      encoded-word ¤¬ ASCIIÊ¸»ú¤äÆÃ¼ìÊ¸»ú¤ÈÄ¾ÀÜÀÜ¤¹¤ë¤³¤È¤òÈò¤±¤ë¤¿¤á
-    ¤Ë¡¢É¬Í×¤Ë±þ¤¸¤Æ¶õÇò¤òÁÞÆþ¤·¤Þ¤¹¡£encoded-word ¤¬¥³¥á¥ó¥È¤ÎÆâÂ¦¤Ë
-    ¤¢¤ë¾ì¹ç¤ÏÎã³°°·¤¤¤È¤·¤Æ³ç¸Ì¤È¤Î´Ö¤Ë¶õÇò¤òÁÞÆþ¤·¤Þ¤»¤ó¡£
-      Ä¹¤¤ÆüËÜ¸ìÊ¸»úÎó¤ÏÉ¬Í×¤Ë±þ¤¸¤ÆÊ¬³ä¤·¤Æ¥¨¥ó¥³¡¼¥É¤·¡¢¤Þ¤¿É¬Í×¤Ë±þ
-    ¤¸¤Æ encoded-word ¤ÎÁ°¸å¤ÇÀÞ¤êÊÖ¤·¡Ê¹ÔÊ¬³ä¡Ë½èÍý¤ò¤·¤Þ¤¹¡£
 
-    ¢¡&bodyencode($data)
-      $data Ãæ¤Î¥Ç¡¼¥¿¤ò base64 ¥¨¥ó¥³¡¼¥É¤·¤½¤Î·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£
-      ¥¨¥ó¥³¡¼¥É¤Ï½ÐÎÏ£±¹Ô¡Ê¥Ç¥Õ¥©¥ë¥È¤Ç¤Ï72¥Ð¥¤¥È¡Ë¤ËÁêÅö¤¹¤ëÃ±°Ì¡Ê¥Ç
-    ¥Õ¥©¥ë¥È¤Ç¤Ï54¥Ð¥¤¥È¡ËËè¤Ë½èÍý¤·¤Þ¤¹¡£$data ¤Î¤¦¤ÁÈ¾Ã¼¤ÊÉôÊ¬¤Ï¥Ð¥Ã
-    ¥Õ¥¡Ãæ¤ËÊÝÂ¸¤µ¤ì¡¢¼¡¤Î¸Æ¤Ó½Ð¤·»þ¤Ë¤¤¤Ã¤·¤ç¤Ë¥¨¥ó¥³¡¼¥É¤µ¤ì¤Þ¤¹¡£¥Ð
-    ¥Ã¥Õ¥¡¤ò¥¯¥ê¥¢¤¹¤ë¤Ë¤Ï &benflush ´Ø¿ô¤ò»ÈÍÑ¤·¤Þ¤¹¡£
-      ¤Ê¤ª¡¢½ÐÎÏ£±¹Ô¤ÎÄ¹¤µ¤Ï¥é¥¤¥Ö¥é¥ê¤ÎºÇ½é¤ÎÊý¤ÇÀßÄê¤Ç¤­¤Þ¤¹¡£
+$B!}%P!<%8%g%sHV9f$ND4$YJ}(B
 
-    ¢¡&benflush
-      &bodyencode ´Ø¿ô¤Ë¤è¤ê¥Ð¥Ã¥Õ¥¡¤ËÊÝÂ¸¤µ¤ì¤¿¥Ç¡¼¥¿¤ò¥¨¥ó¥³¡¼¥É¤·¤½
-    ¤Î·ë²Ì¤òÊÖ¤·¤Þ¤¹¡£¥¨¥ó¥³¡¼¥É·ë²Ì¤¬£´¤ÎÇÜ¿ôÄ¹¤Ë¤Ê¤é¤Ê¤±¤ì¤ÐÉ¬Í×¤Ë±þ
-    ¤¸¤Æ padÊ¸»ú'=' ¤òÄÉ²Ã¤·¤Þ¤¹¡£
-      ¤³¤Î´Ø¿ô¤¬¸Æ¤Ð¤ì¤ë¤È &bodyencode ¤Î¥Ð¥Ã¥Õ¥¡¤¬¥¯¥ê¥¢¤µ¤ì¤Þ¤¹¡£
+  Ver.2.02$B$+$i$O!"(Bmime_pls$B%i%$%V%i%j$r;HMQ$9$k%9%/%j%W%H$,(Bmimer.pl$B$H(B
+mimew.pl$B$N%P!<%8%g%s$r$=$l$>$lD4$Y$k$3$H$,$G$-$k$h$&$K(B$mimer_version
+$B$H(B$mimew_version$B$N(B2$B$D$NJQ?t$rDj5A$7$F$$$^$9!#(B
+  $B$3$l$i$NJQ?t$O!"CM$H$7$FIbF0>.?tE@?t$r;}$A%P!<%8%g%s$,>e$,$k$K$7$?(B
+$B$,$C$FC1=cA}2C$9$k$3$H$,!":#8e$N%P!<%8%g%s$K$*$$$F$bJ]>Z$5$l$^$9!#(B
 
-  ¢£rmime
-    mimer.pl ¤ò»ÈÍÑ¤·¤Æ MIME header ¤ò¥Ç¥³¡¼¥É¤¹¤ë¥Õ¥£¥ë¥¿¡¼¤Ç¤¹¡£
-    »È¤¤Êý¡§[[j]perl] rmime [ -s | -e | -j ] [¥Õ¥¡¥¤¥ë ...]
 
-  ¢£wmime
-    mimew.pl ¤ò»ÈÍÑ¤·¤Æ¥Ø¥Ã¥À¥Õ¥£¡¼¥ë¥ÉÃæ¤ÎÆüËÜ¸ìÊ¸»úÎó¤ò MIME ¤Ë¥¨¥ó
-  ¥³¡¼¥É¤¹¤ë¥Õ¥£¥ë¥¿¡¼¤Ç¤¹¡£
-    »È¤¤Êý¡§[[j]perl [-Llatin]] wmime [¥Õ¥¡¥¤¥ë ...]
+$B!}:FG[I[$K$D$$$F(B
 
-  ¢£rbody
-    mimer.pl ¤ò»ÈÍÑ¤·¤Æ MIME base64 ¥¨¥ó¥³¡¼¥É¤µ¤ì¤¿¥Ç¡¼¥¿¤ò¥Ç¥³¡¼¥É¤¹
-  ¤ë¥Õ¥£¥ë¥¿¡¼¤Ç¤¹¡£MS-DOS¥Þ¥·¥ó¤Ç¤âÆ°ºî¤¹¤ë¤è¤¦¤ËºîÀ®¤·¤¿¤Î¤Ç UNIX Åù
-  ¤Ç¤Ï¸úÎ¨¤¬°­¤¤¤«¤â¤·¤ì¤Þ¤»¤ó¡£
-    »È¤¤Êý¡§[[j]perl] rbody [¥Õ¥¡¥¤¥ë ...]
+  $B$3$N%i%$%V%i%j$rMxMQ$7$?%"%W%j%1!<%7%g%s$r=q$+$l$?>l9g$K$O!"$3$N%i%$(B
+$B%V%i%j$=$N$b$N$rE:IU$7$F$$$?$@$$$F9=$$$^$;$s!#$?$@$7!"I,$:K\%I%-%e%a%s(B
+$B%H$r4^$`G[I[%U%!%$%k$rA4$FE:IU$7$F$/$@$5$$!#(B
+  $B2~JQ$7$F:FG[I[$9$k>l9g$O%i%$%V%i%j%U%!%$%kCf$N!VG[I[>r7o!W$K=>$C$F$/(B
+$B$@$5$$!#(B
 
-  ¢£wbody
-    mimew.pl ¤ò»ÈÍÑ¤·¤Æ¥Ç¡¼¥¿¤ò MIME base64 ¥¨¥ó¥³¡¼¥É¤¹¤ë¥Õ¥£¥ë¥¿¡¼¤Ç
-  ¤¹¡£MS-DOS¥Þ¥·¥ó¤Ç¤âÆ°ºî¤¹¤ë¤è¤¦¤ËºîÀ®¤·¤¿¤Î¤Ç UNIX Åù¤Ç¤Ï¸úÎ¨¤¬°­¤¤
-  ¤«¤â¤·¤ì¤Þ¤»¤ó¡£
-    »È¤¤Êý¡§[[j]perl] wbody [¥Õ¥¡¥¤¥ë ...]
 
-  ¢£Makefile
-    mimer.pl mimew.pl rmime wmime rbody wbody ¤ò¥·¥¹¥Æ¥à¤Ë¥¤¥ó¥¹¥È¡¼¥ë
-  ¤¹¤ëºÝ¤Ë»ÈÍÑ¤·¤Þ¤¹¡£Â¾¤Ë¤Ï¡¢ppack ¤ä tar+gzip(or compress)+uuencode ¤Ç
-  ¥¢¡¼¥«¥¤¥Ö¤òºîÀ®¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£¡Ê£²¤Ä¤á¤Ï¤Û¤È¤ó¤Éºî¼ÔÀìÍÑ¤Ç¤¹¤¬¡Ë
+$B!}L5J]>Z(B
 
-¡ýÌµÊÝ¾Ú
-  ¤³¤Î¥×¥í¥°¥é¥à¤ò»ÈÍÑ¤¹¤ë¤³¤È¤Ë¤è¤êÀ¸¤¸¤¿Â»³²¤Ë¤Ä¤¤¤Æ¤Ï¡¢ºî¼Ô¤Ï¤¤¤«¤Ê
-¤ëÍýÍ³¤Ë¤ª¤¤¤Æ¤âÀÕÇ¤¤òÉé¤¤¤Þ¤»¤ó¡£»ÈÍÑ¤µ¤ì¤ëÊý¤ÎÀÕÇ¤¤Ë¤ª¤¤¤Æ¤ª»È¤¤¤¯¤À
-¤µ¤¤¡£
+  $B$3$N%W%m%0%i%`$r;HMQ$9$k$3$H$K$h$j@8$8$?B;32$K$D$$$F$O!":n<T$O$$$+$J(B
+$B$kM}M3$K$*$$$F$b@UG$$rIi$$$^$;$s!#;HMQ$5$l$kJ}$N@UG$$K$*$$$F$*;H$$$/$@(B
+$B$5$$!#(B
 
-                                              À¸ÅÄ¡¡¾º¡÷»Ô¸¶.ÀéÍÕ.ÆüËÜ
-                                              ikuta@crc.co.jp
-					      QGB01240@niftyserve.or.jp
-                                              net43236@asciinet.or.jp
+
+$B!}G[I[%U%!%$%k$K$D$$$F(B
+
+  $B"#%I%-%e%a%s%H%U%!%$%k(B
+
+    $B"!(Bmime_pls.doc
+      $B$3$N%U%!%$%k$G$9!#(B
+
+    $B"!(Bhistory
+      $B$3$l$^$G$NJQ99MzNr$r5-=R$7$?%I%-%e%a%s%H$G$9!#(B
+
+    $B"!(BHTML$B7A<0%I%-%e%a%s%H%U%!%$%k(B
+      WWW$B>e$N%Z!<%8$G8x3+$7$F$$$k(BHTML$BJ8=q$G$9!#(B
+
+  $B"#(Bmimer.pl
+    require $B$9$k$3$H$K$h$j!"(B&mimedecode, &bodydecode, &bdeflush $B$N(B3$B$D(B
+  $B$N4X?t$,;HMQ$G$-$^$9!#(BVer.2.02$B$+$i!"(B$mimer_version$B$r;2>H$9$k$3$H$K(B
+  $B$h$j%P!<%8%g%sHV9f$rD4$Y$k$3$H$,$G$-$k$h$&$K$J$j$^$7$?!#(B
+
+    $B"!(B&mimedecode($string,$kout)
+      $string$BCf$N(Bencoded-word$B$N$&$A!"(Bcharset=ISO-2022-JP,encoding=B$B$N(B
+    $B$b$N$rA*BrE*$K%G%3!<%I$7!"(B$kout$B$N;XDj$K$7$?$,$C$F4A;z%3!<%IJQ49$r(B
+    $B9T$J$C$?7k2L$rJV$7$^$9!#(B
+      $kout$B$O(B"SJIS"$B$^$?$O(B"EUC"$B$,M-8z$G$9!#(B$kout$B$r>JN,$7$?>l9g!"$^$?$O(B
+    $BM-8z$J;XDj$,$5$l$J$+$C$?>l9g$O(BISO-2022-JP($B$$$o$f$k(B7bit JIS)$B$rJV$7(B
+    $B$^$9!#(B
+      RFC2047$B$K4p$E$-!"(Bencoded-word$B$K$O$5$^$l$?(BLWS($B6uGr!"%?%VJ8;z!"(B
+    $B2~9T!\%?%V$^$?$O6uGr(B)$B$O:o=|$7$^$9!#%G%3!<%I$N$"$H!"(BISO-2022-JP
+    (RFC1468)$B$GDj5A$5$l$?%(%9%1!<%W%7!<%1%s%9$N$&$AITMW$J$b$N$,$"$l$P(B
+    $B:o=|$7$^$9!#(B
+
+    $B"!(B&bodydecode($encoded,$coding)
+      $coding$B$,(B"b64"$B$KEy$7$$$+;XDj$7$J$$>l9g$O!"(B$encoded$B$KF~$l$i$l$?(B
+    $BJ8;zNs$r(BMIME Base64$B7A<0$N%G!<%?$H$_$J$7$F%G%3!<%I$7!"$=$N7k2L$r(B
+    $BJV$7$^$9!#(BBase64 alphabet(A-Za-z0-9+/=)$B0J30$NJ8;z$,B8:_$7$F$bC1$K(B
+    $BL5;k$7$F=hM}$7$^$9!#(B
+      Base64$B$N%G%3!<%I$O(B4$B%P%$%HC10L$K9T$o$l$k$N$G!"H>C<$JItJ,(B($B:G8e$N(B
+    1$B!A(B3$B%P%$%H(B)$B$O%P%C%U%!$KJ]B8$5$l!"<!$K$3$N4X?t$,8F$S=P$5$l$?;~$K(B
+    $B$$$C$7$g$K%G%3!<%I$5$l$^$9!#%P%C%U%!$r%/%j%"$9$k$K$O(B&bdeflush$B4X?t(B
+    $B$r;HMQ$7$^$9!#(B
+
+      $coding$B$,(B"qp"$B$KEy$7$$>l9g$O!"(B$encoded$B$KF~$l$i$l$?J8;zNs$r(BMIME
+    Quoted-Printable$B7A<0$N%G!<%?$H$_$J$7$F%G%3!<%I$7!"$=$N7k2L$rJV$7(B
+    $B$^$9!#(B
+
+    $B"!(B&bdeflush($coding)
+      $coding$B$K(B"b64"$B$^$?$O(B"qp"$B$r;XDj$9$k$3$H$K$h$j!"%(%s%3!<%I7A<0$H(B
+    $B$7$F(BBase64$B$^$?$O(BQuoted-Printable$B$rA*Br$9$k$3$H$,$G$-$^$9!#(B$coding
+    $B$r;XDj$7$J$+$C$?>l9g$O(BBase64$B$rA*Br$7$?$H$_$J$5$l$^$9!#(B
+      &bodydecode$B4X?t$K$h$j%P%C%U%!$KJ]B8$5$l$?%G!<%?$r(B(Base64$B$N>l9g$O(B
+    $B:G8e$KE,Ev$J(Bpad$BJ8;z(B'='$B$r2>Dj$7$F(B)$B%G%3!<%I$7$=$N7k2L$rJV$7$^$9!#(B
+      $B$3$N4X?t$,8F$P$l$k$H(B&bodydecode$B$N%P%C%U%!$,%/%j%"$5$l$^$9!#(B
+
+  $B"#(Bmimew.pl
+    require$B$9$k$3$H$K$h$j!"(B&mimeencode,&bodyencode,&benflush$B$N#3$D$N(B
+  $B4X?t$,;HMQ$G$-$^$9!#(BVer.2.02$B$+$i!"(B$mimew_version$B$r;2>H$9$k$3$H$K$h$j(B
+  $B%P!<%8%g%sHV9f$rD4$Y$k$3$H$,$G$-$k$h$&$K$J$j$^$7$?!#(B
+
+    $B"!(B&mimeencode($string)
+      $string$BCf$NF|K\8l%3!<%I$NItJ,$r(BISO-2022-JP($B$$$o$f$k(B7bit JIS)$B$K(B
+    $BJQ49$7$?$"$H(BMIME ecoded-word(RFC2047$B;2>H(B)$B$KJQ49$7!"$=$N7k2L$rJV$7(B
+    $B$^$9!#(B
+      ShiftJIS$B%3!<%I$H(BEUC$B%3!<%I$,F1$89T$K$"$k>l9g$r=|$-!"J8;z%3!<%I$O(B
+    $B<+F0E*$KH=JL$7$^$9!#%(%s%3!<%I$5$l$k(BISO-2022-JP$B$N%(%9%1!<%W%7!<%1(B
+    $B%s%9$O%i%$%V%i%j%U%!%$%k(B(mimew.pl)$B$N:G=i$NJ}$G@_Dj$G$-$^$9!#(B
+      $string$BCf$N(BShiftJIS$B$^$?$O(BEUC$B$NJ8;zNs$r@5>o$K(BISO-2022-JP$B$KJQ49$7(B
+    $B%(%s%3!<%I$9$k$?$a$K$O!"1Q8lHG$N(BPerl$B$r;HMQ$9$kI,MW$,$"$j$^$9!#(B
+      encoded-word$B$,(BASCII$BJ8;z$dFC<lJ8;z$HD>@\@\$9$k$3$H$rHr$1$k$?$a$K!"(B
+    $BI,MW$K1~$8$F6uGr$rA^F~$7$^$9!#(Bencoded-word$B$,%3%a%s%H$NFbB&$K$"$k>l(B
+    $B9g$ONc3007$$$H$7$F3g8L$H$N4V$K6uGr$rA^F~$7$^$;$s!#(B
+      $BD9$$F|K\8lJ8;zNs$OI,MW$K1~$8$FJ,3d$7$F%(%s%3!<%I$7!"$^$?I,MW$K1~(B
+    $B$8$F(Bencoded-word$B$NA08e$G@^$jJV$7(B($B9TJ,3d(B)$B=hM}$r$7$^$9!#(B
+
+    $B"!(B&bodyencode($data,$coding)
+      $coding$B$,(B"b64"$B$KEy$7$$$+;XDj$7$J$$>l9g$O!"(B$data$BCf$N%G!<%?$r(BBase64
+    $B%(%s%3!<%I$7$=$N7k2L$rJV$7$^$9!#(B$coding$B$,(B"qp"$B$KEy$7$$>l9g$O!"(B$data
+    $BCf$N%G!<%?$r(B Quoted-Printable$B%(%s%3!<%I$7$=$N7k2L$rJV$7$^$9!#(B
+      Base64$B%(%s%3!<%I$N>l9g$O=PNO(B1$B9T(B($B%G%U%)%k%H$G$O(B72$B%P%$%H(B)$B$KAjEv$9$k(B
+    $BC10L(B($B%G%U%)%k%H$G$O(B54$B%P%$%H(B)$BKh!"(BQuoted-Printable$B%(%s%3!<%I$N>l9g$O(B
+    $B85%G!<%?$NO@M}9T(B($B2~9T%3!<%I$K$h$k9T(B)$BKh$K=hM}$7$^$9!#(B$data$B$N$&$AH>C<(B
+    $B$JItJ,$O%P%C%U%!Cf$KJ]B8$5$l!"<!$N8F$S=P$7;~$K$$$C$7$g$K%(%s%3!<%I(B
+    $B$5$l$^$9!#%P%C%U%!$r%/%j%"$9$k$K$O(B&benflush$B4X?t$r;HMQ$7$^$9!#(B
+
+    $B"!(B&benflush($coding)
+      $coding$B$K(B"b64"$B$^$?$O(B"qp"$B$r;XDj$9$k$3$H$K$h$j!"%(%s%3!<%I7A<0$H$7$F(B
+    Base64$B$^$?$O(BQuoted-Printable$B$rA*Br$9$k$3$H$,$G$-$^$9!#(B$coding$B$r;XDj(B
+    $B$7$J$$>l9g$O(BBase64$B$rA*Br$7$?$H$_$J$5$l$^$9!#(B
+      &bodyencode$B4X?t$,%P%C%U%!$KJ]B8$7$?%G!<%?$rA*Br$7$?7A<0$G%(%s%3!<%I(B
+    $B$7$=$N7k2L$rJV$7$^$9!#(BBase64$B$N>l9g$O!"%(%s%3!<%I7k2L$,(B4$B$NG\?tD9$K$J$i(B
+    $B$J$1$l$PI,MW$K1~$8$F(Bpad$BJ8;z(B'='$B$rDI2C$7$^$9!#(B
+      $B$3$N4X?t$,8F$P$l$k$H(B&bodyencode$B$N%P%C%U%!$,%/%j%"$5$l$^$9!#(B
+
+  $B"#%i%$%V%i%j$r;HMQ$7$?%9%/%j%W%H(B
+
+    $B"!(Brmime
+      mimer.pl$B$r;HMQ$7$F(BMIME header$B$r%G%3!<%I$9$k%U%#%k%?!<$G$9!#(B
+
+      $B;H$$J}!'(B[[j]perl] rmime [ -s | -e | -j ] [$B%U%!%$%k(B ...]
+
+    $B"!(Bwmime
+      mimew.pl$B$r;HMQ$7$F%X%C%@%U%#!<%k%ICf$NF|K\8lJ8;zNs$r%(%s%3!<%I(B
+    $B$9$k%U%#%k%?!<$G$9!#(B
+
+      $B;H$$J}!'(B[[j]perl [-Llatin]] wmime [$B%U%!%$%k(B ...]
+
+    $B"!(Brbody
+      mimer.pl$B$r;HMQ$7$F(BMIME Base64/Quoted-Printable$B7A<0$N%G!<%?$r(B
+    $B%G%3!<%I$9$k%U%#%k%?!<$G$9!#(BDOS$B%^%7%s$N$h$&$K;HMQ$G$-$k%a%b%j(B
+    $B$,>/$J$$4D6-$G$bF0:n$9$k$h$&$K%a%b%j;HMQ$rM^$($F:n$C$F$"$j$^$9!#(B
+
+      $B;H$$J}!'(B[[j]perl] rbody {-q|-b} [$B%U%!%$%k(B ...]
+
+    $B"!(Bwbody
+      mimew.pl$B$r;HMQ$7$F%G!<%?$r(BMIME Base64/Quoted-Printable$B7A<0$G(B
+    $B%(%s%3!<%I$9$k%U%#%k%?!<$G$9!#(BDOS$B%^%7%s$N$h$&$K;HMQ$G$-$k%a%b%j(B
+    $B$,>/$J$$4D6-$G$bF0:n$9$k$h$&$K%a%b%j;HMQ$rM^$($F:n$C$F$"$j$^$9!#(B
+
+      $B;H$$J}!'(B[[j]perl] wbody {-q|-b} [$B%U%!%$%k(B ...]
+
+  $B"#(BMakefile
+    mimer.pl,mimew.pl,rmime,wmime,rbody,wbody$B$r%$%s%9%H!<%k$9$k:]$K(B
+  $B;HMQ$7$^$9!#B>$K$O!"(Brat$B$d(Btar+gzip(or compress)+uuencode$B$GG[I[MQ$N(B
+  $B%"!<%+%$%V$r:n@.$9$k5!G=$,$"$j$^$9!#(B
+    $B:n<T$N4D6-(B(SunOS4.1.3)$B$G;H$&$?$a$N(BMakefile$B$J$N$G!"B>$N4D6-(B($BFC$K(B
+  UNIX$B7O0J30$N4D6-(B)$B$G$O$&$^$/F0$+$J$$$+$b$7$l$^$;$s!#(B
+
+---
+$B@8ED!!>:(B <noboru@ikuta.ichihara.chiba.jp>

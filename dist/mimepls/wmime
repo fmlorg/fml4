@@ -1,31 +1,31 @@
 #!/usr/bin/perl
 ##!/usr/bin/jperl -Llatin
 
-# Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
+# Copyright (C) 1993-94 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
 #
 # wmime: MIME-header encoder Ver.1.11a
-#   ¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥ÀÃæ¡ÊÀèÆ¬¤«¤éºÇ½é¤Î¶õ¹Ô¤Þ¤Ç¡Ë¤Ë´Þ¤Þ¤ì¤ë´Á»ú¤ÎÉôÊ¬¤ò
-#   ISO-2022-JP(7bit JIS)¤ËÊÑ´¹¤· MIME ¥¨¥ó¥³¡¼¥É¤¹¤ë¡£
-#   ¤Þ¤¿¡¢Mime-Version: ¤ÈContent-Type: ¤Î£²¤Ä¤Î¥Õ¥£¡¼¥ë¥É¤¬¥Ø¥Ã¥ÀÉô¤Ë
-#   ´Þ¤Þ¤ì¤Ê¤±¤ì¤Ð¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥À¤ÎºÇ¸å¤Ë°Ê²¼¤ÎÂÐ±þ¤¹¤ë¥Õ¥£¡¼¥ë¥É¤òÄÉ
-#   ²Ã¤¹¤ë¡£¡Ê$add_headers ¤¬ 1 ¤Î¤È¤­¡Ë
+#   $B%a%C%;!<%8%X%C%@Cf!J@hF,$+$i:G=i$N6u9T$^$G!K$K4^$^$l$k4A;z$NItJ,$r(B
+#   ISO-2022-JP(7bit JIS)$B$KJQ49$7(B MIME $B%(%s%3!<%I$9$k!#(B
+#   $B$^$?!"(BMime-Version: $B$H(BContent-Type: $B$N#2$D$N%U%#!<%k%I$,%X%C%@It$K(B
+#   $B4^$^$l$J$1$l$P%a%C%;!<%8%X%C%@$N:G8e$K0J2<$NBP1~$9$k%U%#!<%k%I$rDI(B
+#   $B2C$9$k!#!J(B$add_headers $B$,(B 1 $B$N$H$-!K(B
 
 $mime_ver = "Mime-Version: 1.0\n";
 $con_type = "Content-Type: text/plain; charset=iso-2022-jp\n";
 $add_headers = 0;
 
-# »È¤¤Êý : [ perl ] wmime [ ¥Õ¥¡¥¤¥ëÌ¾ ...]
+# $B;H$$J}(B : [ perl ] wmime [ $B%U%!%$%kL>(B ...]
 #
-#         mimew.pl ¤Ï¡¢´Ä¶­ÊÑ¿ô HOME¢ªwmime¤ÈÆ±¤¸¢ªÄÌ¾ï¤Î@INC ¤Î½ç¤Ë¥µ
-#         ¡¼¥Á¤µ¤ì¤Þ¤¹¡£
+#         mimew.pl $B$O!"4D6-JQ?t(B HOME$B"*(Bwmime$B$HF1$8"*DL>o$N(B@INC $B$N=g$K%5(B
+#         $B!<%A$5$l$^$9!#(B
 #
-# Ãí°Õ : wmime¤òjperl¡Ê¤Î2¥Ð¥¤¥ÈÊ¸»úÂÐ±þ¥â¡¼¥É¡Ë¤Ç»ÈÍÑ¤¹¤ë¤È¡¢SJIS¤ÈEUC
-#        ¤ò¤¦¤Þ¤¯7bit JIS(ISO-2022-JP)¤ËÊÑ´¹¤Ç¤­¤Þ¤»¤ó¡£
-#        ÆþÎÏ¤Ë´Þ¤Þ¤ì¤ëÊ¸»ú¤¬7bit JIS(ISO-2022-JP)¤ÈASCII¤Î¤ß¤Ç¤¢¤ë¤³¤È
-#        ¤¬ÊÝ¾Ú¤µ¤ì¤Æ¤¤¤ë¾ì¹ç¤ò½ü¤­¡¢É¬¤ºoriginal¤Î±Ñ¸ìÈÇ¤Îperl¡Ê¤Þ¤¿¤Ï
-#        jperl1.4°Ê¾å¤ò -Llatin ¥ª¥×¥·¥ç¥óÉÕ¤­¡Ë¤ÇÆ°¤«¤·¤Æ¤¯¤À¤µ¤¤¡£
+# $BCm0U(B : wmime$B$r(Bjperl$B!J$N(B2$B%P%$%HJ8;zBP1~%b!<%I!K$G;HMQ$9$k$H!"(BSJIS$B$H(BEUC
+#        $B$r$&$^$/(B7bit JIS(ISO-2022-JP)$B$KJQ49$G$-$^$;$s!#(B
+#        $BF~NO$K4^$^$l$kJ8;z$,(B7bit JIS(ISO-2022-JP)$B$H(BASCII$B$N$_$G$"$k$3$H(B
+#        $B$,J]>Z$5$l$F$$$k>l9g$r=|$-!"I,$:(Boriginal$B$N1Q8lHG$N(Bperl$B!J$^$?$O(B
+#        jperl1.4$B0J>e$r(B -Llatin $B%*%W%7%g%sIU$-!K$GF0$+$7$F$/$@$5$$!#(B
 #
-# ÇÛÉÛ¾ò·ï : Ãøºî¸¢¤ÏÊü´þ¤·¤Þ¤»¤ó¤¬¡¢ÇÛÉÛ¡¦²þÊÑ¤Ï¼«Í³¤È¤·¤Þ¤¹¡£
+# $BG[I[>r7o(B : $BCx:n8"$OJ|4~$7$^$;$s$,!"G[I[!&2~JQ$O<+M3$H$7$^$9!#(B
 
 $home = $ENV{'HOME'};
 $perl_dir = $0;
@@ -34,11 +34,11 @@ substr($perl_dir, rindex($perl_dir, "/")) = '';
 unshift(@INC, $home, $perl_dir);
 require 'mimew.pl';
 
-## `MIME-Version:'¤È`Content-Type:' ¤Ë¥Þ¥Ã¥Á¤¹¤ë¥Ñ¥¿¡¼¥ó
+## `MIME-Version:'$B$H(B`Content-Type:' $B$K%^%C%A$9$k%Q%?!<%s(B
 $match_mime_ver = '^mime-version:';
 $match_con_type = '^content-type:';
 
-## ¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥À¤Î½èÍý
+## $B%a%C%;!<%8%X%C%@$N=hM}(B
 $/ = "\n\n";
 $* = 1;
 $_ = <>;
@@ -56,7 +56,7 @@ if (/\n\n$/){
     }
     print "\n";
 
-## ¥á¥Ã¥»¡¼¥¸¥Ü¥Ç¥£¤Î½èÍý
+## $B%a%C%;!<%8%\%G%#$N=hM}(B
     $/ = "\n";
     while (<>){
         print;

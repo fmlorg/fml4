@@ -1,29 +1,29 @@
 #!/usr/bin/perl
 
-# Copyright (C) 1993-94 Noboru Ikuta <ikuta@crc.co.jp>
+# Copyright (C) 1993-94 Noboru Ikuta <noboru@ikuta.ichihara.chiba.jp>
 #
 # rmime: MIME-header decoder Ver.1.11a
-#   ¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥ÀÃæ¡ÊÀèÆ¬¤«¤éºÇ½é¤Î¶õ¹Ô¤Þ¤Ç¡Ë¤Ë´Þ¤Þ¤ì¤ë encoded-word
-#   ¡Ê"=?ISO2022-JP?B?" ¤È "?=" ¤Ë°Ï¤Þ¤ì¤¿Ê¸»úÎó¡Ë¤ò¥µ¡¼¥Á¤·¤Æ¥Ç¥³¡¼¥É
-#   ¤¹¤ë¡£encoded-word ¤Ë¤Ï¤µ¤Þ¤ì¤¿¶õÇò¤ÏÁ´¤Æ½üµî¤¹¤ë¡£¥ª¥×¥·¥ç¥ó¥¹¥¤¥Ã
-#   ¥Á¤ò»ØÄê¤¹¤ë¤³¤È¤Ë¤è¤ê MIME º­Êñ¤ò²ò¤¤¤¿ÉôÊ¬¤Î´Á»ú¥³¡¼¥É¤ò 7bit JIS
-#   ¤«¤é Shift-JIS ¤Þ¤¿¤Ï EUC ¤ËÊÑ´¹¤¹¤ë¤³¤È¤¬¤Ç¤­¤ë¡£
+#   $B%a%C%;!<%8%X%C%@Cf!J@hF,$+$i:G=i$N6u9T$^$G!K$K4^$^$l$k(B encoded-word
+#   $B!J(B"=?ISO2022-JP?B?" $B$H(B "?=" $B$K0O$^$l$?J8;zNs!K$r%5!<%A$7$F%G%3!<%I(B
+#   $B$9$k!#(Bencoded-word $B$K$O$5$^$l$?6uGr$OA4$F=|5n$9$k!#%*%W%7%g%s%9%$%C(B
+#   $B%A$r;XDj$9$k$3$H$K$h$j(B MIME $B:-Jq$r2r$$$?ItJ,$N4A;z%3!<%I$r(B 7bit JIS
+#   $B$+$i(B Shift-JIS $B$^$?$O(B EUC $B$KJQ49$9$k$3$H$,$G$-$k!#(B
 #
-# ÆþÎÏ´Á»ú¥³¡¼¥É¤Ï¸ÇÄê(7bit JIS)¤Ç¤¹¤¬¡¢½ÐÎÏ´Á»ú¥³¡¼¥É¤Ï»ØÄê¤Ç¤­¤Þ¤¹¡£
-# ¤Ê¤ª¡¢½ÐÎÏ´Á»ú¥³¡¼¥É¤Î¥Ç¥Õ¥©¥ë¥È¤Ï 7bit JIS¡ÊÆ©²á¡Ë¤Ç¤¹¡£
+# $BF~NO4A;z%3!<%I$O8GDj(B(7bit JIS)$B$G$9$,!"=PNO4A;z%3!<%I$O;XDj$G$-$^$9!#(B
+# $B$J$*!"=PNO4A;z%3!<%I$N%G%U%)%k%H$O(B 7bit JIS$B!JF)2a!K$G$9!#(B
 #
-# »È¤¤Êý : [ [j]perl ] rmime [ -s|-e|-j ] [ ¥Õ¥¡¥¤¥ëÌ¾ ...]
+# $B;H$$J}(B : [ [j]perl ] rmime [ -s|-e|-j ] [ $B%U%!%$%kL>(B ...]
 #
-#         mimer.pl ¤Ï¡¢´Ä¶­ÊÑ¿ô HOME¢ªrmime¤ÈÆ±¤¸¢ªÄÌ¾ï¤Î@INC ¤Î½ç¤Ë¥µ
-#         ¡¼¥Á¤µ¤ì¤Þ¤¹¡£
+#         mimer.pl $B$O!"4D6-JQ?t(B HOME$B"*(Brmime$B$HF1$8"*DL>o$N(B@INC $B$N=g$K%5(B
+#         $B!<%A$5$l$^$9!#(B
 #
-# Ãí°Õ : rmime¤òjperl¡Ê¤Î2¥Ð¥¤¥ÈÊ¸»úÂÐ±þ¥â¡¼¥É¡Ë¤Ç»ÈÍÑ¤¹¤ë¤È¤­¤Ï¡¢tr///
-#        ¤Î½ñ¤­Êý¤¬°Û¤Ê¤ê¤Þ¤¹¤Î¤Ç¡¢É¬Í×¤Ë±þ¤¸¤Æ mimer.pl Ãæ¤Î 'sub j2e'
-#        ¤Î¥³¥á¥ó¥È(#)¤òÉÕ¤±ÂØ¤¨¤Æ¤¯¤À¤µ¤¤¡£jperl1.4°Ê¾å¤ò -Llatin ¥ª¥×
-#        ¥·¥ç¥óÉÕ¤­¤Ç»ÈÍÑ¤¹¤ë¾ì¹ç¤ª¤è¤ÓEUCÊÑ´¹µ¡Ç½¤ò»È¤ï¤Ê¤¤¾ì¹ç¤Ï¤½¤ÎÉ¬
-#        Í×¤Ï¤¢¤ê¤Þ¤»¤ó¡£
+# $BCm0U(B : rmime$B$r(Bjperl$B!J$N(B2$B%P%$%HJ8;zBP1~%b!<%I!K$G;HMQ$9$k$H$-$O!"(Btr///
+#        $B$N=q$-J}$,0[$J$j$^$9$N$G!"I,MW$K1~$8$F(B mimer.pl $BCf$N(B 'sub j2e'
+#        $B$N%3%a%s%H(B(#)$B$rIU$1BX$($F$/$@$5$$!#(Bjperl1.4$B0J>e$r(B -Llatin $B%*%W(B
+#        $B%7%g%sIU$-$G;HMQ$9$k>l9g$*$h$S(BEUC$BJQ495!G=$r;H$o$J$$>l9g$O$=$NI,(B
+#        $BMW$O$"$j$^$;$s!#(B
 #
-# ÇÛÉÛ¾ò·ï : Ãøºî¸¢¤ÏÊü´þ¤·¤Þ¤»¤ó¤¬¡¢ÇÛÉÛ¡¦²þÊÑ¤Ï¼«Í³¤È¤·¤Þ¤¹¡£
+# $BG[I[>r7o(B : $BCx:n8"$OJ|4~$7$^$;$s$,!"G[I[!&2~JQ$O<+M3$H$7$^$9!#(B
 
 $home = $ENV{'HOME'};
 $perl_dir = $0;
@@ -32,20 +32,20 @@ substr($perl_dir, rindex($perl_dir, "/")) = '';
 unshift(@INC, $home, $perl_dir);
 require 'mimer.pl';
 
-## ¥ª¥×¥·¥ç¥ó¥¹¥¤¥Ã¥ÁÈ½ÃÇ¤Î¤¿¤á¤Î¥Æ¡¼¥Ö¥ë
+## $B%*%W%7%g%s%9%$%C%AH=CG$N$?$a$N%F!<%V%k(B
 %kanjicode = ( "-e", "EUC", "-s", "SJIS", "-E", "EUC", "-S", "SJIS" );
 
-## ½ÐÎÏ´Á»ú¥³¡¼¥É¤ÎÀßÄê (UNDEF ¤Ï 7bit JIS)
+## $B=PNO4A;z%3!<%I$N@_Dj(B (UNDEF $B$O(B 7bit JIS)
 shift if ( $ARGV[0] =~ /^-[esj]$/i );
 $kout = $kanjicode{$&};
 
-## ¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥À¤Î½èÍý
+## $B%a%C%;!<%8%X%C%@$N=hM}(B
 $/ = "\n\n";
 $* = 1;
 $_ = <>;
 print &mimedecode($_,$kout);
 
-## ¥á¥Ã¥»¡¼¥¸¥Ü¥Ç¥£¤Î½èÍý
+## $B%a%C%;!<%8%\%G%#$N=hM}(B
 $/ = "\n";
 while (<>){
     print;
