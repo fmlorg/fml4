@@ -49,6 +49,10 @@ sub ExpandOption
 	    next if $dir =~ /^\./;
 	    next if $dir =~ /^etc/;
 	    next if $dir =~ /^fmlserv/;
+
+	    # @listname@list.com must not exists!
+	    next if $dir =~ /^\@/;
+
 	    print "\t\t\t<OPTION VALUE=$dir>$dir\n";
 	}
 	closedir(DIRD);
