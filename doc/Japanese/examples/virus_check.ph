@@ -1,4 +1,4 @@
-# $Id$
+# $FML$
 # 
 # これは perl script です。
 #
@@ -44,19 +44,19 @@ $FILTER_ATTR_REJECT_MS_GUID = 1;
 
 # ちょっと複雑な HOOK
 $DISTRIBUTE_FILTER_HOOK .= q#
-    if ($e{'Body'} =~ /Content.*\.vbs|filename=.*\.vbs/i) {
+    if ($e{'Body'} =~ /Content.*\.vbs|(filename|name)=.*\.vbs/i) {
 	return 'VB script attatchment';
     }
 
-    if ($e{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty Park\.exe/i ) {
 	return 'original Pretty Park virus';
     }
 
-    if ($e{'Body'} =~ /filename=.*\.Pretty.*Park.*\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty.*Park.*\.exe/i ) {
 	return 'original Pretty Park familly ?';
     }
 
-    if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
+    if ($e{'Body'} =~ /(filename|name)=.*search.*URL.*\.exe/i ) {
 	return 'P2000 virus familly?';
     }
 #;
@@ -76,7 +76,7 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 $DISTRIBUTE_FILTER_HOOK .= q#
     my($extension) = 'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
 
-    if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
+    if ($e{'Body'} =~ /(filename|name)=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';
     }
 #;
