@@ -235,7 +235,7 @@ sub DeadOrAlive
 	    for (@opts) { /r=(\S+)/ && ($pri = $1);}
 
 	    print STDERR "$addr : $addr{\"$addr $ml\"}\t" if $debug;
-	    $addr{"$addr $ml"} += $PRI{$pri} != 0 ? $PRI{$pri} : 0.25;
+	    $addr{"$addr $ml"} += $PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
 	    print STDERR "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
 	}
     }
@@ -511,6 +511,7 @@ sub Init
 
     # priority; $opt_p
     $PRI{'uu'} = 1;
+    $PRI{'default'} = 0.25;
     for (split(/,/, $opt_p)) {
 	if (/(\S+)=(\S+)/) {
 	    $PRI{$1} = $2;
