@@ -28,7 +28,7 @@ sub Init
     $MAKE_FML = "$EXEC_DIR/makefml";
 
     # htdocs/
-    $HTDOCS_DIR = "$EXEC_DIR/www/template";
+    $HTDOCS_TEMPLATE_DIR = "$EXEC_DIR/www/template";
 
     # /cgi-bin/ in HTML
     $CGI_PATH = $CGI_PATH || '/cgi-bin/fml';
@@ -36,6 +36,7 @@ sub Init
 
 sub ExpandOption
 {
+    local($dir);
     if (opendir(DIRD, $ML_DIR)) {
 	while ($dir = readdir(DIRD)) {
 	    next if $dir =~ /^\./;
