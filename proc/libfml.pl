@@ -97,7 +97,7 @@ sub DoProcedure
     # $mailbody != $Envelope{'Body'};
   GivenCommands: for $xbuf (split(/\n/, $mailbody)) {
       $linenum++; # line number (!= %Envelope under subject: command)
-      $e{'tmp:line_number'} = $linenum;
+      $_PCB{'proc:buf_linep'} = $e{'tmp:line_number'} = $linenum;
 
       &Log("proc debug: input [$xbuf]") if $debug;
 

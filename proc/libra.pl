@@ -996,9 +996,17 @@ sub ProcAdminPutFile
     }
 
     ### skip until find "# admin put file" line.
-    for (split(/\n/, $e{'Body'})) {
-	next while /^(\#\s*|\s*)(admin|approve)\s*\S+/i; # skip all admin lines
-	$s .= $_."\n";
+    {
+	local($lp, $buf); 
+	$lp = 0; 
+	for $buf (split(/\n/, $e{'Body'})) {
+	    # XXX remove this "admin help" line also
+	    next if $lp++ < $_PCB{'proc:buf_linep'};
+
+	    # XXX NO! "skip all admin lines" should not be done.
+	    #    next while /^(\#\s*|\s*)(admin|approve)\s*\S+/i;
+	    $s .= $buf."\n";
+	}
     }
 
     if (-f $file) {# if exist, -> .bak;
