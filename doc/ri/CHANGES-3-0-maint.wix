@@ -6,6 +6,9 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+   sbin/makefml (2.43-2.44)
+	define dummy DEFINE_FIELD_PAT_TO_REJECT()
+
 [ 3.0pl9 ] 
 
   fix qmail examples (qmail/users/assign)
