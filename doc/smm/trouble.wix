@@ -1005,6 +1005,10 @@ fml-support: 02353
 ＃ふりーのEudoraで Bcc: -> Reply-To: とするパッチがあるらしい…
 
 
+.S	article ID duplication error 
+
+次を見てね↓
+
 .S	perl 5.003 flock と そらりす 2.5 2.5.1 ?
 
 flock やってるふりして、できてない？そのため SEQUENCE_FILE がちゃんと

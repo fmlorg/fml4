@@ -1240,6 +1240,54 @@ CAVEAT
 	 */
 
 
+.S	Precedence Priority
+
+sendmail operations manual tells:
+
+             5.7.  P -- Precedence Definitions
+
+                     Values for the "Precedence:" field may be defined
+                using  the  P  control line.  The syntax of this field
+                is:
+
+                    Pname==num
+
+                When the name is found in a "Precedence:"  field,  the
+                message  class  is  set  to  num.  Higher numbers mean
+                higher precedence.  Numbers less than  zero  have  the
+                special  property  that if an error occurs during pro-
+                cessing the body of the message will not be  returned;
+                this  is  expected  to be used for "bulk" mail such as
+                through mailing  lists.   The  default  precedence  is
+                zero.  For example, our list of precedences is:
+
+                    Pfirst-class=0
+                    Pspecial-delivery=100
+                    Plist=-30
+                    Pbulk=-60
+                    Pjunk=-100
+
+                People  writing  mailing list exploders are encouraged
+                to use "Precedence: list".  Older versions of sendmail
+                (which discarded all error returns for negative prece-
+                dences)  didn't  recognize  this  name,  giving  it  a
+                default  precedence  of  zero.  This allows list main-
+                tainers to see error returns on both old and new  ver-
+                sions of sendmail.
+
+
+.S	4.4BSD vacation
+
+     No message will be sent unless login (or an alias supplied using the -a
+     option) is part of either the ``To:'' or ``Cc:'' headers of the mail.  No
+     messages from ``???-REQUEST'', ``Postmaster'', ``UUCP'', ``MAILER'', or
+     ``MAILER-DAEMON'' will be replied to (where these strings are case insen-
+     sitive) nor is a notification sent if a ``Precedence: bulk'' or
+     ``Precedence: junk'' line is included in the mail headers.  The people
+     who have sent you messages are maintained as a db(3) database in the file
+     .vacation.db in your home directory.
+
+
 .S	Directory Permissions
 
 複数の人が fmlserv と一緒に使う場合 fmlserv はメンバーリストを書き変え
