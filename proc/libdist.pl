@@ -17,8 +17,8 @@ sub DoDistribute
     $0 = "--Distributing <$FML $LOCKFILE>";
     local($status, $s, $id);
 
-    # DECLARE: Global Rcpt Lists;    
-    @Rcpt = ();
+    # DECLARE: Global Rcpt Lists; and the number of recipients;   
+    @Rcpt = (); $Rcpt;
 
     $DISTRIBUTE_START_HOOK && 
 	&eval($DISTRIBUTE_START_HOOK, 'Distribute Start hook'); 
@@ -62,15 +62,19 @@ sub DoDistribute
     # Get a member list to deliver
     # After 1.3.2, inline-code is modified for further extentions.
     {
-	local($rcpt, $opt, $w, $relay, $who, $mxhost);
+	local($rcpt, $opt, $w, $relay, $who, $mxhost, $k, $v);
+
+	for ($MAIL_LIST, $CONTROL_ADDRESS) { tr/A-Z/a-z/; $SKIP{$_} = 1;}
+	while (($k, $v) = each %Skip) { $SKIP{$k} = $v;}
+	while (($k, $v) = each %SKIP) { $v =~ tr/A-Z/a-z/; $SKIP{$k} = $v;}
 
       line: while (<ACTIVE_LIST>) {
 	  chop;
 
 	  next line if /^\#/o;	 # skip comment and off member
 	  next line if /^\s*$/o; # skip null line
-	  next line if /^$MAIL_LIST/i; # no loop back
-	  next line if $CONTROL_ADDRESS && /^$CONTROL_ADDRESS/i;
+
+	  tr/A-Z/a-z/;		 # lower case;
 
 	  # strip comment, not \S+ for mx;
 	  s/(\S+)\s\#.*$/$1/;
@@ -89,23 +93,29 @@ sub DoDistribute
 	      $w = $rcpt;
 	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
 	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
+	      $SKIP{$w} = 1;
 	      next line if $NoRcpt{$w}; # no add to @Rcpt
 	  }
 
 	  next line if $opt =~ /\s[ms]=/i;	# tricky "^\s";
-	  next line if $SKIP{$rcpt};
-	  next line if $skip{$rcpt}; # backward compat;_;
+	  next line if $SKIP{$rcpt}; # SKIP FIELD;
 
 	  # Relay server
 	  # % relay hack is not refered in RFC, but effective in Sendmail's;
 	  if ($opt =~ /\sr=(\S+)/i || $DEFAULT_RELAY_SERVER) {
 	      $relay = $1 || $DEFAULT_RELAY_SERVER;
 	      ($who, $mxhost) = split(/@/, $rcpt, 2);
-	      $rcpt = "$who%$mxhost\@$relay";
+
+	      if ($LESS_STACK_HACK) {
+		  $RelayRcpt{$rcpt} = "${who}\%${mxhost}\@${relay}";
+	      }
+
+	      $rcpt = "${who}\%${mxhost}\@${relay}";
 	  }
-	  
+
 	  print STDERR "RCPT:<$rcpt>\n\n" if $debug;
-	  push(@Rcpt, $rcpt);
+	  push(@Rcpt, $rcpt) unless $LESS_STACK_HACK;
+	  $Rcpt++; # count the number of recipients;
       }
 
 	close(ACTIVE_LIST);
@@ -237,31 +247,35 @@ sub DoDistribute
 # So we must be able to do UNLOCK our current process.
 sub Deliver
 {
-    local($status, $smtp_time, $nrcpt);
-    $nrcpt = scalar(@Rcpt);
+    local($status, $smtp_time);
     
     if ($debug) {
-	&Log("DEBUG MODE: NO DELIVER rcpt=[$nrcpt] debug=[$debug]");
+	&Log("DEBUG MODE: NO DELIVER rcpt=[$Rcpt] debug=[$debug]");
 	return 1;
     }
 
-    # NO RECPT
-    if ($nrcpt == 0) { return;}
+    if ($Rcpt == 0) { return;} # NO RCPT
+
+    $Envelope{'mode:_Deliver'} = 1; # notify the &Smtp deliver mode;
 
     $smtp_time = time;
     $status = &Smtp(*Envelope, *Rcpt);
     &Log("Smtp:$status") if $status;
-    &StatDelivery($smtp_time, $nrcpt) if $debug_stat;
+    &StatDelivery($smtp_time, $Rcpt) if $debug_stat;
+
+    undef $Envelope{'mode:_Deliver'};
 
     ##### ML Distribute Phase 05: ends
     $DISTRIBUTE_CLOSE_HOOK .= $SMTP_CLOSE_HOOK;
-    $DISTRIBUTE_CLOSE_HOOK && 
+    if ($DISTRIBUTE_CLOSE_HOOK) {
 	&eval($DISTRIBUTE_CLOSE_HOOK, 'Distribute close Hook');
+    }
 }
 
 sub StatDelivery
 {
     local($smtp_time, $nrcpt) = @_;
+
     $smtp_time = time - $smtp_time;
     $pdt = $smtp_time/$nrcpt;
     &Log("Delivery Stat[$ID]: ${smtp_time}/${nrcpt} = ${pdt} sec./rcpts");
