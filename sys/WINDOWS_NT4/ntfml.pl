@@ -15,8 +15,12 @@
 ### MAIN
 &Init;
 
+$msend_watch_dog = &SetMSendWatchDog;
+
 # main loop
 for (;;) { 
+    $slt = time;		# start loop time
+
     # A new ml may has been created a little ago, 
     # We scan $MAIL_LIST_DIR to check it.
     &GetConf; 
@@ -47,9 +51,14 @@ for (;;) {
 
     &GetTime;
 
-    # Matome Okuri
-    # e.g. 18:00 
-    if ($min == 0 || $debug_msend) {
+    # Matome Okuri (e.g. 18:00)
+    # We do msend.pl if $min == 0. 
+    # But this check may be ineffective if each loop is over 60 secs.
+    # So we need to run another watch dog variable.
+    if (($msend_watch_dog < 0) || $min == 0 || $debug_msend) {
+	$debug_org = $debug; 
+	$debug = 1 if $debug_msend;
+
 	for $ml (keys %IncludeFile) {
 	    next unless $ml;
 	    next if !-f "$ML_DIR/$ml/config.ph";
@@ -60,7 +69,20 @@ for (;;) {
 	    $p = &ArrangeMSendProc($ml);
 	    system $p;
 	}
+
+	$msend_watch_dog = &SetMSendWatchDog;
+	$debug = $debug_org if $debug_msend;
     } # $min == 0
+
+
+    ### loop cost time 
+    $loop_cost       = time - $slt;
+    $msend_watch_dog = $msend_watch_dog - $loop_cost;
+
+    # debug watch dog expire 
+    if ($opt_o eq 'watch_dog') {
+	print STDERR "msend_watch_dog: $msend_watch_dog\n";
+    }
 }
 
 
@@ -78,7 +100,7 @@ sub GetConf
     for $ml (readdir(DIRD)) {
 	next if /^\./;
 
-	# special
+	# special virtual ML directory
 	next if $ml eq 'etc';
 	next if $ml eq 'popfml';
 
@@ -93,6 +115,8 @@ sub GetConf
 	    $eval .= &Grep($pat, $cf);
 	    eval $eval; &Log($@) if $@;
 
+	    $MSEND_RC = $MSEND_RC =~ /$DIR/ ? $MSEDN_RC : "$DIR/$MSEND_RC";
+
 	    ($ctladdr) = split(/\@/, $CONTROL_ADDRESS);
 
 	    # alloc
@@ -100,6 +124,7 @@ sub GetConf
 		$IncludeFile{$ml}       = "$ML_DIR/$ml/include";
 		$MsendList{$ml}         = "$ML_DIR/$ml";
 		$MsendRc{$ml}           = $MSEND_RC;
+		$Maintainer{$ml}        = $MAINTAINER;
 	    }
 
 	    if ($ctladdr ne $ml) {
@@ -109,6 +134,7 @@ sub GetConf
 
 		    # reverse pointer
 		    $ML{$ctladdr} = $ml;
+		    $Maintainer{$ctladdr} = $MAINTAINER;
 		}
 	    }
 	}
@@ -116,6 +142,12 @@ sub GetConf
     closedir(DIRD);
 
     undef $CONTROL_ADDRESS;
+}
+
+
+sub SetMSendWatchDog
+{
+    3600 - (time % 3600);
 }
 
 
@@ -253,7 +285,7 @@ sub ArrangeProc
     $p .= "-perl_prog $PerlProgram ";
     $p .= "-arch $COMPAT_ARCH ";
     $p .= "-queue_dir $qd ";
-    $p .= "-M $MAINTAINER ";
+    $p .= "-M $Maintainer{$ml} ";
     $p .= "$ap";
 
     if ($debug) {
