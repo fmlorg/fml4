@@ -11,6 +11,10 @@
 #
 # $Id$
 
+###
+### sbin/makefml kicks this ntinstall.pl when "makefml install".
+###
+
 # flush
 $| = 1;
 
@@ -124,6 +128,7 @@ sub Conv
     local($uid, $gid, $format);
 
     $PERL_PROG = &search_path('perl.exe');
+    $PERL_PROG =~ s#/#\\#g;
 
     open(EXAMPLE, $example)  || (&Warn("cannot open $example"), return 0);
     open(CF, "> $out")       ||  (&Warn("cannot open $out"), return 0);
