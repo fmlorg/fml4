@@ -109,16 +109,30 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 
 .S	インストール
 
-とりあえず非常に細かいチューニングを行なわなくてよいなら
+とりあえず細かいチューニングを行なわなくてよいなら
+=E
+The simplest way to install Fml system is to do in the top directory
+of the fml source
+# Hence a lot of variables are pre-defined.
 
-	○対話的プログラムで行なう 
-	○コマンドラインで引数を２つほど指定して make する
+	perl makefml 
 
-ことで、ＭＬの設定は終ります。その時、自動的に環境に合わせた各種見本設
-定も自動生成しますので、それを cut and paste すればインストールは終り
-です。
+=E
+when you make a new ML 
+=S
+	perl makefml newml ML-Name
+=S
+e.g. to make elena@your-domain mailng list
+=S
+	perl makefml newml elena
 
-詳しくは INSTALL というファイルを見て下さい。
+ことで、インストールをします。ML の作成は
+
+	perl makefml newml ＭＬの名前
+
+で何個でも作れます。説明は INSTALL というファイルを見て下さい。
+=E
+Please see the file INSTALL for the detail.
 
 
 .S	fml 1.x とのCompatibility
@@ -182,7 +196,7 @@ HTML 版は var/html/ の下に用意されいますが、
 operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 shell% make doc でつくってください
 最新版は
-   http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
+   http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
 をのぞいてみてください
 
 

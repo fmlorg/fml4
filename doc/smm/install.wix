@@ -1,30 +1,30 @@
-.C	初心者向けインストール・インターフェイス (makefml)
+.C	インストールについて
 .l	install
-.include install-new.wix
 
+.S	makefml: 初心者向けインストール・インターフェイス
+.k	makefml: 初心者向けインストール・インターフェイス
+.k	makefml
+.k	sbin/makefml
+.# .include install-new.wix
 
-.C	より細やかなインストール (旧標準インストールの方法)
-.l	install-advanced
+fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
+では makefml という対話的にインストールや簡単なＭＬの設定を行なうイン
+ターフェイスが附属しています。それの使い方が INSTALL というファイルです。
 
-インストールについては(READMEでもそういっていますが)
-INSTALL-advanced (doc/INSTALL-advanced) を見て下さい。
-
-「お手軽なインストール」はfml を広げた directory へいって
-
-   % make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
-
-で、インストール先のマシンに合わせたサンプル(./samples/の下)まで作るの
-で、それを参考にしながらで十分インストールできるとおもいます。
-
-細かいカスタマイズをしたくなったら、このドキュメントを見ながら 
-config.ph を直したりすれば良いでしょう。
+INSTALL + α でこの doc/op というファイルと INSTALL の中間に当たるユー
+ザーズガイドが整備される予定です。
 
 
 .S	Version up
 
-現在では ソースの下の src 階層以下に perl scripts は集められています。
-よって version up は src/*.pl をコピー(cp -pr)すれば終りです。
+makefml install を使うのがいいでしょう。
 
+実質的にやればいいことは
+
+	現在では ソースの下の src 階層以下に perl scripts は集められて
+	います。よって version up は src/*.pl をコピー(cp - pr)する
+
+これだけで十分です。
 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
 
 
@@ -41,23 +41,39 @@ config.ph を直したりすれば良いでしょう。
 
 いつものように複数のやり方があります:-)
 
+○	初心者で内部構造がよくわからない場合はインストール時に使った
+	makefml というコマンドを使って、ＭＬの設定ができます。
+	makefml config ML で ML-directory/config.ph が変更できます。
+	よく使いそうだと思われる基本的な設定はこれで十分でしょう。
+
+   それ以上のことがしたい場合は…
+
 ○	ひとつしかMLがない場合
 	
 	config.ph をいじるか コマンドラインオプションで変更します。
 	
 ○	複数のMLがある場合
 
-	ML固有の変更はそれぞれのMLの config.ph へ変更を加えるか
+	ML固有の変更はそれぞれのMLの config.ph へ変更を加える
 
 	include file 等で fml.pl --distribute のようにコマンドラインオ
-	プションで変更するか？
+	プションで変更する
 
-ですが、複数の ML に共通の設定であれば libsmtp.pl 等がおいてある場所に 
+といった方法がありますがが、複数の ML に共通の設定であれば libsmtp.pl 
+等がおいてある場所に
 sitedef.ph を作って、これの中にいれておくとよいでしょう。
 .xref	order-of-option-effeciency, init-data-structure
 
 例：
-	/usr/libexec/fml/sitedef.ph
+	/usr/local/fml/sitedef.ph
+
+を作り、この中に例えば
+
+	$HOST = "mlrelay.dokka.org";
+	1;
+
+とか共通の設定を書く(この例では↑は配送に使うマシンをデフォールトから
+mlrela.dokka.org(←架空の名前)というマシンに変更している)。
 
 
 .S	fml.plの呼び方、引数の渡し方(4.3BSD)

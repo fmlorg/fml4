@@ -221,9 +221,7 @@ e.g. to make elena@your-domain mailng list
 Please see the file INSTALL for the detail.
 
 これだけで十分動くようになりますが、簡単な分、初心者用にいろいろな値を
-決め打ちしています。もう少し好みのインストールがしたい場合は 
-INSTALL_advanced というファイルを見て下さい。
-＃ INSTALL_advanced が昔のINSTALLです＞昔からの人:-)
+決め打ちしています。
 =E
 INSTALL_advanced is a document for you to customize more closely.
 

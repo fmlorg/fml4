@@ -343,13 +343,13 @@ Subject: [0403.00128] 外国ＴＶシリーズＭＬむけですね、これは
 
 余談ですが、このStardateに意味はありません。翻訳の時に適当につけられた
 ものです。詳しくは、エンサイクロペディア等をごらんください。
-＃http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+＃http://www.sapporo.iij.ad.jp/staff/fukachan/href/Startrek/
 
 
 .S	宇宙歴その２
 
 外国ＴＶシリーズＭＬで使ってます:-)
-＃http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
+＃http://www.sapporo.iij.ad.jp/staff/fukachan/href/Startrek/
 
 config.ph で	$APPEND_STARDATE = 1;
 
@@ -658,7 +658,7 @@ in libsendfile.pl
 を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
 いますよね。
 ＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
-＃参照 http://www.iij.ad.jp/sapporo/staff/fukachan/fml/ の下
+＃参照 http://www.sapporo.iij.ad.jp/staff/fukachan/fml/ の下
 ＃pc-van は何の問題もなかったと思いました（たしか）
 
 １０００行でだいたい５０ｋくらいになります。
