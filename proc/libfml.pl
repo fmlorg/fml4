@@ -811,8 +811,9 @@ sub ProcSetMemberList
 
     &Log("ProcSetMemberList: $proc") if $debug_confirm || $debug;
 
-    ### UNSUBSCRIBE CONFIRMATION
-    if ($proc eq 'unsubscribe' || $proc eq 'bye') {
+    ### UNSUBSCRIBE CONFIRMATION (if not admin mode ;)
+    if (($proc eq 'unsubscribe' || $proc eq 'bye') &&
+	(! $e{'mode:admin'})) {
 	if ($UNSUBSCRIBE_AUTH_TYPE eq 'confirmation') {
 	    &use('confirm');
 	    &ConfirmationModeInit(*e, 'unsubscribe');
