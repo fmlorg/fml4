@@ -41,8 +41,14 @@ Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 	(but this config ignores "free software" content ?;-).
 
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+これは
+
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
 	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+と書いても一緒です。
 
 
 .S	Subject:に特定のパターン(大文字小文字を問わず)があったら拒否する

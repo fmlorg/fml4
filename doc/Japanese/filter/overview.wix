@@ -46,8 +46,14 @@ makefml config で
 config.ph にフィルタリングの設定を書くことができます。例:
 
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+これは
+
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
 	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+
+と書いても一緒です。
 
 
 .S	弾けないもの

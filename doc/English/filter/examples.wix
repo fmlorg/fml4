@@ -17,6 +17,8 @@ Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 	(but this config ignores "free software" content ?;-).
 
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
+	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
+or
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
 	&DEFINE_FIELD_PAT_TO_REJECT('from', 'ADULT');
 

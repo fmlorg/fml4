@@ -51,8 +51,7 @@ $USE_DISTRIBUTE_FILTER   = 1;
 # Subject: ILOVEYOU         I Love You original (VB script)
 $USE_DISTRIBUTE_FILTER = 1;
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
-&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
-&DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*|ILOVEYOU");
 </pre><Br><Br>
 <Font Size=4><B><A Name="Anchor3">●Word ファイルなどにマクロが仕込まれているかどうかを検査する</A>
 </B></Font>

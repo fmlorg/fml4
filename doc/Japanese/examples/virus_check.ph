@@ -1,4 +1,4 @@
-# $FML: virus_check.ph,v 1.16 2002/05/24 10:47:20 fukachan Exp $
+# $FML: virus_check.ph,v 1.17 2002/06/26 15:15:44 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -26,8 +26,7 @@ $USE_DISTRIBUTE_FILTER   = 1;
 # Subject: Important ...    Melissa original    (Word's macro)
 # Subject: ILOVEYOU         I Love You original (VB script)
 &DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
-&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
-&DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*|ILOVEYOU");
 
 # Word ファイルなどにマクロが仕込まれているかどうかを検査する
 # virus かどうかを検査しているわけではないので弾き過ぎるのは
