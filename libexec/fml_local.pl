@@ -195,8 +195,14 @@ sub FmlLocalReadCF
 
 	# Set environment variables
 	foreach $VAR (@VAR) { 
+	    if (/^PASSWORD\s+(.*)/) { # special. permit SPACE.
+		eval "\$PASSWORD = '$1';";
+		next;
+	    }
+
 	    if (/^$VAR\s+(\S+)/) {
 		eval "\$$VAR = '$1';";
+		next;
 	    }
 	}
 
@@ -239,9 +245,14 @@ sub FmlLocalConfigure
 		(-r "/usr/spool/mail/$USER" && "/usr/spool/mail/$USER");
 
     $VACATION_RC = $VACATION   || "$HOME/.vacationrc";
-    $DOMAIN      = $DOMAIN     || (gethostbyname('localhost'))[1];
-    ($DOMAIN)    = ($DOMAIN =~ /localhost\.(\S+)\./i); 
-    $MAINTAINER  = $MAINTAINER || (getpwuid($<))[0] .'@'. $DOMAIN;
+
+    if (! $DOMAIN) {
+	$DOMAIN = (gethostbyname('localhost'))[1];
+	($DOMAIN)    = ($DOMAIN =~ /(\S+)\.$/i) if $DOMAIN =~ /\.$/i;
+	($DOMAIN)    = ($DOMAIN =~ /localhost\.(\S+)/i); 
+    }
+
+    $MAINTAINER  = $MAINTAINER || $USER .'@'. $DOMAIN;
     
     # include ~/.vacationrc
     &FmlLocalReadCF($VACATION_RC) if -f $VACATION_RC;
@@ -400,13 +411,19 @@ sub FmlLocalMatchInBody
 
 	  return 1 if /$pat/i;	# match!
 
-	  if (/^#\s*PASS\s+(\S+)/ || /^#\s*PASSWORD\s+(\S+)/) {
-	      $AUTH++ if $password eq $PASSWORD;
+	  if (/^#\s*PASS\s+(.*)/ || /^#\s*PASSWORD\s+(.*)/) {
+	      &Log("AUTHENTIFIED");
+	      $AUTH++ if $1 eq $PASSWORD;
 	      next;
 	  }
 
-	  if (/^#\s*PASSWD\s+(\S+)/) {
-	      &FmlLocalAppend2CF("PASSWORD $1");
+	  if (/^#\s*PASSWD\s+(.*)/) {
+	      if (! $AUTH) {
+		  &Log("NOT AUTHENTIFIED BUT PASSWD REQUEST. STOP!");
+		  last;
+	      }
+	      &Log("CHANGE PASSWD [$PASSWORD] -> [$1]");
+	      &FmlLocalAppend2CF("\nPASSWORD $1\n"); # additional '\n'
 	      next;
 	  }
       }
