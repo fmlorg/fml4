@@ -1108,8 +1108,9 @@ sub CheckCurrentProc
     # XXX reject all "From: MAIL_LIST" mails (3.0)
     # XXX fix for 3.0.1
     # XXX controllable by %LOOP_CHECKED_HDR_FIELD.
-    {
-	local($f, $v);
+    if (%LOOP_CHECKED_HDR_FIELD) {
+	my($f, $v);
+
 	for $f (keys %LOOP_CHECKED_HDR_FIELD) {
 	    next unless $LOOP_CHECKED_HDR_FIELD{$f};
 	    if ($v = $e{"h:${f}:"}) {
@@ -2687,12 +2688,14 @@ sub CheckAddr2Reply
 {
     local(*e, @addr_list) = @_;
     local($addr, $m);
+    my (@caller) = caller;
 
     ### 01: check recipients == myself?
     for $addr (@addr_list) {
 	if (&LoopBackWarn($addr)) {
 	    &Log("Notify: ERROR: the mail is not sent to $addr",
 		 "since the addr to reply == ML or ML-Ctl-Addr");
+	    &Log(@caller);
 	    $m .= "\nNotify: ERROR: the mail is not sent to [$addr]\n";
 	    $m .= "since the addr to reply == ML or ML-Ctl-Addr.\n";
 	    $m .= "-" x60; $m .= "\n";
@@ -2725,7 +2728,7 @@ sub CheckAddr2Reply
 	$e{'error'} .= $m;
     }
 
-    $m ? 0: 1;	# if O.K., return 1;
+    $m ? 0 : 1;	# if O.K., return 1;
 }
 
 # Check uid == euid && gid == egid
