@@ -288,9 +288,11 @@ sub SetHashDefaults
 		    'setq',     'do_setq',
 		    'show',     'do_show',
 		    'config',   'do_config',
+
 		    '5#config ML', 'configure the fundamental of <ML>',
-		    'policy',   'do_policy',
-		    '5#policy ML', "set up common policy for all <ML>\'s",
+		    'edit',   'do_edit',
+		    '5#edit ML', "edit config.ph of <ML>\'s",
+
 		    'new',      'do_newml',
 		    'newml',    'do_newml',
 		    '1#newml ML',   'make a new Mailing List <ML>',
@@ -1950,6 +1952,10 @@ sub do_pgp
     print STDERR "Error: $@" if $@;
 
     print "\n--- PGP END ---\n\n";
+
+    if ($GroupWritable) {
+	chmod 0660, "$config{'PGP_PATH'}/pubring.pgp";	
+    }
 }
 
 
@@ -1974,6 +1980,19 @@ sub MkDirHier
 	}
     } 
 }
+
+
+sub do_edit
+{
+    local($ml) = @_;
+    local($cf, $local_config, $config, @config, %config);
+
+    $editor = $ENV{'EDITOR'} || "vi";
+    print STDERR "\n\t$editor $ML_DIR/$ml/config.ph\n\n";
+
+    system "$editor $ML_DIR/$ml/config.ph";
+}
+
 
 sub do_config
 {
