@@ -1287,10 +1287,10 @@ sub Expand
 
 	if ($index{$s}) {
 	    &Log("   $s already exists\tin \%index[$file::line=$.]");
-	    &Log("      xref: $_index{$s}") ;
+	    &Log("      xref: $diag_index{$s}") ;
 	}
 
-	$_index{$s} = "$c $s($file::line=$.)";
+	$diag_index{$s} = "$c $s($file::line=$.)";
 
 	if ($mode eq 'text') {
 	    $index{$s}  = $CurPosition;
