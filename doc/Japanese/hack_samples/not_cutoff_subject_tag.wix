@@ -1,0 +1,37 @@
+.HTML_PRE
+
+Q: Replyのメールのサブジェクトを新しくする際にブラケットを外さない
+   例: (Elena 100) Re:(Elena 99) xxxxxx のままにしてしまう
+
+A: $SUBJECT_TAG_TYPE を使わず、なおかつ $SUBJECT_FREE_FORM_REGEXP = $NULL;
+
+	$SUBJECT_TAG_TYPE = "";
+        $SUBJECT_FREE_FORM = 1;
+        $BEGIN_BRACKET     = '(';
+        $BRACKET           = 'Elena';
+        $BRACKET_SEPARATOR = ' ';
+        $END_BRACKET       = ')';
+	$SUBJECT_FREE_FORM_REGEXP = $NULL;
+
+
+と定義しておくと外す動作ではずせなくなる。
+＃正確には(Elena 100)にマッチしなくなるだけなので、ちょっと違う
+
+もしくは全然違う正規表現にしてマッチしないようにしておいても同様です。
+
+注意としては $SUBJECT_TAG_TYPE も併用して差分だけ書いてはいけません。
+$SUBJECT_TAG_TYPEを定義するとはfml が起動して config.ph をよんだ後に動
+的に上の設定をしているので config.ph の設定では単純に上書きできません。
+
+
+$Id$
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+
+.~HTML_PRE
