@@ -7,25 +7,27 @@
 				Ken'ichi Fukamachi
 ==
 				fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
 
 
    以下のドキュメント中ではメーリングリストをＭＬと略しています
 =E
-   EXECUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
+   EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 =S
-   The word "ML" is the abbriviation of "Mailing List" in this document.
+   The word "ML" is the abbreviation of "Mailing List" in this document.
 
 
-   NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
-   ＃まだとってもとっても途中っす;-)
+.#   NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
+.#   ＃まだとってもとっても途中なので信用しないように;-)
 =E
    INSTALL_on_NT4.English is the install guide for Windows NT4.0.
    NT3.5 may be also O.K (not tested since I do not have the OS).
    ***ATTENTION!*** NT Version is now underway.
 
 .~HTML_PRE
-
+__________________________________________
 #.index
+__________________________________________
 
 
 
@@ -40,10 +42,10 @@ ML の運用を特権ユーザでやるべきではありません。一般ユーザ (例えばあな
 ML 用の特別な一般アカウント (e.g. fml 等) を作り、その架空ユーザになっ
 てインストール・設定を行なうことでしょう。
 =E
-In general you should not run maling lists as a priviledged user.
-Please run mailing lists as a non-priviledged user.
-The best way is to set up a non-priviledged user (e.g. fml) for the
-maling lists.
+In general you should not run mailing lists as a privileged user.
+Please run mailing lists as a non-privileged user.
+The best way is to set up a non-privileged user (e.g. fml) for the
+mailing lists.
 
 「makefml install (fml 本体のインストール,後述) 自体は root で実行し、
 他の人にはいじれないようにする」という仕方はありえます。しかし、それ以
@@ -52,7 +54,7 @@ maling lists.
 
 
 .S	ひとつだけ下準備
-=E.S	How many kinds of people runs mailng lists on this machine?
+=E.S	How many kinds of people runs mailing lists on this machine?
 
 あなたがインストールしようと思っているマシンでＭＬを走らせる人（オーナー、
 所有者）はあなただけですか？ それともあなた以外の人もＭＬを走らせるで
@@ -67,7 +69,7 @@ machine? The files and directories permissions depend on the policy.
 
 "あなただけ"なら、すぐ次の節へ飛んで下さい("personal" を選んで下さい(後述))
 =E
-If only you runs maling lists, please jump to the next section (select
+If only you runs mailing lists, please jump to the next section (select
 "personal").
 
 あなた以外の人もＭＬを作れるが、面倒を見るのがあなたならＭＬのオーナー
@@ -81,7 +83,7 @@ you. In this case please select "personal".
 プにして、そのグループだけがＭＬの場所をいじれるようにします。
 =E
 When several people can set up and run several mailing lists, that is
-the owners of mailng lists are plural, you can select "group". 
+the owners of mailing lists are plural, you can select "group". 
 In this case please create the maintainer group (e.g. fml) in
 /etc/group (4.4BSD), 
 
@@ -123,8 +125,8 @@ Here you see the following questions. Please answer them!
    Personal Use or ML-Admin-Group-Shared or fmlserv you use? 
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
 
-   DOMAIN NAME               [sapporo.iij.ad.jp] 
-   FQDN                      [beth.sapporo.iij.ad.jp] 
+   DOMAIN NAME               [fml.org] 
+   FQDN                      [beth.fml.org] 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
    TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
    LANGUAGE                  [Japanese] 
@@ -139,14 +141,14 @@ the value in the [] is used.  These questions are as follows:
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
 =E
    "personal"	if only you use the fml system.
-		irrespctive of using "fmlserv".
+		irrespective of using "fmlserv".
 =S
    "group"	if several members in a group (ML operators) 
 		can set up the ML by fml. "fmlserv" is NOT USED.
 =S
    "fmlserv"	if several members in a group (ML operators) and
 		they USE "fmlserv" (fmlserv is listserv, majordomo like)
-	      	which requires group writale permission 
+	      	which requires group writable permission 
 		since e.g. fmlserv can manage each ML's member files.
 =S
    the write permission of the fml system is changed in each type. 
@@ -171,18 +173,18 @@ the value in the [] is used.  These questions are as follows:
 =E
 	Please input group (e.g. fml) explained above.
 
-   DOMAIN NAME               [sapporo.iij.ad.jp] 
+   DOMAIN NAME               [fml.org] 
 
 	ドメイン名。
 	メーリングリストのアドレスの @ から後ろで使う部分
 =E
 	Domain Name. The part after "@" of the Mailing List Address.
 
-   FQDN                      [beth.sapporo.iij.ad.jp] 
+   FQDN                      [beth.fml.org] 
 
-	Fully Quarified Domain Name(マシンのインターネット上での完全名)
+	Fully Qualified Domain Name(マシンのインターネット上での完全名)
 =E
-	Fully Quarified Domain Name of the machine you install in
+	Fully Qualified Domain Name of the machine you install in
 	
 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
@@ -204,7 +206,7 @@ the value in the [] is used.  These questions are as follows:
 	/var/spool/ml/elena	for an "Elena" Mailing List
 	/var/spool/ml/mirei	for a  "Mirei" Mailing List
    are the ML's directory for each ML.
-   The directory for each maling list has configuration files and
+   The directory for each mailing list has configuration files and
    the spool of ML articles in each ML.
 
 	ML(複数)はこの階層の"下"に作られる。例えば
@@ -271,53 +273,11 @@ In this case, you change the input for "makefml" to the following
 =E
 The configurations (inputs by "makefml") defined above are save here.
 After this time, "makefml" uses this configurations to generate each
-maling list configurations (e.g. config.ph, include).
+mailing list configurations (e.g. config.ph, include).
 
     Config Saved in [/usr/local/fml/.fml] 
 
 ＃つまり上で選んだ EXEC FILES DIRECTORYで指定した場所の下の .fml です
-
-
-.S	Policy
-=E.S	Policy
-
-makefml install の最後に 
-
----For Your Information:
-The Current Policy to use ML addresses are as follows
-    (DEFAULT POLICY IS BACKWARD COMPATIBLE AS BELOW):
-
-………
-
-という情報が表示されます。これは Policy というか ML を新しく作る 
-(makefml newml) 際の fml のデフォールト設定情報です。後述する "makefml
-Policy" で変更できます。デフォールトの policy は
-=E
-This information is default configuration when "makefml newml". 
-You can change this configuration by "makefml policy" interactively.
-=S
-The default is 
-	for the "listname@domain" mailing list
-=S
-	command is available at the address listname-ctl@domain
-=S
-	delivery address is listname@domain
-=S
-	For backward compatibility, listname can also interpret
-	commands. Please setup how to use addresses by "makefml
-	policy" or "makefml config"(for each mailing list). 
-=S
-	In this age, we recommend that you set up 
-		ONLY MEMBER CAN POST
-	by "makefml policy".
-
-	ＭＬ (listname@domain) の配送は Backward compatibility のため 
-	配送をしさらにコマンドも実行可能
-
-	コマンドは listname-ctl@domain へコマンドを送ってもらう。
-	＃まんがいち listname@domain に送ってもコマンドは実行可能
-
-という設定です。
 
 
 
@@ -326,7 +286,7 @@ The default is
 
 いくつかの簡単な設定やメンバー登録等はコマンドで実行できます。
 =E
-You can create a new maling list, do the setting of simple maling list
+You can create a new mailing list, do the setting of simple mailing list
 settings and subscription of ML members.
 
 コマンドのシンタックス：
@@ -403,7 +363,7 @@ Your operating system has Vixie cron, you can set digest with
 	/var/spool/ml/listname/crontab 
 =S
 here /var/spool/ml/listname/crontab is a sample of vixie cron for the
-maling list.
+mailing list.
 
 	/var/spool/ml/ＭＬの名前/crontab 
 
@@ -501,7 +461,7 @@ list as the syntax above. The part of "listname" is added to the
 default fml command syntax. 
 =S
 In fml, "config.ph" for each ML defines each command set for each ML.
-fmlserv can understatnd each proper commands defined for each mailing
+fmlserv can understand each proper commands defined for each mailing
 list since fmlserv can emulate each mailing list in the action.
 fmlserv just offers in another "fmlserv" (listserv) syntax.
 
@@ -602,79 +562,25 @@ username@domain の両方を登録して下さい。
 .S	ユーザをＭＬに加える場合
 =E.S	To add a new user to the ML
 
-   /usr/local/fml/makefml adduser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/makefml add elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml adduser elena fukachan@fml.org
+   /usr/local/fml/makefml add elena fukachan@fml.org
 
-	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
+	Elena ＭＬに fukachan@fml.org を加える。
 
 =E
-This example is that you add a new user "fukachan@sapporo.iij.ad.jp"
+This example is that you add a new user "fukachan@fml.org"
 in "Elena" ML.
 
 
 .S	ユーザをＭＬから削除する場合
 =E.S	To remove the user from the ML
 
-   /usr/local/fml/makefml byeuser elena fukachan@sapporo.iij.ad.jp
-   /usr/local/fml/makefml bye elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml byeuser elena fukachan@fml.org
+   /usr/local/fml/makefml bye elena fukachan@fml.org
 
-	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
+	Elena ＭＬから fukachan@fml.org を消す。
 =E
-Remove "fukachan@sapporo.iij.ad.jp" in "Elena" ML.
-
-
-
-.C	リモート管理の設定
-
-.S	リモート管理を有効にする
-=E.S	Enable remote maintenance
-
-セキュリティ上デフォールトではリモート管理はできないようにしています。
-とりあえず有効にするには config.ph の一番最後( 1; より前に)に 
-
-	&DEFINE_MODE('remote');
-
-と書いておいて下さい。細かい設定は doc/op を見て下さい。
-=E
-Attention! You cannot remote-maintenance "fml" server in default for
-security. How to enable remote-maintenance is described below.
-To enable remote maintenance, in the last of config.ph (but before the
-last "1;")
-=S
-	&DEFINE_MODE('remote');
-
-.S	リモート管理の権限をもつユーザをＭＬに加える場合
-=E.S	To add the user who can manage the ML server in remote. 
-
-   /usr/local/fml/makefml addadmin elena fukachan@sapporo.iij.ad.jp
-
-Elena ＭＬのリモート管理者に fukachan@sapporo.iij.ad.jp を加える。
-=E
-Add "fukachan@sapporo.iij.ad.jp" in "Elena" mailing list. He can
-manage the mailing list server in remote.
-
-.S	リモート管理の権限をもつユーザをＭＬから削除する場合
-=E.S	To remove the user who can manage the ML server in remote. 
-
-   /usr/local/fml/makefml byeadmin elena fukachan@sapporo.iij.ad.jp
-
-Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
-=E
-Remove the user "fukachan@sapporo.iij.ad.jp" who can manage the
-"Elena" ML in remote.
-
-.S	リモート管理の権限をもつユーザのパスワードの設定・変更
-=E.S	To set or change the password of the remote-maintenance user 
-
-   /usr/local/fml/makefml passwd elena 
-
-	---Changing Passwd of Admin  in elena mailing list
-	Who: 
-	Password: 
-
-とかになるのでアドレス(Who)とパスワード(Passwd)を入れて下さい。
-=E
-Please input the "password" of "who" (Email address). 
+Remove "fukachan@fml.org" in "Elena" ML.
 
 
 
@@ -686,10 +592,11 @@ Please input the "password" of "who" (Email address).
 =E
    /usr/local/fml/makefml config listname
 
-   例:
+例:
 =E
 e.g.
-	/usr/local/fml/makefml config elena
+
+   /usr/local/fml/makefml config elena
 
 を実行すると基本的な設定を対話的に行なうことができます。
 次のような画面が出てくるので適当に答えて下さい。
@@ -697,118 +604,375 @@ e.g.
 You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
 
-TOP画面
-=E
-TOP MENU
+.S	TOP メニュー
+=E.S	TOP MENU
 
-    ********************************************************************
-    Which entry do you change?
-    --------------------------------------------------------------------
-      ENTRY                                   Current Configuration
-    --------------------------------------------------------------------
-    
-    0 END
-    1 MEMBER CHECK or AUTO REGISTRATION        member_check
-    2 SUBJECT TYPE                             
-    3 OPTIONAL SETTINGS (e.g. MIME, HTML)      
-    4 Delivery Mode                            distribute + commands available
+   ************************************************************
+   === TOP MENU ===
 
-    Menu  (number) [0] 
+   Mailing List Addresses
+        FOR POST          elena@fml.org
+        FOR COMMAND       elena-ctl@fml.org
+   _______________________
 
-のような画面で、数字を打込むと下の階層に進み、同様の画面が出ます。
-やはり同様に数字か y/n なら y(yes) か n(no) を入れて下さい。
+   0    END             
+   1    POLICY OF POST AND COMMANDS
+
+        [POST]
+          PERMIT_POST_FROM                 members_only
+          WHEN POST FROM NOT MEMBER        reject
+
+        [COMMAND]
+          PERMIT_COMMAND_FROM              members_only
+          WHEN COMMAND FROM NOT MEMBER     reject
+
+   2    POLICY OF AUTO REGISTRATION
+
+        AUTO_REGISTRATION_TYPE             confirm
+
+   3    COMMAND ADDRESS 
+              address for command          elena-ctl@fml.org
+
+   4    REMOTE_ADMINISTRATION              no
+
+                    AUTH_TYPE              crypt
+
+   5    SUBJECT_TAG_TYPE                   
+   6    OPTION                             
+   ********************************************************************
+
+   Which section? (0-6) [0] 
+
+が TOP画面 です。数字は選択(0 の END はその階層を抜けること)、y/n なら 
+y(yes) か n(no) を入れて下さい。
+数字を選択し打込むと下の階層に進み、同様の画面が出ます。
 =E
 Please input the number you choose, you see the similar menu in the
 next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 
-単語の意味は次のようなものです（以下、一覧）。
+単語の意味は次のようなものです(なお、以下の日本語部分はここでの説明用
+のもので、実際の画面には表示されません)。
+
+○ サマリー
+
+   Mailing List Addresses 
+        FOR POST          ＭＬへの投稿用のアドレス
+        FOR COMMAND       コマンド用のアドレス	
+
+○ アクセス制御
+
+   1    POLICY OF POST AND COMMANDS
+
+FML 2.1 では投稿とコマンドそれぞれについて以下の
+
+	・誰からの投稿を許すか？
+		だれでもOK			anyone
+		登録されているメンバーだけ	members_only
+		モデレーターだけ		moderator
+
+	・もし、登録されているメンバー以外から来た場合にはどうするか？
+		許否				reject
+		自動登録			auto_regist
+		無視(管理者へ報告だけする)	ignore
+
+を設定できます。デフォールトはいずれも
+
+	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
+	もしメンバー以外から来たら許否(reject)
+
+です。自動登録は"投稿がメンバーだけ"(members_only)の場合に
+
+	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+
+することで行ないます。
+
+自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
+   [COMMAND]
+
+   3    PERMIT_COMMAND_FROM                members_only
+   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_regist
+
+よって 2.1 では「投稿用のアドレスは許否、コマンド用のアドレスで自動登
+録」のような非対称な設定も「両方のアドレスで自動登録」のような設定も可
+能です。
 
 
-.S	TOP画面
-=E.S	TOP MENU
 
-なお、以下の日本語部分はここでの説明用のものです。実際の画面には表示さ
-れません。
+○ 自動登録について (後述)
 
-    ********************************************************************
-    Which entry do you change?
-    --------------------------------------------------------------------
-      ENTRY                                   Current Configuration
-    --------------------------------------------------------------------
+   2    POLICY OF AUTO REGISTRATION
 
-      ↑項目                                  ↑現在の設定
-    
-    0 END
-    1 MEMBER CHECK or AUTO REGISTRATION        member_check
-    2 SUBJECT TYPE                            
-    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
-    
-    Menu  (number) [0] 
+        AUTO_REGISTRATION_TYPE             confirm
 
-                    ↑単に叩くとこの値になります（０は終了）
+上述のアクセス制御で auto_regist を選んだ場合に自動登録の仕方を
+選ぶことができます。デフォールトは 「確認」 を求めるやり方です。
 
- ○ 1 MEMBER CHECK or AUTO REGISTRATION        member_check   
-=E
- <> 1 MEMBER CHECK or AUTO REGISTRATION        member_check   
-=S
-	When the server receives a mail	from a not member of the ML.
-	Automatically register the address? or deny the mail?
 
-	メンバー以外からメールが来たら自動的に登録するのか？
-	メンバー以外からのメールは拒否するか？
+○ コマンド用のアドレスの方針
 
-    ○下の階層の画面
-=E
-	the menu in the lower level 
+   3    COMMAND ADDRESS 
+              address for command          elena-ctl@fml.org
 
-        Auto Registration  (y/n) [n] y
+デフォールトでは listname に対し listname-ctl を使います。
+	listname でコマンドも受け付けるようにする
+	コマンドは fmlserv を使う
+等の設定変更ができます。
 
-		y なら自動登録 n ならメンバーチェックする
-=E
-	If "y", the server add the address to the ML automatically.
-	If "n", the server checks the address and send a warning that
-	you are not a member of the ML.
 
-        Auto Registration Type
+○ リモート管理 (後述)
 
-        0 default	メンバーでないなら登録
+   4    REMOTE_ADMINISTRATION              no
 
-        1 subject	Subject: subscribe と書いてあるメールなら登録
-			そうでないなら登録を拒否
+リモートでＭＬの設定をいじることを可能にするか？(デフォールトはしない)
+リモート管理の場合の認証方式は
 
-        2 body		本文に subscribe と書いてあるメールなら登録
-			そうでないなら登録を拒否
+                    AUTH_TYPE              crypt
 
-	3 body with confirmation (RECOMMENDED)
-			subscribe request に対し一度確認を求めるメールを
+デフォールトはパスワード認証。
+
+
+○ Subject: につけるタグ(デフォールトはつけない) (後述)
+
+   5    SUBJECT_TAG_TYPE                   
+	
+
+○ その他のオプション(MIME Decoding や スプールの自動HTML化) (後述)
+
+   6    OPTION                             
+
+
+
+.S	アクセス制御のポリシー
+
+   WHO CAN POST AND COMMAND
+
+   0    END             
+
+   [POST]
+
+   1    PERMIT_POST_FROM                   members_only
+   2    WHEN_POST_FROM_NOT_MEMBER          reject
+
+   [COMMAND]
+
+   3    PERMIT_COMMAND_FROM                members_only
+   4    WHEN_COMMAND_FROM_NOT_MEMBER       reject
+   ************************************************************
+
+      policy (0-4) [0] 
+
+
+FML 2.1 では投稿とコマンドそれぞれについて以下の
+
+	・誰からの投稿を許すか？
+		だれでもOK			anyone
+		登録されているメンバーだけ	members_only
+		モデレーターだけ		moderator
+
+	・もし、登録されているメンバー以外から来た場合にはどうするか？
+		許否				reject
+		自動登録			auto_regist
+		無視(管理者へ報告だけする)	ignore
+
+を設定できます。自動登録は"投稿がメンバーだけ"(members_only)の場合に
+
+	もしメンバー以外から来たら自動登録 → auto_regist へ変更
+
+することで行ないます。
+自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
+
+   3    PERMIT_COMMAND_FROM                members_only
+   4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_regist
+
+
+画面のそれぞれの行は
+
+   1    PERMIT_POST_FROM               誰が投稿して良いのか？
+   2    WHEN_POST_FROM_NOT_MEMBER      メンバー以外からメールが来た時？
+   3    PERMIT_COMMAND_FROM            誰がコマンドを使えるのか？
+   4    WHEN_COMMAND_FROM_NOT_MEMBER   メンバー以外からコマンド要請が来た時？
+
+という意味です。例えば 1 を選択すると
+
+
+   ************************************************************
+   ADDRESSS FOR POST                  elena@fml.org
+   PERMIT_POST_FROM                   members_only
+
+   0    END
+   1    members_only
+   2    anyone
+   3    moderator
+   ************************************************************
+
+         Permit post from  (0-3) [0] 
+
+という画面に移ります。ここで1〜3を選択して下さい。以下同様です。
+
+
+
+.S	自動登録の方式
+
+上述のアクセス制御で auto_regist を選んだ場合に自動登録モードになりま
+す。ここは自動登録の場合の手続きのやりかたを変更することができます。
+キーワード等をいじる場合は直接 edit してください。
+
+   ************************************************************
+   AUTO_REGISTRATION_TYPE       confirm
+
+   0    END
+   1    confirm
+   2    body
+   3    subject
+   4    no-keyword
+   ************************************************************
+
+それぞれのキーワードは以下のような意味です。
+
+	confirm		subscribe request に対し一度確認を求めるメールを
 			送り確認メールをもらって初めて登録する。
 			subscribe attack 阻止のため推奨します
         
-        Auto Registration Type  (0,1,2 ) [0] 
+	body		本文に subscribe と書いてあるメールなら登録
+			そうでないなら登録を拒否
+
+	subject		Subject: subscribe と書いてあるメールなら登録
+			そうでないなら登録を拒否
+
+ 	no-keyword	メンバーでないなら登録
+
 
 =E
-        0 default	added if the mail comes from a not member.
-        1 subject	
+	confirm
+			RECOMMENDED AGAINST SUBSCRIBE ATTACK!
+			the server asks the user (From:) the confirmation
+			of subscription will.
+        body
+			A keyword "subscribe" in the body is required 
+			to add him.
+			If the keyword not exists or is not matched, 
+			not added.
+        subject	
 			A keyword "subscribe" in the subject is required 
 			to add him.
 			e.g. Subject: subscribe 
 			If the keyword not exists or is not matched, 
 			not added.
-        2 body
-			A keyword "subscribe" in the body is required 
-			to add him.
-			If the keyword not exists or is not matched, 
-			not added.
-	
-	3 body with confirmation (RECOMMENDED)
-			RECOMMENDED AGAINST SUBSCRIBE ATTACK!
-			the server asks the user (From:) the confirmation
-			of subscription will.
+        no-keyword	added if the mail comes from a not member.
 
- ○ 2 SUBJECT TYPE                            
+
+基本的に登録用のアドレスはメールの From: 行からとります。body や 
+subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
+が、セキュリティ的に推奨できないので confirm タイプが望ましいでしょう。
+
+
+.S	コマンドのアドレス
+
+それぞれの環境と趣味によって
+
+	与えられるアドレスが少ないのでＭＬ本体で配送もコマンド実行も可
+	能だと便利だという場合もあるだろうし
+
+	アドレスを配送専用とコマンド専用とはっきりわける主義
+
+	配送専用のアドレスと、コマンドは一つのアドレスですべて受け付け
+	る listserv type のサーバが好み
+
+のような要求がありえるでしょう。TOPメニューの
+
+   3    COMMAND ADDRESS 
+              address for command          elena-ctl@fml.org
+
+下の階層が、そのようなポリシーの変更を行ないます。
+
+   ************************************************************
+   COMMAND ADDRESS                      elena-ctl@fml.org
+
+   For command, which address you use?
+   (here DOMAINNAME = fml.org);
+
+   0    END
+   1    elena-ctl@$DOMAINAME
+   2    elena@$DOMAINAME
+   3    fmlserv@$DOMAINAME
+
+   In default, we use "listname-ctl" format address for command only.
+   If you choice "listname" for commands, 
+   your mailing list address receive both posting and commands.
+   "fmlserv" is the listserv/majordomo style interface of fml.
+   ************************************************************
+
+      which type (0-3) [0] 
+
+のような画面です。この設定はＭＬの記事のメールヘッダやＭＬサーバへ送っ
+たコマンドへのREPLYに付加される情報に利用されます。
+＃注意: sendmail への設定は別途必要です。
+
+
+・ elena-ctl@$DOMAINAME タイプ
+
+デフォールトではエレナさんＭＬ(elena@fml.org)に対し、elena-ctl@fml.org 
+がコマンド専用に設定されています。
+
+・ elena@$DOMAINAME タイプ (backward compatible)
+
+もし、コマンドのアドレスに elena を設定するつまり投稿用のアドレスとコ
+マンド用のアドレスが同じ場合は # command 形のコマンドをメール本文に書
+いて、送るとサーバはコマンドとして理解するという動きをします
+
+・ fmlserv@$DOMAINAME タイプ
+
+fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
+がある場合に設定します。
+＃ fmlserv の設定は別途必要です(前述)
+
+
+.S	リモート管理
+
+セキュリティ上デフォールトではリモート管理はできないようにしています。
+
+   ************************************************************
+   REMOTE ADMINISTRATION
+   Do you maintenance the ML in remote?    no
+
+   0    END
+   1    REMOTE_ADMINISTRATION               no
+   2    REMOTE_ADMINISTRATION_AUTH_TYPE     crypt
+   ************************************************************
+
+      which (0-2) [0] 
+
+リモートで管理できるようにするには 1 を選び、yes と答えます。その上で 
+2 で認証タイプを設定します。デフォールトは crypt(パスワード認証)。
+認証の画面は次のようなもので、
+
+   ************************************************************
+   REMOTE_ADMINISTRATION_AUTH_TYPE          crypt
+
+   0    END
+   1    pgp
+   2    crypt
+   3    md5
+   4    address
+   ************************************************************
+
+それぞれのキーワードは以下のようなものです。
+
+	pgp		PGPベースの認証方式
+
+	crypt		パスワード認証(パスワードを crypt して保存)
+				＋
+			From: のアドレスが管理者メンバーリストにある
+
+	md5		パスワード認証(パスワードを MD5 して保存)
+				＋
+			From: のアドレスが管理者メンバーリストにある
+
+	address		From: のアドレスが管理者メンバーリストにある
+
+
+.S	SUBJECT TAG TYPE                            
 =E
- <> 2 SUBJECT TYPE                            
-=S
 	You can configure the listname and the sequence number of the article
 	in the subject.
  	e.g. You like Subject: [Elena:00010] ? 
@@ -821,33 +985,39 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 
     ○下の階層の画面
 =E
-	The menu in the lower level
+    * The menu in the lower level
 
-        Subject TAG TYPE [0-6]:
-        
-        TYPE    Subject Example
-        ----------------------------
-        0       Subject: NO TAG (Default, Fml recommends)
-        
-        1       Subject: (Elena:100)
-        
-        2       Subject: [Elena:100]    (hml 1.6 compat)
-        
-        3       Subject: (Elena 100)
-        
-        4       Subject: [Elena 100]
-        
-        5       Subject: [Elena,100]
-        
-        6       Subject: (Elena,100)
+   ************************************************************
+   SUBJECT_TAG_TYPE     
+
+   0    END
+
+   TYPE    Subject Example
+   ----------------------------
+   1       Subject: NO TAG (Default, Fml recommends)
+   
+   2       Subject: (Elena:100)
+   
+   3       Subject: [Elena:100]    (hml 1.6 compat)
+   
+   4       Subject: (Elena 100)
+   
+   5       Subject: [Elena 100]
+   
+   6       Subject: [Elena,100]
+   
+   7       Subject: (Elena,100)
+   ************************************************************
+
+      SUBJECT TAG TYPE (0-7) [0] 
 
 
- ○     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+.S	その他の設定
 =E
- <>     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+.S	Other Optional Settings (e.g. MIME, Automatic Html Generation)
 =S
 	Other settings:
-		to do several MIME convertion? 
+		to do several MIME conversion? 
 		e.g. generate MIME-converted summary 
 =S
 		to generate HTML Converted article spool
@@ -860,28 +1030,28 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 
     ○下の階層の画面
 =E
-	The menu in the lower level
+    * The menu in the lower level
 
-        OPTIONS
-        
-        ------------------------------------
-          ENTRY                Current Configuration
-        ------------------------------------
-        0 END
-        1 MIME                 
-        2 HTML CONVERSION      
-        
-           OPTIONS  (1-2) [0] 
+   ************************************************************
+   Other Optional Settings
+
+   0    END             
+   1    MIME    
+   2    HTML    
+   ************************************************************
+
+      Which section? (0-2) [0] 
+
 
      ○   1 MIME
 =E
      <>   1 MIME
 
-	MIME を使うことにすると、ＭＬの記事のサマリや保存する記事は
-	MIME decode されたものになる。
-=E
-	Using MIME. Summary file of the ML and articles saved in the
-	ML spool are MIME-Decoded. 
+MIME を使うことにすると、ＭＬの記事のサマリ等がMIME decode されたもの
+になる。
+=E 
+Using MIME. Summary file of the ML and articles saved in the ML spool
+are MIME-Decoded.
 
 	HTML自動変換は 
 
@@ -903,155 +1073,42 @@ collected in each day directory below here.  Each directory has
 index.html and thread.html. index.html is the menu for the ML sequence
 order, thread.html is threaded menu for articles.
 
-○    4 Delivery Mode                          distribute + commands available
+
+
+.C	リモート管理するユーザの登録について
+
+.S	リモート管理の権限をもつユーザをＭＬに加える場合
+=E.S	To add the user who can manage the ML server in remote. 
+
+   /usr/local/fml/makefml addadmin elena fukachan@fml.org
+
+Elena ＭＬのリモート管理者に fukachan@fml.org を加える。
 =E
-<>    4 Delivery Mode                          distribute + commands available
+Add "fukachan@fml.org" in "Elena" mailing list. He can
+manage the mailing list server in remote.
 
-ＭＬ本体の配送モードを変更できます。この値は newml の時の際のデフォー
-ルトが使われます。デフォールトは makefml policy で変更できます。
+.S	リモート管理の権限をもつユーザをＭＬから削除する場合
+=E.S	To remove the user who can manage the ML server in remote. 
 
+   /usr/local/fml/makefml byeadmin elena fukachan@fml.org
 
-    ○下の階層の画面
+Elena ＭＬのリモート管理者から fukachan@fml.org を消す。
 =E
-	The menu in the lower level
+Remove the user "fukachan@fml.org" who can manage the
+"Elena" ML in remote.
 
+.S	リモート管理の権限をもつユーザのパスワードの設定・変更
+=E.S	To set or change the password of the remote-maintenance user 
 
-        DELIVERY MODE (CURRENT MODE is distribute + commands available)
-         address elena      for both distribute and commands
-         address elena-ctl  for commands
-        
-        -------------------------------------------------------
-          ENTRY                           Current Configuration
-        -------------------------------------------------------
-        0 END
-        1 Distribute Only (only members can post)  
-        2 Distribute Only (anyone can post)       
-        3 Distribute + Commands (default)         <===
-        
-           Delivery Mode  (1-3) [0] 
+   /usr/local/fml/makefml passwd elena 
 
+	---Changing Passwd of Admin  in elena mailing list
+	Who: 
+	Password: 
 
-        1 Distribute Only (only member can post)  
-
-	メンバーチェックをし、メンバーであれば配送します。
-	コマンドは使えません。
-
-        2 Distribute Only (anyone can post)       
-
-	メンバーチェックをしません。だれでも投稿でき、配送されます。
-	コマンドは使えません。
-
-
-        3 Distribute + Commands (default)      
-
-	メンバーチェックをし、メンバーであれば配送します。
-	コマンドも使えます。また、自動登録モードに設定されている場合
-	自動登録ルーチンへ入ります。
-
-デフォールトは Backward compatibility で Distribute + Commands です。
-またコマンドは listname-ctl 宛を使うことを各ドキュメントのデフォールト
-では推奨しています。しかしＭＬ本体でもコマンドを実行可能です。
-
-
-
-.C	makefml policy 
-=E.C	makefml policy 
-
-ここでいうポリシーは、ＭＬのアドレス群をどう使いわけるか？です。
-具体的には makefml newml を実行する時のデフォールトの設定になります。
-
-例えば
-
-	与えられるアドレスが少ないのでＭＬ本体で配送もコマンド実行も可
-	能だと便利だという場合もあるだろうし
-
-	アドレスを配送専用とコマンド専用とはっきりわける主義
-
-	配送専用のアドレスと、コマンドは一つのアドレスですべて受け付け
-	る listserv type のサーバが好み
-
-等いろいろあるでしょう。policy は newml の際にできる config.ph のデフォー
-ルトを左右するだけです。config.ph の設定次第でどうとでもなります。
-
-
-[TOP MENU]
-
-    0 END
-    1 $MAIL_LIST Delivery mode (mode of delivery)
-     
-        [available modes]                  [current setting]
-        distribute + commands              <===
-        distribute (only member can post)  
-        distribute (anyone can post)       
-    
-    2  FORMAT
-
-        [available format]                [current setting]
-        _ML_-ctl (default)                 <===
-        _ML_ (require distribute+commands) 
-        fmlserv                            
-        other                              
-    
-    Menu  (0,1,2) [0] 
-
-	○ 1 $MAIL_LIST Delivery mode (mode of delivery)
-
-$MAIL_LIST つまりＭＬの投稿用のアドレスについてどうするか？
-
-        [available modes]                  [current setting]
-        distribute + commands              <===
-        distribute (only member can post)  
-        distribute (anyone can post)       
-
-        ・ Distribute + Commands 
-
-	メンバーチェックをし、メンバーであれば配送します。
-	コマンドも使えます。また、自動登録モードに設定されている場合
-	自動登録ルーチンへ入ります。
-
-        ・ distribute (only member can post)  
-	メンバーチェックをし、メンバーであれば配送します。
-	コマンドは使えません。配送専用です。
-
-        ・ Distribute Only (anyone can post)
-
-	メンバーチェックをしません。だれでも投稿できそれは配送されます。
-	コマンドは使えません。配送専用です。
-
-	○    2  FORMAT
-
-        [available format]                [current setting]
-        _ML_-ctl (default)                 <===
-        _ML_ (require distribute+commands) 
-        fmlserv                            
-        other                              
-
-_ML_ の部分は newml の際変換されます。例えば makefml newml elena を実
-行する時 _ML_ の部分は elena に変換され設定ファイル群が生成されます。
-例:	_ML_-ctl	-> 	elena-ctl
-
-        [available format]                [current setting]
-        _ML_-ctl (default)                 <===
-        _ML_ (require distribute+commands) 
-        fmlserv                            
-        other                              
-
-	_ML_-ctl はデフォールト。
-
-	_ML_	を選ぶ場合は １の配送モードで
-	 Distribute + Commands と設定していないとエラーになります。
-
-	fmlserv は コマンドの先として fmlserv を選んだ場合です。
-
-	other だけは上記の場合と違い、好きなフォーマットを入れて下さい。
-	間違うと変なことになるので注意。
-	例: other を選び、 _ML_-command 等の _ML_ を使ったフォーマットで入力
-
-
-なお、このコマンドのアドレス等は X-ML-Info: Field 等にも当然反映される
-ものです。
-
-
+とかになるのでアドレス(Who)とパスワード(Passwd)を入れて下さい。
+=E
+Please input the "password" of "who" (Email address). 
 
 
 .A	:include: ではうまく動かない場合 (/etc/aliases)
@@ -1065,7 +1122,7 @@ The example of the C-wrapper is
 =S
 	/var/spool/ml/listname/fml.c 
 =S
-Please compile and set it properly. I recommend you councel the
+Please compile and set it properly. I recommend you council the
 setting of the C-wrapper with the administrator of the
 machine since it requires a lot of attention.
 
