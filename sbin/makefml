@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.220 2001/08/02 09:29:18 fukachan Exp $
+# $FML: makefml,v 2.221 2001/09/01 15:31:08 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -4859,7 +4859,7 @@ sub do_addmembers
 sub do_adduser
 {
     local($ml, $member) = @_;
-    local(@files);
+    local(@files, @dbfiles);
     local($proc) = $fp;
     $proc =~ s/do_//;
 
@@ -4881,14 +4881,17 @@ sub do_adduser
     if ($AdminMode) {
 	@files = (&Value('ADMIN_MEMBER_LIST') ||
 		  "$ML_DIR/$ml/members-admin");
+	push(@dbfiles, 'admin_member_p');
     }
     elsif ($AsymmetricMode) {
 	if ($AsymmetricMode eq 'actives_only') {
 	    push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"));
+	    push(@dbfiles, 'active_p');
 	    print "   * added to actives (recipients list) only!\n";
 	}
 	elsif ($AsymmetricMode eq 'members_only') {
 	    push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
+	    push(@dbfiles, 'member_p');
 	    print "   * added to members (authentication list) only!\n";
 	}
 	else {
@@ -4899,6 +4902,8 @@ sub do_adduser
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
 	    if &UseSeparateListP;
+	    push(@dbfiles, 'active_p');
+	    push(@dbfiles, 'member_p');
     }
 
     &ResetVariables;
@@ -4917,6 +4922,50 @@ sub do_adduser
     local($acm) = $ADDR_CHECK_MAX;
     $ADDR_CHECK_MAX = 10;
 
+    if ( $config_ph'USE_DATABASE ) {
+	require 'libdatabases.pl';
+        require 'libkern.pl';
+	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
+	$MAIL_LIST = $ml;
+	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
+	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
+	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
+	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
+	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
+	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
+	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+
+	for $f (@dbfiles) {
+	    my (%mib, %result, %misc, $error);
+	    &DataBaseMIBPrepare(\%mib, $f, {'address' => $member});
+	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    if ($mib{'error'}) {
+		&Debug("   WARN: skip $fn since $member is already member.");
+		&Log("skip $fn since $member is already member");
+		&XSWarn("already_subscribed");
+		next;
+	    }
+	    if ($mib{'_result'}) {
+		&Debug("   WARN: skip $fn since $member is already member.");
+		&Log("skip $fn since $member is already member");
+		&XSWarn("already_subscribed");
+		next;
+	    }
+	    if ($f eq 'admin_member_p') {
+		&DataBaseMIBPrepare(\%mib, 'addadmin', {'address' => $member});
+		&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    }
+	    elsif ($f eq 'member_p') {
+		&DataBaseMIBPrepare(\%mib, 'addmembers', {'address' => $member});
+		&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    }
+	    elsif ($f eq 'active_p') {
+		&DataBaseMIBPrepare(\%mib, 'addactives', {'address' => $member});
+		&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    }
+	}
+    }
+    else {
     for $f (@files) {
 	$fn = $f;
 	$fn =~ s#.*/(\S+)#$1#;
@@ -4934,6 +4983,7 @@ sub do_adduser
 	print "Append $member to $fn\n" if $debug;
 	&AppendString2File($member, $f);
     }
+    }
 
     # $XStatus = 'OK:';
     $ADDR_CHECK_MAX = $acm;
@@ -4943,7 +4993,7 @@ sub do_adduser
 sub do_byeuser
 {
     local($ml, $member) = @_;
-    local(@files);
+    local(@files, @dbfiles);
     local($proc) = $fp;
     $proc =~ s/do_//;
 
@@ -4966,11 +5016,13 @@ sub do_byeuser
     if ($AdminMode) {
 	@files = (&Value('ADMIN_MEMBER_LIST') ||
 		  "$ML_DIR/$ml/members-admin");
+	push(@dbfiles, 'admin_member_p');
     }
     else {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
 	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"))
 	    if &UseSeparateListP;
+	push(@dbfiles, 'member_p');
     }
 
     &ResetVariables;
@@ -4986,6 +5038,47 @@ sub do_byeuser
 
     # delete 
     local($file, $found);
+
+    if ( $config_ph'USE_DATABASE ) {
+	require 'libdatabases.pl';
+        require 'libkern.pl';
+	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
+	$MAIL_LIST = $ml;
+	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
+	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
+	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
+	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
+	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
+	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
+	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+
+	for $file (@dbfiles) {
+	    my (%mib, %result, %misc, $error);
+	    &DataBaseMIBPrepare(\%mib, $file, {'address' => $member});
+	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    if ($mib{'error'}) {
+		&Log("makefml::$proc delete $member in $file");
+		print "Delete $member in $file\n" if $debug;
+
+	    }
+	    if (!$mib{'_result'}) {
+		&Log("makefml::$proc delete $member in $file");
+		print "Delete $member in $file\n" if $debug;
+
+		# notify if plural addresses (> 1) has been changed
+		print "\tRemoved $found addrs.\n" if $found > 1;
+	    }
+	    if ($file eq 'admin_member_p') {
+		&DataBaseMIBPrepare(\%mib, 'byeadmin', {'address' => $member});
+		&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    }
+	    elsif ($file eq 'member_p') {
+		&DataBaseMIBPrepare(\%mib, 'unsubscribe', {'address' => $member});
+		&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    }
+	}
+    }
+    else {
     for $file (@files) {
 	if ($found = &RemoveMember($file, $member)) {
 	    $file =~ s#.*/(\S+)#$1#;
@@ -4995,6 +5088,7 @@ sub do_byeuser
 	    # notify if plural addresses (> 1) has been changed
 	    print "\tRemoved $found addrs.\n" if $found > 1;
 	}
+    }
     }
 
     # $XStatus = 'OK:';
@@ -5009,7 +5103,7 @@ sub do_digest { &do_ctladdr(@_);}
 sub do_ctladdr
 {
     local($ml, $addr, $opt) = @_;
-    local(@files);
+    local(@files, @dbfiles);
     local($proc) = $fp;
 
     # canonicalize
@@ -5053,13 +5147,15 @@ sub do_ctladdr
     # so we should use *SeparateList*() functions.
     if (&NotUseSeparateListP) {
 	push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
-
+	push(@dbfiles, 'member_p');
     }
     else {
 	push(@files, (&Value('ACTIVE_LIST') || "$ML_DIR/$ml/actives"));
+	push(@dbfiles, 'active_p');
 
 	if ($proc eq 'chaddr') {
 	    push(@files, (&Value('MEMBER_LIST') || "$ML_DIR/$ml/members"));
+	    push(@dbfiles, 'member_p');
 	}
     }
 
@@ -5076,6 +5172,42 @@ sub do_ctladdr
 
     # delete 
     local($file, $found);
+    if ( $config_ph'USE_DATABASE ) {
+	require 'libdatabases.pl';
+        require 'libkern.pl';
+	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
+	$MAIL_LIST = $ml;
+	$DATABASE_METHOD = $config_ph'DATABASE_METHOD;
+	$DATABASE_DRIVER = $config_ph'DATABASE_DRIVER;
+	$SQL_SERVER_HOST = $config_ph'SQL_SERVER_HOST;
+	$SQL_SERVER_PORT = $config_ph'SQL_SERVER_PORT;
+	$SQL_SERVER_USER = $config_ph'SQL_SERVER_USER;
+	$SQL_SERVER_PASSWORD = $config_ph'SQL_SERVER_PASSWORD;
+	$SQL_DATABASE_NAME = $config_ph'SQL_DATABASE_NAME;
+
+	$XStatus = '';
+	for $file (@dbfiles) {
+	    my (%mib, %result, %misc, $error);
+	    &DataBaseMIBPrepare(\%mib, $file, {'address' => $addr});
+	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	    if ($mib{'error'}) {
+		print "\t*** ERROR: Nothing has been changed. ***\n";
+		$XStatus = 'ERROR: makefml.nothing_changed';
+	    }
+	    if (!$mib{'_result'}) {
+		print "\t*** ERROR: Nothing has been changed. ***\n";
+		$XStatus = 'ERROR: makefml.nothing_changed';
+	    }
+	}
+	if ($XStatus eq '') {
+	    if ($proc eq 'chaddr' || $proc eq 'matome' || $proc eq 'digest') {
+		$mib{'_value'} = $opt;
+	    }
+	    &DataBaseMIBPrepare(\%mib, $proc, {'address' => $addr});
+	    &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	}
+    }
+    else {
     for $file (@files) {
 	if ($found = &CtlAddrList($proc, $file, $addr, $opt)) {
 	    $file =~ s#.*/(\S+)#$1#;
@@ -5088,6 +5220,7 @@ sub do_ctladdr
 	else {
 	    print "\t*** ERROR: Nothing has been changed. ***\n";
 	    $XStatus = 'ERROR: makefml.nothing_changed';
+	    }
 	}
     }
 
