@@ -1,6 +1,3 @@
-FML_VERSION
-
-
 INIT_PACKAGE () {
 
 	# initialize
