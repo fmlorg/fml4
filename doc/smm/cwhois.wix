@@ -8,9 +8,35 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 自動的に ローカルサーチ に切替えることができます。
 
 
-.S	configuration file
+.S	client の whois command の使い方
 
-変数は次の通りです。
+コマンドラインで
+
+% whois -h whois-server help
+
+  HELP を見る。フォワード先の help と caching whois 自身の help 
+  両方が表示される
+
+% whois -h whois-server KEYWORD
+
+ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
+ ドし、答をキャッシュする
+
+% whois -h whois-server #KEYWORD
+
+ 'local' で定義されたキャッシュ データベースを検索
+
+% whois -h whois-server opt#KEYWORD
+
+ 'opt' で定義されたキャッシュ データベースを検索
+
+  例：	whois -h whois-relay.uja.or.jp local#uja
+
+
+.S	configuration file による設定
+
+
+設定できる変数は次の通りです。
 
 ローカルサーチに使うプログラムの定義
 
@@ -26,7 +52,7 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 
 	必要なら（対応する） key1:key2, spool1:spool2 という形で
 
-	   一つのキーワード => 複数の database と spool
+	   一つのキーワード => 複数の database と spool の対応関係
 
 	が定義できます。
 
@@ -47,7 +73,18 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
 	$TIMEOUT            = 5;#20;
 
 
-.S	Search Algorithm
+.S	複数のキャッシュデータ
+
+
+連想配列
+    KEYWORD => スプール（directory）
+    KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
+
+	%WhoisCacheSpool    = ('apply', '/var/spool/apply');
+	%WhoisCacheDB       = ('apply', '/var/db/applydb');
+
+
+.S	Cwhois の Search Algorithm
 
     if  "#key" SYNTAX
 
@@ -63,7 +100,7 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
 	Signal handling を設定した後
 	＃ SIGALRM
 
-	Whois ライブラリを呼び初期化する
+	fml の Whois ライブラリを呼び初期化する
 
 	TCP/43 で通信
 	&Ipc2Whois(*e, *Fld, *host, *pat)
@@ -72,14 +109,46 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
 	＃sendmail の struct ENVELOPE e; に対応するもの
 	＃だが perl 4 用に reference は使わない実装である
 
-	fml 標準実装では $e{'message'}; にセット
+	fml 標準実装では $e{'message'}; に答をセット
 	
 	キャッシュ オン（後で利用するため）
 
 
-.S	複数のサーチ
+.S	データベース・フォーマット
+
+仮定： スプールの中に キッャシュデータ は 数字のファイルで保存されてい
+る。データベースは
+
+	数字：	キーワード（複数可だが一行にかぎる）
+
+のような形のフィールドをもつと仮定しています。
+このデータを事前に作っておく必要があります。
+
+caching whois server 用の付録として
+
+   lib/cwhois/scandb.pl キーワードを探して表示するためのプログラム
+   lib/cwhois/gendb.pl 	データベースを作るためのプログラム
+
+が提供されています。
 
 
+.S	scandb.pl (lib/cwhois/scandb.pl)
+
+    require scandb.pl;
+    &ScanDB(*key, *proc, *WHOIS_CACHE_DB, *WHOIS_CACHE_SPOOL);
+
+
+.S	gendb.pl (lib/cwhois/gendb.pl)
+
+有効なキャッシュは良いデータベースがあってはじめて有効となります:-)
+＃『良い展示には良い暗幕』という諺のようなものですね（謎）
+
+$CACHE_PROG で与えられる program を hard reference で呼び出します。
+
+sub CacheOn という example が gendb.pl の中にありますので、
+この関数をまねして gendb.ph 等に保存し、保守すると良いでしょう。
+
+この 関数の定義次第で データベースの出来が変わります。
 
 
 .# $Id$

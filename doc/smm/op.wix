@@ -2982,6 +2982,7 @@ which д╚дл
 .include function.wix
 .include localhack.wix
 .include href.wix
+.include cwhois.wix
 
 
 .# ##########################################################
