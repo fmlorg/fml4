@@ -5507,9 +5507,12 @@ sub FixDefault
     local(*query, *config, $top_level) = @_;
     local(@x, $x);
 
-    @x = split(/\//, $top_level);
-    $x = $x[$#x];
-    $query{'default'} = $config{$x} ? 'y' : 'n';
+    if ($query{"type"} eq "y-or-n" || 
+	$query{"type"} eq "reverse-y-or-n") {
+	@x = split(/\//, $top_level);
+	$x = $x[$#x];
+	$query{'default'} = $config{$x} ? 'y' : 'n';
+    }
 }
 
 
