@@ -99,7 +99,7 @@ sub ContentHandler
 	&Mesg(*e, $NULL, 'filter.reject_non_text_mail');
 	&Mesg(*e, "This mailing list <$MAIL_LIST> denies by mailing list.");
 	&Mesg(*e, "Obey your mailing list rule.");
-	&Mesg(*e, &WholeMail);
+	&MesgMailBodyCopyOn;
 	&Log("Reject multipart mail");
 	return "reject";
     } else {

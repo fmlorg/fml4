@@ -123,9 +123,8 @@ sub Confirm
     &Log("Confirm::FirstTimeP r=$r type=$type");
 
     if ($debug_confirm) {
-	&Warn("Confirm Request[$r] $ML_FN", 
-	      "debug_confirm = 1\nConfirm::FirstTimeP r=$r type=$type\n\n". 
-	      &WholeMail);
+	&WarnE("Confirm Request[$r] $ML_FN", 
+	       "debug_confirm = 1\nConfirm::FirstTimeP r=$r type=$type\n\n");
     }
     
     if ($r eq 'first-time' || $r eq 'expired' || 
@@ -346,10 +345,14 @@ sub ManualRegistConfirm
     # How to handle 'subscribe' request
     if ($mode eq 'subscribe' && 
 	$MANUAL_REGISTRATION_TYPE eq 'forward_to_admin') {
-	&LogWEnv("$proc request is forwarded to Maintainer", *e);
+	# To Sender
+	&LogWEnv("$proc request is forwarded to maintainer", *e);
 	&Mesg(*e, "Please wait a little");
 	&Mesg(*e, $NULL, 'confirm.manual_regist.forward_to_admin');
-	&Warn("$proc request from $From_address", &WholeMail);
+
+	# To $MAINTAINER
+	&WarnE("$proc request from $From_address", 
+	       "$proc request from $From_address");
     }
     # $MANUAL_REGISTRATION_TYPE eq confirmation
     elsif ($mode eq 'subscribe') {
@@ -363,16 +366,15 @@ sub ManualRegistConfirm
 	if ($r) {
 	    &Log("ManualRegistConfirm: confirm succeeds");
 
-	    &Warn("subscribe request is confirmed $ML_FN",
-		  "Hi, I am fml ML manager for <$MAIL_LIST>.\n".
-		  "I confirmed subscribe request from <$From_address>.\n".
-		  "Please add <$From_address> to a ML member.\n\n".
-		  "FYI:Administrative Command Example:\n".
-		  "Please send back the following either phrase to <$CONTROL_ADDRESS>.\n\n".
-		  "admin pass ADMIN-PASSWORD\n".
-		  "admin add $From_address\n\n\tOR\n\n".
-		  "approve ADMIN-PASSWORD add $From_address\n\n".
-		  &WholeMail);
+	    &WarnE("subscribe request is confirmed $ML_FN",
+		   "Hi, I am fml ML manager for <$MAIL_LIST>.\n".
+		   "I confirmed subscribe request from <$From_address>.\n".
+		   "Please add <$From_address> to a ML member.\n\n".
+		   "FYI:Administrative Command Example:\n".
+		   "Please send back the following either phrase to <$CONTROL_ADDRESS>.\n\n".
+		   "admin pass ADMIN-PASSWORD\n".
+		   "admin add $From_address\n\n\tOR\n\n".
+		   "approve ADMIN-PASSWORD add $From_address\n\n");
 	    &Log("subscribe request is forwarded to maintainer");
 
 	    $r = $buf;

@@ -474,7 +474,8 @@ sub ProcessEachMLReq
 	    if (/^(subscribe|confirm)\s*(.*)/i){ 
 		if (&NonAutoRegistrableP) {
 		    &Mesg(*e, $mesg);
-		    &Warn("Subscribe Request $ML_FN", &WholeMail);
+		    &WarnE("Subscribe request $ML_FN", 
+			   "subscribe request comes as follows.\n");
 		}
 		else {
 		    &use('amctl');

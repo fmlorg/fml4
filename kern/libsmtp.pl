@@ -539,6 +539,15 @@ sub SmtpIO
 	undef $e{'Body:append:files'};
     }
 
+    # special control
+    if ($Envelope{'ctl:smtp:ebuf2socket'}) {
+	require 'libsmtpsubr.pl';
+	&Copy2SocketFromHash('Header');
+	print SMTPLOG "\r\n";
+	print S "\r\n";
+	&Copy2SocketFromHash('Body');
+    }
+
     # Trailer
     if ($e{'trailer'}) { 
 	$e{'trailer'} =~ s/\n/\r\n/g; 

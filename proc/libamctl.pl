@@ -120,7 +120,7 @@ sub AutoRegist
 	&Log("AutoRegist: Dup $from");
 	&Mesg(*e, "Address [$from] already subscribed.");
 	&Mesg(*e, $NULL, "already_subscribed", $from);
-	&Mesg(*e, &WholeMail);
+	&MesgMailBodyCopyOn;
 	return 0;
     }
 
@@ -159,7 +159,7 @@ sub AutoRegist
 	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	&Append2($entry, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
 	($ok == 2) ? &Log("Added: $entry") : do {
-	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
+	    &WarnE("ERROR[sub AutoRegist]: cannot operate $er", $NULL);
 	    return 0; 
 	};
     }
@@ -167,7 +167,7 @@ sub AutoRegist
     else {
 	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
 	$ok == 1 ? &Log("Added: $entry") : do {
-	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
+	    &WarnE("ERROR[sub AutoRegist]: cannot operate $er");
 	    return 0;
 	};
     }
@@ -221,7 +221,7 @@ sub AutoRegist
     {
 	local($subject) = $e{"GH:Subject:"};
 	$e{"GH:Subject:"} = "New added member: $from $ML_FN";
-	&Warn("New added member: $from $ML_FN", $r . &WholeMail);
+	&WarnE("New added member: $from $ML_FN", $r);
 	$e{"GH:Subject:"} = $subject;
     }
 
@@ -325,7 +325,7 @@ sub AutoRegistError
     $b .= "\tfor changing your address to regist explicitly.\n";
 
     &Log($sj, "$key => [$s]");
-    &Warn("$sj $ML_FN", &WholeMail);
+    &WarnE("$sj $ML_FN", $NULL);
 
     # for notify
     $e{'message:h:subject'} .= $sj;
@@ -338,7 +338,8 @@ sub AutoRegistError
 	  $AUTO_REGISTRATION_KEYWORD,
 	  $MAINTAINER,
 	  $key);
-    &Mesg(*e, $b.&WholeMail);
+    &Mesg(*e, $b);
+    &MesgMailBodyCopyOn;
 }
 
 
@@ -363,7 +364,7 @@ sub Chk822_addr_spec_P
 	    &Mesg(*e, "It should be <$from\@$FQDN> form.");
 	}
 
-	&Mesg(*e, &WholeMail);
+	&MesgMailBodyCopyOn;
 
 	0;
     }

@@ -302,10 +302,9 @@ sub MTIWarn
     else {
 	$s .= "Fml MTI rejects submission of articles hereafter.\n";
     }
-    $s .= "The current rejected article:\n\n$MTIErrorString\n".
-	&WholeMail;
+    $s .= "The current rejected article:\n\n$MTIErrorString\n";
 
-    &Warn("FML Mail Traffic Monitor System Report $ML_FN", $s);
+    &WarnE("FML Mail Traffic Monitor System Report $ML_FN", $s);
 }
 
 sub Date2UnixTime

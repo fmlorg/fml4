@@ -961,7 +961,7 @@ sub ProcSubscribe
 	&LogWEnv("$proc request is forwarded to Maintainer", *e);
 	&Mesg(*e, "Please wait a little");
 	&Mesg(*e, $NULL, 'req.subscribe.forwarded_to_admin', $proc);
-	&Warn("$proc request from $From_address", &WholeMail);
+	&WarnE("$proc request from $From_address", $NULL);
     }
     else {
 	&use('amctl');

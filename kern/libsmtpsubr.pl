@@ -98,4 +98,28 @@ sub DoSmtpFiles2Socket
 }
 
 
+sub Copy2SocketFromHash
+{
+    local($key) = @_;
+    local($pp, $p, $maxlen, $len, $buf);
+
+    $pp     = 0;
+    $maxlen = length($Envelope{$key});
+
+    while (1) {
+	$p   = index($Envelope{$key}, "\n", $pp);
+	$len = $p  - $pp + 1;
+	$buf = substr($Envelope{$key}, $pp, ($p < 0 ? $maxlen-$pp : $len));
+	if ($buf !~ /\r\n$/) { $buf =~ s/\n$/\r\n/;}
+
+	print SMTPLOG "   ", $buf;
+	print S "   ", $buf;
+	$LastSmtpIOString = $buf;
+
+	last if $p < 0;
+	$pp = $p + 1;
+    }
+}
+
+
 1;

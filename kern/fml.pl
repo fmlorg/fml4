@@ -1059,9 +1059,11 @@ sub CheckCurrentProc
     ### WE SHOULD REJCECT "CANNOT IDENTIFIED AS PERSONAL" ADDRESSES;
     ###   In addition, we check another atack possibility;
     ###      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
-    if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@/i) {
-	&Log("Mail From Addr to Reject [$&], FORW to Maintainer");
-	&Warn("Mail From Addr to Reject [$&]", &WholeMail);
+    if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@(\S+)/i) {
+	local($addr, $domain) = ($1, $2);
+	&Log("reject address $addr\@$domain");
+	&WarnE("reject mail from $addr\@$domain", 
+	       "reject mail from $addr\@$domain\n");
 	$DO_NOTHING = 1;
 	return 0;
     }
@@ -1077,10 +1079,9 @@ sub CheckCurrentProc
 	if (&RejectAddrP($From_address) ||
 	    &RejectAddrP($UnixFrom)) {
 	    $s="Reject spammers: UnixFrom=[$UnixFrom], From=[$From_address]";
-	    &Warn("Spam mail from a spammer is rejected $ML_FN",
+	    &WarnE("Spam mail from a spammer is rejected $ML_FN",
 		  "Reject Spammers:\n".
-		  "   UnixFrom\t$UnixFrom\n   From\t\t$From_address\n".
-		  &WholeMail);
+		  "   UnixFrom\t$UnixFrom\n   From\t\t$From_address\n");
 	    &Log($s);
 	    $DO_NOTHING = 1;
 	    return 0;
@@ -1119,9 +1120,8 @@ sub CheckCurrentProc
     if ((! $NOT_USE_UNIX_FROM_LOOP_CHECK) && 
 	&AddressMatch($UnixFrom, $MAINTAINER)) {
 	&Log("WARNING: UNIX FROM Loop[$UnixFrom == $MAINTAINER]");
-	&Warn("WARNING: UNIX FROM Loop",
-	      "UNIX FROM[$UnixFrom] == MAINTAINER[$MAINTAINER]\n\n".
-	      &WholeMail);
+	&WarnE("WARNING: UNIX FROM Loop",
+	      "UNIX FROM[$UnixFrom] == MAINTAINER[$MAINTAINER]\n\n");
 	exit 0;
     }
 
@@ -1516,7 +1516,8 @@ sub RejectHandler
     if ($debug) { @c = caller; &Log("RejectHandler called from $c[2]");}
 
     &Log("Rejected: \"From:\" field is not member");
-    &Warn("NOT MEMBER article from $From_address $ML_FN", &WholeMail);
+    &WarnE("NOT MEMBER article from $From_address $ML_FN", 
+	   "NOT MEMBER article from $From_address\n\n");
     &SendFile($From_address, 
 	      "You $From_address are not member $ML_FN", $DENY_FILE);
 }
@@ -1524,7 +1525,8 @@ sub RejectHandler
 sub IgnoreHandler
 {
     &Log("Ignored: \"From:\" field is not member");
-    &Warn("Ignored NOT MEMBER article from $From_address $ML_FN", &WholeMail);
+    &WarnE("Ignored NOT MEMBER article from $From_address $ML_FN", 
+	   "Ignored NOT MEMBER article from $From_address");
 }
 
 # Lookup(key, file); return 1 if the "key" is found in the "file".
@@ -1686,7 +1688,7 @@ sub WholeMail
     $_ .= "\n".$Envelope{'Header'}."\n".$Envelope{'Body'};
     s/\n/\n   /g; # against ">From ";
     
-    $title = $Envelope{"tmp:ws"} || "Original Mail as follows";
+    $title = $Envelope{"tmp:ws"} || "Original mail as follows";
     "\n$title:\n$_\n";
 }
 
@@ -1733,6 +1735,14 @@ sub Mesg
     $e{'message:to:admin'} .= "$s\n" if $e{'mode:notify_to_admin_also'};
 }
 
+# no real data copy but 
+# enable flag to mail body forwarding in Smtp() via Notify().
+sub MesgMailBodyCopyOn
+{
+    &Mesg(*e, "Original mail as follows:\n");
+    $Envelope{'message:ebuf2socket'} = 1;
+}
+
 sub MesgSetBreakPoint { undef $MesgBuf;} 
 sub MesgGetABP { $MesgBuf;}	# After Break Point
 
@@ -1748,6 +1758,24 @@ sub WarnFile
     @to   = ($MAINTAINER);
     $Envelope{'preamble'} = $preamble;
     &NeonSendFile(*to, *subject,*file);
+    undef $Envelope{'preamble'};
+}
+
+# Extended Warn()
+sub WarnE
+{
+    local($subject, $body, $preamble, $trailor) = @_;
+    local($title);
+
+    $Envelope{'preamble'} = $preamble;
+
+    $title = $Envelope{"tmp:ws"} || "Original mail as follows";
+    $title = "\n$title:\n\n";
+
+    $Envelope{'ctl:smtp:ebuf2socket'} = 1;
+    &Sendmail($MAINTAINER, $subject, $body.$title);
+    $Envelope{'ctl:smtp:ebuf2socket'} = 0;
+
     undef $Envelope{'preamble'};
 }
 
@@ -1780,13 +1808,19 @@ sub Notify
 	$REPORT_HEADER_CONFIG_HOOK .= 
 	    q# $le{'Body:append:files'} = $Envelope{'message:append:files'}; #;
 	
-	$Envelope{'trailer'} = &$proc;
+	$Envelope{'trailer'} .= "\n$GOOD_BYE_PHRASE $FACE_MARK\n";
+	$Envelope{'trailer'} .= &$proc;
 
+	if ($Envelope{'message:ebuf2socket'}) {
+	    $Envelope{'ctl:smtp:ebuf2socket'} = 1;
+	}
 	&Sendmail($to, 
 		  $s, 
-		  ($buf || $Envelope{'message'}) .
-		  "\n$GOOD_BYE_PHRASE $FACE_MARK\n", 
+		  ($buf || $Envelope{'message'}),
 		  @to);
+	if ($Envelope{'message:ebuf2socket'}) {
+	    $Envelope{'ctl:smtp:ebuf2socket'} = 0;
+	}
     }
 
     # if $buf is given, ignore after here.
@@ -1796,7 +1830,7 @@ sub Notify
     # send the report mail ot the maintainer;
     $Envelope{'error'} .= $m;
     if ($Envelope{'error'}) {
-	&Warn("fml system error message $ML_FN",$Envelope{'error'}.&WholeMail);
+	&WarnE("fml system error message $ML_FN", $Envelope{'error'});
     }
 
     if ($Envelope{'message:to:admin'}) {
@@ -2395,10 +2429,9 @@ sub MailLoopP
 	    $Envelope{'h:x-ml-info:'} =~ /$MAIL_LIST/i ||
 	    $Envelope{'h:x-ml-info:'} =~ /$CONTROL_ADDRESS/i) {
 	    &Log("Loop Alert: dup X-ML-Info:");
-	    &Warn("Loop Alert: dup X-ML-Info: $ML_FN", 
-		  "fml <$MAIL_LIST> has detected a loop condition so that\n"
-		  ."input mail has already our ML X-ML-Info: field.\n\n"
-		  .&WholeMail);
+	    &WarnE("Loop Alert: dup X-ML-Info: $ML_FN", 
+		   "fml <$MAIL_LIST> has detected a loop condition so that\n"
+		   ."input mail has already our ML X-ML-Info: field.\n\n");
 	    return 1;
 	}
     }
@@ -2476,8 +2509,7 @@ sub DupMessageIdP
 	&Debug("\tDupMessageIdP::(DUPLICATED == LOOPED)") if $debug;
 	local($s) = "Duplicated Message-ID";
 	&Log("Loop Alert: $s");
-	&Warn("Loop Alert: $s $ML_FN", 
-	      "$s in <$MAIL_LIST>.\n\n".&WholeMail);
+	&WarnE("Loop Alert: $s $ML_FN", "$s in <$MAIL_LIST>.\n\n");
 	1;
     }
     else {
@@ -2587,13 +2619,13 @@ sub SecureP
     elsif ($command_mode && $s =~ /[\;\|]/) {
 	&Log("SecureP: [$s] includes ; or |"); 
 	$s = "Security alert:\n\n\t$s\n\t[$'$`] HAS AN INSECURE CHAR\n";
-	&Warn("Security Alert $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
+	&WarnE("Security Alert $ML_FN", "$s\n".('-' x 30)."\n");
 	0;
     }
     else {
 	&Log("SecureP: Security Alert for [$s]", "[$s] ->[($`)<$&>($')]");
 	$s = "Security alert:\n\n\t$s\n\t[$'$`] HAS AN INSECURE CHAR\n";
-	&Warn("Security Alert $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
+	&WarnE("Security Alert $ML_FN", "$s\n".('-' x 30)."\n");
 	0;
     }
 }
@@ -2640,7 +2672,8 @@ sub LoopBackWarn
 	if (&AddressMatch($to, $_)) {
 	    &Debug("AddressMatch($to, $_)") if $debug;
 	    &Log("Loop Back Warning: ", "$to eq $_");
-	    &Warn("Loop Back Warning: [$to eq $_] $ML_FN", &WholeMail);
+	    &WarnE("Loop Back Warning: [$to eq $_] $ML_FN", 
+		   "Loop Back Warning: [$to eq $_]");
 	    return 1;
 	}
     }
@@ -2847,11 +2880,12 @@ sub EnvelopeFilter
     if ($r) { 
 	$DO_NOTHING = 1;
 	&Log("EnvelopeFilter::reject for '$r'");
-	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
-	      "Mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
+	&WarnE("Rejected mail by FML EnvelopeFilter $ML_FN", 
+	       "Mail from $From_address\nis rejected for '$r'.\n\n");
 	if ($FILTER_NOTIFY_REJECTION) {
 	    &Mesg(*e, $NULL, 'filter.rejected', $r);
-	    &Mesg(*e, "Your mail is rejected for '$r'.\n". &WholeMail);
+	    &Mesg(*e, "Your mail is rejected for '$r'.\n");
+	    &MesgMailBodyCopyOn;
 	}
     }
 
@@ -3196,7 +3230,7 @@ sub TimeOut
     $0 = "$FML: TimeOut $Now <$LOCKFILE>";
 
     # Now we may be not able to connect socket, isn't it?
-    # &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);
+    # &WarnE("TimeOut: $MailDate ($From_address) $ML_FN", $NULL);
     &Log("TimeOut[$$]: Caught SIGALRM, timeout");
 
     if ($TimeOutCalled++) {

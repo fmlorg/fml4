@@ -92,8 +92,7 @@ sub CheckMailBodyCKSUM
     if ($status) {
 	local($s) = "Duplicated mail body CKSUM";
 	&Log("Loop Alert: $s");
-	&Warn("Loop Alert: $s $ML_FN", 
-	      "$s in <$MAIL_LIST>.\n\n".&WholeMail);
+	&WarnE("Loop Alert: $s $ML_FN", "$s in <$MAIL_LIST>.\n\n");
 	1;
     }
     else {

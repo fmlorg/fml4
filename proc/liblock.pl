@@ -55,11 +55,13 @@ sub V7Lock
 
 	open(TIMEOUT, "> $FP_VARLOG_DIR/$Timeout");
 	select(TIMEOUT); $| = 1; select(STDOUT);
-	print TIMEOUT &WholeMail;
+	print TIMEOUT $Envelope{'Header'};
+	print TIMEOUT "\n";
+	print TIMEOUT $Envelope{'Body'};
 	close(TIMEOUT);
 
-	&Warn("link(2) style LOCK TIMEOUT", 
-	      "saved in $FP_VARLOG_DIR/$Timeout\n\n".&WholeMail);
+	&WarnE("link(2) style LOCK TIMEOUT", 
+	       "saved in $FP_VARLOG_DIR/$Timeout\n\n");
 
 	sleep(3);
 	&TimeOut; # called when flock(2) and alarm(3) works and lock timeouts.

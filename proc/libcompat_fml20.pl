@@ -71,7 +71,7 @@ sub DoMLMemberCheck
     # Crosspost extension.
     if ($USE_CROSSPOST && $Envelope{'crosspost'}) {
 	&Log("Crosspost from not member");	    
-	&Warn("Crosspost from not member: $From_address $ML_FN", &WholeMail);
+	&WarnE("Crosspost from not member: $From_address $ML_FN", $NULL);
 	return 0;
     }
 
