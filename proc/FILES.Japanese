@@ -20,9 +20,6 @@ src/
    libexpire.pl		ＭＬの記事等の expiration を行なう
    libfml.pl		コマンドインターフェイスおよびコマンド用基本関数
    libfop.pl		ファイル操作関数
-   libftp.pl		ftp の操作 ftp://, および、ローカルスプール用
-   libftpmail.pl	ftpmail インターフェイス (obsolete)
-   libhref.pl		URL 操作インターフェイス e.g. http://, gopher://, 
    libhtmlsubr.pl	HTML new threading code
    libkern.pl		kernel library (fml.pl から作られている。fml.plと同じ)
    liblibrary.pl	ユーザからのファイルの put と getを可能にする

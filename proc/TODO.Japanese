@@ -1,6 +1,6 @@
 ◯ Database access
 
-[TODO]
+ [TODO]
 
    count up the number of members
 	proc/libamctl.pl:1167:    @a = @main'ACTIVE_LIST; #';
@@ -9,30 +9,9 @@
 	proc/libmoderated.pl:222:
 	proc/libmoderated.pl:320:
 
-[DONE]
-  We use now
-	if ($USE_DABABASE) {
-		database access
-	}
-	else {
-		traditional file access
-	}
-
-  list to be done:
-	proc/libamctl.pl:160
-
-  * disabled to append address to $ACTIVE_LIST if $USE_DATABASE
-
-	proc/libra.pl:587
-	proc/libra.pl:588
-	proc/libra.pl:590
-
-------------------------------------------------------------
-
 ◯ DiagPrograms() をうけて、エラー制御をちゃんとしたい
 
-1.  return でOKのところもあるが
-
-2.  for () { &$_fp();} ループでなんらかのエラー判定？
+  1.  return でOKのところもあるが
+  2.  for () { &$_fp();} ループでなんらかのエラー判定？
 
 $Id$

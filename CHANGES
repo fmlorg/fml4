@@ -5,6 +5,13 @@
 
 2000/10/28
 
+  nuke some libraries in proc/ since these are not maintained long time.
+
+	最近メインテンナスされてない２、３のライブラリを削除
+		proc/libftpmail.pl
+		proc/libftp.pl
+		proc/libhref.pl
+
   makefml ml-admin.cgi $ml {update,config}
 
 
