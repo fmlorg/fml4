@@ -883,21 +883,28 @@ sub ProcAdminUnlinkArticle
 
     &Log("admin $proc $opt");
 
+    # check the existence
     if ($opt =~ /^\d+$/) {
-	local($atime, $mtime) = (stat($f))[8,9];
-	if (open(OW, "> $FP_SPOOL_DIR/$opt")) {
-	    select(OW); $| = 1; select(STDOUT);
-	    print OW "This article $opt is removed by an administrator.\n\n";
-	    print OW "-- $MAINTAINER\n";
-	    close(OW);
-	    utime($atime, $mtime, $f);
-
-	    &LogWEnv("admin $proc $opt", *e);
+	if (-f $f) {
+	    if (&OverWriteFileToRemove("$FP_SPOOL_DIR/$opt")) {
+		&LogWEnv("admin $proc $opt", *e);
+	    }
+	    else {
+		&LogWEnv("admin $proc: cannot find $opt, STOP!", *e);
+		&Mesg(*e, $NULL, 'no_such_file', $opt);
+		return $NULL;		# dangerous, should stop
+	    }
 	}
+	# not exist
 	else {
-	    &LogWEnv("admin $proc: cannot find $opt, STOP!", *e);
-	    &Mesg(*e, $NULL, 'no_such_file', $opt);
-	    return $NULL;		# dangerous, should stop
+	    &use('sendfile');
+	    $b = &GetArchiveBoundary;
+	    if ($opt <= $b) { 
+		&RemoveArticleInArchive($opt) || do {
+		    &Mesg(*e, "Error: something fails. See logfile for more details");
+		    return 0;
+		};
+	    }
 	}
     }
     else {
@@ -906,23 +913,25 @@ sub ProcAdminUnlinkArticle
 	return 0; 
     }
 
-    ### 
-    # O.K. here, searching plain article is done. 
-    # Now search html article.
-    $hook = qq#sub wanted { /^$opt\\.html\$/ && push(\@wanted,\$name);}#;
-    eval($hook);
-    &Log($@) if $@;
+    if (-d $HTML_DIR) {
+	### 
+	# O.K. here, searching plain article is done. 
+	# Now search html article.
+	$hook = qq#sub wanted { /^$opt\\.html\$/ && push(\@wanted,\$name);}#;
+	eval($hook);
+	&Log($@) if $@;
 
-    require 'find.pl';
-    &find($HTML_DIR);
+	require 'find.pl';
+	&find($HTML_DIR);
 
-    # o$pt
-    if (@wanted) {
-	&use('synchtml');
-	for (@wanted) { &SyncHtmlUnlinkArticle(*e, $_);}
-    }
-    else {
-	&Log("$opt.html to remove is not found");
+	# o$pt
+	if (@wanted) {
+	    &use('synchtml');
+	    for (@wanted) { &SyncHtmlUnlinkArticle(*e, $_);}
+	}
+	else {
+	    &Log("$opt.html to remove is not found");
+	}
     }
 
     1;
@@ -1111,6 +1120,104 @@ sub SearchUsualPath
 	    return "$dir/$f";
 	}
     }
+}
+
+
+### remove article
+sub OverWriteFileToRemove
+{
+    local($f) = @_;
+    local($atime, $mtime) = (stat($f))[8,9];
+
+    if (open(OW, "> $f")) {
+	select(OW); $| = 1; select(STDOUT);
+	print OW "This article $opt is removed by an administrator.\n\n";
+	print OW "-- $MAINTAINER\n";
+	close(OW);
+
+	utime($atime, $mtime, $f);
+	1;
+    }
+    else {
+	0;
+    }
+}
+
+
+sub RemoveArticleInArchive
+{
+    local($n) = @_;
+    local($cmd, $a, $dir, $arc, $rwf, $fatal);
+
+    # tar xf -
+    $cmd = $TAR; $cmd =~ s/^(\S+)\s.*$/$1/; $cmd = "$cmd xf -";
+
+    # \d+.tar.gz
+    $a = &ArticleInWhichArchive($n);
+
+    # ensure $a should be \d+
+    if ($a !~ /^\d+$/) {
+	&Log("RemoveArticleInArchive: invalid archive name");
+	return 0;
+    }
+
+    for $dir (@ARCHIVE_DIR) {
+	if (-f "$dir/$a.tar.gz") {
+	    $arc = "$DIR/$dir/$a.tar.gz";
+	    last;
+	}
+    }
+
+    # exit if archive is not found
+    if (! $arc) {
+	&Log("RemoveArticleInArchive: cannot find $a.tar.gz");
+	return 0;
+    }
+
+    ## O.K. now we know the archive file name ##
+    # extract in tmp/
+    chdir $FP_TMP_DIR || do {
+	&Log("RemoveArticleInArchive: cannot chdir $FP_TMP_DIR");
+	return 0;
+    };
+
+    &use('utils');
+    &system("$ZCAT $arc|$cmd"); # in $DIR/tmp/
+
+    # overwrite of tmp/spool/\d+
+    $rwf = "$FP_TMP_DIR/$SPOOL_DIR/$n";
+    if (&OverWriteFileToRemove($rwf)) {
+	# archive again
+	if ($INSECURE_SYSTEM) {
+	    system("$TAR $SPOOL_DIR | $COMPRESS > $a.tar.gz");
+	}
+	else {
+	    &system("$TAR $SPOOL_DIR | $COMPRESS", "$a.tar.gz");
+	}
+
+	# replace the original archive
+	if (-s "$a.tar.gz") {
+	    rename("$a.tar.gz", $arc) || do {
+		&Log("RemoveArticleInArchive: cannot rename $a.tar.gz");
+		$fatal = 1;
+	    };
+	}
+	else {
+	    &Log("RemoveArticleInArchive: cannot remake $a.tar.gz");
+	    $fatal = 1;
+	}
+    }
+    else {
+	&Log("RemoveArticleInArchive: cannot rewrite $n");
+	$fatal = 1;
+    }
+
+    # clean up
+    &CleanUpDirectory("$FP_TMP_DIR/$SPOOL_DIR"); # libutils.pl
+
+    chdir $DIR || return 0;
+
+    $fatal ? 0 : 1;
 }
 
 
