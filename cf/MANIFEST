@@ -574,11 +574,17 @@ EXPIRE_SUMMARY:
 # If $USE_ARCHIVE is on, we do automatically archive, which is 
 # spool/articles is aggregated to e.g. "$ARCHIVE_DIR/100.tar.gz"
 # by the unit $ARCHIVE_UNIT.
-# @ARCHIVE_DIR ($ARCHIVE_DIR == $ARCHIVE_DIR[0] now, $ARCHIVE_DIR is obsolete)
+#
+# the location of store (when $USE_ARCHIVE on):	$ARCHIVE_DIR
+# the search path order                       : $ARCHIVE_DIR @ARCHIVE_DIR
+#
+# If @ARCHIVE_DIR is set and $ARCHIVE_DIR is not set, 
+#    we use $ARCHIVE_DIR[0] as the $ARCHIVE_DIR.
 #
 USE_ARCHIVE:			0
 ARCHIVE_UNIT:			100
 DEFAULT_ARCHIVE_UNIT:		100
+ARCHIVE_DIR:			var/archive
 
 # "index" command; in default we scan spool and archives and reports. But
 # "# index" send $INDEX_FILE if $INDEX_FILE exists;
