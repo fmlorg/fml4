@@ -1385,7 +1385,7 @@ sub FixPath
 	next if /^\#\#\# AUTOMATICALLY REPLACED/;
 
 	# recreate my own;
-	if ($prog =~ /makefml/ && 
+	if ($prog =~ /makefml|\.cgi$/ && 
 	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$CONFIG_DIR/) {
 	    #print STDERR "----Replace makefml::\$CONFIG_DIR -> $CONFIG_DIR\n";
 	    print NEW "### AUTOMATICALLY REPLACED by makefml ($MailDate)\n";
@@ -2176,6 +2176,9 @@ sub do_install
 	# bin/*.pl
 	print STDERR " bin ";
 	for (<bin/*.pl>){ &FixPath($_); print STDERR ".";}
+
+	print STDERR " www/cgi-bin ";
+	for (<www/cgi-bin/admin/*>){ &FixPath($_); print STDERR ".";}
 
 	print STDERR "\n\tDone.\n";
     }
