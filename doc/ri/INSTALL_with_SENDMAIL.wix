@@ -6,9 +6,10 @@
 				Ken'ichi Fukamachi
 
 .if LANG == JAPANESE
-fml は歴史的に sendmail を使う環境をデフォルトにしています。よって 
-INSTALL ファイルは sendmail を使うことを前提に書かれています。
-よってsendmailの場合の詳細は INSTALL ファイルを見て下さい。
+(1999 年末まで) fml は歴史的に sendmail を使う環境をデフォルトにしてい
+ます。よって INSTALL ファイルを筆頭に多くのファイルが sendmail を使う
+ことを前提に書かれています。よって sendmail の場合の詳細は INSTALL ファ
+イルを見て下さい。
 
 .url	../INSTALL/index.html
 
@@ -16,25 +17,35 @@ sendmail は CF のマニュアルを参照すると良いでしょう。JPCERTの『技術メ
 モ - sendmail バージョンアップマニュアル -』も非常に参考になります。
 
 .url http://www.jpcert.or.jp/ed/
+
+2003/03/04: sendmail 事実上すべてのバージョンに security hole が見つか
+りました。パッチもでていますが、やはり、sendmail は常に最新版のオッカ
+ケをする元気がないとまずいでしょう。
+
+.url http://www.cert.org/advisories/CA-2003-07.html
 .fi
 
 .if LANG == ENGLISH
-Fml assumes fml works with sendmail by default.
+Fml assumes fml works with sendmail by default until 1999.
 If so,  see INSTALL file for installation with sendmail. 
 .url	../INSTALL-e/index.html
 
 For more details on sendmail configurations, see sendmail.org.
 .url 	http://www.sendmail.org/
+
+2003/03/04 almost all sendmail versions are vulnerable.
+you should upgrade sendmail to the latest one.
+.url http://www.cert.org/advisories/CA-2003-07.html
 .fi
 
 .~HTML_PRE
-.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000,2003 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.#               1996-2000,2003 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .#
-.# $Id$
+.# $FML$
