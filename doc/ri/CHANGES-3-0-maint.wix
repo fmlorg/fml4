@@ -5,6 +5,8 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#26 == 3.0.1_BETA #15 ]
+
   sbin/makefml: 2.64-2.65
 
 	PR in fml-support: 07167
