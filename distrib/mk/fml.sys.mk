@@ -19,7 +19,7 @@ COMPILE_DIR  = $(DIST_DIR)/compile
 
 ### exports  ###
 FTP_DIR      = $(DESTDIR)/exports/ftp
-SNAPSHOT_DIR = $(FTP_DIR)/snapshot
+SNAPSHOT_DIR = $(FTP_DIR)/current/src
 
 WWW          = ${DESTDIR}/exports/www
 WWW_DIR      = ${WWW}
