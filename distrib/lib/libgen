@@ -479,19 +479,30 @@ GEN_ARCHIVE () {
 
 	echo "Generating $FMLID.zip";
 	find $FMLID |zip -q -@ $FMLID.zip
+
+	echo "   remove *zip"
 	(
-		echo 	chdir $FTP
-		chdir $FTP
+		echo 	chdir $FTP; chdir $FTP
 
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
-			echo 	rm -f *.zip
-			rm -f *.zip
+			echo 	rm -f *.zip official/fml*zip
+			rm -f *.zip official/fml*zip
+		else
+			echo 	rm -f *.zip experimental/fml*zip
+			rm -f *.zip experimental/fml*zip
 		fi
 	)
 
-	cp -p $FMLID.zip $FTP/experimental
+	echo "   install *zip"
+	if [ X$IN_RELEASE_BRANCH = X ]
+	then
+		cp -p $FMLID.zip $FTP/official/
+	else
+		cp -p $FMLID.zip $FTP/experimental/
+	fi
 
+	echo "   relink *zip"
 	(
 		if [ X$IN_RELEASE_BRANCH = X ]
 		then
