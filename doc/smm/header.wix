@@ -67,6 +67,47 @@ config.ph で
 これらは Backward Compatibility という趣が強い例外処理です。
 
 
+.S	ヘッダフィールドの内容の強制
+.k	&DEFINE_FIELD_FORCED
+.k	--fh:field
+
+SYNOPSIS:
+	&DEFINE_FIELD_FORCED('field') = "field-contents";
+
+これは
+
+	$Envelope{'fh:field:'} = "field-contents";
+	--fh:field="field-contents" (コマンドライン)
+
+と同じです。フィールドの内容を強制操作します。
+
+例：
+	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+
+X-Ml-Info: の内容を"書きたいこと"に設定する。
+
+
+.S	ヘッダフィールドをオリジナルのままにする
+.k	&DEFINE_FIELD_ORIGINAL
+.k	--oh:field
+
+
+SYNOPSIS:
+	&DEFINE_FIELD_ORIGINAL('field');
+
+これは
+
+	$Envelope{'oh:field:'};
+	--oh:field  (コマンドライン)
+
+と同じです。オリジナルの値にしておきたいフィールドを指定します。
+
+例：
+	&DEFINE_FIELD_ORIGINAL('to');
+	&DEFINE_FIELD_ORIGINAL('cc');
+
+To: Cc: フィールドをオリジナルのままにして配送する。
+
 
 .S	Received: もヘッダにつける
 .k	Received: もヘッダにつける
@@ -535,20 +576,31 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 
 .S	コマンドメールの結果のメールの Reply-To: を変更する
 .k	$FORCE_COMMAND_REPLY_TO
+.k	$Envelope{'GH:Reply-To:'}
+
+	$Envelope{'GH:Reply-To:'} = "Your Reply-To Address";
+
+Backward compatibility で残っている変数が
 
 	$FORCE_COMMAND_REPLY_TO = "address-you-want-to-use";
 
-実際には $Envelope{'GH:Reply-To:'} への代入と全く同じです。
-Backward compatibility で残っているともいえます。
+です。実際には $Envelope{'GH:Reply-To:'} への代入と全く同じです。
 
 
 .S	X-ML-Info: の内容を指定する
 .k	$X_ML_INFO_MESSAGE
+.k	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+
+	&DEFINE_FIELD_FORCED('x-ml-info') = "書きたいこと";
+
+で強制的に指定すれば良いでしょう。一応昔風に変数
 
 	$X_ML_INFO_MESSAGE
 
-で指定した内容を優先して X-ML-Info: につけて配送します。そうでない場合
-はモードによって適当に作られた user friendly な内容が付け加えられます。
+で指定した内容を優先して X-ML-Info: につけて配送できるようにもなってい
+ます。そうでない場合はモードによって適当に作られた user friendly な内
+容が付け加えられます。
+
 
 
 .S	To: と Cc: の Rewriting 処理
