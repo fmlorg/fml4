@@ -7049,6 +7049,7 @@ sub SetUpCGIadmin
         &SetPublicUmask;
 	&MkDirHier("$CGI_AUTHDB_DIR/admin");
 	&Touch("$CGI_AUTHDB_DIR/admin/htpasswd");
+	chmod 0644, "$CGI_AUTHDB_DIR/admin/htpasswd";
     }
 
     # make cgi-bin/admin/
@@ -7347,7 +7348,8 @@ sub cgi_menu_mainloop
 	    &SetPublicUmask;
 	    $flag = '-c';
 	    &MkDirHier($dir);
-	    &Touch($pwd);
+	    &Touch($pwf);
+	    chmod 0644, $pwf;
 	}
 
 	my $user = &Query("user", $ENV{'USER'}, '[\w\d+\-_\.]+', $ENV{'USER'});
