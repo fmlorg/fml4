@@ -2796,7 +2796,7 @@ sub LoopBackWarn
 
     for $a ($MAIL_LIST, $CONTROL_ADDRESS, @MAIL_LIST_ALIASES, 
 	    "fmlserv\@$DOMAINNAME", "majordomo\@$DOMAINNAME", 
-	    "listserv\@$DOMAINNAME") {
+	    "listserv\@$DOMAINNAME", "mead\@$DOMAINNAME") {
 
 	next if $a =~ /^\s*$/oi;	# for null control addresses
 	if (&AddressMatch($to, $a)) {
