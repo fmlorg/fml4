@@ -153,19 +153,31 @@ fml-1.4.1 以降、各ユーザーごとにまとめ送りの様式を決めることができま
 
 
 .S	まとめ送りメールに付くSubjectの設定
-.k	$MSEND_DEFAULT_SUBJECT	
+.k	$MSEND_SUBJECT_TEMPLATE
+.k	$MSEND_DEFAULT_SUBJECT (CFv2)
 
-syntax:
-	$MSEND_DEFAULT_SUBJECT モード表示 (1/N) ($ML_FN)
+	$MSEND_SUBJECT_TEMPLATE
 
-で設定します。
+という変数があります。これは
 
-例：    
-	$MSEND_DEFAULT_SUBJECT = "ML BUNCH SERVICE";
+    Digest -Matome Okuri- _ARTICLE_RANGE_ _DOC_MODE_ _PART_ _ML_FN_
 
-とすると
+のように設定されていて、内部で
 
-	ML BUNCH SERVICE Article 311 [PLAINTEXT(UNIX FROM)] (1/1) (Elena Lolabrigita ML)
+	   _ARTICLE_RANGE_  <=>    Article 768
+	   _DOC_MODE_       <=>    [last:10 tar + gzip]
+	   _PART_           <=>    (1/4)
+	   _ML_FN_          <=>    $ML_FN (here is "(Elena ML)") 
+
+のように変換して、メールの subject: は
+
+   Digest -Matome Okuri- Article 768 [last:10 tar + gzip] (1/1) (Elena ML)
+
+のようになるようにしあした。この変数を customize すれば (1/1) を削る
+(_PART_を切る)とかが簡単にできます。
+
+これにより$NOT_SHOW_DOCMODE (CFVersion 2) や $MSEND_DEFAULT_SUBJECT は 
+obsolete になりました。
 
 
 .S	まとめ送り処理をhookする場合
@@ -188,16 +200,28 @@ msend の Subject: 等を変更する場合に使用します。
 
 
 gzip で複数のファイルを一つにして送るのがデフォールトですが、 
-$MSEND_MODE_DEFAULT の値で、まとめ送りサーバの設定を変更することが出来
-ます。使えるパラメータは $MGET_MODE_DEFAULT と同様です。
+
+	$MSEND_MODE_DEFAULT
+
+の値で、まとめ送りサーバの設定を変更することが出来ます。使えるパラメー
+タは $MGET_MODE_DEFAULT と同様です。
 
 なお便利なように、これらの簡易設定があります。
 
-	$USE_RFC1153_DIGEST	デフォールトをRFC1153
-	$USE_RFC1153		デフォールトをRFC1153
-	$USE_RFC934		デフォールトをRFC934
+(config.ph CFVerion 3)
+
+	$MSEND_MODE_DEFAULT = "rfc1153"   デフォールトをRFC1153
+	$MSEND_MODE_DEFAULT = "rfc934"	   デフォールトをRFC934
 
 に設定する(詳細以下)。
+
+＃昔は (config.ph CFVerion 2)
+＃
+＃	$USE_RFC1153_DIGEST	デフォールトをRFC1153
+＃	$USE_RFC1153		デフォールトをRFC1153
+＃	$USE_RFC934		デフォールトをRFC934
+＃
+＃でした。CFVersion 2 になっていれば自動的に変換します。
 
 
 .S	まとめおくりのデフォールトで RFC934 形をつかうか？
