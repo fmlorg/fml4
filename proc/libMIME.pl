@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libMIME.pl,v 2.17 2001/09/13 08:46:33 fukachan Exp $
+# $FML: libMIME.pl,v 2.18 2001/09/14 03:08:29 fukachan Exp $
 #
 
 use vars qw($debug 
@@ -70,7 +70,7 @@ sub mimeencode
     my $pkg = 'IM::Iso2022jp';
     eval qq{ require $pkg; $pkg->import();};
     unless ($@) {
-	line_iso2022jp_mimefy($s);
+	line_iso2022jp_mimefy(&STR2JIS($s));
     }
     else {
 	Log("mimeencode cannot load $pkg, fallback to mimew.pl");
@@ -155,7 +155,10 @@ package main;
 
 # for debug
 if ($0 eq __FILE__) {
-    eval q{ sub Log { print STDERR "LOG>", $_, "\n";} };
+    eval q{ sub Log { print STDERR "LOG>", $_[0], "\n";} };
+
+    require 'libloadconfig.pl';
+
     while (<>) {
 	my ($x) = $_;
 	chop $x;
