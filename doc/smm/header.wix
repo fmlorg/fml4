@@ -25,6 +25,9 @@ config.ph 等で定義してください。
 	fml.pl $DIR --through 
 
 
+.S	To: Cc: Rewriting;
+.l	$NOT_REWRITE_CC
+
 
 .S	Cc: フィールドを“つけない”
 
