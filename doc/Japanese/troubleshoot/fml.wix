@@ -2,67 +2,14 @@
 =E.C	Trouble Shooting (around FML itself)
 .k	trouble shooting around FML itself
 
-.S	最新版にバージョンアップする時に、config.ph は前のままでＯＫ？
-=E.S	I can use the same old config.ph when version up?
+.S	user@domain でないと自動登録できない
+=E.S	FML accepts only user@domain form, denies addr without domain part
+.xref	reject-address-in-autoregist
 
-基本的にそうです。 適宜自動補正のルーチンが処理されます。config.ph は 
-$CFVersion という変数の値でバージョンが定められています。この値によっ
-て互換性を保つルーチンが呼ばれます。2.1 では CFVersion 3.0 で現在
-(2.2ALPHA)の config.ph は 3.2 です。
-=E
-Yes, FML is backward compatible except for contents of your hooks, so
-understand the old config.ph. FML checks $CFVersion in config.ph. Pay
-attention hooks you customized uses obsolete functions in old FML. If
-so, such hooks do not work and you need to write hooks based on
-current functions.
+そういうものです。
 
-1.6 と 1.5 の境目で大きく内部データ構造がちがうので、自分で HOOK をか
-いて使っている場合は、 $COMPAT_FML15 = 1; ってのが必要になるでしょう。
-使ってない場合はそのままでＯＫです。
+makefml を使えば登録できます。
 
-ただたまに変数名のスペリングの間違いを直すとか〜で かわっちゃうことが
-ありますけど compat はできるだけ補正するし、そういうのは doc/INFO 等に
-書いておきますので、見てもらえばOKのはずです。
-
-.S	ML-request をコマンド用のアドレスにする
-=E.S	Set up listname-request as a command address
-.k	ML-request をコマンド用のアドレスにする
-
-1 	-request 宛をコマンドにするためには、-request 宛が fml.pl を
-     	呼ぶようにしなければなりません。つまり /etc/aliases を変更し
-	listname-request がコマンド用の include-ctl を呼ぶようにしていないと
-	いけません。例: elena ML の場合
-=E
-   1 set up listname-request to run fml.pl with command mode
-
-	elena-request: :include:/var/spool/ml/elena/include-ctl
-
-   ファイル include-ctl は
-=E
-   The content of file elena-request is such as
-
-	"|/usr/local/fml/fml.pl /var/spool/ml/elena --ctladdr"
-
-のようになっている必要があります。
-
-2 	また配送するメールのヘッダではコマンドの送り先情報を
-	書いています。ユーザの便宜のためアドレスも変えて下さい。
-	config.ph  なら
-=E
-2	FML distribution article has information of commands in the header.
-	Please set 
-
-	$CONTROL_ADDRESS       = "elena-request\@$DOMAINNAME";
-.k    	$CONTROL_ADDRESS
-
-と登録する必要があります。問題はこの場合 $MAINTAINER をどうするかです。-
-request のままだとエラーの時恐いので、 elena-admin 等をつくってそれは
-本当の単なる管理者宛のフォワード等にするとよいとおもいます。ちなみにデ
-フォールトは elena-admin なのでそのままで大丈夫でしょう。
-=E
-In config.ph. If $MAINTAINER is the same as $CONTROL_ADDRESS, please
-change it to different one. In default it is o.k. since $MAINTAINER is
-listname-admin.
 
 .S	log ファイルに残る 550... みたいな数字は何？
 =E.S	550 and so on ... in log file
@@ -73,6 +20,7 @@ Sendmail からのエラーメッセージの記録です。メッセージは [45]\d\d 形式
 FML logs error messages from sendmail which messages begin with 4XX or
 5XX. Check log file of FML and sendmail. $DIR/var/log/_smtplog (SMTP
 session log) may be useful.
+
 
 .S	WARNING: UNIX FROM Loop
 .k	WARNING: UNIX FROM Loop
@@ -107,6 +55,7 @@ Hence we recommend $MAINTAINER is -admin or -request form. If
 =E
 this mechanism does not work.
 	
+
 .S	Try mci:prog since smtp connections cannot be opened
 .key	ソケットがつくれまへん
 .key	プロセス間通信
@@ -137,6 +86,7 @@ In this case fml.pl runs $SENDMAIL as a delivery program.
 トされているとはおもいますが、念のためチェックして下さい。なお 
 qmail-smtpd や exim も動かそうと努力します。
 
+
 .S	The flock() function is unimplemented ...
 .k	The flock() function is unimplemented ...
 
@@ -151,6 +101,9 @@ qmail-smtpd や exim も動かそうと努力します。
 .k	$USE_FLOCK
 
 にしてみてください。
+
+	メニュ → オプション → USE_FLOCK → n
+
 .fi
 .if LANG == ENGLISH
 * compilation of perl fails
@@ -164,6 +117,7 @@ If you cannot avoid this, please set
 in config.ph. FML does not use flock(2) but use link(2) style lock
 algorithm.
 .fi
+
 
 .S	503 Need RCPT (recipient) 
 .k	503 Need RCPT (recipient) 
@@ -203,6 +157,7 @@ Check mail headers from the person.
 
 .fi
 
+
 .S	fml.pl はうごくのに msend.pl とか cron.pl とかはちゃんと動かない
 =E.S	fml.pl works well but msend.pl and cron.pl cannot work. Why?
 
@@ -211,18 +166,22 @@ Smtp:connect:なんとか とかエラーがでるんじゃないかとおもいます。
 
 メールを受けて fml.pl を起動するマシンと UNIX の Shell サービスを提供
 しているマシン、つまり msend.pl を動かすマシンが違う場合がありえます。
-例えばRIMNET。
+例えば RIMNET。
 =E
 In some ISP's, a host where user's cron job runs and a host receiving
 in coming mails are different, in addition they are different
 operations systems. This is a special case, so please consult with
 your ISP or administrators of your host.
 
-.S	まとめおくりファイルの文法は違う？
+
+
+.S	まとめおくりの設定を手でしたらだめ？
 =E.S	Grammer of msend control file
 
 .if LANG == JAPANESE
-ある意味では悪いんです;-) すいません_o_
+あまりよくありません。makefml かコマンドで設定して欲しいです。
+
+解説:
 
    Elena@Baycity.asia  matome   1u
 
@@ -269,7 +228,8 @@ Elena@Baycity.jp  m=1u
 が出るかも知れません(最初の一人の時だけしか該当しません)。
 .fi
 
-.S	EUC のファイルを perl はバイナリと認識する
+
+.S	EUC のファイルを perl はバイナリと認識する?
 =E.S	Perl understand EUC file as a binary file
 .k	EUC
 
@@ -289,9 +249,6 @@ perl は8ビット目が立っているものがある量 or ファイル全体の10%を越える
 *** Japanese specific problem. 
 .fi
 
-.S	user@domain でないと自動登録できない
-=E.S	FML accepts only user@domain form, denies addr without domain part
-.xref	reject-address-in-autoregist
 
 .S	lha または ish が見つからない…
 =E.S	Lha or ish is not found
@@ -315,7 +272,8 @@ static である必要があります
 	So fml.pl and msend.pl works differently.
 .fi
 
-.S	MLとWWWのマシンが別々の場合
+
+.S	MLとWWWのマシンが別々の場合なのでトラブリます;)
 =E.S	A ML host and a WWW host are different
 
 メールを受けるマシンと WWW のマシンは別々(にある日強制的にさせられてし
@@ -330,31 +288,3 @@ ML はメールを受けるマシンでしかできませんが、WWWマシンはメールを受けと
 れず、そのマシンの上でないとDISKも十分でない場合。pop でメールを読む環
 境ならPOPを使ったMLが実行できます。
 .xref popfml
-
-.S	勝手についてしまう signature を取る
-=E.S	ISP enforce to append a signature to your mail 
-.k	signature
-
-そもそもメールの本文をいじるなんてとんでもない話ですが…
-そういうことをする provider なり会社を許してはいけませんね。
-=E
-Such an ISP is terrible since it implies YOU HAVE NO SECRET, someone
-can rewrite your mail.
-
-これができるということは内容の改竄もできるし機密保持も存在していないわ
-けです。ということは通信の秘密に関してモラルがない企業ということではな
-いでしょうか？
-
-その部分を削るHOOKの例:
-=E
-To cut off the last signature.
-
-$SMTP_OPEN_HOOK = q#
-	local($uja);
-	for (split(/\n/, $e{'Body'})) {
-	   next if /=+/ .. /\-+/;
-	   $uja .= "$_\n";
-	}
-
-	$e{'Body'} = $uja;
-#;

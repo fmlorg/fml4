@@ -1,0 +1,80 @@
+.C	Header
+
+.S	メールサーバがグリニッジな時間をつけてるぞ！
+
+素の qmail なら、そういうものです。いやなら patch をあてましょう。
+.xref http://www.qmail.org/
+
+
+.S	ヘッダの時間がおかしい?
+=E.S	Strange time zone of mail header
+.key	TZ
+.key	sendmail.cf
+
+.if LANG == JAPANESE
+システムで環境変数 TZ がちゃんと定義されてない or ちゃんと Sendmail に
+渡されない場合
+「変な TZ が設定されているため GMT を使ってしまう」
+
+例えば sendmail.cf が古いので sendmail を新しくしたらそれが顕在化した
+ケースとかありました。
+
+fml.pl内で呼ばれるlocaltimeが正しい値を返さないため、
+変な TZ の渡し方をして、結果としてGMTをかえしてしまう
+
+例えば、JLEでないSUN-OS4.1.3でおこる。JLEの場合は正しい値を返す
+
+sendmail.cf に TZ=japan-time みたいに見知らぬものがついてたら削るかそ
+のOSの正しい書き方にする。
+
+もうひとつの後向きな考え方は fml.pl で 
+	$ENV{'TZ'} = 'JST';
+のようにセットしてしまうこと
+
+SunOS 4.1.3_U1(English)では、$ENV{'TZ'} = 'Japan';  だそうです。
+#thanks to hogawa@mesh.ad.jp
+.fi
+.if LANG == ENGLISH
+Please check time zone of sendmail.cf if you use old sendmail.cf.
+The last method is to configure $ENV{'TZ'} in config.ph.
+.fi
+
+
+.S	Received: from  (localhost.変なドメイン) by ...
+=E.S	Received: from  (localhost.domain) by ...
+.key	Received:
+.key	sendmail.cf
+
+少なくとも localhost ってところだけは関係ありますが後は sendmail,
+sendmail.cf および DNS の問題であって fml の問題ではありません。
+=E
+If the mail header delivered from fml.pl has "Received: from
+localhost.domain", it comes from connection information since fml.pl
+uses loopback to connect sendmail. Please set $HOST to your machine
+external interface name to reveal your hostname in the header.
+
+謎の sendmail.cf が変な展開とか resolver が変とかもありうるかもしれま
+せんが、fml.pl が loopback を使ってメールを出してるならそれで正しいは
+ずです。
+
+	$HOST		= 'FMLが走るマシン名';
+
+にしてそのマシンの loopback でないのがつくこともあります。
+＃でも普通は自分自身へのroutingは loopback interface 使ってないかなぁ 
+
+別解答: Received: from  ... by ... を Received: by ... にする
+	sendmail.cf 	を HReceived: by $j ($v/$Z); $b などへ
+
+
+
+.S	JST問題
+=E.S	JST problem
+
+.if LANG == JAPANESE
+"  JST"(スペース2個) はだめで、" JST"(スペース1個) はOKな変なメールイン
+ターフェイスあるんだって？？？
+.fi
+.if LANG == ENGLISH
+*** Japanese specific ***
+.fi
+

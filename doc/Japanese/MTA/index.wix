@@ -4,9 +4,17 @@
 .toc
 .~HTML_PRE
 
+.P	∞Ï»Ã
+.include common.wix
+
+
 .P	Postfix
 .include postfix.wix
 .include postfix-pop-before-smtp.wix
+
+
+.appendix
+.include wrapper.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

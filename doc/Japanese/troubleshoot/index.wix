@@ -2,6 +2,15 @@
 .# .__repl_title__
                 トラブルシューティング
 
+.if LANG == JAPANESE
+とりあえずエラーメッセージにでてくる単語でサーチをしてみて、ドキュメン
+トのエラーリストなりに事例がないかを調べて下さい。
+.url http://www.fml.org/fml/search-j.html
+.fi
+.if LANG == ENGLISH
+Anyway search please!
+.url http://www.fml.org/fml/search-e.html
+.fi
 .toc
 .~HTML_PRE
 
@@ -9,12 +18,8 @@
 .include overview.wix
 .include permission.wix
 .include fml.wix
-.include mua.wix
 .include misc.wix
 .include os.wix
-
-.appendix
-.include wrapper.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -1,0 +1,128 @@
+.C	メールサーバの問題
+.l	troubles.mailserv
+
+.S	エラーメールの例
+
+エラーメールが返ってきたら,こんな風になっていると思います。
+この
+   ----- The following addresses had permanent fatal errors -----
+や
+   ----- Transcript of session follows -----
+のあたりをみて、
+
+	Quota exceeded
+
+のようなキーワードを探して下さい。
+
+
+◯ sendmail が返すエラーメールの例
+.q
+エラーメールのヘッダ
+
+   ----- The following addresses had permanent fatal errors -----
+<rudo@nui.fml.org
+
+   ----- Transcript of session follows -----
+procmail: Quota exceeded while writing "/var/spool/mail/rudo"
+550 <rudo@nui.fml.org>... Can't create output
+
+	この後に DSN
+
+	送った本文などが続く…
+.~q
+
+
+.S	典型的なエラーメール
+
+.if LANG == JAPANESE
+エラーメールの最初の方に以下のようなキーワードがありますか？
+
+	エラー		原因
+	--------------------------------------------------------
+	unsafe	 	ファイルやdirectoryのpermissionがおかしい
+			どこかが group writable になっていませんか？
+			/ から全階層に渡ってチェック
+
+			とあるOSで / が drwxrwxrwx というのがありました
+			(なんて駄目過ぎる OS …)
+
+	loop		/etc/aliases の設定がおかしい 
+			newaliases を実行しましたか？
+
+	user unknown	そんなユーザはいない
+			/etc/aliases に設定はありますか？
+			newaliases を実行しましたか？
+
+	sh: fml.pl not available
+			smrsh を使ってたりしますか？
+			(最近のRedhatでこのsmrshからみのトラブルが多いです)
+			sendmail.cfをどうやって作ったかを確認してください
+
+	Quota exceeded	ディスク(の割り当て)が一杯でメールスプールに書けない
+			相手の問題			
+
+	Can't create output	書けないといっている。
+			結果はどうでもよくて、問題は理由。
+			その前後に理由が書いてないですか？
+.fi
+.if LANG == ENGLISH
+	error		origin
+	--------------------------------------------------------
+	unsafe		permission of files or directories
+
+	loop		/etc/aliases miss-configuration
+			did not newaliases
+
+	user unknown	no such user
+			/etc/aliases miss-configuration
+			did not newaliases
+
+	sh: fml.pl not available
+			you use smrsh? properly configured?
+			
+
+	Quota exceeded	Quota exceeded	
+.fi
+
+
+.S	Can't locate getopts.pl in @INC at makefml line 104.	
+
+perlが正しくインストールされていません。perlをインストールしなおして
+ください。
+=E
+The installation of perl fails. Please install perl again!
+
+
+.S	:include: がうまく動かない場合 (/etc/aliases)
+=E.S	You fails to use :include: form in /etc/aliases
+
+可能性として
+=E
+The following reasons are possible:
+
+○ メールサーバが include 形式をそもそもサポートしていない
+	そんなことはなく、設定がおかしい
+	NT なんかだと普通かも（？）
+=E
+* your mail system do not support include form.
+  You may require C-Wrapper (see below). 
+
+
+○ include ファイルの場所がセキュリティ的に問題があるためエラー
+   例えば 
+	・ NFS ごし
+	・ include ファイルのある場所までのどこかの permission が危ない
+	   例えば /usr, /usr/local, /usr/local/fml のように順次下って
+	   group writable か否かを調べる。chmod 755 をしまくる
+=E	
+* "include" file exists in an insecure directory.
+  Please check the whole hierarchy permission from / to the "include".
+  check	/usr, /usr/local, /usr/local/fml, ... and chmod 755 them!
+
+などが考えられます。include ファイルの置き場所は可能な限り permission 
+を落したローカル(NFSではない)場所(そこまでの階層すべての permission に
+配慮する)に include ファイルを置いてみて下さい。例えば /usr/local が 
+local disk の上にあるとして /usr/local/include/ の下に置いておくなどです。
+＃注意: そもそも NFS ごしに setuid しようというのが間違い
+
+C wrapper の詳細: .ptr{C-wrapper}

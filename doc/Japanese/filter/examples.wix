@@ -227,6 +227,34 @@ fml adjusts $REJECT_ADDR for rejection irrespective of this file.
 .fi
 
 
+.S	勝手についてしまう signature を取る
+=E.S	ISP enforce to append a signature to your mail 
+.k	signature
+
+(料金を下げるかわりにそういうことをするとか最初に明言しているサービス
+ならともかく)そもそもメールの本文をいじるなんてとんでもない話ですね
+=E
+Such an ISP is terrible since it implies YOU HAVE NO SECRET, someone
+can rewrite your mail.
+
+これができるということは内容の改竄もできるし機密保持も存在していないわ
+けです。ということは通信の秘密に関してモラルがない企業ということではな
+いでしょうか？
+
+その部分を削るHOOKの例:
+=E
+To cut off the last signature.
+
+$SMTP_OPEN_HOOK = q#
+	local($uja);
+	for (split(/\n/, $e{'Body'})) {
+	   next if /=+/ .. /\-+/;
+	   $uja .= "$_\n";
+	}
+
+	$e{'Body'} = $uja;
+#;
+
 .#
 .# $Id$
 .#
