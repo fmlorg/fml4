@@ -93,8 +93,15 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 最新版の fml-current のソースコードを手に入れてから改造等はしていただ
 けるとよろしいかと存じます(_o_)。
 
-○ fml のWWWのページは http://axion.phys.titech.ac.jp/uja/fml/ です。
-   最新のドキュメント、ソースともにここに揃っています。 
+○ fml のWWWのページは 
+
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/ 
+
+です。昔のＵＲＬにも同じものがあります。
+
+	http://www.phys.titech.ac.jp/uja/fml/ 
+
+最新のドキュメント、ソースともにここに揃っています。 
 
 ○ fml@phys.titech.ac.jpへ何でもいいからメールを送ると最新情報を返すよ
 うにしてあります。
@@ -159,6 +166,15 @@ fml-current@phys.titech.ac.jp に送ると自動的に送り返されます。
 
 members や log file等をそのままに、*pl 群と config.phを差し替えればい
 きなり動きます。
+
+
+.S	使用上の注意
+
+このソフトウエアはIIJの業務とは”一切関係ありません”。
+単なる私の趣味です。質問等は上記のアドレスへ送って下さい _o_ 
+また”絶対に IIJ のサポート窓口等に質問をしない”ようにして下さい。
+
+よろしくお願いします。
 
 
 .C	fml でやれること
