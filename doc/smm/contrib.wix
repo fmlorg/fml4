@@ -17,9 +17,9 @@ lexical
 localhack
 localhack/release-1		contrib for FML release-1
 localhack/release-1/mnews	mnews ML
-localhack/release-1/putfile	(.ptr{contrib/localhack/release-1/putfile})
-localhack/release-1/schwalben	(.ptr{contrib/localhack/release-1/schwalben})
-localhack/release-1/vote	(.ptr{contrib/localhack/release-1/vote})
+localhack/release-1/putfile	
+localhack/release-1/schwalben	
+localhack/release-1/vote	
 localhack/release-2		contrib for FML release-2
 localhack/release-2/kizu	
 localhack/release-2/doc-changes	doc-changes@ffs.fml.org
