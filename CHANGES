@@ -35,7 +35,52 @@
 	反映されないものがあります。  
 
 
+
+2001/07/12
+
+   4.0.2_BETA
+
+  module/
+	sync w/ latest fml 5.0 branch
+
+	2001/07/01 分のマージがちゃんと sync されてなかったので retry もする
+
+
+2001/07/09
+
+   sys/WINDOWS_NT4/ntfml.pl
+	sleep() varies with -u INTERVAL
+
+
+	とりあえず -u オプションで変更できるループインターバルに対応し
+	て(実のところ 100 で割って整数にしてみるだけですが:-)みるよう
+	な quick hack をしてみました( 4.0-current )。
+
+	つまり ntfml.pl -u 60 とかすると、ぜんぜん sleep しません
+	＃いいのかなぁ
+
+
+2001/07/08
+
+  daily snapshot restarts
+
+	日代わりスナップショットの作成を再開しました。
+
+	4.0-current
+		ftp://ftp.fml.org/pub/fml/daily-snapshots/current/
+
+	4.0-stable
+		ftp://ftp.fml.org/pub/fml/daily-snapshots/stable/
+
+
 2001/07/06
+
+  CGI interface bug fixes
+
+	www/template/English/ml-admin
+		nuke prependig _CGI_PATH_
+
+	define cgi-langext-0-0 tag for further development
 
   bin/lntgz.pl is added: symlink *.tar.gz with *.tgz
 	PR by fml-help: 00409 (Masaki Hojo <hojo@CyberAssociates.co.jp>)
@@ -45,12 +90,14 @@
 
 	2000 で実際に動いた環境の例を追加
 
+
 2001/07/03
 
    proc/libdist.pl 
 
 	apply fml-help:00418 (by OGAWA Kunihiko <kuni@edit.ne.jp>) to
 	fix MIME encoding.
+
 
 2001/07/02
 
