@@ -89,15 +89,18 @@ fml-suppport: 07638
 
 いまでは MesgLE() をつかって再実装するべきだ
 
+
 .S	chkerror
 
 Author: i16@forest.ne.jp
 
 package としてくみこむ作業がのこってる
 
+
 .S	msend.pl should not tr/A-Z/a-z/
 
 fml-support: 07262
+
 
 .S	makefml (bye|chaddr|?) address(regexp)
 
@@ -105,6 +108,7 @@ fml-support: 07101
 fml-support: 07104
 Incomplate but effective fix is done.
 We should rewrite address match routine.
+
 
 .S	makefml add ML addr options ?
 
@@ -135,6 +139,7 @@ mead が判定不能だったメールを知らせる
 =E
 if mead finds unknown error format, notify it to administrator.
 
+
 .S	$DEFAULT_DIR_MODE in makefml ?
 
 makefml 内での $DEFAULT_DIR_MODE の取り扱い
@@ -149,6 +154,7 @@ fml-support: 06899
    ＃ もし違ってたら$DEFAULT_DIR_MODEに直すといいかな…と一瞬おもったけど
    ＃ 意図的にchmodしててもこれに戻されちゃうとかあって問題だろうなぁ
    
+
 .S	makefml mkdir()
 
 fml-support:6899
@@ -434,15 +440,6 @@ check also GNU Privacy Gaurd.
  *  $REWRITE_TO not number value
 
 
-.S	&Open()
-
-remove &Open()
-
-  contrib/localhack/release-2/member_name/src/libmember_name.pl
-  contrib/mail2fax/libfax.pl
-  kern/libkernsubr.pl
-
-
 .S	アドレス一括書き換え
 =E.S	rewrite address in one action
 
@@ -603,10 +600,10 @@ XXX 「美しいコード」という命題自体がかなり無意味な気がする
 XXX わかりやすいコードというべきなんだろうな
 
 .# $Id$
-.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
