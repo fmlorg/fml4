@@ -1,5 +1,79 @@
 .C	記事の配送について
 
+.S	フィルタリング
+=E.S	Filtering
+.xref	EnvelopeFilter
+
+ＭＬにながれるメールの中には好ましくないものがあります。例えば
+
+	○ 本文が何もないメール
+	○ help や unsubscribe などの英語一行メール
+	○ %echo ふがほげ の行
+	   1999/02/24からはこの行がひっかかった時点で拒否
+	   これ以前はあるパラグラフがこの行そのものの時のみ拒否
+	   つまり『空行＋%echoなんとか行＋空行』の時だけだった
+	○ Message-Id: が朗かに addr-spec でないのは SPAM メール
+=E
+	* reject null body
+	* reject one line English words mail
+	  e.g. "help", "unsubscribe"
+	* reject invalid Message-Id mails (may be SPAM mails)
+	* other strange syntaxes
+
+などです。FMLはヘッダや本文の内容によってこれらを弾くフィルターを内蔵
+しています。詳細と仕組みについては .ptr{EnvelopeFilter} を見て下さい。
+
+オプションとしては次のようなものがあります。
+
+	$FILTER_ATTR_REJECT_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_COMMAND
+
+○ #unsubscribe などのコマンドをはじく
+=E
+* reject '#unsubscribe' like commands
+
+	$FILTER_ATTR_REJECT_2BYTES_COMMAND (default 0)
+.k	$FILTER_ATTR_REJECT_2BYTES_COMMAND
+
+○ ２バイト英文字ではじまる行を拒否
+	   例: ＵＮＳＵＢＳＣＲＩＢＥ ほえほえ
+=E
+* reject a line begining with Japanese 2-byte English Characters
+	  e.g. 2-byte "unsubscribe"
+
+○ ヘッダに特別なキーワードを見つけたら弾く
+.xref &DEFINE_FIELD_PAT_TO_REJECT
+
+happy99 virusのメールを弾く。
+=E
+reject "happy99 virus" mail
+
+	&DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
+
+
+○ これ以外の高度なチェックは
+=E
+You can use a hook to write your own more complicated filtering rules.
+Attention: in this hook you can refer %Envelope as %e.
+
+	$DISTRIBUTE_FILTER_HOOK (for post)
+.k	$DISTRIBUTE_FILTER_HOOK
+.k	$REJECT_DISTRIBUTE_FILTER_HOOK
+.if LANG == JAPANESE
+＃ $REJECT_DISTRIBUTE_FILTER_HOOK でも可能です(obsolete)。
+＃ 同様に $REJECT_COMMAND_FILTER_HOOK もありますが obsolete
+.k	$REJECT_COMMAND_FILTER_HOOK
+.fi
+
+	$COMMAND_FILTER_HOOK (for command)
+.k	$COMMAND_FILTER_HOOK
+
+で直接 perl の構文で %e (%Envelope) ハッシュの変数を使って記述して下さ
+い。HOOK 内部では $e{'h:from:'} などでハッシュにアクセスして下さい。
+＃このために独自の言語とかをまた新たに導入するのは面倒だとおもうので
+＃perl で生書きです。
+
+
 .S	PGPを使って暗号化したメーリングリストにする
 =E.S	Pgp Encrypted Distribution (Mailing List)
 .l	$USE_ENCRYPTED_DISTRIBUTION
