@@ -856,7 +856,7 @@ sub CutOffRe
 
 sub CheckCurrentProc
 {
-    local(*e) = @_;
+    local(*e, $ccp_mode) = @_;
 
     # connection info
     &eval('&GetPeerInfo;') if $LOG_CONNECTION;
@@ -984,6 +984,7 @@ sub CheckCurrentProc
 
     ##### SubSection: special trap
     return 0 if $CheckCurrentProcUpperPartOnly;
+    return 0 if $ccp_mode eq 'upper_part_only';
 
     ##### SubSection: misc
 
