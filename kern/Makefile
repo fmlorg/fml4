@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -13,7 +13,6 @@ CC 	  = cc
 CFLAGS	  = -s -O -DPOSIX
 
 SH	  = /bin/sh
-MKDIR     = mkdirhier
 
 PWD       = `pwd`
 CONFIG_PH = ./config.ph
@@ -38,12 +37,8 @@ doc: 	html_doc
 html_doc:
 	$(FWIX) -T op -m html -D doc/html/op -d doc/smm < doc/smm/op.wix
 
-roff:	doc/smm/op.wix
-	@ echo "sorry, not implemetend yet but halfly completed?"
-	@ echo ""
-	@ echo "Making nroff of doc/smm/op => var/man"
-	@ $(MKDIR) var/man
-	@ $(FWIX) -T smm/op -m roff -R var/man -I doc/smm doc/smm/op.wix
+roff:
+	@ echo sorry, not implemetend yet
 
 texinfo:
 	@ echo sorry, not implemetend yet
