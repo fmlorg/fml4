@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Message.pm,v 1.60 2002/04/28 13:34:16 fukachan Exp $
+# $FML: Message.pm,v 1.66 2002/08/03 04:25:20 fukachan Exp $
 #
 
 package Mail::Message;
@@ -505,6 +505,7 @@ sub _parse
     my ($self, $fd, $result) = @_;
     my ($header, $header_size, $p, $buf, $data);
     my $total_buffer_size = 0;
+    my $is_header_found   = 0;
     my $data_ptr          = $self->{ __data };
 
   DATA:
@@ -513,18 +514,25 @@ sub _parse
 	$buf               .= $data;
 
 	if (($p = index($buf, "\n\n", 0)) > 0) {
-	    $header      = substr($buf, 0, $p + 1);
-	    $header_size = $p + 1;
-	    $$data_ptr   = substr($buf, $p + 2);
+	    $is_header_found = 1;
+	    $header          = substr($buf, 0, $p + 1);
+	    $header_size     = $p + 1;
+	    $$data_ptr       = substr($buf, $p + 2);
 	    last DATA;
 	}
     }
 
-    # extract mail body and put it to $$data_ptr
-  DATA:
-    while ($p = sysread($fd, $data, 1024)) {
-	$total_buffer_size += $p;
-	$$data_ptr         .= $data;
+    if ($is_header_found) {
+	# extract mail body and put it to $$data_ptr
+      DATA:
+	while ($p = sysread($fd, $data, 1024)) {
+	    $total_buffer_size += $p;
+	    $$data_ptr         .= $data;
+	}
+    }
+    else {
+	$header      = $buf;
+	$header_size = $total_buffer_size;
     }
 
     # read the message (mail body) from the incoming mail
@@ -546,7 +554,7 @@ sub _parse
 }
 
 
-# Descriptions: return hash array for header for further parsing.
+# Descriptions: return ARRAY_REF for header for further parsing.
 #               get reverse_path if possible.
 #    Arguments: OBJ($self) HASH_REF($r)
 # Side Effects: update $r
@@ -791,7 +799,7 @@ sub find
 	    }
 	}
     }
-    elsif (defined $args->{ data_type_regexp } && 
+    elsif (defined $args->{ data_type_regexp } &&
 	   $args->{ data_type_regexp }) {
 	my $regexp = $args->{ data_type_regexp };
 	my $mp     = $self;
@@ -1048,6 +1056,23 @@ sub _print_messsage_on_memory
 	$header =~ s/\n/\r\n/g unless (defined $raw_print_mode);
 	print $fd $header;
 	print $fd ($raw_print_mode ? "\n" : "\r\n");
+
+	# XXX we need to print header separator only if valid body exists.
+	# XXX but it seems difficult ... ;)
+	if (0) {
+	    my $m = $self->{ next };
+	    if (defined $m) {
+		my $pmap = $self->data_type_list();
+		if ($debug || 1) {
+		    print STDERR "\tlist: @$pmap\n";
+		    print STDERR "\tnext size: ", $m->size, "\n";
+		}
+		if ($m->size() > 0 || $#$pmap > 1) {
+		    print STDERR "\t<cr>\n" if $debug || 1;
+		    print $fd ($raw_print_mode ? "\n" : "\r\n");
+		}
+	    }
+	}
     }
 
     # skip the first rfc822 header (which is the real header for delivery).
@@ -2004,6 +2029,20 @@ sub message_text
     else {
 	return substr($$data, $pos_begin, $msglen);
     }
+}
+
+
+# Descriptions: get body in message as ARRAY REF
+#    Arguments: OBJ($self) NUM($size)
+# Side Effects: none
+# Return Value: ARRAY_REF
+sub message_text_as_array_ref
+{
+    my ($self, @argv) = @_;
+    my $x = $self->message_text(@argv);
+    my @x = split(/\n/, $x);
+
+    return \@x;
 }
 
 

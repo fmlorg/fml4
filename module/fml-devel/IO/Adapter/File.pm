@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: File.pm,v 1.28 2002/01/27 13:11:58 fukachan Exp $
+# $FML: File.pm,v 1.36 2002/07/25 11:34:02 fukachan Exp $
 #
 
 package IO::Adapter::File;
@@ -130,8 +130,8 @@ sub _rw_open
     my $file = $args->{ file };
     my $flag = $args->{ flag };
 
-    require IO::File::Atomic;
-    my ($rh, $wh)  = IO::File::Atomic->rw_open($file);
+    use IO::Adapter::AtomicFile;
+    my ($rh, $wh)  = IO::Adapter::AtomicFile->rw_open($file);
     $self->{ _fh } = $rh;
     $self->{ _wh } = $wh;
     $rh;
@@ -156,15 +156,28 @@ sub touch
 
     use IO::File;
     my $fh = new IO::File;
-    $fh->open($file, "a");
-    $fh->close;
+    if (defined $fh) {
+	$fh->open($file, "a");
+	$fh->close;
+    }
 }
 
 
 # debug tools
 my $c  = 0;
 my $ec = 0;
-sub line_count { my ($self) = @_; return "${ec}/${c}";}
+
+
+# Descriptions: line couter (for debug).
+#               XXX remove this in the future
+#    Arguments: OBJ($self) HASH_REF($args)
+# Side Effects: none
+# Return Value: none
+sub line_count
+{
+    my ($self) = @_;
+    return "${ec}/${c}";
+}
 
 
 =head2 C<getline()>
@@ -188,7 +201,13 @@ sub getline
 {
     my ($self) = @_;
     my $fh = $self->{_fh};
-    $fh->getline;
+
+    if (defined $fh) {
+	$fh->getline;
+    }
+    else {
+	return undef;
+    }
 }
 
 
@@ -344,7 +363,7 @@ sub add
     my $fh = $self->{ _fh };
     my $wh = $self->{ _wh };
 
-    if (defined $fh) {
+    if (defined $fh && defined $wh) {
       FILE_IO:
 	while (<$fh>) {
 	    print $wh $_;
@@ -386,46 +405,6 @@ sub delete
 	while (<$fh>) {
 	    next FILE_IO if /$regexp/;
 	    print $wh $_;
-	}
-	$fh->close;
-	$wh->close;
-    }
-    else {
-	$self->error_set("Error: cannot open file=$self->{ _file }");
-	return undef;
-    }
-}
-
-
-=head2 C<replace($regexp, $value)>
-
-replace lines which matches $regexp with $value.
-
-=cut
-
-
-# Descriptions: replace address(es) matching $reexp with $value
-#    Arguments: OBJ($self) STR($regexp) STR($value)
-# Side Effects: update map
-# Return Value: same as close()
-sub replace
-{
-    my ($self, $regexp, $value) = @_;
-
-    $self->open("w");
-
-    my $fh = $self->{ _fh };
-    my $wh = $self->{ _wh };
-
-    if (defined $fh) {
-      FILE_IO:
-	while (<$fh>) {
-	    if (/$regexp/) {
-		print $wh $value, "\n";
-	    }
-	    else {
-		print $wh $_;
-	    }
 	}
 	$fh->close;
 	$wh->close;
