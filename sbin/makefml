@@ -677,7 +677,7 @@ sub Repl
     select(NEW); $| = 1; select(STDOUT);
 
     while (<F>) {
-	s/^\#\s+$member/\#\#BYE $member/i; # off;
+	s/^\#\s*$member/\#\#BYE $member/i; # off;
 	s/^$member/\#\#BYE $member/i;
 	print NEW $_;
     }
