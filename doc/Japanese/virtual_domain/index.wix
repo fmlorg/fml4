@@ -1,0 +1,3 @@
+.include fml-install-for-virtual-domain.wix
+.include virtual-domain.en.wix
+.include virtual-domain.wix

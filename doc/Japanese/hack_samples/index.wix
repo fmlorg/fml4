@@ -1,0 +1,11 @@
+.include always_multipart_mode.wix
+.include daily-renewal.wix
+.include distribute-emulation.wix
+.include fml-stable-with-cgi.wix
+.include misc.wix
+.include nospam.wix
+.include not_cutoff_subject_tag.wix
+.include postfix-pop-before-smtp.wix
+.include qmail-mead.wix
+.include recruit.wix
+.include smrsh.wix

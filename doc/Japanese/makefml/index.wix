@@ -1,0 +1,2 @@
+.include overview.wix
+.include stdin.wix

@@ -1,0 +1,5 @@
+.include acl.wix
+.include autoregist.wix
+.include examples.wix
+.include moderator.wix
+.include registration.wix
