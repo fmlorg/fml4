@@ -23,11 +23,12 @@ var/doc/drafts/*
 PERL_SOURCES:
 kern/*pl
 proc/lib*.pl
-net/utashiro/jcode.pl
-contrib/MIME/v1.1a/mime?.pl
-contrib/MIME/2.0alpha/mimew20alpha.pl
-contrib/MIME/2.0alpha/mimer20alpha.pl
-contrib/traffic/libtraffic.pl
+pkgsrc/jcode/jcode.pl
+pkgsrc/mimepls/mimer.pl
+pkgsrc/mimepls/mimew.pl
+pkgsrc/mimepls2/mimer20alpha.pl
+pkgsrc/mimepls2/mimew20alpha.pl
+pkgsrc/traffic/libtraffic.pl 
 contrib/localhack/release-2/member_name/src/libmember_name.pl
 
 
