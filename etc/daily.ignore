@@ -95,5 +95,6 @@ CHANGE
 ON
 help
 HELP
+create \S+.html
 Create \S+.html
 reconfig \S+.html
