@@ -113,11 +113,19 @@ sub ContentHandler
     $cutoff = grep(/^.*\tstrip$/, @actions);
 
     if ($debug_ch) {
-	print STDERR "MailContentHandler: @MailContentHandler\n
-        actions: @actions
+	print STDERR "\nMailContentHandler:\n   RULES\n";
+
+	my $i = 0;
+	for (@MailContentHandler) { $i++; print STDERR "   ${i}: ",$_,"\n";}
+
+	print STDERR "\n";
+	$i = 0;
+	for (@actions) { $i++; print STDERR "   part(${i})->action($_)\n";}
+
+	print STDERR "
          reject: $reject
       multipart: $multipart 
-         cutoff: $cutoff\n";
+         cutoff: $cutoff\n\n";
     }
     
     # Rebuild message body
