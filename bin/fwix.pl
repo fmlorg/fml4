@@ -64,6 +64,7 @@ $OUTPUT_FILE = $opt_o;
 $OnFml       = 1 if $opt_F;
 
 $Lang        = $opt_L || 'JAPANESE';
+$Lang        =~ tr/a-z/A-Z/;
 
 $Manifest    = ""; # log of label;
 
@@ -323,6 +324,11 @@ sub ReadFile
     local($InIf, $TrueInIf, $HaveDotReturn);
     local($d, $f);
     local($fname) = $file;
+
+    if (! -f "$dir/$file") {
+	print STDERR "no such file $dir/$file\n";
+	return;
+    }
 
     $ReadFileRecursiveLevel++;
 
