@@ -1,0 +1,394 @@
+.C	Caching Whois (libexec/cwhois.pl)
+.k	Caching Whois (libexec/cwhois.pl)
+.l	cwhois
+.l	libexec/cwhois.pl
+.k	cwhois.pl
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.return
+.fi
+
+* whois proxy with cache と説明する方がきっとわかりやすいと思うあるね-o-;;
+
+.S	Whois Server with Cache
+.k	Whois Server with Cache
+
+whois server でデータベースを引く時、
+
+	・whois で引きたい相手先が落ちている
+	・落ちていたらローカルキャッシュに recover してほしい
+	・ローカルなキャッシュ及びデータベースも
+	  同様のインターフェイスで引きたい
+
+という要求がありえます。その機能を提供します。
+
+よってローカルなデータを引かない時の whois server は一見単なるフォワー
+ド処理をしているだけのように見えます(実際には返ってきた答をキャッシュ
+もしています)。
+
+lib/whois では本物の whois server を提供してますが、libexec/cwhois.pl 
+は本物の whois とローカルサーチを実行する extended whois です。TIMEOUT
+($TIMEOUT 変数) 秒の間に whois の返事がこない場合自動的に ローカルサー
+チ に切替えることができます。
+
+.S	一次キャッシュと２次キャッシュも含む探索アルゴリズム
+.k	$WHOIS_SERVER
+.k	#keyword
+.k	all#keyword
+.k	option#keyword
+
+一次キャッシュと２次キャッシュも含む探索アルゴリズムは次のようになる。
+
+0	一時間以内に全く同じキーワードでひいていたら
+	そのデータを表示(一次キャッシュ)
+
+1	whois -h $WHOIS_SERVER keyword
+	TIMEOUT した場合は
+	ローカルサーチ(2次キャッシュ)
+
+2	#keyword で2次キャッシュサーチ
+
+	なお、これらは一番新しいデータだけを表示。
+	明示的に関連データ全部を出すためには
+
+	all#keyword
+	all#apply#keyword 
+
+	のようにオプション( all# ) をつける
+
+.S	キャッシュの表示
+
+デフォールトではキャッシュは一番新しいデータのみを表示する。
+そのキーワードにマッチしたものすべてを表示するためには
+
+	all#keyword 
+
+のような引き方をする必要がある。なおデータの表示の順番は新しい方から古
+い方へという向きです。
+
+.S	/etc/inetd.conf 
+.k	/etc/inetd.conf 
+
+例：
+	whois stream tcp nowait fukachan \
+	/usr/local/libexec/cwhois.pl cwhois.pl /var/spool/whois
+
+
+.S	configuration file (config.ph)
+
+cwhois.pl の引数の directory にある config.ph を見ます。
+上の例だと /var/spool/whois/config.ph になります。
+キャッシュデータは /var/spool/whois/spool の下に番号をつけられてスプー
+ルされます。
+
+.S	本来の whois データベースサーバの設定
+.k	$WHOIS_SERVER
+
+このフォーワード先、つまり本来聞きたい先の whois server はあらかじめ 
+設定ファイル中に定義しておく必要があります。
+$WHOIS_SERVER を定義して下さい。
+
+例：
+	$WHOIS_SERVER       = 'whois.nic.ad.jp';
+
+
+.S	client 側での whois command の使い方
+.k	whois
+
+コマンドラインで
+
+	% whois -h whois-server help
+
+HELP を見る。相手先の help と caching whois 自身の help 両方が表示される
+
+	% whois -h whois-server KEYWORD
+
+whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
+ドし、答をキャッシュする
+
+	% whois -h whois-server #KEYWORD
+
+'opt' で定義されたキャッシュ データベースを検索
+
+	% whois -h whois-server opt#KEYWORD
+
+例：
+'local' で定義されたキャッシュ データベースを検索
+
+	whois -h whois-server local#uja
+
+
+.S	configuration file の設定一覧
+.k	$CACHE_SEARCH_PROG
+
+設定できる変数は次の通りです。
+
+○ローカルサーチに使うプログラムの定義
+＃exec するとかではなく file を include して実行します。
+
+	$CACHE_SEARCH_PROG  = "/usr/local/fml/bin/scandb.pl";
+
+＃ ちなみに &ScanDB(*key, *set, *db, *spool, *misc); のように呼び出します
+
+○キャッシュスプールとデータベース対応させる配列（連想配列）
+.k	%CWHOIS_CACHE_SPOOL
+.k	%CWHOIS_CACHE_DB
+
+    KEYWORD => スプール（directory）
+
+と
+
+    KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
+
+というついになったデータを利用します。
+
+例：
+	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply');
+	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb');
+
+必要なら（対応する） spool1:spool2 という形で
+
+	 一つのキーワード <=> 複数の database と spool の対応関係
+例：
+	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply:/var/spool/cache');
+	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb:/var/db/cachedb');
+
+が定義できます。
+
+○コマンドモードの定義
+	デフォールトでは proc#keyword 形	
+
+	$CHMODE             = '#';
+.k	$CHMODE
+
+オプションとキーワードの区切り。ここでは # なので	
+
+	help#
+	   #keyword
+	opt#keyword
+
+のようなシンタックスを受け付けます。
+
+○デフォールトフォワード先の whois server
+
+	$WHOIS_SERVER       = 'whois.nic.ad.jp';
+.k	$WHOIS_SERVER
+
+○WHOIS の TCP CONNECTION をあきらめるまでの時間
+
+	$TIMEOUT            = 5;#20;
+.k	$TIMEOUT
+
+○ whois のHELPファイル が定義されている場合は help# で
+   このファイルを表示する。
+
+	$CWHOIS_HELP_FILE
+.k	$CWHOIS_HELP_FILE
+
+○	#keyword でデータベースの指定がない時使うデフォールトのデータベース
+
+	$CWHOIS_DEFAULT_SET
+.k	$CWHOIS_DEFAULT_SET
+
+○ 	一次キャッシュ探索アルゴリズムを使う
+
+	$USE_CWHOIS_FIRST_CACHE
+.k	$USE_CWHOIS_FIRST_CACHE
+
+○ 	一次キャッシュのTIMEOUT
+
+	$FIRST_CACHE_TIMEOUT
+.k	$FIRST_CACHE_TIMEOUT
+
+○ 	一次キャッシュデータの有効期限
+
+	$FIRST_CACHE_EXPIRE
+.k	$FIRST_CACHE_EXPIRE
+
+○ 	一次キャッシュのデータベースファイル
+
+	$FIRST_CACHE_DB
+.k	$FIRST_CACHE_DB
+
+○ 	一次キャッシュのデータ格納場所
+
+	$FIRST_CACHE_SPOOL
+.k	$FIRST_CACHE_SPOOL
+
+.S	Cwhois の Search Algorithm
+
+    if  "#key" SYNTAX
+
+	key の ローカルサーチ
+
+    elsif "option#key" SYNTAX
+
+	key の ローカルサーチ
+	ローカルサーチする対象は option の部分で変更可能
+
+    else 
+
+	Signal handling を設定した後
+	＃ SIGALRM
+
+	fml の Whois ライブラリを呼び初期化する
+
+	43/tcp で通信
+	&Ipc2Whois(*e, *Fld, *host, *pat)
+
+	返り値は %e 内部変数へ返す。
+	＃sendmail の struct ENVELOPE e; に対応するもの
+	＃だが perl 4 用に reference は使っていないので注意
+
+	fml 標準実装では $e{'message'}; に答をセット
+	
+	キャッシュ オン（後で利用するため）
+
+.S	データベース・フォーマット
+
+仮定： 
+	スプールの中に キッャシュデータ は 数字のファイルで保存されている。
+	データベースは
+
+	数字：	キーワード（複数可だが一行にかぎる）
+
+	のような形のフィールドをもつ
+
+と仮定しています。この形のデータベースを事前に作っておく必要があります。
+
+caching whois server 用の付録として
+
+   lib/cwhois/scandb.pl キーワードを探して表示するためのプログラム
+   lib/cwhois/gendb.pl 	データベースを作るためのプログラム
+
+が提供されています。
+
+.S	データベースの作成
+
+cron を使って１時間に一度とかの割合で update をかけるのが良いでしょう。
+
+例：
+
+% cat crontab 
+0 * * * * /usr/local/libexec/gendb.pl /var/spool/whois/spool --DB=/var/db/cachedb
+
+データベースの内容は gendb.pl が呼ぶデータベース生成関数に依存していま
+す。
+
+.S	gendb.pl (lib/cwhois/gendb.pl)
+.k	lib/cwhois/gendb.pl
+.k	gendb.pl
+
+有効なキャッシュは良いデータベースがあってはじめて有効となります:-)
+＃『良い展示には良い暗幕』という諺のようなものですね（謎）
+
+$CACHE_PROG で与えられる program を hard reference で呼び出します。
+
+sub CacheOn という example が gendb.pl の中にありますので、
+この関数をまねして gendb.ph 等に保存し、保守すると良いでしょう。
+
+この 関数の定義次第で データベースの出来が変わります。
+
+.S	データベース生成関数の例
+.k	$CACHE_PROG
+
+データベース生成関数（ここの例は CacheOn）というこの関数は 
+メールのヘッダと本文を渡され、
+
+	マッチした文字列を返す
+
+ことを期待されています。この仕様を満たせば書き方はどうでもいいです(笑)
+
+自分でカスタマイズした 例えば 'MyCacheOn' という関数 $CACHE_PROG とい
+う変数に入れて下さい。この関数を呼び出します(hard reference 呼びだし)。
+
+	$CACHE_PROG = 'MyCacheOn';
+
+関数の例、適用ルール：
+	・メールのヘッダに uja が含まれていたら捨てる。
+	・本文に [Project] という文字列があったら捨てる。
+	・メールが nic.netじゃないところから来ていたら捨てる。
+	 （From: に nic.net という文字列があるか否か？を見る）
+
+# return matched strings
+sub CacheOn
+{
+    local(*hdr, *body) = @_;
+    local($s, $nic);
+
+    $DISCARD_HDR_PAT  = 'Subject:.*uja';
+    $DISCARD_BODY_PAT = 'c.\s+\[Project\]\s+.*';
+
+    # 822 unfolding
+    $hdr  =~ s/\n\s+/\n/g;
+    $body =~ s/\n\s+/\n/g;
+
+    for (split(/\n/, $hdr)) {
+	return 0 if /^($DISCARD_HDR_PAT)/i;
+	$nic++ if /^From:.*nic.net/i;
+    }
+
+    return unless $nic;
+
+    for (split(/\n/, $body)) {
+	return 0 if /^($DISCARD_BODY_PAT)/i;
+
+	if (/ matched_pattern /) {
+	    $s .= "$1 ";
+	}
+
+	/\[wanted_pattern\]\s+(.*)/ && ($s .= "$1 ");
+    }
+
+    while ($s =~ s/\s+/ /g) { 1;}
+    $s;
+}
+
+.S	scandb.pl (lib/cwhois/scandb.pl)
+.l	lib/cwhois/scandb.pl
+.k	scandb.pl
+.k	$CWHOIS_SEARCH_PROG
+.k	&ScanDB
+
+	require $CWHOIS_SEARCH_PROG;
+	&ScanDB(*key, *set, *db, *spool, *misc);
+
+
+.S	$CWHOIS_START_HOOK
+.k	$CWHOIS_START_HOOK
+
+keyword が help 要求でない場合まずこのフックを評価し、この後
+caching whois の main routine に入る。
+
+.S	$CWHOIS_CACHE_SEARCH_HOOK
+.k	$CWHOIS_CACHE_SEARCH_HOOK
+
+例：uja データベースの検索の時はデータ全部を表示する
+    ちなみに $MATCH_THE_LATEST = 1;（つまり一番新しいもののみ表示）
+    がデフォールト
+
+	$CWHOIS_CACHE_SEARCH_HOOK = q#
+	    if ($set eq "uja") { undef $MATCH_THE_LATEST;}
+	#:
+
+
+.S	$CWHOIS_TCP_EXIT_HOOK
+.k	$CWHOIS_TCP_EXIT_HOOK
+
+TCPコネクションが終った直後に評価されるフック
+
+
+.S	$CWHOIS_EXIT_HOOK
+.k	$CWHOIS_EXIT_HOOK
+
+終了する時に評価
+
+.# $Id$
+.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
