@@ -76,7 +76,7 @@ sub AutoRegist
     &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
     $from = ($from || $From_address);
     &Debug("AUTO REGIST FROM     >$from<") if $debug;
-    return 0 if 1 == &LoopBackWarn($from); # loop back check
+    return 0 if &LoopBackWarn($from); # loop back check
 
     # ADD the newcomer to the member list
     open(TMP, ">> $MEMBER_LIST") || do {
@@ -104,6 +104,432 @@ sub AutoRegist
 }
 
 
+# Parameters:
+# $tmpf     : a temporary file
+# $mode     : mode 
+# $file     : filename of encode e.g. uuencode , ish ...
+# @filelist : filelist of packing and encodeing
+#
+# INSIDE VARIABLES:
+# *conf : input 
+# *r    : output
+# *misc : output as an additional
+sub DraftGenerate
+{
+    local(*conf, *r, *misc);
+    local($prog, $proc);
+    local($tmpf, $mode, $file, @conf) = @_; # attention! *conf above
+    $conf = $tmpf;
+    $r    = $file;
+    $conf{'total'} = 0;
+
+    print STDERR "&DraftGenerate ($tmpf, $mode, $file, @conf)\n" if $debug;
+
+    &InitDraftGenerate;
+
+    # INCLUDE
+    require $_fp{'inc', $mode} if $_fp{'inc', $mode};
+
+    foreach $proc ( # order 
+		    'hdr',
+		    'cnstr', 
+		    'retrieve',
+		    'split',
+		    'destr'
+		    ) {
+
+	$prog = $_fp{$proc, $mode};
+	print STDERR "Call &$prog(*conf, *r, *misc)\n" if $debug;
+	&$prog(*conf, *r, *misc) if $prog;
+    }
+
+    $r{'total'};
+}
+
+
+# Get a option value for msend..
+# Parameter = opt to parse
+# If required e.g. 3mp, parse to '3' and 'mp', &ParseM..('mp')
+# return option name || NULL (fail)
+sub ParseMSendOpt
+{
+    local($opt) = @_;
+
+    foreach $OPT (keys %MSendOpt) {
+	return $MSendOpt{$OPT} if $opt eq $OPT;
+    }
+
+    return $NULL;
+}
+
+
+# &ModeLookup($d+$S+) -> $d+ and $S+. 
+# return ($d+, $S+) or a NULL list
+sub ModeLookup
+{
+    local($opt) = @_;    
+    local($when, $mode);
+
+    print STDERR "&ModeLookup($opt)\n" if $debug;
+
+    # Require called by anywhere
+    &InitDraftGenerate;
+
+    # Parse option 
+    # return NULL LIST if fails
+    if ($opt =~ /(\d+)(.*)/) {
+	$when = $1;
+	$mode = $2;
+    }
+    elsif ($opt =~ /(\d+)/) {
+	$when = $1;
+	$mode = '';
+    }else {
+	return ($NULL, $NULL);
+    }
+
+    # try to find 
+    $mode = $MSendOpt{$mode};
+
+    # Not match or document
+    $mode || do { return ($NULL, $NULL);};
+    ($mode =~ /^\#/) &&  do { return ($NULL, $NULL);};
+
+    # O.K. 
+    return ($when, $mode);
+}
+
+
+# &ModeLookup($d+$S+) -> $d+ and $S+. 
+# return DOCUMENT string
+sub DocModeLookup
+{
+    local($opt) = @_;    
+    $opt =~ s/\#\d+/\#/g;
+
+    print STDERR "&DocModeLookup($opt)\n" if $debug;
+
+    # Require called by anywhere
+    &InitDraftGenerate;
+
+    if ($opt =~ /^\#/ && ($opt = $MSendOpt{$opt})) {
+	($opt =~ /^\#(.*)/) && (return $1);
+    }
+    else {
+	return '[No document]';
+    }
+}
+
+
+sub InitDraftGenerate
+{
+    #            KEY        MODE
+    # DOCUMENT   #KEY       #MODE 
+    %MSendOpt = (
+		 '#gz', '#gzipped(UNIX FROM)', 
+		 '',        'gz',
+		 'gz',      'gz',
+
+
+		 '#mp', '#MIME/multipart', 
+		 'mp',      'mp',
+
+
+		 '#uf', '#PLAINTEXT(UNIX FROM)', 
+		 'u',       'uf', 
+		 'uf',      'uf',
+		 'unpack',  'uf',
+
+
+		 '#lhaish', '#LHA+ISH', 
+		 'i',       'lhaish',
+		 'ish',     'lhaish',
+
+
+		 '#rfc954', '#RFC954(mh-burst)', 
+		 'b',       'rfc954', 
+		 'rfc954',  'rfc954',
+
+
+		 '#rfc1153', '#Digest (RFC1153)',
+		 'd',       'rfc1153',
+		 'rfc1153', 'rfc1153'
+
+		 );
+
+
+    # PLAIN TEXT with UNIX FROM
+    $_fp{'cnstr',    'uf'} = 'Cnstr_uf';
+    $_fp{'retrieve', 'uf'} = 'f_RetrieveFile';
+    $_fp{'split',    'uf'} = '';
+    $_fp{'destr',    'uf'} = '';
+
+    # PLAINTEXT by RFC954
+    $_fp{'cnstr',    'rfc954'} = 'Cnstr_rfc954';
+    $_fp{'retrieve', 'rfc954'} = 'f_RetrieveFile';
+#    $_fp{'split',    'rfc954'} = 'f_SplitFile';
+
+    # PLAINTEXT by RFC1153
+    $_fp{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
+    $_fp{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
+#    $_fp{'split',    'rfc1153'} = 'f_SplitFile';
+
+    # PLAINTEXT by MIME/Multipart
+    $_fp{'cnstr',    'mp'} = 'Cnstr_mp';
+    $_fp{'retrieve', 'mp'} = 'f_RetrieveFile';
+#    $_fp{'split',    'mp'} = 'f_SplitFile';
+
+    # Gzipped UNIX FROM
+    $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
+    $_fp{'retrieve', 'gz'} = 'f_gz';
+    $_fp{'split',    'gz'} = 'f_SplitFile';
+
+    # PACK: TAR + GZIP
+    $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
+    $_fp{'retrieve', 'tgz'} = 'f_tgz';
+
+    # PACK: LHA + ISH
+    $_fp{'cnstr',    'lhaish'} = '';
+    $_fp{'retrieve', 'lhaish'} = 'f_LhaAndEncode2Ish';
+    $_fp{'split',    'lhaish'} = 'f_SplitFile';
+
+}
+
+				# 
+sub Cnstr_uf
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'plain'} = 1;
+    $conf{'total'} = 1;
+    $conf{'delimiter'} = "From $MAINTAINER\n";
+    $conf{'preamble'} = '';
+    $conf{'trailer'}  = '';
+}
+
+
+sub Cnstr_rfc1153
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'plain'} = 1;
+    $conf{'total'} = 1;
+    $conf{'delimiter'} = "\n\n".('-' x 30)."\n\n";
+
+    require 'librfc1153.pl';
+    local($PREAMBLE, $TRAILER) = &Rfc1153Custom(@conf);
+
+    $conf{'rfhook'}   = &Rfc1153ReadFileHook;
+    $conf{'preamble'} = $PREAMBLE;
+    $conf{'trailer'}  = $TRAILER;
+
+    $_cf{'Destr'} .= "&Rfc1153Destructer;\n";
+}
+
+
+sub Cnstr_rfc954
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'plain'} = 1;
+    $conf{'total'} = 1;
+    $conf{'delimiter'} = "\n------- Forwarded Message\n\n";
+    $conf{'preamble'} = '';
+    $conf{'trailer'}  = '';
+}
+
+
+sub Cnstr_mp
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'plain'} = 1;
+    $conf{'total'} = 1;
+
+    if (! $MIME_MULTIPART_BOUNDARY) {
+	$MIME_MULTIPART_BOUNDARY = "simple boundary\nContent-Type: message/rfc822\n";
+    }
+    else {
+	&eval($MIME_MULTIPART_BOUNDARY, 'MIME/Multipart:');
+    }
+
+    $conf{'total'} = 1;
+    $conf{'delimiter'} = "\n--$MIME_MULTIPART_BOUNDARY\n";
+    $conf{'preamble'} = q#
+      This is the preamble.  It is to be ignored, though it
+      is a handy place for mail composers to include an
+      explanatory note to non-MIME conformant readers.
+#;
+
+    $conf{'trailer'} = "\n--$MIME_MULTIPART_BOUNDARY--\n";
+    $conf{'trailer'} .= "This is the epilogue.  It is also to be ignored.\n";
+
+    undef $_cf{'header', 'MIME'};
+    $_cf{'header', 'MIME'} .= "MIME-Version: 1.0\n";
+    $_cf{'header', 'MIME'} .= "Content-type: multipart/mixed;\n";
+    $_cf{'header', 'MIME'} .= "\tboundary=\"$MIME_MULTIPART_BOUNDARY\"\n";
+}
+
+
+sub Cnstr_gz
+{
+    local(*conf, *r, *misc) = @_;
+
+    $conf{'total'} = 0;
+    $conf{'delimiter'} = "From $MAINTAINER\n";
+    $conf{'preamble'} = '';
+    $conf{'trailer'}  = '';
+}
+
+
+sub f_RetrieveFile
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+    local($file, $lines, $linecounter, $total, $new_p);
+    local($total) = $conf{'total'};
+
+    # OPEN
+    &OpenStream($tmpf, 0, 0, $total) || (return 0);
+
+    # PREAMBLE
+    if ($conf{'preamble'}) {
+	print OUT $conf{'preamble'};
+	$new_p++;
+    }
+
+    # Retrieve files
+    foreach $file (@conf) {
+	$lines = &WC($file);
+	
+	# open the next file
+	open(FILE, $file) || next; 
+	print OUT $conf{'delimiter'} if $conf{'delimiter'};
+
+ 	if ($conf{'rfhook'}) {
+	    $s = qq#
+		while (<FILE>) { 
+		    \$conf{'rfhook'};
+		    print OUT \$_; \$linecounter++;
+		}
+	    #;
+	    &Debug(">>$s<<") if $debug;
+	    &eval($s, 'Retreive file hook');
+	}
+	else {
+	    while (<FILE>) { 
+		print OUT $_; $linecounter++;
+	    }
+	}
+	close(FILE);
+	
+	print OUT "\n"; $linecounter++;
+	$new_p++;	# the number of files
+	
+	# If PLAIN TEXT, reset!
+	if ($conf{'plain'} && ($linecounter + $lines) > $MAIL_LENGTH_LIMIT) {
+	    # e.g. in the format of RFC1153, 
+	    # each mail is perfect format is appropriate?
+	    print OUT $conf{'trailer'} if $conf{'trailer'};
+
+	    # Close Output
+	    &CloseStream;
+
+	    # Reconfig
+	    $total++;
+	    $linecounter = 0;
+
+	    # Open new file(OUTPUT)
+	    &OpenStream($tmpf, 0, 0, $total) || (return 0);
+
+	    # if preamble only, not need to deliver, so new_p = 0
+	    print OUT $conf{'preamble'} if $conf{'preamble'}; 
+	    $new_p = 0;
+	}
+    }
+
+    # TRAILER
+    if ($conf{'trailer'}) {
+	print OUT $conf{'trailer'};
+	$new_p++ ;
+    }
+
+    # CLOSE
+    &CloseStream;
+
+    # if write filesize=0, decrement TOTAL.
+    $total-- unless $new_p;
+
+    $r{'total'} = $total;
+}
+
+
+sub f_LhaAndEncode2Ish
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+
+    &LhaAndEncode2Ish($tmpf, $r, @conf);
+}
+
+
+sub f_gz
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+
+    &f_RetrieveFile(*conf, *r, *misc);
+    &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
+}
+
+
+sub f_tgz
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+
+    &system("$TAR ".join(" ", @conf)."|$COMPRESS|$UUENCODE $r", $tmpf);
+}
+
+
+sub f_gzuu
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+
+    &system("$COMPRESS $tmp.0|$UUENCODE $r", $tmpf);
+}
+
+
+sub f_SplitFile
+{
+    local(*conf, *r, *misc) = @_;
+    local($tmpf) = $conf;
+    local($total) = $r{'total'};
+
+    print STDERR "f_SplitFile: $tmpf -> $r \n" if $deubg;
+
+    local($totallines) = &WC($tmpf);
+    $total = int($totallines/$MAIL_LENGTH_LIMIT + 1);
+    &Debug("$total = int($totallines/$MAIL_LENGTH_LIMIT + 1);") if $debug;
+
+    if ($total > 1) {
+	local($s) = &SplitFiles($tmpf, $totallines, $total);
+	if ($s == 0) {
+	    &Log("f_SplitFile: Cannot split $tmpf");
+	    return 0;
+	}
+    }
+    elsif (1 == $total) {# a trick for &SendingBackInOrder;
+	&Debug("rename($tmpf, $tmpf.1)") if $debug; 
+	rename($tmpf, "$tmpf.1"); 
+    }
+
+    $r{'total'} = $total;
+}
+######################################################################
+
+
 # Open FILEHANDLE 'OUT'.
 # PACK_P is backward compatibility since 
 # PACK_P is always 0!
@@ -113,18 +539,11 @@ sub OpenStream
 {
     local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
 
-    &Debug("&OpenStream($WHERE, $PACK_P, $FILE, $TOTAL)") if $debug;
-
-    if ($PACK_P) {
-	# MEANINGLESS since always called as 0 .
-
-	### Here NOT CALLED !(Must be)###
-	open(OUT, "|$COMPRESS|$UUENCODE $FILE > $WHERE.$TOTAL") || return 0;
-    }
-    else {
-	open(OUT, "> $WHERE.$TOTAL") || return 0;
-    }
-
+    &Debug("&OpenStream: open OUT > $WHERE.$TOTAL;") if $debug;
+    open(OUT, "> $WHERE.$TOTAL") || do { 
+	&log("OpenStream: cannot open $WHERE.$TOTAL");
+	return $NULL;
+    };
     select(OUT); $| = 1; select(stdout);
 
     1;
@@ -199,130 +618,8 @@ sub SplitFiles
 # if plain,
 # $WHERE.1 -> $WHERE.$TOTAL(>=1) that is .1, .2, .3...
 # return $TOTAL
-sub MakeFilesWithUnixFrom { &MakeFileWithUnixFrom(@_);}
-sub MakeFileWithUnixFrom
-{
-    local($TMPF, $PACK_P, $FILE, @filelist) = @_;
-    local($linecounter, $NEW, $PUNC, $s);
-    local($PLAINTEXT)  = local($TOTAL) = $PACK_P ? 0: 1;
-    local($PUNC_FLAG)  = 1;	# trick flag
-
-    &Debug("local($TMPF, $PACK_P, $FILE, @filelist)") if $debug;
-
-    if ($USE_RFC934) {
-	$PUNC = "\n------- Forwarded Message\n\n";
-    }
-    elsif ($USE_RFC1153) {	# 30 lines followed by blank lines
-	if (! $_cf{'rfc1153', 'in'}) {
-	    require 'rfc1153.ph';
-	    ($PREAMBLE, $TRAILER) =	&CustomRFC1153(@filelist);
-	}
-	$PUNC = "\n\n------------------------------\n\n";
-	$PUNC_FLAG = 0;
-    }
-    else {
-	$PUNC = "From $MAINTAINER\n";
-    }
-
-    # If PLAINTEXT, split files
-    # Open $TMPF.(0 or 1(plain text)), return if fails;
-    if (0 == &OpenStream($TMPF, 0, 0, $TOTAL)) { return 0;}
-    
-    # 1153 preamble
-    if ($USE_RFC1153) { print OUT $PREAMBLE;}
-    
-    foreach $file (@filelist) {
-	local($lines) = &WC($file);
-	
-	# open the next file
-	open(FILE, $file) || next;
-	print OUT $PUNC if $PUNC_FLAG;
-	$PUNC_FLAG++;	$linecounter++;
-	
-	if ($_cf{'readfile', 'hook'}) {
-	    $s = qq#
-		while (<FILE>) { 
-		    $_cf{'readfile', 'hook'}; 
-		    print OUT \$_; \$linecounter++;
-		}
-	    #;
-	    &Debug(">>$s<<") if $debug;
-	    &eval($s, 'Readfile hook');
-	}
-	else {
-	    while (<FILE>) { 
-		print OUT $_; 
-		$linecounter++;
-	    }
-	}
-	close(FILE);
-	
-	print OUT "\n"; $linecounter++;
-	$NEW++;		# the number of files
-	
-	# If PLAIN TEXT, reset!
-	if ($PLAINTEXT && ($linecounter + $lines) > $MAIL_LENGTH_LIMIT) {
-	    close(OUT);
-	    $TOTAL++;
-	    $linecounter = 0;
-	    &OpenStream($TMPF, 0, 0, $TOTAL) || (return 0);
-	    $NEW = 0;
-	}
-    }
-    
-    if ($USE_RFC1153) { print OUT $TRAILER;}
-    close(OUT);
-    ###### end of foreach #####
-    
-    $TOTAL-- unless $NEW;
-    
-    ###############################################################
-    # at this stage, 
-    # 
-    # $TMPF.0 file                               when packed.
-    # $TMPF.$TOTAL .. files are already splitted when plain text.
-    #
-    # when PACK 
-    #      spool/files or archive/files -> tmpf.0
-    #      split tmpf.0 -> tmpf.1 .. tmpf.$TOTAL
-    # 
-
-    # IF PLAIN TEXT, already ends.
-    # PACKING ...
-    # Exceptional action for e.g. gzip
-    if ($PACK_P) {
-	if ($_cf{'ish'}) {
-	    &LhaAndEncode2Ish($TMPF, $FILE, @filelist);
-	}
-	elsif ($_cf{'MakeFile', 'spool.tar.gz'}) {
-	    &system("$TAR ".join(" ", @filelist)."|$COMPRESS|$UUENCODE $FILE", $TMPF);
-	}
-	else {			# uuencode + gzip
-	    &system("$COMPRESS $TMPF.0|$UUENCODE $FILE", $TMPF);
-	}
-
-	# $TMPF is a encoded file(a master file of multiple-sending)
-	# Split is below...
-	local($totallines) = &WC($TMPF);
-	$TOTAL = int($totallines/$MAIL_LENGTH_LIMIT + 1);
-	&Debug("$TOTAL = int($totallines/$MAIL_LENGTH_LIMIT + 1);") if $debug;
-
-	if ($TOTAL > 1) {
-	    local($s) = &SplitFiles($TMPF, $totallines, $TOTAL);
-	    if ($s == 0) {
-		&Log("MakeFileWithUnixFrom: Cannot split $TMPF");
-		return 0;
-	    }
-	}
-	elsif (1 == $TOTAL) {# a trick for &SendingBackInOrder;
-	    &Debug("rename($TMPF, $TMPF.1)") if $debug; 
-	    rename($TMPF, "$TMPF.1"); 
-	}
-    }
-
-    $TOTAL;
-}
-
+sub MakeFilesWithUnixFrom { &DraftGenerate(@_);}
+sub MakeFileWithUnixFrom  { &DraftGenerate(@_);}
 
 # Lha + uuencode for $FILE
 # &Lha..( outputfile, encode-name, @list ) ;
@@ -353,6 +650,8 @@ sub LhaAndEncode2Ish
 
     &system($COMPRESS);
     &system($UUENCODE);
+
+    unlink @filelist if $debug;
 
     $TMPF;
 }
@@ -456,6 +755,7 @@ sub SendingBackInOrder
 
     unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
     unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
+    undef $_cf{'header', 'MIME'}; # destructor
 }
 
 
@@ -491,6 +791,7 @@ sub SendFilebySplit
     if ($TOTAL) {
 	&SendingBackInOrder($tmp, $TOTAL, $s, ($SLEEPTIME || 3), @to);
     }
+    undef $_cf{'header', 'MIME'}; # destructor
 }
 
 

@@ -1,9 +1,10 @@
 # Lock library functions, 
 # This lock functions uses proceses ID
+# Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
+# Please obey GNU Public Licence(see ./COPYING)
 
-# $Author$
 $lockid   = q$Id$;
-($lockid) = ($lockid =~ /Id: *(.*) *\d\d\d\d\/\d+\/\d+.*/); 
+($lockid) = ($lockid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid   .= "/$lockid";
 
 # if the younger process number exists in $LOCKDIR, return 1;
@@ -45,6 +46,11 @@ sub CheckProcessTable
 sub Lock
 {
     $0 = "--Locked and waiting <$FML $LOCKFILE>";
+
+    if (! -d $LOCKDIR) {
+	mkdir($LOCKDIR, 0700);
+    }
+
     &CheckProcessTable;
     print STDERR "> $LOCKDIR/$LOCKFILE\n" if($debug);
     open(LOCK, "> $LOCKDIR/$LOCKFILE") || die "Can't make LOCK\n";
@@ -65,6 +71,13 @@ sub Lock
 	(!$USE_FLOCK) ? &Unlock : &Funlock;
 	exit 1;
     }
+}
+
+sub Unlock
+{
+    if (-f "$LOCKDIR/$LOCKFILE") {
+	unlink "$LOCKDIR/$LOCKFILE";
+    } 
 }
 
 1;
