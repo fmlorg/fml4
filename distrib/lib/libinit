@@ -22,9 +22,14 @@ INIT_PACKAGE () {
 INIT_DIST () {
 	test -d $PATCHLEVEL_DIR || mkdir $PATCHLEVEL_DIR
 
-	( chdir $PATCHLEVEL_DIR; version.pl )
+	( chdir $PATCHLEVEL_DIR; $VERSION_PL )
 
 	PATCHLEVEL=`cat $PATCHLEVEL_FILE`
+
+	if [ "X$PATCHLEVEL" = "X" ]
+	then
+		PATCHLEVEL=1
+	fi
 }
 
 
