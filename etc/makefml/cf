@@ -10,7 +10,7 @@
 # $Id$
 #
 
-CFVersion			3
+CFVersion			3.1
 
 ### DNS
 DOMAINNAME			_DOMAIN_
@@ -56,7 +56,7 @@ USE_FLOCK			1
 
 ### Misc
 USE_MIME
-
+MAIL_LIST_ACCEPT_COMMAND	0
 
 ### Architecture
 CPU_TYPE_MANUFACTURER_OS	_CPU_TYPE_MANUFACTURER_OS_
