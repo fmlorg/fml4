@@ -648,8 +648,7 @@ sub ProcFileSendBack
     if (! -f $f) {
 	$draft  = $f;
 	$draft  =~ s#(.*)/([^/]*)#$2#;
-	$draft .= $LANGUAGE eq 'Japanese' ? '.jp' : '.en';
-	$f = &SearchFileInLIBDIR("drafts/$draft") || $f;
+	$f = &SearchFileInLIBDIR("drafts/$LANGUAGE/$draft") || $f;
 	$Envelope{'mode:doc:repl'} = 1;
     }
 
