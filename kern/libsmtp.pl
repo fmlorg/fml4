@@ -25,6 +25,9 @@ sub SmtpInit
     $e{'mci:mailer'} = $e{'mci:mailer'} || 'ipc';
     $e{'macro:s'}    = $e{'macro:s'}    || $FQDN;
 
+    # Pipelining waiting receive queue length
+    $PipeLineMaxRcvQueue = 100;
+
     # Set Defaults (must be "in $DIR" NOW)
     $SmtpTime  = time() if $TRACE_SMTP_DELAY;
 
@@ -546,20 +549,36 @@ sub SocketTimeOut
 
 sub SmtpPut2Socket_NoWait
 {
+    $PipeLineCount++; # the number of wait after 'DATA' request.
     &SmtpPut2Socket(@_, 0, 0, 1);
 }
 
 
+sub GetPipeLineReply
+{
+    local($ipc) = @_;    
+    local($wc)  = int($PipeLineCount/2);
+    while ($wc-- > 0) {
+	&WaitForSmtpReply($ipc, 1, 0);
+	$PipeLineCount--;
+    }
+}
+
+
+# XXX If $Current_Rcpt_Count is no longer used, 
+# XXX remove it! (must be true in the future. logged on 1999/06/21).
 sub WaitFor354
 {
     local($ipc) = @_;
-    local($wc) = $Current_Rcpt_Count + 1;
+    local($wc) = $PipeLineCount + 1; 
 
     while ($wc-- > 0) {
 	undef $RetVal;
 	&WaitForSmtpReply($ipc, 1, 0);
 	last if $RetVal =~ /^354/;
     }
+
+    $PipeLineCount = 0;
 }
 
 
@@ -748,6 +767,10 @@ sub SmtpPutActiveList2Socket
 
 	if ($USE_SMTP_PROFILE && (time - $xtime > 1)) { 
 	    &Log("SMTP::Prof $rcpt slow");
+	}
+
+	if ($e{'mci:pipelining'} && ($PipeLineCount > $PipeLineMaxRcvQueue)) {
+	    &GetPipeLineReply($ipc);
 	}
 
 	$Current_Rcpt_Count++;
