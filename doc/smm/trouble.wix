@@ -763,6 +763,32 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 [Elena:数字]がなくなる。
 
 
+.S	ML-request をコマンド用のアドレスにする
+.k	ML-request をコマンド用のアドレスにする
+
+-request 宛をコマンドにするためには、-request 宛が fml.pl を呼ぶように
+しなければなりません。つまり
+
+   /etc/aliases で
+	elena-request: :include:/var/spool/ml/driver/elena-request
+
+   ファイル elena-request の中は
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+
+のようになっている必要があります。
+
+また、そのアドレスをコマンド専用にするために config.ph で、
+
+    $CONTROL_ADDRESS               = "elena-request\@$DOMAINNAME";
+
+みたいにするとなお良いとおもいます。
+
+問題はこの場合 $MAINTAINER をどうするかですが、-request のままだとエラー
+の時恐いので、 elena-admin 等をつくってそれは本当の単なる管理者宛の
+フォワード等にするとよいとおもいます。
+
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
