@@ -10,7 +10,7 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
 ### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
-$CONFIG_DIR = ""; # __MAKEFML_AUTO_REPLACED_HERE__
+$CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 
 
@@ -49,7 +49,7 @@ sub InitMakeFml
     &GetTime;
 
     require 'getopts.pl';
-    &Getopts("dh");
+    &Getopts("dhf:A:");
 
     # flock(2)
     $LOCK_SH                       = 1;
@@ -61,7 +61,14 @@ sub InitMakeFml
     # if a group mainteints the fml system, umask(007)?;
     umask(002);
 
-    $USER = $ENV{'USER'} || (getpwuid($<))[0];
+    $COMPAT_ARCH = $opt_A;
+
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$USER = $ENV{'USERNAME'};
+    }
+    else {
+	$USER = $ENV{'USER'} || (getpwuid($<))[0];
+    }
 
     $debug = $opt_d;
 
@@ -82,10 +89,16 @@ sub InitMakeFml
 	$DOMAINNAME =~ s/^$hostname\.//;
     }
 
+    # architecture dependence;
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$CONFIG_DIR =~ s#\\#/#g;
+    }
+
     # config amd temporary files
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
     $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
-    $FML_CONFIG  = "$CONFIG_DIR/system";
+    $FML_CONFIG  = $opt_f || "$CONFIG_DIR/system";
+
 
     # initialize files
     if (-f $FML_CONFIG) {
@@ -101,12 +114,17 @@ sub InitMakeFml
 	&Dumpvar('Config') if $debug;
     }
     else {
+	print STDERR "---ignore no configuration file $FML_CONFIG\n\n";
 	$TheFirstTime = 1;
     }
 
     # if not defined this machine OS;
     if ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
 	print "---THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+    }
+    elsif ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$OS_TYPE = "WINDOWS_NT4";
+	eval("\$Config'OS_TYPE{'$FQDN'} = '$OS_TYPE';");
     }
     else {
 	print "---Try to inspect your Operating System ...\n\n";
@@ -143,6 +161,15 @@ sub InitMakeFml
 		'DOMAIN',   $DOMAINNAME,
 		'FQDN',     $FQDN,
 		); 
+
+    # $COMPAT_ARCH eq "WINDOWS_NT4"
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	local($dir);
+	chop($dir = `cd`);
+	$dir =~ s/(\w:).*/$1/;
+	$Default{'EXEC_DIR'} = "$dir\\fml";
+	$Default{'ML_DIR'}   = "$dir\\fml\\ml";
+    }
 
     %MakeFmlProc = ('init',    'do_init',
 		    'install', 'do_install',
@@ -226,7 +253,13 @@ sub InitFmlConfig
     {
 	local($dir);
 	for (split(/\//, $CONFIG_DIR)) {
-	    $dir .= "/$_";
+	    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+		$dir .= $dir ? "/$_" : $_;
+	    }
+	    else {
+		$dir .= "/$_";
+	    }
+
 	    $dir =~ s#//#/#g;
 
 	    if (! -d $dir) {
@@ -285,8 +318,8 @@ sub Cat
     local($in) = @_;
 
     open(IN, $in) || return;
-     $| = 1;
-    while (<IN>) { print OUT $_;}
+    select(STDOUT); $| = 1;
+    while (<IN>) { print $_;}
     close(IN); 
 }
 
@@ -298,7 +331,7 @@ sub Copy
     open(IN,  $in)      || (&Log("CopyIN: $!"), return);
     open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
     select(OUT); $| = 1; select(STDOUT); 
-    while (<IN>) { print OUT $_;}
+    while (sysread(IN, $_, 4096)) { print OUT $_;}
     close(OUT);
     close(IN); 
 }
@@ -474,7 +507,12 @@ sub FixPath
     local($prog) = @_;
     local($perl);
 
-    $perl = &search_path('perl');
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	$perl = "";
+    }
+    else {
+	$perl = &search_path('perl');
+    }
 
     open(IN, $prog) || (&Warn("cannot open $prog"), return);
     open(NEW, "> $prog.new") || (&Warn("cannot open $prog.new"), return);
@@ -482,26 +520,37 @@ sub FixPath
 
     while (<IN>) {
 	if ($. == 1) {
-	    print NEW "\#\!$perl\n";
+	    print NEW "\#\!$perl\n" if $perl;
 	    next;
 	}
+
+	next if /^\#\#\# AUTOMATICALLY REPLACED/;
 
 	# recreate my own;
 	if ($prog =~ /makefml/ && 
 	    /__MAKEFML_AUTO_REPLACED_HERE__/ && /^\$CONFIG_DIR/) {
+	    print STDERR "-----Replace makefml::\$CONFIG_DIR -> $CONFIG_DIR\n";
 	    print NEW "### AUTOMATICALLY REPLACED by makefml ($MailDate)\n";
-	    print NEW "\$CONFIG_DIR = \"$CONFIG_DIR\"; ";
+	    print NEW "\$CONFIG_DIR = '$CONFIG_DIR'; ";
 	    print NEW "\# __MAKEFML_AUTO_REPLACED_HERE__\n";
 	    next;
 	}
 
 	print NEW $_;
     }
-    close(OUT);
+    close(NEW);
     close(IN);
+    sleep 1;
 
-    rename($prog, "$prog.bak");
-    rename("$prog.new", $prog);
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+	unlink "${prog}.bak" if -f "${prog}.bak";
+	&Copy($prog, "${prog}.bak");
+	&Copy("${prog}.new", $prog);
+    }
+    else {
+	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
+	rename("${prog}.new", $prog) || &Warn("cannot rename $prog.new $prog");
+    }
 }
 
 
@@ -769,7 +818,13 @@ sub ResetVariables
     # anyway set;
     &GetCurConfig;
 
-    $USER    = (getpwuid($<))[0];
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$USER = $ENV{'USERNAME'};
+    }
+    else {
+	$USER    = (getpwuid($<))[0];
+    }
+
     $ExecDir = $CurConfig{'EXEC_DIR'};
     $MLDir   = $CurConfig{'ML_DIR'};
     $DOMAIN  = $CurConfig{'DOMAIN'};
@@ -862,8 +917,13 @@ sub Conv
     
     print STDERR "\tGenerating $out\n";
 
-    $uid   = $uid || (getpwuid($<))[2];
-    $gid   = $gid || (getpwuid($<))[3];
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	$USER = $ENV{'USERNAME'};
+    }
+    else {
+	$uid   = $uid || (getpwuid($<))[2];
+	$gid   = $gid || (getpwuid($<))[3];
+    }
 
     while (<IN>) {
 	s/_EXEC_DIR_/$ExecDir/g;
@@ -974,7 +1034,7 @@ sub do_passwd
 	    # no echo
 	    system "stty", "-echo";
 
-	    print "Passwd: ";
+	    print "Password: ";
 	    chop($passwd = <STDIN>);
 	    print "\n";
 
@@ -1035,11 +1095,12 @@ sub do_install
 	return;
     }
     else {
-	print "\nsbin/install.sh $Config'EXEC_DIR\n"; #';
+	print "\nInstalling ... to $Config'EXEC_DIR\n"; #';
     }
 
     &FixPath("src/fml.pl");
     &FixPath("src/msend.pl");
+    &FixPath("libexec/fmlserv.pl");
     &FixPath("sbin/makefml");
     &FixPath("cf/config");
 
@@ -1059,7 +1120,11 @@ sub do_install
     }
 
     # $ExecDir/sbin/install.sh is NOT yet installed 
-    if (-f "sbin/install.sh") {
+    if ($COMPAT_ARCH eq "WINDOWS_NT4") {
+	print "perl sys/arch/WINDOWS_NT4/ntinstall.pl $ExecDir\n";
+	system "perl sys/arch/WINDOWS_NT4/ntinstall.pl $ExecDir";
+    }
+    elsif (-f "sbin/install.sh") {
 	$SH = $ENV{'SH'} || "/bin/sh";
 	system "$SH ./sbin/install.sh $ExecDir";
 	eval symlink($CONFIG_DIR, "$ExecDir/Configurations");
@@ -1078,12 +1143,9 @@ sub do_setq
 }
 
 
-sub do_new { &do_newml(@_);}
-sub do_newml
+sub GenerateDirectory
 {
     local($ml) = @_;
-
-    print "---Creating $ml mailing list\n";
 
     ### umask;
     umask(002);
@@ -1112,6 +1174,21 @@ sub do_newml
     umask(077);
     -d "$MLDir/$ml"         || mkdir("$MLDir/$ml", 0700);
 
+
+
+}
+
+
+sub do_new { &do_newml(@_);}
+sub do_newml
+{
+    local($ml) = @_;
+
+    print "---Creating $ml mailing list\n";
+
+    &GenerateDirectory($ml);
+    &ResetVariables;
+
     ### cf file; 
     umask(022);
 
@@ -1129,10 +1206,10 @@ sub do_newml
 
     # include file is public readable;
     # why for () fails?;
-    &Conv($ml, "$ExecDir/etc/samples/__include", "$ML_ETC_DIR/$ml/include");
-    &Conv($ml, "$ExecDir/etc/samples/__aliases", "$ML_ETC_DIR/$ml/aliases");
-    &Conv($ml, "$ExecDir/etc/samples/__crontab", "$ML_ETC_DIR/$ml/crontab");
-    &Conv($ml, "$ExecDir/etc/samples/__fml.c", "$ML_ETC_DIR/$ml/fml.c");
+    &Conv($ml, "$ExecDir/etc/makefml/include", "$ML_ETC_DIR/$ml/include");
+    &Conv($ml, "$ExecDir/etc/makefml/aliases", "$ML_ETC_DIR/$ml/aliases");
+    &Conv($ml, "$ExecDir/etc/makefml/crontab", "$ML_ETC_DIR/$ml/crontab");
+    &Conv($ml, "$ExecDir/etc/makefml/fml.c",   "$ML_ETC_DIR/$ml/fml.c");
     &FixIncludeHeader;
 
     &GenCrontab;
@@ -1333,6 +1410,41 @@ sub do_byeuser
 	    print "Delete $member in $_\n" if $debug;
 	}
     }
+}
+
+
+sub do_fmlserv
+{
+    print "---Configure fmlserv mailing list ... \n";
+
+    # special assigned ML;
+    $ml = "fmlserv";
+
+    &GenerateDirectory($ml);
+    &ResetVariables;
+
+    ### cf file; 
+    umask(022);
+
+    &ResetVariables;
+
+    # include file is public readable;
+    # why for () fails?;
+    local($exec_dir) = "$ExecDir/etc/makefml";
+    &Conv($ml, "$exec_dir/fmlserv-include", "$ML_ETC_DIR/$ml/include");
+    &Conv($ml, "$exec_dir/fmlserv-aliases", "$ML_ETC_DIR/$ml/aliases");
+    &Conv($ml, "$exec_dir/fmlserv-fml.c",   "$ML_ETC_DIR/$ml/fml.c");
+
+    &FixIncludeHeader;
+
+    &Copy("$ExecDir/doc/drafts/help-fmlserv", "$MLDir/fmlserv/help");
+
+    # the last info
+    print "\n   Please see several examples in $ML_ETC_DIR/$ml\n";
+    print "\n# Example of Aliases ($ML_ETC_DIR/$ml/aliases)\n";
+    &Cat("$ML_ETC_DIR/$ml/aliases");
+    print "\n";
+
 }
 
 
