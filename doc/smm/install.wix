@@ -21,11 +21,11 @@ config.ph を直したりすれば良いでしょう。
 
 Version up は *.pl をコピーすれば終りです。
 
-注意：fml 1.x 時代の場合の注意は 
-.xref{appendix:fmlR1}
+注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
 
 
 .S	インストール後にサーバの設定（パラメータ）をいじる
+.l	how-to-customize-parameter
 .key	fml.plの起動のしかた
 .key	exec fml.pl
 .key	$DIR
@@ -49,6 +49,7 @@ Version up は *.pl をコピーすれば終りです。
 
 ですが、複数の ML に共通の設定であれば libsmtp.pl 等がおいてある場所に 
 sitedef.ph を作って、これの中にいれておくとよいでしょう。
+.xref	order-of-option-effeciency, init-data-structure
 
 例：
 	/usr/libexec/fml/sitedef.ph
@@ -60,7 +61,7 @@ sitedef.ph を作って、これの中にいれておくとよいでしょう。
 .key	:include:
 .key	onwer-list
 .label	calling-fml.pl
-.seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
+.seealso fml-uid, plural-handling-1, plural-handling-2
 
 fml.pl の中に変数は今はもうありません (fml 1.2 より)
 
@@ -183,7 +184,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 .key	まとめおくり
 .key	Cron
 .key	Not using Cron
-.xref	msend-c, msend-1, msend-2, msend-3
+.xref	msend
 
 詳細については「まとめ送り」と「CRON」の章を見て下さい
 .xref	msend cron
@@ -286,7 +287,7 @@ $MEMBER_LIST に登録します。
 自動登録はキーワードを必要とするとか登録したいアドレスを指定したい時に
 どうするか？等に関して様々なバリエーションがあります。
 詳細については「自動登録」の章を見て下さい。
-.label auto-regist
+.xref auto-regist
 
 
 コマンドラインオプションでも
@@ -523,7 +524,7 @@ sub ModeDef
 
 .S	再配送だけをするサーバ（コマンドを必要としないサーバ）
 .key	再配送だけをするサーバ
-.seealso	--distribute
+.xref	--distribute
 
 単に配送を待って、それをスプールすることだけを目的にするMLを作ることも
 あるでしょう。つまり ガイドを相手に返すこともなく、単に再配送するだけ
@@ -815,7 +816,7 @@ private communication なので public な場所にファイルを残すことはしない
 .C	複数のメーリングリストの運用
 .key	複数のメーリングリストの運用
 .label	{plural-handling-1}
-.l	fml-process
+.xref	fml-process
 
 ここでは
 

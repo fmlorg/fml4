@@ -116,6 +116,7 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 
 
 .S	オプション設定の優先順位
+.l	order-of-option-effeciency
 .k	オプション設定の優先順位
 
 オプション設定の強い順番に並べると
@@ -403,6 +404,7 @@ sendmail の struct envelople e; に対応するものです。
 
 
 .S	データ構造の初期化
+.l	init-data-structure
 .k	データ構造の初期化
 
 各データの初期化は次の順序で行なわれる。

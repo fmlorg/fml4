@@ -225,8 +225,7 @@ config.ph でコントロールできます。
 
 
 .S	パスワードファイルの初期化と設定
-.l	bin/passwd.pl
-.label	set-passwd
+.label	init-passwd
 .k	etc/passwd
 .k	bin/passwd.pl
 

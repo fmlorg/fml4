@@ -1,5 +1,6 @@
 .C	fmlserv
 .l	fmlserv
+.l	fmlserv.pl
 
 
 .S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)

@@ -54,6 +54,7 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
 システムに「 fml 管理者の プロセスとして走る」用に命令することが
 システムによって違うことがあるので少し厄介なことが発生します。
+.xref fml-process, msend
 
 ○ローカルに fml にメールを投げる
 
@@ -70,8 +71,6 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 		   fml.pl を起動し、メールを fml.pl へ渡す
 		＃これは fml.c で作った fml を使うか
 		＃:include list 形
-
-.xref configuration, calling-fml.pl, msend-intro, msend-1, msend-2, msend-3, msend-dir
 
 ここでsetuidの話が関係するわけです。
 

@@ -270,6 +270,7 @@ localtime(); を実行し、フォーマットの違ういくつかの日付変数(グローバル)
 
 
 .S	Lock                   (fml.pl)
+.l	Lock
 .k	Lock
 
 SYNOPSIS:

@@ -1,7 +1,9 @@
 .C	libexec/fml_local.pl マニュアル
+.l	fml_local
+.l	fml_local.pl
 .key	libexec/fml_local.pl manual
 .key	manual of libexec/fml_local.pl
-.label	{manual of libexec/fml_local.pl}
+.label	manual-of-fml_local.pl
 
 
 ~/.forward は通常アドレスのフォワードに使われますが、本質的に 
@@ -49,6 +51,8 @@ SYNOPSIS:
 
 
 .S	~/.fmllocalrc 
+.l	~/.fmllocalrc 
+.l	$HOME/.fmllocalrc 
 
 fml_local.pl は ~/.fmllocalrc で制御します。見本が etc/dot_fmllocalrc 
 です。
@@ -84,6 +88,7 @@ fml_local.pl は ~/.fmllocalrc で制御します。見本が etc/dot_fmllocalrc
 
 
 .S	~/.fmllocalrc のフィールド
+.k	~/.fmllocalrc のフィールド
 
 ４つの変数をSPACE or TABで区切ってやってほしいことをかきます。
 
@@ -209,6 +214,7 @@ To: フィールドのどっかに uja という文字列があれば、それにマッチする
 
 
 .S	~/.fmllocalrc でＭＬを行なう例
+.k	~/.fmllocalrc でＭＬを行なう例
 
 LAST MATCH に注意！
 
@@ -440,7 +446,7 @@ X-MLserver	\S		&	MailLocal
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
 
-.S	ファイルを送り返す用にする設定の例
+.S	ファイルを送り返す設定の例
 
 ~/.fmllocalrc
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿

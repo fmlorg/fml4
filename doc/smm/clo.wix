@@ -134,7 +134,8 @@ mkdir して、cp してコマンドラインを書き換えるとはい、おしまひ
 	"| fml.pl  --distribute $DIR " 
 は $DIR/config.ph での $Envelope{'mode:distribute'} = 1; と同じ
 
-.k	--distribute	
+.k	--distribute
+.l	--distribute
  --distribute	
 
 	distribgute only 
@@ -201,14 +202,18 @@ config.ph では
 
 
 .k	--auto
+.l	--auto
  --auto
 	投稿者がメンバーでない場合自動的にMLに登録する
 
 .k	--check
+.l	--check
  --check 
 	投稿者がMLのメンバーか否かチェックを行う(default)
 
 .k	--moderated
+.l	--moderated
+
  --moderated
 	メールは一回管理者へフォワードされる。
 	管理者が査読してOKとみなしたらＭＬへ投げる。

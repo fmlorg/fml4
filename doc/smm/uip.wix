@@ -22,18 +22,18 @@ current directory の config.ph をみてそこで指定されているデータに従い
 HTML化を実行します。
 
 
-.S	CRON (bin/cron.pl)
+.S	cron (bin/cron.pl)
 .key	bin/cron.pl
 .key	cron.pl
-.xref	CRON
+.xref	cron
 
-4.4BSDのcronとCOMAPTIBLEなCRON 
+4.4BSD の cron と compatible な cron
  
 
 .S	プログラムをデーモン化して実行 (bin/daemon.pl)
 .k	bin/daemon.pl
 .k	daemon.pl
-.xref	CRON
+.xref	cron
 
 例：
 	% bin/daemon.pl cron.pl $PWD
@@ -197,6 +197,7 @@ SYNOPSIS
 
 .S	WIX言語フォーマッタ (bin/fwix.pl)
 .l	fwix.pl
+.l	bin/fwix.pl
 .key	bin/fwix.pl
 .key	fwix.pl
 .xref	WIX
@@ -206,6 +207,7 @@ WIX言語のフォーマッタ
 
 .S	URL の中身を取り出す (bin/geturl.pl)
 .l	geturl.pl
+.l	bin/geturl.pl
 .key	bin/geturl.pl
 .key	geturl.pl
 
@@ -289,7 +291,7 @@ bin/passwd.pl を使って下さい。使い方は、
 	moderated モード
 
 等で使われます。
-.xref moderated
+.xref --moderated
 .xref REMOTE-ADMINISTRATION
 
 

@@ -30,7 +30,7 @@ SMTP		libsmtp.pl
 	fop = file operation
 
 とか省略系もあるけど… ちなみに
-.xref{FILES} にライブラリの説明がありますね。
+.ptr{FILES} にライブラリの説明がありますね。
 
 
 .S	消してもいいファイル…
@@ -64,7 +64,7 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
 
 .S	MIME文字列を日本語へ変換すること
-.seealso	MIME-1, MIME-2, MIME-3, MIME-extension
+.seealso	MIME-1, MIME-2
 
 $MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
 Decodeしてしまうなら、

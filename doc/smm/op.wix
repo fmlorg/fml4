@@ -79,7 +79,7 @@
 .include cwhois.wix
 .include fred.wix
 .include hack.wix
-.include ftpmail.wix
+.include ftp.wix
 .include hook.wix
 .include wix.wix
 .include smtp.wix
@@ -92,7 +92,6 @@
 
 .include misc.wix
 .include perl.wix
-.include misc.wix
 
 
 

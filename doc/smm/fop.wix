@@ -123,7 +123,7 @@ spool とは別にＭＬのアーカイブがある場合があるでしょう。例えば
 
 
 .S	プログラムのパス
-.xref	sitedef.ph
+.xref	order-of-option-effeciency, init-data-structure
 .k	$TAR
 .k	$UUENCODE
 .k	$COMPRESS

@@ -1,5 +1,5 @@
-.S	CRON (fml original bin/cron.pl)
-.label	CRON
+.S	cron (fml original bin/cron.pl)
+.l	cron
 .key	cron.pl
 .k	bin/cron.pl
 .key	etc/crontab

@@ -121,7 +121,8 @@ RFC1522	2. Syntax of encoded-words
 
 
 .S	MIME decodeをするためのライブラリ libMIME.pl はどこにあるか？
-.label	{MIME-3}
+.l	libMIME.pl
+
 	$LIBMIMEDIR	= "$LIBDIR/contrib/MIME";
 					# location in libMIME.pl
 
@@ -503,10 +504,6 @@ hml 1.6 では
 .key	$COMMAND_SYNTAX_EXTENSION
 	$COMMAND_SYNTAX_EXTENSION = 1;
 	両方解釈するなら１、"# summary"みたいなhml 1.6形だけなら０。
-
-
-.S	コマンドは一辺に実行できるか？２
-.seealso	command-plural2
 
 
 .S	WHOISを使うか？

@@ -356,8 +356,8 @@ cron は 昔からある Unix の Daemon process で １分に一回起きて、やるこ
 ＃ネットワーク管理者は激務なのでいたわってあげてください（お願い）
 
 .#########################################################################
-.# BIN/CRON.PL
-.# .include cron.wix
+.# bin/cron.pl
+.include cron.wix
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
