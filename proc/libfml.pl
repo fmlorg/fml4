@@ -627,14 +627,25 @@ sub ProcFileSendBack
     local(@to, $subject, $f, @files, $draft, $draft_dir, @tmp);
     local($ignore_mode);
 
-    if ($USE_DATABASE) {
+    # we use when dbdirective is defined, 
+    # for example, in 'dump_*_list' cases.
+    if ($USE_DATABASE && $Procedure{"dbd#$proc"}) {
+	&use('databases');
+
 	my ($dbdirective) = $Procedure{"dbd#$proc"};
 	&Log("Directive => $dbdirective") if $dbdirective;
-    }
 
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, $dbdirective);
+	$f = $mib{'_cache_file'};
+
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	&Log("fail to do $mydirective") if $mib{'error'};
+	return $NULL if $mib{'error'};
+    }
     # file to send back
     # ADMIN MODE
-    if ( $e{'mode:admin'} ) {
+    elsif ( $e{'mode:admin'} ) {
 	$f = $AdminProcedure{"#$proc"};
     }
     # USER MODE
@@ -656,7 +667,7 @@ sub ProcFileSendBack
 	$f = &SearchFileInLIBDIR("drafts/$LANGUAGE/$draft") || $f;
 	$Envelope{'mode:doc:repl'} = 1;
     }
-
+    &Log("send $f");
     &Log($proc);
 
     # To:
