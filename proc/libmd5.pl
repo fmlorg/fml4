@@ -12,6 +12,8 @@
 
 use MD5;
 
+sub MD5 { &Md5(@_);}
+
 sub Md5
 {
     local($data) = @_;
@@ -19,6 +21,18 @@ sub Md5
     $md5 = new MD5;
     $md5->reset();
     $md5->add($data);
+    $digest = $md5->digest();
+    unpack("H*", $digest);
+}
+
+
+sub BodyMD5Cksum
+{
+    local(*e) = @_;
+
+    $md5 = new MD5;
+    $md5->reset();
+    $md5->add($e{'Body'});
     $digest = $md5->digest();
     unpack("H*", $digest);
 }
