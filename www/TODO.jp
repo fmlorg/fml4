@@ -2,6 +2,8 @@
 
 [NOT YET]
 
+○ apache-ssl (1.3.9 base)の解説の用意をする
+
 ○ インストーラがどうパスワードを生成するべきか？
 
    makefml admin.cgi
