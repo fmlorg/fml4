@@ -427,6 +427,9 @@ DISTRIBUTE_FILTER_HOOK:
 FILTER_NOTIFY_REJECTION:
 
 # Attribute of filter of posted article
+FILTER_ATTR_REJECT_NULL_BODY:	1
+
+# Attribute of filter of posted article
 # When $FILTER_ATTR_REJECT_COMMAND is 1 under distribution mode, 
 # rejects "# command" syntax just before distribution (&Distribute;)
 # value: 1/0
@@ -436,6 +439,18 @@ FILTER_ATTR_REJECT_COMMAND:
 # reject Japanese "2byes English words"
 # value: 1/0
 FILTER_ATTR_REJECT_2BYTES_COMMAND:
+
+# Attribute of filter of posted article
+# reject command mail sent to the address for posting.
+FILTER_ATTR_REJECT_INVALID_COMMAND:	1
+
+# Attribute of filter of posted article
+# reject a mail with "one line" mail body (must be invalid command mail)
+# one line means the input mail has one line in the first paragraph
+# except for signature (last paragraph).
+# Even if it has one line, the paragraph ends with period '.'
+# it must be an effective paragraph. So we should not reject it.
+FILTER_ATTR_REJECT_ONE_LINE_BODY:	1
 
 # Attribute of filter of posted article
 # reject MIME/multipart mails with Microsoft GUID within it, 
