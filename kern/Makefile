@@ -57,7 +57,11 @@ localtest:
 	@ echo "   DEBUG MODE!   "
 	@ echo "-----------------------------------"
 
-doc: 	htmldoc
+doc: 	html_doc
+
+html_doc:
+	perl bin/fwix.pl -T op -m html -D doc/html/op -d doc/smm < doc/smm/op.wix
+
 
 roff:	doc/smm/op.wix
 	@ echo "sorry, not yet implemetend but halfly completed?"
