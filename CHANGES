@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/28
+
+   add & enable members/actives commands for databases
+
+	ごめん、データベース使う時の members actives コマンド
+	書きかけのままだったので、書きました。
+
+2000/07/27
+
+   modify DELETE_FIELD() accepts case-insensitive argument
+
+   nuke MySQL debug code ;)
+
 2000/07/25
 
    kern/libloadconfig.pl
