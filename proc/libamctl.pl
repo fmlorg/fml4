@@ -1,13 +1,13 @@
-# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-2001 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libamctl.pl,v 2.50 2001/10/22 14:56:00 fukachan Exp $
+# $FML: libamctl.pl,v 2.51 2002/02/10 13:50:04 fukachan Exp $
 #
 
 
@@ -662,7 +662,23 @@ sub DoSetMemberList
 	# invalid for plural "chaddr" command in admin mode 
 	# XXX: 2.2A#36 to become under $Procedure{"r2a#command"} control
 	# $e{'message:h:@to'} = "$curaddr $newaddr $MAINTAINER";
-	$e{'message:h:@to'} = "$curaddr $newaddr";
+	{
+	    my $recipient = '';
+
+	    for my $x (split(/\s+/, $ChaddrReplyTo)) {
+		if ($x =~ /old/) {
+		    $recipient .= " ". $curaddr;
+		}
+		elsif ($x =~ /new/) {
+		    $recipient .= " ". $newaddr;
+		}
+		elsif ($x =~ /maintainer|admin/) {
+		    $recipient .= " ". $MAINTAINER;
+		}
+	    }
+
+	    $e{'message:h:@to'} = $recipient;
+	}
 
 	&Log("$cmd: Try change address: $curaddr -> $newaddr");
 	&Mesg(*e, "\t set $cmd => CHADDR") if $cmd ne "CHADDR";

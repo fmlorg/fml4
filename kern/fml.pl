@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.141 2001/12/19 13:13:07 fukachan Exp $
+# $FML: fml.pl,v 2.142 2002/01/25 04:55:36 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -2032,7 +2032,9 @@ sub WarnE
 
 sub Notify
 {
-    local(@xargv) = @_; &use('kernsubr'); &__Notify(@xargv);
+    local(@xargv) = @_; 
+    if ($debug) { my (@c) = caller; Log( "Notify: $c[1] $c[2]" ) ; }
+    &use('kernsubr'); &__Notify(@xargv);
 }
 
 sub EnableReportForw2Admin
