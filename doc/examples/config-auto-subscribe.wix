@@ -20,28 +20,24 @@
 
 いちいち登録するのが面倒だから自動でやってほしい
 
-
-
-○ メーリングリストを作る
-
-% makefml newml elena
-% makefml add elena 自分のアドレス
-% su
-# cat /var/spool/ml/elena/aliases >> /etc/aliases
-# newaliases
-# exit
-
 ○ 自動登録にする(1)
 
 % makefml config elena
 
+.if LANG == JAPANESE
 次のような画面が現れるので数字を入れて選択していく。0 を押すと前の画面
 に戻る。
 
    メインメニュ -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_subscribe
 
    例えばこの場合押すキーは
+.fi
+.if LANG == ENGLISH
+which shows the following menu. Please input one of number and go
+forward. Change the $REJECT_COMMAND_HANDLER to be "auto_subscribe".
 
+   MAIN MENU -> 1 -> WHEN_COMMAND_FROM_NOT_MEMBER -> auto_subscribe
+.fi
                    1 -> 4 -> 2 -> 0 -> 0 -> 0
 
    のような感じになる。
@@ -50,6 +46,8 @@
 
 
 ○ 終る直前の画面では
+=E
+* In the end of operation, the main menu shows 
 
 	〜〜〜略〜〜〜
 
@@ -70,6 +68,8 @@
 
 
 ○ 登録時に自動的に送り返されるファイルなどを編集しておく
+=E
+* Edit mailing list guide which is sent back to the newly added user.
 
 % $EDITOR /var/spool/ml/elena/welcome
 
