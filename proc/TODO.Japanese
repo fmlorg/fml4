@@ -1,6 +1,15 @@
 ¢þ Database access
 
-DONE:
+[TODO]
+
+   count up the number of members
+	proc/libamctl.pl:1167:    @a = @main'ACTIVE_LIST; #';
+
+   support for moderator ???
+	proc/libmoderated.pl:222:
+	proc/libmoderated.pl:320:
+
+[DONE]
   We use now
 	if ($USE_DABABASE) {
 		database access
