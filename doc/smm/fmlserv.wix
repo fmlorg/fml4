@@ -5,17 +5,146 @@
 
 .S	LISTSERV (or MAJORDOMO) COMPATIBLE MODE (libexec/fmlserv.pl)
 
-LISTSERV (or MAJORDOMO) COMPATIBLE MODE について
+ここでは LISTSERV (or MAJORDOMO) COMPATIBLE MODE について述べます。
+つまり、fml コマンドを Listserv のようなインターフェイスで呼ぶための仕
+組みです。それ以上のものではありません。単なる別種のインターフェイスに
+すぎません。
 
-書きかけ _o_ 
+例えば今 Elena ML と Freekick ML があるとすると、普通 Elena ML へコン
+トロールコマンドを送り込む形でコマンドを実行できます。
+
+   "# get 1-10 mp"		というメールを
+   Elena-ctl@baycity.asia	へ送る
+
+ことで最初の10個の記事を取り寄せることができます。これを同じことが
 
 
-.S	$FMLSERV_DIR
+   "# get elena 1-10 mp" 	というメールを
+   fmlserv@baycity.asia		へ送る
+
+ことで実行できるようになります。これだけ書くと全然ありがたみがないです
+ね;-)。
+
+違う点はコマンドのシンタックスが拡張されて
+
+	コマンド	ＭＬ	オプション
+
+の形になることです。コマンドそれぞれについてＭＬを指定するので
+
+   "# get Freekick 1-10 mp" 	
+   "# get elena 1-10 mp" 	というメールを
+   fmlserv@baycity.asia		へ送る
+
+と、一通のメールで Freekick と Elena それぞれのＭＬの最初の10通の記事
+を取り寄せることができるようになります。
+
+
+オプションが後に来るとか、いろいろシンタックスが異なりますが、これはこ
+れで便利なような気がします。おそらく最大の問題（ずっと実装されなかった
+最大の理由は） security の問題でしょう（後述）。
+
+
+
+.S	一番簡単な設定
+
+例：
+	fmlserv@bayicity.asia
+
+を設定し、通常のＭＬを２つ
+
+	elena@bayicity.asia	(/var/spool/elena)
+	Freekick@bayicity.asia	(/var/spool/Freekick)
+
+を管理する設定を考えてみます。
+
+fml.pl と同様に make した時にできている samples/include-fmlserv を 
+include file として使うように設定します。この時 $DIR に相当する部分は
+/var/spool のようにします。そして /var/spool/Elena と 
+/var/spool/Freekick を作ります。config.ph を作らないなら
+
+   "|/usr/libexec/fml/fml.pl /var/spool/elena --mladdr=elena@baycity.asia"
+
+のように設定すればＯＫです。必要な基本設定はよきにはからいます。
+
+
+.S	設定と基本動作
+
+一番簡単な設定は、make 時にサンプルファイルができています。このファイ
+ルを見ると設定がわかりますが、実のところ fml.pl の設定と全く同じです。
+
+	samples/include-fmlserv
+
+の中身は
+
+	"|/usr/libexec/fml/libexec/fmlserv.pl /var/spool"
+
+のようになります。見かけは同じように見えますが、引数の意味は少し違いま
+す。引数は通常の fml.pl の one level 上の directory を定義します。
+
+今 /var/spool/ を定義したので、その下の階層に
+
+	/var/spool/fmlserv
+	/var/spool/elena
+	/var/spool/Freekick
+	…
+
+のようにＭＬが並びます。つまり
+
+	/var/spool/elena/config.ph
+	/var/spool/elena/spool/
+	…
+	/var/spool/Freekick/config.ph
+	/var/spool/Freekick/spool/
+	…
+
+のような感じになります。
+
+ここで
+
+	/var/spool/fmlserv
+
+だけは特別な directory で、ここに fmlserv のログを取り、HELP ファイル
+をここに置きます。デフォールトでは ＭＬのならんでいる directory 中に並
+んで fmlserv、 つまり今の場合は
+
+	/var/spool/fmlserv
+
+に log ファイル等が置かれます。この directory は
+
+	$FMLSERV_DIR
 .k	$FMLSERV_DIR
 
+で設定を変更できます。また同様にログファイルの場所は
 
-.S	$FMLSERV_LOGFILE
+	$FMLSERV_LOGFILE
 .k	$FMLSERV_LOGFILE
+
+で変更できます。
+
+
+.S	使えるコマンド一覧
+
+○ fml で使えるコマンドすべて
+   ただし、
+
+	コマンド ＭＬ オプション
+
+   のようにＭＬ名がコマンドの次にはさまることに注意。
+ 	
+○ fmlserv 独自のコマンド
+
+	help		fmlserv のHELP
+	lists		fmlserv のコントロール下にあるＭＬ一覧
+	which		From: のアドレスがどのＭＬに属しているかを表示
+
+	href		URL を引数にとりその中身を返す。		
+	http		以下同様
+	gopher
+	ftp
+	ftpmail		
+
+
+.S	listserv と Security
 
 
 .# $Id$
