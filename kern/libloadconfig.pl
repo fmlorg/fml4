@@ -94,6 +94,8 @@ sub __LoadConfiguration
 	delete $INC{$_} if /config.ph/;
 	delete $INC{$_} if /loadconfig.pl/;
     }
+
+    $LoadConfigurationDone = 1;
 }
 
 
@@ -250,8 +252,21 @@ sub DELETE_FIELD
 # the value is not inserted now.
 sub COPY_FIELD 
 { 
-    $HdrFieldCopy{ $_[0] } = $_[1];
-    &ADD_FIELD(&FieldCapitalize($_[1]));
+    my ($old, $new) = @_; 
+
+    # already %Envelope is ready.
+    if ($LoadConfigurationDone || $Envelope{"h:${old}:"}) {
+	my ($xsrc, $xnew);
+	$xnew = &FieldCapitalize($new);
+	$xold = &FieldCapitalize($old);
+	$Envelope{"h:${xnew}:"} = $Envelope{"h:${xold}:"};
+    }
+    else { # in *.ph files
+	# XXX while (($old,$new) = each %HdrFieldCopy) { ... } later
+	$HdrFieldCopy{ $src } = $new;
+    }
+
+    &ADD_FIELD(&FieldCapitalize($new));
 }
 
 # the value is not inserted now.
