@@ -95,6 +95,7 @@
 .include uip.wix
 .include lib.wix
 .include aucea.wix
+.include pager.wix
 
 
 .# ##########################################################
