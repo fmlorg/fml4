@@ -1507,7 +1507,8 @@ Please see doc/op for more details.
 =S
 FYI. NT Version uses this trick:)
 
-なお NT 上ではこの裏技を使います:)
+なお MetaInfo Sendmail 2.x 以外のMTAを使う場合の NT 上ではこの裏技を使
+います:)
 
 
 $Id$

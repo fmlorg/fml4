@@ -35,6 +35,7 @@ bind, perl自体についてはよく知らないので聞かれても困ります。マルチプラッ
 ＃ が多いためなおさらです。
 
 
+
 .S	FML NT Version について
 
 
@@ -71,7 +72,33 @@ gzip を使う』などの Unix のコマンドに依存したコードは動きませんが、
 ようになるのでしょう。この点についての展望はまだ見えてこない部分です。
 
 
-.S	基本的な動作原理
+.S	MetaInfo Sendmail の場合
+
+
+MetaInfo Sendmail では prog mailer で動くので UNIX Version と基本的に
+同じになります。POP版のように ntfml.cmd をずっと走らせるなどは必要あり
+ません。
+
+現在のインストーラー(2.1A#6以降)では MetaInfo Sendmail なのかそれ以外
+かを聞いてきます。MetaInfo を選んだら、そのまま INSTALL ドキュメントの
+通りに進んで、aliases をシステムの aliases に cut & paste して 
+sendmail -bi などとし newaliases をかけます。
+
+これだけで配送とコマンドシステムは動くはずです（一部 UNIX コマンド依存
+の部分を除けば)
+
+まとめおくりは 各ＭＬにできる msend.cmd というプログラムを定期的に動か
+せばよいはず（ぼくは設定の仕方は知りませんが)。
+後は INSTALL を読んでPATHとかは適当に解釈して下さい。
+
+注意としては、UNIX version では SMTP 以外の通信方法がありますが、NT 版
+ではできません。もし sendmail が connection を拒否したら、エラーで配送
+は失敗します(スプールや番号のインクリメントはされます。配送だけは失敗)
+
+＊＊ここから後のドキュメントはPOPを使ったタイプのインストールについてです。
+
+
+.S	基本的な動作原理(MetaInfo Sendmail 以外)
 
 
 NT では sendmail が受けとってもその後にプログラムを起動してくれません。
@@ -121,12 +148,13 @@ ntfml.pl (ずっとはしっている)の無限ループ{
 てしまうという仕組みです。
 
 
-.S	開発/テスト環境
+.S	テスト環境
 
 	i486 architecture
 	NT 4.0 sercive pack 1 のすっぴん
 	Pw32i307.exe
 	ataman の rlogind を入れて使っている
+	MetaInfo Sendmail 2.x 
 
 
 でも perl 自体は NT workstation でも 95 でも動くんだから、これなんでも
@@ -173,7 +201,7 @@ POP3を使うため、Unix Version の /etc/aliases の設定の代わりに POPの設
 
 
 
-.C	makefml の相違点について
+.C	makefml の相違点について (POPを使うタイプ)
 
 .S	makefml newml (MLの作成)
 
@@ -214,7 +242,7 @@ tar も gzip も標準ではないため、MIME/Multipart がデフォールトになるよ
 
 
 
-.C	ntfml を走らせる (MLのスタート)
+.C	ntfml を走らせる (MLのスタート, POP版のみ)
 
 
 最後に ntfml.cmd を走らせます。このプロセスを殺してはいけません。
