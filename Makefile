@@ -262,7 +262,8 @@ sync:
 	chmod 755 /var/tmp/fml-current/src/fml.pl \
 		/var/tmp/fml-current/src/msend.pl \
 		/var/tmp/fml-current/libexec/*pl
-	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/ eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/ eriko:~/.fml/
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/bin/ eriko:~/.fml/bin/
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/drafts/ eriko:~/.fml/drafts/
 	rsync --rsh ssh -aubzv /var/tmp/fml-current/libexec/ eriko:~/.fml/libexec
 	(echo "test of new FML snapshot."; echo ""; echo "--fukachan")|\

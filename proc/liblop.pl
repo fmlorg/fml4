@@ -28,12 +28,13 @@ sub DoSummary
     }
     else {
 	local($lc) = 0;
-	$s = ($s || "Summary _PART_ _ML_FN_");
 
 	if (open(F, $SUMMARY_FILE)) { while (<F>) { $lc++;}}
 	&Debug("$lc > $MAIL_LENGTH_LIMIT") if $debug;
 
 	if ($lc > $MAIL_LENGTH_LIMIT) {	# line count > MAIL_LENGTH_LIMIT;
+	    $s = ($s || "Summary _PART_ _ML_FN_");
+
 	    &use('sendfile');
 
 	    # &SendFileDividedly($SUMMARY_FILE, 'uf', $s, $e{'Addr2Reply:'});
@@ -41,6 +42,8 @@ sub DoSummary
 				    'uf', $s, $e{'Addr2Reply:'});
 	}
 	else {
+	    $s = ($s || "Summary");
+
 	    &SendFile($e{'Addr2Reply:'}, "$s $ML_FN", $SUMMARY_FILE);
 	}
     }

@@ -26,6 +26,9 @@ $IGNKEY  = 'toc';
 $FORMAT  = 'q|~q|appendix';
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
 
+# output in both Japanese and English mode.
+$ALWAYS_OUTPUT_KEYWORD = 'C|C\.S|\.S|url|ptr|xref|seealso';
+
 $BGColor   = "E6E6FA";# lavender ("E0FFFF" == lightcyan);
 
 %Part = (1, 'I',
@@ -411,7 +414,7 @@ sub ReadFile
 	    $Both = 1;
 	}
 	# Case 3: but print out English chapter or section name
-	elsif (!$LANG && /^\.(C|C\.S|\.S)/) { 
+	elsif (!$LANG && /^\.($ALWAYS_OUTPUT_KEYWORD)/) { 
 	    $Both = 1;
 	}
 
@@ -525,6 +528,7 @@ sub ReadFile
 		undef $ForcePrint;
 	    }
 
+	    # e.g. form '.url English' line IS IGNORED!
 	    next if $DetectKeyword == $.;
 
 	    # print "--Cur[$CurLang]   ";
@@ -1111,6 +1115,8 @@ sub Expand
 	;
     }
     elsif ($c eq 'url') {
+	$ForcePrint = 1;
+
 	if ($mode eq 'html') {
 	    $index{"url=$s"} = "<A HREF=$s>$s</A>";
 	    $index{"url=$s"} = "</PRE>".$index{"url=$s"}."<PRE>" if $In_PRE;

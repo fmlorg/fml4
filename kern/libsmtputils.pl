@@ -59,9 +59,10 @@ sub DoSmtpFiles2Socket
 	    if ($Envelope{'mode:doc:ignore#'}) {
 		next if $hdr_found && (1 .. /^\#\.endFML HEADER/);
 		next if /^\#/   && $Envelope{'mode:doc:ignore#'} eq 'a';
-		next if /^\#\#/ && $Envelope{'mode:doc:ignore#'} eq 'm';
+		# next if /^\#\#/ && $Envelope{'mode:doc:ignore#'} eq 'm';
 		if ($Envelope{'mode:doc:ignore#'} eq 'm') {
-		    s/^\#\s+//;
+		    next if /^\#\#/;
+		    s/^\#\s*//;
 		}
 	    }
 

@@ -303,8 +303,14 @@ sub AutoRegistError
 
     &Debug("AutoRegist()::($key, '$s') SYNTAX ERROR") if $debug;
 
-    $sj = "Bad Syntax $key in AutoRegistration";
-    $b  = "${key}: $AUTO_REGISTRATION_KEYWORD [your-email-address]\n";
+    $sj = "AutoRegist: NOT A ML MEMBER or bad subscribe syntax";
+    $b  = "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
+    $b .= "I find some errors. Please check your mail!\nFor example,\n\n";
+    $b .= "   - The address you used IS NOT A ML MEMBER?\n";
+    $b .= "     (TRUE if you try to subscribe)\n";
+    $b .= "   - You sent a bad subscribe syntax $key?\n";
+    $b .= "\nFYI: subscribe syntax\n";
+    $b .= "${key}: $AUTO_REGISTRATION_KEYWORD [your-email-address]\n";
     $b .= "\t[] is optional\n";
     $b .= "\tfor changing your address to regist explicitly.\n";
 
@@ -487,10 +493,12 @@ sub DoSetMemberList
 	}
 
 	# for usual user, From: == $curaddr is required
+	# ATTENTION! $Fld[2] != $curaddr ($curaddr is forced to From:).
+	# CHECK RAW CHECK TO COMPARE $Fld[2] (src argument) WITH From: address.
 	if (! $e{'mode:admin'} && 
-	    ! &AddressMatch($From_address, $curaddr)) {
-	    &Log("$cmd: Security Error: requests to change another member's address '$curaddr'");
-	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$curaddr'.");
+	    (! &AddressMatch($From_address, $Fld[2]))) {
+	    &Log("$cmd: Security Error: requests to change another member's address '$Fld[2]'");
+	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$Fld[2]'.");
 	    return $NULL;
 	}
 

@@ -230,14 +230,20 @@ sub GenConfirmReplyText
 
     &Log("GenConfirmReplyText: $mode") if $debug_confirm;
 
+    $s .= "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
+
     # extensions for confirmd
     if ($CONFIRM_REPLAY_TEXT_FUNCTION) {
 	return &$CONFIRM_REPLAY_TEXT_FUNCTION(@_);
     }
 
     if ($mode eq 'Confirm::GenPreamble') {
+	undef $s;
+
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}\n\n";
+
+	$s .= "Hi, I am fml ML driver for the ML <$MAIL_LIST>.\n";
 	$s .= "Please reply this mail to confirm your subscribe request\n";
 	$s .= "and send this to $CONFIRMATION_ADDRESS\n";
 	$s .= "So, you can be added to MAILING LIST <$MAIL_LIST>.";
@@ -258,7 +264,11 @@ sub GenConfirmReplyText
     }
     elsif ($mode eq 'BufferSyntax::Error') {
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
-	$s .= "Syntax Error! Please use the following syntax\n\n";
+	$s .= "Syntax Error! Please check your mail\n\n";
+	$s .= "   - The address you used IS NOT A ML MEMBER?\n";
+	$s .= "     (TRUE if you try to subscribe)\n";
+	$s .= "   - You sent a bad subscribe syntax?\n\n";
+	$s .= "If you try to subscribe,  please use the following syntax\n\n";
 	$s .= "   $CONFIRMATION_SUBSCRIBE Your-Name ";
 	$s .= "(Name NOT E-Mail Address)\n";
 	$s .= "\nwhere \"Your Name\" for clearer identification.\n";
@@ -287,6 +297,7 @@ sub AddressMatch { &main'AddressMatch(@_);} #';
 sub Log          { &main'Log(@_);} #';
 sub Mesg         { &main'Mesg(@_);} #';
 sub Open         { &main'Open(@_);} #';
+sub Debug        { &main'Debug(@_);} #';
 
 sub IdCheck
 {

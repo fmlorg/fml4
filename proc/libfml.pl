@@ -562,17 +562,23 @@ sub ProcFileSendBack
     # files to send
     if ($f eq $MEMBER_LIST) { 
 	push(@files, $MEMBER_LIST); push(@files, @MEMBER_LIST);
-	$e{'mode:doc:ignore#'} = 'm' if $ignore_mode;
     }
     elsif ($f eq $ACTIVE_LIST) { 
 	push(@files, $ACTIVE_LIST); push(@files, @ACTIVE_LIST);
-	$e{'mode:doc:ignore#'} = 'a' if $ignore_mode;
     }
     else {
 	push(@files, $f);
     }
 
     &Uniq(*files);
+
+    if ($proc =~ /member/i) { # $f eq $MEMBER_LIST) { 
+	$e{'mode:doc:ignore#'} = 'm' if $ignore_mode;
+    }
+    elsif ($proc =~ /active/i) {  # $f eq $ACTIVE_LIST) { 
+	$e{'mode:doc:ignore#'} = 'a' if $ignore_mode;
+    }
+
 
     # ordinary people should not know $ADMIN_MEMBER_LIST content. 
     if (! $e{'mode:admin'}) {
@@ -795,12 +801,10 @@ sub ProcSetAddr
 {
     local($proc, *Fld, *e, *misc) = @_;
 
-    if (! $e{'mode:admin'}) {
-	$s = "$proc cannot be permitted without AUTHENTICATION";
-	&Mesg(*e, $s);
-	&Log($s);
-	return 'LAST';
-    }
+    $s = "$proc is removed in fml 2.2 Release.\n";
+    &Mesg(*e, $s);
+    &Log($s);
+    return 'LAST';
 
     if (&AddressMatch($Fld[2], $From_address)) {
 	$Addr = $Fld[2];

@@ -102,10 +102,11 @@ sub InitMakeFml
 	unshift(@ARGV, split(/\s+/, $ENV{'MAKEFML'}));
     }
     require 'getopts.pl';
-    &Getopts("dhf:A:O:p:D:vwV:mi:u:U");
+    &Getopts("dhf:A:O:p:D:vwV:mi:u:UF");
     $debug   = $opt_d;
     $verbose = $opt_v;
     $MailNotify = $opt_m;
+    $EnForceMode = $opt_F ? 1 : 0;
 
     $HOME  = $ENV{'HOME'};
     $PWD   = $ENV{'PWD'};
@@ -2171,6 +2172,13 @@ sub GenerateDirectory
 	&MakeWritableDir("$ML_ETC_DIR/crontab");
     }
 
+    # THIS ROUTINE IS CALLED IN THE CREATION OF A NEW ML!
+    # dup check
+    if (-d "$ML_DIR/$ml" && (!$EnForceMode)) {
+	&Debug("*** Error: $ml already exists ***");
+	return "FATAL";
+    }
+
     # owner only read-write
     # umask(077);
     &MakeDir("$ML_DIR/$ml");
@@ -2202,9 +2210,11 @@ sub do_newml
 
     # &ApplyPolicy;
 
-    &GenerateDirectory($ml);
+    local($status);
+    $status = &GenerateDirectory($ml);
+    return if $status eq 'FATAL';
     &ResetVariables;
-
+    
     print STDERR "---Generting configuration examples.\n";
 
     ### cf file; 
@@ -3317,7 +3327,9 @@ sub do_fmlserv
     # special assigned ML;
     $ml = "fmlserv";
 
-    &GenerateDirectory($ml);
+    local($status);
+    $status = &GenerateDirectory($ml);
+    return if $status eq 'FATAL';
     &ResetVariables;
 
     ### cf file; 
