@@ -145,17 +145,20 @@ samples/sitedef.ph が作られますので参考にしてみて下さい。
 
 .S	fml process の signal handling
 .k	$Sigarlm
-.k	$TIMEOUT
+.k	$FLOCK_TIMEOUT
+.k	$MAX_TIMEOUT
 
 現在は次のように設定されています。
 これは alarm(3) を使ういつものやり方です。
-TIMEOUTを待つ時間は $MAX_TIMEOUT で決まります。
+TIMEOUTを待つ時間は $FLOCK_TIMEOUT で決まります。
+(flock でない場合は 三秒＋α 程度のSLEEPを MAX_TIMEOUT 回待ってみる）
 
     # signal handling
     $SIG{'ALRM'} = 'TimeOut';
     $SIG{'INT'}  = $SIG{'QUIT'} = 'SignalLog';
 
-$TIMEOUT 後 $SIG{'ALRM'} で定義された関数(TimeOut)を実行します。
+$FLOCK_TIMEOUT (デフォールトは3600秒) 後 $SIG{'ALRM'} で定義された関数
+(TimeOut)を実行します。
 
 TimeOut は管理者へTIMEOUTを知らせ、ログを残しfmlを終了します。
 これがないとずっとロック(flock)がかかったままになるからです。
@@ -476,6 +479,8 @@ sendmail の struct envelople e; に対応するものです。
 
 各データの初期化は次の順序で行なわれる。
 
+	$DIR $LIBDIR @INC の初期化
+
 	&InitConfig
 	   &SetDefaults
 		%Envelope
@@ -488,7 +493,7 @@ sendmail の struct envelople e; に対応するものです。
 		sitedef.ph
 
    	   &SetOpts
-		コマンドリンオプション
+		コマンドリンオプションの評価
 
 	   COMPATIBILITY CODE
    
@@ -509,6 +514,147 @@ sendmail の struct envelople e; に対応するものです。
 		$START_HOOK
 		$SMTP_OPEN_HOOK
 		$FML_EXIT_HOOK
+
+
+.S	DIRECTORY変数
+.xref	fml-process
+
+起動時の一番最初の段階では $DIR $LIBDIR @INC という変数の設定を筆頭に
+各種変数の初期化が行なわれます（上述）。
+
+$DIR $LIBDIR @INC が起動時にどう評価され使われているかは
+「fml の基本動作と起動オプション…」の章を見ると分かるでしょう。
+.xref	fml-process
+
+以下では DIRECTORY 一覧を示します。
+		
+	@INC	（参考）
+		これは Perl の include file の search path
+		$DIR @INC(original) $LIBDIR ...
+		の順番に探される。
+
+	$DIR
+		config.phのある場所、いわゆるMLのHOME	
+		@INC の先頭に設定される
+
+	$LIBDIR	
+
+		fml.pl や libsmtp.pl 等の置き場所。
+		$DIR と同じでも良いし、別の場所で保守されていてもよい。
+		もともと複数のＭＬを扱うためにスプールと *.pl ファイル
+		群の置き場所をわけるために導入された
+		@INC の最後に入る。
+
+		なおコマンドラインに出てくるdirectoryはすべて @INC に
+		設定されるが、$DIR の直後の directory が $LIBDIR に設
+		定される。
+
+    	$SPOOL_DIR		$DIR/spool
+		ＭＬの記事を格納する場所
+
+
+	[$DIRからの相対パスで設定されるもの]
+	$TMP_DIR		tmp (temporary)	4.4BSD の /tmp
+	$VARDB_DIR		4.4BSD の /var/db (データベース)
+	$VARLOG_DIR		4.4BSD の /var/log に対応 ログが置かれる
+				backward compat のため
+				log 等のデフォールトは $DIR/log のままである
+				本来は $VARLOG_DIR/log が望ましい
+
+	$VARRUN_DIR		4.4BSD の /var/run pid-file 等はここ
+				なお cache もここにおいている。
+	$VAR_DIR		4.4BSD の /var
+
+	[FULL PATH 化された変数]
+	$FP_TMP_DIR		$DIR/$TMP_DIR
+	$FP_VARDB_DIR		$DIR/$VARDB_DIR
+	$FP_VARLOG_DIR		$DIR/$VARLOG_DIR
+	$FP_VARRUN_DIR		$DIR/$VARRUN_DIR
+	$FP_VAR_DIR		$DIR/$VAR_DIR
+    	$FP_SPOOL_DIR		$DIR/$SPOOL_DIR
+
+
+.S	設定ファイル群
+.xref	fml-file-structure
+
+[メンバーのリスト関係]
+
+	$MEMBER_LIST 	 	$DIR/members
+		メンバーリスト(認証のみに使う)
+.xref	fml-file-structure
+
+	$ACTIVE_LIST 		$DIR/actives
+		ＭＬの配送リスト
+.xref	fml-file-structure
+
+
+[各種の説明、ご案内関係のファイル]
+
+	$OBJECTIVE_FILE	 	$DIR/objective
+		ＭＬの目的を書いたファイル
+
+	$GUIDE_FILE		$DIR/guide
+		ＭＬの一般向けご案内（ガイド）
+
+	$HELP_FILE	 	$DIR/help
+		ＭＬのHELP、コマンドの解説等
+
+	$DENY_FILE	 	$DIR/deny
+		ＭＬがメンバーチェックをしている時
+		メンバー以外からメールが来た時に返す断りの文章
+		
+	$WELCOME_FILE	 	$DIR/guide
+		ＭＬが自動登録の時、登録時に送ってあげる文章
+		デフォールトではとりあえずガイドと同じになっている。
+.xref	auto-regist
+
+
+[ログファイル関係]
+
+	$LOGFILE	 	$DIR/log
+		ログ
+
+	$MGET_LOGFILE    	$DIR/log
+		mgetのログ。デフォールトでは↑ログファイルと同じ
+.xref	mget
+	
+	$SMTPLOG		$VARLOG_DIR/_smtplog
+		プロセス間通信(SMTP)のログ(デバッグの役に立つ)
+
+	$SUMMARY_FILE 	 	$DIR/summary	
+		MLの記事のサマリ
+
+	$SEQUENCE_FILE 	 	$DIR/seq
+		MLの記事番号
+
+	$MSEND_RC		$VARLOG_DIR/msendrc
+		まとめおくりの制御ファイル
+.xref	msend
+
+	$LOCK_FILE	 	$VARRUN_DIR/lockfile.v7
+		flock() を使わない時のロックで使うファイル
+
+	$LOG_MESSAGE_ID		$VARRUN_DIR/msgidcache
+		message-id cache ファイル
+		(ML自身での無限ループを防ぐためのキャッシュ)
+
+
+.S	単に便利なためにある変数
+
+	$NULL
+		ダミー:-) ＃ 別にこんな変数いらない 
+		#define null (char *)0 みたいなものだと思ってもらえば良い
+
+	$FML	
+		カーネル内のプロセステーブルを書き変える際に使う変数
+
+	$FACE_MARK	（単なる愛敬:-）
+		各種リクエストの結果を返す時にお別れの文章の腋につける
+		e.g. P(^^)
+			Be seeing you P(^^)
+
+		のようになる。		 
+
 
 
 .C	fml 設定ファイルのフォーマットと構造

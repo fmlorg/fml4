@@ -203,6 +203,27 @@ SYNOPSIS
 .xref	WIX
 
 WIX言語のフォーマッタ 
+.k	$COMMENT (bin/fwix.pl)
+.k	$KEYWORD (bin/fwix.pl)
+.k	$FORMAT  (bin/fwix.pl)
+.k	$HTML_KEYWORD (bin/fwix.pl)
+
+   $COMMENT = '^\.comment|^\.\#';
+
+	コメントを意味する予約語
+
+   $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
+
+	chapter section 等予約語の定義
+	
+   $FORMAT  = 'q|~q';
+
+	quote 等で特殊フォーマット命令を適用するもの		
+
+   $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
+
+	HTMLモード用の予約語
+
 
 
 .S	URL の中身を取り出す (bin/geturl.pl)
@@ -388,7 +409,7 @@ SYNOPSIS:
 .k	split_and_msend.pl
 
 与えられたファイルを分割して送り出すプログラムを太古の昔使ってた名残。
-事実上使ってない。fml 2.x では OBSOLETE
+事実上使ってない。fml 2.x では OBSOLETE のため無保証 or 単なるおまけ。 
  
 
 .S	SPOOL -> HTML Hierarchy (bin/spool2html.pl)

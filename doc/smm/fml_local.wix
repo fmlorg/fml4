@@ -319,29 +319,37 @@ body	getmyspool\s+(\S+)	&	getmyspool_pw
 
 
 # USER	-user fukachan で設定する変数と同じ意味
+.k	$USER (fml_local)
 USER	fukachan
 
 # HOME	$HOME変数。
 # Bourne Shell 風にしているので、~/ を展開するようにはなっていません
+.k	$HOME (fml_local)
 HOME	/home/axion/fukachan
 
 # fml.pl のある場所。でも使ってない変数…:-)
+.k	$FML_PL (fml_local)
 FML_PL	/home/vivian/fukachan/work/EXP/fml.pl
 
 # $DIR 変数の設定。下で使われると $DIR を次の値で展開するため
+.k	$DIR (fml_local)
 DIR	/home/vivian/fukachan/work/EXP
 
 # $LIBDIR 変数の設定。下で使われると $LIBDIR を次の値で展開するため
+.k	$LIBDIR (fml_local)
 LIBDIR	/home/vivian/fukachan/work/EXP
 
 # メールスプールの場所
+.k	$MAIL_SPOOL (fml_local)
 MAIL_SPOOL	/var/mail/fukachan
 
 # デバッグモード
+.k	$DEBUG (fml_local)
 DEBUG
 
 # From: であり、エラーメールが返る場所。もっともふつう〜は
 # 自分自身以外に設定仕様がないですね
+.k	$MAINTAINER (fml_local)
 MAINTAINER 	fukachan@phys.titech.ac.jp
 
 # From: in MAINTAINER's SIGNATURE
@@ -349,21 +357,26 @@ MAINTAINER 	fukachan@phys.titech.ac.jp
 # e.g. 返るメールのFrom:が、
 # From: fukachan@phys.titech.ac.jp (Prisoner No.6 Fukachan)
 # になる
+.k	$MAINTAINER_SIGNATURE (fml_local)
 MAINTAINER_SIGNATURE	Prisoner No.6 Fukachan
 
 # ログファイル デフォールトは ~/log
+.k	$LOG (fml_local)
 LOG		$HOME/work/fml/log
 
 # パスワード
+.k	$PASSWORD (fml_local)
 PASSWORD	uja uja 
 
 # get とかで使う アーカイブの置き場所。もし設定してないと HOME
+.k	$ARCHIVE_DIR (fml_local)
 ARCHIVE_DIR	/home/uja/uja/work/archive
 
 # Vacation program compatible で vacation の働きもする。
 VACATION	/home/uja/uja/.vacationrc
 
 # フィールドセパレータを変更する
+.k	$FS (fml_local)
 FS	\s+
 
 FS	:
@@ -371,9 +384,10 @@ FS	:
 
 # ユーザーが自分用に設定した関数を 別のファイルにしまいたいなら
 # そのファイル名を設定する。デフォールトは ~/.myfunctions.pl
+.k	$MY_FUNCTIONS (fml_local)
 MY_FUNCTIONS	/home/your-function-file
 
-
+.k	@INC (fml_local)
 INC	include-path
 
 必要なら、fml のいろいろな ライブラリファイルを include してより高度な
@@ -382,8 +396,8 @@ INC	include-path
 値は指定した順番に @INC に代入されます。そして、その順番にサーチされま
 す。
 
-
 MAIL_LENGTH_LIMIT	2900
+.k	$MAIL_LENGTH_LIMIT (fml_local)
 
 getmyspool2 では分割して送り返す関数を呼びます。この分割のしかたで、
 何行でファイルを分けるか？ をきめます。
@@ -392,12 +406,14 @@ getmyspool2 では分割して送り返す関数を呼びます。この分割のしかたで、
 
 
 TMPDIR			./tmp
+.k	$TMPDIR (fml_local)
 
 $HOME からの相対パスをかく。デフォールトは ./tmp（つまり $HOME/tmp ）
 ＃なければ、つくります。
 
 
 SECURE_FML_LOCAL	0
+.k	$SECURE_FML_LOCAL (fml_local)
 
 最終的に実行されるコマンドのsecurity予備チェック。自分で書いたコードで
 も Special character があれば、Insecure となってしまうので、.fmllocalrc 

@@ -1,6 +1,7 @@
 .C	WIX Language
 .l	WIX
 .k	WIX Languate
+.xref	bin/fwix.pl
 
 	"WIX" == "With Index and Xreference"
 
