@@ -23,15 +23,35 @@ while (<>) {
 	# &jcode'convert(*s, 'jis'); #';
     }
 
-    # Section
-    if (/^\.j\s+(Section::\S+)\s+(.*)/) {
-	&SectionOutput($1, $2);
+    if ($LANG eq 'Japanese') {
+	# Section
+	if (/^\.j\s+(Section::\S+)\s+(.*)/) {
+	    &SectionOutput($1, $2);
+	    next;
+	}
+
+	# get description
+	if (/^\.j\s+(.*)/) {
+	    $buf .= "   ".$1."\n";
+	}
+    }
+    else {
+	next if /^\#.*Sub Section/;
+
+	s/[\#\s]+$//;
+
+	# Section
+	if (/^[\#\s]+(Section:)\s*(.*)/) {
+	    &SectionOutput($1.$2, $2);
+	    next;
+	}
+
+	# get description
+	if (/^\#\s+(.*)/) {
+	    $buf .= "   ".$1."\n";
+	}
     }
 
-    # get description
-    if (/^\.j\s+(.*)/) {
-	$buf .= "   ".$1."\n";
-    }
 
     # variable name
     if (/^([A-Z0-9_]+):/) {
@@ -63,10 +83,11 @@ sub Init
 {
     # getopt()
     require 'getopts.pl';
-    &Getopts("dhm:s");
+    &Getopts("dhm:sL:");
 
     $MODE = $opt_m || 'text';
     $SORT = $opt_s ? 1 : 0;
+    $LANG = $opt_L || die($!);
 
     $TmpBuf = "/tmp/manifest$$";
 }
@@ -123,6 +144,7 @@ sub SectionOutput
     }
     elsif ($MODE eq 'html') {
 	$section =~ s/::/-/g;
+	$section =~ s/\s+/-/g;
 	$Index .= "   <LI> <A HREF=\"\#${section}\"> $buf</A>\n";
 	print "<A NAME=$section>\n";
 	print "¡û $buf\n\n";
