@@ -94,7 +94,7 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 
 
 
-.S	ユーザをＭＬに加える場合（未実装）
+.S	ユーザをＭＬに加える場合
 
    /usr/local/fml/sbin/fmladmin adduser elena fukachan@sapporo.iij.ad.jp
    /usr/local/fml/sbin/fmladmin add elena fukachan@sapporo.iij.ad.jp
@@ -102,7 +102,7 @@ Enter?(CR) を押すと [] の中の値が設定されます。
 	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
 
 
-.S	ユーザをＭＬに加える場合（未実装）
+.S	ユーザをＭＬから削除される場合
 
    /usr/local/fml/sbin/fmladmin byeuser elena fukachan@sapporo.iij.ad.jp
    /usr/local/fml/sbin/fmladmin bye elena fukachan@sapporo.iij.ad.jp
