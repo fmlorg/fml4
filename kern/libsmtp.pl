@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsmtp.pl,v 2.57 2001/09/11 13:32:21 fukachan Exp $
+# $FML: libsmtp.pl,v 2.58 2001/09/29 10:35:43 fukachan Exp $
 #
 
 no strict qw(subs);
@@ -500,6 +500,7 @@ sub __SmtpIO
     ### SMTP Section: HELO/EHLO
     $Current_Rcpt_Count = 0;
     $e{'mci:pipelining'} = 0; # reset EHLO information
+    $e{'mci:xverp'}      = 0; # reset EHLO information
 
     if ($e{'mci:mailer'} eq 'smtpfeed' || $SmtpFeedMode) {
 	&SmtpPut2Socket("LHLO $e{'macro:s'}", $ipc);
@@ -515,6 +516,11 @@ sub __SmtpIO
 	    $e{'mci:pipelining'} = 1;
 	}
 
+	# Postfix XVERP
+	if ($RetVal =~ /250.XVERP/) {
+	    $e{'mci:xverp'} = 1;
+	}
+
 	undef $SoErrBuf;
     }
 
@@ -528,15 +534,22 @@ sub __SmtpIO
     # XXX If USE_VERP (e.g. under qmail), you can use VERPs
     # XXX "VERPs == Variable Envelope Return-Path's".
     {
-	my ($mail_from);
+	my ($mail_from, $xverp);
 	if ($USE_VERP) {
-	    $mail_from = $SMTP_SENDER || $MAINTAINER;
-	    $mail_from =~ s/\@/-\@/;
-	    $mail_from .= '-@[]';
+	    # postfix xverp
+	    if ($e{'mci:xverp'}) {
+		$xverp = ' XVERP=-=';
+	    }
+	    # qmail
+	    else {
+		$mail_from = $SMTP_SENDER || $MAINTAINER;
+		$mail_from =~ s/\@/-\@/;
+		$mail_from .= '-@[]';
+	    }
 	} else {
 	    $mail_from = $SMTP_SENDER || $MAINTAINER;
 	}
-	&SmtpPut2Socket("MAIL FROM:<$mail_from>", $ipc);
+	&SmtpPut2Socket("MAIL FROM:<$mail_from>$xverp", $ipc);
     }
     
     if ($SoErrBuf =~ /^[45]/) {
