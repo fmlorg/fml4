@@ -15,14 +15,13 @@
 .if LANG == JAPANESE
 [ガイド]
 
+   チュートリアル。まずここを読んでみて欲しいです。
+.url http://www.fml.org/fml/examples/
+   もう少し詳細なものがこのドキュメント(INSTALL)です。
+
     *** 重要 *** 
     2.xから3.0以降へのアップグレードの注意(特に自動登録を使っている人へ)
 .url http://www.fml.org/fml/UPGRADE-3.0/
-
-   簡単なインストールの流れや設定例などについては以下のURLにあります。
-   感じを掴むために先にこっちを読むといいかもしれません。
-.url http://www.fml.org/fml/examples/
-   もう少し詳細なものがこのドキュメント(INSTALL)です。
 
    デザインや内部の実装の説明、HOOKを使った高度なカスタマイズは
    doc/op.jp というファイルをみてください
@@ -42,15 +41,15 @@
 .if LANG == ENGLISH
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 
+   For easy guideline of installation and fundamental configuration,
+   See
+.url http://www.fml.org/fml/examples/index-e.html
+
    ***** IMPORTANT!!! *****
    If you use automatic registration and upgrade fml 2.x to fml 3.0, 
    please read UPGRADE file firstly. Especially the first part
 
 .url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
-
-   For easy guideline of installation and fundamental configuration,
-   See
-.url http://www.fml.org/fml/examples/index-e.html
 
    For more details of internals, advanced configurations, see
    doc/op.en		(plain text)

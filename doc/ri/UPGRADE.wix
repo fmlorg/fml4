@@ -1,6 +1,6 @@
 .HTML_PRE
 .if LANG == JAPANESE
-		3.0 stable/3.0.1 への UPGRADE をする人向けの注意
+		3.0.1 への UPGRADE をする人向けの注意
 
 				深町 賢一
 .fi
