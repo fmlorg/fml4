@@ -899,6 +899,8 @@ sub OutPutLocalConfig
 	    print CF "\$MAKE_FML{'OPT_MIME'} = 1;\n";
 	}
 	elsif ($k eq "AUTO_REGIST_WITH_CONFIRM" && $v == 1) {
+	    print CF "\# \$ML_MEMBER_CHECK = 0; IS DEFINED ABOVE\n";
+	    print CF "\# \$ML_MEMBER_CHECK = 0; IS AUTOMATIC REGISTRATION\n";
 	    print CF "\$MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'} = 1;\n";
 	    print CF "\&DEFINE_MODE('artype=confirm');\n";
 	}
