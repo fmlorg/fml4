@@ -99,18 +99,28 @@ sub OneLineCheckP
     my($one_line_check_p) = 0;
     my($n_paragraph) = $#pmap;
 
-    my($buf) = &main::STR2EUC($lparbuf);
-
     if ($n_paragraph == 1) { $one_line_check_p = 1;}
     if ($n_paragraph == 2) { 
-	if ($lparbuf =~ /\@/ || 
+	my($buf) = &main::STR2EUC($lparbuf);
+	my($pat); 
+	if ($buf =~ /(\n.)/) { $pat = $1;}
+
+	# basic citation ?
+	if ($buf =~ /\n>/) {
+	    &Log("must be citation") if $main::debug;
+	}
+	# more functional citation ?:)
+	elsif ($pat && ($buf =~ /$pat.*$pat/)) {
+	    &Log("must be citation") if $main::debug;
+	}
+	elsif ($lparbuf =~ /\@/ || 
 	    $lparbuf =~ /TEL:/i ||
 	    $lparbuf =~ /FAX:/i ||
 	    $lparbuf =~ /:\/\// ) {
 	    $one_line_check_p = 1; 
 	}
 	# account"2-byte @"domain where "@" is a 2-byte "@" character.
-	if ($buf =~ /[-A-Za-z0-9]\241\367[-A-Za-z0-9]/) {
+	elsif ($buf =~ /[-A-Za-z0-9]\241\367[-A-Za-z0-9]/) {
 	    $one_line_check_p = 1;
 	}
     }
