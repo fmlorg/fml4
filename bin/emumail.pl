@@ -50,7 +50,14 @@ To: $To
 Subject: $Subject
 #;
 
+
+    $_ .= "Reply-To: $opt_R\n" if $opt_R;
+
+# null line (separator between header and body)
 $_ .= "\n" unless $opt_H; 
+
+# body
+$_ .= "$opt_B\n" if $opt_B;
 
 if ($opt_r) {
     s/_RECEIVED_/\nReceived: received at .../;
@@ -67,7 +74,7 @@ $_;
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("dhg:f:s:t:hHr");
+    &Getopts("dhg:f:s:t:hHrR:B:");
 
     $USER  = $ENV{'USER'} || (getpwuid($<))[0];
     $Gecos = (getpwuid($<))[6] || $USER;
