@@ -448,7 +448,7 @@ package SyncHtml;
 # $HTML_INDEX_TITLE = "THE TITLE of index.html";
 #
 
-@Import = ("debug", "debug_html", "debug_expire",
+@Import = ("debug", "debug_html", "debug_expire", "opt_overwrite",
            From_address, Now, HtmlDataCache, HtmlThreadCache,
            COMPAT_ARCH,
            HTML_EXPIRE, HTML_EXPIRE_LIMIT, ID, ML_FN, USE_MIME, USE_LIBMIME, 
@@ -535,8 +535,12 @@ sub Write
     # write permission is required for only you and nobody read these files;
     umask($HTML_WRITE_UMASK ? $HTML_WRITE_UMASK : 022);
 
-    # file existence check
-    -f "$f.html" && (&Log("Already $f.html exists"), return $NULL);
+    # check the $id.html exists already or not
+    # if --overwrite is specified as arguments for spool2html,
+    # you can overwrite $id.html which exists already.
+    unless ($opt_overwrite) {
+	-f "$f.html" && (&Log("Already $f.html exists"), return $NULL);
+    }
 
     # open
     if ($HTML_OUTPUT_FILTER) {

@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: spool2html.pl,v 2.19 2001/06/17 14:12:13 fukachan Exp $
+# $FML: spool2html.pl,v 2.20 2001/06/17 14:25:13 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -75,8 +75,11 @@ exit 0;
 
 sub InitS2P
 {
-    require 'getopts.pl';
-    &Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
+    use Getopt::Long;
+    Getopt::Long::Configure("bundling");
+    GetOptions(qw(overwrite! 
+		  h v V T H F
+		  d=s f=s t=s I=s D=s M=s L=s o=s S=s E=s));
 
     eval(' chop ($PWD = `pwd`); ');
     $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
