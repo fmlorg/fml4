@@ -5,121 +5,198 @@
 The Design and Implementation of "fml" Mailing List Server
 </TITLE>
 <META http-equiv="Content-Type"
+#ifdef JAPANESE
 	content="text/html; charset=ISO-2022-JP">
+#else
+	content="text/html; charset=us-ascii">
+#endif
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rel="stylesheet" 
 	    type="text/css" href="master.css">
 <LINK rev="Contents" href="index.html">
+#ifdef JAPANESE
 <LINK rev="alternate" lang="en" href="index-e.html">
+#else
+<LINK rev="alternate" lang="ja" href="index.html">
+#endif
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 
 <!-- =================================================================== -->
 <H1>
-"fml" Mailing List Server の設計と実装
-<BR>
-The Design and Implementation of "fml" Mailing List Server
+#ifdef JAPANESE
+	"fml" Mailing List Server の設計と実装
+	<BR>
+#endif
+	The Design and Implementation of "fml" Mailing List Server
 </H1>
 
 <A HREF="index-e.html">[English] is here.</A>
 
 <!-- =================================================================== -->
 <HR>
+<PRE>NOW 2.2 BETA PHASE (2.2 RELEASE IS COMING SOON).</PRE>
+
 <P>
-	<A HREF=search-j.html>
+#ifdef JAPANESE
+	<A HREF="search-j.html">
 	FML配布ドキュメント群へのサーチ
+#else
+	<A HREF="search-e.html">
+	Search over FML documents
+#endif
 	</A>
+
+	<LI>
+#ifdef JAPANESE
+	<A HREF="CHECK_LIST/">
+	CHECK LIST (質問の前にチェックしてみて欲しいリスト)
+	</A>
+#else
+	<A HREF="CHECK_LIST-e/">
+	CHECK LIST before ask
+	</A>
+#endif
+
 <HR>
 <H3>
+#ifdef JAPANESE
 Information とドキュメントのHTML版
+#else
+Information and HTML version documents in the fml source distribution 
+#endif
 </H3>
 <UL>
 	<LI>
 	<A HREF="INFO.html">
+#ifdef JAPANESE
 	What's New; 最新の情報(INFO)
-	</A>
-	[<A HREF="mailto:fml@ffs.fml.org">fml@ffs.fml.org</A>
-	にメールを出すと返送されるもの]
-
-	<LI>
-	<A HREF="roadmap.html">
-	ROADMAP TO 2.2 RELAESE
+#else
+	What's New; Latest Information(INFO)
+	(Sorry, the translation to English may be incomplete.
+	and it is composed of Japanese and English _o_)
+#endif
 	</A>
 
 	<LI>
+#ifdef JAPANESE
 	<A HREF="README/">
+#else
+	<A HREF="README-e/">
+#endif
 	README
 	</A>
 
 	<LI>
+#ifdef JAPANESE
 	<A HREF="INSTALL/">
 	INSTALL ガイド
+#else
+	<A HREF="INSTALL-e/">
+	GUIDE on INSTALLATION
+#endif
 	</A>
 	<BR>
+#ifdef JAPANESE
 	<A HREF="INSTALL_on_NT4/">
-	INSTALL ガイド (for NT4)
+	INSTALL ガイド (Windows NT4 の上での fml のインストールについて)
 	<BR>
 	* MetaInfo Sendmail ではほとんどUNIX Version と同じです。
-	<BR>
-	* MetaInfo version なら普通(?)に動いてると思うんですが
-	<BR>
-	* POP version が新しくなりました (2.1A#14)
+#else
+	<A HREF="INSTALL_on_NT4-e/">
+	INSTALLATION on WINDOWS NT4 (Beta Test Phase)
+#endif
 	</A>
 	<BR>
-	<A HREF=UPGRADE/>
+#ifdef JAPANESE
+	<A HREF="UPGRADE/">
+	アップグレードの際の注意
+#else
+	<A HREF="UPGRADE-e/">
 	FOR UPGRADE
+#endif
 	</A>
 	<BR>
-	<A HREF=INSTALL_with_QMAIL/>
-	qmail の場合のインストールメモ(ほんとにOKかなぁ？) 
+#ifdef JAPANESE
+	<A HREF="INSTALL_with_QMAIL/">
+	qmail の場合のインストールメモ
+#else
+	<A HREF="INSTALL_with_QMAIL-e/">
+	MEMO on when you use fml with MTA "qmail"
+#endif
 	</A>
 
 	<LI>
+#ifdef JAPANESE
 	<A HREF="op/index.html">
 	Fml 2.2 の設計と実装 (Deamon Book for fml)
+	設計、運用、変数の意味とカスタマイズについてなど全般について
 	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
+#else
+	<A HREF="op-e/index.html">
+	Fml 2.2's daemon book to show design, operations, varialbes
+	and the customize and so o....
 	<BR>
-	(fml-source-tree/doc/smm/)
+	The Design and Implementation of the Fml Mailing List Server 
+#endif
+	<BR>
+	(generated from fml-source-tree/doc/smm/)
 	</A>
 
 	<LI>
 	<A HREF="RELEASE_NOTES.html">
-	RELEASE_NOTES
+	RELEASE_NOTES (composed of Japanese and English _o_)
 	</A>
 
 	<LI>
 	<A HREF="GPL.html">
 	GNU PUBLIC LICENSE
 	</A>
-
 </UL>
 
 <H3>
-ソースコード
+#ifdef JAPANESE
+	ソースコード
+#else
+	Source codes and so on ...
+#endif
 </H3>
 <UL>
 	<LI>
 	<A HREF="fml-current.tar.gz">
+#ifdef JAPANESE
 	fml 最新版ソースコード一式 (fml-current.tar.gz)
+#else
+	fml latest source code package (fml-current.tar.gz)
+#endif
 	</A>
 
 	<LI>
 	<A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/archive/">
-	fml ソース一式のアーカイブ
+#ifdef JAPANESE
+	fml のソースと関連するアーカイブ (WWW.SAPPORO.IIJ.AD.JP)
+#else
+	fml sources and related things (WWW.SAPPORO.IIJ.AD.JP)
+#endif
 	<BR>
 	(the same as on ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/)
 	</A>
 
 	<LI>
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
-	fml ソース一式 on
+#ifdef JAPANESE
+	fml ソース (FTP)
+#else
+	fml sources (FTP)
+#endif
 	<BR>
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 	</A>
 	<BR>
-	lha, ish and mime_pls.* sendmail, bind, ntperl
-	等も一緒に置いてあります。御利用下さい
+	lha, ish and mime_pls.* sendmail, smtpfeed, bind, ntperl
+#ifdef JAPANESE
+	等も参考までに一緒に置いてあります。
 	<BR>
 	あと、
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
@@ -127,9 +204,20 @@ Information とドキュメントのHTML版
 	</A>
 	の下には current のソースが広がった形でおいてあります
 	(時として tar.gz にまとめられる前のものもあり得る)。
+#else
+	exist here for convenience. Also you find the fml latest source tree
+	on
+	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/">
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/
+	</A>
+#endif
 
 	<LI>
+#ifdef JAPANESE
 	その他のソフトウエア
+#else
+	My other softwares:)
+#endif
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/">
 	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/
 	</A>	
@@ -146,16 +234,24 @@ links around mail systems
 	http://www.sendmail.org/
 	</A>
 	<BR>
+
+#ifdef JAPANESE
 	<A HREF=http://www.jpcert.or.jp/tech/98-0001/>
 	技術メモ - sendmail バージョンアップマニュアル -
 	</A>
+#else
+#endif
 	<A HREF="http://www.sendmail.com/">
-	http://www.sendmail.com/
+	Sendmail Inc. (http://www.sendmail.com/)
 	</A>
 
 	<LI>
 	<A HREF="http://www.vmailer.org/">
-	http://www.vmailer.org/ (作者はあの tcp_wrapper の Wietse Venema)
+	http://www.vmailer.org/
+#ifdef JAPANESE
+	(作者はあの tcp_wrapper の Wietse Venema)
+#else
+#endif
 	</A>
 	<BR>
 
@@ -163,14 +259,26 @@ links around mail systems
 	<A HREF="http://www.qmail.org/">
 	http://www.qmail.org/
 	</A>
+#ifdef JAPANESE
 	<BR>
-	<A HREF="http://tehanu.hpcl.titech.ac.jp/">
-	qmail ドキュメントの日本語訳 (http://tehanu.hpcl.titech.ac.jp/)
+	<A HREF="http://www.jp.qmail.org/">
+	qmail ドキュメントの日本語訳 (http://www.jp.qmail.org/)
 	</A>
+#endif
 
 	<LI>
 	<A HREF="http://www.exim.org/">
 	http://www.exim.org/
+	</A>
+
+	<LI>
+	<A HREF="http://www.zmailer.org/">
+	http://www.zmailer.org/
+	</A>
+
+	<LI>
+	<A HREF="ftp://ftp.uu.net/networking/mail/smail/">
+	smail
 	</A>
 	
 
@@ -179,26 +287,25 @@ links around mail systems
 	<A HREF="http://www.isc.org/bind.html">
 	http://www.isc.org/bind.html
 	</A>
-	<BR>
 	<A HREF="ftp://ftp.isc.org/">
-	ftp://ftp.isc.org/
+	; ISC (ftp://ftp.isc.org/)
 	</A>
 
 
-	<P> Security
+	<P> Arond Security
 	<LI>
 	<A HREF="http://www.cert.org/">
-	http://www.cert.org/
+	CERT 
 	</A>
 
 	<LI>
 	<A HREF="http://www.jpcert.or.jp/">
-	http://www.jpcert.or.jp/
+	JPCERT
 	</A>
 	
 	<LI>
 	<A HREF="http://www.nsi.org">
-	http://www.nsi.org/
+	NSI
 	</A>
 
 
@@ -212,17 +319,26 @@ links around mail systems
 	http://www.perl.com/CPAN/ports/
 	</A>
 	<BR>
-	<A HREF=http://www.ActiveState.com>
-	http://www.ActiveState.com (NTPERL)
+	<A HREF=http://www.activestate.com/ActivePerl/>
+	ActivePerl
 	</A>
+	(
+	<A HREF=http://www.ActiveState.com/>
+	NTPERL
+	</A>
+	)
+#ifdef JAPANESE
+	＃5.005 はUNIX版と統合されている
+#endif
 	<BR>
 	<A HREF=ftp://err.ethz.ch/pub/neeri/MacPerl/>
 	ftp://err.ethz.ch/pub/neeri/MacPerl/
 	</A>
 	<BR>
-	<A HREF=ftp://sunsite.cnlab-switch.ch//software/platform/macos/perl/>
-	ftp://sunsite.cnlab-switch.ch//software/platform/macos/perl/
+	<A HREF=ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
+	ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/
 	</A>
+
 
 
 	<P> Operating Systems and Architectures
@@ -230,7 +346,6 @@ links around mail systems
 	<A HREF="nt.html">
 	links around Windows NT
 	</A>	
-
 </UL>
 
 <!-- =================================================================== -->
