@@ -29,7 +29,7 @@ sub HRef
     }
     else {
 	&Log("ERROR: HRef: invalid url:". $_);
-	&Mesg(*e, 'request has an invalid syntax', 'invalid_syntax', $_):
+	&Mesg(*e, 'request has an invalid syntax', 'invalid_syntax', $_);
 	return;
     }# "split http://host (http, host, ...);;";
 
