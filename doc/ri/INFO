@@ -1,4 +1,4 @@
-fml Mailing List Packeges release rivison 1.6   Bulletin
+fml Mailing List Packeges release rivison 2.1   Bulletin
 
 ＃バグ、質問等はfml-bugs@phys.titech.ac.jpまでおねがいします。
 
@@ -26,13 +26,66 @@ fml Mailing List Packeges release rivison 1.6   Bulletin
 の下です。（名前はfml-current.日付.tar.gzです。日付の新しいのをどうぞ）
 
 WWW が使えるなら
+
 	http://www.phys.titech.ac.jp/uja/fml/
 
 という「ＭＬサーバの設計と実装」というところを御覧下さいませ。
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 
-========== WHAT'S NEW  fml current (1.7 pre release version) ==========
+=== WHAT'S NEW  fml 2.0 current (version 2 pre release version) ===
+04/25
+
+libexec/fml_local.pl
+	SECURE_FML_LOCAL
+
+fml.pl
+	FIX the behaviour when $USE_SUBJECT_AS_COMMANDS is ON
+
+04/24
+
+	$EXPIRE_SUMMARY を non-nil にすると summary も Expire する
+
+04/23
+
+fml.pl
+	&CheckMember は 特殊文字を含む場合、正規表現エラーを避けるため 
+	high performance 用コードを用いない
+
+libexpire.pl
+	summary の expire も行う。
+
+04/22
+
+libfop.pl
+libutils.pl
+	FIX uuencode: bad file descriptor on NetBSD 1.1B
+
+librfc1153.pl
+	カスタマイズ用の変数を外へ出す（config.phで設定できるように）
+
+	変数				デフォールト
+	$RFC1153_ISSUE    		1
+	$RFC1153_LISTNAME 		UJA
+	$RFC1153_VOL      		$year
+	$RFC1153_SEQUENCE_FILE  	$FP_VARLOG_DIR/IssueSeq
+
+libsendfile.pl
+     $MGET_TEXT_MODE_DEFAULT 
+     $MGET_BIN_MODE_DEFAULT 
+	mget のデフォールトの変更
+
+msend.pl
+     $MSEND_MODE_DEFAULT 
+	まとめおくりのデフォールトの変更
+
+
+＊＊＊＊＊
+	SAPPORO.IIJ.AD.JP へ
+	ターゲットマシンは perl 4.036 on NetBSD 1.1B へ
+＊＊＊＊＊
+
+
 @HOSTS			複数のsendmailの走っているマシン（非常時のセカンダリも含む）
 $MCI_SMTP_HOSTS = N;	@HOSTS のうち Ｎ個 のマシンのsendmail をパラレルに使って
 			（理論上での限界は）Ｎ倍配送を高速化する。
