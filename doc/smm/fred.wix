@@ -1,6 +1,6 @@
-.C	FRED （汎関数的正規表現分解）ライブラリ
+.C	FRED （汎関数-正規表現-微分）ライブラリ
 
-.S	Funtional Regular Expressional Decomposer
+.S	Funtional Regular Expressional Derivative
 
 正規表現にマッチするか否かを調べパターンにマッチした時およびしない時に
 それぞれ定義された関数を実行します。fred は
