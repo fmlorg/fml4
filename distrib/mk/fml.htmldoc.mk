@@ -68,8 +68,8 @@ var/html/advisories/index.html: doc/advisories/index.html
 	$(CPP) -P -DJAPANESE doc/advisories/index.html |\
 	$(JCONV) > $(FML)/var/html/advisories/index.html
 
-var/html/advisories/index-e.html: doc/advisories/index.html
-	$(CPP) -P -UJAPANESE doc/advisories/index.html \
+var/html/advisories/index-e.html: doc/advisories/index-e.html
+	$(CPP) -P -UJAPANESE doc/advisories/index-e.html \
 	> $(FML)/var/html/advisories/index-e.html
 
 var/html/op/index.html: doc/smm/*wix
