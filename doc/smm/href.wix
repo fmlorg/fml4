@@ -135,6 +135,17 @@ $START_HOOK = q#
 .k	HRef
 
 
+    &HRef($request, *Envelope);
+
+$request のURLの内容を$Envelope{'message'}に入れて送り返す。
+$request は
+
+	http://
+	gopher://
+	ftp://
+
+を理解します。ftp はローカル or ftpmailへのリレーへ自動的に切替えます。
+また、もしバイナリデータの場合はuuencodeして送り返します。
 
 
 .# $Id$
