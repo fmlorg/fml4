@@ -3426,7 +3426,7 @@ sub do_pgp
     print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
 
     &Log("makefml::pgp pgp @argv");
-    &__system(pgp,  @argv);
+    &__system('pgp',  @argv);
     print STDERR "ERROR: $@" if $@;
 
     print "\n--- PGP END ---\n\n";
