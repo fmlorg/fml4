@@ -826,8 +826,8 @@ sub Convert2Sjis
     foreach $r (@f) { 
 	$r =~ s/^\.\///; # $SPOOL_DIR/, tmp/, ...;
 
-	&Debug("file2sjis($r, $tmpf)") if $debug;
-	&file2sjis($r, $tmpf) || next;
+	&Debug("FileConv2SJIS($r, $tmpf)") if $debug;
+	&FileConv2SJIS($r, $tmpf) || next;
 
 	if ($r =~ /^$SPOOL_DIR/) {
 	    rename($tmpf, "$TMP_DIR/$r") || 
@@ -853,12 +853,12 @@ sub Convert2Sjis
 
 # using jcode.pl and add ^M and ^Z
 # return 1 if succeed
-sub file2sjis 
+sub FileConv2SJIS 
 {
     local($in, $out) = @_;
 
-    open(IN, $in)       || (&Log("file2sjis < $in: $!"),  return $NULL);
-    open(OUT, "> $out") || (&Log("file2sjis > $out: $!"), return $NULL);
+    open(IN, $in)       || (&Log("FileConv2SJIS < $in: $!"),  return $NULL);
+    open(OUT, "> $out") || (&Log("FileConv2SJIS > $out: $!"), return $NULL);
     select(OUT); $| = 1; select(STDOUT);
 
     while (<IN>) {
