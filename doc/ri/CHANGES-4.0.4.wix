@@ -15,7 +15,19 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
-2002/01/19
+2003/01/25
+
+   kern/fml.pl (2.147-2.148)
+	fix log to find mime boundary. 
+
+   www/lib/libcgi_kern.pl (1.55-1.56)
+	fix htpasswd handling
+
+   sbin/makefml (2.231-2.232)
+	fix @INC to include fml-devel
+	bug fix user handling
+
+2003/01/19
 
    sbin/makefml (2.227-2.228):
 	fml8 style qmail virtual domain support
@@ -33,17 +45,17 @@
 
    sync modules with current
 
-2002/01/18
+2003/01/18
 
    databases/
 	update documents.
 
-2002/01/15
+2003/01/15
 
    cf/config (2.9-2.10):
 	bug fix ^\d+$ ml name for BRACKET
 
-2002/01/14
+2003/01/14
 
    messages/English.
 	apply patch by sm@opusvl.com.
@@ -244,7 +256,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.35 2003/01/19 13:45:43 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.37 2003/02/09 12:42:44 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
