@@ -478,8 +478,11 @@ sub DoChangeMemberList
 	# if matched, get "$addr including mx or comments"
 	if (/^\s*(.*)/o)   { $addr = $1;}
 	if (/^\#\s*(.*)/o) { $addr = $1;}
-	
-	print STDERR "DChML main::{ CMD=$cmd \$addr=[$addr]}\n" if $debug;
+
+	# fixing multiple s=skip possiblities;
+	if ($cmd =~ /^ON|SKIP|NOSKIP$/) { $addr =~ s/s=skip//g;}
+
+	print STDERR "ChangeAMList::{ CMD=$cmd \$addr=[$addr]}\n" if $debug;
 
 	# not use "last" for the possibility the address is written double. 
 	# may not be effecient.
