@@ -52,6 +52,10 @@ $DISTRIBUTE_FILTER_HOOK .= q#
     if ($e{'Body'} =~ /filename=.*\.Pretty.*Park.*\.exe/i ) {
 	return 'original Pretty Park familly ?';
     }
+
+    if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
+	return 'P2000 virus familly?';
+    }
 #;
 
 # さらに HOOK へつけたす
