@@ -22,24 +22,6 @@ foreach (@ARGV) {
 
 &InitFmlServ;
 
-# Fmlserv specific here
-sub InitFmlServ
-{
-    $DIR           = $DIR  || '/home/axion/fukachan/work/spool/EXP';
-    $MAIL_LIST_DIR = $DIR;
-    $FMLSERV_DIR   = "$DIR/fmlserv";
-    $DIR           = $FMLSERV_DIR;
-    $LIBDIR	   = $LIBDIR || $DIR;
-    unshift(@INC, $FMLSERV_DIR);
-
-    # Directory check
-    $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
-    if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
-
-    $LOGFILE       = "$FMLSERV_DIR/log";
-    &Touch($LOGFILE);
-}
-
 ### MAIN ###
 umask(077);			# ATTENTION!
 
@@ -70,6 +52,31 @@ exit 0;
 
 ##### FmlServ Emulation Codes
 
+# Fmlserv specific here
+sub InitFmlServ
+{
+    $DIR           = $DIR;
+    $MAIL_LIST_DIR = $DIR;
+    $FMLSERV_DIR   = "$DIR/fmlserv";
+    $DIR           = $FMLSERV_DIR;
+    $LIBDIR	   = $LIBDIR || $DIR;
+    unshift(@INC, $FMLSERV_DIR);
+
+    # Directory check
+    $FMLSERV_DIR || die "Please define \$FMLSERV_DIR\n";
+    if (! -d $FMLSERV_DIR) { mkdir($FMLSERV_DIR, 0700);}
+
+    $LOGFILE       = "$FMLSERV_DIR/log";
+    &Touch($LOGFILE);
+
+    if (!-f "$FMLSERV_DIR/guide") {
+	#require 'libfmlserv.pl';
+	#&MakeDefaultGuide("$FMLSERV_DIR/guide");
+	system "/bin/cp /etc/sendmail.cf $FMLSERV_DIR/guide";
+    }
+}
+
+
 sub FmlServ
 {
     local(*e) = @_;
@@ -86,6 +93,7 @@ sub FmlServ
 
     # Alloc %ML {list => directory_of_list}
     # checks -d $MAIL_LIST_DIR/* -> %ML (generated from the data)
+    #           except for "^@\w+"
     &NewMLAA($MAIL_LIST_DIR, *ML);
 
     # Summary of requested procedures for each ML
@@ -103,6 +111,7 @@ sub FmlServ
 
     foreach $ml (keys %ReqInfo) {
 	next if $ml eq 'fmlserv'; # fmlserv is the last;
+	next if $ml =~ /^majordomo:/; # fmlserv is the last;
 
 	$DIR  = $ML{$ml};	# reset $DIR for each ML's $DIR
 	$cf   = "$DIR/config.ph";
@@ -113,19 +122,13 @@ sub FmlServ
 	&Debug("ML\t$ml\nDIR\t$DIR\ncf\t$cf\nprocs\t$proc\n") if $debug;
 	
 	# Load 'ml' NS from $list/config.ph
-	if ($COMPAT_MAJORDOMO) {
-	    require 'libcompat_majordomo.pl';
-	    &CompatMajordomo;
-	}
-	else {
-	    &NewML($DIR, $ml, *e);
-	}
+	&NewML($DIR, $ml, *e, *ML);
 
 	&Lock;			# LOCK
 
 	chdir $DIR || die $!;
 
-	$e{'message'} .= "\n\n\#\#\# Requests to $ml ML \#\#\#\n";
+	&Mesg(*e, "\n\n\#\#\# Requests to $ml ML \#\#\#");
 	$e{'message'} .= $ML_cmds_log{$ml};
 
 	&DoFmlServProc($ml, $proc, *e);
@@ -156,6 +159,7 @@ sub FmlServ
 	undef $FML_EXIT_HOOK;	# unlink each ML hook
 
 	# Reload NS from main'NS
+	&DestructCompatMajordomo if $e{'mode:majordomo'};
 	&ResetNS;
 
 	undef $PresentML;
@@ -166,7 +170,7 @@ sub FmlServ
 
     chdir $DIR || die $!;
 
-    &NewML($FMLSERV_DIR, 'fmlserv', *e);
+    &NewML($FMLSERV_DIR, 'fmlserv', *e, *ML);
 
     &DoFmlServItselfFunctions(*ReqInfo, *e) if ($ReqInfo{'fmlserv'});
 
@@ -192,8 +196,6 @@ sub DoFmlServItselfFunctions
 	&use('fml');
 
 	foreach (@proc) {
-	    print STDERR "proc $_\n";
-
 	    # ATTENTION! already "cut the first #.. syntax"
 	    # in sub SortRequest
 	    $org_str = $_;
@@ -210,7 +212,7 @@ sub DoFmlServItselfFunctions
 
 		# REPORT
 		if ($Procedure{"r#fmlserv:$_"}) {
-		    $e{'message'} .= "\n>>> $org_str\n";
+		    &Mesg(*e, "\n>>> $org_str");
 		}
 
 		# PROCEDURE
@@ -241,8 +243,13 @@ sub DoFmlServProc
     else {
 	&Debug("ERROR: CheckMember($From_address, $MEMBER_LIST)") if $debug;
 	foreach (split(/\n/, $proc)) {
+	    &Debug("DoFmlServProc::$_()") if $debug;
+	    
 	    if (/^subscribe\s*(.*)/i){ $sp = 1; $addr = $1; next;}
-	    if (/^(guide|info)/i) { $guide_p     = $_; next;}
+	    if (/^(guide|info)/i)    { $guide_p = $_;       next;}
+
+	    &Debug("DoFmlServProc::$_(){YOU ARE NOT MEMBER($ml)") if $debug;
+
 	    $s  = "YOU ARE NOT MEMBER($ml), so NOT PERMIT $proc";
 	    &LogWEnv($s, *e);
 	}
@@ -250,11 +257,14 @@ sub DoFmlServProc
 	### Subscription is an exception.
 	if ($sp) {
 	    if ($ML_MEMBER_CHECK) {
+		&Mesg(*e, "\n\tYour subscribe request is");
+		&Mesg(*e, "\tforwarded to the maintainer.");
+		&Mesg(*e, "\tPlease wait a little.");
 		&Warn("Subscribe Request from $From_address", &WholeMail);
 	    }
 	    else {
 		&use('utils');
-		&AutoRegist(*e, $addr);
+		&AutoRegist(*e, ($addr || $From_address));
 	    }
 	}
 	elsif ($guide_p) {
@@ -263,17 +273,28 @@ sub DoFmlServProc
     }
 }
 
-
+#
+# --majorodmo mode is the compatibility with majordomo
+# but the conflict fml's ml is a directory <-> majordomo's ml == members of fml
+# Hmm...
 sub NewML
 {
-    local($DIR, $ml, *e) = @_;
+    local($DIR, $ml, *e, *ML) = @_;
     local($cf)  = "$DIR/config.ph";
+
+    # reset
+    undef $e{'mode:majordomo:chmemlist'};
 
     print STDERR "NewML::Check($cf)\n" if $debug;
 
     # Define Defaults against "no $MAIL_LIST_DIR/$ml/config.ph"
     print STDERR "NewML::SetMLDefaults($DIR, $ml)\n" if $debug;
+
     &SetMLDefaults($DIR, $ml);
+    if ($e{'mode:majordomo'} && $ML{"majordomo:$ml"}) { 
+	&CompatMajordomo($DIR, $ml);
+    }
+    &FixMLMode($DIR, $ml);	# check $DIR/$ml.auto ...
 
     if (-f $cf) {
 	print STDERR "NewML::Load($cf)\n" if $debug;
@@ -308,6 +329,19 @@ sub NewML
 
     # FORCE Reply-TO
     $e{'h:Reply-To:'}  = "fmlserv\@$DOMAINNAME";
+}
+
+
+sub FixMLMode
+{
+    local($dir, $ml) = @_;
+    local($mdir) = "$MAIL_LIST_DIR/$ml";
+
+    &Debug("\n\tFound $mdir.closed;\n") if -f "$mdir.closed" && $debug;
+    &Debug("\n\tFound $mdir.auto;\n")   if -f "$mdir.auto"   && $debug;
+
+    $ML_MEMBER_CHECK = 1 if -f "$mdir.closed";
+    $ML_MEMBER_CHECK = 0 if -f "$mdir.auto";
 }
 
 
@@ -347,16 +381,84 @@ sub SetMLDefaults
     $SEQUENCE_FILE                 = "$DIR/seq"; # sequence number file
     $MSEND_RC                      = "$VARLOG_DIR/msendrc";
     $LOCK_FILE                     = "$VARRUN_DIR/lockfile.v7"; # liblock.pl
+
+
+    # IF NOT EXIST;
+    -f $GUIDE_FILE   || ($GUIDE_FILE   = "$FMLSERV_DIR/guide");
+    -f $HELP_FILE    || ($HELP_FILE    = "$FMLSERV_DIR/guide");
+    -f $DENY_FILE    || ($DENY_FILE    = "$FMLSERV_DIR/guide");
+    -f $WELCOME_FILE || ($WELCOME_FILE = "$FMLSERV_DIR/guide");
 }
 
+
+sub CompatMajordomo
+{
+    local($dir, $ml) = @_;
+    local($mldir) = $MAIL_LIST_DIR;
+
+    print STDERR "MAJORDOMO::($dir, $ml) = @_; mldir=$mldir\n" if $debug;
+
+    $MEMBER_LIST                   = "$mldir/$ml"; # member list
+    $ACTIVE_LIST                   = "$mldir/$ml"; # active member list
+    $GUIDE_FILE                    = "$mldir/$ml.info";
+
+    push(@ARCHIVE_DIR, "$mldir/$ml.archive");
+    $Envelope{'mode:majordomo:chmemlist'} = 1;
+}
+
+
+sub DestructCompatMajordomo
+{
+    undef $MEMBER_LIST;
+    undef $ACTIVE_LIST;
+    undef $GUIDE_FILE;
+    undef @ARCHIVE_DIR;
+}
+
+# The point to mention is "skip if /^\./"!!!
+# We may use this feature for the compatibility with majordomo
 sub NewMLAA
 {
     local($dir, *entry) = @_;
 
     opendir(DIRD, $dir) || die $!;
-    foreach(readdir(DIRD)) {
-	next if /^\./;
-	$entry{$_} = "$dir/$_" if -d "$dir/$_";
+    foreach (readdir(DIRD)) {
+	next if /^\./;	# this skip is important for the further trick (^^)
+
+	# $_.archive is the default archive dir of $_
+	if (/^(\S+)\.archive$/ && -d "$dir/$_") {
+	    local($mf) = $1;	# member file
+	    next if $Envelope{'mode:majordomo'} && -f "$dir/$mf";
+	}
+	# 
+	# e.g. $_.info, $_.auto is the file of the ml $_ (majordomo)
+	# skip
+	if ($Envelope{'mode:majordomo'} && -f "$dir/$_" && /^(\S+)\.(\S+)$/) {
+	    next if -f "$dir/$1";
+	}
+
+	# FML Case
+	# IF -d elena && -f elena.auto
+	if ($Envelope{'mode:majordomo'} && -f "$dir/$_" && /^(\S+)\.(\S+)$/) {
+	    next if -d "$dir/$1";
+	}
+
+	# A Candidate
+	$entry{$_} = "$dir/$_"  if -d "$dir/$_" && (! /^\@/);
+
+	# Compat:Majordomo
+	if ($Envelope{'mode:majordomo'} && -f "$dir/$_") {
+	    -d "$dir/\@$_" || mkdir("$dir/\@$_", 0755);
+
+	    if (-d "$dir/${_}.archive") {
+		-d "$dir/\@$_/var" || mkdir("$dir/\@$_/var", 0755);
+		eval("symlink(\"$dir/${_}.archive\", \"$dir/\@$_/var/archive\")");
+	    }
+
+	    $entry{$_} = "$dir/\@$_";
+	    $entry{"majordomo:$_"} = "$dir/\@$_";
+	    print STDERR "Declare \$entry{majordomo:$_}\n";
+	} 
     }
     closedir(DIRD);
 
@@ -395,18 +497,18 @@ sub SortRequest
 	    last if /^\s*(quit|end|exit)/i;
 
 	    if (/^\s*subscribe/i) {
-		$e{'message'} .= ">>>> $_\n\tnot effective, so ignored ...\n";
+		&Mesg(*e, ">>>> $_\n\tnot effective, so ignored ...");
 		next;
 	    }
 
-	    if (/^\s*(guide|info|help|lists|which|href|http|gopher|ftp|ftpmail)/) {
+	    if (/^\s*(guide|info|help|lists|which|href|http|gopher|ftp|ftpmail)/i) {
 		# push(@ML_cmds, $_);
 		# default >> virtual fmlserv ML
-		$ML_cmds{'fmlserv'}         .= "$cmd @p\n";
+		$ML_cmds{'fmlserv'}         .= "$_\n";
 		&Debug("FMLSERV COMMAND [$_]") if $debug;
 	    }
 	    else {
-		$e{'message'} .= ">>>> $_\n\tunknown command!\n";
+		&Mesg(*e, ">>>> $_\n\tunknown command!");
 	    }
 	}
     }    
@@ -541,16 +643,17 @@ sub ProcLists
 {
     local($proc, *Fld, *e, *misc) = @_;
 
-    $e{'message'} .= "\n>>> $proc\n\n";
-    $e{'message'} .= "  $MAIL_LIST serves the following lists\n\n";
+    &Mesg(*e, "\n>>> $proc\n");
+    &Mesg(*e, "  $MAIL_LIST serves the following lists\n");
     $e{'message'} .= sprintf("   %s\n", 'Lists:');
 
     while (($key, $value) = each %ML) {
 	next if $key eq 'fmlserv'; # fmlserv is an exception
+	next if $key =~ /^majordomo:/;
 	$e{'message'} .= sprintf("\t%-15s\t%s\n", $key);
     }
 
-    $e{'message'} .= "\n\n";
+    &Mesg(*e, "\n");
 }
 
 
@@ -562,33 +665,44 @@ sub ProcWhich
 
     &Log($proc);
 
-    $e{'message'} .= "\n>>> $proc $addr\n\n";
+    &Mesg(*e, "\n>>> $proc $addr\n");
+    &Mesg(*e, "You are registered in the following lists:");
     $e{'message'} .= sprintf("%-15s\t%s\n", 'List', 'Address');
     $e{'message'} .= ('-' x 50)."\n";
 
     foreach $ml (keys %ML) {
 	next if $ml eq 'fmlserv'; # fmlserv is an exception
+
 	$DIR = $ML{$ml};
 
 	# get MEMBER_LIST
-	$s = "$DIR/config.ph";
-	$s = &GetEntryByName($s, '^\$MEMBER_LIST');
-	$s =~ s/\$DIR/$DIR/g;	# expand $DIR
-	$s .= ' 1;';
-
-	# and eval it
-	$r = eval $s, $@ eq "";	# $r is a result
+	if ("$DIR/config.ph") {
+	    $s = "$DIR/config.ph";
+	    $s = &GetEntryByName($s, '^\$MEMBER_LIST');
+	    $s =~ s/\$DIR/$DIR/g;	# expand $DIR
+	    $s .= ' 1;';
+	    
+	    # and eval it
+	    eval $s;
+	    $r = 1 if $@ eq "";	# $r is a result
+	}
+	elsif (-f "$DIR/members") {
+	    # sub NewML:: default is
+	    # $MEMBER_LIST = "$DIR/members"; # member list
+	    $r = $MEMBER_LIST = "$DIR/members";
+	}
+	else {
+	    &Mesg(*e, "ML Configuration Error");
+	}
 
 	# if eval is succeed, get entry for $addr
 	if ($r && ($s = &CheckMember($addr, $MEMBER_LIST))) {
 	    $e{'message'} .= sprintf("%-15s\t%s\n", $ml, $addr);
-	}
-
-	if (! $s) {
-	    ;# $e{'message'} .= "YOU ARE NOT A MEMBER of $ml\n";
+	    $hitc++;
 	}
     }#FOREACH;
 
+    if (! $hitc) { &Mesg(*e, "\tnothing");}
 }
 
 
@@ -597,8 +711,10 @@ sub ProcHRef
     local($proc, *Fld, *e, *misc) = @_;
     local(*r, $s, $DIR, $request);
 
+    &Debug("$proc, @Fld, *e, *misc)");
+
     ($request = $Fld[2]) || do {
-	$e{'message'} .= "\tERROR: NO GIVEN PARAMETER\n";
+	&Mesg(*e, "\tERROR: NO GIVEN PARAMETER");
 	return;
     };
 
@@ -754,11 +870,20 @@ sub Log {
 #:sub WholeMail eval CheckMember AddressMatch Logging 
 #:sub GetFieldsFromHeader
 #:sub Opt SetCommandLineOptions LoopBackWarn Lock Unlock Flock Funlock
-#:sub Touch Write2 Append2 use Debug InitConfig Warn ChkREUid CheckUGID
+#:sub Touch Write2 Append2 use Debug InitConfig Warn ChkREUid CheckUGID Mesg
 #:sub FixHeaders CheckEnv CtlAddr Addr2FQDN CutFQDN SecureP
 #:replace
-# Strange "Check flock() OK?" mechanism???
-sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
+# lock algorithm using flock system call
+# if lock does not succeed,  fml process should exit.
+sub Flock
+{
+    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
+
+    eval alarm($TIMEOUT || 3600);
+    $SIGARLM = 1;
+    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
+    flock(LOCK, $LOCK_EX);
+}
 
 
 sub SetDefaults
@@ -767,11 +892,22 @@ sub SetDefaults
     $Envelope{'mode:uip'}   = '';    # default UserInterfaceProgram is nil.;
     $Envelope{'mode:req:guide'} = 0; # not member && guide request only
 
+    # DNS
+    chop($HOSTNAME = `hostname`);
+    local($n, $a) = (gethostbyname($HOSTNAME))[0,1];
+    foreach (split(/\s+/, "$n $a")) { /^$HOSTNAME\./ && ($FQDN = $_);}
+    $FQDN       =~ s/\.$//; # for e.g. NWS3865
+    $DOMAINNAME = $FQDN;
+    $DOMAINNAME =~ s/^$HOSTNAME\.//;
+
+    # DEBUG CODE; for (FQDN, DOMAINNAME) {
+    # eval("printf STDERR \"Default %-20s %s\n\", $_, \$$_;");}
+
     %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', +1);
     $REJECT_ADDR = 'root|postmaster|MAILER-DAEMON|msgs|nobody';
     $SKIP_FIELDS = 'Received|Return-Receipt-To';
-    $MAIL_LIST   = 'dev.null@domain.uja';
-    $MAINTAINER  = 'dev.null-admin@domain.uja';
+    $MAIL_LIST   = "dev.null\@$DOMAINNAME";
+    $MAINTAINER  = "dev.null-admin\@$DOMAINNAME";
     $ML_MEMBER_CHECK = 1;
 
     @HdrFieldsOrder = 
@@ -843,15 +979,7 @@ sub InitConfig
     ### Options
     &SetOpts;
 
-    # Mode Definition
-    if ($Envelope{'mode:fmlserv'})     { &use("mladdr");  &FmlServMode;}
-    if ($Envelope{'mode:fml'})         { &use("mladdr");  &FmlMode;}
-    if ($Envelope{'mode:hml'})         { &use('modedef'); &HmlMode;}
-    if ($Envelope{'mode:auto'})        { $ML_MEMBER_CHECK = 0;}
-    if ($Envelope{'mode:check'})       { $ML_MEMBER_CHECK = 1;}
-    if ($Envelope{'mode:commandonly'}) { $COMMAND_ONLY_SERVER = 1;}
-    if ($Envelope{'mode:mime'})        { $USE_MIME = 1;}
-    if ($Envelope{'mode:through'})     { $SUPERFLUOUS_HEADERS = 1;}
+    &eval('&GetPeerInfo;') if $LOG_CONNECTION;
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
 
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
@@ -868,7 +996,7 @@ sub InitConfig
 
     ### Initialize DIR's and FILE's of the ML server
     local($s);
-    for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
+    for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
 	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
@@ -901,8 +1029,9 @@ sub InitConfig
 # Setting CommandLineOptions after include config.ph
 sub SetOpts
 {
+    # should pararelly define ...
     for (@SetOpts) { /^\-\-MLADDR=(\S+)/i && (&use("mladdr"), &MLAddr($1));}
-
+    for (@SetOpts) { /^\-\-([a-z0-9]+)$/  && (&use("modedef"), &ModeDef($1));}
     for (@SetOpts) {
 	if (/^\-\-(force|fh):(\S+)=(\S+)/) { # "foreced header";
 	    $h = $2; $h =~ tr/A-Z/a-z/; $Envelope{"fh:$h:"} = $3;
@@ -915,7 +1044,7 @@ sub SetOpts
 	}
 	elsif (/^\-\-(\S+)/) {
 	    local($_) = $1;
-	    /^[a-z0-9]+$/  ? ($Envelope{"mode:$_"} = 1) : eval("\$$_ = 1;"); 
+	    /^[a-z0-9]+$/ ? ($Envelope{"mode:$_"} = 1) : eval("\$$_ = 1;"); 
 	    /^permit:([a-z0-9:]+)$/ && ($Permit{$1} = 1); # set %Permit;
 	    next;
 	}
@@ -949,11 +1078,6 @@ sub CacheMessageId
     $id        =~ /\s*\<(\S+)\>\s*/;
     &Append2($id, $LOG_MESSAGE_ID);
 }
-
-
-# which address to use a COMMAND control.
-sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
-
 
 
 # Do FQDN of the given Address 1. $addr is set and has @, 2. MALI_LIST
@@ -999,7 +1123,7 @@ sub Notify
     $GOOD_BYE_PHRASE = $GOOD_BYE_PHRASE  || "\tBe seeing you!   ";
     
     if ($Envelope{'message'}) {
-	$Envelope{'message'} .= "\n$GOOD_BYE_PHRASE $FACE_MARK\n";
+	&Mesg(*Envelope, "\n$GOOD_BYE_PHRASE $FACE_MARK");
 	&use('utils');
 	$Envelope{'trailer'}  = &$proc;
 	&Sendmail($to, $s, $Envelope{'message'}, @to);
@@ -1018,9 +1142,6 @@ sub RunHooks
 {
     local($s);
     $0  = "--Run Hooks <$FML $LOCKFILE>";
-
-    # html mode
-    if ($Envelope{'mode:html'}) { &use('synchtml'); &HtmlMode;}
 
     # FIX COMPATIBILITY
     $FML_EXIT_HOOK .= $_cf{'hook', 'str'};
@@ -1162,19 +1283,16 @@ sub Parse
 # Recreation of the whole mail for error infomation
 sub WholeMail   
 { 
-    local($b) = "--$MailDate--";
-    local($c) = "Content-Type: message/rfc822\n";
-    undef $Envelope{'r:MIME'};
-    $Envelope{'r:MIME'} .= "MIME-Version: 1.0\n";
-    $Envelope{'r:MIME'} .= 
-	"Content-type: multipart/mixed;\n\tboundary=\"$b\"\n";
+    $_ = "\n";
 
     if ($MIME_CONVERT_WHOLEMAIL) { 
 	&use('MIME'); 
-	$_ = &DecodeMimeStrings($Envelope{'Header'});
+	$_ .= &DecodeMimeStrings($Envelope{'Header'});
     }
-    $_ .= $Envelope{'Header'}."\n".$Envelope{'Body'};
-    "\n\nOriginal Mail as follows:\n\n$b$c\n$_\n$b\n";
+
+    $_ .= "\n".$Envelope{'Header'}."\n".$Envelope{'Body'};
+    s/\n/\n   /g; # against ">From ";
+    "\n\nOriginal Mail as follows:\n$_\n";
 }
 
 
@@ -1371,6 +1489,13 @@ sub LoopBackWarn
 }
 
 
+# Strange "Check flock() OK?" mechanism???
+sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
+
+
+sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
+
+
 sub LoadConfig
 {
     # configuration file for each ML
@@ -1378,6 +1503,11 @@ sub LoadConfig
 
     eval("require 'sitedef.ph';");      # common defs over ML's
     require 'libsmtp.pl';		# a library using smtp
+
+    # if mode:some is set, load the default configuration of the mode
+    for (keys %Envelope) { 
+	/mode:(\S+)/ && $Envelope{$_} && do { &use("modedef"); &ModeDef($1);}
+    }
 }
 
 
@@ -1420,7 +1550,7 @@ sub use { require "lib$_[0].pl";}
 sub Debug 
 { 
     print STDERR "$_[0]\n";
-    $Envelope{'message'} .= "\nDEBUG $_[0]\n" if $debug_message;
+    &Mesg(*Envelope, "\nDEBUG $_[0]") if $debug_message;
 }
 
 
@@ -1441,15 +1571,7 @@ sub InitConfig
     ### Options
     &SetOpts;
 
-    # Mode Definition
-    if ($Envelope{'mode:fmlserv'})     { &use("mladdr");  &FmlServMode;}
-    if ($Envelope{'mode:fml'})         { &use("mladdr");  &FmlMode;}
-    if ($Envelope{'mode:hml'})         { &use('modedef'); &HmlMode;}
-    if ($Envelope{'mode:auto'})        { $ML_MEMBER_CHECK = 0;}
-    if ($Envelope{'mode:check'})       { $ML_MEMBER_CHECK = 1;}
-    if ($Envelope{'mode:commandonly'}) { $COMMAND_ONLY_SERVER = 1;}
-    if ($Envelope{'mode:mime'})        { $USE_MIME = 1;}
-    if ($Envelope{'mode:through'})     { $SUPERFLUOUS_HEADERS = 1;}
+    &eval('&GetPeerInfo;') if $LOG_CONNECTION;
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
 
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
@@ -1466,7 +1588,7 @@ sub InitConfig
 
     ### Initialize DIR's and FILE's of the ML server
     local($s);
-    for ('SPOOL_DIR', 'TMP_DIR', 'VAR_DIR', 'VARLOG_DIR', 'VARRUN_DIR') {
+    for (SPOOL_DIR,TMP_DIR,VAR_DIR,VARLOG_DIR,VARRUN_DIR,VARDB_DIR) {
 	$s .= "-d \$$_ || mkdir(\$$_, 0700); \$$_ =~ s#$DIR/##g;\n";
 	$s .= "\$FP_$_ = \"$DIR/\$$_\";\n"; # FullPath-ed (FP)
     }
@@ -1507,6 +1629,10 @@ sub CheckUGID
     print STDERR "\nsetuid is not set $< != $>\n\n" if $< != $>;
     print STDERR "\nsetgid is not set $( != $)\n\n" if $( ne $);
 }
+
+
+# &Mesg(*e, );
+sub Mesg { local(*e, $s) = @_; $e{'message'} .= "$s\n";}
 
 
 # LATTER PART is to fix extracts
@@ -1627,20 +1753,9 @@ sub CheckEnv
 }
 
 
-sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
+# which address to use a COMMAND control.
+sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
 
-
-# lock algorithm using flock system call
-# if lock does not succeed,  fml process should exit.
-sub Flock
-{
-    $0 = "--Locked(flock) and waiting <$FML $LOCKFILE>";
-
-    eval alarm($TIMEOUT || 3600);
-    $SIGARLM = 1;
-    open(LOCK, $FP_SPOOL_DIR); # spool is also a file!
-    flock(LOCK, $LOCK_EX);
-}
 
 
 sub Funlock {
