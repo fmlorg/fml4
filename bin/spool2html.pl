@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: spool2html.pl,v 2.18 2001/05/09 15:22:50 fukachan Exp $
 #
 
 $rcsid   = q$Id$;
@@ -85,7 +85,9 @@ sub InitS2P
 
     $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
     push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
+    push(@INC, "$EXEC_DIR/module") if -d "$EXEC_DIR/module";
     push(@INC, $PWD) if $PWD && (-d $PWD);
+    push(@INC, "$PWD/module") if $PWD && (-d "$PWD/module");
 
     if (! $ConfigFile) {
 	print STDERR "FYI: you must need '-f \$DIR/config.ph' option in usual case\n";
@@ -95,7 +97,8 @@ sub InitS2P
 
     # include search path
     $opt_h && do { &Usage; exit 0;};
-    push(@INC, $opt_I);
+    push(@INC, $opt_I) if -d $opt_I;
+    push(@INC, "$opt_I/module") if -d "$opt_I/module";
 
     local($inc) = $0;
     $inc =~ s#^(\S+)/bin.*$#$1#;
