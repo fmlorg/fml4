@@ -54,8 +54,8 @@ $HasCrypt = $@ eq "" ? 1 : 0; # should be global!
 sub Crypt
 {
     local($passwd, $salt) = @_;
-    local($no_md5_p);
 
+    # required on sys/WINDOWS_NT4/
     return $passwd if $CryptNoEncryptionMode;
     
     if ($REMOTE_ADMINISTRATION_AUTH_TYPE eq "md5" && 
@@ -101,7 +101,6 @@ sub TraditionalCryptP
 sub CmpPasswd
 {
     local($ep, $p) = @_;
-    local($seed);
 
     &Log("CmpPasswd: $ep eq crypt($p)") if $debug;
 

@@ -49,7 +49,6 @@ sub Archive
 {
     local($archive_dir, $max_seq, $unit, $limit) = @_;
     local($i) = 1;
-    local($dir) = ".";
 
     # Adjust following config.ph; moved here;
     # fml-support: 02590 <fujita@soum.co.jp>
