@@ -74,7 +74,7 @@ sub MCIWindowUnit
     if ($u == 1) { return $n;}
 
     # e.g. &N_MCIUnit(399,  4) return 100;
-    $x = ($u > 0) ? int(($n+1)/ $u) : $n;
+    $x = ($u > 0) ? int(($n+$u)/ $u) : $n;
 }
 
 
