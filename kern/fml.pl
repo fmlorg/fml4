@@ -1229,7 +1229,7 @@ sub RuleSetTo
     local($ok, $match, $addr, $x_addr, $ml, $buf, $to);
     local(@ml) = ($MAIL_LIST, @MAIL_LIST_ALIASES); # PLAY_TO Trick;
 
-    eval "use Mail::Address;";
+    eval "require Mail::Address; Mail::Address->import();";
 
     # if fails, call fml 3.0 compatible routine.
     if ($@ ne '') {
@@ -1278,7 +1278,7 @@ sub Conv2mailbox
     local($mb, *e) = @_;	# original string
     local($addr);
 
-    eval "use Mail::Address;";
+    eval "require Mail::Address; Mail::Address->import();";
 
     # if fails, call fml 3.0 compatible routine.
     if ($@ ne '') {
