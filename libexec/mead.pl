@@ -17,20 +17,34 @@
 chdir $DIR || die "Can't chdir to $DIR\n";
 
 $error_code_pat = '55\d|5\.5\.\d';
-$TrapWord       = 'unknown user|user unknown';
+$TrapWord       = 'unknown \S+|\S+ unknown';
 $new_block = 1;
 $gabble = 0;
 
 while (<>) {
     chop;
 
-    &Debug("   | $_") if $debug;
+    if ($original_mail && $found && $debug) {
+	&Debug("   --- $_") if $debug;
+    }
+    elsif ($debug) {
+	&Debug("   | $_") if $debug;
+    }
 
     $new_block = 1 if /^\s*$/;
 
     if (/^From:.*mailer-daemon/i ||
 	/^From:.*postmaster/) {
 	undef %return_addr;
+	$original_mail = $found = 0;
+	undef $MTA;
+	undef $CurADDR;
+    }
+
+    # guess MTA ...
+    if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) { 
+	$MTA = "exim";
+	next;
     }
 
     # get returned addresses
@@ -46,18 +60,37 @@ while (<>) {
 	&ExtractAddr($_);
 	next;
     }
+    # 822 folding
     elsif (/^\s+/ && $gabble) {
 	&ExtractAddr($_);
 	next;	
     }
+
+    # exim
+    if ($MTA eq 'exim') {
+	/^\s+(\S+\@\S+):\s*$/ && ($CurADDR = $1);
+    }
+
 
     $gabble = 0;
 
     # error message line
     next if /<<<.*\@/;
     next if /^Diagnostic-Code:/i;
-    if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_);}
-    if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_);}
+
+    # ignore the original mails
+    # &Debug("next") if $original_mail && $found;
+    next if $original_mail && $found;
+    $original_mail = 1 if /^received:/i;
+
+    if (/\@/ && /(5\d\d)/) { &AnalyzeErrorCode($_); $found++; }
+    if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_); $found++; }
+
+    # exim
+    if (/$TrapWord/i && $MTA eq 'exim') { 
+	&AnalyzeErrorWord($_, $CurADDR); 
+	$found++;
+    }
 }
 
 &DeadOrAlive;
@@ -90,6 +123,11 @@ sub AnalWord
     if (/host unknown|unknown host/i) { $reason = 'uh';}
     if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
 
+    # exim ?
+    if (/unknown local-part/i)  { $reason = 'uu';}
+    if (/unknown mail domain/i) { $reason = 'uh';}
+
+    &Debug("AnalWord: $reason") if $debug;
     $reason;
 }
 
@@ -112,6 +150,9 @@ sub AnalyzeErrorCode
 	    &CacheOn($addr, &AnalWord($_));
 	}
     }
+    elsif ($addr = $_[1]) {
+	    &CacheOn($addr, &AnalWord($_));
+    }
     else {
 	&Debug("AnalyzeErrorCode: invalid input <$_>") if $debug;
     }
@@ -125,7 +166,10 @@ sub AnalyzeErrorWord
     &Debug("AnalyzeErrorWord: <$_>");
 
     if (/user unknown|unknown user/i && /(\S+\@[\.A-Za-z0-9\-]+)/) {
-	&CacheOn($addr = $1, "uu");
+	&CacheOn($addr = $1, &AnalWord($_));
+    }
+    elsif ($addr = $_[1]) {
+	    &CacheOn($addr, &AnalWord($_));
     }
 }
 
@@ -541,9 +585,11 @@ Options:
 
     -p priority     priority, e.g. -p uu=2,uh=0.5
                     (user unkwown == 2, host unkown == 0.5)
-                    uu: unknown user
-                    uh: unknown host
-                    ua: unknown address
+                    [KEYWORD]
+                            uu: unknown user
+                            uh: unknown host
+                            ua: unknown address
+                            default: default value for phrases not above
 "
 }
 
