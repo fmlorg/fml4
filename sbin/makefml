@@ -1384,7 +1384,7 @@ sub LangExtConv
 	if (%LangExtCache) {
 	    return $LangExtCache{$key};
 	}
-	print STDERR "mis hit $key\n";
+	print STDERR "mis hit $key\n" if $debug_cgi || 1;
 	
 	require 'libmesgle.pl';
 
