@@ -16,14 +16,19 @@ FML  = ${.CURDIR}
 # search ${HOME} also for ~/.fmlmk.conf
 .PATH: ${HOME}
 
-.if exists(conf/release_branch)
-IN_RELEASE_BRANCH = yes
+# branch
+.if exists(conf/branch)
+BRANCH=`cat conf/branch`
 .else
-IN_RELEASE_BRANCH =
+.BEGIN:
+	@echo please prepare conf/branch to define branch/trunk
+	@false
 .endif
 
-# If release branch, use it
-# .include "distrib/mk/fml.release.mk"
+# mode {daily,}
+.if exists(conf/mode)
+MODE=`cat conf/mode`
+.endif
 
 # standard includes
 .include "distrib/mk/fml.sys.mk"
@@ -52,8 +57,7 @@ FMLMK_CONF=.fmlmk.conf
 .endif
 
 ### export environmental variable
-EXPORT_ENV = FML=${FML} DESTDIR=${DESTDIR} IN_RELEASE_BRANCH=$(IN_RELEASE_BRANCH)
-
+EXPORT_ENV = FML=${FML} DESTDIR=${DESTDIR}
 
 
 ### MAIN ###
@@ -88,7 +92,6 @@ distsnap:
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
 # If release branch, use this
-#snapshot: __in_release_branch
 snapshot:
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
