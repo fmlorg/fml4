@@ -126,6 +126,41 @@ XXX じれるようにする作業はエラーとかは一通り終ってるけどそれ以外は...
 
 .include myGenConfirmReplySubject.pl
 
+
+.S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+fml-support: 07521 より
+
+Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+
+   A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
+      へ投稿した場合は、
+   [1] members ファイルに自動登録する。
+   [2] 投稿されたメールをmembersに配送する。
+
+これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
+いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+
+B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   へメールを送信した場合は、
+
+   [1] membersに自動登録する。
+
+A: config.ph でちょっと tricky だが 
+   
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+
+のような設定をする。
+
+
            Copyright (C) 2000 Ken'ichi Fukamachi
                    All rights reserved. 
 
