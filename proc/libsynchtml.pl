@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libsynchtml.pl,v 2.42.2.2 2001/09/11 13:46:26 fukachan Exp $
+# $FML: libsynchtml.pl,v 2.42.2.3 2001/09/13 10:20:48 fukachan Exp $
 #
 
 
@@ -859,9 +859,21 @@ sub Conv2HRef
 
     &jcode'convert(*url, 'euc'); #';
 
+    # remove prepended/appended EUC strings
     if ($url =~ /($re_euc_s)+/) {
 	$x   = $1;
 	$url =~ s/$x//;
+    }
+
+    # incomplete but may be effective ?
+    # RFC2068 says these special char's are not used.
+    # we should not include these char's in URL.
+    # reserved       = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"
+    # unsafe         = CTL | SP | <"> | "#" | "%" | "<" | ">"
+    if ($url =~ /(\&\w{2}\;|\;|\/|\?|\:|\@|\&|\=|\+|\#|\%|\<|\>|\")$/) {
+	my $pat = $1;
+	$x = $pat. $x;
+	$url =~ s/$pat$//; 
     }
 
     print STDERR "Conv2HRef(\$url = $url, \$x = $x)\n" if $debug || $debug_html;
