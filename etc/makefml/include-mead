@@ -1,0 +1,2 @@
+# MEAD: Mail Error Analize Daemon
+"|_EXEC_DIR_/libexec/mead.pl -S _ML_DIR_ -D _ML_DIR_/_ML_"
