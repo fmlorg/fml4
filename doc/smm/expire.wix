@@ -1,0 +1,119 @@
+.C	Expire
+.S	expire
+.label	{expire}
+.key	$FML_EXIT_HOOK
+
+形式： &Expire(場所, 日数(以上古いファイルを消す));
+
+$FML_EXIT_HOOK = q#
+	&use('expire');
+	&Expire($SPOOL_DIR, 7);
+#;
+
+と設定すれば、$SPOOL_DIR 以下のファイルにたいして 7日以上古いファイル
+を消します（いきなり消します。注意）
+
+今： libexpire.pl を作った。
+旧： expire.pl を perl の inlcude pathのどこかにいれてください
+
+まぁこれだと、毎回起動するたびに一個ずつ消すことになるので、やることの
+わりにおおげさですね。
+
+cron で 
+	expire.pl -s spool-directory -e expire-period 
+とかを設定して、週一くらいで動かせばいいのでは？
+
+
+.S	expireを残すファイルの数で指定して行なう
+.label	{expire_with_number}
+.key	$FML_EXIT_HOOK
+
+形式： &Expire(場所, 残すファイル数 , 1（ファイルで実行を指示するため）);
+
+$FML_EXIT_HOOK = q#
+	&use('expire');
+	&Expire($SPOOL_DIR, 50, 1);
+#;
+
+今： libexpire.pl を作った。
+旧： expire.pl を perl の inlcude pathのどこかにいれてください
+
+と設定すれば、$SPOOL_DIR 以下のファイルにたいして 
+	”５０個残して”（注意）
+それ以外の古いファイルを消します（いきなり消します。注意）
+
+cron で 
+	expire.pl -s spool-directory -e expire-period 
+とかを設定して、週一くらいで動かせばいいのでは？
+
+
+.S 	いきなりExpireの実験はしないほうが…
+
+$SPOOL_DIR じゃなくて tmp の下に tmp/spool とか作って、実験したほうが
+いいですね。
+
+
+.S	expire.pl コマンドラインオプション
+.label	{expire_getopt}
+.label	{expire.pl}
+.key	$FML_EXIT_HOOK
+
+expire.pl [-h] [-e expire_days] [-s spool_directry] [-n]
+    -h                 : HELP
+    -e expireする日数
+    -s スプール
+    -n （残すファイル数を設定して、expireするモード）
+
+
+
+.S	logファイルの整理、消去をする → newsyslog
+.seealso	newsyslog
+
+
+.S	newsyslogをする（デフォールト）
+.label	{newsyslog}
+.key	$NOT_USE_NEWSYSLOG
+.key	@NEWSYSLOG_FILES
+
+まとめおくりの MSendv4.pl は日曜朝６時に（デフォールト）
+
+	libnewsyslog.pl を実行します
+
+この３つのファイル（デフォールト）に対し
+
+@NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak")
+
+rm -f var/log/members.4
+mv -f var/log/members.3 var/log/members.4
+mv -f var/log/members.2 var/log/members.3
+mv -f var/log/members.1 var/log/members.2
+mv -f var/log/members.0 var/log/members.1
+ln -s members.bak 	var/log/members.0
+
+を実行します。必要なら この @NEWSYSLOG_FILES に これ↑をやってほしいファ
+イル（log とか…）をつけくわえて 
+
+@NEWSYSLOG_FILES = 
+	("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak", "log")
+
+とか	config.ph に書いておいてください。
+
+
+.S	cronでnewsyslogをする
+
+たとえば、
+
+0	6	*	*	0	(chdir dir-of-fml; sh bin/newsyslog.sh log var/log)
+
+とかかく
+
+
+.S	newsyslogをしない
+.label	{newsyslog-2}
+.seealso	newsyslog
+.key	$NOT_USE_NEWSYSLOG
+
+$NOT_USE_NEWSYSLOG = 1; なら実行しません
+
+

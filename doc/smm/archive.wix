@@ -1,0 +1,127 @@
+.# ##########################################################
+.C	アーカイブ, Archive & Expire
+.label	{archive}
+
+場所をとるから古い記事にはgzipかけたい。でも一つ一つやるより１００個ず
+つとかならさらに効率が上がります。以下を参照
+
+.comment beth
+.S	古い記事にはgzipかけたいなぁ、場所をとるから
+.key	@ARCHIVE_DIR
+
+config.ph の例：
+
+@ARCHIVE_DIR = ('old');
+＃ @StoredSpool_DIR = ('old');はObsolete
+
+spool/1-100	-> +tar+gzip	-> old/100.gz と作っているとする
+＃（趣味）僕は恐いので その gzip fileは自分で自動では作らないようにしてい
+ます。
+
+これは次のように fml.pl は解釈します。
+
+例えば、"# get 1 " というコマンドを送り込んだとする。その時は
+−−−−−−−−−−
+$STORED_BOUNDARY（今は100まで）以下の記事の請求（get等）がもしあったら、
+
+	ml-dir/spool/	を探索し、もし、ファイル spool/1 が見つからない時は
+
+	ml-dir/old/	という場所も探し、1-100 までがtar + gzipされて
+	いる old.100.gzを送り返す。
+
+
+.S	gzip fileにしよう！（アーカイブへの変換）
+.key	Archive.pl
+
+それには fml-1.3.x/bin/Archive.pl というのを使って下さい。
+さらに cron で自動処理するなら次の節を御覧下さい
+
+これは Archive.pl 2000とかすると、２０００までのファイルを１００個ずつ
+の塊にして、oldに作ります。変数はArchive.plの先頭でセットしてください。
+スプールのオリジナルは消さないので、注意を払って消して下さい（とりかえ
+しがききませんから、それは）
+＃自分じゃ、こわいのである程度まとまったところでこうやって手動でつくり
+ますね、アーカイブは
+
+例えば、
+
+spool/1-100	->  +tar+gzip	-> old/100.gz
+spool/101-200	->  +tar+gzip	-> old/200.gz
+
+のようなファイルをoldの下に作るプログラムがfml-1.3.x/bin/Archive.pl で
+す。
+
+目的のＭＬの場所にまでいって
+% ls 
+
+MSendrc		actives		config.ph	deny
+guide		help		list		log
+members		objective	seq		spool
+summary		welcome
+
+% mkdir old
+
+% perl Archive.pl 3800
+…たくさんメッセージが出るが省略…
+
+% ls old
+
+100.gz   1400.gz  1900.gz  2300.gz  2800.gz  3200.gz  3700.gz  700.gz   
+1000.gz  1500.gz  200.gz   2400.gz  2900.gz  3300.gz  3800.gz  800.gz   
+1100.gz  1600.gz  2000.gz  2500.gz  300.gz   3400.gz  400.gz   900.gz   
+1200.gz  1700.gz  2100.gz  2600.gz  3000.gz  3500.gz  500.gz   
+1300.gz  1800.gz  2200.gz  2700.gz  3100.gz  3600.gz  600.gz   
+
+spoolの３８００までの１００個ずつのパッケージを作りました。
+spoolの方の元メールを自動的に消しはしない（安全のため）ので、
+自分で消して下さい。
+
+
+.S	gzip fileにしよう！（cron で自動処理）
+.key	Archive.cron
+.key	crontab
+
+cronで自動的（例えば週一日曜の朝とか）に次の形で
+
+	fml-1.3/bin/Archive.cron "MLサーバのdirectory名
+
+をよんでください。 いくつかＭＬがあるなら、シェルスクリプトにまとめて
+呼ぶといいでしょう。
+＃まとめ送りと一緒とかでもよいですね
+
+Archive.cron の先頭に変数があります
+
+	DIR="$1"
+	ARCHIVE="$DIR/bin/Archive.pl"
+
+Archive.pl が gzip化 のメインなのでこれのおき場所をちゃんとセットして
+下さい。
+
+例：
+----- crontab -----
+0 * * * *	fukachan /bin/sh /適当な場所/ML-Archive 2>&1 | Mail あなたのアドレス
+-------------------
+----- ML-Archive -----
+#!/bin/sh
+
+	sh fml-1.3/bin/Archive.cron Elena
+	sh fml-1.3/bin/Archive.cron Uja
+	sh fml-1.3/bin/Archive.cron Sayori
+
+-------------------
+
+
+.S	gzip fileにしよう！（理論編）
+
+何故、まとめてgzip化したいのか？
+
+１．一個一個gzipかけると、約半分にしかなりませんが、１００個まとめて書
+けると、ヘッダとかの重なりがあるので約２５％にまで圧縮できるようになり
+ます。
+
+２．Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
+るのでファイル数を減らす or ほかの場所に移すことに意味があるようになり
+ます。そこでspoolの中身をうつし、１００分の一のファイル数にすると効果
+が非常にあります。
+
+
