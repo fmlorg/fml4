@@ -1065,9 +1065,18 @@ sub CheckCurrentProc
     ###      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
     if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@(\S+)/i) {
 	local($addr, $domain) = ($1, $2);
-	&Log("reject address $addr\@$domain");
+	&Log("reject mail from $addr\@$domain");
 	&WarnE("reject mail from $addr\@$domain", 
 	       "reject mail from $addr\@$domain\n");
+	$DO_NOTHING = 1;
+	return 0;
+    }
+
+    # reject all "From: MAIL_LIST" mails
+    if (&LoopBackWarn($From_address)) {
+	&Log("reject mail from $From_address");
+	&WarnE("reject mail from $From_address",
+	       "reject mail from $From_address\n");
 	$DO_NOTHING = 1;
 	return 0;
     }
