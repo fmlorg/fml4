@@ -37,7 +37,7 @@ sub DoMLMemberCheck
 {
     local($k, $v, $file);
 
-    $0 = "--Checking Members or not <$FML $LOCKFILE>";
+    $0 = "$FML: Checking Members or not <$LOCKFILE>";
 
     &AdjustActiveAndMemberLists; # tricky
 
@@ -83,7 +83,7 @@ sub DoMLMemberCheck
     else {
 	# original designing is for luna ML (Manami ML)
 	# If failed, add the user as a new member of the ML	
-	$0 = "--Checking Members and add if new <$FML $LOCKFILE>";
+	$0 = "$FML: Checking Members and add if new <$LOCKFILE>";
 
 	&use('amctl');
 	return &AutoRegist(*Envelope);
