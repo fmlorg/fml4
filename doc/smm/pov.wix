@@ -802,6 +802,26 @@ $DIR $LIBDIR @INC が起動時にどう評価され使われているかは
    $NON_PORTABILITY
 
 
+.S	内部で使われている変数を調べるには？
+.k	$DUMPVAR
+.k	dumpvar.pl
+
+config.ph で 
+
+	$DUMPVAR = 1;
+
+やコマンドラインで
+
+	fml.pl --DUMPVAR 引数
+
+として fml を呼び出すと全ての変数を dump します。この場合はPerlについ
+てくる dumpvar.pl ライブラリを利用し、名前空間から変数リストを引っ張り
+出しています。
+
+ちなみに fmlserv.pl は同様のやり方で名前空間の switch を利用して複数の
+ＭＬを疑似的に実行しています。
+
+
 
 .C	fml 設定ファイルのフォーマットと構造
 .l	fml-file-structure
@@ -1449,7 +1469,111 @@ fml.pl の次の行は
 Architecture 依存コードをロードするためのものです。
 
 
+.C	配送について
 
+.S	配送プロセスの律速段階とは
+
+律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
+この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
+それでもかなりのものです。
+
+論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
+げても ML の配送プロセスには何のメリットも生じないということでもありま
+す。
+
+余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
+ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
+す。
+
+これを改善する方法は基本的に複数の sendmail で作業を分割することです。
+
+１	十分なパワーのマシンで十分な file descriptor や 
+	多くの process が走っても大丈夫であれば、
+	複数の sendmail を起動して配送を試みる。
+	この場合ちゃんと Load Average と sendmail.cf を tune する
+	必要がある。 
+	
+２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
+
+３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
+	一回そのリレーサーバに投げて、そこから再配送をする。
+
+１、２は”MCI_… ” という変数群がそれを可能にします。
+
+リレーサーバは各ユーザごとに”管理者”が設定できます。
+リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
+考慮の上決めるべきです。
+また、fml のリレーハックは RFCにはない % hack を前提にしています。
+そのため、管理者が注意深く設定すべきです。
+
+
+なお $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
+
+	$DEFAULT_RELAY_SERVER
+.k	$DEFAULT_RELAY_SERVER
+
+で定義されたリレーサーバへ投げそのサーバに配送してもらうということもで
+きます。
+.xref	DEFAULT_RELAY_SERVER
+
+
+qmail というひたすら配送プロセスを fork() しまくって、何も考えずにばん
+ばん投げるMTAがあります。そういう配送の仕方でバックボーンならいいと思
+いますが、細い線のサイトにばんばん投げ付けられてしまうようになったら最
+低ですよね？世の中どこも線が太いなんていう仮定は誤りですから。
+.url	http://www.qmail.org/
+
+
+.S	複数のマシンの sendmail を使ってパラレルに送信
+.k	$HOSTS
+.k	@HOSTS
+.k	@HOST(@HOSTSの旧変数名)
+
+複数の(sendmailの走っている)マシン(非常時のセカンダリも含む)
+
+	$MCI_SMTP_HOSTS = N;
+
+で指定されたＮ台のマシンを配列 @HOSTS で指定する
+
+   @HOSTS = (machine-1.domain, machine-2.domain, machine-3.domain, ...);
+
+$HOST と @HOSTS で与えられる Ｎ個 のマシンの sendmail をパラレルに使っ
+て（理論上での限界は）Ｎ倍配送を高速化する。
+＃ $HOST も使われてしまうのは、もともと @HOSTS はセカンダリだったから
+＃ です（歴史的に）。
+
+もし、指定したサーバ数が N 個に足りない場合は、$HOST が何度も使われま
+す。
+
+
+Ｎは理論上 int と同じだろうが、普通は netmask できまるわな（笑）
+でも、他のドメインでも使えるから、int までいく（理屈、理屈）
+＃とくに actives の最後の方の人はうれしい
+
+actives の中をちゃんと考えてならべないと sendmail R8 のHOST_CACHE がう
+まくいかせない可能性はあります。
+
+
+.S	配送するメールのMIME部分はDecodeしてから配送したい
+.label	MIME-hack
+.xref 	MIME-header
+
+＃注意：以下試していない。
+
+sub Distribute で
+
+    for (@HdrFieldsOrder) {
+	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
+
+という部分を
+
+    for (@HdrFieldsOrder) {
+	if (/ISO\-2022\-JP/o) { $_ = &DecodeMimeStrings($_);}
+
+とすれば ISO-2022-JP で始まる部分だけをMIME decodeします。
+実はこうすると、本文の中のMIMEもDecodeしてしまいますね(^^)
+
+ 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
