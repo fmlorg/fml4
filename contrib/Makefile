@@ -27,7 +27,6 @@ SUBDIRS += localhack/release-2/member_name
 SUBDIRS += lexical
 SUBDIRS += pager
 SUBDIRS += mail2fax
-SUBDIRS += netutils
 SUBDIRS += mail2news
 SUBDIRS += msend-anytime
 SUBDIRS += irc
