@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.223 2001/09/11 11:02:28 fukachan Exp $
+# $FML: makefml,v 2.224 2001/09/11 11:11:28 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -5170,6 +5170,22 @@ sub do_ctladdr
 	    if (!$mib{'_result'}) {
 		print "\t*** ERROR: Nothing has been changed. ***\n";
 		$XStatus = 'ERROR: makefml.nothing_changed';
+	    }
+	}
+	if ($XStatus eq '') {
+	    if ($proc eq 'chaddr') {
+	        &DataBaseMIBPrepare(\%mib, $f, {'address' => $member});
+	        &DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	        if ($mib{'error'}) {
+		    &Log("$newaddr should not be a member");
+	  	    print "\t*** ERROR: Nothing has been changed. ***\n";
+		    $XStatus = 'ERROR: makefml.nothing_changed';
+	        }
+	        if ($mib{'_result'}) {
+		    &Log("$newaddr should not be a member");
+	  	    print "\t*** ERROR: Nothing has been changed. ***\n";
+		    $XStatus = 'ERROR: makefml.nothing_changed';
+	        }
 	    }
 	}
 	if ($XStatus eq '') {

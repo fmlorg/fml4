@@ -7,6 +7,18 @@
 
 2001/09/18
 
+   databases/mysql/toymodel.pl
+   databases/postgresql/DBI_toymodel.pl
+   databases/postgresql/Pg_toymodel.pl
+   databases/postgresql/toymodel.pl
+   kern/fml.pl
+   proc/libra.pl
+   sbin/makefml
+	PR by shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
+	(fml-help: 00872)
+
+	bug fix chaddr et. al. in database access
+
    databases/TOY_MODEL.English
 	remove Japanese (EUC), 
 	comment "not translated"

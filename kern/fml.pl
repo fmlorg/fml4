@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.136 2001/08/20 11:12:02 fukachan Exp $
+# $FML: fml.pl,v 2.137 2001/08/25 12:18:35 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -526,9 +526,17 @@ sub InitConfig
 	&eval("-d \$$_||&Mkdir(\$$_);");
     }
 
-    for ($LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
-	 $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
-	-f $_ || &Touch($_);	
+    if ($USE_DATABASE) {
+	for ($LOGFILE, $MGET_LOGFILE, 
+	     $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
+	    -f $_ || &Touch($_);
+	}	
+    }
+    else {
+	for ($LOGFILE, $MEMBER_LIST, $MGET_LOGFILE, 
+	     $SEQUENCE_FILE, $SUMMARY_FILE, $LOG_MESSAGE_ID) {
+	    -f $_ || &Touch($_);
+	}	
     }
 
     ### CFVersion 3

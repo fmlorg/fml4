@@ -3,7 +3,7 @@
 # Copyright (C) 2000,2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #
-# $FML: DBI_toymodel.pl,v 1.6 2001/08/25 14:15:02 fukachan Exp $
+# $FML: DBI_toymodel.pl,v 1.7 2001/08/25 14:37:41 fukachan Exp $
 #
 
 #
@@ -85,7 +85,9 @@ sub DataBases::Execute
 	       $mib->{'_action'} eq 'digest' ||
 	       $mib->{'_action'} eq 'matome' ||
 	       $mib->{'_action'} eq 'addmembers' ||
+	       $mib->{'_action'} eq 'add2members' ||
 	       $mib->{'_action'} eq 'addactives' ||
+	       $mib->{'_action'} eq 'add2actives' ||
 	       $mib->{'_action'} eq 'addadmin' ||
 	       $mib->{'_action'} eq 'byeadmin' ) {
 	    &__ListCtl($mib);
@@ -103,6 +105,8 @@ sub DataBases::Execute
 	}
 	else {
 	    &Log("ERROR: PostgreSQL: unkown ACTION $mib->{'_action'}");
+	    $mib->{'error'} = "ERROR: PostgreSQL: unkown ACTION $mib->{'_action'}";
+	    return 0;
 	}
 
 	if ($mib->{'error'}) { 

@@ -140,13 +140,26 @@ sub AdminModeInit
     local(%adminproc);
 
     # Touch
-    for ($ADMIN_MEMBER_LIST, $ADMIN_HELP_FILE, $PASSWD_FILE) {
-	stat($_);
-	-f _ || &Touch($_);
+    if ($USE_DATABASE) {
+	for ($ADMIN_HELP_FILE, $PASSWD_FILE) {
+	    stat($_);
+	    -f _ || &Touch($_);
 
-	if ((! &RAAuthTypePGPModeP) &&
-	    $REMOTE_ADMINISTRATION_AUTH_TYPE ne "address") {
-	    -z _ && &LogWEnv("AdminMode: WARNING $_ == filesize 0", *Envelope);
+	    if ((! &RAAuthTypePGPModeP) &&
+		$REMOTE_ADMINISTRATION_AUTH_TYPE ne "address") {
+		-z _ && &LogWEnv("AdminMode: WARNING $_ == filesize 0", *Envelope);
+	    }
+	}
+    }
+    else {
+	for ($ADMIN_MEMBER_LIST, $ADMIN_HELP_FILE, $PASSWD_FILE) {
+	    stat($_);
+	    -f _ || &Touch($_);
+
+	    if ((! &RAAuthTypePGPModeP) &&
+		$REMOTE_ADMINISTRATION_AUTH_TYPE ne "address") {
+		-z _ && &LogWEnv("AdminMode: WARNING $_ == filesize 0", *Envelope);
+	    }
 	}
     }
 
@@ -619,7 +632,12 @@ sub ProcAdminSubscribe
 	}
     }
 
-    $status = &Append2($s, $file_to_regist);
+    if ($USE_DATABASE) {
+	$status = 1;
+    }
+    else {
+	$status = &Append2($s, $file_to_regist);
+    }
 
     if ($status) {
 	&LogWEnv("admin $proc $s is added to the member list", *e);
@@ -688,9 +706,11 @@ sub __ListCtl
 	    &Mesg(*Envelope, 'database error occurs', 'configuration_error');
 	    return 0; # return ASAP
 	}
+	$status = 1;
     }
-
-    $status = &Append2($s, $file_to_regist);
+    else {
+	$status = &Append2($s, $file_to_regist);
+    }
 
     if ($status) {
 	&LogWEnv("admin ${proc}: $s is added to $op", *e);
