@@ -412,6 +412,10 @@ config.ph に
 
 .S	メンバーを問わずファイル news を送り返す例
 
+例:
+１	誰からのリクエストでもOK
+２	本文にキーワード uja とかくこと
+
 $START_HOOK = q#
     $UJA_FILE = "$DIR/uja";
 
@@ -423,72 +427,27 @@ $START_HOOK = q#
 #;
 
 
-.S	自動送り返しサーバってどう実装してるんですか？ その１
-.key	自動送り返しサーバっ実装例１
+.S	自動送り返しサーバの実装例
+.key	自動送り返しサーバの実装例
 
 なんのことはない。ガイドファイルに適当なファイルを設定して、config.ph 
 で強制的にガイド送り返ししかしないようにしてしまえば終わりですね。
-＃いままで、きづかなかった…
 
-ポイントは、“$START_HOOK にしかける”ってところですね。
+ポイントは、“$START_HOOK にしかける”ってところです。
 
 例：
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-$MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent information)';
-$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
 
-$FML            = '/home/axion/fukachan/work/spool/EXP';
-$GUIDE_FILE	= "$FML/doc/INFO";
-$LOGFILE	= "$FML/var/log/fmlinfo-log"; # activity log file
+1	適当なＭＬ(guide ML)を作成する (makefml newml guide)
+2	普通に aliases を設定する
+3	config.ph に $GUIDE_FILE (guide) の内容をを送り返すなら
 
-$START_HOOK     = q# $Envelope{'req:guide'} = 1;#;
+	$START_HOOK = q#
+		&SendFile($From_address, "Guide $ML_FN", $GUIDE_FILE);
+		&Log("Guide request from $From_address");
+		$DO_NOTHING = 1;
+	#;
 
-1;
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-
-.S	自動送り返しサーバってどう実装してるんですか？ その２
-.key	自動送り返しサーバっ実装例２
-
-設問：fml-current@phys.titech.ac.jp 宛に送ったメールは自動返送されて戻っ
-てくるのですが、こういったものを作るには、どのような設定をすればいい？
-/usr/ucb/vacation ってのはこれとほぼ同じですね。
-＃もっともあれは unix from をみるんですが
-
-(基本的な理屈はFMLのコードをけずっただけ(笑)というだけですが)
-
-０．いつもの通り仕掛ける
-１．ロック
-２．メンバーチェックをしないで
-３．送り返す
-	&SendFile($to, "", 目的のFILE);
-４．ロックをはずす
-
-in fml.pl MAIN PART
-
-(!$USE_FLOCK) ? &Lock : &Flock;	# Locking 
-
-#---------------- CHANGE -------------------------
-
-$MAIL_LIST	= 'fml@phys.titech.ac.jp';
-$ML_FN		= '(fml recent information)';
-$MAINTAINER	= 'fml-request@phys.titech.ac.jp';
-
-$INFO_FILE	= "$DIR/INFO";
-
-$LOGFILE	= "$DIR/fmlinfo-log";		# activity log file
-
-$to             = $Reply_to ? $Reply_to : $From_address;
-
-&SendFile($to, "Info $ML_FN", $INFO_FILE);
-&Log("Info request from $From_address");
-
-#---------------- CHANGE ENDS --------------------
-
-(!$USE_FLOCK) ? &Unlock : &Funlock;# UnLocking 
-exit 0;				# the main ends.
-
+を guide ML の config.ph に付け加える。(おわり)
 
 
 .S	たとえば、Received: のようなヘッダを残すには？
