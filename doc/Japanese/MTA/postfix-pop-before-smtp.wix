@@ -27,6 +27,7 @@ postfix での pop before smtp について
    MANADM = 8
    
 .S	qpopperの改造
+=E.S	hack qpopper
 
 ・INSTALLの中にある pop_pass.c へのパッチをあてる。
   必要なら手であてる

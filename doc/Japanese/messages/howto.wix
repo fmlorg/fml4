@@ -1,18 +1,22 @@
 .C	事例集
+=E.S	Samples
 
 .S	ヘルプメッセージを消す
+=E.S	remove help messages
 
 .q
 sub DUMMY {};
 $PROC_GEN_INFO = 'DUMMY';
 .~q
 
-この↓部分を消す呪文です。
+これは、以下のメッセージを消す呪文です。
 fml-current (2000/07/26 以降)には DUMMY という関数があるので
 .q
 $PROC_GEN_INFO = 'DUMMY';
 .~q
 だけで十分です。
+=E
+disables the following help messages.
 
 .q
 --elena@fml.org, Be Seeing You!    
@@ -36,16 +40,24 @@ e.g. on a Unix Machine
 .~q
 
 .S	例: fmlでの confirm のメールの本文をハックする (ひとつのＭＬだけ)
+=E.S	Example: hack confirmation messages
 .l	messages.customize
 
 fml-support: 07974, 07975
 「FMLから確認のメールの内容を、一つのメーリングリストだけ変えたい」
 
 日本語で返事を返すテンプレートが /usr/local/fml/messages/ にあります。
+=E
+The message templates fml uses exists in /usr/local/fml/messages/
+directory. Copy the apporopriate file to ML HOME directory, and edit
+it.
 
 	% cp -pr /usr/local/fml/messages /var/spool/ml/elena 
 
 してください。confirmation 関係は
+=E
+For example, messages on confirmation are in this file. 
+Copy this and hack it.
 
 	/var/spool/ml/elena/messages/Japanese/confirm 
 
@@ -68,10 +80,16 @@ NOTE: 現在の実装(2000/05: 3.0-current も 3.0-stable も)ではこのように
 
 
 .S	例: fmlでのwelcomeメールの本文をハックする (全ＭＬ共通)
+=E.S	hack welcome message in subscribed
 
 ◯ $DIR/welcome ファイルをいじる
+=E
+* Firstly hack $DIR/welcome (e.g. /var/spool/ml/elena/welcome)
 
 ◯ 一番先頭の
+=E
+* Secondarly edit /usr/local/fml/messages/Japanese/amctl to change
+  the first paragraph.
 
    メーリングリストへの投稿は	<foo@bar.jp>
    コマンドは			<foo-ctl@bar.jp>
@@ -101,6 +119,10 @@ XXX /usr/local/fml のほうもさがすように修正するべきでしょう。
 
 
 .S	welcomeというファイルの内容の前についてしまう部分を削除/編集
+=E.S	nuke the fist paragraph in welcome message
+
+=E
+see the previous recipe.
 
 [3.0pl113 以降]
 

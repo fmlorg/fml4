@@ -3,15 +3,19 @@
 
 まとめおくりとは「リアルタイムではなくＮ時間おきにＮ時間分のＭＬの記事
 をまとめて送りつける」ことです。
+=E
+digest is "send articles once N hours" not in realtime.
+/usr/local/fml/msend.pl doed this service.  Please run this program
+periodically for example by cron(8).  cron is built-in in UNIX
+usually.
 
 fml では msend というプログラムを定期的に実行することでまとめおくりを
 行ないます。このためにOSにある"指定されたプログラムを定期的に実行する"
 cron という機能を使います。これは OS の cron という機能を使って設定を
 してください。
 
-msend => .ptr{msend}
-
-cron  => .ptr{cron}
+msend => .ptr{msend} section
+cron  => .ptr{cron} section
 
 /var/spool/ml/elena/crontab というファイルがOSに設定するべき
 見本のファイルです。設定は crontab というコマンドを使います。
@@ -19,15 +23,20 @@ cron  => .ptr{cron}
 	% crontab /var/spool/ml/elena/crontab
 
 .S	管理者のするべきこと
+=E.S	What fml administrator needs to do
 
 cron に設定して下さい。それだけです。あとは
 	まとめ送りプログラムがよきにはからいます。
 	ユーザのまとめ送り希望者はコマンドで設定するように教える
 だけです。
+=E
+inject /var/spool/ml/elena/crontab to crontab by crontab(1).
+/var/spool/ml/elena/crontab is created by "makefml newml" command.
 
 % makefml newml elena
 % crontab /var/spool/ml/elena/crontab
 
+.if LANG == JAPANESE
 もし、複数のＭＬがあるなら /var/spool/ml/etc/crontab/ を利用するのが良
 いでしょう。
 
@@ -37,20 +46,30 @@ cron に設定して下さい。それだけです。あとは
 この部分はＭＬを動かすためのユーザです。デフォールトは仮想ユーザ fml 
 です。このファイルは newml を実行するたびに update され存在するすべて
 のＭＬについてまとめ送りを定期的に試みます。
-
+.fi
 
 .S	ユーザのすること
+=E.S	What the user to do
 
 	matome 3mp
 
 といったコマンドを elena-ctl へおくってもらうことです。一般形は
+=E
+Each user sends "matome option" command to elena-ctl@fml.org (in
+"elena" ML case). Here "option" is "hour" + "fop".  "fop" is file
+format in compression.
 
 	matome 時間とオプション
 
 です。ヘルプファイルにせつめいがあります。
 例: /var/spool/ml/elena/help
+=E
+See /var/spool/ml/elena/help for more details.
 
 通常配送に戻す時は
+=E
+To back again to real time delivery, send "matome 0" to control
+address.
 
 	matome 0
 

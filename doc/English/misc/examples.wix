@@ -1,4 +1,5 @@
 .C	いろいろ
+=E.C	misc
 
 .S	fmlのコマンドが送れるページの例
 =E.S	URL where you can send FML commands
@@ -12,8 +13,12 @@ From: Yuao Tanigawa <yuao@infonia.or.jp>
 …
 .~q
 
+=E
+URL where you can send the fml command,
+
 
 .S	意見受付用アドレス？
+=E.S	send back "thank you" mail for enquete
 
 意見受付用アドレスをMLでうけて、送ってきた人に「ご意見ありがとうござい
 ました。返事はしばらく待ってね。」と自動で応答させる。
@@ -108,6 +113,7 @@ to
 
 
 .S	confirm の確認メッセージを MAINTAINER へ転送する
+=E.S	forward confirm message to MAINTAINER 
 
 fml-support: 08960
 
@@ -115,6 +121,11 @@ Q: fml の自動登録のモードで confirmation をしているとします。この時、
 confirm の確認メッセージは投稿者に対して返信されます。これを、管理者宛
 に送信し、管理者が返信することにより登録が完了するような形にするにはど
 うすれば良いでしょうか？
+=E
+By default confirmation is sent to the use who send subscribe request.
+If this mail should be forwarded to MAINTAINER, try the following
+hook.
+
 
 Q: 管理者宛に転送されるメール
 

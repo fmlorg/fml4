@@ -3,6 +3,7 @@
 .url http://www.postfix.org/
 
 .S	postfix ¤Î°ì»þÄä»ß
+=E.S	control postfix
 
 To suspend smtp delivery:
 

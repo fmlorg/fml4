@@ -2,14 +2,25 @@
 =E.C	Overview
 
 .S	ＭＬが使うアドレス
+=E.S	addresses for ML
 
 elena ML の場合
+=E
+In elena ML case,
 
 	elena		投稿用				$MAIL_LIST 
 	elena-ctl	コマンドを投げるアドレス	$CONTROL_ADDRESS
 	elena-admin	管理者				$MAINTAINER
+=E
+	elena		for post			$MAIL_LIST 
+	elena-ctl	for command			$CONTROL_ADDRESS
+	elena-admin	MAINTAINER			$MAINTAINER
+
+elena-ctl is called "control address".
+
 
 .S	アドレスのチェックの厳しさ
+=E.S	how severely fml checks the mail address 
 
 	$ADDR_CHECK_MAX
 .xref	$ADDR_CHECK_MAX
@@ -18,24 +29,36 @@ elena ML の場合
 
 
 .S	メンバーの認証
+=E.S	authentication
 
 $MEMBER_LIST (例: /var/spool/ml/elena/members )というファイルにアドレ
 スがあるかないか？で決まります。
+=E
+whether the address exists in $MEMBER_LIST (For example:
+/var/spool/ml/elena/members).
 
 $MEMBER_LIST にあっても配送はされません。このファイルにあると fml がメー
 ルを受けとります。つまり拒否をしないだけです。
 
 
 .S	配送先
+=E.S	recipients
 
 配送先は $ACTIVE_LIST というファイルにあるアドレスたちです。
+=E
+addresses in $ACTIVE_LIST.
 
 
 .S	投稿したいけれど配送は受けたくないアドレス
+=E.S	not recipient but not postable address.
 
-ファイルが２つに分かれているので、「投稿したいけれど配送は受けたくないアドレ
-ス」は $MEMBER_LIST にだけそのアドレスをかけばOKです。
+ファイルが２つに分かれているので、「投稿したいけれど配送は受けたくない
+アドレス」は $MEMBER_LIST にだけそのアドレスをかけばOKです。
+=E
+add the address to $MEMBER_LIST not $ACTIVE_LIST. 
+makefml helps you.
 
+.if LANG == JAPANESE
 ◯ 管理者は
 
 	% makefml add2members elena アドレス
@@ -49,11 +72,19 @@ $MEMBER_LIST にあっても配送はされません。このファイルにあると fml がメー
 ◯ ユーザは？
 
 登録した後 skip コマンドを使ってもらうことになるでしょう。
+.fi
+.if LANG == ENGLISH
+	% makefml add2members elena ADDRESS 
+	% makefml addmembers elena ADDRESS
 
-
+Contrarily each user subscribe the ML and sends "skip" to control
+address.
+.fi
 
 .S	投稿先は変えずに、配送先だけを増やす
+=E.S	add a recipient not postable address
 
+.if LANG == JAPANESE
 管理者は
 
 	% makefml add2actives elena アドレス
@@ -67,10 +98,23 @@ $MEMBER_LIST にあっても配送はされません。このファイルにあると fml がメー
 ◯ ユーザは？
 
 単に複数回 subscribe すればいいわけですね
+.fi
+.if LANG == ENGLISH
+To add ADDRESS to "actives" not "members" file,
+
+	% makefml add2actives elena ADDRESS
+	% makefml addactives elena  ADDRESS
+
+Each user subscribe the ML usullaly.
+.fi
 
 
 .S	削除の時は？
+=E.S	when "bye"
 
 members, actives に対になっているか？などは一切調べず有無を言わさず該
 当するアドレスを消します。なので非対称に登録したか？などはおぼえていな
 くてもかまいません。
+=E
+nothing to do. 
+fml removes all ADDRESS from actives and members.

@@ -14,9 +14,12 @@ makefml は fml を設定するための CUI (Chacacter User Interface) インター
 コマンドラインから実行します。
 
 .S	makefml で使えるコマンドは？
+=E.S	help
 
 makefml help を実行してみて下さい
-.q
+=E
+run "makefml help".
+
 % makefml help
 
    makefml command arguments         what
@@ -24,24 +27,33 @@ makefml help を実行してみて下さい
 
    makefml info                      show this message
    makefml install                   Install the fml system
-       ... 以下略 ...
-.~q
+
+       ... snip ...
+
 
 .S	makefml config のメニューを日本語にする？
+=E.S	menu of "makefml config"
 
 GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
 ドを使うことが可能です。
 
 環境変数を設定して下さい。
+=E
+You can set ENVIRONMENTAL VARIABLE to enforce makefml shows menu in
+Japanse. Try this.
 
 .q
-◯ born shell, bash などの場合
+◯ bourne shell, bash などの場合
+=E
+bourne shell, bash
 
 ~/.profile ~/.bash_profile (?)
 
   MAKEFML_LANG=euc; export MAKEFML_LANG
 
 ◯ csh, tcsh  などの場合
+=E
+csh, tcsh
 
 ~/.cshrc ~/.tcshrc
   setenv MAKEFML_LANG euc
@@ -50,11 +62,17 @@ GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
 .S	lock
 
 shell-script を lock 下で実行する
+=E
+run shell-script under lock.
+
 .q
 % makefml lock elena -e shell-script
 .~q
 
 30秒間 elena を lock する。
+=E
+lock elena ML in 30 sec.
+
 .q
 % makefml lock elena 30
 DO "lock 30" for elena mailing list.
@@ -65,14 +83,18 @@ DO "lock 30" for elena mailing list.
 .~q
 
 "succeeded to lock elena" が出たら今ロックをしている状態
+=E
+If you can see "succeeded to lock elena", elena ML is locked.
+Please do your work!
 
 
 .S	GUI はないんでしょうか？
-
-fml-current には CGI があります。MTAとWWWサーバの設定変更を忘れずに
+=E.S	GUI menu fo rfml?
 .xref GUI
 
-CGI のメニューは日本語です。
+fml 4.0 以降には CGI があります。CGI のメニューは日本語です。
+=E
+fml 4.0 has CGI interface.
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

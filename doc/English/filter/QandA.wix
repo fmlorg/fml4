@@ -1,27 +1,27 @@
 .C	Q & A
 
 .S	"one line body" じゃないのにはじかれちゃうぞ？;-)
-=E.S	"one line body" mis-judge?
+=E.S	fml mis-judge "one line body" mail ?
 
 元々はコマンド(に見えるもの)をはじくために作られました。
 でもこんなのも弾かれてしまいます。
 =E
+In some cases the following mail looks one line mail body.
+But this is Japanese paragraph case only.
 
-
+.if LANG == JAPANESE
 .q
 64MB
  
 日本語のパラグラフ
 .~q
-
 というのは最後のパラグラフは signature だろうと思って判定を無視してい
 るからです。つまりこの場合は最初の
-
 .q
 64MB
 .~q
-
 部分だけを判定してます。
+.fi
 
 TODO: そういうわけでこれにどう対応するか？ですが
 

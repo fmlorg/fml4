@@ -1,50 +1,69 @@
 .C	TIPS
 
 .S	自動的に記事のスプールを圧縮する
+=E.S	compress articles in spool directory
 
 spool を tar.gz 形式にまとめる。おおむね 1/4 くらいになるようにおもう。
 デフォールトでは100通の記事を一つの tar.gz 形式に圧縮する。
 注意: tar.gz を作るだけで、圧縮したものの記事は(危ないので)消さない。
       自動的に消すには $USE_EXPIRE (次節)
+=E
+use $USE_ARCHIVE variable. It compresses 100 articles to one tar.gz
+file.
 
 	$USE_ARCHIVE
 .xref	$USE_ARCHIVE
 
 .S	自動的にスプールの古い記事を消す
-
-	$USE_EXPIRE
+=E.S	remove too old articles in spool directory.
 .xref	$USE_EXPIRE
-
-spool/ の古い記事を自動的に消す。これは「消すだけ」です。
-
-$USE_ARCHIVE と同時に使う時は注意が必要です。
 .xref relation_EXPIRE_LIMIT_and_ARCHIVE_UNIT 
 
-.S	ログをみる
+$USE_EXPIRE を 1 にすれば spool/ の古い記事を自動的に消す。これは「消
+すだけ」です。
+=E
+try $USE_EXPIRE to be 1 to remove too old articles in spool directory.
 
-最後の10行をみる。ちなみに log と tail は一緒
-.q
-% makefml log elena
-.~q
+$USE_ARCHIVE と同時に使う時は注意が必要です。
+=E
+pay attention when you both expire and $USE_ARCHIVE. 
+.xref relation_EXPIRE_LIMIT_and_ARCHIVE_UNIT 
+
+
+.S	ログをみる
+=E.S	see logs
+
 (2000/春以降の current only)
 
+最後の10行をみる。ちなみに log と tail は一緒
+=E
+the last 10 lines
+
+% makefml log elena
+
 最後の100行
-.q
+=E
+the last 100 lines
+
 % makefml elena::tail -100 
-.~q
+
 
 .S	fml のログのチェックをする
+=E.S	checks fml log
 .xref bin/daily.pl
 
 /usr/local/fml/bin/daily.pl というプログラムがある。あきらかに正常とい
 う以外の行(例: Article 数字)を全部表示する。
 出過ぎるとおもうときはパターンファイルを変更する。
+=E
+/usr/local/fml/bin/daily.pl shows invalid lines of the given fml
+logfile.
 
 本質的には、前日のログに対して
-.q
+
 % egrep -v -f /usr/local/fml/etc/daily.ignore ログファイル
-.~q
-をするのと一緒
+
+をするのと一緒です。
 
 .q
 [daily ヘルプ]

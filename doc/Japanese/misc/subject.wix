@@ -1,6 +1,8 @@
 .C	Subject はっく
+=E.C	hack Subject:
 
 .S	すれっどの先頭にだけ番号をふる？
+=E.S	add each number for each thread
 
 fml-support: 07772 近辺
 
@@ -14,8 +16,19 @@ A: とても面倒のようです。
    3通目: Subject: Re: [ML:1] 元の件名
    4通目: Subject: [ML:4] 別の件名
    5通目: Subject: Re: [ML:4] 別の件名
+.if LANG == ENGLISH
+   1 Subject: [ML:1] aaa
+   2 Subject: Re: [ML:1] aaa
+   3 Subject: Re: [ML:1] aaa
+   4 Subject: [ML:4] bbb
+   5 Subject: Re: [ML:4] bbb
+.fi
 
-なら
+なら次の HOOK でいけます。
+=E
+This is very difficult. If you add each number for each thread, this
+hook works. But the number is non continuous since the number is the
+number of article.
 
    $SMTP_OPEN_HOOK = q#
        if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
@@ -24,11 +37,12 @@ A: とても面倒のようです。
        }
    #;
    
-でいけます。
-
 しかし、4 通目は [ML:2] とカウントしてほしいなら、
 いわゆる記事番号とは別にカウントするしかありません。
 例えば別の sequence ファイルをつくってカウントをしていきます。
+=E
+If you add [ML:2] for article 4, this hook may be useful.
+Pay attention this hook has not enough error check codes.
    
 .q   
    $SMTP_OPEN_HOOK = q`

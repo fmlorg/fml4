@@ -1,4 +1,5 @@
 .C	いろいろ
+=E.C	misc
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
 =E.S	Not Deliver From: Field Address Of In-Coming Mail. 
@@ -23,27 +24,36 @@ $START_HOOK = q#
 
 
 .S	off と skip
+=E.S	off and skip
 
 fml-support: 07144
 
 off はメンバ用
 skip は管理者だけが使えるように
+=E
+These functions are same but different internally.
 
 Count: 07122 で話題にあったように、エラー対策 (を兼ねたお知らせメイルな
 んですが) として on off matome のメンバには定期的に個別にメイルを送って
 ます。(skip の場合には送らないようにしている)
 
+
 .S	登録/削除以外は限りなく不必要
+=E.S	disable all commands except for subscribe/unsubscribe
 
 fml-support: 07271
 
 条件1. 登録者に一切報告メール(welcome も)は送らない
 条件2. 登録した、退会した、旨のメールのみ送る
 条件3. よってコマンドは subscribe と bye 以外不要だろう
+=E
+disable all commands except for subscribe/unsubscribe
 
 @PermitProcedure = ('subscribe', 'confirm', 'bye');
 
 で、この３つ以外のコマンドをdisableして、さらに
+=E
+It is better to set up this to disable "fml status report" reply.
 
      &DEFINE_MODE('disablenotify');
 
@@ -51,6 +61,7 @@ fml-support: 07271
 
 
 .S	メーリングリストへの初投稿に至る手数をなるべく少なくしたい
+=E.S	actionless subscribe
 
 fml-support: 07521 より
 
@@ -58,18 +69,23 @@ Q: メーリングリストへの初投稿に至る手数をなるべく少なくしたい
 
    A) メンバ以外のアドレスからML名@xxxxxxxxxx ($MAIL_LIST)
       へ投稿した場合は、
-   [1] members ファイルに自動登録する。
-   [2] 投稿されたメールをmembersに配送する。
+	[1] members ファイルに自動登録する。
+	[2] 投稿されたメールをmembersに配送する。
 
-これだけですとメーリングリストへ参加するために何か投稿しなくてはならな
-いので、コマンド用のアドレスでは登録のみを行うようにする。即ち、
+	これだけですとメーリングリストへ参加するために何か投稿しなくて
+	はならないので、コマンド用のアドレスでは登録のみを行うようにす
+	る。即ち、
 
-B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+   B) メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
    へメールを送信した場合は、
 
-   [1] membersに自動登録する。
+	[1] membersに自動登録する。
 
 A: config.ph でちょっと tricky だが 
+=E
+This is tricky. If subscribe request comes to elena-ctl, the function
+is same as the default one.  But subscribe request comes to elena ML
+itself, the article is forwarded to elena ML.
    
     $AUTO_REGISTRATION_LINES_LIMIT = -1;
     $START_HOOK = q#
@@ -85,6 +101,7 @@ A: config.ph でちょっと tricky だが
 
 
 .S	skip コマンドの操作対象のファイルは？
+=E.S	what file "skip" command operates?
 
 fml-support: 07656, 07716
 
@@ -109,6 +126,11 @@ fml-support: 07656, 07716
 て list2 のほうにそうさをしようとしてしまいます。
 
 2.2A でなんとかするなら
+=E
+When you use both "list1" and "list2" ML member lists for list1 ML,
+"skip" command operates the first matched target within these lists.
+To enforce the search order to list2/members, list1/members, try this
+hook (if you use old fml (< 4.0)).
 
 $START_HOOK = q#
    push( @MEMBER_LIST, "$DIR/../list2/members" );

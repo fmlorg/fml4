@@ -14,24 +14,33 @@ verbose mode
 /usr/local/fml/.fml に相当するディレクトリを指定する。
 
 .S	-f systemファイル
+=E.S	-f system
 .l	makefml-opt-f
+.xref virtual-domains
 
 system file を指定できる。virtual domain の時に便利
-.xref virtual-domains
+=E
+It is useful for virtual domain setup.
 
 	% makefml -f /some/where/fml/.fml/system install
 
 
 .S	 -i コマンド入力チャンネル
+=E.S	-i INPUT-CHANNEL
 
 -i STDIN は CGI なんかが使ってます。
 
   CGI -> 入力チェック -> open(MAKEFML, "|  makefml -i STDIN  ") ..
+=E
+For examle
+  CGI -> open(MAKEFML, "|  makefml -i STDIN  ") ..
 
 
 .S	-U
 
 ロックをしない。
+=E
+not lock
 
 例:
 
@@ -42,6 +51,8 @@ makefml -U install
 
 newml 時にすでにＭＬがある場合はエラーになる。
 しかし -F をつけるとその場合にも再作成を行なう。
+=E
+Enforce "newml" operation. For example, to re-create elena ML, runs
 
 makefml -F newml elena
 
@@ -49,6 +60,8 @@ makefml -F newml elena
 .S	-E Environment (for GUI)
 
 makefml に CUI モードか GUI モードかを教えるフラッグ 
+=E
+-E tells makefml under CUI or GUI mode.
 
 
 .S	-W cgi (for GUI)
@@ -61,32 +74,48 @@ CGI installation mode
 cgi configuration file.
 
 
-
 .# ######################################################
 
 .S	-m
 
 makefml test で使ってる。実際にエラーメールを出していいか？
+=E
+-m tells whether fml sends command reply mail or not under "makefml
+test" emulation mode.
 
 
 .S	-u USER
 
 $USER 変数
+=E
+-u tells makefml under $USER.
 
 .S	-w 
 
-windows NT4 でつかっている。メニューを無限ループしている。
+windows 2000/NT4 でつかっている。メニューを無限ループしている。
 ＃そうしないと MSDOS prompt が終了しちゃって画面から消えてしまうんです。
+=E
+-w is used on Windows 2000/NT4.
 
 .S	-V VENDOR
 
 VENDOR 。たぶんでばっぐ以外で使わない
+=E
+VENDER name. It is for debug ?
 
 .S	-A アーキテクチャ
+=E.S	-A ARCHITECTURE
 
 アーキテクチャを強制的に指定する。デバッグ以外でつかうことがたぶんない
+=E
+mainly for debug ?
+
 
 .S	-O オペレーティングシステム
+=E.S	-O OPERATING-SYSTEM
 
 オペレーティングシステムを強制的に指定する。デバッグ以外でつかうことが
 たぶんない
+=E
+mainly for debug ?
+

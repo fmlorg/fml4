@@ -1,5 +1,5 @@
 .C	事例集
-
+=E.C	Examples
 
 .S	メンバーを問わずファイル uja を送り返す例
 =E.S	Send back $DIR/uja for anyone
@@ -73,15 +73,18 @@ In config.ph
 
 
 .S	Get以外のCommandで MLとは別のファイルを取り出すようにするには
+=E.S	get some files by not "get" commands 
 
 こんなんかな。"get-etc passwd" を elena-ctl におくると 
 /var/spool/ml/elena/etc/passwd が返ってくる。
 ＃わかるとおり、チェックあまあまですが、まぁ prototype だから
+=E
+get-SOMETHING gets file in SOMETHING directory.
 
 %LocalProcedure = (
-		   'get-spool', 'mySendFile',    # $DIR/spool
+		   'get-spool',   'mySendFile',  # $DIR/spool
 		   'get-archive', 'mySendFile',  # $DIR/archive
-		   'get-etc', 'mySendFile',      # $DIR/etc
+		   'get-etc',     'mySendFile',  # $DIR/etc
 		   );
 
 sub mySendFile
@@ -98,8 +101,11 @@ sub mySendFile
 
 
 .S	get 100 とコマンドを おくるとマルチパート形式で100番の記事がおくられる
+=E.S	you gets back article 100 in MIME/multipart format by "get 100" command
 
 答え: get の時も呼び出す関数を mget の関数にしてしまう。
+=E
+A: always identify "get" and "mget" commands internally.
 
 つまり
 1. いつでもmget扱いにして

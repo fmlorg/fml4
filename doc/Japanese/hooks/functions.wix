@@ -2,6 +2,7 @@
 .l	safe-functions
 
 .S	ヘッダ関係の操作
+=E.S	Header Operation
 
 GET_HEADER_FIELD_VALUE( header_field )
 
@@ -20,6 +21,7 @@ SET_HEADER_FIELD_VALUE( header_field , value )
 	もうちょっと汎用的
 
 .S	%Envelope の操作
+=E.S	%Envelope Operation
 
 GET_ENVELOPE_VALUE( hash_key )
 
@@ -40,6 +42,7 @@ ENVELOPE_PREPEND( hash_key, value )
 	直前に挿入する。
 
 .S	ファイルを読む
+=E.S	Read Files
 
 GET_BUFFER_FROM_FILE( file )
 
@@ -50,6 +53,7 @@ GET_BUFFER_FROM_FILE( file )
 
 
 .S	これらの関数を使う例 (本文へ注意をつけたす)
+=E.S	Example
 
 (2000/06/05 以降の fml-current)
 
@@ -66,3 +70,6 @@ $START_HOOK = q#
 
 などと書いておきます。過去のリリース、fml-stable および 2000/06 以前の 
 current では %Envelope を直接いじってください。
+=E
+Please write message in $DIR/info (for example,
+/var/spool/ml/elena/info ).

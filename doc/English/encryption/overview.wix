@@ -1,6 +1,8 @@
 .C	暗号関係の概要
+=E.C	Overview
 
 .S	できること
+=E.S	What fml can do
 
 リモート管理のコマンドを PGP で認証する
 .xref remote-control

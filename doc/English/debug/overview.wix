@@ -3,6 +3,9 @@
 
 ＭＬサーバ/ドライバ はユーザが直接使うコマンドではありません。
 通常それはメールサーバ（デーモン）が起動するプログラムです。
+=E
+MLM (mailing list manager) is not a user command. Usually mail server
+runs fml. To debug fml, you need to emulate this relation.
 
 デバッグするためにはメールサーバがしていることをエミュレーションする必
 要があります。
@@ -11,15 +14,20 @@
 多いです。
 
 ◯ メールサーバの典型的なエラーについては => .ptr{MTA-TROUBLE}
+=E
+See .ptr{MTA-TROUBLE} sectoin for typical errors.
 
  メールサーバ → fml へ渡る時/前の話です。
 
 ◯ SMTPのやりとりのログ => .ptr{$SMTP_LOG}
+=E
+See .ptr{$SMTP_LOG} sectoin for SMTP log between fml and MTA.
 
  fml -> メールサーバ へメールを渡す時のログが見られます。
 
 ◯ エラー事例集は => .ptr{trouble}
-
+=E
+Also see .ptr{trouble} section for error messages and trouble shooting.
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

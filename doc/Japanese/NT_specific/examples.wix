@@ -1,13 +1,15 @@
 .C	Examples
 
 .S	日別に生メールをSJIS+CRLFに変換しただけのもの
+=E.S	convert articles to SJIS+CRLF
 
 fml-support: 08941
 
-mailbox 形式でいいんですかね？
+mailbox 形式でいいんですかね？こんなんでできますかね…
 ＃それを UNIX でよむならともかく、M$ 環境でも嬉しいかしら？
+=E
+If you article by mailbox format in SJIS+CRLF, try this hook.
 
-こんなんでできますかね…
 .q
 $DISTRIBUTE_CLOSE_HOOK = q#
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];

@@ -1,11 +1,13 @@
 .C	概要
 =E.C	Overview
 
-エラーメールの事例については「トラブル対策」の方をみてください。
-.xref ../troubleshoot/
-
+エラーメールの事例については「トラブル対策」( .ptr{troubleshoot}
+section)の方をみてください。
+=E
+See  .ptr{troubleshoot} section for troubleshooting examples.
 
 .S	エラーメール
+=E.S	errormails
 
 エラーメールは通常 $MAINTAINER に返ってきます。
 elena MLなら elena-admin@あなたのドメイン です。
@@ -15,13 +17,21 @@ MTAから返ってくるメールはエラーの分析とデバッグの大事な情報です。
 エラーをしらせるキーワードを探してみてください。
 
 典型的な例 => .ptr{errorlist}
+=E
+Typical error messages => .ptr{errorlist} section
 
 メールがループするのもエラーです。=> .ptr{loop}
+=E
+loop => .ptr{loop} section
 
 
 .S	エラーメールの送られる先は？
+=E.S	where error messages comes to
 
-elena-admin です。
+elena ML の場合 elena-admin です。
+=E
+"elena-admin" by default. The mail is forwarded to "fml" who ran
+makefml in "makefml newml". If you change the forwarding rule,
 
 "makefml newml"の時に作る見本で
 
@@ -37,14 +47,22 @@ fml@あなたのドメイン のメールを読む人にいきます。設定によっては単にメー
 この送り先を変えるには
 
 1. 単に /etc/aliases をいじる
+=E
+1. change elena-admin entry in /etc/aliases
 
 	elena-admin: ユーザ１@どっかのドメイン, ユーザ2@どっかのドメイン2
 
 2. いちいち root になりたくない
+=E
+2. If you do "su" always, you can use :include: directive.
 
 	elena-admin: :include:/var/spool/ml/elena/include-admin
 
 /var/spool/ml/elena/include-admin は一行一アドレス
+=E
+The format of /var/spool/ml/elena/include-admin is one address for
+each line. Pay attention the permission of include-admin file. It
+should be 0644.
 
 	ユーザ１@どっかのドメイン
 	ユーザ2@どっかのドメイン2
@@ -54,6 +72,7 @@ fml@あなたのドメイン のメールを読む人にいきます。設定によっては単にメー
 
 
 .S	エラーになるアドレスの自動削除
+=E.S	Automatically remove addresses which causes error. 
 
 /etc/aliases を編集して mead (Mail Error Analyze Daemon) を有効にして
 下さい。詳細は .ptr{mead}
@@ -79,6 +98,7 @@ Example: elena ML. To set up mead
 
 
 .S	ＭＬ側から定期的に『入り続けるか？』を確認する
+=E.S	confirmd
 .xref 	confirmd
 
 抜けなきゃいけないけれど連絡をし忘れているなどよくある話です。confirmd 
@@ -86,7 +106,9 @@ Example: elena ML. To set up mead
 入り続けるか？」を尋ね、返事がなければ参加の意志がないものとして、その
 メンバーを削除するプログラムです。
 
+
 .S	ループを防ぐ
+=E.S	avoid loop
 .xref	loop
 
 fml は入力されるメールをチェックしています。その項目は以下のようなものです。

@@ -6,6 +6,11 @@
 
 Message-ID: は時空全体で一意です。なので同じMessage-ID:のメールが突っ
 込まれることは有り得ません。ありうる場合は
+=E
+fml check Message-ID: duplication within messages fml receives by
+default.  The cache file size is $MESSAGE_ID_CACHE_BUFSIZE (default
+60*100) bytes.  The number of cache files is $NEWSYSLOG_MAX + 2.
+Approximately fml checks duplication over the past 600 mails.
 
 1.	出した方のソフト(MUA,MSA,MTA?)のどれかがRFC違反
 2.	どっかでエラーして２通になった
