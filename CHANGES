@@ -3,6 +3,18 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/17
+
+   installation
+	install makefml not makefml*
+
+   sbin/makefml
+	fix to use $^X not "perl" 
+
+   sbin/makefml, cf/config, www/lib/lib*pl, module/*
+	fix all perl path within scripts (polite for diag check?)
+	from Naoki IDO <ido@hitachi-ms.co.jp> (fml-support: 08471)
+
 2000/07/16
 
   fix installation on windows 2000 (2000 only???)
