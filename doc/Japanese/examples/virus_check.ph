@@ -57,8 +57,10 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .vbs: VB script
 #   .js : Java script ?
 #   .exe: executable
+#   .doc: word
+#   .rtf: RTF (embedded object in RTF is possible?) ?
 $DISTRIBUTE_FILTER_HOOK .= q#
-    my($extension) = 'vbs|js|exe';
+    my($extension) = 'com|vbs|vbe|wsh|wse|js|exe|doc|rtf';
 
     if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
 	return 'dangerous attatchment ?';
