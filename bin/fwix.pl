@@ -10,38 +10,43 @@ $id = q$Id$;
 $rcsid .= " :".($id =~ /Id: (.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
 require 'getopts.pl';
-&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:");
+&Getopts("hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:");
 
 
-##### VARIABLES #####
+##### Config VARIABLES #####
 $Chapter = $Section = 0;
 $COMMENT = '^\.comment|^\.\#';
 $KEYWORD = 'C|ST|S|C\.S|P|http|label|l|key|k|seealso|xref|A|ptr';
 $FORMAT  = 'q|~q';
-
 $HTML_KEYWORD = 'HTML_PRE|~HTML_PRE';
+
 
 # Alphabetical Order Table
 for('A'..'Z') { push(@AlpTable, $_);}
 
-
-$|        = 1;
-$no_index = 1 if $opt_n eq 'i';
+$|           = 1;
+$no_index    = 1 if $opt_n eq 'i';
 $not_include = 1 if $opt_n eq 'I';
-$debug    = $opt_v; 
-$Author   = $opt_I;
-$Copyright = $opt_C;
-$DIR      = $opt_d || $opt_I;
-$HTML_DIR = $opt_D;
-$ROFF_DIR = $opt_R;
-$Title    = $opt_T || "NONE TITLE";
-$TMPDIR   = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; # this order is correct.
--d $TMPDIR || mkdir($TMPDIR, 0700);
+$debug       = $opt_v; 
+$Author      = $opt_I;
+$Copyright   = $opt_C;
+$DIR         = $opt_d || $opt_I;
+$HtmlDir     = $opt_D;
+$RoffDir     = $opt_R;
+$Title       = $opt_T || "NONE TITLE";
+$TmpDir      = (-d $ENV{'TMPDIR'} && $ENV{'TMPDIR'}) || './tmp'; 
 
+$Lang        = $opt_L || 'JAPANESE';
 
-$TMPF          = $opt_t || "$TMPDIR/$$.fml";
-$TMP_ENG       = "$TMPDIR/$$.fml-e";
-$MANIFEST_FILE = $opt_M || "$TMPDIR/MANIFEST";
+$Manifest    = ""; # log of label;
+
+$TmpFile     = $opt_t || "$TmpDir/$$.fml";
+$TmpFile_Eng = "$TmpDir/$$.fml-e";
+
+$ManifestFile = $opt_M || "$TmpDir/MANIFEST";
+
+# this order is correct.
+-d $TmpDir || mkdir($TmpDir, 0700);
 
 $SIG{'HUP'}  = 'CleanUp';
 $SIG{'INT'}  = 'CleanUp';
@@ -55,8 +60,8 @@ $SIG{'HUP'}  = 'CleanUp';
     local($mode) = $opt_b || $opt_m || 'text';
 
     if ($mode eq 'html') {
-	$HTML_DIR    || die "Required! \$HTML_DIR Direcotry for the output of html files\n";	
-	-d $HTML_DIR || mkdir($HTML_DIR, 0700);
+	$HtmlDir    || die "Required! \$HtmlDir Direcotry for the output of html files\n";	
+	-d $HtmlDir || mkdir($HtmlDir, 0700);
     }
 
     print STDERR "MODE:\t$mode\n";
@@ -102,14 +107,18 @@ sub Formatter
     else { # STDIN;
 	&$Prog($opt_N, ($DIR || '.'), $mode);
     }
+
     close(TMPF);
+    close(ENG);
 
 
     ### PHASE 02:
     $Prog = $Prog{"phase2:$mode"};
     &Open4Read;
     &$Prog($_, ($DIR || $dir || '.'), $mode);
+
     close(TMPF);
+    close(ENG);
 
     ### PHASE 03:
     if ($mode eq 'text') {
@@ -131,8 +140,8 @@ sub ShowIndex
 
 sub LogManifest
 {
-    open(MANIFEST, "> $MANIFEST_FILE") || die $!;
-    print MANIFEST $MANIFEST;
+    open(MANIFEST, "> $ManifestFile") || die $!;
+    print MANIFEST $Manifest;
     close(MANIFEST);
 }
 
@@ -146,8 +155,8 @@ sub CleanUp
 
     print STDERR "Caught a SIG$sig--shutting down\n" if $sig;
 
-    unlink $TMPF;
-    unlink $TMP_ENG;
+#    unlink $TmpFile;
+#    unlink $TmpFile_Eng;
 
     exit(0);
 }
@@ -170,60 +179,73 @@ sub Open4Write
 {
     local($mode) = @_;
 
-    open(TMPF, "> $TMPF") || die($!);
+    open(TMPF, "> $TmpFile") || die($!);
     select(TMPF); $| = 1; select(STDOUT);
 
-    open(ENG, "> $TMP_ENG") || die($!);
+    open(ENG, "> $TmpFile_Eng") || die($!);
     select(ENG); $| = 1; select(STDOUT);
 
-    print TMPF "\#.CUT:${HTML_DIR}/index.html\n" if $mode eq 'html'; 
-    print ENG  "\#.CUT:${HTML_DIR}/index.html\n" if $mode eq 'html'; 
+    print TMPF "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
+    print ENG  "\#.CUT:${HtmlDir}/index.html\n" if $mode eq 'html'; 
 }
 
 
 sub Open4Read
 {
-    print STDERR "Open4Read::($TMPF)\n" if $debug;
-    open(TMPF, $TMPF)   || die $!;
-    open(ENG, $TMP_ENG) || die $!;
+    print STDERR "Open4Read::($TmpFile)\n" if $debug;
+    open(TMPF, $TmpFile)   || die $!;
+    open(ENG, $TmpFile_Eng) || die $!;
 }
 
+
+sub OutputHtml
+{
+    local($IN) = @_;
+
+    while (<$IN>) {
+	undef $Error;
+
+	if (/^\#\.CUT:(\S+)/) {
+	    print STDERR ">>>$_\n";
+	    $name = $outfile = $1;
+	    $name =~ s#.*/##;
+	    print STDERR "> $outfile\n";
+
+	    close(OUTHTML);
+	    open(OUTHTML, "> $outfile") || die "$!\n";
+	    print OUTHTML "<TITLE>$Title $name</TITLE>";
+
+	    next;		# cut the line "^#.CUT";
+	}
+
+	s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
+	s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
+
+	s/^(\#\.index)/$Index{$Lang}/; 
+
+	print STDERR "   $prev   $_\n" if $Error; $prev = $_;
+	print OUTHTML $_;
+    }
+
+    close(OUTHTML);
+}
 
 sub OutputFile
 {
     local($file, $dir, $mode) = @_;
-    local($outfile);
+    local($outfile, $prev);
 
     if ($mode eq 'html') {
-	$INDEX = "<UL>\n$INDEX\n</UL>";
+	$Index = "<UL>\n$Index\n</UL>";
 
-	while (<TMPF>) {
-	    if (/^\#\.CUT:(\S+)/) {
-		print STDERR ">>>$_\n";
-		$name = $outfile = $1;
-		$name =~ s#.*/##;
-		print STDERR "> $outfile\n";
-
-		close(OUTHTML);
-		open(OUTHTML, "> $outfile") || die "$!\n";
-		print OUTHTML "<TITLE>$Title $name</TITLE>";
-
-		next;		# cut the line "^#.CUT";
-	    }
-
-	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
-	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
-
-	    s/^(\#\.index)/$INDEX/; 
-
-	    print OUTHTML $_;
-	}
-
-	close(OUTHTML);
+	&OutputHtml('TMPF');
+	&OutputHtml('ENG');
     }
     elsif ($mode eq 'roff') {
 	print ".SH\n$Copyright\n" if $Copyright;
 	while (<TMPF>) {
+	    undef $Error;
+
 	    if (/^\#\.CUT:(\S+)/) {
 		$name = $outfile = $1;
 		$name =~ s#.*/##;
@@ -237,18 +259,25 @@ sub OutputFile
 	    }
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
-	    s/^(\#\.index)/$INDEX/; 
+	    s/^(\#\.index)/$Index{$Lang}/; 
 
+	    print STDERR "   $prev   $_\n" if $Error; $prev = $_;
 	    print OUTROFF $_;
 	}
 
 	close(OUTROFF);
     }
     elsif ($mode eq 'text') {
-	while (<TMPF>) {
+	$IN = $Lang eq 'ENGLISH' ? 'ENG' : 'TMPF';
+
+	while (<$IN>) {
+	    undef $Error;
+
 	    s/\#\.ptr\{(\S+)\}/&PtrExpand($1)/gei;
 	    s/^\#\.xref\s+(.*)/&IndexExpand($1)/gei;
-	    s/^(\#\.index)/$INDEX/; 
+	    s/^(\#\.index)/$Index{$Lang}/; 
+
+	    print STDERR "   $prev   $_\n" if $Error; $prev = $_;
 	    print $_;
 	}
     }
@@ -266,11 +295,11 @@ sub Format
     if ($s =~ /{(.*)}/) { $s = $1;}
 
     if ($c eq 'q') {
-	$TAG = "    ";
+	$Tag = "    ";
 	$r = "<PRE>"  if $mode eq 'html';
     }
     elsif ($c eq '~q') {	# destructor:-)
-	undef $TAG;
+	undef $Tag;
 	$r = "</PRE>" if $mode eq 'html';
     }
 
@@ -280,7 +309,7 @@ sub Format
 
 sub FormatReset
 {
-    undef $TAG;
+    undef $Tag;
     if ($InPre) {
 	print TMPF "</PRE>\n";
 	print ENG  "</PRE>\n";
@@ -346,21 +375,21 @@ sub Expand
 		 10, 'XII',
 		 );
 
-	$Part++;
+	$Part++ unless $LANG;
 	$s = "$Part{$Part}\t$s";
 
 	if ($mt) {
-	    $INDEX .= "\n$s\n";
+	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
-	    $INDEX .= "<HR><LI><H3><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A></H3>\n";
+	    $Index{$CurLang} .= "<HR><LI><H3><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A></H3>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
 	    $s     .= "<PRE>\n";
 
 	    # split after the tmpfile is generated;
-	    # $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
+	    # $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s"; 
 
-	    $InPre++;
+	    $InPre++ unless $LANG;
 	}
 	elsif ($mr) {
 	    $s = ".SH\n$s\n";
@@ -373,24 +402,24 @@ sub Expand
 	&FormatReset;
 	$CurrentSubject = $s;
 
-	$Chapter++;
+	$Chapter++ unless $LANG;
 	$Section    = 0;
 	$InAppendix = 0;
 
 	$s = "$Chapter\t$s";
 
 	if ($mt) {
-	    $INDEX .= "\n$s\n";
+	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
-	    $INDEX .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    $Index{$CurLang} .= "<HR><LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<HR>\n<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
 	    $s     .= "<PRE>\n";
 
 	    # split after the tmpfile is generated;
-	    $s     = "\#.CUT:${HTML_DIR}/$Chapter.html\n<HR>\n$s"; 
+	    $s     = "\#.CUT:${HtmlDir}/$Chapter.html\n<HR>\n$s"; 
 
-	    $InPre++;
+	    $InPre++ unless $LANG;
 	}
 	elsif ($mr) {
 	    $s = ".SH\n$s\n";
@@ -401,17 +430,18 @@ sub Expand
 	&FormatReset;
 	$CurrentSubject = $s;
 
-	$Section++;
+	$Section++ unless $LANG;
+# beth
 	$s = &GetCurPosition."\t$s";
 
 	if ($mt) {
-	    $INDEX .= "$s\n";
+	    $Index{$CurLang} .= "$s\n";
 	}
 	elsif ($mh) {
-	    $INDEX .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
+	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
 	    $s      = "<A NAME=\"C${Chapter}S${Section}\">$s</A>\n";
 	    $s     .= "<PRE>\n";
-	    $InPre++;
+	    $InPre++ unless $LANG;
 	}
 	elsif ($mr) {
 	    $s = ".SH\t$s\n";
@@ -422,7 +452,7 @@ sub Expand
 	$CurrentSubject .= $s;
 
 	$s = "\t$s";
-	$INDEX .= "$s\n";
+	$Index{$CurLang} .= "$s\n";
     }
     ###  Chapter
     elsif ($c eq 'A') {
@@ -435,7 +465,7 @@ sub Expand
 	$s = "Appendix $Appendix\t$s";
 
 	if ($mt) {
-	    $INDEX .= "\n$s\n";
+	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
 	    ;
@@ -451,8 +481,9 @@ sub Expand
     elsif ($c eq 'key' || $c eq 'k') {
 	$key{$s} = $CurPosition;
 	$keylist{$s} .= "$CurPosition ";
-	$MANIFEST .= "key=$s\n$CurPosition";
-	$MANIFEST .= "   $CurrentSubject\n";
+
+	$Manifest .= "key=$s\n$CurPosition";
+	$Manifest .= "   $CurrentSubject\n";
 	return '#.next';
     }
     elsif ($c eq 'seealso' || $c eq 'xref') {
@@ -462,8 +493,11 @@ sub Expand
 	$s = "\#.ptr{$s}";
     }
     elsif ($c eq 'label' || $c eq 'l') {
-	&Log("$s already exists\tin \%index[$file::line=$.]\n  ALREADY $_index{$s}") 
-	    if $index{$s};
+	if ($index{$s}) {
+	    &Log("   $s already exists\tin \%index[$file::line=$.]");
+	    &Log("      xref: $_index{$s}") ;
+	}
+
 	$_index{$s} = "$c $s($file::line=$.)";
 
 	if ($mode eq 'text') {
@@ -499,33 +533,62 @@ sub ReadFile
     #print STDERR "Try Including $dir/$file\n";
 
     if ($file && -f $file) {
-	print STDERR "Including $file\n";
 	open($file, $file) || &Log("cannot open $file");
     }
     elsif ("$dir/$file" && -f "$dir/$file") {
 	$file = "$dir/$file";
-	print STDERR "Including $file\n";
 	open($file, $file) || &Log("cannot open $file");
     }
     else {
 	$file = 'STDIN';
-	print STDERR "Including $file\n";
     }
 
-
+    # info
+    {	
+	local($c) = $Chapter + 1;
+	printf STDERR "Including %-40s  %s\n", $file,
+	"(".($Appendix ? "App.$Appendix " : ""). "Chap.$c)";
+    }
+    
     ### split after the tmpfile is generated;
     if ($mode eq 'html') {
-	;#; print TMPF "#.CUT:$HTML_DIR/$fname\n";
+	;#; print TMPF "#.CUT:$HtmlDir/$fname\n";
     }
     elsif ($mode eq 'roff') {
 	$fname =~ s/\.wix/.1/;
-	print TMPF "#.CUT:$ROFF_DIR/$fname\n";
-	print ENG  "#.CUT:$ROFF_DIR/$fname\n";
+	print TMPF "#.CUT:$RoffDir/$fname\n";
+	print ENG  "#.CUT:$RoffDir/$fname\n";
     }
 
 
     while (<$file>) {
 	chop;
+
+	undef $Both;
+
+	# language declared
+	# reset Language if it encounters null line; 
+	if (/^\s*$/ || /\.($KEYWORD)/) {
+	    undef $LANG;
+	}
+
+	if (/[\241-\376][\241-\376]/) {	# EUC(Japanese);
+	    undef $LANG;
+	}
+	elsif (! $LANG && !/\.($KEYWORD)/) {# to avoid duplicate title;
+	    $Both = 1;
+	}
+	
+	if (/^=E/) { 
+	    s/^=E//; 
+	    $LANG = 'ENGLISH';
+	}
+
+	##########
+	if (/\.($KEYWORD)/) {
+	    $CurLang = $LANG || "JAPANESE";
+	}
+
 
 	/$COMMENT/i && next;                    # Comments
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
@@ -561,20 +624,22 @@ sub ReadFile
 	    s/^\.include\s+(\S+)/&ReadFile($1, $dir || '.', $mode)/e;
 	}
 
-	select(TMPF);
-
-	# Save the body
-	if ($mode eq 'text') {
-	    print $TAG;
-	    print "$_\n";
+	# Handling Multiple Languages
+	# TMPF == Japanese;
+	if ($LANG eq 'ENGLISH') {
+	    select(ENG); $| = 1;
+	    &Print;
 	}
-	elsif ($mode eq 'html') {
-	    print "$_\n";
-	}
-	elsif ($mode eq 'roff') {
-	    print "$_\n";
+	else {
+	    select(TMPF); $| = 1;
+	    &Print;
 	}
 
+	# OK. Print in both language
+	if ($Both) {
+	    select(ENG); $| = 1;
+	    &Print;
+	}
 
 	# Try to detect ERROR
 	if ($mode ne 'roff') { /^\.(\S+)/ && &Log("Error? ^.$1");}
@@ -585,6 +650,20 @@ sub ReadFile
     select(STDOUT);
 
     "";
+}
+
+sub Print
+{
+    # Save the body
+    if ($mode eq 'text') {
+	print "$Tag$_\n";
+    }
+    elsif ($mode eq 'html') {
+	print "$_\n";
+    }
+    elsif ($mode eq 'roff') {
+	print "$_\n";
+    }
 }
 
 sub PtrExpand
@@ -610,6 +689,7 @@ sub IndexExpand
 
 	if (index($r, $org) == 0) {
 	    &Log("[$. lines] error or not defined? $org => $r\n");
+	    $Error = 1;
 	}
     }
 
