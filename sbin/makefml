@@ -3905,7 +3905,7 @@ sub MakeConfigPH
 	}
     }
 
-    $cf ||= "-i";
+    $cf = $cf || "-i";
 
     if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
 	&Log("Error: cannot exec $config -m $manifest $cf");
