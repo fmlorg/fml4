@@ -1,4 +1,5 @@
 .C	メールサーバの問題
+=E.C	MTA specific problems
 .l	troubles.mailserv
 
 .S	エラーメールの例
@@ -34,6 +35,7 @@ procmail: Quota exceeded while writing "/var/spool/mail/rudo"
 
 
 .S	典型的なエラーメール
+=E.S	Typical error messages
 
 .if LANG == JAPANESE
 エラーメールの最初の方に以下のようなキーワードがありますか？
@@ -153,6 +155,8 @@ cannot open /var/spool/ml/etc/aliases
 Executable files not allowed 
 
 executable bit を落してください。/ から全階層をたどって検査して下さい。
+=E
+disable executable bit.
 .q
 % chmod a-x /var/spool/ml/etc/aliases
 .~q
@@ -166,14 +170,18 @@ executable bit を落してください。/ から全階層をたどって検査して下さい。
 
 / から全階層をたどって permission を検査して下さい。
 /var/spool/ml/elena に仮想ユーザ fml 以外が書く権限は必要はありません。
-
+=E
+traverse file system from / and check permissions.
 
 .S	   sh: fml.pl not available for sendmail programs
 
 最近では Red Hat Linux ではまる人が多いのが
 sendmail の smrsh ではまるケースのようです(?)。
 例えばこのようなエラーメールが返ってきます
+=E
+If you see the following messages, tackle with smrsh.
 
+.q
       ----- The following addresses had permanent fatal errors -----
    "|/usr/local/fml/fml.pl /var/spool/ml/elena "
        (expanded from: :include:/var/spool/ml/elena/include)
@@ -181,6 +189,7 @@ sendmail の smrsh ではまるケースのようです(?)。
       ----- Transcript of session follows -----
    sh: fml.pl not available for sendmail programs
    554 "|/usr/local/fml/fml.pl /var/spool/ml/elena "... Service unavailable
+.~q
 
 これは fml じゃなくて sendmail のエラーです。この段階では fml は実行さ
 れてもいません。よって fml のログも残りません。
@@ -198,9 +207,11 @@ sendmail の smrsh ではまるケースのようです(?)。
 	のがあったとおもいます。で、Redhat がまさにそれだったようなきが
 	します
 
-.q
 sendmail.cf に
+=E
+If you find Mprog in sendmail.cf, you use smrsh.
 
+.q
 Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
 .~q
 のような行が P=/bin/smrsh になっていればこれです。
