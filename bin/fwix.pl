@@ -1505,7 +1505,7 @@ sub IndexExpand
     if ($mode eq 'html') {
 	if ($InPre) {
 	    $result =~ s#\<\/PRE\>\s*\<PRE\>\s*##;
-	    $result =~ s#\<\PRE\>\s*\<\/PRE\>\s*##;
+	    $result =~ s#\<PRE\>\s*\<\/PRE\>\s*##;
 	    $result =~ s#\<\/PRE\>##;
 	    $result =~ s#\<PRE\>\s*$##;
 	}
