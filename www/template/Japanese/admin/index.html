@@ -15,7 +15,7 @@
 <!-- =================================================================== -->
 <H2>
 <CENTER>
-"fml" Configuration Interface
+"fml" _FML_VERSION_ Configuration Interface
 </CENTER>
 </H2>
 
@@ -28,15 +28,16 @@
 <P>
 <UL>
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#config">設定</A>
+<LI><A HREF="#config">特定のメーリングリストの設定</A>
 <LI><A HREF="#add.bye">登録/削除 関係</A>
 <LI><A HREF="#password">パスワードの設定</A>
 <LI><A HREF="#newml">メーリングリストの作成</A>
 <LI><A HREF="#destructml">メーリングリストの削除</A>
+<LI><A HREF="#cgi_config">CGIの設定</A>
 </UL>
 
 <HR>
-<A NAME=config><P>設定
+<A NAME=config><P>特定のメーリングリストの設定
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -104,7 +105,7 @@ _____________________________
 
 
 <HR>
-<A NAME=password><P>パスワードの設定
+<A NAME=password><P>メーリングリストの管理者パスワードの設定
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -185,6 +186,9 @@ _____________________________
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
 </FORM>
 
+
+<HR>
+<A NAME=cgi_config><P>CGIの設定 (まだ_o_)
 
 <HR>
 
