@@ -1,0 +1,6 @@
+ftpmail.submitted:
+	receives your request to ftpmail server <_ARG0_>
+	Please wait a little
+
+ftpmail.not_supported:
+	not permit relay to ftpmail server

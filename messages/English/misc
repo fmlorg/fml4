@@ -1,7 +1,0 @@
-### Section: Subscribe Request
-req.subscribe.forwarded_to_admin:
-	_ARG0_ request is forwarded to the maintainer
-	Please wait a little
-
-req.digest.no_spool:
-	_ARG0_ is unavaialbe since this mailing list not spool articles

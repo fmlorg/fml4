@@ -1,0 +1,11 @@
+ftp.not_configure:
+	inmature fml configuration
+
+ftp.exit:
+	exit
+
+ftp.cd.insecure:
+	insecure change-directory. exit
+
+ftp.cannot_chdir:
+	cannot move to the directory

@@ -1,0 +1,12 @@
+ftp.not_configure:
+	fmlの設定が不充分です。
+
+ftp.exit:
+	終了します。
+
+ftp.cd.insecure:
+	不正なディレクトリの移動です。終了します。
+
+ftp.cannot_chdir:
+	ディクレトリに移動できません。
+

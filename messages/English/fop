@@ -17,9 +17,6 @@ fop.rename.fail:
 fop.write.fail:
 	cannot write_ARG0_ 
 
-ftp.not_configure:
-	inmature fml configuration
-
 fop.not_found:
 	no such files for request
 
@@ -34,18 +31,3 @@ fop.mget.no_such_mode:
 fop.summary.not_match:
 	no such entry in summary file
 
-ftp.exit:
-	exit
-
-ftp.cd.insecure:
-	insecure change-directory. exit
-
-ftp.cannot_chdir:
-	cannot move to the directory
-
-ftpmail.submitted:
-	receives your request to ftpmail server <_ARG0_>
-	Please wait a little
-
-ftpmail.not_supported:
-	not permit relay to ftpmail server

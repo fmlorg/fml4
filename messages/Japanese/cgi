@@ -9,5 +9,5 @@ cgi.password.different:
 cgi.password.empty:
 	エラー: cgi パスワードが空です。入れ直して下さい
 
-adduser.already_member:
+cgi.adduser.already_member:
 	エラー: すでにメンバーです

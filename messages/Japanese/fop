@@ -17,9 +17,6 @@ fop.rename.fail:
 fop.write.fail:
 	_ARG0_ ファイルに書き込めませんでした。
 
-ftp.not_configure:
-	fmlの設定が不充分です。
-
 fop.not_found:
 	該当するファイルが一つも見つかりませんでした。
 
@@ -33,18 +30,3 @@ fop.mget.no_such_mode:
 fop.summary.not_match:
 	サマリーファイルに該当する項目がないようです。
 
-ftp.exit:
-	終了します。
-
-ftp.cd.insecure:
-	不正なディレクトリの移動です。終了します。
-
-ftp.cannot_chdir:
-	ディクレトリに移動できません。
-
-ftpmail.submitted:
-	ftpmail サーバ _ARG0_ へのリクエストを受理しました。
-	少し待って下さい。
-
-ftpmail.not_supported:
-	ftpmail サーバへのリレーはサポートされていません。

@@ -1,0 +1,8 @@
+ftpmail.submitted:
+	ftpmail サーバ _ARG0_ へのリクエストを受理しました。
+	少し待って下さい。
+
+ftpmail.not_supported:
+	ftpmail サーバへのリレーはサポートされていません。
+
+
