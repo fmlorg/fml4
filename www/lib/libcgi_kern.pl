@@ -143,14 +143,15 @@ sub ExpandMemberList
     local($config_ph, @list, $list, $addr);
     local(%uniq, %addr);
 
-    $config_ph = "$ML_DIR/$ML/config.ph";
+    # XXX 3.0B
+    # $DIR, @LIBDIR
     $DIR       = "$ML_DIR/$ML";
+    $config_ph = "$DIR/config.ph";
 
     if (-f $config_ph) {
 	package config_ph;
 	$DIR = $main'DIR; #';
-	eval require $main'DefaultConfigPH if -f $main'DefaultConfigPH;
-	eval require $main'config_ph; #';
+	require 'libloadconfig.pl'; &__LoadConfiguration;    
 	package main;
     }
     else {
