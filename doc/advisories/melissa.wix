@@ -2,22 +2,30 @@
 	FML Security Advisory 1999-003: melissa
 	========================================
 
-Topic:	Melissa 対策
+Topic:	Melissa Macro Virus 対策
+	Melissa に感染した Microsoft Word 97 or Word 2000 がばらまくメー
+	ルを拒否する。
 
 			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
 
 	Copyright (C) 1999 Ken'ichi Fukamachi
 		All rights reserved.
 .~HTML_PRE
+
+[Abstract]
+
+Melissaが何か？については Cert Advisory を参照
+.url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
+
+fmlのレベルでの対策は「特定のSubject:でフィルタリング」になる。できれ
+ばMTAで弾く方がよい。
+
 -------------------------
 .toc
 -------------------------
 
 手順の意味についてはINSTALLマニュアルを参照して下さい
-http://www.fml.org/fml/INSTALL/
-
-何か？については Cert Advisory を参照
-.url http://www.cert.org/advisories/CA-99-04-Melissa-Macro-Virus.html
+.url	http://www.fml.org/fml/INSTALL/
 
 
 .P	フィルタリング
