@@ -1,0 +1,74 @@
+.S	Traffic を調べる( libtraffic.pl )
+
+AUTHOER: tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
+
+.q
+[libtraffic.pl の説明]
+
+  メイルの投稿量の統計をとるコマンドです。
+
+  使い方は、
+
+% libtraffic.pl [-n <best?>] [-m <mails>] [-d] [where is summary?]
+
+で、オプションを指定しないで、
+
+% libtraffic.pl
+
+とすると、デフォルトで、カレントディレクトリのsummaryを読んで、
+
+1. 月毎のメイル投稿量
+2. メイル投稿量毎の日数
+3. 時間帯別の投稿量
+4. １日２５通以上投稿があった日
+5. 投稿者ベストテン
+6. １日当たりの平均投稿量と最大投稿量
+
+を出力します。
+
+  オプションで、-d を指定すると、さらに、
+
+0. 日毎の投稿量
+
+も得られます。デフォルトでは表示しません。
+
+  オプション -n は、5.の投稿量の多い人のベスト何人まで表示するかを
+数字で指定します。デフォルトでは、-n 10 と同じです。
+
+  オプション -m は、4.の何通以上あった日を表示するかを数字で指定し
+ます。デフォルトでは、-m 25 と同じです。
+.~q
+
+
+.S	#traffic で 複数のアドレスを持つ人物を同一視してカウントする 技
+
+	fml-support: 00736
+	From: tanigawa@tribo.mech.nitech.ac.jp (Yuao Tanigawa)
+	より
+.q
+> $TRF_NAME_HOOK = q#
+>     $name =~ s/umura@solan\.chu/umura@nn.solan./oi;
+> #;
+> 
+> 　と設定しています。これは
+> 
+>    umura@solan.chu -> umura@nn.solan.
+> 
+> 　という書き換えを行うことになります。
+
+  こんな感じで、$name にsummaryに書いてあるアドレスが入っている
+ので、config.ph の中で $TRF_NAME_HOOK にいちいちアドレスを置き
+換えるコードを書いて下さい。あとは、
+
+if ( $name eq 'yuao@drei.mech.' || $name eq 'XN9Y-TNGW@j.asa' ) {
+	$name = 'tanigawa@tribo.';
+}
+
+など、ほんとに、好きなように書いて下さい。同一人物データベースと
+かつくって自動的にやってくれるようなインテリジェントな作りには
+なっていないので、ごめんなさい。(_o_)
+＃ ということで、メンバ全員、対応させようとすると、本当にシンドイ
+＃ です。^_^;
+.~q
+
+
