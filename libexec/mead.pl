@@ -121,6 +121,7 @@ sub AnalWord
 
     if (/user unknown|unknown user/i) { $reason = 'uu';}
     if (/host unknown|unknown host/i) { $reason = 'uh';}
+    if (/service unavailable/i)       { $reason = 'us';}
     if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
 
     # exim ?
@@ -589,6 +590,7 @@ Options:
                             uu: unknown user
                             uh: unknown host
                             ua: unknown address
+                            us: service unavaiable 
                             default: default value for phrases not above
 "
 }
