@@ -1,0 +1,41 @@
+.C	トラブルシュート 
+
+.S	WWWでＭＬを作成したが、aliases のエントリがちゃんとUPDATEされてない？
+
+注意: 以下はたまたま solaris 2.6 の例
+
+◯ fml 側の確認
+
+1. /var/spool/ml/etc/aliases に作成したＭＬのエントリがあるかどうかを確認する。
+
+2. /var/spool/ml/etc/aliases.db の日付を aliases と比べて下さい。
+   aliases を実行しているのなら .db のほうが新しい(か分の精度で同時刻)はずです。
+   ソラリスなんかだと Berkeley DB ではなく
+
+	/var/spool/ml/etc/aliases.pag
+	/var/spool/ml/etc/aliases.dir
+
+   となっていたかもしれません
+
+◯ OS(というかMTA)の設定
+
+1. /etc/mail/sendmail.cf に 
+   /usr/local/fml/www/examples/sendmail/senmail.cf というファイルに書いて
+   ある設定を追加してあるか確認してください。編集するのは、この一行だけですが
+
+	O AliasFile=/etc/aliases,/var/spool/ml/etc/aliases
+
+ソラリスなので、
+
+	O AliasFile=/etc/mail/aliases,/var/spool/ml/etc/aliases
+
+でしょう。
+
+
+2. １を確かめた後 /usr/bin/newaliases を実行してみて下さい。
+
+	/etc/mail/aliases: 30 aliases, longest 49 bytes, 886 bytes total
+	/var/spool/ml/aliases: 20 aliases, longest 26 bytes, 239 bytes total
+
+のように２つのファイルの処理をしたという表示がでるはずです。
+＃この例の数字は適当ですので

@@ -6,6 +6,7 @@
 
 .# .__repl_include__
 .include overview.wix
+.include troubles.wix
 .include QandA.wix
 .include gui.wix
 
