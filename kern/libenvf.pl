@@ -114,7 +114,7 @@ sub __EnvelopeFilter
 
     ### 4. check the only last paragraph
     # If it has @ or ://, it must be a paragraph 
-    $one_line_check_p = &EnvelopeFilter::SignatureP(*e, *pmap, $lparbuf);
+    $one_line_check_p = &EnvelopeFilter::OneLineCheckP(*e, *pmap, $lparbuf);
     &Debug("--EnvelopeFilter::BufferToCheck($xbuf)\n") if $debug;
     &Log("EnvelopeFilter: one line check? $one_line_check_p") if $debug;
 
