@@ -28,14 +28,10 @@ fml Mailing List Packeges release revison 3.0 current Bulletin
 の下です。ファイル名はfml-current.日付.tar.gzです。日付の新しいのを使っ
 てみて下さい。過去の正式リリースは
 
-	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml/
+	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/release/
 
-の下にあります。WWWでは
+の下にあります。
 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
+HOME PAGE: 
 
-という「ＭＬサーバの設計と実装」というところからたどって下さい。そこで
-最新版のドキュメントやらソースやらが見られます。
-
-	http://www.sapporo.iij.ad.jp/staff/fukachan/archive/
+	http://www.fml.org/fml/
