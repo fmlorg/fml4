@@ -15,3 +15,10 @@
 
 .p	HOOK
 .include hook.wix
+
+.p	examples
+.C	examples
+
+.include sample-sitedef-mnews
+
+.# $Id$
