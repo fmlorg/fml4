@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.83 2001/06/10 14:33:05 fukachan Exp $
+# $FML: MANIFEST,v 1.84 2001/06/18 15:20:29 fukachan Exp $
 #
 
 
@@ -1398,15 +1398,15 @@ NOT_USE_TIOCNOTTY:
 
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
-HAS_GETPWUID:	
+HAS_GETPWUID:	&is_unix
 
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
-HAS_GETPWGID:	
+HAS_GETPWGID:	&is_unix
 
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
-HAS_ALARM:	
+HAS_ALARM:	&is_unix
 
 # program paths fml uses
 # Usually "makefml newml" checks and expands this value. 

@@ -5,6 +5,13 @@
 	$Date$
 
 
+2001/08/17
+
+   modify default_config.ph creation code
+
+	UNIX 依存変数は &is_unix としてある。インストール時に
+	OS が win32 であれば 0 へ、それ以外では 1 に設定される。
+
 2001/08/13
 
    kern/fml.pl
