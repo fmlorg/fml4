@@ -1,6 +1,19 @@
 .C	qmail の VERPs での自動エラー処理のしかた
 =E.C	qmail VERPs
 
+.if LANG == ENGLISH
+mead works if you set 
+
+	$USE_VERP = 1;
+
+In "makefml config" menu, 
+
+	MENU → SMTP -> VERPs -> "y"
+
+.return
+.fi
+
+
 fml-support: 07462
 
 ◯ INSTALL_with_QMAIL というファイルを見ながらインストール&&qmailの設定をする
@@ -36,12 +49,6 @@ config.ph で $USE_VERP = 1 (defaultは0で、VREPsを使わない)を設定する
 
 この設定がされているならエラーメールが帰ってきた時は .
 qmail-elena-default の中身がよばれて、自動的にエラーの集計をおこなう
-
-
-◯ KNOWN_BUGS / TODO(にあるけど)
-
-mead の設定は今 mead のコマンドラインオプションだけになっています。こ
-れを overwrite できるような設定ファイルが別に必要でしょう
 
 
 ◯ エラーメールログのフォーマット

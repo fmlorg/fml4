@@ -1,7 +1,11 @@
 .C	フィルタリングということの概要
-.l	filter
+.l	filtering
 
 フィルタリングといっても
+=E
+Filtering process consists of several positions. 
+Firstly the user level filtering (=> .ptr{user-level-filtering})
+Secondary mail server rejects it in receiving mails (=> .ptr{EnvelopeFilter}).
 
 1. ユーザレベルでのフィルタリング (=> .ptr{user-level-filtering})
    つまり
@@ -25,20 +29,21 @@
 前者 1. については情報へのポインタだけ示すことにします。
 .xref	user-level-filtering
 
-.S	投稿メールのフィルタリング機能を有効にする
+.S	fml の投稿メールのフィルタリング機能を有効にする
+=E.S	Filtering by fml
 
 	$USE_DISTRIBUTE_FILTER = 1;
 
-.q
 makefml config で
 
-メインメニュー -> セキュリティ -> USE_DISTRIBUTE_FILTER -> ON
-.~q
+   メインメニュー -> セキュリティ -> USE_DISTRIBUTE_FILTER -> ON
+=E
+   MENU -> SECURITY -> USE_DISTRIBUTE_FILTER -> ON
 
 .S	カスタマイズ
+=E.S	customize
 
-config.ph にフィルタリングの設定を書くことができます。
-例:
+config.ph にフィルタリングの設定を書くことができます。例:
 
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', 'FREE|SEX|ADULT|XXX');
 	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
@@ -46,7 +51,9 @@ config.ph にフィルタリングの設定を書くことができます。
 
 
 .S	弾けないもの
+=E.S	examples fml cannot rejects
 
+.if LANG == JAPANESE
 パラグラフ(空行と空行の間)ごとに判定しているので、弾けないものがありま
 す。ようするにフィルタが見ているのは
 
@@ -67,7 +74,16 @@ config.ph にフィルタリングの設定を書くことができます。
 　　しぐにちゃあ
 *----------------------------*
 ~.q
+.fi
+.if LANG == ENGLISH
+	the paragraph looks a command
 
+	the last paragraph looks a signature 
+
+	some paragraph contains Japanese
+
+If the judgement of some paragraph is ambiguous, it may be mis-judged.
+.fi
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

@@ -11,28 +11,42 @@
 
 
 .S	暗号関係の概要
+=E.S	overview
 
 ◯ PGP2 および PGP5 用です。(以下 {2,5} と略します)
 	OpenPGP, GPG, S/MIME 用のモデュールなどはないです。
+=E
+* You can use pgp2 and pgp5.
 
 ◯ コマンドメールの認証にPGP{2,5}を使います。
    いわゆる『リモート管理の認証』という話の枠組です。
+=E
+* You can use the authentication of admin commands.
 
 関連事項: リモート管理 => .ptr{REMOTE-ADMINISTRATION}
 関連事項:  PGP2        => .ptr{PGP2}
 
 ◯ 配送メールの暗号をPGP{2,5}でするというオプションもありますが…
+=E
+* you can use ML article encryption
 
 	$USE_ENCRYPTED_DISTRIBUTION
 
 ◯ PGPの設定は makefml 経由で設定をして下さい。
+=E
+* Please use makefml if you use PGP.
+
 .xref makefml-pgp
 
 
 .C	PGP2
 
-fml 4.0 で整理されました。 
-.ptr{makefml-pgp-howto} を参照して下さい。
+fml 4.0 で整理されました。 詳しくは .ptr{makefml-pgp-howto} を参照して
+下さい。
+=E
+fml 4.0 clean up the pgp keys directory hierarchy.
+See .ptr{makefml-pgp-howto} section for more details.
+
 
 .S	makefml による PGP2 の公開鍵の登録
 =E.S	Register PGP2 Public Keys
@@ -48,13 +62,18 @@ fml 3.0 までの makefml では
 =E
 	makefml pgp <ML> PGP's options
 
-例:
+です。たとえば
+=E
+For examle
+
 	makefml pgp elena -ka public.asc
 
-
 同じことを fml 4.0 では
+=E
+In fml 4.0
 
 	makefml モード.コマンド <ML> PGPコマンドのオプション
+
 
 というシンタックスになります。
 
@@ -76,7 +95,6 @@ fml 3.0 までの makefml では
 と同じです。またあまりに長いので admin-auth を aa で代用できます :-) 
 dist-encrypt は de で代用できます。
 例:
-
 	makefml aa.pgp
 	makefml de.pgp
 

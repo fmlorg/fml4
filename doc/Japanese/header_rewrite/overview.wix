@@ -1,5 +1,5 @@
 .C	ヘッダのいろいろな操作
-=E.C	Examples
+=E.C	Examples of header manipulation
 
 fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
 ドの並び変えや特定のフィールドの削除などを行なっています。FML 2.2 以降
@@ -9,60 +9,52 @@ fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
 
 
 .S	サブジェクトの書き換え
+=E.S	rewrite subject
 
 	$SUBJECT_TAG_TYPE	[elena:00100] みたいな部分の選択
 .xref	$SUBJECT_TAG_TYPE
 
 	$SUBJECT_TAG_FIGURE	       ↑これの桁数
 
-.q
-[メニュー画面]
 
-makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_TYPE
-makefml config -> メインメニュー -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
-.~q
+	MENU -> HEADER_CONFIG -> SUBJECT_TAG_TYPE
+	MENU -> HEADER_CONFIG -> SUBJECT_TAG_FIGURE
+
 
 .S	ヘッダフィールドの値をコピーする
+=E.S	copy header fields
 .xref	COPY_FIELD
 
 	&COPY_FIELD(コピー元, コピー先);
-
   例:
+=E
+	&COPY_FIELD(src, dst);
+
 	&COPY_FIELD('Sender', 'X-Sender');
 
 .S	ヘッダフィールドの値をある値に強制的にする
+=E.S	enforce the value for a header field
 .xref	DEFINE_FIELD_FORCED
 
 	&DEFINE_FIELD_FORCED(フィールド名, 値);
-
   例:
+=E
+	&DEFINE_FIELD_FORCED(fieldname, value);
+  For example:
+
 	&DEFINE_FIELD_FORCED("reply-to", "$From_address, $MAIL_LIST");
-
-	&DEFINE_FIELD_ORIGINAL
-	&DEFINE_FIELD_ORIGINAL()
-	&DEFINE_FIELD_PAT_TO_REJECT
-	DEFINE_FIELD_FORCED
-	DEFINE_FIELD_ORIGINAL()
-
-.S	ヘッダフィールドを加える
-.xref	ADD_FIELD
-
-	&ADD_FIELD(フィールド名);
-
-   例:
-	&ADD_FIELD('X-Uja');
-
-デフォールトで $PASS_ALL_FIELDS_IN_HEADER が定義されているので
-見知らぬヘッダは素通りしていく。
-$PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 
 
 .S	ヘッダフィールドを消す
+=E.S	remove a header field
 .xref	DELETE_FIELD
 
 	&DELETE_FIELD(フィールド名);
-
    例:
+=E
+	&DELETE_FIELD(fieldname);
+   For example:
+
 	&DELETE_FIELD('X-Uja');
 
 デフォールトで $PASS_ALL_FIELDS_IN_HEADER が定義されているので見知らぬ
@@ -70,43 +62,58 @@ $PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 
 
 .S	ヘッダフィールドの値をそのまま通すようにする
+=E.S	pass through a field
 .xref	DEFINE_FIELD_ORIGINAL
 
 	&DEFINE_FIELD_ORIGINAL(フィールド名);
-
    例:
+=E
+	&DEFINE_FIELD_ORIGINAL(fieldname);
+   For example:
+
 	&DEFINE_FIELD_ORIGINAL('reply-to');
 
 
 .S	コマンドの返事メールのヘッダの値を設定する
+=E.S	set up the value for command reply message 
 .xref	DEFINE_FIELD_OF_REPORT_MAIL
 
 	&DEFINE_FIELD_OF_REPORT_MAIL(フィールド名, 値);
-
    例:
+=E
+	&DEFINE_FIELD_OF_REPORT_MAIL(fieldname, value);
+
 	&DEFINE_FIELD_OF_REPORT_MAIL('Reply-To', "Your Reply-To Address");
 
+
 .S	ヘッダを素通しする(デフォールト)
+=E.	pass through the whole header (by default)
 .xref	$PASS_ALL_FIELDS_IN_HEADER
 
-$PASS_ALL_FIELDS_IN_HEADER
+   $PASS_ALL_FIELDS_IN_HEADER = 1;
+
 
 .S	ヘッダの並び方
+=E.S	order of header fields
 .xref	@HdrFieldsOrder
 
 @HdrFieldsOrder という配列
+=E
+@HdrFieldsOrder defines the order of header fields.
 
 
 
 .C	関連事項
+=E.S	other topics
 
 .S	ヘッダの値によって弾く
+=E.S	filtering by header
 
 これはヘッダの書き換えではなく、フィルタリングルールを拡張する命令。
-詳しくはフィルタリングの章を参照
+詳しくはフィルタリングの章を参照してください。
+例: subject にいかがわしい文字列があったら弾く
 
-   例: subject にいかがわしい文字列があったら弾く
-	&DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
+   &DEFINE_FIELD_PAT_TO_REJECT('subject', '/FREE|SEX|ADULT|XXX/');
 
 
 .# $Id$

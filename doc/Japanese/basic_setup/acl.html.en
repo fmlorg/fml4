@@ -14,75 +14,62 @@
 <H1>
 
 <CENTER>
-まとめ: ＭＬのメンバーにできること、できないこと
+Summary: What ML members can do and cannot do
 </CENTER>
 
 
-<P> デフォールトのメンバーリスト
+<P> By default
 <TABLE BORDER=4>
 <TR>
-	<TD> ＭＬのメンバーリスト
+	<TD> Who is a member of ML ?
 	<TD>
+		mail addresses contained in files defined in
 		@MEMBER_LIST
-		で定義されたファイル群に含まれる
-		有効なメールアドレス
 		<BR>
-		デフォールトでは members と members-admin
+		members and members-admin by default
 
 <TR>
-	<TD> ＭＬの配送先（受信者）リスト
+	<TD> recipients of articles
 	<TD>
+		mail addresses contained in files defined in
 		@ACTIVE_LIST
-		で定義されたファイル群に含まれる
-		有効なメールアドレス
 		<BR>
-		デフォールトでは actives のみ
+		only actives by default
 
 </TABLE>
 
 
-<P> デフォールトの動作
+<P> By default
 <TABLE BORDER=4>
 <TR>
-	<TD> ＭＬに投稿できる人
+	<TD> who can post to ML
 	<TD>
-		ＭＬのメンバー
+		a ML member
 
 <TR>
-	<TD> ＭＬに投稿できる人
+	<TD> who can use fml commands
 	<TD>
-		ＭＬのメンバー
+		a ML member
 
 </TABLE>
 
 <HR>
 <P> FAQ
 
-<P>Q: リモート管理者はＭＬのメンバーでなくても投稿したい。
+<P>Q: a remote administrator (who is not a member) can post ?
 <BR>
-A: それがデフォールトの動作です。
+A: yes by default. Consider the following case
 
-実は投稿できる人は members と members-admin (リモート管理者のメンバーリスト)
-に含まれている人です。
-つまりリモート管理者はＭＬのメンバーでなくても投稿可能です。
-
-これは
 <UL>
 
 	<LI>
-	リモート管理者は単なる世話人に徹していてＭＬの記事自体は読んでない
+	a remote administrator not a ML member.
+	He/She do not read ML articles.
 
 	<LI>
-	しかし記事をＭＬへフォワードするなどできないと困る
-
-	登録の依頼やエラーメールを受けとるために MAINTAINER と
-	リモート管理者の役割は兼任することが普通です。
-	そこでメンバー以外からの投稿とみなされた記事をＭＬにフォワード
-	する時があります。
-
+	But the remote administrator sometimes
+	need to forward ML articles to ML.
 </UL>
-というケースを想定して members-admin の人もＭＬに投稿可能になっています。
-
 
 
 <PRE>

@@ -1,10 +1,14 @@
 .C	その他の話題
+=E.C	misc
 
 .S	pgp の認証の時には address 登録なんていらないのでは？
+=E.S	members-admin is not needed in pgp authentication ?
 
 たしかに必要ないです。例外処理をいれるよりは念を入れさせる方がいいとお
 もうので残っています。
 正確にはコードを共有している都合でアドレス認証の部分も通ってしまうとい
 うことになります。
+=E
+No, not needed. But exceptional rule is worse than duplicated checks.
 
 .# $Id$

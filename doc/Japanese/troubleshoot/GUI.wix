@@ -3,57 +3,32 @@
 .S	管理者パスワードを忘れました。
 =E.S	when I forget remote administrator passwords
 
-default なら /usr/local/fml/www/authdb/admin/htpasswd というのが
-パスワードファイルです。fml のサーバに入って
-.q
-% htpasswd  /usr/local/fml/www/authdb/admin/htpasswd admin
-New password: 
-~.q
-で、パスワードを再設定してください。ちなみに
-.q
-% htpasswd パスワードファイル ユーザ名
-.~q
-です。どのファイルかは 
-/usr/local/fml/share/cgi-bin/fml/admin/.htaccess を見ると分かります。
-例: .htaccess
-.q
-AuthName ByPassword
-AuthType Basic
-AuthUserFile /usr/local/fml/www/authdb/admin/htpasswd  ←これ
-<Limit GET POST>
-require valid-user
-</Limit>
-.~q
+makefml admin.cgi config
 
-各ＭＬ、例えば elena ML の設定は
+	MENU -> CHANGE PASSWORD
 
-   /usr/local/fml/share/cgi-bin/fml/ml-admin/elena/.htaccess
+.S	elena ML のCGI メニューにはいるパスワードを忘れました。
+=E.S	when I forget remote administrator passwords for elena ML CGI
 
-を見ると分かります(以下同様)。
+makefml ml-admin.cgi elena config
+
+	MENU -> CHANGE PASSWORD
 
 
-.S	newaliases を実行すると permission denied という
+.S	newaliases を実行すると permission denied といわれる
+=E.S	permission denied when newaliases runs
 
-root が
+Sendmail の場合 root プロセスが
+=E
+In sendmail, newaliaes (root process) creates/update these .db files:
 
        /etc/aliaes.db  /var/spool/ml/etc/aliases.db
 
-というファイルを作るために
-
-       /etc/        /var/spool/ml/etc/
-
-それぞれのディレクトリに書き込めるか？ それができなかった という話です。
-
-sendmail という名前で postfix かも:-) ということもあるので
-sendmail.{com,org} の sendmail と仮定しますが
-＃ ということはきにしなくてもOK？ > FreeBSD 4.0
-
-sendmail では最初の一回  
+というファイルを更新します。sendmail を使う場合、最初に一回  
 
        /etc/aliaes.db  /var/spool/ml/etc/aliases.db
 
-を作っておけばあとはどのユーザから newaliases を実行しても作ることがで
-きるはずです。ですが root でやる癖をつけるのはそれはそれでOKです。
+をオーナ root で作っておいてください。
 
 .q
 FYI:
@@ -78,10 +53,15 @@ FYI:
 
 
 .S	apache の permission の問題で動かない？
+=E.S	apache's configuration error?
 
 apache の /usr/local/apache/logs/errors_log ですでにエラーメッセージが
 でている場合、fml の CGI 自体が実行できていません。それは apache の設
 定の問題です。
+=E
+Firstly check /usr/local/apache/logs/errors_log.
+Secondary check "User" line of httpd.conf. 
+It should be the same as user "fml" which owns /var/spool/ml.
 
 まず apache は default では nobody で動いています。fml のインストール
 ガイドは fml というユーザでインストールすることになっています。このま
@@ -110,37 +90,53 @@ apache の /usr/local/apache/logs/errors_log ですでにエラーメッセージが
 /usr/local/www/cgi-bin/fml は /usr/local/fml/share/cgi-bin/fml への 
 symlink ですか？ apache のCGI関係の設定例で symlink はデフォールトでは
 ないです。Options FollowSymLinks 
+=E
+check "Options FollowSymLinks" for the directiry directive.
 
 
 .S	WWWでＭＬを作成したが、aliases のエントリがちゃんとUPDATEされてない？
+=E.S	aliases not updated when I make a ML by CGI ?
+
+=E
+Hmm, it is broken. Check the follwoing possibilities.
 
 注意: 以下はたまたま solaris 2.6 の例
 
 ◯ fml 側の確認
+=E
+* fml specific
 
 1. /var/spool/ml/etc/aliases に作成したＭＬのエントリがあるかどうかを確認する。
+=E
+1. /var/spool/ml/etc/aliases has the ML entry you made. 
 
 2. /var/spool/ml/etc/aliases.db の日付を aliases と比べて下さい。
    aliases を実行しているのなら .db のほうが新しい(か分の精度で同時刻)はずです。
    ソラリスなんかだと Berkeley DB ではなく
-
 	/var/spool/ml/etc/aliases.pag
 	/var/spool/ml/etc/aliases.dir
-
    となっていたかもしれません
+=E
+2. the date of /var/spool/ml/etc/aliases.db is newer than aliases
 
 ◯ OS(というかMTA)の設定
+=E
+* OS specific
 
 1. /etc/mail/sendmail.cf に 
    /usr/local/fml/www/examples/sendmail/senmail.cf というファイルに書いて
    ある設定を追加してあるか確認してください。編集するのは、この一行だけですが
+=E
+1. AliasFile of sendmail.cf
 
 	O AliasFile=/etc/aliases,/var/spool/ml/etc/aliases
 
 2. １を確かめた後 /usr/bin/newaliases を実行してみて下さい。
+=E
+2. run newaliases and it shows two lines ?
 
-	/etc/mail/aliases: 30 aliases, longest 49 bytes, 886 bytes total
-	/var/spool/ml/aliases: 20 aliases, longest 26 bytes, 239 bytes total
+   /etc/mail/aliases: 30 aliases, longest 49 bytes, 886 bytes total
+   /var/spool/ml/etc/aliases: 20 aliases, longest 26 bytes, 239 bytes total
 
 のように２つのファイルの処理をしたという表示がでるはずです。
 ＃この例の数字は適当です
@@ -148,14 +144,16 @@ symlink ですか？ apache のCGI関係の設定例で symlink はデフォールトでは
 .S	Invalid command 'SSLRequireSSL'
 	
 Q: apache のエラーログ /usr/local/apache/logs/error_log をみると 
+=E
+Q: /usr/local/apache/logs/error_log shows the following error. What is it? 
 
-.q
+
 [Thu May 25 18:49:40 2000] [alert] [client xxx.xxx.xxx.xxx] \
                            /usr/local/fml/share/cgi-bin/fml/admin/.htaccess: \
                            Invalid command 'SSLRequireSSL', perhaps mis-spelled \
                            or defined by a module not included in the server \ 
                            configuration
-.~q
+
 
 こういうエラーログが出ますが何でしょう？
 
@@ -163,21 +161,23 @@ A:
 
 1. .htaccess にかくのが SSLRequireSSL という呪文ではなくなった。
    今のところそんな話は聞きませんのでこれはない。＃要 modssl の調査
+=E
+1. check the grammer for .htaccess
 
-2. apache がちゃんと作られていない 
+2. apache がちゃんと作られていない。 SSL いりの apache なら起動時のロ
+   グ( error_log )に
+=E
+2. check whether normail apache or apache + ssl. For example
+   apache + mod_ssl shows the following staring message in error_log:
 
-.q
-error_log の起動時のログで
+	[notice] Apache/1.3.12 (Unix) mod_ssl/2.6.4 OpenSSL/0.9.5a
+	configured -- resuming normal operations
 
-Apache/1.3.12 (Unix) configured -- resuming normal operations
+などと残ります。ふつうの apache は次のようになっています。
+=E
+but normal apache shows
 
-こうではなく
-
-SSL がはいってたらSSLはいってるぜといいます。
-
-例:
-[notice] Apache/1.3.12 (Unix) mod_ssl/2.6.4 OpenSSL/0.9.5a configured -- resuming normal operations
-.~q
+	Apache/1.3.12 (Unix) configured -- resuming normal operations
 
 3. apache startssl していないなど起動手順が違う？
 

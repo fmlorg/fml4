@@ -2,11 +2,14 @@
 .l	ContentHandler
 
 .S	フィルタルールの事例
+=E.S	Filtering Rule Examples
 
 multipart の各ブロックに対し処理を行なうので、良く考えないと
 期待と違う動作をします。
 
 ◯ text/plain と text/html からなるメールの html 部分を落す
+=E
+* delete the html part of text/plain and text/html
 
   &ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip+notice');
 
@@ -19,6 +22,10 @@ multipart の各ブロックに対し処理を行なうので、良く考えないと
 	text/plain + text/html は html 部分を叩き落す
 	text/plain + text/html + それ以外(謎の添付ファイル) は
 	最初の text/plain 以外は落す。
+=E
+* through text/plain
+  delete the html part of text/plain + text/html
+  delete other all
 
   &ADD_CONTENT_HANDLER('multipart/.*', 'text/plain', 'allow');
   &ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip+notice');
@@ -26,7 +33,8 @@ multipart の各ブロックに対し処理を行なうので、良く考えないと
 
 
 
-.S	解説 by original author 
+.S	解説 by the original author 
+=E.S	description by the original author 
 
 Author: t-nakano@marimo.org
 

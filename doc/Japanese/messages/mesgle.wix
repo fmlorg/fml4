@@ -100,3 +100,26 @@ You add "auth.ok" to /var/spool/ml/elena/messages.conf.  The search
 order of keywors is the following way: If you search "auth.ok",
 messages.conf is used.  If you search "auth.fail",
 /usr/local/fml/messages/English/auth is used.
+
+
+.S	容量オーバーのメールを投稿した場合のエラーメッセージを変更する
+=E.S	modify error message for oversize error
+
+/usr/local/fml/messages/Japanese/resource が定義ファイルでその中の
+=E
+copy /usr/local/fml/messages/Japanese/resource somewhere, edit the
+paragraph of  resource.too_big:.
+
+resource.too_big:
+	あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
+
+の定義部分を使って
+
+  あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
+
+という本文のメールが返るはずです。この部分を編集すれば変わります。
+＃そのあとによけいな英語がついてるかもしれませんが…
+
+ただ /usr/local/fml/messages/ はインストール時に上書きされるので
+編集する場合は copy を /var/spool/ml/etc/fml/messages/ にコピーして
+/var/spool/ml/etc/fml/messages/resouce を編集しておくのがよいです。

@@ -1,4 +1,5 @@
 .C	投稿メールのフィルタリング事例
+=E.C	examples
 
 .S	Message-Id: がないものを reject
 =E	reject null Message-Id:
@@ -6,6 +7,7 @@
 	&DEFINE_FIELD_PAT_TO_REJECT('message-id', '^\s*$');
 
 .S	Subject:に特定のパターンがあったら拒否する
+=E.S	reject Subject: with FREE, SEX, ADULT, XXX.
 
 Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 	SPAMとみなして捨てる(でもこれするとFreesoftも捨てちゃうね;-)
@@ -20,6 +22,7 @@ Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 
 
 .S	Subject:に特定のパターン(大文字小文字を問わず)があったら拒否する
+=E.S	reject Subject: with FREE, SEX, ADULT, XXX (case insensitive).
 
 	Adult も ADULT も大文字小文字に関係なく許否。/i というperlで
 	おなじみの形式を使います。/ 以外は使わないで下さい。
@@ -30,6 +33,7 @@ Subject: に FREE SEX ADULT XXX のいづれかの文字列が入っていたら
 
 
 .S	received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否
+=E.S	reject if received: contains spam.co.jp
 
 $DISTRIBUTE_FILTER_HOOK = q#
     if ($e{'h:received:'} =~ /from spam.co.jp/) {
@@ -39,6 +43,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 
 
 .S	本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否
+=E.S	reject if the mail body contains http-equiv=3DContent-Type
 
 $DISTRIBUTE_FILTER_HOOK = q#
     if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
@@ -48,6 +53,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 
 
 .S	From: のドメインが Message-ID に含まれていないなら拒否
+=E.S	reject if the domain of From: conflicts Message-ID:
 
 $DISTRIBUTE_FILTER_HOOK = q#
    local($domain) = (split(/@/, $From_address))[1];
@@ -58,6 +64,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 
 
 .S	前者３つ全部
+=E.S	aggregate the previous 3 rules
 
 例: (not tested ;-)
 ○ received: 行のどこかに spam.co.jp というドメインを見つけたら拒否する。
@@ -89,6 +96,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 
 
 .S	sendmail の PICKY_HELO_CHECK と組み合わせる
+=E.S	rule combined with sendmail PICKY_HELO_CHECK
 
 =E
 Example 2: When you configure PICKY_HELO_CHECK is on in config.h of
@@ -105,29 +113,14 @@ since virtual domain users matches them even if they are not spammers;D
 ちゃうだろう ＃それでも構わないという人は使ってみよう(強引)
 
 
-.S	容量オーバーのメールを投稿した場合のエラーメッセージを変更する
-
-/usr/local/fml/messages/Japanese/resource が定義ファイルでその中の
-
-resource.too_big:
-	あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
-
-の定義部分を使って
-
-  あなたのメールはこのメーリングリストが許すメールのサイズを越えています。
-
-という本文のメールが返るはずです。この部分を編集すれば変わります。
-＃そのあとによけいな英語がついてるかもしれませんが…
-
-ただ /usr/local/fml/messages/ はインストール時に上書きされるので
-編集する場合は copy を /var/spool/ml/etc/fml/messages/ にコピーして
-/var/spool/ml/etc/fml/messages/resouce を編集しておくのがよいです。
-
-
 .S	ヘッダ情報の容量制限の設定ってのはあるんでしょうか？
+=E.S	size limit for the mail header
 
 いまのサイズ制限はヘッダと本文と全部含んだ長さについてです。
 ヘッダの長さだけをチェックするというオプションは今はないです。
+=E
+fml checks the size of the whole mail not distinct each header and
+body.
 
 ヘッダが十分大きくてひっかかる場合はどうせ今のチェックと同じだし、
 ヘッダは普通で本文がでかい場合には、どうせヘッダの大きさは誤差でしょう
@@ -135,6 +128,7 @@ resource.too_big:
 
 
 .S	To: とか Cc: にメーリングリストがないのはSPAMだ！
+=E.S	To: or Cc: should have $MAIL_LIST !
 
 fml-support: 06389
 fml-support: 07286
@@ -143,6 +137,8 @@ SPAM メールを弾くために
 
 To: および Cc: 行に ML のアドレス (大文字/小文字は区別しない) が入って
 なければ，そのメールを拒否する
+=E
+If To: or Cc: have not $MAIL_LIST, it is a spam !
 
 $USE_DISTRIBUTE_FILTER = 1;
 $DISTRIBUTE_FILTER_HOOK = q#
@@ -153,6 +149,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 
 
 .S	EnvelopeFilterは厳し過ぎる。VBscriptだけ弾きたい
+=E.S	hook without using EnvelopeFilter
 
 1. Content-Type: に .vbs .js .jse .exe とあるメール
 2. 元のメールは badarticle というファイルに保存して 
@@ -187,11 +184,14 @@ $START_HOOK .= q#
 
 
 .S	Notes で「Duplicated Message-ID」になるケース
+=E.S	Duplicated Message-ID for mails from Notes
 
 Q: Notesのメールでテンプレートか何かを使うと同じMessage-IDになるのため
   「Duplicated Message-ID」になるケースはどうする？
 
 これは直しようがないです;-) NOTES担当に文句をいいましょう 
+=E
+It is impossible to solve this. Fix your MTA.
 
 
 .S	特定のアドレスを拒否する(e.g. spam mails)

@@ -3,22 +3,33 @@
 .l	how_to_subscribe
 
 まず basic_setup を見て欲しいです。
+=E
+Firstly see basic_setup/ 
+
 .url ../basic_setup/index.html
 
 
 .S	基本は手動登録
+=E.S	hand edit by default
 
-登録して欲しいというリクエストを受けたらメールサーバ上で
+登録して欲しいというリクエストを受けたら、メールサーバ上で
+makefml を使って登録作業をして下さい。詳細は .ptr{manual-subscribe} 節
+=E
+If MAINTAINER received subscribe request, please use makefml to add
+the user. See .ptr{manual-subscribe} section.
 
 % makefml add elena アドレス
+=E
+% makefml add elena ADDRESS
 
-詳細: .ptr{manual-subscribe}
 
 .S	でも自動登録に設定することが多い
+=E.S	But automatic subscribe is usual
 
-リクエストの数が多いと面倒ですからね:) 
-
-自動登録にするには
+リクエストの数が多いと面倒ですからね:) 自動登録にするには
+=E
+To make fml automatic subscribe work, please tour the config menu in
+this way.  See .ptr{auto-subscribe} for more detalis.
 
 makefml config elena 
 
@@ -26,16 +37,17 @@ makefml config elena
 
 を選ぶ。ユーザはメール本文に「subscribe 自分の名前(ローマ字)」と書いて
 elena-ctl@ドメイン というアドレスへ出す。そうすると confirmation が返
-るのでそれに答える。
-
-詳細: .ptr{auto-subscribe}
+るのでそれに答える。詳細は .ptr{auto-subscribe} 節参照。
 
 .S	モデレータ: 誰でも投稿可だが、査読あり
+=E.S	Moderators
 
 誰でも投稿させると問題があるので査読をするという場合。これはモデレータ
-と呼ばれています。
+と呼ばれています。詳細は .ptr{moderators} 節
+=E
+Moderators checks article before the article is distributed.
+See .ptr{moderators} for more details.
 
-詳細: .ptr{moderators}
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
