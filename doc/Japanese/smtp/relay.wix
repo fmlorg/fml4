@@ -3,7 +3,9 @@
 .k	%リレー (obsolete)
 .l	relay
 
-リレーなんか禁止というサイトもあることにちゅういしましょう(昔のはなし)。
+リレーなんか禁止というサイトもあることに注意しましょう。ＭＬの東日本リ
+レーサーバ、西日本リレーサーバなんてことをしていたのは随分昔の話です。
+
 最近では SPAM があるのでリレーは基本的に禁止ですからあまり意味がありま
 せん。もちろんお互いに合意の上でIPアドレスベースでチェックしてリレーを
 するなどは考えられます。
@@ -91,6 +93,7 @@ r=$DEFAULT_RELAY_SERVER.
 
 で定義されたリレーサーバへ投げそのサーバに配送します。
 
+
 .S	activesファイルによるリレー (sendmail 5.x)
 =E.S	Relay Based On Actives File (Sendmail 5.X)
 
@@ -105,7 +108,7 @@ In Sendmail 5.x, you require additional orderings by relay server in
 "actives". 
 
 
-.S	CF (by motonori@wide.ad.jp) 形式による relay 
+.S	CF (by motonori@wide.ad.jp) 形式による relay 設定ファイル
 =E.S	Cf (By motonori@wide.ad.jp) Style Relay Configurations
 .k	relay hack based on CF (by motonori@wide.ad.jp)
 .k	$CF_DEF

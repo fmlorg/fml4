@@ -1,4 +1,5 @@
 .C	Overview
+.l	virtual-domains
 
 virtual domain については fml がどうこうというよりMTAの設定のはなしな
 ので特別何かあるわけじゃありませんが、インストールや upgrade を簡単化
@@ -29,6 +30,7 @@ makefml を使って設定することを考えるとこれする方が簡単です。
 
 
 .S	makefml に設定を読み込ませるやりかた
+.xref	makefml-opt-f
 
 makefml install を実行すると対話モードになるので、各
 

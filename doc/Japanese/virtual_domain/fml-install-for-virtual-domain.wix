@@ -1,22 +1,12 @@
-.S	makefml -f 
+.C	その他の TIPS
+
+.S	makefml 
 
 virtual domain の設定の時には makefml -f の活用を考えると便利です。
 
-ちなみに
-
-   -f systemファイル
-   -i コマンド入力チャンネル
-
-ね:-) 
-
-◯ -i STDIN は CGI なんかが使ってます。
-
-  CGI -> 入力チェック -> open(MAKEFML, "|  makefml -i STDIN  ") ..
-
-◯ -f はこういうかんじ↓です。
+例:
 
   makefml -f /some/where/virtual-domain-1 install
-
   makefml -f /some/where/virtual-domain-2 install
 
 ここの /some/where/virtual-domain-1,2 は /usr/local/fml/.fml/system

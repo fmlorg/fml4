@@ -1,4 +1,12 @@
-.C	PGP 2 (Pretty Good Privacy version 2)
+.C	暗号関係の概要
+
+.S	できること
+
+リモート管理のコマンドを PGP で認証する
+.xref remote-control
+
+投稿メールの暗号化
+
 
 .S	暗号関係の概要
 

@@ -3,13 +3,13 @@
 
 .S	httpd.conf は fml/share/ の下について設定すれば十分か？
 
-そういう設定を書く
+そういう設定を書きます
 
 
 .S	fml/www/ と fml/share/ の違いは？
 
-www 経由でアクセスさせる場所が fml/share/ でライブラリやtemplateを格納
-する場所が fml/www/
+www 経由でアクセスさせる場所が fml/share/
+ライブラリやテンプレートを格納する場所が fml/www/
 
 
 .S	CGI導入以前に作られたものはどう処理する？自動的に有効か？
@@ -31,8 +31,10 @@ CGIをいじれる人は概ねそのサーバに入ってmakefmlでの設定変更を使える人と
 
 .S	CGI操作ユーザの設定追加/変更/削除
 
-1. CGIからおこなう
-2. makefml htpasswd ML ユーザ名
+1.	CGIからおこなう
+
+2.	makefml htpasswd ML ユーザ名
+
 
 .S	CGI操作ユーザのパスワードの変更
 

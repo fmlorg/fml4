@@ -8,3 +8,6 @@
 .# .__repl_include__
 .include overview.wix
 .include MIME.wix
+
+.appendix
+.include howto.wix

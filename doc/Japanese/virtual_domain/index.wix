@@ -5,7 +5,6 @@
 .~HTML_PRE
 .include overview.wix
 .include virtual-domain.wix
-.include fml-install-for-virtual-domain.wix
 
 .appendix
 .include postfix-example.txt

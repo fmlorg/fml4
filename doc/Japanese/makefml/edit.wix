@@ -1,3 +1,5 @@
+.C	makefml HOW-TO
+
 .S	MLを止めて(ロックして) config.phの edit をしたい
 =E.S	Lock ML and edit its config.ph
 .k	vipw.pl
@@ -48,8 +50,5 @@ cf を設定のマスターファイルにする必要があります。ちょうど sendmail.cf
 というコマンドが用意されています。でもこれならMLのHOME以外からの実行も、 
 make がないOSでもOKです。
 
-
-注意: 昔あった maintenance.pl や vipw.pl は削除されましたが、それと同
-じことをする機能です。
 
 .# $Id$

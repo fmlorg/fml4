@@ -1,5 +1,6 @@
 .C	メールでfmlの設定を変更するには？ (REMOTE_ADMINISTRATION)
 .l	remote_control
+.l	remote-control
 
 .S	リモート管理とは？
 

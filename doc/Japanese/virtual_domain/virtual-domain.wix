@@ -1,3 +1,5 @@
+.C	virtual domain
+
 .S	２つの virtual domain で同じＭＬを作る
 
 例:

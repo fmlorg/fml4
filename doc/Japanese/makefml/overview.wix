@@ -12,6 +12,50 @@ makefml は fml を設定するための CUI (Chacacter User Interface) インター
 
 コマンドラインから実行します。
 
+.S	makefml で使えるコマンドは？
+
+makefml help を実行してみて下さい
+.q
+% makefml help
+
+   makefml command arguments         what
+   ---------------------------------------------------------
+
+   makefml info                      show this message
+   makefml install                   Install the fml system
+   makefml newml ML                  make a new Mailing List <ML>
+   makefml destruct ML               destruct Mailing List <ML>
+   makefml add ML addr               add <addr> to <ML>
+   makefml bye ML addr               remove <addr> from <ML>
+   makefml add2members ML addr       add <addr> to only members
+   makefml add2actives ML addr       add <addr> to only actives
+   makefml on  ML addr               on  <addr>
+   makefml off ML addr               off <addr>
+   makefml chaddr ML old new         change address <old> => <new>
+   makefml matome ML addr [opt]      set up digest(matome) for address <addr>
+   makefml digest ML addr [opt]      set up digest(matome) for address <addr>
+   makefml byeadmin ML addr          remove the administrator of <ML>
+   makefml addadmin ML addr          add <addr> as an admin to <ML>
+   makefml test ML                   test 
+   makefml help                      help message
+   makefml passwd ML addr            to change the administrator passwd
+   makefml pgp ML PGP-arguments      e.g. "pgp ML -ka publib_key"
+   makefml fmlserv                   set up fmlserv (listserv-like server)
+   makefml lock ML [time]            lock <ML> for <time> (default 3600) sec.
+   makefml edit-template             edit template file under locked state
+   makefml config-template           configure template cf file
+   makefml create-doc-template ML    create document templates e.g. help, guide, ...
+   makefml update-config.ph ML       make config.ph (cf -> config_ph)
+   makefml htpasswd ML               htpasswd wrapper for ml
+   makefml mladmin.cgi ML            set up ml-admin/$ml/*.cgi
+   makefml log ML [opt]              show log: [-i] [-NUMBER] [all] [-pPATTERN]
+   makefml command ML addr ...       e.g. "command ML <addr> mget last:3 mp"
+   makefml edit ML                   edit <ML>'s file under lock (default config.ph)
+   makefml config ML                 [menu] to configure <ML> fundamental
+   makefml showconfig                show environment, version, ..
+
+.~q
+
 .S	makefml config のメニューを日本語にする？
 
 GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
@@ -31,6 +75,13 @@ GUI はできるだけ日本語になっています。コマンドラインでもGUIの日本語モー
 ~/.cshrc ~/.tcshrc
   setenv MAKEFML_LANG euc
 .~q
+
+.S	GUI はないんでしょうか？
+
+fml-current には CGI があります。MTAとWWWサーバの設定変更を忘れずに
+.xref GUI
+
+CGI のメニューは日本語です。
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

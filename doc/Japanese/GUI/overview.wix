@@ -1,4 +1,5 @@
 .C	Overview
+.l	GUI
 
 .S	GUIとは？
 
@@ -11,6 +12,17 @@ fml のメニュー設定プログラムは２つあります。
 
 です。GUI はCGIのことをさしています。
 
+.S	インストールの方法は？
+
+PLAINTEXT は
+
+	doc/INSTALL_CGI.jp 
+
+というファイルを見て下さい。HTML なら
+
+.url http://www.fml.org/fml/INSTALL_CGI/
+
+を見て下さい。
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
