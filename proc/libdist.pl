@@ -194,16 +194,11 @@ sub DoDistribute
 	      "Try save > $FP_VARLOG_DIR/DUP$CurrentTime\n$e{'Hdr'}\n$e{'Body'}");
     }
 
-    umask($umask)       if $USE_FML_WITH_FMLSERV;
+    umask($umask) if $USE_FML_WITH_FMLSERV;
 
     ##### ML Distribute Phase 04: SMTP
     # IPC. when debug mode or no recipient, no distributing 
-    if ($SPEED_HACK) { 
-	$e{"hack:unlocked_deliver"} = 1;
-    }
-    else {
-	&Deliver;
-    }
+    &Deliver;
 }
 
 
@@ -299,7 +294,6 @@ sub ReadActiveRecipients
 }
 
 
-# IF SPEED_HACK, Mail Delivery is done after the unlocked;
 # Thoreticaly all file IO have been done and needed info are on the memory.
 # So we must be able to do UNLOCK our current process.
 sub Deliver
@@ -343,11 +337,14 @@ sub GenXMLInfo
     if ($X_ML_INFO_MESSAGE) { 
 	$X_ML_INFO_MESSAGE;
     }
-    elsif ($Envelope{'mode:distribute'}) {
-	"If you have a question, please make a contact with $MAINTAINER";
+    elsif (!$CONTROL_ADDRESS && 
+	   ($Envelope{'mode:post=anyone'} || 
+	    $Envelope{'mode:post=members_only'})) {
+	"If you have a question,\n\tplease make a contact with $MAINTAINER";
     }
     else {
-	"If you have a question, send \"\# help\" to the address ".&CtlAddr;
+	"If you have a question, send a mail with the body\n".
+	    "\t\"\# help\" (without quotes) to the address ". &CtlAddr;
     }
 }
 
