@@ -158,5 +158,3 @@ proc/libkern.pl: kern/fml.pl
 
 search:
 	@ env ${EXPORT_ENV} echo now we make namazu on external www server.
-
- 
