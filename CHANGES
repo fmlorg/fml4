@@ -3,6 +3,18 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/01
+
+   proc/libconfirm.pl
+	define %CONFIRMATION_REPLY_WITH_HELP_P to handle whether we
+	should reply help with $CONFIRM_FILE or not See also
+	fml-support: 7723
+
+	confirmationのエラーの時にいつでもヘルプファイルを
+	つけるのは変なので、それを制御するハッシュテーブルを用意した
+	
+   modify how to use of $ENV{'PWD'}
+
 2000/03/31
 
    EnvelopFilter
