@@ -4,7 +4,6 @@
 
 TUTORIAL_LANGUAGE    = Japanese
 
-DOC_TUTORIAL_SUBDIR += .
 DOC_TUTORIAL_SUBDIR += Japanese
 DOC_TUTORIAL_SUBDIR += digest
 DOC_TUTORIAL_SUBDIR += basic
@@ -12,22 +11,15 @@ DOC_TUTORIAL_SUBDIR += daily
 DOC_TUTORIAL_SUBDIR += debug
 DOC_TUTORIAL_SUBDIR += extension
 DOC_TUTORIAL_SUBDIR += filter
-DOC_TUTORIAL_SUBDIR += filter/example
-DOC_TUTORIAL_SUBDIR += filter/example/config
 DOC_TUTORIAL_SUBDIR += header_rewrite
-DOC_TUTORIAL_SUBDIR += header_rewrite/example
-DOC_TUTORIAL_SUBDIR += header_rewrite/example/config
 DOC_TUTORIAL_SUBDIR += install
 DOC_TUTORIAL_SUBDIR += misc
-DOC_TUTORIAL_SUBDIR += obsolete
-DOC_TUTORIAL_SUBDIR += obsolete/app
 DOC_TUTORIAL_SUBDIR += remote_control
 DOC_TUTORIAL_SUBDIR += resource_control
 DOC_TUTORIAL_SUBDIR += smtp
 DOC_TUTORIAL_SUBDIR += troubleshoot
 DOC_TUTORIAL_SUBDIR += howto
 DOC_TUTORIAL_SUBDIR += template
-DOC_TUTORIAL_SUBDIR += tips
 DOC_TUTORIAL_SUBDIR += command
 DOC_TUTORIAL_SUBDIR += examples
 DOC_TUTORIAL_SUBDIR += encryption
