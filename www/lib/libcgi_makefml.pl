@@ -35,7 +35,10 @@ sub Parse
     $PASSWORD_VRFY = $Config{'PASSWORD_VRFY'};
 
     # MTA
-    $MTA = $Config{'MTA'};
+    $MTA    = $Config{'MTA'};
+
+    # misc
+    $OPTION = $Config{'OPTION'};
 
     # fix
     $PTR       =~ s#^\/{1,}#\/#;
@@ -333,6 +336,18 @@ sub SecureP
 }
 
 
+sub Translate2LogOption
+{
+    local($x) = @_;
+
+    if ($x eq 'tail') {
+	if ($Config{'TAIL_SIZE'} =~ /^\d+$/) {
+	    "-$Config{'TAIL_SIZE'}";
+	}
+    }
+}
+
+
 sub Command
 {
     &ShowReferer;
@@ -379,6 +394,9 @@ sub Command
 	    &ERROR("empty password");
 	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
 	}
+    }
+    elsif ($PROC eq 'log') {
+	&Control($ML, $PROC, &Translate2LogOption($OPTION));
     }
     # not "makefml" calls
     elsif ($PROC eq 'mail_server_config') {

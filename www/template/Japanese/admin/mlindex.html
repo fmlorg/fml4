@@ -20,7 +20,7 @@ _ML_ mailing list configuration
 </H2>
 
 <PRE>
-このページはfmlの管理下にある全ＭＬの設定を更新/変更する画面です。
+このページは_ML_の設定やメンバーリストの更新/変更などをする画面です。
 基本的にサーバにはいって makefml コマンドを使える管理者と同じ権限です。
 ＃(makefmlにはあるけどCGIでは用意されていない機能もあります)
 </PRE>
@@ -114,6 +114,25 @@ _____________________________
 		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 </TABLE>
 _____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
+<A NAME=log><P>メーリングリストのログをみる
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=log>
+<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+
+<BR>
+<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>最後のＮ行
+<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=10>
+<BR>
+<INPUT NAME="OPTION" TYPE="radio" VALUE="all">全部
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Go>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
