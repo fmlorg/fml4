@@ -16,7 +16,7 @@ require 'getopts.pl';
 if ($opt_t) {
     print <<'_EOF_';
 \begin{quote}
-\baselineskip=13Q
+\small
 \begin{verbatim}
 _EOF_
 }
