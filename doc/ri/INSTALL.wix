@@ -501,6 +501,46 @@ The configurations you input are saved here.  After this time,
 configurations (e.g. config.ph, include).
 
 
+.C	fml の扱い方の概要について
+
+MLの設定のカスタマイズやユーザの登録/削除などはfml の動いているホスト
+に入り、設定ファイルやメンバーリストを変更することで行ないます。これが
+もっとも安全な方法でしょう。直接手で編集もしくは makefml (使い方は後述)
+という操作するためのフロントエンドもあります。
+
+「メールでfmlにコマンドを送り込み、ユーザの登録/削除などを行なう」こと
+もできます。ドキュメント中では『リモート管理』と呼ばれています。リモー
+ト管理はデフォールトの動作ではありません。明示的にこの動作を許すように
+設定を変更しなければいけません。 => .ptr{REMOTE_ADMINISTRATION}
+
+コマンドを送り込むことのできる人は(各ＭＬごとに設定できる)パスワードを
+知っている必要があります。お紆余として認証をPGPで行なうオプションなど
+も使えます。 => .ptr{configure-remote-administrators}
+
+代表的な設定項目の変更はメニューで選択できます。=> .ptr{makefml-config}
+
+メンバーリストは手で書くか、makefml add/bye などを駆使して登録なりを行
+ないます。=> .ptr{add-user}
+
+メニューないような細かいパラメータの調整などは設定ファイルを編集する必
+要があります。ファイルのフォーマットは => .ptr{config-file}
+
+コマンドの詳細は help ファイルを見て下さい。
+管理者用の コマンドは help-admin です。
+
+doc/op.jp が内部構造、大まかな機能ごとに章だてされた『設計と実装』につ
+いて書いてあるドキュメントです。印刷するとでかくて死にそうなので注意。
+
+カスタマイズ変数一覧は インストール先(/usr/local/fml)/cf/MANIFEST を見
+てください。各変数の意味、実装上の理念、パラメータについての詳細は 
+doc/op の中をサーチしてください。
+
+いづれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
+ワードや変数名でサーチして見て下さい。最新版のドキュメント全体へのサー
+チは http://www.fml.org/fml/serach-j.html でできます。
+
+
+
 .C	ＭＬを作る
 =E.C	Creating A New Mailing List
 
@@ -583,8 +623,9 @@ Created samples are the following files:
 	include-mead 	mead (エラーを解析してエラーを起こすアドレスを削
 			除するプログラム)を使う時(デフォールトは使わない)
 
-	cf		config.ph の元
+	cf		config.ph の元 (See .ptr{config-file})
 	config.ph	メーリングリストの設定ファイル
+			(config.ph については .ptr{config-file})
 
 	guide		ガイド
 	help		ＭＬやコマンドの使い方
@@ -606,7 +647,7 @@ Created samples are the following files:
 	include-mead	not used in default. This is for mead
 			which analyzes error mails to remove obsolete address
 
-	cf		config.ph is generated from this "cf"
+	cf		config.ph is generated from this "cf" (See .ptr{config-file})
 	config.ph	the FML configuration file for each ML
 
 	guide		guide
@@ -767,7 +808,7 @@ fmlserv@your-domain.
 というコマンド形式になります。単に一枚皮が被さっているだけなのでコマン
 ドの動作はシンタックスを除いて、全く同じです。また各ＭＬの config.ph 
 に従って実行されるので、各ＭＬのコマンド用のアドレスに送った時と同じ動
-きをします。
+きをします。(config.ph のかきかたについては .ptr{config-file})
 .fi
 .if LANG == ENGLISH
 The command syntax of "fmlserv" is 
@@ -782,6 +823,7 @@ In fml, "config.ph" for each ML defines each command set for each ML.
 fmlserv can understand each proper commands defined for each mailing
 list since fmlserv can emulate each mailing list in the action.
 fmlserv just offers in another "fmlserv" (listserv) syntax.
+See .ptr{config-file} on config.ph syntaxes.
 .fi
 
 ○ 複数のＭＬオーナーがいる場合への注意
@@ -799,6 +841,7 @@ writable であるような設定が必要なことに注意して下さい。最初に fmlserv
 
 .C	ＭＬへのユーザの登録・削除
 =E.C	To Add And Delete A User In The Mailing List
+.l	add-user
 
 .S	ＭＬへのユーザの登録・削除の場合の注意
 =E.S	Attention When To Add And Delete A User
@@ -864,9 +907,11 @@ e.g.   /usr/local/fml/makefml config elena
 
 適当に答えて設定してみて下さい。makefml の終了時に cf と config.ph が
 新しい設定で再生成されます。ここでは設定の概要について説明します。
+(cf や config.ph については .ptr{config-file})
 =E
 You can configure the "elena" mailing list interactively. You see the
 following recursive menu, so please select one and answer it.
+See .ptr{config-file} for more "config.ph".
 
 .S	TOP メニュー
 =E.S	TOP MENU
@@ -1276,7 +1321,7 @@ REJECT_COMMAND_HANDLER, you can see the following menu
 subject の場合は subscribe aoi@chan.panic のような指定の仕方もできます
 がセキュリティ的に推奨できないので confirm タイプが望ましいです。
 ＃なお subscribe などのキーワードをいじる場合は直接cfを edit してくだ
-＃さい(=> Chapter .ptr{configure})。
+＃さい(=> Chapter .ptr{configure}, .ptr{config-file})。
 
 
 .########### Menu Section ##########
@@ -1817,7 +1862,9 @@ $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 
 .C	リモート管理するユーザの登録について
 =E.C	How to add a user by remote administration
+.l	configure-remote-administrators
 .l	configure
+
 
 .S	リモート管理の権限をもつユーザをＭＬに加える場合
 =E.S	To add the user who can manage the ML server in remote. 
@@ -1856,6 +1903,16 @@ Please input the "password" of "who" (Email address).
 
 .C	設定ファイルの編集について
 =E.C	Configuration File
+.l	config-file
+
+各ＭＬのHOMEディレクトリには cf と config.ph という２つのファイルがあ
+ります。config.ph がそのＭＬの動作を制御するもっとも大事なファイルです。 
+cf というファイルは主にメニュープログラムが処理しやすくするために存在
+します。
+
+一般に初心者はメニューで設定を行い cf や config.ph を直接いじらない。
+慣れてきたら config.ph を直接EDITする人が多いようです。config.ph を直
+接EDITするようになったら cf ファイルは消しても構いません。
 
 .S	設定ファイル(cf と config.ph)についての注意 
 =E.S	On cf and config.ph
@@ -1913,22 +1970,26 @@ config.ph. It always overwrites config.ph.
 =E
 Please see doc/op.en for the details.
 
-○ config.ph の書き方は perl の構文そのものです。
+○ config.ph 
+書き方は perl の構文そのものです。
 =E
+-- config.ph
 config.ph is perl statements.
 
-○ cf は『変数名 値』をスペースかタブで区切って書く UNIX 伝統のスタイ
-ルです。 行の # 以降はコメントです。cf で定義されていないものはデフォー
-ルト値が使われます。つまり cf にはデフォールトと異なる差分だけを保守す
-るのに便利です。
+○ cf ファイル
+『変数名 値』をスペースかタブで区切って書く UNIX 伝統のスタイルです。 
+行の # 以降はコメントです。cf で定義されていないものはデフォールト値が
+使われます。つまり cf にはデフォールトと異なる差分だけを保守するのに便
+利です。
 ＃FMLをインストールした場所/cf/MANIFEST に変数デフォールトの一覧が
 ＃あります。
 =E
+-- cf file
 The format of cf is "variable the value of it", UNIX traditional
 style. The rest of a line after # is a comment. We use the default
 value defined in cf/MANIFEST for an entry not defined in cf. The list
 of user defined variables exists in
-fml-installed-directory/cf/MANIFEST.
+fml-installed-directory/cf/MANIFEST (e.g. /usr/local/fml/cf/MANIFEST).
 
 cf の『変数名 変数の値』行は config.ph の『$変数名 = "変数の値";』行に
 変換されます。つまり『変数名は perl の変数名から $ をとったもの』です。
@@ -1952,11 +2013,14 @@ corresponds to this in config.ph.
 	$PERMIT_POST_FROM              = "members_only";
 	$REJECT_POST_HANDLER           = "reject";
 
-に変換されます。
+に変換されます。cf に現れない変数は config.ph にデフォールト値を持って
+生成されます。config.phに設定される変数一覧は cf/MANIFEST にあります。
+デフォールト及び変数一覧はこのcf/MANIFEST(例:
+/usr/local/fml/cf/MANIFEST) というファイルを読んで下さい。
 
-LOCAL_CONFIG というキーワードから後は生の perl 構文が書けます。ローカ
-ルハックはこの部分に記述しておくと便利。この部分は cf -> config.ph を
-再生成した時に config.ph の最後につけ足されます。
+cf ファイルではLOCAL_CONFIG というキーワードから後は生の perl 構文が書
+けます。ローカルハックはこの部分に記述しておくと便利。この部分は cf ->
+config.ph を再生成した時に config.ph の最後につけ足されます。
 =E
 You can write raw perl statements after "LOCAL_CONFIG". It is appended
 in the config.ph when you re-create "config.ph" from "cf" file. Here
