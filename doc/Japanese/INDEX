@@ -21,6 +21,7 @@ virtual_domain		virtual domain
 command			コマンド、そして拡張について
 resource_control	リソースの制御	
 digest			まとめおくり
+html_convert		記事の HTML への変換
 encryption		暗号化関係
 daily			日々の運用についてのTIPS
 documentation		ドキュメントについて
