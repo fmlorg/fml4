@@ -3310,10 +3310,23 @@ sub HtmlConfigQuery
     print "<HR>\n";
 
     if ($variable && $value) {
-	if ($value eq 'YES') {
-	    &SetValue(*config, $variable, 1);
+	if ($variable eq 'unknown') {
+	    if ($HOOK{$top_level}) {
+		print STDERR "\trun hook ...\n";
+		eval $HOOK{$top_level};
+		&Debug($@) if $@;
+		&Log($@) if $@;
+		print STDERR "\thook is done.\n";
+		sleep 1;
+	    }
+	    else {
+		print "ERROR: invalid request";
+	    }
 	}
 	elsif ($value eq 'YES') {
+	    &SetValue(*config, $variable, 1);
+	}
+	elsif ($value eq 'NO') {
 	    &SetValue(*config, $variable, $NULL);
 	}
 	else {
@@ -3339,9 +3352,9 @@ sub HtmlConfigQuery
 
     print STDERR "
     --- debug ---
-    CONFIG{$top_level} => $v
-    MAP $top_level => $MAP{$top_level};
-    \$query{'type'} => $query{'type'}
+    CONFIG{$top_level} => [$v]
+    MAP $top_level => [$MAP{$top_level}]
+    \$query{'type'} => [$query{'type'}]
     --- debug ---
     " if $debug;
 
@@ -3355,12 +3368,19 @@ sub HtmlConfigQuery
 	    ; # do nothing
 	}
     }
-    elsif ($query{'type'} eq 'y-or-n' ||
-	   $query{"type"} eq "reverse-y-or-n") {
+    elsif ($query{'type'} eq 'y-or-n') {
 	$v   = "VARIABLE=$v";
 	print "\t";
 	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=YES>[YES]</A>";
 	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=NO>[NO]</A>";
+	print "\n";
+	print "<A HREF=${MakefmlCGI}&${v}&PTR=$prev_ptr>[BACK] $prev_ptr</A>\n";
+    }
+    elsif ($query{"type"} eq "reverse-y-or-n") {
+	$v   = "VARIABLE=$v";
+	print "\t";
+	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=NO>[YES]</A>";
+	print "\t<A HREF=${MakefmlCGI}&${v}&PTR=$ptr&VALUE=YES>[NO]</A>";
 	print "\n";
 	print "<A HREF=${MakefmlCGI}&${v}&PTR=$prev_ptr>[BACK] $prev_ptr</A>\n";
     }
