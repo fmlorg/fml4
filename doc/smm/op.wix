@@ -2983,6 +2983,7 @@ which д╚дл
 .include localhack.wix
 .include href.wix
 .include cwhois.wix
+.include fred.wix
 
 
 .# ##########################################################

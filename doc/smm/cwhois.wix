@@ -1,6 +1,19 @@
 .C	Caching Whois (libexec/cwhois.pl)
 
-.S	Whois Server with cache
+.S	Whois Server with Cache
+
+whois server でデータベースを引く時、
+
+	・whois で引きたい相手先が落ちている
+	・落ちていたらローカルキャッシュに recover してほしい
+	・ローカルなキャッシュ及びデータベースも
+	  同様のインターフェイスで引きたい
+
+という要求がありえます。その機能を提供します。
+
+よってローカルなデータを引かない時の whois server は一見単なるフォワー
+ド処理をしているだけのように見えます。
+実際には返ってきた答をキャッシュもしています。
 
 lib/whois では本物の whois server を提供してますが、
 libexec/cwhois.pl は本物の whois とローカルサーチを実行する extended
@@ -8,55 +21,89 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 自動的に ローカルサーチ に切替えることができます。
 
 
-.S	client の whois command の使い方
+.S	/etc/inetd.conf 
+
+例：
+	whois stream tcp nowait fukachan \
+	/usr/local/libexec/cwhois.pl cwhois.pl /var/spool/whois
+
+.S	configuration file (config.ph)
+
+cwhois.pl の引数の directory にある config.ph を見ます。
+上の例だと /var/spool/whois/config.ph になります。
+キャッシュデータは /var/spool/whois/spool の下に番号をつけられてスプー
+ルされます。
+
+
+.S	本来の whois データベースサーバの設定
+
+このフォーワード先、つまり本来聞きたい先の whois server はあらかじめ 
+設定ファイル中に定義しておく必要があります。
+$WHOIS_SERVER を定義して下さい。
+
+例：
+	$WHOIS_SERVER       = 'whois.nic.ad.jp';
+
+
+.S	client 側での whois command の使い方
 
 コマンドラインで
 
-% whois -h whois-server help
+	% whois -h whois-server help
 
-  HELP を見る。フォワード先の help と caching whois 自身の help 
-  両方が表示される
+HELP を見る。相手先の help と caching whois 自身の help 両方が表示される
 
-% whois -h whois-server KEYWORD
+	% whois -h whois-server KEYWORD
 
- whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
- ドし、答をキャッシュする
+whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
+ドし、答をキャッシュする
 
-% whois -h whois-server #KEYWORD
+	% whois -h whois-server #KEYWORD
 
- 'local' で定義されたキャッシュ データベースを検索
+'local' で定義されたキャッシュ データベースを検索
 
-% whois -h whois-server opt#KEYWORD
+	% whois -h whois-server opt#KEYWORD
 
- 'opt' で定義されたキャッシュ データベースを検索
+'opt' で定義されたキャッシュ データベースを検索
+例：
+	whois -h whois-server local#uja
 
-  例：	whois -h whois-relay.uja.or.jp local#uja
 
-
-.S	configuration file による設定
-
+.S	configuration file の設定一覧
 
 設定できる変数は次の通りです。
 
-ローカルサーチに使うプログラムの定義
+○ローカルサーチに使うプログラムの定義
+＃exec するとかではなく file を include して実行します。
 
 	$CACHE_SEARCH_PROG  = "/usr/local/fml/bin/scandb.pl";
 
 
-連想配列
+○キャッシュスプールとデータベース対応させる配列（連想配列）
+
     KEYWORD => スプール（directory）
+
+と
+
     KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
 
+というついになったデータを利用します。
+
+例：
 	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply');
 	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb');
 
-	必要なら（対応する） key1:key2, spool1:spool2 という形で
 
-	   一つのキーワード => 複数の database と spool の対応関係
+必要なら（対応する） spool1:spool2 という形で
 
-	が定義できます。
+	 一つのキーワード <=> 複数の database と spool の対応関係
+例：
+	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply:/var/spool/cache');
+	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb:/var/db/cachedb');
 
-コマンドモードの定義
+が定義できます。
+
+○コマンドモードの定義
 	デフォールトでは proc#keyword 形	
 
 	$CHMODE             = '#';
@@ -64,24 +111,13 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 	$LOCAL_CACHE_SEARCH = "$CHMODE(\\S+)";
 	$LOCAL_COMMAND_MODE = "(\\S+)$CHMODE(\\S+)";
 
-デフォールト whois server
+○デフォールトフォワード先の whois server
 
 	$WHOIS_SERVER       = 'whois.nic.ad.jp';
 
-WHOIS の TCP CONNECTION をあきらめるまでの時間
+○WHOIS の TCP CONNECTION をあきらめるまでの時間
 
 	$TIMEOUT            = 5;#20;
-
-
-.S	複数のキャッシュデータ
-
-
-連想配列
-    KEYWORD => スプール（directory）
-    KEYWORD => そのKEYWORDのスプールのデータに対するデータベースファイル
-
-	%WHOIS_CACHE_SPOOL    = ('apply', '/var/spool/apply');
-	%WHOIS_CACHE_DB       = ('apply', '/var/db/applydb');
 
 
 .S	Cwhois の Search Algorithm
@@ -107,7 +143,7 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
 
 	返り値は %e 内部変数へ返す。
 	＃sendmail の struct ENVELOPE e; に対応するもの
-	＃だが perl 4 用に reference は使わない実装である
+	＃だが perl 4 用に reference は使っていないので注意
 
 	fml 標準実装では $e{'message'}; に答をセット
 	
@@ -116,13 +152,15 @@ WHOIS の TCP CONNECTION をあきらめるまでの時間
 
 .S	データベース・フォーマット
 
-仮定： スプールの中に キッャシュデータ は 数字のファイルで保存されてい
-る。データベースは
+仮定： 
+	スプールの中に キッャシュデータ は 数字のファイルで保存されている。
+	データベースは
 
 	数字：	キーワード（複数可だが一行にかぎる）
 
-のような形のフィールドをもつと仮定しています。
-このデータを事前に作っておく必要があります。
+	のような形のフィールドをもつ
+
+と仮定しています。この形のデータベースを事前に作っておく必要があります。
 
 caching whois server 用の付録として
 
