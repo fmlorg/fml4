@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
-$Rcsid   = 'fml 2.0 Exp #: Wed, 7 Aug 96 02:36:32 JST 1996';
+$Rcsid   = 'fml 2.1 Experimental';
 
 ### Import: fml.pl ###
 
@@ -37,28 +37,27 @@ chdir $DIR || die $!;
 
 &CWhoisInit;
 
-# RETURN HELP FOR "help#" or NULL
-if ($Key =~ /^help${CHMODE}$/oi || (! $Key) ) { 
+# RETURN HELP FOR "help#" or NULL;
+if ($Key =~ /^help${CHMODE}$/oi || (! $Key) ) {
     &Usage;
 }
 # O.K. Here we go!
 else {
-    # RUN-HOOKS START HOOK
-    &eval($CWHOIS_START_HOOK, 'CWHOIS_START_HOOK');
+    # RUN-HOOKS START HOOK;
+    &eval($CWHOIS_START_HOOK, "CWHOIS_START_HOOK");
 
-if ($USE_CWHOIS_FIRST_CACHE &&
-    &CWhoisProbeFirstCache($Key)) {
-    &CWhoisSearch(*e, $WHOIS_SERVER, "fcache${CHMODE}${Key}");
-}
-else {
-    &CWhoisSearch(*e, $WHOIS_SERVER, $Key) unless $FirstCacheHit;
+    if ($USE_CWHOIS_FIRST_CACHE && &CWhoisProbeFirstCache($Key)) {
+	&CWhoisSearch(*e, $WHOIS_SERVER, "fcache${CHMODE}${Key}");
+    }
+    else {
+	&CWhoisSearch(*e, $WHOIS_SERVER, $Key) unless $FirstCacheHit;
 
-    # WHEN whois -h server host, append the help of this server
-    if ($Key =~ /^help$/i) { print ("\#" x 60); print "\n"; &Usage;}
+	# WHEN whois -h server host, append the help of this server
+	if ($Key =~ /^help$/i) { print ("\#" x 60); print "\n"; &Usage;}
 
-    # RUN-HOOKS EXIT HOOK
-    &eval($CWHOIS_EXIT_HOOK, 'CWHOIS_EXIT_HOOK');
-}
+	# RUN-HOOKS EXIT HOOK
+	&eval($CWHOIS_EXIT_HOOK, 'CWHOIS_EXIT_HOOK');
+    }
 }
 
 exit 0;
@@ -67,7 +66,7 @@ exit 0;
 sub CWhoisInit
 {
     # default;
-    $CHMODE = $KEY_SEPARATOR = '#';
+    $CHMODE = '#';
     $Set  = '';
     $Mode = 'help';
     $MATCH_THE_LATEST = 1; # show the latest target
@@ -78,22 +77,17 @@ sub CWhoisInit
     $FIRST_CACHE_EXPIRE  = 3600;
     $FIRST_CACHE_TIMEOUT = 5;
 
-    # we ask only in English!
-    $CWHOIS_JCODE_P = $CWHOIS_JCODE_P || 0;
-
-    $CF = "$DIR/config.ph";
-
-    if (-f $CF) {
-	require $CF;
+    if (-f "$DIR/config.ph") {
+	require "$DIR/config.ph";
     }
     else {
-	die "Please define \CF (configuration file)\n";
+	die "Please define \DIR/config.ph (configuration file)\n";
     }
 
     &GetKey;
 
     # including libraries
-    require '__fml.pl';		# only subroutines from fml.pl
+    require 'libkern.pl';		# only subroutines from fml.pl
     require 'libsmtp.pl';
     require 'libwhois.pl';
 
@@ -112,9 +106,6 @@ sub GetKey
 {
     local($pat, $key);
 
-    # default 
-    $Set  = $DEFAULT_SET  || $Set;
-
     # via /usr/sbin/inetd
     # Generate the key 
     $Key = <STDIN>; 
@@ -132,24 +123,6 @@ sub GetKey
     $Key =~ s/^\s*(.*)\s*$/$1/;
 }
 
-
-sub SetSelect
-{
-    local($s) = @_;
-
-    if ($s =~ /^debug$/i) { $debug++; undef $s;}
-    if ($s =~ /^history$/i) { undef $MATCH_THE_LATEST; undef $s;}
-    if ($s =~ /^(rev|reverse)$/i) { 
-	$REVERSE_ORDER++;
-	undef $s;
-    }
-    if ($s =~ /^(normal|historical)$/i) { 
-	$HISTORICAL_ORDER++; 
-	undef $s;
-    }
-
-    $s;
-}
 
 # Caching (spooling) function
 # Derived From fml.pl::Distribute()" Distribute mail to members"
@@ -211,6 +184,8 @@ sub CWhoisSearch
     local($r, @r, %r, $pat, $all, %db, %spool, $proc, $key);
     local(*e, $host, $pat) = @_;
 
+    if ($pat =~ /^tcp${CHMODE}(\S+)/) { $pat = $1;}
+
     # first cache
     if ($pat =~ /^fcache${CHMODE}(\S+)$/) { 
 	&CWhoisFirstCacheSearch($1);
@@ -240,11 +215,13 @@ sub CWhoisSearch
 	$e{'Body'} =~ s/\($ML_FN\)//g;
 	print "$e{'Body'}\n";
 
+	&eval($CWHOIS_TCP_EXIT_HOOK, "CWHOIS_TCP_EXIT_HOOK:");
+	
 	&CWhoisCacheOn(*e); # both first and second cache on;
     }
 
     # special information for the first cache
-    if ($proc ne 'local') { $TCP_CONNECTION_OK = 1;}
+    if ($proc ne 'local') { $TcpConnectionOK = 1;}
 }
 
 
@@ -258,7 +235,7 @@ sub CWhoisCacheSearch
     local($set, $k);
     local(*key, *proc, *db, *spool) = @_;
     
-    # Define ($Set == Database-name) (subset in all the set)
+    # Define ($set == Database-name) (subset in all the set)
     # %KeySetClass
     # AddressSet -> /\d+\.\d+.../ 
     # domain and host differs but "last" call ends it
@@ -282,8 +259,8 @@ sub CWhoisCacheSearch
 	/^debug/i         && ($debug++, next);
 	/^history/i       && (undef $MATCH_THE_LATEST, next);
 	/^all/i           && (undef $MATCH_THE_LATEST, next);
-	/^(rev|reverse)/i && ($REVERSE_ORDER++, next);
-	/^(normal|historical)/i && ($HISTORICAL_ORDER++, next);
+	/^(rev|reverse)/i && ($CWhoisOpt{'order:reverse'} = 1, next);
+	/^(normal|historical)/i && ($CWhoisOpt{'order:historical'} = 1, next);
     }
 
 
@@ -293,12 +270,14 @@ sub CWhoisCacheSearch
     # UJA.ORG    -> domain class 
     # ip#UJA.ORG -> all the ip data search (explicitly defined case)
     # 
-
     $set = $set || $keyclass || $CWHOIS_DEFAULT_SET || 'local';
 
     print "CacheSearch key=$key set=$set\n" if $debug;
 
     &Log("CacheSearch key=$key set=$set");
+
+    eval($CWHOIS_CACHE_SEARCH_HOOK) if $CWHOIS_CACHE_SEARCH_HOOK;
+    &Log($@) if $@;
 
     ### SHOULD BE PREPARED INDEPENDENTLY FROM THE WHOIS SERVER
     if ($CWHOIS_SEARCH_PROG) { 
@@ -313,57 +292,59 @@ sub CWhoisCacheSearch
     print $@ if $@; # whois reply including logs > STDOUT
 }
 
-sub Usage { -f $HELP_FILE ? &Cat($HELP_FILE) : &CWhoisUsage;}
+sub Usage { -f $CWHOIS_HELP_FILE ? &Cat($CWHOIS_HELP_FILE) : &CWhoisUsage;}
 
 sub CWhoisUsage
 {
     local($rcsid) = $Rcsid;
     $rcsid =~ s/fml/Caching whois server \#fml/;
 
-    local(@db) = keys %WHOIS_CACHE_DB;
+    local(@db) = keys %CWHOIS_CACHE_DB;
 
     $s = qq!;
     Caching Whois Server HELP (FOR YOUR HELP);
     ;
-    % whois -h WHOIS-SERVER key;
+    % whois -h $FQDN key;
     ;
     e.g.;
-    whois -h WHOIS-SERVER key;
-    whois -h WHOIS-SERVER opt1#opt2#key;
+    whois -h $FQDN key;
+    whois -h $FQDN opt1#opt2#key;
     ;
-    Default:; query to $WHOIS_SERVER with a key
-	if the request fails, search key in the local cache;
+    Default:; query to $WHOIS_SERVER with the "key"
+	if the request fails, search "key" in the local cache;
+    ;
+    [available commands]
     ;
     help    help from whois.nic.ad.jp;
     help#   help from this server;
     ;
-    key       keyword;
-    local#key local search;
-    #key      local search;
+    key       "key" is a keyword you would like to ask;
+    local#key local search for the "key";
+    #key      local search for the "key";
     opt#key   local search with "opt";
     ;
-    e.g. whois -h WHOIS-SERVER opt1#opt2#key
+    available opt are as follows:;
+    [available specifc ML Databases];
+    @db
     ;
-    [available options];
+    [other "opt"];
     ;
-    local        local search mode (NOT FROM whois.nic.ad.jp);
-    debug        debug mode;
+    all          show all the cached data for the "key";
+    local        local search mode (NOT FROM $WHOIS_SERVER);
+    debug        debug mode on;
     rev          in the reverse histrical order;
     reverse      in the reverse histrical order;
     normal       in the histrical order;
     historical   in the histrical order;
     ;
-    [available specifc ML Databases];
-    @db
     ;
-    ;
-    $rcsid;
+    $Rcsid;
     Copyright (C) 1993-1996 fukachan\@phys.titech.ac.jp;
     Copyright (C) 1996      fukachan\@sapporo.iij.ad.jp;
     fml is free software distributed under the terms of the GNU General;
     Public License. see the file COPYING for more details.;
-
-    If you find a bug, please send it to fml-bugs\@phys.titech.ac.jp;
+    ;
+    If you find a bug, please send it to fml-bugs\@axion.phys.titech.ac.jp;
 !;
 
     $s =~ s/;//g;
@@ -397,6 +378,8 @@ sub CWhoisProbeFirstCache
     local($now)       = time - $FIRST_CACHE_EXPIRE;
     local($cache_hit) = 0;
     local($ok);
+
+    return 0 if $k =~ /^tcp${CHMODE}/; # tcp#keyword is an exception;
 
     open(DB, $FIRST_CACHE_DB) || return;
     while (<DB>) {
@@ -469,7 +452,6 @@ sub Funlock {
 
     close(LOCK);
     flock(LOCK, $LOCK_UN);
-    undef $SIGARLM;
 }
 
 1;
