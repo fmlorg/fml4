@@ -399,6 +399,9 @@ sub SetDefaults
 	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
 	 'Content-ID', 'Content-Description', # RFC2045
 	 'Precedence', 'Lines');
+    
+    # Content Filtering Handler for MIME
+    @MailContentHandler = ();	# Default: No filter
 }
 
 sub GetTime
@@ -541,6 +544,20 @@ sub InitConfig
     # signal handling
     $SIG{'ALRM'} = 'Tick';
     $SIG{'INT'}  = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
+    
+    # MIME Content Handler(include backword compatible)
+    if ($AGAINST_HTML_MAIL ||
+	$HTML_MAIL_DEFAULT_HANDLER eq 'strip') {
+	&ADD_CONTENT_HANDLER('multipart/*', 'text/plain', 'allow');
+	&ADD_CONTENT_HANDLER('multipart/*', '*/*',        'strip');
+	&ADD_CONTENT_HANDLER('text/plain',  '*/*',        'allow');
+	&ADD_CONTENT_HANDLER('!MIME',       '*/*',        'allow');
+    } elsif ($HTML_MAIL_DEFAULT_HANDLER eq 'reject') {
+	&ADD_CONTENT_HANDLER('multipart/*', 'text/plain', 'allow');
+	&ADD_CONTENT_HANDLER('multipart/*', '*/*',        'reject');
+	&ADD_CONTENT_HANDLER('text/plain',  '*/*',        'allow');
+	&ADD_CONTENT_HANDLER('!MIME',       '*/*',        'allow');
+    }
 }
 
 # one pass to cut out the header and the body
@@ -2774,6 +2791,48 @@ sub MOVE_FIELD
     &COPY_FIELD(@_);
     &DELETE_FIELD($_[0]);
 }
+
+# add Content Handler
+sub ADD_CONTENT_HANDLER
+{
+    local($bodytype, $parttype, $action) = @_;
+    local($type, $subtype, $xtype, $xsubtype);
+   
+    if ($bodytype eq '!MIME') {
+	$type = '!MIME';
+	$subtype = '*';
+    } else {
+	($type, $subtype) = split(/\//, $bodytype, 2);
+    }
+    ($xtype, $xsubtype) = split(/\//, $parttype, 2);
+    push (@MailContentHandler,
+	  join("\t", $type, $subtype, $xtype, $xsubtype, $action));
+}
+
+# Get Next MIME Multipart Block
+sub GetNextMultipartBlock
+{
+    local(*e, $ptr) = @_;
+    local($pTop, $pEndHeader, $pBottom, $xbuf);
+    
+    if ($e{'MIME:boundary'}) {
+	$pTop  = index($e{'Body'}, $e{'MIME:boundary'}, $ptr);
+	$pEndHeader  = index($e{'Body'}, "\n\n", $pTop);
+	$pBottom  = index($e{'Body'}, $e{'MIME:boundary'}, $pEndHeader);
+
+	if ($pEndHeader > 0 && $pBottom > 0) { 
+	    $xhdr = substr($e{'Body'}, $pTop, $pEndHeader - $pTop);
+	    $xbuf = substr($e{'Body'}, $pEndHeader, $pBottom - $pEndHeader);
+	    ($xhdr, $xbuf, $pBottom)
+	} else {
+	    $NULL;
+	}
+    } else {
+	&Log("GetNextMultipartBlock: no MIME boundary definition");
+	$NULL;
+    }
+}
+
 
 ####### Section: TRAP
 ### Hmm, I call this section locore but .. :-)

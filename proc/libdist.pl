@@ -20,15 +20,15 @@ sub DoDistribute
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
     @Rcpt = (); $Rcpt = 0;
 
-    # cut off the html mail's second (and after ) multipart parts
-    # e.g. mails from outlook
-    # The existence of $AGAINST_HTML_MAIL is backward compatible.
-    if ($AGAINST_HTML_MAIL ||
-	$HTML_MAIL_DEFAULT_HANDLER) { 
+    # Cutoff or reject by mail's Content-Type filter
+    # The existence of $AGAINST_HTML_MAIL and $HTML_MAIL_DEFUALT_HANDLER
+    # are backward compatible.
+    if (@MailContentHandler > 0) {
 	&use('disthack'); 
-	local($status) = &AgainstHtmlMail(*e);
+    	local($status) = &ContentHandler(*e);
 	if ($status eq 'reject') { return $NULL;}
     }
+
 
     # PGP Encryption
     if ($USE_ENCRYPTED_DISTRIBUTION) {

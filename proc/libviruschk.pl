@@ -61,32 +61,4 @@ sub VirusCheck
 }
 
 
-sub GetNextMultipartBlock
-{
-    local(*e, $ptr) = @_;
-    local($pb0, $pb1, $pb, $pe, $xbuf);
-    
-    if ($e{'MIME:boundary'}) {
-	$pb  = index($e{'Body'}, $e{'MIME:boundary'}, $ptr);
-	$pb0 = $pb;
-	$pb  = index($e{'Body'}, "\n\n", $pb);
-	$pb1 = $pb;
-	$pe  = index($e{'Body'}, $e{'MIME:boundary'}, $pb);
-
-	if ($pb > 0 && $pe > 0) { 
-	    $xhdr = substr($e{'Body'}, $pb0, $pb1 - $pb0);
-	    $xbuf = substr($e{'Body'}, $pb, $pe - $pb);
-	    ($xhdr, $xbuf, $pe)
-	}
-	else {
-	    $NULL;
-	}
-    }
-    else {
-	&Log("GetNextMultipartBlock: no MIME boundary definition");
-	$NULL;
-    }
-}
-
-
 1;
