@@ -1647,11 +1647,11 @@ sub GetCF
     # without LOCAL_CONFIG;
     open(CF, $cf) || die ("cannot open cf[$cf]");
     while (<CF>) {
-	next if /^\#/;
 	next if /^\s*$/;
 	chop;
 
 	if (1 .. /LOCAL_CONFIG/) {
+	    next if /^\#/; # required here,not required in the next section;
 	    next if /^LOCAL_CONFIG/;
 	    ($key, $value) = split(/\s+/, $_, 2);
 	    $config{$key} = $value;
@@ -1939,11 +1939,11 @@ sub SetPublicUmask
 
 sub GetGID
 {
-    open(GROUP, "/etc/group") || (&Warn("cannot open /etc/group"), return '');
-    while (<GROUP>) { /^$_[0]/ && (return (split(/:/, $_))[2]);}
-    close(GROUP);
+    local($gid);
 
-    "";
+    $gid = (getgrnam($_[0]))[2];
+    print STDERR "Error: No such group $_[0]\n" if $gid eq '';
+    $gid;
 }
 
 sub MakeWritableDir
