@@ -384,6 +384,7 @@ sub SyncHtml'DecodeMimeStrings { &main'DecodeMimeStrings(@_);}
 sub SyncHtml'Log               { &main'Log(@_);}
 sub SyncHtml'Debug             { &main'Debug(@_);}
 sub SyncHtml'Append2           { &main'Append2(@_);}
+sub SyncHtml'ProgExecuteP      { &main'ProgExecuteP(@_);}
 
 ### DECLARE DIFFERENT NAME SPACE ###
 package SyncHtml;
@@ -395,7 +396,8 @@ package SyncHtml;
 # $HTML_INDEX_TITLE = "THE TITLE of index.html";
 #
 
-@Import = ("debug", From_address, Now, HtmlDataCache, HtmlThreadCache,
+@Import = ("debug", "debug_html", "debug_expire",
+           From_address, Now, HtmlDataCache, HtmlThreadCache,
            COMPAT_ARCH,
            HTML_EXPIRE, HTML_EXPIRE_LIMIT, ID, ML_FN, USE_MIME, USE_LIBMIME, 
            XMLCOUNT,
@@ -532,7 +534,8 @@ sub Write
 	    if ($s = $FieldHash{$_}) {
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 		&ConvSpecialChars(*s);
-		print OUT "<SPAN CLASS=$_>$_</SPAN>: <SPAN CLASS=$_-value>$s</SPAN>\n";
+		print OUT "<SPAN CLASS=$_>$_</SPAN>: ";
+		print OUT "<SPAN CLASS=$_-value>$s</SPAN>\n";
 	    }
 	}
     }
@@ -608,6 +611,8 @@ sub ConvSpecialChars
 
     ### special character convertion
     &jcode'convert(*s, 'euc'); #';
+    $s =~ s/\r\n/\n/g; # too obstinate ;-) to cut off \r ?
+    $s =~ s/\r//g;     # too obstinate ;-) to cut off \r ?
     $s =~ s/&/&amp;/g;
     $s =~ s/</&lt;/g;
     $s =~ s/>/&gt;/g;
@@ -1218,7 +1223,7 @@ sub ReConfigureEachFieldIndex
     print OUT $INDEX_HTML_FORMAT_TRAILER;
     close(OUT);
 
-    &Log("reconfig $dir/index.html");
+    &Log("reconfig $dir/index.html") if $debug_html;
 }
 
 
@@ -1320,7 +1325,7 @@ sub DoMakeIndex
     print OUT $INDEX_HTML_FORMAT_TRAILER;
     close(OUT);
 
-    &Log("reconfig $dir/$index.html [reverse order]");
+    &Log("reconfig $dir/$index.html [reverse order]") if $debug_html;
 
     undef @cache;
 }
@@ -1385,6 +1390,17 @@ sub GenThread
     }
     close(CACHE);
 
+    ### XXX
+    if ($HTML_INDENT_STYLE eq 'UL') {
+	require 'libhtmlsubr.pl';
+	&AggregateLinks(*next);
+	&OutPutAggrThread(*list, *next);
+	return 1;
+    }
+    ### XXX
+
+
+    ### the original threading
     # next $x -> (only-next);
     # replace %next;
     for ($i = $first; $i <= $last; $i++) {
@@ -1467,6 +1483,11 @@ sub ConsiderQueueExpiration
 
     # remove non-contents threads
     $buf =~ s/\(\s*\)//g;
+
+    # (a b (c)) => (a (b) (c)) => (a (b c)) => ( a (b (c))) 
+    # while ($buf =~ s/(\d+)\s+(\d+)/$1 ( $2 )/) { 1;}
+    # $buf =~ s/\)\s+\(//g;
+    # while ($buf =~ s/(\d+)\s+(\d+)/$1 ( $2 )/) { 1;}
 
     # check the close of parentheses
     # ( a b (c d) )
