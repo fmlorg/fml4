@@ -798,6 +798,9 @@ USE_OUTGOING_ADDRESS:
 # value: string
 OUTGOING_ADDRESS:
 
+# VERPs: Variable Envelope Return Paths. See qmail documents for more details.
+USE_VERP:
+
 
 #####################################################################
 # ### Section: MISC ###
