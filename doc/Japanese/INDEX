@@ -18,6 +18,7 @@
 
 .part Basic Configuration
 basic_setup		基礎的なこと
+Glossary		用語集
 how_to_subscribe	メンバー登録について
 makefml			makefml (CUI) interface for fml
 GUI			GUI インタフェイス
