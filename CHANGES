@@ -1,87 +1,9 @@
 ---------------------------------------------------------------------------
 [FOR YOUR INFORMATION]
 
-	 MEMO AROUND RECENTLY UPDATED or FIXED;
+	fml-4.0.1 CHANGES
 
-2001/03/09
-
-    コマンドの返事をする時に、
-    もし $LANGUAGE eq 'Japanese' ならいつも
-
-	Mime-Version: 1.0
-	Content-Type: text/plain; charset=iso-2022-jp
-
-	＃ちょっとうそっぽい…      
-
-2001/03/07
-
-  define $SMTP_LOG_ROTATE_EXPIRE_LIMIT 
-	90 days by default
-
-	$SMTP_LOG_ROTATE_TYPE が day の時に、この
-	$SMTP_LOG_ROTATE_EXPIRE_LIMIT を指定すると
-	古い _smtplog.日付 ファイルを消す。
-	デフォルトは 90 日以上古いファイル。
-
-2001/03/04
-
-  lowerize the domain part of mail addresses in database access methods 
-
-2001/02/26
-
-  apply patch (fml-support: 09289) to the PostgreSQL toymodel 
-	thanks shigetoshi hirano <s_hirano@eva.hi-ho.ne.jp>
-
-2001/02/18
-
-   fix perl search path algorithm
-	thanks Yu Ooasa <you@dearest.net> (fml-support: 09276, 09277)
-
-   fix NT 4.0
-	link($SMTP_LOG, $org_smtp_log) only on unix
-	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09271)
-
-   fix NT installer bugs
-	install also ("databases", "messages", "drafts", "module")
-	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09235)
-
-2001/02/07,08
-
-   update documents
-
-2001/02/06
-
-   fml/libexec/fmlserv.pl 
-	s/RunHooks/RunExitHooks/ to fix missing renamed function definition
-	thanks KAWADE Koji <kawade@rd.casio.co.jp> (fml-support: 09238)
-
-2001/02/03
-
-  fmlserv
-	oops, RunHooks() is not used now.
-	fix it to use RunexitHooks().
-
-2001/02/01
-
-  ドキュメント修正
-	オライリー本への補足、誤植等について…
-	welcome ファイルを送り返さない方法
-	DEFINE_MODE(disablenotify) について補足
-
-   makefml
-	fix _PERL_PATH handling
-
-	env _PERL_PATH= makefml ...
-	の指定をする時も perl をさがしてしまうバグをなおす
-
-2001/01/22
-
-   4.0-stable series start
-
-   apply patch to html converter (fml-support:09166) 
-	not to ignore forwarded messages
-
-	KUBO Hiroya <hiroya@netcom.mag.keio.ac.jp>
+Snee CHANGES-4.0.1 for change details.
 
 2001/01/15
    4.0 release
