@@ -60,37 +60,57 @@ sub GetUrl
     $headnew  = ".head-${outfile}-new";
 
     $oldcache = "${outfile}.old";
+    $newcache = "${outfile}.new";
 
     # clean up
-    for ($oldcache, $headnew) { unlink $_ if -f $_;}
+    for ($oldcache, $newcache, $headnew) { 
+	unlink $_ if -f $_;
+    }
 
     # probe by HEAD
-    &ProbeUrl($headnew);
+    $tmpf = &ProbeUrl($headnew);
 
-    # HEAD probe retrieved failed?
+
+    # connect failed
+    if (-z $headnew) {
+	&Log("Cannot connect (HEAD probe) $req, exit");
+	return 0;
+    }
+
+    # not found error?
     if (&Grep('404.*[nN]ot [fF]ound', $headnew)) {
 	&Log("Cannot connect (HEAD probe) $req, exit");
-	$force_created = 1;
+	$force_updated = 1 if -f $outfile;
+	$force_created = 1 if !-f $outfile;
     }
 
     # for the first time;
     if ($force_created || !-f $outfile || !-f $head) {
 	&Log(sprintf("%-15s %s", "created:", $req));
+
 	$tmpf     = &DoGetUrl($req, $outfile);
+
 	&OutPutFile($tmpf, $outfile);
 	&OutPutFile($headnew, $head);
+
+	link($outfile, $newcache);
     }
     # IF updated
-    elsif (&UpDatedP($head, $headnew)) {
+    elsif ($force_updated || &UpDatedP($head, $headnew)) {
 	&Log(sprintf("%-15s %s", "updated:", $req));
 	rename($outfile, $oldcache);
+
 	$tmpf     = &DoGetUrl($req, $outfile);
+
 	&OutPutFile($tmpf, $outfile);
 	&OutPutFile($headnew, $head);
     }
     else {
 	&Log(sprintf("%-15s %s", "not updated:", $req));
     }
+
+    # unlink temporarily
+    unlink $tmpf;
 }
 
 
@@ -143,6 +163,7 @@ sub Init
 sub ProbeUrl
 {
     local($out) = @_;
+    local($tmpf);
 
     $e{"special:probehttp"} = 1;
     $e{'special:geturl'} = 1; # Retrieve
@@ -150,10 +171,19 @@ sub ProbeUrl
     &HRef($req, *e);
 
     $tmpf = $e{'special:geturl'};
+
     undef $e{'special:geturl'};
     undef $e{"special:probehttp"};
 
-    &OutPutFile($tmpf, $out);
+    if (-f $tmpf && -s $tmpf) {
+	&OutPutFile($tmpf, $out);
+	unlink $tmpf;
+    }
+    else {
+	&Log("Not Found: $tmpf");
+    }
+
+    $tmpf;
 }
 
 
@@ -176,12 +206,15 @@ sub DoGetUrl
 sub OutPutFile
 {
     local($in, $out) = @_;
+    local($p, $f, $l) = caller;
+
+    print STDERR "Open $out < $in\n" if $debug;
 
     ### $tmpf -> $out
-    open(IN, $in) || die("< $in: $!\n");
+    open(IN, $in) || die("$!: input($in) [$f $l]\n");
 
     if (! $UseStdout) {
-	open(STDOUT, "> $out") || die("> $out: $!\n");
+	open(STDOUT, "> $out") || die("$!: output($out) [$f $l]\n");
     }
     else {
 	&Debug("> STDOUT") if $debug;
@@ -195,8 +228,6 @@ sub OutPutFile
     close(IN);
 
     &Debug("$in -> ".($out || 'STDOUT')) if $debug;
-
-    unlink $tmpf;
 }
 
 
