@@ -176,11 +176,26 @@ ADMIN_HELP_FILE:	$DIR/help-admin
 # password file to authenticate members
 PASSWD_FILE: 		$DIR/etc/passwd
 
-# "admin log" is "tail -100 log"
+# "admin log" is "tail -100 log" in default
 ADMIN_LOG_DEFAULT_LINE_LIMIT:	100
 
 # PGP PATH
 PGP_PATH:		$DIR/etc/pgp
+
+
+#####################################################################
+# ### Section: Moderations; moderators check posted articles ###
+
+# If you select "moderator", you can select forwarding type to 1 or 2.
+MODERATOR_FORWARD_TYPE:	2
+
+# This is a list to send posted articles for the certification.
+# If this file does not exist, moderator == $MAINTAINER.
+#
+# Moderators who certificate articles posted to this mailing list
+# They receive articles posted here. We do not check moderators's
+# addresses. We check only "moderators knows passwords or identifiers". 
+MODERATOR_MEMBER_LIST:	$DIR/moderators
 
 
 #####################################################################
@@ -342,7 +357,7 @@ MGET_TEXT_MODE_DEFAULT:
 # The reply for "mget" commands sends long reply mails as splitten mails
 # by the unit $MAIL_LENGTH_LIMIT lines once at $SLEEPTIME secs..
 MAIL_LENGTH_LIMIT:	1000
-SLEEPTIME:		300
+SLEEPTIME:		60
 
 # See doc/op and libfop.pl for the detail. You change MIME/Multipart default.
 MIME_VERSION:
