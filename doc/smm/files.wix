@@ -32,6 +32,7 @@
    liblock.pl		UNIX V7 タイプの lock()
    liblop.pl		summary ファイル等のログファイルへの operation
    libmakefml.pl	not used (backward)
+   libmd5.pl		MD5 (perl 5 only)
    libmladdr.pl		コマンドラインによる簡易設定ルーチン
    libmodedef.pl	簡易 MODE 設定ルーチン
    libmoderated.pl	moderated mode
