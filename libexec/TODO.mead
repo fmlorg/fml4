@@ -1,0 +1,57 @@
+◯ /var/spool/ml/mead を作業場所として確保する。
+   全ＭＬをひとつの mead にあつめて処理する場合はここを使う
+
+	% su fml
+	% makefml mead
+	% su root
+	# cat /var/spool/ml/mead/aliases >> /etc/aliases
+	# newaliases
+
+   ＊ /var/spool/ml/mead/aliases はこんなかんじ
+
+	mead: :include:/var/spool/ml/mead/include-mead
+	owner-mead: fml
+
+
+   ＊ 各ＭＬは
+
+	elena-admin: fml, mead
+
+	などと変更してもらう
+
+
+
+◯ /var/spool/ml/mead/log.mead にログをのこす
+
+ ＊ /var/spool/ml/mead/error_addr.hints に
+	エラーぽいアドレスのヒントをのこす
+
+	とりあえず smtpfeed -1 -f 用だけど
+	なかなかエラーにならないけどえらーぽいものを示唆してもいいかも？
+
+
+◯ 設定ファイルを以下の順で読み込む
+   a. コマンドラインが真中に来るのは互換性のため
+
+	/var/spool/ml/mead/mead_init.ph を評価する
+	mead のコマンドラインオプションを評価する
+	/var/spool/ml/mead/mead_forece.ph を評価する
+
+	よってこれらの mead_*ph ファイルを作成しなければ
+	今まで通り
+
+   b. ファイル名は既存の設定とぶつからないようにするため
+	elena ＭＬの mead の作業場所は 
+	/var/spool/ml/elena にうめこまれている。
+	そのため以下のように動くことになる。
+
+	elena ＭＬ用の mead は次の用意なるため
+
+	   ログは /var/spool/ml/elena/log.mead 
+
+	   読み込みは
+		/var/spool/ml/elena/mead_init.ph を評価する
+		mead のコマンドラインオプションを評価する
+		/var/spool/ml/elena/mead_force.ph を評価する
+
+	   という順序になる。

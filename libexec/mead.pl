@@ -348,8 +348,9 @@ sub PickUpHint
    my ($pickup_addr);
    
    $pickup_addr = &ExtractAddr($addr, 'pickup');
-   &Touch($HINT);
-   &Append($pickup_addr, $HINT) if -f $HINT;
+   &Touch($ERROR_ADDR_HINT_FILE);
+   &Append($pickup_addr, $ERROR_ADDR_HINT_FILE) if -f $ERROR_ADDR_HINT_FILE;
+   &Log("erroraddr.hint: <$pickup_addr>");
 }
 
 
@@ -488,6 +489,7 @@ sub AddrCache
 
     $k = sprintf("%s %s\t%s\t", $time, $addr, $_);
 
+    &Log("cache: <$addr> reason=$reason");
     &Debug("AddrCache => $AddrCache{$k}, \"r=$reason\"") if $debug;
 
     if ($reason) {
@@ -511,13 +513,14 @@ sub AddrCache
 
 sub CacheOut
 {
-    local($s);
+    my ($a, $s);
     &Debug("--- CacheOut") if $debug;
 
-    for (keys %AddrCache) {
-	$s = $_.$AddrCache{$_};
-	&Append($s, $CACHE);
+    for $a (keys %AddrCache) {
+	$s = $a.$AddrCache{$a};
+	&Append($s, $CACHE_FILE);
 	&Debug($s) if $debug;
+	# &Log("cache.out: <$a>");
     }
     &Debug("--- CacheOut End.") if $debug;
 } 	
@@ -526,7 +529,7 @@ sub CacheOut
 sub DoCacheOn
 {
     local($s) = @_;
-    &Append($s, $CACHE);
+    &Append($s, $CACHE_FILE);
 }
 
 
@@ -540,11 +543,18 @@ sub Append
     close(APP);
 }
 
+sub Log
+{
+    my ($s) = @_;
+    &GetTime;
+    &Append($Now." ".$s, $LOGFILE);
+}
 
 sub Die
 {
+    my ($s) = @_;
     &GetTime;
-    &Append("$Now $_[0]", "$DIR/meadlog");
+    &Log($s);
     exit 0;
 }
 
@@ -557,17 +567,19 @@ sub DeadOrAlive
 
     ### check time arrival?
 
-    open(CACHE, $CACHE) || &Die("CacheOn: cannot read CACHE $CACHE\n");
-    while (<CACHE>) { 
+    open(CACHE_FILE, $CACHE_FILE) || 
+	&Die("CacheOn: cannot read CACHE_FILE $CACHE_FILE\n");
+    while (<CACHE_FILE>) { 
 	$buf = $_ if /^\#check/;
     }
-    close(CACHE);
+    close(CACHE_FILE);
 
     ($last) = (split(/\s+/, $buf))[1];
 
     if ($now - $last > $CHECK_INTERVAL) {
 	&MLEntryOn($ML_DIR);	# set %ml'ML
 	&Debug("check time comes") if $debug;
+	&Log("dead-or-alive-p() time comes");
     }
     else {
 	&Debug("check time comes not yet") if $debug;
@@ -578,16 +590,18 @@ sub DeadOrAlive
     ### check whether a user is dead or alive
     ### expire old entries 
     local($time, $addr, $ml, $expire_range, $debugbuf);
-    local($new) = "$CACHE.".$$."new";
+    local($new) = "$CACHE_FILE.".$$."new";
     local($expire_time) = $now - int($EXPIRE*24*3600);
 
     &Debug("expire time is " . ($EXPIRE*24*3600)/3600 ." hour(s)") if $debug;
 
-    open(CACHE, $CACHE) || &Die("CacheOn: cannot read CACHE $CACHE\n");
+    open(CACHE_FILE, $CACHE_FILE) || 
+	&Die("CacheOn: cannot read CACHE_FILE $CACHE_FILE\n");
     open(NEW, "> $new") || &Die("CacheOn: cannot open $new\n");
     select(NEW); $| = 1; select(STDOUT);
 
-    while (<CACHE>) {
+    my (%logaddr);
+    while (<CACHE_FILE>) {
 	# uniq
 	next if $prev eq $_;
 	$prev = $_;
@@ -605,6 +619,8 @@ sub DeadOrAlive
 	    print NEW $_ unless $expire_range;
 	    next;
 	}
+
+	$logaddr{$addr} = $addr;
 
 	# expire check, not print, so remove them
 	if ($time < $expire_time) {
@@ -628,10 +644,20 @@ sub DeadOrAlive
 	}
     }
 
-    print NEW "#check $now\n";
-    close(CACHE);
+    # fml 4.0 log
+    {
+	my ($a);
+	for $a (keys %logaddr) {
+	    if ($addr{"$a $ml"} > 0) {
+		&Log("eval: <$a> = $addr{\"$a $ml\"} points");
+	    }
+	}
+    }
 
-    rename($new, $CACHE) || &Die("CacheOn: cannot rename $new $CACHE");
+    print NEW "#check $now\n";
+    close(CACHE_FILE);
+
+    rename($new, $CACHE_FILE) || &Die("CacheOn: cannot rename $new $CACHE_FILE");
 
     ### remove address 
     local($addr, $admin);
@@ -646,6 +672,8 @@ sub DeadOrAlive
 
 	# dead
 	if ($addr{$_} > $LIMIT) {
+	    &Log("dead-or-alive: <$addr> ($addr{$_} points) is dead");
+
 	    ($addr, $admin) = split;
 
 	    &Debug("\$ml = \$ml'ML{$admin}; #';");
@@ -660,6 +688,8 @@ sub DeadOrAlive
 	    }
 	    else {
 		&Debug("$ml for <$admin> is not found, ignore <$_>") if $debug;
+		&Log("warn: ml='$ml' for '$admin' is not found");
+		&Log("warn: ignore to remove <$addr>");
 	    }
 	}
 	# alive
@@ -719,6 +749,7 @@ sub Report
 
 	    rename($tmp, $file) || &Debug("cannot rename $tmp $file");
 	    chmod 0755, $file;
+	    &Log("create $file");
 	}
     }
 
@@ -762,7 +793,7 @@ sub Report
 sub Mesg
 {
     local($ml, $buf) = @_;
-    $Template{$ml} .= "$buf\n";
+    $Template{$ml} .= $buf."\n";
 }
 
 
@@ -781,6 +812,7 @@ sub CacheHints
 	if (/for\s+<(\S+\@[A-Za-z0-9\.]+)>/) {
 	    &Debug("--&CacheOn($1, $CurReason);");
 	    &CacheOn($1, $CurReason);
+	    &Log("cache.hint: <$1> reason=$CurReason");
 	}
     }
 }
@@ -849,6 +881,7 @@ sub Action
     if (&ValidAddressP($addr)) {
 	if ($mode eq 'auto') {
 	    &MakeFml("$ACTION $ml $addr", $addr, $ml);
+	    &Log("action: makefml bye <$ml> $addr");
 	}
 	elsif ($mode eq 'report') {
 	    $Template{$ml}            .= $CTK{$ml}."admin $ACTION $addr\n";
@@ -860,7 +893,7 @@ sub Action
 	}
     }
     else {
-	&Debug("ignore invalid address $addr");
+	&Log("action: ignore $addr (invalid syntax)");
 
 	$MFSummary{$ml} .= "\tignore invalid address <$addr>.\n";
 	$MFSummary{$ml} .= "\tPlease remove <$addr> by hand.\n";
@@ -870,6 +903,7 @@ sub Action
 
     # record the addr irrespective of succeess or fail
     # to avoid a log of warning mails "remove ... but fails" ;-)
+    &Log("log: remove <$addr>");
     &DoCacheOn("#remove $addr");
 }
 
@@ -964,31 +998,52 @@ sub Init
     if ($opt_f && -f $opt_f) {
 	$ConfigFile = $opt_f;
     }
+    # backward compatible ;-) but this is obsolete !!!
     elsif (-f "$ML_DIR/etc/mead/mead_config.ph") {
 	$ConfigFile = "$ML_DIR/etc/mead/mead_config.ph";
     }
 
+    # fml 4.0
+    if ($opt_D) {
+	if (-d $opt_D && -f "$opt_D/mead_init.ph") {
+	    eval require "$opt_D/mead_init.ph";
+	}
+    }
+
     &EvalCF($ConfigFile) if -f $ConfigFile;
 
+    # fml 4.0
+    if ($opt_D) {
+	if (-d $opt_D && -f "$opt_D/mead_force.ph") {
+	    package Forced;
+	    eval require "$opt_D/mead_force.ph";
+	    package main;
+	}
+    }
 
-    $LIMIT  = $FORCE_LIMIT  || $opt_l || $LIMIT  || 5;
-    $EXPIRE = $FORCE_EXPIRE || $opt_e || $EXPIRE || 14; # days
-    $ACTION = $FORCE_ACTION || $opt_k || $ACTION || 'bye';
-    $MODE   = $FORCE_MODE   || $opt_m || $MODE || 'report'; # mode
+    $LIMIT  = $Forced::LIMIT  || $opt_l || $LIMIT  || 5;
+    $EXPIRE = $Forced::EXPIRE || $opt_e || $EXPIRE || 14; # days
+    $ACTION = $Forced::ACTION || $opt_k || $ACTION || 'bye';
+    $MODE   = $Forced::MODE   || $opt_m || $MODE || 'report'; # mode
 
     # expire check interval
     $CHECK_INTERVAL = $opt_i || $CHECK_INTERVAL || 3*3600;
 
-    # directories / files
-    $DIR      = $FORCE_DIR     || $opt_D || $DIR;
-    $ML_DIR   = $FORECE_ML_DIR || $opt_S || $ML_DIR;
-    $CACHE    = $FORCE_CACHE   || $opt_C || $CACHE || "$DIR/errormaillog";
-    $HINT     = $FORCE_HINT    || $opt_C || $HINT  || "$DIR/error_addr.hints";
-    $EXEC_DIR = $FORCE_EXEC_DIR || $opt_E || $EXEC_DIR;
+    # directories
+    $DIR      = $Forced::DIR      || $opt_D || $DIR; # working directory.
+    $ML_DIR   = $FORECE_ML_DIR    || $opt_S || $ML_DIR;
+    $EXEC_DIR = $Forced::EXEC_DIR || $opt_E || $EXEC_DIR;
+
+    # log file
+    $LOGFILE = "$DIR/log.mead";
+
+    # cache
+    $CACHE_FILE    = $Forced::CACHE_FILE || $opt_C || $CACHE_FILE || "$DIR/errormaillog";
+    $ERROR_ADDR_HINT_FILE     = $Forced::ERROR_ADDR_HINT_FILE  || $ERROR_ADDR_HINT_FILE  || "$DIR/error_addr.hints";
 
     # programs
-    $MAKEFML  = $FORCE_MAKEFML  || $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
-    $SENDMAIL = $FORCE_SENDMAIL || $opt_z || $SENDMAIL;
+    $MAKEFML  = $Forced::MAKEFML  || $opt_M || $MAKEFML || "$EXEC_DIR/makefml";
+    $SENDMAIL = $Forced::SENDMAIL || $opt_z || $SENDMAIL;
 
     # priority; $opt_p
     $PRI{'uu'}      = 1;
@@ -1001,7 +1056,7 @@ sub Init
     }
 
     # touch
-    &Touch($CACHE);
+    &Touch($CACHE_FILE);
 
     # diagnostics
     $DIR    || die("Please define -D \$DIR, mead.pl working directory\n");
@@ -1018,12 +1073,12 @@ sub EvalCF
     for ("debug", 
 	 OVERWRITE_COMMAND_LINE_OPTIONS,
 	 EXPIRE, ACTION, CHECK_INTERVAL, LIMIT, 
-	 DIR, ML_DIR, CACHE, EXEC_DIR, MAKEFML, 
+	 DIR, ML_DIR, CACHE_FILE, EXEC_DIR, MAKEFML, 
 	 MODE, SENDMAIL, PRIORITY, MEAD_REPORT_HOOK) {
-	eval("\$main'${_} = \$mead'${_};");
+	eval("\$main::${_} = \$mead::${_};");
 
 	if ($OVERWRITE_COMMAND_LINE_OPTIONS) {
-	    eval("\$main'FORCE_${_} = \$mead'${_};");
+	    eval("\$Force::${_} = \$mead::${_};");
 	}
     }
 }
@@ -1072,8 +1127,10 @@ sub Touch  { open(APP, ">>$_[0]"); close(APP); chown $<, $GID, $_[0] if $GID;}
 
 sub Debug
 {
+    my ($s) = @_;
+
     open(DEBUG, ">> /tmp/debugbuf");
-    print DEBUG @_, "\n";
+    print DEBUG $s, "\n";
     close(DEBUG);
     return unless $debug;
     print STDERR @_, "\n";
