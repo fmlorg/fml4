@@ -4,6 +4,13 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/05/23
+
+   updated virus_check.ph
+	fml-help:01853 で言及されているような特別な条件を追加
+	(デフォルトでは使われないルール)。
+	詳しくは virus_check.ph 内のコメントを参照
+
 2002/05/18
 
    update IM to 141 + local patch
@@ -277,7 +284,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.246 2002/05/01 15:06:27 fukachan Exp $
+	add $FML: CHANGES,v 1.247 2002/05/18 15:27:43 fukachan Exp $
 
 2001/10/03
 
