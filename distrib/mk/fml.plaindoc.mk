@@ -49,6 +49,6 @@ __initplaindocbuild__:
 	@ test -d var/doc/Japanese   || mkdir var/doc/Japanese
 	@ test -d var/doc/English    || mkdir var/doc/English
 
-plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} op __plainbuild_new
+plaindocbuild: __initplaindocbuild__ ${__DOC_TARGETS__} __plainbuild_new
 	@ echo --plaindoc done.
 #	@ echo ${__DOC_TARGETS__} |tr ' ' '\012'
