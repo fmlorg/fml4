@@ -5,6 +5,24 @@
 =E
 				Ken'ichi Fukamachi
 
+  member_name extension
+	cutoff approve password in logfile
+	(not appear in mail but logfile)
+
+	ログファイルに approve パスワードが残らないように
+
+  messages language extension (MesgLE)
+	fix amctl.added.caution controll
+
+	自動登録の時の welcome というファイルを返すが
+	その前につく警告文が MesgLE だけで制御できないのを修正
+	今は messages/Japanese/amctl だけでコントロールできる
+
+  moderator mode
+	try to check default $MODERATOR_MEMBER_LIST if not defined
+
+[ 3.0pl12 ]
+
    sbin/makefml
 	import a subset of 2.49-2.50: Conv() preserves file mode
 
