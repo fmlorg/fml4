@@ -15,6 +15,9 @@ DOC_EXAMPLES_SOURCES += tips/nospam
 DOC_EXAMPLES_SOURCES += tips/postfix-pop-before-smtp
 DOC_EXAMPLES_SOURCES += tips/smrsh
 
+# misc
+DOC_EXAMPLES_SOURCES += tips/daily-renewal
+
 # obsolete
 DOC_EXAMPLES_SOURCES += tips/distribute-emulation
 
