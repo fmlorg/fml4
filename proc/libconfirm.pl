@@ -44,8 +44,8 @@ sub Confirm
 {
     local(*e, $addr, $buffer) = @_;
     local($id, $r, @r, %r, $time, $m, $gh_subject);
-    
-    $e{"GH:Subject:"} = "Subscribe confirmation result $ML_FN";
+
+    $e{"GH:Subject:"} = "Subscribe request result $ML_FN";
 
     # current time
     $time = time;
@@ -88,11 +88,13 @@ sub Confirm
 	 return 0;
     }
     elsif ($r eq 'confirmed') { # @r == identifier;
+	$e{"GH:Subject:"} = "Subscribe and confirmation result $ML_FN";
 	$r = &Confirm'IdCheck(*e, *r, $addr, $buffer);#';
 	undef $e{"GH:Subject:"};# subject: welcome file;
 	return $r;
     }
     else {
+    $e{"GH:Subject:"} = "Subscribe with confirmation error $ML_FN";
 	&Log("Confirm: Error exception");
 	return 0;
     }
