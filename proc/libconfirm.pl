@@ -257,6 +257,11 @@ sub GenConfirmReplyText
     }
 
     if ($mode eq 'Confirm::GenPreamble') {
+	&Mesg(*e, $NULL, 'confirm.auto_regist.preamble',
+	      $MAIL_LIST, 
+	      "$CONFIRMATION_KEYWORD $cf{'id'} $cf{'name'}",
+	      $CONFIRMATION_ADDRESS);
+
 	undef $s;
 
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
@@ -268,6 +273,12 @@ sub GenConfirmReplyText
 	$s .= "So, you can be added to MAILING LIST $ML_FN.";
     }
     elsif ($mode eq 'IdCheck::syntax_error') {
+	&Mesg(*e, $NULL, 'confirm.auto_regist.syntax_error',
+	      $MAIL_LIST, 
+	      $CONFIRMATION_KEYWORD,
+	      $cf{'name'},
+	      $CONFIRMATION_ADDRESS);
+
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "Confirmation Syntax or Password Error:\n";
 	$s .= "Syntax is following style, check again syntax and password\n\n";
@@ -276,12 +287,22 @@ sub GenConfirmReplyText
 	$s .= "confirmation request mail from MAILING LIST <$MAIL_LIST>.\n";
     }
     elsif ($mode eq 'Confirm::expired') {
+	&Mesg(*e, $NULL, 'confirm.auto_regist.expired',
+	      $MAIL_LIST, 
+	      $CONFIRMATION_KEYWORD);
+
 	$s .= "Your confirmation for \"subscribe request for $MAIL_LIST\"\n";
 	$s .= "is TOO LATE TO REPLY SINCE ALREADY EXPIRED.\n";
 	$s .= "So we treat you request is the first time request.\n";
 	$s .= "Please try again. The new confirm key is as follows\n\n";
     }
     elsif ($mode eq 'BufferSyntax::Error') {
+	&Mesg(*e, $NULL, 'confirm.auto_regist.syntax_error',
+	      $MAIL_LIST, 
+	      $CONFIRMATION_SUBSCRIBE,
+	      $MAINTAINER,
+	      $key);
+
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "Syntax Error! Please check your mail\n\n";
 	$s .= "   - The address you used IS NOT A ML MEMBER?\n";
@@ -295,6 +316,12 @@ sub GenConfirmReplyText
 	$s .= "   $CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
     }
     elsif ($mode eq 'BufferSyntax::InvalidAddr') {
+	&Mesg(*e, $NULL, 'confirm.auto_regist.invalid_addr',
+	      $MAIL_LIST, 
+	      $CONFIRMATION_SUBSCRIBE,
+	      $MAINTAINER,
+	      $key);
+
 	&FixFmlservConfirmationMode(*e) if $e{'mode:fmlserv'};
 	$s .= "Please use your name NOT E-Mail Address! like \n\n";
 	$s .= "$CONFIRMATION_SUBSCRIBE Elena Lolabrigita\n";
@@ -321,6 +348,7 @@ sub ManualRegistConfirm
 	$MANUAL_REGISTRATION_TYPE eq 'forward_to_admin') {
 	&LogWEnv("$proc request is forwarded to Maintainer", *e);
 	&Mesg(*e, "Please wait a little");
+	&Mesg(*e, $NULL, 'confirm.manual_regist.forward_to_admin');
 	&Warn("$proc request from $From_address", &WholeMail);
     }
     # $MANUAL_REGISTRATION_TYPE eq confirmation
@@ -354,6 +382,7 @@ sub ManualRegistConfirm
 	    $r .= "and forwarded to the maintainer.\n";
 	    $r .= "He/She will subscribe you, so PLEASE WAIT A LITTLE.\n";
 	    &Mesg(*e, $r);
+	    &Mesg(*e, $NULL, 'confirm.manual_regist.confirmed');
 	}
 	else {
 	    &Log("ManualRegistConfirm: confirm fails");
@@ -421,6 +450,7 @@ sub FML_SYS_ChaddrRequest
 	    &Log("invalid chaddr request: $2 => $3");
 	    # &Mesg(*e, ">>> $buf");
 	    &Mesg(*e, "Error: invalid chaddr request");
+	    &Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
 	    &Mesg(*e, $e{'tmp:reason'}) if $e{'tmp:reason'};
 	    &MesgChaddrConfirm(*e);
 	    $e{'mode:in_amctl'} = 0;
@@ -450,6 +480,7 @@ sub FML_SYS_ChaddrRequest
     }
     else {
 	&Mesg(*e, "$proc had something error.");
+	&Mesg(*e, $NULL, 'command_something_error', $proc);
     }
 }
 
@@ -467,6 +498,7 @@ sub FML_SYS_ChaddrConfirm
     else {
 	&Log("invalid chaddr-confirm request");
 	&Mesg(*e, "invalid chaddr-confirm request");
+	&Mesg(*e, $NULL, 'command_syntax_error', "chaddr-confirm");
 	&MesgChaddrConfirm(*e, 'chaddr-confirm');
 	return $NULL;
     }
@@ -479,6 +511,7 @@ sub FML_SYS_ChaddrConfirm
     else {
 	&Log("no such chaddr request");
 	&Mesg(*e, "Error: no such chaddr request");
+	&Mesg(*e, $NULL, 'no_such_request', 'chaddr');
 	return $NULL;	
     }
 
@@ -508,8 +541,10 @@ sub MesgChaddrConfirm
     local(*e, $mode) = @_;
 
     if ($mode eq 'chaddr-confirm') {
+	; # do nothing
     }
     else {
+	&Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
 	&Mesg(*e, "\tsyntax: chaddr old-address new-address");
 	&Mesg(*e, "\told-address should be a member now");
     }
@@ -612,6 +647,7 @@ sub BufferSyntax
 
 	if ($buffer =~ /($re_jin|$re_euc_c)/) {
 	    &Log("confirm: request includes Japanese character [$&]");
+	    &Mesg(*e, $NULL, 'confirm.has_japanese_char');
 	    &Mesg(*e, "Error! Your request seems to include Japanese.");
 	}
 
