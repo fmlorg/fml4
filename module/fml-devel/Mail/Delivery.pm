@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Delivery.pm,v 1.6 2002/09/11 23:18:21 fukachan Exp $
+# $FML: Delivery.pm,v 1.7 2002/09/22 14:56:59 fukachan Exp $
 #
 
 package Mail::Delivery;
@@ -128,6 +128,10 @@ sub new
     }
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

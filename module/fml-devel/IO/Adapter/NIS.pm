@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: NIS.pm,v 1.18 2002/09/11 23:18:20 fukachan Exp $
+# $FML: NIS.pm,v 1.19 2002/09/22 14:56:59 fukachan Exp $
 #
 
 package IO::Adapter::NIS;
@@ -71,6 +71,10 @@ sub configure
 =head1 SEE ALSO
 
 L<IO::Adapter::Array>
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

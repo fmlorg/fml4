@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: Qmail.pm,v 1.6 2002/09/11 23:18:22 fukachan Exp $
+# $FML: Qmail.pm,v 1.7 2002/09/22 14:57:01 fukachan Exp $
 #
 
 
@@ -85,6 +85,10 @@ sub analyze
     $result;
 }
 
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 

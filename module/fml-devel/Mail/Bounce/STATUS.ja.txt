@@ -1,5 +1,5 @@
 
-		Current Status of fml-devel (fml 5.0) Bounce Filter
+		Current Status of fml-devel (fml 8) Bounce Filter
 
 
 ○ 実装済み
@@ -46,4 +46,4 @@
 		compuserve.net (要テスト)
 
 
-$FML: STATUS.ja.txt,v 1.14 2002/04/01 23:41:15 fukachan Exp $
+$FML: STATUS.ja.txt,v 1.15 2002/09/24 14:20:50 fukachan Exp $

@@ -4,7 +4,7 @@
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: INET4.pm,v 1.5 2002/09/11 23:18:24 fukachan Exp $
+# $FML: INET4.pm,v 1.6 2002/09/22 14:57:03 fukachan Exp $
 #
 
 package Mail::Delivery::Net::INET4;
@@ -94,6 +94,10 @@ L<Mail::Delivery::SMTP>,
 L<Socket>,
 L<IO::Socket>,
 L<Mail::Delivery::Utils>
+
+=head1 CODING STYLE
+
+See C<http://www.fml.org/software/FNF/> on fml coding style guide.
 
 =head1 AUTHOR
 
