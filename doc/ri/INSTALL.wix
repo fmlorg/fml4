@@ -11,59 +11,79 @@
 
    以下のドキュメント中ではメーリングリストをＭＬと略しています
 =E
+   EXECUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
+=S
    The word "ML" is the abbriviation of "Mailing List" in this document.
+
 
    NT4.0 については別のドキュメント(INSTALL_on_NT4)が用意されています。
    ＃まだとってもとっても途中っす;-)
 =E
-   INSTALL_on_NT4. English is the install guide for Windows NT4.0.
+   INSTALL_on_NT4.English is the install guide for Windows NT4.0.
    NT3.5 may be also O.K (not tested since I do not have the OS).
-
-   昔の INSTALL ドキュメントは INSTALL.advanced に移動しました。
-   INSTALL.advanced はより細やかな設定をしつつインストールをするための
-   ドキュメントです。
+   ***ATTENTION!*** NT Version is now underway.
 
 .~HTML_PRE
 
 #.index
 
 
+
 .C	とりあえずＭＬを動かすためのインストールの仕方
-=E.C	Installing the fml to your system anyway :-)
+=E.C	Installing the fml to your system (anyway :-)
 
 
 .S	はじめに
 
-ＭＬの運用を特権ユーザでやるべきではありません。一般ユーザ（例えばあな
-たのアカウント等）でインストールおよび運用をして下さい。
-一番いいのはＭＬ用の特別な一般アカウント(e.g. fml 等)を作り、その架空
-ユーザになってインストール・設定を行なうことでしょう。
+ML の運用を特権ユーザでやるべきではありません。一般ユーザ (例えばあな
+たのアカウント等) でインストールおよび運用をして下さい。一番いいのは 
+ML 用の特別な一般アカウント (e.g. fml 等) を作り、その架空ユーザになっ
+てインストール・設定を行なうことでしょう。
+=E
+In general you should not run maling lists as a priviledged user.
+Please run mailing lists as a non-priviledged user.
+The best way is to set up a non-priviledged user (e.g. fml) for the
+maling lists.
 
-「makefml install (インストール,後述) 自体は root で実行し、他の人には
-いじれないようにする」という仕方はありえます。しかし、それ以外の操作、
-例えば makefml newml (MLの作成,後述)は一般ユーザで実行して下さい。
+「makefml install (fml 本体のインストール,後述) 自体は root で実行し、
+他の人にはいじれないようにする」という仕方はありえます。しかし、それ以
+外の操作、例えば makefml newml (MLの作成,後述)は一般ユーザで実行して下
+さい。
 
 
 .S	ひとつだけ下準備
+=E.S	How many kinds of people runs mailng lists on this machine?
 
 あなたがインストールしようと思っているマシンでＭＬを走らせる人（オーナー、
 所有者）はあなただけですか？ それともあなた以外の人もＭＬを走らせるで
 しょうか？
 =E
-Only you 
+Only you can run mailing lists? or a group of people run ML's on this
+machine? The files and directories permissions depend on the policy.
 
 ＊＊＊注意＊＊＊ 
 ここでいうＭＬのオーナー(所有者?)とはＭＬサーバ プログラムが OSの上で
 走る時のオーナーです。リモート管理できる管理者のことではありません
 
 "あなただけ"なら、すぐ次の節へ飛んで下さい("personal" を選んで下さい(後述))
+=E
+If only you runs maling lists, please jump to the next section (select
+"personal").
 
 あなた以外の人もＭＬを作れるが、面倒を見るのがあなたならＭＬのオーナー
 は一人です。やっぱりすぐ次の節へ飛んで下さい:-) (やはり "personal" です)
+=E
+There exist several mailing lists, but the maintainer of them is only
+you. In this case please select "personal".
 
 しかしあなた以外の人も自由に作りたいということであれば、ＭＬのオーナー
 は複数人いるということになります。その場合そのオーナー達を一つのグルー
 プにして、そのグループだけがＭＬの場所をいじれるようにします。
+=E
+When several people can set up and run several mailing lists, that is
+the owners of mailng lists are plural, you can select "group". 
+In this case please create the maintainer group (e.g. fml) in
+/etc/group (4.4BSD), 
 
 グループのデフォールトは fml です。例えば、 /etc/group に
 
@@ -81,10 +101,13 @@ Only you
 の directory ができてその下にひとセット入ってます。
 
 =E
-Unpacking fml-something.tar.gz, you can find fml-x.y-something
-directory. In it you have a set of the fml system.  Moving this
-directory, please input the command "perl makefml install" to install
-the fml to your system
+Unpacking fml-something(usually revision).tar.gz, you can find
+fml-x.y-something directory. Change to the directory, you have a set
+of the fml system.  In this directory, please input the command 
+=S
+	perl makefml install
+=S
+to install the fml to your system
 
 この directory に移動して、
 
@@ -95,7 +118,7 @@ the fml to your system
 
 この時に以下のような項目を聞いて来ます。
 =E
-Here you see the following questions.  Please answer them!
+Here you see the following questions. Please answer them!
 
    Personal Use or ML-Admin-Group-Shared or fmlserv you use? 
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
@@ -109,8 +132,8 @@ Here you see the following questions.  Please answer them!
 それぞれ、次のような意味ですので、適当に入れて下さい。単に
 Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 =E
-If you just "ENTER"(Carriage Return), the value in the [] is used.
-These questions are as follows:
+The value in [] is the default.  If you just "ENTER"(Carriage Return),
+the value in the [] is used.  These questions are as follows:
 
    Personal Use or ML-Admin-Group-Shared or fmlserv you use? 
    Personal, Group, Fmlserv (personal/group/fmlserv) [personal] 
@@ -145,7 +168,8 @@ These questions are as follows:
     Group of Mailing List Operators (fml or GID ([\w\d]+)) [fml] 
 
 	あらかじめ決めておいた group を入れて下さい(前節参照)
-
+=E
+	Please input group (e.g. fml) explained above.
 
    DOMAIN NAME               [sapporo.iij.ad.jp] 
 
@@ -166,7 +190,7 @@ These questions are as follows:
 	実行ファイル等の fml system をインストールする場所。
 	例えば、この値の場合 
 =E
-	Where you install exectutable files of the fml system?  
+	Where you install executable files of the fml system?  
 	For example, the locations defined by values above are
 
 		/usr/local/fml/fml.pl  (main exectutable file)
@@ -180,7 +204,7 @@ These questions are as follows:
 	/var/spool/ml/elena	for an "Elena" Mailing List
 	/var/spool/ml/mirei	for a  "Mirei" Mailing List
    are the ML's directory for each ML.
-   The directory below the directory has configuration files and
+   The directory for each maling list has configuration files and
    the spool of ML articles in each ML.
 
 	ML(複数)はこの階層の"下"に作られる。例えば
@@ -193,15 +217,17 @@ These questions are as follows:
 
    LANGUAGE                  [Japanese] 
 =E
-	When you make a new ml by "makefml newml", 
-	this setteing determines the languge of documents for the ml.
-	By default, If the target machine to install is "*.jp", "Japanese".
-	If not, "English". 
-	If you would like to change, please select "Japanese" or "English" 
+=S
+	When you make a new ml by "makefml newml", this setteing
+	determines the languge of documents for the maling list.
+=S
+	By default, If the target machine to install matches "*.jp",
+	"Japanese". If not, "English". If you would like to change,
+	please select "Japanese" or "English"
 
 	"makefml newml" (後述)の際にＭＬ用に作られるドキュメントの言語
-	設定。実はインストールするマシンが .jp ならデフォールトが日本
-	語になります。"Japanese" か "English" が選べます。
+	設定。インストールするマシンが .jp の場合[]の中つまりデフォー
+	ルトは日本語になります。"Japanese" か "English" が選べます。
 
 
 .S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
@@ -221,31 +247,35 @@ These questions are as follows:
 
 =E
 For example, 
-	when you are not a root and you can manage directories under
-	/home on providers or universities.
-		AND
-	the adminisitator of the machine can edit /etc/aliases.
-
-=E
+=S
+	when you are not one of superusers but you can manage
+	directories under /home on providers or universities.
+	You can install fml to directories under your home. You must
+	reqeust adminisitators to edit /etc/aliases.
+=S
 In this case, you change the input for "makefml" to the following
+=S
 	/home/fukachan/fml	for the directory of executables
 	/home/fukachan/ml	for the hierarchy of ML's
 
 
 .S	設定の保存
-=E.S	the location where the configuration file is saved.
+=E.S	the location where the fml system configuration file is saved.
 
-なお、上で設定したDirectory等の情報次の場所に格納されます。
-次回以降 newml (後述)する時などはいつもこの値が使われます。
+なお、上で設定した directory 等の情報は次の場所に格納されます。次回以
+降 newml (後述)する時などはいつもこの値が使われます。
 =E
-The configurations (inputs for "makefml") defined above are save here.
-"makefml" uses this configurations after the next time of using it.
+The configurations (inputs by "makefml") defined above are save here.
+After this time, "makefml" uses this configurations to generate each
+maling list configurations (e.g. config.ph, include).
 
     Config Saved in [/usr/local/fml/.fml] 
 
-＃つまり上で選んだ実行ファイルをインストールする場所の下の .fml です
+＃つまり上で選んだ EXEC FILES DIRECTORYで指定した場所の下の .fml です
 
-.S	POLICY
+
+.S	Policy
+=E.S	Policy
 
 makefml install の最後に 
 
@@ -255,9 +285,27 @@ The Current Policy to use ML addresses are as follows
 
 ………
 
-という Information が表示されます。これは Policy というか ML を新しく
-作る際のデフォールトを決定するものです。詳しくは後述します。
-"makefml policy" で変更できます。デフォールトの POLICY は
+という情報が表示されます。これは Policy というか ML を新しく作る 
+(makefml newml) 際の fml のデフォールト設定情報です。後述する "makefml
+Policy" で変更できます。デフォールトの policy は
+=E
+This information is default configuration when "makefml newml". 
+You can change this configuration by "makefml policy" interactively.
+=S
+The default is 
+	for the "listname@domain" mailing list
+=S
+	command is available at the address listname-ctl@domain
+=S
+	delivery address is listname@domain
+=S
+	For backward compatility, listname can also interprete
+	commands. Please setup how to use addresses by "makefml
+	policy" or "makefml config"(for each mailing list). 
+=S
+	In this age, we recommend that you set up 
+		ONLY MEMBER CAN POST
+	by "makefml policy".
 
 	ＭＬ (listname@domain) の配送は Backward compatilibity のため 
 	配送をしさらにコマンドも実行可能
@@ -274,15 +322,14 @@ The Current Policy to use ML addresses are as follows
 
 いくつかの簡単な設定やメンバー登録等はコマンドで実行できます。
 =E
-You can create a new ml, do the setting of simple ML settings and
-subscription of ML members. 
+You can create a new maling list, do the setting of simple maling list
+settings and subscription of ML members.
 
 コマンドのシンタックス：
 
 	makefml コマンド [引数]
-
 =E
-"makefml" Command Syntax is as follows:
+"makefml" command Syntax is as follows:
 	makefml command [parameters or options]
 
 .S	新しくＭＬを作る場合
@@ -292,13 +339,13 @@ subscription of ML members.
 
 例： Elena ＭＬを作ろうと思ったら
 =E
-When you create a new "Elena" Mailing List, you do only 
+When you create a new "elena" Mailing List, you do just
 
 	/usr/local/fml/makefml newml elena
 
 を実行すれば終りです。ＭＬ用の include ファイル
 =E
-You can find the samples for each ML under /var/spool/ml/"ML-name"/
+You can find the samples for each ML under /var/spool/ml/"listname"/
 e.g. the include sample for elena ML is
 
 	/var/spool/ml/elena/include
@@ -334,40 +381,37 @@ You can find samples for each ML
 
 が設定の見本です。
 
-
-=E
-Attention!: The address of a ML is case insensitivive but the
-directory name is lower case charactes(automatically changed if you
-input no lower-case words).
-
-
 .S	まとめおくり
-=E.S	Matome Okuri (Digest Delivery)
+=E.S	Matome Okuri (Digest delivery)
+
+まとめおくりは、cronを設定して使用します。
 
 =E
-Matome Okuri (Digest) is to send articles in one mail periodically not
-delivery of a mail when the server receives a mail. 
+Matome Okuri (digest delivery) is to send articles in one mail
+periodically not real time delivery of a mail when the server receives
+a mail.
 
 NetBSD のような Vixie Cron がＯＳ附属の場合については
-各ＭＬごとに
+各ＭＬごとに makefml newml を実行した時に
 =E
-Your Operating System has Vixie Cron, you can set Matome Okuri with
-	/var/spool/ml/ML-name/crontab 
-here /var/spool/ml/ml-name/crontab is a sample of vixie cron for
-the ML.
+Your operating system has Vixie cron, you can set digest with
+=S
+	/var/spool/ml/listname/crontab 
+=S
+here /var/spool/ml/listname/crontab is a sample of vixie cron for the
+maling list.
 
 	/var/spool/ml/ＭＬの名前/crontab 
 
 というファイルができます。またＭＬを作成した各ユーザ（各ＭＬ管理者）ご
 とにそのユーザの管理するすべてのＭＬのまとめおくりを設定するための
 =E
-For each user who used "makefml newml ML-Name", the user can find
+For each user who used "makefml newml listname", the user can find
 =S
 	/var/spool/ml/crontab/user-name
 =S
 which entries are automatically added when you create a new ml. 
-This file contains all "Matome Okuri" entries of ML's the user
-administrate.
+This file has all crontab entries the user administrates. 
 
 	/var/spool/ml/etc/crontab/ユーザの名前
 
@@ -383,26 +427,35 @@ Please use crontab(1) in the following way:
 べてについて、まとめ送りサーバが一定時間間隔で起動されて配送するように
 なります。
 =E
-The Matome Okuri Server wakes up periodically, checks articles in the
-ML spool and deliver articles in one mail.
+cron wakes up periodically, checks articles in the mailing list spool
+and deliver articles in one mail.
 
 ＊玄人向け解説: 本来まとめ送りサーバはログレポートを一時間に一度送りま
 す。この makefml で newml する時はメールが送られないように -q がデフォー
 ルトでついています。もしログレポートが欲しいなら 
+
 	/var/spool/ml/etc/crontab/ユーザの名前 
+
 から-q を外して下さい。
-=E
 
 
 Vixie Cron でない OS については man crontab で調べるとか doc/op の 
 cron の章を見る等して下さい。
 =E 
-If your OS has not Vixie Cron, please see the manual of "crontab" or
+If your OS has not Vixie cron, please see the manual of "crontab" or
 the chapter on "cron" of doc/op in the fml source.
-
 
 .S	fmlserv (Listserv もしくは majordomo的インターフェイス)
 =E.S	fmlserv (Listserv or majordomo like interface for fml)
+
+fmlserv は listserv スタイルのインターフェイスです。似たような機能は実
+装していますが security 上デフォールトの機能はかなり制限されています。
+もはや単に複数のＭＬ宛のコマンドを一つのメールにまとめるか？否か？以上
+の意味はないといって良いでしょう。
+=E 
+fmlserv interface is not default but listserv like interface which
+manipulate several mailing lists. In this age I DO NOT recoomend
+this, but you can setup this if you like this style. 
 
 fmlserv を setup すること自体はオーナーの数に関わらず
 
@@ -436,16 +489,21 @@ fmlserv@your-domain.
 
 =E
 The command syntax of "fmlserv" is 
-	command		ML	[arguments or options]
-Precisely speaking, "fmlserv" recognizes a command for a ML as the
-syntax above. The part "ML" is added to the default fml commands.
-"config.ph" for each ML defines each Command set for each ML.
-"fmlserv" just implies you can use all commands defined for the ML in
-another "fmlserv" (listserv) syntax.
+=S
+	command	   listname   [arguments or options]
+=S
+Precisely speaking, "fmlserv" recognizes a command for each mailing
+list as the syntax above. The part of "listname" is added to the
+default fml command syntax. 
+=S
+In fml, "config.ph" for each ML defines each command set for each ML.
+fmlserv can understatnd each proper commands defined for each mailing
+list since fmlserv can emulate each mailing list in the action.
+fmlserv just offers in another "fmlserv" (listserv) syntax.
 
 
 .S	fmlserv -- 複数のＭＬオーナーがいる場合への注意 --
-=E.S	fmlserv (Listserv or majordomo like interface for fml)
+=E.S	fmlserv when you select "fmlserv"
 
 前述の通り、fmlserv では次のようなコマンドを処理します。
 
@@ -454,6 +512,11 @@ another "fmlserv" (listserv) syntax.
 
 このためには fmlserv (もまた一つの特殊なＭＬサーバなので)のオーナーと
 違うオーナーのＭＬのメンバーリストをいじる権限が必要になります。
+=E
+If plural mailing list owners has several mailing lists, each owner
+has each mailing list, other owners cannot see mailing list articles.
+Hence, you should set up the group (e.g. fml) which group includes
+mailing list owners.
 
 そのためにはＭＬのオーナーグループ全体に write permission をだす必要が
 あります。
@@ -463,19 +526,17 @@ another "fmlserv" (listserv) syntax.
 そのユーザ(fml)の所有にして personal 扱いで作成する方法だとおもいます。
 ＭＬの設定をいじる時はいちいち su fml (switch user) するわけです。
 
-
-備考： "group" と "fmlserv" の違いですが、
-
-"group" では「各ＭＬはそれぞれのオーナーのＭＬごとに管理」されます。
-各ＭＬの設定はオーナーグループのメンバーに見せる必要はありません。
-少数の共有されるべき場所に group-writable が必要なだけです
+*備考: "group" と "fmlserv" の違いですが、"group" では「各ＭＬはそれぞ
+れのオーナーのＭＬごとに管理」されます。各ＭＬの設定はオーナーグループ
+のメンバーに見せる必要はありません。少数の共有されるべき場所に 
+group-writable が必要なだけです
 
 
 .S		＊＊＊ＭＬを作る際の注意＊＊＊
 
-この簡易インストールでは作られるＭＬの設定で debug モードは切ってある
-のですでにメールは配送可能な状態です。またいくつかの点で portability 
-を無視してあります。
+以上の簡易インストールでは作られるＭＬの設定で debug モードは切ってあ
+るのですでにメールは配送可能な状態です。
+またいくつかの点で portability を無視してあります。
 
 
 
@@ -487,7 +548,7 @@ another "fmlserv" (listserv) syntax.
 =E
 You can find settting samples in the directory
 =S
-	/var/spool/ml/ML-Name/
+	/var/spool/ml/listname/
 
 という場所(上の例ではこの場所)に makefml で作った見本が入っています。
 それぞれのＭＬ用にカスタマイズされた内容の
@@ -499,30 +560,43 @@ Samples are the following files:
 が保存されています。参考にして下さい。
 
 
-.C	ＭＬへのユーザの登録・削除の場合の注意
+
+.C	ＭＬへのユーザの登録・削除
+=E.C	To add and delete a user in the mailing list
+
+.S	ＭＬへのユーザの登録・削除の場合の注意
+=E.S	Attention when to add and delete a user
 
 以下ＭＬへのユーザの登録・削除等について述べますが、もしＭＬサーバを作
 るのと同じマシンルからＭＬへメールを出すとすると、設定によっては
+=E
+When you send a mail to a mailing list server on the same machine as
+one running mailing list servers, your mail header has NOT
 
 	From: username@domain 
 
 ではなく 
+=E
+BUT
 
 	From: username 
 
 のようなメールがＭＬサーバへ送られます。その場合そのために
+=E
+Hence, the server recongizes YOU ARE NOT MEMBER!.  To avoid this
+error, you can register both addresses "username" and
+"username@domain" by "makefml add listname address"
 
 	メンバーではない
 or
 	自動登録できない
 
-といわれてしまいます。その場合は username も username@domain も両方と
-も登録して下さい。
+等のエラーが発生します。それを避けるためにはとりあえず username と
+username@domain の両方を登録して下さい。
 
 
-
-.C	ユーザをＭＬに加える場合
-=E.C	To add a new user to the ML
+.S	ユーザをＭＬに加える場合
+=E.S	To add a new user to the ML
 
    /usr/local/fml/makefml adduser elena fukachan@sapporo.iij.ad.jp
    /usr/local/fml/makefml add elena fukachan@sapporo.iij.ad.jp
@@ -534,8 +608,8 @@ This example is that you add a new user "fukachan@sapporo.iij.ad.jp"
 in "Elena" ML.
 
 
-.C	ユーザをＭＬから削除する場合
-=E.C	To remove the user from the ML
+.S	ユーザをＭＬから削除する場合
+=E.S	To remove the user from the ML
 
    /usr/local/fml/makefml byeuser elena fukachan@sapporo.iij.ad.jp
    /usr/local/fml/makefml bye elena fukachan@sapporo.iij.ad.jp
@@ -545,33 +619,48 @@ in "Elena" ML.
 Remove "fukachan@sapporo.iij.ad.jp" in "Elena" ML.
 
 
-.C	リモート管理の権限をもつユーザをＭＬに加える場合
-=E.C	To add the user who can manage the ML server in remote. 
+
+.C	リモート管理の設定
+
+.S	リモート管理を有効にする
+=E.S	Enable remote maintenance
+
+セキュリティ上デフォールトではリモート管理はできないようにしています。
+とりあえず有効にするには config.ph の一番最後( 1; より前に)に 
+
+	&DEFINE_MODE('remote');
+
+と書いておいて下さい。細かい設定は doc/op を見て下さい。
+=E
+Attention! You cannot remote-maintenance "fml" server in default for
+security. How to enable remote-maintenance is described below.
+To enable remote maintenance, in the last of config.ph (but before the
+last "1;")
+=S
+	&DEFINE_MODE('remote');
+
+.S	リモート管理の権限をもつユーザをＭＬに加える場合
+=E.S	To add the user who can manage the ML server in remote. 
 
    /usr/local/fml/makefml addadmin elena fukachan@sapporo.iij.ad.jp
 
-	Elena ＭＬのリモート管理者に fukachan@sapporo.iij.ad.jp を加える。
+Elena ＭＬのリモート管理者に fukachan@sapporo.iij.ad.jp を加える。
 =E
-Add "fukachan@sapporo.iij.ad.jp" in "Elena" ML. He can manage the ML
-server in remote. 
-=E
-Attention! You cannot remote-maintenance "fml" server in default for
-security.
+Add "fukachan@sapporo.iij.ad.jp" in "Elena" mailing list. He can
+manage the mailing list server in remote.
 
-
-.C	リモート管理の権限をもつユーザをＭＬから削除する場合
-=E.C	To remove the user who can manage the ML server in remote. 
+.S	リモート管理の権限をもつユーザをＭＬから削除する場合
+=E.S	To remove the user who can manage the ML server in remote. 
 
    /usr/local/fml/makefml byeadmin elena fukachan@sapporo.iij.ad.jp
 
-	Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
+Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
 =E
 Remove the user "fukachan@sapporo.iij.ad.jp" who can manage the
 "Elena" ML in remote.
 
-
-.C	リモート管理の権限をもつユーザのパスワードの設定・変更
-=E.C	To set or change the passwd of the remote-maitenance user 
+.S	リモート管理の権限をもつユーザのパスワードの設定・変更
+=E.S	To set or change the passwd of the remote-maitenance user 
 
    /usr/local/fml/makefml passwd elena 
 
@@ -584,14 +673,16 @@ Remove the user "fukachan@sapporo.iij.ad.jp" who can manage the
 Please input the "password" of "who" (Email address). 
 
 
-.C	ＭＬの基本的ないくつかの設定
-=E.C	To configure the fundamental settings of a ML 
+
+.# Beth
+.C	makefml で ＭＬの基本的な設定変更をする
+=E.C	To change the configuration of a mailing list
 
    /usr/local/fml/makefml config ML名
 =E
-   /usr/local/fml/makefml config ML-Name
+   /usr/local/fml/makefml config listname
 
-   例：
+   例:
 =E
 e.g.
 	/usr/local/fml/makefml config elena
@@ -599,8 +690,8 @@ e.g.
 を実行すると基本的な設定を対話的に行なうことができます。
 次のような画面が出てくるので適当に答えて下さい。
 =E
-You can configure the "elena" ML interectively. You see the following
-recursive menu, so please select one and answer it.
+You can configure the "elena" mailing list interectively. You see the
+following recursive menu, so please select one and answer it.
 
 TOP画面
 =E
@@ -621,7 +712,7 @@ TOP MENU
     Menu  (number) [0] 
 
 のような画面で、数字を打込むと下の階層に進み、同様の画面が出ます。
-やはり同様に数字かy/nならy(yes)かn(no)を入れて下さい。
+やはり同様に数字か y/n なら y(yes) か n(no) を入れて下さい。
 =E
 Please input the number you choose, you see the similar menu in the
 next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
@@ -677,10 +768,17 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
         Auto Registration Type
 
         0 default	メンバーでないなら登録
+
         1 subject	Subject: subscribe と書いてあるメールなら登録
 			そうでないなら登録を許否
+
         2 body		本文に subscribe と書いてあるメールなら登録
 			そうでないなら登録を許否
+
+	3 body with confirmation (RECOMMENDED)
+			subscribe request に対し一度確認を求めるメールを
+			送り確認メールをもらって初めて登録する。
+			subscribe attack 阻止のため推奨します
         
         Auto Registration Type  (0,1,2 ) [0] 
 
@@ -698,19 +796,24 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 			If the keyword not exists or is not matched, 
 			not added.
 	
+	3 body with confirmation (RECOMMENDED)
+			RECOMMENDED AGAINST SUBSCRIBE ATTACK!
+			the server asks the user (From:) the confirmation
+			of subscription will.
 
  ○ 2 SUBJECT TYPE                            
 =E
  <> 2 SUBJECT TYPE                            
 =S
-	You can configure the ML-Name and the sequence number of the article
+	You can configure the listname and the sequence number of the article
 	in the subject.
  	e.g. You like Subject: [Elena:00010] ? 
-	(though I like such a syntax does not exists(I recomended))
+	(though I like such a syntax does not exists (I recomended))
 
 	SubjectでのＭＬ名前と記事番号の設定について
 	例えば、Subject: [Elena:00010] のようにするのか？
-	何もつけないのか？（推奨は何もつけない）
+	何もつけないのか? (推奨は何もつけない。読むインターフェイスの
+	自由度を制限するし、元々サーバではなくクライアントの仕事です)
 
     ○下の階層の画面
 =E
@@ -740,12 +843,16 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
  <>     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
 =S
 	Other settings:
-		do MIME convertion?
-		save MIME-converted articles in the ML spool?
+		to do several MIME convertion? 
+		e.g. generate MIME-converted summary 
+=S
+		to generate HTML Converted article spool
 
 	それ以外の設定
-	   MIME処理をするか？
-	   HTML変換した記事の保存もするか？
+	   さまざまな MIME 処理を有効にするか？
+	   MIME変換した記事のサマリを作るか？
+	   スプールを自動的に HTML 化するか？
+	等
 
     ○下の階層の画面
 =E
@@ -774,7 +881,7 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 
 	HTML自動変換は 
 
-		/var/spool/ml/ML名/var/htdocs/ 
+		/var/spool/ml/ML名/htdocs/ (default)
 
 	の下に html 化された階層を作る。
 	デフォールトではその日ごとに別の階層にまとめて
@@ -785,7 +892,7 @@ next hierarchy.  When you see "[y/n]", please input y(yes) or n(no).
 =E
 You will have the directory	
 =S
-		/var/spool/ml/ML-Name/var/htdocs/
+		/var/spool/ml/listname/htdocs/ (default)
 =S
 which contains the html'ed articles here. In default articles are
 collected in each day directory below here.  Each directory has
@@ -813,7 +920,7 @@ order, thread.html is threaded menu for articles.
           ENTRY                           Current Configuration
         -------------------------------------------------------
         0 END
-        1 Distribute Only (only member can post)  
+        1 Distribute Only (only members can post)  
         2 Distribute Only (anyone can post)       
         3 Distribute + Commands (default)         <===
         
@@ -842,7 +949,9 @@ order, thread.html is threaded menu for articles.
 では推奨しています。しかしＭＬ本体でもコマンドを実行可能です。
 
 
+
 .C	makefml policy 
+=E.C	makefml policy 
 
 ここでいうポリシーは、ＭＬのアドレス群をどう使いわけるか？です。
 具体的には makefml newml を実行する時のデフォールトの設定になります。
@@ -950,7 +1059,7 @@ If you fails to use :include: in /etc/aliases, please use the
 C-wrapper program which may be required to be root-setuid.
 The example of the C-wrapper is 
 =S
-	/var/spool/ml/ML-Named/fml.c 
+	/var/spool/ml/listname/fml.c 
 =S
 Please compile and set it properly. I recommend you councel the
 setting of the C-wrapper with the administrator of the
