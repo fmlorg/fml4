@@ -34,7 +34,7 @@ DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
 
 
 ## doc/advisory
-DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family
+DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year2000
 
 
 ### doc/examples
