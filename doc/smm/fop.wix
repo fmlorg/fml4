@@ -65,8 +65,19 @@ libsendfile.pl では
 
 で送り返されます。このデフォールトは $MGET_MODE_DEFAULT で変更できます。
 定義して意味のある変数は 上述のmgetのオプションと同じと思って構いませ
-ん。正確には(libutils.pl中で定義されている) %MSendOpt というハッシュテー
-ブルのKEYです。
+ん。正確には(libfop.pl中で定義されている) %_fp というハッシュテーブル
+のKEY(2番目の引数のフィールド)です。
+一覧:
+	uf
+	rfc934
+	rfc1153
+	mp
+	gz
+	tgz
+	lhaish
+	lhauu
+	uu
+
 .k	%MSendOpt
 
 ○ アーカイブ(var/archive や library コマンドや…)のencodingのデフォールト
