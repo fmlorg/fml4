@@ -10,7 +10,12 @@
 				fukachan@fml.org
 
 
-   以下のドキュメント中ではメーリングリストをＭＬと略しています
+   このドキュメントで説明しているのは基本的なことに絞っています。
+   よりすすんだ設定については doc の下にある op というファイルや 
+   http://www.fml.org/fml/op/ の part III「インストールとカスタマイズ」
+   を見て下さい。
+
+   なお以下のドキュメント中ではメーリングリストをＭＬと略しています
 =E
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 =S
@@ -28,7 +33,6 @@
 __________________________________________
 #.index
 __________________________________________
-
 
 
 .C	とりあえずＭＬを動かすためのインストールの仕方
@@ -742,7 +746,7 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
 
 
-.S	アクセス制御のポリシー
+.S	アクセス制御のポリシーと自動登録
 
    WHO CAN POST AND COMMAND
 
@@ -811,7 +815,7 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
 
 
-.S	自動登録の方式
+.S	自動登録の方式の選択
 
 上述のアクセス制御で auto_regist を選んだ場合に自動登録モードになりま
 す。ここは自動登録の場合の手続きのやりかたを変更することができます。
@@ -866,7 +870,7 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
 が、セキュリティ的に推奨できないので confirm タイプが望ましいでしょう。
 
 
-.S	コマンドのアドレス
+.S	コマンドとして使うアドレスの設定
 
 それぞれの環境と趣味によって
 
@@ -877,6 +881,8 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
 
 	配送専用のアドレスと、コマンドは一つのアドレスですべて受け付け
 	る listserv type のサーバが好み
+
+	そもそもコマンド機能は要らない
 
 のような要求がありえるでしょう。TOPメニューの
 
@@ -980,7 +986,7 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 	address		From: のアドレスが管理者メンバーリストにある
 
 
-.S	SUBJECT TAG TYPE                            
+.S	SUBJECT TAG TYPE (e.g. Subject: [Elena:00100])
 =E
 	You can configure the listname and the sequence number of the article
 	in the subject.
@@ -1022,8 +1028,7 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 
 
 .S	その他の設定
-=E
-.S	Other Optional Settings (e.g. MIME, Automatic Html Generation)
+=E.S	Other Optional Settings (e.g. MIME, Automatic Html Generation)
 =S
 	Other settings:
 		to do several MIME conversion? 
@@ -1129,9 +1134,9 @@ Remove the user "fukachan@fml.org" who can manage the
 =E
 Please input the "password" of "who" (Email address). 
 
-
-.A	:include: ではうまく動かない場合 (/etc/aliases)
-=E.A	You fails to use :include: form in /etc/aliases
+.appendix
+.C	:include: ではうまく動かない場合 (/etc/aliases)
+=E.C	You fails to use :include: form in /etc/aliases
 
 大抵は include でうまくいくはずですが、どうしてもだめな場合は 
 =E
@@ -1150,6 +1155,13 @@ machine since it requires a lot of attention.
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
 にしつつ、root の人とよく相談しながら設定して下さい。
+
+
+.C	POP3 を利用してのML(sendmail等を経由して起動しないorできない場合)
+=E.C	ML via pop3
+
+sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
+そういうtrickyな話題については doc/op を見てください(^^;)
 
 
 $Id$
