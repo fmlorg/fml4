@@ -1332,8 +1332,6 @@ sub Conv
 }
 
 
-sub Touch  { open(APPEND, ">> $_[0]"); close(APPEND);}
-
 sub GetTime
 {
     @WDay = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
