@@ -25,9 +25,6 @@ __init_conf:
 
 __note_conf:
 	@ echo ""
-	@ echo --- see /tmp/fml.note ---
-	@ cat /tmp/fml.note
-	@ echo ""
 
 __init_build:
 	@ env FML=${FML} ${MAKE} -f distrib/mk/fml.sys.mk __setup
