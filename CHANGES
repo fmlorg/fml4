@@ -3,6 +3,11 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/05/29
+
+  www/examples/postfix/main.cf
+	no! use alias_maps not alias_database
+
 2000/05/24
 
   libarchive.pl: fix function import bug (Thanks Yasuyuki Nakasone)
