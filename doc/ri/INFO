@@ -32,7 +32,10 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 ========== WHAT'S NEW  1.6 current ==========
-Backward Compatibility:
+・fml_local は分割してファイルを送り返す関数をBuilt-IN しました。
+＃ libutils.pl を使うので、INCLUDE-PATH を設定する必要があります
+
+○Backward Compatibility:
 	$COMPAT_FML15 = 1; 
 
 ＊＊＊ヴァージョンアップの場合の注意＊＊＊
