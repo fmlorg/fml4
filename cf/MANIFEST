@@ -61,10 +61,33 @@ CONTROL_ADDRESS:  	Elena-ctl@$FQDN
 PERMIT_COMMAND_FROM:	members_only
 REJECT_COMMAND_HANDLER:	reject
 
+# When $MAIL_LIST_ACCEPT_COMMAND = 1, 
+# both $MAIL_LIST and $CONTROL_ADDRESS accept commands
+# which format is "# command".
+MAIL_LIST_ACCEPT_COMMAND:
+
 # ## Sub Section: Maintainer ##
 # $MAINTAINER != $MAIL_LIST IS REQUIRED AGAINST MAIL LOOP
 MAINTAINER:		Elena-admin@$FQDN
 MAINTAINER_SIGNATURE:	
+
+
+#####################################################################
+# ### Section: Directory  ###
+# We use fully pathed directory name => $FP_SPOOL_DIR(= $DIR/$SPOOL_DIR)
+# and relative path $SPOOL_DIR (e.g. spool) 
+
+# article spool directory
+SPOOL_DIR:	 spool
+
+# tmp, after chdir, under DIR
+TMP_DIR:	tmp
+
+# LOG is /var/log (4.4BSD style)
+VAR_DIR:	var
+VARLOG_DIR:	var/log
+VARRUN_DIR:	var/run
+VARDB_DIR:	var/db
 
 
 #####################################################################
@@ -174,6 +197,11 @@ LOG_CONNECTION:	0
 
 # address check levels, which level is the tree depth from the root.
 ADDR_CHECK_MAX:		3
+
+# In-coming mail size > $INCOMING_MAIL_SIZE_LIMIT, fml discards it
+# and send a warning only to the maintainer.
+# 0 (default) implies infinite (no limit)
+INCOMING_MAIL_SIZE_LIMIT:	
 
 
 #####################################################################
@@ -384,24 +412,6 @@ MSEND_NOT_USE_X_ML_INFO:
 
 # not do newsyslog in the sunday morning. $NOT_USE_NEWSYSLOG (CFVersion 2)
 MSEND_NOT_USE_NEWSYSLOG:
-
-
-#####################################################################
-# ### Section: Directory  ###
-# We use fully pathed directory name => $FP_SPOOL_DIR(= $DIR/$SPOOL_DIR)
-# and relative path $SPOOL_DIR (e.g. spool) 
-
-# article spool directory
-SPOOL_DIR:	 spool
-
-# tmp, after chdir, under DIR
-TMP_DIR:	tmp
-
-# LOG is /var/log (4.4BSD style)
-VAR_DIR:	var
-VARLOG_DIR:	var/log
-VARRUN_DIR:	var/run
-VARDB_DIR:	var/db
 
 
 #####################################################################
