@@ -395,6 +395,7 @@ GEN_ARCHIVE () {
 	chdir $DESTDIR
 
 	FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
+	FMLID=`echo $FMLID| sed 's/pl\#/pl/'` # handle $release.$patchlevel case
 	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
 	DATE=`date +%y%h%d`
 	DATE=` $FML/distrib/bin/date `
