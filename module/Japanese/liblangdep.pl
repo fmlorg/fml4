@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: liblangdep.pl,v 1.6 2000/03/21 03:10:05 fukachan Exp $
+# $Id$
 
 # patch from OGAWA Kunihiko <kuni@edit.ne.jp>
 # fml-support: 07599, 07600
@@ -54,6 +54,9 @@ sub CutOffReReRe
     $pattern  = 'Re:|Re\d+:|Re\[\d+\]:|Re\(\d+\):|Re\^\d+:|Re\*\d+:';
     $pattern .= '|(ÊÖ¿®|ÊÖ|£Ò£Å|£Ò£å)(\s*:|¡§)';
     $pattern .= '|' . $CUT_OFF_RERERE_PATTERN if ($CUT_OFF_RERERE_PATTERN);
+
+    # for i-mode? What is 'Re>' ?
+    $pattern .= '|Re>';
 
     # fixed by OGAWA Kunihiko <kuni@edit.ne.jp> (fml-support: 07815)
     # $x =~ s/^((\s*|(¡¡)*)*($pattern)\s*)+/Re: /oi;
