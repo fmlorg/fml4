@@ -54,27 +54,38 @@ sub __EnvelopeFilter
     }
     # reject for some header field patterns.
     elsif (%REJECT_HDR_FIELD_REGEXP) {
-	my($hf, $pat, $match);
+	my ($hf, $pat, $match);
+	my ($buf);
 
 	for $hf (keys %REJECT_HDR_FIELD_REGEXP) {
 	    next unless ($hf && $REJECT_HDR_FIELD_REGEXP{$hf});
 
 	    $pat = $REJECT_HDR_FIELD_REGEXP{$hf};
+	    $pat = &STR2EUC($pat);
+
+	    $buf = $e{"h:$hf:"};
+	    if ($buf =~ /ISO-2022-JP/i) { 
+		&use('MIME');
+		$buf = &DecodeMimeString($buf);
+	    }
+	    $buf = &STR2EUC($buf);
 
 	    if ($pat =~ m@/i$@) { # case insensitive
 		$pat =~ s@(/i|/)$@@g; 
 		$pat =~ s@^/@@g;
-		$e{"h:$hf:"} =~ /$pat/i && $match++;
+		print STDERR "<$buf> =~ /$pat/i && $match++; \n" if $debug;
+		$buf =~ /$pat/i && &EUCCompare($buf, $&) && $match++;
 	    }
 	    else {		# case sensitive
 		$pat =~ s@(/i|/)$@@g; 
 		$pat =~ s@^/@@g;
-		$e{"h:$hf:"} =~ /$pat/ && $match++;
+		print STDERR "<$buf> =~ /$pat/ && $match++; \n" if $debug;
+		$buf =~ /$pat/ && &EUCCompare($buf, $&) && $match++;
 	    }
 
 	    if ($match) {
 		&Log("EnvelopeFilter: \$REJECT_HDR_FIELD_REGEXP{\"$hf\"} HIT");
-		$r = "reject for invalid $hf field.";
+		$r = "${hf}: contains an invalid pattern.";
 		last;
 	    }
 	}
@@ -275,5 +286,44 @@ sub NonJISP
     0; # O.K.
 }
 
+
+# EUCCompare($buf, $pat) where $pat should be $& (matched pattern)
+sub EUCCompare
+{
+    my ($a, $pat) = @_;
+
+    # (Refeence: jcode 2.12)
+    # $re_euc_c    = '[\241-\376][\241-\376]';
+    # $re_euc_kana = '\216[\241-\337]';
+    # $re_euc_0212 = '\217[\241-\376][\241-\376]';
+    my ($re_euc_c, $re_euc_kana, $re_euc_0212);
+    $re_euc_c    = '[\241-\376][\241-\376]';
+    $re_euc_kana = '\216[\241-\337]';
+    $re_euc_0212 = '\217[\241-\376][\241-\376]';
+
+    # always true if given buffer is not EUC.
+    if ($a !~ /($re_euc_c|$re_euc_kana|$re_euc_0212)/) {
+	&Log("EUCCompare: do nothing for non EUC strings") if $debug;
+	return 1;
+    }
+
+    # extract EUC code (e.g. .*EUC_PATTERN.*)
+    # but how to do for "EUC ASCII EUC" case ???
+    my ($pa, $loc, $i);
+    do {
+	if ($a =~ /(($re_euc_c|$re_euc_kana|$re_euc_0212)+)/) {
+	    $pa  = $1;
+	    $loc = index($pa, $pat);
+	}
+
+	print "buf = <$a> pa=<$pa> pat=<$pat> loc=$loc\n";
+
+	return 1 if ($loc % 2) == 0;
+
+	$a = substr($a, index($a, $pa) + length($pa) );
+    } while ($i++ < 16);
+
+    0;
+}
 
 1;
