@@ -1,3 +1,20 @@
+hack for Database 
+
+[TODO]
+
+Lookup()
+
+ * DoMailListMemberP()
+	kern/fml.pl:1504: if (-f $file && &Lookup($addr, $file)) { ...}
+
+ * MailListAdminMemberP()
+	kern/fml.pl:1526: &Lookup($_[0], $ADMIN_MEMBER_LIST);
+
+
+[DONE]
+	nuke or disable CheckMember()
+
+------------------------------------
 強烈な複数行マッチを試みるとメモリを食うので、
 パラグラフ単位で切り出して、マッチングを試みるか
 関数をフィルタリング機構に用意しておく
