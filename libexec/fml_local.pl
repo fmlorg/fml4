@@ -337,13 +337,13 @@ sub FmlLocalReadCF
 	$Config{$entry} .= $_."\n";
 
 	# for later trick
-	/^body/i && ($_cf{'has-body-pat'} = 1);
+	/^body/i && ($_PCB{'has-body-pat'} = 1);
     }
 
     close(CF);
 
     # record the number of matched entry
-    $_cf{'entry'} = $entry + 1;	# +1 is required for anti-symmetry
+    $_PCB{'entry'} = $entry + 1;	# +1 is required for anti-symmetry
 }
 
 
@@ -457,7 +457,7 @@ sub FmlLocalSearchMatch
 	    }
 	}
 
-	($f =~ /^default/i) && ($_cf{'default'} = $pat);
+	($f =~ /^default/i) && ($_PCB{'default'} = $pat);
     }
 
     $match;# return value;
@@ -470,10 +470,10 @@ sub FmlLocalSearch
 
     # TRICK! deal MailBody like a body: field.
     # has-body-pat is against useless malloc 
-    $Envelope{'body:'} = $Envelope{'Body'} if $_cf{'has-body-pat'};
+    $Envelope{'body:'} = $Envelope{'Body'} if $_PCB{'has-body-pat'};
 
     # try to match pattern in %entry(.fmllocalrc) and *Envelope{Hdr,Body}
-    for($i = 0; $i < $_cf{'entry'}; $i++) {
+    for($i = 0; $i < $_PCB{'entry'}; $i++) {
 	$_ = $Config{$i};
 	next if /^\s*$/o;
 	next if /^\#/o;
@@ -593,7 +593,7 @@ sub FmlLocalMainProc
     # default is "ALWAYS GO!"
     local($a, $b, $type, $exec);
     undef @OPT;
-    ($a, $b, $type, $exec, @OPT) = split(/\s+/, $_cf{'default'});
+    ($a, $b, $type, $exec, @OPT) = split(/\s+/, $_PCB{'default'});
     if ($type) {
 	print STDERR "\n *** ALWAYS GO! *** \n" if $debug;
 	&FmlLocalSetVar($type, $exec, @OPT);

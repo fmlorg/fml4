@@ -194,7 +194,7 @@ sub Cnstr_rfc1153
 
     # set Destructor used in MSendv4.pl 
     # to increment the issue count of the digest
-    $_cf{'Destr'} .= "&Rfc1153Destructer;\n";
+    $_PCB{'Destr'} .= "&Rfc1153Destructer;\n";
 
     $conf{'MimeDecodable'} = 1;
 }
@@ -686,7 +686,7 @@ sub SplitFiles
     close(OUT);
 
     # delete original source
-    unlink $file unless $_cf{'splitfile', 'NOT unlink'}; 
+    unlink $file unless $_PCB{'splitfile', 'NOT unlink'}; 
     &Debug("SplitFiles:unlink $file") if $debug;
 
     $i;
@@ -950,7 +950,7 @@ sub SendBackInOrder
     }
 
     &Debug("SBO:unlink $returnfile $returnfile.[0-9]*") if $debug;
-    unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
+    unlink $returnfile if ((! $_PCB{'splitfile', 'NOT unlink'}) && (! $debug));
     unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
 
     # for example, msend.pl uses this routine several times.

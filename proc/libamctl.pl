@@ -928,11 +928,11 @@ sub DoChangeMemberList
 
     # protection for multiplly matching, 
     # $log_c > 1 implies multiple matching;
-    # ADMIN MODE permit multiplly matching($_cf{'mode:addr:multiple'} = 1);
+    # ADMIN MODE permit multiplly matching($_PCB{'mode:addr:multiple'} = 1);
     ## IF MULTIPLY MATCHED
     if ($log_c > 1 && 
 	($ChMemCount < 10) && # ($ADDR_CHECK_MAX < 10) && 
-	(! $_cf{'mode:addr:multiple'})) {
+	(! $_PCB{'mode:addr:multiple'})) {
 	&Log("$cmd: Do NOTHING since Muliply MATCHed..");
 	$log =~ s/; /\n/g;
 	&Mesg(*e, "Multiply Matched?\n$log") if $debug_amctl;
@@ -1050,7 +1050,7 @@ sub Rehash
 
     if ($l < $r) {
 	$s = "Rehash: Try send mails[$l - $r] left in spool.";
-	$_cf{'rehash'} = "$l-$r"; # for later use "# rehash" ???
+	$_PCB{'rehash'} = "$l-$r"; # for later use "# rehash" ???
 	&Log($s);
 	&Mesg(*e, $s, 'amctl.msend_rehash.send', $l, $r);
     }

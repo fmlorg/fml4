@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/16
+
+  3.0F
+	internal variable/function name changes (part 2)
+	
+	内部利用の関数や変数名の naming convention を修正しています(part II)
+	もしなんか挙動がおかしいようなら bug-report をお願いします _o_
+
 2000/06/13
 
   3.0E

@@ -53,7 +53,7 @@ sub MgetCompileEntry
 	$0 = "$FML: Command Mode mget[$key $fld] status=$status: $LOCKFILE>";
 
 	# regardless of RETURN VALUE;
-	return if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
+	return if $_PCB{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
 
 	if ($status) {
 	    ;
@@ -534,7 +534,7 @@ sub mget3_Search
       print STDERR "MGET V2 Request [$r]\n" if $debug;
       &mget3_V2search($r, *sp) && ($m .= "\tFOUND.\n") && (next TARGET);
 
-      if ($_cf{'INSECURE'}) { # EMERGENCY STOP FOR SECURITY
+      if ($_PCB{'INSECURE'}) { # EMERGENCY STOP FOR SECURITY
 	  &Log('mget3_Search: insecure, stop');
 	  return 'STOP';
       }
@@ -545,7 +545,7 @@ sub mget3_Search
       &mget3_SearchInArchive($r, *ar, *e) 
 	  && ($m .= "\tFOUND.\n") && (next TARGET);
 
-      return 'STOP' if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
+      return 'STOP' if $_PCB{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
 
       ### V1
       if (0) { ### REMOVED; $SECURITY_LEVEL < 2) { # permit mget(v1)
@@ -566,7 +566,7 @@ sub mget3_Search
       }
 
       # EMERGENCY STOP FOR SECURITY
-      return 'STOP' if $_cf{'INSECURE'}; 
+      return 'STOP' if $_PCB{'INSECURE'}; 
   }# foreach;
 }
 
@@ -601,7 +601,7 @@ sub mget3_SearchInArchive
       ### SECURITY ROUTINES, STOP!
       if (! &SecureP($fn)) {
 	  &Log("SECURITY_LEVEL: $SECURITY_LEVEL");
-	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  $_PCB{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  &Mesg(*e, 
 		"trap special charactors, so process stops for security reason",
 		'filter.insecure_p.stop');
@@ -610,7 +610,7 @@ sub mget3_SearchInArchive
       }
 
       if ($Permit{'ShellMatchSearch'} && (! &SecureP($fn))) {
-	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  $_PCB{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  &Mesg(*e, 
 		"trap special charactors, so process stops for security reason",
 		'filter.insecure_p.stop');

@@ -161,7 +161,7 @@ sub MSend4You
 
     &MSendRCConfig;			# When new comers exist. 
 
-    &eval($_cf{'Destr'}, 'Destructer:');# Destructer;
+    &eval($_PCB{'Destr'}, 'Destructer:');# Destructer;
 
     &Unlock;			        # Unlock and ENDS
 }
@@ -405,7 +405,7 @@ sub MSending
     ### MSEND header Generation ###
     # Make a subject here since mode::constructor in DraftGenerate. 
     {
-	$rfc1153 = $_cf{'subject', $mode};
+	$rfc1153 = $_PCB{'subject', $mode};
 	$name    = &DocModeLookup("#3$mode");
 	$a       = $left < $right ? "Articles $left-$right" : "Article $left";
 

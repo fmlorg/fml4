@@ -362,7 +362,7 @@ sub AdminCommand
     # Security Check Exception
     local($buf) = join(" ", $cmd, @opt);
     if (! &SecureP($buf, 'admin')) {
-	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  $_PCB{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  &Mesg(*e, 
 		"trap special charactors, so process stops for security reason",
 		'filter.insecure_p.stop');
@@ -371,7 +371,7 @@ sub AdminCommand
     }
 
     # DEFINE for libfml.pl for multiple-matching
-    $_cf{'mode:addr:multiple'} = 1;
+    $_PCB{'mode:addr:multiple'} = 1;
 
     ### Calling admin:command
     if ($proc = $AdminProcedure{"admin:$cmd"}) {
@@ -1278,7 +1278,7 @@ who         $to
 now         $_
 opt         $opt
 rest        @parameter
-AUTH        $_cf{'remote', 'auth'}
+AUTH        $_PCB{'remote', 'auth'}
 PASSWD      $PASSWD_FILE
 "#;
 

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id: libcompat_fml20.pl,v 2.4 1999/07/03 06:50:04 fukachan Exp $
+# $Id: libcompat_fml20.pl,v 1.1.1.1 2000/02/20 15:49:55 fukachan Exp $
 
 
 sub ProcRetrieveFileInSpool_FML_20
@@ -24,8 +24,8 @@ sub ProcRetrieveFileInSpool_FML_20
     else {
 	&SendFile($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
 		  "$DIR/$mail_file", 
-		  $_cf{'libfml', 'binary'});
-	undef $_cf{'libfml', 'binary'}; # destructor
+		  $_PCB{'libfml', 'binary'});
+	undef $_PCB{'libfml', 'binary'}; # destructor
     }
 
     &Log("Get $ID, Success");

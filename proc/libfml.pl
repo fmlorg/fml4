@@ -711,7 +711,7 @@ sub ProcModeSet
 
     ### CASE
     if ($s eq 'debug') {
-	$_cf{'debug'} = $debug = $p;
+	$_PCB{'debug'} = $debug = $p;
     }
 
     ### LOG
@@ -1279,7 +1279,7 @@ sub ExistP
     &Debug("ExistP($fp) called. search $f") if $debug;
 
     # global binary or not variable on (previous attached)
-    $_cf{'libfml', 'binary'} = 0; 
+    $_PCB{'libfml', 'binary'} = 0; 
 
     # plain and 400 and your file. usually return here;
     stat($f);
@@ -1295,7 +1295,7 @@ sub ExistP
     if ($ARCHIVE_DIR || @ARCHIVE_DIR) {
 	local($sp) = (int(($fp - 1)/$ar_unit) + 1) * $ar_unit;
 
-	$_cf{'libfml', 'binary'} = 2; # WHY HERE? 2 is uuencode operation
+	$_PCB{'libfml', 'binary'} = 2; # WHY HERE? 2 is uuencode operation
 
 	for $dir ($SPOOL_DIR, @ARCHIVE_DIR) {
 	    next unless $dir;

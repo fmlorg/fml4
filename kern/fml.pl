@@ -1385,7 +1385,7 @@ sub RunHooks
     $0 = "$FML: Run Hooks <$LOCKFILE>";
 
     # FIX COMPATIBILITY
-    $FML_EXIT_HOOK .= $_cf{'hook', 'str'};
+    $FML_EXIT_HOOK .= $_PCB{'hook', 'str'};
 
     if ($s = $FML_EXIT_HOOK) {
 	print STDERR "\nmain::eval >$s<\n\n" if $debug;
@@ -1404,7 +1404,7 @@ sub RunHooks
 sub ExecNewProcess
 {
     $0 = "$FML: Run New Process <$LOCKFILE>";
-    $FML_EXIT_PROG .= $_cf{'hook', 'prog'};
+    $FML_EXIT_PROG .= $_PCB{'hook', 'prog'};
     if ($FML_EXIT_PROG) { &use('kernsubr2'); &__ExecNewProcess;}
 }
 

@@ -78,9 +78,9 @@ sub Rfc1153Custom
 
     # MAIL SUBJECT 
     # example "Subject: Info-IBMPC Digest V95 #22"
-    $_cf{'subject', $mode} = "$listname Digest V$vol \#$issue";
+    $_PCB{'subject', $mode} = "$listname Digest V$vol \#$issue";
 
-    print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n"
+    print STDERR "\$_PCB{'subject', $mode} = $_cf{'subject', $mode}\n"
 	if $debug;
 
     # FIRST LINE
@@ -181,8 +181,8 @@ sub Rfc1153Destructer
     local($vol)       = $year;
 
     # ONCE ONLY
-    return if $_cf{'rfc1153', 'in-destr'};
-    $_cf{'rfc1153', 'in-destr'} = 1;
+    return if $_PCB{'rfc1153', 'in-destr'};
+    $_PCB{'rfc1153', 'in-destr'} = 1;
 
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
     $issue = &Rfc1153GetSeq($IssueSeq);

@@ -362,7 +362,7 @@ sub RemoveMembers
 
     # administration mode
     $e{'mode:admin'} = 1;
-    $_cf{'mode:addr:multiple'} = 1;
+    $_PCB{'mode:addr:multiple'} = 1;
 
     for (keys %remove_addr) {
 	next unless $remove_addr{$_};

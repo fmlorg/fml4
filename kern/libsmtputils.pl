@@ -255,7 +255,7 @@ sub DoGenerateHeader
 
     # MEMO:
     # MIME (see RFC1521)
-    # $_cf{'header', 'MIME'} => $Envelope{'GH:MIME:'}
+    # $_PCB{'header', 'MIME'} => $Envelope{'GH:MIME:'}
     # 
     if (@ResentForwHdrFieldsOrder) { 
 	for (@ResentForwHdrFieldsOrder, @ResentHdrFieldsOrder) {
