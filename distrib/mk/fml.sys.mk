@@ -31,6 +31,10 @@ WORK_HTML_DIR   = ${VAR_DIR}/html
 WORK_DRAFTS_DIR = ${WORK_DOC_DIR}/drafts
 
 
+__EXPORTS_DIR__ = COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
+		DIST_DOC_BIN FTP_DIR SNAPSHOT_DIR TMP_DIR \
+		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR WORK_HTML_DIR WWW_DIR
+
 ######################################################################
 ###
 ### if ($0 eq __FILE__)
@@ -48,3 +52,9 @@ ${dir}:
 .endfor
 
 __setup: $(__ALL__)
+
+
+__import_variables:
+.for dir in ${__EXPORTS_DIR__}
+	@ echo ${dir}=${$(dir)}
+.endfor
