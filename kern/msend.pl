@@ -751,6 +751,17 @@ sub MSendInit
 {
     local(*e) = @_;
 
+    if ($USE_DATABASE) {
+        &use('databases');
+
+        # dump recipients
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'dump_active_list');
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	&Log("fail to dump active list") if $mib{'error'};
+	exit 1 if $mib{'error'};
+    }
+
     # defaults header;
     $Envelope{'h:From:'} = $From_address = "msend";
     $SLEEPTIME           = 5;

@@ -77,6 +77,18 @@ sub Init
     $CONFIRMD_ACK_LOGFILE = 
 	$CONFIRMD_ACK_LOGFILE || "$DIR/var/log/confirmd.ack";
     &Touch($CONFIRMD_ACK_LOGFILE) if ! -f $CONFIRMD_ACK_LOGFILE;
+
+
+    if ($USE_DATABASE) {
+        &use('databases');
+
+        # dump recipients
+	my (%mib, %result, %misc, $error);
+	&DataBaseMIBPrepare(\%mib, 'dump_member_list');
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	&Log("fail to dump active list") if $mib{'error'};
+	exit 1 if $mib{'error'};
+    }
 }
 
 
