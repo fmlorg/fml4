@@ -413,4 +413,6 @@ sub DEFINE_PROCEDURE
     $LocalProcedure{$proc} = $fp;
 }
 
+sub Debug { print STDERR "@_\n";}
+
 1;
