@@ -30,8 +30,24 @@ sub AutoRegist
 
     # report mail such as WELCOME ..;
     $e{'GH:Reply-To:'} = $MAIL_LIST;
+    
+    ##### Confirm Mode: We request a confirm to $from before ADD.
+    ##### listserv emulation code;
+    # Confirmation Mode; 
+    # check the MailBody to search $CONFIRMATION_KEYWORD
+    if ($e{'mode:confirm'}) {
+	&use('confirm');
+	&ConfirmationModeInit;
 
-    if ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
+	$s    = &GetSubscribeString($e{'Body'}); # the first line
+	$from = $From_address;
+
+	if (! &Confirm(*e, $from, $s)) {
+	    $e{'mode:stranger'} = 1;
+	    return 0;
+	}
+    }
+    elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
 	# Syntax e.g. "subscribe" in the body
 
 	$s    = &GetSubscribeString($e{'Body'});
@@ -75,13 +91,6 @@ sub AutoRegist
 	&Mesg(*e, "Address [$from] already subscribed.");
 	&Mesg(*e, &WholeMail);
 	return 0;
-    }
-
-    ##### Confirm Mode: We request a confirm to $from before ADD.
-    ##### listserv emulation code;
-    if ($e{'mode:confirm'}) {
-	&use('confirm');
-	&AutoRegistConfirm(*e, $from);
     }
 
     ##### ADD the newcomer to the member list
