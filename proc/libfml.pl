@@ -4,7 +4,7 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
 &Command if $LOAD_LIBRARY eq 'libfml.pl';
@@ -12,38 +12,32 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 
 # VARIABLE SCOPE is limited in this file.
 local($addr);
-local(*mget_list);
-
+local(%mget_list, $misc, @misc, %misc);
 
 # fml command routine
-# return NONE but ,if exist, mail back $Envelope{'message'} to the user
+# return NONE but ,if exist, mail back $e{'message'} to the user
 sub Command
 {
     $0 = "--Command Mode in <$FML $LOCKFILE>";
 
-    ##### PERMIT TO PREAMBLE AND TRAILER to the reply-mail #####
-    $_cf{'ADD2BODY'} = 1;
-    ############################################################
+    ### against loop 
+    if (-f "$TMP_DIR/emerg.stop") { 
+	$e{'message'} .= "*** Server is now UNDER EMERGENCY STOP ***\n";
+	$e{'message'} .= 
+	    "Distribute function of ML Server is unavailable.\n";
+    }
 
     # set parameters 
+    local(*e) = *Envelope;# envelope
     local(@Fld);
+    local($to) = $e{'Addr2Reply:'}; # compatible (for COMMAND_HOOK);
     local($mb) = @_;
-    local($MailBody) = $mb || $Envelope{'Body'};
-
-    # How severely check address
-    # $_cf{'addr-check'} to save the value for the fugure
-    # $ADDR_CHECK_MAX    global variable
-    $_cf{'addr-check'} = $ADDR_CHECK_MAX  = ($ADDR_CHECK_MAX || 3);
-
-    # From_address and Original_From_address are arbitrary.
-    # set Reply-To:, use "original Reply-To:" if exists
-    local($to) = $_cf{'reply-to'} = $Envelope{'h:reply-to:'} || $From_address;
+    local($MailBody) = $mb || $e{'Body'};
 
     # reset for reply
-    $Envelope{'h:Reply-To:'} = $CONTROL_ADDRESS ? 
-	"$CONTROL_ADDRESS\@".(split(/\@/, $MAIL_LIST))[1] : $MAINTAINER;
+    $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'Reply2:'};
 
-    return if 1 == &LoopBackWarn($to);
+    return if 1 == &LoopBackWarn($e{'Addr2Reply:'});
     
     # HERE WE GO!
     &InitProcedure;
@@ -56,29 +50,37 @@ sub Command
       # e.g. *-ctl server, not require '# command' syntax
       $_ = "# $_" if $COMMAND_ONLY_SERVER && (!/^\#/o); 
 
-      # Illegal syntax
+      ### Illegal syntax
       if (! /^#/o) {
 	  next GivenCommands unless $USE_WARNING;
 
 	  &Log("ERROR:Command Syntax without ^#");
-	  $Envelope{'message'} .= "Command Syntax Error not with ^#\n";
+	  $e{'message'} .= "Command Syntax Error not with ^#\n";
 
 	  next GivenCommands;	# 'last' in old days 
       }
+      # since, this ; | is not checked when interact with shell.
+      if (/[\;\|]/) {
+	  $e{'message'} .= "[$_] have illegal characters, EXIT\n";
+	  &Log("Insecure [$_] =~ [$`($&)$']"); 
+	  &Warn("Insecure [$_] =~ [$`($&)$']", &WholeMail);
+	  return;
+      }
 
-      # syntax check, and set the array of cmd..
+      ### syntax check, and set the array of cmd..
       s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
       @Fld = split(/\s+/, $_, 999);
       s/^#\s*//, $org_str = $_;
       $_ = $Fld[1];
 
-      # info
+      ### info
       $0 = "--Command Mode processing $_: $FML $LOCKFILE>";
       &Debug("Present command    $_") if $debug;
 
-      ########## SWITCH ##########
+      ### Special Syntax Modulation
       # enable us to use "mget 200.tar.gz" = "get 200.tar.gz"
-      (/^get$/io) && ($Fld[2] =~ /^\d+.*z$/o) && ($_ = 'mget');
+      # EXCEPT FOR 'get \d+', get -> mget.
+      /^get$/io && ($Fld[2] !~ /^\d+$/o) && ($_ = 'mget');
 
       ### Procedures
       local($status, $proc);
@@ -87,7 +89,7 @@ sub Command
       if ($proc = $Procedure{$_}) {
 	  # REPORT
 	  if ($Procedure{"r#$_"}) {
-	      $Envelope{'message'} .= "\n>>> $org_str\n";
+	      $e{'message'} .= "\n>>> $org_str\n";
 	  }
 
 	  # INFO
@@ -95,7 +97,7 @@ sub Command
 	  $0 = "--Command calling $proc: $FML $LOCKFILE>";
 
 	  # PROCEDURE
-	  $status = &$proc($_, *Fld);
+	  $status = &$proc($_, *Fld, *e, *misc);
 
 	  # NEXT
 	  last GivenCommands if $status eq 'LAST';
@@ -110,7 +112,7 @@ sub Command
 
       # if undefined commands, notify the user about it and abort.
       &Log("Unknown Cmd $_");
-      $Envelope{'message'} .= ">>> $_\n\tUnknown Command: $_\n\tStop.\n";
+      $e{'message'} .= ">>> $_\n\tUnknown Command: $_\n\tStop.\n";
 
       # stops.
       last GivenCommands;
@@ -119,14 +121,16 @@ sub Command
 
     # process for mget submissions.
     if (%mget_list) {
-	&MgetCompileEntry;
-	$FML_EXIT_HOOK .= '&mget3_SendingEntry;';
+	&MgetCompileEntry(*e);
+	if ($FML_EXIT_HOOK !~ /mget3_SendingEntry/) {
+	    $FML_EXIT_HOOK .= '&mget3_SendingEntry;';
+	}
     }
 
     # return "ERROR LIST"
-    if ($Envelope{'message'}) {
-	$Envelope{'message:h:to'}      = $to; 
-	$Envelope{'message:h:subject'} = "fml Command Status report $ML_FN";
+    if ($e{'message'}) {
+	$e{'message:h:to'}      = $e{'Addr2Reply:'};
+	$e{'message:h:subject'} = "fml Command Status report $ML_FN";
     }
 }
 
@@ -138,15 +142,12 @@ sub InitProcedure
     $COMMAND_SYNTAX_EXTENSION = 1 if $RPG_ML_FORM_FLAG;
 
     # Command Line Options
-    $COMMAND_ONLY_SERVER = 1 if $_cf{'opt', 'c'};
-
-    # BACKUP for user-defined-set-up-data 
-    local(%bak) = %Procedure;
+    $COMMAND_ONLY_SERVER = 1 if $_cf{'opt:c'};
 
     # SYNTAX
     # $s = $_;(present line of the given mail body)
     # $ProcFileSendBack($proc, *s);
-    %Procedure = (
+    local(%proc) = (
 		  # send a guide back to the user
 		  'guide',	'ProcFileSendBack',
 		  '#guide',	$GUIDE_FILE,
@@ -198,18 +199,23 @@ sub InitProcedure
 		  'sendfile', 'ProcRetrieveFileInSpool',
 
 		  # mget is a special case
-		  'mget', 'ProcMgetMakeList',
+		  'mget',  'ProcMgetMakeList',
 		  'mget2', 'ProcMgetMakeList',
+		  'mget3', 'ProcMgetMakeList',
 		  'msend', 'ProcMgetMakeList',
+
+		  # library access: another way to access archives
+		  'library',	'ProcLibrary',
+		  'r#library',	1, 
 
 		  # these below are not implemented, 
 		  # but implemented in hml 1.6
 		  # codes only for notifying the alart to the user
-		  'iam',    'ProcObsolete',
+		  'iam',    'ProcWhoisWrite',
 		  'r#iam', 1,
-		  'whois',  'ProcObsolete',
+		  'whois',  'ProcWhoisSearch',
 		  'r#whois', 1,
-		  'who',    'ProcObsolete',
+		  'who',    'ProcWhoisList',
 		  'r#who', 1,
 
 		  # send a message to $MAINTAINER
@@ -235,17 +241,17 @@ sub InitProcedure
 		  'r#skip', 1,
 		  'noskip', 'ProcSetDeliveryMode',
 		  'r#noskip', 1,
-		  'chaddr', 'ProcSetDeliveryMode',
-		  'r#chaddr', 1,
-		  'change-address', 'ProcSetDeliveryMode',
-		  'r#change-address', 1,
-		  'change', 'ProcSetDeliveryMode',
-		  'r#change', 1,
 
 		  # Bye - Good Bye Eternally
-		  'bye',         'ProcUnSubscribe',
+		  'chaddr',         'ProcSetMemberList',
+		  'r#chaddr', 1,
+		  'change-address', 'ProcSetMemberList',
+		  'r#change-address', 1,
+		  'change',         'ProcSetMemberList',
+		  'r#change', 1,
+		  'bye',            'ProcSetMemberList',
 		  'r#bye',         1,
-		  'unsubscribe', 'ProcUnSubscribe',
+		  'unsubscribe',    'ProcSetMemberList',
 		  'r#unsubscribe', 1,
 
 		  # Subscribe
@@ -267,24 +273,41 @@ sub InitProcedure
 		  'r#addr', 1,
 
 		  # DUMMY SETTING for the easy coding
-		  '#dummy', '#dummy'
+		  '#dummy', '#dummy',
+
+		  # CONTRIB
+		  'traffic', 'ProcTraffic', 
+		  'r#traffic', 1,
 		  );
 
-    # SET UP! user-defined-set-up-data 
-    if (%bak) {
-	%Procedure = (%Procedure, %bak);
+
+
+    ### OVERWRITE by user-defined-set-up-data (%LocalProcedure)
+    ### REDEFINE  by @PermitProcedure and @DenyProcedure
+
+    # IF @PermitProcedure, PERMIT ONLY DEFINED FUNCTIONS;
+    if (@PermitProcedure) { 
+	foreach $k (@PermitProcedure) { $Procedure{$k} = $proc{$v};}
+    }
+    # PERMIT ALL FUNCTIONS
+    else {
+	%Procedure = %proc;
+    }
+
+    # OVERLOAD USER-DEFINED FUNCTIONS
+    local($k, $v);
+    while (($k, $v) = each %LocalProcedure) { $Procedure{$k} = $v;}
+
+    # IF @DenyProcedure, Delete DEFIEND FUNCTIONS
+    if (@DenyProcedure) { 
+	foreach $k (@DenyProcedure) { undef $Procedure{$k};}
     }
 }
 
 
+# 1.6.1 whois becomes a standard.
 sub ReConfigProcedure
 {
-    # these below are not implemented, but implemented in hml 1.6
-    # codes only for notifying the alart to the user
-    if ($USE_WHOIS) {
-	$Procedure{'whois'} =  'ProcWhois';
-    }
-
     # IF USED AS ONLY COMMAND SERVER, 
     if ($COMMAND_ONLY_SERVER) {
 	local($key) = $REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE;
@@ -293,28 +316,28 @@ sub ReConfigProcedure
 
     # Use Subject as a command input
     if ($USE_SUBJECT_AS_COMMANDS) {
-	$Envelope{'Body'} = $Envelope{'h:Subject:'}."\n".$Envelope{'Body'};
+	$e{'Body'} = $e{'h:Subject:'}."\n".$e{'Body'};
     }
 }
 
 
 sub ProcFileSendBack
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     &Log($proc);
-    &SendFile($_cf{'reply-to'}, "$proc $ML_FN", $Procedure{"#$proc"});
+    &SendFile($e{'Addr2Reply:'}, "$proc $ML_FN", $Procedure{"#$proc"});
 }
 
 
 sub ProcModeSet
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     local($s) = $Fld[2]; 
     local($p) = $Fld[3] ? $Fld[3] : 1; 
     $s =~ tr/A-Z/a-z/;
 
-    $Envelope{'message'} .= "\n>>> $proc $s $p\n";
+    $e{'message'} .= "\n>>> $proc $s $p\n";
 
     if ($s eq 'addr_check_max') {
 	$ADDR_CHECK_MAX = $p;
@@ -324,7 +347,7 @@ sub ProcModeSet
     }
     elsif (! $_cf{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTIFICATION";
-	$Envelope{'message'} .= "$s\n";
+	$e{'message'} .= "$s\n";
 	&Log($s);
 	return 'LAST';
     }
@@ -333,64 +356,67 @@ sub ProcModeSet
 
     ### CASE
     if ($s eq 'debug') {
-	$_cf{'debug'}= $debug = $p;
+	$_cf{'debug'} = $debug = $p;
     }
 
     ### LOG
-    $Envelope{'message'} .= "\t$s = $p;\n";
+    $e{'message'} .= "\t$s = $p;\n";
     &Log("$proc $s = $p");
 }
 
 
 sub ProcSummary
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
+    local($s) = $e{'r:Subject'};
 
     if ($Fld[2] && ($proc eq 'search')) {
-	$Envelope{'message'} .= "\n>>> Search Key=$Fld[2] in Summary file\n\n";
+	$e{'message'} .= "\n>>> Search Key=$Fld[2] in Summary file\n\n";
 	&SearchKeyInSummary($Fld[2], 's');
-	&Log("Search [$Fld[2]]");
+	&Log(($s && "$s ")."Search [$Fld[2]]");
     }
     elsif ($Fld[2] && ($proc eq 'summary')) {
-	$Envelope{'message'} .= "\n>>> Summary: Search KEY=$Fld[2]\n\n";
+	$e{'message'} .= "\n>>> Summary: Search KEY=$Fld[2]\n\n";
 	&SearchKeyInSummary($Fld[2], 'rs');
-	&Log("Restricted Summary [$Fld[2]]");
+	&Log(($s && "$s ")."Restricted Summary [$Fld[2]]");
     }
     else {
-	&Log("Summary");
-	&SendFile($_cf{'reply-to'}, "Summary $ML_FN", $SUMMARY_FILE);
+	$s = ($s || "Summary");
+	&Log($s);
+	&SendFile($e{'Addr2Reply:'}, "$s $ML_FN", $SUMMARY_FILE);
     }
 }
 
 
 sub ProcShowStatus
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     &Log("Status for $Fld[2]");
     &use('utils');
-    $Envelope{'message'} .= "\n>>> status for $Fld[2].\n";
-    $Envelope{'message'} .= &MemberStatus($Fld[2] ? $Fld[2] : $_cf{'reply-to'})."\n";
+    $e{'message'} .= "\n>>> status for $Fld[2].\n";
+    $e{'message'} .= 
+	&MemberStatus($Fld[2] ? $Fld[2] : $From_address)."\n";
 }
 
 
 sub ProcObsolete
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     &Log("$proc[Not Implemented]");
-    $Envelope{'message'} .= "Command $proc is not implemented.\n";
+    $e{'message'} .= "Command $proc is not implemented.\n";
 }
 
 
 sub ProcRetrieveFileInSpool
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     local(*cat);
     local($ID) = $Fld[2]; 
 
     if (&InSecureP($ID)){ 
-	$Envelope{'message'} .= "\n>>> $org_str\nget $Fld[2] failed.\n";
+	$e{'message'} .= "\n>>> $org_str\nget $Fld[2] failed.\n";
 	return 'LAST';
     }
 
@@ -401,11 +427,11 @@ sub ProcRetrieveFileInSpool
 	$cat{"$SPOOL_DIR/$ID"} = 1;
 	if ($ar eq 'TarZXF') {  
 	    &use('utils');
-	    &Sendmail($_cf{'reply-to'}, "Get $ID $ML_FN", 
+	    &Sendmail($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
 		      &TarZXF("$DIR/$mail_file", 1, *cat));
 	}
 	else {
-	    &SendFile($_cf{'reply-to'}, "Get $ID $ML_FN", 
+	    &SendFile($e{'Addr2Reply:'}, "Get $ID $ML_FN", 
 		      "$DIR/$mail_file", 
 		      $_cf{'libfml', 'binary'});
 	    undef $_cf{'libfml', 'binary'}; # destructor
@@ -414,7 +440,7 @@ sub ProcRetrieveFileInSpool
 	&Log("Get $ID, Success");
     } 
     else {				# or null $ID
-	$Envelope{'message'} .= "\n>>> $org_str\nArticle $ID is not found.\n";
+	$e{'message'} .= "\n>>> $org_str\nArticle $ID is not found.\n";
 	&Log("Get $ID, Fail");
     }
 }
@@ -422,11 +448,11 @@ sub ProcRetrieveFileInSpool
 
 sub ProcForward
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     
     &Log('Msg');
     &Warn("Msg ($From_address)", 
-	  $Envelope{'h:Subject:'}."\n\n".$Envelope{'Body'});
+	  $e{'h:Subject:'}."\n\n".$e{'Body'});
 
     'LAST';
 }
@@ -434,13 +460,17 @@ sub ProcForward
 
 sub ProcExit
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     &Log("exit[$proc]");
     'LAST';
 }
 
 
+# ($ProcName, *FieldName, *Envelope, *misc)
+# $misc      : E-Mail-Address to operate
+# $FieldName : "# procname opt1 opt2" FORM
+#
 # Off: temporarily.
 # On : Return to Mailng List
 # Matome : Matome Okuri ver.2 Control Interface
@@ -448,15 +478,12 @@ sub ProcExit
 # NOSkip : inverse above
 sub ProcSetDeliveryMode
 {
-    local($proc, *Fld) = @_;
-    local($addr) = $addr ? $addr : $From_address;
-    local($c, $_, $cmd, $opt, *misc);
+    local($proc, *Fld, *e, *misc) = @_;
+    local($addr) = $misc || $addr || $From_address;
+    local($c, $_, $cmd, $opt, *misc); # order is important(e.g. $misc)
     local($cmd, $opt, $misc) = ($proc, $Fld[2], $Fld[3]);
     $cmd =~ tr/a-z/A-Z/;
     $_   = $cmd;
-
-    # KEYWORDO for 'chaddr'
-    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
 
     ###### LOOP CHECK
     if (&LoopBackWarn($addr)) {
@@ -482,8 +509,8 @@ sub ProcSetDeliveryMode
 
 	    if ((!$d) && (!$mode)) { 
 		&Log("$cmd $c fails, not match");
-		$Envelope{'message'} .= "$cmd: $opt parameter not match.\n";
-		$Envelope{'message'} .= "\tDO NOTHING!\n";
+		$e{'message'} .= "$cmd: $opt parameter not match.\n";
+		$e{'message'} .= "\tDO NOTHING!\n";
 		return $NULL;
 	    }			
 	}# $c == non-nil;
@@ -493,14 +520,50 @@ sub ProcSetDeliveryMode
     ###### [case 2 "matome" call the default slot value]
     elsif (/^MATOME$/i) {
 	&Log("$cmd: $opt inappropriate, do nothing");
-	$Envelope{'message'} .= "$cmd: $opt parameter inappropriate.\n";
-	$Envelope{'message'} .= "\tDO NOTHING!\n";
+	$e{'message'} .= "$cmd: $opt parameter inappropriate.\n";
+	$e{'message'} .= "\tDO NOTHING!\n";
 	return $NULL;
     }
+
+    if (&ChangeMemberList($cmd, $addr, $ACTIVE_LIST, *misc)) {
+	&Log("$cmd [$addr] $c");
+	$e{'message'} .= "$cmd [$addr] $c accepted.\n";
+    }
+    else {
+	&Log("$cmd [$addr] $c failed");
+	$e{'message'} .= "$cmd [$addr] $c failed.\n";
+    }
+}
+
+
+# ($ProcName, *FieldName, *Envelope, *misc)
+# $misc      : E-Mail-Address to operate
+# $FieldName : "# procname opt1 opt2" FORM
+#
+# Bye - Good Bye Eternally
+sub ProcSetMemberList
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    local($addr)             = $misc || $addr || $From_address;
+    local($cmd, $opt, $misc) = ($proc, $Fld[2], $Fld[3]); # order (e.g. $misc)
+    $cmd =~ tr/a-z/A-Z/;
+    $_   = $cmd;
+
+    # KEYWORD for 'chaddr'
+    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';
+
+    # LOOP CHECK
+    if (&LoopBackWarn($addr)) {
+	&Log("$cmd: LOOPBACk ERROR, exit");
+	return '';
+    }
+    
     ###### change address [chaddr old-addr new-addr]
     # Default: $CHADDR_KEYWORD = 'CHADDR|CHANGE\-ADDRESS|CHANGE';
-    elsif (/^($CHADDR_KEYWORD)$/i) {
+    if (/^($CHADDR_KEYWORD)$/i) {
 	$addr = $opt;
+	$e{'message'} .= "\t set $cmd => CHADDR\n";
+	$cmd = 'CHADDR';
 	
 	# LOOP CHECK
 	&LoopBackWarn($misc) && &Log("$cmd: LOOPBACk ERROR, exit") && 
@@ -510,36 +573,59 @@ sub ProcSetDeliveryMode
 	if (&CheckMember($addr, $MEMBER_LIST) || 
 	    &CheckMember($misc, $MEMBER_LIST)) {
 	    &Log("$cmd: OK! Either $addr and $misc is a member.");
-	    $Envelope{'message'} .= "\tTry change $addr to $misc\n";
+	    $e{'message'} .= 
+		"\tTry change\n\n\t$addr\n\t=>\n\t$misc\n\n";
 	}
 	else {
 	    &Log("$cmd: NEITHER $addr and $misc is a member. STOP");
-	    $Envelope{'message'} .= "$cmd:\n\tNEITHER\n\t$addr nor $misc\n\t";
-	    $Envelope{'message'} .= "is a member.\n\tDO NOTHING!\n";
+	    $e{'message'} .= "$cmd:\n\tNEITHER\n\t$addr nor $misc\n\t";
+	    $e{'message'} .= "is a member.\n\tDO NOTHING!\n";
 	    return 'LAST';
 	}
     }
+    # NOT CHADDR;
+    else {
+	$e{'message'} .= "\t set $cmd => BYE\n";
+	$cmd = 'BYE';
+    }
 
+    ##### Call recursively
+    local($r) = 0;
+    if ($ML_MEMBER_CHECK) {
+	&ChangeMemberList($cmd, $addr, $MEMBER_LIST, *misc) && $r++;
+	&Log("$cmd MEMBER [$addr] $c O.K.")   if $r == 1 && $debug2;
+	&Log("$cmd MEMBER [$addr] $c failed") if $r != 1;
+    }
+    else {
+	$r++;
+    }
 
-    if (&ChangeMemberList($cmd, $addr, $ACTIVE_LIST, *misc)) {
-	&Log("$cmd [$addr] $c");
-	$Envelope{'message'} .= "$cmd [$addr] $c accepted.\n";
+    &ChangeMemberList($cmd, $addr, $ACTIVE_LIST, *misc) && $r++;
+    &Log("$cmd ACTIVE [$addr] $c O.K.")   if $r == 2  && $debug2;
+    &Log("$cmd ACTIVE [$addr] $c failed") if $r != 2;
+
+    # Status
+    if ($r == 2) {
+	&Log("$cmd [$addr] $c accepted");
+	$e{'message'} .= "$cmd [$addr] $c accepted.\n";
     }
     else {
 	&Log("$cmd [$addr] $c failed");
-	$Envelope{'message'} .= "$cmd [$addr] $c failed.\n";
+	$e{'message'} .= "$cmd [$addr] $c failed.\n";
     }
+
+    return 'LAST';
 }
 
 
 # Set the address to operate e.g. for exact matching
 sub ProcSetAddr
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     if (! $_cf{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTIFICATION";
-	$Envelope{'message'} .= "$s\n";
+	$e{'message'} .= "$s\n";
 	&Log($s);
 	return 'LAST';
     }
@@ -547,90 +633,37 @@ sub ProcSetAddr
     if (&AddressMatch($Fld[2], $From_address)) {
 	$addr = $Fld[2];
 	$ADDR_CHECK_MAX = 10;	# exact match(trick)
-	$Envelope{'message'} .= "Try exact-match for $addr.\n";
+	$e{'message'} .= "Try exact-match for $addr.\n";
 	&Log("Exact addr=$addr");
     }
     else {
-	$Envelope{'message'} .= "Forbidden to use $addr,\n";
-	$Envelope{'message'} .= "since $addr is too different from $From_address.\n";
+	$e{'message'} .= "Forbidden to use $addr,\n";
+	$e{'message'} .= "since $addr is too different from $From_address.\n";
 	&Log("Exact addr=$addr fail");
     }
 }
 
 
-# Bye - Good Bye Eternally
-sub ProcUnSubscribe
-{
-    local($proc, *Fld) = @_;
-
-    local($cmd) = 'BYE';
-    # $addr = $Fld[2] unless $addr;
-    local($addr) = $addr ? $addr : $From_address;
-
-    # if ($c = $Fld[2]) {
-    #    # Set or unset Address to SKIP, OFF, ON ...
-    #    $addr = $c;
-    # }
-
-    # LOOP CHECK
-    if (&LoopBackWarn($addr)) {
-	&Log("$cmd: LOOPBACk ERROR, exit");
-	return '';
-    }
-    
-    # Call recursively
-    local($r) = 0;
-    if ($ML_MEMBER_CHECK) {
-	$ADDR_CHECK_MAX = $_cf{'addr-check'};
-	&ChangeMemberList($cmd, $addr, $MEMBER_LIST) && $r++;
-	&Log("BYE MEMBER [$addr] $c O.K.")   if $r == 1 && $debug2;
-	&Log("BYE MEMBER [$addr] $c failed") if $r != 1;
-
-	$ADDR_CHECK_MAX = $_cf{'addr-check'};
-	&ChangeMemberList($cmd, $addr, $ACTIVE_LIST) && $r++;
-	&Log("BYE ACTIVE [$addr] $c O.K.")   if $r == 2 && $debug2;
-	&Log("BYE ACTIVE [$addr] $c failed") if $r != 2;
-    }
-    else {
-	$r++;
-	&ChangeMemberList($cmd, $addr, $ACTIVE_LIST) && $r++;
-	&Log("BYE ACTIVE [$addr] $c O.K.")   if $r == 2  && $debug2;
-	&Log("BYE ACTIVE [$addr] $c failed") if $r != 2;
-    }
-
-    # Status
-    if ($r == 2) {
-	&Log("$cmd [$addr] $c accepted");
-	$Envelope{'message'} .= "$cmd [$addr] $c accepted.\n";
-    }
-    else {
-	&Log("$cmd [$addr] $c failed");
-	$Envelope{'message'} .= "$cmd [$addr] $c failed.\n";
-    }
-
-    return 'LAST';
-}
-
-
 sub ProcSubscribe
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
 
     # if member-check mode, forward the request to the maintainer
     if ($ML_MEMBER_CHECK) {
-	&Log("$proc request is forwarded to Maintainer");
+	&LogWEnv("$proc request is forwarded to Maintainer", *e);
+	$e{'message'} .= "Please wait a little\n";
 	&Warn("$proc request from $From_address", &WholeMail);
     }
     else {
 	&use('utils');
-	&AutoRegist;
+	&AutoRegist(*e);
     }
 }
 
 
 sub ProcSetAdminMode
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     local($addr) = $addr ? $addr : $From_address;
 
     # REMOTE PERMIT or NOT?
@@ -647,17 +680,17 @@ sub ProcSetAdminMode
     $REMOTE_AUTH        = $REMOTE_AUTH       || 0;
 
     # touch
-    (!-f $PASSWD_FILE) && open(TOUCH,">> $_") && close(TOUCH);
+    -f $PASSWD_FILE || &Touch($PASSWD_FILE);
     
-    &use('remote');
+    &use('ra');	# remote -> ra
 
     if (&CheckMember($addr, $ADMIN_MEMBER_LIST)) {
-	&Log("$proc: REQUEST: " . join(" ", @Fld)) if $debug;
+	&Log("$proc: Request[@Fld]") if $debug;
 
 	$_cf{'mode:admin'} = 1;	# AUTHENTIFIED, SET MODE ADMIN
 
-	&AdminCommand(@Fld) || do {
-	    &Log("&AdminCommand return nil, STOP!");
+	&AdminCommand(*Fld, *e) || do {
+	    &Log("AdminCommand return nil, STOP!");
 	    return 'LAST';
 	};
 
@@ -665,8 +698,8 @@ sub ProcSetAdminMode
 	return '';
     }
     else {
-	$Envelope{'message'} .= "$proc: You are not member\n";
-	&Log("$proc: ILLEGAL ADMIN COMMANDS REQUEST");
+	&LogWEnv("$proc: Request From NOT ADMINISTRATORS, STOP!", *e);
+	return 'LAST';
     }
 
     $_cf{'mode:admin'} = 0;	# UNSET for hereafter
@@ -675,7 +708,7 @@ sub ProcSetAdminMode
 
 sub ProcApprove
 {
-    local($proc, *Fld) = @_;	# 
+    local($proc, *Fld, *e, *misc) = @_;
     local($addr) = $addr ? $addr : $From_address;
     local($p);
 
@@ -697,31 +730,29 @@ sub ProcApprove
     
     # INCLUDE Libraries
     &use('crypt');
-    &use('remote');
+    &use('ra');	# remote -> ra
 
     # get passwd
-    shift @Fld;    shift @Fld;
-    $p = shift @Fld;
+    local($d0, $d1, $p, @p) = @Fld;
+    local(@Fld) = ('#', 'approve', @p);
 
     &Log("&CmpPasswdInFile($PASSWD_FILE, $addr, $p)") if $debug;
 
     if (&CmpPasswdInFile($PASSWD_FILE, $addr, $p)) {
-	&Log("$proc: REQUEST: " . join(" ", @Fld)) if $debug;
+	&Log("$proc: Request[@p]") if $debug;
 
 	$_cf{'mode:admin'} = 1;	# AUTHENTIFIED, SET MODE ADMIN
 
-	@Fld = ('#', 'admin', @Fld);
-	&AdminCommand(@Fld) || do {
-	    &Log("&AdminCommand return nil, STOP!");
+	&ApproveCommand(*Fld, *e) || do {
+	    &Log("AdminCommand return nil, STOP!");
 	    return 'LAST';
 	};
 
 	$_cf{'mode:admin'} = 0;	# UNSET for hereafter
-
 	return '';
     }
     else {
-	$Envelope{'message'} .= "$proc: You are not an administrator\n";
+	$e{'message'} .= "$proc: You are not an administrator\n";
 	&Log("$proc: ILLEGAL ADMIN COMMANDS REQUEST");
     }
 }
@@ -729,7 +760,7 @@ sub ProcApprove
 
 sub ProcPasswd
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     local($addr) = $addr ? $addr : $From_address;
 
     shift @Fld;
@@ -746,70 +777,67 @@ sub ProcPasswd
 
     # if you know the old password, you are authentified.
     if (&CmpPasswdInFile($PASSWD_FILE, $addr, $old)) {
-	$Envelope{'message'} .= "$proc: Authentified\n";
+	$e{'message'} .= "$proc: Authentified\n";
 	&Log("$proc; Authentified");
 	if (&ChangePasswd($PASSWD_FILE, $addr, $new)) {
-	    $Envelope{'message'} .= "$proc; change passwd succeed";
+	    $e{'message'} .= "$proc; change passwd succeed";
 	    &Log("$proc; change passwd succeed");
 	}
 	else {
-	    $Envelope{'message'} .= "$proc; change passwd fail";
+	    $e{'message'} .= "$proc; change passwd fail";
 	    &Log("$proc; change passwd fail");
 	}
     }
     else {
-	$Envelope{'message'} .= "$proc: Illegal password\n";
+	$e{'message'} .= "$proc: Illegal password\n";
 	&Log("$proc: Illegal password");
     }
 }
 
 
-sub ProcWhois
-{
-    local($proc, *Fld) = @_;
-
-    &Log("whois $Fld[2]");
-
-    &use('utlis');
-    $Envelope{'message'} .= &Whois(@Fld)."\n";
-}
-
-
 sub ProcIndex
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
+    local(*e) = *Envelope;
 
     &Log($proc);
-    $INDEX_FILE = $INDEX_FILE || "$DIR/index";
     
     if (-f $INDEX_FILE && open(F, $INDEX_FILE)) {
-	$Envelope{'message'} .= <F>;
-	$Envelope{'message'} .= "\n";
+	$e{'message'} .= <F>;
+	$e{'message'} .= "\n";
     }
     else {
 	local($ok, $dir, $f);
+	if (&ProcIndexSearchMinCount < &GetID) {
+	    $e{'message'} .= 
+		"The spool of this ML have plain format articles\n";
+	    $e{'message'} .= "\tthe number(count) exists\n\t";
+	    $e{'message'} .= &ProcIndexSearchMinCount;
+	    $e{'message'} .= " <-> ";
+	    $e{'message'} .= &GetID;
+	    $e{'message'} .= "\n\n";
+	}
+	else {
+	    $e{'message'} .= "NO plain format articles\n\n";
+	}
 
-	$Envelope{'message'} .= "The spool of this ML have plain format articles\n";
-	$Envelope{'message'} .= "\tthe number(count) exists\n\t";
-	$Envelope{'message'} .= &ProcIndexSearchMinCount;
-	$Envelope{'message'} .= " <-> ";
-	$Envelope{'message'} .= &GetID;
-	$Envelope{'message'} .= "\n\n";
-	$Envelope{'message'} .= "In 'ARCHIVE' the following files exist.\n";
-	$Envelope{'message'} .= "Please 'mget' command to get them\n\n";
+	$e{'message'} .= "In 'ARCHIVE' the following files exist.\n";
+	$e{'message'} .= "Please 'mget' command to get them\n\n";
 
 	$ok = 0;
-
       AR: foreach $dir (@ARCHIVE_DIR) {
 	  next if /^\./o;
 
+	  $e{'message'} .= "\n$dir:\n" if $INDEX_SHOW_DIRNAME;
+
 	  if ( -d $dir && opendir(DIRD, $dir) ) {
-	    FILE: foreach $f (readdir(DIRD)) {
+	    FILE: foreach $f (sort readdir(DIRD)) {
 		next FILE if $f =~ /^\./;
 
-		stat("$dir/$f");
+		local($size) = (stat("$dir/$f"))[7];
 		if (-f _) {
-		    $Envelope{'message'} .= "\t$f\n";
+		    $e{'message'} .= 
+			sprintf("\t%-20s\t%10d bytes\n", $f, $size);
 		    $ok++;
 		}
 	    }# FOREACH;
@@ -817,18 +845,19 @@ sub ProcIndex
 	      closedir DIRD;
 	  }
 	  else {
-	      &Log("Index:cannot open $dir");
+	      &Log("Index:cannot opendir $dir");
 	  }
       }	# AR:;
 
-	$Envelope{'message'} .= "\n";
-	$Envelope{'message'} .= "\tNothing.\n" unless $ok;
+	$e{'message'} .= "\n";
+	$e{'message'} .= "\tNothing.\n" unless $ok;
     }# case of file no index exists.;
 }
 
 
 sub ProcIndexSearchMinCount
 {
+    local($proc, *Fld, *e, *misc) = @_;
     local($try)  = &GetID - 1;# seq is already +1;
     local($last) = $try;
 
@@ -839,7 +868,7 @@ sub ProcIndexSearchMinCount
     } 
     
     for ((!-f "$SPOOL_DIR/$try"); (!-f "$SPOOL_DIR/$try"); $try++) {
-	last MIN if $try > $last; # ERROR
+	last if $try > $last; # ERROR
 	print STDERR "ExistCheck: min ++ $try\n" if $debug;
     }
 
@@ -847,9 +876,10 @@ sub ProcIndexSearchMinCount
     ($try < 1) ? 1: $try;
 }
 
+
 sub ProcMgetMakeList
 {
-    local($proc, *Fld) = @_;
+    local($proc, *Fld, *e, *misc) = @_;
     local($key);
     local(@fld) = @Fld;
 
@@ -883,6 +913,54 @@ sub ProcMgetMakeList
 }
 
 
+sub ProcLibrary
+{
+    local($proc, *Fld, *e, *misc) = @_;
+    &use('library');
+    &ProcLibrary4PlainArticle($proc, *Fld, *e, *misc);
+}
+
+
+# the left of e{'Body'} is whois-text
+sub ProcWhoisWrite 
+{ 
+    local($proc, *Fld, *e, *misc) = @_;
+
+    &use('whois');
+    &WhoisWrite(*e);
+    return 'LAST';
+}
+
+
+sub ProcWhoisList
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    &use('whois');
+    &WhoisList(*e);
+}
+
+
+sub ProcWhoisSearch 
+{ 
+    local($proc, *Fld, *e, *misc) = @_;
+
+    &use('whois'); 
+    &WhoisSearch(*e, *Fld);
+}
+
+
+sub ProcTraffic
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    &use('traffic');
+
+    &Log("$proc [@Fld[2..$#Fld]]");
+    &Traffic(*Fld, *e);
+}
+
+
 ################## PROCEDURE SETTINGS ENDS ##################
 
 
@@ -892,7 +970,8 @@ sub ProcMgetMakeList
 # matomete get articles from the spool, then return them
 sub MgetCompileEntry
 {
-    local($key, $value, $Status, *fld, *value);
+    local(*e) = @_;
+    local($key, $value, $status, $fld, @fld, $value, @value);
     local($proc) = 'mget';
 
     # Do nothing if no entry.
@@ -900,14 +979,16 @@ sub MgetCompileEntry
 
     $0 = "--Command Mode loading mget library: $FML $LOCKFILE>";
 
-    require 'SendFile.pl';
+    &use('sendfile');
 
     while (($key, $value) = each %mget_list) {
-	print STDERR "TRY ENTRY [$key]\t=>\t[$value]\n" if $debug;
+	print STDERR "TRY MGET ENTRY [$key]\t=>\t[$value]\n" if $debug;
 
-	# options
+	# SPECIAL EFFECTS
+	next if $key =~ /^\#/o;
+	
 	@fld = split(/:/, $fld = $key); 
-	$fld =~ s/:/ /;
+	$fld =~ s/:/ /;		# for $0;
 
 	# targets, may be multiple
 	@value = split(/\s+/, $value); 
@@ -917,23 +998,22 @@ sub MgetCompileEntry
 
 	# mget3 is a new interface to generate requests of "mget"
 	$fld = $key;		# to make each "sending entry"
-	$Status = &mget3(*value, *fld);
+	$status = &mget3(*value, *fld, *e);
 
-	$0 = "--Command Mode mget[$key $fld] status=$Status: $FML $LOCKFILE>";
+	$0 = "--Command Mode mget[$key $fld] status=$status: $FML $LOCKFILE>";
 
 	# regardless of RETURN VALUE;
 	return if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
 
-	if ($Status) {
+	if ($status) {
 	    ;
 	}
 	else {
-	    $Status = "Fail";
-	    $Envelope{'message'} .= "\n>>>$proc $value $fld\n\tfailed.\n";
-	    $ERROR_FLAG++;	# global
+	    $status = "Fail";
+	    $e{'message'} .= "\n>>>$proc $value $fld\n\tfailed.\n";
 	};
 
-	&Log("$proc:[$$] $key $fld: $Status");
+	&Log("$proc:[$$] $key $fld: $status");
     }
 }
 
@@ -955,34 +1035,50 @@ $;
 }
 
 
-# ChangeMemberList(cmd, address, file)
-# If multiply matched for the given address, 
-# do Log [$log = "$addr"; $log_c++;]
 sub ChangeMemberList
 {
+    local($org_addr) = $ADDR_CHECK_MAX;	# save the present severity
+    local($status);
+
+    while ($ADDR_CHECK_MAX < 10) { # 10 is built-in;
+	$status = &DoChangeMemberList(@_);
+	last if $status ne 'RECURSIVE';
+	$ADDR_CHECK_MAX++;
+	&Debug("Call Again ChangeMemberList(...)[$ADDR_CHECK_MAX]") if $debug;
+    } 
+
+    $ADDR_CHECK_MAX = $org_addr; # reset;
+    $status;
+}
+
+
+# MAIN Routine of ChangeMemberList(cmd, address, file) 
+# If multiply matched for the given address, 
+# do Log [$log = "$addr"; $log_c++;]
+sub DoChangeMemberList
+{
     local($cmd, $Address, $file, *misc) = @_;
-    &GetTime;
-    local($Date) = sprintf("%02d%02d", ++$mon, $mday);
-    local($Status, $log, $log_c, $r, $addr, $org_addr);
+    local($status, $log, $log_c, $r, $addr, $org_addr);
     local($acct) = split(/\@/, $Address);
 
-    &Debug("&ChangeMemberList($cmd, $Address, $file)") if $debug;
+    &Debug("ChangeMemberList ($cmd, $Address, $file, misc)") if $debug;
     
-    if ($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file) {
-	open(BAK, ">> $file.bak") || (&Log($!), return $NULL);
-	select(BAK); $| = 1; select(STDOUT);
-	print BAK "----- Backup on $Now -----\n";
+    ### File IO
+    # NO CHECK 95/10/19 ($MEMBER_LIST eq $file || $ACTIVE_LIST eq $file)
+    # Backup
+    open(BAK, ">> $file.bak") || (&Log($!), return $NULL);
+    select(BAK); $| = 1; select(STDOUT);
+    print BAK "----- Backup on $Now -----\n";
 
-	open(NEW, ">  $file.tmp") || (&Log($!), return $NULL);
-	select(NEW); $| = 1; select(STDOUT);
+    # New
+    open(NEW, ">  $file.tmp") || (&Log($!), return $NULL);
+    select(NEW); $| = 1; select(STDOUT);
 
-	open(FILE,"<  $file") || (&Log($!), return $NULL);
-    }
-    else {
-	&Log("Cannot match $file in ChangeMemberList");
-	return $NULL;
-    }
+    # Input
+    open(FILE,"<  $file") || (&Log($!), return $NULL);
 
+
+    ### Process GO!
     print NEW &FML_HEADER;
 
     in: while (<FILE>) {
@@ -992,7 +1088,7 @@ sub ChangeMemberList
 	if (/^\+/o) { 
 	    &Log("NO CHANGE[$file] when no member check");
 	    close(FILE); 
-	    return ($Status = 'done'); 
+	    return ($status = 'done'); 
 	}
 
 	# Backward Compatibility.	tricky "^\s".
@@ -1062,82 +1158,89 @@ sub ChangeMemberList
 		print NEW "$misc\n"; 
 	    }
 
-	    $Status = 'done'; 
+	    $status = 'done'; 
 	    $log .= "$cmd $addr; "; $log_c++;
 	}# CASE of COMMANDS;
 	else {
+	    print NEW "$_\n"; 
 	    &Log("ChangeMemberList:Unknown cmd = $cmd");
 	}
     } # end of while loop;
 
     # CORRECTION; If not registerd, add the Address to SKIP
-    if ($cmd eq 'SKIP' && $Status ne 'done') { 
+    if ($cmd eq 'SKIP' && $status ne 'done') { 
 	print NEW "$addr\ts=skip\n"; 
-	$Status = 'done'; 
+	$status = 'done'; 
     }
 
     # END OF FILE OPEN, READ..
-    close BAK;     close NEW;     close FILE;
+    close(BAK); close(NEW); close(FILE);
 
     # protection for multiplly matching, 
     # $log_c > 1 implies multiple matching;
     # ADMIN MODE permit multiplly matching($_cf{'mode:addr:multiple'} = 1);
     ## IF MULTIPLY MATCHED
-    if ($log_c > 1 && $ADDR_CHECK_MAX < 10 && (!$_cf{'mode:addr:multiple'})) {
-	&Log("$cmd: Do nothing muliply matched..");
+    if ($log_c > 1 && 
+	($ADDR_CHECK_MAX < 10) && 
+	(! $_cf{'mode:addr:multiple'})) {
+	&Log("$cmd: Do NOTHING since Muliply MATCHed..");
 	$log =~ s/; /\n/g;
-	$Envelope{'message'} .= "Multiply Matched?\n$log\n";
-	$Envelope{'message'} .= "Retry to check your adderss severely\n";
-	$ADDR_CHECK_MAX++;
+	$e{'message'} .= "Multiply Matched?\n$log\n";
+	$e{'message'} .= "Retry to check your adderss severely\n";
 
 	# Recursive Call
-	print STDERR "Call ChangeM...($cmd,..[$ADDR_CHECK_MAX]);\n" if $debug;
-	return &ChangeMemberList($cmd, $Address, $file);
+	return 'RECURSIVE';
     }
     ## IF TOO RECURSIVE
     elsif ($ADDR_CHECK_MAX >= 10) {
-	&Log("MAXIMUM of ADDR_CHECK_MAX, stop");
+	&Log("MAXIMUM of ADDR_CHECK_MAX, STOP");
     }
     ## DEFAULT 
     else {
 	rename("$file.tmp", $file) || 
 	    (&Log("fail to rename $file"), return $NULL);
-    }#;
+    }
 
     # here should be "Only once called"
-    if ($cmd eq 'MATOME' && $Status eq 'done') {
+    if ($cmd eq 'MATOME' && $status eq 'done') {
 	&Log("ReConfiguring $Address in \$MSendRC");
 	&ConfigMSendRC($Address);
 	&Rehash($org_addr) if $org_addr;# info of original mode is required
     }
 
-    $Envelope{'message'} .= "O.K.!\n" if $Status eq 'done';
-    $Status;
+    $e{'message'} .= "O.K.!\n" if $status eq 'done';
+
+    $status;
 }
     
 
 sub CtlMatome
 {
     local($addr, *misc) = @_;
-    local($MATOME) = $misc;	# set value(0 implies Realtime deliver)
+    local($matome) = $misc;	# set value(0 implies Realtime deliver)
     local($org_addr) = $addr;	# save excursion
     local($s);
 
+    &Log("matome => $matome") if $debug;
+
     # parameter is whether 0 or not-defiend
-    if (! $MATOME) {
+    if ($matome eq '') {
 	# modification
 	if ($addr =~ /\smatome/oi || $addr =~ /\sm=/) {
-	    $MATOME = 'RealTime';
+	    $matome = 'RealTime';
 	}
 	# new comer, set default
 	else {
-	    $MATOME = 3;
+	    $matome = 3;
 	    $s = "Hmm.. no given parameter. use default[m=3]";
 	    &Log($s);
-	    $Envelope{'message'} .= "$s\n";
-	    $Envelope{'message'} .= 
+	    $e{'message'} .= "$s\n";
+	    $e{'message'} .= 
 		"So your request is accepted but modified to m=3\n";
 	}
+    }
+    elsif ($matome == 0) {
+	$matome = 'RealTime';
     }
 
     # Remove the present matomeokuri configuration
@@ -1145,11 +1248,11 @@ sub CtlMatome
     $addr =~ s/\sm=(\S+)//ig; # remover m= syntax
 
     # Set value
-    if ($MATOME eq 'RealTime') {    # 'call &Rehash'
+    if ($matome eq 'RealTime') {    # 'call &Rehash'
 	;
     }
     else {
-	$addr = "$addr\tm=$MATOME";
+	$addr = "$addr\tm=$matome";
 	undef $org_addr;	# 'NOT require call &Rehash'
     }
 
@@ -1168,7 +1271,6 @@ sub Rehash
     print STDERR "\n---Rehash local($adr, $mode)\n\n";
 
     &use('utils');
-    require 'SendFile.pl';
 
     if ($mode =~ /m=(\S+)/) {
 	($d, $mode) = &ModeLookup($1);
@@ -1183,7 +1285,7 @@ sub Rehash
 
     $_cf{'rehash'} = "$l-$r"; # for later use "# rehash" ???
     &Log($s);
-    $Envelope{'message'} .= "\n$s\n\n";
+    $e{'message'} .= "\n$s\n\n";
 
     # make an entry 
     local(@fld) = ('#', 'mget', "$l-$r", 10, $mode);
@@ -1236,6 +1338,9 @@ sub ExistP
 sub InSecureP
 {
     local($ID) = @_;
+
+    print STDERR "\t   [INSECURE CHECK:$ID]\n" if $debug;
+
     if ($ID =~ /..\//o || $ID =~ /\`/o){ 
 	local($s)  = "INSECURE and ATTACKED WARNING";
 	local($ss) = "Match: $ID  -> $`($&)$'";
@@ -1254,6 +1359,8 @@ sub InSecureP
 sub MetaCharP
 {
     local($r) = @_;
+
+    print STDERR "\t   [META     CHECK:$r]\n" if $debug;
 
     if ($r =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
 	&Log("Match: $r -> $`($&)$'");
@@ -1274,7 +1381,7 @@ sub CheckCommandHook
 
     foreach $s (@s) {
 	if(&MetaCharP($s)) {
-	    $Envelope{'message'} .= "NOT permit META Char's in parameters.\n";
+	    $e{'message'} .= "NOT permit META Char's in parameters.\n";
 	    return 0;
 	};
     }
@@ -1384,7 +1491,7 @@ sub SearchKeyInSummary
 	($a, $b) = &GetLastID($s);
     }
     else {
-	$Envelope{'message'} .= "Restricted Summary: the parameter not matched\n";
+	$e{'message'} .= "Restricted Summary: the parameter not matched\n";
 	return;
     }
 
@@ -1392,14 +1499,14 @@ sub SearchKeyInSummary
     if($fl eq 'rs') {
 	while(<TMP>) {
 	    if(/\[$a:/ .. /\[$b:/) {
-		$Envelope{'message'} .= $_;
+		$e{'message'} .= $_;
 	    }
 	}
     }
     elsif($fl eq 's') {
 	while(<TMP>) {
 	    if(/$s/) {
-		$Envelope{'message'} .= $_;
+		$e{'message'} .= $_;
 	    }
 	}
     }

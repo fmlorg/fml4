@@ -21,7 +21,7 @@ sub Stardate
     # bits).  Cancelling the 1000000 with the 17280 gives an expression that
     # takes only 27 bits.
 
-    $fraction = ( (time % 17280) * 3125) / 54;
+    $fraction = int (    (((time % 17280) * 3125) / 54)   );
 
     # Get integer part.
     $integer = time / 17280 + 9350;
@@ -36,7 +36,7 @@ sub Stardate
 
     $integer = $integer % 10000;
 
-    sprintf("[%d]%04d.%04d", $issue, $integer, $fraction);
+    sprintf("[%d]%04d.%02.2s", $issue, $integer, $fraction);
 }
 
 1;

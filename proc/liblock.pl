@@ -5,80 +5,54 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
-
-# if the younger process number exists in $LOCKDIR, return 1;
-# using system call is four or five times faster than `ls`.
-# Pay attention! readdir system call not return sorted filenames.
-sub CheckWaitMatrix
+# Lock UNIX V7 age like..
+# old lock extracted from fml 0.x and revised now :-)
+sub V7Lock
 {
-    local($file) = '';
-    opendir(DIRD, "$LOCKDIR");
-    foreach $file (readdir(DIRD)) {
-	print STDERR $file,"\n" if($debug);
-	next if($file =~ /\./);
-	if("$LOCKFILE" > "$file") { # If only one is satisfied, wait!
-	    closedir(DIRD);
-	    return 1; 
+    $0 = "--V7 Locked and waiting <$FML $LOCKFILE>";
+
+    # set variables
+    $LockFile = "$VAR_DIR/run/lockfile.v7";
+    $LockTmp  = "$VAR_DIR/run/lockfile.$$";
+    $rcsid .= ' :V7L';
+    local($timeout) = 0;
+
+    # create tmpfile
+    &Touch($LockTmp) || die "Can't make LOCK\n";
+    &Append2(&WholeMail."[$$]", $LockTmp) if $debug;
+
+    # try within about 10min.
+    for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
+	if (link($LockTmp, $LockFile) == 0) {	# if lock fails, wait&try
+	    sleep (rand(3)+5);
+	} else {
+	    last;
 	}
     }
-    closedir(DIRD);
-    return 0;
-}
-
-# if process number inversed, create the greater lock number
-sub CheckProcessTable
-{
-    local($file) = '';
-    local($UPGRADE) = 100000;
-    local($maxnumber) = "$LOCKFILE";
-    opendir(DIRD, "$LOCKDIR");
-    foreach $file (readdir(DIRD)) {
-	print STDERR $file,"\n" if($debug);
-	next if($file =~ /\./);
-	if("$maxnumber" < "$file"){ $LOCKFILE += $UPGRADE;}
-    }
-    closedir(DIRD);
-    return;
-}
-
-# locking 
-sub Lock
-{
-    $0 = "--Locked and waiting <$FML $LOCKFILE>";
-
-    if (! -d $LOCKDIR) {
-	mkdir($LOCKDIR, 0700);
-    }
-
-    &CheckProcessTable;
-    print STDERR "> $LOCKDIR/$LOCKFILE\n" if($debug);
-    open(LOCK, "> $LOCKDIR/$LOCKFILE") || die "Can't make LOCK\n";
-    close(LOCK);
-    for($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
-	if(&CheckWaitMatrix) { sleep(rand(3)+5);}
-	else { last;}
-    }
     
-# save incoming mail, send warning to maintainer, put log, die
+    unlink $LockTmp;
+
     if ($timeout >= $MAX_TIMEOUT) {
 	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
 			   $year, $mon+1, $mday, $hour, $min, $sec);
-	open(TIMEOUT, "> $TIMEOUT") || (&Log($!), return);
-	while(<>) { print TIMEOUT $_;}
+
+	open(TIMEOUT, "> $VARLOG_DIR/$TIMEOUT");
+	select(TIMEOUT); $| = 1; select(STDOUT);
+	print TIMEOUT &WholeMail;
 	close(TIMEOUT);
-	&Sendmail($MAINTAINER, "Locked:<$LOCKFILE>. $TIMEOUT $ML_FN");
-	(!$USE_FLOCK) ? &Unlock : &Funlock;
-	exit 1;
+
+	&Warn("V7 LOCK TIMEOUT", 
+	      "saved in $VARLOG_DIR/$TIMEOUT\n\n".&WholeMail);
     }
 }
 
-sub Unlock
+
+sub V7Unlock
 {
-    if (-f "$LOCKDIR/$LOCKFILE") {
-	unlink "$LOCKDIR/$LOCKFILE";
-    } 
+    $0 = "--V7 Unlocked <$FML $LOCKFILE>";
+    unlink $LockFile;
 }
 
 1;

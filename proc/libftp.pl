@@ -129,7 +129,8 @@ sub Ftp
 
       # help for usage of commands
       if (/^help$/io) {		# help or HELP
-	  &FtpSetFtpEntry('.', $f, $Mode);
+	  &SendFile($Envelope{'Addr2Reply:'}, "Ftp(Local) help $ML_FN", 
+		    $FTP_HELP_FILE || "$TopDir/help");
 	  &Log("Ftp Help");
 	  $e{'message'} .= "\tTry Sent back help file\n";
 	  next;
@@ -291,11 +292,12 @@ sub Ftpmail
 	$d{'Hdr'}  = "From: $to\nSubject: Ftpmail Request\nReply-To: $to\n";
 
 	# Body
+	$dir = $dir || '/';
 	$body .= "\nreply-to $to\nopen $host\ncd $dir\nget $file\nquit\n";
 	$d{'Body'} = $body;
 
 	# SMTP since Ftpmail Server checks "-admion syntax".
-	push(@to, "RCPT TO: $FTPMAIL_SERVER");
+	push(@to, $FTPMAIL_SERVER);
 
 	# Mail to Ftpmail Server
 	print STDERR "$d{'Hdr'}\n$d{'Body'}\n";

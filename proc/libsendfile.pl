@@ -3,10 +3,9 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: (.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
-($sfid) = ($id =~ /Id: (.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
-&use('utils');
+&use('fop');
 
 # VARIABLES
 #
@@ -15,9 +14,8 @@ $rcsid .= " :".($id =~ /Id: (.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
 # %sp key=archive, value=files_in_it(may be multiple)..
 # @ar archive files (must be binary)
 #
-
 # Sending Entry ; private
-local(*SendingEntry, *SendingArchiveEntry);
+local(@SendingEntry, @SendingArchiveEntry, %SendingEntry, %SendingArchiveEntry);
 
 
 # NEW MGET Interface e.g. 
@@ -35,24 +33,31 @@ local(*SendingEntry, *SendingArchiveEntry);
 #
 #      mget * or mget 1?
 #
+# ATTENTION: "mget3 is called in MgetCompileEntry", NOT DO ACTIONS;
+#
 sub mget3 
 {
-    local(*value, *opt) = @_;	# $opt is used to identify %Sending.*Entry
-    local(*CF);			# SCOPE is restricted hereafter
+    # $opt is used to identify %Sending.*Entry
+    local(*value, *opt, *e) = @_;
+
+    local(%cf);			# SCOPE is restricted hereafter
+    local($r, @r, %r);		# Result
+    local($sp, @sp, %sp, $ar, @ar, %ar); # sp, ar
+    local($fn, $dir, $tmpf, $prev, $m, $total, $s, @filelist);
     local($log_s) = "mget:[$$]";
-    local($fn, $dir, $tmpf);
-    local(*r);			# Result
-    local(*sp, *ar);
-    local($prev, $m, $TOTAL, $s, @filelist);
     
-    &mget3_Init(*CF);		# default values and ADDR_CHECK_MAX?(security)
-				# set -> %CF
+    $0 = "--mget3 initialize $FML $LOCKFILE>";
+
+    &mget3_Init(*cf, *e);	# default values and ADDR_CHECK_MAX?(security)
+				# set -> %cf
     &InitDraftGenerate;		# set "function pointers"
 				# set -> %_fp
-    &mget3_Getopt(*CF, *opt);	# parsing options 
-				# set -> %CF
+    &mget3_Getopt(*cf,*opt,*e); # parsing options 
+				# set -> %cf
 
-    $r = &mget3_Search(*CF, *value, *opt, *sp, *ar);
+    $0 = "--mget3 searching files $FML $LOCKFILE>";
+
+    $r = &mget3_Search(*cf, *value, *opt, *sp, *ar, *e);
 				# Search and if found
 				# @sp   spool/\d+ files
 				# @ar   archive files in @ARCHIVE_DIR
@@ -62,12 +67,10 @@ sub mget3
 
 
     ##### IF TOO MATCHED
-    if(scalar(@sp) > $CF{'MAXFILE'}) {
-	local($s);
-	&Log("$log_s: Requested files are exceeded!");
-	$s .= "Sorry. your request exceeds $CF{'MAXFILE'}\n";
-	$s .= "Anyway, try to send the first $CF{'MAXFILE'} files\n";
-	$Envelope{'message'} .= $s;
+    if (scalar(@sp) > $cf{'MAXFILE'}) {
+	&Log("$log_s: Requested files are exceeded! > $cf{'MAXFILE'}");
+	$e{'message'} .= "Sorry. your request exceeds $cf{'MAXFILE'}\n";
+	$e{'message'} .= "Anyway, try to send the first $cf{'MAXFILE'} files\n";
     }
 
 
@@ -75,33 +78,27 @@ sub mget3
     # whether the requested files exist or not?
     # if with unpack option, select only plain text files. 
     # require 400, "your own and only you"
-    SORT: foreach (sort @sp) {	# sort as strings since e.g. "spool/\d+"
+    SORT: foreach (sort csort @sp) {	# sort as strings since e.g. "spool/\d+"
 	next SORT if $prev eq $_; # uniq emulation
 	$prev = $_;		  # uniq emulation
-
-	print STDERR "Sorting stat($_)\n" if $debug;
 
 	stat($_);
 	(-r _ && -o _ && -T _) && push(@filelist, $_) && $m++;
 	(-r _ && -o _ && -B _) && 
-	    &Log("Must be Plain but Binary[$_]? NOT SEND");
+	    &Log("Must be Plain but Binary[$_]? NOT SENT");
 
-	last SORT if $m > $CF{'MAXFILE'}; # if @sp > $CF{'MAXFILE'}
+	last SORT if $m > $cf{'MAXFILE'}; # if @sp > $cf{'MAXFILE'}
     }
 
-    &Debug("After Sorting, filelist = @filelist\nar = @ar") if $debug;
-
-    ##### Extract plain text from archives #####
     if ($debug) {
-	while(($k,$v)=each %sp) {
-	    print STDERR "\%SP $k = $v\n"; 
-	}
+	while(($k,$v) = each %sp) { print STDERR "\%SP $k = $v\n";}
     }
-    # 
+
+    ### Extract plain text from archives 
     # %sp is $sp{100.tar.gz} = 99. ...
     # @r is extracted filelists to send
+    $0 = "--mget3 extracting files $FML $LOCKFILE>";
     if (%sp) {		
-	# &ExtractFiles(*candidate, *return_filelist_to_send);
 	$m += &ExtractFiles(*sp, *r);
 	push(@filelist, @r) if @r;
     }
@@ -113,34 +110,29 @@ sub mget3
 
     ###### Check and Log: not matched!
     if (0 == $m) {
-	print STDERR "$log_s: NO MATCH [\$m == 0]\n" if $debug;
-	&Log("$log_s: NO MATCHED files."); 
+	$0 = "--mget3 error, so ends $FML $LOCKFILE>";
+	print STDERR "$log_s: NO MATCHED FILE[\$m == 0]\n" if $debug;
+	&Log("$log_s: NO MATCHED FILE"); 
 	return 0;
     }
 
 
     ###### for Headers and a few variables
-    $0 = "--mget3 try send back process $FML $LOCKFILE>";
+    $0 = "--mget3 try send-back-processes $FML $LOCKFILE>";
 
-    $which = join(" ", @value);
-    $mode      = $CF{'mode'};	# set $mode !
-
-    $SUBJECT    = "Matomete Send [$which $CF{'mode-doc'}]";
-    $to         = $CF{'reply-to'} = $Envelope{'Addr2Reply:'};
-    $SLEEPTIME  = $CF{'SLEEP'};
+    $which     = " @value ";	# file1 file2 ... (MAY BE NOISY?)
+    $mode      = $cf{'mode'};	# set $mode !
+    $subject   = $e{'r:Subject'} || "Matomete Send [$which $cf{'mode-doc'}]";
+    $to        = $cf{'reply-to'} = $e{'Addr2Reply:'};
+    $sleeptime = $cf{'SLEEP'};
 
     # default 1000lines == 50k
     $MAIL_LENGTH_LIMIT = ($MAIL_LENGTH_LIMIT || 1000); 
     
-    # RCSID
-    local($fid);
-    ($fid) = ($rcsid =~ /^(fml\S+)/);
-    $rcsid = "$sfid:[$fid]";
-
     ### TMP 
     # SETTINGS affected by config.ph
     # ATTENTION: in SendingBackOrderly $DIR/$returnfile
-    local($returnfile)	 = "$TMP_DIR/m:$opt:$$reteurn";
+    local($returnfile)	 = "$TMP_DIR/m:$opt:$$return";
 
     ##### mget interface 
     # filename may be a complicated filename but it is O.K.?
@@ -155,50 +147,75 @@ sub mget3
     }
 
     if (@filelist) {
-	$TOTAL  = &DraftGenerate($returnfile, $mode, $s, @filelist);
+	$total  = &DraftGenerate($returnfile, $mode, $s, @filelist);
 	
 	# ENTRY IN
 	push(@SendingEntry, $opt);
 	$SendingEntry{$opt, 'file'}    = $returnfile;
-	$SendingEntry{$opt, 'total'}   = $TOTAL;
-	$SendingEntry{$opt, 'subject'} = $SUBJECT;
-	$SendingEntry{$opt, 'sleep'}   = $SLEEPTIME;
+	$SendingEntry{$opt, 'total'}   = $total;
+	$SendingEntry{$opt, 'subject'} = $subject;
+	$SendingEntry{$opt, 'sleep'}   = $sleeptime;
 	$SendingEntry{$opt, 'to:'}     = $to;
-	$SendingEntry{$opt, 'unlink'}  = join(" ", @r);
+	$SendingEntry{$opt, 'unlink'}  = " @r ";
     }
     elsif (@ar) {
 	# ENTRY IN
 	foreach $opt (@ar) {
 	    next unless -f $opt;
 
-	    if ($CF{'mode-default'}) { # IF MODE IS NOT GIVEN,
+	    if ($cf{'mode-default'}) { # IF MODE IS NOT GIVEN,
 		$mode = -T $opt ? 'mp': 'uu'; # PLAIN->MIME/Multipart
-		$CF{'mode'}     = $mode;
-		$CF{'mode-doc'} = &DocModeLookup("#3$mode");
-		$SUBJECT        = "Matomete Send [$which $CF{'mode-doc'}]";
+		$cf{'mode'}     = $mode;
+		$cf{'mode-doc'} = &DocModeLookup("#3$mode");
+		$subject        = $e{'r:Subject'} || 
+		    "Matomete Send [$which $cf{'mode-doc'}]";
 	    }
 
 	    push(@SendingArchiveEntry, $opt);
 	    $SendingArchiveEntry{$opt, 'file'}    = $opt;
 	    $SendingArchiveEntry{$opt, 'mode'}    = $mode;
-	    $SendingArchiveEntry{$opt, 'subject'} = $SUBJECT;
-	    $SendingArchiveEntry{$opt, 'to:'}     = $CF{'reply-to'};
+	    $SendingArchiveEntry{$opt, 'subject'} = $subject;
+	    $SendingArchiveEntry{$opt, 'to:'}     = $cf{'reply-to'};
 	}
     }
     else {
-	$Envelope{'message'} .= "Hmm.. no match file in mget3 processing\n";
-	$Envelope{'message'} .= "\tprocessing ends.\n";
-	return $NULL;
+	$e{'message'} .= "Hmm.. no matched file in mget3 processing\n";
+	$e{'message'} .= "\tprocessing ends.\n";
+	return 0;
     }
 
     1;
 }
 
 
-# after unlock
+sub csort
+{
+    local($na, $nb, $wa, $wb);
+    $xa = $a;
+    $xb = $b;
+
+    $xa =~ s/^(\D+)(\d+)/$wa = $1, $na = $2/e;
+    $xb =~ s/^(\D+)(\d+)/$wb = $1, $nb = $2/e;
+
+    if ($na || $nb) {
+	# print STDERR "($wa cmp $wb) || ($na <=> $nb);\n";
+	($wa cmp $wb) || ($na <=> $nb);
+    }
+    else {
+	$a cmp $b;
+    }
+}
+
+
+# ACTUAL WORKS OF SENDING AFTER UNLOCKED
 sub mget3_SendingEntry
 {
-    local(*file, *mode, *subject, *to, *t, *r, *sleep);
+    local($file, $mode, $subject, $to, $t, $r, $sleep);
+
+    if ($mget3_SendingEntry_counter++ > 0) { 
+	&Log("mget3_SendingEntry is SHOULD NOT be called more then once");
+	return;
+    }
 
     foreach $opt (@SendingEntry) {
 	$file     = $SendingEntry{$opt, 'file'};
@@ -233,50 +250,47 @@ sub mget3_SendingEntry
 ###                       MGET3 LIBRARY
 ######################################################################
 sub mget3_Init { 
-    local(*CF) = @_;
-    local($mode) = 'tgz';	# default
+    local(*cf, *e) = @_;
+    local($mode)   = 'tgz';	# default
 
     # global variable
-    $STORED_BOUNDARY = &GetStoredBoundary;
+    $ArchiveBoundary = &GetArchiveBoundary;
 
     # default
-    $CF{'PACK'}     = 1;
-    $CF{'SLEEP'}    =  300;
-    $CF{'MAXFILE'}  = 1000;
-    $CF{'mode'}     = $mode;
-    $CF{'mode-doc'} = &DocModeLookup("#3$mode");
-    $CF{'reply-to'} = $Envelope{'Addr2Reply:'};
+    $cf{'PACK'}     = 1;
+    $cf{'SLEEP'}    = 300;
+    $cf{'MAXFILE'}  = 1000;
+    $cf{'mode'}     = $mode;
+    $cf{'mode-doc'} = &DocModeLookup("#3$mode");
+    $cf{'reply-to'} = $e{'Addr2Reply:'};
 
     # for the later EVARLUATOR(NO EVAL NOW! 95/09)
-    # &MetaP($CF{'reply-to'})     && return 0;
-    # &InSecureP($CF{'reply-to'}) && return 0;
+    # &MetaP($cf{'reply-to'})     && return 0;
+    # &InSecureP($cf{'reply-to'}) && return 0;
 }
 
 
 sub mget3_Getopt
 {
-    local(*CF, *opt) = @_;
-    local($dummy);		# dummy variable for ModeLookup
+    local(*cf, *opt, *e) = @_;
 
-    $CF{'mode-default'} = 1;	# default flag on
+    $cf{'mode-default'} = 1;	# default flag on
 
     foreach(@opt) {
-	next if /^$/o;#tricky?
-	    next if /^default$/o;#tricky?	
+	next if /^(\s*|default)$/;
 
-		/^(\d+)$/o   && ($CF{'SLEEP'}  = $1, next);
-	($dummy, $mode) = &ModeLookup("3$_");
+	/^(\d+)$/o && ($cf{'SLEEP'}  = $1, next);
+	local($dummy, $mode) = &ModeLookup("3$_");
 
 	if ($mode) {
-	    $CF{'mode'}     = $mode;
-	    $CF{'mode-doc'} = &DocModeLookup("#3$mode");
-	    undef $CF{'mode-default'}; # MODE IS GIVEN !
+	    $cf{'mode'}     = $mode;
+	    $cf{'mode-doc'} = &DocModeLookup("#3$mode");
+	    undef $cf{'mode-default'}; # MODE IS GIVEN !
 	}
 	else {
-	    $Envelope{'message'} .= "mget:\n";
-	    $Envelope{'message'} .= "\tgiven mode[$_] is unknown.\n";
-	    $Envelope{'message'} .= "\tanyway try [gzip] mode\n";
-	    $ERROR_FLAG++;	# global
+	    $e{'message'} .= "mget:\n";
+	    $e{'message'} .= "\tgiven mode[$_] is unknown.\n";
+	    $e{'message'} .= "\tanyway try [gzip] mode\n";
 	}
     }
 }
@@ -293,45 +307,53 @@ sub mget3_Getopt
 #
 sub mget3_Search
 {
-    local(*CF, *value, *opt, *sp, *ar) = @_;
-    local($dir, $target, $fn, $tmpf, *r);
+    local(*cf, *value, *opt, *sp, *ar, *e) = @_;
+    local($dir, $target, $fn, $tmpf, *r, $m);
 
   TARGET: foreach $target (@value) {
       undef $fn;		# reset
 
       print STDERR "TARGET: $target\n" if $debug;
+      $m .= "   Searching $target\n";
 
       ### MH
       $r = &mget3_MHExpand($target, *sp);
 
       ### V2
       # set the result to @sp, %sp
-      print STDERR "\tV2\t$r\n" if $debug;
-      &mget3_V2search($r, *sp) && (next TARGET);
+      print STDERR "MGET V2 Request [$r]\n" if $debug;
+      &mget3_V2search($r, *sp) && ($m .= "\tFOUND.\n") && (next TARGET);
 
       return 'STOP' if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
 
       ### search in archive
       # set the result to @ar
       print STDERR "\tARCHIVE\t$r\n" if $debug;
-      &mget3_SearchInArchive($r, *ar) && (next TARGET);
+      &mget3_SearchInArchive($r, *ar, *e) 
+	  && ($m .= "\tFOUND.\n") && (next TARGET);
 
       return 'STOP' if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
 
       ### V1
       if ($SECURITY_LEVEL < 2) { # permit mget(v1)
-	  print STDERR "\tV1\t$r\n" if $debug;
-	  &mget3_V1search($r, *sp,*ar) && (next TARGET);
+	  &mget3_V1search($r, *sp,*ar) 
+	      && ($m .= "\tFOUND.\n") && (next TARGET);
       }
-      else {
-	  &Log("NOT PERMIT mget v1 search since Security level < 2, stop");
-	  $Envelope{'message'} .= 
-	      "\n* Sorry, our Server NOT permit shell-matching when mget\n\n";
+      elsif ($target =~ /[\$\&\*\(\)\{\}\[\]\'\\\"\;\\\\\|\?\<\>\~\`]/) {
+	  &Log("NOT PERMIT mget v1 since Security level < 2, stop");
+	  $m .= "\n* Sorry, our Server ";
+	  $m .= "NOT permit shell-matching when mget\n\n";
 	  print STDERR "MGET V[12] NO MATCH [$r]\n" if $debug;
 	  return 0;
       }
+      # NOTHING IS MATCHED
+      else {
+	  &Log("$target IS NOT FOUND");
+	  $e{'message'} .= "$m\tNOT FOUND.\n\tSkip.\n";
+      }
 
-      return 'STOP' if $_cf{'INSECURE'}; # EMERGENCY STOP FOR SECURITY
+      # EMERGENCY STOP FOR SECURITY
+      return 'STOP' if $_cf{'INSECURE'}; 
   }# foreach;
 }
 
@@ -351,7 +373,7 @@ sub mget3_Search
 #
 sub mget3_SearchInArchive
 {
-    local($target, *ar) = @_;
+    local($target, *ar, *e) = @_;
     local($dir, $fn, $tmpf, *r);
     local($ok) = 0;
 
@@ -362,12 +384,21 @@ sub mget3_SearchInArchive
 
       ### save the original for each $dir
       $fn = $target;
-
+      
       ### SECURITY ROUTINES, STOP!
-      if (&MetaP($fn) || &InSecureP($fn)) {
+      if (&InSecureP($fn)) {
+	  &Log("SECURITY_LEVEL: $SECURITY_LEVEL");
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
-	  $Envelope{'message'}  .= "Execuse me. Please check your request.\n";
-	  $Envelope{'message'}  .= "  PROCESS STOPS FOR SECURITY REASON\n\n";
+	  $e{'message'}   .= "Execuse me. Please check your request.\n";
+	  $e{'message'}   .= "  PROCESS STOPS FOR SECURITY REASON\n\n";
+	  &Log("STOP for insecure [$fn]");
+	  return 0;
+      }
+
+      if (($SECURITY_LEVEL > 1) && (&MetaP($fn) || &InSecureP($fn))) {
+	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
+	  $e{'message'}   .= "Execuse me. Please check your request.\n";
+	  $e{'message'}   .= "  PROCESS STOPS FOR SECURITY REASON\n\n";
 	  &Log("STOP for insecure [$fn]");
 	  return 0;
       }
@@ -494,6 +525,9 @@ sub mget3_V1search
 
     print STDERR "MGET V1 Request [$f]\n" if $debug;
 
+    # Check Again and Again;
+    &InSecureP($f) && (return 0);
+
     # old type mget. Not using ARCHIVE_DIR;
     foreach (<./$SPOOL_DIR/$f>) {
 	print STDERR "MGET V1 Request [-f $_]\n" if $debug;
@@ -527,56 +561,44 @@ sub MHwiseExpand
 
     print STDERR "MH Expanding $s\n" if $debug;
 
-    if ($s =~ /^\d+$/) {
-	return $s;
-    }
- 
-    if ($s eq 'last') {
-	return &GetID;
-    }
+    ($s =~ /^\d+$/) && (return $s);
+    ($s eq 'last')  && (return &GetID);
 
     if ($s =~ /^last:\d+$/) {
 	local($L, $R) = &GetLastID($s);
 	return "$L-$R";
     }
 
-    if ($s eq 'cur') {
-	return &GetID;
-    }
-
-    if ($s eq 'first') {
-	return 1;
-    }
-
+    ($s eq 'cur')   && (return &GetID);
+    ($s eq 'first') && (return 1);
     return $s;
 }
 
 
 # Determine which is the boundary between spool and archive
 # return Boundary 
-sub GetStoredBoundary
+sub GetArchiveBoundary
 {
-    local($i, $ID);
     local($ar_unit) = ($DEFAULT_ARCHIVE_UNIT || 100);
-    local($STORED_BOUNDARY) = 0; # obsolete in config.ph
+    local($i, $id);
+    local($bound)   = 0; # obsolete in config.ph
 
-    # Reset $STORED_BOUNDARY
-    if($ID = &GetID){
-	for($i = $ar_unit; $i < $ID; $i += $ar_unit) {
-	    foreach $dir ("spool", @ARCHIVE_DIR) {
-		$STORED_BOUNDARY += $ar_unit 
-		    if(-f "$dir/$i.tar.gz" || -f "$dir/$i.gz");
+    # Reset $bound
+    if ($id = &GetID){
+	for ($i = $ar_unit; $i < $id; $i += $ar_unit) {
+	    foreach $dir ($SPOOL_DIR, @ARCHIVE_DIR) {
+		$bound += $ar_unit if -f "$dir/$i.tar.gz" || -f "$dir/$i.gz";
 	    }
 	}
     }
 
-    $STORED_BOUNDARY;
+    $bound;
 }
 
 
 # Set
 #    @flist is "spool/number" lists
-#    %flist is "archive/100.tar.gz" like lists by &Storedfilelist
+#    %flist is "archive/100.tar.gz" like lists by &ArchiveFileList
 #
 # return 1(success) or 0;
 #
@@ -589,19 +611,20 @@ sub ExistCheck
     print STDERR "$EC: $left <-> $right\n" if $debug;
 
     # illegal
-    if($left > $right) {
+    if ($left > $right) {
 	&Log("$log_s: illegal condition: $left > $right");
 	return 0;
     }
 
     # meaningless?
-    if($left == $right) {
+    if ($left == $right) {
 	# if an article in spool
-	if($left > $STORED_BOUNDARY && (-f "$SPOOL_DIR/$left")) { 
+	if ($left > $ArchiveBoundary && (-f "$SPOOL_DIR/$left")) { 
 	    push(@flist, "$SPOOL_DIR/$left");
-	}else {			       # if stored as an archive 
-	    print STDERR "$EC:\$left <= $STORED_BOUNDARY\n" if $debug;
-	    &Storedfilelist($left, $right, *flist);
+	}
+	else {			       # if stored as an archive 
+	    print STDERR "$EC:\$left <= $ArchiveBoundary\n" if $debug;
+	    &ArchiveFileList($left, $right, *flist);
 	}
 	return 1;
     }
@@ -609,51 +632,51 @@ sub ExistCheck
     # O.K. Here we go!
     # for too large request e.g. 1-100000
     # This code may be not good but useful enough.
-    if($left < $right) {
+    if ($left < $right) {
 	local($try)  = $right;
 	do {
 	    $right = $try;
 	    $try  = int($try - ($try - $left)/2);
-	    print STDERR "ExistCheck: $left <-> $try\n" if($debug);
-	}while( (!&ExistP($try)) && ($left < $try));
+	    print STDERR "ExistCheck: $left <-> $try\n" if $debug;
+	} while( (!&ExistP($try)) && ($left < $try));
 
-	if($left > $right) { return 0;}	# meaningless
+	if ($left > $right) { return 0;}	# meaningless
 
 	# store the candidates
-	for($i = $left; $i < $right + 1; $i++) { 
+	for ($i = $left; $i < $right + 1; $i++) { 
 	    push(@flist, "$SPOOL_DIR/$i") if -f "$SPOOL_DIR/$i";
 	}
 
-	print STDERR "$EC:\$left <= $STORED_BOUNDARY\n" if $debug;
+	print STDERR "$EC:\$left <= $ArchiveBoundary\n" if $debug;
 
-	if(defined(@ARCHIVE_DIR) && $left < ($STORED_BOUNDARY + 1)) { 
-	    &Storedfilelist($left, $right, *flist);
+	if (defined(@ARCHIVE_DIR) && $left < ($ArchiveBoundary + 1)) { 
+	    &ArchiveFileList($left, $right, *flist);
 	}
 
 	return 1;
     }# left < right;
 
-    return 0;
+    0;
 }
 
 
 # Search files in ARCHIVE_DIR directories
 # find to store in %filelist
 # return NONE.
-sub Storedfilelist
+sub ArchiveFileList
 {
     local($left, $right, *flist) = @_;
     local($i, $f);
     local($ar_unit) = $DEFAULT_ARCHIVE_UNIT ? $DEFAULT_ARCHIVE_UNIT : 100;
 
-    for($i = $left; $i < ($right + 1); $i++) {
+    for ($i = $left; $i < ($right + 1); $i++) {
 	local($sp) = (int(($i - 1)/$ar_unit) + 1) * $ar_unit;
 
 	foreach $dir ("spool", @ARCHIVE_DIR) {
 	    $f = (-f "$dir/$sp.tar.gz") ? "$dir/$sp.tar.gz" : "$dir/$sp.gz";
 
 	    stat($f);
-	    if(-B _ && -r _ && -o _) { 
+	    if (-B _ && -r _ && -o _) { 
 		$flist{$f} .= "$SPOOL_DIR/$i ";
 	    }
 	}#FOREACH;
@@ -668,21 +691,21 @@ sub Storedfilelist
 sub ExtractFiles
 {
     local(*c, *r) = @_;
-    local($cmd, $m, $s, $c);
+    local($cmd, $m, $s, $f);
     
     $cmd = $TAR;
     $cmd =~ s/^(\S+)\s.*$/$1/;
     $cmd = "$cmd xf - ";
 
     # (cd tmp; tar zxvf ../old/300.tar.gz $SPOOL_DIR/201 ...)
-    foreach $c (keys %c) {
-	next if $c eq 'Binary';	# special for e.g. archive/summary-old-ml
+    foreach $f (keys %c) {
+	next if $f eq 'Binary';	# special for e.g. archive/summary-old-ml
 
-	$s = "cd $TMP_DIR; $ZCAT $DIR/$c|$cmd ". $c{$c};
+	$s = "cd $TMP_DIR; $ZCAT $DIR/$f|$cmd ". $c{$f};
 	print STDERR "Extract: sh -c $s\n" if $debug;
 	&system($s);
 
-	foreach (split(/\s+/, $c{$c})) {
+	foreach (split(/\s+/, $c{$f})) {
 	    push(@r, "$TMP_DIR/$_");
 	    push(@c, "$TMP_DIR/$_");
 	    $m++;

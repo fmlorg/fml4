@@ -2,6 +2,9 @@
 # Please obey GNU Public License(see ./COPYING)
 # $rcsid   = q$Id$;
 
+# local scope
+local($IssueSeq);
+
 &use('MIME') if $USE_LIBMIME;
 
 # Skipped field for each mail header
@@ -30,20 +33,20 @@ sub Rfc1153Custom
 {
     local($mode, @filelist) = @_;
     local($i, $f, $s);
-    local($issue, $listname, $vol, $ISSUE_SEQ);
-    local($PREAMBLE, $TRAILER, $TRICK);
+    local($issue, $listname, $vol, $IssueSeq);
+    local($preamble, $trailer, $trick);
 
     ########## CUSTOMIZE BELOW ##########
     $issue     = 1;
     $listname  = "UJA";
     $vol       = $year;
-    $ISSUE_SEQ = "$DIR/issue_seq"; # file to remember count;
+    $IssueSeq = "$VARLOG_DIR/IssueSeq"; # file to remember count;
 
     &GetTime;
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
-    $issue = &Rfc1153GetSeq($ISSUE_SEQ);
+    $issue = &Rfc1153GetSeq($IssueSeq);
 
-    ##### PREAMBLE #####
+    ##### preamble #####
 
     # MAIL SUBJECT 
     # example "Subject: Info-IBMPC Digest V95 #22"
@@ -52,16 +55,16 @@ sub Rfc1153Custom
     print STDERR "\$_cf{'subject', $mode} = $_cf{'subject', $mode}\n";
 
     # FIRST LINE
-    $PREAMBLE .= "$listname DIGEST\t";
-    $PREAMBLE .= 
+    $preamble .= "$listname DIGEST\t";
+    $preamble .= 
 	sprintf("%3s, %2d %3s %2d", $WDay[$wday], $mday, $Month[$mon], $year);
-    $PREAMBLE .= sprintf("\tVolume %2d: Issue %d\n",$vol, $issue);
+    $preamble .= sprintf("\tVolume %2d: Issue %d\n",$vol, $issue);
 
     # SECOND LINE
-    $PREAMBLE .= "\n";
+    $preamble .= "\n";
 
     # 3rd LINE and Subjects
-    $PREAMBLE .= "Today's Topics:\n";
+    $preamble .= "Today's Topics:\n";
 
     ########## CUSTOMIZE ENDS ##########
 
@@ -81,49 +84,49 @@ sub Rfc1153Custom
 	    $s =~ s/\n(\s+)/$1/g;
 	    $s =~ s/\[$BRACKET:\d+\]\s*//g if $STRIP_BRACKETS; # Cut [Elena:..]
 	    $s = &DecodeMimeStrings($s) if $USE_LIBMIME;       # MIME DECODING 
-	    ($s =~ /\nSubject:(.*)\n/) && ($PREAMBLE .= "\t$1\n");
+	    ($s =~ /\nSubject:(.*)\n/) && ($preamble .= "\t$1\n");
 	}
     }# end of foreach;
 
     # end of preamble
     # Separater between the main part and preamble
-    $PREAMBLE .= "\n".('-' x 70)."\n\n";
+    $preamble .= "\n".('-' x 70)."\n\n";
     
-    $TRICK .= "Date: $MailDate\n";
-    $TRICK .= "From: $MAINTAINER\n";	
-    $TRICK .= q#
+    $trick .= "Date: $MailDate\n";
+    $trick .= "From: $MAINTAINER\n";	
+    $trick .= q#
 	This is a RFC1153 digest format.
 #;
 
-	    $PREAMBLE .= $TRICK; 	    
+	    $preamble .= $trick; 	    
 
     ########## CUSTOMIZE BELOW ##########
 
-    ##### TRAILER #####
-    $TRAILER  .= ('-' x 30)."\n\n";
-    $TRAILER  .= ($s = "End of $listname Digest V$vol Issue \#$issue\n");
+    ##### trailer #####
+    $trailer  .= ('-' x 30)."\n\n";
+    $trailer  .= ($s = "End of $listname Digest V$vol Issue \#$issue\n");
     $i = length($s) - 1;
-    $TRAILER  .= '*' x $i;
-    $TRAILER  .= "\n";
+    $trailer  .= '*' x $i;
+    $trailer  .= "\n";
 
     ########## CUSTOMIZE ENDS ##########
 
-    return ($PREAMBLE, $TRAILER);
+    return ($preamble, $trailer);
 }
 
 
 sub Rfc1153GetSeq
 {
-    local($ISSUE_SEQ) = @_;
+    local($IssueSeq) = @_;
 
     ### ISSUE COUNT UPDATE ###
     # TOUCH
-    (-f $ISSUE_SEQ) || do {
-	open(F, ">> $ISSUE_SEQ");close(F);
+    (-f $IssueSeq) || do {
+	open(F, ">> $IssueSeq");close(F);
     };
 
     # GET SEQ
-    open(F, "< $ISSUE_SEQ") || &Log("Cannot open $ISSUE_SEQ");
+    open(F, "< $IssueSeq") || &Log("Cannot open $IssueSeq");
     $issue = <F>;
     chop $issue;
     close(F);
@@ -132,8 +135,8 @@ sub Rfc1153GetSeq
     ($issue >= 1) || ($issue = 1);
 
     # reset when happy new year!
-    $PREV_YEAR = (localtime((stat($f))[9]))[5];# the last modify time
-    if($PREV_YEAR != $year) {# not ">" when 2000 vs 1999 
+    $PrevYear = (localtime((stat($f))[9]))[5];# the last modify time
+    if($PrevYear != $year) {# not ">" when 2000 vs 1999 
 	$issue = 1;		
     }
 
@@ -145,16 +148,15 @@ sub Rfc1153Destructer
 {
     local($listname)  = "UJA";
     local($vol)       = $year;
-    local($ISSUE_SEQ) = "$DIR/issue_seq"; # file to remember count;
 
     # ONCE ONLY
     return if $_cf{'rfc1153', 'in-destr'};
     $_cf{'rfc1153', 'in-destr'} = 1;
 
     &eval($RFC1153_CUSTOM_HOOK, 'RFC1153 custom:');
-    $issue = &Rfc1153GetSeq($ISSUE_SEQ);
+    $issue = &Rfc1153GetSeq($IssueSeq);
 
-    open(F, "> $ISSUE_SEQ") || &Log("Cannot open $ISSUE_SEQ");
+    open(F, "> $IssueSeq") || &Log("Cannot open $IssueSeq");
     $issue++;
     print F "$issue\n";
     close(F);

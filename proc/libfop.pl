@@ -322,7 +322,7 @@ sub f_RetrieveFile
     # CLOSE
     &CloseStream;
 
-    # if write filesize=0, decrement TOTAL.
+    # if write filesize=0, decrement total.
     $total-- unless $new_p;
 
     $r{'total'} = $total;
@@ -419,11 +419,11 @@ sub f_SplitFile
 sub OpenStream_OUT { &OpenStream(@_);}
 sub OpenStream
 {
-    local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
+    local($where, $PACK_P, $FILE, $total) = @_;
 
-    &Debug("OpenStream: open OUT > $WHERE.$TOTAL;") if $debug;
-    open(OUT, "> $WHERE.$TOTAL") || do { 
-	&Log("OpenStream: cannot open $WHERE.$TOTAL");
+    &Debug("OpenStream: open OUT > $where.$total;") if $debug;
+    open(OUT, "> $where.$total") || do { 
+	&Log("OpenStream: cannot open $where.$total");
 	return $NULL;
     };
     select(OUT); $| = 1; select(STDOUT);
@@ -455,14 +455,14 @@ sub WC
 
 
 # Split files and unlink the original
-# $file - split -> $file.1 .. $file.$TOTAL files 
+# $file - split -> $file.1 .. $file.$total files 
 # return the number of splitted files
 sub SplitFiles
 {
-    local($file, $totallines, $TOTAL) = @_;
-    local($unit)  = int($totallines/$TOTAL); # equal lines in each file
+    local($file, $totallines, $total) = @_;
+    local($unit)  = int($totallines/$total); # equal lines in each file
     local($lines) = 0;
-    local($i)     = 1;		# split to (1 .. $TOTAL)
+    local($i)     = 1;		# split to (1 .. $total)
 
     open(BUFFER,"< $file")    || do { &Log($!); return 0;};
     open(OUT,   "> $file.$i") || do { &Log($!); exit 1;};
@@ -497,11 +497,11 @@ sub SplitFiles
 
 # Making files encoded and compressed for the given @filelist
 # if PACK_P >0(PACKING),
-# packed one is > "$WHERE.0"
+# packed one is > "$where.0"
 # $FILE is an finally encoded name 
 # if plain,
-# $WHERE.1 -> $WHERE.$TOTAL(>=1) that is .1, .2, .3...
-# return $TOTAL
+# $where.1 -> $where.$total(>=1) that is .1, .2, .3...
+# return $total
 sub MakeFilesWithUnixFrom { &DraftGenerate(@_);}
 sub MakeFileWithUnixFrom  { &DraftGenerate(@_);}
 
@@ -659,25 +659,23 @@ sub file2sjis
 sub SendingBackOrderly { &SendingBackInOrder(@_);}
 sub SendingBackInOrder
 {
-    local($returnfile, $TOTAL, $SUBJECT, $SLEEPTIME, @to) = @_;
+    local($returnfile, $total, $subj, $sleeptime, @to) = @_;
 
-    foreach $now (1..$TOTAL) {
+    foreach $now (1..$total) {
 	local($file) = "$DIR/$returnfile.$now";
-	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
-	    " Sending Back $now/$TOTAL";
-	&Log("SendBackInOrder[$$] $now/$TOTAL $to");
+	$0 = "--SendingBackInOrder $FML Sending Back $now/$total";
+	&Log("SendBackInOrder[$$] $now/$total $to");
 
-	$subject = "$SUBJECT ($now/$TOTAL) $ML_FN";
+	$subject = "$subj ($now/$total) $ML_FN"; # subject is reset anytime;
 	@files = ($file);
 	&NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
-	#    &SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, @to);
+	#    &SendFile2Majority("$subj ($now/$total) $ML_FN", $file, @to);
 	# -> &NeonSendFile(*to, *subject, *files); #(*to, *subject, *files);
 
 	unlink $file unless $debug;
 
-	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
-	    " Sleeping [".($SLEEPTIME ? $SLEEPTIME : 3)."] $now/$TOTAL";
-	sleep($SLEEPTIME ? $SLEEPTIME : 3);
+	$0 = "--SendingBackInOrder $FML Sleeping [".($sleeptime || 3)."] $now/$total";
+	sleep($sleeptime || 3);
     }
 
     &Debug("SBO:unlink $returnfile $returnfile.[0-9]*") if $debug;

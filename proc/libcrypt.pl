@@ -4,10 +4,9 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
-
-$EXIST_CRYPT = eval "crypt('fukachan', 11);", $@ eq "";
+local($HasCrypt) = eval "crypt('fukachan', 11);", $@ eq "";
 
 
 # PLAIN passwd -> crypt(passwd, DES-function)
@@ -18,7 +17,7 @@ sub Crypt
     local($passwd, $salt) = @_;
 
     # if not have crypt();
-    return $passwd unless $EXIST_CRYPT;
+    return $passwd unless $HasCrypt;
 
     # if DES function is not given
     $salt = $salt || rand(64);

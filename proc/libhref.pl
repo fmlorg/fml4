@@ -4,36 +4,11 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
-sub HRefInit
-{
-    require 'jcode.pl';
+sub HRefInit { require 'jcode.pl'; &SocketInit;}
 
-    ##### PERL 5  
-    local($eval, $ok);
-    if ($_cf{'perlversion'} == 5) { 
-	eval "use Socket;", ($ok = $@ eq "");
-	&Log($ok ? "Socket O.K.": "Socket fails. Try socket.ph") if $debug;
-	return 1 if $ok;
-    }
-
-    ##### PERL 4
-    $EXIST_SOCKET_PH = eval "require 'sys/socket.ph';", $@ eq "";
-    &Log("sys/socket.ph is O.K.") if $EXIST_SOCKET_PH && $debug;
-
-    if ((! $EXIST_SOCKET_PH) && $COMPAT_SOLARIS2) {
-	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
-	$eval .= "sub SOCK_STREAM {2;}; sub SOCK_DGRAM  {1;};";
-	&eval($eval) && $debug && &Log("Set socket [Solaris2]");
-    }
-    elsif (! $EXIST_SOCKET_PH) {	# 4.4BSD
-	$eval  = "sub AF_INET {2;};     sub PF_INET { &AF_INET;};";
-	$eval .= "sub SOCK_STREAM {1;}; sub SOCK_DGRAM  {2;};";
-	&eval($eval) && $debug && &Log("Set socket [4.4BSD]");
-    }
-}
 
 sub Http { &HRef(@_);}
 sub HRef

@@ -4,11 +4,7 @@
 
 local($id);
 $id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && "$1[$2]");
-
-# Aliases
-sub SendFileMajority  { &SendFile('#dummy', @_);}
-sub SendFile2Majority { &SendFile('#dummy', @_);}
+$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 # Auto registraion procedure
 # Subject: subscribe
@@ -17,57 +13,75 @@ sub SendFile2Majority { &SendFile('#dummy', @_);}
 # return 0 or 1 to use the return of &MLMemberCheck
 sub AutoRegist
 {
+    local(*e) = @_;
     local($from, $s, $b, $r);
     local($file_to_regist) = $FILE_TO_REGIST || $MEMBER_LIST;
+
+    # for &Notify,  reply-to ? reply-to : control-address
+    $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'Reply2:'};
 
     if ($REQUIRE_SUBSCRIBE && (! $REQUIRE_SUBSCRIBE_IN_BODY)) {
 	# Syntax e.g. "Subject: subscribe"...
 	# 
 	# [\033\050\112] is against a bug in cc:Mail
 	# patch by yasushi@pier.fuji-ric.co.jp
-	$s = $Envelope{'h:Subject'};
-	$s =~ s/^\#\s*//;
+	$s = $e{'h:Subject:'};
+	$s =~ s/(^\#\s*|^\s*)//;
+	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
 	$s =~ s/^\033\050\112\s*($REQUIRE_SUBSCRIBE.*)/$1/;
+	&Debug("AUTO REGIST SUBJECT ENTRY [$s]") if $debug;
 
-	# multiple lines matching case could happen
-	($s) = grep(/$REQUIRE_SUBSCRIBE/, split(/\n/, $s));
-
-	if ($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*$/i ||
-	   $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i) {
+	if ($s =~ /^$REQUIRE_SUBSCRIBE\s*(.*)/) { 
 	    $from = $1;
+	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
+	    $from =~ s/^(\S+).*/$1/;
+	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
 	}
 	else {
-	    $s = "Bad Syntax on subject in autoregistration";
-	    &Log($s);
-	    &Warn("$s $ML_FN", &WholeMail);
+	    &Debug("AUTO REGIST SUBJECT[$s] SYNTAX ERROR") if $debug;
+	    $sj = "Bad syntax subject in autoregistration";
 	    $b  = "Subject: $REQUIRE_SUBSCRIBE [your-email-address]\n";
 	    $b .= "\t[] is optional\n";
 	    $b .= "\tfor changing your address to regist explicitly.\n";
-	    &Sendmail($From_address, "$s $ML_FN", $b); return 0;
-	}
 
+	    &Log($sj, "Subject => [$s]");
+	    &Warn("$sj $ML_FN", &WholeMail);
+
+	    # notify
+	    $e{'message:h:subject'} .= $sj;
+	    $e{'message'}           .= $b. &WholeMail;
+
+	    return 0;
+	}
     }
     elsif ($REQUIRE_SUBSCRIBE && $REQUIRE_SUBSCRIBE_IN_BODY) {
 	# Syntax e.g. "subscribe" in body
-	$s = $Envelope{'Body'};
-	$s =~ s/^\#\s*//;
+	$s = $e{'Body'};
+	$s =~ s/(^\#\s*|^\s*)//;
+	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
+	&Debug("AUTO REGIST BODY ENTRY [$s]") if $debug;
 
-	# multiple lines matching case could happen
-	($s) = grep(/$REQUIRE_SUBSCRIBE/, split(/\n/, $s));
-
-	if ($s =~ /^\s*$REQUIRE_SUBSCRIBE\s+(\S+)\s*$/i ||
-	    $s =~ /^\s*$REQUIRE_SUBSCRIBE\s*$/i) {
+	if ($s =~ /^$REQUIRE_SUBSCRIBE\s*(.*)/) { 
 	    $from = $1;
+	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
+	    $from =~ s/^(\S+).*/$1/;
+	    &Debug("AUTO REGIST FROM ENTRY [$from]") if $debug;
 	}
 	else {
-	    $s = "Bad Syntax in mailbody in autoregistration";
-	    &Log($s);
-	    &Warn("$s $ML_FN", &WholeMail);
-	    $b  = "In the first line of your mail body\n\n";
-	    $b .= "$REQUIRE_SUBSCRIBE [your-email-address]\n\n";
+	    &Debug("AUTO REGIST BODY[$s] SYNTAX ERROR") if $debug;
+	    $sj = "Bad syntax body in autoregistration";
+	    $b  = "Body: $REQUIRE_SUBSCRIBE [your-email-address]\n";
 	    $b .= "\t[] is optional\n";
 	    $b .= "\tfor changing your address to regist explicitly.\n";
-	    &Sendmail($From_address, "$s $ML_FN", $b); return 0;
+
+	    &Log($sj, "Body => [$s]");
+	    &Warn("$sj $ML_FN", &WholeMail);
+
+	    # notify
+	    $e{'message:h:subject'} .= $sj;
+	    $e{'message'}           .= $b. &WholeMail;
+
+	    return 0;
 	}
     }
     else {
@@ -75,10 +89,18 @@ sub AutoRegist
 	# Determine the address to check
 	# In default, when changing your registerd address
 	# use "subscribe your-address" in body.
+	$s = $e{'Body'};
+	$s =~ s/(^\#\s*|^\s*)//;
+	$s =~ s/\n(\s)/$1/g;	# may be multiple lines
 
 	$DEFAULT_SUBSCRIBE || ($DEFAULT_SUBSCRIBE = "subscribe");
-	($Envelope{'Body'} =~ /^\s*$DEFAULT_SUBSCRIBE\s*(\S+)/i) && 
-	    ($from = $1);
+
+	if ($s =~ /^$DEFAULT_SUBSCRIBE\s*(\S+)/i) { 
+	    $from = $1;
+	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
+	    $from =~ s/^(\S+).*/$1/;
+	    &Debug("AUTO REGIST DEFAULT ENTRY [$from]") if $debug;
+	}
     }# end of REQUIRE_SUBSCRIBE;
 	
     &Debug("AUTO REGIST CANDIDATE>$from<") if $debug;
@@ -88,50 +110,42 @@ sub AutoRegist
     return 0 if     &LoopBackWarn($from); 	# loop back check	
     return 0 unless &Chk822_addr_spec_P($from);	# permit only 822 addr-spec 
 
-    # duplicate by umura@nn.solan.chubu.ac.jp  95/6/8
+    ### duplicate check (patch by umura@nn.solan.chubu.ac.jp 95/06/08)
     if (&CheckMember($from, $MEMBER_LIST)) {	
 	&Log("Dup: $from");
-        &Sendmail($From_address, "fml Command Status report $ML_FN",
-	   "Address [$from] already subscribed.\n");
+	$e{'message'} .= "Address [$from] already subscribed.\n";
+	$e{'message'} .= &WholeMail;
 	return 0;
     }
 
-    ### ADD the newcomer to the member list
-    if (open(TMP, ">> $file_to_regist")) {
-	print TMP $from, "\n";
-	close(TMP);
-	&Log("Added: $from");
-    }
-    else {
-	select(TMP); $| = 1; select(STDOUT);
-	&Log($!);
-	&Warn("Auto-Regist: cannot open $file_to_regist", &WholeMail);
-	return 0;
-    };
+    ##### ADD the newcomer to the member list
+    local($ok, $er);		# ok and error-strings
 
-    ### ADD the newcomer to the active list
+    # WHEN CHECKING MEMBER...
     if ($ML_MEMBER_CHECK) {
-	$file_to_regist = $ACTIVE_LIST;
-	if (open(TMP, ">> $file_to_regist")) {
-	    print TMP $from, "\n";
-	    close(TMP);
-#	    &Log("Added: $from");
-	}
-	else {
-	    select(TMP); $| = 1; select(STDOUT);
-	    &Log($!);
-	    &Warn("Auto-Regist: cannot open $file_to_regist", &WholeMail);
+	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
+	&Append2($from, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
+	($ok == 2) ? &Log("Added: $from") : do {
+	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
+	    return 0; 
+	};
+    }
+    # AUTO REGISTRATION MODE
+    else {
+	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
+	$ok == 1 ? &Log("Added: $from") : do {
+	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
 	    return 0;
 	};
     }
 
-
-
-    # WHETHER DELIVER OR NOT?
+    ### WHETHER DELIVER OR NOT?
     # 7 is body 3 lines and signature 4 lines, appropriate?
     local($limit) = $AUTO_REGISTRATION_LINES_LIMIT || 8;
-    if ($Envelope{'nline'} < $limit) { 
-	&Log("Not deliver: lines:$Envelope{'nline'} < $limit");
+    &Log("Deliver? $e{'nlines'} <=> $limit") if $debug;
+
+    if ($e{'nlines'} < $limit) { 
+	&Log("Not deliver: lines:$e{'nlines'} < $limit");
 	$AUTO_REGISTERD_UNDELIVER_P = 1;
 	$r  = "The number of mail body-line is too short(< $limit),\n";
 	$r .= "So NOT FORWARDED to ML($MAIL_LIST). O.K.?\n\n";
@@ -147,54 +161,7 @@ sub AutoRegist
     &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
 
     ### Ends.
-    return ($AUTO_REGISTERD_UNDELIVER_P ? 0 : 1);
-}
-
-
-# Parameters:
-# $tmpf     : a temporary file
-# $mode     : mode 
-# $file     : filename of encode e.g. uuencode , ish ...
-# @filelist : filelist of packing and encodeing. !REQUIRE push(@here,$file)!
-#
-# INSIDE VARIABLES:
-# *conf : input 
-# *r    : output
-# *misc : output as an additional
-sub DraftGenerate
-{
-    local(*conf, *r, *misc);
-    local($prog, $proc);
-    local($tmpf, $mode, $file, @conf) = @_; # attention! *conf above
-    $conf = $tmpf;
-    $r    = $file;
-    $conf{'total'} = 0;
-
-    &Debug("&DraftGenerate ($tmpf, $mode, $file, @conf)") if $debug;
-
-    &InitDraftGenerate;
-
-    # INCLUDE
-    require $_fp{'inc', $mode} if $_fp{'inc', $mode};
-
-    foreach $proc ( # order 
-		    'hdr',
-		    'cnstr', 
-		    'retrieve',
-		    'split',
-		    'destr'
-		    ) {
-
-	$prog = $_fp{$proc, $mode};
-	if ($debug) {
-	    print STDERR "Call [$proc]\t";
-	    print STDERR "&$prog(*conf, *r, *misc);" if $prog;
-	    print STDERR "\n";
-	}
-	&$prog(*conf, *r, *misc) if $prog;
-    }
-
-    $r{'total'};
+    ($AUTO_REGISTERD_UNDELIVER_P ? 0 : 1);
 }
 
 
@@ -221,7 +188,7 @@ sub ModeLookup
     local($opt) = @_;    
     local($when, $mode);
 
-    print STDERR "&ModeLookup($opt)\n" if $debug;
+    print STDERR "ModeLookup($opt)\n" if $debug;
 
     # Require called by anywhere
     &MSendModeSet;
@@ -258,7 +225,7 @@ sub DocModeLookup
     local($opt) = @_;    
     $opt =~ s/\#\d+/\#/g;
 
-    print STDERR "&DocModeLookup($opt)\n" if $debug;
+    print STDERR "DocModeLookup($opt)\n" if $debug;
 
     # Require called by anywhere
     &MSendModeSet;
@@ -299,9 +266,15 @@ sub MSendModeSet
 
 
 		 '#lhaish', '#LHA+ISH', 
+		 'li',      'lhaish',
 		 'i',       'lhaish',
 		 'ish',     'lhaish',
 		 'wait#lhaish', 1,
+
+
+		 '#lhauu',   '#LHA+Uuencoded', 
+		 'lu',       'lhauu',
+		 'lhauu',    'lhauu',
 
 
 		 '#rfc934', '#RFC934(mh-burst)', 
@@ -318,6 +291,7 @@ sub MSendModeSet
 		 'uish',     'uish', 
 		 'wait#uish', 1,
 
+
 		 '#rfc1153','#Digest (RFC1153)',
 		 '#rfc1153','#Digest (RFC1153)',
 		 'd',       'rfc1153',
@@ -326,608 +300,6 @@ sub MSendModeSet
 		 );
 
     $MSEND_OPT_HOOK && &eval($MSEND_OPT_HOOK, 'MSendModeSet:');
-}
-
-
-# Initialization of msending interface. 
-# return NONE
-sub InitDraftGenerate
-{
-    &MSendModeSet;
-
-    # PLAIN TEXT with UNIX FROM
-    $_fp{'cnstr',    'uf'} = 'Cnstr_uf';
-    $_fp{'retrieve', 'uf'} = 'f_RetrieveFile';
-    $_fp{'split',    'uf'} = '';
-    $_fp{'destr',    'uf'} = '';
-
-    # PLAINTEXT by RFC934
-    $_fp{'cnstr',    'rfc934'}  = 'Cnstr_rfc934';
-    $_fp{'retrieve', 'rfc934'}  = 'f_RetrieveFile';
-    $_fp{'destr',    'rfc934'}  = 'Destr_rfc934';
-
-    # PLAINTEXT by RFC1153
-    $_fp{'cnstr',    'rfc1153'} = 'Cnstr_rfc1153';
-    $_fp{'retrieve', 'rfc1153'} = 'f_RetrieveFile';
-
-    # PLAINTEXT by MIME/Multipart
-    $_fp{'cnstr',    'mp'} = 'Cnstr_mp';
-    $_fp{'retrieve', 'mp'} = 'f_RetrieveFile';
-
-    # Gzipped UNIX FROM
-    $_fp{'cnstr',    'gz'} = 'Cnstr_gz';
-    $_fp{'retrieve', 'gz'} = 'f_gz';
-    $_fp{'split',    'gz'} = 'f_SplitFile';
-
-    # PACK: TAR + GZIP
-    $_fp{'cnstr',    'tgz'} = 'Cnstr_tgz';
-    $_fp{'retrieve', 'tgz'} = 'f_tgz';
-    $_fp{'split',    'tgz'} = 'f_SplitFile';
-
-    # PACK: LHA + ISH
-    $_fp{'cnstr',    'lhaish'} = '';
-    $_fp{'retrieve', 'lhaish'} = 'f_LhaAndEncode2Ish';
-    $_fp{'split',    'lhaish'} = 'f_SplitFile';
-
-    # UUENCODE ONLY
-    $_fp{'retrieve', 'uu'}     = 'f_uu';
-    $_fp{'split',    'uu'}     = 'f_SplitFile';
-
-}
-
-
-############################## CONSTRUCTORS
-
-
-sub Cnstr_uf
-{
-    local(*conf, *r, *misc) = @_;
-
-    $conf{'plain'} = 1;
-    $conf{'total'} = 1;
-    $conf{'delimiter'} = "From $MAINTAINER\n";
-    $conf{'preamble'} = '';
-    $conf{'trailer'}  = '';
-}
-
-
-sub Cnstr_rfc1153
-{
-    local(*conf, *r, *misc) = @_;
-    local($mode) = 'rfc1153';
-
-    $conf{'plain'} = 1;
-    $conf{'total'} = 1;
-    $conf{'delimiter'} = "\n\n".('-' x 30)."\n\n";
-
-    &use('rfc1153');
-    local($PREAMBLE, $TRAILER) = &Rfc1153Custom($mode, @conf);
-
-    print STDERR "PREAMBLE $PREAMBLE\nTRALER $TRAILER\n";
-
-    $conf{'rfhook'}   = &Rfc1153ReadFileHook;
-    $conf{'preamble'} = $PREAMBLE;
-    $conf{'trailer'}  = $TRAILER;
-
-    # set Destructor used in MSendv4.pl 
-    # to increment the issue count of the digest
-    $_cf{'Destr'} .= "&Rfc1153Destructer;\n";
-}
-
-
-sub Cnstr_rfc934
-{
-    local(*conf, *r, *misc) = @_;
-
-    $conf{'plain'} = 1;
-    $conf{'total'} = 1;
-    $conf{'delimiter'} = "\n------- Forwarded Message\n\n";
-    $conf{'preamble'} = '';
-    $conf{'trailer'}  = '';
-
-    $conf{'rfhook'} = q#
-	s/^-/- -/;
-    #;
-}
-
-
-sub Destr_rfc934
-{
-    local(*conf, *r, *misc) = @_;
-
-    undef $conf{'rfhook'};
-}
-
-
-# patched by mikami@saturn.hcs.ts.fujitsu.co.jp
-# Posted:  Tue, 16 May 1995 23:20:32 JST
-# fml-supoort ML: 00363
-# Following this fix, modify
-# $ORG_MIME_MULTIPART_BOUNDARY -> $MIME_MULTIPART_BOUNDARY
-# $MIME_MULTIPART_BOUNDARY     -> $MIME_MULTIPART_DELIMITER
-#
-sub Cnstr_mp
-{
-    local(*conf, *r, *misc) = @_;
-    local($boundary) = "--$MailDate--";
-    $boundary =~ s/,//g; $boundary =~ s/\s+JST//g; $boundary =~ s/ /_/g;
-
-    # MIME CONFIGURATION
-    $MIME_VERSION              = $MIME_VERSION || '1.0';
-    $MIME_CONTENT_TYPE         = $MIME_CONTENT_TYPE || 'multipart/mixed;';
-    $MIME_MULTIPART_BOUNDARY   = $MIME_MULTIPART_BOUNDARY || $boundary;
-    $MIME_MULTIPART_DELIMITER  = $MIME_MULTIPART_BOUNDARY;
-    $MIME_MULTIPART_DELIMITER .= "\nContent-Type: message/rfc822\n";
-    $MIME_MULTIPART_CLOSE_DELIMITER = $MIME_MULTIPART_BOUNDARY;
-
-    # configurations 
-    $conf{'plain'}     = 1;
-    $conf{'total'}     = 1;
-    $conf{'delimiter'} = "\n--$MIME_MULTIPART_DELIMITER\n";
-    $conf{'preamble'}  = $MIME_MULTIPART_PREAMBLE if $MIME_MULTIPART_PREAMBLE;
-    $conf{'trailer'}   = "\n--$MIME_MULTIPART_CLOSE_DELIMITER--\n";
-    $conf{'trailer'}  .= $MIME_MULTIPART_TRAILER if $MIME_MULTIPART_TRAILER;
-
-    # make MIME Header
-    undef $_cf{'header', 'MIME'};
-    $_cf{'header', 'MIME'} .= "MIME-Version: $MIME_VERSION\n";
-    $_cf{'header', 'MIME'} .= "Content-type: $MIME_CONTENT_TYPE\n";
-    $_cf{'header', 'MIME'} .= "\tboundary=\"$MIME_MULTIPART_BOUNDARY\"\n";
-}
-
-
-sub Cnstr_gz
-{
-    local(*conf, *r, *misc) = @_;
-
-    $conf{'total'} = 0;
-    $conf{'delimiter'} = "From $MAINTAINER\n";
-    $conf{'preamble'} = '';
-    $conf{'trailer'}  = '';
-}
-
-
-sub Cnstr_tgz
-{
-    local(*conf, *r, *misc) = @_;
-
-    $conf{'total'} = 0;
-    $conf{'delimiter'} = "From $MAINTAINER\n";
-    $conf{'preamble'} = '';
-    $conf{'trailer'}  = '';
-}
-
-
-sub f_RetrieveFile
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-    local($file, $lines, $linecounter, $total, $new_p);
-    local($total) = $conf{'total'};
-
-    # OPEN
-    &OpenStream($tmpf, 0, 0, $total) || (return 0);
-    &Debug("&OpenStream($tmpf, 0, 0, $total), success") if $debug; 
-    
-    # PREAMBLE
-    if ($conf{'preamble'}) {
-	print OUT $conf{'preamble'};
-	$new_p++;
-    }
-
-    # Retrieve files
-    foreach $file (@conf) {
-	$lines = &WC($file);
-	
-	# open the next file
-	&Debug("open(FILE, $file) || next;") if $debug; 
-	open(FILE, $file) || next; 
-	print OUT $conf{'delimiter'} if $conf{'delimiter'};
-
- 	if ($conf{'rfhook'}) {
-	    local($s) = qq#
-		while (<FILE>) { 
-		    $conf{'rfhook'};
-		    print OUT \$_; \$linecounter++;
-		}
-	    #;
-	    &Debug(">>$s<<") if $debug;
-	    &eval($s, 'Retreive file hook');
-	}
-	else {
-	    while (<FILE>) { 
-		print OUT $_; $linecounter++;
-	    }
-	}
-	&Debug("close(FILE) [total=$total];") if $debug; 
-	close(FILE);
-	
-	print OUT "\n"; $linecounter++;
-	$new_p++;	# the number of files
-	
-	# If PLAIN TEXT, reset!
-	if ($conf{'plain'} && ($linecounter + $lines) > $MAIL_LENGTH_LIMIT) {
-	    # e.g. in the format of RFC1153, 
-	    # each mail is perfect format is appropriate?
-	    print OUT $conf{'trailer'} if $conf{'trailer'};
-
-	    # Close Output
-	    &CloseStream;
-
-	    # Reconfig
-	    $total++;
-	    $linecounter = 0;
-
-	    # Open new file(OUTPUT)
-	    &OpenStream($tmpf, 0, 0, $total) || (return 0);
-
-	    # if preamble only, not need to deliver, so new_p = 0
-	    print OUT $conf{'preamble'} if $conf{'preamble'}; 
-	    $new_p = 0;
-	}
-    }
-
-    # TRAILER
-    if ($conf{'trailer'}) {
-	print OUT $conf{'trailer'};
-	$new_p++ ;
-    }
-
-    # CLOSE
-    &CloseStream;
-
-    # if write filesize=0, decrement TOTAL.
-    $total-- unless $new_p;
-
-    $r{'total'} = $total;
-}
-
-
-sub f_LhaAndEncode2Ish
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-
-    &LhaAndEncode2Ish($tmpf, $r, @conf);
-}
-
-
-sub f_gz
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-
-    &f_RetrieveFile(*conf, *r, *misc);
-    &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
-}
-
-
-sub f_tgz
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-
-    &system("$TAR ".join(" ", @conf)."|$COMPRESS|$UUENCODE $r", $tmpf);
-}
-
-
-sub f_uu
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-    local($f, $dir);
-
-    $r =~ s#(\S+)/(\S+)#$dir=$1, $f=$2#e;
-
-    &system("chdir $dir; $UUENCODE $f $f", $tmpf);
-}
-
-
-sub f_gzuu
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-
-    &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
-}
-
-
-sub f_SplitFile
-{
-    local(*conf, *r, *misc) = @_;
-    local($tmpf) = $conf;
-    local($total) = $r{'total'};
-
-    print STDERR "f_SplitFile: $tmpf -> $r \n" if $debug;
-
-    local($totallines) = &WC($tmpf);
-    $total = int($totallines/$MAIL_LENGTH_LIMIT + 1);
-    &Debug("$total = int($totallines/$MAIL_LENGTH_LIMIT + 1);") if $debug;
-
-    if ($total > 1) {
-	local($s) = &SplitFiles($tmpf, $totallines, $total);
-	if ($s == 0) {
-	    &Log("f_SplitFile: Cannot split $tmpf");
-	    return 0;
-	}
-    }
-    elsif (1 == $total) {# a trick for &SendingBackInOrder;
-	&Debug("rename($tmpf, $tmpf.1)") if $debug; 
-	rename($tmpf, "$tmpf.1"); 
-    }
-
-    $r{'total'} = $total;
-}
-##############################
-
-
-# Open FILEHANDLE 'OUT'.
-# PACK_P is backward compatibility since 
-# PACK_P is always 0!
-# return 1 if succeed;
-sub OpenStream_OUT { &OpenStream(@_);}
-sub OpenStream
-{
-    local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
-
-    &Debug("&OpenStream: open OUT > $WHERE.$TOTAL;") if $debug;
-    open(OUT, "> $WHERE.$TOTAL") || do { 
-	&log("OpenStream: cannot open $WHERE.$TOTAL");
-	return $NULL;
-    };
-    select(OUT); $| = 1; select(STDOUT);
-
-    1;
-}
-
-
-# Aliases for symmetry. close FILEHANDLE 'OUT'
-sub CloseStream     { close(OUT);}
-sub CloseStream_OUT { close(OUT);}
-
-
-# Word Counting of the gigen file
-# return lines
-sub WC
-{
-    local($f) = @_;
-    local($lines) = 0;
-
-    open(TMP, $f) || return 0;
-    while (<TMP>) { 
-	$lines++;
-    }
-    close(TMP);
-
-    $lines;
-}
-
-
-# Split files and unlink the original
-# $file - split -> $file.1 .. $file.$TOTAL files 
-# return the number of splitted files
-sub SplitFiles
-{
-    local($file, $totallines, $TOTAL) = @_;
-    local($unit)  = int($totallines/$TOTAL); # equal lines in each file
-    local($lines) = 0;
-    local($i)     = 1;		# split to (1 .. $TOTAL)
-
-    open(BUFFER,"< $file")    || do { &Log($!); return 0;};
-    open(OUT,   "> $file.$i") || do { &Log($!); exit 1;};
-    select(OUT); $| = 1; select(STDOUT);
-
-    while (<BUFFER>) {
-	print OUT $_; $lines++;
-
-	# Reset
-	if ($lines > $unit) { 
-	    $lines = 0; 
-	    close OUT; 
-	    $i++;
-
-	    &Debug("open(OUT, > $file.$i)") if $debug;
-
-	    # Next file
-	    open(OUT, "> $file.$i") || do { &Log($!); return 0;};
-	    select(OUT); $| = 1; select(STDOUT);
-	}
-    }# WHILE;
-
-    close(OUT);
-
-    # delete original source
-    unlink $file unless $_cf{'splitfile', 'NOT unlink'}; 
-    &Debug("SplitFiles:unlink $file") if $debug;
-
-    $i;
-}
-
-
-# Making files encoded and compressed for the given @filelist
-# if PACK_P >0(PACKING),
-# packed one is > "$WHERE.0"
-# $FILE is an finally encoded name 
-# if plain,
-# $WHERE.1 -> $WHERE.$TOTAL(>=1) that is .1, .2, .3...
-# return $TOTAL
-sub MakeFilesWithUnixFrom { &DraftGenerate(@_);}
-sub MakeFileWithUnixFrom  { &DraftGenerate(@_);}
-
-# Lha + uuencode for $FILE
-# &Lha..( outputfile, encode-name, @list ) ;
-# return ENCODED_FILENAME
-sub LhaAndEncode2Ish
-{
-    local($TMPF, $FILE, @filelist) = @_;
-    local($COMPRESS, $UUENCODE); # locally define!
-
-    &Debug("LhaAndEncode2Ish($TMPF, $FILE, @filelist)") if $debug;
-
-    # Variable setting
-    $FILE =~ s/\.gz$/.lzh/;
-    local($tmp) = "$TMP_DIR/$FILE";
-    local($LHA) = $LHA ? $LHA : "$LIBDIR/bin/lha";
-    local($ISH) = $ISH ? $ISH : "$LIBDIR/bin/aish";
-
-    # SJIS ENCODING
-    if ($USE_SJIS_in_ISH) {
-	require 'jcode.pl';
-	@filelist = &Convert2Sjis(*filelist);
-    }
-
-    # O.K. here we go
-    unlink $tmp if -f $tmp;# for lha
-    $COMPRESS = "$LHA a $tmp ". join(" ", @filelist);
-    $UUENCODE = "$ISH -s7 -o $TMPF $tmp";
-
-    &system($COMPRESS);
-    &system($UUENCODE);
-
-    unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
-    unlink $tmp unless $debug;	# e.g. unlink msend.lzh
-
-    $TMPF;
-}
-
-
-# Convert @filelist -> 
-# return filelist(may be != given filelist e.g. spool -> tmp/spool)
-# &system 's parameter is ($cmd , $out, $in)
-# 
-sub Convert2Sjis
-{
-    local(*f) = @_;
-    local(*r);
-    local($tmp)  = $TMP_DIR;
-    local($tmpf) = "$TMP_DIR/$$";
-    $tmp =~ s/^\.\///; # $SPOOL_DIR/,  tmp/, ..
-
-    &Debug("\$tmp = $tmp") if $debug;
-
-    # temporary directory
-    if (! -d "$TMP_DIR/spool") {
-	mkdir("$TMP_DIR/spool", 0700);
-    }
-
-    # GO!
-    foreach $r (@f) { 
-	$r =~ s/^\.\///; # $SPOOL_DIR/,  tmp/, ..
-
-	&Debug("&file2sjis($r, $tmpf)") if $debug;
-	&file2sjis($r, $tmpf) || next;
-
-	if ($r =~ /^$SPOOL_DIR/) {
-	    rename($tmpf, "$TMP_DIR/$r") || &Log("cannot rename $tmf $TMP_DIR/$r");
-	    push(@r, "$TMP_DIR/$r");
-	}
-	elsif ($r =~ /^$tmp/) {
-	    rename($tmpf, $r) || &Log("cannot rename $tmf $r");
-	    push(@r, $r);
-	}
-    }
-
-    return @r;
-}
-
-
-# using jcode.pl and add ^M and ^Z
-# return 1 if succeed
-sub file2sjis 
-{
-    local($in, $out) = @_;
-    local($line);
-
-    if (open(IN, $in)) {
-	;
-    }
-    else {
-	&Log("file2sjis: $in: $!");
-	return 0;
-    }
-
-    if (open(OUT, "> $out")) {
-	select(OUT); $| = 1; select(STDOUT);
-    }
-    else {
-	&Log("file2sjis: $out: $!");
-	return 0;
-    }
-
-    while (<IN>) {
-	$line = $_;
-	&jcode'convert(*line, 'sjis');#';
-	$line =~ s/\012$/\015\012/; # ^M^J
-	print OUT $line;
-    }
-
-    print OUT "\032\012";	# ^Z
-    close(OUT);
-
-    1;
-}
-
-
-# Sending files back, Orderly is [a], not [ad] _o_
-# $returnfile not include $DIR PATH
-# return NONE
-sub SendingBackOrderly { &SendingBackInOrder(@_);}
-sub SendingBackInOrder
-{
-    local($returnfile, $TOTAL, $SUBJECT, $SLEEPTIME, @to) = @_;
-
-    foreach $now (1..$TOTAL) {
-	local($file) = "$DIR/$returnfile.$now";
-	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
-	    " Sending Back $now/$TOTAL";
-	&Log("SendBackInOrder[$$] $now/$TOTAL $to");
-	&SendFile2Majority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0, @to);
-
-	unlink $file unless $debug;
-
-	$0 = ($PS_TABLE || "--SendingBackInOrder $FML"). 
-	    " Sleeping [".($SLEEPTIME ? $SLEEPTIME : 3)."] $now/$TOTAL";
-	sleep($SLEEPTIME ? $SLEEPTIME : 3);
-    }
-
-    &Debug("SBO:unlink $returnfile $returnfile.[0-9]*") if $debug;
-    unlink $returnfile if ((! $_cf{'splitfile', 'NOT unlink'}) && (! $debug));
-    unlink "$returnfile.0" unless $debug; # a trick for MakeFileWithUnixFrom
-
-    undef $_cf{'header', 'MIME'}; # destructor
-}
-
-
-# Split the given file and send back them
-# ($f, $mode, $subject, @to)
-# $f          the target file
-# $mode
-# $subject
-# @to 
-# return NONE
-sub SendFilebySplit
-{
-    local($f, $mode, $enc, @to) = @_;
-    local($total, $s);
-    local($sleep) = ($SLEEPTIME || 3);
-    local($tmp)   = "$TMP_DIR/$$";
-
-    $0 = "--Split and Sendback $f to $to $ML_FN <$FML $LOCKFILE>";
-    local($s)   = ($enc || "Matomete Send");
-
-    # local($tmpf, $mode, $file, @conf)
-    # $tmpf     : a temporary file 
-    # $mode     : mode 
-    # $file     : filename of encode e.g. uuencode , ish ...
-    &Debug("SendFilebySplit::DraftGenerate($tmp, $mode, $f, $f)") if $debug;
-    $total  = &DraftGenerate($tmp, $mode, $f, $f);
-
-    &Debug("SendFilebySplit::($tmp, $total, $s, $sleep, @to)") if $debug;
-    if ($total) {
-	&SendingBackInOrder($tmp, $total, $s, $sleep, @to);
-    }
-
-    undef $_cf{'header', 'MIME'}; # destructor. 
 }
 
 
@@ -940,8 +312,8 @@ sub TarZXF
     local($header_size)   = 512;
     local($header_format) = "a100 a8 a8 a8 a12 a12 a8 a a100 a*";
     local($nullblock)     = "\0" x $header_size;
-    local($BUF, $SIZE);
-    local($TOTAL) = 1;
+    local($buf, $totalsize);
+    local($tmptotal) = 1;
     
     &Debug("TarZXF local($tarfile, $total, ". 
 	join(" ", keys %cat) .", $outfile)\n") if $debug;
@@ -955,7 +327,7 @@ sub TarZXF
     select(TAR); $| = 1; select(STDOUT);
 
     if ($outfile) {
-	&OpenStream($outfile, 0, 0, $TOTAL) 
+	&OpenStream($outfile, 0, 0, $tmptotal) 
 	    || do { &Log("TarZXF: Cannot Open $outfile"); return "";};
     };
     
@@ -974,16 +346,16 @@ sub TarZXF
 
 	local($bufsize) = 8192;
 	local($size)    = oct($header[4]);
-	$SIZE          += $size; # total size?
-	$size = 0 if $header[7] =~ /1/;
+	$totalsize     += $size; # total size?
+	$size           = 0 if $header[7] =~ /1/;
 
 	# suppose 80 char/line
-	if ($outfile && $catit && $SIZE > 80 * $MAIL_LENGTH_LIMIT) { 
+	if ($outfile && $catit && $totalsize > 80 * $MAIL_LENGTH_LIMIT) { 
 	    close(OUT);
-	    $TOTAL++; 
-	    $outfile && &OpenStream($outfile, 0, 0, $TOTAL) 
+	    $tmptotal++; 
+	    $outfile && &OpenStream($outfile, 0, 0, $tmptotal) 
 		|| do { &Log("TarZXF: Cannot Open $outfile"); return "";};    
-	    $SIZE = 0;
+	    $totalsize = 0;
 	}
 	
 	while ($size > 0) {
@@ -999,7 +371,7 @@ sub TarZXF
 		    print OUT $B;
 		}
 		else {
-		    $BUF .= substr($buf, 0, $size);
+		    $buf .= substr($buf, 0, $size);
 		}
 	    }
 
@@ -1011,57 +383,47 @@ sub TarZXF
 	if ($catit && ! --$total) {
 	    close TAR;
 	    close OUT;
-	    return $outfile ? $TOTAL : $BUF;
+	    return $outfile ? $tmptotal : $buf;
 	}
     }# end of Tar extract
     
     close TAR; 
     close OUT;
 
-    return $outfile ? $TOTAL : $BUF;
+    return $outfile ? $tmptotal : $buf;
 }
 
 # InterProcessCommunication
-# return the answer from <S>(socket)
+# return the answer from <S>(socket) since for jcode-converson
 sub ipc
 {
-    local(*ipc) = @_;
-    local($a);
+    local(*ipc, *r) = @_;
     local($err) = "Error of IPC";
 
-    local($name,$aliases,$addrtype,$length,$addrs) = 
-	gethostbyname($ipc{'host'} || "localhost");
-    local($name,$aliases,$port,$proto) = 
-	getservbyname($ipc{'serve'}, $ipc{'tcp'});
-    $port = 13 unless defined($port); # default port:-)
+    local($addrs)  = (gethostbyname($ipc{'host'} || 'localhost'))[4];
+    local($proto)  = (getprotobyname($ipc{'tcp'}))[2];
+    local($port)   = (getservbyname($ipc{'serve'}, $ipc{'tcp'}))[2];
+    $port          = 13 unless defined($port); # default port:-)
     local($target) = pack($ipc{'pat'}, &AF_INET, $port, $addrs);
-
-    if ($debug) {
-	&Debug("ipc:");
-	&Debug("\t%ipc". join(",", %ipc));
-	&Debug("\tpack($ipc{'pat'}, &AF_INET, $port, $addrs)");
-    }
 
     socket(S, &PF_INET, &SOCK_STREAM, 6) || (&Log($!), return $err);
     connect(S, $target)                  || (&Log($!), return $err);
     select(S); $| = 1; select(STDOUT); # need flush of sockect <S>;
 
     foreach (@ipc) {
-	&Debug("IPC S>$_") if $debug;
 	print S $_;
-	while (<S>) { 
-	    $a .= $_;
-	}
+	while (<S>) { $r .= $_;}
     }
 
-    close S;
-    $a;
+    close(S);
 }
 
 
 # Pseudo system()
 # fork and exec
-# $s < $in > $out
+# $s < $in(file) > $out(file)
+#          OR
+# $s < $write(file handle) > $read(file handle)
 # 
 # PERL:
 # When index("$&*(){}[]'\";\\|?<>~`\n",*s)) > 0, 
@@ -1074,33 +436,45 @@ sub ipc
 # 
 sub system
 {
-    local($s, $out, $in) = @_;
+    local($s, $out, $in, $read, $write) = @_;
+    local($c_w, $c_r) = ("cw$$", "cr$$"); # for child handles
 
-    &Debug("&system ($s, $out, $in)") if $debug;
+    &Debug("system ($s, $out, $in, $read, $write)") if $debug;
 
     # Metacharacters check, but we permit only '|' and ';'.
     local($r) = $s;
     $r =~ s/[\|\;]//g;		
 
-    if ( &MetaP($r) ) {
+    if (&MetaP($r)) {
 	&Log("$s matches the shell metacharacters, exit");
 	return 0;
     }
+
+    # File Handles "pipe(READHANDLE,WRITEHANDLE)"
+    $read  && (pipe($read, $c_w)  || (&Log("ERROR pipe(pr, wr)"), return));
+    $write && (pipe($c_r, $write) || (&Log("ERROR pipe(cr, pw)"), return));
 
     # Go!;
     if (($pid = fork) < 0) {
 	&Log("Cannot fork");
     }
     elsif (0 == $pid) {
-	if ($in){
+	if ($write){
+	    open(STDIN, "<& $c_r") || die "child in";
+	}
+	elsif ($in){
 	    open(STDIN, $in) || die "in";
 	}
 	else {
 	    close(STDIN);
 	}
 
-	if ($out){
-	    open(STDOUT, '>'. $out)|| die "out";
+	if ($read) {
+	    open(STDOUT, ">& $c_w") || die "child out";
+	    $| = 1;
+	}
+	elsif ($out){
+	    open(STDOUT, '>'. $out) || die "out";
 	    $| = 1;
 	}
 	else {
@@ -1111,10 +485,25 @@ sub system
 	&Log("Cannot exec $s:".$@);
     }
 
+    close($c_w) if $c_w;# close child's handles.
+    close($c_r) if $c_r;# close child's handles.
+    
     # Wait for the child to terminate.
     while (($dying = wait()) != -1 && ($dying != $pid) ){
 	;
     }
+}
+
+
+sub Copy
+{
+    local($in, $out) = @_;
+    open(IN,  $in)      || (&Log("CopyIN: $!"), return);
+    open(OUT, "> $out") || (&Log("CopyOUT: $!"), return);
+    select(OUT); $| = 1; select(STDOUT); 
+    while (<IN>) { print OUT $_;}
+    close(OUT);
+    close(IN); 
 }
 
 
@@ -1140,31 +529,67 @@ sub Chk822_addr_spec_P
 {
     local($from) = @_;
 
-    if ($from !~ /@/) {
+    if ($from !~ /\@/) {
 	&Log("NO \@ mark: $from");
-        &Sendmail($From_address, "fml Command Status report $ML_FN",
-	   "Address [$from] contains no \@.\n");
+        $Envelope{'message'} .= "WARNING From AUTO REGIST ROUTINE.\n";
+        $Envelope{'message'} .= "Address [$from] contains no \@.\n";
+        $Envelope{'message'} .= "\tHence, EXIT! Try Again!\n\n";
+        $Envelope{'message'} .= &WholeMail;
 	return 0;
     }
 
-   return 1;
+    1;
 }
 
 
-# ALIASES
-sub GetFQN_Dj { &GetFQN;}                      # $j in sendmail.cf
-sub GetFQN_Dm { (split(/\@/, $MAIL_LIST))[1];} # $m in sendmail.cf (or $j)
-sub GetFQCtlAddr { 
-    $CONTROL_ADDRESS ? "$CONTROL_ADDRESS\@".&GetFQN_Dm : $MAIL_LIST;
+##### sendmail.cf
+# $w hostname
+# $j fully quarified domain name 
+# $m domain mail(BSD)
+#
+
+
+sub DefineMacro 
+{
+    &Append2("\$Envelope{'macro:$_[0]'}\t= '$_[1]';", "config.ph");
+    $_[1] || &Append2("1;", "config.ph");
+    $Envelope{"macro:$_[0]"} = $_[1]; # return value;
 }
+
+
+sub Define_j { $Envelope{'macro:j'} || &DefineMacro('j', &GetFQDN);}
+
+sub Define_m { $Envelope{'macro:m'} || &DefineMacro('m', (split(/\@/, $MAIL_LIST))[1]);} 
+
+sub Define_s { $Envelope{'macro:s'} || &DefineMacro('s', &GetFQDN);}
+
+sub GetFQCtlAddr 
+{ 
+    if ($Envelope{'macro:fqca'}) { return $Envelope{'macro:fqca'};}
+
+    if ($CONTROL_ADDRESS && ($CONTROL_ADDRESS =~ /\@/)) {
+	&DefineMacro('ca',   (split(/\@/, $CONTROL_ADDRESS))[0]); 
+	&DefineMacro('fqca', $CONTROL_ADDRESS);
+    }
+    elsif ($CONTROL_ADDRESS) {
+	&DefineMacro('ca',   $CONTROL_ADDRESS);
+	&DefineMacro('fqca', "$CONTROL_ADDRESS\@".&Define_m);
+    }
+    else {
+	$MAIL_LIST;
+    }
+}
+
 
 # $j in /etc/sendmail.cf
 # seems $DOMAIN   = (gethostbyname('localhost'))[1]; do not work
 # So, we make domainname via $MAIL_LIST(must be user@domain form)
-sub GetFQN
+sub GetFQDN 
 {
     local($domain, $hostname);
-    $domain = &GetFQN_Dm;
+
+    # $m
+    $domain = $Envelope{'macro:m'} || &Define_m;
 
     # Get HOSTNAME 
     # WARN:4.4BSD getdomainname return 'domain', but 4.3 return NIS domain
@@ -1180,18 +605,18 @@ sub GenInfo
 {
     local($addr)  = $MAIL_LIST;
     local($s, $c, $d);
+    local($del) = ('*' x 60);
+    local($c)   = &GetFQCtlAddr if $CONTROL_ADDRESS;
 
-    $c = &GetFQCtlAddr if $CONTROL_ADDRESS;
-    
-    $s .= "\n".('*' x 60)."\n";
+    $s .= "\n$del\n";
     $s .= "If you have any questions or problems,\n";
     $s .= "   please make a contact with $MAINTAINER\n";
     $s .= "       or \n";
     $s .= "   send a mail with the body '# help' to \n";
-    $s .= "   $addr".($c && "\nor $c (preferable)")."\n\n";
+    $s .= "   ".($c || $addr)."\n\n";
     $s .= "e.g. \n";
     $s .= "(shell prompt)\% echo \# help |Mail ".($c || $addr);
-    $s .= "\n\n".('*' x 60)."\n";
+    $s .= "\n\n$del\n";
 
     $s;
 }
@@ -1234,64 +659,78 @@ sub ChAddrModeOK
 }
 
 
-# Lock UNIX V7 age like..
-# old lock extracted from fml 0.x and revised now :-)
-sub V7Lock
+# NAME
+#      daemon - run in the background
+# 
+# SYNOPSIS
+#     #include <stdlib.h>
+#     daemon(int nochdir, int noclose)
+#
+# C LANGUAGE
+#  f = open( "/dev/tty", O_RDWR, 0);
+#  if( -1 == ioctl(f ,TIOCNOTTY, NULL))
+#    exit(1);
+#  close(f);
+sub daemon
 {
-    $0 = "--V7 Locked and waiting <$FML $LOCKFILE>";
+    local($nochdir, $noclose) = @_;
+    local($s, @info);
 
-    # setting Signal Handler
-    $SIG{'HUP'}  = 'handler';
-    $SIG{'INT'}  = 'handler';
-    $SIG{'QUIT'} = 'handler';
-    $SIG{'HUP'}  = 'handler';
+    if ($ForkCount++ > 1) {	# the precautionary routine
+	$s = "WHY FORKED MORE THAN ONCE"; 
+	&Log($s, "[ @info ]"); 
+	die($s);
+    }
 
-    # set variables
-    $LockFile = "$TMP_DIR/lockfile.v7";
-    $LockTmp  = "$TMP_DIR/lockfile.$$";
-    $rcsid .= ' :V7L';
-    local($timeout) = 0;
+    if (($pid = fork) > 0) {	# parent dies;
+	exit 0;
+    }
+    elsif (0 == $pid) {		# child is new process;
+	if (! $NOT_USE_TIOCNOTTY) {
+	    eval "require 'sys/ioctl.ph';";
 
-    # create tmpfile
-    &Touch($LockTmp) || die "Can't make LOCK\n";
-    &Append2(&WholeMail."[$$]", $LockTmp) if $debug;
-
-    # try within about 10min.
-    for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
-	if (link($LockTmp, $LockFile) == 0) {	# if lock fails, wait&try
-	    sleep (rand(3)+5);
-	} else {
-	    last;
+	    if (defined &TIOCNOTTY) {
+		require 'sys/ioctl.ph';
+		open(TTY, "+> /dev/tty")   || die("$!\n");
+		ioctl(TTY, &TIOCNOTTY, "") || die("$!\n");
+		close(TTY);
+	    }
 	}
+
+	close(STDIN);
+	close(STDOUT);
+	close(STDERR);
+	return 1;
     }
-    
-    unlink $LockTmp;
-
-    if ($timeout >= $MAX_TIMEOUT) {
-	$TIMEOUT = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
-			   $year, $mon+1, $mday, $hour, $min, $sec);
-
-	open(TIMEOUT, "> $VARLOG_DIR/$TIMEOUT");
-	select(TIMEOUT); $| = 1; select(STDOUT);
-	print TIMEOUT &WholeMail;
-	close(TIMEOUT);
-
-	&Warn("V7 LOCK TIMEOUT", 
-	      "saved in $VARLOG_DIR/$TIMEOUT\n\n".&WholeMail);
+    else {
+	&Log("daemon: CANNOT FORK");
+	return 0;
     }
 }
 
-sub handler {  # 1st argument is signal name
-    local($sig) = @_;
-    &Log("Caught a SIG$sig--shutting down");
-    unlink $LockFile;
-    exit(0);
-}
 
-sub V7Unlock
+
+###### EMERGENCY STOP AND RESTART
+sub EmergencyNotify
 {
-    $0 = "--V7 Unlocked <$FML $LOCKFILE>";
-    unlink $LockFile;
+    local($s, $b);
+    $s  = $b = "Found Emergency control file, Exit!";
+    $b .= "If using Remote Administration\n";
+    $b .= "\t'\# admin start' command.\n"; 
+    &Log($s);
+    &Warn($s, $b);
+}
+
+sub EmergencyRestart 
+{ 
+    unlink "$TMP_DIR/emerg.stop";
+    &LogWEnv("ML Server Restart!", *Envelope);
+}
+
+sub EmergencyStop  
+{ 
+    &Touch("$TMP_DIR/emerg.stop");
+    &LogWEnv("O.K. ML Server stop!", *Envelope);
 }
 
 1;
