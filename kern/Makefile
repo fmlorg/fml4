@@ -10,7 +10,7 @@
 # $Id$
 
 SH	  = /bin/sh
-PWD       = `pwd`
+# PWD       = `pwd`
 
 all:
 	perl ./makefml
