@@ -716,7 +716,7 @@ ENCRYPTED_DISTRIBUTION_TYPE:	pgp
 .j 6 received-date+x-posted		Date: + X-Posted:
 .j 7 received-date+x-original-date	Date: + X-Original-Date:
 .j などいろいろ
-DATE_TYPE:	received-date+posted
+DATE_TYPE:	original
 
 # In Header, we expand these values to
 #
@@ -838,13 +838,13 @@ TZone:		 +0900
 # when $PASS_ALL_FIELDS_IN_HEADER is set. 
 # The old variable name is $SUPERFLUOUS_HEADERS.
 # value: 1/0
-PASS_ALL_FIELDS_IN_HEADER: 0
+PASS_ALL_FIELDS_IN_HEADER: 1
 
 .j $SKIP_FIELDS のヘッダフィールドは落す。
 .j 少なくとも Return-Receipt-To: は最低限はじくべきである 
 .j ループの原因になり得るためである
 # value: regexp string
-SKIP_FIELDS:	Received|Return-Receipt-To
+SKIP_FIELDS:	Return-Receipt-To
 
 
 #####################################################################
