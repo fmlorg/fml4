@@ -154,16 +154,13 @@ sub MailServerConfig
 
     if ($proc eq 'run_newaliases') {
 	&PRE;
-	&P($NULL); &P("*** update aliases ***"); &P($NULL);
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
 	    # /usr/sbin/postalias
 	    $ENV{'PATH'} = '/bin:/usr/ucb:/usr/bin:/sbin:/usr/sbin';
 
-	    &P("run \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\"");
-	    &P($NULL);
+	    &P("updated aliases (ran \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\")");
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
-	    &P($NULL);
 	}
 	else {
 	    &ERROR("I don't know how to update aliases map");
@@ -174,8 +171,6 @@ sub MailServerConfig
     else {
 	&ERROR("MailServerConfig: unknown $proc");
     }
-
-    if ($ErrorString) { &Exit($ErrorString);}
 }
 
 
@@ -453,7 +448,6 @@ sub Command
 
 sub Finish
 {
-    &P("-- FINISH --");
     if ($ErrorString) { &Exit($ErrorString);}
 
     &EndPRE;

@@ -421,7 +421,7 @@ sub GetBuffer
 
 sub Err
 {
-    local($s) = @_;
+    my ($s) = @_;
     $ErrorString .= $s;
 }
 
@@ -429,15 +429,22 @@ sub Err
 sub Exit
 {
     local($s) = @_;
-    &PRE;
+
+    print "<H3>";
+    print "<STRONG> ***** ERROR ***** </STRONG>";
+    print "<PRE>";
     print $s;
-    print "\nStop.\n";
-    &EndPRE;
+    print "\nStop.";
+    print "</PRE>\n";
     exit 0;
 }
 
 
-sub ERROR { &P(@_);}
+sub ERROR
+{ 
+    my ($s) = @_;
+    $ErrorString .= "<STRONG>ERROR:". $s ."</STRONG>\n";
+}
 
 
 sub P
@@ -534,9 +541,8 @@ sub SpawnProcess
     open(PROG, "-|") || exec $prog, "2>&1";
 
     if ($? || $!) {
-	&Err("cannot open $prog\n");
-	&Err($!."\n");
-	&Err("exit (" .($? & 255). ")") if $? & 255;
+	&ERROR("cannot execute $prog");
+	&ERROR("exit (" .($? & 255). ")") if $? & 255;
     }
     else {
 	while (<PROG>) { &P($_);}
