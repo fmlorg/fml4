@@ -5,6 +5,12 @@
 =E
 				Ken'ichi Fukamachi
 
+   sbin/makefml
+	import a subset of 2.49-2.50: Conv() preserves file mode
+
+   sbin/install.sh
+	you can use both MKDOC=no and MKDOC=NO to disable doc installation.
+
    proc/libmoderated.pl (2.10-2.11)
 
 	missing Japanese message
