@@ -10,6 +10,9 @@
 #
 # $Id$
 
+### themost important variable ! ###
+FML = $(PWD)
+
 .include "distrib/mk/fml.sys.mk"
 .include "distrib/mk/fml.prog.mk"
 .include "distrib/mk/fml.doc.mk"
@@ -34,30 +37,50 @@ usage:
 	@ echo "\"make sync\"      to syncrhonize -> fml.org mail server"
 	@ echo ""
 
-dist:	
+
+dist:
+	@ make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator 2>&1| tee $(DESTDIR)/_distrib.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_distrib.log
 	@ make usage
 
 distsnap:
+	@ make -f distrib/mk/fml.sys.mk __setup
 	@ (cd $(DESTDIR)/fml-current/; $(RSYNC) -auv . $(SNAPSHOT_DIR))
 
 snapshot:
+	@ make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
 	(/bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
-branch:
+branch: 
+	@ make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator -b 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
 release:
+	@ make -f distrib/mk/fml.sys.mk __setup
 	(/bin/sh $(DIST_BIN)/generator -rp 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
+.PHONY: pkgsrc
+pkgsrc:
+	(cd pkgsrc; make MASTER_SITE=${MASTER_SITE} )
 
-doc: INFO INFO-e syncinfo newdoc search
 
+##################################################
+World: world
+world: build
+build: touch_info plaindoc htmldoc dist
+
+.PHONY: touch_info
+touch_info:
+	touch .info
+##################################################
+
+
+doc: INFO syncinfo newdoc search
 newdoc: htmldoc syncwww syncinfo 
 
 INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
