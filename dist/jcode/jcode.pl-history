@@ -1,0 +1,430 @@
+==============================================================================
+2.11 (1999/12/26 17:16:47)
+==============================================================================
+Message-ID: <19991227024224G.utashiro@iij.ad.jp>
+Mime-Version: 1.0
+X-Dispatcher: imput version 991025(IM133)
+Content-Type: Multipart/Mixed;
+ boundary="--Next_Part(Mon_Dec_27_02:41:53_1999_197)--"
+Content-Transfer-Encoding: 7bit
+Subject: jcode.pl-2.11 released
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+Newsgroups: fj.comp.lang.perl
+Date: 27 Dec 1999 02:42:24 +0900
+X-Mailer: Mew version 1.95b3 on Emacs 19.28 / Mule 2.3 (SUETSUMUHANA)
+Path: news3.iij.ad.jp!not-for-mail
+Organization: Internet Initiative Japan Inc., Tokyo, JAPAN
+
+----Next_Part(Mon_Dec_27_02:41:53_1999_197)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+jcode.pl が thread を有効にした perl5 で動作しないという問題が以前から
+指摘されていました。それに対応したバージョンを 2.11 としてリリース致し
+ます。
+
+    ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/jcode.pl-2.11
+
+Thread 機能が有効にして (-Dusethread) perl5 がコンパイルされている場合、
+変数 $_ がレキシカルスコープを持ち、typeglob の対象にならなくなります。
+今までは、内部で local(*_) = shift のように特殊変数 $_ に対する 
+typeglob を使って引数を受け取るコーディングが多用されていたのですが、
+それをすべて local(*s) = shift のように、通常の変数で処理するように変
+更しました。
+
+ただし、呼び出し時に
+
+	jcode::convert(*_, 'jis');
+
+のように typeglob を使うと、同じ問題の影響を受けますので、
+
+	jcode::convert(\$_, 'jis');
+
+のように、リファレンスを使うようにしてください。この問題が無いとしても、
+perl5 では、my で宣言された変数に対しては typeglob を使用することがで
+きませんから、リファレンスを使う方がいいでしょう。
+
+Thread 機能を使わない perl5 および perl4 で使用する場合には、今回の変
+更による影響はありません。
+
+--utashiro
+
+
+----Next_Part(Mon_Dec_27_02:41:53_1999_197)--
+Content-Type: Message/External-Body; access-type=anon-ftp;
+ name="jcode.pl-2.11"; directory="/pub/IIJ/dist/utashiro/perl/";
+ site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+
+Content-Type: Text/Plain
+Content-ID: <14438.20294.334@bbright.iij.ad.jp>
+
+
+----Next_Part(Mon_Dec_27_02:41:53_1999_197)----
+
+==============================================================================
+2.10 (1999/01/10 13:43:14)
+==============================================================================
+Return-Path: utashiro@iij.ad.jp
+Received: from ns.iij.ad.jp (root@ns.iij.ad.jp [192.168.2.8]) by fs.iij.ad.jp (8.8.5/3.5Wpl7) with ESMTP id XAA05576 for <utashiro@fs.iij.ad.jp>; Sun, 10 Jan 1999 23:13:31 +0900 (JST)
+Received: from mgi.iij.ad.jp (root@mgi.iij.ad.jp [192.168.2.5]) by ns.iij.ad.jp (8.8.5/3.5Wpl7) with ESMTP id XAA14131 for <utashiro@iij.ad.jp>; Sun, 10 Jan 1999 23:13:31 +0900 (JST)
+Received: from bbright.iij.ad.jp (h163.n127.iijnet.or.jp [202.232.177.163])
+	by mgi.iij.ad.jp (8.8.8/MGI1.0) with ESMTP id XAA17440
+	for <utashiro@iij.ad.jp>; Sun, 10 Jan 1999 23:13:30 +0900 (JST)
+Received: from localhost (localhost.bbright.iij.ad.jp [127.0.0.1])
+	by bbright.iij.ad.jp (8.8.5/8.8.5) with ESMTP id XAA14486
+	for <utashiro@iij.ad.jp>; Sun, 10 Jan 1999 23:13:23 +0900 (JST)
+X-Newsgroups: fj.comp.lang.perl,fj.sources
+In-Reply-To: <19981226011652M.utashiro@iij.ad.jp>
+References: <19981226011652M.utashiro@iij.ad.jp>
+Mime-Version: 1.0
+Message-Id: <19990110231321Q.utashiro@iij.ad.jp>
+X-Dispatcher: imput version 981124(IM104)
+Lines: 29
+Content-Type: Multipart/Mixed;
+	boundary="--Next_Part(Sun_Jan_10_23:10:31_1999_266)--"
+Content-Transfer-Encoding: 7bit
+Subject: jcode.pl-2.10 released
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+Cc: utashiro@iij.ad.jp
+Date: 10 Jan 1999 23:13:21 +0900
+X-Mailer: Mew version 1.94b2 on Emacs 19.28 / Mule 2.3 (SUETSUMUHANA)
+Followup-To: fj.comp.lang.perl
+
+----Next_Part(Sun_Jan_10_23:10:31_1999_266)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+昨年末にリリースした jcode.pl-2.9 にバグがあることを発見しました。コー
+ド変換には支障がありませんが、&jcode'tr がうまく動作しません。
+
+修正したバージョンを 2.10 として置きましたで、こちらをご利用ください。
+&jcode'tr 関数を使っていなければ何も問題はありませんが、再配付している
+している方は、必ず 2.10 に入れ換えてください。
+
+この件でご迷惑をおかけした方がいましたら、申し訳ありませんでした。反省
+して &jcode'tr 関数のテスト環境も用意したので、今後は大丈夫だと思います。
+
+--utashiro
+
+
+----Next_Part(Sun_Jan_10_23:10:31_1999_266)--
+Content-Type: Message/External-Body; access-type="anon-ftp";
+	name="jcode.pl-2.10";
+	directory="/pub/IIJ/dist/utashiro/perl/";
+	site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+
+Content-Type: Text/Plain
+Content-ID: <13976.45204.266@bbright.iij.ad.jp>
+
+
+----Next_Part(Sun_Jan_10_23:10:31_1999_266)----
+
+==============================================================================
+2.9 (1998/12/25 15:48:04)
+==============================================================================
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+Newsgroups: fj.comp.lang.perl,fj.sources
+Subject: jcode.pl-2.9 released
+Followup-To: fj.comp.lang.perl
+Date: 26 Dec 1998 01:16:52 +0900
+Organization: Internet Initiative Japan Inc., Tokyo, JAPAN
+Lines: 33
+Message-ID: <19981226011652M.utashiro@iij.ad.jp>
+NNTP-Posting-Host: h163.n127.iijnet.or.jp
+Mime-Version: 1.0
+Content-Type: Multipart/Mixed;
+	boundary="--Next_Part(Sat_Dec_26_01:13:41_1998_689)--"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Mew version 1.94b2 on Emacs 19.28 / Mule 2.3 (SUETSUMUHANA)
+X-Dispatcher: imput version 981124(IM104)
+
+----Next_Part(Sat_Dec_26_01:13:41_1998_689)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+クリスマスにはちょっと遅れましたが、Perl による日本語文字コード変換ラ
+イブラリ jcode.pl-2.9 をリリースします。
+
+今回は機能的な変更はまったく無しで、変わったのは
+
+  - $`, $&, $' の利用を排除
+
+という点だけです。プログラムによっては処理速度が大幅に改善します。
+
+今まで知ってはいたものの、あまり気にしていなかったのですが、これが効率
+に大きく影響を与えるプログラムを作成する必要が生じたことで jcode.pl も
+合わせて変更しました。
+
+--utashiro
+
+
+----Next_Part(Sat_Dec_26_01:13:41_1998_689)--
+Content-Type: Message/External-Body; access-type="anon-ftp";
+	name="jcode.pl-2.9";
+	directory="/pub/IIJ/dist/utashiro/perl/";
+	site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+Content-Description: jcode.pl-2.9
+
+Content-Type: Text/Plain
+Content-ID: <13955.46522.299@bbright.iij.ad.jp>
+
+
+----Next_Part(Sat_Dec_26_01:13:41_1998_689)----
+
+==============================================================================
+2.8 (1998/09/23 17:22:55)
+==============================================================================
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+Newsgroups: fj.comp.lang.perl
+Subject: jcode.pl-2.8 released
+Date: 24 Sep 1998 02:52:28 +0900
+Organization: Internet Initiative Japan Inc., Tokyo, JAPAN
+Lines: 39
+Message-ID: <19980924025228D.utashiro@iij.ad.jp>
+References: <19980906013839V.utashiro@iij.ad.jp>
+NNTP-Posting-Host: h163.n127.iijnet.or.jp
+Mime-Version: 1.0
+Content-Type: Multipart/Mixed;
+	boundary="--Next_Part(Thu_Sep_24_02:45:28_1998_911)--"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Mew version 1.93 on Emacs 19.28 / Mule 2.3 (SUETSUMUHANA)
+X-Dispatcher: imput version 980923(IM101)
+
+----Next_Part(Thu_Sep_24_02:45:28_1998_911)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+Perl による日本語文字コード変換ライブラリ jcode.pl-2.8 をリリースしま
+した。
+
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/jcode.pl-2.8
+
+2.6 からの変更点は、以下の通りです。
+
+  - JIS X 0212 (補助漢字) のサポート
+    (SJIS に変換する場合には『〓』に変換されます)
+  - Perl5 で使用する場合のインタフェースを記述
+  - 若干のドキュメントの修正
+
+ベータテストにご協力頂いた方々に感謝致します。
+
+--utashiro
+
+p.s. Perl5 用のモジュールについては現在検討中で、できれば11月に行われ
+る Perl Conference Japan までに叩き台を作って BOF を持ちたいと思ってい
+ます (http://www.oreilly.co.jp/pcjp98/)。
+
+
+
+----Next_Part(Thu_Sep_24_02:45:28_1998_911)--
+Content-Type: Message/External-Body; access-type="anon-ftp";
+	name="jcode.pl-2.8";
+	directory="/pub/IIJ/dist/utashiro/perl/";
+	site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+Content-Description: jcode.pl-2.8
+
+Content-Type: Text/Plain
+Content-ID: <13833.12569.10658@bbright.iij.ad.jp>
+
+
+----Next_Part(Thu_Sep_24_02:45:28_1998_911)----
+
+==============================================================================
+2.6 (1997/12/24 17:01:11)
+==============================================================================
+Newsgroups: fj.lang.perl
+Subject: jcode.pl-2.6
+Cc: utashiro@iij.ad.jp
+Mime-Version: 1.0
+Organization: Internet Initiative Japan Inc.
+Cc: utashiro@iij.ad.jp
+Content-Type: Multipart/Mixed;
+	boundary="--Next_Part(Thu_Dec_25_02:12:24_1997_651)--"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Mew version 1.93b6 on Emacs 19.28 / Mule 2.3 (SUETSUMUHANA)
+Message-Id: <19971225021947T.utashiro@iij.ad.jp>
+Date: 25 Dec 1997 02:19:47 +0900
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+X-Dispatcher: imput version 971106
+Lines: 30
+
+----Next_Part(Thu_Dec_25_02:12:24_1997_651)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+jcode.pl-2.6 をリリースしました。
+
+  ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/jcode.pl-2.6
+
+2.3 からの変更点は、以下の通り。
+
+  - &jcode'tr の中で JIS コードの認識方法をちょっとだけ変更
+  - JIS X 0208-1990 のシークエンスを認識するように変更
+  - &jcode'getcode のバグを修正して、説明を追加
+
+--utashiro
+
+
+----Next_Part(Thu_Dec_25_02:12:24_1997_651)--
+Content-Type: Message/External-Body; access-type="anon-ftp";
+	name="jcode.pl-2.6";
+	directory="/pub/IIJ/dist/utashiro/perl/";
+	site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+Content-Description: jcode.pl-2.6
+
+Content-Type: Text/Plain
+Message-ID: 13473.16799.349@bbright.iij.ad.jp
+
+
+----Next_Part(Thu_Dec_25_02:12:24_1997_651)----
+
+==============================================================================
+2.3 (1997/02/23 14:12:26)
+==============================================================================
+Newsgroups: fj.lang.perl,fj.sources
+Cc: utashiro@iij.ad.jp
+Subject: jcode.pl-2.3
+X-Mailer: Mew version 1.54 on Emacs 19.28.1, Mule 2.2
+Mime-Version: 1.0
+Content-Type: Multipart/Mixed;
+	boundary="--Next_Part(Tue_Feb_25_23:49:30_1997)--"
+Content-Transfer-Encoding: 7bit
+Organization: Internet Initiative Japan Inc.
+Message-Id: <19970225234940Y.utashiro@iij.ad.jp>
+Date: 25 Feb 1997 23:49:40 +0900
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+X-Dispatcher: impost version 0.93+ (Nov. 23, 1996)
+Lines: 34
+
+----Next_Part(Tue_Feb_25_23:49:30_1997)--
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+
+日本語コード変換 Perl ライブラリ jcode.pl の &jcode'tr 関数にキャッシュ
+の機能を入れて、同じ変換を連続して行う場合の効率を改善しました。その他、
+実装上のマイナーな変更がされています。
+
+JIS か EUC なら、
+
+        &jcode'tr(*_, 'あ-ん', 'ア-ン');
+        &jcode'tr(*_, '０-９Ａ-Ｚａ-ｚ', '0-9A-Za-z');
+
+のような使い方も可能です (2.0 から)。
+
+        ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/jcode.pl-2.3
+
+から入手してください。
+
+--utashiro
+
+
+----Next_Part(Tue_Feb_25_23:49:30_1997)--
+Content-Type: Message/External-Body; access-type="anon-ftp";
+	name="jcode.pl-2.3";
+	directory="/pub/IIJ/dist/utashiro/perl/";
+	site="ftp.iij.ad.jp"
+Content-Transfer-Encoding: 7bit
+
+Content-Type: Text/Plain
+Message-ID: 13074.64489.5568@cpu1.iij.ad.jp
+
+
+----Next_Part(Tue_Feb_25_23:49:30_1997)----
+
+==============================================================================
+2.0 (1996/10/02 16:02:38)
+==============================================================================
+Date: Thu, 3 Oct 1996 02:27:26 +0900 (JST)
+From: Kazumasa Utashiro <utashiro@iij.ad.jp>
+Message-Id: <199610021727.CAA19339@cpu1.iij.ad.jp>
+Newsgroups: fj.lang.perl,fj.sources,fj.kanji
+Subject: jcode.pl-2.0 and pkf-2.0 release announcement
+References: <19960815164047I/utashiro@iij.ad.jp> <19960820041332P/utashiro@iij.ad.jp> <19960910141123W/utashiro@iij.ad.jp>
+Followup-To: fj.lang.perl
+Organization: Internet Initiative Japan Inc.
+Apparently-To: <utashiro@iij.ad.jp>
+
+jcode.pl-2.0 および pkf-2.0 を正式リリースしました。ベータの有効期限を
+若干過ぎてしまったことをお詫びします。内容的には 2.0pre3 と変わってい
+ません。
+
+    ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/jcode.pl-2.0
+    ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/pkf-2.0
+
+から入手可能です。
+
+				□□
+
+jcode.pl-2.0 は、Perl で日本語コード変換を行うためのライブラリです。
+JIS, EUC, Shift JIS の相互変換をサポートし、元のコードの自動認識も行い
+ます。1.12 からの変更点は、以下の通りです。
+
+    + JIS X 0201 仮名 (いわゆる半角仮名) が含まれるデータについても変
+      換できるようになった。
+    + JIS X 0201 仮名と JIS X 0208 仮名 (いわゆる全角仮名) の間の相互
+      変換をサポートした。(&jcode'h2z_xxx, &jcode'z2h_xxx と変換関数に
+      対するオプション)
+    + Perl の tr 関数をエミュレートする &jcode'tr で、不完全ながら2バ
+      イトコードの範囲指定 ('あ-ん' のようなもの) をサポートした。
+    + スカラー値で渡してスカラー値を返すインタフェース; &jcode'to,
+      &jcode'jis, &jcode'euc, &jcode'sjis, &jcode'trans を用意した。
+      (s///e の中で使うような場合には有効である)
+
+ただし、
+
+    - JIS X 0201 仮名が含まれる場合の日本語コードの自動認識は保証しま
+      せん。
+
+    - JIS の SO, SI による X 0201 仮名コードについては対応していません。
+      実装するのは簡単ですが、作者がこのエンコーディングが一体どういう
+      ものなのかよく理解していないのと、ベータリリース期間中も誰からも
+      そのリクエストが出なかったためです。
+
+perl4.036 および perl5.003 での動作は確認しています。jperl では、動作
+しません。
+
+内部変数はかなり変更されているので、以前のバージョンを修正して使われて
+いる場合は、その対応が必要でしょう。ライブラリを使っているスクリプトか
+ら、インタフェースとして定義されていない変数を使用するのは、あまりお勧
+めしません。
+
+				□□
+
+pkf-2.0 は、jcode.pl-2.0 の機能を使うように変更した、日本語コード変換
+コマンドです。元々は jcode.pl のテスト用に作られたコマンドで nkf と似
+た機能を持っていますが、独自の機能も少しあります。
+
+pkf-1.10 からの変更点は、以下の通りです。
+
+    + -Z オプションで JIS X 0201 仮名から JIS X 0208 仮名への変換
+    + -H オプションで JIS X 0208 仮名から JIS X 0201 仮名への変換
+    + -n オプションでコード変換を行わないことを指定
+
+				□□
+
+jcode.pl もそれを利用する pkf も、C 言語でかかれたプログラムに比べると
+非常に『遅い』という特徴を持っています。ですから、大量のデータを効率良
+く変換するような用途には向いていないので、注意してください。
+
+				□□
+
+コメントにも書いてありますが、再配布は商用、非商用を含めて完全に自由で
+す。再配布に際して、作者の許可を得る必要はありません。一言連絡していた
+だけると嬉しいとは思います。
+
+ただし、機能的な変更を加えた場合は、それが明らかな形での配布を行って下
+さい (Perl の ARTISTIC LICENCE の気持ちです)。もちろん、有用な機能であ
+ればオリジナルに組み入れることも可能です。
+
+				□□
+
+バグレポートその他については fj.lang.perl に投稿するか (他のグループは
+滅多に読みません)、utashiro@iij.ad.jp にメールでお知らせください。
+
+--utashiro
+
