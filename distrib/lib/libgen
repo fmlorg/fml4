@@ -112,6 +112,7 @@ COPY_DOCS () {
    $CPP -DJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-j.html
    $CPP -UJAPANESE doc/advisories/index.html > $HTML_DIR/advisories/index-e.html
 
+   test -d $HTML_DIR/pictures || mkdirhier $HTML_DIR/pictures
    $CPP doc/html/pictures/index.html > $HTML_DIR/pictures/index.html
 
    cp doc/html/release-index.html $HTML_DIR/index.html
