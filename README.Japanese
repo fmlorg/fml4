@@ -1,0 +1,7 @@
+		how to release
+
+% echo 3.0.x > conf/release
+% echo 3.0.x > conf/release_version
+% make release
+
+$Id$
