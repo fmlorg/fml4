@@ -2,6 +2,8 @@
 
 CAUTION: you need "BSD make" not gmake.
 
+
+
 1. how to hack 
 
    % cvs -d cvs.fml.org:/cvsroot co fml
@@ -25,6 +27,8 @@ CAUTION: you need "BSD make" not gmake.
    % cd fml
    % make snapshot
 
+ XXX If you have no BSD make, 
+ XXX run "make bsdmake" here before you run make.
 
 4. how to make release tarball
 
@@ -32,8 +36,8 @@ CAUTION: you need "BSD make" not gmake.
    % cd fml
    % cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
 	... edit ~/.fmlmk.conf ...
-   % echo 3.0.x > conf/release
-   % echo 3.0.x > conf/release_version
+   % echo 4.0.x > conf/release
+   % echo 4.0.x > conf/release_version
    % make release
 
 
