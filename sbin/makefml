@@ -1681,7 +1681,7 @@ sub ExecCmd
 	my($curproc) = join(" ", $SavedFP, @opts);
 	$curproc =~ s/\s*$//;
 	print "DO \"$curproc\" for $ml mailing list.\n" 
-	    if $show && ($fp !~ /^do\_show/);
+	    if $show && ($fp !~ /^do\_show/) && ($fp !~ /do\_.*htpasswd/);
 
 	&$fp(@argv);
 	if ($Env eq 'HTTPD') { &FixErrorBuffer($fp);}
