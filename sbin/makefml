@@ -913,10 +913,19 @@ sub SaveConfig
 
     if (-f $FML_CONFIG) { rename($FML_CONFIG, "${FML_CONFIG}.bak");}
 
+    # /usr/local/fml/.fml/system (perl script: config for makefml)
     open(F, ">> $FML_CONFIG") || &Die("Cannot save config to $FML_CONFIG");
     select(F); $| = 1; select(STDOUT);
-    print F "$buf\n";
+    print F $buf, "\n";
     print F "\n1;\n";
+    close(F);
+
+    # /usr/local/fml/.fml/system.sh (shell script: config for shell script)
+    open(F, ">> ${FML_CONFIG}.sh") || 
+	&Die("Cannot save config to ${FML_CONFIG}.sh");
+    select(F); $| = 1; select(STDOUT);
+    print F "EXEC_DIR=$EXEC_DIR\n";
+    print F "ML_DIR=$ML_DIR\n";
     close(F);
 }
 
