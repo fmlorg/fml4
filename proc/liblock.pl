@@ -48,7 +48,7 @@ sub V7Lock
 
     if ($timeout >= $MAX_TIMEOUT) {
 	$Timeout = sprintf("TIMEOUT.%2d%02d%02d%02d%02d%02d", 
-			   $year, $mon+1, $mday, $hour, $min, $sec);
+			   1900 + $year, $mon+1, $mday, $hour, $min, $sec);
 
 	open(TIMEOUT, "> $FP_VARLOG_DIR/$Timeout");
 	select(TIMEOUT); $| = 1; select(STDOUT);
