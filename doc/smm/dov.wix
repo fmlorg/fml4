@@ -513,15 +513,15 @@ Backward Compatibility は保証していますが 万が一 consistencyのないもの
 
 
 .S	CF VERSION による Backward Compatibility 
-.k	$CF_VERSION
+.k	$CFVersion
 .k	$COMPAT_CF1 
 
-fml 2.1 の標準の config.ph は $CF_VERSION = 2; です。これは cf/config 
+fml 2.1 の標準の config.ph は $CFVersion = 2; です。これは cf/config 
 を使って生成されるものです。これ以前の config.ph を使っている場合は
 
 	$COMPAT_CF1 = 1;
 
-がセットされているか $CF_VERSION が２より小さい場合は自動的に
+がセットされているか $CFVersion が２より小さい場合は自動的に
 
 	libcompat_cf1.pl
 .k	libcompat_cf1.pl
