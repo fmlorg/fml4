@@ -99,9 +99,6 @@ sub InitMakeFml
 	$CONFIG_DIR =~ s#\\#/#g;
     }
 
-    # mode
-    $FML_MODE;
-
     # config amd temporary files
     $CONFIG_LOG  = "/tmp/.fmlconfiglog.$USER";
     $CONFIG_DIR   = $CONFIG_DIR || "$HOME/.fml";
@@ -1077,7 +1074,6 @@ sub Conv
 	s/_FQDN_/$FQDN/g;
 	s/_USER_/$USER/g;
 	s/_OPTIONS_/$opts/g;
-	s/_MODE_/$FML_MODE/g;
 	s/XXUID/$uid/g;
 	s/XXGID/$gid/g;
 
