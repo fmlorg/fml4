@@ -1,0 +1,100 @@
+##### Section: confirmation
+
+# @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
+confirm.auto_regist.preamble:
+	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	I would like to verify your will to subscribe this mailing list.
+	If I can confirm your will to subscribe this mailing list,
+	please reply
+
+	_ARG1_
+
+	in the mail body to the address
+
+	_ARG2_ 
+
+
+# @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
+confirm.auto_regist.syntax_error:
+	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	I encounter a syntax error. The correct syntax is
+
+	_ARG1_ PASSWORD _ARG2_
+
+	in the mail body.
+	The address to send it back is <_ARG3_>.
+
+	Please check again your mail.
+	
+
+# @argv = ($MAIL_LIST, $CONFIRMATION_KEYWORD)
+confirm.auto_regist.expired:
+	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	I received subscribe request from you but it is done
+	long time ago. So your request is expired.
+
+	Please start subscribe process by sending the mail back again
+	with the folllowing new identifier.
+	
+	_ARG1_
+
+# @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
+confirm.auto_regist.buffer_syntax_error:
+	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	Hmm, you may be not a member.
+
+	1. Your mail may come from a bad address which is not 
+	   registered in this mailing list
+
+	2. Your mail has a syntax error.
+	   If you would like to subscribe this mailing list
+
+		_ARG1_ YOUR NAME
+
+	     For example
+		_ARG1_ Hayakawa Aoi
+
+# @argv = ($MAIL_LIST, $AUTO_REGISTRATION_KEYWORD, $MAINTAINER, $key)
+confirm.auto_regist.invalid_addr:
+	Hi, I am "fml" mailing list manager for <_ARG0_>.
+	I expect the following syntax. Please try again!
+
+		_ARG1_ YOUR NAME
+
+	     For example
+		_ARG1_ Hayakawa Aoi
+
+##### Section: 管理者が手動登録するケース
+confirm.manual_regist.forward_to_admin:
+	your confirmation request is forwarded to the maintainer
+	of this mailing list.
+	Please wait a little since this process is not automatically done.
+
+confirm.manual_regist.preamble:
+	CAUTION: the subscribe process for this mailing list is not automatic.
+	I would like to verify your will to subscribe this mailing list.
+	If I can confirm your will to subscribe this mailing list,
+	I forward your request to the maintainer.
+
+	Please reply this mail to send back confirmation to Reply-To:
+
+confirm.manual_regist.confirmed:
+	I confirm your will to subscribe this mailing list,
+	Please wait a little since this process is not automatically done.
+
+##### Section: CHADDRコマンド
+confirm.chaddr.syntax_error:
+	syntax error of "chaddr command".
+
+		"chaddr old-address new-address"
+
+	but old-address must be an address registered in this mailing list 
+	already.
+
+##### Section: confirmation その他
+confirm.has_japanese_char:
+	Japanese strings included.
+
+##### Section: misc
+confirm.try_again:
+	Please try again from the start point.
