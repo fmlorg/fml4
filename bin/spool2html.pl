@@ -12,7 +12,7 @@ $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vVTHM:L:o:");
+&Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:");
 
 
 $opt_h && do { &Usage; exit 0;};
@@ -24,8 +24,10 @@ $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
 $debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
-$Minimum          = $opt_M > 0 ? $opt_M : 1;
+$Minimum         = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
+$SleepTime       = $opt_S || 3;
+$HTML_EXPIRE_LIMIT = $opt_E;
 push(@INC, $opt_I);
 
 # set opt
@@ -79,7 +81,7 @@ for ($i = $Minimum; $i <  ($max + 100); $i += 100) {
 	;
     }
 
-    sleep 3;
+    sleep($SleepTime || 3);
 }
 
 exit 0;
