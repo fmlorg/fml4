@@ -6,6 +6,17 @@
 # $Id$
 #
 
+# ### VARIABLES passed to database routines ###
+#   \w+          control variables for database routines
+#   _\w+         1. variables for database routines but from fml internal
+#                   temporary
+#                2. return value from database routines
+#                3. in/out variable w/ database routines, may be rewritten
+#                   in database routines
+#   error        error messages from database routines
+#
+#   [-A-Z_]+     fml user defined varibales (defined in config.ph)
+#
 
 # DataBaseMIBPrepare( \$mib, action_strings, \%attr )
 sub DataBaseMIBPrepare
@@ -27,27 +38,34 @@ sub DataBaseMIBPrepare
     $mib->{'FQDN'}            = $FQDN;
 
     # split $MAIL_LIST
-    ($mib->{'ML_ACCT'}, $mib->{'ML_DOMAIN'}) = split(/\@/, $MAIL_LIST);
+    ($mib->{'_ml_acct'}, $mib->{'_ml_domain'}) = split(/\@/, $MAIL_LIST);
 
     # set up action, method, ...
     # cached file which is the dumped data from database server.
-    $mib->{'METHOD'}          = $DATABASE_METHOD;
-    $mib->{'ACTION'}          = $action;
+    $mib->{'DATABASE_METHOD'} = $DATABASE_METHOD;
+    $mib->{'DATABASE_LIB'}    = $DATABASE_LIB;
+    $mib->{'_action'}         = $action;
 
     my ($suffix) = $DATABASE_CACHE_FILE_SUFFIX || ".dbcache";
     if ($action =~ /active/) {
-	$mib->{'CACHE_FILE'}     = $ACTIVE_LIST.".dbcache";
+	$mib->{'_cache_file'}     = $ACTIVE_LIST. ".". $suffix;
     }
     elsif ($action =~ /member/) {
-	$mib->{'CACHE_FILE'}     = $MEMBER_LIST.".dbcache";	
+	$mib->{'_cache_file'}     = $MEMBER_LIST. ".". $suffix;	
     }
     else {
-	$mib->{'CACHE_FILE'}     = $MEMBER_LIST.".dbcache";
+	$mib->{'_cache_file'}     = $MEMBER_LIST. ".". $suffix;
     }
 
     # LDAP by default (these are templates provided by fml).
-    if ($mib->{'METHOD'} =~ /^LDAP$/i) {
+    if ($mib->{'DATABASE_METHOD'} =~ /^LDAP$/i) {
 	&_GenLDAPTemplate($mib);
+    }
+    elsif ($mib->{'DATABASE_METHOD'} =~ /^.*SQL$/i) {
+	&_GenSQLTemplate($mib);
+    }
+    else {
+	&Log("ERROR: DataBaseMIBPrepare: unknown METHOD $mib->{'DATABASE_METHOD'}");
     }
 }
 
@@ -68,7 +86,7 @@ sub _GenLDAPTemplate
     $mib->{'query_filter'} = $LDAP_QUERY_FILTER || '(objectclass=*)';
 
     if ($LDAP_SEARCH_BASE) {
-	$mib->{'base'} = $LDAP_SEARCH_BASE;
+	$mib->{'base'}     = $LDAP_SEARCH_BASE;
     }
     else {
 	my($acct, $domain) = split(/\@/, $MAIL_LIST);
@@ -78,6 +96,9 @@ sub _GenLDAPTemplate
 }
 
 
+# $SQL_SERVER_HOST      = "sql.fml.org";
+# $SQL_SERVER_USER      = "fml";
+# $SQL_SERVER_PASSWORD  = $NULL;
 sub _GenSQLTemplate
 {
     my ($mib) = @_;
@@ -99,33 +120,40 @@ sub Log { &main::Log(@_);}
 #          MIB: Management Information Base
 #       result: returned value or not used (*** reserved **)
 #         misc: *** reserved **
+#
+# return: NONE
 sub main::DataBaseCtl
 {
     local($e, $mib, $result, $misc) = @_;
 
-    &Log("debug: DataBaseCtl($mib->{'ACTION'})");
+    &Log("debug: DataBaseCtl($mib->{'_action'})");
 
-    # Leightweight Directory Access Protocol
-    if ($mib->{'METHOD'} =~ /^LDAP$/i) {
-	if ($mydb) {
-	    require $mib->{'mylib'};
-	}
-	else {
-	    require 'databases/ldap/examples/libldap.pl'; # temporary
+    if ($mib->{'DATABASE_METHOD'} =~ /^LDAP$/i  ||
+	$mib->{'DATABASE_METHOD'} =~ /^MySQL$/i ||
+	$mib->{'DATABASE_METHOD'} =~ /^PostgreSQL$/i) {
+	if ($mib->{'DATABASE_LIB'}) {
+	    eval(" require \"$mib->{'DATABASE_LIB'}\"; ");
+	    if ($@) {
+		&Log($@);
+		$mib->{'error'} = 'internal error';
+		return;
+	    }
+
 	    eval(' &Execute($e, $mib, $result, $misc); ');
 	    &Log($@) if $@;
+	    if ($@) {
+		&Log($@);
+		$mib->{'error'} = 'internal error';
+		return;
+	    }
+	}
+	else {
+	    &Log("ERROR: DataBaseCtl: \$DATABASE_LIB not defined");
+	    $mib->{'error'} = 'internal error' if $@;
 	}
     }
-    # MySQL
-    elsif ($mib->{'METHOD'} =~  /^MySQL$/i) {
-	;
-    }
-    # PostgreSQL
-    elsif ($mib->{'METHOD'} =~ /^PostgreSQL$/i) {
-	;
-    }
     else {
-	$NULL;
+	$mib->{'error'} = 'internal error' if $@;
     }
 }
 

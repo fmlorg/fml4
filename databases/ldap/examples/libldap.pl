@@ -21,7 +21,7 @@ sub DataBases::Execute
 	while (($k, $v) = each %$mib) { print "LDAP: $k => $v\n";}
     }
 
-    if ($mib->{'ACTION'}) {
+    if ($mib->{'_action'}) {
 	# initialize
 	&Init($mib);
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
@@ -29,47 +29,47 @@ sub DataBases::Execute
 	&LDAP::Connect($mib);
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
 
-	if ($mib->{'ACTION'} eq 'get_status') {
+	if ($mib->{'_action'} eq 'get_status') {
 	    &Log("not yet implemented");
 	    # &GetStatus($mib, $mib->{'_address'});
 	}
-	elsif ($mib->{'ACTION'} eq 'num_active') {
+	elsif ($mib->{'_action'} eq 'num_active') {
 	    &Log("not yet implemented");
 	}
-	elsif ($mib->{'ACTION'} eq 'num_member') {
+	elsif ($mib->{'_action'} eq 'num_member') {
 	    &Log("not yet implemented");
 	}
-	elsif ($mib->{'ACTION'} eq 'get_active_list' ||
-	    $mib->{'ACTION'} eq 'dump_active_list') {
+	elsif ($mib->{'_action'} eq 'get_active_list' ||
+	    $mib->{'_action'} eq 'dump_active_list') {
 	    &GetActiveList($mib);
 	}
-	elsif ($mib->{'ACTION'} eq 'get_member_list' ||
-	       $mib->{'ACTION'} eq 'dump_member_list') {
+	elsif ($mib->{'_action'} eq 'get_member_list' ||
+	       $mib->{'_action'} eq 'dump_member_list') {
 	    &GetMemberList($mib);
 	}
-	elsif ($mib->{'ACTION'} eq 'active_p') {
+	elsif ($mib->{'_action'} eq 'active_p') {
 	    $mib->{'_result'} = &ActiveP($mib, $mib->{'_address'});
 	}
-	elsif ($mib->{'ACTION'} eq 'member_p') {
+	elsif ($mib->{'_action'} eq 'member_p') {
 	    $mib->{'_result'} = &MemberP($mib, $mib->{'_address'});
 	}
-	elsif ($mib->{'ACTION'} eq 'admin_member_p') {
+	elsif ($mib->{'_action'} eq 'admin_member_p') {
 	    $mib->{'_result'} = &AdminMemberP($mib, $mib->{'_address'});
 	}
-	elsif ($mib->{'ACTION'} eq 'add' ||
-	       $mib->{'ACTION'} eq 'bye' ||
-	       $mib->{'ACTION'} eq 'subscribe'   ||
-	       $mib->{'ACTION'} eq 'unsubscribe' ||
-	       $mib->{'ACTION'} eq 'on'     ||
-	       $mib->{'ACTION'} eq 'off'    ||
-	       $mib->{'ACTION'} eq 'digest' ||
-	       $mib->{'ACTION'} eq 'matome' ||
-	       $mib->{'ACTION'} eq 'addadmin' ||
-	       $mib->{'ACTION'} eq 'byeadmin' ) {
+	elsif ($mib->{'_action'} eq 'add' ||
+	       $mib->{'_action'} eq 'bye' ||
+	       $mib->{'_action'} eq 'subscribe'   ||
+	       $mib->{'_action'} eq 'unsubscribe' ||
+	       $mib->{'_action'} eq 'on'     ||
+	       $mib->{'_action'} eq 'off'    ||
+	       $mib->{'_action'} eq 'digest' ||
+	       $mib->{'_action'} eq 'matome' ||
+	       $mib->{'_action'} eq 'addadmin' ||
+	       $mib->{'_action'} eq 'byeadmin' ) {
 	    &__ListCtl($mib);
 	}
 	else {
-	    &Log("ERROR: LDAP: unkown ACTION $mib->{'ACTION'}");
+	    &Log("ERROR: LDAP: unkown ACTION $mib->{'_action'}");
 	}
 
 	if ($mib->{'error'}) { &Log("ERROR: LDAP: $mib->{'error'}"); return 0;}
@@ -181,8 +181,8 @@ sub __DumpList
 	$orgf = $newf = '/dev/stdout';
     }
     else {
-	$orgf = $mib->{'CACHE_FILE'};
-	$newf = $mib->{'CACHE_FILE'}.".new.$$";
+	$orgf = $mib->{'_cache_file'};
+	$newf = $mib->{'_cache_file'}.".new.$$";
     }
 
     &main::Log("LDAP: member max = $max") if $main::debug;
@@ -217,33 +217,33 @@ sub __ListCtl
 
     $addr = $addr || $mib->{'_address'};
 
-    &main::Log("$mib->{'ACTION'} $addr");
+    &main::Log("$mib->{'_action'} $addr");
 
     $conn->simpleAuth( $entry->getDN(), $mib->{'password'});
 
-    if ($mib->{'ACTION'} eq 'subscribe' ||
-	$mib->{'ACTION'} eq 'add') {
+    if ($mib->{'_action'} eq 'subscribe' ||
+	$mib->{'_action'} eq 'add') {
 	$entry->addValue("member", $addr) ||
 	    &__Error("fail to add $addr to member");
 	$entry->addValue("active", $addr) ||
 	    &__Error("fail to add $addr to active");
     }
-    elsif ($mib->{'ACTION'} eq 'unsubscribe' ||
-	   $mib->{'ACTION'} eq 'bye') {
+    elsif ($mib->{'_action'} eq 'unsubscribe' ||
+	   $mib->{'_action'} eq 'bye') {
 	$entry->removeValue("member", $addr) ||
 	    &__Error("fail to remove $addr from member");
 	$entry->removeValue("active", $addr) ||
 	    &__Error("fail to remove $addr from active");
     }
-    elsif ($mib->{'ACTION'} eq 'off') {
+    elsif ($mib->{'_action'} eq 'off') {
 	$entry->removeValue("active", $addr) ||
 	    &__Error("fail to remove $addr from active");
     }
-    elsif ($mib->{'ACTION'} eq 'on') {
+    elsif ($mib->{'_action'} eq 'on') {
 	$entry->addValue("active", $addr) ||
 	    &__Error("fail to add $addr to active");
     }
-    elsif ($mib->{'ACTION'} eq 'chaddr') {
+    elsif ($mib->{'_action'} eq 'chaddr') {
 	$entry->removeValue("member", $mib->{'_old_address'}) ||
 	    &__Error("fail to remove $mib->{'_old_address'}");
 	$entry->addValue("member",    $mib->{'_new_address'}) ||
@@ -254,19 +254,19 @@ sub __ListCtl
 	$entry->addValue("active",    $mib->{'_new_address'}) ||
 	    &__Error("fail to add $mib->{'_new_address'}");
     }
-    elsif ($mib->{'ACTION'} eq 'digest') {
+    elsif ($mib->{'_action'} eq 'digest') {
 	&Log("not yet implemented");
     }
-    elsif ($mib->{'ACTION'} eq 'addadmin') {
+    elsif ($mib->{'_action'} eq 'addadmin') {
 	$entry->addValue("admin", $addr) ||
 	    &__Error("fail to addadmin $addr");
     }
-    elsif ($mib->{'ACTION'} eq 'byeadmin') {
+    elsif ($mib->{'_action'} eq 'byeadmin') {
 	$entry->removeValue("admin", $addr) ||
 	    &__Error("fail to byeadmin $addr");
     }
     else {
-	&Log("ERROR: LDAP: unknown ACTION $mib->{'ACTION'}");
+	&Log("ERROR: LDAP: unknown ACTION $mib->{'_action'}");
     }
 
     if ($mib->{'error'}) { return $NULL;}
@@ -355,12 +355,12 @@ if ($0 eq __FILE__) {
 	&LDAP::RemoveAll();
     }
     elsif ($r) {
-	$mib{'ACTION'} = $opt_A || 'subscribe';
+	$mib{'_action'} = $opt_A || 'subscribe';
 	&LDAP::__ListCtl(\%mib, $r);
 	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
     }
     elsif ($opt_a) {
-	$mib{'ACTION'} = 'addadmin';
+	$mib{'_action'} = 'addadmin';
 	&LDAP::__ListCtl(\%mib, $opt_a);
 	if ($mib{'error'}) { &Log("ERROR: LDAP: $mib{'error'}"); exit 1;}
     }

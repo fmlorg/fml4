@@ -1515,7 +1515,9 @@ sub DoMailListMemberP
 	# and try to verify the address is member or not.
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, $action, {'address' => $addr});
-	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
+	if ($mib->{'error'}) { return 0;}
+
 	$Envelope{'database:cache:$action'} = 1 if $mib{'_result'};
 
 	return $mib{'_result'};
@@ -1578,6 +1580,8 @@ sub MailListAdminMemberP
 	my (%mib, %result, %misc, $error);
 	&DataBaseMIBPrepare(\%mib, 'admin_member_p', {'address' => $addr});
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc); 
+	if ($mib->{'error'}) { return 0;}
+
 	$Envelope{'database:cache:admin_member_p'} = 1 if $mib{'_result'};
 
 	return $mib{'_result'};
