@@ -2107,14 +2107,12 @@ $body .= "Message-ID: ".
 ここで、強制的にヘッダの内容を変えたりすると効果的です。
 
 例：
-To: フィールドのオリジナルを保存
 Reply-To: フィールドをＭＬ自体へ強制書き換え
 Precedence: を bulk へ
 
 $SMTP_OPEN_HOOK = q#
-	$To         = $Original_To_address;
-	$Reply_to   = $MAIL_LIST;
-	$PRECEDENCE = 'bulk';
+	$Envelope{'h:reply-to:'}   = $Reply_to = $MAIL_LIST; 
+	$Envelope{'h:Precedence:'} = PRECEDENCE = 'bulk';
 #;
 
 
