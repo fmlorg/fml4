@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
 <TITLE>
-"fml" Mailing List Server Package
+"fml 3.0 stable" Mailing List Server Package
 </TITLE>
 <META http-equiv="Content-Type"
 #ifdef JAPANESE
@@ -24,37 +24,64 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" Mailing List Server Package
+"fml 3.0 stable" Mailing List Server Package
 </CENTER>
 </H1>
 <P>
-The lastest official release is fml-3.0 (1999/08/15).
+<CENTER>
+The latest official release is fml-3.0.1 (2000/01/xx ?).
+</CENTER>
+<BR>
+#ifdef JAPANESE
+"3.0pl数字".{tar.gz,zip}という名前のパッケージは3.0リリースのバグ修正
+だけ(機能拡張なし)という安定したバージョンを提供するためのものです。
+<BR>
+3.0.1はそのバグ修正シリーズの一回目のまとめです。3.0.1のあともバグ修正
+があれば3.0pl数字(patchlevel 数字)というシリーズが作られ、いつか3.0.2
+にまとまることになるでしょう。
+<BR>
+新しい機能を試したい人はcurrentを試してみてください。今(3.0A)の旬の話
+題はCGIインターフェイスです。
+#else
+<BR>
+This 3.0pl\d+ packages series is fml stable, 3.0 + bug patches and no
+extension.
+<BR>
+3.0.1 is a mile stone of 3.0 stable series.
+<BR>
+We will provide fml-3.0pl\d+.tar.gz (3.0 release + bug fix patches)
+after 3.0.1. Pleaes check the file date and use latest one.
+<BR>
+If you try to use current working snapshot, please use fml-current,
+which version is 3.0A now. I now develop GUI (WWW's CGI) interface.
+Please check out ftp and get latest one.
+#endif
 
 #ifdef JAPANESE
 <PRE>
 
         <A HREF="index-e.html">[English] is here.</A>
 
-        <A HREF="3.0-new-features.html">3.0 highlights (2.2.1と3.0の主な違い)</A>
-        <A HREF="UPGRADE-3.0/index.html">3.0へ移行する際の注意 (*** 重要 ***)</A>
+        <A HREF="3.0-new-features.html">3.0 highlights (2.2.1と3.0の主な違い)</A>
+        <A HREF="UPGRADE-3.0/index.html">3.0へ移行する際の注意 (*** 重要 ***)</A>
 
-        <A HREF="WHATS_NEW/index.html">What's new</A>     <A HREF="download.html">ダウンロード</A>
-        <A HREF="#fml">fml</A>            <A HREF="FEATURES/index.html">特徴</A>
+        <A HREF="WHATS_NEW/index.html">What's new</A>     <A HREF="download.html">ダウンロード</A>
+        <A HREF="#fml">fml</A>            <A HREF="FEATURES/index.html">特徴</A>
         <A HREF="mailinglist.html">Mailing List</A> 
 
-        <A HREF="examples/index.html">設定ガイド(インストール、設定例など…)</A>
-        <A HREF="advisories/index.html">FML アドバイザリィ</A>
+        <A HREF="examples/index.html">設定ガイド(インストール、設定例など…)</A>
+        <A HREF="advisories/index.html">FML アドバイザリィ</A>
 
-        <A HREF="roadmap.html">Roadmap</A>        <A HREF="TODO/index.html">TODO(やりのこし/やりたいこと/ほしいもの)</A>
+        <A HREF="roadmap.html">Roadmap</A>        <A HREF="TODO/index.html">TODO(やりのこし/やりたいこと/ほしいもの)</A>
         <A HREF="history.html">History</A>        <A HREF="people.html">People</A>
-        <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>
+        <A HREF="pictures/index.html">fmlのマスコットキャラクタ</A>
 
-        <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
+        <A HREF="links.html">メーリングリストと関連する内容のlinks</A>
 
 </PRE>
 #ifndef DIST
 <PRE>
-        <A HREF="search-j.html">[検索]</A>
+        <A HREF="search-j.html">[検索]</A>
 </PRE>
 #endif
 #else
@@ -84,7 +111,7 @@ The lastest official release is fml-3.0 (1999/08/15).
 	<A HREF="http://www.fml.org/fml/">
 	FML HOME PAGE (http://www.fml.org/fml/);
 #ifdef JAPANESE 
-	[検索] FMLドキュメントの検索ができます。
+	[検索] FMLドキュメントの検索ができます。
 #else
 	[Search] over FML documents
 #endif
@@ -94,9 +121,9 @@ The lastest official release is fml-3.0 (1999/08/15).
 <!-- =================================================================== -->
 <P>* Topics
 #ifdef JAPANESE /* JAPANESE */
-<A HREF="INSTALL_on_MacOS_X_Server/index.html">Mac OS X Server でのインストールについて</A>
+<A HREF="INSTALL_on_MacOS_X_Server/index.html">Mac OS X Server でのインストールについて</A>
 <br>
-<A HREF="advisories/year2000/index.html">2000年問題について</A>
+<A HREF="advisories/year2000/index.html">2000年問題について</A>
 #endif
 
 <P> [Project]
@@ -107,13 +134,13 @@ The lastest official release is fml-3.0 (1999/08/15).
 /* http://www.fml.org/fml/index.html */
 #ifdef JAPANESE /* JAPANESE */
 <PRE>
-* CGI interface 計画 (experimental)
+* CGI interface 計画 (experimental)
    <A HREF=ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/>ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/experimental/</A>
-   <A HREF="examples/makefml.cgi.txt">メモ(TODO, インストールについて)</A>
+   <A HREF="examples/makefml.cgi.txt">メモ(TODO, インストールについて)</A>
 * fml restructuring project (beyond 3.0 Release) but not yet documented
-  fml 再構成計画 -- 3.0を越えて --
-* <A HREF="http://www.jwntug.or.jp/wg/ntfml/faq/announce.html">fml FAQ作成プロジェクトについて</A>
-* Ports: MacOS X, BeOS, OS/2 で試した人いませんか？:)
+  fml 再構成計画 -- 3.0を越えて --
+* <A HREF="http://www.jwntug.or.jp/wg/ntfml/faq/announce.html">fml FAQ作成プロジェクトについて</A>
+* Ports: MacOS X, BeOS, OS/2 で試した人いませんか？:)
 </PRE>
 #else /* ENGLISH */
 <PRE>
@@ -130,7 +157,7 @@ The lastest official release is fml-3.0 (1999/08/15).
 <H3>
 <A NAME="fml">
 #ifdef JAPANESE
-Information とドキュメントのHTML版
+Information とドキュメントのHTML版
 #else
 Information and HTML version documents in the fml source distribution 
 #endif
@@ -139,7 +166,7 @@ Information and HTML version documents in the fml source distribution
 	<LI>
 #ifdef JAPANESE
 	<A HREF="README/index.html">
-	README; 概要と情報へのポインタについて
+	README; 概要と情報へのポインタについて
 #else
 	<A HREF="README-e/index.html">
 	README; Overview and Pointers
@@ -151,7 +178,7 @@ Information and HTML version documents in the fml source distribution
 	<A HREF="CHECK_LIST/index.html">
 	CHECK LIST
 	</A>
-	(質問の前にチェックしてみて欲しいリスト)
+	(質問の前にチェックしてみて欲しいリスト)
 #else
 	<A HREF="CHECK_LIST-e/index.html">
 	CHECK LIST
@@ -162,7 +189,7 @@ Information and HTML version documents in the fml source distribution
 
 <P>
 #ifdef JAPANESE
-<A NAME=#installation>インストールとアップグレード
+<A NAME=#installation>インストールとアップグレード
 #else
 <A NAME=#installation>Installation and Upgrade
 #endif
@@ -170,7 +197,7 @@ Information and HTML version documents in the fml source distribution
 	<LI>
 #ifdef JAPANESE
 	<A HREF="UPGRADE/index.html">
-	アップグレードの際の注意
+	アップグレードの際の注意
 #else
 	<A HREF="UPGRADE-e/index.html">
 	ATTENTIONS and TIPS FOR UPGRADE
@@ -181,9 +208,9 @@ Information and HTML version documents in the fml source distribution
 	<A NAME="#install-on-unix">
 #ifdef JAPANESE
 	<A HREF="INSTALL/index.html">
-	INSTALL ガイド
+	INSTALL ガイド
 	</A>
-	(インストール, makefmlの使い方など全般)
+	(インストール, makefmlの使い方など全般)
 #else
 	<A HREF="INSTALL-e/index.html">
 	INSTALLATION GUIDE
@@ -194,7 +221,7 @@ Information and HTML version documents in the fml source distribution
 
 <P>
 #ifdef JAPANESE
-	MTAごとの注意点。sendmail はINSTALLファイルを参照のこと
+	MTAごとの注意点。sendmail はINSTALLファイルを参照のこと
 #else
 	Tips for each MTA. See INSTALL for sendmail.
 #endif
@@ -217,7 +244,7 @@ Information and HTML version documents in the fml source distribution
 <P> Operating systems
 	<LI>
 #ifdef JAPANESE
-	<A HREF="INSTALL/index.html">[UNIXはINSTALLガイド]</A>
+	<A HREF="INSTALL/index.html">[UNIXはINSTALLガイド]</A>
 
 	<A HREF="INSTALL_on_NT4/index.html">[Windows NT4]</A>
 
@@ -231,7 +258,7 @@ Information and HTML version documents in the fml source distribution
 
 <P>
 #ifdef JAPANESE
-<A NAME=#configuration>設計思想と進んだ設定についてのガイド
+<A NAME=#configuration>設計思想と進んだ設定についてのガイド
 #else
 <A NAME=#configuration>Design and Configuration Guide
 #endif
@@ -240,15 +267,15 @@ Information and HTML version documents in the fml source distribution
 #ifdef JAPANESE
 #ifdef DIST
 	<A HREF="http://www.fml.org/fml/op/index.html">
-	fml の設計及び運用ガイド
+	fml の設計及び運用ガイド
 	</A>
-	はwww.fml.orgをみにいくかfmlのソースの一番上のディレクトリで
-	make doc を走らせて作ってください。
+	はwww.fml.orgをみにいくかfmlのソースの一番上のディレクトリで
+	make doc を走らせて作ってください。
 #else
-	<A HREF="op/index.html">fml の設計及び運用ガイド</A>
+	<A HREF="op/index.html">fml の設計及び運用ガイド</A>
 #endif /* DIST */
 	<BR>
-	設計、運用、変数の意味とカスタマイズについてなど全般について
+	設計、運用、変数の意味とカスタマイズについてなど全般について
 #else /* JAPANESE */
 #ifdef DIST
 	Please see
@@ -266,7 +293,7 @@ Information and HTML version documents in the fml source distribution
 
 <P>
 #ifdef JAPANESE
-<A NAME="#misc">その他
+<A NAME="#misc">その他
 #else
 <A NAME="#misc">misc
 #endif
@@ -289,7 +316,7 @@ Information and HTML version documents in the fml source distribution
 <HR>
 <P>
 #ifdef JAPANESE
-その他のソフトウエア
+その他のソフトウエア
 #else
 My other softwares:)
 #endif
