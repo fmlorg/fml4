@@ -3,7 +3,7 @@ INFO:
 # $Id$
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 # 
@@ -150,7 +150,7 @@ SUPERFLUOUS_HEADERS:  0
 
 
 STRIP_BRACKETS:  0
-			# Strip e.g. [ML:fukachan] in Subject
+			# multiple Re:, Strip e.g. [ML:fukachan] in Subject
 
 
 AGAINST_NIFTY:  0
@@ -430,7 +430,7 @@ INFO:
 FML:		 fml.pl
 			# driver name (dont add /)
 
-LOG_MESSAGE_ID:	$VARLOG_DIR/msgid.cache
+LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
 
 
 
@@ -539,4 +539,3 @@ COMPRESS:	&path(gzip) -c
 ZCAT:		&path(gzcat)
 LHA:		&path(lha)
 ISH:		&path(ish)
-
