@@ -4,6 +4,19 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/19
+
+   www/lib/libcgi_cleanup.pl
+	global variable declaration
+
+   remove obsolete library
+	proc/libdb.pl
+	proc/libtts.pl
+
+   proc/libqmail.pl
+   proc/libmd5.pl
+   proc/libcksum.pl 
+	my()-ify et.al. (p5 style)
 
 2001/09/18
 
