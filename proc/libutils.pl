@@ -295,7 +295,7 @@ sub TarZXF
 
 # InterProcessCommunication
 # return the answer from <S>(socket) since for jcode-converson
-sub ipc
+sub _IPC
 {
     local(*ipc, *r) = @_;
     local($err)     = "Error of IPC";

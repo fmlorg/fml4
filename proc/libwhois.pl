@@ -31,7 +31,7 @@ sub WhoisSearch
     &Whois'Import; #';
 
     if ($host) {
-	&Ipc2Whois(*e, *Fld, *host, *pat);#';
+	&IPC2Whois(*e, *Fld, *host, *pat);#';
     }
     elsif ($all) {
 	&Whois'ShowAllEntry(*e, *r); #';
@@ -88,7 +88,7 @@ sub WhoisList
 
 # WHOIS INTERFACE using IPC
 # return the answer
-sub Ipc2Whois
+sub IPC2Whois
 {
     local(*e, *Fld, *host, *req) = @_;
     local(@ipc, $r, @r, %r);
@@ -112,13 +112,13 @@ sub Ipc2Whois
 	# After code-conversion!
 	# '#' is a trick for inetd
 	@ipc = ("$req\n\n");
-	&ipc(*ipc, *r);
+	&_IPC(*ipc, *r);
 
 	&jcode'convert(*r, 'jis'); #'(trick) -> JIS
     }
     else {
 	@ipc = ("$req\n\n");
-	&ipc(*ipc, *r);
+	&_IPC(*ipc, *r);
     }
 
     &Mesg(*e, "whois -h $host $req $ML_FN");
