@@ -137,7 +137,7 @@ versionup:
 allclean: clean cleanfr
 
 clean:
-	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] NT/*~
+	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] NT/*~ tmp/release.info* tmp/sendfilesbysplit*
 
 cleanfr:
 	gar *.frbak */*.frbak
