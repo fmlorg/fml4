@@ -7,8 +7,10 @@
 
 .# .__repl_include__
 .include overview.wix
+.include howto.wix
 .include archive.wix
 .include expire.wix
+.include tips.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
