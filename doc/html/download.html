@@ -28,52 +28,68 @@ The Design and Implementation of "fml" Mailing List Server
 <A HREF="download.html">[Japanese] is here.</A>
 #endif
 
-<P> 
+<BR>
+<BR>
 <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
 [master ftp server] ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 </A>
-<P>
+
 <BR>
 <A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/">
 [master www server]
 http://www.sapporo.iij.ad.jp/staff/fukachan/mirror/ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 </A>
 
+<!- ----------------------------------------------------------------- ->
+<HR>
 
 #ifdef JAPANESE
 <LI>
+<CENTER>
 <H3>
-<P>	ソースのダウンロード
+ソースのダウンロード
 </H3>
+</CENTER>
 <UL>
 
 <LI>
-3.0 Release にバグ修正だけをほどこしたstableシリーズと
+3.0 Release にバグ修正だけをほどこしたstableシリーズ
+<BR>
 <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz">
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-stable-latest.tar.gz (stableシリーズの最新版)
 </A>
 
 <LI>
-開発版(bug fixと機能拡張)
+と開発版(bug fixと機能拡張)
+<BR>
 <A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz">
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
 </A>
+<BR>
 があります。
-
 <BR>
 currentもある程度まとまったところで作るのでそれなりに動きますが、たま
 に失敗していることもあります。テストをしてくれる人が多ければ多いほどリ
-リースが充実するのでcurrentでひとみ悟空になっていただける or currentも
-ちょっとくらい失敗してもいいＭＬで使ってみてもらえると非常にあり難いで
-す。
-
-<BR>
-また毎日作っているスナップショットもありますがより賭けに近くなります。
-おっかけをする人向け。
+リースが充実するのでcurrentでひとみ悟空になっていただける、もしくは
+stable以外にcurrentもちょっとくらい失敗してもいいＭＬで使ってみてもら
+えると非常にあり難いです。
 
 <LI>
-ftpサーバ上の階層構造については
-<A HREF=ftphier.ja.html>ここ</A>をみてください。
+またstableとcurrentについて毎日作っているスナップショットもあります。
+が、より賭けに近くなります:-)。おっかけをする人向け。
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/
+</A>
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/stable/">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/stable/
+</A>
+
+
+<LI>
+ftpサーバ上の階層構造の
+<A HREF=ftphier.ja.html>解説</A>
 
 #else
 <P>	Download fml source codes
@@ -95,8 +111,20 @@ ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/fml-current.tar.gz
 </A>
 
 <LI>
-See hierarchy on ftp server
-<P><A HREF=ftphier.html>here</A>
+daily snapshots for both current and stable
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/
+</A>
+<BR>
+<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/stable/">
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/stable/
+</A>
+
+<LI>
+See 
+<A HREF=ftphier.html>here</A>
+for hierarchy on ftp server.
 #endif
 
 </UL>
@@ -104,7 +132,11 @@ See hierarchy on ftp server
 #if DIST
 #else /* DIST */
 	<LI>
+#ifdef JAPANESE
+	http://www.fml.org/fml/ 以下のHTMLドキュメントのかたまり
+#else
 	daily html documents snapshot
+#endif
 	<BR>
 	<A HREF="ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/daily-snapshots/current/">
 	"htmldocs-current-YYYYMMDD.tar.gz"
