@@ -452,6 +452,7 @@ Please send this form from OLD-ADDRESS (fml 2.2 specification).
 	d	RFC1153 format 	PLAINTEXT
 	b	RFC934 format 	PLAINTEXT(mh-burst)
 	rfc934	
+	tgz	tar+gzip คว spool.tar.gz
 	ish	lha + ish 
 	lhaish
 	i
@@ -479,6 +480,7 @@ Please send this form from OLD-ADDRESS (fml 2.2 specification).
             (no option)   gzip(with UNIX From:)
             u             PLAINTEXT(with UNIX From:) 
             uf            PLAINTEXT(with UNIX From:)
+            tgz           'tar+gzip' -> spool.tar.gz
             i             lha+ish
             ish           lha+ish
             b             RFC934 format   PLAINTEXT
