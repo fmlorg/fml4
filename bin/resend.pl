@@ -90,7 +90,7 @@ sub InitTTY
 }
 
 
-sub gets
+sub _GetS
 {
     local($.);
     $_ = <IN>;
@@ -101,7 +101,7 @@ sub GetString
 {
     local($s);
 
-    $s = &gets;
+    $s = &_GetS;
 
     # ^D
     if ($s eq "")  { print STDERR "'^D' Trapped.\n"; exit 0;}
