@@ -4338,7 +4338,7 @@ sub HtmlConfigQuery
 	    &SetValue(*config, $variable, 1);
 	}
 	elsif ($value eq 'NO') {
-	    &SetValue(*config, $variable, $NULL);
+	    &SetValue(*config, $variable, 0);
 	}
 	else {
 	    # XXX USE POINTER NOT RAW VALUE IN HTML
