@@ -140,6 +140,15 @@ secure to save password files (RSA keys with empty pass phrase) on it.
 6	send it in usual procedures.
 
 
+[KNOWN BUGS] 暗号化ＭＬのPGPの鍵とリモート管理でPGPを使う時の鍵が同じ
+場所にあります。そのため同時には使えません。
+3.0以降のversionで全面的に直す予定です。
+=E
+[KNOWN BUGS] encrypted distribution and remote administration with PGP
+authentication shares pgp key directory. So you cannot use both
+simultaneously. I will fix this after fml 3.0.
+
+
 
 .C	メール配送システムについて
 =E.C	Mail Delivery System Tuning

@@ -71,6 +71,14 @@ FML は管理者の認証には方式１を採用しています。
 =E
 FML uses the former method as an authentication method.
 
+[KNOWN BUGS] 暗号化ＭＬのPGPの鍵とリモート管理でPGPを使う時の鍵が同じ
+場所にあります。そのため同時には使えません。
+3.0以降のversionで全面的に直す予定です。
+=E
+[KNOWN BUGS] encrypted distribution and remote administration with PGP
+authentication shares pgp key directory. So you cannot use both
+simultaneously. I will fix this after fml 3.0.
+
 
 .S	PGP の公開鍵の登録
 =E.S	Register PGP Public Keys
