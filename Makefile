@@ -60,19 +60,22 @@ doc: INFO INFO-e syncinfo newdoc search
 
 newdoc: htmldoc syncwww syncinfo 
 
-INFO:	var/doc/INFO var/doc/INFO-e
+INFO:	$(WORK_DOC_DIR)/INFO $(WORK_DOC_DIR)/INFO-e
 
-var/doc/INFO: $(FML)/.info
-	@ $(MKDIR) $(DESTDIR)/.fml
-	@ rm -f $(DESTDIR)/.fml/INFO
+INFO-common: $(FML)/.info
+	@ make -f distrib/mk/fml.sys.mk __setup
+	@ $(MKDIR) $(COMPILE_DIR)
+	@ rm -f $(COMPILE_DIR)/INFO
 	($(ECONV) doc/ri/INFO; $(ECONV) .info; $(ECONV) doc/ri/README.wix)|\
 		$(ECONV) |\
-		tee var/doc/INFO > $(DESTDIR)/.fml/INFO
-	$(GEN_PLAIN_DOC) -o var/doc $(DESTDIR)/.fml/INFO 
+		tee $(WORK_DOC_DIR)/INFO > $(COMPILE_DIR)/INFO
 
-var/doc/INFO-e:
+$(WORK_DOC_DIR)/INFO: INFO-common
+	$(GEN_PLAIN_DOC) -o $(WORK_DOC_DIR) $(COMPILE_DIR)/INFO 
+
+$(WORK_DOC_DIR)/INFO-e: INFO-common
 	perl $(DIST_BIN)/remove_japanese_line.pl \
-		< $(DESTDIR)/.fml/INFO > $(DESTDIR)/.fml/INFO-e
+		< $(COMPILE_DIR)/INFO > $(COMPILE_DIR)/INFO-e
 
 plaindoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
@@ -80,16 +83,16 @@ plaindoc: INFO doc/smm/op.wix
 
 htmldoc: INFO doc/smm/op.wix
 	@ make -f distrib/mk/fml.sys.mk __setup
-	@ find var/html -type l -print |perl -nle unlink
+	@ find $(WORK_HTML_DIR) -type l -print |perl -nle unlink
 	@ (chdir doc/html; make)
-	@ $(MKDIR) var/html/op
+	@ $(MKDIR) $(WORK_HTML_DIR)/op
 	@ (chdir doc/html; make op)
 
 syncwww:
-	$(RSYNC) -av $(FML)/var/html/ $(WWW)
+	$(RSYNC) -av $(WORK_HTML_DIR)/ $(WWW)/
 
 syncinfo:
-	$(JCONV) var/doc/INFO > $(SNAPSHOT_DIR)/info
+	$(JCONV) $(WORK_DOC_DIR)/INFO > $(SNAPSHOT_DIR)/info
 
 
 search:
