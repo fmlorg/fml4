@@ -163,7 +163,9 @@ sub MailServerConfig
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
 	    &P("run \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\"");
+	    &P($NULL);
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
+	    &P($NULL);
 	}
 	else {
 	    &ERROR("I don't know how to update aliases map");
