@@ -178,16 +178,11 @@ Can you understand sources of quotations?:-)
 .include mail2news.wix
 .include mail2irc.wix
 
-.# .include aucea.wix
-.# .include fred.wix
-
 .include fml-2-1.wix
 .# .include fml-1.wix
 .include app/fmlR1.wix
 .include app/vars.wix
 .# .include app/misc.wix
-.# .include app/distribute-emulation.wix
-.# .include app/sid.wix
 .# .include app/obsolete.wix
 
 
