@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -1324,6 +1324,15 @@ sub Distribute
 {
     local(*e, $mode, $compat_hml) = @_;
     local($ml) = (split(/\@/, $MAIL_LIST))[0];
+
+    # Japanese specific: convert hankaku to zenkaku
+    if ($USE_HANKAKU_CONVERTER) {
+	if ($LANGUAGE eq 'Japanese') { 
+	    require("module/$LANGUAGE/libhankaku2zenkaku.pl");
+	    eval &FixJapaneseMDChars(*e);
+	    &Log($@) if $@;
+	}
+    }
 
     # Filtering mail body from members but not check other cases
     # e.g. null body subscribe request in "no-keyword" case

@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/18
+
+   $USE_HANKAKU_CONVERTER
+	add $USE_HANKAKU_CONVERTER (Japanese specific)
+
+	半角→全角コンバータを組み込む (optional)
+
 2000/03/16
 
 	fix RuleSetTo: 
