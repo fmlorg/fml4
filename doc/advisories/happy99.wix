@@ -1,37 +1,48 @@
-	fml が happy99 のメールを拒否するためには？
+	fml と happy99 について
 
 			Ken'ichi Fukamachi
 
 .toc
 
-詳しくはINSTALLマニュアルを参照。
+手順の意味についてはINSTALLマニュアルを参照して下さい
+http://www.fml.org/fml/INSTALL/
 
 
 .P	フィルタリング
 
 .C	フィルタリング機能
 
-まずフィルタリングをONにする必要がある。以下elena MLを例にとる。
-以下の節のいづれか一つの方法を行なえばよいです。
+.S	fml フィルタリング機能について
 
+fml 2.2以降にはヘッダやメール本文に基づくフィルタリング機構があります。
+つまり「ヘッダに特定のパターンがあったら弾く」とか「一行メールを拒否す
+る」などができます。
+＃正式なリリースとしては2.2ですが当然 2.1 current からあります。
+＃ドキュメントないしソースにUSE_DISTRIBUTE_FILTERというのがあれば
+＃動くバージョンです。
+
+この機能の一例としてhappy99を拒否する方法について、以下では述べます。
+
+まずフィルタリングをONにする必要があります(以下elena MLを例にとる)。
+以下の節のいづれか一つの方法を行ないます。
+
+.S	makefml config を使う人
+
+   "makefml config elena" -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
 
 .S	cf 書きの人
 
    USE_DISTRIBUTE_FILTER 1
 
-を書いてあと 
+を書く。その後
 
 	% make config.ph
 
- でconfig.ph update
+で config.ph を作り直す。
 
 .S	config.ph 生書きの人
 
    $USE_DISTRIBUTE_FILTER = 1;
-
-.S	makefml config を使う人
-
-   makefml config ML -> security -> USE_DISTRIBUTE_FILTER -> "y" (yes)
 
 .S	make secure
 
@@ -42,7 +53,7 @@
    % make secure
 
 するといろいろな設定を自動的にcfに書いてconfig.phをUPDATEする。 
-やってる設定は画面に表示されるので見ておくこと。
+やってる設定は画面に表示される。
 
 
 .C	フィルタリングに新ルールを加える
@@ -53,6 +64,7 @@
 
 をcfの最後(LOCAL_CONFIG行の後)に追加して config.ph を update するため
 に 
+
 	% make config.ph
 
 .S	config.phを使う人
@@ -65,12 +77,17 @@ config.ph生書きの人は
 
 
 .P	fml以外の部分で弾く
+
 .C	前処理プログラム bin/multipart.pl を使う場合
 
      MTA -> bin/multipart.pl -> fml.pl
 
+のように、前処理フィルタリングがある場合。
+multipart.pl については op.jpを参照
+http://www.fml.org/fml/op/
+
 2.2A#34 以降のものにいれかえると happy99 が uuencode されたものがくっ
-ついてたらrejectする。
+ついてたらその部分を切りとる。
 ＃ by Yuao Tanigawa <yuao@infonia.ne.jp>: fml-support ML's Count:05863 
 
 ただmultipart.plでやることについては意味論的に疑問はある(e.g. この場所
