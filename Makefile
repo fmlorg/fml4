@@ -94,7 +94,7 @@ distsnap:
 # If release branch, use this
 snapshot:
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
-	@ if [ X`tty` != X ]; then \
+	@ if [ "X`tty`" != X ]; then \
 	     ssh-add -l |\
 	     grep `hostname -s` >/dev/null || printf "\n ! please ssh-add.\n\n";\
 	  fi
