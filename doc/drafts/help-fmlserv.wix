@@ -1,0 +1,40 @@
+＊＊＊ fmlserv (fml listserv風インターフェイス) の使い方 ＊＊＊
+
+fmlserv は fml の listserv風インターフェイスです。fml のコマンドはすべ
+て使えますが、コマンド命令形式が一箇所だけ異なります。
+
+fml では(各ＭＬごとに設定するのが基本なので)
+
+   コマンド 			引数 or オプション 	(fml)
+
+のような形でしたが、fmlserv では
+
+   コマンド メーリングリスト名	引数 or オプション 	(fmlserv)
+
+のようにどのメーリングリスト宛の命令かを間に夾みます。fmlserv へ異なる
+メーリングリスト宛の命令を混在させて送りつけても構いません。
+
+
+
+The commands that fmlserv understands are:
+
+    subscribe <list> [<address>]
+        Subscribe yourself (or <address> if specified) to the named <list>.
+
+    unsubscribe <list> [<address>]
+        Unsubscribe yourself (or <address> if specified) from the named <list>.
+
+    help
+        This Help
+
+    which [<address>]
+        Find out which lists you (or <address> if specified) are on.
+
+    lists (もし管理者が許していれば)
+        Show the lists served by this fmlserv server.
+
+    end
+    exit
+    quit
+        End of commands (to avoid the signature)
+

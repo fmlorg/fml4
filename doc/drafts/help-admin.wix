@@ -1,0 +1,186 @@
+		管理者コマンドのヘルプ
+
+________________________________
+#.index
+________________________________
+
+
+.C	Overview
+
+.S	コマンドについて
+
+"# admin コマンド" == "# approve パスワード コマンド" 
+と同じです。パスワードは平文で書いてください。
+
+#approve 形式は各行にパスワードを書く必要がありますが、
+#admin 形式の方では最初にだけパスワードの認証が必要なだけです。
+
+なおPGPモードでパスワードを書く必要はありません。よってPGPの場合 admin
+pass 行は必要ないし、approve コマンドは無意味です(無意味にパスワード打
+ち間違えによるエラーで混乱する可能性もあります)。
+
+
+コマンドの例:
+
+	# admin pass パスワード
+	# admin ls
+
+
+は次の行と同じです。
+	# approve パスワード ls
+
+
+.C	コマンド
+
+.S	パスワード関係
+
+# admin pass パスワード
+# admin password パスワード
+	もしパスワードを必要とする設定なら必ず先頭にこれがないといけま
+	せん。キーワードはpasswdにしようかと思ったけど、
+	そうすると、コマンドラインとごっちゃになるからftpからとって
+	きてpassというキーワードを使います。
+
+# admin passwd 新しいパスワード
+	パスワードの変更
+	shell% passwd ってやつとおなじっす(複数回は要求されませんが)。
+
+# admin initpass アドレス パスワード
+	アドレスに対するパスワードを"パスワード"で初期化する
+	初期化は変更と違い特別扱いです。bin/passwd -i とおなじです。
+
+
+.S	ヘルプ
+
+# admin help
+	管理者コマンドヘルプを取り寄せる(このファイル)
+
+
+
+.S	ログファイル
+
+# admin log
+	ログの最近の100行を取り寄せる
+
+# admin log -N(数字)
+	ログの最近の N行を取り寄せる。例 admin log -40 (最近の40行)
+	
+# admin log all
+	ログファイル全体を取り寄せる。とても大きいかも知れないので注意。
+
+
+.S	メンバーリストの変更
+
+# admin add address
+	address の人をMLに登録する
+
+# admin off address
+	address の人をML一時おやすみにする
+	(actives file にのみ作用する)
+
+# admin on address
+	address の人のML一時おやすみを解除
+	(actives file にのみ作用する)
+
+# admin bye address
+	address の人をMLメンバーから削除
+
+# admin chaddr old-addr new-addr
+# admin change old-addr new-addr
+# admin change-address old-addr new-addr
+	old-addrを削除して、new-addrを登録する
+
+# admin matome address 引数 
+	address の人を まとめおくりに
+	引数は 6 6u 6i 等
+
+# admin skip address
+	この address を配送はしないけど投稿はできるようにする
+
+
+.S	管理者メンバーリストの変更
+
+# admin addadmin address
+# admin addpriv  address
+	address の人を管理者メンバーとして登録
+
+# admin byeadmin address
+# admin byepriv  address
+	address の人を管理者メンバーから削除
+
+
+.S	ファイル操作
+
+# admin dir
+	MLのある場所の階層全部のリスト(ls -lR)
+
+# admin ls options
+	MLのある場所のリスト(ls)
+
+	# admin ls -l
+	# admin ls -l spool
+	のようにオプション(一行に書く限りいくつあってもいい)も使える
+
+# admin get filename
+	MLのある場所の filename というファイルをとってくる
+
+# admin resend filename address
+	MLのある場所の filename というファイルを address へ送る。
+
+# admin forward
+	admin forward 行より後ろをＭＬへフォワードする
+	本来 moderated モードで使うためのもの
+	でもこのコマンドをTYPOして…という危険はありうるので注意
+
+# admin newinfo
+# admin newguide
+
+	この命令に続くメール本文の残り部分を新しい GUIDE ファイルとして
+	入れ換える
+
+
+*** 注意 ***
+ファイルを削除、上書きをするコマンドは security 上の問題があります。上
+書きするファイルは @REMOTE_RECONFIGURABLE_FILES という配列に入っている
+ファイル群です。必要ならこの配列に付け加えてください。
+
+# admin put filename
+	MLのある場所の filename というファイルを置く。
+	もし filename というファイルがある場合は、
+	古い filename は filename.back に変えておく
+
+# admin remove filename
+	MLのある場所の filename というファイルを削除
+
+# admin rename filename1 filename2
+	MLのある場所の filename1 というファイルを filename2 という名
+	前にする。
+
+ただし rename は filename1 filename2 とも @REMOTE_RECONFIGURABLE_FILES 
+のファイルでないといけないため使い道はあまりないだろう。
+
+
+.S	特殊なもの
+
+admin はつかないけど…
+
+# set debug		
+		デバッグモードをオン
+
+# set addr_check_max LEVEL
+		アドレスのチェックを LEVEL(数字)へ。つまり
+		$ADDR_CHECK_MAX = LEVEL へ
+
+# set exact
+		アドレスのチェックをExact へ
+		実は $ADDR_CHECK_MAX = 9; です:-)
+
+.# $Id$
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.

@@ -1,0 +1,29 @@
+ メンバーがファイルを登録したり、それを取り寄せたりするためのものです。
+ 
+-# library 命令		ライブラリーへのアクセス。アーカイブとの違いは
+-			ほとんどありませんがサーバへ put することが可能です。
+-			＃ただし security 上ファイル名は記事番号指定のみです
++# library 命令		ライブラリーへのアクセス
++			アーカイブとの違いはほとんどありませんが、put 
++			が可能になっています。
++			＃ただしセキュリティ上、ファイル名は記事番号指
++			　定のみです
++
++# library index		ライブラリーにたくわえられているファイルの一覧を得る
++# library summary	# library indexと同じ
+ 
+-# library index		ライブラリーにたくわえられているファイルのサマリ
+-# library summary	同上
++# library get 数字	ライブラリーから記事を得る
++			mget と同じ引数がつかえます
+ 
+-# library get 数字	mget と同じ引数がつかえます
+-# library put 		普通のメールスプールのようにアーカイブしていきます
++# library put 		ライブラリーに記事を保存する
+ 
+ # library unlink [番号]	指定番号の記事をライブラリーから削除する
+-# library delete [番号] 同上
+-# library rm     [番号] 同上
++# library delete/rm [番号]
++			# library unlink [番号]と同じ
+ 

@@ -1,0 +1,244 @@
+		traslated: 95/05:	fukachan@phys.titech.ac.jp
+		traslated: 95/11:	Jason.Chen@efi.com
+
+****************************************************************************
+*                               HELP FILE                                  *
+****************************************************************************
+
+Depends on the configuration of the ML server, '# help' and '#help' may be
+treated as the same. (if USE_RPG_ML_FLAG is non-nil)
+Note that commands are case-insensitive, i.e. # help = $ Help = # HELP
+[Option] means optional.  % is shell prompt.
+
+
+# help              Get command help (this file)
+# objective         Get ML objective
+# guide             Get ML guide (non-members are allowed to use
+                    this command)
+# msg               Send a mail to ML administrator
+# members           Get member list
+# actives           Get active member list
+# summary [arg]     Get a summary of ML articles
+                    arg: range of the ML articles
+                    Ex.
+                    summary          whole summary (1-last)
+                    summary last:10  summary of last 10 articles
+                    summary 100-200  summary of article 100-200
+
+# get ID
+# send ID           Get a ML article (sends back in plain text)
+
+# index             Get a list of files which you can # get
+                    Index file will be returned if it exists
+
+# status [arg]
+# stat   [arg]      Get current status of a member (batch send mode or
+                    OFF etc.)
+                    arg: the member's address (myself if not specified)
+
+# exit
+# end
+# quit              Terminate command processing (so that your signature
+                    will not get processed)
+
+# mget <range list>          [mode] [interval]
+# mget <regular expression>  [mode] [interval]
+                    Get multiple files (ML articles or archive files)
+     Arg:
+       <range list>  Ex. 1-10,12,15-100  1,2,10
+                         first first:10 last:30 100-last  (MH syntax)
+       <regular exp> Ex. * ? 1? 1??
+       [mode]        gz tgz ish rfc934 b rfc1153 d unpack uf (default=tgz)
+       [interval]    mail time interval if the reply spans multiple mails
+                     (default=300)
+     Mode:
+      (No option)  'tar+gzip' -> spool.tar.gz
+       tgz         'tar+gzip' -> spool.tar.gz
+       uf          PLAINTEXT(with UNIX From:)
+       gz          GZIP(with UNIX From:)
+       b           lha+ish
+       ish         lha+ish
+       rfc934      RFC934 format   PLAINTEXT
+       unpack      PLAINTEXT(with UNIX From:)
+       uu          UUENCODE
+       d           RFC1153 format  PLAINTEXT
+       rfc1153     RFC1153 format  PLAINTEXT
+
+<<<<< Commands related to mail distribution
+
+# skip             Make the address of From: in your mail a posting only
+                   address; mails will not be sent to this address any more
+# noskip           Reverse of # skip
+# off              Sign off ML temporarily (stop receiving mails)
+# on               Resume receiving mails after # off
+# bye              Sign off ML permanently
+# unsubscribe      Sign off ML permanently
+
+<<<<< Batch mail mode (approximately every N hours)
+
+# matome <num>[opt]  Send batch mail at approximately every <num> hours
+                     To be exact, mail are sent at N clock where
+                          0 == N (mod <num>)    N=1..24
+                     When <num> is between 13 to 36, mail batch will be
+                     sent once a day at 
+                          <num>    if  <num>=13..24
+                          <num>-24 if  <num>=25..36
+
+        Ex.
+            # matome <num>u   plain(unpack) format
+            # matome <num>i   lha+ish format
+        [opt]:
+            (no option)   gzip(with UNIX From:)
+            u             PLAINTEXT(with UNIX From:) 
+            uf            PLAINTEXT(with UNIX From:)
+            i             lha+ish
+            ish           lha+ish
+            b             RFC934 format   PLAINTEXT
+            d             RFC1153 format  PLAINTEXT
+            mp            MIME/Multipart PLAINTEXT
+
+# matome 0         Cancel batch mode.  Return to normal distribution
+        Ex.
+        # matome 1        Mail batch every 1 hour  (gzipped)
+        # matome 2        Mail batch every 2 hours (gzipped) 
+        # matome 2u       Mail batch every 2 hours (plain text)
+        # matome 2mp      Mail batch every 2 hours (MIME/Multipart)
+        # matome 17       Mail batch once a day at 17:00 (gzipped)
+        # matome 29       Mail batch once a day at  5:00 (gzipped)
+
+<<<<< Miscellaneous
+
+# whois [-h host] key  Look up whois database with key
+                       When host is given, look up is done on the host
+                       through IPC.  Otherwise the search is performed
+                       in ML local whois database
+# iam                  Put self-introduction (ML local whois database)
+
+# who
+# whois-index
+# whois-list           Get the list of available whois entries
+
+# addr xxx@yyy.zzz     Restrict the target address to xxx@yyy,zzz
+                       Depends on the ML configuraion, sometimes
+                       multiple addresses may match the address given
+                       in a command, e.g.  xxx@yyy.zzz, xxx@www.yyy.zzz
+                       may both match xxx@yyy.zzz in a # off command.
+                       This # addr command will force the target to
+                       be xxx@yyy.zzz  Usually the server will retry
+                       address comparison with more strict matching rule
+                       when multiple entries are found.  This command
+                       should be rarely needed
+
+<<<<<  Bug report
+
+     If you find any problem or bug of this ML program, please report
+it to:
+
+           dev.null-admin@domain.uja
+
+     Please include the problem situation, mail header, and syslog if
+possible.
+
+<<<<<
+NOTE: Old articles are stored in tar+gzip file where each one contains
+      100 articles
+
+<<<<< Examples
+
+In the following, 'mail' refers to /usr/ucb/mail, Mail(SUN), malix(SYSR3/4)
+/usr/bin/Mail(4.4BSD), /usr/bin/mail(4.4BSD)
+
+* Get article number 1
+          % echo "# get 1" | mail <ML address>
+          % echo "#get 1"  | mail <ML address>
+
+* Get article number 100-200
+          % echo "# mget 100-200" | mail <ML address>
+
+* Get article number 100-200.  In the case where the reply consists of
+  multiple mails, send each one at an interval of 30 seconds
+          % echo "# mget 100-200 30" | mail <ML address>
+
+* Get article number 100-200 in PLAINTEXT format
+          % echo "# mget 100-200 unpack" | mail <ML address>
+
+* Get article number 100-200 in lha+ish format
+          % echo "# mget 100-200 ish" | mail <ML address>
+
+* Get article number 100-200 in PLAINTEXT (mail interval = 30sec)
+          % echo "# mget 100-200 30 unpack" | mail <ML address>
+
+* Get files matching ?  (i.e. article 1-9)
+          % echo "# mget ?" | mail <ML address>
+
+* Get files matching *  (i.e. all articles)
+          % echo "# mget *" | mail <ML address>
+
+<<<<< Explanation of the example
+
+(1) Get the article of X-Mail-Count: 1 (article 1)
+    NOTE:  All command mail must begin with '#'  If illegal commands are
+           found, the server will send back this help file
+
+    The following way is recommended:
+
+     % echo "# get 1" | mail <ML address>
+
+    If you want to get article 1-3
+     % cat > foo
+     # get 1
+     # get 2
+     # get 3
+     ^D
+     % cat foo
+     # mget 1
+     # mget 2
+     # mget 3
+     % cat fpp | mail <ML address>
+
+    Then the server will send article 1, 2, 3 in seperate mails
+
+    The problem with this scheme is that, for each get command the server
+    has to start a sendmail process.  Imagine you try to get 1-100 articles
+    in this way.  It will be a big burden for the server machine.
+
+    The solution is to use # mget
+    For example, we want to get article 1-9:
+     % echo "# mget ? 30" | mail <ML address>
+
+    Like ftp mget command, you can use regular expression.  In this case,
+    ? will match all files with single character file name, therefore it
+    matches 1 to 9 in spool directory.  Likewise, * will match all articles,
+    ?? will match article 10-99
+
+    Mail interval argument is not necessarily needed.  If a reply
+    is longer than 1000 lines, ML server will split it into multiple
+    mails every 1000 lines.  In this example, the server will send
+    each of these mails at the specified interval of 30 seconds (default
+    is 5 minutes)  This argument is usually used in the case like : you
+    only want to receive 2-3 mails for each UUCP polling interval.  If your
+    machine is IP-reachable and you are confident that it can handle
+    lots of incoming mails at the same time, probably you don't need to
+    worry about this arugment.
+
+    The requested files will be tar+gzip+uuencoded.  If the result file
+    is longer than 1000 lines, the server will split it.  You'll have
+    to concatenate them into one file, say bar, and then decode,
+    decompress, extract the original files from it (uumerge.pl is very
+    convenient for this purpose)
+
+    % uudecode bar
+    % ls
+    spool.tar.Z
+    % zcat spool.tar.Z | tar xf -
+    % ls
+    spool.tar.Z spool
+    % ls -l
+     rw-r--r-- ............................ spool.tar.Z
+    drwxr-xr-x ............................ spool
+
+    spool/ contains the files you want
+
+****************************************************************************
+*                             End of HELP FILE                             *
+****************************************************************************
