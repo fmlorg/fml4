@@ -510,6 +510,41 @@ lib/Utilitites/packmbox.pl を使って、
 で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
 
 
+.S	認証する際のドメインのALIAS %DOMAIN_ALIASES
+
+認証する時には ujauja.or.jp  => ujauja.ne.jp に書き換えてTRYしてみる
+
+%DOMAIN_ALIASES = (
+	'ujauja.or.jp', 'ujauja.ne.jp',
+	);
+
+＃ fml.pl 2.0.24.47 へのパッチの例
+
+--- fml.pl.org	Fri Nov 21 08:11:10 1997
++++ fml.pl	Sat Nov 22 12:51:33 1997
+@@ -571,6 +571,19 @@
+     &Log("Gecos [$e{'macro:x'}]") if $debug;
+     $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+ 
++    if (%DOMAIN_ALIASES) {
++	if (&MailListMemberP($From_address)) {
++	    ; # not rewrite
++	}
++	else {
++	    for (keys %DOMAIN_ALIASES) {
++		if ($From_address =~ /$_$/i) {
++		    $From_address =~ s/$_$/$DOMAIN_ALIASES{$_}/i;
++		}
++	    }
++	}
++    }
++
+     # To: $MAIL_LIST for readability;
+     # &RewriteField(*e, 'Cc') unless $NOT_REWRITE_CC;
+     if ($REWRITE_TO < 0) { 
+
+
+
 .# $Id$
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 
