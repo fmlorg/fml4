@@ -1,4 +1,5 @@
 		How to edit fml CVS repository
+		$Date$
 
 CAUTION: you need "BSD make" not gmake.
 
@@ -89,11 +90,14 @@ Appendix D: CVS TAGS, BRANCH
 [4.0 series]
 
       fml-4-0-maint (branch)
-     -------------------> 4.0.1 (2001/06/03)
-    |
-    |     ----------- fml-4-0-maint2 ---> 4.0.2
-    |    |
-------------------------------------
+     -------------------> 4.0.1 ---------------> 4.0.2
+    |                    A          A merge
+    |                    |          |
+    |                    |-- diff ---  
+    |                    |
+    |                    | current-20010701
+    |                    V
+------------------------------------ (current branch)
   A A A
   | | |--- fml-4-0-1-alpha-0   (tag for diff, tagged on 2001/03/19)
   | |----- fml-4-0-1-pre-alpha (tag for diff, to be removed 2001/03/19)
@@ -120,11 +124,34 @@ stable branch:
 fml-2-1		2.1   release
 fml-2-2		2.2   release
 fml-2-2-1	2.2.1 release
+
 fml-3-0-maint	3.0 stable branch
 fml-3-0		3.0   release
 fml-3-0-1	3.0.1 release
+
+fml-4-0-maint	4.0 stable branch
 fml-4-0		4.0   release
 fml-4-0-1	4.0.1 release
 
+   current-20010701	merge/brake point to road for 4.0.2
 
-XXX: update -j fml-3-0-maint:"1999-8-16 00:39" -j fml-3-0-maint
+fml-4-0-2	4.0.2 release
+
+
+*** HOW TO MERGE ***
+
+  1. assign tag to current
+
+	% cvs rtag current-20010701 fml
+
+  2. merge up the patch between fml-4-0-1 and current-20010701
+
+	% cvs update -j fml-4-0-1 -j current-20010701 -d 
+
+	*** "-d" is required
+
+  3. check again
+
+	% cvs diff 
+
+$FML$
