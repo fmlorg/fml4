@@ -2,7 +2,6 @@
 
 				Ken'ichi Fukamachi
 				<fukachan@fml.org>
-				1999 January
 
 Caution: you need "BSD make" not gmake.
 
@@ -17,7 +16,7 @@ Caution: you need "BSD make" not gmake.
 	% cvs co fml
 	% cd fml
 
-1.1	If you are the maintainer to make 'snapshot', you need to set up 
+2.	If you are the maintainer to make 'snapshot', you need to set up 
 	distrib/history. The repository distrib/history is special. 
 	Please check out it:
 
@@ -26,10 +25,6 @@ Caution: you need "BSD make" not gmake.
 
 where 'history' is the alias of 'release/history'. This directory is
 ignored in fml/ repository since it is maintained separetely.
-
-2.	generate pkgsrc/. NOTE: You need Intenet connection to 'make pkgsrc'. 
-
-	% make pkgsrc
 
 3.	run "make build", which process follows:
 
@@ -41,7 +36,6 @@ which generate basic snapshot without pkgsrc and stop just before
 tar.gz.
 
 4.	O.K., now start your hack!
-
 
 5.	When you make distribution, you need several programs
 	such as ssh, rsync, .... Please see distrib/mk/fml.prog.mk 
@@ -58,6 +52,8 @@ tar.gz.
 	conf/release_version		2.2A#100  ;;; snapshot (not in cvs)
 	conf/branch			current, stable, etc...
 					which reflects ftp servre hier(7).
+	conf/mode			$NULL or "daily" which indicates mode
+					expecially for daily snapshot system
 
 "conf/release" is the main trunk revision, which should be set up by hand.
 distrib/bin/fml_version.pl controls "conf/release_version".
