@@ -385,6 +385,26 @@ MLのアドレスを書くようにしました。
 .~q
 
 
+.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+.k	%SKIP
+.key	$SKIP{'mail-address'}
+.key	skip
+.key	skip-but-determined-dynamically
+.key	$START_HOOK
+
+こういう処理を config.ph にかいてください。
+
+$START_HOOK = q#
+	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+
+こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
+↑ここは actives とかに現れるものと同じにして下さい。
+
+複数あるなら 全部を うえのフックに加えて下さい。
+
+
 .S	multi domain server ではどうすればいいのか
 
 multi domain server といってもいろいろ実装形態はあるとおもうのですが…

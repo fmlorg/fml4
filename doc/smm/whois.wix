@@ -1,4 +1,6 @@
-.C	WHOIS データベース
+.C	WHOIS データベースとサーバ
+.l	whois
+.xref	whois-security
 
 fml の whois コマンドは
 
@@ -45,13 +47,28 @@ fml の whois コマンドは
 でも変更できます。その場合はコマンドの -h オプションが優先します。
 
 	$WHOIS_DB
+.k	$WHOIS_DB
 
 ローカルにもっているデータベースです。デフォールトは "$FP_VARLOG_DIR/whoisdb" 
 
 	$WHOIS_HELP_FILE
+.k	$WHOIS_HELP_FILE
+.k	"# whois help"コマンド
 
-"# whois help" コマンドで送り返されるヘルプメッセージ。デフォールトは 
-"$DIR/etc/help.whois"
+	"# whois help" 
+
+コマンドで送り返されるヘルプメッセージ。デフォールトは "$DIR/etc/help.whois"
+
+
+.S	Whois と答えの日本語変換
+.k	$WHOIS_JCODE_P
+
+	$WHOIS_JCODE_P
+
+をセットすると日本語変換をしてから答えを返します。これが toggle flag 
+として実装されているのは変な答えを変換しようとして落ちたりすることもあ
+りうるようなので、たまにおちるかもしれないRISKを負う覚悟があるか否か？
+を表現している toggle です;-)
 
 
 .# $Id$

@@ -1,369 +1,331 @@
 .C	自動登録
-.label	auto-regist
+.l	auto-regist
 
-fmlで”自動登録”といっているのは
+.S	Introduction
+.k	自動登録のIntroduction
+.k	$ML_MEMBER_CHECK
 
-.S	基本的な挙動は…
+○ fml で "自動登録" といっているのは
 
-	From: のアドレスについて
-	メンバーチェック（もしくはしない）、失敗したらロックを外して終り
-	見知らぬ人からのガイドの要求ならガイドを送る。
-	＃See INSTALL, README, config.ph
 
-	&MLMemberCheck; が呼ばれると
+   1 あるアドレスについて、
+   2 すでにＭＬのメンバーであるかどうかをチェックして
+	($MEMBER_LIST の中のアドレスについてチェックします)
+   3 もしメンバーでないならそのアドレスをＭＬに登録する
+	($MEMBER_LISTに登録します)
+   4 登録した場合にはガイド等を送ってあげる
 
-	ここでは、
-	１．メンバーファイルと比較して
-	２．見知らぬ人なら	
-	３．メンバーファイルに登録して（ここからはlibutils.plを使う）
-	４．管理者へ知らせ
-	５．WELCOME…というメールを返す
+   また、管理者へ登録した旨をメールで知らせます。
 
-というのをします。この５↑のために config.ph に
+という一連の動作のことです。
+
+なお、ＭＬサーバはあくまでプライベート・コミュニケイションの延長である
+と考えた上での設計なのでデフォールトはメンバーチェックを行なうというこ
+とになっています。そのため $ML_MEMBER_CHECK という変数を 0 にすること
+が自動登録を意味することになっています。
+
 	
-	$WELCOME_FILE	= "$DIR/guide";		# could be "$DIR/welcome"
+○ メンバーチェックおよび登録に使うアドレスは 
+
+	From: にあるアドレス
+or
+	明示的にメールの本文中で指定されたもの
+
+のいづれかです。論理的には Reply-To: があれば Reply-To: を
+使うべきだと思うのですが、危険なので使いません。
+
+それは、例えば Reply-To: ＭＬそれ自身 をつけたままにするどうしょうもな
+いクラアイントのメールインターフェイス等が存在するために Reply-To: を
+信じるのは危険すぎるためです。
+
+
+○ またガイド等を送り返すわけですが、config.ph には
+	
+	$WELCOME_FILE	= "$DIR/guide";	# could be "$DIR/welcome"
 	$WELCOME_STATEMENT = 
 	"Welcome to our $ML_FN\n You are added automatically\n";
 
-というのがあって $WELCOME_FILE は歓迎の文章を書いたファイル（とりあえ
-ず、guideにしておいてあります）で、そのメールの Subject が
+という変数があります。
 
-	$WELCOME_STATEMENT = 
-	"Welcome to our $ML_FN\n\sYou are added automatically\n";
+$WELCOME_FILE は送り返す歓迎の文章を書いたファイル(とりあえず、guideに
+しておいてあります)で、また、そのメールの Subject が
 
-になります。
+	Subject: Welcome to our (Elena ML)
+	 You are added automatically
 
-
-
-.S	自動登録の基本挙動
-
-   1.	メンバーリスト($MEMBER_LIST)と比較して
-   2.	見知らぬ人なら	
-   3.	メンバーファイルに登録して
-   4.	管理者へ知らせ
-   5.	WELCOME というメールを返す
-   6.	→ そのメールをMLにフォワードする(配送)
-      or
-   	→ そのメールをMLにフォワードしない(配送しない)
-   7.	管理者にはいづれの場合でもメールをフォワードする
+のょうになります (since $ML_FN = "(Elena ML)")
 
 
-.S	自動登録のヴァリエーション
-.k	自動登録のヴァリエーション
-.key 	自動登録に使うアドレスはどこから選ぶ？
+.S	自動登録の仕方のバリエーション(登録するアドレスとキーワードについて)
+.k	自動登録の仕方のバリエーション
+.k	自動登録の仕方のバリエーション(登録するアドレスとキーワードについて)
+.k 	自動登録に使うアドレスはどこから選ぶか？
+.k 	自動登録に使うキーワードをSubjec: でキーワードを宣言してもらう
+.k 	自動登録に使うキーワードをメール本文で宣言してもらう
 
 
-自動登録で使うアドレスと、メールで登録したいアドレスをどう明示的な意志
-表示をしてほしいか？ には次のようなバリエーションがあります。
+バリエーションは
 
-注意：Reply-to は危険なので、自動登録の時は考慮しません。From: か以下
-の明示的に指定するか？どちらかを使って下さい。
+	登録すべきアドレスをどこから選ぶか？
+	登録アクションの起動にキーワード等を必要とするか？
 
+により何種類も存在します。
 
-○明示的に From: と違うアドレスで登録したい時
+   0 自動登録の宣言
 
-本文の先頭に 
+	config.ph で &DEFINE_MODE('auto');
+		か
+	$ML_MEMBER_CHECK = 0; 
+		か
+	コマンドラインで --auto 
 
-	subscribe email-address(指定したいアドレス) 
+	と指定します。
 
-を書いて下さい。この subscribe というキーワードは
+	これは config.ph で
 
+		$ML_MEMBER_CHECK = 0; 
 
-	自動登録のパターンは
-	見知らぬ人からメールがきた	→
+	と宣言することと同じです。
+	なぜこの分かりにくい変数名の宣言(メンバーチェックをするの否定)
+	かというと、もともと
 
-	１．	自動的に登録してそのままＭＬにフォワードする。	
-	.seealso auto-regist-4
+	「ＭＬとは private communication なのだから管理者がリクエスト
+	を吟味して手動で操作するのが筋だろう」
 
-		ＯＦＦ会用ＭＬなんかに便利です。
-		例：「出席します」メールがそのまま流れる
-
-
-	２．	自動的に登録してそのままＭＬにはフォワードしない
-	.seealso auto-regist-3
-
-	３．	そのメールにSubject: subscribe のようなキーワードが必要
-		（キーワード必須）
-.#	.seealso auto-regist-6
-
-	４．	そのメール本文に subscribe のようなキーワードが必要
-		（キーワード必須）
-.#	.seealso auto-regist-7
-
-のVariationがあります。くわしい設定はそれぞれのセクションを見て下さい。
-
-＃注意：２の”フォワードするか否か？”は１、３、４と独立事象です。つま
-り、２ｘ３＝６通り
+	という思想からメンバーチェックをするのがデフォールトだからです。
 
 
+   1 自動登録を設定してそれ以外特に設定をしない時
 
-.S	メンバーチェック or 自動登録
-.seealso auto-regist
+	From: からアドレスを割り出してそれを比較・登録に使います。
+	$DEFAULT_SUBSCRIBE (デフォールトは "subscribe") で指定されるキー
+	ワードでメール本文に
 
-ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
-た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
-MLMemberCheck)。
+		subscribe your-mail-address 
 
-チェックするか否かはconfig.phの中で
+	の形で登録したいメールアドレスを変更できます。
+	From: と違うアドレスで登録したい時にこの方法で明示的に行なえます
+	これから述べるキーワードを必要とする場合と違うのは 
 
-.key	$ML_MEMBER_CHECK
-$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+		subscribe your-mail-address 
 
-で指定します。ここを
+	のようなキーワードを含む書き方が"必須ではない"という点です。
 
-$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
+	From: をみてメンバーでない人からのメールだった場合は自動的に
+	メンバーに加えます。
 
-にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
-るようになる（subroutine MLMemberCheck）。
-注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
-の両方を兼任する形になっています。
-
-自動登録は３ｘ２種類もヴァリエーションがあるので、詳細については自動登
-録の章を御覧下さい。デフォールトはメンバーチェックをするのですが、上の
-フラッグを変えた時は、「自動登録して、かつそのメールをＭＬに流す」とい
-うＯＦＦ会用の設定になってます。
-.seealso auto-regist
-
-.key reply-to
-それから ＲＦＣ８２２を素直に解釈すれば登録の時に reply-to: をみて明示
-的に登録したいアドレスの変更ができるようにするべきな気がします。
-しかし、実際やってみると結構変なことが置きます。
-ヘッダをいじらない、つまり reply-to は前のメールから何も考えずにつけた
-ままにする人とかいろいろです。
-
-そこで明示的にアドレスを変えたい時は listserve のようにBody に
-
-subscribe Email-address
-
-とかいてあれば変更、ないときは From: からアドレスを決定します。
-このキーワードの変更は
-
-.key	$DEFAULT_SUBSCRIBE
-$DEFAULT_SUBSCRIBE = "subscribe";
-
-です。
-
-注意： 
-	$REQUIRE_SUBSCRIBE = "subscribe";
-
-は自動登録の時に”必ず subscribe syntaxが必須” です。
-
-デフォールトはガイド以外の見知らぬ人からのメールはメールの内容とはかか
-わらず登録です。
+	[歴史] この形式はもともとOFF会用MLなんかに便利です。
+		例：「出席します」メールがそのまま流れる。
 
 
-.S	自動登録した時にそのメールをフォワードするか否か？
-.seealso	{auto-regist}
-.seealso	{auto-regist-3}
+
+   2 自動登録のためには Subject: にキーワードを必要とする場合
+
+	config.ph で &DEFINE_MODE('autosubject');
+	コマンドラインオプションで --autosubject
+	この簡易モード宣言は
+
+		$ML_MEMBER_CHECK = 0;
+		$REQUIRE_SUBSCRIBE = "subscribe";
+
+	と同じです。この場合
+
+	○ Subject: subscribe の時 From: のアドレス
+	○ Subject: subscribe address なら、この address 
+
+	をメンバーチェックおよび登録に使います。
+
+	このいづれかのパターンにマッチしない場合は登録は行なわれず、
+	登録の仕方が間違っているとユーザにメールが送られます。
+
+
+   3 自動登録のためにはメール本文にキーワードを必要とする場合
+
+	config.ph で &DEFINE_MODE('autobody');
+	コマンドラインオプションで --autobody
+	この簡易モード宣言は
+
+		$ML_MEMBER_CHECK = 0;
+		$REQUIRE_SUBSCRIBE = "subscribe";
+		$REQUIRE_SUBSCRIBE_IN_BODY = 1;
+
+	と同じです。この場合メールの本文に
+
+	○ subscribe の時は From: のアドレス
+	○ subscribe address なら、この address 
+
+	をメンバーチェックおよび登録に使います。
+
+	このいづれかのパターンにマッチしない場合は登録は行なわれず、
+	登録の仕方が間違っているとユーザにメールが送られます。
+
+
+
+.S	登録とメンバーチェックに使うファイルについて
+.k	$MEMBER_LIST
+.k	@MEMBER_LIST
+
+自動登録の場合はactivesを使わずmembersファイルがmemberとactivesの両方
+を兼任する形になっています。
+
+	$MEMBER_LIST
+
+に対して登録を行ないますが、メンバーチェックは
+
+	@MEMBER_LIST
+
+のファイル群に対して行ないます。これを利用するといろいろなことができる
+はずです。
+
+
+.S	自動登録した際そのメールをフォワードするか否か？
 .key	$AUTO_REGISTERED_UNDELIVER_P
 .k	$AUTO_REGISTERD_UNDELIVER_P
 
+
+「subscribe」としか本文にないメールは流したくないので、自動登録のデフォー
+ルトでは登録要請をしているそのメールをＭＬへ流しません。管理者へその旨
+を通知するだけです。
+
+また自明ですがこの「フォワード処理をするか？否か？」は「どのアドレスを
+登録に使うか？」の動作とは独立な設定です。
+
+フォラードしたくないなら
+
 	$AUTO_REGISTERED_UNDELIVER_P = 1;
 
-自動登録はデフォールトでは登録要請をしているそのメールをＭＬへ流さない。
-つまり、「Subscribe」としか本文にないメールは流さない
+そうでないなら 0 です。
 
-メール	→	登録	→ＭＬへ流す（デフォールト、
-					$AUTO_REGISTERED_UNDELIVER_P = 0;）
+しかしながら、流すという設定をしても、subscribe だけのメール (じつは8
+行)は流しません。管理者以外は見てもうれしくないという配慮からです。
+＃off 用ならともかく『subscribe』と signature 4行くらいしかなかったり
+＃するメールを流してもしょうがないです。
 
-				→ＭＬへは流さない
-					$AUTO_REGISTERED_UNDELIVER_P = 1;）
+8 = 1 + 3行本文 + 4行シグニチャア ということで、デフォールトでは
 
-注意： この変数をセットしても subscribe だけのメール（じつは８行）は 
-デフォールトでも流しません。管理者以外は見てもうれしくないでしょ？
-８ ＝ １ ＋ ３行本文 ＋４行シグニチャア ってことで
+	$AUTO_REGISTRATION_LINES_LIMIT = 8; 
 
-デフォールトは $AUTO_REGISTRATION_LINES_LIMIT = 8; となってます
-これを -1 にしておけば、たとえ 中身なしメールでも流れます:-)
-＃０だと、８に変更されてしまうから
+のように定義されています。つまり 8 行を越えたメールはながれますが、そ
+うでないとながれません。
 
-注意：TYPOで $AUTO_REGISTERD_UNDELIVER_P に昔のfmlはなっているversionがある
+これを -1 にしておけば、たとえ 中身の無いメールでも流れます;-)
+＃注意： 0 だと、8 に変更されてしまう
 
-
-.S	自動登録の時にSubject: subscribe と明示的に書いてもらうようにしたい
-.key	Subject: subscribe 
-
-明示的な自動登録をする時にセットして下さい。
-例えば Subject: subscribe とか書いてもらうようにしたい時です。
-
-	config.ph に使いたいキーワード（e.g. subscribe）を次のようにセッ
-	トすると、そのキーワードがある時に登録を行ないます。
-
-.key	$REQUIRE_SUBSCRIBE
-	$REQUIRE_SUBSCRIBE = "subscribe"; 
-
-デフォールトはセットされてません：
-	$REQUIRE_SUBSCRIBE = "";	# e.g.  "subscribe";
-
-例：
-	$REQUIRE_SUBSCRIBE = "subscribe";
-
-ちなみに、このメールを ＭＬ本体にフォワードさせるか否か？
-.key	$AUTO_REGISTERED_UNDELIVER_P
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-とは独立な事象です
-
-
-.S	同様だが自動登録の時にメール本文にsubscribeと明示的に書いてほしい
-.key	$REQUIRE_SUBSCRIBE_IN_BODY
-.key	$REQUIRE_SUBSCRIBE
-
-上と同様に	config.ph で
-	$REQUIRE_SUBSCRIBE = "subscribe"; 
-に加え
-	$REQUIRE_SUBSCRIBE_IN_BODY = 1;
-
-のようにします。すると本文の先頭をみて判断します。（注意！最初の一行だ
-けです）
-
-ちなみに、これを ＭＬ本体にフォワードさせるか否か？
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-とは独立な事象です。
+なお、TYPOで $AUTO_REGISTERD_UNDELIVER_P になっている version が昔の 
+fml にはありえます _o_
 
 
 .S	メンバーチェックはしないけど自動登録はしたくない(+ trick)
-.label	{auto-regist-1}
-.key	+
-.key	/etc/aliases＋アーカイブ
+.l	+trick
+.key	+ トリック
+.key	/etc/aliases ＋ アーカイブ
 
-membersに
+現在では配送するだけのモード設定というのがあるのでこれを使う必要はない
+でしょう。これも backward compatibility という趣があります。
+モード設定：--distribute もしくは config.ph で &DEFINE_MODE('distribute') 
+.xref --distribute
+
+members ($MEMBER_LIST) に
 
 	+
 
-とだけ書いて
+と書いておくと、この行に出あった時点で認証ＯＫとなります。
+
+つまり + を書いておくと、
 
 	$ML_MEMBER_CHECK  = 1;
 
+メンバーチェックするモードでもメールを素通しします。
+＃シンタックスはNISにならっているです:-)
 
-とすると、メンバーチェックはしないけど登録もしないという動きをします。
-＃ＮＩＳにならう:-)
 
-
-.S	自動登録モードで、複数アドレスから投稿だがうけとりは一つ( skip )
+.S	複数アドレスから投稿だが配送先は一つ(自動登録モード)
+.k	複数アドレスから投稿だが配送先は一つ(自動登録モード)
+.xref	fml-file-structure
 .key	skip
 .key	s=skip
-.key	複数アドレスからの投稿だが受けは一つ
-.label	{auto-regist-2}
+.label	auto-regist-2
 
-自動登録では見知らぬアドレスは全部新しい人とおもってしまうのですが、少
-数の人だけが
+自動登録では見知らぬアドレスは全部新しい人とおもってしまうのですが、
 
 	複数アドレスから投稿可能だが
-	うけとりはあるアドレスに送って欲しい
+	配送先ははある一つのアドレスに送って欲しい
 
 という場合を考えて、members(自動登録では actives と兼任) で
 
-fukachan@phys.titech.ac.jp	skip
+	# fukachan@phys.titech.ac.jp
+   および
+	fukachan@phys.titech.ac.jp	skip
 
-と書いておけば認証（新人さんチェック）には使うけど配送はしないというア
-クションをします
+というシンタックスは fukachan@phys.titech.ac.jp をメンバーとして扱いま
+すが、配送先にはしません。
 
 つまり
 
 	fukachan@phys.titech.ac.jp	skip
 	Elena@phys.titech.ac.jp	
-	Pollyanna@phys.titech.ac.jp	skip
+	# Pollyanna@phys.titech.ac.jp
 
-になっているとすると、fukachan,elena,pollyannaどこからでも投稿はできる
-が、配送はelenaにしか行なわれないということです。
+という $MEMBER_LIST のファイルがあるとすると、fukachan, elena,
+pollyanna のどのアドレスからでも投稿はできるが、配送は elena にしか行
+なわれないということになります。
 
-今の話とは無関係ですが 
+なお、今の話とは無関係ですが 
+
 fukachan@phys.titech.ac.jp	matome
 
-の行もスキップしています。まとめ送りの人だから
+の行も「まとめ送りの人だから」リアルタイムの配送の対象にはなりません。
 
 
-.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
-.key	$skip{'mail-address'}
-.key	skip
-.key	skip-but-determined-dynamically
-.key	$START_HOOK
+.S	サーバをインストールしたホストからのメンバーの自動登録ができない
+.k	user@domain でないと自動登録できない
+.k	サーバをインストールしたホストからのメンバーの自動登録ができない
+.k	user@domain 形式でないメールアドレスは登録の対象になるか？
+.l	rejct-address-in-autoregist
 
-こういう処理を config.ph にかいてください。
+この話は 
+	user@domain 形式でないメールアドレスは登録の対象になるか？ 
+という問題に還元されます。
 
-$START_HOOK = q#
-	$skip{'fukachan@phys.titech.ac.jp'} = 1
-		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
-#;
+RFC82 に従い user@domain 形式でないメールアドレスは ILLEGAL とみなすべ
+きです。つまりこれに対して何らかかの Operation を実行するのはよくない。
+と考えられます。
 
-こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
-↑ここは actives とかに現れるものと同じにして下さい。
-
-複数あるなら 全部を うえのフックに加えて下さい。
-
-
-.S	自動的に登録してそのままＭＬにフォワードする
-.label	{auto-regist-4}
-
-これが一番シンプルなやつですね。もともとＯＦＦ会用ＭＬなんです。
-＃「いきます」メールがＭＬにながれると便利だから
-
-
-.S	自動登録モードだと最初のメールから全部流れてしまうのはちょっと…？
-.label	{auto-regist-3}
-.key	$AUTO_REGISTERED_UNDELIVER_P
-
-config.ph の中で 
-	$AUTO_REGISTERED_UNDELIVER_P = 1;
-
-なら 登録要請をしている最初のメールはＭＬへ流さないようになります。
-デフォールトは０で 流してしまいます。
-
-ＯＦＦ会用ＭＬなんかだと流れててしまう（「わたしもいきま〜す！」メール）
-方がよいのですが…ケースバイケースですよね
-
-
-.S	ＯＦＦ会とかでも subscribe一行だけのメールはＭＬに流さなくても…？
-.key	$AUTO_REGISTRATION_LINES_LIMIT 
-
-登録要請をするメールで８行に達しない（つまり７行まで）のメールは、大抵
-『subscribe』とsignature４行くらいしか書いてなかったりするので、ＯＦＦ
-会用ならともかく自動登録で使う時は
-
-	$AUTO_REGISTRATION_LINES_LIMIT 
-
-の値以下の行数のメールはＭＬサーバから配送されません。
-＃もちろん管理者には知らせます
-
-$AUTO_REGISTRATION_LINES_LIMIT を明示的にセットしないと、８行にセット
-されます。
-
-config.ph では一応
-
-	$AUTO_REGISTRATION_LINES_LIMIT = 0;
-
-とセットしています。
-
-
-.S	サーバーをインストールしたホストからのメンバーの自動登録ができない
-
-.q
-
-FROM: fukachan@phys.titech.ac.jp
-正確には user@domain フォームでない ILLEGAL なメールアドレスに 対して
-なんらかの Operation を実行するのはよくない。
-という根拠に基づいて…ということですが
-
-localhost とからとか条件をつければ出来るでしょうけど（getpeername()）
+localhost とからとか条件をつけて、$PeerAddr を利用すると少しまともな
+気がしますが
+.xref $PeerAddr
 
 user@domain フォームでない ILLEGAL なメールアドレス がすどおりして、サ
-イトを越えて Deliver されてしまうようなこともあるので、
+イトを越えて Deliver されてしまうようなこともありうると考えられます。
 ＃もちろんよくないが実際に出来てしまう。
 
-変な補整を加えてしまうとかえってまずいとおもうんです。
+よって変な補整を加えてしまうとかえってまずいとおもうんです。そういう場
+合こそ管理者が吟味してＭＬの設定をメインテナンスするべきでしょう。
 
-.~q
+それにもかかわらず自動的に登録するやり方としては次のようなものが考えら
+れます。
 
-＃＃＃＃＃＃＃＃＃＃
+○ sendmail.cf をいじる
 
-対策編１：
-ってことなんですが、
+これが一番まともな方法だと思うのですが、Rule Set 10 で
+
+R$+			$@$1<@$S>			user w/o host
+
+で、user -> user@domain に変換する。
+＃事前に DS$m されている（$m == domain である）
+
+
+○ subscribe 形式の強制
+
 “From行のアドレスに@以下をつけないでメールが送られてくる”
-をやらせないために、
-メール本体に subscribe uja@localhost-name.uja.jp とかかけばＯＫってい
-えばＯＫなんですけどね（↑ From: より優先されるから）
 
-対策編２：
+をやらせないために、ローカルドメインの人は 
+	subscribe uja@localhost-name.uja.jp 
+形式を必ず使ってもらう。
+
+
+○ フックによる自動補正
+
 自動補整も やってやれなくはないです。でも変なこと（or illegal）
 がおこってもおこらないでね:-) YOUR OWN RISK
 
@@ -373,7 +335,7 @@ $START_HOOK  = q#
 	}
 #;
 
-ローカルなドメイン は自分のドメイン
+ローカルなドメイン は自分のドメイン です。
 
 
 .# $Id$
@@ -381,4 +343,3 @@ $START_HOOK  = q#
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
-

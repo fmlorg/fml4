@@ -788,6 +788,10 @@ Exchange 同士ではOK。リッチテキストを ON にして受けると subject の
 フォワード等にするとよいとおもいます。
 
 
+.S	user@domain でないと自動登録できない
+.xref	rejct-address-in-autoregist
+
+
 
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
