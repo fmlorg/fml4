@@ -1,7 +1,7 @@
 SH	  = /bin/sh
 CC 	  = /usr/bin/cc
 CFLAGS	  = -s -O -DPOSIX
-MKDIR     = mkdirhier
+MKDIR     = /usr/X11R6/bin/mkdirhier
 RSYNC     = rsync --rsh ssh
 FETCH     = /usr/bin/ftp
 TAR       = /usr/bin/tar
