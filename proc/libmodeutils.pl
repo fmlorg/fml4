@@ -64,7 +64,7 @@ sub SpeculateContorolOrDistriuteMode
 
 sub StdinLogMode
 {
-    $START_HOOK .= q#;
+    $FmlStartHook{'stdinlog'} = q#;
     &use('debug');
     &StdinLog;
     #;
@@ -73,8 +73,8 @@ sub StdinLogMode
 
 sub AppendMimeDecodedSubjectMode
 {
-    $START_HOOK .= q# &AppendMimeDecodedSubject(*Envelope);#;
-
+    $FmlStartHook{'AppendMimeDecodedSubjectMode'} = 
+	q# &AppendMimeDecodedSubject(*Envelope);#;
 }
 
 
@@ -94,7 +94,7 @@ sub AppendMimeDecodedSubject
     }
 
     # IF Subject: MIME, Append  X-Subject: MIME-Decoded
-    if ($s =~ /ISO\-2022\-JP/i) {
+    if ($s =~ /=\?ISO\-2022\-JP\?/i) {
 	&use('MIME');
 	$e{'h:X-Subject:'} = &mimedecode($s);
 	$append++;
