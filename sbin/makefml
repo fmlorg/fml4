@@ -5637,8 +5637,8 @@ sub do_setup_mladmin_cgi_init
     else {
 	&Error("Usage: admin.cgi [update|config]");
 	print STDERR "Usage:\n        \n";
-	print STDERR "      admin.cgi update    remake /admin/*.cgi\n";
-	print STDERR "      admin.cgi config    configuration menu\n";
+	print STDERR "      mladmin.cgi $ml update    remake /admin/*.cgi\n";
+	print STDERR "      mladmin.cgi $ml config    configuration menu\n";
     }
 }
 
