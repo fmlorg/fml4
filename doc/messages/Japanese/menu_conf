@@ -209,13 +209,14 @@ menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT:
 
 
 menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT.TIME_RANGE:
+	htdocs/以下のディレクトリ作成の単位(日/週/月)
 
 
 menu_conf.OPTION.HTML_GENERATION.HTML_INDEX_UNIT.NUMBER_OF_ARTICLES:
-
+	htdocs/以下のディレクトリ作成の単位(記事の数)
 
 menu_conf.OPTION.HTML_GENERATION.HTML_INDENT_STYLE:
-
+	indentのスタイル
 
 menu_conf.OPTION.MIME:
 	MIME処理
@@ -230,6 +231,7 @@ menu_conf.OPTION.FLOCK:
 
 
 menu_conf.OPTION.USE_MEMBER_NAME:
+	USE_MEMBER_NAMEを使うか？
 
 
 menu_conf.OPTION.LOGFILE_NEWSYSLOG_LIMIT:
