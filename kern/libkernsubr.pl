@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
+# $FML$
 #
 
 ###
@@ -16,7 +16,7 @@
 
 sub __SecureP 
 { 
-    local($s, $command_mode) = @_;
+    my ($s, $command_mode) = @_;
 
     $s =~ s#(\w)/(\w)#$1$2#g; # permit "a/b" form
 
@@ -71,7 +71,7 @@ sub __SecureP
 
 sub __RejectAddrP
 {
-    local($from) = @_;
+    my ($from) = @_;
 
     if (! -f $REJECT_ADDR_LIST) {
 	&Log("RejectAddrP: \$REJECT_ADDR_LIST NOT EXISTS");
@@ -141,8 +141,8 @@ sub __Write3
 # Notification of the mail on warnigs, errors ... 
 sub __Notify
 {
-    local($buf) = @_;
-    local($to, @to, $s, $proc, $m);
+    my ($buf) = @_;
+    my ($to, @to, $s, $proc, $m);
 
     # special flag
     return $NULL if $Envelope{'mode:disablenotify'};
