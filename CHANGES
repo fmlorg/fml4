@@ -3,6 +3,17 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+
+2001/02/07,08
+
+   update documents
+
+2001/02/06
+
+   fml/libexec/fmlserv.pl 
+	s/RunHooks/RunExitHooks/ to fix missing renamed function definition
+	thanks KAWADE Koji <kawade@rd.casio.co.jp> (fml-support: 09238)
+
 2001/02/03
 
   fmlserv
