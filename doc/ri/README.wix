@@ -77,10 +77,10 @@ edit of config.ph.
    メール配送プログラムがあること(default は sendmail R8 を想定)
 
 です。必要ならこれらをインストールしてちゃんと動くようにセットアップし
-てからfml のインストールに進んで下さい。Windows NT4 上での fml (β 
-version) については INSTALL_on_NT4 を参照してください。いくつかの
-MTA(現在は sendmail, postfix, qmail and exim)についての注意点が 
-INSTALL_with_MTA名 というファイルにあります。
+てからfml のインストールに進んで下さい。Windows NT4 上での fmlについて
+は INSTALL_on_NT4 を参照してください。いくつかのMTA(現在は sendmail,
+postfix, qmail and exim)についての注意点が INSTALL_with_MTA名 というファ
+イルにあります。
 .fi
 .if LANG == ENGLISH
 FML fundamentally needs
@@ -90,7 +90,7 @@ FML fundamentally needs
 	MTA (e.g. sendmail,qmail,exim,...).
 
 See INSTALL for more details on installation.
-See INSTALL_on_NT4 for fml on Windows NT4 though fml on NT4 is BETA VERSION.
+See INSTALL_on_NT4 for fml on Windows NT4.
 See INSTALL_with_QMAIL when you use fml with qmail.
 .fi
 
@@ -328,6 +328,14 @@ Please see the file INSTALL for the detail.
 
 ○ アップグレード・インストールをしようとしている人へ
 
+3.0 へのアップグレードの際には必ず UPGRADE ファイルの最初の章を読んで
+おいて下さい。自動登録をしていない人は考えなくてもいいとは思いますが
+
+.url	http://www.fml.org/fml/UPGRADE/
+
+   2.x to 3.0 の部分だけ以下のURLに抜き出してあります。
+.url	http://www.fml.org/fml/UPGRADE-3.0/
+
 UPGRADE というファイルを見て下さい。古い config.ph をそのまま使おうと
 思っている人は(HOOKについてはちょっと気を付けないといけませんが)そのま
 ま使って下さい。凝ったHOOKをしていない人はそのまま使って大丈夫です。
@@ -346,17 +354,17 @@ Fml can run on almost UNIX like operating systems. The installer
 possible. Fml master source has been tested on NetBSD (4.4BSD derived
 system).
 
-ベータテスト版ですが WINDOWS NT 4.0 上でも動きます。INSTALL と 
-INSTALL_on_NT4 というドキュメントを参照して下さい。
+WINDOWS NT 4.0 上でも動きます。INSTALL と INSTALL_on_NT4 というドキュ
+メントを参照して下さい。
 =E
-Fml on Windows NT4.0 (beta test phase) can work also. Please read
-INSTALL and INSTALL_on_NT4.
+Fml on Windows NT4.0 can work also. Please read INSTALL and
+INSTALL_on_NT4.
 
 ○ 開発環境
 =E
 * Development Environment:
 
-	postfix 19990513 on NetBSD 1.4_BETA
+	postfix 19990601 on NetBSD 1.4_BETA
 
 ○ テスト環境: fml 3.0 のターゲットマシン/テスト環境は
 =E
