@@ -6,6 +6,9 @@
 2000/03/25
 
    makefml
+	apply patch (fml-support: 7706)
+
+   makefml
 	add prototype of new command "makefml showconfig" to show configuration
 	For example:
 

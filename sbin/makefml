@@ -129,6 +129,7 @@ sub InitMakeFml
     # special aliases
     if ($ARGV[0] =~ /^install\-withcgi/) {
 	$CGIInstallMode = 1;
+	$ARGV[0] = 'install'; # fml-support: 7706
     }
     if ($CGIInstallMode) {
 	print STDERR "  *** installing fml with WWW/CGI interface ***\n";
