@@ -1326,7 +1326,9 @@ sub IndexExpand
 
     print STDERR "IndexExpand($x) => {\n" if $debug;
 
-    @index = split(/\s*[,\s{1,}]\s*/, $x);
+    # @index = split(/\s*[,\s{1,}]\s*/, $x);
+    while ($x =~ s/,\s\s+/, /g) { 1;}
+    @index = split(/\s+|\s*,\s+/, $x);
     foreach (@index) {
 	$org = $_;
 	$r = $index{$_} || $_;
