@@ -299,7 +299,9 @@ sub LoadConfig
     # 2. $DIR/../etc/fml/ (e.g. /var/spool/ml/etc/fml/ )
     # 3. $EXEC_DIR (e.g. /usr/local/fml/)
     unshift(@LIBDIR, "$DIR/../etc/fml/"); # ../etc for not UNIX OS
+    unshift(@INC, "$DIR/../etc/fml/"); # ../etc for not UNIX OS
     unshift(@LIBDIR, $DIR);
+    unshift(@INC, $DIR);
 
     # configuration file for each ML
     if (-e "$DIR/config.ph" && ((stat("$DIR/config.ph"))[4] != $<)) { 
