@@ -23,7 +23,7 @@ if ($0 eq __FILE__) {
 sub DecodeMimeStrings 
 { 
     # 2.1A4 test phase (2.1REL - 2.1A3 requires explicit $MIME_EXT_TEST=1)
-    if (1) {
+    if (0) {
 	&MIME'MimeBDecode(@_); #';
     }
     else {
