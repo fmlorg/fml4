@@ -2,9 +2,19 @@
 
 [NOT YET]
 
+○  script 一発インストーラ (きめうち)
+
+	postfix  + apache + fml-current
+	sendmail + apache + fml-current
+	qmail    + apache + fml-current
+
 ○ apache-ssl (1.3.9 base)の解説の用意をする
 
 ○ ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更できないといかん
+
+   ユーザの追加／削除までは現在OK
+
+	crypt / md5
 
 ○ 一般ユーザ用のWWWアクセスモデルの構築
 
