@@ -71,16 +71,6 @@ Content Hanlder ちょっと変 (allow+multipartの時だけ?)
 bug fix Content Hanlder ... only in the "allow+multipart" case ?
 
 
-.S	redistribute emulation command
-
-再配送を行なうコマンド
-=E
-command to redistribute an aritcle
-
-Example:
-
-   /usr/local/fml/bin/resend.pl email-address article-number ?
-
 .S	chaddr reply
 
 chaddrのレポートメールのTo: CC: にuniqかける
