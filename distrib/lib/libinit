@@ -3,7 +3,7 @@ INIT_PACKAGE () {
    	cp /dev/null $PATCHLEVEL_DIR/version
 
 	echo " "; echo "Fixing permissions ... ";
-	chmod 755 kern/{fml,msend}.pl bin/* sbin/* libexec/*
+	chmod 755 kern/fml.pl kern/msend.pl bin/* sbin/* libexec/*
 	chmod 644 kern/lib*.pl proc/*.pl
 }
 
