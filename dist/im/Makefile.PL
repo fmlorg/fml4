@@ -2,7 +2,7 @@
 ###
 ### Author:  Internet Message Group <img@mew.org>
 ### Created: Apr 23, 1997
-### Revised: Apr 14, 2000
+### Revised: Dec 20, 2002
 ###
 ### perl Makefile.PL
 ### make
@@ -33,7 +33,7 @@ if (open(CONFIN, "configure.in")) {
     close(CONFIN);
 }
 
-if ($Config{'osname'} ne 'MSWin32'){
+if ($Config{'osname'} ne 'MSWin32') {
 $prefix = "/usr/local";
 $libdir = "\$exec_prefix/lib";
 } else {
@@ -134,9 +134,9 @@ WriteMakefile(
 
 # special rules
 sub MY::postamble {
-    my ($self) = shift;
-    my (@m);
-    if ($Config{'osname'} ne 'MSWin32'){
+    my($self) = shift;
+    my(@m);
+    if ($Config{'osname'} ne 'MSWin32') {
     push (@m, qq{
 prefix=$prefix
 exec_prefix=$prefix
@@ -163,7 +163,7 @@ uninstall_config::
 	\$(RM_F) \$(IM_SITECONFIG_DIR)/SiteConfig
 
 install_rpop: install
-	\$(PERL) -e 'chown(0, (getgrnam("mail"))[2], \@ARGV) and chmod(04555, \@ARGV);' \$(INSTALLSCRIPT)/imget
+	\$(PERL) -e 'chown(0, (getgrnam("mail"))[2], \@ARGV) and chmod(04755, \@ARGV);' \$(INSTALLSCRIPT)/imget
     });
   } else {
     push (@m, qq{
