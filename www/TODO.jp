@@ -1,0 +1,13 @@
+TODO
+
+admin/ を触れる人の権限は
+   『 makefml でできることが全部できる人』
+
+htdocs/ は廃止
+
+/cgi-bin/admin/menu.cgi => /cgi-bin/admin/makefml.cgi
+
+	必要ならこの時にパスワード制限をかける
+
+インストーラが admin/.htpasswd を生成するように
+したい
