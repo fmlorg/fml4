@@ -183,12 +183,16 @@ sub ModeratedDeliveryTypeII
 		    'moderator.submission', 
 		    $e{'CtlAddr:'});
 
-    $info  = &GenModeratorInfo;
+    $info = &GenModeratorInfo;
 
     if (! $r) {
 	$info .= "Please check it. If you certify the following article, \n";
 	$info .= "please send to $e{'CtlAddr:'}\n";
 	$info .= "the following line (only this line!)\n";
+    }
+    # by Satoshi Tatsuoka <satoshi@softagency.co.jp> (1999/11/26)
+    else {
+	$info .= $r;
     }
     $info .= "\n$e{'trap:ctk'}moderator certified $id\n\n";
 
