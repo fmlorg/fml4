@@ -6,6 +6,7 @@
 
 .P	ÅÐÏ¿¤Ë¤Ä¤¤¤Æ
 .include overview.wix
+.include QandA.wix
 .include registration.wix
 .include autoregist.wix
 .include moderator.wix
