@@ -1,0 +1,33 @@
+### makefml 日本語化大作戦（でもCGIでしかつかってない;-)
+
+makefml.add:
+	mailing list: _ARG0_
+	Email Address: _ARG1_
+	add _ARG1_ to _ARG0_ ML
+
+makefml.bye:
+	mailing list: _ARG0_
+	Email Address: _ARG1_
+	remove _ARG1_ from _ARG0_ ML
+
+makefml.newml:
+	mailing list: _ARG0_
+	create _ARG0_ ML
+
+makefml.destructml:
+	mailing list: _ARG0_
+	remove _ARG0_ ML
+
+makefml.passwd:
+	mailing list: _ARG0_ 
+	Email Address: _ARG1_ 
+	change _ARG1_ password
+
+makefml.html_passwd:
+	mailing list: _ARG0_ 
+	Email Address: _ARG1_ 
+	change _ARG1_ password
+
+makefml.html_config:
+	mailing list: _ARG0_
+	change configuration of  _ARG0_ ML
