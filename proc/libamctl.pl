@@ -156,11 +156,6 @@ sub AutoRegist
 	};
     }
 
-    # Member Name Registration
-    if ($e{'mode:member_name'}) {
-	return 0 unless &AutoRegistMemberName(*e, $from);
-    }
-
     ### WHETHER DELIVER OR NOT;
     # 7 is body 3 lines and signature 4 lines, appropriate?;
     # spelling miss fix;
