@@ -1,13 +1,14 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 #
 # CmpPasswdInFile($file, $from, $passwd);
@@ -200,7 +201,7 @@ sub ModeratedDeliveryTypeII
     $h = $e{'Header'};
     $h =~ s/^From .*\n//;
 
-    # open
+    # save submitted article in the mail queue
     open(APP, "> $f") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
     print APP $h;
@@ -209,20 +210,56 @@ sub ModeratedDeliveryTypeII
 
     require 'libsmtpsubr.pl';
 
+    # make a temporary queue to be forwarded to moderators
     open(APP, "> $f_info") || (&Log("cannot open $f"), return '');
     select(APP); $| = 1; select(STDOUT);
-    print APP "\n$info\n";
 
-    print APP &ForwardSeparatorBegin;
-    print APP $e{'Header'};
-    print APP "\n";
-    print APP $e{'Body'};
-    print APP &ForwardSeparatorEnd;
-    close(APP);
+    eval q{ use MIME::Lite };
+    unless ($@) {
+	my $msg = MIME::Lite->new(Type => 'multipart/mixed');
+	my $str = $msg->as_string;
+	my (@h) = split(/\n/, $str);
+
+	$msg->attach(Type     => 'text/plain;  charset=iso-2022-jp',
+		     Data     => STR2JIS($info),
+		     );
+
+	$msg->attach(Type     => 'message/rfc822; charset=iso-2022-jp',
+		     Data     => $e{'Header'}."\n".$e{'Body'},
+		     );
+
+	$msg->print(\*APP);
+	close(APP);
+
+	use Mail::Header;
+	my $header = new Mail::Header \@h;
+	for my $k ('Mime-Version', 
+		   'Content-Type', 
+		   'Content-Transfer-Encoding') {
+	    my $v = $header->get($k);
+	    $v =~ s/[\s\n]*$//g;
+	    $Envelope{"GH:$k:"} = $v if $v;
+	}
+    }
+    # RFC934
+    else {
+	print APP "\n$info\n";
+
+	print APP &ForwardSeparatorBegin;
+	print APP $e{'Header'};
+	print APP "\n";
+	print APP $e{'Body'};
+	print APP &ForwardSeparatorEnd;
+	close(APP);
+    }
 
     &ModeratorNotify(*MODERATOR_MEMBER_LIST, $subject, $f_info);
-
     unlink $f_info;
+
+    # clean up
+    for my $k ('Mime-Version', 'Content-Type', 'Content-Transfer-Encoding') {
+	delete $Envelope{"GH:$k:"};
+    }
 }
 
 
@@ -404,8 +441,6 @@ sub ModeratorResend
     }
     else {
 	&FixHeaderFields(*e); # e.g. checking MIME
-
-	# distribute
 	&CheckCurrentProc(*Envelope, 'upper_part_only');
 	&Distribute(*e, 'permit from members_only');
     }
