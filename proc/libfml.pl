@@ -687,6 +687,7 @@ sub ProcModeSet
     elsif (! $e{'mode:admin'}) {
 	$s = "$proc cannot be permitted without AUTHENTICATION";
 	&Mesg(*e, "$s");
+	&Mesg(*e, $NULL, 'EACCES');
 	&Log($s);
 	return 'LAST';
     }
@@ -731,6 +732,7 @@ sub ProcObsolete
 
     &Log("$proc[Not Implemented]");
     &Mesg(*e, "Command $proc is not implemented.");
+    &Mesg(*e, $NULL, 'ENOSYS');
 }
 
 
@@ -962,6 +964,7 @@ sub ProcSetAdminMode
 	&Log("ILLEGAL REQUEST $proc mode, STOP!",
 	     "Please \$REMOTE_ADMINISTRATION=1; for REMOTE-ADMINISTRATION");
 	&Mesg(*e, "   Error: remote maintenance service unavailable.");
+	&Mesg(*e, $NULL, 'EACCES');
 	return 'LAST';
     }
     
@@ -979,6 +982,7 @@ sub ProcApprove
 	&Log("ILLEGAL REQUEST $proc mode, STOP!",
 	     "Please \$REMOTE_ADMINISTRATION=1; for REMOTE ADMINISTRATION");
 	&Mesg(*e, "   Error: remote maintenance service unavailable.");
+	&Mesg(*e, $NULL, 'EACCES');
 	return 'LAST';
     }
     
