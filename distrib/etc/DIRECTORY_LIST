@@ -6,6 +6,7 @@ libexec
 cf
 etc
 doc
+doc/man
 doc/html
 doc/html/advisories
 drafts

@@ -2146,6 +2146,13 @@ sub do_install
 	closedir(DIRD);
     }
 
+    print STDERR "\n --substitute nroff manuals doc/man/\n";
+    for $f (<doc/man/*.?>) {
+	&Copy($f, "$f.bak");
+	&Conv('elena', "$f.bak", $f);
+    }
+    print STDERR " --substituted\n\n";
+
 
     # $EXEC_DIR/sbin/install.sh is NOT yet installed 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {

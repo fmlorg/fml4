@@ -85,6 +85,9 @@ COPY_DOCS () {
 	cp -p $DOC_CONTRIB $DESTDIR/distrib/doc;
    )
 
+   echo " "; echo "Copying doc/man/"
+   rsync -av doc/man/ $DESTDIR/distrib/doc/man/;
+
    (
 	echo " "; echo "Copying Documents (doc/smm/)...";
 	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
