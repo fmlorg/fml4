@@ -4,9 +4,11 @@ sub Log { &main::Log(@_);}
 
 sub MakeParagraphMap
 {
+    use vars qw(%e @pmap $buf);
     local(*e, *pmap, $buf) = @_;
-    my($p, $rp, $xp, $bodylen);
-    my($debug) = $main::debug;
+    my ($p, $rp, $xp, $bodylen);
+    my ($debug) = $main::debug;
+    my $n_paragraph;
 
     $p       = 0; 
     $bodylen = length($buf ? $buf : $e{'Body'}); # body length
@@ -86,7 +88,7 @@ sub MakeParagraphMap
 
 sub CleanUpBuffer
 {
-    local($xbuf) = @_;
+    my ($xbuf) = @_;
 
     # 1. cut off Email addresses (exceptional).
     $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
@@ -101,9 +103,10 @@ sub CleanUpBuffer
 
 sub OneLineCheckP
 {
+    use vars qw(%e @pmap $lparbuf);
     local(*e, *pmap, $lparbuf) = @_;
-    my($one_line_check_p) = 0;
-    my($n_paragraph) = $#pmap;
+    my $one_line_check_p = 0;
+    my $n_paragraph      = $#pmap;
 
     &Log("OneLineCheckP: n_paragraph=$n_paragraph") if $main::debug;
 
