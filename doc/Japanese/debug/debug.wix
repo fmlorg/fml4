@@ -1,0 +1,255 @@
+.C	デバッグについて
+=E.C	How to debug
+.l	debug
+
+コマンドラインオプションについては => .ptr{-d}
+SMTPのログとり => .ptr{$SMTP_LOG}
+
+.S	デバッグモード
+=E.S	Debug mode
+.k	デバッグモード
+.label	debug-mode
+.k	$debug
+
+	$debug        = 1; (default 0)
+
+デバッグモードのフラッグ。１がデバッグモード。配送以外の設定、コマンド
+操作はすべて有効です。テストに使って下さい。０に設定しないと配送してく
+れません。デバッグの内容をSTDERRに吐きます。
+=E
+In debug mode, fml.pl does not distribute (for test).
+
+.S	デバッグモード レベル２
+=E.S	Debug mode level 2 
+
+$debug を2以上にすると、にデバッグ出力を
+=E
+If $debug >= 2, fml writes debug info the file
+
+	$DEBUG_LOGFILE (default "$DIR/log.debug")
+
+ファイルに吐きます。
+
+.S	How to debug (1)
+
+in fml-support: 5282
+.if LANG == JAPANESE
+.q
+1. OSのメールのログを調べる。
+   see INSTALL file Appendix A.
+
+2. fml のログを調べる。$DIR/log (ML's HOME ログファイル)
+
+3. fml からMTAへちゃんと渡せているかのログを調べる。
+   ($DIR/var/log/_smtplog)
+
+4. "makefml test ML" で fml 自体が動いているかを調べる。
+   このテストはMTAとは完全に無関係に動くのでこれが動くならMTAの問題
+
+	makefml test ML
+
+と打つとデバッグモードでの動作テストができます。画面に debug 情報が一
+杯出るので emacs の shell mode なり /usr/bin/script などでログをとるな
+りして見て下さい。makefml test ML を起動すると配送のテストかコマンドの
+テストか？選択をしろといわれます。
+.~q
+.fi
+.if LANG == ENGLISH
+.q
+1. check OS's maillog.
+   following the check list in INSTALL file Appendix A.
+
+2. check fml log, $DIR/log.
+
+3. check the connection between fml and MTA, $DIR/var/log/_smtplog.
+
+4. "makefml test ML" helps you to test fml.
+
+.~q
+.fi
+
+.S	How to debug (2)［デバッグのポイント］
+=E.S	How to debug (2)
+.k	debug
+
+From: fml-support: 01411
+
+…略…
+
+○ 私 printf デバッグがすきなので $debug = 1; にした時の画面に出るエラー
+情報から推測するのが多いです。
+=E
+* Printf debug is fundamental technique. FML has $debug variable. If
+you know the details of processing, set $debug = 1, which helps your
+debug. If $debug is 1, FML shows all debug information.
+
+もしくは
+
+○ perl -d オプションで perl debugger を使う
+=E
+* perl -d enables perl debugger. See perl manual for how to use it.
+
+Example:
+
+	% ($FML/bin/emumail.pl; echo something )|perl -d $FML/fml.pl $PWD
+	....debugger starts ...
+	<1> t
+	<2> c
+	.... debug information flood! ....
+
+
+○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
+=E
+* Which file is libraries for an object?
+  A lib"NAME".pl library corresponds to functions on "NAME".
+  e.g. libsmtp.pl is SMTP (Simple Mail Transfer Protocol) routines.
+
+	基本関数	fml.pl
+	SMTP		libsmtp.pl
+	その他		lib(それっぽい名前).pl
+
+	[Naming Convention Example]
+	ra  = remote administration
+	fop = file operation
+	...
+
+とか省略系もあるけど… ちなみに
+.ptr{library-lists} にライブラリの説明一覧があります。
+
+.S	消してもいいファイル…
+=E.S	I can remove this file or not?
+
+プロセスがない時なら、すべてのファイルは手作業でなにしてもいいです。例
+えば MTA を止めてメールを受けないようにしてしまえば何をしても大丈夫で
+す。結局メールがきた時"だけ" fml.pl が動いているので、それ以外の時は何
+をしても大丈夫です。まとめおくりのファイルについても msend.pl が走って
+いる時を除けばvar/log/msendrc をいじっても大丈夫です。そうでないときな
+ら手動 edit できます。
+=E
+If no process runs, you can edit any files :-). However in general we
+do not know when mail comes in.  You should lock FML to edit files.
+
+.if LANG == JAPANESE
+makefml lock ML		MLをロックする。プロセスを殺すか
+			3600秒たってTIMEOUTするまでロックは解除されない。
+			例:
+			% makefml lock elena &
+			mule config.ph などなど
+			プロセスを kill する		
+			
+makefml edit ML ファイル名
+			% makefml edit ML cf
+			lock して cf を編集できる。ロックの下で
+			環境変数 EDITOR のエディターが起動される。
+			エディターの終了後 lock ははずされる。
+			もし環境変数 EDITOR が未定義だと
+			どのエディターを使うか聞かれる。
+.fi
+.if LANG == ENGLISH
+You need to do "makefml lock ML" locks before edit.
+
+makefml lock ML		Lock ML. unlocked if this process is killed
+			or timeouts in 3600 secs.
+			e.g.
+			% makefml lock elena &
+			mule config.ph ...
+			kill this process
+
+makefml edit ML filename
+			Under the ML is locked, editor is executed.
+			Environment variable EDITOR is used.
+			If it is not defined, makefml asks you what
+			editor you use.
+			After editor ends, makefml unlocks ML and exits.
+			e.g.
+			% makefml lock elena cf
+.fi
+
+そりゃさすがに code の debug は今動いているMLとは別のところでやったほ
+うがいいですけど…
+=E
+I recommends the debug of codes apart from the current running ML :D
+
+間違って消して一番困りそうなのは seq と var/log/msendrc あたりです :-)
+もちろんメンバーリストも消すとやっかいです。
+ようするにＭＬの今の記事番号や uniqueness を保存しているログです。
+=E
+Removing $DIR/seq, $DIR/actives, $DIR/members and $DIR/var/log/msendrc
+must be critical. "actives" and "members" are the member list of ML.
+"seq" is the current article number and "msendrc" is the log file of
+msend (digest) which log saves the number of msend'ed articles.
+If the content is lost, search for the following information.
+The content of "seq" is the maximum number in spool dir articles.
+Each "actives", "members" and "msendrc" has back up each file.
+Restore them.
+
+seq ファイルの番号が狂うと記事を上書きしたりはしないかわりに管理者にエ
+ラーメールがきます。var/log にメールは保存されるので、復旧は簡単ですが
+面倒は面倒です。
+
+間違って seq を消してしまった時は 即効で spool の一番大きい番号を調べて
+その値を seq へ書き込めばよいです。
+=E
+If you remove seq in accident, you should write the largest article
+number in the spool as soon as possible. In the case of msendrc, you
+have to write msendrc by reading log file ;_; If msendrc is lack,
+msend.pl reconfigures the msendrc. But this msendrc must be not
+continuous to msend'ed users since msendrc creates a new msendrc with
+the latest article number.
+
+msendrc 消しちゃうと msendrc のバックアップファイルを見て直すか log ファ
+イルを参考にして直すかします。次回 msend.pl が起動する時に自動復旧され
+ることを期待するか…ただ、これは最新のメールしか送らないから↑、たまっ
+ていた分はログみないと不明のままになります。
+
+actives, members などもバックアップファイルがあるので、それを見て再構成
+してみて下さい。
+
+.S	古典の printf debug の例
+=E.S	printf debug
+.k	debug: printf
+ 
+.q
+From: fukachan@phys.titech.ac.jp
+X-Mail-Count: 00702 
+
+例えば次のような適当な printf 構文をつっこむ
+=E
+For example, insert the following string.
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+
+のあいだにはさんで、
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&InitConfig;			# initialize date etc..
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+とかしておいて、
+
+% perl sbin/localtest.pl |sed 's/test/#guide/' | perl fml.pl $PWD -d 
+
+とかして、この REQ:GUIDE の値の変化をみるというのはどうでしょう？
+
+ただしいばあいは &Parsing のあと １になって そのままのはずですよね
+
+.~q
+
+.# $Id$
+.# Copyright (C) 1993-2000 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2000 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
