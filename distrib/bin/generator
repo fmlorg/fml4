@@ -2,6 +2,13 @@
 
 umask 022
 
+if [ X$FML != X ]; then
+	chdir $FML || exit 1
+else
+	echo "please define \$FML environment variable";
+	exit 1
+fi
+
 . distrib/etc/config
 . distrib/lib/getopt
 
