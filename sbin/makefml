@@ -2773,6 +2773,7 @@ sub DEFINE_FIELD_ORIGINAL { 1;}
 sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
 sub ADD_FIELD     { 1;}
 sub DELETE_FIELD  { 1;}
+sub COPY_FIELD  { 1;}
 sub ADD_CONTENT_HANDLER { 1;}
 sub Load 
 {
