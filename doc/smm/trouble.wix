@@ -875,6 +875,20 @@ static である必要がありますね
 ＃どうしてそういう config にするかの裏の真の理由は理解できるけどね
 
 
+.S	AL-Mailを使うとループ・アラートが出る？場合
+
+どうせ使ってるソフトが悪いんですが、どうも常に同じ Message-id を出して
+しまうようなことができるソフトがあるらしいです。
+
+例： AL-Mail 
+fml-support: 01702
+
+	手動で出すとOK
+	あて先ファイルとシグネチャファイルを使う時×
+
+という verseion があるらしい…で、これどこまで本当なの？（伝聞調）
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
