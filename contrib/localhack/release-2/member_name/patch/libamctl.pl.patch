@@ -1,0 +1,17 @@
+*** libamctl.pl.orig	Thu Jan  8 01:24:31 1998
+--- libamctl.pl	Fri Jan  9 19:25:29 1998
+***************
+*** 156,161 ****
+--- 156,167 ----
+  	};
+      }
+  
++     # Member Name Registration
++     if ($USE_MEMBER_NAME) {
++ 	&use('member_name');
++ 	return 0 unless &AutoRegistMemberName(*e, $from);
++     }
++ 
+      ### WHETHER DELIVER OR NOT;
+      # 7 is body 3 lines and signature 4 lines, appropriate?;
+      # spelling miss fix;

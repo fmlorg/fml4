@@ -1,0 +1,23 @@
+FILES.euc			このファイル
+readme.euc			libmember_name.pl 簡易ドキュメント
+
+src/libmember_name.pl		libmember_name.pl ソース
+patch/libamctl.pl.patch		libamctl.pl へのパッチ
+patch/libfml.pl.patch		libfml.pl へのパッチ
+
+注意: ソースとパッチの3つのファイルは、今後 fml に機能追加しようとする人の
+      ための参考として添付したものです。libmember_name.pl を使う際にこのパッ
+      チを適用したり、ソースをインストールしたりする必要は全くありません。
+
+      また、libmember_name.pl がサポートされる前の fml にこのパッチを適用
+      することもできません。(fml 本体側の機能が不足しているので動きません)
+
+      これらのソースとパッチの3つのファイルは、この機能が完成したときに最
+      終的に fukachan にお送りしたファイルそのままです。この機能を実現する
+      にあたっては fml 本体に大きな修正を加えることなく、fml 本体から別モ
+      ジュール化されたソース (libmember_name.pl) と、fml 本体からソースを
+      呼び出すための必要最小限の修正(パッチ) によって構成されています。
+      fml に機能を追加しようとする方にとって、ご参考になれば幸いです。
+
+                                         1998/01/09  福井 誠之
+                                              (fukui@sonic.nm.fujitsu.co.jp)

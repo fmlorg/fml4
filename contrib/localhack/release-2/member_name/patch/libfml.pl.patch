@@ -1,0 +1,14 @@
+*** libfml.pl.orig	Thu Jan  8 01:25:17 1998
+--- libfml.pl	Fri Jan  9 19:42:57 1998
+***************
+*** 261,266 ****
+--- 261,269 ----
+      # Command Line Options
+      $COMMAND_ONLY_SERVER = 1 if $_cf{'opt:c'};
+  
++     # Initialize for libmember_name.pl
++     &use('member_name') if $USE_MEMBER_NAME;
++ 
+      # SYNTAX
+      # $s = $_;(present line of the given mail body)
+      # $ProcFileSendBack($proc, *s);
