@@ -1898,6 +1898,7 @@ sub do_newml
     # drafts -> help,deny,guide,objective
     if ($LANGUAGE eq 'Japanese') {
 	&Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
 	&Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
 	&Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
 	&Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
@@ -1905,6 +1906,7 @@ sub do_newml
 	&Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    }
     else {
 	&Conv($ml, "$EXEC_DIR/drafts/help.English", "$ML_DIR/$ml/help");
+	&Conv($ml, "$EXEC_DIR/drafts/help-admin.English", "$ML_DIR/$ml/help-admin");
 	&Conv($ml, "$EXEC_DIR/drafts/deny.English", "$ML_DIR/$ml/deny");
 	&Conv($ml, "$EXEC_DIR/drafts/guide.English", "$ML_DIR/$ml/guide");
 	&Conv($ml, "$EXEC_DIR/drafts/welcome.English", "$ML_DIR/$ml/welcome");
@@ -2329,6 +2331,15 @@ sub Uniq
 	$uniq{$_} = 1;
     }
     @config = @new;
+}
+
+sub PerlModuleExistP
+{
+    local($pm) = @_;
+    if ($] !~ /^5\./) { &Log("Error: using $pm requires perl 5"); return 0;}
+    eval("use $pm");
+    if ($@) { &Log("${pm}5.pm NOT FOUND; Please install ${pm}.pm"); return 0;}
+    1;
 }
 
 sub MakeConfigPH
