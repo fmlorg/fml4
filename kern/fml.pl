@@ -796,7 +796,8 @@ sub FixHeaderFields
 	$e{'h:To:'} = "$MAIL_LIST $ML_FN"; # force the original To: to pass
     }
     elsif ($REWRITE_TO == 1) {
-	$e{'h:To:'} = "$MAIL_LIST $ML_FN"; # force the original To: to pass
+	# To: $MALI_LIST, plus original To: ...
+	$e{'h:To:'} = "$MAIL_LIST $ML_FN";
 	&RewriteField(*e, 'To');
     }
     elsif ((!$REWRITE_TO) || $REWRITE_TO < 0) {
@@ -1197,14 +1198,32 @@ sub RewriteField
 sub RuleSetTo
 {
     local(*e) = @_;
-    local($ok, $addr, $ml);
+    local($ok, $match, $addr, $x_addr, $ml, $buf);
     local(@ml) = ($MAIL_LIST, @MAIL_LIST_ALIASES); # PLAY_TO Trick;
 
+    # search $MALI_LIST (+ aliases) contained in To: ?
     for $addr (split(/[\s,]+/, $e{'h:to:'})) {
-	$addr = &Conv2mailbox($addr, *e);
-	for $ml (@ml) { &AddressMatch($addr, $ml) && $ok++;}
+	$x_addr = $addr;
+	$addr   = &Conv2mailbox($addr, *e);
+	$match  = 0;
+
+	# match one of $MALI_LIST ?
+	for $ml (@ml) { 
+	    # ignore $MALI_LIST (or aliases) addresses to avoid noisy To;)
+	    if (&AddressMatch($addr, $ml)) { $ok++; $match = 1;}
+	}
+
+	# IF NOT match one of $MAIL_LIST,
+	# gabble not $MALI_LIST address to $buf
+	if (! $match) {
+	    $buf .= $buf ? ", ". $x_addr : $x_addr;
+	    &Log("RuleSetTo: buf = {$buf}") if $debug;
+	}
     }
-    if (!$ok) { $e{'h:To:'} .= $e{'h:To:'} ? "\n\t,".$e{'h:to:'}: $e{'h:to:'};}
+
+    if ($buf) {
+	$e{'h:To:'} .= $e{'h:To:'} ? "\n\t,".$buf : $buf;
+    }
 }
 
 # Expand mailbox in RFC822
