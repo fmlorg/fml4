@@ -20,16 +20,18 @@
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 =S
    The word "ML" is the abbreviation of "Mailing List" in this document.
-
+   For more details on advanced settings, please see the part III of
+	FML-package-source-tree/doc/op	(plain)
+	http://www.fml.org/fml/op/	(html)
 
    NT4.0 でも Path 名表記は当然異なりますが、基本的に同じです。
    ntinstall.cmd というのがあるのでそれを使って下さい。Unix 版との相違点
    については INSTALL_on_NT4 を見て下さい。このドキュメントはあくまでも
    Unix版の makefml の使い方について述べたものです。
 =E
-   INSTALL_on_NT4.English is the install guide for Windows NT4.0.
-   NT3.5 may be also O.K (not tested since I do not have the OS).
-   ***ATTENTION!*** NT Version is now underway.
+   For NT version, you should see this INSTALL.English and 
+   INSTALL_on_NT4.English, which is on the difference between 
+   UNIX and Windows NT4.0.
 
 .~HTML_PRE
 __________________________________________
@@ -62,9 +64,9 @@ mailing lists.
 .S	ひとつだけ下準備
 =E.S	How many kinds of people runs mailing lists on this machine?
 
-あなたがインストールしようと思っているマシンでＭＬを走らせる人（オーナー、
-所有者）はあなただけですか？ それともあなた以外の人もＭＬを走らせるで
-しょうか？
+あなたがインストールしようと思っているマシンでMLを走らせる人(オーナー、
+所有者)はあなただけですか? それともあなた以外の人もMLを走らせるでしょ
+うか?
 =E
 Only you can run mailing lists? or a group of people run ML's on this
 machine? The files and directories permissions depend on the policy.
@@ -107,22 +109,19 @@ In this case please create the maintainer group (e.g. fml) in
 
 まずパッケージ (fml.*.tar.gzとか…) をひろげると fml-x.y.. という名前
 の directory ができてその下にひとセット入ってます。
-
-=E
-Unpacking fml-something(usually revision).tar.gz, you can find
-fml-x.y-something directory. Change to the directory, you have a set
-of the fml system.  In this directory, please input the command 
-=S
-	perl makefml install
-=S
-to install the fml to your system
-
 この directory に移動して、
-
+=E
+Unpack fml-something(usually revision).tar.gz, you can find
+fml-x.y-something directory. Change to the directory, you have a set
+of the fml system.  In this directory, please input the command
+=S
 	perl makefml install
 
 というコマンドを実行して下さい。そのマシンの上に FML システムをインス
 トールします。
+=S
+to install the fml to your system
+
 
 この時に以下のような項目を聞いて来ます。
 =E
@@ -325,7 +324,6 @@ e.g. the include sample for elena ML is
 これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
 のでそれを cut & paste して/etc/aliases に加えて newaliases して下さい。
 ＃まとめ送りについては後述
-
 =E
 You can see a sample to add to /etc/aliases is shown in the last
 action of makefml. Please cut and paste them in /etc/aliases and
@@ -336,18 +334,19 @@ action of makefml. Please cut and paste them in /etc/aliases and
 
 新しく別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を 
 mirei に変えて実行すればよいです。
-
 =E 
 If you create another "mirei" ML, you do the same way again for mirei
 in replacing "elena" with "mirei".
 
+
+なお、各ＭＬごとに 
 =E
 You can find samples for each ML
 	/var/spool/ml/"the name of ML"/"files of samples"
 
-なお、各ＭＬごとに 
-
 	/var/spool/ml/MLの名前/サンプルのファイル群
+=E
+	/var/spool/ml/listname/sample-files
 
 が設定の見本です。入っている(それぞれのＭＬ用にカスタマイズされた内容
 の)サンプルは
@@ -356,15 +355,65 @@ Samples are the following files:
 
 	include aliases crontab fml.c config.h cf Makefile
 
-が保存されています。参考にして下さい。
+が保存されています。参考にして下さい。help や guide の見本が作られるの
+で確認して下さい。必要なら適宜直して下さい。help はＭLの使い方やユーザ
+の使えるコマンドについてです。help-admin はリモート管理用のコマンドに
+ついてのものです。
+
+[ファイル]
+	aliases		/etc/aliases にはりつける見本（出力されたものと同じ）
+	include		include file 投稿するアドレスのためのもの
+	include-ctl	include file コマンド用のアドレスのためのもの
+
+	cf		config.ph の元
+	config.ph	メーリングリストの設定ファイル
+
+	guide		ガイド
+	help		ＭＬやコマンドの使い方
+	help-admin	リモート管理のためのコマンドの一覧
+	objective	ＭＬの目的について
+	welcome		自動登録時に返す「ようこそ…」の文面
+	confirm		自動登録(confirmationモード)で使う文面
+	crontab		vixie cron 用の定義ファイルの見本
+	deny		メンバー以外からの投稿に許否を伝える
+
+	fml.c		C Wrapper
+	config.h	fml.c のヘッダファイル
+
+=E
+[Files]
+	aliases		/etc/aliases samples
+	include		include file for post address
+	include-ctl	include file for command address
+
+	cf		config.ph is generated from this "cf"
+	config.ph	the FML configuration file for each ML
+
+	guide		guide
+	help		help for ML and user commands
+	help-admin	command index for remote administration
+	objective	objective of ML
+	welcome		when automatic subscription, we send back this file
+	confirm		send back this explanation when confirmation mode
+	crontab		vixie cron 's sample
+	deny		deny post from not member
+
+	fml.c		C Wrapper
+	config.h	fml.c header file
 
 
-ちなみにＭＬを消す時は単に、
+○ ちなみにＭＬを消す時は単に、
+=E
+To remove ML,
 
 	rm -fr /var/spool/ml/MLの名前
+=E
+	rm -fr /var/spool/ml/listname
 
 でファイルを消して下さい。そして、/etc/aliases から該当するＭＬの部分
 を削って newaliases をかけます。
+=E
+and delete the entries in /etc/aliases
 
 
 .S	作ったＭＬの使い方について (特に upgrade する人向けの注意)
@@ -391,6 +440,7 @@ elena@fml.org でコマンド "# command" を受け付けるようにはなっていませ
 がコマンド "# command" をコマンドとして理解するようになります。
 設定は makefml config でもできます。詳細は .ptr{post-or-command-addr} を参照。
 elena と elena-ctl 両方がコマンドとして使える場合については .ptr{post-ac}
+
 
 .S	まとめおくり
 =E.S	Matome Okuri (Digest delivery)
@@ -419,7 +469,7 @@ mailing list.
 =E
 For each user who used "makefml newml listname", the user can find
 =S
-	/var/spool/ml/crontab/user-name
+	/var/spool/ml/etc/crontab/user-name
 =S
 which entries are automatically added when you create a new ml. 
 This file has all crontab entries the user administrates. 
@@ -447,7 +497,7 @@ and deliver articles in one mail.
 
 	/var/spool/ml/etc/crontab/ユーザの名前 
 
-から-q を外して下さい。
+から -q を外して下さい。
 
 
 Vixie Cron でない OS については man crontab で調べるとか doc/op の 
@@ -455,6 +505,7 @@ cron の章を見る等して下さい。
 =E 
 If your OS has not Vixie cron, please see the manual of "crontab" or
 the chapter on "cron" of doc/op in the fml source.
+
 
 .S	fmlserv (Listserv もしくは majordomo的インターフェイス)
 =E.S	fmlserv (Listserv or majordomo like interface for fml)
@@ -560,7 +611,7 @@ group-writable が必要なだけです
 るのと同じマシンルからＭＬへメールを出すとすると、設定によっては
 =E
 When you send a mail to a mailing list server on the same machine as
-one running mailing list servers, your mail header has NOT
+one running mailing list servers, your mail header may have NOT
 
 	From: username@domain 
 
@@ -572,7 +623,7 @@ BUT
 
 のようなメールがＭＬサーバへ送られます。その場合そのために
 =E
-Hence, the server recognizes YOU ARE NOT MEMBER!.  To avoid this
+In this case the server recognizes YOU ARE NOT MEMBER!.  To avoid this
 error, you can register both addresses "username" and
 "username@domain" by "makefml add listname address"
 
@@ -609,7 +660,6 @@ Remove "fukachan@fml.org" in "Elena" ML.
 
 
 
-.# Beth
 .C	makefml で ＭＬの基本的な設定変更をする
 =E.C	To change the configuration of a mailing list
 
@@ -696,18 +746,38 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 		だれでもOK			anyone
 		登録されているメンバーだけ	members_only
 		モデレーターだけ		moderator
+=E
+The list of chobi is 
+=S
+	post from anyone			anyone
+	post from only a member			members_only
+	post form only a moderator		moderator
 
 	・もし、登録されているメンバー以外から来た場合にはどうするか？
 		許否				reject
 		自動登録			auto_regist
 		無視(管理者へ報告だけする)	ignore
-
+=E
+If a mail comes from not a ML member, what action should be done?
+=S
+	send back "deny" file to notify "reject"	reject
+	automatic registration/subscription		auto_regist
+	ignore the mail					ignore
+	
 を設定できます。デフォールトはいずれも
+=E
+In default, the mode of FML is 
+	post from only a member			members_only
+and
+	send back "deny" file to notify "reject"	reject.
 
 	メンバーのみ(members_only) 投稿/コマンドの使用 が可能
 	もしメンバー以外から来たら許否(reject)
 
 です。自動登録は"投稿がメンバーだけ"(members_only)とし、
+=E
+Automatic registration is done when a mail comes to an address form
+not member and the mode for the address is "auto_regist".
 
 	auto_regist に設定 → もしメンバー以外から来たら自動登録
 
@@ -733,6 +803,9 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
 上述のアクセス制御で auto_regist を選んだ場合に自動登録の仕方を
 選ぶことができます。デフォールトは 「確認」 を求めるやり方です。
+=E
+The automatic registration type. The default is "confirm" which
+require the confirmation of subscription.
 
 
 ○ コマンド用のアドレスの方針
@@ -744,13 +817,21 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 	listname でコマンドも受け付けるようにする
 	コマンドは fmlserv を使う
 等の設定変更ができます。
-
+=E
+The address for command. You can select
+ e.g.
+	listname-ctl
+	listname
+	fmlserv (listserv style interface)
 
 ○ リモート管理 (後述)
 
    4    REMOTE_ADMINISTRATION              no
 
 リモートでＭＬの設定をいじることを可能にするか？(デフォールトはしない)
+=E
+You maintain the ML in remote? or not. And the defaul type is "crypt".
+This is "password authentication" and the password is saved as a crypted.
 
                     AUTH_TYPE              crypt
 
@@ -758,17 +839,22 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
 
 ○ Subject: につけるタグ(デフォールトはつけない) (後述)
+=E
+Subject Tag Type.
 
    5    SUBJECT_TAG_TYPE                   
 	
 
 ○ その他のオプション(MIME Decoding や スプールの自動HTML化) (後述)
+=E
+Other options.
 
    6    OPTION                             
 
 
 
 .S	アクセス制御のポリシーと自動登録
+=E.S	Access Control Policy and Automatic Registration
 
    WHO CAN POST AND COMMAND
 
@@ -794,11 +880,23 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 		だれでもOK			anyone
 		登録されているメンバーだけ	members_only
 		モデレーターだけ		moderator
+=E
+The permission for post address has the following choice:
+	post from anyone			anyone
+	post from only a member			members_only
+	post form only a moderator		moderator
 
 	・もし、登録されているメンバー以外から来た場合にはどうするか？
 		許否				reject
 		自動登録			auto_regist
 		無視(管理者へ報告だけする)	ignore
+=E
+If a mail comes from not a ML member, what action should be done?
+=S
+	send back "deny" file to notify "reject"	reject
+	automatic registration/subscription		auto_regist
+	ignore the mail					ignore
+
 
 を設定できます。自動登録は"投稿がメンバーだけ"(members_only)の場合に
 
@@ -806,6 +904,8 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
 することで行ないます。
 自動登録の例(コマンド用のアドレスへメールを送ると自動登録モード):
+=E
+The example of an automatic registration setting.
 
    3    PERMIT_COMMAND_FROM                members_only
    4    WHEN_COMMAND_FROM_NOT_MEMBER       auto_regist
@@ -819,7 +919,8 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
    4    WHEN_COMMAND_FROM_NOT_MEMBER   メンバー以外からコマンド要請が来た時？
 
 という意味です。例えば 1 を選択すると
-
+=E
+If you select 1, 
 
    ************************************************************
    ADDRESSS FOR POST                  elena@fml.org
@@ -834,14 +935,19 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
          Permit post from  (0-3) [0] 
 
 という画面に移ります。ここで1〜3を選択して下さい。以下同様です。
-
+=E
+Please select one of them. 
 
 
 .S	自動登録の方式の選択
+=E.S	The type of Automatic Registration
 
 上述のアクセス制御で auto_regist を選んだ場合に自動登録モードになりま
 す。ここは自動登録の場合の手続きのやりかたを変更することができます。
 キーワード等をいじる場合は直接 edit してください。
+=E
+If you select "auto_regist" in either REJECT_POST_HANDLER or
+REJECT_COMMAND_HANDLER, you can see the following menu
 
    ************************************************************
    AUTO_REGISTRATION_TYPE       confirm
@@ -867,8 +973,8 @@ FML 2.1 では投稿とコマンドそれぞれについて以下の
 
  	no-keyword	メンバーでないなら登録
 
-
 =E
+[description]
 	confirm
 			RECOMMENDED AGAINST SUBSCRIBE ATTACK!
 			the server asks the user (From:) the confirmation
@@ -893,6 +999,7 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
 
 
 .S	コマンドとして使うアドレスの設定
+=E.S	Address for ML commands
 .l	post-or-command-addr
 
 それぞれの環境と趣味によって
@@ -908,7 +1015,18 @@ subject の場合は subscribe mikoto@fml.org のような指定の仕方もできます
 	そもそもコマンド機能は要らない
 
 のような要求がありえるでしょう。TOPメニューの
-
+=E
+We suppose several environments,
+	* You can not control /etc/aliases freely.
+	  You have a few limited address.
+=S
+	* You DO NOT USE well-known addresses such as "listserv".
+	  You set up "elena" for post, "elena-ctl" for "elena" ML's command.
+	  For security and the concept "ML is a personal communication", 
+	  I recommends this style
+=S
+	* You use listserv-style. Your choice is "fmlserv" listsev emulatiobn.
+	
    3    COMMAND ADDRESS 
               address for command          elena-ctl@fml.org
 
@@ -966,8 +1084,13 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 
 
 .S	リモート管理
+=E.S	Remote Administration
 
 セキュリティ上デフォールトではリモート管理はできないようにしています。
+＃注意: なおリモート用のコマンドについては help-admin を見て下さい。
+=E
+In default we do not permit remote administration for security.
+* the file "help-admin" is the index of remote administration commands.
 
    ************************************************************
    REMOTE ADMINISTRATION
@@ -983,6 +1106,9 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 リモートで管理できるようにするには 1 を選び、yes と答えます。その上で 
 2 で認証タイプを設定します。デフォールトは crypt(パスワード認証)。
 認証の画面は次のようなもので、
+=E
+If you maintain the ML in remote, please select "yes" in 1 and the
+type in 2.
 
    ************************************************************
    REMOTE_ADMINISTRATION_AUTH_TYPE          crypt
@@ -997,16 +1123,27 @@ fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を使う用意
 それぞれのキーワードは以下のようなものです。
 
 	pgp		PGPベースの認証方式
+=E
+	pgp		PGP based authentication
 
 	crypt		パスワード認証(パスワードを crypt して保存)
 				＋
 			From: のアドレスが管理者メンバーリストにある
+=E
+	crypt		password authentication 
+			the password is saved in ML/etc/passwd in crypted form
 
 	md5		パスワード認証(パスワードを MD5 して保存)
 				＋
 			From: のアドレスが管理者メンバーリストにある
+=E
+	md5		password authentication 
+			the password is saved in ML/etc/passwd in md5 form
 
 	address		From: のアドレスが管理者メンバーリストにある
+=E
+	address		From: field's address exists in members-admin
+			* members-admin is the default of $ADMIN_MEMBER_LIST
 
 
 .S	SUBJECT TAG TYPE (e.g. Subject: [Elena:00100])
@@ -1163,51 +1300,90 @@ Please input the "password" of "who" (Email address).
 
 
 .S	設定ファイル(cf と config.ph)についての注意 
+=E.S	On cf and config.ph
 
 fml.pl がメーリングリスト本体です。このプログラムにメールを入れるとメー
 リングリストとして作動します。fml.pl の動作は config.ph という設定ファ
 イルで決まります。
+=E
+fml.pl is the main execution file. The configuration file "config.ph"
+controls this action.
 
 makefml config は cf というファイルを編集するインターフェイスです。 
 makefml はこの cf というファイルから config.ph を毎回作っています。
+=E
+"makefml" (makefml config) is the interface to edit "cf" file.
+makefml converts cf to config.ph. makefml always re-generates
+config.ph from cf.
 
 		cf	->	config.ph
 
 makefml config (の画面)で設定できない(より進んだ/凝った)設定をするためには
+=E
+To configure advanced settings, 
 
 	1. cf ファイルを編集し、その cf から config.ph を作る。
 	   MLのHOMEで、 make config.ph というコマンドをうつと
 	   cf -> config.ph はつくられます。
+=E
+	1. edit cf and create config.ph from cf.
+	   you can re-generate config.ph by 
+		(prompt)% make config.ph
 
 	2. 今後は cf も makefml も使わない。
 	   config.ph を手で編集することにする。
+=E
+	2. edit config.ph by hand ALWAYS.
 
 そういう意味で cf ファイルは config.ph のマスターですが、config.ph を
 直接編集してももちろん構いません。むしろ望ましいです。しかし、
 config.ph を手でいじって、そのあと makefml config を使うとせっかくの設
 定が上書きされて消されてしまうので注意して下さい(この場合 makefml は警
 告を出して一回止まりこのまま進んでいいかどうか尋ねてきます)。
+=E
+Pay attention! cf is the master file of config.ph. It is better to
+edit config.ph by hand. makefml is easy interface for
+config.ph. It always overwrites config.ph.
 
 
 .S	cf ファイルと config.ph のフォーマット
+=E.S	the format of cf and config.ph
 
 いずれの場合も詳細は doc/op というファイルのパートIIIなどを見て下さい。
+=E
+Please see doc/op for the details.
 
 ○ 単純なものは makefml config で編集できます。
+=E
+makefml config can control the fundamental settings in config.ph.
 
 ○ config.ph の書き方は perl の構文そのものです。
+=E
+config.ph is perl statements.
 
 ○ cf はどちらかという機械処理のために単純化された config.ph です。
    また cf で定義されていないものはデフォールト値が使われます。
    cf にはデフォールトと異なる差分だけを保守するのに便利です。
    ＃FMLをインストールした場所/cf/MANIFEST に変数デフォールトの一覧が
    ＃あります。
+=E
+The format of cf is a simplified config.ph format. We use the default
+value defined in cf/MANIFEST for an entry not defined in cf. The list
+of user defined variables exists in
+fml-installed-directory/cf/MANIFEST.
 
    # はコメントで、定義に使う行は
+=E
+   # is a comment. Each line is
+=S
+	variable (spaces)	the value of it
 
 	変数名	適当なスペース	変数の値
 	
 のように書きます。これが config.ph に変換されると
+=E
+Each entry in config.ph converted from cf is the following:
+	$variable = "the value of it";
 
 	$変数名 = "変数の値";
 
@@ -1215,12 +1391,16 @@ config.ph を手でいじって、そのあと makefml config を使うとせっかくの設
 です。
 
 例: cf で	
-
+=E
+For Example, in cf
+ 
 	MAIL_LIST                	elena@$DOMAINNAME
 	PERMIT_POST_FROM         	members_only
 	REJECT_POST_HANDLER      	reject
 
 は config.ph の
+=E
+is converted like this in config.ph
 
 	$MAIL_LIST                     = "elena\@$DOMAINNAME";
 	$PERMIT_POST_FROM              = "members_only";
@@ -1254,18 +1434,28 @@ machine since it requires a lot of attention.
 
 
 .C	コマンド用のアドレスについての捕捉 
+=E.C	Attention to the command address
 .l	post-ac
 
 .ptr{post-or-command-addr} で述べられている通りに
+=E
+When
 
 	$COMMAND_ADDRESS = $MAIL_LIST;
 
 とすれば elena@fml.org でコマンドを受け付けます。この場合は配送メール
 の X-ML-Info: というフィールドやコマンドのREPLYもすべて elena@fml.org 
 宛になるように設定されます。（helpファイルは手動で書き直してください）
+=E
+elena@fml.org accepts the command such as "# help" ("# command" form). 
+Both X-ML-Info: and command server replies shows the pointer to
+elena@fml.org on the use of commands.
 
 # command というシンタックスのコマンドをelena@fml.org も 
 elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
+=E
+If you configure that both elena@fml.org and elena-ctl@fml.org can
+accept commands, you should set
 
 	$MAIL_LIST_ACCEPT_COMMAND = 1;
 
@@ -1283,6 +1473,11 @@ elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
 
 sendmail が走っていなくても POP でメールを引っ張って実行する裏技もあり
 そういうtrickyな話題については doc/op を見てください(^^;)
+=E
+If sendmail do not run on your machine, you can set ML via POP3.
+Please see doc/op for more details. 
+=S
+FYI. NT Version uses this trick:)
 
 なお NT 上ではこの裏技を使います:)
 
