@@ -49,10 +49,19 @@ sub Parse
     $ML        = $config{'ML_DEF'} || $config{'ML'};
     $MAIL_ADDR = $config{'MAIL_ADDR'};
     $PROC      = $config{'PROC'};
+    $LANGUAGE  = $config{'LANGUAGE'};
     @PROC_ARGV = split(/\s+/, $config{'ARGV'});
 
     # fix
     $PROC =~ tr/A-Z/a-z/;
+
+    if ($LANGUAGE eq 'Japanese') {
+	push(@INC, $EXEC_DIR);
+	require 'jcode.pl';
+	eval "&jcode'init;";
+	require 'libmesgle.pl';
+	$MESG_FILE = "$EXEC_DIR/messages/$LANGUAGE/makefml";
+    }
 }
 
 
@@ -93,12 +102,62 @@ sub Control
 }
 
 
+sub XSTranslate
+{
+    local($mesg) = @_;
+
+    $mesg =~ s/^\s*//;
+
+    if ($mesg =~ /OK:/) {
+	&Mesg2Japanese('OK') || $mesg;
+    }
+    elsif ($mesg =~ /(ERROR:|WARN:)\s*makefml\.(\S+)/) {
+	"$1 ". &Mesg2Japanese($2);
+    }
+    else {
+	$mesg;
+    }
+}
+
+
+sub Mesg2Japanese
+{
+    local($key) = @_;
+    local($x);
+
+    $x = &MesgLE'Lookup($key, $MESG_FILE); #';
+    &jcode'convert(*x, 'jis'); #';
+
+    $x;
+}
+
+sub Log
+{
+    print "LOG: @_\n";
+}
+
+
 sub OUTPUT_FILE
 {
     local($file) = @_;
 
     if (open($file, $file)) {
-	while (<$file>) { print $_;}
+	# firstly check "ExitStatus:" 
+	while (<$file>) {
+	    if (/^ExitStatus:(.*)/) { 
+		print &XSTranslate($1), "\n";
+		next;
+	    }
+	}
+	close($file);
+
+	print "\n\n";
+
+	open($file, $file);
+	while (<$file>) {
+	    next if /^ExitStatus:/;
+	    print $_;
+	}
 	close($file);
     }
     else {
