@@ -14,8 +14,6 @@
 XXX 終ったもの/終ったつもりのものはここに一回書いておく
 XXX 一月くらいで消すこと
 
-データベース・アクセス (α クオリティ？)
-	LDAP 
 
 
 
@@ -222,6 +220,8 @@ makefml でのPGP操作をどうするべきなのか？
 =E
 makefml pgp ??? This command is for administrators.
 Which command could we use for usual member PGP authentication?
+
+S/MIME
 
 
 .S	暗号化の問題 (USE_ENCRYPTION_DISTRIBUTION)
@@ -432,8 +432,15 @@ e.g. newml
 
 右の画面の newml の結果が出る時に左のメニュバーのフレームに強制的に 
 TARGET 指定をして reload はできないのか？
-＃規格的にはできなさそうだけど…
+＃規格的にはできなさそうだけど… 
 ＃全体を一括管理されたものとかにしてゴリゴリしないとだめなのか？
+
+Reference: fml-support: 08449
+＃たぶん間違いなくだめ、他の技を考えるように
+＃うーん、でも Java Script とか実装依存ぽいのは考えたくないねぇ
+＃それよりは table でなんとかならんかなとかとにかく
+＃HTML 規格にあるものでなんとか〜
+
 
 
 .S	ＭＬを消したら対応する authdb/ml-admin/$ml/ 以下も消す
