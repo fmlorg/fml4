@@ -133,28 +133,28 @@ $DATE_TYPE default is "original-date".
 	received-date
 	received-date+posted
 		Date:	FMLがメールを受けとった時間
-		Posted:	オリジナルメールのDate:
+		Posted:	元のメールそのままのDate:
 
 	received-date+x-posted
 		Date:	FMLがメールを受けとった時間
-		X-Posted:	オリジナルメールのDate:
+		X-Posted:	元のメールそのままのDate:
 
 	received-date+x-original-date
 		Date:	FMLがメールを受けとった時間
-		X-Original-Date: オリジナルメールのDate:
+		X-Original-Date: 元のメールそのままのDate:
 
 	distribute-date
 	distribute-date+posted
 		Date:	FMLがメール配送を始めた時間
-		Posted:	オリジナルメールのDate:
+		Posted:	元のメールそのままのDate:
 
 	distribute-date+x-posted
 		Date:	FMLがメール配送を始めた時間
-		X-Posted:	オリジナルメールのDate:
+		X-Posted:	元のメールそのままのDate:
 
 	distribute-date+x-original-date
 		Date:	FMLがメール配送を始めた時間
-		X-Original-Date:	オリジナルメールのDate:
+		X-Original-Date:	元のメールそのままのDate:
 
 
 .fi
@@ -405,7 +405,7 @@ $CFVersion 3 以前にあった $HML_FORM_LONG_ID は config.ph が CFVersion
 も有効でしたが、今はありません。
 .fi
 
-.S	オリジナルの Message-ID を配送に使う
+.S	元々の Message-ID を配送に使う
 =E.S	Pass the original Message-Id through
 .key	Message-ID
 .l	Uniq_Identifier_of_Message-ID
@@ -413,15 +413,14 @@ $CFVersion 3 以前にあった $HML_FORM_LONG_ID は config.ph が CFVersion
 
 	$USE_ORIGINAL_MESSAGE_ID = 1; (default)
 
-とするとオリジナルの Message-ID を保存してヘッダにつけます。
+とすると元々メールにあった Message-ID を保存してヘッダにつけます。
+これがデフォールトの挙動です。
 
 .if LANG == JAPANESE
 References: fml-support ML's Count: 02687 あたりを参照
 
-デフォールトは original の Message-ID: をつかいます。
-
 .q
-quoted from fml-support ML's Count: 02687
+References: fml-support: 02687
 
 original で妙な pattern の Message-ID を使われてて、ちゃんと detect で
 きないとかあると嫌ね＃そうそうあるとはおもえないのだが
@@ -429,13 +428,13 @@ original で妙な pattern の Message-ID を使われてて、ちゃんと detect で
 という可能性もある一方 ＃ばぐってるperlとかね〜
 
 fml 自体がつける場合、キャッシュテーブルの有効な大きさが半分になってし
-まふというのがあるので、オリジナルを使う方が有効な大きさは増える。
+まふというのがあるので、元々を使う方が有効な大きさは増える。
 ループが発生する場合にどのくらい未来まで世界線をたどればいいのかは不明
-なので統計的な議論はできない＃マシンスペックやネットワーク構成に依存
+なので統計的な議論はできない。
 
 自分が自分に送るとかそういうのなら一瞬でループにはいるのでまず間違いな
-く detect するはずという場合が多いという仮定が正しいならどちらのやり方
-でも大差はない
+く検出するはずという場合が多いという仮定が正しいならどちらのやり方でも
+大差はないはず
 
 という論理になるような気がする。
 .~q
@@ -543,7 +542,7 @@ not to set up a hook.
 
 .if LANG == JAPANESE
 その複数のアドレスを(ループチェックに使うために) @MAIL_LIST_ALIASES が
-必要です。配列の先頭がオリジナルのアドレス(== $MAIL_LIST)です。
+必要です。配列の先頭は $MAIL_LIST です。
 
 こうすると Elena になげても Anna に投げても同じＭＬと見なし、
 
@@ -591,8 +590,8 @@ $X_ML_INFO_MESSAGE causes the same effect.
 .l	$NOT_REWRITE_CC
 
 .if LANG == JAPANESE
-2.1A の途中(config.ph CFVersion: 3.2)から To: Cc: はオリジナルのものを
-そのまま通しています。2.2 のデフォールトは素通しです。
+2.1A の途中(config.ph CFVersion: 3.2)から To: Cc: は元のメールをそのま
+ま通しています。2.2 のデフォールトは素通しです。
 
 可読性のため、To: フィールドは $MAIL_LIST が展開され、常にＭＬのアドレ
 スが出るようにすることもできます。makefml config ML で変更できます。
@@ -615,7 +614,7 @@ $X_ML_INFO_MESSAGE causes the same effect.
 		にする (FML 2.1 default)。
 
 	2 	To: $MAIL_LIST に強制する。
-		To: のオリジナル内容は失われる。
+		To: の元々の内容は失われる。
 		
 To: Cc: というのは人間がメールを書く時の単なる便宜上のもので、配送手段
 の SMTP としてはなんら区別はしていません。ですから、情報を落さず、To: 

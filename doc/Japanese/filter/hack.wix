@@ -46,7 +46,7 @@ Eudora 等の In-Reply-To: References: をつけてくれないMUA対策
 1. Message-ID: はＭＬ独自のものをつける
 2. Subject: Re: [elena 00100] のようなTAGを解析する
 ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
-オリジナルのMessage-ID:はX-Original-Message-ID:に移動される
+元々あった Message-ID: は X-Original-Message-ID: に移動される
 (2.2A#28はbugでつけてない, fixed in 2.2A#29)
 .fi
 .if LANG == ENGLISH

@@ -68,7 +68,7 @@ $PASS_ALL_FIELDS_IN_HEADER が0の時に意味がある。
 ヘッダは素通りしていく。しかし特定のフィールドだけを消したい時に便利
 
 
-.S	ヘッダフィールドの値をオリジナルのまま通すようにする
+.S	ヘッダフィールドの値をそのまま通すようにする
 .xref	DEFINE_FIELD_ORIGINAL
 
 	&DEFINE_FIELD_ORIGINAL(フィールド名);

@@ -155,7 +155,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 .S	EnvelopeFilterは厳し過ぎる。VBscriptだけ弾きたい
 
 1. Content-Type: に .vbs .js .jse .exe とあるメール
-2. オリジナルのメールは badarticle というファイルに保存して 
+2. 元のメールは badarticle というファイルに保存して 
 3. ＭＬにはアナウンスを流す。
    「ウィルスぽいものが来たので、ＭＬに流さずに別途ファイルに落した」 
 

@@ -1035,7 +1035,7 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 	1. Message-ID: はＭＬ独自のものをつける
 	2. Subject: Re: [elena 00100] のようなTAGを解析する
 	ことでＭＬ全体のスレッドの一貫性を疑似的に強制する。
-	オリジナルのMessage-ID:はX-Original-Message-ID:に移動される
+	元のMessage-ID:はX-Original-Message-ID:に移動される
 	(#28はbugでつけてない, fixed in #29)
 
 	$AGAINST_HTML_MAIL: cut off except the first multipart block
@@ -3009,7 +3009,7 @@ contributorおよびその変更点についてはRELEASE_NOTESを見て下さい。
 	get コマンドのデフォールトを Resent-つきのフォワードに変更
 	コマンドの結果だと分かるように
 	Subject: に Get Number $ML_FN が付け加えられる他はスプールの
-	オリジナルが送り返される。
+	元記事が送り返される。
 
 
 96/12/15

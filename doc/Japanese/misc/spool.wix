@@ -14,8 +14,8 @@ fml に入力されたものとは違います。
 expire してもいいなら $USE_LOG_MAIL を on にすると入力(のメール)を 
 var/Mail/ の下に貯めていけます。
 
-spool.orig とかにオリジナルをずっと貯めておきたいなら、こんなかんじで
-すかね
+spool.orig とかに元記事をずっと貯めておきたいなら、こんなかんじですか
+ね
 
 # $ID は $START_HOOK ではまだ決まっていないので最後のHOOKにする
 $FML_EXIT_HOOK = q#

@@ -247,7 +247,7 @@ $CONTROL_ADDRESS から != に変更する時)も自動的に再生成が行なわれる。
 ○ デフォールトで Date: は original をとおします。Posted: はなくなりま
 した。前と同じにするには $DATE_TYPE で設定します。
 
-○ To: はオリジナルをとおします。2.1 のようにするには $REWRITE_TO で制
+○ To: は元の値のままとおします。2.1 のようにするには $REWRITE_TO で制
 御します。
  
 ○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER

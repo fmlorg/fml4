@@ -30,7 +30,7 @@ Example: set "X-ML-Info: ML Information"
 ==
 	&DEFINE_FIELD_FORCED('x-ml-info', "ML Information");
 
-.S	ヘッダフィールドをオリジナルのままにする
+.S	ヘッダフィールドを元メールのままにする
 =E.S	Enforce the value of a field to one of the in-coming mail header
 .l	&DEFINE_FIELD_ORIGINAL
 .l	DEFINE_FIELD_ORIGINAL
@@ -39,9 +39,8 @@ Example: set "X-ML-Info: ML Information"
 SYNOPSIS:
 	&DEFINE_FIELD_ORIGINAL('field');
 
-@HdrFieldsOrder 内で定義されているフィールドに対しオリジナルの値(MLサー
-バへ入ってきた時のヘッダの値)にしておきたいフィールドを指定します。こ
-れは
+@HdrFieldsOrder 内で定義されているフィールドに対し元々の値(MLサーバへ
+入ってきた時のヘッダの値)にしておきたいフィールドを指定します。これは
 =E
 enforce the value of a field to one of the in-coming mail header.  The
 field must be one of elements of @HdrFieldsOrder. This function sets
@@ -52,7 +51,7 @@ up
 と同じです。
 ＃obsoleteですが --oh:field  (コマンドライン)と同じ
 
-例: To:, Cc:, Reply-To: をオリジナルの内容のままにする。
+例: To:, Cc:, Reply-To: を元の内容のままにする。
 =E
 Example: Let the value of To:, Cc:, Reply-To: be original.
 
@@ -60,7 +59,7 @@ Example: Let the value of To:, Cc:, Reply-To: be original.
 	&DEFINE_FIELD_ORIGINAL('cc');
 	&DEFINE_FIELD_ORIGINAL('reply-to');
 
-To: Cc: フィールドをオリジナルのままにして配送する。
+To: Cc: フィールドを元々の値のまま配送する。
 
 .S	ヘッダのフィールドを増やす or 減らす
 =E.S	Add or Remove @HdrFieldsOrder entries

@@ -79,10 +79,10 @@ Please define following variables:
 
 	("from", "newsgroups", "subject", "supersedes", "references")
 
-	小文字なのはオリジナルを使うためです。Capital にすれば
-	メーリングリストにながれる内容と同じものがながれます。例えば
-	subject ではなく Subject にすると(そういう設定をしていれば)
-	Counter つきのが流れるといった具合です。
+	小文字なのはfmlに入力されたメールのヘッダを使うためです。
+	Capital にすればメーリングリストにながれる内容と同じものがなが
+	れます。例えばsubject ではなく Subject にすると(そういう設定を
+	していれば) Counter つきのが流れるといった具合です。
 =E
 	Please use small characters "subject" if you use the original
 	fields in a posted article, whereas Capital "Subject" if you

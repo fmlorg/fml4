@@ -680,7 +680,7 @@ Keys of %Envelope:
 	KEY beginning with "h:" is a field of a header.
 
 	h:Capital:	補正されたデータ e.g. h:Subject:
-	h:lower-case:	オリジナルデータ e.g. h:subject:
+	h:lower-case:	元メールのデータ e.g. h:subject:
 =E
 	h:Capital:	adjusted field data to use in delivery e.g. h:Subject:
 	h:lower-case:	original field data e.g. h:subject:
@@ -743,8 +743,8 @@ Keys of %Envelope:
 =E
 	[Internal Data]
 
-	Header		オリジナルのヘッダ
-	Body		オリジナルのメール本文
+	Header		元メールのヘッダ
+	Body		元メールのメール本文
 	Hdr		送り出すメールのヘッダ（&Smtpの直前に生成される）
 =E
 	Header		original header
@@ -833,7 +833,7 @@ Initialization of fml.pl is as follows:
 	   COMPATIBILITY CODE
    
 	&Parse
-		%Envelope へ Header Body 等のオリジナルデータをセット
+		%Envelope へ Header Body 等の元々の内容を保存
 =E
 	&Parse
 		reset %Envelope
