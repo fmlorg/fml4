@@ -20,30 +20,16 @@ HTML_REQ_CPP_SOURCES += 3.0-new-features
 HTML_MISC        += var/html/advisories/index.html var/html/advisories/index-e.html
 HTML_SMM          = var/html/op/index.html var/html/op-e/index.html
 
-## doc/ri
-DOC_RI_SOURCES  = CHANGES CHECK_LIST FILES 
-DOC_RI_SOURCES += CHANGES-3-0-maint
-DOC_RI_SOURCES += INSTALL INSTALL_on_NT4 INSTALL_on_MacOS_X_Server
-DOC_RI_SOURCES += INSTALL_with_SENDMAIL INSTALL_with_POSTFIX
-DOC_RI_SOURCES += INSTALL_with_QMAIL INSTALL_with_EXIM
-DOC_RI_SOURCES += INSTALL_with_ZMAILER
-DOC_RI_SOURCES += PORTINGS README UPGRADE FEATURES TODO UPGRADE-3.0
-DOC_RI_EXCEPTIONAL_SOURCES = RELEASE_NOTES INFO
+# doc/ri
+.include "doc/ri/Makefile"
 
-# raw copy
-DOC_RI_RAW     += COPYING
+# doc/drafts
+.include "doc/drafts/Makefile"
 
+# doc/advisory
+.include "doc/advisories/Makefile"
 
-## doc/drafts
-DOC_DRAFT_SOURCES  = confirm confirmd.ackreq deny guide 
-DOC_DRAFT_SOURCES += help-admin help-fmlserv help objective welcome
-
-
-## doc/advisory
-DOC_ADVISORY_SOURCES  = happy99 migrating_domains melissa melissa_family year2000
-
-
-### doc/examples
+# doc/examples
 .include "doc/examples/Makefile"
 .include "doc/examples/filter/Makefile"
 .include "doc/examples/tips/Makefile"
