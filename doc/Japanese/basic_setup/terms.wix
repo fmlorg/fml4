@@ -9,7 +9,11 @@
 
    /usr/local/fml/	実行ファイルやライブラリの置き場所
 			例: fml.plやlibsmtp.plなど
+			$EXEC_DIR という変数はこれのことです。
+	
    /var/spool/ml/	MLのディレクトリが生成される場所
+			$ML_DIR という変数はこれのことです。
+
    /var/spool/ml/elena/	elena MLのHOMEディレクトリ
 .fi
 .if LANG == ENGLISH

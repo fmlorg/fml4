@@ -5,16 +5,15 @@
 .toc
 .~HTML_PRE
 
-.# .__repl_include__
+.P	overview
 .include overview.wix
 .include examples.wix
 .include howto.wix
-.include functions.wix
 
-.p	内部構造他
+.P	内部構造他
 .include internals.wix
 
-.p	コマンド各論
+.P	コマンド各論
 .include library.wix
 .include member_name.wix
 .include traffic.wix

@@ -1,7 +1,10 @@
 .C	Overview
 
-コマンドとは「メールでfmlに何かをさせること」です。一般ユーザの使うコ
-マンドと、管理者だけが使えるコマンドというのがあります。
+コマンドとは「メールでfmlに何かをさせること」です。
+	一般ユーザの使うコマンド
+と、
+	管理者だけが使えるコマンド (リモート管理 => .ptr{remote_control})
+というのがあります。
 
 一般ユーザ向けの代表的な機能は
 
@@ -11,7 +14,7 @@
 
 のようなことを指します。
 
-管理者用のものについては参照 => .ptr{remote_control}
+リモート管理: 管理者用のものについては => .ptr{remote_control}
 
 
 .S	コマンドの一覧
@@ -59,6 +62,7 @@ elena ＭＬのヘルプファイルは /var/spool/ml/elena/help
 
 	sub myProcHack { なんとかかんとか… }
 	%LocalProcedure = ('hack', 'myProcHack');
+
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

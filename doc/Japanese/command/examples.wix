@@ -1,3 +1,5 @@
+.C	事例集
+
 .S	メンバーを問わずファイル uja を送り返す例
 =E.S	Send back $DIR/uja for anyone
 

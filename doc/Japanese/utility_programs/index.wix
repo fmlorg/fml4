@@ -1,11 +1,10 @@
 .HTML_PRE
 .# .__repl_title__
-                その他
+                その他の便利なプログラム群
 
 .toc
 .~HTML_PRE
 
-.# .__repl_include__
 .include crosspost.wix
 .include fml_local.wix
 .include fmlserv.wix

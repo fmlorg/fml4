@@ -8,7 +8,8 @@ in fml-support: 5282
 .if LANG == JAPANESE
 .q
 1. OSのメールのログを調べる。
-   see INSTALL file Appendix A.
+
+INSTALL file の Appendix A をみてみてください。
 
 2. fml のログを調べる。$DIR/log (ML's HOME ログファイル)
 

@@ -1,9 +1,10 @@
-.C	概要
+.C	＊＊＊に制限を加えること
 
 .S	ＭＬのメンバーの上限数
 .xref	$MAX_MEMBER_LIMIT
 
 デフォールトは無制限
+
 
 .S	メールサイズの制限
 
@@ -11,6 +12,11 @@
 デフォールトは無制限
 
 .xref $MAX_MEMBER_LIMIT
+
+
+.S	メール一通あたりのコマンド数の上限
+.xref $MAXNUM_COMMAND_INPUT
+
 
 .S	トラフィックの制御
 .xref MTI
