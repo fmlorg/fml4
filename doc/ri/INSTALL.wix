@@ -1328,7 +1328,7 @@ If mail comes from not a ML member, what action should be done?
 .fi
 =E
 Caution: you can use "auto_regist" but it is obsolete in fml 3.0 and after.
-         It works even in fml 3.0 for compatibility.
+         It works even in fml 3.0 after for compatibility.
 .if LANG == ENGLISH
 .url http://www.fml.org/fml/UPGRADE-3.0-e/index.html
 .fi
