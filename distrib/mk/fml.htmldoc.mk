@@ -1,3 +1,7 @@
+#
+# $FML$
+#
+
 .for file in ${HTML_MISC_SOURCES}
 HTML_MISC += var/html/${file}
 var/html/${file}: doc/html/${file}
@@ -10,6 +14,11 @@ var/html/pictures/index.html: doc/html/pictures/index.html
 	@ test -d var/html/pictures || mkdir var/html/pictures
 	${CPP} -P -UDIST doc/html/pictures/index.html |\
 		${JCONV} > var/html/pictures/index.html
+
+# logo
+HTML_MISC += var/html/logo.jpg
+var/html/logo.jpg: doc/html/pictures/logo.jpg
+	cp -p doc/html/pictures/logo.jpg var/tml
 
 # history
 HTML_MISC += var/html/p_list.gif
