@@ -82,11 +82,16 @@ CFVersion:	2
 
 
 INFO:
-### AUTO REGISTRAION and around it
-# require no special syntax for auto-registration
-# DEFAULT IS NOT REQUIRE SPECIAL SYNTAX
-# e.g. subscrib Email-address in the mail body
-
+### AUTO REGISTRAION
+#
+# MEMBER CHECK (DEFUALT) IS "$ML_MEMBER_CHECK = 1;"
+# AUTOMATIC REGISTRATION IS "$ML_MEMBER_CHECK = 0;"
+#
+# IN DEFAULT, no special syntax (subscribe keyword in body) is required
+# for automatic registration. BUT IF YOU LIKE, YOU CAN HAVE CHOICES.
+# TODAY I RECOMMENDS YOU "Confirmation Mode". For it you can set in the last
+#     &DEFINE_MODE('confirm'); (in the last of config.ph but before "1;") 
+#
 
 ML_MEMBER_CHECK:  1
 			# if non-nill, do a member check
