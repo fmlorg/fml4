@@ -1,7 +1,19 @@
 #!/usr/local/bin/perl
 
+# $Id$
+
+### CHECK COMPAT MODE;
+$compat_file = "cf/__compat__";
+if (-s $compat_file) {
+    $COMPAT = `cat $compat_file`;
+    chop $COMPAT;
+    $OPTIONS .= " --${COMPAT} ";
+}
+
+### PWD;
 chop($PWD = `pwd`);
 
+### Config file;
 $CONFIG_PH	= "$PWD/config.ph";
 if (-f $CONFIG_PH) { 
     require $CONFIG_PH;
@@ -26,7 +38,7 @@ $FMLSERVDIR =~ s#(\S+)/\S+#$1#;
 
 ($a, $d) = split(/@/,$ML);
 
-$EXECDIR        = $FMLDIR;
+$EXECDIR        = "$FMLDIR/src";
 $MLDIR          = $FMLDIR;
 $INCLUDEDIR     = "$FMLDIR/samples";
 $SAMPLE_DIR     = 'samples';
@@ -50,7 +62,7 @@ sub Conv
     local($file, $outfile) = @_;
 
     #printf STDERR "   %-30s => %s\n", $file, $outfile;
-    printf STDERR "   %-30s\n", $outfile;
+    printf "\t\t%-30s\n", $outfile;
 
     open(FILE, $file);
     open(OUT, "> $outfile") || die $!;
