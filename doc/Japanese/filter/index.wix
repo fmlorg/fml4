@@ -12,6 +12,9 @@
 .include content-handler.wix
 .include user.wix
 
+.appendix
+.include postfix.wix
+
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 .#          All rights reserved. 
