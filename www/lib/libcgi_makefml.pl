@@ -42,14 +42,17 @@ sub Parse
     $PROC      =~ tr/A-Z/a-z/;
 
     # For example:
-    #   REQUEST_URI  => /cgi-bin/fml/admin/makefml.cgi
-    #   HTTP_REFERER => https://beth/cgi-bin/fml/admin/menu.cgi
-    #   SCRIPT_NAME  => /cgi-bin/fml/admin/makefml.cgi
+    # * input ../ syntax  
+    # SCRIPT_FILENAME => /usr/local/fml/www/cgi-bin/admin/makefml.cgi
+    # SCRIPT_NAME => /cgi-bin/fml/admin/makefml.cgi
+    # HTTP_REFERER => http://beth.fml.org/cgi-bin/fml/admin/makefml.cgi
+    # REQUEST_URI => /cgi-bin/fml/../fml/admin/makefml.cgi
+    # 
     $SCRIPT_NAME  = $ENV{'SCRIPT_NAME'};
-    $REQUEST_URI  = $ENV{'REQUEST_URI'};
     $HTTP_REFERER = $ENV{'HTTP_REFERER'};
 
     # fix (tricky:-)
+    $SCRIPT_NAME  =~ s/makefml.cgi$/menu.cgi/;
     $SCRIPT_NAME  =~ s/makefml.cgi.+$/menu.cgi/;
     $HTTP_REFERER =~ s/makefml.cgi.+$/menu.cgi/;
     
@@ -374,10 +377,10 @@ sub Finish
 
 sub ShowReferer
 {
-    if ($HTTP_REFERER || $SCRIPT_NAME) {
+    if ($SCRIPT_NAME) {
 	print "<H2>\n";
 	print "<A HREF=\"";
-	print $HTTP_REFERER || $SCRIPT_NAME;
+	print $SCRIPT_NAME;
 	print "\">[back to main menu]</A>\n";
 	print "</H2>\n";
     }
