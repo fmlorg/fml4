@@ -246,10 +246,10 @@ sub SetTime
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($mtime))[0..6];
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			$year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,

@@ -12,11 +12,11 @@ if ($#ARGV >= 0 && $ARGV[0] =~ m/^-h/) {
     &usage;
 }
 
-foreach $i (sort {$a <=> $b} <[0-9]*>) {
+foreach $i (<[0-9]*>) {
     $msg{$i} = &scan($i);
 }
 
-foreach $msg (keys %msg) {
+foreach $msg (sort {$a <=> $b} (keys %msg)) {
     print $msg{$msg} . "\n";
     open(M, $msg) || die "cannot open $msg, $!\n";
     while (<M>) {
@@ -26,7 +26,7 @@ foreach $msg (keys %msg) {
 	print;
     }
     close(M);
-    print;
+    print "\n";
 }
 exit 0;
 
@@ -53,7 +53,9 @@ sub scan {
 	$from =~ s/(.*)\(.*\)/\1/;
     }
     ($day, $mday, $mon, $year, $time, $tz) = split(/[,\s]+/,$header{'date'});
-    if ($year < 100) {
+    if ($year < 50) {
+	$year += 2000;
+    } elsif ($year < 1900) {
 	$year += 1900;
     }
     return "From $from  $day $mon $mday $time $year";

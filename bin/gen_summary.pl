@@ -96,7 +96,7 @@ sub InitGenSummary
     # h:date -> Now 
     # Date: Fri, 28 Mar 97 01:31:00 +0900
     # 97/03/19 12:16:01 [1:fukachan@sappor] 
-    $DatePat = '(?:\w\w\w,\s)?(\d\d)\s(\w\w\w)\s(?:\d\d)?(\d\d)\s(\d\d):(\d\d):(\d\d)';
+    $DatePat = '(?:\w\w\w,\s)?(\d\d)\s(\w\w\w)\s(\d+)\s(\d\d):(\d\d):(\d\d)';
 }
 
 sub Ctl
@@ -142,12 +142,12 @@ sub Ctl
 	$s =~ s/^\s*//; # required???
 
 	# Date -> Now
-	# Date: Fri, 28 Mar 97 01:31:00 +0900
+	# Date: Fri, 28 Mar 1997 01:31:00 +0900
 	# $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-	# $year, $mon + 1, $mday, $hour, $min, $sec);
+	# $year % 100, $mon + 1, $mday, $hour, $min, $sec);
 	if ($Envelope{"h:date:"} =~ /$DatePat/) {
 	     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-			    $3, $Month{$2}, $1, $4, $5, $6);
+			    $3 % 100, $Month{$2}, $1, $4, $5, $6);
 	}
 
 	printf "%s [%d:%s] %s\n", $Now, $ID, substr($from, 0, 15), $s;
@@ -193,10 +193,10 @@ sub SetTime
     
     ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime($mtime))[0..6];
     $Now = sprintf("%02d/%02d/%02d %02d:%02d:%02d", 
-		   $year, $mon + 1, $mday, $hour, $min, $sec);
+		   ($year % 100), $mon + 1, $mday, $hour, $min, $sec);
     $MailDate = sprintf("%s, %d %s %d %02d:%02d:%02d %s", 
 			$WDay[$wday], $mday, $Month[$mon], 
-			$year, $hour, $min, $sec, $TZone);
+			1900 + $year, $hour, $min, $sec, $TZone);
 
     # /usr/src/sendmail/src/envelop.c
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
