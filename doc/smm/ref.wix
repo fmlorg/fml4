@@ -14,18 +14,31 @@ S. J. Leffler, M. K. McKusick, M. J. Karels and J. S. Quarterman,
 "The design and implementation of the 4.3BSD UNIX Operating System"
 (Addison-Wesley, , 1989).
 
+＃邦訳:『4.3BSDの設計と実装』。
+
+J.Lions,
+"Lions' Commentary on UNIX 6th Edition with Source Code"
+(Peer-to-Peer Communications, , 1996)
+
+＃邦訳:
+＃	``Lion's Commentary on UNIX''
+＃	J.Lions 著/ 岩本信一訳
+＃	アスキー出版局
+
 W. R. Stevens, 
 "UNIX Network Programming" 
 (A Simon \& Schuster Company, NJ, 1990)
 .l	book-unix-network-programming
 
-なお邦訳は(``UNIXネットワークプログラミング
-W.リチャード・スティーヴンス 著／篠田 陽一 訳
- プリンティスホール／トッパン 定価7,900円
-ISBN4-8101-8509-5'').
+＃邦訳:
+＃	``UNIXネットワークプログラミング 
+＃	W.リチャード・スティーヴンス 著／篠田 陽一 訳
+＃	 プリンティスホール／トッパン 定価7,900円
+＃	ISBN4-8101-8509-5''
 
 perl texinfo in Japanee --- version 4.0.19.2
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
+
 
 .S	参考文献(RFC)
 =E.S	References: RFC
@@ -39,7 +52,7 @@ rfc974				MAIL ROUTING AND THE DOMAIN SYSTEM
 rfc934				Proposed Standard for Message Encapsulation
 rfc1153				digest format
 
-rfc1425-1428				ESMTP
+rfc1425-1428			ESMTP
 
 1495  PS  H. Alvestrand, S. Kille, R. Miles, M. Rose, S. Thompson, "Mapping  
            between X.400 and RFC-822 Message Bodies", 08/26/1993. (Pages=15) 
@@ -61,6 +74,13 @@ rfc1425-1428				ESMTP
            Service Extensions", 07/18/1994. (Pages=11) (Format=.txt) 
            (Obsoletes RFC1425) (Obsoleted by RFC1869) 
 
+2033 Local Mail Transfer Protocol. J. Myers. October 1996. (Format:
+     TXT=14711 bytes) (Status: INFORMATIONAL)
+
+2034 SMTP Service Extension for Returning Enhanced Error Codes. N.
+     Freed. October 1996. (Format: TXT=10460 bytes) (Status: PROPOSED
+     STANDARD)
+
 2049  DS  N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions  
            (MIME) Part Five:  Conformance Criteria and Examples", 
            12/02/1996.  (Pages=24) (Format=.txt) (Obsoletes RFC1521) 
@@ -81,6 +101,17 @@ rfc1425-1428				ESMTP
            (MIME) Part One:  Format of Internet Message Bodies", 12/02/1996.  
            (Pages=31) (Format=.txt) (Obsoletes RFC1521) 
 
+2184 MIME Parameter Value and Encoded Word Extensions: Character Sets,
+     Languages, and Continuations. N. Freed, K. Moore. August 1997.
+     (Format: TXT=17635 bytes) (Obsoletes RFC2184) (Obsoleted by RFC2184,
+     RFC2231) (Updates RFC2045, RFC2047, RFC2183) (Status: PROPOSED
+     STANDARD)
+
+2231 MIME Parameter Value and Encoded Word Extensions: Character Sets,
+     Languages, and Continuations. N. Freed, K. Moore. November 1997.
+     (Format: TXT=19280 bytes) (Obsoletes RFC2184) (Updates RFC2045,
+     RFC2047 RFC2183) (Status: PROPOSED STANDARD)
+
 
 [IP Address]
 
@@ -96,6 +127,8 @@ rfc1425-1428				ESMTP
 
 以下RFCのインターネットスタンダード集より関係ありそうな部分のみの抜粋
 ＃ 96/9/14記
+=E
+(checked on 96/09/14)
 
 0001 INTERNET OFFICIAL PROTOCOL STANDARDS. J. Postel, Editor. February
      1997. (Format: TXT=121356 bytes) (Obsoletes RFC1920, 1880, 1800,
@@ -192,7 +225,7 @@ Message-ID: <HIRANO.91May1105615@azabu.tkl.iis.u-tokyo.ac.jp>
 =E
 You can see my papers at
 
-.url http://www.fml.org/PAPERS/
+.url http://www.sapporo.iij.ad.jp/staff/fukachan/PAPERS/
 
 にあります。メーリングリストの挙動と 1/fゆらぎ に関しての論文は
 =E
