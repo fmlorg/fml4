@@ -67,6 +67,21 @@ sub Init
 
     # signal handling
     $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'CleanUp';
+
+    # copy %ENV
+    my $key;
+    for $key (
+	      'REQUEST_METHOD',
+	      'CONTENT_LENGTH',
+	      'QUERY_STRING',
+	      'REQUEST_URI',
+	      ) {
+	$SavedENV{ $key } = $ENV{ $key };
+    }
+
+    $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
+    $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
+    $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 }
 
 
@@ -376,15 +391,15 @@ sub GetBuffer
 
     $GETBUFLEN = $GETBUFLEN || 2048;
     
-    $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
+    $SavedENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
 
-    if ($ENV{'REQUEST_METHOD'} eq "POST") {
-	my $len = $ENV{'CONTENT_LENGTH'};
+    if ($SavedENV{'REQUEST_METHOD'} eq "POST") {
+	my $len = $SavedENV{'CONTENT_LENGTH'};
 	$len    = $len < $GETBUFLEN ? $len : $GETBUFLEN;
 	read(STDIN, $buffer, $len);
     }
     else {
-	$buffer = $ENV{'QUERY_STRING'};
+	$buffer = $SavedENV{'QUERY_STRING'};
     }
 
     if (length($buffer) > $GETBUFLEN) {
