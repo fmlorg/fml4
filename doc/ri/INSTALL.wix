@@ -1,6 +1,5 @@
 		INSTALL of fml
 
-
 .C	Introduction
 
 まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.x.. という名前
@@ -26,7 +25,7 @@ cf directory にいって、sample をコピーして、適当な名前にしておきます。
 
 別に cf へ移動しなくても構わないのですが、後々のメンテ（複数のメーリン
 グリストを管理する等）を考えると、
-大元の configuration files を一箇所で面倒見たほうがいいでしょう。
+大元の configuration files を一箇所で面倒見たほうがいいでしょ？
 
 Elena の中身は必須の変数の設定だけが書かれています。
 (perl と同様に行の # 以降の部分はコメントです。無視してください)
@@ -356,3 +355,6 @@ tmp		temporary に使う
 
 
 					Please enjoy!
+
+Last Modified
+$Id$

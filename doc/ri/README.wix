@@ -186,7 +186,7 @@ fml-support@phys.titech.ac.jp は fml の議論？のＭＬです
 
 
 	 
-１．ｈｏｗ　ｔｏ　ｉｎｓｔａｌｌ
+.S	How to install
 
 まずperlとsendmailが必要です。私のテスト環境は
 	sendmail 8.6.12+2.4W, perl4.036 on NEWS-OS 4.2R 
@@ -256,12 +256,12 @@ current でドキュメントがおいつかない部分は INFO（fml@phys.titechで返す
 ＃サーバ本体と関係ないもの若干は ./bin の下に移動したものもあります。
 
 
-２．配布条件
+.S	配布条件
 
 GPL(GNU Public License)に従うこと。COPYINGを読んでください
 
 
-３．Acknowledgement 
+.S	Acknowledgement 
 
 I thank a lot of people valuable comments, suggestions, contributions
 of bug reports, fixes and patches both on fml-support ML and with
@@ -281,8 +281,10 @@ discussion on the design and implementation of Mailing List server,
 perl, operating systems and so on.
 
 
-４． Changes
+.S	Changes
 
 Please see CHANGES and RELEASE_NOTES
 
 
+Last Modified
+$Id$
