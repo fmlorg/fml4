@@ -3,10 +3,7 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-local($id);
-
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+# $Id$;
 
 
 sub DoDistribute
@@ -194,7 +191,7 @@ sub DoDistribute
 
     # Server info to add
     $e{'h:X-MLServer:'}  = $Rcsid if $Rcsid;
-    $e{'h:X-MLServer:'} .= "\n\t($rcsid)" if $debug;
+    $e{'h:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $e{"h:$XMLCOUNT:"}   = $id || sprintf("%05d", $ID); # 00010;
     $e{"h:X-ML-Info:"}   = &GenXMLInfo;
 
