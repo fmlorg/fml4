@@ -4,7 +4,6 @@
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 
-
 # $Id$;
 
 &Ftpmail_00 if $LOAD_LIBRARY eq 'libftpmail.pl';
