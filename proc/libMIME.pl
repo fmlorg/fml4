@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libMIME.pl,v 2.15.2.4 2003/12/08 13:38:19 fukachan Exp $
 #
 
 use vars qw($debug 
@@ -109,7 +109,7 @@ sub DecodeMimeString
 
     use Mail::Message::Encode;
     my $encode = new Mail::Message::Encode;
-    return $encode->decode_mime_string($buf);
+    return $encode->decode_mime_string($buf, 'jis');
 }
 
 
