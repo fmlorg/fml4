@@ -11,6 +11,8 @@
 	correctness. apply patches in
 	fml-support: 09026, 09027 by OGAWA Kunihiko <kuni@edit.ne.jp>
 
+  fix internal to make fml/ml-admin/ ... hier
+
 2000/11/07
 
   drafts/English/
