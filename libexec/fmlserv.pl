@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # $Id$;
-$Rcsid = 'fmlserv 2.1A';
+$Rcsid = 'fmlserv 2.2A';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
@@ -167,7 +167,7 @@ sub FmlServ
     # Envelope{Body} => %ReqInfo (Each ML)
     #                   @ReqInfo (fmlserv commands) 
     # 
-    &SortRequest(*Envelope, *MailList, *ReqInfo);
+    &SortRequest(*Envelope, *MailList, *ReqInfo, *TraceInfo);
 
     ### 05: REFUGING THE CURRENT NAME SPACE, GO EACH ML NAME SPACE; 
     ### 
@@ -197,6 +197,9 @@ sub FmlServ
 
 	$proc = $ReqInfo{$ml};	  # requests
 
+	&Mesg(*e, "\n<<<< Process requests for '$ml' ML");
+	&Mesg(*e, $TraceInfo{$ml});
+
 	# Load $ml NAME SPACE from $list/config.ph
 	next if ! -f $cf;
 	&MLContextSwitch($DIR, $ml, *e);
@@ -221,8 +224,8 @@ sub FmlServ
 	&ReloadMySelf;
 
 	### Processing $proc For $ml ###
-	# DoFmlServProc emulation;
-	&DoFmlServProc($ml, $proc, *e);
+	# ProcessEachMLReq is an emulation for each ML;
+	&ProcessEachMLReq($ml, $proc, *e);
 
 	### alloc $ml NAME SPACE for mget;
 	# attention here; we do not set $FML_EXIT_HOOK
@@ -332,7 +335,7 @@ sub FmlServ
 	$e{'message:append:files'} .= "$;$FMLSERV_DIR/help";
     }
 
-    &Mesg(*e, "*** Processing Done.");
+    &Mesg(*e, "\n*** Processing Done.");
 
     # IF HELP ONLY, DO NOT &Notify
     if ($help_only && (! $proc_count)) {
@@ -342,7 +345,7 @@ sub FmlServ
     # The first reply message;
     # preparation for &Notify;
     $e{'message'} = 
-	"Fmlserv (Fml Listserv-Like Interface) Results:\n$e{'message'}";
+	"FMLSERV (FML Listserv Style Interface) Results:\n$e{'message'}";
 }
 
 
@@ -386,7 +389,8 @@ sub DoFmlServItselfFunctions
 	    # REPORT IF REPLY IS DEFINED?
 	    # if($Procedure{"r#fmlserv:$_"}){&Mesg(*e,"\n${ml}> $org_str");}
 	    # Anyway We REPORT ALWAYS Anything!
-	    &Mesg(*e, "\nfmlserv> $org_str");
+	    &Mesg(*e, "<<<< Process fmlserv command");
+	    &Mesg(*e, " <<< $org_str");
 
 	    ### Procedures is lower-case;
 	    tr/A-Z/a-z/;
@@ -416,12 +420,12 @@ sub DoFmlServItselfFunctions
 }
 
 
-sub DoFmlServProc
+sub ProcessEachMLReq
 {
     local($ml, $proc, *e) = @_;
     local($sp, $guide_p, $auth, $badproc);
 
-    &Debug("FmlServ::DoFmlServProc($ml, $proc, *e);") if $debug;
+    &Debug("FmlServ::ProcessEachMLReq($ml, $proc, *e);") if $debug;
 
     # reset arrays since fmlserv handles several different ML's;
     undef @MEMBER_LIST;
@@ -436,13 +440,11 @@ sub DoFmlServProc
     if ($auth) {
 	local($req);
 	$MesgTag = $ml;
-	&Mesg(*e, "*** Processing command(s) for <$ml> ML");
+	# &Mesg(*e, "*** Processing command(s) for <$ml> ML");
 
-	# for $req (split(/\n/, $proc)) {
-	# for (split(/\n/, $req)) { &Mesg(*e, "${ml}> $_");}
-	# }
+	for $req (split(/\n/, $proc)) { &DoProcedure($req, *e);}
+	# &DoProcedure($proc, *e);
 
-	&Command($proc);
 	undef $MesgTag;
     }
     else {
@@ -455,11 +457,11 @@ sub DoFmlServProc
 	for (split(/\n/, $proc)) {
 	    $buf = $_; # preserve;
 
-	    &Debug("DoFmlServProc($_)") if $debug;
+	    &Debug("ProcessEachMLReq($_)") if $debug;
 	    s/\s+$//;		# cut the \s+
 
-	    &Mesg(*e, "\n${ml}> $_");
-	    &Debug("DoFmlServProc::$_()") if $debug;
+	    &Mesg(*e, "\n>>> $_");
+	    &Debug("ProcessEachMLReq::$_()") if $debug;
 	    
 	    if (/^(guide|info)/i)    { 
 		&GuideRequest(*e); # bug fix 97/10/24 ando@iij-mc.co.jp
@@ -485,9 +487,8 @@ sub DoFmlServProc
 		next;
 	    }
 
-	    &Debug("DoFmlServProc::$_(){YOU ARE NOT MEMBER($ml)") if $debug;
-
-	    &Mesg(*e, "*** [$_] FORBIDDEN FOR NOT MEMBER OF ML[$ml]");
+	    &Debug("ProcessEachMLReq::$_(){YOU ARE NOT MEMBER($ml)") if $debug;
+	    &Mesg(*e, "   forbidden since you are not member of '$ml' ML");
 	}
     }
 }
@@ -629,7 +630,7 @@ sub MLExistP
 # ATTENTION! "cut the first #.. syntax"
 sub SortRequest
 {
-    local(*e, *MailList, *ML_cmds) = @_;
+    local(*e, *MailList, *ML_cmds, *TraceInfo) = @_;
     local($cmd, $ml, @p, $s, $k, $v);
 
     for (split(/\n/, $e{'Body'})) {
@@ -659,7 +660,9 @@ sub SortRequest
 	# $ml is non-nil and the ML exists
 	if (&MLExistP($ml)) {
 	    $ML_cmds{$ml}     .= "$cmd @p\n";
-	    $ML_cmds_log{$ml} .= "${ml}> $cmd $ml @p\n";	    
+	    $ML_cmds_log{$ml} .= "${ml}> $cmd $ml @p\n";
+	    $TraceInfo{$ml}   .= "\n" if $TraceInfo{$ml};
+	    $TraceInfo{$ml}   .= " <<< $_";
 	}
 	# LISTSERV COMPATIBLE: COMMANDS SINCE NO EXPILICIT ML.
 	else {
@@ -677,13 +680,14 @@ sub SortRequest
 		next;
 	    }
 
-	    &Mesg(*e, "\nfmlserv> $_");
+	    &Mesg(*e, "<<<< Process fmlserv command");
+	    &Mesg(*e, " <<< $_");
 
 	    if ($ml) {
-		&Mesg(*e, "   Ignore request since ML[$ml] is unknown.\n");
+		&Mesg(*e, "   ignore request since no such '$ml' ML exists.\n");
 	    }
 	    else {
-		&Mesg(*e, "   Unknown fmlserv commands");
+		&Mesg(*e, "   unknown fmlserv commands");
 	    }
 	}
     }    
@@ -971,7 +975,10 @@ sub main'LoadMLNS
     # load the presnet directry information (tricky?)
     $ml'DIR = $main'DIR;
 
-    $file = $history{$file} ? "/../$file" : $file;
+    delete $INC{$file};
+    if ($INC{$file}) { # if failed, mandatory loading config.ph
+	$file = $history{$file} ? "/../$file" : $file;
+    }
     $history{$file} = 1;
     eval("require '$file';");
     &Log($@) if $@;
@@ -1026,5 +1033,7 @@ sub DEFINE_FIELD_ORIGINAL { 1;}
 sub DEFINE_FIELD_OF_REPORT_MAIL  { 1;}
 sub ADD_FIELD     { 1;}
 sub DELETE_FIELD  { 1;}
+sub ml'Log { &main'Log(@_);}
+
 
 1;
