@@ -179,7 +179,7 @@ sub ModeratedDeliveryTypeII
 
     local($r, $info);
 
-    $r = &Translate(*e, $NULL, 
+    $r = &Translate(*e, 'submission request', 
 		    'moderator.submission', 
 		    $e{'CtlAddr:'});
 
@@ -329,22 +329,22 @@ sub ModeratorProcedure
 	    else {
 		&Log("ERROR: moderator: no such id=$id");
 		&Mesg(*e, ">>> $Fld");
-		&Mesg(*e, "ERROR: moderator: no such id=$id");
-		&Mesg(*e, $NULL, 'moderator.no_such_id', $id);
+		&Mesg(*e, "ERROR: moderator: no such id=$id", 
+		      'moderator.no_such_id', $id);
 	    }
 	}
 	else {
 	    &Log("ERROR: moderator: id=$id syntax is illegal");
 	    &Mesg(*e, ">>> $Fld");
-	    &Mesg(*e, "ERROR: moderator: id=$id syntax is illegal");
-	    &Mesg(*e, $NULL, 'moderator.id.error');
+	    &Mesg(*e, "ERROR: moderator: id=$id syntax is illegal",
+		  'moderator.id.error');
 	}
     }
     else {
 	&Log("ERROR: moderator: $Fld[2] is unknown command.");
 	&Mesg(*e, ">>> $Fld");
-	&Mesg(*e, "ERROR: moderator: $Fld[2] is unknown command.");
-	&Mesg(*e, $NULL, 'no_such_command', $Fld[2]);
+	&Mesg(*e, "ERROR: moderator: $Fld[2] is unknown command.", 
+	      'no_such_command', $Fld[2]);
     }
 }
 

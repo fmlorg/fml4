@@ -1,0 +1,12 @@
+moderator.submission:
+	To moderators:
+	Hi, I am "fml". I forward submission request to you.
+	If you certified this mail, please send the following keyword
+	to address <_ARG0_>.
+	Caution: send KEYWORD ONLY !
+
+moderator.no_such_id:
+	no such ID=_ARG0_
+
+moderator.id.error:
+	wrong ID=_ARG0_
