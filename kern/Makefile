@@ -203,9 +203,7 @@ contents: FAQ
 	egrep '^[0-9]\.' | perl -nle '/^\d\.\s/ && print ""; print $_'
 
 check:	fml.pl
-	(for x in *.pl bin/*pl sbin/*pl sbin/ccfml sbin/makefml proc/*.p? libexec/*.p? ; do perl4.036 -c $$x; perl5.003 -c $$x ;done)
-	@ echo "gmake varcheck IS ALSO USEFUL"
-#	(for x in `sh sbin/bin.list.sh` ; do perl -c $$x;done)
+	sh usr/sbin/check.sh
 
 c:	*.p?
 	(2>&1; for x in *.p? ; do perl -cw $$x ; done ) |\
@@ -303,3 +301,8 @@ init-makefml:
 ci:
 	ci *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
 	chmod 755 fml.pl msend.pl libexec/*pl
+
+rd:
+	perl usr/bin/rdiff.pl *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
+
+
