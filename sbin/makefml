@@ -473,23 +473,23 @@ sub SetHashDefaults
 		    'show',     'do_show',
 
 		    'config',   'do_config',
-		    '5#config ML', 'configure the fundamental of <ML>',
+		    '5001#config ML', '[menu] to configure <ML> fundamental',
 		    'edit',   'do_edit',
-		    '5#edit ML', "edit <ML>'s file under lock (default config.ph)",
+		    '5000#edit ML', "edit <ML>'s file under lock (default config.ph)",
 
 		    'new',      'do_newml',
 		    'newml',    'do_newml',
-		    '1#newml ML',   'make a new Mailing List <ML>',
+		    '10#newml ML',   'make a new Mailing List <ML>',
 
 		    # admin command (main)
 		    'add',      'do_adduser',
-		    '2#add ML address',     'add <address> to <ML>',
+		    '20#add ML address',     'add <address> to <ML>',
 		    'adduser',  'do_adduser',
-		    '2#adduser ML address', 'add <address> to <ML>',
+		    '20#adduser ML address', 'add <address> to <ML>',
 		    'bye',      'do_byeuser',
-		    '3#bye ML address',     'remove <address> from the <ML>',
+		    '30#bye ML address',     'remove <address> from <ML>',
 		    'byeuser',  'do_byeuser',
-		    '3#byeuser ML address', 'remove <address> from the <ML>',
+		    '30#byeuser ML address', 'remove <address> from <ML>',
 
 		    # admin command (sub)
 		    'on',     'do_on',
@@ -497,19 +497,24 @@ sub SetHashDefaults
 		    'chaddr', 'do_chaddr',
 		    'matome', 'do_matome',
 		    'digest', 'do_digest',
+		    '40#on  ML address', 'on  <address>',
+		    '40#off ML address', 'off <address>',
+		    '45#chaddr ML old new', 'change address <old> => <new>',
+		    '48#matome ML addr [opt]', 'set up digest(matome) for address <addr>',
+		    '48#digest ML addr [opt]', 'set up digest(matome) for address <addr>',
 
 		    'addadmin', 'do_addadmin',
-		    '4#addadmin ML address', 'add <address> as an admin to <ML>',
+		    '60#addadmin ML address', 'add <address> as an admin to <ML>',
 		    'byeadmin', 'do_byeadmin',
-		    '4#byeadmin ML address', 'remove the administrator of the <ML>',
+		    '60#byeadmin ML address', 'remove the administrator of <ML>f',
 
 		    'help',	'do_info',
-		    '8#help',	'help message',
+		    '80#help',	'help message',
 		    'passwd',	'do_passwd',
-		    '8#passwd ML address',	'to change the administrator passwd',
+		    '80#passwd ML address',	'to change the administrator passwd',
 
 		    'test',	'do_test',
-		    '8#test ML',	'test ',
+		    '80#test ML',	'test ',
 
 		    'fmlserv',  'do_fmlserv',
 		    'listserv', 'do_fmlserv',
@@ -521,32 +526,33 @@ sub SetHashDefaults
 
 		    # PGP
 		    'pgp',	'do_pgp',
-		    '9#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
+		    '90#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
 
 		    'delivery_mode',  'do_delivery_mode',
 
-		    '10#fmlserv', 'set up fmlserv (listserv-like command interface)',
-		    '10#listserv','set up fmlserv (listserv-like command interface)',
-		    '10#majordomo','set up fmlserv (listserv-like command interface)',
+		    '100#fmlserv', 'set up fmlserv (listserv-like command interface)',
+		    '100#listserv','set up fmlserv (listserv-like command interface)',
+		    '100#majordomo','set up fmlserv (listserv-like command interface)',
 
 		    # misc
 		    'lock', 'do_lock',
-		    '11#lock ML', 'lock <ML>',
+		    '110#lock ML [time]', 'lock <ML> for <time> (default 3600) sec.',
 
 		    # extension/special
 		    'qmail-setup', 'do_qmail_setup',
 
 		    # edit $EXEC_DIR/drafts/* $EXEC_DIR/etc/makefml/cf
 		    'edit-template',   'do_edit_template',
-		    '20#edit-template', 'edit template file under locked state',
+		    '200#edit-template', 'edit template file under locked state',
 		    'config-template', 'do_config_template',
-		    '20#config-template', 'configure template cf file',
+		    '200#config-template', 'configure template cf file',
 
 		    'command', 'do_command',
+		    '1000#command ML addr ...', 'e.g. "command ML address mget last:3 mp"',
 
 		    # create document templates
 		    'create-doc-template',    'do_create_doc_template',
-		    '30#create-doc-template', 'create document templates e.g. help, guide, ...',
+		    '300#create-doc-template', 'create document templates e.g. help, guide, ...',
 
 		    # conversion
 		    'conv', 'do_conv',
@@ -2031,7 +2037,8 @@ sub do_info
     print STDERR "*" x 60; print STDERR "\n";
     print STDERR "\n";
     print STDERR "HOW TO INSTALL:\n";
-    print STDERR "Please input \"perl makefml install\" to INSTALL the fml\n";
+    print STDERR "\"perl makefml install\" to INSTALL the fml\n";
+    print STDERR "\"perl makefml config <ML>\" to go to the menu screen\n";
     print STDERR "\n";
 }
 
