@@ -428,7 +428,8 @@ sub InitConfig
 
     # XXX SetDefaults but works after &__LoadConfiguration, so defined here.
     # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
-    &DEFINE_FIELD_LOOP_CHECKED('from');
+    # disabled by fukachan (2000/06/19), PR8220 pointed out by MURASHITA Takuya
+    # &DEFINE_FIELD_LOOP_CHECKED('from');
 
     # $FML for process table readability
     if ($0 =~ m%^(.*)/(.*)%) { $FML = $2;}
