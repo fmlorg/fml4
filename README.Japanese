@@ -1,7 +1,8 @@
-FYI: THIS FILE IS "EUC-JAPAN".
+CAUTION: THE CODE OF JAPANESE IN THIS FILE IS "EUC-JAPAN".
 
 
 		CVS repository のいじり方
+
 					Ken'ichi Fukamachi
 
 
@@ -66,8 +67,8 @@ FYI: THIS FILE IS "EUC-JAPAN".
 
    % cvs -d cvs.fml.org:/cvsroot co fml
    % make build
-   % echo 3.0.x > conf/release
-   % echo 3.0.x > conf/release_version
+   % echo 4.0.x > conf/release
+   % echo 4.0.x > conf/release_version
    % make release
 
 
