@@ -2318,11 +2318,11 @@ sub Conv
     print STDERR "\t$out\n" if $debug0;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	$PERL_PATH = &__SearchPath('perl.exe');
+	$PERL_PATH = $^X;
 	$USER = $USER || $ENV{'USERNAME'};
     }
     else {
-	$PERL_PATH = &__SearchPath('perl');
+	$PERL_PATH = $^X;
 	$uid   = $uid || (getpwuid($<))[2];
 	$gid   = $gid || (getpwuid($<))[3];
     }
@@ -4699,21 +4699,6 @@ sub PerlModuleExistP
 sub MakeConfigPH
 {
     local($config, $manifest, $cf, $config_ph, $preamble) = @_;
-    local($perl);
-
-    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
-	$perl = &__SearchPath('perl.exe');
-    }
-    else {
-	$perl = &__SearchPath('perl');
-    }
-
-    if (! $perl) { 
-	&Log("ERROR: makefml cannot find perl");
-	print STDERR "I cannot find perl!! Dead Ends!\n";
-	print STDERR "Hence I cannot make config.ph.\n";
-	return "";
-    }
 
     if ($cf) {
 	print STDERR "\n   Create config.ph($config_ph):\n";
@@ -4729,7 +4714,7 @@ sub MakeConfigPH
 
     $cf = $cf || "-i";
 
-    if (! open(EXEC_CF, "$perl $config -m $manifest $cf|")) {
+    if (! open(EXEC_CF, "$^X $config -m $manifest $cf|")) {
 	&Log("ERROR: cannot exec $config -m $manifest $cf");
 	&Warn("cannot exec $config -m $manifest $cf");
 	return $NULL;
@@ -4797,7 +4782,7 @@ sub MakeConfigPH
 
 	if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	    print STDERR "failed:";
-	    print STDERR "   $perl $config -m $manifest $cf > $config_ph\n\n";
+	    print STDERR "   $^X $config -m $manifest $cf > $config_ph\n\n";
 	}
 	return $NULL;
     }
