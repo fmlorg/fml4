@@ -5,6 +5,15 @@
 =E
 				Ken'ichi Fukamachi
 
+	makefml
+		use $DIR/cf value in 'y/n' case
+
+		y/nでメニューに答える時はcfにある値をデフォールト値として
+		メニューにだす
+
+	MesgLE
+		add some debug code
+
 [ 3.0pl#23 == 3.0.1_BETA #12 ]
 
 	clean up documents
