@@ -3,6 +3,14 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/09/27
+
+   nuke <LIMIT> in .htaccess
+
+2000/09/26
+
+   import Jcode.pm 0.60 to cvs tree
+
 2000/09/24
 
    fix include-outgoin template permission and other problems
