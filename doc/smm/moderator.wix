@@ -1,10 +1,11 @@
 .C	モデレーター
 =E.C	Moderator
 .l	moderators
+.l	moderator
 
 .S	Overview
 
-モデレーターは
+モデレーター機能は、以下のような査読投稿システムです。
 =E
 In Moderator mode (moderation for posted articles)
 
@@ -15,17 +16,17 @@ In Moderator mode (moderation for posted articles)
 	  ＭＬ全体へ配送されます。	
 	 (このキーワードを送る方法については後述します)
 =E
-	1 posted mail is not delivered to members.
-	2 the mail is forwarded to moderators
+	1 posted mail to ML is not delivered to members.
+	2 the mail is forwarded to moderators.
 	3 moderator certifies the content. If he accepts it,
-	  he sends back a keyword to ML server which the keyword
-	  is attached in a mail from your FML server(described after).
+	  he sends back a keyword of certification to ML server.
+	  FML server (described below) notifies the keyword/password to you.
 
 変数は config.ph で
 =E
-FML runs in moderator mode if in config.ph
+FML runs under moderator mode if in config.ph
 
-$PERMIT_POST_FROM              = "moderator";
+	$PERMIT_POST_FROM              = "moderator";
 
 となっている状態です。makefml config の設定画面では
 =E
@@ -54,19 +55,19 @@ $MAIL_LIST も # moderator コマンドは理解してしまいます。このままでもい
 いような気がしてそうなってます。$PERMIT_COMMAND_FROM が moderators は
 tricky なことをしているので、ちょっとねぇ…
 
-
 .S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 2 デフォールト)
 =E.S	Certification ($MODERATOR_FORWARD_TYPE == 2 default)
 
 $MODERATOR_FORWARD_TYPE という変数があります。デフォールトは２です。
-デフォールトについて説明します。２以外は doc/op (WWW なら 
+デフォールトについて説明します。２以外は doc/op.jp (WWW なら 
 http://www.fml.org/fml/op/) を見て下さい。
 =E
-FML has two kinds of certifications.  The type differs following
-$MODERATOR_FORWARD_TYPE.  When $MODERATOR_FORWARD_TYPE is type I, you
-should send back remote administrator password with Approval: password
-in the header.  When $MODERATOR_FORWARD_TYPE is type II, you receive
-the following mail from FML when an article is submitted.
+FML has several kinds of certifications. The type differs following
+$MODERATOR_FORWARD_TYPE. When $MODERATOR_FORWARD_TYPE is type I, you
+send back a submitted mail to ML with a field "Approval:
+remote-administrator-password" in the header.  When
+$MODERATOR_FORWARD_TYPE is type II, you receive the following mail
+from FML when an article is submitted.
 
 次のようなメールがモデレーターに来ます。
    
@@ -81,7 +82,7 @@ the following mail from FML when an article is submitted.
    # moderator certified 199711032027.709982
    
    ------- Forwarded Message
-   
+
    メール本文
 =E
    a submitted mail
@@ -90,7 +91,7 @@ the following mail from FML when an article is submitted.
 
 メールはＭＬサーバも保存しています。メール本文の内容を承認したなら、
 =E
-If the moderator certifies the content, he should send the "moderator"
+If the moderator certifies the content, he/she sends the "moderator"
 keyword line to elena-ctl@fml.org.
 
 # moderator certified 199711032027.709982
@@ -104,27 +105,26 @@ keyword line to elena-ctl@fml.org.
 =E
 Who is a moderator? When $MODERATOR_FORWARD_TYPE is type II, it is
 members which the keyword and notification is sent to. In default a
-moderator is the ML maintainer $MAINTAINER. If the file
-$DIR/moderators exists, the forwarded mail described above is sent to a
-list in $DIR/moderators. Hence people who receive the mail are
-moderators since password (one time) is seen in this mail.
-When $MODERATOR_FORWARD_TYPE is type I, moderators should know the
-password to add Approval: field.
+moderator is the ML maintainer, $MAINTAINER. If the file
+$DIR/moderators exists, the forwarded mail described above is sent to
+members in a list, $DIR/moderators. Hence people who receive the mail
+are moderators since a password (one time) is seen in this mail. When
+$MODERATOR_FORWARD_TYPE is type I, moderators are people who can know
+the password to add "Approval:" field.
 
-このメールが送られてくる人はは誰でもモデレーターになれます。デフォール
-トは $MAINTAINER ですが、複数の人をモデレーターにするなら moderators 
-というファイルを作り、actives や members のように一行一アドレス書いて
-いって下さい。
-
+このメールが送られてくる人は誰でもモデレーターになれます。デフォールト
+は $MAINTAINER ですが、複数の人をモデレーターにするなら moderators と
+いうファイルを作り actives や members のように一行一アドレス書いていっ
+て下さい。
 
 .S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 1 もしくは 未定義)
-=E.S	How to certify
+=E.S	How to Certify ($MODERATOR_FORWARD_TYPE == 1)
 
 承認を求めるメールがフォワードされるのは $MAINTAINER です。承認したか
 否かはパスワード認証になります。パスワードを知っている人がモデレータと
 いえます。ＭＬサーバへ送るメールのヘッダに Approval: line をつけて
 =E
-The forwared mail is sent to $MAINTAINER or members in
+The forwarded mail is sent to $MAINTAINER or members in
 $DIR/moderators. When $MODERATOR_FORWARD_TYPE is type I, you should
 send back remote administrator password with Approval: password in the
 header.
@@ -138,12 +138,12 @@ header.
 問題としては
 =E
 The problem is to use password in the header. When an error occurs,
-postmaster can read passwords in a header.
+postmaster can read a password in a header.
 
 	Approval: password をつかうのはいやだ
 	＃こういう実装はいやなんだけど、してるだけ
 
-	ださいMUA(メールインターフェイス)がある
+	ださいMUA(メールユーザインターフェイス)がある
 
 などがあるので回避策の一つとして
 =E
@@ -167,6 +167,15 @@ Example:
 	# admin pass approval-password
 	# admin forward
 	mail body (certified article sent to ML)
+
+.S	承認の仕方 ($MODERATOR_FORWARD_TYPE == 3 もしくは 未定義)
+=E.S	How to Certify ($MODERATOR_FORWARD_TYPE == 3)
+
+Type III は I の変形です。パスワードを知っている人(モデレータ)は査読に
+関わらず出せます。
+=E
+Type III is a variation of type I. A mail from a moderator pass
+through without certification.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

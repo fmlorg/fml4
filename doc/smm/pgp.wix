@@ -7,8 +7,10 @@
 .l	pgp
 
 注意: 以下では公開鍵暗合やPGPについては既知のものとしています。
+PGP 2.6.3ui を使っています。PGP 5 には対応していません。
 =E
-Attention: We assume you know PGP well.
+Attention: I assume you know PGP well. I checked a combination of FML
+and PGP 2.6.3ui but not PGP 5.
 
 公開鍵暗合の代表的な応用例。
 PGP自体についてはここでは解説しませんが、例えば参考文献としては
@@ -16,13 +18,12 @@ PGP自体についてはここでは解説しませんが、例えば参考文献としては
 	O'Reilly の PGP
 	MIT Press (かな？)の P.Zimmerman の PGP Manual (だっけ？) 
 
-
 .S	PGP での認証に基づくリモート管理
 =E.S	PGP Authenticated Remote Administration
 
 PGPベースで考えると簡単に思いつく自明な解が二通りあります。
 =E
-Answers based on PGP are as follows:
+Apparent answers based on PGP are as follows:
 
 1	本文に clear signed して、signature が登録されているか否か
 =E
@@ -33,19 +34,17 @@ Answers based on PGP are as follows:
 =E
 Administrators are people whose public keys the server knows.
 
-sniffer すれば本文は見えますが、暗合の鍵は破れないということです。
-
-この方式はサーバ側は key generation を必要としないという安全性が重要で
-す。
+sniffer すればメール本文は見えてしますが暗合の鍵は破れないということで
+す。この方式はサーバ側は key generation を必要としないという安全性がポ
+イントです。
 =E
 The merit of this method is that the server does not require the
 server key generation.
 
-
 2	サーバの公開鍵で本文全体を encrypt する。
 =E
-2	create the PGP key of the server, 
-	you encrypt the mail by server public key
+2	Prepare the PGP secret key of the server.
+	You encrypt the mail by server public key
 
 サーバ側で key generation を必要とする。サーバ側は自分の秘密鍵がないと
 読めない。やはり管理者はPGP公開鍵を管理することでのみ認証する範囲を制
@@ -54,8 +53,8 @@ server key generation.
 =E
 Administrators are people whose knows the server public keys.  This
 method requires the assumption "a ML machine is not broken" since the
-machine has the PGP private and public key on the local disk. This
-situation is very bad.
+machine has the PGP private/secret and public key on the local
+disk. This assumption is very bad.
 
 いずれにしても一方通行に送るプロトコルではなんでもそうですが、メール本
 体がどこかで盗聴された場合にすでに行なわれたコマンドをもう一度叩き込ま
@@ -64,17 +63,16 @@ situation is very bad.
 
 FML は管理者の認証には方式１を採用しています。
 =E
-FML uses the former method as the authentication.
-
+FML uses the former method as an authentication method.
 
 .S	PGP の公開鍵の登録
-=E.S	register PGP public keys
+=E.S	Register PGP Public Keys
 
 ＭＬごとに PGPPATH を設定(デフォールトはMLのHOMEの etc/pgp/ )している
 ので、必ず
 =E
-Each ML has each PGPPATH (environment variable). Hence you should
-always use "makefml" the following way:
+Each ML has each PGPPATH (environment variable). You should always use
+"makefml" in the following way:
 
 	makefml pgp mailing-list pgpのオプション
 =E
@@ -88,7 +86,7 @@ Let a public key be
 
 とし elena MLのリモート管理者を増やす場合は
 =E
-add the public key, that is, the key's owner to remote administrators
+It is the key of a remote administrator. Add the public key, 
 
 	makefml pgp elena -ka public.asc
 
@@ -110,20 +108,19 @@ Example: show the public key list of elena ML.
 
 	makefml pgp elena -kv
 
-
 .S	PGP によるリモート管理
-=E.S	remote administration based on PGP
+=E.S	Remote Administration Based On PGP
 
 1	admin コマンドを書く
-2	clearsign をする
+2	clear sign をする
 =E
 1	write "admin commands"
-2	sign PGP clearsign to it
-	e.g. C-c /s is you use mailcrypt.el
+2	sign PGP clear sign to it
+	e.g. C-c /s if you use mailcrypt.el
 
-例えば、mailcrypt なら C-c / s です。この時に秘密鍵を入力。
+	例えば mailcrypt なら C-c / s です。この時に秘密鍵を入力。
 
-3	clearsign をしたメールを送る
+3	clear sign をしたメールを送る
 =E
 3	send the mail to the server
 
@@ -132,13 +129,11 @@ Example: show the public key list of elena ML.
 	コマンド群を実行する。
 =E
 4 	ML server checks public keys in ML's pgp pubrings (under
-	$DIR/etc/pgp/). If the mail is from the author, 
-	the server runs commnds.
-
+	$DIR/etc/pgp/). If the mail is from the author (authenticated),  
+	the server runs commands.
 
 .S	PGPを使って暗号化したメーリングリストにする
-=E
-.S	PGP Encrypted distribution (Mailing List)
+=E.S	Pgp Encrypted Distribution (Mailing List)
 
 暗号化とかファイアウォールとかは中途半端が一番危ないです。詳しく説明し
 ませんが、これで意味の分からない人は使わない方がいいかもしれません。
@@ -149,11 +144,10 @@ secure か否かはすべて「サーバが破られない」にかかっています:)
 というわけで意味があるようなないような暗号化ＭＬ実装例です。
 =E
 Fundamental theory requires some not-written password for security
-e.g. in a human brain. So encryption by a ML server is thoretically
+e.g. in a human brain. So encryption by a ML server is theoretically
 vulnerable when a cracker can penetrate the ML server machine. 
 Our theory requires an assumption that the ML server machine is enough
-secure to save password files on it.
-
+secure to save password files (RSA keys with empty pass phrase) on it.
 
 1	サーバのマシンの上で makefml で(PGPPATH を変えて)
 	メーリングリストの秘密鍵を作る。
@@ -176,7 +170,7 @@ secure to save password files on it.
 
 4	メンバーはメーリングリストの公開鍵を使って暗号化しサーバへ送る
 =E
-4	each member encryptes the mail with the server public key
+4	each member encrypts the mail with the server public key
 	to send it to the ML server.
 
 5	サーバはメンバーの公開鍵と自分の秘密鍵を使って
@@ -189,10 +183,8 @@ secure to save password files on it.
 =E
 6	send it in usual procedures.
 
-
 .S	管理用のコマンド
-=E
-.S	PGP commands to maintain ML's PGP keys 
+=E.S	Pgp Commands To Maintain ML'S PGP Keys 
 
 管理者が pgp -kv などをリモートでできるようにしてあります。KEYの編集な
 どはリモートではできません。公開鍵を加える、削除。一覧を見るなどをでき
@@ -220,7 +212,6 @@ Please read PGP books if you cannot understand them.
 Example:
 
 	# admin pgp -kvv
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

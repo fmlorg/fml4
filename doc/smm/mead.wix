@@ -1,72 +1,101 @@
-.C	MEAD (Mail Error Analyze Deamon)
+.C	MEAD (Mail Error Analyze Daemon)
 
-まだアルファテストだよん
+まだアルファテストだよん。
+=E
+Not yet alpha test phase.
 
-.S	Introdution
+.S	Introduction
 
 エラーメールは普通 $MAINTAINER に帰ってきます。
+=E
+A mail delivery causes some errors such as "User unknown", ...
 
 Example:
 .q
-From:    Mail Delivery Subsystem <MAILER-DAEMON@DOMAIN.OR.JP>
-Subject: Returned mail: User unknown
-To:      xxx-admin@shumi.fml.org
-Date:    Sun, 21 Jun 1998 16:17:22 +0900 (JST)
+ From:    Mail Delivery Subsystem <MAILER-DAEMON@DOMAIN.OR.JP>
+ Subject: Returned mail: User unknown
+ To:      xxx-admin@shumi.fml.org
+ Date:    Sun, 21 Jun 1998 16:17:22 +0900 (JST)
 
-... while talking to mail.domain.or.jp.:
->>> RCPT To:<xyz@ar.domain.or.jp>
-<<< 553 <xyz@ar.domain.or.jp>... User Unknown
-550 xyz@ar.domain.or.jp... User unknown
+ ... while talking to mail.domain.or.jp.:
+ >>> RCPT To:<xyz@ar.domain.or.jp>
+ <<< 553 <xyz@ar.domain.or.jp>... User Unknown
+ 550 xyz@ar.domain.or.jp... User unknown
 ~.q
 
 帰ってくるメールはデフォールトではMLを作成したユーザへフォワードされる
-ように設定されています(aliasesファイルを参照)。
+ように設定されています(aliasesファイルを参照)。この user unknown など
+の情報を自動的に拾い上げ、Ｎ回(デフォールトは5回)エラーが帰ってきたら
+そのユーザを削除するためのプログラムが mead.pl (libexec/mead.pl) です。
+=E
+In default returned error mails are set up to be forwarded to
+$MAINTAINER. See the file $DIR/aliases example file. If you can
+collect error information automatically, you may remove "user unknown"
+user addresses. For example mead.pl collects the information and remove
+an address if the address causes errors over some limit.
 
-この user unknown などの情報を自動的に拾い上げ、Ｎ回(デフォールトは5回)
-エラーが帰ってきたらそのユーザを削除するためのプログラムが mead.pl
-(libexec/mead.pl) です。
-
-設定の手違などあるととても困るのであまりお勧めしません。が年度末などに
-連絡もなく勝手にいなくなるユーザ多数なのでこういうった処理が必要だとい
-う人もいるでしょう。
+設定の手違などあるととても困るのであまりお勧めしません。そのため fml 
+デフォールトでは設定されません。が年度末などに連絡もなく勝手にいなくな
+るユーザ多数なのでこういうった処理が必要だという人もいるでしょう。
+=E
+This may be dangerous especially when you do mis-configuration. So
+this is not fml default.  But this mechanism is helpful for you in the
+last of year.
 
 .S	設定
+=E.S	Configurations
 
 makefml newml を実行すると
+=E
+"makefml newml" creates a sample
 
 	include-mead
 
 が作られます。また生成される見本の aliases ファイルには mead を使う設
-定がコメントアウトされた状態で入っています。
+定がコメントアウトされた状態で入っています。meadを設定するためには
+=E
+and $DIR/aliases has a sample entry for mead (comment out).
+":include:/var/spool/ml/elena/include-mead" is a sample to kick off mead
+program for mails forwarded to elena-admin.
 
 elena ML の例:
+=E
+Example: elena ML. To set up mead
 
 	elena-admin: fukachan
 
 	# MEAD; If you use mead.pl, 
-	#elena-admin: fukachan, :include:/tmp/s/elena/include-mead
+	#elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
 
-を
+を 
 
 	# elena-admin: fukachan
 
 	# MEAD; If you use mead.pl, 
-	elena-admin: fukachan, :include:/tmp/s/elena/include-mead
+	elena-admin: fukachan, :include:/var/spool/ml/elena/include-mead
 
-のように入れ換えます。:include:/tmp/s/elena/include-mead は mead.pl を
-起動するように設定されています。
+のように入れ換えます。:include:/var/spool/ml/elena/include-mead は 
+mead.pl を起動するように設定されています。
 
 .S	理論
+=E.S	Theory
 
 帰ってきたエラーメールが mead.pl に入力として渡される。5XX のような行
-からエラーになるアドレスを割だし、キャッシュします。5(がデフォールト)
+からエラーになるアドレスをわりだし、キャッシュします。5(がデフォールト)
 回エラーが来たら
 	『そのアドレスを削除すべきことをしらせる』(デフォールト)
 か
 	『makefmlを呼び出して自動的に削除する』
 ことをします。
+=E
+mead.pl caches returned error mails as an input if the error content
+has 5XX code which must be critical. If the error limits some
+threshold, mead.pl does "notify removing address to $MAINTAINER" or
+"call makefml and remove error mail addresses automatically". In
+default "notify removing address to $MAINTAINER".
 
 .S	mead.pl コマンドラインオプション
+=E.S	mead.pl Command Line Option
 
 Usage: mead.pl [options]
 
@@ -83,6 +112,35 @@ Options:
     -E directory    $EXEC_DIR (e.g. /usr/local/fml)
     -S directory    $ML_DIR (e.g. /var/spool/ml)
     -M path         makefml path
+
+    -p priority     priority, e.g. -p uu=2,uh=0.5
+                    (user unkwown == 2, host unkown == 0.5)
+                    [KEYWORD]
+                            uu: unknown user
+                            uh: unknown host
+                            ua: unknown address
+                            us: service unavaiable
+                       default: default value for phrases not above 
+
+.S	問題点
+=E.S	Discussion
+
+forward の forward はさすがに detect できないんだよねぇ…
+=E
+We cannot detect the original address which is forwarded and causes
+errors. e.g.
+
+	fml -> a@b.org	-> a@xyz.com (error)
+
+エラーメールは a@b.org に送ったはずなのに xyz.com でエラーになる
+=E
+The error mail says for the delivered address <a@b.org>
+
+	 550 <a@xyz.com> user unknown
+
+これは fml 側の配送リストにはないので削除できないわけです。
+=E
+which is not on $ACTIVE_LIST nor $MEMBER_LIST.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -1,48 +1,48 @@
-.C	fmlserv - Listserv style interface -
+.C	Fmlserv - Listserv Style Interface -
 .k	fmlserv
 .l	fmlserv
 .l	fmlserv.pl
 
-
-.S	インストール
-
-一番楽なインストール方法は makefml を使ってインストールする方法です。
-詳細は INSTALL というファイルを見て下さい。
-
-	perl makefml fmlserv 
-
-でセットアップされます。
-
-
-.S	Listserv (or Majordomo) style interface (libexec/fmlserv.pl)
+.S	Listserv (Or Majordomo) Style Interface (libexec/fmlserv.pl)
 .k	listserv compatibility
-.k	marjodomo compatibility
+.k	majordomo compatibility
 
 ここでは Listserv (or Majordomo) compatible mode について述べます。つ
 まり FML コマンドを Listserv のようなインターフェイスで呼ぶための仕組
-みです。それ以上のものではありません。つまり単なる別種のインターフェイ
-スです。
+みです。これは単なるインターフェイス変換プログラムに過ぎません。
+=E
+Fmlserv provides listserv compatible mode. It is interface convertor.
 
 例えば今 Elena ML (elena@baycity.asia) と Freekick ML
 (freekick@baycity.asia)があるとすると、デフォールトでは
 elena-ctl@baycity.asia へコントロールコマンドを送り込む形でコマンドを
 実行できます。
+=E
+Consider Elena ML (elena@baycity.asia) and Freekick ML
+(freekick@baycity.asia).
 
    "# get 1-10 mp"		というメールを
    Elena-ctl@baycity.asia	へ送る
+=E
+To get articles from 1 to 10 in MIME/Multipart mode, you send "get
+1-10 mp" to Elena-ctl@baycity.asia.
 
 ことで最初の10個の記事を取り寄せることができます。これを同じことが
 
-   "# get elena 1-10 mp" 	というメールを
+   "get elena 1-10 mp" 	というメールを
    fmlserv@baycity.asia		へ送る
+=E
+Fmlserv provides the same function if you send "get elena 1-10 mp" to
+fmlserv@baycity.asia.  The command style for fmlserv is "command <ML>
+options".  You can insert <ML> within command syntaxes. So you can
+inject commands such as
+
+	"get Freekick 1-10 mp" 	
+	"get elena 1-10 mp".
 
 ことで実行できるようになります。こう書くと全然ありがたみがないですね;-)。
-
-違う点は単にコマンドのシンタックスが拡張されて
-
-	コマンド	ＭＬ	オプション
-
-の形になることです。コマンドそれぞれについてＭＬを指定するので
+違う点は単にコマンドのシンタックスが拡張されて『コマンド ＭＬ オプショ
+ン』の形になることです。コマンドそれぞれについてＭＬを指定するので
 
    "# get Freekick 1-10 mp" 	
    "# get elena 1-10 mp" 	というメールを
@@ -55,86 +55,100 @@ elena-ctl@baycity.asia へコントロールコマンドを送り込む形でコマンドを
 れで便利なような気がします。おそらく最大の問題(ずっと実装されなかった
 最大の理由は)security の問題でしょう(後述)。
 
+.S	インストール
+=E.S	Install And Setup Fmlserv
 
-.S	一番簡単な設定
+一番楽なインストール方法は makefml を使ってインストールする方法です。
+詳細は INSTALL というファイルを見て下さい。
+=E
+To set up listserv style interface for FML, please use
 
-例：
-	fmlserv@bayicity.asia
+	/usr/local/fml/makefml fmlserv 
 
-を設定し、通常のＭＬを２つ
+でセットアップされます。
+=E
+(path may be different). In default FML provides each command address
+for each ML. But fmlserv provides listserv style. The difference is
+just the interface. The internal routines are the same.
 
-	elena@bayicity.asia	(/var/spool/elena)
-	Freekick@bayicity.asia	(/var/spool/Freekick)
+fmlserv@baycity.asia を設定し通常のＭＬを２つ管理する設定を考えてみま
+す。ML は次のものを考えます。
+=E
+Consider fmlserv@baycity.asia serve two mailing lists.
 
-を管理する設定を考えてみます。
+	elena@baycity.asia	(/var/spool/elena)
+	Freekick@baycity.asia	(/var/spool/Freekick)
 
-makefml fmlserv で fmlserv という directory の下に include ファイルが 
-setup されます。この include を、つまり makefml fmlserv の最後に表示さ
-れる内容を /etc/aliases に cut & paste して newaliaes して下さい。
+makefml install 時に fmlserv mode (personal / group / fmlserv の選択) 
+を選択しているものとします。fmlserv の set up は makefml fmlserv を実
+行すると fmlserv というMLが作られます。概念的には fmlserv も配送などは
+しませんが、一種のMLです。そのため/var/spool に elena Freekick fmlserv 
+というML群が作られます。他のMLと同様にfmlserv の下に作られた include 
+ファイルを用いて/etc/aliases を setup しnewaliases します。
+=E
+When "makefml install", I suppose you select "fmlserv" in mode choice
+(personal or group or fmlserv).
+To set up "fmlserv",
+	1	makefml fmlserv, which creates 
+		/var/spool/fmlserv/include.
+		It implies fmlserv is a kind of mailing lists.
+	2	set up /etc/aliases and newaliases using
+		/var/spool/fmlserv/include.
 
-
-.S	設定と基本動作
-
-一番簡単な設定は、make 時にサンプルファイルができています。このファイ
-ルを見ると設定がわかりますが、実のところ fml.pl の設定と全く同じです。
-
-	ML群を作るdirectory/fmlserv/include
-
-の中身は
+"/var/spool/fmlserv/include" is as follows:
 
 	"|/usr/libexec/fml/libexec/fmlserv.pl /var/spool"
 
 のようになります。見かけは同じように見えますが引数の意味は少し違います。
 引数は通常の fml.pl の一つ上の directory を定義します。
 今 /var/spool/ を定義したので、その下の階層に
+=E
+where the argument of fmlserv.pl is the top directory ("/var/spool")
+which provides mailing list homes in "/var/spool" such as
 
 	/var/spool/fmlserv
 	/var/spool/elena
 	/var/spool/Freekick
-	…
+	...
 
 のようにＭＬが並びます。つまり
+=E
+There exist
 
 	/var/spool/elena/config.ph
 	/var/spool/elena/spool/
-	…
+	...
+
 	/var/spool/Freekick/config.ph
 	/var/spool/Freekick/spool/
-	…
+	...
 
-のような感じになります。ここで
+	/var/spool/fmlserv/config.ph
+	...
 
-	/var/spool/fmlserv
-
-だけは特別な directory で、ここに fmlserv のログを取り、HELP ファイル
-をここに置きます。デフォールトでは ＭＬのならんでいる directory 中に並
-んで fmlserv、 つまり今の場合は
-
-	/var/spool/fmlserv
-
-に log ファイル等が置かれます。この directory は
-
-	$FMLSERV_DIR
+のような感じになります。ここで /var/spool/fmlserv だけは特別な 
+directory で、ここに fmlserv のログ ($FMLSERV_LOGFILE, default is
+"/var/spool/fmlserv/log") を取り、HELP ファイル 
+(/var/spool/fmlserv/help)をここに置きます。/var/spool/fmlserv というパ
+スは $FMLSERV_DIR で設定を変更できます。
 .k	$FMLSERV_DIR
-
-で設定を変更できます。また同様にログファイルの場所は
-
-	$FMLSERV_LOGFILE
 .k	$FMLSERV_LOGFILE
-
-で変更できます。
-
+=E
+Configuration variables are that /var/spool/fmlserv is $FMLSERV_DIR,
+/var/spool/fmlserv/log is $FMLSERV_LOGFILE.
 
 .S	使えるコマンド一覧
+=E.S	Available commands
 .k	$FMLSERV_PERMIT_LISTS_COMMAND
 
+.if LANG == JAPANESE
 ＊注意＊
 97/03/08 からデフォールトでは lists コマンドを使えないようにしました。
 
 というのは、このコマンドを使って、一覧を手に入れ、fake mail で
 自分じゃない人を登録してまわるとかいういたずらに多用されるためです。
 
-	$FMLSERV_PERMIT_LISTS_COMMAND  = 1;
+	$FMLSERV_PERMIT_LISTS_COMMAND  = 1; (default 0)
 
 で使えるようになります(default は 0 で使えない)
 ＃余談： もともと mailing-list, mailing-list-ctl を使い、
@@ -142,6 +156,11 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 ＃       この lists を使わせないというのは思想的には矛盾しないで
 ＃       むしろよろこばしいとおもいます。
 
+同様に which コマンドについても
+
+	$FMLSERV_PERMIT_WHICH_COMMAND  = 1; (default 0)
+ 
+で制御されます。
 
 ○ fml で使えるコマンドすべてが使えます。ただし、
 
@@ -156,6 +175,37 @@ setup されます。この include を、つまり makefml fmlserv の最後に表示さ
 
         ●デフォールトでは使えないコマンド
 	lists		fmlserv のコントロール下にあるＭＬ一覧
+.fi
+.if LANG == ENGLISH
+In default, fmlserv cannot provide "lists" for security.
+To make "lists" available, please set
+
+	$FMLSERV_PERMIT_LISTS_COMMAND  = 1; (default 0)
+
+To make "which" available, please set
+
+	$FMLSERV_PERMIT_WHICH_COMMAND  = 1; (default 0)
+
+
+* fmlserv commands
+
+	help		fmlserv help
+
+	*** prohibited for security
+	which
+	lists
+
+* all fml commands are available.
+
+	command <ML> options
+.fi
+
+.S	Variables
+
+	$MAP_DB 
+.k	$MAP_DB 
+
+is a cache for 'lists' command.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

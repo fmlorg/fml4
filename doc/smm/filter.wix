@@ -12,12 +12,11 @@ Filtering FAQ is
 
 plaintext version は
 =E
-Plain text version is 
+The plain text version is 
 
 .url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
 
-
-.S	MH slcoal interface
+.S	MH slocal Interface
 .key	slocal
 .key	.maildelivery
 .l	slocal-1
@@ -34,9 +33,14 @@ MH slocal is used like
 
 と書きます。よく名前を聞く slocal ってやつですね。
 slocal では、設定は  ~/.maildelivery で設定します。
+
 例：
 To: username@domain (uja) 宛のメールはＭＬ宛とみなす。
 それ以外は全部スプールに落す（普通の挙動）
+=E
+Example: 
+A mail with "To: username@domain (uja)"  is injected to fml.pl.
+All others are saved in /var/mail/fukachan.
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 #field   pattern   action  result    string
 To     uja  |    R    "/fml-DIR/fml.pl /fml-DIR /fml-DIR"
@@ -49,22 +53,20 @@ default  -       >       ?      /var/mail/fukachan
 ませんが、自動的に fml.pl が適当な値（uidから割り出した値）を補正しま
 す。
 
-
 .S	ローカル配送のためのインターフェイス (libexec/fml_local.pl)
 =E.S	slocal-like interface (libexec/fml_local.pl)
 .l	libexec/fml_local.pl
 .key	fml_local.pl
 
 ようはループを止めようと思ったものの、作り終わってみたら な〜んか 
-slocal と同じになっちゃいましたね(馬鹿)
+slocal と同じになっちゃいましたね(馬鹿)。まぁ tk-slocal とか世の中には
+あるんで、perl-slocal があってもいいでしょ(開きなおり(苦笑))
 =E
 Consequently fml_local.pl is similar to slocal ;-). But fml_local.pl
 and slocal differs on formats of configurations and the last match.
 FIRST_MATCH variable changes fml_local to the first match rule (
-slocal rule is the first match).
-
-まぁ tk-slocal とか世の中にはあるんで、perl-slocal があってもいいでしょ
-(開きなおり(苦笑))
+slocal rule is the first match). fml_local2.pl is an alias of
+fml_local.pl, which differs in "last match rule" from fml_local.pl.
 
 slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 か、(必要なら fml のlibrary を呼び込んで)perlの関数を直接呼べるとか…
@@ -73,9 +75,7 @@ slocalと違うのは、制御するファイルのFieldの数とか、正規表現が使えると
 歴史的に(デフォールトでは)「最後にマッチするエントリを実行する」という
 ところが決定的に違います。諸葉の都合で、例えば簡単に学習するvacationプ
 ログラムへと拡張できるための仕様だったのですが、今となっては設計のミス
-のようなきがします。
-
-設定で
+のような気がします。設定で
 =E
 Variable
 
@@ -90,12 +90,11 @@ changes fml_local to the first_match, which is the same as
 
 のほうはデフォールトが「最初にマッチしたパターンを実行」するようになっ
 ています。
-＃実は単なるリンクで、自分の名前を見て実行を変えているだけですが
+＃実は単なるリンクで、自分の名前を見て実行を変えているだけです
 =E
-The defaul of fml_local2.pl is driven by the first match rule.
+The default of fml_local2.pl is driven by the first match rule.
 
 .include	fml_local.wix
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -2,40 +2,19 @@
 =E.C	Several Utilities (bin/, lib/Utilities/ ...)
 .l	uip
 
-ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
-について解説します。
+ここでは bin/ 以下と contrib/Utilities/ 以下の階層で提供しているプログ
+ラムについて解説します。
 =E
 In this chapter we describe utility programs under bin/ and
-lib/Utilities/.
+contrib/Utilities/.
 
+.S 	analyze_mail_error.pl (replaced to libexec/mead.pl)
+.k 	analyze_mail_error.pl
+.k	analyze_mail_error.sh 
+.l 	analyze_mail_error.pl
+.l	analyze_mail_error.sh 
 
-.S 	analize_mail_error.pl, analize_mail_error.sh 
-.k 	analize_mail_error.pl
-.k	analize_mail_error.sh 
-.l 	analize_mail_error.pl
-.l	analize_mail_error.sh 
-
-ベータテスト版。エラーメール(複数でもよい)を入力すると解析してエラーレ
-ポートを吐く。
-=E
-Beta test phase. This analizes error mails which is injected and shows
-error summary.
-
-   analize_mail_error.pl [-c cut_pattern] [-e exluce_pattern]
-
-		-c アドレスの中から削除するパターン
-		-e この文字列を含む排除するアドレスのパターン
-=E
-		-c pattern to ignore addresses in the header
-		-e pattern of addesses to remove 
-
-例:
-=E
-Example:
-
-	show all +errormail |\
-	analize_mail_error.pl -c hostname -e mydomain
-
+use libexec/mead.pl.
 
 .S	アーカイブの作成 (bin/Archive.pl bin/Archive.sh)
 =E.S	Archive Generator
@@ -45,41 +24,37 @@ Example:
 .k	Archive.sh
 .xref	Archive.pl
 
-
 アーカイブの節を参照 (.ptr{archive})
 =E
 Please see the chapter of "archive" (.ptr{archive}).
-
 
 .S	cron (bin/cron.pl)
 .l	bin/cron.pl
 .k	cron.pl
 .xref	cron
 
-4.4BSD の cron と compatible な cron (.ptr{cron}).
+Vixie Cron (4.4BSD の cron) と compatible な cron もどき(.ptr{cron}).
 =E
-cron is a compativle of Vixie Cron.
+cron is a tiny program which is almost compatible of Vixie Cron.
 Please see cron chapter (.ptr{cron}).
 
-
 .S	プログラムをデーモン化して実行 (bin/daemon.pl)
-=E.S	Deamon-ize programs
+=E.S	Daemon-ize programs
 .l	bin/daemon.pl
 .k	daemon.pl
 .xref	cron
 
 例：
 =E
-Example
+Example:
 
 	% bin/daemon.pl cron.pl $PWD
 
-cron.pl をデーモン化して実行する。
-ようは次のプログラムの perl version です。
-OSによっては動かないだろう。
+cron.pl をデーモン化して実行する。ようは次のプログラムの perl version 
+です。おそらくBSDでしか動かないだろう。
 =E
 to make cron.pl a daemon. perl version of the following C program.
-may not work on some OS's.
+This may work on BSD's.
 
 .q
 #include <stdio.h>
@@ -114,9 +89,8 @@ main(argc, argv)
 }
 .~q
 
-
-.S	daily （日々のログ解析）
-=E.S	daily, log analizer 
+.S	daily (日々のログ解析)
+=E.S	daily, log analyzer 
 .l	bin/daily.pl
 .l	etc/daily.ignore
 .k	daily.pl
@@ -127,23 +101,25 @@ main(argc, argv)
 は log ファイル（複数も可）を解析しログの中で普通じゃない行をOUTPUTし
 ます。どういう行を正常の動作とみなして無視するかは
 =E
-which shows ambiguous yesterday lines in the log file ($LOGFILE).
+which shows ambiguous yesterday lines in the log file($LOGFILE).
 
-	FMLのインストール先/etc/daily.ignore
+	/usr/local/fml/etc/daily.ignore
+	(FMLのインストール先/etc/daily.ignore)
 =E
-	"FML installed directory"/etc/daily.ignore
+	/usr/local/fml/etc/daily.ignore
+	("FML installed directory"/etc/daily.ignore)
 
-というファイルに入っています。各行が無視するキーワードです。
-増やすなら足せばいいし、減らすなら切ってしまえば良いでしょう。
-毎朝 cron で実行するといいとおもいます。
+というファイルに入っています。各行が無視するキーワードです。増やすなら
+足せばいいし減らすなら切ってしまえば良いでしょう。毎朝 cron で実行する
+とよいです。
 =E
-determines which lines we ignore. This file contains key phrases
-regarded as valid.  We recommend you run daily and check the
-output. If it has superfluous lines, you add needless phrase patterns
-to daily.ignore. It is good to run daily.pl each morning by cron.
+determines which lines daily.pl ignores. This file contains key
+phrases regarded as valid in the context of FML operations. We
+recommend you run daily.pl and check the output. If it has superfluous
+lines, you add needless phrase patterns to "daily.ignore". It is good
+to run daily.pl each morning by cron.
 
-
-.S	DNS のチェック (bin/dns_check.pl)
+.S	DNS のチェック(bin/dns_check.pl)
 =E.S	Checking DNS
 .l	bin/dns_check.pl
 .k	dns_check.pl
@@ -158,7 +134,6 @@ A small program to check DNS values.
 =E
 runs this program.
 
-
 .S	emumail.pl
 .k	emumail.pl
 .l	bin/emumail.pl
@@ -170,6 +145,9 @@ emulation するためのもの。debug に使うだけ(なくてもいいけど、あるとちょっ
 Emulation program of output from sendmail into fml.pl which is for
 debug only.
 
+"makefml test <ML>" が同じことをしてくれます。こっちの方が便利だと思う。
+=E
+"makefml test <ML>" is the same function and more useful I believe.
 
 .S	EXPIRE を実行するプログラムの例 (bin/expire.pl)
 =E.S	Expire
@@ -177,9 +155,8 @@ debug only.
 
 Please see the chapter .ptr{expire}.
 
-
 .S	WIX言語フォーマッタ (bin/fwix.pl)
-=E	WIX Language Formatter  (bin/fwix.pl)
+=E.S	WIX Language Formatter  (bin/fwix.pl)
 .k	fwix.pl
 .l	bin/fwix.pl
 .xref	WIX
@@ -187,7 +164,6 @@ Please see the chapter .ptr{expire}.
 WIX言語のフォーマッタ 
 =E
 Please see the chapter .ptr{WIX}
-
 
 .S	gen_summary.pl (summary ファイルを再生成する)
 =E.S	gen_summary.pl (summary re-creator)
@@ -212,7 +188,7 @@ in fml-support ML's Count: 02393
 	-m MIME decoding
 
 .S	URL の中身を取り出す (bin/geturl.pl)
-=E	get given URL content (bin/geturl.pl)
+=E.S	get given URL content (bin/geturl.pl)
 .k	geturl.pl
 .l	bin/geturl.pl
 .k	$WWW_HOME
@@ -221,8 +197,8 @@ in fml-support ML's Count: 02393
 
 おまけ機能:)
 =E
-bonus :), a demo using libhref.pl. Today it is of no use since a
-lot of programs to do this exist. e.g. GNU wget, ncftp, ...
+bonus program:), a demo using libhref.pl. Today it is of no use since
+a lot of programs to do this exist. e.g. GNU wget, ncftp, ...
 
 	bin/geturl.pl URL
 
@@ -246,22 +222,23 @@ saveします。画像データや音声データでも同様にファイルに落せます。
 
 一般には例えば GNU wget 等のWWWデータを落すソフトが多数あります。
 
-
 .S	ローカルテスト (sbin/localtest.pl)
 =E.S	localtest (sbin/localtest.pl)
 .l	sbin/localtest.pl
 .k	localtest.pl
 
 メッセージIDチェックをチェックしている都合上、これを使わずにローカルテ
-ストをするとメールがループしているとみなしてしまうので、TEXT をメール
-の見本として使って fml のテストは
+ストをするとメールがループしているとみなしてしまいます。そのためこのよ
+うな wrapper が必要になります。あるファイル TEXT を入力するメールの見
+本として使いたい時
 =E
 To inject TEXT as a mail input into fml.pl, you cannot test in the
-following
+following:
 
 	cat TEXT | perl fml.pl $PWD 
 
-のようにはできず
+のようにはできません。Message-Id を一通ごとに変えて突っ込むために 
+localtest.pl を wrapper として利用できます。
 =E
 since FML checks Message-Id duplication. Hence you should do
 
@@ -269,6 +246,10 @@ since FML checks Message-Id duplication. Hence you should do
 
 のようにしないとテストできません。
 
+でも "makefml test <ML>" が同じことをしてくれます。こっちの方が便利だ
+と思う。
+=E
+"makefml test <ML>" is the same function and more useful I believe.
 
 .S	NEWSYSLOG SHELL VERSION (bin/newsyslog.sh)
 .xref	newsyslog
@@ -277,8 +258,7 @@ since FML checks Message-Id duplication. Hence you should do
 
 libnewsyslog.pl がなかった時代の産物。
 =E
-inheritence in the age without libnewsyslog.pl
-
+Inheritance in the age without libnewsyslog.pl
 
 .S	Multipart Canceler Filter (bin/multipart.pl)
 .l	bin/multipart.pl
@@ -302,14 +282,13 @@ X-Mail-Count: 01937
   最近、ML に Multipart/Mixed とか Multipart/Alternative とかの
 形式で、メールを送ってくる人がいるので（特にコマンドの処理がで
 きないので）、Multipart Canceler なるフィルタを作ってみました。
-  Multimart/Mixed の場合は、# End of Document No.??? でつなげる。
+  Multipart/Mixed の場合は、# End of Document No.??? でつなげる。
 Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 いうことをしています。
   使い方は、fml を起動するのに "|/fmlpath/fml.pl ..." と記述し
 ているところを "|/scriptpath/multipart.pl|/fmlpath/fml.pl ..."
 などと記述すれば機能します。
 .~q
-
 
 .S	SMTPライブラリを使った /usr/bin/Mail の emulation (bin/pmail.pl)
 =E.S	A demo of SMTP library
@@ -320,11 +299,15 @@ Multipart/Alternative の場合は、最初の文書以外は捨てる。...と
 =E
 A demo.
 
-
 .S	パスワードの初期化と変更 (bin/passwd.pl)
 =E.S	initialize and change password  (bin/passwd.pl)
 .l	bin/passwd.pl
 .k	passwd.pl
+.xref REMOTE-ADMINISTRATION
+
+現在では makefml passwd ML を使う方が便利です。
+=E
+Please use "makefml passwd ML ...", which is more useful today.
 
 fml でのパスワードは通常 crypt された形で保存されます(オプションでMD5
 も可能 .ptr{MD5})。つまり UNIX の /etc/passwd と同じようにです。
@@ -375,9 +358,8 @@ where this "32ZrV/XvYj1kY" is a crypted password.
 等で使われます。
 .xref REMOTE-ADMINISTRATION
 
-
-.S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/pop2recv.pl)
-=E.S	get mails by POP3
+.S	POP経由でスプールへ、POPを使ってＭＬを実行 (bin/popfml.pl)
+=E.S	get mails via POP3
 .k	bin/pop2recv.pl
 .k	bin/inc_via_pop.pl
 .k	pop2recv.pl
@@ -387,12 +369,11 @@ where this "32ZrV/XvYj1kY" is a crypted password.
 libexec/popfml.pl がこの目的の専用プログラムです。
 .xref	popfml
 =E
-This gets mails from a mail servers by POP3 and 
-injects them into fml.pl and runs ML.
-The real program is libexec/popfml.pl, others is a link to it.
+This gets mails from a mail servers via POP3 and injects them into
+fml.pl and runs ML. The real program is libexec/popfml.pl, others is a
+link to it.
 
-注意： inc_via_pop.pl は昔の名前（今はリンク）
-
+注意: inc_via_pop.pl は昔の名前(今はリンク)
 
 .S	与えられたファイルを分割して送り出すプログラム (bin/split_and_msend.pl)
 =E.S	split and send files (bin/split_and_msend.pl)
@@ -404,7 +385,6 @@ The real program is libexec/popfml.pl, others is a link to it.
 =E
 Obsolete.
 
-
 .S	SPOOL -> HTML Hierarchy (bin/spool2html.pl)
 .l	spool2html.pl
 .k	bin/spool2html.pl
@@ -412,8 +392,8 @@ Obsolete.
 
 ターゲットとなるdirectory中のメールをHTML化します。
 =E
-make articles of ML spool HTML style. In default
-this generates index.html and thread.html (thread).
+make HTML style articles of ML. In default this generates index.html,
+thread.html (thread) and each article.html.
 
 SYNOPSIS:
 
@@ -434,21 +414,23 @@ SYNOPSIS:
     -I    path; add path to @INC
     
     SPOOL $SPOOL_DIR
-    
+
+Example:
+   % cd /var/spool/ml/elena
+   % spool2html.pl -I /usr/local/fml -d /htdocs /var/spool/ml/elena/spool
 
 ターゲット SPOOL 中のメールを HTML化し $HTML_DIR 中に変換します。
-注意： 2.1GAMMA#103 以降はデフォールトでスレッド処理も実行します。 
+注意: 2.1GAMMA#103 以降はデフォールトでスレッド処理も実行します。 
 
 変換の仕方については SyncHtml (.ptr{SyncHtml}) を参照してください。
 
-ＭＬなら config.ph を評価して実行するので -f config.ph で呼び出しても
-ＯＫです。
+MLなら config.ph を評価して実行するので -f config.ph で呼び出してもOK
+です。
 
 なお -D で設定していない場合 $DIR には $PWD が設定されています。
 config.ph を評価する場合には気をつけて下さい。
 =E
 Attention: Without -D, $DIR == $PWD.
-
 
 .S	MH scan.format (lib/Utilities/scan.format)
 .l	scan.format 
@@ -457,15 +439,14 @@ Attention: Without -D, $DIR == $PWD.
 
 lib/Utilities/scan.format を自分の ~/Mail にいれると
 =E
-Pleas input lib/Utilities/scan.format to your ~/Mail, 
-MH scan shows the following
+Please input lib/Utilities/scan.format to your ~/Mail, MH scan shows
+the following
 
   65 -06/14 Horaki Hikari fml-su Subject uja  <<うじゃ…
+のような表示になります。    ↑ここが X-ML-Name: の部分の６文字
 =E
   65 -06/14 Horaki Hikari fml-su Subject uja  <<UJA
      Date:  From:         X-ML-Name: Subject:
-
-のような表示になります。    ↑ここが X-ML-Name: の部分の６文字
 
 MHは暗号のようですが、ポイントは今レジスターに何が入っているかと、
 =E
@@ -490,7 +471,6 @@ X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 
 %?(match NetBSD.ORG)NetBSD\
 
-
 .S	mgetで得たファイルをmh以外で読む時 (lib/Utilities/packmbox.pl)
 =E.S	to make articles by "mget" mbox style (lib/Utilities/packmbox.pl)
 .l	packmbox.pl
@@ -498,15 +478,15 @@ X-ML-Name: とかがないＭＬは、この辺↓のマッチングパターンのエントリを
 
 packmbox.pl	(by ukai@hplj.hpl.hp.com)
 
-		1,2,3,...のように並んでいるファイルをmbox形式のファイ
-		ルにするスクリプト
+	1,2,3,...のように並んでいるファイルをmbox形式のファイ
+	ルにするスクリプト
 
-		つまり、mget してきたファイルたちをｍｈでない人はmbox
-		にした後で好きなインターフェイスをつかえばよいように
+	つまり mget してきたファイルたちをMHでない人はmbox
+	にした後で好きなインターフェイスをつかえばよいように
 
-lib/Utilitites/packmbox.pl を使って、
+lib/Utilities/packmbox.pl を使って、
 =E
-By lib/Utilitites/packmbox.pl you do to make mbox style file. 
+By lib/Utilities/packmbox.pl, you do to make mbox style file. 
 
 	(cd spool; packmbox.pl ) > ~/mbox
 
@@ -519,7 +499,6 @@ You can incorporate mails to your ~/Mail/inbox if with MH
 
 のようにすれば、mbox から inbox へ入ります。
 
-
 .S	RMAILファイルからfmlへのメッセージの取込み (lib/Utilities/Rmail2fml.pl)
 =E.S	RMAIL -> fml.pl
 .l	Rmail2fml.pl
@@ -527,8 +506,9 @@ You can incorporate mails to your ~/Mail/inbox if with MH
 
 Rmail2fml.pl	(yamane@ngi.co.jp)
 
-		RMAILファイルから fmlへのメッセージの取込みプログラム
-
+	RMAILファイルから fmlへのメッセージの取込みプログラム
+=E
+	RMAIL file -> fml.pl
 
 .S	宇宙歴関係
 =E.S	Stardate (STAR TREK)
@@ -561,6 +541,11 @@ stardate.el です。
 =E
 libstardate.pl is stardate library.
 
+注意: 宇宙歴には複数の解釈があります。そのうちの一つを勝手に選んで使っ
+ています。
+=E
+* This algorithm is one of stardate calculation. Several
+interpretation are available for stardate, but I choice one of them.
 
 .S	weekend-msend.sh
 .l	weekend-msend
@@ -581,7 +566,6 @@ m=1u みたいに常に送りつけるように設定しておいて送り時間は cron でコン
 理者が手で設定すると仮定しています。
 ＃まぁそれ用の別のアドレス作ってしまえばできますけどね
 =E
-
 In default you cannot configure FML to control weekly digest
 configurations for each address by remote (e.g. command).
 # Of course, you can hack FML.
@@ -596,39 +580,38 @@ The heart of weekly-msend is
 
 で ACTIVE_LIST に 
 =E
-and "address m=1option" in actives or members (depended on modes).
-You require "1" of "m=1" since we require msend.pl works always.
+and "address option" in actives or members (depended on modes).  You
+require "1" of "m=1" as an option since we require msend.pl works
+always.
 
 	address m=1オプション
 
-	例：
+	例:
 	address m=1u
 
 とか書いておくという部分です。
 
-
 .S	X-Stardate: をつける(mh-e)
-=E.S	append X-Stardate: (Emacs Lisp)
+=E.S	Append X-Stardate: (Emacs Lisp)
 .l	x-stardate
 .k	STAR TREK
 .k	stardate.el
 .xref	stardate.el
 
-lib/Utilities/stardate.el を load してください
+contrib/Utilities/stardate.el を load してください
 ＃ emacs 19 でなきゃかきかえないとだめ
 =E
-Please load lib/Utilities/stardate.el and add the follwing codes to
-your ~/.emacs. mh-comp generates draft buffer with X-Stardate:.
-I check this code on mule-2.3.
+Please load contrib/Utilities/stardate.el and add the following codes
+to your ~/.emacs. mh-comp generates draft buffer with X-Stardate:.  I
+check this code on mule-2.3.
 
 たとえば、.emacs に
 
-(load-libaray "stardate")
-(setq startrek-stardate-process "/some-directory-path/libStardate.pl")
+(load-library "stardate")
+(setq startrek-stardate-process "/some-directory-path/libstardate.pl")
 
-とすると mh-comp の draft buffer をつくるときに 
-X-Stardate: をつけてくれます。
-
+とすると mh-comp の draft buffer をつくるときに X-Stardate: をつけてく
+れます(mule-2.3で確認)。
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

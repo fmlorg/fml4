@@ -6,6 +6,9 @@
 .return
 .fi
 
+* contrib/lexical/ に収録されているおまけ機能です。進化はすでに止まり
+保守されていません;D
+
 .S	Introduction to Aucea
 
 例えば ファイルの形式が
@@ -33,7 +36,7 @@ field.
 =E
 For example, voting, questionnaire ...
 
-投票システム lib/Elena (VotingSystem) や FRED ライブラリの可読性をあげ、
+投票システム lib/Elena (Voting System) や FRED ライブラリの可読性をあげ、
 汎用的に拡張しなおしたものと考えればよいでしょう。
 
 
@@ -45,7 +48,7 @@ For example, voting, questionnaire ...
 =E
 e.g. vote
 
-	datatype 	ACTRESS
+	data-type 	ACTRESS
 	data-begin	\[ACTORESS\]
 
 	field-if  "best" match &BestP required
@@ -195,7 +198,7 @@ libraries separately.
 空白は [\s\t]+ で余計な空白は解釈されない。また空白はいくらあってもよ
 い。
 =E
-* Not interprete [\s\t]+ and empty lines.
+* Not interpret [\s\t]+ and empty lines.
 
 １行１ statements なので、複数行に渡る時は(/etc/disktab みたいに)
 	 \ で終って次の行
@@ -271,7 +274,7 @@ The pattern match is
 
 のような関数呼び出しでの判定ができます。この時
 =E
-wheter the function call is &InetAddrTypeP(pattern-matched variable). 
+whether the function call is &InetAddrTypeP(pattern-matched variable). 
 
 	&InetAddrTypeP(IP-Address行の右辺値);
 

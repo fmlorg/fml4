@@ -2,6 +2,8 @@
 =E.C	ftp-like access to local spool (ftpmail)
 .l	ftp
 
+おまけなのであまし気にしないように:)
+=E
 *** This is an additional bonus program. ***
 
 .S	libftp.pl Introduction
@@ -12,7 +14,8 @@ libftp.pl はローカルスプール、例えば /usr/local/ftp へのアクセスを可能
 にします。つまりメールで ftp のように
 =E
 libftp.pl offers the access to the local directory, which is similar
-to "ftpmail".  For example, you can access like a ftp
+to "ftpmail" but "local" only. This is a bonus program. For example,
+you can access like a ftp
 
 	cd pub/net/fml-current
 	get fml-current.tar.gz
@@ -32,7 +35,6 @@ libhref.pl enables the following request style:
 
 形式での要求も理解できます。
 
-
 .S	libftp.pl と libhref.pl はどう使う？
 =E.S	the difference between libftp.pl and libhref.pl
 .k	libftp.pl
@@ -51,10 +53,10 @@ library to understand URL e.g.
 or
 	gopher://host/something 
 
-を自力で取りにいって、必要なら、binaryをuuencode や、ファイル分割をし
-て送り返す。なお ftp://host/something は libftp.pl へ引き渡します。
+を自力で取りにいって、必要なら binaryをuuencode や、ファイル分割をして
+送り返す。なお ftp://host/something は libftp.pl へ引き渡します。
 =E
-ftp://host/something is passed to libftp.pl
+ftp://host/something request is passed to libftp.pl
 
 ○libftp.pl
 =E
@@ -67,7 +69,6 @@ ftp://host/something is passed to libftp.pl
 =E
 	ftp interface to local spool
 
-
 .S	ローカルアクセスのための config.ph の設定
 =E.S	config.ph for local access
 
@@ -75,17 +76,16 @@ ftp://host/something is passed to libftp.pl
 
 ローカルにあるftp用のスプール。
 =E
-$FTP_DIR for ftp spool. $FTP_HELP_FILE is help file for ftpmail.
+$FTP_DIR for ftp spool. $FTP_HELP_FILE is a help file for ftpmail.
 
 	$FTP_HELP_FILE  = '/var/local/ftpmail/help';
 
 ftpmail のヘルプファイル。help でユーザに返されるファイル。
-
 デフォールトでは、メール全文をftpmailへのコマンドだと解釈します。
 特定の文字列だけを ftpmail へのコマンドにするには、
 =E
 In default, FML interprets the whole mail as a command.
-To inject specific phrase to ftpmail, we use ($_ is a command string)
+To inject a specific phrase to ftpmail, we use ($_ is a command string)
 
     &Ftp(*Envelope, $_);
 
@@ -94,7 +94,7 @@ To inject specific phrase to ftpmail, we use ($_ is a command string)
 
 代表的な使い方は
 =E
-A typical usage is the follwing in config.ph
+A typical usage is the following in config.ph
 
 	$START_HOOK  = q#
 	    require 'libftp.pl';
@@ -104,25 +104,23 @@ A typical usage is the follwing in config.ph
 
 を config.ph にしかける。といった感じになります。
 
-
 .S	FTPMAIL専用サーバ
-=E.S	ftpmail server
+=E.S	Ftpmail Server
 .k	libftpmail.pl
 
 	$LOAD_LIBRARY	= "libftpmail.pl";
 
 をセットすると ftpmail 専用のサーバになる
 
-
 .S	ローカルアクセスの挙動の説明
-=E.S	Local access
+=E.S	Local Access
 .k	@FtpDirStack
 
 Security 対策のため cd ./ みたいなコマンドは実行させません。
 また、今どこにいるかはシェル等を使わず自力でそのデータを把握しています
 (@FtpDirStack)。そういう形で chroot($FTP_DIR) を疑似的に実装しています。
 =E
-We deny strigns e.g. "cd ./" for security. 
+We deny strings e.g. "cd ./" for security. 
 We always checks where we locates under the top directory.
 
 もし、spool/uja/Aoichan_panic が欲しい時は
@@ -158,8 +156,8 @@ or
 
 	# cd ../X11
 
-もできます。今どこにいるか把握しているので疑似的に chroot() した先より
-上にいこうとしたらエラーになります。
+もできます。今どこにいるかチェックしていてTOP directoryより上にいこう
+としたらエラーになります。
 =E
 When you change up the top directory, we do not permit the command.
 
@@ -167,7 +165,7 @@ When you change up the top directory, we do not permit the command.
 カイブを対象にした簡易版で、他のマシンへコネクトしてとってきたりはでき
 ません。＃そこまでやるなら ほんものの ftpmail を使うべきでしょう(^^;)
 =E
-We do not inplement "ftp" and "connect" of real "ftpmail". 
+We do not implement "ftp" and "connect" of real "ftpmail". 
 If you use them, you should use the original "ftpmail".
 
 ftpmail だと
@@ -184,10 +182,10 @@ and
 
 と書いても理解します。後は help 参照 
 
-
 .S	ftpmail server へのリレーの設定
-=E.S	relay to real ftpmail server
-.S	ftp://www.iij.ad.jp/ls-lR.gz をとりにいく
+=E.S	Relay To Real Ftpmail Server
+
+例えば ftp://www.iij.ad.jp/ls-lR.gz をとりにいくケースです。
 
 ftpmail serverへ経由する設定になっていれば、そのサーバーへメールをリレー
 する。たとえばうちでは、
@@ -202,7 +200,6 @@ To relay the command to ftpmail server, you set in config.ph
 =E
 where this address is "ftpmail" (real) server.  The command is passed
 to beth.phys.titech.ac.jp's ftpmail server.
-
 
 .S	&Href(), access to URL 
 .k	&HRef
@@ -225,7 +222,6 @@ the configuration
 =E
 return the result.
 
-
 .S	libftpmail.pl (obsolete)
 .k	libftpmail.pl
 
@@ -237,7 +233,6 @@ libftpmail.pl is obsolete.
 
 libftp.pl はローカルディスクへアクセスおよびftpmailへのリレー両方を担
 当します。
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -1,30 +1,32 @@
 .C	コマンドライン オプション
-=.C	Command Line Option
+=E.C	Command Line Options
 .l	clo
 .k	コマンドライン オプション
 
-
 コマンドラインオプションは /etc/aliases から呼ばれる include file の
 =E
-"Command Line Option" here is that of fml.pl which is used in include
-file such as 
+"Command Line Options" here is that of fml.pl which is used in include
+file such as
 
 	"|/usr/libexec/fml/fml.pl $DIR $LIBDIR -option" 
 
-のオプション部分(上の -option)の話のことです。
-当然デバッグの時に shell 上で手動実行する時でも同様に使えます。
+のオプション部分(上の -option)の話のことです。主にデバッグ時に使うこと
+を想定しています。保守の都合を考えたら $DIR/cf (config.ph) で設定する
+べきです。
 =E
-Command line options enable you to do debug fml.pl on your shell. For
+Command line options enable you to debug fml.pl on your shell. For
 unified maintenance you should configure $DIR/cf (for makefml) or
 $DIR/config.ph (not use makefml) since "makefml" reconfigures "cf" and
-"config.ph" from "cf". It is useful to do debug. 
+recreate "config.ph" from "cf". Command line options are useful to
+debug FML.
 
-makefml は config.ph の中の変数を書き換えるので、通常設定をいじる時は
-config.ph の中にすべての設定を書くようにして下さい。コマンドラインはデ
-バッグ以外の目的では使わない方が無難です。
+makefml config は $DIR/cf の中の変数を書き換えます。通常設定をいじる時
+は $DIR/cf の中にデフォールトとは異なる設定を書くようにして下さい
+(config.phをcfから生成することを忘れずに)。コマンドラインオプションは
+デバッグ以外の目的では使わないことを推奨します。
 
-コマンドラインは使い方(e.g. デバッグ)によってはとっても便利ですが、
-どういうものかよくわからない人は使わないで下さい。
+コマンドラインは使い方(e.g. デバッグ)によってはとっても便利ですが、ど
+ういうものかよくわからない人は使わないで下さい。
 =E
 I will recommend not to configure fml.pl with command line options but
 to use them only for debug. You can see the list at .ptr{command-line-option-index}.
@@ -37,11 +39,13 @@ to use them only for debug. You can see the list at .ptr{command-line-option-ind
 	*** Attention! ***
 
 なお makefml で作る include-ctl というファイル中には --ctladdr という
-オプションがついていますが、これは外さないで下さい。
+オプションがついていますが、これは外さないで下さい。 このオプションだ
+けは全プログラムに共通の config.ph に書けない項目だからです。
 =E
-In the file "include-ctl", FML calles "fml.pl --ctladdr" style. PLEASE
-DO NOT REMOVE --ctladdr option.
-
+In the file "include-ctl", FML calls "fml.pl --ctladdr" style. PLEASE
+DO NOT REMOVE --ctladdr option. This options tells fml.pl to be a
+command server which is not written in config.ph since config.ph is
+common for all programs.
 
 .S	コマンドラインのシンタックス
 =E.S	syntaxes of command line options
@@ -55,9 +59,8 @@ SYNOPSIS:
 =E
 fml.pl and msend.pl option styles are the same but fml_local.pl is
 different from them since fml_local.pl is similar to MH.
-If options and arguments co-exist, we regard a string begining with
+If options and arguments co-exist, we regard a string beginning with
 "-" as an option, others as arguments.
-
 
 オプションと引数が共存する時は
 
@@ -73,33 +76,34 @@ directory が存在すれば引数の順に $DIR、$LIBDIR にセットされます。
 			（ＭＬへの配送以外すべてを実行可能）
 =E
 	-d		debug mode (FML does not distribute)
-	-bt		debug mode (address test mode)
-			now the same as -d :)
 
 	-bt   		アドレステストモード	(Become Test)
 			メンバーチェックのところまで実行する。
 			ＭＬへの配送やコマンドは実行しない。
 			いまのところ debug mode とかわらへんねん:-)
+=E
+	-bt		debug mode (address test mode)
+			now the same as -d :)
 
 	-bd		デーモンモード	(Become Daemon)
 =E
 	-bd		become daemon, detach the control tty.
 
-	-sOPT $OPT 	をセットする。(e.g. -sdebug == -d)
-	-uOPT $OPT 	をオフする。  (e.g. -udebug は $debug = 0; と同じ）
+	-sOPT 		$OPT をセットする(e.g. -sdebug == -d)
+	-uOPT 		$OPT をオフする(e.g. -udebug は $debug = 0; と同じ）
 	-lfile		file を $LOAD_LIBRARY 変数に代入する 
 			e.g. -llibfml.pl 下↓参照
 =E
-	-sOPT $OPT	set $OPT = 1
-	-uOPT $OPT	set $OPT = 0
-	-lfile		set $LOAD_LIBRARY = file
+	-sOPT 		set "$OPT = 1;"
+	-uOPT 		set "$OPT = 0;"
+	-lfile		set "$LOAD_LIBRARY = file;"
 	e.g.
 	-sdebug		the same as $debug = 1;
 	-sUSE_MIME	the same as $USE_MIME = 1;
 	-uUSE_MIME	the same as $USE_MIME = 0;
 	-llibftpmail.pl	$LOAD_LIBRARY = libftpmail.pl
 
-＊＊注意：-btのように『空白は無し』です。(だってその方がコードが簡単:-)＊＊
+**注意:-btのように『空白は無し』です。(だってその方がコードが簡単:-)**
 =E
 *** Attention!: -bt follows an option string without spaces
 ***             since the code is easier :D
@@ -123,9 +127,8 @@ variables.
 
 デバッグモード かつ $USE_MIME =1; で 変数のダンプも行なう。
 
-
 .S	ロングラインオプション --\S+=\S+
-=E.S	Long line option --\S+=\S+
+=E.S	Long line option style --\S+=\S+
 
 例:
 Example: eval( $MAINTAINER = "fukachan@sapporo.iij.ad.jp" ); essentially
@@ -135,7 +138,6 @@ Example: eval( $MAINTAINER = "fukachan@sapporo.iij.ad.jp" ); essentially
 $MAINTAINER の値を fukachan@sapporo.iij.ad.jp で Overwrite します。
 config.ph の後評価されるので、ロングラインオプションを使ってある値だけ
 を変更することが可能です。
-
 
 .S	設定ファイルとコマンドラインオプション
 =E.S	configuration files and command line options
@@ -155,10 +157,11 @@ The evaluation order of configurations are
 =S
 The latter overwrites former configurations.
 
-   1	(もしあれば) 共用directory の config.ph  を loading
-   2	(もしあれば) 共用directory の sitedef.ph を loading
-   3	その後コマンドラインオプションを評価
-
+   0     デフォールト設定(program 内にハードコード)
+   1    (もしあれば) 共用directory の site_init.ph を loading
+   2	$DIR/config.ph (このファイルは必須)
+   3	(もしあれば) 共用directory の sitedef.ph を loading
+   4	その後コマンドラインオプションを評価
 
 .S	簡易モード設定 (ロングラインオプション) --\S+
 =E.S	simple mode setting option --\S+
@@ -187,7 +190,6 @@ $Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外では使わない
 例:
 		fml.pl --ctladdr
 
-
 .S	--ctladdr 指定について (コマンド用のアドレス)
 =E.S	--ctladdr 
 
@@ -195,12 +197,13 @@ $Envelope{"mode:$mode"} と同じ意味になります。デバッグ以外では使わない
 ます。そのためコマンドラインオプションはいじりません。
 =E
 Today you can configure FML by "makefml" interface. Makefml configures
-$DIR/cf for each ML and re-generates config.ph from cf but cannot
-control command line options e.g. in $DIR/include and
-$DIR/include-ctl. Hence for maintenance, you should not edit
+$DIR/cf for each ML and re-generates config.ph from cf.  makefml does
+not control command line options e.g. in $DIR/include and
+$DIR/include-ctl. For unified maintenance, you should not edit
 $DIR/include* directly and command line options. $DIR/include-ctl is
 exceptional. In it, we use --ctladdr to declare fml.pl runs as a
-command server mode. Please do not remove --ctladdr in include-ctl.
+command server mode since config.ph is common over programs. Please do
+not remove --ctladdr in include-ctl.
 
 ひとつだけ例外があります。コマンド用のアドレス listname-ctl は 
 include-ctl を呼びますが、この include-ctl の中には
@@ -208,24 +211,20 @@ include-ctl を呼びますが、この include-ctl の中には
 		--ctladdr
 .k		--ctladdr
 
-という
-
-	コマンド用のアドレス宛のメールを処理するという意味を
-	fml.pl へ伝えるためのコマンドラインオプション
-
-を使っています。この --ctladdr は消さないで下さい。--ctladdr ですが、
-次のような理由で使われています。もしこの ctladdr 指定がないと起動され
-たプロセスが何用なのか判定できません。
+という『コマンド用のアドレス宛のメールを処理するという意味をfml.pl へ
+伝えるためのコマンドラインオプション』があります。これは全プログラムに
+共通の config.ph には記述できません。
+この --ctladdr は消さないで下さい。
 
 コマンド用のコマンド fmlcommand.pl を呼び出すようにしても同じことです
-が複数のファイルを保守するのは嫌なので、FML 2.1 では fml.pl を用い --
-ctladdr で挙動を変える実装にしています。
+が複数のファイルを保守するのは嫌なので、FML 2.1 以降では fml.pl を用い 
+--ctladdr で挙動を変える実装にしています。
 ＃これにより、backward も可能になるという理由もあります。
 =E
-Using --ctladddr is essentially same when I split FML to fml.pl and
-fmlcommand.pl. Ror source maintenance I maintain only fml.pl as a
+To use --ctladddr is same as to use a distributor program and another
+command server program.  For source maintenance and compatibility my
+choice is not to make plural programs but maintain only fml.pl as a
 kernel library for FML and options change fml.pl behavior.
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

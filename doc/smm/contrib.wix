@@ -1,14 +1,13 @@
-.C	contrib
-.l	contrib
+.C	Contrib
+.l	Contrib
 
 lib/ == contrib/ の階層のリストと簡単な説明です。
 =E
 Here is a list of contrib
 
-.S	contrib 一覧
-.k	contrib 一覧
-=E
-.S	contrib list
+.S	Contrib 一覧
+=E.S	Contrib List
+.k	Contrib 一覧
 
 .q
 MIME				
@@ -24,11 +23,13 @@ localhack/release-1/vote	(.ptr{contrib/localhack/release-1/vote})
 localhack/release-2		contrib for FML release-2
 localhack/release-2/kizu	
 localhack/release-2/doc-changes	doc-changes@ffs.fml.org
-mail2irc			(.ptr{mail2irc})	
+localhack/release-2/mnews
+localhack/release-2/member_name
+irc				(.ptr{mail2irc})	
 mail2fax			
 mail2news			(.ptr{mail2news})
 msend-anytime 			(.ptr{msend-anytime})
-netutils			a few examples applied based on fml librarys
+netutils			a few examples applied based on fml libraries
 pager				(.ptr{pager})
 traffic				(.ptr{libtraffic.pl})
 utilities			(.ptr{uip})
@@ -36,9 +37,7 @@ whois				(.ptr{whois})
 www-utils			
 .~q
 
-
 .include traffic.wix
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

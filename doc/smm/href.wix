@@ -1,10 +1,28 @@
-.C	Generating HTML articles 
+.C	HTML形式の記事を作成する
+=E.C	Generating HTML Articles 
 .l	href
 .k	WWW
-.k	ローカルスプールへのftp操作
 
 注意: HTML を作る場所ですが、デフォールトでは var/htdocs -> htdocs/ に
 変わっています。var は nobody 等へpermission を出していないからです。
+
+このルーチンは htdocs/ の下に記事をHTMLファイルとして成し適当に 
+index.html や thread.html を再生成しています。そのため運用ポリシーとし
+てWWWサーバでCGIなどが使えない場合(使いたくない場合)にも問題はありませ
+ん。一般にCGIの方が自由度は高いでしょうが、普通WWW管理者はセキュリティ
+的にそういうものは使わせたくないし、一つ記事を読むたびに毎回プログラム
+が走ると重たいということもあります。fmlの方式はそういう事情に左右され
+ませんが、そのために支払わねばならないトレードオフは当然あります。
+=E
+This routine creates html articles in htdocs/ and adjusts index.html
+and thread.html. By this you can read html articles under a www server
+without CGI, SSI ... Usually www server administrators think that our
+server does not provide such a function for security and avoidance of
+high load. Under such a circumstance, you can provide ML articles as a
+HTML style. CGI is more flexible but may be unsafe. Fml HTML function
+is restricted without functions provided by CGI, but not affected by
+WWW server operation policy (security and high load average). It is a
+trade-off but it is effective I believe under some environments.
 
 .S	自動的に スプールを html 化する(Expireはしない)
 =E.S	Automatically generating HTML articles from ML spool ($DIR/spool)
@@ -22,9 +40,7 @@ $AUTO_HTML_GEN = 1; をセットすると、自動的にHTML化された記事も作ります。
 ます。
 =E
 When $AUTO_HTML_GEN = 1;, FML generates both plain articles in
-$DIR/spool and HTML articles in
-
-	$DIR/htdocs/
+$DIR/spool and HTML articles in $DIR/$HTML_DIR ($DIR/htdocs/).
 
 HTML化の実体は HOOK で呼び出されます。fml.pl の中から外部の 
 SyncHTMLfiles.pl を呼んでやらせるのは美しくないので;-)、HOOK でやれる
@@ -36,11 +52,12 @@ hook. Running external program SyncHtmlfiles.pl is an old time design,
 which is obsolete.
 
 記事は htdocs/ の下に階層構造を作りその下に作られます。階層構造は日や
-記事番号100通ごとなどを単位にしています。
+記事番号100通ごとなどを単位にしています。単位は $HTML_INDEX_UNIT で決
+められます。
 =E
 FML creates HTML articles in sub-directories under htdocs/. The unit
-of sub-directoreis are based on days, weeks, month and article
-sequences.
+of sub-directories is are based on days, weeks, month and article
+sequences. The unit is $HTML_INDEX_UNIT.
 
 Example:
 
@@ -49,7 +66,6 @@ Example:
 	htdocs/19980120/1.html
 	htdocs/19980120/2.html
 	.....
-
 
 .S	&SyncHtml($HTML_DIR, $ID, *Envelope);
 .k	&SyncHtml
@@ -63,8 +79,8 @@ SYNOPSIS:
 			グローバル変数 $ID はセットされる。
 	*Envelope	%Envelope
 =E
-	$HTML_DIR 	HTML articles stored in here.
-	$ID		current article ID. Global variable ID is defined
+	$HTML_DIR 	Location where HTML articles is stored.
+	$ID		Current article ID. Global variable ID is defined
 			in &Distribute.  
 	*Envelope	%Envelope
 
@@ -85,7 +101,7 @@ Running &SyncHtml makes
 
 を生成します。index.html の中身は LIST 構造を成しています。
 =E
-index.html is the follwing listing structure.
+index.html is the following listing structure.
 
 	<UL>
 	<LI>
@@ -112,52 +128,62 @@ entries in reverse order. Latest article is on the top of index.html.
 .k	$HTML_DATA_CACHE
 =E
 The cache file is $HTML_DATA_CACHE (default is .indexcache). 
-Each directory has cach file. 
+Each directory has each cache file. 
 
-また、スレッドを生成するためのキャッシュのファイル名は 
-$HTML_DATA_THREAD です。
+またスレッドを生成するためのキャッシュのファイル名は $HTML_DATA_THREAD 
+です。
 .k	$HTML_DATA_THREAD
 =E
-Also cache file for threading is $HTML_DATA_THREAD.
+Also a cache file for threading is $HTML_DATA_THREAD.
 
 同じライブラリを呼んで同じことをするコマンドラインからのためのインター
 フェイスに spool2html.pl というのもあります。
 .xref spool2html.pl
 =E
 spool2html.pl is the command line interface.
-
+.xref spool2html.pl
 
 .S	HTML化する単位 (数 or 日)
 =E.S	Unit of HTML directory
 .l	$HTML_INDEX_UNIT
 .key	$HTML_INDEX_UNIT
 
-	$HTML_INDEX_UNIT (default 'day') 
+	$HTML_INDEX_UNIT (default is 'day')
 
-expireしない場合一つの htdocs/ に数千のファイルができることになりかね
-ません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをまとめ
-ておく方が見やすいでしょう。現在の標準実装のデフォールトは 
-$HTML_INDEX_UNIT = 'day'; で
+	設定できる値:
+=E
+	value:	
+
+		"day"
+		"week"
+		"month"
+		"infinite"
+		number (e.g. 100, 1000, ...)
+
+現在の標準実装のデフォールトは $HTML_INDEX_UNIT = 'day'; です。
 =E
 $HTML_INDEX_UNIT is the unit of sub-directories under htdocs/. The
 default unit is 'day'. FML creates each sub-directory for each day and
 stores HTML articles.
+
+もしexpireしない場合一つの htdocs/ に数千のファイルができることになり
+かねません。これよりはファイル100個ごと、もしくは日ごとにdirectoryをま
+とめておくなどが見やすいでしょう。
 
 Example: Creation of HTML articles on 1996/09/16
 
 	htdocs/19960916/index.html
 	htdocs/19960916/100.html
 	htdocs/19960916/101.html
-	…
+	...
 
 のように 1996/09/16 日のMLの記事を htdocs/19960916/ 以下にHTML化
-します。また、
+します。
 
-	$HTML_INDEX_UNIT = 数字 (e.g. 100)
-
-とした場合記事100個ごとに別のdirectoryを作ります。
+また $HTML_INDEX_UNIT = 数字; (e.g. 100)とした場合は記事100個ごとに別
+のdirectoryを作ります。
 =E
-If $HTML_INDEX_UNIT = number (e.g. 100), each sub-direcory is 100 HTML
+If $HTML_INDEX_UNIT = number (e.g. 100), each sub-directory is 100 HTML
 articles.
 
 Example:
@@ -165,14 +191,26 @@ Example:
 	htdocs/100/
 	htdocs/100/101.html
 	htdocs/100/102.html
-	…
+	...
 	htdocs/200/
 	htdocs/200/201.html
 	htdocs/200/202.html
-	…
+	...
+
+.S	$HTML_INDEX_UNIT == "infinite"
+.k	$HTML_INDEX_UNIT == "infinite"
+
+日などでわけずに一つの directory に作る。$HTML_DIR 直下に生成する。
+トラフィックが多く数万個の記事ディレクトリ直下にできてしまうことが想定
+されるようなケースでは非現実的なので使うべきでない(いろいろな整合性チェッ
+クの時間だけで馬鹿にならない)。
+=E
+Generate html files in one directory, just under $HTML_DIR.  If you
+have a ML with large traffic, you should not use this setting since
+only inconsistency check routine must run very longly.
 
 .S	thread.html; スレッド化した index を作成する
-=E.S	thread.html
+=E.S	thread.html; Threading
 .k	$HTML_THREAD
 .k	スレッド化したHTML階層を作る
 
@@ -182,24 +220,116 @@ Index file for threaded html articles are created when
 
 	$HTML_THREAD = 1; 
 
-にするとスレッド化したindex.html としてthread.html を作ります。両方を
-作るので好きな階層を見ればいいでしょう。
-スレッドには In-Reply-To: と References: の依存関係を使っています。
-よって、この場合は	 
+にするとスレッド化したインデックスファイルとして thread.html を作りま
+す。両方を作るので好きな階層を見ればいいでしょう。スレッドには 
+In-Reply-To: と References: の依存関係を使っています。そういうものをつ
+けない MUA を使ってる人からのメールだけはうまく動きません。
 =E
-FML Threading depends on In-Reply-To: and References: fields. 
-Hence FML can recognize mails sent from some MUA's such as Eudora
-since they ignore In-Reply-To: and References: fields.
+FML Threading depends on In-Reply-To: and References: fields. Hence
+FML cannot recognize mails sent from some MUA's such as Eudora since
+they ignore In-Reply-To: and References: fields.
 
 	thread.html
 	index.html
 		SUB-DIRECTORY/thread.html
 		SUB-DIRECTORY/index.html
-	…
+	...
 
-のように両方のファイルが作られ別の階層が形成されるので、見る人にはどっ
+このように両方のファイルが作られ別の階層が形成されるので、見る人にはどっ
 ちか好きな方をたどってみてもらえば良いでしょう。
 
+$HTML_THREAD_REF_TYPE は依存関係の作り方のタイプです。デフォールトでは
+References: In-Reply-To: のすべてのリファレンスへリンクをはります。た
+とえ thread.html の中で重複していてもです。リンクは一つだけを選びたい
+なら
+=E
+$HTML_THREAD_REF_TYPE defines how articles are referred within them.
+In default FML uses all elements in References: and In-Reply-To:.
+Even if plural links are shown (duplicated) in thread.html. When
+
+	$HTML_THREAD_REF_TYPE = "prefer-in-reply-to";
+.k	$HTML_THREAD_REF_TYPE
+
+と設定すると、
+	1.	In-Reply-To: 
+	2.	In-Reply-To: がない時は References: に現れる最後のID
+を前の記事とみなすようにします。
+=E
+FML selects one message-id in References: and In-Reply-To:. 
+	1.	In-Reply-To: 
+	2.	If no In-Reply-To: is given,
+		the last message-id in References:
+
+.S	Variables to Customize HTML File 
+
+           $HTML_FORMAT_PREAMBLE
+.k         $HTML_FORMAT_PREAMBLE
+
+		(default) 先頭から <HEAD> まで
+		<TITLE>あたり
+=E
+		From the begin to <HEAD>
+
+           $HTML_DOCUMENT_SEPARATOR
+.k         $HTML_DOCUMENT_SEPARATOR
+		(default) </HEAD><BODY>
+
+		本体
+=E
+		main body
+
+           $HTML_FORMAT_TRAILER
+.k         $HTML_FORMAT_TRAILER
+
+		</BODY></HTML> (default) 
+
+index.html 用には
+
+	$INDEX_HTML_DOCUMENT_SEPARATOR
+	$INDEX_HTML_FORMAT_PREAMBLE
+	$INDEX_HTML_FORMAT_TRAILER
+.k	$INDEX_HTML_DOCUMENT_SEPARATOR
+.k	$INDEX_HTML_FORMAT_PREAMBLE
+.k	$INDEX_HTML_FORMAT_TRAILER
+
+という変数が用意されています。
+
+メーリングリストの記事のどのヘッダを表示するかは @HtmlHdrFieldsOrder 
+で決まります。が $HTML_HEADER_TEMPLATE という変数を使うと 
+@HtmlHdrFieldsOrder は無視され、$HTML_HEADER_TEMPLATE だけが書き込まれ
+ます。
+.k	@HtmlHdrFieldsOrder
+=E
+The header fields defined in @HtmlHdrFieldsOrder is written to html
+files. If $HTML_HEADER_TEMPLATE is defined, only the content is
+written and @HtmlHdrFieldsOrder is ignored.
+.k	@HtmlHdrFieldsOrder
+
+.S	HTML 4.0
+.k	$HTML_STYLESHEET_BASENAME
+
+HTML 4.0 については
+=E
+HTML 4.0 comes from a patch by
+
+	From: TAMURA Kent <kent@hauN.org>
+	fml-support: 04153
+
+のパッチをほとんどそのまんま使っています。＃ ありがとう _o_
+=E
+Thank you the contribution.
+
+$HTML_STYLESHEET_BASENAME はスタイルシートのファイルです。sub
+directory の下に html ファイルが作られることを考慮して設定して下さい。
+例:
+=E
+HTML 4.0 has a css as a standard. $HTML_STYLESHEET_BASENAME is a style
+sheet file. Please consider the relative path.
+
+	$HTML_STYLESHEET_BASENAME = "../fml.css";
+
+A style sheet example is automatically installed under automatic html
+generation.
 
 .S	HTMLファイルのExpire
 =E.S	Expiration over HTML articles
@@ -235,28 +365,29 @@ Firstly the HTML directory has the following structure.
 必要になるからです。
 =E
 If removing articles one by one, FML requires sub-directory
-consistency checkes for re-creating index.html and so on. 
-It is difficult to keep consistency. 
-Hence our algorighm is "removing the whole sub-directory if all
-articles in the sub-direcoty are expired".
-After removing, FML re-creates the top index.html and thread.html. 
+consistency checks for re-creating index.html and so on. It is
+difficult to keep consistency. Hence our algorithm is "removing the
+whole sub-directory if all articles in the sub-directory are expired".
+After removing, FML re-creates the top index.html and thread.html.
 
 directory ごと expire する根拠はdirectory 中に含まれる全てのファイルが 
 expire だと判定された場合です。よって、ある directory 中の一部のファイ
 ルが expire の日付を過ぎていてもそれらは全てのファイルが expire される
-まで残り続けることに注意して下さい。なお directory ごと消す時に一番上
-の index.html thread.html は再構成されます。
+まで残り続けることに注意して下さい。なお directory ごと消す時にだけ一
+番上の index.html thread.html は再構成されます。
 
-また expire 処理の overhead がかなりかかります。また directry 単位なの
+また expire 処理の overhead がかなりかかります。また directory 単位なの
 に毎回 expire するべきか？の判定処理をしてもしょうがありません。デフォー
 ルトは投稿数に対し $HTML_EXPIRE_LIMIT * 5 回に一回 expire code は走り
-ます。
+ます。この値は $HTML_EXPIRE_SCAN_UNIT で変更できます。
+.k	$HTML_EXPIRE_SCAN_UNIT
 =E
-Expiration codes requires some overhead. It must be of no use to run
-expiration each time FML runs since our algorighm is applied for each
-directory and so expirations occurs sometimes.
-FML runs expiration codes once $HTML_EXPIRE_LIMIT * 5 times in default.
-
+Expiration codes requires some overheads. It must be of no use to run
+expiration each time FML runs since our algorithm is applied for each
+directory but an expiration occurs sometimes.  FML runs expiration
+codes once $HTML_EXPIRE_LIMIT * 5 times in default.
+$HTML_EXPIRE_SCAN_UNIT can control this value.
+.k	$HTML_EXPIRE_SCAN_UNIT
 
 .S	BASE64 Decoding
 .k	$BASE64_DECODE
@@ -267,12 +398,11 @@ base64 で encode されたものがあった場合$BASE64_DECODE という変数に定義
 なお展開した結果はFMLが勝手につけた名前でファイルに落されます。
 ユーザが与えた名前は security 上使いません。
 =E
-If $BASE64_DECODE is defined, FML try to decode BASE64 parts contained
-in a mail when HTML articles is created.
+If $BASE64_DECODE is defined, FML tries to decode BASE64 parts
+contained in a mail when a HTML article is created.
 
 Example:
 	$BASE64_DECODE = "/usr/local/bin/mewdecode";
-
 
 .S	$HTML_OUTPUT_FILTER
 .k	$HTML_OUTPUT_FILTER
@@ -281,7 +411,6 @@ index.html を作る時 $HTML_OUTPUT_FILTER というプログラムを通してから作
 る。具体的には 日本語漢字変換やMIME,BASE64 decoder 等が該当するだろう。
 =E
 When creating HTML articles, apply $HTML_OUTPUT_FILTER as a filter.
-
 
 .S	$HTML_TITLE_HOOK
 .k	$HTML_TITLE_HOOK
@@ -298,7 +427,6 @@ Example: to change HTML article subject.
 
 で、タイトルのシンタックスを日付を付け加える等…変えられる。
 
-
 .S	キーワードによるHTML化の自動分類 （今の実装でOKか未確認？）
 =E.S	Classification by keywords (obsolete?)
 .k	@HTML_FIELD
@@ -308,7 +436,9 @@ Example: to change HTML article subject.
 ヘッダの Keyword: エントリが含んでいるキーワードが @HTML_FIELD のどれ
 かにマッチした場合に、キーワード別に別のHTML階層を作ります。
 .fi
-
+.if LANG == ENGLISH
+* please ignore ;D
+.fi
 
 .S	&TalkWithHttpServer
 .l	&TalkWithHttpServer
@@ -329,7 +459,6 @@ SYNOPSIS:
 	$request	request (e.g. http://www.fml.org/)
 	$tp		TYPE OF PROTOCOL (http, gopher, ftp, ...)
 	*e		stab of the result
-
 
 http:// で始まらない時には、デフォールトで聞きにいくサーバを
 =E
@@ -369,7 +498,6 @@ Example:
 	&Mesg(*e, ">>> ENDS HREF=$tp://$host$request\n");
     } 
 	
-
 .S	URLの中身を返すサーバ
 =E.S	Server to get the request URL and send back it
 .k	&HRef
@@ -385,11 +513,10 @@ $START_HOOK = q#
 
 です。こうするとメール本文をコマンドレポートの形で送り返します。
 =E
-send backs the URL contents as a "fml status report".
-
+It send backs the URL contents as a "fml status report".
 
 .S	HRef関数によるURL先データの引き落とし
-=E.S	Download URL
+=E.S	Download URL's content
 .l	HRef
 .k	&HRef
 .k	HRef
@@ -400,8 +527,8 @@ SYNOPSIS:
 $request のURLの内容を$Envelope{'message'}に入れて送り返す。
 $request は
 =E
-Download the URL by $request and set it in $Envelope{'message'}.
-Requests below are available.
+Download the URL which URI is $request and set the content in
+$Envelope{'message'}. Request types below are available.
 
 	http://
 	gopher://
@@ -410,13 +537,12 @@ Requests below are available.
 を理解します。ftp はローカル or ftpmailへのリレーへ自動的に切替えます。
 また、もしバイナリデータの場合はuuencodeして送り返します。
 =E
-ftp:// automatically changes to local or to be relaied to ftpmail. 
+ftp:// automatically changes to local or to be related to ftpmail. 
 
 関数の使い方の実例としては bin/geturl.pl 
 =E
 An example of functions is bin/geturl.pl
 .xref bin/geturl.pl
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -10,7 +10,7 @@
 SMTP ライブラリは SMTP(プロセス間通信)で sendmail 等のMTA(Mail
 Transport Agent)と通信するライブラリです。
 =E
-FML can connet MTA (Mail Transport Agent) via SMTP (IPC).
+FML can connect MTA (Mail Transport Agent) via SMTP (IPC).
 libsmtp*.pl are SMTP libraries. The default port is 25/tcp.
 You can control the port as $PORT. 
 
@@ -19,11 +19,11 @@ $PORT = 25 (25/tcp) で通信しますが、
 	$PORT 
 .k	$PORT 
 
-を変えることで別のポートで通信することもできます。また、標準で
+を変えることで別のポートで通信することもできます。また通常
 =E
-In default you can take a debug of SMTP sessions in
+FML logs a session details in $SMTP_LOG.
 
-	$SMTP_LOG (default は "var/log/_smtplog")
+	$SMTP_LOG (default "var/log/_smtplog")
 .k	$SMTP_LOG
 
 というファイルに通信のログを残します。このログはデバッグに非常に役立ち
@@ -34,14 +34,16 @@ If you do not need th session log, set
 	$NOT_TRACE_SMTP 
 .k	$NOT_TRACE_SMTP 
 
-をセットすると、このログは残りません。また、どのマシンの sendmail を使
-うかも自由に設定できます。デフォールトはそのマシンです。もしMLサーバの
-マシン(受けるマシン)が貧弱ならそのマシンが何十通もメールを送り出すのは
-酷です。
+をセットすると、このログは残りません。
+
+また、どのマシンの sendmail を使うかも自由に設定できます。デフォールト
+はそのマシンです。もしMLサーバのマシン(受けるマシン)が貧弱ならそのマシ
+ンが何十通もメールを送り出すのは酷です。
 =E
-Which MTA in which hosts FML uses as a distributor. In default, $HOST
+Which MTA in which hosts FML uses as a distributor? In default, $HOST
 is "localhost" (ML server itself). You can use another host by
 configuring $HOST.
+.l	$HOST
 
 	$HOST         = 'localhost'; (default)
 .key	$HOST
@@ -49,15 +51,21 @@ configuring $HOST.
 そういう場合変数 $HOST を書き換えて別のマシンに配送を任すこともできま
 す。その時は
 
-	$HOST         = 'beth.foo.bar.ac.jp';
+	$HOST         = 'beth.foo.bar.ac.jp'; (another host)
 
 のようにそのマシン名を書いて下さい。もちろんアクセスできないマシンとか
 ではできません(あったりする)し勝手にそのマシンのパワーを使うことになる
 のでそのマシンを使う許可を得るべきです。
 =E
 You requires permission that you can use $HOST as a distributor since
-you use the machine resources.
+you use the machine resources. 
 
+HOSTではポート番号が25でないMTAへのアクセスも可能です。例えば port
+10025/tcp を使うこともできます。
+=E
+You can use MTA with another port (not 25/tcp). For example, 10025/tcp
+
+	$HOST         = 'beth.foo.bar.ac.jp:10025'; 
 
 .S	予備のSMTPサーバ
 =E.S	Secondary SMTP Servers
@@ -74,11 +82,13 @@ If you can use several machines as delivery, you can set
 この場合、もし $HOST に connect() できない時は、machine-1 に、
 もし machine-1 に connect() できない時は machine-2 へ…とい
 う風に予備のサーバを使い何とか配送をしようと試みます。
-全部だめだった場合は sendmail コマンドを使って配送します。
+全部だめだった場合は sendmail コマンドを使って配送を試みます。
+sendmail がないシステムでは qmail-smtpd, exim なdも試します。
 =E
-to use machine-* pararelly. FML breaks out recipients up to
-$MCI_SMTP_HOSTS and injects them to each MTA on $HOST and @HOSTS.
-
+to use machine-* parallelly. FML breaks out recipients up to
+$MCI_SMTP_HOSTS groups. A mail to deliver is injected to each MTA on
+$HOST and @HOSTS. If all connections to hosts fail, FML tries to send
+a mail with "sendmail" called as a command.
 
 .S	リレー(RFC821)
 =E.S	Relaying based on RFC821
@@ -89,16 +99,16 @@ $MCI_SMTP_HOSTS and injects them to each MTA on $HOST and @HOSTS.
 せん。もちろんお互いに合意の上でIPアドレスベースでチェックしてリレーを
 するなどは考えられます。
 =E
-Today we cannot permit relaying against spam mails. 
-
+Today we cannot permit relaying against spam mails. If sendmail is not
+found, FML tries to use qmail-smtpd, exim.
 
 .S	activesファイルによるリレー制御
-=E.S	relay configurations in actives file
+=E.S	Relay Configurations In Actives File
 
 actives には
 =E
 When you can use relay server (here axion.phys.titech.ac.jp), You can
-write in "actives" file, 
+write how to relay in "actives" file, 
 
 	アドレス			リレーサーバー
 	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
@@ -108,13 +118,13 @@ write in "actives" file,
 
 のような書き方ができます。これをすると sendmail には
 =E
-FML interpretes, rewrite and injecets this to sendmail as:
+FML interprets, rewrite and injects this to sendmail as:
 
 	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
 
-のように渡されます。	だから actives ファイルに
+のように渡されます。actives ファイルに
 =E
-"actices" file has the following entries
+If "actives" file has the following entries
 
 	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
@@ -122,7 +132,7 @@ FML interpretes, rewrite and injecets this to sendmail as:
 
 なものがあると
 =E
-FML injectes 
+FML injects 
 
 	@axion.phys.titech.ac.jp:fukachan@phys.titech.ac.jp
 	@axion.phys.titech.ac.jp:Elena@phys.titech.ac.jp
@@ -132,6 +142,7 @@ FML injectes
 で一通にまとめられて来てaxion.phys.titech.ac.jp で3通にばらけます。
 =E
 sendmail 8.x delivery aggregates SMTP sessions to axion.
+On axion, MTA segregates it to three mails.
 
 パケットの数もサーバの負担も軽くなるのでもしリレーしていいという許可が
 得られればどこかでリレーサーバを使えるといいですね。
@@ -158,8 +169,10 @@ NEW FORMATでは
 
 $DEFAULT_RELAY_SERVER が定義されている場合は強制的に全てのメールを
 =E
-$DEFAULT_RELAY_SERVER is a default relay server. FML recognizes all
-recipients in "actives" has r=$DEFAULT_RELAY_SERVER.
+You can set up $DEFAULT_RELAY_SERVER. it is used as a default relay
+server. FML recognizes all recipients should be delivered via the
+relay server. FML interprets entries in "actives" has
+r=$DEFAULT_RELAY_SERVER.
 
 	$DEFAULT_RELAY_SERVER
 .k	$DEFAULT_RELAY_SERVER
@@ -167,9 +180,8 @@ recipients in "actives" has r=$DEFAULT_RELAY_SERVER.
 
 で定義されたリレーサーバへ投げそのサーバに配送します。
 
-
 .S	activesファイルによるリレー (sendmail 5.x)
-=E.S	relay based on actives file (sendmail 5.x)
+=E.S	Relay Based On Actives File (Sendmail 5.X)
 
 	fukachan@phys.titech.ac.jp	r=axion.phys.titech.ac.jp
 	Elena@phys.titech.ac.jp		r=axion.phys.titech.ac.jp
@@ -178,11 +190,11 @@ recipients in "actives" has r=$DEFAULT_RELAY_SERVER.
 ↑このように順番に並んでいないと一通になってくれませんので注意。
 それ以外は8.xの時と一緒です。
 =E
-In Sendmail 5.x, you require ordering by relay server in "actives". 
-
+In Sendmail 5.x, you require additional orderings by relay server in
+"actives". 
 
 .S	CF (by motonori@wide.ad.jp) 形式による relay 
-=E.S	CF (by motonori@wide.ad.jp) style relay configurations
+=E.S	Cf (By motonori@wide.ad.jp) Style Relay Configurations
 .k	relay hack based on CF (by motonori@wide.ad.jp)
 .k	$CF_DEF
 .k	%RELAY_NGW
@@ -190,9 +202,9 @@ In Sendmail 5.x, you require ordering by relay server in "actives".
 .k	%RELAY_NGW_DOM
 .k	$RELAY_HACK
 
-$RELAY_HACK = 1; がセットされ、$CF_DEF で定義された CF 形式の static 
-配送ルールが設定された場合、それにしたがったリレーサーバの設定がされま
-す。
+$RELAY_HACK = 1; がセットされ、$CF_DEF で STATIC_ROUTE_FILE で定義する
+static 配送ルールを記したファイルが設定された場合、それに従ってリレー
+サーバの設定がされます。
 =E
 When $RELAY_HACK = 1; is defined and $CF_DEF (CF style static delivery
 rule file) exists, FML controls relaying based on it.
@@ -206,7 +218,6 @@ CF style example:
 
 	GW smtp-ignmx:  mlrelay0.domain0
 	DOM or.jp
-
 
 CF 形式の例2:
 co.jp にマッチしないドメイン宛のメールはすべて mlrelay.domain というマ
@@ -224,17 +235,16 @@ CF style example2:
 リレー情報はハッシュテーブル %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM に入
 れられ、smtp library で利用されます。
 =E
-SMTP library uses hashes %RELAY_NGW %RELAY_GW %RELAY_NGW_DOM for
+SMTP library uses hashes %RELAY_NGW, %RELAY_GW, %RELAY_NGW_DOM for
 control of this relay routings.
 
-
 .S	同じmxについて
-=E.S	on the same MX
+=E.S	On The Same Mx
 .key	mx
 
 sendmail 8.xではCHANGES-R5-R8にあるとおり↓
 =E
-Sendmail 8.x:
+In CHANGES-R5-R8 of Sendmail R8:
 
    For example, if two sites ``foo.com'' and ``bar.com'' are both
    served by UUNET, they will have the same set of MX hosts and will
@@ -256,13 +266,12 @@ Sendmail 5.x requires ordering by domain:
 qmail 1.0 はそうことをせず相手の負荷も回線の太さも考えず、ひたすら一通
 ずつ投げつけます(だ〜っ)。
 
-
 .S	MCI Cache
 =E.S	MCI Cache
 .k	MCI
 
 .if LANG == ENGLISH
-Today sendmail 8.x has pararell connections ons and re-uses sockets. 
+Today sendmail 8.x has parallel connections and re-uses sockets. 
 Delivery acceleration codes is called MCI.
 Please see deliver() in /usr/src/usr.sbin/sendmail/src/deliver.c.
 
@@ -275,28 +284,28 @@ TCP Connection Cache の基本的なアイデアは TCP Connection 自体のコスト
 
 もともとの sendmail は
 
-	for (…おくるべきホストのリスト…) ｛
+	for (…おくるべきホストのリスト…) {
 		ソケット、コネクト、通信、おしまひ
-	｝
+	}
 
 を一つ一つおこないます。これだと 通信が遅いだろうが、なんだろうが、
 TIMEOUT か error が起こるまで長い間無駄な配送がありえます。
 
 sendmail 8.7 では標準装備ですが、いまは
-＃旧もとのりさんのWIDEぱっち ってやつです
+#旧もとのりさんのWIDEぱっち ってやつです
 
-	for (…おくるべきホストのリスト…) ｛
-		ソケット１
-		ソケット２
+	for (…おくるべきホストのリスト…) {
+		ソケット1
+		ソケット2
 		…
 
 		じゅんぐりにまわしていって、
 		通信がしやすい connection へ優先的に
-		通信、（…おしまひ）
+		通信、(…おしまひ)
 
 		………
-	｝
-	＃ちょっと、簡単化し過ぎかな↑
+	}
+	#ちょっと、簡単化し過ぎかな↑
 
 のように、さっさと送ることが可能なホストへどんどん送って、駄目なところ
 は駄目なままです。どうしてもだめなら、最後は queue up されて、次回30分
@@ -304,21 +313,21 @@ sendmail 8.7 では標準装備ですが、いまは
 
 そういう意味で、MCI CACHE は多いと だめなホストが2、3個ならかなり理想
 的な速度で配送できるでしょう。もし、MCI_CACHE が2個で、2個だめなホスト
-があると、そこでしばらくつかえてしまうので、遅くなってしまい R５ のよ
+があると、そこでしばらくつかえてしまうので、遅くなってしまい R5 のよ
 うになってしまうと。
 
 そういう意味で MCI CACHE は多ければ多いほどよさそうに見えますが、やり
 すぎると 今度はカーネルと折り合いがつかなくなるので、まぁ数個が妥当な
 数字なのでしょうね。
 
-○ １つのメールは常に１か所づつ配送されるのでしょうか？
+○ 1つのメールは常に1か所づつ配送されるのでしょうか?
 
-これは (multithread kernel でないのなら) kernel がある時点ではかならず 
+これは (multi thread kernel でないのなら) kernel がある時点ではかならず 
 CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
-ても Connection 自体は OkN の N 個(MAX) ACTIVE なままです（netstat で
-みえるもの）。
+ても Connection 自体は OkN の N 個(MAX) ACTIVE なままです(netstat で
+みえるもの)。
 
-これにさらに MX Cache 等が組合わさって、R８はR５にくらべ非常に高速化さ
+これにさらに MX Cache 等が組合わさって、R8はR5にくらべ非常に高速化さ
 れましたね。
 .fi
 
@@ -327,17 +336,36 @@ CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
 .k	var/log/_smtplog
 .k	_smtplog
 .k	$NOT_TRACE_SMTP
+.k	$SMTP_LOG
 
 sendmailとのやりとりの記録(もっとも最近のものだけ)デバッグに便利です。
 (デバッグとか終わっちゃって)必要ないなら
 =E
-For debug, FML logs SMTP sessoin log in $SMTP_LOG. If you do not want
+For debug, FML logs SMTP session log in $SMTP_LOG. If you do not want
 the logging, please set
 
 	$NOT_TRACE_SMTP = 1; 
 
 と config.ph にかいてください。ログをとらなくなります。
 
+.S	ドメインをソートしてから配送
+=E.S	Delivery After Sorting
+
+bulkmailer の用にドメインをソートしてから配送プログラムに突っ込む。
+でも現代ではほとんど意味がないだろう。
+=E
+If
+
+	$SMTP_SORT_DOMAIN
+.k	$SMTP_SORT_DOMAIN
+
+を設定するとソートを行なう。
+=E
+is defined, delivery routine works after sorting recipients by domain.
+
+.# [MEMO] (against variable consistency check)
+.# %WMD is not a user defined variable.
+.#
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

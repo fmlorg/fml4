@@ -4,16 +4,16 @@
 
 .S	インタプリタとconfig.ph
 =E.S	Interpreter and config.ph
-.seealso	command-hook
+.xref	command-hook
 
-インタプリタなので(例えば config.ph に)HOOK を定義すれば
-適当な場所でそのHOOKは評価され実行されます。
+インタプリタなので(例えば config.ph に)フックを定義すれば適当な場所で
+そのHOOKは評価され実行されます。
 =E
-Perl is an interpreter language. FML evals several hooks in a log of
-places. In this chapter we describe hooks. You can use complicated
+Perl is an interpreter language. FML evaluates several hooks in a lot
+of places. In this chapter we describe hooks. You can use complicated
 control of FML and dynamic configuration changes by using hooks.
 
-その HOOK でちょっと複雑な設定やダイナミックなサーバの挙動の変更をした
+そのフックでちょっと複雑な設定やダイナミックなサーバの挙動の変更をした
 りできます。config.ph で定義するのでMLが複数あってもMLごとに変更できる
 わけです。一方 sitedef.ph で行なえばML共通のHOOKを仕掛けることができま
 す。
@@ -24,15 +24,17 @@ control of FML and dynamic configuration changes by using hooks.
 .l	$START_HOOK
 .k	$START_HOOK
 
-この時点では、ヘッダの各フィールドの切り出しは終っている。が、配送orコ
-マンド本体を行なう前である。
+評価されるタイミングは、
+	ヘッダの各フィールドの切り出しは終っている。
+	が、配送orコマンド本体を行なう前
+である。
 =E
 FML evaluates $START_HOOK, after header parsing and fundamental checks
 but before main distribution and command functions
 
 .if LANG == JAPANESE
-例： 配送前に、もし #ではじまらない行が８行以上あれば、たとえ#ではじま
-る行があっても普通のメールとおもうようにする。
+例: 配送前にもし #ではじまらない行が８行以上あれば、たとえ#ではじまる
+行があっても普通のメールとおもうようにする。
 
 $START_HOOK =q%
     if ($Envelope{'nlines'} - $Envelope{'nclines'} >= 8) {
@@ -45,8 +47,8 @@ $START_HOOK =q%
 .l	$HEADER_ADD_HOOK
 .k	$HEADER_ADD_HOOK
 
-ヘッダに”新たに”つけくわえる フィールドをかいて、カスタマイズするた
-めのフック。
+ヘッダに”新たに”つけくわえるフィールドをかいてカスタマイズするための
+フック。
 =E
 Evaluated before header generation of distribution articles. $body
 variable is used.
@@ -54,19 +56,21 @@ variable is used.
 現在では $body という変数はこのためだけに使われる。
 ＃注意：昔は違った
 
-例(昔のやり方)：
+例(昔のやり方):
 =E
-Example: 
-add the field "X-Baycity-Weather: Mizumaki" (riddle:-).
+Example: add the field "X-Baycity-Weather: Mizumaki" (riddle:-).
 
     $HEADER_ADD_HOOK = q#
 	$body .= "X-Baycity-Weather: Mizumaki\n";
     #;
 
 ヘッダに X-Baycity-Weather: Mizumaki とつけくわえる(意味不明(笑))
-
 現在では同じことは例えば 
+=E
+is the same as
+
 	&DEFINE_FIELD_FORCED("X-Baycity-Weather","Mizumaki");
+
 のような関数でできる。
 
 例２:
@@ -81,42 +85,41 @@ $HEADER_ADD_HOOK = q#
 	"Elena.Lolobrigita@Baycity.asia");
 #;
 
-
 .S	$DISTRIBUTE_START_HOOK
 .l	$DISTRIBUTE_START_HOOK
 .k	$DISTRIBUTE_START_HOOK
 
 配送を始める関数に入った時に最初に評価されるHOOK
 =E
-evaled in the begging of &Distribute which is the main function of
+evaluated in the begging of &Distribute which is the main function of
 distribution.
 
 .S	$SMTP_OPEN_HOOK
 .l	$SMTP_OPEN_HOOK
 .k	$SMTP_OPEN_HOOK
 
-このフックの後 Sendmail へ渡すヘッダの処理が始まります。ここで強制的か
-つダイナミックにヘッダの内容を変えたりすると効果的です。
-単にヘッダの各フィールドを書き換えるのなら &DEFINE_FIELDうじゃうじゃ 
-関数シリーズが用意されています。そちらを使うのがよいでしょう。
+配送時にはこのフックの後 Sendmail へ渡すヘッダの処理が始まります。ここ
+で強制的かつダイナミックにヘッダの内容を変えたりすると効果的です。単に
+ヘッダの各フィールドを書き換えるのなら &DEFINE_FIELDうじゃうじゃ 関数
+シリーズが用意されています。そちらを使うのがよいでしょう。
+SMTPという名前がついていますがSMTP汎用ではありません。歴史的な名前です。
 .xref	&DEFINE_FIELD_FORCED &DEFINE_FIELD_ORIGINAL
 =E
 The variable name is historical, so ambiguous. Today this hook is
 evaluated after $DISTRIBUTE_START_HOOK but before $HEADER_ADD_HOOK.
-You can understarnd faster to see libdist.pl.
+You can understand faster to see libdist.pl.
 
-例：	Reply-To: フィールドをＭＬ自体へ強制書き換え
-	&DEFINE_FIELD_うじゃうじゃ以外にも別解はいくつかあるが解１
+例:	Reply-To: フィールドをML自体へ強制書き換え
+	&DEFINE_FIELD_うじゃうじゃ以外にも別解はいくつかあるが解1
 =E
-Example:
-Overwrite Reply-To: field of distribution mail. Today we recommend
-to use $DEFINE_FIELD_FORCED.
+Example: Overwrite Reply-To: field of distribution mail. Today we
+recommend to use $DEFINE_FIELD_FORCED.
 
 $SMTP_OPEN_HOOK = q#
 	$Envelope{'fh:reply-to:'} = $MAIL_LIST; 	
 #;
 
-例２：	Precedence: を bulk へ
+例2:	Precedence: を bulk へ
 =E
 Example 2: overwrite Precedence: to set "bulk".
 
@@ -126,7 +129,6 @@ $SMTP_OPEN_HOOK = q#
 
 Precedence: に関しては実は config.ph で $PRECEDENCE = 'bulk'; でＯＫで
 す。
-
 
 .S	$DISTRIBUTE_CLOSE_HOOK (SMTP_CLOSE_HOOK)
 .l	$DISTRIBUTE_CLOSE_HOOK
@@ -139,9 +141,8 @@ $DISTRIBUTE_CLOSE_HOOK は配送が終った後でかつまだロックされている状態
 $SMTP_CLOSE_HOOK は昔の名前です。
 =E
 $DISTRIBUTE_CLOSE_HOOK is evaluated in the last of &Distribute, which
-is the main function of distribution.
-$SMTP_CLOSE_HOOK is an old name, so both are same.
-
+is the main function of distribution. $SMTP_CLOSE_HOOK is an old
+obsolete name, so both are same.
 
 .S	$FML_EXIT_HOOK
 .l	$FML_EXIT_HOOK
@@ -151,9 +152,8 @@ fml.pl が最後に実行する フック。このときすでに 『排他制御の lock が解
 除されている』いることに注意して下さい。
 =E
 fml.pl evaluates this hook in the last. This evaluation is after
-unlock! This hook is the last hook but $FML_EXIT_PROG is execcuted
+unlock! This hook is the last hook but $FML_EXIT_PROG is executed
 after this since $FML_EXIT_PROG is to start a new process.
-
 
 .S	$FML_EXIT_PROG
 .l	$FML_EXIT_PROG
@@ -162,27 +162,24 @@ after this since $FML_EXIT_PROG is to start a new process.
 In the last of fml.pl, FML starts $FML_EXIT_PROG as a new process by
 exec(2) system call (precisely speaking via exec(3)).
 
-
 .S	$MSEND_START_HOOK
 .l	$MSEND_START_HOOK
 .k	$MSEND_START_HOOK
 
 After msend.pl is initialized, msend.pl evaluates this hook in the
-begging of the main function.
-
+begging of the main function. See msend.pl internal.
 
 .S	$MSEND_HEADER_HOOK
 .l	$MSEND_HEADER_HOOK
 .k	$MSEND_HEADER_HOOK
 
-In the header generation when sending digest mail createion time.
-
+In the header generation when sending digest mail creation time.
 
 .S	$MSEND_OPT_HOOK
 .l	$MSEND_OPT_HOOK
 .k	$MSEND_OPT_HOOK
 
-msend.pl evalutates $MSEND_OPT_HOOK in the &MSendInit.
+msend.pl evaluates $MSEND_OPT_HOOK in the &MSendInit.
 
 例:
 デフォールトでは、まとめおくり や mget の時の Subject は
@@ -203,12 +200,12 @@ $MSEND_OPT_HOOK = q%
 このように、
 		$MSEND_OPT_HOOK 
 に 連想配列の 
+
 	#モード の値が #説明の文章
 
 のようにかいてください。なにをやってるのかは、libutils.pl の中の
 sub MSendModeSet  という関数を見るとわかるとおもいます。
 .xref	$MSEND_SUBJECT_TEMPLATE
-
 
 .S	$REPORT_HEADER_CONFIG_HOOK
 .l	$REPORT_HEADER_CONFIG_HOOK
@@ -219,8 +216,7 @@ SMTP 配送ライブラリへ渡す直前に評価されるフック。
 In SMTP library, this hook is evaluated just before the mail is passed
 to &Smtp; This routine is used in a reply mail of command results.
 
-
-.S	$COMMAND_HOOK (obsolete on to add new commnads technique)
+.S	$COMMAND_HOOK (obsolete on to add new commands technique)
 .l	$COMMAND_HOOK
 .l	command-hook
 .k	コマンドのカスタマイズ
@@ -228,17 +224,17 @@ to &Smtp; This routine is used in a reply mail of command results.
 
 インタプリタですから、コマンドでそのML独自の機能をもたせたかったら
 config.ph にセットして下さい(そうすれば、MLが複数あってもそれぞれ別様
-にカスタマイズできる)。
-
-これはリストを返すようにするコマンド "# list" を新たに付け加える例です。
+にカスタマイズできる)。以下の例はリストを返すようにするコマンド "#
+list" を新たに付け加える例です。
 =E
 This hook is evaluated in the command execution loop. Historically
-this hook is to add a new command you customize. Today to add a new
-command is that you write a new routine and inject "command name" and
-the function name (reference to the function) to %LocalProcedure.
-Using this hook is obsolete. This example is to add a new commnad "#
-list" which send back $DIR/list file.
-.xref my-file-sendback-command
+this hook is to add a new command you customize. Today this is
+obsolete, to add a new command is that you write a new routine and
+inject "command name" and the function name (reference to the
+function) to %LocalProcedure.  Using this hook is obsolete. This
+example is to add a new command "# list" which send back $DIR/list
+file.
+.xref add-procedures my-file-sendback-command
 
 --------- in config.ph ---------
 $COMMAND_HOOK =q#
@@ -258,14 +254,12 @@ quoteする関数（本当の意味での関数ではないそうだ）
 注意: 実はHOOKをかけなくても上のような簡単なコマンドは 
 .ptr{my-file-sendback-command} のように簡単に作れます。
 
-
-なお、$COMMAND_HOOK はコマンドチェックのループの中で評価されます。つま
+なお $COMMAND_HOOK はコマンドチェックのループの中で評価されます。つま
 り一般にメールのコマンドの数だけ評価されることになります。こういうこと
 をしても overhead にならないだろういうのは、大抵コマンドは一メールあた
 り1、2回しか呼ばれないので、eval は重たいけど、1、2度ならまぁ便利さの
 方が優先という観察と経験に基づいてます。ただ前述のようにこのやり方はす
 でに obsolete です。
-
 
 .S	$COMMAND_HOOK Example: add "# list" and "# rsummary"
 .k	"list" command (example)
@@ -274,9 +268,9 @@ quoteする関数（本当の意味での関数ではないそうだ）
 FYI: rsummary は現在は summary 引数 の形で実行できます
 =E
 FYI: "rsummay" command below is available in the context of "summary"
-commnad.
+command.
 
-例：
+例:
 	# list		list リストファイルを取り寄せる
 .xref	my-file-sendback-command
 
@@ -292,7 +286,7 @@ $COMMAND_HOOK =q#
       }
 #;
 
-例：
+例:
 # rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
 =E
 Example: to show summary of article number from 100 to 200 articles.
@@ -322,8 +316,8 @@ $COMMAND_HOOK = q#
     }
 #;
 
-
-.S	HOOKによろコマンド実装例： "# sget"
+.S	HOOKによるコマンド実装例: "# sget"
+=E.S	Example: "# sget"
 .key	$COMMAND_HOOK
 
 # sget uja		subjectに uja というキーワードが入っているファ
@@ -350,8 +344,7 @@ $COMMAND_HOOK =q#
     }
 #;
 
-
-.S	HOOKによるコマンド実装例： "# admin" アドミンコマンド
+.S	HOOKによるコマンド実装例: "# admin" アドミンコマンド
 =E.S	"# admin" command by $COMMAND_HOOK
 .k	admin コマンド
 .xref	REMOTE-ADMINISTRATION 
@@ -362,12 +355,13 @@ $COMMAND_HOOK =q#
 Obsolete. Long time ago, FML provides "admin" commands by
 $COMMAND_HOOK.
 
-
-.S	HOOKの例：ある行数を越えるメールは廃棄する設定
-=E.S	Example: to disgard an over length mail
+.S	HOOKの例:ある行数を越えるメールは廃棄する設定
+=E.S	Example: to discard an over length mail
 .k	$START_HOOK
 
-We disgard a mail with over 1000 lines.
+We discard a mail with over 1000 lines. Today please use
+$INCOMING_MAIL_SIZE_LIMIT for incoming mail size upper limit.
+.xref $INCOMING_MAIL_SIZE_LIMIT
 	
 $START_HOOK = q#
     if ($Envelope{'nlines'} > 1000) {
@@ -375,7 +369,6 @@ $START_HOOK = q#
 	$DO_NOTHING = 1;
     }
 #;
-
 
 .S	$START_HOOK でＭＬメンバーの人数制限をする
 =E.S	$START_HOOK: limit the number of member 
@@ -418,6 +411,19 @@ if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
 
 %;
 
+.S	$MODE_BIFURCATE_HOOK
+
+モードが分岐する関数の中で呼ばれるHOOK。ほとんど先頭で呼ばれる。実際に
+は sub ModeBifurcate を見ないと何だか分からないだろう。
+=E
+Called in the first stage of &ModeBifurcate where fml.pl running mode
+changes.
+
+.S	$COMMAND_FILTER_HOOK
+.xref	EnvelopeFilter
+
+.S	$REJECT_COMMAND_FILTER_HOOK
+.xref	EnvelopeFilter
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

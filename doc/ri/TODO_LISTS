@@ -6,12 +6,12 @@
 
 .S	documents
 
+   * want FAQ for beginners
+
    * especially split doc/op to 
 
 	operations guide
 	The design and implementation 
-
-   * want FAQ
 
 .S	WWW Interface ?
 
@@ -21,9 +21,13 @@
 
 .S	integrated system, which may be related with ...
 
-	(like a minimum groupware) 
+	(like a minimum group ware) 
 	irc
 	database search 
 	...
+
+.S	makefml menu extension (full menu? It seems incredible)
+
+.S	MANIFEST Japanese comments?
 
 $Id$

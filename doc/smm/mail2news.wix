@@ -1,26 +1,26 @@
-.C	mail2news (メーリングリストからニュースへ)
-=E.C	mail2news (ML -> News)
+.C	Mail2news (メーリングリストからニュースへ)
+=E.C	Mail2news (ML -> News)
 .k	mail2news (メーリングリストからニュースへ)
 =E.k	mail2news (ML -> News)
 .l	mail2news
 
 注意: ベータテストですぅ。また Perl 5 でないと使えません。
 =E
-This is beta test phase. You require perl 5 here.
+This is beta test phase. You require perl 5 if you use this function.
 
 おまけ機能のメーリングリストからネットニュースへも流す例です:-)
 NNTPClient.pm の使い方の例とでもいう方がいいかもしれない。perl 5 での
 み使える機能です。また NNTPClient.pm がインストールされていることが必
 要です。
 =E
-mail2news injects ML to NetNews :). We use NNTPClient.pm as NNTP
-engine to implement it. Please see contrib/mail2news/.
+mail2news injects a mail (distributed in a mailing list) to NetNews.
+We use NNTPClient.pm as NNTP engine to implement it. Please see
+contrib/mail2news/.
 
 なお libnntp.pl は contrib/mail2news に入っています。
 
-
-.S	mail2news の組み込み方
-=E.S	how to set up mail2news
+.S	Mail2news の組み込み方
+=E.S	How to set up mail2news
 
 contrib/mail2news/libnntp.pl を perl の include の search path のどこ
 かへ入れます。例えば makefml でインストールした場所 ( fml.pl や 
@@ -29,9 +29,8 @@ libsmtp.pl の入ってる場所)へ入れます。
 Install contrib/mail2news/libnntp.pl to the search path of perl
 include path or FML installed directory (e.g. fml.pl lib*pl). 
 
-
-.S	mail2news の設定
-=E.S	mail2news configurations
+.S	Mail2news の設定
+=E.S	Mail2news configurations
 
 まずこのライブラリを fml.pl の最後に実行するように組み込みます。
 =E
@@ -48,15 +47,30 @@ Example:
 
 また、必要な変数を設定します (e.g. config.ph に設定する)。
 =E
-For set up, 
+Please define following variables:
 
     $NEWS_SERVER
+.l  $NEWS_SERVER
+.k  $NEWS_SERVER
 
 	投稿する先のニュースサーバ。設定しないと自分自身のホスト
 =E
 	news server to post
 
+    $DEFAULT_NEWS_GROUP
+.l  $DEFAULT_NEWS_GROUP
+.k  $DEFAULT_NEWS_GROUP
+
+	MLのメールに Newsgroup: ヘッダがない時に投稿すべき Newsgroup:
+	設定しない場合で Newsgroup: ヘッダがないメールはエラーにする
+=E
+	default newsgroup to post. It is used if Newsgroup: field does
+	not exist in the input mail. If this variable is not defined and
+	Newsgroup: field does not exist, mail2news routine returns an error.
+
     @NEWS_HDR_FIELDS_ORDER
+.l  @NEWS_HDR_FIELDS_ORDER
+.k  @NEWS_HDR_FIELDS_ORDER
 
 	ニュースに投稿する時に元のメールから内容を採り入れる
 	ヘッダ。デフォールトは
@@ -71,21 +85,25 @@ For set up,
 	Counter つきのが流れるといった具合です。
 =E
 	Please use small characters "subject" if you use the original
-	fields in a posted article, whereas Captital "Subject" if you
-	use a Netnews article is the same content of a ML article.
+	fields in a posted article, whereas Capital "Subject" if you
+	use a Net news article is the same content of a ML article.
 
    %NEWS_FIELD_DEFAULT
+.l %NEWS_FIELD_DEFAULT
+.k %NEWS_FIELD_DEFAULT
 
 	メールにない場合必要な内容をハッシュに入れる。
-	Organization とかか？
+	Organization とかに使うと思われる？
 =E
-	Hash of contente of Non-usual fields in the header of a
+	Hash of contents of Non-usual fields in the header of a
 	mail. e.g. Organization?
 
    %NEWS_FIELD_TO_OVERWRITE
+.l %NEWS_FIELD_TO_OVERWRITE
+.k %NEWS_FIELD_TO_OVERWRITE
 
 	強制的に書き換える内容をハッシュに入れる。
-	Organization とかか？
+	Organization とかに使うと思われる？
 =E
 	Hash of contents of overwritten fields. e.g. Organization?
 

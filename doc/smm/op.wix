@@ -1,6 +1,7 @@
 .HTML_PRE
 
-   The Design and Implementation of the FML 2.1 Mailing List Server
+   The Design and Implementation of the FML 2.2 Mailing List Server
+   Last modified: 
 
 	   			深町 賢一
 	   			fukachan@sapporo.iij.ad.jp
@@ -9,7 +10,6 @@
    http://www.fml.org/fml/
    http://www.sapporo.iij.ad.jp/staff/fukachan/fml/
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-   Last modified: 
 
    Copyright (C) 1993-1998 Ken'ichi Fukamachi
             All rights reserved. 
@@ -22,22 +22,25 @@
 
 .~HTML_PRE
 
-----------目次----------
-#.index
+--------------- 目次 ---------------
+=E
+-------- Table of Contents ---------
+
+.toc
 
 総索引
 =E
 Index
-------------------------
+------------------------------------
 
 
 パートI は設計思想、II は内部構造等について述べています。
 設定そのものについて知りたい人はパートIIIの「インストールとカスタマイ
 ズ」へ一気に進んで下さい。(part III .ptr{install})
 =E
-We describe design policy at part I, the internal structure at part II. 
-If you would like to know how to configure anyway, go to part III
-"Install and Customize". (part III .ptr{install})
+We describe design policy at part I, the internal structure at part
+II. If you would like to know how to configure FML anyway, go to part
+III "Install and Customize". (part III, chapter .ptr{install})
 
 
 .# ##########################################################
@@ -45,12 +48,13 @@ If you would like to know how to configure anyway, go to part III
 .k	Design Overview
 
 パートIでは、fml の設計思想の概略について述べます。設計思想を知ってい
-ると設定のデフォールトがどうなっているかを推測するに役立つでしょう。
-実際の細かい設定についてはパートIII以降へ譲ります。
+ると設定のデフォールトがどうなっているかを推測するに役立つでしょう。実
+際の細かい設定についてはパートIII(chapter .ptr{install})以降へ譲ります。
 =E
 Here at part I, we describe overview of design policy, which helps you
 to speculate the FML internals. Please refer to Part III on the
-details of confiturations.
+details of configurations.
+.xref .ptr{install}
 
 なおこのドキュメント中では便宜上
 
@@ -58,16 +62,16 @@ details of confiturations.
 	# を root の時のshell prompt
 
 とすることにします。また directory 等はあくまで見本だということに注意
-して下さい。そこに自動的に作られるわけでも、推奨なわけでもありません。
-各々自分の環境に合わせて読み替えて下さい。
+して下さい。そこに自動的に作られるわけでも推奨というわけでもありません。
+各自自分の環境に合わせて読み替えて下さい。
 =E
-In this document, there describes the design concept of the fml.
-Detailed configurations are in the second part or later.
-=S
-In these documents, % means a shell prompt, # means a "root" shell
-prompt . And you please keep in mind that these directories and so on
-as follows are only samples, not be made automatically , much less I
-recommend.
+This document describes the design concept of the fml.  Detailed
+configurations are explained in the part III or later.
+==
+In this document, % means a shell prompt, # means a "root" shell
+prompt . Please keep in mind that directory names described below are
+just examples, much less I recommend.  It may not be made
+automatically in some cases. Please check them by yourself.
 
 .# DOV == Design OverView
 .include dov.wix
@@ -78,11 +82,11 @@ recommend.
 .l	process-overview
 .k	Process overview
 
-ここでは fml プロセスと他のプログラムとの関係、fml の起動の仕方等につ
-いて解説します。
+ここでは FML のプロセスと他のプログラムとの関係、FML の起動の仕方等に
+ついて解説します。
 =E
-Here we describe the relation between fml processes and other
-programs, and how to launch fml.
+Here we describe the relation between FML processes and other
+programs, and how to launch FML.
 ==
 .include pov.wix
 
@@ -97,9 +101,28 @@ programs, and how to launch fml.
 .# ##########################################################
 .P	トラブルシューティング
 =E.P      Trouble Shooting
-==
-.include os.wix
+
+.if LANG == JAPANESE
+トラブルの元としてはFML自体の設定のミス、perlの挙動不審、OS依存性など
+があります。OSのログファイルとFMLのログ($DIR/log)のチェックは当然とし
+て、トラブル・シューティングには debug モード(config.ph で $debug = 1)
+でのprintfデバッグなどが役に立ちます。
+
+CHECK_LIST.jp というファイルに従って一通りチェックしてみることも推奨さ
+れています。
+.url http://www.fml.org/fml/CHECK_LIST/
+
+c.f. OS依存性: .ptr{os-dependence}
+.fi
+.if LANG == ENGLISH
+FML itself must have bugs and also several OS dependent
+inconveniences.
+.xref	os-dependence
+.url http://www.fml.org/fml/CHECK_LIST/
+.fi
+
 .include trouble.wix
+.include os.wix
 
 
 .# ##########################################################
@@ -136,13 +159,13 @@ programs, and how to launch fml.
 ＃この辺の並びでそよ風を感じる人(おぉ同志よ:-)メールください(^^)
 =E
 Can you understand sources of quotations?:-)
-.url	http://www.sapporo.iij.ad.jp/staff/fukachan/Anime/AminoTetsuro.html
+.url	http://www.fml.org/Anime/AminoTetsuro.html
 
 .C	あしたリリースオフ
 =E.C	Release off tomorrow
 
 .S	主に言葉ではなくコーディングする姿から伝わってくるもの
-=E.S	Something from coding style not languages
+=E.S	Wind blown mainly from coding style not languages
 
 「それぞれの道は違っても…」
 
@@ -186,7 +209,7 @@ Can you understand sources of quotations?:-)
 .include fml-1.wix
 .include app/fmlR1.wix
 .include app/vars.wix
-.include app/misc.wix
+.# .include app/misc.wix
 .include app/distribute-emulation.wix
 .# .include app/sid.wix
 .# .include app/obsolete.wix

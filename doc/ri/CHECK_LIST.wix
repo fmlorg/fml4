@@ -1,6 +1,6 @@
-		質問をする前に最低限チェックしておくリスト
+	質問をする前に最低限チェックしておくリスト
 =E
-		CHECK LIST BEFORE ASKING
+	CHECK LIST BEFORE ASKING
 
 				深町 賢一
 =E
@@ -9,37 +9,53 @@
 				fukachan@sapporo.iij.ad.jp
 				fukachan@fml.org
 
-
-どうしても分からないならしょうがないですが、質問の前に事前に調べられる
-ことは調べておいてもらえると助かります。というリストです。
+「どうしても分からないならしょうがないですが、質問の前に事前に調べられ
+ることは調べておいてもらえると助かる」というリストです。
 
 なお以下で % は shell の prompt です。
 =S
 In these documents, % means a shell prompt, # means a "root" shell
 prompt . 
 
+------------------------------
+.toc
+------------------------------
 
 .C	質問の種類にかかわらず共通なチェック項目
-=E.C	Common things over problmes
+=E.C	Common things over problems
 
 .S	FML の吐くログは調べたか？
-=E.S	Check FML's logfile ? 
+=E.S	Check FML's log file? 
 
-	$DIR/log (config.phのある場所の log ファイル)に何が書いてあるか？
-	(例えば /var/spool/ml/elena/log のようなファイル名)
+$DIR/log (config.phのある場所の log ファイル)に何が書いてあるか？
+(例えば /var/spool/ml/elena/log のようなファイル名)
+=E
+Please see $DIR/log (e.g. /var/spool/ml/elena) to check fml log ?
+Can you find some error messages?
 
-.S	OS は何か？ その Version は？
-=E.S	What is OS and the version?
+.S	FML の version は？
+=E.S	FML version ?
 
-   Example:
+取ってきて広げたファイル名か展開したdirectoryで % cat etc/release_version
+=E
+archive file name or `cat fml-source/etc/release_version`
+
+.S	OS は何か? その Version は?
+=E.S	What is your operating system and the version?
+
+run "uname -a"
+
+Example: (uname があるかどうかもOS依存だが）
 	% uname -a
 	NetBSD beth 1.3B NetBSD 1.3B (BETH) #4: Fri Jan 23 14:22:17 JST 1998
         fukachan@beth:/sys/arch/i386/compile/BETH i386
 
-.S	メール配送システムは何か？ その version は？(必要ならメーカーも)
+.S	メール配送システムは何か?その version は?
 =E.S	What is MTA(Mail Transport Agent) and the version?
 
-	sendmail PRO?(Sendmail INC.)
+For example, 
+
+	sendmail PRO?(Sendmail INC.)	
 	sendmail (free?)
 	qmail
 	exim
@@ -48,61 +64,83 @@ prompt .
 	MMDF:)
 	..........
 
+Please TRY like this!
+
+	% telnet localhost 25
+	Trying 127.0.0.1...
+	Connected to localhost.fml.org.
+	Escape character is '^]'.
+	220 beth.fml.org ESMTP Sendmail 8.9.1/3.6W; Mon, 10 Aug 1998 23:39:14 +0900 (JST)
+
 .S	perl の version は？
-=E.S	Perl version?
+=E.S	What is Perl version ?
 
-   Example:
-	% perl4.036 -v
-	This is perl, version 4.0
+run "perl -v"
 
-	$RCSfile$$Revision$$Date$
-	Patch level: 36
+Example:
+% perl4.036 -v
+This is perl, version 4.0
+$RCSfile$$Revision$$Date$
+Patch level: 36
 
-	Copyright (c) 1989, 1990, 1991, Larry Wall
+Copyright (c) 1989, 1990, 1991, Larry Wall
 
-	Perl may be copied only under the terms of either the Artistic License or the
-	GNU General Public License, which may be found in the Perl 4.0 source kit.
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 4.0 source kit.
 
-
-.S	メールシステムのログはどうなっているか？(OSによりファイル名は異なる)
+.S	メールシステムのログはどうなっているか？
 =E.S	Check MTA's log?
 
-	/var/log/maillog (4.4BSD; NetBSD, OpenBSD, FreeBSD, BSD/OS)
+OSによりファイル名は異なります。
+例:
 
-.S	エラーや疑問点についてキーワードについてドキュメントを検索したか？
+/var/log/maillog (4.4BSD; NetBSD, OpenBSD, FreeBSD, BSD/OS)
+
+.S	エラーや疑問点についてドキュメントを検索したか？
 =E.S	Search keywords on problems over FML documents?
 
-	配布しているパッケージの中の doc/ の下のドキュメントを開いて検索
-	特に doc/op.jp (日本語)。
+配布しているパッケージの中の doc/ の下のドキュメントを開いて検索
+特に doc/op.jp (日本語)。
 =E
+Please see fils in the distribution package
+
 	doc/op.jp  (Japanese)
 	doc/op.en  (English)
-	in the distribution package
 
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/search-j.html (Japanese)
-	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/search-e.html (English)
+FML ドキュメント群へのサーチ
+=E
+Search keywords on your problem over FML documents ?
 
+	http://www.fml.org/fml/search-j.html (Japanese)
+	http://www.fml.org/fml/search-e.html (English)
 
 
 .C	質問時に最低限用意して欲しい情報は？
+=E.C	Least Required Information in questions
 
 	FML version
 	perl version
 	MTA version
 	OS version
-	現象が起きたあたりのFMLのログ
+
+	現象が起きたあたりのFMLのログ($DIR/log)
+=E
+	$DIR/log around the time an error occurs.
 
 
-
-.C	Sendmail 
+.C	MTA: Sendmail 
 
 .S	/etc/aliases に設定はちゃんとあるか？ newaliases はしたか？
 =E.S	Check entries in /etc/aliases? You did newaliases?
 
+e.g.
+	/etc/aliases (4.4BSD derived)
+	/etc/mail/aliases 
+
 .S	FMLに対しメールを送ったら、エラーメールが返ってきたか？ 
 =E.S	Check error mails if exists?
 
-エラーメールで自明なことはないのか？	
+エラーメールを見てチェックをしたか？
 =E
 Error mails can tell you the reason of errors. Please check it before
 asking.
@@ -112,14 +150,23 @@ asking.
 	--------------------------------------------------------
 	unsafe	 	ファイルやdirectoryのpermissionがおかしい 
 	loop		/etc/aliases の設定がおかしい 
+			full path にそって全部調べる必要があります。
+			newaliases してない
+	user unknown	そんなユーザーはいない
+			/etc/aliases に設定をしていない
+			newaliases してない
 .fi
 .if LANG == ENGLISH
 	error		origin
 	--------------------------------------------------------
 	unsafe		permission of files or directories
+			check along the full path
 	loop		/etc/aliases miss-configuration
+			you did not newaliases ?
+	user unknown	no such user
+			/etc/aliases miss-configuration
+			did not newaliases ?
 .fi
-
 
 $Id$
 .# $Id$

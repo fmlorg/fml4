@@ -1,14 +1,13 @@
 .C	ライブラリ関数
-=E.C	Library FUnctions
+=E.C	Library Functions
 .k	ライブラリ関数
 
 ここでは、カスタマイズに役に立ちそうなライブラリ関数の説明をします。
 とりあえずいきあたりばったりに選んで説明:-)
 =E
 I explain useful (I believe) library functions in this chapter.
-Anyway here we go though choice depends on me, so choice must be
-random and not cover the whole;D.
-
+Anyway here we go though choice depends on me.  The choice must be
+random and does not cover the whole ;-D.
 
 .S	daemon (libutils.pl)
 .k	daemon()
@@ -17,7 +16,7 @@ random and not cover the whole;D.
 (4.4BSDにならって) 今のプロセスをデーモンにします。
 ＃4.4BSDのdaemon()には引数がありますが、まだそれをEmulateしていません
 =E
-daemon-ize the current execution program.
+Let the current execution program be a daemon.
 
 fml.pl から cron.pl を動かすんなら、これをつかうとうまくいくといいです
 な:-)
@@ -33,15 +32,15 @@ fml.pl から cron.pl を動かすんなら、これをつかうとうまくいくといいです
 Example:
 	&use('utils');
 	&daemon;
-	work after daemon(); 
+	work under daemon mode
 
-みたいにすると、 &daemon; のところで、TTYを切り放し、
-STDIN,STDOUT,STDERRを閉じます。
+みたいにすると &daemon; のところでTTYを切り放しSTDIN,STDOUT,STDERRを閉
+じます。
 ＃注意：4.4BSDの setsid()は 新しいセッションをはじめること
 =E
-&daemon detach the currety TTY and close STDIN,STDOUT,STDERR.
+&daemon detaches the current TTY and close STDIN,STDOUT,STDERR.
 
-例：
+例:
 =E
 Example:
 
@@ -55,11 +54,10 @@ $NOT_USE_TIOCNOTTY を セットしないと、うまく daemonさんになってくれな
 いかもしれませんが…
 ＃このへんの挙動はいまひとつわからない…
 =E
-You may be rquired to set $NOT_USE_TIOCNOTTY? This function works well
+You may be required to set $NOT_USE_TIOCNOTTY? This function works well
 on 4.x BSD, but I don't know how it works on other OS's.
 
 4.4BSD では setsid() ですが、そのへんの細かいところは省略…
-
 
 .S	Sendmail (libsmtp.pl)
 .k	Sendmail
@@ -76,7 +74,6 @@ SYNOPSIS
 	$subject	subject of a mail to send
 	$body		body of a mail to send
 	@to		recipients except $to 
-
 
 .S	SendFile (libsmtp.pl)
 .k	SendFile
@@ -98,16 +95,16 @@ SYNOPSIS
 	$zcat		conversion flag (not used)
 	@to		recipients except $to 
 
-
 	実際には、$zcat	@to エントリは使ってませんが…
 	＃いつ、第４エントリ以降をなくすか保証しない
-
 
 .S	NeonSendFile (libsmtp.pl)
 .k	NeonSendFile
 
 複数のアドレスとファイルを一辺にハンドリングし、メールで送り返すための
 インターフェイス
+=E
+handling plural recipients and plural files to send.
 
 SYNOPSIS
 	&NeonSendFile(*to, *subject, *files);
@@ -120,7 +117,6 @@ SYNOPSIS
 	@to		recipients (array)
 	$subject	subject of a mail to send
 	@files		array of files to send
-
 
 .S	Addr2FQDN              (fml.pl)
 .k	Addr2FQDN
@@ -138,7 +134,6 @@ If given $addr has no '@', we convert it to
 =E
 If $addr contains '@', return $addr.
 
-
 .S	AddressMatch           (fml.pl)
 .k	AddressMatch
 .xref	$ADDR_CHECK_MAX
@@ -149,7 +144,7 @@ SYNOPSIS:
 $addr1 と $addr2 が同じものかどうか調べる。
 =E
 compare $addr1 and $addr2, return 1 if they are the same.
-
+return 0 if different.
 
 .S	MailListMemberP        (fml.pl)
 .k	MailListMemberP
@@ -162,8 +157,7 @@ SYNOPSIS:
 =E
 search $addr in lists of member (member files are listed in
 @MEMBER_LIST) and return the file name in which $addr if $addr is
-found.
-
+found. return $NULL if fails.
 
 .S	MailListActiveP        (fml.pl)
 .k	MailListActiveP
@@ -178,16 +172,14 @@ search $addr in lists of active member (active member files are listed
 in @ACTIVE_LIST) and return the file name in which $addr if $addr is
 found.
 
-
 .S	Append2                (fml.pl)
 .k	Append2
 
 SYNOPSIS:
 	&Append2($string, $file)
 
-append $string to $file
+appends $string to $file
 	
-
 .S	AutoRegist             (libutils.pl)
 .k	AutoRegist
 
@@ -203,8 +195,7 @@ SYNOPSIS:
 =E
 Auto Registration routine. The argument is *Envelope or *Envelope and
 $string. If $string is given, the routine checks $string as an input.
-If not, $Envelope{'Body'} whihc is a mail body. 
-
+If not, $Envelope{'Body'} which is a mail body. 
 
 .S	ChangeMemberList       (libfml.pl)
 .k	ChangeMemberList
@@ -214,8 +205,8 @@ $ADDR_CHECK_MAX(default 10) 回、アドレスチェックを厳しくしながら
 段階までしかアドレスチェックをしないので
 =E
 Apply &DoChangeMemberList(@_) recursively up to
-$ADDR_CHECK_MAX(default 10) times. It checks address checks 
-little by little severely. For example we check the address
+$ADDR_CHECK_MAX(default 10) times. It checks the given address little
+by little severely. For example we check the address
 
 	fukachan@sapporo.iij.ad.jp
 
@@ -224,15 +215,19 @@ little by little severely. For example we check the address
 =E
 up to 3 level, that is "iij.ad.jp" in default. If both
 fukachan@iij.ad.jp and fukachan@sapporo.iij.ad.jp exist in member
-file, we cannot determine this mail is from which person?
-Hence we require changing the address check level dynamically.
+file, we cannot determine this mail is from which person?  Hence we
+require changing the address check level dynamically. Secondary FML
+checks up to 4 levels, that is "sapporo.iij.ad.jp" and matches in
+exacet and return TRUE.
 
 例:
+=E
+Example: a list have two similar addresses with different levels.
+
 	fukachan@iij.ad.jp
 	fukachan@sapporo.iij.ad.jp
 
 の両方がファイル中に現れる場合。	
-
 
 .S	ChangePasswd           (libcrypt.pl)
 .k	ChangePasswd
@@ -244,8 +239,7 @@ $PASSWD_FILE 中の $addr に対してのパスワードを $new にする。
 なお、この時点でパスワード認証は終っていなければならない。
 =E
 Change the password for the address $addr. The new password is $new
-and the password file is $PASSWD_FILE.
-
+and the password file is $PASSWD_FILE.  $new is a plain password.
 
 .S	CheckMember            (fml.pl)
 .k	CheckMember
@@ -255,8 +249,7 @@ SYNOPSIS:
 
 $list の中に $addr が現れるかどうかしらべる。
 =E
-Check whether $addr appears in $list.
-
+Check whether $addr appears in $list or not. 1 if found, 0 if fails.
 
 .S	CmpPasswd              (libcrypt.pl)
 .k	CmpPasswd
@@ -270,9 +263,8 @@ etc/passwd 中の
 	user が送り込んだ plain password ($plain-passwd)
 を比較する
 =E
-compare encypted password $encrypt and input plain password
+compare encrypted password $encrypt and input plain password
 $plain-passwd.
-
 
 .S	CmpPasswdInFile        (libcrypt.pl)
 .k	CmpPasswdInFile
@@ -286,7 +278,6 @@ $PASSWD_FILE 中のアドレス $addr に対しパスワード $pass で認証できるか
 check whether $addr with password $pass is valid in $PASWD_FILE.
 If valid, $addr is authenticated.
 
-
 .S	Conv2mailbox           (fml.pl)
 .k	Conv2mailbox
 
@@ -298,7 +289,6 @@ $from の中の アドレス部分（ユーザ＠ドメイン 部分）だけを取り出す。
 =E
 Cut out only user@domain part from given string $from.
 
-
 .S	DecodeMimeStrings      (libMIME.pl)
 .k	DecodeMimeStrings
 
@@ -309,7 +299,6 @@ $s 中のMIME文字列を日本語へ変換する。関数の返り値が日本語化された文字
 列である。
 =E
 Decode MIME string to Japanese and return it.
-
 
 .S	Flock                  (fml.pl)
 .k	Flock
@@ -326,22 +315,18 @@ flock(2) to $FP_SPOOL_DIR.
 標準は &TimeOut; が実行され、fml.pl はタイムアウトエラーで終る。
 =E
 After $Timeout{'flock'} (default 3600) under locked, we trap signal
-SIGALRM and runs $SIG{'ALRM'} function. In default fml.pl exits after
-timeout.
-
+SIGALRM and runs &Tick. In default fml.pl exits after timeout.
 
 .S	Ftp                    (libftp.pl)
 .k	Ftp
 .xref	ftp
-
 
 .S	Funlock                (fml.pl)
 .k	Funlock
 
 $FP_SPOOL_DIR に対する flock(2) をはずす。
 =E
-unlock flock(2)
-
+unlock the lock on $FP_SPOOL_DIR. see flock(2)
 
 .S	GetID                  (libfml.pl)
 .k	GetID
@@ -353,7 +338,6 @@ $SEQUENCE_FILE の値を返す。
 =E
 Return value in $SEQUENCE_FILE where the value is the last article
 sequence.
-
 
 .S	GetTime                (fml.pl)
 .k	GetTime
@@ -374,12 +358,6 @@ runs localtime(); and sets several global variables such as:
 
     $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
-
-
-.S	HRef                   (libhref.pl)
-.k	HRef
-.xref	href
-
 
 .S	Lock                   (fml.pl)
 .l	Lock
@@ -404,17 +382,15 @@ SYNOPSIS:
 		require liblock.pl;
 		&V7Lock;
 
-
 .S	Log                    (fml.pl)
 .k	Log
 
 SYNOPSIS:
 	&Log($s);
 
-$s 文字列を $LOGFILE に書き込む。
+$s 文字列を日付とともに $LOGFILE に書き込む。
 =E
-Append $s string to $LOGFILE.
-
+Append $s string to $LOGFILE with date.
 
 .S	LogWEnv                (fml.pl)
 .k	LogWEnv
@@ -431,7 +407,8 @@ SYNOPSIS:
 
 です。$LOGFILE への書き込みと、&Notify で返されるfml Status Reportの
 内容に $s を付け加える。
-
+=E
+Both Logs $LOGFILE and the messages &Notify uses.
 
 .S	Mesg                   (fml.pl)
 .k	Mesg
@@ -441,16 +418,16 @@ SYNOPSIS:
 
 &Notify で返される fml Status Reportの内容へ $s を付け加える。
 =E
-&Notify uses $Envelope{'message'} to notify a user (From: address).
-&Mesg() appends $s to $Envelope{'message'}.
+&Notify sends a content $Envelope{'message'} to a user (From:
+address). &Mesg() appends $s to $Envelope{'message'}.
 
 	$Envelope{'message'} .= "$s\n";
-
 
 .S	NewSyslog              (libnewsyslog.pl)
 .k	NewSyslog
 .xref	newsyslog
 
+newsyslog(8) like function.
 
 .S	Notify                 (fml.pl)
 .k	Notify
@@ -468,9 +445,8 @@ $Envelope{'message:h:@to'}. The return mail subject is
 $Envelope{'message:h:subject'}, if not defined, "fml status report
 $ML_FN".
 
-
    宛先:	$Envelope{'message:h:to'} 
-		がなければ $Envelope{'Addr2Reply:'}
+		もし未定義の場合は $Envelope{'Addr2Reply:'} が使われる
    宛先(複数):	$Envelope{'message:h:@to'} にアドレスリストを入れる。
    Subject:	$Envelope{'message:h:subject'}
 		default は "fml Status report $ML_FN"
@@ -500,6 +476,8 @@ define it by
 	$GOOD_BYE_PHRASE = "\tBe seeing you!   ";
 	$FACE_MARK	 = "(^^)P〜";
 
+例2:	Episode 42(謎)
+	$GOOD_BYE_PHRASE = &JSTR("\tヴェデル シーン   ");
 
 .S	RunHooks               (fml.pl)
 .k	RunHooks
@@ -513,7 +491,6 @@ If $FML_EXIT_HOOK is defined, runs it.
 
 	eval $FML_EXIT_HOOK
 
-
 .S	ExecNewProcess		(fml.pl)
 .k	ExecNewProcess
 
@@ -524,7 +501,6 @@ If $FML_EXIT_PROG is defined, runs it
 	exec $FML_EXIT_PROG;
 
 を実行する。
-
 
 .S	SecureP                (fml.pl)
 .k	SecureP
@@ -542,12 +518,11 @@ SYNOPSIS:
 Check whether $request is safe or unsafe. Please use %SECURE_REGEXP
 for an exceptional security check.
 
-
-.S	SendingBackInOrder     (libfop.pl)
-.k	SendingBackInOrder
+.S	SendBackInOrder     (libfop.pl)
+.k	SendBackInOrder
 
 SYNOPSIS:
-	&SendingBackInOrder($returnfile, $total, $subj, $sleeptime, @to)
+	&SendBackInOrder($returnfile, $total, $subj, $sleeptime, @to)
 
 	$returnfile	tmp/uja のようなファイル
 	$total		全部で何分割しているか？
@@ -564,7 +539,6 @@ SYNOPSIS:
 まとめ送りサーバ msend.pl や mget の中で使われている代表的なファイル送
 り返し関数。
 
-
 .S	SocketInit             (libsmtp.pl)
 .k	SocketInit
 
@@ -574,16 +548,7 @@ SYNOPSIS:
 プロセス間通信をはじめる前にはこれを呼ぶ。libsmtp.pl の中にあるので、
 普通はどこからでも呼べる。
 =E
-Initialize socket.
-
-
-.S	SyncHtml               (libsynchtml.pl)
-.xref	SyncHtml
-
-
-.S	TalkWithHttpServer     (libhref.pl)
-.xref	TalkWithHttpServer
-
+Initialize socket functions.
 
 .S	TurnOverW0             (libnewsyslog.pl)
 .k	TurnOverW0
@@ -591,10 +556,11 @@ Initialize socket.
 SYNOPSIS:
 	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
 
-$LOG_MESSAGE_ID に newsyslog を適用する。
-=E
-Runs newsyslog over $LOG_MESSAGE_ID.
+newsyslog を適用する。
 
+上の例は $LOG_MESSAGE_ID に newsyslog を適用する。
+=E
+Runs newsyslog. Example: runs newsyslog over $LOG_MESSAGE_ID.
 
 .S	Unlock                 (fml.pl)
 .k	Unlock
@@ -603,7 +569,6 @@ Runs newsyslog over $LOG_MESSAGE_ID.
 上述の Lock の逆をやる。
 =E
 Unlcok.
-
 
 .S	Warn                   (fml.pl)
 .k	Warn
@@ -618,7 +583,8 @@ SYNOPSIS:
 	&Sendmail($MAINTAINER, $subject, $body);
 
 と同じ。つまり管理者宛のメールを出す。
-
+=E
+Mails to $MAINTAINER. 
 
 .S	WholeMail              (fml.pl)
 .k	WholeMail
@@ -633,16 +599,15 @@ SYNOPSIS:
 せず単純なインデントですませるべきであろう。エラーデバッグのためには、
 できるだけ生のメールを管理者へフォワードするべきだと思う。
 =E
-Return the whole mail with 3 SPACE CHRACTERS indent.  The indent
+Return the whole mail with 3 SPACE CHARACTERS indent.  The indent
 prevents strange MTA or MUA converting the mail body.  No conversion
-is important for debug.  I want to receive raw mail for debug!
+is important for debug. I want to receive raw mail for debug!
 
 $MIME_CONVERT_WHOLEMAIL をセットした場合MIME逆変換をしたメールも付加さ
 れるが、エラーメール等では変なメールもありうるため推奨しない。
 =E
 If $MIME_CONVERT_WHOLEMAIL is set, we try MIME decoding of Japanese of
 the mail body.
-
 
 .S	eval                   (fml.pl)
 .k	eval
@@ -655,7 +620,6 @@ $eval_string を eval する。$COMPAT_FML15 を指定すると eval の前後で補
 ＃完璧に補正できる保証はないと思う。
 =E
 Evaluate $eval_string.
-
 
 .S	ipc                    (libutils.pl)
 .k	ipc
@@ -680,7 +644,6 @@ Interface of InterProcess Communication based on Berkeley Socket mechanism.
 	$ipc{'pat'}	struct sockaddr
 	@ipc		input strings (array)
 	$r		return value
-
 
 .S	system                 (libutils.pl)
 .k	system
@@ -711,7 +674,6 @@ If $s matches
 の文字列にマッチした場合 security のため system() は実行されない。
 =E
 &system does not run for security.
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -1,74 +1,127 @@
 .C	改造について
-=E.C	Hack Tips
+=E.C	Tips on Hack
 .l	hack
 
 改造の話はFMLのデータ構造の章は読んでおくとよりわかり易くなります。
+.xref	data-structure
+=E
+To hack FML, it is better to read chapter on data structure.
 .xref	data-structure
 
 .S	HOW TO DEBUG ... ［デバッグのポイント］
 =E.S	How to debug
 .k	debug
 
-   fml-support: 01411 より
+From: fml-support: 01411
 
 …略…
 
 ○ 私 printf デバッグがすきなので $debug = 1; にした時の画面に出るエラー
 情報から推測するのが多いです。
 =E
-* printf debug is fundamental. FML uses $debug variable. If you know
-the details of processing, set $debug = 1, which helps your debug.
+* Printf debug is fundamental technique. FML has $debug variable. If
+you know the details of processing, set $debug = 1, which helps your
+debug. If $debug is 1, FML shows all debug information.
 
 もしくは
 
 ○ perl -d オプションで perl debugger を使う
 =E
-* perl -d enables perl debugger.
+* perl -d enables perl debugger. See perl manual for how to use it.
+
+Example:
+
+	% ($FML/bin/emumail.pl; echo something )|perl -d $FML/fml.pl $PWD
+	....debugger starts ...
+	<1> t
+	<2> c
+	.... debug information flood! ....
+
 
 ○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
 =E
-* which file is libraries for an object?
+* Which file is libraries for an object?
   A lib"NAME".pl library corresponds to functions on "NAME".
-  e.g. libsmtp.pl is SMTP (Simple Mail Tranfer Protocol) routines.
+  e.g. libsmtp.pl is SMTP (Simple Mail Transfer Protocol) routines.
 
-基本関数	fml.pl
-SMTP		libsmtp.pl
-その他		lib(それっぽい名前).pl
+	基本関数	fml.pl
+	SMTP		libsmtp.pl
+	その他		lib(それっぽい名前).pl
 
+	[Naming Convention Example]
 	ra  = remote administration
 	fop = file operation
+	...
 
 とか省略系もあるけど… ちなみに
 .ptr{library-lists} にライブラリの説明一覧があります。
 
-
 .S	消してもいいファイル…
 =E.S	I can remove this file or not?
 
-プロセスがない時なら、すべてのファイルは手作業でなにしてもいいです。
+プロセスがない時なら、すべてのファイルは手作業でなにしてもいいです。例
+えば MTA を止めてメールを受けないようにしてしまえば何をしても大丈夫で
+す。結局メールがきた時"だけ" fml.pl が動いているので、それ以外の時は何
+をしても大丈夫です。まとめおくりのファイルについても msend.pl が走って
+いる時を除けばvar/log/msendrc をいじっても大丈夫です。そうでないときな
+ら手動 edit できます。
 =E
-If no process runs, you can edit any files :-). Howerver in general
-you require "LOCK FML" to edit files though FML runs when a mail comes
-in but I don't know when a mail comes. "makefml" locks before the
-operations.
+If no process runs, you can edit any files :-). However in general we
+do not know when a mail comes in.  You should lock FML to edit files.
 
-結局メールがきた時"だけ" fml.pl が動いているので、それ以外の時は何をし
-てもOKです。まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじっ
-てはいけないのも同様の理由です。そうでないときなら手動 edit できます。
+.if LANG == JAPANESE
+makefml lock ML		MLをロックする。プロセスを殺すか
+			3600秒たってTIMEOUTするまでロックは解除されない。
+			例:
+			% makefml lock elena &
+			mule config.ph などなど
+			プロセスを kill する		
+			
+makefml edit ML ファイル名
+			% makefml edit ML cf
+			lock して cf を編集できる。ロックの下で
+			環境変数 EDITOR のエディターが起動される。
+			エディターの終了後 lock ははずされる。
+			もし環境変数 EDITOR が未定義だと
+			どのエディターを使うか聞かれる。
+.fi
+.if LANG == ENGLISH
+You need to do "makefml lock ML" locks before edit.
+
+makefml lock ML		Lock ML. unlocked if this process is killed
+			or timeouts in 3600 secs.
+			e.g.
+			% makefml lock elena &
+			mule config.ph ...
+			kill this process
+
+makefml edit ML filename
+			Under the ML is locked, editor is executed.
+			Environment variable EDITOR is used.
+			If it is not defined, makefml asks you what
+			editor you use.
+			After editor ends, makefml unlocks ML and exits.
+			e.g.
+			% makefml lock elena cf
+.fi
 
 そりゃさすがに code の debug は今動いているMLとは別のところでやったほ
 うがいいですけど…
 =E
-I reccomends the debug of codes apart from the current working ML :D
+I recommends the debug of codes apart from the current running ML :D
 
 間違って消して一番困りそうなのは seq と var/log/msendrc あたりです :-)
 もちろんメンバーリストも消すとやっかいです。
-ようするにＭＬの今の記事番号や uniqueness を保存しているログですね。
+ようするにＭＬの今の記事番号や uniqueness を保存しているログです。
 =E
 Removing $DIR/seq, $DIR/actives, $DIR/members and $DIR/var/log/msendrc
-must be critical where actives and members are the member list of ML.
-seq is the current article number and msendrc is the log file of msend
-(digest) which log saves the number of msend'ed articles.
+must be critical. "actives" and "members" are the member list of ML.
+"seq" is the current article number and "msendrc" is the log file of
+msend (digest) which log saves the number of msend'ed articles.
+If the content is lost, search the following information.
+The content of "seq" is the maximum number in spool dir articles.
+Each "actives", "members" and "msendrc" has back up each file.
+Restore them.
 
 seq ファイルの番号が狂うと記事を上書きしたりはしないかわりに管理者にエ
 ラーメールがきます。var/log にメールは保存されるので、復旧は簡単ですが
@@ -84,12 +137,13 @@ msend.pl reconfigures the msendrc. But this msendrc must be not
 continuous to msend'ed users since msendrc creates a new msendrc with
 the latest article number.
 
-msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
+msendrc 消しちゃうと msendrc のバックアップファイルを見て直すか log ファ
+イルを参考にして直すかします。次回 msend.pl が起動する時に自動復旧され
+ることを期待するか…ただ、これは最新のメールしか送らないから↑、たまっ
+ていた分はログみないと不明のままになります。
 
-次回 msend.pl が起動する時に自動復旧されることを期待するか…ただ、これ
-は最新のメールしか送らないから↑、たまっていた分はログみないと不明のま
-まになります。
-
+actives, members などもバックアップファイルがあるので、それを見て再構成
+してみて下さい。
 
 .S	MIME文字列を日本語へ変換すること
 =E.S	Convert MIME strings to Japanese
@@ -97,9 +151,9 @@ msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
 
 $MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
 Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
-いけないのはとてつもなください通信サービス業者が…の場合です)、
+いけないのはとてつもなください通信サービス業者が…などの場合です)、
 
-例：	$MailBody をMIME逆変換して日本語にする場合
+例:	$MailBody という変数をMIME逆変換して日本語にする場合
 	$MailBody = &DecodeMimeStrings($MailBody);
 
 こんな感じのコードを適当な場所に書けばいいわけですね。
@@ -107,10 +161,10 @@ Decodeしてしまうなら(こんな邪悪なことは普通しません、これをしなくては
 =E
 To convert MIME strings to Japanese, you can use codes like
 =S
+	e.g. variable $MailBody
 	$MailBody = &DecodeMimeStrings($MailBody);
 
-
-.S	改造事例:  sitedef.ph
+.S	改造事例: sitedef.ph
 =E.S	example: sitedef.ph
 .k	sitedef.ph
 
@@ -119,7 +173,7 @@ To convert MIME strings to Japanese, you can use codes like
 # みやすい Subject を提供する
 # 
 =E
-# To provide a subject for your eys, 
+# To provide a subject for your eyes, 
 # cut [ML number] or (ML number) in subjects and 
 # preserve the original subject to X-Original-Subject.
 # 
@@ -161,7 +215,6 @@ $DISTRIBUTE_CLOSE_HOOK = q#
 	chmod 0644, "$FP_SPOOL_DIR/$ID";
 #;
 
-
 .S	改造事例: axion.phys.titech.ac.jp
 =E.S	example:  axion.phys.titech.ac.jp
 
@@ -188,7 +241,7 @@ $USE_SJIS_IN_ISH = 1;
 # host_map_lookup での DNS 遅延情報を トレースする、
 # １０秒かかるホストはログに残す
 =E
-# trace slow smtp session infomation
+# trace slow smtp session information
 
 $TRACE_SMTP_DELAY = 10;		# 10 sec.
 
@@ -202,12 +255,11 @@ $TRACE_SMTP_DELAY = 10;		# 10 sec.
 1;
 .~q	
 
-
 .S	改造事例:  mnews-ml
 =E.S	example: mnews-ml
 
 =E
-* not translate 
+* not translate. Sorry 
 
 .q
 
@@ -335,8 +387,8 @@ $TRF_NAME_HOOK = q#
 
 .~q
 
-
 .S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
+=E.S	Example: set up Reply-To if required when Reply-To == $MAIL_LIST
 .key	# replyto コマンド
 
 .if LANG == ENGLISH
@@ -388,13 +440,15 @@ MLのアドレスを書くようにしました。
 .fi
 
 .S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
-=E.S	not deliver From: field address of in-coming mail. 
+=E.S	Not Deliver From: Field Address Of In-Coming Mail. 
 .k	%SKIP
 .k	$SKIP{アドレス}
 .k	skip
 .k	$START_HOOK
 
 こういう処理を config.ph にかいてください。
+=E
+If you do not deliver an article when you yourself post it, set
 
 $START_HOOK = q#
 	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
@@ -406,7 +460,6 @@ $START_HOOK = q#
 
 複数あるなら 全部を うえのフックに加えて下さい。
 
-
 .S	古典の printf debug の例
 =E.S	printf debug
 .k	debug: printf
@@ -415,11 +468,12 @@ $START_HOOK = q#
 From: fukachan@phys.titech.ac.jp
 X-Mail-Count: 00702 
 
-じゃ、
+例えば次のような適当な printf 構文をつっこむ
+=E
+For example, insert the following string.
 
 	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
 
-を、
 
 &InitConfig;			# initialize date etc..
 &Parsing;			# Phase 1(1st pass), pre-parsing here
@@ -444,7 +498,6 @@ X-Mail-Count: 00702
 ただしいばあいは &Parsing のあと １になって そのままのはずですよね
 
 .~q
-
 
 .S	fmlのコマンドが送れるページの例
 =E.S	URL where you can send FML commands
@@ -471,11 +524,13 @@ exception code いれたけど、裏技なのでdocumentにはかかず状態
 このコードはSNMPなMIB的になってしまふのかしらん… あななやまし
 =E
 fake operation to a member list. I cannot ensure this code exists in
-the future.
+the future. This code enforces FML to ignore $MEMBER_LIST check in
+"unsubscribe" operation.
 
 .S	新しく『特定のファイルを送り返す』コマンドを作る
 =E.S	make a new command what send back a file
 .l	my-file-sendback-command
+.xref	%Procedure-special-key
 
 例: コマンド # news でニュースというファイルを送り返す。
 =E
@@ -494,9 +549,8 @@ In config.ph
 
 と書けば news という新しいコマンドのでき上がりです。
 
-
 .S	メンバーを問わずファイル uja を送り返す例
-=E.S	to send back $DIR/uja for anyone
+=E.S	Send back $DIR/uja for anyone
 
 例:
 １	誰からのリクエストでもOK
@@ -515,7 +569,6 @@ $START_HOOK = q#
     }
 #;
 
-
 .S	自動送り返しサーバの実装例
 =E.S	Automatic Replay Server
 .key	自動送り返しサーバの実装例
@@ -528,7 +581,7 @@ in the following hook:
 
 ポイントは、“$START_HOOK にしかける”ってところです。
 
-例：
+例:
 
 1	適当なＭＬ(guide ML)を作成する (makefml newml guide)
 2	普通に aliases を設定する
@@ -542,22 +595,22 @@ in the following hook:
 
 を guide ML の config.ph に付け加える。(おわり)
 
-
 .S	たとえば、Received: のようなヘッダを残すには？
 =E.S	Preserve Received: lines
 
-FML 2.1 では
+FML 2.2 以降では
 =E
-After FML 2.1, set
+After FML 2.2, set
 
-    unshift(@HdrFieldsOrder, 'received');
+    unshift(@HdrFieldsOrder, 'Received');
 
-とすればいいでしょう。もっともこの場合一行だけ Received ではなく 
-received になってしまってちょっと情けないかも知れませんが…
+とすればいいでしょう。
+＃2.1 では子文字じゃないとだめかも unshift(@HdrFieldsOrder, 'received');
+＃この場合一行だけ Received ではなく received になってしまってちょっ
+＃と情けないかも知れませんが…
 ＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
 =E
 to preserve Received: fields in the header. A capital is important.
-
 
 .S	スプールにあるファイルをMIME逆変換する
 =E.S	reconvert MIME characters in the spool
@@ -576,21 +629,23 @@ use lib/MIME/rmime and runs shell scripts like
 くらいでＯＫでしょう
 ＃とりあえず .org つきのをバックアップに残すコードつき:-)
 
+nkf -m でもいいだろう
+=E
+nkf -m must be also useful if nkf is not too old.
 
 .S	mget でえた spool の下のファイルを mh 以外で読む時
 =E.S	read not MH in the spool which is sent back by "mget".
-.l	lib/Utilitites/packmbox.pl
+.l	lib/Utilities/packmbox.pl
 .k	packmbox.pl
-
-lib/Utilitites/packmbox.pl を使って、
+ 
+lib/Utilities/packmbox.pl を使って、
 =E
-To create "mbox", you use lib/Utilitites/packmbox.pl and runs 
+To create "mbox", you use lib/Utilities/packmbox.pl and runs 
 
 	(cd spool; packmbox.pl ) > ~/mbox
 
 として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
 うことができて便利でしょう。
-
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
 =E.S	MIME-Decode MIME parts of a mail to distribute
@@ -618,9 +673,8 @@ to
 
 で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
 
-
 .S	認証する際のドメインのALIAS %DOMAIN_ALIASES
-=E.S	%DOMAIN_ALIASES when autentication
+=E.S	%DOMAIN_ALIASES when authentication
 
 認証する時には ujauja.or.jp  => ujauja.ne.jp に書き換えてTRYしてみる
 =E
@@ -642,13 +696,16 @@ An example of a patch for fml.pl 2.0.24.47
      $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
  
 +    if (%DOMAIN_ALIASES) {
++       local($addr);
 +	if (&MailListMemberP($From_address)) {
 +	    ; # not rewrite
 +	}
 +	else {
 +	    for (keys %DOMAIN_ALIASES) {
 +		if ($From_address =~ /$_$/i) {
-+		    $From_address =~ s/$_$/$DOMAIN_ALIASES{$_}/i;
++                   $addr = $From_address;
++		    $addr =~ s/$_$/$DOMAIN_ALIASES{$_}/i;
++                   &MailListMemberP($addr) && ($From_address = $addr);
 +		}
 +	    }
 +	}
@@ -658,7 +715,141 @@ An example of a patch for fml.pl 2.0.24.47
      # &RewriteField(*e, 'Cc') unless $NOT_REWRITE_CC;
      if ($REWRITE_TO < 0) { 
 
+.S	メーリングリストに参加可能なユーザのドメインを絞る
+=E.S	Restrict domains of user which joins a mailing list
 
+自動登録やリモートでの登録の際の制限については 
+$REGISTRATION_ACCEPT_ADDR という変数で制限できます。
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+=E
+$REGISTRATION_ACCEPT_ADDR can restrict registration to e.g. we permit
+only persons in some domains can join this mailing list.
+Please see it (this section may be of no use after this).
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+
+直接そういう変数があるわけじゃないですが、特殊な処理をするために HOOK 
+がいっぱいあります。ありうる可能性をすべて変数にしてるといくらあっても
+追いつかないので
+=E
+Several hooks are available to enable a lot of exceptional functions.
+To permit only users on permit_domain.co.jp can join this list, you
+can use $START_HOOK.
+
+$START_HOOK = q#
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+	&Mesg(*Envelope, 
+	   "We permit user@*permit_domain.co.jp can join this list.");
+	$DO_NOTHING = 1;
+   }
+#;
+
+とかすれば、permit_domain.co.jp 以外のユーザには「permit_domainのゆー
+ざだけしか参加できないよん」とメールが返って終りにできます。
+$DO_NOTHING = 1 にすれば配送、自動登録などほとんど全ての処理が行なわれ
+ません。これら全ての場合に共通の設定として利用できます。
+
+	$DO_NOTHING = 1		メインの処理をしない
+				配送、自動登録などほとんど全ての処理が
+				行なわれないことになる
+=E
+	$DO_NOTHING = 1		do not run the main routine
+				* distribute
+				* automatic registration
+				and other almost all functions
+
+で、メインを呼ばなければ自動登録ルーチンも動きません。
+
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+
+が From: が permit_domain 以外のユーザの表現です。後例えば
+=E
+is "addresses(From: address) which do not match permit_domain.co.jp".
+
+   if ($Envelope{'h:sender:'} !~ /permit_domain\.co\.jp/i) {
+
+なら Sender: が permit_domain.co.jp 以外の人は参加できないことになりま
+す。(が Sender: なんて From: == Sender: なら普通つけないからよくない例
+だな)。
+=E
+is "Sender: does not contains permit_domain.co.jp string".
+
+.C	『自動登録』かつ『ポストできる人を制限する』設定例その２
+=E.C	Example: "automatic registration" and "restrict members who can post"
+.xref auto_asymmetric_regist
+
+$REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
+ります。これは配送と認証のリストを非対称に使う時に使います。
+.xref auto_asymmetric_regist
+=E
+$REJECT_COMMAND_HANDLER can have a value 'auto_asymmetric_regist'. If
+defined, FML uses delivery list controlled by automatic registration
+and authentication list edited by hand (or makefml).
+.xref auto_asymmetric_regist
+
+これは別の考え方です。elena と elena-regist という２つのＭＬを作る。
+=E
+make "elena" and "elena-regist" ML.
+
+	elena		投稿専用(手動登録)
+	elena-regist	コマンド専用(自動登録に設定しておく)
+=E
+	elena		only for post (by hand or makefml)
+	elena-regist	only for commands
+
+アドレスを書くファイル
+
+	elena-regist/members	MLの配送のリスト(自動登録)
+	elena/members		MLの認証に使うリスト(手動登録)
+				(MLに投稿できる人のリスト)
+=E
+	elena-regist/members	distribution list (automatic registration)
+	elena/members		authentication list (by hand or makefml)
+
+という２つのＭＬを作り設定する。登録用に elena-registを作り elena/cf 
+の ACTIVE_LIST を /var/spool/ml/elena-regist/members にする。
+=E
+We use "elena-regist" for automatic registration to add
+"elena-regist/members". "elena" ML uses plural distribution lists,
+"elena/actives", "elena-regist/members".
+
+   [作業の流れ]
+=E
+   [Example of flow]
+
+	% makefml newml elena
+	% makefml newml elena-regist
+	% cd /var/spool/ml/elena-regist
+	% cp include-ctl include
+
+	*** /etc/aliases を適宜設定する
+=E
+	*** edit /etc/aliases
+
+	% cd /var/spool/ml/elena
+	% makefml edit elena cf
+
+	*** edit cf ふぁいる (ACTIVE_LISTを設定する)
+	elena/cf に
+=E
+	*** edit cf file to append "elena-regist/members" to @ACTIVE_LIST.
+ 
+	ACTIVE_LIST	/var/spool/ml/elena-regist/members
+
+	を加え config.ph を再生成する。
+=E
+	recreate config.ph
+
+	% make config.ph
+	% makefml add elena postable-member-address-1
+	% makefml add elena postable-member-address-2
+	.....
+
+[Discussion]
+elena が elena-regist/members を open する時に elena-regist をロックし
+てない。が、大丈夫だらう:)
+=E
+[Discussion]
+FML cannot lock elena-regist ML in default but works well I believe:)
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

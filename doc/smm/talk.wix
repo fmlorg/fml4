@@ -1,5 +1,5 @@
 .C	ちょっとした事
-=E.C	little talks around mail
+=E.C	A few tips around a mailing list
 .if LANG == ENGLISH
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
 .return
@@ -16,7 +16,7 @@ Perl 4 も 5も 偉大だとおもうけど、Perl は4でほとんど完成しちゃってるか
 
 ただ データ構造の改良はすごくて、４をみすてて ５にして
 
-	$Evnelope{'Addr'}->@Rcpt 
+	$Envelope{'Addr'}->@Rcpt 
 
 とか しようかな?とかおもうことはありますが、いまさら sendmail とX11の
 中間みたいなスタイルは かえないでしょうね
@@ -35,12 +35,11 @@ Object Oriented なんて ゲシュタルトとおなじで、ものすご〜く基本的な部
 いととおもいますけどねぇ
 .~q
 
-
 .S	アドレス まとめ送りの間隔 … の Extension論
 
 in fml-support: 00637
 .q
-現状（accives）：
+現状（actives）：
 
 	アドレス r=リレーさーば  s=なんでもいい(skip address) \
 		 m=まとめ送り方式 
@@ -69,14 +68,13 @@ Subject: とかも クライアントの問題ですよね、本来。
 ちょっとかんがえているけど（RFC かくくらいじゃ なきゃいけないのかな）
 .~q
 
-
 .S	サブジェクトに [Name:ID] を付ける…
 
 in X-Mail-Count: 00623
 .q
 
 MH だったら 
-	fmlのそーす/lib/Utilites/scan.format 
+	fmlのそーす/lib/Utilities/scan.format 
 を ~/Mail にほうりこめば
 
 161 -10/27 Takashi Yokoyam fml-su fml problems <<はじめまして、横山＠リコ
@@ -106,7 +104,6 @@ MH だったら
 	Subject のほうがだいじ
 .~q
 
-
 .S	fml 1.6 で 1.5 を大きく変えてまでやりたかったこと
 
 	call by reference
@@ -120,7 +117,6 @@ MH だったら
 	（UNIX ではすでに実行できている）
 
 	WINDOWS NT サポート
-
 
 .S	h2ph でシステムパラメータは install するもんなんでは？…
 
@@ -140,12 +136,11 @@ perl 5
 	XS インターフェイスを通じて、 sys/socket.h の内容をチェックし
 	てその値を eval する。
 
-	だから効率はいいのか悪いのかよくわからない。Dnamic Loader やら
+	だから効率はいいのか悪いのかよくわからない。Dynamic Loader やら
 	なにやらいろいろ使いまくるから。
 
 ただこういう話の利点はちゃんと system parameter が使えるといういう点に
 あるので効率を考えてそれを無視してはいけない。
-
 
 .S	Reply-To:を設定された投稿メールの配送をする際のReply-To:の扱い
 
@@ -171,7 +166,6 @@ Reply-to: を設定しているメールは 投稿者が意味あってすることだし たとえ
 	&DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
 
 を使うことです。
-
 
 .S	メール本文をいじることと慣習法と倫理(私見)
 
@@ -209,8 +203,7 @@ Reply-to: を設定しているメールは 投稿者が意味あってすることだし たとえ
 どうしょうもないインターフェイスに文句をいうべきです。それが資本主義と
 いうものでしょう。
 
-
-.S	Special Character (libhsynchtml.pl)
+.S	Special Character (libsynchtml.pl)
 
 特殊文字
 
@@ -252,7 +245,6 @@ ASCII(or ISO 8859)コードの中の4つのキャラクタは HTMLでは特別な意味を持つため、
 
 このようなエスケープシーケンスに関してはCERN からリストが提供されてい
 るのでそちらを参照していただきたい。
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

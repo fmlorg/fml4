@@ -1,92 +1,176 @@
-【解凍直後の構成】
-INSTALL.*             -> doc/INSTALL.*
-Makefile              make できます(^^)
-README.*              -> doc/README.*
-lib                   -> contrib
-makefml               -> sbin/makefml
-ntinstall.cmd         NT で install に使う script
-./C/                      C-wrapper用のソース
-./bin/                    基本的には管理用 utility 集ですが、使用する機能
-                          や環境によっては使う場合があるものです
-./cf/                     カスタマイズ用 setting 集
-./contrib/                様々な utility 集 (contributed)
-./doc/                    FML のドキュメント群
-    CHANGES.*             変更履歴詳細
-    CHECK_LIST.*          トラブル時にまずチェックする点
-    COPYING               ライセンス(GNU)
-    CROSSPOST_PROTOCOL    クロスポスト制御に関する事柄
-    FILES                 このファイル
-    INFO.*                FML サポート情報＆メモ (HTML版有)
-    INSTALL.*             FML installマニュアル (HTML版有)
-    INSTALL_on_NT4.*      NT 固有の install 情報 (HTML版有)
-    INSTALL_with_QMAIL.*  qmail 固有の情報
-    README.*              README(--) (HTML版有)
-    RELEASE_NOTES.*       変更履歴(^^; (HTML版有)
-    UPGRADE.*             UPGRADEする人向けへの注意
-    drafts                -> ../drafts
-    help.example2         helpメッセージの例
-    html                  HTML版ドキュメント
-    op.*                  FML の詳細な解説
-./doc/html/               doc の html 版
-./drafts/                 ユーザへのメッセージの雛形
-    confirm.*             confirm モードの登録用
-    confirmd.ackreq.*     confirm モードの登録継続確認用
-    deny.*                メンバ外
-    guide.*               ML の guide
-    help.*                ML の使い方の help
-    help-admin.*          admin メンバ用 help
-    help-fmlserv.*        fmlserv モード時の help
-    objective.*           ML の objective (目的)
-    welcome.*             入会メッセージ
-./etc/                    システムファイル群
-./libexec/                ML の運用形態によっては必要となるプログラム群
-./sbin/                   FML のメンテ用コード
-./src/                    FML 本体のプログラム群
-./sys/SOLARIS2/           SOLARIS2 用のコード群。
-./sys/WINDOWS_NT4/        NT 用のコード群。
-
-makefml install すると、まず EXEC FILES DIRECTORY に展開したソースファ
-イルがコピーされます。
-    ・bin sbin libexec cf etc doc はディレクトリごと EXEC の下に
-    ・src は EXEC DIR に行きます。
-    ・install した FML 固有のファイルが .fml/ に作られます。
-
-
-新しく ML を作ると、以下のファイル群が TOP LEVEL ML の下の各 ML のホー
-ムディレクトリに作られます。
-
-【各ＭＬの HOME 】
-Makefile                  Makefile
-aliases                   aliases 設定見本
-cf                        ML の設定
-config.h                  fml.c 用
-config.ph                 ML の設定
-confirm                   ※
-crontab                   CRON 設定見本(まとめ送り用)
-deny                      ※
-fml.c                     C-Wrapper ソース
-guide                     ※
-help                      ※
-help-admin                ※
-include                   aliases で include されるファイル( ML 本体用)
-include-ctl                        〃             ( コマンドアドレス用)
-include-mead              (MEAD 用)
-objective                 ※
-welcome                   ※
-
-※印はユーザへのメッセージファイルです。確認、修正して下さい。
-
-また、ML の使用によって以下のファイルが生成・追加されます。
-actives                   配送名簿
-members                   投稿者名簿(自動登録時は配送名簿兼用)
-seq                       ML 記事のカウント
-spool/                    ML 記事の spool
-summary                   サマリ(Subject)の保管用
-var/run/msgidcache        ML に来たメールのメッセージID 保管用
-
-
+.if LANG == JAPANESE
+ 【解凍直後の構成】
+ INSTALL.*             -> doc/INSTALL.*
+ Makefile              make できます(^^)
+ README.*              -> doc/README.*
+ lib                   -> contrib
+ makefml               -> sbin/makefml
+ ntinstall.cmd         NT で install に使う script
+ ./C/                      C-wrapper用のソース
+ ./bin/                    基本的には管理用 utility 集ですが、使用する機能
+                           や環境によっては使う場合があるものです
+ ./cf/                     カスタマイズ用 setting 集
+ ./contrib/                様々な utility 集 (contributed)
+ ./doc/                    FML のドキュメント群
+     CHANGES.*             変更履歴詳細
+     CHECK_LIST.*          トラブル時にまずチェックする点
+     COPYING               ライセンス(GNU)
+     CROSSPOST_PROTOCOL    クロスポスト制御に関する事柄
+     FILES                 このファイル
+     INFO.*                FML サポート情報＆メモ (HTML版有)
+     INSTALL.*             FML installマニュアル (HTML版有)
+     INSTALL_on_NT4.*      NT 固有の install 情報 (HTML版有)
+     INSTALL_with_QMAIL.*  qmail 固有の情報
+     README.*              README(--) (HTML版有)
+     RELEASE_NOTES.*       変更履歴(^^; (HTML版有)
+     UPGRADE.*             UPGRADEする人向けへの注意
+     drafts                -> ../drafts
+     help.example2         helpメッセージの例
+     html                  HTML版ドキュメント
+     op.*                  FML の詳細な解説
+ ./doc/html/               doc の html 版
+ ./drafts/                 ユーザへのメッセージの雛形
+     confirm.*             confirm モードの登録用
+     confirmd.ackreq.*     confirm モードの登録継続確認用
+     deny.*                メンバ外
+     guide.*               ML の guide
+     help.*                ML の使い方の help
+     help-admin.*          admin メンバ用 help
+     help-fmlserv.*        fmlserv モード時の help
+     objective.*           ML の objective (目的)
+     welcome.*             入会メッセージ
+ ./etc/                    システムファイル群
+ ./libexec/                ML の運用形態によっては必要となるプログラム群
+ ./sbin/                   FML のメンテ用コード
+ ./src/                    FML 本体のプログラム群
+ ./sys/SOLARIS2/           SOLARIS2 用のコード群。
+ ./sys/WINDOWS_NT4/        NT 用のコード群。
+ 
+ makefml install すると、まず EXEC FILES DIRECTORY に展開したソースファ
+ イルがコピーされます。
+     ・bin sbin libexec cf etc doc はディレクトリごと EXEC の下に
+     ・src は EXEC DIR に行きます。
+     ・install した FML 固有のファイルが .fml/ に作られます。
+ 
+ 
+ 新しく ML を作ると、以下のファイル群が TOP LEVEL ML の下の各 ML のホー
+ ムディレクトリに作られます。
+ 
+ 【各ＭＬの HOME 】
+ Makefile                  Makefile
+ aliases                   aliases 設定見本
+ cf                        ML の設定
+ config.h                  fml.c 用
+ config.ph                 ML の設定
+ confirm                   ※
+ crontab                   CRON 設定見本(まとめ送り用)
+ deny                      ※
+ fml.c                     C-Wrapper ソース
+ guide                     ※
+ help                      ※
+ help-admin                ※
+ include                   aliases で include されるファイル( ML 本体用)
+ include-ctl                        〃             ( コマンドアドレス用)
+ include-mead              (MEAD 用)
+ objective                 ※
+ welcome                   ※
+ 
+ ※印はユーザへのメッセージファイルです。確認、修正して下さい。
+ 
+ また、ML の使用によって以下のファイルが生成・追加されます。
+ actives                   配送名簿
+ members                   投稿者名簿(自動登録時は配送名簿兼用)
+ seq                       ML 記事のカウント
+ spool/                    ML 記事の spool
+ summary                   サマリ(Subject)の保管用
+ var/run/msgidcache        ML に来たメールのメッセージID 保管用
+.fi
+.if LANG == ENGLISH
+ [You can find these after extracting fml sources]
+ 
+ INSTALL.*		-> doc/INSTALL.* (symbolic link)
+ Makefile		to run make	
+ README.*		-> doc/README.* (symbolic link)
+ lib			-> contrib (symbolic link)
+ makefml			-> sbin/makefml (symbolic link)
+ ntinstall.cmd		installer on Windows NT4
+ ./C/			C wrapper sources
+ ./bin/			utilities
+ ./cf/			configuration tools and examples
+ ./contrib/		contributions
+ ./doc/			documents directory
+     CHANGES.*
+     CHECK_LIST.*
+     COPYING
+     CROSSPOST_PROTOCOL
+     FILES
+     INFO.*
+     INSTALL.*
+     INSTALL_on_NT4.*
+     INSTALL_with_QMAIL.*
+     README.*
+     RELEASE_NOTES.*
+     UPGRADE.*
+     drafts		-> ../drafts/ (symbolic link)
+     help.example2
+     html
+     op.*
+ ./doc/html/		html version documents
+ ./drafts/		templates fml uses to response to user requests
+     confirm.*
+     confirmd.ackreq.*
+     deny.*
+     guide.*
+     help.*
+     help-admin.*
+     help-fmlserv.*
+     objective.*
+     welcome.*
+ ./etc/
+ ./libexec/
+ ./sbin/
+ ./src/				main sources
+ ./sys/SOLARIS2/			
+ ./sys/WINDOWS_NT4/
+ 
+ "makefml install" copies these directories in installation.
+ 
+     ・bin sbin libexec cf etc doc  -> EXEC_DIR/ (you define in installation)
+     ・src			   -> EXEC_DIR/
+     ・install			   -> EXEC_DIR/.fml/
+ 
+ "makefml newml" creates these files in $DIR (ML's HOME directory).
+ 
+ Makefile
+ aliases
+ cf
+ config.h
+ config.ph
+ confirm
+ crontab
+ deny
+ fml.c
+ guide
+ help
+ help-admin
+ include
+ include-ctl
+ include-mead
+ objective
+ welcome
+ 
+ running fml operates and logs to these files.
+ 
+ actives
+ members
+ seq
+ spool/
+ summary
+ var/run/msgidcache
+.fi
+ 
 1998/08/12 by Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>
 1997/08/13 improved by fukachan@sapporo.iij.ad.jp
 1997/08/12 by Hiroshi NAKATA <hnakata@cc.gunma-u.ac.jp>
-
+ 
 $Id$

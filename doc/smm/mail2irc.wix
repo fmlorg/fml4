@@ -3,7 +3,7 @@
 
 何の役に立つのか分からないのがおしゃれ(爆笑)
 =E
-Hmm ... meaningless must be nice? :-D
+Hmm ... meaningless must be nice :D
 
 .S	IRCへのリレー
 =E.S	Relay to IRC
@@ -11,7 +11,7 @@ Hmm ... meaningless must be nice? :-D
 IRCへ入って、書いて、抜けるという一撃離脱の処理をするルーチンがありま
 す。
 =E
-mail2irc enters an IRC server, write and get out it :-).
+Mail2irc enters an IRC server, write and get out from it:).
 
 .q
 fml.pl -> 処理
@@ -25,7 +25,6 @@ fml.pl -> 処理
 
 	IRCから抜ける 	
 .~q
-
 
 .S	変数
 =E.S	Variables
@@ -56,14 +55,13 @@ $IRC_SIGNOFF_MSG = "そ、そなの？";
 
 .~q
 
-
 .S	設定例
-=E.S	configuration example
+=E.S	A configuration example
 
 config.phに付け加える例:
-
 メーリングリストに来た記事をIRCへリレーする
-
+=E
+Relaying a mail to IRC and put the mail body to the channel "#test".
 
 $IRC_SERVER  = "hikari.sapporo.iij.ad.jp";
 $IRC_PORT    = 6667;
@@ -86,7 +84,6 @@ $FML_EXIT_HOOK = q!
 	&Write2Irc($buf);
 !;
 
-
 .S	stdin2irc.pl
 
 STDIN からほうり込んだ文字列をIRCへ書き込みます。
@@ -105,8 +102,7 @@ tail -f 何かのログファイル | perl stdin2irc.pl -f 設定ファイル
 のように使います。例えば /var/log/messages をIRCの画面で見張りたいなど
 に使います(何だそりゃ:)
 =E
-where a logfile is /var/log/messages and so on.
-
+where a logfile is /var/log/messages and so on. Is it useful?:D
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

@@ -2,10 +2,12 @@
 	INSTALL guide (FML Unix Version)
 	--- fml Mailing List Server Package ---
 
+.if LANG == JAPANESE
 				深町 賢一
-=E
+.fi
+.if LANG == ENGLISH
 				Ken'ichi Fukamachi
-==
+.fi
 				fukachan@sapporo.iij.ad.jp
 				fukachan@fml.org
 
@@ -31,14 +33,14 @@
 	http://www.fml.org/fml/op-e/	(html)
 	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op-e/ (html)
 
-   For installation on Windoes NT4, please also see INSTALL_on_NT4.
+   For installation on Windows NT4, please also see INSTALL_on_NT4.
 
    The word "ML" is the abbreviation of "Mailing List" in this document.
    % is the prompt.
 .fi
 .~HTML_PRE
 __________________________________________
-#.index
+.toc
 __________________________________________
 
 
@@ -81,17 +83,17 @@ a mail from a member
  MTA (e.g. sendmail)   ------------------>     
                                             fml <ML server (ML driver)>
  MTA (e.g. sendmail)   <-----------------      
- (deistribution)
+ (distribution)
    | | | 
    V V V   
- members of the Maling List 
+ members of the Mailing List 
 .fi
 
 配送プロセスは上図のように動きます。ＭＬサーバが普通のメールではなくあ
 る命令(ＭＬを辞める、過去の記事を読むなど)を含んだメールをうけた場合は、
 それを実行して答えをリクエストした人へ配送します(コマンド)。
 =E
-Described above, the mailing list and delivery processo works.
+Described above, the mailing list and delivery process works.
 A mailing list driver can accept commands, too. 
 
 また上図からわかるとおりＭＬ宛のメールが来た時だけＭＬサーバは起動され
@@ -109,9 +111,9 @@ burst, you can receive a digest e.g. once per three hours.
 グラム群はcronというオペレーティングシステムが提供する機能を使うことを
 前提にしています。
 =E
-You should use operating system function to run digest deilvery
+You should use operating system function to run digest delivery
 program periodically. On UNIX, you may be able to use cron (cron(8)).
-Fml accumes you can use cron of your OS. If not, you can use an
+Fml assumes you can use cron of your OS. If not, you can use an
 emulator bin/cron.pl in fml-source.
 
 
@@ -152,7 +154,7 @@ makefml は自動的にOSを判定し必要なら調整を行ないます。もし使っているOS
 =E
 makefml tries to detect your OS and adjusts fml to fit it. If makefml
 cannot detect your operating system, please use -O option to enforce
-the os type. For exapmple
+the os type. For example
 
 	% makefml -O i386-unknown-OSTYPE install
 
@@ -167,9 +169,9 @@ System V なマシンで"IPC はだめなので sendmail を exec するぜ"などの
 warning が出たら
 =E
 When you encounter some warning or error on SYSV (e.g. NEC EWS4800),
-it may be effective to enfoce
+it may be effective to enforce
 
-	% makefml -O unknown-unkown-sysv install
+	% makefml -O unknown-unknown-sysv install
 
 を試してみる価値はあります(例: NEC EWS4800)。
 
@@ -251,15 +253,15 @@ The write permission of the fml system changes in each type.
 
 という２つの運用方ポリシーが考えられます。
 =E
-If only you create and maintain mailing lists on a machine, plaese
+If only you create and maintain mailing lists on a machine, please
 select "personal". When plural people create and maintain plural
-mailing lists, more loose permsssion is reuiqred. Ideally speaking you
+mailing lists, more loose permission is needed. Ideally speaking you
 should prepare ML account e.g. "fml".
 
 1. 自分だけなら "personal" 
 =E
 1. If only you runs mailing lists, please jump to the next section
-(select "personal"). If you use "fmlserv" under "fml" account, plase
+(select "personal"). If you use "fmlserv" under "fml" account, please
 select "personal".
 
 2. ＭＬをリモートで管理する人などが複数いたりしても newml をしたり直接
@@ -299,10 +301,25 @@ recompile が必要です。設定は各OSやMTAによって変わります。詳しくはMTA附
 DontBlameSendmail などの呪文のあたりを参照するなどになります。
 =E
 Attention! The current MTA does not accept group writable permission.
-If you use "group" or "fmlserv" type, you may need MTA cnfiguration
+If you use "group" or "fmlserv" type, you may need MTA configuration
 change. For example, see 
 
+.if LANG == JAPANESE
+JPCERT の技術メモの中に中村素典先生による非常に良い sendmail 解説があ
+るので困ったらここを読みましょう。
+
+.url http://www.jpcert.or.jp/tech/
+
+   O DontBlameSendmail=GroupWritableDirPathSafe
+   O DontBlameSendmail=GroupWritableIncludeFileSafe
+
+などが必要です。オプションについては上記ドキュメントなどを参照してくだ
+さい。
+.fi
+.if LANG == ENGLISH
+For example, see "O DontBlameSendmail=GroupWritableIncludeFileSafe" option.
 .url http://www.sendmail.org/tips/DontBlameSendmail.html
+.fi
 
 .S	インストーラ(makefml)を走らせる
 =E.S	Installing by makefml
@@ -504,8 +521,8 @@ e.g. the include sample for elena ML is
 	/var/spool/ml/elena
 
 の下に include や aliases を初め必要なサンプルが作成されます。
-(sendmailの場合)見本の aliases ファイルを /etc/alaises に追加して 
-newaliaes したら終りです。まとめ送りについては後述(.ptr{msend})
+(sendmailの場合)見本の aliases ファイルを /etc/aliases に追加して 
+newaliases したら終りです。まとめ送りについては後述(.ptr{msend})
 ＃ unsafe とかエラーがでたら？ → .ptr{unsafe}
 =E
 You can see a sample to add to /etc/aliases is shown in the last
@@ -619,6 +636,8 @@ which entries are automatically added when you create a new ml.
 This file has all crontab entries the user administrates. 
 
 	/var/spool/ml/etc/crontab/ユーザの名前
+=E
+	/var/spool/ml/etc/crontab/USERNAME
 
 というファイルには各ＭＬオーナーが管理しているＭＬ全部のまとめおくり項
 目が入った見本です。これはＭＬを増やすたびに新しいまとめおくりの設定が
@@ -626,18 +645,74 @@ This file has all crontab entries the user administrates.
 newml で作成後、
 =E
 Please use crontab(1) in the following way:
- 
+
+.if LANG == JAPANESE
 	% crontab /var/spool/ml/etc/crontab/ユーザの名前
 
-=E
+としてください。USERNAME.master については後述。MLの数が増えてきたら
+
+	% crontab /var/spool/ml/etc/crontab/ユーザの名前.master
+
+とするのがよいでしょう(下の記述 => ”MLが多くなってきたら?”)。
+.fi
+.if LANG == ENGLISH
+	% crontab /var/spool/ml/etc/crontab/USERNAME
+	   or
+	% crontab /var/spool/ml/etc/crontab/USERNAME.master (see below)
+
 cron wakes up periodically, checks articles in the mailing list spool
 and deliver articles in one mail.
+.fi
 
 Vixie Cron でない OS についてはマニュアルで cron を調べるとか 
 doc/op.jp の cron の章を見て下さい。
 =E 
 If your OS has not Vixie cron, please see the manual of "crontab" or
 the chapter on "cron" of doc/op.jp in the fml source.
+
+＊＊＊ MLが多くなってきたら? (ISPのシェルアカウントなどでは初めからこ
+＊＊＊ のケースでしょう)
+=
+***** When a lot of ML run in ONE MACHINE? (must be always yes on ISP
+***** accounts)?
+
+(どんなプログラムにも当てはまる)当然のことですが、複数の人が複数のＭＬ
+でまとめおくりをしている場合、全員が cron で 0 分に msend を走らせると
+システムの負荷が瞬間最大風速的に上がります。cron はいわれた通り走るだ
+けでチューニングはしてくれません。システム管理者が2、3分ずつずらして走
+るなどの運用的なシステムチューニングに気を配ることが重要です。
+=E
+When in operational point of view, as usual to say, a lot of people
+should avoid to run programs simultaneously on one machine. Plural
+people run msend programs for plural ML's, each msend should run in
+shifted phase, 10:00 min for A ML, 10:03 min for B ML, 10:06 for C
+ML... Cron does its work as defined but not tunes itself up. System
+administrator should check its system tuning.
+
+makefml が作成する /var/spool/ml/etc/crontab/USERNAME.master は
+=E
+/var/spool/ml/etc/crontab/USERNAME.master helps you to avoid
+concurrent plural msend running. This crontab example follows:
+
+   0 * * * * /usr/local/fml/bin/msend_master.sh -E /usr/local/fml -M /var/spool/ml
+
+のような見本を作ります。msend_master.sh は /var/spool/ml (-M オプショ
+ンで変更できる)の下にあるML全部に対してまとめおくり作業を順番に実行す
+るためのスクリプトです。複数のＭＬのまとめおくりが一斉に走らないように
+するために有効です。
+
+=E
+You should run msend in order, now elena, next mirei, ...
+msend_master.sh kicks off msend.pl in order for each ML's in
+/var/spool/ml (-M option).
+
+別の例(crontab の設定で逃げる):
+=E
+Crontab Example to avoid concurrent msend running:
+
+   0 * * * * /usr/local/fml/msend.pl /var/spool/ml/elena -q
+   2 * * * * /usr/local/fml/msend.pl /var/spool/ml/mirei -q
+   4 * * * * /usr/local/fml/msend.pl /var/spool/ml/anna  -q
 
 .S	fmlserv (Listserv もしくは majordomo的インターフェイス)
 =E.S	fmlserv (Listserv or majordomo like interface for fml)
@@ -985,7 +1060,7 @@ Special functions for security
       policy (0-4) [0] 
 
 
-FML 2.1 では投稿とコマンドそれぞれについて以下の
+FML 2.1 以降では投稿とコマンドそれぞれについて以下の
 
 	・誰からの投稿を許すか？
 		だれでもOK			anyone
@@ -1032,7 +1107,7 @@ The example of an automatic registration setting.
 If you select 1, 
 
    ************************************************************
-   ADDRESSS FOR POST                  elena@baycity.asia
+   ADDRESSES FOR POST                  elena@baycity.asia
    PERMIT_POST_FROM                   members_only
 
    0    END
@@ -1066,7 +1141,7 @@ and authentication list edited by hand (or makefml).
 	elena/members	MLの認証に使うリスト(手動登録)
 			(MLに投稿できる人のリスト)
 =E
-	elena/actives	delivary list (automatic registration)
+	elena/actives	delivery list (automatic registration)
 	elena/members	authentication list (edit by hand)
 
 ○ 注意: $REJECT_ADDR について
@@ -1189,7 +1264,7 @@ In default, fml sets up these addresses for elena ML
 
 	elena		for post
 	elena-ctl	for command	
-	elena-dmin	for maintaner. Human reads mailf for this address.
+	elena-dmin	for maintainer. Human reads mails for this address.
 
 We suppose several environments,
 	* You can not control /etc/aliases freely.
@@ -1200,7 +1275,7 @@ We suppose several environments,
 	  For security and the concept "ML is a personal communication", 
 	  I recommends this style
 
-	* You use listserv-style. Your choice is "fmlserv" listsev emulatiobn.
+	* You use listserv-style. Your choice is "fmlserv" listserv emulation.
 .fi
 	
 下の階層メニューでそのようなポリシーの変更を行ないます。
@@ -1222,9 +1297,9 @@ We suppose several environments,
    (here DOMAINNAME = baycity.asia);
 
    0    END
-   1    elena-ctl@$DOMAINAME
-   2    elena@$DOMAINAME
-   3    fmlserv@$DOMAINAME
+   1    elena-ctl@$DOMAINNAME
+   2    elena@$DOMAINNAME
+   3    fmlserv@$DOMAINNAME
    4    NOT USE
 
    In default, we use "listname-ctl" format address for command only.
@@ -1239,19 +1314,19 @@ We suppose several environments,
    送ったコマンドへのREPLYに付加される情報に利用されます。注意: つまり 
    sendmail 等のMTAへの設定は別途必要です。
 
-   ・ elena-ctl@$DOMAINAME タイプ
+   ・ elena-ctl@$DOMAINNAME タイプ
 
 	デフォールトではエレナさんＭＬ(elena@baycity.asia)に対し、
 	elena-ctl@baycity.asia がコマンド専用に設定されています。
 
-   ・ elena@$DOMAINAME タイプ (backward compatible)
+   ・ elena@$DOMAINNAME タイプ (backward compatible)
 
 	もし、コマンドのアドレスに elena を設定するつまり投稿用のアド
 	レスとコマンド用のアドレスが同じ場合は # command 形のコマンド
 	をメール本文に書いて、送るとサーバはコマンドとして理解するとい
 	う動きをします
 
-   ・ fmlserv@$DOMAINAME タイプ
+   ・ fmlserv@$DOMAINNAME タイプ
 
 	fmlserv (上述)は listserv style のコマンド用サーバ(fmlserv) を
 	使う用意がある場合に設定します。＃ fmlserv の設定は別途必要です(前述)
@@ -1308,7 +1383,7 @@ need to enable this function by yourself.  Please see file
 リモートで管理できるようにするには yes 
 =E
 If you maintain the ML in remote, please select "yes". You can control
-ML to send "# admin command" or "# aporove PASSWORD command" format
+ML to send "# admin command" or "# approve PASSWORD command" format
 commands.
 
 ○ REMOTE_ADMINISTRATION_AUTH_TYPE (default: crypt)
@@ -1318,7 +1393,7 @@ commands.
 認証タイプを設定します。デフォールトは crypt(パスワード認証)。認証の画
 面は次のようなものです。
 =E
-set up the autuenticaion type in remote administration.
+set up the authentication type in remote administration.
 
    ************************************************************
    REMOTE_ADMINISTRATION_AUTH_TYPE          crypt
@@ -1354,6 +1429,20 @@ set up the autuenticaion type in remote administration.
 =E
 	address		From: field's address exists in members-admin
 			* members-admin is the default of $ADMIN_MEMBER_LIST
+
+○ ADMIN_ADD_SEND_WELCOME_FILE (default: no)
+=E
+*  ADMIN_ADD_SEND_WELCOME_FILE (default: no)
+
+.q
+admin add でユーザを登録した時にそのユーザに自動的に WELCOME ファイル
+を送るか？
+=E
+When you do 'admin add' to add a user to your ML, do you want to send
+WELCOME_FILE to the user? In default, fml does nothing. It is your job
+to notify the registration.
+.~q
+
 
 .# beth
 .########### Menu Section ##########
@@ -1471,8 +1560,8 @@ $SKIP_FIELDS (Received: と Return-Receipt-To) のフィールドは削られる。
 =E
 Do you pass all fields in the header or not? If you ignore superfluous
 X-* fields, please set this. The format of the header used by FML
-default is defined as @HdrFiedlsOrder. Even in "yes", fml ignores
-$SKIP_FIELDS (Recieved: and Return-Receipt-To) fileds to avoid loops
+default is defined as @HdrFieldsOrder. Even in "yes", fml ignores
+$SKIP_FIELDS (Received: and Return-Receipt-To) fields to avoid loops
 and hop count expiration errors. see the next menu.
 .~q
 
@@ -1534,7 +1623,7 @@ for articles.
 
    lock algorithm に flock を使うか？それとも別のアルゴリズムか？
 =E
-   flock or not for lock algorithm. If no, rename() baed lock is done.
+   flock or not for lock algorithm. If no, rename() based lock is done.
 
 
 .########### Menu Section ##########
@@ -1590,7 +1679,7 @@ regard it as a mail bomb and rejects mails from the sender.
 
 ○ MAX_MAIL_SIZE (default: 未定義 == 無制限) 
 =E
-*  MAX_MAIL_SIZE (defalut: nothing, == infinite)
+*  MAX_MAIL_SIZE (default: nothing, == infinite)
 
 .q
 メールサイズの最大値(デフォールトでは無制限)。貼付ファイルを許すか否か
@@ -1624,8 +1713,8 @@ $MAX_MAIL_SIZE.
 レスだが、beth.lw.fml.org と jo.lw.fml.org は同じドメインとみなす。
 =E
 How severe fml checks the address? If 3, fml identifies addresses in 3
-level domins. beth.fml.org and jo.fml.org differs but beth.lw.fml.org
-and jo.lw.fml.org is same in 3 level copmarison.
+level domains. beth.fml.org and jo.fml.org differs but beth.lw.fml.org
+and jo.lw.fml.org is same in 3 level comparison.
 .~q
       
 ○ MAXNUM_COMMAND_INPUT (default: 無制限)
@@ -1638,7 +1727,7 @@ and jo.lw.fml.org is same in 3 level copmarison.
 
 ○ REJECT_ADDR (無視するシステムアカウント名のリスト)
 =E 
-*  REJECT_ADDR (the account name list to ignore againt mail loop)
+*  REJECT_ADDR (the account name list to ignore against mail loop)
 
 see => .ptr{REJECT_ADDR}
 
@@ -1650,7 +1739,7 @@ see => .ptr{REJECT_ADDR}
 var/Mail/ の下に最近Ｎ通のメールの先頭2Kバイト程度を保存するヘッダ情報
 を保存してデバッグなどに用いるとよい
 =E
-For debug (and agasint tricks), it may be useful to save the latest
+For debug (and against tricks), it may be useful to save the latest
 $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 .~q
 
@@ -1801,10 +1890,10 @@ newml 時に $DIR/cf は $EXEC_DIR/etc/makefml/cf というファイルから生成
 $EXEC_DIR/etc/makefml/cf というファイルを編集しておいた方が後々楽がで
 きます。もちろん手動で設定変更しても構いません(ロックも不必要)。
 =E
-In "makefml newml", makefml creats $DIR/cf from
+In "makefml newml", makefml creates $DIR/cf from
 $EXEC_DIR/etc/makefml/cf file. If you make a lot of ML's and need to
 configure them, you want to change the default configuration for
-yourself. e.g. the default is "automatic registratin". 
+yourself. e.g. the default is "automatic registration". 
 
 	makefml config-template 
 
@@ -1834,7 +1923,7 @@ cf はメニューでのテンプレート変更ができますが、もっと複雑な変更がした
 を仕込んでおけばＭＬ作成時に必要な作業を減らすことができます。このファ
 イルを直接いじってもよいし、
 =E
-When "makefml newml" creates a new mailing list with exapmles e.g. cf,
+When "makefml newml" creates a new mailing list with examples e.g. cf,
 help, guide, ..., makefml uses templates. They are in
 e.g. /usr/local/fml, where you installed. If you edit template files,
 1.	edit them, which are under /usr/local/fml.
@@ -1858,6 +1947,7 @@ Also you can edit files e.g. help, guide in the same way.
 できます。
 
 .S	動作テスト(デバッグモード)について
+=E.S	Debug Mode
 
 	makefml test ML
 
@@ -1865,6 +1955,10 @@ Also you can edit files e.g. help, guide in the same way.
 杯出るので emacs の shell mode なり /usr/bin/script などでログをとるな
 りして見て下さい。makefml test ML を起動すると配送のテストかコマンドの
 テストか？選択をしろといわれます。
+=E
+to sets in debug mode. Under this environment, makefml emulates a fml
+works. When the following prompt appears, select "y" (command test) or
+"n" (post test) and go ahead! 
 
 	test of command? (y/n) [n] 
 
@@ -1873,8 +1967,10 @@ Also you can edit files e.g. help, guide in the same way.
 
 どちらかを選んで下さい。この後メール本文の入力を求められるので入れて下
 さい。本文入力の終りは . (ピリオド)だけの行の入力です。
+=E
+The last of input is just a period "." line.
 
-例:
+Example:
 	
 	* Enter mailbody, end with "." on a line by itself
 	help
@@ -1891,8 +1987,21 @@ Also you can edit files e.g. help, guide in the same way.
 http://www.fml.org/fml/CHECK_LIST/ にリストアップされている項目をチェッ
 クします。
 =E
-Please check items e.g. logfiles refered in CHECK_LIST.en (package),
+Please check items e.g. logfiles referred in CHECK_LIST.en (package),
 http://www.fml.org/fml/CHECK_LIST/.
+
+例えばエラーメールの中に含まれる適当な文字列を見つけます。そして、 
+
+	doc/op.jp に対して grep する
+
+	エディターでその文字をサーチする
+
+	http://www.fml.org/fml/ でドキュメントのサーチをしてみる。
+	＃最新版のドキュメントにはそのエラーについて言及されてるかも
+
+などをするのがまず第一歩です。
+例: エラーメールに unsafe とか permission denied とかでてきた
+	% grep -i unsafe doc/op.jp
 
 例えばMTAのエラーの場合の典型例は以下のようなものがあります。
 MTA(sendmail など)から返ってきたメールのエラーメッセージの代表例:
@@ -1916,10 +2025,10 @@ in error mails returned from MTA's.
 	--------------------------------------------------------
 	unsafe		permission of files or directories
 	loop		/etc/aliases miss-configuration
-			did not newaliaes
+			did not newaliases
 	user unknown	no such user
 			/etc/aliases miss-configuration
-			did not newaliase
+			did not newaliases
 .fi
 
 ○	:include: がうまく動かない場合 (/etc/aliases)
@@ -1939,7 +2048,7 @@ The following reasons are possible:
 		   group writable か否かを調べる。chmod 755 をしまくる
 =E	
 	* "include" file exists in an insecure directory.
-	  Please check the whole hirerychy permission from / to the "include".
+	  Please check the whole hierarchy permission from / to the "include".
 	  check	/usr, /usr/local, /usr/local/fml, ... and chmod 755 them!
 
 	○ include 形式をそもそもサポートしていない

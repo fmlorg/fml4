@@ -1,5 +1,26 @@
 		UPGRADE する人向けの注意
 
+				深町 賢一
+=E
+				Ken'ichi Fukamachi
+==
+				fukachan@sapporo.iij.ad.jp
+				fukachan@fml.org
+
+-----------------
+.toc
+-----------------
+			
+.if LANG == ENGLISH
+*** FML 2.2 is the first international version.
+*** Hence this file is not translated.
+***
+*** EXCUSE ME. THE TRANSLATION OF THIS FILE IS INCOMPLETE. ***
+.return
+.fi
+
+
+.C	2.1 とそれ以前との互換性について
 
 ○ (従来どおりですが)できるだけ互換性を保つように作られていますが、
 HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
@@ -9,14 +30,13 @@ HOOK などは関数コールが異なるために動かない可能性はやはりあるので注意
 い config.ph のまま使うのなら backward compatible になるように動作する
 ので関係ありません。
 
-具体的にどこで区別しているかというと $CFVersion です。FML 2.1 ではこれ
-が 3 になります。3 のものについては以下のような動作をします。
+具体的にどこで区別しているかというと $CFVersion です。FML 2.1 RELEASE 
+ではこれが 3 になります。3 のものについては以下のような動作をします。
 問題になるのは
 
    $CFVersion = 3; でなおかつ $MAIL_LIST と $CONTROL_ADDRESS が異なる場合
 
 だけです。
-
 
 2.1 RELEASE のデフォールトは
 
@@ -75,5 +95,64 @@ elena-ctl@fml.org どっちでも受け付けるようにするためには、config.ph で
 # 以前の version ではヘッダで「elena-ctl へ」とか書いてるのに実は 
 # elena でも受け付けてたという仕様上の問題を再現するためのオプションです。
 # いわば option TCP_COMPAT_42 みないなもんですかね
+
+
+.C	2.2 RELEASE と 2.1 RELEASE の間の差について
+
+新機能は README や op.jp を読んで下さい。ここではデフォールト値の違い
+について説明します。古い config.ph を使う場合には関係ありません。
+ＭＬを新たに壱から作ると2.1の時と何が違うか？について記述します。
+
+○ 一般ユーザの使う members, actives コマンドの返答からは
+   # で始まる行は削除されています。管理者モードではファイルそのものが
+   返されます。セキュリティの上からもやめてしまったユーザの情報を
+   流すべきではないでしょう。
+
+○ chaddr old-address new-address しかできません。つまり移行する場合は
+   移行する前に古いアドレスから新しいアドレスへ変更しておかなければ
+   いけません。   
+
+○ モデレータは3種類あります。デフォールトは Approval: password という
+ヘッダの一部を使う方法ではなく、各モデレータ依頼のメールの承認KEYを与
+えます。confirmation と似ています。
+
+○ デフォールトではサイズチェックなどは特にかけていません。
+   members.bak actives.bak は１５０ｋをめやすに members.0 などへ
+   移動して古いものから順にログは消されていきます。
+
+
+○ デフォールトで Date: は original をとおします。Posted: はなくなりま
+した。前と同じにするには $DATE_TYPE で設定します。
+
+○ To: はオリジナルをとおします。2.1 のようにするには $REWRITE_TO で制
+御します。
+ 
+○ 名前変更: SUPERFLUOUS_HEADERS => PASS_ALL_FIELDS_IN_HEADER
+ 
+○ USE_MIME はデフォールトで on です。
+
+○ HTML記事を作ると HTML 4.0 です。スタイルシートがないと自動的に見本が
+   インストールされます。
+
+
+
+.C	その他互換性について
+
+.S	fml 1.6 より前からの移行について (2.1 READMEより)
+
+HOOKについて注意が必要です。FML 1.6 で基本的なデータ構造を call by
+reference に書き直しました。それ以前の HOOK はまずそのままでは反映され
+ないでしょう。libcompat.pl などを参考に書き直すなどが必要でしょう。
+
+
+.S	hml 1.6 的インターフェイスとの互換性 (2.1 READMEより)
+=E
+*  compatibility with hml 1.6
+
+歴史的に hml 1.6 を基本的にemulationできます。直接 FML 2.2 へ移行する
+場合は、members や log ファイル等はそのままで構いません。*pl 群と 
+config.ph を差し替えれば動くはずです。ただ FML 2.2 では makefml config
+(INSTALL参照)などでコマンド用のアドレスを配送用のアドレスにするという
+設定が必要です。
 
 $Id$

@@ -1,9 +1,10 @@
 .C	perl 豆知識
-=E
-.C	perl small small tips :)
-
-=E
-I omit here since here perl tips is well known, I wonder...
+=E.C	perl small small tips :)
+.if LANG == ENGLISH
+*** I omit here since here perl tips is well known, I wonder...
+*** so, I omit English translation of this chapter.
+.return
+.fi
 
 以下引用部分は 
 
@@ -11,7 +12,6 @@ I omit here since here perl tips is well known, I wonder...
   Copyright (C) 1990, 1991 高尾 直弥
 
 からです。
-
 
 .S	Perl 4 or 5 ?
 
@@ -21,7 +21,6 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
 の方が新しいからOS適応性が上なのは当然ですが)。
 
 例: 64ビットマシンやソラリス2なんかは5の方が無難だろう。
-
 
 .S	exec LIST
 
@@ -33,7 +32,6 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
      `/bin/sh -c' に渡される。もしなければ、引数は単語毎に分けられ、
      `execvp()' にそのまま渡される。この方が効率的だからである。
 
-
 .S	system LIST
 
      `exec LIST' と全く同じことをするが、違いは最初に `fork' を行い、親
@@ -41,20 +39,19 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
 
 注意：shell escape character check してからexec sh -c 等に入る
 
-
 .S	open
 
 最終的に exec (do_exec in doio.c)を呼ぶので、この場合のメタキャラクタ
 の取り扱いも同じ
 
-
 .S	perlはinterpreter
+=E.S	perl is interpreter
 
 必要のないコードは評価しない方が“少しは”はやいよね、きっと
 ＃そうして、require ってのが増えていく（笑）
 
-
 .S	変数
+=E.S	Variables
 
 基本はグローバルで、localで明示的にlocal variableにする。
 そうでなければ前に評価した時の値のままなんです。
@@ -62,7 +59,6 @@ fml は Backward Compatibility と(私の趣味で) perl 4 で書ける範囲で書か
 
 だから、“config.phを評価する時に$DIRに入っている値”が重要になるわけ
 ですね。
-
 
 .S	@INC	
 
@@ -95,20 +91,18 @@ require 'sys/socket.ph';
 
 がこの順で探されるはずなんですね。
 
-
 .S	require
 
 @INCの順でファイルを探してそれをperl scriptとして評価する。
 ＃perlはinterpreterなので必要に応じて取り込んで評価した方がいいはず
-
 
 .S	\w
 .k	\w
 
 \w は [0-9A-Za-z_]  です
 
-
 .S	単語
+=E.S	Words
 .k	@ARGV
 .k	%ENV
 
@@ -123,6 +117,7 @@ require 'sys/socket.ph';
 
 
 .S	perl の習得はやさしいか？
+=E.S	Learning perl
 
 perlの書き方は見ての通り、
 
@@ -136,7 +131,6 @@ perlの書き方は見ての通り、
 ただ、変なOSやperlのために悲しいことにくどい書き方とかしなきゃいけない
 ところもあってちょっと…;_;;_;;_;
 
-
 気をつけなければいけないこと、それぞれの言語との違い等はperl.texinfoの
 
 * Traps::			注意点
@@ -145,7 +139,7 @@ perlの書き方は見ての通り、
 ＃Larry Wallのperlの本（ラクダ本）とほとんど同じ内容です。
 ＃この本の後半のライブラリ集は見る価値があるのかも知れないが…
 
-perl texinfo in japanese --- version 4.0.19.2
+perl texinfo in Japanee --- version 4.0.19.2
 ・perl.texinfo		perl.man を日本語に訳して texinfo 形式にしたもの
 
 というものがfj.sourcesに投稿されています。ちなみに
@@ -153,7 +147,6 @@ perl texinfo in japanese --- version 4.0.19.2
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
 
 にもおいてあります。
-
 
 .q
 fml-support Count: 01582
@@ -195,7 +188,6 @@ in fml-support ML's Count:01566
 GNU は汎用過ぎて unifdef(1)  とかしないと わかりにくいでしょう
 
 .~q
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

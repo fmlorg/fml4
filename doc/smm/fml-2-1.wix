@@ -35,7 +35,7 @@ config.ph で簡易モード設定をするための関数です。以下のような理由のため
 
 ○ 変数の設定の中には 1 or 0 だけでは不充分な場合がある
 
-&DEFIN_MODE(mode-name); は必ず config.ph の最後 (1; より前) に書いて下
+&DEFINE_MODE(mode-name); は必ず config.ph の最後 (1; より前) に書いて下
 さい。というのはモード設定の中には config.ph の値を overwrite する必要
 のあるものがあるからです(もちろん必要のないものもあります)。
 
@@ -209,7 +209,7 @@ obsolete なのは今後は makefml しか保守されないから。
 もどきのインターフェイス)、これで複数のコマンドを実行したりもできます。
 
 SYNOPSIS
-	fmlctl.pl -i [-c configfile] [-d ML_directory] [-h] [DIR] [LIBDIR]
+	fmlctl.pl -i [-c config-file] [-d ML_directory] [-h] [DIR] [LIBDIR]
 
 	-a	ADMIN MODE (コマンド は # admin ... が前についてるものと仮定) 
 		つまり help をいれても # admin help のことだと思う。

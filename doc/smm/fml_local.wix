@@ -31,7 +31,7 @@ fml_local2.pl は最初にマッチした条件(以下 FIRST MATCH)を実行します。
 
    "|/usr/libexec/fml/libexec/fml_local.pl -user username || exit 75"
 
-とか書いて使います。usename はあなたの account名です。
+とか書いて使います。username はあなたの account名です。
 
 SYNOPSIS: 
   fml_local.pl [-Ddh] [-f config_file] [-user username]
@@ -39,7 +39,7 @@ SYNOPSIS:
     -d     debug mode on
     -D     dump variable 
     -f     configuration file for ~/.fmllocalrc
-    -user  usename
+    -user  username
 
 デフォールトでは $HOME/.fmllocalrc という設定ファイルにしたがってパター
 ンマッチングとその処理を実行します。

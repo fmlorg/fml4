@@ -1,45 +1,49 @@
 .C	WIX Language
 .l	WIX
-.k	WIX Languate
+.k	WIX Language
 .xref	bin/fwix.pl
 
-   "WIX" == "With Index and Xreference"
+   "WIX" == "With Index and X-reference"
 
 .S	WIX Language Introduction
 
 WIX は4種類のフォーマットのドキュメントを同時生成するために考え出され
-た(妥協ともいう)言語です。名前の通り Index や Xref(Cross Rerefence)は
+た(妥協ともいう)言語です。名前の通り Index や Xref(Cross Reference)は
 重視しますが、大文字、イタリックのような見栄えは何一つ考えていない言語
 です。それゆえ、言語仕様は必要最小限のもののみを実装しています。
 =E
-WIX is a language that generates documents which support Index and
-Xref (Cross Reference) and are not concerned with looks such as
-Capital, Bold, Italic. It support minimum sets of a language.
-It is similar to half nroff + half texinfo.
-fwix.pl (bin/fwix.pl) translates *.wix to a text and html documents.
+WIX is a language, which generates several types format documents.  It
+supports only Index and Xref (Cross Reference). It is not concerned
+with looks such as Capital, Bold, Italic. It supports minimum sets of
+a language.  It is similar to both nroff and texinfo. fwix.pl
+(bin/fwix.pl) translates a wix file or a set of *.wix to a text and a
+set of html documents. Roff and texinfo version is underway.
 
-言語自体はおおむね nroff like + texinfo like 折衷版くらいです
+言語自体はおおむね nroff like + texinfo like 折衷版くらいです専用のフォー
+マッタの bin/fwix.pl を使って４種類のフォーマットでマニュアルを生成す
+るという野望を持っていますが、現状ではテキストとHTMLの生成しかできませ
+ん(FML 2.2)。
+=E
+Language statements is a half of nroff and texinfo. I would like to
+take fwix.pl to generate four kinds of formats but now fwix.pl
+supports text and html.
 
-専用のフォーマッタ bin/fwix.pl を使って４種類のフォーマットで 
-マニュアルを生成します。
+doc/op.jp などは wix から作られた plain text です。同じ wix ファイルか
+らHTML版(doc/html/)は作られています。html 版はソースを広げたTOP
+directoryで『make doc』でつくってください。
+=E
+doc/op.jp is a plain text version of op.wix (fwix.pl translated).
+Html version can be seen in doc/html/ or http://www.fml.org/fml/.
 
-plain text は
-	doc/op そのもの 
-
-html 版は
-	make doc でつくってください
-
-nroff と texinfo 版は対応しかけてるところ です(2.1 release では未実装
-のままの予定)。
-
-WIX Language は 
+WIX Language はあくまでも
+ 
 	１	nroff 覚え直すのも面倒臭い
 	２	texinfo, html, nroff, plain text 
 		４種類を同時に生成する
 
 ために作られたものです。単に僕が書きやすいか否か？で言語仕様が決まって
-ます:-)。二か国語対応です(でも翻訳してる暇がない;-)
-
+ます:-)。二か国語対応です(でも翻訳してる暇がないといいつつ2.2では全て
+ニか国語になりました;-)
 
 .S	WIX 言語仕様
 =E.S	WIX Specifications
@@ -51,8 +55,8 @@ WIX は 行の先頭が . で始まっている行をコマンドとみなします。次に示すよ
 のパラグラフはどれも新しいセクションの一部です。空行があったら次のセク
 ションのようにはカウントしません。
 =E
-A WIX command is a line with the first character ".", which command is
-The command .key syntax such as:
+A wix command is a line with the first character ".". The command
+".key" syntax such as:
 
 [章立て/構造]
 =E
@@ -63,13 +67,18 @@ The command .key syntax such as:
 	.S	Section
 	.SS	Sub Section 
 
-	.A	Appendix	Appendix (付録)。
+	.A	Appendix	Appendix (付録)
 =E
 	.A	Appendix	Appendix
 
 TeX も同様なデータ構造を持つので理解はしやすいと思います。
 =E
 The structure of WIX is similar to that of TeX.
+
+	.if	if
+	.fi	end of if
+
+	.return	return at this line
 
 [索引]
 =E
@@ -80,7 +89,7 @@ The structure of WIX is similar to that of TeX.
 
 KEYWORDと現在の Chapter.Section との対応づけ。索引に使われる
 =E
-WIX bind the keyword to the current Chapter.Section index.
+WIX binds the keyword to the current Chapter.Section index.
 
 [ラベルづけ]
 =E
@@ -93,15 +102,15 @@ WIX bind the keyword to the current Chapter.Section index.
 もの。KEYWORDと現在の Chapter.Section との対応づけに使われます。
 xref が使うポインタで索引にも使われます。ラベルの参照は
 =E
-XRef uses this labels and the pointer to Chapter.Section.
+XRef corresponds this label to Chapter.Section.
 
 	.xref	KEYWORD
 	.seealso KEYWORD
 
 .label でラベルづけした Chapter.Section への Cross Reference です。
-この Cross Reference は分中では
+この Cross Reference は文中では
 =E
-The keyword  .xref is expanded to the following
+The keyword .xref is expanded to the following phrase.
 
 	see also 10.3 
 
@@ -113,8 +122,7 @@ If you use xref: in the middle of a line, you can use .ptr command.
 
 役目は xref と同じだが see also の部分は付け加えられない。
 =E
-It is the same in essential, but without "see also".
-
+It is the same as ".xref" in essential, but without "see also".
 
 [引用]
 =E
@@ -131,9 +139,9 @@ It is the same in essential, but without "see also".
 ＃そのために 終りを示す必要がある。
 =E
 In the quotation block, the indent is 3 spaces. If LaTeX, these
-corresponds to
+correspond to
 
-LaTex でいえば 
+LaTeX でいえば 
 
 	\begin{quote}
 	\end{quote}
@@ -142,7 +150,7 @@ LaTex でいえば
 
 ○特殊な命令
 =E
-* special statements, comments
+* Special statements, comments
 
 	.#		COMMENT
 	.comment	COMMENT
@@ -155,9 +163,8 @@ and "include" command is to replace here contents of FILE.
 
 FILE をその部分に挿入する。
 
-
 .S	WIXの多国語対応
-=E.S	Plural Language Extension to WIX
+=E.S	Internationalization of WIX
 .k	WIXの多国語対応
 
 文章の構造を越えたメタなレベルで2か国語(日本語、英語)を対和訳的に記述
@@ -165,9 +172,10 @@ FILE をその部分に挿入する。
 がどこに当たるのかわからなくなるので;-)、一つのファイルに対訳で表現し
 後で分離しています。
 =E
-The current support to Languages is both Japanese and English.  You
-can write the simultaneous interpretation with the separator "=E".
-WIX prapares another statements apart from commands such as .C, .S, ... 
+The current WIX supports both Japanese and English. You can write the
+simultaneous interpretation with the separator "=E". WIX prepares
+another statements apart from commands such as .C, .S, ...
+This simultaneous interpretation is for easy maintenance.
 
 構造とは別のレベルの話なので別の構文が用意されています。
 
@@ -178,27 +186,24 @@ WIX prapares another statements apart from commands such as .C, .S, ...
 行の最初の=コマンドもしくは空行を区切りとみなし、区切りで挟まれた
 文章("パラグラフ")を単位として切りわけます。"パラグラフ"中、
 =E
-Language context switches are "=command" syntax. Language switch
-occurs in the unit of blocks (paragraphs).
-That is that "empty line"(null line) is also a separator.
-The block with a Japanese EUC code character appears in Japanese mode.
-The block containing English characters only appears both in Japanese
-and English.
+Language context switch occurs when fwix encounters "=command" syntax. 
+Language switch continues in the unit of blocks (paragraphs). That is
+that "empty line" (null line) is also a separator.  The block with a
+Japanese EUC code character appears in Japanese mode.  The block
+containing English characters appears both in Japanese and English.
 
 	1)EUCを含まないもので、=E〜(区切り)で囲まれた部分→英語のみ
 	　　　　　〃　　　　 、上記以外　　　　　　　　　→日英両方
 
 	2)EUCを含むもの→日のみ
 
-のパラグラフに変換されます。
-
-現在用意されているコマンドの一覧:
+のパラグラフに変換されます。現在用意されている切替えコマンドの一覧:
 
 	=E
 	以降、EUC文字を含む"パラグラフ"前の区切りまでを英語と見なす。
 =E
 	=E
-	English Block declaration
+	declare the beginning of English block 
 =S
 	empty line
 	empty line is the reset of Language mode.
@@ -225,7 +230,6 @@ and English.
 	is a syntax sugar, which is translated to an empty line.
 	It is useful in some times though this is not essential.
 
-
 .S	WIX と HTML 例外処理
 =E.S	WIX and HTML Exceptions
 
@@ -234,9 +238,8 @@ and English.
 
 <PRE> 〜 </PRE> で展開したい部分。
 =E
-which is translated to <PRE> </PRE> statements.
-WIX ignore this block not in html mode.
-
+which is translated to a <PRE> ... </PRE> block. fwix.pl ignore this
+block not in html mode.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

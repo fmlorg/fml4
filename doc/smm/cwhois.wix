@@ -8,6 +8,8 @@
 .return
 .fi
 
+* whois proxy with cache と説明する方がきっとわかりやすいと思うあるね-o-;;
+
 .S	Whois Server with Cache
 .k	Whois Server with Cache
 
@@ -21,14 +23,13 @@ whois server でデータベースを引く時、
 という要求がありえます。その機能を提供します。
 
 よってローカルなデータを引かない時の whois server は一見単なるフォワー
-ド処理をしているだけのように見えます。
-実際には返ってきた答をキャッシュもしています。
+ド処理をしているだけのように見えます(実際には返ってきた答をキャッシュ
+もしています)。
 
-lib/whois では本物の whois server を提供してますが、
-libexec/cwhois.pl は本物の whois とローカルサーチを実行する extended
-whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
-自動的に ローカルサーチ に切替えることができます。
-
+lib/whois では本物の whois server を提供してますが、libexec/cwhois.pl 
+は本物の whois とローカルサーチを実行する extended whois です。TIMEOUT
+($TIMEOUT 変数) 秒の間に whois の返事がこない場合自動的に ローカルサー
+チ に切替えることができます。
 
 .S	一次キャッシュと２次キャッシュも含む探索アルゴリズム
 .k	$WHOIS_SERVER
@@ -55,7 +56,6 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 
 	のようにオプション( all# ) をつける
 
-
 .S	キャッシュの表示
 
 デフォールトではキャッシュは一番新しいデータのみを表示する。
@@ -65,7 +65,6 @@ whois です。TIMEOUT ($TIMEOUT 変数) 秒の間に whois の返事がこない場合
 
 のような引き方をする必要がある。なおデータの表示の順番は新しい方から古
 い方へという向きです。
-
 
 .S	/etc/inetd.conf 
 .k	/etc/inetd.conf 
@@ -81,7 +80,6 @@ cwhois.pl の引数の directory にある config.ph を見ます。
 上の例だと /var/spool/whois/config.ph になります。
 キャッシュデータは /var/spool/whois/spool の下に番号をつけられてスプー
 ルされます。
-
 
 .S	本来の whois データベースサーバの設定
 .k	$WHOIS_SERVER
@@ -148,8 +146,6 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	%CWHOIS_CACHE_SPOOL   = ('apply', '/var/spool/apply');
 	%CWHOIS_CACHE_DB      = ('apply', '/var/db/applydb');
 
-
-
 必要なら（対応する） spool1:spool2 という形で
 
 	 一つのキーワード <=> 複数の database と spool の対応関係
@@ -189,43 +185,35 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	$CWHOIS_HELP_FILE
 .k	$CWHOIS_HELP_FILE
 
-
 ○	#keyword でデータベースの指定がない時使うデフォールトのデータベース
 
 	$CWHOIS_DEFAULT_SET
 .k	$CWHOIS_DEFAULT_SET
-
 
 ○ 	一次キャッシュ探索アルゴリズムを使う
 
 	$USE_CWHOIS_FIRST_CACHE
 .k	$USE_CWHOIS_FIRST_CACHE
 
-
 ○ 	一次キャッシュのTIMEOUT
 
 	$FIRST_CACHE_TIMEOUT
 .k	$FIRST_CACHE_TIMEOUT
-
 
 ○ 	一次キャッシュデータの有効期限
 
 	$FIRST_CACHE_EXPIRE
 .k	$FIRST_CACHE_EXPIRE
 
-
 ○ 	一次キャッシュのデータベースファイル
 
 	$FIRST_CACHE_DB
 .k	$FIRST_CACHE_DB
 
-
 ○ 	一次キャッシュのデータ格納場所
 
 	$FIRST_CACHE_SPOOL
 .k	$FIRST_CACHE_SPOOL
-
-
 
 .S	Cwhois の Search Algorithm
 
@@ -256,7 +244,6 @@ whois-server が KEYWORD を 定義されている whois server へ質問をフォワー
 	
 	キャッシュ オン（後で利用するため）
 
-
 .S	データベース・フォーマット
 
 仮定： 
@@ -276,7 +263,6 @@ caching whois server 用の付録として
 
 が提供されています。
 
-
 .S	データベースの作成
 
 cron を使って１時間に一度とかの割合で update をかけるのが良いでしょう。
@@ -288,7 +274,6 @@ cron を使って１時間に一度とかの割合で update をかけるのが良いでしょう。
 
 データベースの内容は gendb.pl が呼ぶデータベース生成関数に依存していま
 す。
-
 
 .S	gendb.pl (lib/cwhois/gendb.pl)
 .k	lib/cwhois/gendb.pl
@@ -303,7 +288,6 @@ sub CacheOn という example が gendb.pl の中にありますので、
 この関数をまねして gendb.ph 等に保存し、保守すると良いでしょう。
 
 この 関数の定義次第で データベースの出来が変わります。
-
 
 .S	データベース生成関数の例
 .k	$CACHE_PROG
@@ -360,7 +344,6 @@ sub CacheOn
     $s;
 }
 
-
 .S	scandb.pl (lib/cwhois/scandb.pl)
 .l	lib/cwhois/scandb.pl
 .k	scandb.pl
@@ -376,7 +359,6 @@ sub CacheOn
 
 keyword が help 要求でない場合まずこのフックを評価し、この後
 caching whois の main routine に入る。
-
 
 .S	$CWHOIS_CACHE_SEARCH_HOOK
 .k	$CWHOIS_CACHE_SEARCH_HOOK
@@ -400,7 +382,6 @@ TCPコネクションが終った直後に評価されるフック
 .k	$CWHOIS_EXIT_HOOK
 
 終了する時に評価
-
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

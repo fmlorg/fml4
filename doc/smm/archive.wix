@@ -13,9 +13,11 @@
 てくるからです。
 =E
 Articles in $DIR/spool requires a lot of spaces if the number of
-articles are 10000 or so. You can gzip 100 articles to be 1/4 size
-tar.gz file. In my experience 100 articles to be gzipped to be 50K
-size tar.gz. 50K seems an apropriate size. You can save spaces a lot.
+articles are many (e.g. 1000 articles may need 2M). You can use "gzip"
+(GNU zip) 100 articles to be 1/4 size tar.gz archived file. In my
+experience 100 articles to be gzip-ped to be 50K size tar.gz. 50K
+seems an appropriate size for one mail. You can save spaces a lot by
+archiving articles.
 
 .S	自動アーカイブと自動 expire 
 =E.S	Automatic Archive and Expire 
@@ -24,16 +26,27 @@ size tar.gz. 50K seems an apropriate size. You can save spaces a lot.
 する方法のことを意味しています。$DIR/spool に一通ずつためるのもアーカ
 イブという概念だとは思いますが、このドキュメントでは区別しています。
 =E
-Spooling $DIR/spool must be a kind of "archive", but in this document
-we distinct "archive" and "spooling". Here "archive" is to pack
-several articles to one file and to store them in some directories.
+Spooling $DIR/spool must be a kind of "archive" (plain format), but in
+this document we distinct "archive" and "spooling". Here "archive" is
+to pack several articles to one file (e.g. tar.gz) and to store them
+in some directories.
 
-$USE_EXPIRE と $USE_ARCHIVE を同時に使う場合はパラメータの選び方に要注
-意です。というのはexpire と アーカイブ は相反する概念だからです。
+手動でアーカイブ作成や古い記事の削除をするのがある意味で安全ですが、
+FML に自動でそれらを行なわせることもできます。$USE_EXPIRE (古い記事の
+削除)と $USE_ARCHIVE (アーカイブの作成) という変数を 1 にするとFMLがアー
+カイブとexpireを行ないます。
 =E
-If you ste both $USE_EXPIRE and $USE_ARCHIVE, pay attention on the
-values since expire and archive conflicts each other. 
-Of course runnig archive and expire BY HAND is best!
+Running archive and expire BY HAND must be safe. FML can expire or
+archive articles automatically.  The variables are $USE_EXPIRE
+(expire) and $USE_ARCHIVE (archive).
+
+expire と アーカイブ は相反する概念です。２つを同時におこ名和させる場
+合はパラメータの選び方に要注意です。デフォールトはそれを考慮した数値に
+なっているため、少しDISK効率が悪いかもしれません。
+=E
+Notions of $USE_EXPIRE (expire) and $USE_ARCHIVE (archive) conflicts
+each other.  If you set both variables, pay attention on the values.
+Default parameters can be considered for this possibility.
 
 「絶対に記事はうしなわれてはいけない」という強い要求がある場合に 
 「expire しつつアーカイブも作ることを全自動で行なう」ことは推奨できま
@@ -46,36 +59,40 @@ Of course runnig archive and expire BY HAND is best!
 	『まぁこのＭＬの記事はちょっとくらい失われてもOK』
 など容認できる必要があります。
 =E
-Usually we wanna not to lose ML articles. Hence running both expire
+Usually we want not to lose ML articles. Hence running both expire
 and archive at the same time conflicts each other. Firstly it is
-difficult to choose paraemeters. Secondly archive depends on "gzip"
-and "tar", external system ommands. It may be broken and may be
+difficult to choose parameters. Secondly archive depends on "gzip"
+and "tar", external system commands. It may be broken and may be
 mis-replaced for version up. On the other hand expire code does not
-depends such a thing. You can run "expire" without archive safely but
-articles are lost. So running both requires your confidence :) or
-torelance that articles may be lost.
+depends such a thing. You can run "expire" without archive safely.
+Running both functions depends on your confidence :) or tore-lance
+that articles may be lost.
 
 アーカイブかExpireのどちらかを自動でどちらかを手動でやるのが理想なのか
 もしれません。安全性からいえばやはり自動アーカイブ＋手動expireですね。
+両方やる場合はアーカイブだけを設定してみて、うまくいっていることを確認
+してから expire を設定するべきでしょう。
 =E
 To do both archive and expire by hand is best.  To do automatic
-archive and expire by hand must be second best.
+archive and expire by hand must be second best. 
+If you want to use both, firstly use only archive and check it.
+After checking archive works well, set expire.
 
 パラメータの選び方ですが、ファイルの取り寄せ等に影響があるため必ず 
-$EXPIRE_LIMIT が日数ではなく"記事の数"(残したい記事の数)で指定されてい
-て、
+$EXPIRE_LIMIT が日数ではなく"記事の数"(残したい記事の数)で指定して下さ
+い。そして次の条件
 =E
 Configuration parameters require $EXPIRE_LIMIT is "number" (articles
-left in $DIR/spool) NOT "DAYS" (expire date). It also requries
+left in $DIR/spool) NOT "DAYS" (expire date). It also requires
 
 	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
 .k	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
 .k	$EXPIRE_LIMIT
 .k	$ARCHIVE_UNIT 
 
-でなくてはいけません。念のため
+が必要です。念のため
 =E
-We recommemend such as conditions
+We recommend such as conditions
 
 	$EXPIRE_LIMIT = $ARCHIVE_UNIT * 2;
 
@@ -83,7 +100,6 @@ We recommemend such as conditions
 でエラーとなります。もちろん毎回ファイルを全て調べる等の莫大な 
 overhead をかければ実現はできますが、コストが見合うとは思えないので実
 装されていません。
-
 
 .S	config.ph の設定
 =E.S	config.ph configurations
@@ -97,17 +113,15 @@ To set automatic archive by FML, set
 .k	$USE_ARCHIVE
 
 をセットすれば呼べるようになっています。アーカイブが作られる場所は 
-$ARCHIVE_DIR で、
 =E
 The directory where FML creates archives is 
 
-	$ARCHIVE_DIR = 'var/archive';
+	$ARCHIVE_DIR = 'var/archive'; (default is 'var/archive')
 .k	$ARCHIVE_DIR
 
-です。ここでは 'var/archive' です。
-=E
-This setting is to create "var/archive".
+です。(default は 'var/archive' になっています)。
 
+.# beth
 この内容はアーカイブの場所のリストである配列 @ARCHIVE_DIR の先頭に代入
 されます。アーカイブの場所は複数あってもいいですがそれは get, mget の
 時に探す対象にはなりますが、自動的に作る場所は $ARCHIVE_DIR ==
@@ -144,11 +158,12 @@ If not defined, FML uses
 例えば、"# get 1 " や "# mget 1" というコマンドを送り込んだ時のサーチ
 の順番は
 =E
-The search path when FML interpretes "get" and "mget" command follows:
+Consider "# get 1", "# mget 1" command.  The search path when FML
+interprets "get" and "mget" command follows:
 
-*	"# get 1", "# mget 1" command
+* Case: "# get 1" and "# mget 1"
 
-1	$SPOOL_DIR
+1	$SPOOL_DIR (=> $FP_SPOOL_DIR)
 
 2	@ARCHIVE_DIR
 
@@ -156,27 +171,26 @@ The search path when FML interpretes "get" and "mget" command follows:
 	を見つけたら記事 １ を取り出して１だけを送り返す
 =E
 	If e.g. var/archive/100.tar.gz is found, FML extracts the
-	article 1 and send back it.
+	article 1 from it and send back the article.
 
-*	"# mget 1-10"  command
+* Case: "# mget 1-10"  command
 
 サーチの順番は同じ。100.tar.gz が該当した時は 1 から 10 を取り出して送
 り返す。
 =E
-The search path algorithm is the same. If not found in spool and
-100.tar.gz is found, FML extracts 1-10 articles from it and send back
-them.
+The search path algorithm is the same. If plain article are not found
+in spool and 100.tar.gz is found, FML extracts 1-10 articles from it
+and send back them.
 
-
-*	"# get 100.tar.gz" and "# mget 100.tar.gz"  command
+* Case: "# get 100.tar.gz" and "# mget 100.tar.gz"  command
 
 var/archive/100.tar.gz をそのまま送り返す。デフォールトはこれを 
 uuencode したものです。
 =E
-send back var/archive/100.tar.gz itself (uuencoded in default).
-
+send back var/archive/100.tar.gz itself ("uuencode"d in default).
 
 .S	gzip file にする(アーカイブへの変換)
+=E.S	Conversion to "gzip"ed file (archive file)
 .l	Archive.pl
 .k	Archive.pl
 .xref	cron
@@ -208,10 +222,11 @@ If you would like to create archives by hand, please run Archive.pl.
 注意:このプログラムはMLのホームで実行されることを前提にしています。つ
 まり
 =E
-Please run thig program in a mailing list home (config.ph location).
-E.g. 
+Please run thig program in $DIR, a mailing list home (config.ph
+location).  E.g.
 
-	chdir /var/spool/ml/Elena; perl bin/Archive.pl 
+	% cd /var/spool/ml/Elena
+	% perl bin/Archive.pl
 
 のように使うことを期待されています。
 
@@ -247,7 +262,7 @@ summary		welcome
 
 	…たくさんメッセージが出るが省略…
 =E
-	messages ...
+	a lot of messages ...
 
 % ls archive
 
@@ -255,11 +270,10 @@ summary		welcome
 
 	…たくさんメッセージが出るが省略…
 =E
-	messages ...
+	a lot of messages ...
 
 spoolの 3800 までの 100 個ずつのパッケージを作りました。spoolの方の元
 メールを自動的に消しはしない(安全のため)ので、自分で消して下さい。
-
 
 .S	アーカイブ作成を cron で自動処理
 =E.S	Automatic archive creation (run Archive.pl by cron)
@@ -275,6 +289,8 @@ cron once in a week (morning on Sun) in the following:
 とでもすれば良いでしょう。bin/Archive.sh がその見本です。いくつかＭＬ
 があるなら、シェルスクリプトにまとめて呼べば楽です。まとめ送りと同様に 
 crontab に記述すればよいです。
+=E
+It is useful to set up a shell script for plural ML's.
 
 crontab の例：
 =E
@@ -286,26 +302,24 @@ crontab example:
 
 	#!/bin/sh
 
-	(chdir /var/spool/ml/Elena;    /usr/local/bin/perl bin/Archive.pl)
-	(chdir /var/spool/ml/Freekick; /usr/local/bin/perl bin/Archive.pl)
-
+	(cd /var/spool/ml/Elena;    /usr/local/bin/perl bin/Archive.pl)
+	(cd /var/spool/ml/Freekick; /usr/local/bin/perl bin/Archive.pl)
 
 .S	何故、まとめてgzip化したいのか?
-=E.S	Why gzip
+=E.S	Why "gzip" articles?
 
 1. 一個一個gzipかけると、約半分にしかなりませんが、100個まとめて書ける
 と、ヘッダとかの重なりがあるので約25%にまで圧縮できるようになります。
 =E
-1. Why gzip? To save directoy usage.  Compression rate is very
-effective since headers are similar each other.
+1. Why gzip articles? It is to save directory usage. Compression rate
+is very high since each headers are similar each other.
 
-2. Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
-るのでファイル数を減らす or ほかの場所に移すことに意味があるようになり
-ます。そこでspoolの中身をうつし、100分の一のファイル数にすると効果が非
-常にあります。また、kernel 内の directory cache が大きくなるのも避けた
-いところですから、そのためにもよいです。
+2. Mail-Countが万を越える頃になるといい加減 directory cache などが煩わ
+しくなってきます。一つの directory の中のファイル数を減らす or ほかの
+場所に移すことに意味があるようになります。そこでspoolの中身を移し、100
+分の一のファイル数にすると効果が非常にあります。
 =E
-2. Expire: To avoid a large directory cache in the unix kernel.
+2. to avoid a large directory cache in the unix kernel.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi

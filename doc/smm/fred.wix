@@ -1,18 +1,21 @@
 .C	FRED （汎関数-正規表現-微分）ライブラリ 
-=E.C	Funtional Regular Expressional Derivative
+=E.C	Functional Regular Expressional Derivative
 .l	fred
 .if LANG == ENGLISH
 *** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
 .return
 .fi
 
+* contrib/lexical/ に収録されているおまけ機能です。進化はすでに止まり
+保守されていません;D
+
 sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
 つきにくいかも知れません。中身は同じでも違ったインターフェイスは Aucea
 ライブラリが提供します。
 .xref	aucea
 
-.S	Funtional Regular Expressional Derivative
-.k	Funtional Regular Expressional Derivative
+.S	Functional Regular Expressional Derivative
+.k	Functional Regular Expressional Derivative
 
 正規表現にマッチするか否かを調べパターンにマッチした時およびしない時に
 それぞれ定義された関数を実行します。fred は
@@ -24,14 +27,14 @@ sendmail.cf や mh のような config の形式といえるでしょう。ちょっと取っ
 
 例：
 	ADDRESS:		fukachan@sapporo.iij.ad.jp
-	FAVORITE_ACTORESS:	西原久美子
-	FAVORITE_ACTORESS:	こおろぎさとみ
-	FAVORITE_ACTORESS:	荘真由美
-	FAVORITE_ACTORESS:	矢島晶子
+	FAVORITE_ACTRESS:	西原久美子
+	FAVORITE_ACTRESS:	こおろぎさとみ
+	FAVORITE_ACTRESS:	荘真由美
+	FAVORITE_ACTRESS:	矢島晶子
 	COMMENT:		うじゃ
 				うじゃうじゃ
 
-投票システム lib/Elena (VotingSystem) というのが lib/ の下にありますが、
+投票システム lib/Elena (Voting System) というのが lib/ の下にありますが、
 これをさらに汎用的に拡張しなおしたものと考えてよいでしょう。
 
 

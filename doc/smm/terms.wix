@@ -7,7 +7,6 @@
 =E.S	HOME of ML
 .k	MLのHOME
 
-
 ML(fml) の HOME は config.ph のある場所です。例えば config.ph が 
 /var/spool/ml/elena/config.ph にあるとすると、directory
 /var/spool/ml/elena をMLのHOMEと呼んでいます。
@@ -20,9 +19,9 @@ The HOME of each ML is the location of config.ph. If
 .k	SMTP
 .k	Simple Mail Transfer Protocol
 
-SMTP == Simple Mail Transfer Protocol。 sendmail 間の通信方式のこと。
+SMTP == Simple Mail Transfer Protocol。sendmail 間の通信方式のこと。
 =E
-SMTP == Simple Mail Transfer Protocol。 
+SMTP == Simple Mail Transfer Protocol.
 
 
 .S	メールサーバ/SMTPサーバ, MTA
@@ -35,8 +34,8 @@ sendmail というプログラムが元祖であり、もっとも代表的なプログラムです
 =E
 "Mail Server" is a host where MTA runs to receive and deliver mails.
 The most famous MTA is "sendmail", which is the default of BSD
-(Berkeley Software Distribution). You do not have to insist on using
-"sendmail".
+(Berkeley Software Distribution) UNIX. You do not have to insist on
+using "sendmail". 
 
 MTAなら qmail (http://www.qmail.org/) や exim (http://www.exim.org/) 
 のような他のMTAもあるし、MTAではなく例えば TIS (Trusted Information
@@ -44,30 +43,29 @@ System) の Gauntlet という Firewall では smap というプログラムが受けて
 queue だけをします。
 =E
 Other MTA are qmail (http://www.qmail.org/), exim
-(http://www.exim.org/). 
-You can use other interfaces such as smap of fwtk of TIS (Trusted
-Information System), smtpd for more security.
-You can use MTA you like if the MTA can receive, send and exec ML
-driver programs from it.
+(http://www.exim.org/). You can use other interfaces such as smap of
+fwtk of TIS (Trusted Information System Inc.), smtpd for more
+security.  You can use MTA you like if the MTA can receive, send and
+exec ML driver programs from it.
 
 世の中にはそれ以外にも sendmail もどきのプログラムはありますから、
-sendmail に拘る必要はありません。
-
-この文書ではターゲットマシンが 4.4BSD なので、sendmail と perl を使う
-場合について解説しています。
+sendmail に拘る必要はありません。この文書ではターゲットマシンが 4.4BSD 
+なので、sendmail と perl を使う場合について解説しています。
 =E
-FML target is NetBSD, so we explain sendmail and perl in this
-document.
-
+FML target is NetBSD, so we explain a case using sendmail and perl in
+this document.
 
 .S	sendmail
 .k	/usr/sbin/sendmail
 .k	sendmail
 
 現在も Eric Allman がメンテしている メール配送エージェントのこと。
-sendmail は BSD の標準装備です。
+sendmail は BSD の標準装備です。1998 3 月に Sendmail
+Inc. (http://www.sendmail.com/) ができました。
 =E
-The most famous MTA (Mail Tranport Agent), which is standard of BSD.
+The most famous MTA (Mail Transport Agent), which is standard of BSD.
+Now Sendmail Inc. (http://www.sendmail.com/) exists and maintains
+sendmail.
 
 どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
 もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
@@ -86,22 +84,19 @@ A mirror in Japan is
 です。
 =E
 and also WIDE patch (by Motonori Nakamura, Kyoto University) for
-sendmail is available to enable pararell processing resolving,
+sendmail is available to enable parallel processing resolver, 
 smtpfeed and so on.
 
-
-.S	sendmail.cf 
+.S	/etc/sendmail.cf 
 .k	/etc/sendmail.cf 
 .k	sendmail.cf 
 
-sendmail をコントロールする configration file。これの読み書きができな
-いとネットワーク管理者にはなれません(なりたくないって?(泣))。
-
-大抵の場合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッ
-ケージで sendmail.cf を簡単に作ることができるが、この見本で十分実用で
-す。
-
+sendmail をコントロールする configuration file。これの読み書きができな
+いとネットワーク管理者にはなれません(なりたくないって?(泣))。大抵の場
+合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッケージで 
+sendmail.cf を簡単に作ることができるが、この見本で十分実用です。
 詳しくは、このCFパッケージの日本語マニュアルも参照して下さい。
+=E
 You can use CF (by Motonori Nakamura, Kyoto University) to configure
 sendmail.cf. This software works well.
 
@@ -109,7 +104,6 @@ sendmail.cf. This software works well.
 A mirror in Japan is 
 
 	ftp://ftp.iij.ad.jp/pub/network/sendmail/
-
 
 .S	newaliases
 .k	/usr/sbin/newaliases
@@ -120,7 +114,7 @@ A mirror in Japan is
 ばなりません。
 =E
 A program to make aliases database from /etc/aliases. 
-You should run newaliases if you edit /etc/aliases.
+You should run newaliases after you edit /etc/aliases.
 
 .# $Id$
 .# Copyright (C) 1993-1998 Ken'ichi Fukamachi
