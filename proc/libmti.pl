@@ -95,6 +95,7 @@ sub MTICache
     }
 
     ## speculate intermittent / burst traffic
+    &MTIDBMClose;
     &MTIDBMOpen($mode) || return $NULL;
 
     local($fp) = $MTI_COST_EVAL_FUNCTION || 'MTISimpleBomberP';
