@@ -4,6 +4,18 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/10/03
+
+   proc/libMIME.pl (2.19 -> 2.20)
+	apply patch by OGAWA Kunihiko (See fml-help:00907)
+
+	fixing broken MIME encoding  
+
+	    if ($main::MIME_BROKEN_ENCODING_FIXUP) {
+		s/\0+/\x1B(B/g;
+		s/$/\x1b(B/;
+	    }
+
 2001/09/29
 
    cf/MANIFEST: define varialbes
