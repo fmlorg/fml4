@@ -109,6 +109,7 @@ testsetup: libkern
 	rsync -C -a proc/ /usr/local/fml/
 	rsync -C -a libexec/ /usr/local/fml/libexec/
 	rsync -C -a bin/ /usr/local/fml/bin/
+	rsync -C -a etc/makefml/ /usr/local/fml/etc/makefml/
 
 install_current:
 	rsync -C -a kern/ /usr/local/fml-current/
