@@ -25,7 +25,7 @@ sub main'SDInit #';
     $tmp_dir  = $main'FP_TMP_DIR; #';
     $dir      = $main'DIR; #';
     $TmpFile  = "$tmp_dir/sd$$";
-    $SDCache = "$dir/sd.cache";
+    $SDCache  = "$dir/sd.cache";
 
     if (open(OUTLIST, "| sort > $TmpFile")) {
 	select(OUTLIST); $| = 1; select(STDOUT);
@@ -36,7 +36,7 @@ sub main'SDInit #';
     }
 
     # file list
-    local($buf);
+    local($buf, $addr, $domain);
     for (@list) {
 	next unless $_;
 	open(LIST, $_) || do { &Log("SDInit: cannot open $_"); next;};

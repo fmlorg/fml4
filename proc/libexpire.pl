@@ -118,6 +118,11 @@ sub ExpireSummary
     local($backf) = "$VARLOG_DIR/summary.bak";
     local($tmpf)  = "$TMP_DIR/summary.tmp";
 
+    if ($first < 1 || $last < 1) {
+	&Log("ExpireSummary: invalid range ($first, $last)");
+	return $NULL;
+    }
+
     open(IN,  $SUMMARY_FILE) || (&Log($!), return);
     open(BAK, "> $backf")    || (&Log($!), return);
     open(NEW, "> $tmpf")     || (&Log($!), return);

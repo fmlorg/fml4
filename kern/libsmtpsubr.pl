@@ -18,7 +18,7 @@ sub ForwardSeparatorEnd { "\n\n------- End of Forwarded Message\n";}
 sub DoSmtpFiles2Socket
 {
     local(*f, *e) = @_;
-    local($autoconv, $count, $boundary, $fn, $ml);
+    local($autoconv, $count, $boundary, $ml);
     local($hdr_found) = 0;
 
     $ml    = (split(/\@/, $MAIL_LIST))[0];
@@ -60,35 +60,35 @@ sub DoSmtpFiles2Socket
 	    $hdr_found  = 1 if /^\#\.FML HEADER/;
 	    
 	    # guide, help, ...
-	    if ($Envelope{'mode:doc:ignore#'}) {
+	    if ($e{'mode:doc:ignore#'}) {
 		next if $hdr_found && (1 .. /^\#\.endFML HEADER/);
-		next if /^\#/   && $Envelope{'mode:doc:ignore#'} eq 'a';
-		# next if /^\#\#/ && $Envelope{'mode:doc:ignore#'} eq 'm';
-		if ($Envelope{'mode:doc:ignore#'} eq 'm') {
+		next if /^\#/ && $e{'mode:doc:ignore#'} eq 'a';
+		# next if /^\#\#/ && $e{'mode:doc:ignore#'} eq 'm';
+		if ($e{'mode:doc:ignore#'} eq 'm') {
 		    next if /^\#\#/;
 		    s/^\#\s*//;
 		}
 	    }
 
 	    # guide, help, ...
-	    if ($Envelope{'mode:doc:repl'}) {
+	    if ($e{'mode:doc:repl'}) {
 		s/_DOMAIN_/$DOMAINNAME/g;
 		s/_FQDN_/$FQDN/g;
 
 		s/_ML_/$ml/g;
-		s/_CTLADDR_/$Envelope{'CtlAddr:'}/g;
+		s/_CTLADDR_/$e{'CtlAddr:'}/g;
 		s/_MAIL_LIST_/$MAIL_LIST/g;
 
-		s/_ARG0_/$Envelope{'doc:repl:arg0'}/g;
-		s/_ARG1_/$Envelope{'doc:repl:arg1'}/g;
-		s/_ARG2_/$Envelope{'doc:repl:arg2'}/g;
-		s/_ARG3_/$Envelope{'doc:repl:arg3'}/g;
-		s/_ARG4_/$Envelope{'doc:repl:arg4'}/g;
-		s/_ARG5_/$Envelope{'doc:repl:arg5'}/g;
-		s/_ARG6_/$Envelope{'doc:repl:arg6'}/g;
-		s/_ARG7_/$Envelope{'doc:repl:arg7'}/g;
-		s/_ARG8_/$Envelope{'doc:repl:arg8'}/g;
-		s/_ARG9_/$Envelope{'doc:repl:arg9'}/g;
+		s/_ARG0_/$e{'doc:repl:arg0'}/g;
+		s/_ARG1_/$e{'doc:repl:arg1'}/g;
+		s/_ARG2_/$e{'doc:repl:arg2'}/g;
+		s/_ARG3_/$e{'doc:repl:arg3'}/g;
+		s/_ARG4_/$e{'doc:repl:arg4'}/g;
+		s/_ARG5_/$e{'doc:repl:arg5'}/g;
+		s/_ARG6_/$e{'doc:repl:arg6'}/g;
+		s/_ARG7_/$e{'doc:repl:arg7'}/g;
+		s/_ARG8_/$e{'doc:repl:arg8'}/g;
+		s/_ARG9_/$e{'doc:repl:arg9'}/g;
 	    }
 
 	    s/\n/\r\n/;

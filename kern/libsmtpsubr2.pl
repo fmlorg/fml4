@@ -57,6 +57,9 @@ sub GetMCIWindow
 	    $end   += $size;
 	}
     }
+    else {
+	&Log("unknown \$MCIType = $MCIType");
+    }
 
     $MCIWindowCB{$file} = "${size}:${start}:${end}";
     ($size, $start, $end);

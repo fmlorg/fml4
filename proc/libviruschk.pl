@@ -18,7 +18,7 @@ local($WinSiz);
 sub VirusCheck
 {
     local(*e) = @_;
-    local($ptr, $i, $guid_pat);
+    local($i, $guid_pat);
     local($pb, $hpe, $pe, $xr, $gpe);
 
     # M$ GUID pattern ; thanks to hama@sunny.co.jp
@@ -54,7 +54,7 @@ sub VirusCheck
 sub ProbeSlidingWindow
 {
     local(*e, $enc, $pat, $pb, $pe) = @_;
-    local($n, $buf, $pbuf, $xbuf, $found, @id);
+    local($buf, $pbuf, $xbuf, $found, @id);
 
     require 'mimer.pl';
 
