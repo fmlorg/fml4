@@ -1,3 +1,7 @@
+#
+# $FML$
+#
+
 check:
 	env FML=${FML} sh distrib/bin/check.sh
 
