@@ -1,0 +1,34 @@
+		How to maintain fml CVS tree
+
+				Ken'ichi Fukamachi
+				<fukachan@fml.org>
+
+-----------------------------------------------------------------
+* Firstly cvs checkout
+
+0.	checkout fml repository
+
+	% cvs co fml
+	% cd fml
+
+1.	set up TCP/IP to the Internet if needed.
+
+2.	generate pkgsrc/
+
+	% make pkgsrc
+
+3.	set up $FML/.info and make documents
+
+	% touch .info	(or get the latest .info)
+	% make plaindoc
+	% make htmldoc
+
+4.	O.K. start your hack!
+
+
+-----------------------------------------------------------------
+* maintainer should check the version number
+
+0.	check conf/release which is the main trunk version.
+
+1.	define the current snapshot number conf/release_version.
