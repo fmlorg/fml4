@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>日々の運用についてのTIPS</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">コントロールコマンド以外を NEWS に流す</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●コントロールコマンド以外を NEWS に流す</A>
+</B></Font>
+<pre>
+【fml-help:01389】
+
+$FML_EXIT_HOOK .= q#;
+  if($ID){
+    &use('nntp');
+    &NntpPost(*Envelope);
+  }
+#;
+</pre><Br><Br>
+</Div>
+</Body>
+</Html>

@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>フィルタリング１　メールの配送を拒否する方法 </B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">フィルタリング ON</A>
+<A Href="#Anchor2">著名なウィルス(の original)を弾く</A>
+<A Href="#Anchor3">Word ファイルなどにマクロが仕込まれているかどうかを検査する</A>
+<A Href="#Anchor4">正規表現が複数行マッチをするように設定する</A>
+<A Href="#Anchor5">メールウイルス臨時対策設定その１</A>
+<A Href="#Anchor16">メールウイルス臨時対策設定その２</A>
+<A Href="#Anchor6">received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否</A>
+<A Href="#Anchor7">本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否</A>
+<A Href="#Anchor8">From: のドメインが Message-ID に含まれていないなら拒否</A>
+<A Href="#Anchor9">To: および Cc: 行に ML のアドレスが入ってなければ，そのメールを拒否</A>
+<A Href="#Anchor10">自サイト以外のアドレスを拒否</A>
+<A Href="#Anchor14">ファイル拡張子 .xxx が危なそうなもの(?)はかたっぱしから認めない</A>
+<A Href="#Anchor15">sjisやeucで書かれたメールは拒否</A>
+<A Href="#Anchor12">登録された複数ドメインのFromであったら投稿は許可するが、それ以外の投稿は拒否</A>
+<A Href="#Anchor13">ちょっと複雑な HOOK</A>
+<A Href="#Anchor11">独自のスパム処理をする方法</A>
+<A Href="#Anchor18">「！広告！」なメールを弾く</A>
+<A Href="#Anchor17">uuencode な添付ファイル付きメールを弾く</A>
+
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●フィルタリング ON</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+
+$USE_DISTRIBUTE_FILTER   = 1;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●著名なウィルス(の original)を弾く</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+
+# どうせ変形版がすぐにでるので subject: で弾くのは気安めだが
+# やらないよりはましだとおもう
+# X-Spanska                 happy99 original
+# Subject: Important ...    Melissa original    (Word's macro)
+# Subject: ILOVEYOU         I Love You original (VB script)
+$USE_DISTRIBUTE_FILTER = 1;
+&DEFINE_FIELD_PAT_TO_REJECT("X-Spanska", ".*Yes.*");
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", ".*Important Message From .*");
+&DEFINE_FIELD_PAT_TO_REJECT("Subject", "ILOVEYOU");
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor3">●Word ファイルなどにマクロが仕込まれているかどうかを検査する</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+
+# virus かどうかを検査しているわけではないので弾き過ぎるのは
+# 承知の上で使うこと 
+#   例: Melissa シリーズ
+# 
+$USE_DISTRIBUTE_FILTER = 1;
+$FILTER_ATTR_REJECT_MS_GUID = 1;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4">●正規表現が複数行マッチをするように設定する</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK .= q@ $* = 1; @;
+# (メモリ使用量がぐーんと上がるとおもうが)
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor5">●メールウイルス臨時対策設定その１</A>
+</B></Font>
+<pre>
+【fml-help:00897】
+
+いずれも副作用覚悟のやや乱暴な設定です。
+
+$USE_DISTRIBUTE_FILTER = 1;
+### For TROJ_HYBRIS
+&DEFINE_FIELD_PAT_TO_REJECT('From','^\s*$') ;
+### For TROJ_SIRCAM
+$DISTRIBUTE_FILTER_HOOK = q#
+    if ($e{'Body'} =~ /^Content-Type:.*application\/mixed/im) {
+        return 'Please do not send such type of file!  It looks like a VIRUS.';
+    }
+#;
+#application/mixedって他であまり見かけないようなので．．．
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor16">●メールウイルス臨時対策設定その２</A>
+</B></Font>
+<pre>
+【fml-help:01484】
+
+##### Distribute Filters for Anti-VIRUS #####
+#
+$USE_DISTRIBUTE_FILTER   = 1 ;
+### Notifies the rejection to the sender.
+$FILTER_NOTIFY_REJECTION = 1 ;
+### Reject without 'From' - HYBRIS etc.
+&DEFINE_FIELD_PAT_TO_REJECT('From','^\s*$') ;
+### Reject mail without 'To' - NIMDA etc.
+&DEFINE_FIELD_PAT_TO_REJECT('To','^\s*$') ;
+###
+# "*.XXX.pif" etc. - BADTRANS
+# Type application/mixed - SIRCAM etc.
+# "whatever.exe" - ALIZ.A
+# "Gone.scr" - Goner.A
+# "CHRISTMAS.EXE" - MALDAL.C
+# "JAVASCRIPT.EXE" - ZOHER.A
+###
+$DISTRIBUTE_FILTER_HOOK .= q%
+  my ($error) ;
+  if ($e{'h:Content-Type:'} =~ /multipart/i)
+  {
+    # Check typical virus file extensions.
+    my($extension) =
+    'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+    if ($e{'Body'} =~ /(filename|name)=.*\..{3}\.($extension)/i)
+    {
+      $Envelope{'Addr2Reply:'} =~ s/^_//;
+      $error = 1 ;
+    }
+    # Check typical virus attachement file names.
+    my($attachement) =
+    'readme.exe|whatever.exe|gone.scr|christmas.exe|javascript.exe' ;
+    if ($e{'Body'} =~ /(filename|name)=.*($attachement)/i)
+      { $error = 1 ;}
+    # Check application/mixed type - SIRCAM
+    if ($e{'Body'} =~ /^Content-Type:.*application\/mixed/im)
+      { $error = 1 ;}
+  }
+  # Return with error message.
+  if ($error)
+  {
+    my($message) =
+    "Your mail seems to be infected by a VIRUS!\n".
+    "   メールからウイルスと類似したデータが検出されました！" ;
+    &DEFINE_FIELD_OF_REPORT_MAIL('Subject','VIRUS detected ??') ;
+    &DEFINE_FIELD_OF_REPORT_MAIL('From',$ML_FN) ;
+    &DEFINE_FIELD_OF_REPORT_MAIL('Reply-To',$MAINTAINER) ;
+    return $message ;
+  }
+%;
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+
+（補足）
+・Fromが空欄もしくは存在しないメールを拒否
+　　→　いくつかのワームと多くのSPAMを排除
+・同様にToが空欄もしくは存在しないメールを拒否
+　　→　同上、ただし副作用もあるので適時コメントアウトのこと
+・BADTRANS対策で、投稿メールのFromアドレスの先頭が"_"ならば
+　除去し、エラーメールのFromは "ML名 <>" で返信
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor6">●received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/software/fml/Japanese/filter/2.html#C2S4">【チュートリアル−フィルタリング−2.4 received: 行のどこかに spam.co.jp というドメインを含んでいたら拒否】</A>
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+     if ($e{'h:received:'} =~ /from spam.co.jp/) {
+ 	return 'from a host in spam blacklist';
+     }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor7">●本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/software/fml/Japanese/filter/2.html#C2S5">【チュートリアル−フィルタリング−2.5 本文にhttp-equiv=3DContent-Type なHTMLをつけてくる迷惑なメールは拒否】</A>
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+     if ($e{'Body'} =~ /http-equiv=3DContent-Type/) {
+ 	return 'mail with appended HTML documents';
+     }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor8">●From: のドメインが Message-ID に含まれていないなら拒否</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/software/fml/Japanese/filter/2.html#C2S6">【チュートリアル−フィルタリング−2.6 From: のドメインが Message-ID に含まれていないなら拒否】</A>
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+    local($domain) = (split(/@/, $From_address))[1];
+    if ($e{'h:message-id:'} !~ /$domain/i) {
+ 	return 'Message-Id conflicts your From: address';
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor9">●To: および Cc: 行に ML のアドレスが入ってなければ，そのメールを拒否</A>
+</B></Font>
+<pre>
+【fml-support:07289】
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK = q#
+     if (($e{'h:to:'} !~ /$MAIL_LIST/i) && ($e{'h:cc:'} !~ /$MAIL_LIST/i)){
+        if ( ! &CheckMember($From_address, $MEMBER_LIST) ) {
+         return 'Not addressed to mailing list';
+        }
+     }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor10">●自サイト以外のアドレスを拒否</A>
+</B></Font>
+<pre>
+【fml-support:07630】
+
+$START_HOOK = q%
+   if ($From_address !~ /u-tokai\.ac\.jp$/i) {
+        &Mesg(*Envelope, 
+           "We permit user@*u-tokai.ac.jp can ask this list.");
+        $DO_NOTHING = 1;
+   }
+%;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor14">●ファイル拡張子 .xxx が危なそうなもの(?)はかたっぱしから認めない</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+
+#	.vbs: VB script
+#	.js : Java script ?
+#	.exe: executable
+#	.doc: word
+#	.rtf: RTF (embedded object in RTF is possible?) ?
+#	.pif: win32/MTX sircam?
+#	.scr: win32/MTX
+#	.lnk: sircam ?  
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK .= q#
+    my($extension) = 'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+
+    if ($e{'Body'} =~ /filename=.*\.($extension)/i) {
+	return 'dangerous attatchment ?';
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor15">●sjisやeucで書かれたメールは拒否</A>
+</B></Font>
+<pre>
+【fml-support:07020】
+
+$USE_DISTRIBUTE_FILTER =1;
+$DISTRIBUTE_FILTER_HOOK = q%
+  if( $e{'Body'} =~ /[\x80-\xFF]/ ){
+    return 'Mail Body is Not ISO-2022-jp';
+  }
+%;
+#拒否されると　ログに
+#99/11/24 22:40:59 EnvelopeFilter::reject for 'Mail Body is Not ISO-2022-jp' #(hoge@foo.domain)
+#の様に　return の返り値が　記録され管理人宛に　Subject が
+#「Rejected mail by FML EnvelopeFilter (ml-name)」
+#のメールがきます．
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor12">●登録された複数ドメインのFromであったら投稿は許可するが、それ以外の投稿は拒否</A>
+</B></Font>
+<pre>
+【fml-help:00903】
+
+(1) $PERMIT_POST_FROM = "members_only";
+    にしておく。
+
+(2) HOOK を書く。
+
+$START_HOOK = q{
+    $DOMAIN_LIST = "$DIR/domain";
+    ($domain) = $From_address =~ /\S+\@(\S+)/;
+    if ($domain && &CheckMember($domain, $DOMAIN_LIST)) {
+        $PERMIT_POST_FROM  = "anyone";
+    }
+};
+
+(3) ML ディレクトリの下の domain というファイルに、
+    投稿を許すドメインを @ なしで列記する。
+    members ファイルは空でも良いし、
+    「ドメインに関わらずこの人だけは投稿を許す」という人を
+    列記しても良い。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor13">●ちょっと複雑な HOOK</A>
+</B></Font>
+<pre>
+【fml-help:01002】
+<A Href="http://www.fml.org/fml/Japanese/examples/virus_check.ph">【virus_check.ph】</A>
+
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK .= q#
+    if ($e{'Body'} =~ /Content.*\.vbs|filename=.*\.vbs/i) {
+	return 'VB script attatchment';
+    }
+
+    if ($e{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
+	return 'original Pretty Park virus';
+    }
+
+    if ($e{'Body'} =~ /filename=.*\.Pretty.*Park.*\.exe/i ) {
+	return 'original Pretty Park familly ?';
+    }
+
+    if ($e{'Body'} =~ /filename=.*search.*URL.*\.exe/i ) {
+	return 'P2000 virus familly?';
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor11">●独自のスパム処理をする方法</A>
+</B></Font>
+<pre>
+【fml-help:01009】
+
+$REJECT_ADDR_LIST = "/dev/null";
+# ↑騙しておく（↓ここが「"$DIR/spamlist"」以外なら不要かも）
+$SPAMMER_LIST = "$DIR/spamlist";  # 拒否したいアドレスリスト
+$START_HOOK = q#
+  my $ORG_REJECT_ADDR_LIST = $REJECT_ADDR_LIST;
+  $REJECT_ADDR_LIST = $SPAMMER_LIST;
+  if (&RejectAddrP($From_address) || &RejectAddrP($UnixFrom)){
+    ＜ここにログに書いたり、メールを送ったりする独自処理を書く＞
+    $DO_NOTHING = 1;
+  }
+  $REJECT_ADDR_LIST = $ORG_REJECT_ADDR_LIST;
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor18">●「！広告！」なメールを弾く</A>
+</B></Font>
+<pre>
+【fml-help:01432】
+
+$DISTRIBUTE_FILTER_HOOK = q#
+  require "libMIME.pl";
+  require "jcode.pl";
+  $DecodeSubject = &DecodeMimeStrings( $Envelope{'h:Subject:'} );
+  &jcode'convert( *DecodeSubject, 'euc', 'jis');
+  if( $DecodeSubject =~ /^\s*[！!]広告[！!]/ ){
+    return 'No spam !!';
+  }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor17">●uuencode な添付ファイル付きメールを弾く</A>
+</B></Font>
+<pre>
+【fml-help:01479】
+
+$DISTRIBUTE_FILTER_HOOK = q#
+    if (($e{'Body'} =~ /^begin\s+\d{3}/)&&($e{'Body'} =~ /^end/)) {
+        return 'Please do not send such type of file!  It looks like a VIRUS.';
+    }
+#;
+</pre><Br><Br>
+</Div>
+</Body>
+</Html>

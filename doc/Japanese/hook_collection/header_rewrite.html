@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>フィルタリング３　ヘッダの書き換え</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">ある特定のユーザだけヘッダを書き換えて配信する</A> 
+<A Href="#Anchor2">差出人をメーリングリストのアカウント名に変更したい</A> 
+<A Href="#Anchor3">メンバーとメンバー外で Reply-To の付加方法を変える</A> 
+<A Href="#Anchor4">メールヘッダーのReply-toを$From_address, $MAIL_LISTに書き換える</A> 
+<A Href="#Anchor5">腐った Message-Idを矯正</A> 
+<A Href="#Anchor6">Cc: を元メールの Cc:,From にしたい</A> 
+<A Href="#Anchor7">オリジナルのFrom:を本文に付け加える</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●ある特定のユーザだけヘッダを書き換えて配信する</A>
+</B></Font>
+<pre>
+【fml-help:00874】
+
+$START_HOOK = q#
+	if ( &Lookup( $From_address, "hiddenlist")) {
+		&DEFINE_FIELD_FORCED('From' , '置換後のアドレス');
+		$mess_ID = &GET_ORIGINAL_HEADER_FIELD_VALUE('Message-Id' );
+		$mess_ID =~ s/隠したいユーザ名/置換後/i;
+		&DEFINE_FIELD_FORCED('Message-Id' , $mess_ID);
+	}
+   #;
+hiddenlist: 隠したいメールアドレスのリストファイル
+ s/隠したいユーザ名/置換後/i;  iは念のため
+ドメイン内で置換えたのでユーザ名だけで処理している
+注意点
+置換後のアドレスは自分が管理できる、存在するアドレスにしないと
+エラーが出たときにループしたり他に迷惑を掛けたりする原因になる。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●差出人をメーリングリストのアカウント名に変更したい</A>
+</B></Font>
+<pre>
+【fml-help:00472】
+
+単にヘッダの From: を ML 宛てに書き替えるのであれば以下のHOOK
+
+$SMTP_OPEN_HOOK = %
+  $Envelope{'fh:from:'} = $MAIL_LIST;
+%;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor3">●メンバーとメンバー外で Reply-To の付加方法を変える</A>
+
+</B></Font><pre>
+【fml-support:06240】
+
+メーリングリストのメンバーでない人の投稿の場合には Reply-To を削除するが、
+投稿する人が Reply-To を設定したらそちらが優先される設定
+
+例１：
+   $START_HOOK =q#
+      if (&MailListMemberP($From_address)) {
+	  unless (&GET_HEADER_FIELD_VALUE('reply-to')) {
+	           &DEFINE_FIELD_FORCED("reply-to", $MAIL_LIST);
+	  }
+      }
+      else {
+           &DELETE_FIELD("reply-to");
+      }
+   #;
+
+例２：
+
+   $START_HOOK =q#
+      if (&MailListMemberP($From_address)) {
+	  unless ( $Envelope{'oh:reply-to:'} ) {
+	           &DEFINE_FIELD_FORCED("reply-to", $MAIL_LIST);
+	  }
+      }
+      else {
+           &DELETE_FIELD("reply-to");
+      }
+   #;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4">●メールヘッダーのReply-toを$From_address, $MAIL_LISTに書き換える</A>
+</B></Font>
+<pre>
+【fml-help:00254】
+
+$START_HOOK = q#
+  &DEFINE_FIELD_FORCED("reply-to", "$From_address, $MAIL_LIST");
+#;
+
+config.ph は fml が起動されたときに評価されます。
+この時点ではまだメールを読み込んでいないので、
+$From_address はまだ設定されていません。
+
+したがって、メールを読み込んでから DEFINE_FIELD_FORCED を
+実行するようにすればいいわけです。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor5">●腐った Message-Idを矯正</A>
+</B></Font>
+<pre>
+【fml-support:07765】
+
+#sitedef.ph に以下の設定を記述。
+$HEADER_ADD_HOOK = q#
+    if ($FORCED_BAD_MESSAGE_ID && $e{'h:Message-Id:'} !~ /.*@.*\..*/) {
+        &DEFINE_FIELD_FORCED("X-Orig-Message-Id", $e{'h:Message-Id:'});
+        &DEFINE_FIELD_FORCED("X-Orig-Message-Id-Info", 
+        "Original posted mail had wrong Message-Id.\n\t
+         Then forced correct one on system.\n\t
+         If you are a contributor, must fix setting for your MUA.");
+        $e{'h:Message-Id:'}  = &GenMessageId;
+    }
+#;
+#この機能を有効にしたいメーリングリストの config.ph に
+$FORCED_BAD_MESSAGE_ID = 1;
+#を記述。
+#
+#ただしこのままだと X-Orig-Message-Id とかのヘッダが、
+#ヘッダ部分の一番下に配置される形になって気持ち悪かったので、
+#sitedef.ph で @HdrFieldsOrder を定義し直して、
+#適当な位置に配置されるように設定しました。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor6">●Cc: を元メールの Cc:,From にしたい</A>
+</B></Font>
+<pre>
+【fml-support:07933】
+
+$SMTP_OPEN_HOOK = q`
+    if ($Envelope{'h:Cc:'}) {
+        &DEFINE_FIELD_FORCED('Cc', "$Envelope{'h:Cc:'}, $From_address");
+    } else {
+        &DEFINE_FIELD_FORCED('Cc', $From_address);
+    }
+`;
+# このままでは、From: を Cc: に書いて投稿する人は Cc に自分が
+# ダブるとか、Cc: の後に余計な空白が入るとか、いろいろ小細工の余地が
+# 残っていると思います。適宜整形してください。
+</pre>
+<Br><Br>
+<Font Size=4><B><A Name="Anchor7">●オリジナルのFrom:を本文に付け加える</A>
+</B></Font>	
+<pre>
+【fml-help:01521】
+
+$START_HOOK = q%
+	   $Envelope{'Body'} = $From_address ."\n". $Envelope{'Body'};
+%;
+#携帯電話などへの配送の際に From を書き換えて固定して、
+#実際の From は本文中に埋め込む用途に使用
+
+
+</pre>
+</Div>
+</Body>
+</Html>

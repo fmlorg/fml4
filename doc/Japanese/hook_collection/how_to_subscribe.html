@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>メンバーの登録方法などについて</B></Font> <Br><Br>
+<pre>
+<A Href="#Anchor1">特定ドメインの自動登録を拒否</A>
+<A Href="#Anchor1.5">メーリングリストに参加可能なユーザのドメインを絞る</A>
+<A Href="#Anchor2">confirmを管理者が行う</A>
+<A Href="#Anchor3">WELCOMEのメールの Reply-To: を管理者宛にする</A>
+<A Href="#Anchor4">From行のアドレスに@以下をつけないで送られてくるメールの自動補整</A>
+<A Href="#Anchor5">メンバーを信頼度に応じて3段階に分ける</A>
+<A Href="#Anchor6">From と 配送先が一致した時に、配送を止めたい(dynamical skip?)</A>
+<A Href="#Anchor7">登録時の welcome メールが送り返されるのを止める</A>
+<A Href="#Anchor8">ＭＬへ投稿せずに自動登録する</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●特定ドメインの自動登録を拒否</A>
+</B></Font>
+<pre>
+【fml-support:09147】
+
+#$AUTO_REGISTRATION_HOOK で $from か $From_address を見て、
+#弾くことはできるとおもいます
+#
+$AUTO_REGISTRATION_HOOK = q#
+   if ($From_address =~ /^\d+\@/) {
+	&Mesg(*e, "deny your subscribe request");
+	return;
+   }
+#;
+#この例は、数字だけアカウント名＠ドメイン形を拒否
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1.5">●メーリングリストに参加可能なユーザのドメインを絞る</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/8.html#C8S7">【チュートリアル−メンバーの登録方法などについて−8.7 メーリングリストに参加可能なユーザのドメインを絞る】</A>
+
+# 自動登録やリモートでの登録の際の制限については 
+# $REGISTRATION_ACCEPT_ADDR という変数で制限できます。
+#
+$START_HOOK = q#
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+	&Mesg(*Envelope, 
+	   "We permit user@*permit_domain.co.jp can join this list.");
+	$DO_NOTHING = 1;
+   }
+#;
+#これで permit_domain.co.jp 以外のユーザには「permit_domainのゆー
+#ざだけしか参加できないよん」とメールが返って終りにできます。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●confirmを管理者が行う</A>
+</B></Font>
+<pre>
+【fml-support:08960】
+
+#登録者宛に転送されるメールを HOOK を用いて横取り
+$FML_EXIT_HOOK = q#
+   if (! &MailListMemberP($From_address)) {
+        $Envelope{'message:h:to'} = $MAINTAINER;
+   }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor3">●WELCOMEのメールの Reply-To: を管理者宛にする</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/4.html#C4S17">【チュートリアル−メンバーの登録方法などについて−4.17 $AUTO_REGISTRATION_HOOK】</A>
+
+$AUTO_REGISTRATION_HOOK = q#
+    $e{'GH:Reply-To:'} = $MAINTAINER;
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4">●From行のアドレスに@以下をつけないで送られてくるメールの自動補整</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/4.html#C4S15">【チュートリアル−メンバーの登録方法などについて−4.15 サーバをインストールしたホストからのメンバーの自動登録ができない】</A>
+
+#変なことがおきえますから、YOUR OWN RISK でやってください
+#
+$START_HOOK  = q#
+	if ($From_address !~ /\@/) {
+		$From_address = "$From_address\@ローカルなドメイン";
+	}
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor5">●メンバーを信頼度に応じて3段階に分ける</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/5.html#C5S5">【チュートリアル−メンバーの登録方法などについて−5.5 メンバーを信頼度に応じて3段階に分ける】</A>
+
+
+#group 1: モデレータ(の人々)。無条件に信頼される。
+#group 2: 信頼できるメンバ。普通に送ると普通に配送される。
+#group 3: 一般メンバ。普通に送るとモデレータに転送され、
+#	    通常のモデレータの手順を踏む。
+#priv というファイルをＭＬのHOMEにつくり、group 2 に対応する信頼でき
+#るメンバー(だがモデレータではない)の群を登録する(一行一アドレス)。
+#
+$PERMIT_POST_FROM  = "moderator";
+$START_HOOK = q#
+     $PRIV_LIST = "$DIR/priv";
+      if (&CheckMember($From_address, $PRIV_LIST)) {
+         $PERMIT_POST_FROM  = "members_only";
+   }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor6">●From と 配送先が一致した時に、配送を止めたい(dynamical skip?)</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/8.html#C8S1">【チュートリアル−メンバーの登録方法などについて−8.1 From と 配送先が一致した時に、配送を止めたい(dynamical skip?)】</A>
+
+$START_HOOK = q#
+	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+#この例では From:がfukachan@phys.titech.ac.jpであれば、本人に配送しない。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor7">●登録時の welcome メールが送り返されるのを止める</A>
+</B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/8.html#C8S3">【チュートリアル−メンバーの登録方法などについて−8.3 登録時の welcome メールが送り返されるのを止める】</A>
+
+* fml 3.0 シリーズ
+
+libamctl.pl というファイル（ 例: /usr/local/fml/libamctl.pl )に sub
+AutoRegist ではじまる関数があって、その最後の方に
+
+   &SendFile($from, $WELCOME_STATEMENT, $WELCOME_FILE);
+
+というところがあります。ここを除いてもらうと絶対 welcome は送られませ
+ん。次のような HOOK が 3.0 シリーズにはないので、トリッキーな回避の仕
+方はないです。
+
+
+* fml 4.0
+#fml 4.0 では、非常にトリッキーなやりかたでよくありませんが、
+#
+$AUTO_REGISTRATION_HOOK = q#
+        sub SendFile {};
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor8">●ＭＬへ投稿せずに自動登録する</A></B></Font>
+<pre>
+<A Href="http://www.fml.org/software/fml/Japanese/how_to_subscribe/8.html#C8S5">【チュートリアル−メンバーの登録方法などについて−8.5 メーリングリストへの初投稿に至る手数をなるべく少なくしたい】</A>
+
+# メンバ以外のアドレスからML名-ctl@xxxxxxxxxx ($CONTROL_ADDRESS)
+# へメールを送信した場合に membersに自動登録する。
+#
+    $AUTO_REGISTRATION_LINES_LIMIT = -1;
+    $START_HOOK = q#
+    	if ($Envelope{'mode:ctladdr'}) {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 1;
+    	}
+    	else {
+    		$AUTO_REGISTERED_UNDELIVER_P   = 0;
+    	}
+    #;
+</pre>
+
+</Div>
+</Body>
+</Html>

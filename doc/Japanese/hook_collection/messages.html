@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>fml の返すメッセージをいじる</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">ＭＬに投稿されたメールに受領書を自動で返す　その１</A>
+<A Href="#Anchor2">ＭＬに投稿されたメールに受領書を自動で返す　その２</A>
+<A Href="#Anchor3">welcome の中に送られた来た本文を加えたい</A>
+<A Href="#Anchor4">配信メール本文に自動でヘッダ／フッタはつけたい</A>
+<A Href="#Anchor5">メールマガジンへの誤った投稿に対する挙動をメンバーとそれ以外で変更</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●ＭＬに投稿されたメールに受領書を自動で返す　その１</A>
+</B></Font>
+
+<pre>
+【fml-help:01008】
+
+$RECEIVED_FILE=      "$DIR/received";
+# ↑このファイルに本文を用意しておく。
+$RECEIVED_STATEMENT= "Received your application, thanks.";
+# ↑この文面は適宜変えてください。
+$DISTRIBUTE_CLOSE_HOOK= q{
+  $MY_RECEIVED_STATEMENT=
+        sprintf("[${BRACKET}:%05d] ${RECEIVED_STATEMENT}", $ID);
+  # ↑題名にシリアルを埋め込む（ここでは配信番号といっしょ）。
+  &SendFile($From_address, $MY_RECEIVED_STATEMENT, $RECEIVED_FILE);
+};
+問い合わせ用として題名に配信番号をコピー
+また、あえて、$DISTRIBUTE_CLOSE_HOOKなのは、$START_HOOKだと配信番号が分らないため
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●ＭＬに投稿されたメールに受領書を自動で返す　その２</A>
+</B></Font>
+<pre>
+【fml-help:00190】
+
+#・自動返信のFrom:をhoge-adminでなくて、hogeにしたい。
+#・自動返信のSubject:もGuide (hoge ML)じゃなくて任意に設定したい。
+#・guideファイルとは別にしておいた方がいいかも。
+$THANKS_STATEMENT = "Thanks for your mail";
+$THANKS_FILE = "thanks";
+$START_HOOK = q#
+    if (! &MailListMemberP($From_address)) {
+        &Log("Thanks");
+	$Envelope{'GH:From:'} = $MAIL_LIST;
+        &SendFile($From_address, $THANKS_STATEMENT, $THANKS_FILE);
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor3">●welcome の中に送られた来た本文を加えたい</A>
+</B></Font>
+<pre>
+【fml-help:00395】
+
+中間ファイル( $MLのほーむ/tmp/welcome数字 )というファイルに一回、メー
+ルの内容をつっこんで、それを$WELCOME_FILE に指定する( overwrite )と言
+う(ひどい)やりかたです:)
+   
+   $AUTO_REGISTRATION_HOOK = q#
+      $MyWelcomeFile = $FP_TMP_DIR."/welcome$$";
+   
+      &Copy($WELCOME_FILE, $MyWelcomeFile);
+   
+      if ($Envelope{'Body'}) {
+          &Append2("-- quotation from the original mail:", $MyWelcomeFile);
+          &Append2($Envelope{'Body'}, $MyWelcomeFile);
+          $WELCOME_FILE = $MyWelcomeFile;
+      }
+   #;
+   
+   # clean up 
+   $FML_EXIT_HOOK = q# 
+           unlink $MyWelcomeFile;
+   #;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4">●配信メール本文に自動でヘッダ／フッタはつけたい</A>
+</B></Font>
+<pre>
+【fml-help:00616】
+
+$SMTP_OPEN_HOOK = q#
+        local($head) = &GET_BUFFER_FROM_FILE("$DIR/head");
+        local($foot) = &GET_BUFFER_FROM_FILE("$DIR/foot");
+        &ENVELOPE_PREPEND('Body', $head);
+        &ENVELOPE_APPEND('Body', $foot);
+#;
+とつけておいて、各MLごとにヘッダ、フッタを変える。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor5">●メールマガジンへの誤った投稿に対する挙動をメンバーとそれ以外で変更</A>
+</B></Font>
+<pre>
+【fml-help:00737】
+
+メールマガジンメンバから間違って投稿された場合、
+「意見等は以下の管理者アドレスまで」のようなリターンメールを
+返信し、メンバ外からはメンバの登録方法のリターンメールを返信する
+
+	$START_HOOK = q{
+		# もし actives に含まれているメンバーなら
+		# help ファイルを送り返す
+		if (&Lookup($From_address, $ACTIVE_LIST)) {
+			$DENY_FILE = $HELP_FILE;		 
+		}
+		else {
+			; # ここはなにもしなくてもいいはず
+			  # デフォルトは $DENY_FILE だから
+		}
+	};
+</pre>
+</Div>
+</Body>
+</Html>

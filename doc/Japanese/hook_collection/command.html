@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>コマンドとリモート管理(admin コマンド)</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">chaddr の結果を返す人を変更する</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●chaddr の結果を返す人を変更する</A>
+</B></Font>
+<pre>
+【fml-help:00475】
+<A Href="http://www.fml.org/software/fml/Japanese/address_manipulate/2.html#C2S1">【チュートリアル−アドレスの取り扱いについて−2.1 Q: chaddr の結果を返す人を変更する】</A>
+
+けっこう面倒。
+
+	$FML_EXIT_HOOK = q#
+	   if ($Envelope{'mode:ctladdr'} && $Envelope{'Body'} =~ /chaddr/) {
+		処理を書く(下の例を参照)
+	   }
+	#;
+
+ケース1: だれにも返事そのものを返さない
+	$Envelope{'mode:disablenotify'} = 1;
+
+ケース2: 操作対象のユーザに返事を送る、管理者へはレポートを送らない
+	注: コマンドメールを送った人に"も"返事は返します
+	undef $Envelope{'message:to:admin'}
+
+ケース3: ユーザへは返事を返さない、管理者へは送る
+	注: コマンドメールを送った人に"も"返事は返します
+	undef $Envelope{'message:h:@to'};
+
+ケース4: chaddr コマンドを送った人にだけは返事を返す
+	注: コマンドメールを送った人に"だけ"返事は返す
+	undef $Envelope{'message:h:@to'};
+	undef $Envelope{'message:to:admin'};
+
+
+★★★★★注意！★★★★★
+【fml-help:01573】
+
+$CHADDR_REPLY_TO と $ADMIN_CHADDR_REPLY_TO でそれぞれ
+
+	chaddr と admin chaddr の返事を送る先
+
+を変更できるようにしました(2002/02/16 current から)。
+
+	old		旧アドレス
+	new		新アドレス
+	maintainer	ＭＬの管理者 ($MAINTAINER)
+
+のコンビネーションが指定できます。
+
+例:
+	$CHADDR_REPLY_TO = 'new old';
+	$CHADDR_REPLY_TO = 'new old maintainer';
+	$CHADDR_REPLY_TO = 'new';
+
+</pre>
+</Div>
+</Body>
+</Html>

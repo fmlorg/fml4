@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br>  
+<Font Size=4><B>アドレスの取り扱いについて</B></Font>
+<Br><Br>
+<pre>
+<A Href="#Anchor1">特定のヘッダーを追加してもらうと普段とは別のactivesを参照して異なる配信を行う</A>
+<A Href="#Anchor2">投稿した本人のアドレスには配信しない</A>
+<A Href="#Anchor3">認証するアドレスを From: だけでなく、X-Sender なども対象にする</A>
+<A Href="#Anchor4">メンバー以外からの投稿はモデレートに回す</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●特定のヘッダーを追加してもらうと普段とは別のactivesを参照して異なる配信を行う</A>
+</B></Font>
+<pre>
+【fml-support:06643】
+
+# Subject: [uja] ほえほえ の時は actives2 が配送リスト
+$START_HOOK = q#
+   if ($Envelope{'h:subject:'} =~ /\[uja\]/) {
+	$ACTIVE_LIST = "$DIR/actives2";
+	undef @ACTIVE_LIST;
+   }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●投稿した本人のアドレスには配信しない</A>
+</B></Font>
+<pre>
+【fml-help:01123】
+
+$START_HOOK = q{
+	$SKIP{ $From_address } = 1;
+};
+#$From_address(ヘッダのFrom:)が、配信先として登録されているアドレスの場合に有効です。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor3">●認証するアドレスを From: だけでなく、X-Sender なども対象にする</A>
+</B></Font>
+<pre>
+【fml-help:01315】
+
+From: か X-Sender: のどちらかが
+登録されているアドレスなら投稿を許す。
+
+HOOK でこれを実現するには、できるだけ早い段階で $From_address (認証の際に比較する対象のアドレス)
+をメンバーであるアドレスに上書きすることでなんとかなります。
+
+例:	Unix From (Reverse Path の部分)
+	X-Sender
+	From
+
+のいずれかが登録されているアドレスならば OK
+
+   $START_HOOK = q{
+	for ($UnixFrom, $Envelope{'h:x-sender:'}, $From_address) {
+	   if ($_) {
+		&MailListMemberP($_) && ($From_address = $_, last);
+	   }	
+	}
+   };
+
+ノート: 実際には From: の値を格納している変数 $From_address を 
+Envelope From なりの値(登録されているアドレス)と入れ替えて(上書きして)
+ごまかすというひどい:)方法です。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4">●メンバー以外からの投稿はモデレートに回す</A>
+</B></Font>
+<PRE>
+【fml-support:09394】
+
+$START_HOOK =q%
+  if( ! &MailListMemberP($From_address) ){
+    $PERMIT_POST_FROM = "moderator";
+  }
+%;
+</pre><Br><Br>
+</Div>
+</Body>
+</Html>

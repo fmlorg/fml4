@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>リソースの制御</B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">メンバーと非メンバーでメールサイズの制限値を変えたい</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●メンバーと非メンバーでメールサイズの制限値を変えたい</A>
+</B></Font>
+<pre>
+【fml-support:09159】
+
+(1) メンバー用のサイズを設定しておく(あるいは設定しない==無制限)
+
+INSTALL.jp
+| ○ MAX_MAIL_SIZE (default: 未定義 == 無制限)
+|  メールサイズの最大値(デフォルトでは無制限)。貼付ファイルを許すか否か
+|  でサイズ制限は決まるだろう。ちなみに fml.org では500K bytes にしている。
+
+(2) メンバーでなかったら、動的に設定しなおす。
+	$START_HOOK =q%
+	   if (! &MailListMemberP($From_address)) {
+		$MAX_MAIL_SIZE = 30 * 1024; # 30KB の例
+	   }
+	%;
+</pre>
+</Div>
+</Body>
+</Html>

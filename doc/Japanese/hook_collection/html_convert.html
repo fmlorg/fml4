@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>記事の HTML への変換 </B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">HTML化したものはFromのメールアドレスを載せないようにしたい</A>
+<A Href="#Anchor2">htmlのヘッダの表示を制限したい</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●HTML化したものはFromのメールアドレスを載せないようにしたい</A>
+
+</B></Font><pre>
+【fml-help:00324】
+
+$HTML_TITLE_HOOK = q`
+    $from = $e{'tmp:x'} || $From_address;
+    $HtmlTitleForIndex =
+    "&lt;SPAN CLASS=article-value&gt;$ID.&lt;/SPAN&gt; 
+     &lt;SPAN CLASS=Subject-value&gt;
+     &lt;A HREF=\"$ID.html\"&gt;$htmlsubject&lt;/a&gt;&lt;/SPAN&gt;
+     (&lt;SPAN CLASS=From-value&gt;$from&lt;/SPAN&gt;)
+     (&lt;SNAP CLASS=Date-value&gt;$Now&lt;/SPAN&gt;)";
+`;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●htmlのヘッダの表示を制限したい</A>
+</B></Font>
+<pre>
+【fml-support:08757】
+
+#メーリングリストの記事のどのヘッダを表示するかは @HtmlHdrFieldsOrder 
+#で決まります。が $HTML_HEADER_TEMPLATE という変数を使うと 
+#@HtmlHdrFieldsOrder は無視され、$HTML_HEADER_TEMPLATE だけが書き込まれます。
+$HTML_TITLE_HOOK = q`
+	@HtmlHdrFieldsOrder = ('Date', 'From', 'Subject', 'To', 'Cc');
+`;
+</pre>
+</Div>
+</Body>
+</Html>

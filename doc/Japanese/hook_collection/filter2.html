@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>フィルタリング２　内容により一部削除したり警告したりする方法 </B></Font><Br><Br>
+<pre>
+<A Href="#Anchor12">1回だけ投稿を許す（主に応募・申請用途）</A> 
+<A Href="#Anchor16">ＨＴＭＬメールはstripして、添付ファイルがあるものは投稿を拒否</A>
+<A Href="#Anchor17">USE_ENVELOPE_FILTER で、警告を与えるだけで投稿は許して良い</A>
+<A Href="#Anchor1">BADTRANS 対策（送信者に警告）</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor12">●1回だけ投稿を許す（主に応募・申請用途）</A>
+</B></Font>
+<pre>
+【fml-help:01009】
+
+$SENDER_LIST = "$DIR/senders";  # 多重投稿チェック用のアドレスリスト
+$START_HOOK = q#
+  my $ORG_REJECT_ADDR_LIST = $REJECT_ADDR_LIST;
+  $REJECT_ADDR_LIST = $SENDER_LIST;
+  if (&RejectAddrP($From_address) || &RejectAddrP($UnixFrom)){
+    ＜必要ならログに書いたり、メールを送ったりする処理を書く＞
+    $DO_NOTHING = 1;
+  }else{
+    &Append2($From_address, $REJECT_ADDR_LIST);
+    &Append2($UnixFrom, $REJECT_ADDR_LIST)
+      if $From_address ne $UnixFrom;
+  }
+  $REJECT_ADDR_LIST = $ORG_REJECT_ADDR_LIST;
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor16">●ＨＴＭＬメールはstripして、添付ファイルがあるものは投稿を拒否</A>
+</B></Font>
+<pre>
+【fml-support:09089】
+
+&ADD_CONTENT_HANDLER('multipart/.*', 'text/html', 'strip');
+#
+$USE_DISTRIBUTE_FILTER = 1;
+$DISTRIBUTE_FILTER_HOOK .=q#
+if($e{'Body'} =~ /Content-Disposition:\s*attachment/i) {
+      return 'THIS ML NOT PERMIT ATTACHMENT';
+   }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor17">●USE_ENVELOPE_FILTER で、警告を与えるだけで投稿は許して良い</A>
+</B></Font>
+<pre>
+【fml-support:08774】
+
+$USE_DISTRIBUTE_FILTER = 1;
+$START_HOOK = q#
+   if ($USE_DISTRIBUTE_FILTER) {
+        &EnvelopeFilter(*e, 'distribute');
+        undef $DO_NOTHING;
+    }
+#;
+#Description: EnvelopeFilter() の結果だけは利用するけど:-)
+#             $DO_NOTHING をリセットしてしまえばひっかかってもひかからなくても
+#             この後普通のＭＬプロセスになるから
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor1">●BADTRANS 対策（送信者に警告）</A>
+</B></Font>
+<pre>
+【fml-help:01300】
+
+＃管理者への通知もこれになってしまいますが
+$USE_DISTRIBUTE_FILTER = 1;
+$FILTER_NOTIFY_REJECTION = 1;
+$DISTRIBUTE_FILTER_HOOK .= q#
+  my($extension) = 
+'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+  my($message) = "Your mail seems to be infected by a VIRUS!" ;
+  if ($e{'Body'} =~ /(filename|name)=.*\..{3}\.($extension)/i) {
+    &DEFINE_FIELD_OF_REPORT_MAIL('Subject','VIRUS detected!') ;
+    &DEFINE_FIELD_OF_REPORT_MAIL('From',$ML_FN) ;
+    $Envelope{'Addr2Reply:'} =~ s/^_//;
+    return $message ;
+  }
+#;
+</pre><Br><Br>
+</Div>
+</Body>
+</Html>

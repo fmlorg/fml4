@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<Html>
+<Head>
+    <Meta Http-equiv="Content-Type" Content="text/html;charset=EUC">
+    <Meta Name="editor" Content="Cool Editor">
+    <Title></Title>
+    <Basefont Size=3>
+</Head>
+<Body BGCOLOR=#E6E6FA>
+<Div Align="left">
+<Br><Br><Font Size=4><B>その他(分類に苦しんだ)改造事例集 </B></Font><Br><Br>
+<pre>
+<A Href="#Anchor1">actives のパーミッションを変更する</A>
+<A Href="#Anchor2">actives と membersのパーミッションが、元にもどってしまう</A>
+<A Href="#Anchor3">members-adminファイルを作成する時に、所有権を設定する</A>
+<A Href="#Anchor4">1通目の発言メールに対しては Subject: に通し番号を振り、返信メールに関しては Subject: はいじらない</A>
+<A Href="#Anchor4.1">1通目の発言メールに対して Subject: に通し番号を振り、返信メールはそのままの番号で</A>
+<A Href="#Anchor5">日別に生メールをSJIS+CRLFに変換しただけのものをアーカイブ</A>
+<A Href="#Anchor6">1ML複数投稿用アドレスで挙動を変える</A>
+<A Href="#Anchor7">WEBでメールが読めるのだから、WEB上から投稿できるようにしてほしい</A>
+<A Href="#Anchor8">包含関係MLを作る</A>
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor2">●actives のパーミッションを変更する</A>
+</B></Font>
+<pre>
+【fml-help:00033】
+
+actives のパーミッションを -rw-r----- に変更する
+$UMASK を指定するか、
+
+$START_HOOK = q#
+	umask(027);
+ #;
+</pre><Br><Br>
+<A Name="Anchor2"><Font Size=4><B>●actives と membersのパーミッションが、元にもどってしまう</B></Font></A>
+<pre>
+【fml-support:09183】
+
+$FML_EXIT_HOOK = q#
+	chmod 0666, $MEMBER_LIST, $ACTIVE_LIST;
+#;
+</pre><Br><Br>
+<A Name="Anchor3"><Font Size=4><B>●members-adminファイルを作成する時に、所有権を設定する</B></Font></A>
+<pre>
+【fml-support:08329】
+
+#  /var/spool/ml/etc/fml/site_force.ph に
+$FML_EXIT_HOOK .= q#
+   if (-f $ADMIN_MEMBER_LIST) {
+	chmod 0644, $ADMIN_MEMBER_LIST;
+   }
+#; 
+</pre>
+<Font Size=4><B><A Name="Anchor4">●1通目の発言メールに対しては Subject: に通し番号を振り、返信メールに関しては Subject: はいじらない</A></B></Font>
+<pre>
+【fml-support:07785】
+
+#spool とか HTML とかまとめ送りとか過去メール取り出しとかが
+#ややこしくなるので、Subject にだけ使う番号を seq とは別に管理しています。
+#
+$SMTP_OPEN_HOOK = q`
+    undef $SUBJECT_FREE_FORM;
+    if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
+        $Envelope{'h:Subject:'} = $Envelope{'h:subject:'};
+    } else {
+        $SEQ_SUBJ_FILE = "$DIR/seqsubj";
+        &Touch($SEQ_SUBJ_FILE) unless -f $SEQ_SUBJ_FILE;
+        $IDSUBJ = &GetFirstLineFromFile($SEQ_SUBJ_FILE);
+        $IDSUBJ++;
+        &Write2($IDSUBJ, $SEQ_SUBJ_FILE);
+        #&Log("IDSUBJ=[$IDSUBJ]");
+        $Envelope{'h:Subject:'} =~ s/^\s+//;
+        $Envelope{'h:Subject:'} = "[$BRACKET:$IDSUBJ] $Envelope{'h:Subject:'}";
+    }
+`;
+#
+#seq の更新はいろいろエラーチェックが入っていますが、
+#seqsubj は、万が一狂っても Subject 以外に影響がないので、
+#見ての通り、何もエラー処理を書いていません。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor4.1">●1通目の発言メールに対して Subject: に通し番号を振り、返信メールはそのままの番号で</A></B></Font>
+<pre>
+【fml-help:01309】
+#上の HOOK の改良版です。
+#　　・タグ番号の０パディング
+#　　・Subjectの先頭にある Re: の削除
+#　　・タグの後ろに Re: を入れる
+#という処理を追加。
+$SMTP_OPEN_HOOK = q#
+  undef $SUBJECT_FREE_FORM;
+  if ($Envelope{'h:subject:'}  =~ /^\s*Re:/i) {
+      $Envelope{'h:subject:'} =~ s/^\s*Re://;
+      if ($Envelope{'h:subject:'} !~ /$END_BRACKET Re:/i) {
+          $Envelope{'h:subject:'} =~ s/$END_BRACKET/$END_BRACKET Re:/;
+      }
+      $Envelope{'h:Subject:'} = $Envelope{'h:subject:'};
+    } else {
+        $SEQ_SUBJ_FILE = "$DIR/seqsubj";
+        &Touch($SEQ_SUBJ_FILE) unless -f $SEQ_SUBJ_FILE;
+        $IDSUBJ = &GetFirstLineFromFile($SEQ_SUBJ_FILE);
+        $IDSUBJ++;
+        &Write2($IDSUBJ, $SEQ_SUBJ_FILE);
+        if ($SUBJECT_FORM_LONG_ID) {
+            $IDSUBJ = &LongId($IDSUBJ, $SUBJECT_FORM_LONG_ID);
+        }
+        local($pat);
+        local($subject) = $Envelope{'h:Subject:'};
+        $subject =~ s/^\s*//;
+        if ($BRACKET_SEPARATOR ne '') {
+            $pat = $BEGIN_BRACKET.$BRACKET.$BRACKET_SEPARATOR.$IDSUBJ.$END_BRACKET;
+        } else {
+            if ($BRACKET) {
+                $pat = $BEGIN_BRACKET.$BRACKET.$END_BRACKET;
+            } else {
+                $pat = $BEGIN_BRACKET.$IDSUBJ.$END_BRACKET;
+            }
+        }
+        $Envelope{'h:Subject:'} = "$pat $subject";
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor5">●日別に生メールをSJIS+CRLFに変換しただけのものをアーカイブ</A></B></Font>
+<pre>
+【fml-support:08941】
+
+$DISTRIBUTE_CLOSE_HOOK = q#
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday) = (localtime(time))[0..6];
+    my $dir = "$DIR/mailbox";
+    my $mailbox = 
+       $dir .'/'.sprintf("%04d%02d%02d", 1900 + $year, $mon + 1, $mday);
+
+    &Mkdir($dir);
+
+    if ( open($mailbox, ">> $mailbox") ) {
+        my $body = "\n". $Envelope{'Body'};
+        $body =~ s/\nFrom /\n>From /g;
+        $body = &JSTR($body, 'sjis');
+
+        print $mailbox "From $From_address \n";
+        print $mailbox $Envelope{'Hdr'};
+        print $mailbox $body ;
+        print $mailbox "\n";
+        close($mailbox);
+    }
+    else {
+        &Log("ERROR: cannot open $mailbox");
+    }
+#;
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor6">●1ML複数投稿用アドレスで挙動を変える</A>
+</B></Font>
+<pre>
+【fml-support:08781】
+
+# Elenaの方は、通常通り(default)の動作をする。
+# Annaの方は、付けられてきたReply-To:を削除して、後は通常通りの動作をする。
+#
+$START_HOOK = q`
+	if ($Envelope{'h:to:'} =~ /Anna\@phys.titech.ac.jp/) {
+		&DEFINE_FIELD_FORCED('reply-to', $MAIL_LIST);
+	}
+`;
+#
+#Elena と Anna の両方に To: や Cc: されたらどうしようか? とか
+#そのへんによって、if や else を調節してください。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor7">●WEBでメールが読めるのだから、WEB上から投稿できるようにしてほしい</A></B></Font>
+<pre>
+【fml-support:08161】
+
+Netscape を標準ブラウザとして使っている場合を想定して、
+form を使って mailto: で送るようにしました。
+この方法では、IE や w3m ではうまく動きません。
+また、Netscape 6 は、mailto: を使うと Messenger が
+起動するので、普通に ML に投稿できます。
+
+で、Netscape 4.0x、4.7、4.73 (他は未確認)は、
+Content-Type: application/x-www-form-urlencoded
+で送ってくるので、これをデコードして配送にまわす
+HOOK を書いてみました。
+
+--- 投稿用 HTML (の一部) ---------------------------------------
+&lt;form method=POST action="mailto:MLアドレス"&gt;
+&lt;input type="submit" value="送信" tabindex=1&gt;
+&lt;input type="reset" value="書き直し" tabindex=2&gt;&lt;br&gt;
+&lt;br&gt;
+To: アドレス&lt;br&gt;
+Subject: &lt;input type="text" name="subject" size=40 tabindex=3&gt;&lt;br&gt;
+&lt;textarea name="body" rows=30 cols=82 tabindex=4&gt;&lt;/textarea&gt;&lt;br&gt;
+&lt;/form&gt;
+---------------------------------------------- ここまで --------
+
+--- config.ph に追加するもの -----------------------------------
+$START_HOOK = q`
+    if ($Envelope{'h:content-type:'} =~
+	    m@application/x-www-form-urlencoded@i) {
+	local($f, $key, $data, %form, $subj, $ct);
+	$Envelope{'Body'} =~ s/\s//g;
+	foreach $f (split(/&/, $Envelope{'Body'})) {
+	    ($key, $data) = $f =~ /(\S+)=(\S+)/;
+	    $key =~ tr/[A-Z]/[a-z]/;
+	    $data =~ s/[!\s]//g;
+	    $data =~ tr/+/ /;
+	    $data =~ s/%([a-f0-9]{2})/pack('C', hex($1))/egi;
+	    $form{$key} = &STR2JIS($data);
+	}
+	($subj = $Envelope{'h:subject:'}) =~ s/^\s+//;
+	($ct = $Envelope{'h:content-type:'}) =~ s/^\s+//;
+	&DEFINE_FIELD_FORCED('X-Mailto-Subject', $subj);
+	&DEFINE_FIELD_FORCED('X-Mailto-Content-Type', $ct);
+	$Envelope{'h:Subject:'} = $Envelope{'h:subject:'} = $form{'subject'};
+	$Envelope{'h:Content-Type:'} = $Envelope{'h:content-type:'} =
+				"text/plain; charset=iso-2022-jp";
+	$form{'body'} =~ s/\s+$//;
+	$Envelope{'Body'} = $form{'body'} . "\n";
+	# Subject: fix
+	&FixHeaderFields(*Envelope);
+	# Lines: fix
+	$Envelope{'h:Lines:'} = $Envelope{'Body'} =~ tr/\n/\n/;
+    }
+`;
+---------------------------------------------- ここまで --------
+
+ここで、Subject を処理するために &FixHeaderFields を呼んでいるのが
+ちょっと問題になりそうですが。
+
+あと、$HTML_TITLE_HOOK 内に
+
+($dir2 = $dir) =~ s#htdocs/##;
+$HTML_FORMAT_TRAILER = 
+  '[&lt;a href="../../cgi-bin/reply.cgi?'
+    . "$dir2/$file.html"
+    . '"&gt;このメールに返信&lt;/a&gt;]'
+
+と書いてリプライ用の引用文を作る reply.cgi も動いていますが、
+本文を切り出す処理がイマイチ(どこが本文かわからないので、
+&lt;pre&gt; で囲まれたところを取り出している)です。
+</pre><Br><Br>
+<Font Size=4><B><A Name="Anchor8">●包含関係MLを作る</A></B></Font>
+<pre>
+【fml-support:09054】
+
+#list1 ,list2 というメーリングリストがあり、list1 への投稿は
+#list2 の登録者にも配信する方法です。
+#
+#以下、list 1 に設定してください。
+$START_HOOK = q#
+   push( @MEMBER_LIST, "$DIR/../list2/members" );
+   push( @ACTIVE_LIST, "$DIR/../list2/members" );
+#;
+</pre>
+</Div>
+</Body>
+</Html>
