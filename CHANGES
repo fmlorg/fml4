@@ -4,6 +4,12 @@
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
 
+2001/02/18
+
+   fix NT installer bugs
+	install also ("databases", "messages", "drafts", "module")
+	thanks Kozo Sasaki <ssk@pse.pfu.co.jp> (fml-support: 09235)
+
 2001/02/07,08
 
    update documents

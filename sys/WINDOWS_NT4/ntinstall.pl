@@ -21,7 +21,9 @@ $| = 1;
 chop($PWD = `cd`);
 $PWD =~ s#\\#/#g;
 
-@DIRS = ("bin", "sbin", "libexec", "cf", "etc", "doc", "var\\html");
+@DIRS = ("bin", "sbin", "libexec", "cf", "etc", 
+	 "databases", "messages", "drafts", "module",
+	 "doc", "var\\html");
 
 #
 # print STDERR "Expireing backup failes ... \n";
