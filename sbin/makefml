@@ -588,7 +588,11 @@ sub SetHashDefaults
 		 'command', 1,
 		 'edit-template', 1,
 		 'config-template', 1,
+
+		 # CGI/
 		 'html_config', 1,
+		 'admin.cgi',   1,
+		 'mladmin.cgi', 1,
 		 );
 
     # <ML> argument is not required.
@@ -596,7 +600,10 @@ sub SetHashDefaults
 	(
 	 "newml", "info", "help", "install", 
 	 "fmlserv", "majordomo", "listserv", "popfml",
-	 "edit-template", "config-template"
+	 "edit-template", "config-template",
+
+	 # CGI/
+	 "admin.cgi"
 	 );
 }
 
