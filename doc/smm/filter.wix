@@ -22,6 +22,20 @@ The plain text version is
 
 .url	ftp://rtfm.mit.edu/pub/usenet/news.answers/mail/filtering-faq
 
+[procmail faq]
+
+    Html and text version of pm-tips
+
+.url        http://www.procmail.org/jari/pm-tips.html
+.url        http://www.procmail.org/jari/pm-tips.txt
+
+    Other procmail docuemts
+
+        Era's exellent procmail pages (including procmail faq) are at:
+
+.url            http://www.iki.fi/~era/procmail/links.html
+.url            http://www.iki.fi/~era/procmail/mini-faq.html
+
 .S	MH slocal Interface
 .key	slocal
 .key	.maildelivery
