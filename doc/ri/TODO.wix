@@ -391,6 +391,11 @@ fmlserv じゃない別の admin ML でやるとかのほうが建設的な感じがするなぁ
 .C	CGI
 .l	CGI
 
+.S	qmail のばあい
+
+例:  FreeBSD + Apache + qmail  で、Rootの権限が無い場合
+.url http://www.nmt.ne.jp/~myone/fml.shtml
+
 
 .S	script 一発インストーラ (きめうち)
 
