@@ -1,0 +1,11 @@
+   libenvf.pl           Envelope Filter
+   libkernsubr.pl	kernel library subroutine 1 (used some times)
+   libkernsubr2.pl	kernel library subroutine 2 (seldom used)
+   liblmtp.pl		Local Mail Transfer Protocol
+   libsmtp.pl		SMTP (sendmailとの通信) インターフェイス
+   libsmtphack.pl	SMTP Library hack e.g. OUTGOING_ADDRESS
+   libsmtpsubr.pl	SMTP Library subroutine
+   libsmtpsubr2.pl	SMTP Library subroutine 2 (seldom used)
+   libsmtputils.pl	SMTP utility functions
+   libsmtpmci.pl	SMTP plural connections
+   libtrap.pl		trap vector
