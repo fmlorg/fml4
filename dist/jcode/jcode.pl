@@ -3,20 +3,24 @@ package jcode;
 ;#
 ;# jcode.pl: Perl library for Japanese character code conversion
 ;#
-;# Copyright (c) 1995,1996 Kazumasa Utashiro <utashiro@iij.ad.jp>
+;# Copyright (c) 1995,1996,1997 Kazumasa Utashiro <utashiro@iij.ad.jp>
 ;# Internet Initiative Japan Inc.
 ;# 1-4 Sanban-cho, Chiyoda-ku, Tokyo 102, Japan
 ;#
 ;# Copyright (c) 1992,1993,1994 Kazumasa Utashiro
 ;# Software Research Associates, Inc.
-;# Original by srekcah@sra.co.jp, Feb 1992
 ;#
-;# Redistribution for any purpose, without significant modification,
-;# is granted as long as all copyright notices are retained.  THIS
-;# SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-;# IMPLIED WARRANTIES ARE DISCLAIMED.
+;# Original version was developed under the name of srekcah@sra.co.jp
+;# February 1992 and it was called kconv.pl at the beginning.  This
+;# address was a pen name for group of individuals and it is no longer
+;# valid.
 ;#
-;; $rcsid = q$Id: jcode.pl,v 2.0 1996/10/02 16:02:38 utashiro Rel $;
+;# Use and redistribution for any purpose, without significant
+;# modification, is granted as long as all copyright notices are
+;# retained.  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND
+;# ANY EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED.
+;#
+;; $rcsid = q$Id: jcode.pl,v 2.3 1997/02/23 14:12:26 utashiro Exp $;
 ;#
 ;######################################################################
 ;#
@@ -63,10 +67,10 @@ package jcode;
 ;#		The value of this associative array is pointer to the
 ;#		subroutine jcode'xxx2yyy().
 ;#
-;#	&to($ocode, $line [, $icode [, $option]])
-;#	&jis($line [, $icode [, $option]])
-;#	&euc($line [, $icode [, $option]])
-;#	&sjis($line [, $icode [, $option]])
+;#	&jcode'to($ocode, $line [, $icode [, $option]])
+;#	&jcode'jis($line [, $icode [, $option]])
+;#	&jcode'euc($line [, $icode [, $option]])
+;#	&jcode'sjis($line [, $icode [, $option]])
 ;#		These functions are prepared for easy use of
 ;#		call/return-by-value interface.  You can use these
 ;#		funcitons in s///e operation or any other place for
@@ -115,13 +119,17 @@ package jcode;
 ;#	---------------------------------------------------------------
 ;#
 ;#	&jcode'tr(*line, $from, $to [, $option]);
-;#		&jcode'tr emulates tr operator for 2 byte code.  This
-;#		funciton is under construction and doesn't have full
-;#		feature of tr.  Range operator like a-z is partially
-;#		supported: JIS or EUC and first byte should be same on
-;#		first and last character (so HIRAGANA-KATAKANA
-;#		conversion is possible).  Only 'd' is interpreted as
-;#		option.
+;#		&jcode'tr emulates tr operator for 2 byte code.  Only 'd'
+;#		is interpreted as option.
+;#
+;#		Range operator like `A-Z' for 2 byte code is partially
+;#		supported.  Code must be JIS or EUC, and first byte
+;#		should be same on first and last character.
+;#
+;#		CAUTION: Handling range operator is a kind of trick
+;#		and it is not perfect.  So if you need to transfer `-' 
+;#		character, please be sure to put it at the beginning
+;#		or the end of $from and $to strings.
 ;#
 ;#	&jcode'trans($line, $from, $to [, $option);
 ;#		Same as &jcode'tr but accept string and return string
@@ -319,20 +327,19 @@ sub trans {
 sub sjis2jis {
     local(*_, $opt, $n) = @_;
     &sjis2sjis(*_, $opt) if $opt;
-    if (s/($re_sjis_kana)+|($re_sjis_c)+/&_sjis2jis($&)/geo) {
-	s/$re_asc($re_jp|$re_kana)/$1/go;
-    }
+    s/($re_sjis_kana)+|($re_sjis_c)+/&_sjis2jis($&, $')/geo;
     $n;
 }
 sub _sjis2jis {
-    local($_) = @_;
+    local($_) = shift;
+    local($post) = $_[$[] =~ /^($re_sjis_kana|$re_sjis_c)/o ? "" : $esc_asc;
     if (/^$re_sjis_kana/o) {
 	$n += tr/\241-\337/\041-\137/;
-	$esc_kana . $_ . $esc_asc;
+	$esc_kana . $_ . $post;
     } else {
 	$n += s/$re_sjis_c/$s2e{$&}||&s2e($&)/geo;
 	tr/\241-\376/\041-\176/;
-	$esc_jp . $_ . $esc_asc;
+	$esc_jp . $_ . $post;
     }
 }
 
@@ -342,16 +349,15 @@ sub _sjis2jis {
 sub euc2jis {
     local(*_, $opt, $n) = @_;
     &euc2euc(*_, $opt) if $opt;
-    if (s/($re_euc_kana)+|($re_euc_c)+/&_euc2jis($&)/geo) {
-	s/$re_asc($re_jp|$re_kana)/$1/go;
-    }
+    s/($re_euc_kana)+|($re_euc_c)+/&_euc2jis($&, $')/geo;
     $n;
 }
 sub _euc2jis {
-    local($_) = @_;
-    local($esc) = tr/\216//d ? $esc_kana : $esc_jp;
+    local($_) = shift;
+    local($pre) = tr/\216//d ? $esc_kana : $esc_jp;
+    local($post) = $_[$[] =~ /^($re_euc_kana|$re_euc_c)/o ? "" : $esc_asc;
     $n += tr/\241-\376/\041-\176/;
-    $esc . $_ . $esc_asc;
+    $pre . $_ . $post;
 }
 
 ;#
@@ -566,14 +572,33 @@ sub init_z2h_sjis {
 ;# TR function for 2-byte code
 ;#
 sub tr {
+    # $prev_from, $prev_to, %table are persistent variables
     local(*_, $from, $to, $opt) = @_;
-    local(@from, @to, %table);
+    local(@from, @to);
     local($jis, $n) = (0, 0);
-    local($ascii) = '(\\\\[\\-\\\\]|[\0-\133\135-\177])';
     
-    &jis2euc(*_),   $jis++ if $_    =~ /$re_jp/o;
-    &jis2euc(*to),  $jis++ if $to   =~ /$re_jp/o;
-    &jis2euc(*from)	   if $from =~ /$re_jp/o;
+    $jis = /$re_jp/o || $to =~ /$re_jp/o;
+    &jis2euc(*_) if /$re_jp/o;
+
+    if ($from ne $prev_from || $to ne $prev_to) {
+	($prev_from, $prev_to) = ($from, $to);
+	undef %table;
+	&_maketable;
+    }
+
+    s/[\200-\377][\000-\377]|[\000-\377]/
+	defined($table{$&}) && ++$n ? $table{$&} : $&/ge;
+
+    &euc2jis(*_) if $jis;
+
+    $n;
+}
+
+sub _maketable {
+    local($ascii) = '(\\\\[\\-\\\\]|[\0-\133\135-\177])';
+
+    &jis2euc(*to) if $to =~ /$re_jp/o;
+    &jis2euc(*from) if $from =~ /$re_jp/o;
 
     grep(s/([\200-\377])[\200-\377]-\1[\200-\377]/&_expnd2($&)/ge, $from, $to);
     grep(s/$ascii-$ascii/&_expnd1($&)/geo, $from, $to);
@@ -582,13 +607,6 @@ sub tr {
     @from = $from =~ /[\200-\377][\000-\377]|[\000-\377]/g;
     push(@to, ($opt =~ /d/ ? '' : $to[$#to]) x (@from - @to)) if @to < @from;
     @table{@from} = @to;
-
-    s/[\200-\377][\000-\377]|[\000-\377]/
-	defined($table{$&}) && ++$n ? $table{$&} : $&/ge;
-
-    &euc2jis(*_) if $jis;
-
-    $n;
 }
 
 sub _expnd1 {
