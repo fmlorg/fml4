@@ -248,7 +248,7 @@ sub OutPutAggrThread
     local(*list, *links) = @_;
     local($p, $i, $level, %already);
 
-    for $p (sort {$a <=> $b} keys %links) {
+    for $p (sort __SortHtmlThread keys %links) {
 	next if $already{$p};
 
 	if ($debug_thread) { print "==$p\n";}
@@ -259,6 +259,17 @@ sub OutPutAggrThread
 	&ThreadPrint(*list, *links, *already, $p, 0);
 
 	print OUT "\n</UL>\n";
+    }
+}
+
+
+sub __SortHtmlThread
+{
+    if ($HTML_THREAD_SORT_TYPE eq 'reverse-number') {
+	{$b <=> $a};
+    }
+    else {
+	{$a <=> $b};
     }
 }
 

@@ -1522,6 +1522,11 @@ HTML_STYLESHEET_BASENAME:
 # value: default / prefer-in-reply-to
 HTML_THREAD_REF_TYPE:		prefer-in-reply-to
 
+.j スレッドの順番。デフォールトは記事の順番通り(上の方が過去)
+.j reverse-number にすると上の方が一番最近のもの
+# value: "" / reverse-number
+HTML_THREAD_SORT_TYPE:
+
 .j htdocs/サブディレクトリ/htmlファイル のような構造になる
 .j サブディレクトリの単位
 .j 例:

@@ -1160,6 +1160,12 @@ HTML_STYLESHEET_BASENAME:
 # value: default / prefer-in-reply-to
 HTML_THREAD_REF_TYPE:		prefer-in-reply-to
 
+# sort type for entries of thread.html
+# default is "time" from past to latest, 
+# "reverse-number" is from latest to past.
+# value: "" / reverse-number
+HTML_THREAD_SORT_TYPE:
+
 # $subdir type of htdocs/$subdir/
 # value: number / day / week / month / infinite
 HTML_INDEX_UNIT:		day
