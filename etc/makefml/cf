@@ -62,7 +62,7 @@ REWRITE_TO			0
 SUBJECT_TAG_TYPE
 DATE_TYPE			original-date
 PASS_ALL_FIELDS_IN_HEADER	1
-SKIP_FIELDS			Received|Return-Receipt-To
+SKIP_FIELDS			Return-Receipt-To
 
 ### Misc
 USE_FLOCK			1
