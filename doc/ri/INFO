@@ -43,6 +43,14 @@ WWW が使えるなら
 
 === WHAT'S NEW  fml 2.0 current (version 2 pre release version) ===
 
+96/07/13
+
+libutils.pl
+	defauilt subscribe の直しそこないをFIX
+	自動 html 化ライブラリが一月;-)ずれてるのをFIX
+
+96/07/12
+
 お手軽インストールのバグをなおす;_;
 
 	・こないだ直し過ぎて勢い余ってしまっているところ;_;
