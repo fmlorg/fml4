@@ -7,6 +7,9 @@
 
 [ 3.0pl#30 == 3.0.1_BETA #19 ]
 
+   makefml (2.68-2.69):
+	FixDefault: reflect real variable name not hier name
+
    libexec/mead.pl
 	fix qmail VERPs analyze code
 
