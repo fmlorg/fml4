@@ -245,6 +245,27 @@ Which command could we use for usual member PGP authentication?
 DO not use etc/pgp/ for encrypted distribution. Make a new "makefml
 command" to handle pgp key for usual users.
 
+.q
+fml-support: 08120
+
+$DIR/$ml/etc/pgp/
+	デフォールトではさようなら 
+	＃互換: 変数を $DIR/$ml/etc/pgp2/admin/ から etc/pgp/ にもどすと
+	＃これになるようにする 
+
+$DIR/$ml/etc/pgp2/
+	$DIR/$ml/etc/pgp2/dist/		(post ? distribute ?)
+	$DIR/$ml/etc/pgp2/admin/
+
+$DIR/$ml/etc/pgp5/
+	$DIR/$ml/etc/pgp5/dist/		(post ? distribute ?)
+	$DIR/$ml/etc/pgp5/admin/
+
+とかでわかりますかね？（いい、ねーみんぐ募集中)
+＃ dist/	記事の暗号化をするＭＬのための $PGPPATH
+＃ admin/	admin コマンドの認証のための $PGPPATH
+.~q
+
 
 .S	間違いメールのフィルタリング
 =E.S	more smart filtering algorithm for e.g. signature
@@ -338,17 +359,18 @@ but it is o.k. now? (on some OS?)
 
 .S	PGP version
 
-	現状 PGP 2 
+	現状は PGP 2, PGP 5 
 =E	
-	now PGP2
+	now PGP2 PGP 5
 
-	PGP 5
+not yet	
 	PGP 6
 	OpenPGP ...
+	GNU Privacy Gaurd.
 
+?
 	RFC2015
 
-check also GNU Privacy Gaurd.
 
 .S	ヘッダ関係
 =E.S	Header and the around it
