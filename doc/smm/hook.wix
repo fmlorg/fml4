@@ -1,4 +1,5 @@
 .C	フック、カスタマイズ（例を見る方がはやいかも）
+.l	hook
 .label	{customize}
 
 .S	インタプリタとconfig.ph

@@ -1,4 +1,5 @@
 .C	リモート管理
+.l	remote
 .label	REMOTE-ADMINISTRATION
 .key	$REMOTE_ADMINISTRATION
 

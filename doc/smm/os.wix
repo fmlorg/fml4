@@ -44,6 +44,127 @@ From:    nino@windy.mech.utsunomiya-u.ac.jp
 
 
 
+.S	プロセスは誰の権限で動くか？
+.key	uid
+.key	setuid
+.key	ユーザー権限ということ
+.label	{fml-uid}
+
+「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
+走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
+システムに「 fml 管理者の プロセスとして走る」用に命令することが
+システムによって違うことがあるので少し厄介なことが発生します。
+
+○ローカルに fml にメールを投げる
+
+	自分のuidで実行します
+
+○外からメールがやってきたら？
+	つまり sendmail がうけとって fml を起動する場合
+
+	外→	
+		sendmail は uid = 0 で待っている(デーモン)
+		＃昔の sendmail だと daemon の場合もあるだろう
+
+		→ setuidしてユーザー権限 (uid=your own) にして
+		   fml.pl を起動し、メールを fml.pl へ渡す
+		＃これは fml.c で作った fml を使うか
+		＃:include list 形
+
+.xref configuration, calling-fml.pl, msend-intro, msend-1, msend-2, msend-3, msend-dir
+
+ここでsetuidの話が関係するわけです。
+
+各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
+
+注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
+は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
+いくことにしてます。
+
+
+.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
+
+make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
+fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
+れているはずです。
+
+/etc/aliases では
+	Elena: :include:/some/directory/include-file 
+		もしくは
+	Elena: "|/some/directory/fml-2.1/fml"
+の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
+ます。現在では include-file 形式が普通のような気がします。
+
+sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
+BSD )以外では挙動がまちまちみたいです
+
+問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
+
+ [4.3BSD]
+	fml でも :include: でもOKでしょう
+
+ [4.4、POSIX準拠のOS、その他]
+	:include: 式か 
+	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
+
+以下は実際にテストされたOS一覧です
+
+	キーワード：
+	uid		ownerが自分自身で 4755 した fml
+	include		sendmail に setuid をまかせる :include:を使う
+	root		ownerがrootで 4755 した fml
+			＃こういうことは最後の手段であまりやりたくない…
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+4.3BSD			uid include
+4.4BSD 			include
+BSD386 1.1		include
+SUN4.1.2 - 4.1.3JLE 	uid include
+Solaris 2.4 		include
+Solaris 2.3J 		だめ？
+DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
+OSF/1 Alpha AXP V2.1 	include
+HP UX 9?		[:include でかつ perl -U が必要？]
+			＃なんか、setreuid しかないんだけど…＞HP-UX
+SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+manualで確認した機種一覧
+4.3BSD系	SONY NEWS 4.x
+		4.1.3JLE
+		SVR3
+
+POSIX準拠	4.4BSD
+		NetBSD 
+		BSD/OS 2.x
+		BSD386 1.1
+		Solaris 2.4	
+
+その他の注意：
+・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
+
+そのときはsetuid する時だけ local ならいいわけで、
+たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
+home とかにおいてある という風にしてあればＯＫでしょう
+
+・NFSごしにファイルが存在すると setuid を認めない機種 もある
+たとえば
+		SUN 4.1.3JLE 4.1.4
+		＃これは fpathconf の return 値が問題
+
+・uid と include を試してみてどっちもうまくいかなかったら
+最後の手段（root）： 
+
+まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
+make OPT=-DPOSIX として make してください
+
+root のケースでは rootでしかかけない /usr/local/ml/driver 
+とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
+は注意してくださいね。管理者とよく相談してみてください（重要）
+＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
+＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp

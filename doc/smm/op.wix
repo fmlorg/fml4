@@ -629,61 +629,55 @@ sendmail.cf を簡単に作ることができるが、この見本で十分実用である。
 
 
 
-.P	インストールとカスタマイズ
+.P	Process overview of the fml
 
-
-ここでは fml の起動の仕方、起動時の設定の有効になる順番について述べま
-す。
-
-
-.C	インストール
-
-インストールについては(READMEでもそういっていますが)
-INSTALL(doc/INSTALL) を見て下さい。
-
-「お手軽なインストール」はfml を広げた directory へいって
-
-   % make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
-
-で、インストール先のマシンに合わせたサンプル(./samples/の下)まで作るの
-で、それを参考にしながらで十分インストールできるとおもいます。
-
-細かいカスタマイズをしたくなったら、このドキュメントを見ながら 
-config.ph を直したりすれば良いでしょう。
-
+ここでは fml プロセスと他のプログラムとの関係、fml の起動のし方等につ
+いて解説する。
 
 
 .C	fml の基本動作と起動オプション…
 
-.S	ＭＬサーバの動作
+ＭＬサーバの基本動作を知っておくとカスタマイズの時役にたつでしょう。
+
+
+.S	ＭＬサーバの動作 (fml と sendmail の役割分担)
 .key	ＭＬサーバの動作
 
-	メールが SMTP で送られてくる
+   メールが SMTP で送られてくる
 
              ↓
 
-    	SMTP で待ち構えているプログラムがうけとる
-	例えば sendmail が受けとる
+   SMTP で待ち構えているプログラムがうけとる (例： sendmail)
 
              ↓
 
-	fml へ渡す。
-
-             ↓
-	フィルター操作（しないなら/etc/aliasesいじるだけ）
-	さらにヘッダを一定形式でフォーマットする…
+   /etc/aliase から何をすれば良いのかを理解して、
+   setuid 操作等を行なった後
+   fml の STDIN にメールが送り込まれる。
              ↓
 
-	なんらかのリストにしたがって配送
+   (sendmail -> fml へ引き渡される。ここからが fml の担当)
+   config.ph による設定に従い、ヘッダの解析、ＭＬメンバーのリストに従い
+   配送 or コマンド要求を処理した結果のメールを
+   sendmail 等のSMTPサーバへ引き渡す
+
+             ↓
+
+   (ここから再び sendmail の担当)
+   sendmail 等のSMTPサーバがメールの配送を行なう。
 
 
 フィルタだけなら sed でも十分だし、“配るだけ”なら Sendmail 8.x でも
 十分でしょう。しかし、＋αでログをとり、スプールし、必要なら取り寄せら
 れるようにちょこっとだけ複雑なことをしようとするならこの サーバ まで必
-要です。
+要となるわけです。
+
+なお、この図でわかるとおり、まとめおくりはこれとは別のプロセスです。
+.xref msend
 
 
-.S	sendmail -> fml の時の動作
+.S	sendmail -> fml 時の動作
+.k	sendmail -> fml 時の動作
 
 sendmail から fml へメールが渡される時は次のように動作します。
 
@@ -722,6 +716,9 @@ sendmail から fml へメールが渡される時は次のように動作します。
 
 
 .S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
+.k	fml.plと引数
+.k	DIR
+.k	LIBDIR
 
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena "
 
@@ -730,6 +727,7 @@ sendmail から fml へメールが渡される時は次のように動作します。
 	/usr/libexec/fml/fml.pl 
 の
 	/usr/libexec/fml 
+
 部分をとりだします。そして
 
 	1   /var/spool/ml/elena 
@@ -752,15 +750,22 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 
 
 .S	オプション設定の優先順位
+.k	オプション設定の優先順位
 
-強い順番に並べると
+オプション設定の強い順番に並べると
 
 	1   コマンドラインオプション (fml.pl -d や --distribute 等)
 	2   sitedef.ph による設定のoverwrite(サイト共通の設定等が望ましい)
 	3   各MLごとの config.ph による設定
 	4   fml デフォールト設定
 
-大抵の program と同様ですね。
+大抵の program と同様ですね。ちなみにインストール時に 
+samples/sitedef.ph が作られますので参考にしてみて下さい。
+とりあえずこれはＭＬごとではなくそのマシン共通の設定になるもの
+
+	tar や gzip はどこにある？
+
+の設定のみを sitedef.ph でしています。
 
 
 
@@ -769,19 +774,32 @@ libsmtp.pl をこの順番で探します。もし、この後に directory 名がさらに付
 .include clo.wix
 
 
-.S	Security Check Code
+.C	Security 
 
-fml-support: 00950
+.S	Security Check Routine
+.l	InSecureP
+.k	InSecureP
+.k	SecureP
+
+ファイアウォールでも同様ですが、概念的に２種類の考え方が出来ます。
+
+	1 明らかに危ないものを除いていく
+	2 安全なものを許可していってそれ以外は拒否する
+
+fml-support: 00950 でも述べていますが
 
 	1.x は外掘から埋める方式 (関数 InSecureP)
-	2.x は内掘から埋める方式 (関数 SecureP)
+	2.y は内掘から埋める方式 (関数 SecureP)
 
-といってます(^^)
+といってます(^^)。1.x と 2.y の関係はそのまま 上の 1 と 2 の違いといっ
+て間違いありません。
 
-SecureP は以下のように作動します。
 
-コマンドとしてうけいれる命令(メールの一行全体について実行)は次の形に限
-る。
+SecureP は以下のように
+
+   コマンドとしてうけいれる命令(メールの一行全体について実行)の形を限定
+
+します。
 
     １ 	\w/\w の部分は見逃す。＃ ../ とか .[a.]/ とかはだ〜め
        	/ でOKのところは消去し、
@@ -810,18 +828,47 @@ SecureP は以下のように作動します。
    # mget `domainname`
 
 
+例外処理として：
 
-.C	Install && Configurations
-.label	{configuration}
+   # whois 日本語
 
-ここはおおむね概論です。細かい詳細（フラッグ等のsetting）は後の章を御
-覧下さい（その名前の章があれば…ですが）。
+をどうしよう？という問題があります。今のところ”通さない”設定のままで
+すが、これはこれで何とかするべき問題なのですが、良い解決策はありません。
+.k	whoisと日本語の問題
+
+
+
+.P	インストールとカスタマイズ
+
+
+細かい詳細（フラッグ等のsetting）は後の章を御覧下さい（その名前の章が
+あれば…ですが）。
+
+
+.C	インストール
+
+.S	インストール
+
+インストールについては(READMEでもそういっていますが)
+INSTALL(doc/INSTALL) を見て下さい。
+
+「お手軽なインストール」はfml を広げた directory へいって
+
+   % make MAIL_LIST=作りたいMLのアドレス MAINTAINER=ML管理者のアドレス
+
+で、インストール先のマシンに合わせたサンプル(./samples/の下)まで作るの
+で、それを参考にしながらで十分インストールできるとおもいます。
+
+細かいカスタマイズをしたくなったら、このドキュメントを見ながら 
+config.ph を直したりすれば良いでしょう。
 
 
 .S	Version up
 
 Version up は *.pl をコピーすれば終りです。
-＃fml 1.x 時代への注意は .seealso{appendix:fmlR1}
+
+注意：fml 1.x 時代の場合の注意は 
+.xref{appendix:fmlR1}
 
 
 .S	インストール後にサーバの設定（パラメータ）をいじるには？
@@ -846,8 +893,11 @@ Version up は *.pl をコピーすれば終りです。
 	include file 等で fml.pl --distribute のようにコマンドラインオ
 	プションで変更するか？
 
-ですが、複数のMLに共通の設定であれば libsmtp.pl 等がおいてある場所に 
+ですが、複数の ML に共通の設定であれば libsmtp.pl 等がおいてある場所に 
 sitedef.ph を作って、これの中にいれておくとよいでしょう。
+
+例：
+	/usr/libexec/fml/sitedef.ph
 
 
 .S	fml.plの呼び方、引数の渡し方(4.3BSD)
@@ -858,29 +908,29 @@ sitedef.ph を作って、これの中にいれておくとよいでしょう。
 .label	{calling-fml.pl}
 .seealso fml-uid, plural-handling-1, plural-handling-2, plural-handling-3
 
-fml.pl の中に変数は今はもうありません（fml 1.2）。
+fml.pl の中に変数は今はもうありません (fml 1.2 より)
 
-fml.cの中でfml.pl directoryという形で呼ぶようになってます。
-＃ fml.pl config.phのあるdirectry libaries の形で呼ぶ
+fml.c の中で fml.pl directory ... という形で呼ぶようになってます。
 
-上と同じことを↓こういう書き方（ちゃんと動くか否かはsendmail の 
-version依存）ができます。
+	fml.pl config.phのあるdirectry libaries 
 
-	/etc/aliases では
+の形で呼ぶ。上と同じことを↓こういう書き方（ちゃんと動くか否かは 
+sendmail の version 依存）ができます。
 
-	Elena: :include:/usr/local/list/Elena
-	owner-Elena:fukachan
+   /etc/aliases では
 
-	/usr/local/list/Elenaの中身は
+	Elena: :include:/usr/local/ml/include/Elena
+	owner-Elena: fukachan
+
+   /usr/local/ml/include/Elena の中身は
 
 	"|/usr/libexec/fml/fml.pl directory"
 
-こうするとElena（ファイル）の所有者のＩＤで動くようになります。
-
+こうするとElena(include ファイル)の所有者のIDで動くようになります。
 
 
 .S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
-.label	{calling-fml.pl-POSIX}
+.label	calling-fml.pl-POSIX
 .key	POSIXなsetuid
 .key	POSIX
 .key	fml.plの起動のしかた
@@ -890,10 +940,11 @@ version依存）ができます。
 
 もし POSIX なら 
 
-% make OPT=-DPOSIX 
+   % make OPT=-DPOSIX 
 
-とすると、 uid gid を今の環境からわりだして自動的にこういう風にcompile
-します。↓
+とすると、 uid gid を今の環境からわりだして自動的にこういう風に 
+compileします。↓
+
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 perl sbin/ccfml cc -s -O -DPOSIX   fml.c -o fml
 O.K. I'll try to guess your OS...
@@ -905,10 +956,10 @@ O.K. I'll try to guess your OS...
 cc -s -O fml.c -o fml  -DXXUID=65536 -DXXGID=999 -DPOSIX  -DOS=nos4 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-fml ができたら スーパーユーザー権限で
+fml ができたら root権限で
 
-# chown root fml
-# chmod 4755 fml
+   # chown root fml
+   # chmod 4755 fml
 
 これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
 たのuidに設定して fml.pl を起動します。
@@ -919,20 +970,18 @@ fml ができたら スーパーユーザー権限で
 それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
 せん。管理者の方と相談して見てください。
 
-新しい発見 or bugがあったら fml-support ML か fml-bugs （fukachan@ に
-のみフォワード）に御一報くださいませ _o_
-
 
 .S	binary の driver 
 
-
-	/usr/local/list/Elena というファイルを sendmail が実行し
+	/usr/local/ml/include/Elena というファイルを sendmail が実行し
 	その中身は
+
 	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+
 	のように書いてある。
 
-と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
-があります。
+と上述しましたが、このやり方が変なOSもしくは古い sendmail では駄目な場
+合があります。
 
 その場合次のような setuid された driver(binary) を使うということになり
 ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
@@ -948,10 +997,10 @@ directoryを変えるにはここを書き換えてrecompileです。
 
 例： fml.c
 
-execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
+execl("/usr/libexec/fml/fml.pl", /* 本体 fml.pl はどこ？ */
       "(fml)", 
-      "/usr/spool/EXP", /* config.ph は どこ？ */
-      "/usr/spool/lib", /* fml packeage の library はどこ？ */
+      "/var/spool/ml/Elena", /* config.ph は どこ？ */
+      "/usr/libexec/fml", /* fml packeage の library はどこ？ */
       NULL);
 
 これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
@@ -960,52 +1009,8 @@ execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
 version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
 の設定を変更する必要ありません。
 
-.S	binary の driver 
 
-
-	/usr/local/list/Elena というファイルを sendmail が実行し
-	その中身は
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
-	のように書いてある。
-
-と上述しましたが、このやり方が変なOSもしくは古いsendmailでは駄目な場合
-があります。
-
-その場合次のような setuid された driver(binary) を使うということになり
-ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
-あなたの環境に併せて変更されていますが、確認はしてみてください。
-
-それは次のような内容です。fml.c の中に
-
-	fml.plの場所   config.phのある場所   ライブラリの場所
-
-の形でexecするように埋め込んで最初にcompileしました。
-directoryを変えるにはここを書き換えてrecompileです。
-＃since 1.1.2.17 1994.3.14 version
-
-例： fml.c
-
-execl("/usr/spool/EXP/fml.pl", /* 本体 fml.pl はどこ？ */
-      "(fml)", 
-      "/usr/spool/EXP", /* config.ph は どこ？ */
-      "/usr/spool/lib", /* fml packeage の library はどこ？ */
-      NULL);
-
-これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
-イル等を見ながら直してみて下さい。
-
-version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
-の設定を変更する必要ありません。
-
-ただ、この binary driver 方式では root に setuid した binary を作る必
-要があります＃ POSIX 準拠の場合
-
-これは、非常にいやらしいし、setuid コマンドは慎重に扱う必要があります。
-それでできれば sendmail が正しく動いて setuid の部分をうけもってくれる
-ことが望ましいとおもわれます。
-
-
-.S	fml.plの呼び方 と OS一覧
+.S	OSによるfml.plの呼び方の違い一覧
 .label	{calling-fml.pl-and-OS}
 .key	OS_dependence
 
@@ -1013,7 +1018,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 
 .S	まとめおくり
-.label	{msend-0}
+.label	msend-intro
 .key	UNIX FROM
 .key	RFC934
 .key	RFC1153
@@ -1021,15 +1026,23 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 .key	まとめおくり
 .key	Cron
 .key	Not using Cron
-.seealso msend-c, msend-1, msend-2, msend-3
+.xref	msend-c, msend-1, msend-2, msend-3
 
-選択肢は
-	Release 4 で system にbundleされたCRON をつかう
-		か
-	fml の cron.pl (CRON clone)
-	を使う
+詳細については「まとめ送り」と「CRON」の章を見て下さい
+.xref	msend cron
 
+まとめおくりとは
+
+	特定時間になると配送リストの情報に基づき
+	その時間に送ることになっている人に
+	まだ送っていなかった分のメールをスプールから取り出して送る
+
+ということをすることです。送るべき時間になった時その場で作るため
 各ユーザーごとに
+   配送するべき時間
+	Ｎ時間おき、一日一回等
+
+   配送時のファイルのまとめ方
 
 	UNIX FROM形 でメールをひとセットにする
 	RFC934形    でメールをひとセットにする
@@ -1038,25 +1051,11 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 	tar + gzip でまとめる
 	lzh + ish でまとめる
 
-を（ユーザーが）えらべます。
-
-ソースは msend.pl があれば十分で、
-[Ｎ通たまったらメールを送る まとめおくり]だけは別で
-Contrib/Matomeokuri-NOCRONの下に
-	store-and-deliver.ph	(configuratio file)
-	store-and-deliver.pl
-があります。
-
-くわしくは、まとめおくりの章をご覧ください
-.seealso msend-c
-
-まとめおくり Release 4 は
-「特定時間になるとactivesの情報に基づき、その時間におくることになって
-いる人に、まだ送っていなかった分のメールをスプールから取り出して送る」
-ということをしています
+を定義できます。# matome (digest) コマンドで各ユーザが定義して下さい。
 
 
-.S	コントロール専用アドレス
+
+.S	コマンドコントロール専用のアドレス
 .label	{control-addr}
 .seealso calling-fml.pl
 .key	$CONTROL_ADDRESS
@@ -1065,7 +1064,7 @@ Contrib/Matomeokuri-NOCRONの下に
 
 config.phの中で
 
-$CONTROL_ADDRESS = 'Elena-ctl';
+	$CONTROL_ADDRESS = 'Elena-ctl';
 
 をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
 けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
@@ -1080,121 +1079,212 @@ $CONTROL_ADDRESS = 'Elena-ctl';
 のようにフルアドレスを書いても良いです。
 
 ローカルからコマンドメールを出す時のことを考えると、
-フルアドレスじゃないほうが望ましいという意見もあります。
+フルアドレスじゃないほうが望ましいという意見があります。
 ＃ sendmail.cf 等に依存した話なので断言はできませんが…
-
 
 この場合/etc/aliasesに
 
-	Elena-ctl:"|/usr/libexec/fml/fml"
+	Elena-ctl: Elena
 
-とか書くことが必要です。
-＃あ、newaliasesも忘れずにね
+とか書くことが必要です。＃ newaliasesも忘れずにね
 
 
-.S	メンバーチェックについて
-.xref	auto-regist
+.S	メンバーチェックと自動登録について
+.xref	auto-regist delivery-mode
 
 ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
-た上での設計なのでデフォールトはメンバーチェックを行なう(subroutine
-MLMemberCheck)。
+た上での設計なのでデフォールトではメンバーチェックを行ないます。
+＃何をやってるかは fml.pl の subroutine MLMemberCheck を見て下さい
 
-チェックするか否かはconfig.phの中で
+チェックするか否かは config.ph の中で
 
-$ML_MEMBER_CHECK = 1;		# if non-nill, do a member check
+	$ML_MEMBER_CHECK 
 
-で指定します。ここを（↓自動登録ということ）
+という変数で指定します。
 
-$ML_MEMBER_CHECK = 0;		# if non-nill, do a member check
+[メンバーチェック]
 
-にすると見知らぬ人から来た場合その人を自動的に登録して配布モードにはい
-るようになる（subroutine MLMemberCheck）。
-注意：自動登録の場合はactivesを使わずmembersファイルがmemberとactives
-の両方を兼任する形になっています。
+	$ML_MEMBER_CHECK = 1;
 
-単にメンバーチェックをしない時はMLMemberCheck が常にreturn 1; としても
-いいでしょう
+の時は $MEMBER_LIST (デフォールト members) の中に From: 行のアドレスが
+存在するか否か？を調べます。ない場合は管理者へ知らせ、さらに From: 行
+のアドレスの人へ $DENY_FILE を送り返します。
+この場合の配送は $ACTIVE_LIST に従って配送されます。
 
 
-.S	$MAINTAINERって何？
-.key	UNIX FROM
+[自動登録]
+
+	$ML_MEMBER_CHECK = 0;
+
+の時は $MEMBER_LIST (デフォールト members) の中に From: 行のアドレスが
+存在するか否か？を調べます。
+
+存在しない場合は管理者へ知らせ、(例えば From: 行の)アドレスを自動的に 
+$MEMBER_LIST に登録します。
+
+配送は $MEMBER_LIST のみに従って配送されます（注意）。
+つまり自動登録時は $MEMBER_LIST しか使っていないのです。
+＃実は $ACTIVE_LIST = $MEMBER_LIST に設定しています。
+
+自動登録はキーワードを必要とするとか登録したいアドレスを指定したい時に
+どうするか？等に関して様々なバリエーションがあります。
+詳細については「自動登録」の章を見て下さい。
+.label auto-regist
+
+
+コマンドラインオプションでも
+.xref	clo
+
+	check		メンバーチェック
+	auto		自動登録（どういうメールが来ても登録）
+	autosubject	subject: subscribe のキーワードを必要とする
+	autobody	メール本文にsubscribe のキーワードを必要とする
+
+等がカスタマイズできます。これらの詳細については「自動登録」の章を参照
+.xref	auto-regist
+
+例：
+	/usr/libexec/fml/fml.pl /var/ML-dir --auto 
+
+
+
+.S	$MAINTAINER というアドレス
+.key	UNIX_FROM
 .key	$MAINTAINER
 
-“大雑把に”いうとエラ−メ−ルの帰る場所です。
-＃エラーが返る時にこれがＭＬ宛になっていると無限ループするわけですね
+ＭＬの管理者のアドレスです。“大雑把に”いうとエラ−メ−ルの帰る場所と
+思ってもいいです。エラーが返る時にこれがＭＬ宛になっていると無限ループ
+するわけですね。
 
-[歴史]	hml 1.6 はこのアドレスを
+インターネットでは歴史的に listname (MLの名前) に対して
 
-	sendmail -f"$MAINTAINER"
+	listname-request は管理者のアドレス
 
-の形で使っていました。
+が多いです（絶対ではない）。ちょっと request というのが直観に反すると
+ころもありますが…
+いつも私はこの事実との整合性とわかりやすさのために
+
+	listname-admin 		管理者のアドレス
+	listname-request 	listname-adminへフォワード
+
+のように設定しています。そのためどちらのアドレスへ送られても管理者へそ
+のメールは届くわけです。
 
 
-.S	他の人にＭＬのスプールを見せないような設定はどうするんですか？
+.S	他の人にＭＬのスプールを見せない設定
 
+要はＯＳの permission を正しく使う。それだけです。setuid() してから実
+行するのでＭＬ管理者の権限で fml は走っています。そのため全てのファイ
+ルを管理者以外の人が見れない様になっていればＯＫなわけです。
+
+例：
+% pwd
+/var/spool/ml/Elena
 % ls .
-Elena	lib	driver
+config.ph spool	...(省略)
 
-という directory とする。
-＃以下省略して書くので適当にdirectory名は補ってください
+という directory とする。/var/spool/ml/driver/Elena には 
 
-driver/driver には "|lib/fml.pl Elena lib"
+   "|/usr/libexec/fml/fml.pl /var/spool/ml/Elena /usr/libexec/fml"
 
-lib Elena は 700、driver は755としておけば、
+のように書きます。 permission は以下のようであればＯＫです。
 
-	sendmail(uid = 1)
-	→	
-	driver/driver を起動すると、uidが あなたのuidに変わる。
-	→	
-	ここから後は、lib, Elena は自分のuidになっているので、700でＯ
-	Ｋです。
+	/var/spool/ml/driver/Elena 	755
+
+	/var/spool/ml/Elena 		700
+	/var/spool/ml/Elena/spool	700
+
+等の/var/spool/ml/Elena以下の階層はすべて管理者のみ read write 可能に
+します。
+
+この場合はまず sendmail (root 権限)がメールを受けた時
+
+	sendmail (root 権限) は
+	/var/spool/ml/driver/Elena を読めないといけません
+
+そのため 755 にしておきます。どのみちこのファイル自体を他人に読まれて
+も影響はないので 755 で構いません。
+
+	/var/spool/ml/driver/Elena 
+	を通して
+	"|/usr/libexec/fml/fml.pl /var/spool/ml/Elena /usr/libexec/fml"
+
+を実行する時までに setuid() system call をかけ 
+
+	/var/spool/ml/driver/Elena 
+
+の所有者のプロセスになっています。つまり fml.pl を exec() する時はすで
+にＭＬ管理者のプロセスなので、 fml は /var/spool/ml/Elena 以下のファイ
+ルを操作しますが、そのためにはこれで必要十分なわけです。
 
 
-.S	デバッグモード
-.label	{debug-mode}
-
-デバッグモードのフラッグ。１がデバッグモード。配送以外のことは全部でき
-るので、テストに使って下さいませ。０にすると配送もするようになります。
-.key	$debug
-	$debug        = 1;
-
-.S	配送されるメールのヘッダのカスタマイズ
-.seealso header-custom
-
-.S 	OS, MISC: OTHER CUSTOM OPTIONS
-.seealso config-misc
-
-.S HOOKS: ML-specific hooks e.g. "# list"
-.seealso	customize
-
-フックの章をみてください
-
+.#	
+.#	.S	配送されるメールのヘッダのカスタマイズ
+.#	.xref	header
+.#	
+.#	.S 	それ以外のこまごまとしたこと（OS, MISC: OTHER CUSTOM OPTIONS）
+.#	.xref 	misc
+.#	
+.#	
+.#	.S 	HOOKS: ML-specific hooks e.g. "# list"
+.#	.xref	hook hack
+.#	
 
 
 .C	配送のモード
+.l	delivery-mode
+
+
+以下では配送のモードについて解説します。fml の設定変数は非常に多岐に渡っ
+ています。またメタレベルで設計されている部分もあります。
+
+そのため設定の自由度は高いのですが、そのためにわかりやすさは多少犠牲に
+なっています。そこで、
+
+代表的なモードは”簡易モード設定”という形でわかりやすいユーザインター
+フェイスを提供するようになっています。
+
+初めはわからなくてもいいので、もっと細かくいじりたくなった時にその設定
+の意味を調べれば良いとおもうのです。
+
+
+.S	デバッグモード
+.k	デバッグモード
+.label	debug-mode
+.k	$debug
+
+	$debug        = 1;
+
+デバッグモードのフラッグ。１がデバッグモード。配送以外の設定、コマンド
+操作はすべて有効です。テストに使って下さい。０に設定しないと配送してく
+れません。
+
 
 .S	DEFINE_MODE マクロ
+.k	DEFINE_MODE
+.k	&DEFINE_MODE
 .xref	auto-regist
 
-マクロというのは正確ではないですが、config.ph で 簡易モード設定ができます。
+マクロというのは正確ではないですが config.ph で簡易モード設定ができま
+す。
 
 特に歴史的な理由で自動登録とメンバーチェックをするモードの設定はわかり
-にくいので、このモード設定をつかうと楽かも知れません。
+にくいので、このモード設定をつかうと楽かもしれません。
 
-モード設定は config.ph を評価した後行なわれます。そのため、
+注意として、モード設定は config.ph を評価した後行なわれます。そのため、
+config.ph の中で
+
+	$ML_MEMBER_CHECK = 1;
+	&DEFINE_MODE('autoregist'); 
+
+とか書くと、自動登録モードになり、メンバーチェック ($ML_MEMBER_CHECK =
+1)と宣言したことは overwrite されてしまいます。
+
+注意：コマンドラインオプションはこの定義よりも強いことに注意して下さい
 
 config.ph の中で
 
-	メンバーチェック
-	&DEFINE_MODE('autoregist'); # 自動登録
-
-とか書くと、自動登録モードになり、メンバーチェックと宣言したことは 
-overwrite されてしまいます。
-
-注意：コマンドラインオプションはこの定義よりも強いのに注意して下さい。
-
-config.ph の中で
-	メンバーチェック
+	$ML_MEMBER_CHECK = 1;
 	&DEFINE_MODE('autoregist'); # 自動登録
 
 でもコマンドラインで
@@ -1205,29 +1295,13 @@ config.ph の中で
 録もせずに、配送しスプールするだけのモード）に設定されます。
 
 モード一覧は コマンドラインオプションを見て下さい。
-コマンドラインで
-
-	--mode
-
-のように指定する内容を config.ph 中では同じことを
-
-	&DEFINE_MODE('mode');
-
-のように書けば実現できます。
-
-例：
-
-	"| /uja/fml.pl /DIR --distribute  "
-は
-	/DIR/config.ph で &DEFINE_MODE('distribute');
-
-と同じ
+.xref	clo
 
 
 .S	簡易モード一覧
+.xref	clo
 
-詳細はコマンドラインオプションの項を見てね。
-また、ソースを見るなら、libmodedef.pl です。
+詳細はコマンドラインオプションの項を見てね。ソースは libmodedef.pl です。
 
 	distribute	配送だけ
 	hack		ローカルハック用
@@ -1290,78 +1364,6 @@ sub ModeDef
 .~q
 
 
-.S	自動登録について
-.xref	auto-regist
-.xref	fml-mechanism
-.key	$ML_MEMBER_CHECK
-.key	自動登録
-.key	自動登録の仕方のvariatin
-.k	--auto
-.k	--check
-
-
-$ML_MEMBER_CHECK という変数が
-	0 とか "" 
-
-のようになっている時が
-”自動登録モード”
-	で、
-”それ以外はメンバーチェックをするモードです”。
-
-コマンドラインオプションでは
-
- --auto
-	投稿者がメンバーでない場合自動的にMLに登録する
-
- --check 
-	投稿者がMLのメンバーか否かチェックを行う
-
-です。
-
-例：
-	/usr/libexec/fml/fml.pl /var/ML-dir --auto 
-
-
-そして、自動登録で使うアドレスと、メールでどういうふうに明示的な意志表
-示をしてほしいか？のvariationが以下の話です。
-
-.key 登録に使うアドレスはどこから選ぶ？
-登録に使うアドレスはどこから選ぶ？：
-From: を見てメンバーチェックをし、知らない人かどうかを決めています。
-明示的に普段の From: と違うアドレスで登録したいなら
-＃例えば、ＭＬからのメールは マシン名つきのアドレスでうけるとか？
-
-本文の先頭に subscribe email-address（変更したいもの） を書いて下さい。
-＃Reply-to はLoopbackだけならともかく危険なので、自動登録の時は考慮す
-＃るのをやめました。
-
-	自動登録のパターンは
-	見知らぬ人からメールがきた	→
-
-	１．	自動的に登録してそのままＭＬにフォワードする。	
-	.seealso auto-regist-4
-
-		ＯＦＦ会用ＭＬなんかに便利です。
-		例：「出席します」メールがそのまま流れる
-
-
-	２．	自動的に登録してそのままＭＬにはフォワードしない
-	.seealso auto-regist-3
-
-	３．	そのメールにSubject: subscribe のようなキーワードが必要
-		（キーワード必須）
-.#	.seealso auto-regist-6
-
-	４．	そのメール本文に subscribe のようなキーワードが必要
-		（キーワード必須）
-.#	.seealso auto-regist-7
-
-のVariationがあります。くわしい設定はそれぞれのセクションを見て下さい。
-
-＃注意：２の”フォワードするか否か？”は１、３、４と独立事象です。つま
-り、２ｘ３＝６通り
-
-
 .S	再配送だけをするサーバ（コマンドを必要としないサーバ）
 .key	再配送だけをするサーバ
 .seealso	--distribute
@@ -1372,8 +1374,12 @@ From: を見てメンバーチェックをし、知らない人かどうかを決めています。
 
 	コマンドラインオプションの --distribute はそういう目的です。
 
+別の言い方をすれば、/etc/aliases でやってるただのフォワードにスプール
+機能がついてるようなものですね。
+
 		
 .S	コマンド専用サーバ
+.k	$COMMAND_CHECK_LIMIT
 
 fmlのデフォールトの挙動は
 
@@ -1381,19 +1387,45 @@ fmlのデフォールトの挙動は
 	# command（英文字だけの塊）
 	の場合コマンドモードへ移行する
 
-です。これは 配送するのか？コマンドを実行するのか？の切替の合図に #
-command を使っているからです。
-Emacs の C- (control) とか vi のモード切替えみたいなものです。
+です。ちなみにこの３行の３は
+
+	$COMMAND_CHECK_LIMIT           = 3;
+
+で決めています。
+
+これは 配送するのか？コマンドを実行するのか？の切替の合図に 
+
+	# command options
+
+形を使っているからです。
+＃Emacs の C- (control) とか vi のモード切替えみたいなものです:-)
 
 コマンドしか受け付けないアドレスなら "# command" syntax じゃなくてもい
-いはずでず…	それは次説参照
+いはずでず…	
+
+	$COMMAND_SYNTAX_EXTENSION      = 1;
+
+とすると 
+
+	# command options 
+
+ではなくメールは
+
+	command options
+
+の形と仮定します。つまり通常のメールもすべてコマンドとみなされてしまう
+コマンド専用のサーバになります。
 
 
-.S	特殊目的専用のサーバへの変更
+.S	コマンドor特殊目的専用のサーバへの変更
+.k	コマンド専用のサーバへの変更
 .key	特殊目的専用のサーバへの変更
 .label	server-for-command-only
 
-$CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
+$CONTROL_ADDRESS にアドレスを登録するとコマンド専用野ＭＬサーバが作れ
+ます。その場合 $CONTROL_ADDRESS に来た場合有無を言わさずすべてコマンド
+と解釈します。
+
 別の汎用の仕方として、
 
 	$LOAD_LIBRARY = 'libfml.pl'; 
@@ -1404,12 +1436,13 @@ $CONTROL_ADDRESS にアドレスを登録すると コマンド専用になります
 
 とすれば、ftpmail 専用のアドレスに早変わりです。
 
-それは $LOAD_LIBRARY が設定されていると、配送じゃなくて、そのライブラ
-リを実行するように動くからです
+それは $LOAD_LIBRARY が設定されていると、そのライブラリを評価して実行
+するように作動します。この場合配送は行ないません。
 
 
 .S	リモートで管理する設定
-.seealso	REMOTE-ADMINISTRATION
+.xref	REMOTE-ADMINISTRATION
+.xref	bin/passwd.pl
 
 SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 にはなっていません。リモートで管理もできるようにモードを変えるには、
@@ -1447,7 +1480,8 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
    その場合のパスワードを保存するファイル
    $PASSWD_FILE        = "$DIR/etc/passwd";
 
-詳細は(.seealso REMOTE-ADMINISTRATION )を見てくださいませ。
+詳細は「リモート管理」の章を見てください。
+.xref REMOTE-ADMINISTRATION 
 
 
 .# ##########################################################
@@ -1456,172 +1490,7 @@ fukachan@sapporo.iij.ad.jp のパスワードを password という文字列に
 .include autoregist.wix
 
 
-
-.C	fml のプロセス
-
-.S	律速段階
-.key	何がどこが遅くさせるか？
-
-律速段階はやっぱり sendmailの配送プロセスそのものでしょう。
-この部分の overhead は R5 にくらべ R8 では非常に改善されましたが
-それでもかなりのものです。
-
-論理をひっくりかえすと、fml 自体を tuning して速度を例えば 0.1 sec 上
-げても ML の配送プロセスには何のメリットも生じないということでもありま
-す。
-
-余計なプロセスがついても、配送速度には効きません。それよりはいろいろな
-ことができたほうがおもしろいでしょう？という思想的背景はここに起因しま
-す。
-
-これを改善する方法は基本的に複数の sendmail で作業を分割することです。
-
-１	十分なパワーのマシンで十分な file descriptor や 
-	多くの process が走っても大丈夫であれば、
-	複数の sendmail を起動して配送を試みる。
-	この場合ちゃんと Load Average と sendmail.cf を tune する
-	必要がある。 
-	
-２	非力でも複数のマシンが用意できるなら複数のマシンでパラレルに実行
-
-３	リレーサーバを用意する。例えば東京方面、関西方面のように分けて
-	一回そのリレーサーバに投げて、そこから再配送をする。
-
-１、２は”MCI_… ” という変数群がそれを可能にします。
-
-リレーサーバは各ユーザごとに”管理者”が設定できます。
-リレーサーバは相手のマシンに負荷をかけるり、ネットワークトポロジーを
-考慮の上決めるべきです。
-また、fml のリレーハックは RFCにはない % hack を前提にしています。
-そのため、管理者が注意深く設定すべきです。
-
-
-
-.S	プロセスは誰の権限で動くか？
-.key	uid
-.key	setuid
-.key	ユーザー権限ということ
-.label	{fml-uid}
-
-「プロセスは誰の権限で動くか？」というのは sendmail 自体は root 権限で
-走っているからで、fml 実行時は fml 管理者のプロセスとして走ります。
-システムに「 fml 管理者の プロセスとして走る」用に命令することが
-システムによって違うことがあるので少し厄介なことが発生します。
-
-○ローカルに fml にメールを投げる
-
-	自分のuidで実行します
-
-○外からメールがやってきたら？
-	つまり sendmail がうけとって fml を起動する場合
-
-	外→	
-		sendmail は uid = 0 で待っている(デーモン)
-		＃昔の sendmail だと daemon の場合もあるだろう
-
-		→ setuidしてユーザー権限 (uid=your own) にして
-		   fml.pl を起動し、メールを fml.pl へ渡す
-		＃これは fml.c で作った fml を使うか
-		＃:include list 形
-
-.seealso configuration, calling-fml.pl, msend-0, msend-1, msend-2, msend-3, msend-dir
-
-ここでsetuidの話が関係するわけです。
-
-各ＯＳでどう setuid をすればうまくいくか？ は次の節にまとめてあります。
-
-注意：以下のまとめは昔 INSTALL に書いてありましたが、INSTALL のサイズ
-は適当な大きさに押えたいので細かいデータはすべてこの doc/op に収録して
-いくことにしてます。
-
-
-.S	/etc/aliases と ＯＳ依存性（make する時 OPT=-DPOSIX が必要か？）
-
-make すると fml という "C Wrapper" (setuidをするもの) が生成されます。
-fml（fml.c から作られる）自体は、make の時 fml.c を自動的に補正してく
-れているはずです。
-
-/etc/aliases では
-	Elena: :include:/some/directory/include-file 
-		もしくは
-	Elena: "|/some/directory/fml-2.1/fml"
-の両方の書き方ができますが、ＯＳによってうまくいったりいかなかったりし
-ます。現在では include-file 形式が普通のような気がします。
-
-sendmail が setuid をちゃんと実行できないからで、ターゲットマシン(4.4
-BSD )以外では挙動がまちまちみたいです
-
-問題は“ setuid のしかた”で大別すると、以下の２種類に別れます
-
- [4.3BSD]
-	fml でも :include: でもOKでしょう
-
- [4.4、POSIX準拠のOS、その他]
-	:include: 式か 
-	最後の技;-) rootにsetuidされたfml(make OPT=-DPOSIX)	
-
-以下は実際にテストされたOS一覧です
-
-	キーワード：
-	uid		ownerが自分自身で 4755 した fml
-	include		sendmail に setuid をまかせる :include:を使う
-	root		ownerがrootで 4755 した fml
-			＃こういうことは最後の手段であまりやりたくない…
-
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-4.3BSD			uid include
-4.4BSD 			include
-BSD386 1.1		include
-SUN4.1.2 - 4.1.3JLE 	uid include
-Solaris 2.4 		include
-Solaris 2.3J 		だめ？
-DEC OSF/1		[:include でかつ perl -U が必要（なぜ;_;？）]
-OSF/1 Alpha AXP V2.1 	include
-HP UX 9?		[:include でかつ perl -U が必要？]
-			＃なんか、setreuid しかないんだけど…＞HP-UX
-SVR3 [4.3BSD とおなじ]	uidでＯＫのはず
-
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-manualで確認した機種一覧
-4.3BSD系	SONY NEWS 4.x
-		4.1.3JLE
-		SVR3
-
-POSIX準拠	4.4BSD
-		NetBSD 
-		BSD/OS 2.x
-		BSD386 1.1
-		Solaris 2.4	
-
-その他の注意：
-・単に NFS ごしだからうまくいかなった という場合(オチ;-)もあるでしょう
-
-そのときはsetuid する時だけ local ならいいわけで、
-たとえば /usr/local/ml/fml とかを作ってもらってfml.pl自体は NFS ごしの 
-home とかにおいてある という風にしてあればＯＫでしょう
-
-・NFSごしにファイルが存在すると setuid を認めない機種 もある
-たとえば
-		SUN 4.1.3JLE 4.1.4
-		＃これは fpathconf の return 値が問題
-
-・uid と include を試してみてどっちもうまくいかなかったら
-最後の手段（root）： 
-
-まず fml.c をPOSIX版で 作りなおしてください（make OPT=-DPOSIX）。
-make OPT=-DPOSIX として make してください
-
-root のケースでは rootでしかかけない /usr/local/ml/driver 
-とかにインストールしてもらうとかしたほうがいいとおもいます。取り扱いに
-は注意してくださいね。管理者とよく相談してみてください（重要）
-＃もしかしたら sendmail が呼ぶ関数のどこかで rootのsetuid をみとめない
-＃かもしれないということもあるかもしれない。単にＮＦＳかもしれないが:-)
-
-
-
-
-
-
+.#	hikari beth
 .C	コマンドの実行に関する２、３のこと…
 
 .S	ＭＬで使えるコマンドを増やすor減らす
