@@ -48,6 +48,10 @@ $DISTRIBUTE_FILTER_HOOK .= q#
     if ($e{'Body'} =~ /filename=.*\.Pretty Park\.exe/i ) {
 	return 'original Pretty Park virus';
     }
+
+    if ($e{'Body'} =~ /filename=.*\.Pretty.*Park.*\.exe/i ) {
+	return 'original Pretty Park familly ?';
+    }
 #;
 
 # さらに HOOK へつけたす
