@@ -51,11 +51,18 @@ for (;;) {
     # e.g. 18:00 
     if ($min == 0 || $debug_msend) {
 	for $ml (keys %IncludeFile) {
-	    next unless $ml;
+print qq#
+	    next if !-f $ML_DIR/$ml/config.ph;
+	    next if !-f $MsendRc{$ml};
+#;
 
+	    next unless $ml;
+	    next if !-f "$ML_DIR/$ml/config.ph";
+	    next if !-f $MsendRc{$ml};
+	    
 	    &Log("start $ml msend session") if $debug;
 
-	    $p = &ArrangeMSendProc;
+	    $p = &ArrangeMSendProc($ml);
 	    system $p;
 	}
     } # $min == 0
@@ -67,7 +74,10 @@ exit 0;
 
 sub GetConf
 {
-    local($ml, $eval, $ctladdr);
+    local($ml, $eval, $ctladdr, $pat);
+
+    $pat = 
+	'^\$(FQDN|DOMAINNAME|CONTROL_ADDRESS|MAINTAINER|MSEND_RC|[A-Z_]+DIR)';
 
     opendir(DIRD, $ML_DIR) || die("Error: cannot open ML_DIR[$ML_DIR];$!");
     for $ml (readdir(DIRD)) {
@@ -82,10 +92,10 @@ sub GetConf
 	if (-f $cf) {
 	    undef $eval;
 
-	    $eval .= &Grep('^\$FQDN', $cf);
-	    $eval .= &Grep('^\$DOMAINNAME', $cf);
-	    $eval .= &Grep('^\$CONTROL_ADDRESS', $cf);
-	    $eval .= &Grep('^\$MAINTAINER', $cf);
+	    # evaluate
+	    $eval  = q#$DIR = "$ML_DIR/$ml";#;
+	    $eval .= "\n";
+	    $eval .= &Grep($pat, $cf);
 	    eval $eval; &Log($@) if $@;
 
 	    ($ctladdr) = split(/\@/, $CONTROL_ADDRESS);
@@ -94,6 +104,7 @@ sub GetConf
 	    if (-f "$ML_DIR/$ml/include" && &GetPopPasswd($ml, $cf)) {
 		$IncludeFile{$ml}       = "$ML_DIR/$ml/include";
 		$MsendList{$ml}         = "$ML_DIR/$ml";
+		$MsendRc{$ml}           = $MSEND_RC;
 	    }
 
 	    if ($ctladdr ne $ml) {
@@ -116,9 +127,10 @@ sub GetConf
 sub Init
 {
     require 'getopts.pl';
-    &Getopts("d");
+    &Getopts("do:");
 
-    $debug = $opt_d;
+    $debug       = $opt_d;
+    $debug_msend = $opt_o eq 'debug_msend' ? 1 : 0;
 
     ### COMPAT CODE ###
     if ($ENV{'OS'} =~ /Windows_NT/) {
@@ -283,14 +295,15 @@ sub ArrangeMSendProc
 sub Grep
 {
     local($key, $file) = @_;
+    local($s);
 
     &Log("Grep $key $file") if $debug;
 
     open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
-    while (<IN>) { return $_ if /$key/i;}
+    while (<IN>) { $s .= $_ if /$key/i;}
     close(IN);
 
-    $NULL;
+    $s;
 }
 
 
