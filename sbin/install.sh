@@ -34,7 +34,7 @@ list=/tmp/.fml-install$$
 
 eval umask 022;
 
-DIRS="bin sbin libexec cf etc sys src drafts messages"
+DIRS="bin sbin libexec cf etc sys src drafts messages www"
 
 if [ X$MKDOC != Xno ]
 then
@@ -70,7 +70,7 @@ chmod 755 src/fml.pl src/msend.pl makefml
 ### here we go! ###
 for dir in $DIRS
 do
-	echo "Installing $dir ..."
+	echo -n "Installing $dir "
 
 	# making directories
 	find $dir -type d -print|while read x
@@ -100,8 +100,11 @@ do
 	   	test -d $EXEC_DIR/$dir || mkdir $EXEC_DIR/$dir
 	   fi
 
+	   echo -n '.'
 	   MOVE
 	done
+
+	echo ''
 done
 
 chmod -R +w $EXEC_DIR/*
