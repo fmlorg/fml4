@@ -50,7 +50,8 @@ FQDN:		&fix:fqdn axion.phys.titech.ac.jp
 # $PERMIT_POST_FROM is "anyone", "members_only" or "moderator", 
 # which permit post from who? If not-member posts is rejected,
 # THE FUNCTION $REJECT_POST_HANDLER is applied.
-# $REJECT_POST_HANDLER is "reject", "auto_regist" or "ignore"
+# $REJECT_POST_HANDLER is "reject", "auto_subscribe" or "ignore"
+#     you can use "auto_regist" used in fml 2.x.
 #
 # **ATTENTION**: "reject" implies just "NOT REGISTERED IN $MEMBER_LIST".
 #    See "Section: Security" for positive reject against e.g. spammers.
@@ -65,7 +66,8 @@ REJECT_POST_HANDLER:	reject
 # $PERMIT_COMMAND_FROM is "anyone", "members_only" or "moderator", 
 # which permit command from who? If not-member commands is rejected,
 # THE FUNCTION $REJECT_COMMAND_HANDLER is applied.
-# $REJECT_COMMAND_HANDLER is "reject", "auto_regist" or "ignore"
+# $REJECT_COMMAND_HANDLER is "reject", "auto_subscribe" or "ignore"
+#     you can use "auto_regist" used in fml 2.x.
 #
 # value: string
 CONTROL_ADDRESS:  	Elena-ctl@$FQDN
@@ -126,7 +128,8 @@ MANUAL_REGISTRATION_CONFIRMATION_FILE:	$DIR/confirm.msub
 
 #####################################################################
 # ### Section: Automatic Registration ###
-# If at least either REJECT_{POST,COMMAND}_HANDLER is "auto_regist", 
+# If at least either REJECT_{POST,COMMAND}_HANDLER is "auto_subscribe"
+# or "auto_regist",
 # PLEASE SELECT THE TYPE OF AUTOMATIC REGISTRATION
 # value: confirmation/subject/body/no-keywrod
 AUTO_REGISTRATION_TYPE:	confirmation
@@ -164,7 +167,8 @@ CONFIRMATION_LIST:
 # value: string
 DEFAULT_SUBSCRIBE:  subscribe
 
-# WHEN either $REJECT_{POST,COMMAND}_HANDLER has "auto_regist", 
+# WHEN either $REJECT_{POST,COMMAND}_HANDLER has "auto_subscribe" 
+# (or "auto_regist"), 
 # we do automatic registration. After we register an address to 
 # $MEMBER_LIST ($FILE_TO_REGIST if $FILE_TO_REGIST is set),
 # we send $WELCOME_FILE to him/her with the subject $WELCOME_STATEMENT
