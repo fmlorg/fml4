@@ -1,40 +1,59 @@
-.C	アーカイブ, Archive & Expire
-.label	{archive}
+.C	アーカイブ, Archive
+.l	archive
 
-場所をとるから古い記事にはgzipかけたい。でも一つ一つやるより100個ずつ
-とかまとめて固めると、さらに効率が上がります。というのは、ヘッダとか同
-じようなものが繰り返し出てくるからですね。
+.S	Introduction
+.l	archive-and-expire-conflicts
+
+場所をとるから古い記事は tar で100個くらい固めて gzip かけると 1/4 く
+らいになります。100 というマジックナンバーの目安は 100 個固めると 50K 
+前後になるので好都合な値にうまくなるという経験論から来ています。
+効率がいいのはヘッダとか同じようなものが繰り返し出てくるからですね。
+
+しかし $USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。必ず 
+$EXPIRE_LIMIT が記事の数で指定されていて、
+
+	$EXPIRE_LIMIT > $ARCHIVE_UNIT 
+
+でなくてはいけません。念のため
+
+	$EXPIRE_LIMIT = $ARCHIVE_UNIT * 2;
+
+くらいにしておくのが良いでしょう。
 
 
-.S	古い記事に gzip をかけて固める(場所をとるから)
-.key	@ARCHIVE_DIR
-.key	@StoredSpool_DIR
+.S	config.ph の設定
+.l	$USE_ARCHIVE
 
-config.ph の例：
+現在ではHOOKをかけなくてすむように 
+
+	$USE_ARCHIVE = 1;
+.k	$USE_ARCHIVE
+
+をセットすれば呼べるようになっています。
+アーカイブが作られる場所は @ARCHIVE_DIR の先頭の内容
 
 	@ARCHIVE_DIR = ('var/archive');
+.k	@ARCHIVE_DIR
 
-＃ @StoredSpool_DIR = ('var/archive'); は Obsolete な書き方です。
-＃ Backward Compatibility として
-＃ 内部で @ARCHIVE_DIR に代入してるので、どちらでも動きます
+です。ここでは 'var/archive' です。配列 @ARCHIVE_DIR の内容は複数あっ
+てもいいですがそれは get, mget の時に探す対象となるだけで作る場所とは
+みなされません。
+何個ずつ単位でまとめるかは
 
-以下記事100個ずつ、つまり
+	$ARCHIVE_UNIT 
+.k	$ARCHIVE_UNIT 
 
-	spool/1〜100
-
-を tar して gzip かけて
-
-	var/archive/100.tar.gz 
-
-と作っているとしましょう
-
-これを 次のように fml.pl は解釈します。
-上に出てくる 100 個という数字は
+で決まります。この値がないと
 
 	$DEFAULT_ARCHIVE_UNIT
 .k	$DEFAULT_ARCHIVE_UNIT
 
-でコントロールできます。デフォールトは 100 です。
+が使われます。デフォールトは 100 です。backward compatibility のためこ
+の変数がなくても 100 になります。
+＃ @StoredSpool_DIR = ('var/archive'); は Obsolete な書き方です。
+＃ Backward Compatibility として
+＃ 内部で @ARCHIVE_DIR に代入してるので、どちらでも動きます
+.key	@StoredSpool_DIR
 
 
 .S	"# get 1 " と archive
@@ -54,7 +73,7 @@ config.ph の例：
 
 	var/archive/100.tar.gz 
 
-があれば、ファイル １ を取り出して１だけを送り返す。
+があれば、ファイル １ を取り出して１だけを送り返します。
 
 
 .S	"# mget 1 " と archive
@@ -82,9 +101,13 @@ config.ph の例：
 上述のようになります。
 
 
-.S	Archive.pl (bin/Archive.pl)
+.S	gzip file にする(アーカイブへの変換)
+.l	Archive.pl
 .k	bin/Archive.pl
 .key	Archive.pl
+
+$USE_ARCHIVE の自動操作にまかせずに時々手で or cron でこのプログラムを
+動かしても良いです。cron で自動処理するなら次の節を御覧下さい
 
 	Archive.pl [-dh] [-A ARCHIVE_DIR][-u unit] MAX
 	-d	debug mode
@@ -103,13 +126,6 @@ config.ph の例：
 	chdir /var/spool/ml/Elena; perl bin/Archive.pl 
 
 のように使うことを期待されています。
-		
-
-.S	gzip file にする(アーカイブへの変換)
-.key	Archive.pl
-
-それには上述の Archive.pl というのを使って下さい。
-さらに cron で自動処理するなら次の節を御覧下さい
 
 これは Archive.pl 2000 とかすると、2000 までのファイルを 100 個ずつの
 塊にして、archiveに作ります。変数は Archive.pl の先頭でセットしてくだ
@@ -190,8 +206,9 @@ crontab が
 
 ２．Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
 るのでファイル数を減らす or ほかの場所に移すことに意味があるようになり
-ます。そこでspoolの中身をうつし、１００分の一のファイル数にすると効果
-が非常にあります。
+ます。そこでspoolの中身をうつし、100分の一のファイル数にすると効果が非
+常にあります。また、kernel 内の directory cache が大きくなるのも避けた
+いところですから、そのためにもよいです。
 
 
 .# $Id$
