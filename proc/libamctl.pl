@@ -521,9 +521,10 @@ sub DoChangeMemberList
 		print NEW "$addr\n"; 
 	    }
 
-	    # Matome Okuri Control
+	    # Matome Okuri Control 
+	    # $addr is reset each time, $org_addr is reused after if matome 0
 	    if ($cmd eq 'MATOME') {
-		local($addr, $org_addr) = &CtlMatome($addr, *misc);
+		($addr, $org_addr) = &CtlMatome($addr, *misc);
 		print NEW "$addr\n"; 
 	    }
 
@@ -583,6 +584,9 @@ sub DoChangeMemberList
 	&ConfigMSendRC($curaddr);
 	&Rehash($org_addr) if $org_addr;# info of original mode is required
     }
+    elsif ($cmd eq 'MATOME' && $status ne 'done') {
+	&Log("Matome[Digest]: something Error");
+    }
 
     &Mesg(*e, "O.K.!") if $status eq 'done';
 
@@ -597,7 +601,7 @@ sub CtlMatome
     local($org_addr) = $a;	# save excursion
     local($s);
 
-    &Debug("CtlMatome { $addr=[$addr] => [$matome];}") if $debug;
+    &Debug("CtlMatome::{ \$addr[$addr] => [$matome];}") if $debug;
 
     # parameter is whether 0 or not-defiend
     if ($matome eq '') {
@@ -685,15 +689,17 @@ sub Rehash
 sub ConfigMSendRC
 {
     local($curaddr) = @_;
-    local($ID) = &GetID;
+    local($ID)      = &GetID;
 
+    # may be duplicated 
+    # but the latter config is overwritten when msend.pl works. 
     if (open(TMP, ">> $MSEND_RC") ) {
 	select(TMP); $| = 1; select(STDOUT);
 	print TMP "$curaddr\t$ID\n";
 	close TMP;
     } 
     else { 
-	&Log("Cannot open $MSEND_RC");
+	&Log("ConfigMSendRC: Cannot open $MSEND_RC");
     }
 }
 
