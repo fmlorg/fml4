@@ -26,8 +26,9 @@ all:
 install:
 	perl ./makefml install
 
-install-withcgi:
-	perl ./makefml -W cgi install
+# install-withcgi:
+#	perl ./makefml -W cgi install
+install-withcgi: install
 
 dns_check:
 	@ perl bin/dns_check.pl
