@@ -1,4 +1,17 @@
-.C	MIME関係
+.C	MIME関係の変数
+
+.S	MIME 関係の処理を ON にする
+
+	$USE_MIME = 1; (default 1)
+.xref	$USE_MIME
+
+.S	記事を強引にMIME decodeする (使ってはいけない)
+
+	$MIME_DECODED_ARTICLE
+.xref	$MIME_DECODED_ARTICLE
+
+
+.C	MIME関係の解説
 
 .S	MIME処理
 =E.S	Header Mime Decoding (To Japanese)
@@ -59,6 +72,5 @@ is saved in summary file as
 と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
 時に日本語へ逆変換した内容を書き込みます。ただしこれをすると 
 MIME/Multipart とかでエラーになるのでやってはいけません。
-
 
 .# $Id$
