@@ -1,0 +1,205 @@
+#!/usr/local/bin/perl
+#-*- perl -*-
+#
+# Copyright (C) 2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#
+# $Id$
+#
+
+$| = 1;
+
+# getopt()
+require 'getopts.pl';
+&Getopts("dhp:i:");
+
+$debug = $opt_d;
+$TrapPattern   = $opt_p || 'Config';
+$IgnorePattern = $opt_i ; # || '(DefaultConfigPH|__LoadConfiguration)';
+
+&DummyConfig;
+for (@ARGV) { &Trace($_);}
+
+
+if (%UNDEF) {
+    print "\n\n";
+    for (keys %UNDEF) {
+	print "undef> ", $_, "\n";
+    }
+}
+
+if ($IgnoreBuf) {
+    print "\n\n";
+    print $IgnoreBuf;
+}
+
+exit 0;
+
+
+sub DummyConfig
+{
+    for my $f ('Getopts', 'Debug', 'ConvertMode2CFVersion3') {
+	$where{$f} = $file{$f} = 1;
+    }
+
+    $where{"jcode'convert"}  = 1;
+    $file{"jcode'convert"}   = 1;
+    $where{"jcode'init"}     = 1;
+    $file{"jcode'init"}      = 1;
+    $where{"jcode::convert"} = 1;
+    $file{"jcode::convert"}  = 1;
+    $where{"jcode::init"}    = 1;
+    $file{"jcode::init"}     = 1;
+}
+
+
+sub Trace
+{
+    my ($f) = @_;
+
+    $f =~ s/"//g; #";
+    $f =~ s/'//g; #';
+    $f =~ s/\(//g;
+    $f =~ s/\)//g;
+
+    $f =~ s@\$CONFIG_DIR@/usr/local/fml/.fml@;
+    $f =~ s@\$CGI_CONF@/usr/local/fml/.fml/cgi.conf@;
+
+    if (-f $f) {
+	;
+    }
+    else {
+	for my $path (@INC, 
+		      "./kern", "./proc", "./www/lib",
+		      "/usr/local/fml") {
+	    if (-f "$path/$f") {
+		$f = "$path/$f";
+		last;
+	    }
+	}
+    }
+
+    my ($package) = 'main';
+
+    return $NULL if $Cache{$f};
+    $Cache{$f} = 1;
+    return $NULL if $f =~ m#/usr/local/lib/perl#;
+    return $NULL if $f =~ /jcode.pl/;
+    return $NULL if $f =~ /libcompat_/;
+    return $NULL if $f =~ /libsimulation/;
+    return $NULL if $f =~ /libmodedef/;
+
+    $Hier++;
+
+    if (1) { 
+	print "---";
+	print "   " x $Hier;
+	print "open $f\n";
+    }
+
+    my ($i) = 0;
+    open($f, $f) || die("cannot find $f : $!");
+    while (<$f>) {
+	$i++;
+
+	s/Log\(.*\)//;
+	s/\#.*$//;
+
+	if (/^package\s+(\S+);/) {
+	    $package = $1;
+	}
+
+	if (/^sub (\S+)/) {
+	    my ($fp) = $1;
+	    $fp =~ s@'@:;@; #';
+
+	    $where{$fp} = $i;
+	    $file{$fp}  = $f;
+	}
+    }
+    close($f);
+
+    # convert for more easy parsing
+    my ($new) = "/tmp/lib$$";
+    open($f, $f) || die("cannot find $f : $!");
+    open($new, "> $new")  || die("cannot find $new : $!");
+    while (<$f>) {
+	s/\{/\n{\n/g;
+	s/\}/\n}\n/g;
+	s/=/\n=\n/g;
+	print $new $_;
+    }
+    close($new);
+    close($f);
+
+    open($f, $new) || die("cannot find $f : $!");
+    while (<$f>) {
+	s/Log\(.*\)//;
+	s/use\((\S+)\)/require lib${1}.pl/;
+	s/\#.*$//;
+
+	if (/require (\S+);/) { &Trace($1);}
+
+	if (/&([_a-zA-Z0-9]+);/     || 
+	    /&([_a-zA-Z0-9]+)\s*\)/ ||
+	    /&([_a-zA-Z0-9]+)\(/    ){ # function call
+	    my ($fp) = $1;
+	    $fp =~ s@'@:;@; #';
+
+	    if ( $file{$fp} && $where{$fp}) {
+
+		if ( $xbuf = &__Scan($fp, $file{$fp}, $where{$fp}) ) {
+		    print "   " x $Hier;
+		    print "&${fp}( $file{$fp} )\n";
+		    print $xbuf;
+		    print "\n";
+		}
+
+	    }
+	    else {
+		$UNDEF{$fp} = $fp;
+		# print "   " x $Hier; print " * undefined $fp\n";
+		print "   " x $Hier; print " * ", $_;
+	    }
+	}
+    }
+    close($f);
+
+    $Hier--;
+}
+
+
+sub __Scan
+{
+    my ($fp, $file, $p) = @_;
+    my ($xbuf);
+
+    print "===> $fp \n" if $fp eq 'SecureP';
+    print "my ($fp, $file, $p)\n" if $debug;
+
+    if (open(F, $file)) {
+	my ($i) = 0;
+
+	while (<F>) {
+	    next if $i++ < ($p - 2);
+
+	    if ( $debug ){
+		$xbuf .= "   " x $Hier;
+		$xbuf .= $_;
+	    }
+
+	    if ($IgnorePattern && /$IgnorePattern/) {
+		$IgnoreBuf .= "ignored> $_"; # ignored
+	    }
+	    elsif (/$TrapPattern/) {
+		$xbuf .= "   " x $Hier;
+		$xbuf .= "   ". $_;
+	    }
+
+	    last if /^\}/;
+	}
+	close(F);
+    }
+
+    $xbuf;
+}
