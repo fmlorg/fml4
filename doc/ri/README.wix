@@ -343,6 +343,7 @@ fml のターゲットマシンでのテスト環境は
 2.1 は
 	sendmail 8.7.6 + perl4.036 on NetBSD 1.2 Beta
 	sendmail 8.8.0 + perl4.036 on NetBSD 1.1B Current
+	sendmail 8.8.0 + perl5.003 on NetBSD 1.1B Current
 	(fwtk 1.3 も併用) 
 
 2.0 まで

@@ -19,12 +19,13 @@ config.ph を直したりすれば良いでしょう。
 
 .S	Version up
 
-Version up は *.pl をコピーすれば終りです。
+現在では ソースの下の src 階層以下に perl scripts は集められています。
+よって version up は src/*.pl をコピー(cp -pr)すれば終りです。
 
 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
 
 
-.S	インストール後にサーバの設定（パラメータ）をいじる
+.S	インストール後にサーバの設定(パラメータ)をいじる
 .l	how-to-customize-parameter
 .key	fml.plの起動のしかた
 .key	exec fml.pl
@@ -32,9 +33,10 @@ Version up は *.pl をコピーすれば終りです。
 .key	$LIBDIR
 .key	fml.c
 .key	fml.plの引数
+.xref	fml-maintenance
 
 
-例によって複数のやり方があります:-)
+いつものように複数のやり方があります:-)
 
 ○	ひとつしかMLがない場合
 	
@@ -176,7 +178,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 
 .S	まとめおくり
-.label	msend-intro
+.l	msend-intro
 .key	UNIX FROM
 .key	RFC934
 .key	RFC1153
@@ -198,7 +200,7 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 ということをすることです。送るべき時間になった時その場で作るため
 各ユーザーごとに
    配送するべき時間
-	Ｎ時間おき、一日一回等
+	N時間おき、一日一回等
 
    配送時のファイルのまとめ方
 
@@ -214,8 +216,8 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 
 .S	コマンドコントロール専用のアドレス
-.label	{control-addr}
-.seealso calling-fml.pl
+.l	control-addr
+.xref	calling-fml.pl
 .key	$CONTROL_ADDRESS
 .key	コマンドの専用アドレス
 .key	コントロール専用アドレス
@@ -226,15 +228,15 @@ config.phの中で
 
 をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
 けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
-ルがきても配送はしない
+ルがきても配送はしません。ちなみに
 
-ちなみに
 	'Elena-ctl';
 
 でも
+
 	'Elena-ctl@axion.phys.titech.ac.jp';
 
-のようにフルアドレスを書いても良いです。
+のようにフルにアドレスを書いても良いです。
 
 ローカルからコマンドメールを出す時のことを考えると、
 フルアドレスじゃないほうが望ましいという意見があります。
@@ -477,13 +479,16 @@ config.ph の中で
 	autosubject	subject: subscribe のキーワードを必要とする
 	autobody	メール本文にsubscribe のキーワードを必要とする
 	cack		コマンドをだれでも実行できる（ + trick の時有用）
+	remote		ＭＬのリモート管理機能が使えるモードへ
+	ra		同上
 
 
-ソースより(以下 libmodedef.pl 2.0.2)：
+ソースより(以下 libmodedef.pl 2.0.4)：
 .q
 sub ModeDef
 {
     local($mode) = @_;
+    $mode =~ tr/A-Z/a-z/;
 
     &Debug("ModeDef::$mode()") if $debug;
 
@@ -517,12 +522,17 @@ sub ModeDef
 	$PROHIBIT_COMMAND_FOR_STRANGER = 0;
     }
 
+    if ($mode eq 'remote' || $mode eq 'ra') {
+	$REMOTE_ADMINISTRATION = 1;
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+    }
+
     1;
 }
 .~q
 
 
-.S	再配送だけをするサーバ（コマンドを必要としないサーバ）
+.S	再配送だけをするサーバ(コマンドを必要としないサーバ)
 .key	再配送だけをするサーバ
 .xref	--distribute
 
@@ -575,7 +585,7 @@ fmlのデフォールトの挙動は
 コマンド専用のサーバになります。
 
 
-.S	コマンドor特殊目的専用のサーバへの変更
+.S	コマンド or 特殊目的専用のサーバへの変更
 .k	コマンド専用のサーバへの変更
 .key	特殊目的専用のサーバへの変更
 .label	server-for-command-only
@@ -605,18 +615,29 @@ $CONTROL_ADDRESS にアドレスを登録するとコマンド専用野ＭＬサーバが作れ
 SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 にはなっていません。リモートで管理もできるようにモードを変えるには、
 
-	コマンドラインオプションで --remote か
-
-	$REMOTE_ADMINISTRATION = 1;
+	コマンドラインオプションで --remote (か --ra) か
+	config.ph で &DEFINE_MODE('remote') (か &DEFINE_MODE('ra'))  
 
 としてください。デフォールトではパスワードを要求する設定です。
-＃つまり   $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; の状態
+この状態は
 
-パスワードは $DIR/etc/passwd に crypt された形で保存されます。
+	$REMOTE_ADMINISTRATION = 1;
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1;
+
+を設定しているのと同じです。
+
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD 
+
+をセットしないならパスワード認証をせず管理者のメンバーリスト 
+($ADMIN_MEMBER_LIST) でアドレスの認証だけをします。 
+
+また、パスワードは $DIR/etc/passwd に crypt された形で保存されます。
 
 新たにパスワードを初期化する場合は
 	bin/passwd -i mail-address new-passwod
-のようにしてください。
+のようにしてください。アドミンコマンドには初期化用の initpass というコ
+マンドが用意されています。
+.xref	remote
 
 例：
 	% bin/passwd -i fukachan@sapporo.iij.ad.jp password

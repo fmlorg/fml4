@@ -516,8 +516,8 @@ sendmail の struct envelople e; に対応するものです。
 .k	fml 設定ファイルのフォーマットと構造
 
 fml の設定ファイル、メンバーリストは基本的に shell like な構造で記述さ
-れていると期待されています。つまり # ではじまる行はコメント、空行は飛
-ばす等の挙動を各ルーチンはしています。
+れていると期待されています。つまり基本的に # ではじまる行はコメント、
+空行は飛ばす等の挙動を各ルーチンはしています。
 
 以下では各設定ファイルのフォーマットについて言及します。
 
@@ -570,8 +570,11 @@ $ACTIVE_LIST (default members) で定義されるファイルは ＄MEMBER_LIST と
 
 	アドレス	オプション	# コメント
 
-よって、勝手に何かを書いた場合オプションとみなされます。付加情報は # 
-コメント として行の最後にでも書いて下さい。この辺は shell と同じです。
+	注意：なお、それぞれの↑ブロックの間には必ず一つ以上の SPACE
+	か TAB があると仮定しています。
+
+よって勝手に何かを書いた場合オプションとみなされます。付加情報は # コ
+メント として行の最後にでも書いて下さい。この辺は shell と同じです。
 
 オプションは V1 と V2 フォーマットがあります。
 
@@ -586,7 +589,8 @@ $ACTIVE_LIST (default members) で定義されるファイルは ＄MEMBER_LIST と
 	r=リレーサーバ
 	s=1(skip を意味する)
 
-のように alphabet=option-value の形で定義されています。
+のように alphabet=option-value の形で定義されています。現在のところこ
+れ以外のキーワードは将来のために予約されています。
 
 現在のルーチンは V2 のみを理解します。よって V1 -> V2 に変換する必要が
 あります。この変換は
@@ -598,6 +602,7 @@ $ACTIVE_LIST (default members) で定義されるファイルは ＄MEMBER_LIST と
 
 
 .S	actives と members の違い
+.k	actives と members の違い
 
 フォーマット的には上述の通りです。後は自動登録の章で述べられている通り
 members はメンバーであるか否か？の認証、 actives は配送リストです。
@@ -635,6 +640,8 @@ msend.pl は $ACTIVE_LIST を見て、
 .k	パスワードファイルのフォーマットと構造
 .l	etc/passwd
 .xref	bin/passwd.pl remote
+.k	$PASSWD_FILE
+.k	$DIR/etc/passwd
 
 パスワードを保存しているファイルは通常 etc/passwd に置かれています。
 
@@ -652,16 +659,23 @@ msend.pl は $ACTIVE_LIST を見て、
 
 あるアドレスをこのファイルへ登録する時などは bin/passwd.pl を使うと良
 いでしょう。
-.xref	bin/passwd.pl
+＃また、admin コマンドには initpass という初期化コマンドもあります。
 
 
-.k	fmlインストール後のmaintenanceとversion upに関する一考察
+.S	fml インストール後の maintenance と version up に関して
+.l	fml-maintenance
 .k	How to maintan the installed fml source
 .k	インストール後のメインテナンスとversion up
+.k	version up of fml
+.k	maintenance of fml
 
 上述のデータ構造とファイルの扱いを考慮した場合、インストール後の
 version up や maintenance に便利な形は次のようなものだと思っています。
-少なくとも僕はそういう風にやってます。
+＃僕はこんな感じにやってます。
+
+version up は基本的に 
+	cp -p fml-source/src/*.pl your-directory 
+です。
 ＃以下 $HOME は適当に各自の環境に合わせて展開して考えて下さいね
 
 	$HOME/libexec/fml/ に *.pl を全部いれておく
@@ -679,15 +693,29 @@ version up や maintenance に便利な形は次のようなものだと思っています。
 のようなファイルを /etc/aliases から呼び出します。僕はＭＬ用には
 $HOME/etc/aliases を使ってたりしますが:-)
 ＃ sendmail.cf は O AliasFile=/etc/aliases, それ以外のaliasファイル
+.k	sendmail.cf
 .k	O AliasFile=...
 
 version up の仕方は、例えば次のようになるでしょう。
 
 	% cd /var/tmp
 	% tar zxvf fml-current.tar.gz
-	% cp -p fml-2.1何か/*.pl $HOME/libexec/fml
+	% cp -pr fml-2.1何か/src/*.pl $HOME/libexec/fml
 
 で終りだと:-)
+
+maintenance は コマンドのパスやＭＬ全体共通の設定は
+
+	$HOME/libexec/fml/sitedef.ph 
+.k	sitedef.ph 
+
+で行ない、各ＭＬごとの設定は
+
+	$HOME/w/spool/fml-support/config.ph 
+.k	config.ph 
+
+で制御する。
+
 
 
 .C	Security 
@@ -720,7 +748,8 @@ SecureP は以下のように
 します。
 
     １ 	\w/\w の部分は見逃す。＃ ../ とか .[a.]/ とかはだ〜め
-       	/ でOKのところは消去し、
+       	/ でOKのところは消去する
+	また、まとめ送り等の m=数字 等の特別なシンタックスは消去する。
 
     ２ 	/^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/
 

@@ -129,7 +129,7 @@
 .include app/fmlR1.wix
 .include app/vars.wix
 .include app/misc.wix
-.include app/sid.wix
+.# .include app/sid.wix
 .# .include app/obsolete.wix
 
 
