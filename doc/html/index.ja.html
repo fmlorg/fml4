@@ -16,7 +16,7 @@
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" mailing list server/manager package
+"fml" <B>4.0</B> mailing list server/manager package
 <A HREF="http://www.nuinui.net/menu.html" TARGET=_top><IMG SRC="logo.jpg"></A>
 </CENTER>
 </H1>
@@ -59,8 +59,8 @@ basic コース: まず最初に見てみてほしい場所
 <P>最近のトピックス
 <UL>
 	<LI>
-	<A HREF="http://www.fml.org/devel/fmlsrc/index.ja.html">
-	次世代プロジェクト (fml next generation)
+	<A HREF="http://www.fml.org/devel/fmlsrc/index.html.ja" TARGET=_top>
+	次世代プロジェクト: (遠い将来) fml 5.0 になるでしょう
 	</A>
 
 	<LI>
@@ -68,8 +68,27 @@ basic コース: まず最初に見てみてほしい場所
 	<A HREF="ftp://ftp.fml.org/pub/fml/stable/">
 	4.0 stable シリーズ
 	</A>
-	は現在 4.0.1_ALPHA というステータスです。
-	問題なければじきに 4.0.1_BETA および 4.0.1 リリースになります。
+	は現在 4.0.1_BETA というステータスです
+	(注: ファイル名は fml-stable になっています)。
+	問題なければじきに 4.0.1 リリースになります。
+	<BR>
+	<A HREF="CHANGES-4.0.1/index.html">4.0.1 の変更点一覧</A>
+
+	<LI>
+	4.0 の doc/devel/ のドキュメントは 
+	<A HREF="http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/tips.html">
+	5.0 branch のドキュメント (SGML)
+	</A>
+	に移動しました。 5.0 の開発の一貫として保守されます。
+	<A HREF="http://www.fml.org/devel/fmlsrc/Documentation/ja/tech/perl.html">
+	OS 附属 Perl バージョンの一覧表
+	</A>
+	などもこちらへ移動しました。
+
+	<LI>
+	FYI: RFC 821 と 822 は 2821 と 2822 により obsolete になりました。
+	fml ドキュメント中で 821 822 をよく取り上げますが、適宜読み直すなり
+	してください。
 
 	<LI>
 	<A HREF="Japanese/FAQ/index.html">
@@ -133,13 +152,13 @@ basic コース: まず最初に見てみてほしい場所
 
 <P>fml リリースの<A HREF="releng.ja.html">流れ</A>。
 <A HREF="ftp://ftp.fml.org/pub/fml/current/">
-fml-current
+fml 4.0-current
 </A>
 は開発版。
 <A HREF="ftp://ftp.fml.org/pub/fml/stable/">
 fml-stable
 </A>
-は 3.0 release にbug fixをしている版です。
+は 4.0 release にbug fixをしている版です。
 fml-stable の一番新しい日付がお薦めです
 (開発サイドとしてはfml-currentのテストをしてくれる方がもちろんあり難いです)。
 </UL>
@@ -157,7 +176,6 @@ fml-stable の一番新しい日付がお薦めです
 
 <TR>
 	<TD><A HREF="#fml">配布ドキュメント(current)</A></TD>
-	<TD><A HREF="http://www.sapporo.iij.ad.jp/staff/fukachan/fml/sources/stable/src/doc/html/index-j.html"> 配布ドキュメント(stable) </A></TD>
 	<TD><A HREF="advisories/index.html">アドバイザリィ</A></TD>
 
 <TR>
@@ -196,16 +214,6 @@ fml-stable の一番新しい日付がお薦めです
         <LI>
 	<A HREF="UPGRADE-3.0/index.html">
 	3.0へ移行する際の注意 (*** 重要 ***)
-	</A>
-
-        <LI>
-	<A HREF="CHANGES-3.0.2/index.html">
-	fml-stable CHANGES (from 3.0.1 to 3.0.2)
-	</A>
-
-        <LI>
-	<A HREF="CHANGES-3.0.1/index.html">
-	3.0.1 CHANGES (3.0 to 3.0.1)
 	</A>
 </UL>
 
@@ -318,10 +326,10 @@ http://www.sapporo.iij.ad.jp/staff/fukachan/
 </ADDRESS>
 
 <PRE>
-Copyright (C) 1993-2000 Ken'ichi Fukamachi
+Copyright (C) 1993-2001 Ken'ichi Fukamachi
          All rights reserved.
 
-$Id$
+$FML$
 </PRE>
 </BODY>
 </HTML>
