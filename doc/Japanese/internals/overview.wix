@@ -397,7 +397,6 @@ You can add and remove functions in config.ph. Firstly please use
 
 .S	インストール
 =E.S	Installation
-.xref	install
 
 とりあえず細かいチューニングを行なわなくてよいなら
 =E
@@ -1007,7 +1006,6 @@ Other topics:
 =E.C	Version Up and Compatibility
 
 .S	how to version up
-.xref	version-up
 
 makefml を使ってインストールしてもらうのが確実です。makefml の使い方に
 ついては INSTALL.jp というファイルを見て下さい。

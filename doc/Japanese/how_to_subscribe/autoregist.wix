@@ -10,7 +10,6 @@
 ないます。エラーの時だけが管理者の出番です。
 注意: 管理者がコマンドを送ってメンバーの登録を行なうやり方は手動登録と
 呼んでいます。例: "admin subscribe fukachan@fml.org"
-.xref term-registration
 
 自動登録関連の設定は大きく
 

@@ -407,7 +407,7 @@ exits if timeout.
 =E.S	Another locking algorithm
 .l	how-to-lock
 .k	ロックアルゴリズム
-.xref	fml-mechanism, seq-file
+.xref	seq-file
 
 ロックアルゴリズムは二通り用意されてます。flockがお奨めです。flock(2) 
 参照
@@ -502,7 +502,6 @@ See e.g. A. S. Tannenbaum, "Modern Operating Systems" for exclusive locks.
 .C	FML 内部におけるデータ構造
 =E.C	FML internal data structures
 .l	data-structure
-.xref	hack
 
 ここでは fml 内部処理におけるデータ構造について解説します。これらの知
 識は改造する上で必須の事柄でしょうが、単に変数を 1 or 0 にセットするだ

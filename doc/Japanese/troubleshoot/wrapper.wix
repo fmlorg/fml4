@@ -122,7 +122,7 @@ Please see previous sections.
 =E.S	:include: file
 .k	:include: ファイル
 .l	calling-fml.pl
-.xref	fml-uid, plural-handling-1, plural-handling-2
+.xref	fml-uid
 
 fml の起動の仕方は
 =E

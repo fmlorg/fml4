@@ -311,7 +311,7 @@ To create "mbox", you use lib/Utilities/packmbox.pl and runs
 
 .S	配送するメールのMIME部分はDecodeしてしまいたい
 =E.S	MIME-Decode MIME parts of mail to distribute
-.xref	MIME-1
+.xref	MIME
 
 では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
 例えば、fml.pl の sub GetFieldsFromHeaderで

@@ -324,10 +324,6 @@ flock(2) to $FP_SPOOL_DIR.
 After $Timeout{'flock'} (default 3600) under locked, we trap signal
 SIGALRM and runs &Tick. In default fml.pl exits after timeout.
 
-.S	Ftp                    (libftp.pl)
-.k	Ftp
-.xref	ftp
-
 .S	Funlock                (fml.pl)
 .k	Funlock
 

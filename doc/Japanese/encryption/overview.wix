@@ -15,7 +15,6 @@
 ◯ 配送メールの暗号をPGP2でするというオプションもありますが…
 
 	$USE_ENCRYPTED_DISTRIBUTION
-.xref	$USE_ENCRYPTED_DISTRIBUTION
 
 ◯ PGPの設定は makefml 経由で設定をして下さい。
 .xref makefml-pgp

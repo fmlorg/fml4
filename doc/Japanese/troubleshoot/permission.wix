@@ -6,7 +6,7 @@
 .S	Insecure dependency in chdir, Permission denied, ... 
 .k	Insecure dependency in chdir 
 .k	Permission denied
-.xref	c-wrapper, calling-fml.pl, plural-handling-1, plural-handling-2
+.xref	c-wrapper, calling-fml.pl
 .xref	non_privileged_user
 
 

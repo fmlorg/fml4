@@ -1,9 +1,8 @@
 .C	MIME関係の諸機能
+.l	MIME
 
 .S	MIMEの処理
 =E.S	Header Mime Decoding (To Japanese)
-.# .k	MIME
-.# .l	MIME-header
 
 本来MIME関係はクライアントプログラムが処理すればいいことなのでサーバと
 しては素通しでいいはずです。
@@ -55,6 +54,7 @@ is saved in summary file as
 
 	$MIME_DECODED_ARTICLE          = 1;
 .k	$MIME_DECODED_ARTICLE
+.l	$MIME_DECODED_ARTICLE
 
 と定義して下さい。$DIR/spool/数字 というファイルにＭＬの記事の保存する
 時に日本語へ逆変換した内容を書き込みます。ただしこれをすると 
