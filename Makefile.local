@@ -14,26 +14,6 @@ capital:
 	cat `echo *pl proc/*pl |\
 	 sed 's#proc/libcompat.pl##'| sed 's#proc/libsid.pl##'` |\
 	perl $(DIST_BIN)/getcapital.pl | sort -n | uniq | sed 's/\$\(.*\)/\1:/' 
-
-ntdist: 
-	(/bin/sh distrib/bin/generator 2>&1| tee $(DESTDIR)/_distrib.log)
-	(/bin/sh $(RELBIN)/nt-release.sh /tmp/distrib 2>&1|\
-	 tee -a $(DESTDIR)/_distrib.log)
-	@ $(RELBIN)/error_report.sh $(DESTDIR)/_distrib.log
-	@ echo "(chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)"
-	@ (chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)
-	@ chmod -R 777 /tmp/nt
-
-nt:	dist wintermute
-
-wintermute:
-	chmod -R 777 $(DESTDIR)/fml-current/
-	ssh wintermute 'mv -f /home/nt/fukachan/src /home/nt/fukachan/src$$$$'
-	ssh wintermute mkdir /home/nt/fukachan/src
-	ssh wintermute chmod 777 /home/nt/fukachan/src
-	$(RSYNC) -av $(DESTDIR)/fml-current/ wintermute:/home/nt/fukachan/src/
-
-
 varcheck:
 	perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
@@ -75,7 +55,6 @@ init-makefml:
 simulation:
 	sh $(FML)/.simulation/bootstrap
 
-
 scan:
 	@ cvs -n update |tee /tmp/__scan__
 	@ echo "--- others ---"
@@ -92,7 +71,7 @@ e:	testsetup
 	@ echo 'make m is to re-generate /tmp/e/makefml'
 	@ (cd $(DESTDIR)/fml-current; pwd ; perl makefml -f /tmp/e/.fml/system install)
 
-m:
+m:	testsetup
 	if [ -d /tmp/e ]; then \
 	 perl w/repl.pl sbin/makefml > /tmp/e/makefml ; fi
 
