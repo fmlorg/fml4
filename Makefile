@@ -8,7 +8,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: Makefile,v 2.96 2001/03/29 16:03:19 fukachan Exp $
+# $FML: Makefile,v 2.97 2001/07/13 09:51:27 fukachan Exp $
 
 ### themost important variable ! ###
 FML  = ${.CURDIR}
@@ -73,7 +73,7 @@ usage:
 	@ echo ""
 	@ echo "\"make release\"   to make the release"
 	@ echo "\"make snapshot\"  to make a snapshot to export"
-	@ echo "\"make __dist \"   to make a snapshot for internal use
+	@ echo "\"make __dist \"   to make a snapshot for internal use"
 	@ echo "\"make distsnap\"  to export snapshot to ftp.fml.org"
 	@ echo "";
 
