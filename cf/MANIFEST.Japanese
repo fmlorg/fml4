@@ -641,7 +641,7 @@ UNSUBSCRIBE_AUTH_TYPE:
 
 .j "chaddr アドレスを変更するコマンド" にも confirmation を用いるか？
 .j defualt は使わない
-# chaddr checks confirmation (not implemented)
+# chaddr checks confirmation
 # value: confirmation / ""
 CHADDR_AUTH_TYPE:
 

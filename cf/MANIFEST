@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.102 2003/05/10 14:41:23 fukachan Exp $
+# $FML: MANIFEST,v 1.103 2003/05/19 14:46:03 fukachan Exp $
 #
 
 
@@ -546,7 +546,7 @@ SUBSCRIBE_ANNOUNCE_FORWARD_TYPE: prepend_info
 # value: confirmation
 UNSUBSCRIBE_AUTH_TYPE:
 
-# chaddr checks confirmation (not implemented)
+# chaddr checks confirmation
 # value: confirmation / ""
 CHADDR_AUTH_TYPE:
 
