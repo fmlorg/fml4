@@ -24,6 +24,22 @@
 		_smtplog の expire が変なのを修正
 
 
+2001/07/12
+
+   4.0.2_BETA
+
+   proc/libsynchtml.pl (2.42-2.43): 
+	article can be overwritten
+
+   bin/spool2html.pl (2.18-2.21):
+	use Getopt::Long to enable --overwrite option
+
+	we can now overwrite HTML'ed article which already exists in htdocs/
+	when you specify --overwrite option for spool2html.
+
+	use FML::Date to speculate unix time from Date: in the article and
+	use it for the date of HTML'ed article not stat(2) information.
+
 2001/07/08
 
    sbin/makefml (2.216-2.218):
@@ -123,7 +139,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.2.wix,v 1.4.2.3 2001/07/03 13:57:43 fukachan Exp $
+$FML: CHANGES-4.0.2.wix,v 1.4.2.4 2001/07/08 14:18:42 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
