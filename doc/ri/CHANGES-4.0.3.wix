@@ -17,6 +17,11 @@
 
 2001/09/23
 
+  bin/base64decode.pl (1.6-1.7)
+  proc/libhtmlsubr.pl (1.10-1.11) 
+	use "base64decode.pl -o OUTFILE" style to avoid error
+	on win32 system
+
    kern/libkernsubr2.pl
 	sync w/ HEAD (2.9-2.10): fix List-* in anyone mode
 
@@ -169,7 +174,7 @@
 
 ---------------------------------------------------------------------------
 
-$FML: CHANGES-4.0.3.wix,v 1.1.2.20 2001/09/20 12:47:29 fukachan Exp $
+$FML: CHANGES-4.0.3.wix,v 1.1.2.21 2001/09/24 13:17:25 fukachan Exp $
 .# Copyright (C) 2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001 fukachan@sapporo.iij.ad.jp
