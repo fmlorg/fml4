@@ -1,0 +1,32 @@
+	return guide if fml receives post from the member
+
+.if LANG == JAPANESE
+意見受付用アドレスをMLでうけて、送ってきた人に「ご意見ありがとうござい
+ました。返事はしばらく待ってね。」と自動で応答させる。
+
+改造:
+そのために投稿は誰でもOK。ただし、メンバー以外からの投稿はMLに流し、か
+つ投稿者にguideファイルを返す（自動登録はしない）。
+
+config.phの設定:
+.fi
+.if LANG == ENGLISH
+We accept opinions by mail from anyone and send back the reply "thank
+you for your opinion" to the sender.
+
+object:
+return guide if fml receives post from the member.
+
+config.ph configuration:
+
+1. permit post from anyone
+2. add $START_HOOK to send back "guide"
+.fi
+
+$PERMIT_POST_FROM              = "anyone";
+
+$START_HOOK = q# 
+   if (! &MailListMemberP($From_address)) { &GuideRequest(*Envelope);} 
+#;
+
+$Id$
