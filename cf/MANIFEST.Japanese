@@ -964,6 +964,15 @@ RFC1153_VOL:
 # value: filename string
 RFC1153_SEQUENCE_FILE:
 
+# ## Sub Section: MTA specific ##
+# qmail 依存拡張
+# メール本文に "get 1" を書いて ml-ctl@domain に送ることは
+# ml-get-1@domain に何かを送ることに等しい。つまり
+# ml-command-引数@domain == "command 引数"を ml-ctl@domain に送ること
+# value: 1/0
+USE_DOT_QMAIL_EXT:	0
+
+
 .j obsolete
 .j Reply-To: の値を強制する。
 .j fml 3.0 では&DEFINE_FIELD_FORCED() を使う
