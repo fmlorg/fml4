@@ -1,0 +1,9 @@
+sbin/makefml
+
+    # Lock all when "install"
+    if ($TheFirstTime || $NOT_LOCK{$fp}) {
+	# XXX TODO for 4.0.3 
+	# XXX I don't understand why this hack locates here ???
+	# XXX reload $LANGUAGE to translate messages on Web CGI
+	# XXX &GetConfigPH($ml) if (!$TheFirstTime);
+    }
