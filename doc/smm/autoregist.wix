@@ -4,6 +4,13 @@
 .l	autoregist
 .xref	access_policy access_policy_and_auto_regist
 
+
+自動登録とは『fmlが登録意志の確認から実際の登録作業』までを自動的に行
+ないます。エラーの時だけが管理者の出番です。
+注意: 管理者がコマンドを送ってメンバーの登録を行なうやり方は手動登録と
+呼んでいます。例: "admin subscribe fukachan@fml.org"
+.xref term-registration
+
 自動登録関連の設定は大きく
 
 	自動登録をするか？しないか？
@@ -988,10 +995,10 @@ WELCOMEのメールの Reply-To: を管理者宛にする
 Reply-To: $MAINTAINER for welcome mail when automatic registration.
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

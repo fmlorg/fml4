@@ -1,8 +1,21 @@
 .C	メンバーの登録について
 =E.C	Registration
 
+○ 手動登録とは『fmlの動いているホストに入って、メンバーリストをいじる』
+場合です。エディターないしmakefmlを使って行ないます。登録意志の確認を
+fmlがしてくれることもありますが、最後のメンバーリストをいじる部分はＭ
+Ｌ管理者が何らかの行動を起こす必要があります。
+
+○ 自動登録とは『fmlが登録意志の確認から実際の登録作業』までを自動的に
+行ないます。エラーの時だけが管理者の出番です。
+
+○ 注意: 管理者がコマンドを送ってメンバーの登録を行なうやり方は手動登
+録と呼んでいます。例: "admin subscribe fukachan@fml.org"
+
+用語集 => .ptr{term-registration}
 自動登録については次章の .ptr{auto-regist} を見て下さい。
 =E
+Technical Terms => .ptr{term-registration}
 See .ptr{auto-regist} for automatic registration details.
 
 .S 	subscribe コマンド(手動登録)時の挙動について(5 way hand shake)

@@ -71,6 +71,7 @@ FML は管理者の認証には方式１を採用しています。
 =E
 FML uses the former method as an authentication method.
 
+
 .S	PGP の公開鍵の登録
 =E.S	Register PGP Public Keys
 
@@ -138,67 +139,6 @@ Example: show the public key list of elena ML.
 	$DIR/etc/pgp/). If the mail is from the author (authenticated),  
 	the server runs commands.
 
-.S	PGPを使って暗号化したメーリングリストにする
-=E.S	Pgp Encrypted Distribution (Mailing List)
-.l	$USE_ENCRYPTED_DISTRIBUTION
-.k	$USE_ENCRYPTED_DISTRIBUTION
-
-makefml のメニューの『セキュリティ』で USE_ENCRYPTED_DISTRIBUTION を設
-定します。PGPの鍵を作る、メンバーに配るの作業が別途必要です。以下で述
-べます。
-=E
-You can set PGP Encrypted ML by "makefml config" menu. When
-$USE_ENCRYPTED_DISTRIBUTION is set, your ML becomes a PGP encrypted
-ML. You need to set up ML PGP keys and the distribution other than
-to enable this option. Please see below on it.
-
-暗号化とかファイアウォールとかは中途半端が一番危ないです。詳しく説明し
-ませんが、これで意味の分からない人は使わない方がいいかもしれません。
-
-secure か否かはすべて「サーバが破られない」にかかっています:)
-これはもともとパスフレーズなどを人間が覚えていないといけないので全自動っ
-て原理的にだめだということの必然の結果なんですがね。
-というわけで意味があるようなないような暗号化ＭＬ実装例です。
-=E
-Fundamental theory requires some not-written password for security
-e.g. in a human brain. So encryption by a ML server is theoretically
-vulnerable when a cracker can penetrate the ML server machine. 
-Our theory requires an assumption that the ML server machine is enough
-secure to save password files (RSA keys with empty pass phrase) on it.
-
-1	サーバのマシンの上で makefml で(PGPPATH を変えて)
-	メーリングリストの秘密鍵を作る。
-	全自動で実行するためにこの時パスフレーズは設定しない。
-=E
-1	makefml pgp -kg to make the mailing list secret key
-	with empty pass phrase. 
-
-	なおパスフレーズを設定しても結局それをどこにか平文で書いておか
-	なければならないのでセキュリティの度合いは同程度だと考えられる。
-
-2	メーリングリストの公開鍵をメンバーに配る。
-=E
-2	distribute the server public key to members of ML
-
-3	メーリングリストのメンバーの公開鍵をメーリングリストの
-	鍵リングに登録する(makefml を使う)。
-=E
-3	add public keys of members to the ML's PGP key ring.
-
-4	メンバーはメーリングリストの公開鍵を使って暗号化しサーバへ送る
-=E
-4	each member encrypts the mail with the server public key
-	to send it to the ML server.
-
-5	サーバはメンバーの公開鍵と自分の秘密鍵を使って
-	復号とメンバー全体に対して暗号化する
-=E
-5	the server decrypts the mail with its secret key and
-	encrypts the mail with members public keys.
-
-6	普通のメーリングリストサーバの動きに従い配送する。
-=E
-6	send it in usual procedures.
 
 .S	管理用のコマンド
 =E.S	Pgp Commands To Maintain ML'S PGP Keys 

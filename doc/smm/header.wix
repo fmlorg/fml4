@@ -2,6 +2,13 @@
 =E.C	Customize Fields of the Mail Header 
 .l	header-custom
 
+fml はＭＬの記事やコマンドの結果を知らせるメールなどのヘッダのフィール
+ドの並び変えや特定のフィールドの削除などを行なっています。FML 2.2 以降
+のデフォールトは『Return-Receipt-To と Received を除き素通し』に設定さ
+れています。ヘッダの一部を切ったり、付け加えるにはconfig.phに &DEFINE_
+なんとか という関数呼びだしを設定して行ないます。
+
+
 .S	ヘッダ・フィールドのフォーマット
 =E.S	Configure Header Fields
 .key	ヘッダ・フィールドのフォーマット
@@ -9,10 +16,10 @@
 .xref	data-structure
 
 fml は配送メールおよびコマンドの結果を知らせるメールなどのヘッダのフィー
-ルドの成形を行います。またあらかじめ設定されたフィールドのみを通します。
-フィールドの並び順は @HdrFieldsOrder という変数配列に従い、
-@HdrFieldsOrder に出てくるフィールドのみを通過させます。X-Faces のよう
-なうざったいフィールドは通しません。
+ルドの成形を行います。またあらかじめ設定されたフィールドのみを通すよう
+に設定できます。例えば、フィールドの並び順は @HdrFieldsOrder という変
+数配列に従い、@HdrFieldsOrder に出てくるフィールドのみを通過させます。
+X-Faces のようなうざったいフィールドは通さない などのようにです。
 =E
 fml.pl passes only defined fields through to cut off annoying fields,
 e.g. X-Faces, and distributes the mail with a formatted header. It
@@ -21,7 +28,7 @@ orders the header fields of distribution following an array
 
 $PASS_ALL_FIELDS_IN_HEADER という変数を指定すると @HdrFieldsOrder にな
 いフィールドも通過させます。@HdrFieldsOrder にないフィールドは入力の順
-番でヘッダに現れます。
+番でヘッダに現れます。2.2のデフォールトでは１です(素通し)。
 =E
 If $PASS_ALL_FIELDS_IN_HEADER is defined, fml.pl passed all fields in a
 header except for Received: and Return-Receipt-To: (fields defined in
@@ -174,12 +181,7 @@ To: Cc: フィールドをオリジナルのままにして配送する。
 =E.S	Add or Remove @HdrFieldsOrder entries
 .k	ヘッダのフィールドを増やす or 減らす
 
-例えば、Return-Path: フィールドが要らないなら、@HdrFieldsOrder から
-Return-Path の部分を除けばいいし、逆に Received: を付け加えるなら
-上述のように @HdrFieldsOrder につけ足せば良いでしょう。
-＃配列を直接いじるか、shift や unshift を使うと良いでしょう。
-
-また &ADD_FIELD, &DELETE_FIELD という関数も用意しています。
+&ADD_FIELD, &DELETE_FIELD という関数も用意しています。
 例: X-Uja を付け加える。
 =E
 To add or remove header fields, set up @HdrFieldsOrder in config.ph.
@@ -201,7 +203,15 @@ up by
 .k	$NOT_USE_CC
 .fi
 
-.S	COPY_FIELD
+ヘッダに現れる順番が重要な場合は @HdrFieldsOrder という配列を直接いじ
+るしかありません。
+
+例: 先頭に X-Some-Thing をつける
+
+	unshift(@HdrFieldsOrder, 'X-Some-Thing');
+
+.S	特定のヘッダ・フィールドのコピー
+=E.S	COPY_FIELD
 
 @HdrFieldsOrder 内で定義されているフィールドに対し、
 
@@ -215,6 +225,21 @@ where the field is one of fields defined in @HdrFieldsOrder.
 =E.S	Preserve Received: field in distribution articles
 .k	Received: を残す
 .l	left-Received
+
+FML 2.2 以降では
+=E
+After FML 2.2, set
+
+    $SKIP_FIELDS  = 'Return-Receipt-To';
+
+です。makefml configのメニューにあります(中身はこれ)。
+＃2.1 では子文字じゃないとだめかも unshift(@HdrFieldsOrder, 'received');
+＃この場合一行だけ Received ではなく received になってしまってちょっ
+＃と情けないかも知れませんが…
+＃RFC822 としては大文字小文字は関係ないので問題はない。カッコ悪いだけ;-)
+=E
+to preserve Received: fields in the header. A capital is important.
+
 
 歴史的に「サーバで受けたところまではOKなんだから、管理者が責任を持って、
 ユーザにはMLサーバからユーザまでの配送分を見せれば十分だろう(余計なも
@@ -250,15 +275,6 @@ In FML, "Posted:" is when this mail is sent from the original poster
 and "Date:" is the time when FML runs. The difference between Date:
 and Posted: reflects network delays.
 .xref $DATE_TYPE
-
-Received: フィールドをつける時は
-=E
-To add Received: field to distribution mails, configure (in config.ph)
-like 
-
-	unshift(@HdrFieldsOrder, 'Received');
-
-とでもして、@HdrFieldsOrder につけ足せば良いでしょう。
 
 FYI: fml-support's ML Count: 01816, 01821 for the discussion
 
@@ -833,7 +849,8 @@ config.ph あたりで
 obsolete. Please ignore this.
 .fi
 
-.S	Append Errors-To:
+.S	Errors-To:をつける
+=E.S	Append Errors-To:
 
 RFC1123 に逆らって Erros-To: をつけるなら $USE_ERRORS_TO = 1; 
 =E
@@ -908,10 +925,10 @@ Example: Append "how to get help" to the last of a distributed article.
    %;
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

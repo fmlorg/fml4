@@ -1,6 +1,9 @@
 .C	コマンドについて
 =E.C	Commands
 
+この章ではコマンドの定義などについて解説します。
+
+
 .S	コマンドの一覧
 =E.S	Available command index
 .k	コマンドの一覧->helpファイル

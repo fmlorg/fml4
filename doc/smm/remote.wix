@@ -5,12 +5,19 @@
 .l	REMOTE-ADMINISTRATION
 .k	$REMOTE_ADMINISTRATION
 
+
+この章は「ＭＬの管理のためにfmlの走っているマシンには入ることなく、メー
+ルでfmlにコマンドを送ってメンバーの登録などを行なう」などの話です。
+注意: 管理者がコマンドを送ってメンバーの登録を行なうやり方は手動登録と
+呼んでいます。例: "admin subscribe fukachan@fml.org"
+
+
 リモート管理用のコマンドは help-admin というファイルをみて下さい。
 =E
 See the file "help-admin" for more details on commands used in remote.
 
 
-.S	リモート管理 イントロダクション
+.S	イントロダクション
 =E.S	Introduction
 .xref	bin/passwd.pl
 
@@ -738,10 +745,10 @@ code directly.
 .fi
 
 .# $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.

@@ -29,6 +29,7 @@ The HOME of each ML is the location of config.ph. If
 
 
 .S	手動登録
+.l	term-registration
 
 『手動』と「自動』登録はこの単語を使っている意図がまぎらわしいかもしれ
 ません。削除やアドレス変更などについても以下同様のロジックです。
@@ -38,6 +39,8 @@ The HOME of each ML is the location of config.ph. If
 
 0.	管理者は「入れて欲しい」というリクエストを
 	何らかの手段で受けとります。
+
+	登録意志の確認をfmlがしてくれることもあります。
 
 1.	入りたい人のEmailアドレスをファイルに書きます。
 

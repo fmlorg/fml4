@@ -3,8 +3,17 @@
 .l	href
 .k	WWW
 
-注意: HTML を作る場所ですが、デフォールトでは var/htdocs -> htdocs/ に
-変わっています。var は nobody 等へpermission を出していないからです。
+[アブストラクト]
+ＭＬにながれる記事をHTML形式で"も"作成します。つまりMLのホームには
+「spoolディレクトリの下に普通の記事、htdocsの下にHTML化された記事」が
+作られます。スレッドのindexも作ります。WWWサーバにとっては単にファイル
+を読むだけなので負担が軽いです。でもCGIではないので高度なことができた
+りしません。
+
+
+(たぶん2.1以前からのUPGRADEの人への)注意: 
+HTML を作る場所ですが、デフォールトでは var/htdocs -> htdocs/ に変わっ
+ています。var は nobody 等へpermission を出していないからです。
 
 このルーチンは htdocs/ の下に記事をHTMLファイルとして成し適当に 
 index.html や thread.html を再生成しています。そのため運用ポリシーとし

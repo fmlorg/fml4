@@ -94,7 +94,7 @@ In this part we describe FML internals more deeply.
 .P	各種設定について
 =E.P	Configurations
 .l	Configurations
-==
+
 .include install.wix
 .include clo.wix
 .include acl.wix

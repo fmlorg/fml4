@@ -71,6 +71,8 @@ If options and arguments co-exist, we regard a string beginning with
 directory が存在すれば引数の順に $DIR、$LIBDIR にセットされます。
 
 [DESCRIPTION]
+.l	-d
+.l	-d2
 
 	-d		デバッグモード
 			（ＭＬへの配送以外すべてを実行可能）
