@@ -5,10 +5,11 @@
 .S	Introduction
 .l	archive-and-expire-conflicts
 
-場所をとるから古い記事は tar で100個くらい固めて gzip かけると 1/4 く
-らいになります。100 というマジックナンバーの目安は 100 個固めると 50K 
-前後になるので好都合な値にうまくなるという経験論から来ています。
-効率がいいのはヘッダとか同じようなものが繰り返し出てくるからですね。
+記事は溜ってくるとかなり場所をとります。古い記事は tar で100個くらい固
+めて gzip かけると 1/4 くらいになります。100 というマジックナンバーの
+目安は 100 個固めると 50K 前後になるので好都合な値にうまくなるという経
+験論から来ています。効率がいいのはヘッダとか同じようなものが繰り返し出
+てくるからです。
 
 しかし $USE_EXPIRE と $USE_ARCHIVE を同時に使う場合は要注意です。必ず 
 $EXPIRE_LIMIT が記事の数で指定されていて、
@@ -22,7 +23,10 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 
 	$EXPIRE_LIMIT = $ARCHIVE_UNIT * 2;
 
-くらいにしておくのが良いでしょう。
+くらいにしておくのが良いでしょう。そうでない場合整合性が保証されないの
+でエラーとなります。もちろん毎回ファイルを全て調べる等の莫大な 
+overhead をかければ実現はできますが、コストが見合うとは思えないので実
+装されていません。
 
 
 .S	config.ph の設定
@@ -42,6 +46,7 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 です。ここでは 'var/archive' です。配列 @ARCHIVE_DIR の内容は複数あっ
 てもいいですがそれは get, mget の時に探す対象となるだけで作る場所とは
 みなされません。
+
 何個ずつ単位でまとめるかは
 
 	$ARCHIVE_UNIT 
@@ -64,14 +69,14 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 
 例えば、"# get 1 " というコマンドを送り込んだ時
 
-	ml-dir/spool/	
+	$SPOOL_DIR (MLのHOME/spool/)
 
 を探索し、
 
 	もしファイル spool/1 が見つかればＯＫ、
 	見つからない時は
 
-	ml-dir/var/archive/	
+	@ARCHIV_DIR (e.g. MLのHOME/var/archive/)
 
 という場所も探し、1-100 までがtar + gzipされている 
 
@@ -109,8 +114,9 @@ $EXPIRE_LIMIT が記事の数で指定されていて、
 .l	Archive.pl
 .k	Archive.pl
 
-$USE_ARCHIVE の自動操作にまかせずに時々手で or cron でこのプログラムを
-動かしても良いです。cron で自動処理するなら次の節を御覧下さい
+$USE_ARCHIVE の自動操作にまかせずに時々手で もしくは cron 等でこのプロ
+グラムを動かしても良いです。
+.xref	cron
 
 	Archive.pl [-dh] [-A ARCHIVE_DIR][-u unit] MAX
 	-d	debug mode
@@ -123,8 +129,8 @@ $USE_ARCHIVE の自動操作にまかせずに時々手で or cron でこのプログラムを
 		デフォールトでは今の記事番号の直前の”１００の倍数”
 		までをアーカイブの対象の記事としてアーカイブを作る。
 
-注意：このプログラムはＭＬのホームで実行されることを前提にしています。
-よって、
+注意:このプログラムはMLのホームで実行されることを前提にしています。つ
+まり
 
 	chdir /var/spool/ml/Elena; perl bin/Archive.pl 
 
@@ -173,14 +179,14 @@ spoolの 3800 までの 100 個ずつのパッケージを作りました。spoolの方の元
 .S	アーカイブ作成を cron で自動処理
 .k	archive by cron
 
-cronで自動的（例えば週一日曜の朝とか）に次の形で
+cronで自動的(例えば週一日曜の朝とか)に次の形で
 
    (chdir "MLサーバのdirectory名"; /usr/local/bin/perl bin/Archive.pl)
 
 とでもすれば良いでしょう。
 ＃見本として bin/Archive.sh があるので見てみてね。
 
- いくつかＭＬがあるなら、シェルスクリプトにまとめて呼べば楽ですね。
+いくつかＭＬがあるなら、シェルスクリプトにまとめて呼べば楽ですね。
 ようするに まとめ送りと一緒とかでもよいですね
 
 例：
@@ -197,13 +203,12 @@ crontab が
 	(chdir /var/spool/ml/Freekick; /usr/local/bin/perl bin/Archive.pl)
 
 
-.S	何故、まとめてgzip化したいのか？
+.S	何故、まとめてgzip化したいのか?
 
-１．一個一個gzipかけると、約半分にしかなりませんが、１００個まとめて書
-けると、ヘッダとかの重なりがあるので約２５％にまで圧縮できるようになり
-ます。
+1. 一個一個gzipかけると、約半分にしかなりませんが、100個まとめて書ける
+と、ヘッダとかの重なりがあるので約25%にまで圧縮できるようになります。
 
-２．Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
+2. Mail-Countが万を越える頃になるとi-nodeの計算に時間がかかるようにな
 るのでファイル数を減らす or ほかの場所に移すことに意味があるようになり
 ます。そこでspoolの中身をうつし、100分の一のファイル数にすると効果が非
 常にあります。また、kernel 内の directory cache が大きくなるのも避けた
@@ -211,7 +216,11 @@ crontab が
 
 
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
