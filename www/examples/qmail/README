@@ -1,1 +1,4 @@
-run /var/qmail/bin/qmail-newu but I am not root ...
+Hmm,... you need to run /var/qmail/bin/qmail-newu under not user
+"root"!
+
+It is better to use virtual domain of qmail ?
