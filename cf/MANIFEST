@@ -149,7 +149,7 @@ CONFIRMATION_KEYWORD:		confirm
 CONFIRMATION_WELCOME_STATEMENT:
 
 # explanation of confirmation
-# value: directory string 
+# value: filename string 
 CONFIRMATION_FILE:	 $DIR/confirm
 
 # Expire of request queue. The unit is "hour". (default, 168 == 7*24)
