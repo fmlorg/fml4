@@ -1446,13 +1446,19 @@ sub AddressMatch
 {
     local($addr1, $addr2) = @_;
 
+    &Debug("   AddressMatch($addr1, $addr2)".
+	   " [\$ADDR_CHECK_MAX=$ADDR_CHECK_MAX]\n") if $debug_addrmatch;
+
     # canonicalize to lower case
     $addr1 =~ y/A-Z/a-z/;
     $addr2 =~ y/A-Z/a-z/;
 
     # try exact match. must return here in a lot of cases.
     if ($addr1 eq $addr2) {
-	&Debug("\tAddr::match($addr1) { Exact Match;}") if $debug;
+	if ($debug) {
+	    &Debug("   AddressMatch($addr1, $addr2) => exact match");
+	    &Log("AddressMatch($addr1, $addr2) => exact match");
+	}
 	return 1;
     }
 
@@ -1470,12 +1476,21 @@ sub AddressMatch
     # Check only "jp.ac.titech" part( = 3)(default)
     # If you like to strict the address check, 
     # change $ADDR_CHECK_MAX = e.g. 4, 5 ...
-    local($i);
+    local($i, $m) = (0, 0);
     while ($d1[$i] && $d2[$i] && ($d1[$i] eq $d2[$i])) { $i++;}
 
-    &Debug("\tAddr::match($addr1) { $i >= ($ADDR_CHECK_MAX || 3);}") if $debug;
+    $m = ($ADDR_CHECK_MAX > 0) ? $ADDR_CHECK_MAX : 3;
 
-    ($i >= ($ADDR_CHECK_MAX || 3));
+    if ($debug) {
+	&Debug("   AddressMatch($acct1\@$addr1, $acct2\@$addr2) => ".
+	       (($i >= $m) ? "match" : "not match").
+	       " [$i >= $m ? y : n]");
+	&Log("AddressMatch($acct1\@$addr1, $acct2\@$addr2) => ".
+	     (($i >= $m) ? "match" : "not match"));
+	&Log("AddressMatch: $i >= $m ? match : not match");
+    }
+
+    ($i >= $m) ? 1 : 0;
 }
 
 ####### Section: Info
@@ -2419,7 +2434,8 @@ sub EnvelopeFilter
     elsif (!$c && /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/) {
 	$r = "one line body";
     }
-    elsif (/^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
+    # elsif (/^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
+    elsif (/^[\s\n]*\%\s*echo.*/i) {
 	$r = "invalid command line body";
     }
 
@@ -2549,6 +2565,7 @@ sub DEFINE_FIELD_OF_REPORT_MAIL
 sub DEFINE_FIELD_PAT_TO_REJECT
 { 
     $REJECT_HDR_FIELD_REGEXP{$_[0]} = $_[1];
+    $REJECT_HDR_FIELD_REGEXP_REASON{$_[0]} = $_[2] if $_[2];
 }
 
 sub ADD_FIELD
