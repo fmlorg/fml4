@@ -61,7 +61,8 @@ sub MesgLE
 	    closedir(DIRD);
 	}
 	else {
-	    &Log("MesgLE: cannot open $dir");
+	    &Log("MesgLE: FYI: $dir has no entry") if 0;
+	    &Log("MesgLE: cannot opendir $dir") if 0;
 	    return $NULL;
 	}
     }
@@ -137,6 +138,11 @@ sub Lookup
 
     undef $mesg;
 
+    if (! -f $file) {
+	&Log("ERROR: MesgLE::Lookup no such file $file");
+	return $NULL;
+    }
+
     if (open(LE_TMPL, $file)) {
 	while (<LE_TMPL>) {
 	    # next if /^\s*$/;
@@ -155,7 +161,7 @@ sub Lookup
 	close(LE_TMPL);
     }
     else {
-	&Log("MesgLE::Lookup cannot open $file");
+	&Log("ERROR: MesgLE::Lookup cannot open file $file");
 	undef $mesg;
     }
 
