@@ -1,18 +1,67 @@
 FYI: THIS FILE IS "EUC-JAPAN".
 
-◯ 最初の一回
+
+		CVS repository のいじり方
+					Ken'ichi Fukamachi
+
+
+
+◯ 最初の一回、つまり fml repository を取り出す時。
 
    % cvs -d cvs.fml.org:/cvsroot co fml
 
 	さぁエディット！
 
-◯ snapshot の作り方
+  * 二回目以降は
+
+   % cd fml
+   % make update
+
+  * 変更があったかを調べる
+
+   % cd fml
+   % make scan
+   結果は __scan__ というファイルにキャッシュされます。
+
+
+◯ snapshot の作り方 (BSD)
+
+   注意: BSD make で make してください。
+	 linux の場合は以下の bsd make のインストールを見てね
+
+   1. repository を取り出す。
 
    % cvs -d cvs.fml.org:/cvsroot co fml
+   % cd fml
+
+   % cp fml/distrib/mk/fmlmk.conf ~/.fmlmk.conf
+
+	~/.fmlmk.conf のディレクトリやプログラムの PATH を編集してね
+
    % make build
    % make snapshot
 
-   注意: BSD make じゃないと make 不能
+
+  *** Debian/linux で make する例 ***
+
+        1. bsd make をインストールする
+           /usr/local/bin/bmake (dist/NetBSD/src/usr.bin/bmake)
+           /usr/share/mk (dist/NetBSD/src/share/mk)
+
+        % cvs -d cvs.fml.org:/cvsroot co fml
+        % cd fml
+        % make bsdmake
+        % su
+        # install -c -s dist/NetBSD/src/usr.bin/bmake /usr/local/bin
+        # cp -pr dist/NetBSD/src/share/mk /usr/share
+
+        2. ~/.fmlmk.conf を編集する。
+
+        3. make build
+             環境変数 PERL と MAKE は指定した方がいいです。
+
+	% env PERL=`which perl` MAKE=bmake bmake build
+
 
 ◯ リリースの仕方
 
@@ -21,5 +70,6 @@ FYI: THIS FILE IS "EUC-JAPAN".
    % echo 3.0.x > conf/release
    % echo 3.0.x > conf/release_version
    % make release
+
 
 $Id$
