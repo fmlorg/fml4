@@ -14,14 +14,29 @@
    3.0へのアップグレードの注意
 .url http://www.fml.org/fml/UPGRADE-3.0/
 
-   簡単な install と設定例などについて
+   簡単なインストールのアウトラインと基本的な設定例などについて
 .url http://www.fml.org/fml/examples/
+
+   あとはここからたどってください。
+.url http://www.fml.org/fml/
+
+   ソース
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 .if LANG == ENGLISH
 [Guide]
 
    Please read when you upgrade from 2.x to 3.0.
 .url http://www.fml.org/fml/UPGRADE-3.0-e/
+
+   outline of installation and fundamental configurations
+.url http://www.fml.org/fml/examples/index-e.html
+
+   home page of fml
+.url http://www.fml.org/fml/
+
+   download from here
+.url	ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
 .fi
 
 .~HTML_PRE
