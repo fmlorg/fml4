@@ -46,7 +46,8 @@ sub DoDistribute
     if ($e{'MIME'}) { &use('MIME'); $s = &DecodeMimeStrings($s);}
 
     # fml-support: 02007
-    &Append2(sprintf("%s [%d:%s]%s", 
+    $s =~ s/^\s*//; # required???
+    &Append2(sprintf("%s [%d:%s] %s", 
 		     $Now, $ID, substr($From_address, 0, 15), $s),
 	     $SUMMARY_FILE) || return;
 
