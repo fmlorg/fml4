@@ -21,13 +21,19 @@ foreach(@ARGV) { /^\-/ && &Opt($_) || push(@INC, $_);}# adding to include path;
 require 'config.ph';
 
 $debug || ($debug = $_cf{'opt', 'd'});
+
+print STDERR "DEBUG $debug\n";
  
 chdir $DIR || die "Can't chdir to $DIR\n";
 
+$From_address = "Cron.pl";
 $pid = &GetPID;
-if($pid > 0 && 1 == kill(0, $pid)) {
-    print STDERR "Already Running, exit 0\n";
+
+# MAIN
+if($pid > 0 && 1 == kill(0, $pid) && (!&RestartP)) {
+    print STDERR "cron.pl Already Running, exit 0\n";
 }else {
+    &Log((&RestartP ? "New day.! " : "")."cron.pl Restart!");
     &OutPID;
     &Cron;
 }
@@ -62,19 +68,45 @@ sub GetPID
 sub OutPID
 {
     open(F, "> $CRON_PIDFILE")|| return 0;
-    select(F); $| = 1; select(stdout);	
+    select(F); $| = 1; select(STDOUT);	
     print F "$$\n";
     close(F);
 }
 
+sub GetDayofTime
+{
+    local($f) = @_;
+    local($a) = (localtime((stat($f))[9]))[3]; # the last modify time
+
+    return $a;
+}
+
+# If the day changes, restart cron.pl
+sub RestartP
+{
+    &GetTime;
+    local($day) = &GetDayofTime($CRON_PIDFILE);
+
+    print STDERR "local($day) = &GetDayofTime($CRON_PIDFILE);\n".
+	"return ($day != $mday) = ".($day != $mday)."\n" if $debug;
+
+    return ($day != $mday);
+}
+
 sub Cron
 {
+    local($max_wait) = ($_cf{'opt', 'm'} || 3);
+
     # FOR PROCESS TABLE
     $FML .= "[".substr($MAIL_LIST, 0, 8)."]"; # Trick for tracing
 
   CRON: while($_cf{'opt', 'a'} || $max_wait--> 0) {
       $0 = "--Cron <$FML $LOCKFILE>";
       $0 = "--Cron [$max_wait] times <$FML $LOCKFILE>" unless $_cf{'opt', 'a'}; 
+
+      # Restart if cron may be running over 24 hours
+      local($pid) = &GetPID;
+      if($$ != $pid) { last CRON;};
       
       &GetTime;
       $init_t = time();
@@ -84,19 +116,26 @@ sub Cron
 
 	  &system($EXEC);
 	  &Log($@) if $@;
-
       }
-      
+      else {
+	  print STDERR "DO NOTHING\n" if $debug;
+      }
+
       # next 60sec.
       $0 = "--Cron Sleeping <$FML $LOCKFILE>";
-      $0 = "--Cron Sleeping [$max_wait] times <$FML $LOCKFILE>" unless $_cf{'opt', 'a'}; 
+      $0 = "--Cron Sleeping [$max_wait] times <$FML $LOCKFILE>" 
+	  unless $_cf{'opt', 'a'}; 
+      $time = (time() - $init_t);
 
-      if($time = (time() - $init_t) <= 60) {
+      print STDERR "$time = (time() - $init_t) <= 60) \n" if $debug;
+
+      if($time <= 60) {
 	  $time = 60 - $time;
 	  print STDERR "Sleeping $time\n" if $debug;
 	  sleep $time;
       }else {
-	  print STDERR "Hmm exec costs over 60sec... go the next step now!\n" if $debug;
+	  print STDERR "Hmm exec costs over 60sec... go the next step now!\n"
+	      if $debug;
 	  next CRON;
       }
   }#END OF WHILE;
@@ -109,8 +148,10 @@ sub CronChk
     print STDERR "Try ($m, $h, $d, $M, $w, $exec)\n" if $debug;
 
     if(&Match($m, $h, $d, $M, $w)) {
+	print STDERR "MATCH: return [$exec]\n" if $debug;
 	return $exec;
     }else {
+	print STDERR "NOT MATCH\n" if $debug;
 	return "";
     }
 }
@@ -121,7 +162,8 @@ sub Match
     local($nomatch);
 
     # WEEK
-    print STDERR "($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)\n" if $debug;
+    print STDERR "($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)\n" 
+	if $debug;
     if(($w eq '*') || ($w eq $wday) || (7==$w && 0==$wday)) { 
 	;
     }else { 
@@ -161,6 +203,7 @@ sub Match
     }
 
     # O.K.
+    print STDERR "return $nomatch ? 0 : 1;\n" if $debug;
     return $nomatch ? 0 : 1;
 }
 
@@ -175,21 +218,26 @@ sub ReadCrontab
     open(CRON, "< $CRONTAB");
     while(<CRON>) {
 	chop;
+	print STDERR "CRONTAB IN> $_\n" if $debug;
 	next if /^\#/o;
 	next if /^\s*$/o;
+	print STDERR "CRONTAB GO> $_\n" if $debug;
 
 	local($m, $h, $d, $M, $w, @com) = split(/\s+/, $_, 99);
 	local($org)  = $_;
 	local($exec) = join(" ", @com);
 	local(@s, $i, $start, $end, $unit);
 
+	##### SPACIAL SYNTAX 1
 	if($m =~ /(.*)\/(\d+)$/) {
-	    print STDERR "MATCHED CRON MIN:($m =~ /(.*)\/(\d+)\$/);\n" if $debug;
+	    print STDERR "MATCHED CRON MIN:($m =~ /(.*)\/(\d+)\$/);\n" 
+		if $debug;
 	    print STDERR "\$m = $1; \$unit = $2;\n" if $debug;
 	    $m = $1; 
 	    $unit = $2;
 	}
 
+	##### SPACIAL SYNTAX 2
 	foreach $m (split(/,/, $m, 9999)) {
 	    if($m =~ /^(\d+)$/) {
 		push(@s, $1);
@@ -205,13 +253,12 @@ sub ReadCrontab
 	foreach $m (@s) {
 	    next unless 0 == ($m % $unit);
 	    print STDERR "$m," if $debug;
-	}
-	print STDERR "\n\n" if $debug;
-
-	foreach $m (@s) {
-	    next unless 0 == ($m % $unit);
-	    if(&CronChk($m, $h, $d, $M, $w, $exec, $org)) {
+	    if (&CronChk($m, $h, $d, $M, $w, $exec, $org)) {
+		print STDERR "MATCH: &CronChk\n" if $debug;		
 		$EXEC .= "$exec;\n";   
+	    }
+	    else {
+		print STDERR "NO MATCH: &CronChk\n" if $debug;
 	    }
 	}
     }
@@ -244,7 +291,7 @@ sub Logging
     &GetTime;
 
     open(LOGFILE, ">> $LOGFILE");
-    select(LOGFILE); $| = 1; select(stdout);
+    select(LOGFILE); $| = 1; select(STDOUT);
     print LOGFILE "$Now $str ". ((!$e)? "($From_address)\n": "\n");
     close(LOGFILE);
 }
@@ -306,7 +353,14 @@ sub system
 	    close(STDOUT);
 	}
 
-	exec '/bin/sh', '-c', $s;
+	if($s =~ /[\<\>\;\|]/) {
+	    print STDERR "exec '/bin/sh', '-c', $s;\n" if $debug;
+	    exec '/bin/sh', '-c', $s;
+	}else {
+	    print STDERR "exec $s;\n" if $debug;
+	    exec split(/\s+/, $s);
+	}	    
+
 	&Log("Cannot exec $s:$@");
     }
 
