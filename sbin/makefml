@@ -1349,6 +1349,7 @@ sub FixPath
 {
     local($prog) = @_;
     local($perl);
+    local($mode) = (stat($prog))[2]; # preserve mode! 
 
     if ($perl = $ENV{'_PATH_PERL'}) {
 	print STDERR "\n   replace perl with $perl\n" if $FixPathCount++ < 1;
@@ -1387,6 +1388,8 @@ sub FixPath
     close(NEW);
     close(PROG);
     # sleep 1;
+
+    chmod $mode, "${prog}.new";
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	rename($prog, "${prog}.bak") || &Warn("cannot rename $prog $prog.bak");
