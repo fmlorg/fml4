@@ -93,6 +93,30 @@ expireしない場合一つの var/htdocs/ に数千のファイルができることになり
 	var/htdocs/200/
 	…
 
+.S	スレッド化した index.html を作成する
+.k	$HTML_THREAD
+.k	スレッド化したHTML階層を作る
+
+スレッド化 HTML (libsynchtml.pl)
+
+	$HTML_THREAD = 1; 
+
+にするとスレッド化したindex.html としてthread.html を作ります。両方を
+作るので好きな階層を見ればいいでしょう。
+スレッドには In-Reply-To: と References: の依存関係を使っています。
+
+よって、この場合は	 
+
+	thread.html
+	index.html
+		SUB-DIRECTORY/thread.html
+		SUB-DIRECTORY/index.html
+	…
+
+のように両方のファイルが作られ別の階層が形成されるので、見る人にはどっ
+ちか好きな方をたどってみてもらえば良いでしょう。
+
+
 .S	HTMLファイルのExpire
 .k	$HTML_EXPIRE
 
