@@ -525,18 +525,25 @@ sub LhaAndEncode2Ish
 
     # Variable setting
     $name     =~ s#(\S+)/(\S+)#$2.lzh#;
-    $name     =~ s/\.gz$/.lzh/;
-    $name     =~ s/\.lzh\.lzh$/.lzh/;
-    $tmpout   = "$TMP_DIR/$name";
-    $LHA      = $LHA || "$LIBDIR/bin/lha";
-    $ISH      = $ISH || "$LIBDIR/bin/aish";
-    $COMPRESS = "$LHA a $tmpout ". join(" ", @filelist);
-    $UUENCODE = "$ISH -s7 -o $input $tmpout";
+    $name     =~ s/\.gz$//i;
+    $name     =~ s/\.lzh$//i;
+    $tmpout   = "$TMP_DIR/$name.lzh";
+    $tmpish   = "$TMP_DIR/$name.ish";
 
-    unlink $tmpout if -f $tmpout; # against strange behaviours by "lha";
+    $LHA      = $LHA || "$LIBDIR/bin/lha";
+    $ISH      = $ISH || "$LIBDIR/bin/ish";
+
+    $COMPRESS = "$LHA a $tmpout @filelist ";
+    $UUENCODE = "$ISH -s7 $name.lzh"; # since in $TMP_DIR
+    #OLD: $UUENCODE = "$ISH -s7 -o $input $tmpout";
+
+    # against unremoved left files;
+    unlink $tmpish if -f $tmpish; 
+    unlink $tmpout if -f $tmpout; 
 
     &system($COMPRESS);
-    &system($UUENCODE);
+    system("(cd $TMP_DIR; $UUENCODE)"); # ish cannot understand ">tmp/*.lzh.ish"
+    rename($tmpish, $input) || &Log("canot rename $tmpish $input");
 
     unlink @filelist if (!$debug) && $USE_SJIS_in_ISH; #unlnik tmp/spool/*
     unlink $tmpout unless $debug;	# e.g. unlink msend.lzh

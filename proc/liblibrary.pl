@@ -50,7 +50,8 @@ sub ProcLibrary4PlainArticle
 	%mget_list  = %list;
     }
     elsif (/^put$/i) {
-	$ID = &LibraryWriteSummary(*e, $seq, $summary) || (return 0);
+	local($ID);
+	($ID = &LibraryWriteSummary(*e, $seq, $summary)) || (return 0);
 	&Log("$proc $_");
 
 	&use('MIME') if $USE_LIBMIME;
@@ -70,6 +71,9 @@ sub ProcLibrary4PlainArticle
 
 	### Write
 	&Write3(*e, "$arc_dir/$ID");
+	&LogWEnv("The article is saved as $ID in the archive", *e);
+
+	return 'LAST'; # 95/12/25 tanigawa@tribo.mech.nitech.ac.jp
     }
     elsif (/^index$|^summary$/i) {
 	local($org)     = $SUMMARY_FILE;

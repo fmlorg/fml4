@@ -139,7 +139,8 @@ sub AdminAuthP
     local($ok);
 
     ### IF NOT SET, ANYTIME O.K.!
-    $REMOTE_ADMINISTRATION_REQUIRE_PASSWORD || (return 1);
+
+    $Permit{'ra:req:passwd'} || (return 1);
 
     &use('crypt');
 

@@ -2,10 +2,10 @@
 # This lock functions uses proceses ID
 # Copyright (C) 1993-1995 fukachan@phys.titech.ac.jp
 # Please obey GNU Public License(see ./COPYING)
-
-local($id);
-$id = q$Id$;
-$rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
+#
+# local($id);
+# $id = q$Id$;
+# $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 # Lock UNIX V7 age like..
 # old lock extracted from fml 0.x and revised now :-)
@@ -14,7 +14,7 @@ sub V7Lock
     $0 = "--V7 Locked and waiting <$FML $LOCKFILE>";
 
     # set variables
-    $LockFile = "$VAR_DIR/run/lockfile.v7";
+    $LockFile = $LOCK_FILE || "$VAR_DIR/run/lockfile.v7";
     $LockTmp  = "$VAR_DIR/run/lockfile.$$";
     $rcsid .= ' :V7L';
     local($timeout) = 0;

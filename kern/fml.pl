@@ -5,7 +5,7 @@
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && $1."[$2]");
-$rcsid  .= '(2.0alpha)';
+$rcsid  .= '(2.0beta)';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
@@ -121,7 +121,7 @@ sub InitConfig
     &GetTime;			        # Time
 
     # COMPATIBILITY
-    if ($COMPAT_CF1)   { &use('compat_cf1');}
+    if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
     
     ### Initialize DIR's and FILE's of the ML server
@@ -192,14 +192,14 @@ sub GetFieldsFromHeader
     }
 
     ### MIME: IF USE_LIBMIME && MIME-detected;
-    $Envelope{'MIME'}= 1 if $Envelope{'Header'} =~ /ISO\-2022\-JP/o && $USE_LIBMIME;
+    $Envelope{'MIME'}= 1 if $Envelope{'Header'} =~ /ISO\-2022\-JP/o && $USE_MIME;
 
     ### Get @Hdr;
     local($s) = $Envelope{'Header'}."\n";
     $s =~ s/\n(\S+):/\n\n$1:\n\n/g; #  trick for folding and unfolding.
 
     # misc
-    if ($SUPERFLUOUS_HEADERS) { $hdr_entry = join("|", @HdrOrder);}
+    if ($SUPERFLUOUS_HEADERS) { $hdr_entry = join("|", @HdrFieldsOrder);}
 
     ### Parsing main routines
     for (@Hdr = split(/\n\n/, "$s#dummy\n"), $_ = $field = shift @Hdr; #"From "
@@ -593,13 +593,13 @@ sub Distribute
     $HEADER_ADD_HOOK && &eval($HEADER_ADD_HOOK, 'Header Add Hook');
 
     # Server info to add
-    $Envelope{'h:X-MLServer'} = $rcsid if $rcsid;
-    $Envelope{"h:$XMLCOUNT:"} = sprintf("%05d", $ID); # 00010 
-    $Envelope{'h:X-Ml-Info:'} = "If you have a question, %echo \# help|Mail ".&CtlAddr;
+    $Envelope{'h:X-MLServer:'} = $rcsid if $rcsid;
+    $Envelope{"h:$XMLCOUNT:"}  = sprintf("%05d", $ID); # 00010 
+    $Envelope{'h:X-Ml-Info:'}  = "If you have a question, %echo \# help|Mail ".&CtlAddr;
 
     ##### ML Distribute Phase 02: Generating Hdr
     # This is the order recommended in RFC822, p.20. But not clear about X-*
-    for (@HdrOrder) {
+    for (@HdrFieldsOrder) {
 	if (/^:body:$/o && $body) {
 	    $Envelope{'Hdr'} .= $body;
 	}
@@ -1022,6 +1022,11 @@ Original Subject:    $Envelope{'subject:'}
 To:                  $Envelope{'mode:chk'}
 Reply-To:            $Envelope{'h:Reply-To:'}
 
+DIR:                 $DIR
+LIBDIR:              $LIBDIR
+MEMBER_LIST:         $MEMBER_LIST
+ACTIVE_LIST:         $ACTIVE_LIST
+
 CONTROL_ADDRESS:     $CONTROL_ADDRESS
 Do uip:              $Envelope{'mode:uip'}
 
@@ -1051,7 +1056,20 @@ sub CheckUGID
 sub CtlAddr { $CONTROL_ADDRESS =~ /\@/ ? $CONTROL_ADDRESS : "$CONTROL_ADDRESS\@$FQDN";}
 
 # Security 
-sub SecureP { ($_[0] =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) ? 1 : (&use('utils'), &SecWarn(@_), 0);}
+sub SecureP 
+{ 
+    local($s) = @_;
+
+    $s =~ s#(\w)/(\w)#$1$2#g; # permit "a/b" form
+
+    if ($s =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
+	1;
+    }
+    else {
+	&use('utils'), &SecWarn(@_); 
+	0;
+    }
+}
 
 # Check Looping 
 # return 1 if loopback
@@ -1074,16 +1092,8 @@ sub LoopBackWarn
     0;
 }
 
-sub Lock 
-{ 
-    # Check flock() OK?
-    if ($USE_FLOCK) {
-	eval "open(LOCK, $SPOOL_DIR) && flock(LOCK, $LOCK_SH);"; 
-	$USE_FLOCK = ($@ eq "");
-    }
-
-    $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);
-}
+# Strange "Check flock() OK?" mechanism???
+sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
 
 sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
 

@@ -117,7 +117,7 @@ sub SmtpConnect
 	print SMTPLOG "connect ok\n"; 
     } 
     else { 
-	return ($error = "Smtp:connect:$!");
+	return ($error = "Smtp:connect->$host[$!]");
     }
 
     ### need flush of sockect <S>;

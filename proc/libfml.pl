@@ -34,6 +34,9 @@ sub Command
     local($mb) = @_;
     local($MailBody) = $mb || $e{'Body'};
 
+    # Use Subject as a command input: (FIX:95/12/29 kise@ocean.ie.u-ryukyu.ac.jp)
+    if ($USE_SUBJECT_AS_COMMANDS) { $MailBody = $e{'h:Subject:'}.$MailBody;}
+
     # reset for reply
     $e{'h:Reply-To:'} = $e{'h:reply-to:'} || $e{'Reply2:'};
 
@@ -148,137 +151,137 @@ sub InitProcedure
     # $s = $_;(present line of the given mail body)
     # $ProcFileSendBack($proc, *s);
     local(%proc) = (
-		  # send a guide back to the user
-		  'guide',	'ProcFileSendBack',
-		  '#guide',	$GUIDE_FILE,
+		    # send a guide back to the user
+		    'guide',	'ProcFileSendBack',
+		    '#guide',	$GUIDE_FILE,
 
-		  # ALIAS of 'guide' above
-		  # send a guide back to the user
-		  'info',	'ProcFileSendBack',
-		  '#info',	$GUIDE_FILE,
+		    # ALIAS of 'guide' above
+		    # send a guide back to the user
+		    'info',	'ProcFileSendBack',
+		    '#info',	$GUIDE_FILE,
 
-		  # help for usage of commands
-		  'help',	'ProcFileSendBack',
-		  '#help',	$HELP_FILE,
+		    # help for usage of commands
+		    'help',	'ProcFileSendBack',
+		    '#help',	$HELP_FILE,
 
-		  # return the objective of Mailing List
-		  'objective','ProcFileSendBack',
-		  '#objective',  $OBJECTIVE_FILE,
+		    # return the objective of Mailing List
+		    'objective','ProcFileSendBack',
+		    '#objective',  $OBJECTIVE_FILE,
 
-		  # return a  member file of Mailing List
-		  'members', 'ProcFileSendBack',
-		  '#members',     $MEMBER_LIST,
-		  'member', 'ProcFileSendBack',
-		  '#member',     $MEMBER_LIST,
+		    # return a  member file of Mailing List
+		    'members', 'ProcFileSendBack',
+		    '#members',     $MEMBER_LIST,
+		    'member', 'ProcFileSendBack',
+		    '#member',     $MEMBER_LIST,
 
-		  # return a active file of Mailing List
-		  'actives',  'ProcFileSendBack',
-		  '#actives',    $ACTIVE_LIST,
-		  'active',  'ProcFileSendBack',
-		  '#active',    $ACTIVE_LIST,
+		    # return a active file of Mailing List
+		    'actives',  'ProcFileSendBack',
+		    '#actives',    $ACTIVE_LIST,
+		    'active',  'ProcFileSendBack',
+		    '#active',    $ACTIVE_LIST,
 
-		  # MODE switch(users not require to know this option.)
-		  'mode',    'ProcModeSet',
-		  'set',     'ProcModeSet',
+		    # MODE switch(users not require to know this option.)
+		    'mode',    'ProcModeSet',
+		    'set',     'ProcModeSet',
 
-		  # return a summary of Mailing List
-		  'summary', 'ProcSummary',
+		    # return a summary of Mailing List
+		    'summary', 'ProcSummary',
 
-		  # return a summary of Mailing List
-		  'stat',   'ProcShowStatus',
-		  'status', 'ProcShowStatus',
+		    # return a summary of Mailing List
+		    'stat',   'ProcShowStatus',
+		    'status', 'ProcShowStatus',
 
-		  # return a file list to enable to get
-		  'index',   'ProcIndex',
-		  'r#index',  1,
+		    # return a file list to enable to get
+		    'index',   'ProcIndex',
+		    'r#index',  1,
 
-		  # get file in spool 
-		  'get', 'ProcRetrieveFileInSpool',
-		  'getfile', 'ProcRetrieveFileInSpool',
-		  'send', 'ProcRetrieveFileInSpool',
-		  'sendfile', 'ProcRetrieveFileInSpool',
+		    # get file in spool 
+		    'get', 'ProcRetrieveFileInSpool',
+		    'getfile', 'ProcRetrieveFileInSpool',
+		    'send', 'ProcRetrieveFileInSpool',
+		    'sendfile', 'ProcRetrieveFileInSpool',
 
-		  # mget is a special case
-		  'mget',  'ProcMgetMakeList',
-		  'mget2', 'ProcMgetMakeList',
-		  'mget3', 'ProcMgetMakeList',
-		  'msend', 'ProcMgetMakeList',
+		    # mget is a special case
+		    'mget',  'ProcMgetMakeList',
+		    'mget2', 'ProcMgetMakeList',
+		    'mget3', 'ProcMgetMakeList',
+		    'msend', 'ProcMgetMakeList',
 
-		  # library access: another way to access archives
-		  'library',	'ProcLibrary',
-		  'r#library',	1, 
+		    # library access: another way to access archives
+		    'library',	'ProcLibrary',
+		    'r#library',	1, 
 
-		  # these below are not implemented, 
-		  # but implemented in hml 1.6
-		  # codes only for notifying the alart to the user
-		  'iam',    'ProcWhoisWrite',
-		  'r#iam', 1,
-		  'whois',  'ProcWhoisSearch',
-		  'r#whois', 1,
-		  'who',    'ProcWhoisList',
-		  'r#who', 1,
+		    # these below are not implemented, 
+		    # but implemented in hml 1.6
+		    # codes only for notifying the alart to the user
+		    'iam',    'ProcWhoisWrite',
+		    'r#iam', 1,
+		    'whois',  'ProcWhoisSearch',
+		    'r#whois', 1,
+		    'who',    'ProcWhoisList',
+		    'r#who', 1,
 
-		  # send a message to $MAINTAINER
-		  'msg',    'ProcForward',
+		    # send a message to $MAINTAINER
+		    'msg',    'ProcForward',
 
-		  # for Convenience
-		  'end',    'ProcExit',
-		  'quit',   'ProcExit',
-		  'exit',   'ProcExit',
+		    # for Convenience
+		    'end',    'ProcExit',
+		    'quit',   'ProcExit',
+		    'exit',   'ProcExit',
 
-		  # Off: temporarily.
-		  # On : Return to Mailng List
-		  # Matome : Matome Okuri ver.2 Control Interface
-		  # Skip : can post but not be delivered
-		  # NOSkip : inverse above
-		  'off',    'ProcSetDeliveryMode',
-		  'r#off', 1,
-		  'on',     'ProcSetDeliveryMode',
-		  'r#on', 1,
-		  'matome', 'ProcSetDeliveryMode',
-		  'r#matome', 1,
-		  'skip',   'ProcSetDeliveryMode',
-		  'r#skip', 1,
-		  'noskip', 'ProcSetDeliveryMode',
-		  'r#noskip', 1,
+		    # Off: temporarily.
+		    # On : Return to Mailng List
+		    # Matome : Matome Okuri ver.2 Control Interface
+		    # Skip : can post but not be delivered
+		    # NOSkip : inverse above
+		    'off',    'ProcSetDeliveryMode',
+		    'r#off', 1,
+		    'on',     'ProcSetDeliveryMode',
+		    'r#on', 1,
+		    'matome', 'ProcSetDeliveryMode',
+		    'r#matome', 1,
+		    'skip',   'ProcSetDeliveryMode',
+		    'r#skip', 1,
+		    'noskip', 'ProcSetDeliveryMode',
+		    'r#noskip', 1,
 
-		  # Bye - Good Bye Eternally
-		  'chaddr',         'ProcSetMemberList',
-		  'r#chaddr', 1,
-		  'change-address', 'ProcSetMemberList',
-		  'r#change-address', 1,
-		  'change',         'ProcSetMemberList',
-		  'r#change', 1,
-		  'bye',            'ProcSetMemberList',
-		  'r#bye',         1,
-		  'unsubscribe',    'ProcSetMemberList',
-		  'r#unsubscribe', 1,
+		    # Bye - Good Bye Eternally
+		    'chaddr',         'ProcSetMemberList',
+		    'r#chaddr', 1,
+		    'change-address', 'ProcSetMemberList',
+		    'r#change-address', 1,
+		    'change',         'ProcSetMemberList',
+		    'r#change', 1,
+		    'bye',            'ProcSetMemberList',
+		    'r#bye',         1,
+		    'unsubscribe',    'ProcSetMemberList',
+		    'r#unsubscribe', 1,
 
-		  # Subscribe
-		  'subscribe', 'ProcSubscribe',
-		  'r#subscribe', 1,
+		    # Subscribe
+		    'subscribe', 'ProcSubscribe',
+		    'r#subscribe', 1,
 
-		  # Subscribe
-		  'admin', 'ProcSetAdminMode',
-		  'r#admin', 1,
-		  'approve', 'ProcApprove',
-		  'r#approve', 1,
+		    # Subscribe
+		    'admin', 'ProcSetAdminMode',
+		    'r#admin', 1,
+		    'approve', 'ProcApprove',
+		    'r#approve', 1,
 
-		  # PASSWD
-		  'passwd', 'ProcPasswd',
-		  'r#passwd', 1,
+		    # PASSWD
+		    'passwd', 'ProcPasswd',
+		    'r#passwd', 1,
 
-		  # Set the address to operate e.g. for exact matching
-		  'addr', 'ProcSetAddr', 
-		  'r#addr', 1,
+		    # Set the address to operate e.g. for exact matching
+		    'addr', 'ProcSetAddr', 
+		    'r#addr', 1,
 
-		  # DUMMY SETTING for the easy coding
-		  '#dummy', '#dummy',
+		    # DUMMY SETTING for the easy coding
+		    '#dummy', '#dummy',
 
-		  # CONTRIB
-		  'traffic', 'ProcTraffic', 
-		  'r#traffic', 1,
-		  );
+		    # CONTRIB
+		    'traffic', 'ProcTraffic', 
+		    'r#traffic', 1,
+		    );
 
 
 
@@ -312,11 +315,6 @@ sub ReConfigProcedure
     if ($COMMAND_ONLY_SERVER) {
 	local($key) = $REQUIRE_SUBSCRIBE || $DEFAULT_SUBSCRIBE;
 	$Procedure{$key} = 'ProcSubscribe';
-    }
-
-    # Use Subject as a command input
-    if ($USE_SUBJECT_AS_COMMANDS) {
-	$e{'Body'} = $e{'h:Subject:'}."\n".$e{'Body'};
     }
 }
 

@@ -625,7 +625,8 @@ sub InitConfig
     &GetTime;			        # Time
 
     # COMPATIBILITY
-    if ($COMPAT_FML15) { &use('fixenv'); &use('compat');}
+    if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
+    if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
     
     ### Initialize DIR's and FILE's of the ML server
     for ($SPOOL_DIR, $TMP_DIR, $VAR_DIR, $VARLOG_DIR, $VARRUN_DIR) { 
@@ -832,16 +833,8 @@ sub SetCommandLineOptions
 }
 
 
-sub Lock 
-{ 
-    # Check flock() OK?
-    if ($USE_FLOCK) {
-	eval "open(LOCK, $SPOOL_DIR) && flock(LOCK, $LOCK_SH);"; 
-	$USE_FLOCK = ($@ eq "");
-    }
-
-    $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);
-}
+# Strange "Check flock() OK?" mechanism???
+sub Lock { $USE_FLOCK ? &Flock : (&use('lock'), &V7Lock);}
 
 
 sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
