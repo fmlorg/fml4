@@ -2147,13 +2147,12 @@ sub do_install
 	closedir(DIRD);
     }
 
-    print STDERR "\n --substitute nroff manuals doc/man/\n";
+    print STDERR "\nGenerating nroff manuals:\n";
     for $f (<doc/man/*.?>) {
 	&Copy($f, "$f.bak");
 	&Conv('elena', "$f.bak", $f);
     }
-    print STDERR " --substituted\n\n";
-
+    print STDERR "\n";
 
     # $EXEC_DIR/sbin/install.sh is NOT yet installed 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
@@ -2223,12 +2222,14 @@ sub GenerateDirectory
 	print STDERR "mkdir etc crontab\n" if $debug;;
 	&MakeWritableDir($ML_ETC_DIR);
 	&MakeWritableDir("$ML_ETC_DIR/crontab");
+	&MakeWritableDir("$ML_ETC_DIR/fml");
     }
     else {
 	print STDERR "Personal Use\n" if $debug;;
 	print STDERR "mkdir etc crontab\n" if $debug;;
 	&MakeWritableDir($ML_ETC_DIR);
 	&MakeWritableDir("$ML_ETC_DIR/crontab");
+	&MakeWritableDir("$ML_ETC_DIR/fml");
     }
 
     # THIS ROUTINE IS CALLED IN THE CREATION OF A NEW ML!
