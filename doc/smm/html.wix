@@ -260,7 +260,7 @@ $HTML_THREAD_REF_TYPE defines how articles are referred within them.
 In default FML uses all elements in References: and In-Reply-To:.
 Even if plural links are shown (duplicated) in thread.html. When
 
-	$HTML_THREAD_REF_TYPE = "prefer-in-reply-to";
+	$HTML_THREAD_REF_TYPE = "prefer-in-reply-to"; (3.0 default)
 .k	$HTML_THREAD_REF_TYPE
 
 と設定すると、
