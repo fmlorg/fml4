@@ -204,7 +204,13 @@ sub ModeBifurcate
 	       ) {
 	    if ($member_p) {
 		require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
-		&Command() if $ForceKickOffCommand;
+
+		if ($Envelope{'mode:req:unsubscribe-confirm'}) {
+		    &Command($Envelope{'buf:req:unsubscribe-confirm'});
+		}
+		else {
+		    &Command() if $ForceKickOffCommand;
+		}
 	    }
 	    # chaddr-confirm
 	    elsif ((! $member_p) && $Envelope{'mode:req:chaddr-confirm'}) {
@@ -377,6 +383,7 @@ sub SetDefaults
     $ADD_URL_INFO = $ML_MEMBER_CHECK = $CHECK_MESSAGE_ID = $USE_FLOCK = 1;
     $NOTIFY_MAIL_SIZE_OVERFLOW = 1;
     $CHADDR_CONFIRMATION_KEYWORD = 'chaddr-confirm';
+    $UNSUBSCRIBE_CONFIRMATION_KEYWORD = 'unsubscribe-confirm';
 
     # Envelope Filter
     $FILTER_ATTR_REJECT_NULL_BODY = $FILTER_ATTR_REJECT_ONE_LINE_BODY = 1;
@@ -952,6 +959,12 @@ sub CheckCurrentProc
 	elsif (/$CONFIRMATION_KEYWORD\s+\S+/i) {
 	    $e{'mode:req:confirm'} = 1;
 	    $e{'buf:req:confirm'} .= $_."\n";
+	}
+
+	# unsubscribe-confirm ID
+	if (/($UNSUBSCRIBE_CONFIRMATION_KEYWORD\s+\S+.*)/i) {
+	    $e{'buf:req:unsubscribe-confirm'} .= $1."\n";
+	    $e{'mode:req:unsubscribe-confirm'} = 1;
 	}
 
 	if ($boundary) { # if MIME skip mode;
