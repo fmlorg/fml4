@@ -1,11 +1,40 @@
 .C	Expire (一定日数より古いファイルは消す)とNewSyslog
 
-.S	一定日数以上古いファイルを消去
-.label	{expire}
-.key	$FML_EXIT_HOOK
-.k	&Expire
 
-SYNOPSIS:
+Expire(一定日数以上古いファイルを消去する方法)は従来 HOOK をかけるやり
+方で実装されていましたが、正式なライブラリとして使えるようにしました。
+別に中身は変わっていません。単にHOOKを書かなくても良くなったということ
+だけです。
+
+
+.S	一定日数以上古いファイルを消去
+.l	$USE_EXPIRE
+.l	$EXPIRE_LIMIT
+
+	$USE_EXPIRE = 1; (デフォールトは0、expireはしない) 
+
+にすると expire をします。デフォールトでは
+
+	$EXPIRE_LIMIT = "7days";
+
+で、7日つまり一週間分の記事だけを残して後は消去します。単位は
+$EXPIRE_LIMIT で調整します。$EXPIRE_LIMIT のシンタックスは
+
+	数字days(日数)
+か
+	数字	(記事の数)
+
+のいづれかです。例:
+
+	7days	7日間保存
+	100	最近100通の記事を残して後は消去
+
+[参考]
+
+参考までにHOOKを使う従来のやり方を書いておくと
+.key	$FML_EXIT_HOOK
+
+   SYNOPSIS:
 	&Expire(場所, 日数(以上古いファイルを消す));
 
 例：
@@ -18,10 +47,9 @@ SYNOPSIS:
 を消します（いきなり消します。注意）
 
 
-.S	ファイル数で消すファイルを決める
-.k	&Expire
+例:	ファイル数で消すファイルを決める
 
-SYNOPSIS:
+   SYNOPSIS:
 	&Expire(場所, 残しておきたい記事数, 1);
 
 例：
