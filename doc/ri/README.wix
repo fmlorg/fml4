@@ -362,8 +362,8 @@ INSTALL and INSTALL_on_NT4.
 =E
 *  Test Environment: I've tested fml on the following system:
 
-	sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.3K
-	sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.3K
+	sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.4_BETA
+	sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.4_BETA
 
 なおFML.ORGの配送システムは5つのMTAを使った並列配送で高速化しています:)。
 (通称MTAみくじです ^^;)
