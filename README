@@ -62,6 +62,11 @@ distrib/bin/fml_version.pl controls "conf/release_version".
 
 You need to set "conf/release" based on information not in cvs.
 
+2. 	cp distrib/mk/fmlmk.conf.example ~/.fmlmk.conf
+	
+edit .fmlmk.conf to fit your directory hier(7), for example, WWW_DIR,
+FTP_DIR for exports...
+	
 
 -----------------------------------------------------------------
 * CVS on cvs.fml.org  NetBSD-current/newsmips (1.3I)
