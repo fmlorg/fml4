@@ -368,7 +368,7 @@ GEN_ARCHIVE () {
 	chdir $DESTDIR || return
 
 	# date YYYYMMDD
-	DATE=` $FML/distrib/bin/date `
+	DATE=`date -u +"%C%y%m%d"`
 
 	if [ X$MODE = X ]; then
 		# fml identifier
