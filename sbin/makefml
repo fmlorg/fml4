@@ -612,9 +612,16 @@ sub SetHashDefaults
 		    'popfml',     'do_popfml',
 		    'pop_passwd', 'do_pop_passwd',
 
-		    # PGP
-		    'pgp',	'do_pgp',
+		    # PGP 2
+		    'pgp',	'do_pgp2',
+		    'pgp2',	'do_pgp2',
 		    '90#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
+
+		    # PGP 5
+		    'pgpk',	'do_pgpk',
+		    'pgps',	'do_pgps',
+		    'pgpe',	'do_pgpe',
+		    'pgpv',	'do_pgpv',
 
 		    'delivery_mode',  'do_delivery_mode',
 
@@ -3464,7 +3471,7 @@ sub Value
 
 
 # makefml pgp elena PGP-OPTIONS
-sub do_pgp
+sub do_pgp2
 {
     local($ml, @argv) = @_;
     local($xdir);
@@ -3482,7 +3489,7 @@ sub do_pgp
     print "\n--- PGP BEGIN ---\n";
     print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
 
-    &Log("makefml::pgp pgp @argv");
+    &Log("makefml::pgp @argv");
     &__system('pgp',  @argv);
     print STDERR "ERROR: $@" if $@;
 
@@ -3490,6 +3497,48 @@ sub do_pgp
 
     if ($GroupWritable) {
 	chmod 0660, "$xdir/pubring.pgp";	
+    }
+}
+
+
+# makefml pgp[ksev] elena PGP-OPTIONS
+sub do_pgpk { local($xfp) = $fp; &do_pgp5(@_);}
+sub do_pgps { local($xfp) = $fp; &do_pgp5(@_);}
+sub do_pgpv { local($xfp) = $fp; &do_pgp5(@_);}
+sub do_pgpe { local($xfp) = $fp; &do_pgp5(@_);}
+
+sub do_pgp5
+{
+    local($ml, @argv) = @_;
+    local($xdir);
+
+    $xfp =~ s/do_//;
+    
+    $cf = "$ML_DIR/$ml/cf";
+    # set %config, eval %MAKE_FML in it;
+    # &GetCF($cf, $ml, *config, *cur_config); 
+    &GetConfigPH($ml);
+
+    $xdir = &Value('PGP_PATH');
+    $ENV{'PGPPATH'} = $xdir;
+    &MkDirHier($xdir, 0700);
+
+    &Touch("$xdir/pgp.cfg") unless -f "$xdir/pgp.cfg";
+
+    $| = 1;
+    print "\n--- PGP BEGIN ---\n";
+    print "   PGPPATH = $ENV{'PGPPATH'}\n\n";
+
+    print STDERR "makefml::$xfp @argv\n" if $debug;
+    &Log("makefml::$xfp @argv");
+    &__system($xfp,  @argv);
+    print STDERR "ERROR: $@" if $@;
+
+    print "\n--- PGP END ---\n\n";
+
+    if ($GroupWritable) {
+	chmod 0660, "$xdir/pubring.skr";
+	chmod 0660, "$xdir/pubring.pkr";
     }
 }
 
