@@ -4,6 +4,12 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2001/09/09
+
+   bin/confirmd_master.sh
+   bin/daily_master.sh
+	bug fix: use chdir not cd
+
 2001/09/02
 
    libhtmlsubr.pl
