@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: makefml,v 2.217 2001/07/07 09:48:28 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -5534,10 +5534,23 @@ sub do_log
 	# XXX by Tomoaki MITSUYOSHI <Mitsuyoshi.Tomoaki@ss.anritsu.co.jp>
 	# XXX (private communication)
 	# XXX We need to know this check is portable over unix and Windows ..
+	# 
+	# XXX OS portability check:
+	# XXX It works on NetBSD 1.5, Debian/linux (2.0.36 base), FreeBSD 4.x
+	# 
+	# XXX sysseek() is implemented after when ?
+	# XXX At least 5.004 supports it.
+	#
 	my $seekerr = 0;
-	sysopen (FORSEEK, $file, O_RDONLY);
-	$seekerr = 1 if !(sysseek (FORSEEK, $p, 2));
-	close (FORSEEK);
+	eval {
+	    sysopen (FORSEEK, $file, O_RDONLY);
+	    $seekerr = 1 if !(sysseek (FORSEEK, $p, 2));
+	    close (FORSEEK);
+	};
+
+	# XXX old style error check but not works well. 
+	# XXX try this when sysseek() is not implemented, I wonder. 
+	if ($@) { $seekerr = 1 unless seek($file, $p, 2);}
 
 	if (!$seekerr) {
 	    seek($file, $p, 2); # is it portable ? probably not portable :<
