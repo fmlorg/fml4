@@ -191,6 +191,7 @@ multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
    # admin ls options
    # admin remove filename
    # admin get filename
+   # admin resend filename address
    # admin put filename
    # admin rename filename1 filename2
    # admin newinfo

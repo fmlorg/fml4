@@ -1011,6 +1011,17 @@ flock やってるふりして、できてない？そのため SEQUENCE_FILE がちゃんと
 更新されなくて article ID duplication error が出る？
 ＃参照: fml-support:241? あたり
 
+
+.S	include's owner != config.ph's owner.
+
+in fml-support: 02475, 02469, 02472 あたり
+
+root で install してたりしたら(そもそもそんなことは本来してはいけませ
+ん）、root で makefml newml とかしないで、一般ユーザで makefml newml 
+をして ML を作ってみる。
+
+
+
 .# $Id$
 .# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp

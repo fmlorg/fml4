@@ -13,9 +13,9 @@
 
 config.ph の例：
 
-	@ARCHIVE_DIR = ('archive');
+	@ARCHIVE_DIR = ('var/archive');
 
-＃ @StoredSpool_DIR = ('archive'); は Obsolete な書き方です。
+＃ @StoredSpool_DIR = ('var/archive'); は Obsolete な書き方です。
 ＃ Backward Compatibility として
 ＃ 内部で @ARCHIVE_DIR に代入してるので、どちらでも動きます
 
