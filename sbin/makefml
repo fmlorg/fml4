@@ -3963,6 +3963,12 @@ sub HtmlConfigQuery
     print "<P><B>Mailing List: $config{'_ML_'}</B>\n";
     print "<HR>\n";
 
+    if (! $VALID_HIER{$top_level}) {
+	&Log("ERROR: HtmlConfigQuery: invalid level=$top_level");
+	&ERROR("unknown menu hierarchy level");
+	return;
+    }
+
     if ($variable && $value) {
 	if ($variable eq 'unknown') {
 	    if ($HOOK{$top_level}) {
@@ -3984,6 +3990,9 @@ sub HtmlConfigQuery
 	    &SetValue(*config, $variable, $NULL);
 	}
 	else {
+	    # XXX USE POINTER NOT RAW VALUE IN HTML
+	    $value = $MAP{$top_level, $value} || $MAP_RAW_VALUE{$top_level, $value};
+	    print "<BR>&SetValue(*config, $variable, $value);<BR>\n" if $debug;
 	    &SetValue(*config, $variable, $value);
 	}
     }
@@ -4004,13 +4013,15 @@ sub HtmlConfigQuery
     $prev_ptr = $ptr = $top_level;
     $prev_ptr =~ s#/[^/]+$##;
 
-    print STDERR "
+    if ($debug) {
+	print STDERR "
     --- debug ---
     CONFIG{$top_level} => [$v]
     MAP $top_level => [$MAP{$top_level}]
     \$query{'type'} => [$query{'type'}]
     --- debug ---
-    " if $debug;
+    ";
+    }
 
     if ($query{'type'} eq 'select') {
 	# choice in this menu if $MAP is defined
@@ -6097,6 +6108,7 @@ sub InitMenu
 	elsif (/^\/(.*)/) {
 	    $hier  = "/";
 	    $hier .= join("/", split(/\//, $1));
+	    $main::VALID_HIER{$hier} = 1;
 	    next;
 	}
 	elsif (/^=menu/) {
@@ -6167,6 +6179,8 @@ sub InitMenu
 	elsif ($map_p) {
 	    $_ =~ s/^\s+//;
 	    $MAP{$hier} .= $_;
+	    my($x, $y) = split(/\s+/, $_, 2);
+	    $main::MAP_RAW_VALUE{$hier, $x} = $y; # cache for cgi use  
 	}
 	elsif ($hook_p) {
 	    $HOOK{$hier} .= $_;
@@ -6391,13 +6405,14 @@ sub Bind
 	$ptr =~ s#//#/#g;
 	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr>";
     }
-    elsif ($v = $MAP{$menu, $Count}) {
+    # elsif ($v = $MAP{$menu, $Count}) {  # SHOW RAW VALUE IN HTML
+    elsif ($v = $MAP{$menu, $Count}) {    # SHOW POINTER IN HTML
 	local($vn);
 	$ptr = $menu;
 	$ptr =~ s#//#/#g;
 	$vn = $CONFIG{$menu} || 'unknown';
 	$vn = "VARIABLE=$vn";
-	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr&${vn}&VALUE=$v>";
+	$html_ptr = "<A HREF=${MakefmlCGI}&PTR=$ptr&${vn}&VALUE=$Count>";
     }
     else {
 	$ptr = "$menu/$xl";
