@@ -2224,6 +2224,8 @@ sub MailLoopP
     }
     
     &DupMessageIdP;
+
+    &DupMailBodyCKSUM;
 }
 
 # If O.K., record the Message-Id to the file $LOG_MESSAGE_ID);
@@ -2297,6 +2299,11 @@ sub DupMessageIdP
 	&Debug("\tDupMessageIdP::(OK NOT LOOPED)") if $debug;
 	0;
     }
+}
+
+sub DupMailBodyCKSUM
+{
+    ;
 }
 
 # if the addr to reply is O.K., return value is 1;
