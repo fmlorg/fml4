@@ -7,12 +7,16 @@ OpenBSD 2.7			5.6.0
 FreeBSD 2.2.5-RELEASE		4.036
 FreeBSD 2.2.7-RELEASE		4.036
 FreeBSD 2.2.8-RELEASE		4.036
-FreeBSD 3.0R			5.005_02
-FreeBSD 3.1-RELEASE		5.005_02 built for i386-freebsd	
-FreeBSD 3.2-RELEASE		5.005_03 built for i386-freebsd
-FreeBSD 3.3-RELEASE		5.005_03 built for i386-freebsd
-FreeBSD 3.4-RELEASE		5.005_03 built for i386-freebsd
-FreeBSD 4.0R			5.005_03
+FreeBSD 3.0-RELEASE		5.005_02
+FreeBSD 3.1-RELEASE		5.005_02
+FreeBSD 3.2-RELEASE		5.005_03
+FreeBSD 3.3-RELEASE		5.005_03
+FreeBSD 3.4-RELEASE		5.005_03
+FreeBSD 3.5-RELEASE		5.005_03
+FreeBSD 3.5.1-RELEASE		5.005_03
+FreeBSD 4.0-RELEASE		5.005_03
+FreeBSD 4.1-RELEASE		5.005_03
+FreeBSD 4.1.1-RELEASE		5.005_03
 
 BSD/OS 2.0			4.036 (but broken)
 BSD/OS 2.1			4.036 (but broken)
@@ -42,10 +46,14 @@ Solaris 8			5.005_03 (/usr/bin/perl)
 
 # HP
 HP-UX 10.20			4.036 (/usr/contrib/bin/perl)
+HP-UX 11.00			4.036 (/usr/contrib/bin/perl)
 
 # SGI
 IRIX 6.5 6.5.7m			5.005_04 (/usr/bin/perl) (may not exist)
 
+# IBM AIX
+AIX V4.3.2			none
+AIX V4.3.3			5.005_03
 
 # Mach-like ...
 Mac OS X			?
@@ -53,6 +61,9 @@ Mac OS X			?
 # not UNIX-like
 Windows NT4			none
 Windows 2000			none
+Windows Services for UNIX 2.0 (JP) 5.6.0 
+				(ActivePerl 5.6.0 build 613 
+				MSWin32-x86-multi-thread)
 
 ---
 checked by
@@ -61,5 +72,6 @@ checked by
 	Masaki Ikeda <masaki@orange.co.jp>
 	Toshimi Aoki <toshi@kinotrope.co.jp>
 	toshi@he.kobelcosys.co.jp
+	Masayuki FUKUI <fukui@sonic.nm.fujitsu.co.jp>
 
 $Id$
