@@ -369,6 +369,16 @@ fml-support: 05843
 MANY MANY "; post only (only members can post)"  ...
 
 
+.S	Memory Usage
+
+	PGP
+	MD5
+	Sendmail()
+	WholeMail()
+	Forw()
+	&Warn() 
+
+
 .C	日本特有の問題
 =E.C	Japan Specific problems
 
