@@ -1,0 +1,40 @@
+.HTML_PRE
+.if LANG == JAPANESE
+	sendmail の smrsh ではまる
+.fi
+.if LANG == ENGLISH
+.fi
+
+最近では Red Hat Linux ではまるひとが多い(?)
+
+      ----- The following addresses had permanent fatal errors -----
+   "|/usr/local/fml/fml.pl /var/spool/ml/elena "
+       (expanded from: :include:/var/spool/ml/elena/include)
+   
+      ----- Transcript of session follows -----
+   sh: fml.pl not available for sendmail programs
+   554 "|/usr/local/fml/fml.pl /var/spool/ml/elena "... Service unavailable
+
+これは fml じゃなくて sendmail のエラーです。fmlはそもそもよばれてもい
+ません。
+
+1. /usr/local/bin/perlなどが存在しない。
+   fml.pl の先頭の #!/usr/local/bin/perl の部分のこのパスにperlがない
+
+2. sendmail restricted shell のせい。最近の linux の distribution のな
+かにはそれがデフォールトのものがあったとおもいます。で、Redhatがまさに
+それだったようなきがします
+
+sendmail.cf に
+
+Mprog,                P=/bin/sh, F=lsDFMoqeu9, S=10/30, R=20/40, D=$z:/,
+
+のような行が P=/bin/smrsh になってたりしませんか？
+
+(securityを緩める方向のうしろむきな解決ですが) そこを/bin/shにするとと
+りあえず動くようになるとおもいます。もしこれが正解だったら、Sendmail
+Restricted Shell というものについて調べて下さい。
+そして smrsh について正しい設定をしなおしてみてください。
+
+$Id$
+.~HTML_PRE

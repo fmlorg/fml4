@@ -1,0 +1,91 @@
+.HTML_PRE
+
+	POP before SMTP with Postfix
+
+1. install postfix
+
+2. install DRAC (Dynamic Relay Authorization Control)
+
+.url http://www.mbnet.mb.ca/howto/dynamic.htm
+
+.if LANG == JAPANESE
+[drac のつくりかた]
+・INSTALLを読んで、OSにあわせてMakefileを直す。
+  注意: -DREQ_HASH を忘れずに
+   
+   INSTALL = install
+   EBIN = /usr/local/sbin
+   MAN = /usr/local/man/man
+   DEFS = -DSOCK_RPC -DFCNTL_LOCK -DGETHOST -DDASH_C -DREQ_HASH
+   CC = cc
+   RANLIB = ranlib
+   CFLAGS = $(DEFS) -g -I/usr/include
+   LDLIBS = 
+   TSTLIBS = -L. -ldrac
+   RPCGENFLAGS = -C
+   MANLIB = 3
+   MANADM = 8
+   
+[qpopperの改造]
+・INSTALLの中にある pop_user.c へのパッチをあてる。
+  必要なら手であてる
+
+・qpopper をcompileするときに libdrac.a が必要なので適当な場所におく
+  Makefileをそれにあわせて修正。
+
+.fi
+.if LANG == ENGLISH
+see INSTALL of drac and make drac and qpopper
+.fi
+
+patch
+.url qpopper-patch-by-drac.txt
+
+3. modify postfix /etc/postfix/main.cf.
+
+        smtpd_recipient_restrictions =
+            permit_mynetworks
+            check_client_access hash:/etc/mail/dracd
+            reject
+
+4. mkdir /etc/mail. 
+
+dracd users the directory "/etc/mail".
+
+5. run "rpc.dracd" as a daemon.
+
+.if LANG == JAPANESE
+[解説]
+
+改造の結果 popper はPOPの認証に成功した直後に dracd へRPC(Remote
+Procedure Call)でそのデータを渡すようになる。dracdはそれをうけて 
+/etc/mail/dracd.db というファイルに
+
+   IPアドレス   何時までこのアドレスからのSMTPが有効か？(unix time)
+
+のハッシュテーブルを作る。デフォールトでは30分間有効。
+
+RPCを使うためdracdは同じホスト上で動いていなくても構わない。つまり pop 
+サーバと MTAは同じホストである必要がない。ここが肝なわけだけど、逆に
+RPC関係の設定を間違えるとRPCまわりが世界に◯見えというサーバが出来上が
+るともいえて気をつけないといけない。
+
+postfixの check_client_access maptype:mapname は
+
+   Search the named access database for the client hostname, parent
+   domains, client IP address, or networks obtained by stripping least
+   significant octets. Reject the request if the result is REJECT or
+   "[45]XX text".  Permit the request if the result is OK or RELAY or
+   all-numerical. Otherwise, treat the result as another list of UCE
+   restrictions. The access_map_reject_code parameter specifies the
+   response code for REJECT results (default: 554).
+   
+のようになっているため、ハッシュテーブルの値が数字だけならOKとなる。
+
+.fi
+.if LANG == ENGLISH
+[description]
+.fi
+
+$Id$
+.~HTML_PRE
