@@ -100,6 +100,13 @@ sub SyncHtml
 	    elsif (!-f "$html_dir/index.html") {
 		$remake_index = 1;
 	    }
+	    # y2k fix
+	    elsif (&Grep("in the week\\s+100", "$html_dir/index.html")) {  
+		$remake_index = 1;
+	    }
+	    elsif (&Grep("in the year\\s+100", "$html_dir/index.html")) {  
+		$remake_index = 1;
+	    }
 
 	    # Error? or First Time?
 	    if (! -f "$subdir/index.html" &&
@@ -1053,10 +1060,18 @@ sub ReConfigureIndex
     }
     select(OUT); $| = 1; select(STDOUT);
  
+    local($yyy, $yyyy);
     while (<LIST>) {
 	# we use an "A HREF" line only. 
 	# This depends on our "one line" output.
 	next unless /A\s+HREF/i;
+
+	# y2k fix
+	if (/HREF.*in the week\s+(\d{3})\/\d+/) {
+	    $yyy  = $1;
+	    $yyyy = $yyy + 1900;
+	    s@(HREF.*in the week\s+)$yyy/@$1$yyyy/@;
+	}
 
 	# existence check
 	if (/HREF="(\S+\.html)"/) { # check {index,thread,\d+}.html
