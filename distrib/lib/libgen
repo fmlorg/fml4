@@ -374,6 +374,8 @@ GEN_ARCHIVE () {
  	WWW=$WWW_DIR
 
 	# check more
+	if [ -d $FTP_DIR ]; then mkdir $FTP_DIR; fi
+	if [ -d $WWW_DIR ]; then mkdir $WWW_DIR; fi
 	if [ -d $FTP ]; then mkdir $FTP; fi
 
 
