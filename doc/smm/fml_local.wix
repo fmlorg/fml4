@@ -225,6 +225,28 @@ FS	:
 MY_FUNCTIONS	/home/your-function-file
 
 
+INC	include-path
+
+必要なら、fml のいろいろな ライブラリファイルを include してより高度な
+関数を使うことが可能です。そのライブラリが置いてある場所を指定します。
+いくつ指定してもＯＫです。
+値は指定した順番に @INC に代入されます。そして、その順番にサーチされま
+す。
+
+
+MAIL_LENGTH_LIMIT	2900
+
+getmyspool2 では分割して送り返す関数を呼びます。この分割のしかたで、
+何行でファイルを分けるか？ をきめます。
+たとえば、ヘッダが２、３０行あると仮定すると、余裕を見て２９００とかし
+ておけば、３０００行制限のあるＢＢＳでも受け取れるようになるでしょう。
+
+
+TMPDIR			./tmp
+
+$HOME からの相対パスをかく。デフォールトは ./tmp（つまり $HOME/tmp ）
+＃なければ、つくります。
+
 
 .S	フィールド パターン 実行のタイプ 実行すること
 
@@ -318,38 +340,5 @@ body            getmyspool\s+(\S+)	&	getmyspool_pw
 
 
 .S	BUILD-IN Functions
+.include smm/smm/fml_local_builtin.txt
 
- sendback
-     内部定義関数としては &sendback(ファイル) は
-     ファイル を送り返します
-     引数なしに sendback を使うと
-        e.g. .fmllocalrc で from uja & sendback
-     正規表現でマッチした第一フィールドのファイルを送り返す
-     .fmllocalrcの例:
-     subject get (\S+) & sendback
- 
- getmyspool_nopasswd
-     メールスプールを送り返します
-     パスワードは必要ありません。
-     内部定義関数として使うべきです
- 
- getmyspool 
-     メールスプールを送り返します
-     正規表現でマッチした第一フィールドをパスワードとして認証します
-     認証した場合 送り返します。
-    .fmllocalrcの例:
-    body get my spool (\.*) & getmyspool
- 
- forward
-     メールを特定のアドレスへフォワードする
-     アドレスは forward の後に空白で続けて 
-     \@OPT の中に入ってます。
-     簡単なメーリングリストですね
-    .fmllocalrcの例:
-    To (uja) & forward address-1 address-2 ..
- 
- 
- ALIASES:
- getback       は sendback と同じ
- 
- getmyspool_pw は getmyspool と同じ
