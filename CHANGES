@@ -3,6 +3,26 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/09
+
+   kern/fml.pl 
+	rename &RunHooks() &RunExitHooks()
+	define &RunEndHooks() for symmetric x
+
+   proc/libdist.pl 
+	arrange $DISTRIBUTE_START_HOOK and $DISTRIBUTE_END_HOOK in
+	the beginning and end of &DoDistribute().
+	$DISTRIBUTE_END_HOOK includes $SMTP_CLOSE_HOOK $DISTRIBUTE_CLOSE_HOOK
+
+   MIME functions
+	clean up debug codes, add function definitions:
+		DecodeMimeStrings()
+		DecodeMimeString()
+		MimeEncode()
+		MimeDecode()
+		MIMEEncode()
+		MIMEDecode()
+
 2000/07/08
 
   3.0G  add database access hook
