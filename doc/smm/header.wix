@@ -331,6 +331,12 @@ $SUBJECT_HML_FORM = 1; の時にのみ有効。
 $SUBJECT_FREE_FORM 使用時に有効な変数。
 
 
+.S	TAGの [Elena:00001] の 0 パディングをなくす
+
+	$SUBJECT_FORM_LONG_ID = -1;
+	$HML_FORM_LONG_ID = -1;
+
+
 .S	オリジナルの Message-ID
 .key	Message-ID
 .key	Uniq_Identifier_of_Message-ID
