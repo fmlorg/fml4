@@ -490,7 +490,7 @@ FML 2.1 (config.ph の CFVersion が 3)では
 
 	anyone			だれでもOK
 	members_only		ＭＬのメンバーのみ
-	moderator		モデレーターのみ
+	moderator		モデレーターのみ (.ptr{moderators})
 
    [HANDLERの種類]
 	reject			許否 (deny というファイルが送り返される)
@@ -706,6 +706,7 @@ Email Address と秘密鍵の組合せ もしくは 公開鍵暗合によりアクセス制御を
 .include forward.wix
 .include filter.wix
 .include fmlserv.wix
+.include moderator.wix
 
 
 
