@@ -246,7 +246,7 @@ sub DoAggregateLinks
 sub OutPutAggrThread
 {
     local(*list, *links) = @_;
-    local($buf, $p, $i, $level, %already);
+    local($p, $i, $level, %already);
 
     for $p (sort {$a <=> $b} keys %links) {
 	next if $already{$p};

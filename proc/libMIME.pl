@@ -69,7 +69,6 @@ sub EnvelopeMimeDecode
 sub StripMIMESubject
 {
     local(*e) = @_;
-    local($r)  = 10;	# recursive limit against infinite loop
 
     &Debug("MIME  INPUT:      [$_]") if $debug;
     ($_ = $e{'h:Subject:'}) || return;
@@ -103,7 +102,7 @@ sub MimeQDecode
 
 sub MimeDecode 
 {
-    local($_, $out) = @_;
+    local($_) = @_;
 
     $MimeBEncPat = 
 	'=\?[Ii][Ss][Oo]-2022-[Jj][Pp]\?[Bb]\?([A-Za-z0-9\+\/]+)=*\?=';
