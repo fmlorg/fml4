@@ -2685,7 +2685,7 @@ sub RejectAddrP
 sub EnvelopeFilter
 {
     local(*e, $mode) = @_;
-    local($p, $r, $org_mlp);
+    local($c, $p, $r, $org_mlp);
 
     # force plural line match
     $org_mlp = $*;
@@ -2703,6 +2703,8 @@ sub EnvelopeFilter
 	$r = &EvalRejectFilterHook(*e, *COMMAND_FILTER_HOOK);
     }
 
+
+    ### Part I. Check Invalid Header ###
     if ($r) {
 	; # O.K.
     }
@@ -2734,56 +2736,64 @@ sub EnvelopeFilter
 	}
     }
 
-    # If Multipart, evaluate the first block only.
-    # skip the first multipart separator block
-    # evalute the first multipart block
+
+    ### Part II. Check Body Content ####
+    # XXX malloc() too much?
+    # If multipart, check the first block only.
+    # If plaintext, check the first two paragraph or 1024 bytes.
+    local($xbuf);
+
     if ($e{'MIME:boundary'}) {
-	# XXX malloc() too much?
-	$_ = &GetFirstMultipartBlock(*e, $e{'Body'}) || $e{'Body'};
+	$xbuf = &GetFirstMultipartBlock(*e);
     }
     else {
-	# XXX malloc() too much?
-	$_ = $e{'Body'};
+	# skip the first two paragraph
+	$p = index($e{'Body'}, "\n\n");
+	$p = index($e{'Body'}, "\n\n", $p + 1);
+	if ($p > 0) {
+	    $xbuf = substr($e{'Body'}, 0, $p < 1024 ? $p : 1024);
+	}
+	else { # may be null or continuous character buffer?
+	    $xbuf = substr($e{'Body'}, 0, 1024);
+	}
     }
 
     # remove the last block which must be a signature.
-    $_ =~ s/^[\n\s]*//;		# remove the first spaces
-    $_ =~ s/[\n\s]*$//;		# remove the last spaces
+    $xbuf =~ s/^[\n\s]*//;		# remove the first spaces
+    $xbuf =~ s/[\n\s]*$//;		# remove the last spaces
 
-    # ensure "block1 null-line block2 ..."
-    $p = index($_, "\n\n");
-    if ($p > 0) { 
-	$p = rindex($_, "\n\n");
-	$_ = substr($_, 0, $p) if $p > 0;
-    }
-
+    # XXX: remove check "block1 null-line block2" (already this syntax)
+    # $p = index($xbuf, "\n\n"); # forward ...
+    # if ($p > 0) { $p = rindex($xbuf, "\n\n"); # backward ...
+    #               $xbuf = substr($xbuf, 0, $p) if $p > 0;}
+    # 
     # count up "\n\n" lines;
     # If one paraghaph (+ signature), must be $c == 0. 
-    local($c); $c = $p = 0;
-    $_ =~ s/[\n\s]*$//;		# remove the last spaces
-    while (($p = index($_, "\n\n", $p + 1)) > 0) { $c++;}
+    $c = $p = 0;
+    while (($p = index($xbuf, "\n\n", $p + 1)) > 0) { $c++;}
 
     # cut off Email addresses (exceptional).
-    s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
+    $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
 
-    &Debug("--EnvelopeFilter::Buffer($_\n);\ncount=$c\n") if $debug;
+    &Debug("--EnvelopeFilter::Buffer($xbuf\n);\ncount=$c\n") if $debug;
 
     if ($r) { # must be matched in a hook.
 	;
     }
-    elsif (/^[\s\n]*$/ && $FILTER_ATTR_REJECT_NULL_BODY) {
+    elsif ($xbuf =~ /^[\s\n]*$/ && $FILTER_ATTR_REJECT_NULL_BODY) {
 	$r = "null body";
     }
     # e.g. "unsubscribe", "help", ("subscribe" in some case)
     # DO NOT INCLUDE ".", "?" (I think so ...)! 
     # If we include them, we cannot identify a command or an English phrase ;D
     # If $c == 0, the mail must be one paragraph (+ signature).
-    elsif (!$c && /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
+    elsif (!$c && $xbuf =~ /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
 	   $FILTER_ATTR_REJECT_ONE_LINE_BODY) {
 	$r = "one line body";
     }
-    # elsif (/^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
-    elsif (/^[\s\n]*\%\s*echo.*/i && $FILTER_ATTR_REJECT_INVALID_COMMAND) {
+    # elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
+    elsif ($xbuf =~ /^[\s\n]*\%\s*echo.*/i && 
+	   $FILTER_ATTR_REJECT_INVALID_COMMAND) {
 	$r = "invalid command line body";
     }
 
@@ -2795,8 +2805,10 @@ sub EnvelopeFilter
     # 243 323 243 325 243 302 243 323 243 303 243 322 243 311 243 302
     # 243 305
     if ($FILTER_ATTR_REJECT_2BYTES_COMMAND && 
-	/\033\044\102(\043[\101-\132\141-\172])/) { # JIS "2 byte"[A-Za-z]+
-	$s = &STR2EUC($_);
+	$xbuf =~ /\033\044\102(\043[\101-\132\141-\172])/) {
+	# /JIS"2byte"[A-Za-z]+/
+	
+	$s = &STR2EUC($xbuf);
 
 	local($n_pat, $sp_pat);
 	$n_pat  = '\243[\301-\332\341-\372]';
@@ -2813,7 +2825,7 @@ sub EnvelopeFilter
     # XXX: "# command" is internal represention
     # XXX: but to reject the old compatible syntaxes.
     if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
-	/^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
+	$xbuf =~ /^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
 	$r = $1; $r =~ s/\n//g;
 	$r = "avoid to distribute commands [$r]";
     }
@@ -2830,7 +2842,6 @@ sub EnvelopeFilter
 
     if ($r) { 
 	$DO_NOTHING = 1;
-
 	&Log("EnvelopeFilter::reject for '$r'");
 	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
 	      "Mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
