@@ -33,6 +33,13 @@ sub Init
     # makefml location
     $MAKE_FML = "$EXEC_DIR/makefml";
 
+    # version
+    $VERSION_FILE = "$EXEC_DIR/etc/release_version";
+
+    open($VERSION_FILE, $VERSION_FILE);
+    sysread($VERSION_FILE,$VERSION,1024);
+    $VERSION =~ s/[\s\n]*$//;
+
     # htdocs/
     $HTDOCS_TEMPLATE_DIR = $HTDOCS_TEMPLATE_DIR || "$EXEC_DIR/www/template";
 
@@ -75,6 +82,7 @@ sub Convert
 	    }
 
 	    s/_CGI_PATH_/$CGI_PATH/g;
+	    s/_FML_VERSION_/$VERSION/g;
 
 	    print;
 	}
