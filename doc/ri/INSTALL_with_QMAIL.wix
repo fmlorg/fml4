@@ -32,25 +32,48 @@ Please see manuals and http://www.qmail.org/ and so on.
 .S	Qmail Configuration
 
 qmail-smtpd は /var/qmail/control/rcpthosts に書かれているホストあての
-メイルしか受け取らないためです。MLの配送をそのホストで行なうならqmail 
-の設定を変更する必要があります。やり方は qmail の FAQ などを見ると出て
-います(適当にWWWからたどるか tcp-env でサーチなどしてみると見つかるだ
-ろう)。
+メイルしか受け取りません。fml はSMTPでMTAと通信するのでMLの配送をその
+ホストで行なうならqmail の設定を変更する必要があります。やり方は qmail 
+の FAQ などを見ると出ています(適当にWWWからたどるか tcp-env でサーチな
+どしてみると見つかるだろう)。要点は
+.if LANG == ENGLISH
+fml connnects to MTA via SMTP, so you need RELAYCLIENT configuration
+of qmail as follows.  See QMAIL FAQ and the manula of "qmail-smtpd" at
+the first. The point is
+
+   1. 	set RELAYCLIENT be null string when SMTP from localhost
+	to disable rcpthosts
+
+   2.	enable rcpthosts when SMTP from outside the host
+	
+.fi
+
+   localhost の通信なら RELAYCLIENT を空文字にして rcpthosts を無効にする
+   外からのSMTPでは rcpthosts だけを受けとる
+
+ということです。
 
 ここでは tcp wrappers を使っている場合の説明をします。tcpserver の設定
 は qmail のドキュメントを見て下さい。
 
 * inetd.conf の smtp の行を次のようにする。
+=E
+* inetd.conf example
 
 smtp stream tcp nowait qmaild /usr/libexec/tcpd	/var/qmail/bin/tcp-env /var/qmail/bin/qmail-smtpd
 
 * % kill -HUP `cat /var/run/inetd.pid` などとし inetd.conf を inetd に 
 reload させる。
+=E
+* After rewrite inted.conf, send the HUP signal to inetd.
+   % kill -HUP `cat /var/run/inetd.pid` 
 
 * リレーさせたいホストからのSMTPの場合は環境変数 RELAYCLIENT を空文字
 列に定義して、qmail-smtpd を実行します。この場合 qmail-smtpd は 
 rcpthosts を無視します。例えば 10.0.0.1 がこのホストのIPアドレスだとす
 ると /etc/hosts.allow に
+=E
+* Set RELAYCLIENT be null when SMTP from localhost. 
 
 tcp-env: 10.0.0.1, 127.0.0.1: setenv = RELAYCLIENT
 tcp-env: ALL
