@@ -188,18 +188,6 @@ CurrentProcess を実行しているのだから、YES です。ただ 通信はしていなく
 れましたね。
 
 
-.S	mget でえた spool の下のファイルを mh 以外で読む時
-.key	lib/Utilitites/packmbox.pl
-.key	packmbox.pl
-
-lib/Utilitites/packmbox.pl を使って、
-
-	(cd spool; packmbox.pl ) > ~/mbox
-
-として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
-うことができて便利でしょう。
-
-
 .S	配送プログラム(e.g. sendmail)との通信のログ
 .key	var/log/_smtplog
 .key	_smtplog
