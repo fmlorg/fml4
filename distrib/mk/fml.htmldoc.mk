@@ -84,7 +84,28 @@ var/html/op-e/index.html: doc/smm/*wix
 	${FIX_WIX} doc/smm/op.wix |\
 	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
 
+distrib/compile/WHATS_NEW.wix: .info
+	rm -f distrib/compile/WHATS_NEW.wix
+	echo '.HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
+	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix
+	echo '.~HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
+
+var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix
+	${JCONV} distrib/compile/WHATS_NEW.wix |\
+	${FWIX} -L JAPANESE -T WHATS_NEW -m html -D var/html/WHATS_NEW
+
+var/html/WHATS_NEW-e/index.html: distrib/compile/WHATS_NEW.wix
+	distrib/bin/remove_japanese_line.pl distrib/compile/WHATS_NEW.wix |\
+	${FWIX} -L ENGLISh -T WHATS_NEW-e -m html -D var/html/WHATS_NEW-e
+
+
 ### main ###
-htmlbuild: __inithtml__ ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM} ${__HTML_CPP__}
+__htmlbuild__ += __inithtml__ 
+__htmlbuild__ += ${HTML_MISC} 
+__htmlbuild__ += ${__HTML_RI__} 
+__htmlbuild__ += ${HTML_SMM} 
+__htmlbuild__ += ${__HTML_CPP__}
+__htmlbuild__ += var/html/WHATS_NEW/index.html var/html/WHATS_NEW-e/index.html
+htmlbuild: ${__htmlbuild__}
 	@ echo ${HTML_MISC} ${__HTML_RI__} ${HTML_SMM}
 	@ echo --htmlbuild done.
