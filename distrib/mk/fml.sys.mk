@@ -22,9 +22,10 @@ SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 WWW          = $(DESTDIR)/exports/www
 WWW_DIR      = $(WWW)
 
-VAR_DIR        = $(FML)/var
-WORK_DOC_DIR   = $(VAR_DIR)/doc
-WORK_HTML_DIR  = $(VAR_DIR)/html
+VAR_DIR         = $(FML)/var
+WORK_DOC_DIR    = $(VAR_DIR)/doc
+WORK_HTML_DIR   = $(VAR_DIR)/html
+WORK_DRAFTS_DIR = $(WORK_DOC_DIR)/drafts
 
 
 ######################################################################
@@ -32,13 +33,14 @@ WORK_HTML_DIR  = $(VAR_DIR)/html
 ### if ($0 eq __FILE__)
 ###
 __ALL__  = $(DESTDIR) $(FTP_DIR) $(SNAPSHOT_DIR) $(WWW_DIR)
-__ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_HTML_DIR)
+__ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_HTML_DIR) $(WORK_DRAFTS_DIR)
 
 .for dir in ${__ALL__}
 .PHONY: ${dir}
 ${dir}: 
-	@ echo ${dir}
-	if [ ! -d ${dir} ]; then $(MKDIR) ${dir} ; fi
+	@ if [ ! -d ${dir} ]; then \
+		echo creating ${dir} ;\
+		$(MKDIR) ${dir} ; fi
 .endfor
 
 __setup: $(__ALL__)
