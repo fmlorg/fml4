@@ -9,19 +9,18 @@
 #
 # $Id$;
 
-### Syncronization of spool and html files directory
-# Obsolete SyncHtml.ph 
-#   $DEFALUT_EXPIRE = 10;
-#   $title = "Index of Seminars";
-#   @keyword   = 
-#   ('non-linear', 'comp', 'material', 'hp', 'misc', 'book', 'info');
-# 
-#
-# &SyncHtml($SPOOL_DIR, $ID, *Envelope)
+# Name: Syncronization of spool and html files directory
+#       
+# Parameters:
+#    &SyncHtml($SPOOL_DIR, $ID, *Envelope)
+#                $SPOOL_DIR   target (spool) directory
+#                $ID          article to check
 # 
 # if ($HTML_EXPIRE_LIMIT == 0) { NOT do EXPIRE, ONLY APPEND;}
-# 
-# return NONE
+#
+# Returns:
+#   NONE
+#
 sub SyncHtml
 {
     local($dir, $file, *e) = @_;
@@ -236,6 +235,9 @@ sub SyncHtml
 }
 
 
+#
+# wrepper to enforce SyncHtml() to probe but not convert the article.
+#
 sub SyncHtmlProbeOnly
 {
     local($dir, $file, *e) = @_;
@@ -244,6 +246,15 @@ sub SyncHtmlProbeOnly
 }
 
 
+# Description:
+#    only "spool2html" calls this routine.
+#      a kind of tricky cleanup function.
+#
+#  %RequireReGenerateIndex is a global hash. If it is defiend, 
+#  this is called. For example,
+#
+#    if (%RequireReGenerateIndex) { &SyncHtmlReGenerateIndex();}
+# 
 sub SyncHtmlReGenerateIndex
 {
     local($dir, $file, *e) = @_;
@@ -274,7 +285,9 @@ sub SyncHtmlReGenerateIndex
     }
 }
 
-
+#
+# only "spool2html" uses this.
+#
 sub SyncHtmlExpire
 {
     local($dir, $file, *e) = @_;
@@ -289,6 +302,12 @@ sub SyncHtmlExpire
 }
 
 
+# Parameters:
+#      article's mtime.
+#
+# Returns:
+#      (sub directory name, title)
+#
 sub SyncHtmlGenDirId
 {
     local($mtime) = @_;
@@ -346,6 +365,12 @@ sub SyncHtmlGenDirId
 }
 
 
+# Yes. This is grep :-)
+# Parameters:
+#      (key, filename)
+# Returns:
+#    the line which the key matches. if not matched, return NULL.
+#
 sub Grep
 {
     local($key, $file) = @_;
@@ -361,6 +386,9 @@ sub Grep
 }
 
 
+#
+# "admin unlink-article" command calls this.
+#
 sub SyncHtmlUnlinkArticle
 {
     local(*e, $article) = @_;
@@ -489,6 +517,14 @@ q#  </BODY>
     $INDEX_HTML_DOCUMENT_SEPARATOR = $INDEX_HTML_DOCUMENT_SEPARATOR || $sep;
 }
 
+# convert article (text) to html file and write it at $subdir/$id.html.
+#
+# Parameters:
+#    (sub directory, article-id, *title, *envelope)
+#
+# Returns:
+#    title
+#
 sub Write
 {
     local($dir, $file, *title, *e) = @_;
@@ -616,6 +652,16 @@ sub Write
 
 
 # Re-Generate Header Fields from the header in the distributed article.
+#
+# Parameter:
+#        *envelope
+#
+# Returns:   
+#       NULL
+#
+# SideEffects:
+#       set up %FieldHash hash.
+#
 sub GetHdrField
 { 
     local(*e) = @_;
@@ -635,7 +681,11 @@ sub GetHdrField
     }
 }
 
-
+# Search *.css file.
+#
+# Returns:
+#    .css filename with reletive path name if needed.
+#
 sub StyleSheeRelativePath 
 {
     local($dir, $f) = @_;
@@ -644,6 +694,10 @@ sub StyleSheeRelativePath
 }
 
 
+#
+# SideEffects: 
+#    create fml.css file
+#
 sub ConvSpecialChars
 {
     local(*s) = @_;
@@ -660,7 +714,8 @@ sub ConvSpecialChars
     ### special character convertion ends
 }
 
-
+# Show Pointer e.g. top hier(7) directory.
+#
 sub ShowPointer
 {
     return unless $main'HTML_THREAD; #';
@@ -698,7 +753,16 @@ sub ShowPointer
     $_;
 }
 
-# 'mime-version', 'content-type', 'content-transfer-encoding',
+# Multipart Parser
+#    ('mime-version', 'content-type', 'content-transfer-encoding')
+# Write() calls this if the target article is multipart style.
+# This calls WriteHtmlFile() in libhtmlsubr.pl when it creates html file.
+#
+# Parameters: the same as Write()
+#    (sub directory, article-id, *title, *envelope)
+#     
+# Returns: none
+#
 sub ParseMultipart
 {
     local($dir, $file, *e) = @_;
@@ -770,8 +834,13 @@ sub ParseMultipart
     $NULL;
 }
 
-
+# utility to convert html specific special char's 
+#
 # s#(http://\S+)#<A HREF="$1">$1</A>#g;
+#
+# Parameters: strings
+# Returns: url
+#
 sub Conv2HRef
 {
     local($url) = @_;
@@ -792,7 +861,7 @@ sub Conv2HRef
     "<A HREF=\"$url\">$url</A>$x";
 }
 
-
+# obsolete ?
 # bin/Html.pl
 sub ReWrite
 {
@@ -835,8 +904,9 @@ sub ReWrite
     &Write($dir, $file, *le);
 }
 
-
-# modify index.html ...
+#
+# entry point for functions to modify index.html ...
+# 
 sub Configure 
 { 
     local($dir, $file, $title, $li, *e) = @_;
@@ -860,8 +930,10 @@ sub Configure
     }
 }
 
-
-# append only
+#
+# append (only) pointor to cache file for index.html
+# called from Configure()
+#
 sub Append2Cache
 {
     local($dir, $file, $title, $li, *e) = @_;
@@ -880,6 +952,7 @@ sub Append2Cache
 }
 
 
+# uniq function:-)
 sub Uniq
 {
     local($p, @p);
@@ -893,7 +966,10 @@ sub Uniq
     @p;
 }
 
-
+#
+# Thread generator entry point.
+#    Append2Cache() calls this. 
+#
 sub MakeThreadData
 {
     local($dir, $file, *e) = @_;
@@ -963,10 +1039,11 @@ sub MakeThreadData
 }
 
 
-# type:  $index := index | thread 
+# entry point to recreate index.html
+#    RemakeIndex() -> ReConfigureIndex() -> htdocs/{index,thread}.html
+#    TOP_DIR/{index,thread}.html
+#    type:  $index := index | thread 
 # 
-#
-# TOP_DIR/{index,thread}.html
 sub RemakeIndex
 {
     local($index, $dir, $file, $title, $list, *e) = @_;
@@ -983,7 +1060,9 @@ sub RemakeIndex
     &ReConfigureIndex(@_);
 }
 
-# TOP_DIR/{index,thread}.html
+
+# cache pointor info for TOP_DIR/{index,thread}.html
+#
 sub AppendIndexInformation
 {
     local($index, $dir, $file, $title, $list, *e) = @_;
@@ -1021,7 +1100,11 @@ sub AppendIndexInformation
 }
 
 
-# TOP_DIR/{index,thread}.html
+# entry point to recreate index.html
+#    RemakeIndex() -> ReConfigureIndex() -> htdocs/{index,thread}.html
+#       TOP_DIR/{index,thread}.html
+#    gabble index.{hdr,list,..} information to make htdocs/{index,thread}.html
+#
 sub ReConfigureIndex
 {
     # Hmm, $file is not used ...?
@@ -1167,6 +1250,7 @@ sub Copy
 }
 
 
+# obsolete ?
 sub GetEntry
 {
     local($f) = @_;
@@ -1198,7 +1282,7 @@ sub GetEntry
     (($k || $DEFAULT_HTML_FIELD || 'misc'), ($c && "[$c]").($s || $f));
 }
 
-
+# obsolete ?
 sub ReConfigureEachFieldIndex
 {
     local($dir, $file, *e) = @_; # file is dummy:-);
@@ -1258,6 +1342,7 @@ sub ReConfigureEachFieldIndex
 }
 
 
+# entry point to call DoMakeIndex()
 sub MakeThread
 {
     local($dir, $file, $title, $li, *e) = @_;
@@ -1265,6 +1350,7 @@ sub MakeThread
 }
 
 
+# entry point to call DoMakeIndex()
 sub MakeIndex
 {
     local($dir, $file, $title, $li, *e) = @_;
@@ -1272,7 +1358,18 @@ sub MakeIndex
 }
 
 
-# main {index, thread}.html re-creation (mainly subdir)
+# Description:
+#  recreate main {index, thread}.html (mainly in $subdir)
+#    if (thread) {
+#        GenThread()
+#    }
+#    else {
+#        index.html maker
+#    }
+#
+#
+# Returns: none
+#
 sub DoMakeIndex
 {
     local($index, $dir, $file, $title, $li, *e) = @_;
@@ -1362,7 +1459,15 @@ sub DoMakeIndex
     undef @cache;
 }
 
-
+# Description: 
+#   set up %list which is a list of HREF lines.
+#
+# Parameters: 
+#   ptr to hash %list (return value) 
+# 
+# SideEffects: 
+#   set up hash %list.
+#
 sub GetCache
 {
     local(*list) = @_;
@@ -1378,6 +1483,16 @@ sub GetCache
 }
 
 
+# thread.cache analyzer which uses recursive call.
+#
+# Parameters:
+#    ($number, *next, *queue)
+#
+# SideEffects:
+#    set up %next hash which is a chain of thread.
+#
+# Returns: none
+#
 sub OutQueueOn
 {
     local($i, *next, *queue) = @_;
@@ -1400,7 +1515,10 @@ sub OutQueueOn
     $queue .= " ) " if $next{$i} =~ /\d+\s+\d+/;
 }
 
-
+# entry point to make thread structure.
+#   read thread.cache, call OutCacheOn() to make theard chain in %next.
+#   output the structure to channel "OUT" (globally passed here).
+#
 sub GenThread
 {
     local(*entry, $dir) = @_;
@@ -1486,6 +1604,13 @@ sub GenThread
 }
 
 
+# special uniq for GenThread()
+# XXX but bad programing.
+#
+# Parameters: 
+#   thread chain
+# Returns: 
+#   uniq'ed thread chain
 sub QueueUniq
 {
     local(@x, $x, $p, $buf);
@@ -1499,6 +1624,12 @@ sub QueueUniq
 }
 
 
+# Parameters:
+#   (sub directory, thread chain)
+#
+# Returns:
+#   cleanup'ed lisp like thread chain
+#
 sub ConsiderQueueExpiration
 {
     local($dir, $buffer) = @_;
@@ -1544,11 +1675,18 @@ sub ConsiderQueueExpiration
     $buf;
 }
 
-
-# ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+# Description:
+#   ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
 #       $atime,$mtime,$ctime,$blksize,$blocks)
 #         = stat($filename);
-# "last access, modify, change" = 8,9,10
+#   "last access, modify, change" = 8,9,10
+#
+# Parameters:
+#   (html top dir, dummy, *envelope)
+#
+# Returns:
+#   none
+#
 sub Expire
 {
     local($html_dir, $file, *e) = @_; # file is a dummy:-);
@@ -1632,7 +1770,9 @@ sub Expire
     }
 }
 
-
+# Desctiption:
+#   expire the whole $subdir if all articles are old enough.
+#
 sub ExpireByDirectoryUnit
 {
     local($subdir, $expire) = @_;
@@ -1669,7 +1809,8 @@ sub ExpireByDirectoryUnit
     }
 }
 
-
+# Remove $subdir's articles efined in %ExpireDirList
+#
 sub Remove
 {
     local($html_dir, *e) = @_;
@@ -1703,6 +1844,13 @@ sub Remove
 
 
 ### Section: Utilities
+#
+# Parameters:
+#   $type
+#
+# Returns:
+#   valid mime.types if $type is found in etc/mime.types.
+#
 sub SearchMimeTypes
 {
     local($type) = @_;
