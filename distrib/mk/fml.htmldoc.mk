@@ -80,13 +80,13 @@ var/html/advisories/index-e.html: doc/advisories/index-e.html
 
 var/html/op/index.html: doc/smm/*wix
 	test -d var/html/op || mkdir var/html/op
-	test -h var/html/op-jp || ln -s var/html/op var/html/op-jp
+	test -h var/html/op-jp || (cd var/html; ln -s op op-jp)
 	${FIX_WIX} doc/smm/op.wix |\
 	${FWIX} -L JAPANESE -T op -m html -D var/html/op -d doc/smm
 
 var/html/op-e/index.html: doc/smm/*wix
 	test -d var/html/op-e || mkdir var/html/op-e
-	test -h var/html/op-en || ln -s var/html/op-e var/html/op-en
+	test -h var/html/op-en || (chdir var/html; ln -s op-e op-en)
 	${FIX_WIX} doc/smm/op.wix |\
 	${FWIX} -L ENGLISH -T op -m html -D var/html/op-e -d doc/smm
 
