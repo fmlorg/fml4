@@ -4,6 +4,16 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2003/05/10
+
+   enhance postfix verps
+	$POSTFIX_VERP_DELIMITERS = '+=' by default.
+
+2003/05/01
+
+   kern/fml.pl
+	strict 2822 (PR fml-help:2364)
+
 2003/01/24
 
    sbin/makefml
@@ -447,7 +457,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.274 2003/01/21 14:37:54 fukachan Exp $
+	add $FML: CHANGES,v 1.275 2003/01/23 22:19:10 fukachan Exp $
 
 2001/10/03
 
