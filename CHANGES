@@ -3,6 +3,18 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/20
+
+  makefml install
+	do not try to load /usr/local/fml/.fml/system in default
+	makefml -a install tries to load /usr/local/fml/.fml/system if exists
+
+	makefml install で /usr/local/fml/.fml/system などをさがして
+	デフォールト値を探そうとするのをやめてみる。-a オプションをつけると
+	以前の挙動(.fml/system を探そうとしてみる)にもどる。
+	＃ virtual domain のときなどは不便なために不人気？
+	＃ virtualでない人は default 値を推測してくれた方が便利だと思うんだが
+
 2000/02/19
 
   CGI
