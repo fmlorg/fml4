@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/03/23
+
+   proc/libamctl.pl
+	apply patch by shigetoshi hirano (fml-support: 09336)
+	check the member who subscribes this list is duplicated or not
+
 2001/03/15
 
    proc/libexpire.pl
