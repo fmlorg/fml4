@@ -159,6 +159,11 @@ sub Parse
 	    }
 	}
 
+	# smtpfeed -1 -F hack
+	if (/^To: \(original recipient in envelope at \S+\) <(\S+)>/) {
+	    &ExtractAddr($1);
+	}
+
 	#####
 	##### MTA szpecific
 	#####

@@ -244,6 +244,15 @@ sub DoDistribute
     $e{"h:$XMLCOUNT:"}   = $id || sprintf("%05d", $ID); # 00010;
     $e{"h:X-ML-Info:"}   = &GenXMLInfo;
 
+    # XXX smtpfeed -1 -F hack
+    # See smtpfeed/ML-ADMIN for more details
+    if ($USE_SMTPFEED_F_OPTION) {
+	if (($ID % 100) == 0) { 
+	    push(@HdrFieldsOrder, 'X-Smtpfeed');
+	    $e{"h:X-Smtpfeed:"} = 1;
+	}
+    }
+
     ##### ML Distribute Phase 02: Generating Hdr
     # This is the order recommended in RFC822, p.20. But not clear about X-*
     local(%dup);
