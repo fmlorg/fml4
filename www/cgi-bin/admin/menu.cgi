@@ -14,10 +14,16 @@ $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
 
 ### MAIN ###
 &Init;
+&GetBuffer(*Config);
 
 &P("Content-Type: text/html\n");
 
-&Convert("$HTDOCS_DIR/Japanese/admin/index.html");
+if ($Config{'LANGUAGE'} eq 'Japanese') {
+   &Convert("$HTDOCS_DIR/Japanese/admin/index.html");
+}
+else {
+   &Convert("$HTDOCS_DIR/English/admin/index.html");
+}
 
 exit 0;
 ### MAIN ENDS ###
