@@ -1,6 +1,7 @@
 .S	CRON (fml original bin/cron.pl)
 .label	CRON
 .key	cron.pl
+.k	bin/cron.pl
 .key	etc/crontab
 .key	samples/crontab
 
@@ -9,6 +10,7 @@ SYNOPSYS
 
     -d                debug mode 
     -a                run eternally(default: 180sec. = 60sec. * 3times) 
+    -n                working all times without RESTART
     -mtimes           run from now to (60 * times) sec. after 
     -fcrontab-file    alternative crontab 
     -h                show this help and exit 
@@ -16,57 +18,82 @@ SYNOPSYS
     -bOSTYPE          -b43(OSTYPE = 43): 4.3BSD Like. not mailed to you 
 
 
-fml.pl が cron.pl を走らせ（正確にはfml.pl自身が変身するんだけど…）
-そのまま system の cron と同じ働きをします。
+fml.pl が cron.pl を走らせ、そのまま system の cron と同じ働きをします。
 つまり１分に一回おきて crontab をみて、実行する。
 ＃単にシステムのcronじゃないだけですね…うじゃ
 
-ちなみに、複数のcron.plは走りません、cron.pid をみて一つのＭＬにつき一
-つしか走らないようになってます。
-＃あと 長く走り過ぎておかしくなること防止で、デファオールトでは２４時
-＃間くらいで 次のcron.plを起動しなおします。
+本来一台あたり一個のcronで十分です。
 
-インストール：
+ちなみに、複数のcron.plは走りませんが、一つの”ＭＬ”につき一つ走りま
+す。というのは $CRON_PIDFILE ($DIR/var/run/cron.pid)というファイルにプ
+ロセス番号を保存し一意性を保証するわけですが、ＭＬごとに corn を起動す
+るとこのファイルを各ＭＬごとに作れてしまうからです。
 
-○システムが定期的に何かをしてくれないので、
-cron.pl をなんとかして(疑似定期的に)起動すればいいわけです。
+あと長く走り過ぎておかしくなる場合も考慮してデフォールトでは２４時間く
+らいで次のcron.plを起動しなおしますが、-n オプションをつけるとずっと走
+り続けます。
 
-% cron.pl ML's-Directory(config.phの場所) Library's(libsmtp.plとかの場所) 
 
-で起動します。＃ Argument がないと、その環境の $HOME にいってしまう
+.S	Vixie Cron
+.k	P.Vixie
+.k	bind
 
-１． たとえば ~/.login で cron.pl を起動するとか（すでに走っていれば走
-     らないから大丈夫）…
+4.4BSDにはPaul Vixie(現在、bindのMaintainerでもある)の書いた各ユーザご
+とにcronを定義できるcronが入っています。これがあるなら cron.pl は要ら
+ないでしょう。システムのマニュアルを見て下さい。
 
-２．loginしたとき、まめにたちあげるとか…
+cron.pl はあくまでもそういうcronを提供してくれていないOSでなんとかまと
+め送りをしたい場合のためのものです。
 
-３．ＭＬサーバにメールが来たときに起動させる↓とか…
 
-config.ph に
+.S	cron.plのインストール
+
+システムが定期的に何かをしてくれないので、cron.pl をなんとかして(疑似
+定期的に)起動したいわけです。
+
+まず起動自体は
+
+	% cron.pl $DIR(config.phの場所) $LIBDIR(libsmtp.plとかの場所) 
+
+の形で起動します。
+＃注意： Argument がないと、その環境の $HOME にいってしまう
+
+問題はどうやって定期的に起動をトライするかですが、例えば
+
+   1. たとえば ~/.login で cron.pl を起動するとか(すでに走っていれば走
+      らないから大丈夫)…
+
+   2. loginしたとき、まめにたちあげるとか…
+
+   3. MLサーバにメールが来たときに起動させる↓とか…
+
+が考えられます。設定としては
+
+
+config.ph の
 .key	$CRON_PIDFILE
 .key	$CRONTAB
 .key	$DISTRIBUTE_CLOSE_HOOK
 
-$CRON_PIDFILE = "$DIR/var/run/cron.pid";
-$CRONTAB      = "$DIR/etc/crontab-4.4";
-＃ directory がなかったらつくってくださいませ
+	$CRON_PIDFILE = "$DIR/var/run/cron.pid";
+	$CRONTAB      = "$DIR/etc/crontab";
+	＃ directory がなかったらつくってくださいませ
 
-$FML_EXIT_PROG = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
+	$FML_EXIT_PROG = "$LIBDIR/bin/cron.pl $DIR $LIBDIR -a";
 
-をつけたす。
-＃いずれも適当にパスとかは変えてください
+	をつけたす。
+	＃いずれも適当にパスとかは変えてください
 
 cron.pid は cron.pl の pid を記録するファイル（ /var/run/cron.pidに相
 当するもの）。
 
-crontab-4.4  は システムの /etc/crontab に相当するものです。
-＃注意： cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
+crontab は システムの /etc/crontab に相当するものです。
+＊＊＊注意＊＊＊
+cron.pl は 4.4 BSD FORMAT を理解します。4.3ではありません
 
-適当な設定をして下さい。
+fml のインストール時に make しているなら、samples/crontab があるはずです。
+これを $DIR/etc/crontab にコピーするなり参考にすれば良いでしょう。
 
-余談：	cron.pl は ほんもののcron のクローンですので、at とか 自分用の 
-cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
-あるようだ）
 
 
 .S	cron.pl を使う際の注意
@@ -75,20 +102,20 @@ cron として使えます（4.4 ははじめからついてるけど、まだないしすてむも
 .key	attention-4-cron.pl
 
 
-cron.pl を sendmail が  exec して実行するというのは
-crontab をユーザー毎に設定できないＯＳへの対応です。
-できるなら、 user ごとに crontab を設定できるほうがいいとおもうんです
-が世の中そういうＯＳばっかりじゃないわけで
+上述のように cron.pl を sendmail が exec して実行するというのはcrontab 
+をユーザー毎に設定できないOSへの対応です。できるなら、 user ごとに 
+crontab を設定できるほうがいいとおもうんですが世の中そういうOSばっかり
+じゃないわけで
 
-例えば、２４時間でおきかえるっていうのも 安全策なだけで、別に１週間走
-らせてもＯＫです。
+例えば、24時間でおきかえるっていうのも 安全策なだけで、別に1週間走
+らせてもOKです(-n option)。
 
-だから、別に無理に sendmail にcron.pl を走らせさせなくても、ＭＬ管理者
-が login したときだけ cron.pl をいれかえる（実行すれば勝手に入れ替わる）
+だから、別に無理に sendmail にcron.pl を走らせさせなくても、ML管理者
+が login したときだけ cron.pl をいれかえる(実行すれば勝手に入れ替わる)
 のでもいいはずです。
 
 たまに、 sendmail とうまくおりあえないこともあるみたいなので、そういう
-時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね？
+時はこうすれば、 sendmail の変な挙動に悩まされずにすみますよね?
 
 
 .# $Id$

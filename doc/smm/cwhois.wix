@@ -1,4 +1,5 @@
 .C	Caching Whois (libexec/cwhois.pl)
+.l	cwhois
 .k	libexec/cwhois.pl
 .k	cwhois.pl
 .k	Caching-Whois

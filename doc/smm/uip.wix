@@ -1,4 +1,5 @@
 .C	各種ユーザ用ユーティリティ等 (bin/, lib/Utilities/ ...)
+.l	uip
 
 ここでは bin/ 以下と lib/Utilities/ 以下の階層で提供しているプログラム
 について解説します。
