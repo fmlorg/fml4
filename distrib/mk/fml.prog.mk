@@ -35,3 +35,7 @@ VERSION  ?= ${PERL} ${FML}/distrib/bin/version.pl
 #
 _FWIX    ?=  ${PERL} ${FML}/bin/fwix.pl
 FWIX     ?=  ${_FWIX} -F -Z fml-bugs@fml.org 
+
+# programsn to generate documents
+DOC_GENERATOR = env PERL=${PERL} $(SH) ${FML}/distrib/doc/bin/generator.sh
+FIX_WIX       = ${PERL} ${FML}/distrib/bin/fix-wix.pl -X ${FML}

@@ -1,13 +1,5 @@
 .include "distrib/mk/fml.prog.mk"
 
-### executables; document generators ###
-# release snapshot generator library
-GEN_PLAIN_DOC    = env PERL=${PERL} ${SH} ${DIST_DOC_BIN}/genplaindoc.sh
-DOC_GENERATOR    = env PERL=${PERL} $(SH) ${FML}/distrib/doc/bin/generator.sh
-#DOC_GENERATOR_D = $(SH) ${FML}/distrib/doc/bin/depend_wrapper.sh
-#DOC_CONV        = $(DOC_GENERATOR)
-FIX_WIX          = $(PERL) ${FML}/distrib/bin/fix-wix.pl -X ${FML}
-
 ### sources ###
 HTML_MISC_SOURCES += roadmap.html nt.html search-j.html search-e.html 
 HTML_MISC_SOURCES += releng.ja.html
