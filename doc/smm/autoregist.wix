@@ -173,6 +173,7 @@ variation は
 
 
 .S	Confirmation モード (お勧め)
+.l	confirmation
 .l	confirmation-mode
 .k	confirmation mode
 .k	$CONFIRMATION_ADDRESS

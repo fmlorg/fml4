@@ -2,6 +2,7 @@
 
 
 .S	Books (参考文献：本)
+.l	books
 
 S. J. Leffler, K. Bostic, M. J. Karels and J. S. Quarterman, 
 "The design and implementation of the 4.4BSD UNIX Operating System"
@@ -19,6 +20,7 @@ W. R. Stevens,
 W.リチャード・スティーヴンス 著／篠田 陽一 訳
  プリンティスホール／トッパン 定価7,900円
 ISBN4-8101-8509-5'').
+.l	book-unix-network-programming
 
 perl texinfo in japanese --- version 4.0.19.2
 ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/perl.texinfo-j4.0.19.2.tar.gz
