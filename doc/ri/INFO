@@ -32,7 +32,10 @@ WWW が使えるなら
 そこで最新版のドキュメントやらソースやらが見られます_o_
 
 
-========== WHAT'S NEW  1.6.1 current ==========
+========== WHAT'S NEW  fml current (1.6.2) ==========
+・ lha して uuencode する モード
+
+
 ・FIX libra.pl help, log
 ・FIX libfml.pl approve 
 

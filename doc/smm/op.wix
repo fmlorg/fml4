@@ -611,19 +611,29 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 コマンドラインといっても、デバッグ以外じゃ、/etc/aliasesとかの
 "|/Baycity/fml.pl $DIR $LIBDIR -option" の形ですが、
 
-		fml.pl $DIR $LIBDIR &optionals 
+	fml.pl 	   [ options ] $DIR [ options ]  [ $LIBDIR [ options ] ]
 
-で、オプション（最後につく）
-	-d	debug mode on
+	fml.pl MSendv4.pl sid.pl は同じ引数のとりかたをします。
+	注意：fml_local.pl は MH を意識してるので異なります。
+
+
+順番は関係ありません。引数が -ではじまらなくて、そのDirectoryが存在す
+れば、その順に $DIR、 $LIBDIR にセットされます。
+
+	-d		デバッグモード
+	-bt   		デバッグモード	(Become Test)
+	-bd		デーモンモード	(Become Daemon)
+	-sOPT $OPT 	をセットする。
+	-uOPT $OPT 	をオフする。
 	-lfile	file を $LOAD_LIBRARY 変数に代入する
-	-sopt	$opt 変数をセットする。つまり $opt = 1;
 
 注意：sendmail のように『空白なし』です。
 
--llibfml.pl とすると、コマンド専用アドレスのできあがりです
-＃ CONTROL_ADDRESS とおなじ意味ですね
 
 例：
+	-llibfml.pl とすると、コマンド専用アドレスのできあがりです
+	＃ CONTROL_ADDRESS とおなじ意味ですね
+
 	-llibftpmail.pl ftpmail 専用アドレス
 	-sdebug		debug mode
 	-sFIX_SLOCAL_PIPE	$FIX_SLOCAL_PIPE = 1;と同じ
