@@ -63,9 +63,9 @@ amctl.info:
 		- ＭＬに登録したのと違うアドレスでメールを投げていませんか？
 		- それともＭＬに登録したいですか？
 	もし登録したいなら _ARG2_ のあとにあなたの名前(ローマ字)で
-	なげ直して下さい
-	_ARG3_: _ARG2_ YOUR NAME
-
+	なげ直して下さい。
+	例: メールの _ARG3_ に次のように書いて下さい。
+	_ARG2_ YOUR NAME
 
 ### Section: others
 # dummy to adjust '\n' above
