@@ -145,7 +145,7 @@ htmldoc: init_dir INFO doc/smm/op.wix
 	@ $(MKDIR) $(WORK_HTML_DIR)/op
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.doc.mk htmlbuild
 
-syncwww:
+syncwww: doc
 	$(RSYNC) -av $(WORK_HTML_DIR)/ ${WWW_DIR}/
 
 syncinfo:
