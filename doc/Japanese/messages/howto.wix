@@ -1,5 +1,40 @@
 .C	事例集
 
+.S	ヘルプメッセージを消す
+
+.q
+sub DUMMY {};
+$PROC_GEN_INFO = 'DUMMY';
+.~q
+
+この↓部分を消す呪文です。
+fml-current (2000/07/26 以降)には DUMMY という関数があるので
+.q
+$PROC_GEN_INFO = 'DUMMY';
+.~q
+だけで十分です。
+
+.q
+--elena@fml.org, Be Seeing You!    
+
+************************************************************
+
+       Help: <mailto:elena-ctl@fml.org?body=help>
+Unsubscribe: <mailto:elena-ctl@fml.org?body=unsubscribe>
+
+If you have any questions or problems,
+   please contact elena-admin@fml.org
+       or 
+   send e-mail with the body "help"(without quotes) to
+      elena-ctl@fml.org
+      (here is the automatic reply, so more preferable)
+
+e.g. on a Unix Machine
+(shell prompt)% echo "help" |Mail elena-ctl@fml.org
+
+************************************************************
+.~q
+
 .S	例: fmlでの confirm のメールの本文をハックする (ひとつのＭＬだけ)
 .l	messages.customize
 
