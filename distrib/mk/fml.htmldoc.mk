@@ -87,7 +87,7 @@ var/html/op-e/index.html: doc/smm/*wix
 distrib/compile/WHATS_NEW.wix: .info
 	rm -f distrib/compile/WHATS_NEW.wix
 	echo '.HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
-	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix
+	grep -v -e ------- .info >> distrib/compile/WHATS_NEW.wix || echo ""
 	echo '.~HTML_PRE'  >> distrib/compile/WHATS_NEW.wix
 
 var/html/WHATS_NEW/index.html: distrib/compile/WHATS_NEW.wix
