@@ -238,7 +238,13 @@ FIX_DISTRIBUTION_LINKS () {
 }
 
 
+# XXX: need DESTDIR !!!
 GEN_CONTRIB () {
+   ( cd $FML/contrib; make FML=${FML} DESTDIR=${DESTDIR} )
+}
+
+
+OLD_GEN_CONTRIB () {
 
 	for dir in `cat distrib/etc/contrib_list`
 	do
@@ -335,7 +341,7 @@ GEN_BRANCH_ARCHIVE () {
 }
 
 GEN_ARCHIVE () {
-	if [ X$FML_MASTER_MACHINE -eq X ]
+	if [ X$__FML_MASTER_MACHINE__ -eq X ]
 	then
 		echo ignore GEN_ARCHIVE not on fml distribution master machine
 		return
