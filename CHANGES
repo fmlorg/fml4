@@ -18,7 +18,20 @@
 	* bug fixes
 		FreeBSD での CGI 
 		spool2html で module が @INC にない
+		_smtplog の expire が変なのを修正
 
+2001/06/27
+
+   proc/libmodedef.pl
+	fix _smtplog expiration
+
+	_smtplog の expire の bug fix	
+
+   proc/libMIME.pl 
+
+	mimeencode uses IM::Iso2022jp not mimew.pl by default.
+	If it fails to load IM:: modules, fall back to old
+	mimeencode() by mimew.pl
 
 2001/06/18
 
