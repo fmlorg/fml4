@@ -24,25 +24,29 @@ SNAPSHOT_DIR = $(FTP_DIR)/snapshot
 WWW          = ${DESTDIR}/exports/www
 WWW_DIR      = ${WWW}
 
-TMP_DIR         = ${FML}/tmp
-VAR_DIR         = ${FML}/var
-WORK_DOC_DIR    = ${VAR_DIR}/doc
-WORK_HTML_DIR   = ${VAR_DIR}/html ${VAR_DIR}/html/advisories
-WORK_DRAFTS_DIR = ${WORK_DOC_DIR}/drafts
+TMP_DIR           = ${FML}/tmp
+VAR_DIR           = ${FML}/var
+WORK_DOC_DIR      = ${VAR_DIR}/doc
+WORK_HTML_DIR     = ${VAR_DIR}/html
+WORK_HTML_ADV_DIR = ${VAR_DIR}/html/advisories
+WORK_DRAFTS_DIR   = ${WORK_DOC_DIR}/drafts
 
 
 __EXPORTS_DIR__ = FML COMPILE_DIR DESTDIR DIST_BIN DIST_DIR \
 		DIST_DOC_BIN FTP_DIR SNAPSHOT_DIR TMP_DIR \
-		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR WORK_HTML_DIR WWW_DIR
+		VAR_DIR WORK_DOC_DIR WORK_DRAFTS_DIR \
+		WORK_HTML_DIR WORK_HTML_ADV_DIR WWW_DIR
+
 
 ######################################################################
 ###
 ### if ($0 eq __FILE__)
 ###
 __ALL__  = $(DESTDIR) $(FTP_DIR) $(SNAPSHOT_DIR) $(WWW_DIR)
-__ALL__  = $(DESTDIR) $(TMP_DIR) $(VAR_DIR)
-__ALL__ += $(VAR_DIR) $(WORK_DOC_DIR) $(WORK_HTML_DIR) $(WORK_DRAFTS_DIR)
-__ALL__ += $(TMP_DIR) $(COMPILE_DIR)
+__ALL__ += $(TMP_DIR) $(VAR_DIR)
+__ALL__ += $(WORK_DOC_DIR) $(WORK_DRAFTS_DIR)
+__ALL__ += $(WORK_HTML_DIR) $(WORK_HTML_ADV_DIR)
+__ALL__ += $(COMPILE_DIR)
 
 .for dir in ${__ALL__}
 .PHONY: ${dir}
