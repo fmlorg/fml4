@@ -1,3 +1,6 @@
+FML_VERSION
+
+
 INIT_PACKAGE () {
 
 	# initialize
@@ -38,17 +41,17 @@ INIT_VERSION () {
 	echo " "; 
 	echo "fml release version::Initialize() ... "
 	echo "fml release          Date() ... "
-	perl $FML/distrib/bin/fml_version.pl -t kern/fml.pl > /dev/null
+	perl $FML_VERSION -t kern/fml.pl > /dev/null
 
 	if [ $release = 1 ]
 	then
 		echo "FML Release";
-		perl $FML/distrib/bin/fml_version.pl -s
+		perl $FML_VERSION -s
 
 	elif [ $init = 1 ]
 	then
 		echo "fml release          Increment() ... "
-		perl $FML/distrib/bin/fml_version.pl -i kern/fml.pl > /dev/null
+		perl $FML_VERSION -i kern/fml.pl > /dev/null
 	else
 		echo ""
 		echo "RELEASE VERSION NOT INCREMENTED"

@@ -174,7 +174,7 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in fml.pl msend.pl 
 	do
 		echo "   Fixing Rcsid in $file ... ( > src/$file )"
-		perl $FML/distrib/bin/fml_version.pl $file > $DESTDIR/distrib/src/$file
+		perl $FML_VERSION $file > $DESTDIR/distrib/src/$file
 	done
 
    )
@@ -182,7 +182,7 @@ FIX_DISTRIBUTION_FILE_RCSID () {
 	for file in $LIBEXEC_SOURCES 
 	do
 		echo "   Fixing Rcsid in $file ... "
-		perl $FML/distrib/bin/fml_version.pl $file > $DESTDIR/distrib/$file
+		perl $FML_VERSION $file > $DESTDIR/distrib/$file
 	done
 }
 
@@ -280,7 +280,7 @@ FIX_DISTRIBUTION_PERMISSION () {
 
 PATCHLEVEL_INCREMENT () {
 	echo "$src => $dst"
-	perl $FML/distrib/bin/fml_version.pl -p $PATCHLEVEL $src |\
+	perl $FML_VERSION -p $PATCHLEVEL $src |\
 	perl -nple 's/(\$Rcsid.*pl\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' |\
 	perl -nple 's/(\$Rcsid.*\#\d+)pl(\d+)/sprintf("%s.%04d", $1, $2)/e' \
 	> $dst
