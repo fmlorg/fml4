@@ -279,6 +279,7 @@ sub SmtpIO
     ### not IPC, try popen(sendmail) ... OR WHEN ALL CONNEVTION FAIL;
     ### Only on UNIX
     if ($e{'mci:mailer'} eq 'prog' || $error) {
+	$host = '';
 	&Log("Try mci:prog since smtp connections cannot be opened") if $error;
 
 	if ($UNISTD) {
@@ -303,6 +304,10 @@ sub SmtpIO
 	    &Log("delivery fails since cannot open prog mailer");
 	    return 0;
 	}
+    }
+
+    if ($USE_SMTP_PROFILE) {
+	&Log("SMTP::Prof:connect $host/$Port");
     }
 
     ### Do talk with sendmail via smtp connection
@@ -456,7 +461,9 @@ sub SmtpIO
     $e{'Body'} =~ s/\r\n/\n/g;
 
     # 
-    if ($USE_SMTP_PROFILE) { &Log("SmtpIO: ", (time - $SmtpIOStart));}
+    if ($USE_SMTP_PROFILE) { 
+	&Log("SMTP::Prof::IO: ". (time - $SmtpIOStart)." secs.");
+    }
 
     0;
 }
@@ -506,7 +513,7 @@ sub SmtpPutActiveList2Socket
 {
     local($ipc, $file) = @_;
     local($rcpt, $lc_rcpt, $gw_pat, $ngw_pat, $relay);
-    local($mci_count, $count, $time, $filename);
+    local($mci_count, $count, $time, $filename, $xtime);
 
     $filename = $file; $filename =~ s#$DIR/##;
 
@@ -608,7 +615,12 @@ sub SmtpPutActiveList2Socket
 	&Debug("Delivered[$count]\t$rcpt") if $debug_mci;
 	&Debug("RCPT TO[$count]:\t$rcpt") if $debug_smtp || $debug_dla;
 
+	if ($USE_SMTP_PROFILE) { $xtime = time;}
 	&SmtpPut2Socket("RCPT TO:<$rcpt>", $ipc);
+	if ($USE_SMTP_PROFILE && (time - $xtime > 1)) { 
+	    &Log("SMTP::Prof $rcpt slow");
+	}
+
 	$Current_Rcpt_Count++;
     }
 
@@ -616,8 +628,8 @@ sub SmtpPutActiveList2Socket
     dbmclose(%WMD);
 
     &Log("Smtp: ".(time - $time)." sec. for $count rcpts.") if $debug_smtp;
-    if ($USE_SMTP_PROFILE) {
-	&Log("Smtp::Active->Smtp: ".(time - $time)." sec. for $count rcpts.");
+    if ($USE_SMTP_PROFILE && ((time - $time) > 0)) {
+	&Log("SMTP::Prof:RCPT ".(time - $time)." sec. for $count rcpts.");
     }
 }
 
