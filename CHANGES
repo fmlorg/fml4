@@ -3,6 +3,12 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/12/28
+
+   makefml
+	nuke undefined ERROR()
+
+
 2000/12/24
 
 	CGI fix the behaviour in /ml-admin/$ml layer
