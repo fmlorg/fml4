@@ -51,3 +51,8 @@ permission さえあっていれば自由にいじれる
 
 2. もし  cgi-bin/fml/ml-admin/$ml/menu.cgi が用意されているなら
    WWWでそのＭＬをいじらせることができる。
+
+○ cgi-bin/admin/menu.cgi から htpasswd の変更をば
+
+○ もちろん ML名つきで、その下のアクセス権限は各ＭＬごとに自由に変更で
+   ないといかんです。
