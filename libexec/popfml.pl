@@ -46,28 +46,46 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 
 ### POPFML Win32 Version
 if ($COMPAT_WIN32) {
-    # require 'arch/Win32/libwin32.pl';
-    # require 'libwin32.pl';
-
-    ### &PopFmlGabble; (without fork version)
-    $status = &Pop'Gabble(*PopConf);#';
-    if ($status) { die("Error: $status\n");}
-
-    ### &PopFmlProg;
-    &PopFmlProg;
+    if ($MODE eq 'POP_ONLY') {
+	### &PopFmlGabble; (without fork version)
+	$status = &Pop'Gabble(*PopConf);#';
+	if ($status) { die("Error: $status\n");}
+	&PopFmlScan if $debug;
+    }
+    elsif ($MODE eq 'EXEC_ONLY_ONCE') {
+	&PopFmlProg;
+    }
+    else {
+	$status = &Pop'Gabble(*PopConf);#';
+	if ($status) { die("Error: $status\n");}
+	&PopFmlProg;
+    }
 }
 ### UNIX Version
 else {
-    # anyway shutdown after 45 sec (60 sec. must be a unit).
-    $SIG{'ALRM'} = "PopFmlProgShutdown";
-    alarm($TimeOut{"pop:flock"} || 45) if $HAS_ALARM;
+    local($evid);
+
+    if ($HAS_ALARM) {
+	# see libkern.pl (Global Jump)
+	$Sigarlm = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut');
+
+	# POP
+	# anyway shutdown after 45 sec (60 sec. must be a unit).
+	$evid = &SetEvent($TimeOut{'pop:flock'} || 45, "PopFmlProgShutdown");
+    }
 
     # spool -POP3-> pop.queue
     &PopFmlGabble;
+    &ClearEvent($evid) if $HAS_ALARM && $evid; # alarm(3) schduling reset;
 
     # scan pop.queue and fork() and exec()
+    # the first &SetEvent 3600 governs sprog's timeout but 
+    # this is incorrect if the child process execs "mget" ...
     &PopFmlProg;
 }
+
+
+&CheckQueueIsExpireP;
 
 exit 0;
 
@@ -100,6 +118,7 @@ sub PopFmlGetOpts
 	$_ = shift @ARGV;
 	/^\-user/ && ($USER = $PopConf{'USER'} = shift @ARGV) && next; 
 	/^\-host/ && ($PopConf{'SERVER'} = shift @ARGV) && next; 
+	/^\-M/    && ($PopConf{'MAINTAINER'} = shift @ARGV) && next; 
 	/^\-f/    && ($ConfigFile = shift @ARGV) && next; 
 	/^\-h/    && do { print &USAGE; exit 0;};
 	/^\-d/    && $debug++;
@@ -111,11 +130,16 @@ sub PopFmlGetOpts
 	/^\-perl_prog/    && ($PerlProg = shift @ARGV) && next;
 
 	/^\-arch/         && ($COMPAT_ARCH = shift @ARGV) && next;
+
+	### mode
+	/^\-mode/ && ($MODE = shift @ARGV) && next; 
     }
 
     if (0 && $debug) {
 	while (($k, $v) = each %ENV) { print STDERR "$k\t=>\t$v\n";}
     }
+
+    $MAINTAINER = $conf{'MAINTAINER'};
 }
 
 
@@ -145,6 +169,7 @@ qq#
    -perl_prog     perl program path
 
    -arch          architecture
+   -mode          mode
 #;
 }
 
@@ -197,11 +222,14 @@ sub PopFmlInit
 
     # get password for the host;
     if (-f $PopConf{'POP_PASSWD'}) {
-	print STDERR "POP3: user passwd format file\n" if $debug;
+	&Debug("popfml: $PopConf{'POP_PASSWD'} 'usr passwd' format file")
+	    if $debug;
+
 	$PopConf{"PASSWORD"} = &GetPopPasswd($USER, $PopConf{'POP_PASSWD'});
     }
     else {
-	print STDERR "POP3: .netrc format file\n" if $debug;
+	&Debug("popfml: .netrc format file") if $debug;
+
 	&PopFmlGetPasswd($PopConf{'SERVER'}, 
 			 $PopConf{'NETRC'} || "$ENV{'HOME'}/.netrc");
 	$PopConf{"PASSWORD"}  = $Password;
@@ -237,6 +265,17 @@ sub PopFmlInit
     }
     else {
 	&Log("not found $ConfigFile");
+    }
+
+    if ($debug) {
+	for (keys %PopConf) {
+	    if ($_ eq 'PASSWORD') {
+		printf STDERR "---PopConf: %-15s => %s\n", $_, '********';
+	    }
+	    else {
+		printf STDERR "---PopConf: %-15s => %s\n", $_, $PopConf{$_};
+	    }
+	}
     }
 }
 
@@ -330,6 +369,107 @@ sub PopFmlProgFreeLock
     &PopFmlUnLock;
 }
 
+sub PopFmlScan
+{
+    local($queue, $queue_dir, $prog, $qf);
+    $queue_dir = $PopConf{'QUEUE_DIR'};
+
+    opendir(DIRD, $queue_dir) || &Log("Cannot opendir $queue_dir");
+    for $qf (sort {$a <=> $b} readdir(DIRD)) {
+	next if $qf =~ /^\./;
+
+	print STDERR "   debug scan: $qf\n" if $debug;
+
+	if ($qf =~ /prog$/) {
+	    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+             $atime,$mtime,$ctime,$blksize,$blocks) = stat("$queue_dir/$qf");
+	    
+	    $Queue{$qf} = $ctime;
+	    print STDERR "   debug scan: $qf ($ctime)\n";
+	}
+    }
+    closedir(DIRD);
+}
+
+
+sub CheckQueueIsExpireP
+{
+    local($buf, $cur_time, $queue, $queue_dir, $qel);
+ 
+    ### Initialize
+    ### InitConfig defines $DOMAINNAME;
+    local($m);
+    $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
+	($ENV{'USER '}|| $ENV{'USERNAME'});
+    $MAINTAINER = "$m\@$DOMAINNAME";
+
+    $HOST = $PopConf{'SERVER'};
+    ### Initialize ends
+
+    # scan
+    &PopFmlScan;
+
+    # 3 hours
+    $QUEUE_EXPIRE_LIMIT = 120;
+    $QUEUE_EXPIRE_LIMIT = $QUEUE_EXPIRE_LIMIT || 3*3600;
+
+    # current time
+    $cur_time  = time;
+    $queue_dir = $PopConf{'QUEUE_DIR'};
+
+    &Log("check queue $queue_dir");
+
+    if ($QUEUE_EXPIRE_LIMIT > 3600) {
+	$qel = sprintf("%.1f hours", $QUEUE_EXPIRE_LIMIT/3600);
+    }
+    elsif ($QUEUE_EXPIRE_LIMIT == 3600) {
+	$qel = "1 hour";
+    }
+    else {
+	$qel = "$QUEUE_EXPIRE_LIMIT secs";
+    }
+
+    # check the current queue
+    for $qf (keys %Queue) {
+	$uiq   = "$queue_dir/$qf.ui";
+	$queue = "$queue_dir/$qf";
+
+	&Log("check queue $qf") if $debug;
+
+	# created time is 3 hours before.
+	if ($cur_time - $Queue{$qf} > $QUEUE_EXPIRE_LIMIT) {
+	    &Log("queue $qf is timed out.");
+
+	    eval("require \"$uiq\";") if -f $uiq;
+	    &Log($@) if $@;
+
+	    undef $buf;
+	    $buf  = "Popfml:\n";
+	    $buf .= "Queue $qf is created before $qel but not processed.\n";
+	    $buf .= "Queue $qf is timed out.\n";
+	    $buf .= "\n------- Forwarded Message\n\n";
+	    open(F, $queue) || &Log("cannot open $queue");
+	    while (<F>) { $buf .= $_;}
+	    close(F);
+	    $buf .= "\n\n------- End of Forwarded Message\n";
+
+	    &Sendmail($MAINTAINER, "popfml: timeout queue $qf", $buf);
+
+	    $status = unlink $queue;
+
+	    if ($status) {
+		&Log("unlink $queue for timeout");
+	    }
+	    else {
+		&Log("cannot unlink $queue");
+	    }
+	    
+	    unlink $uiq if -f $uiq;
+	}
+    }
+}
+
+
 sub PopFmlProg
 {
     local($queue, $queue_dir, $prog, $qf);
@@ -338,7 +478,7 @@ sub PopFmlProg
     $prog  = $PopConf{'PROG'};
     $prog =~ s/^\|+//;
 
-    print STDERR "--PopFmlProg (\n\tqueue_dir=$queue_dir\n\tprog=$prog\n)\n"
+    &Debug("--PopFmlProg (\n\tqueue_dir=$queue_dir\n\tprog=$prog\n)")
 	if $debug;
 
     &PopFmlLock;
@@ -349,6 +489,7 @@ sub PopFmlProg
 
 	next if $qf =~ /^\./;
 	next if $qf =~ /\.prog$/;
+	next if $qf =~ /\.ui$/; # user credential
 
 	last if $ForkCount >= $POPFML_MAX_CHILDREN;
 	last if $PopFmlProgExitP;
@@ -400,6 +541,10 @@ sub PopFmlProg
 	}
 
 	$ForkCount++; # parent;
+
+	if ($MODE eq 'EXEC_ONLY_ONCE') {
+	    &Log("ends for EXEC_ONLY_ONCE");
+	}
     }
     
     # O.K. Setup the prog of the queue; GO!
@@ -426,35 +571,41 @@ sub PopFmlProg
 sub PopFmlDoExec
 {
     local($qf, $queue, $prog) = @_;
-    local($pid);
+    local($pid, $uiq);
 
-    print STDERR "--PopFmlDoExec [$qf] ... ($$)\n" if $debug;
-    print STDERR "   $prog\n\n" if $debug;
+    # log info
+    $uiq = "${queue}.ui";
 
-    if (! open(QUEUE_IN, $queue)) {
-	&Log("Cannot open $queue");
-	exit 0;
+    if ($debug) {
+	print STDERR "--PopFmlDoExec [$qf] ... ($$)\n";
+	print STDERR "   $prog\n\n";
     }
-    else {
+
+    if (open(QUEUE_IN, $queue)) {
 	&Debug("open $queue") if $debug;
     }
+    else {
+	&Log("cannot open $queue");
+	return 0;
+    }
 
-    if (! open(PROG_IN, "|$prog")) {
-	&Log("Cannot exec [$prog] for $queue");
-	exit 0;
+    if (open(PROG_IN, "|$prog")) {
+	&Debug("open |$prog") if $debug;
     }
     else {
-	&Debug("open |$prog") if $debug;
+	&Log("cannot exec [$prog] for $queue");
+	return 0;
     }
 
     while (<QUEUE_IN>) { 
-	s/^From /From /;
+	s/^From /From /; # ???
 	print PROG_IN $_;
     }
 
     close(PROG_IN);
     close(QUEUE_IN);
 
+    unlink $uiq   || &Log("PopFmlProg: fails to remove the queue $uiq");
     unlink $queue || &Log("PopFmlProg: fails to remove the queue $qf");
 }
 
