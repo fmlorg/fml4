@@ -12,7 +12,7 @@ $Rcsid   = 'fml 2.0 Exp #: Wed, 29 May 96 19:32:37  JST 1996';
 ######################################################################
 
 require 'getopts.pl';
-&Getopts("d:f:ht:I:D:vTHM:L:o:");
+&Getopts("d:f:ht:I:D:vVTHM:L:o:");
 
 
 $opt_h && do { &Usage; exit 0;};
@@ -22,6 +22,7 @@ $HTTP_DIR        = $opt_d;
 $SPOOL_DIR       = shift;
 $ConfigFile      = $opt_f;
 $verbose         = $opt_v;
+$debug           = $opt_V;
 $HTML_THREAD     = 1; # $opt_T;
 $MIN             = $opt_M > 0 ? $opt_M : 1;
 $LastRange       = $opt_L;
@@ -36,7 +37,7 @@ for (split(/:/, $opt_o)) {
 ########## MAIN ##########
 ### WARNING;
 -d $SPOOL_DIR || die("At least one argument is required for \$SPOOL_DIR\n");
--d $HTTP_DIR  || die("-d \$HTTP_DIR REQUIRED\n");
+-d $HTTP_DIR  || die("\$HTTP_DIR not exists? FYI: -d \$HTTP_DIR REQUIRED\n");
 
 ### Libraries
 require $ConfigFile if -f $ConfigFile;
@@ -92,7 +93,7 @@ sub Ctl
 
     print STDERR "$label::Ctl $_[0] .. $_[1]\n" if $verbose;
 
-    return if $_[0] > $_[1];
+    return 0 if $_[0] > $_[1];
 
     for ($id = $_[0]; $id < $_[1]; $id++ ) {
 	print STDERR "$label::Ctl  $id processing...\n" if $verbose;
