@@ -4,7 +4,7 @@ echo "Possible Error Report ($1):";
 echo "";
 
 egrep -ni 'stop|no |not | no| not|error' $1 |\
-egrep -v "analyze_mail_error|liberror.pl| Nov |:\+|RCS|:var/html/RELEASE_NOTES.html|:doc/ri/RELEASE_NOTES|:Crosspost|:\(FML=/home/beth/fukachan/w/fml" |\
+egrep -v "analyze_mail_error|liberror.pl| Nov |:\+|RCS|:var/html/RELEASE_NOTES.html|:doc/ri/RELEASE_NOTES|:Crosspost|:\(FML=/home/beth/fukachan/w/fml|doc/examples/errormail-handling.*.wix   [0-9].[0-9]+" |\
 perl -nle ' s/:/  /; print "   $_\n"'
 
 echo "";

@@ -73,7 +73,7 @@ INIT_VERSION () {
 	date 		>> $RELEASE_MANIFEST
 	echo "" 	>> $RELEASE_MANIFEST
 
-	RS="kern/*.pl proc/*.pl bin/*.pl sbin/*.pl libexec/*.pl contrib/*/*.pl sys/*/[a-z]*"
+	RS="kern/*.pl proc/*.pl bin/*.pl sbin/[a-z]* libexec/*.pl contrib/*/*.pl sys/*/[a-z]*"
 
 	if [ $package = 1 ]
 	then
