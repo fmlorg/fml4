@@ -185,6 +185,8 @@ sub ModeBifurcate
     }
     # command mode?
     elsif ($command_mode) {
+	$Envelope{'pcb:mode'} = 'command'; # process control block
+
 	# NOT PERMIT COMMAND WHEN MAIL SIZE IS OVER LIMIT.
 	if ($Envelope{'trap:mail_size_overflow'}) {
 	    &Log("ModeBifurcate: ignore too bit mail in command mode");
@@ -248,6 +250,8 @@ sub ModeBifurcate
     }
     # distribute
     else {
+	$Envelope{'pcb:mode'} = 'distribute'; # process control block
+
         if ($PERMIT_POST_FROM eq "anyone") {
 	    &Distribute(*Envelope, 'permit from anyone');
 	}
