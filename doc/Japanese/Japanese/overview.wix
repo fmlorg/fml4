@@ -10,6 +10,21 @@
 .xref	$USE_MIME
 
 
+.S	だめなメールソフトに対応するための特殊なオプション (例: Apple mail )
+
+
+MIME エンコーディングを間違えているメールソフトがあります。
+例えば Mac OS 附属の Apple mail というものです。
+
+	$MIME_BROKEN_ENCODING_FIXUP = 1 ; (default 0)
+
+とすると、壊れているエンコーディングを何とか修復しようと努力します。
+
+   [ノート]
+	このコードは OGAWA Kunihiko さん作のパッチに基づいています。
+	たんきゅー
+
+
 .S	HOOKで使うと便利な関数: &STR2JIS(文字列)
 
 	&STR2JIS(変換したい文字列);
