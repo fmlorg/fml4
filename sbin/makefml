@@ -856,12 +856,12 @@ sub Copy
     local($mode) = (stat($in))[2];
 
     open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
-    open(OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
-    select(OUT); $| = 1; select(STDOUT); 
+    open(COPY_OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
+    select(COPY_OUT); $| = 1; select(STDOUT); 
     chmod $mode, $out;
 
-    while (sysread(COPY_IN, $_, 4096)) { print OUT $_;}
-    close(OUT);
+    while (sysread(COPY_IN, $_, 4096)) { print COPY_OUT $_;}
+    close(COPY_OUT);
     close(COPY_IN);
     1;
 }
