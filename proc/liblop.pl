@@ -162,7 +162,15 @@ sub ResentForwFileInSpool
     if ($ar eq 'TarZXF') {  
 	&use('utils');
 	$buffer = &TarZXF("$DIR/$mail_file", 1, *cat);
-	($header, $body) = split(/\n\n/, $buffer, 2);
+
+	if (! $buffer) { # empty;
+	    &Log("Not found Article $ID");
+	    &Log("Get $ID, Fail");
+	    return $NULL;
+	}
+	else {
+	    ($header, $body) = split(/\n\n/, $buffer, 2);
+	}
     }
     else {
 	if (open(ARTICLE, "$DIR/$mail_file")) {
