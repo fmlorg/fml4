@@ -3192,7 +3192,7 @@ sub do_newml
 
     print "\n";
     print "   The next step: update your MTA configuration. For example\n";
-    print "\t% su\n";
+    print "\t% su root\n";
     print "\t# cat $ML_DIR/$ml/aliases >> /etc/aliases\n";
     print "\t# newaliases\n";
     print "\n   FYI: See templates in '$ML_DIR/$ml/'\n";
@@ -5029,7 +5029,7 @@ sub do_mead
 
     print "\n";
     print "   The next step: update your MTA configuration. For example\n";
-    print "\t% su\n";
+    print "\t% su root\n";
     print "\t# cat $ML_DIR/$ml/aliases >> /etc/aliases\n";
     print "\t# newaliases\n";
     print "\n   FYI: See templates in '$ML_DIR/$ml/'\n";
@@ -5075,10 +5075,18 @@ sub do_fmlserv
     ### config.ph ends
 
     # the last info
-    print "\n   Please see several examples in $ML_DIR/$ml\n";
-    print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
-    &Cat("$ML_DIR/$ml/aliases");
+    # print "\n   Please see several examples in $ML_DIR/$ml\n";
+    # print "\n# Example of Aliases ($ML_DIR/$ml/aliases)\n";
+    # &Cat("$ML_DIR/$ml/aliases");
+    # print "";
+    # print "\n";
+
     print "\n";
+    print "   The next step: update your MTA configuration. For example\n";
+    print "\t% su root\n";
+    print "\t# cat $ML_DIR/$ml/aliases >> /etc/aliases\n";
+    print "\t# newaliases\n";
+    print "\n   FYI: See templates in '$ML_DIR/$ml/'\n";
 }
 
 
