@@ -6,6 +6,11 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl4 ]
+
+  etc/makefml/include-mead
+	fix spelling 
+
   doc/html/index.html
 	add ptr to Mac OS X Server
 
