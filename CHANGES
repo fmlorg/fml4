@@ -4,6 +4,18 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/02/24
+
+   4.0E
+	bump up to 4.0E (digest delivery fix)
+
+   bug fix RDBMS dump_xxx_list() to enable digest delivery
+	kern/msend.pl
+	databases/mysql/toymodel.pl
+	databases/postgresql/DBI_toymodel.pl
+	databases/postgresql/DBI_toymodel2.pl
+	databases/postgresql/Pg_toymodel.pl
+	databases/postgresql/toymodel.pl kern/msend.pl
 
 2002/02/16
 
@@ -223,7 +235,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.236 2002/02/16 14:24:18 fukachan Exp $
+	add $FML: CHANGES,v 1.237 2002/02/18 10:37:30 fukachan Exp $
 
 2001/10/03
 
