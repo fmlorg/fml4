@@ -607,8 +607,9 @@ makefml の使い方については INSTALL マニュアルを見て下さい。
 
 .S	Backward Compatibility 
 
-『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』が従
-来と異なり『配送専用』です。
+config.ph で $CFVersion = 3; と定義されている時には『$MAIL_LIST と 
+$CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』が従来と異なり『配送
+専用』です。
 .xref	non-compat-1-2
 
 それ以外のものについては可能な限り backward compatible に作られていま
