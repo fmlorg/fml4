@@ -17,10 +17,10 @@ sub FTPMAIL
     $FTPMAIL_SUBJECT = "Ftpmail";
     
     # the length of one mail < 3000 lines.
-    $MAIL_LENGTH_LIMIT || ($MAIL_LENGTH_LIMIT = 1000);
+    $MAIL_LENGTH_LIMIT = $MAIL_LENGTH_LIMIT || 1000;
     
     # default sleeping time between mails to send
-    $SLEEPTIME 	= 30;
+    $SLEEPTIME 	= $SLEEPTIME || 30;
     
     # Most Important Variable; We cannot permit the access upper this dir.
     $CURRENT_DIR = $TOPDIR = $TOPDIR ? $TOPDIR : $DIR;
@@ -215,10 +215,10 @@ sub SendBack
     local($tmpfile) = "$DIR/$TMP_DIR/ftpmail$$";
 
     if ($_cf{'SendBack', 'plaintext'}) {
-	system "cd $dir; $CP $f $tmpfile";
+	&system("cd $dir; $CP $f $tmpfile");
     }
     else {
-	system "cd $dir; $UUENCODE $f $f > $tmpfile";
+	&system("cd $dir; $UUENCODE $f $f > $tmpfile");
     }
 
     local($lines)   = &WC($tmpfile);
