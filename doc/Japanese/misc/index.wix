@@ -4,19 +4,23 @@
 .toc
 .~HTML_PRE
 
-.p	いろいろ
+.P	いろいろ
 .include examples.wix
 .include lock.wix
 
 
-.p	MTA 関係
+.P	レンタルサーバというかISPのサービスというか…
+.include isp_specific.wix
+
+
+.P	MTA 関係
 .include postfix-pop-before-smtp.wix
 
 
-.p	HOOK
+.P	HOOK
 .include hook.wix
 
-.p	examples
+.P	examples
 .C	examples
 
 .include sample-sitedef-mnews

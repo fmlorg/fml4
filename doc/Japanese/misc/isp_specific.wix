@@ -1,0 +1,71 @@
+.C	レンタルサーバネタ?
+
+.S	レンタルサーバーを借りて複数のＭＬを動かしたい
+
+結論としては、契約形態によるという答え方しかないでしょう。
+
+(1) いくらでも aliases に書いてくれるのなら 普通のインストール手順です。
+   INSTALL ファイルや fml チュートリアルの basic_setup を読んで下さい。
+
+.q
+もし一つのアカウントでいくつＭＬを実行してもいいのなら 
+＃ここが間違っていると話しがかわってしまいます。
+
+1. ユーザ aaa になって
+
+2.  ml-a 〜 ml-e を作成する
+
+	makefml  newml ml-a
+	makefml  newml ml-b
+	makefml  newml ml-c
+	makefml  newml ml-d
+	makefml  newml ml-e
+
+を全部ユーザ aaa で実行する。
+
+3.  ml-a 〜 ml-e の aliaes (見本) を /etc/aliases に書いてくれと依頼する
+
+	/var/spool/ml/ml-a/aliases
+	/var/spool/ml/ml-b/aliases
+	/var/spool/ml/ml-c/aliases
+	/var/spool/ml/ml-d/aliases
+	/var/spool/ml/ml-e/aliases
+.~q
+
+2. 『 aliases は書いてくれるがアカウント一つでアドレスはＮ個分』
+   などの制限がある場合
+
+.q
+もし一つのアカウントでは一つのＭＬ分しか認めないのなら
+
+1. ユーザ aaa-a になって
+
+2.  ml-a を作成する
+
+	makefml  newml ml-a
+
+1. ユーザ aaa-b になって
+
+2.  ml-b を作成する
+
+	makefml  newml ml-b
+
+という手順を繰り返すます。
+
+3. 依頼はまとめて
+
+	/var/spool/ml/ml-a/aliases
+	/var/spool/ml/ml-b/aliases
+	/var/spool/ml/ml-c/aliases
+	/var/spool/ml/ml-d/aliases
+	/var/spool/ml/ml-e/aliases
+
+を全部かいてくれとたのみます(必要でない行があれば削って)。各プロセスは
+
+	/var/spool/ml/ml-a/include のユーザ aaa-a  
+	/var/spool/ml/ml-b/include のユーザ aaa-b  
+		…以下同様…
+
+で走ります。
+.~q
+
