@@ -2,25 +2,6 @@ INIT_PACKAGE () {
 	# initialize
    	cp /dev/null $PATCHLEVEL_DIR/version
 
-	# if conf/mode does NOT EXISTS, we should check 'cvs ci *'.
-	if [ X$MODE = X ]; then
-		### rcsid is not used explicit, so delete here
-		#	echo " "; echo "Fixing rcsid ... " 
-		#	/bin/sh distrib/bin/fix-rcsid.sh
-
-		# echo " ";
-		# echo "O.K. rcs check in var/doc/ ... ";
-		# sh distrib/bin/sync-rcs-of-doc.sh
-		echo "------------------------------"
-		echo "Checking CVS commited all?";
-		echo ""
-		${MAKE} scan
-		echo ""
-		echo "------------------------------"
-	else
-		echo ignore make scan check
-	fi
-
 	echo " "; echo "Fixing permissions ... ";
 	chmod 755 kern/*.pl bin/* sbin/* libexec/*
 	chmod 644 kern/lib*.pl proc/*.pl
