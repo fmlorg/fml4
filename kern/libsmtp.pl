@@ -496,7 +496,7 @@ sub SmtpIO
 	    $LastSmtpIOString = $_;
 	}
 	else {
-	    $LastSmtpIOString = $e{'Body'};
+	    $LastSmtpIOString = substr($e{'Body'}, -128);
 	}
     }
 
