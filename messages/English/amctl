@@ -2,7 +2,7 @@ amctl.change.ok:
 	change member and recipient lists
 
 amctl.change.fail:
-	fail to	change member and recipient lists
+	change member and recipient lists failed
 
 amctl.change.only_recipient_list:
 	change recipient list not member list
@@ -11,10 +11,10 @@ amctl.change.only_member_list:
 	change member list not recipient list
 
 amctl.multiply.match:
-	multiple addresses matches. try again address matching more restrictly
+	multiple addresses matches. Please refine your search.
 
 amctl.digest.no_args:
-	no argument. I use default value (3).
+	no argument. Default value (3) will be used.
 
 amctl.msend_rehash.send:
 	send articles from _ARG0_ to _ARG1_ 
@@ -24,37 +24,38 @@ amctl.msend_rehash.send_nothing:
 
 ### Section: subscribe
 amctl.added:
-	I am the fml for <_ARG1_> mailing list
-	I added the following address as a new member
+	I am the fml List manager for the <_ARG1_> mailing list
+	I have added the following address
 
 	     Email address: <_ARG0_>
 	      Mailing List: <_ARG1_>
 
 amctl.added.notify2ml:
-	I added the following address as a new member
+	I have added the following address as a new member
 	     Email address: <_ARG0_>
 
 amctl.added.notify2ml.subject:
-	_ARG0_ is added to <_ARG1_>
+	_ARG0_ has been added to <_ARG1_>
 
 amctl.added.caution:
-	Caution: If you reply this mail, the recipient is mailing list!
+	Caution: If you reply this mail, your reply will be sent to the mailing list!
 	post articles	<_ARG1_>
 	commands	<_ARG2_>
 	maintainer	<_ARG0_>
 
 amctl.mail.undelivered:
-	FYI: a mail with no content withtout subscribe requiest is
-	not delivered
+	FYI: a mail with no content and that is not a subscribe request will
+	not be delivered
 
 amctl.info:
-	Hi, I am the fml ML manager for the ML <_ARG0_>.
-	I find some errors. Please check your mail!
-	For example,
-		- The address you used IS NOT A ML MEMBER?
-		(TRUE if you try to subscribe)
-		- You sent a bad subscribe syntax _ARG3_ ?
-	FYI: subscribe syntax
+	Hi, I am the fml Mailing List manager for the list <_ARG0_>.
+	I have found some errors. Please check your mail!
+
+	Possible causes:
+		- The address you used IS NOT A ML MEMBER
+		(TRUE if you are trying to subscribe)
+		- The subscribe syntax is incorrect, _ARG3_
+	FYI: The subscribe syntax is:
 	_ARG3_: _ARG2_ YOUR NAME
 
 ### Section: others

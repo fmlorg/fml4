@@ -14,7 +14,7 @@ fmlserv.serv:
 	_ARG0_ serves the following mailing lists
 
 fmlserv.not_any_member:
-	<_ARG0_> is not any member for all mailing lists served by this host.
+	<_ARG0_> is not a member of any mailing lists served by this host.
 
 fmlserv.subscribed_lists:
 	<_ARG0_> is a member of the following mailing lists

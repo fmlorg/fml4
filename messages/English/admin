@@ -1,11 +1,11 @@
 admin.mandatry_addr_args:
 	   admin command address [options]
-	you can also approve command by the following syntax
+	you can also approve command by using the following syntax
 	   approve PASSWORD command address [options]
 
 admin.log:
 	_ARG0_ shows the last _ARG1_ line of the logfile
-	since the file is too big.
+	as the file is too big.
 	_ARG0_ all shows all of logfile.
 	_ARG0_ -N shows the last N lines.
 	For example: _ARG0_ -200 shows the last 200 lines.

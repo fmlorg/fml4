@@ -5,7 +5,7 @@ unlink.fail:
 	failed to remove _ARG0_
 
 wait_a_little:
-	Please wait a little
+	Please wait a while
 
 fail:
 	failed
@@ -54,13 +54,13 @@ not_avail:
 	_ARG0_  is unavaialble
 
 obsolete_command:
-	_ARG0_ is obsleted by _ARG1_
+	_ARG0_ is replaced by _ARG1_
 
 no_such_member:
 	no such member
 
 already_subscribed:
-	_ARG0_ is a member already
+	_ARG0_ is already a member
 
 not_member:
 	not a member
@@ -73,20 +73,20 @@ configuration_error:
 	Please report it to the mailing list maintainer
 
 command_something_error:
-	_ARG0_ command got some errors
+	_ARG0_ returned some errors
 
 command_syntax_error:
-	_ARG0_ has invalid syntax.
+	_ARG0_ has an invalid syntax.
 
 invalid_addr_syntax:
-	_ARG0_ is invalid syntax.
-	It shouldbe "account@domain" format.
+	_ARG0_ has invalid syntax.
+	Correct sysntax: "account@domain"
 
 invalid_syntax:
-	_ARG0_ is invalid syntax.
+	_ARG0_ has an invalid syntax.
 
 mailloop:
-	Error: address<_ARG0_> may cause mail loop
+	Error: address<_ARG0_> may cause a mail loop
 
 
 ##########################################################################

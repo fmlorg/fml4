@@ -9,18 +9,18 @@ filter.rejected:
 filter.reject_html_mail:
 	This mailing list denies a HTML mail which has plaintext and html
 	parts with the same contents.
-	Please write your mail by text only!
+	Please resend with text only!
 
 filter.strip_html_mail:
 
 
 filter.insecure_p.stop:
 	Error: request has special charactors
-	process stops for security reason.
+	process stopped for security reasons.
 
 filter.reject_non_text_mail:
-	This mailing list denies mails with attatchments.
+	This mailing list denies messages with attatchments.
 
 filter.strip_notice_non_text_mail:
-	This mailing list denies mails with attatchments, so strips 
+	This mailing list denies messages with attatchments, so will strip 
 	attachments.

@@ -1,8 +1,8 @@
 moderator.submission:
 	To moderators:
-	Hi, I am the fml. I forward submission request to you.
-	If you certified this mail, please send the following keyword
-	to address <_ARG0_>.
+	Hi, I am the fml Mailing List Manager. I will forward submission 
+	request to you.  If you can certify this mail, 
+	please send the following keyword to address <_ARG0_>.
 	Caution: send KEYWORD ONLY !
 
 moderator.no_such_id:

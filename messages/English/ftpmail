@@ -1,6 +1,6 @@
 ftpmail.submitted:
-	receives your request to ftpmail server <_ARG0_>
-	Please wait a little
+	Received your request to the ftpmail server <_ARG0_>
+	Please wait a while
 
 ftpmail.not_supported:
-	not permit relay to ftpmail server
+	Relay to ftpmail server not permitted
