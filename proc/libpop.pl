@@ -43,7 +43,7 @@ sub Init
 	eval("\$Pop'$_ = \$main'$_;");	
     }
 
-    for (SERVER, PORT, USER, PASSWORD, TIMEOUT, 
+    for (SERVER, PORT, USER, PASSWORD, TIMEOUT, PORT,
 	 PROG, MAIL_SPOOL, QUEUE_DIR, RECVSTORE, LOGFILE) {
 	eval("\$POP_${_} = \$PopConf{\"${_}\"};");
     }
@@ -158,6 +158,14 @@ sub Gobble
     else {
 	&Log("Pop::fails to STAT the pop server[$POP_SERVER].");
 	return 'ERROR of POP SERVER';
+    }
+
+    if ($n > 0) {
+	&Log("$n entry") if $n == 1;
+	&Log("$n entries") if $n > 1;
+    }
+    else {
+	&Log("nothing to do") if $debug;
     }
 
     my($time) = time;

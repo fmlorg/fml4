@@ -94,18 +94,23 @@ exit 0;
 sub PopFmlGetPasswd
 {
     local($h, $config_file) = @_;
+    my ($c) = 0;
     local($org_sep)  = $/;
     $/ = "\n\n";
 
     open(NETRC, $config_file) || die("Error: cannot open $config_file [$!]");
+    if ($debug) { print STDERR "open password file: $config_file\n";}
     while(<NETRC>) {
 	s/\n/ /;
 	s/machine\s+(\S+)/$Host = $1/ei;
 	if ($Host eq $h && /login\s+$USER/) {
+	    $c++;
  	    s/password\s+(\S+)/$Password = $1/ei;
 	}
     }
     close(NETRC);
+
+    if ($debug) { if (! $c) { &Log("no such user $USER for Host $h");}}
 
     $/ =  $org_sep;
 }
@@ -130,6 +135,7 @@ sub PopFmlGetOpts
 	/^\-include_file/ && ($PopConf{'INCLUDE_FILE'} = shift @ARGV) && next;
 	/^\-pwfile/       && ($PopConf{'NETRC'} = shift @ARGV) && next;
 	/^\-pop_passwd/   && ($PopConf{'POP_PASSWD'} = shift @ARGV) && next;
+	/^\-pop_port/     && ($PopConf{'PORT'} = shift @ARGV) && next;
 	/^\-perl_prog/    && ($PerlProg = shift @ARGV) && next;
 
 	/^\-arch/         && ($COMPAT_ARCH = shift @ARGV) && next;
@@ -236,7 +242,7 @@ sub PopFmlInit
 
 	&PopFmlGetPasswd($PopConf{'SERVER'}, 
 			 $PopConf{'NETRC'} || "$ENV{'HOME'}/.netrc");
-	$PopConf{"PASSWORD"}  = $Password;
+	$PopConf{"PASSWORD"} = $Password;
     }
 
     if (! $PopConf{'USER'}) {
@@ -280,6 +286,11 @@ sub PopFmlInit
 	for (keys %PopConf) {
 	    if ($_ eq 'PASSWORD') {
 		printf STDERR "---PopConf: %-15s => %s\n", $_, '********';
+		if (! $PopConf{'PASSWORD'}) {
+		    &Log("ERROR: password for user '$USER' is empty");
+		    &Log("no more action, exit now");
+		    exit 1;
+		}
 	    }
 	    else {
 		printf STDERR "---PopConf: %-15s => %s\n", $_, $PopConf{$_};
@@ -318,9 +329,9 @@ sub EvalIncludeFile
 
 sub PopFmlGobble
 {
-    $! = "";
     &PopFmlLock;
 
+    undef $!;
     if (($pid = fork) < 0) {
 	&Log("Cannot fork");
     }
@@ -336,8 +347,7 @@ sub PopFmlGobble
 	;
     }
 
-    &Log("Gobble Error: $!") if $!;
-
+    &Log("ERROR: PopFmlGobble: $!") if $!;
 
     &PopFmlUnLock;
 }
@@ -358,8 +368,12 @@ sub PopFmlLock
 
     print STDERR "--try lock ... ($$)\n" if $debug;
 
-    open(LOCK, $queue_dir);
-    flock(LOCK, $LOCK_EX);
+    if (open(FML_LOCK, $queue_dir)) {
+	flock(FML_LOCK, $LOCK_EX);
+    }
+    else {
+	&Log("cannot open $queue_dir");
+    }
 
     print STDERR "--locked ... ($$)\n" if $debug;
 }
@@ -563,7 +577,8 @@ sub PopFmlProg
     &PopFmlUnLock;
     closedir(DIRD);
 
-    &Log("fork $ForkCount childrens") if $ForkCount;
+    &Log("fork $ForkCount child")    if $ForkCount == 1;
+    &Log("fork $ForkCount children") if $ForkCount > 1;
 
     print STDERR "---PopFmlProg Ends\n" if $debug;
 
