@@ -3,6 +3,10 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/06/03
+
+  libpop.pl: change queue file name format
+
 2000/06/02
 
   enable installer to search pgp5 programs
