@@ -7,6 +7,11 @@
 
 2001/08/20
 
+  bug fix cgi list check in initial state without members/actives 
+	
+	初期状態で members  や actives がない場合に
+	エラーが表示されることがあるが、このエラーは不必要なので削除
+
   remove $LOCKFILE in $0 
 
 	$LOCKFILE という変数名が変なので $MyProcessInfo に変更した

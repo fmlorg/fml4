@@ -1,13 +1,13 @@
 #-*- perl -*-
 #
-# Copyright (C) 1999-2000 Ken'ichi Fukamachi
+# Copyright (C) 1999-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: libcgi_kern.pl,v 1.54 2001/08/20 12:29:52 fukachan Exp $
 #
 
 
@@ -215,7 +215,9 @@ sub ExpandMemberList
     my (%uniq, %addr);
 
     for $list (@list) {
+	next unless -f $list;
 	next unless $list;
+
 	# uniq
 	next if $uniq{$list}; $uniq{$list} = 1;
 
