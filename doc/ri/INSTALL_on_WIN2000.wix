@@ -31,8 +31,9 @@ fml-current (3.0G 20000716) pop version
 .C	installation
 
 
-インストールは NT4 用のドキュメントを見て下さい。
-基本的に一緒です。
+インストールは NT4 用のドキュメントを見て下さい。基本的に一緒です。
+.url ../INSTALL_on_NT4/index.html
+
 
 MS-DOS prompt じゃなくて command prompt とか細かい違いはありますが
 その辺はよきにはからってください:)
