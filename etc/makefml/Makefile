@@ -30,3 +30,15 @@ config.ph: cf
 fml: fml.c config.h
 	$(CC) $(CFLAGS) -o fml fml.c
 	$(CHMOD) $(MODE) fml
+	$(CC) $(CFLAGS) -DCTLADDR -o fml-ctl fml.c
+	$(CHMOD) $(MODE) fml-ctl
+
+spool2html:
+	perl _EXEC_DIR_/bin/spool2html.pl \
+		-I _EXEC_DIR_ \
+		-d $(PWD)/htdocs \
+		-f $(PWD)/config.ph \
+		$(PWD)/spool
+
+config:
+	perl _EXEC_DIR_/makefml config _ML_
