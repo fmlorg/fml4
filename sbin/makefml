@@ -1796,7 +1796,9 @@ sub __SearchPath
     local($f) = @_;
     local($p, @path);
 
-    if ($ENV{'_PATH_PERL'}) { return $ENV{'_PATH_PERL'};}
+    if ($f eq 'perl') {
+	if ($ENV{'_PATH_PERL'}) { return $ENV{'_PATH_PERL'};}
+    }
 
     # cache on
     if ($PathCache{$f}) { return $PathCache{$f};}
@@ -1809,14 +1811,20 @@ sub __SearchPath
     }
 
     # too pesimistic?
-    for ("/usr/local/bin", "/usr/share/bin", 
-	 "/usr/contrib/bin", "/usr/gnu/bin", 
-	 "/usr/bin", "/bin", "/usr/gnu/bin", "/usr/ucb",
+    for ("/usr/local/bin", 
+	 "/usr/share/bin", 
+	 "/usr/contrib/bin", 
+	 "/usr/gnu/bin", 
+	 "/usr/bin", 
+	 "/bin", 
+	 "/usr/ucb",
 	 "/usr/ucblib",  # NEC EWS4800 
 	 "/usr/pkg/bin", # NetBSD pkgsrc
 	 # NT Extention
 	 "/perl5/bin", 
-	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
+	 "c:\\perl\\bin", 
+	 "d:\\perl\\bin", 
+	 "e:\\perl\\bin",
 
 	 # search for "htpasswd"
 	 "/usr/local/apache/bin",
