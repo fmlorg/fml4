@@ -1,0 +1,82 @@
+.HTML_PRE
+	FML Advisory 2000-001: Y2K summary
+	========================================
+
+Topic:		2000年問題サマリ (FA-1999-005 後)
+=E
+Topic:		YEAR 2000 after FA-1999-005
+
+			Ken'ichi Fukamachi <fukachan@sapporo.iij.ad.jp>
+
+	Copyright (C) 2000 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+
+[Abstract]
+
+summary on y2k after 1999-005 advisory.
+
+.toc
+
+
+.C	FA-1999-005 以降について
+=E.C	After FA-1999-005
+
+.if LANG == JAPANESE
+今までのまとめはここをみてください。
+
+.url http://www.fml.org/fml/advisories/FA1999_005/index.html
+
+このファイルは以前のアドヴァイザリ以降の修正についてしるしたメモです。
+.fi
+.if LANG == ENGLISH
+FA-1999-005 on y2k fixes in 1999.
+
+.url http://www.fml.org/fml/advisories/FA1999_005-e/index.html
+.fi
+
+.S	traffic コマンド
+=E.S	traffic command
+
+traffic module作者の谷川さんから新しいversionをもらったのでmergeしまし
+た(ありがと〜)。
+
+修正案1.	3.0.1 BETA#2 以降を使う
+修正案2.	/usr/local/fml/libtraffic.pl だけを今の版にいれかえる
+修正案3.	traffic commandは使わない;)
+
+traffic module の修正は
+
+.url ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/y2k-fix.tar.gz
+
+では修正できないので入れ換える方が速いです。
+
+.S	HTML生成ルーチンのバグ
+=E.S	html converters
+
+fixed in 2000/01/02.
+.q
+libsynchtml (2.32-2.33)
+date: 2000/01/02 05:58:51;  author: fukachan;  state: Exp;  lines: +7 -4
+fix title yyyy/mm/dd. PR of fml-support:7172,7173
+.~q
+
+.C	その他
+=E.C	misc
+
+.S	RFC1153
+
+あいかわらずどうなおすのが正しいのか良くわからない(だってRFC1153って曖
+昧なんだもの)
+=E
+no idea to fix in the correct way???
+
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
