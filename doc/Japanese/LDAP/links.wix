@@ -78,3 +78,11 @@ some project
 
         RFC 2970
         Title:	    Architecture for Integrated Directory Services -
+
+
+"Understanding X.500 - The Directory"
+.url http://www.isi.salford.ac.uk/staff/dwc/X500.htm
+
+.#
+.# $FML$
+.#
