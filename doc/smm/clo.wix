@@ -278,7 +278,17 @@ config.ph では
 	reply-to: を常にMLにしてしまう
 	--force:reply-to=uja@domain
 
-	＃ $Envelope{"fh:reply-to:"} = 'uja@domain'; と同じ
+config.ph では
+
+	$Envelope{"fh:reply-to:"} = 'uja@domain'; と同じ
+
+便利なように、
+
+	&DEFINE_FIELD_FORCED('reply-to') = 'uja@domain';
+
+というマクロも用意されている。
+.k	&DEFINE_FIELD_FORCED()
+.k	DEFINE_FIELD_FORCED()
 
 .k	--oh:field
 .k	--original:field
@@ -294,7 +304,13 @@ config.ph では
 
 	--oh:to --oh:cc
 
-	＃ $Envelope{"oh:reply-to:"} = 1; とおなじ
+config.ph では $Envelope{"oh:to:"} = 1; とおなじ。便利なように、
+
+	&DEFINE_FIELD_ORIGINAL('to');
+
+というマクロも用意されている。
+.k	&DEFINE_FIELD_ORIGINAL()
+.k	DEFINE_FIELD_ORIGINAL()
 
 .k	--permit:variable
  --permit:variable
