@@ -3,8 +3,9 @@
 # Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
-
+#
 # $Id$;
+#
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
 $CONFIG_DIR = ''; # __MAKEFML_AUTO_REPLACED_HERE__
@@ -98,9 +99,21 @@ sub InitMakeFml
 	print STDERR "${tab}YOUR PERL LOOKS jperl!\n";
 	print STDERR "${tab}YOU SHOULD USE\n";
 	print STDERR "${tab}perl 4.036 or perl 5\n${tab}NOT jperl!\n";
-	print STDERR "\n\n$sep\n${tab}anyway wait 10 sec...";
-	sleep 5;
-	print STDERR "\n";
+
+	&InitTTY;
+	$r = &Query("YOU USE fml under jperl?", "y/n", "y|n", "n");
+
+	if ($r eq 'y') {
+	    print STDERR "\nHmm... YOU MAY HAVE PROBLEMS.\n";
+	    print STDERR "ALL IS DONE UNDER YOUR OWN RISK\n";
+	    print STDERR "PLEASE DO NOT ASK fml-* ML's ON PROBLEMS\n\n";
+	    sleep 3;
+	}
+	else {
+	    print STDERR "O.K. Please install usual perl. Good Luck!\n";
+	    print STDERR "makefml ends here.\n\n";
+	    exit 0;
+	}
     }
 
     # architecture dependence;
@@ -304,6 +317,10 @@ sub SetHashDefaults
 		    'fmlserv',  'do_fmlserv',
 		    'listserv', 'do_fmlserv',
 		    'marjodomo','do_fmlserv',
+
+		    # PGP
+		    'pgp',	'do_pgp',
+		    '9#pgp ML PGP-arguments', 'e.g. "pgp ML -ka publib_key"',
 
 		    'delivery_mode',  'do_delivery_mode',
 
@@ -540,6 +557,9 @@ sub Warn
 }
 
 
+sub Debug { print STDERR "@_\n";}
+
+
 sub Log 
 { 
     &AppendString2File($_[0], $CONFIG_LOG);
@@ -556,6 +576,10 @@ sub SignalLog
     exit(1);
 }
 
+
+# dummary
+sub WholeMail { print STDERR "Dummy WholeMail [@_]\n";}
+sub SetEvent  { print STDERR "Dummy SetEvent [@_]\n";}
 
 
 ##############################################################################
@@ -592,12 +616,18 @@ sub Lock
 {
     local($ml, $mldir) = @_;
 
+    return if $InstallMode;
+
+    if (! -d "$mldir/$ml" && ! -d $mldir) {
+	die("\n\n*** Error: $mldir nor $mldir/$ml not exists. stop. *** \n\n");
+    }
+
     if (&FlockP($ml, $mldir)) {
-	print STDERR "---Flock\n" if $debug_lock;
+	print STDERR "\n---Flock($ml, $mldir)\n" if $debug_lock;
 	&FLock($ml, $mldir);
     }
     else {
-	print STDERR "---V7 lock\n" if $debug_lock;
+	print STDERR "\n---V7 lock($ml, $mldir)\n" if $debug_lock;
 	&V7Lock($ml, $mldir);
     }
 }
@@ -607,12 +637,14 @@ sub UnLock
     local($ml) = @_;
     local($flockp) = $ml'FLockP{$ml};#'
 
+    return if $InstallMode;
+
     if ($flockp) {
-	print STDERR "---Flock\n" if $debug_lock;
+	print STDERR "\n---Flock\n" if $debug_lock;
 	&FUnLock($ml);
     }
     else {
-	print STDERR "---V7 lock\n" if $debug_lock;
+	print STDERR "\n---V7 lock\n" if $debug_lock;
 	&V7UnLock($ml);
     }
 }
@@ -631,7 +663,9 @@ sub MakeFmlLock
     # only one
     if ($ml) {
 	print "---Locking $ml ML"; $count++;
+	
 	&Lock($ml, $mldir);
+	$LockList{$ml} = $mldir;
     }
     else {
 	print "---Locking\n\t";
@@ -644,6 +678,7 @@ sub MakeFmlLock
 	    print " $_"; $count++;
 	    
 	    &Lock($_, "$mldir/$_");
+	    $LockList{$ml} = "$mldir/$_";
 	}
 	closedir(DIRD);
     }
@@ -661,7 +696,7 @@ sub MakeFmlUnLock
 {
     local($ml, $mldir) = @_;
 
-    if ($ml) {
+    if ($ml && $LockList{$ml}) {
 	print "---UnLocking $ml ML";
 	&UnLock($ml);
     }
@@ -672,6 +707,8 @@ sub MakeFmlUnLock
 	for (readdir(DIRD)) {
 	    next if /^\./;
 	    next unless -f "$mldir/$_/config.ph";
+	    next unless $LockList{$_}; # skip if not locked;
+
 	    print " $_";
 	    &UnLock($_);
 	}
@@ -842,100 +879,113 @@ sub search_path
     for (@path) { if (-f "$_/$f") { return "$_/$f";}}
 }
 
+
+############ CFVersion 2 -> 3 
+
+### convert CF2 -> CF3
+sub ConvertCF2to3
+{
+    local(*config, *MAKE_FML) = @_;
+
+    print STDERR "--ConvertCF2to3\n" if $verbose || $debug;
+
+    ### Section: config
+    @config = ("CFVersion",
+	       "DOMAINNAME",
+	       "FQDN",
+	       "debug",
+	       "MAINTAINER",
+	       "MAIL_LIST",
+	       "PERMIT_POST_FROM",
+	       "REJECT_POST_HANDLER",
+	       "CONTROL_ADDRESS",
+	       "PERMIT_COMMAND_FROM",
+	       "REJECT_COMMAND_HANDLER",
+	       "AUTO_REGISTRATION_TYPE",
+	       "AUTO_HTML_GEN",
+	       "ML_FN",
+	       "XMLNAME",
+	       "XMLCOUNT",
+	       "BRACKET",
+	       "SUBJECT_TAG_TYPE");
+
+    ### Section: Remove obsolete variable
+    undef $config{"ML_MEMBER_CHECK"};
+
+    $config{"CFVersion"} = 3;
+
+    ### Section: Acces Policy and Auto Registration
+
+    # default 
+    $config{"PERMIT_POST_FROM"}       = "members_only";
+    $config{"PERMIT_COMMAND_FROM"}    = "members_only";
+    $config{"REJECT_POST_HANDLER"}    = "reject";
+    $config{"REJECT_COMMAND_HANDLER"} = "reject";
+    $config{"AUTO_REGISTRATION_TYPE"} = "confirmation";
+
+    if ($MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'}) {
+	undef $MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'};
+
+	$config{"REJECT_POST_HANDLER"}    = "auto_regist";
+	$config{"REJECT_COMMAND_HANDLER"} = "auto_regist";
+	$config{"AUTO_REGISTRATION_TYPE"} = "confirmation";
+    }
+
+    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
+	$config{"PERMIT_POST_FROM"} = "anyone";
+    }
+    elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
+	$config{"PERMIT_POST_FROM"} = "members_only";
+    }
+    undef $MAKE_FML{"DELIVERY_MODE"};
+
+    ### Section: Subject Tag
+    if ($MAKE_FML{"SUBJECT_TAG"}) {
+	$config{"SUBJECT_TAG"} = $MAKE_FML{"SUBJECT_TAG"};
+	undef $MAKE_FML{"SUBJECT_TAG"};
+    }
+
+    ### Section: Options
+    $config{'USE_MIME'} = $MAKE_FML{'OPT_MIME'};
+    undef $MAKE_FML{'OPT_MIME'};
+
+    ### Version 3 
+    $config{'REMOTE_ADMINISTRATION_AUTH_TYPE'} = "crypt";
+    $config{'PGP_PATH'} = "$ML_DIR/$ml/etc/pgp";
+}
+
+
 # USE_MIME is an exception of treatment
 # USE_MIME 1 and $MAKE_FML{OPT_MIME} = 1
 # since we show the menu determined by %MAKE_FML values;
 sub OutPutLocalConfig
 {
     local(*MAKE_FML) = @_;
+    local($output_count);
 
-    # this lefts... ;_;
-    # $MAKE_FML{"SUBJECT_TAG"} =  "$tag{$r}";
-
-    # always yes;
-    print CF "\n\n\# configured by $0\n";
-    print CF "# on $MailDate\n";
-    # print CF "NON_PORTABILITY\t1\n";
-    print CF "COMPAT_$MAKE_FML{'OS_TYPE'}\t1\n";
-    print CF "CPU_TYPE_MANUFACTURER_OS\t$CPU_TYPE_MANUFACTURER_OS\n";
-
-    print CF "STRUCT_SOCKADDR\t$STRUCT_SOCKADDR\n";
-
+    ### %MAKE_FML
     while (($k, $v) = each %MAKE_FML) {
 	next unless $v;
-
-	if ($k eq 'OPT_MIME') {
-	    print CF "USE_MIME\t$MAKE_FML{'OPT_MIME'}\n";
-	    # undef $MAKE_FML{$k}; # logs to %MAKE_FML for option_summary
-	}
-	elsif ($k eq "NON_PORTABILITY" || $k eq 'OS_TYPE') {
-	    undef $MAKE_FML{$k};
-	}
+	print STDERR "MAKE_FML\t$k\t=>$v\n";
     }
 
-    local($output_count);
+
+    ### output of other configurations
     print CF "\n\n\nLOCAL_CONFIG\n\n";
     print CF "\#__MAKEFML_LOCAL_CONFIG__\n";
     print CF "\# configured by $0 on $MailDate\n";
     print CF "\# *** DO NOT EDIT MANUALLY THIS BLOCK!!! ***\n";
 
-    printf STDERR "\n---MAKE_FML OUTPUT\n\n", $k, $v if $debug;
 
     ### POINT!!!
     ### $local_config .= $_ if /\$MAKE_FML/;
-    ### 
     while (($k, $v) = each %MAKE_FML) {
-	printf STDERR "   debug:\$MAKE_FML %-20s -> %s\n", $k, $v if $debug;
-
+	printf STDERR "   \$MAKE_FML %-20s -> %s\n", $k, $v if $debug;
 	next unless $v;
-
-	# ATTENTION! RESET HERE;
-	undef $MAKE_FML{$k};
-
-	if ($k eq 'OPT_HTML') {
-	    print CF "\$MAKE_FML{'OPT_HTML'} = 1;\n";
-	    print CF "\$Envelope{'mode:html'} = 1;";
-	    print CF "\# MAKEFML_OPT_HTML\n";
-	}
-	elsif ($k eq 'OPT_MIME') {
-	    print CF "\$MAKE_FML{'OPT_MIME'} = 1;\n";
-	}
-	elsif ($k eq "AUTO_REGIST_WITH_CONFIRM" && $v == 1) {
-	    print CF "\# \$ML_MEMBER_CHECK = 0; IS DEFINED ABOVE\n";
-	    print CF "\# \$ML_MEMBER_CHECK = 0; IS AUTOMATIC REGISTRATION\n";
-	    print CF "\$MAKE_FML{'AUTO_REGIST_WITH_CONFIRM'} = 1;\n";
-	    print CF "\&DEFINE_MODE('artype=confirm');\n";
-	}
-	elsif ($k eq "DELIVERY_MODE") {
-	    print CF "\# --- MAKEFML_DELIVERY_MODE SETUP ---\n";
-	    print CF "\# *** ATTENTION! ***\n";
-	    print CF "\# ./include-ctl has \"fml.pl --ctladdr\" form\n";
-	    print CF "\# option --ctladdr is stronger than --distribute\n";
-
-	    if ($v eq "distribute") {
-		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
-		print CF "\&DEFINE_MODE('post=anyone') ";
-		print CF "unless \$Envelope{'mode:ctladdr'};\n";
-		print CF "\# mode != ctladdr may be always true\n";
-	    }
-	    if ($v eq "distribute_with_member_check") {
-		print CF "\$MAKE_FML{'DELIVERY_MODE'} = '$v';\n";
-		print CF "\&DEFINE_MODE('post=members_only') ";
-		print CF "unless \$Envelope{'mode:ctladdr'};\n";
-		print CF "\# mode != ctladdr may be always true\n";
-	    }
-	    elsif ($v eq "default") {
-		; # do nothing;
-	    }
-	}
-	elsif ($k eq "SUBJECT_TAG") {
-	    print CF "\$MAKE_FML{'SUBJECT_TAG'} = '$v';\n";
-	    print CF "require 'libtagdef.pl';";
-	    print CF "&SubjectTagDef('$v');";
-	    print CF "\# MAKEFML_SUBJECT_TAG\n";
-	}
+	undef $MAKE_FML{$k}; # ATTENTION! RESET HERE;
     }
 
+    # abnormal
     for (keys %MAKE_FML) {
 	$value = $MAKE_FML{$_};
 	next unless $value;
@@ -945,7 +995,8 @@ sub OutPutLocalConfig
 	$output_count++;
     }
 
-    if ($output_count) {
+    # CFVersion 2
+    if ($output_count && !$config{"CFVersion"}) {
 	print CF "require 'libmakefml.pl';\n";
 	print CF "&ConfigByMakeFml;\n";
     }
@@ -964,6 +1015,7 @@ sub Query
 {
     local($menu, $query, $pat, $default) = @_;
     
+    print "Query(debug): ($menu, $query, $pat, $default)\n" if $debug;
     print "\n";
 
     while (1) {
@@ -975,381 +1027,12 @@ sub Query
 	if ($cmd =~ /^($pat)$/) { last;}
 	if ($cmd =~ /^\s*$/) { $cmd = $default; last;}
 
-	print "$CurTag   ***Warning!!! Please input one of ($query)\n";
+	print "$CurTag   *** WARNING! Please input one of ($query) ***\n\n";
     }    
 
     $cmd;
 }
 
-
-# THIS OUTPUT MENU ROUTINE IS CONTROLLED ONLY BY %config and %MAKE_FML; 
-# OK?
-#
-sub ShowMainMenu
-{
-    local(*config, *MAKE_FML) = @_;
-    local($delivery_mode, $policy);
-
-    # ??? why here?
-    # eval($local_config); print $@ if $@;
-
-    if ($config{'ML_MEMBER_CHECK'}) {
-	$ShowMenu{'auto_regist'} = "member_check";
-    }
-    else {
-	$ShowMenu{'auto_regist'} = "auto_registation";
-
-	if ($MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"}) {
-	    $ShowMenu{'auto_regist'} .= " (confirmation)"; 
-	}
-	elsif ($config{"REQUIRE_SUBSCRIBE_IN_BODY"}) {
-	    $ShowMenu{'auto_regist'} .= " (body)"; 
-	}
-	else {
-	    $ShowMenu{'auto_regist'} .= " (subject)"; 
-	}
-    }
-
-    # debug
-    if ($debug) {
-	while (($k,$v)=each %MAKE_FML) {print STDERR "SMM:MAKEFML $k -> $v\n";}
-    }
-
-    # change %ShowMenu;
-    &MakeOptionShowMenu(*MAKE_FML);
-
-    $delivery_mode = &ModeString(*MAKE_FML);
-    $policy        = "";
-
-    $MENU = qq#;
-    ********************************************************************;
-    Which entry do you change?;
-    --------------------------------------------------------------------;
-      ENTRY                                   Current Configuration
-    --------------------------------------------------------------------;
-    ;
-    0 END;
-    1 MEMBER CHECK or AUTO REGISTRATION        $ShowMenu{'auto_regist'};
-    2 SUBJECT TYPE                             $MAKE_FML{'SUBJECT_TAG'};
-    3 OPTIONAL SETTINGS (e.g. MIME, HTML)      $ShowMenu{'option_summary'};
-    4 Delivery Mode                            $delivery_mode;
-    ;
-    ;#;
-
-    $MENU =~ s/;//g;
-
-    print $MENU;
-}
-
-
-sub AutoRegistQuery
-{
-    local($ml, *config, *MAKE_FML) = @_;
-    local($r, *new);
-
-    ### MENU;
-    undef $MENU{'AUTO_REGIST_TYPE'};
-    $MENU{'AUTO_REGIST_TYPE'} .= "\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "Auto Registration Type\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "0 default\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "1 subject\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "2 body\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "3 body with confirmation (RECOMMENDED)\n";
-    $MENU{'AUTO_REGIST_TYPE'} .= "\n";
-    $MENU{'AUTO_REGIST_TYPE'} =~ s/\n/\n$CurTag/g;
-    ### END MENU;
-
-    ### DEFAULT CONFIG; 
-    $new{'ML_MEMBER_CHECK'}           = 0;
-    $new{"REQUIRE_SUBSCRIBE"}         = "";
-    $new{"REQUIRE_SUBSCRIBE_IN_BODY"} = "";
-    push(@config, (sort keys %new));
-    ### END CONFIG; 
-
-    # MAIN;
-    $r = &Query("Auto Registration ", "y/n", "y|n", "n");
-    $new{'ML_MEMBER_CHECK'} = $r eq 'y' ? 0 : 1;
-
-    if ($r eq "y") {
-	print $MENU{'AUTO_REGIST_TYPE'};
-
-	$r = &Query("Auto Registration Type ", "0,1,2,3", '0|1|2|3', "0");
-
-	if ($r == 1) {
-	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
-	}
-	elsif ($r == 2) {
-	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
-	    $new{"REQUIRE_SUBSCRIBE_IN_BODY"} = 1;
-	}
-	elsif ($r == 3) {
-	    $new{"REQUIRE_SUBSCRIBE"}         = "subscribe";
-	    $new{"AUTO_REGIST_WITH_CONFIRM"}  = 1;
-	}
-    }
-
-    # reset;
-    for (keys %new) {
-	undef $config{$_};
-	$config{$_} = $new{$_};
-    }
-
-    # export;
-    undef $MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"};
-    $MAKE_FML{"AUTO_REGIST_WITH_CONFIRM"} = $new{"AUTO_REGIST_WITH_CONFIRM"};
-}
-
-
-sub SubjectTagQuery
-{
-    local($ml, *MAKE_FML) = @_;
-    local($r, $buf);
-
-    undef $MAKE_FML{"SUBJECT_TAG"};
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "Subject TAG TYPE [0-6]:\n\n";
-    $MENU{"SUBJECT_TAG"} .= "TYPE    Subject Example\n";
-    $MENU{"SUBJECT_TAG"} .= "----------------------------\n";
-    $MENU{"SUBJECT_TAG"} .= "0\tSubject: NO TAG (Default, Fml recommends)\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "1\tSubject: (Elena:100)\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "2\tSubject: [Elena:100]	(hml 1.6 compat)\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "3\tSubject: (Elena 100)\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "4\tSubject: [Elena 100]\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "5\tSubject: [Elena,100]\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-    $MENU{"SUBJECT_TAG"} .= "6\tSubject: (Elena,100)\n";
-    $MENU{"SUBJECT_TAG"} .= "\n";
-
-    $MENU{'SUBJECT_TAG'} =~ s/\n/\n$CurTag/g;
-
-    print $MENU{'SUBJECT_TAG'};
-
-    $r = &Query("Subject TAG TYPE ", "0-6", "[0-6]", "0");
-
-    %tag = (1, "(:)",
-	    2, "[:]",
-	    3, "( )",
-	    4, "[ ]",
-	    5, "(,)",
-	    6, "[,]");
-
-    if ($r =~ /^[123456]$/) {
-	$MAKE_FML{"SUBJECT_TAG"} =  "$tag{$r}";
-    }
-}
-
-
-sub MakeOptionShowMenu
-{
-    local(*MAKE_FML) = @_;
-    local($r, $buf);
-
-    undef $r;
-
-    for (keys %MAKE_FML) {
-	next unless /^OPT_/;
-
-	if ($MAKE_FML{$_}) {
-	    print STDERR "MakeOptionShowMenu: $_ -> $MAKE_FML{$_}\n";
-	    $_ =~ s/OPT_//;
-	    $r .= $r ? ",$_" : $_;
-	}
-    }
-
-    $ShowMenu{'OPT_MIME'} = $MAKE_FML{'OPT_MIME'} == 1 ? "USE": "";
-    $ShowMenu{'OPT_HTML'} = $MAKE_FML{'OPT_HTML'} == 1 ? "USE": "";
-
-    $ShowMenu{'option_summary'} = $r;
-}
-
-
-sub ShowOptionMenu
-{
-    local(*MAKE_FML) = @_;
-
-    &MakeOptionShowMenu(*MAKE_FML);
-    
-    $MENU{'OPTIONS'}  = "\n";
-    $MENU{'OPTIONS'} .= "OPTIONS\n";
-    $MENU{'OPTIONS'} .= "\n";
-    $MENU{'OPTIONS'} .= "------------------------------------\n";
-    $MENU{'OPTIONS'} .= "  ENTRY                Current Configuration\n";
-    $MENU{'OPTIONS'} .= "------------------------------------\n";
-    $MENU{'OPTIONS'} .= "0 END\n";
-    $MENU{'OPTIONS'} .= "1 MIME                 $ShowMenu{'OPT_MIME'}\n";
-    $MENU{'OPTIONS'} .= "2 HTML CONVERSION      $ShowMenu{'OPT_HTML'}\n";
-    $MENU{'OPTIONS'}  =~ s/\n/\n$CurTag/g;
-
-    print $MENU{'OPTIONS'};
-}
-
-
-sub OptionQuery
-{
-    local($ml, *MAKE_FML) = @_;
-    local($r, $buf);
-
-    ### MAIN ###
-    while (1) {
-	&ShowOptionMenu(*MAKE_FML);
-
-	$tag = $CurTag;
-	$CurTag .= "   ";
-	$r = &Query("OPTIONS ", "1-2", "[1-2]", "0");
-
-	$CurTag .= "   ";
-
-	if ($r == 0) {
-	    last;
-	}
-	elsif ($r == 1) {
-	    $r = &Query("USE MIME", "y/n", "y|n", "n");
-	    $MAKE_FML{"OPT_MIME"} = $r eq "y" ?  1 : 0;
-	}
-	elsif ($r == 2) {
-	    $r = &Query("USE HTML", "y/n", "y|n", "n");
-	    $MAKE_FML{"OPT_HTML"} = $r eq "y" ?  1 : 0;
-	}
-
-	$CurTag = $tag;
-    }
-
-    $CurTag = $tag;
-}
-
-sub ModeString
-{
-    local(*MAKE_FML) = @_;
-    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
-	"distribute-only (anyone can post)";
-    }
-    elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
-	"distribute-only (only members can post)";
-    }
-    else {
-	"distribute + commands available";
-    }
-}
-
-sub ShowDeliveryModeMenu
-{
-    &MakeOptionShowMenu(*MAKE_FML);
-    local($_, $mode, $mode1, $mode2, $mode3);
-
-    undef $mode1; undef $mode2; undef $mode3;
-
-    $mode = &ModeString(*MAKE_FML);
-
-    if ($MAKE_FML{"DELIVERY_MODE"} eq "distribute_with_member_check") {
-	$mode1 = "<===";
-    }
-    elsif ($MAKE_FML{"DELIVERY_MODE"} eq "distribute") {
-	$mode2 = "<===";
-    }
-    else {
-	$mode3 = "<===";
-    }
-
-    $_  = "\n";
-    $_ .= "DELIVERY MODE (CURRENT MODE is $mode)\n";
-
-    if ($mode1) {
-	$_ .= sprintf(" address %-10s for distribution only\n", $ml);
-	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
-    }
-    elsif ($mode2) {
-	$_ .= sprintf(" address %-10s for distribution only\n", $ml);
-	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
-    }
-    elsif ($mode3) {
-	$_ .= sprintf(" address %-10s for both distribute and commands\n",$ml);
-	$_ .= sprintf(" address %-10s for commands\n", "${ml}-ctl");
-    }
-
-    $_ .= "\n";
-    $_ .= "-------------------------------------------------------\n";
-    $_ .= "  ENTRY                           Current Configuration\n";
-    $_ .= "-------------------------------------------------------\n";
-    $_ .= "0 END\n";
-    $_ .= "1 Distribute only (only members can post) $mode1\n";
-    $_ .= "2 Distribute only (anyone can post)       $mode2\n";
-    $_ .= "3 Distribute + Commands (default)         $mode3\n";
-
-    $_  =~ s/\n/\n$CurTag/g;
-
-    print ($MENU{'DELIVERY_MODE_OPTIONS'} = $_);
-}
-
-sub DeliveryQuery
-{
-    local($ml, *MAKE_FML) = @_;
-    local($r, $buf);
-
-    ### MAIN ###
-    while (1) {
-	&ShowDeliveryModeMenu(*MAKE_FML);
-
-	$tag = $CurTag;
-	$CurTag .= "   ";
-	$r = &Query("Delivery Mode ", "1-3", "[1-3]", "0");
-
-	$CurTag .= "   ";
-
-	if ($r == 0) {
-	    last;
-	}
-	elsif ($r == 1) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "distribute_with_member_check";
-	}
-	elsif ($r == 2) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
-	}
-	elsif ($r == 3) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "default";
-	    # loop once again;
-	}
-
-	$CurTag = $tag;
-    }
-
-    $CurTag = $tag;
-}
-
-sub PolicyQuery
-{
-    local($ml, *MAKE_FML) = @_;
-    local($r, $buf);
-
-    while (1) {
-	&ShowDeliveryModeMenu(*MAKE_FML);
-
-	$tag = $CurTag;
-	$CurTag .= "   ";
-	$r = &Query("Delivery Mode ", "1-2", "[1-2]", "0");
-
-	$CurTag .= "   ";
-
-	if ($r == 0) {
-	    last;
-	}
-	elsif ($r == 1) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "distribute";
-	}
-	elsif ($r == 2) {
-	    $MAKE_FML{"DELIVERY_MODE"} = "default";
-	    # loop once again;
-	}
-
-	$CurTag = $tag;
-    }
-
-    $CurTag = $tag;
-}
 
 sub ResetVariables
 {
@@ -1685,6 +1368,8 @@ sub do_install
 {
     local($cmd);
 
+    $InstallMode = 1;
+
     # main proc -> here;
     &InitFmlConfig;
 
@@ -1774,7 +1459,8 @@ sub do_install
 
     &FYI;
 
-    &FYIPolicy;
+    # CFVersion 2
+    # &FYIPolicy;
 }
 
 
@@ -1850,9 +1536,11 @@ sub do_newml
 
     if (($OS_TYPE || $CPU_TYPE_MANUFACTURER_OS)
 	 && open(CF, ">> $ML_DIR/$ml/cf")) {
-	$MAKE_FML{'NON_PORTABILITY'} = 1;
+	# CFVersio 2;
+	# $MAKE_FML{'NON_PORTABILITY'} = 1;
+	# $MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
-	$MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 
 	# conversion here; since cf/config can be overwrittern 
 	&OutPutLocalConfig(*MAKE_FML);
@@ -1956,7 +1644,24 @@ sub do_test
 sub GetCF
 {
     local($cf, *config) = @_;
-    local($local_config, %uniq);
+    local($local_config, %uniq, $cf_template);
+
+    # template -> @ConfigOrder (with comments)
+    $cf_template = "$EXEC_DIR/etc/makefml/cf";
+    open(CF, $cf_template) || die ("cannot open cf template[$cf_template]");
+    while (<CF>) {
+	chop;
+
+	if (/^\#/ || /^\s*$/) {
+	    push(@ConfigOrder, $_);
+	}
+	else {
+	    ($key, $value) = split(/\s+/, $_, 2);
+	    push(@ConfigOrder, $key);
+	}
+    }
+    close(CF);
+
 
     # GET PRESENT CONFIG;
     # without LOCAL_CONFIG;
@@ -1966,7 +1671,8 @@ sub GetCF
 	chop;
 
 	if (1 .. /LOCAL_CONFIG/) {
-	    next if /^\#/; # required here,not required in the next section;
+	    # required here,not required in the next section;
+	    if (/^\#/) { next;}
 
 	    next if /^LOCAL_CONFIG/; # just "cf"(for cf/config) statements;
 
@@ -1975,7 +1681,7 @@ sub GetCF
 	    push(@config, $key) unless $uniq{$key}; # entry is unique;
 	    $uniq{$key}   = 1;	# unique
 
-	    print STDERR "\$config{$key} = $value\n";
+	    print STDERR "\$config{$key} = [$value]\n" if $debug;
 	}
 	else {
 	    next if /^LOCAL_CONFIG/;
@@ -1996,6 +1702,17 @@ sub GetCF
     # print $local_config if $debug;
     eval($local_config);
     print $@ if $@;
+
+    # CFVerion 2 -> 3; Backward Compatilitity 
+    if (!$config{"CFVersion"} || 
+	$config{"CFVersion"} < 3 ||
+	$COMPAT_CF2) {
+	print STDERR "   (Backward Compatible: Convert CFVersion 2 -> 3)\n";
+	&ConvertCF2to3(*config, *MAKE_FML);
+    }
+    else {
+	print STDERR "   CFVersion 3\n";
+    }
 }
 
 
@@ -2212,6 +1929,49 @@ sub PolicyCtlAddr
     }
 }
 
+
+# makefml pgp elena PGP-OPTIONS
+sub do_pgp
+{
+    local($ml, @argv) = @_; 
+
+    &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
+
+    &MkDirHier($config{'PGP_PATH'});
+
+    $ENV{'PGPPATH'} = $config{'PGP_PATH'};
+
+    $| = 1;
+    print "\n--- PGP BEGIN ---\n\n";
+    system("pgp @argv");
+    print STDERR "Error: $@" if $@;
+
+    print "\n--- PGP END ---\n\n";
+}
+
+
+sub Mkdir
+{
+    $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
+    if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
+    if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
+}
+
+
+sub MkDirHier
+{
+    local($dir) = @_;
+    local($d);
+    for (split(/\//, $dir)) {
+	$d .= "/$_";
+	$d =~ s#//#/#g;
+	if (! -d $d) {
+	    print STDERR "making directory $d ...\n";
+	    &Mkdir($d);
+	}
+    } 
+}
+
 sub do_config
 {
     local($ml) = @_;
@@ -2227,43 +1987,17 @@ sub do_config
     # evaluate "$ML_DIR/$ml/cf";
     &GetCF($cf, *config); # set %config, eval %MAKE_FML in it;
 
-    ### MAIN LOOP ###
-    while (1) {
-	$CurTag = "    ";
+    # internal use
+    $config{'_ML_'} = $ml;
+    ($config{'_CA_DOMAIN_'}) = (split(/\@/, $config{'CONTROL_ADDRESS'}))[1];
+    
 
-	# debug
-	if ($debug) {
-	    while (($k,$v)=each %MAKE_FML) {print STDERR "MAKEFML $k -> $v\n";}
-	}
+    # menu.conf version
+    $MENU = "$EXEC_DIR/etc/makefml/menu.conf";
+    &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG);#';
 
-	&ShowMainMenu(*config, *MAKE_FML);
-
-	#Query($menu, $query, $pat, $default)
-	$r = &Query("Menu ", "number", "\\d+", "0");
-
-	$CurTag = "\t";  
-
-	if ($r == 0) {
-	    last;
-	}
-	elsif ($r == 1) {
-	    &AutoRegistQuery($ml, *config, *MAKE_FML);
-	}
-	elsif ($r == 2) {
-	    &SubjectTagQuery($ml, *MAKE_FML);
-	}
-	elsif ($r == 3) {
-	    &OptionQuery($ml, *MAKE_FML);
-	}
-	elsif ($r == 4) {
-	    &DeliveryQuery($ml, *MAKE_FML);
-	}
-	elsif ($r == 5) {
-	    print STDERR "Policy NOT IMPREMENTED YET _o_\n";
-	    # &PolicyQuery($ml, *MAKE_FML);
-	}
-    }
-
+    ### MAIN LOOP 
+    &EachLevelQuery(*config, "/");
 
     # set local_config -> %MAKE_FML;
     # print $local_config;
@@ -2284,24 +2018,100 @@ sub do_config
 		  $cf, "$ML_DIR/$ml/config.ph");
 }
 
+
+sub EachLevelQuery 
+{
+    local(*config, $top_level) = @_;
+    local($r);
+
+    while ($top_level =~ s#^//#/#) { ;}
+
+    $Depth++;
+
+    while (1) {
+	$CurTag = "   " x $Depth;
+
+	&EvalMenu($top_level, *config, *BIND, *MENU, *COUNT, *MAP);
+
+	print "   ".("*" x 60); print "\n";
+	print "   [$Depth $top_level]\n\n" if $debug;
+	print $MENU{$top_level};
+	print "   ".("*" x 60); print "\n";
+
+	&Menu'GenQuery(*query, $QUERY{$top_level}, $top_level); #';
+	$r = &Query($query{'menu'}, $query{'query'}, 
+		    $query{'pat'}, $query{'default'});
+
+
+	if ($query{"type"} eq "y-or-n") {
+	    print "--query y/n\n";
+	    $v   = $CONFIG{$top_level};
+	    &Debug("\$config{$v} = $r eq 1 ? 1 : 0;");
+
+	    if ($v) {
+		$config{$v} = $r eq "y" ? 1 : 0;
+	    }
+	    else {
+		&Debug("EachLevelQuery(y/n): Error, $v is not defined");
+	    }
+
+	    last;
+	}
+	elsif ($query{"type"} eq "select" && ($r == 0)) {
+	    last;
+	}
+	else {
+	    $lvl = $BIND{$top_level, $r};
+
+	    # check in the current level
+	    if ($v = $CONFIG{$top_level}) {
+		$config{$v} = 
+		    $MAP{$top_level, $r} ne "" ? $MAP{$top_level, $r} : $r;
+	    }
+	    else {
+		&EachLevelQuery(*config, "$top_level/$lvl");
+	    }
+	}
+    }
+
+    $Depth--;
+}
+
+
 sub SaveCF
 {
     local($cf, *config) = @_;
+    local(%uniq);
+
+    # fix
+    $config{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+    $config{'STRUCT_SOCKADDR'}          = $STRUCT_SOCKADDR;
 
     if (open(CF, "> $cf")) {
 	select(CF); $| = 1; select(STDOUT);
-	
+
 	# believe the config conservation
 	# undef $config{'NON_PORTABILITY'};
 	# undef $config{"COMPAT_$OS_TYPE"};
 
+	print CF "\# $MailDate(configured by $0)\n\n";
+
+	# configurable variable <=> %config entries;
+	push(@config, keys %config);
 	&Uniq(*config);
 
-	for (@config) {
+	for (@ConfigOrder, @config) {
+	    if (/^\#/ || /^\s*$/) {
+		printf CF "$_\n";
+		next;
+	    }
+
+	    next if $uniq{$_}; $uniq{$_} = 1;
+
 	    print STDERR "-config: $_\n" if $debug;
 
-	    # skip MIME since thie value set by $MAKE_FML{OPT_MIME}
-	    next if $_ eq 'USE_MIME'; 
+	    # skip internal and obsolete entries
+	    next if /^_\S+_/; # internal use variables e.g. _ML_
 	    next if $_ eq 'NON_PORTABILITY';
 	    next if $_ eq "COMPAT_${OS_TYPE}";
 
@@ -2310,9 +2120,11 @@ sub SaveCF
 	    undef $config{$_};
 	}
 
-	$MAKE_FML{'NON_PORTABILITY'} = 1;
-	$MAKE_FML{'OS_TYPE'}         = $OS_TYPE;
-	$MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+	# CFVersion 2;
+	# $MAKE_FML{'OS_TYPE'}         = $OS_TYPE;
+	# $MAKE_FML{'NON_PORTABILITY'} = 1;
+	# $MAKE_FML{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
+
 	&OutPutLocalConfig(*MAKE_FML);
 
 	close(CF);
@@ -2689,6 +2501,11 @@ package v7;
 sub main'V7Lock   { &v7'MakeFml_V7Lock(@_);}
 sub main'V7UnLock { &v7'MakeFml_V7UnLock(@_);}
 
+sub v7'Warn       { &main'Warn(@_);}
+sub v7'WholeMail  { &main'WholeMail(@_);}
+sub v7'SetEvent   { &main'SetEvent(@_);}
+
+
 sub Mkdir
 {
     $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
@@ -2728,6 +2545,9 @@ sub MakeFml_V7Lock
     &LoadConfigPH($ml, $mldir);
 
     require 'liblock.pl';
+
+    print STDERR "LOCK_FILE     $LOCK_FILE\n";
+    print STDERR "FP_VARRUN_DIR $FP_VARRUN_DIR\n";
 
     &V7Lock;
 
@@ -2908,6 +2728,7 @@ sub ProbeSockAddr
     }
 }
 
+
 sub ProbePerlVersion
 {
     open(PERL, "perl -v |");
@@ -2916,5 +2737,201 @@ sub ProbePerlVersion
     }
     close(PERL);
 }
+
+
+########################################################################
+package Menu;
+
+
+sub InitMenu
+{
+    (*config, *MENU, *FP, *QUERY, *NAME, *MAP, *BIND, *CONFIG) = @_;
+
+    open(F, $MENU) || die($!);
+    while (<F>) {
+	next if /^\#/;
+
+	if (/^==/) {
+	    &Reset;
+	    next;
+	}
+	elsif (/^\/(.*)/) {
+	    $hier  = "/";
+	    $hier .= join("/", split(/\//, $1));
+	    next;
+	}
+	elsif (/^=menu/) {
+	    &Reset;
+	    $menu_p = 1;
+	    next;
+	}
+	elsif (/^=name/) {
+	    &Reset;
+	    $name_p = 1;
+	    next;
+	}
+	elsif (/^=map/) {
+	    &Reset;
+	    $map_p = 1;
+	    next;
+	}
+	elsif (/^=query/) {
+	    &Reset;
+	    $query_p = 1;
+	    next;
+	}
+	elsif (/^=config/) {
+	    &Reset;
+	    $config_p = 1;
+	    next;
+	}
+
+
+	if ($menu_p) {
+	    # this Name Space Global
+	    $MenuTemplate{$hier} .= $_;
+	}
+	elsif ($query_p) {
+	    $QUERY{$hier} .= $_;
+	}
+	elsif ($config_p) {
+	    s/\s//g;
+	    $CONFIG{$hier} .= $_ if $_ !~ /^\s*$/;
+	}
+	elsif ($name_p) {
+	    next if /^\s*$/;
+	    $_ =~ s/^\s+//;
+	    s/\n$//g;
+	    $NAME{$hier} .= $_;
+	}
+	elsif ($map_p) {
+	    $_ =~ s/^\s+//;
+	    $MAP{$hier} .= $_;
+	}
+    }
+
+    close(F);
+
+    for $menu (keys %MenuTemplate){
+	&EvalMenu($menu, *config, *BIND, *MENU, *COUNT, *MAP);
+    }
+}
+
+sub main'EvalMenu { &EvalMenu(@_);} #";
+sub EvalMenu
+{
+    local($menu, *config, *BIND, *MENU, *COUNT, *MAP) = @_;
+    local($buf);
+
+    # global
+    $Count = 0;
+
+    # useful config for menu (dynamic generation)
+    $SUMMARY{'REMOTE_ADMINISTRATION'} = 
+	$config{'REMOTE_ADMINISTRATION'} ? "yes" : "no";
+
+
+    for (split(/\n/, $MenuTemplate{$menu})) {
+	# substitute
+	if (/_i_\s+(\S+)/) {
+	    s/(_i_\s+\S+)/&Bind(*BIND, $1, $menu)/e;
+	}
+	s/^\s/   /;
+	$buf .= "$_\n";
+    }
+
+    # menu evaluator
+    eval("\$buf = \"$buf\";");
+
+    $buf =~ s/(\s)1\s*\n/$1USE\n/g;
+    $buf =~ s/(\s)0\s*\n/$1NOT USE\n/g;
+    $buf =~ s/\$DOMAINNAME/$config{'DOMAINNAME'}/g;
+    $buf =~ s/\$FQDN/$config{'FQDN'}/g;
+
+
+    $MENU{$menu}  = $buf;
+    $COUNT{$menu} = $Count;
+
+    for (split(/\n/, $MAP{$menu})) {
+	if (/^\s*(\S+)\s*(.*)\s*$/) {
+	    $MAP{$menu, $1} = $2;
+	    $MAP{$menu, $1} =~ s/\$config{\'_ML_\'}/$config{'_ML_'}/g;
+	}
+    }
+}
+
+
+sub GenQuery
+{
+    local(*query, $s, $menu) = @_;
+    local($type, $pat);
+
+    undef %query;
+    # print STDERR "GenQuery:\n$s\n";
+
+    for (split(/\n/, $s)) {
+	if (/(\S+):\s+(.*)\s*$/) {
+	    $query{$1} = $2;
+	}
+    }
+    
+    # "type", "menu", "query", "pat", "default"
+    $type = $query{"type"};
+
+    if ($type eq "y-or-n") {
+	$query{"menu"}    = $query{"menu"}    || "Use this option?";
+	$query{"query"}   = $query{"query"}   || "y/n";
+	$query{"pat"}     = $query{"pat"}     || "y|n";
+	$query{"default"} = $query{"default"} || "n";
+    }
+    elsif ($type eq "select") {
+	$max = $COUNT{$menu} - 1;
+	for (0 .. $max) { $pat .= $pat ne "" ? "|$_" : $_;}
+
+	$max  = $max == 1 ?  "0-1" : "0-$max";
+
+	$query{"menu"}    = $query{"menu"}    || "Which section?";
+	$query{"query"}   = $query{"query"}   || $max;
+	$query{"pat"}     = $query{"pat"}     || $pat;
+	$query{"default"} = $query{"default"} || 0;
+    }
+
+}
+
+
+sub Reset
+{
+    undef $menu_p;
+    undef $query_p;
+    undef $name_p;
+    undef $map_p;
+    undef $config_p;
+}
+
+
+sub Bind
+{
+    local(*bind, $s, $menu) = @_;
+    local($index, $label);
+
+    if ($s =~ /(_i_\s+)(\S+)/) {
+	$index = $1;
+	$label = $2;
+
+	$index =~ s/_i_/sprintf("%-3s", $Count)/ge;
+	$bind{$menu, $Count} = $label;
+
+	# return value is rewritten .
+	$label = $NAME{"/$label"} || $label;
+    }
+
+    $Count++;
+
+    return "${index}${label}";
+}
+
+
+exit 0;
+
 
 1;
