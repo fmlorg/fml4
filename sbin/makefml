@@ -1344,7 +1344,10 @@ sub FixPath
     local($prog) = @_;
     local($perl);
 
-    if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
+    if ($perl = $ENV{'_PATH_PERL'}) {
+	print STDERR "\n   replace perl with $perl\n" if $FixPathCount++ < 1;
+    }
+    elsif ($COMPAT_ARCH eq "WINDOWS_NT4") { 
 	$perl = &search_path('perl.exe');
     }
     else {
