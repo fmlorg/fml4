@@ -199,8 +199,8 @@ v2: varcheck2
 
 varcheck2:
 	perl usr/sbin/search-config-variables.pl -E -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
-	tee tmp/VARLIST
-	@ wc tmp/VARLIST
+	tee /tmp/VARLIST
+	@ wc /tmp/VARLIST
 
 v3:
 	perl usr/sbin/search-config-variables.pl \
@@ -210,7 +210,7 @@ v3:
 
 sync:
 	# scp -v -p /var/tmp/distrib/src/*.pl eriko:~/.fml
-	rsync --rsh ssh -aubzv /var/tmp/fml-curent/src/*pl eriko:~/.fml
+	rsync --rsh ssh -aubzv /var/tmp/fml-current/src/*pl eriko:~/.fml
 
 test:
 	(bin/emumail.pl; echo test )|perl fml.pl $(PWD) $(PWD)/proc
