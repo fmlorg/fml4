@@ -1,6 +1,6 @@
 .HTML_PRE
 .# .__repl_title__
-                内部構造や実装の理屈についてなど
+                tips
 
 --------------------
 .toc
@@ -8,12 +8,6 @@
 .~HTML_PRE
 
 .# .__repl_include__
-.include fop.wix
-.include function.wix
-.include internals.wix
-.include lang-jp.wix
-.include ref.wix
-.include wix.wix
 
 .# $Id$
 .# Copyright (C) 1993-2000 Ken'ichi Fukamachi

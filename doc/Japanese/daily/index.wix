@@ -8,6 +8,7 @@
 .~HTML_PRE
 
 .# .__repl_include__
+.include overview.wix
 .include archive.wix
 .include expire.wix
 
