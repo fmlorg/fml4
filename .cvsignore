@@ -1,10 +1,8 @@
 var
 tmp
-todo
-ref
 .copyright
 branch
-00_HERE_IS_MAIN_TRUNK
-00_HERE_IS_fml-3.0-maint_BRANCH
-fmlmk.conf
 00_CURRENT_BRANCH_
+00_HERE_IS_MAIN_TRUNK
+fmlmk.conf
+__scan__
