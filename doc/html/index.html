@@ -21,7 +21,6 @@ The Design and Implementation of "fml" Mailing List Server
 #endif
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
-
 <!-- =================================================================== -->
 <H1>
 #ifdef JAPANESE
@@ -31,34 +30,26 @@ The Design and Implementation of "fml" Mailing List Server
 	The Design and Implementation of "fml" Mailing List Server
 </H1>
 
+#ifdef JAPANESE
 <A HREF="index-e.html">[English] is here.</A>
-
+#else
+<A HREF="index.html">[Japanese] is here.</A>
+#endif
 <!-- =================================================================== -->
 <HR>
 #ifdef DIST
+/* fml distribution */
 #else /* DIST */
+/* http://www.fml.org/fml/index.html */
 <PRE>
 * Latest Topics
-
-THe lastest official release is 2.2.1. The current version is 2.2C.
-
-#ifdef JAPANESE
+The lastest official release is 2.2.1. The fml-current version is 2.2C.
+#ifdef JAPANESE /* JAPANESE */
 ○ 1999/05/11 fml 2.2.1 リリース
-
-   2.2Aの開発は 2.2.1 にまとまっています。一方並行して進んでいる本来の
-   開発コード, いわゆるfml-currentは現在2.2Cというバージョン番号がつけ
-   られています。
-
-○ fml FAQ作成プロジェクトについて
-
-   JWNTUG ntfml-wg では、fml の FAQ を作成中です。より充実した FAQ を
-   目指すため fml ユーザの皆様からネタを募集しています。以下のサイトに
-   登録ページを用意しましたので、ご協力お願いします。
-   <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>http://www.jwntug.or.jp/wg/ntfml/faq/announce.html</A>
-
-FML Advisories
-1999-004 <A HREF="advisories/melissa_family/index.html">Melissa一族対策について</A>
-#else
+○ <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ作成プロジェクトについて</A>
+#else /* ENGLISH */
+* 1999/05/11 fml 2.2.1 release
+* <A HREF=http://www.jwntug.or.jp/wg/ntfml/faq/announce.html>fml FAQ</A>
 #endif
 </PRE>
 #endif /* DIST */
@@ -67,19 +58,19 @@ FML Advisories
 	<A HREF="http://www.fml.org/fml/">
 	FML HOME PAGE (http://www.fml.org/fml/);
 #ifdef JAPANESE 
-	ここからFMLドキュメントのサーチへたどっていける
+	[検索] FMLドキュメントの検索ができます。
 #else
-	From here you will go to SEARCH over FML documents!
+	[Search] over FML documents
 #endif
 	</A>
 #else
 <P>
 #ifdef JAPANESE 
 	<A HREF="search-j.html">
-	FML配布ドキュメント群へのサーチ
+	[検索] FMLドキュメントの検索ができます。
 #else
 	<A HREF="search-e.html">
-	Search over FML documents;
+	[Search] over FML documents
 	Anyway try to search keywords around your question
 #endif
 	</A>
@@ -92,7 +83,7 @@ FML Advisories
 	</A>
 #else
 	<A HREF="CHECK_LIST-e/">
-	CHECK LIST before ask
+	CHECK LIST: Please check these before ask
 	</A>
 #endif
 
@@ -145,7 +136,6 @@ Information and HTML version documents in the fml source distribution
 #endif
 	<P>*** 
 	I think "principle of least surprise" is most important in upgrade.
-
 	</A>
 
 	<LI>
@@ -191,7 +181,7 @@ Information and HTML version documents in the fml source distribution
 
 	<LI>
 #ifdef JAPANESE
-	Fml 2.2 の設計と実装 (Deamon Book for fml)
+	fml の設計と実装 (Deamon Book for fml)
 #ifdef DIST
 	<A HREF="http://www.fml.org/fml/op/index.html">
 	http://www.fml.org/fml/op/index.html
@@ -201,6 +191,7 @@ Information and HTML version documents in the fml source distribution
 #else
 	<A HREF="op/index.html">
 #endif /* DIST */
+	<BR>
 	設計、運用、変数の意味とカスタマイズについてなど全般について
 	<BR>
 	The Design and Implementation of the Fml Mailing List Server 
