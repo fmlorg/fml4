@@ -382,7 +382,7 @@ sub SmtpIO
 
     if ($USE_SMTP_PROFILE) { &GetTime; print SMTPLOG "RCPT  IN>$MailDate\n";}
 
-    if ($e{'mode:_Deliver'} && $USE_OUTGOING_ADDRESS) { 
+    if ($e{'mode:__deliver'} && $USE_OUTGOING_ADDRESS) { 
 	if ($e{'mci:pipelining'}){
 	    &SmtpPut2Socket_NoWait("RCPT TO:<$OUTGOING_ADDRESS>", $ipc);
 	}
@@ -392,7 +392,7 @@ sub SmtpIO
 	    
 	$Current_Rcpt_Count = 1;
     }
-    elsif ($e{'mode:_Deliver'}) { 
+    elsif ($e{'mode:__deliver'}) { 
 	if ($SMTP_SORT_DOMAIN) { &use('smtpsd'); &SDInit(*RcptLists);}
 
 	for $a (@RcptLists) { # plural active lists

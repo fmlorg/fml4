@@ -29,7 +29,7 @@ sub SmtpMCIDeliver
     local(*e, *rcpt, *smtp, *files) = @_;
     local($nh, $nm, $i);
 
-    if ($e{'mode:_Deliver'}) {
+    if ($e{'mode:__deliver'}) {
 	return &SmtpDLAMCIDeliver(*e, *rcpt, *smtp, *files);
     }
 

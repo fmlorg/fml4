@@ -396,14 +396,14 @@ sub Deliver
 
     if ($Rcpt == 0) { return;} # NO RCPT
 
-    $Envelope{'mode:_Deliver'} = 1; # notify the &Smtp deliver mode;
+    $Envelope{'mode:__deliver'} = 1; # notify the &Smtp deliver mode;
 
     $smtp_time = time;
     $status = &Smtp(*Envelope, *Rcpt);
     &Log("Smtp:$status") if $status;
     &StatDelivery($smtp_time, $Rcpt) if $debug_stat;
 
-    undef $Envelope{'mode:_Deliver'};
+    undef $Envelope{'mode:__deliver'};
 
     ##### ML Distribute Phase 05: ends
     $DISTRIBUTE_CLOSE_HOOK .= $SMTP_CLOSE_HOOK;
