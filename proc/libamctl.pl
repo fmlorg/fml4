@@ -29,6 +29,9 @@ sub AutoRegist
     # report mail such as WELCOME ..;
     $e{'GH:Reply-To:'} = $MAIL_LIST;
     
+    # Special hook e.g. "# list",should be used as a ML's specific hooks
+    &eval($AUTO_REGISTRATION_HOOK, "Auto Registration Hook:");
+
     ##### Confirm Mode: We request a confirm to $from before ADD.
     ##### listserv emulation code;
     # Confirmation Mode; 
@@ -94,19 +97,28 @@ sub AutoRegist
     ##### ADD the newcomer to the member list
     local($ok, $er);		# ok and error-strings
 
+    ### HERE WE GO REGISTRATION PROCESS;
+    local($entry); # locally modified { addr -> addr mode syntax;}
+    if ($AUTO_REGISTRATION_DEFAULT_MODE) {
+	$entry = "$from $REGISTRATION_DEFAULT_MODE";
+    }
+    else {
+	$entry = $from;
+    }
+
     # WHEN CHECKING MEMBER MODE
     if ($ML_MEMBER_CHECK) {
-	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
-	&Append2($from, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
-	($ok == 2) ? &Log("Added: $from") : do {
+	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
+	&Append2($entry, $ACTIVE_LIST)    ? $ok++ : ($er .= " $ACTIVE_LIST");
+	($ok == 2) ? &Log("Added: $entry") : do {
 	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
 	    return 0; 
 	};
     }
     # AUTO REGISTRATION MODE
     else {
-	&Append2($from, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
-	$ok == 1 ? &Log("Added: $from") : do {
+	&Append2($entry, $file_to_regist) ? $ok++ : ($er  = $file_to_regist);
+	$ok == 1 ? &Log("Added: $entry") : do {
 	    &Warn("ERROR[sub AutoRegist]: cannot operate $er", &WholeMail);
 	    return 0;
 	};
