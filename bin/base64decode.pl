@@ -32,6 +32,6 @@ binmode(STDOUT);
 while (sysread(STDIN, $_, 1024)) { 
     print &bodydecode($_);
 }
-
+print &bdeflush;
 
 1;
