@@ -33,7 +33,6 @@ GEN_LIBRARY () {
 	echo  " ";
 	echo  "Generating libkern.pl  ";
 	sed '/^$Rcsid/,/MAIN ENDS/d' kern/fml.pl > proc/libkern.pl
-
 }
 
 
@@ -141,13 +140,12 @@ COPY_SOURCES () {
 	cp -p  $PERL_SOURCES	$DESTDIR/distrib/src
 
 	echo ""
-	echo Copying doc/messages/
-	rsync --exclude CVS -av doc/messages/ $DESTDIR/distrib/messages/
+	echo Copying messages/
+	rsync --exclude CVS -av messages/ $DESTDIR/distrib/messages/
 
-	# [fml-3-0-maint] has no cgi interface
-	# echo ""
-	# echo Copying www/
-	# rsync --exclude CVS --exclude .cvsignore -av www/ $DESTDIR/distrib/www/
+	echo ""
+	echo Copying www/
+	rsync --exclude CVS --exclude .cvsignore -av www/ $DESTDIR/distrib/www/
 
 	echo ""
 	echo Copying sys/
@@ -184,6 +182,14 @@ COPY_SOURCES () {
 	(chdir $DESTDIR/distrib; tar xvf - )
 
 	# tar cf - etc/samples/[a-z]* | (chdir $DESTDIR/distrib; tar xvf - )
+
+	echo  " ";
+	echo  "Generating default_config.ph  ";
+	cf/config -m cf/MANIFEST -i /dev/null |\
+	sed 's@sapporo.iij.ad.jp"@installer.fml.org"@g' \
+		> $DESTDIR/distrib/src/default_config.ph
+
+	echo  " ";
 
 	rm -f $archsrc
 }
@@ -285,8 +291,7 @@ FIX_DISTRIBUTION_PERMISSION () {
 	(
 		cd $DESTDIR/distrib
 		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
-		# fml-3-0-maint branch has no cgi interface.
-		# chmod -R ugo+x www/cgi-bin/
+		chmod -R ugo+x www/cgi-bin/
 	)
 }
 
@@ -375,17 +380,8 @@ GEN_ARCHIVE () {
 	echo chdir $DESTDIR
 	chdir $DESTDIR || return
 
-	# date YYYYMMDD
-	DATE=`date -u +"%C%y%m%d"`
-
-	if [ X$MODE = X ]; then
-		# fml identifier
-		FMLID="fml-`sed 's/_//' $FML/conf/release_version`"
-		FMLID=`echo $FMLID| sed 's/pl\#/pl/'` 
-		FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
-	else
-		FMLID=fml-${BRANCH}-${DATE}
-	fi
+	# DATE, FMLID
+	GEN_FMLID
 	export FMLID
 
 	# directory
@@ -437,14 +433,16 @@ GEN_ARCHIVE () {
 	if [ X$MODE = X -a X$BRANCH = Xcurrent ]; then
 	   (
 	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      chdir archives/these_days || exit 1
 	      rm -f fml-current.tar.gz
-	      ln -s current/$FMLID.tar.gz fml-current.tar.gz # backward compatibility
+	      ln -s ../../current/$FMLID.tar.gz fml-current.tar.gz
 	   )
 	elif [ X$MODE = X -a X$BRANCH = Xstable ]; then
 	   (
 	      chdir $FTP_DIR; # NOT $FTP, $FTP_DIR is valid here. 
+	      chdir archives/these_days || exit 1
 	      rm -f fml-stable-latest.tar.gz
-	      ln -s stable/$FMLID.tar.gz fml-stable-latest.tar.gz
+	      ln -s ../../stable/$FMLID.tar.gz fml-stable-latest.tar.gz
 	   )
 	fi
 

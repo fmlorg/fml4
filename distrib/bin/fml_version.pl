@@ -1,13 +1,14 @@
 #!/usr/local/bin/perl
 
 require 'getopts.pl';
-&Getopts("iqtsp:L:X:Tm:b:");
+&Getopts("iqtsp:L:X:Tm:b:Nr");
 
 $FML           = $opt_X || $ENV{'FML'};
 $TRUNK_ID      = "$FML/conf/release";
 $RELEASE_ID    = "$FML/conf/release_version";
 $RELEASE_DATE  = "$FML/distrib/compile/release_date";
 $SHOW_ID       = $opt_s;
+$RCSID_FNAME   = $opt_r;
 $query         = $opt_q;
 $patchlevel    = $opt_p;
 $Label         = $opt_L;
@@ -22,6 +23,8 @@ if (! -f $RELEASE_DATE) {
 
 &GetTime;
 $Year     = 1900 + $year;
+
+chop($Trunk = `cat $TRUNK_ID`);
 
 if ($opt_T) {
     chop($_ = `cat $TRUNK_ID`);
@@ -48,12 +51,24 @@ $PL = "${PL}pl$patchlevel" if $patchlevel;
 
 $DailyID = $BRANCH. " ". &YYYYMMDD;
 
-if ($SHOW_ID) { 
+# 3.0B new id system
+if ($opt_N || $RCSID_FNAME) {
+    $ID = $Trunk;
+    $PL = " (". &__YYYYMMDD .")";
+}
+
+if ($SHOW_ID || $RCSID_FNAME) {
    if ($MODE eq 'daily') {
        print "fml $DailyID\n";
    }
    else {
-       print "fml $ID$PL\n";
+       if ($RCSID_FNAME) {
+	   $PL =~ s/[\s\(\)]//g;
+	   print $PL, "\n";
+       }
+       else {
+	   print "fml $ID$PL\n";
+       }
    }
    exit 0;
 }
@@ -89,6 +104,8 @@ exit 0;
 
 sub GetID
 {
+    return ($NULL, $NULL) if $opt_N;
+
     open(F, $RELEASE_ID) || die("cannot open $RELEASE_ID :$!");
     chop($ID = <F>);
     $ID =~ s/\s*//g;
@@ -188,6 +205,16 @@ sub YYYYMMDD
 {
     local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
     sprintf("%4d%02d%02d.%02d%02d",
+		$year + 1900, $mon + 1, $mday,
+		$hour, 0);
+}
+
+
+# return YYYYMMDD at Greenwich standard timezone (tricky:-)
+sub __YYYYMMDD
+{
+    local($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time);
+    sprintf("%4d%02d%02d",
 		$year + 1900, $mon + 1, $mday,
 		$hour, 0);
 }
