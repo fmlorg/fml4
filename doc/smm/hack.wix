@@ -1,0 +1,412 @@
+.C	改造についていろいろ
+
+.S	HOW TO DEBUG ... ［デバッグのポイント］
+
+   fml-support: 01411 より
+
+…略…
+
+○ 私 printf デバッグがすきなので、$debug = 1; にした時の画面に出るエ
+ラー情報から推測するのが多いです。
+
+もしくは
+
+○ perl -d オプションで perl debugger 使う
+
+○ どのファイルか？は目的別なのでそれっぽい名前のことが多いですが…
+
+基本関数	fml.pl
+SMTP		libsmtp.pl
+その他		lib(それっぽい名前).pl
+
+	ra  = remote administraion
+	fop = file operation
+
+とか省略系もあるけど… ちなみに
+.xref{FILES} にライブラリの説明がありますね。
+
+
+.S	消してもいいファイル…
+
+すべてのファイルは手作業でなにしてもいいです。
+
+それは結局メールがきた時”だけ” fml.pl が動いているので、それ以外の時
+は何をしてもＯＫだということですね(^^) 
+
+まとめおくりサーバが動いてる瞬間に var/log/msendrc をいじってはいけない
+のも同様
+
+そりゃさすがに code の debug はＭＬとは別のところでやったほうがいいけど…
+
+間違って消して困りそうなのは seq と var/log/msendrc あたりです :-)
+ようするにＭＬの今の記事番号や uniqueness を保存しているログですね
+
+seq ファイルの番号が狂うと 記事を overwrite したりはしないかわりに管理
+者にエラーメールがきます。
+var/log にメールは保存されるので、復旧は簡単ですが面倒は面倒です。
+
+間違って seq を消してしまった時は 即効で spool の一番大きい番号を調べて
+その値を seq へ書き込みます(^^)
+
+msendrc 消しちゃうと log 見て、直すか＃すげぇたいへんそう
+
+次回 msend.pl が起動する時に自動復旧されることを期待するか…
+ただ、これは最新のメールしか送らないから↑、たまっていた分はログみない
+と不明のまま
+
+
+
+.S	変数の名前つけには組織的な何かがあるんですか？
+.key	変数の名前つけ
+.key	Naming-Convention
+
+あります。例えば config.ph の中でみられる
+
+	$ML_MEMBER_CHECK
+
+という大文字（[A-Z0-9_]+）だけの塊はユーザーのカスタマイズで使う目的の
+Global Variables。
+
+	$MailBody	$Reply_to
+	*Envelope	*_cf
+
+のように”大文字ではじまる”単語はメール本体やヘッダをSubroutine間で渡
+し会うためのGlobal Variables。
+＃*_cf は システム情報をもっている名前空間です。
+
+小文字は基本的にlocal Variableで、大抵はsubroutineの先頭でlocal宣言さ
+れているでしょう。
+
+ついでに subroutine の名前はX11風だったりします。最近のはlisp風味も混
+ざってます:-)
+#おおむねX11風ですね
+
+.S	変数の名前つけの例外
+
+fml 1.5 以降では若干例外があります。まとめ送り関係の関数で
+
+	変換インターフェイスとしての 	f_関数 名
+	＃いつか、なくなるだろう
+
+		と 
+
+	そのモードのコンストラクタ	Cnstr_関数 名
+	そのモードのディストラクタ	Destr_関数 名
+
+が例外です
+
+
+.S	MIME文字列を日本語へ変換すること
+.seealso	MIME-1, MIME-2, MIME-3, MIME-extension
+
+$MailBody でもなんでも任意の変数の中の ISO-2022-JP で始まる部分を
+Decodeしてしまうなら、
+
+例：	$MailBody をMIME逆変換して日本語にする場合
+	$MailBody = &DecodeMimeStrings($MailBody);
+
+こんな感じのコードを適当な場所に書けばいいわけですね。
+＃例えば HOOK でしかければよい
+
+
+.S	改造事例:  sitedef.ph
+
+# Subject の [ML 数字] や (ML 数字) は切り落とし
+# Subject のオリジナルは X-Original-Subject に保存して
+# みやすい Subject を提供する
+# 
+# Subject Hack
+$Envelope{'h:X-Original-Subject:'} = $Envelope{'h:Subject:'};
+$Envelope{'h:Subject:'} =~ s/\[\S+\s+\d+\]//g;
+$Envelope{'h:Subject:'} =~ s/\(\S+\s+\d+\)//g;
+$Envelope{'h:Subject:'} =~ s/Re:\s+Re:\s+/Re: /g;
+
+if ($Envelope{'h:X-Original-Subject:'} eq $Envelope{'h:Subject:'}) {
+    undef $Envelope{'h:X-Original-Subject:'};
+}
+
+!;
+
+# received 行を保存
+@HdrFieldsOrder = 
+('received',
+ 'Return-Path', 'Date', 'From', 'Subject',
+ 'X-Original-Subject',
+ 'Sender',
+ 'To', 'Reply-To', 'Errors-To', 'Cc', 'Posted',
+ ':body:', 'Message-Id', ':any:', ':XMLNAME:', 
+ 'X-Cache',	
+ ':XMLCOUNT:', 'X-MLServer',
+ 'mime-version', 'content-type', 'content-transfer-encoding',
+ 'XRef', 'X-Stardate', 'X-Ml-Info', 
+ 'References', 'In-Reply-To', 'Precedence', 'Lines');
+
+# 念のため最後に記事を 644 にして誰でも読めるようにする
+$DISTRIBUTE_CLOSE_HOOK = q#
+	chmod 0644, "$FP_SPOOL_DIR/$ID";
+#;
+
+
+.S	改造事例:  axion.phys.titech.ac.jp
+
+.q	
+
+このマシンのすべてのＭＬサーバで共通の設定(sitedef.ph)
+別に config.ph でいいんだけど、
+ＭＬが多いもんで、共通の設定はここでいっきにしてしまう。	
+
+#!/usr/local/bin/perl --    # -*-Perl-*-
+# コマンド実行時の返答の時のフェイスマーク(^^)
+$FACE_MARK = '(o)^^)';
+
+# ish の時は SJIS自動変換
+$USE_SJIS_in_ISH = 1;
+
+# host_map_lookup での DNS 遅延情報を トレースする、
+# １０秒かかるホストはログに残す
+$TRACE_SMTP_DELAY = 10;		# 10 sec.
+
+# インターネットプロバイダ (or.jp のアドレスを持つユーザ)に対しては 
+# addrのチェックを厳しく
+
+%SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', 1);
+
+1;
+.~q	
+
+
+.S	改造事例:  mnews-ml
+
+.q
+
+# コマンドメールの返送に付くフッタのフェースマーク
+$FACE_MARK     = '(^_^)/~';
+
+# たとえ空メールでも配布する
+$AUTO_REGISTRATION_LINES_LIMIT = -1;
+
+# ヘッダの「X-何たら: 」を素通しにする
+$SUPERFLUOUS_HEADERS = 1;	# preserve more header fields
+
+# MIME に対応する
+$USE_LIBMIME   = 1;		# when use MIME Extension in libMIME.pl
+
+# spool に MIME デコードしてから書き込む
+$MIME_DECODED_ARTICLE = 1;	# do MIME decoding, then spool
+
+# コマンドメールであるかどうかを確認する行数
+$COMMAND_CHECK_LIMIT = 1;	# the first 3 lines is checked for
+ 				# mistakes whether the command mode or not?
+ 				# at &Parsing in fml.pl, 
+ 
+# コマンドで単なるシンタックスエラーの警告
+$USE_WARNING = 1;		# コマンドで単なるシンタックスエラーの警告
+
+# まとめ送りのとき mh/burst 用にする
+$USE_RFC934    = 1;		# inMatomeokuri, use mh/burst for the split
+ 
+# パス名を変更(更新のとき =* をコピーすれば良い)
+$OBJECTIVE_FILE = "$DIR/=objective"; 	# objective file
+$GUIDE_FILE    = "$DIR/=guide";		# the guide file of our Mailing List 
+$HELP_FILE     = "$DIR/=help";		# the help file for useful commands
+$DENY_FILE     = "$DIR/=deny";		# attention to illegal access
+$FAIL_FILE     = "$DIR/=fail";		# attention to illegal access
+$WELCOME_FILE  = "$DIR/=welcome";	# could be "$DIR/welcome"
+
+# 気分的に log とは分離した
+$MGET_LOGFILE  = "$DIR/log_mget";	# log file for mget routine
+
+# ちょっとした変更(特に効果はない)
+$Subject       = '(No Subject in original)';	# Subject field
+
+# SMTP コネクションを張って HELO のときに localhost と名乗る
+$Envelope{'macro:s'} = 'localhost';
+
+# 配送レベルを bulk にする
+$PRECEDENCE     = 'bulk';
+
+# ローテーションするログの指定
+@NEWSYSLOG_FILES = ("$MSEND_RC.bak", "$MEMBER_LIST.bak", "$ACTIVE_LIST.bak",
+                    "${LOGFILE}_archive", "${LOGFILE}_matome");
+
+# スキップする「X-何たら: 」フィールド
+$SKIP_FIELDS = '|X-Nsubject|X-Confirm-Reading-To';
+
+# スタートフック
+$START_HOOK = q#
+     # コントロールメールアドレスか?
+    if ($CONTROL_ADDRESS && ($Envelope{'mode:chk'} =~ /$CONTROL_ADDRESS/i)) {
+         # 新規登録か?
+        if ($Envelope{'Body'} =~ /subscribe/io
+              && $Envelope{'Body'} !~ /unsubscribe/io) {
+            &use('utils');
+            &AutoRegist(*Envelope);
+            $DO_NOTHING = 1;
+        }
+        $Envelope{'mode:uip'} = 'on'
+     # コマンドモードか?
+     # (この ML では本体の方でコマンドメールを受け付けていないため)
+    } elsif ($Envelope{'mode:uip'}) {
+        &Logging("Unsupport Command Mail");
+        &SendFile($From_address, 
+                  "Unsupport Command Mail this Address $ML_FN", $FAIL_FILE);
+        $DO_NOTHING = 1;
+     # 普通に配送する
+    } else {
+        &Distribute;
+        $DO_NOTHING = 1;
+    }
+#;
+
+# SMTP 開始時のフック
+$SMTP_OPEN_HOOK = q#
+     # 元メールの To: フィールドを保存
+    $Envelope{'h:To:'}       = $Envelope{'h:to:'}
+          || $Envelope{'h:apparently-to:'} || "$MAIL_LIST $ML_FN";
+     # Reply-To: を強制的に書き換える
+    $Envelope{'h:Reply-To:'} = $Envelope{'h:reply-to:'} = $MAIL_LIST;
+     # MIME なら Subject: をデコードする
+    if ($USE_LIBMIME && $Envelope{'MIME'}) {
+        &use('MIME');
+        $Envelope{'h:Subject:'} = &DecodeMimeStrings($Envelope{'h:Subject:'});
+    }
+#;
+ 
+# ヘッダに追加するフック
+$HEADER_ADD_HOOK = q#
+     # X-Nsubject: フィールドの処理
+     # (この ML では X-Nsubject: も Subject: と同じ処理を受ける)
+    if ($Envelope{'x-nsubject:'}) {
+        if ($STRIP_BRACKETS) {
+            $_ = $Envelope{'x-nsubject:'};
+            local($r)  = 10;
+
+            s/\[$BRACKET:\d+\]\s*//g;
+
+            while (s/Re:\s*Re:\s*/Re: /gi && $r-- > 0) { ;}
+
+            $Envelope{'x-nsubject:'} = $_;
+        }
+        if ($USE_LIBMIME && $Envelope{'MIME'}) {
+            &use('MIME');
+            $Envelope{'x-nsubject:'} =
+                  &DecodeMimeStrings($Envelope{'x-nsubject:'});
+        }
+        $body .= "X-Nsubject: [$BRACKET:$ID] $Envelope{'x-nsubject:'}\n";
+    }
+#;
+ 
+# libtraffic のフック(試験的設定)
+$TRF_NAME_HOOK = q#
+    $name =~ s/umura@solan\.chu/umura@nn.solan./oi;
+#;
+
+.~q
+
+
+
+.S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
+.key	# replyto コマンド
+
+.q
+From:    Yuao Tanigawa <yuao@infonia.or.jp>
+X-ML-Name: fml-support
+X-Mail-Count: 01249
+
+メール本文の最初に、
+	# replyto myaddr@mydomain 
+
+と書いて、次の行から通常の文章を書いて投稿すれば、
+Reply-To にそのアドレスをセットして記事を配送します。
+
+  うちのMLでは、今まで、Reply-Toのアドレスを強制的にはMLの
+アドレスに書き換えないようにしていたのですが、最近、いつも
+Reply-Toに自分のアドレスを書いて投稿する人とかいて、Reply-To
+にはアドレスを書かないようにと言うと、メールソフトの使い方
+とかよく知らなくて、Reply-Toのアドレスの設定方法とかも知ら
+ない人とかいたりして（学校とかでも周りの人とかも知らないら
+しい）、どうしようもなくなったので、Reply-Toには、強制的に
+MLのアドレスを書くようにしました。
+  でも、必要なときにはReply-Toにアドレスが設定できると便利
+なので、以下のようにして、# replyto コマンドを使えるように
+してみました。
+
+  config.phで、$SMTP_OPEN_HOOK には、
+
+    $Envelope{'h:reply-to:'} = $Reply_to
+            = $Envelope{'command:reply-to:'} || $MAIL_LIST;
+
+として、$COMMAND_HOOK には、
+
+    if(/replyto/io) {
+        &Log("Set Reply-To: $Fld[2]");
+        $e{'command:reply-to:'} = $Fld[2];
+        $e{'Body'} =~ s/#\s*replyto\s+\S+\n//io;
+        &Distribute;
+        last GivenCommands;
+    }
+
+としました。ただし、この場合、$COMMAND_HOOK のクォートに、
+`#'記号が使えないです。
+
+.~q
+
+
+.S	multi domain server ではどうすればいいのか
+
+multi domain server といってもいろいろ実装形態はあるとおもうのですが…
+一例だけ
+
+multi domain server でどうすればいいのか、考えてみてたんですが…別にい
+じる必要はないようなきがしてきました。
+
+環境：
+	Multi Domain Server
+	例：
+		＊@nerv.org 宛のメールはひとつのアカウントへ集中する
+
+	対策：
+		.forward で fml_local をしかける
+
+	必要な設定：
+		ループは fml_local が阻止するので
+		問題はどう To: Cc: をみてわけるか？ということになる
+		最大の問題は Bcc: をどうするか？
+		
+
+.S	古典の printf debug 
+
+.q
+From: fukachan@phys.titech.ac.jp
+X-Mail-Count: 00702 
+
+じゃ、
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+を、
+
+&InitConfig;			# initialize date etc..
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+
+のあいだにはさんで、
+
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&InitConfig;			# initialize date etc..
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&Parsing;			# Phase 1(1st pass), pre-parsing here
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+&GetFieldsFromHeader;		# Phase 2(2nd pass), extract headers
+	print STDERR "REQ:GUIDE $Envelope{'req:guide'}";
+
+とかしておいて、
+
+% perl sbin/localtest.pl |sed 's/test/#guide/' | perl fml.pl $PWD -d 
+
+とかして、この REQ:GUIDE の値の変化をみるというのはどうでしょう？
+
+ただしいばあいは &Parsing のあと １になって そのままのはずですよね
+
+.~q
+
+
+.# $Id$
