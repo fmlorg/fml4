@@ -144,7 +144,7 @@ delivery.
  (配送プロセス)
    | | | 
    V V V
- ＭＬのメンバー                                             
+ ＭＬのメンバ
 .fi
 .if LANG == ENGLISH
 [Figure]
@@ -2446,7 +2446,7 @@ in error mails returned from MTA's.
 			どこかが group writable
 	loop		/etc/aliases の設定がおかしい 
 			newaliases してない
-	user unknown	そんなユーザーはいない
+	user unknown	そんなユーザはいない
 			/etc/aliases に設定をしていない
 			newaliases してない
 
