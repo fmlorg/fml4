@@ -3087,10 +3087,6 @@ sub do_newml
 	print "\n";
     }
 
-    &ConcatenateAliases($ml, 
-			"$ML_ETC_DIR/aliases", 
-			"$ML_DIR/$ml/aliases");
-
     &CollectAliases;
 
     # always cf is newer than config.ph (against manual edit check)
@@ -3135,33 +3131,6 @@ sub do_destructml
     }
     else {
 	&Error("cannot rename $old $new");
-    }
-}
-
-
-sub ConcatenateAliases
-{
-    local($ml, $target, @sources) = @_;
-    local($f);
-
-    &Append2("\n# ml=$ml aliases (added by makefml at $MailDate)", 
-	     $target);
-
-    for $f (@sources) {
-	if (open($f, $f)) {
-	    while (<$f>) {
-		next if /^\#/;
-		next if /^\s*$/;
-
-		chop;
-		&Append2($_, $target);
-	    }
-	    close($f);
-		&Append2("\n", $target);
-	}
-	else {
-	    &Log("cannot open $f");
-	}
     }
 }
 
