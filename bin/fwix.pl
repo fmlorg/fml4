@@ -1,20 +1,23 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2002 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2002 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
 
 unshift(@ARGV, split(/\s+/, $ENV{'FWIX_OPTS'}));
 
 require 'getopts.pl';
 &Getopts("f:i:hd:b:m:M:t:vT:D:I:A:C:R:N:n:L:S:Z:Fo:");
+
+my $out_jcode = 'euc';
 
 $debug=1;
 
@@ -708,7 +711,7 @@ sub OutputHtml
 		&POH("   content=\"text/html; charset=us-ascii\">\n");
 	    }
 	    elsif ($Lang eq 'JAPANESE') {
-		&POH("   content=\"text/html; charset=ISO-2022-JP\">\n");
+		&POH("   content=\"text/html; charset=EUC-JP\">\n");
 	    }
 	    else {
 		print STDERR "ERROR: http-equiv lang=$Lang";
@@ -820,14 +823,14 @@ sub POH
     if ($lc > 1) {
 	&Debug("POH: input $lc lines") if $debug;
 	for $b (split(/\n/, $s)) {
-	    &jcode'convert(*b, 'jis'); #';
+	    &jcode'convert(*b, $out_jcode); #';
 	    $buf .= "$b\n";
 	}
 
 	$s = $buf;
     }
     else {
-	&jcode'convert(*s, 'jis'); #';
+	&jcode'convert(*s, $out_jcode); #';
     }
 
     # print OUTHTML $s;
@@ -1555,7 +1558,7 @@ sub ConvSpecialChars
     $s =~ s/</&lt;/g;
     $s =~ s/>/&gt;/g;
     $s =~ s/\"/&quot;/g;
-    &jcode'convert(*s, 'jis'); #';
+    &jcode'convert(*s, $out_jcode); #';
     ### special character convertion ends
 }
 

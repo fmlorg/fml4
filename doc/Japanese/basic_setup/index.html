@@ -5,33 +5,33 @@
 "fml" Examples
 </TITLE>
 <META http-equiv="Content-Type"
-	content="text/html; charset=ISO-2022-JP">
+	content="text/html; charset=EUC-JP">
 <LINK rev="made" href="mailto:fml-bugs@fml.org">
 <LINK rev="Contents" href="index.html">
 <META name="keywords"   lang="ja"
-   content="fml, $B4pK\(B, $B%A%e!<%H%j%"%k(B">
+   content="fml, ´ðËÜ, ¥Á¥å¡¼¥È¥ê¥¢¥ë">
 </HEAD>
 <BODY BGCOLOR="#E6E6FA">
 <!-- =================================================================== -->
 <H1>
 <CENTER>
-"fml" $B%A%e!<%H%j%"%k(B: basic $B%3!<%9(B
+"fml" ¥Á¥å¡¼¥È¥ê¥¢¥ë: basic ¥³¡¼¥¹
 </CENTER>
 </H1>
 
 <P>
-<A HREF=../tutorial.html> "fml" $B%A%e!<%H%j%"%k(B </A>
+<A HREF=../tutorial.html> "fml" ¥Á¥å¡¼¥È¥ê¥¢¥ë </A>
 <A HREF=../FAQ/index.html> FAQ </A>
 
 <P>
 <!- menu ->
-	$B!!(B<A HREF="#overview">$B35MW(B</A>
-	$B!!(B<A HREF="#newml">basic$B$JA`:n(B</A>
-	$B!!(B<A HREF="#fundamental-config">$B$d$5$7$$%+%9%?%^%$%:(B</A>
-	$B!!(B<A HREF="#advanced-config">$B$d$d?J$s$@%+%9%?%^%$%:(B</A>
+	¡¡<A HREF="#overview">³µÍ×</A>
+	¡¡<A HREF="#newml">basic¤ÊÁàºî</A>
+	¡¡<A HREF="#fundamental-config">¤ä¤µ¤·¤¤¥«¥¹¥¿¥Þ¥¤¥º</A>
+	¡¡<A HREF="#advanced-config">¤ä¤ä¿Ê¤ó¤À¥«¥¹¥¿¥Þ¥¤¥º</A>
 <BR>
-	$B!!(B<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">
-	  [$B8!:w(B]
+	¡¡<A HREF="http://mikoto.sapporo.iij.ad.jp/cgi-bin/fml.ja/namazu.cgi">
+	  [¸¡º÷]
 	  </A>
 <!- menu ->
 
@@ -39,208 +39,208 @@
 <UL>
 	<LI>
 	<A NAME="overview">
-	$B#M#L$N:n$jJ}$N35MW(B: 
-		$BNc$O(B elena $B#M#L$G$9!#%Q%9L>$OE,Ev$KFI$_$+$($F$/$@$5$$!#(B
+	£Í£Ì¤Îºî¤êÊý¤Î³µÍ×: 
+		Îã¤Ï elena £Í£Ì¤Ç¤¹¡£¥Ñ¥¹Ì¾¤ÏÅ¬Åö¤ËÆÉ¤ß¤«¤¨¤Æ¤¯¤À¤µ¤¤¡£
 
 	<P>
-	$BCm0U(B: $B$3$N%Z!<%8$O(B fml $B$r%$%s%9%H!<%k$7$?%^%7%s$N>e$G9T$J$&A`:nJ}K!$G$9!#(B
-	(GUI$B$K$D$$$F$O(B<A HREF="../GUI/">../GUI</A>$B$r;2>H(B)
+	Ãí°Õ: ¤³¤Î¥Ú¡¼¥¸¤Ï fml ¤ò¥¤¥ó¥¹¥È¡¼¥ë¤·¤¿¥Þ¥·¥ó¤Î¾å¤Ç¹Ô¤Ê¤¦ÁàºîÊýË¡¤Ç¤¹¡£
+	(GUI¤Ë¤Ä¤¤¤Æ¤Ï<A HREF="../GUI/">../GUI</A>¤ò»²¾È)
 
 
 	<UL>
-	<LI> 	$BA0Ds$H$7$F!"$9$G$K%a!<%k%5!<%P(B(sendmail, postfix, qmail,...)
-		$B$N@_Dj$O$9$G$K=*$C$F$$$k$O$:!#(B
+	<LI> 	Á°Äó¤È¤·¤Æ¡¢¤¹¤Ç¤Ë¥á¡¼¥ë¥µ¡¼¥Ð(sendmail, postfix, qmail,...)
+		¤ÎÀßÄê¤Ï¤¹¤Ç¤Ë½ª¤Ã¤Æ¤¤¤ë¤Ï¤º¡£
 
-	<LI>	 ($B$b$7$J$$$J$i(B)$B%0%k!<%W(B fml$B!"%f!<%6(B fml $B$r:n$k!#(B
+	<LI>	 (¤â¤·¤Ê¤¤¤Ê¤é)¥°¥ë¡¼¥× fml¡¢¥æ¡¼¥¶ fml ¤òºî¤ë¡£
 
-	<LI> 	$B%f!<%6(B fml $B$K$J$j!"(B
+	<LI> 	¥æ¡¼¥¶ fml ¤Ë¤Ê¤ê¡¢
 		<A HREF="sample.ls_fml">/usr/local/fml</A>
-		$B$K(B fml $B$r%$%s%9%H!<%k$9$k(B
+		¤Ë fml ¤ò¥¤¥ó¥¹¥È¡¼¥ë¤¹¤ë
 
-	<LI> 	elena ML$B$r:n$k(B
-		($B:n$i$l$k%G%#%l%/%H%j(B:
+	<LI> 	elena ML¤òºî¤ë
+		(ºî¤é¤ì¤ë¥Ç¥£¥ì¥¯¥È¥ê:
  		<A HREF="sample.ls_elena">/var/spool/ml/elena</A>
 		)
 
 	<LI>	<A HREF="sample.aliases">/var/spool/ml/elena/aliases</A>
-		$B$r(B /etc/aliases $B$KIU$12C$($k(B($B%U%!%$%k$NJT=8(B)$B!#(B
-		$BJT=8$7$?$i(B newaliases $B$J$I$rK:$l$:$K(B
-		(update $B$N<j=g$O;H$C$F$$$k(BMTA$B$K0MB8$7$^$9(B)$B!#(B
+		¤ò /etc/aliases ¤ËÉÕ¤±²Ã¤¨¤ë(¥Õ¥¡¥¤¥ë¤ÎÊÔ½¸)¡£
+		ÊÔ½¸¤·¤¿¤é newaliases ¤Ê¤É¤òËº¤ì¤º¤Ë
+		(update ¤Î¼ê½ç¤Ï»È¤Ã¤Æ¤¤¤ëMTA¤Ë°ÍÂ¸¤·¤Þ¤¹)¡£
 		
-	<LI>	<A HREF="add.html">$B%a%s%P!<$rEPO?(B</A>$B$9$k!#(B
+	<LI>	<A HREF="add.html">¥á¥ó¥Ð¡¼¤òÅÐÏ¿</A>¤¹¤ë¡£
 
 	</UL>
-	<A HREF="howto-customize.html">$B%+%9%?%^%$%:(B</A>
-	$B$O@_Dj%U%!%$%k(B(/var/spool/ml/elena/config.ph)$B$G9T$J$$$^$9!#(B
-	$B#M#L$4$H$K0[$J$k@_Dj$G$9!#(B	
+	<A HREF="howto-customize.html">¥«¥¹¥¿¥Þ¥¤¥º</A>
+	¤ÏÀßÄê¥Õ¥¡¥¤¥ë(/var/spool/ml/elena/config.ph)¤Ç¹Ô¤Ê¤¤¤Þ¤¹¡£
+	£Í£Ì¤´¤È¤Ë°Û¤Ê¤ëÀßÄê¤Ç¤¹¡£	
 	<BR>
-	$B@_Dj%U%!%$%k$N%a%$%s%F%J%s%9J}K!$K$D$$$F$O>>C]G_(B(?)$B$"$j$^$9!#(B
+	ÀßÄê¥Õ¥¡¥¤¥ë¤Î¥á¥¤¥ó¥Æ¥Ê¥ó¥¹ÊýË¡¤Ë¤Ä¤¤¤Æ¤Ï¾¾ÃÝÇß(?)¤¢¤ê¤Þ¤¹¡£
 	<BR>
 	<A HREF="site_xxx.html">
-	$BA4#M#L6&DL$N@_Dj$r6/@)$9$k$3$H$b$G$-$^$9(B
-	(/var/spool/ml/elena/site_force.ph)$B!#(B
+	Á´£Í£Ì¶¦ÄÌ¤ÎÀßÄê¤ò¶¯À©¤¹¤ë¤³¤È¤â¤Ç¤­¤Þ¤¹
+	(/var/spool/ml/elena/site_force.ph)¡£
 	</A>
 
 	<HR>
 	<UL>
 		<LI>
 		<A HREF="fml-install.html">
-		fml$B$N%$%s%9%H!<%k$N354Q(B
+		fml¤Î¥¤¥ó¥¹¥È¡¼¥ë¤Î³µ´Ñ
 		</A>
-		$B!!(B
+		¡¡
 		<A HREF="../../INSTALL/index.html">
-		($B>\:Y(B)	
+		(¾ÜºÙ)	
 		</A>
-		$B!!(B
+		¡¡
 		<A HREF="installer-QandA.html">
 		[Q and A]
 		</A>
 
 		<LI>
 		<A HREF="../../INSTALL_CGI/index.html">
-		[CGI$B$N%$%s%9%H!<%k(B (fml-current only)]
+		[CGI¤Î¥¤¥ó¥¹¥È¡¼¥ë (fml-current only)]
 		</A>
 
 		<LI>
 		<A HREF=MTAspecific.html>
-		MTA $BJL$NCm0U(B 
+		MTA ÊÌ¤ÎÃí°Õ 
 		</A>
 
 		<LI>
 		<A HREF=server_movement.html>
-		fml$B$rJL$N(B($B?7(B)$B%5!<%P$X0\F0$5$;$kJ}K!(B
+		fml¤òÊÌ¤Î(¿·)¥µ¡¼¥Ð¤Ø°ÜÆ°¤µ¤»¤ëÊýË¡
 		</A>
 
 		<LI>
 		<A HREF="../../UPGRADE/index.html">
-		$BCm(B: fml 3.0 or 3.0.1 $B$+$i(B 4.0 $B$X$N%"%C%W%0%l!<%I(B
+		Ãí: fml 3.0 or 3.0.1 ¤«¤é 4.0 ¤Ø¤Î¥¢¥Ã¥×¥°¥ì¡¼¥É
 		</A>
 
 		<LI>
 		<A HREF="../../UPGRADE-3.0/index.html">
-		$BCm(B: fml 2.x $B$+$i(B 3.0 $B$X$N%"%C%W%0%l!<%I(B
+		Ãí: fml 2.x ¤«¤é 3.0 ¤Ø¤Î¥¢¥Ã¥×¥°¥ì¡¼¥É
 		</A>
 	</UL>
 
 
 	<HR>
 	<LI>
-	<A NAME="newml">$B#M#L$r:n$k!#%a%s%P!<$NEPO?(B/$B:o=|(B
+	<A NAME="newml">£Í£Ì¤òºî¤ë¡£¥á¥ó¥Ð¡¼¤ÎÅÐÏ¿/ºï½ü
 	<UL>
-		<LI><A HREF="newml.html">$B#M#L$r?7$7$/:n$k(B</A>
-		<LI><A HREF="add.html">$B%a%s%P!<$rEPO?$9$k(B</A>
-		<LI><A HREF="bye.html">$B%a%s%P!<$r:o=|$9$k(B</A>
+		<LI><A HREF="newml.html">£Í£Ì¤ò¿·¤·¤¯ºî¤ë</A>
+		<LI><A HREF="add.html">¥á¥ó¥Ð¡¼¤òÅÐÏ¿¤¹¤ë</A>
+		<LI><A HREF="bye.html">¥á¥ó¥Ð¡¼¤òºï½ü¤¹¤ë</A>
 	</UL>
 	<BR>
-	<A HREF="acl.html"> [$B$^$H$a(B] $B%a%s%P!<$K$G$-$k$3$H(B/$B$G$-$J$$$3$H(B</A>
+	<A HREF="acl.html"> [¤Þ¤È¤á] ¥á¥ó¥Ð¡¼¤Ë¤Ç¤­¤ë¤³¤È/¤Ç¤­¤Ê¤¤¤³¤È</A>
 
 	<HR>
 	<LI>
 	<A NAME="fundamental-config">
-	<P> $B#M#L$N%+%9%?%^%$%:(B($B4pK\JT(B)
+	<P> £Í£Ì¤Î¥«¥¹¥¿¥Þ¥¤¥º(´ðËÜÊÔ)
 	<UL>
 		<LI>
 		<A HREF="howto-customize.html">
-		fml$B$N@_DjJQ99$N;EJ}$K$D$$$F(B
+		fml¤ÎÀßÄêÊÑ¹¹¤Î»ÅÊý¤Ë¤Ä¤¤¤Æ
 		</A>
 		
 		<UL>
-			<LI> $B%a%K%e!<A*Br(B: GUI $B$+(B CUI (makefml) $B$r;H$&(B
-			<LI> cf $B$rJT=8!#$=$7$F(B config.ph $B$r@8@.(B
-			<LI> config.ph (perl script)$B$r@8=q$-(B ($B>e5iJT(B)
+			<LI> ¥á¥Ë¥å¡¼ÁªÂò: GUI ¤« CUI (makefml) ¤ò»È¤¦
+			<LI> cf ¤òÊÔ½¸¡£¤½¤·¤Æ config.ph ¤òÀ¸À®
+			<LI> config.ph (perl script)¤òÀ¸½ñ¤­ (¾åµéÊÔ)
 		</UL>
 
 		<LI>
-		<A HREF="files.html">$B@_Dj%U%!%$%k(B</A>$B$NFI$_9~$`=g$H(B
-		$B#M#L6&DL$N@_Dj%U%!%$%k$K$D$$$F(B		
+		<A HREF="files.html">ÀßÄê¥Õ¥¡¥¤¥ë</A>¤ÎÆÉ¤ß¹þ¤à½ç¤È
+		£Í£Ì¶¦ÄÌ¤ÎÀßÄê¥Õ¥¡¥¤¥ë¤Ë¤Ä¤¤¤Æ		
 
 		<LI>
 		<A HREF="../../INSTALL/index.html#makefml-config">
-		$B@_Dj%a%K%e!<(B(makefml config)$B$N;H$$J}(B
+		ÀßÄê¥á¥Ë¥å¡¼(makefml config)¤Î»È¤¤Êý
 		</A>
 		<BR>
-		$BCm(B: CGI$B$G$OF|K\8l$N%a%K%e!<$G$9!#(B
+		Ãí: CGI¤Ç¤ÏÆüËÜ¸ì¤Î¥á¥Ë¥å¡¼¤Ç¤¹¡£
 		<BR>
-		$BCm(B: CUI$B$G$b4D6-JQ?t(BMAKEFML_LANG$B$K(Beuc$B$J$I$HDj5A$9$k$H(B
-		$B$=$NJ8;z%3!<%I$GI=<($5$l$^$9!#(B
-		<A HREF=../makefml/index.html>$BNc(B:</A>
+		Ãí: CUI¤Ç¤â´Ä¶­ÊÑ¿ôMAKEFML_LANG¤Ëeuc¤Ê¤É¤ÈÄêµÁ¤¹¤ë¤È
+		¤½¤ÎÊ¸»ú¥³¡¼¥É¤ÇÉ½¼¨¤µ¤ì¤Þ¤¹¡£
+		<A HREF=../makefml/index.html>Îã:</A>
 		<BR>
 		<A HREF="../../INSTALL/index.html#cf-and-config.ph">
-		$B@_Dj%U%!%$%k$K$D$$$F(B(cf$B$H(Bconfig.ph$B$N0c$$$O(B?)
+		ÀßÄê¥Õ¥¡¥¤¥ë¤Ë¤Ä¤¤¤Æ(cf¤Èconfig.ph¤Î°ã¤¤¤Ï?)
 		</A>
 		<BR>
 		<A HREF="../../variable-list.ja.html">
-		$BJQ?t%j%9%H(B
+		ÊÑ¿ô¥ê¥¹¥È
 		</A>
 		<A HREF="../../sorted-variable-list.ja.html">
-		$B%"%k%U%!%Y%C%H=g$NJQ?t%j%9%H(B
+		¥¢¥ë¥Õ¥¡¥Ù¥Ã¥È½ç¤ÎÊÑ¿ô¥ê¥¹¥È
 		</A>
 
 		<LI>
 		<A HREF="config-default.html">
-		fml$B$N@_Dj(B($B@8$N>uBV(B)
+		fml¤ÎÀßÄê(À¸¤Î¾õÂÖ)
 		</A>
 
 		<LI>
 		<A HREF="config-auto-subscribe.html">
-		fml$B$N@_Dj(B($B<+F0EPO?(B)
-		<A HREF="../how_to_subscribe/index.html">[$B>\:Y(B]</A>
+		fml¤ÎÀßÄê(¼«Æ°ÅÐÏ¿)
+		<A HREF="../how_to_subscribe/index.html">[¾ÜºÙ]</A>
 		</A>
 
 		<LI>
 		<A HREF="config-remote.html">
-		$B%j%b!<%H$+$i%a!<%k$G%a!<%j%s%0%j%9%H$N@_Dj$rJQ99$9$k(B
+		¥ê¥â¡¼¥È¤«¤é¥á¡¼¥ë¤Ç¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤ÎÀßÄê¤òÊÑ¹¹¤¹¤ë
 		</A>
 		<BR>
-		"$B%j%b!<%H4IM}(B"	
-		<A HREF="../remote_control/index.html">[$B>\:Y(B]</A>
+		"¥ê¥â¡¼¥È´ÉÍý"	
+		<A HREF="../remote_control/index.html">[¾ÜºÙ]</A>
 
 		<LI>
 		<A HREF="../header_rewrite/index.html">
-		$B%X%C%@$N=q$-49$((B
+		¥Ø¥Ã¥À¤Î½ñ¤­´¹¤¨
 		</A>
 
 		<LI>
 		<A HREF="setup-more-secure.html">
-		$B$h$j%;%-%e%"$K(B
+		¤è¤ê¥»¥­¥å¥¢¤Ë
 		</A>
 		<BR>
-		$B>\:Y(B:
-		<A HREF="../filter/index.html">$B%U%#%k%?(B</A>
-		<A HREF="../resource_control/index.html">$B%H%i%U%#%/%b%K%?(B</A>
+		¾ÜºÙ:
+		<A HREF="../filter/index.html">¥Õ¥£¥ë¥¿</A>
+		<A HREF="../resource_control/index.html">¥È¥é¥Õ¥£¥¯¥â¥Ë¥¿</A>
 		<A HREF="../../advisories/index.html">
-		FML$B%;%-%e%j%F%#%"%I%P%$%6%j%#(B
+		FML¥»¥­¥å¥ê¥Æ¥£¥¢¥É¥Ð¥¤¥¶¥ê¥£
 		</A> 
 
 		<LI>
-		<A HREF="../errormails/index.html">$B%(%i!<%a!<%k$N<+F0=hM}(B</A>
+		<A HREF="../errormails/index.html">¥¨¥é¡¼¥á¡¼¥ë¤Î¼«Æ°½èÍý</A>
 	</UL>
 
 
 	<HR>
 	<LI>
 	<A NAME="advanced-config">
-	<P> $B>/$7?J$s$@@_Dj(B
+	<P> ¾¯¤·¿Ê¤ó¤ÀÀßÄê
 	<UL>
 		<LI>
-		$B4k6H$N%5%]!<%HMQ#M#L$J$I(B
+		´ë¶È¤Î¥µ¥Ý¡¼¥ÈÍÑ£Í£Ì¤Ê¤É
 		<A HREF="config-post-from-anyone.html">
-		$B$@$l$G$bEj9F2DG=$J#M#L(B
+		¤À¤ì¤Ç¤âÅê¹Æ²ÄÇ½¤Ê£Í£Ì
 		</A>
 
 		<LI>
-		$BNc$($P%a!<%k%^%,%8%s(B?
+		Îã¤¨¤Ð¥á¡¼¥ë¥Þ¥¬¥¸¥ó?
 		<BR>
 		<A HREF="config-asymmetric-regist.html">
-		$B%a!<%k$r0lJ}E*$KAw$k$h$&$J>l9g$K%f!<%6$K<+J,$GEPO?$5$;$?$$(B
+		¥á¡¼¥ë¤ò°ìÊýÅª¤ËÁ÷¤ë¤è¤¦¤Ê¾ì¹ç¤Ë¥æ¡¼¥¶¤Ë¼«Ê¬¤ÇÅÐÏ¿¤µ¤»¤¿¤¤
 		</A>
-		<A HREF="../how_to_subscribe/index.html#auto_asymmetric_regist">[$B>\:Y(B]</A>
+		<A HREF="../how_to_subscribe/index.html#auto_asymmetric_regist">[¾ÜºÙ]</A>
 
 		<LI>
-		"$B%b%G%l!<%?(B" 
+		"¥â¥Ç¥ì¡¼¥¿" 
 		<BR>
 		<A HREF="config-moderated.html">
-		$B%a!<%j%s%0%j%9%H$N5-;v$O$J$,$l$kA0$K::FI$r$&$1$k>l9g(B
+		¥á¡¼¥ê¥ó¥°¥ê¥¹¥È¤Îµ­»ö¤Ï¤Ê¤¬¤ì¤ëÁ°¤ËººÆÉ¤ò¤¦¤±¤ë¾ì¹ç
 		</A>
 	</UL>
 </UL>

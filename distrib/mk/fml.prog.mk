@@ -1,5 +1,5 @@
 #
-# $FML$
+# $FML: fml.prog.mk,v 1.9 2001/06/24 13:59:09 fukachan Exp $
 #
 
 # search ${HOME} also for ~/.fmlmk.conf
@@ -25,7 +25,7 @@ MKDIR    ?= ${PERL} ${FML}/distrib/bin/mkdirhier.pl
 
 # Convert to Japanese/English
 # NKF      ?= /usr/local/bin/nkf
-JCONV    ?= /usr/pkg/bin/nkf -j
+JCONV    ?= /usr/pkg/bin/nkf -e
 ECONV    ?= /usr/pkg/bin/nkf -e
 
 # version up 

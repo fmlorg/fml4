@@ -22,5 +22,5 @@ done
 for x in */*html
 do
 	echo "jis: $x"
-	$nkf -j $x > $tmp; mv $tmp $x 
+	$nkf -e $x > $tmp; mv $tmp $x 
 done
