@@ -3,6 +3,13 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/03/09
+
+  fix '# command' trap in the case of "com-mand"
+	for example "unsubscribe-confirm" ( alphabets + "-")
+
+	'# command'をトラップする場合に - を含むコマンドの場合のbugをつぶす
+
 2000/03/08
 
    Re: Re: Re: 
