@@ -715,7 +715,7 @@ sub DeadOrAlive
 	my ($a);
 	for $a (keys %logaddr) {
 	    if ($addr{"$a $ml"} > 0) {
-		&Log(sprintf("eval: %-40s = %d points", 
+		&Log(sprintf("eval: %-40s = %2.1f points", 
 			     "<$a>", $addr{"$a $ml"}));
 	    }
 	}
@@ -782,18 +782,19 @@ sub MeadSimpleEvaluator
 				    $info->{'pri'},
 				    );
 
+    if ($MEAD_ERROR_ESTIMATION_METHOD eq 'simple_sum_up_errors') {
+	my $debugbuf = "EVAL> $addr : $addr{\"$addr $ml\"}\t" if $debug;
 
-    my $debugbuf = "EVAL> $addr : $addr{\"$addr $ml\"}\t" if $debug;
+	$addr{"$addr $ml"} += 
+	    $PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
 
-    $addr{"$addr $ml"} += 
-	$PRI{$pri} != 0 ? $PRI{$pri} : $PRI{'default'};
-
-    $debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
-    &Debug($debugbuf) if $debug;
+	$debugbuf .= "=>\t$addr{\"$addr $ml\"} (pri=$pri)\n" if $debug;
+	&Debug($debugbuf) if $debug;
+    }
 
     # for better profile
     {
-	# cache oldest log for better evaluation
+	# cache oldest log for better ESTIMATION
 	if (! $OldestLog{$addr}) { $OldestLog{$addr} = $time;}
 
 	# total errors
@@ -826,6 +827,10 @@ sub ShowProfile
 	}
 
 	&Log("prof: <$a> sum=$profile_sum/total=$SumUp{$a} [$profile]");
+
+	if ($MEAD_ERROR_ESTIMATION_METHOD eq 'simple_sum_up_error_days') {
+	    $addr{$key} = $profile_sum;
+	}
     }
 }
 
@@ -1195,7 +1200,7 @@ sub Init
 	}
     }
 
-    
+    $MEAD_ERROR_ESTIMATION_METHOD = 'simple_sum_up_errors';
     $MEAD_INCOMING_MAIL_SIZE_LIMIT = 64*1024; # 64K bytes 
 
     $LIMIT  = $Forced::LIMIT  || $opt_l || $LIMIT  || 5;
