@@ -105,6 +105,7 @@ Search keywords on your problem over fml documents ?
 
 
 .S	以下のような典型的なエラーではありませんか？
+=E.S	check the following typical errors
 
 *	/etc/aliases に設定はちゃんとあるか？ newaliases はしたか？
 =E
@@ -143,7 +144,7 @@ before asking.
 			did not newaliases ?
 .fi
 
-$FML$
+$FML: CHECK_LIST.wix,v 1.6 2001/05/27 01:39:00 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp

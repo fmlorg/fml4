@@ -55,6 +55,7 @@ No difference is found between NT 4 and 2000 untile now.
 .fi
 
 .C	インストールの手順の例
+=E.C	installation procedure steps
 
     1. Active Perlのインストール
     2. Perlの動作確認
@@ -75,7 +76,7 @@ appreciate the environment information to be installed on windows
 
 	Masaya Mase
 
-$Id$
+$FML$
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp

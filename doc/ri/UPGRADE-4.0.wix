@@ -1,5 +1,7 @@
 .HTML_PRE
 		fml 4.0 へのアップグレードについて 
+=E
+		upgrading to fml 4.0 
 
 				Ken'ichi Fukamachi
 
@@ -8,10 +10,13 @@
 
 
 .P	4.0 へのアップグレードの際の注意
+=E.P	cautions at upgrading to 4.0
 
 .C	PGP まわり ( fml-current (3.0I) 2000/08/12 以降 )
+=E.C	on PGP
 
 .S	ディレクトリについて
+=E.S	directories
 
    fml 3.0 までは $DIR/etc/pgp だけでした。
    例: /var/spool/ml/elena/etc/pgp/
@@ -37,6 +42,7 @@
 
 
 .S	makefml の使い方 （互換性について)
+=E.S	makefml usage ( on compatibility )
 
  fml 4.0 では
 
@@ -71,6 +77,7 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 
 .S	省略しない makefml の使い方 （admin コマンドの認証鍵の操作）
+=E.S	complate makefml syntax on admin commands
 
   fml 3.0 では makefml pgp により admin コマンドの認証鍵を操作しました。
   fml 4.0 では
@@ -98,6 +105,7 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 
 .S	省略しない makefml の使い方 （ ML の暗号化の鍵の操作）
+=E.S	complate makefml syntax on encryption key manipulations
 
   fml 3.0 では makefml pgp により ML の暗号化のため鍵を操作しました。
   fml 4.0 では
@@ -124,6 +132,7 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 
 
 .S	解説: 3.0 と 4.0 とのちがいについて
+=E.S	difference between 3.0 and 4.0
 
   3.0 までは例えば elena  ML の PGP 認証( admin コマンド)および
    ML の暗号化のキーがともに
@@ -170,4 +179,13 @@ MAKEFML_PGP_DEFAULT_MODEで指定できます。
 	PGP version 2 で admin コマンドメールの PGP 認証
 	のために PGP2 の鍵を操作することになります。
 
-$Id$
+$FML$
+
+.# Copyright (C) 1993-2001 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-2001 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
