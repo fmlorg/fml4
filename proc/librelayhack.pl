@@ -63,7 +63,7 @@ sub RelayHack
 sub SearchNegativeGw
 {
     local($rcpt, $already_relay) = @_;
-    local($match, $ngw, $not_domains);
+    local($match, $ngw);
 
     # @relay:user@domain or @relay2,@relay1:user@domain
     if ($already_relay) { ($rcpt) = split(/[,:]/, $rcpt);}

@@ -12,8 +12,6 @@
 # do not change here for backward compat ;_;
 sub ConfigByMakeFml
 {
-    $UnderMakeFml = 1; # Set Global Identifier;
-
     local($os);
 
     for (keys %MAKE_FML) {

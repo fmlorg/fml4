@@ -16,7 +16,7 @@ local($MTI_DB, $MTIErrorString, %MTI, %HI);
 sub MTICache
 {
     local(*e, $mode) = @_;
-    local($time, $from, $rp, $sender, $db, $xsender);
+    local($time, $from, $rp, $sender, $xsender);
     local($host, $date, $rdate, $buf, $status);
     local(%hostinfo, %addrinfo);
 
@@ -537,7 +537,7 @@ sub GetHostInfo
 sub main'MTISimpleBomberP #';
 {
     local(*e, *MTI, *HI, *addrinfo, *hostinfo) = @_;
-    local($sum, $soft_limit, $hard_limit, $es, $addr);
+    local($soft_limit, $hard_limit, $es, $addr);
     local($cr, $scr);
 
     # BOMBER OR NOT: the limit is 
