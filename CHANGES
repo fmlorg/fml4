@@ -8,14 +8,24 @@
   3.0B newconfig: cf/config
 	fix conversion dependence of explicitly defined keys in $DIR/cf
 
+	『cfで定義されている変数』に依存する変数は config.ph で
+	明示的に定義されるようにする。
+	XXX 3.0B では default_config.ph を上書きする内容だけが
+	XXX config.ph に明示的にコメントアウトされない行となるため	 
+
   sbin/makefml and drafts/{help, welcome, guide, ... } files
 	Conv() use _MAINTAINER_ to make templates
+
+	help ファイルなどのtemplate内部の _MAINTAINER_ を展開できるように
+	また -admin のような埋め込み部分を _MAINTAINER_ に書き換え
 
 2000/02/21
 
   CVS repository hier
 	module/Japanese/	Japanese specific library
 	module/compat/		compatible library
+
+	CVSのディレクトリの整理
 
   doc/advisories/
 	clean up
