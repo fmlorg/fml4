@@ -1,0 +1,23 @@
+.S	Get以外のCommandで MLとは別のファイルを取り出すようにするには
+
+こんなんかな。"get-etc passwd" を elena-ctl におくると 
+/var/spool/ml/elena/etc/passwd が返ってくる。
+＃わかるとおり、チェックあまあまですが、まぁ prototype だから
+
+%LocalProcedure = (
+		   'get-spool', 'mySendFile',    # $DIR/spool
+		   'get-archive', 'mySendFile',  # $DIR/archive
+		   'get-etc', 'mySendFile',      # $DIR/etc
+		   );
+
+sub mySendFile
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    if ($proc =~ /^get-([a-z]+)$/io) {
+	local($dir) = $1;
+	if (-f "$dir/$Fld[2]") {
+	    &SendFile($to, "Get $dir/$Fld[2] $ML_FN", "$dir/$Fld[2]");
+	}
+    }
+}
