@@ -115,7 +115,6 @@ sub PGPDecode2
     # 2>&1 is required to detect "Good signature"
     open(WPGP, "|$PGP $PgpOpts -o $tmpf")||&Log("PGPDecode2: $!");
     select(WPGP); $| = 1; select(STDOUT);
-    binmode(WPGP);
     print WPGP $buf;
     close(WPGP);
 

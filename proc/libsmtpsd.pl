@@ -29,7 +29,6 @@ sub main'SDInit #';
 
     if (open(OUTLIST, "| sort > $TmpFile")) {
 	select(OUTLIST); $| = 1; select(STDOUT);
-	binmode(OUTLIST);
     }
     else {
 	&Log("SDInit: $!");

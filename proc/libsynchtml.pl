@@ -489,7 +489,6 @@ sub Write
 
     # fflush
     select(OUT); $| = 1; select(STDOUT);
-    binmode(OUT);
     
     # TITLE
     $htmlsubject = $e{"h:http-subject:"} || $e{"h:Subject:"} || "Article $ID";
@@ -766,7 +765,6 @@ sub ParseMultipart
 	    open(IMAGE, "|$decode > $dir/${file}_$mp_count.$suffix") 
 		|| &Log($!);
 	    select(IMAGE); $| = 1; select(STDOUT);
-	    binmode(IMAGE);
 	    print IMAGE $_;
 	    close(IMAGE);
 
@@ -1082,7 +1080,6 @@ sub ReConfigureIndex
 	};
     }
     select(OUT); $| = 1; select(STDOUT);
-    binmode(OUT);
  
     while (<LIST>) {
 	# we use an "A HREF" line only. 
@@ -1239,7 +1236,6 @@ sub ReConfigureEachFieldIndex
 	    (&Log("cannot open index.html"), return);
     }
     select(OUT); $| = 1; select(STDOUT);
-    binmode(OUT);
 
     print STDERR "INDEX:<TITLE>Index $ML_FN</TITLE>\n" if $debug;
     print OUT $INDEX_HTML_FORMAT_PREAMBLE;
@@ -1303,7 +1299,6 @@ sub DoMakeIndex
 	    (&Log("cannot open $index.html"), return);
     }
     select(OUT); $| = 1; select(STDOUT);
-    binmode(OUT);
 
     # generating {index,thread}.html ...;
     if ($index eq 'thread') {
