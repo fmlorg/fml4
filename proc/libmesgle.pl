@@ -39,7 +39,6 @@ sub MesgLE
 	    $file = 'kern'; # if without '.', search file "kern".
 	}
 
-	&Log("check $dir/$file");
 	if (-f "$dir/$file") {
 	    $msg = &MesgLE'Lookup($key, "$dir/$file"); #';
 	    &Log("MesgLE: found in $dir/$file") if $msg && $debug;
