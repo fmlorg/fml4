@@ -429,10 +429,10 @@ sub Err
 sub Exit
 {
     local($s) = @_;
-    print "<PRE>";
+    &PRE;
     print $s;
     print "\nStop.\n";
-    print "</PRE>";
+    &EndPRE;
     exit 0;
 }
 
@@ -447,6 +447,19 @@ sub P
     print $s, "\n";
 }
 
+
+sub PRE
+{
+    return if $WithinPre;
+    print "<PRE>\n";
+    $WithinPre = 1;
+}
+
+sub EndPRE
+{
+    print "</PRE>\n";
+    $WithinPre = 0;
+}
 
 ### Section: conf/cgi.cf
 ###
@@ -499,12 +512,12 @@ sub ShowCGICF
 {
     if (open(CFTMP, $CGI_CF)) {
 	local($p);
-	print "<PRE>";
+	&PRE;
 	print "\n\n-- \"$CGI_CF\" configuration --\n\n";
 	while ($p = sysread(CFTMP, $_, 1024)) {
 	    syswrite(STDOUT, $_, $p);
 	}
-	print "</PRE>";
+	&EndPRE;
     }
 }
 

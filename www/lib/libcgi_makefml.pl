@@ -94,7 +94,7 @@ sub UpperHalf
 
     if ($ErrorString) { &Exit($ErrorString);}
 
-    &P("<PRE>");
+    &PRE;
 }
 
 
@@ -153,6 +153,7 @@ sub MailServerConfig
     local($proc, *config) = @_;
 
     if ($proc eq 'run_newaliases') {
+	&PRE;
 	&P($NULL); &P("*** update aliases ***"); &P($NULL);
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
@@ -167,6 +168,8 @@ sub MailServerConfig
 	else {
 	    &ERROR("I don't know how to update aliases map");
 	}
+
+	&EndPRE;
     }
     else {
 	&ERROR("MailServerConfig: unknown $proc");
@@ -332,11 +335,11 @@ sub Command
     if ($PROC eq 'add' || $PROC eq 'bye') {
 	&Control($ML, $PROC, $MAIL_ADDR);
 
-	&P("</PRE>");
+	&EndPRE;
 	&P("<HR>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
 	&P("<HR>");
-	&P("<PRE>");
+	&PRE;
     }
     elsif ($PROC eq 'add_admin' || $PROC eq 'bye_admin' ||
 	   $PROC eq 'addadmin' || $PROC eq 'byeadmin') {
@@ -344,11 +347,11 @@ sub Command
 
 	&Control($ML, $PROC, $MAIL_ADDR);
 
-	&P("</PRE>");
+	&EndPRE;
 	&P("<HR>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
 	&P("<HR>");
-	&P("<PRE>");
+	&PRE;
     }
     elsif ($PROC eq 'add_cgi_admin' || $PROC eq 'bye_cgi_admin') {
 	$PROC =~ s/_//g;
@@ -358,18 +361,18 @@ sub Command
 	&Control($ML, 'mladmin.cgi', 'update');
     }
     elsif ($PROC eq 'newml') {
-	&P("</PRE>");
+	&EndPRE;
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
 	&P("<HR>");
-	&P("<PRE>");
+	&PRE;
 
 	&Control($ML, $PROC);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
     }
     elsif ($PROC eq 'destructml' || $PROC eq 'rmml') {
-	&P("<PRE>");
+	&PRE;
 	&Control($ML, $PROC);
-	&P("</PRE>");
+	&EndPRE;
 	&P("<HR>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/rmml.html", 1);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
@@ -392,10 +395,10 @@ sub Command
 	    if ($PASSWORD eq $PASSWORD_VRFY) {
 		&Control($ML, $PROC, $CGI_ADMIN_USER || $MAIL_ADDR, $PASSWORD);
 
-		&P("</PRE>");
+		&EndPRE;
 		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${saved_proc}.html", 1);
 		&P("<HR>");
-		&P("<PRE>");
+		&PRE;
 	    }
 	    else {
 		&ERROR("input passwords are different each other.");
@@ -453,7 +456,7 @@ sub Finish
     &P("-- FINISH --");
     if ($ErrorString) { &Exit($ErrorString);}
 
-    &P("</PRE>");
+    &EndPRE;
 
     if ($ControlThrough) {
 	;# &P("<META HTTP-EQUIV=refresh CONTENT=\"2; URL=menubar.cgi\">");
