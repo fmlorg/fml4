@@ -31,6 +31,12 @@ sub ContentHandler
     $type =~ s/\s//g;
     $subtype =~ s/\s//g;
     $nonMime = 1 if ($type eq '');
+
+    if ($debug_ch) {
+	print STDERR "Content-Type: $e{'h:content-type:'}\n";
+	print STDERR "boundary: $boundary\n";
+	print STDERR "{ $type, $subtype, $paramaters\t}\n";
+    }
     
     $ptr = 0;
     $multipart = 1;
@@ -62,6 +68,7 @@ sub ContentHandler
 		# MIME mail
 		$prevp = $ptr;
 		($header, $body, $ptr) = &GetNextMultipartBlock(*e, $ptr);
+		print STDERR "($header, \$body, $ptr)\n" if $debug_ch;
 		if ($header eq '' && $body eq '' && $ptr == 0) {
 		    # No more part/break do-while
 		    last;
@@ -82,8 +89,12 @@ sub ContentHandler
 		}
 	    }
 	}
+
 	# Decide action to this part
-	$action = 'allow';
+	$action = 'allow'; # enforce default to be "allow"
+	# XXX first match !!!
+	# We check @MailContentHandler (ADD_CONTENT_HANDLER() order)
+	# and apply the action by first match
 	foreach (@MailContentHandler) {
 	    local($t, $st, $xt, $xst, $act) = split(/\t/);
 	    
@@ -100,12 +111,20 @@ sub ContentHandler
     $reject = grep(/^.*\treject$/, @actions);
     $multipart = grep(/^.*\tallow\+multipart$/, @actions);
     $cutoff = grep(/^.*\tstrip$/, @actions);
+
+    if ($debug_ch) {
+	print STDERR "MailContentHandler: @MailContentHandler\n
+        actions: @actions
+         reject: $reject
+      multipart: $multipart 
+         cutoff: $cutoff\n";
+    }
     
     # Rebuild message body
     if ($reject) {
 	&Mesg(*e, "We deny non plaintext mails", 'filter.reject_non_text_mail');
 	&MesgMailBodyCopyOn;
-	&Log("Reject multipart mail");
+	&Log("reject multipart mail");
 	return "reject";
     } 
     else {
@@ -114,7 +133,7 @@ sub ContentHandler
 	
 	if ($multipart) {
 	    if ($boundary eq '') {
-		$boundary = 'simplebounrady==';
+		$boundary = 'simpleboundary==';
 	    }
 	    foreach (@actions) {
 		local($bodiesp, $action) = split(/\t/);
@@ -126,6 +145,7 @@ sub ContentHandler
 		else {
 		    ($header, $body, $ptr) =
 			&GetNextMultipartBlock(*e, $bodiesp);
+		    print STDERR "($header, \$body, $ptr)\n" if $debug_ch;
 		}
 		if ($action eq 'allow' ||
 		    $action eq 'allow+multipart' ||
@@ -172,6 +192,7 @@ sub ContentHandler
 		else {
 		    ($header, $body, $ptr) =
 			&GetNextMultipartBlock(*e, $bodiesp);
+		    print STDERR "($header, \$body, $ptr)\n" if $debug_ch;
 		}
 		if ($action eq 'allow' || $action eq '') {
 		    $outputbody .= $body;
