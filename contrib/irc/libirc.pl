@@ -136,7 +136,9 @@ sub main'IrcParseArgv #'
     $USE_SYSLOG = $opt_S ? 1 : 0;
 
     # logfile ; logged even under syslog() works.
-    $LOGFILE = $opt_L || $ENV{'PWD'}."/log";
+    eval(' chop ($PWD = `pwd`); ');
+    $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+    $LOGFILE = $opt_L || $PWD."/log";
     
     $SetProcTitle = $opt_t;
 
@@ -620,7 +622,7 @@ sub Import
     }
 
     if (! $LOGFILE) {
-	$LOGFILE = $ENV{'PWD'}."/log";
+	$LOGFILE = $PWD."/log";
     }
 
     &Touch($LOGFILE) unless -f $LOGFILE;

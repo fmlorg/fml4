@@ -76,12 +76,14 @@ sub InitS2P
     require 'getopts.pl';
     &Getopts("d:f:ht:I:D:vVTHM:L:o:S:E:F");
 
-    $DIR = $opt_D || $ENV{'PWD'};
+    eval(' chop ($PWD = `pwd`); ');
+    $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+    $DIR = $opt_D || $PWD;
     $ConfigFile = $opt_f;
 
     $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
     push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
-    push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+    push(@INC, $PWD) if $PWD && (-d $PWD);
 
     if (! $ConfigFile) {
 	print STDERR "FYI: you must need '-f \$DIR/config.ph' option in usual case\n";

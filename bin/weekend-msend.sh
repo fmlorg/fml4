@@ -14,6 +14,10 @@
 # perl
 PERL=perl
 
+if [ X$PWD = X ];then
+	eval PWD=`pwd`
+fi
+
 # fml execution and library files directory (location of fml.pl, libsmtp.pl)
 FML=$PWD
 

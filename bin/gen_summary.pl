@@ -16,10 +16,12 @@ $rcsid   = q$Id$;
 require 'getopts.pl';
 &Getopts("d:f:ht:I:D:vVTHM:L:o:m");
 
+eval(' chop ($PWD = `pwd`); ');
+$PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
 
 $opt_h && do { &Usage; exit 0;};
 $HTML_INDEX_UNIT = $opt_t || 'day';
-$DIR             = $opt_D || $ENV{'PWD'};
+$DIR             = $opt_D || $PWD;
 $HTTP_DIR        = $opt_d;
 $SPOOL_DIR       = shift;
 $ConfigFile      = $opt_f;
@@ -32,7 +34,7 @@ $LastRange       = $opt_L;
 push(@INC, split(/:/,$opt_I));
 $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
 push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
-push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+push(@INC, $PWD) if -d $PWD;
 
 # gen_summary extension
 $USE_MIME        = $opt_m;

@@ -7,13 +7,16 @@ if ($opt_h) { &USAGE; exit 0;}
 
 &GetTime;
 
+eval(' chop ($PWD = `pwd`); ');
+$PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+
 # flush
 $| = 1; 
 $SIG{'HUP'} = 'ReadFilterConf';
 $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'SignalLog';
 
 $FILTER_CONF = $opt_f || &die("Please define -f filter-config");
-$LOGFILE     = $opt_L || "$ENV{'PWD'}/filter.log";
+$LOGFILE     = $opt_L || "$PWD/filter.log";
 $SetProcTitle = $opt_t;
 
 $FILE = shift || &die("Please define logfile\n");

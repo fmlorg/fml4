@@ -32,9 +32,12 @@ $LIBDIR	= $LIBDIR || $DIR;
 unshift(@INC, $DIR);
 
 #################### MAIN ####################
+eval(' chop ($PWD = `pwd`); ');
+$PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+
 $EXEC_DIR = $0; $EXEC_DIR =~ s@bin/.*@@;
 push(@INC, $EXEC_DIR) if -d $EXEC_DIR;
-push(@INC, $ENV{'PWD'}) if -d $ENV{'PWD'};
+push(@INC, $PWD) if -d $PWD;
 require 'libloadconfig.pl'; &__LoadConfiguration;
 
 ###### Customizable Varaibles

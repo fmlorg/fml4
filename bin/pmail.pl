@@ -26,8 +26,11 @@ exit 0;
 ########## Section: pmail specific 
 sub Init
 {
+    eval(' chop ($PWD = `pwd`); ');
+    $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+
     ### set defaults ###
-    $DIR             = $ENV{'PWD'};
+    $DIR             = $PWD;
     $e{'mci:mailer'} = 'ipc';
     $debug           = 1;
     $debug_smtp      = 1;

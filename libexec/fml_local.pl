@@ -657,8 +657,10 @@ sub FmlLocalReadFile
 ##### INCLUDE Libraries
 ############################################################
 if ($debug_fml_local) {
-    push(@INC, $ENV{'PWD'});
-    push(@INC, "$ENV{'PWD'}/proc");
+    eval(' chop ($PWD = `pwd`); ');
+    $PWD = $ENV{'PWD'} || $PWD || '.'; # '.' is the last resort;)
+    push(@INC, $PWD);
+    push(@INC, "$PWD/proc");
     require 'libsmtp.pl'; 
     require 'libsmtputils.pl';
     require 'libkern.pl'; 
