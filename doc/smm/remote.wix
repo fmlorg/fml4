@@ -7,20 +7,23 @@
 .S	リモート管理 イントロダクション
 .xref	bin/passwd.pl
 
-”リモート管理”といっているのは config.ph や members 等をＭＬ管理者が
-そのＭＬサーバのマシンに入って直接メインテナンスをするのではなく、ＭＬ
-管理者がサーバにコマンドを送ってＭＬの設定をメインテナンスすることを意
-図しています。
+FMLで”リモート管理”といっているのは、ＭＬ管理者が config.ph や 
+members 等を、そのＭＬサーバのマシンに入って直接いじるのではなく、サー
+バにコマンドメールを送ってＭＬの設定をメインテナンスすることを意図して
+います。
 
-SMTP (Simple Mail Transfer Protocol) では原理的に認証はできません。パ
-スワードによる認証もまた当てにはなりません。パスワードを含むメールが
-FAILしてどこかのポストマスタにうっかり見えてしまう可能性もあります(普
-通はヘッダだけですが)。でもヘッダの Approval: password フィールドは見
-えちゃいますよね、その場合は。
+しかし SMTP (Simple Mail Transfer Protocol) では原理的に認証はできませ
+ん。パスワードによる認証もまた当てにはなりません。パスワードを含むメー
+ルが FAIL してどこかのポストマスタにうっかり見えてしまう可能性もありま
+す(普通はヘッダだけですが)。でもヘッダの Approval: password フィールド
+は見えちゃいますよね、その場合は。
 
 そういう意味で決して”推奨していません”が、実用上しかたなく使うことに
 なるケースも一杯あるらしいので実装しています。そういうものだと心に止め
 ておいて下さい。
+
+
+.S	より安全を考えると
 
 SMTP でやるより、Secure Shell で RSA 認証して、
 .k SSH 
@@ -37,7 +40,7 @@ SMTP でやるより、Secure Shell で RSA 認証して、
 これならコネクションがRSA認証されていてなおかつIDEA(default)暗号化され
 ているという優れ物です。
 
-なおマシンの上で他の人に除かれた場合は少しだけましで、etc/passwd とい
+なおマシンの上で他の人に覗かれた場合は少しだけましで、etc/passwd とい
 うパスワードを保存するファイルにパスワードをcryptで暗号化して保存して
 います。
 
@@ -54,16 +57,16 @@ config.ph に
 	$REMOTE_ADMINISTRATION = 1;
 	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 1; (default)
 
-をするとリモート管理を可能にします。パスワード認証を必要としない場合
-
-	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
-
-ですが、これはするべきではないでしょう。
+をするとリモート管理を可能にします。これは
 
 	リモート管理を認め
 	管理者であることを証明するためにはパスワード認証が必要
 
-という設定です。
+という設定です。パスワード認証を必要としない場合
+
+	$REMOTE_ADMINISTRATION_REQUIRE_PASSWORD = 0;
+
+ですが、これはするべきではないでしょう。
 
 
 .S	コマンド
@@ -112,7 +115,7 @@ config.ph に
 
 は ２行分
 
-	# pass  password
+	# admin pass  password
 	# admin commands
 
 と同じです。つまりパスワードを付け加えれば 
@@ -157,8 +160,8 @@ $REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
 .key	アドレスの複数マッチ
 .key	アドミンコマンド
 
-リモートの場合 OFF コマンド等での multiple-matching を認めません。
-つまり、
+通常のリモートコマンドの場合、 OFF コマンド等での multiple-matching 
+を認めません。つまり、
 
 	fukachan@aoi.chan.panic
  と
@@ -168,16 +171,16 @@ $REMORE_AUTH) が古い変数名。Backward compatible にしてあるので、どっち
 
 	チェックをきびしくしてひとつのアドレスだけを選ぶ
 
-のがデフォールトのfmlの挙動ですが、リモート管理のコマンドの時だけは 
+のがデフォールトのFMLの挙動ですが、リモート管理のコマンドの時だけは 
 multiple です。つまり、上の両方のアドレスを一気に消して、新しく add し
 たりできるわけです。
 
 
 .S	リモートで入れ替えが可能なファイルについて、
 
-具体的には remove unlink put rename の場合に、任意のファイルが操作でき
-るのはまずいです。本来これらのコマンドはリモートで guide ファイルを入
-れ換える等の目的のためにあります。現在では
+具体的には remove unlink put rename コマンドの場合に、任意のファイルが
+操作できるのはまずいです。本来これらのコマンドはリモートで guide ファ
+イルを入れ換える等の目的のためにあります。現在では
 
 	  @REMOTE_RECONFIGURABLE_FILES
 .k	  @REMOTE_RECONFIGURABLE_FILES
@@ -259,7 +262,8 @@ config.ph でコントロールできます。
 	これらの設定はグローバル変数の %AdminProcedure に定義されます。
 
    2	%LocalAdminProcedure が定義されているなら
-	1 で定義された %AdminProcedure を %LocalAdminProcedure で上書きします。
+	1 で定義された %AdminProcedure を %LocalAdminProcedure で上書き
+	します。
 
    3	@DenyAdminProcedure が定義されているなら
 	@DenyAdminProcedure のコマンドだけを使えなくする
@@ -310,8 +314,8 @@ fukachan@sapporo.iij.ad.jp を管理者に加える時は
 
    bin/passwd.pl -i fukachan@sapporo.iij.ad.jp パスワード
 
-をすることです。そのマシンがリモートにある場合さらに良い方法はあらかじ
-めそのパスワードを crypt した文字列を（ローカルマシン上で）用意して、
+をすることです。そのマシンがリモートにある場合さらに良い方法は、あらか
+じめそのパスワードを crypt した文字列を（ローカルマシン上で）用意して、
 そのマシンへ入って $DIR/etc/passwd (ML の HOME の下の etc/passwd) を
 手で編集することです。
 .xref	bin/passwd.pl etc/passwd 
@@ -369,11 +373,10 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 .S	リモート管理の古い設定への注意
 .key	リモート管理の古い設定への注意
 
-古い設定のままでは動きません。ごめんなさい
+古い設定のままでは動きません(libfml.pl 1.5.2より前)。ごめんなさい
 
 昔、リモート管理はフックをしかけることで実装していました。 
-いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようにしました。
-(libfml.pl 1.5.2 から)
+いまでは、$REMOTE_ADMINISTRATION で ON, OFF できるようになっています。
 
 
 .# $Id$
@@ -381,3 +384,4 @@ fukachan@phys.titech.ac.jp のパスワードを uja で初期化する。
 .# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 .# fml is free software distributed under the terms of the GNU General
 .# Public License. see the file COPYING for more details.
+
