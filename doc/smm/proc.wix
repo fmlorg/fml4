@@ -66,6 +66,13 @@ Example:
 
 	@DenyProcedure = ('get', 'send', 'mget', 'msend');
 
+	○ メンバーリストなどを取れないようにする
+=E
+	Disable commands to retrieve member lists
+
+	@DenyProcedure = ('member', 'active', 'members', 'actives');
+
+
 .S	ハッシュ %Procedure の特殊なキー
 =E.S	Special keys available in %Procedure
 .l	%Procedure-special-key
