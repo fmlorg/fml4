@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.142 2002/01/25 04:55:36 fukachan Exp $
+# $FML: fml.pl,v 2.143 2002/02/16 09:42:09 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -453,7 +453,14 @@ sub InitConfig
     # &DEFINE_FIELD_LOOP_CHECKED('from');
 
     # $FML for process table readability
-    if ($0 =~ m%^(.*)/(.*)%) { $ExecDir = $1; $FML = $2;}
+    eval q{ use File::Basename;};
+    unless ($@) {
+	$ExecDir = dirname($0);
+	$FML     = basename($0);
+    }
+    else {
+	if ($0 =~ m%^(.*)/(.*)%) { $ExecDir = $1; $FML = $2;}
+    }
 
     # fml 4.0 modules
     unshift(@INC, "$ExecDir/module/fml-devel");
