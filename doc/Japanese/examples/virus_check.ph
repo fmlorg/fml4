@@ -1,4 +1,4 @@
-# $FML: virus_check.ph,v 1.12 2001/11/24 15:39:33 fukachan Exp $
+# $FML: virus_check.ph,v 1.13 2002/02/01 00:08:18 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -43,26 +43,30 @@ $FILTER_ATTR_REJECT_MS_GUID = 1;
 
 
 # ちょっと複雑な HOOK
+# XXX multipart の場合のみ適用
 $DISTRIBUTE_FILTER_HOOK .= q#
-    if ($e{'Body'} =~ /Content.*\.vbs|(filename|name)=.*\.vbs/i) {
-	return 'VB script attatchment';
-    }
+    if ($e{'h:content-type:'} =~ /multipart/i) {
+	if ($e{'Body'} =~ /Content.*\.vbs|(filename|name)=.*\.vbs/i) {
+	    return 'VB script attatchment';
+	}
 
-    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty Park\.exe/i ) {
-	return 'original Pretty Park virus';
-    }
+	if ($e{'Body'} =~ /(filename|name)=.*\.Pretty Park\.exe/i ) {
+	    return 'original Pretty Park virus';
+	}
 
-    if ($e{'Body'} =~ /(filename|name)=.*\.Pretty.*Park.*\.exe/i ) {
-	return 'original Pretty Park familly ?';
-    }
+	if ($e{'Body'} =~ /(filename|name)=.*\.Pretty.*Park.*\.exe/i ) {
+	    return 'original Pretty Park familly ?';
+	}
 
-    if ($e{'Body'} =~ /(filename|name)=.*search.*URL.*\.exe/i ) {
-	return 'P2000 virus familly?';
+	if ($e{'Body'} =~ /(filename|name)=.*search.*URL.*\.exe/i ) {
+	    return 'P2000 virus familly?';
+	}
     }
 #;
 
 # さらに HOOK へつけたす
 # このHOOKを使うなら 上のHOOK例は含まれているので不必要
+# XXX multipart の場合のみ適用
 #
 #   ファイル拡張子 .xxx が危なそうなもの(?)はかたっぱしから認めない
 #   .vbs: VB script
@@ -74,10 +78,13 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 #   .scr: win32/MTX
 #   .lnk: sircam ?  
 $DISTRIBUTE_FILTER_HOOK .= q#
-    my($extension) = 'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
+    if ($e{'h:content-type:'} =~ /multipart/i) {
+	my($extension) = 
+	    'lnk|hta|com|pif|vbs|vbe|js|jse|exe|bat|cmd|vxd|scr|shm|dll';
 
-    if ($e{'Body'} =~ /(filename|name)=.*\.($extension)/i) {
-	return 'dangerous attatchment ?';
+	if ($e{'Body'} =~ /(filename|name)=.*\.($extension)/i) {
+	    return 'dangerous attatchment ?';
+	}
     }
 #;
 
