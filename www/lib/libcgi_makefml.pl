@@ -98,7 +98,7 @@ sub MailServerConfig
 
 	if ($CGI_CF{'HOW_TO_UPDATE_ALIAS'}) {
 	    # /usr/sbin/postalias
-	    $ENV{'PATH'} = '/bin:/usr/ucb:/usr/bin:/sbin:/usr/sbin';
+	    $ENV{'PATH'} = '/bin:/usr/ucb:/usr/bin:/sbin:/usr/sbin:/usr/local/sbin';
 
 	    &_P("updated aliases (ran \"$CGI_CF{'HOW_TO_UPDATE_ALIAS'}\")");
 	    &SpawnProcess($CGI_CF{'HOW_TO_UPDATE_ALIAS'});
