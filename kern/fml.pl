@@ -1743,6 +1743,7 @@ sub Mesg
     local(*e, $s, $mesgle_key, @mesgle_argv) = @_;
 
     if ($MESSAGE_LANGUAGE && $mesgle_key) {
+	&Debug("MesgLE:try to translate key <$mesgle_key>") if $debug;
 	&use('mesgle');
 	$s = &MesgLE(*e, $mesgle_key, @mesgle_argv) || $s;
     }
