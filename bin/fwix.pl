@@ -148,7 +148,6 @@ sub LogManifest
 }
 
 
-
 # SIGNAL HANDER
 # 1st argument is signal name
 sub CleanUp 
@@ -168,13 +167,12 @@ sub CleanUp
 sub Log { print STDERR @_, "\n"; }
 
 
-################################################################################
+###########################################################################
 ######### Libraries
-################################################################################
-
-
-################################################################################
-### IO
+###########################################################################
+#####
+##### IO
+#####
 
 
 sub Open4Write
@@ -234,6 +232,7 @@ sub OutputHtml
 
     close(OUTHTML);
 }
+
 
 sub OutputFile
 {
@@ -338,6 +337,7 @@ sub GetCurPosition
 	$CurPosition = $Section ? "$Chapter.$Section" : $Chapter;
     }
 }
+
 
 ########################
 # ROFF
@@ -629,7 +629,7 @@ sub ReadFile
 
 	# seealso{guide}
 	if (/^\.($KEYWORD)\{(\S+)\}/) {
-	    print STDERR "\tCATCH $1{$2}\n";
+	    print STDERR "\tCATCH $1"."{$2}\n"; # against perl 5
 	    s/\.($KEYWORD)\{(\S+)\}/&Expand($1, $2, $file, $mode)/e;
 	}
 
@@ -689,6 +689,7 @@ sub ReadFile
     "";
 }
 
+
 sub Print
 {
     # Save the body
@@ -703,6 +704,7 @@ sub Print
     }
 }
 
+
 sub PtrExpand
 {
     local($k) = @_;
@@ -710,18 +712,19 @@ sub PtrExpand
     $key{$k};
 }
 
+
 sub IndexExpand
 {
-    local($org, $r, $result);
-    local($X) = @_;
-    local(@index) = split(/\s*[,\s+]\s*/, $X);
+    local($org, $r, $result, @index);
+    local($x) = @_;
 
-    print STDERR "[$X] -> [" if $debug;
+    print STDERR "IndexExpand: [$x] -> [" if $debug;
 
+    @index = split(/\s*[,\s+]\s*/, $x);
     foreach (@index) {
 	$org = $_;
 	$r = $index{$_} || $_;
-	print STDERR "$r " if $debug;	    
+	print STDERR $r if $debug;	    
 	$result .= "$r ";
 
 	if (index($r, $org) == 0) {
@@ -741,7 +744,7 @@ sub HtmlExpand
 {
     local($_, $s, $file, $mode) = @_;
 
-    print STDERR "HtmlExpand::($_, $s, $file, $mode);\n";
+    print STDERR "HtmlExpand::($_, $s, $file, $mode);\n" if $debug;
 
     /~HTML_PRE/ && ($s = "</PRE>");
     /HTML_PRE/  && ($s = "<PRE>");
