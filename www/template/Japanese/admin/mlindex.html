@@ -30,7 +30,8 @@ _ML_ mailing list configuration
 <LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
 <LI><A HREF="#config">特定のメーリングリストの設定</A>
 <LI><A HREF="#add.bye">登録/削除 関係</A>
-<LI><A HREF="#password">パスワードの設定</A>
+<LI><A HREF="#adminadd.bye">管理者登録/削除 関係</A>
+<LI><A HREF="#password">管理者パスワードの設定</A>
 </UL>
 
 <HR>
@@ -74,6 +75,39 @@ _ML_ メーリングリストの設定(makefml config)
 		<SELECT NAME=PROC>
 		<OPTION VALUE=ADD>ADD 登録
 		<OPTION VALUE=BYE>BYE 削除
+		</SELECT>
+</TABLE>
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
+<A NAME=adminadd.bye><P>管理者の登録/削除 関係
+
+<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
+
+<P>
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Email アドレス:
+		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>既存リストからの選択:
+			<TD ALIGN=right>
+			<SELECT NAME=MAIL_ADDR>
+			__EXPAND_OPTION_ADMIN_MEMBER_LIST__
+			</SELECT>
+		</TABLE>
+
+	<TR>
+		<TD ALIGN=right> 登録/削除:
+		<TD ALIGN=left> 
+		<SELECT NAME=PROC>
 		<OPTION VALUE=ADD_ADMIN>ADD ADMIN 管理者として登録
 		<OPTION VALUE=BYE_ADMIN>BYE ADMIN 管理者として削除
 		</SELECT>
@@ -87,6 +121,14 @@ _____________________________
 
 <HR>
 <A NAME=password><P>メーリングリストの管理者パスワードの設定
+<BR>
+admin ないし approve コマンドのパスワードとGUIのメニューにはいるための
+パスワードを同時に更新します。
+<BR>
+GUIではとりあえずこれらについては同じパスワードです。
+<BR>
+CUIの方の makefml htpasswd を用いることで別のパスワードをつけることは
+可能です。
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
