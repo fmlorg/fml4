@@ -3,7 +3,7 @@
 .k	digest
 .k	matomeokuri
 .label	{msend-c}
-.key	samples/crontab
+.key	$DIR/crontab
 
 
 .S	まとめおくりの基本原理
@@ -86,16 +86,16 @@ $LIBDIR にセットされます。
 .S	crontab の見本
 .k	crontab
 .k	crontab(4.4BSD)
-.k	samples/crontab
+.k	$DIR/crontab
 
-INSTALL 時に make していれば、 samples/crontab に cron の設定のしかた
-の見本ができています。
+INSTALL 時に make していれば $DIR/crontab に cron の設定のしかたの見本
+ができています。ここで $DIR は各ＭＬのHOMEです(config.phのある場所)。
 
 4.4BSD では各個人ごとに cron の設定が可能です。その場合、
 
-   (shell prompt)% crontab samples/crontab 
+   (shell prompt)% crontab $DIR/crontab 
 
-を実行することで個人ごとのcronが設定できます。samples/crontab は例えば
+を実行することで個人ごとのcronが設定できます。$DIR/crontab は例えば
 
 0 * * * * /usr/libexec/fml/msend.pl /var/spool/ml/Elena /usr/libexec/fml
 

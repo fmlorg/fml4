@@ -67,10 +67,9 @@
 
 を管理する設定を考えてみます。
 
-fml.pl と同様に make した時にできている samples/include-fmlserv を 
-include file として使うように設定します。この時 $DIR に相当する部分は
-/var/spool のようにします。そして /var/spool/Elena と 
-/var/spool/Freekick を作ります。
+makefml fmlserv で fmlserv という directory の下に include ファイルが 
+setup されます。この include を、つまり makefml fmlserv の最後に表示さ
+れる内容を /etc/aliases に cut & paste して newaliaes して下さい。
 
 
 .S	設定と基本動作
@@ -78,7 +77,7 @@ include file として使うように設定します。この時 $DIR に相当する部分は
 一番簡単な設定は、make 時にサンプルファイルができています。このファイ
 ルを見ると設定がわかりますが、実のところ fml.pl の設定と全く同じです。
 
-	samples/include-fmlserv
+	ML群を作るdirectory/fmlserv/include
 
 の中身は
 
