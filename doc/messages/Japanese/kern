@@ -1,0 +1,26 @@
+not_found:
+	_ARG0_がみつかりません。
+
+no_such_directory:
+	_ARG0_というディレクトリはありません。
+
+no_such_command:
+	_ARG0_というコマンドはありません。
+
+no_such_request:
+	そのような _ARG0_ のリクエストはありません。
+
+already_subscribed:
+	_ARG0_はすでにメンバーに登録されています。
+
+exceed_max_member_limit:
+	登録数の上限を越えたので登録できませんでした。
+
+not_member:
+
+
+command_something_error:
+	_ARG0_ コマンドで何らかのエラーが発生しました。
+
+command_syntax_error:
+	_ARG0_ コマンドのシンタックスが違います。
