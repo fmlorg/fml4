@@ -1,0 +1,15 @@
+errormails$
+no www search db make. now namazu runs on external www server.
+basic_setup/errormail-handling.*html$
+Japanese/basic_setup/errormail-handling.*wix *[0-9]\.[0-9][0-9]*
+Japanese/troubleshoot/errormails.wix *[0-9]\.[0-9][0-9]*
+Japanese/errormails
+Japanese/basic_setup/errormail-handling-qmail
+analyze_mail_error
+liberror.pl
+RCS
+:var/html/RELEASE_NOTES.html
+:doc/ri/RELEASE_NOTES
+:Crosspost
+:\(FML=/home/beth/fukachan/w/fml
+doc/examples/errormail-handling.*.wix   [0-9].[0-9]+
