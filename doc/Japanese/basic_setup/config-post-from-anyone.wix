@@ -1,0 +1,98 @@
+.HTML_PRE
+
+	fml 3.0 の設定 -- 誰でも投稿可能に --
+=E
+	fml 3.0 permit post from anyone
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.include ptr.wix
+
+.HTML_PRE
+.if LANG == ENGLISH
+.include config-post-from-anyone.en.wix
+.return
+.fi
+○ 目的
+
+誰でも投稿ができる。こういう設定が必要なのは
+
+	企業のサポート用のＭＬ
+	フリーソフトの開発プロジェクトのＭＬなどもありうる
+
+しかし、場違いなメールもくることがありうる。
+
+トラフィックやどこまで場違いなメールを許せるか？によって『だれでも投稿
+可能』の設定にするか、それともモデレータにしてしまうか？が決まる。
+
+＃個人的には必要がないならだれでも投稿可能なんてしないほうがいいとおもう
+
+
+○ 設定
+
+% makefml config elena
+
+   メインメニュ -> 1 -> PERMIT_POST_FROM -> anyone
+
+○ コマンドについて
+
+この状態ではメンバーに登録されている人だけがコマンドを使える。しかし、
+誰でも投稿できるＭＬでコマンドが必要だろうか？
+
+企業のサポート用などならむしろ不必要だろう。コマンドを使えなくするため
+にアドレスその物を使えなくしておくといいだろう。
+
+   メインメニュ -> SETTINGS AROUND COMMANDS -> CONTROL_ADDRESS -> NOT USE
+
+この場合
+	
+   メインメニュ -> POLICY OF ACCESS の
+
+        [COMMAND]                          
+          PERMIT_COMMAND_FROM              members_only
+          WHEN COMMAND FROM NOT MEMBER     reject
+
+は無意味な設定ということになる。
+
+注意: /etc/aliases からも削除されていることを確認しよう。
+     デフォールトのものをそのまま使っていると入ったままになっているか
+     も知れない。
+
+     例: elena ML の場合なら
+     /etc/aliases の elena-ctl という行が存在しないことをチェック 
+     存在したら削って、newaliases をかけなおす
+
+
+○ SPAMなどの場違いなもの、メール爆弾については
+
+1. ある程度はしょうがないとあきらめる
+
+それでも一気に送られてきたら弾く(メール爆弾か?)などについてはMTIで弾け
+る場合がありうるだろう。
+.url ../op/index.html#mti
+
+メールサイズの制限などもかけたいだろうが、『誰からも投稿可能』な場合に
+は制限をかけ過ぎるとまずい場合があってなかなか歯がゆいといえるのではな
+いだろうか…
+
+
+2. 流量が少ないならモデレータにしてしまう
+
+＃しかしすぐ面倒と思うようになる気がする…
+
+.url config-moderated.html
+
+
+           Copyright (C) 1999 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE

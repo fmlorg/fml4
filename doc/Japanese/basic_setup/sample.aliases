@@ -1,0 +1,6 @@
+elena: :include:/var/spool/ml/elena/include
+elena-ctl: :include:/var/spool/ml/elena/include-ctl
+elena-request: elena-admin
+elena-admin: fukachan
+owner-elena: fukachan
+

@@ -1,0 +1,48 @@
+.HTML_PRE
+
+		Configuration files
+
+ [用語]
+   % はユーザの prompt
+   # は root の prompt
+   $EDITOR は自分の好きなエディタ
+
+   メーリングリスト名やディレクトリは適当に読みかえてください
+   ここではデフォールトの値を使って説明しています。
+
+.~HTML_PRE
+
+.HTML_PRE
+
+各ＭＬ(例: elena)の設定は /var/spool/ml/elena/config.ph という perl
+script が使われる。一般には個別にいじるが、全ＭＬ共通の設定をしたい場
+合がある。ある一つのファイルで共通の設定ができる方が便利である。
+
+fml-current (3.0B 以降) では、インストール(make install)すると
+
+   /var/spool/ml/etc/fml/
+
+というディレクトリが作られる。このディレクトリはデフォールトではなにも
+ない。必要なら次のようなファイル(perl script)を置くことができる。
+通常これらのファイルを使うことはない。
+
+   /var/spool/ml/etc/fml/site_init.ph
+
+	全ＭＬ共通の初期設定 (2.x 時代の途中から)
+	各ＭＬの設定(config.ph)で overwrite される
+
+   /var/spool/ml/etc/fml/site_force.ph
+
+	各ＭＬの設定を overwrite する設定 (3.0 以降)
+
+   /var/spool/ml/etc/fml/sitedef.ph
+
+	各ＭＬの設定を overwrite する設定 (2.x 時代)
+	一応 3.0 以降でも sitedef.ph は利用可能だが
+	site_force.ph があればそちらが優先され sitedef.ph が使われない
+
+           Copyright (C) 2000 Ken'ichi Fukamachi
+                   All rights reserved. 
+
+$Id$
+.~HTML_PRE
