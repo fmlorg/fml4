@@ -120,16 +120,17 @@ INFO-common: $(FML)/CHANGES
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
 	@ $(MKDIR) $(COMPILE_DIR)
 	@ rm -f $(COMPILE_DIR)/INFO
-	($(ECONV) doc/ri/INFO; $(ECONV) CHANGES; $(ECONV) doc/ri/README.wix)|\
+	($(ECONV) doc/ri/INFO; $(ECONV) CHANGES)|\
 		$(ECONV) |\
-		tee $(WORK_DOC_DIR)/INFO > $(COMPILE_DIR)/INFO
+		tee $(WORK_DOC_DIR)/INFO > $(COMPILE_DIR)/INFO.src
 
 $(WORK_DOC_DIR)/INFO: INFO-common
-	$(GEN_PLAIN_DOC) -o $(WORK_DOC_DIR) $(COMPILE_DIR)/INFO 
+	${FWIX} -n i ${COMPILE_DIR}/INFO.src > ${COMPILE_DIR}/INFO
 
 $(WORK_DOC_DIR)/INFO-e: INFO-common
 	${PERL} ${DIST_BIN}/remove_japanese_line.pl \
-		< $(COMPILE_DIR)/INFO > $(COMPILE_DIR)/INFO-e
+		< $(COMPILE_DIR)/INFO.src |\
+		uniq > $(COMPILE_DIR)/INFO-e
 
 init_dir:
 	@ env ${EXPORT_ENV} ${MAKE} -f distrib/mk/fml.sys.mk __setup
