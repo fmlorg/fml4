@@ -3,6 +3,19 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/04/10
+
+  bin/fwix.pl
+  distrib/mk/fml.turotial.mk
+  doc/Japanese/
+	rearrange documentation hierarchy. project phase 1 
+	enhance bin/fwix.pl also to use X reference cache
+
+	ドキュメント再構成計画 phase 1
+
+	fwix は { label <=> xref } のリファレンスキャッシュと
+	それを利用したディレクトリを越えた相互引用を可能にした
+
 2000/04/01
 
    proc/libconfirm.pl
