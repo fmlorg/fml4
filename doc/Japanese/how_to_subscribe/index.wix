@@ -1,3 +1,9 @@
+.HTML_PRE
+	¥á¥ó¥Ð¡¼ÅÐÏ¿¤äºï½ü
+
+.toc
+.~HTML_PRE
+
 .include acl.wix
 .include autoregist.wix
 .include examples.wix

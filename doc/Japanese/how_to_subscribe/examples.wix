@@ -28,4 +28,187 @@ $START_HOOK = q#
    push( @MEMBER_LIST, "$DIR/../list2/members" );
 #;
 
+
+.S	メーリングリストに参加可能なユーザのドメインを絞る
+=E.S	Restrict domains of user which joins a mailing list
+
+自動登録やリモートでの登録の際の制限については 
+$REGISTRATION_ACCEPT_ADDR という変数で制限できます。
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+=E
+$REGISTRATION_ACCEPT_ADDR can restrict registration to e.g. we permit
+only persons in some domains can join this mailing list.
+Please see it (this section may be of no use after this).
+.xref auto-$REGISTRATION_ACCEPT_ADDR $REGISTRATION_ACCEPT_ADDR 
+
+直接そういう変数があるわけじゃないですが、特殊な処理をするために HOOK 
+がいっぱいあります。ありうる可能性をすべて変数にしてるといくらあっても
+追いつかないので
+=E
+Several hooks are available to enable a lot of exceptional functions.
+To permit only users on permit_domain.co.jp can join this list, you
+can use $START_HOOK.
+
+$START_HOOK = q#
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+	&Mesg(*Envelope, 
+	   "We permit user@*permit_domain.co.jp can join this list.");
+	$DO_NOTHING = 1;
+   }
+#;
+
+とかすれば、permit_domain.co.jp 以外のユーザには「permit_domainのゆー
+ざだけしか参加できないよん」とメールが返って終りにできます。
+$DO_NOTHING = 1 にすれば配送、自動登録などほとんど全ての処理が行なわれ
+ません。これら全ての場合に共通の設定として利用できます。
+
+	$DO_NOTHING = 1		メインの処理をしない
+				配送、自動登録などほとんど全ての処理が
+				行なわれないことになる
+=E
+	$DO_NOTHING = 1		do not run the main routine
+				* distribute
+				* automatic registration
+				and other almost all functions
+
+で、メインを呼ばなければ自動登録ルーチンも動きません。
+
+   if ($From_address !~ /permit_domain\.co\.jp$/i) {
+
+が From: が permit_domain 以外のユーザの表現です。後例えば
+=E
+is "addresses(From: address) which do not match permit_domain.co.jp".
+
+   if ($Envelope{'h:sender:'} !~ /permit_domain\.co\.jp/i) {
+
+なら Sender: が permit_domain.co.jp 以外の人は参加できないことになりま
+す。(が Sender: なんて From: == Sender: なら普通つけないからよくない例
+だな)。
+=E
+is "Sender: does not contains permit_domain.co.jp string".
+
+
+.S	『自動登録』かつ『ポストできる人を制限する』設定例その２
+=E.S	Example: "automatic registration" and "restrict members who can post"
+.xref auto_asymmetric_regist
+
+$REJECT_COMMAND_HANDLER には特殊な auto_asymmetric_regist という値があ
+ります。これは配送と認証のリストを非対称に使う時に使います。
+.xref auto_asymmetric_regist
+=E
+$REJECT_COMMAND_HANDLER can have a value 'auto_asymmetric_regist'. If
+defined, FML uses delivery list controlled by automatic registration
+and authentication list edited by hand (or makefml).
+.xref auto_asymmetric_regist
+
+これは別の考え方です。elena と elena-regist という２つのＭＬを作る。
+=E
+make "elena" and "elena-regist" ML.
+
+	elena		投稿専用(手動登録)
+	elena-regist	コマンド専用(自動登録に設定しておく)
+=E
+	elena		only for post (by hand or makefml)
+	elena-regist	only for commands
+
+アドレスを書くファイル
+
+	elena-regist/members	MLの配送のリスト(自動登録)
+	elena/members		MLの認証に使うリスト(手動登録)
+				(MLに投稿できる人のリスト)
+=E
+	elena-regist/members	distribution list (automatic registration)
+	elena/members		authentication list (by hand or makefml)
+
+という２つのＭＬを作り設定する。登録用に elena-registを作り elena/cf 
+の ACTIVE_LIST を /var/spool/ml/elena-regist/members にする。
+=E
+We use "elena-regist" for automatic registration to add
+"elena-regist/members". "elena" ML uses plural distribution lists,
+"elena/actives", "elena-regist/members".
+
+   [作業の流れ]
+=E
+   [Example of flow]
+
+	% makefml newml elena
+	% makefml newml elena-regist
+	% cd /var/spool/ml/elena-regist
+	% cp include-ctl include
+
+	*** /etc/aliases を適宜設定する
+=E
+	*** edit /etc/aliases
+
+	% cd /var/spool/ml/elena
+	% makefml edit elena cf
+
+	*** edit cf ふぁいる (ACTIVE_LISTを設定する)
+	elena/cf に
+=E
+	*** edit cf file to append "elena-regist/members" to @ACTIVE_LIST.
+ 
+	ACTIVE_LIST	/var/spool/ml/elena-regist/members
+
+	を加え config.ph を再生成する。
+=E
+	recreate config.ph
+
+	% make config.ph
+	% makefml add elena postable-member-address-1
+	% makefml add elena postable-member-address-2
+	.....
+
+[Discussion]
+elena が elena-regist/members を open する時に elena-regist をロックし
+てない。が、大丈夫だらう:)
+=E
+[Discussion]
+FML cannot lock elena-regist ML in default but works well I believe:)
+
+
+.S	認証する際のドメインのALIAS %DOMAIN_ALIASES
+=E.S	%DOMAIN_ALIASES when authentication
+
+認証する時には ujauja.or.jp  => ujauja.ne.jp に書き換えてTRYしてみる
+=E
+When FML authenticates From: address as a member or not, FML tries
+both who@ujauja.or.jp and who@ujauja.ne.jp.
+
+%DOMAIN_ALIASES = (
+	'ujauja.or.jp', 'ujauja.ne.jp',
+	);
+
+＃ fml.pl 2.0.24.47 へのパッチの例
+=E
+An example of a patch for fml.pl 2.0.24.47
+
+--- fml.pl.org	Fri Nov 21 08:11:10 1997
++++ fml.pl	Sat Nov 22 12:51:33 1997
+@@ -571,6 +571,19 @@
+     &Log("Gecos [$e{'macro:x'}]") if $debug;
+     $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+ 
++    if (%DOMAIN_ALIASES) {
++       local($addr);
++	if (&MailListMemberP($From_address)) {
++	    ; # not rewrite
++	}
++	else {
++	    for (keys %DOMAIN_ALIASES) {
++		if ($From_address =~ /$_$/i) {
++                   $addr = $From_address;
++		    $addr =~ s/$_$/$DOMAIN_ALIASES{$_}/i;
++                   &MailListMemberP($addr) && ($From_address = $addr);
++		}
++	    }
++	}
++    }
++
+     # To: $MAIL_LIST for readability;
+     # &RewriteField(*e, 'Cc') unless $NOT_REWRITE_CC;
+     if ($REWRITE_TO < 0) { 
+
+
+
 $Id$

@@ -1,0 +1,69 @@
+.C	事例
+
+.S	改造事例: Reply-To == MLで必要な時にはReply-Toを設定するコマンド
+=E.S	Example: set up Reply-To if required when Reply-To == $MAIL_LIST
+.key	replyto コマンド
+
+.if LANG == ENGLISH
+*** NOT TRANSLATE THIS CHAPTER FOR AN ADDITIONAL BONUS PROGRAM ***
+.fi
+.if LANG == JAPANESE
+fml 2.x ではこのままではうごきません。参考までに収録しています。
+
+.q
+From:    Yuao Tanigawa <yuao@infonia.or.jp>
+X-ML-Name: fml-support
+X-Mail-Count: 01249
+
+メール本文の最初に、
+	# replyto myaddr@mydomain 
+
+と書いて、次の行から通常の文章を書いて投稿すれば、
+Reply-To にそのアドレスをセットして記事を配送します。
+
+  うちのMLでは、今まで、Reply-Toのアドレスを強制的にはMLの
+アドレスに書き換えないようにしていたのですが、最近、いつも
+Reply-Toに自分のアドレスを書いて投稿する人とかいて、Reply-To
+にはアドレスを書かないようにと言うと、メールソフトの使い方
+とかよく知らなくて、Reply-Toのアドレスの設定方法とかも知ら
+ない人とかいたりして（学校とかでも周りの人とかも知らないら
+しい）、どうしようもなくなったので、Reply-Toには、強制的に
+MLのアドレスを書くようにしました。
+  でも、必要なときにはReply-Toにアドレスが設定できると便利
+なので、以下のようにして、# replyto コマンドを使えるように
+してみました。
+
+  config.phで、$SMTP_OPEN_HOOK には、
+
+    $Envelope{'h:reply-to:'} = $Reply_to
+            = $Envelope{'command:reply-to:'} || $MAIL_LIST;
+
+として、$COMMAND_HOOK には、
+
+    if(/replyto/io) {
+        &Log("Set Reply-To: $Fld[2]");
+        $e{'command:reply-to:'} = $Fld[2];
+        $e{'Body'} =~ s/#\s*replyto\s+\S+\n//io;
+        &Distribute;
+        last GivenCommands;
+    }
+
+としました。ただし、この場合、$COMMAND_HOOK のクォートに、
+`#'記号が使えないです。
+
+.~q
+.fi
+
+でもコマンドで実装しなくてもええやんか？メール本文の先頭に
+Reply-To: address があったらそれを設定する。
+
+$START_HOOK = q!
+    local($pat) = '.*\s*reply-to:\s*';
+    local($s);
+    if ($Envelope{'Body'} =~ /^$pat(\S+)/i) {
+	&DEFINE_FIELD_FORCED('reply-to', $s=$1);
+        &Log("reply-to: <$s>");
+	$Envelope{'Body'} =~ s/^$pat\S+\n//io;
+    }
+!;
+

@@ -1,4 +1,4 @@
-.C	投稿メールのフィルタリング事例
+C	投稿メールのフィルタリング事例
 
 
 .S	Message-Id: がないものを reject
@@ -151,7 +151,6 @@ $DISTRIBUTE_FILTER_HOOK = q#
         return 'Not addressed to mailing list';
     }
 #;
-
 
 .#
 .# $Id$

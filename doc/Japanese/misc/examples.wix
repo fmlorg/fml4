@@ -1,6 +1,28 @@
 .C	いろいろ
 
 
+.S	From と 配送先が一致した時に、配送を止めたい(dynamical skip?)
+=E.S	Not Deliver From: Field Address Of In-Coming Mail. 
+.k	%SKIP
+.k	$SKIP{アドレス}
+.k	skip
+.k	$START_HOOK
+
+こういう処理を config.ph にかいてください。
+=E
+If you do not deliver an article when you yourself post it, set
+
+$START_HOOK = q#
+	$SKIP{'fukachan@phys.titech.ac.jp'} = 1
+		if &AddressMatch($From_address, 'fukachan@phys.titech.ac.jp');
+#;
+
+こうすると fukachan@phys.titech.ac.jp あてのメールは skip します。
+↑ここは actives とかに現れるものと同じにして下さい。
+
+複数あるなら 全部を うえのフックに加えて下さい。
+
+
 .S	スプールに記事をためない
 =E.S	Not spooling of articles
 .k	スプールに記事をためない
@@ -250,4 +272,78 @@ world readable for httpd.
 See .ptr{security} for security.
 
 
+.S	スプールにあるファイルをMIME逆変換する
+=E.S	reconvert MIME characters in the spool
+.k	スプールにあるファイルをMIME逆変換
 
+lib/MIME/rmime を使って、/bin/sh なら
+=E
+use lib/MIME/rmime and runs shell scripts like 
+
+	for file in *
+	do
+	   mv   $file     $file.org
+	   perl rmime $file.org > $file
+	done
+
+くらいでＯＫでしょう
+＃とりあえず .org つきのをバックアップに残すコードつき:-)
+
+nkf -m でもいいだろう
+=E
+nkf -m must be also useful if nkf is not too old.
+
+
+.S	mget でえた spool の下のファイルを mh 以外で読む時
+=E.S	read not MH in the spool which is sent back by "mget".
+.l	lib/Utilities/packmbox.pl
+.k	packmbox.pl
+ 
+lib/Utilities/packmbox.pl を使って、
+=E
+To create "mbox", you use lib/Utilities/packmbox.pl and runs 
+
+	(cd spool; packmbox.pl ) > ~/mbox
+
+として、mbox をつくれば、これにたいして、/bin/Mail なり Rmail なりを使
+うことができて便利でしょう。
+
+
+.S	配送するメールのMIME部分はDecodeしてしまいたい
+=E.S	MIME-Decode MIME parts of mail to distribute
+.xref	MIME-1
+
+では、配送するメールのMIME部分はDecodeしてしまいたい時はどうするか？
+例えば、fml.pl の sub GetFieldsFromHeaderで
+=E
+To MIME-Decode MIME parts of mail to distribute is to change
+
+    if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+    }
+
+を
+=E
+to
+
+    if ($USE_LIBMIME && ($MailHeaders =~ /ISO\-2022\-JP/o)) {
+        require 'libMIME.pl';
+	$Summary_Subject = &DecodeMimeStrings($Summary_Subject);
+	$MailBody = &DecodeMimeStrings($MailBody);
+    }
+
+で本文の任意の ISO-2022-JP で始まる部分だけをMIME decodeします
+
+
+.S	fmlのコマンドが送れるページの例
+=E.S	URL where you can send FML commands
+.url	http://www.infosite.ne.jp/fml/
+
+.q
+in fml-support: Count: 01585
+From: Yuao Tanigawa <yuao@infonia.or.jp>
+>   fmlのコマンドが送れるページを作ってみました。URLは
+
+…
+.~q

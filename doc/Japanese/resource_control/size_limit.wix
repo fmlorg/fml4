@@ -61,3 +61,64 @@ is defined, announce "somebody sends too big mail to ML" to ML.
 =E
 is the maximum number of members. It may be useful in automatic
 registration mode.
+
+
+
+
+.S	HOOKの例:ある行数を越えるメールは廃棄する設定
+=E.S	Example: to discard an over length mail
+.k	$START_HOOK
+
+We discard mail with over 1000 lines. Today please use
+$INCOMING_MAIL_SIZE_LIMIT for incoming mail size upper limit.
+.xref $INCOMING_MAIL_SIZE_LIMIT
+	
+$START_HOOK = q#
+    if ($Envelope{'nlines'} > 1000) {
+	&Warn("Discarded on the behalf of too Large Mail", &WholeMail);	
+	$DO_NOTHING = 1;
+    }
+#;
+
+.S	$START_HOOK でＭＬメンバーの人数制限をする
+=E.S	$START_HOOK: limit the number of member 
+.k	$START_HOOK
+
+ファイル $LIMIT_OVER_FILE にごめんなさいの文章を書いておく。
+Ref: START_HOOK => .ptr{$START_HOOK}
+=E
+A file $LIMIT_OVER_FILE is to say "Sorry for that I cannot regist you
+since this ML is over the limit of ML member".
+Ref: START_HOOK => .ptr{$START_HOOK}
+
+$START_HOOK = q%;
+
+$MAX_MEMBER = 100;
+
+$LIMIT_OVER_FILE = "$DIR/limit.over"; 
+
+sub WC
+{
+    local($f) = @_;
+    local($lines) = 0;
+
+    open(TMP, $f) || return 0;
+    while (<TMP>) { 
+	next if /^\#/;
+        $lines++;
+    }
+    close(TMP);
+
+    $lines;
+}
+
+
+if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
+    &SendFile($From_address, 
+	      "Sorry, the mailing list member exceeds the limit $ML_FN", 
+	      $LIMIT_OVER_FILE);
+    $DO_NOTHING = 1;
+}
+
+
+%;

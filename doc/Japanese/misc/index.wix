@@ -9,3 +9,7 @@
 
 .p	MTA ดุทธ
 .include postfix-pop-before-smtp.wix
+
+
+.p	HOOK
+.include hook.wix

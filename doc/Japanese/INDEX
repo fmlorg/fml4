@@ -10,19 +10,16 @@ daily			日々の運用についてのTIPS
 encryption		暗号化関係
 header_rewrite		ヘッダの書き換え
 filter			フィルタリング
-remote_control		メールでの設定変更など(REMOTE_ADMINISTRATION): adminコマンド
+remote_control		リモート管理(REMOTE_ADMINISTRATION, adminコマンド)
+command			コマンド、そして拡張について
 resource_control	リソースの制御	
 makefml			makefml (CUI) interface for fml
-GUI			GUI interface
+GUI			GUI インタフェイス
 messages		コマンドの結果や警告メールのメッセージ文について
 virtual_domain		virtual domain
 digest			まとめおくり
 errormails		エラーメールをどうするか？
 documentation		ドキュメントについて
-
-.part 拡張
-command			コマンドについて
-extension		拡張
 
 .part エラー
 debug			デバッグについて

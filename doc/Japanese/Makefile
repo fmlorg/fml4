@@ -17,7 +17,6 @@ DOC_TUTORIAL_SUBDIR += digest
 DOC_TUTORIAL_SUBDIR += documentation
 DOC_TUTORIAL_SUBDIR += encryption
 DOC_TUTORIAL_SUBDIR += errormails
-DOC_TUTORIAL_SUBDIR += extension
 DOC_TUTORIAL_SUBDIR += filter
 DOC_TUTORIAL_SUBDIR += header_rewrite
 DOC_TUTORIAL_SUBDIR += how_to_subscribe

@@ -1,11 +1,7 @@
-.C	フック、カスタマイズ（例を見る方がはやいかも）
+.C	フック一覧
 =E.C	Hooks
 .n	hooks
 .l	hook
-
-.S	インタプリタとconfig.ph
-=E.S	Interpreter and config.ph
-.xref	command-hook
 
 インタプリタなので(例えば config.ph に)フックを定義すれば適当な場所で
 そのHOOKは評価され実行されます。
@@ -18,8 +14,6 @@ control of FML and dynamic configuration changes by using hooks.
 りできます。config.ph で定義するのでMLが複数あってもMLごとに変更できる
 わけです。一方 sitedef.ph で行なえばML共通のHOOKを仕掛けることができま
 す。
-
-以下 HOOKおよび、それを使ういくつかの例です。
 
 .S	$START_HOOK
 .l	$START_HOOK
@@ -223,196 +217,9 @@ to &Smtp; This routine is used in a reply mail of command results.
 .k	コマンドのカスタマイズ
 .k	$COMMAND_HOOK
 
-インタプリタですから、コマンドでそのML独自の機能をもたせたかったら
-config.ph にセットして下さい(そうすれば、MLが複数あってもそれぞれ別様
-にカスタマイズできる)。以下の例はリストを返すようにするコマンド "list" 
-を新たに付け加える例です。
-=E
-This hook is evaluated in the command execution loop. Historically
-this hook is to add a new command you customize. Today this is
-obsolete, to add a new command is that you write a new routine and
-inject "command name" and the function name (reference to the
-function) to %LocalProcedure.  Using this hook is obsolete. This
-example is to add a new command "list" which send back $DIR/list
-file.
-.xref add-procedures my-file-sendback-command
+現在のfmlでは %Procedure に登録していない関数を実行しようとするとエラー
+になります。そのため $COMMAND_HOOK によるコマンドの実行はできません。
 
---------- in config.ph ---------
-$COMMAND_HOOK =q#
-      if(/list/io) {
-	  &Log("List ($From_address)");
-	  &SendFile($to, "List $ML_FN", "$DIR/list");
-	  next GivenCommands;
-      }
-#;
---------- in config.ph ---------
-
-この例だとは # 〜 # の間をquoteしています。#...コメントをとかははさめ
-ません。
-＃q syntax は q# ... # の形で任意の二つの文字（今はたまたま #）の間を
-quoteする関数（本当の意味での関数ではないそうだ）
-
-注意: 実はHOOKをかけなくても上のような簡単なコマンドは 
-.ptr{my-file-sendback-command} のように簡単に作れます。
-
-なお $COMMAND_HOOK はコマンドチェックのループの中で評価されます。つま
-り一般にメールのコマンドの数だけ評価されることになります。こういうこと
-をしても overhead にならないだろういうのは、大抵コマンドは一メールあた
-り1、2回しか呼ばれないので、eval は重たいけど、1、2度ならまぁ便利さの
-方が優先という観察と経験に基づいてます。ただ前述のようにこのやり方はす
-でに obsolete です。
-
-.S	$COMMAND_HOOK Example: add "list" and "rsummary"
-.k	"list" command (example)
-.k	"rsummary" command (example)
-
-FYI: rsummary は現在は summary 引数 の形で実行できます
-=E
-FYI: "rsummay" command below is available in the context of "summary"
-command.
-
-例:
-	list		list リストファイルを取り寄せる
-.xref	my-file-sendback-command
-
-sub Command では $to にコマンドの結果の返し先が設定されています。
-
-$COMMAND_HOOK は sub Command の中で定義されています。
-
-$COMMAND_HOOK =q#
-      if (/list/io) {
-	  &Log("List ($From_address)");
-	  &SendFile($to, "List $ML_FN", "$DIR/list");
-	  next GivenCommands;
-      }
-#;
-
-例:
-rsummary 100-200	Count 100-200 までのサマリの部分だけを見る
-=E
-Example: to show summary of article number from 100 to 200 articles.
-
-$COMMAND_HOOK = q#
-    if (/rsummary/io) {
-	&Log("R Summary ". $Fld[2]);
-	if ($Fld[2] =~ /^(\d+)\-(\d+)$/) {
-	    local($r);
-	    local($a) = $1; 
-	    local($b) = $2; 
-
-	    open(TMP, $SUMMARY_FILE) || do { &Log($!); next GivenCommands;};
-	    while (<TMP>) {
-		if (/\[$a:/ .. /\[$b:/) { $r .= $_;}
-	    }
-	    close(TMP);
-
-	    &Mesg(*e, "Restricted  Summary $Fld[2]\n$r\n");
-        }
-	else {
-	    &Log("Summary ($From_address)");
-	    &SendFile($to, "Summary $ML_FN", "$DIR/summary");
-	}
-
-	next GivenCommands;
-    }
-#;
-
-.S	HOOKによるコマンド実装例: "sget"
-=E.S	Example: "sget"
-.key	$COMMAND_HOOK
-
-sget uja		subjectに uja というキーワードが入っているファ
-			イルを取り寄せる
-
-$COMMAND_HOOK =q#
-    if (/^sget$/io) {
-	local($s);
-
-	if (open(F, $SUMMARY_FILE)) {
-	    while (<F>) {
-		/$Fld[2]/ && do {/\s\[(\d+):/ && ($s .= $s ? ",$1" : $1);}
-	    }
-	    close(F);
-	}
-	else {
-	    $s = "Fail";
-	    &Log("Search and Get $Fld[2] Fail");
-	    next GivenCommands;
-	}
-
-	&Log("Search and Get $Fld[2]");
-	&Sendmail($to, "Search and Get $Fld[2] $ML_FN", $s);
-    }
-#;
-
-.S	HOOKによるコマンド実装例: "admin" アドミンコマンド
-=E.S	"admin" command by $COMMAND_HOOK
-.k	admin コマンド
-.xref	REMOTE-ADMINISTRATION 
-
-"admin" アドミンコマンド って昔HOOKで実装していましたが、今は変数が
-あります。
-=E
-Obsolete. Long time ago, FML provides "admin" commands by
-$COMMAND_HOOK.
-
-.S	HOOKの例:ある行数を越えるメールは廃棄する設定
-=E.S	Example: to discard an over length mail
-.k	$START_HOOK
-
-We discard mail with over 1000 lines. Today please use
-$INCOMING_MAIL_SIZE_LIMIT for incoming mail size upper limit.
-.xref $INCOMING_MAIL_SIZE_LIMIT
-	
-$START_HOOK = q#
-    if ($Envelope{'nlines'} > 1000) {
-	&Warn("Discarded on the behalf of too Large Mail", &WholeMail);	
-	$DO_NOTHING = 1;
-    }
-#;
-
-.S	$START_HOOK でＭＬメンバーの人数制限をする
-=E.S	$START_HOOK: limit the number of member 
-.k	$START_HOOK
-
-ファイル $LIMIT_OVER_FILE にごめんなさいの文章を書いておく。
-Ref: START_HOOK => .ptr{$START_HOOK}
-=E
-A file $LIMIT_OVER_FILE is to say "Sorry for that I cannot regist you
-since this ML is over the limit of ML member".
-Ref: START_HOOK => .ptr{$START_HOOK}
-
-$START_HOOK = q%;
-
-$MAX_MEMBER = 100;
-
-$LIMIT_OVER_FILE = "$DIR/limit.over"; 
-
-sub WC
-{
-    local($f) = @_;
-    local($lines) = 0;
-
-    open(TMP, $f) || return 0;
-    while (<TMP>) { 
-	next if /^\#/;
-        $lines++;
-    }
-    close(TMP);
-
-    $lines;
-}
-
-
-if (&WC($ACTIVE_LIST) > $MAX_MEMBER) {
-    &SendFile($From_address, 
-	      "Sorry, the mailing list member exceeds the limit $ML_FN", 
-	      $LIMIT_OVER_FILE);
-    $DO_NOTHING = 1;
-}
-
-
-%;
 
 .S	$MODE_BIFURCATE_HOOK
 .l	$MODE_BIFURCATE_HOOK
