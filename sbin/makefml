@@ -63,6 +63,8 @@ sub System
 {
     local($cmd);
 
+    $| = 1;
+
     if ($SYSTEM_ARGV_IN) {
 	open(SYS_IN,  "$SYSTEM_ARGV_IN|")   || &Die($!);
 	open(SYS_OUT, "| $SYSTEM_ARGV_OUT") || &Die($!);
@@ -71,6 +73,8 @@ sub System
 	while (<SYS_IN>) { print SYS_OUT $_;}
 
 	if ($SYSTEM_ARGV_QUERY_INPUT) {
+	    sleep 1;
+	    print STDERR "\n";
 	    sleep 1;
 	    print STDERR 
 		"* Enter mailbody, end with \".\" on a line by itself\n";
@@ -3179,7 +3183,7 @@ sub do_test
 	$SYSTEM_ARGV_OUT .= " --ctladdr";
     }
 
-   print STDERR "test() { $SYSTEM_ARGV }\n" if $debug;
+    print STDERR "test() { $SYSTEM_ARGV }\n" if $debug;
 }
 
 
