@@ -134,6 +134,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 to the last of config.ph (but before the last "1;").
 
 .S	MIME Multipart のメールをすべて拒否する
+=E.S	reject every MIME Multipart mails
 
 MIME Multipart のメールはすべからく危ない可能性があるので、拒否すると
 いう大技もある。ＭＬのポリシーとして認めないと宣言しこれを使用すること
@@ -189,12 +190,12 @@ header_checks = regexp:/etc/postfix/header_checks
 To: postfix-users@postfix.org
 Message-ID: <20000505100443.N3160@alcove.wittsend.com>
 
-... snip ...
+	... snip ...
 
 they are using Microsoft Information Server and it's configured to send
 attachments to exterior addresses in uuencoded form.  
 
-... snip ...
+	... snip ...
 .~q
 
 .# $Id$
