@@ -374,6 +374,10 @@ sub SetDefaults
     $NOTIFY_MAIL_SIZE_OVERFLOW = 1;
     $CHADDR_CONFIRMATION_KEYWORD = 'chaddr-confirm';
 
+    # Envelope Filter
+    $FILTER_ATTR_REJECT_NULL_BODY = $FILTER_ATTR_REJECT_ONE_LINE_BODY = 1;
+    $FILTER_ATTR_REJECT_INVALID_COMMAND = 1;
+
     ### default distribution and command mode
     $PERMIT_POST_FROM    = $PERMIT_COMMAND_FROM    = "members_only";
     $REJECT_POST_HANDLER = $REJECT_COMMAND_HANDLER = "reject";
@@ -2666,18 +2670,19 @@ sub EnvelopeFilter
     if ($r) { # must be matched in a hook.
 	;
     }
-    elsif (/^[\s\n]*$/) {
+    elsif (/^[\s\n]*$/ && $FILTER_ATTR_REJECT_NULL_BODY) {
 	$r = "null body";
     }
     # e.g. "unsubscribe", "help", ("subscribe" in some case)
     # DO NOT INCLUDE ".", "?" (I think so ...)! 
     # If we include them, we cannot identify a command or an English phrase ;D
     # If $c == 0, the mail must be one paragraph (+ signature).
-    elsif (!$c && /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/) {
+    elsif (!$c && /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/ &&
+	   $FILTER_ATTR_REJECT_ONE_LINE_BODY) {
 	$r = "one line body";
     }
     # elsif (/^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
-    elsif (/^[\s\n]*\%\s*echo.*/i) {
+    elsif (/^[\s\n]*\%\s*echo.*/i && $FILTER_ATTR_REJECT_INVALID_COMMAND) {
 	$r = "invalid command line body";
     }
 
