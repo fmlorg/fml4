@@ -261,7 +261,10 @@ sub DoGenerateHeader
     $le{'GH:Date:'}        = $MailDate;
     $le{'GH:X-MLServer:'}  =  $Rcsid;
     $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
-    $le{'GH:From:'}      .= " ($MAINTAINER_SIGNATURE)" if $MAINTAINER_SIGNATURE;
+    $le{'GH:From:'}       .= " ($MAINTAINER_SIGNATURE)"
+	if $MAINTAINER_SIGNATURE;
+
+    $le{'GH:Message-Id:'}  = &GenMessageId;
 
     # Run-Hooks. when you require to change header fields...
     if ($REPORT_HEADER_CONFIG_HOOK) {
