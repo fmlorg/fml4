@@ -54,7 +54,8 @@ sub ProcLibrary4PlainArticle
 	for $p (@DenyLibraryProcedure) {
 	    if ($p && ($_ =~ /^$p$/i)) {
 		&Log("Library: cannot permit $_ command");
-		next;
+		&Mesg(*e, "Library: cannot permit $_ command");
+		return;
 	    }
 	}
     }

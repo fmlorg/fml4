@@ -20,6 +20,28 @@ sub DoDistribute
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
     @Rcpt = (); $Rcpt = 0;
 
+    # PGP Encryption
+    if ($USE_ENCRYPTED_DISTRIBUTION) {
+	if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp') {
+	    require 'libpgp.pl';
+
+	    # check PGP signature
+	    if (&PGPGoodSignatureP(*e, 1)) {
+		&Log("PGP encryption mode sets in");
+		&PGPDecode(*e);
+		&PGPEncode(*e);
+	    }
+	    else {
+		&Log("NOT ALLOW delivery");
+		&Mesg(*e, "Your PGP signature seems incorrect, ML delivery is not allowed.");
+		return 0;
+	    }
+	}
+	else {
+	    &Log("unknown \$ENCRYPTED_DISTRIBUTION_TYPE = $ENCRYPTED_DISTRIBUTION_TYPE");
+	}
+    }
+
     $DISTRIBUTE_START_HOOK && 
 	&eval($DISTRIBUTE_START_HOOK, 'Distribute Start hook'); 
 
@@ -81,9 +103,16 @@ sub DoDistribute
 
     # fml-support: 02007
     $s =~ s/^\s*//; # required???
-    &Append2(sprintf("%s [%d:%s] %s", 
-		     $Now, $ID, substr($From_address, 0, 15), $s),
-	     $SUMMARY_FILE) || return;
+
+    if ($DISTRIBUTE_SUMMARY_HOOK) {
+	eval $DISTRIBUTE_SUMMARY_HOOK;
+	&Log($@) if $@;
+    }
+    else {
+	&Append2(sprintf("%s [%d:%s] %s", 
+			 $Now, $ID, substr($From_address, 0, 15), $s),
+		 $SUMMARY_FILE) || return;
+    }
 
     # Original is for 5.67+1.6W, but R8 requires no MX tuning tricks.
     # So version 0 must be forever(maybe) :-)
@@ -109,7 +138,9 @@ sub DoDistribute
 	$e{'fh:reply-to:'} || $e{'h:Reply-To:'} || $MAIL_LIST;
 
     # get ID (the current sequence of the Mailing List)
-    $id = sprintf("%05d", $ID);		# 96/05/07 set $id here for each mode 
+    # 96/05/07 set $id here for each mode 
+    $id = $SUBJECT_FORM_LONG_ID ?
+	&LongId($ID, $SUBJECT_FORM_LONG_ID) : sprintf("%05d", $ID);
 
     # Subject ReConfigure;
     { 
@@ -226,7 +257,7 @@ sub DoDistribute
     local($umask) = umask(027) if $USE_FML_WITH_FMLSERV;
 
     if ($NOT_USE_SPOOL) {
-	;
+	&Log("ARTICLE $ID");
     }
     elsif (! -f "$FP_SPOOL_DIR/$ID") {	# not exist
 	&Log("ARTICLE $ID");
@@ -368,13 +399,14 @@ sub LongId
     local($id, $howlong) = @_;
     local($s);
 
+    # require '< 2' condition to ensure backward compatibility
     if ($howlong > 0) {
 	$howlong = $howlong < 2 ? 5 : $howlong; # default is 5;
-	$s = "\$id = sprintf(\"%0". $howlong. "d\", $id);";
-	eval $s;
+	$id = sprintf("%0".$howlong."d", $id)
     }
-
-    $id;
+    else {
+	$id;
+    }
 }
 
 1;

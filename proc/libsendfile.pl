@@ -955,7 +955,7 @@ sub ExtractFiles
     foreach $f (keys %c) {
 	next if $f eq 'Binary';	# special for e.g. archive/summary-old-ml
 
-	$s = "chdir $FP_TMP_DIR; $ZCAT $DIR/$f|$cmd ". $c{$f};
+	$s = "cd $FP_TMP_DIR; $ZCAT $DIR/$f|$cmd ". $c{$f};
 	print STDERR "Extractfiles::system($s)\n" if $debug;
 	&system($s);
 

@@ -61,6 +61,7 @@ sub ConfirmationModeInit
 	 CONFIRMATION_ADDRESS,
 	 CONFIRMATION_SUBSCRIBE, 
 	 CONFIRMATION_EXPIRE,
+	 CONFIRMATION_WELCOME_STATEMENT,
 	 MAIL_LIST) {
 	eval("\$Confirm'$_ = \$main'$_;");
     }
@@ -195,7 +196,7 @@ sub GenConfirmReplySubject
 	$s = "Subscribe request result $ML_FN";
     }
     elsif ($mode eq 'Confirm::Confirmed') {
-	$s = $WELCOME_STATEMENT;
+	$s = $CONFIRMATION_WELCOME_STATEMENT || $WELCOME_STATEMENT;
 	# $s = "Newly added $From_address $ML_FN";
     }
     elsif ($mode eq 'Confirm::Error') {
@@ -285,6 +286,70 @@ sub GenConfirmReplyText
 }
 
 
+##### SPECIAL HOOKS FOR MANUAL REGISTRATION WITH CONFIRMATION
+sub ManualRegistConfirm
+{
+    local(*e, $mode, $buf) = @_;
+    local($org_cf, $org_ws) = ($CONFIRMATION_FILE,
+			       $CONFIRMATION_WELCOME_STATEMENT);
+
+    $CONFIRMATION_FILE = $MANUAL_REGISTRATION_CONFIRMATION_FILE;
+    $CONFIRMATION_WELCOME_STATEMENT = "Your subscribe request is confirmed.";
+
+    &ConfirmationModeInit(*e, 'subscribe');
+
+    # How to handle 'subscribe' request
+    if ($mode eq 'subscribe' && 
+	$MANUAL_REGISTRATION_TYPE eq 'forward_to_admin') {
+	&LogWEnv("$proc request is forwarded to Maintainer", *e);
+	&Mesg(*e, "Please wait a little");
+	&Warn("$proc request from $From_address", &WholeMail);
+    }
+    # $MANUAL_REGISTRATION_TYPE eq confirmation
+    elsif ($mode eq 'subscribe') {
+	&Confirm(*e, $From_address, $buf);
+	&Log("send back confirmation");
+    }
+    # $MANUAL_REGISTRATION_TYPE eq confirmation
+    elsif ($mode eq 'confirm') {
+	local($r);
+	$r = &Confirm(*e, $From_address, $buf);
+	if ($r) {
+	    &Log("ManualRegistConfirm: confirm succeeds");
+
+	    &Warn("subscribe request is confirmed $ML_FN",
+		  "Hi, I am fml ML manager for <$MAIL_LIST>.\n".
+		  "I confirmed subscribe request from <$From_address>.\n".
+		  "Please add <$From_address> to a ML member.\n\n".
+		  "FYI:Administrative Command Example:\n".
+		  "Please send back the following either phrase to <$CONTROL_ADDRESS>.\n\n".
+		  "admin pass ADMIN-PASSWORD\n".
+		  "admin add $From_address\n\n\tOR\n\n".
+		  "approve ADMIN-PASSWORD add $From_address\n\n".
+		  &WholeMail);
+	    &Log("subscribe request is forwarded to maintainer");
+
+	    $r = $buf;
+	    $r =~ s/\n/\n>>> /g;
+	    $r  = ">>> $r\n\n";
+	    $r .= "Good. Your subscribe request is confirmed ";
+	    $r .= "and forwarded to the maintainer.\n";
+	    $r .= "He/She will subscribe you, so PLEASE WAIT A LITTLE.\n";
+	    &Mesg(*e, $r);
+	}
+	else {
+	    &Log("ManualRegistConfirm: confirm fails");
+	}
+    }
+    else {
+	&Log("Error: ManualRegistConfirm: unknown mode");
+    }    
+
+    # back store
+    ($CONFIRMATION_FILE, $CONFIRMATION_WELCOME_STATEMENT) = ($org_cf, $org_ws);
+}
+
+
 package Confirm;
 
 sub Confirm'GenConfirmReplySubject { &main'GenConfirmReplySubject(@_);}
@@ -320,7 +385,8 @@ sub IdCheck
 	    }
 
 	}
-	
+
+	&Log("Confirm::IdCheck(addr=$addr) reset");
 	return 0;
     }
 
@@ -329,8 +395,8 @@ sub IdCheck
 	return 1;
     }
     else {
-	&Log("confirm[confirm] syntax error");
-	&Log("confirm request[$buffer]");
+	&Log("Confirm::IdCheck syntax error");
+	&Log("Confirm::IdCheck request[$buffer]") if $debug_confirm;
 	$cf{'name'} = $name;
 	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'IdCheck::syntax_error'));
 	if (-f $CONFIRMATION_FILE) {
@@ -415,10 +481,15 @@ sub FirstTimeP
     local(*r, $addr, $cur_time) = @_;
     local($time, $key_addr, $a, $id, $name, $match, $addr_found);
     local($status) = 'first-time'; # default
+    local($has_special_char);
 
     # init variables;
     $cur_time   = time;
     ($key_addr) = split(/\@/, $addr);
+
+    if ($key_addr =~ /\+/) {
+	$has_special_char = 1;
+    }
 
     open(FILE, $CONFIRMATION_LIST) || 
 	(&Log("cannot open $CONFIRMATION_LIST"), return $NULL);
@@ -427,7 +498,7 @@ sub FirstTimeP
 	($time, $a, $id, $name) = split(/\s+/, $_, 4);
 
 	# pre-match for faster code;
-	next if $a !~ /^$key_addr/i;
+	next if (!$has_special_char) && $a !~ /^$key_addr/i;
 
 	# address match
 	&AddressMatch($addr, $a) || next;

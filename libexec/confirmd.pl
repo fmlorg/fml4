@@ -369,7 +369,9 @@ sub RemoveMembers
 	next unless &MailListMemberP($_);
 	&Log("member::remove $_");
 	$Fld[2] = $_;
+	&SaveACL;
 	&DoSetMemberList('BYE', *Fld, *e, *misc);
+	&RetACL;
     }
     
     $e{'mode:admin'} = 0;

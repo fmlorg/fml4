@@ -14,7 +14,7 @@ local($PgpOpts);
 
 sub PGPGoodSignatureP
 {
-    local(*e) = @_;
+    local(*e, $no_reply) = @_;
     local($auth) = 0;
 
     &Log("PGPGoodSignatureP") if $debug;
@@ -34,7 +34,9 @@ sub PGPGoodSignatureP
     close(RPGP);
 
     # PGP authenticated
-    &Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
+    if (! $no_reply) {
+	&Mesg(*e, $auth ? "PGP: Good signature." : "PGP: No good signature.");
+    }
 
     &Log("Error: PGP no good signature.") unless $auth;
 

@@ -90,6 +90,7 @@ sub DoProcedure
 
     # WE SHOULD NOT CHANGE THE KEYWORD "GivenCommands" for "backward compat";
     local($status, $proc, $fp, $input_command_count, $linenum);
+    local($limit, $history);
     $linenum = 0;
 
     # ATTENTION!
@@ -109,7 +110,10 @@ sub DoProcedure
 
       # reset variables
       # dup the current mesg to report to admin
-      undef $e{'mode:message:to:admin'}; 
+      undef $e{'mode:message:to:admin'};
+
+      # history buffer
+      $history .= "\t". $_. "\n"; 
 
       # e.g. *-ctl server, not require '# command' syntax
       # bug default has been false(not rewrite), true 198/01/19	
@@ -163,7 +167,8 @@ sub DoProcedure
 
       ### THIS STAGE; string is a candidate of command sets;
       print STDERR "SECURE CHECK IN>$_\n" if $debug;
-      &SecureP($_, "command_mode") || last GivenCommands;
+      &SecureP($_, /admin|approve/i ? "admin" : "command") ||
+	  last GivenCommands;
       print STDERR "SECURE CHECK OK>$_\n" if $debug;
 
       ### syntax check, and set the array of cmd..
@@ -179,6 +184,8 @@ sub DoProcedure
 	  &Log("$input_command_count++ >= $MAXNUM_COMMAND_INPUT");
 	  if ($input_command_count++ >= $MAXNUM_COMMAND_INPUT) {
 	      &Log("input commans >= $MAXNUM_COMMAND_INPUT, force to a stop");
+	      &Mesg(*e, "FYI: The following requests are processed.");
+	      &Mesg(*e, $history);
 	      last GivenCommands;
 	  }
       }
@@ -220,6 +227,22 @@ sub DoProcedure
 	      &Mesg(*e, "\n>>> $org_str");
 	      $o = $_;
 	      $_ = $o;
+	  }
+
+	  # LIMIT
+	  if ($limit = $Procedure{"l#$_"}) {
+	      if ($ProcedureLimitCount{$_}++ > $limit) {
+		  &Log("$_ command exceeds the limit $limit, STOP");
+		  local($s);
+		  $s .= "*** ";
+		  $s .= "Sorry, we suppress the maximum number of requests\n";
+		  $s .= "*** for $_ command in one mail up to $limit.\n";
+		  $s .= "*** STOP PROCESSING IMMEDIATELY.\n";
+		  &Mesg(*e, $s);
+		  &Mesg(*e, "FYI: The following requests are processed.");
+		  &Mesg(*e, $history);
+		  last GivenCommands;
+	      }
 	  }
 
 	  # INFO
@@ -359,6 +382,11 @@ sub InitProcedure
 		    'getfile', 'ProcRetrieveFileInSpool',
 		    'send', 'ProcRetrieveFileInSpool',
 		    'sendfile', 'ProcRetrieveFileInSpool',
+		    # get limit
+		    'l#get',      10,
+		    'l#getfile',  10,
+		    'l#sendfile', 10,
+		    'l#sendfile', 10,
 
 		    # mget is a special case
 		    'mget',  'ProcMgetMakeList',
@@ -516,6 +544,14 @@ sub ReConfigProcedure
 	local($key) = $AUTO_REGISTRATION_KEYWORD || $DEFAULT_SUBSCRIBE;
 	$Procedure{$key} = 'ProcSubscribe';
     }
+
+    # permit arbitrary phrase when passwored related commands come in.
+    %SecureRegExp = 
+	('admin', 
+	 '(#\s*|\s*)admin\s+(initpass|initpasswd|pass|password|passwd)\s+[\#\s\w\-\[\]\?\*\.\,\@\:]+',
+	 'in_admin', 
+	 '\s*(initpass|initpasswd|pass|password|passwd)\s+[\#\s\w\-\[\]\?\*\.\,\@\:]+',
+	 );
 }
 
 
@@ -724,7 +760,9 @@ sub ProcSetDeliveryMode
     &use('amctl');
 
     $e{'mode:in_amctl'} = 1;
-    $status = &DoSetDeliveryMode(@_);
+    &SaveACL;
+    $status = &DoSetDeliveryMode($proc, *Fld, *e, *misc);
+    &RetACL;
     $e{'mode:in_amctl'} = 0;
 
     $status;
@@ -771,13 +809,14 @@ sub ProcSetMemberList
 
     &Log("ProcSetMemberList: $proc") if $debug_confirm || $debug;
 
+    ### UNSUBSCRIBE CONFIRMATION
     if ($proc eq 'unsubscribe' || $proc eq 'bye') {
 	if ($UNSUBSCRIBE_AUTH_TYPE eq 'confirmation') {
 	    &use('confirm');
 	    &ConfirmationModeInit(*e, 'unsubscribe');
 
 	    local(@addr) = split(/\@/, $From_address);
-	    $s = "unsubscribe @addr";
+	    $s = join(" ", "unsubscribe", @addr);
 
 	    &Confirm(*e, $From_address, $s) || return $NULL;
 	}
@@ -785,12 +824,33 @@ sub ProcSetMemberList
     elsif ($proc eq 'unsubscribe-confirm') {
 	&use('confirm');
 	&ConfirmationModeInit(*e, 'unsubscribe');
-	&Confirm(*e, $From_address, "@Fld") || return $NULL;
+	&Confirm(*e, $From_address, join(" ", @Fld)) || return $NULL;
+    }
+
+    ### CHADDR CONFIRMATION
+    $CHADDR_KEYWORD = $CHADDR_KEYWORD || 'CHADDR|CHANGE\-ADDRESS|CHANGE';    
+    if ($proc =~ /^($CHADDR_KEYWORD)$/i) {
+	if ($CHADDR_AUTH_TYPE eq 'confirmation') {
+	    &use('confirm');
+	    &ConfirmationModeInit(*e, 'chaddr');
+
+	    local(@addr) = split(/\@/, $From_address);
+	    $s = join(" ", "chaddr", @addr);
+
+	    &Confirm(*e, $From_address, $s) || return $NULL;
+	}
+    }
+    elsif ($proc eq 'chaddr-confirm') {
+	&use('confirm');
+	&ConfirmationModeInit(*e, 'chaddr');
+	&Confirm(*e, $From_address, join(" ", @Fld)) || return $NULL;
     }
 
     &use('amctl');
     $e{'mode:in_amctl'} = 1;
+    &SaveACL;
     $status = &DoSetMemberList($proc, *Fld, *e, *misc);
+    &RetACL;
     $e{'mode:in_amctl'} = 0;
 
     $status;
@@ -1110,6 +1170,16 @@ sub ProcConfirmdAckReply
 	0;
     }
 }
+
+
+sub ProcDeny
+{
+    local($proc, *Fld, *e, *misc) = @_;
+
+    &Mesg(*e, "Sorry, YOU CANNOT USE $proc command!");
+    &Log("ProcDeny: $proc is disabled");
+}
+
 
 ##################################################################
 ### PROCEDURE SETTINGS ENDS 

@@ -64,7 +64,7 @@ sub SyncHtml
 	local($f) = &SearchFileInLIBDIR("etc/makefml/fml.css");
 	if ($f) { 
 	    &Copy($f, "$html_dir/fml.css") && 
-		&Log("create sylesheet example in $html_dir");
+		&Log("create stylesheet example in $html_dir");
 	}
     }
 
@@ -396,6 +396,7 @@ package SyncHtml;
 #
 
 @Import = ("debug", From_address, Now, HtmlDataCache, HtmlThreadCache,
+           COMPAT_ARCH,
            HTML_EXPIRE, HTML_EXPIRE_LIMIT, ID, ML_FN, USE_MIME, USE_LIBMIME, 
            XMLCOUNT,
 	   DEFAULT_HTML_FIELD, HTML_INDEX_TITLE, HTML_THREAD, 
@@ -427,6 +428,9 @@ sub Init
 	('Date', 'From', 'Subject', 'Sender', 'To', 'Cc', 
 	 'Message-Id', 'In-Reply-To', 
 	 'References', 'Keywords', 'Comments', 'Encrypted', 'Posted');
+
+    # Adjust From: field if fh:From exists.
+    $From_address = $main'Envelope{'fh:from:'} || $From_address; #';
 
     # scope is this package
     $HtmlTitle = "Article $ID ($ML_FN)";
@@ -518,9 +522,11 @@ sub Write
     }
     else {
 	local(%dup);
+	&GetHdrField(*e); # -> %FieldHash
 	for (@HtmlHdrFieldsOrder) {
 	    next if $dup{$_}; $dup{$_} = 1; # duplicate check;
-	    if ($s = $e{"h:$_:"}) {
+	    # if ($s = $e{"h:$_:"}) {
+	    if ($s = $FieldHash{$_}) {
 		$s = &DecodeMimeStrings($s) if $USE_MIME && ($s =~ /ISO/i);
 		&ConvSpecialChars(*s);
 		print OUT "<SPAN CLASS=$_>$_</SPAN>: <SPAN CLASS=$_-value>$s</SPAN>\n";
@@ -539,6 +545,7 @@ sub Write
     ### Body ###
     # 96/05/17 If mutipart, goto exceptional routine (for NCF)
     print OUT "\n";
+
     if ($USE_MIME && $e{"h:Content-Type:"} =~ /Multipart/i) {
 	&ParseMultipart($dir, $file, *e);
     }
@@ -560,6 +567,27 @@ sub Write
 
     # return the created .html title;
     $title = $HtmlTitleForIndex;
+}
+
+
+# Re-Generate Header Fields from the header in the distributed article.
+sub GetHdrField
+{ 
+    local(*e) = @_;
+    local($cf);
+
+    for (split(/\n/, $e{'Hdr'})) {
+	if (/^(\S+):(.*)/) {
+	    $cf = $1;
+	    $FieldHash{$cf} .= $2;
+	}
+	elsif (/^(\s+\S+.*)/) {
+	    $FieldHash{$cf} .= "\n".$1;
+	}
+	else {
+	    undef $cf;
+	}
+    }
 }
 
 
@@ -639,8 +667,11 @@ sub ParseMultipart
 	print STDERR "boundary='$boundary'\n" if $debug;
     }
  
+    &Log("--ParseMultipart");
+
     # Split Body
     @s = split(/\n\n|$boundary/, $e{'Body'});
+    local($decode);
     foreach (@s) {
 	/ISO\-/i && ($_ = &DecodeMimeStrings($_)); 
 
@@ -667,16 +698,33 @@ sub ParseMultipart
 	if ($base64) {		# now BASE64 strings here
 	    $image_count++;		# global in one mail
 
-	    if (! $BASE64_DECODE) {
-		&Log("SyncHtml::\$BASE64_DECODE is not defined");
+	    &Log("image_count ++");
+
+	    # if not defined, try search bin/base64decede.pl
+	    if ($BASE64_DECODE && -x $BASE64_DECODE) {
+		$decode = $BASE64_DECODE;
+	    }
+	    elsif (! $BASE64_DECODE) {
+		$decode = &main'SearchFileInLIBDIR("bin/base64decode.pl");#';
+		$decode = $^X . " " . $decode; # perl base64decode.pl
+
+		if (! $decode) {
+		    &Log("SyncHtml::\$BASE64_DECODE is not defined");
+		    $image_count = 0;
+		    next;
+		}
+	    }
+	    # when $BASE64_DECODE is defined, but not found
+	    elsif (! -x $BASE64_DECODE) {
+		&Log("SyncHtml::\$BASE64_DECODE is not found");
 		$image_count = 0;
 		next;
 	    }
 
 	    &Log("write image > $dir/${file}_$image_count.$image") ;
-	    &Debug("|$BASE64_DECODE > $dir/${file}_$image_count.$image") 
+	    &Debug("|$decode > $dir/${file}_$image_count.$image") 
 		if $debug; 
-	    open(IMAGE, "|$BASE64_DECODE > $dir/${file}_$image_count.$image") 
+	    open(IMAGE, "|$decode > $dir/${file}_$image_count.$image") 
 		|| &Log($!);
 	    select(IMAGE); $| = 1; select(STDOUT);
 

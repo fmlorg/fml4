@@ -357,6 +357,26 @@ sub Chk822_addr_spec_P
 ########################################################################
 
 
+sub AddrSimilarity
+{
+    local($a, $b) = @_;
+    local(@a, @b, $i);
+
+    $a = (split(/\@/, $a))[1];
+    $b = (split(/\@/, $b))[1];
+    @a = reverse split(/\./, $a);
+    @b = reverse split(/\./, $b);
+
+    for ($i = 0; $a[$i] && $b[$i]; $i++) {
+	$a[$i] =~ s/A-Z/a-z/g;
+	$b[$i] =~ s/A-Z/a-z/g;
+	last if $a[$i] ne $b[$i];
+    }
+
+    $i;
+}
+
+
 sub DoSetDeliveryMode
 {
     local($proc, *Fld, *e, *misc) = @_;
@@ -429,6 +449,8 @@ sub DoSetDeliveryMode
 }
 
 
+# USAGE:
+# &SaveACL; &DoSetMemberList; &RetACL;
 sub DoSetMemberList
 {
     local($proc, *Fld, *e, *misc) = @_;
@@ -503,7 +525,12 @@ sub DoSetMemberList
 	}
 
 	#ATTENTION! $newaddr should not be a member.
-	local($new_list);
+	local($new_list, $asl);
+
+	# check the similarity level; (e.g. sub-domain change)
+	# possibility of "chaddr *@uja.x.y.z -> *@kitakitune.z.y.z"
+	$asl = &AddrSimilarity($curaddr, $newaddr);
+	if ($asl > $ADDR_CHECK_MAX) { $ADDR_CHECK_MAX = $asl + 1;}
 
 	if ($new_list = &MailListMemberP($newaddr)) {
 	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");

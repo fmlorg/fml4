@@ -17,12 +17,24 @@
 chdir $DIR || die "Can't chdir to $DIR\n";
 
 $error_code_pat = '55\d|5\.5\.\d';
-$TrapWord       = 'unknown \S+|\S+ unknown';
+$TrapWord       = 'unknown \S+|\S+ unknown|\S+ not known';
 $new_block = 1;
 $gabble = 0;
+$curf = $NULL;
 
 while (<>) {
     chop;
+
+    # Store Received: field 
+    if (/^([-A-Za-z]+):(.*)/) {
+	$curf  = $1;
+	$value = $2;
+	$Received .= "\n".$value if $curf =~ /Received/i;
+    }
+    elsif (/^\s+(.*)/) {
+	$value = $1;
+	$Received .= $value if $curf =~ /Received/i;
+    }
 
     if ($original_mail && $found && $debug) {
 	&Debug("   --- $_") if $debug;
@@ -38,12 +50,16 @@ while (<>) {
 	undef %return_addr;
 	$original_mail = $found = 0;
 	undef $MTA;
-	undef $CurADDR;
+	undef $CurAddr;
     }
 
     # guess MTA ...
     if (/^Message-ID:\s+\<[\w\d]+\-[\w\d]+\-[\w\d]+\@/i) { 
 	$MTA = "exim";
+	next;
+    }
+    if (/qmail-send/) {
+	$MTA = "qmail";
 	next;
     }
 
@@ -66,32 +82,107 @@ while (<>) {
 	next;	
     }
 
-    # exim
-    if ($MTA eq 'exim') {
-	/^\s+(\S+\@\S+):\s*$/ && ($CurADDR = $1);
-    }
 
+    #####
+    ##### MTA szpecific
+    #####
+    # exim || qmail
+    if ($MTA eq 'exim' || $MTA eq 'qmail') {
+	/^\s*(\S+\@\S+):\s*$/ && ($CurAddr = $1);
+	$CurAddr =~ s/[\<\>]//g;
+	$CurAddr =~ s/\s*//g;
+	&Debug("CurAddr => $CurAddr") if $debug && $CurAddr;
+    }
 
     $gabble = 0;
 
+    # ignore Japanese strings.
+    next if /$RE_JIN/;
+    next if /$RE_JOUT/;
+    next if /$RE_SJIS_S/;
+    next if /$RE_EUC_S/;
+
+    ### unknown MTA  ###
+    if (/(\S+\@[-A-Z0-9\.]+)/i) {
+	/(\S+\@[-A-Z0-9\.]+)/i && ($P_CurAddr = $1); # pseudo
+	$P_CurAddr =~ s/[\<\>]//g;
+	$P_CurAddr =~ s/\s*//g;
+	&Debug("P_CurAddr => $P_CurAddr") if $debug && $P_CurAddr;
+    }
+
     # error message line
-    next if /<<<.*\@/;
-    next if /^Diagnostic-Code:/i;
+    # next if /<<<.*\@/;
+    # next if /^Diagnostic-Code:/i;
 
     # ignore the original mails
     # &Debug("next") if $original_mail && $found;
     next if $original_mail && $found;
     $original_mail = 1 if /^received:/i;
 
-    if (/\@/ && /(5\d\d)/) { &AnalyzeErrorCode($_); $found++; }
+    ##### TRAP CODE #####
+    if (/fatal error/i) { $fatal++;}
+
+    if (/\@/ && /(5\d\d)/)    { &AnalyzeErrorCode($_); $found++; }
     if (/\@/ && /$TrapWord/i) { &AnalyzeErrorWord($_); $found++; }
 
-    # exim
+    ### unknown MTA
+    # e.g. uset not known
+    if (/$TrapWord/i && $P_CurAddr) {
+	&AnalyzeErrorWord($_, $P_CurAddr); 
+	$found++;	
+    }
+
+    ###
+    ### exim
+    ###
     if (/$TrapWord/i && $MTA eq 'exim') { 
-	&AnalyzeErrorWord($_, $CurADDR); 
+	&AnalyzeErrorWord($_, $CurAddr); 
 	$found++;
     }
+
+    # EXIM pattern
+    if (/failed/i && $MTA eq 'exim') { 
+	$trap_want_addr = $_;
+	next;
+    }
+    if ($trap_want_addr && /\@/ && $MTA eq 'exim') { 
+	local($a);
+	/^\s*(\S+\@\S+)/ && ($a = $1);
+	$a =~ s/[\<\>:]//g;
+	&CacheOn($a, " ") if $a; # space is a dummy
+	undef $trap_want_addr;
+    }
+
+    if (/($error_code_pat)/ && $MTA eq 'exim') { 
+	&AnalyzeErrorWord($_, $CurAddr); 
+	$found++;
+    }
+
+    ###
+    ### qmail
+    ###
+    if (/\#5\.\d+\.\d+/ && $MTA eq 'qmail') { 
+	&AnalyzeErrorWord($_, $CurAddr);
+	$found++;
+    }
+
+    ###
+    ### sendmail
+    ###
+    if ($fatal) {
+	local($a);
+	/^\s*(\S+\@\S+)/ && ($a = $1);
+	$a =~ s/[\<\>]//g;
+	&CacheOn($a, " ") if $a; # space is a dummy
+    }
+    # end of fatal block
+    if ($fatal && /^$/) {    
+	undef $fatal;
+    }
 }
+
+&CacheOut;
+&CacheHints;
 
 &DeadOrAlive;
 
@@ -116,10 +207,13 @@ sub ExtractAddr
 
 sub AnalWord
 {
-    local($reason, $_);
+    local($reason);
+
+    &Debug("AnalWord: @_") if $debug;
+
     $_ = $_[0];
 
-    if (/user unknown|unknown user/i) { $reason = 'uu';}
+    if (/user unknown|unknown user|user not known/i) { $reason = 'uu';}
     if (/host unknown|unknown host/i) { $reason = 'uh';}
     if (/service unavailable/i)       { $reason = 'us';}
     if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
@@ -162,15 +256,21 @@ sub AnalyzeErrorCode
 
 sub AnalyzeErrorWord
 {
-    $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
+    local($addr);
 
-    &Debug("AnalyzeErrorWord: <$_>");
+    $_ = $_[0]; s/</ /g; s/>/ /g; s/\.\.\./ /;
+    $addr = $_[1];
+
+    &Debug("AnalyzeErrorWord(@_)");
 
     if (/user unknown|unknown user/i && /(\S+\@[\.A-Za-z0-9\-]+)/) {
 	&CacheOn($addr = $1, &AnalWord($_));
     }
-    elsif ($addr = $_[1]) {
+    elsif ($addr) {
 	&CacheOn($addr, &AnalWord($_));
+    }
+    elsif ($debug) {
+	&Debug("AnalyzeErrorWord: invalid input");	
     }
 }
 
@@ -178,15 +278,73 @@ sub AnalyzeErrorWord
 sub CacheOn
 {
     local($addr, $reason) = @_;
+    local($hit);
+
+    &Debug("--CacheOn ($addr, $reason);");
+
+    # cache check
+    return if $Cached{"$addr:$reason"};
+    $Cached{"$addr:$reason"} = 1;
 
     for (keys %return_addr) {
 	next if /^\s*$/;
 	next if $_ eq $addr;
-		
-	&DoCacheOn(sprintf("%s %s\t%s\tr=%s", time, $addr, $_, $reason))
-	    if $addr && $_;
+
+	# %AddrCache
+	&AddrCache(time, $addr, $_, $reason);
+	$hit++
+
+	# &DoCacheOn(sprintf("%s %s\t%s\tr=%s", time, $addr, $_, $reason))
+	# if $addr && $_;
+    }
+
+    if (! $hit) {
+	&Debug("not hit") if $debug;
     }
 }
+
+
+sub AddrCache 
+{
+    local($time, $addr, $_, $reason) = @_;
+    local($k);
+
+    $k = sprintf("%s %s\t%s\t", $time, $addr, $_);
+
+    &Debug("AddrCache => $AddrCache{$k}, \"r=$reason\"") if $debug;
+
+    if ($reason) {
+	$AddrCache{$k} = "r=$reason";
+    }
+    ### no speculated reason ###
+    # If already "r=something", should not overwrite it!
+    elsif ($AddrCache{$k} ne 'r=') {
+	; # not overwrite
+	&Debug("no \$AddrCache{$k} !") if $debug;
+    }
+    # elsif ($AddrCache{$k} eq 'r=') {
+    # first time
+    else {
+	$AddrCache{$k} = "r=$reason";
+    }
+
+    &Debug("\$AddrCache{$k} = \"r=$reason\"") if $debug;
+}
+
+
+sub CacheOut
+{
+    local($s);
+    &Debug("--- CacheOut") if $debug;
+
+    for (keys %AddrCache) {
+	$s = $_.$AddrCache{$_};
+	&Append($s, $CACHE);
+	&Debug($s) if $debug;
+    }
+    &Debug("--- CacheOut End.") if $debug;
+} 	
+
 
 sub DoCacheOn
 {
@@ -270,7 +428,7 @@ sub DeadOrAlive
 	    # not print within expire range
 	    print NEW $_ unless $expire_range;
 	    next;
-	} 
+	}
 
 	# expire check, not print, so remove them
 	if ($time < $expire_time) {
@@ -412,6 +570,19 @@ sub Mesg
 }
 
 
+sub CacheHints
+{
+    for (reverse split(/\n/,$Received)) {
+	if (/from\s+([-A-Za-z0-9]+\.[-A-Za-z0-9\.]+)/i) {
+	    $Hint{$1} = $1;
+	}
+	if (/by\s+([-A-Za-z0-9]+\.[-A-Za-z0-9\.]+)/i) {
+	    $Hint{$1} = $1;
+	}
+    }
+}
+
+
 sub Mail
 {
     local($ml, $buf) = @_;
@@ -465,11 +636,11 @@ sub Action
     ###            $MakeFmlTemplate{$ml} (e.g. "makefml bye $ml $addr");
 
     if ($MODE eq 'auto') {
-	&MakeFml("bye $ml $addr", $addr, $ml);
+	&MakeFml("$KILL $ml $addr", $addr, $ml);
     }
     elsif ($MODE eq 'report') {
-	$Template{$ml} .= "\# admin bye $addr\n";
-	$MakeFmlTemplate{$ml} .= "$MAKEFML bye $ml $addr\n";
+	$Template{$ml} .= "\# admin $KILL $addr\n";
+	$MakeFmlTemplate{$ml} .= "$MAKEFML $KILL $ml $addr\n";
     }
     else {
 	&Debug("mode $MODE is unknown");
@@ -488,8 +659,8 @@ sub MakeFml
 
     $ok = 0;
 
-    $LogBuf{$ml} .= "mead> bye $ml $addr\n";
-    $MFSummary{$ml} .= "mead> bye $ml $addr\n";
+    $LogBuf{$ml} .= "mead> $KILL $ml $addr\n";
+    $MFSummary{$ml} .= "mead> $KILL $ml $addr\n";
 
     require 'open2.pl';
 
@@ -499,7 +670,8 @@ sub MakeFml
 	close(S);
 	while (<RS>) {
 	    $logbuf .= $_;
-	    if (/\#\#BYE\s+$addr/i) { $ok = 1;}
+	    if (/\#\#BYE\s*$addr/i) { $ok = 1;} # bye case (default)
+	    if (/\#\s*$addr/i)     { $ok = 1;} # off case
 	}
 	close(RS);
 
@@ -553,10 +725,11 @@ sub Init
     $| = 1;
 
     require 'getopts.pl';
-    &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:");
+    &Getopts("dD:e:S:hC:i:l:M:m:E:p:z:k:");
     $opt_h && die(&Usage);
     $debug  = $opt_d;
     $EXPIRE = $opt_e || 14; # days
+    $KILL   = $opt_k || 'bye';
 
     # expire check interval
     $CHECK_INTERVAL = $opt_i || 3*3600;
@@ -592,6 +765,14 @@ sub Init
 	    &Debug("--- \$PRI{$1} = $2") if $debug;
 	}
     }
+
+    # Regular Expression
+    $RE_SJIS_C = '[\201-\237\340-\374][\100-\176\200-\374]';
+    $RE_SJIS_S = "($RE_SJIS_C)+";
+    $RE_EUC_C  = '[\241-\376][\241-\376]';
+    $RE_EUC_S  = "($RE_EUC_C)+";
+    $RE_JIN    = '\033\$[\@B]';
+    $RE_JOUT   = '\033\([BJ]';
 }
 
 

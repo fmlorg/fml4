@@ -135,10 +135,17 @@ sub DoStatusInFile
 	    /\ss=/      && 
 		($s .= "\tNOT delivered here, but can post to $ML_FN\n");
 
-	    # KEY MARIEL;
+	    # digest delivery
 	    if (/\sm=(\S+)\s/o) {
-		($d, $mode) = &ModeLookup($1);
-		$s   .= "\tDigest Delivery/MATOME OKURI mode = ";
+		local($x) = $1;
+
+		# m=\d+ style and under $MSEND_MODE_DEFAULT is defined.
+		if ($x =~ /^\d+$/ && $MSEND_MODE_DEFAULT) {
+		    $x = "$x$MSEND_MODE_DEFAULT";
+		}
+
+		($d, $mode) = &ModeLookup($x);
+		$s .= "\tDigest Delivery/MATOME OKURI mode = ";
 
 		if ($d) {
 		    $s .= &DocModeLookup("\#$d$mode");

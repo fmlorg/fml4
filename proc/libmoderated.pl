@@ -364,6 +364,7 @@ sub GetPasswd
 	$p = $e{'h:approval:'};
 	undef $e{'h:approval:'};
 	undef $e{'h:Approval:'};
+	$e{'Hdr2add'} =~ s/Approval:.*\n//ig;
     }
     elsif ($e{'Body'} =~ /^[\s\n\#]*approval\s+(\S+)\s+forward\n/) {
 	$e{'Body'} =~ s/^[\s\n\#]*approval\s+(\S+)\s+forward\n//;

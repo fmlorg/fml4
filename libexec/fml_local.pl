@@ -665,8 +665,8 @@ if ($debug_fml_local) {
     require 'libdebug.pl';
 }
 
-#.include libsmtp.pl
-#.include libsmtputils.pl
+#.include kern/libsmtp.pl
+#.include kern/libsmtputils.pl
 #.include proc/libkern.pl
 #.include proc/libdebug.pl
 

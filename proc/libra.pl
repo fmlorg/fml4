@@ -355,7 +355,8 @@ sub AdminCommand
     &AdminModeInit;		
 
     # Security Check Exception
-    if (! &SecureP(" $cmd @opt ", "command_mode") ) {
+    local($buf) = join(" ", $cmd, @opt);
+    if (! &SecureP($buf, 'admin')) {
 	  $_cf{'INSECURE'} = 1; # EMERGENCY STOP FOR SECURITY
 	  &Mesg(*e, "Execuse me. Please check your request.");
 	  &Mesg(*e, "  PROCESS STOPS FOR SECURITY REASON\n");
