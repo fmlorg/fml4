@@ -1,0 +1,130 @@
+		2000年問題
+=E
+		YEAR 2000 Problems
+
+わかっている範囲の問題と対応しているversionについての情報です。
+=E
+Best current practise on fml y2k.
+
+READMEの通りY2Kに限らず汎用的な答えはいつも『currentを使う』です。
+=E
+"Please use current" is always true answer.
+
+
+.C	Overview
+
+
+元々必要に応じて呼ばれるフィルタリングプロセスのため時間に依存する関数
+というものがそもそもありません。問題になりうるとすればヘッダに現れる日
+付やログファイルのフォーマットなどの部分です。
+=E
+Fml uses unix time internally, so fml will have no y2k problem except
+for header and log files. Fml uses &GetTime as date translation, so we
+should check only this function.
+
+日付については &GetTime という関数にまとめられています。ほとんどすべて
+のソースはこの関数を使っています。必ずしも一箇所にまとめられているわけ
+ではありませんが、関数名は全部一緒です。そのためチェックする場合はこの
+関数の中を見ます。
+
+自分で直す場合は fml-current の fml.pl から
+=E
+If you fix problems around date, hack 'sub GetTime' function. 
+For example
+
+sub GetTime
+{
+
+	〜略〜
+=E
+	...
+
+}
+
+の部分を抜き出して、各ソースのこの部分を置き換えればOKです。
+/usr/local/fml/src/ の下にあるようなものについてはこれで修正が可能とお
+もいます。
+
+(標準ではインストールされない) contrib/の特殊なものについてはこの関数
+が日付設定以上のことをしていることもままあるのできをつけてください。
+＃もちろん手っとり早いのは fml-current にいれかえることです。
+
+
+
+.C	メールの Date: フィールド
+=E.C	Date: field
+
+=E
+must be O.K. after 2.2.1.
+
+配送されるメールなどについては、2.1A#20 以降は4桁
+fml.pl revision: 1997/12/07 fml.pl 2.0.24.49
+
+RFC1123 に合わせた(RFC822 はそもそも間違っている;D)
+＃注:実は2000年問題を意識した作業ではなく結果としてそうなっている
+
+2.2A#35 以降では contrib/ 以下など特殊なソースの中のについても(たぶん
+使っていなくても) &GetTime は修正済み
+
+
+.C	ログファイルのalign問題
+=E.C	Log file format
+
+=E
+must be O.K. after 2.2.1.
+
+.S	Overview
+
+2000年になると log と summary が 100/01/01 のようになる。ちょっとかっ
+こ悪い。ユニークであることが必要ないのと、100年前のログファイルをとっ
+ておくとはおもえないので、ログファイルの類いは100年以下の単位にしてい
+る(例: 2000年は0年)。
+
+.S	対応
+=E.S	How to fix
+
+○ 2.2A#14 以降は次のようになる
+fml.pl revision: 2.2.1.7 (1998/11/06)
+
+	' 0/01/01' (２桁にしているが、スペースが入ったalignment)
+
+ちょっと間が抜けているかも…
+
+○ 2.2A#32 以降(makefmlを除く)は次のようになる
+fml.pl revison: 2.12 (1999/02/13)
+
+	00/01/01 (0 でパディングされたalignment)
+
+○ 2.2A#35以降 makefml も修正
+
+	00/01/01 (0 でパディングされたalignment)
+	
+2.2A#35 以降では contrib/ 以下など特殊なソースの中のについても(たぶん
+使っていなくても)修正済み
+
+
+
+.C	RFC1153モード
+=E.C	RFC1153 mode
+
+=E
+This problem is not fixed after fml 2.2.1 release. But RFC1153 is
+ambiguous. I have no correct idea how to fix rfc1153 mode...
+fml rfc1153 library appends rather date to 1153-like identifier, so
+we should rewrite librfc1153.pl completely.
+
+元々適当につけているので、何が正しいのか良く分からないという問題がある
+が…(だってRFC1153ってメモみたいなRFCでよくわからない)。
+
+2000年になると vol 100 になるが…それはそれで構わないような気もするし、
+構うようなきもする。
+
+.# $Id$
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
