@@ -6,8 +6,6 @@
 
 # $Id$;
 
-$ADD_STR = shift;
-
 &Init;
 &GetTime;
 $MessageId = "<$CurrentTime/$$.$USER\@$DOMAINNAME>";
@@ -40,7 +38,7 @@ sub EmuHeader
 {
 $_ = qq#From $USER\@$DOMAINNAME $MailDate
 Date: $MailDate
-From: $USER\@$DOMAINNAME
+From: $FROM
 Message-Id: $MessageId
 To: (list suppressed)
 Subject: test mail
@@ -52,7 +50,11 @@ $_ .= $ADD_STR if $ADD_STR;
 
 sub Init
 {
-    $USER = $ENV{'USER'} || (getpwuid($<))[0];
+    require 'getopts.pl';
+    &Getopts("dhg:");
+
+    $USER  = $ENV{'USER'} || (getpwuid($<))[0];
+    $GECOS = (getpwuid($<))[6] || $USER;
 
     # DNS AutoConfigure to set FQDN and DOMAINNAME; 
     local(@n, $hostname, $list);
@@ -66,6 +68,15 @@ sub Init
     $FQDN       =~ s/\.$//; # for e.g. NWS3865
     $DOMAINNAME = $FQDN;
     $DOMAINNAME =~ s/^$hostname\.//;
+
+    if ($opt_g) {
+	$FROM = "$USER\@$DOMAINNAME (\"$GECOS\")";
+    }
+    else {
+	$FROM = "\"$GECOS\" <$USER\@$DOMAINNAME>";	
+    }
+
+    $ADD_STR = shift @ARGV;
 }
 
 1;
