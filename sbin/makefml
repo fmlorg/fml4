@@ -1089,6 +1089,11 @@ sub Error
     $XStatus .= "ERROR: $buf\n";
 }
 
+sub _Error
+{
+    local($buf) = @_;
+    $XStatus .= "ERROR: $buf\n";
+}
 
 sub Debug { print STDERR "@_\n";}
 
@@ -6624,8 +6629,11 @@ sub ValidatePerlScriptP
     else {
 	system "perl -c $cf > nul 2>&1";
     }
-    &Error("$cf is broken as perl script.") if $?;
-    &Log("$cf is broken as perl script.") if $?;
+    if ($?) {
+	print "\n";
+	&_Error("$cf is broken as perl script.");
+	&Log("$cf is broken as perl script.");
+    }
 
     $? ? 0 : 1; # $? is 0 if normal. 
 }
