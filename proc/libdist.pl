@@ -258,6 +258,7 @@ sub ReadActiveRecipients
 	      $w = $lc_rcpt;
 	      ($w)=($w =~ /(\S+)@\S+\.(\S+\.\S+\.\S+\.\S+)/ && $1.'@'.$2||$w);
 	      print STDERR "   ".($NoRcpt{$w} && "not ")."deliver\n" if $debug;
+	      # address ($w) is delivered in other ml's (ml == $NoRcpt{$w})
 	      if ($NoRcpt{$w}) { # no add to @Rcpt
 		  $SKIP{$w} = 1;
 		  next line;
@@ -333,8 +334,7 @@ sub GenXMLInfo
 	$X_ML_INFO_MESSAGE;
     }
     elsif (!$CONTROL_ADDRESS && 
-	   ($Envelope{'mode:post=anyone'} || 
-	    $Envelope{'mode:post=members_only'})) {
+	   $PERMIT_POST_FROM =~ /^(anyone|members_only)$/) {
 	"If you have a question,\n\tplease make a contact with $MAINTAINER";
     }
     else {
