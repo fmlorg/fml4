@@ -21,6 +21,9 @@ sub Init
     require 'getopts.pl';
     &Getopts("dh");
 
+    # save /ml-admin/$ml/*.cgi case
+    if ($ML) { $SavedML = $ML;}
+
     # fml system configuration
     require "$CONFIG_DIR/system";
 

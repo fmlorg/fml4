@@ -83,6 +83,14 @@ sub SecureP
     &ERROR("ML is empty.")   unless $ML;
     &ERROR("PROC is empty.") unless $PROC;
 
+    # check /ml-admin/$ml/*cgi case
+    if ($SavedML) {
+	if ($SavedML ne $ML) {
+	    &ERROR("expected ML differs in this URL.");
+	    $ok = 0;
+	}
+    }
+
     my ($secure_pat) = '[A-Za-z0-9\-_]+';
     my ($num_pat)    = '[0-9]+';
     my ($mail_addr)  = '[A-Za-z0-9\.\-_]+\@[A-Za-z0-9\.\-]+';
