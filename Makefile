@@ -13,6 +13,12 @@
 ### themost important variable ! ###
 FML = ${.CURDIR}
 
+.if exists(conf/release_branch)
+IN_RELEASE_BRANCH = yes
+.else
+IN_RELEASE_BRANCH =
+.endif
+
 # If release branch, use it
 # .include "distrib/mk/fml.release.mk"
 
@@ -60,7 +66,7 @@ distsnap:
 snapshot:
 	@ make -f distrib/mk/fml.sys.mk __setup
 	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
-	(/bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
+	(env IN_RELEASE_BRANCH=$(IN_RELEASE_BRANCH) /bin/sh $(DIST_BIN)/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ $(DIST_BIN)/error_report.sh $(DESTDIR)/_release.log
 
 branch: 
