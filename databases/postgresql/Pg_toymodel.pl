@@ -222,7 +222,7 @@ sub __DumpList
     my ($query);
 
     $ml     = $mib->{'_ml_acct'};
-    $query  = " select address from ml ";
+    $query  = " select address,options from ml ";
     $query .= " where ml = '$ml' ";
     $query .= " and file = '$file' ";
     if ($ignore_off) {
@@ -242,7 +242,7 @@ sub __DumpList
 	};
 
 	while (@row = $res->fetchrow()) { 
-	    print OUT $row[0], "\n";
+	    print OUT $row[0], "\t", $row[1], "\n";
 	}
 	close(OUT);
 

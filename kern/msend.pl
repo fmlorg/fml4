@@ -760,6 +760,11 @@ sub MSendInit
 	&DataBaseCtl(\%Envelope, \%mib, \%result, \%misc);
 	&Log("fail to dump active list") if $mib{'error'};
 	exit 1 if $mib{'error'};
+
+	# tricky but effective 
+	# we push cache file to recipient lists, so that
+	# @ACTIVE_LIST = ($ACTIVE_LIST, $mib{'_cache_file'});
+	push(@ACTIVE_LIST, $mib{'_cache_file'}) if -f $mib{'_cache_file'};
     }
 
     # defaults header;
