@@ -8,15 +8,15 @@
 ### [LOCATIONS] ###
 
 # exports for ftp 
-FTP_DIR      = /var/spool/ftp/pub/fml/
-ARCHIVE_DIR  = $(FTP_DIR)/archives/these_days
-SNAPSHOT_DIR = $(FTP_DIR)/snapshot
+FTP_DIR      = /var/spool/ftp/pub/fml
+ARCHIVE_DIR  = ${FTP_DIR}/archives/these_days
+SNAPSHOT_DIR = ${FTP_DIR}/snapshot
 
 # exports for www
-WWW_BASE_DIR = /var/www/htdocs/fml/
-WWW_DIR      = /var/www/htdocs/fml/
+WWW_BASE_DIR = /var/www/htdocs/fml
+WWW_DIR      = /var/www/htdocs/fml
 
-# working directory for exportation work
+# (temporary) working directory for make "snapshot", "build" and "release"
 DESTDIR      = /var/tmp/daily_fml_snapshots
 
 
@@ -28,3 +28,8 @@ PERL  = /usr/local/bin/perl
 RSYNC = /usr/local/bin/rsync
 ZIP   = /usr/local/bin/zip
 BZIP2 = /usr/bin/bzip2
+
+# Japanese conversion
+NKF   = /usr/pkg/bin/nkf
+JCONV = ${NKF} -j
+ECONV = ${NKF} -e
