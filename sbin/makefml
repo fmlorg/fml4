@@ -1281,13 +1281,11 @@ sub do_newml
     # &SetWritableUmask; &SetPublicUmask;
     &SetPersonalUmask;	# umask 077;
 
-    #print STDERR "$EXEC_DIR/cf/__makefml -> $ML_DIR/$ml/cf\n";
     &Conv($ml, "$EXEC_DIR/cf/__makefml", "$ML_DIR/$ml/cf");
 
     if ($OS_TYPE && open(CF, ">> $ML_DIR/$ml/cf")) {
 	$MAKE_FML{'NON_PORTABILITY'} = 1;
 	$MAKE_FML{'OS_TYPE'} = $OS_TYPE;
-	$MAKE_FML{'ML_NAME'} = $ml;
 	&OutPutLocalConfig(*MAKE_FML);
 	close(CF);
     }
