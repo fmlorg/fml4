@@ -337,9 +337,28 @@ DISTRIBUTION_PATCHLEVEL_INCREMENT () {
 
 FIX_LANGUATE () {
    (
-	cd $DESTDIR/distrib/drafts
-	echo "Fixing Japanese code: "
+	cd $DESTDIR/distrib/drafts || exit 1
+	echo "Ensure Japanese code to be JIS (distrib/drafts/)"
+
 	for file in */*
+	do
+	   if [ -f $file ];then
+		echo -n "$file "
+		nkf -j $file > $file.j
+		mv $file.j $file
+	   else
+		echo ERROR: $file is not a text.
+	   fi
+	done
+
+	echo " ... Done."
+   )
+
+   (
+	cd $DESTDIR/distrib/www/template/Japanese || exit 1
+	echo "Ensure Japanese code to be JIS (distrib/www/template/Japanese/)"
+
+	for file in */*html
 	do
 	   if [ -f $file ];then
 		echo -n "$file "
