@@ -1,10 +1,10 @@
 #-*- perl -*-
 #
-#  Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+#  Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 #   All rights reserved. This program is free software; you can
 #   redistribute it and/or modify it under the same terms as Perl itself.
 #
-# $FML: SMTP.pm,v 1.19 2002/09/22 14:57:02 fukachan Exp $
+# $FML: SMTP.pm,v 1.22 2003/01/11 15:16:34 fukachan Exp $
 #
 
 
@@ -402,7 +402,7 @@ See L<Mail::Message> for more details.
 # Return Value: none
 sub deliver
 {
-    my ($self, $args, $io_params) = @_;
+    my ($self, $args) = @_;
 
     # recipient limit
     $self->{_recipient_limit} = $args->{recipient_limit} || 1000;
@@ -757,13 +757,15 @@ sub _send_body_to_mta
     my ($self, $socket, $msg) = @_;
 
     # XXX $msg is Mail::Message object.
-    $msg->set_log_function( $SmtpLogFunctionPointer );
+    $msg->set_log_function($SmtpLogFunctionPointer, $SmtpLogFunctionPointer);
     $msg->set_print_mode('smtp');
     $msg->print($socket);
 
     if (defined $self->{ _smtp_log_handle }) {
 	$msg->print( $self->{ _smtp_log_handle });
     }
+
+    $msg->unset_log_function();
 }
 
 
@@ -849,7 +851,7 @@ Ken'ichi Fukamachi
 
 =head1 COPYRIGHT
 
-Copyright (C) 2000,2001,2002 Ken'ichi Fukamachi
+Copyright (C) 2000,2001,2002,2003 Ken'ichi Fukamachi
 
 All rights reserved. This program is free software; you can
 redistribute it and/or modify it under the same terms as Perl itself.
