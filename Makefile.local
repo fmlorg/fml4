@@ -9,7 +9,7 @@ DESTDIR      = /var/tmp
 MASTER_SITE  = ftp://ftp.sapporo.iij.ad.jp/pub/IIJ/dist/fukachan/fml/utils/pkgsrc/
 
 check:
-	sh distrib/bin/check.sh
+	env FML=${FML} sh distrib/bin/check.sh
 
 capital:
 	cat `echo *pl proc/*pl |\
@@ -19,19 +19,19 @@ capital:
 # Section: Variable checks
 #
 varcheck:
-	perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
+	env FML=${FML} perl distrib/bin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
 
 v2: varcheck2
 varcheck2:
-	perl distrib/bin/search-config-variables.pl -E -D -s -m \
+	env FML=${FML} perl distrib/bin/search-config-variables.pl -E -D -s -m \
 	kenn/*pl libexec/[a-lo-z]*pl proc/lib[a-z]*pl bin/*pl |\
 	tee /tmp/VARLIST
 	@ wc /tmp/VARLIST
 
 v3:
-	perl distrib/bin/search-config-variables.pl \
+	env FML=${FML} perl distrib/bin/search-config-variables.pl \
 	-E -D -s *pl libexec/*pl proc/*pl bin/*pl |\
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
@@ -51,14 +51,14 @@ sync:
 	  Mail test@fml.org
 
 makefml:
-	sh distrib/bin/reset-makefml
+	env FML=${FML} sh distrib/bin/reset-makefml
 
 init-makefml:
 	cp sbin/makefml /tmp/distrib
 	(chdir /tmp/distrib ; perl makefml )
 
 simulation:
-	sh $(FML)/.simulation/bootstrap
+	env FML=${FML} sh $(FML)/.simulation/bootstrap
 
 scan:
 	@ cvs -n update |tee /tmp/__scan__
@@ -98,4 +98,4 @@ testsetup:
 
 search:
 	@ echo ""
-	@ sh $(DIST_DOC_BIN)/search_doc_generator ${WWW_DB_DIR}
+	@ env FML=${FML} sh $(DIST_DOC_BIN)/search_doc_generator ${WWW_DB_DIR}
