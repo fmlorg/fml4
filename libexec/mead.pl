@@ -260,9 +260,14 @@ sub AnalWord
     if (/service unavailable/i)       { $reason = 'us';}
     if (/address\w+ unknown|unknown address/i) { $reason = 'ua';}
 
+    # qmail
+    if (/couldn\'t find any host/) { $reason = 'uh';}
+    if (/can\'t accept addresses/) { $reason = 'ua';}
+
     # exim ?
     if (/unknown local-part/i)  { $reason = 'uu';}
     if (/unknown mail domain/i) { $reason = 'uh';}
+    if (/unrouteable mail domain/) { $reason = 'uh';}
 
     &Debug("AnalWord: $reason") if $debug;
     $reason;
