@@ -13,6 +13,9 @@ remote_control		メールでの設定変更など(REMOTE_ADMINISTRATION): adminコマンド
 resource_control	リソースの制御	
 makefml			makefml (CUI) interface for fml
 GUI			GUI interface
+messages		コマンドの結果や警告メールのメッセージ文について
+virtual_domain		virtual domain
+digest			まとめおくり
 
 .part 拡張
 command			コマンドについて
@@ -28,7 +31,7 @@ smtp			配送関係
 Japanese		日本語処理について
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
-develope		内部構造や実装の理屈についてなど
+devel			内部構造や実装の理屈についてなど
 tips			tips
 
 #
