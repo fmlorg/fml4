@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.222 2001/09/11 10:43:53 fukachan Exp $
+# $FML: makefml,v 2.223 2001/09/11 11:02:28 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -4859,8 +4859,8 @@ sub do_addmembers
 sub do_adduser
 {
     local($ml, $member) = @_;
-    local(@files, @dbfiles);
-    local($proc) = $fp;
+    my (@files, @dbfiles);
+    my ($proc) = $fp;
     $proc =~ s/do_//;
 
     if (! $ml || !$member) {
@@ -4922,7 +4922,7 @@ sub do_adduser
     local($acm) = $ADDR_CHECK_MAX;
     $ADDR_CHECK_MAX = 10;
 
-    if ( $config_ph::USE_DATABASE ) {
+    if ($config_ph::USE_DATABASE) {
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
 	&InitDataBaseAccess($ml);
 
@@ -4957,23 +4957,23 @@ sub do_adduser
 	}
     }
     else {
-    for $f (@files) {
-	$fn = $f;
-	$fn =~ s#.*/(\S+)#$1#;
+	for $f (@files) {
+	    $fn = $f;
+	    $fn =~ s#.*/(\S+)#$1#;
 
-	# file and member check 
-	&Touch($f) if ! -f $f;
-	if (&CheckMember($member, $f)) {
-	    &Debug("   WARN: skip $fn since $member is already member.");
-	    &Log("skip $fn since $member is already member");
-	    &XSWarn("already_subscribed");
-	    next;
+	    # file and member check 
+	    &Touch($f) if ! -f $f;
+	    if (&CheckMember($member, $f)) {
+		&Debug("   WARN: skip $fn since $member is already member.");
+		&Log("skip $fn since $member is already member");
+		&XSWarn("already_subscribed");
+		next;
+	    }
+
+	    &Log("makefml::$proc append $member to $fn");
+	    print "Append $member to $fn\n" if $debug;
+	    &AppendString2File($member, $f);
 	}
-
-	&Log("makefml::$proc append $member to $fn");
-	print "Append $member to $fn\n" if $debug;
-	&AppendString2File($member, $f);
-    }
     }
 
     # $XStatus = 'OK:';
@@ -4984,8 +4984,8 @@ sub do_adduser
 sub do_byeuser
 {
     local($ml, $member) = @_;
-    local(@files, @dbfiles);
-    local($proc) = $fp;
+    my (@files, @dbfiles);
+    my ($proc) = $fp;
     $proc =~ s/do_//;
 
     if (! $ml || !$member) {
@@ -5030,7 +5030,7 @@ sub do_byeuser
     # delete 
     local($file, $found);
 
-    if ( $config_ph'USE_DATABASE ) {
+    if ($config_ph::USE_DATABASE) {
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
 	&InitDataBaseAccess($ml);
 
@@ -5061,16 +5061,16 @@ sub do_byeuser
 	}
     }
     else {
-    for $file (@files) {
-	if ($found = &RemoveMember($file, $member)) {
-	    $file =~ s#.*/(\S+)#$1#;
-	    &Log("makefml::$proc delete $member in $file");
-	    print "Delete $member in $file\n" if $debug;
+	for $file (@files) {
+	    if ($found = &RemoveMember($file, $member)) {
+		$file =~ s#.*/(\S+)#$1#;
+		&Log("makefml::$proc delete $member in $file");
+		print "Delete $member in $file\n" if $debug;
 
-	    # notify if plural addresses (> 1) has been changed
-	    print "\tRemoved $found addrs.\n" if $found > 1;
+		# notify if plural addresses (> 1) has been changed
+		print "\tRemoved $found addrs.\n" if $found > 1;
+	    }
 	}
-    }
     }
 
     # $XStatus = 'OK:';
@@ -5085,8 +5085,8 @@ sub do_digest { &do_ctladdr(@_);}
 sub do_ctladdr
 {
     local($ml, $addr, $opt) = @_;
-    local(@files, @dbfiles);
-    local($proc) = $fp;
+    my (@files, @dbfiles);
+    my ($proc) = $fp;
 
     # canonicalize
     $proc =~ s/do_//;
@@ -5154,7 +5154,7 @@ sub do_ctladdr
 
     # delete 
     local($file, $found);
-    if ( $config_ph'USE_DATABASE ) {
+    if ($config_ph::USE_DATABASE) {
 	local($MAIL_LIST, $DATABASE_METHOD, $DATABASE_DRIVER);
 	&InitDataBaseAccess($ml);
 
@@ -5181,18 +5181,18 @@ sub do_ctladdr
 	}
     }
     else {
-    for $file (@files) {
-	if ($found = &CtlAddrList($proc, $file, $addr, $opt)) {
-	    $file =~ s#.*/(\S+)#$1#;
-	    &Log("makefml::$proc delete $addr in $file");
-	    print "Delete $addr in $file\n" if $debug;
+	for $file (@files) {
+	    if ($found = &CtlAddrList($proc, $file, $addr, $opt)) {
+		$file =~ s#.*/(\S+)#$1#;
+		&Log("makefml::$proc delete $addr in $file");
+		print "Delete $addr in $file\n" if $debug;
 
-	    # notify if plural addresses (> 1) has been changed
-	    print "\tChanged $found addrs.\n" if $found > 1;
-	}
-	else {
-	    print "\t*** ERROR: Nothing has been changed. ***\n";
-	    $XStatus = 'ERROR: makefml.nothing_changed';
+		# notify if plural addresses (> 1) has been changed
+		print "\tChanged $found addrs.\n" if $found > 1;
+	    }
+	    else {
+		print "\t*** ERROR: Nothing has been changed. ***\n";
+		$XStatus = 'ERROR: makefml.nothing_changed';
 	    }
 	}
     }
