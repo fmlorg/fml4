@@ -182,6 +182,17 @@ sub MSendModeSet
 }
 
 
+# msend.pl uses this prototype generator.
+sub GetProtoByMode
+{
+    local($type, $mode) = @_;
+
+    if ($type =~ /matome/) {
+	$mode =~ /tgz/ ? "matome.tar.gz" : "matome.gz", 
+    }
+}
+
+
 # I learn "how to extract from a tar file " from taro-1.3 by
 # utashiro@sra.co.jp.
 # So several codes are stolen from taro-1.3.
