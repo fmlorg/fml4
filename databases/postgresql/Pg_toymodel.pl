@@ -9,8 +9,14 @@
 
 package PostgreSQL;
 
-
+use vars qw($debug);
+  
 sub Log { &main::Log(@_);}
+  
+my ($NULL); # ''
+my ($dbh);  # $dbh = data base handler
+my ($res);  # $res = response from data base handler
+my (@row);  # data $res->fetchrow_array() returns 
 
 
 sub DataBases::Execute
@@ -18,6 +24,7 @@ sub DataBases::Execute
     my ($e, $mib, $result, $misc) = @_;
 
     if ($main::debug) {
+	my ($k, $v);
 	while (($k, $v) = each %$mib) { print "PostgreSQL: $k => $v\n";}
     }
 
@@ -335,7 +342,7 @@ sub __ListCtl
 	my ($new_addr) = $mib->{'_value'};
 	$new_addr      = &main::LowerDomain($new_addr);
 
-	for $file ('actives', 'members') {
+	for my $file ('actives', 'members') {
 	    $query  = " update ml ";
 	    $query .= " set address = '$new_addr' ";
 	    $query .= " where ml = '$ml' ";
@@ -383,7 +390,7 @@ sub __ListCtl
 sub Count
 {
     my ($mib, $file) = @_;
-    my ($mll, $query, $res);
+    my ($mll, $query, $res, $ml);
 
     $ml     = $mib->{'_ml_acct'};
     $query  = " select count(address) from ml ";
@@ -400,7 +407,7 @@ sub Count
 sub Status
 {
     my ($mib, $file) = @_;
-    my ($mll, $query, $res, $addr);
+    my ($mll, $query, $res, $addr, $ml);
 
     $addr   = $mib->{'_address'};
     $addr   = &main::LowerDomain($addr);
@@ -416,13 +423,6 @@ sub Status
 
     $mib->{'_result'} .= "off "  if $off;
     $mib->{'_result'} .= $option if $option;
-}
-
-
-sub __Error
-{
-    my ($s) = @_;
-    $mib->{'error'} = $s;
 }
 
 
@@ -457,8 +457,8 @@ if ($0 eq __FILE__) {
     eval "sub Log { print \@_, \"\\n\";}";
 
     # getopt()
-    require 'getopts.pl';
-    &Getopts("dh");
+    use Getopt::Std;
+    Getopts("dh");
 
     my (%mib);
     $mib{'dbname'}   = $opt_D || 'fml';
