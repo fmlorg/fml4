@@ -1,12 +1,12 @@
 .HTML_PRE
-	CHANGES from fml 0.x(1993) to fml-current
+	CHANGES from fml 0.x(1993) to 2001/05
 
 				深町 賢一
 =E
 				Ken'ichi Fukamachi
 			
 
-最新の動向については INFO というファイルを見て下さい。
+最新の動向については CHANGES というファイルを見て下さい。
 このファイルは作者による変更点のメモです。
 contributor およびその変更点については RELEASE_NOTES を見て下さい。
 .if LANG == ENGLISH
