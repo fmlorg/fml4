@@ -158,21 +158,9 @@ After this edit, run /var/qmail/bin/qmail-newu. This is just an
 example. User name, uid, gid, home is customizable (If your account is
 used, you have not only to su).
 
-注意: 
-
-fml ではなく自分のアカウントにすれば、自分の権限のＭＬになります。
-例えば次の例を考えましょう。
-
-   +:fml:65535:10:/var/spool/ml/etc/qmail/alias:-::
-   +mikoto:mikoto:100:10:/home/mikoto:-::
-   .
-
-mikoto 宛のメールは mikoto が受け取り、それ以外の宛先は全部 ML 用にな
-ります。詳しくは マニュアル qmail-users(5) を参照してください。
+詳しくは マニュアル qmail-users(5) を参照してください。
 =E
-CAUTION: All mails are forwarded to ML in this "assign" config.  If
-user "mikoto" like to receive her mail in this host, she require the
-following configuration. Please see manual of qmail-users(5).
+Please see manual of qmail-users(5).
 
 
 .S	:include: (だめ)
@@ -317,7 +305,7 @@ When you use this function, please set $USE_DOT_QMAIL_EXT = 1;
 
 .~HTML_PRE
 
-.# $FML$
+.# $FML: INSTALL_with_QMAIL.wix,v 1.8 2001/05/27 01:39:00 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
