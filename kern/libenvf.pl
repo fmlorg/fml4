@@ -101,10 +101,16 @@ sub __EnvelopeFilter
 	$xbuf = substr($xbuf, 0, $p) if $p > 0;
     }
 
+    ### count up the number of paragraphs
     # count up "\n\n" lines;
     # If one paraghaph (+ signature), must be $c == 0. 
     $c = $p = 0;
-    while (($p = index($xbuf, "\n\n", $p + 1)) > 0) { $c++;}
+    $pe = rindex($e{'Body'}, "\n\n"); # ignore the last signature
+    while (($p = index($e{'Body'}, "\n\n", $p + 1)) > 0) {
+	last if $p >= $pe;
+	$c++;
+    }
+    ### "count up the number of paragraphs" ends
 
     # cut off Email addresses (exceptional).
     $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
