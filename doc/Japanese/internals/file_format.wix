@@ -188,10 +188,6 @@ actives members のバックアップについて => .ptr{list-turn-over}
 =E
 turn over actives/members list => .ptr{list-turn-over}
 
-.##########
-.# .include member_name.wix
-.##########
-
 .S	msendrc ファイルのフォーマットと構造
 =E.S	$MSEDN_RC format (digest control file msend.pl uses)
 .k	msednrc ファイルのフォーマットと構造
