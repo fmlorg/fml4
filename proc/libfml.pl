@@ -313,7 +313,7 @@ sub DoProcedure
 	}
 	else {
 	    $s .= "If you have a problem, ";
-	    $s .= "please make a contact with a ML maintainer.\n";
+	    $s .= "please contact ML maintainer.\n";
 	    $s .= "Address for a ML maintainer is <$MAINTAINER>.\n";
 	}
 	$s .= "*" x 60;
