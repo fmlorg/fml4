@@ -557,6 +557,6 @@ INFO:
 TAR:		&path(tar) cf -
 UUENCODE:	&path(uuencode)
 COMPRESS:	&path(gzip) -c
-ZCAT:		&path(gzcat)
+ZCAT:		&path(gzcat:zcat)
 LHA:		&path(lha)
 ISH:		&path(ish)
