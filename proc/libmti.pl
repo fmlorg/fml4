@@ -17,8 +17,9 @@ sub MTICache
 {
     local(*e, $mode) = @_;
     local($time, $from, $rp, $sender, $db, $xsender);
-    local($host, $date, $rdate, $buf);
-    local(%uniq);
+    local($host, $date, $rdate, $buf, $status);
+    local(%hostinfo);
+    local(%addrinfo);
 
     ### Extract Header Fields
     $time    = time;
@@ -29,10 +30,11 @@ sub MTICache
     $xsender = &Conv2mailbox($e{'h:x-sender:'}, *e);
 
     ## Received:
-    if ($e{"sh:received:"}) {
-	($host, $rdate) = &ExtractInfoFromReceived($e{"sh:received:"});
+    $status = &MTI'GetHostInfo(*hostinfo, *e); #';
+    if ($status) {
+	&Log("MTI[$$]: $status"); # Information
     }
-
+    
     ### OPEN HASH TABLES (SWITCH)
     if ($mode eq 'distribute') {
 	$MTI_DB    = $db = $MTI_DIST_DB || "$FP_VARDB_DIR/mti.dist";
@@ -43,7 +45,7 @@ sub MTICache
 	$MTI_HI_DB = $MTI_HI_COMMAND_DB || "$FP_VARDB_DIR/mti.hi.command";
     }
     else {
-	&Log("Error: MTICache called under an unknown mode");
+	&Log("MTI[$$] Error: MTICache called under an unknown mode");
 	return $NULL;
     }
 
@@ -51,16 +53,16 @@ sub MTICache
 
     ### CACHE ON
     ### cache on addresses with the current time; also, expire the addresses
-
+    
     ## cache addresses info
     for ($from, $rp, $sender, $xsender) {
-	next unless $_;
-	next if $uniq{$_};
-	next if $MTI{$_} =~ /${time}:/; # uniq
-
-	&MTICleanUp(*MTI, $_, $time);
+  	next unless $_;
+	next if $addrinfo{$_};
+	next if $MTI{$_} =~ /$time:/; # unique;
+    
+        &MTICleanUp(*MTI, $_, $time);
 	$MTI{$_} .= " $time:$date";
-	$uniq{$_} = $_;
+	$addrinfo{$_} = $_;
     }
 
     ## cache host info with Date: or Received: 
@@ -69,9 +71,12 @@ sub MTICache
     # we cannot determine whether he is a real bomber
     # or to be a bomber by a mistake.
     # Here we record time estimated as when the mail left the host.
-    if ($host && ($date || $rdate)) {
-	&MTICleanUp(*HI, $host, $rdate);
-	$HI{$host} .= " ". &ValidateDate($date, $rdate);
+    if (%hostinfo) {
+	local($host, $rdate);
+	while (($host, $rdate) = each %hostinfo) {
+	    &MTICleanUp(*HI, $host, $rdate);
+	    $HI{$host} .= " ${date}:$rdate";
+	}
     }
 
     ### CLOSE HASH (save once anyway), AND RE-OPEN
@@ -99,11 +104,11 @@ sub MTICache
     }
 
     ## SPECULATE BOMBERS
-    for (keys %uniq) { &BomberP('addr', $_, $MTI{$_});}
-    &BomberP('host', $host, $HI{$host});
+    local($fp) = $MTI_COST_EVAL_FUNCTION || 'MTISimpleBomberP';
+    &$fp(*e, *MTI, *HI, *addrinfo, *hostinfo);
 
     ## EVAL HOOKS
-    if ($MTI_CHECK_FUNCTION_HOOK) {
+    if ($MTI_COST_EVAL_HOOK) {
 	eval($MTI_CHECK_FUNCTION_HOOK);
 	&Log($@) if $@;
     }
@@ -111,50 +116,6 @@ sub MTICache
 
     ### CLOSE
     &MTIDBMClose;
-}
-
-sub ExtractInfoFromReceived
-{
-    local($buf) = @_;
-    local($host, $rdate);
-
-    $buf =~ s/\n\s/ /g;
-    $buf =~ s/\(/ \(/g;
-
-    if ($buf =~ /\@localhost.*by\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
-    }
-    elsif ($buf =~ /from\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
-    }
-    elsif ($buf =~ /^\s*by\s+(\S+).*;(.*)/) { 
-	$host = $1;
-	$rdate = $2;
-    }
-    else {
-	&Log("MTI: not match Received: [$buf]");
-    }
-
-    # Received: date
-    &Log("MTI: Received info: host=$host [$rdate]") if $debug_mti;
-    $rdate = &Date2UnixTime($rdate) if $rdate;
-
-    ($host, $rdate);
-}
-
-sub ValidateDate
-{
-    local($date, $rdate) = @_;
-
-    # both errors
-    if (!$date && !$rdate) {
-	$NULL;
-    }
-    else {
-	$rdate < $date ? $rdate : $date;
-    }
 }
 
 sub MTIDBMOpen
@@ -181,9 +142,9 @@ sub MTIProbe
 	    $s  = "Distribute traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
 	    $s .= "exceeds \$MTI_DISTRIBUTE_TRAFFIC_MAX.";
 	    $ss = "Reject post from $From_address for a while.";
-	    &Log("MTI: $s");
-	    &Log($ss);
-	    &Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
+	    &Log("MTI[$$]: $s");
+	    &Log("MTI[$$]: $ss");
+	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_LIST;
 	}
     }
     elsif ($mode eq "command:max_traffic") {
@@ -193,9 +154,9 @@ sub MTIProbe
 	    $s  = "Command traffic ($c mails/$MTI_EXPIRE_UNIT s) ";
 	    $s .= "exceeds \$MTI_COMMAND_TRAFFIC_MAX.";
 	    $ss = "Reject command from $From_address for a while.";
-	    &Log("MTI: $s");
-	    &Log($ss);
-	    &Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
+	    &Log("MTI[$$]: $s");
+	    &Log("MTI[$$]: $ss");
+	    &MTIHintOut(*e, $addr) if $MTI_APPEND_TO_REJECT_LIST;
 	}
     }
 
@@ -235,8 +196,8 @@ sub MTIError
     local(*e) = @_;
 
     if ($MTIErrorString) {
-	&Warn("MTI Error $ML_FN",
-	      "FML Warning:\n$MTIErrorString\n".
+	&Warn("FML Mail Traffic Monitor System Report $ML_FN", 
+	      "FML Mail Traffic Monitor System:\n\n$MTIErrorString\n".
 	      &WholeMail);
 	1;
     }
@@ -245,13 +206,6 @@ sub MTIError
     }
 }
 
-sub TrafficInfoEval
-{
-    $TrafficInfoFP = $TrafficInfoFP || 'TrafficInfoFP';
-    1;
-}
-
-sub TrafficInfoFP { 30/(30 + $_[0]);}
 
 sub Date2UnixTime
 {
@@ -323,78 +277,168 @@ sub Date2UnixTime
 	&timegm($sec,$min,$hour,$day,$month,$year) + $shift*3600;
     }
     else {
-	&Log("Error Date2UnixTime: cannot resolve [$in]");
+	&Log("Date2UnixTime: invalid date-time [$in]");
 	0;
     }
 }
 
 
-######################################################################
-sub BomberP
+sub MTILog
 {
-    local($tag, $addr, $buf) = @_;
-    local($fp) = $MTI_COST_FUNCTION || 'MTICost';
-    local($sum, $limit);
+    local(*e, $s) = @_;
+    local($buf, $x, $h);
 
-    # BOMBER OR NOT: the limit is 
-    # "traffic over sequential 5 mails with 1 mail for each 10s".
-    $limit = $MTI_BURST_HARD_LIMIT || (5/10);
-    $sum   = &$fp($buf);
-
-    if ($sum > $limit) {
-	&Log("MTI::${tag}_cache: [$addr] must be a bomber; ".
-	     sprintf("sum=%1.2f > %1.2f", $sum, $limit));
-
-	$MTIErrorString .= "\nFML Mail Traffic Monitor System:\n";
-	$MTIErrorString .= "We detect address[$addr] must be a bomber, so\n";
-	$MTIErrorString .= "reject mails with address[$addr] in the header.\n";
-	$MTIErrorString .= "FYI: evaled as ".
-	    sprintf("sum=%1.2f > limit=%1.2f\n", $sum, $limit);
+    $buf .= "We reject the following mail:\n\n";
+    for ('return-path', 'date', 'from', 'sender', 'x-sender') {
+	$h = $_;
+	$h =~ s/^(\w)/ $x = $1, $x =~ tr%a-z%A-Z%, $x/e; # capitlalize
+	$h =~ s/(\-\w)/$x = $1, $x =~ tr%a-z%A-Z%, $x/eg; # capitlalize
+	$buf .= sprintf("%15s %s\n", "$h:", $e{"h:$_:"}) if $e{"h:$_:"};
     }
+    $buf .= "\nsince\n$s\n";
 
-    &Log("MTI::${tag}_cache: [$addr] ".sprintf("sum=%1.2f", $sum));
+    # IN TEST PHASE, please set $USE_MTI_TEST to reject mails automatically.
+    # removed $USE_MTI_TEST in the future;
+    $MTIErrorString .= $buf if $USE_MTI_TEST && $s;
 }
 
 
-sub MTICost
+sub MTIHintOut
 {
-    local($s) = @_;
-    local($prev, $sum, $epsilon, $time, $date, $p_date, $cr);
-    local($x, $cx);
+    local(*e, $addr) = @_;
+    local($rp, $hint);
 
-    # against divergence
-    $epsilon = $MTI_EPSILON || 0.1; 
+    $hint = $MTI_MAIL_FROM_HINT_LIST || "$DIR/mti_mailfrom.hints";
+    &Touch(hint) if ! -f $hint;
 
-    for (split(/\s+/, $s)) {
-	next unless $_;
-	($time, $date) = split(/:/, $_);
-	if ($prev) { $sum += 1 / &ABS($time - $prev + $epsilon);}
+    # logs Erturn-Path: (hints for MTA e.g. sendmail)
+    if ($e{'h:return-path:'}) {
+	$rp = &Conv2mailbox($e{'h:return-path:'});
 
-	printf STDERR "=== %d\t%d\t%d\t%d\n",  $time, $prev, $date, $p_date;
-
-	if ($p_date) { 
-	    printf STDERR "--- %1.3f\t%1.3f\n", 
-	    &ABS($time - $prev + $epsilon),
-	    &ABS($date - $p_date + $epsilon);
-
-	    $cr += 1 / &ABS($date - $p_date + $epsilon);
-
-	    $x += 
-1 / (&ABS($time - $prev + $epsilon) * &ABS($date - $p_date + $epsilon));
-
-	    $cx += 
-(&ABS($time - $prev + $epsilon) * &ABS($date - $p_date + $epsilon));
+	if (! &CheckMember($rp, $hint)) {
+	    &Append2(&Conv2mailbox($e{'h:return-path:'}, *e), $hint);
 	}
-
-	$prev   = $time;
-	$p_date = $date;
     }
 
-    $sum;
+    # logs $addr to $DIR/spamlist (FML level)
+    if ($addr) {
+	&Append2($addr, $REJECT_ADDR_LIST) if $MTI_APPEND_TO_REJECT_LIST;
+    }
+}
 
-    &Log( sprintf("sum=%1.2f cr=%1.2f", $sum, $cr) ) if $sum && $cr;
-    &Log("x=$x") if $x;
-    &Log("cx=$cx") if $cx;
+
+######################################################################
+package MTI;
+
+sub Log { &main'Log(@_);} #';
+sub ABS { $_[0] < 0 ? - $_[0] : $_[0];}
+
+# should we try ?
+#    if ($buf =~ /\@localhost.*by\s+(\S+).*;(.*)/) { 
+#    elsif ($buf =~ /from\s+(\S+).*;(.*)/) { 
+#    elsif ($buf =~ /^\s*by\s+(\S+).*;(.*)/) { 
+sub GetHostInfo
+{
+    local(*hostinfo, *e) = @_;
+    local($host, $rdate, $p_rdate, @chain, $threshold);
+    local($buf) = "\n$e{'h:received:'}\n";
+    local($host_pat) = '[A-Za-z0-9\-]+\.[A-Za-z0-9\-\.]+';
+
+    # We trace Received: chain to detect network error (may be UUCP?)
+    # where the threshold is 15 min.
+    $threshold = $main'MTI_CACHE_HI_THRESHOLD || 15*60; #'; 15 min.
+
+    for (split(/\n\w+:/, $buf)) {
+	s/\n/ /g;
+	s/\(/ \(/g;
+	s/by\s+($host_pat).*;(.*)/$host = $1, $rdate = $2/e;
+
+	if ($rdate) {
+	    $rdate = &main'Date2UnixTime($rdate); #';
+	    $rdate || next;	# skip if invalid Date:
+	    $hostinfo{$host} = $rdate;
+
+	    push(@chain, &ABS($rdate - $p_rdate)) if $p_rdate;
+	    $p_rdate = $rdate;
+	}
+    }
+
+    for (@chain) {
+	if ($_ > $threshold) {
+	    return "network error? @chain";
+	}
+    }
+
+    $NULL;
+}
+
+
+sub main'MTISimpleBomberP #';
+{
+    local(*e, *MTI, *HI, *addrinfo, *hostinfo) = @_;
+    local($sum, $soft_limit, $hard_limit, $es, $addr);
+    local($cr, $scr);
+
+    # BOMBER OR NOT: the limit is 
+    # "traffic over sequential 5 mails with 1 mail for each 5s".
+    $soft_limit = $main'MTI_BURST_SOFT_LIMIT || (5/5);   #';
+    $hard_limit = $main'MTI_BURST_HARD_LIMIT || (2*5/5); #';
+
+    # GLOBAL in this Name Space; against divergence
+    $Threshold = $main'MTI_BURST_MINIMUM || 3; #': 
+
+    # addresses
+    for $addr (keys %addrinfo) {
+	($cr, $scr)  = &SumUp($MTI{$addr});	# CorRelation 
+
+	if (($cr > 0) && $main'debug_mti) { #';
+	    &Log("MTI[$$]: SumUp ". 
+		 sprintf("src_cr=%2.4f dst_cr=%2.4f", $scr, $cr));
+	}
+
+	# soft limit: scr > cr : busrt in src host not dst host
+	# hard limit: cf > hard_limit or scr > hard_limit
+	if (($scr >= $cr && ($scr > $soft_limit)) ||
+	    (($scr > $hard_limit) || ($cr > $hard_limit))) {
+	    &Log("MTI[$$]: <$addr> must be a bomber;");
+	    &Log("MTI[$$]:".
+		 sprintf("src_cr=%2.4f >= dst_cr=%2.4f", $scr, $cr));
+	    $es .= "MTI[$$]: <$addr> must be a bomber,\n";
+	    $es .= "since the evaled costs are ".
+		sprintf("src_cr=%2.4f >= dst_cr=%2.4f\n", $scr, $cr);
+	    &main'MTIHintOut(*e); #';
+	}
+    }
+
+    &main'MTILog(*e, $es) if $es; #';
+}
+
+
+sub COST 
+{
+    &ABS($_[0]) < $Threshold ? $Threshold : &ABS($_[0]);
+}
+
+
+sub SumUp
+{
+    local($buf) = @_;
+    local($time, $date);
+
+    for (split(/\s+/, $buf)) {
+	next unless $_;
+	($time, $date) = split(/:/, $_);
+
+	if ($p_time) { # $p_date may be invalid, so not check it.
+	    $cr   += 1 / &COST($time - $p_time);
+	    $d_cr += 1 / &COST($date - $p_date);
+	}
+
+	# cache on previous values
+	($p_time, $p_date) = ($time, $date);
+    }
+
+    ($cr, $d_cr);
 }
 
 
