@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.76.2.5 2001/09/27 15:43:01 fukachan Exp $
+# $FML: MANIFEST,v 1.90 2001/10/14 06:37:10 fukachan Exp $
 #
 
 
@@ -473,6 +473,10 @@ FILTER_ATTR_REJECT_ONE_LINE_BODY:	1
 # value: 1/0
 FILTER_ATTR_REJECT_MS_GUID: 1
 
+# reject not ascii nor ISO-2022-JP
+# value: 1/0
+FILTER_ATTR_REJECT_INVALID_JAPANESE: 0
+
 # try to convert Japanese HANKAKU chars in the mail body to ZENAKKU
 # value: 1/0
 USE_HANKAKU_CONVERTER:	0
@@ -898,6 +902,10 @@ MSEND_NOT_USE_NEWSYSLOG:
 # value: filename string
 LOG_MESSAGE_ID:	$VARRUN_DIR/msgidcache
 
+# cache size of Message-ID: negative cache
+# value: number
+MESSAGE_ID_CACHE_BUFSIZE:	6000
+
 # cache file of mailbody cksum mail loop check
 # value: filename string
 LOG_MAILBODY_CKSUM:	$VARRUN_DIR/bodycksumcache
@@ -1000,7 +1008,11 @@ SMTP_LOG_ROTATE_TYPE:	number
 # IF $TRACE_SMTP_DELAY IS 1, we log the delay of response between SMTP server.
 # value: 1/0
 NOT_TRACE_SMTP:  	0
-TRACE_SMTP_DELAY:	
+TRACE_SMTP_DELAY:
+
+# smtp profile for debug
+# value: 1/0
+USE_SMTP_PROFILE:	0
 
 # You can use plural MTA for parallel delivery.
 # $MCI_SMTP_HOSTS is the number of hosts you use.
@@ -1053,6 +1065,10 @@ OUTGOING_ADDRESS:
 #
 # value: 1/0
 USE_VERP:
+
+# we use ESMTP pipelining mechanism by default.
+# value: 1/0
+NOT_USE_ESMTP_PIPELINING: 0
 
 # smtpfeed special option which provides VERPs like error track trick.
 # value: 1/0
@@ -1433,6 +1449,11 @@ HAS_GETPWGID:	&is_unix
 # On Unix, always yes set 1 in &SetDefaults;
 # value: 1/0
 HAS_ALARM:	&is_unix
+
+# On Unix, always yes set 1 in &SetDefaults;
+# value: 1/0
+UNISTD:		&is_unix
+
 
 # program paths fml uses
 # Usually "makefml newml" checks and expands this value. 
