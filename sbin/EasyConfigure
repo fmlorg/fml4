@@ -1,0 +1,212 @@
+#!/bin/sh
+#
+# $Id$
+# Original file is using EUC
+# 1.1: あ〜あ、エレガントじゃないなぁ、このコード
+# 1.2: 少しまとも:-)
+#
+
+# config
+MYREAD=/tmp/myread
+TEXT=/tmp/_text_
+CONFIGURE_PH=/tmp/_configure
+CONFIGURE='perl sbin/configure_ph'
+
+# trap
+trap "rm -f __*__  /tmp/fml$$ $MYREAD $TEXT" 0 1 2 3 15
+
+# warning
+cat > /tmp/fml$$ << __EOF__
+Bourne shell(大抵は/bin/sh)がうまく動かないみたいだねぇ
+るぷ〜 だめ;_;
+__EOF__
+
+export PATH || cat /tmp/fml$$
+rm -f /tmp/fml$$
+
+# MYREAD Useful script
+cat > $MYREAD <<_EOF_
+#!/bin/sh
+
+trap "rm -f $TEXT" 0 1 2 3 15
+
+yornp='n'
+while [ "\$yornp" = 'n' ]
+do
+	echo " "	 	1>&2
+	echo "\$1"	 	1>&2
+	echo "例： \$2"	 	1>&2
+	if [ -f $TEXT ]; then cat $TEXT; fi	1>&2
+	echo " "	 	1>&2
+	echo -n "[\$1]:" 	1>&2
+	read ans
+
+	echo -n "\$1 は \$ans でよろしいですか？ [y/n] " 1>&2
+	read yornp
+	echo " "	 	1>&2
+
+	case \$yornp in
+	   y | Y )
+		 yornp='y'
+		;;
+	   * )
+		 yornp='n'
+		;;
+	esac
+done
+
+echo \$ans
+
+exit 0
+_EOF_
+
+##### MAIN  #####
+cat <<_EOF_
+
+これは対話的にＭＬ（メーリングリスト（サーバー））の
+コンフィギュレイションをするためのスクリプトです。
+
+まず、Ｍａｋｅｆｉｌｅをなおします
+次の３つです。
+ＭＬのアドレス
+ＭＬの管理者のアドレス
+ＭＬのサーバーのあるdirectory
+
+_EOF_
+
+### ML address
+ML=`sh $MYREAD  "ＭＬのアドレス" Elana@phys.titech.ac.jp`
+
+### Maintainer Address
+MAINTAINER=`sh $MYREAD "ＭＬの管理者のアドレス" Elena-request@axion`
+
+### directory of fml system
+cat > $TEXT <<_EOF_
+
+	Full Pathで書いて下さいね
+	サーバのある場所ですから、このdirctory
+	"$PWD"
+	でもいいんです"
+
+_EOF_
+
+DIR=`sh $MYREAD "ＭＬサーバのdirectry" /home/axion/fukachan/work/spool/Elena`
+
+### Mailing list name 
+cat > $TEXT <<_EOF_
+
+	メールのＴｏ：に現れるＭＬの名前はどうしますか？
+	"To: \$ML （ＭＬの名前）"
+
+	"例： To: $ML (Elena Lolabrigita ML)"
+	このElena Lolabrigita MLの部分↑
+
+_EOF_
+MLFN=`sh $MYREAD "ＭＬの名前" '(Elena Lolobrigita ML)'`
+
+### X-ML-Name: ...
+cat > $TEXT <<_EOF_
+
+	メールのヘッダのX-ML-Name:の名前はどうしますか？
+
+	例 X-ML-Name: Elena
+	のElenaの部分です↑
+
+_EOF_
+
+XMLNAME=`sh $MYREAD 'X-ML-Name' 'X-ML-Name: Elena'`
+
+echo " " 1>&2
+echo -n "Reconfiguring " 1>&2
+echo -n "Makefile " 1>&2
+
+echo "XXML         = $ML"  >  __MAKEFILE__
+echo "XXMAINTAINER = $MAINTAINER"  >> __MAKEFILE__
+echo "XXFMLDIR     = $DIR" >> __MAKEFILE__
+
+sed '/^XXML/{
+N
+N
+g
+r __MAKEFILE__
+}' Makefile > __TMP__
+mv __TMP__ Makefile
+rm -f __MAKEFILE__
+
+echo -n "config.ph " 1>&2
+
+echo "\$MAIL_LIST    = '$ML';"                 >  __CONFIG__
+echo "\$ML_FN	     = '($MLFN)';"             >> __CONFIG__
+echo "\$XMLNAME      = 'X-ML-Name: $XMLNAME';" >> __CONFIG__
+
+sed '/^\$MAIL_LIST/{
+N
+N
+g
+r __CONFIG__
+}' config.ph > __CONFIG.PH__
+mv __CONFIG.PH__ config.ph
+rm -f __CONFIG__
+
+echo "Done." 1>&2
+echo " " 1>&2
+
+########## Make ##########
+yornp='n'
+echo -n "makeを実行してよいですか？ [y/n] "; 
+read yornp
+case $yornp in
+   y | Y )
+	make 
+	cat <<_EOF_
+
+いま↑に setuid に関する情報がでています。詳しくはINSTALL等をみてください。
+
+_EOF_
+	;;
+   * )
+	echo "何か意図があってmakeしないのなら使う前に必ずmakeしてくださいね"
+	echo ""
+	;;
+esac
+
+##### Message
+cat <<_EOF_
+
+----------
+
+_EOF_
+
+########## config.ph ##########
+yornp='n'
+echo -n "ついでに config.ph のよりすすんだ設定も設定しますか？ [y/n] "; 
+read yornp
+case $yornp in
+   y | Y )
+	$CONFIGURE
+	;;
+   * )
+	echo "O.K. あとで一応の確認はしてくださいね"
+	echo ""
+	;;
+esac
+
+##### Message
+cat <<_EOF_
+
+**************************************************************************************
+
+_EOF_
+
+##### Ending message #####
+cat <<_EOF_
+
+
+	これでＭＬサーバの基本設定は終りです。
+	Makefile config.phを一応確認してみて下さい
+	これ以上細かいところはINSTALL READMEを参照してくださいませ
+
+
+_EOF_
+
+exit 0
