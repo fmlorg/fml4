@@ -202,11 +202,11 @@ sub XSTranslate
     $mesg =~ s/^\s*//;
 
     if ($mesg =~ /OK:/) {
-	&Mesg2Japanese('cgi.ok') || $mesg;
+	&MesgConv('cgi.ok') || $mesg;
     }
     elsif ($mesg =~ /(ERROR:|WARN:)\s*(\S+)(.*)/i) {
 	local($tag, $key, $tbuf) = ($1, $2, $3);
-	$r = &Mesg2Japanese($key);
+	$r = &MesgConv($key);
 	$tag ." ". ($r ? $r : $key.$tbuf);
     }
     else {
@@ -215,12 +215,12 @@ sub XSTranslate
 }
 
 
-sub Mesg2Japanese
+sub MesgConv
 {
     local($key) = @_;
     local($x);
 
-    if ($LANGUAGE eq 'Japanese') {
+    if ($LANGUAGE eq 'Japanese' || $LANGUAGE eq 'English') {) {
 	$x = &MesgLE'Lookup($key, $MESG_FILE); #';
 	return $NULL unless $x;
 
@@ -462,12 +462,12 @@ sub Command
 	    }
 	    else {
 		&ERROR("input passwords are different each other.");
-		&ERROR(&Mesg2Japanese("cgi.password.different"));
+		&ERROR(&MesgConv("cgi.password.different"));
 	    }
 	}
 	else {
 	    &ERROR("empty password");
-	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
+	    &ERROR(&MesgConv("cgi.password.empty"));
 	}
     }
     elsif ($PROC eq 'cgiadmin_passwd') {
@@ -484,12 +484,12 @@ sub Command
 	    }
 	    else {
 		&ERROR("input passwords are different each other.");
-		&ERROR(&Mesg2Japanese("cgi.password.different"));
+		&ERROR(&MesgConv("cgi.password.different"));
 	    }
 	}
 	else {
 	    &ERROR("empty password");
-	    &ERROR(&Mesg2Japanese("cgi.password.empty"));
+	    &ERROR(&MesgConv("cgi.password.empty"));
 	}
     }
     elsif ($PROC eq 'log') {
