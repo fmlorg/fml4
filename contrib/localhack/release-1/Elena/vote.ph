@@ -4,8 +4,9 @@
 $COMMENT_STRING     = 'comment';
 $END_COMMENT_STRING = 'endcomment';
 
-@keywords           = ('new', 'all');
-@maxkeywords        = ('5', '5', '5', '5', '5');
+@keywords           = ('new', 'all'); 
+#, 'si', 'ra', 'to', 'new', 'all', 'si', 'ra', 'to');
+@maxkeywords        = ('5', '5', '5', '5', '5', '5', '5', '5', '5', '5');
 
 # files for logging
 $DIR		    = $DIR ? $DIR : $ENV{'PWD'};
