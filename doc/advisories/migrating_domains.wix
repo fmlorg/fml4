@@ -1,0 +1,143 @@
+.HTML_PRE
+	FML Advisory 1999-002: TODO for Migrating Domains
+	========================================
+
+Topic: OR.JP => NE.JP 対策
+
+	Copyright (C) 1999 Ken'ichi Fukamachi
+		All rights reserved.
+.~HTML_PRE
+-------------------------
+.toc
+-------------------------
+
+手順の意味についてはINSTALLマニュアルを参照して下さい
+http://www.fml.org/fml/INSTALL/
+
+
+OR.JP => NE.JP への移行期間の終りを向かえどたばたがこれから発生すると
+おもわれる。参考:
+
+.url http://www.nic.ad.jp/jp/regist/dom/or-ne/index.html
+
+以下対策についてまとめておく
+
+
+.C	メンバーリストなどの書き換え
+
+根本的な対策はもちろん、メンバーリストの保守になる。つまりOR.JPから
+NE.JPになるドメインのEmailアドレスを全部書き変えて歩くということだ。
+
+
+.S	書き変えの基本的な方法
+
+MLのホームにある members, actives などの該当するアドレスを書き変える。
+例: who@xxx.or.jp を who@xxx.ne.jp に書き換える。
+
+でもorをneに単純に置き換えるわけではないのでいちいち変換表をつくってチェッ
+クしないとわからない。
+
+
+.S	自動書き変え: fml 2.2A#40 以降の場合
+.l	fml-2.2A#40
+
+ML作成時のMLのホームにできるMakefileにはdomain-translateというルールが
+しこまれている。MLのホームで
+
+	% make domain-translate
+
+とすると members actives members-admin の中に現れる移行するドメインに
+ついて書き変えをおこなう。ただこの処理はロックをしないので、ちゃんとす
+るには適当な秒数(はシステムによるとおもうのでよくわからないが)
+
+(elena MLを例にとるが)
+
+   % makefml lock elena 120
+   % make domain-translate	
+
+などとするとよい(120は120秒間ＭＬをロックする)。これ以外にもすることが
+あるなら必要なファイル file について
+
+   % /usr/local/fml/bin/translate.pl -f /usr/local/fml/etc/mgrdomains file
+
+を実行すれば良い
+
+
+.S	自動書き変え: fml 2.2A#39
+.xref	fml-2.2A#40
+
+前節(.ptr{fml-2.2A#40})の自動変換はすでに可能になっているが、
+members-admin の書き変えをしないというバグがある。後は同じ
+
+
+.S	自動書き変え: fml 2.2A#38以前
+
+
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/etc/mgrdomains
+ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/snapshot/bin/translate.pl
+
+をもってくる。(elena MLを例にとるが)。適当にどっかにおいて(例として
+/tmpにおくとすると)
+
+   % cd /var/spool/ml/elena
+   % makefml lock elena 120
+   % perl /tmp/translate.pl -f /tmp/mgrdomains actives members members-admin 
+
+などとすれば、actives members members-admin が書き変わる。
+
+
+.S	問題点
+
+○ 配送はOKだが、投稿する人が設定を更新していないおかげで認証で失敗し
+   管理者の仕事が増えること。これは「できない」といわれたら「設定を直せ」
+   というしかないだろう
+
+○ 厳密にはいつどこのドメインは準備完了でどこがだめをちゃんと考えない
+   といけない。が、とてもそんな真面目に保守してられない。
+
+
+.C	OR.JPでもNE.JPでもどっちでも認証だけは可能にする
+
+ちなみにこの機能自体は 2月中旬くらいから入っている。でも移行するドメイ
+ンリストは2.2A#39以降にしかないので、適当に作る必要がある。
+
+	$IDENTIFY_MIGRATING_DOMAIN = 1;
+
+を設定すると、"認証についてだけ"
+/usr/local/fml/etc/mgrdomains の各行に書かれている
+
+	DOMAIN-1	DOMAIN-2
+
+の２つのドメインを等価に扱うようになる。つまりメンバーリストには
+domain.ne.jpになっていてもメールソフトの設定がまちがっていてFrom:
+who@domain.or.jp で出してきた場合は通常は「メンバーではない」と認識し
+てしまう。が、このオプションを有効にしている場合はdomain.or.jpでも
+domain.ne.jpでも構わない。ただし配送先は配送リストに書いてある宛先にな
+る。
+
+
+以下の方法は等価である。好きな方法を使えばいい
+
+.S	config.ph を手で書いている人
+
+	$IDENTIFY_MIGRATING_DOMAIN = 1;
+
+.S	cf を保守している人
+
+	IDENTIFY_MIGRATING_DOMAIN 	1
+
+をLOCAL_CONFIGより前のどこかにつけたして、
+
+	% make config.ph
+
+を走らせる。
+
+
+.S	問題点
+
+○ 小手先芸なのでよくない
+
+○ メールソフトの設定の問題なんだからユーザが直すのが本質
+
+○ リストの保守がおろそかになって配送先がある日なくなるとかでトラブル
+かもしれない(さきのばししているだけ)
