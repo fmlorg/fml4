@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# $FML$
+#
 
 
 use strict;
@@ -23,6 +26,8 @@ push(@VARS, qw($DIR @LIBDIR
 	       $NULL $DO_NOTHING
 	       $FML $MyProcessInfo
 	       $CFVersion $MailDate $From_address
+	       
+	       $GID
 
 	       @HdrFieldsOrder %HdrFieldCopy
 	       @ResentForwHdrFieldsOrder @ResentHdrFieldsOrder
