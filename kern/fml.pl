@@ -429,7 +429,8 @@ sub SetDefaults
     @MailContentHandler = ();	# Default: No filter
 
     # 3.0.1 compatible with 3.0's "From: $MAIL_LIST" rejection
-    &DEFINE_FIELD_LOOP_CHECKED('from');
+    # XXX removed in 3.0.1 release 
+    # &DEFINE_FIELD_LOOP_CHECKED('from');
 }
 
 sub GetTime
