@@ -232,61 +232,29 @@ sub EvalConfigPH
     local($f, $dir, $ml)   = @_;
     local($buf);
 
-    # but site_{init,force,def} ?
-    require 'default_config.ph';
+    $crosspost_ns'DIR = $dir; #';
 
-    if (-f $f && open(FILE, $f)) {
-	;
-    }
-    else {
-	undef @DeliveryList;
-	if (-f "$dir/actives") {
-	    push(@DeliveryList, "$dir/actives");
-	}
-	elsif  (-f "$dir/members") {
-	    push(@DeliveryList, "$dir/members");
-	}
-	else {
-	    &Log("Error: Crosspost::EvalConfigPH no list for $ml");
-	}
-
-	return 0;
-    }
-
-    $buf .= q#;
     package crosspost_ns;
+
     undef @DeliveryList;
-    #;
+    undef $AutoRegistP;
 
-    $buf .= "\$DIR = \"$dir\";\n";
-
-    while(<FILE>) {
-	next unless /^\$/;
-
-	if (/CFVersion|ML_MEMBER_CHECK|ACTIVE_LIST|MEMBER_LIST|_DIR|REJECT_/) {
-	    $buf .= $_; 
-	}
-    }
-    close(FILE);
-
-    # check algorithm
-    $buf .= q%;
-
-    # print STDERR "CFVerion\t$CFVersion\n";
-    # print STDERR "ML_MEMBER_CHECK\t$ML_MEMBER_CHECK\n";
+    # XXX 3.0B new loadconfig 2000/03/19
+    require 'libloadconfig.pl'; &__LoadConfiguration;
 
     if ($CFVersion >= 3) {
+	# fml 2.x
 	if ($REJECT_POST_HANDLER    =~ /auto_regist/ ||
 	    $REJECT_COMMAND_HANDLER =~ /auto_regist/) {
 	    $AutoRegistP = 1;
 	}
     }
+    # $CFVersion < 3
     else {
-	if (! $ML_MEMBER_CHECK) {
-	    $AutoRegistP = 1;
-	}
+	if (! $ML_MEMBER_CHECK) { $AutoRegistP = 1;}
     }
 
+    # fml 3.x not use active/members difference no more.
     if ($AutoRegistP) {
 	push(@DeliveryList, @MEMBER_LIST);
 	push(@DeliveryList, $MEMBER_LIST);
@@ -301,13 +269,6 @@ sub EvalConfigPH
     # user-defined) but not changed. fixed on 1999/06/24 by 
     # fml-support: 6368, Atushi Sakauchi <sakauchi@micon.co.jp>
     @Crosspost'DeliveryList = @crosspost_ns'DeliveryList;
-    
-    package Crosspost;
-    %;
-
-    $buf =~ s/\n/\n   /g;
-    eval($buf);
-    print STDERR "Error: $@\n" if $@;
 }
 
 

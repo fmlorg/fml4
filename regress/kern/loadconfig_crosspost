@@ -1,0 +1,45 @@
+#!/usr/local/bin/perl
+#-*- perl -*-
+#
+# Copyright (C) 2000 Ken'ichi Fukamachi
+#          All rights reserved. 
+#
+# $Id$
+#
+
+# getopt()
+require 'getopts.pl';
+&Getopts("dhI:");
+
+$ML_DIR = shift || '/var/spool/ml';
+push(@INC, $opt_I);
+
+require 'proc/libcrosspost.pl';
+
+if (opendir(DIRD, $ML_DIR)) {
+    for $ml (readdir(DIRD)) {
+	next if $ml =~ /^\./;
+	next if $ml =~ /^\@/;
+
+	$DIR = "$ML_DIR/$ml";
+	if (-f "$DIR/config.ph") {
+	    &Crosspost'EvalConfigPH("$DIR/config.ph", $DIR, $ml); #';
+	    printf STDERR "%10s(%1s):   ", $ml, $crosspost_ns'AutoRegistP;#';
+	    print STDERR join(" ", @Crosspost'DeliveryList); #';
+	    print STDERR "\n";
+	}
+    }
+    closedir(DIRD);
+}
+else {
+    ;
+}
+
+exit 0;
+
+sub Log
+{
+    print STDERR @_, "\n";
+}
+
+1;
