@@ -3,6 +3,9 @@
 
 2001/03/29
 
+   doc/ri/INSTALL_with_POSTFIX.wix (1.11-1.12):
+	caution on $smtpd_recipient_limit
+
    kern/Makefile (2.60-2.61):
 	disable all: rule
 
