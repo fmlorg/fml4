@@ -1,4 +1,4 @@
-# $FML$
+# $FML: virus_check.ph,v 1.12 2001/11/24 15:39:33 fukachan Exp $
 # 
 # これは perl script です。
 #
@@ -80,6 +80,18 @@ $DISTRIBUTE_FILTER_HOOK .= q#
 	return 'dangerous attatchment ?';
     }
 #;
+
+
+#
+# uuencode されてるものはすべからく怪しい？
+# (このチェックを有効にするには以下の行頭の # をはずしてください)
+# Against MyParty et.al.
+#
+$DISTRIBUTE_FILTER_HOOK .= q{
+    if ($e{'Body'} =~ /^begin\s+\d{3}\s+\S+|\nbegin\s+\d{3}\s+\S+/m) {
+	return 'uuencoded attachment';
+    }
+};
 
 
 # XXX TODO 
