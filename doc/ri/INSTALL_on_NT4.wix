@@ -1,0 +1,419 @@
+		fml INSTALL guide (for NT4.0)
+
+
+				深町 賢一
+				fukachan@sapporo.iij.ad.jp
+
+
+   このドキュメントは未完成です。なお将来的にはGUI化するで
+   しょうが、とりあえずコマンドラインで makefml と叩いて下さい。
+
+
+.C	とりあえずＭＬを動かすためのインストールの仕方
+
+まずパッケージ（fml.*.tar.gzとか…）をひろげると fml-x.y.. という名前
+の directory ができてその下にひとセット入ってます。
+
+この directory に移動して、
+
+	makefml 
+
+というコマンドを、つまり makefml.cmd を、実行して下さい。
+そのマシンの上に fml システムをインストールします。
+
+なお以下で DIRECTORY を聞かれますが、Unix ではdirectoryの区切りは /、 
+NT では \ です。でもどっちの形式でもいいです。内部で変換します。なお表
+示は / 形式です。
+
+この時に次のような項目を聞いて来ます。
+
+   Personal Use? or ML-Admin-Group-Shared? 
+   Personal or Group  (personal/group) [personal] group
+
+   DOMAIN NAME               [sapporo.iij.ad.jp] 
+   FQDN                      [beth.sapporo.iij.ad.jp] 
+   EXEC FILES DIRECTORY      [/usr/local/fml] 
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+
+それぞれ、次のような意味ですので、適当に入れて下さい。単に
+Enter?(CR) を押すと [] の中の値が自動的に設定されます。
+
+   Personal Use? or ML-Admin-Group-Shared? 
+   Personal or Group  (personal/group) [personal] group
+	・自分しか使わないなら personal
+	・特定他数の人達がＭＬをいじる権限を持つ場合(例： /etc/groupで管理)
+	  group 
+
+	を指定して下さい。作られるdirectoryの write permission が異なります。
+
+
+   DOMAIN NAME               [sapporo.iij.ad.jp] 
+
+	ドメイン名。
+	メーリングリストのアドレスの @ から後ろで使う部分
+
+   FQDN                      [beth.sapporo.iij.ad.jp] 
+
+	マシンのインターネット上での完全名
+
+   EXEC FILES DIRECTORY      [/usr/local/fml] 
+
+	実行ファイル等の fml system をインストールする場所。
+	例えば、この値の場合 
+
+		/usr/local/fml/fml.pl 
+		/usr/local/fml/doc/ 
+
+	等がインストールされる。
+
+   TOP LEVEL ML DIRECTORY    [/var/spool/ml] 
+
+	ML(複数)はこの階層の"下"に作られる。例えば
+
+	   Elena ＭＬを作る場合は /var/spool/ml/elena 
+	   Mirei ＭＬを作る場合は /var/spool/ml/mirei
+
+	といった具合に複数のＭＬがこの場所の下に作られていく。
+	ここは各ＭＬごとの設定ファイルや記事を保存する場所です。
+
+
+.S	ＭＬのマスターサーバのスタート
+
+終ったら、インストールした場所(/usr/local/fml)へいって、ntfml.cmd を起
+動して下さい。このコマンドがずっと走って、ＭＬの管理、配送、まとめおく
+り等の面倒をいっさいがっさい見ます。
+
+
+.S	/usr や /var を直接いじれない場合（例えばプロバイダ…）
+
+例えば、
+
+   provider や大学の一般ユーザで /home の下だけならいじってよい。
+   aliases 等は root の人に書いてもらう
+
+というケースもありうるでしょう。その場合は
+
+	/home/fukachan/fml に実行ファイル
+	/home/fukachan/ml  にＭＬ群の階層を作る
+
+とか /home の下の適当な場所に作ればよいでしょう。
+
+
+.S	設定の保存
+
+なお、上で設定したDirectory等の情報次の場所に格納されます。
+次回以降 newml (後述)する時などはいつもこの値が使われます。
+
+    Config Saved in [/usr/local/fml/.fml] 
+
+＃つまり上で選んだ実行ファイルをインストールする場所の下の .fml です
+
+
+.C	ＭＬを作る。
+
+いくつかの簡単な設定やメンバー登録等はコマンドで実行できます。
+
+コマンドのシンタックス：
+
+	makefml コマンド [引数]
+
+
+.S	新しくＭＬを作る場合
+
+もちろんはじめて作る場合も同様ですね。
+
+例： Elena ＭＬを作ろうと思ったら
+
+	/usr/local/fml/makefml newml elena
+
+を実行すれば終りです。ＭＬ用の include ファイル
+
+	/var/spool/ml/etc/elena/include
+
+を初め必要なサンプルが作成されます。
+
+これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
+のでそれを cut & paste して/etc/aliases に加えて newalises して下さい。
+＃まとめ送りについては後述
+
+なおこの aliases の表示内容は /var/spool/ml/etc/elena/aliases に保存さ
+れています。
+
+新しく別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を 
+mirei に変えて実行すればよいです。
+
+なお、各ＭＬごとに 
+
+	/var/spool/ml/etc/MLの名前/サンプルのファイル群
+
+が設定の見本です。
+注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
+小文字の ML 名で作成されます。
+
+
+
+.S	まとめおくり
+
+NetBSD のような Vixie Cron がＯＳ附属の場合については
+各ＭＬごとに
+
+	/var/spool/ml/etc/ＭＬの名前/crontab 
+
+というファイルができます。また、ＭＬを作成した各ユーザごとそのユーザの
+管理するすべてのＭＬのまとめおくりを設定するための
+
+	/var/spool/ml/etc/crontab/ユーザの名前
+
+というファイルが作成されます。これはＭＬを増やすたびに新しいまとめおく
+りの設定が自動的に付け加えられます。
+
+	crontab /var/spool/ml/etc/crontab/ユーザの名前
+
+というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
+起動されて配送するようになります。
+
+Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron 
+の章を見る等して下さい。
+
+
+.S	fmlserv (Listserv もしくは majordomo的インターフェイス)
+
+	/usr/local/fml/makefml fmlserv
+
+で、
+	/var/spool/ml/fmlserv
+
+設定見本が
+	/var/spool/ml/etc/fmlserv
+
+に作られ、aliases の見本が表示されるのでそれを /etc/aliases に張りつけ
+て newaliases してください。後は fmlserv というアドレスに help とか送っ
+てみると分かるでしょう。
+
+各ＭＬごとにうけつけるのに加えて、fmlserv 宛の
+
+	コマンド   ML  [コマンドのオプションと引数]
+
+というコマンドの形を理解するようになります。動作はこのコマンドの書き方
+を除いて、全く同じです。また、各ＭＬの configuration file に従って実行
+されるので、各ＭＬのコマンド用のアドレスに送った時と同じ同じ動きをしま
+す。あくまでコマンドの書き方にＭＬ名が加わっているだけです。
+
+
+
+.S		＊＊＊ＭＬを作る際の注意＊＊＊
+
+この簡易インストールでは作られるＭＬの設定で debug モードは切ってある
+のでいきなりメールは配送可能です。またいくつかの点で portability を無
+視してあります。
+
+
+
+.C	設定ファイルの保存
+
+	/var/spool/ml/etc/ＭＬの名前/
+		と
+	/var/spool/ml/ＭＬの名前/samples (リンクで上と同じ場所)
+
+という場所(上の例ではこの場所)に makefml で作った見本が入っています。
+それぞれのＭＬ用にカスタマイズされた内容の
+
+	include  aliases crontab fml.c config.h 
+
+が保存されています。参考にして下さい。
+
+
+
+.C	ユーザをＭＬに加える場合
+
+   /usr/local/fml/makefml adduser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml add elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬに fukachan@sapporo.iij.ad.jp を加える。
+
+
+
+.C	ユーザをＭＬから削除する場合
+
+   /usr/local/fml/makefml byeuser elena fukachan@sapporo.iij.ad.jp
+   /usr/local/fml/makefml bye elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
+
+
+
+.C	リモート管理の権限をもつユーザをＭＬに加える場合
+
+   /usr/local/fml/makefml addadmin elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬのリモート管理者に fukachan@sapporo.iij.ad.jp を加える。
+
+
+
+.C	リモート管理の権限をもつユーザをＭＬから削除する場合
+
+   /usr/local/fml/makefml byeadmin elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
+
+
+.C	リモート管理の権限をもつユーザのパスワードの設定・変更
+
+   /usr/local/fml/makefml passwd elena 
+
+	---Changing Passwd of Admin  in uja mailing list
+	Who: 
+	Passwd: 
+
+  とかになるのでアドレスとパスワードを入れて下さい。
+
+
+
+.C	ＭＬの基本的ないくつかの設定
+
+   /usr/local/fml/makefml config ML名
+   例：
+	/usr/local/fml/makefml config elena
+
+を実行すると基本的な設定を対話的に行なうことができます。
+次のような画面が出てくるので適当に答えて下さい。
+
+TOP画面
+
+    ********************************************************************
+    Which entry do you change?
+    --------------------------------------------------------------------
+      ENTRY                                   Current Configuration
+    --------------------------------------------------------------------
+    
+    0 END
+    1 MEMBER CHECK or AUTO REGISTRATION        member_check
+    2 SUBJECT TYPE                             
+    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+    
+    
+    Menu  (number) [0] 
+
+のような画面で、数字を打込むと下の階層に進み、同様の画面が出ます。
+やはり同様に数字かy/nならy(yes)かn(no)を入れて下さい。
+
+単語の意味は次のようなものです（以下、一覧）。
+
+
+.S	TOP画面
+
+なお、以下の日本語部分はここでの説明用のものです。実際の画面には表示さ
+れません。
+
+    ********************************************************************
+    Which entry do you change?
+    --------------------------------------------------------------------
+      ENTRY                                   Current Configuration
+      ↑項目                                  ↑現在の設定
+    --------------------------------------------------------------------
+    
+    0 END
+    1 MEMBER CHECK or AUTO REGISTRATION        member_check
+    2 SUBJECT TYPE                            
+    3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+    
+    Menu  (number) [0] 
+                    ↑単に叩くとこの値になります（０は終了）
+
+ ○ 1 MEMBER CHECK or AUTO REGISTRATION        member_check   
+
+	メンバー以外からメールが来たら自動的に登録するのか？
+	メンバー以外からのメールは拒否するか？
+
+    ○下の階層の画面
+
+        Auto Registration  (y/n) [n] y
+		y なら自動登録 n ならメンバーチェックする
+
+        Auto Registration Type
+        0 default	メンバーでないなら登録
+        1 subject	Subject: subscribe と書いてあるメールなら登録
+			そうでないなら登録を許否
+        2 body		本文に subscribe と書いてあるメールなら登録
+			そうでないなら登録を許否
+        
+        Auto Registration Type  (0,1,2 ) [0] 
+
+
+ ○ 2 SUBJECT TYPE                            
+
+	SubjectでのＭＬ名前と記事番号の設定について
+	例えば、Subject: [Elena:00010] のようにするのか？
+	何もつけないのか？（推奨は何もつけない）
+
+    ○下の階層の画面
+
+        Subject TAG TYPE [0-6]:
+        
+        TYPE    Subject Example
+        ----------------------------
+        0       Subject: NO TAG (Default, Fml recommends)
+        
+        1       Subject: (Elena:100)
+        
+        2       Subject: [Elena:100]    (hml 1.6 compat)
+        
+        3       Subject: (Elena 100)
+        
+        4       Subject: [Elena 100]
+        
+        5       Subject: [Elena,100]
+        
+        6       Subject: (Elena,100)
+
+
+ ○     3 OPTIONAL SETTINGS(e.g. MIME, HTML)       
+
+	それ以外の設定
+	   MIME処理をするか？
+	   HTML変換した記事の保存もするか？
+
+    ○下の階層の画面
+
+        OPTIONS
+        
+        ------------------------------------
+          ENTRY                Current Configuration
+        ------------------------------------
+        0 END
+        1 MIME                 
+        2 HTML CONVERSION      
+        
+           OPTIONS  (1-2) [0] 
+
+	MIME を使うことにすると、ＭＬの記事のサマリや保存する記事は
+	MIME decode されたものになる。
+
+	HTML自動変換は 
+
+		/var/spool/ml/ML名/var/htdocs/ 
+
+	の下に html 化された階層を作る。
+	デフォールトではその日ごとに別の階層にまとめて
+	   index.html  で記事を新しい順にならべてもの
+	   thread.html でスレッド化された記事	
+	の階層構造を作る。
+
+
+
+.A	include ではうまく動かない場合
+
+大抵は include でうまくいくはずですが、どうしてもだめな場合は 
+
+	/var/spool/ml/etc/ML名/fml.c 
+
+というのが各ＭＬ用に作られているので compile して設定する必要がありま
+す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
+にしつつ、root の人とよく相談しながら設定して下さい。
+
+
+$Id$
+.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+.# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+.# fml is free software distributed under the terms of the GNU General
+.# Public License. see the file COPYING for more details.
