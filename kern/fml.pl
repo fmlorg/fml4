@@ -10,7 +10,7 @@
 # See the file COPYING for more details.
 #
 # $Id$
-$Rcsid   = 'fml 2.1A';
+$Rcsid   = 'fml 2.2';
 
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
 $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
@@ -27,7 +27,7 @@ foreach (@ARGV) {
 }
 $DIR    = $DIR    || die "\$DIR is not Defined, EXIT!\n";
 $LIBDIR	= $LIBDIR || $DIR;
-$0 =~ m#^(.*)/(.*)# && do { unshift(@INC, $1), unshift(@LIBDIR, $1);};
+$0 =~ m#^(.*)/(.*)# && do { unshift(@INC, $1); unshift(@LIBDIR, $1);};
 unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 
 #################### MAIN ####################
@@ -41,22 +41,25 @@ chdir $DIR || die "Can't chdir to $DIR\n";
 &Parse;				# Phase 1, pre-parsing here
 &GetFieldsFromHeader;		# Phase 2, extract fields
 &FixHeaderFields(*Envelope);	# Phase 3, fixing fields information
-&CheckCurrentProc(*Envelope);	# Phase 4, check the current proc (e.g.loop)
+&CheckCurrentProc(*Envelope);	# Phase 4, check the current proc
+				# (e.g. mail loop).
 				# If an error is found, exit here.
-
 				# We lock for Message-ID cache
 				# even if $DO_NOTHING = 1;
+
 &Lock;				# Lock!
 
-&RunStartHooks;			# run hooks before locking
-&CacheMessageId;		# Message-Id caching against loopback
-&ModeBifurcate(*Envelope);	# Main Procedure
+if (! &MailLoopP) {
+    &CacheMessageId(*Envelope);
+    &RunStartHooks;		# run hooks
+    &ModeBifurcate(*Envelope);	# Main Procedure
+}
 
 &Unlock;			# UnLock!
 
 &RunHooks;			# run hooks after unlocking
 
-&Notify if $Envelope{'message'} || $Envelope{'error'};
+&Notify() if $Envelope{'message'} || $Envelope{'error'};
 				# some report or error message if needed.
 				# should be here for e.g., mget, ...
 
@@ -82,7 +85,7 @@ sub ModeBifurcate
     # member ot not?
     &AdjustActiveAndMemberLists;
     $member_p = &MailListMemberP($From_address);
-    $member_p = 1 if $Enveope{"trap:+"};
+    $member_p = 1 if $Envelope{"trap:+"};
     $Envelope{'mode:stranger'} = 1 unless $member_p;
 
     # chaddr is available from new address if old to "chaddr" is a member;
@@ -104,6 +107,8 @@ sub ModeBifurcate
 		      "auto_regist", "AutoRegistHandler",
 		      "autoregist",  "AutoRegistHandler",
 		      "ignore",      "IgnoreHandler",
+
+		      "auto_asymmetric_regist", "AutoRegistHandler",
 		      );
     if ($debug) {
 	&Log("ModeBifurcate: \$PERMIT_POST_FROM    $PERMIT_POST_FROM");
@@ -160,6 +165,9 @@ sub ModeBifurcate
 
     &Log("03 \$command_mode = $command_mode;") if $debug;
 
+    # initialize Information
+    &GenInfo;
+
     ### 03: Bifurcate by Condition
     # Do nothing. Tricky. Please ignore 
     if ($DO_NOTHING) {
@@ -167,6 +175,12 @@ sub ModeBifurcate
     }
     # command mode?
     elsif ($command_mode) {
+	# NOT PERMIT COMMAND WHEN MAIL SIZE IS OVER LIMIT.
+	if ($Envelope{'trap:mail_size_overflow'}) {
+	    &Log("ModeBifurcate: ignore too bit mail in command mode");
+	    return $NULL;
+	}
+
         if ($PERMIT_COMMAND_FROM eq "anyone") {
 	    require($LOAD_LIBRARY = $LOAD_LIBRARY || 'libfml.pl');
 	    &Command() if $ForceKickOffCommand;
@@ -179,7 +193,7 @@ sub ModeBifurcate
 		&Command() if $ForceKickOffCommand;
 	    }
 	    # we should return reply for "guide" request from even "stranger";
-	    elsif (! $member_p &&
+	    elsif ((! $member_p) &&
 		   ($Envelope{'mode:req:guide'} || $Envelope{'req:guide'})) {
 		&GuideRequest(*Envelope);
 	    }
@@ -219,7 +233,12 @@ sub ModeBifurcate
 	else {
 	    &Log("Error: \$PERMIT_POST_FROM is unknown type.");
 	}
+
+	# to ensure the unique Date: (since the smallest unit is second).
+	if ($DATE_TYPE =~ /distribute-date/) { sleep 1;}
     }
+
+    &LogFileNewSyslog if $LOGFILE_NEWSYSLOG_LIMIT; # log file turn over
 }
 
 ####### Section: Main Functions
@@ -238,10 +257,10 @@ sub LoadConfig
     }
 
     # site_init
-    for (@LIBDIR) { 
-	if (-r "$_/site_init.ph") { 
-	    &Log("require $_/sit_init.ph") if $debug;
-	    require($SiteInitPath = "$_/site_init.ph");
+    if ($SiteInitPath = &SearchFileInLIBDIR("site_init.ph")) {
+	if (-r $SiteInitPath) { 
+	    &Log("require $SiteInitPath") if $debug;
+	    require($SiteInitPath);
 	}
     }
 
@@ -250,14 +269,16 @@ sub LoadConfig
 	require("$DIR/config.ph");
     }
     else {
-	print STDERR "Sorry, FML 2.1 Release requires \$DIR/config.ph\n";
+	print STDERR "I cannot read $DIR/config.ph\n" if !-r "$DIR/config.ph";
+	print STDERR "no $DIR/config.ph exist?\n" if !-f "$DIR/config.ph";
+	print STDERR "FYI: FML Release 2 Release requires \$DIR/config.ph\n";
 	exit 1;
     }
 
-    for (@LIBDIR) { 
-	if (-r "$_/sitedef.ph") { 
-	    &Log("require $_/sitedef.ph") if $debug;
-	    require($SitedefPath = "$_/sitedef.ph");
+    if ($SitedefPath = &SearchFileInLIBDIR("sitedef.ph")) {
+	if (-r $SitedefPath) { 
+	    &Log("require $SitedefPath") if $debug;
+	    require($SitedefPath);
 	}
     }
 
@@ -294,13 +315,15 @@ sub SetDefaults
 
     # Architecture Dependence;
     $UNISTD = $HAS_ALARM = $HAS_GETPWUID = $HAS_GETPWGID = 1;
-
+    
     # REQUIRED AS DEFAULTS
     %SEVERE_ADDR_CHECK_DOMAINS = ('or.jp', +1, 'ne.jp', +1);
     $REJECT_ADDR  = 'root|postmaster|MAILER-DAEMON|msgs|nobody';
     $REJECT_ADDR .= '|majordomo|listserv|listproc';
+    $REJECT_ADDR .= '|\S+\-subcribe|\S+\-unsubcribe|\S+\-help';
     $SKIP_FIELDS  = 'Received|Return-Receipt-To';
-    $ML_MEMBER_CHECK  = $CHECK_MESSAGE_ID = $USE_FLOCK = 1;
+    $ADD_URL_INFO = $ML_MEMBER_CHECK = $CHECK_MESSAGE_ID = $USE_FLOCK = 1;
+    $NOTIFY_MAIL_SIZE_OVERFLOW = 1;
 
     ### default distribution and command mode
     $PERMIT_POST_FROM    = $PERMIT_COMMAND_FROM    = "members_only";
@@ -317,13 +340,14 @@ sub SetDefaults
 
     @DenyProcedure = ('library');
     @HdrFieldsOrder =	# rfc822; fields = ...; Resent-* are ignored;
-	('Return-Path', 'Date', 'Posted', 
+	('Return-Path', 'Received',
+	 'Date', 'Posted', 'X-Posted', 'X-Original-Date',
 	 'From', 'Reply-To', 'Subject', 'Sender', 
 	 'To', 'Cc', 'Errors-To', 'Message-Id', 'In-Reply-To', 
 	 'References', 'Keywords', 'Comments', 'Encrypted',
 	 ':XMLNAME:', ':XMLCOUNT:', 'X-MLServer', 
 	 'XRef', 'X-Stardate', 'X-ML-Info', 
-	 'X-MLCP-Version', 'X-MLCP',
+	 'X-Mailer',
 	 ':body:', ':any:', 
 	 'X-Authentication-Warning',
 	 'Mime-Version', 'Content-Type', 'Content-Transfer-Encoding',
@@ -348,8 +372,10 @@ sub GetTime
     #     (void) sprintf(tbuf, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
     #                     tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min);
     # 
-    $CurrentTime = sprintf("%04d%02d%02d%02d%02d", 
+    $CurrentTime  = sprintf("%04d%02d%02d%02d%02d", 
 			   1900 + $year, $mon + 1, $mday, $hour, $min);
+    $PCurrentTime = sprintf("%04d%02d%02d%02d%02d%02d", 
+			    1900 + $year, $mon + 1, $mday, $hour, $min, $sec);
 }
 
 sub InitConfig
@@ -361,7 +387,10 @@ sub InitConfig
     if ($0 =~ m%^(.*)/(.*)%) { $FML = $2;}
 
     # a little configuration before the action
-    if ($USE_FML_WITH_FMLSERV) {
+    if ($FML_UMASK || $UMASK) {
+	$FML_UMASK ? umask($FML_UMASK) : umask($UMASK);
+    }
+    elsif ($USE_FML_WITH_FMLSERV) {
 	umask(007); # rw-rw----
     }
     else {
@@ -374,27 +403,34 @@ sub InitConfig
 	exit 0;
     }
 
-    # set architechture
-    if ($CPU_TYPE_MANUFACTURER_OS =~ /solaris2/i) { $COMPAT_ARCH = SOLARIS2;}
+    # set architechture if not defined
+    if (! $COMPA_ARCH) {
+	if ($CPU_TYPE_MANUFACTURER_OS =~ /(sysv4|solaris2)/i) {
+	    $COMPAT_ARCH = "SOLARIS2";
+	}
+	elsif ($CPU_TYPE_MANUFACTURER_OS =~ /windowsnt4$/i) {
+	    $COMPAT_ARCH = "WINDOWS_NT4";
+	}
+    }
 
     ### Options
     &SetOpts;
 
     # load architecture dependent default 
     # here for command line options --COMPAT_ARCH
-    if ($COMPAT_ARCH)  { require "arch/$COMPAT_ARCH/depend.pl";}
+    if ($COMPAT_ARCH)  { require "sys/$COMPAT_ARCH/depend.pl";}
 
     &eval('&GetPeerInfo;') if $LOG_CONNECTION;
     if ($DUMPVAR) { require 'dumpvar.pl'; &dumpvar('main');}
     if ($debug)   { require 'libdebug.pl';}
     if ($_cf{"opt:b"} eq 'd') { &use('utils'); &daemon;} # become daemon;
 
-    &GetTime;			        # Time
-
     # COMPATIBILITY
     if ($COMPAT_CF1 || ($CFVersion < 2))   { &use('compat_cf1');}
     if ($CFVersion < 3) { &use('compat_cf2');}
     if ($COMPAT_FML15) { &use('compat_cf1'); &use('compat_fml15');}
+
+    &GetTime;			        # Time, (may be for compatible codes)
 
     push(@MAIL_LIST_ALIASES, @PLAY_TO);
     unshift(@ARCHIVE_DIR, $ARCHIVE_DIR);
@@ -417,9 +453,8 @@ sub InitConfig
     ### CFVersion 3
     ### DEFINE INTERNAL FLAG FOR THE USE $DIR/members or $DIR/actives ?
     ### $ML_MEMBER_CHECK is internal variable to indicate file relation
-    if ($REJECT_POST_HANDLER =~ /auto.*regist/i ||
-	$REJECT_COMMAND_HANDLER =~ /auto.*regist/i) {
-	$ML_MEMBER_CHECK = 0;
+    if (&AutoRegistrableP) {
+	$ML_MEMBER_CHECK = 0;	# backward
 	$touch = "${ACTIVE_LIST}_is_dummy_when_auto_regist";
 	&Touch($touch) if ! -f $touch;
     }
@@ -437,13 +472,6 @@ sub InitConfig
     $LOG_MESSAGE_ID = $LOG_MESSAGE_ID || "$VARRUN_DIR/msgidcache";#important;
     $REJECT_ADDR_LIST = $REJECT_ADDR_LIST || "$DIR/spamlist";
     $FML .= "[".(split(/\@/, $MAIL_LIST))[0]."]"; # For tracing Process Table
-
-    # Turn Over log file (against too big)
-    if ((stat($LOG_MESSAGE_ID))[7] > 50*100) { # once per about 100 mails.
-	&use('newsyslog');
-	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
-	&Touch($LOG_MESSAGE_ID);
-    }
 
     # initialize some arrays; if auto-regist is clear here, we reset;
     &AdjustActiveAndMemberLists;
@@ -470,21 +498,22 @@ sub Parsing { &Parse;}
 sub Parse
 {
     $0 = "$FML: Parsing header and body <$LOCKFILE>";
-    local($bufsiz, $buf, $p);
+    local($bufsiz, $buf, $p, $maxbufsiz);
+
+    $maxbufsiz = &ATOI($INCOMING_MAIL_SIZE_LIMIT) if $INCOMING_MAIL_SIZE_LIMIT;
 
     undef $Envelope{'Body'};
     while ($p = sysread(STDIN, $_, 1024)) {
 	$bufsiz += $p; 
-	
-	if ($INCOMING_MAIL_SIZE_LIMIT && 
-	    ($bufsiz > $INCOMING_MAIL_SIZE_LIMIT)) {
+
+	if ($INCOMING_MAIL_SIZE_LIMIT && ($bufsiz > $maxbufsiz)) {
 	    $Envelope{'trap:mail_size_overflow'} = 1;
 	    last;
 	}
 
 	$Envelope{'Body'} .= $_;
     }
-    
+
     # Split buffer to Header and Body
     $p = index($Envelope{'Body'}, "\n\n");
     $Envelope{'Header'} = substr($Envelope{'Body'}, 0, $p + 1);
@@ -499,15 +528,20 @@ sub GetFieldsFromHeader
 
     $0 = "$FML: GetFieldsFromHeader <$LOCKFILE>";
 
-    # misc
-    if ($SUPERFLUOUS_HEADERS) { $hdr_entry = join("|", @HdrFieldsOrder);}
+    # To ensure non exsistence
+    for (split(/\|/, $SKIP_FIELDS)) { &DELETE_FIELD($_);}
+
+    # pass all fields through
+    if ($SUPERFLUOUS_HEADERS || $PASS_ALL_FIELDS_IN_HEADER) { 
+	$hdr_entry = join("|", @HdrFieldsOrder);
+    }
 
     ### Header Fields Extraction
     $s = "$Envelope{'Header'}\n";
     $* = 0;			# match one line
     if ($s =~ /^From\s+(\S+)/i) {
+	$Envelope{'UnixFrom'} = $UnixFrom = $1;
 	$s =~ s/^From\s+.*//i;
-	$Envelope{'UnixFrom'} = $Unix_From = $1;
     }
 
     $s = "\n$s";		# tricky
@@ -531,11 +565,11 @@ sub GetFieldsFromHeader
 	# "Cc: ..\n Cc: ..\n" also may exist
 	$Envelope{"h:$field"} .= 
 	    $Envelope{"h:$field"} ? "\n${_}$value" : $value;
-	
+
 	next if /^($SKIP_FIELDS):/i;
 
 	# hold fields without in use_fields if $SUPERFLUOUS_HEADERS is 1.
-	if ($SUPERFLUOUS_HEADERS) {
+	if ($SUPERFLUOUS_HEADERS || $PASS_ALL_FIELDS_IN_HEADER) {
 	    next if /^($hdr_entry)/i; # :\w+: not match
 	    $Envelope{'Hdr2add'} .= "${_}$value\n";
 	}
@@ -544,17 +578,16 @@ sub GetFieldsFromHeader
     ### Anyway set all the fields (96/09/24) ###
     local($f, $fc, $k, $v, $x);
     while (($k, $v) = each %hf) {
-	$_ =  $k;
-	s/^(\w)/ $x = $1, $x =~ tr%a-z%A-Z%, $x/e;
-	s/(\-\w)/$x = $1, $x =~ tr%a-z%A-Z%, $x/eg;
+	$_ = &FieldCapitalize($k);
  	$Envelope{"h:$_"} = $Envelope{"h:$k"};
     }
 
     ### fix Unix From
-    if (! $Envelope{'UnixFrom'}) {
-	$Envelope{'UnixFrom'} = $Unix_From = 
-	    $Envelope{'h:Return-Path:'} || $Envelope{'h:From:'} ||
-		"postmaster\@$FQDN";
+    if (! $Envelope{'UnixFrom'}) { # == !$UnixFrom
+	$UnixFrom = $Envelope{'h:return-path:'} || $Envelope{'h:From:'} ||
+	    "postmaster\@$FQDN";
+	$UnixFrom = $Unix_From = $Envelope{'UnixFrom'} = 
+	    &Conv2mailbox($UnixFrom, *Envelope);
     }
 }
 
@@ -578,10 +611,27 @@ sub FixHeaderFields
     }
 
     $e{'h:Return-Path:'} = "<$MAINTAINER>";        # needed?
-    $e{'h:Date:'}        = $MailDate;
-    $e{'h:Posted:'}      = $e{'h:date:'} || $e{'h:Date:'};
     $e{'h:Precedence:'}  = $PRECEDENCE || 'list';
-    # $e{'h:Lines:'}       = $e{'nlines'}; now in CheckCurrentProc (97/12/07)
+    # $e{'h:Lines:'}     = $e{'nlines'}; now in CheckCurrentProc (97/12/07)
+
+    # Date: field type definition
+    if ($DATE_TYPE eq 'original-date') {
+	$e{'h:Date:'} = $e{'h:date:'};
+    }
+    elsif ($DATE_TYPE eq 'received-date+x-posted') {
+	$e{'h:Date:'}     = $MailDate;
+	$e{'h:X-Posted:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
+    elsif ($DATE_TYPE eq 'received-date+x-original-date') {
+	$e{'h:Date:'}     = $MailDate;
+	$e{'h:X-Original-Date:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
+    elsif (($DATE_TYPE eq 'received-date') ||
+	   ($DATE_TYPE eq 'received-date+posted') ||
+	   (!$DATE_TYPE)) { # default (backward)
+	$e{'h:Date:'}   = $MailDate;
+	$e{'h:Posted:'} = $e{'h:date:'} || $e{'h:Date:'};
+    }
 
     # Some Fields need to "Extract the user@domain part"
     # Addr2Reply: is used to pass to sendmail as the recipient
@@ -589,6 +639,27 @@ sub FixHeaderFields
     $e{'macro:x'}        = $e{'tmp:x'}; 
     &Log("Gecos [$e{'macro:x'}]") if $debug;
     $e{'Addr2Reply:'}    = &Conv2mailbox($e{'h:reply-to:'},*e)||$From_address;
+
+    # KAKUSHI(SECRET) OPTION :) (UNDER DEVELOPMENT)
+    # use Return-Path: as the sender for authentication
+    if ($SENDER_AUTH_TYPE eq 'strict-envelope-from') {
+	$_ = &Conv2mailbox($Envelope{'h:return-path:'}, *e);
+	if ($_) {
+	    $From_address = $_;
+	}
+	else {
+	    &Log("\$SENDER_AUTH_TYPE eq 'strict-envelope-from'");
+	    &Log("INVALID Return-Path:<$_>");
+	    &Mesg(*e, "YOU ARE NOT A MEMBER!");
+	    $DO_NOTHING = 1;
+	}
+
+    }
+    elsif ($SENDER_AUTH_TYPE eq 'envelope-from-or-from') {
+	for ($UnixFrom, $From_address) {
+	    &MailListMemberP($_) && ($From_address = $_, last);
+	}
+    }
 
     # To: $MAIL_LIST for readability;
     # &RewriteField(*e, 'Cc') unless $NOT_REWRITE_CC;
@@ -624,9 +695,15 @@ sub FixHeaderFields
 		&StripMIMESubject(*e);
 	    }
 	    else { # e.g. Subject: [Elena:003] E.. U so ...;
+		print STDERR "IN: $_\n" if $debug;
 		$e{'h:Subject:'} = &StripBracket($_);
+		print STDERR "OUT: $e{'h:Subject:'}\n" if $debug;
 	    }
 	} 
+	# Even if pass through, always strip of Re:* 
+	else {
+	    $e{'h:Subject:'} = &CutOffRe($_);
+	}
     }
 
     # Obsolete Errors-to:, against e.g. BBS like a nifty
@@ -640,11 +717,22 @@ sub FixHeaderFields
     # Set Control-Address for reply, notify and message
     $e{'CtlAddr:'} = &CtlAddr;
 
-    ### MAILING LIST CONTROL PROTOCOL (IF USED)
-    if ($USE_MAILING_LIST_CONTROL_PROTOCOL) {
-	&use('mlcp');
-	&GenMLCP(*e);
+    ### USER MACROS: &COPY_FIELD(old, new);
+    local($old, $new);
+    while (($old,$new) = each %HdrFieldCopy) {
+	&Debug("COPY_FIELD: \$e{\"h: $old => $new\"}") if $debug;
+	$e{"h:$new:"} = $e{"h:$old:"};
+	$e{"h:$new:"} =~ s/\n$old:/\n$new:/gi;
     }
+}
+
+sub FieldCapitalize
+{	
+    local($_) =  @_;
+    s/^(\w)/ $x = $1, $x =~ tr%a-z%A-Z%, $x/e;
+    s/(\-\w)/$x = $1, $x =~ tr%a-z%A-Z%, $x/eg;
+    $_ =~ s/^X-ML-/X-ML-/i; # X-ML- is an exception. to avoid dup of X-M{L,;}
+    $_;
 }
 
 sub StripBracket
@@ -665,8 +753,19 @@ sub StripBracket
     # cut out all the e.g. [BRACKET:\d] form;
     s/$pat//g;
 
-    while (s/\s*Re:\s*Re:\s*/Re: /gi) { ;} #'/gi' for RE: Re: re: ;
-    s/Re:\s+/Re: /; # canonicalize it to "Re: ";
+    $_ = &CutOffRe($_);
+}
+
+sub CutOffRe
+{
+    local($_) = @_;
+
+    # BBS style? CUT OFF 
+    s/^\s*Re\[\d+\]:\s+/Re: /gi;
+    s/^\s*Re\^\d+:\s+/Re: /gi;
+
+    while (s/^\s*Re:\s*Re:\s*/Re: /gi) { ;} #'/gi' for RE: Re: re: ;
+    s/^\s*Re:\s+/Re: /; # canonicalize it to "Re: ";
 
     $_;
 }
@@ -679,18 +778,31 @@ sub CheckCurrentProc
     local($limit, $p, $buf, $boundary, $nclines, $cc);
 
     # MIME skip mode; against automatic-MIME-encapsulated fool MUA
-    if ($e{'h:Content-Type:'} =~ /boundary=\"(\S+)\"/) { 
+    if ($e{'h:content-type:'} =~ /boundary=\"(.*)\"/i ||
+	$e{'h:content-type:'} =~ /boundary=\s*(\S+)/i) {
 	$boundary = $1;
 	$boundary = "--$boundary";
 	$e{'MIME:boundary'} = $boundary;
     }
-
+    elsif ($e{'h:content-type:'} =~ /multipart/i) {
+	&Log("cannot get boundary string of Content-Type");
+	&Log("Content-Type: $e{'h:content-type:'}");
+    }
+    
     # Check the range to scan
     $limit =  $GUIDE_CHECK_LIMIT > $COMMAND_CHECK_LIMIT ? 
 	$GUIDE_CHECK_LIMIT  : $COMMAND_CHECK_LIMIT;
 
+    # dot-qmail(5) ~alias/.uja-default emulates uja-help@domain ("-> #help")
+    if ($USE_DOT_QMAIL_EXT && 
+	(!&AddressMatch($MAIL_LIST, $ENV{'RECIPIENT'}))) { 
+	&Log("sets in dot-qmail-ext") if $debug_qmail;
+	&use('qmail'); 
+	&DotQmailExt(*Envelope);
+    }
+
     # search the location of $limit's "\n";
-    $limit += 5; # against MIME
+    $limit += 10; # against MIME
     $p = 0;
     while ($limit-- > 0) { 
 	if (index($e{'Body'}."\n", "\n", $p + 1) > 0) {
@@ -702,18 +814,20 @@ sub CheckCurrentProc
     }
     $buf = substr($e{'Body'}, 0, $p + 1); # +1 for the last "\n";
 
-    $mime_skip = 0;
-
     # check only the first $limit lines.
+    local($found, $mime_skip);
     for (split(/\n/, $buf)) {
 	print STDERR "INPUT BUF> $_\n" if $debug;
 
 	if ($boundary) { # if MIME skip mode;
-	    if ($_ eq $boundary) { $mime_skip++; next;}
+	    if ($_ eq $boundary) { $found++; $mime_skip++; next;}
 	    if (/^Content-Type:/i && $mime_skip) { next;}
 	    # skip the null line after the first MIME separator
 	    if ($mime_skip) { $mime_skip = 0; next;} 
 	}
+
+	# skip before the first MIME boundary
+	next if $boundary && !$found;
 
 	$cc++;
 	print STDERR " SCAN BUF> $_ ($cc line)\n\n" if $debug;
@@ -721,6 +835,10 @@ sub CheckCurrentProc
 	# Guide Request from the unknown
 	if ($GUIDE_CHECK_LIMIT-- > 0) { 
 	    $e{'mode:req:guide'} = 1 if /^\#\s*$GUIDE_KEYWORD\s*$/i;
+
+	    # accept 'guide' under --ctladdr;
+	    $e{'mode:req:guide'} = 1
+		if $e{'mode:ctladdr'} && /^\s*$GUIDE_KEYWORD\s*$/i;
 	}
 
 	# Command or not is checked within the first 3 lines.
@@ -751,14 +869,56 @@ sub CheckCurrentProc
     if ($e{'trap:mail_size_overflow'}) {
 	&use('error');
 	&NotifyMailSizeOverFlow(*e);
-	$DO_NOTHING = 1;
-	return;
+
+	if ($ANNOUNCE_MAIL_SIZE_OVERFLOW) {
+	    &AnnounceMailSizeOver(*e); # call &Distribute;
+	}
+	else {
+	    $DO_NOTHING = 1;
+	    return $NULL;
+	}
     }
+
+    # Against a lot of mails for MIME partial, e.g. Outlook
+    # Content-Type: message/partial; number=1; total=6; ...
+    if ($e{'h:content-type:'} =~ /\/partial\s*;/ && 
+	$INCOMING_MAIL_SIZE_LIMIT) {
+	local($n, $total, $bufsiz);
+
+	$e{'h:content-type:'} =~ s/number=(\d+)/$n = $1/e;
+	$e{'h:content-type:'} =~ s/total=(\d+)/$total = $1/e;
+	$bufsiz = length($Envelope{'Body'}) * $total;
+
+	if ($bufsiz > &ATOI($INCOMING_MAIL_SIZE_LIMIT)) {
+	    &Log("reject for too large size mail");
+	    &Log("partial message's <$n/$total> total mail size seems too large");
+	    &Log("evaluated whole size $bufsiz > \$INCOMING_MAIL_SIZE_LIMIT[$INCOMING_MAIL_SIZE_LIMIT]");
+
+	    # WARNING in n ==1 partial case.
+	    if ($n == 1 && $NOTIFY_MAIL_SIZE_OVERFLOW) {
+		&use('error');
+		&NotifyMailSizeOver;
+	    } 
+
+	    if ($n == 1 && $ANNOUNCE_MAIL_SIZE_OVERFLOW) {
+		&use('error');
+		&AnnounceMailSizeOver(*e); # call &Distribute;
+	    }
+	    else {
+		$DO_NOTHING = 1;
+	    }
+	}
+	else {
+	    &Log("partial message but the whole size seems enough small")
+		if $debug;
+	}
+    }
+
 
     ### WE SHOULD REJCECT "CANNOT IDENTIFIED AS PERSONAL" ADDRESSES;
     ###   In addition, we check another atack possibility;
-    ###      e.g. majorodmo <-> fml-ctl 
-    if ($From_address =~ /^($REJECT_ADDR)\@/i) {
+    ###      e.g. majorodmo,listproc,list-subscribe <-> fml-ctl 
+    if ($REJECT_ADDR && $From_address =~ /^($REJECT_ADDR)\@/i) {
 	&Log("Mail From Addr to Reject [$&], FORW to Maintainer");
 	&Warn("Mail From Addr to Reject [$&]", &WholeMail);
 	$DO_NOTHING = 1;
@@ -774,11 +934,11 @@ sub CheckCurrentProc
     # AGAINST SPAM MAILS
     if (-f $REJECT_ADDR_LIST) {
 	if (&RejectAddrP($From_address) ||
-	    &RejectAddrP($Unix_From)) {
-	    $s="Reject spammers: UnixFrom=[$Unix_From], From=[$From_address]";
+	    &RejectAddrP($UnixFrom)) {
+	    $s="Reject spammers: UnixFrom=[$UnixFrom], From=[$From_address]";
 	    &Warn("Spam mail from a spammer is rejected $ML_FN",
 		  "Reject Spammers:\n".
-		  "   UnixFrom\t$Unix_From\n   From\t\t$From_address\n".
+		  "   UnixFrom\t$UnixFrom\n   From\t\t$From_address\n".
 		  &WholeMail);
 	    &Log($s);
 	    $DO_NOTHING = 1;
@@ -816,10 +976,10 @@ sub CheckCurrentProc
     ###### LOOP CHECK PHASE 2
     # now before flock();
     if ((! $NOT_USE_UNIX_FROM_LOOP_CHECK) && 
-	&AddressMatch($Unix_From, $MAINTAINER)) {
-	&Log("WARNING: UNIX FROM Loop[$Unix_From == $MAINTAINER]");
+	&AddressMatch($UnixFrom, $MAINTAINER)) {
+	&Log("WARNING: UNIX FROM Loop[$UnixFrom == $MAINTAINER]");
 	&Warn("WARNING: UNIX FROM Loop",
-	      "UNIX FROM[$Unix_From] == MAINTAINER[$MAINTAINER]\n\n".
+	      "UNIX FROM[$UnixFrom] == MAINTAINER[$MAINTAINER]\n\n".
 	      &WholeMail);
 	exit 0;
     }
@@ -924,7 +1084,6 @@ sub CompatFMLv1P
 }
 
 # Distribute mail to members (fml.pl -> libdist.pl)
-# Distribute mail to members (fml.pl -> libdist.pl)
 sub Distribute
 {
     local(*e, $mode, $compat_hml) = @_;
@@ -947,10 +1106,10 @@ sub Distribute
     if ($debug) { @c = caller; &Log("Distritute called from $c[2] ");}
 
     if ($mode eq 'permit from members_only') {
-        $Rcsid .= "; post only from members";
+	$Rcsid .= "; post only (only members can post)";
     }
     elsif ($mode eq 'permit from anyone') {
-	$Rcsid .= "; post only from anyone"; 
+	$Rcsid .= "; post only (anyone can post)"; 
     }
     elsif ($mode eq 'permit from moderator') {
 	$Rcsid =~ s/^(.*)(\#\d+:\s+.*)/$1."(moderated mode)".$2/e;
@@ -959,7 +1118,7 @@ sub Distribute
     }
     ### NOT REMOVE FOR BACKWARD?
     else {
-	$Rcsid .= "; post from members + commands"; # default ;
+	$Rcsid .= "; post + commands (members only)"; # default ;
     }
 
     if ($MAIL_LIST eq $CONTROL_ADDRESS) {
@@ -1028,9 +1187,15 @@ sub ExecNewProcess
 # @MEMBER_LIST = ($MEMBER_LIST) unless @MEMBER_LIST;
 sub AdjustActiveAndMemberLists
 {
-    local($f);
+    local($f, $status);
 
-    if (! $ML_MEMBER_CHECK) { 
+    if ($status = &AutoRegistrableP) {
+	# automatic asymmetric registration
+	if ($status eq "auto_asymmetric_regist") {
+	    $FILE_TO_REGIST = $FILE_TO_REGIST || $ACTIVE_LIST;
+	    &Touch($FILE_TO_REGIST) unless -f $FILE_TO_REGIST;
+	}
+
 	$ACTIVE_LIST = $MEMBER_LIST;
 	for (@MEMBER_LIST) {
 	    grep(/$_/, @ACTIVE_LIST) || push(@ACTIVE_LIST, $_);
@@ -1095,6 +1260,25 @@ sub DoMailListMemberP
 sub MailListMemberP { return &DoMailListMemberP(@_, 'm');}
 sub MailListActiveP { return &DoMailListMemberP(@_, 'a');}
 
+sub NonAutoRegistrableP { ! &AutoRegistrableP;}
+sub AutoRegistrableP
+{
+    if ($Envelope{'mode:ctladdr'} && 
+	($REJECT_POST_HANDLER    eq 'auto_asymmetric_regist' ||
+	 $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist')) {
+	"auto_asymmetric_regist";
+    }
+    elsif ($REJECT_POST_HANDLER =~ /auto_regist/i ||
+	   $REJECT_POST_HANDLER =~ /autoregist/i ||
+	   $REJECT_COMMAND_HANDLER =~ /auto_regist/i ||
+	   $REJECT_COMMAND_HANDLER =~ /autoregist/i) {
+	1;
+    }
+    else {
+	0;
+    }
+}
+
 sub AutoRegistHandler
 {
     if ($debug) { @c = caller; &Log("AutoRegistHandler called from $c[2]");}
@@ -1116,7 +1300,7 @@ sub RejectHandler
 sub IgnoreHandler
 {
     &Log("Ignored: \"From:\" field is not member");
-    &Warn("NOT MEMBER article from $From_address $ML_FN", &WholeMail);
+    &Warn("Ignored NOT MEMBER article from $From_address $ML_FN", &WholeMail);
 }
 
 # CheckMember(address, file)
@@ -1136,7 +1320,10 @@ sub IgnoreHandler
 sub CheckMember
 {
     local($address, $file) = @_;
-    local($addr, $has_special_char);
+    local($addr, $has_special_char, $auto_registrable);
+
+    # mode
+    $auto_registrable = &AutoRegistrableP;
 
     # more severe check;
     $address =~ s/^\s*//;
@@ -1148,11 +1335,10 @@ sub CheckMember
     }
 
     &Open(FILE, $file) || return 0;
-
   getline: while (<FILE>) {
       chop; 
 
-      if ((!$ML_MEMBER_CHECK) || $SubstiteForMemberListP) { 
+      if ($auto_registrable || $SubstiteForMemberListP) { 
 	  /^\#\s*(.*)/ && ($_ = $1);
       }
 
@@ -1260,10 +1446,14 @@ sub Mesg
 { 
     local(*e, $s) = @_; 
     $e{'message'} .= "$s\n";
+    $MesgBuf .= "$s\n";
 
     # dup to admins
     $e{'message:to:admin'} .= "$s\n" if $e{'mode:notify_to_admin_also'};
 }
+
+sub MesgSetBreakPoint { undef $MesgBuf;} 
+sub MesgGetABP { $MesgBuf;}	# After Break Point
 
 # Forwarded and Warned to Maintainer;
 sub Warn { &Forw(@_);}
@@ -1272,28 +1462,44 @@ sub Forw { &Sendmail($MAINTAINER, $_[0], $_[1]);}
 # Notification of the mail on warnigs, errors ... 
 sub Notify
 {
+    local($buf) = @_;
     local($not_send, $addr);
     local($to, @to, $s, $proc, $m);
 
+    # special flag
+    return $NULL if $Envelope{'mode:disablenotify'};
+
     # refer to the original(NOT h:Reply-To:);
     $to   = $Envelope{'message:h:to'} || $Envelope{'Addr2Reply:'};
-    @to   = split(/\s+/, $Envelope{'message:h:@to'});
-    $s    = $Envelope{'message:h:subject'} || "fml Status report $ML_FN";
+
+    # once only (e.g. used in chaddr)
+    @to   = split(/\s+/, $Envelope{'message:h:@to'}); 
+    undef $Envelope{'message:h:@to'};
+
+    $s    = $Envelope{'message:h:subject'} || "Fml status report $ML_FN";
     $proc = $PROC_GEN_INFO || 'GenInfo';
     $GOOD_BYE_PHRASE = $GOOD_BYE_PHRASE || "--${MAIL_LIST}, Be Seeing You!   ";
 
     # send the return mail to the address (From: or Reply-To:)
     # (before it, checks whether the return address is not ML nor ML-Ctl)
     # Error Message is set to $Envelope{'error'} if loop is detected;
-    if ($Envelope{'message'} && 
+    if (($buf || $Envelope{'message'}) && 
 	&CheckAddr2Reply(*Envelope, $to, @to)) {
 	$REPORT_HEADER_CONFIG_HOOK .= 
 	    q# $le{'Body:append:files'} = $Envelope{'message:append:files'}; #;
-	&Mesg(*Envelope, "\n$GOOD_BYE_PHRASE $FACE_MARK\n");
-	&use('utils');
+	
 	$Envelope{'trailer'} = &$proc;
-	&Sendmail($to, $s, $Envelope{'message'}, @to);
+
+	&Sendmail($to, 
+		  $s, 
+		  ($buf || $Envelope{'message'}) .
+		  "\n$GOOD_BYE_PHRASE $FACE_MARK\n", 
+		  @to);
     }
+
+    # if $buf is given, ignore after here.
+    # admin error report is done in the last of fml.pl, &Notify(); 
+    return if $buf;
 
     # send the report mail ot the maintainer;
     $Envelope{'error'} .= $m;
@@ -1303,6 +1509,118 @@ sub Notify
 
     if ($Envelope{'message:to:admin'}) {
 	&Warn("Fml System Message $ML_FN", $Envelope{'message:to:admin'});
+    }
+}
+
+# Generate additional information for command mail reply.
+# return the STRING
+sub GenInfo
+{
+    local($s, $c, $d, $del);
+    local($message, $has_ctladdr_p, $addr, $trap);
+
+    # initialize variables
+    $del     = ('*' x 60);
+
+    # if has control-address
+    if ($CONTROL_ADDRESS) {
+	$addr = $Envelope{'CtlAddr:'};
+	$has_ctladdr_p = 1;
+    }
+    # if !control-address but MAIL_LIST==CONTROL_ADDRESS
+    elsif ((! $CONTROL_ADDRESS) && &CompatFMLv1P) { 
+	$addr = $MAIL_LIST;
+	$has_ctladdr_p = 1;
+    }
+    elsif ((! $CONTROL_ADDRESS) && $MAIL_LIST_ACCEPT_COMMAND) {
+	$addr = $MAIL_LIST;
+	$has_ctladdr_p = 1;
+    }
+
+    # help style;
+    $message = $Envelope{"mode:fmlserv"} ? "help": "\# help";
+    if ($MAIL_LIST =~ /^(fmlserv|majordomo|listserv)/i) {
+	$trap = '';
+    }
+    elsif ($CONTROL_ADDRESS eq $NULL || $MAIL_LIST eq $CONTROL_ADDRESS) {
+	$trap = "\#";
+    }
+    elsif ((! $CONTROL_ADDRESS) && $MAIL_LIST_ACCEPT_COMMAND) {
+	$trap = "\#";
+    }
+    else {
+	$trap = '';
+    }
+
+    $s .= "\n$del\n";
+
+    # URL Extentions
+    if ($ADD_URL_INFO) {
+	if ($Envelope{'mode:stranger'}) {
+	    $URLInfo = ";\n\t<mailto:$MAINTAINER>";
+	    $URLComInfo = &GenXMLInfo;
+	}
+	# not stranger and has ctladdr (From: is a member).
+	elsif ($has_ctladdr_p) {
+	    $s .= "\n";
+	    $s .= "       Help: <mailto:$addr?body=${trap}help>\n";
+	    $s .= "Unsubscribe: <mailto:$addr?body=${trap}unsubscribe>\n";
+	    $s .= "\n";
+
+	    $URLInfo = ";\n\thelp=<mailto:$addr?body=${trap}help>";
+	    $URLComInfo = &GenXMLInfo;
+	}
+	# not stranger and has no ctladdr (From: is a member).
+	else {
+	    $URLInfo = ";\n\t<mailto:$MAINTAINER>";
+	}
+    }
+    # RFC2369; Proposed Standard (so fml optional)
+    if ($USE_RFC2369) {
+	if ($Envelope{'mode:stranger'}) {
+	    &DefineDefaultField("List-Subscribe", 
+				"<mailto:$addr?body=${trap}subscribe>");
+	}
+	else {
+	    &DefineDefaultField("List-Help", 
+				"<mailto:$addr?body=${trap}help>");
+	    &DefineDefaultField("List-Unsubscribe", 
+				"<mailto:$addr?body=${trap}unsubscribe>");
+	}
+    }
+
+    $s .= "If you have any questions or problems,\n";
+    $s .= "   please make a contact with $MAINTAINER\n";
+
+    if (! $Envelope{'mode:stranger'} && $has_ctladdr_p) { # a member
+	$s .= "       or \n";
+	$s .= "   send a mail with the body \"$message\"(without quotes) to\n";
+	$s .= "      $addr\n";
+	$s .= "      (here is the automatic reply, so more preferable)\n\n";
+	$s .= "e.g. on a Unix Machine\n";
+	$s .= "(shell prompt)\% echo \"$message\" |Mail $addr";
+    }
+
+    $s .= "\n\n$del\n";
+
+    $s;
+}
+
+sub GenXMLInfo
+{
+    if ($X_ML_INFO_MESSAGE) { 
+	$X_ML_INFO_MESSAGE;
+    }
+    elsif ($Envelope{'mode:stranger'} ||
+	   (!$CONTROL_ADDRESS && 
+	      $PERMIT_POST_FROM =~ /^(anyone|members_only)$/)) {
+	"If you have a question,\n\tplease make a contact with $MAINTAINER".
+	    ";\n\t<mailto:$MAINTAINER>";
+    }
+    else {
+	"If you have a question, send a mail with the body\n".
+	    "\t\"\# help\" (without quotes) to the address ". &CtlAddr .
+		$URLInfo;
     }
 }
 
@@ -1354,7 +1672,7 @@ sub Append2
 { 
     &Write2(@_, 1) || do {
 	local(@caller) = caller;
-	print STDERR "Append2(@_)::Error [@caller] \n";
+	print STDERR "Append2(@_)::Error caller=<@caller>\n";
     };
 }
 
@@ -1374,7 +1692,7 @@ sub Write2
     }
     else {
 	local(@caller) = caller;
-	print STDERR "Write2(@_)::Error [@caller] \n";
+	print STDERR "Write2(@_)::Error caller=<@caller>\n";
 	return 0;
     }
 
@@ -1436,11 +1754,42 @@ sub Copy
     1;
 }
 
+# mainly search e.g. "sendmail"
 sub SearchPath
 {
     local($prog, @path) = @_;
     for ("/usr/sbin", "/usr/lib", @path) {
 	if (-e "$_/$prog" && -x "$_/$prog") { return "$_/$prog";}
+    }
+}
+
+sub SearchFileInLIBDIR
+{
+    for (@LIBDIR) { 
+	&Debug("SearchFileInLIBDIR: <$_>/$_[0]") if $debug;
+	if (-f "$_/$_[0]") { return "$_/$_[0]";}
+    }
+    $NULL;
+}
+
+sub GetFirstMultipartBlock
+{
+    local(*e, $_) = @_;
+    if ($e{'MIME:boundary'}) {
+	$pb = index($_, $e{'MIME:boundary'});
+	$pb = index($_, "\n\n", $pb);
+	$pe = index($_, $e{'MIME:boundary'}, $pb);
+	if ($pb > 0 && $pe > 0) { 
+	    $_ = substr($_, $pb, $pe - $pb);
+	}
+	else {
+	    &Log("GetFirstMultipartBlock: invalid MIME/multipart message");
+	    $NULL;
+	}
+    }
+    else {
+	&Log("GetFirstMultipartBlock: invalid MIME/multipart message");
+	$NULL;
     }
 }
 
@@ -1470,15 +1819,54 @@ sub Debug
 
 sub ABS { $_[0] < 0 ? - $_[0] : $_[0];}
 
+sub ATOI 
+{
+    if ($_[0] eq '') {
+	return $NULL;
+    }
+    elsif ($_[0] =~ /^(\d+)$/i) {
+	$_[0];
+    }
+    elsif ($_[0] =~ /^(\d+)M$/i) {
+	 $1 * 1024 * 1024;
+    }
+    elsif ($_[0] =~ /^(\d+)K$/i) {
+	$1 * 1024;
+    }
+    else {	
+	&Log("ATOI: $_[0] is unknown type");
+    }
+}
+
 # eval and print error if error occurs.
 # which is best? but SHOULD STOP when require fails.
 sub use { require "lib$_[0].pl";}
 
+sub MkDir { &Mkdir(@_);}
 sub Mkdir
 {
-    $USE_FML_WITH_FMLSERV ? mkdir($_[0], 0770) : mkdir($_[0], 0700);
+    if ($_[1] ne '') { return &MkDirHier($_[0], $_[1]);}
+    &MkDirHier($_[0], $USE_FML_WITH_FMLSERV ? 0770 : 0700);
     if ($USE_FML_WITH_FMLSERV && $SPOOL_DIR eq $_[0]) { chmod 0750, $_[0];}
     if ($USE_FML_WITH_FMLSERV && $GID) { chown $<, $GID, $_[0];}
+}
+
+sub MkDirHier
+{
+    local($pat) = $UNISTD ? '/|$' : '\\\\|/|$'; # on UNIX or NT4
+
+    while ($_[0] =~ m:$pat:go) {
+	next if (!$UNISTD) && $` =~ /^[A-Za-z]:$/; # ignore drive letter on NT4
+
+	if ($` ne "" && !-d $`) {
+	    mkdir($`, $_[1] || 0777) || do { 
+		&Log("cannot mkdir $`: $!"); 
+		return 0;
+	    };
+	}
+    }
+
+    1;
 }
 
 # eval and print error if error occurs.
@@ -1552,30 +1940,99 @@ sub CtlAddr { &Addr2FQDN($CONTROL_ADDRESS);}
 sub Addr2FQDN { $_[0]? ($_[0] =~ /\@/ ? $_[0]: $_[0]."\@$FQDN") : $MAIL_LIST;}
 sub CutFQDN   { $_[0] =~ /^(\S+)\@\S+/ ? $1 : $_[0];}
 
+sub SRand
+{
+    local($i) = time;
+    $i = (($i & 0xff) << 8) | (($i >> 8) & 0xff) | 1;
+    srand($i + $$); 
+}
+
+sub LogFileNewSyslog
+{
+    $LOGFILE_NEWSYSLOG_LIMIT = &ATOI($LOGFILE_NEWSYSLOG_LIMIT);
+    if ($LOGFILE_NEWSYSLOG_LIMIT) {
+	if ((stat($LOGFILE))[7] > $LOGFILE_NEWSYSLOG_LIMIT) {
+	    require 'libnewsyslog.pl'; 
+	    &NewSyslog($LOGFILE);
+	    &Touch($LOGFILE);
+	}
+    }
+}
+
 ####### Section: Security 
+# anyway alias now (1998/05/03)
+sub MailLoopP { &DupMessageIdP;}
+
 # If O.K., record the Message-Id to the file $LOG_MESSAGE_ID);
-# message-id cache should be done for the mail with the real action
+# message-id cache should be done for mails in action
 sub CacheMessageId
 {
-    local($_) = $Envelope{'h:Message-Id:'};
-    s/[\<\>]//g; 
-    s/^\s+//;
-    &Append2($_, $LOG_MESSAGE_ID);
+    local(*e, $msgid) = @_;
+    local($id);
+
+    # checks
+    $id = $msgid || $e{'h:Message-Id:'};
+    $id || (&Log("Invalid Message-Id:<$id>"), return $NULL);
+    $id =~ s/[\<\>]//g;
+    $id =~ s/^\s+//;
+
+    if ($CachedMessageID{$id}) {
+	&Log("CacheMessageId: warning: duplicated input") if $debug_loop;
+	return 0;
+    }
+
+    # Turn Over log file (against too big);
+    # The default value is evaluated as "once per about 100 mails".
+    $MESSAGE_ID_CACHE_BUFSIZE = $MESSAGE_ID_CACHE_BUFSIZE || 60*100;
+    if ((stat($LOG_MESSAGE_ID))[7] > $MESSAGE_ID_CACHE_BUFSIZE) {
+	&use('newsyslog');
+	&NewSyslog'TurnOverW0($LOG_MESSAGE_ID);#';
+	&Touch($LOG_MESSAGE_ID);
+    }
+
+    $CachedMessageID{$id} = 1;
+    &Append2($id." \# pid=$$", $LOG_MESSAGE_ID);
+
+    if ($USE_LOG_MAIL) {
+	&use('logmail');
+	&MailCacheDir;
+    }
 }
 
 sub DupMessageIdP
 {
-    local($_) = $Envelope{'h:Message-Id:'};
-    s/[\<\>]//g; 
-    s/^\s+//;
+    local($status, $mid);
 
-    &Debug("DupMessageIdP::($_, $LOG_MESSAGE_ID)") if $debug;
+    # no check -> "return not looped"
+    $CHECK_MESSAGE_ID || return 0;
 
-    if (&CheckMember($_, $LOG_MESSAGE_ID)) {
+    local($mid) = $Envelope{'h:Message-Id:'};
+    $mid =~ s/[\<\>]//g; 
+    $mid =~ s/^\s+//;
+
+    &Debug("DupMessageIdP::($mid, $LOG_MESSAGE_ID)") if $debug;
+
+    # 1. scan current and 
+    if (-f $LOG_MESSAGE_ID) {
+	$status = &CheckMember($mid, $LOG_MESSAGE_ID);
+    }
+
+    # 2. scan all available caches
+    for $i (0 .. $NEWSYSLOG_MAX) {
+	if ($status) {
+	    last; # end if non null $status is returned.
+	}
+	elsif (-f "$LOG_MESSAGE_ID.$i") {
+	    $status = &CheckMember($mid, "$LOG_MESSAGE_ID.$i");
+	}
+    }
+
+    if ($status) {
 	&Debug("\tDupMessageIdP::(DUPLICATED == LOOPED)") if $debug;
-	local($s) = "Duplicated Message ID Detected";
+	local($s) = "Duplicated Message-ID is detected";
 	&Log("Loop Alert: $s");
-	&Warn("Loop Alert: $s", "[$s]".&WholeMail);
+	&Warn("Loop Alert: $s $ML_FN", 
+	      "$s in <$MAIL_LIST>.\n\n".&WholeMail);
 	1;
     }
     else {
@@ -1659,7 +2116,14 @@ sub SecureP
 	for (keys %SECURE_REGEXP) { next if !$_; return 1 if $s =~ /^($_)$/;}
     }
 
-    if ($s =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
+    # special hooks to reject some patterns
+    if (%INSECURE_REGEXP) {
+	for (keys %INSECURE_REGEXP) { next if !$_; return 0 if $s =~ /^($_)$/;}
+    }
+
+    # permit Email Address, 100.tar.gz, # command, # mget 100,last:10 mp ...
+    # if ($s =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
+    if ($s =~ /^[\#\s\w\-\.\,\@\:]+$/) {
 	1;
     }
     # since, this ; | is not checked when interact with shell in command.
@@ -1675,6 +2139,12 @@ sub SecureP
 	&Warn("Security Alert $ML_FN", "$s\n".('-' x 30)."\n". &WholeMail);
 	0;
     }
+}
+
+sub ValidAddrSpecP
+{
+    ($_[0] !~ /\s|\033\$[\@B]|\033\([BJ]/ && 
+     $_[0] =~ /^[\0-\177]+\@[\0-\177]+$/) ? 1 : 0;
 }
 
 sub GetPeerInfo
@@ -1741,35 +2211,113 @@ sub RejectAddrP
     0;
 }
 
-# require $USE_DISTRIBUTE_FILTER 
+# Called under $USE_DISTRIBUTE_FILTER is not null.
 # IF *HOOK is not defined, we apply default checkes.
+# The function name looks strange but this is derived from
+# that "filtering for %Envelope hash, not only mail message/body".
 sub EnvelopeFilter
 {
     local(*e, $mode) = @_;
-    local($r);
+    local($p, $r, $org_mlp);
 
-    # force one line match
+    # force plural line match
+    $org_mlp = $*;
     $* = 0;
 
-    if ($mode eq 'distribute' && $REJECT_DISTRIBUTE_FILTER_HOOK) {
-	$r = &EvalRejectFilterHook(*e, *REJECT_DISTRIBUTE_FILTER_HOOK);
+    # compatible 
+    # appending twice must be no problem since statments is "return".
+    $DISTRIBUTE_FILTER_HOOK .= $REJECT_DISTRIBUTE_FILTER_HOOK;
+    $COMMAND_FILTER_HOOK    .= $REJECT_COMMAND_FILTER_HOOK;
+
+    if ($mode eq 'distribute' && $DISTRIBUTE_FILTER_HOOK) {
+	$r = &EvalRejectFilterHook(*e, *DISTRIBUTE_FILTER_HOOK);
     }
-    elsif ($mode eq 'command' && $REJECT_COMMAND_FILTER_HOOK) {
-	$r = &EvalRejectFilterHook(*e, *REJECT_COMMAND_FILTER_HOOK);
+    elsif ($mode eq 'command' && $COMMAND_FILTER_HOOK) {
+	$r = &EvalRejectFilterHook(*e, *COMMAND_FILTER_HOOK);
     }
 
     if ($r) {
+	; # O.K.
+    }
+    # reject for some header field patterns.
+    elsif (%REJECT_HDR_FIELD_REGEXP) {
+	local($hf, $pat, $match);
+
+	for $hf (keys %REJECT_HDR_FIELD_REGEXP) {
+	    next unless ($hf && $REJECT_HDR_FIELD_REGEXP{$hf});
+
+	    $pat = $REJECT_HDR_FIELD_REGEXP{$hf};
+
+	    if ($pat =~ m@/i$@) { # case insensitive
+		$pat =~ s@(/i|/)$@@g; 
+		$pat =~ s@^/@@g;
+		$e{"h:$hf:"} =~ /$pat/i && $match++;
+	    }
+	    else {		# case sensitive
+		$pat =~ s@(/i|/)$@@g; 
+		$pat =~ s@^/@@g;
+		$e{"h:$hf:"} =~ /$pat/ && $match++;
+	    }
+
+	    if ($match) {
+		&Log("EnvelopeFilter: \$REJECT_HDR_FIELD_REGEXP{\"$hf\"} HIT");
+		$r = "reject for invalid $hf field.";
+		last;
+	    }
+	}
+    }
+
+    # If Multipart, evaluate the first block only.
+    # skip the first multipart separator block
+    # evalute the first multipart block
+    if ($e{'MIME:boundary'}) {
+	$_ = &GetFirstMultipartBlock(*e, $e{'Body'}) || $e{'Body'};
+    }
+    else {
+	$_ = $e{'Body'};
+    }
+
+    # remove the last block which must be a signature.
+    $_ =~ s/^[\n\s]*//;		# remove the first spaces
+    $_ =~ s/[\n\s]*$//;		# remove the last spaces
+
+    # ensure "block1 null-line block2 ..."
+    $p = index($_, "\n\n");
+    if ($p > 0) { 
+	$p = rindex($_, "\n\n");
+	$_ = substr($_, 0, $p) if $p > 0;
+    }
+
+    # count up "\n\n" lines;
+    # If one paraghaph (+ signature), must be $c == 0. 
+    local($c); $c = $p = 0;
+    $_ =~ s/[\n\s]*$//;		# remove the last spaces
+    while (($p = index($_, "\n\n", $p + 1)) > 0) { $c++;}
+
+    &Debug("--EnvelopeFilter::Buffer($_\n);\ncount=$c\n") if $debug;
+
+    if ($r) { # must be matched in a hook.
 	;
     }
+    elsif (/^[\s\n]*$/) {
+	$r = "null body";
+    }
     # e.g. "unsubscribe", "help", ("subscribe" in some case)
-    elsif ($e{'Body'} =~ /^[\s\n]*[\s\w]+[\n\s]*$/) {
+    # DO NOT INCLUDE ".", "?" (I think so ...)! 
+    # If we include them, we cannot identify a command or an English phrase ;D
+    # If $c == 0, the mail must be one paragraph (+ signature).
+    elsif (!$c && /^[\s\n]*[\s\w\d:,\@\-]+[\n\s]*$/) {
 	$r = "one line body";
     }
-    elsif ($e{'Body'} =~ /^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
+    elsif (/^[\s\n]*\%\s*echo.*[\n\s]*$/i) {
 	$r = "invalid command line body";
     }
-    elsif ($e{'Body'} =~ /^[\s\n]*$/) {
-	$r = "null body";
+
+    # some attributes
+    if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
+	/^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
+	$r = $1; $r =~ s/\n//g;
+	$r = "avoid to distribute commands [$r]";
     }
 
     # Spammer?  Message-Id should be <addr-spec>
@@ -1786,14 +2334,17 @@ sub EnvelopeFilter
 	    &Mesg(*e, "Your mail is rejected for '$r'.\n". &WholeMail);
 	}
     }
+
+    $* = $org_mlp;
 }
 
 # return 0 if reject;
 sub EvalRejectFilterHook
 {
     local(*e, *filter) = @_;
-    local($r);
-    $r = eval($filter); &Log($@) if $@;
+    local($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
+    eval($r); &Log($@) if $@;
+    $r = &DoEvalRejectFilterHook;
     $r || $NULL;
 }
 
@@ -1806,14 +2357,22 @@ sub CheckResourceLimit
 	&use('amctl'); return &MemberLimitP(*e);
     }
     elsif ($mode eq 'mti:distribute:max_traffic') { 
-	&MTIProbe($From_address, 'distribute:max_traffic');
+	&MTIProbe(*MTI, $From_address, 'distribute:max_traffic');
     }
     elsif ($mode eq 'mti:command:max_traffic') { 
-	&MTIProbe($From_address, 'command:max_traffic');
+	&MTIProbe(*MTI, $From_address, 'command:max_traffic');
     }
 }
 
 ####### Section: Macros for the use of user-side-definition (config.ph) 
+
+sub JSTR 
+{
+    local($s) = @_;
+    require 'jcode.pl';
+    &jcode'convert(*s, 'jis'); #';
+    $s;
+} 
 
 sub DEFINE_SUBJECT_TAG { &use('tagdef'); &SubjectTagDef($_[0]);}
 
@@ -1831,39 +2390,83 @@ sub DEFINE_MODE
 	&ConvertMode2CFVersion3($m);
     }
 
-    if ($m !~ /^(post=|command=|ctladdr|artype=confirm)/) {
+    if ($m =~ 
+	/^(post=|command=|artype=confirm|ctladdr|disablenotify|makefml)/) {
+	&Log("ignore $m call ModeDef") if $debug;
+    }
+    else {
 	&Log("call ModeDef($m)") if $debug;
 	&use("modedef"); 
 	&ModeDef($m);
     }
+}
+
+sub DefineDefaultField
+{
+    local($f) = $_[0];
+    $f =~ tr/A-Z/a-z/;
+
+    # not overwrite
+    if ($Envelope{"h:$f"}) {
+	;
+    }
     else {
-	&Log("ignore $m call ModeDef") if $debug;
+	&DEFINE_FIELD_FORCED(@_);
+	&DEFINE_FIELD_OF_REPORT_MAIL(@_);
     }
 }
 
 sub DEFINE_FIELD_FORCED 
 { 
     local($_) = $_[0]; tr/A-Z/a-z/; $Envelope{"fh:$_:"} = $_[1];
+    &ADD_FIELD(&FieldCapitalize($_));
 }
 
 sub DEFINE_FIELD_ORIGINAL
 { 
     local($_) = $_[0]; tr/A-Z/a-z/; $Envelope{"oh:$_:"} = 1;
+    &ADD_FIELD(&FieldCapitalize($_));
 }
 
 sub DEFINE_FIELD_OF_REPORT_MAIL 
 { 
     local($_) = $_[0]; $Envelope{"GH:$_:"} = $_[1];
+    &ADD_FIELD(&FieldCapitalize($_));
 }
 
-sub ADD_FIELD    { push(@HdrFieldsOrder, $_[0]);}
+sub DEFINE_FIELD_PAT_TO_REJECT
+{ 
+    $REJECT_HDR_FIELD_REGEXP{$_[0]} = $_[1];
+}
+
+sub ADD_FIELD
+{ 
+    grep(/$_[0]/, @HdrFieldsOrder) || push(@HdrFieldsOrder, $_[0]);
+    &Debug("ADD_FIELD $_[0]") if $debug;
+}
 
 sub DELETE_FIELD 
 {
     local(@h); 
+    $SKIP_FIELDS .= $SKIP_FIELDS ? "|$_[0]" : $_[0];
     for (@HdrFieldsOrder) { push(@h, $_) if $_ ne $_[0];}
     @HdrFieldsOrder = @h;
 }
+
+# the value is not inserted now.
+sub COPY_FIELD 
+{ 
+    $HdrFieldCopy{ $_[0] } = $_[1];
+    &ADD_FIELD(&FieldCapitalize($_[1]));
+}
+
+# the value is not inserted now.
+sub MOVE_FIELD 
+{ 
+    &COPY_FIELD(@_);
+    &DELETE_FIELD($_[0]);
+}
+
 
 ####### Section: Event Handling Functions
 
@@ -1876,8 +2479,25 @@ sub SignalLog
 }
 
 # Strange "Check flock() OK?" mechanism???
-sub Lock   { $USE_FLOCK ? &Flock   : (&use('lock'), &V7Lock);}
-sub Unlock { $USE_FLOCK ? &Funlock : &V7Unlock;}
+# fml.pl exits under all cases after 12 hours (IT IS TOO LONG)!
+sub Lock   
+{ 
+    &SetEvent($TimeOut{'dead'} || 43200, 'TimeOut') if $HAS_ALARM;
+
+    # $LockQueueId is of mean under main locked phase
+    # "mget" runs after $LockQueueId is cleared.
+    $LockQueueId = &SetEvent($TimeOut{'lock'} || $TimeOut{'flock'} || 3600, 
+			     'TimeOut') if $HAS_ALARM;
+    $USE_FLOCK ? &Flock   : (&use('lock'), &V7Lock);
+}
+
+sub Unlock 
+{ 
+    $USE_FLOCK ? &Funlock : &V7Unlock;
+
+    # $LockQueueId is of mean under main locked phase
+    if ($LockQueueId) { &ClearEvent($LockQueueId);}
+}
 
 # lock algorithm using flock system call
 # if lock does not succeed,  fml process should exit.
@@ -1886,8 +2506,6 @@ sub Flock
     local($min,$hour,$mday,$mon) = 
 	(localtime(time + ($TimeOut{'flock'} || 3600)))[1..4];
     local($ut) = sprintf("%02d/%02d %02d:%02d", $mon + 1, $mday, $hour, $min);
-		  
-    $Sigarlm = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
 
     $FlockFile = $FlockFile ||
 	(open(LOCK,$FP_SPOOL_DIR) ? $FP_SPOOL_DIR : "$DIR/config.ph");
@@ -1908,18 +2526,25 @@ sub Funlock
 
     flock(LOCK, $LOCK_UN);
     close(LOCK); # unlock,close <kizu@ics.es.osaka-u.ac.jp>
-
-    if ($Sigarlm) { &ClearEvent($Sigarlm); undef $Sigarlm;}
 }
 
+# do not anything except for logging since now the fatal error case.
 sub TimeOut
 {
-    &GetTime;  $0 = "$FML: TimeOut $Now <$LOCKFILE>";
-    return unless $Sigarlm;
-    &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);    
-    &Log("Caught ARLM Signal, forward the mail to the maintainer and exit");
-    sleep 3;
-    exit(75); # kill 9, $$;
+    &GetTime;
+    $0 = "$FML: TimeOut $Now <$LOCKFILE>";
+
+    # Now we may be not able to connect socket, isn't it?
+    # &Warn("TimeOut: $MailDate ($From_address) $ML_FN", &WholeMail);
+    &Log("TimeOut[$$]: Caught SIGALRM, timeout");
+
+    if ($TimeOutCalled++) {
+	kill 9, $$;
+    }
+    else {
+	$TimeOutCalled++;
+	exit(0);
+    }
 }
 
 sub SetEvent
@@ -1930,6 +2555,11 @@ sub SetEvent
     $now = time; # the current time;
 
     $id  = $EventQueue++ + 1; # unique identifier
+
+    if ($interval < 60) {
+	&Log("SetEvent: input interval[$interval] is too short. reset to 60");
+	$interval = $interval < 60 ? 60 : $interval;
+    }
 
     # the first reference is a dummy (without $fp);
     if ($id == 1) {
@@ -2010,6 +2640,7 @@ sub Tick
 
 	# $EventQueue{time:$qp} and alarm(3) time may be at the same time!
 	undef $EventQueue{"fp:$qp"};
+	&Log("Tick[$$]: run fp=$fp");
 	eval("&$fp;");
 	&Log($@) if $@;
 
@@ -2017,7 +2648,7 @@ sub Tick
 	$cur = time;
     }
 
-    $SIG{'ARLM'} = 'Tick'; 
+    $SIG{'ALRM'} = 'Tick'; 
 
     # info
     &Debug("\tnow\tqp=$qp fp=$EventQueue{\"fp:${qp}\"}") if $debug;
@@ -2034,12 +2665,25 @@ sub Tick
     $cur = $cur > 0 ? $cur : 3;
     alarm($cur); # considering context switching;
 
-    &Log("Tick::alarm($cur)") if $debug_tick;
+    &Log("Tick[$$]::alarm($cur)") if $debug_tick;
     if ($debug) {
 	&OutputEventQueue;
-	&Debug("\tnow set alarm($cur) for the queue id $qp ...");
+	&Debug("\tnow set alarm($cur) for the queue id $qp");
+	&Debug("\tfp = $qp->$EventQueue{\"fp:${qp}\"}") if $debug_tick;
+    }
+
+    if ($debug_tick) {
+	for ($qp = 1; $qp ne ""; $qp = $EventQueue{"next:${qp}"}) {
+	    $cur = $EventQueue{"time:${qp}"} - time;
+	    if ($cur >= 0) { # the future events list
+		&Log(sprintf("  when=%-5d qp=%-2d link->%-2d fp=%s", 
+			     $cur,
+			     $qp, 
+			     $EventQueue{"next:$qp"}, 
+			     $EventQueue{"fp:$qp"}));
+	    }
+	}
     }
 }
-
 
 1;

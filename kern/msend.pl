@@ -10,8 +10,7 @@
 # See the file COPYING for more details.
 #
 # q$Id$;
-#
-$Rcsid   = 'msend 2.1A';
+$Rcsid   = 'msend 2.2';
 
 # For the insecure command actions
 $ENV{'PATH'}  = '/bin:/usr/ucb:/usr/bin';	# or whatever you need
@@ -29,14 +28,17 @@ foreach (@ARGV) {
 }
 $DIR    = $DIR    || '/home/beth/fukachan/w/fml';
 $LIBDIR	= $LIBDIR || $DIR;
-$0 =~ m#(\S+)/(\S+)# && (unshift(@INC, $1)); #for lower task;
+$0 =~ m#^(.*)/(.*)# && do { unshift(@INC, $1); unshift(@LIBDIR, $1);};
 unshift(@INC, $DIR); #IMPORTANT @INC ORDER; $DIR, $1(above), $LIBDIR ...;
 
 
 #################### MAIN ####################
 # a little configuration before the action
 # this code is required since msend has newsyslog(8) actions;
-if ($USE_FML_WITH_FMLSERV) {
+if ($MSEND_UMASK || $UMASK) {
+    $MSEND_UMASK ? umask($MSEND_UMASK) : umask($UMASK);
+}
+elsif ($USE_FML_WITH_FMLSERV) {
     umask(007); # rw-rw----
 }
 else {
@@ -52,15 +54,18 @@ if ($0 eq __FILE__) {
     # defaults header;
     $Envelope{'h:From:'} = $From_address = "msend";
     $SLEEPTIME           = 5;
-    $MSEND_SUBJECT_TEMPLATE = 
-	"Digest -Matome Okuri- _ARTICLE_RANGE_ _DOC_MODE_ _PART_ _ML_FN_";
+    $MSEND_SUBJECT_TEMPLATE = "Digest _ARTICLE_RANGE_ _PART_ _ML_FN_";
 
-    &InitConfig;			# initialize date etc..
-    require 'libfop.pl';		# file operations
+    &InitConfig;		# initialize date etc..
 
-    &MSendInit(*Envelope);		# IF $MSEND_RC is NOT SET, exit
+    &SlowStart if $_cf{"opt:s"};# sleep a little 
+				# to be shifed from cron kick off
 
-    $Quiet      = 1 if $_cf{"opt:q"}; # quiet mode;
+    require 'libfop.pl';	# file operations
+
+    &MSendInit(*Envelope);	# IF $MSEND_RC is NOT SET, exit
+
+    $Quiet = 1 if $_cf{"opt:q"}; # quiet mode;
 
     if (! $Quiet) {
 	print STDERR "MatomeOkuri Control Program for $ML_FN\n";
@@ -72,12 +77,11 @@ if ($0 eq __FILE__) {
 	local($t);
 	while (1) {
 	    $t = time;
-	    &ExecMSend;
+	    &ExecMSend; # timeout within
 	    $t = time - $t; # used time 
 	    &Log("MSend Daemon: sleep(3600 - $t)") if $debug;
 	    $0 = "$FML: MSend Daemon $ML_FN <$LOCKFILE>";
 
-	    &SetEvent(3600 - $t, 'TimeOut') if $HAS_ALARM;
 	    sleep(3600 - $t); # adjust the sleeptime;
 	}
     }
@@ -114,7 +118,8 @@ sub ExecMSend
     $MSEND_NOTIFICATION && &MSendNotifyP && &MSendNotify(*Envelope);
 
     # set timeout for the whole process (against the lock of IPC)
-    $Sigarlm = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
+    local($evid);
+    $evid = &SetEvent($TimeOut{'flock'} || 3600, 'TimeOut') if $HAS_ALARM;
 
     &MSend4You;			        # MAIN
 
@@ -136,6 +141,7 @@ sub ExecMSend
     &Notify if $Envelope{'message'};    # Reply some report if-needed.
 	                                # should be here for e.g. mget..
 
+    &ClearEvent($evid) if $evid;
 }
 
 
@@ -329,7 +335,8 @@ sub MSendReadActiveList
       if ($opt =~ /\sm=(\d+)\s/i) {
 	  $When{$rcpt}  = $DefaultWhen || $1;
 	  ($d, $m) = &ModeLookup($1.$2);
-	  $mode{$rcpt}  = $m; # = 'gz'; 
+	  # $mode{$rcpt}  = $m; # = 'gz'; 
+	  $mode{$rcpt} = $MSEND_MODE_DEFAULT || $m;
       }
       elsif ($opt =~ /\sm=(\d+)([A-Za-z]+)\s/i) {
 	  $When{$rcpt}  = $DefaultWhen || $1;
@@ -419,6 +426,8 @@ sub MSending
 
     local(@rcpt);
 
+    $Envelope{'GH:Precedence:'} = $PRECEDENCE || 'list';
+
     if ($total) {
 	# rewriting each $addr => rcpt to: address; (for relay)
 	undef @rcpt;
@@ -428,6 +437,13 @@ sub MSending
 
 	&SendingBackInOrder($tmp, $total, $msend_subject, ($SLEEPTIME || 3), @rcpt);
 	$0 = "$FML: MSending to $to $ML_FN ends <$LOCKFILE>";
+
+	# may duplicate but cache out agasint errors
+	# though removed in &MSendRCConfig
+	for (@rcpt) {
+	    $_ = "$_\t". ($ID + 1). "\n";
+	    &Append2($_, $MSEND_RC);
+	}
     }
     else {
 	&Log("MSend: total =[$total], so not send to @to") if $debug_msend;
@@ -615,9 +631,11 @@ sub MSendNotify
 
     ##### ML Distribute Phase 02: Generating Hdr
     # This is the order recommended in RFC822, p.20. But not clear about X-*
+    local(%dup);
     for (@HdrFieldsOrder) {
 	# print STDERR "\$e{'h:$_:'}\t". $e{"h:$_:"} ."\n";
 	$lcf = $_; $lcf =~ tr/A-Z/a-z/; # lower case field name
+	next if $dup{$_}; $dup{$_} = 1; # duplicate check;
 
 	if ($e{"fh:$lcf:"}) {	# force some value to a field
 	    $e{'Hdr'} .= "$_: ". $e{"fh:$lcf:"} ."\n";
@@ -775,5 +793,17 @@ sub MSendInit
 ### :include: -> libkern.pl
 # Getopt
 sub Opt { push(@SetOpts, @_);}
+
+
+### Section: utils
+sub SlowStart
+{
+    # required before lock();
+    &SRand;
+    $sleep = int(rand($MSEND_SLOW_START_DELAY || 180));
+    print STDERR "    sleep($sleep);\n" if $debug;
+    sleep($sleep);
+}
+
 
 1;
