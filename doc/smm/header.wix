@@ -73,7 +73,7 @@ or
 
 
 .S	ヘッダフィールドの内容の強制
-.k	&DEFINE_FIELD_FORCED
+.l	&DEFINE_FIELD_FORCED
 .k	--fh:field
 
 SYNOPSIS:
@@ -93,7 +93,7 @@ X-Ml-Info: の内容を"書きたいこと"に設定する。
 
 
 .S	ヘッダフィールドをオリジナルのままにする
-.k	&DEFINE_FIELD_ORIGINAL
+.l	&DEFINE_FIELD_ORIGINAL
 .k	--oh:field
 
 
