@@ -110,7 +110,7 @@ sub InitMakeFml
     $FML_CONFIG = $opt_f || "$CONFIG_DIR/system";
     $FML_POLICY = $opt_p || "$CONFIG_DIR/policy";
 
-    for ($FML_CONFIG, $FML_POLICY) { &Touch($_) unless -f $_;}
+    # for ($FML_CONFIG, $FML_POLICY) { &Touch($_) unless -f $_;}
 
 
     ### *Config, %Default, %PolicyDefault;
@@ -1718,6 +1718,12 @@ sub do_install
     }
 
     &FYI;
+
+    &PolicyMenu; 
+    print "\n---For Your Information:\n";
+    print "The Current Policy to use ML addresses are follows\n";
+    print $SHOW_ONLY_POLICY_MENU;
+    print "\nYou can change this policy settings by \"makefml policy\".\n\n";
 }
 
 
@@ -1911,7 +1917,7 @@ sub GetCF
 
 sub do_policy
 {
-    local($buf);
+    local($buf, $error, $default);
 
     # Variable Settings;
     &ResetVariables;
@@ -1919,18 +1925,33 @@ sub do_policy
     &GetCurPolicy;
 
     while (1) {
+	undef $error;
+	$default = 0;
 	$CurTag = "    ";
 
 	&PolicyMenu;
 
-	### 
 	print "--- Set Up the Policy of How to use ML Addresses\n";
 	print $POLICY_MENU;
-	
-	### 
-	$r = &Query("Menu ", "0,1,2", "\\d+", "0");
 
-	if ($r == 0) {
+	if ($Policy{'CONTROL_ADDRESS_FORMAT'} eq '_ML_' &&
+	    $MAIL_LIST_MODE ne "") {
+	    $error = "*" x 20;
+	    print "\n\t$error Error $error\n";
+
+	    print "\tWhen \$CONTROL_ADDRESS == \$MAIL_LIST,\n";
+	    print "\tyou need to set \"distribute + commands\".\n";
+
+	    $error = "*" x 47;
+	    print "\t$error\n";
+
+	    $default = 1;
+	}
+
+	### 
+	$r = &Query("Menu ", "0,1,2", "\\d+", $default);
+
+	if ($r == 0 && !$error) {
 	    last;
 	}
 	elsif ($r == 1) {
@@ -1948,7 +1969,6 @@ sub do_policy
     &SavePolicy($buf);
 }
 
-
 sub PolicyMenu
 {
     for (keys %Marker) {
@@ -1958,17 +1978,25 @@ sub PolicyMenu
 
     &ApplyPolicy;
 
-    $MenuPolicy{'MAIL_LIST_MODE'} = qq#;
+    if ($Marker{'policy:ca:other'}) {
+	$Marker{'policy:ca:other'} .= " $Policy{'CONTROL_ADDRESS_FORMAT'}";
+    }
+
+
+    $MenuPolicy{'MAIL_LIST_MODE'} = qq#; 
+    \t[avialable modes]                  [current setting]
     \tdistribute + commands              $Marker{'policy:dm:d+c'};
     \tdistribute (only member can post)  $Marker{'policy:dm:d-c:member'};
     \tdistribute (anyone can post)       $Marker{'policy:dm:d-c:any'};
     ;#;
+   
 
     $MenuPolicy{'CONTROL_ADDRESS_FORMAT'} = qq#;
+    \t[avialable format]                [current setting]
     \t_ML_-ctl (default)                 $Marker{'policy:ca:ctl'};
     \t_ML_ (require distribute+commands) $Marker{'policy:ca:ml'};
     \tfmlserv                            $Marker{'policy:ca:fmlserv'};
-    \tOTHER                              $Marker{'policy:ca:other'};
+    \tother                              $Marker{'policy:ca:other'};
     ;#;
 
     $POLICY_MENU = qq#;
@@ -1978,7 +2006,19 @@ sub PolicyMenu
     2 $CONTROL_ADDRESS FORMAT\n;$MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
     ;
     ;#;
+
     $POLICY_MENU =~ s/;//g;
+
+    $SHOW_ONLY_POLICY_MENU = qq#;
+    \$MAIL_LIST Delivery mode;
+    $MenuPolicy{'MAIL_LIST_MODE'};
+    \$CONTROL_ADDRESS FORMAT\n;$MenuPolicy{'CONTROL_ADDRESS_FORMAT'};
+    ;
+    ;#;
+
+    $SHOW_ONLY_POLICY_MENU =~ s/;//g;
+    $SHOW_ONLY_POLICY_MENU =~ s/_ML_/listname/g;
+    $SHOW_ONLY_POLICY_MENU =~ s/\(require\s+distribute\+commands\)//;
 }
 
 
@@ -2008,7 +2048,7 @@ sub ApplyPolicy
     elsif ($_ eq 'fmlserv') {
 	$Marker{'policy:ca:fmlserv'} = "<===";
     }
-    elsif ($_ eq 'other') {
+    else { # if ($_ eq 'other') {
 	$Marker{'policy:ca:other'} = "<===";
     }
 }
@@ -2058,15 +2098,20 @@ sub PolicyCtlAddr
     $m =~ s/;//g;
     print $m;
 
-    $r = &Query("\$CONTRO_LADDRESS", "0-4", "[\\-\\_\\w\\d]+", "0");
-
     %Menu = (0, $Policy{'CONTROL_ADDRESS_FORMAT'},
 	     1, "_ML_-ctl",
 	     2, "_ML_",
 	     3, "fmlserv",
 	     4, $r);
 
+    $r = &Query("\$CONTRO_LADDRESS", "0-4", "[\\-\\_\\w\\d]+", "0");
+
     $Policy{'CONTROL_ADDRESS_FORMAT'} = $Menu{$r};
+
+    if ($r == 4) {
+	$r = &Query("Format", "_ML_-ctl", "[\\-\\_\\w\\d]+", "_ML_-ctl");
+	$Policy{'CONTROL_ADDRESS_FORMAT'} = $r;
+    }
 }
 
 sub do_config
