@@ -1,6 +1,6 @@
 # Library of fml.pl 
 # Copyright (C) 1994-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      kfuka@iij.ad.jp, kfuka@sapporo.iij.ad.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 # Please obey GNU Public Licence(see ./COPYING)
 
 local($id);
@@ -47,9 +47,9 @@ sub HRef
 	$port = $port || $DEFAULT_HTTP_PORT || 80;
 
 	# connect http server
-	$e{'message'} .= ">>> HREF=$tp://$host$request\n\n";
+	&Mesg(*e, ">>> HREF=$tp://$host$request\n");
 	&TalkWithHttpServer($host, $port, $request, $tp, *e); 
-	$e{'message'} .= ">>> ENDS HREF=$tp://$host$request\n\n";
+	&Mesg(*e, ">>> ENDS HREF=$tp://$host$request\n");
     } 
     elsif ($tp =~ /gopher/i) {
 	$host = $host || $DEFAULT_GOPHER_SERVER;
@@ -69,7 +69,7 @@ sub HRef
 	}
     }
     else {
-	$e{'message'} .= ">>>Sorry.\n\t$tp://$host... is NOT IMPLEMENTED\n\n";
+	&Mesg(*e, ">>>Sorry.\n\t$tp://$host... is NOT IMPLEMENTED\n");
     }
 }
 
@@ -83,16 +83,17 @@ sub TalkWithHttpServer
     &Debug("TalkWithHttpServer($host, $port, $body, $tp, *re)") if $debug;
 
     # set variables
-    $tmpf  = "$TMP_DIR/href:$$";
+    $tmpf   = "$FP_TMP_DIR/href:$$";
     $addrs  = (gethostbyname($host || 'localhost'))[4];
     $port   = 80 unless defined($port); # default port
     $target = pack($pat, &AF_INET, $port, $addrs);
 
     # temporary
+    &Debug("open(HOUT, > $tmpf") if $debug;
     if (! open(HOUT, "> $tmpf")) { 
 	select(HOUT); $| = 1; select(STDOUT);
 	&Log("Cannot open $tmpf"); 
-	$re{'message'} .= "Cannot write to tmporary file\n"; 
+	&Mesg(*re, "Cannot write to tmporary file"); 
     }
 
     ### IPC
@@ -101,6 +102,7 @@ sub TalkWithHttpServer
 
 	### INPUT 
 	if ($tp eq 'http') {
+	    $body = '/index.html' unless $body;
 	    print S "GET $body\n"; 
 	}
 	else {
@@ -122,8 +124,10 @@ sub TalkWithHttpServer
 	
 	### PLAIN TEXT FILE
 	if (-T $tmpf) {
+	    &Debug("open(HIN, < $tmpf") if $debug;
 	    if (! open(HIN, $tmpf)) {
-		$re{'message'} .= "canont open tmpf"; 
+		# SHOULD NOT SHOW the file path
+		&Mesg(*re, "cannot open temporary file"); 
 		return;
 	    }
 
@@ -143,18 +147,19 @@ sub TalkWithHttpServer
 
 		# Append Body to reply.
 		&jcode'convert(*_, 'jis');# KANJI CONVERSION. ';
-		$re{'message'} .= $_;
+		&Mesg(*re, $_);
 	    }
 	    close(HIN);
 	}
 	### BINARY FILE 
 	else {
+	    &Debug("open(HIN, $UUENCODE, $tmpf, $name") if $debug;
 	    local($name) = reverse split(/\//, $body);
 	    if (! (open(HIN,"-|") || exec $UUENCODE, $tmpf, $name)) {
-		$re{'message'} .= "canont open tmpf"; 
+		&Mesg(*re, "cannot exec or open temporary file"); 
 		return;
 	    }
-	    while (<HIN>) { $re{'message'} .= $_;}
+	    while (<HIN>) { $re{'message'} .= $_;} # &Mesg is overhead?
 	    close(HIN);
 	}
     } 

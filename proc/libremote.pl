@@ -1,3 +1,4 @@
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 # Admin Commands 
 # Remote control library of fml  -> libra.pl
 #
