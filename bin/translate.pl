@@ -82,11 +82,13 @@ sub Translate
 
 	if (/$CACHE_TABLE/i) {
 	    $x = $&;
-	    $buf =~ s/$x/$TransTable{$x}/gi;
+	    $buf =~ s/\.$x/\.$TransTable{$x}/gi;
+	    $buf =~ s/\@$x/\@$TransTable{$x}/gi;
 
 	    if ($opt_a) { 
 		for $key (keys %TransTable) {
-		    $buf =~ s/$key/$TransTable{$key}/gi;
+		    $buf =~ s/\.$key/\.$TransTable{$key}/gi;
+		    $buf =~ s/\@$key/\@$TransTable{$key}/gi;
 		}
 	    }
 	}
