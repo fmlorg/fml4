@@ -447,8 +447,8 @@ GEN_ARCHIVE () {
 		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
 		ln $FMLID.tar.gz fml-current.tar.gz
 		ln $FMLID.tar.gz old/$FMLID.tar.gz
-		(uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
-		cat > $FTP/fml-current.uu
+		# (uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
+		# cat > $FTP/fml-current.uu
 	   )
 	fi
 
