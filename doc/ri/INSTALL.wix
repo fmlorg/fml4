@@ -710,7 +710,9 @@ following recursive menu, so please select one and answer it.
 
                     AUTH_TYPE              crypt
 
-   5    SUBJECT_TAG_TYPE                   
+   5    HEADER_CONFIG
+        SUBJECT_TAG_TYPE                   
+        REWRITE_TO                         To: is original (pass through)
    6    OPTION                             
    ********************************************************************
 
@@ -834,11 +836,12 @@ This is "password authentication" and the password is saved as a crypted.
 これはリモート管理の場合の認証方式の設定。デフォールトはパスワード認証。
 
 
-○ Subject: につけるタグ(デフォールトはつけない) (後述)
+○ ヘッダの設定
+   例: Subject: につけるタグ(デフォールトはつけない) (後述)
 =E
-Subject Tag Type.
+Header configuration, e.g. Subject Tag Type.
 
-   5    SUBJECT_TAG_TYPE                   
+   5    HEADER_CONFIG
 	
 
 ○ その他のオプション(MIME Decoding や スプールの自動HTML化) (後述)
@@ -1142,7 +1145,27 @@ type in 2.
 			* members-admin is the default of $ADMIN_MEMBER_LIST
 
 
-.S	SUBJECT TAG TYPE (e.g. Subject: [Elena:00100])
+.S	ヘッダの設定
+=E
+.S	Header Configurations
+
+例えば
+
+	To: をどうするか？
+	Subject: につけるタグ [Elena:00100] 
+	ヘッダに出てくる全てのフィールドを素通しにするのか？
+	(X-Faces とかも当然すどおし）
+
+などの設定。
+
+   ************************************************************
+   0    END
+   1    SUBJECT_TAG_TYPE                   
+   2    REWRITE_TO                         To: MAIL_LIST, others
+   3    PASS_ALL_FIELDS                    
+   ************************************************************
+
+1	SUBJECT TAG TYPE (e.g. Subject: [Elena:00100])
 =E
 	You can configure the listname and the sequence number of the article
 	in the subject.
@@ -1185,6 +1208,57 @@ type in 2.
    ************************************************************
 
       SUBJECT TAG TYPE (0-9) [0] 
+
+
+2    REWRITE_TO                         To: MAIL_LIST, others
+
+
+   ************************************************************
+   REWRITE_TO           To: MAIL_LIST, others
+
+   1 and 2 is FOR YOUR EYES. 
+   YOU CAN ALWAYS SEE "To: $MAIL_LIST" AT THE SAME POSITION.
+
+   0    END
+   1    To: elena@sapporo.iij.ad.jp, NON-MAIL-LIST-ADDRESS
+   2    To: elena@sapporo.iij.ad.jp
+   3    pass through the original To: 
+   ************************************************************
+
+メールを読む時にどこのＭＬのメールか見易いようにTo: $MAIL_LIST が常に
+同じ位置に来るようにするためのもの。
+=E
+For your eyes, you can configure "To: $MAIL_LIST always exits".
+
+	1	To: $MAIL_LIST の形で始っていない時は
+		    $MAIL_LIST, それ以外のアドレス
+		に書きかえる。
+		(2.1 Release default)
+=E
+	We always overwrite To: to To: $MAIL_LIST but not ignore original To:.
+	We rewrite To: to 
+=S
+		To: $MAIL_LIST, 
+			original-To
+
+
+	2	常に To: $MAIL_LIST (大昔）
+=E
+	2	always overwrite To: to To: $MAIL_LIST 
+
+	3	original  の To: のまま (2.1A default)
+=E
+	3	original To: (2.1A default)
+
+
+3    PASS_ALL_FIELDS                    
+
+ヘッダの中身を全部とおすか？否か？例えば意味不明の X-なんとか を全部除
+く。残るフィールドは @HdrFieldsOrder で定義されているもの。
+=E
+Do you pass all fields in the header or not? If you ignore superfluous
+X-* fields, please set this. The format of the header used by FML
+default is defined as @HdrFiedlsOrder.
 
 
 .S	その他の設定
@@ -1510,10 +1584,18 @@ FYI. NT Version uses this trick:)
 なお MetaInfo Sendmail 2.x 以外のMTAを使う場合の NT 上ではこの裏技を使
 います:)
 
+.C	HELPなどの取り寄せについてユーザに知らせる方法についての考察
+
+ヘッダにはデフォールトで X-ML-Info に書いてあります。当然ＭＬに入った
+時にはそういったことについてメールを書く or 自動的に送られるでしょう。
+
+それでもどうしてもだめだとあきらめて、最後の手段「本文に情報をつけてし
+まふ」という倫理的に問題ありまくりの方法もとれなくはありません。詳しく
+は doc/op (http://www.fml.org/fml/op/) をみると「メールの最後に付加情
+報をつける設定」
+
 
 $Id$
-
-
 .# Copyright (C) 1993-1997 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
