@@ -54,7 +54,7 @@ No difference is found between NT 4 and 2000 untile now.
 .url ../INSTALL_on_NT4-e/index.html
 .fi
 
-.C	インストールの手順の例
+.C	インストールの手順の例 (Exchange 2000 で POP モード)
 =E.C	installation procedure steps
 
     1. Active Perlのインストール
@@ -76,7 +76,7 @@ appreciate the environment information to be installed on windows
 
 	Masaya Mase
 
-$FML$
+$FML: INSTALL_on_WIN2000.wix,v 1.7 2001/07/07 08:22:00 fukachan Exp $
 .# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
