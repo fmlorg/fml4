@@ -7,7 +7,6 @@
 .if LANG == ENGLISH
 				Ken'ichi Fukamachi
 .fi
-				<fukachan@sapporo.iij.ad.jp>
 
 
 .~HTML_PRE
@@ -331,15 +330,17 @@ INSTALL and INSTALL_on_NT4.
 	sendmail 8.9.3 + perl 5.005_01 on NetBSD/i386 1.3K
 	sendmail 8.9.3 + perl 4.036    on NetBSD/i386 1.3K
 
-なおFML.ORGの配送システムは4つのMTAを使った並列配送で高速化しています:)。
+なおFML.ORGの配送システムは5つのMTAを使った並列配送で高速化しています:)。
+(通称MTAみくじです ^^;)
 =E
-The delivery system on FML.ORG consists of 4 MTA's to accelerate the
+The delivery system on FML.ORG consists of 5 MTA's to accelerate the
 delivery (as both an experiment and a demonstration :-).
 
 	sendmail 8.8.8 + WIDE patch + smtpfeed
 	sendmail 8.9.3
 	qmail 1.03
 	exim 2.04
+	postfix snap-19990322
 
 
 .C	FML 2.2 の機能の概要
@@ -629,10 +630,7 @@ Please see CHANGES and RELEASE_NOTES.
 GNU General Public License です。詳しくは COPYING というファイルを読ん
 で下さい。
 
-   Copyright (C) 1993-1998 Ken'ichi Fukamachi
-            All rights reserved. 
-                 1993-1996 fukachan@phys.titech.ac.jp
-                 1996-1998 fukachan@sapporo.iij.ad.jp
+   Copyright (C) 1993-1999 Ken'ichi Fukamachi
  
    FML is free software; you can redistribute it and/or modify
    it under the terms of GNU General Public License.
@@ -667,10 +665,10 @@ can obtain on anonymous ftp's. 4.4BSD has been a start point to study
 several aspects of OS details. 
 
 $Id$
-.# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+.# Copyright (C) 1993-1999 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               1993-1996 fukachan@phys.titech.ac.jp
-.#               1996-1998 fukachan@sapporo.iij.ad.jp
+.#               1996-1999 fukachan@sapporo.iij.ad.jp
 .# 
 .# FML is free software; you can redistribute it and/or modify
 .# it under the terms of GNU General Public License.
