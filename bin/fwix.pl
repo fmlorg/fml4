@@ -271,14 +271,14 @@ sub CleanUp
 sub ShowIndex
 {
     print "\n\t\tINDEX\n\n";
-    foreach $x (sort ci_sort keys %key) {
+    foreach $x (sort __CISort keys %key) {
 	printf "%-40s   ...   %s\n", $x, $keylist{$x};
     }
 }
 
 
 # case insensitive
-sub ci_sort
+sub __CISort
 {
     local($ta, $tb) = ($a, $b);
 

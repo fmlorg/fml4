@@ -1590,10 +1590,10 @@ sub FixPath
 	print STDERR "\n   replace perl with $perl\n" if $FixPathCount++ < 1;
     }
     elsif ($COMPAT_ARCH eq "WINDOWS_NT4") { 
-	$perl = &search_path('perl.exe');
+	$perl = &__SearchPath('perl.exe');
     }
     else {
-	$perl = &search_path('perl');
+	$perl = &__SearchPath('perl');
     }
 
     local($newprog) = $prog.".new$$";
@@ -1639,7 +1639,7 @@ sub FixPath
 }
 
 
-sub search_path
+sub __SearchPath
 {
     local($f) = @_;
     local($p, @path);
@@ -2135,11 +2135,11 @@ sub Conv
     print STDERR "\t$out\n" if $debug0;
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") {
-	$PERL_PATH = &search_path('perl.exe');
+	$PERL_PATH = &__SearchPath('perl.exe');
 	$USER = $USER || $ENV{'USERNAME'};
     }
     else {
-	$PERL_PATH = &search_path('perl');
+	$PERL_PATH = &__SearchPath('perl');
 	$uid   = $uid || (getpwuid($<))[2];
 	$gid   = $gid || (getpwuid($<))[3];
     }
@@ -2574,7 +2574,7 @@ sub do_htpasswd
     }
 
     &ResetVariables;
-    $prog = &search_path('htpasswd');
+    $prog = &__SearchPath('htpasswd');
 
     if (! ($prog && -x $prog)) {
 	&Error("cannot find 'htpasswd'");
@@ -4073,7 +4073,7 @@ sub EachLevelQuery
     local($r, $clear_prog);
 
     # "clear" not exist on NT4
-    $clear_prog = $UNISTD ? &search_path('clear') : "cls";
+    $clear_prog = $UNISTD ? &__SearchPath('clear') : "cls";
 
     while ($top_level =~ s|^//|/|) { ;}
 
@@ -4347,10 +4347,10 @@ sub MakeConfigPH
     local($perl);
 
     if ($COMPAT_ARCH eq "WINDOWS_NT4") { 
-	$perl = &search_path('perl.exe');
+	$perl = &__SearchPath('perl.exe');
     }
     else {
-	$perl = &search_path('perl');
+	$perl = &__SearchPath('perl');
     }
 
     if (! $perl) { 
@@ -6532,7 +6532,7 @@ sub SetUpCGIadmin
 	&Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
 	      "$CGI_AUTHDB_DIR/admin/htpasswd");
 
-	local($htp) = &search_path('htpasswd');
+	local($htp) = &__SearchPath('htpasswd');
 	if (-x $htp) {
 	    print STDERR 
 		"   $htp -c $CGI_AUTHDB_DIR/admin/htpasswd admin\n";

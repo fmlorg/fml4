@@ -140,8 +140,8 @@ sub mget3
 	return 0;
     }
     else {
-	# nsort is required here for the escape code in the next "for" loop;
-	@sp = sort nsort @sp;
+	# NameSort is required here for the escape code in the next "for" loop;
+	@sp = sort NameSort @sp;
     }
 
 
@@ -252,7 +252,7 @@ sub mget3
     if (@filelist) {
 	# sort files with extracted files
 	local($xa, $xb);
-	@filelist = sort nsort @filelist;
+	@filelist = sort NameSort @filelist;
 
 	# define %SE_MIB; # mget3; SendingEntry MIME Information Base;
 
@@ -320,7 +320,7 @@ sub mget3
 }
 
 
-sub nsort
+sub NameSort
 {
     $xa = $a;
     $xb = $b;

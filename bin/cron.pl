@@ -128,9 +128,8 @@ sub GetDayofTime { (localtime((stat($_[0]))[9]))[3];}
 # If the day changes, restart cron.pl
 sub RestartP { (localtime(time))[3] != &GetDayofTime($CRON_PIDFILE);}
 
-sub abs { $_[0] > 0 ? $_[0]: - $_[0];}
-
-sub Opt { 
+sub Opt
+{ 
     ($_[0] =~ /^\-(\S)/)      && ($Opt{"opt:$1"} = 1);
     ($_[0] =~ /^\-(\S)(\S+)/) && ($Opt{"opt:$1"} = $2);
 }
