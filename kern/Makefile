@@ -13,7 +13,7 @@ SH	  = /bin/sh
 # PWD       = `pwd`
 
 all:
-	perl ./makefml
+	@ echo "run 'make install' to install fml"
 
 install:
 	perl ./makefml install

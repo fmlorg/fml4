@@ -1,6 +1,10 @@
 .HTML_PRE
 	CHANGES-4.0.1: CHANGES from 4.0 to 4.0.1
 
+2001/03/29
+
+   kern/Makefile (2.60-2.61):
+	disable all: rule
 
 2001/03/25
 
