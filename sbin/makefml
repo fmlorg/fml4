@@ -406,7 +406,6 @@ sub InitFmlConfig
 
     $FML_CONFIG  = "$CONFIG_DIR/system";
 
-    $buf = &Dumpvar('Config');
     &SaveConfig($buf) if $buf;
 
     print "\nThe Current Config is saved in $FML_CONFIG\n";
