@@ -43,7 +43,13 @@ sub Init
     &Getopts('s:f:hvI:D:H:d');
     die(&USAGE) if $opt_h;
 
-    push(@INC, split(/:/,$opt_I)) if $opt_I;
+    # fix includes
+    {
+	local($dir) = $0;
+	$dir =~ s@bin/.*@@;
+	push(@INC, $dir);
+	push(@INC, split(/:/,$opt_I)) if $opt_I;
+    }
 
     # variables
     $user    = (split(/:/, getpwuid($<), 999))[0];
@@ -108,9 +114,15 @@ sub STDIN2Body
 sub Deliver
 {
     local(*e) = @_;
+    local(@inc);
+
+    for (@INC) { push(@inc, $_) unless /usr\/local/;}
 
     print STDERR qq#
-In verbose mode, SMTP does not connect $HOST:25
+
+CAUTION: In verbose mode, SMTP does not connect $HOST:25
+
+    INC: @inc
 
 === variables
 Recipients => @Rcpt
