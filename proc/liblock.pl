@@ -34,12 +34,15 @@ sub V7Lock
     &SetEvent(($MAX_TIMEOUT+10)*20 +60, 'TimeOut') if $HAS_ALARM;
 
     # try within about 10min.
+    $LockStatus{$LockFile} = 'unlocked';
     &SRand();
     for ($timeout = 0; $timeout < $MAX_TIMEOUT; $timeout++) {
 	if (link($LockTmp, $LockFile) == 0) {	# if lock fails, wait&try
+	    $LockStatus{$LockFile} = 'unlocked';
 	    sleep (rand(3)+5);
 	} 
 	else {
+	    $LockStatus{$LockFile} = 'locked';
 	    last;
 	}
     }
@@ -57,13 +60,17 @@ sub V7Lock
 
 	&Warn("link(2) style LOCK TIMEOUT", 
 	      "saved in $FP_VARLOG_DIR/$Timeout\n\n".&WholeMail);
+
+	sleep(3);
+	&TimeOut; # called when flock(2) and alarm(3) works and lock timeouts.
     }
 }
 
 sub V7Unlock
 {
     $0 = "$FML: link(2) style Unlocked <$LOCKFILE>";
-    unlink $LockFile;
+    unlink $LockFile if $LockStatus{$LockFile} eq 'locked';
+    &Log("cannot unlink $LockFile (unlocked)") if $LockStatus ne 'locked';
 }
 
 1;
