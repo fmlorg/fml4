@@ -1,7 +1,7 @@
 # fml Makefile
 #
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
 # Public License. see the file COPYING for more details.
 #
@@ -132,7 +132,7 @@ versionup:
 allclean: clean cleanfr
 
 clean:
-	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9]
+	gar *~ _* proc/*~ tmp/mget* *.core tmp/MSend*.[0-9] tmp/[0-9]*.[0-9] tmp/*:*:*.[0-9] NT/*~
 
 cleanfr:
 	gar *.frbak */*.frbak
@@ -147,6 +147,19 @@ DISTRIB: distrib
 #     fj: distrib archive fj.sources
 
 local: distrib 
+
+ntdist: 
+	(/bin/sh usr/sbin/release.sh 2>&1| tee /var/tmp/_distrib.log)
+	(/bin/sh usr/sbin/nt-release.sh /tmp/distrib 2>&1|\
+	 tee -a /var/tmp/_distrib.log)
+	@ usr/sbin/error_report.sh /var/tmp/_distrib.log
+	@ echo "(chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)"
+	@ (chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)
+	@ chmod -R 777 /tmp/nt
+
+nt:	
+	@ (chdir /tmp/; tar cf - distrib)|(chdir /tmp/nt; tar xf -)
+	@ chmod -R 777 /tmp/nt
 
 dist:	distrib 
 distrib:
@@ -163,23 +176,21 @@ textdoc: plaindoc
 plaindoc: doc/smm/op.wix
 	@ if [ ! -d /var/tmp/.fml ]; then mkdir /var/tmp/.fml; fi
 	@ rm -f /var/tmp/.fml/INFO
-	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README) |\
+	@ (nkf -e doc/ri/INFO ; nkf -e .info ; nkf -e doc/ri/README.wix) |\
 		nkf -e > /var/tmp/.fml/INFO
 	@ sh usr/sbin/sync-rcs-of-doc.sh
 	@ sh usr/sbin/DocReconfigure
 
 htmldoc:	doc/smm/op.wix
+	@ (chdir doc/html;make)
 	@ echo "Making WWW pages of doc/smm/op => var/html/op"
 	@ test -d var/html/op || mkdir var/html/op
-	@ perl doc/ri/conv-install.pl < doc/ri/INSTALL > doc/smm/install-new.wix 
+	@ perl doc/ri/conv-install.pl < doc/ri/INSTALL.wix > doc/smm/install-new.wix 
 	@ perl usr/sbin/fix-wix.pl doc/smm/op.wix |\
 	  perl bin/fwix.pl -T smm/op -m html -D var/html/op -I doc/smm
 	@ echo "Please see ./var/html/index.html for html version documents"
 
 message: 
-	@echo  "" 
-#	@echo  "YOU USE        gmake        ? O.K.?" 
-#	@echo  "" 
 
 fix-rcsid:
 	@ echo " "; echo "Fixing rcsid ... " 
@@ -192,7 +203,7 @@ contents: FAQ
 	egrep '^[0-9]\.' | perl -nle '/^\d\.\s/ && print ""; print $_'
 
 check:	fml.pl
-	(for x in *.pl proc/*.p? libexec/*.p? ; do perl -c $$x; perl5.003 -c $$x ;done)
+	(for x in *.pl bin/*pl sbin/*pl sbin/ccfml sbin/makefml proc/*.p? libexec/*.p? ; do perl4.036 -c $$x; perl5.003 -c $$x ;done)
 	@ echo "gmake varcheck IS ALSO USEFUL"
 #	(for x in `sh sbin/bin.list.sh` ; do perl -c $$x;done)
 
@@ -248,8 +259,11 @@ test:
 syncwww:
 	sh usr/sbin/syncwww
 
+syncinfo:
+	nkf -j var/doc/INFO > $(HOME)/.ftp/snapshot/info
+
 bethdoc: newdoc
-newdoc: plaindoc htmldoc syncwww
+newdoc: plaindoc htmldoc syncwww syncinfo
 
 varcheck:
 	perl usr/sbin/search-config-variables.pl -D -s -m *pl libexec/*pl proc/*pl bin/*pl |\
@@ -269,7 +283,7 @@ v3:
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
 sync:
-	rcp -p /tmp/distrib/src/*.pl eriko:~/.fml
+	/bin/rcp -p /tmp/distrib/src/*.pl eriko:~/.fml
 
 TEST:
 	tar cf - `find etc/ sbin |grep -v RCS` | ( chdir /tmp/distrib ; tar xvf - )
@@ -281,3 +295,11 @@ ruby:
 
 makefml:
 	sh usr/sbin/reset-makefml
+
+init-makefml:
+	cp sbin/makefml /tmp/distrib
+	(chdir /tmp/distrib ; perl makefml )
+
+ci:
+	ci *pl libexec/*pl proc/lib[a-jl-z]*pl *bin/[a-z]* Makefile C/*.[ch]
+	chmod 755 fml.pl msend.pl libexec/*pl
