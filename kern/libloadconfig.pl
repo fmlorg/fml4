@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libloadconfig.pl,v 2.23 2002/01/09 15:39:23 fukachan Exp $
+# $FML: libloadconfig.pl,v 2.24 2002/06/29 15:17:23 fukachan Exp $
 #
 
 use vars qw($debug);
@@ -173,6 +173,9 @@ sub LoadDummyMacros
     eval "sub DEFINE_ADMIN_PROCEDURE { 1;}";
     eval "sub DEFINE_MAXNUM_OF_PROCEDURE_IN_ONE_MAIL { 1;}";
     eval "sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL { 1;}";
+
+    # misc
+    eval "sub SIZE { ;}";
 
     # for convenience
     eval "sub DUMMY { ;}";
@@ -507,6 +510,12 @@ sub DEFINE_MAXNUM_OF_ADMIN_PROCEDURE_IN_ONE_MAIL
 }
 
 sub Debug { print STDERR "@_\n";}
+
+# return total size reading from STDIN
+sub SIZE
+{
+    return $Envelope{ _pcb }->{ incoming_message }->{ total_read_size };
+}
 
 # for conveinience
 sub DUMMY { ;}

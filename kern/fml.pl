@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.145 2002/06/17 14:54:25 fukachan Exp $
+# $FML: fml.pl,v 2.146 2002/07/03 16:12:52 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -666,6 +666,9 @@ sub Parse
 	exit(0);
     }
     $Envelope{'tmp:bufsiz'} = $bufsiz;
+
+    # hold size info at process control block
+    $Envelope{ _pcb }->{ incoming_message }->{ total_read_size } = $bufsiz;
 }
 
 # Phase 2 extract several fields 
