@@ -180,8 +180,10 @@ sub Convert
 	    s/_EXEC_DIR_/$EXEC_DIR/g;
 	    s/_ML_DIR_/$ML_DIR/g;
 
-	    # PR from ikeda <ikeda@maple.or.jp>
+	    # added by PR from ikeda <ikeda@maple.or.jp>
 	    # XXX $ML is global, defined in ml-admin/menu.cgi
+	    # XXX or $ML is passed from /admin/menu.cgi
+	    # http://www.maple.or.jp/~ikeda/diffs/fml/
 	    s/_ML_/$ML/g;
 
 	    print;
