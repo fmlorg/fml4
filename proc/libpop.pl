@@ -98,7 +98,7 @@ sub MakeConnection # ($host, $headers, $body)
     select(POPLOG);  $| = 1; select(STDOUT);
 
     # the first "OK.. session";
-    print POPLOG $_ = <S>; /^\-/o && &Log($_) && (return "$_");
+    print POPLOG $_ = <S>; /^\-/o && &Log($_) && (return $_);
 
     &PopPut2Socket("USER $POP_USER");
     &PopPut2Socket("PASS $POP_PASSWORD");
@@ -126,10 +126,10 @@ sub PopPut2Socket
     }
     else {
 	$0 = "$FML: Put2Socket $s <$LOCKFILE>"; 
-	print POPLOG "$s<INPUT\n";
+	print POPLOG $s, "<INPUT\n";
     }
 
-    print S "$s\r\n";
+    print S $s, "\r\n";
     print POPLOG $_ = <S>; 
 
     if (/^\-/o) { &Log($_); print STDERR "POP3: $_";}

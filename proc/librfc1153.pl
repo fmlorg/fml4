@@ -189,7 +189,7 @@ sub Rfc1153Destructer
 
     open(F, "> $IssueSeq") || &Log("Cannot open $IssueSeq");
     $issue++;
-    print F "$issue\n";
+    print F $issue, "\n";
     close(F);
 }
 

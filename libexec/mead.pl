@@ -434,7 +434,7 @@ sub Append
 
     open(APP, ">> $file") || die("Append: cannot open $file\n");
     select(APP); $| = 1; select(STDOUT);
-    print APP "$s\n";
+    print APP $s, "\n";
     close(APP);
 }
 

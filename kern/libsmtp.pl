@@ -695,7 +695,7 @@ sub SmtpPut2Socket
     # return if $s =~ /^\s*$/; # return if null;
 
     $0 = "$FML:  $s <$LOCKFILE>"; 
-    print SMTPLOG "$s<INPUT\n";
+    print SMTPLOG $s, "<INPUT\n";
     print S $s, "\r\n";
 
     # no wait

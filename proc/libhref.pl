@@ -115,7 +115,7 @@ sub TalkWithHttpServer
 	    print S "GET $body\n\n";
 	}
 	else {
-	    print S "$body\n";
+	    print S $body, "\n";
 	}
 
 	### RETRIEVE (sysread for binary)

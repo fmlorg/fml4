@@ -608,7 +608,7 @@ sub FmlLocalAppend2CF
 
     open(CF, ">> $FmlLocalRc") || (return 'open fail ~/.fmllocalrc');
     select(CF); $| = 1;
-    print CF "$s\n";
+    print CF $s, "\n";
     close(CF);
 
     print CF "\n";

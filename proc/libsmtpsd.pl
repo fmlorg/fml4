@@ -76,7 +76,7 @@ sub main'SDInit #';
 	chop;
 	($domain, $x) = split(/\s+/, $_, 2);
 
-	print OUTLIST "$x\n";
+	print OUTLIST $x, "\n";
 	$NumSortedRecipient++;
     }
 

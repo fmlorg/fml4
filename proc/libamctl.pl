@@ -805,7 +805,7 @@ sub DoChangeMemberList
 	&Debug("--change member list($_)") if $debug;
 
 	# Backup
-	print BAK "$_\n";
+	print BAK $_, "\n";
 	next in if /^\s*$/o;
 
 	# get $addr for ^#\s+$addr$. if ^#, skip process except for 'off' 
@@ -815,11 +815,11 @@ sub DoChangeMemberList
 
 	# for high performance
 	if ($addr !~ /^$acct/i) {
-	    print NEW "$_\n"; 
+	    print NEW $_, "\n"; 
 	    next in;
 	} 
 	elsif (! &AddressMatch($addr, $curaddr)) {
-	    print NEW "$_\n"; 
+	    print NEW $_, "\n"; 
 	    next in;
 	}
 

@@ -520,7 +520,7 @@ sub Write
 	print OUT "    <LINK REL=stylesheet TYPE=\"text/css\" HREF=\"$css\">\n";
     }
     print OUT "    <TITLE>$HtmlTitle</TITLE>\n";
-    print OUT "$HTML_DOCUMENT_SEPARATOR\n";
+    print OUT $HTML_DOCUMENT_SEPARATOR, "\n";
     print OUT &ShowPointer;
     print OUT "    <PRE>\n";
 
@@ -925,7 +925,7 @@ sub MakeThreadData
 	# search the reference relations;
 	for $mid (@mid) { $line .= " $file" if $m eq $mid;}
 	
-	print OUT "$line\n";
+	print OUT $line, "\n";
     }
 
     # my message-id cache on 

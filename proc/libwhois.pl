@@ -181,7 +181,7 @@ sub Append
     open(F, ">> $WHOIS_DB") || (&Log("Cannot open $WHOIS_DB"), return 0);
     select(F); $| = 1; select(STDOUT);
 
-    print F "$e{'h:From:'}\n\n";
+    print F $e{'h:From:'}, "\n\n";
     &Mesg(*e, "Your data is registered");
     &Mesg(*e, "in the ML($ML_FN) whois database as following:\n");
     &Mesg(*e, "$e{'h:From:'}\n");
@@ -189,8 +189,8 @@ sub Append
     # ^. -> ..
     foreach (split(/\n/, $s)) {
 	s/^\./\.\./;
-	print F "$_\n";
-	&Mesg(*e, "$_");
+	print F $_, "\n";
+	&Mesg(*e, $_);
     }
 
     print F $Separator;     # ATTENTION! $/ = $Separator = ".\n\n";
@@ -320,7 +320,7 @@ sub List
     &AllocAllEntry(*e, *r);
 
     &Mesg(*e, "Entry List submitted to Whois Database of $ML_FN\n");
-    foreach (keys %r) { &Mesg(*e, "$_") if $_;}
+    foreach (keys %r) { &Mesg(*e, $_) if $_;}
 }
 
 

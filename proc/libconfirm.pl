@@ -756,7 +756,7 @@ sub RemoveAddrInConfirmFile
 	# address match
 	&AddressMatch($addr, $a) && ($status++, next);
 
-	print OUT "$_\n";
+	print OUT $_, "\n";
     }
     close(BAK);
     close(OUT);
