@@ -5941,7 +5941,7 @@ sub FixDefault
 	$x = $x[$#x];
 	$x = $Menu'CONFIG{$top_level} ? $Menu'CONFIG{$top_level} : $x;
 
-	print STDERR "   $x => $config{$x} ? 'y' : 'n'\n" ; # if $debug; 
+	print STDERR "   $x => $config{$x} ? 'y' : 'n'\n" if $debug; 
 
 	if ($query{"type"} eq "y-or-n") {
 	    $query{'default'} = $config{$x} ? 'y' : 'n';
