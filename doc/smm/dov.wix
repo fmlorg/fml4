@@ -1,26 +1,35 @@
 .C	ＭＬサーバ Overview
 
+-- ＭＬサーバとは何をすればいいのだろうか？
 
-サマリ:
-	・日々の routine work をいかに自動処理化できるか？
+   ・日々の routine work をいかに自動処理化できるか？
 
-	・可能な限り user および ＭＬ管理者 にとっての自由度をあげる
+   ・可能な限り user および ＭＬ管理者 にとっての自由度をあげる
 
-	・デフォールトは単に配送とユーザ用のコマンド(help や記事の取り
-	  寄せ、配送先の変更/停止等)
+   ・デフォールトは単に配送とユーザ用のコマンド(help や記事の取り
+     寄せ、配送先の変更/停止等)
 
-	・しかしそれ以外の様々な機能もひととおり準備されていると便利
-	  これらの高度な設定は管理者が明示的に設定しなければならない。
-	  というのは管理者は何をしているのか知っているべきだし、
-	  何をしているかの把握はセキュリティ的にも望ましい。
+   ・しかしそれ以外の様々な機能もひととおり準備されていると便利
+     これらの高度な設定は管理者が明示的に設定しなければならない。
+     というのは管理者は何をしているのか知っているべきだし、
+     何をしているかの把握はセキュリティ的にも望ましい。
+
+    ………
+
+
+.S	Introduction
+
+FML 2.1 は Mailing List Server の package (Perl Scripts package) で、
+僕が壱から Full Scratch したものです。
+＃おまけCDROMつき雑誌等にある「…の改良」の記述は間違った推測なのです
+
+これからＭＬをはじめる方にはそのままＭＬサーバをカスタマイズして使いた
+いとおもっている方には改造の PLATFORM として利用してもらうことを想定し
+ています。
 
 
 .S	歴史(なりゆき?:-)とおおまかな視点
 =E.S	Brief History and Overview
-
-fml 2.1 は Mailing List Server package(Perl Scripts package)で、
-僕が壱から Full Scratch したものです。
-＃おまけCDROMつき雑誌等にある「…の改良」の記述は間違った推測なのです
 
 最初の発端は(フリーソフトの例にもれず)
 
@@ -34,48 +43,65 @@ fml 2.1 は Mailing List Server package(Perl Scripts package)で、
 のは面倒でした。そのため デフォールトの emulation は hml 1.6 を 
 support しています(「なりゆき」ともいいますね)。
 
-また、Mailing List == Private Communication を便利にするツール（Filter） 
-という観点を重視しているため、デフォールトでは メンバーチェック をする
-という考え方を尊重しています。
 
-その辺は設定ファイル(config.ph)でいくらでも変えられるので、まぁ拘る必
-要はないのですが、設計思想を知っていると設定のデフォールトがどうなって
-いるかを推測するに役立つでしょう。
+.S	FML 2.1
 
-結局のところ、日々の routine work をいかに自動処理化できるか？が重要な
-ので、ユーザにみえるインターフェイスはどうでもいいわけです。
+   Mailing List は Private Communication を便利にするツール(Filter) 
+
+という観点を重視しているため、デフォールトではメンバーのみが投稿やコマ
+ンドを使える という考え方を尊重しています。
+
+結局のところ、日々の routine work をいかに自動処理化できるか？が重要で
+す。逆にユーザにみえるインターフェイスはどうでもいいわけです。デフォー
+ルトは
+
+	投稿用のアドレス
+	コマンド用のアドレス
+	があり、それらのアドレスでMTA (e.g. sendmail)が受けて
+	fml.pl を起動する
+
+という形態です。しかし
+
+   可能な限り user および ＭＬ管理者 にとっての自由度をあげる
+   (簡単に設定できる自由度をできるだけ確保するべき)
+
+という理想も追求したいところです。その結果として
+
+   ・設定ファイルには sendmail.cf なみに様々な変数が定義されている
+
+のを筆頭に
+
+   ・コマンド用のアドレスは listserv(majordomo) スタイルでも可能
+
+   ・ sendmail が動いていなくても POP3 を使ってＭＬを実行する
+
+等様々なインターフェイスがパッケージ中に収録されています。
 
 ＭＬサーバというものは一番肝心な部分はかなり簡単なのですが、実際にはそ
 れ以外のさまざまな例外処理が発生します。それをいかに封じ込めるかをノウ
 ハウというわけですが…また、環境による違いを吸収するためにさまざまな関
 数をサポートする必要がありました。例えば ish, lha サポート
 
-これらを踏まえての基本的方針は
+一方セキュリティ的には
 
-   『可能な限り user および ＭＬ管理者 にとっての自由度をあげる』
+   ・必要なことはしても、できるだけ何もしない
+   ・機能の増加は簡単な configuration で、しかし明示的に指定しない限り
+     よきにはからって動くべきではない
 
-としています。またそれらの Configuration を簡単に設定できるようにする
-べきです。そして、
+といえます。これが
 
-    『必要なことはしても、できるだけ何もしない』
-    『機能の増加は簡単な configuration で、しかし明示的に指定しない限り
-      よきにはからって動くべきではない』
+   ある機能をONにする変数はあるが、明示的に指定しない限りONにはしない
+   つまりデフォールトでは様々な機能はOFFにされている。	
 
-そのことは、これからＭＬをはじめる方にはそのままＭＬサーバをカスタマイ
-ズして使いたいとおもっている方には改造の PLATFORM として利用してもらう
-ことを想定しています。
+ということの背景です。
 
-多くの変数があるのは、簡単に例えばある変数の値を変えるだけで挙動が変え
-られるようにするためで、変数についてはこのドキュメントに述べられていま
-す。また変数設定方式であれば簡易インターフェイスを割と簡単に書くことが
-できます。例えば makefml です。これはインストールや簡単な設定の変更が
-可能です。ある程度以上複雑なことは手でやって下さい。
-また頑張ればWWWインターフェイスもすぐ書けるでしょう。
+多くの変数があるのは、簡単にある変数の値を変えるだけで挙動が変えられる
+ようにするためです。また、それにより設定を操作するためのインターフェイ
+スを割と簡単に書くことができます。
 
-
-このドキュメントは簡単なカスタマイズ以上のことをするための関数の説明や
-設計思想についても議論しています。
-
+例えば makefml です。makefml を使ってのインストールや簡単な設定の変更
+が可能です(ある程度以上複雑なことは手でやって下さい)。また頑張ればWWW
+インターフェイスもすぐ書けるでしょう。
 
 各種機能はそれぞれの目的に応じて選んでみて下さい。例えば『あるＭＬのロー
 カルな再配送』のような場合はコマンド機能を落して使うべきでしょう。
@@ -89,49 +115,69 @@ ip-connection を受けるアドレス (include ファイルを呼び出すアドレス)に
 	$PERMIT_POST_FROM = "anyone";
 
 
-.S	fml 2.1 Overview
+.S	FML 2.1 機能の概要
 
-ML server, management tool, .forward 等メールを使う各種インターフェイスの
-集合体です。
+ＭＬサーバはおおまかに
 
-デフォールトの使い方は
+
 				設定ファイル(config.ph)の変数
+	_____________________________________________________
+	
 	配送用のアドレス	$MAIL_LIST	
 	コマンド用のアドレス	$CONTROL_ADDRESS
 .l 	$MAIL_LIST
 .l	$CONTROL_ADDRESS
 
-からなります。特別な場合には(歴史的理由により)デフォールトでは hml 1.6
-(正確にはその元祖の shell script) というサーバを Emulate します。なお
-特別な場合とは 配送用のアドレス==コマンド用のアドレスの時です。
+からなります。特別な場合には(歴史的理由により) hml 1.6 (正確にはその元
+祖の shell script) というサーバを Emulate します。特別な場合とは 
+
+	配送用のアドレス==コマンド用のアドレス
+	($MAIL_LIST == $CONTROL_ADDRESS)
+
+の時です。
 
 ＭＬサーバの現在の代表的な機能は以下のようなものです。
 
-   ○ 配送用のアドレスとコマンド用のアドレス
+   ○ 配送用のアドレスとコマンド用のアドレス 
+	-- Chapter .ptr{access_policy}
+
 	それぞれについてアクセス制御や自動登録の設定
 	なお特別な場合「配送用のアドレス==コマンド用のアドレス」は hml 1.6
 
    ○ 様々な自動登録方式
+	-- Chapter .ptr{auto-regist}
+
 	前述のどのアドレスで？ x 4種類 x 各カスタマイズ変数…
 
    ○ リモートメインテナンス/リモート管理
+	-- Chapter .ptr{remote} .ptr{pgp}
+
 	PGP, パスワード認証等の選択
 
    ○ 様々なヘッダカスタマイズ
+	-- Chapter .ptr{header-custom}
 
-   ○ 様々なコマンド、コマンドのカスタマイズ
-	mget コマンドのいろいろなファイル形式のサポート
+   ○ 様々なコマンド
+	-- Chapter .ptr{mget}
+
+	ファイル取り寄せのコマンド mget コマンドのいろいろなファイル形
+	式のサポート
 
    ○ まとめおくり
+	-- Chapter .ptr{msend}
 
    ○ SMTP配送方式(リレー)
+	-- Chapter .ptr{smtp}
 
    ○ その他(MIME処理等)
 
    ○ スプール
+	-- Chapter .ptr{archive} .ptr{expire} .ptr{href}
 	HTML自動化処理(thread化)、アーカイブ、Expire等
 
    ○ 複数のインターフェイス (listserv や majordomo style)
+	-- Chapter .ptr{fmlserv}
+
 	みかけがあたかも listserv のように fml のコマンド群を使う
 
 必要に応じて設定ファイルで機能の追加・削減を行うことができます。
@@ -165,52 +211,6 @@ e.g. to make elena@your-domain mailng list
 =E
 Please see the file INSTALL for the detail.
 
-
-.S	FML 1.x との互換性
-.l	non-compat-1-2
-
-FML 2.1 で互換性のないのはデフォールトでのアドレスの振舞いです。異なる
-配送用のアドレス(elena)とコマンド用のアドレス(elena-ctl)がある時に
-
-[FML 2.1]
-	elena		配送専用
-	elena-ctl	コマンドだけ
-
-になります。2.1 リリース以前(2.1 Gamma series)では 
-
-	elena		配送もコマンドも処理する
-	elena-ctl	コマンドだけ
-
-のように振舞いました。elena でのコマンドの「配送とコマンドの切り分け」
-はメール本文が"# command"であるか？否か？で決めています。
-
-2.1 でも配送用とコマンド用のアドレスが同じ場合は
-
-	elena		配送もコマンドも処理する
-
-になります。この場合「コマンドなのか？否か？はメール本文が"# command"
-であるか？否か？」で決まります。これがもともとの hml 1.6 互換のスタイ
-ルです。
-
-FML 1.x を使っていて FML 2.x に入れ換える場合、基本的にはperl script 
-群だけを入れ換えれば動きます。ほとんどすべての差異はFML内部で自動補正
-を行ない吸収できます。
-
-しかし config.ph でちょっと複雑な HOOK を書けている場合はちょっと注意
-がいるでしょう。というのはHOOKで使う関数や変数等が今でもサポートされて
-いるとは限らないからです。
-
-
-.S	 hml 1.6 との compatibility
-
-   0	members や log file 等はそのままでよい
-
-   1 	fml をインストールし
-
-   2 	makefml か手で config.ph で
-	$MAIL_LIST と $CONTROL_ADDRESS の内容を同じにする。 
-
-これで同じになります。
 
 
 .C	fml の機能についての概要
@@ -441,7 +441,7 @@ Listserv 形式のシンタックスをうけつけるように拡張されたインターフェイ
 
 
 .S	 MIME や base64 等の処理 
-.xref	MIME, href
+.xref	href
 
 基本的にすどおしですが、MIME 処理は下請けにだして、Subject を decode 
 してサマリーを作る等が可能です。またHTMLでは base64 の画像等の変換処理
@@ -589,9 +589,9 @@ contrib/Utilities に宇宙歴をつけるmh, mh-e user interface つき:-)です。
 .xref	startrek x-stardate
 
 
-.C	Version up と Compatibility 
+.C	Version Up と互換性について
 
-.S	version up
+.S	how to version up
 .xref	version-up
 
 makefml を使ってインストールしてもらのが確実です。
@@ -600,40 +600,97 @@ makefml の使い方については INSTALL マニュアルを見て下さい。
 
 .S	新しい機能を有効にするには？
 
-なお、新しい機能は config.ph へ差分だけを付け加えるか コマンドラインで
-指定するかしないと使えません。
-つまり、新しい機能・オプションは明示的に指定しない限り単に動きません
+なお、新しい機能は config.ph へ差分だけを付け加えないと使えません 
+(makefml で設定できる部分もある)。つまり、新しい機能・オプションは明示
+的に指定しない限り単に動かないだけです。
 
 
-.S	Backward Compatibility 
+.S	互換性について
+.l	non-compat-1-2
+.l	compatibility
 
-config.ph で $CFVersion = 3; と定義されている時には『$MAIL_LIST と 
-$CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』が従来と異なり『配送
-専用』です。
-.xref	non-compat-1-2
+FML では config.ph という設定ファイルが振舞いを決めます。
+config.ph にも version という概念があります。
 
-それ以外のものについては可能な限り backward compatible に作られていま
-す。
-
-
-.S	CF VERSION による Backward Compatibility 
+	$CFVersion
 .k	$CFVersion
-.k	$COMPAT_CF1 
 
-fml 2.1 の標準の config.ph は $CFVersion = 2; です。これは cf/config 
-を使って生成されるものです。これ以前の config.ph を使っている場合は
+という変数で指定されています。現在の version は 3 です。version が異な
+る場合、ほとんどの変数について自動的に補正が加えられ昔作った config.ph 
+をそのまま使っても大丈夫なようになっています。
+
+config.ph でちょっと複雑な HOOK を書けている場合はちょっと注意がいるで
+しょう。というのはHOOKで使う関数や変数等が今でもサポートされているとは
+限らないからです。
+
+できるだけ互換性を保つように作られています。ただ 
+
+    config.ph の $CFVersion が 3
+
+で、なおかつ
+
+   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
+
+の時は従来と異なり『配送専用』です。ここだけは互換性がありません。しか
+し
+
+	$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
+	昔と同じで配送用のアドレス $MAIL_LIST で
+	コマンド(# command の形)を受け付けます。
+
+従来 $MAIL_LIST != $CONTROL_ADDRESS の場合にヘッダやHELP等では「コマン
+ドは $CONTROL_ADDRESS へ送ってね」と書いてあるにも関わらず $MAIL_LIST 
+でもコマンドは受けられたという変な挙動がありました。これを互換性と解釈
+するかバグと解釈するかは微妙ですが、FML 2.1 のアクセス制御ルールの導入
+時に上記の解釈になりました。
+
+______________________________________________________
+[比較表]
+
+	elena		配送専用
+	elena-ctl	コマンドだけ
+
+になります。2.1 リリース以前(2.1 Gamma series)では 
+
+	elena		配送もコマンドも処理する
+	elena-ctl	コマンドだけ
+
+のように振舞いました。elena でのコマンドの「配送とコマンドの切り分け」
+はメール本文が"# command"であるか？否か？で決めています。
+
+2.1 でも配送用とコマンド用のアドレスが同じ場合は
+
+	elena		配送もコマンドも処理する
+
+になります。この場合「コマンドなのか？否か？はメール本文が"# command"
+であるか？否か？」で決まります。これがもともとの hml 1.6 互換のスタイ
+ルです。
+______________________________________________________
+
+
+.S	補正ライブラリのダイナミック・ローディング
+
+cf/config という生成コマンドで作るようになった時 $CFVersion = 2; とい
+う version が与えられました。さらに、それ以前の手動編集のみだった時代
+の config.ph を使っている場合は 1 と定義されています。
 
 	$COMPAT_CF1 = 1;
+.k	$COMPAT_CF1 
 
 がセットされているか $CFVersion が２より小さい場合は自動的に
 
 	libcompat_cf1.pl
 .k	libcompat_cf1.pl
 
-が dynamic loading されます。
+が dynamic loading されます。また 3 以下と判定された場合は
+
+	libcompat_cf2.pl
+.k	libcompat_cf2.pl
+
+が自動的にローディングされます。
 
 
-.S	1.6より前からの移行について
+.S	FML 1.6 より前からの移行について
 
 1.6では、基本的なデータ構造を call by reference 用に書き直したので、
 いままでの SMTP_OPEN_HOOK 等の カスタマイズはそのままでは反映されません。
@@ -650,7 +707,7 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 下さい。
 
 
-.S	2.0 〜 2.1 の間の compatible
+.S	FML 2.0 〜 2.1 の間の compatible
 .k	$COMPAT_FML20
 
 	$COMPAT_FML20 = 1;
@@ -666,6 +723,18 @@ libcompat.pl にBackward compatibility のためのコードがあります。
 (HOOKは難しいですが)これ以外のものについてはできるだけ backward
 compatible になるように作っていますが、変なことがあればＭＬへでもメー
 ルを御一報下さい。
+
+
+.S	 hml 1.6 との compatibility
+
+   0	members や log file 等はそのままでよい
+
+   1 	fml をインストールし
+
+   2 	makefml か手で config.ph で
+	$MAIL_LIST と $CONTROL_ADDRESS の内容を同じにする。 
+
+これで同じになります。
 
 
 
@@ -797,94 +866,12 @@ Date: と Posted: の時間差でネットワークのDELAY情報が分かるのは副次的効
 人”が悪いのはいうまでもありまん。
 
 
-.C	用語
-
-以下で使う用語について2、3説明しておきます。
-
-.S	MLのHOME
-.k	MLのHOME
-
-ML(fml) の HOME は config.ph のある場所です。例えば config.ph が 
-/var/spool/ml/elena/config.ph にあるとすると、directory
-/var/spool/ml/elena をMLのHOMEと呼んでいます。
-
-
-.S	SMTP
-.k	SMTP
-.k	Simple Mail Transfer Protocol
-
-SMTP == Simple Mail Transfer Protocol。 sendmail 間の通信方式のこと。
-
-
-.S	メールサーバ/SMTPサーバ, MTA
-
-sendmail というプログラムが元祖であり、もっとも代表的なプログラムです
-が、SMTPを理解すればうけるのは何でも構いません。より正確には $HOST で
-指定する(デフォールトは自分自身 "localhost")で smtp/tcp ポートがメール
-を受けとってくれれば何が走っていて構わないという意味です。
-
-MTAなら qmail (http://www.qmail.org/) のような他のMTAもあるし、MTAでは
-なく例えば TIS (Trusted Information System) の Gauntlet という 
-Firewall では smap というプログラムが受けて queue だけをします。
-
-世の中にはそれ以外にも sendmail もどきのプログラムはありますから、
-sendmail に拘る必要はありません。
-
-この文書ではターゲットマシンが 4.4BSD なので、sendmail と perl を使う
-場合について解説しています。
-
-
-.S	sendmail
-.k	/usr/sbin/sendmail
-.k	sendmail
-
-現在も Eric Allman がメンテしている メール配送エージェントのこと。
-sendmail は BSD の標準装備です。
-
-どんな複雑な環境でも適応できる柔軟性を兼ね備えている分、security hole 
-もありえます。bug つぶしのupdateは非常にはやいです。そのため常に最新版
-を使うようにして下さい。
-例えば
-
-	ftp://ftp.cert.org/pub/tools/sendmail/
-	ftp://ftp.sendmail.org/
-
-国内のミラーは例えば
-
-	ftp://ftp.iij.ad.jp/pub/network/sendmail/
-
-です。
-
-
-.S	sendmail.cf 
-.k	/etc/sendmail.cf 
-.k	sendmail.cf 
-
-sendmail をコントロールする configration file。これの読み書きができな
-いとネットワーク管理者にはなれません(なりたくないって?(泣))。
-
-大抵の場合 motonori さん(motonori@wide.ad.jp) のメンテしている CF パッ
-ケージで sendmail.cf を簡単に作ることができるが、この見本で十分実用で
-す。
-
-詳しくは、このCFパッケージの日本語マニュアルも参照して下さい。
-
-国内のミラーは例えば
-
-	ftp://ftp.iij.ad.jp/pub/network/sendmail/
-
-
-.S	newaliases
-.k	/usr/sbin/newaliases
-.k	newaliases
-
-/etc/aliases から aliases データベースを作るための操作のこと。
-/etc/aliases をいじったら必ず newaliases というコマンドを実行しなけれ
-ばなりません。
-
-
 .# $Id$
-.# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-.# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-.# fml is free software distributed under the terms of the GNU General
-.# Public License. see the file COPYING for more details.
+.# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+.#          All rights reserved. 
+.#               1993-1996 fukachan@phys.titech.ac.jp
+.#               1996-1997 fukachan@sapporo.iij.ad.jp
+.# 
+.# FML is free software; you can redistribute it and/or modify
+.# it under the terms of GNU General Public License.
+.# See the file COPYING for more details.
