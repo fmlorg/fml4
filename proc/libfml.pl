@@ -1176,7 +1176,7 @@ sub DoIndexSearchMinCount
     print STDERR "FindRange=>($try, $last);\n" if $debug;
 
     for ($try = $try - 10; $try <= $last; $try++) {
-	print STDER "check: -f $FP_SPOOL_DIR/$try\n" if $debug;
+	print STDERR "check: -f $FP_SPOOL_DIR/$try\n" if $debug;
 	last if -f "$FP_SPOOL_DIR/$try";
     }
 
