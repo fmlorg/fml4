@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.148 2003/01/20 14:35:34 fukachan Exp $
+# $FML: fml.pl,v 2.149 2003/03/19 15:46:03 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -2764,7 +2764,7 @@ sub MailLoopP
 	if ($MAINTAINER && $Envelope{'h:x-ml-info:'} =~ /contact $MAINTAINER/i) {
 	    $error_count++;
 	}
-	elsif ($MAIL_LIST/i &&
+	elsif ($MAIL_LIST &&
 	       $Envelope{'h:x-ml-info:'} =~ /(address\s+|mailto:)$MAIL_LIST/i) {
 	    $error_count++;
 
