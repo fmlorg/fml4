@@ -36,16 +36,29 @@ Example:
   DNS
 	BIND 8.2.1
 
+source
 .url ftp://ftp.isc.org/isc/bind/src/8.2.1/bind-src.tar.gz
+
+binary
+.url http://www.peanuts.org/peanuts/MacOSX/unix/connectivity/protocol/bind.8.2p1.P.bs.tar.gz
 
   MTA
 	sendmail 8.9.3
 
+source
 .url ftp://ftp.sendmail.org/pub/sendmail/sendmail.8.9.3.tar.gz
+
+binary
+.url http://www.peanuts.org/peanuts/MacOSX/unix/connectivity/mail/sendmail_8.9.3.m.P.bs.tar.gz
 
 	postfix-19990906
 
+source
 .url ftp://ftp.porcupine.org/mirrors/postfix-release/official/postfix-19990906-pl02.tar.gz
+
+binary (too old but ...)
+http://www.peanuts.org/peanuts/MacOSX/unix/connectivity/mail/postfix_19990317-pl05.m.P.bs.tar.gz
+
 
 .S	/etc/sendmail.cf
 .l	/etc/sendmail.cf
