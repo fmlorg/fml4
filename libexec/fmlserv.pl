@@ -312,32 +312,18 @@ sub FmlServ
 
     &Mesg(*e, "Processing Done.");
 
+    # The first reply message;
     # preparation for &Notify;
-    &MakePreambleOfReply(*e); # The first reply message;
-
-    if ($debug) {
-	print STDERR "----- ends of fmlserv ---\n";
-	for (FQDN, DOMAINNAME, MAIL_LIST, CONTROL_ADDRESS, 
-	     ML_FN, XMLNAME, XMLCOUNT, MAINTAINER,
-	     MEMBER_LIST, ACTIVE_LIST,
-	     LOGFILE) {
-	    eval("printf STDERR \"%-20s %s\\n\", '$_', \$$_;");
-	}
-    }
+    $e{'message'} = 
+	"Fmlserv (Fml Listserv-Like Interface) Results:\n$e{'message'}";
 }
 
 
 sub DebugEnvelopeDump
 {
     local($log)= @_;
-
-    $_ = "Addr2Reply:";
-    &Debug("$log: $_\t=>$e{$_}") if $e{$_};
-
-    for (keys %Envelope) {
-	next unless /^mode:/;
-	&Debug("$log: $_\t=>$e{$_}") if $e{$_};
-    }
+    &Debug("$log: Addr2Reply:\t=>$e{'Addr2Reply:'}") if $e{"Addr2Reply:"};
+    for (keys %Envelope) { &Debug("$log: $_\t=>$e{$_}") if $e{$_} && !/^mode/;}
 }
 
 
@@ -350,14 +336,6 @@ sub Opt { push(@SetOpts, @_);}
 #####
 ##### LIBRARY FUNCTIONS OF FMLSERV 
 #####
-
-sub MakePreambleOfReply
-{
-    local(*e) = @_;
-    $e{'message'} = 
-	"Fmlserv (Fml Listserv-Like Interface) Results:\n$e{'message'}";
-}
-
 
 sub DoFmlServItselfFunctions
 {
