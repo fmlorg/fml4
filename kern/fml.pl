@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.124.2.5 2001/09/18 15:00:10 fukachan Exp $
+# $FML: fml.pl,v 2.124.2.6 2001/10/15 12:53:04 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -456,10 +456,12 @@ sub InitConfig
     if ($0 =~ m%^(.*)/(.*)%) { $ExecDir = $1; $FML = $2;}
 
     # fml 4.0 modules
-    push(@INC, "$ExecDir/module");
-    push(@INC, "$ExecDir/module/CPAN");
-    push(@INC, "$ExecDir/module/Japanese");
-    push(@INC, "$ExecDir/module/fml-devel");
+    unshift(@INC, "$ExecDir/module/fml-devel");
+    unshift(@INC, "$ExecDir/module/CPAN");
+    unshift(@INC, "$ExecDir/module/Japanese");
+    unshift(@INC, "$ExecDir/module");
+    unshift(@INC, $LIBDIR) if $LIBDIR;
+    unshift(@INC, $DIR);
 
     # a little configuration before the action
     if (defined $FML_UMASK) {
