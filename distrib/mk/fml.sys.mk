@@ -67,3 +67,11 @@ __import_variables:
 .for dir in ${__EXPORTS_DIR__}
 	@ echo ${dir}=${$(dir)}
 .endfor
+
+
+# dirty hack
+scan: __scan
+
+# tricky definition but to overwrite doc/*/Makefile's scan: rules
+scan:
+	@ echo ""
