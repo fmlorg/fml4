@@ -10,19 +10,27 @@ $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'} ne '';
 $ENV{'IFS'}   = '' if $ENV{'IFS'} ne '';
 
 ###### MAIN #####
+require 'getopts.pl';
+&Getopts('D:hd');
+$DIR = $opt_D ? $opt_D : $ENV{'PWD'};
+
 umask (022);
 require 'vote.ph';
+$debug = 1 if $opt_d;
 
 &VoteInitConfig;
 
 if($0 =~ 'summary.pl') { 
-    foreach (<$DIR/spool/*>) { &Vote(&GetBufferFromFile($_));}
+    $SUMMARY_MODE = 1;
+    foreach (<$DIR/spool/[0-9]>, <$DIR/spool/[0-9][0-9]>, 
+	     <$DIR/spool/[0-9][0-9][0-9]>) { # built-in is a special?
+	&Vote(&GetBufferFromFile($_)) if(/spool\/\d+$/);
+    }
     &VoteOutput;
     exit 0;
 }
 
 if(@ARGV) {
-# get vote from a file
     foreach (@ARGV) { &Vote(&GetBufferFromFile($_));}
 } else {
       &Vote(<STDIN>);
@@ -62,20 +70,29 @@ sub GetBufferFromFile
 {
     local($FD) = @_;
     local($BUFFER) = "";
+    local($WHOLE_MAIL);
 
     open(FD, "$JCONVERTER $FD|") || (&VoteLog("cannot open $FD"), return);
-    local(@tmp) = <FD>;
+    eval "while(<FD>) {
+	    $READ_FILE_Hook
+		\$WHOLE_MAIL .= \$_;
+	}";
+    print STDERR $@ if $@;
     close(FD);
-    &GetFrom(@tmp);
+    
+    &GetFrom($WHOLE_MAIL);
     $Original_From_address = &DecodeMimeStrings($Original_From_address);
-    return @tmp;
+    return split(/\n/, $WHOLE_MAIL, 9999);
 }
 
 sub GetFrom
 {
     # Tricky for folding and unfolding.
-    local($MailHeaders) = join("", @_);
-
+    local($WHOLE_MAIL) = @_;
+    local($MailBodyIndex) = index($WHOLE_MAIL, "\n\n");
+    $StoredMailHeaders = $MailHeaders = 
+	substr($WHOLE_MAIL, 0, $MailBodyIndex);
+    
     # No UNIX FROM!(a possibility)
     $MailHeaders =~ s/^(\S+):/$1:\n\n/;
     $MailHeaders =~ s/\n(\S+):/\n\n$1:\n\n/g;
@@ -93,7 +110,8 @@ sub GetFrom
 
 	# filelds to use later.
 	/^Reply-to:$/io       && ($Reply_to = $contents, next);
-	/^Sender:$/io         && ($Sender = $contents, next);
+	/^Sender:$/io         && ($Sender   = $contents, next);
+	/^X-Mail-Count:$/io   && ($ID       = $contents, next);
 
 	if(/^From:$/io) {
 	    # Original_From_address is preserved.
@@ -111,38 +129,52 @@ sub GetFrom
 
 # get one buffer, collect @keywords up to @maxkeywords. 
 sub Vote {
+    
     local(@votebody) = @_;
     local($i) = local($j) = 0;
-    local($in_comment) = '';
-    local(@counter_keywords);
-    local($COMMAND, $GET_FIELD, $JNAMECONV, $RESET);
+    local($COMMAND, $GET_FIELD, $JNAMECONV, $RESET, $AsA2A);
 
     # generate regexp for given fields(One Line Matching)
     foreach $key (@keywords) {
-	$RESET .= "\$Count$key = 0;\n";
-	$GET_FIELD .= "if(/^$key:(.*)/o && (\$Count$key++ < $maxkeywords[$i]))
-                       \t{ push(\@KEY$key, \$1);}\n\t" unless $SUMMARY_MODE;
-	$GET_FIELD .= "if(/^$key:(.*)/o) { push(\@KEY$key, \$1);}\n\t"
-	    if $SUMMARY_MODE;
+	$RESET .= "\$Count{$key} = 0;\n";
+	$RESET .= "undef %Var;\n";
 	$JNAMECONV .= "\ts/^$Jkeywords[$i]/$key/;\n" if $Jkeywords[$i];
+
+	$GET_FIELD .= "if((/^$key:(.*)\\(/o || /^$key:(.*)/o )";
+#	$GET_FIELD .= "&& \$Count{$key}++ < $maxkeywords[$i])\n";
+#	$GET_FIELD .= "\t{ \$KEY{$key} .=  \"\$1\\n\";}\n\t";
+
+	$GET_FIELD .= "&& \$Count{$key}++ < $maxkeywords[$i])\n\t";
+	$GET_FIELD .= "{ \$Var{\$1} += 1;}";
+	$GET_FIELD .= "\n\t";
+
+	$AsA2A     .= "\n\t";
+	$AsA2A     .= "foreach(keys %Var) { \$KEY{$key} .= \"\$_\\n\";}";
 	$i++;
     }
 
     # Execution Command Generation
-    $EXEC_COMMAND = "$RESET;\n
+    $EXEC_COMMAND = "$RESET
     foreach (\@votebody) {
-	# for comment
         $Hook
 
  	# get voting fields, initilize
- 	y/A-Z/a-z/;  # to lower case
+ 	#y/A-Z/a-z/;  # to lower case
+        y/£Á-£Ú/A-Z/;
+        y/£á-£ú/a-z/;
+        y/£°-£¹/0-9/;
+        y/¡Ê¡§/\(:/;
  	s/[¡¡\\s]//g;# Spaces
         $JNAMECONV\n\t# Jname and Name conversion
-        $GET_FIELD\n}\n";
-
+        $GET_FIELD\n
+    }
+    $AsA2A;\n";
+    $I++;
+    
     print STDERR $EXEC_COMMAND if $debug;
     eval $EXEC_COMMAND;
     print STDERR $@ if $@;
+
 }
 
 sub VoteCleanup
@@ -152,32 +184,42 @@ sub VoteCleanup
 }
 
 sub VoteOutput {
-    # Return mail
-    local($return) = "$DIR/return_body_$$";
     local($i) = 0;
-
-    # 
-    unlink $return if -f $return;
 
     # generate evaled strings
     foreach $key (@keywords) {
 	$GET_FIELD .= "open(POUT, \"|cat \");\n";
-	$GET_FIELD .= "print POUT \"$Jkeywords[$i]\\n\";" if $Jkeywords[$i];
-	$GET_FIELD .= "print POUT \"$key\\n\";"       unless $Jkeywords[$i];
+	if( $Jkeywords[$i] ) {
+	    $GET_FIELD .= 
+		sprintf("printf POUT \"\\n%-20s \";", $Jkeywords[$i]); 
+	}else {
+	    $GET_FIELD .= "print POUT \"\\n$key:\\t\";";
+	}
+	$GET_FIELD .= "print POUT \"\\n\";" if( $maxkeywords[$i] > 1);
+	$GET_FIELD .= "print POUT \"\\n\";" if $SUMMARY_MODE;
 	$GET_FIELD .= "close POUT;\n";
-	$i++;
-	$GET_FIELD .= "open(OUT, \"|sort |uniq -c |sort -nr\");";
-	$GET_FIELD .= "print OUT join(\"\\n\", \@KEY$key), \"\\n\";\n";
-	$GET_FIELD .= "print STDOUT join(\"\\n\", \@KEY$key);\n" if $debug;
+
+	if($SUMMARY_MODE) {
+	    $GET_FIELD .= "open(OUT, \"|sort |uniq -c |sort -nr\");";
+	    $GET_FIELD .= "print STDERR \">>>\",\$KEY{$key},\"<<<\\n\";\n";
+	} else {
+	    $GET_FIELD .= "open(OUT, \"|cat\");";
+	}
+	if( $maxkeywords[$i] > 1) {
+	    $GET_FIELD .= "\$KEY{$key} =~ s/\\n/\\n                     /g;\n";
+	    $GET_FIELD .= 
+		"\$KEY{$key} = \"                     \" . \$KEY{$key};\n";
+	}
+
+	$GET_FIELD .= "print OUT \$KEY{$key};\n";
 	$GET_FIELD .= "close OUT;\n";
+
+	$i++;
     }
 
     print STDERR ">",$GET_FIELD . $HookOut,"<\n" if $debug;
     eval $GET_FIELD . $HookOut;
     print STDERR $@ if $@;
-
-    # remove the return mail
-    unlink $return;
 }
 
 1;
