@@ -1,5 +1,5 @@
 		How to edit fml CVS repository
-		$Date$
+		$Date: 2001/07/01 02:23:51 $
 
 CAUTION: you need "BSD make" not gmake.
 
@@ -137,6 +137,10 @@ fml-4-0-1	4.0.1 release
 
 fml-4-0-2	4.0.2 release
 
+postfix-verps	Postfix current VERP's hack branch
+
+	break from main:current-20010722
+
 
 *** HOW TO MERGE ***
 
@@ -154,4 +158,4 @@ fml-4-0-2	4.0.2 release
 
 	% cvs diff 
 
-$FML$
+$FML: README,v 1.25 2001/07/01 02:23:51 fukachan Exp $
