@@ -6,6 +6,49 @@ $libid   = q$Id$;
 ($libid) = ($libid =~ /Id:(.*).pl,v(.*) *\d\d\d\d\/\d+\/\d+.*/ && $1.$2);
 $rcsid  .= "/$libid";
 
+sub AutoRegistP
+{
+    local($from) = @_;		
+    local($SubjectM, $SubjectF, $CheckString);
+
+    # mailbody is "subscribe"
+    if($REQUIRE_SUBSCRIBE && 
+       $REQUIRE_SUBSCRIBE_IN_BODY) {
+
+	if(! ($MailBody =~ /^\s*$REQUIRE_SUBSCRIBE\s*/i)) {
+	    $SubjectM = "Illegal Subject in auto-regist $ML_FN";
+	    $SubjectF = 
+		"Auto-Regist requires top of body is $REQUIRE_SUBSCRIBE";
+	}
+
+	$CheckString = $MailBody;
+
+	# "Subject: subscribe"
+    }elsif($REQUIRE_SUBSCRIBE) {
+	if(! ($Subject =~ /^\s*$REQUIRE_SUBSCRIBE/i)) {
+	    $SubjectM = "Illegal Subject in auto-regist $ML_FN";
+	    $SubjectF = "Auto-Regist requires Subject:$REQUIRE_SUBSCRIBE";
+	}
+
+	$CheckString = $Subject;
+    }	    
+
+    if("" ne $SubjectM) {
+	&Warning($from, $SubjectM, $SubjectF);
+	return 0;
+    }else {
+	# O.K. Go! e.g. Subject: subscribe or subscribe E-mail-address
+	if($CheckString =~ /^\s*$REQUIRE_SUBSCRIBE\s*(\S+)\s*/i){ $from = $1;}
+
+	# LoopBack Check;
+	if(($from =~ /$MAIL_LIST/io) || &AddressMatching($from, $MAIL_LIST)) {
+	    return 0;
+	}else {
+	    return $from;
+	}
+    }
+}
+
 sub OpenStream_OUT
 {
     local($WHERE, $PACK_P, $FILE, $TOTAL) = @_;
@@ -18,7 +61,6 @@ sub OpenStream_OUT
 
     return 1;
 }
-
 
 sub CloseStream_OUT { close(OUT);}
 
@@ -34,10 +76,10 @@ sub WC
     return $lines;
 }
 
-
 sub SplitFiles
 {
     local($file, $totallines, $TOTAL) = @_;
+    local($returnfile) = $file;
     local($lines) = 0;
     local($limit) = int($totallines/$TOTAL); # equal lines in each file
     local($i) = 1;
@@ -49,15 +91,15 @@ sub SplitFiles
 	
 	if($lines > $limit) { # reset
 	    $lines = 0; close OUT; $i++;
+	    print STDERR "open(OUT, > $returnfile.$i)\n" if $debug;
 	    open(OUT, "> $returnfile.$i") || 
 		do { &Logging("$!"); return 0;};
 	}
-    }# WHILE
+    }# WHILE;
 
-    unlink $file;
+    unlink $file unless $SplitFiles_NOT_DELETE_ORIGINAL;
     return 1;
 }
-
 
 sub MakeFilesWithUnixFrom { &MakeFileWithUnixFrom(@_);}
 sub MakeFileWithUnixFrom
@@ -113,24 +155,23 @@ sub MakeFileWithUnixFrom
     return $TOTAL;
 }
 
-
 # Sending files back 
 sub SendingBackOrderly
 {
-    local($returnfile, $TOTAL, $SUBJECT, $SLEEPTIME) = @_;
+    local($returnfile, $TOTAL, $SUBJECT, $SLEEPTIME, @to) = @_;
 
     foreach $now (1..$TOTAL) {
 	local($file) = "$DIR/$returnfile.$now";
 	
 	&Logging("SendFile: Send a $now/$TOTAL to $to");
-	&SendFile($to, "$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0);
+	&SendFileMajority("$SUBJECT ($now/$TOTAL) $ML_FN", $file, 0, @to);
+
 	unlink $file unless $debug;
 	sleep($SLEEPTIME ? $SLEEPTIME : 3);
     }
 
     unlink $returnfile unless $debug;
 }
-
 
 sub Whois
 {
@@ -187,6 +228,55 @@ sub talkWhois # ($host, $headers, $body)
     } else { &Logging("Cannot connect $host");}
 }
 
+sub SendFileMajority
+{
+    local($subject, $file, $zcat, @to) = @_;
+    local($body);
+
+    if(-T $file && open(file)) { 
+    }elsif((1 == $zcat) && $ZCAT && -r $file && open(file, "$ZCAT $file|")) {
+    }elsif((2 == $zcat) && $ZCAT && -r $file && open(file, "$UUENCODE $file spool.tar.gz|")) {
+    }else { 
+	&Logging("no $file in sub SendFile"); return;
+    }
+
+    # trick for using smaller memory!
+    $SEND_FILE_TRICK = 1;
+    ($host, $body, @headers) = &GenerateMailMajority($subject, @to);
+
+    $Status = &Smtp($host, $body, @headers);
+    &Logging("SendFile:$Status") if $Status;
+
+    close(file);
+}
+
+sub GenerateMailMajority
+{
+    local($subject, @to) = @_;
+    local($body) = '';
+    local($whom, @tmp) = split(/:/, getpwuid($<), 999);
+    local($from) = $MAINTAINER ? $MAINTAINER: $whom;
+    local($host) = $host ? $host : 'localhost';
+    local($Status) = 0;
+
+    @headers  = ("HELO", "MAIL FROM: $from");
+    foreach $to (@to) {
+	push(@headers, "RCPT TO: $to");
+    }
+    push(@headers, "DATA");
+
+    # the order below is recommended in RFC822 
+    $body .= "Date: $MailDate\n" if $MailDate;
+    $body .= "From: $from\n";
+    $body .= "Subject: $subject\n";
+    $body .= "Sender: $Sender\n" if $Sender; # Sender is additional.
+    $body .= "To: $to\n";
+    $body .= "Reply-to: $Reply_to\n" if $Reply_to;
+    $body .= "X-MLServer: $rcsid\n" if $rcsid;
+    $body .= "\n";
+
+    return ($host, $body, @headers);
+}
 
 # FOR DEBUG
 if($0 =~ __FILE__) {
