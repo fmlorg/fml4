@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>
+"fml" Configuration Interface
+</TITLE>
+<META http-equiv="Content-Type"
+	content="text/html; charset=us-ascii">
+</HEAD>
+<BODY BGCOLOR="#E6E6FA">
+<!-- =================================================================== -->
+<H2>
+<CENTER>
+"fml" Configuration Interface
+</CENTER>
+</H2>
+
+<P>
+<A HREF="/cgi-bin/admin/menu.cgi?LANGUAGE=Japanese">[Japanese]</A>
+
+<HR>Configuration
+
+<P>
+<FORM ACTION="/cgi-bin/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=config>
+<INPUT TYPE=hidden NAME=PTR  VALUE=/>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Mailing List:
+		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>Choice:
+			<TD ALIGN=right>
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+		</TABLE>
+</TABLE>
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+
+<HR>
+<P>subscribe/unsubscribe
+
+<FORM ACTION="/cgi-bin/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+
+<P>
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Mailing List:
+		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
+		<TABLE>
+			<TD ALIGN=left>Choice:
+			<TD ALIGN=right>
+			<SELECT NAME=ML>
+			__EXPAND_OPTION_ML__
+			</SELECT>
+		</TABLE>
+
+	<TR>
+		<TD ALIGN=right> Email address:
+		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR SIZE=30>
+
+	<TR>
+		<TD ALIGN=right> subscribe/unsubscribe:
+		<TD ALIGN=left> 
+		<SELECT NAME=PROC>
+		<OPTION VALUE=ADD>subscribe
+		<OPTION VALUE=BYE>unsubscribe
+		<OPTION VALUE=ADD_ADMIN>subscribe as ML administrator
+		<OPTION VALUE=BYE_ADMIN>unsubscribe as ML administrator
+		</SELECT>
+</TABLE>
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
+<P>Create a new Mailing List
+
+<FORM ACTION="/cgi-bin/admin/makefml.cgi" METHOD=POST>
+<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+<INPUT TYPE=hidden NAME=PROC VALUE=newml>
+
+<TABLE>
+	<TR>
+		<TD ALIGN=right> Mailing List:
+		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+</TABLE>
+
+_____________________________
+<BR>
+<INPUT NAME=submit-p TYPE=submit VALUE=Create>
+<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+</FORM>
+
+
+<HR>
+
+<PRE>
+Copyright (C) 1993-1999 Ken'ichi Fukamachi
+         All rights reserved. 
+
+$Id$
+</PRE>
+</BODY>
+</HTML>
