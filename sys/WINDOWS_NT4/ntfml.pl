@@ -311,6 +311,7 @@ sub GetPopPasswd
     local($buf, @buf);
 
     $buf = &Grep("^$ml\\s+", "$ML_DIR/etc/pop_passwd");
+    $buf =~ s/^[\r\n]+$//g;
     (split(/\s+/, $buf, 2))[1];
 }
 
