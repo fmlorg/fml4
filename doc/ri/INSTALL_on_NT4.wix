@@ -508,14 +508,15 @@ ntfml.cmd は常には知っていなければなりません。これの起動/コントロール
 ntfml.cmd need to run always. If the machine is down, you need to kick
 off it again.
 
-NTのサービスとして登録するプログラムを k.ssk@nifty.com さんが作成しました。
+NTのサービスとして登録するプログラムを佐々木さん(
+ssk@dmail.plala.or.jp )が作成してくださいました。
 登録やコントロールパネルから操作する方法については
 =E
 Please see this url on how to regist fml to NT service and control via
 control panel.
 
-	Author: k.ssk@nifty.com
-.url	http://member.nifty.ne.jp/~ssk/download.html
+	Author: ssk@dmail.plala.or.jp
+.url	http://www6.plala.or.jp/k-ssk/download.html
 
 を参照して下さい。
 
