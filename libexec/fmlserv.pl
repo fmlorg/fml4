@@ -399,7 +399,7 @@ sub DoFmlServItselfFunctions
 
 	    # FIRST TRY fmlserv:command form here
 	    if ($proc = $Procedure{"fmlserv:$_"}) {
-		$0 = "$FML: Fmlserv command $proc: $LOCKFILE>";
+		$0 = "${FML}: Fmlserv command $proc: $LOCKFILE>";
 		&Debug("Call $proc for [$org_str]") if $debug;
 		
 		# PROCEDURE

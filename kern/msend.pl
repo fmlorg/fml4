@@ -80,7 +80,7 @@ if ($0 eq __FILE__) {
 	    &ExecMSend; # timeout within
 	    $t = time - $t; # used time 
 	    &Log("MSend Daemon: sleep(3600 - $t)") if $debug;
-	    $0 = "$FML: MSend Daemon $ML_FN <$LOCKFILE>";
+	    $0 = "${FML}: MSend Daemon $ML_FN <$LOCKFILE>";
 
 	    sleep(3600 - $t); # adjust the sleeptime;
 	}
@@ -373,7 +373,7 @@ sub MSending
     local($to) = join(" ", @to);
     local(@filelist, $total);
 
-    $0 = "$FML: MSending to $to $ML_FN <$LOCKFILE>";
+    $0 = "${FML}: MSending to $to $ML_FN <$LOCKFILE>";
 
     # check the given condistion is correct or not?
     print STDERR "TRY $left -> $right for $to \n" if $debug;
@@ -391,7 +391,7 @@ sub MSending
     &Log("MSend: $left -> $right ($to)");
     print STDERR "MSend: $left -> $right ($to)\n" unless $Quiet;
      
-    $0 = "$FML: MSending to $to $ML_FN ends <$LOCKFILE>";
+    $0 = "${FML}: MSending to $to $ML_FN ends <$LOCKFILE>";
 
     # matome.gz -> matome.ish in LhaAndEncode2Ish().
     local($total, $tmp, $mode, $name, $s, $a, $msend_subject, $field);
@@ -443,7 +443,7 @@ sub MSending
 	&Log("MSend: total =[$total], sendx to @rcpt") if $debug_msend;
 
 	&SendingBackInOrder($tmp, $total, $msend_subject, ($SLEEPTIME || 3), @rcpt);
-	$0 = "$FML: MSending to $to $ML_FN ends <$LOCKFILE>";
+	$0 = "${FML}: MSending to $to $ML_FN ends <$LOCKFILE>";
 
 	# may duplicate but cache out agasint errors
 	# though removed in &MSendRCConfig
@@ -462,7 +462,7 @@ sub MSendMasterControl
 {
     local(%mconf, $id, $mode);
 
-    $0 = "$FML: MSendMasterControl $ML_FN <$LOCKFILE>";
+    $0 = "${FML}: MSendMasterControl $ML_FN <$LOCKFILE>";
 
     # gathering same condition requests;
     # %MRcpt: addr =hash=> <rcpt to:'s address> (may addr != rcpt to:);
@@ -518,7 +518,7 @@ sub MSendMasterControl
 
 sub MSendRCConfig
 {
-    $0 = "$FML: MSendRCConfig $ML_FN <$LOCKFILE>";
+    $0 = "${FML}: MSendRCConfig $ML_FN <$LOCKFILE>";
     local($warn, $who);
 
     ### Update RC temporary file ###
@@ -586,7 +586,7 @@ sub MSendRCConfig
 # Distribute mail to members
 sub MSendNotify
 {
-    $0 = "$FML: Distributing <$LOCKFILE>";
+    $0 = "${FML}: Distributing <$LOCKFILE>";
     local($mail_file, $status, $num_rcpt, $s, @Rcpt);
     local(*e) = @_;
 
