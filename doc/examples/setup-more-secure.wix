@@ -12,9 +12,7 @@
 
 .~HTML_PRE
 
-注意: 詳細については
-.url ../INSTALL/index.html
-を参照してください。
+.include ptr.wix
 
 .HTML_PRE
 

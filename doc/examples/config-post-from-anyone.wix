@@ -1,6 +1,8 @@
 .HTML_PRE
 
 	fml 3.0 の設定 -- 誰でも投稿可能に --
+=E
+	fml 3.0 permit post from anyone
 
  [用語]
    % はユーザの prompt
@@ -12,9 +14,7 @@
 
 .~HTML_PRE
 
-注意: 詳細については
-.url ../INSTALL/index.html
-を参照してください。
+.include ptr.wix
 
 .HTML_PRE
 

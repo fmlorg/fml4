@@ -54,9 +54,7 @@
 =E
 After postfix, install fml in the same way as "sendmail" case.
 
-.url http://www.fml.org/fml/INSTALL/
-=E
-.url http://www.fml.org/fml/INSTALL-e/
+.include ptr.wix
 
            Copyright (C) 1999 Ken'ichi Fukamachi
                    All rights reserved. 
