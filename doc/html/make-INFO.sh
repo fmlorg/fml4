@@ -10,3 +10,8 @@ chdir $FML;
 	cat doc/html/INFOpre
 	cat var/doc/INFO.jp
 ) > var/html/INFO.html
+
+(
+	cat doc/html/INFOpre
+	cat var/doc/INFO.en
+) > var/html/INFO-e.html
