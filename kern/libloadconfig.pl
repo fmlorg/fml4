@@ -364,6 +364,7 @@ sub COPY_FIELD
 	$xnew = &FieldCapitalize($new);
 	$xold = &FieldCapitalize($old);
 	$Envelope{"h:${xnew}:"} = $Envelope{"h:${xold}:"};
+	$Envelope{"h:${xnew}:"} =~ s/\n$xold/\n$xnew/sgi;
     }
     else { # in *.ph files
 	# XXX pass real operation to the later function
