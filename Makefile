@@ -94,7 +94,10 @@ distsnap:
 # If release branch, use this
 snapshot:
 	@ env ${EXPORT_ENV} make -f distrib/mk/fml.sys.mk __setup
-	@ ssh-add -l |grep beth >/dev/null || printf "\n--please ssh-add.\n"
+	@ if [ X`tty` != X ]; then \
+	     ssh-add -l |\
+	     grep `hostname -s` >/dev/null || printf "\n--please ssh-add.\n";\
+	  fi
 	(env ${EXPORT_ENV} /bin/sh ${DIST_BIN}/generator -ip 2>&1| tee $(DESTDIR)/_release.log)
 	@ env ${EXPORT_ENV} ${DIST_BIN}/error_report.sh $(DESTDIR)/_release.log
 
