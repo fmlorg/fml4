@@ -50,6 +50,8 @@ sub Archive
     local($archive_dir, $max_seq, $unit, $limit) = @_;
     local($i) = 1;
 
+    &DiagPrograms('COMPRESS', 'TAR');
+
     # Adjust following config.ph; moved here;
     # fml-support: 02590 <fujita@soum.co.jp>
     $unit  = $unit  || $ARCHIVE_UNIT || $DEFAULT_ARCHIVE_UNIT || 100;

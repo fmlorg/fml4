@@ -266,6 +266,8 @@ sub Cnstr_gz
 {
     local(*conf, *r, *misc) = @_;
 
+    &DiagPrograms('UUENCODE', 'COMPRESS');
+
     $conf{'total'} = 0;
     $conf{'delimiter'} = "From $MAINTAINER $MailDate\n";
     $conf{'preamble'} = '';
@@ -276,6 +278,8 @@ sub Cnstr_gz
 sub Cnstr_tgz
 {
     local(*conf, *r, *misc) = @_;
+
+    &DiagPrograms('UUENCODE', 'COMPRESS', 'TAR');
 
     $conf{'total'} = 0;
     $conf{'delimiter'} = "From $MAINTAINER $MailDate\n";
@@ -449,6 +453,8 @@ sub f_zip
 
     $ZIP = $ZIP || "/usr/local/bin/zip";
 
+    &DiagPrograms('ZIP');
+
     if (!-x $ZIP) {
 	&Log("f_zip: cannot find zip executable");
 	return;
@@ -518,6 +524,7 @@ sub f_uu
     # &system("chdir $dir; $UUENCODE $f $f", $tmpf);
     # &system("$UUENCODE $dir/$f $f", $tmpf); 
     # system($s, $out, $in, $read, $write)
+    &DiagPrograms('UUENCODE');
     &system("$UUENCODE $name", $output, $input); 
     unlink "$TMP_DIR/msend.uu" if -f "$TMP_DIR/msend.uu";
 }
@@ -546,6 +553,8 @@ sub f_base64
     $libdir = join(":", @LIBDIR);
     $BASE64_ENCODE = $BASE64_ENCODE || "$encode -I $libdir";
 
+    &DiagPrograms('BASE64_ENCODE');
+
     open(IN, "$tmpf.0") || &Log("f_base64: cannot open $tmpf");
     open(BASE64, "|$BASE64_ENCODE > $tmpf.1") ||
 	&Log("f_base64: cannot open $tmpf.1");
@@ -567,6 +576,7 @@ sub f_gzuu
     local(*conf, *r, *misc) = @_;
     local($tmpf) = $conf;
 
+    &DiagPrograms('UUENCODE', 'COMPRESS');
     &system("$COMPRESS $tmpf.0|$UUENCODE $r", $tmpf);
 }
 
@@ -720,6 +730,8 @@ sub Lha
     $tmpout   = "$TMP_DIR/$name.lzh";
     push(@unlink, $tmpout);	# unlink
 
+    &DiagPrograms('LHA');
+
     $LHA      = $LHA || "$LIBDIR/bin/lha";
 
     $compress = "$LHA a $tmpout @filelist ";
@@ -746,6 +758,7 @@ sub f_lha_encode
     $tmpout = $misc{'tmpout'};
 
     if ($CurrentMode =~ /uu/) {
+	&DiagPrograms('UUENCODE');
 	&system("$UUENCODE $name.lzh", $input, $tmpout);
     }
     elsif ($CurrentMode =~ /ish/) {
@@ -754,6 +767,8 @@ sub f_lha_encode
 
 	# FIX for 'aish' when NOT "aish -d"
 	($ISH =~ /aish/) && ($ISH !~ /\s+\-d\s+/) && ($ISH .= " -d ");
+
+	&DiagPrograms('ISH');
 
 	$uuencode = "$ISH -s7 $name.lzh"; # since in $TMP_DIR
 	#OLD: $uuencode = "$ISH -s7 -o $input $tmpout";

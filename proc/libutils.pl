@@ -205,6 +205,8 @@ sub TarZXF
     local($buf, $buffer, $totalsize);
     local($tmptotal) = 1;
     
+    &DiagPrograms('ZCAT');
+
     &Debug("TarZXF local($tarfile, $total, ". 
 	join(" ", keys %cat) .", $outfile)\n") if $debug;
     

@@ -2188,6 +2188,24 @@ sub ProgExecuteP
     -x $prog ? 1 : 0;
 }
 
+# check fundamental programs existence
+sub DiagPrograms
+{
+    my (@prog) = @_;
+    my ($x, $bad);
+
+    if ($UNISTD) {
+	for $x (@prog) {
+	    &ProgExecuteP( ${ $x } ) || do {
+		$bad++;
+		&Log("ERROR: program \$${x} is not defined");
+	    };
+        }
+    }
+
+    $bad ? 0 : 1; # if bad, return 0; 
+}
+
 # mainly search e.g. "sendmail"
 sub SearchPath
 {

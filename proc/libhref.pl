@@ -169,6 +169,7 @@ sub TalkWithHttpServer
 	}
 	### BINARY FILE 
 	else {
+	    &DiagPrograms('UUENCODE');
 	    &Debug("open(HIN, $UUENCODE, $tmpf, $name") if $debug;
 	    local($name) = reverse split(/\//, $body);
 	    if (! (open(HIN,"-|") || exec $UUENCODE, $tmpf, $name)) {

@@ -30,6 +30,12 @@ sub DoSmtpFiles2Socket
 
 	if ($f{$f, 'zcat'}) {
 	    &Log("SmtpFiles2Socket: \$ZCAT not defined") unless $ZCAT;
+	    &DiagPrograms('ZCAT');
+	}
+
+	if ($f{$f, 'uuencode'}) {
+	    &Log("SmtpFiles2Socket: \$UUENCODE not defined") unless $UUENCODE;
+	    &DiagPrograms('UUENCODE');
 	}
 
 	if ($f{$f, 'zcat'} && open(FILE, " $ZCAT $f|")) {

@@ -58,6 +58,8 @@ sub RCSInit
 
     $RCS = $RCS || &SearchPath('rcs', @path);
     $CI  = $CI  || &SearchPath('ci', @path);
+
+    &DiagPrograms('RCS', 'CI');
 }
 
 

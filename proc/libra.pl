@@ -1176,6 +1176,8 @@ sub RemoveArticleInArchive
     # tar xf -
     $cmd = $TAR; $cmd =~ s/^(\S+)\s.*$/$1/; $cmd = "$cmd xf -";
 
+    &DiagPrograms('COMPRESS', 'TAR', 'ZCAT');
+
     # \d+.tar.gz
     $a = &ArticleInWhichArchive($n);
 
@@ -1206,6 +1208,7 @@ sub RemoveArticleInArchive
     };
 
     &use('utils');
+    &DiagPrograms('ZCAT');
     &system("$ZCAT $arc|$cmd"); # in $DIR/tmp/
 
     # overwrite of tmp/spool/\d+

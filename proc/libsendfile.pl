@@ -959,6 +959,8 @@ sub ExtractFiles
     local(*c, *r) = @_;
     local($cmd, $m, $s, $f);
     
+    &DiagPrograms('TAR', 'ZCAT');
+
     $cmd = $TAR;
     $cmd =~ s/^(\S+)\s.*$/$1/;
     $cmd = "$cmd xf - ";
