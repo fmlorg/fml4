@@ -1396,7 +1396,12 @@ We suppose several environments,
 .q
 elena と elena-ctl と両方のアドレスがあって、なおかつ elena でもコマン
 ドを受けたい(つまり両方とも "# command" コマンドトラップを起こせる)場
-合はYES
+合はYES。
+
+なお、デフォールトでは # は不必要なのでドキュメント(helpなど)は # 抜き
+のものが生成されます。この変更や、MAIL_LIST == CONTROL_ADDRESS への設
+定の変更を行なうとドキュメントを再生成するか？と尋ねられます。
+make doc-template でもドキュメント再生成はできます。
 =E
 This menu enables both elena and elena-ctl accepts "# command" trap
 for backward compatibility.
