@@ -20,6 +20,22 @@ ${WORK_TUTORIAL_DIR}/${dir}/index.html: doc/${TUTORIAL_LANGUAGE}/${dir}/*wix
 		doc/${TUTORIAL_LANGUAGE}/${dir}/index.wix
 .endfor
 
+.for dir in ${DOC_TUTORIAL_RAW_SUBDIR}
+# prepare directory to be created
+__HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/${dir}
+__HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/${dir}/index.html
+
+# make directory
+${WORK_TUTORIAL_DIR}/${dir}:
+	test -d ${WORK_TUTORIAL_DIR}/${dir} ||\
+	   ${MKDIR} ${WORK_TUTORIAL_DIR}/${dir}
+
+# creation rule
+${WORK_TUTORIAL_DIR}/${dir}/index.html: doc/${TUTORIAL_LANGUAGE}/${dir}/*
+	${RSYNC} -C -av doc/${TUTORIAL_LANGUAGE}/${dir}/ \
+		${WORK_TUTORIAL_DIR}/${dir}/
+.endfor
+
 # make $LANGUAGE/tutorial.html
 __HTML_TUTORIAL__ += ${WORK_TUTORIAL_DIR}/tutorial.html
 ${WORK_TUTORIAL_DIR}/tutorial.html: doc/${TUTORIAL_LANGUAGE}/INDEX

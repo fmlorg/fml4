@@ -20,3 +20,5 @@ DOC_TUTORIAL_SUBDIR += remote_control
 DOC_TUTORIAL_SUBDIR += resource_control
 DOC_TUTORIAL_SUBDIR += smtp
 DOC_TUTORIAL_SUBDIR += troubleshoot
+
+DOC_TUTORIAL_RAW_SUBDIR += tips

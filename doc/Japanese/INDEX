@@ -26,7 +26,8 @@ smtp			配送関係
 Japanese		日本語処理について
 
 .part 開発者向け(旧 doc/smm/ 相当か?)
-develope		開発者向け
+develope		内部構造や実装の理屈についてなど
+tips			tips
 
 #
 # $Id$
