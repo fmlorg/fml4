@@ -6,6 +6,17 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+   kenn/fml.pl
+	if handler == ignore in command mode, ignore all requests
+
+   bin/spool2html.pl
+	define $Envelope{'mode:dist'} to avoid libsynchtml check
+
+	SyncHtml()の新しいチェックにひっかかる
+
+   etc/makefml/Makefile (1.16-1.17)
+	validate config.ph.new before mv .ph.new to .ph
+
 [ 3.0pl10 ]
 
    bin/fwix.pl
