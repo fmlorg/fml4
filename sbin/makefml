@@ -2334,6 +2334,25 @@ sub do_install
 	require "$EXEC_DIR/sys/$COMPAT_ARCH/makefml.pl";
 	&PopFmlSetUp;
     }
+
+    # cgi mode
+    &SetUpCGIadmin;
+}
+
+
+sub SetUpCGIadmin
+{
+    print STDERR "---Setup CGI interfaces\n";
+
+    &MkDirHier("$EXEC_DIR/www/cgi-bin/admin");
+    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htaccess.admin",
+	  "$EXEC_DIR/www/cgi-bin/admin/.htaccess");
+
+    &MkDirHier("$EXEC_DIR/www/db/admin");
+    &Conv($NULL, "$EXEC_DIR/www/etc/dot_htpasswd.admin",
+	  "$EXEC_DIR/www/db/admin/htpasswd");
+
+    print STDERR "\n";
 }
 
 
