@@ -14,7 +14,13 @@ This document logs CHANGES in fml stable branch.
 See http://www.fml.org/ for CHANGES in fml-current. 
 .fi
 
- 2000/03/09
+2000/03/10
+
+ libtraffic.pl
+	apply fml-support:7627 (patch by Yuao Tanigawa)
+	import fix month update bug (libtraffic 1.3)
+
+2000/03/09
 
    proc/libfml.pl
 	check mode:uip to validate input procedure 
@@ -22,7 +28,7 @@ See http://www.fml.org/ for CHANGES in fml-current.
    kern/fml.pl:
 	CheckCurrentProc: fix to trap #\s+[\w\-]+ command string
 
- 2000/03/08
+2000/03/08
 
    kern/fml.pl (2.79-2.80): 
 	fix $REWRITE_TO == 1 behaviour to follow doc/op
