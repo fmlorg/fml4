@@ -7,7 +7,7 @@
 .# .include overview.wix
 
 .appendix
-.include toy_model.wix
+.include toymodel.wix
 .include links.wix
 
 .# $Id$
