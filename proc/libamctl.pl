@@ -459,7 +459,7 @@ sub DoSetMemberList
     local($curaddr, $newaddr);
 
     ### Modification routine is called recursively in ChangeMemberList;
-    local($r, $list, $mcs);
+    local($list, $mcs);
 
     $cmd = $proc; $cmd =~ tr/a-z/A-Z/;
 
@@ -485,8 +485,10 @@ sub DoSetMemberList
     # NOT REQUIRED, since 'r2a' is defind in %Procedure.
     # $e{'message:h:@to'} = $MAINTAINER unless $e{'mode:admin'};
 
+    # Under administration mode, ignore this check.
     # ATTENTION! $curaddr should be a member.
-    if (! ($list = &MailListMemberP($curaddr))) {
+    if ((! $e{'mode:admin'}) &&
+	(! ($list = &MailListMemberP($curaddr)))) {
 	&Log("$cmd: Error: address '$curaddr' is not a member. STOP");
 	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
 	&Mesg(*e, "$cmd requires command from a member address.");
@@ -560,47 +562,60 @@ sub DoSetMemberList
 	$cmd = 'BYE';
     }
 
+    # result check flag
+    local($rm, $ra) = (0, 0);
+
     # obsolete code but left for compatibility.
     if (&ListIncludePatP($list, $ProcedureException{"bye", "ignore_list"})) {
 	&Log("ProcedureException: bye ignore $list");
-	$r++;
+	$rm++;
     }
     elsif (&NonAutoRegistrableP) {
-	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
-	&Log($mcs = "$cmd MEMBER [$curaddr] $c O.K.")
-	    if $r == 1 && $debug_amctl;
-	if ($r == 1) {
-	    &Mesg(*e, "changed a member list.");
+	$list = &MailListMemberP($curaddr);
+	&ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $rm++;
+	if ($rm == 1) {
+	    &Log($mcs = "$cmd MEMBER [$curaddr] $c O.K.") if $debug_amctl;
+	    &Mesg(*e, "   changed a member list.");
 	}
 	else {
 	    &Log($mcs = "$cmd MEMBER [$curaddr] $c failed");
-	    &Mesg(*e, "Hmm,.., modifying member list fails.");
+	    &Mesg(*e, "   Hmm,.., modifying member list fails.");
+	    &Mesg(*e, "   since $curaddr is not found in member list.") unless $list;
 	}
     }
     else {
-	$r++;
+	# ignore the result if manual registration case.
+	$rm = 1;
     }
 
     # special flag
     return $NULL if $Envelope{'mode:majordomo:chmemlist'};
 
-
     $list = &MailListActiveP($curaddr);
-    &ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $r++;
-    &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $r == 2 && $debug_amctl;
+    &ChangeMemberList($cmd, $curaddr, $list, *newaddr) && $ra++;
+    &Log("$cmd ACTIVE [$curaddr] $c O.K.")   if $ra == 1 && $debug_amctl;
 
-    if ($r == 2) {
-	&Mesg(*e, "changed a delivery list.");
+    if ($ra == 1) {
+	&Mesg(*e, "   changed a delivery list.");
     }
     else {
 	&Log("$cmd ACTIVE [$curaddr] $c failed");
-	&Mesg(*e, "Hmm,.., modifying delivery list fails.");
-    }
+	&Mesg(*e, "   Hmm,.., modifying delivery list fails.");
+	&Mesg(*e, "   since $curaddr is not found in delivery list.") unless $list;    }
 
-    # Status
-    if ($r == 2) {
+    if ($rm && $ra) {
 	&Log("$cmd [$curaddr] $c accepted");
 	&Mesg(*e, "$cmd [$curaddr] $c accepted.");
+    }
+    elsif ($rm && (!$ra)) {
+	&Log("$cmd [$curaddr] $c succeed for members not actives");
+	&Mesg(*e, "$cmd [$curaddr] $c accepted".
+	      " for member but not delivery list.");
+    }
+    elsif ($ra && (!$rm)) {
+	&Log("$cmd [$curaddr] $c succeed for actives not members");
+	&Mesg(*e, "$cmd [$curaddr] $c accepted".
+	      " for delivery but not member list.");
     }
     else {
 	&Log($mcs);
