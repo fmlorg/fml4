@@ -95,47 +95,55 @@ sub DoProcedure
     # ATTENTION!
     # if $USE_SUBJECT_AS_COMMANDS != NULL,
     # $mailbody != $Envelope{'Body'};
-  GivenCommands: foreach (split(/\n/, $mailbody)) {
+  GivenCommands: for $xbuf (split(/\n/, $mailbody)) {
       $linenum++; # line number (!= %Envelope under subject: command)
       $e{'tmp:line_number'} = $linenum;
 
-      &Log("proc debug: input [$_]") if $debug;
+      &Log("proc debug: input [$xbuf]") if $debug;
 
       # skip null line
-      next GivenCommands if /^\s*$/o;
+      next GivenCommands if $xbuf =~ /^\s*$/o;
 
       # counter
-      $trap_counter++ if /^\#/;
+      $trap_counter++ if $xbuf =~ /^\#/;
 
       # reset variables
       # dup the current mesg to report to admin
       undef $e{'mode:message:to:admin'};
 
       # history buffer
-      $history .= "\t". $_. "\n"; 
+      $history .= "\t". $xbuf. "\n"; 
 
       # XXX: CTK
       # e.g. *-ctl server, not require '# command' syntax
       # bug default has been false(not rewrite), true 198/01/19	
-      if ($COMMAND_ONLY_SERVER && (!/^\#/o)) {
-	  $_ = "\# $_";
+      if ($COMMAND_ONLY_SERVER && ($xbuf !~ /^\#/o)) {
+	  &Log("Procedure: command only server") if $debug;
+	  $xbuf = "\# $xbuf";
       }
-      elsif ($e{'mode:ctladdr'} && (!/^\#/o)) {
+      elsif ($e{'mode:ctladdr'} && ($xbuf !~ /^\#/o)) {
+	  &Log("Procedure: mode:ctladdr") if $debug;
 	  for $p (keys %Procedure) {
-	      if ($p && /^$p/) {
+	      if ($p && $xbuf =~ /^$p/) {
 		  # &Log("recognize $p => '# $p'"); # XXX: not log
-		  $_ = "\# $_";	# XXX: internal representation
+		  $xbuf = "\# $xbuf"; # XXX: internal representation
 	      }
 	  }
       }
+      else {
+	  &Log("Procecure: neither command only nor mode:ctladdr") if $debug;	  
+      }
       
-      (/^\#\s*(\w+)/ && &Log("proc debug: trap $`<$&>$'")) if $debug;
+      if ($debug) {
+	  $xbuf =~ /^\#\s*(\w+)/ && &Log("proc debug: trap $`<$&>$'") || 
+	      &Log("proc debug: invalid input? [$xbuf]");
+      }
 
       # special traps when auto_regist mode;
       # e.g. even when permit from "anyone" mode, auto_regist works
       if ($REJECT_COMMAND_HANDLER eq "auto_regist" && 
-	  /^($subscribe_key|$confirm_key)/i)  {
-	  $_ = "\# $_"; # XXX: CTK interal representation
+	  $xbuf =~ /^($subscribe_key|$confirm_key)/i)  {
+	  $xbuf = "\# $xbuf"; # XXX: CTK interal representation
 
 	  # fml-support: 03100 <kishiba@ipc.hiroshima-u.ac.jp>
 	  # we should consider this special case without "^#"
@@ -146,43 +154,44 @@ sub DoProcedure
       # XXX: CTK internal representation
       # against the signature (NOT COMMAND_ONLY)
       # \w == [0-9A-Za-z_]
-      if (/^\#\s*(\w+)/) {
-	  $try = $1; $try =~ tr/A-Z/a-z/;
+      if ($xbuf =~ /^\#\s*(\w+)/) {
+	  $try = $1;
+	  $try =~ tr/A-Z/a-z/;
 	  if (! ($Procedure{$try} || $Procedure{"#$try"})) {
 	      &Log("warn: command [$try] not found in \%Procedure");
 	  }
       }
-      else { # if (! /^\#\s*\w+/) 
+      else { # if ($xbuf !~ /^\#\s*\w+/) 
 	  # USE_WARNING = 0 (default), so go to the next line in usual.
 	  next GivenCommands unless $USE_INVALID_COMMAND_WARNING; 
 	  next GivenCommands unless $USE_WARNING; # backward
 
 	  # XXX: (internally converted, so) already "# command" in usual
-	  &Log("Command: Syntax Error /\# \\w+/ !~ [$_]");
-	  &Mesg(*e, "Command Syntax Error: without ^#") if !/^\#/;
+	  &Log("Command: Syntax Error /\# \\w+/ !~ [$xbuf]");
+	  &Mesg(*e, "Command Syntax Error: without ^#") if $xbuf !~ /^\#/;
 	  &Mesg(*e, "Command Syntax Error: expect \"# English-word\"") 
-	      if ! /^\#\s*\w+/;
+	      if $xbuf !~ /^\#\s*\w+/;
 
 	  next GivenCommands;	# 'last' in old days 
       }
 
 
       ### THIS STAGE; string is a candidate of command sets;
-      print STDERR "SECURE CHECK IN>$_\n" if $debug;
-      &SecureP($_, /admin|approve/i ? "admin" : "command") ||
+      print STDERR "SECURE CHECK IN>$xbuf\n" if $debug;
+      &SecureP($xbuf, $xbuf =~ /admin|approve/i ? "admin" : "command") ||
 	  last GivenCommands;
-      print STDERR "SECURE CHECK OK>$_\n" if $debug;
+      print STDERR "SECURE CHECK OK>$xbuf\n" if $debug;
 
       ### syntax check, and set the array of cmd..
       # XXX: (internally converted, so) already "# command" in usual
-      s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
-      $Fld = $_;		# preserve the original string;
-      @Fld = split(/\s+/, $_);
+      $xbuf =~ s/^#(\S+)(.*)/# $1 $2/ if $COMMAND_SYNTAX_EXTENSION;
+      $Fld = $xbuf;		# preserve the original string;
+      @Fld = split(/\s+/, $xbuf);
 
       # XXX: internal representation; "# command" => "command" for convenience
-      s/^#\s*//;
-      $org_str = $_;
-      $_ = $Fld[1];
+      $xbuf =~ s/^#\s*//;
+      $org_str = $xbuf;
+      $xbuf = $Fld[1];
 
       # counter
       if ($MAXNUM_COMMAND_INPUT = &ATOI($MAXNUM_COMMAND_INPUT)) {
@@ -197,38 +206,38 @@ sub DoProcedure
       }
 
       ### info
-      $0 = "$FML: Command Mode processing $_: $LOCKFILE>";
-      &Log("proc debug: eval [$_]") if $debug;
-      &Debug("Present command    $_") if $debug;
+      $0 = "$FML: Command Mode processing $xbuf: $LOCKFILE>";
+      &Log("proc debug: eval [$xbuf]") if $debug;
+      &Debug("Present command    $xbuf") if $debug;
 
       ### Special Syntax Modulation
       # enable us to use "mget 200.tar.gz" = "get 200.tar.gz"
       # EXCEPT FOR 'get \d+', get -> mget.
-      if (/^(get|send)$/io && ($Fld[2] !~ /^\d+$/o)) { 
-	  $_ = 'mget';
+      if ($xbuf =~ /^(get|send)$/io && ($Fld[2] !~ /^\d+$/o)) { 
+	  $xbuf = 'mget';
 	  $MGET_MODE_DEFAULT = 'mp';
       }
 
       ### Procedures
       undef $status; undef $proc; undef $fp;
-      tr/A-Z/a-z/;
+      $xbuf =~ tr/A-Z/a-z/;
 
       # extract each proc local message buffer (e.g. for plural "chaddr")
       &MesgSetBreakPoint;
 
-      if ($proc = $Procedure{$_}) {
+      if ($proc = $Procedure{$xbuf}) {
 	  $trap_counter++; # found in %Procedure;
 
 	  # REPORT TO ADMINS ALSO 
-	  if ($Procedure{"r2a#$_"}) { &EnableReportForw2Admin(*e);}
+	  if ($Procedure{"r2a#$xbuf"}) { &EnableReportForw2Admin(*e);}
 
-	  if ($Procedure{"confirm#$_"} &&
-	      (! $Procedure{"confirm_r2a#$_"})) { 
+	  if ($Procedure{"confirm#$xbuf"} &&
+	      (! $Procedure{"confirm_r2a#$xbuf"})) { 
 	      &DisableReportForw2Admin(*e);
 	  }
 
 	  # REPORT
-	  if ($Procedure{"r#$_"}) {
+	  if ($Procedure{"r#$xbuf"}) {
 	      # hide the password;
 	      if ($org_str =~ /^(admin|approve)/i) {
 		  $org_str =~ s/(approve\s+)\S+/$1********/i;
@@ -236,21 +245,21 @@ sub DoProcedure
 	      };
 
 	      &Mesg(*e, "\n>>> $org_str");
-	      $o = $_;
-	      $_ = $o;
+	      $o = $xbuf;
+	      $xbuf = $o;
 	  }
 
 	  # LIMIT
-	  if ($limit = $Procedure{"l#$_"}) {
-	      if ($ProcedureLimitCount{$_}++ > $limit) {
-		  &Log("$_ command exceeds the limit $limit, STOP");
+	  if ($limit = $Procedure{"l#$xbuf"}) {
+	      if ($ProcedureLimitCount{$xbuf}++ > $limit) {
+		  &Log("$xbuf command exceeds the limit $limit, STOP");
 		  local($s);
 		  $s .= "*** ";
 		  $s .= "Sorry, we suppress the maximum number of requests\n";
-		  $s .= "*** for $_ command in one mail up to $limit.\n";
+		  $s .= "*** for $xbuf command in one mail up to $limit.\n";
 		  $s .= "*** STOP PROCESSING IMMEDIATELY.\n";
 		  &Mesg(*e, $s);
-		  &Mesg(*e, $NULL, 'resource.exceed_max_proc_req',$_,$limit);
+		  &Mesg(*e, $NULL, 'resource.exceed_max_proc_req',$xbuf,$limit);
 		  &Mesg(*e, "FYI: The following requests are processed.");
 		  &Mesg(*e, $history);
 		  last GivenCommands;
@@ -258,11 +267,11 @@ sub DoProcedure
 	  }
 
 	  # INFO
-	  &Debug("Call               &$Procedure{$_}") if $debug;
+	  &Debug("Call               &$Procedure{$xbuf}") if $debug;
 	  $0 = "$FML: Command calling $proc: $LOCKFILE>";
 
 	  # PROCEDURE
-	  $status = &$proc($_, *Fld, *e, *misc);
+	  $status = &$proc($xbuf, *Fld, *e, *misc);
 
 	  &Debug("Addr=$Addr") if $Addr;
 	  
@@ -277,9 +286,9 @@ sub DoProcedure
       &Log("COMMAND_HOOK ERROR", $@) if $@;
 
       # if undefined commands, notify the user about it and abort.
-      &Log("unknown command [$_]");
-      &Mesg(*e, ">>> $_\n\tUnknown Command: $_");
-      &Mesg(*e, $NULL, 'no_such_command', $_);
+      &Log("unknown command [$xbuf]");
+      &Mesg(*e, ">>> $xbuf\n\tUnknown Command: $xbuf");
+      &Mesg(*e, $NULL, 'no_such_command', $xbuf);
 
       # stops.
       &Mesg(*e, "\tStop.");
