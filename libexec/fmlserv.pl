@@ -1,9 +1,14 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-# fml is free software distributed under the terms of the GNU General
-# Public License. see the file COPYING for more details.
-
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
+#
 # $Id$;
 $Rcsid   = 'fmlserv #: Wed, 29 May 96 19:32:37  JST 1996';
 
@@ -18,6 +23,7 @@ foreach (@ARGV) {
     /^\-/   && &Opt($_) || push(@INC, $_);
     $LIBDIR || ($DIR  && -d $_ && ($LIBDIR = $_));
     $DIR    || (-d $_ && ($DIR = $_));
+    -d $_   || push(@LIBDIR, $_);
 }
 $DIR    = $DIR    || die "\$DIR is not Defined, EXIT!\n";
 $LIBDIR	= $LIBDIR || $DIR;
@@ -203,7 +209,7 @@ sub FmlServ
 	# attention here; we do not set $FML_EXIT_HOOK
 	# aggregate the mget requests, after this routine,
 	# we set $FML_EXIT_HOOK;
-	if ($FML_EXIT_HOOK =~ /mget3_SendingEntry/) {
+	if ($FmlExitHook{'mget3'} =~ /mget3_SendingEntry/) {
 	    local($n);
 
 	    undef $eval;
@@ -221,7 +227,7 @@ sub FmlServ
 	    # eval
 	    eval($eval); &Log($@) if $@;
 
-	    $FML_EXIT_HOOK =~ s/&mget3_SendingEntry;//g;
+	    $FmlExitHook{'mget3'} =~ s/&mget3_SendingEntry;//g;
 	    &mget3_Reset;	# only mget3 routine called..
 	}	
 
