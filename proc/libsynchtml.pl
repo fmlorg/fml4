@@ -507,6 +507,9 @@ sub Write
 	$HtmlTitleForIndex = &DecodeMimeStrings($HtmlTitleForIndex);
     } 
 
+    # required ?
+    $HtmlTitleForIndex =~ s/\n(\s+)/$1/g;
+
     ### HTML HEADER (REQUIRE SUPERFLUOUS \012 FOR RECONFIGURE OF index
     print OUT $HTML_FORMAT_PREAMBLE;
     if ($HTML_STYLESHEET_BASENAME) {
