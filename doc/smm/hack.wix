@@ -702,16 +702,15 @@ FML cannot lock elena-regist ML in default but works well I believe:)
 .S	たわけたHTMLメール対策
 =E.S	Cut off except the first multipart block
 
-	$AGAINST_OUTLOOK = 1; (default 0)
+	$AGAINST_HTML_MAIL = 1; (default 0)
 
-OUTLOOKを使っているユーザからのメールでMIME/Multipartは中身を問わず一
-番最初のマルチパートブロックだけを残して後はぶったぎる。つまり中身が一
-緒のplainとHTML部分を持つメールが来たらplain部分だけを残そうとする。で
-も常に正しい処理かどうかは不明(大抵正しそうだが)。
+ユーザからのメールでMIME/Multipartは中身を問わず一番最初のマルチパート
+ブロックだけを残して後はぶったぎる。つまり中身が一緒のplainとHTML部分
+を持つメールが来たらplain部分だけを残そうとする。でも常に正しい処理か
+どうかは不明(大抵正しそうだが)。
 =E
 Cut off except the first multipart block if
 1.	Content-Type: mime/multipart
-2.	X-Mailer: looks "outlook" !
 
 .S	In-Reply-To: や References: をつけないREPLYメールを返すMUA対策
 =E.S	Against replied mails without In-Reply-To: nor References:
