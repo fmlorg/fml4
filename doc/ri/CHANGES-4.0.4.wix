@@ -15,6 +15,24 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/01/19
+
+   sbin/makefml (2.227-2.228):
+	fml8 style qmail virtual domain support
+
+   make msend talk w/ DBMS
+	 databases/mysql/toymodel.pl   (1.12-1.13)
+	 databases/postgresql/DBI_toymodel.pl   (1.8-1.9)
+	 databases/postgresql/DBI_toymodel2.pl   (1.1-1.2)
+	 databases/postgresql/Pg_toymodel.pl   (1.5-1.6)
+	 databases/postgresql/toymodel.pl   (1.12-1.13)
+	 kern/msend.pl   (2.13-2.14)
+
+   bin/spool2html.pl (2.21-2.22):
+	switch FML::Date to Mail::Message::Date
+
+   sync modules with current
+
 2002/01/18
 
    databases/
@@ -226,7 +244,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.34 2003/01/18 02:38:39 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.35 2003/01/19 13:45:43 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
