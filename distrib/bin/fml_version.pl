@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $FML$
+# $FML: fml_version.pl,v 1.18.2.1 2001/04/05 14:58:58 fukachan Exp $
 #
 
 require 'getopts.pl';
@@ -35,6 +35,11 @@ if ($Branch eq 'stable') {
 }
 else {
     undef $Branch;
+}
+
+# release !
+if ($Trunk =~ /^[\d\.]+$/) {
+	print $Trunk; exit 0;
 }
 
 if ($opt_T) {
