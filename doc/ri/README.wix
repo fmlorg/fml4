@@ -1,12 +1,12 @@
 .HTML_PRE
 
 .if LANG == JAPANESE
-	fml 4.0.2_ALPHA メーリングリスト サーバ/マネージャ
+	fml 4.0.2_BETA メーリングリスト サーバ/マネージャ
 
 				深町 賢一
 .fi
 .if LANG == ENGLISH
-	fml 4.0.2_ALPHA mailing list server/manager package
+	fml 4.0.2_BETA mailing list server/manager package
 
 				Ken'ichi Fukamachi
 .fi
