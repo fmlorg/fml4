@@ -362,7 +362,7 @@ FIX_LANGUATE () {
 	do
 	   if [ -f $file ];then
 		echo -n "$file "
-		nkf -j $file > $file.j
+		nkf -e $file > $file.j
 		mv $file.j $file
 	   else
 		echo ERROR: $file is not a text.
