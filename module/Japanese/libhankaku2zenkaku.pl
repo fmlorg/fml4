@@ -10,7 +10,7 @@
 #		Input and Output => JIS
 
 #
-# $Id: libhankaku2zenkaku.pl,v 1.3 2000/06/12 11:22:07 fukachan Exp $
+# $Id: libhankaku2zenkaku.pl,v 1.4 2000/06/12 11:23:28 fukachan Exp $
 #
 
 sub FixJapaneseMDChars
@@ -41,8 +41,7 @@ sub FixJapaneseMDChars
 	&Log("hankaku to zenkaku conversion: $c lines");
     }
 
-    # XXX change here to "if ($debug_hankaku) {"
-    if (1) {
+    if ($debug_hankaku) {
 	&Log("(debug)hankaku to zenkaku conversion: $c lines");
     }
 }
@@ -54,6 +53,8 @@ sub JConvert;	# Convert Code
 sub main::ConvertHankakuToZenkaku
 {
     my ($input) = @_;
+
+    &OctalDump("debug in:", $input) if $debug_hankaku;
 
     require 'jcode.pl';
 
@@ -361,15 +362,19 @@ sub InitTable
 sub JConvert #(str) return $str
 {
     my ($str) = @_;
+    local($tbuf); # temporary buffer
     my ($len, $retstr);
     my ($i, $c0, $c1, $zp);
     
+    &OctalDump("JConvert in:", $str) if $debug_hankaku;
+
     $len = length($str);
     $retstr = '';
     for ($i = 0; $i < $len; $i++) {
 	$c0 = substr($str, $i, 1);
 	if (ord($c0) < 128) {
 	    # ASCII
+	    &OctalDump("case 1  in", $c0) if $debug_hankaku;
 	    $retstr .= $c0;
 	    next;
 	}
@@ -378,6 +383,7 @@ sub JConvert #(str) return $str
 	$c1 = substr($str, $i, 1);
 	if (defined $kishuizon{(ord($c0) << 8) + ord($c1)}) {
 	    # Machine depend code
+	    &OctalDump("case 2  in", $c0) if $debug_hankaku;
 	    $retstr .= $kishuizon{(ord($c0) << 8) + ord($c1)};
 	    next;
 	}
@@ -386,10 +392,20 @@ sub JConvert #(str) return $str
 	    ((ord($c1) >= 0x40 && ord($c1) <= 0x7e) ||
 	     (ord($c1) >= 0x80 && ord($c1) <= 0xfc))) {
 	    # KANJI
-	    $retstr .= jcode::euc($c0 . $c1);
+
+	    &OctalDump("case 3  in", $c0) if $debug_hankaku;
+
+	    # $retstr .= jcode::euc($c0 . $c1);
+	    $tbuf = $c0 . $c1;
+	    &jcode::sjis2euc(\$tbuf);
+	    $retstr .= $tbuf;
+	    &OctalDump("case 3 out", $retstr) if $debug_hankaku;
+
 	    next;
 	}
 	if (ord($c0) >= 0xa0 && ord($c0) <= 0xdf) {
+	    print STDERR "case 4 ($c0,$c1)\n" if $debug_hankaku;
+
 	    # HANKAKU-KANA
 	    $zp = ord($c0) - 0xa0;
 	    if (ord($c1) == 0xde) {
@@ -418,5 +434,47 @@ sub JConvert #(str) return $str
 
     return $retstr;
 }
+
+
+sub OctalDump
+{
+    my ($prompt, $z) = @_;
+    my ($i);
+    printf "%s %-10s ( ", $prompt, $z;
+    for ( $i = 0; $i < length($z); $i++) {
+	my $x = substr($z, $i, $i +1); 
+	printf "%03o ", ord($x);
+    }
+    print ")\n";
+}
+
+
+package main;
+
+if ($0 eq __FILE__) {
+    $| = 1;
+    require 'jcode.pl';
+  
+    eval "sub Log { print STDERR \@_, \"\\n\";}";
+    while (<>) { 
+	chop;
+	$han2zen::debug_hankaku = 1;
+
+	# input
+	$z = &jcode::euc($_);
+	&jcode::h2z_euc(\$z);
+	&han2zen::OctalDump("<< ", $z);
+
+	# conversion
+	$x  = &ConvertHankakuToZenkaku( &jcode::jis($_) );
+	$x  = &jcode::euc($x);
+	&han2zen::OctalDump(" >", $x);
+
+	$z = &jcode::euc($x);
+	&jcode::h2z_euc(\$z);
+	&han2zen::OctalDump(">>", $z);
+    }
+}
+
 
 1;
