@@ -1,23 +1,38 @@
+#-*- perl -*-
+#
 # Smtp library functions, 
 # smtp does just connect and put characters to the sockect.
-# Copyright (C) 1993-1998 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1998 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$;
+# $FML$
+#
+
+use vars qw($debug);
+use vars qw($Rcsid $URLComInfo);
+use vars qw(%RelayRcpt);  # special recipient forwarded to specified relay
+use vars qw($SUN_OS_413); # obsolete but defined for compatibility 
+use vars qw($SENDFILE_NO_FILECHECK); # obsolete
 
 # NEW VERSION FOR MULTIPLE @to and @files (required @files NOT $files) 
 # return NONE
 sub DoNeonSendFile
 {
+    use vars qw($le %le 
+		$to @to $subject 
+		$f @f %f $files @files %files
+		@rcpt
+		);
     local(*to, *subject, *files) = @_;
-    local(@info) = caller;
-    local($le, %le, @rcpt, $error, $n, $f, @f, %f);
+    local($le, %le, @rcpt, $f, @f, %f);
+    my (@info) = caller;
+    my ($n, $error);
 
     # backward compat;
     $SENDFILE_NO_FILECHECK = 1 if $SUN_OS_413;
@@ -48,9 +63,7 @@ sub DoNeonSendFile
 
 		# AUTO CONVERSION 
 		eval "require 'jcode.pl';";
-		$ExistJcode = $@ eq "" ? 1 : 0;
-
-		if ($ExistJcode) {
+		unless ($@) {
 		    &Log("NeonSendFile::AutoConv $n to JIS");
 		    $f{$f, 'autoconv'} = 1;
 		}
@@ -93,6 +106,7 @@ sub DoNeonSendFile
 # require $zcat = non-nil and ZCAT is set.
 sub DoSendFile
 {
+    use vars qw($to $subject $file $zcat @to);
     local(@to, %le, @rcpt, @files, %files);
     local($to, $subject, $file, $zcat, @to) = @_;
 
@@ -120,12 +134,14 @@ sub DoSendPluralFiles
 # Sendmail($to, $subject, $MailBody) paramters are only three.
 sub DoSendmail
 {
+    use vars qw(@to %le @rcpt);
     local(@to, %le, @rcpt);
-    local($to, $subject, $body, @to) = @_;
-    push(@to, $to);		# extention for GenerateHeader
+    my ($xto, $subject, $body, @xto) = @_;
+    push(@to, @xto);
+    push(@to, $xto); # extention for GenerateHeader
 
     # (before it, checks whether the return address is not ML nor ML-Ctl)
-    if (! &CheckAddr2Reply(*Envelope, $to, @to)) { return;}
+    if (! &CheckAddr2Reply(*Envelope, $xto, @to)) { return;}
 
     $le{'GH:Subject:'} = $subject;
     &GenerateHeader(*to, *le, *rcpt);
@@ -141,10 +157,11 @@ sub DoSendmail
 
 sub DoSendmail2
 {
+    use vars qw($distfile $subject $body);
     local(*distfile, $subject, $body) = @_;
-    local(@a, $a);
 
     if (-f $distfile && open(DIST, $distfile)) {
+	my (@a, $a);
 	while (<DIST>) {
 	    next if /^\s*$/;
 	    next if /^\#/;
@@ -170,6 +187,7 @@ sub DoSendFile2 { &DoNeonSendFile(@_);}
 # import $misc{'hook'}
 sub DoSendFile3
 {
+    use vars qw($distfile $subject $files @files %files %misc @f2s);
     local(*distfile, *subject, *files, *misc) = @_;
     local(@to, $to, @f2s);
 
@@ -194,7 +212,7 @@ sub DoGenerateHeader
     # @Rcpt is passed as "@to" even if @to has one addr;
     # WE SHOULD NOT TOUCH "$to" HERE;
     local(*to, *le, *rcpt) = @_;
-    local($tmpto, %dup);
+    my ($tmpto, %dup);
 
     # Resent (RFC822)
     @ResentHdrFieldsOrder = ("Resent-Reply-To", "Resent-From", "Resent-Sender",
@@ -231,8 +249,7 @@ sub DoGenerateHeader
     $le{'macro:s'}    = $Envelope{'macro:s'};
     $le{'mci:mailer'} = $Envelope{'mci:mailer'};
 
-    local($m);
-    $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
+    my $m = $HAS_GETPWUID ? (getpwuid($<))[0] : 
 	($ENV{'USER '}|| $ENV{'USERNAME'});
 
     $le{'GH:From:'}        = $MAINTAINER || "$m\@$DOMAINNAME";
@@ -241,7 +258,6 @@ sub DoGenerateHeader
     $le{'GH:References:'}  = $Envelope{'h:message-id:'};
     $le{'GH:References:'}  =~ s/^\s+//;
     $le{'GH:X-MLServer:'}  = $Rcsid;
-    $le{'GH:X-MLServer:'} .= "\n\t($rcsid)" if $debug && $rcsid;
     $le{'GH:X-ML-Info:'}   = $URLComInfo if $URLComInfo;
     $le{'GH:From:'}       .= " ($MAINTAINER_SIGNATURE)"
 	if $MAINTAINER_SIGNATURE;
