@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -96,17 +96,17 @@ sub CopyRight
 {
 q%
 <PRE>
-Copyright (C) 1993-1997 Ken'ichi Fukamachi
+Copyright (C) 1993-1998 Ken'ichi Fukamachi
 All rights of this page is reserved.
 
 # This Document(html format) is automatically geneareted by fwix.pl. 
 # fwix (Formatter of WIX Language) is fml document formatter system
 # designed to generate plaintext, html, texinfo and nroff from one file.
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -330,6 +330,11 @@ sub ReadFile
 	undef $Both;
 	undef $NotFormatReset;
 	undef $NotIncrement;
+	undef $TrapEC;
+
+	# IF, ENDIF
+	if (/^\.if\s+(\S+)/i)        { $LANG = $1; next;}
+	if (/^\.endif/i || /^\.~if/) { undef $LANG; next;}
 
 	# language declared
 	# reset Language if it encounters null line; 
@@ -337,20 +342,28 @@ sub ReadFile
 	    undef $LANG;
 	}
 
+	# BLOCK WITHIN OR NOT INFOMATION
+	# null line reset the block info
+	if (/^\s*$/) {
+	    undef $WithinBlock;
+	}
+
 	# keywords
-	$DetectKeyword = $. if /\.($KEYWORD)/;# EUC or English;
+	$WithinBlock = $DetectKeyword = $. if /\.($KEYWORD)/;# EUC or English;
 
 	if (/[\241-\376][\241-\376]/) {	# EUC(Japanese);
 	    undef $LANG;
 	    $DetectEUC = $.;	# save the current line;
 	}
-	elsif (!$LANG && !/^\.($KEYWORD)/) {# to avoid duplicate title;
+	elsif (!$LANG && !/^\.($KEYWORD)/) { # to avoid duplicate title;
 	    $Both = 1;
 	}
-	
-	if (/^=E/) { 
+
+
+	if (/^=E/) {
 	    s/^=E//; 
 	    $LANG = 'ENGLISH';
+	    $TrapEC = 1;
 	    $NotFormatReset = 1;
 	    $NotIncrement = 1;
 	}
@@ -366,37 +379,11 @@ sub ReadFile
 	    $CurLang = $LANG || "JAPANESE";
 	}
 
-
 	/$COMMENT/i && next;                    # Comments
 	/^\.DEBUG/o && ($debug = 1, next); 	# DEBUG MODE
 
-	# FOOTNOTE
-	# buffer alloc
-	if (/\.fn\s*\{/ .. /^\.~fn/)  { 
-	    if (/\.fn\s*\{/) {
-		$FootNote++;
-		s/\.fn\s*\{/\#\.fn${FootNote}/;
-	    }
-	    else {
-		/^\.~fn/ && next;
-		$FootNote{$FootNote} .= "$_\n";
-		next;
-	    }
-	}
-
-	# caption
-	if (/\.caption/ .. /^\.~caption/)  { 
-	    if (/\.caption/) {
-		s/\.caption/\[Caption $Chapter.$Figure\] \{/;
-	    }
-	    else {
-		s/^\.~caption/\}/;
-	    }
-	}
-
-
-	### PATTERN
-	
+	### PATTERN MATCH
+	###
 	if (/^\.($HTML_KEYWORD)/) {
 	    print STDERR "\tCATCH HTML($&)\n" if $verbose;
 	    if ($mode eq 'html')  {
@@ -416,13 +403,20 @@ sub ReadFile
 	s/^\.($KEYWORD)\s+(.*)/$_ = &Expand($1, $2, $file, $mode)/e;
 	s/^\.($FORMAT)\s*(.*)/$_  = &Format($1, $2, $file, $mode)/e;
 
-	# Exception ???
-	s/\.(ptr|fig|ps)\s*\{(\S+)\}/&Expand($1, $2, $file, $mode)/ge;
+	### Command Exceptions in the middle of a line
+	### ESCAPE SEQUENCE
+	if (/\\\.(ptr|fig|ps)/) {
+	    s/\\\./\./g;
+	}
+	### expand
+	else {
+	    s/\.(ptr|fig|ps)\s*\{(\S+)\}/&Expand($1, $2, $file, $mode)/ge;
+	}
 
 
 	# NEXT
 	next if /^\#.next/o;
-
+	
 	# INCLUDE; anyway including. we add ".CUT" commands to Temporary Files
 	if (! $not_include) {
 	    s/^\.include\s+(\S+)/&ReadFile($1, $dir || '.', $mode)/e;
@@ -443,8 +437,15 @@ sub ReadFile
 	# BUT if a null line is output between Japanese sentences.
 	# a lot of null lines are printed.
 	# "(! $LANG && !/\.($KEYWORD)/)" ALREADY satisfied 
-	if ($Both) {
+	if ($Both || $ForcePrint) {
 	    select(ENG); $| = 1;
+
+	    # force printout (.S english)
+	    if ($ForcePrint && !$TrapEC) {
+		print STDERR "\$ForcePrint($_) is set\n" if $debug;
+		&Print;
+		undef $ForcePrint;
+	    }
 
 	    next if $DetectKeyword == $.;
 
@@ -804,6 +805,12 @@ sub Expand
 	$s = "$Part{$Part}\t$s";
 
 	if ($mt) {
+	    # always set ENGLISH MODE Title:)
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= "$s\n"; 
+		$ForcePrint = 1;
+	    }
+
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
@@ -837,6 +844,12 @@ sub Expand
 	$s = "$Chapter\t$s";
 
 	if ($mt) {
+	    # always set ENGLISH MODE Title:)
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= "$s\n"; 
+		$ForcePrint = 1;
+	    }
+
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {
@@ -858,11 +871,16 @@ sub Expand
 	$CurrentSubject = $s;
 
 	$Section++ unless $LANG;
-# beth
 	$s = &GetCurPosition."\t$s";
 
 	if ($mt) {
-	    $Index{$CurLang} .= "$s\n";
+	    # always set ENGLISH MODE Title:)
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= "$s\n"; 
+		$ForcePrint = 1;
+	    }
+
+	    $Index{$CurLang}  .= "$s\n";
 	}
 	elsif ($mh) {
 	    $Index{$CurLang} .= "<LI><A HREF=\"$Chapter.html#C${Chapter}S${Section}\">$s</A>\n";
@@ -894,6 +912,12 @@ sub Expand
 	$s = "Appendix $Appendix\t$s";
 
 	if ($mt) {
+	    # always set ENGLISH MODE Title:)
+	    if ($s !~ /[\241-\376][\241-\376]/ && $CurLang ne 'ENGLISH') {
+		$Index{'ENGLISH'} .= "$s\n"; 
+		$ForcePrint = 1;
+	    }
+
 	    $Index{$CurLang} .= "\n$s\n";
 	}
 	elsif ($mh) {

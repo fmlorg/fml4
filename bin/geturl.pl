@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -31,7 +31,12 @@ sub LogWEnv { &Log(@_);};
 
 ### MAIN ###
 &Init;
-&GetUrl;
+
+$retry = 3;
+# while ($retry-- > 0) {
+    $status = &GetUrl(@ARGV);
+#    last if $status ne 'RETRY';
+# }
 
 exit 0;
 
@@ -42,10 +47,10 @@ exit 0;
 #########################################################################
 sub GetUrl
 { 
-    local($req, $outfile, $head, $tmpf);
+    local($req, $outfile) = @_;
+    local($head, $tmpf);
 
-    $req      = shift @ARGV || $WWW_HOME;
-    $outfile  = shift @ARGV;
+    $req = $req || $WWW_HOME;
 
     if ($outfile) {
 	# if exists already, we update it;
@@ -75,14 +80,16 @@ sub GetUrl
 	close(URL);
     }
 
-    # clean up
-    for ($oldcache, $newcache, $headnew) { 
-	unlink $_ if -f $_;
-    }
-
     # probe by HEAD
+    # If 200 OK is returned, go ahead.
+    # If not, return here.
+    unlink $headnew if -f $headnew; # required here;
     $tmpf = &ProbeUrl($headnew);
+    $tmpf || (return "RETRY");
 
+
+    # clean up caches
+    for ($oldcache, $newcache) { unlink $_ if -f $_;}
 
     # connect failed
     if (-z $headnew) {
@@ -124,6 +131,8 @@ sub GetUrl
 
     # unlink temporarily
     unlink $tmpf;
+
+    "OK";
 }
 
 
@@ -138,10 +147,11 @@ sub UpDatedP
 
     return 0 unless (-f $head && -f $headnew);
 
-    $last    = &Grep('^Last-Modified:', $head);
-    $lastnew = &Grep('^Last-Modified:', $headnew);
+    $last    = &Grep('^Last-Modified:', $head) || &Grep('^Date:', $head);
+    $lastnew = &Grep('^Last-Modified:', $headnew) || &Grep('^Date:', $headnew);
 
     &Log("?: last=$last != lastnew=$lastnew") if $debug;
+
     ($last ne $lastnew) ? 1 : 0;
 }
 
@@ -189,6 +199,11 @@ sub ProbeUrl
     $e{'special:geturl'} = 1; # Retrieve
 
     &HRef($req, *e);
+
+    if ($e{'http:status'} !~ /200\s+OK/) {
+	print STDERR "$e{'http:status'}\n";
+	return 0;
+    }
 
     $tmpf = $e{'special:geturl'};
 

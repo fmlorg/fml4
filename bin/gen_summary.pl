@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
 #
-# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+# Copyright (C) 1993-1998 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1997 fukachan@sapporo.iij.ad.jp
+#               1996-1998 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -96,7 +96,7 @@ sub InitGenSummary
     # h:date -> Now 
     # Date: Fri, 28 Mar 97 01:31:00 +0900
     # 97/03/19 12:16:01 [1:fukachan@sappor] 
-    $DatePat = '\w\w\w,\s(\d\d)\s(\w\w\w)\s(\d\d)\s(\d\d):(\d\d):(\d\d)';
+    $DatePat = '(?:\w\w\w,\s)?(\d\d)\s(\w\w\w)\s(?:\d\d)?(\d\d)\s(\d\d):(\d\d):(\d\d)';
 }
 
 sub Ctl

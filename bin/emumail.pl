@@ -42,7 +42,7 @@ sub GetTime
 sub EmuHeader
 {
 $_ = qq#From $USER\@$DOMAINNAME $MailDate
-Date: $MailDate
+Date: $MailDate +0900 (JST)
 From: $From
 Message-Id: $MessageId
 To: $To
