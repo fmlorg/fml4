@@ -40,12 +40,12 @@
 =E
 Unpacking fml-something.tar.gz, you can find fml-x.y-something
 directory. In it you have a set of the fml system.  Moving this
-directory, please input the command "perl makefml" to install the fml
-to your system
+directory, please input the command "perl makefml install" to install
+the fml to your system
 
 この directory に移動して、
 
-	perl makefml 
+	perl makefml install
 
 というコマンドを実行して下さい。そのマシンの上に fml システムをインス
 トールします。
@@ -203,7 +203,7 @@ e.g. the include sample for elena ML is
 
 	/var/spool/ml/elena/include
 
-を初め必要なサンプルが作成されます。
+を初め必要なサンプルが /var/spool/ml/elena に作成されます。
 
 これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
 のでそれを cut & paste して/etc/aliases に加えて newalises して下さい。
@@ -233,8 +233,7 @@ You can find samples for each ML
 	/var/spool/ml/MLの名前/サンプルのファイル群
 
 が設定の見本です。
-注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
-小文字の ML 名で作成されます。
+
 
 =E
 Attention!: The address of a ML is case insensitivive but the
@@ -259,11 +258,13 @@ the ML.
 
 	/var/spool/ml/ＭＬの名前/crontab 
 
-というファイルができます。また、ＭＬを作成した各ユーザごとそのユーザの
-管理するすべてのＭＬのまとめおくりを設定するための
+というファイルができます。またＭＬを作成した各ユーザ（各ＭＬ管理者）ご
+とにそのユーザの管理するすべてのＭＬのまとめおくりを設定するための
 =E
 For each user who used "makefml newml ML-Name", the user can find
+=S
 	/var/spool/ml/crontab/user-name
+=S
 which entries are automatically added when you create a new ml. 
 This file contains all "Matome Okuri" entries of ML's the user
 administrate.
@@ -272,13 +273,15 @@ administrate.
 
 というファイルが作成されます。これはＭＬを増やすたびに新しいまとめおく
 りの設定が自動的に付け加えられます。
+いっきに更新するには makefml newml で作成後、
 =E
 Please use crontab(1) in the following way:
  
 	crontab /var/spool/ml/etc/crontab/ユーザの名前
 
-というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
-起動されて配送するようになります。
+というコマンドをうってください。これでそのユーザの管理しているＭＬ群す
+べてについて、まとめ送りサーバが一定時間間隔で起動されて配送するように
+なります。
 =E
 The Matome Okuri Server wakes up periodically, checks articles in the
 ML spool and deliver articles in one mail.
@@ -358,7 +361,7 @@ You can find settting samples in the directory
 =E
 Samples are the following files:
 
-	include  aliases crontab fml.c config.h 
+	include aliases crontab fml.c config.h cf Makefile
 
 が保存されています。参考にして下さい。
 
@@ -411,6 +414,7 @@ security.
 =E
 Remove the user "fukachan@sapporo.iij.ad.jp" who can manage the
 "Elena" ML in remote.
+
 
 .C	リモート管理の権限をもつユーザのパスワードの設定・変更
 =E.C	To set or change the passwd of the remote-maitenance user 
@@ -636,7 +640,7 @@ order, thread.html is threaded menu for articles.
 
 
 .A	:include: ではうまく動かない場合 (/etc/aliases)
-.A	You fails to use :include: form in /etc/aliases
+=E.A	You fails to use :include: form in /etc/aliases
 
 大抵は include でうまくいくはずですが、どうしてもだめな場合は 
 =E
