@@ -20,13 +20,12 @@ require 'libcgi_kern.pl';
 ### MAIN ###
 &Init;
 &GetBuffer(*Config);
-$ML = $Config{'ML'};
 
 &ShowHeader;
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-&ShowAminMenu($Config{'PROC'});
+&ShowAminMenu('newml');
 
 if ($ErrorString) { &Exit($ErrorString);}
 

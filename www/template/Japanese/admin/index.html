@@ -21,63 +21,93 @@
 
 <P>
 <UL>
-<LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
-<LI><A HREF="#newml">新規ＭＬの作成</A>
-<LI><A HREF="#config">既存ＭＬの詳細 (詳細設定/登録/削除)</A>
-<LI><A HREF="#destructml">既存ＭＬの削除</A>
-<LI><A HREF="#cgiadmin">この画面(CGI)を操作可能なユーザの設定</A>
-<LI><A HREF="#server_config">サーバの設定(初回の確認必須)</A>
+	<LI><A HREF="_CGI_PATH_/admin/menu.cgi?LANGUAGE=English">[English]</A>
+	<LI><A HREF="#newml">新規ＭＬの作成</A>
+	<LI><A HREF="#config">既存ＭＬの詳細 (詳細設定/登録/削除)</A>
+	<LI><A HREF="#destructml">既存ＭＬの削除</A>
+	<LI><A HREF="#cgiadmin">この画面(CGI)を操作可能なユーザの設定</A>
+	<LI><A HREF="#server_config">サーバの設定(初回の確認必須)</A>
 </UL>
 
 
 <HR>
 <UL>
-<A NAME=newml><LI><P>新規ＭＬの作成
+	<A NAME=newml><LI><P>新規ＭＬの作成
 
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=newml>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=newml>
 
-<TABLE>
+	<TABLE>
+		<TR>
+			<TD ALIGN=right> メーリングリスト名:
+			<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+	</TABLE>
+
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Create>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+
+	<HR>
+	<A NAME=config>
+	<LI><P>
+	詳細設定
+
+	<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=config>
+	<INPUT TYPE=hidden NAME=PTR  VALUE=/>
+
+		<SELECT NAME=ML>
+		__EXPAND_OPTION_ML__
+		</SELECT>
+	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+
+	<HR>
+	<LI>
+	既存メーリングリストをWWWでいじれるように設定する
+
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
+
+	<TABLE>
+		<TR>
+			<TD ALIGN=right> メーリングリスト名:
+			<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+				<TABLE>
+				<TD ALIGN=left>既存リストからの選択:
+				<TD ALIGN=right>
+				<SELECT NAME=ML>
+				__EXPAND_OPTION_ML__
+				</SELECT>
+			</TABLE>
+		<TR>
+	</TABLE>
+	
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+	
+	
+	
+	<HR>
+	<A NAME=destructml>
+	<LI><P>既存メーリングリストの消去
+	
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
+	
 	<TR>
-		<TD ALIGN=right> メーリングリスト名:
-		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
-</TABLE>
-
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Create>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-<HR>
-<A NAME=config>
-<LI><P>
-詳細設定
-
-<FORM ACTION="_CGI_PATH_/admin/mlmenu.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=config>
-<INPUT TYPE=hidden NAME=PTR  VALUE=/>
-
-	<SELECT NAME=ML>
-	__EXPAND_OPTION_ML__
-	</SELECT>
-<INPUT NAME=submit-p TYPE=submit VALUE=GO>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-<BR>
-既存メーリングリストをWWWでいじれるように設定する
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=mladmincgi>
-
-<TABLE>
-	<TR>
-		<TD ALIGN=right> メーリングリスト名:
-		<TD ALIGN=left> <INPUT NAME=ML SIZE=30>
+		<TD ALIGN=right> メーリングリスト:
+		<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
 		<TABLE>
 			<TD ALIGN=left>既存リストからの選択:
 			<TD ALIGN=right>
@@ -86,157 +116,131 @@ _____________________________
 			</SELECT>
 		</TABLE>
 	<TR>
-</TABLE>
-
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-
-
-<HR>
-<A NAME=destructml>
-<LI><P>既存メーリングリストの消去
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=destructml>
-
-<TR>
-	<TD ALIGN=right> メーリングリスト:
-	<TD ALIGN=left> <INPUT NAME=ML_DEF SIZE=30>
+	
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Remove>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+	
+	
+	<HR>
+	<LI>
+	<A NAME=cgiadmin>
+	この画面を操作可能な(CGI)管理者アカウントのパスワード設定
+	<BR>
+	追加: アカウントとパスワードの組を入力すれば追加になります。
+	<BR>
+	削除: 消したいアカウントを入力し、削除モードにしてGOです。
+	<BR>
+	
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
+	<INPUT TYPE=hidden NAME=ML   VALUE=etc>
+	
 	<TABLE>
-		<TD ALIGN=left>既存リストからの選択:
-		<TD ALIGN=right>
-		<SELECT NAME=ML>
-		__EXPAND_OPTION_ML__
-		</SELECT>
+		<TR>
+			<TD ALIGN=right> Email アドレス ないしアカウント名:
+			<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
+			<TABLE>
+				<TD ALIGN=left>既存リストからの選択:
+				<TD ALIGN=right>
+				<SELECT NAME=CGI_ADMIN_USER>
+				__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
+				</SELECT>
+			</TABLE>
+	
+		<TR>
+			<UL>
+			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
+			<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
+			</UL>
+	
+		<TR>
+			<TD ALIGN=right> パスワード:
+			<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
+	
+		<TR>
+			<TD ALIGN=right> 確認のため同じパスワード:
+			<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
 	</TABLE>
-<TR>
-
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Remove>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-
-<HR>
-<A NAME=cgiadmin>
-この画面を操作可能な(CGI)管理者アカウントのパスワード設定
-<BR>
-追加: アカウントとパスワードの組を入力すれば追加になります。
-<BR>
-削除: 消したいアカウントを入力し、削除モードにしてGOです。
-<BR>
-
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=cgiadmin_passwd>
-<INPUT TYPE=hidden NAME=ML   VALUE=etc>
-
-<TABLE>
-	<TR>
-		<TD ALIGN=right> Email アドレス ないしアカウント名:
-		<TD ALIGN=left> <INPUT NAME=CGI_ADMIN_USER_DEF SIZE=30>
-		<TABLE>
-			<TD ALIGN=left>既存リストからの選択:
-			<TD ALIGN=right>
-			<SELECT NAME=CGI_ADMIN_USER>
-			__EXPAND_OPTION_CGI_ADMIN_MEMBER_LIST__
-			</SELECT>
-		</TABLE>
-
-	<TR>
-		<UL>
-		<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="ADD" checked>追加
-		<LI><INPUT NAME="ACTION" TYPE="radio" VALUE="BYE">削除
-		</UL>
-
-	<TR>
-		<TD ALIGN=right> パスワード:
-		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD SIZE=30>
-
-	<TR>
-		<TD ALIGN=right> 確認のため同じパスワード:
-		<TD ALIGN=left> <INPUT TYPE=password NAME=PASSWORD_VRFY SIZE=30>
-</TABLE>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Go>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-
-
-<HR>
-<A NAME=server_config>
-<LI><P>
-サーバの設定
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
-<INPUT TYPE=hidden NAME=ML VALUE=etc>
-
-<TR>
-	<TABLE>
-		<TD ALIGN=left>MTA:
-		<TD ALIGN=right>
-		<SELECT NAME=MTA>
-		<OPTION VALUE=sendmail>sendmail
-		<OPTION VALUE=postfix>postfix
-		<OPTION VALUE=qmail>qmail
-		</SELECT>
-	</TABLE>
-<TR>
-_____________________________
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-<LI><P>
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
-<INPUT TYPE=hidden NAME=ML VALUE=etc>
-
-<TABLE>
-	<TR>
-		<TD ALIGN=right> 現在のaliasesの更新方法:
-		<TD ALIGN=left> _HOW_TO_UPDATE_ALIAS_
-	<TR>
-		<TD ALIGN=right> 更新方法:
-		<TD ALIGN=left>
-		<INPUT NAME=HOW_TO_UPDATE_ALIAS SIZE=80>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Go>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+	
+	
+	
+	<HR>
+	<A NAME=server_config>
+	<LI><P>
+	サーバの設定
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=mail_server_config>
+	<INPUT TYPE=hidden NAME=ML VALUE=etc>
+	
 	<TR>
 		<TABLE>
-			<TD ALIGN=left> いくつかの例:
+			<TD ALIGN=left>MTA:
 			<TD ALIGN=right>
-			<SELECT NAME=HOW_TO_UPDATE_ALIAS>
-			__EXPAND_HOW_TO_UPDATE_ALIASES__
+			<SELECT NAME=MTA>
+			<OPTION VALUE=sendmail>sendmail
+			<OPTION VALUE=postfix>postfix
+			<OPTION VALUE=qmail>qmail
 			</SELECT>
 		</TABLE>
-</TABLE>
-
-
-<BR>
-<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
-<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
-</FORM>
-
-<LI><P>
-<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
-<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
-<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
-<INPUT TYPE=hidden NAME=ML VALUE=etc>
-
-aliasesを更新する: 
-<INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
-</FORM>
-
+	<TR>
+	_____________________________
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+	
+	<HR>
+	<LI><P>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=newaliases_config>
+	<INPUT TYPE=hidden NAME=ML VALUE=etc>
+	
+	<TABLE>
+		<TR>
+			<TD ALIGN=right> 現在のaliasesの更新方法:
+			<TD ALIGN=left> _HOW_TO_UPDATE_ALIAS_
+		<TR>
+			<TD ALIGN=right> 更新方法:
+			<TD ALIGN=left>
+			<INPUT NAME=HOW_TO_UPDATE_ALIAS SIZE=80>
+		<TR>
+			<TABLE>
+				<TD ALIGN=left> いくつかの例:
+				<TD ALIGN=right>
+				<SELECT NAME=HOW_TO_UPDATE_ALIAS>
+				__EXPAND_HOW_TO_UPDATE_ALIASES__
+				</SELECT>
+			</TABLE>
+	</TABLE>
+	
+	
+	<BR>
+	<INPUT NAME=submit-p TYPE=submit VALUE=Submit>
+	<INPUT NAME=reset-p  TYPE=reset VALUE=Reset>
+	</FORM>
+	
+	<HR>
+	<LI><P>
+	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
+	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
+	<INPUT TYPE=hidden NAME=PROC VALUE=run_newaliases>
+	<INPUT TYPE=hidden NAME=ML VALUE=etc>
+	
+	aliasesを更新する: 
+	<INPUT NAME=submit-p TYPE=submit VALUE="[run newaliases]">
+	</FORM>
+	
 </UL>
 <HR>
 

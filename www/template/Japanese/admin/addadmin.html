@@ -23,27 +23,22 @@ _ML_ メーリングリストの設定
 </H2>
 
 <!-- __START__ -->
-メンバーの削除 (_ML_ ＭＬ)
+管理者メンバーの登録 (_ML_ ＭＬ)
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 <INPUT TYPE=hidden NAME=ML   VALUE=_ML_>
-<INPUT TYPE=hidden NAME=PROC VALUE=BYE>
+<INPUT TYPE=hidden NAME=PROC VALUE=ADD_ADMIN>
 
-<P>
-<TABLE>
-	<TR>
-		<TD ALIGN=right> Email アドレス:
-		<TD ALIGN=left> <INPUT NAME=MAIL_ADDR_DEF SIZE=30>
-		<TABLE>
-			<TD ALIGN=left>既存リストからの選択:
-			<TD ALIGN=right>
-			<SELECT NAME=MAIL_ADDR>
-			__EXPAND_OPTION_MEMBER_LIST__
-			</SELECT>
-		</TABLE>
-</TABLE>
-_____________________________
+Email アドレス:<INPUT NAME=MAIL_ADDR_DEF SIZE=30>
+
+<BR>
+	現在のメンバーの確認:
+	<SELECT NAME=MAIL_ADDR>
+	__EXPAND_OPTION_ADMIN_MEMBER_LIST__
+	</SELECT>
+<BR>
+
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>

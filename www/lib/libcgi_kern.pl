@@ -396,28 +396,28 @@ sub SpawnProcess
 
 
 ### Real Function of *.cgi
-sub __Run_mlmenu
+sub ShowAminMenu
 {
-    $PROC = $Config{'PROC'};
+    local($mode) = @_;
 
-    if ($PROC =~ /^[a-z]+$/) {
+    if ($mode =~ /^[a-z]+$/) {
 	if ($Config{'LANGUAGE'} eq 'Japanese') {
-	    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html");
+	    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${mode}.html");
 	}
 	elsif ($Config{'LANGUAGE'} eq 'English') {
-	    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/$PROC.html");
+	    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/${mode}.html");
 	}
 	else {
 	    if ($LANGUAGE eq 'Japanese') {
-		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html");
+		&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/${mode}.html");
 	    }    
 	    else {
-		&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/$PROC.html");
+		&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/${mode}.html");
 	    }
 	}
     }
     else {
-	&Error("insecure");
+	&Error("insecure xxx.cgi call");
     }
 }
 

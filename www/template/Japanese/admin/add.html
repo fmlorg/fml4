@@ -23,8 +23,7 @@ _ML_ メーリングリストの設定
 </H2>
 
 <!-- __START__ -->
-<HR>
-<A NAME=add.bye><P>メンバーの登録 (_ML_ ＭＬ)
+メンバーの登録 (_ML_ ＭＬ)
 
 <FORM ACTION="_CGI_PATH_/admin/makefml.cgi" METHOD=POST>
 <INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
@@ -33,6 +32,11 @@ _ML_ メーリングリストの設定
 
 Email アドレス:<INPUT NAME=MAIL_ADDR_DEF SIZE=30>
 
+<BR>
+	現在のメンバーの確認:
+	<SELECT NAME=MAIL_ADDR>
+	__EXPAND_OPTION_MEMBER_LIST__
+	</SELECT>
 <BR>
 <INPUT NAME=submit-p TYPE=submit VALUE=Submit>
 <INPUT NAME=reset-p  TYPE=reset VALUE=Reset>

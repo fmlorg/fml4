@@ -376,19 +376,35 @@ sub Command
 
     if ($PROC eq 'add' || $PROC eq 'bye') {
 	&Control($ML, $PROC, $MAIL_ADDR);
+
 	&P("</PRE>");
+	&P("<HR>");
 	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&P("<HR>");
 	&P("<PRE>");
     }
-    elsif ($PROC eq 'add_admin' || $PROC eq 'bye_admin') {
+    elsif ($PROC eq 'add_admin' || $PROC eq 'bye_admin' ||
+	   $PROC eq 'addadmin' || $PROC eq 'byeadmin') {
 	$PROC =~ s/_admin/admin/;
+
 	&Control($ML, $PROC, $MAIL_ADDR);
+
+	&P("</PRE>");
+	&P("<HR>");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&P("<HR>");
+	&P("<PRE>");
     }
     elsif ($PROC eq 'add_cgi_admin' || $PROC eq 'bye_cgi_admin') {
 	$PROC =~ s/_//g;
 	&Control($ML, $PROC, $MAIL_ADDR);
     }
     elsif ($PROC eq 'newml') {
+	&P("</PRE>");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&P("<HR>");
+	&P("<PRE>");
+
 	&Control($ML, $PROC);
 	&MailServerConfig('run_newaliases', $CGI_CF{'MTA'});
     }
@@ -396,6 +412,11 @@ sub Command
 	&Control($ML, 'mladmin.cgi');
     }
     elsif ($PROC eq 'destructml') {
+	&P("</PRE>");
+	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/$PROC.html", 1);
+	&P("<HR>");
+	&P("<PRE>");
+
 	&Control($ML, $PROC);
     }
     elsif ($PROC eq 'config') {

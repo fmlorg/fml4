@@ -15,15 +15,17 @@
 <!-- =================================================================== -->
 
 <CENTER>
-<A HREF="http://www.fml.org/fml/">"fml"</A> _FML_VERSION_ 
-<BR>Configuration Interface
+<A HREF="http://www.fml.org/fml/" TARGET="right">
+fml _FML_VERSION_ 
+</A>
+設定メニュー
 </CENTER>
-</H2>
 
-<P>基本設定
+<!--- ------------------------------------------------------------------- -->
+<CENTER><H3>基本設定</H3></CENTER>
 <UL>
 	<LI>
-	<A HREF="_CGI_PATH_/admin/index.cgi#newml" TARGET="right">
+	<A HREF="_CGI_PATH_/admin/newml.cgi" TARGET="right">
 	ＭＬの新規作成
 	</A>
 
@@ -34,6 +36,10 @@
 	<INPUT NAME=PROC TYPE="radio" VALUE="add" checked>メンバー登録
 	<BR>
 	<INPUT NAME=PROC TYPE="radio" VALUE="bye">メンバー削除
+	<BR>
+	<INPUT NAME=PROC TYPE="radio" VALUE="addadmin">管理者の登録
+	<BR>
+	<INPUT NAME=PROC TYPE="radio" VALUE="byeadmin">管理者の削除
 	<BR>
 	選択: 
 			<SELECT NAME=ML>
@@ -58,13 +64,14 @@
 
 
 	<LI>
-	<A HREF="_CGI_PATH_/admin/index.cgi#destructml" TARGET="right">
+	<A HREF="_CGI_PATH_/admin/rmml.cgi" TARGET="right">
 	ＭＬの削除
 	</A>
 </UL>
 
+<!--- ------------------------------------------------------------------- -->
 <HR>
-<P>管理画面
+<CENTER><H3>管理メニュー</H3></CENTER>
 
 <UL>
 	<LI>
@@ -72,23 +79,23 @@
 	<FORM ACTION="_CGI_PATH_/admin/makefml.cgi" TARGET="right" METHOD=POST>
 	<INPUT TYPE=hidden NAME=LANGUAGE VALUE=Japanese>
 	<INPUT TYPE=hidden NAME=PROC VALUE=log>
-
-	<SELECT NAME=ML>
-	__EXPAND_OPTION_ML__
-	</SELECT>
-
-	<BR>
 	<INPUT NAME="OPTION" TYPE="radio" VALUE="tail" checked>最後のＮ行
 	<INPUT NAME="TAIL_SIZE" VALUE=100 SIZE=5>
 	<BR>
 	<INPUT NAME="OPTION" TYPE="radio" VALUE="all">全部
+
 	<BR>
+	選択: <SELECT NAME=ML>
+	__EXPAND_OPTION_ML__
+	</SELECT>
+
 	<INPUT NAME=submit-p TYPE=submit VALUE=GO>
 	</FORM>
 </UL>
 
+<!--- ------------------------------------------------------------------- -->
 <HR>
-<P>サーバの設定
+<CENTER><H3>サーバの設定</H3></CENTER>
 
 <UL>
 	<LI>

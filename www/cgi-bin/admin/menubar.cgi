@@ -25,21 +25,7 @@ require 'libcgi_kern.pl';
 
 if ($ErrorString) { &Exit($ErrorString);}
 
-
-if ($Config{'LANGUAGE'} eq 'Japanese') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/menubar.html");
-}
-elsif ($Config{'LANGUAGE'} eq 'English') {
-    &Convert("$HTDOCS_TEMPLATE_DIR/English/admin/menubar.html");
-}
-else {
-    if ($LANGUAGE eq 'Japanese') {
-	&Convert("$HTDOCS_TEMPLATE_DIR/Japanese/admin/menubar.html");
-    }    
-    else {
-	&Convert("$HTDOCS_TEMPLATE_DIR/English/admin/menubar.html");
-    }
-}
+&ShowAminMenu('menubar');
 
 if ($ErrorString) { &Exit($ErrorString);}
 
