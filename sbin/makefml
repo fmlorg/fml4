@@ -4192,7 +4192,8 @@ sub MakeConfigPH
     }
 
     # write
-    if (open(SAVE, "> $config_ph")) {
+    my($new_ph) = $config_ph.".new.$$";
+    if (open(SAVE, "> $new_ph")) {
 	select(SAVE); $| = 1; select(STDOUT);
 
 	# preamble
@@ -4204,12 +4205,25 @@ sub MakeConfigPH
 	close(SAVE);
     }
     else {
-	&Log("cannot write $config_ph");
+	&Log("cannot write $new_ph");
+	&Error("cannot write $new_ph");
 	return $NULL;
     }
 
-    print STDERR "Done.\n";
-    print STDERR "\t(back-up is saved in $config_ph.bak)\n" if $back_up;
+    if (&ValidatePerlScriptP($new_ph)) {
+	print STDERR "\t(rename($new_ph, $config_ph)\n\t" if $debug;
+	if (rename($new_ph, $config_ph)) {
+	    print STDERR "Done.\n";
+	    print STDERR "\t(back-up is saved in $config_ph.bak)\n"
+		if $back_up;
+	}
+	else {
+	    &Log("cannot make $config_ph");
+	    &Error("cannot make $config_ph");
+	    &Error("config.ph IS NOT UPDATED.");
+	    return $NULL;
+	}
+    }
 
     # warning
     if (-z $config_ph) {
