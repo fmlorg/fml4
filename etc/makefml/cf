@@ -35,7 +35,7 @@ AUTO_REGISTRATION_TYPE		confirmation
 ### Remote Administration 
 REMOTE_ADMINISTRATION
 REMOTE_ADMINISTRATION_AUTH_TYPE	crypt
-PGP_PATH			_ML_DIR/_ML_/etc/pgp
+PGP_PATH			_ML_DIR_/_ML_/etc/pgp
 
 ### Automatic Html Generation
 AUTO_HTML_GEN
