@@ -9,3 +9,32 @@ fml 3.x
 	&NonAutoRegistrableP()
 	&NotUseSeparateListP
 	&UseSeparateListP	
+
+-----------------------------------------------------
+Usage:
+
+./rv_matrix.pl [-a]
+
+	-a  show all including non-auto-regist cases
+
+-----------------------------------------------------
+What is "auto_asymmetric_regist"?
+
+If $REJECT_COMMAND_HANDLER = "auto_asymmetric_regist" is defined, fml
+fakes $FILE_TO_REGIST = $ACTIVE_LIST. So fml add the new address to
+$ACTIVE_LIST.
+
+fml accpepts mail from a member in $MEMBER_LIST and distribute article
+to members in $ACTIVE_LIST
+
+Caution: fml fakes only this configuration. 
+
+-----------------------------------------------------
+[EXCEPTION]
+
+ignore in these cases:
+
+1.    if $REJECT_POST_HANDLER eq 'auto_asymmetric_regist';
+
+2.    if ($REJECT_POST_HANDLER =~ /auto\S+regist/ &&
+            $REJECT_COMMAND_HANDLER eq 'auto_asymmetric_regist')
