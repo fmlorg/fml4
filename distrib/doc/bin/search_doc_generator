@@ -8,7 +8,7 @@ trap "rm -f $mf" 0 1 3 15
 
 (
 	echo /usr/local/SSE/db/fml-j.inv.new: doc/ri*/*wix doc/smm/*wix
-	echo "	sh $FML/.release/split_doc"
+	echo "	sh $FML/distrib/bin/split_doc"
 	echo "	(cd /usr/local/SSE; make)"
 	echo "	rsync -C --rsh $HOME/sbin/www@ssh -auv \\"
 	echo "	$HOME/.www/fml/ mikoto:/usr/local/etc/httpd/htdocs/staff/fukachan/fml/"
