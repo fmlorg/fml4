@@ -1460,6 +1460,17 @@ sub Lookup
     return 0;
 }
 
+# for convenience
+sub ExactAddressMatch
+{ 
+    local($addr1, $addr2) = @_;
+    &SaveACL;
+    $ADDR_CHECK_MAX = 100; 
+    local($r) = &AddressMatch($addr1, $addr2);
+    &RetACL;
+    $r;
+}
+
 # sub AddressMatching($addr1, $addr2)
 # return 1 given addresses are matched at the accuracy of 4 fields
 sub AddressMatching { &AddressMatch(@_);}
