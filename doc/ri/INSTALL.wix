@@ -1849,6 +1849,37 @@ for articles.
 =E
    flock or not for lock algorithm. If no, rename() based lock is done.
 
+○ SMTP
+=E
+*  SMTP
+
+   USE_OUTGOING_ADDRESS (default: NO)
+	fml.pl => list-outgoing => expand
+
+   USE_VERP (default: NO)
+	Variable Envelope Return-Paths
+
+詳しくは doc/op.jp などをみてください
+=E
+Please see doc/op.en for more details.
+
+○ USE_MEMBER_NAME
+=E
+*  USE_MEMBER_NAME
+   relate "address" with "real name"
+
+○ LANGUAGE
+=E
+*  LANGUAGE
+
+   MESSAGE_LANGUAGE (default: Japanese or English determined in installation)
+	Message Language Extension
+
+エラーなどを何語で返すか？デフォールトはインストール時の言語選択と一緒
+=E
+Which language you use in error reply? Default language is the same as
+$LANGUAGE asked and determined in installation.
+
 
 .########### Menu Section ##########
 .S	セキュリティ関係
@@ -1859,6 +1890,14 @@ for articles.
 詳細については doc/op.jp を読んで下さい。
 =E
 Please see doc/op.jp for more details.
+
+○ 様々なセキュリティオプションを一気に設定する
+   make secure とやることは同じ
+=E
+*  set up several parameters related with security.
+   If you run "make secure", you can get the same effect.
+
+   => MORE_SECURE => "y"
 
 ○ メールの中身のフィルタリングについて
 =E
@@ -1877,17 +1916,37 @@ If MIME/Multipart mail is input, fml checks only the first block.
 *  USE_DISTRIBUTE_FILTER (default: NO)
    Do you use filter? answer "yes" if you use this (recommended).
 
-○ FILTER_ATTR_REJECT_COMMAND (default: no)
+○ FILTER_ATTRIBUTE => 
+
+ * FILTER_ATTRIBUTE => FILTER_ATTR_REJECT_COMMAND (default: no)
    投稿用のＭＬに #help などが来たら拒否 (yes 推奨)
 =E
-*  FILTER_ATTR_REJECT_COMMAND (default: no)
+ * FILTER_ATTR_REJECT_COMMAND (default: no)
    reject "#help" posted to a ML. ("yes" is recommended)
 
-○ FILTER_NOTIFY_REJECTION (default: no)
+ * FILTER_ATTR_REJECT_2BYTES_COMMAND (default: no)
+
+  ＵＮＳＵＢＳＣＲＩＢＥ とかだけのメールを弾く。
+  しかし弾き過ぎることがある(例: 最初の段落が『ＵＪＡ です。』というメー
+  ルはコマンドと引数なのか区別できない)
+=E
+   Japanese specific
+
+ * FILTER_ATTRIBUTE => FILTER_NOTIFY_REJECTION (default: no)
    拒否した旨をその送り主に伝える
 =E
-*  FILTER_NOTIFY_REJECTION (default: no)
+ * FILTER_ATTRIBUTE => FILTER_NOTIFY_REJECTION (default: no)
    report the rejection to the sender?
+
+ * FILTER_ATTRIBUTE => FILTER_ATTR_REJECT_MS_GUID (default: no)
+
+   M$関係のマクロ入りに見えるファイルを弾く(e.g Melissa virus)
+   一般には弾き過ぎることになる
+   (が普通のファイルにはマクロなんて使わないだろうに)
+=E
+   reject files with M$ GUID, which may be a file with macro definition,
+   e.g. Melissa virus.    
+
 
 ○ USE_MTI (トラフィックモニタ; default No)
 =E
@@ -1928,6 +1987,13 @@ message/partial, fml guesses the total mail size and compare it with
 $MAX_MAIL_SIZE.
 .~q
 
+○ ANNOUNCE_MAIL_SIZE_OVERFLOW (default: no) 
+
+拒否した旨をメーリングリストに流す。恥曝し？
+=E
+send "it is rejected" to ML as a distribution.
+
+
 ○ ADDR_CHECK_MAX (default: 3)
 =E
 *  ADDR_CHECK_MAX (default: 3)
@@ -1967,6 +2033,14 @@ var/Mail/ の下に最近Ｎ通のメールの先頭2Kバイト程度を保存するヘッダ情報
 For debug (and against tricks), it may be useful to save the latest
 $USE_LOG_MAIL mails (2K bytes). The cache is stored in $DIR/var/Mail/
 .~q
+
+○ USE_ENCRYPTED_DISTRIBUTION (default: no)
+=E
+*  USE_ENCRYPTED_DISTRIBUTION (default: no)
+
+PGP encrypted ML. Need pgp configuration. Please see doc/op.{jp,en}
+for more details.
+
 
 
 .C	リモート管理するユーザの登録について
