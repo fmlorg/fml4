@@ -18,6 +18,25 @@
 
 .S	3.0C (to be 3.0C in the new future)
 
+*** list to hack for DB Interface ?
+
+[]
+   bin/split_and_msend.pl
+   contrib/localhack/release-2/member_name/src/libmember_name.pl
+   kern/fml.pl
+   kern/libsmtp.pl
+   kern/msend.pl
+   libexec/fmlserv.pl
+   proc/libamctl.pl
+   proc/libdist.pl
+   proc/libfml.pl
+   proc/liblop.pl
+   proc/libra.pl
+   
+[difficult]
+   proc/libcrosspost.pl
+
+
 .S	3.0B (fukui newconfig)
 
 * new 3.0B __LoadConfiguration()
