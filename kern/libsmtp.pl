@@ -79,6 +79,11 @@ sub SocketInit
     push(@RcptLists, $ACTIVE_LIST) 
 	unless grep(/$ACTIVE_LIST/, @RcptLists);
 
+    ## initialize "Recipient Lists Control Block"
+    ## which saves the read pointer on the file.
+    ## e.g. $RcptListsCB{"${file}:ptr"} => 999; (line number 999)
+    undef %RcptListsCB;
+
     # SMTP HACK
     if ($USE_OUTGOING_ADDRESS) { 
 	require 'libsmtphack.pl'; &SmtpHackInit;
@@ -714,7 +719,7 @@ sub SmtpPut2Socket
     # return if $s =~ /^\s*$/; # return if null;
 
     $0 = "$FML:  $s <$LOCKFILE>"; 
-    print SMTPLOG "$s<INPUT\n";
+    print SMTPLOG $s, "<INPUT\n";
     print S $s, "\r\n";
 
     # no wait
