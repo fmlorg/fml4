@@ -5,6 +5,44 @@
 =E
 				Ken'ichi Fukamachi
 
+[ 3.0pl#30 == 3.0.1_BETA #19 ]
+
+   sbin/makefml
+	sync w/ HEAD (2.100-2.101): 
+	FixDefault: no operation.. if debug
+
+   doc/smm/header.wix
+	sync w/ HEAD (2.10-2.11): 
+	clean up $USE_ORIGINAL_MESSAGE_ID around
+
+[ 3.0pl#29 == 3.0.1_BETA #18 ]
+
+   makefml (2.68-2.69):
+	FixDefault: reflect real variable name not hier name
+
+   libexec/mead.pl
+	fix qmail VERPs analyze code
+
+   disable to reject "From: $MAIL_LIST" mail in default 
+
+	デフォールトでは From: $MAIL_LIST を弾かないように変更
+	3.0ではループチェックの一部としてこれをしているが
+	企業のサポートＭＬなどではまるのでとりあえず戻す
+
+	明示的にループチェックする場所を指定する関数を用意したので
+	したい人はチェックするとよいとおもう。
+
+   fix to enable $DEFAULT_RELAY_SERVER even if command reply 
+
+	libsmtp.pl      (2.30-2.31)
+	libsmtputils.pl (2.7-2.8)
+
+   dirty hack to resolve 'admin matome 0' sends articles out asap.
+   XXX we should resolve it to modify fml internals but anyway fix
+   XXX it by dirty hack.
+
+	libamctl.pl (2.24-2.25)
+
 [ 3.0pl#28 == 3.0.1_BETA #17 ]
 
 	changed to accpet From: $MAIL_LIST
