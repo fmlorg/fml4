@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: Makefile,v 1.13 2001/05/12 13:02:34 fukachan Exp $
+# $FML: Makefile,v 1.14 2001/08/19 15:10:41 fukachan Exp $
 #
 
 # doc/ri/ sources
@@ -28,6 +28,7 @@ DOC_RI_SOURCES += CHANGES-3.0.2
 DOC_RI_SOURCES += CHANGES-4.0.1
 DOC_RI_SOURCES += CHANGES-4.0.2
 DOC_RI_SOURCES += CHANGES-4.0.3
+DOC_RI_SOURCES += CHANGES-4.0.4
 
 DOC_RI_SOURCES += UPGRADE
 DOC_RI_SOURCES += UPGRADE-3.0
