@@ -7,6 +7,10 @@
 
 2001/09/18
 
+   databases/TOY_MODEL.English
+	remove Japanese (EUC), 
+	comment "not translated"
+
    proc/libhtmlsubr.pl
 	implement _get_suffix() by Kasui Nayumi (fml-help: 00721) to
 	extract suffix
