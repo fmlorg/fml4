@@ -2050,6 +2050,20 @@ sub ResetVariables
 	&Die("Cannot find $ml. you've not created it yet?\n");
     }
 
+    # sys/$COMPAT_ARCH
+    # load some compatible configuratinos
+    if ($CPU_TYPE_MANUFACTURER_OS =~ /solaris2|sysv4/i) {
+	$COMPAT_ARCH = 'SOLARIS2';
+	print STDERR "\neval require $EXEC_DIR/sys/$COMPAT_ARCH/depend.pl\n"
+	    if $debug;
+	if (-f "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl") {
+	    local($VARRUN_DIR) = &Value(VARRUN_DIR) || 'var/run';
+	    eval require "$EXEC_DIR/sys/$COMPAT_ARCH/depend.pl";
+	    print STDERR ">", $FlockFile, "\n" if $debug;
+	    &Error($@) if $@;
+	}
+    }
+
     # check sum cache for cf and config.ph diagnostic check
     $CHECK_SUM = "$ML_DIR/$ml/.crc";
 }
@@ -5830,12 +5844,13 @@ sub FLock
     # if (!-d $lockdir) { $lockdir  =~ s#$ml/$ml#$ml#;}
 
     $lockf = $main'UNISTD ? $lockdir : ">> $DIR/lockfile"; #';
+    $lockf = $main'FlockFile || $lockf;
 
     &SetFlockParam;
 
     # unique file handle in this name space.
     ++$FH;
-
+    
     open($FH, $lockf) || do {
 	&Log("ERROR: Flock cannot open $lockf");
 	return 0;
