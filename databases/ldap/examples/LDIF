@@ -1,0 +1,7 @@
+dn: cn=elena, dc=fml, dc=org
+cn: elena@fml.org
+o: fml.org
+objectclass: maillist
+maildrop: fukachan@fml.org
+maildrop: rudo@nuinui.fml.org
+maildrop: kenken@nuinui.fml.org

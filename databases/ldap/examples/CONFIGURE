@@ -1,0 +1,3 @@
+$LDAP_SERVER_HOST  = "ldap.fml.org";
+$LDAP_SEARCH_BASE  = "dc=fml, dc=org";
+$LDAP_QUERY_FILTER = "";
