@@ -4,6 +4,14 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/01/10
+
+   DEFINE_FIELD_PAT_TO_REJECT()
+	bug fix argument
+	ヘッダの指定は大文字でも小文字でもいいようにする
+
+   List-Subscribe: をカスタマイズ可能にする。 
+
 2001/12/27
 
    proc/libra.pl
@@ -128,7 +136,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.228 2001/12/19 14:30:08 fukachan Exp $
+	add $FML: CHANGES,v 1.229 2001/12/28 04:26:04 fukachan Exp $
 
 2001/10/03
 
