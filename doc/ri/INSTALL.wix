@@ -25,6 +25,9 @@
 
 この時に次のような項目を聞いて来ます。
 
+   Personal Use? or ML-Admin-Group-Shared? 
+   Personal or Group  (personal/group) [personal] group
+
    DOMAIN NAME               [sapporo.iij.ad.jp] 
    FQDN                      [beth.sapporo.iij.ad.jp] 
    EXEC FILES DIRECTORY      [/usr/local/fml] 
@@ -32,6 +35,15 @@
 
 それぞれ、次のような意味ですので、適当に入れて下さい。単に
 Enter?(CR) を押すと [] の中の値が自動的に設定されます。
+
+   Personal Use? or ML-Admin-Group-Shared? 
+   Personal or Group  (personal/group) [personal] group
+	・自分しか使わないなら personal
+	・特定他数の人達がＭＬをいじる権限を持つ場合(例： /etc/groupで管理)
+	  group 
+
+	を指定して下さい。作られるdirectoryの write permission が異なります。
+
 
    DOMAIN NAME               [sapporo.iij.ad.jp] 
 
@@ -80,20 +92,12 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 .S	設定の保存
 
-なお、上で設定した項目はある場所に格納されるので次回以降 newml (後述)
-する時などはいつもこの値が使われます。
+なお、上で設定したDirectory等の情報次の場所に格納されます。
+次回以降 newml (後述)する時などはいつもこの値が使われます。
 
-これらの↑設定の後これらの設定を保存する directory をどこに置くか？尋
-ねられます。
-
-    CONFIG_DIR (e.g. /home/beth/fukachan/.fml, /usr/local/fml/.fml ...)
     Config Saved in [/usr/local/fml/.fml] 
 
-デフォールトは、上で選んだ実行ファイルをインストールする場所の下の 
- .fml という階層になっています。個人的にインストールする場合には $HOME 
-の下 (例えば ~/.fml ) がよかったりするでしょうから、適当な directory 
-名を入れて下さい。
-
+＃つまり上で選んだ実行ファイルをインストールする場所の下の .fml です
 
 
 .C	ＭＬを作る。
@@ -113,45 +117,48 @@ Enter?(CR) を押すと [] の中の値が自動的に設定されます。
 
 	/usr/local/fml/makefml newml elena
 
-を実行すれば終りです。ＭＬ用の include ファイルの
+を実行すれば終りです。ＭＬ用の include ファイル
 
-	/usr/local/fml/include/elena
+	/var/spool/ml/etc/elena/include
 
-がそれぞれできます。それを呼ぶように設定された aliases の見本がコマン
-ドの最後に表示されるのでそれを cut & paste して/etc/aliases に加えて 
-newalises して下さい。
+を初め必要なサンプルが作成されます。
 
-なおコマンドの最後の表示の内容は /usr/local/fml/.fml/elena/aliases に
-念のため保存されています。
+これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
+のでそれを cut & paste して/etc/aliases に加えて newalises して下さい。
+＃まとめ送りについては後述
 
-別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を mirei に
-変えて実行すればよいです。
+なおこの aliases の表示内容は /var/spool/ml/etc/elena/aliases に保存さ
+れています。
+
+新しく別の mirei ＭＬを作りたい時は、上と同じことを elena の部分を 
+mirei に変えて実行すればよいです。
 
 なお、各ＭＬごとに 
 
-	/usr/local/fml/.fml/MLの名前/サンプルのファイル
+	/var/spool/ml/etc/MLの名前/サンプルのファイル群
 
-という形で作った時の設定を参考までに保存します。
+が設定の見本です。
 注意： アドレスは大文字小文字無関係ですが、ML の名前の directory 等は
 小文字の ML 名で作成されます。
 
-また、分かりやすいように
-
-	/var/spool/ml/ＭＬの名前/samples 
-
-というdirectoryはこの /usr/local/fml/.fml/ＭＬの名前/ にlinkされていま
-す。
 
 
 .S	まとめおくり
 
 NetBSD のような Vixie Cron がＯＳ附属の場合については
+各ＭＬごとに
 
-	/usr/local/fml/.fml/crontab 
+	/var/spool/ml/etc/ＭＬの名前/crontab 
 
-というファイルができているので、
+というファイルができます。また、ＭＬを作成した各ユーザごとそのユーザの
+管理するすべてのＭＬのまとめおくりを設定するための
 
-	crontab /usr/local/fml/.fml/crontab 
+	/var/spool/ml/etc/crontab/ユーザの名前
+
+というファイルが作成されます。これはＭＬを増やすたびに新しいまとめおく
+りの設定が自動的に付け加えられます。
+
+	crontab /var/spool/ml/etc/crontab/ユーザの名前
 
 というコマンドをうってください。これでまとめ送りサーバが一定時間間隔で
 起動されて配送するようになります。
@@ -170,14 +177,14 @@ Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron
 
 .C	設定ファイルの保存
 
-	/usr/local/fml/.fml/ＭＬの名前/
+	/var/spool/ml/etc/ＭＬの名前/
 		と
 	/var/spool/ml/ＭＬの名前/samples (リンクで上と同じ場所)
 
 という場所(上の例ではこの場所)に makefml で作った見本が入っています。
 それぞれのＭＬ用にカスタマイズされた内容の
 
-	aliases          crontab         fml.c           include 
+	include  aliases crontab fml.c config.h 
 
 が保存されています。参考にして下さい。
 
@@ -198,6 +205,23 @@ Vixie Cron でないOSについては man crontab で調べるとか doc/op の cron
    /usr/local/fml/makefml bye elena fukachan@sapporo.iij.ad.jp
 
 	Elena ＭＬから fukachan@sapporo.iij.ad.jp を消す。
+
+
+
+.C	リモート管理の権限をもつユーザをＭＬに加える場合
+
+   /usr/local/fml/makefml addadmin elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬのリモート管理者に fukachan@sapporo.iij.ad.jp を加える。
+
+
+
+.C	リモート管理の権限をもつユーザをＭＬから削除する場合
+
+   /usr/local/fml/makefml byeadmin elena fukachan@sapporo.iij.ad.jp
+
+	Elena ＭＬのリモート管理者から fukachan@sapporo.iij.ad.jp を消す。
+
 
 
 .C	ＭＬの基本的ないくつかの設定
@@ -336,7 +360,7 @@ TOP画面
 
 大抵は include でうまくいくはずですが、どうしてもだめな場合は 
 
-	/usr/local/fml/.fml/ML名/fml.c 
+	/var/spool/ml/etc/ML名/fml.c 
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
 す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
