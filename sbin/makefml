@@ -955,7 +955,9 @@ sub XSWarn
 
 sub Error
 {
-    print STDERR "*** Error: @_\n\n";
+    local($buf) = @_;
+    print STDERR "*** Error: $buf\n\n";
+    $XStatus .= "ERROR: $buf\n";
 }
 
 
@@ -2386,7 +2388,7 @@ sub GenerateDirectory
     # THIS ROUTINE IS CALLED IN THE CREATION OF A NEW ML!
     # dup check
     if (-d "$ML_DIR/$ml" && (!$EnForceMode)) {
-	&Debug("*** Error: $ml already exists ***");
+	&Error("$ml already exists");
 	return "FATAL";
     }
 
