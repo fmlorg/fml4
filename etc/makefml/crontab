@@ -1,8 +1,10 @@
 # msend for _ML_
-0 * * * * _EXEC_DIR_/msend.pl _ML_DIR_/_ML_ -q
+_CRON_TIME_ * * * * _EXEC_DIR_/msend.pl _ML_DIR_/_ML_ -q
 
 # If you do not set -q, you receive a log mail once an hour.
 # I hope this mail might be helpful for you for further recognition.
-# -q をつけないと 一時間に一度まとめ送りのログが送られてきます(more betterよ)
 # For Example,
-# 0 * * * * _EXEC_DIR_/msend.pl _ML_DIR_/_ML_
+# _CRON_TIME_ * * * * _EXEC_DIR_/msend.pl _ML_DIR_/_ML_
+
+# confirmd
+# _CRON_TIME_ 5 * * 0 _EXEC_DIR_/libexec/confirmd.pl _ML_DIR_/_ML_ _EXEC_DIR_

@@ -1,2 +1,2 @@
-# MEAD: Mail Error Analize Daemon
-"|_EXEC_DIR_/libexec/mead.pl -S _ML_DIR_ -D _ML_DIR_/_ML_"
+# MEAD: Mail Error Analize Daemon ("-m auto" to remove addrs automatically)
+"|_EXEC_DIR_/libexec/mead.pl -m report -S _ML_DIR_ -D _ML_DIR_/_ML_ -E _EXEC_DIR_"
