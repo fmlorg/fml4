@@ -56,6 +56,10 @@ cron.pl がおちるかもしれない？ という可能性があります。
 .~q
 
 
+.# .S	msend.pl == MSendv4.pl 
+.include msend-pl.wix
+
+
 .S	まとめおくり	Release 1
 .label	{matome-1}
 .http lib/MatomeOkuri/README
