@@ -103,6 +103,14 @@ current をもってくる。
 	/usr/local/fml/www/examples/sendmail/sendmail.cf	
 
    にある alias ファイルの定義に差し替えて下さい。
+
+   root になって
+  
+   # touch /var/spool/ml/etc/aliases.db
+
+   などとしておいてください。.db なのか .pag .dir なのかはOSによります。
+   4.4BSD では .db です。
+
    sendmail を restart
 
  (postfix の例)
