@@ -15,6 +15,10 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2003/03/30
+
+   update IM to im-144.
+
 2003/01/25
 
    kern/fml.pl (2.147-2.148)
@@ -256,7 +260,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.36 2003/01/25 06:01:00 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.37 2003/02/09 12:42:44 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
