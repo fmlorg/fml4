@@ -196,7 +196,10 @@ sub GetAddr2Regist
 sub GetSubscribeString
 {
     local($_) = @_;
-    @c=caller; &Log("GetSubscribeString is called @c[1,2]");
+
+    if ($debug_confirm) {
+	@c=caller; &Log("GetSubscribeString is called @c[1,2]");
+    }
     &Debug("--GetSubscribeString(\n$_\n);\n") if $debug;
 
     s/(^\#[\s\n]*|^[\s\n]*)//;
