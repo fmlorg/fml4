@@ -12,7 +12,7 @@
 # q$Id$;
 
 if ($0 eq __FILE__) {
-    print &Stardate."\n";
+    print &Stardate, "\n";
 }
 
 sub Stardate
