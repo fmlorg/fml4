@@ -889,7 +889,12 @@ sub ShowPointer
     print STDERR "   generating\t$outfile (prev-> $n, ";
 
     $n = $cur_n - 1;
-    $LastUrlPointer = "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+    if ($n > 0) {
+	$LastUrlPointer = "<A HREF=${n}.html>[PREVIOUS CHAPTER]</A>\n";
+    }
+    else {
+	$LastUrlPointer = "<A HREF=index.html>[PREVIOUS CHAPTER]</A>\n";
+    }
 
     $n = $cur_n;
     $s .= "<A HREF=${n}.html> [NEXT CHAPTER]</A>\n";
