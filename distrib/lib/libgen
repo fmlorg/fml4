@@ -140,8 +140,8 @@ COPY_SOURCES () {
 	cp -p  $PERL_SOURCES	$DESTDIR/distrib/src
 
 	echo ""
-	echo Copying doc/messages/
-	rsync --exclude CVS -av doc/messages/ $DESTDIR/distrib/messages/
+	echo Copying messages/
+	rsync --exclude CVS -av messages/ $DESTDIR/distrib/messages/
 
 	echo ""
 	echo Copying www/

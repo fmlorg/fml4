@@ -20,7 +20,7 @@ DRAFTS_SOURCES:
 var/doc/drafts/*
 
 MESSAGES_SOURCES:
-doc/messages/
+messages/
 
 PERL_SOURCES:
 kern/*pl
