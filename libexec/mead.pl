@@ -913,11 +913,12 @@ sub Init
     $debug = $opt_d ? 1 : 0;
 
     # program directory
+    $EXEC_DIR = $opt_E;
+    $ML_DIR = $opt_S;
     if (! $EXEC_DIR) {
 	$EXEC_DIR = $0;
 	$EXEC_DIR =~ s#/libexec/mead.pl##;
     }
-    $ML_DIR = $opt_S;
 
     # at the first stage, evaluate the configuration file
     # overwrite -m, -S, -D, -E ?
