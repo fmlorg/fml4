@@ -3,8 +3,16 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
-2001/01/15
+2001/01/22
 
+   4.0-stable series start
+
+   apply patch to html converter (fml-support:09166) 
+	not to ignore forwarded messages
+
+	KUBO Hiroya <hiroya@netcom.mag.keio.ac.jp>
+
+2001/01/15
    4.0 release
 
 ---------------------------------------------------------------------------

@@ -822,6 +822,9 @@ sub ParseMultipart
 	elsif ($mpbcb{'type'} eq 'text' && $mpbcb{'subtype'} eq 'plain') {
 	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
 	}
+	elsif ($mpbcb{'type'} eq 'message' && $mpbcb{'subtype'} eq 'rfc822') {
+	    &WriteHtmlFile(*e, *mpbcb, $pb, $pe, $dir, $file, $mp_count);
+	}
 	else {
 	    print OUT "<PRE>\n";
 	    print OUT "attatchment ($mpbcb{'type'}/$mpbcb{'subtype'}) ignored\n";
