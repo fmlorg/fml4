@@ -1,7 +1,5 @@
 	WANTED / TODO LIST TOWARD fml 2.3
 
---- TODO
-
 * more beautiful codes
 
 * documents
@@ -16,6 +14,7 @@
 * WWW Interface ?
 
 * makefml menu extension ?
+  full menu? It seems incredible
 
 * more elaborate port on NT4 ?
 
@@ -26,10 +25,41 @@
 	database search 
 	...
 
-* makefml menu extension (full menu? It seems incredible)
-
-* MANIFEST Japanese comments?
-
 * msend light weight version?
 
+* enhance authentication
+
+  $MEMBER_AUTH_TYPE = address / pgp;
+? $ML_MEMBER_AUTH_TYPE = address / pgp;
+
+* pgp 2, 5, 6 openpgp ...
+
+* run smtpfeed directly
+
+* COMPAT_CHADDR_FML21 
+
+  required ?
+
+* merge mnews help merge
+
+* clean up mget3 internals
+  mget link spool/$x tmp/spoo/$x
+
+* language extension
+
+  messages
+
+  cf/config, cf/MANIFEST
+     define all variables, Japanization?
+
+* check Y2K more
+
 $Id$
+# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1999 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
