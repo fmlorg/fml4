@@ -99,10 +99,14 @@ All rights of this page is reserved.
 # fwix (Formatter of WIX Language) is fml document formatter system
 # designed to generate plaintext, html, texinfo and nroff from one file.
 #
-# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
-# Copyright (C) 1996-1997 fukachan@sapporo.iij.ad.jp
-# fml is free software distributed under the terms of the GNU General
-# Public License. see the file COPYING for more details.
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
 </PRE>    
 %;
 }
@@ -451,7 +455,7 @@ sub ReadFile
 	}
 
 	# Try to detect ERROR
-	if ($mode ne 'roff') { /^\.(\S+)/ && &Log("Error? ^.$1");}
+	if ($mode ne 'roff') { /^\.(\S+)/ && &Log("Error?(${file} $.) ^.$1");}
     }# WHILE;
 
     close($file);
@@ -1020,7 +1024,8 @@ sub FigExpand
     }
 
     # $key{$k};
-    "Fig. $figure_index{$k}";
+    #"Fig. $figure_index{$k}";
+    $figure_index{$k};
 }
 
 
