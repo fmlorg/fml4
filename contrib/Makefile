@@ -1,7 +1,7 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2000 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2000 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
@@ -23,7 +23,6 @@ SUBDIRS += localhack/release-2/kizu
 SUBDIRS += localhack/release-2/doc-changes
 SUBDIRS += localhack/release-2/mnews
 SUBDIRS += localhack/release-2/member_name
-SUBDIRS += lexical
 SUBDIRS += pager
 SUBDIRS += mail2fax
 SUBDIRS += mail2news
