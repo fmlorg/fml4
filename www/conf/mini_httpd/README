@@ -1,1 +1,14 @@
-URL: http://www.acme.com/software/mini_httpd/
+* How to get
+
+http://www.acme.com/software/mini_httpd/
+
+* modify Makefile 
+
+SSL_INCDIR =    /usr/local/ssl/include/
+SSL_LIBDIR =    /usr/local/ssl/lib
+SSL_DEFS =      -DUSE_SSL
+SSL_INC =       -I$(SSL_INCDIR) -I/usr/local/ssl/include/openssl
+SSL_LIBS =      -L$(SSL_LIBDIR) -lssl -lcrypto
+
+
+$Id$
