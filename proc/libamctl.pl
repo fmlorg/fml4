@@ -104,13 +104,13 @@ sub AutoRegist
     # acceptable address patterns
     if ($AUTO_REGISTRATION_ACCEPT_ADDR) {
 	if ($from !~ /$AUTO_REGISTRATION_ACCEPT_ADDR/i) {
-	    &Log("Error: AutoRegist: address [$from] is not acceptable");
+	    &Log("ERROR: AutoRegist: address [$from] is not acceptable");
 	    return 0;
 	}
     }
     if ($REGISTRATION_ACCEPT_ADDR) {
 	if ($from !~ /$REGISTRATION_ACCEPT_ADDR/i) {
-	    &Log("Error: AutoRegist: address [$from] is not acceptable");
+	    &Log("ERROR: AutoRegist: address [$from] is not acceptable");
 	    return 0;
 	}
     }
@@ -445,7 +445,7 @@ sub DoSetDeliveryMode
 
 	if ($NOT_USE_SPOOL) {
 	    &Log("$proc is disabled when \$NOT_USE_SPOOL is set");
-	    &Mesg(*e, "Error: $proc is disabled");
+	    &Mesg(*e, "ERROR: $proc is disabled");
 	    &Mesg(*e, "       since we have no spooled articles");
 	    &Mesg(*e, $NULL, 'req.digest.no_spool', $proc);
 	    return $NULL;
@@ -534,9 +534,9 @@ sub DoSetMemberList
     # ATTENTION! $curaddr should be a member.
     if ((! $e{'mode:admin'}) &&
 	(! ($list = &MailListMemberP($curaddr)))) {
-	&Log("$cmd: Error: address '$curaddr' is not a member. STOP");
+	&Log("$cmd: ERROR: address '$curaddr' is not a member. STOP");
 	&Mesg(*e, $NULL, 'auth.should_be_from_member', $curaddr);
-	&Mesg(*e, "$cmd: Error: address '$curaddr' is not a member.");
+	&Mesg(*e, "$cmd: ERROR: address '$curaddr' is not a member.");
 	&Mesg(*e, "$cmd requires command from a member address.");
 	&Mesg(*e, "please check your From: header field.");
 	return $NULL;
@@ -551,8 +551,8 @@ sub DoSetMemberList
 
 	# addresses
 	if ($curaddr eq '' || $newaddr eq '') {
-	    &Log("$cmd: Error: empty address is given");
-	    &Mesg(*e, "$cmd: Error: $cmd requires two non-empty addresses.");
+	    &Log("$cmd: ERROR: empty address is given");
+	    &Mesg(*e, "$cmd: ERROR: $cmd requires two non-empty addresses.");
 	    &Mesg(*e, "Please use the syntax \"$cmd old-address new-address\"");
 
 	    &Mesg(*e, $NULL, 'chaddr.no_args', $cmd);
@@ -572,7 +572,7 @@ sub DoSetMemberList
 	# CHECK RAW CHECK TO COMPARE $Fld[2] (src argument) WITH From: address.
 	if (! $e{'mode:admin'} && 
 	    (! &AddressMatch($From_address, $Fld[2]))) {
-	    &Log("$cmd: Security Error: requests to change another member's address '$Fld[2]'");
+	    &Log("$cmd: Security ERROR: requests to change another member's address '$Fld[2]'");
 	    &Mesg(*e, "$cmd: Security Error:\n\tYou ($From_address) cannot change\n\tanother member's address '$Fld[2]'.");
 	    &Mesg(*e, $NULL, 'chaddr.invalid_addr', $Fld[2]);
 	    return $NULL;
@@ -582,10 +582,10 @@ sub DoSetMemberList
 	local($new_list, $asl);
 
 	if (&ExactAddressMatch($curaddr, $newaddr)) {
-	    &Log("$cmd: Error: $curaddr == $newaddr");
+	    &Log("$cmd: ERROR: $curaddr == $newaddr");
 	    &Mesg(*e, $NULL, 'chaddr.same_args', $cmd);
 	    &Mesg(*e, $NULL, 'chaddr.from.oldaddr');
-	    &Mesg(*e, "$cmd: Error: $curaddr == $newaddr");
+	    &Mesg(*e, "$cmd: ERROR: $curaddr == $newaddr");
 	    &Mesg(*e, "Please send command mail from old-address");
 	    &Mesg(*e, "usage: $cmd old-address new-address");
 	    return $NULL;
@@ -597,8 +597,8 @@ sub DoSetMemberList
 	if ($asl >= $ADDR_CHECK_MAX) { $ADDR_CHECK_MAX = $asl + 1;}
 
 	if ($new_list = &MailListMemberP($newaddr)) {
-	    &Log("$cmd: Error: newaddr '$newaddr' exist in '$new_list'");
-	    &Mesg(*e, "$cmd: Error: New address '$newaddr' is already a member.");
+	    &Log("$cmd: ERROR: newaddr '$newaddr' exist in '$new_list'");
+	    &Mesg(*e, "$cmd: ERROR: New address '$newaddr' is already a member.");
 	    &Mesg(*e, $NULL, 'already_subscribed', $newaddr);
 	    return $NULL;
 	}

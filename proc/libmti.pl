@@ -127,7 +127,7 @@ sub MTIDBMOpen
 	$MTI_HI_DB = $MTI_HI_COMMAND_DB || "$FP_VARDB_DIR/mti.hi.command";
     }
     else {
-	&Log("MTI[$$] Error: MTICache called under an unknown mode");
+	&Log("MTI[$$] ERROR: MTICache called under an unknown mode");
 	return $NULL;
     }
 

@@ -39,7 +39,7 @@ sub PGPGoodSignatureP
 	&Mesg(*e, $NULL, 'pgp.incorrect_signature') unless $auth;
     }
 
-    &Log("Error: PGP no good signature.") unless $auth;
+    &Log("ERROR: PGP no good signature.") unless $auth;
 
     $auth;
 }
@@ -128,7 +128,7 @@ sub PGPDecode2
 
     unlink $tmpf || &Log("PGPDecode2: cannot unlink $tmpf");;
 
-    &Log("Error: PGP no good signature.") unless $auth;
+    &Log("ERROR: PGP no good signature.") unless $auth;
 
     $dcbuf;
 }
@@ -162,7 +162,7 @@ sub DoPGPDecode
     }
     close(RPGP);
 
-    &Log("Error: PGP no good signature.") unless $auth;
+    &Log("ERROR: PGP no good signature.") unless $auth;
 
     $dcbuf;
 }
@@ -276,7 +276,7 @@ sub PgpInit
     $PgpOpts = "+Language=en";
 
     if ($e{'Body'} =~  /^[\s\n]*$/) {
-	&Log("PGPGoodSignatureP Error: no effective mailbody");
+	&Log("PGPGoodSignatureP ERROR: no effective mailbody");
 	&Mesg(*e, "Mail Body has no PGP Signature");
 	&Mesg(*e, $NULL, 'pgp.no_signature');
 	return 0;
@@ -284,8 +284,8 @@ sub PgpInit
 
     # program exeistence check
     if (! -x $PGP) {
-	&Log("PGPGoodSignatureP Error: program \$PGP is NOT DEFINED");
-	&Mesg(*e, "Error: verify PGP environment");
+	&Log("PGPGoodSignatureP ERROR: program \$PGP is NOT DEFINED");
+	&Mesg(*e, "ERROR: verify PGP environment");
 	&Mesg(*e, $NULL, 'pgp.env.error');
 	return 0;
     }
@@ -331,8 +331,8 @@ sub PGP
 	    &DoPgp(*e, "$PGP $PgpOpts $cmd $argv[0]");
 	}
 	else {
-	    &Log("Error: no such user found");
-	    &Mesg(*e, "Error: no such user found");
+	    &Log("ERROR: no such user found");
+	    &Mesg(*e, "ERROR: no such user found");
 	    &Mesg(*e, $NULL, 'no_such_member');
 	}
     }

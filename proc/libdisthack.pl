@@ -221,7 +221,7 @@ sub AgainstReplyWithNoRef
 
     # no $SUBJECT_FREE_FORM_REGEXP defined
     if ($SUBJECT_FREE_FORM_REGEXP eq '') {
-	&Log("Error: \$AGAINST_MAIL_WITHOUT_REFERENCE not work "
+	&Log("ERROR: \$AGAINST_MAIL_WITHOUT_REFERENCE not work "
 	     ."without \$SUBJECT_FREE_FORM_REGEXP");
 	return $NULL;
     }

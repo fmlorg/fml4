@@ -212,9 +212,9 @@ sub TarZXF
     
     # check the setting on ZCAT
     local($gzip);
-    if (! $ZCAT) { &Log("Error: \$ZCAT NOT DEFINED"); return "";}
+    if (! $ZCAT) { &Log("ERROR: \$ZCAT NOT DEFINED"); return "";}
     ($gzip) = split(/\s+/, $ZCAT);
-    if (!-x $gzip) { &Log("Error: ZCAT[$gzip] NOT EXISTS"); return "";}
+    if (!-x $gzip) { &Log("ERROR: ZCAT[$gzip] NOT EXISTS"); return "";}
     
     if ($tarfile =~ /\.(gz|z|Z)$/) {
 	open(TAR, "$ZCAT $tarfile|") || (&Log("$!:$ZCAT $tarfile"), return "");

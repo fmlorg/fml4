@@ -223,8 +223,8 @@ sub ArchiveAndExpireConflictP
     }
 
     if ($EXPIRE_LIMIT < 2*$au) {
-	&Log("Error: CANNOT $action the spool for safety");
-	&Log("Error: since \$EXPIRE_LIMIT < 2*\$ARCHIVE_UNIT");
+	&Log("ERROR: CANNOT $action the spool for safety");
+	&Log("ERROR: since \$EXPIRE_LIMIT < 2*\$ARCHIVE_UNIT");
 	return 1;
     }
 

@@ -102,7 +102,7 @@ sub Archive
 			    "$archive_dir/$tar.tar.gz");
 		}
 
-		&Log("Error: Archive::Archive [$@]") if $@;
+		&Log("ERROR: Archive::Archive [$@]") if $@;
 		&Log("$archive_dir/$tar.tar.gz is created") unless $@;
 	    }
 	}

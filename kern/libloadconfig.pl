@@ -28,13 +28,13 @@ sub __LoadConfiguration
     local($space) = @_;
 
     if (! $DIR) {
-	print STDERR "Error: __LoadConfiguration: \$DIR is not defined\n";
-	&Log("Error: __LoadConfiguration: \$DIR is not defined");
+	print STDERR "ERROR: __LoadConfiguration: \$DIR is not defined\n";
+	&Log("ERROR: __LoadConfiguration: \$DIR is not defined");
 	exit(1);
     }
     elsif (! -d $DIR) {
-	print STDERR "Error: __LoadConfiguration: \$DIR not exsts\n";
-	&Log("Error: __LoadConfiguration: \$DIR not exists");
+	print STDERR "ERROR: __LoadConfiguration: \$DIR not exsts\n";
+	&Log("ERROR: __LoadConfiguration: \$DIR not exists");
 	exit(1);
     }
 

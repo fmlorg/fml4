@@ -113,8 +113,8 @@ sub ProcLibrary4PlainArticle
 
 	if (! &LibraryUnlinkP($From_address, $target)) {
 	    &Mesg(*e, $NULL, 'library.not_unlink', $n);
-	    &Mesg(*e, "Error: library unlink: you cannot unlink $n");
-	    &Log("Error: library unlink: not author try to unlink $n");
+	    &Mesg(*e, "ERROR: library unlink: you cannot unlink $n");
+	    &Log("ERROR: library unlink: not author try to unlink $n");
 	    &Warn("Warning: illegal request of library unlink $ML_FN",
 		  "library unlink:\n\tnot author ($From_address)\n".
 		  "\ttry to unlink $n in library spool");

@@ -47,7 +47,7 @@ sub Init
 
     # Error Handling
     if (! @CROSSPOST_CF) {
-	&Log("Error: please define \@CROSSPOST_CF to use \$USE_CROSSPOST",
+	&Log("ERROR: please define \@CROSSPOST_CF to use \$USE_CROSSPOST",
 	     "see doc/op for more details");
 	return;
     }
@@ -56,7 +56,7 @@ sub Init
     @import = ("MAIL_LIST", "VARDB_DIR", "FP_VARDB_DIR");
     for (@import) { 
 	eval("\$Crosspost'$_ = \$main'$_;");
-	&Log("Error: eval $_ [$@]\n") if $@;
+	&Log("ERROR: eval $_ [$@]\n") if $@;
     }
 
     # debug
@@ -121,12 +121,12 @@ sub Init
       $dir = $MLDir{$ml};
 
       if (! $dir) {
-	  &Log("Error: Crosspost: directory not defined for ML $ml");
+	  &Log("ERROR: Crosspost: directory not defined for ML $ml");
 	  next scan;
       } 
 
       if (! -d $dir) {
-	  &Log("Error: Crosspost: not exist $dir for ML $ml");
+	  &Log("ERROR: Crosspost: not exist $dir for ML $ml");
 	  next scan;
       } 
 
@@ -169,7 +169,7 @@ sub Scan
 	;
     }
     else {
-	&Log("Error: Crosspost::Scan $f not exist");
+	&Log("ERROR: Crosspost::Scan $f not exist");
 	return 0;
     }
 

@@ -67,7 +67,7 @@ sub DoNeonSendFile
 				 "$f is not found.",
 				 'not_found', $f);
 	    $error .= "\n[ @info ]\n\n";
-	    &Mesg(*Envelope, "NeonSendFile Error:\n\t$f is not found.\n");
+	    &Mesg(*Envelope, "NeonSendFile ERROR:\n\t$f is not found.\n");
 	    &Mesg(*Envelope, $NULL, 'not_found', $f);
 	}
 
@@ -203,7 +203,7 @@ sub DoGenerateHeader
 			     "Resent-Message-Id");
 
     # @to is required; but we can make $from appropriatedly;
-    @to || do { &Log("GenerateHeader:ERROR: NO \@to"); return;};
+    @to || do { &Log("GenerateHeader: ERROR: NO \@to"); return;};
 
     # prepare: *rcpt for Smtp();
     local($x, $lc_rcpt);

@@ -18,14 +18,14 @@ sub RCSBackUp
     &RCSInit;
 
     if (! $CI) {
-	&Log("RCSBackUp: cannot find 'ci'");
+	&Log("RCSBackUp: ERROR: cannot find 'ci'");
 	return $NULL;
     }
 
     &Log("RCSBackUp: $CI -l -q $f 2>&1|") if $debug;
 
     if (!-f $f) {
-	&Log("RCSBackUp: cannot find $f");
+	&Log("RCSBackUp: ERROR: cannot find $f");
 	return;
     }
 
@@ -33,7 +33,7 @@ sub RCSBackUp
     $mode = (stat($f))[2];
 
     open(CI, "$CI -l -q $f 2>&1|") || 
-	&Log("RCSBackUp Error: cannot exec $CI -q $f");
+	&Log("RCSBackUp ERROR: cannot exec $CI -q $f");
     while (<CI>) {
 	chop;
 	&Debug("RCSBackUp> $_") if $debug;

@@ -41,7 +41,7 @@ sub SubMode
 	require 'libsimulation.pl';
     }
     else {
-	&Log("Error: mode [$mode] is unknown");
+	&Log("ERROR: mode [$mode] is unknown");
     }
 }
 

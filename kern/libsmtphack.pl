@@ -33,7 +33,7 @@ sub SmtpHackInit
     if (-z $OUTGOING_RCPTLIST) {
 	local($f) = $OUTGOING_RCPTLIST;
 	$f =~ s#^$DIR/##;
-	&Log("Error: $f is size 0");
+	&Log("ERROR: $f is size 0");
 	&Log("disable \$USE_OUTGOING_ADDRESS and back to normal delivery");
 	undef $USE_OUTGOING_ADDRESS;
 	0;

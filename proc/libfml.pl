@@ -167,9 +167,9 @@ sub DoProcedure
 	  next GivenCommands unless $USE_WARNING; # backward
 
 	  # XXX: (internally converted, so) already "# command" in usual
-	  &Log("Command: Syntax Error /\# \\w+/ !~ [$xbuf]");
-	  &Mesg(*e, "Command Syntax Error: without ^#") if $xbuf !~ /^\#/;
-	  &Mesg(*e, "Command Syntax Error: expect \"# English-word\"") 
+	  &Log("Command: SYNTAX ERROR /\# \\w+/ !~ [$xbuf]");
+	  &Mesg(*e, "Command SYNTAX ERROR: without ^#") if $xbuf !~ /^\#/;
+	  &Mesg(*e, "Command SYNTAX ERROR: expect \"# English-word\"") 
 	      if $xbuf !~ /^\#\s*\w+/;
 
 	  next GivenCommands;	# 'last' in old days 
@@ -987,7 +987,7 @@ sub ProcSetAdminMode
     else {
 	&Log("ILLEGAL REQUEST $proc mode, STOP!",
 	     "Please \$REMOTE_ADMINISTRATION=1; for REMOTE-ADMINISTRATION");
-	&Mesg(*e, "   Error: remote maintenance service unavailable.");
+	&Mesg(*e, "   ERROR: remote maintenance service unavailable.");
 	&Mesg(*e, $NULL, 'EACCES');
 	return 'LAST';
     }
@@ -1005,7 +1005,7 @@ sub ProcApprove
     if (! $REMOTE_ADMINISTRATION) {
 	&Log("ILLEGAL REQUEST $proc mode, STOP!",
 	     "Please \$REMOTE_ADMINISTRATION=1; for REMOTE ADMINISTRATION");
-	&Mesg(*e, "   Error: remote maintenance service unavailable.");
+	&Mesg(*e, "   ERROR: remote maintenance service unavailable.");
 	&Mesg(*e, $NULL, 'EACCES');
 	return 'LAST';
     }

@@ -153,7 +153,7 @@ sub SyncHtml
 	$title = $li;
     }
     else {
-	&Log("Error: \$HTML_INDEX_UNIT is not defined");
+	&Log("ERROR: \$HTML_INDEX_UNIT is not defined");
 	return 0;
     }
 
@@ -1125,7 +1125,7 @@ sub ReConfigureIndex
 	&Copy("$dir/$index.hdr", "$dir/$index.new");
     }
     else {
-	&Log("Error: $dir/$index.hdr not exist");
+	&Log("ERROR: $dir/$index.hdr not exist");
     }
 
     open(LIST, "$dir/$index.list")  || &Log("cannot open $dir/$index.list");
@@ -1239,8 +1239,8 @@ sub Copy
 {
     local($in, $out) = @_;
     local($mode) = (stat($in))[2];
-    open(COPYIN,  $in)      || (&Log("Error: Copy::In [$!]"), return 0);
-    open(COPYOUT, "> $out") || (&Log("Error: Copy::Out [$!]"), return 0);
+    open(COPYIN,  $in)      || (&Log("ERROR: Copy::In [$!]"), return 0);
+    open(COPYOUT, "> $out") || (&Log("ERROR: Copy::Out [$!]"), return 0);
     select(COPYOUT); $| = 1; select(STDOUT);
     chmod $mode, $out;
     while (sysread(COPYIN, $_, 4096)) { print COPYOUT $_;}

@@ -419,7 +419,7 @@ sub ManualRegistConfirm
 	}
     }
     else {
-	&Log("Error: ManualRegistConfirm: unknown mode");
+	&Log("ERROR: ManualRegistConfirm: unknown mode");
     }    
 
     # back store
@@ -438,22 +438,22 @@ sub ValidChaddrRequest
 
     # should be oldaddr != newaddr
     if (&ExactAddressMatch($oldaddr, $newaddr)) {
-	&Log("$cmd: Error: $oldaddr == $newaddr");
-	$e{'tmp:reason'} = "Error: $oldaddr == $newaddr";
+	&Log("$cmd: ERROR: $oldaddr == $newaddr");
+	$e{'tmp:reason'} = "ERROR: $oldaddr == $newaddr";
 	return $NULL;
     }
 
     # $oldaddr should be a member.
     &MailListMemberP($oldaddr) || do {
 	&Log("$oldaddr is NOT a member");
-	$e{'tmp:reason'} = "Error: $oldaddr is NOT a member";
+	$e{'tmp:reason'} = "ERROR: $oldaddr is NOT a member";
 	return 0;
     };
 
     # $newaddr should be a NOT member.
     if (&MailListMemberP($newaddr)) {
 	&Log("$newaddr should not be a member");
-	$e{'tmp:reason'} = "Error: $newaddr exists in a member list.";
+	$e{'tmp:reason'} = "ERROR: $newaddr exists in a member list.";
 	return 0;
     };
 
@@ -479,7 +479,7 @@ sub FML_SYS_ChaddrRequest
 	&ValidChaddrRequest(*e, $2, $3) || do {
 	    &Log("invalid chaddr request: $2 => $3");
 	    # &Mesg(*e, ">>> $buf");
-	    &Mesg(*e, "Error: invalid chaddr request");
+	    &Mesg(*e, "ERROR: invalid chaddr request");
 	    &Mesg(*e, $NULL, 'confirm.chaddr.syntax_error');
 	    &Mesg(*e, $e{'tmp:reason'}) if $e{'tmp:reason'};
 	    &MesgChaddrConfirm(*e);
@@ -540,7 +540,7 @@ sub FML_SYS_ChaddrConfirm
     }
     else {
 	&Log("no such chaddr request");
-	&Mesg(*e, "Error: no such chaddr request");
+	&Mesg(*e, "ERROR: no such chaddr request");
 	&Mesg(*e, $NULL, 'no_such_request', 'chaddr');
 	return $NULL;	
     }

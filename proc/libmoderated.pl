@@ -327,23 +327,23 @@ sub ModeratorProcedure
 				 "$ModeratedQueueDir/xq$id");
 	    }
 	    else {
-		&Log("Error: moderator: no such id=$id");
+		&Log("ERROR: moderator: no such id=$id");
 		&Mesg(*e, ">>> $Fld");
-		&Mesg(*e, "Error: moderator: no such id=$id");
+		&Mesg(*e, "ERROR: moderator: no such id=$id");
 		&Mesg(*e, $NULL, 'moderator.no_such_id', $id);
 	    }
 	}
 	else {
-	    &Log("Error: moderator: id=$id syntax is illegal");
+	    &Log("ERROR: moderator: id=$id syntax is illegal");
 	    &Mesg(*e, ">>> $Fld");
-	    &Mesg(*e, "Error: moderator: id=$id syntax is illegal");
+	    &Mesg(*e, "ERROR: moderator: id=$id syntax is illegal");
 	    &Mesg(*e, $NULL, 'moderator.id.error');
 	}
     }
     else {
-	&Log("Error: moderator: $Fld[2] is unknown command.");
+	&Log("ERROR: moderator: $Fld[2] is unknown command.");
 	&Mesg(*e, ">>> $Fld");
-	&Mesg(*e, "Error: moderator: $Fld[2] is unknown command.");
+	&Mesg(*e, "ERROR: moderator: $Fld[2] is unknown command.");
 	&Mesg(*e, $NULL, 'no_such_command', $Fld[2]);
     }
 }
@@ -374,7 +374,7 @@ sub ModeratorResend
     }
     else {
 	&Log("ModeratorResend: cannot open $f");
-	&Mesg(*e, "Error: cannot open the moderated article queue id=$id");
+	&Mesg(*e, "ERROR: cannot open the moderated article queue id=$id");
 	&Mesg(*e, $NULL, 'not_found', "queue id=$id");
 	return 0;
     }

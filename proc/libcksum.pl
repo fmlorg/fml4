@@ -32,7 +32,7 @@ sub MD5_cksum
 	    close(R_CKSUM);
 	}
 	else {
-	    &Log("Error: cannot open2(RS, S, $prog)") if $debug;
+	    &Log("ERROR: cannot open2(RS, S, $prog)") if $debug;
 	}
 
 	$cksum;
@@ -66,7 +66,7 @@ sub MailBodyCksum
 	$mid = &MD5_cksum(*e, $prog);
     }
     else {
-	&Log("Error: neither MD5.pm nor program 'md5' found");
+	&Log("ERROR: neither MD5.pm nor program 'md5' found");
 	$NULL;
     }
 }
@@ -85,7 +85,7 @@ sub CheckMailBodyCKSUM
 	$status = &SearchDupKey($mid, $LOG_MAILBODY_CKSUM);
     }
     else {
-	&Log("Error: cannot get cksum value");
+	&Log("ERROR: cannot get cksum value");
 	return 0;
     }
 

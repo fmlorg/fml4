@@ -16,10 +16,10 @@ sub NotifyMailSizeOverFlow
     local(*e) = @_;
     local($subj, $body);
 
-    &Log("Error: in-coming mail body size > $INCOMING_MAIL_SIZE_LIMIT bytes.");
+    &Log("ERROR: in-coming mail body size > $INCOMING_MAIL_SIZE_LIMIT bytes.");
 
     $subj = 
-	"Error: In-coming mail body size > $INCOMING_MAIL_SIZE_LIMIT $ML_FN";
+	"ERROR: In-coming mail body size > $INCOMING_MAIL_SIZE_LIMIT $ML_FN";
 	
     $body = "--- Error ---\n";
     $body .= 
