@@ -16,6 +16,7 @@ Anyway search please!
 
 .# .__repl_include__
 .include overview.wix
+.include makefml.wix
 .include GUI.wix
 .include MTA.wix
 .include MUA.wix
