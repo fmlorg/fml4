@@ -112,8 +112,16 @@ sub __EnvelopeFilter
     }
     ### "count up the number of paragraphs" ends
 
-    # cut off Email addresses (exceptional).
+    # FILTERING INITIALIZE() routine
+    # 1. cut off Email addresses (exceptional).
     $xbuf =~ s/\S+@[-\.0-9A-Za-z]+/account\@domain/g;
+
+    # 2. remove invalid syntax seen in help file with the bug? ;D
+    $xbuf =~ s/^_CTK_//g; $xbuf =~ s/\n_CTK_//g;
+
+    # XXX 3. Hmm,convert 2 byte Japanese charactor to 1 byte (required)?
+    # XXX    How we deal buffer with both 1 and 2 bytes strings ??
+
 
     &Debug("--EnvelopeFilter::Buffer($xbuf\n);\ncount=$c\n") if $debug;
 
