@@ -1,14 +1,14 @@
-# Copyright (C) 1993-1999 Ken'ichi Fukamachi
+# Copyright (C) 1993-2001 Ken'ichi Fukamachi
 #          All rights reserved. 
 #               1993-1996 fukachan@phys.titech.ac.jp
-#               1996-1999 fukachan@sapporo.iij.ad.jp
+#               1996-2001 fukachan@sapporo.iij.ad.jp
 # 
 # FML is free software; you can redistribute it and/or modify
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $Id$
-
+# $FML$
+#
 
 # ContentHandler() by <t-nakano@imasy.or.jp>
 # see fml-support ML articles for more details. For example, 
@@ -18,7 +18,9 @@
 sub ContentHandler
 {
     local(*e) = @_;
-    local($boundary) = $e{'MIME:boundary'};
+
+    # PR by fml-help/1208, hmm ;) dirty fix but least change is good ;)
+    local($boundary) = $e{'MIME:boundary'}; $boundary =~ s/^--//;
     local($type, $subtype, $paramaters);
     local($xtype, $xsubtype);
     local($ptr, $header, $body, $prevp);
