@@ -131,6 +131,25 @@ HOME (config.phのある場所 もしくは spool やメンバーファイルのある場所)
 Arbitrary order is available. fml.pl regards the first argument of
 directory as ML's HOME (e.g. location of config.ph).
 
+
+.S	ブートストラップ過程での変数の設定
+=E.S	bootstrap
+
+今の初期化の順番は( elena ML の場合)
+
+	/var/spool/ml/etc/fml/site_init.ph (もし、あれば読み込む)
+	/usr/local/fml/default_config.ph
+	/var/spool/ml/elena/config.ph
+	/var/spool/ml/etc/fml/site_force.ph (もし、あれば読み込む)
+
+の順に読み込んで上書きしていきます。
+
+	/usr/local/fml/default_config.ph
+
+がインストール時に作成され、その中では各変数のデフォルト値が設定されて
+います。
+
+
 .S	ライブラリのファイルを探す順番 (fml.pl と ARGV)
 =E.S	Order to search library files
 .k	fml.plと引数
