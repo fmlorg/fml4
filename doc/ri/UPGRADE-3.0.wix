@@ -63,7 +63,7 @@ makefml config で
 =E
 How to handle member and actives files is different from fml 2.x to
 3.0. If you do not use automatic registration, you feel no difference. 
-I recommend you use "auto_subscribe" hanlder but you can continue to
+I recommend you use "auto_subscribe" handler but you can continue to
 use "auto_regist" in fml 2.x.
 
 この点が最も注意が必要です。選択肢は大きく二通り
@@ -74,7 +74,7 @@ Your choice follows
 	auto_regist を使い続ける
 =E
 	switch to use "auto_subscribe" handler (3.0)
-	continue to use "auto_regist" hanlder  (2.x)
+	continue to use "auto_regist" handler  (2.x)
 
 あります。
 
@@ -113,7 +113,7 @@ Firstly copy members to actives. You have only to do this.
 注意: その時はそうおもっても後で変更をする際にはまる可能性大なので
       案2はあまりお勧めできない気がします。
 =E
-Caution: but I do not recommend caes 2 since your policy will change.
+Caution: but I do not recommend case 2 since your policy will change.
 
 
 .S	変更点について

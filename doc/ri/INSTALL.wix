@@ -50,7 +50,7 @@
 
    For easy guideline of installation and fundamental configuration,
    See
-.url http://www.fml.org/fml/examples/
+.url http://www.fml.org/fml/examples/index-e.html
 
    For more details of internals, advanced configurations, see
    doc/op.en		(plain text)
@@ -74,7 +74,7 @@ __________________________________________
 
 
 .C	簡単なインストールの流れ
-=E.C	Quick Ovewview
+=E.C	Quick Overview
 .n	overview
 
 インストールの大まかな流れは次のようになります。詳しくは後述します。
@@ -640,11 +640,11 @@ doc/op の中をサーチしてください。
 
 いづれの場合でも分からない時はまず最初に doc/op ファイル中を適当なキー
 ワードや変数名でサーチして見て下さい。最新版のドキュメント全体へのサー
-チは http://www.fml.org/fml/serach-j.html でできます。
+チは http://www.fml.org/fml/search-j.html でできます。
 =E
 To find information, 
-1.	search keyword or variable neame in the doc/op.en
-2.	use http://www.fml.org/fml/serach-e.html 
+1.	search keyword or variable name in the doc/op.en
+2.	use http://www.fml.org/fml/search-e.html 
 Check your system following doc/CHECK_LIST.en.
 
 
@@ -689,7 +689,7 @@ newaliases したら終りです。まとめ送りについては後述(.ptr{msend})
 You can see a sample to add to /etc/aliases is shown in the last
 action of makefml. Please cut and paste them in /etc/aliases and
 "newaliases". This sample is in /var/spool/ml/etc/elena/aliases.
-If you encountesr some errors, see .ptr{unsafe}
+If you encounter some errors, see .ptr{unsafe}
 
 /var/spool/ml/elena がすでにある場合は上書きできないようエラーになるよ
 うになっています。意図的に上書きするなら
@@ -1514,7 +1514,7 @@ In default, fml sets up these addresses for elena ML
 
 	elena		for post
 	elena-ctl	for command	
-	elena-dmin	for maintainer. Human reads mails for this address.
+	elena-admin	for maintainer. Human reads mails for this address.
 
 We suppose several environments,
 	* You can not control /etc/aliases freely.
@@ -1679,7 +1679,7 @@ set up the authentication type in remote administration.
 			From: のアドレスが管理者メンバーリストにある
 =E
 	md5		password authentication 
-			the password is saved in ML/etc/passwd in md5 form
+			the password is saved in ML/etc/passed in md5 form
 
 	address		From: のアドレスが管理者メンバーリストにある
 =E
@@ -1831,7 +1831,7 @@ and hop count expiration errors. see the next menu.
 な関数が用意されています。使い方は doc/op.* doc/html/op/ の中をサーチ
 してください。
 =E
-FYI: The following functions are preapred to customize the mail header
+FYI: The following functions are prepared to customize the mail header
 more precisely.
 
 	&ADD_FIELD
@@ -2422,7 +2422,7 @@ http://www.fml.org/fml/CHECK_LIST/.
 perlが正しくインストールされていません。perlをインストールしなしてくだ
 さい。
 =E
-The installaion of perl fails. Please install perl again!
+The installation of perl fails. Please install perl again!
 
 ○ MTAのエラー
 
@@ -2734,7 +2734,7 @@ Append in config.ph (before the last "1;")
 	$INCOMING_MAIL_SIZE_LIMIT The upper limit of mail size
 	$USE_DISTRIBUTE_FILTER    Filtering
 	$USE_MTI                  Traffic Monitor against e.g. mail bomb
-	$UNSUBSCRIBE_AUTH_TYPE    confirmation of unsubscription
+	$UNSUBSCRIBE_AUTH_TYPE    confirmation of un-subscription
 	$USE_LOG_MAIL             logging all mails fml received
 .fi
 
@@ -2747,12 +2747,12 @@ for more details on how to set up this.
 * フィルタリングの補足: 貼付ファイルを禁止する例
 .fi
 .if LANG == ENGLISH
-* Disable attatchments
+* Disable attachments
 .fi
 
 $DISTRIBUTE_FILTER_HOOK = q#
     if ($e{'Body'} =~ /Content-Disposition:\s*attachment/i) {
-	return 'THIS ML NOT PERMIT ATTATCHMENT';
+	return 'THIS ML NOT PERMIT ATTACHMENT';
     }
 #;
 
@@ -2763,7 +2763,7 @@ $DISTRIBUTE_FILTER_HOOK = q#
 すが、それ以外のテーマもあります。
 例: happy99, Melissa
 =E
-FML advisories are a series of documents to advice some kinds of
+FML Advisories are a series of documents to advice some kinds of
 current topics, for example, happy99, Melissa ...
 
 .url	http://www.fml.org/fml/advisories/
