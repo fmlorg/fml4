@@ -17,7 +17,15 @@
 .C	やるべきこと、やり残し、誰か書いてくれないかな:)リスト
 =E.C	TODO, WISH LIST
 
+.S	chkerror
+
+Author: i16@forest.ne.jp
+
+package としてくみこむ作業がのこってる
+
 .S	fukui newconfig
+
+やっぱりいろいろ不都合あり。要いろいろチェック
 
 fml-support: 06987
 
