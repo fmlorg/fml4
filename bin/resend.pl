@@ -15,7 +15,8 @@ push(@INC, $PWD) if -d $PWD;
 
 # getopt()
 require 'getopts.pl';
-&Getopts("dhv");
+&Getopts("dhvD:");
+$DIR = $opt_D || die("ERROR: require -D \$DIR\n");
 
 $opt_h && &Usage;
 
@@ -53,7 +54,7 @@ sub Usage
 sub Resend
 {
     local($id, $addr) = @_;
-    local($article);
+    my ($article);
 
     &InitTTY;
 
@@ -69,11 +70,32 @@ sub Resend
 	print "\n";
     }
 
-    if (-f "$SPOOL_DIR/$id") {
-	$article = "$SPOOL_DIR/$id";
+    if (-f "$DIR/$SPOOL_DIR/$id") {
+	$article = "$DIR/$SPOOL_DIR/$id";
     }
 
-    system "cat $article | sendmail $addr";
+    if (-f $article) {
+	if (open($article, $article)) {
+	    if (open(SENDMAIL, "|sendmail $addr")) {
+		select(SENDMAIL); $| = 1; select(STDOUT);
+		while (<$article>) {
+		    print SENDMAIL $_;
+		}
+		close(SENDMAIL);
+	    }
+	    else {
+		&Log("ERROR: cannot exec sendmail $addr");
+	    }
+
+	    close($article);
+	}
+	else {
+	    &Log("ERROR: cannot open article $article");
+	}
+    }
+    else {
+	&Log("ERROR: cannot find article $article");
+    }
 }
 
 
@@ -110,5 +132,9 @@ sub GetString
     $s;
 }
 
+sub Log
+{
+    print STDERR @_, "\n";
+}
 
 1;

@@ -5251,7 +5251,8 @@ sub do_resend
     local($ml, @argv) = @_;
 
     &ResetVariables;
-    &__system("$EXEC_DIR/bin/resend.pl", @argv);
+    &__system("$EXEC_DIR/bin/resend.pl", "-D", "$ML_DIR/$ml",
+	      @argv);
 }
 
 
