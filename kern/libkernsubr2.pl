@@ -66,7 +66,7 @@ sub GetPeerInfo
 
 sub EmulRFC2369
 {
-    if ($Envelope{'mode:stranger'}) {
+    if ($Envelope{'mode:stranger'} && $PERMIT_POST_FROM ne 'anyone') {
 	&DefineDefaultField("List-Subscribe", 
 			    "<mailto:$addr?body=${trap}subscribe>");
     }
