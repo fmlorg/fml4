@@ -16,10 +16,8 @@ sub ContentHandler
     local($boundary) = $e{'MIME:boundary'};
     local($type, $subtype, $paramaters);
     local($xtype, $xsubtype);
-    local($i, $ptr, $header, $body, $prevp);
+    local($ptr, $header, $body, $prevp);
     local($reject, $multipart, $cutoff);
-    local($outputbody, $deletebody);
-    local(@bodiesp) = ();
     local(@actions) = ();
     local($nonMime) = 0;
     
@@ -28,12 +26,12 @@ sub ContentHandler
     $type =~ s/\s//g;
     $subtype =~ s/\s//g;
     $nonMime = 1 if ($type eq '');
-    $nonMime = 1 if ($type eq 'text' &&
-		     ($subtype eq '' || $subtype eq 'plain'));
     
     $ptr = 0;
     $multipart = 1;
     while ($multipart) {
+	local ($bodiesp, $action);
+	
 	# Check Content-Type Header
 	if ($nonMime) {
 	    # Non MIME mail
@@ -43,28 +41,37 @@ sub ContentHandler
 	    $xsubtype = '';
 	    $multipart = 0;
 	    $header = $type;
-	    push (@bodiesp, -1);
+	    $bodiesp = -1;
 	} else {
-	    local(@xheader, $str);
+	    if ($type ne 'multipart') {
+		$xtype = '';
+		$xsubtype = '';
+		$multipart = 0;
+		$header = $type;
+		$bodiesp = -1;
+	    } else {
+		local(@xheader, $str);
 	    
-	    # MIME mail
-	    $prevp = $ptr;
-	    ($header, $body, $ptr) = &GetNextMultipartBlock(*e, $ptr);
-	    if ($header eq '' && $body eq '' && $ptr == 0) {
-		# No more part/break do-while
-		last;
-	    }
-	    push (@bodiesp, $prevp);
-	    # Get Content-Type
-	    @xheader = split(/\n/, $header);
-	    for ($i = 0; $i < @xheader; $i++) {
-		if ($xheader[$i] =~ /^Content-Type:/io) {
-		    $str = $xheader[$i];
-		    $str =~ s/^Content-Type:\s*//i;
-		    ($xtype, $xsubtype, $paramaters) = split(/[\/;]/, $str, 3);
-		    $xtype =~ s/\s//g;
-		    $xsubtype =~ s/\s//g;
+		# MIME mail
+		$prevp = $ptr;
+		($header, $body, $ptr) = &GetNextMultipartBlock(*e, $ptr);
+		if ($header eq '' && $body eq '' && $ptr == 0) {
+		    # No more part/break do-while
 		    last;
+		}
+		$bodiesp = $prevp;
+		# Get Content-Type
+		@xheader = split(/\n/, $header);
+		foreach (@xheader) {
+		    if (/^Content-Type:/io) {
+			$str = $_;
+			$str =~ s/^Content-Type:\s*//i;
+			($xtype, $xsubtype, $paramaters) =
+			    split(/[\/;]/, $str, 3);
+			$xtype =~ s/\s//g;
+			$xsubtype =~ s/\s//g;
+			last;
+		    }
 		}
 	    }
 	}
@@ -79,27 +86,13 @@ sub ContentHandler
 		last;
 	    }
 	}
-	push (@actions, $action);
+	push (@actions, join("\t", $bodiesp, $action));
     }
     
-    # Check REJECT and MULTIPART
-    $reject = 0;
-    $multipart = 0;
-    $cutoff = 0;
-    foreach (@actions) {
-	if ($_ eq 'reject') {
-	    $reject = 1;
-	    next;
-	}
-	if ($_ eq 'allow+multipart') {
-	    $multipart = 1;
-	    next;
-	}
-	if ($_ eq 'strip') {
-	    $cutoff = 1;
-	    next;
-	}
-    }
+    # Check REJECT, MULTIPART, CUTOFF
+    $reject = grep(/^reject$/, @actions);
+    $multipart = grep(/^allow+multipart$/, @actions);
+    $cutoff = grep(/^strip$/, @actions);
     
     # Rebuild message body
     if ($reject) {
@@ -110,23 +103,26 @@ sub ContentHandler
 	&Log("Reject multipart mail");
 	return "reject";
     } else {
-	$outputbody = '';
-	$deletebody = '';
+	local ($outputbody) = '';
+	local ($deletebody) = '';
+	
 	if ($multipart) {
 	    if ($boundary eq '') {
 		$boundary = 'simplebounrady==';
 	    }
-	    for ($i = 0; $i < @actions; $i++) {
-		if ($bodiesp[$i] == -1) {
+	    foreach (@actions) {
+		local ($bodiesp, $action) = split(/\t/);
+		
+		if ($bodiesp == -1) {
 		    $body = $e{'Body'};
 		    $header = '!MIME';
 		} else {
 		    ($header, $body, $ptr) =
-			&GetNextMultipartBlock(*e, $bodiesp[$i]);
+			&GetNextMultipartBlock(*e, $bodiesp);
 		}
-		if ($actions[$i] eq 'allow' ||
-		    $actions[$i] eq 'allow+multipart' ||
-		    $actions[$i] eq '') {
+		if ($action eq 'allow' ||
+		    $action eq 'allow+multipart' ||
+		    $action eq '') {
 		    if ($header eq '!MIME') {
 			$outputbody .= '--' . $boundary . "\n" .
 			    "Content-Type:" . $e{'h:content-type:'} . "\n\n" .
@@ -134,7 +130,7 @@ sub ContentHandler
 		    } else {
 			$outputbody .= $header . $body;
 		    }
-		} elsif ($actions[$i] eq 'strip+notice') {
+		} elsif ($action eq 'strip+notice') {
 		    if ($header eq '!MIME') {
 			$deletebody .= $body . "\n";
 		    } else {
@@ -152,18 +148,22 @@ sub ContentHandler
 		$e{'h:Content-Transfer-Encoding:'} = '7bit';
 	    }
 	} else {
-	    for ($i = 0; $i < @actions; $i++) {
-		if ($bodiesp[$i] == -1) {
+	    local ($singlepart) = 0;
+	    
+	    foreach (@actions) {
+		local ($bodiesp, $action) = split(/\t/);
+		
+		if ($bodiesp == -1) {
 		    $body = $e{'Body'};
 		    $header = '!MIME';
+		    $singlepart = 1;
 		} else {
 		    ($header, $body, $ptr) =
-			&GetNextMultipartBlock(*e, $bodiesp[$i]);
+			&GetNextMultipartBlock(*e, $bodiesp);
 		}
-		if ($actions[$i] eq 'allow' ||
-		    $actions[$i] eq '') {
+		if ($action eq 'allow' || $action eq '') {
 		    $outputbody .= $body;
-		} elsif ($actions[$i] eq 'strip+notice') {
+		} elsif ($action eq 'strip+notice') {
 		    if ($header eq '!MIME') {
 			$deletebody .= $body . "\n";
 		    } else {
@@ -172,10 +172,12 @@ sub ContentHandler
 		}
 		# strip is do-nothing
 	    }
-	    # Fix mail header
-	    $e{'h:Content-Type:'} = 'text/plain';
-	    $e{'h:Mime-Version:'} = '1.0';
-	    $e{'h:Content-Transfer-Encoding:'} = '7bit';
+	    # Fix mail header, if original is multipart.
+	    if (!$singlepart) {
+		$e{'h:Content-Type:'} = 'text/plain';
+		$e{'h:Mime-Version:'} = '1.0';
+		$e{'h:Content-Transfer-Encoding:'} = '7bit';
+	    }
 	}
 	$e{'Body'} = $outputbody;
 	if ($deletebody ne '') {

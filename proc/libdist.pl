@@ -20,7 +20,7 @@ sub DoDistribute
     # DECLARE: Global Rcpt Lists; and the number of recipients;   
     @Rcpt = (); $Rcpt = 0;
 
-    # Cutoff or reject by mail's Content-Type filter
+    # Cut off multipart or reject by mail's Content-Type handler
     # The existence of $AGAINST_HTML_MAIL and $HTML_MAIL_DEFUALT_HANDLER
     # are backward compatible.
     if (@MailContentHandler > 0) {
