@@ -49,8 +49,14 @@ BRACKET				_ML_
 
 SUBJECT_TAG_TYPE
 
+REWRITE_TO			0
+
+### lock algorithm
+USE_FLOCK			1
+
 ### Misc
 USE_MIME
+
 
 ### Architecture
 CPU_TYPE_MANUFACTURER_OS	_CPU_TYPE_MANUFACTURER_OS_
