@@ -15,7 +15,15 @@
 		$ADMIN_CHADDR_REPLY_TO
 	* subscribe した際のＭＬへのフォワードの仕方をカスタマイズ可能に
 
+2002/06/23
+
+   proc/libamctl.pl (2.52-2.53): 
+	check member_limit in confirmation phase
+
 2002/06/16
+
+   proc/libra.pl (2.41-2.42):
+	admin addadmin コマンドで、メンバーの重複チェックをする
 
    etc/makefml/dot-qmail-admin (1.1-1.2):
 	fix comment
@@ -157,7 +165,7 @@
 	perl モジュールの呼出順( include path )を修正し、
 	fml 附属モジュールが最優先になりました。
 
-$FML: CHANGES-4.0.4.wix,v 1.1.2.21 2002/05/31 03:48:22 fukachan Exp $
+$FML: CHANGES-4.0.4.wix,v 1.1.2.22 2002/06/16 12:39:33 fukachan Exp $
 .# Copyright (C) 2001,2002 Ken'ichi Fukamachi
 .#          All rights reserved. 
 .#               2001,2002 fukachan@sapporo.iij.ad.jp
