@@ -20,9 +20,9 @@ do
 	echo "s#$x ##g" > $sed
 
 	(
-	   perl4.036 -cw $x 2>$buf
-	   sed -f $sed $buf |\
-	   awk -v x=$x '{printf("4 %-20s %s\n", x, $0)}'
+	#   perl4.036 -cw $x 2>$buf
+	#   sed -f $sed $buf |\
+	#   awk -v x=$x '{printf("4 %-20s %s\n", x, $0)}'
 
 	   perl5.00503 -cw $x 2>$buf
 	   sed -f $sed $buf |\
