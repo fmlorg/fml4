@@ -8,6 +8,7 @@
 
 .appendix
 .include toymodel.wix
+.include objectclass.wix
 .include links.wix
 
 .# $Id$
