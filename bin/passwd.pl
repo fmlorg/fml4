@@ -1,21 +1,26 @@
 #!/usr/local/bin/perl
-
-# Copyright (C) 1995 fukachan@phys.titech.ac.jp
-# Please obey GNU Public Licence(see ./COPYING)
+#
+# Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
+# Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
+# fml is free software distributed under the terms of the GNU General
+# Public License. see the file COPYING for more details.
+#
 
 $rcsid   = q$Id$;
 ($rcsid) = ($rcsid =~ /Id: (\S+).pl,v\s+(\S+)\s+/ && "$1[$2]");
 $rcsid  .= 'Current';
 
 require 'getopts.pl';
-&Getopts("p:hd");
+&Getopts("p:hdi");
 
 $opt_h && die(&Usage);
 $debug++ if $opt_d;
+$init++  if $opt_i;
 
+push(@INC, 'proc');
 require 'libcrypt.pl';
 
-print STDERR "Force to change password ... \n";
+&Log("Force to change password ...");
 
 $PASSWD_FILE = $opt_p || 'etc/passwd';
 $to          = shift;
@@ -23,13 +28,13 @@ $p           = shift;
 
 ($to && $p) || die("incorrect arguments?\n".&Usage);
 
-print STDERR "&ChangePasswd($PASSWD_FILE, $to, $p)\n" if $debug;
+&Log("&ChangePasswd($PASSWD_FILE, $to, $p)") if $debug;
 
-if ( &ChangePasswd($PASSWD_FILE, $to, $p) ) {
-    print STDERR "O.K.\n";    
+if ( &ChangePasswd($PASSWD_FILE, $to, $p, $init) ) {
+    &Log("O.K.");
 }
 else {
-    print STDERR "fail.\n";    
+    &Log("fail.");    
 }
 
 exit 0;
@@ -37,14 +42,16 @@ exit 0;
 ##### library #####
 sub Usage
 {
-q#
-passwd.pl [-p password-file] username new-password
+    local($s) = q#;
+    passwd.pl [-i] [-p password-file] username new-password;
+    -i initialize;
+    -p alternative $PASSWD_FILE (default etc/passwd);
+
 #;
+$s =~ s/;//g;
+$s;
 }
 
-sub Log
-{
-    print STDERR "LOG: @_\n";
-}
+sub Log { print STDERR "   @_\n";}
 
 1;
