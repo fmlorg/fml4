@@ -22,7 +22,6 @@ else {
     &ExecCmd("info");
 }
 
-
 if ($GroupWritable) {
     print STDERR "\n   Please check the group permission in $ML_DIR\n";
     print STDERR "   Enjoy Internetworking!\n";
@@ -33,13 +32,8 @@ if ($GroupWritable) {
 exit 0;
 
 
-
 #################### LIBLARIES ####################
-sub System
-{
-    system $SYSTEM_ARGV;
-}
-
+sub System { system $SYSTEM_ARGV;}
 
 sub InitMakeFml
 {
@@ -1686,7 +1680,8 @@ sub do_config
 	    &DeliveryQuery($ml, *MAKE_FML);
 	}
 	elsif ($r == 5) {
-	    &PolicyQuery($ml, *MAKE_FML);
+	    print STDERR "Policy NOT IMPREMENTED YET _o_\n";
+	    # &PolicyQuery($ml, *MAKE_FML);
 	}
     }
 
@@ -2087,6 +2082,9 @@ sub MakeFml_V7Lock
 
     require 'liblock.pl';
     &V7Lock;
+
+    $FLockP{$ml}   = 0;
+    $LockFile{$ml} = $LockFile;
 }
 
 sub MakeFml_V7UnLock
@@ -2094,7 +2092,7 @@ sub MakeFml_V7UnLock
     local($ml) = @_;
 
     $LockFile = $LockFile{$ml};
-    &V7UnLock;
+    &V7Unlock;
 }
 
 1;
