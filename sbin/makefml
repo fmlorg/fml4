@@ -571,7 +571,11 @@ sub SetHashDefaults
 		    # WWW/CGI interface
 		    'html_config',     'do_html_config',
 		    'html_config_set', 'do_html_config',
-		    'newmlcgi', 'do_new_ml_cgi',
+
+		    # 
+		    'admin-cgi',    'do_new_ml_cgi',
+		    'mladmin.cgi', 'do_setup_mladmin_cgi',
+		    '500#mladmin.cgi', 'set up ml-admin/$ml/*.cgi',
 		    );
 
     # functions not to lock
@@ -4142,7 +4146,7 @@ sub do_update
 }
 
 
-sub do_new_ml_cgi
+sub do_setup_mladmin_cgi
 {
     local($ml) = @_;
 
