@@ -20,7 +20,6 @@
 
 *** list to hack for DB Interface ?
 
-[]
    bin/split_and_msend.pl
    contrib/localhack/release-2/member_name/src/libmember_name.pl
    kern/fml.pl
@@ -439,6 +438,14 @@ check also GNU Privacy Gaurd.
 
 remove &Open()
 
+	kern/fml.pl
+	kern/libsmtpsubr.pl
+	kern/msend.pl
+	proc/libconfirm.pl
+	proc/libdist.pl
+	proc/libmti.pl
+	proc/librelayhack.pl
+
 
 .S	アドレス一括書き換え
 =E.S	rewrite address in one action
@@ -448,10 +455,6 @@ remove &Open()
 command to rewrite addresses in one action ?
 
 	admin rewrite s/domain-A/domain-B/ 
-
-.S	distrib/
-
-clean up distribution generator 
 
 .S	BSD make dependence
 
