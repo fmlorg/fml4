@@ -6,7 +6,30 @@
 				Ken'ichi Fukamachi
 .~HTML_PRE
 
+[ 3.0pl7 ] 
+
+   etc/makefml/dot-qmail-default 
+
+	s/USE_QMAIL_EXTENSION/USE_DOT_QMAIL_EXT/
+	$USE_QMAIL_EXTENSION is renamed to $USE_DOT_QMAIL_EXT.
+
+	$USE_QMAIL_EXTENSION は $USE_DOT_QMAIL_EXT に改名されている。
+
+   proc/libexpire.pl 
+	expire spooled articles based on mtime not ctime
+	fml-support: 6867
+
+	なぜかexpireのコードのところ一箇所でだけ判定の基準が異なることを修正
+
+  libexec/mead.pl
+	trap postfix error messages (true?)
+	trap more qmail error messages (sync w/ HEAD 1.8-1.9)
+
+  libexec/mead.pl, doc/smm/mead.wix
+	add missing options mead.pl help shows
+
 [ 3.0pl6 ] 
+
   clean up/changes documents mainly
 
   doc/examples/
