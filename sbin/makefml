@@ -1526,6 +1526,10 @@ sub search_path
 	 # NT Extention
 	 "/perl5/bin", 
 	 "c:\\perl\\bin", "d:\\perl\\bin", "e:\\perl\\bin",
+
+	 # search for "htpasswd"
+	 "/usr/local/apache/bin",
+	 "/usr/contrib/apache/bin",
 	 ) {
 	push(@path, $_);
     }
