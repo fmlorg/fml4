@@ -156,6 +156,12 @@ sub AutoRegist
 	};
     }
 
+    # Member Name Registration
+    if ($USE_MEMBER_NAME) {
+	&use('member_name');
+	return 0 unless &AutoRegistMemberName(*e, $from);
+    }
+
     ### WHETHER DELIVER OR NOT;
     # 7 is body 3 lines and signature 4 lines, appropriate?;
     # spelling miss fix;
