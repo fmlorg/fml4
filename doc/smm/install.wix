@@ -12,24 +12,35 @@ fml のソースファイルを広げて INSTALL というファイルを見て下さい。現在
 ターフェイスが附属しています。それの使い方が INSTALL というファイルです。
 
 INSTALL + α でこの doc/op というファイルと INSTALL の中間に当たるユー
-ザーズガイドが整備される予定です。
+ザーズガイドが整備される予定ですが、2.1-RELEASE に間に合うように統合さ
+れるかどうかはわかりません。
 
 config.ph に現れるハッシュ %MAKE_FML は makefml で使うためのものです。
 makefml 以外では使われません。
 .k	%MAKE_FML
 
 
-.S	Version up
+.S	Version up について
 
-makefml install を使うのがいいでしょう。
+ソースを広げてインストールと同様に makefml install をして下さい。
 
-実質的にやればいいことは
+手動でも十分できますが、makefml の方がよいでしょう。実作業としては
 
-	現在では ソースの下の src 階層以下に perl scripts は集められて
-	います。よって version up は src/*.pl をコピー(cp - pr)する
+	ソースの下の src 階層以下に perl scripts は集められています
+	よって version up はこの src/*.pl をコピー(cp - pr)する
+	必要に応じて bin/ sbin/ cf/ 等も copy する。
+	ドキュメントを copy する
 
-これだけで十分です。
+ことを行ないます。makefml install を使えば必要な作業を行なってくれます。
 注意：fml 1.x 時代の場合の注意は .ptr{appendix:fmlR1}
+
+
+.S	本当に残しておく必要のあるファイルは？
+
+たまにどこが必要な部分ですか？と聞かれますが、makefml install を使えば
+core の部分だけが概ねインストールされます。ドキュメントが大きいので 
+www.sapporo.iij.ad.jp を見るから doc/html は要らないから消すということ
+はありうるでしょう。
 
 
 .S	インストール後にサーバの設定(パラメータ)をいじる
@@ -44,19 +55,28 @@ makefml install を使うのがいいでしょう。
 .xref	order-of-option-effeciency
 .xref	init-data-structure
 
-いつものように複数のやり方があります:-)
+複数のやり方があります。本質的にはどれも configuration file を書き換え
+るということです。コマンドラインでもできますが、保守や makefml との整
+合性のため 2.1-RELEASE では推奨されていません。
 
-○ 初心者で内部構造がよくわからない場合はインストール時に使った 
-makefml というコマンドを使って、ＭＬの設定ができます。makefml config
-ML で ML-directory/config.ph が変更できます。よく使いそうだと思われる
-基本的な設定はこれで十分でしょう。
+1	makefml
 
-○ それ以上のことがしたい場合は各MLの config.ph をいじって下さい。
+初心者で内部構造がよくわからない場合はインストール時に使った makefml 
+というコマンドを使って、ＭＬの設定ができます。makefml config ML で 
+ML-directory/config.ph が変更できます。よく使いそうだと思われる基本的
+な設定はこれで十分でしょう。この辺は INSTALL を読んで下さい。
 
-○ 複数の ML に共通の設定であれば libsmtp.pl 等がおいてある場所に 
-sitedef.ph というファイルを作ってこの中に書いておくと config.ph の評価
-の後に sitedef.ph が評価されます。コマンドとかのマシンに共通の設定等は
-これを使うと良いかも知れません。
+2	config.ph
+
+それ以上のことがしたい場合は各メーリングリストの config.ph をいじって
+下さい。
+
+3	sitedef.ph
+
+複数のメーリングリストに共通の設定であれば libsmtp.pl 等がおいてある場
+所に sitedef.ph というファイルを作ってこの中に書いておくと config.ph 
+の評価の後に sitedef.ph が評価されます。コマンドとかのマシンに共通の設
+定等はこれを使うと良いかも知れません。
 
 例：
 	/usr/local/fml/sitedef.ph
@@ -70,7 +90,7 @@ sitedef.ph というファイルを作ってこの中に書いておくと config.ph の評価
 mlrela.dokka.org(←架空の名前)というマシンに変更している)。
 
 
-.S	fml.plの呼び方、引数の渡し方(4.3BSD)
+.S	include ファイル (fml.plの呼び方、引数の渡し方)
 .key	fml.plの起動のしかた
 .key	fml.plの引数
 .key	:include:
@@ -78,116 +98,105 @@ mlrela.dokka.org(←架空の名前)というマシンに変更している)。
 .label	calling-fml.pl
 .seealso fml-uid, plural-handling-1, plural-handling-2
 
-fml.pl の中に変数は今はもうありません (fml 1.2 より)
+fml の起動の仕方は
 
-fml.c の中で fml.pl directory ... という形で呼ぶようになってます。
-
-	fml.pl config.phのあるdirectry libaries 
+	fml.pl config.phのあるdirectry libary-path(必要なら)
 
 の形で呼ぶ。上と同じことを↓こういう書き方（ちゃんと動くか否かは 
 sendmail の version 依存）ができます。
 
-   /etc/aliases では
+例: Elena メーリングリストの場合
 
-	Elena: :include:/usr/local/ml/include/Elena
+   /etc/aliases は
+
+	Elena: :include:/var/spool/ml/Elena/include
 	owner-Elena: fukachan
+	Elena-request: fukachan
+	Elena-admin: fukachan
 
-   /usr/local/ml/include/Elena の中身は
+   /var/spool/ml/Elena/include の中身は
 
-	"|/usr/libexec/fml/fml.pl directory"
+	"|/usr/local/fml/fml.pl directory"
 
-こうするとElena(include ファイル)の所有者のIDで動くようになります。
-
-
-.S	fml.plの呼び方、引数の渡し方(4.4BSD or POSIX)
-.label	calling-fml.pl-POSIX
-.key	POSIXなsetuid
-.key	POSIX
-.key	fml.plの起動のしかた
-.key	fml.plの引数
-.key	:include:
-.key	onwer-list
-
-もし POSIX なら 
-
-   % make OPT=-DPOSIX 
-
-とすると、 uid gid を今の環境からわりだして自動的にこういう風に 
-compileします。↓
-
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-perl sbin/ccfml cc -s -O -DPOSIX   fml.c -o fml
-O.K. I'll try to guess your OS...
--f /usr/include/sys/types.h
--f /usr/include/unistd.h
-#	... No OS= option specified; dynamically determining OS type
-#	... OS appears to be "nos4"
-
-cc -s -O fml.c -o fml  -DXXUID=65536 -DXXGID=999 -DPOSIX  -DOS=nos4 
-＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-
-fml ができたら root権限で
-
-   # chown root fml
-   # chmod 4755 fml
-
-これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
-たのuidに設定して fml.pl を起動します。
-＃これ最後の手段だから…
-
-こういう時は /usr/local/ml/driver/fml とかにして そこは root 以外は絶
-対に書けないとかにしておくくらいの注意を払いたいものです。
-それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
-せん。管理者の方と相談して見てください。
+こうすると include ファイル の所有者のIDで fml.pl は動き、sendmail は 
+そのプロセス (fml.pl) の STDIN へ来たメールを入れます。
 
 
-.S	binary の driver 
+.S	C wrapper
 .label	c-wrapper
 .k	fml
 .k	fml.c
 
-	/usr/local/ml/include/Elena というファイルを sendmail が実行し
-	その中身は
+:include: 構文が使えない OS もしくは古い sendmail の場合は C wrapper 
+を使う必要があります。
 
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/elena"
+.# beth
+その場合 setuid された C wrapper を使うということになります。fml.c を
+いじり、compile します。fml.c は通常 最初の make の時にあなたの環境に
+併せて変更されていますが、確認はしてみてください。
 
-	のように書いてある。
-
-と上述しましたが、このやり方が変なOSもしくは古い sendmail では駄目な場
-合があります。
-
-その場合次のような setuid された driver(binary) を使うということになり
-ます。fml.c をいじり、compile します。fml.c は通常 最初の make の時に
-あなたの環境に併せて変更されていますが、確認はしてみてください。
-
-それは次のような内容です。fml.c の中に
+fml.c は
 
 	fml.plの場所   config.phのある場所   ライブラリの場所
 
-の形でexecするように埋め込んで最初にcompileしました。
-directoryを変えるにはここを書き換えてrecompileです。
-＃since 1.1.2.17 1994.3.14 version
+を exec する C の program です。
 
 例： fml.c
 
-execl("/usr/libexec/fml/fml.pl", /* 本体 fml.pl はどこ？ */
+execl("/usr/local/fml/fml.pl", /* 本体 fml.pl はどこ？ */
       "(fml)", 
-      "/var/spool/ml/Elena", /* config.ph は どこ？ */
-      "/usr/libexec/fml", /* fml packeage の library はどこ？ */
+      "/var/spool/ml/Elena",   /* config.ph は どこ？ */
+      "/usr/lcoal/fml",        /* fml packeage の library はどこ？ */
       NULL);
 
 これ以外のすべての変数は config.phの中に全部あります。INSTALLやこのファ
 イル等を見ながら直してみて下さい。
 
-version up は *.plファイルをコピーするだけなので 一度設定すれば driver 
-の設定を変更する必要ありません。
-
-
-.S	OSによるfml.plの呼び方の違い一覧
+OSによるfml.plの呼び方の違い一覧は
 .label	{calling-fml.pl-and-OS}
 .key	OS_dependence
 
-INSTALLにOSのまとめ一覧があります。ご覧ください
+
+.S	C wrapper program fml on 4.3BSD
+.k	fml.c
+.k	fml
+
+:include: 構文が使えない時は、setuid された fml という C の wrapper
+program を経由して
+
+	/usr/local/fml/fml.pl directory
+
+を実行するという設定をします。makefml を使えば各メーリングリストごとに
+専用の fml.c が作成されています。その directory で
+
+	% make fml 
+
+とすると作成されます。fml.c の中で fml.pl directory ... という形で呼ぶ
+ようになってます。
+
+
+.S	C wrapper program fml on 4.4BSD or POSIX
+.label	calling-fml.pl-POSIX
+.key	POSIXなsetuid
+.key	POSIX
+
+もし POSIX なら 
+
+	% make CFLAGS=-DPOSIX 
+
+として fml を作成して下さい。uid と gid は makefml newml 時に fml.c に
+埋め込まれています。fml ができたら root権限で
+
+   # chown root fml
+   # chmod 4755 fml
+
+これで、setuid が動くはずです。この場合は root の権限で一回動いて あな
+たのuidに設定して fml.pl を起動します。install の仕方によっては 
+permission をもっと厳しくできるはずです。設定には十分な注意を払って下
+さい。fml は root 以外は絶対に書けない場所にインストールするべきです。
+
+それでも、root にsetuid されてると実行しない設定の場合もあるかも知れま
+せん。詳細については管理者の方と相談して見てください。
 
 
 .S	まとめおくり
@@ -206,12 +215,13 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 
 まとめおくりとは
 
-	特定時間になると配送リストの情報に基づき
+	特定時間になると配送リストに基づき
 	その時間に送ることになっている人に
 	まだ送っていなかった分のメールをスプールから取り出して送る
 
 ということをすることです。送るべき時間になった時その場で作るため
 各ユーザーごとに
+
    配送するべき時間
 	N時間おき、一日一回等
 
@@ -224,8 +234,8 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 	tar + gzip でまとめる
 	lzh + ish でまとめる
 
-を定義できます。# matome (digest) コマンドで各ユーザが定義して下さい。
-
+を定義できます。# matome (# digestでもよい) コマンドで各ユーザが定義し
+て下さい。
 
 
 .S	コマンドコントロール専用のアドレス
@@ -235,21 +245,23 @@ INSTALLにOSのまとめ一覧があります。ご覧ください
 .key	コマンドの専用アドレス
 .key	コントロール専用アドレス
 
-config.phの中で
+makefml が作る config.ph では
 
-	$CONTROL_ADDRESS = 'Elena-ctl';
+	$CONTROL_ADDRESS = "Elena-ctl\@$DOMAINNAME";
 
-をセットすると、 Elena-ctl宛のメールはコントロールコマンドのルーチンだ
-けしか呼ばないようになります。つまり、このアドレスにくれば間違ったメー
-ルがきても配送はしません。ちなみに
+のように設定されています。また、Elena-ctl アドレス宛のメールはinclude 
+ではなく include-ctl というファイルを :include: 構文で呼び出すように設
+定されています(include-ctl では fml.pl --ctladdr という形で呼び出す設
+定がされているのが重要なポイントです)。
+
+Elena-ctl宛のメールはコマンドのルーチンだけしか呼ばないようになります。
+つまり、このアドレスにくれば間違ったメールがきても配送はしません。ちな
+みに
 
 	'Elena-ctl';
-
-でも
-
 	'Elena-ctl@axion.phys.titech.ac.jp';
 
-のようにフルにアドレスを書いても良いです。
+どちらでもいいんですが、フルにアドレスを書く方が良いでしょう。
 
 ローカルからコマンドメールを出す時のことを考えると、
 フルアドレスじゃないほうが望ましいという意見があります。
@@ -267,13 +279,14 @@ config.phの中で
 
 ＭＬサーバはあくまでプライベート・コミュニケイションの延長であると考え
 た上での設計なのでデフォールトではメンバーチェックを行ないます。
-＃何をやってるかは fml.pl の subroutine MLMemberCheck を見て下さい
+またこれは security 上でも望ましいことです。
+.xref auto-regist
 
-チェックするか否かは config.ph の中で
+メンバーチェックをするか否かは config.ph の中で
 
 	$ML_MEMBER_CHECK 
 
-という変数で指定します。
+という変数で決まります。
 
 [メンバーチェック]
 
@@ -305,32 +318,20 @@ $MEMBER_LIST に登録します。
 .xref auto-regist
 
 
-コマンドラインオプションでも
-.xref	clo
-
-	check		メンバーチェック
-	auto		自動登録（どういうメールが来ても登録）
-	autosubject	subject: subscribe のキーワードを必要とする
-	autobody	メール本文にsubscribe のキーワードを必要とする
-
-等がカスタマイズできます。これらの詳細については「自動登録」の章を参照
-
-
 .S	$MAINTAINER というアドレス
 .key	UNIX_FROM
 .key	$MAINTAINER
 
 ＭＬの管理者のアドレスです。“大雑把に”いうとエラ−メ−ルの帰る場所と
 思ってもいいです。エラーが返る時にこれがＭＬ宛になっていると無限ループ
-するわけですね。
+するわけです。
 
 インターネットでは歴史的に listname (MLの名前) に対して
 
 	listname-request は管理者のアドレス
 
-が多いです（絶対ではない）。ちょっと request というのが直観に反すると
-ころもありますが…
-いつも私はこの事実との整合性とわかりやすさのために
+が多いです(絶対ではない)。ちょっと request というのが直観に反するとこ
+ろもありますが…いつも僕はこの事実との整合性とわかりやすさのために
 
 	listname-admin 		管理者のアドレス
 	listname-request 	listname-adminへフォワード
@@ -341,79 +342,57 @@ $MEMBER_LIST に登録します。
 
 .S	他の人にＭＬのスプールを見せない設定
 
-要はＯＳの permission を正しく使う。それだけです。setuid() してから実
-行するのでＭＬ管理者の権限で fml は走っています。そのため全てのファイ
-ルを管理者以外の人が見れない様になっていればＯＫなわけです。
+要はＯＳの permission を正しく使うためです。setuid() してから実行する
+のでＭＬ管理者の権限で fml は走っています。そのため全てのファイルを管
+理者以外の人が見れない様になっていればＯＫなわけです。
 
-例：
-% pwd
-/var/spool/ml/Elena
-% ls .
-config.ph spool	...(省略)
-
-という directory とする。/var/spool/ml/driver/Elena には 
-
-   "|/usr/libexec/fml/fml.pl /var/spool/ml/Elena /usr/libexec/fml"
-
-のように書きます。 permission は以下のようであればＯＫです。
-
-	/var/spool/ml/driver/Elena 	755
-
-	/var/spool/ml/Elena 		700
-	/var/spool/ml/Elena/spool	700
-
-等の/var/spool/ml/Elena以下の階層はすべて管理者のみ read write 可能に
-します。
-
-この場合はまず sendmail (root 権限)がメールを受けた時
-
-	sendmail (root 権限) は
-	/var/spool/ml/driver/Elena を読めないといけません
-
-そのため 755 にしておきます。どのみちこのファイル自体を他人に読まれて
-も影響はないので 755 で構いません。
-
-	/var/spool/ml/driver/Elena 
-	を通して
-	"|/usr/libexec/fml/fml.pl /var/spool/ml/Elena /usr/libexec/fml"
-
-を実行する時までに setuid() system call をかけ 
-
-	/var/spool/ml/driver/Elena 
-
-の所有者のプロセスになっています。つまり fml.pl を exec() する時はすで
-にＭＬ管理者のプロセスなので、 fml は /var/spool/ml/Elena 以下のファイ
-ルを操作しますが、そのためにはこれで必要十分なわけです。
+例外としてメーリングリストの directory でも htdocs だけはすべての人が
+読めるようになっています。これは httpd がどのユーザ権限で走っているか
+わからないためです。
 
 
-.#	
-.#	.S	配送されるメールのヘッダのカスタマイズ
-.#	.xref	header
-.#	
-.#	.S 	それ以外のこまごまとしたこと（OS, MISC: OTHER CUSTOM OPTIONS）
-.#	.xref 	misc
-.#	
-.#	
-.#	.S 	HOOKS: ML-specific hooks e.g. "# list"
-.#	.xref	hook hack
-.#	
+.S	スプールに記事をためない
+.l	$NOT_USE_SPOOL
+
+DISKが足りない等で記事をためずに配送するだけにしたいなら
+
+	$NOT_USE_SPOOL = 1;
+
+と設定してください。もちろんその場合は記事の取り寄せ等できないことがい
+ろいろ発生しますが。
 
 
+.S	makefml install 後使わなさそうなファイルを消す
+
+例えば makefml install で /usr/local/fml なり ~/fml なりにインストール
+したとします。その directory には document 等も入っているので
+
+	DISKが足らない
+	document が要らない ;_;
+	ドキュメントは www.fml.org で見るから別に要らない 
+
+等の要求はあると思います。この場所で普通消しても困らないものは
+
+	doc 	ドキュメント
+	libexec 特殊なもの fml_local とかも含む
+	bin 	fml 自体は使わない user 支援 program 群
+
+etc, sbin, cf は消しちゃダメです。
+
+
+.# beth
 .C	配送のモード
 .l	delivery-mode
 
 
 以下では配送のモードについて解説します。fml の設定変数は非常に多岐に渡っ
-ています。またメタレベルで設計されている部分もあります。
+ています。またメタレベルで設計されている部分もあります。そのため設定の
+自由度は高いのですが、そのためにわかりやすさは多少犠牲になっています。
 
-そのため設定の自由度は高いのですが、そのためにわかりやすさは多少犠牲に
-なっています。そこで、
-
-代表的なモードは”簡易モード設定”という形でわかりやすいユーザインター
-フェイスを提供するようになっています。
-
-初めはわからなくてもいいので、もっと細かくいじりたくなった時にその設定
-の意味を調べれば良いとおもうのです。
+そこで、代表的なモードは”簡易モード設定”という形でわかりやすいユーザ
+インターフェイスを提供するようになっています。初めはわからなくてもいい
+ので、もっと細かくいじりたくなった時にその設定の意味を調べれば良いとお
+もいます。
 
 
 .S	デバッグモード
@@ -428,16 +407,16 @@ config.ph spool	...(省略)
 れません。
 
 
-.S	DEFINE_MODE マクロ
+.S	DEFINE_MODE
 .k	DEFINE_MODE
 .k	&DEFINE_MODE
 .xref	auto-regist
 
-マクロというのは正確ではないですが config.ph で簡易モード設定ができま
-す。以下のような理由のために導入されました。
+config.ph で簡易モード設定をするための関数です。以下のような理由のため
+に導入されました。
 
-○ 歴史的な理由で自動登録とメンバーチェックをするモードの設定はわかり
-にくいものについてはモード設定をつかうと楽かもしれない
+○ 歴史的な理由で自動登録とメンバーチェックをするモードの設定等で同時
+にいくつかの変数を設定する必要がある時にTYPOの可能性を低くする
 
 ○ 変数の設定の中には 1 or 0 だけでは不充分な場合がある
 
@@ -445,7 +424,8 @@ config.ph spool	...(省略)
 さい。というのはモード設定の中には config.ph の値を overwrite する必要
 のあるものがあるからです(もちろん必要のないものもあります)。
 
-例: 
+conflict する例:
+
 	$ML_MEMBER_CHECK = 1;
 	&DEFINE_MODE('autoregist'); 
 
@@ -458,22 +438,131 @@ config.ph spool	...(省略)
 
 またこれらの理由により、2.1 gamma にあった、いくつかのものを除いて多く
 のモード設定は obsolete になりました。backward compatible のため 2.1
-release でも動くことは動きますができるだけ使うべきではありません。
+release でも設定は有効ですができるだけ使うべきではありません。
 
 
-.S	再配送だけをするサーバ(コマンドを必要としないサーバ)
+.S	&DEFINE_MODE の定義について
+
+以下 ＭＬ = 
+
+	listname@domain		include     ファイルを呼ぶ
+	listname-ctl@domain	include-ctl ファイルを呼ぶ(ctladdr mode)
+
+とする。前提条件としてＭＬは通常そのメンバーだけが投稿する。
+メンバーでない人が投稿という概念はない。
+
+
+(歴史的な)メンバーチェックの定義:＃ほんと歴史的だな、これ…
+
+	$ML_MEMBER_CHECK = 1	メンバーチェックを通った人は投稿可
+				違うなら reject 
+
+	$ML_MEMBER_CHECK = 0	メンバーチェックを通らないなら
+				メンバーに加える or confirm に回して配送しない
+				メンバーでない人が投稿という概念ははないので
+				no check という意味にはとらない
+
+	例外処理: post=anyone で listname 宛の挙動は変えられる。
+	listname-ctl は $ML_MEMBER_CHECK の設定に従い振舞いを変える。
+
+
+定義:
+	&DEFINE_MODE(DEFINE_SYNTAX)
+
+	DEFINE_SYNTAX := ACTION "=" RESTRICTION / 
+			 AUTOREGIST_TYPE "=" AUTOREGIST_TYPE_KINDS /
+			 BACKWARD_MODE_DEFINITION
+
+	ACTION        := "post" / "command"
+	RESTRICTION   := "anyone" / "members_only" / "moderated"
+	
+	AUTOREGIST_TYPE       := "artype"
+	AUTOREGIST_TYPE_KINDS := "confirm" / "subject" / "body"
+
+	BACKWARD_MODE_DEFINITION := いままで [a-z_]+ のやつを押込める
+
+
+解説:
+
+○ listname
+
+	・ post=
+	post= syntax は listname 宛の振舞いを変える
+	宣言しないならデフォールトの listname = distribute + command
+
+	・ listname のメンバーチェックで reject 時の振舞いは
+	 $ML_MEMBER_CHECK の設定に従い変わる。
+
+
+○ listname-ctl
+
+	・ command=
+	command= syntax は listname-ctl 宛の振舞いを変える
+
+	デフォールトは「メンバーだけがコマンドを使える」なので
+	command=anyone だけが例外
+	注意:一般に誰でもコマンドが使えるのは推奨しないが、
+	自動送り返しサーバ等の応用がありうる。
+
+	・ listname-ctl のメンバーチェックで reject 時の振舞いは
+	 $ML_MEMBER_CHECK の設定に従い変わる。
+
+
+○ 自動登録のタイプ
+
+	・ artype=
+	$ML_MEMBER_CHECK = 0 の時の AUTO REGISTRATION TYPE を決める。
+	タイプを決めるだけなので 0 は必要。makefml interface でない時
+	は要注意。
+
+	--auto* は便利なように $ML_MEMBER_CHECK の overwrite をしてい
+	るがそれだと config.ph と dup するのでよくない。
+
+	矛盾を防ぐためにモード設定は config.ph (cf/MANIFEST 内の定義)
+	と直交している必要がある。その意味で confirm 以外の artype= は
+	本当はよくない。
+
+	備考:
+	artype って makefml では confirm くらいしか使ってないのだが…
+
+
+.S	配送だけをするサーバ
+.k	distribute-only
+
+makefml は makefml newml listname で listname (配送用), listname-ctl
+(コマンド用)という２つのアドレスを作ります。config.ph では 
+$CONTROL_ADDRESS も listname-ctl として設定されています。
+
+listname のデフォールトの挙動は (backward compatibleのため) サーバは一
+つのアドレスで配送もコマンドも受け持ちます。
+
+listname のアドレスでコマンドを使えなくし配送専用のアドレスにするため
+には
+
+	&DEFINE_MODE("post=anyone");       (誰でも投稿できる)
+OR
+	&DEFINE_MODE("post=members_only"); (メンバーだけが投稿できる)
+
+を設定してみて下さい。listname は配送専用になります。コマンドは 
+listname-ctl を使ってもらうことになります。
+
+
+.S	再配送だけをするサーバ
 .key	再配送だけをするサーバ
 .xref	re-distribute
 
-単に配送を待って、それをスプールすることだけを目的にするMLを作ることも
-あるでしょう。つまり ガイドを相手に返すこともなく、単に再配送するだけ
-です。
+単に配送を待って、それをスプールすることだけを目的にするメーリングリス
+トを作ることもあるでしょう。つまり ガイドを相手に返すこともなく、単に
+再配送するだけです。それは上述のように &DEFINE_MODE("post=anyone"); を
+設定することで実現されます。
 
 例: 	elena メーリングリストを再配送専用に設定する
 
+makefml newml elena で elena メーリングリストを作る。/etc/aliases で
+
 	elena: :include:/var/spool/ml/elena/include
 
-のアドレスを再配送にするために /var/spool/ml/elena/config.ph に
+となっているとします。 /var/spool/ml/elena/config.ph に
 
 	&DEFINE_MODE("post=anyone");
 
@@ -481,10 +570,21 @@ release でも動くことは動きますができるだけ使うべきではありません。
 スプール機能がついてるような状態ですね。
 
 		
-.S	コマンド専用サーバ
+.S	コマンド専用のサーバ (e.g. listname-ctl)
 .k	$COMMAND_CHECK_LIMIT
 
-fml のデフォールトの挙動は
+makefml は listname-ctl というアドレスを用意します。これはコマンド専用
+です。listname-ctl 用に include-ctl というファイルを :include: するよ
+うに設定されています。include-ctl では --ctladdr というオプションがつ
+いているのがコマンド専用として fml.pl を起動するためのオプションです。
+このオプションを消さないで下さい。
+
+
+.S	配送およびコマンドのサーバ (default for backward compatible)
+.k	$COMMAND_CHECK_LIMIT
+
+fml のデフォールトの挙動は(Backward compatible)で サーバは一つのアドレ
+スで配送もコマンドも受け持ちます。
 
 	メールの最所の３行のどこかが 
 	# command（英文字だけの塊）
@@ -526,22 +626,33 @@ fml のデフォールトの挙動は
 .key	特殊目的専用のサーバへの変更
 .label	server-for-command-only
 
-$CONTROL_ADDRESS にアドレスを登録するとコマンド専用のＭＬサーバが作れ
-ます。その場合 $CONTROL_ADDRESS に来た場合有無を言わさずすべてコマンド
-と解釈します。
+makefml は listname-ctl というコマンド専用のアドレスを用意します。
+だから通常はそれで間に合うはずです。
 
-別の汎用の仕方として、
+そのコマンド専用のサーバを特別のものにすることもできます。
 
 	$LOAD_LIBRARY = 'libfml.pl'; 
 
-のようにバインドしたら コマンド専用だし、
+のように設定(default)したら コマンド専用だし、
 
 	$LOAD_LIBRARY = 'libftpmail.pl'; 
 
-とすれば、ftpmail 専用のアドレスに早変わりです。
+とすれば ftpmail 専用のアドレスに早変わりです(注意: ftpmail 用の設定は
+別途必要です)。
 
 それは $LOAD_LIBRARY が設定されていると、そのライブラリを評価して実行
-するように作動します。この場合配送は行ないません。
+するように作動します。この場合配送は行なわれません。
+絶対配送させないようにするにはさらに &DEFINE_MODE('ctladdr'); も設定す
+ると良いでしょう。
+
+$CONTROL_ADDRESS にアドレスを登録するとコマンド専用のＭＬサーバが作れ
+ます。その場合 $CONTROL_ADDRESS に来た場合有無を言わさずすべてコマンド
+と解釈します。ただこのやり方ではヘッダを場合わけの根拠にしているため曖
+昧さがあります。
+
+曖昧さをなくすためには listname-ctl アドレスを使うのが良いでしょう。配
+送用の listname を使わなくてよいなら &DEFINE_MODE('ctladdr'); を設定し
+てもよいです。これを設定すると配送サーバは使えなくなります。
 
 
 .S	Subject: にコマンドを書く場合
@@ -583,7 +694,7 @@ SMTPってしょせん…なのでデフォールトではリモートでサーバを管理するよう
 ではありません。
 
 パスワードは $DIR/etc/passwd に crypt された形で保存されます。
-.xref bin/passwd
+.xref bin/passwd.pl
 
 新たにパスワードを初期化する場合は 
 
@@ -657,6 +768,12 @@ config.ph でコントロールできます。
 
 .S	コマンドの # syntax は必要か？ 
 
+配送とコマンドが同じアドレスなら動作を切替えるためのキーワードが必要で
+す。それが # syntax です。
+
+makefml が作る listname-ctl アドレスはコマンド専用なので要りません。も
+ちろんあっても構いません。
+
 “コマンド専用のアドレスにメールが来た時だけ”は考える必要がないですね
 もし、コマンド専用のアドレスで
 
@@ -667,9 +784,6 @@ config.ph でコントロールできます。
 同じにコマンドとして動いて欲しいなら＃もちろん off bye 等も同様
 
 	config.ph に $COMMAND_ONLY_SERVER = 1;
-
-もっとも、こうしておくと listserv とかわりませんな:-) 
-.seealso fmlserv
 
 
 .S	コマンドの書き方 [e.g. # get 1 と #get 1は同じものとみなす]
@@ -752,7 +866,7 @@ config.ph でコントロールできます。
 
 でない限り、間違ったコマンドへの警告メールをだすことはありません。
 これは signature を自動的に付ける設定をしている場合への対処です。
-# exit 等で明示的にコマンド指定を終わらせるほうが推奨でしょうね
+# exit 等で明示的にコマンド指定を終わらせるのが良いでしょう。
 
 
 .S	コマンドの終り(シグニチャア対策)
@@ -773,8 +887,8 @@ config.ph でコントロールできます。
 変更したい場合は $TMP_DIR をセットして下さい。
 
 /tmp とか /usr/tmp とかは万が一ファイルが残ると嫌なので使いません。
-private communication なので public な場所にファイルを残すことはしない
-方針なわけです。
+private communication のファイルを public な場所にファイルを残すことは
+しない方針です。
 
 その他にも 4.4BSD 風の directory 構造の中に各種のログやキャッシュが保
 存されます。
@@ -793,12 +907,12 @@ private communication なので public な場所にファイルを残すことはしない
 	HELPファイル本文
 	$TRAILER_MAILBODY	（後）
 
-のようになります。
+のようになります。昔のやり方は
 
    $SMTP_OPEN_HOOK = q# $e{'Body'} .= $PREAMBLE_BODY.$e{'Body'}; #;
    ＃注：普通のＭＬのメールに $PREAMBLE_BODY がついて配送
 
-と同じことですが、今は汎用性のためSMTPライブラリ中で処理される。
+ですが今は汎用性のためSMTPライブラリ中で処理される。
 
 これと同様にすれば、本文にメールカウントを埋め込むことも可能になります。
 
@@ -812,20 +926,24 @@ private communication なので public な場所にファイルを残すことはしない
 .include fmlserv.wix
 
 
-.# hikari beth
 .# ##########################################################
 .C	複数のメーリングリストの運用
 .key	複数のメーリングリストの運用
 .label	{plural-handling-1}
 .xref	fml-process
 
-ここでは
 
-   fml がインストールされている時、メーリングリスト毎に一つ設定ファイ
-   ルを保守するだけで複数のメーリングリストを運用するにはどうすればよ
-   いか？
+.S	複数のメーリングリストを作る。
 
-について説明します。
+
+INSTALL を見て下さい。メーリングリストを作るには
+
+	makefml newml listnmae
+
+で listname というメーリングリストが準備されます。/etc/alisaes に設定
+を書いて newaliases を実行すればそれで終りです。
+
+以下では実装の理屈について説明します。
 
 
 .S	複数のメーリングリストの運用時の設定の理論
@@ -879,10 +997,10 @@ fml は
 この場合
 
 	/usr/local/ml/include/Elena は
-	"/usr/libexec/fml/fml.pl /var/spool/ml/Elena"
+	"/usr/local/fml/fml.pl /var/spool/ml/Elena"
 
 	/usr/local/ml/include/freekick は
-	"/usr/libexec/fml/fml.pl /var/spool/ml/freekick"
+	"/usr/local/fml/fml.pl /var/spool/ml/freekick"
 
 のように呼び出します。この後 
 
@@ -904,10 +1022,10 @@ fml.c を参考にして下さい。fml.c を
 
   Elena ML が
 
-  execl("/usr/libexec/fml/fml.pl", "(fml)", "/var/spool/ml/Elena", NULL);
+  execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/Elena", NULL);
 
   freekick ML が
-  execl("/usr/libexec/fml/fml.pl", "(fml)", "/var/spool/ml/freekick", NULL);
+  execl("/usr/local/fml/fml.pl", "(fml)", "/var/spool/ml/freekick", NULL);
 
 のように変更し、compileすればいいわけです。
 
