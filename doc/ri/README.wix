@@ -95,11 +95,7 @@ subset として ユーザにとってもＭＬ管理者にとっても使い勝手が同じになる
 
 ○ fml のWWWのページは 
 
-.#	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/ 
-.#
-.# です。昔のＵＲＬにも同じものがあります。
-
-	http://www.phys.titech.ac.jp/uja/fml/ 
+	http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 
 最新のドキュメント、ソースともにここに揃っています。 
 
@@ -207,7 +203,7 @@ fml 2.1 が hml 1.6 と同様に目指したものは
 	operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 	shell% make doc でつくってください
 	最新版は
-		http://axion.phys.titech.ac.jp/uja/fml/ 
+	http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 	をのぞいてみてください
 
 ○user 権限で実行します＃ daemon とかではなく

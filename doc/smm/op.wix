@@ -7,7 +7,7 @@
    			fukachan@sapporo.iij.ad.jp
 
    [smm/op.wix: smm = System Management Manual]
-   http://www.phys.titech.ac.jp/uja/fml/
+   http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
    Last modified: 
 
 ごめん、いま大書き直し中…少し順番とか入り乱れてます _o_ 
@@ -17,7 +17,7 @@
    ＃注意：なお改造は最新版を手に入れてから行なうのをお奨めします(^^)
 
    ftp://ftp.iij.ad.jp/pub/IIJ/dist/fukachan/fml/
-   http://www.phys.titech.ac.jp/uja/fml/
+   http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 
 .HTML_PRE_END
 
@@ -216,7 +216,7 @@ HTML 版は var/html/ の下に用意されいますが、
 operation manual (旧FAQ) は巨大なのでこれの HTML 版は
 shell% make doc でつくってください
 最新版は
-	http://www.phys.titech.ac.jp/uja/fml/ 
+   http://www.iij.ad.jp/sapporo/staff/fukachan/fml/
 をのぞいてみてください
 
 
@@ -2539,7 +2539,7 @@ $body .= "Message-ID: ".
 
 .S	宇宙歴(外国TVシリーズMLで使ってます:-)
 
-	http://www.phys.titech.ac.jp/uja/Startrek/
+   http://www.iij.ad.jp/sapporo/staff/fukachan/href/Startrek/
 
 config.ph で	$APPEND_STARDATE = 1; とすると宇宙歴がつきます:-)
 
@@ -2856,9 +2856,9 @@ in libsendfile.pl
 を変える。Internetならともかく、パソコン通信の人へも配送する時は気を使
 いますよね。
 ＃最近は３０００らしいまで設定可能みたいです(e.g. NIFTY)
-＃参照 http://www.phys.titech.ac.jp/fml/ の下
+＃参照 http://www.iij.ad.jp/sapporo/staff/fukachan/fml/ の下
 ＃pc-van は何の問題もなかったと思いました（たしか）
-
+   
 １０００行でだいたい５０ｋくらいになります。
 
 
