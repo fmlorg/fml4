@@ -1,79 +1,96 @@
 #!/usr/local/bin/perl
+# 
+# Copyright (C) 1993-1997 Ken'ichi Fukamachi
+#          All rights reserved. 
+#               1993-1996 fukachan@phys.titech.ac.jp
+#               1996-1997 fukachan@sapporo.iij.ad.jp
+# 
+# FML is free software; you can redistribute it and/or modify
+# it under the terms of GNU General Public License.
+# See the file COPYING for more details.
 #
-#
+# $Id$
 
 ### MAIN ###
-&Init;
-&SocketInit;
-&IrcConnect(*HOST, *error);
-&SetUpSelect;
+if ($0 eq __FILE__) {
+    # signal handling
+    $SIG{'HUP'} = $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = "irc'Exit";#';
 
-$timeout = 2;
+    &IrcParseArgv;
+    &IrcInit;
+    &IrcConnect;
+    &IrcMainLoop;
 
-for (;;) {
-    ($nfound, $timeleft) =
-	select($rout=$rin, $wout=$win, $eout=$ein, $timeout);
-
-    if (vec($rout, $S_BITS, 1)) {
-	sysread(S, $buffer, 4096) || &Log("Error:$!");
-	for (split(/\n/, $buffer)) { print STDERR "--- $_\n";}
-    }
-
-    if (vec($rout, $I_BITS, 1)) {
-	sysread(STDIN, $buffer, 4096) || &Log("Error:$!");
-
-	for (split(/\n/, $buffer)) {
-	    # print STDERR "PRIVMSG $CHANNEL :$_\n" if $debug;
-	    push(@Queue, "PRIVMSG $CHANNEL :$_\n");
-	}
-    }
-
-    sleep 1;
-    $wbuf = shift @Queue;
-    &SendS($wbuf) if $wbuf;
+    exit 0;
+}
+else {
+    &IrcImport;
+    &IrcInit;
+    &IrcConnect;
 }
 
-&SendS("AWAY :$IRC_SIGNOFF_MSG\n");
-
-exit 0;
 
 ### MAIN ENDS ###
 
+package irc;
 
-sub Log { print STDERR "LOG: @_\n";}
-
-
-sub Init
+sub main'IrcParseArgv #'
 {
+    eval "sub Log { print STDERR \"LOG: \@_\\n\";}";
+
+
+    ### getopts
     require 'getopts.pl';
-    &Getopts("df:");
+    &Getopts("df:I:");
 
     $debug = $opt_d;
-    if (!-f $opt_f) { die("cannot load config file, stop.\n");}
 
+    # load config.ph
+    if (!-f $opt_f) { die("cannot load config file, stop.\n");}
     require $opt_f;
 
-    push(@INC, $PERL_LIB_PATH);
+    # log
+    if (-w "/dev/stderr") {
+	open(SMTPLOG, ">/dev/stderr") || die($!);
+    }
+
+    # include path
+    push(@INC, $opt_I);
+}
+
+
+sub main'IrcInit  #'
+{
+    ### defaults 
+    # default
+    $IRC_TIMEOUT = $IRC_TIMEOUT || 2;
+    $IRC_SIGNOFF_MSG = $IRC_SIGNOFF_MSG || "Seeing you";
+
+    ### fix Japanese code of configurable variables
     require 'jcode.pl';
+    eval "&jcode'init; #';";
+    for (IRC_CHANNEL, IRC_USER, IRC_NAME, IRC_NICK, IRC_SIGNOFF_MSG) {
+	eval "&jcode'convert(*$_, 'jis'); #';";
+    }
+    
+    ### Declare the first connection phase
+    # stack on @Queue
+    &InitConnection;
 
-    open(SMTPLOG, ">/dev/stderr") || die($!);
+    ### set up socket
+    &SocketInit;
+}
 
-    eval "&jcode'init;";
-    &jcode'convert(*IRC_NAME, 'jis'); #';
-    &jcode'convert(*CHANNEL, 'jis'); #';
-    &jcode'convert(*IRC_USER, 'jis'); #';
-    &jcode'convert(*IRC_NAME, 'jis'); #';
-    &jcode'convert(*IRC_NICK, 'jis'); #';
-    &jcode'convert(*IRC_SIGNOFF_MSG, 'jis'); #';
 
-    @Queue = ("USER $IRC_USER * * :$IRC_NAME\n",
-	      "NICK $IRC_NICK\n",
-	      "PING FML-IRC-FIRST\n",
-	      "JOIN $CHANNEL\n"
-	      );
-
-    # signal
-    $SIG{'HUP'} = $SIG{'INT'} = $SIG{'QUIT'} = $SIG{'TERM'} = 'Exit';
+sub InitConnection
+{
+    for ("USER $IRC_USER * * :$IRC_NAME",
+	 "NICK $IRC_NICK",
+	 "PING FML-IRC-FIRST",
+	 "JOIN $IRC_CHANNEL"
+	 ) {
+	push(@Queue, $_);
+    }
 }
 
 
@@ -82,36 +99,16 @@ sub Exit
     local($sig) = @_; 
     &Log("Caught SIG${sig}, shutting down");
     &Log("Send QUIT To Server");
-    &SendS("QUIT :$IRC_SIGNOFF_MSG\n");
+    &SendS("QUIT :$IRC_SIGNOFF_MSG");
     sleep 1;
     exit(0);
-}
-
-
-sub SetUpSelect
-{
-    $S_BITS = fileno(S);
-    $I_BITS = fileno(STDIN);
-
-    $rin = $win = $ein = "";
-    vec($rin,fileno(S),1) = 1;
-    vec($rin,fileno(STDIN),1) = 1;
-    $ein = $rin | $win;
-
-    if ($debug_fileno) {
-	print STDERR "----\n";
-	print STDERR join(" ", split(//, unpack("b*", $rin))), "\n";
-	print STDERR join(" ", split(//, unpack("b*", $win))), "\n";
-	print STDERR join(" ", split(//, unpack("b*", $ein))), "\n";
-	print STDERR "---------\n";
-    }
 }
 
 
 sub SendS
 {
     local($s) = @_;
-    print S $s;
+    print S "$s\r\n";
     print STDERR "SendS:[$s]\n" if $debug;
 }
 
@@ -158,16 +155,23 @@ sub SocketInit
 }
 
 
-# Connect $host to SOCKET "S"
+sub main'IrcConnect #'
+{
+    $status = &DoConnect(*IRC_SERVER, *error);
+    &Log($status) if $status;
+}
+
+
+# Connect $IRC_SERVER to SOCKET "S"
 # RETURN *error
-sub IrcConnect
+sub DoConnect
 {
     local(*host, *error) = @_;
 
     local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
-    local($port)   = $Port || $PORT || (getservbyname('irc', 'tcp'))[2];
+    local($port)   = $IRC_PORT || (getservbyname('irc', 'tcp'))[2];
     $port          = 6667 unless defined($port); # default port
 
     # Check the possibilities of Errors
@@ -196,6 +200,47 @@ sub IrcConnect
     select(S); $| = 1; select(STDOUT);
 
     $error = "";
+}
+
+
+sub main'IrcMainLoop  #'
+{
+    local($rin, $win, $ein);
+    local($rout, $wout, $eout);
+    local($buf, $wbuf);
+
+    $BITS{'S'}     = fileno(S);
+    $BITS{'STDIN'} = fileno(STDIN);
+
+    $rin = $win = $ein = "";
+    vec($rin,fileno(S),1) = 1;
+    vec($rin,fileno(STDIN),1) = 1;
+    $ein = $rin | $win;
+
+    for (;;) {
+	($nfound, $timeleft) =
+	    select($rout=$rin, $wout=$win, $eout=$ein, $IRC_TIMEOUT);
+
+	if (vec($rout, $BITS{'S'}, 1)) {
+	    sysread(S, $buf, 4096) || &Log("Error:$!");
+	    if ($debug) {
+		for (split(/\n/, $buf)) { print STDERR "--- $_\n";}
+	    }
+	}
+
+	if (vec($rout, $BITS{'STDIN'}, 1)) {
+	    sysread(STDIN, $buf, 4096) || &Log("Error:$!");
+
+	    for (split(/\n/, $buf)) {
+		print STDERR ">>> $_\n" if $debug;
+		push(@Queue, "PRIVMSG $IRC_CHANNEL :$_");
+	    }
+	}
+
+	sleep 1;
+	$wbuf = shift @Queue;
+	&SendS($wbuf) if $wbuf;
+    }
 }
 
 
