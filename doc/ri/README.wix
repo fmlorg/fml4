@@ -304,7 +304,7 @@ address <fml-bugs@ffs.fml.org>.
 .# automatically.
 .fi
 
-.S	fml-FAQのネタ募集について
+.S	fml-FAQ project
 =E.S	fml FAQ
 
 fmlのFAQを作成中するプロジェクトが現在進行形です。プロジェクトからのお
@@ -468,14 +468,6 @@ config.ph でちょっと複雑な HOOK をしかけている場合は注意が必要です。と
 いうのはHOOKで使う関数や変数等が今でもサポートされているとは限らないか
 らです。ただ、昔できたことは必ず今の実装でもできるので doc/op.jp を参
 照してみて下さい。
-
-できるだけ互換性を保つように作られていますが、2.1 RELEASE 以降では
-   『$MAIL_LIST と $CONTROL_ADDRESS が違う場合の $MAIL_LIST の挙動』
-が昔と異なり『配送専用』です。
-   『$MAIL_LIST と $CONTROL_ADDRESS が同じ場合は
-	昔と同じで配送用のアドレス $MAIL_LIST で
-	コマンド(# command の形)を受け付けます。
-   』(HML 1.6 互換モード)
 
 .S	Changes
 
