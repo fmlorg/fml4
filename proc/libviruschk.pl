@@ -13,51 +13,82 @@
 # helps me to speculate the virus family?
 # This idea is based on ZDNet news information.
 
+local($WinSiz);
 
 sub VirusCheck
 {
     local(*e) = @_;
-    local($ptr) = 0;
-    local($i, @id, $guid_pat);
+    local($ptr, $i, $guid_pat);
+    local($pb, $hpe, $pe, $xr, $gpe);
 
     # M$ GUID pattern ; thanks to hama@sunny.co.jp
+    $WinSiz = 1024; # at lease 32*2
     $guid_pat = 
 	'\{([0-9A-F]{8}\-[0-9A-F]{4}\-[0-9A-F]{4}\-[0-9A-F]{4}\-[0-9A-F]{12})\}';
 
-    if ($e{'Body'} =~ 
-	/Content-Transfer-Encoding:\s*(base64|quoted-principle)/i) {
-	require 'mimer.pl';
+    $gpe = index($e{'Body'}, $e{'MIME:boundary'}.'--', 0);
+    for ($pb = $pe = $i = 0; $i < 16; $i++)  {
+	($pb, $hpe, $pe) = &GetNextMPBPtr(*e, $pb + 1);
+	last if $pb < 0;
+	last if $pb >= $gpe;
+
+	$xhdr = substr($e{'Body'}, $pb, $hpe - $pb);
+	if ($xhdr =~ /Content-Transfer-Encoding:\s*base64/i) {
+	    $enc = 'b64';
+	}
+	elsif ($xhdr =~ /Content-Transfer-Encoding:\s*quoted-principle/i) {
+	    $enc = 'qp';
+	}
+	else {
+	    undef $enc;
+	}
+
+	$xr = &ProbeSlidingWindow(*e, $enc, $guid_pat, $hpe + 2, $pe);
+	return $xr if $xr;
     }
 
-    for ($i = 0; $i < 10 ; $i++)  {
-	($xhdr, $xbuf, $ptr) = &GetNextMultipartBlock(*e, $ptr);
+    $NULL;
+}
 
-	$xbuf =~ s/^[\n\s]+//;
-	$xbuf =~ s/[\n\s]+$//;
 
-	last unless $xbuf;
+sub ProbeSlidingWindow
+{
+    local(*e, $enc, $pat, $pb, $pe) = @_;
+    local($n, $buf, $pbuf, $xbuf, $found, @id);
 
-	if ($xhdr =~ 
-	    /Content-Transfer-Encoding:\s*base64/i) {
-	    $xbuf  = &bodydecode($xbuf, "b64");
-	    $xbuf .= &bdeflush;
-	}
-	elsif ($xhdr =~ 
-	    /Content-Transfer-Encoding:\s*quoted-principle/i) {
-	    $xbuf  = &bodydecode($xbuf, "qp");
-	    $xbuf .= &bdeflush;
-	}
+    require 'mimer.pl';
 
-	# M$ GUID pattern
-	@id = ($xbuf =~ /$guid_pat/g);
-	if (@id) {
-	    &Log("Microsoft GUID found, this mail may be a virus");
-	    for (@id) { &Log("found GUID=$_");}
-	    return 'melissa family computer virus';
-	}
+  loop:
+    while (1) {
+	last loop if $pb >= $pe;
+
+	# get $WinSiz bytes window and decode it
+	$buf = substr($e{'Body'}, $pb, 
+		      ($pe - $pb) > $WinSiz ? $WinSiz : ($pe - $pb));
+
+	$pb  += $WinSiz;
+	$buf  = &bodydecode($buf, $enc);
+
+	# check current window
+	if ($buf =~ /($pat)/) { push(@id, $1); $found++;}
+
+	# check previous + current window (1024 bytes)
+	$xbuf = $pbuf . $buf;
+	if ($xbuf =~ /($pat)/) { push(@id, $1); $found++;}
+
+	# save current as the prev window for the next loop use
+	$pbuf = $buf;
     }
 
-    return $NULL;
+    if ($found) {
+	&Log("Microsoft GUID found, this mail may be a virus");
+	for (@id) { &Log("found GUID=$_");}
+
+	return 'melissa family computer virus';
+    }
+    else {
+	$NULL;
+    }
 }
 
 

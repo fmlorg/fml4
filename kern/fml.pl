@@ -2703,7 +2703,6 @@ sub EnvelopeFilter
 	$r = &EvalRejectFilterHook(*e, *COMMAND_FILTER_HOOK);
     }
 
-
     ### Part I. Check Invalid Header ###
     if ($r) {
 	; # O.K.
@@ -2840,7 +2839,9 @@ sub EnvelopeFilter
     # Even if Multipart, evaluate all blocks agasint virus checks.
     if ($FILTER_ATTR_REJECT_MS_GUID && $e{'MIME:boundary'}) {
 	&use('viruschk');
-	$r = &VirusCheck(*e);
+	local($xr);
+	$xr = &VirusCheck(*e);
+	$r = $xr if $xr;
     }
 
     if ($r) { 
@@ -2848,7 +2849,6 @@ sub EnvelopeFilter
 	&Log("EnvelopeFilter::reject for '$r'");
 	&Warn("Rejected mail by FML EnvelopeFilter $ML_FN", 
 	      "Mail from $From_address\nis rejected for '$r'.\n".&WholeMail);
-
 	if ($FILTER_NOTIFY_REJECTION) {
 	    &Mesg(*e, $NULL, 'filter.rejected', $r);
 	    &Mesg(*e, "Your mail is rejected for '$r'.\n". &WholeMail);
@@ -2862,6 +2862,7 @@ sub EnvelopeFilter
 sub EvalRejectFilterHook
 {
     local(*e, *filter) = @_;
+    return $NULL unless $filter;
     local($r) = sprintf("sub DoEvalRejectFilterHook { %s;}", $filter);
     eval($r); &Log($@) if $@;
     $r = &DoEvalRejectFilterHook;
@@ -3032,15 +3033,32 @@ sub ADD_CONTENT_HANDLER
 }
 
 # Get Next MIME Multipart Block
+sub GetNextMPBPtr
+{
+    local(*e, $ptr) = @_;
+    local($pTop, $pEndHeader, $pBottom, $xbuf);
+    
+    if ($e{'MIME:boundary'}) {
+	$pTop       = index($e{'Body'}, $e{'MIME:boundary'}, $ptr);
+	$pEndHeader = index($e{'Body'}, "\n\n", $pTop);
+	$pBottom    = index($e{'Body'}, $e{'MIME:boundary'}, $pEndHeader);
+	($pTop, $pEndHeader, $pBottom);
+    } else {
+	&Log("GetNextMPBPtr: no MIME boundary definition");
+	();
+    }
+}
+
+# Get Next MIME Multipart Block
 sub GetNextMultipartBlock
 {
     local(*e, $ptr) = @_;
     local($pTop, $pEndHeader, $pBottom, $xbuf);
     
     if ($e{'MIME:boundary'}) {
-	$pTop  = index($e{'Body'}, $e{'MIME:boundary'}, $ptr);
-	$pEndHeader  = index($e{'Body'}, "\n\n", $pTop);
-	$pBottom  = index($e{'Body'}, $e{'MIME:boundary'}, $pEndHeader);
+	$pTop       = index($e{'Body'}, $e{'MIME:boundary'}, $ptr);
+	$pEndHeader = index($e{'Body'}, "\n\n", $pTop);
+	$pBottom    = index($e{'Body'}, $e{'MIME:boundary'}, $pEndHeader);
 
 	if ($pEndHeader > 0 && $pBottom > 0) { 
 	    $xhdr = substr($e{'Body'}, $pTop, $pEndHeader - $pTop);
