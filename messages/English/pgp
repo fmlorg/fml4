@@ -1,0 +1,16 @@
+### Section: Authentication
+pgp.incorrect_signature:
+	PGP signature differs
+
+pgp.no_signature:
+	PGP signature not found
+
+pgp.env.error:
+	Error: please check PGP environment
+
+pgp.cmd.disabled:
+	_ARG0_ is unavailable by remote
+	Please do the action on the host where fml runs
+
+pgp.cmd.not_supported:
+	_ARG0_ is not supported

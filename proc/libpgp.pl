@@ -277,16 +277,14 @@ sub PgpInit
 
     if ($e{'Body'} =~  /^[\s\n]*$/) {
 	&Log("PGPGoodSignatureP ERROR: no effective mailbody");
-	&Mesg(*e, "Mail Body has no PGP Signature");
-	&Mesg(*e, $NULL, 'pgp.no_signature');
+	&Mesg(*e, "Mail Body has no PGP Signature", 'pgp.no_signature');
 	return 0;
     }
 
     # program exeistence check
     if (! -x $PGP) {
 	&Log("PGPGoodSignatureP ERROR: program \$PGP is NOT DEFINED");
-	&Mesg(*e, "ERROR: verify PGP environment");
-	&Mesg(*e, $NULL, 'pgp.env.error');
+	&Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
 	return 0;
     }
 
@@ -349,14 +347,15 @@ sub PGP
 	   $cmd eq '-ke' ||
 	   $cmd eq '-kg' ) {
 	&Log("\"pgp $cmd @argv\" disabled by FML");
-	&Mesg(*e, "\"pgp $cmd @argv\" disabled by FML");
-	&Mesg(*e, "Please \"pgp $cmd @argv\" on this host NOT by mail.");
-	&Mesg(*e, $NULL, 'pgp.cmd.disabled');
+	my($s);
+	$s .= "\"pgp $cmd @argv\" disabled by FML\n";
+	$s .= "Please \"pgp $cmd @argv\" on this host NOT by mail.";
+	&Mesg(*e, $s, 'pgp.cmd.disabled');
     }
     else {
 	&Log("doing \"pgp $cmd @argv\" not supported by FML");
-	&Mesg(*e, "doing \"pgp $cmd @argv\" not supported by FML");
-	&Mesg(*e, $NULL, 'pgp.cmd.not_supported');
+	&Mesg(*e, "doing \"pgp $cmd @argv\" not supported by FML", 
+	      'pgp.cmd.not_supported');
     }
 
 }
