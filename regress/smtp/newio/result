@@ -1,0 +1,52 @@
+use &MStat() in libdebug.pl. (1999/06/29)
+
+check memory usage in distiribution article at these points:
+
+	config.ph
+	$START_HOOK
+	$DISTRIBUTE_START_HOOK
+	$DISTRIBUTE_CLOSE_HOOK
+	$FML_EXIT_HOOK
+
+where
+	old IO = 2.2C
+	new IO = 2.2E
+
+
+------------------------------------------------------------
+* input 700K file
+
+ [old IO]
+
+     1720	2168
+   + 4516	3312
+   +    0	   0
+   + 4360	3152
+   +    0	   0
+
+
+ [new IO]
+
+     1720	2168
+   + 4436	3080
+   +    0	 124
+   + 1472	1084
+   +    0	   0
+
+
+------------------------------------------------------------
+* input 3M file
+
+[old IO]
+     1720	2152
+   + 16804	12300
+   +    0	   0
+   Out of memory during "large" request for 4198400 bytes at libsmtp.pl line 535.
+
+
+ [new IO]
+     1720	2144
+   + 17092	12068
+   +    0	 128
+   + 4428	3332
+   +    0	   0
