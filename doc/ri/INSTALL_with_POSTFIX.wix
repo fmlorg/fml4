@@ -102,16 +102,19 @@ postfix では SMTP で通信する時（デフォルトです）に
 ＃これは、ななめよみするかぎり release でもできないとおもいました。
 ＃ release はソース読んでないので嘘かもしれず
 ＃
-＃(2003/04 記、thanks SEKINE Tatsuo)
+＃(2003/04 記、thanks postfix-jp ML)
 ＃確かに、main.cf だけでは出来ませんが、master.cf も編集するなら
 ＃インターフェイスごとに変更できますね、失礼 _o_
-＃この手でいいなら、実は結構初期からできたはずです。
 ＃
-＃ 設定例:
+＃ master.cf の設定例:
 ＃	-o key=value 形式で main.cf の値を上書きできます。
 ＃      インターフェイスごとに smtpd を定義し、limit を変更してください。
 ＃ インターフェイス:smtp ... smtpd -o smtpd_recipient_limit=10000
 ＃ インターフェイス:smtp ... smtpd -o smtpd_recipient_limit=0 (無制限)
+＃
+＃なお、初期の postfix では以下の -o オプションが使えません。全部調べ
+＃たわけではありませんが、19991231 ではできませんでした。少なくとも 
+＃1.1.x では利用可能です。
 
 .appendix
 
@@ -128,7 +131,7 @@ default_privs = fml
 
 などとして elena: "| fml.pl" などと直接 /etc/aliases に書くこともできます。
 
-$FML: INSTALL_with_POSTFIX.wix,v 1.14 2001/07/07 08:22:00 fukachan Exp $
+$FML: INSTALL_with_POSTFIX.wix,v 1.15 2003/04/13 14:58:12 fukachan Exp $
 
 .# Copyright (C) 1993-2001,2003 Ken'ichi Fukamachi
 .#          All rights reserved. 
@@ -139,4 +142,4 @@ $FML: INSTALL_with_POSTFIX.wix,v 1.14 2001/07/07 08:22:00 fukachan Exp $
 .# it under the terms of GNU General Public License.
 .# See the file COPYING for more details.
 .#
-.# $FML: INSTALL_with_POSTFIX.wix,v 1.14 2001/07/07 08:22:00 fukachan Exp $
+.# $FML: INSTALL_with_POSTFIX.wix,v 1.15 2003/04/13 14:58:12 fukachan Exp $
