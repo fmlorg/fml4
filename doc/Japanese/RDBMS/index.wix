@@ -4,6 +4,8 @@
 .toc
 .~HTML_PRE
 
+.include postgresql.wix
+
 .appendix
 .include toymodel.wix
 
