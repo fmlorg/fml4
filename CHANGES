@@ -6,6 +6,9 @@
 
 2002/06/03
 
+  4.0F
+	bump up for postfix verps hack 
+
   VEPRs bug fixes
 	handle postfix style
 	$USE_VEPR handling in Smtp()
@@ -302,7 +305,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.249 2002/05/24 15:41:47 fukachan Exp $
+	add $FML: CHANGES,v 1.250 2002/06/03 13:14:18 fukachan Exp $
 
 2001/10/03
 
