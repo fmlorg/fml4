@@ -3,6 +3,21 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/07/16
+
+  fix installation on windows 2000 (2000 only???)
+	sbin/makefml
+		not use pwd but cd
+		check USERNAME not $<, $> (this check is valid?)
+
+  fix installation on windows NT4 (NT4 only?)
+	sys/WINDOWS_NT4/ntinstall.cmd
+		not use fix_syscalls.pl
+
+	sys/WINDOWS_NT4/ntinstall.pl
+		clean up installation messages
+		nuke debug messages almost anywhere
+
 2000/07/15
 
   sbin/makefml
