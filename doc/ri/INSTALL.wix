@@ -14,9 +14,10 @@
    よりすすんだ設定については 
 	doc の下にある op というファイル
 	http://www.fml.org/fml/op/ 
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/
    の part III「インストールとカスタマイズ」を見て下さい。
 
-   なお以下のドキュメント中ではメーリングリストをＭＬと略しています
+   なお以下のドキュメント中ではメーリングリストをＭＬと略しています。
 =E
    EXCUSE FOR MY LIMITED ENGLISH (I WELCOME FIXES). 
 =S
@@ -24,7 +25,7 @@
    For more details on advanced settings, please see the part III of
 	FML-package-source-tree/doc/op	(plain)
 	http://www.fml.org/fml/op/	(html)
-
+	http://www.sapporo.iij.ad.jp/staff/fukachan/fml/op/ (html)
 
 .~HTML_PRE
 __________________________________________
@@ -112,8 +113,8 @@ of the fml system.  In this directory, please input the command
 
 というコマンドを実行して下さい。そのマシンの上に FML システムをインス
 トールします。
-=S
-to install the fml to your system
+=E
+to install the fml to your system.
 
 
 この時に以下のような項目を聞いて来ます。
@@ -313,6 +314,8 @@ e.g. the include sample for elena ML is
 	/var/spool/ml/elena/include
 
 を初め必要なサンプルが /var/spool/ml/elena に作成されます。
+＃ ここに include を置いたままやって unsafe とか sendmail にいわれるか
+＃ もしれない。→  .ptr{unsafe}
 
 これを呼ぶように設定された aliases の見本がコマンドの最後に表示される
 のでそれを cut & paste して/etc/aliases に加えて newaliases して下さい。
@@ -1407,7 +1410,33 @@ is converted like this in config.ph
 .C	:include: ではうまく動かない場合 (/etc/aliases)
 =E.C	You fails to use :include: form in /etc/aliases
 
-大抵は include でうまくいくはずですが、どうしてもだめな場合は 
+可能性としては
+=E
+The following reasons are possible:
+
+	○ include ファイルの場所がセキュリティ的に問題があるためエラー
+	   例えば 
+		・ NFS ごし
+		・ include ファイルのある場所までのどこかの permission が危ない
+		   (全階層に沿って調べること)
+=E	
+	* "include" file exists in an insecure directory.
+	  Please check the whole hirerychy permission from / to the "include".
+
+	○ include 形式をそもそもサポートしていない
+	   -> C Wrapper が必要かも知れない
+=E
+	* your mail system do not support include form.
+	  You may require C-Wrapper (see below). 
+
+などが考えられます。include ファイルの置き場所は可能な限り permission 
+を落したローカル(NFSではない)場所(そこまでの階層すべての permission に
+配慮する)に include ファイルを置いてみて下さい。例えば /usr/local が 
+local disk の上にあるとして /usr/local/include/ の下に置いておくなどで
+す。
+＃注意: そもそも NFS ごしに setuid しようというのが間違い
+
+C Wrapper については
 =E
 If you fails to use :include: in /etc/aliases, please use the
 C-wrapper program which may be required to be root-setuid.
@@ -1422,8 +1451,9 @@ machine since it requires a lot of attention.
 	/var/spool/ml/ML名/fml.c 
 
 というのが各ＭＬ用に作られているので compile して設定する必要がありま
-す。が、それは危険な設定なので doc/op の "fml.c の呼び方" あたりを参考
-にしつつ、root の人とよく相談しながら設定して下さい。
+す。compile そのものはその場所で make fml で実行されますが、setuid は
+よ〜く注意して設定しないといけないので doc/op の "fml.c の呼び方" あた
+りを参考に root の人とよく相談しながら設定して下さい。
 
 
 .C	コマンド用のアドレスについての捕捉 
