@@ -6,9 +6,8 @@ GEN_DOC () {
 		${MAKE} plaindoc
 	)
 
-	echo "Generating WWW Doc"
+	echo "Generating WWW Doc at var/html/"
 	(
-		echo "Making WWW pages of doc/smm/op => var/html/op";
 		cd $FML; 
 		${MAKE} htmldoc 
 	)
