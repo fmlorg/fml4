@@ -132,7 +132,8 @@ sub InitMakeFml
 
     # if not defined this machine OS;
     if ($OS_TYPE = $opt_O) {
-	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
+	$OS_TYPE =~ tr/a-z/A-Z/;
+	print "   YOU DEFINE THIS HOST ($FQDN)'s OS == $OS_TYPE.\n";
     }
     elsif ($OS_TYPE = $Config'OS_TYPE{$FQDN}) { #';
 	print "   THIS HOST ($FQDN)'s OS IS $OS_TYPE\n";
