@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.151 2003/05/01 14:23:26 fukachan Exp $
+# $FML: fml.pl,v 2.152 2003/11/20 14:03:02 fukachan Exp $
 
 $Rcsid   = 'fml 4.0';
 
@@ -1693,6 +1693,32 @@ sub DoMailListMemberP
 	$NULL;
     }
 }
+
+
+# Descriptions: search map having $addr in member lists 
+#               without the admin member list.
+#    Arguments: STR($addr)
+# Side Effects: none
+# Return Value: STR
+sub GetTargetMemberList
+{
+    my ($addr) = @_;
+    my (@orig) = @MEMBER_LIST;
+    my (@new)  = ();
+
+  MAP:
+    for my $map (@MEMBER_LIST) {
+	next MAP if $map eq $ADMIN_MEMBER_LIST;
+	push(@new, $map);
+    }
+
+    @MEMBER_LIST = @new;
+    my $r = &DoMailListMemberP(@_, 'm');
+    @MEMBER_LIST = @orig;
+
+    return $r;
+}
+ 
 
 sub MailListMemberP { return &DoMailListMemberP(@_, 'm');}
 sub MailListActiveP { return &DoMailListMemberP(@_, 'a');}
