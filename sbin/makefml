@@ -557,6 +557,9 @@ sub SetHashDefaults
 		    # conversion
 		    'conv',   'do_conv',
 		    'update', 'do_update',
+
+		    # upgrade from 2.x to 3.0
+		    'upgrade', 'do_upgrade',
 		    );
 
     # functions not to lock
@@ -2905,6 +2908,16 @@ sub do_config
     }
     $config{'CPU_TYPE_MANUFACTURER_OS'} = $CPU_TYPE_MANUFACTURER_OS;
 
+    # fml 3.0
+    local($fml30_helper);
+    for ("REJECT_POST_HANDLER", "REJECT_COMMAND_HANDLER") {
+	# auto_regist => auto_subscribe
+	if (($saved_config{$_} eq 'auto_regist') &&
+	    ($config{$_} eq 'auto_subscribe')) {
+	    $fml30_helper = 1;
+	}
+    }
+
     ### MENU END ###
 
     # set local_config -> %MAKE_FML;
@@ -2954,6 +2967,80 @@ sub do_config
 	elsif ($cmd eq "n") { 
 	    print "   O.K. makefml DOES NOT re-create documents.\n";
 	}
+    }
+
+    if ($fml30_helper) {
+	local($m);
+	$m  = "   --- Caution ---\n";
+	$m .= "\nWhen you upgarade fml 2.x to 3.0 ";
+	$m .= "and you use 'auto_subscribe', you need\n";
+	$m .= "\n   copy 'members' file to 'actives' file\n\n";
+	$m .= "Q: Can I copy members to actives ?\n";
+
+	$cmd = &Query($m, "y/n", "y|n", "y");
+
+	if ($cmd eq "y") {
+	    &UpgradeTo30($ml);
+	}
+	elsif ($cmd eq "n") { 
+	    print "   O.K. makefml does nothing.\n";
+	}
+    }
+}
+
+
+sub UpgradeTo30
+{
+    local($ml) = @_;
+
+    print "   -- copy members to actives ...\n";
+
+    &ResetVariables;
+    &Copy("$ML_DIR/$ml/actives", "$ML_DIR/$ml/actives.bak30");
+    &Copy("$ML_DIR/$ml/members", "$ML_DIR/$ml/actives");
+
+    print STDERR "      (backup is $ML_DIR/$ml/actives.bak30)\n\n";
+    print "   Done.\n   ";
+    print "\n";
+}
+
+
+sub do_upgrade
+{
+    local($ml) = @_;
+    local($cf, $ph);
+
+    &ResetVariables;
+    $cf = "$ML_DIR/$ml/cf";
+    $ph = "$ML_DIR/$ml/config.ph";
+
+    if (&CSGrep('auto_regist', $cf) || &CSGrep('auto_regist', $ph)) {
+	print STDERR "   Replace auto_regist with auto_subscribe ... \n";
+    }
+
+    if (&CSGrep('auto_regist', $cf)) {
+	print STDERR "   -- upgrade $cf\n";
+	&Replace($cf, "${cf}.new", 'auto_regist', 'auto_subscribe');
+	&Copy($cf, "${cf}.bak30");
+	&Copy("${cf}.new", $cf);
+	print STDERR "      (backup is $cf.bak30)\n\n";
+    }
+
+    if (&CSGrep('auto_regist', $ph)) {
+	print STDERR "   -- upgrade $ph\n";
+	&Replace($ph, "${ph}.new", 'auto_regist', 'auto_subscribe');
+	&Copy($ph, "${ph}.bak30");
+	&Copy("${ph}.new", $ph);
+	print STDERR "      (backup is $ph.bak30)\n\n";
+    }
+
+    &UpgradeTo30($ml);
+
+    # touch cf for 'makefml config'
+    &Touch($cf);
+
+    if (-f "$ML_DIR/$ml/actives_is_dummy_when_auto_regist") {
+	unlink "$ML_DIR/$ml/actives_is_dummy_when_auto_regist";
     }
 }
 
@@ -3245,6 +3332,38 @@ sub Grep
     close(IN);
 
     $NULL;
+}
+
+sub CSGrep
+{
+    local($key, $file) = @_;
+
+    open(IN, $file) || (&Log("Grep: cannot open file[$file]"), return $NULL);
+    while (<IN>) { return $_ if /$key/;}
+    close(IN);
+
+    $NULL;
+}
+
+sub Replace
+{
+    local($in, $out, $key, $newkey) = @_;
+    local($mode) = (stat($in))[2];
+
+    open(COPY_IN,  $in) || (&Log("Error: Copy < $in [$!]"), return 0);
+    open(COPY_OUT, "> $out") || (&Log("Error: Copy > $out [$!]"), return 0);
+    select(COPY_OUT); $| = 1; select(STDOUT); 
+    chmod $mode, $out;
+
+    while (<COPY_IN>) {
+	s/$key/$newkey/g;
+	print COPY_OUT $_;
+    }
+
+    close(COPY_OUT);
+    close(COPY_IN);
+
+    1;
 }
 
 sub PerlModuleExistP
