@@ -1,8 +1,9 @@
 .C	まとめおくり (MatomeOkuri or Digest)
 .l	msend
+.k	msend
 .k	digest
-.k	matomeokuri
-.key	$DIR/crontab
+.k	まとめおくり
+.k	$DIR/crontab
 
 
 .S	まとめおくりの基本原理
@@ -46,7 +47,6 @@ matome もしくは digest というコマンドです。
 能なら bin/cron.pl をシステムのcronの代わりに使えばよいわけです。
 
 
-
 .S	まとめおくりサーバ  msend.pl 
 .k	msend.pl
 .k	MSendv4.pl
@@ -82,8 +82,7 @@ $LIBDIR にセットされます。
 
 
 .S	crontab の見本
-.k	crontab
-.k	crontab(4.4BSD)
+.k	crontab (4.4BSD)
 .k	$DIR/crontab
 
 INSTALL 時に make していれば $DIR/crontab に cron の設定のしかたの見本
@@ -106,7 +105,7 @@ INSTALL 時に make していれば $DIR/crontab に cron の設定のしかたの見本
 
 
 .S	プログラムの名称 msend.pl (旧 MSendv4.pl)
-.key	MSendv4.pl->msend.pl
+.k	MSendv4.pl->msend.pl
 
 最初実験プロジェクトのつもりではじめた時の version 4 というのがついた
 MSendv4.pl というプログラム名のまま使ってきましたが、msend.pl に正式に
@@ -115,8 +114,8 @@ link がはってあります。
 
 
 .S	プログラムのログファイル $MSEND_RC (名称が変更されました)
-.key	MSendrc -> var/log/msendrc
-.key	$MSEND_RC
+.k	MSendrc -> var/log/msendrc
+.k	$MSEND_RC
 
 デフォールトが MSendrc -> var/log/msendrc に変更されています。
 fml 1.x から version up する時に問題になるかも知れません。
@@ -226,8 +225,8 @@ mailに展開できます。＃あと、どういうソフトがあるのか知らない…:-)
 
 
 .S	まとめ送りのデフォールトを RFC1153 digest にする
-.label	msend-RFC1153
-.key	RFC1153
+.l	msend-RFC1153
+.k	RFC1153
 .k	$USE_RFC1153
 .k	$USE_RFC1153_DIGEST
 

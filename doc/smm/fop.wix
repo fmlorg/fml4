@@ -1,4 +1,5 @@
 .C	ファイルをまとめて操作する関数群 (mget と まとめおくり)
+.k	mget
 .l	mget
 	
 .S	mget options (help file より)
@@ -39,8 +40,8 @@ help ファイルより抜粋
 	d	RFC1153 format 	PLAINTEXT
 	rfc1153	RFC1153 format 	PLAINTEXT
 
+ここでは、これらの
 
-ここでは、これら
 	複数のファイルを一辺に取り扱う方法
 	そのフォーマットについての少し細かい点
 
@@ -48,7 +49,7 @@ help ファイルより抜粋
 
 
 .S	mget3 のデフォールトの変更
-.k	mget3のデフォールトの変更
+.k	mget で3のデフォールトの変更
 .k	$MGET_MODE_DEFAULT
 .l	$MGET_MODE_DEFAULT
 
@@ -112,8 +113,8 @@ spool とは別にＭＬのアーカイブがある場合がありえます。例えば
 
 
 .S	mget3 インターフェイス:パターンマッチ戦略
-.key	mget3
-.label	mget3
+.k	mget3
+.l	mget3
 
 	この時点で flock もはずれて、最後の最後
 	あとは、&Notify だけが残っている
@@ -214,8 +215,8 @@ $SLEEPTIME が優先される。
 
 
 .S	コマンドで単なるシンタックスエラーの警告をしない
-.label	{USE_WARNING}
-.key	$USE_WARNING
+.l	USE_WARNING
+.k	$USE_WARNING
 
 明示的に $USE_WARNING をセット
 e.g. in config.ph
@@ -231,7 +232,7 @@ e.g.
 
 
 .S	mget の送り返し時のファイルサイズ
-.key	$MAIL_LENGTH_LIMIT
+.k	$MAIL_LENGTH_LIMIT
 
 	$MAIL_LENGTH_LIMIT (default は 1000)
 
@@ -338,6 +339,7 @@ Message-ID: <19950518.01906.Elena.Lolobrigita@Baycity.asia>
 
 .S	RFC934
 .l	RFC934
+.k	RFC934
 
 rfc934	"Proposed Standard for Message Encapsulation"
 
@@ -364,7 +366,7 @@ Subject: Albatoros
 
 .S	RFC1153 digest 
 .l	RFC1153
-.k	RFC1153-digest
+.k	RFC1153
 
 comp.sys.ibm.pc.digest とかでみるでしょ？あれです。RFC は aboutすぎて
 読んでもよくわかりません;_;
@@ -399,7 +401,7 @@ End of GODAI BBS Digest V95 Issue #120
 
 .S	1153 のカスタマイズ
 .k	librfc1153.pl
-.k	&Rfc1153Custom($mode, *conf)
+.k	&Rfc1153Custom
 
 $RFC1153_ISSUE		ＭＬの記事番号ではなく1153形式で送り出す時の番号
 $RFC1153_SEQUENCE_FILE	その番号を保存するファイル
@@ -451,7 +453,8 @@ $RFC1153_CUSTOM_HOOK	&Rfc1153Custom($mode, *conf) の中で
 
 
 .S	SJIS にファイルを変換して送る （lzh + ish option）
-.key	lzh
+.k	SJIS (lha +i sh)
+.k	lzh
 .key	ish
 
 config.ph で $USE_SJIS_IN_ISH = 1; をセットしてください。
