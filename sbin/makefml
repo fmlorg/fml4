@@ -543,6 +543,10 @@ sub SetHashDefaults
 		    '20#config-template', 'configure template cf file',
 
 		    'command', 'do_command',
+
+		    # create document templates
+		    'create-doc-template',    'do_create_doc_template',
+		    '30#create-doc-template', 'create document templates e.g. help, guide, ...',
 		    );
 
     # functions not to lock
@@ -1817,6 +1821,9 @@ sub Conv
 	# TZ
 	s/_TZ_/$TZ/g;
 
+	# Command Trap keyword
+	s/_CTK_/$CTK/g;
+
 	# config
 	s/_EXEC_DIR_/$EXEC_DIR/g;
 	s/_ML_DIR_/$ML_DIR/g;
@@ -2317,13 +2324,7 @@ sub do_newml
     ($GroupWritable eq 'fmlserv') ? umask(027) : umask(077);
 
     # drafts -> help,deny,guide,objective
-    &Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
-    &Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
-    &Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
-    &Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
-    &Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
-    &Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
-    &Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");    
+    &CreateDocTemplate(*config, $ml);
 
     # qmail setup
     &QmailSetUp($ml);
@@ -2362,6 +2363,60 @@ sub do_newml
 
     # permission check only on UNIX's
     &PermCheck("$ML_DIR/$ml/include") if $UNISTD; 
+}
+
+
+sub do_create_doc_template
+{
+    local($ml) = @_;
+    local(%config, %cur_config, $cf);
+
+    &ResetVariables;
+
+    $cf = "$ML_DIR/$ml/cf";
+    # set %config, eval %MAKE_FML in it;
+    &GetCF($cf, $ml, *config, *cur_config);
+
+    &CreateDocTemplate(*config, $ml);
+}
+
+
+sub CreateDocTemplate
+{
+    local(*config, $ml) = @_;
+    local($x);
+
+    # <Command Trap Keyword>
+    # In 'newml', we have no knowledge so that 
+    # this ML is compatible mode or not. 
+    if ($config{'MAIL_LIST'}) {
+	if ($config{'MAIL_LIST'} eq $config{'CONTROL_ADDRESS'} ||
+	    $config{'MAIL_LIST_ACCEPT_COMMAND'}) {
+	    &Log("\$CTK = '# ';"); 
+	    $CTK = '# '; 
+	}
+    }
+
+    # back up 
+    for $x ("help", "help-admin", "deny", "guide", 
+	"welcome", "confirm", "objective") {
+	if (-f "$ML_DIR/$ml/$x") {
+	    &Copy("$ML_DIR/$ml/$x", "$ML_DIR/$ml/$x.bak");
+	}
+
+	&Conv($ml, "$EXEC_DIR/drafts/$x", "$ML_DIR/$ml/$x");
+    }
+
+    return;
+
+    # not reach here
+    &Conv($ml, "$EXEC_DIR/drafts/help", "$ML_DIR/$ml/help");
+    &Conv($ml, "$EXEC_DIR/drafts/help-admin", "$ML_DIR/$ml/help-admin");
+    &Conv($ml, "$EXEC_DIR/drafts/deny", "$ML_DIR/$ml/deny");
+    &Conv($ml, "$EXEC_DIR/drafts/guide", "$ML_DIR/$ml/guide");
+    &Conv($ml, "$EXEC_DIR/drafts/welcome", "$ML_DIR/$ml/welcome");
+    &Conv($ml, "$EXEC_DIR/drafts/confirm", "$ML_DIR/$ml/confirm");
+    &Conv($ml, "$EXEC_DIR/drafts/objective", "$ML_DIR/$ml/objective");
 }
 
 
@@ -2744,7 +2799,7 @@ sub do_config
     ($config{'_CA_DOMAIN_'}) = (split(/\@/, $config{'CONTROL_ADDRESS'}))[1];
     
 
-    ### MENU BEGIN
+    ### MENU BEGIN ###
     # for log
     %saved_config = %config;
 
@@ -2752,15 +2807,23 @@ sub do_config
     $MENU = "$EXEC_DIR/etc/makefml/menu.conf";
     &Menu'InitMenu(*config,*MENU,*FP,*QUERY,*NAME,*MAP,*BIND,*CONFIG);#';
 
-    ### MAIN LOOP 
+    # MAIN LOOP 
     &EachLevelQuery(*config, "/");
 
+    ### After Care (Logging) ###
     for (keys %config) {
 	if ($config{$_} ne $saved_config{$_}) {
 	    &Log("makefml::config \$${_} \"$saved_config{$_}\" -> \"$config{$_}\"");
 	}
     }
-    ### MENU END 
+
+    local($change_p);
+    for ('MAIL_LIST', 'CONTROL_ADDRESS', 'MAIL_LIST_ACCEPT_COMMAND') {
+	if ($config{$_} ne $saved_config{$_}) {
+	    $change_p = 1;
+	}
+    }
+    ### MENU END ###
 
     # set local_config -> %MAKE_FML;
     # print $local_config;
@@ -2788,6 +2851,28 @@ sub do_config
 
     # touch for (cf is newer than config.ph always when makefml works)
     &Touch($cf);
+
+    # FYI: "config-template" does not need this reconfigure-document
+    if ($change_p) {
+	local($cmd);
+	$cmd = &Query("*** FYI ***".
+		      "Hmm... you have changed ML or COMMAND address, ".
+		      "have\'nt it?\n".
+		      "You need to rewrite addresses or command syntaxes\n".
+		      "in documents e.g. help, guide,.. \n".
+		      "Do you RE-CREATE THEM (help,guide,welcome,...)?",
+		      "y/n", 
+		      "y|n", 
+		      "y");
+
+	if ($cmd eq "y") {
+	    print "--- re-create documents (the backup is file.bak)...\n";
+	    &CreateDocTemplate(*config, $ml);
+	}
+	elsif ($cmd eq "n") { 
+	    print "   O.K. makefml DOES NOT re-create documents.\n";
+	}
+    }
 }
 
 
