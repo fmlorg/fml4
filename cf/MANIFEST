@@ -63,8 +63,15 @@ debug:		 1
 
 INFO:
 ### DEFINITIONS FOR "makefml"
-#
-NON_PORTABILITY:	0
+
+# GNU config.guess
+CPU_TYPE_MANUFACTURER_OS:
+
+# struct sockaddr
+STRUCT_SOCKADDR:	S n a4 x8
+
+# for further extention: fml 2.1 not use this except for "makefml newml"
+LANGUAGE:		Japanese
 
 
 INFO:
@@ -173,9 +180,9 @@ ERRORS_TO:	$MAINTAINER
 
 USE_ORIGINAL_MESSAGE_ID:	1
 
-PRECEDENCE:	list
+PRECEDENCE:	bulk
 
-REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news
+REJECT_ADDR:	root|postmaster|MAILER-DAEMON|msgs|nobody|news|majordomo|listserv|listproc
 
 SKIP_FIELDS:	Received|Return-Receipt-To
 
