@@ -127,6 +127,13 @@ $mib->{'_action'} には次のようなものがあります。
 		データベースをいじってください。
 		* makefml やコマンドメールで使っているコマンドと同じ意味です。
 
+	add2actives
+	addactives
+	add2members
+	addmembers
+
+		どちらかのファイルにのみアドレスを加えます。
+		* makefml やコマンドメールで使っているコマンドと同じ意味です。
 
 	chaddr
 
