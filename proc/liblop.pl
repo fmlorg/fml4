@@ -92,7 +92,7 @@ sub MemberStatus
     
     &use('utils');
 
-    open(ACTIVE_LIST) || 
+    open(ACTIVE_LIST, $ACTIVE_LIST) || 
 	(&Log("cannot open $ACTIVE_LIST when $ID:$!"), return "No Match");
 
     &Log("Status [$who]");
