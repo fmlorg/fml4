@@ -6,7 +6,7 @@ $libid   = q$Id$;
 ($libid) = ($libid =~ /Id: *(.*) *\d\d\d\d\/\d+\/\d+.*/); 
 $rcsid  .= "/$libid";
 
-&FTPMAIL unless $MASTER_FML;
+&FTPMAIL if ($LOAD_LIBRARY eq 'libftpmail.pl') || (!$MASTER_FML);
 
 sub FTPMAIL
 {
