@@ -3,6 +3,22 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2001/06/10
+
+   List-* ヘッダをカスタマイズできるようにする。変数は
+
+	$USE_RFC2369 を 1 （デフォルト）で、
+	0 にすると List-* ものが全部なくなります。
+
+	List-* ヘッダを個別にカスタマイズしたい場合は、
+	次の変数があります。
+
+		$LIST_SOFTWARE   
+		$LIST_POST       
+		$LIST_OWNER      
+		$LIST_HELP       
+		$LIST_UNSUBSCRIBE
+		$LIST_ID         
 
 2001/06/03
 

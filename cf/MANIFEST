@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML$
+# $FML: MANIFEST,v 1.82 2001/05/11 16:26:48 fukachan Exp $
 #
 
 
@@ -630,6 +630,15 @@ APPEND_STARDATE:
 # RFC2369 e.g. list-post: ..
 # value: 1/0
 USE_RFC2369:	1
+
+# List-*
+LIST_SOFTWARE:		$Rcsid
+LIST_POST:		<mailto:$MAIL_LIST>
+LIST_OWNER:		<mailto:$MAINTAINER>
+LIST_HELP:		<mailto:$CONTROL_ADDRESS?body=help>
+LIST_UNSUBSCRIBE:	<mailto:$CONTROL_ADDRESS?body=unsubscribe>
+LIST_ID:		<$BRACKET.$DOMAINNAME>
+
 
 # obsolete in fml 3.0
 # We should force "To: $MAIL_LIST" form "For Eye" or NOT?
