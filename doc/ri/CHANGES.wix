@@ -3391,7 +3391,7 @@ contributor およびその変更点については RELEASE_NOTES を見て下さい。
 
 	(stdinlog のかわりに使えるよね？)
 	最近 $NUM_LOG_MAIL 通のメールの先頭2048バイトを $LOG_MAIL_DIR 
-	($DIR/var/Mail) に保存する。各ファイルのサイズの上限は
+	($DIR/var/Mail) に保存する。各ファイルの本文のサイズの上限は
 	$LOG_MAIL_FILE_SIZE_MAX bytes。このくらいあればヘッダとメール
 	の最初の方は十分収まるのでデバッグには十分だろう。
 	101通めは1を上書きするなどのようにファイルは円環上に使用される

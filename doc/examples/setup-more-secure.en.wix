@@ -112,11 +112,12 @@ $USE_LOG_MAIL
    LOGGING THE LATEST IN-COMING MAILS
    Logs an in-coming mail to $LOG_MAIL_DIR/$id 
    where ($id = `cat $LOG_MAIL_SEQ`; $id = $id % $NUM_LOG_MAIL; $id++).
-   Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and each file size
+   Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and 
+   the message size of each file excluding th header
    is limited up to $LOG_MAIL_FILE_SIZE_MAX bytes to save disk.
    value: 1/0
 
-           Copyright (C) 1999 Ken'ichi Fukamachi
+           Copyright (C) 1999,2003 Ken'ichi Fukamachi
                    All rights reserved. 
 
 $Id$

@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.101 2003/01/09 14:58:24 fukachan Exp $
+# $FML: MANIFEST,v 1.102 2003/05/10 14:41:23 fukachan Exp $
 #
 
 
@@ -553,7 +553,8 @@ CHADDR_AUTH_TYPE:
 # LOGGING THE LATEST IN-COMING MAILS
 # Logs an in-coming mail to $LOG_MAIL_DIR/$id 
 # where ($id = `cat $LOG_MAIL_SEQ`; $id = $id % $NUM_LOG_MAIL; $id++).
-# Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and each file size
+# Latest $NUM_LOG_MAIL files are stored in $LOG_MAIL_DIR and 
+# the message size of each file except for the header
 # is limited up to $LOG_MAIL_FILE_SIZE_MAX bytes to save disk.
 # value: 1/0
 USE_LOG_MAIL:	0

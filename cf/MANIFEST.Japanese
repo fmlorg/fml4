@@ -664,7 +664,7 @@ LOG_MAIL_SEQ:	$LOG_MAIL_DIR/.seq
 
 .j 保存するファイル数(default 100)
 .j 101 通めは 1 になる。つまり modulus により円管バッファになっている
-.j 大きいメールは先頭の $LOG_MAIL_FILE_SIZE_MAX (2048) bytes分だけ
+.j 大きいメールは本文先頭の $LOG_MAIL_FILE_SIZE_MAX (2048) bytes分だけ
 .j 保存する(ヘッダ等の方が重要なので大きいメール本文は途中まででも構わない)
 # value: number
 NUM_LOG_MAIL:	100
