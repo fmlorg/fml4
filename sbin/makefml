@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl --    # -*-Perl-*-
+#!/usr/local/bin/perl
 # Copyright (C) 1993-1996 fukachan@phys.titech.ac.jp
 # Copyright (C) 1996      fukachan@sapporo.iij.ad.jp
 # fml is free software distributed under the terms of the GNU General
@@ -10,6 +10,7 @@ $rcsid .= " :".($id =~ /Id: lib(.*).pl,v\s+(\S+)\s+/ && $1."[$2]");
 
 
 ### AUTOMATICALLY REPLACED (Agent-Oriented?) ###
+### AUTOMATICALLY REPLACED by makefml (Wed, 11 Dec 96 23:26:19 )
 $CONFIG_DIR = ""; # __MAKEFML_AUTO_REPLACED_HERE__
 
 
@@ -135,6 +136,8 @@ sub InitMakeFml
     %MakeFmlProc = ('init',    'do_init',
 		    'install', 'do_install',
 		    'setq',    'do_setq',
+		    'show',    'do_show',
+		    'config',  'do_config',
 		    'new',     'do_newml',
 		    'newml',   'do_newml',
 		    'add',     'do_adduser',
@@ -536,6 +539,9 @@ sub do_newml
     &Conv($ml, "$exec_dir/cf/__makefml", "$CONFIG_DIR/$ml.cf");
 
     if ($OS_TYPE && open(CF, ">> $CONFIG_DIR/$ml.cf")) {
+	print CF "\nLOCAL_CONFIG\n\n";
+	print CF "\# makefml TENUKI;-) Config\n";
+	print CF "\$NON_PORTABILITY = 1;\n";
 	print CF "\n\# makefml defines the following.\n";
 	print CF "\$COMPAT_${OS_TYPE} = 1;\n";
 	close(CF);
@@ -543,7 +549,9 @@ sub do_newml
 
     # 
     # make ml/config.ph
-    system "perl $exec_dir/cf/config $CONFIG_DIR/$ml.cf > $ml_dir/$ml/config.ph";
+    $exec  = "perl $exec_dir/cf/config -m $exec_dir/cf/MANIFEST ";
+    $exec .= "$CONFIG_DIR/$ml.cf";    
+    system "$exec > $ml_dir/$ml/config.ph";
 
     ### generate samples, includes and aliases in $exec_dir/include ###
     umask(022);
@@ -574,8 +582,159 @@ sub do_newml
 }
 
 
+sub do_config
+{
+    local($ml) = @_;
+    local($exec_dir, $ml_dir, $cf, $domain, $fqdn, $cf, $cfex, $user);
+    local($cf, $local_config, $config);
+
+    print "---Configure $ml mailing list ... \n";
+
+    &InitLocalVariables;
+
+    # without LOCAL_CONFIG;
+    open(CF, "$CONFIG_DIR/$ml.cf") || die ("cannot find $CONFIG_DIR/$ml.cf");
+    while (<CF>){
+	next if /---SUBSTITUTE BY makefml/;
+	next if /---END OF SUBSTITUTE BY makefml/;
+
+	if (1 .. /LOCAL_CONFIG/) {
+	    next if /LOCAL_CONFIG/;
+	    $config .= $_;
+	}
+	else {
+	    $local_config .= $_;
+	}
+
+    }
+
+    $config .= "### ---SUBSTITUTE BY makefml ($MailDate)---\n";
+    $config .= &AutoRegistQuery($ml);
+    $config .= "### ---END OF SUBSTITUTE BY makefml ($MailDate)---\n";
+
+    $local_config .= "### ---SUBSTITUTE BY makefml ($MailDate)---\n";
+    $local_config .= "\n\# makefml defines the following.\n";
+    $local_config .= "\$COMPAT_${OS_TYPE} = 1;\n";
+    $local_config .= &SubjectTagQuery($ml);
+    $local_config .= "### ---END OF SUBSTITUTE BY makefml ($MailDate)---\n";
+
+    print "Saved in $CONFIG_DIR/$ml.cf\n";
+
+    if (open(CF, "> $CONFIG_DIR/$ml.cf")) {
+	print CF $config;
+	print CF "\nLOCAL_CONFIG\n$local_config\n";
+	close(CF);
+    }
+
+    # 
+    # make ml/config.ph
+    $exec = "perl $exec_dir/cf/config $CONFIG_DIR/$ml.cf ";
+    system "$exec > $ml_dir/$ml/config.ph";
+}
+
+
+sub Query
+{
+    local($menu, $query, $pat, $default) = @_;
+
+    while (1) {
+	print "$menu ($query) [$default] ";
+	$cmd = &GetString;
+	print "\n";
+
+	if ($cmd =~ /^($pat)$/) { last;}
+	if ($cmd =~ /^\s*$/) { $cmd = $default; last;}
+
+	print "   ***Warning!!! Please input ($query)\n";
+    }    
+
+    $cmd;
+}
+
+
+sub AutoRegistQuery
+{
+    local($ml) = @_;
+    local($r, $buf);
+
+    $r = &Query("Auto Registration ", "y/n", "y|n", "n");
+
+    $buf .= "ML_MEMBER_CHECK\t";
+    $buf .= $r eq 'y' ? "0" : "1";
+    $buf .= "\n";
+
+    if ($r eq "y") {
+	print "   Auto Registration Type\n";
+	print "      0 default\n";
+	print "      1 subject\n";
+	print "      2 body\n";	
+	print "\n";
+
+	$r = &Query("   Auto Registration Type ", "0,1,2 ", '0|1|2', "0");
+
+	if ($r == 1) {
+	    $buf .= "REQUIRE_SUBSCRIBE\tsubscribe\n";
+	}
+	elsif ($r == 2) {
+	    $buf .= "REQUIRE_SUBSCRIBE\tsubscribe\n";
+	    $buf .= "REQUIRE_SUBSCRIBE_IN_BODY\t1\n";
+	}
+    }
+
+    $buf;
+}
+
+
+sub SubjectTagQuery
+{
+    local($ml) = @_;
+    local($r, $buf);
+
+    print "Subject TAG TYPE [0-6]:\n\n";
+    print <<_EOF_;
+TYPE    Subject Example
+----------------------------
+0       Subject:                (NO TAG which Fml recommends)
+
+1	Subject: (Elena:100)
+
+2	Subject: [Elena:100]	(hml 1.6 compat)
+
+3	Subject: (Elena 100)
+
+4	Subject: [Elena 100]
+
+5	Subject: [Elena,100]
+
+6	Subject: (Elena,100)
+
+_EOF_
+
+    $r = &Query("Subject TAG TYPE ", "0-6", "[0-6]", "0");
+
+    %tag = (1, "(:)",
+	    2, "[:]",
+	    3, "( )",
+	    4, "[ ]",
+	    5, "(,)",
+	    6, "[,]");
+
+    if ($r =~ /^[123456]$/){
+	$buf .= "&DEFINE_SUBJECT_TAG('$tag{$r}');\n";
+    }
+    else {
+	$buf = "";
+    }
+
+    $buf;
+}
+
+
 sub InitLocalVariables
 {
+    # anyway set;
+    &GetCurConfig;
+
     $user     = (getpwuid($<))[0];
     $exec_dir = $CurConfig{'EXEC_DIR'};
     $ml_dir   = $CurConfig{'ML_DIR'};
@@ -756,7 +915,11 @@ sub main'Dumpvar
 {
     ($package, @vars) = @_;
 
+    # if perl 4
     local(*stab) = eval("*_$package");
+
+    # if perl 5
+    if ($] =~ /5\.\d\d\d/) { *stab = *{"Config::"};}
 
     while (($key, $val) = each(%stab)) {
 	{
