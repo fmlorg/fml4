@@ -30,6 +30,7 @@ sub ConfigByMakeFml
 	if ($MAKE_FML{'SUBJECT_TAG'}) {
 	    require 'libtagdef.pl';
 	    &SubjectTagDef($MAKE_FML{'SUBJECT_TAG'});
+	    $BRACKET = $MAKE_FML{'ML_NAME'};
 	}
 
 	if ($os = $MAKE_FML{'OS_TYPE'}) {
