@@ -5,6 +5,21 @@
 =E
 				Ken'ichi Fukamachi
 
+  update libtraffic to 1.2
+	fix y2k related bugs
+	PR from Yuao Tanigawa
+
+  update multipart.pl to 1.3.1.2
+	PR from Yuao Tanigawa
+
+  update to use jcode.pl-2.11
+	PR from Fumitoshi UKAI
+
+  smm/hack.wix (2.17-2.18)
+	update url. PR from Yuao Tanigawa
+
+[3.0.1_BETA#1]
+
    libsynchtml.pl
 	sync w/ head 2.31-2.32
 	import critical bug fix: $ID here should be local
