@@ -3,6 +3,15 @@
 
 	 MEMO AROUND RECENTLY UPDATED or FIXED;
 
+2000/02/21
+
+  CVS repository hier
+	module/Japanese/	Japanese specific library
+	module/compat/		compatible library
+
+  doc/advisories/
+	clean up
+
 2000/02/20
 
   makefml install
