@@ -55,7 +55,6 @@ sub Init
 sub MakeConnection # ($host, $headers, $body)
 {
     local(*conf) = @_;
-    local($pat)  = 'S n a4 x8';
 
     $host    = $conf{'SERVER'};
     %PopConf = %conf;
@@ -63,7 +62,7 @@ sub MakeConnection # ($host, $headers, $body)
     # Initialize
     &Init;			# sys/socket.ph
 
-    local($pat)    = 'S n a4 x8'; # 'S n C4 x8'? which is correct? 
+    local($pat)    = $main'STRUCT_SOCKADDR; #';
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = $POP_PORT || (getservbyname('pop3', 'tcp'))[2];

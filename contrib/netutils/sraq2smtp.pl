@@ -81,6 +81,9 @@ sub SraqInit
     $LOCK_NB = 4;
     $LOCK_UN = 8;
 
+    # struct sockaddr
+    $STRUCT_SOCKADDR = "n n a4 x8";
+
     # time
     &GetTime;
 
@@ -242,8 +245,8 @@ sub Smtp
     $host = $FQDN;
 
     open(SMTPLOG, "> /tmp/_smtplog") || &Log($!);
-
-    local($pat)    = 'S n a4 x8'; # 'S n C4 x8'? which is correct? 
+    
+    local($pat)    = $STRUCT_SOCKADDR;
     local($addrs)  = (gethostbyname($host || 'localhost'))[4];
     local($proto)  = (getprotobyname('tcp'))[2];
     local($port)   = (getservbyname('smtp', 'tcp'))[2];

@@ -77,7 +77,7 @@ sub HRef
 sub TalkWithHttpServer
 {
     local($host, $port, $body, $tp, *re) = @_;
-    local($pat)  = 'S n a4 x8';
+    local($pat) = $STRUCT_SOCKADDR;
     local($addrs, $target, $tmpf);
 
     &Debug("TalkWithHttpServer($host, $port, $body, $tp, *re)") if $debug;
