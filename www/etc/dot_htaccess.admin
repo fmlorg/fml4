@@ -1,0 +1,7 @@
+SSLRequireSSL
+AuthName ByPassword
+AuthType Basic
+AuthUserFile _EXEC_DIR_/www/authdb/admin/htpasswd
+<Limit GET POST>
+require valid-user
+</Limit>
