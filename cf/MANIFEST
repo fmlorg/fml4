@@ -10,7 +10,7 @@ INFO:
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: MANIFEST,v 1.95 2002/02/16 09:42:14 fukachan Exp $
+# $FML: MANIFEST,v 1.96 2002/03/31 23:34:18 fukachan Exp $
 #
 
 
@@ -1495,6 +1495,7 @@ PGPE:		&path(pgpe)
 PGPK:		&path(pgpk)
 PGPS:		&path(pgps)
 PGPV:		&path(pgpv)
+GPG:		&path(gpg)
 RCS:		&path(rcs)
 CI:		&path(ci)
 BASE64_DECODE:

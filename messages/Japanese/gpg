@@ -1,0 +1,3 @@
+### Section: Authentication
+gpg.env.error:
+	エラー: システムのエラーです。GPG環境を設定してください。

@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libra.pl,v 2.39 2001/12/27 05:15:40 fukachan Exp $
+# $FML: libra.pl,v 2.40 2002/02/16 09:42:14 fukachan Exp $
 #
 
 # LOCAL SCOPE
@@ -1494,10 +1494,12 @@ sub __InitPGP
 
 	if ($CFVersion >= 6.1) {
 	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
+	    $ENV{'GNUPGHOME'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
 	}
 	else {
 	    -d $PGP_PATH || &Mkdir($PGP_PATH);
 	    $ENV{'PGPPATH'} = $PGP_PATH;
+	    $ENV{'GNUPGHOME'} = $PGP_PATH;
 	}
     }
 } 
@@ -1507,15 +1509,15 @@ sub RAAuthTypePGPModeP
 {
     my $m = $REMOTE_ADMINISTRATION_AUTH_TYPE;
     if ($m eq 'pgp' || $m eq 'pgp2') {
-	$PGP_VERSION = 2;
+	$PGP_VERSION = 'pgp2';
 	1;
     }
     elsif ($m eq 'pgp5') {
-	$PGP_VERSION = 5;
+	$PGP_VERSION = 'pgp5';
 	1;
     }
     elsif($m eq 'gpg') {    
-	$GPG_VERSION = 1;
+	$PGP_VERSION = 'gpg';
 	1;
     }
     else {

@@ -16,7 +16,7 @@ sub LoadPGPConfig
     my ($path, $opt) = @_;
 
     # PGP2 definition
-    if ($PGP_VERSION == 2 || (!$PGP_VERSION)) {
+    if ($PGP_VERSION eq 'pgp2' || (!$PGP_VERSION)) {
 	%PGP = (
 		"pgp -kv"     => "$path/pgp $opt -kv",      # view key
 		"pgp -f -ka"  => "$path/pgp $opt -f -ka",   # addkey
@@ -29,7 +29,7 @@ sub LoadPGPConfig
 
     }
     # PGP5 definition
-    elsif ($PGP_VERSION == 5) {
+    elsif ($PGP_VERSION eq 'pgp5') {
 	$opt .= " +NoBatchInvalidKeys=0 +batchmode=1 +ArmorLines=0";
 	%PGP = (
 		"pgp -kv"     => "$path/pgpk $opt -l",       # view key
@@ -46,6 +46,19 @@ sub LoadPGPConfig
 		"pgp -f -sea" => "$path/pgpe $opt -f -s -a", # sign/encrypt
 		);
     }
+    # GPG(GNUPG) definition
+    elsif ($PGP_VERSION eq 'gpg') {
+	$opt .= " ";
+	%PGP = (
+		"pgp -kv"     => "$path/gpg $opt --list-keys",      # list keys
+		"pgp -f -ka"  => "$path/gpg $opt --import --batch", # import/merge keys 
+
+		"pgp -f"      => "$path/gpg $opt --decrypt --batch", # verify
+		"pgp -o"      => "$path/gpg $opt --output",          # -o out
+
+		"pgp -f -sea" => "$path/gpg $opt --sign --encrypt --armor --batch", # sign/encrypt
+		);
+    }
 }
 
 
@@ -56,6 +69,7 @@ sub PGPGoodSignatureP
 
     &Log("PGPGoodSignatureP") if $debug || $debug_pgp;
     &Log("PGPPATH = $ENV{'PGPPATH'}") if $debug || $debug_pgp;
+    &Log("GNUPGHOME = $ENV{'GNUPGHOME'}") if $debug || $debug_pgp;
 
     &_PGPInit(*e) || return 0;
 
@@ -315,7 +329,7 @@ sub DoPGPEncode
 
     # 2>&1 is required to detect "Good signature"
     require 'open2.pl';
-    if ($PGP_VERSION == 5) {
+    if ($PGP_VERSION eq 'pgp5') {
 	&Log("run $PGP{'pgpe'} $whom -fsa") if $debug || $debug_pgp;
 	&open2(RPGP, WPGP, "$PGP{'pgpe'} $whom -fsa 2>&1") || do {
 	    $PGPError .= "cannot exec pgp encoder\n";
@@ -335,7 +349,7 @@ sub DoPGPEncode
     close(WPGP);
 
     # gobble encrypted data from stdout
-    if ($PGP_VERSION == 2) {
+    if ($PGP_VERSION eq 'pgp2' || $PGP_VERSION eq 'gpg') {
 	my ($found) = 0;
 	while (<RPGP>) {
 	    $found = 1 if /$bs/;
@@ -358,7 +372,7 @@ sub DoPGPEncode
 	    &Log("empty error buffer") if $debug_pgp;
 	}
     }
-    elsif ($PGP_VERSION == 5) {
+    elsif ($PGP_VERSION eq 'pgp5') {
 	my ($found) = 0;
 	while (<RPGP>) {
 	    $found = 1 if /$bs/;
@@ -401,7 +415,7 @@ sub _PGPScan
 
     # 2>&1 is required to detect "Good signature"
     &Log("run $PGP{'pgp -kv'} 2>&1|") if $debug || $debug_pgp;
-    if ($PGP_VERSION == 5) {
+    if ($PGP_VERSION eq 'pgp5') {
 	open(RPGP, "$PGP{'pgp -kv'} |") || &Log("PGP: $!");
     }
     else {
@@ -411,9 +425,10 @@ sub _PGPScan
     while (<RPGP>) {
 	$in = 1 if m#Type\s+Bits/KeyID\s+Date\s+User ID#;
 	$in = 1 if m#Type\s+Bits\s+KeyID\s+Created#;
+	$in = 1 if m#^---------------------------#;       # for GNUPG
 
 	if ($in && /([a-z0-9]\S+\@[-a-z0-9\.]+)/i) {
-	    if ($PGP_VERSION == 5) {
+	    if ($PGP_VERSION eq 'pgp5' || $PGP_VERSION eq 'gpg') {
 		$whom .= " -r $1 ";
 	    }
 	    else {
@@ -481,7 +496,7 @@ sub _PGPInit
 
     # program exeistence check
     # default pgp2 anyway (2000/06/01 by fukachan)
-    if ($PGP_VERSION == 2) {
+    if ($PGP_VERSION eq 'pgp2') {
 	if (! $PGP) {
 	    &Log("ERROR: PGPInit: program \$PGP is not defined");
 	    &Mesg(*e, "ERROR: verify PGP environment", 'pgp.env.error');
@@ -501,7 +516,7 @@ sub _PGPInit
 	$path = $PGP;
 	$path =~ s@/[^/]+$@@;
     }
-    elsif ($PGP_VERSION == 5) {
+    elsif ($PGP_VERSION eq 'pgp5') {
 	my $prog;
 	for $prog ($PGPE, $PGPS, $PGPV, $PGPK) {
 	    if (! $prog) {
@@ -524,8 +539,28 @@ sub _PGPInit
 	$path = $PGPK;
 	$path =~ s@/[^/]+$@@;
     }
-    elsif ($PGP_VERSION == 6) {
+    elsif ($PGP_VERSION eq 'pgp6') {
 	&Log("PGP 6 is not implemented");
+    }
+    elsif ($PGP_VERSION eq 'gpg') {
+	if (! $GPG) {
+	    &Log("ERROR: PGPInit: program \$GPG is not defined");
+	    &Mesg(*e, "ERROR: verify GPG environment", 'gpg.env.error');
+	    $PGPError .= "gpg program not defiend\n";
+	    return 0;
+	}
+	elsif (&DiagPrograms('GPG')) {
+	    ; # O.K.
+	}
+	else {
+	    &Log("ERROR: PGPInit: \$GPG is not found");
+	    &Mesg(*e, "ERROR: verify GPG environment", 'gpg.env.error');
+	    $PGPError .= "gpg program not found\n";
+	    return 0;
+	}
+
+	$path = $GPG;
+	$path =~ s@/[^/]+$@@;
     }
     else {
 	$PGPError .= "unknown pgp version\n";
@@ -535,10 +570,12 @@ sub _PGPInit
     # fml 4.0 new-pgp-hier
     if (! $USE_FML40_PGP_PATH) {
 	$ENV{'PGPPATH'} = $PGP_PATH;
+	$ENV{'GNUPGHOME'} = $PGP_PATH;
     }
     else {
 	if ($_PCB{'asymmetric_key'}{'keyring_dir'}) {
 	    $ENV{'PGPPATH'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
+	    $ENV{'GNUPGHOME'} = $_PCB{'asymmetric_key'}{'keyring_dir'};
 	}
 	else {
 	    &Log("\$CFVersion >= 6.1 but no suitable PGPPATH defined");
@@ -548,9 +585,15 @@ sub _PGPInit
     }
 
     &Log("\$ENV{'PGPPATH'} = $ENV{'PGPPATH'}") if $debug;
+    &Log("\$ENV{'GNUPGHOME'} = $ENV{'GNUPGHOME'}") if $debug;
 
     # Set Language for easy analyze by fml.
-    &LoadPGPConfig($path, "+Language=en");
+    if ($PGP_VERSION eq 'gpg') {
+        &LoadPGPConfig("env LANGUAGE=C $path", "");
+    }
+    else {
+        &LoadPGPConfig($path, "+Language=en");
+    }
 
     $debug = 0 if $debug_fml40;
 
@@ -562,13 +605,13 @@ sub EncryptedDistributionInit0
 {
     if ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp'  ||
 	$ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp2') {
-	$PGP_VERSION = 2;
+	$PGP_VERSION = 'pgp2';
     }
     elsif ($ENCRYPTED_DISTRIBUTION_TYPE eq 'pgp5') {
-	$PGP_VERSION = 5;
+	$PGP_VERSION = 'pgp5';
     }
     elsif ($ENCRYPTED_DISTRIBUTION_TYPE eq 'gpg') {
-	;
+	$PGP_VERSION = 'gpg';
     }
 }
 

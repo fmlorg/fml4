@@ -4,6 +4,11 @@
 	MEMO AROUND RECENTLY UPDATED or FIXED
 	$Date$
 
+2002/04/07
+
+  GNU Privacy Guard Extension
+	thanks m2@soumu.cojp
+
 2002/04/01
 
    subscribe 時に名前の部分を必須としない
@@ -249,7 +254,7 @@
    proc/libamctl.pl 
 	bug fix: chaddr error in encountering avoid duplication
 	fix spaces for parentheses
-	add $FML: CHANGES,v 1.242 2002/03/31 14:38:06 fukachan Exp $
+	add $FML: CHANGES,v 1.243 2002/04/05 02:56:07 fukachan Exp $
 
 2001/10/03
 

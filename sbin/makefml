@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: makefml,v 2.225 2001/09/18 14:41:51 fukachan Exp $
+# $FML: makefml,v 2.226 2002/03/18 04:40:18 fukachan Exp $
 #
 
 ### AUTOMATICALLY REPLACED by makefml (Sun, 9 Mar 97 19:57:48 )
@@ -667,7 +667,7 @@ sub SetHashDefaults
 		    '91#dist-auth.pgp ML args'     => '(abbr. da.pgp) pgp = pgp2 pgp[5kesv] gpg',
 		    '91#dist-encrypt.pgp ML args'  => '(abbr. de.pgp) pgp = pgp2 pgp[5kesv] gpg',
 		    '91#admin-auth.pgp ML args'    => '(abbr. aa.pgp) pgp = pgp2 pgp[5kesv] gpg',
-		    '91#admin-encrypt.pgp ML args' => '(abbr. ae.pgp) pgp = pgp2 pgp[5kesv] gppg',
+		    '91#admin-encrypt.pgp ML args' => '(abbr. ae.pgp) pgp = pgp2 pgp[5kesv] gpg',
 
 
 		    # PGP 2
@@ -680,6 +680,9 @@ sub SetHashDefaults
 		    'pgps',	'do_pgps',
 		    'pgpe',	'do_pgpe',
 		    'pgpv',	'do_pgpv',
+
+		    # GPG(GNUPG)
+		    'gpg',	'do_gpg',
 
 		    'delivery_mode',  'do_delivery_mode',
 
@@ -3866,6 +3869,55 @@ sub do_pgp5
 	chmod 0660, "$xdir/pubring.pkr";
     }
 }
+
+
+# makefml gpg elena GPG-OPTIONS
+sub do_gpg
+{
+    local($ml, @argv) = @_;
+    local($xdir);
+
+    $cf = "$ML_DIR/$ml/cf";
+    # set %config, eval %MAKE_FML in it;
+    # &GetCF($cf, $ml, *config, *cur_config); 
+    &GetConfigPH($ml);
+
+    if ($NewEncryptionHier) {
+	print STDERR "\$xdir = &Value($NewEncryptionHier); \n" if $debug;
+	$xdir = &Value($NewEncryptionHier);
+	$ENV{'GNUPGHOME'} = $xdir || "$ML_DIR/$ml/etc/$NewEncryptionDefaultDir";
+    }
+    else {
+	$xdir = &Value('PGP_PATH');
+	$ENV{'GNUPGHOME'} = $xdir;
+    }
+
+    if ($ENV{'GNUPGHOME'}) {
+	&MkDirHier($ENV{'GNUPGHOME'}, 0700);
+    }
+    else {
+	&Error("cannot set up GNUPGHOME");
+	return 0;
+    }
+
+    &Touch("$xdir/options") unless -f "$xdir/options";
+
+    $| = 1;
+    print "\n--- PGP BEGIN ---\n";
+    print "   GNUPGHOME = $ENV{'GNUPGHOME'}\n\n";
+
+    &Log("makefml::gpg @argv");
+    &__system('gpg',  @argv);
+    print STDERR "ERROR: $@" if $@;
+
+    print "\n--- PGP END ---\n\n";
+
+    if ($GroupWritable) {
+	chmod 0660, "$xdir/pubring.gpg";	
+	chmod 0660, "$xdir/secring.gpg";	
+    }
+}
+
 
 
 sub MkDir { &Mkdir(@_);}
