@@ -55,7 +55,6 @@ if ($USE_LOG_MAIL) { &use('logmail'); &MailCacheDir;}
 
 if (! &MailLoopP) {
     &CacheMessageId(*Envelope);
-    &CacheMailBodyCksum(*Envelope) if $CHECK_MAILBODY_CKSUM;
     &RunStartHooks;		# run hooks
     &ModeBifurcate(*Envelope);	# Main Procedure
 }
@@ -1221,7 +1220,22 @@ sub Distribute
     # e.g. null body subscribe request in "no-keyword" case
     if ($USE_DISTRIBUTE_FILTER) {
 	&EnvelopeFilter(*e, 'distribute');
-	return 0 if $DO_NOTHING;
+	return $NULL if $DO_NOTHING;
+    }
+
+    # check duplication baesd on mailbody MD5 cksum cache
+    if ($CHECK_MAILBODY_CKSUM) {
+	&use('cksum');
+
+	if (&CheckMailBodyCKSUM(*Envelope)) {
+	    # looped !
+	    $DO_NOTHING = 1;
+	    return $NULL;
+	}
+	else {
+	    # not looped ! O.K. now cache on for the future
+	    &CacheMailBodyCksum(*e);
+	}
     }
 
     # Security: Mail Traffic Information
@@ -2236,14 +2250,7 @@ sub MailLoopP
 	}
     }
 
-    if (&DupMessageIdP) { 
-	return 1;
-    }
-    # optional MD5 cksum
-    elsif ($CHECK_MAILBODY_CKSUM) { 
-	&use('cksum');
-	&CheckMailBodyCKSUM(*Envelope);
-    }
+    &DupMessageIdP;
 }
 
 sub SearchDupKey
