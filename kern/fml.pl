@@ -9,7 +9,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: fml.pl,v 2.124.2.17 2003/12/05 15:00:14 fukachan Exp $
+# $FML$
 
 $Rcsid   = 'fml 4.0';
 
@@ -350,7 +350,7 @@ sub SetDefaults
     $Envelope{'mode:uip'}   = '';    # default UserInterfaceProgram is nil.;
     $Envelope{'mode:req:guide'} = 0; # not member && guide request only
 
-    $LOCKFILE = "$$ $DIR";	# (variable name is historical, not meaning)
+    $MyProcessInfo = "$$ $DIR";      # ps shows this as a part of argv[0]
 
     { # DNS AutoConfigure to set FQDN and DOMAINNAME; 
 	local(@n, $hostname, $list);
@@ -628,7 +628,7 @@ sub InitConfig
 sub Parsing { &Parse;}
 sub Parse
 {
-    $0 = "${FML}: Parsing header and body <$LOCKFILE>";
+    $0 = "${FML}: Parsing header and body <$MyProcessInfo>";
     local($bufsiz, $buf, $p, $maxbufsiz, $in_header);
 
     $maxbufsiz = &ATOI($INCOMING_MAIL_SIZE_LIMIT) if $INCOMING_MAIL_SIZE_LIMIT;
@@ -678,7 +678,7 @@ sub GetFieldsFromHeader
     local($field, $value, @hdr, %hf);
     local($s);
 
-    $0 = "${FML}: GetFieldsFromHeader <$LOCKFILE>";
+    $0 = "${FML}: GetFieldsFromHeader <$MyProcessInfo>";
 
     # To ensure non exsistence
     for (split(/\|/, $SKIP_FIELDS)) { &DELETE_FIELD($_);}
@@ -1500,7 +1500,7 @@ sub Distribute
 
 sub RunStartHooks
 {
-    $0 = "${FML}: RunStartHooks <$LOCKFILE>";
+    $0 = "${FML}: RunStartHooks <$MyProcessInfo>";
 
     # additional before action
     $START_HOOK && &eval($START_HOOK, 'Start hook');
@@ -1508,14 +1508,14 @@ sub RunStartHooks
     for (keys %FmlStartHook) {
 	print STDERR "Run StartHook $_ -> $FmlStartHook{$_}\n" if $debug;
 	next unless $FmlStartHook{$_};
-	$0 = "${FML}: Run FmlStartHook [$_] <$LOCKFILE>";
+	$0 = "${FML}: Run FmlStartHook [$_] <$MyProcessInfo>";
 	&eval($FmlStartHook{$_}, "Run FmlStartHook [$_]");
     }
 }
 
 sub RunEndHooks
 {
-    $0 = "${FML}: RunEndHooks <$LOCKFILE>";
+    $0 = "${FML}: RunEndHooks <$MyProcessInfo>";
 
     # additional before action
     $END_HOOK && &eval($END_HOOK, 'END_HOOK');
@@ -1523,7 +1523,7 @@ sub RunEndHooks
     for (keys %FmlEndHook) {
 	print STDERR "Run EndHook $_ -> $FmlEndHook{$_}\n" if $debug;
 	next unless $FmlEndHook{$_};
-	$0 = "${FML}: Run FmlEndHook [$_] <$LOCKFILE>";
+	$0 = "${FML}: Run FmlEndHook [$_] <$MyProcessInfo>";
 	&eval($FmlEndHook{$_}, "Run FmlEndHook [$_]");
     }
 }
@@ -1533,28 +1533,28 @@ sub ExExec { &RunHooks(@_);}
 sub RunExitHooks
 {
     local($s);
-    $0 = "${FML}: RunExitHooks <$LOCKFILE>";
+    $0 = "${FML}: RunExitHooks <$MyProcessInfo>";
 
     # FIX COMPATIBILITY
     $FML_EXIT_HOOK .= $_PCB{'hook', 'str'};
 
     if ($s = $FML_EXIT_HOOK) {
 	print STDERR "\nmain::eval >$s<\n\n" if $debug;
-	$0 = "${FML}: Run Hooks(eval) <$LOCKFILE>";
+	$0 = "${FML}: Run Hooks(eval) <$MyProcessInfo>";
 	&eval($s, 'Run Hooks:');
     }
     
     for (keys %FmlExitHook) {
 	print STDERR "Run hooks $_ -> $FmlExitHook{$_}\n" if $debug;
 	next unless $FmlExitHook{$_};
-	$0 = "${FML}: Run FmlExitHook [$_] <$LOCKFILE>";
+	$0 = "${FML}: Run FmlExitHook [$_] <$MyProcessInfo>";
 	&eval($FmlExitHook{$_}, "Run FmlExitHook [$_]");
     }
 }
 
 sub ExecNewProcess
 {
-    $0 = "${FML}: Run New Process <$LOCKFILE>";
+    $0 = "${FML}: Run New Process <$MyProcessInfo>";
     $FML_EXIT_PROG .= $_PCB{'hook', 'prog'};
     if ($FML_EXIT_PROG) { &use('kernsubr2'); &__ExecNewProcess;}
 }
@@ -2210,7 +2210,14 @@ sub GenInfo
     }
 
     # RFC2369; Proposed Standard (so fml optional)
-    if ($USE_RFC2369) { &use('kernsubr2'); &EmulRFC2369;}
+    if ($USE_RFC2369) {
+	&use('kernsubr2'); 
+	&EmulRFC2369( {
+	    'addr'  => $addr,
+	    'trap'  => $trap,
+	    'rcsid' => $Rcsid,
+	});
+    }
 
     $s .= "If you have any questions or problems,\n";
     $s .= "   please contact $MAINTAINER\n";
@@ -3129,7 +3136,7 @@ sub Flock
     $FlockFile = $FlockFile ||
 	(open(LOCK,$FP_SPOOL_DIR) ? $FP_SPOOL_DIR : "$DIR/config.ph");
 
-    $0 = "${FML}: Locked(flock) until $ut <$LOCKFILE>";
+    $0 = "${FML}: Locked(flock) until $ut <$MyProcessInfo>";
 
     # spool is also a file!
     if (! open(LOCK, $FlockFile)) {
@@ -3141,7 +3148,7 @@ sub Flock
 
 sub Funlock 
 {
-    $0 = "${FML}: Unlock <$LOCKFILE>";
+    $0 = "${FML}: Unlock <$MyProcessInfo>";
 
     flock(LOCK, $LOCK_UN);
     close(LOCK); # unlock,close <kizu@ics.es.osaka-u.ac.jp>
@@ -3151,7 +3158,7 @@ sub Funlock
 sub TimeOut
 {
     &GetTime;
-    $0 = "${FML}: TimeOut $Now <$LOCKFILE>";
+    $0 = "${FML}: TimeOut $Now <$MyProcessInfo>";
 
     # Now we may be not able to connect socket, isn't it?
     # &WarnE("TimeOut: $MailDate ($From_address) $ML_FN", $NULL);
@@ -3239,7 +3246,7 @@ sub Tick
 {
     local($cur, $fp, $qp);
 
-    &GetTime; $0 = "${FML}: Tick $Now <$LOCKFILE>";
+    &GetTime; $0 = "${FML}: Tick $Now <$MyProcessInfo>";
 
     return unless $HAS_ALARM;
 
