@@ -511,6 +511,8 @@ sub InitConfig
     &DEFINE_MODE('html')    if $AUTO_HTML_GEN;
 
     # command trap keywrod : '# ' ; in default, we not use it.
+    # XXX: "# command" is internal represention
+    # XXX: it is historical, so remove '# command' part if exist and possible.
     $Envelope{'trap:ctk'} = &CompatFMLv1P ? '# ' : '';
     
     # signal handling
@@ -854,6 +856,8 @@ sub CheckCurrentProc
 	print STDERR "INPUT BUF> $_\n" if $debug;
 
 	# subscribe trap
+	# XXX: "# command" is internal represention
+	# XXX: remove '# command' part if exist
 	if (/^(\s*|\#\s*)$CONFIRMATION_SUBSCRIBE\s+/i) {
 	    $e{'mode:req:subscribe'} = 1;
 	    $e{'buf:req:subscribe'} .= $_."\n";
@@ -1588,18 +1592,12 @@ sub GenInfo
     }
 
     # help style;
-    $message = $Envelope{"mode:fmlserv"} ? "help": "\# help";
+    $message = $Envelope{"mode:fmlserv"} ? "help": "$Envelope{'trap:ctk'}help";
     if ($MAIL_LIST =~ /^(fmlserv|majordomo|listserv)/i) {
 	$trap = '';
     }
-    elsif ($CONTROL_ADDRESS eq $NULL || $MAIL_LIST eq $CONTROL_ADDRESS) {
-	$trap = "\#";
-    }
-    elsif ((! $CONTROL_ADDRESS) && $MAIL_LIST_ACCEPT_COMMAND) {
-	$trap = "\#";
-    }
     else {
-	$trap = '';
+	$trap = &CompatFMLv1P ? '#' : '';
     }
 
     $s .= "\n$del\n";
@@ -1669,7 +1667,8 @@ sub GenXMLInfo
     }
     else {
 	"If you have a question, send a mail with the body\n".
-	    "\t\"\# help\" (without quotes) to the address ". &CtlAddr .
+	    "\t\"". $Envelope{'trap:ctk'}.
+		"help\" (without quotes) to the address ". &CtlAddr .
 		$URLInfo;
     }
 }
@@ -2187,6 +2186,8 @@ sub SecureP
 	}
     }
 
+    # XXX: "# command" is internal represention
+    # XXX: and for permitting a special backward compatibility.
     # permit Email Address, 100.tar.gz, # command, # mget 100,last:10 mp ...
     # if ($s =~ /^[\#\s\w\-\[\]\?\*\.\,\@\:]+$/) {
     if ($s =~ /^[\#\s\w\-\.\,\@\:]+$/) {
@@ -2393,6 +2394,8 @@ sub EnvelopeFilter
     }
 
     # some attributes
+    # XXX: "# command" is internal represention
+    # XXX: but to reject the old compatible syntaxes.
     if ($mode eq 'distribute' && $FILTER_ATTR_REJECT_COMMAND &&
 	/^[\s\n]*(\#\s*[\w\d\:\-\s]+)[\n\s]*$/) {
 	$r = $1; $r =~ s/\n//g;
