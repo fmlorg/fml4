@@ -123,6 +123,8 @@ sub PGPDecode2
     }
     close(RPGP);
 
+    unlink $tmpf || &Log("PGPDecode2: cannot unlink $tmpf");;
+
     &Log("Error: PGP no good signature.") unless $auth;
 
     $dcbuf;
