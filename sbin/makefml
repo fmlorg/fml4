@@ -5661,6 +5661,10 @@ sub Bind
 	"${html_ptr}$index". ($le_label || $label) . "</A>";
     }
     elsif ($ENV{'MAKEFML_LANG'}) {
+	local($lang) = $ENV{'MAKEFML_LANG'};
+	require 'jcode.pl';
+        &jcode'convert(*le_label, $lang); #';
+
 	$le_label ? "${index}${le_label}" : "${index}${label}";
     }
     else {
