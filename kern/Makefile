@@ -287,7 +287,7 @@ v3:
 	tee tmp/VARLIST
 	@ wc tmp/VARLIST
 sync:
-	/bin/rcp -p /tmp/distrib/src/*.pl eriko:~/.fml
+	scp -v -p /tmp/distrib/src/*.pl eriko:~/.fml
 
 TEST:
 	tar cf - `find etc/ sbin |grep -v RCS` | ( chdir /tmp/distrib ; tar xvf - )
