@@ -2071,11 +2071,11 @@ End of GODAI BBS Digest V95 Issue #120
 る行があっても普通のメールとおもうようにする。
 
 $START_HOOK =q%
-    if($CommandMode &&
+    if($Envelope{'req:guide'} &&
        (! ($MailBody =~ /\#\s*msg/)) &&
        ($BodyLines - $_cf{'cl'} > 8)
        ) {
-	$CommandMode = "";
+	$Envelope{'req:guide'} = "";
     };
 %;
 
@@ -2083,7 +2083,8 @@ $START_HOOK =q%
 .S	$HEADER_ADD_HOOK
 .key	$HEADER_ADD_HOOK
 
-ヘッダにつけくわえる フィールドをかいて、カスタマイズするためのフック
+ヘッダに”新たに”つけくわえる フィールドをかいて、カスタマイズするた
+めのフック
 
 例：
     $HEADER_ADD_HOOK = q#
@@ -2117,6 +2118,10 @@ $SMTP_OPEN_HOOK = q#
 	$Envelope{'h:Precedence:'} = PRECEDENCE = 'bulk';
 #;
 
+＊＊＊1.5 と 1.6 と注意＊＊＊ 
+$COMPAT_FML15 = 1; とすれば 
+$Reply_to = $MAIL_LIST; 
+という昔(1.6以前)の形でも理解します。
 
 
 .S	$FML_EXIT_HOOK
