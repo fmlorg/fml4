@@ -1,0 +1,13 @@
+P,BR,HR,LI { color: red }
+PRE.title { color: red }
+
+#attention { 
+	margin-top: 0;
+	color: red;
+}
+
+#id { color: red }
+
+A:link    { color: blue }
+A:visited { color: green }
+A:active  { color: red }
