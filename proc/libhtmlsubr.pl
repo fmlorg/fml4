@@ -7,7 +7,7 @@
 # it under the terms of GNU General Public License.
 # See the file COPYING for more details.
 #
-# $FML: libhtmlsubr.pl,v 1.11 2001/09/21 04:36:49 fukachan Exp $
+# $FML: libhtmlsubr.pl,v 1.12 2001/10/28 15:05:29 fukachan Exp $
 #
 
 
@@ -108,8 +108,9 @@ sub WriteHtmlFile
 
     # mp_count N is the N-th multipart block.
     # after 2nd multipart block or when 1st block is text/html
-    my $is_attachment = 1 if $mp_count > 1;
-    my $is_attachment = 1 if $mpbcb{'subtype'} eq 'html';
+    my $is_attachment = 0;
+    $is_attachment = 1 if $mp_count > 1;
+    $is_attachment = 1 if $mpbcb{'subtype'} eq 'html';
 
     if ($is_attachment) {
 	if ($mpbcb{'subtype'} eq 'html') {
