@@ -1,0 +1,67 @@
+#!/bin/sh
+
+umask 022
+
+. .release/config
+. .release/getopt
+
+trap 'rm -f $TMP' 0 1 3 6 9 15
+
+(echo -n "BEGIN:	"; date ) > $DATE_LOG
+chdir $FML || exit 1
+test -d $UPDIR/FML || mkdir $UPDIR/FML # backup directory
+
+. .release/fyi
+. .release/libinit
+. .release/libgen
+
+INIT 
+
+GEN_LIBRARY # libkern, libcompat_*
+
+INCREMENT_VERSION
+
+CLEAN_UP_SNAPSHOT
+
+MKDIR_DISTRIBUTION
+
+COPY_SOURCES
+
+if [ $package = 1 ]
+then
+	GEN_DOC
+fi
+
+COPY_DOCS
+
+
+# MAKE_CONFIG_PH_EXAMPLE # not required now?
+
+FIX_DISTRIBUTION_FILE_RCSID
+FIX_DISTRIBUTION_FILE_MAKEFILE
+FIX_DISTIRUBTION_FILE_INCLUDE
+FIX_DISTRIBUTION_LINKS
+FIX_DISTRIBUTION_PERMISSION
+
+
+echo " "; echo "End of makeing distrib ... "; echo " "
+
+
+
+if [ $package = 0 ]
+then
+	DISTRIBUTION_PATCHLEVEL_INCREMENT
+
+	(chdir $UPDIR ; rm -f fml-current; ln -s distrib fml-current)
+elif [ $package = 1 ]
+then
+	GEN_CONTRIB
+	GEN_ARCHIVE
+
+	(chdir $UPDIR ; rm -f fml-current; ln -s $FMLID fml-current)
+fi
+
+
+
+echo " "; echo "Done. "; echo " "
+(echo -n "END:	"; date ) >> $DATE_LOG

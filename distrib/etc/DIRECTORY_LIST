@@ -1,0 +1,12 @@
+src
+src/arch
+bin
+sbin
+libexec
+cf
+etc
+doc
+doc/html
+drafts
+contrib
+C

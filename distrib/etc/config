@@ -1,0 +1,47 @@
+### internal variables
+init=0
+package=0
+
+### user defined variables
+
+# prog
+MAKE=make
+INCLUDE_PROG="perl usr/sbin/_include.pl "
+
+
+# working directory
+UPDIR=/var/tmp
+
+TMP=/var/tmp/release.info.$$ 
+
+BAKID=`date +%y%m%d.%H%M%S`
+
+# log file
+DATE_LOG=/var/tmp/_datelog_
+
+# config file
+
+PATCHLEVEL_DIR=.release/patch
+PATCHLEVEL_FILE=$PATCHLEVEL_DIR/version
+
+
+RELEASE_MANIFEST=etc/RELEASE_FILES
+
+
+# distribution directory
+DIRECTORY_LIST=.release/directory_list
+
+
+perl usr/sbin/gen_variable_from_release_files.pl .release/RELEASE_FILES > $TMP
+. $TMP
+
+
+###### check 
+if [ "X" = "X$UPDIR" ]
+then
+	echo " "; echo "No set UPDIR, exit"
+	exit 1
+else
+	echo $UPDIR	
+fi
+

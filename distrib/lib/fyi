@@ -1,0 +1,3 @@
+echo  "" 
+echo  "'$MAKE ci' DONE? O.K.?" 
+echo  "" 

@@ -1,0 +1,374 @@
+GEN_DOC () {
+
+	echo "Generating Plain Doc"
+	(chdir $FML; $MAKE plaindoc);
+
+	echo "Generating WWW Doc"
+	(
+		echo "Making WWW pages of doc/smm/op => var/html/op";
+		chdir $FML; 
+		make htmldoc
+	)
+}
+
+
+GEN_LIBRARY () {
+
+	#perl cf/config -cn -I cf/compat.ignore |\
+	#sed 's/sapporo.iij.ad.jp/phys.titech.ac.jp/' > proc/libcompat_cf1.pl
+
+	echo  " ";
+	echo  "Generating libkern.pl  ";
+	sed '/^$Rcsid/,/MAIN ENDS/d' fml.pl > proc/libkern.pl
+
+}
+
+
+INCREMENT_VERSION () {
+	(chdir var/run; version.pl)
+	echo " "; 
+}
+
+
+CLEAN_UP_SNAPSHOT () {
+	echo " "; echo "rm -f $UPDIR/fml-*.gz"
+	rm -f $UPDIR/fml-*.gz
+	echo " ";
+}
+
+
+MKDIR_DISTRIBUTION () {
+
+	if [ -d $UPDIR/distrib ]
+	then 
+		echo ""
+		echo "      mv $UPDIR/distrib $UPDIR/FML/distrib.$BAKID" 
+		mv $UPDIR/distrib $UPDIR/FML/distrib.$BAKID
+		echo ""
+	fi
+
+	echo make a directory $UPDIR/distrib; 
+	mkdir $UPDIR/distrib;
+
+	for dir in `cat $DIRECTORY_LIST`
+	do
+		echo "mkdir $UPDIR/distrib/$dir"
+		mkdir $UPDIR/distrib/$dir
+	done
+
+	(chdir $UPDIR/distrib; ln -s contrib lib )
+	(chdir $UPDIR/distrib/doc; ln -s ../drafts drafts )
+}
+
+
+COPY_DOCS () {
+   (
+	echo " "; echo "Copying Documents (doc/ri)...";
+	cd var/doc;
+	cp -p $DOC $UPDIR/distrib/doc;
+   )
+   (
+	echo " "; echo "Copying 'contrib' Documents (doc/master)...";
+	cp -p $DOC_CONTRIB $UPDIR/distrib/doc;
+   )
+
+   (
+	echo " "; echo "Copying Documents (doc/smm/)...";
+	(chdir doc; tar cf - smm/*.wix smm/app/*wix) |\
+	(chdir $UPDIR/distrib/doc; tar xvf - )
+
+	perl usr/sbin/fix-wix.pl doc/smm/op.wix > $UPDIR/distrib/doc/smm/op.wix
+
+	echo " "; echo "Copying Documents (doc/ri/)...";
+	(chdir doc; tar cf - ri/*.wix) |\
+	(chdir $UPDIR/distrib/doc; tar xvf - ) 
+   )
+
+   # http
+   echo " ";
+   echo "Copying html/index.html < doc/html/release-index.html";
+   echo "doc/html/release-index.html => \$UPDIR/distrib/doc/html/index.html";
+	cp -p doc/html/release-index.html $UPDIR/distrib/doc/html/index.html
+
+   (
+	chdir var/html;
+	echo "tar cf - INFO.html RE* INSTALL ...";
+	tar cf - INFO.html RE* INSTALL |\
+	(chdir $UPDIR/distrib/doc/html; tar xvf -)
+   )	
+
+}
+
+
+COPY_SOURCES () {
+
+	echo ""; echo "Copying Main Sources ... ";
+	cp -p $SOURCES 		$UPDIR/distrib/
+	cp -p $DRAFTS_SOURCES   $UPDIR/distrib/drafts
+	cp -p $C_SOURCES	$UPDIR/distrib/C
+	cp -p $PERL_SOURCES	$UPDIR/distrib/src
+	cp -p $PERL_ARCH_SOURCES $UPDIR/distrib/src/arch
+
+	tar cf - `find $ARCH_SOURCES -type f -print|grep -v RCS`|\
+	(chdir $UPDIR/distrib; tar xvf -)
+
+	# cf
+	echo " "; echo "cf/ ...";
+	(cd cf;
+	cp -p `find . -type f|egrep -v 'sapporo|beth|RCS'|grep -v '~'` \
+	$UPDIR/distrib/cf;
+	)
+
+	# bin
+	echo " "; echo "Copying bin/ ";
+	cp -p $BIN_SOURCES $UPDIR/distrib/bin
+	echo "chmod 755 bin/\*";
+	chmod 755 $UPDIR/distrib/bin/*
+
+	# sbin
+	echo " "; echo "Copying sbin/ ";
+	cp -p $SBIN_SOURCES $UPDIR/distrib/sbin
+	echo "chmod 755 sbin/\*";
+	chmod 755 $UPDIR/distrib/sbin/*
+
+	# libexec
+	echo " "; echo "Copying libexec/ ";
+	cp .fmllocalrc 	$UPDIR/distrib/etc/dot_fmllocalrc
+	cp -p $LIBEXEC_SOURCES $UPDIR/distrib/libexec
+
+	# etc
+	echo " "; echo "Copying etc/ ";
+	cp -p $ETC_SOURCES $UPDIR/distrib/etc;
+	tar cf - etc/makefml/Makefile etc/makefml/[0-9a-z]* |\
+	(chdir $UPDIR/distrib; tar xvf - )
+
+	# tar cf - etc/samples/[a-z]* | (chdir $UPDIR/distrib; tar xvf - )
+}
+
+
+FIX_DISTRIBUTION_FILE_RCSID () {
+
+	echo " ";
+	echo "Fixing Rcsid ..."
+
+	for file in fml.pl msend.pl 
+	do
+		echo "   Fixing Rcsid in $file ... ( > src/$file )"
+		perl usr/sbin/fml_version.pl $file > $UPDIR/distrib/src/$file
+	done
+
+	for file in $LIBEXEC_SOURCES 
+	do
+		echo "   Fixing Rcsid in $file ... "
+		perl usr/sbin/fml_version.pl $file > $UPDIR/distrib/$file
+	done
+}
+
+
+FIX_DISTRIBUTION_FILE_MAKEFILE () { 
+	echo " "; echo "Fixing Makefile"
+
+	sed '/^DISTRIB/,$d' Makefile |\
+	sed '/^include/d'|\
+	sed 's/gar/rm \-f/' |\
+	sed 's/delete/rm \-f/' > $UPDIR/distrib/Makefile
+}
+
+
+MAKE_CONFIG_PH_EXAMPLE () {
+	(echo "";echo -n " cf/release -> config.ph  "; date)
+	cf/config cf/release > $UPDIR/distrib/config.ph
+}
+
+
+FIX_DISTIRUBTION_FILE_INCLUDE () {
+	echo "---Including relations";
+	echo "   libexec/fml_local.pl"
+	$INCLUDE_PROG $UPDIR/distrib/libexec/fml_local.pl > /tmp/_fml$$_
+	cp /tmp/_fml$$_ $UPDIR/distrib/libexec/fml_local.pl
+	rm -f /tmp/_fml$$_
+}
+
+
+
+FIX_DISTRIBUTION_LINKS () {
+   (
+	echo "Arrangement of Links ... "
+	cd $UPDIR/distrib;
+	ln -s sbin/makefml makefml
+   )
+
+
+   (
+	cd $UPDIR/distrib/doc
+	ln -s op fml_operations_manual
+	ln -s op "Daemon_Book_of_fml"
+   )
+
+   (
+	cd $UPDIR/distrib
+
+	for file in README README.English INSTALL INSTALL.English
+	do 
+		ln -s doc/$file $file
+	done
+   )
+
+	#cd $UPDIR/distrib/doc/drafts
+	#for file in help guide deny objective confirm welcome 
+	#do
+	#	test -f $file && (chdir ../..; ln -s doc/drafts/$file $file)
+	#done
+}
+
+
+GEN_CONTRIB () {
+
+	for dir in `cat .release/contrib_list`
+	do
+		echo " "; 
+		echo "---installing contrib/$dir"
+
+		(cd contrib/$dir;\
+		 make -f $FML/contrib/Makefile.template UPDIR=$UPDIR DISTRIB)
+
+	done
+}
+
+
+FIX_DISTRIBUTION_PERMISSION () {
+	echo " "
+	echo "Fixing Permissions ..."
+
+	find $UPDIR/distrib |\
+	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+
+	find $HOME/.ftp/ |\
+	perl -nle '-d $_ && chmod(0755,$_); -f $_ && chmod(0644,$_)'
+
+	(
+		cd $UPDIR/distrib
+		chmod 755 src/fml.pl src/msend.pl bin/* sbin/* libexec/*
+	)
+}
+
+
+DISTRIBUTION_PATCHLEVEL_INCREMENT () {
+   ( 
+	chdir $FML
+	file=fml.pl
+	perl usr/sbin/fml_version.pl -p $PATCHLEVEL $file \
+	> $UPDIR/distrib/src/$file
+   )
+}
+
+
+GEN_ARCHIVE () {
+   (
+	cd $UPDIR/distrib/drafts
+	echo "Fixing Japanese code: "
+	for file in *
+	do
+		echo -n "$file "
+		nkf -j $file > $file.j
+		mv $file.j $file
+	done
+
+	echo " ... Done."
+   )
+
+
+	FTP=/usr/local/ftp/pub/net/fml-current
+ 	WWW=/home/hikari/sapporo/www/staff/fukachan/href/fml
+
+	echo ""
+	echo "rm -f $FTP/fml-2.1*gz $FTP/fml-current*gz"
+	rm -f "$FTP/fml-2.1*gz $FTP/fml-current*gz"
+
+	echo ""
+
+	chdir $UPDIR
+
+	FMLID="fml-`sed 's/_//' $FML/etc/release_version`"
+	FMLID=`echo $FMLID| sed 's/\#/-snapshot/'`
+	DATE=`date +%y%h%d`
+
+	echo "Synchronizing $FTP/snapshot ..."
+	echo " "
+	test -d $FTP/snapshot || mkdir $FTP/snapshot;
+	rsync -aubv distrib/ $HOME/.ftp/snapshot
+
+	echo " Making snapshto/info for fml@eriko.sapporo.iij.ad.jp ... "
+	echo " "
+	echo "nkf -j $UPDIR/distrib/doc/INFO => $FTP/snapshot/info"
+	nkf -j $UPDIR/distrib/doc/INFO > $FTP/snapshot/info
+
+	echo "Synchronizing $WWW ..."
+	echo " "
+	(chdir $FML/var/html ; tar cf - .)|(chdir $WWW || exit; tar xvf - )
+
+	echo " "
+	echo "Unlinking *~ ..."
+	echo " "
+	find distrib -name '*~' -print|perl -nple unlink
+
+	echo " "
+	echo "Making tar.gz ...a "
+	echo " "
+	mv distrib $FMLID
+	tar cvf $FMLID.tar $FMLID
+	gzip -9 $FMLID.tar
+	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
+
+	echo cp -p $FMLID.tar.gz $FTP
+	cp -p $FMLID.tar.gz $FTP
+
+	echo cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+	cp -p $FMLID.tar.gz $WWW/fml-current.tar.gz
+
+	(
+		echo 	chdir $FTP
+		echo    rm -f fml-current.*.tar.gz
+		echo 	ln $FMLID.tar.gz fml-current.$DATE.tar.gz
+		echo 	ln $FMLID.tar.gz fml-current.tar.gz
+
+		chdir $FTP
+		rm -f fml-current.*.tar.gz fml-current.tar.gz
+		ln $FMLID.tar.gz fml-current.$DATE.tar.gz
+		ln $FMLID.tar.gz fml-current.tar.gz
+		(uuencode fml-current.$DATE.tar.gz fml-current.$DATE.tar.gz)|\
+		cat > $FTP/fml-current.uu
+	)
+
+
+	(
+		echo "### NT4.0 VERSION ###"
+		echo "Fixing for NT Version ...";
+		sh $FML/usr/sbin/nt-release.sh $FMLID
+		
+		FTP_NT=$FTP/arch//WINDOWS_NT4
+		NT="nt$FMLID"
+
+
+		echo "Makeing .zip format ...";
+
+		find $FMLID |zip -q -@ $NT.zip
+		tar cf $NT.tar $FMLID
+		gzip -9 $NT.tar
+
+		cp -p $NT.zip 	 $FTP_NT
+		cp -p $NT.tar.gz $FTP_NT
+
+		chdir $FTP_NT
+
+		rm -f ntfml-current*zip
+		rm -f ntfml-current*tar.gz
+
+		ln $NT.zip ntfml-current.$DATE.zip
+		ln $NT.zip ntfml-current.zip
+		ln $NT.tar.gz ntfml-current.$DATE.tar.gz
+		ln $NT.tar.gz ntfml-current.tar.gz
+
+		set +vx
+	)
+}

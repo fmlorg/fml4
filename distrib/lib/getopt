@@ -1,0 +1,18 @@
+set -- `getopt ip $*`
+if test $? != 0
+then
+        echo 'Usage: ...'
+        exit 2
+fi
+for i
+do
+        case "$i"
+        in
+      -i)
+	    init=1; shift;;
+      -p)
+	    package=1; shift;;
+      --)
+	    shift; break;;
+        esac
+done
